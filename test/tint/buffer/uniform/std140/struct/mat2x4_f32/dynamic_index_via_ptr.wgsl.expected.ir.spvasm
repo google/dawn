@@ -1,0 +1,100 @@
+; SPIR-V
+; Version: 1.3
+; Generator: Google Tint Compiler; 1
+; Bound: 54
+; Schema: 0
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %f "f"
+               OpExecutionMode %f LocalSize 1 1 1
+               OpMemberName %Inner 0 "m"
+               OpName %Inner "Inner"
+               OpMemberName %Outer 0 "a"
+               OpName %Outer "Outer"
+               OpMemberName %tint_symbol_1 0 "tint_symbol"
+               OpName %tint_symbol_1 "tint_symbol_1"
+               OpName %counter "counter"
+               OpName %i "i"
+               OpName %f "f"
+               OpName %p_a "p_a"
+               OpName %p_a_i "p_a_i"
+               OpName %p_a_i_a "p_a_i_a"
+               OpName %p_a_i_a_i "p_a_i_a_i"
+               OpName %p_a_i_a_i_m "p_a_i_a_i_m"
+               OpName %p_a_i_a_i_m_i "p_a_i_a_i_m_i"
+               OpName %l_a "l_a"
+               OpName %l_a_i "l_a_i"
+               OpName %l_a_i_a "l_a_i_a"
+               OpName %l_a_i_a_i "l_a_i_a_i"
+               OpName %l_a_i_a_i_m "l_a_i_a_i_m"
+               OpName %l_a_i_a_i_m_i "l_a_i_a_i_m_i"
+               OpName %l_a_i_a_i_m_i_i "l_a_i_a_i_m_i_i"
+               OpMemberDecorate %Inner 0 Offset 0
+               OpMemberDecorate %Inner 0 ColMajor
+               OpMemberDecorate %Inner 0 MatrixStride 16
+               OpDecorate %_arr_Inner_uint_4 ArrayStride 64
+               OpMemberDecorate %Outer 0 Offset 0
+               OpDecorate %_arr_Outer_uint_4 ArrayStride 256
+               OpMemberDecorate %tint_symbol_1 0 Offset 0
+               OpDecorate %tint_symbol_1 Block
+               OpDecorate %1 DescriptorSet 0
+               OpDecorate %1 Binding 0
+               OpDecorate %1 NonWritable
+      %float = OpTypeFloat 32
+    %v4float = OpTypeVector %float 4
+%mat2v4float = OpTypeMatrix %v4float 2
+      %Inner = OpTypeStruct %mat2v4float
+       %uint = OpTypeInt 32 0
+     %uint_4 = OpConstant %uint 4
+%_arr_Inner_uint_4 = OpTypeArray %Inner %uint_4
+      %Outer = OpTypeStruct %_arr_Inner_uint_4
+%_arr_Outer_uint_4 = OpTypeArray %Outer %uint_4
+%tint_symbol_1 = OpTypeStruct %_arr_Outer_uint_4
+%_ptr_Uniform_tint_symbol_1 = OpTypePointer Uniform %tint_symbol_1
+          %1 = OpVariable %_ptr_Uniform_tint_symbol_1 Uniform
+        %int = OpTypeInt 32 1
+%_ptr_Private_int = OpTypePointer Private %int
+      %int_0 = OpConstant %int 0
+    %counter = OpVariable %_ptr_Private_int Private %int_0
+         %18 = OpTypeFunction %int
+      %int_1 = OpConstant %int 1
+       %void = OpTypeVoid
+         %26 = OpTypeFunction %void
+%_ptr_Uniform__arr_Outer_uint_4 = OpTypePointer Uniform %_arr_Outer_uint_4
+     %uint_0 = OpConstant %uint 0
+%_ptr_Uniform_Outer = OpTypePointer Uniform %Outer
+%_ptr_Uniform__arr_Inner_uint_4 = OpTypePointer Uniform %_arr_Inner_uint_4
+%_ptr_Uniform_Inner = OpTypePointer Uniform %Inner
+%_ptr_Uniform_mat2v4float = OpTypePointer Uniform %mat2v4float
+%_ptr_Uniform_v4float = OpTypePointer Uniform %v4float
+%_ptr_Uniform_float = OpTypePointer Uniform %float
+          %i = OpFunction %int None %18
+         %19 = OpLabel
+         %20 = OpLoad %int %counter
+         %21 = OpIAdd %int %20 %int_1
+               OpStore %counter %21
+         %23 = OpLoad %int %counter
+               OpReturnValue %23
+               OpFunctionEnd
+          %f = OpFunction %void None %26
+         %27 = OpLabel
+        %p_a = OpAccessChain %_ptr_Uniform__arr_Outer_uint_4 %1 %uint_0
+         %31 = OpFunctionCall %int %i
+      %p_a_i = OpAccessChain %_ptr_Uniform_Outer %p_a %31
+    %p_a_i_a = OpAccessChain %_ptr_Uniform__arr_Inner_uint_4 %p_a_i %uint_0
+         %36 = OpFunctionCall %int %i
+  %p_a_i_a_i = OpAccessChain %_ptr_Uniform_Inner %p_a_i_a %36
+%p_a_i_a_i_m = OpAccessChain %_ptr_Uniform_mat2v4float %p_a_i_a_i %uint_0
+         %41 = OpFunctionCall %int %i
+%p_a_i_a_i_m_i = OpAccessChain %_ptr_Uniform_v4float %p_a_i_a_i_m %41
+        %l_a = OpLoad %_arr_Outer_uint_4 %p_a
+      %l_a_i = OpLoad %Outer %p_a_i
+    %l_a_i_a = OpLoad %_arr_Inner_uint_4 %p_a_i_a
+  %l_a_i_a_i = OpLoad %Inner %p_a_i_a_i
+%l_a_i_a_i_m = OpLoad %mat2v4float %p_a_i_a_i_m
+%l_a_i_a_i_m_i = OpLoad %v4float %p_a_i_a_i_m_i
+         %50 = OpFunctionCall %int %i
+         %51 = OpAccessChain %_ptr_Uniform_float %p_a_i_a_i_m_i %50
+%l_a_i_a_i_m_i_i = OpLoad %float %51
+               OpReturn
+               OpFunctionEnd

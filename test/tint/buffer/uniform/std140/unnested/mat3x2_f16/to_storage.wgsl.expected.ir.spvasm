@@ -1,0 +1,83 @@
+; SPIR-V
+; Version: 1.3
+; Generator: Google Tint Compiler; 1
+; Bound: 46
+; Schema: 0
+               OpCapability Shader
+               OpCapability Float16
+               OpCapability UniformAndStorageBuffer16BitAccess
+               OpCapability StorageBuffer16BitAccess
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %f "f"
+               OpExecutionMode %f LocalSize 1 1 1
+               OpMemberName %tint_symbol_1_std140 0 "tint_symbol_col0"
+               OpMemberName %tint_symbol_1_std140 1 "tint_symbol_col1"
+               OpMemberName %tint_symbol_1_std140 2 "tint_symbol_col2"
+               OpName %tint_symbol_1_std140 "tint_symbol_1_std140"
+               OpMemberName %tint_symbol_3 0 "tint_symbol_2"
+               OpName %tint_symbol_3 "tint_symbol_3"
+               OpName %f "f"
+               OpMemberDecorate %tint_symbol_1_std140 0 Offset 0
+               OpMemberDecorate %tint_symbol_1_std140 1 Offset 4
+               OpMemberDecorate %tint_symbol_1_std140 2 Offset 8
+               OpDecorate %tint_symbol_1_std140 Block
+               OpDecorate %1 DescriptorSet 0
+               OpDecorate %1 Binding 0
+               OpDecorate %1 NonWritable
+               OpMemberDecorate %tint_symbol_3 0 Offset 0
+               OpMemberDecorate %tint_symbol_3 0 ColMajor
+               OpMemberDecorate %tint_symbol_3 0 MatrixStride 4
+               OpDecorate %tint_symbol_3 Block
+               OpDecorate %6 DescriptorSet 0
+               OpDecorate %6 Binding 1
+       %half = OpTypeFloat 16
+     %v2half = OpTypeVector %half 2
+%tint_symbol_1_std140 = OpTypeStruct %v2half %v2half %v2half
+%_ptr_Uniform_tint_symbol_1_std140 = OpTypePointer Uniform %tint_symbol_1_std140
+          %1 = OpVariable %_ptr_Uniform_tint_symbol_1_std140 Uniform
+ %mat3v2half = OpTypeMatrix %v2half 3
+%tint_symbol_3 = OpTypeStruct %mat3v2half
+%_ptr_StorageBuffer_tint_symbol_3 = OpTypePointer StorageBuffer %tint_symbol_3
+          %6 = OpVariable %_ptr_StorageBuffer_tint_symbol_3 StorageBuffer
+       %void = OpTypeVoid
+         %12 = OpTypeFunction %void
+%_ptr_Uniform_v2half = OpTypePointer Uniform %v2half
+       %uint = OpTypeInt 32 0
+     %uint_0 = OpConstant %uint 0
+     %uint_1 = OpConstant %uint 1
+     %uint_2 = OpConstant %uint 2
+%_ptr_StorageBuffer_mat3v2half = OpTypePointer StorageBuffer %mat3v2half
+%_ptr_StorageBuffer_v2half = OpTypePointer StorageBuffer %v2half
+        %int = OpTypeInt 32 1
+      %int_1 = OpConstant %int 1
+      %int_0 = OpConstant %int 0
+%_ptr_Uniform_half = OpTypePointer Uniform %half
+%_ptr_StorageBuffer_half = OpTypePointer StorageBuffer %half
+          %f = OpFunction %void None %12
+         %13 = OpLabel
+         %14 = OpAccessChain %_ptr_Uniform_v2half %1 %uint_0
+         %18 = OpLoad %v2half %14
+         %19 = OpAccessChain %_ptr_Uniform_v2half %1 %uint_1
+         %21 = OpLoad %v2half %19
+         %22 = OpAccessChain %_ptr_Uniform_v2half %1 %uint_2
+         %24 = OpLoad %v2half %22
+         %25 = OpCompositeConstruct %mat3v2half %18 %21 %24
+         %26 = OpAccessChain %_ptr_StorageBuffer_mat3v2half %6 %uint_0
+               OpStore %26 %25
+         %28 = OpAccessChain %_ptr_StorageBuffer_v2half %6 %uint_0 %int_1
+         %32 = OpAccessChain %_ptr_Uniform_v2half %1 %uint_0
+         %33 = OpLoad %v2half %32
+               OpStore %28 %33
+         %34 = OpAccessChain %_ptr_StorageBuffer_v2half %6 %uint_0 %int_1
+         %35 = OpAccessChain %_ptr_Uniform_v2half %1 %uint_0
+         %36 = OpLoad %v2half %35
+         %37 = OpVectorShuffle %v2half %36 %36 1 0
+               OpStore %34 %37
+         %38 = OpAccessChain %_ptr_StorageBuffer_v2half %6 %uint_0 %int_0
+         %40 = OpAccessChain %_ptr_Uniform_v2half %1 %uint_1
+         %41 = OpAccessChain %_ptr_Uniform_half %40 %int_0
+         %43 = OpLoad %half %41
+         %44 = OpAccessChain %_ptr_StorageBuffer_half %38 %int_1
+               OpStore %44 %43
+               OpReturn
+               OpFunctionEnd

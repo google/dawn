@@ -1,0 +1,55 @@
+; SPIR-V
+; Version: 1.3
+; Generator: Google Tint Compiler; 1
+; Bound: 32
+; Schema: 0
+               OpCapability Shader
+         %25 = OpExtInstImport "GLSL.std.450"
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %f "f"
+               OpExecutionMode %f LocalSize 1 1 1
+               OpMemberName %tint_symbol_1 0 "tint_symbol"
+               OpName %tint_symbol_1 "tint_symbol_1"
+               OpName %f "f"
+               OpName %t "t"
+               OpName %l "l"
+               OpName %a "a"
+               OpMemberDecorate %tint_symbol_1 0 Offset 0
+               OpMemberDecorate %tint_symbol_1 0 ColMajor
+               OpMemberDecorate %tint_symbol_1 0 MatrixStride 16
+               OpDecorate %tint_symbol_1 Block
+               OpDecorate %1 DescriptorSet 0
+               OpDecorate %1 Binding 0
+               OpDecorate %1 NonWritable
+      %float = OpTypeFloat 32
+    %v4float = OpTypeVector %float 4
+%mat2v4float = OpTypeMatrix %v4float 2
+%tint_symbol_1 = OpTypeStruct %mat2v4float
+%_ptr_Uniform_tint_symbol_1 = OpTypePointer Uniform %tint_symbol_1
+          %1 = OpVariable %_ptr_Uniform_tint_symbol_1 Uniform
+       %void = OpTypeVoid
+          %9 = OpTypeFunction %void
+%_ptr_Uniform_mat2v4float = OpTypePointer Uniform %mat2v4float
+       %uint = OpTypeInt 32 0
+     %uint_0 = OpConstant %uint 0
+    %v2float = OpTypeVector %float 2
+%mat4v2float = OpTypeMatrix %v2float 4
+%_ptr_Uniform_v4float = OpTypePointer Uniform %v4float
+        %int = OpTypeInt 32 1
+      %int_1 = OpConstant %int 1
+      %int_0 = OpConstant %int 0
+          %f = OpFunction %void None %9
+         %10 = OpLabel
+         %11 = OpAccessChain %_ptr_Uniform_mat2v4float %1 %uint_0
+         %15 = OpLoad %mat2v4float %11
+          %t = OpTranspose %mat4v2float %15
+         %19 = OpAccessChain %_ptr_Uniform_v4float %1 %uint_0 %int_1
+         %23 = OpLoad %v4float %19
+          %l = OpExtInst %float %25 Length %23
+         %26 = OpAccessChain %_ptr_Uniform_v4float %1 %uint_0 %int_0
+         %28 = OpLoad %v4float %26
+         %29 = OpVectorShuffle %v4float %28 %28 1 3 0 2
+         %30 = OpCompositeExtract %float %29 0
+          %a = OpExtInst %float %25 FAbs %30
+               OpReturn
+               OpFunctionEnd

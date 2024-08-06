@@ -1,9 +1,54 @@
-SKIP: FAILED
-
-../../src/tint/lang/wgsl/reader/program_to_ir/program_to_ir.cc:1164 internal compiler error: expression did not resolve to a value
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
+; SPIR-V
+; Version: 1.3
+; Generator: Google Tint Compiler; 1
+; Bound: 27
+; Schema: 0
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+               OpMemberName %tint_symbol_1 0 "tint_symbol"
+               OpName %tint_symbol_1 "tint_symbol_1"
+               OpName %deref "deref"
+               OpName %p "p"
+               OpName %no_deref "no_deref"
+               OpName %p_0 "p"
+               OpName %main "main"
+               OpMemberDecorate %tint_symbol_1 0 Offset 0
+               OpDecorate %tint_symbol_1 Block
+               OpDecorate %1 DescriptorSet 0
+               OpDecorate %1 Binding 0
+        %int = OpTypeInt 32 1
+      %v4int = OpTypeVector %int 4
+%tint_symbol_1 = OpTypeStruct %v4int
+%_ptr_StorageBuffer_tint_symbol_1 = OpTypePointer StorageBuffer %tint_symbol_1
+          %1 = OpVariable %_ptr_StorageBuffer_tint_symbol_1 StorageBuffer
+       %void = OpTypeVoid
+          %8 = OpTypeFunction %void
+%_ptr_StorageBuffer_v4int = OpTypePointer StorageBuffer %v4int
+       %uint = OpTypeInt 32 0
+     %uint_0 = OpConstant %uint 0
+      %deref = OpFunction %void None %8
+          %9 = OpLabel
+          %p = OpAccessChain %_ptr_StorageBuffer_v4int %1 %uint_0
+         %14 = OpLoad %v4int %p
+         %15 = OpVectorShuffle %v4int %14 %14 3 2 1 0
+         %16 = OpAccessChain %_ptr_StorageBuffer_v4int %1 %uint_0
+               OpStore %16 %15
+               OpReturn
+               OpFunctionEnd
+   %no_deref = OpFunction %void None %8
+         %18 = OpLabel
+        %p_0 = OpAccessChain %_ptr_StorageBuffer_v4int %1 %uint_0
+         %20 = OpLoad %v4int %p_0
+         %21 = OpVectorShuffle %v4int %20 %20 3 2 1 0
+         %22 = OpAccessChain %_ptr_StorageBuffer_v4int %1 %uint_0
+               OpStore %22 %21
+               OpReturn
+               OpFunctionEnd
+       %main = OpFunction %void None %8
+         %24 = OpLabel
+         %25 = OpFunctionCall %void %deref
+         %26 = OpFunctionCall %void %no_deref
+               OpReturn
+               OpFunctionEnd

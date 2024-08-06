@@ -1,0 +1,74 @@
+; SPIR-V
+; Version: 1.3
+; Generator: Google Tint Compiler; 1
+; Bound: 32
+; Schema: 0
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %f "f"
+               OpExecutionMode %f LocalSize 1 1 1
+               OpMemberName %UBO 0 "dynamic_idx"
+               OpName %UBO "UBO"
+               OpMemberName %tint_symbol_1 0 "tint_symbol"
+               OpName %tint_symbol_1 "tint_symbol_1"
+               OpMemberName %Result 0 "out"
+               OpName %Result "Result"
+               OpMemberName %tint_symbol_3 0 "tint_symbol_2"
+               OpName %tint_symbol_3 "tint_symbol_3"
+               OpMemberName %SSBO 0 "data"
+               OpName %SSBO "SSBO"
+               OpMemberName %tint_symbol_5 0 "tint_symbol_4"
+               OpName %tint_symbol_5 "tint_symbol_5"
+               OpName %f "f"
+               OpMemberDecorate %UBO 0 Offset 0
+               OpMemberDecorate %tint_symbol_1 0 Offset 0
+               OpDecorate %tint_symbol_1 Block
+               OpDecorate %1 DescriptorSet 0
+               OpDecorate %1 Binding 0
+               OpDecorate %1 NonWritable
+               OpMemberDecorate %Result 0 Offset 0
+               OpMemberDecorate %tint_symbol_3 0 Offset 0
+               OpDecorate %tint_symbol_3 Block
+               OpDecorate %6 DescriptorSet 0
+               OpDecorate %6 Binding 2
+               OpDecorate %_arr_int_uint_4 ArrayStride 4
+               OpMemberDecorate %SSBO 0 Offset 0
+               OpMemberDecorate %tint_symbol_5 0 Offset 0
+               OpDecorate %tint_symbol_5 Block
+               OpDecorate %10 DescriptorSet 0
+               OpDecorate %10 Binding 1
+        %int = OpTypeInt 32 1
+        %UBO = OpTypeStruct %int
+%tint_symbol_1 = OpTypeStruct %UBO
+%_ptr_Uniform_tint_symbol_1 = OpTypePointer Uniform %tint_symbol_1
+          %1 = OpVariable %_ptr_Uniform_tint_symbol_1 Uniform
+     %Result = OpTypeStruct %int
+%tint_symbol_3 = OpTypeStruct %Result
+%_ptr_StorageBuffer_tint_symbol_3 = OpTypePointer StorageBuffer %tint_symbol_3
+          %6 = OpVariable %_ptr_StorageBuffer_tint_symbol_3 StorageBuffer
+       %uint = OpTypeInt 32 0
+     %uint_4 = OpConstant %uint 4
+%_arr_int_uint_4 = OpTypeArray %int %uint_4
+       %SSBO = OpTypeStruct %_arr_int_uint_4
+%tint_symbol_5 = OpTypeStruct %SSBO
+%_ptr_StorageBuffer_tint_symbol_5 = OpTypePointer StorageBuffer %tint_symbol_5
+         %10 = OpVariable %_ptr_StorageBuffer_tint_symbol_5 StorageBuffer
+       %void = OpTypeVoid
+         %19 = OpTypeFunction %void
+%_ptr_Uniform_int = OpTypePointer Uniform %int
+     %uint_0 = OpConstant %uint 0
+%_ptr_StorageBuffer_int = OpTypePointer StorageBuffer %int
+      %int_1 = OpConstant %int 1
+      %int_3 = OpConstant %int 3
+          %f = OpFunction %void None %19
+         %20 = OpLabel
+         %21 = OpAccessChain %_ptr_Uniform_int %1 %uint_0 %uint_0
+         %24 = OpLoad %int %21
+         %25 = OpAccessChain %_ptr_StorageBuffer_int %10 %uint_0 %uint_0 %24
+               OpStore %25 %int_1
+         %28 = OpAccessChain %_ptr_StorageBuffer_int %6 %uint_0 %uint_0
+         %29 = OpAccessChain %_ptr_StorageBuffer_int %10 %uint_0 %uint_0 %int_3
+         %31 = OpLoad %int %29
+               OpStore %28 %31
+               OpReturn
+               OpFunctionEnd

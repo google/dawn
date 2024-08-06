@@ -1,0 +1,203 @@
+; SPIR-V
+; Version: 1.3
+; Generator: Google Tint Compiler; 1
+; Bound: 106
+; Schema: 0
+               OpCapability Shader
+         %53 = OpExtInstImport "GLSL.std.450"
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main" %main_global_invocation_id_Input
+               OpExecutionMode %main LocalSize 1 1 1
+               OpName %gl_GlobalInvocationID "gl_GlobalInvocationID"
+               OpMemberName %ResultMatrix 0 "numbers"
+               OpName %ResultMatrix "ResultMatrix"
+               OpName %resultMatrix "resultMatrix"
+               OpMemberName %FirstMatrix 0 "numbers"
+               OpName %FirstMatrix "FirstMatrix"
+               OpName %firstMatrix "firstMatrix"
+               OpMemberName %SecondMatrix 0 "numbers"
+               OpName %SecondMatrix "SecondMatrix"
+               OpName %secondMatrix "secondMatrix"
+               OpMemberName %Uniforms 0 "NAN"
+               OpMemberName %Uniforms 1 "sizeA"
+               OpMemberName %Uniforms 2 "sizeB"
+               OpName %Uniforms "Uniforms"
+               OpMemberName %tint_symbol_1 0 "tint_symbol"
+               OpName %tint_symbol_1 "tint_symbol_1"
+               OpName %main_global_invocation_id_Input "main_global_invocation_id_Input"
+               OpName %binaryOperation_f1_f1_ "binaryOperation_f1_f1_"
+               OpName %a_root "a_root"
+               OpName %b_root "b_root"
+               OpName %return_value "return_value"
+               OpName %continue_execution "continue_execution"
+               OpName %x_26 "x_26"
+               OpName %x_21 "x_21"
+               OpName %x_41 "x_41"
+               OpName %main_1 "main_1"
+               OpName %index "index"
+               OpName %a_1 "a_1"
+               OpName %param "param"
+               OpName %param_1 "param_1"
+               OpName %x_63 "x_63"
+               OpName %x_68 "x_68"
+               OpName %main_inner "main_inner"
+               OpName %gl_GlobalInvocationID_param "gl_GlobalInvocationID_param"
+               OpName %main "main"
+               OpDecorate %_runtimearr_float ArrayStride 4
+               OpMemberDecorate %ResultMatrix 0 Offset 0
+               OpDecorate %ResultMatrix Block
+               OpDecorate %resultMatrix DescriptorSet 0
+               OpDecorate %resultMatrix Binding 2
+               OpMemberDecorate %FirstMatrix 0 Offset 0
+               OpDecorate %FirstMatrix Block
+               OpDecorate %firstMatrix DescriptorSet 0
+               OpDecorate %firstMatrix Binding 0
+               OpDecorate %firstMatrix NonWritable
+               OpMemberDecorate %SecondMatrix 0 Offset 0
+               OpDecorate %SecondMatrix Block
+               OpDecorate %secondMatrix DescriptorSet 0
+               OpDecorate %secondMatrix Binding 1
+               OpDecorate %secondMatrix NonWritable
+               OpMemberDecorate %Uniforms 0 Offset 0
+               OpMemberDecorate %Uniforms 1 Offset 4
+               OpMemberDecorate %Uniforms 2 Offset 8
+               OpMemberDecorate %tint_symbol_1 0 Offset 0
+               OpDecorate %tint_symbol_1 Block
+               OpDecorate %17 DescriptorSet 0
+               OpDecorate %17 Binding 3
+               OpDecorate %17 NonWritable
+               OpDecorate %main_global_invocation_id_Input BuiltIn GlobalInvocationId
+       %uint = OpTypeInt 32 0
+     %v3uint = OpTypeVector %uint 3
+%_ptr_Private_v3uint = OpTypePointer Private %v3uint
+          %5 = OpConstantNull %v3uint
+%gl_GlobalInvocationID = OpVariable %_ptr_Private_v3uint Private %5
+      %float = OpTypeFloat 32
+%_runtimearr_float = OpTypeRuntimeArray %float
+%ResultMatrix = OpTypeStruct %_runtimearr_float
+%_ptr_StorageBuffer_ResultMatrix = OpTypePointer StorageBuffer %ResultMatrix
+%resultMatrix = OpVariable %_ptr_StorageBuffer_ResultMatrix StorageBuffer
+%FirstMatrix = OpTypeStruct %_runtimearr_float
+%_ptr_StorageBuffer_FirstMatrix = OpTypePointer StorageBuffer %FirstMatrix
+%firstMatrix = OpVariable %_ptr_StorageBuffer_FirstMatrix StorageBuffer
+%SecondMatrix = OpTypeStruct %_runtimearr_float
+%_ptr_StorageBuffer_SecondMatrix = OpTypePointer StorageBuffer %SecondMatrix
+%secondMatrix = OpVariable %_ptr_StorageBuffer_SecondMatrix StorageBuffer
+        %int = OpTypeInt 32 1
+   %Uniforms = OpTypeStruct %float %int %int
+%tint_symbol_1 = OpTypeStruct %Uniforms
+%_ptr_Uniform_tint_symbol_1 = OpTypePointer Uniform %tint_symbol_1
+         %17 = OpVariable %_ptr_Uniform_tint_symbol_1 Uniform
+%_ptr_Input_v3uint = OpTypePointer Input %v3uint
+%main_global_invocation_id_Input = OpVariable %_ptr_Input_v3uint Input
+%_ptr_Function_float = OpTypePointer Function %float
+         %28 = OpTypeFunction %float %_ptr_Function_float %_ptr_Function_float
+         %31 = OpConstantNull %float
+       %bool = OpTypeBool
+%_ptr_Function_bool = OpTypePointer Function %bool
+       %true = OpConstantTrue %bool
+    %float_0 = OpConstant %float 0
+      %false = OpConstantFalse %bool
+    %float_1 = OpConstant %float 1
+    %float_2 = OpConstant %float 2
+       %void = OpTypeVoid
+         %77 = OpTypeFunction %void
+%_ptr_Function_int = OpTypePointer Function %int
+         %81 = OpConstantNull %int
+%_ptr_Private_uint = OpTypePointer Private %uint
+     %uint_0 = OpConstant %uint 0
+    %int_n10 = OpConstant %int -10
+   %float_n4 = OpConstant %float -4
+   %float_n3 = OpConstant %float -3
+%_ptr_StorageBuffer_float = OpTypePointer StorageBuffer %float
+         %99 = OpTypeFunction %void %v3uint
+%binaryOperation_f1_f1_ = OpFunction %float None %28
+     %a_root = OpFunctionParameter %_ptr_Function_float
+     %b_root = OpFunctionParameter %_ptr_Function_float
+         %29 = OpLabel
+%return_value = OpVariable %_ptr_Function_float Function %31
+%continue_execution = OpVariable %_ptr_Function_bool Function
+       %x_26 = OpVariable %_ptr_Function_float Function %31
+               OpStore %continue_execution %true
+         %36 = OpAccessChain %_ptr_Function_float %a_root
+         %37 = OpAccessChain %_ptr_Function_float %b_root
+         %39 = OpLoad %float %37
+         %40 = OpFOrdEqual %bool %39 %float_0
+               OpSelectionMerge %42 None
+               OpBranchConditional %40 %43 %42
+         %43 = OpLabel
+               OpStore %continue_execution %false
+               OpStore %return_value %float_1
+               OpBranch %42
+         %42 = OpLabel
+         %46 = OpLoad %bool %continue_execution
+               OpSelectionMerge %47 None
+               OpBranchConditional %46 %48 %47
+         %48 = OpLabel
+       %x_21 = OpLoad %float %37
+         %50 = OpFDiv %float %x_21 %float_2
+         %52 = OpExtInst %float %53 Floor %50
+         %54 = OpFMul %float %float_2 %52
+         %55 = OpFSub %float %x_21 %54
+         %56 = OpExtInst %float %53 RoundEven %55
+         %57 = OpFOrdEqual %bool %56 %float_1
+         %58 = OpLogicalNot %bool %57
+               OpSelectionMerge %59 None
+               OpBranchConditional %58 %60 %61
+         %60 = OpLabel
+         %62 = OpLoad %float %36
+         %63 = OpExtInst %float %53 FAbs %62
+         %64 = OpLoad %float %37
+         %65 = OpExtInst %float %53 Pow %63 %64
+               OpStore %x_26 %65
+               OpBranch %59
+         %61 = OpLabel
+         %66 = OpLoad %float %36
+         %67 = OpExtInst %float %53 FSign %66
+         %68 = OpLoad %float %36
+         %69 = OpExtInst %float %53 FAbs %68
+         %70 = OpLoad %float %37
+         %71 = OpExtInst %float %53 Pow %69 %70
+         %72 = OpFMul %float %67 %71
+               OpStore %x_26 %72
+               OpBranch %59
+         %59 = OpLabel
+       %x_41 = OpLoad %float %x_26
+               OpStore %return_value %x_41
+               OpBranch %47
+         %47 = OpLabel
+         %74 = OpLoad %float %return_value
+               OpReturnValue %74
+               OpFunctionEnd
+     %main_1 = OpFunction %void None %77
+         %78 = OpLabel
+      %index = OpVariable %_ptr_Function_int Function %81
+        %a_1 = OpVariable %_ptr_Function_int Function %81
+      %param = OpVariable %_ptr_Function_float Function %31
+    %param_1 = OpVariable %_ptr_Function_float Function %31
+         %85 = OpAccessChain %_ptr_Private_uint %gl_GlobalInvocationID %uint_0
+         %88 = OpLoad %uint %85
+         %89 = OpBitcast %int %88
+               OpStore %index %89
+               OpStore %a_1 %int_n10
+       %x_63 = OpLoad %int %index
+               OpStore %param %float_n4
+               OpStore %param_1 %float_n3
+       %x_68 = OpFunctionCall %float %binaryOperation_f1_f1_ %param %param_1
+         %95 = OpAccessChain %_ptr_StorageBuffer_float %resultMatrix %uint_0 %x_63
+               OpStore %95 %x_68
+               OpReturn
+               OpFunctionEnd
+ %main_inner = OpFunction %void None %99
+%gl_GlobalInvocationID_param = OpFunctionParameter %v3uint
+        %100 = OpLabel
+               OpStore %gl_GlobalInvocationID %gl_GlobalInvocationID_param
+        %101 = OpFunctionCall %void %main_1
+               OpReturn
+               OpFunctionEnd
+       %main = OpFunction %void None %77
+        %103 = OpLabel
+        %104 = OpLoad %v3uint %main_global_invocation_id_Input
+        %105 = OpFunctionCall %void %main_inner %104
+               OpReturn
+               OpFunctionEnd

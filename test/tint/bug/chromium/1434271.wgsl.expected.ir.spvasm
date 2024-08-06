@@ -1,0 +1,480 @@
+; SPIR-V
+; Version: 1.3
+; Generator: Google Tint Compiler; 1
+; Bound: 265
+; Schema: 0
+               OpCapability Shader
+               OpCapability Sampled1D
+               OpCapability Float16
+               OpCapability UniformAndStorageBuffer16BitAccess
+               OpCapability StorageBuffer16BitAccess
+               OpCapability ImageQuery
+         %71 = OpExtInstImport "GLSL.std.450"
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint Fragment %fragment_main "fragment_main"
+               OpEntryPoint GLCompute %rgba32uintin "rgba32uintin"
+               OpEntryPoint Vertex %vertex_main "vertex_main" %vertex_main_position_Output %vertex_main___point_size_Output
+               OpEntryPoint Vertex %vs_main "vs_main" %vs_main_loc0_Input %vs_main_loc1_Input %vs_main_loc2_Input %vs_main_position_Output %vs_main_loc0_Output %vs_main_loc1_Output %vs_main___point_size_Output
+               OpEntryPoint GLCompute %simulate "simulate" %simulate_global_invocation_id_Input
+               OpEntryPoint GLCompute %export_level "export_level" %export_level_global_invocation_id_Input
+               OpExecutionMode %fragment_main OriginUpperLeft
+               OpExecutionMode %rgba32uintin LocalSize 1 1 1
+               OpExecutionMode %simulate LocalSize 64 1 1
+               OpExecutionMode %export_level LocalSize 64 1 1
+               OpName %rand_seed "rand_seed"
+               OpMemberName %RenderParams 0 "modelViewProjectionMatrix"
+               OpMemberName %RenderParams 1 "right"
+               OpMemberName %RenderParams 2 "up"
+               OpName %RenderParams "RenderParams"
+               OpMemberName %tint_symbol_1 0 "tint_symbol"
+               OpName %tint_symbol_1 "tint_symbol_1"
+               OpMemberName %SimulationParams 0 "deltaTime"
+               OpMemberName %SimulationParams 1 "seed"
+               OpName %SimulationParams "SimulationParams"
+               OpMemberName %tint_symbol_3 0 "tint_symbol_2"
+               OpName %tint_symbol_3 "tint_symbol_3"
+               OpMemberName %Particle 0 "position"
+               OpMemberName %Particle 1 "lifetime"
+               OpMemberName %Particle 2 "color"
+               OpMemberName %Particle 3 "velocity"
+               OpName %Particle "Particle"
+               OpMemberName %Particles 0 "particles"
+               OpName %Particles "Particles"
+               OpName %data "data"
+               OpName %texture "texture"
+               OpMemberName %UBO 0 "width"
+               OpName %UBO "UBO"
+               OpMemberName %tint_symbol_5 0 "tint_symbol_4"
+               OpName %tint_symbol_5 "tint_symbol_5"
+               OpMemberName %Buffer 0 "weights"
+               OpName %Buffer "Buffer"
+               OpName %buf_in "buf_in"
+               OpName %buf_out "buf_out"
+               OpName %tex_in "tex_in"
+               OpName %tex_out "tex_out"
+               OpName %vertex_main_position_Output "vertex_main_position_Output"
+               OpName %vertex_main___point_size_Output "vertex_main___point_size_Output"
+               OpName %vs_main_loc0_Input "vs_main_loc0_Input"
+               OpName %vs_main_loc1_Input "vs_main_loc1_Input"
+               OpName %vs_main_loc2_Input "vs_main_loc2_Input"
+               OpName %vs_main_position_Output "vs_main_position_Output"
+               OpName %vs_main_loc0_Output "vs_main_loc0_Output"
+               OpName %vs_main_loc1_Output "vs_main_loc1_Output"
+               OpName %vs_main___point_size_Output "vs_main___point_size_Output"
+               OpName %simulate_global_invocation_id_Input "simulate_global_invocation_id_Input"
+               OpName %export_level_global_invocation_id_Input "export_level_global_invocation_id_Input"
+               OpName %asinh_468a48 "asinh_468a48"
+               OpName %arg_0 "arg_0"
+               OpName %res "res"
+               OpName %vertex_main_inner "vertex_main_inner"
+               OpName %fragment_main "fragment_main"
+               OpName %rgba32uintin "rgba32uintin"
+               OpName %vs_main_inner "vs_main_inner"
+               OpMemberName %VertexOutput 0 "position"
+               OpMemberName %VertexOutput 1 "color"
+               OpMemberName %VertexOutput 2 "quad_pos"
+               OpName %VertexOutput "VertexOutput"
+               OpMemberName %VertexInput 0 "position"
+               OpMemberName %VertexInput 1 "color"
+               OpMemberName %VertexInput 2 "quad_pos"
+               OpName %VertexInput "VertexInput"
+               OpName %in "in"
+               OpName %quad_pos "quad_pos"
+               OpName %position "position"
+               OpName %out "out"
+               OpName %simulate_inner "simulate_inner"
+               OpName %GlobalInvocationID "GlobalInvocationID"
+               OpName %idx "idx"
+               OpName %particle "particle"
+               OpName %export_level_inner "export_level_inner"
+               OpName %coord "coord"
+               OpName %dst_offset "dst_offset"
+               OpName %src_offset "src_offset"
+               OpName %a "a"
+               OpName %b "b"
+               OpName %c "c"
+               OpName %d "d"
+               OpName %sum "sum"
+               OpName %probabilities "probabilities"
+               OpName %tint_store_and_preserve_padding "tint_store_and_preserve_padding"
+               OpName %target_indices "target_indices"
+               OpName %value_param "value_param"
+               OpName %vertex_main "vertex_main"
+               OpName %vs_main "vs_main"
+               OpName %simulate "simulate"
+               OpName %export_level "export_level"
+               OpMemberDecorate %RenderParams 0 Offset 0
+               OpMemberDecorate %RenderParams 0 ColMajor
+               OpMemberDecorate %RenderParams 0 MatrixStride 16
+               OpMemberDecorate %RenderParams 1 Offset 64
+               OpMemberDecorate %RenderParams 2 Offset 80
+               OpMemberDecorate %tint_symbol_1 0 Offset 0
+               OpDecorate %tint_symbol_1 Block
+               OpDecorate %6 DescriptorSet 0
+               OpDecorate %6 Binding 5
+               OpDecorate %6 NonWritable
+               OpMemberDecorate %SimulationParams 0 Offset 0
+               OpMemberDecorate %SimulationParams 1 Offset 16
+               OpMemberDecorate %tint_symbol_3 0 Offset 0
+               OpDecorate %tint_symbol_3 Block
+               OpDecorate %13 DescriptorSet 0
+               OpDecorate %13 Binding 0
+               OpDecorate %13 NonWritable
+               OpMemberDecorate %Particle 0 Offset 0
+               OpMemberDecorate %Particle 1 Offset 12
+               OpMemberDecorate %Particle 2 Offset 16
+               OpMemberDecorate %Particle 3 Offset 32
+               OpDecorate %_runtimearr_Particle ArrayStride 48
+               OpMemberDecorate %Particles 0 Offset 0
+               OpDecorate %Particles Block
+               OpDecorate %data DescriptorSet 0
+               OpDecorate %data Binding 1
+               OpDecorate %texture DescriptorSet 0
+               OpDecorate %texture Binding 2
+               OpMemberDecorate %UBO 0 Offset 0
+               OpMemberDecorate %tint_symbol_5 0 Offset 0
+               OpDecorate %tint_symbol_5 Block
+               OpDecorate %25 DescriptorSet 0
+               OpDecorate %25 Binding 3
+               OpDecorate %25 NonWritable
+               OpDecorate %_runtimearr_float ArrayStride 4
+               OpMemberDecorate %Buffer 0 Offset 0
+               OpDecorate %Buffer Block
+               OpDecorate %buf_in DescriptorSet 0
+               OpDecorate %buf_in Binding 4
+               OpDecorate %buf_in NonWritable
+               OpDecorate %buf_out DescriptorSet 0
+               OpDecorate %buf_out Binding 5
+               OpDecorate %tex_in DescriptorSet 0
+               OpDecorate %tex_in Binding 6
+               OpDecorate %tex_out DescriptorSet 0
+               OpDecorate %tex_out Binding 7
+               OpDecorate %tex_out NonReadable
+               OpDecorate %vertex_main_position_Output BuiltIn Position
+               OpDecorate %vertex_main___point_size_Output BuiltIn PointSize
+               OpDecorate %vs_main_loc0_Input Location 0
+               OpDecorate %vs_main_loc1_Input Location 1
+               OpDecorate %vs_main_loc2_Input Location 2
+               OpDecorate %vs_main_position_Output BuiltIn Position
+               OpDecorate %vs_main_loc0_Output Location 0
+               OpDecorate %vs_main_loc1_Output Location 1
+               OpDecorate %vs_main___point_size_Output BuiltIn PointSize
+               OpDecorate %simulate_global_invocation_id_Input BuiltIn GlobalInvocationId
+               OpDecorate %export_level_global_invocation_id_Input BuiltIn GlobalInvocationId
+               OpMemberDecorate %VertexOutput 0 Offset 0
+               OpMemberDecorate %VertexOutput 1 Offset 16
+               OpMemberDecorate %VertexOutput 2 Offset 32
+               OpMemberDecorate %VertexInput 0 Offset 0
+               OpMemberDecorate %VertexInput 1 Offset 16
+               OpMemberDecorate %VertexInput 2 Offset 32
+               OpDecorate %_arr_uint_uint_1 ArrayStride 4
+      %float = OpTypeFloat 32
+    %v2float = OpTypeVector %float 2
+%_ptr_Private_v2float = OpTypePointer Private %v2float
+          %5 = OpConstantNull %v2float
+  %rand_seed = OpVariable %_ptr_Private_v2float Private %5
+    %v4float = OpTypeVector %float 4
+%mat4v4float = OpTypeMatrix %v4float 4
+    %v3float = OpTypeVector %float 3
+%RenderParams = OpTypeStruct %mat4v4float %v3float %v3float
+%tint_symbol_1 = OpTypeStruct %RenderParams
+%_ptr_Uniform_tint_symbol_1 = OpTypePointer Uniform %tint_symbol_1
+          %6 = OpVariable %_ptr_Uniform_tint_symbol_1 Uniform
+%SimulationParams = OpTypeStruct %float %v4float
+%tint_symbol_3 = OpTypeStruct %SimulationParams
+%_ptr_Uniform_tint_symbol_3 = OpTypePointer Uniform %tint_symbol_3
+         %13 = OpVariable %_ptr_Uniform_tint_symbol_3 Uniform
+   %Particle = OpTypeStruct %v3float %float %v4float %v2float
+%_runtimearr_Particle = OpTypeRuntimeArray %Particle
+  %Particles = OpTypeStruct %_runtimearr_Particle
+%_ptr_StorageBuffer_Particles = OpTypePointer StorageBuffer %Particles
+       %data = OpVariable %_ptr_StorageBuffer_Particles StorageBuffer
+         %24 = OpTypeImage %float 1D 0 0 0 1 Unknown
+%_ptr_UniformConstant_24 = OpTypePointer UniformConstant %24
+    %texture = OpVariable %_ptr_UniformConstant_24 UniformConstant
+       %uint = OpTypeInt 32 0
+        %UBO = OpTypeStruct %uint
+%tint_symbol_5 = OpTypeStruct %UBO
+%_ptr_Uniform_tint_symbol_5 = OpTypePointer Uniform %tint_symbol_5
+         %25 = OpVariable %_ptr_Uniform_tint_symbol_5 Uniform
+%_runtimearr_float = OpTypeRuntimeArray %float
+     %Buffer = OpTypeStruct %_runtimearr_float
+%_ptr_StorageBuffer_Buffer = OpTypePointer StorageBuffer %Buffer
+     %buf_in = OpVariable %_ptr_StorageBuffer_Buffer StorageBuffer
+%_ptr_StorageBuffer_Buffer_0 = OpTypePointer StorageBuffer %Buffer
+    %buf_out = OpVariable %_ptr_StorageBuffer_Buffer_0 StorageBuffer
+         %38 = OpTypeImage %float 2D 0 0 0 1 Unknown
+%_ptr_UniformConstant_38 = OpTypePointer UniformConstant %38
+     %tex_in = OpVariable %_ptr_UniformConstant_38 UniformConstant
+         %41 = OpTypeImage %float 2D 0 0 0 2 Rgba8
+%_ptr_UniformConstant_41 = OpTypePointer UniformConstant %41
+    %tex_out = OpVariable %_ptr_UniformConstant_41 UniformConstant
+%_ptr_Output_v4float = OpTypePointer Output %v4float
+%vertex_main_position_Output = OpVariable %_ptr_Output_v4float Output
+%_ptr_Output_float = OpTypePointer Output %float
+%vertex_main___point_size_Output = OpVariable %_ptr_Output_float Output
+%_ptr_Input_v3float = OpTypePointer Input %v3float
+%vs_main_loc0_Input = OpVariable %_ptr_Input_v3float Input
+%_ptr_Input_v4float = OpTypePointer Input %v4float
+%vs_main_loc1_Input = OpVariable %_ptr_Input_v4float Input
+%_ptr_Input_v2float = OpTypePointer Input %v2float
+%vs_main_loc2_Input = OpVariable %_ptr_Input_v2float Input
+%vs_main_position_Output = OpVariable %_ptr_Output_v4float Output
+%vs_main_loc0_Output = OpVariable %_ptr_Output_v4float Output
+%_ptr_Output_v2float = OpTypePointer Output %v2float
+%vs_main_loc1_Output = OpVariable %_ptr_Output_v2float Output
+%vs_main___point_size_Output = OpVariable %_ptr_Output_float Output
+     %v3uint = OpTypeVector %uint 3
+%_ptr_Input_v3uint = OpTypePointer Input %v3uint
+%simulate_global_invocation_id_Input = OpVariable %_ptr_Input_v3uint Input
+%export_level_global_invocation_id_Input = OpVariable %_ptr_Input_v3uint Input
+       %void = OpTypeVoid
+         %63 = OpTypeFunction %void
+       %half = OpTypeFloat 16
+%_ptr_Function_half = OpTypePointer Function %half
+%half_0x0p_0 = OpConstant %half 0x0p+0
+         %74 = OpTypeFunction %v4float
+         %77 = OpConstantNull %v4float
+%VertexOutput = OpTypeStruct %v4float %v4float %v2float
+%VertexInput = OpTypeStruct %v3float %v4float %v2float
+         %88 = OpTypeFunction %VertexOutput %VertexInput
+%_ptr_Uniform_v3float = OpTypePointer Uniform %v3float
+     %uint_0 = OpConstant %uint 0
+     %uint_1 = OpConstant %uint 1
+     %uint_2 = OpConstant %uint 2
+%mat2v3float = OpTypeMatrix %v3float 2
+%_ptr_Function_v3float = OpTypePointer Function %v3float
+%float_0_00999999978 = OpConstant %float 0.00999999978
+%_ptr_Function_VertexOutput = OpTypePointer Function %VertexOutput
+        %113 = OpConstantNull %VertexOutput
+%_ptr_Function_v4float = OpTypePointer Function %v4float
+%_ptr_Uniform_mat4v4float = OpTypePointer Uniform %mat4v4float
+    %float_1 = OpConstant %float 1
+%_ptr_Function_v2float = OpTypePointer Function %v2float
+        %131 = OpTypeFunction %void %v3uint
+%_ptr_Uniform_v4float = OpTypePointer Uniform %v4float
+     %v2uint = OpTypeVector %uint 2
+%_ptr_StorageBuffer_Particle = OpTypePointer StorageBuffer %Particle
+%_ptr_Function_Particle = OpTypePointer Function %Particle
+%_arr_uint_uint_1 = OpTypeArray %uint %uint_1
+       %bool = OpTypeBool
+     %v2bool = OpTypeVector %bool 2
+%_ptr_Uniform_uint = OpTypePointer Uniform %uint
+    %uint_31 = OpConstant %uint 31
+%_ptr_StorageBuffer_float = OpTypePointer StorageBuffer %float
+        %208 = OpConstantComposite %v4float %float_1 %float_1 %float_1 %float_1
+%_ptr_StorageBuffer_float_0 = OpTypePointer StorageBuffer %float
+    %float_4 = OpConstant %float 4
+    %float_0 = OpConstant %float 0
+        %int = OpTypeInt 32 1
+      %v2int = OpTypeVector %int 2
+        %229 = OpTypeFunction %void %_arr_uint_uint_1 %Particle
+%_ptr_StorageBuffer_v3float = OpTypePointer StorageBuffer %v3float
+%_ptr_StorageBuffer_v4float = OpTypePointer StorageBuffer %v4float
+%_ptr_StorageBuffer_v2float = OpTypePointer StorageBuffer %v2float
+     %uint_3 = OpConstant %uint 3
+%asinh_468a48 = OpFunction %void None %63
+         %64 = OpLabel
+      %arg_0 = OpVariable %_ptr_Function_half Function
+        %res = OpVariable %_ptr_Function_half Function
+               OpStore %arg_0 %half_0x0p_0
+         %69 = OpLoad %half %arg_0
+         %70 = OpExtInst %half %71 Asinh %69
+               OpStore %res %70
+               OpReturn
+               OpFunctionEnd
+%vertex_main_inner = OpFunction %v4float None %74
+         %75 = OpLabel
+         %76 = OpFunctionCall %void %asinh_468a48
+               OpReturnValue %77
+               OpFunctionEnd
+%fragment_main = OpFunction %void None %63
+         %79 = OpLabel
+         %80 = OpFunctionCall %void %asinh_468a48
+               OpReturn
+               OpFunctionEnd
+%rgba32uintin = OpFunction %void None %63
+         %82 = OpLabel
+         %83 = OpFunctionCall %void %asinh_468a48
+               OpReturn
+               OpFunctionEnd
+%vs_main_inner = OpFunction %VertexOutput None %88
+         %in = OpFunctionParameter %VertexInput
+         %89 = OpLabel
+   %quad_pos = OpVariable %_ptr_Function_v3float Function
+   %position = OpVariable %_ptr_Function_v3float Function
+        %out = OpVariable %_ptr_Function_VertexOutput Function %113
+         %90 = OpAccessChain %_ptr_Uniform_v3float %6 %uint_0 %uint_1
+         %94 = OpLoad %v3float %90
+         %95 = OpAccessChain %_ptr_Uniform_v3float %6 %uint_0 %uint_2
+         %97 = OpLoad %v3float %95
+         %99 = OpCompositeConstruct %mat2v3float %94 %97
+        %100 = OpCompositeExtract %v2float %in 2
+        %101 = OpMatrixTimesVector %v3float %99 %100
+               OpStore %quad_pos %101
+        %104 = OpCompositeExtract %v3float %in 0
+        %105 = OpLoad %v3float %quad_pos
+        %106 = OpCompositeConstruct %v3float %float_0_00999999978 %float_0_00999999978 %float_0_00999999978
+        %108 = OpFAdd %v3float %105 %106
+        %109 = OpFSub %v3float %104 %108
+               OpStore %position %109
+        %114 = OpAccessChain %_ptr_Function_v4float %out %uint_0
+        %116 = OpAccessChain %_ptr_Uniform_mat4v4float %6 %uint_0 %uint_0
+        %118 = OpLoad %mat4v4float %116
+        %119 = OpLoad %v3float %position
+        %120 = OpCompositeConstruct %v4float %119 %float_1
+        %122 = OpMatrixTimesVector %v4float %118 %120
+               OpStore %114 %122
+        %123 = OpAccessChain %_ptr_Function_v4float %out %uint_1
+        %124 = OpCompositeExtract %v4float %in 1
+               OpStore %123 %124
+        %125 = OpAccessChain %_ptr_Function_v2float %out %uint_2
+        %127 = OpCompositeExtract %v2float %in 2
+               OpStore %125 %127
+        %128 = OpLoad %VertexOutput %out
+               OpReturnValue %128
+               OpFunctionEnd
+%simulate_inner = OpFunction %void None %131
+%GlobalInvocationID = OpFunctionParameter %v3uint
+        %132 = OpLabel
+   %particle = OpVariable %_ptr_Function_Particle Function
+        %133 = OpAccessChain %_ptr_Uniform_v4float %13 %uint_0 %uint_1
+        %135 = OpLoad %v4float %133
+        %136 = OpVectorShuffle %v2float %135 %135 0 1
+        %137 = OpVectorShuffle %v2uint %GlobalInvocationID %GlobalInvocationID 0 1
+        %139 = OpConvertUToF %v2float %137
+        %140 = OpFMul %v2float %136 %139
+        %141 = OpAccessChain %_ptr_Uniform_v4float %13 %uint_0 %uint_1
+        %142 = OpLoad %v4float %141
+        %143 = OpVectorShuffle %v2float %142 %142 2 3
+        %144 = OpFMul %v2float %140 %143
+               OpStore %rand_seed %144
+        %idx = OpCompositeExtract %uint %GlobalInvocationID 0
+        %146 = OpAccessChain %_ptr_StorageBuffer_Particle %data %uint_0 %idx
+        %148 = OpLoad %Particle %146
+               OpStore %particle %148
+        %151 = OpLoad %Particle %particle
+        %153 = OpCompositeConstruct %_arr_uint_uint_1 %idx
+        %154 = OpFunctionCall %void %tint_store_and_preserve_padding %153 %151
+               OpReturn
+               OpFunctionEnd
+%export_level_inner = OpFunction %void None %131
+      %coord = OpFunctionParameter %v3uint
+        %158 = OpLabel
+        %159 = OpVectorShuffle %v2uint %coord %coord 0 1
+        %160 = OpLoad %41 %tex_out
+        %161 = OpImageQuerySize %v2uint %160
+        %162 = OpULessThan %v2bool %159 %161
+        %165 = OpAll %bool %162
+               OpSelectionMerge %166 None
+               OpBranchConditional %165 %167 %166
+        %167 = OpLabel
+        %168 = OpCompositeExtract %uint %coord 0
+        %169 = OpCompositeExtract %uint %coord 1
+        %170 = OpAccessChain %_ptr_Uniform_uint %25 %uint_0 %uint_0
+        %172 = OpLoad %uint %170
+        %173 = OpIMul %uint %169 %172
+        %174 = OpBitwiseAnd %uint %173 %uint_31
+ %dst_offset = OpShiftLeftLogical %uint %168 %174
+        %177 = OpCompositeExtract %uint %coord 0
+        %178 = OpISub %uint %177 %uint_2
+        %179 = OpCompositeExtract %uint %coord 1
+        %180 = OpBitwiseAnd %uint %uint_2 %uint_31
+        %181 = OpShiftRightLogical %uint %179 %180
+        %182 = OpAccessChain %_ptr_Uniform_uint %25 %uint_0 %uint_0
+        %183 = OpLoad %uint %182
+        %184 = OpIMul %uint %181 %183
+ %src_offset = OpIAdd %uint %178 %184
+        %186 = OpBitwiseAnd %uint %uint_0 %uint_31
+        %187 = OpShiftLeftLogical %uint %src_offset %186
+        %188 = OpAccessChain %_ptr_StorageBuffer_float %buf_in %uint_0 %187
+          %a = OpLoad %float %188
+        %191 = OpIAdd %uint %src_offset %uint_1
+        %192 = OpAccessChain %_ptr_StorageBuffer_float %buf_in %uint_0 %191
+          %b = OpLoad %float %192
+        %194 = OpIAdd %uint %src_offset %uint_1
+        %195 = OpAccessChain %_ptr_Uniform_uint %25 %uint_0 %uint_0
+        %196 = OpLoad %uint %195
+        %197 = OpIAdd %uint %194 %196
+        %198 = OpAccessChain %_ptr_StorageBuffer_float %buf_in %uint_0 %197
+          %c = OpLoad %float %198
+        %200 = OpIAdd %uint %src_offset %uint_1
+        %201 = OpAccessChain %_ptr_Uniform_uint %25 %uint_0 %uint_0
+        %202 = OpLoad %uint %201
+        %203 = OpIAdd %uint %200 %202
+        %204 = OpAccessChain %_ptr_StorageBuffer_float %buf_in %uint_0 %203
+          %d = OpLoad %float %204
+        %206 = OpCompositeConstruct %v4float %a %b %c %d
+        %sum = OpDot %float %206 %208
+        %209 = OpAccessChain %_ptr_StorageBuffer_float_0 %buf_out %uint_0 %dst_offset
+        %211 = OpFRem %float %sum %float_4
+               OpStore %209 %211
+        %213 = OpFMul %float %a %b
+        %214 = OpFDiv %float %a %b
+        %215 = OpFAdd %float %214 %c
+        %216 = OpCompositeConstruct %v4float %a %213 %215 %sum
+        %217 = OpExtInst %float %71 FMax %sum %float_0
+        %219 = OpCompositeConstruct %v4float %217 %217 %217 %217
+%probabilities = OpFAdd %v4float %216 %219
+        %221 = OpLoad %41 %tex_out
+        %222 = OpVectorShuffle %v2uint %coord %coord 0 1
+        %225 = OpBitcast %v2int %222
+               OpImageWrite %221 %225 %probabilities None
+               OpBranch %166
+        %166 = OpLabel
+               OpReturn
+               OpFunctionEnd
+%tint_store_and_preserve_padding = OpFunction %void None %229
+%target_indices = OpFunctionParameter %_arr_uint_uint_1
+%value_param = OpFunctionParameter %Particle
+        %230 = OpLabel
+        %231 = OpCompositeExtract %uint %target_indices 0
+        %232 = OpAccessChain %_ptr_StorageBuffer_v3float %data %uint_0 %231 %uint_0
+        %234 = OpCompositeExtract %v3float %value_param 0
+               OpStore %232 %234
+        %235 = OpAccessChain %_ptr_StorageBuffer_float_0 %data %uint_0 %231 %uint_1
+        %236 = OpCompositeExtract %float %value_param 1
+               OpStore %235 %236
+        %237 = OpAccessChain %_ptr_StorageBuffer_v4float %data %uint_0 %231 %uint_2
+        %239 = OpCompositeExtract %v4float %value_param 2
+               OpStore %237 %239
+        %240 = OpAccessChain %_ptr_StorageBuffer_v2float %data %uint_0 %231 %uint_3
+        %243 = OpCompositeExtract %v2float %value_param 3
+               OpStore %240 %243
+               OpReturn
+               OpFunctionEnd
+%vertex_main = OpFunction %void None %63
+        %245 = OpLabel
+        %246 = OpFunctionCall %v4float %vertex_main_inner
+               OpStore %vertex_main_position_Output %246
+               OpStore %vertex_main___point_size_Output %float_1
+               OpReturn
+               OpFunctionEnd
+    %vs_main = OpFunction %void None %63
+        %248 = OpLabel
+        %249 = OpLoad %v3float %vs_main_loc0_Input
+        %250 = OpLoad %v4float %vs_main_loc1_Input
+        %251 = OpLoad %v2float %vs_main_loc2_Input
+        %252 = OpCompositeConstruct %VertexInput %249 %250 %251
+        %253 = OpFunctionCall %VertexOutput %vs_main_inner %252
+        %254 = OpCompositeExtract %v4float %253 0
+               OpStore %vs_main_position_Output %254
+        %255 = OpCompositeExtract %v4float %253 1
+               OpStore %vs_main_loc0_Output %255
+        %256 = OpCompositeExtract %v2float %253 2
+               OpStore %vs_main_loc1_Output %256
+               OpStore %vs_main___point_size_Output %float_1
+               OpReturn
+               OpFunctionEnd
+   %simulate = OpFunction %void None %63
+        %258 = OpLabel
+        %259 = OpLoad %v3uint %simulate_global_invocation_id_Input
+        %260 = OpFunctionCall %void %simulate_inner %259
+               OpReturn
+               OpFunctionEnd
+%export_level = OpFunction %void None %63
+        %262 = OpLabel
+        %263 = OpLoad %v3uint %export_level_global_invocation_id_Input
+        %264 = OpFunctionCall %void %export_level_inner %263
+               OpReturn
+               OpFunctionEnd

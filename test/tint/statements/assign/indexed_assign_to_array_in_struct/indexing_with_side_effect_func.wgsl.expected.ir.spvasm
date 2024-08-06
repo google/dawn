@@ -1,0 +1,82 @@
+; SPIR-V
+; Version: 1.3
+; Generator: Google Tint Compiler; 1
+; Bound: 40
+; Schema: 0
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+               OpName %nextIndex "nextIndex"
+               OpMemberName %Uniforms 0 "i"
+               OpMemberName %Uniforms 1 "j"
+               OpName %Uniforms "Uniforms"
+               OpMemberName %tint_symbol_1 0 "tint_symbol"
+               OpName %tint_symbol_1 "tint_symbol_1"
+               OpName %getNextIndex "getNextIndex"
+               OpName %main "main"
+               OpMemberName %InnerS 0 "v"
+               OpName %InnerS "InnerS"
+               OpName %v "v"
+               OpMemberName %S1 0 "a2"
+               OpName %S1 "S1"
+               OpMemberName %OuterS 0 "a1"
+               OpName %OuterS "OuterS"
+               OpName %s "s"
+               OpMemberDecorate %Uniforms 0 Offset 0
+               OpMemberDecorate %Uniforms 1 Offset 4
+               OpMemberDecorate %tint_symbol_1 0 Offset 0
+               OpDecorate %tint_symbol_1 Block
+               OpDecorate %5 DescriptorSet 1
+               OpDecorate %5 Binding 4
+               OpDecorate %5 NonWritable
+               OpMemberDecorate %InnerS 0 Offset 0
+               OpDecorate %_arr_InnerS_uint_8 ArrayStride 4
+               OpMemberDecorate %S1 0 Offset 0
+               OpDecorate %_arr_S1_uint_8 ArrayStride 32
+               OpMemberDecorate %OuterS 0 Offset 0
+       %uint = OpTypeInt 32 0
+%_ptr_Private_uint = OpTypePointer Private %uint
+          %4 = OpConstantNull %uint
+  %nextIndex = OpVariable %_ptr_Private_uint Private %4
+   %Uniforms = OpTypeStruct %uint %uint
+%tint_symbol_1 = OpTypeStruct %Uniforms
+%_ptr_Uniform_tint_symbol_1 = OpTypePointer Uniform %tint_symbol_1
+          %5 = OpVariable %_ptr_Uniform_tint_symbol_1 Uniform
+         %10 = OpTypeFunction %uint
+     %uint_1 = OpConstant %uint 1
+       %void = OpTypeVoid
+         %18 = OpTypeFunction %void
+        %int = OpTypeInt 32 1
+     %InnerS = OpTypeStruct %int
+%_ptr_Function_InnerS = OpTypePointer Function %InnerS
+         %24 = OpConstantNull %InnerS
+     %uint_8 = OpConstant %uint 8
+%_arr_InnerS_uint_8 = OpTypeArray %InnerS %uint_8
+         %S1 = OpTypeStruct %_arr_InnerS_uint_8
+%_arr_S1_uint_8 = OpTypeArray %S1 %uint_8
+     %OuterS = OpTypeStruct %_arr_S1_uint_8
+%_ptr_Function_OuterS = OpTypePointer Function %OuterS
+         %32 = OpConstantNull %OuterS
+%_ptr_Uniform_uint = OpTypePointer Uniform %uint
+     %uint_0 = OpConstant %uint 0
+%getNextIndex = OpFunction %uint None %10
+         %11 = OpLabel
+         %12 = OpLoad %uint %nextIndex
+         %13 = OpIAdd %uint %12 %uint_1
+               OpStore %nextIndex %13
+         %15 = OpLoad %uint %nextIndex
+               OpReturnValue %15
+               OpFunctionEnd
+       %main = OpFunction %void None %18
+         %19 = OpLabel
+          %v = OpVariable %_ptr_Function_InnerS Function %24
+          %s = OpVariable %_ptr_Function_OuterS Function %32
+         %33 = OpFunctionCall %uint %getNextIndex
+         %34 = OpAccessChain %_ptr_Uniform_uint %5 %uint_0 %uint_1
+         %37 = OpLoad %uint %34
+         %38 = OpAccessChain %_ptr_Function_InnerS %s %uint_0 %33 %uint_0 %37
+         %39 = OpLoad %InnerS %v
+               OpStore %38 %39
+               OpReturn
+               OpFunctionEnd

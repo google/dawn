@@ -1,0 +1,247 @@
+; SPIR-V
+; Version: 1.3
+; Generator: Google Tint Compiler; 1
+; Bound: 146
+; Schema: 0
+               OpCapability Shader
+               OpCapability ImageQuery
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main" %main_global_invocation_id_Input
+               OpExecutionMode %main LocalSize 1 1 1
+               OpName %src "src"
+               OpName %dst "dst"
+               OpMemberName %OutputBuf 0 "result"
+               OpName %OutputBuf "OutputBuf"
+               OpName %output "output"
+               OpMemberName %Uniforms 0 "dstTextureFlipY"
+               OpMemberName %Uniforms 1 "isFloat16"
+               OpMemberName %Uniforms 2 "isRGB10A2Unorm"
+               OpMemberName %Uniforms 3 "channelCount"
+               OpName %Uniforms "Uniforms"
+               OpMemberName %tint_symbol_1 0 "tint_symbol"
+               OpName %tint_symbol_1 "tint_symbol_1"
+               OpName %main_global_invocation_id_Input "main_global_invocation_id_Input"
+               OpName %ConvertToFp16FloatValue "ConvertToFp16FloatValue"
+               OpName %fp32 "fp32"
+               OpName %main_inner "main_inner"
+               OpName %GlobalInvocationID "GlobalInvocationID"
+               OpName %size "size"
+               OpName %dstTexCoord "dstTexCoord"
+               OpName %srcTexCoord "srcTexCoord"
+               OpName %srcColor "srcColor"
+               OpName %dstColor "dstColor"
+               OpName %success "success"
+               OpName %srcColorBits "srcColorBits"
+               OpName %dstColorBits "dstColorBits"
+               OpName %i "i"
+               OpName %outputIndex "outputIndex"
+               OpName %tint_v4f32_to_v4u32 "tint_v4f32_to_v4u32"
+               OpName %value "value"
+               OpName %main "main"
+               OpDecorate %src DescriptorSet 0
+               OpDecorate %src Binding 0
+               OpDecorate %dst DescriptorSet 0
+               OpDecorate %dst Binding 1
+               OpDecorate %_runtimearr_uint ArrayStride 4
+               OpMemberDecorate %OutputBuf 0 Offset 0
+               OpDecorate %OutputBuf Block
+               OpDecorate %output DescriptorSet 0
+               OpDecorate %output Binding 2
+               OpMemberDecorate %Uniforms 0 Offset 0
+               OpMemberDecorate %Uniforms 1 Offset 4
+               OpMemberDecorate %Uniforms 2 Offset 8
+               OpMemberDecorate %Uniforms 3 Offset 12
+               OpMemberDecorate %tint_symbol_1 0 Offset 0
+               OpDecorate %tint_symbol_1 Block
+               OpDecorate %11 DescriptorSet 0
+               OpDecorate %11 Binding 3
+               OpDecorate %11 NonWritable
+               OpDecorate %main_global_invocation_id_Input BuiltIn GlobalInvocationId
+      %float = OpTypeFloat 32
+          %3 = OpTypeImage %float 2D 0 0 0 1 Unknown
+%_ptr_UniformConstant_3 = OpTypePointer UniformConstant %3
+        %src = OpVariable %_ptr_UniformConstant_3 UniformConstant
+        %dst = OpVariable %_ptr_UniformConstant_3 UniformConstant
+       %uint = OpTypeInt 32 0
+%_runtimearr_uint = OpTypeRuntimeArray %uint
+  %OutputBuf = OpTypeStruct %_runtimearr_uint
+%_ptr_StorageBuffer_OutputBuf = OpTypePointer StorageBuffer %OutputBuf
+     %output = OpVariable %_ptr_StorageBuffer_OutputBuf StorageBuffer
+   %Uniforms = OpTypeStruct %uint %uint %uint %uint
+%tint_symbol_1 = OpTypeStruct %Uniforms
+%_ptr_Uniform_tint_symbol_1 = OpTypePointer Uniform %tint_symbol_1
+         %11 = OpVariable %_ptr_Uniform_tint_symbol_1 Uniform
+     %v3uint = OpTypeVector %uint 3
+%_ptr_Input_v3uint = OpTypePointer Input %v3uint
+%main_global_invocation_id_Input = OpVariable %_ptr_Input_v3uint Input
+         %20 = OpTypeFunction %uint %float
+     %uint_1 = OpConstant %uint 1
+       %void = OpTypeVoid
+         %26 = OpTypeFunction %void %v3uint
+     %v2uint = OpTypeVector %uint 2
+     %uint_0 = OpConstant %uint 0
+%_ptr_Function_v2uint = OpTypePointer Function %v2uint
+%_ptr_Uniform_uint = OpTypePointer Uniform %uint
+       %bool = OpTypeBool
+%_ptr_Function_uint = OpTypePointer Function %uint
+    %v4float = OpTypeVector %float 4
+        %int = OpTypeInt 32 1
+      %int_0 = OpConstant %int 0
+%_ptr_Function_v4float = OpTypePointer Function %v4float
+%_ptr_Function_bool = OpTypePointer Function %bool
+       %true = OpConstantTrue %bool
+     %v4uint = OpTypeVector %uint 4
+%_ptr_Function_v4uint = OpTypePointer Function %v4uint
+         %71 = OpConstantNull %v4uint
+     %uint_3 = OpConstant %uint 3
+%_ptr_Function_float = OpTypePointer Function %float
+      %false = OpConstantFalse %bool
+%_ptr_StorageBuffer_uint = OpTypePointer StorageBuffer %uint
+        %128 = OpTypeFunction %v4uint %v4float
+        %132 = OpConstantNull %v4float
+     %v4bool = OpTypeVector %bool 4
+%float_4_29496704e_09 = OpConstant %float 4.29496704e+09
+        %136 = OpConstantComposite %v4float %float_4_29496704e_09 %float_4_29496704e_09 %float_4_29496704e_09 %float_4_29496704e_09
+%uint_4294967295 = OpConstant %uint 4294967295
+        %139 = OpConstantComposite %v4uint %uint_4294967295 %uint_4294967295 %uint_4294967295 %uint_4294967295
+        %142 = OpTypeFunction %void
+%ConvertToFp16FloatValue = OpFunction %uint None %20
+       %fp32 = OpFunctionParameter %float
+         %21 = OpLabel
+               OpReturnValue %uint_1
+               OpFunctionEnd
+ %main_inner = OpFunction %void None %26
+%GlobalInvocationID = OpFunctionParameter %v3uint
+         %27 = OpLabel
+       %size = OpVariable %_ptr_Function_v2uint Function
+%dstTexCoord = OpVariable %_ptr_Function_v2uint Function
+%srcTexCoord = OpVariable %_ptr_Function_v2uint Function
+   %srcColor = OpVariable %_ptr_Function_v4float Function
+   %dstColor = OpVariable %_ptr_Function_v4float Function
+    %success = OpVariable %_ptr_Function_bool Function
+%srcColorBits = OpVariable %_ptr_Function_v4uint Function %71
+%dstColorBits = OpVariable %_ptr_Function_v4uint Function
+          %i = OpVariable %_ptr_Function_uint Function
+%outputIndex = OpVariable %_ptr_Function_uint Function
+         %28 = OpLoad %3 %src
+         %29 = OpImageQuerySizeLod %v2uint %28 %uint_0
+               OpStore %size %29
+         %34 = OpVectorShuffle %v2uint %GlobalInvocationID %GlobalInvocationID 0 1
+               OpStore %dstTexCoord %34
+         %36 = OpLoad %v2uint %dstTexCoord
+               OpStore %srcTexCoord %36
+         %38 = OpAccessChain %_ptr_Uniform_uint %11 %uint_0 %uint_0
+         %40 = OpLoad %uint %38
+         %41 = OpIEqual %bool %40 %uint_1
+               OpSelectionMerge %43 None
+               OpBranchConditional %41 %44 %43
+         %44 = OpLabel
+         %45 = OpAccessChain %_ptr_Function_uint %size %uint_1
+         %47 = OpLoad %uint %45
+         %48 = OpAccessChain %_ptr_Function_uint %dstTexCoord %uint_1
+         %49 = OpLoad %uint %48
+         %50 = OpISub %uint %47 %49
+         %51 = OpISub %uint %50 %uint_1
+         %52 = OpAccessChain %_ptr_Function_uint %srcTexCoord %uint_1
+               OpStore %52 %51
+               OpBranch %43
+         %43 = OpLabel
+         %53 = OpLoad %3 %src
+         %54 = OpLoad %v2uint %srcTexCoord
+         %55 = OpImageFetch %v4float %53 %54 Lod %int_0
+               OpStore %srcColor %55
+         %61 = OpLoad %3 %dst
+         %62 = OpLoad %v2uint %dstTexCoord
+         %63 = OpImageFetch %v4float %61 %62 Lod %int_0
+               OpStore %dstColor %63
+               OpStore %success %true
+         %72 = OpLoad %v4float %dstColor
+         %73 = OpFunctionCall %v4uint %tint_v4f32_to_v4u32 %72
+               OpStore %dstColorBits %73
+               OpBranch %76
+         %76 = OpLabel
+               OpStore %i %uint_0
+               OpBranch %79
+         %79 = OpLabel
+               OpLoopMerge %80 %78 None
+               OpBranch %77
+         %77 = OpLabel
+         %82 = OpLoad %uint %i
+         %83 = OpAccessChain %_ptr_Uniform_uint %11 %uint_0 %uint_3
+         %85 = OpLoad %uint %83
+         %86 = OpULessThan %bool %82 %85
+               OpSelectionMerge %87 None
+               OpBranchConditional %86 %87 %88
+         %88 = OpLabel
+               OpBranch %80
+         %87 = OpLabel
+         %89 = OpLoad %uint %i
+         %90 = OpLoad %uint %i
+         %91 = OpAccessChain %_ptr_Function_float %srcColor %90
+         %93 = OpLoad %float %91
+         %94 = OpFunctionCall %uint %ConvertToFp16FloatValue %93
+         %95 = OpAccessChain %_ptr_Function_uint %srcColorBits %89
+               OpStore %95 %94
+         %96 = OpLoad %bool %success
+               OpSelectionMerge %97 None
+               OpBranchConditional %96 %98 %99
+         %98 = OpLabel
+        %100 = OpLoad %uint %i
+        %101 = OpAccessChain %_ptr_Function_uint %srcColorBits %100
+        %102 = OpLoad %uint %101
+        %103 = OpLoad %uint %i
+        %104 = OpAccessChain %_ptr_Function_uint %dstColorBits %103
+        %105 = OpLoad %uint %104
+        %106 = OpIEqual %bool %102 %105
+               OpBranch %97
+         %99 = OpLabel
+               OpBranch %97
+         %97 = OpLabel
+        %107 = OpPhi %bool %106 %98 %false %99
+               OpStore %success %107
+               OpBranch %78
+         %78 = OpLabel
+        %109 = OpLoad %uint %i
+        %110 = OpIAdd %uint %109 %uint_1
+               OpStore %i %110
+               OpBranch %79
+         %80 = OpLabel
+        %111 = OpCompositeExtract %uint %GlobalInvocationID 1
+        %112 = OpAccessChain %_ptr_Function_uint %size %uint_0
+        %113 = OpLoad %uint %112
+        %114 = OpIMul %uint %111 %113
+        %115 = OpCompositeExtract %uint %GlobalInvocationID 0
+        %116 = OpIAdd %uint %114 %115
+               OpStore %outputIndex %116
+        %118 = OpLoad %bool %success
+               OpSelectionMerge %119 None
+               OpBranchConditional %118 %120 %121
+        %120 = OpLabel
+        %122 = OpLoad %uint %outputIndex
+        %123 = OpAccessChain %_ptr_StorageBuffer_uint %output %uint_0 %122
+               OpStore %123 %uint_1
+               OpBranch %119
+        %121 = OpLabel
+        %125 = OpLoad %uint %outputIndex
+        %126 = OpAccessChain %_ptr_StorageBuffer_uint %output %uint_0 %125
+               OpStore %126 %uint_0
+               OpBranch %119
+        %119 = OpLabel
+               OpReturn
+               OpFunctionEnd
+%tint_v4f32_to_v4u32 = OpFunction %v4uint None %128
+      %value = OpFunctionParameter %v4float
+        %129 = OpLabel
+        %130 = OpConvertFToU %v4uint %value
+        %131 = OpFOrdGreaterThanEqual %v4bool %value %132
+        %134 = OpSelect %v4uint %131 %130 %71
+        %135 = OpFOrdLessThanEqual %v4bool %value %136
+        %138 = OpSelect %v4uint %135 %134 %139
+               OpReturnValue %138
+               OpFunctionEnd
+       %main = OpFunction %void None %142
+        %143 = OpLabel
+        %144 = OpLoad %v3uint %main_global_invocation_id_Input
+        %145 = OpFunctionCall %void %main_inner %144
+               OpReturn
+               OpFunctionEnd

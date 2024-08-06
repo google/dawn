@@ -1,0 +1,153 @@
+; SPIR-V
+; Version: 1.3
+; Generator: Google Tint Compiler; 1
+; Bound: 104
+; Schema: 0
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+               OpName %main "main"
+               OpName %v2f "v2f"
+               OpName %v3f "v3f"
+               OpName %v4f "v4f"
+               OpName %v2i "v2i"
+               OpName %v3i "v3i"
+               OpName %v4i "v4i"
+               OpName %v2u "v2u"
+               OpName %v3u "v3u"
+               OpName %v4u "v4u"
+               OpName %v2b "v2b"
+               OpName %v3b "v3b"
+               OpName %v4b "v4b"
+               OpName %i "i"
+               OpName %i_0 "i"
+       %void = OpTypeVoid
+          %3 = OpTypeFunction %void
+      %float = OpTypeFloat 32
+    %v2float = OpTypeVector %float 2
+%_ptr_Function_v2float = OpTypePointer Function %v2float
+          %9 = OpConstantNull %v2float
+    %v3float = OpTypeVector %float 3
+%_ptr_Function_v3float = OpTypePointer Function %v3float
+         %13 = OpConstantNull %v3float
+    %v4float = OpTypeVector %float 4
+%_ptr_Function_v4float = OpTypePointer Function %v4float
+         %17 = OpConstantNull %v4float
+        %int = OpTypeInt 32 1
+      %v2int = OpTypeVector %int 2
+%_ptr_Function_v2int = OpTypePointer Function %v2int
+         %22 = OpConstantNull %v2int
+      %v3int = OpTypeVector %int 3
+%_ptr_Function_v3int = OpTypePointer Function %v3int
+         %26 = OpConstantNull %v3int
+      %v4int = OpTypeVector %int 4
+%_ptr_Function_v4int = OpTypePointer Function %v4int
+         %30 = OpConstantNull %v4int
+       %uint = OpTypeInt 32 0
+     %v2uint = OpTypeVector %uint 2
+%_ptr_Function_v2uint = OpTypePointer Function %v2uint
+         %35 = OpConstantNull %v2uint
+     %v3uint = OpTypeVector %uint 3
+%_ptr_Function_v3uint = OpTypePointer Function %v3uint
+         %39 = OpConstantNull %v3uint
+     %v4uint = OpTypeVector %uint 4
+%_ptr_Function_v4uint = OpTypePointer Function %v4uint
+         %43 = OpConstantNull %v4uint
+       %bool = OpTypeBool
+     %v2bool = OpTypeVector %bool 2
+%_ptr_Function_v2bool = OpTypePointer Function %v2bool
+         %48 = OpConstantNull %v2bool
+     %v3bool = OpTypeVector %bool 3
+%_ptr_Function_v3bool = OpTypePointer Function %v3bool
+         %52 = OpConstantNull %v3bool
+     %v4bool = OpTypeVector %bool 4
+%_ptr_Function_v4bool = OpTypePointer Function %v4bool
+         %56 = OpConstantNull %v4bool
+%_ptr_Function_int = OpTypePointer Function %int
+      %int_0 = OpConstant %int 0
+      %int_2 = OpConstant %int 2
+%_ptr_Function_float = OpTypePointer Function %float
+    %float_1 = OpConstant %float 1
+      %int_1 = OpConstant %int 1
+%_ptr_Function_uint = OpTypePointer Function %uint
+     %uint_1 = OpConstant %uint 1
+%_ptr_Function_bool = OpTypePointer Function %bool
+       %true = OpConstantTrue %bool
+       %main = OpFunction %void None %3
+          %4 = OpLabel
+        %v2f = OpVariable %_ptr_Function_v2float Function %9
+        %v3f = OpVariable %_ptr_Function_v3float Function %13
+        %v4f = OpVariable %_ptr_Function_v4float Function %17
+        %v2i = OpVariable %_ptr_Function_v2int Function %22
+        %v3i = OpVariable %_ptr_Function_v3int Function %26
+        %v4i = OpVariable %_ptr_Function_v4int Function %30
+        %v2u = OpVariable %_ptr_Function_v2uint Function %35
+        %v3u = OpVariable %_ptr_Function_v3uint Function %39
+        %v4u = OpVariable %_ptr_Function_v4uint Function %43
+        %v2b = OpVariable %_ptr_Function_v2bool Function %48
+        %v3b = OpVariable %_ptr_Function_v3bool Function %52
+        %v4b = OpVariable %_ptr_Function_v4bool Function %56
+          %i = OpVariable %_ptr_Function_int Function
+        %i_0 = OpVariable %_ptr_Function_int Function
+               OpBranch %57
+         %57 = OpLabel
+               OpStore %i %int_0
+               OpBranch %60
+         %60 = OpLabel
+               OpLoopMerge %61 %59 None
+               OpBranch %58
+         %58 = OpLabel
+         %65 = OpLoad %int %i
+         %66 = OpSLessThan %bool %65 %int_2
+               OpSelectionMerge %68 None
+               OpBranchConditional %66 %68 %69
+         %69 = OpLabel
+               OpBranch %61
+         %68 = OpLabel
+         %70 = OpLoad %int %i
+         %71 = OpAccessChain %_ptr_Function_float %v2f %70
+               OpStore %71 %float_1
+         %74 = OpLoad %int %i
+         %75 = OpAccessChain %_ptr_Function_int %v2i %74
+               OpStore %75 %int_1
+         %77 = OpLoad %int %i
+         %78 = OpAccessChain %_ptr_Function_uint %v2u %77
+               OpStore %78 %uint_1
+         %81 = OpLoad %int %i
+         %82 = OpAccessChain %_ptr_Function_bool %v2b %81
+               OpStore %82 %true
+               OpBranch %59
+         %59 = OpLabel
+         %85 = OpLoad %int %i
+         %86 = OpIAdd %int %85 %int_1
+               OpStore %i %86
+               OpBranch %60
+         %61 = OpLabel
+               OpStore %i_0 %int_0
+         %88 = OpLoad %int %i_0
+         %89 = OpAccessChain %_ptr_Function_float %v3f %88
+               OpStore %89 %float_1
+         %90 = OpLoad %int %i_0
+         %91 = OpAccessChain %_ptr_Function_float %v4f %90
+               OpStore %91 %float_1
+         %92 = OpLoad %int %i_0
+         %93 = OpAccessChain %_ptr_Function_int %v3i %92
+               OpStore %93 %int_1
+         %94 = OpLoad %int %i_0
+         %95 = OpAccessChain %_ptr_Function_int %v4i %94
+               OpStore %95 %int_1
+         %96 = OpLoad %int %i_0
+         %97 = OpAccessChain %_ptr_Function_uint %v3u %96
+               OpStore %97 %uint_1
+         %98 = OpLoad %int %i_0
+         %99 = OpAccessChain %_ptr_Function_uint %v4u %98
+               OpStore %99 %uint_1
+        %100 = OpLoad %int %i_0
+        %101 = OpAccessChain %_ptr_Function_bool %v3b %100
+               OpStore %101 %true
+        %102 = OpLoad %int %i_0
+        %103 = OpAccessChain %_ptr_Function_bool %v4b %102
+               OpStore %103 %true
+               OpReturn
+               OpFunctionEnd

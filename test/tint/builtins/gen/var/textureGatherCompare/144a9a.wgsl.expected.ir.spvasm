@@ -1,0 +1,144 @@
+; SPIR-V
+; Version: 1.3
+; Generator: Google Tint Compiler; 1
+; Bound: 78
+; Schema: 0
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint Fragment %fragment_main "fragment_main"
+               OpEntryPoint GLCompute %compute_main "compute_main"
+               OpEntryPoint Vertex %vertex_main "vertex_main" %vertex_main_position_Output %vertex_main_loc0_Output %vertex_main___point_size_Output
+               OpExecutionMode %fragment_main OriginUpperLeft
+               OpExecutionMode %compute_main LocalSize 1 1 1
+               OpMemberName %tint_symbol_1 0 "tint_symbol"
+               OpName %tint_symbol_1 "tint_symbol_1"
+               OpName %arg_0 "arg_0"
+               OpName %arg_1 "arg_1"
+               OpName %vertex_main_position_Output "vertex_main_position_Output"
+               OpName %vertex_main_loc0_Output "vertex_main_loc0_Output"
+               OpName %vertex_main___point_size_Output "vertex_main___point_size_Output"
+               OpName %textureGatherCompare_144a9a "textureGatherCompare_144a9a"
+               OpName %arg_2 "arg_2"
+               OpName %arg_3 "arg_3"
+               OpName %arg_4 "arg_4"
+               OpName %res "res"
+               OpName %fragment_main "fragment_main"
+               OpName %compute_main "compute_main"
+               OpName %vertex_main_inner "vertex_main_inner"
+               OpMemberName %VertexOutput 0 "pos"
+               OpMemberName %VertexOutput 1 "prevent_dce"
+               OpName %VertexOutput "VertexOutput"
+               OpName %out "out"
+               OpName %vertex_main "vertex_main"
+               OpMemberDecorate %tint_symbol_1 0 Offset 0
+               OpDecorate %tint_symbol_1 Block
+               OpDecorate %1 DescriptorSet 0
+               OpDecorate %1 Binding 0
+               OpDecorate %arg_0 DescriptorSet 1
+               OpDecorate %arg_0 Binding 0
+               OpDecorate %arg_1 DescriptorSet 1
+               OpDecorate %arg_1 Binding 1
+               OpDecorate %vertex_main_position_Output BuiltIn Position
+               OpDecorate %vertex_main_loc0_Output Location 0
+               OpDecorate %vertex_main_loc0_Output Flat
+               OpDecorate %vertex_main___point_size_Output BuiltIn PointSize
+               OpMemberDecorate %VertexOutput 0 Offset 0
+               OpMemberDecorate %VertexOutput 1 Offset 16
+      %float = OpTypeFloat 32
+    %v4float = OpTypeVector %float 4
+%tint_symbol_1 = OpTypeStruct %v4float
+%_ptr_StorageBuffer_tint_symbol_1 = OpTypePointer StorageBuffer %tint_symbol_1
+          %1 = OpVariable %_ptr_StorageBuffer_tint_symbol_1 StorageBuffer
+          %8 = OpTypeImage %float 2D 0 1 0 1 Unknown
+%_ptr_UniformConstant_8 = OpTypePointer UniformConstant %8
+      %arg_0 = OpVariable %_ptr_UniformConstant_8 UniformConstant
+         %11 = OpTypeSampler
+%_ptr_UniformConstant_11 = OpTypePointer UniformConstant %11
+      %arg_1 = OpVariable %_ptr_UniformConstant_11 UniformConstant
+%_ptr_Output_v4float = OpTypePointer Output %v4float
+%vertex_main_position_Output = OpVariable %_ptr_Output_v4float Output
+%vertex_main_loc0_Output = OpVariable %_ptr_Output_v4float Output
+%_ptr_Output_float = OpTypePointer Output %float
+%vertex_main___point_size_Output = OpVariable %_ptr_Output_float Output
+         %18 = OpTypeFunction %v4float
+    %v2float = OpTypeVector %float 2
+%_ptr_Function_v2float = OpTypePointer Function %v2float
+    %float_1 = OpConstant %float 1
+         %23 = OpConstantComposite %v2float %float_1 %float_1
+       %uint = OpTypeInt 32 0
+%_ptr_Function_uint = OpTypePointer Function %uint
+     %uint_1 = OpConstant %uint 1
+%_ptr_Function_float = OpTypePointer Function %float
+         %37 = OpTypeSampledImage %8
+    %v3float = OpTypeVector %float 3
+        %int = OpTypeInt 32 1
+      %v2int = OpTypeVector %int 2
+      %int_1 = OpConstant %int 1
+         %42 = OpConstantComposite %v2int %int_1 %int_1
+%_ptr_Function_v4float = OpTypePointer Function %v4float
+       %void = OpTypeVoid
+         %51 = OpTypeFunction %void
+%_ptr_StorageBuffer_v4float = OpTypePointer StorageBuffer %v4float
+     %uint_0 = OpConstant %uint 0
+%VertexOutput = OpTypeStruct %v4float %v4float
+         %63 = OpTypeFunction %VertexOutput
+%_ptr_Function_VertexOutput = OpTypePointer Function %VertexOutput
+         %67 = OpConstantNull %VertexOutput
+         %69 = OpConstantNull %v4float
+%textureGatherCompare_144a9a = OpFunction %v4float None %18
+         %19 = OpLabel
+      %arg_2 = OpVariable %_ptr_Function_v2float Function
+      %arg_3 = OpVariable %_ptr_Function_uint Function
+      %arg_4 = OpVariable %_ptr_Function_float Function
+        %res = OpVariable %_ptr_Function_v4float Function
+               OpStore %arg_2 %23
+               OpStore %arg_3 %uint_1
+               OpStore %arg_4 %float_1
+         %31 = OpLoad %8 %arg_0
+         %32 = OpLoad %11 %arg_1
+         %33 = OpLoad %v2float %arg_2
+         %34 = OpLoad %uint %arg_3
+         %35 = OpLoad %float %arg_4
+         %36 = OpSampledImage %37 %31 %32
+         %38 = OpConvertUToF %float %34
+         %40 = OpCompositeConstruct %v3float %33 %38
+         %41 = OpImageDrefGather %v4float %36 %40 %35 ConstOffset %42
+               OpStore %res %41
+         %48 = OpLoad %v4float %res
+               OpReturnValue %48
+               OpFunctionEnd
+%fragment_main = OpFunction %void None %51
+         %52 = OpLabel
+         %53 = OpFunctionCall %v4float %textureGatherCompare_144a9a
+         %54 = OpAccessChain %_ptr_StorageBuffer_v4float %1 %uint_0
+               OpStore %54 %53
+               OpReturn
+               OpFunctionEnd
+%compute_main = OpFunction %void None %51
+         %58 = OpLabel
+         %59 = OpFunctionCall %v4float %textureGatherCompare_144a9a
+         %60 = OpAccessChain %_ptr_StorageBuffer_v4float %1 %uint_0
+               OpStore %60 %59
+               OpReturn
+               OpFunctionEnd
+%vertex_main_inner = OpFunction %VertexOutput None %63
+         %64 = OpLabel
+        %out = OpVariable %_ptr_Function_VertexOutput Function %67
+         %68 = OpAccessChain %_ptr_Function_v4float %out %uint_0
+               OpStore %68 %69
+         %70 = OpAccessChain %_ptr_Function_v4float %out %uint_1
+         %71 = OpFunctionCall %v4float %textureGatherCompare_144a9a
+               OpStore %70 %71
+         %72 = OpLoad %VertexOutput %out
+               OpReturnValue %72
+               OpFunctionEnd
+%vertex_main = OpFunction %void None %51
+         %74 = OpLabel
+         %75 = OpFunctionCall %VertexOutput %vertex_main_inner
+         %76 = OpCompositeExtract %v4float %75 0
+               OpStore %vertex_main_position_Output %76
+         %77 = OpCompositeExtract %v4float %75 1
+               OpStore %vertex_main_loc0_Output %77
+               OpStore %vertex_main___point_size_Output %float_1
+               OpReturn
+               OpFunctionEnd

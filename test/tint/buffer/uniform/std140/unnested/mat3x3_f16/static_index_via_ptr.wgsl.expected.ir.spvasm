@@ -1,0 +1,67 @@
+; SPIR-V
+; Version: 1.3
+; Generator: Google Tint Compiler; 1
+; Bound: 35
+; Schema: 0
+               OpCapability Shader
+               OpCapability Float16
+               OpCapability UniformAndStorageBuffer16BitAccess
+               OpCapability StorageBuffer16BitAccess
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %f "f"
+               OpExecutionMode %f LocalSize 1 1 1
+               OpMemberName %tint_symbol_1_std140 0 "tint_symbol_col0"
+               OpMemberName %tint_symbol_1_std140 1 "tint_symbol_col1"
+               OpMemberName %tint_symbol_1_std140 2 "tint_symbol_col2"
+               OpName %tint_symbol_1_std140 "tint_symbol_1_std140"
+               OpName %counter "counter"
+               OpName %i "i"
+               OpName %f "f"
+               OpName %l_m "l_m"
+               OpName %l_m_1 "l_m_1"
+               OpMemberDecorate %tint_symbol_1_std140 0 Offset 0
+               OpMemberDecorate %tint_symbol_1_std140 1 Offset 8
+               OpMemberDecorate %tint_symbol_1_std140 2 Offset 16
+               OpDecorate %tint_symbol_1_std140 Block
+               OpDecorate %1 DescriptorSet 0
+               OpDecorate %1 Binding 0
+               OpDecorate %1 NonWritable
+       %half = OpTypeFloat 16
+     %v3half = OpTypeVector %half 3
+%tint_symbol_1_std140 = OpTypeStruct %v3half %v3half %v3half
+%_ptr_Uniform_tint_symbol_1_std140 = OpTypePointer Uniform %tint_symbol_1_std140
+          %1 = OpVariable %_ptr_Uniform_tint_symbol_1_std140 Uniform
+        %int = OpTypeInt 32 1
+%_ptr_Private_int = OpTypePointer Private %int
+      %int_0 = OpConstant %int 0
+    %counter = OpVariable %_ptr_Private_int Private %int_0
+         %11 = OpTypeFunction %int
+      %int_1 = OpConstant %int 1
+       %void = OpTypeVoid
+         %19 = OpTypeFunction %void
+%_ptr_Uniform_v3half = OpTypePointer Uniform %v3half
+       %uint = OpTypeInt 32 0
+     %uint_0 = OpConstant %uint 0
+     %uint_1 = OpConstant %uint 1
+     %uint_2 = OpConstant %uint 2
+ %mat3v3half = OpTypeMatrix %v3half 3
+          %i = OpFunction %int None %11
+         %12 = OpLabel
+         %13 = OpLoad %int %counter
+         %14 = OpIAdd %int %13 %int_1
+               OpStore %counter %14
+         %16 = OpLoad %int %counter
+               OpReturnValue %16
+               OpFunctionEnd
+          %f = OpFunction %void None %19
+         %20 = OpLabel
+         %21 = OpAccessChain %_ptr_Uniform_v3half %1 %uint_0
+         %25 = OpLoad %v3half %21
+         %26 = OpAccessChain %_ptr_Uniform_v3half %1 %uint_1
+         %28 = OpLoad %v3half %26
+         %29 = OpAccessChain %_ptr_Uniform_v3half %1 %uint_2
+         %31 = OpLoad %v3half %29
+        %l_m = OpCompositeConstruct %mat3v3half %25 %28 %31
+      %l_m_1 = OpCompositeExtract %v3half %l_m 1
+               OpReturn
+               OpFunctionEnd

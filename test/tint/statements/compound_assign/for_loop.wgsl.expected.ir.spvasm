@@ -1,0 +1,122 @@
+; SPIR-V
+; Version: 1.3
+; Generator: Google Tint Compiler; 1
+; Bound: 66
+; Schema: 0
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %unused_entry_point "unused_entry_point"
+               OpExecutionMode %unused_entry_point LocalSize 1 1 1
+               OpMemberName %S 0 "a"
+               OpMemberName %S 1 "b"
+               OpMemberName %S 2 "c"
+               OpName %S "S"
+               OpMemberName %tint_symbol_1 0 "tint_symbol"
+               OpName %tint_symbol_1 "tint_symbol_1"
+               OpName %i "i"
+               OpName %idx1 "idx1"
+               OpName %idx2 "idx2"
+               OpName %idx3 "idx3"
+               OpName %foo "foo"
+               OpName %a "a"
+               OpName %unused_entry_point "unused_entry_point"
+               OpMemberDecorate %S 0 Offset 0
+               OpMemberDecorate %S 1 Offset 16
+               OpMemberDecorate %S 2 Offset 32
+               OpMemberDecorate %S 2 ColMajor
+               OpMemberDecorate %S 2 MatrixStride 8
+               OpMemberDecorate %tint_symbol_1 0 Offset 0
+               OpDecorate %tint_symbol_1 Block
+               OpDecorate %1 DescriptorSet 0
+               OpDecorate %1 Binding 0
+               OpDecorate %_arr_float_uint_4 ArrayStride 4
+        %int = OpTypeInt 32 1
+      %float = OpTypeFloat 32
+    %v4float = OpTypeVector %float 4
+    %v2float = OpTypeVector %float 2
+%mat2v2float = OpTypeMatrix %v2float 2
+          %S = OpTypeStruct %int %v4float %mat2v2float
+%tint_symbol_1 = OpTypeStruct %S
+%_ptr_StorageBuffer_tint_symbol_1 = OpTypePointer StorageBuffer %tint_symbol_1
+          %1 = OpVariable %_ptr_StorageBuffer_tint_symbol_1 StorageBuffer
+       %uint = OpTypeInt 32 0
+%_ptr_Private_uint = OpTypePointer Private %uint
+         %13 = OpConstantNull %uint
+          %i = OpVariable %_ptr_Private_uint Private %13
+         %15 = OpTypeFunction %int
+     %uint_1 = OpConstant %uint 1
+      %int_1 = OpConstant %int 1
+     %uint_2 = OpConstant %uint 2
+     %uint_3 = OpConstant %uint 3
+       %void = OpTypeVoid
+         %33 = OpTypeFunction %void
+     %uint_4 = OpConstant %uint 4
+%_arr_float_uint_4 = OpTypeArray %float %uint_4
+%_ptr_Function__arr_float_uint_4 = OpTypePointer Function %_arr_float_uint_4
+         %39 = OpConstantNull %_arr_float_uint_4
+%_ptr_Function_float = OpTypePointer Function %float
+    %float_2 = OpConstant %float 2
+   %float_10 = OpConstant %float 10
+       %bool = OpTypeBool
+    %float_1 = OpConstant %float 1
+       %idx1 = OpFunction %int None %15
+         %16 = OpLabel
+         %17 = OpLoad %uint %i
+         %18 = OpIAdd %uint %17 %uint_1
+               OpStore %i %18
+               OpReturnValue %int_1
+               OpFunctionEnd
+       %idx2 = OpFunction %int None %15
+         %22 = OpLabel
+         %23 = OpLoad %uint %i
+         %24 = OpIAdd %uint %23 %uint_2
+               OpStore %i %24
+               OpReturnValue %int_1
+               OpFunctionEnd
+       %idx3 = OpFunction %int None %15
+         %27 = OpLabel
+         %28 = OpLoad %uint %i
+         %29 = OpIAdd %uint %28 %uint_3
+               OpStore %i %29
+               OpReturnValue %int_1
+               OpFunctionEnd
+        %foo = OpFunction %void None %33
+         %34 = OpLabel
+          %a = OpVariable %_ptr_Function__arr_float_uint_4 Function
+               OpStore %a %39
+               OpBranch %40
+         %40 = OpLabel
+         %45 = OpFunctionCall %int %idx1
+         %46 = OpAccessChain %_ptr_Function_float %a %45
+         %48 = OpLoad %float %46
+         %49 = OpFMul %float %48 %float_2
+               OpStore %46 %49
+               OpBranch %43
+         %43 = OpLabel
+               OpLoopMerge %44 %42 None
+               OpBranch %41
+         %41 = OpLabel
+         %51 = OpFunctionCall %int %idx2
+         %52 = OpAccessChain %_ptr_Function_float %a %51
+         %53 = OpLoad %float %52
+         %54 = OpFOrdLessThan %bool %53 %float_10
+               OpSelectionMerge %57 None
+               OpBranchConditional %54 %57 %58
+         %58 = OpLabel
+               OpBranch %44
+         %57 = OpLabel
+               OpBranch %42
+         %42 = OpLabel
+         %59 = OpFunctionCall %int %idx3
+         %60 = OpAccessChain %_ptr_Function_float %a %59
+         %61 = OpLoad %float %60
+         %62 = OpFAdd %float %61 %float_1
+               OpStore %60 %62
+               OpBranch %43
+         %44 = OpLabel
+               OpReturn
+               OpFunctionEnd
+%unused_entry_point = OpFunction %void None %33
+         %65 = OpLabel
+               OpReturn
+               OpFunctionEnd

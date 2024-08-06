@@ -1,0 +1,198 @@
+; SPIR-V
+; Version: 1.3
+; Generator: Google Tint Compiler; 1
+; Bound: 124
+; Schema: 0
+               OpCapability Shader
+         %61 = OpExtInstImport "GLSL.std.450"
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main" %main_local_invocation_index_Input
+               OpExecutionMode %main LocalSize 1 1 1
+               OpMemberName %tint_symbol_1 0 "tint_symbol"
+               OpName %tint_symbol_1 "tint_symbol_1"
+               OpName %g1 "g1"
+               OpName %main_local_invocation_index_Input "main_local_invocation_index_Input"
+               OpName %accept_value "accept_value"
+               OpName %val "val"
+               OpName %accept_ptr_deref_call_func "accept_ptr_deref_call_func"
+               OpName %val_root "val_root"
+               OpName %accept_ptr_deref_pass_through "accept_ptr_deref_pass_through"
+               OpName %val_root_0 "val_root"
+               OpName %accept_ptr_to_struct_and_access "accept_ptr_to_struct_and_access"
+               OpMemberName %S 0 "a"
+               OpMemberName %S 1 "b"
+               OpName %S "S"
+               OpName %val_root_1 "val_root"
+               OpName %accept_ptr_to_struct_access_pass_ptr "accept_ptr_to_struct_access_pass_ptr"
+               OpName %val_root_2 "val_root"
+               OpName %b "b"
+               OpName %accept_ptr_vec_access_elements "accept_ptr_vec_access_elements"
+               OpName %v1_root "v1_root"
+               OpName %call_builtin_with_mod_scope_ptr "call_builtin_with_mod_scope_ptr"
+               OpName %main_inner "main_inner"
+               OpName %tint_local_index "tint_local_index"
+               OpName %v1 "v1"
+               OpName %v2 "v2"
+               OpName %v4 "v4"
+               OpName %t1 "t1"
+               OpName %tint_f32_to_i32 "tint_f32_to_i32"
+               OpName %value "value"
+               OpName %main "main"
+               OpMemberDecorate %tint_symbol_1 0 Offset 0
+               OpDecorate %tint_symbol_1 Block
+               OpDecorate %1 DescriptorSet 0
+               OpDecorate %1 Binding 0
+               OpDecorate %main_local_invocation_index_Input BuiltIn LocalInvocationIndex
+               OpMemberDecorate %S 0 Offset 0
+               OpMemberDecorate %S 1 Offset 4
+        %int = OpTypeInt 32 1
+%tint_symbol_1 = OpTypeStruct %int
+%_ptr_StorageBuffer_tint_symbol_1 = OpTypePointer StorageBuffer %tint_symbol_1
+          %1 = OpVariable %_ptr_StorageBuffer_tint_symbol_1 StorageBuffer
+%_ptr_Workgroup_int = OpTypePointer Workgroup %int
+         %g1 = OpVariable %_ptr_Workgroup_int Workgroup
+       %uint = OpTypeInt 32 0
+%_ptr_Input_uint = OpTypePointer Input %uint
+%main_local_invocation_index_Input = OpVariable %_ptr_Input_uint Input
+         %12 = OpTypeFunction %int %int
+%_ptr_Function_int = OpTypePointer Function %int
+         %17 = OpTypeFunction %int %_ptr_Function_int
+          %S = OpTypeStruct %int %int
+%_ptr_Function_S = OpTypePointer Function %S
+         %35 = OpTypeFunction %int %_ptr_Function_S
+     %uint_0 = OpConstant %uint 0
+     %uint_1 = OpConstant %uint 1
+      %int_2 = OpConstant %int 2
+      %float = OpTypeFloat 32
+    %v3float = OpTypeVector %float 3
+%_ptr_Function_v3float = OpTypePointer Function %v3float
+         %55 = OpTypeFunction %int %_ptr_Function_v3float
+%_ptr_Function_float = OpTypePointer Function %float
+         %70 = OpTypeFunction %int
+     %uint_2 = OpConstant %uint 2
+       %void = OpTypeVoid
+         %77 = OpTypeFunction %void %uint
+       %bool = OpTypeBool
+      %int_0 = OpConstant %int 0
+   %uint_264 = OpConstant %uint 264
+         %89 = OpConstantNull %S
+         %91 = OpConstantNull %v3float
+%_ptr_StorageBuffer_int = OpTypePointer StorageBuffer %int
+        %108 = OpTypeFunction %int %float
+%float_n2_14748365e_09 = OpConstant %float -2.14748365e+09
+%int_n2147483648 = OpConstant %int -2147483648
+%float_2_14748352e_09 = OpConstant %float 2.14748352e+09
+%int_2147483647 = OpConstant %int 2147483647
+        %120 = OpTypeFunction %void
+%accept_value = OpFunction %int None %12
+        %val = OpFunctionParameter %int
+         %13 = OpLabel
+               OpReturnValue %val
+               OpFunctionEnd
+%accept_ptr_deref_call_func = OpFunction %int None %17
+   %val_root = OpFunctionParameter %_ptr_Function_int
+         %18 = OpLabel
+         %19 = OpAccessChain %_ptr_Function_int %val_root
+         %20 = OpLoad %int %19
+         %21 = OpLoad %int %19
+         %22 = OpFunctionCall %int %accept_value %21
+         %23 = OpIAdd %int %20 %22
+               OpReturnValue %23
+               OpFunctionEnd
+%accept_ptr_deref_pass_through = OpFunction %int None %17
+ %val_root_0 = OpFunctionParameter %_ptr_Function_int
+         %26 = OpLabel
+         %27 = OpAccessChain %_ptr_Function_int %val_root_0
+         %28 = OpLoad %int %27
+         %29 = OpFunctionCall %int %accept_ptr_deref_call_func %val_root_0
+         %30 = OpIAdd %int %28 %29
+               OpReturnValue %30
+               OpFunctionEnd
+%accept_ptr_to_struct_and_access = OpFunction %int None %35
+ %val_root_1 = OpFunctionParameter %_ptr_Function_S
+         %36 = OpLabel
+         %37 = OpAccessChain %_ptr_Function_int %val_root_1 %uint_0
+         %39 = OpLoad %int %37
+         %40 = OpAccessChain %_ptr_Function_int %val_root_1 %uint_1
+         %42 = OpLoad %int %40
+         %43 = OpIAdd %int %39 %42
+               OpReturnValue %43
+               OpFunctionEnd
+%accept_ptr_to_struct_access_pass_ptr = OpFunction %int None %35
+ %val_root_2 = OpFunctionParameter %_ptr_Function_S
+         %46 = OpLabel
+          %b = OpAccessChain %_ptr_Function_int %val_root_2 %uint_0
+               OpStore %b %int_2
+         %49 = OpLoad %int %b
+               OpReturnValue %49
+               OpFunctionEnd
+%accept_ptr_vec_access_elements = OpFunction %int None %55
+    %v1_root = OpFunctionParameter %_ptr_Function_v3float
+         %56 = OpLabel
+         %57 = OpAccessChain %_ptr_Function_v3float %v1_root
+         %58 = OpLoad %v3float %57
+         %59 = OpLoad %v3float %57
+         %60 = OpExtInst %v3float %61 Cross %58 %59
+         %62 = OpCompositeExtract %float %60 0
+         %63 = OpAccessChain %_ptr_Function_float %57 %uint_0
+               OpStore %63 %62
+         %65 = OpAccessChain %_ptr_Function_float %57 %uint_0
+         %66 = OpLoad %float %65
+         %67 = OpFunctionCall %int %tint_f32_to_i32 %66
+               OpReturnValue %67
+               OpFunctionEnd
+%call_builtin_with_mod_scope_ptr = OpFunction %int None %70
+         %71 = OpLabel
+         %72 = OpAtomicLoad %int %g1 %uint_2 %uint_0
+               OpReturnValue %72
+               OpFunctionEnd
+ %main_inner = OpFunction %void None %77
+%tint_local_index = OpFunctionParameter %uint
+         %78 = OpLabel
+         %v1 = OpVariable %_ptr_Function_int Function
+         %v2 = OpVariable %_ptr_Function_S Function
+         %v4 = OpVariable %_ptr_Function_v3float Function
+         %79 = OpIEqual %bool %tint_local_index %uint_0
+               OpSelectionMerge %81 None
+               OpBranchConditional %79 %82 %81
+         %82 = OpLabel
+               OpAtomicStore %g1 %uint_2 %uint_0 %int_0
+               OpBranch %81
+         %81 = OpLabel
+               OpControlBarrier %uint_2 %uint_2 %uint_264
+               OpStore %v1 %int_0
+               OpStore %v2 %89
+               OpStore %v4 %91
+         %t1 = OpAtomicLoad %int %g1 %uint_2 %uint_0
+         %93 = OpFunctionCall %int %accept_ptr_deref_pass_through %v1
+         %94 = OpFunctionCall %int %accept_ptr_to_struct_and_access %v2
+         %95 = OpIAdd %int %93 %94
+         %96 = OpFunctionCall %int %accept_ptr_to_struct_and_access %v2
+         %97 = OpIAdd %int %95 %96
+         %98 = OpFunctionCall %int %accept_ptr_vec_access_elements %v4
+         %99 = OpIAdd %int %97 %98
+        %100 = OpFunctionCall %int %accept_ptr_to_struct_access_pass_ptr %v2
+        %101 = OpIAdd %int %99 %100
+        %102 = OpFunctionCall %int %call_builtin_with_mod_scope_ptr
+        %103 = OpIAdd %int %101 %102
+        %104 = OpIAdd %int %103 %t1
+        %105 = OpAccessChain %_ptr_StorageBuffer_int %1 %uint_0
+               OpStore %105 %104
+               OpReturn
+               OpFunctionEnd
+%tint_f32_to_i32 = OpFunction %int None %108
+      %value = OpFunctionParameter %float
+        %109 = OpLabel
+        %110 = OpConvertFToS %int %value
+        %111 = OpFOrdGreaterThanEqual %bool %value %float_n2_14748365e_09
+        %113 = OpSelect %int %111 %110 %int_n2147483648
+        %115 = OpFOrdLessThanEqual %bool %value %float_2_14748352e_09
+        %117 = OpSelect %int %115 %113 %int_2147483647
+               OpReturnValue %117
+               OpFunctionEnd
+       %main = OpFunction %void None %120
+        %121 = OpLabel
+        %122 = OpLoad %uint %main_local_invocation_index_Input
+        %123 = OpFunctionCall %void %main_inner %122
+               OpReturn
+               OpFunctionEnd

@@ -1,0 +1,87 @@
+; SPIR-V
+; Version: 1.3
+; Generator: Google Tint Compiler; 1
+; Bound: 38
+; Schema: 0
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main1 "main1"
+               OpEntryPoint GLCompute %main2 "main2"
+               OpEntryPoint GLCompute %main3 "main3"
+               OpEntryPoint GLCompute %main4 "main4"
+               OpExecutionMode %main1 LocalSize 1 1 1
+               OpExecutionMode %main2 LocalSize 1 1 1
+               OpExecutionMode %main3 LocalSize 1 1 1
+               OpExecutionMode %main4 LocalSize 1 1 1
+               OpMemberName %tint_symbol_1 0 "tint_symbol"
+               OpName %tint_symbol_1 "tint_symbol_1"
+               OpMemberName %tint_symbol_3 0 "tint_symbol_2"
+               OpName %tint_symbol_3 "tint_symbol_3"
+               OpMemberName %tint_symbol_5 0 "tint_symbol_4"
+               OpName %tint_symbol_5 "tint_symbol_5"
+               OpName %uses_a "uses_a"
+               OpName %foo "foo"
+               OpName %uses_uses_a "uses_uses_a"
+               OpName %uses_b "uses_b"
+               OpName %foo_0 "foo"
+               OpName %main1 "main1"
+               OpName %main2 "main2"
+               OpName %main3 "main3"
+               OpName %main4 "main4"
+               OpMemberDecorate %tint_symbol_1 0 Offset 0
+               OpDecorate %tint_symbol_1 Block
+               OpMemberDecorate %tint_symbol_3 0 Offset 0
+               OpDecorate %tint_symbol_3 Block
+               OpMemberDecorate %tint_symbol_5 0 Offset 0
+               OpDecorate %tint_symbol_5 Block
+        %int = OpTypeInt 32 1
+%tint_symbol_1 = OpTypeStruct %int
+%_ptr_PushConstant_tint_symbol_1 = OpTypePointer PushConstant %tint_symbol_1
+          %1 = OpVariable %_ptr_PushConstant_tint_symbol_1 PushConstant
+%tint_symbol_3 = OpTypeStruct %int
+%_ptr_PushConstant_tint_symbol_3 = OpTypePointer PushConstant %tint_symbol_3
+          %5 = OpVariable %_ptr_PushConstant_tint_symbol_3 PushConstant
+%tint_symbol_5 = OpTypeStruct %int
+%_ptr_PushConstant_tint_symbol_5 = OpTypePointer PushConstant %tint_symbol_5
+          %8 = OpVariable %_ptr_PushConstant_tint_symbol_5 PushConstant
+       %void = OpTypeVoid
+         %13 = OpTypeFunction %void
+%_ptr_PushConstant_int = OpTypePointer PushConstant %int
+       %uint = OpTypeInt 32 0
+     %uint_0 = OpConstant %uint 0
+     %uses_a = OpFunction %void None %13
+         %14 = OpLabel
+         %15 = OpAccessChain %_ptr_PushConstant_int %1 %uint_0
+        %foo = OpLoad %int %15
+               OpReturn
+               OpFunctionEnd
+%uses_uses_a = OpFunction %void None %13
+         %21 = OpLabel
+         %22 = OpFunctionCall %void %uses_a
+               OpReturn
+               OpFunctionEnd
+     %uses_b = OpFunction %void None %13
+         %24 = OpLabel
+         %25 = OpAccessChain %_ptr_PushConstant_int %5 %uint_0
+      %foo_0 = OpLoad %int %25
+               OpReturn
+               OpFunctionEnd
+      %main1 = OpFunction %void None %13
+         %28 = OpLabel
+         %29 = OpFunctionCall %void %uses_a
+               OpReturn
+               OpFunctionEnd
+      %main2 = OpFunction %void None %13
+         %31 = OpLabel
+         %32 = OpFunctionCall %void %uses_uses_a
+               OpReturn
+               OpFunctionEnd
+      %main3 = OpFunction %void None %13
+         %34 = OpLabel
+         %35 = OpFunctionCall %void %uses_b
+               OpReturn
+               OpFunctionEnd
+      %main4 = OpFunction %void None %13
+         %37 = OpLabel
+               OpReturn
+               OpFunctionEnd

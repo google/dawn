@@ -1,0 +1,65 @@
+; SPIR-V
+; Version: 1.3
+; Generator: Google Tint Compiler; 1
+; Bound: 31
+; Schema: 0
+               OpCapability Shader
+               OpCapability ImageQuery
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint Fragment %fragment_main "fragment_main"
+               OpEntryPoint GLCompute %compute_main "compute_main"
+               OpExecutionMode %fragment_main OriginUpperLeft
+               OpExecutionMode %compute_main LocalSize 1 1 1
+               OpMemberName %tint_symbol_1 0 "tint_symbol"
+               OpName %tint_symbol_1 "tint_symbol_1"
+               OpName %arg_0 "arg_0"
+               OpName %textureNumLayers_59eb57 "textureNumLayers_59eb57"
+               OpName %res "res"
+               OpName %fragment_main "fragment_main"
+               OpName %compute_main "compute_main"
+               OpMemberDecorate %tint_symbol_1 0 Offset 0
+               OpDecorate %tint_symbol_1 Block
+               OpDecorate %1 DescriptorSet 0
+               OpDecorate %1 Binding 0
+               OpDecorate %arg_0 DescriptorSet 1
+               OpDecorate %arg_0 Binding 0
+               OpDecorate %arg_0 NonReadable
+       %uint = OpTypeInt 32 0
+%tint_symbol_1 = OpTypeStruct %uint
+%_ptr_StorageBuffer_tint_symbol_1 = OpTypePointer StorageBuffer %tint_symbol_1
+          %1 = OpVariable %_ptr_StorageBuffer_tint_symbol_1 StorageBuffer
+        %int = OpTypeInt 32 1
+          %7 = OpTypeImage %int 2D 0 1 0 2 R32i
+%_ptr_UniformConstant_7 = OpTypePointer UniformConstant %7
+      %arg_0 = OpVariable %_ptr_UniformConstant_7 UniformConstant
+         %10 = OpTypeFunction %uint
+     %v3uint = OpTypeVector %uint 3
+%_ptr_Function_uint = OpTypePointer Function %uint
+       %void = OpTypeVoid
+         %21 = OpTypeFunction %void
+%_ptr_StorageBuffer_uint = OpTypePointer StorageBuffer %uint
+     %uint_0 = OpConstant %uint 0
+%textureNumLayers_59eb57 = OpFunction %uint None %10
+         %11 = OpLabel
+        %res = OpVariable %_ptr_Function_uint Function
+         %12 = OpLoad %7 %arg_0
+         %13 = OpImageQuerySize %v3uint %12
+         %15 = OpCompositeExtract %uint %13 2
+               OpStore %res %15
+         %18 = OpLoad %uint %res
+               OpReturnValue %18
+               OpFunctionEnd
+%fragment_main = OpFunction %void None %21
+         %22 = OpLabel
+         %23 = OpFunctionCall %uint %textureNumLayers_59eb57
+         %24 = OpAccessChain %_ptr_StorageBuffer_uint %1 %uint_0
+               OpStore %24 %23
+               OpReturn
+               OpFunctionEnd
+%compute_main = OpFunction %void None %21
+         %28 = OpLabel
+         %29 = OpFunctionCall %uint %textureNumLayers_59eb57
+         %30 = OpAccessChain %_ptr_StorageBuffer_uint %1 %uint_0
+               OpStore %30 %29
+               OpReturn
+               OpFunctionEnd

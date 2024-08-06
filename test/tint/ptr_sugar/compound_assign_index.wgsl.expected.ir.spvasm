@@ -1,0 +1,80 @@
+; SPIR-V
+; Version: 1.3
+; Generator: Google Tint Compiler; 1
+; Bound: 45
+; Schema: 0
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+               OpName %deref "deref"
+               OpName %a "a"
+               OpName %a "p"
+               OpName %no_deref "no_deref"
+               OpName %a_0 "a"
+               OpName %a_0 "p"
+               OpName %deref_inc "deref_inc"
+               OpName %a_1 "a"
+               OpName %a_1 "p"
+               OpName %no_deref_inc "no_deref_inc"
+               OpName %a_2 "a"
+               OpName %a_2 "p"
+               OpName %main "main"
+       %void = OpTypeVoid
+          %3 = OpTypeFunction %void
+        %int = OpTypeInt 32 1
+      %v3int = OpTypeVector %int 3
+%_ptr_Function_v3int = OpTypePointer Function %v3int
+          %9 = OpConstantNull %v3int
+%_ptr_Function_int = OpTypePointer Function %int
+      %int_0 = OpConstant %int 0
+     %int_42 = OpConstant %int 42
+      %int_1 = OpConstant %int 1
+      %deref = OpFunction %void None %3
+          %4 = OpLabel
+          %a = OpVariable %_ptr_Function_v3int Function %9
+         %10 = OpAccessChain %_ptr_Function_int %a %int_0
+         %13 = OpLoad %int %10
+         %14 = OpIAdd %int %13 %int_42
+         %16 = OpAccessChain %_ptr_Function_int %a %int_0
+               OpStore %16 %14
+               OpReturn
+               OpFunctionEnd
+   %no_deref = OpFunction %void None %3
+         %18 = OpLabel
+        %a_0 = OpVariable %_ptr_Function_v3int Function %9
+         %20 = OpAccessChain %_ptr_Function_int %a_0 %int_0
+         %21 = OpLoad %int %20
+         %22 = OpIAdd %int %21 %int_42
+         %23 = OpAccessChain %_ptr_Function_int %a_0 %int_0
+               OpStore %23 %22
+               OpReturn
+               OpFunctionEnd
+  %deref_inc = OpFunction %void None %3
+         %25 = OpLabel
+        %a_1 = OpVariable %_ptr_Function_v3int Function %9
+         %27 = OpAccessChain %_ptr_Function_int %a_1 %int_0
+         %28 = OpLoad %int %27
+         %29 = OpIAdd %int %28 %int_1
+         %31 = OpAccessChain %_ptr_Function_int %a_1 %int_0
+               OpStore %31 %29
+               OpReturn
+               OpFunctionEnd
+%no_deref_inc = OpFunction %void None %3
+         %33 = OpLabel
+        %a_2 = OpVariable %_ptr_Function_v3int Function %9
+         %35 = OpAccessChain %_ptr_Function_int %a_2 %int_0
+         %36 = OpLoad %int %35
+         %37 = OpIAdd %int %36 %int_1
+         %38 = OpAccessChain %_ptr_Function_int %a_2 %int_0
+               OpStore %38 %37
+               OpReturn
+               OpFunctionEnd
+       %main = OpFunction %void None %3
+         %40 = OpLabel
+         %41 = OpFunctionCall %void %deref
+         %42 = OpFunctionCall %void %no_deref
+         %43 = OpFunctionCall %void %deref_inc
+         %44 = OpFunctionCall %void %no_deref_inc
+               OpReturn
+               OpFunctionEnd

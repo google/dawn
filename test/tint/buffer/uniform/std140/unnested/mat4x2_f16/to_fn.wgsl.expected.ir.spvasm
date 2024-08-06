@@ -1,0 +1,95 @@
+; SPIR-V
+; Version: 1.3
+; Generator: Google Tint Compiler; 1
+; Bound: 56
+; Schema: 0
+               OpCapability Shader
+               OpCapability Float16
+               OpCapability UniformAndStorageBuffer16BitAccess
+               OpCapability StorageBuffer16BitAccess
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %f_0 "f"
+               OpExecutionMode %f_0 LocalSize 1 1 1
+               OpMemberName %tint_symbol_1_std140 0 "tint_symbol_col0"
+               OpMemberName %tint_symbol_1_std140 1 "tint_symbol_col1"
+               OpMemberName %tint_symbol_1_std140 2 "tint_symbol_col2"
+               OpMemberName %tint_symbol_1_std140 3 "tint_symbol_col3"
+               OpName %tint_symbol_1_std140 "tint_symbol_1_std140"
+               OpName %a "a"
+               OpName %m "m"
+               OpName %b "b"
+               OpName %v "v"
+               OpName %c "c"
+               OpName %f "f"
+               OpName %f_0 "f"
+               OpMemberDecorate %tint_symbol_1_std140 0 Offset 0
+               OpMemberDecorate %tint_symbol_1_std140 1 Offset 4
+               OpMemberDecorate %tint_symbol_1_std140 2 Offset 8
+               OpMemberDecorate %tint_symbol_1_std140 3 Offset 12
+               OpDecorate %tint_symbol_1_std140 Block
+               OpDecorate %1 DescriptorSet 0
+               OpDecorate %1 Binding 0
+               OpDecorate %1 NonWritable
+       %half = OpTypeFloat 16
+     %v2half = OpTypeVector %half 2
+%tint_symbol_1_std140 = OpTypeStruct %v2half %v2half %v2half %v2half
+%_ptr_Uniform_tint_symbol_1_std140 = OpTypePointer Uniform %tint_symbol_1_std140
+          %1 = OpVariable %_ptr_Uniform_tint_symbol_1_std140 Uniform
+       %void = OpTypeVoid
+ %mat4v2half = OpTypeMatrix %v2half 4
+         %10 = OpTypeFunction %void %mat4v2half
+         %14 = OpTypeFunction %void %v2half
+         %18 = OpTypeFunction %void %half
+         %21 = OpTypeFunction %void
+%_ptr_Uniform_v2half = OpTypePointer Uniform %v2half
+       %uint = OpTypeInt 32 0
+     %uint_0 = OpConstant %uint 0
+     %uint_1 = OpConstant %uint 1
+     %uint_2 = OpConstant %uint 2
+     %uint_3 = OpConstant %uint 3
+%_ptr_Uniform_half = OpTypePointer Uniform %half
+          %a = OpFunction %void None %10
+          %m = OpFunctionParameter %mat4v2half
+         %11 = OpLabel
+               OpReturn
+               OpFunctionEnd
+          %b = OpFunction %void None %14
+          %v = OpFunctionParameter %v2half
+         %15 = OpLabel
+               OpReturn
+               OpFunctionEnd
+          %c = OpFunction %void None %18
+          %f = OpFunctionParameter %half
+         %19 = OpLabel
+               OpReturn
+               OpFunctionEnd
+        %f_0 = OpFunction %void None %21
+         %22 = OpLabel
+         %23 = OpAccessChain %_ptr_Uniform_v2half %1 %uint_0
+         %27 = OpLoad %v2half %23
+         %28 = OpAccessChain %_ptr_Uniform_v2half %1 %uint_1
+         %30 = OpLoad %v2half %28
+         %31 = OpAccessChain %_ptr_Uniform_v2half %1 %uint_2
+         %33 = OpLoad %v2half %31
+         %34 = OpAccessChain %_ptr_Uniform_v2half %1 %uint_3
+         %36 = OpLoad %v2half %34
+         %37 = OpCompositeConstruct %mat4v2half %27 %30 %33 %36
+         %38 = OpFunctionCall %void %a %37
+         %39 = OpAccessChain %_ptr_Uniform_v2half %1 %uint_1
+         %40 = OpLoad %v2half %39
+         %41 = OpFunctionCall %void %b %40
+         %42 = OpAccessChain %_ptr_Uniform_v2half %1 %uint_1
+         %43 = OpLoad %v2half %42
+         %44 = OpVectorShuffle %v2half %43 %43 1 0
+         %45 = OpFunctionCall %void %b %44
+         %46 = OpAccessChain %_ptr_Uniform_v2half %1 %uint_1
+         %47 = OpAccessChain %_ptr_Uniform_half %46 %uint_0
+         %49 = OpLoad %half %47
+         %50 = OpFunctionCall %void %c %49
+         %51 = OpAccessChain %_ptr_Uniform_v2half %1 %uint_1
+         %52 = OpLoad %v2half %51
+         %53 = OpVectorShuffle %v2half %52 %52 1 0
+         %54 = OpCompositeExtract %half %53 0
+         %55 = OpFunctionCall %void %c %54
+               OpReturn
+               OpFunctionEnd

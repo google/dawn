@@ -1,0 +1,76 @@
+; SPIR-V
+; Version: 1.3
+; Generator: Google Tint Compiler; 1
+; Bound: 41
+; Schema: 0
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+               OpName %count "count"
+               OpMemberName %Outputs 0 "data"
+               OpName %Outputs "Outputs"
+               OpName %outputs "outputs"
+               OpName %push_output "push_output"
+               OpName %value "value"
+               OpName %main "main"
+               OpName %a "a"
+               OpName %b "b"
+               OpName %c "c"
+               OpDecorate %_runtimearr_uint ArrayStride 4
+               OpMemberDecorate %Outputs 0 Offset 0
+               OpDecorate %Outputs Block
+               OpDecorate %outputs DescriptorSet 0
+               OpDecorate %outputs Binding 1
+       %uint = OpTypeInt 32 0
+%_ptr_Private_uint = OpTypePointer Private %uint
+     %uint_0 = OpConstant %uint 0
+      %count = OpVariable %_ptr_Private_uint Private %uint_0
+%_runtimearr_uint = OpTypeRuntimeArray %uint
+    %Outputs = OpTypeStruct %_runtimearr_uint
+%_ptr_StorageBuffer_Outputs = OpTypePointer StorageBuffer %Outputs
+    %outputs = OpVariable %_ptr_StorageBuffer_Outputs StorageBuffer
+       %void = OpTypeVoid
+         %12 = OpTypeFunction %void %uint
+%_ptr_StorageBuffer_uint = OpTypePointer StorageBuffer %uint
+     %uint_1 = OpConstant %uint 1
+         %21 = OpTypeFunction %void
+%_ptr_Function_uint = OpTypePointer Function %uint
+    %uint_10 = OpConstant %uint 10
+%uint_4294967294 = OpConstant %uint 4294967294
+%push_output = OpFunction %void None %12
+      %value = OpFunctionParameter %uint
+         %13 = OpLabel
+         %14 = OpLoad %uint %count
+         %15 = OpAccessChain %_ptr_StorageBuffer_uint %outputs %uint_0 %14
+               OpStore %15 %value
+         %17 = OpLoad %uint %count
+         %18 = OpIAdd %uint %17 %uint_1
+               OpStore %count %18
+               OpReturn
+               OpFunctionEnd
+       %main = OpFunction %void None %21
+         %22 = OpLabel
+          %a = OpVariable %_ptr_Function_uint Function
+          %b = OpVariable %_ptr_Function_uint Function
+          %c = OpVariable %_ptr_Function_uint Function
+               OpStore %a %uint_0
+               OpStore %b %uint_10
+               OpStore %c %uint_4294967294
+         %29 = OpLoad %uint %a
+         %30 = OpIAdd %uint %29 %uint_1
+               OpStore %a %30
+         %31 = OpLoad %uint %b
+         %32 = OpIAdd %uint %31 %uint_1
+               OpStore %b %32
+         %33 = OpLoad %uint %c
+         %34 = OpIAdd %uint %33 %uint_1
+               OpStore %c %34
+         %35 = OpLoad %uint %a
+         %36 = OpFunctionCall %void %push_output %35
+         %37 = OpLoad %uint %b
+         %38 = OpFunctionCall %void %push_output %37
+         %39 = OpLoad %uint %c
+         %40 = OpFunctionCall %void %push_output %39
+               OpReturn
+               OpFunctionEnd

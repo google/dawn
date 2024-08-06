@@ -1,0 +1,59 @@
+; SPIR-V
+; Version: 1.3
+; Generator: Google Tint Compiler; 1
+; Bound: 33
+; Schema: 0
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint Fragment %main "main"
+               OpExecutionMode %main OriginUpperLeft
+               OpName %x_75 "x_75"
+               OpMemberName %S_6 0 "field0"
+               OpName %S_6 "S_6"
+               OpName %x_82 "x_82"
+               OpName %x_85 "x_85"
+               OpName %main_1 "main_1"
+               OpName %x_88 "x_88"
+               OpName %main "main"
+               OpDecorate %_arr_mat4v4float_x_88 ArrayStride 64
+               OpDecorate %_arr_v3float_uint_18 ArrayStride 16
+               OpDecorate %_arr__arr_v3float_uint_18_uint_13 ArrayStride 288
+               OpMemberDecorate %S_6 0 Offset 0
+               OpDecorate %_arr_S_6_uint_46 ArrayStride 3744
+               OpDecorate %_arr_v3float_uint_37 ArrayStride 16
+      %float = OpTypeFloat 32
+    %v4float = OpTypeVector %float 4
+%mat4v4float = OpTypeMatrix %v4float 4
+       %uint = OpTypeInt 32 0
+       %x_88 = OpConstant %uint 58
+%_arr_mat4v4float_x_88 = OpTypeArray %mat4v4float %x_88
+%_ptr_Private__arr_mat4v4float_x_88 = OpTypePointer Private %_arr_mat4v4float_x_88
+          %9 = OpConstantNull %_arr_mat4v4float_x_88
+       %x_75 = OpVariable %_ptr_Private__arr_mat4v4float_x_88 Private %9
+    %v3float = OpTypeVector %float 3
+    %uint_18 = OpConstant %uint 18
+%_arr_v3float_uint_18 = OpTypeArray %v3float %uint_18
+    %uint_13 = OpConstant %uint 13
+%_arr__arr_v3float_uint_18_uint_13 = OpTypeArray %_arr_v3float_uint_18 %uint_13
+        %S_6 = OpTypeStruct %_arr__arr_v3float_uint_18_uint_13
+    %uint_46 = OpConstant %uint 46
+%_arr_S_6_uint_46 = OpTypeArray %S_6 %uint_46
+%_ptr_Private__arr_S_6_uint_46 = OpTypePointer Private %_arr_S_6_uint_46
+         %20 = OpConstantNull %_arr_S_6_uint_46
+       %x_82 = OpVariable %_ptr_Private__arr_S_6_uint_46 Private %20
+    %uint_37 = OpConstant %uint 37
+%_arr_v3float_uint_37 = OpTypeArray %v3float %uint_37
+%_ptr_Private__arr_v3float_uint_37 = OpTypePointer Private %_arr_v3float_uint_37
+         %25 = OpConstantNull %_arr_v3float_uint_37
+       %x_85 = OpVariable %_ptr_Private__arr_v3float_uint_37 Private %25
+       %void = OpTypeVoid
+         %28 = OpTypeFunction %void
+     %main_1 = OpFunction %void None %28
+         %29 = OpLabel
+               OpReturn
+               OpFunctionEnd
+       %main = OpFunction %void None %28
+         %31 = OpLabel
+         %32 = OpFunctionCall %void %main_1
+               OpReturn
+               OpFunctionEnd

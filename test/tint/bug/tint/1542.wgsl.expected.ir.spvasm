@@ -1,0 +1,44 @@
+; SPIR-V
+; Version: 1.3
+; Generator: Google Tint Compiler; 1
+; Bound: 22
+; Schema: 0
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+               OpMemberName %UniformBuffer 0 "d"
+               OpName %UniformBuffer "UniformBuffer"
+               OpMemberName %tint_symbol_1 0 "tint_symbol"
+               OpName %tint_symbol_1 "tint_symbol_1"
+               OpName %main "main"
+               OpName %temp "temp"
+               OpMemberDecorate %UniformBuffer 0 Offset 0
+               OpMemberDecorate %tint_symbol_1 0 Offset 0
+               OpDecorate %tint_symbol_1 Block
+               OpDecorate %1 DescriptorSet 0
+               OpDecorate %1 Binding 0
+               OpDecorate %1 NonWritable
+        %int = OpTypeInt 32 1
+      %v3int = OpTypeVector %int 3
+%UniformBuffer = OpTypeStruct %v3int
+%tint_symbol_1 = OpTypeStruct %UniformBuffer
+%_ptr_Uniform_tint_symbol_1 = OpTypePointer Uniform %tint_symbol_1
+          %1 = OpVariable %_ptr_Uniform_tint_symbol_1 Uniform
+       %void = OpTypeVoid
+          %9 = OpTypeFunction %void
+%_ptr_Uniform_v3int = OpTypePointer Uniform %v3int
+       %uint = OpTypeInt 32 0
+     %uint_0 = OpConstant %uint 0
+     %v3uint = OpTypeVector %uint 3
+         %17 = OpConstantNull %v3uint
+    %uint_31 = OpConstant %uint 31
+         %19 = OpConstantComposite %v3uint %uint_31 %uint_31 %uint_31
+       %main = OpFunction %void None %9
+         %10 = OpLabel
+         %11 = OpAccessChain %_ptr_Uniform_v3int %1 %uint_0 %uint_0
+         %15 = OpLoad %v3int %11
+         %16 = OpBitwiseAnd %v3uint %17 %19
+       %temp = OpShiftLeftLogical %v3int %15 %16
+               OpReturn
+               OpFunctionEnd

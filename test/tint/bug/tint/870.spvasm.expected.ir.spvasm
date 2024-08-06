@@ -1,0 +1,88 @@
+; SPIR-V
+; Version: 1.3
+; Generator: Google Tint Compiler; 1
+; Bound: 46
+; Schema: 0
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint Fragment %main "main"
+               OpExecutionMode %main OriginUpperLeft
+               OpMemberName %sspp962805860buildInformationS 0 "footprint"
+               OpMemberName %sspp962805860buildInformationS 1 "offset"
+               OpMemberName %sspp962805860buildInformationS 2 "essence"
+               OpMemberName %sspp962805860buildInformationS 3 "orientation"
+               OpName %sspp962805860buildInformationS "sspp962805860buildInformationS"
+               OpMemberName %x_B4_BuildInformation 0 "passthru"
+               OpName %x_B4_BuildInformation "x_B4_BuildInformation"
+               OpMemberName %tint_symbol_1 0 "tint_symbol"
+               OpName %tint_symbol_1 "tint_symbol_1"
+               OpName %main_1 "main_1"
+               OpName %orientation "orientation"
+               OpName %x_23 "x_23"
+               OpName %main "main"
+               OpMemberDecorate %sspp962805860buildInformationS 0 Offset 0
+               OpMemberDecorate %sspp962805860buildInformationS 1 Offset 16
+               OpMemberDecorate %sspp962805860buildInformationS 2 Offset 32
+               OpDecorate %_arr_int_uint_6 ArrayStride 4
+               OpMemberDecorate %sspp962805860buildInformationS 3 Offset 36
+               OpMemberDecorate %x_B4_BuildInformation 0 Offset 0
+               OpMemberDecorate %tint_symbol_1 0 Offset 0
+               OpDecorate %tint_symbol_1 Block
+               OpDecorate %1 DescriptorSet 0
+               OpDecorate %1 Binding 2
+               OpDecorate %1 NonWritable
+      %float = OpTypeFloat 32
+    %v4float = OpTypeVector %float 4
+        %int = OpTypeInt 32 1
+       %uint = OpTypeInt 32 0
+     %uint_6 = OpConstant %uint 6
+%_arr_int_uint_6 = OpTypeArray %int %uint_6
+%sspp962805860buildInformationS = OpTypeStruct %v4float %v4float %int %_arr_int_uint_6
+%x_B4_BuildInformation = OpTypeStruct %sspp962805860buildInformationS
+%tint_symbol_1 = OpTypeStruct %x_B4_BuildInformation
+%_ptr_StorageBuffer_tint_symbol_1 = OpTypePointer StorageBuffer %tint_symbol_1
+          %1 = OpVariable %_ptr_StorageBuffer_tint_symbol_1 StorageBuffer
+       %void = OpTypeVoid
+         %14 = OpTypeFunction %void
+%_ptr_Function__arr_int_uint_6 = OpTypePointer Function %_arr_int_uint_6
+         %18 = OpConstantNull %_arr_int_uint_6
+%_ptr_StorageBuffer__arr_int_uint_6 = OpTypePointer StorageBuffer %_arr_int_uint_6
+     %uint_0 = OpConstant %uint 0
+     %uint_3 = OpConstant %uint 3
+%_ptr_Function_int = OpTypePointer Function %int
+      %int_0 = OpConstant %int 0
+      %int_1 = OpConstant %int 1
+      %int_2 = OpConstant %int 2
+      %int_3 = OpConstant %int 3
+      %int_4 = OpConstant %int 4
+      %int_5 = OpConstant %int 5
+     %main_1 = OpFunction %void None %14
+         %15 = OpLabel
+%orientation = OpVariable %_ptr_Function__arr_int_uint_6 Function %18
+         %19 = OpAccessChain %_ptr_StorageBuffer__arr_int_uint_6 %1 %uint_0 %uint_0 %uint_3
+       %x_23 = OpLoad %_arr_int_uint_6 %19
+         %24 = OpAccessChain %_ptr_Function_int %orientation %int_0
+         %27 = OpCompositeExtract %int %x_23 0
+               OpStore %24 %27
+         %28 = OpAccessChain %_ptr_Function_int %orientation %int_1
+         %30 = OpCompositeExtract %int %x_23 1
+               OpStore %28 %30
+         %31 = OpAccessChain %_ptr_Function_int %orientation %int_2
+         %33 = OpCompositeExtract %int %x_23 2
+               OpStore %31 %33
+         %34 = OpAccessChain %_ptr_Function_int %orientation %int_3
+         %36 = OpCompositeExtract %int %x_23 3
+               OpStore %34 %36
+         %37 = OpAccessChain %_ptr_Function_int %orientation %int_4
+         %39 = OpCompositeExtract %int %x_23 4
+               OpStore %37 %39
+         %40 = OpAccessChain %_ptr_Function_int %orientation %int_5
+         %42 = OpCompositeExtract %int %x_23 5
+               OpStore %40 %42
+               OpReturn
+               OpFunctionEnd
+       %main = OpFunction %void None %14
+         %44 = OpLabel
+         %45 = OpFunctionCall %void %main_1
+               OpReturn
+               OpFunctionEnd

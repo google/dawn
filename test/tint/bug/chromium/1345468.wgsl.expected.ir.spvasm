@@ -1,0 +1,53 @@
+; SPIR-V
+; Version: 1.3
+; Generator: Google Tint Compiler; 1
+; Bound: 33
+; Schema: 0
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %unused_entry_point "unused_entry_point"
+               OpExecutionMode %unused_entry_point LocalSize 1 1 1
+               OpName %f "f"
+               OpName %i "i"
+               OpName %a "a"
+               OpName %b "b"
+               OpName %unused_entry_point "unused_entry_point"
+      %float = OpTypeFloat 32
+    %v2float = OpTypeVector %float 2
+%mat4v2float = OpTypeMatrix %v2float 4
+%_ptr_Private_mat4v2float = OpTypePointer Private %mat4v2float
+          %7 = OpConstantNull %v2float
+    %float_4 = OpConstant %float 4
+    %float_0 = OpConstant %float 0
+          %8 = OpConstantComposite %v2float %float_4 %float_0
+          %6 = OpConstantComposite %mat4v2float %7 %7 %8 %7
+          %1 = OpVariable %_ptr_Private_mat4v2float Private %6
+       %void = OpTypeVoid
+         %13 = OpTypeFunction %void
+        %int = OpTypeInt 32 1
+%_ptr_Function_int = OpTypePointer Function %int
+      %int_1 = OpConstant %int 1
+%_ptr_Private_v2float = OpTypePointer Private %v2float
+%_ptr_Function_v2float = OpTypePointer Function %v2float
+      %v2int = OpTypeVector %int 2
+      %int_0 = OpConstant %int 0
+         %27 = OpConstantComposite %v2int %int_0 %int_1
+          %f = OpFunction %void None %13
+         %14 = OpLabel
+          %i = OpVariable %_ptr_Function_int Function
+          %a = OpVariable %_ptr_Function_v2float Function
+          %b = OpVariable %_ptr_Function_int Function
+               OpStore %i %int_1
+         %19 = OpLoad %int %i
+         %20 = OpAccessChain %_ptr_Private_v2float %1 %19
+         %22 = OpLoad %v2float %20
+               OpStore %a %22
+         %25 = OpLoad %int %i
+         %26 = OpVectorExtractDynamic %int %27 %25
+               OpStore %b %26
+               OpReturn
+               OpFunctionEnd
+%unused_entry_point = OpFunction %void None %13
+         %32 = OpLabel
+               OpReturn
+               OpFunctionEnd

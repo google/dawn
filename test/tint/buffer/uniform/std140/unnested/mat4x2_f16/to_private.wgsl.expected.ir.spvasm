@@ -1,0 +1,79 @@
+; SPIR-V
+; Version: 1.3
+; Generator: Google Tint Compiler; 1
+; Bound: 47
+; Schema: 0
+               OpCapability Shader
+               OpCapability Float16
+               OpCapability UniformAndStorageBuffer16BitAccess
+               OpCapability StorageBuffer16BitAccess
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %f "f"
+               OpExecutionMode %f LocalSize 1 1 1
+               OpMemberName %tint_symbol_1_std140 0 "tint_symbol_col0"
+               OpMemberName %tint_symbol_1_std140 1 "tint_symbol_col1"
+               OpMemberName %tint_symbol_1_std140 2 "tint_symbol_col2"
+               OpMemberName %tint_symbol_1_std140 3 "tint_symbol_col3"
+               OpName %tint_symbol_1_std140 "tint_symbol_1_std140"
+               OpName %p "p"
+               OpName %f "f"
+               OpMemberDecorate %tint_symbol_1_std140 0 Offset 0
+               OpMemberDecorate %tint_symbol_1_std140 1 Offset 4
+               OpMemberDecorate %tint_symbol_1_std140 2 Offset 8
+               OpMemberDecorate %tint_symbol_1_std140 3 Offset 12
+               OpDecorate %tint_symbol_1_std140 Block
+               OpDecorate %1 DescriptorSet 0
+               OpDecorate %1 Binding 0
+               OpDecorate %1 NonWritable
+       %half = OpTypeFloat 16
+     %v2half = OpTypeVector %half 2
+%tint_symbol_1_std140 = OpTypeStruct %v2half %v2half %v2half %v2half
+%_ptr_Uniform_tint_symbol_1_std140 = OpTypePointer Uniform %tint_symbol_1_std140
+          %1 = OpVariable %_ptr_Uniform_tint_symbol_1_std140 Uniform
+ %mat4v2half = OpTypeMatrix %v2half 4
+%_ptr_Private_mat4v2half = OpTypePointer Private %mat4v2half
+          %9 = OpConstantNull %mat4v2half
+          %p = OpVariable %_ptr_Private_mat4v2half Private %9
+       %void = OpTypeVoid
+         %12 = OpTypeFunction %void
+%_ptr_Uniform_v2half = OpTypePointer Uniform %v2half
+       %uint = OpTypeInt 32 0
+     %uint_0 = OpConstant %uint 0
+     %uint_1 = OpConstant %uint 1
+     %uint_2 = OpConstant %uint 2
+     %uint_3 = OpConstant %uint 3
+%_ptr_Private_v2half = OpTypePointer Private %v2half
+        %int = OpTypeInt 32 1
+      %int_1 = OpConstant %int 1
+      %int_0 = OpConstant %int 0
+%_ptr_Uniform_half = OpTypePointer Uniform %half
+%_ptr_Private_half = OpTypePointer Private %half
+          %f = OpFunction %void None %12
+         %13 = OpLabel
+         %14 = OpAccessChain %_ptr_Uniform_v2half %1 %uint_0
+         %18 = OpLoad %v2half %14
+         %19 = OpAccessChain %_ptr_Uniform_v2half %1 %uint_1
+         %21 = OpLoad %v2half %19
+         %22 = OpAccessChain %_ptr_Uniform_v2half %1 %uint_2
+         %24 = OpLoad %v2half %22
+         %25 = OpAccessChain %_ptr_Uniform_v2half %1 %uint_3
+         %27 = OpLoad %v2half %25
+         %28 = OpCompositeConstruct %mat4v2half %18 %21 %24 %27
+               OpStore %p %28
+         %29 = OpAccessChain %_ptr_Private_v2half %p %int_1
+         %33 = OpAccessChain %_ptr_Uniform_v2half %1 %uint_0
+         %34 = OpLoad %v2half %33
+               OpStore %29 %34
+         %35 = OpAccessChain %_ptr_Private_v2half %p %int_1
+         %36 = OpAccessChain %_ptr_Uniform_v2half %1 %uint_0
+         %37 = OpLoad %v2half %36
+         %38 = OpVectorShuffle %v2half %37 %37 1 0
+               OpStore %35 %38
+         %39 = OpAccessChain %_ptr_Private_v2half %p %int_0
+         %41 = OpAccessChain %_ptr_Uniform_v2half %1 %uint_1
+         %42 = OpAccessChain %_ptr_Uniform_half %41 %int_0
+         %44 = OpLoad %half %42
+         %45 = OpAccessChain %_ptr_Private_half %39 %int_1
+               OpStore %45 %44
+               OpReturn
+               OpFunctionEnd
