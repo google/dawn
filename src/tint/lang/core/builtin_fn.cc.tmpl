@@ -107,10 +107,6 @@ bool IsPacked4x8IntegerDotProductBuiltin(BuiltinFn f) {
            f == BuiltinFn::kUnpack4XI8 || f == BuiltinFn::kUnpack4XU8;
 }
 
-bool IsSubgroup(BuiltinFn f) {
-    return f == BuiltinFn::kSubgroupBallot || f == BuiltinFn::kSubgroupBroadcast;
-}
-
 bool HasSideEffects(BuiltinFn f) {
     switch (f) {
         case BuiltinFn::kAtomicAdd:

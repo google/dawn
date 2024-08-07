@@ -108,7 +108,17 @@ bool IsPacked4x8IntegerDotProductBuiltin(BuiltinFn f) {
 }
 
 bool IsSubgroup(BuiltinFn f) {
-    return f == BuiltinFn::kSubgroupBallot || f == BuiltinFn::kSubgroupBroadcast;
+    switch (f) {
+        case BuiltinFn::kSubgroupBallot:
+        case BuiltinFn::kSubgroupBroadcast:
+        case BuiltinFn::kSubgroupAdd:
+        case BuiltinFn::kSubgroupExclusiveAdd:
+        case BuiltinFn::kSubgroupMul:
+        case BuiltinFn::kSubgroupExclusiveMul:
+            return true;
+        default:
+            return false;
+    }
 }
 
 bool HasSideEffects(BuiltinFn f) {
