@@ -35,6 +35,9 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
+// [hlsl-dxc] flags: --hlsl_shader_model 60
+
+
 enable subgroups;
 @group(0) @binding(0) var<storage, read_write> prevent_dce : vec4<f32>;
 

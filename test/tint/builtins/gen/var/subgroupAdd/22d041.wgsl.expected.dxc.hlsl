@@ -1,17 +1,13 @@
-SKIP: FAILED
+RWByteAddressBuffer prevent_dce : register(u0);
 
-
-@group(0) @binding(0) var<storage, read_write> prevent_dce : vec3<i32>;
-
-fn subgroupAdd_22d041() -> vec3<i32> {
-  var arg_0 = vec3<i32>(1i);
-  var res : vec3<i32> = subgroupAdd(arg_0);
+int3 subgroupAdd_22d041() {
+  int3 arg_0 = (1).xxx;
+  int3 res = WaveActiveSum(arg_0);
   return res;
 }
 
-@compute @workgroup_size(1)
-fn compute_main() {
-  prevent_dce = subgroupAdd_22d041();
+[numthreads(1, 1, 1)]
+void compute_main() {
+  prevent_dce.Store3(0u, asuint(subgroupAdd_22d041()));
+  return;
 }
-
-Failed to generate: error: Unknown builtin method: subgroupAdd

@@ -1,16 +1,12 @@
-SKIP: FAILED
+RWByteAddressBuffer prevent_dce : register(u0);
 
-
-@group(0) @binding(0) var<storage, read_write> prevent_dce : vec2<i32>;
-
-fn subgroupExclusiveMul_4525a3() -> vec2<i32> {
-  var res : vec2<i32> = subgroupExclusiveMul(vec2<i32>(1i));
+int2 subgroupExclusiveMul_4525a3() {
+  int2 res = WavePrefixProduct((1).xx);
   return res;
 }
 
-@compute @workgroup_size(1)
-fn compute_main() {
-  prevent_dce = subgroupExclusiveMul_4525a3();
+[numthreads(1, 1, 1)]
+void compute_main() {
+  prevent_dce.Store2(0u, asuint(subgroupExclusiveMul_4525a3()));
+  return;
 }
-
-Failed to generate: error: Unknown builtin method: subgroupExclusiveMul

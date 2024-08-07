@@ -3074,6 +3074,14 @@ std::string ASTPrinter::generate_builtin_name(const sem::BuiltinFn* builtin) {
             return "WaveActiveBallot";
         case wgsl::BuiltinFn::kSubgroupBroadcast:
             return "WaveReadLaneAt";
+        case wgsl::BuiltinFn::kSubgroupAdd:
+            return "WaveActiveSum";
+        case wgsl::BuiltinFn::kSubgroupExclusiveAdd:
+            return "WavePrefixSum";
+        case wgsl::BuiltinFn::kSubgroupMul:
+            return "WaveActiveProduct";
+        case wgsl::BuiltinFn::kSubgroupExclusiveMul:
+            return "WavePrefixProduct";
         default:
             diagnostics_.AddError(Source{}) << "Unknown builtin method: " << builtin->str();
     }

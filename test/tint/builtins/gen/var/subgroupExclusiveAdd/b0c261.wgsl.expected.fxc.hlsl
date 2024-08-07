@@ -1,17 +1,15 @@
 SKIP: FAILED
 
+RWByteAddressBuffer prevent_dce : register(u0);
 
-@group(0) @binding(0) var<storage, read_write> prevent_dce : i32;
-
-fn subgroupExclusiveAdd_b0c261() -> i32 {
-  var arg_0 = 1i;
-  var res : i32 = subgroupExclusiveAdd(arg_0);
+int subgroupExclusiveAdd_b0c261() {
+  int arg_0 = 1;
+  int res = WavePrefixSum(arg_0);
   return res;
 }
 
-@compute @workgroup_size(1)
-fn compute_main() {
-  prevent_dce = subgroupExclusiveAdd_b0c261();
+[numthreads(1, 1, 1)]
+void compute_main() {
+  prevent_dce.Store(0u, asuint(subgroupExclusiveAdd_b0c261()));
+  return;
 }
-
-Failed to generate: error: Unknown builtin method: subgroupExclusiveAdd

@@ -243,16 +243,20 @@ fn vertex_main() -> VertexOutput {
 {{-   $overload := $permutation.Overload -}}
 {{-   $builtin_name := $permutation.Intrinsic.Name -}}
 
-{{- /* Check and emit dot4I8Packed and dot4U8Packed */ -}}
+{{/* Check and emit dot4I8Packed and dot4U8Packed */}}
 {{-   if or (eq "pack4xI8" $builtin_name) (eq "pack4xU8" $builtin_name) (eq "pack4xI8Clamp" $builtin_name) (eq "unpack4xI8" $builtin_name) (eq "unpack4xU8" $builtin_name)}}
 // [hlsl-dxc] flags: --hlsl_shader_model 66
 
 {{-   else if or (eq "dot4I8Packed" $builtin_name) (eq "dot4U8Packed" $builtin_name)}}
 // [hlsl-dxc] flags: --hlsl_shader_model 64
 
-{{- /* Check and emit f16 */ -}}
+{{/* Check and emit f16 */}}
 {{-   else if OverloadUsesType $overload "f16"}}
 // flags: --hlsl_shader_model 62
+
+{{/* HLSL Wave operations require Shader Model 6.0 (DXC) */}}
+{{-   else if HasPrefix $builtin_name "subgroup"}}
+// [hlsl-dxc] flags: --hlsl_shader_model 60
 
 {{    end -}}
 
@@ -268,7 +272,7 @@ fn vertex_main() -> VertexOutput {
 {{-   $builtin_name := $permutation.Intrinsic.Name -}}
 
 {{- /* Emit 'enable subgroups' and 'enable subgroups_f16' if required */ -}}
-{{-   if or (HasPrefix $builtin_name "subgroup") }}
+{{-   if HasPrefix $builtin_name "subgroup" }}
 enable subgroups;
 {{-     if OverloadUsesType $overload "f16"}}
 enable subgroups_f16;

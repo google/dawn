@@ -1,19 +1,13 @@
-SKIP: FAILED
+RWByteAddressBuffer prevent_dce : register(u0);
 
-
-enable f16;
-
-@group(0) @binding(0) var<storage, read_write> prevent_dce : vec2<f16>;
-
-fn subgroupMul_6aaaf3() -> vec2<f16> {
-  var arg_0 = vec2<f16>(1.0h);
-  var res : vec2<f16> = subgroupMul(arg_0);
+vector<float16_t, 2> subgroupMul_6aaaf3() {
+  vector<float16_t, 2> arg_0 = (float16_t(1.0h)).xx;
+  vector<float16_t, 2> res = WaveActiveProduct(arg_0);
   return res;
 }
 
-@compute @workgroup_size(1)
-fn compute_main() {
-  prevent_dce = subgroupMul_6aaaf3();
+[numthreads(1, 1, 1)]
+void compute_main() {
+  prevent_dce.Store<vector<float16_t, 2> >(0u, subgroupMul_6aaaf3());
+  return;
 }
-
-Failed to generate: error: Unknown builtin method: subgroupMul
