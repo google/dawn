@@ -87,7 +87,7 @@ struct State {
         for (auto* var : var_worklist) {
             auto* result = var->Result(0);
 
-            auto usage_worklist = result->UsagesUnsorted().Vector();
+            auto usage_worklist = result->UsagesSorted();
             auto* var_ty = result->Type()->As<core::type::Pointer>();
             while (!usage_worklist.IsEmpty()) {
                 auto usage = usage_worklist.Pop();
