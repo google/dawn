@@ -249,9 +249,11 @@ NSRef<MTLTextureDescriptor> Texture::CreateMetalTextureDescriptor() const {
     // specified that this texture is for a transient attachment, in which case
     // the texture should be created in memoryless storage mode.
     mtlDesc.storageMode = MTLStorageModePrivate;
-    if (@available(macOS 11.0, iOS 10.0, *)) {
-        if (GetInternalUsage() & wgpu::TextureUsage::TransientAttachment) {
+    if (GetInternalUsage() & wgpu::TextureUsage::TransientAttachment) {
+        if (@available(macOS 11.0, iOS 10.0, *)) {
             mtlDesc.storageMode = MTLStorageModeMemoryless;
+        } else {
+            DAWN_UNREACHABLE();
         }
     }
 

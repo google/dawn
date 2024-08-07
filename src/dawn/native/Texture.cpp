@@ -1225,8 +1225,10 @@ void TextureBase::SetSharedResourceMemoryContentsForTesting(
 }
 
 void TextureBase::DumpMemoryStatistics(dawn::native::MemoryDump* dump, const char* prefix) const {
-    // Do not emit for destroyed textures or textures that wrap external shared texture memory.
-    if (!IsAlive() || GetSharedResourceMemoryContents() != nullptr) {
+    // Do not emit for destroyed textures, textures that wrap external shared texture memory, or
+    // textures used as transient (memoryless) attachments.
+    if (!IsAlive() || GetSharedResourceMemoryContents() != nullptr ||
+        (GetInternalUsage() & wgpu::TextureUsage::TransientAttachment) != 0) {
         return;
     }
     std::string name = absl::StrFormat("%s/texture_%p", prefix, static_cast<const void*>(this));
