@@ -166,6 +166,22 @@ if (TINT_BUILD_TESTS AND NOT TARGET gmock)
     add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/googletest EXCLUDE_FROM_ALL)
 endif()
 
+# Populates 'targets' with list of all targets under 'dir'
+# Use 'get_all_targets_recursive' instead of this macro
+macro(do_get_all_targets_recursive targets dir)
+    get_property(subdirectories DIRECTORY ${dir} PROPERTY SUBDIRECTORIES)
+    foreach(subdir ${subdirectories})
+        do_get_all_targets_recursive(${targets} ${subdir})
+    endforeach()
+    get_property(current_targets DIRECTORY ${dir} PROPERTY BUILDSYSTEM_TARGETS)
+    list(APPEND ${targets} ${current_targets})
+endmacro()
+function(get_all_targets_recursive targets dir)
+    set(targets_out)
+    do_get_all_targets_recursive(targets_out ${dir})
+    set(${targets} ${targets_out} PARENT_SCOPE)
+endfunction()
+
 function(AddSubdirectoryDXC)
     # We use a CMake function so that all these (non-cache) variables are scoped
     # only to this function.
@@ -223,12 +239,6 @@ function(AddSubdirectoryDXC)
     # not visible from our build dir. We don't need this validation, so just disable it.
     set(CLANG_FORMAT_EXE "" CACHE STRING "" FORCE)
 
-    if (CMAKE_BUILD_TYPE STREQUAL "Debug" AND NOT DAWN_DXC_DISABLE_ASSERTS_DEBUG)
-        set(LLVM_ENABLE_ASSERTIONS ON CACHE BOOL "" FORCE)
-    else()
-        set(LLVM_ENABLE_ASSERTIONS OFF CACHE BOOL "" FORCE)
-    endif()
-
     # Override RPATH so that it points to current dir (exe path). This allows both executable and
     # shared library to be in the same location, which we set below. Note that DXC places places
     # executables in a bin directory, and shared libraries in a lib directory.
@@ -246,6 +256,29 @@ function(AddSubdirectoryDXC)
     )
     set_target_properties(dxc PROPERTIES EXCLUDE_FROM_ALL FALSE)
     set_target_properties(dxcompiler PROPERTIES EXCLUDE_FROM_ALL FALSE)
+
+    if ((NOT IS_DEBUG_BUILD) AND DAWN_DXC_ENABLE_ASSERTS_IN_NDEBUG)
+        # NOTE: Don't set LLVM_ENABLE_ASSERTIONS because it modifies CMAKE_CXX_FLAGS_* by removing NDEBUG
+        # from it; but this is a global CMake flag that affects all targets, including the non-DXC ones.
+        # Instead, we add '-UNDEBUG', which will come after the default '-DNDEBUG' that comes from
+        # CMAKE_CXX_FLAGS_*, and rely on the fact that compilers will undefine NDEBUG if it comes last
+        # on the compile command line. This was tested on Clang, GCC, and MSVC.
+        # Also note that MSVC will warn about both being defined, which is why DXC/LLVM
+        # removes NDEBUG from CMAKE_CXX_FLAGS_*, but we can live with the warnings.
+        # TODO(crbug.com/358169277): Once we move the 'dxc' directory one level deeper,
+        # use add_definitions instead of getting all targets and setting properties on them.
+        get_all_targets_recursive(ALL_TARGETS ${CMAKE_CURRENT_SOURCE_DIR}/dxc)
+        foreach(t IN LISTS ALL_TARGETS)
+            set_property(TARGET ${t} APPEND PROPERTY COMPILE_OPTIONS "-UNDEBUG")
+            if (NOT MSVC)
+                set_property(TARGET ${t} APPEND PROPERTY COMPILE_DEFINITIONS "_DEBUG")
+            endif()
+            # Reduce binary size by dropping assertion strings
+            set_property(TARGET ${t} APPEND PROPERTY COMPILE_DEFINITIONS "LLVM_ASSERTIONS_NO_STRINGS")
+            # Always trap on asserts for consistent crash logging
+            set_property(TARGET ${t} APPEND PROPERTY COMPILE_DEFINITIONS "LLVM_ASSERTIONS_TRAP")
+        endforeach()
+    endif()
 
     # Override output dir for both targets so that they end up in the same place
     # as the rest of our binaries. Otherwise, DXC wants its outputs in bin and lib dirs.
