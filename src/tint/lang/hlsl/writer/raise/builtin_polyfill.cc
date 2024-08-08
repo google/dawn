@@ -101,6 +101,7 @@ struct State {
                     case core::BuiltinFn::kAtomicStore:
                     case core::BuiltinFn::kAtomicExchange:
                     case core::BuiltinFn::kAtomicCompareExchangeWeak:
+                    case core::BuiltinFn::kCountOneBits:
                     case core::BuiltinFn::kDot4I8Packed:
                     case core::BuiltinFn::kDot4U8Packed:
                     case core::BuiltinFn::kPack2X16Float:
@@ -112,6 +113,7 @@ struct State {
                     case core::BuiltinFn::kPack4XU8:
                     case core::BuiltinFn::kPack4XI8Clamp:
                     case core::BuiltinFn::kQuantizeToF16:
+                    case core::BuiltinFn::kReverseBits:
                     case core::BuiltinFn::kSelect:
                     case core::BuiltinFn::kSign:
                     case core::BuiltinFn::kTextureDimensions:
@@ -207,6 +209,9 @@ struct State {
                 case core::BuiltinFn::kAtomicCompareExchangeWeak:
                     AtomicCompareExchangeWeak(call);
                     break;
+                case core::BuiltinFn::kCountOneBits:
+                    BitcastToIntOverloadCall(call);  // See crbug.com/tint/1550.
+                    break;
                 case core::BuiltinFn::kDot4I8Packed:
                     Dot4I8Packed(call);
                     break;
@@ -239,6 +244,9 @@ struct State {
                     break;
                 case core::BuiltinFn::kQuantizeToF16:
                     QuantizeToF16(call);
+                    break;
+                case core::BuiltinFn::kReverseBits:
+                    BitcastToIntOverloadCall(call);  // See crbug.com/tint/1550.
                     break;
                 case core::BuiltinFn::kSelect:
                     Select(call);
@@ -1698,6 +1706,26 @@ struct State {
                                                     hlsl::BuiltinFn::kF16Tof32, inner);
         });
         call->Destroy();
+    }
+
+    // Some HLSL methods do not support a signed int overload or the signed int overload has bugs.
+    // This helper function wraps the argument in `asuint` and the result in `asint` to use the
+    // unsigned int overload. It currently supports only single argument function signatures.
+    void BitcastToIntOverloadCall(core::ir::CoreBuiltinCall* call) {
+        TINT_ASSERT(call->Args().Length() == 1);
+        auto* arg = call->Args()[0];
+        if (arg->Type()->UnwrapRef()->is_signed_integer_scalar_or_vector()) {
+            auto* result_ty = call->Result(0)->Type();
+            auto* u32_type = ty.match_width(ty.u32(), result_ty);
+            b.InsertBefore(call, [&] {
+                auto* inner =
+                    b.Call<hlsl::ir::BuiltinCall>(u32_type, hlsl::BuiltinFn::kAsuint, arg);
+                auto* func = b.Call(u32_type, call->Func(), inner);
+                b.CallWithResult<hlsl::ir::BuiltinCall>(call->DetachResult(),
+                                                        hlsl::BuiltinFn::kAsint, func);
+            });
+            call->Destroy();
+        }
     }
 };
 

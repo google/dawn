@@ -6847,5 +6847,81 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, Atanh) {
     EXPECT_EQ(expect, str());
 }
 
+TEST_F(HlslWriter_BuiltinPolyfillTest, CountOneBits) {
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        auto* u = b.Var("u", 1_i);
+        b.Let("a", b.Call(ty.i32(), core::BuiltinFn::kCountOneBits, b.Load(u)));
+        b.Return(func);
+    });
+
+    auto* src = R"(
+%foo = @fragment func():void {
+  $B1: {
+    %u:ptr<function, i32, read_write> = var, 1i
+    %3:i32 = load %u
+    %4:i32 = countOneBits %3
+    %a:i32 = let %4
+    ret
+  }
+}
+)";
+    ASSERT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = @fragment func():void {
+  $B1: {
+    %u:ptr<function, i32, read_write> = var, 1i
+    %3:i32 = load %u
+    %4:u32 = hlsl.asuint %3
+    %5:u32 = countOneBits %4
+    %6:i32 = hlsl.asint %5
+    %a:i32 = let %6
+    ret
+  }
+}
+)";
+    Run(BuiltinPolyfill);
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(HlslWriter_BuiltinPolyfillTest, ReverseBits) {
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        auto* u = b.Var("u", 1_i);
+        b.Let("a", b.Call(ty.i32(), core::BuiltinFn::kReverseBits, b.Load(u)));
+        b.Return(func);
+    });
+
+    auto* src = R"(
+%foo = @fragment func():void {
+  $B1: {
+    %u:ptr<function, i32, read_write> = var, 1i
+    %3:i32 = load %u
+    %4:i32 = reverseBits %3
+    %a:i32 = let %4
+    ret
+  }
+}
+)";
+    ASSERT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = @fragment func():void {
+  $B1: {
+    %u:ptr<function, i32, read_write> = var, 1i
+    %3:i32 = load %u
+    %4:u32 = hlsl.asuint %3
+    %5:u32 = reverseBits %4
+    %6:i32 = hlsl.asint %5
+    %a:i32 = let %6
+    ret
+  }
+}
+)";
+    Run(BuiltinPolyfill);
+    EXPECT_EQ(expect, str());
+}
+
 }  // namespace
 }  // namespace tint::hlsl::writer::raise

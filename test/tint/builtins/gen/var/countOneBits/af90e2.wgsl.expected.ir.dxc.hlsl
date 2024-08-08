@@ -12,7 +12,7 @@ struct vertex_main_outputs {
 RWByteAddressBuffer prevent_dce : register(u0);
 int2 countOneBits_af90e2() {
   int2 arg_0 = (1).xx;
-  int2 res = countbits(arg_0);
+  int2 res = asint(countbits(asuint(arg_0)));
   return res;
 }
 
