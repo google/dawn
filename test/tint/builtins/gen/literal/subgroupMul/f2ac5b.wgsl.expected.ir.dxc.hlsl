@@ -5,6 +5,10 @@ vector<float16_t, 4> subgroupMul_f2ac5b() {
   return res;
 }
 
+void fragment_main() {
+  prevent_dce.Store<vector<float16_t, 4> >(0u, subgroupMul_f2ac5b());
+}
+
 [numthreads(1, 1, 1)]
 void compute_main() {
   prevent_dce.Store<vector<float16_t, 4> >(0u, subgroupMul_f2ac5b());

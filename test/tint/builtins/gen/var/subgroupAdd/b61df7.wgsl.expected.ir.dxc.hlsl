@@ -6,6 +6,10 @@ uint subgroupAdd_b61df7() {
   return res;
 }
 
+void fragment_main() {
+  prevent_dce.Store(0u, subgroupAdd_b61df7());
+}
+
 [numthreads(1, 1, 1)]
 void compute_main() {
   prevent_dce.Store(0u, subgroupAdd_b61df7());

@@ -636,4 +636,7 @@ enum BuiltinFn {
     subgroup_exclusive_add = 123;
     subgroup_mul = 124;
     subgroup_exclusive_mul = 125;
+    subgroup_and = 126;
+    subgroup_or = 127;
+    subgroup_xor = 128;
 }

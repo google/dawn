@@ -6,6 +6,10 @@ float subgroupAdd_3854ae() {
   return res;
 }
 
+void fragment_main() {
+  prevent_dce.Store(0u, asuint(subgroupAdd_3854ae()));
+}
+
 [numthreads(1, 1, 1)]
 void compute_main() {
   prevent_dce.Store(0u, asuint(subgroupAdd_3854ae()));

@@ -6,6 +6,10 @@ int4 subgroupAdd_28db2c() {
   return res;
 }
 
+void fragment_main() {
+  prevent_dce.Store4(0u, asuint(subgroupAdd_28db2c()));
+}
+
 [numthreads(1, 1, 1)]
 void compute_main() {
   prevent_dce.Store4(0u, asuint(subgroupAdd_28db2c()));

@@ -6,6 +6,10 @@ int subgroupMul_3fe886() {
   return res;
 }
 
+void fragment_main() {
+  prevent_dce.Store(0u, asuint(subgroupMul_3fe886()));
+}
+
 [numthreads(1, 1, 1)]
 void compute_main() {
   prevent_dce.Store(0u, asuint(subgroupMul_3fe886()));

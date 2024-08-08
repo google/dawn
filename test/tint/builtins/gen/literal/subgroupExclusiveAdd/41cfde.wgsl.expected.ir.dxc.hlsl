@@ -5,6 +5,10 @@ float3 subgroupExclusiveAdd_41cfde() {
   return res;
 }
 
+void fragment_main() {
+  prevent_dce.Store3(0u, asuint(subgroupExclusiveAdd_41cfde()));
+}
+
 [numthreads(1, 1, 1)]
 void compute_main() {
   prevent_dce.Store3(0u, asuint(subgroupExclusiveAdd_41cfde()));

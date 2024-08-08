@@ -423,6 +423,15 @@ BuiltinFn ParseBuiltinFn(std::string_view name) {
     if (name == "subgroupExclusiveMul") {
         return BuiltinFn::kSubgroupExclusiveMul;
     }
+    if (name == "subgroupAnd") {
+        return BuiltinFn::kSubgroupAnd;
+    }
+    if (name == "subgroupOr") {
+        return BuiltinFn::kSubgroupOr;
+    }
+    if (name == "subgroupXor") {
+        return BuiltinFn::kSubgroupXor;
+    }
     if (name == "__tint_materialize") {
         return BuiltinFn::kTintMaterialize;
     }
@@ -689,6 +698,12 @@ const char* str(BuiltinFn i) {
             return "subgroupMul";
         case BuiltinFn::kSubgroupExclusiveMul:
             return "subgroupExclusiveMul";
+        case BuiltinFn::kSubgroupAnd:
+            return "subgroupAnd";
+        case BuiltinFn::kSubgroupOr:
+            return "subgroupOr";
+        case BuiltinFn::kSubgroupXor:
+            return "subgroupXor";
         case BuiltinFn::kTintMaterialize:
             return "__tint_materialize";
     }
@@ -769,6 +784,9 @@ bool IsSubgroup(BuiltinFn f) {
         case BuiltinFn::kSubgroupExclusiveAdd:
         case BuiltinFn::kSubgroupMul:
         case BuiltinFn::kSubgroupExclusiveMul:
+        case BuiltinFn::kSubgroupAnd:
+        case BuiltinFn::kSubgroupOr:
+        case BuiltinFn::kSubgroupXor:
             return true;
         default:
             return false;

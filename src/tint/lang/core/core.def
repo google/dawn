@@ -710,6 +710,12 @@ fn textureStore[C: iu32](texture: texture_storage_3d<u32_texel_format, writable>
 @must_use @stage("fragment", "compute") fn subgroupMul[N: num, T: fiu32_f16](value: vec<N, T>) -> vec<N, T>
 @must_use @stage("fragment", "compute") fn subgroupExclusiveMul[T: fiu32_f16](value: T) -> T
 @must_use @stage("fragment", "compute") fn subgroupExclusiveMul[N: num, T: fiu32_f16](value: vec<N, T>) -> vec<N, T>
+@must_use @stage("fragment", "compute") fn subgroupAnd[T: iu32](value: T) -> T
+@must_use @stage("fragment", "compute") fn subgroupAnd[N: num, T: iu32](value: vec<N, T>) -> vec<N, T>
+@must_use @stage("fragment", "compute") fn subgroupOr[T: iu32](value: T) -> T
+@must_use @stage("fragment", "compute") fn subgroupOr[N: num, T: iu32](value: vec<N, T>) -> vec<N, T>
+@must_use @stage("fragment", "compute") fn subgroupXor[T: iu32](value: T) -> T
+@must_use @stage("fragment", "compute") fn subgroupXor[N: num, T: iu32](value: vec<N, T>) -> vec<N, T>
 
 ////////////////////////////////////////////////////////////////////////////////
 // Value constructors                                                         //

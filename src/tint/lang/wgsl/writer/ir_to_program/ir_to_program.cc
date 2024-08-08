@@ -650,6 +650,9 @@ class State {
                     case wgsl::BuiltinFn::kSubgroupExclusiveAdd:
                     case wgsl::BuiltinFn::kSubgroupMul:
                     case wgsl::BuiltinFn::kSubgroupExclusiveMul:
+                    case wgsl::BuiltinFn::kSubgroupAnd:
+                    case wgsl::BuiltinFn::kSubgroupOr:
+                    case wgsl::BuiltinFn::kSubgroupXor:
                         Enable(wgsl::Extension::kChromiumExperimentalSubgroups);
                         break;
                     default:

@@ -5,6 +5,10 @@ float16_t subgroupAdd_225207() {
   return res;
 }
 
+void fragment_main() {
+  prevent_dce.Store<float16_t>(0u, subgroupAdd_225207());
+}
+
 [numthreads(1, 1, 1)]
 void compute_main() {
   prevent_dce.Store<float16_t>(0u, subgroupAdd_225207());

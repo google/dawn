@@ -6,6 +6,10 @@ int4 subgroupExclusiveAdd_406ab4() {
   return res;
 }
 
+void fragment_main() {
+  prevent_dce.Store4(0u, asuint(subgroupExclusiveAdd_406ab4()));
+}
+
 [numthreads(1, 1, 1)]
 void compute_main() {
   prevent_dce.Store4(0u, asuint(subgroupExclusiveAdd_406ab4()));

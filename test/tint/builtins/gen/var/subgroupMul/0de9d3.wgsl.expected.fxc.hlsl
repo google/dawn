@@ -13,3 +13,6 @@ void compute_main() {
   prevent_dce.Store(0u, asuint(subgroupMul_0de9d3()));
   return;
 }
+FXC validation failure:
+C:\src\dawn\Shader@0x00000190E3105D30(5,15-38): error X3004: undeclared identifier 'WaveActiveProduct'
+

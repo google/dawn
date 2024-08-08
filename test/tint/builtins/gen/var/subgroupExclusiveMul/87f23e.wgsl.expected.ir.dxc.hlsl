@@ -6,6 +6,10 @@ int3 subgroupExclusiveMul_87f23e() {
   return res;
 }
 
+void fragment_main() {
+  prevent_dce.Store3(0u, asuint(subgroupExclusiveMul_87f23e()));
+}
+
 [numthreads(1, 1, 1)]
 void compute_main() {
   prevent_dce.Store3(0u, asuint(subgroupExclusiveMul_87f23e()));

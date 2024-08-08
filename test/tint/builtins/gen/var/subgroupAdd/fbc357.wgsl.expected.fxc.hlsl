@@ -13,3 +13,6 @@ void compute_main() {
   prevent_dce.Store4(0u, asuint(subgroupAdd_fbc357()));
   return;
 }
+FXC validation failure:
+C:\src\dawn\Shader@0x0000028641012BE0(5,15-34): error X3004: undeclared identifier 'WaveActiveSum'
+

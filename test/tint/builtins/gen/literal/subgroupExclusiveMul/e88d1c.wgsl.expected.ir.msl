@@ -10,6 +10,11 @@ half2 subgroupExclusiveMul_e88d1c() {
   return res;
 }
 
+fragment void fragment_main(device half2* prevent_dce [[buffer(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.prevent_dce=prevent_dce};
+  (*tint_module_vars.prevent_dce) = subgroupExclusiveMul_e88d1c();
+}
+
 kernel void compute_main(device half2* prevent_dce [[buffer(0)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.prevent_dce=prevent_dce};
   (*tint_module_vars.prevent_dce) = subgroupExclusiveMul_e88d1c();

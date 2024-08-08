@@ -13,3 +13,6 @@ void compute_main() {
   prevent_dce.Store<vector<float16_t, 2> >(0u, subgroupExclusiveAdd_01de08());
   return;
 }
+FXC validation failure:
+C:\src\dawn\Shader@0x0000021B04B460F0(3,8-16): error X3000: syntax error: unexpected token 'float16_t'
+

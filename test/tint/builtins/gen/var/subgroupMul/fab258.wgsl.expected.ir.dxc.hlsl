@@ -6,6 +6,10 @@ int4 subgroupMul_fab258() {
   return res;
 }
 
+void fragment_main() {
+  prevent_dce.Store4(0u, asuint(subgroupMul_fab258()));
+}
+
 [numthreads(1, 1, 1)]
 void compute_main() {
   prevent_dce.Store4(0u, asuint(subgroupMul_fab258()));

@@ -1017,7 +1017,15 @@ class Printer : public tint::TextGenerator {
             case core::BuiltinFn::kSubgroupExclusiveMul:
                 out << "WavePrefixProduct";
                 break;
-
+            case core::BuiltinFn::kSubgroupAnd:
+                out << "WaveActiveBitAnd";
+                break;
+            case core::BuiltinFn::kSubgroupOr:
+                out << "WaveActiveBitOr";
+                break;
+            case core::BuiltinFn::kSubgroupXor:
+                out << "WaveActiveBitXor";
+                break;
             default:
                 TINT_UNREACHABLE() << "unhandled: " << func;
         }

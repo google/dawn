@@ -6,6 +6,10 @@ uint3 subgroupMul_fa781b() {
   return res;
 }
 
+void fragment_main() {
+  prevent_dce.Store3(0u, subgroupMul_fa781b());
+}
+
 [numthreads(1, 1, 1)]
 void compute_main() {
   prevent_dce.Store3(0u, subgroupMul_fa781b());

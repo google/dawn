@@ -1,0 +1,18 @@
+#include <metal_stdlib>
+
+using namespace metal;
+uint subgroupXor_7750d6() {
+  uint res = simd_xor(1u);
+  return res;
+}
+
+fragment void fragment_main(device uint* tint_symbol [[buffer(0)]]) {
+  *(tint_symbol) = subgroupXor_7750d6();
+  return;
+}
+
+kernel void compute_main(device uint* tint_symbol_1 [[buffer(0)]]) {
+  *(tint_symbol_1) = subgroupXor_7750d6();
+  return;
+}
+

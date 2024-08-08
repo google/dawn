@@ -991,6 +991,15 @@ class Printer : public tint::TextGenerator {
             case core::BuiltinFn::kSubgroupExclusiveMul:
                 out << "simd_prefix_exclusive_product";
                 break;
+            case core::BuiltinFn::kSubgroupAnd:
+                out << "simd_and";
+                break;
+            case core::BuiltinFn::kSubgroupOr:
+                out << "simd_or";
+                break;
+            case core::BuiltinFn::kSubgroupXor:
+                out << "simd_xor";
+                break;
             case core::BuiltinFn::kInverseSqrt:
                 out << "rsqrt";
                 break;

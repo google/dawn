@@ -2568,9 +2568,12 @@ uint32_t Builder::GenerateBuiltinCall(const sem::Call* call, const sem::BuiltinF
         case wgsl::BuiltinFn::kSubgroupAdd:
         case wgsl::BuiltinFn::kSubgroupExclusiveAdd:
         case wgsl::BuiltinFn::kSubgroupMul:
-        case wgsl::BuiltinFn::kSubgroupExclusiveMul: {
-            // TODO(crbug.com/354738715): Implement more subgroup builtins. Adding this explicit
-            // failure in the intermediary CL to avoid a new ICE that can get caught by the fuzzers.
+        case wgsl::BuiltinFn::kSubgroupExclusiveMul:
+        case wgsl::BuiltinFn::kSubgroupAnd:
+        case wgsl::BuiltinFn::kSubgroupOr:
+        case wgsl::BuiltinFn::kSubgroupXor: {
+            // This file should be removed soon with the SPIR-V AST backend, but in the meantime we
+            // need this explicit failure to avoid a new ICE that can get caught by the fuzzers.
             return 0;
         }
         default: {

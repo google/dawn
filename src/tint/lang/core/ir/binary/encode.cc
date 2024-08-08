@@ -1149,6 +1149,12 @@ struct Encoder {
                 return pb::BuiltinFn::subgroup_mul;
             case core::BuiltinFn::kSubgroupExclusiveMul:
                 return pb::BuiltinFn::subgroup_exclusive_mul;
+            case core::BuiltinFn::kSubgroupAnd:
+                return pb::BuiltinFn::subgroup_and;
+            case core::BuiltinFn::kSubgroupOr:
+                return pb::BuiltinFn::subgroup_or;
+            case core::BuiltinFn::kSubgroupXor:
+                return pb::BuiltinFn::subgroup_xor;
             case core::BuiltinFn::kNone:
                 break;
         }

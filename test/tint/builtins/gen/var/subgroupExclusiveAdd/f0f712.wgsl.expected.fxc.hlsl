@@ -13,3 +13,6 @@ void compute_main() {
   prevent_dce.Store2(0u, asuint(subgroupExclusiveAdd_f0f712()));
   return;
 }
+FXC validation failure:
+C:\src\dawn\Shader@0x000001A5F2BA0120(5,14-33): error X3004: undeclared identifier 'WavePrefixSum'
+

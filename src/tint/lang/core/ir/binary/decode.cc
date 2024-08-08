@@ -1637,6 +1637,12 @@ struct Decoder {
                 return core::BuiltinFn::kSubgroupMul;
             case pb::BuiltinFn::subgroup_exclusive_mul:
                 return core::BuiltinFn::kSubgroupExclusiveMul;
+            case pb::BuiltinFn::subgroup_and:
+                return core::BuiltinFn::kSubgroupAnd;
+            case pb::BuiltinFn::subgroup_or:
+                return core::BuiltinFn::kSubgroupOr;
+            case pb::BuiltinFn::subgroup_xor:
+                return core::BuiltinFn::kSubgroupXor;
 
             case pb::BuiltinFn::BuiltinFn_INT_MIN_SENTINEL_DO_NOT_USE_:
             case pb::BuiltinFn::BuiltinFn_INT_MAX_SENTINEL_DO_NOT_USE_:

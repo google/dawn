@@ -1263,12 +1263,36 @@ bool ASTPrinter::EmitBuiltinCall(StringStream& out,
         return false;
     }
 
-    // Handle single argument builtins that only accept and return uint (not int overload). We need
-    // to explicitly cast the return value (we also cast the arg for good measure). See
-    // crbug.com/tint/1550
-    if (type == wgsl::BuiltinFn::kCountOneBits || type == wgsl::BuiltinFn::kReverseBits) {
+    // Handle single argument builtins that only accept and return uint (not int overload).
+    // For count bits and reverse bits, we need to explicitly cast the return value (we also cast
+    // the arg for good measure). See crbug.com/tint/1550.
+    // For the following subgroup builtins, the lack of support may be a bug in DXC. See
+    // github.com/microsoft/DirectXShaderCompiler/issues/6850.
+    if (type == wgsl::BuiltinFn::kCountOneBits || type == wgsl::BuiltinFn::kReverseBits ||
+        type == wgsl::BuiltinFn::kSubgroupAnd || type == wgsl::BuiltinFn::kSubgroupOr ||
+        type == wgsl::BuiltinFn::kSubgroupXor) {
         auto* arg = call->Arguments()[0];
-        if (arg->Type()->UnwrapRef()->is_signed_integer_scalar_or_vector()) {
+        auto* argType = arg->Type()->UnwrapRef();
+        if (argType->is_signed_integer_scalar_or_vector()) {
+            // Bitcast of literal int vectors fails in DXC so extract arg to a var. See
+            // github.com/microsoft/DirectXShaderCompiler/issues/6851.
+            if (argType->is_signed_integer_vector() &&
+                arg->Stage() == core::EvaluationStage::kConstant) {
+                auto varName = UniqueIdentifier(kTempNamePrefix);
+                auto pre = Line();
+                if (!EmitTypeAndName(pre, argType, core::AddressSpace::kUndefined,
+                                     core::Access::kUndefined, varName)) {
+                    return false;
+                }
+                pre << " = ";
+                if (!EmitExpression(pre, arg->Declaration())) {
+                    return false;
+                }
+                pre << ";";
+                out << "asint(" << name << "(asuint(" << varName << ")))";
+                return true;
+            }
+
             out << "asint(" << name << "(asuint(";
             if (!EmitExpression(out, arg->Declaration())) {
                 return false;
@@ -3082,6 +3106,12 @@ std::string ASTPrinter::generate_builtin_name(const sem::BuiltinFn* builtin) {
             return "WaveActiveProduct";
         case wgsl::BuiltinFn::kSubgroupExclusiveMul:
             return "WavePrefixProduct";
+        case wgsl::BuiltinFn::kSubgroupAnd:
+            return "WaveActiveBitAnd";
+        case wgsl::BuiltinFn::kSubgroupOr:
+            return "WaveActiveBitOr";
+        case wgsl::BuiltinFn::kSubgroupXor:
+            return "WaveActiveBitXor";
         default:
             diagnostics_.AddError(Source{}) << "Unknown builtin method: " << builtin->str();
     }

@@ -5,6 +5,10 @@ vector<float16_t, 2> subgroupAdd_cae1ed() {
   return res;
 }
 
+void fragment_main() {
+  prevent_dce.Store<vector<float16_t, 2> >(0u, subgroupAdd_cae1ed());
+}
+
 [numthreads(1, 1, 1)]
 void compute_main() {
   prevent_dce.Store<vector<float16_t, 2> >(0u, subgroupAdd_cae1ed());

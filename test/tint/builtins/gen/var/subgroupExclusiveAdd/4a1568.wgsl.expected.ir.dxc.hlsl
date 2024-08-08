@@ -6,6 +6,10 @@ float16_t subgroupExclusiveAdd_4a1568() {
   return res;
 }
 
+void fragment_main() {
+  prevent_dce.Store<float16_t>(0u, subgroupExclusiveAdd_4a1568());
+}
+
 [numthreads(1, 1, 1)]
 void compute_main() {
   prevent_dce.Store<float16_t>(0u, subgroupExclusiveAdd_4a1568());

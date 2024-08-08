@@ -6,6 +6,10 @@ vector<float16_t, 2> subgroupExclusiveAdd_01de08() {
   return res;
 }
 
+void fragment_main() {
+  prevent_dce.Store<vector<float16_t, 2> >(0u, subgroupExclusiveAdd_01de08());
+}
+
 [numthreads(1, 1, 1)]
 void compute_main() {
   prevent_dce.Store<vector<float16_t, 2> >(0u, subgroupExclusiveAdd_01de08());

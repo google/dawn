@@ -417,6 +417,15 @@ BuiltinFn ParseBuiltinFn(std::string_view name) {
     if (name == "subgroupExclusiveMul") {
         return BuiltinFn::kSubgroupExclusiveMul;
     }
+    if (name == "subgroupAnd") {
+        return BuiltinFn::kSubgroupAnd;
+    }
+    if (name == "subgroupOr") {
+        return BuiltinFn::kSubgroupOr;
+    }
+    if (name == "subgroupXor") {
+        return BuiltinFn::kSubgroupXor;
+    }
     return BuiltinFn::kNone;
 }
 
@@ -676,6 +685,12 @@ const char* str(BuiltinFn i) {
             return "subgroupMul";
         case BuiltinFn::kSubgroupExclusiveMul:
             return "subgroupExclusiveMul";
+        case BuiltinFn::kSubgroupAnd:
+            return "subgroupAnd";
+        case BuiltinFn::kSubgroupOr:
+            return "subgroupOr";
+        case BuiltinFn::kSubgroupXor:
+            return "subgroupXor";
     }
     return "<unknown>";
 }

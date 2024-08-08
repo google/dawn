@@ -6923,5 +6923,40 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, ReverseBits) {
     EXPECT_EQ(expect, str());
 }
 
+TEST_F(HlslWriter_BuiltinPolyfillTest, SubgroupAndLiteralVec) {
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        b.Let("a", b.Call(ty.vec3<i32>(), core::BuiltinFn::kSubgroupAnd,
+                          b.Composite(ty.vec3<i32>(), 1_i, 1_i, 1_i)));
+        b.Return(func);
+    });
+
+    auto* src = R"(
+%foo = @fragment func():void {
+  $B1: {
+    %2:vec3<i32> = subgroupAnd vec3<i32>(1i)
+    %a:vec3<i32> = let %2
+    ret
+  }
+}
+)";
+    ASSERT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = @fragment func():void {
+  $B1: {
+    %arg:vec3<i32> = let vec3<i32>(1i)
+    %3:vec3<u32> = hlsl.asuint %arg
+    %4:vec3<u32> = subgroupAnd %3
+    %5:vec3<i32> = hlsl.asint %4
+    %a:vec3<i32> = let %5
+    ret
+  }
+}
+)";
+    Run(BuiltinPolyfill);
+    EXPECT_EQ(expect, str());
+}
+
 }  // namespace
 }  // namespace tint::hlsl::writer::raise

@@ -1686,6 +1686,24 @@ class Printer {
                 op = spv::Op::OpGroupNonUniformBroadcast;
                 operands.push_back(Constant(ir_.constant_values.Get(u32(spv::Scope::Subgroup))));
                 break;
+            case core::BuiltinFn::kSubgroupAnd:
+                module_.PushCapability(SpvCapabilityGroupNonUniformArithmetic);
+                op = spv::Op::OpGroupNonUniformBitwiseAnd;
+                operands.push_back(Constant(ir_.constant_values.Get(u32(spv::Scope::Subgroup))));
+                operands.push_back(U32Operand(u32(spv::GroupOperation::Reduce)));
+                break;
+            case core::BuiltinFn::kSubgroupOr:
+                module_.PushCapability(SpvCapabilityGroupNonUniformArithmetic);
+                op = spv::Op::OpGroupNonUniformBitwiseOr;
+                operands.push_back(Constant(ir_.constant_values.Get(u32(spv::Scope::Subgroup))));
+                operands.push_back(U32Operand(u32(spv::GroupOperation::Reduce)));
+                break;
+            case core::BuiltinFn::kSubgroupXor:
+                module_.PushCapability(SpvCapabilityGroupNonUniformArithmetic);
+                op = spv::Op::OpGroupNonUniformBitwiseXor;
+                operands.push_back(Constant(ir_.constant_values.Get(u32(spv::Scope::Subgroup))));
+                operands.push_back(U32Operand(u32(spv::GroupOperation::Reduce)));
+                break;
             case core::BuiltinFn::kTan:
                 glsl_ext_inst(GLSLstd450Tan);
                 break;

@@ -116,6 +116,9 @@ struct State {
                     case core::BuiltinFn::kReverseBits:
                     case core::BuiltinFn::kSelect:
                     case core::BuiltinFn::kSign:
+                    case core::BuiltinFn::kSubgroupAnd:
+                    case core::BuiltinFn::kSubgroupOr:
+                    case core::BuiltinFn::kSubgroupXor:
                     case core::BuiltinFn::kTextureDimensions:
                     case core::BuiltinFn::kTextureGather:
                     case core::BuiltinFn::kTextureGatherCompare:
@@ -253,6 +256,11 @@ struct State {
                     break;
                 case core::BuiltinFn::kSign:
                     Sign(call);
+                    break;
+                case core::BuiltinFn::kSubgroupAnd:
+                case core::BuiltinFn::kSubgroupOr:
+                case core::BuiltinFn::kSubgroupXor:
+                    BitcastToIntOverloadCall(call);
                     break;
                 case core::BuiltinFn::kTextureDimensions:
                     TextureDimensions(call);
@@ -1714,12 +1722,19 @@ struct State {
     void BitcastToIntOverloadCall(core::ir::CoreBuiltinCall* call) {
         TINT_ASSERT(call->Args().Length() == 1);
         auto* arg = call->Args()[0];
-        if (arg->Type()->UnwrapRef()->is_signed_integer_scalar_or_vector()) {
+        auto* arg_type = arg->Type()->UnwrapRef();
+        if (arg_type->is_signed_integer_scalar_or_vector()) {
             auto* result_ty = call->Result(0)->Type();
             auto* u32_type = ty.match_width(ty.u32(), result_ty);
             b.InsertBefore(call, [&] {
+                core::ir::Value* val = arg;
+                // Bitcast of literal int vectors fails in DXC so extract arg to a var. See
+                // github.com/microsoft/DirectXShaderCompiler/issues/6851.
+                if (arg_type->is_signed_integer_vector() && arg->Is<core::ir::Constant>()) {
+                    val = b.Let("arg", arg)->Result(0);
+                }
                 auto* inner =
-                    b.Call<hlsl::ir::BuiltinCall>(u32_type, hlsl::BuiltinFn::kAsuint, arg);
+                    b.Call<hlsl::ir::BuiltinCall>(u32_type, hlsl::BuiltinFn::kAsuint, val);
                 auto* func = b.Call(u32_type, call->Func(), inner);
                 b.CallWithResult<hlsl::ir::BuiltinCall>(call->DetachResult(),
                                                         hlsl::BuiltinFn::kAsint, func);

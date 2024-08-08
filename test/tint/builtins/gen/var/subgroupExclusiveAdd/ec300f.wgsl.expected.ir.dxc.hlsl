@@ -6,6 +6,10 @@ uint4 subgroupExclusiveAdd_ec300f() {
   return res;
 }
 
+void fragment_main() {
+  prevent_dce.Store4(0u, subgroupExclusiveAdd_ec300f());
+}
+
 [numthreads(1, 1, 1)]
 void compute_main() {
   prevent_dce.Store4(0u, subgroupExclusiveAdd_ec300f());

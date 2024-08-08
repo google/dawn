@@ -6,6 +6,10 @@ uint2 subgroupMul_dc672a() {
   return res;
 }
 
+void fragment_main() {
+  prevent_dce.Store2(0u, subgroupMul_dc672a());
+}
+
 [numthreads(1, 1, 1)]
 void compute_main() {
   prevent_dce.Store2(0u, subgroupMul_dc672a());
