@@ -51,10 +51,6 @@ class ColorStateTest : public DawnTest {
             device, {{0, wgpu::ShaderStage::Fragment, wgpu::BufferBindingType::Uniform}});
         pipelineLayout = utils::MakePipelineLayout(device, {bindGroupLayout});
 
-        // TODO(crbug.com/dawn/489): D3D12_Microsoft_Basic_Render_Driver_CPU
-        // produces invalid results for these tests.
-        DAWN_SUPPRESS_TEST_IF(IsD3D12() && IsWARP());
-
         vsModule = utils::CreateShaderModule(device, R"(
                 @vertex
                 fn main(@builtin(vertex_index) VertexIndex : u32) -> @builtin(position) vec4f {
