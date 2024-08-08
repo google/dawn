@@ -138,7 +138,7 @@ class ComputeBoidsSample : public SampleBase {
         descriptor.cAttributes[2].format = wgpu::VertexFormat::Float32x2;
 
         descriptor.cFragment.module = fsModule;
-        descriptor.cTargets[0].format = GetPreferredSwapChainTextureFormat();
+        descriptor.cTargets[0].format = GetPreferredSurfaceTextureFormat();
 
         renderPipeline = device.CreateRenderPipeline(&descriptor);
     }

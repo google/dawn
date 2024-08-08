@@ -53,11 +53,6 @@
 #include <emscripten/emscripten.h>
 #endif  // __EMSCRIPTEN__
 
-wgpu::TextureFormat GetPreferredSwapChainTextureFormat() {
-    // TODO(dawn:1362): Return the adapter's preferred format when implemented.
-    return wgpu::TextureFormat::BGRA8Unorm;
-}
-
 // Parsed options.
 static wgpu::BackendType backendType = wgpu::BackendType::Undefined;
 static wgpu::AdapterType adapterType = wgpu::AdapterType::Unknown;
@@ -353,6 +348,7 @@ bool SampleBase::Setup() {
     config.width = width;
     config.height = height;
     surface.Configure(&config);
+    this->preferredSurfaceTextureFormat = capabilities.formats[0];
 
     return SetupImpl();
 }

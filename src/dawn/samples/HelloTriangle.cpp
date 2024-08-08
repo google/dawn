@@ -62,7 +62,7 @@ class HelloTriangleSample : public SampleBase {
         descriptor.cBuffers[0].attributeCount = 1;
         descriptor.cAttributes[0].format = wgpu::VertexFormat::Float32x4;
         descriptor.cFragment.module = module;
-        descriptor.cTargets[0].format = GetPreferredSwapChainTextureFormat();
+        descriptor.cTargets[0].format = GetPreferredSurfaceTextureFormat();
 
         pipeline = device.CreateRenderPipeline(&descriptor);
         return true;

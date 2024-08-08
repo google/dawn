@@ -128,7 +128,7 @@ class AnimometerSample : public SampleBase {
         descriptor.layout = dawn::utils::MakeBasicPipelineLayout(device, &bgl);
         descriptor.vertex.module = vsModule;
         descriptor.cFragment.module = fsModule;
-        descriptor.cTargets[0].format = GetPreferredSwapChainTextureFormat();
+        descriptor.cTargets[0].format = GetPreferredSurfaceTextureFormat();
 
         pipeline = device.CreateRenderPipeline(&descriptor);
 
