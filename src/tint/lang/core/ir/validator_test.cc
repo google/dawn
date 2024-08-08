@@ -1149,6 +1149,45 @@ MyStruct = struct @align(4) {
 )");
 }
 
+TEST_F(IR_ValidatorTest, Construct_EmptyResult) {
+    auto* str_ty = ty.Struct(mod.symbols.New("MyStruct"), {
+                                                              {mod.symbols.New("a"), ty.i32()},
+                                                              {mod.symbols.New("b"), ty.u32()},
+                                                          });
+
+    auto* f = b.Function("f", ty.void_());
+    b.Append(f->Block(), [&] {
+        auto* c = b.Construct(str_ty, 1_i, 2_u);
+        c->ClearResults();
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_EQ(res.Failure().reason.Str(),
+              R"(:8:13 error: construct: expected exactly 1 results, got 0
+    undef = construct 1i, 2u
+            ^^^^^^^^^
+
+:7:3 note: in block
+  $B1: {
+  ^^^
+
+note: # Disassembly
+MyStruct = struct @align(4) {
+  a:i32 @offset(0)
+  b:u32 @offset(4)
+}
+
+%f = func():void {
+  $B1: {
+    undef = construct 1i, 2u
+    ret
+  }
+}
+)");
+}
+
 TEST_F(IR_ValidatorTest, Convert_NullArg) {
     auto* f = b.Function("f", ty.void_());
     b.Append(f->Block(), [&] {

@@ -326,12 +326,6 @@ class Validator {
                                  size_t num_results,
                                  size_t num_operands);
 
-    /// Checks that the results and operands (and their types) for @p inst are not null.
-    /// Note: Does not check the number of results and operands.
-    /// @param inst the instruction
-    /// @returns true if the results and operands are not null
-    bool CheckResultsAndOperands(const ir::Instruction* inst);
-
     /// Checks the given operand is not null
     /// @param inst the instruction
     /// @param operand the operand
@@ -892,13 +886,6 @@ bool Validator::CheckResultsAndOperands(const ir::Instruction* inst,
     return results_passed && operands_passed;
 }
 
-bool Validator::CheckResultsAndOperands(const ir::Instruction* inst) {
-    // Intentionally avoiding short-circuiting here
-    bool results_passed = CheckResults(inst);
-    bool operands_passed = CheckOperands(inst);
-    return results_passed && operands_passed;
-}
-
 // TODO(353498500): Remove this function once it is no longer used.
 void Validator::CheckOperandNotNull(const Instruction* inst, const ir::Value* operand, size_t idx) {
     if (operand == nullptr) {
@@ -1358,13 +1345,13 @@ void Validator::CheckMemberBuiltinCall(const MemberBuiltinCall* call) {
 }
 
 void Validator::CheckConstruct(const Construct* construct) {
-    auto args = construct->Args();
-    if (args.IsEmpty()) {
-        // Zero-value constructors are valid for all constructible types.
+    if (!CheckResultsAndOperandRange(construct, Construct::kNumResults, Construct::kMinOperands)) {
         return;
     }
 
-    if (!CheckResultsAndOperands(construct)) {
+    auto args = construct->Args();
+    if (args.IsEmpty()) {
+        // Zero-value constructors are valid for all constructible types.
         return;
     }
 
