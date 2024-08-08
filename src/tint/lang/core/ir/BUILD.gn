@@ -140,6 +140,8 @@ libtint_source_set("ir") {
     "unary.h",
     "unreachable.cc",
     "unreachable.h",
+    "unused.cc",
+    "unused.h",
     "user_call.cc",
     "user_call.h",
     "validator.cc",

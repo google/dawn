@@ -1352,7 +1352,7 @@ tint_module_vars_struct = struct @align(1) {
 
 %main_a = @fragment func(%a:ptr<uniform, i32, read> [@binding_point(1, 2)], %b:ptr<storage, i32, read_write> [@binding_point(3, 4)]):void {
   $B1: {
-    %4:tint_module_vars_struct = construct %a, %b, undef
+    %4:tint_module_vars_struct = construct %a, %b, unused
     %tint_module_vars:tint_module_vars_struct = let %4
     %6:ptr<uniform, i32, read> = access %tint_module_vars, 0u
     %7:i32 = load %6
@@ -1367,7 +1367,7 @@ tint_module_vars_struct = struct @align(1) {
 %main_b = @fragment func(%a_1:ptr<uniform, i32, read> [@binding_point(1, 2)]):void {  # %a_1: 'a'
   $B2: {
     %c:ptr<private, i32, read_write> = var
-    %15:tint_module_vars_struct = construct %a_1, undef, %c
+    %15:tint_module_vars_struct = construct %a_1, unused, %c
     %tint_module_vars_1:tint_module_vars_struct = let %15  # %tint_module_vars_1: 'tint_module_vars'
     %17:ptr<uniform, i32, read> = access %tint_module_vars_1, 0u
     %18:i32 = load %17
@@ -1465,7 +1465,7 @@ tint_module_vars_struct = struct @align(1) {
 }
 %main_a = @fragment func(%a:ptr<uniform, i32, read> [@binding_point(1, 2)], %b:ptr<storage, i32, read_write> [@binding_point(3, 4)]):void {
   $B2: {
-    %8:tint_module_vars_struct = construct %a, %b, undef
+    %8:tint_module_vars_struct = construct %a, %b, unused
     %tint_module_vars_1:tint_module_vars_struct = let %8  # %tint_module_vars_1: 'tint_module_vars'
     %10:ptr<storage, i32, read_write> = access %tint_module_vars_1, 1u
     %11:i32 = load %10
@@ -1479,7 +1479,7 @@ tint_module_vars_struct = struct @align(1) {
 %main_b = @fragment func(%a_1:ptr<uniform, i32, read> [@binding_point(1, 2)]):void {  # %a_1: 'a'
   $B3: {
     %c:ptr<private, i32, read_write> = var
-    %18:tint_module_vars_struct = construct %a_1, undef, %c
+    %18:tint_module_vars_struct = construct %a_1, unused, %c
     %tint_module_vars_2:tint_module_vars_struct = let %18  # %tint_module_vars_2: 'tint_module_vars'
     %20:ptr<private, i32, read_write> = access %tint_module_vars_2, 2u
     %21:i32 = load %20

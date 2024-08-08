@@ -183,8 +183,8 @@ struct State {
             Vector<core::ir::Value*, 8> construct_args;
             for (auto var : module_vars) {
                 if (!referenced_vars.Contains(var)) {
-                    // The variable isn't used by this entry point, so set the member to undef.
-                    construct_args.Push(nullptr);
+                    // The variable isn't used by this entry point, so set the member to unused.
+                    construct_args.Push(b.Unused());
                     continue;
                 }
 

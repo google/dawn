@@ -933,6 +933,22 @@ TEST_F(IR_ValidatorTest, Construct_Struct_ValidArgs) {
     ASSERT_EQ(res, Success) << res.Failure();
 }
 
+TEST_F(IR_ValidatorTest, Construct_Struct_UnusedArgs) {
+    auto* str_ty = ty.Struct(mod.symbols.New("MyStruct"), {
+                                                              {mod.symbols.New("a"), ty.i32()},
+                                                              {mod.symbols.New("b"), ty.u32()},
+                                                          });
+
+    auto* f = b.Function("f", ty.void_());
+    b.Append(f->Block(), [&] {
+        b.Construct(str_ty, 1_i, b.Unused());
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_EQ(res, Success) << res.Failure();
+}
+
 TEST_F(IR_ValidatorTest, Construct_Struct_NotEnoughArgs) {
     auto* str_ty = ty.Struct(mod.symbols.New("MyStruct"), {
                                                               {mod.symbols.New("a"), ty.i32()},
@@ -1042,6 +1058,91 @@ MyStruct = struct @align(4) {
 %f = func():void {
   $B1: {
     %2:MyStruct = construct 1i, 2i
+    ret
+  }
+}
+)");
+}
+
+TEST_F(IR_ValidatorTest, Construct_NullArg) {
+    auto* str_ty = ty.Struct(mod.symbols.New("MyStruct"), {
+                                                              {mod.symbols.New("a"), ty.i32()},
+                                                              {mod.symbols.New("b"), ty.u32()},
+                                                          });
+
+    auto* f = b.Function("f", ty.void_());
+    b.Append(f->Block(), [&] {
+        b.Construct(str_ty, 1_i, nullptr);
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_EQ(res.Failure().reason.Str(),
+              R"(:8:33 error: construct: operand is undefined
+    %2:MyStruct = construct 1i, undef
+                                ^^^^^
+
+:7:3 note: in block
+  $B1: {
+  ^^^
+
+note: # Disassembly
+MyStruct = struct @align(4) {
+  a:i32 @offset(0)
+  b:u32 @offset(4)
+}
+
+%f = func():void {
+  $B1: {
+    %2:MyStruct = construct 1i, undef
+    ret
+  }
+}
+)");
+}
+
+TEST_F(IR_ValidatorTest, Construct_NullResult) {
+    auto* str_ty = ty.Struct(mod.symbols.New("MyStruct"), {
+                                                              {mod.symbols.New("a"), ty.i32()},
+                                                              {mod.symbols.New("b"), ty.u32()},
+                                                          });
+
+    auto* f = b.Function("f", ty.void_());
+    b.Append(f->Block(), [&] {
+        auto* c = b.Construct(str_ty, 1_i, 2_u);
+        c->SetResults(Vector<ir::InstructionResult*, 1>{nullptr});
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_EQ(res.Failure().reason.Str(),
+              R"(:8:5 error: construct: result is undefined
+    undef = construct 1i, 2u
+    ^^^^^
+
+:7:3 note: in block
+  $B1: {
+  ^^^
+
+:8:5 error: construct: result is undefined
+    undef = construct 1i, 2u
+    ^^^^^
+
+:7:3 note: in block
+  $B1: {
+  ^^^
+
+note: # Disassembly
+MyStruct = struct @align(4) {
+  a:i32 @offset(0)
+  b:u32 @offset(4)
+}
+
+%f = func():void {
+  $B1: {
+    undef = construct 1i, 2u
     ret
   }
 }
@@ -5914,7 +6015,15 @@ TEST_F(IR_ValidatorTest, Store_NoValueType) {
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_EQ(res.Failure().reason.Str(),
-              R"(:5:15 error: store: operand type is undefined
+              R"(:4:5 error: construct: result type is undefined
+    %3:undef = construct 42u
+    ^^^^^^^^
+
+:2:3 note: in block
+  $B1: {
+  ^^^
+
+:5:15 error: store: operand type is undefined
     store %2, %3
               ^^
 

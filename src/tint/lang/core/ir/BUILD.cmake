@@ -138,6 +138,8 @@ tint_add_target(tint_lang_core_ir lib
   lang/core/ir/unary.h
   lang/core/ir/unreachable.cc
   lang/core/ir/unreachable.h
+  lang/core/ir/unused.cc
+  lang/core/ir/unused.h
   lang/core/ir/user_call.cc
   lang/core/ir/user_call.h
   lang/core/ir/validator.cc

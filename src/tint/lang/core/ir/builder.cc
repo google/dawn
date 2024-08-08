@@ -139,6 +139,10 @@ ir::Unreachable* Builder::Unreachable() {
     return Append(ir.allocators.instructions.Create<ir::Unreachable>(ir.NextInstructionId()));
 }
 
+ir::Unused* Builder::Unused() {
+    return ir.allocators.values.Create<ir::Unused>();
+}
+
 const core::type::Type* Builder::VectorPtrElementType(const core::type::Type* type) {
     auto* vec_ptr_ty = type->As<core::type::Pointer>();
     TINT_ASSERT(vec_ptr_ty);

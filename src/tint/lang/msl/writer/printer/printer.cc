@@ -65,6 +65,7 @@
 #include "src/tint/lang/core/ir/swizzle.h"
 #include "src/tint/lang/core/ir/terminate_invocation.h"
 #include "src/tint/lang/core/ir/unreachable.h"
+#include "src/tint/lang/core/ir/unused.h"
 #include "src/tint/lang/core/ir/user_call.h"
 #include "src/tint/lang/core/ir/validator.h"
 #include "src/tint/lang/core/ir/var.h"
@@ -1049,8 +1050,8 @@ class Printer : public tint::TextGenerator {
                 size_t i = 0;
                 bool needs_comma = false;
                 for (auto* arg : c->Args()) {
-                    if (arg == nullptr) {
-                        // Skip `undef` values.
+                    if (arg->Is<tint::core::ir::Unused>()) {
+                        // Skip `unused` values.
                         i++;
                         continue;
                     }
@@ -1058,7 +1059,7 @@ class Printer : public tint::TextGenerator {
                         out << ", ";
                     }
                     // Emit field designators for structures so that we can skip padding members and
-                    // arguments that are `undef` values.
+                    // arguments that are `undef` or `unused` values.
                     auto name = struct_ty->Members()[i]->Name().Name();
                     out << "." << name << "=";
                     EmitAndTakeAddressIfNeeded(out, arg);

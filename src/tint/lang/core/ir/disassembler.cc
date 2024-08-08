@@ -60,6 +60,7 @@
 #include "src/tint/lang/core/ir/swizzle.h"
 #include "src/tint/lang/core/ir/terminate_invocation.h"
 #include "src/tint/lang/core/ir/unreachable.h"
+#include "src/tint/lang/core/ir/unused.h"
 #include "src/tint/lang/core/ir/user_call.h"
 #include "src/tint/lang/core/ir/var.h"
 #include "src/tint/lang/core/type/struct.h"
@@ -446,6 +447,7 @@ void Disassembler::EmitValue(const Value* val) {
                 };
             emit(constant->Value());
         },
+        [&](const tint::core::ir::Unused*) { out_ << StyleLiteral("unused"); },
         [&](Default) { out_ << NameOf(val); });
 }
 

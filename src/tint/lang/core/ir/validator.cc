@@ -71,6 +71,7 @@
 #include "src/tint/lang/core/ir/terminate_invocation.h"
 #include "src/tint/lang/core/ir/unary.h"
 #include "src/tint/lang/core/ir/unreachable.h"
+#include "src/tint/lang/core/ir/unused.h"
 #include "src/tint/lang/core/ir/user_call.h"
 #include "src/tint/lang/core/ir/var.h"
 #include "src/tint/lang/core/type/bool.h"
@@ -271,12 +272,12 @@ class Validator {
     /// @returns true if the result is not null
     bool CheckResult(const Instruction* inst, size_t idx);
 
-    /// Checks the number of results for @p inst are exactly equal to @p count and that none of
-    /// them are null. Also checks that the types for the results are not null
+    /// Checks the results (and their types) for @p inst are not null. If count is specified then
+    /// number of results is checked to be exact.
     /// @param inst the instruction
     /// @param count the number of results to check
     /// @returns true if the results count is as expected and none are null
-    bool CheckResults(const ir::Instruction* inst, size_t count);
+    bool CheckResults(const ir::Instruction* inst, std::optional<size_t> count);
 
     /// Checks the given operand is not null and its type is not null
     /// @param inst the instruction
@@ -295,12 +296,12 @@ class Validator {
                        size_t min_count,
                        std::optional<size_t> max_count);
 
-    /// Checks the number of operands for @p inst are exactly equal to @p count and that none of
-    /// them are null. Also checks that the types for the operands are not null
+    /// Checks the operands (and their types) for @p inst are not null. If count is specified then
+    /// number of operands is checked to be exact.
     /// @param inst the instruction
     /// @param count the number of operands to check
     /// @returns true if the operands count is as expected and none are null
-    bool CheckOperands(const ir::Instruction* inst, size_t count);
+    bool CheckOperands(const ir::Instruction* inst, std::optional<size_t> count);
 
     /// Checks the number of results for @p inst are exactly equal to @p num_results and the number
     /// of operands is correctly. Both results and operands are confirmed to be non-null.
@@ -324,6 +325,12 @@ class Validator {
     bool CheckResultsAndOperands(const ir::Instruction* inst,
                                  size_t num_results,
                                  size_t num_operands);
+
+    /// Checks that the results and operands (and their types) for @p inst are not null.
+    /// Note: Does not check the number of results and operands.
+    /// @param inst the instruction
+    /// @returns true if the results and operands are not null
+    bool CheckResultsAndOperands(const ir::Instruction* inst);
 
     /// Checks the given operand is not null
     /// @param inst the instruction
@@ -774,15 +781,17 @@ bool Validator::CheckResult(const Instruction* inst, size_t idx) {
     return true;
 }
 
-bool Validator::CheckResults(const ir::Instruction* inst, size_t count) {
-    if (TINT_UNLIKELY(inst->Results().Length() != count)) {
-        AddError(inst) << "expected exactly " << count << " results, got "
-                       << inst->Results().Length();
-        return false;
+bool Validator::CheckResults(const ir::Instruction* inst, std::optional<size_t> count = {}) {
+    if (count.has_value()) {
+        if (TINT_UNLIKELY(inst->Results().Length() != count.value())) {
+            AddError(inst) << "expected exactly " << count.value() << " results, got "
+                           << inst->Results().Length();
+            return false;
+        }
     }
 
     bool passed = true;
-    for (size_t i = 0; i < count; i++) {
+    for (size_t i = 0; i < inst->Results().Length(); i++) {
         if (TINT_UNLIKELY(!CheckResult(inst, i))) {
             passed = false;
         }
@@ -795,6 +804,12 @@ bool Validator::CheckOperand(const Instruction* inst, size_t idx) {
     if (TINT_UNLIKELY(operand == nullptr)) {
         AddError(inst, idx) << "operand is undefined";
         return false;
+    }
+
+    // ir::Unused is a internal value used by some transforms to track unused entries, and is
+    // removed as part of generating an output shader.
+    if (TINT_UNLIKELY(operand->Is<ir::Unused>())) {
+        return true;
     }
 
     // ir::Function does not have a meaningful type, so does not override the default Type()
@@ -836,15 +851,17 @@ bool Validator::CheckOperands(const ir::Instruction* inst,
     return passed;
 }
 
-bool Validator::CheckOperands(const ir::Instruction* inst, size_t count) {
-    if (TINT_UNLIKELY(inst->Operands().Length() != count)) {
-        AddError(inst) << "expected exactly " << count << " operands, got "
-                       << inst->Operands().Length();
-        return false;
+bool Validator::CheckOperands(const ir::Instruction* inst, std::optional<size_t> count = {}) {
+    if (count.has_value()) {
+        if (TINT_UNLIKELY(inst->Operands().Length() != count.value())) {
+            AddError(inst) << "expected exactly " << count.value() << " operands, got "
+                           << inst->Operands().Length();
+            return false;
+        }
     }
 
     bool passed = true;
-    for (size_t i = 0; i < count; i++) {
+    for (size_t i = 0; i < inst->Operands().Length(); i++) {
         if (TINT_UNLIKELY(!CheckOperand(inst, i))) {
             passed = false;
         }
@@ -868,6 +885,13 @@ bool Validator::CheckResultsAndOperands(const ir::Instruction* inst,
     // Intentionally avoiding short-circuiting here
     bool results_passed = CheckResults(inst, num_results);
     bool operands_passed = CheckOperands(inst, num_operands);
+    return results_passed && operands_passed;
+}
+
+bool Validator::CheckResultsAndOperands(const ir::Instruction* inst) {
+    // Intentionally avoiding short-circuiting here
+    bool results_passed = CheckResults(inst);
+    bool operands_passed = CheckOperands(inst);
     return results_passed && operands_passed;
 }
 
@@ -1162,7 +1186,7 @@ void Validator::CheckInstruction(const Instruction* inst) {
             AddError(inst, i) << "operand missing usage";
         } else if (auto fn = op->As<Function>(); fn && !all_functions_.Contains(fn)) {
             AddError(inst, i) << NameOf(op) << " is not part of the module";
-        } else if (!op->Is<Constant>() && !scope_stack_.Contains(op)) {
+        } else if (!op->Is<ir::Unused>() && !op->Is<Constant>() && !scope_stack_.Contains(op)) {
             AddError(inst, i) << NameOf(op) << " is not in scope";
             AddDeclarationNote(op);
         }
@@ -1336,6 +1360,10 @@ void Validator::CheckConstruct(const Construct* construct) {
         return;
     }
 
+    if (!CheckResultsAndOperands(construct)) {
+        return;
+    }
+
     if (auto* str = As<type::Struct>(construct->Result(0)->Type())) {
         auto members = str->Members();
         if (args.Length() != str->Members().Length()) {
@@ -1345,7 +1373,10 @@ void Validator::CheckConstruct(const Construct* construct) {
             return;
         }
         for (size_t i = 0; i < args.Length(); i++) {
-            if (args[i] && args[i]->Type() != members[i]->Type()) {
+            if (args[i]->Is<ir::Unused>()) {
+                continue;
+            }
+            if (args[i]->Type() != members[i]->Type()) {
                 AddError(construct, Construct::kArgsOperandOffset + i)
                     << "structure member " << i << " is of type "
                     << style::Type(members[i]->Type()->FriendlyName())
