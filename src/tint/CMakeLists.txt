@@ -324,17 +324,15 @@ endif()
 ################################################################################
 if(TINT_BUILD_BENCHMARKS)
   set(SCRIPT "${TINT_ROOT_SOURCE_DIR}/src/tint/cmd/bench/generate_benchmark_inputs.py")
-  set(GENERATED_HEADER_REL_PATH "gen/src/tint/cmd/bench/benchmark_inputs.h")
-  set(GENERATED_HEADER_ABS_PATH "${Dawn_BINARY_DIR}/${GENERATED_HEADER_REL_PATH}")
-  set(ARGS ${Python3_EXECUTABLE} ${SCRIPT} ${Dawn_BINARY_DIR} ${GENERATED_HEADER_REL_PATH})
+  set(OUTPUT "${DAWN_BUILD_GEN_DIR}/src/tint/cmd/bench/benchmark_inputs.h")
+  set(ARGS ${Python3_EXECUTABLE} ${SCRIPT} ${OUTPUT})
   add_custom_command(
     COMMAND ${ARGS}
-    OUTPUT ${GENERATED_HEADER_ABS_PATH}
+    OUTPUT ${OUTPUT}
     DEPENDS ${SCRIPT}
-    DEPFILE ${GENERATED_HEADER_ABS_PATH}.d
-    COMMENT "Tint benchmark: Generating ${GENERATED_HEADER_ABS_PATH}."
+    COMMENT "Tint benchmark: Generating ${OUTPUT}."
   )
-  add_custom_target(tint_generate_benchmark_inputs DEPENDS ${GENERATED_HEADER_ABS_PATH})
+  add_custom_target(tint_generate_benchmark_inputs DEPENDS ${OUTPUT})
 endif()
 
 ################################################################################
