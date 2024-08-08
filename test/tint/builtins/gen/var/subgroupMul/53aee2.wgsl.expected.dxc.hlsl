@@ -6,6 +6,11 @@ vector<float16_t, 3> subgroupMul_53aee2() {
   return res;
 }
 
+void fragment_main() {
+  prevent_dce.Store<vector<float16_t, 3> >(0u, subgroupMul_53aee2());
+  return;
+}
+
 [numthreads(1, 1, 1)]
 void compute_main() {
   prevent_dce.Store<vector<float16_t, 3> >(0u, subgroupMul_53aee2());

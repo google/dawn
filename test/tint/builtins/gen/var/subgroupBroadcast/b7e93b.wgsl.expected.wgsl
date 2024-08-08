@@ -9,6 +9,11 @@ fn subgroupBroadcast_b7e93b() -> vec4<f32> {
   return res;
 }
 
+@fragment
+fn fragment_main() {
+  prevent_dce = subgroupBroadcast_b7e93b();
+}
+
 @compute @workgroup_size(1)
 fn compute_main() {
   prevent_dce = subgroupBroadcast_b7e93b();

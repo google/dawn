@@ -154,16 +154,18 @@ TEST_F(ResolverSubgroupsExtensionTest, SubgroupInvocationIdI32Error) {
               "error: store type of '@builtin(subgroup_invocation_id)' must be 'u32'");
 }
 
-// Using builtin(subgroup_size) for anything other than a compute shader input should fail.
-TEST_F(ResolverSubgroupsExtensionTest, SubgroupSizeFragmentShader) {
+// Using builtin(subgroup_size) for anything other than a compute or fragment shader input should
+// fail.
+TEST_F(ResolverSubgroupsExtensionTest, SubgroupSizeVertexShader) {
     Enable(wgsl::Extension::kSubgroups);
     Func("main",
          Vector{Param("size", ty.u32(), Vector{Builtin(core::BuiltinValue::kSubgroupSize)})},
-         ty.void_(), Empty, Vector{Stage(ast::PipelineStage::kFragment)});
+         ty.void_(), Empty, Vector{Stage(ast::PipelineStage::kVertex)});
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(),
-              "error: '@builtin(subgroup_size)' is only valid as a compute shader input");
+    EXPECT_EQ(
+        r()->error(),
+        "error: '@builtin(subgroup_size)' is only valid as a compute or fragment shader input");
 }
 
 TEST_F(ResolverSubgroupsExtensionTest, SubgroupSizeComputeShaderOutput) {
@@ -180,8 +182,9 @@ TEST_F(ResolverSubgroupsExtensionTest, SubgroupSizeComputeShaderOutput) {
          Vector{Builtin(Source{{1, 2}}, core::BuiltinValue::kSubgroupSize)});
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(),
-              "1:2 error: '@builtin(subgroup_size)' is only valid as a compute shader input");
+    EXPECT_EQ(
+        r()->error(),
+        "1:2 error: '@builtin(subgroup_size)' is only valid as a compute or fragment shader input");
 }
 
 TEST_F(ResolverSubgroupsExtensionTest, SubgroupSizeComputeShaderStructOutput) {
@@ -202,21 +205,24 @@ TEST_F(ResolverSubgroupsExtensionTest, SubgroupSizeComputeShaderStructOutput) {
          });
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(),
-              R"(error: '@builtin(subgroup_size)' is only valid as a compute shader input
+    EXPECT_EQ(
+        r()->error(),
+        R"(error: '@builtin(subgroup_size)' is only valid as a compute or fragment shader input
 note: while analyzing entry point 'main')");
 }
 
-// Using builtin(subgroup_invocation_id) for anything other than a compute shader input should fail.
-TEST_F(ResolverSubgroupsExtensionTest, SubgroupInvocationIdFragmentShader) {
+// Using builtin(subgroup_invocation_id) for anything other than a compute or fragment shader input
+// should fail.
+TEST_F(ResolverSubgroupsExtensionTest, SubgroupInvocationIdVertexShader) {
     Enable(wgsl::Extension::kSubgroups);
     Func("main",
          Vector{Param("id", ty.u32(), Vector{Builtin(core::BuiltinValue::kSubgroupInvocationId)})},
-         ty.void_(), Empty, Vector{Stage(ast::PipelineStage::kFragment)});
+         ty.void_(), Empty, Vector{Stage(ast::PipelineStage::kVertex)});
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
-              "error: '@builtin(subgroup_invocation_id)' is only valid as a compute shader input");
+              "error: '@builtin(subgroup_invocation_id)' is only valid as a compute or fragment "
+              "shader input");
 }
 
 TEST_F(ResolverSubgroupsExtensionTest, SubgroupInvocationIdComputeShaderOutput) {
@@ -233,9 +239,9 @@ TEST_F(ResolverSubgroupsExtensionTest, SubgroupInvocationIdComputeShaderOutput) 
          Vector{Builtin(Source{{1, 2}}, core::BuiltinValue::kSubgroupInvocationId)});
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(
-        r()->error(),
-        "1:2 error: '@builtin(subgroup_invocation_id)' is only valid as a compute shader input");
+    EXPECT_EQ(r()->error(),
+              "1:2 error: '@builtin(subgroup_invocation_id)' is only valid as a compute or "
+              "fragment shader input");
 }
 
 }  // namespace

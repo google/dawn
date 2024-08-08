@@ -48,6 +48,11 @@ fn subgroupAdd_22d041() -> vec3<i32>{
   var res: vec3<i32> = subgroupAdd(arg_0);
   return res;
 }
+@fragment
+fn fragment_main() {
+  prevent_dce = subgroupAdd_22d041();
+}
+
 @compute @workgroup_size(1)
 fn compute_main() {
   prevent_dce = subgroupAdd_22d041();

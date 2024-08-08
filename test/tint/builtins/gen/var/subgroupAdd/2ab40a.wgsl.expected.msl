@@ -7,8 +7,13 @@ half4 subgroupAdd_2ab40a() {
   return res;
 }
 
-kernel void compute_main(device half4* tint_symbol [[buffer(0)]]) {
+fragment void fragment_main(device half4* tint_symbol [[buffer(0)]]) {
   *(tint_symbol) = subgroupAdd_2ab40a();
+  return;
+}
+
+kernel void compute_main(device half4* tint_symbol_1 [[buffer(0)]]) {
+  *(tint_symbol_1) = subgroupAdd_2ab40a();
   return;
 }
 

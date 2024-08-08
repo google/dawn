@@ -47,6 +47,11 @@ fn subgroupAdd_8f4c15() -> vec4<f32>{
   var res: vec4<f32> = subgroupAdd(vec4<f32>(1.f));
   return res;
 }
+@fragment
+fn fragment_main() {
+  prevent_dce = subgroupAdd_8f4c15();
+}
+
 @compute @workgroup_size(1)
 fn compute_main() {
   prevent_dce = subgroupAdd_8f4c15();

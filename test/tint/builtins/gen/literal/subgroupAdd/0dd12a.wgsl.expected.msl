@@ -6,8 +6,13 @@ half3 subgroupAdd_0dd12a() {
   return res;
 }
 
-kernel void compute_main(device packed_half3* tint_symbol [[buffer(0)]]) {
+fragment void fragment_main(device packed_half3* tint_symbol [[buffer(0)]]) {
   *(tint_symbol) = packed_half3(subgroupAdd_0dd12a());
+  return;
+}
+
+kernel void compute_main(device packed_half3* tint_symbol_1 [[buffer(0)]]) {
+  *(tint_symbol_1) = packed_half3(subgroupAdd_0dd12a());
   return;
 }
 

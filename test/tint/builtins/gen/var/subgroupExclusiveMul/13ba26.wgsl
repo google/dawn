@@ -52,6 +52,11 @@ fn subgroupExclusiveMul_13ba26() -> vec3<f16>{
   var res: vec3<f16> = subgroupExclusiveMul(arg_0);
   return res;
 }
+@fragment
+fn fragment_main() {
+  prevent_dce = subgroupExclusiveMul_13ba26();
+}
+
 @compute @workgroup_size(1)
 fn compute_main() {
   prevent_dce = subgroupExclusiveMul_13ba26();

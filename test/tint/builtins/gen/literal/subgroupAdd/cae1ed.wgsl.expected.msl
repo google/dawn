@@ -6,8 +6,13 @@ half2 subgroupAdd_cae1ed() {
   return res;
 }
 
-kernel void compute_main(device half2* tint_symbol [[buffer(0)]]) {
+fragment void fragment_main(device half2* tint_symbol [[buffer(0)]]) {
   *(tint_symbol) = subgroupAdd_cae1ed();
+  return;
+}
+
+kernel void compute_main(device half2* tint_symbol_1 [[buffer(0)]]) {
+  *(tint_symbol_1) = subgroupAdd_cae1ed();
   return;
 }
 

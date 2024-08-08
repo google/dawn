@@ -7,8 +7,13 @@ float3 subgroupExclusiveAdd_41cfde() {
   return res;
 }
 
-kernel void compute_main(device packed_float3* tint_symbol [[buffer(0)]]) {
+fragment void fragment_main(device packed_float3* tint_symbol [[buffer(0)]]) {
   *(tint_symbol) = packed_float3(subgroupExclusiveAdd_41cfde());
+  return;
+}
+
+kernel void compute_main(device packed_float3* tint_symbol_1 [[buffer(0)]]) {
+  *(tint_symbol_1) = packed_float3(subgroupExclusiveAdd_41cfde());
   return;
 }
 

@@ -47,6 +47,11 @@ fn subgroupExclusiveMul_4525a3() -> vec2<i32>{
   var res: vec2<i32> = subgroupExclusiveMul(vec2<i32>(1i));
   return res;
 }
+@fragment
+fn fragment_main() {
+  prevent_dce = subgroupExclusiveMul_4525a3();
+}
+
 @compute @workgroup_size(1)
 fn compute_main() {
   prevent_dce = subgroupExclusiveMul_4525a3();

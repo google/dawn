@@ -47,6 +47,11 @@ fn subgroupMul_dd1333() -> vec4<u32>{
   var res: vec4<u32> = subgroupMul(vec4<u32>(1u));
   return res;
 }
+@fragment
+fn fragment_main() {
+  prevent_dce = subgroupMul_dd1333();
+}
+
 @compute @workgroup_size(1)
 fn compute_main() {
   prevent_dce = subgroupMul_dd1333();

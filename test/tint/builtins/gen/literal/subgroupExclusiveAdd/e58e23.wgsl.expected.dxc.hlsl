@@ -5,6 +5,11 @@ vector<float16_t, 3> subgroupExclusiveAdd_e58e23() {
   return res;
 }
 
+void fragment_main() {
+  prevent_dce.Store<vector<float16_t, 3> >(0u, subgroupExclusiveAdd_e58e23());
+  return;
+}
+
 [numthreads(1, 1, 1)]
 void compute_main() {
   prevent_dce.Store<vector<float16_t, 3> >(0u, subgroupExclusiveAdd_e58e23());

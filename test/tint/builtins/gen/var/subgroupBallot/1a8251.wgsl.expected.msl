@@ -17,7 +17,7 @@ uint4 subgroupBallot_1a8251(thread tint_private_vars_struct* const tint_private_
   return res;
 }
 
-kernel void compute_main(device uint4* tint_symbol_1 [[buffer(0)]], uint tint_subgroup_size [[threads_per_simdgroup]]) {
+fragment void fragment_main(device uint4* tint_symbol_1 [[buffer(0)]], uint tint_subgroup_size [[threads_per_simdgroup]]) {
   thread tint_private_vars_struct tint_private_vars = {};
   {
     bool const gt = (tint_subgroup_size > 32u);
@@ -25,6 +25,17 @@ kernel void compute_main(device uint4* tint_symbol_1 [[buffer(0)]], uint tint_su
     tint_private_vars.tint_subgroup_size_mask[1u] = select(0u, (4294967295u >> (64u - tint_subgroup_size)), gt);
   }
   *(tint_symbol_1) = subgroupBallot_1a8251(&(tint_private_vars));
+  return;
+}
+
+kernel void compute_main(device uint4* tint_symbol_2 [[buffer(0)]], uint tint_subgroup_size_1 [[threads_per_simdgroup]]) {
+  thread tint_private_vars_struct tint_private_vars = {};
+  {
+    bool const gt = (tint_subgroup_size_1 > 32u);
+    tint_private_vars.tint_subgroup_size_mask[0u] = select((4294967295u >> (32u - tint_subgroup_size_1)), 4294967295u, gt);
+    tint_private_vars.tint_subgroup_size_mask[1u] = select(0u, (4294967295u >> (64u - tint_subgroup_size_1)), gt);
+  }
+  *(tint_symbol_2) = subgroupBallot_1a8251(&(tint_private_vars));
   return;
 }
 

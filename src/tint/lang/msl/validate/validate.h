@@ -38,6 +38,7 @@ namespace tint::msl::validate {
 enum class MslVersion {
     kMsl_1_2,
     kMsl_2_1,
+    kMsl_2_2,
     kMsl_2_3,
 };
 

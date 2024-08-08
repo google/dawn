@@ -5,6 +5,11 @@ float subgroupMul_0de9d3() {
   return res;
 }
 
+void fragment_main() {
+  prevent_dce.Store(0u, asuint(subgroupMul_0de9d3()));
+  return;
+}
+
 [numthreads(1, 1, 1)]
 void compute_main() {
   prevent_dce.Store(0u, asuint(subgroupMul_0de9d3()));

@@ -6,6 +6,11 @@ int3 subgroupAdd_22d041() {
   return res;
 }
 
+void fragment_main() {
+  prevent_dce.Store3(0u, asuint(subgroupAdd_22d041()));
+  return;
+}
+
 [numthreads(1, 1, 1)]
 void compute_main() {
   prevent_dce.Store3(0u, asuint(subgroupAdd_22d041()));

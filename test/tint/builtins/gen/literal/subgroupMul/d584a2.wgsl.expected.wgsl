@@ -7,6 +7,11 @@ fn subgroupMul_d584a2() -> vec2<i32> {
   return res;
 }
 
+@fragment
+fn fragment_main() {
+  prevent_dce = subgroupMul_d584a2();
+}
+
 @compute @workgroup_size(1)
 fn compute_main() {
   prevent_dce = subgroupMul_d584a2();

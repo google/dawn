@@ -1109,11 +1109,12 @@ bool Validator::BuiltinAttribute(const ast::BuiltinAttribute* attr,
                 err_builtin_type("u32");
                 return false;
             }
-            if (stage != ast::PipelineStage::kNone &&
-                !(stage == ast::PipelineStage::kCompute && is_input)) {
+            if (stage != ast::PipelineStage::kNone && !((stage == ast::PipelineStage::kCompute ||
+                                                         stage == ast::PipelineStage::kFragment) &&
+                                                        is_input)) {
                 AddError(attr->source)
                     << style::Attribute("@builtin") << style::Code("(", style::Enum(builtin), ")")
-                    << " is only valid as a compute shader input";
+                    << " is only valid as a compute or fragment shader input";
                 return false;
             }
             break;

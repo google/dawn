@@ -9,6 +9,11 @@ fn subgroupAdd_0dd12a() -> vec3<f16> {
   return res;
 }
 
+@fragment
+fn fragment_main() {
+  prevent_dce = subgroupAdd_0dd12a();
+}
+
 @compute @workgroup_size(1)
 fn compute_main() {
   prevent_dce = subgroupAdd_0dd12a();

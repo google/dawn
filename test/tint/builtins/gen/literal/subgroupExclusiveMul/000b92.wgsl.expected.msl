@@ -6,8 +6,13 @@ uint4 subgroupExclusiveMul_000b92() {
   return res;
 }
 
-kernel void compute_main(device uint4* tint_symbol [[buffer(0)]]) {
+fragment void fragment_main(device uint4* tint_symbol [[buffer(0)]]) {
   *(tint_symbol) = subgroupExclusiveMul_000b92();
+  return;
+}
+
+kernel void compute_main(device uint4* tint_symbol_1 [[buffer(0)]]) {
+  *(tint_symbol_1) = subgroupExclusiveMul_000b92();
   return;
 }
 

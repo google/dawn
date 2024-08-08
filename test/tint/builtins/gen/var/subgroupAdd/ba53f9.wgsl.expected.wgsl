@@ -8,6 +8,11 @@ fn subgroupAdd_ba53f9() -> i32 {
   return res;
 }
 
+@fragment
+fn fragment_main() {
+  prevent_dce = subgroupAdd_ba53f9();
+}
+
 @compute @workgroup_size(1)
 fn compute_main() {
   prevent_dce = subgroupAdd_ba53f9();

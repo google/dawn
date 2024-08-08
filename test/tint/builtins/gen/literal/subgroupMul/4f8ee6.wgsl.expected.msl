@@ -6,8 +6,13 @@ uint subgroupMul_4f8ee6() {
   return res;
 }
 
-kernel void compute_main(device uint* tint_symbol [[buffer(0)]]) {
+fragment void fragment_main(device uint* tint_symbol [[buffer(0)]]) {
   *(tint_symbol) = subgroupMul_4f8ee6();
+  return;
+}
+
+kernel void compute_main(device uint* tint_symbol_1 [[buffer(0)]]) {
+  *(tint_symbol_1) = subgroupMul_4f8ee6();
   return;
 }
 

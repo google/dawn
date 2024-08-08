@@ -1060,7 +1060,7 @@ TEST_F(ResolverBuiltinValidationTest, SubroupBroadcastInVertexStageIsError) {
     EXPECT_EQ(r()->error(), "3:4 error: built-in cannot be used by vertex pipeline stage");
 }
 
-TEST_F(ResolverBuiltinValidationTest, SubroupBroadcastInFragmentStageIsError) {
+TEST_F(ResolverBuiltinValidationTest, SubroupBroadcastInFragmentStageIsValid) {
     // @vertex fn func { dpdx(1.0); }
 
     Enable(wgsl::Extension::kSubgroups);
@@ -1073,8 +1073,7 @@ TEST_F(ResolverBuiltinValidationTest, SubroupBroadcastInFragmentStageIsError) {
              Stage(ast::PipelineStage::kFragment),
          });
 
-    EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "3:4 error: built-in cannot be used by fragment pipeline stage");
+    EXPECT_TRUE(r()->Resolve());
 }
 
 TEST_F(ResolverBuiltinValidationTest, SubgroupBroadcastValueF32) {

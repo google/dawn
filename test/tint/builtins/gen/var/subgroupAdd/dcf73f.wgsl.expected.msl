@@ -7,8 +7,13 @@ float2 subgroupAdd_dcf73f() {
   return res;
 }
 
-kernel void compute_main(device float2* tint_symbol [[buffer(0)]]) {
+fragment void fragment_main(device float2* tint_symbol [[buffer(0)]]) {
   *(tint_symbol) = subgroupAdd_dcf73f();
+  return;
+}
+
+kernel void compute_main(device float2* tint_symbol_1 [[buffer(0)]]) {
+  *(tint_symbol_1) = subgroupAdd_dcf73f();
   return;
 }
 

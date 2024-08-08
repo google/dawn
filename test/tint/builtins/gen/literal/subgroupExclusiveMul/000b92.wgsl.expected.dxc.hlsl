@@ -5,6 +5,11 @@ uint4 subgroupExclusiveMul_000b92() {
   return res;
 }
 
+void fragment_main() {
+  prevent_dce.Store4(0u, asuint(subgroupExclusiveMul_000b92()));
+  return;
+}
+
 [numthreads(1, 1, 1)]
 void compute_main() {
   prevent_dce.Store4(0u, asuint(subgroupExclusiveMul_000b92()));

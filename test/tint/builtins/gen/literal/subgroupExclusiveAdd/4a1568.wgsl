@@ -51,6 +51,11 @@ fn subgroupExclusiveAdd_4a1568() -> f16{
   var res: f16 = subgroupExclusiveAdd(1.h);
   return res;
 }
+@fragment
+fn fragment_main() {
+  prevent_dce = subgroupExclusiveAdd_4a1568();
+}
+
 @compute @workgroup_size(1)
 fn compute_main() {
   prevent_dce = subgroupExclusiveAdd_4a1568();

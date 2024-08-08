@@ -56,6 +56,9 @@ Result ValidateUsingMetal(const std::string& src, MslVersion version) {
         case MslVersion::kMsl_2_1:
             compileOptions.languageVersion = MTLLanguageVersion2_1;
             break;
+        case MslVersion::kMsl_2_2:
+            compileOptions.languageVersion = MTLLanguageVersion2_2;
+            break;
         case MslVersion::kMsl_2_3:
             if (@available(macOS 11.0, *)) {
                 compileOptions.languageVersion = MTLLanguageVersion2_3;

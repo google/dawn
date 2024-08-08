@@ -49,6 +49,11 @@ fn subgroupBroadcast_f637f9() -> vec4<i32>{
   var res: vec4<i32> = subgroupBroadcast(arg_0, arg_1);
   return res;
 }
+@fragment
+fn fragment_main() {
+  prevent_dce = subgroupBroadcast_f637f9();
+}
+
 @compute @workgroup_size(1)
 fn compute_main() {
   prevent_dce = subgroupBroadcast_f637f9();

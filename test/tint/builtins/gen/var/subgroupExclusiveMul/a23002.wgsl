@@ -48,6 +48,11 @@ fn subgroupExclusiveMul_a23002() -> i32{
   var res: i32 = subgroupExclusiveMul(arg_0);
   return res;
 }
+@fragment
+fn fragment_main() {
+  prevent_dce = subgroupExclusiveMul_a23002();
+}
+
 @compute @workgroup_size(1)
 fn compute_main() {
   prevent_dce = subgroupExclusiveMul_a23002();

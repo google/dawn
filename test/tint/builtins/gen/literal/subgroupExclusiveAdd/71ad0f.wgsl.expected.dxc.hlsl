@@ -5,6 +5,11 @@ float4 subgroupExclusiveAdd_71ad0f() {
   return res;
 }
 
+void fragment_main() {
+  prevent_dce.Store4(0u, asuint(subgroupExclusiveAdd_71ad0f()));
+  return;
+}
+
 [numthreads(1, 1, 1)]
 void compute_main() {
   prevent_dce.Store4(0u, asuint(subgroupExclusiveAdd_71ad0f()));

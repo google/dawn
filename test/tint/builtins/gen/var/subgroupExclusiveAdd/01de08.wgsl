@@ -52,6 +52,11 @@ fn subgroupExclusiveAdd_01de08() -> vec2<f16>{
   var res: vec2<f16> = subgroupExclusiveAdd(arg_0);
   return res;
 }
+@fragment
+fn fragment_main() {
+  prevent_dce = subgroupExclusiveAdd_01de08();
+}
+
 @compute @workgroup_size(1)
 fn compute_main() {
   prevent_dce = subgroupExclusiveAdd_01de08();

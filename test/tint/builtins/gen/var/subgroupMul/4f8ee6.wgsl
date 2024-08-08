@@ -48,6 +48,11 @@ fn subgroupMul_4f8ee6() -> u32{
   var res: u32 = subgroupMul(arg_0);
   return res;
 }
+@fragment
+fn fragment_main() {
+  prevent_dce = subgroupMul_4f8ee6();
+}
+
 @compute @workgroup_size(1)
 fn compute_main() {
   prevent_dce = subgroupMul_4f8ee6();

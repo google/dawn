@@ -7,6 +7,11 @@ fn subgroupExclusiveMul_dc51f8() -> u32 {
   return res;
 }
 
+@fragment
+fn fragment_main() {
+  prevent_dce = subgroupExclusiveMul_dc51f8();
+}
+
 @compute @workgroup_size(1)
 fn compute_main() {
   prevent_dce = subgroupExclusiveMul_dc51f8();

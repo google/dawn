@@ -6,6 +6,11 @@ float2 subgroupAdd_dcf73f() {
   return res;
 }
 
+void fragment_main() {
+  prevent_dce.Store2(0u, asuint(subgroupAdd_dcf73f()));
+  return;
+}
+
 [numthreads(1, 1, 1)]
 void compute_main() {
   prevent_dce.Store2(0u, asuint(subgroupAdd_dcf73f()));

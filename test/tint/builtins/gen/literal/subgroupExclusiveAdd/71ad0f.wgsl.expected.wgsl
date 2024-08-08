@@ -7,6 +7,11 @@ fn subgroupExclusiveAdd_71ad0f() -> vec4<f32> {
   return res;
 }
 
+@fragment
+fn fragment_main() {
+  prevent_dce = subgroupExclusiveAdd_71ad0f();
+}
+
 @compute @workgroup_size(1)
 fn compute_main() {
   prevent_dce = subgroupExclusiveAdd_71ad0f();

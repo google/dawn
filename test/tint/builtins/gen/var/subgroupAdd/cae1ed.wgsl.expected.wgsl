@@ -10,6 +10,11 @@ fn subgroupAdd_cae1ed() -> vec2<f16> {
   return res;
 }
 
+@fragment
+fn fragment_main() {
+  prevent_dce = subgroupAdd_cae1ed();
+}
+
 @compute @workgroup_size(1)
 fn compute_main() {
   prevent_dce = subgroupAdd_cae1ed();

@@ -6,6 +6,11 @@ uint3 subgroupExclusiveAdd_0ff95a() {
   return res;
 }
 
+void fragment_main() {
+  prevent_dce.Store3(0u, asuint(subgroupExclusiveAdd_0ff95a()));
+  return;
+}
+
 [numthreads(1, 1, 1)]
 void compute_main() {
   prevent_dce.Store3(0u, asuint(subgroupExclusiveAdd_0ff95a()));

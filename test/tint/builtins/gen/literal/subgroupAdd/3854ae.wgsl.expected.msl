@@ -6,8 +6,13 @@ float subgroupAdd_3854ae() {
   return res;
 }
 
-kernel void compute_main(device float* tint_symbol [[buffer(0)]]) {
+fragment void fragment_main(device float* tint_symbol [[buffer(0)]]) {
   *(tint_symbol) = subgroupAdd_3854ae();
+  return;
+}
+
+kernel void compute_main(device float* tint_symbol_1 [[buffer(0)]]) {
+  *(tint_symbol_1) = subgroupAdd_3854ae();
   return;
 }
 

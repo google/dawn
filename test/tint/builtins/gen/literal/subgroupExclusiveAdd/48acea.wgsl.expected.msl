@@ -6,8 +6,13 @@ uint2 subgroupExclusiveAdd_48acea() {
   return res;
 }
 
-kernel void compute_main(device uint2* tint_symbol [[buffer(0)]]) {
+fragment void fragment_main(device uint2* tint_symbol [[buffer(0)]]) {
   *(tint_symbol) = subgroupExclusiveAdd_48acea();
+  return;
+}
+
+kernel void compute_main(device uint2* tint_symbol_1 [[buffer(0)]]) {
+  *(tint_symbol_1) = subgroupExclusiveAdd_48acea();
   return;
 }
 

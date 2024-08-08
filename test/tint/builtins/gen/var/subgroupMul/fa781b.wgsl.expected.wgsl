@@ -8,6 +8,11 @@ fn subgroupMul_fa781b() -> vec3<u32> {
   return res;
 }
 
+@fragment
+fn fragment_main() {
+  prevent_dce = subgroupMul_fa781b();
+}
+
 @compute @workgroup_size(1)
 fn compute_main() {
   prevent_dce = subgroupMul_fa781b();

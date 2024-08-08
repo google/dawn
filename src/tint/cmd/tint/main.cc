@@ -872,12 +872,12 @@ bool GenerateMsl([[maybe_unused]] const tint::Program& program,
     }
 
     // Default to validating against MSL 1.2.
-    // If subgroups are used, bump the version to 2.1.
+    // If subgroups are used, bump the version to 2.2.
     auto msl_version = tint::msl::validate::MslVersion::kMsl_1_2;
     for (auto* enable : program.AST().Enables()) {
         if (enable->HasExtension(tint::wgsl::Extension::kChromiumExperimentalSubgroups) ||
             enable->HasExtension(tint::wgsl::Extension::kSubgroups)) {
-            msl_version = std::max(msl_version, tint::msl::validate::MslVersion::kMsl_2_1);
+            msl_version = std::max(msl_version, tint::msl::validate::MslVersion::kMsl_2_2);
         }
         if (enable->HasExtension(tint::wgsl::Extension::kChromiumExperimentalPixelLocal) ||
             enable->HasExtension(tint::wgsl::Extension::kChromiumExperimentalFramebufferFetch)) {

@@ -47,6 +47,11 @@ fn subgroupAdd_3854ae() -> f32{
   var res: f32 = subgroupAdd(1.f);
   return res;
 }
+@fragment
+fn fragment_main() {
+  prevent_dce = subgroupAdd_3854ae();
+}
+
 @compute @workgroup_size(1)
 fn compute_main() {
   prevent_dce = subgroupAdd_3854ae();

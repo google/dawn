@@ -7,8 +7,13 @@ half subgroupMul_2941a2() {
   return res;
 }
 
-kernel void compute_main(device half* tint_symbol [[buffer(0)]]) {
+fragment void fragment_main(device half* tint_symbol [[buffer(0)]]) {
   *(tint_symbol) = subgroupMul_2941a2();
+  return;
+}
+
+kernel void compute_main(device half* tint_symbol_1 [[buffer(0)]]) {
+  *(tint_symbol_1) = subgroupMul_2941a2();
   return;
 }
 

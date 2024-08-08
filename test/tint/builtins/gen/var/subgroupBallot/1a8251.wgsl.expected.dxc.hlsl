@@ -6,6 +6,11 @@ uint4 subgroupBallot_1a8251() {
   return res;
 }
 
+void fragment_main() {
+  prevent_dce.Store4(0u, asuint(subgroupBallot_1a8251()));
+  return;
+}
+
 [numthreads(1, 1, 1)]
 void compute_main() {
   prevent_dce.Store4(0u, asuint(subgroupBallot_1a8251()));

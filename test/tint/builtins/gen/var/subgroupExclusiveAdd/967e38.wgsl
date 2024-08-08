@@ -48,6 +48,11 @@ fn subgroupExclusiveAdd_967e38() -> f32{
   var res: f32 = subgroupExclusiveAdd(arg_0);
   return res;
 }
+@fragment
+fn fragment_main() {
+  prevent_dce = subgroupExclusiveAdd_967e38();
+}
+
 @compute @workgroup_size(1)
 fn compute_main() {
   prevent_dce = subgroupExclusiveAdd_967e38();

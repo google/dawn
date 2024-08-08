@@ -7,6 +7,11 @@ fn subgroupExclusiveMul_000b92() -> vec4<u32> {
   return res;
 }
 
+@fragment
+fn fragment_main() {
+  prevent_dce = subgroupExclusiveMul_000b92();
+}
+
 @compute @workgroup_size(1)
 fn compute_main() {
   prevent_dce = subgroupExclusiveMul_000b92();

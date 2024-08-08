@@ -51,6 +51,11 @@ fn subgroupExclusiveMul_6f431e() -> f16{
   var res: f16 = subgroupExclusiveMul(1.h);
   return res;
 }
+@fragment
+fn fragment_main() {
+  prevent_dce = subgroupExclusiveMul_6f431e();
+}
+
 @compute @workgroup_size(1)
 fn compute_main() {
   prevent_dce = subgroupExclusiveMul_6f431e();

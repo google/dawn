@@ -7,8 +7,13 @@ half4 subgroupMul_f2ac5b() {
   return res;
 }
 
-kernel void compute_main(device half4* tint_symbol [[buffer(0)]]) {
+fragment void fragment_main(device half4* tint_symbol [[buffer(0)]]) {
   *(tint_symbol) = subgroupMul_f2ac5b();
+  return;
+}
+
+kernel void compute_main(device half4* tint_symbol_1 [[buffer(0)]]) {
+  *(tint_symbol_1) = subgroupMul_f2ac5b();
   return;
 }
 

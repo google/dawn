@@ -11,6 +11,11 @@ fn subgroupBroadcast_07e2d8() -> f16 {
   return res;
 }
 
+@fragment
+fn fragment_main() {
+  prevent_dce = subgroupBroadcast_07e2d8();
+}
+
 @compute @workgroup_size(1)
 fn compute_main() {
   prevent_dce = subgroupBroadcast_07e2d8();

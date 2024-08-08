@@ -7,6 +7,11 @@ fn subgroupBroadcast_08beca() -> f32 {
   return res;
 }
 
+@fragment
+fn fragment_main() {
+  prevent_dce = subgroupBroadcast_08beca();
+}
+
 @compute @workgroup_size(1)
 fn compute_main() {
   prevent_dce = subgroupBroadcast_08beca();

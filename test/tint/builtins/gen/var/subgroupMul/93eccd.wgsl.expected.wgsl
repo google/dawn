@@ -8,6 +8,11 @@ fn subgroupMul_93eccd() -> vec3<f32> {
   return res;
 }
 
+@fragment
+fn fragment_main() {
+  prevent_dce = subgroupMul_93eccd();
+}
+
 @compute @workgroup_size(1)
 fn compute_main() {
   prevent_dce = subgroupMul_93eccd();

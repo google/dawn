@@ -8,6 +8,11 @@ fn subgroupExclusiveAdd_4c8024() -> vec2<f32> {
   return res;
 }
 
+@fragment
+fn fragment_main() {
+  prevent_dce = subgroupExclusiveAdd_4c8024();
+}
+
 @compute @workgroup_size(1)
 fn compute_main() {
   prevent_dce = subgroupExclusiveAdd_4c8024();

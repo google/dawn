@@ -7,6 +7,11 @@ fn subgroupMul_5a8c86() -> vec3<i32> {
   return res;
 }
 
+@fragment
+fn fragment_main() {
+  prevent_dce = subgroupMul_5a8c86();
+}
+
 @compute @workgroup_size(1)
 fn compute_main() {
   prevent_dce = subgroupMul_5a8c86();

@@ -7,6 +7,11 @@ fn subgroupExclusiveAdd_b0c261() -> i32 {
   return res;
 }
 
+@fragment
+fn fragment_main() {
+  prevent_dce = subgroupExclusiveAdd_b0c261();
+}
+
 @compute @workgroup_size(1)
 fn compute_main() {
   prevent_dce = subgroupExclusiveAdd_b0c261();

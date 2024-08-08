@@ -7,6 +7,11 @@ fn subgroupMul_dc672a() -> vec2<u32> {
   return res;
 }
 
+@fragment
+fn fragment_main() {
+  prevent_dce = subgroupMul_dc672a();
+}
+
 @compute @workgroup_size(1)
 fn compute_main() {
   prevent_dce = subgroupMul_dc672a();

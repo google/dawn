@@ -7,6 +7,11 @@ fn subgroupAdd_6587ff() -> vec3<u32> {
   return res;
 }
 
+@fragment
+fn fragment_main() {
+  prevent_dce = subgroupAdd_6587ff();
+}
+
 @compute @workgroup_size(1)
 fn compute_main() {
   prevent_dce = subgroupAdd_6587ff();

@@ -6,8 +6,13 @@ int subgroupExclusiveAdd_b0c261() {
   return res;
 }
 
-kernel void compute_main(device int* tint_symbol [[buffer(0)]]) {
+fragment void fragment_main(device int* tint_symbol [[buffer(0)]]) {
   *(tint_symbol) = subgroupExclusiveAdd_b0c261();
+  return;
+}
+
+kernel void compute_main(device int* tint_symbol_1 [[buffer(0)]]) {
+  *(tint_symbol_1) = subgroupExclusiveAdd_b0c261();
   return;
 }
 

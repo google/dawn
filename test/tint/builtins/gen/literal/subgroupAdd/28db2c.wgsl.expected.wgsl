@@ -7,6 +7,11 @@ fn subgroupAdd_28db2c() -> vec4<i32> {
   return res;
 }
 
+@fragment
+fn fragment_main() {
+  prevent_dce = subgroupAdd_28db2c();
+}
+
 @compute @workgroup_size(1)
 fn compute_main() {
   prevent_dce = subgroupAdd_28db2c();

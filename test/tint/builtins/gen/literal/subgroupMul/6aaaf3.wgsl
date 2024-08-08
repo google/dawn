@@ -51,6 +51,11 @@ fn subgroupMul_6aaaf3() -> vec2<f16>{
   var res: vec2<f16> = subgroupMul(vec2<f16>(1.h));
   return res;
 }
+@fragment
+fn fragment_main() {
+  prevent_dce = subgroupMul_6aaaf3();
+}
+
 @compute @workgroup_size(1)
 fn compute_main() {
   prevent_dce = subgroupMul_6aaaf3();

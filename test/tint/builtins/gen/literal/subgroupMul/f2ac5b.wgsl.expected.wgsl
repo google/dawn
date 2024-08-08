@@ -9,6 +9,11 @@ fn subgroupMul_f2ac5b() -> vec4<f16> {
   return res;
 }
 
+@fragment
+fn fragment_main() {
+  prevent_dce = subgroupMul_f2ac5b();
+}
+
 @compute @workgroup_size(1)
 fn compute_main() {
   prevent_dce = subgroupMul_f2ac5b();

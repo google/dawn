@@ -8,6 +8,11 @@ fn subgroupExclusiveAdd_c08160() -> vec3<i32> {
   return res;
 }
 
+@fragment
+fn fragment_main() {
+  prevent_dce = subgroupExclusiveAdd_c08160();
+}
+
 @compute @workgroup_size(1)
 fn compute_main() {
   prevent_dce = subgroupExclusiveAdd_c08160();

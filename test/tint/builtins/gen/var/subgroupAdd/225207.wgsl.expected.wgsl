@@ -10,6 +10,11 @@ fn subgroupAdd_225207() -> f16 {
   return res;
 }
 
+@fragment
+fn fragment_main() {
+  prevent_dce = subgroupAdd_225207();
+}
+
 @compute @workgroup_size(1)
 fn compute_main() {
   prevent_dce = subgroupAdd_225207();
