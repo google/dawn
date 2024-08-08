@@ -932,12 +932,6 @@ luci.cq_tryjob_verifier(
     includable_only = True,
 )
 
-luci.cq_tryjob_verifier(
-    cq_group = "Dawn-CQ",
-    builder = "chromium:try/linux-dawn-nvidia-1660-exp-rel",
-    includable_only = True,
-)
-
 # Views
 
 luci.milo(
