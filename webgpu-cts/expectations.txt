@@ -56,7 +56,8 @@
 # tags: [ mesa_lt_19.1
 #         mesa_ge_21.0
 #         mesa_ge_23.2
-#         nvidia_ge_31.0.15.4601 nvidia_lt_31.0.15.4601 ]
+#         nvidia_ge_31.0.15.4601 nvidia_lt_31.0.15.4601
+#         nvidia_ge_535.183.01 nvidia_lt_535.183.01 ]
 # ASan
 # tags: [ asan no-asan ]
 # Display Server
@@ -1844,6 +1845,19 @@ crbug.com/352768986 [ mac ] webgpu:shader,execution,expression,binary,bitwise_sh
 crbug.com/352768986 [ mac ] webgpu:shader,validation,expression,binary,bitwise_shift:partial_eval_errors:* [ Failure ]
 crbug.com/352768986 [ win ] webgpu:shader,execution,expression,binary,bitwise_shift:shift_right_abstract:* [ Failure ]
 crbug.com/352768986 [ win ] webgpu:shader,validation,expression,binary,bitwise_shift:partial_eval_errors:* [ Failure ]
+
+# Failures from upgrading to Ubuntu 22 w/ a newer driver.
+crbug.com/358165874 [ linux nvidia-0x2184 nvidia_ge_535.183.01 ] webgpu:shader,execution,shader_io,fragment_builtins:inputs,position:nearFar=[0,1];sampleCount=4;interpolation={"type":"linear","sampling":"sample"} [ Failure ]
+crbug.com/358165874 [ linux nvidia-0x2184 nvidia_ge_535.183.01 ] webgpu:shader,execution,shader_io,fragment_builtins:inputs,position:nearFar=[0,1];sampleCount=4;interpolation={"type":"perspective","sampling":"sample"} [ Failure ]
+crbug.com/358165874 [ linux nvidia-0x2184 nvidia_ge_535.183.01 ] webgpu:shader,execution,shader_io,fragment_builtins:inputs,position:nearFar=[0.25,0.75];sampleCount=4;interpolation={"type":"linear","sampling":"sample"} [ Failure ]
+crbug.com/358165874 [ linux nvidia-0x2184 nvidia_ge_535.183.01 ] webgpu:shader,execution,shader_io,fragment_builtins:inputs,position:nearFar=[0.25,0.75];sampleCount=4;interpolation={"type":"perspective","sampling":"sample"} [ Failure ]
+crbug.com/358165874 [ linux nvidia-0x2184 nvidia_ge_535.183.01 ] webgpu:web_platform,copyToTexture,ImageBitmap:from_ImageData:alpha="none";orientation="flipY";colorSpaceConversion="default";srcFlipYInCopy=true;dstFormat="rg8unorm";dstPremultiplied=false [ Failure ]
+crbug.com/358165874 [ linux nvidia-0x2184 nvidia_ge_535.183.01 ] webgpu:web_platform,copyToTexture,ImageBitmap:from_ImageData:alpha="none";orientation="flipY";colorSpaceConversion="none";srcFlipYInCopy=true;dstFormat="rg8unorm";dstPremultiplied=false [ Failure ]
+crbug.com/358165874 [ linux nvidia-0x2184 nvidia_ge_535.183.01 ] webgpu:web_platform,copyToTexture,ImageBitmap:from_ImageData:alpha="none";orientation="none";colorSpaceConversion="none";srcFlipYInCopy=true;dstFormat="rg8unorm";dstPremultiplied=false [ Failure ]
+crbug.com/358165874 [ linux nvidia-0x2184 nvidia_ge_535.183.01 ] webgpu:web_platform,copyToTexture,ImageBitmap:from_ImageData:alpha="premultiply";orientation="flipY";colorSpaceConversion="none";srcFlipYInCopy=true;dstFormat="rg8unorm";dstPremultiplied=false [ Failure ]
+crbug.com/358165874 [ linux nvidia-0x2184 nvidia_ge_535.183.01 ] webgpu:web_platform,copyToTexture,ImageBitmap:from_ImageData:alpha="premultiply";orientation="none";colorSpaceConversion="default";srcFlipYInCopy=false;dstFormat="rg8unorm";dstPremultiplied=false [ Failure ]
+crbug.com/358165874 [ linux nvidia-0x2184 nvidia_ge_535.183.01 ] webgpu:web_platform,copyToTexture,ImageBitmap:from_ImageData:alpha="premultiply";orientation="none";colorSpaceConversion="none";srcFlipYInCopy=true;dstFormat="rg8unorm";dstPremultiplied=false [ Failure ]
+crbug.com/358165874 [ linux nvidia-0x2184 nvidia_ge_535.183.01 ] webgpu:web_platform,copyToTexture,ImageData:from_ImageData:srcDoFlipYDuringCopy=true;dstColorFormat="rg8unorm";dstPremultiplied=true [ Failure ]
 
 ################################################################################
 # Assorted failures that are missing bug associations (NEEDS TRIAGE)
