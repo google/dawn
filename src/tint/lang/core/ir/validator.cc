@@ -383,6 +383,10 @@ class Validator {
     /// @param construct the construct to validate
     void CheckConstruct(const Construct* construct);
 
+    /// Validates the given convert
+    /// @param convert the convert to validate
+    void CheckConvert(const Convert* convert);
+
     /// Validates the given user call
     /// @param call the call to validate
     void CheckUserCall(const UserCall* call);
@@ -1287,7 +1291,7 @@ void Validator::CheckCall(const Call* call) {
         [&](const BuiltinCall* c) { CheckBuiltinCall(c); },              //
         [&](const MemberBuiltinCall* c) { CheckMemberBuiltinCall(c); },  //
         [&](const Construct* c) { CheckConstruct(c); },                  //
-        [&](const Convert*) {},                                          //
+        [&](const Convert* c) { CheckConvert(c); },                      //
         [&](const Discard*) {},                                          //
         [&](const UserCall* c) { CheckUserCall(c); },                    //
         [&](Default) {
@@ -1384,6 +1388,10 @@ void Validator::CheckConstruct(const Construct* construct) {
             }
         }
     }
+}
+
+void Validator::CheckConvert(const Convert* convert) {
+    CheckResultsAndOperands(convert, Convert::kNumResults, Convert::kNumOperands);
 }
 
 void Validator::CheckUserCall(const UserCall* call) {

@@ -1149,6 +1149,71 @@ MyStruct = struct @align(4) {
 )");
 }
 
+TEST_F(IR_ValidatorTest, Convert_NullArg) {
+    auto* f = b.Function("f", ty.void_());
+    b.Append(f->Block(), [&] {
+        b.Convert(ty.f32(), nullptr);
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_EQ(res.Failure().reason.Str(),
+              R"(:3:22 error: convert: operand is undefined
+    %2:f32 = convert undef
+                     ^^^^^
+
+:2:3 note: in block
+  $B1: {
+  ^^^
+
+note: # Disassembly
+%f = func():void {
+  $B1: {
+    %2:f32 = convert undef
+    ret
+  }
+}
+)");
+}
+
+TEST_F(IR_ValidatorTest, Convert_NullResult) {
+    auto* f = b.Function("f", ty.void_());
+    b.Append(f->Block(), [&] {
+        auto* c = b.Convert(ty.i32(), 1_f);
+        c->SetResults(Vector<InstructionResult*, 1>{nullptr});
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_EQ(res.Failure().reason.Str(),
+              R"(:3:5 error: convert: result is undefined
+    undef = convert 1.0f
+    ^^^^^
+
+:2:3 note: in block
+  $B1: {
+  ^^^
+
+:3:5 error: convert: result is undefined
+    undef = convert 1.0f
+    ^^^^^
+
+:2:3 note: in block
+  $B1: {
+  ^^^
+
+note: # Disassembly
+%f = func():void {
+  $B1: {
+    undef = convert 1.0f
+    ret
+  }
+}
+)");
+}
+
 TEST_F(IR_ValidatorTest, Block_NoTerminator) {
     b.Function("my_func", ty.void_());
 
