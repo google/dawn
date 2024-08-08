@@ -288,6 +288,9 @@ TEST_P(SurfaceTests, SwitchPresentMode) {
     // Vulkan drivers.
     DAWN_SUPPRESS_TEST_IF(IsLinux() && IsVulkan() && IsIntel());
 
+    // crbug.com/358166481
+    DAWN_SUPPRESS_TEST_IF(IsLinux() && IsNvidia() && IsVulkan());
+
     constexpr wgpu::PresentMode kAllPresentModes[] = {
         wgpu::PresentMode::Immediate,
         wgpu::PresentMode::Fifo,
