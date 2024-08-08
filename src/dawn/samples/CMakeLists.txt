@@ -64,9 +64,9 @@ dawn_add_library(
 
 function(Sample)
     cmake_parse_arguments(PARSE_ARGV 0 arg
-        ""
-        "NAME;ENABLE_EMSCRIPTEN;SOURCES"
-        ""
+        "ENABLE_EMSCRIPTEN"
+        "NAME"
+        "SOURCES"
     )
 
     # Skip targets that shouldn't be built with Emscripten.

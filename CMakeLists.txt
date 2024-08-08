@@ -290,6 +290,7 @@ message(STATUS "Dawn build Metal backend: ${DAWN_ENABLE_METAL}")
 message(STATUS "Dawn build Vulkan backend: ${DAWN_ENABLE_VULKAN}")
 message(STATUS "Dawn build OpenGL backend: ${DAWN_ENABLE_DESKTOP_GL}")
 message(STATUS "Dawn build OpenGL ES backend: ${DAWN_ENABLE_OPENGLES}")
+message(STATUS "Dawn build Emscripten: ${DAWN_ENABLE_EMSCRIPTEN}")
 message(STATUS "Dawn build Null backend: ${DAWN_ENABLE_NULL}")
 
 message(STATUS "Dawn enable SPIR-V validation: ${DAWN_ENABLE_SPIRV_VALIDATION}")
