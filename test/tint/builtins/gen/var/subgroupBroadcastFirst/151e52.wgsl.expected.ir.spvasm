@@ -1,0 +1,64 @@
+; SPIR-V
+; Version: 1.3
+; Generator: Google Tint Compiler; 1
+; Bound: 29
+; Schema: 0
+               OpCapability Shader
+               OpCapability Float16
+               OpCapability UniformAndStorageBuffer16BitAccess
+               OpCapability StorageBuffer16BitAccess
+               OpCapability GroupNonUniformBallot
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint Fragment %fragment_main "fragment_main"
+               OpEntryPoint GLCompute %compute_main "compute_main"
+               OpExecutionMode %fragment_main OriginUpperLeft
+               OpExecutionMode %compute_main LocalSize 1 1 1
+               OpMemberName %tint_symbol_1 0 "tint_symbol"
+               OpName %tint_symbol_1 "tint_symbol_1"
+               OpName %subgroupBroadcastFirst_151e52 "subgroupBroadcastFirst_151e52"
+               OpName %arg_0 "arg_0"
+               OpName %res "res"
+               OpName %fragment_main "fragment_main"
+               OpName %compute_main "compute_main"
+               OpMemberDecorate %tint_symbol_1 0 Offset 0
+               OpDecorate %tint_symbol_1 Block
+               OpDecorate %1 DescriptorSet 0
+               OpDecorate %1 Binding 0
+       %half = OpTypeFloat 16
+%tint_symbol_1 = OpTypeStruct %half
+%_ptr_StorageBuffer_tint_symbol_1 = OpTypePointer StorageBuffer %tint_symbol_1
+          %1 = OpVariable %_ptr_StorageBuffer_tint_symbol_1 StorageBuffer
+          %6 = OpTypeFunction %half
+%_ptr_Function_half = OpTypePointer Function %half
+%half_0x1p_0 = OpConstant %half 0x1p+0
+       %uint = OpTypeInt 32 0
+     %uint_3 = OpConstant %uint 3
+       %void = OpTypeVoid
+         %19 = OpTypeFunction %void
+%_ptr_StorageBuffer_half = OpTypePointer StorageBuffer %half
+     %uint_0 = OpConstant %uint 0
+%subgroupBroadcastFirst_151e52 = OpFunction %half None %6
+          %7 = OpLabel
+      %arg_0 = OpVariable %_ptr_Function_half Function
+        %res = OpVariable %_ptr_Function_half Function
+               OpStore %arg_0 %half_0x1p_0
+         %11 = OpLoad %half %arg_0
+         %12 = OpGroupNonUniformBroadcastFirst %half %uint_3 %11
+               OpStore %res %12
+         %16 = OpLoad %half %res
+               OpReturnValue %16
+               OpFunctionEnd
+%fragment_main = OpFunction %void None %19
+         %20 = OpLabel
+         %21 = OpFunctionCall %half %subgroupBroadcastFirst_151e52
+         %22 = OpAccessChain %_ptr_StorageBuffer_half %1 %uint_0
+               OpStore %22 %21
+               OpReturn
+               OpFunctionEnd
+%compute_main = OpFunction %void None %19
+         %26 = OpLabel
+         %27 = OpFunctionCall %half %subgroupBroadcastFirst_151e52
+         %28 = OpAccessChain %_ptr_StorageBuffer_half %1 %uint_0
+               OpStore %28 %27
+               OpReturn
+               OpFunctionEnd

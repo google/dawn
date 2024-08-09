@@ -620,8 +620,11 @@ match workgroup
 @stage("fragment", "compute") fn atomicCompareExchangeWeak[T: iu32, S: workgroup_or_storage](ptr<S, atomic<T>, read_write>, T, T) -> __atomic_compare_exchange_result<T>
 
 @must_use @stage("fragment", "compute") fn subgroupBallot(bool) -> vec4<u32>
+@must_use @stage("fragment", "compute") fn subgroupElect() -> bool
 @must_use @stage("fragment", "compute") fn subgroupBroadcast[T: fiu32_f16](value: T, @const sourceLaneIndex: u32) -> T
 @must_use @stage("fragment", "compute") fn subgroupBroadcast[N: num, T: fiu32_f16](value: vec<N, T>, @const sourceLaneIndex: u32) -> vec<N, T>
+@must_use @stage("fragment", "compute") fn subgroupBroadcastFirst[T: fiu32_f16](value: T) -> T
+@must_use @stage("fragment", "compute") fn subgroupBroadcastFirst[N: num, T: fiu32_f16](value: vec<N, T>) -> vec<N, T>
 @must_use @stage("fragment", "compute") fn subgroupAdd[T: fiu32_f16](value: T) -> T
 @must_use @stage("fragment", "compute") fn subgroupAdd[N: num, T: fiu32_f16](value: vec<N, T>) -> vec<N, T>
 @must_use @stage("fragment", "compute") fn subgroupExclusiveAdd[T: fiu32_f16](value: T) -> T

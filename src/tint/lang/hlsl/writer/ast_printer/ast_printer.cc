@@ -3096,8 +3096,12 @@ std::string ASTPrinter::generate_builtin_name(const sem::BuiltinFn* builtin) {
             return "smoothstep";
         case wgsl::BuiltinFn::kSubgroupBallot:
             return "WaveActiveBallot";
+        case wgsl::BuiltinFn::kSubgroupElect:
+            return "WaveIsFirstLane";
         case wgsl::BuiltinFn::kSubgroupBroadcast:
             return "WaveReadLaneAt";
+        case wgsl::BuiltinFn::kSubgroupBroadcastFirst:
+            return "WaveReadLaneFirst";
         case wgsl::BuiltinFn::kSubgroupAdd:
             return "WaveActiveSum";
         case wgsl::BuiltinFn::kSubgroupExclusiveAdd:

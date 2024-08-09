@@ -373,6 +373,8 @@
 "subgroupAny"
 "subgroupBallot"
 "subgroupBroadcast"
+"subgroupBroadcastFirst"
+"subgroupElect"
 "subgroupExclusiveAdd"
 "subgroupExclusiveMul"
 "subgroupMax"

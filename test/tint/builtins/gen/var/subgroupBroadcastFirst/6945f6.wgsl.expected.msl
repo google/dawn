@@ -1,0 +1,19 @@
+#include <metal_stdlib>
+
+using namespace metal;
+float2 subgroupBroadcastFirst_6945f6() {
+  float2 arg_0 = float2(1.0f);
+  float2 res = simd_broadcast_first(arg_0);
+  return res;
+}
+
+fragment void fragment_main(device float2* tint_symbol [[buffer(0)]]) {
+  *(tint_symbol) = subgroupBroadcastFirst_6945f6();
+  return;
+}
+
+kernel void compute_main(device float2* tint_symbol_1 [[buffer(0)]]) {
+  *(tint_symbol_1) = subgroupBroadcastFirst_6945f6();
+  return;
+}
+

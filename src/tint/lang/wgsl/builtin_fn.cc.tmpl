@@ -110,7 +110,9 @@ bool IsPacked4x8IntegerDotProductBuiltin(BuiltinFn f) {
 bool IsSubgroup(BuiltinFn f) {
     switch (f) {
         case BuiltinFn::kSubgroupBallot:
+        case BuiltinFn::kSubgroupElect:
         case BuiltinFn::kSubgroupBroadcast:
+        case BuiltinFn::kSubgroupBroadcastFirst:
         case BuiltinFn::kSubgroupAdd:
         case BuiltinFn::kSubgroupExclusiveAdd:
         case BuiltinFn::kSubgroupMul:

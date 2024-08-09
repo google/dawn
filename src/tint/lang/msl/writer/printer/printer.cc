@@ -877,8 +877,7 @@ class Printer : public tint::TextGenerator {
     }
 
     void EmitCoreBuiltinName(StringStream& out, core::BuiltinFn func) {
-        // TODO(crbug.com/354738715): Implement subgroupBallot and subgroupBroadcast in MSL
-        // IR backend.
+        // TODO(crbug.com/354738715): Implement subgroupBallot in MSL IR backend.
         switch (func) {
             case core::BuiltinFn::kAbs:
             case core::BuiltinFn::kAcos:
@@ -978,6 +977,15 @@ class Printer : public tint::TextGenerator {
                 break;
             case core::BuiltinFn::kSmoothstep:
                 out << "smoothstep";
+                break;
+            case core::BuiltinFn::kSubgroupElect:
+                out << "simd_is_first";
+                break;
+            case core::BuiltinFn::kSubgroupBroadcast:
+                out << "simd_broadcast";
+                break;
+            case core::BuiltinFn::kSubgroupBroadcastFirst:
+                out << "simd_broadcast_first";
                 break;
             case core::BuiltinFn::kSubgroupAdd:
                 out << "simd_sum";

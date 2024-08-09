@@ -1,9 +1,21 @@
-SKIP: FAILED
+#include <metal_stdlib>
+using namespace metal;
 
-../../src/tint/lang/msl/writer/printer/printer.cc:989 internal compiler error: TINT_UNREACHABLE unhandled: subgroupBroadcast
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
+struct tint_module_vars_struct {
+  device int3* prevent_dce;
+};
+
+int3 subgroupBroadcast_e275c8() {
+  int3 res = simd_broadcast(int3(1), 1u);
+  return res;
+}
+
+fragment void fragment_main(device int3* prevent_dce [[buffer(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.prevent_dce=prevent_dce};
+  (*tint_module_vars.prevent_dce) = subgroupBroadcast_e275c8();
+}
+
+kernel void compute_main(device int3* prevent_dce [[buffer(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.prevent_dce=prevent_dce};
+  (*tint_module_vars.prevent_dce) = subgroupBroadcast_e275c8();
+}

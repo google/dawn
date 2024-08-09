@@ -643,4 +643,6 @@ enum BuiltinFn {
     subgroup_max = 130;
     subgroup_any = 131;
     subgroup_all = 132;
+    subgroup_elect = 133;
+    subgroup_broadcast_first = 134;
 }

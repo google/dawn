@@ -1625,8 +1625,12 @@ struct Decoder {
                 return core::BuiltinFn::kAtomicCompareExchangeWeak;
             case pb::BuiltinFn::subgroup_ballot:
                 return core::BuiltinFn::kSubgroupBallot;
+            case pb::BuiltinFn::subgroup_elect:
+                return core::BuiltinFn::kSubgroupElect;
             case pb::BuiltinFn::subgroup_broadcast:
                 return core::BuiltinFn::kSubgroupBroadcast;
+            case pb::BuiltinFn::subgroup_broadcast_first:
+                return core::BuiltinFn::kSubgroupBroadcastFirst;
             case pb::BuiltinFn::input_attachment_load:
                 return core::BuiltinFn::kInputAttachmentLoad;
             case pb::BuiltinFn::subgroup_add:

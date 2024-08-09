@@ -1681,9 +1681,19 @@ class Printer {
                 op = spv::Op::OpGroupNonUniformBallot;
                 operands.push_back(Constant(ir_.constant_values.Get(u32(spv::Scope::Subgroup))));
                 break;
+            case core::BuiltinFn::kSubgroupElect:
+                module_.PushCapability(SpvCapabilityGroupNonUniform);
+                op = spv::Op::OpGroupNonUniformElect;
+                operands.push_back(Constant(ir_.constant_values.Get(u32(spv::Scope::Subgroup))));
+                break;
             case core::BuiltinFn::kSubgroupBroadcast:
                 module_.PushCapability(SpvCapabilityGroupNonUniformBallot);
                 op = spv::Op::OpGroupNonUniformBroadcast;
+                operands.push_back(Constant(ir_.constant_values.Get(u32(spv::Scope::Subgroup))));
+                break;
+            case core::BuiltinFn::kSubgroupBroadcastFirst:
+                module_.PushCapability(SpvCapabilityGroupNonUniformBallot);
+                op = spv::Op::OpGroupNonUniformBroadcastFirst;
                 operands.push_back(Constant(ir_.constant_values.Get(u32(spv::Scope::Subgroup))));
                 break;
             case core::BuiltinFn::kSubgroupAnd:

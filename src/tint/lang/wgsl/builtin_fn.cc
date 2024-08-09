@@ -408,8 +408,14 @@ BuiltinFn ParseBuiltinFn(std::string_view name) {
     if (name == "subgroupBallot") {
         return BuiltinFn::kSubgroupBallot;
     }
+    if (name == "subgroupElect") {
+        return BuiltinFn::kSubgroupElect;
+    }
     if (name == "subgroupBroadcast") {
         return BuiltinFn::kSubgroupBroadcast;
+    }
+    if (name == "subgroupBroadcastFirst") {
+        return BuiltinFn::kSubgroupBroadcastFirst;
     }
     if (name == "subgroupAdd") {
         return BuiltinFn::kSubgroupAdd;
@@ -700,8 +706,12 @@ const char* str(BuiltinFn i) {
             return "atomicCompareExchangeWeak";
         case BuiltinFn::kSubgroupBallot:
             return "subgroupBallot";
+        case BuiltinFn::kSubgroupElect:
+            return "subgroupElect";
         case BuiltinFn::kSubgroupBroadcast:
             return "subgroupBroadcast";
+        case BuiltinFn::kSubgroupBroadcastFirst:
+            return "subgroupBroadcastFirst";
         case BuiltinFn::kSubgroupAdd:
             return "subgroupAdd";
         case BuiltinFn::kSubgroupExclusiveAdd:
@@ -799,7 +809,9 @@ bool IsPacked4x8IntegerDotProductBuiltin(BuiltinFn f) {
 bool IsSubgroup(BuiltinFn f) {
     switch (f) {
         case BuiltinFn::kSubgroupBallot:
+        case BuiltinFn::kSubgroupElect:
         case BuiltinFn::kSubgroupBroadcast:
+        case BuiltinFn::kSubgroupBroadcastFirst:
         case BuiltinFn::kSubgroupAdd:
         case BuiltinFn::kSubgroupExclusiveAdd:
         case BuiltinFn::kSubgroupMul:

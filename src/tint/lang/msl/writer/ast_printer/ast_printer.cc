@@ -791,6 +791,11 @@ bool ASTPrinter::EmitBuiltinCall(StringStream& out,
             break;
         }
 
+        case wgsl::BuiltinFn::kSubgroupElect: {
+            out << "simd_is_first()";
+            return true;
+        }
+
         case wgsl::BuiltinFn::kSubgroupBroadcast: {
             // The lane argument is ushort.
             out << "simd_broadcast(";
@@ -802,6 +807,15 @@ bool ASTPrinter::EmitBuiltinCall(StringStream& out,
                 return false;
             }
             out << "))";
+            return true;
+        }
+
+        case wgsl::BuiltinFn::kSubgroupBroadcastFirst: {
+            out << "simd_broadcast_first(";
+            if (!EmitExpression(out, expr->args[0])) {
+                return false;
+            }
+            out << ")";
             return true;
         }
 

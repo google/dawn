@@ -1,0 +1,19 @@
+#include <metal_stdlib>
+
+using namespace metal;
+half2 subgroupBroadcastFirst_a11307() {
+  half2 arg_0 = half2(1.0h);
+  half2 res = simd_broadcast_first(arg_0);
+  return res;
+}
+
+fragment void fragment_main(device half2* tint_symbol [[buffer(0)]]) {
+  *(tint_symbol) = subgroupBroadcastFirst_a11307();
+  return;
+}
+
+kernel void compute_main(device half2* tint_symbol_1 [[buffer(0)]]) {
+  *(tint_symbol_1) = subgroupBroadcastFirst_a11307();
+  return;
+}
+

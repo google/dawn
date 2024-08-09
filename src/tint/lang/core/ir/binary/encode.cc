@@ -1137,8 +1137,12 @@ struct Encoder {
                 return pb::BuiltinFn::atomic_compare_exchange_weak;
             case core::BuiltinFn::kSubgroupBallot:
                 return pb::BuiltinFn::subgroup_ballot;
+            case core::BuiltinFn::kSubgroupElect:
+                return pb::BuiltinFn::subgroup_elect;
             case core::BuiltinFn::kSubgroupBroadcast:
                 return pb::BuiltinFn::subgroup_broadcast;
+            case core::BuiltinFn::kSubgroupBroadcastFirst:
+                return pb::BuiltinFn::subgroup_broadcast_first;
             case core::BuiltinFn::kInputAttachmentLoad:
                 return pb::BuiltinFn::input_attachment_load;
             case core::BuiltinFn::kSubgroupAdd:

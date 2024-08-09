@@ -1,0 +1,18 @@
+#include <metal_stdlib>
+
+using namespace metal;
+int subgroupElect_3943d6() {
+  bool res = simd_is_first();
+  return select(0, 1, all((res == false)));
+}
+
+fragment void fragment_main(device int* tint_symbol [[buffer(0)]]) {
+  *(tint_symbol) = subgroupElect_3943d6();
+  return;
+}
+
+kernel void compute_main(device int* tint_symbol_1 [[buffer(0)]]) {
+  *(tint_symbol_1) = subgroupElect_3943d6();
+  return;
+}
+

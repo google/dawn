@@ -645,7 +645,9 @@ class State {
 
                 switch (c->Func()) {
                     case wgsl::BuiltinFn::kSubgroupBallot:
+                    case wgsl::BuiltinFn::kSubgroupElect:
                     case wgsl::BuiltinFn::kSubgroupBroadcast:
+                    case wgsl::BuiltinFn::kSubgroupBroadcastFirst:
                     case wgsl::BuiltinFn::kSubgroupAdd:
                     case wgsl::BuiltinFn::kSubgroupExclusiveAdd:
                     case wgsl::BuiltinFn::kSubgroupMul:
