@@ -639,4 +639,6 @@ enum BuiltinFn {
     subgroup_and = 126;
     subgroup_or = 127;
     subgroup_xor = 128;
+    subgroup_min = 129;
+    subgroup_max = 130;
 }

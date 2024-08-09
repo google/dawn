@@ -118,6 +118,8 @@ bool IsSubgroup(BuiltinFn f) {
         case BuiltinFn::kSubgroupAnd:
         case BuiltinFn::kSubgroupOr:
         case BuiltinFn::kSubgroupXor:
+        case BuiltinFn::kSubgroupMin:
+        case BuiltinFn::kSubgroupMax:
             return true;
         default:
             return false;

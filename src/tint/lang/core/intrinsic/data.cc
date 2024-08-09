@@ -10559,6 +10559,20 @@ constexpr IntrinsicInfo kBuiltins[] = {
     /* num overloads */ 2,
     /* overloads */ OverloadIndex(409),
   },
+  {
+    /* [129] */
+    /* fn subgroupMin[T : fiu32_f16](value: T) -> T */
+    /* fn subgroupMin[N : num, T : fiu32_f16](value: vec<N, T>) -> vec<N, T> */
+    /* num overloads */ 2,
+    /* overloads */ OverloadIndex(407),
+  },
+  {
+    /* [130] */
+    /* fn subgroupMax[T : fiu32_f16](value: T) -> T */
+    /* fn subgroupMax[N : num, T : fiu32_f16](value: vec<N, T>) -> vec<N, T> */
+    /* num overloads */ 2,
+    /* overloads */ OverloadIndex(407),
+  },
 };
 
 constexpr IntrinsicInfo kUnaryOperators[] = {

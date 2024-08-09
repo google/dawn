@@ -1,0 +1,19 @@
+#include <metal_stdlib>
+
+using namespace metal;
+half subgroupMax_5611a5() {
+  half arg_0 = 1.0h;
+  half res = simd_max(arg_0);
+  return res;
+}
+
+fragment void fragment_main(device half* tint_symbol [[buffer(0)]]) {
+  *(tint_symbol) = subgroupMax_5611a5();
+  return;
+}
+
+kernel void compute_main(device half* tint_symbol_1 [[buffer(0)]]) {
+  *(tint_symbol_1) = subgroupMax_5611a5();
+  return;
+}
+

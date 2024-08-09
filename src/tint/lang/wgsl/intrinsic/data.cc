@@ -12101,6 +12101,20 @@ constexpr IntrinsicInfo kBuiltins[] = {
   },
   {
     /* [131] */
+    /* fn subgroupMin[T : fiu32_f16](value: T) -> T */
+    /* fn subgroupMin[N : num, T : fiu32_f16](value: vec<N, T>) -> vec<N, T> */
+    /* num overloads */ 2,
+    /* overloads */ OverloadIndex(483),
+  },
+  {
+    /* [132] */
+    /* fn subgroupMax[T : fiu32_f16](value: T) -> T */
+    /* fn subgroupMax[N : num, T : fiu32_f16](value: vec<N, T>) -> vec<N, T> */
+    /* num overloads */ 2,
+    /* overloads */ OverloadIndex(483),
+  },
+  {
+    /* [133] */
     /* fn __tint_materialize[T](T) -> T */
     /* num overloads */ 1,
     /* overloads */ OverloadIndex(547),

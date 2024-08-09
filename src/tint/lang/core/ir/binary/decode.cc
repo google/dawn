@@ -1643,6 +1643,10 @@ struct Decoder {
                 return core::BuiltinFn::kSubgroupOr;
             case pb::BuiltinFn::subgroup_xor:
                 return core::BuiltinFn::kSubgroupXor;
+            case pb::BuiltinFn::subgroup_min:
+                return core::BuiltinFn::kSubgroupMin;
+            case pb::BuiltinFn::subgroup_max:
+                return core::BuiltinFn::kSubgroupMax;
 
             case pb::BuiltinFn::BuiltinFn_INT_MIN_SENTINEL_DO_NOT_USE_:
             case pb::BuiltinFn::BuiltinFn_INT_MAX_SENTINEL_DO_NOT_USE_:

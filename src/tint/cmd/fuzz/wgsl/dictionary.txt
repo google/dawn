@@ -373,6 +373,8 @@
 "subgroupBroadcast"
 "subgroupExclusiveAdd"
 "subgroupExclusiveMul"
+"subgroupMax"
+"subgroupMin"
 "subgroupMul"
 "subgroupOr"
 "subgroupXor"

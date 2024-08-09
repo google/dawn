@@ -1155,6 +1155,10 @@ struct Encoder {
                 return pb::BuiltinFn::subgroup_or;
             case core::BuiltinFn::kSubgroupXor:
                 return pb::BuiltinFn::subgroup_xor;
+            case core::BuiltinFn::kSubgroupMin:
+                return pb::BuiltinFn::subgroup_min;
+            case core::BuiltinFn::kSubgroupMax:
+                return pb::BuiltinFn::subgroup_max;
             case core::BuiltinFn::kNone:
                 break;
         }

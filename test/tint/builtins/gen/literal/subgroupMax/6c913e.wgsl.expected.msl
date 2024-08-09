@@ -1,0 +1,18 @@
+#include <metal_stdlib>
+
+using namespace metal;
+int subgroupMax_6c913e() {
+  int res = simd_max(1);
+  return res;
+}
+
+fragment void fragment_main(device int* tint_symbol [[buffer(0)]]) {
+  *(tint_symbol) = subgroupMax_6c913e();
+  return;
+}
+
+kernel void compute_main(device int* tint_symbol_1 [[buffer(0)]]) {
+  *(tint_symbol_1) = subgroupMax_6c913e();
+  return;
+}
+

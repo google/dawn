@@ -1,0 +1,19 @@
+#include <metal_stdlib>
+
+using namespace metal;
+int subgroupMin_a96a2e() {
+  int arg_0 = 1;
+  int res = simd_min(arg_0);
+  return res;
+}
+
+fragment void fragment_main(device int* tint_symbol [[buffer(0)]]) {
+  *(tint_symbol) = subgroupMin_a96a2e();
+  return;
+}
+
+kernel void compute_main(device int* tint_symbol_1 [[buffer(0)]]) {
+  *(tint_symbol_1) = subgroupMin_a96a2e();
+  return;
+}
+

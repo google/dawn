@@ -1704,6 +1704,32 @@ class Printer {
                 operands.push_back(Constant(ir_.constant_values.Get(u32(spv::Scope::Subgroup))));
                 operands.push_back(U32Operand(u32(spv::GroupOperation::Reduce)));
                 break;
+            case core::BuiltinFn::kSubgroupMin:
+                module_.PushCapability(SpvCapabilityGroupNonUniformArithmetic);
+                if (result_ty->is_float_scalar_or_vector()) {
+                    op = spv::Op::OpGroupNonUniformFMin;
+                } else if (result_ty->is_signed_integer_scalar_or_vector()) {
+                    op = spv::Op::OpGroupNonUniformSMin;
+                } else {
+                    TINT_ASSERT(result_ty->is_unsigned_integer_scalar_or_vector());
+                    op = spv::Op::OpGroupNonUniformUMin;
+                }
+                operands.push_back(Constant(ir_.constant_values.Get(u32(spv::Scope::Subgroup))));
+                operands.push_back(U32Operand(u32(spv::GroupOperation::Reduce)));
+                break;
+            case core::BuiltinFn::kSubgroupMax:
+                module_.PushCapability(SpvCapabilityGroupNonUniformArithmetic);
+                if (result_ty->is_float_scalar_or_vector()) {
+                    op = spv::Op::OpGroupNonUniformFMax;
+                } else if (result_ty->is_signed_integer_scalar_or_vector()) {
+                    op = spv::Op::OpGroupNonUniformSMax;
+                } else {
+                    TINT_ASSERT(result_ty->is_unsigned_integer_scalar_or_vector());
+                    op = spv::Op::OpGroupNonUniformUMax;
+                }
+                operands.push_back(Constant(ir_.constant_values.Get(u32(spv::Scope::Subgroup))));
+                operands.push_back(U32Operand(u32(spv::GroupOperation::Reduce)));
+                break;
             case core::BuiltinFn::kTan:
                 glsl_ext_inst(GLSLstd450Tan);
                 break;

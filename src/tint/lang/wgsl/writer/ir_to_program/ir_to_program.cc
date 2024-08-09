@@ -653,6 +653,8 @@ class State {
                     case wgsl::BuiltinFn::kSubgroupAnd:
                     case wgsl::BuiltinFn::kSubgroupOr:
                     case wgsl::BuiltinFn::kSubgroupXor:
+                    case wgsl::BuiltinFn::kSubgroupMin:
+                    case wgsl::BuiltinFn::kSubgroupMax:
                         Enable(wgsl::Extension::kChromiumExperimentalSubgroups);
                         break;
                     default:

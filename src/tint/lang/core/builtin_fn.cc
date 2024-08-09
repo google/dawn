@@ -426,6 +426,12 @@ BuiltinFn ParseBuiltinFn(std::string_view name) {
     if (name == "subgroupXor") {
         return BuiltinFn::kSubgroupXor;
     }
+    if (name == "subgroupMin") {
+        return BuiltinFn::kSubgroupMin;
+    }
+    if (name == "subgroupMax") {
+        return BuiltinFn::kSubgroupMax;
+    }
     return BuiltinFn::kNone;
 }
 
@@ -691,6 +697,10 @@ const char* str(BuiltinFn i) {
             return "subgroupOr";
         case BuiltinFn::kSubgroupXor:
             return "subgroupXor";
+        case BuiltinFn::kSubgroupMin:
+            return "subgroupMin";
+        case BuiltinFn::kSubgroupMax:
+            return "subgroupMax";
     }
     return "<unknown>";
 }

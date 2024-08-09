@@ -3112,6 +3112,10 @@ std::string ASTPrinter::generate_builtin_name(const sem::BuiltinFn* builtin) {
             return "WaveActiveBitOr";
         case wgsl::BuiltinFn::kSubgroupXor:
             return "WaveActiveBitXor";
+        case wgsl::BuiltinFn::kSubgroupMin:
+            return "WaveActiveMin";
+        case wgsl::BuiltinFn::kSubgroupMax:
+            return "WaveActiveMax";
         default:
             diagnostics_.AddError(Source{}) << "Unknown builtin method: " << builtin->str();
     }

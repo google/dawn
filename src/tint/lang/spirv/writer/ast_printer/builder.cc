@@ -2571,7 +2571,9 @@ uint32_t Builder::GenerateBuiltinCall(const sem::Call* call, const sem::BuiltinF
         case wgsl::BuiltinFn::kSubgroupExclusiveMul:
         case wgsl::BuiltinFn::kSubgroupAnd:
         case wgsl::BuiltinFn::kSubgroupOr:
-        case wgsl::BuiltinFn::kSubgroupXor: {
+        case wgsl::BuiltinFn::kSubgroupXor:
+        case wgsl::BuiltinFn::kSubgroupMin:
+        case wgsl::BuiltinFn::kSubgroupMax: {
             // This file should be removed soon with the SPIR-V AST backend, but in the meantime we
             // need this explicit failure to avoid a new ICE that can get caught by the fuzzers.
             return 0;

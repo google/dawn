@@ -175,6 +175,8 @@ core::BuiltinFn Convert(wgsl::BuiltinFn fn) {
         CASE(kSubgroupAnd)
         CASE(kSubgroupOr)
         CASE(kSubgroupXor)
+        CASE(kSubgroupMin)
+        CASE(kSubgroupMax)
 
         case tint::wgsl::BuiltinFn::kBitcast:               // should lower to ir::Bitcast
         case tint::wgsl::BuiltinFn::kWorkgroupUniformLoad:  // should be handled in Lower()

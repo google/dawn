@@ -868,6 +868,24 @@ bool ASTPrinter::EmitBuiltinCall(StringStream& out,
             return true;
         }
 
+        case wgsl::BuiltinFn::kSubgroupMin: {
+            out << "simd_min(";
+            if (!EmitExpression(out, expr->args[0])) {
+                return false;
+            }
+            out << ")";
+            return true;
+        }
+
+        case wgsl::BuiltinFn::kSubgroupMax: {
+            out << "simd_max(";
+            if (!EmitExpression(out, expr->args[0])) {
+                return false;
+            }
+            out << ")";
+            return true;
+        }
+
         default:
             break;
     }
