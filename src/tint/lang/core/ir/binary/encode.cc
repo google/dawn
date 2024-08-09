@@ -1159,6 +1159,10 @@ struct Encoder {
                 return pb::BuiltinFn::subgroup_min;
             case core::BuiltinFn::kSubgroupMax:
                 return pb::BuiltinFn::subgroup_max;
+            case core::BuiltinFn::kSubgroupAll:
+                return pb::BuiltinFn::subgroup_all;
+            case core::BuiltinFn::kSubgroupAny:
+                return pb::BuiltinFn::subgroup_any;
             case core::BuiltinFn::kNone:
                 break;
         }

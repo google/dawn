@@ -181,6 +181,8 @@ wgsl::BuiltinFn Convert(core::BuiltinFn fn) {
         CASE(kSubgroupXor)
         CASE(kSubgroupMin)
         CASE(kSubgroupMax)
+        CASE(kSubgroupAny)
+        CASE(kSubgroupAll)
         case core::BuiltinFn::kNone:
             break;
     }

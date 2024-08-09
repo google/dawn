@@ -432,6 +432,12 @@ BuiltinFn ParseBuiltinFn(std::string_view name) {
     if (name == "subgroupMax") {
         return BuiltinFn::kSubgroupMax;
     }
+    if (name == "subgroupAll") {
+        return BuiltinFn::kSubgroupAll;
+    }
+    if (name == "subgroupAny") {
+        return BuiltinFn::kSubgroupAny;
+    }
     return BuiltinFn::kNone;
 }
 
@@ -701,6 +707,10 @@ const char* str(BuiltinFn i) {
             return "subgroupMin";
         case BuiltinFn::kSubgroupMax:
             return "subgroupMax";
+        case BuiltinFn::kSubgroupAll:
+            return "subgroupAll";
+        case BuiltinFn::kSubgroupAny:
+            return "subgroupAny";
     }
     return "<unknown>";
 }

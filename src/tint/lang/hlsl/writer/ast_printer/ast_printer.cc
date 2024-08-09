@@ -3116,6 +3116,10 @@ std::string ASTPrinter::generate_builtin_name(const sem::BuiltinFn* builtin) {
             return "WaveActiveMin";
         case wgsl::BuiltinFn::kSubgroupMax:
             return "WaveActiveMax";
+        case wgsl::BuiltinFn::kSubgroupAll:
+            return "WaveActiveAllTrue";
+        case wgsl::BuiltinFn::kSubgroupAny:
+            return "WaveActiveAnyTrue";
         default:
             diagnostics_.AddError(Source{}) << "Unknown builtin method: " << builtin->str();
     }

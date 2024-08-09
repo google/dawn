@@ -1730,6 +1730,16 @@ class Printer {
                 operands.push_back(Constant(ir_.constant_values.Get(u32(spv::Scope::Subgroup))));
                 operands.push_back(U32Operand(u32(spv::GroupOperation::Reduce)));
                 break;
+            case core::BuiltinFn::kSubgroupAll:
+                module_.PushCapability(SpvCapabilityGroupNonUniformVote);
+                op = spv::Op::OpGroupNonUniformAll;
+                operands.push_back(Constant(ir_.constant_values.Get(u32(spv::Scope::Subgroup))));
+                break;
+            case core::BuiltinFn::kSubgroupAny:
+                module_.PushCapability(SpvCapabilityGroupNonUniformVote);
+                op = spv::Op::OpGroupNonUniformAny;
+                operands.push_back(Constant(ir_.constant_values.Get(u32(spv::Scope::Subgroup))));
+                break;
             case core::BuiltinFn::kTan:
                 glsl_ext_inst(GLSLstd450Tan);
                 break;

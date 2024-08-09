@@ -640,6 +640,8 @@ match workgroup
 @must_use @stage("fragment", "compute") fn subgroupMin[N: num, T: fiu32_f16](value: vec<N, T>) -> vec<N, T>
 @must_use @stage("fragment", "compute") fn subgroupMax[T: fiu32_f16](value: T) -> T
 @must_use @stage("fragment", "compute") fn subgroupMax[N: num, T: fiu32_f16](value: vec<N, T>) -> vec<N, T>
+@must_use @stage("fragment", "compute") fn subgroupAll(bool) -> bool
+@must_use @stage("fragment", "compute") fn subgroupAny(bool) -> bool
 
 ////////////////////////////////////////////////////////////////////////////////
 // Value constructors                                                         //

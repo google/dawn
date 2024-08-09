@@ -641,4 +641,6 @@ enum BuiltinFn {
     subgroup_xor = 128;
     subgroup_min = 129;
     subgroup_max = 130;
+    subgroup_any = 131;
+    subgroup_all = 132;
 }

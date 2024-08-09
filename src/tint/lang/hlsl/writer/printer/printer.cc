@@ -1032,6 +1032,12 @@ class Printer : public tint::TextGenerator {
             case core::BuiltinFn::kSubgroupMax:
                 out << "WaveActiveMax";
                 break;
+            case core::BuiltinFn::kSubgroupAll:
+                out << "WaveActiveAllTrue";
+                break;
+            case core::BuiltinFn::kSubgroupAny:
+                out << "WaveActiveAnyTrue";
+                break;
             default:
                 TINT_UNREACHABLE() << "unhandled: " << func;
         }

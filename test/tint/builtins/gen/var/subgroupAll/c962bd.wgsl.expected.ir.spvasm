@@ -1,0 +1,67 @@
+; SPIR-V
+; Version: 1.3
+; Generator: Google Tint Compiler; 1
+; Bound: 35
+; Schema: 0
+               OpCapability Shader
+               OpCapability GroupNonUniformVote
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint Fragment %fragment_main "fragment_main"
+               OpEntryPoint GLCompute %compute_main "compute_main"
+               OpExecutionMode %fragment_main OriginUpperLeft
+               OpExecutionMode %compute_main LocalSize 1 1 1
+               OpMemberName %tint_symbol_1 0 "tint_symbol"
+               OpName %tint_symbol_1 "tint_symbol_1"
+               OpName %subgroupAll_c962bd "subgroupAll_c962bd"
+               OpName %arg_0 "arg_0"
+               OpName %res "res"
+               OpName %fragment_main "fragment_main"
+               OpName %compute_main "compute_main"
+               OpMemberDecorate %tint_symbol_1 0 Offset 0
+               OpDecorate %tint_symbol_1 Block
+               OpDecorate %1 DescriptorSet 0
+               OpDecorate %1 Binding 0
+        %int = OpTypeInt 32 1
+%tint_symbol_1 = OpTypeStruct %int
+%_ptr_StorageBuffer_tint_symbol_1 = OpTypePointer StorageBuffer %tint_symbol_1
+          %1 = OpVariable %_ptr_StorageBuffer_tint_symbol_1 StorageBuffer
+          %6 = OpTypeFunction %int
+       %bool = OpTypeBool
+%_ptr_Function_bool = OpTypePointer Function %bool
+       %true = OpConstantTrue %bool
+       %uint = OpTypeInt 32 0
+     %uint_3 = OpConstant %uint 3
+      %false = OpConstantFalse %bool
+      %int_1 = OpConstant %int 1
+      %int_0 = OpConstant %int 0
+       %void = OpTypeVoid
+         %25 = OpTypeFunction %void
+%_ptr_StorageBuffer_int = OpTypePointer StorageBuffer %int
+     %uint_0 = OpConstant %uint 0
+%subgroupAll_c962bd = OpFunction %int None %6
+          %7 = OpLabel
+      %arg_0 = OpVariable %_ptr_Function_bool Function
+        %res = OpVariable %_ptr_Function_bool Function
+               OpStore %arg_0 %true
+         %12 = OpLoad %bool %arg_0
+         %13 = OpGroupNonUniformAll %bool %uint_3 %12
+               OpStore %res %13
+         %17 = OpLoad %bool %res
+         %18 = OpLogicalEqual %bool %17 %false
+         %20 = OpSelect %int %18 %int_1 %int_0
+               OpReturnValue %20
+               OpFunctionEnd
+%fragment_main = OpFunction %void None %25
+         %26 = OpLabel
+         %27 = OpFunctionCall %int %subgroupAll_c962bd
+         %28 = OpAccessChain %_ptr_StorageBuffer_int %1 %uint_0
+               OpStore %28 %27
+               OpReturn
+               OpFunctionEnd
+%compute_main = OpFunction %void None %25
+         %32 = OpLabel
+         %33 = OpFunctionCall %int %subgroupAll_c962bd
+         %34 = OpAccessChain %_ptr_StorageBuffer_int %1 %uint_0
+               OpStore %34 %33
+               OpReturn
+               OpFunctionEnd

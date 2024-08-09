@@ -886,6 +886,24 @@ bool ASTPrinter::EmitBuiltinCall(StringStream& out,
             return true;
         }
 
+        case wgsl::BuiltinFn::kSubgroupAll: {
+            out << "simd_all(";
+            if (!EmitExpression(out, expr->args[0])) {
+                return false;
+            }
+            out << ")";
+            return true;
+        }
+
+        case wgsl::BuiltinFn::kSubgroupAny: {
+            out << "simd_any(";
+            if (!EmitExpression(out, expr->args[0])) {
+                return false;
+            }
+            out << ")";
+            return true;
+        }
+
         default:
             break;
     }

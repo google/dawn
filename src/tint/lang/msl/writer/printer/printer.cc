@@ -1006,6 +1006,12 @@ class Printer : public tint::TextGenerator {
             case core::BuiltinFn::kSubgroupMax:
                 out << "simd_max";
                 break;
+            case core::BuiltinFn::kSubgroupAll:
+                out << "simd_all";
+                break;
+            case core::BuiltinFn::kSubgroupAny:
+                out << "simd_any";
+                break;
             case core::BuiltinFn::kInverseSqrt:
                 out << "rsqrt";
                 break;

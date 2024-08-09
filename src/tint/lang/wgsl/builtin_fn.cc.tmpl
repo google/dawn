@@ -120,6 +120,8 @@ bool IsSubgroup(BuiltinFn f) {
         case BuiltinFn::kSubgroupXor:
         case BuiltinFn::kSubgroupMin:
         case BuiltinFn::kSubgroupMax:
+        case BuiltinFn::kSubgroupAll:
+        case BuiltinFn::kSubgroupAny:
             return true;
         default:
             return false;
