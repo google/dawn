@@ -1127,10 +1127,7 @@ bool BufferBase::IsFullBufferRange(uint64_t offset, uint64_t size) const {
 }
 
 void BufferBase::DumpMemoryStatistics(MemoryDump* dump, const char* prefix) const {
-    // Do not emit for destroyed buffers.
-    if (!IsAlive()) {
-        return;
-    }
+    DAWN_ASSERT(IsAlive() && !IsError());
     std::string name = absl::StrFormat("%s/buffer_%p", prefix, static_cast<const void*>(this));
     dump->AddScalar(name.c_str(), MemoryDump::kNameSize, MemoryDump::kUnitsBytes,
                     GetAllocatedSize());

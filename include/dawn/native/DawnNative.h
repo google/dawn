@@ -298,6 +298,10 @@ class DAWN_NATIVE_EXPORT MemoryDump {
 };
 DAWN_NATIVE_EXPORT void DumpMemoryStatistics(WGPUDevice device, MemoryDump* dump);
 
+// Unlike memory dumps which include detailed information about allocations, this only returns the
+// total estimated memory usage, and is intended for background tracing for UMA.
+DAWN_NATIVE_EXPORT uint64_t ComputeEstimatedMemoryUsage(WGPUDevice device);
+
 }  // namespace dawn::native
 
 #endif  // INCLUDE_DAWN_NATIVE_DAWNNATIVE_H_

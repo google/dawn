@@ -457,6 +457,7 @@ class DeviceBase : public ErrorSink, public RefCountedWithExternalCount<RefCount
     Ref<RenderPipelineBase> AddOrGetCachedRenderPipeline(Ref<RenderPipelineBase> renderPipeline);
 
     void DumpMemoryStatistics(dawn::native::MemoryDump* dump) const;
+    uint64_t ComputeEstimatedMemoryUsage() const;
 
     ResultOrError<Ref<BufferBase>> GetOrCreateTemporaryUniformBuffer(size_t size);
 

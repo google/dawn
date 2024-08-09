@@ -40,6 +40,7 @@ namespace dawn::native {
 namespace {
 
 using ::testing::ByMove;
+using ::testing::DoDefault;
 using ::testing::NiceMock;
 using ::testing::Return;
 using ::testing::StrEq;
@@ -155,12 +156,12 @@ TEST_F(MemoryInstrumentationTest, DumpMemoryStatistics) {
     EXPECT_CALL(memoryDumpMock, AddScalar(StrEq(textureLabel(etc2Texture)), MemoryDump::kNameSize,
                                           MemoryDump::kUnitsBytes, kETC2TextureSize));
 
-    // Create a texture and destroy it and check that its size is not counted.
+    // Create a texture and destroy it and check that its info is not emitted.
     wgpu::Texture destroyedTexture = device.CreateTexture(&kMipmappedTextureDesc);
     EXPECT_TRUE(destroyedTexture);
     destroyedTexture.Destroy();
 
-    // Create a shared resourc memory texture and check that its size is not counted.
+    // Create a shared resource memory texture and check that its size is not counted.
     constexpr wgpu::TextureFormat kRGBA8UnormTextureFormat = wgpu::TextureFormat::RGBA8Unorm;
     const wgpu::TextureDescriptor kSharedTextureDesc = {
         .usage = wgpu::TextureUsage::TextureBinding,
@@ -169,17 +170,41 @@ TEST_F(MemoryInstrumentationTest, DumpMemoryStatistics) {
         .viewFormatCount = 1,
         .viewFormats = &kRGBA8UnormTextureFormat,
     };
-    Ref<TextureMock> textureMock =
+    Ref<TextureMock> sharedTextureMock =
         AcquireRef(new NiceMock<TextureMock>(mDeviceMock, FromCppAPI(&kSharedTextureDesc)));
-    textureMock->SetSharedResourceMemoryContentsForTesting(
+    sharedTextureMock->SetSharedResourceMemoryContentsForTesting(
         AcquireRef(new SharedResourceMemoryContents(nullptr)));
-    EXPECT_CALL(*mDeviceMock, CreateTextureImpl).WillOnce(Return(ByMove(std::move(textureMock))));
+    EXPECT_CALL(*mDeviceMock, CreateTextureImpl)
+        .WillOnce(Return(ByMove(std::move(sharedTextureMock))))
+        .WillRepeatedly(DoDefault());
     wgpu::Texture sharedTexture = device.CreateTexture(&kSharedTextureDesc);
+    EXPECT_CALL(memoryDumpMock, AddScalar(StrEq(textureLabel(sharedTexture)), MemoryDump::kNameSize,
+                                          MemoryDump::kUnitsBytes, /*size=*/0));
+
+    // Create a transient attachment (memoryless) texture and check that its size is not counted.
+    mDeviceMock->ForceEnableFeatureForTesting(Feature::TransientAttachments);
+    const wgpu::TextureDescriptor kTransientAttachmentTextureDesc = {
+        .usage = wgpu::TextureUsage::RenderAttachment | wgpu::TextureUsage::TransientAttachment,
+        .size = {.width = 30, .height = 20},
+        .format = kRGBA8UnormTextureFormat,
+        .viewFormatCount = 1,
+        .viewFormats = &kRGBA8UnormTextureFormat,
+    };
+    wgpu::Texture transientAttachmentTexture =
+        device.CreateTexture(&kTransientAttachmentTextureDesc);
+    EXPECT_CALL(memoryDumpMock,
+                AddScalar(StrEq(textureLabel(transientAttachmentTexture)), MemoryDump::kNameSize,
+                          MemoryDump::kUnitsBytes, /*size=*/0));
 
     DumpMemoryStatistics(device.Get(), &memoryDumpMock);
 
     EXPECT_EQ(memoryDumpMock.GetTotalSize(), kBufferAllocatedSize + kMipmappedTextureSize +
                                                  kMultisampleTextureSize + kETC2TextureSize);
+
+    // Check that ComputeEstimatedMemoryUsage() matches the memory dump total size.
+    EXPECT_EQ(
+        ComputeEstimatedMemoryUsage(device.Get()),
+        kBufferAllocatedSize + kMipmappedTextureSize + kMultisampleTextureSize + kETC2TextureSize);
 }
 
 }  // namespace

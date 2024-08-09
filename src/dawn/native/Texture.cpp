@@ -1225,12 +1225,6 @@ void TextureBase::SetSharedResourceMemoryContentsForTesting(
 }
 
 void TextureBase::DumpMemoryStatistics(dawn::native::MemoryDump* dump, const char* prefix) const {
-    // Do not emit for destroyed textures, textures that wrap external shared texture memory, or
-    // textures used as transient (memoryless) attachments.
-    if (!IsAlive() || GetSharedResourceMemoryContents() != nullptr ||
-        (GetInternalUsage() & wgpu::TextureUsage::TransientAttachment) != 0) {
-        return;
-    }
     std::string name = absl::StrFormat("%s/texture_%p", prefix, static_cast<const void*>(this));
     dump->AddScalar(name.c_str(), MemoryDump::kNameSize, MemoryDump::kUnitsBytes,
                     ComputeEstimatedByteSize());
@@ -1243,7 +1237,13 @@ void TextureBase::DumpMemoryStatistics(dawn::native::MemoryDump* dump, const cha
 }
 
 uint64_t TextureBase::ComputeEstimatedByteSize() const {
-    DAWN_ASSERT(!IsError());
+    DAWN_ASSERT(IsAlive() && !IsError());
+    // Do not emit a non-zero size for textures that wrap external shared texture memory, or
+    // textures used as transient (memoryless) attachments.
+    if (GetSharedResourceMemoryContents() != nullptr ||
+        (GetInternalUsage() & wgpu::TextureUsage::TransientAttachment) != 0) {
+        return 0;
+    }
     uint64_t byteSize = 0;
     for (Aspect aspect : IterateEnumMask(SelectFormatAspects(*mFormat, wgpu::TextureAspect::All))) {
         const AspectInfo& info = mFormat->GetAspectInfo(aspect);

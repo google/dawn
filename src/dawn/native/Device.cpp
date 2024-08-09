@@ -2613,6 +2613,17 @@ void DeviceBase::DumpMemoryStatistics(dawn::native::MemoryDump* dump) const {
     });
 }
 
+uint64_t DeviceBase::ComputeEstimatedMemoryUsage() const {
+    uint64_t size = 0;
+    GetObjectTrackingList(ObjectType::Texture)->ForEach([&](const ApiObjectBase* texture) {
+        size += static_cast<const TextureBase*>(texture)->ComputeEstimatedByteSize();
+    });
+    GetObjectTrackingList(ObjectType::Buffer)->ForEach([&](const ApiObjectBase* buffer) {
+        size += static_cast<const BufferBase*>(buffer)->GetAllocatedSize();
+    });
+    return size;
+}
+
 ResultOrError<Ref<BufferBase>> DeviceBase::GetOrCreateTemporaryUniformBuffer(size_t size) {
     if (!mTemporaryUniformBuffer || mTemporaryUniformBuffer->GetSize() != size) {
         BufferDescriptor desc;

@@ -309,4 +309,8 @@ void DumpMemoryStatistics(WGPUDevice device, MemoryDump* dump) {
     FromAPI(device)->DumpMemoryStatistics(dump);
 }
 
+uint64_t ComputeEstimatedMemoryUsage(WGPUDevice device) {
+    return FromAPI(device)->ComputeEstimatedMemoryUsage();
+}
+
 }  // namespace dawn::native
