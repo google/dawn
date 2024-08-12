@@ -922,6 +922,129 @@ note: # Disassembly
 )");
 }
 
+TEST_F(IR_ValidatorTest, Bitcast_MissingArg) {
+    auto* f = b.Function("f", ty.void_());
+    b.Append(f->Block(), [&] {
+        auto* bitcast = b.Bitcast(ty.i32(), 1_u);
+        bitcast->ClearOperands();
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_EQ(res.Failure().reason.Str(),
+              R"(:3:14 error: bitcast: expected exactly 1 operands, got 0
+    %2:i32 = bitcast
+             ^^^^^^^
+
+:2:3 note: in block
+  $B1: {
+  ^^^
+
+note: # Disassembly
+%f = func():void {
+  $B1: {
+    %2:i32 = bitcast
+    ret
+  }
+}
+)");
+}
+
+TEST_F(IR_ValidatorTest, Bitcast_NullArg) {
+    auto* f = b.Function("f", ty.void_());
+    b.Append(f->Block(), [&] {
+        b.Bitcast(ty.i32(), nullptr);
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_EQ(res.Failure().reason.Str(),
+              R"(:3:22 error: bitcast: operand is undefined
+    %2:i32 = bitcast undef
+                     ^^^^^
+
+:2:3 note: in block
+  $B1: {
+  ^^^
+
+note: # Disassembly
+%f = func():void {
+  $B1: {
+    %2:i32 = bitcast undef
+    ret
+  }
+}
+)");
+}
+
+TEST_F(IR_ValidatorTest, Bitcast_MissingResult) {
+    auto* f = b.Function("f", ty.void_());
+    b.Append(f->Block(), [&] {
+        auto* bitcast = b.Bitcast(ty.i32(), 1_u);
+        bitcast->ClearResults();
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_EQ(res.Failure().reason.Str(),
+              R"(:3:13 error: bitcast: expected exactly 1 results, got 0
+    undef = bitcast 1u
+            ^^^^^^^
+
+:2:3 note: in block
+  $B1: {
+  ^^^
+
+note: # Disassembly
+%f = func():void {
+  $B1: {
+    undef = bitcast 1u
+    ret
+  }
+}
+)");
+}
+
+TEST_F(IR_ValidatorTest, Bitcast_NullResult) {
+    auto* f = b.Function("f", ty.void_());
+    b.Append(f->Block(), [&] {
+        auto* c = b.Bitcast(ty.i32(), 1_u);
+        c->SetResults(Vector<InstructionResult*, 1>{nullptr});
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_EQ(res.Failure().reason.Str(),
+              R"(:3:5 error: bitcast: result is undefined
+    undef = bitcast 1u
+    ^^^^^
+
+:2:3 note: in block
+  $B1: {
+  ^^^
+
+:3:5 error: bitcast: result is undefined
+    undef = bitcast 1u
+    ^^^^^
+
+:2:3 note: in block
+  $B1: {
+  ^^^
+
+note: # Disassembly
+%f = func():void {
+  $B1: {
+    undef = bitcast 1u
+    ret
+  }
+}
+)");
+}
+
 TEST_F(IR_ValidatorTest, Construct_Struct_ZeroValue) {
     auto* str_ty = ty.Struct(mod.symbols.New("MyStruct"), {
                                                               {mod.symbols.New("a"), ty.i32()},
@@ -1209,10 +1332,39 @@ MyStruct = struct @align(4) {
 )");
 }
 
+TEST_F(IR_ValidatorTest, Convert_MissingArg) {
+    auto* f = b.Function("f", ty.void_());
+    b.Append(f->Block(), [&] {
+        auto* c = b.Convert(ty.i32(), 1_f);
+        c->ClearOperands();
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_EQ(res.Failure().reason.Str(),
+              R"(:3:14 error: convert: expected exactly 1 operands, got 0
+    %2:i32 = convert
+             ^^^^^^^
+
+:2:3 note: in block
+  $B1: {
+  ^^^
+
+note: # Disassembly
+%f = func():void {
+  $B1: {
+    %2:i32 = convert
+    ret
+  }
+}
+)");
+}
+
 TEST_F(IR_ValidatorTest, Convert_NullArg) {
     auto* f = b.Function("f", ty.void_());
     b.Append(f->Block(), [&] {
-        b.Convert(ty.f32(), nullptr);
+        b.Convert(ty.i32(), nullptr);
         b.Return(f);
     });
 
@@ -1220,7 +1372,7 @@ TEST_F(IR_ValidatorTest, Convert_NullArg) {
     ASSERT_NE(res, Success);
     EXPECT_EQ(res.Failure().reason.Str(),
               R"(:3:22 error: convert: operand is undefined
-    %2:f32 = convert undef
+    %2:i32 = convert undef
                      ^^^^^
 
 :2:3 note: in block
@@ -1230,7 +1382,36 @@ TEST_F(IR_ValidatorTest, Convert_NullArg) {
 note: # Disassembly
 %f = func():void {
   $B1: {
-    %2:f32 = convert undef
+    %2:i32 = convert undef
+    ret
+  }
+}
+)");
+}
+
+TEST_F(IR_ValidatorTest, Convert_MissingResult) {
+    auto* f = b.Function("f", ty.void_());
+    b.Append(f->Block(), [&] {
+        auto* c = b.Convert(ty.i32(), 1_f);
+        c->ClearResults();
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_EQ(res.Failure().reason.Str(),
+              R"(:3:13 error: convert: expected exactly 1 results, got 0
+    undef = convert 1.0f
+            ^^^^^^^
+
+:2:3 note: in block
+  $B1: {
+  ^^^
+
+note: # Disassembly
+%f = func():void {
+  $B1: {
+    undef = convert 1.0f
     ret
   }
 }
