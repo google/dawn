@@ -2427,6 +2427,36 @@ note: # Disassembly
 )");
 }
 
+TEST_F(IR_ValidatorTest, Var_Function_NonPtrResult) {
+    auto* f = b.Function("my_func", ty.void_());
+
+    b.Append(f->Block(), [&] {
+        auto* v = b.Var<function, f32>();
+        v->Result(0)->SetType(ty.f32());
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_EQ(res.Failure().reason.Str(),
+              R"(:3:14 error: var: result type must be a pointer or a reference
+    %2:f32 = var
+             ^^^
+
+:2:3 note: in block
+  $B1: {
+  ^^^
+
+note: # Disassembly
+%my_func = func():void {
+  $B1: {
+    %2:f32 = var
+    ret
+  }
+}
+)");
+}
+
 TEST_F(IR_ValidatorTest, Var_Function_UnexpectedInputAttachmentIndex) {
     auto* f = b.Function("my_func", ty.void_());
 

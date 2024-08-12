@@ -1232,30 +1232,33 @@ void Validator::CheckVar(const Var* var) {
 
     auto* result_type = var->Result(0)->Type();
     if (result_type == nullptr) {
-        AddError(var) << "result result_type is undefined";
+        AddError(var) << "result type is undefined";
         return;
     }
 
-    if (auto* mv = result_type->As<type::MemoryView>()) {
-        // Check that only resource variables have @group and @binding set
-        switch (mv->AddressSpace()) {
-            case AddressSpace::kHandle:
-            case AddressSpace::kStorage:
-            case AddressSpace::kUniform:
-                if (!var->BindingPoint().has_value()) {
-                    AddError(var) << "resource variable missing binding points";
-                }
-                break;
-            default:
-                break;
-        }
+    auto* mv = result_type->As<type::MemoryView>();
+    if (!mv) {
+        AddError(var) << "result type must be a pointer or a reference";
+        return;
+    }
 
-        // Check that non-handle variables don't have @input_attachment_index set
-        if (var->InputAttachmentIndex().has_value() &&
-            mv->AddressSpace() != AddressSpace::kHandle) {
-            AddError(var) << "'@input_attachment_index' is not valid for non-handle var";
-            return;
-        }
+    // Check that only resource variables have @group and @binding set
+    switch (mv->AddressSpace()) {
+        case AddressSpace::kHandle:
+        case AddressSpace::kStorage:
+        case AddressSpace::kUniform:
+            if (!var->BindingPoint().has_value()) {
+                AddError(var) << "resource variable missing binding points";
+            }
+            break;
+        default:
+            break;
+    }
+
+    // Check that non-handle variables don't have @input_attachment_index set
+    if (var->InputAttachmentIndex().has_value() && mv->AddressSpace() != AddressSpace::kHandle) {
+        AddError(var) << "'@input_attachment_index' is not valid for non-handle var";
+        return;
     }
 }
 
