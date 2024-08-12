@@ -3102,6 +3102,8 @@ std::string ASTPrinter::generate_builtin_name(const sem::BuiltinFn* builtin) {
             return "WaveReadLaneAt";
         case wgsl::BuiltinFn::kSubgroupBroadcastFirst:
             return "WaveReadLaneFirst";
+        case wgsl::BuiltinFn::kSubgroupShuffle:
+            return "WaveReadLaneAt";
         case wgsl::BuiltinFn::kSubgroupAdd:
             return "WaveActiveSum";
         case wgsl::BuiltinFn::kSubgroupExclusiveAdd:

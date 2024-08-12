@@ -648,6 +648,7 @@ class State {
                     case wgsl::BuiltinFn::kSubgroupElect:
                     case wgsl::BuiltinFn::kSubgroupBroadcast:
                     case wgsl::BuiltinFn::kSubgroupBroadcastFirst:
+                    case wgsl::BuiltinFn::kSubgroupShuffle:
                     case wgsl::BuiltinFn::kSubgroupAdd:
                     case wgsl::BuiltinFn::kSubgroupExclusiveAdd:
                     case wgsl::BuiltinFn::kSubgroupMul:

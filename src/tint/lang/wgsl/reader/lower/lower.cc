@@ -169,6 +169,7 @@ core::BuiltinFn Convert(wgsl::BuiltinFn fn) {
         CASE(kSubgroupElect)
         CASE(kSubgroupBroadcast)
         CASE(kSubgroupBroadcastFirst)
+        CASE(kSubgroupShuffle)
         CASE(kInputAttachmentLoad)
         CASE(kSubgroupAdd)
         CASE(kSubgroupExclusiveAdd)

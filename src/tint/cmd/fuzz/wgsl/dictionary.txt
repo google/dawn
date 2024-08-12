@@ -381,6 +381,7 @@
 "subgroupMin"
 "subgroupMul"
 "subgroupOr"
+"subgroupShuffle"
 "subgroupXor"
 "subgroup_invocation_id"
 "subgroup_size"

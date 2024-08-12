@@ -625,6 +625,8 @@ match workgroup
 @must_use @stage("fragment", "compute") fn subgroupBroadcast[N: num, T: fiu32_f16](value: vec<N, T>, @const sourceLaneIndex: u32) -> vec<N, T>
 @must_use @stage("fragment", "compute") fn subgroupBroadcastFirst[T: fiu32_f16](value: T) -> T
 @must_use @stage("fragment", "compute") fn subgroupBroadcastFirst[N: num, T: fiu32_f16](value: vec<N, T>) -> vec<N, T>
+@must_use @stage("fragment", "compute") fn subgroupShuffle[T: fiu32_f16](value: T, sourceLaneIndex: iu32) -> T
+@must_use @stage("fragment", "compute") fn subgroupShuffle[N: num, T: fiu32_f16](value: vec<N, T>, sourceLaneIndex: iu32) -> vec<N, T>
 @must_use @stage("fragment", "compute") fn subgroupAdd[T: fiu32_f16](value: T) -> T
 @must_use @stage("fragment", "compute") fn subgroupAdd[N: num, T: fiu32_f16](value: vec<N, T>) -> vec<N, T>
 @must_use @stage("fragment", "compute") fn subgroupExclusiveAdd[T: fiu32_f16](value: T) -> T

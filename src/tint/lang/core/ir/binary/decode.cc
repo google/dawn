@@ -1631,6 +1631,8 @@ struct Decoder {
                 return core::BuiltinFn::kSubgroupBroadcast;
             case pb::BuiltinFn::subgroup_broadcast_first:
                 return core::BuiltinFn::kSubgroupBroadcastFirst;
+            case pb::BuiltinFn::subgroup_shuffle:
+                return core::BuiltinFn::kSubgroupShuffle;
             case pb::BuiltinFn::input_attachment_load:
                 return core::BuiltinFn::kInputAttachmentLoad;
             case pb::BuiltinFn::subgroup_add:

@@ -173,6 +173,7 @@ wgsl::BuiltinFn Convert(core::BuiltinFn fn) {
         CASE(kSubgroupElect)
         CASE(kSubgroupBroadcast)
         CASE(kSubgroupBroadcastFirst)
+        CASE(kSubgroupShuffle)
         CASE(kSubgroupAdd)
         CASE(kSubgroupExclusiveAdd)
         CASE(kSubgroupMul)

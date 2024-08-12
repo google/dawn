@@ -1002,6 +1002,9 @@ class Printer : public tint::TextGenerator {
             case core::BuiltinFn::kSubgroupBroadcastFirst:
                 out << "WaveReadLaneFirst";
                 break;
+            case core::BuiltinFn::kSubgroupShuffle:
+                out << "WaveReadLaneAt";
+                break;
             case core::BuiltinFn::kWorkgroupBarrier:
                 out << "GroupMemoryBarrierWithGroupSync";
                 break;

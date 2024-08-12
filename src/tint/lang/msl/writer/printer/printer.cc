@@ -987,6 +987,9 @@ class Printer : public tint::TextGenerator {
             case core::BuiltinFn::kSubgroupBroadcastFirst:
                 out << "simd_broadcast_first";
                 break;
+            case core::BuiltinFn::kSubgroupShuffle:
+                out << "simd_shuffle";
+                break;
             case core::BuiltinFn::kSubgroupAdd:
                 out << "simd_sum";
                 break;

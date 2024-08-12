@@ -819,6 +819,19 @@ bool ASTPrinter::EmitBuiltinCall(StringStream& out,
             return true;
         }
 
+        case wgsl::BuiltinFn::kSubgroupShuffle: {
+            out << "simd_shuffle(";
+            if (!EmitExpression(out, expr->args[0])) {
+                return false;
+            }
+            out << ",";
+            if (!EmitExpression(out, expr->args[1])) {
+                return false;
+            }
+            out << ")";
+            return true;
+        }
+
         case wgsl::BuiltinFn::kSubgroupAdd: {
             out << "simd_sum(";
             if (!EmitExpression(out, expr->args[0])) {

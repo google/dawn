@@ -1,0 +1,18 @@
+#include <metal_stdlib>
+
+using namespace metal;
+uint subgroupShuffle_f194f5() {
+  uint res = simd_shuffle(1u,1u);
+  return res;
+}
+
+fragment void fragment_main(device uint* tint_symbol [[buffer(0)]]) {
+  *(tint_symbol) = subgroupShuffle_f194f5();
+  return;
+}
+
+kernel void compute_main(device uint* tint_symbol_1 [[buffer(0)]]) {
+  *(tint_symbol_1) = subgroupShuffle_f194f5();
+  return;
+}
+

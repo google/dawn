@@ -645,4 +645,5 @@ enum BuiltinFn {
     subgroup_all = 132;
     subgroup_elect = 133;
     subgroup_broadcast_first = 134;
+    subgroup_shuffle = 135;
 }

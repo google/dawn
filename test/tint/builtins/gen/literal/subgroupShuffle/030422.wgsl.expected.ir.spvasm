@@ -1,0 +1,60 @@
+; SPIR-V
+; Version: 1.3
+; Generator: Google Tint Compiler; 1
+; Bound: 30
+; Schema: 0
+               OpCapability Shader
+               OpCapability GroupNonUniformShuffle
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint Fragment %fragment_main "fragment_main"
+               OpEntryPoint GLCompute %compute_main "compute_main"
+               OpExecutionMode %fragment_main OriginUpperLeft
+               OpExecutionMode %compute_main LocalSize 1 1 1
+               OpMemberName %tint_symbol_1 0 "tint_symbol"
+               OpName %tint_symbol_1 "tint_symbol_1"
+               OpName %subgroupShuffle_030422 "subgroupShuffle_030422"
+               OpName %res "res"
+               OpName %fragment_main "fragment_main"
+               OpName %compute_main "compute_main"
+               OpMemberDecorate %tint_symbol_1 0 Offset 0
+               OpDecorate %tint_symbol_1 Block
+               OpDecorate %1 DescriptorSet 0
+               OpDecorate %1 Binding 0
+      %float = OpTypeFloat 32
+%tint_symbol_1 = OpTypeStruct %float
+%_ptr_StorageBuffer_tint_symbol_1 = OpTypePointer StorageBuffer %tint_symbol_1
+          %1 = OpVariable %_ptr_StorageBuffer_tint_symbol_1 StorageBuffer
+          %6 = OpTypeFunction %float
+       %uint = OpTypeInt 32 0
+        %int = OpTypeInt 32 1
+      %int_1 = OpConstant %int 1
+     %uint_3 = OpConstant %uint 3
+    %float_1 = OpConstant %float 1
+%_ptr_Function_float = OpTypePointer Function %float
+       %void = OpTypeVoid
+         %20 = OpTypeFunction %void
+%_ptr_StorageBuffer_float = OpTypePointer StorageBuffer %float
+     %uint_0 = OpConstant %uint 0
+%subgroupShuffle_030422 = OpFunction %float None %6
+          %7 = OpLabel
+        %res = OpVariable %_ptr_Function_float Function
+          %9 = OpBitcast %uint %int_1
+         %12 = OpGroupNonUniformShuffle %float %uint_3 %float_1 %9
+               OpStore %res %12
+         %17 = OpLoad %float %res
+               OpReturnValue %17
+               OpFunctionEnd
+%fragment_main = OpFunction %void None %20
+         %21 = OpLabel
+         %22 = OpFunctionCall %float %subgroupShuffle_030422
+         %23 = OpAccessChain %_ptr_StorageBuffer_float %1 %uint_0
+               OpStore %23 %22
+               OpReturn
+               OpFunctionEnd
+%compute_main = OpFunction %void None %20
+         %27 = OpLabel
+         %28 = OpFunctionCall %float %subgroupShuffle_030422
+         %29 = OpAccessChain %_ptr_StorageBuffer_float %1 %uint_0
+               OpStore %29 %28
+               OpReturn
+               OpFunctionEnd
