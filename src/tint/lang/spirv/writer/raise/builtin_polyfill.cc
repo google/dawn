@@ -88,6 +88,7 @@ struct State {
                     case core::BuiltinFn::kDot4I8Packed:
                     case core::BuiltinFn::kDot4U8Packed:
                     case core::BuiltinFn::kSelect:
+                    case core::BuiltinFn::kSubgroupBroadcast:
                     case core::BuiltinFn::kSubgroupShuffle:
                     case core::BuiltinFn::kTextureDimensions:
                     case core::BuiltinFn::kTextureGather:
@@ -143,6 +144,9 @@ struct State {
                     break;
                 case core::BuiltinFn::kSelect:
                     Select(builtin);
+                    break;
+                case core::BuiltinFn::kSubgroupBroadcast:
+                    SubgroupBroadcast(builtin);
                     break;
                 case core::BuiltinFn::kSubgroupShuffle:
                     SubgroupShuffle(builtin);
@@ -902,6 +906,19 @@ struct State {
             auto* cast = b.Bitcast(ty.u32(), id);
             cast->InsertBefore(builtin);
             builtin->SetArg(1, cast->Result(0));
+        }
+    }
+
+    /// Handle a SubgroupBroadcast() builtin.
+    /// @param builtin the builtin call instruction
+    void SubgroupBroadcast(core::ir::CoreBuiltinCall* builtin) {
+        TINT_ASSERT(builtin->Args().Length() == 2);
+        auto* id = builtin->Args()[1];
+        TINT_ASSERT(id->Is<core::ir::Constant>());
+
+        // For const signed int IDs, compile-time convert to u32 to maintain constness.
+        if (id->Type()->is_signed_integer_scalar()) {
+            builtin->SetArg(1, b.Constant(id->As<core::ir::Constant>()->Value()->ValueAs<u32>()));
         }
     }
 };

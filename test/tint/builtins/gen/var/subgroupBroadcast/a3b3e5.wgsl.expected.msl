@@ -1,0 +1,19 @@
+#include <metal_stdlib>
+
+using namespace metal;
+half3 subgroupBroadcast_a3b3e5() {
+  half3 arg_0 = half3(1.0h);
+  half3 res = simd_broadcast(arg_0,ushort(1));
+  return res;
+}
+
+fragment void fragment_main(device packed_half3* tint_symbol [[buffer(0)]]) {
+  *(tint_symbol) = packed_half3(subgroupBroadcast_a3b3e5());
+  return;
+}
+
+kernel void compute_main(device packed_half3* tint_symbol_1 [[buffer(0)]]) {
+  *(tint_symbol_1) = packed_half3(subgroupBroadcast_a3b3e5());
+  return;
+}
+

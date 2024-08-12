@@ -3026,5 +3026,38 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, SubgroupShuffle) {
     EXPECT_EQ(expect, str());
 }
 
+TEST_F(SpirvWriter_BuiltinPolyfillTest, SubgroupBroadcastConstSignedId) {
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        b.Let("a", b.Call(ty.i32(), core::BuiltinFn::kSubgroupBroadcast, 1_i, 1_i));
+        b.Return(func);
+    });
+
+    auto* src = R"(
+%foo = @fragment func():void {
+  $B1: {
+    %2:i32 = subgroupBroadcast 1i, 1i
+    %a:i32 = let %2
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = @fragment func():void {
+  $B1: {
+    %2:i32 = subgroupBroadcast 1i, 1u
+    %a:i32 = let %2
+    ret
+  }
+}
+)";
+
+    Run(BuiltinPolyfill);
+
+    EXPECT_EQ(expect, str());
+}
+
 }  // namespace
 }  // namespace tint::spirv::writer::raise
