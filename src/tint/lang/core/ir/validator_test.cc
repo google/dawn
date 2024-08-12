@@ -430,6 +430,27 @@ note: # Disassembly
 )");
 }
 
+TEST_F(IR_ValidatorTest, Function_UnexpectedFragDepth) {
+    auto* f = b.Function("my_func", ty.void_());
+    f->SetReturnBuiltin(BuiltinValue::kFragDepth);
+    b.Append(f->Block(), [&] { b.Return(f); });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_EQ(res.Failure().reason.Str(),
+              R"(:1:1 error: frag_depth can only be declared for fragment entry points
+%my_func = func():void [@frag_depth] {
+^^^^^^^^
+
+note: # Disassembly
+%my_func = func():void [@frag_depth] {
+  $B1: {
+    ret
+  }
+}
+)");
+}
+
 TEST_F(IR_ValidatorTest, CallToFunctionOutsideModule) {
     auto* f = b.Function("f", ty.void_());
     auto* g = b.Function("g", ty.void_());

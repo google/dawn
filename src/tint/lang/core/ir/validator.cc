@@ -1061,6 +1061,13 @@ void Validator::CheckFunction(const Function* func) {
         AddError(func) << "function return type must be constructible";
     }
 
+    if (func->Stage() != Function::PipelineStage::kFragment) {
+        if (TINT_UNLIKELY(func->ReturnBuiltin().has_value() &&
+                          func->ReturnBuiltin().value() == BuiltinValue::kFragDepth)) {
+            AddError(func) << "frag_depth can only be declared for fragment entry points";
+        }
+    }
+
     QueueBlock(func->Block());
     ProcessTasks();
 }
