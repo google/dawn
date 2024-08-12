@@ -205,7 +205,6 @@ ShaderModule::~ShaderModule() = default;
     X(std::string_view, entryPointName)                                                          \
     X(bool, disableSymbolRenaming)                                                               \
     X(tint::spirv::writer::Options, tintOptions)                                                 \
-    X(bool, use_tint_ir)                                                                         \
     X(CacheKey::UnsafeUnkeyedValue<dawn::platform::Platform*>, platform)                         \
     X(std::optional<uint32_t>, maxSubgroupSizeForFullSubgroups)
 
@@ -368,7 +367,6 @@ ResultOrError<ShaderModule::ModuleAndSpirv> ShaderModule::GetHandleAndSpirv(
         GetDevice()->IsToggleEnabled(Toggle::VulkanUseBufferRobustAccess2);
     req.tintOptions.polyfill_dot_4x8_packed =
         GetDevice()->IsToggleEnabled(Toggle::PolyFillPacked4x8DotProduct);
-    req.use_tint_ir = GetDevice()->IsToggleEnabled(Toggle::UseTintIR);
     req.tintOptions.disable_polyfill_integer_div_mod =
         GetDevice()->IsToggleEnabled(Toggle::DisablePolyfillsOnIntegerDivisonAndModulo);
 
@@ -447,18 +445,14 @@ ResultOrError<ShaderModule::ModuleAndSpirv> ShaderModule::GetHandleAndSpirv(
             }
 
             TRACE_EVENT0(r.platform.UnsafeGetValue(), General, "tint::spirv::writer::Generate()");
-            tint::Result<tint::spirv::writer::Output> tintResult;
-            if (r.use_tint_ir) {
-                // Convert the AST program to an IR module.
-                auto ir = tint::wgsl::reader::ProgramToLoweredIR(program);
-                DAWN_INVALID_IF(ir != tint::Success,
-                                "An error occurred while generating Tint IR\n%s",
-                                ir.Failure().reason.Str());
 
-                tintResult = tint::spirv::writer::Generate(ir.Get(), r.tintOptions);
-            } else {
-                tintResult = tint::spirv::writer::Generate(program, r.tintOptions);
-            }
+            // Convert the AST program to an IR module.
+            auto ir = tint::wgsl::reader::ProgramToLoweredIR(program);
+            DAWN_INVALID_IF(ir != tint::Success, "An error occurred while generating Tint IR\n%s",
+                            ir.Failure().reason.Str());
+
+            // Generate SPIR-V from Tint IR.
+            auto tintResult = tint::spirv::writer::Generate(ir.Get(), r.tintOptions);
             DAWN_INVALID_IF(tintResult != tint::Success,
                             "An error occurred while generating SPIR-V\n%s",
                             tintResult.Failure().reason.Str());
