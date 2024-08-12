@@ -166,6 +166,9 @@ struct Options {
     /// The bindings
     Bindings bindings;
 
+    /// Set to `true` to polyfill dot4I8Packed() dot4U8Packed().
+    bool polyfill_dot_4x8_packed = false;
+
     /// Reflect the fields of this class so that it can be used by tint::ForeachField()
     TINT_REFLECT(Options,
                  disable_robustness,
@@ -176,7 +179,8 @@ struct Options {
                  fixed_sample_mask,
                  pixel_local_attachments,
                  array_length_from_uniform,
-                 bindings);
+                 bindings,
+                 polyfill_dot_4x8_packed);
 };
 
 }  // namespace tint::msl::writer

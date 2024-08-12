@@ -290,6 +290,8 @@ ResultOrError<CacheResult<MslCompilation>> TranslateToMSL(
     req.use_tint_ir = device->IsToggleEnabled(Toggle::UseTintIR);
     req.tintOptions.disable_polyfill_integer_div_mod =
         device->IsToggleEnabled(Toggle::DisablePolyfillsOnIntegerDivisonAndModulo);
+    req.tintOptions.polyfill_dot_4x8_packed =
+        device->IsToggleEnabled(Toggle::PolyFillPacked4x8DotProduct);
 
     const CombinedLimits& limits = device->GetLimits();
     req.limits = LimitsForCompilationRequest::Create(limits.v1);

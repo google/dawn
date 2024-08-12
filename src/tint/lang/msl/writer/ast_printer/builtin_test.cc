@@ -1142,5 +1142,125 @@ kernel void func() {
 )");
 }
 
+TEST_F(MslASTPrinterTest, PolyfillDot4I8Packed_False) {
+    WrapInFunction(Decl(Let("zero", Expr(0_u))),  //
+                   Decl(Let("v", Call("dot4I8Packed", "zero", Expr(1_u)))));
+
+    Options options;
+    options.polyfill_dot_4x8_packed = false;
+    ASTPrinter& gen = SanitizeAndBuild(options);
+
+    ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
+    EXPECT_EQ(gen.Result(), R"(#include <metal_stdlib>
+
+using namespace metal;
+
+int tint_dot4I8Packed(uint param_0, uint param_1) {
+  char4 vec1 = as_type<char4>(param_0);
+  char4 vec2 = as_type<char4>(param_1);
+  return vec1[0] * vec2[0] + vec1[1] * vec2[1] + vec1[2] * vec2[2] + vec1[3] * vec2[3];
+}
+
+kernel void test_function() {
+  uint const zero = 0u;
+  int const v = tint_dot4I8Packed(zero, 1u);
+  return;
+}
+
+)");
+}
+
+TEST_F(MslASTPrinterTest, PolyfillDot4I8Packed_True) {
+    WrapInFunction(Decl(Let("zero", Expr(0_u))),  //
+                   Decl(Let("v", Call("dot4I8Packed", "zero", Expr(1_u)))));
+
+    Options options;
+    options.polyfill_dot_4x8_packed = true;
+    ASTPrinter& gen = SanitizeAndBuild(options);
+
+    ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
+    EXPECT_EQ(gen.Result(), R"(#include <metal_stdlib>
+
+using namespace metal;
+
+template<typename T>
+T tint_dot4(vec<T,4> a, vec<T,4> b) {
+  return a[0]*b[0] + a[1]*b[1] + a[2]*b[2] + a[3]*b[3];
+}
+int tint_dot4_i8_packed(uint a, uint b) {
+  int4 const a_i8 = (as_type<int4>((uint4(a) << uint4(24u, 16u, 8u, 0u))) >> uint4(24u));
+  int4 const b_i8 = (as_type<int4>((uint4(b) << uint4(24u, 16u, 8u, 0u))) >> uint4(24u));
+  return tint_dot4(a_i8, b_i8);
+}
+
+kernel void test_function() {
+  uint const zero = 0u;
+  int const v = tint_dot4_i8_packed(zero, 1u);
+  return;
+}
+
+)");
+}
+
+TEST_F(MslASTPrinterTest, PolyfillDot4U8Packed_False) {
+    WrapInFunction(Decl(Let("zero", Expr(0_u))),  //
+                   Decl(Let("v", Call("dot4U8Packed", "zero", Expr(1_u)))));
+
+    Options options;
+    options.polyfill_dot_4x8_packed = false;
+    ASTPrinter& gen = SanitizeAndBuild(options);
+
+    ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
+    EXPECT_EQ(gen.Result(), R"(#include <metal_stdlib>
+
+using namespace metal;
+
+uint tint_dot4U8Packed(uint param_0, uint param_1) {
+  uchar4 vec1 = as_type<uchar4>(param_0);
+  uchar4 vec2 = as_type<uchar4>(param_1);
+  return vec1[0] * vec2[0] + vec1[1] * vec2[1] + vec1[2] * vec2[2] + vec1[3] * vec2[3];
+}
+
+kernel void test_function() {
+  uint const zero = 0u;
+  uint const v = tint_dot4U8Packed(zero, 1u);
+  return;
+}
+
+)");
+}
+
+TEST_F(MslASTPrinterTest, PolyfillDot4U8Packed_True) {
+    WrapInFunction(Decl(Let("zero", Expr(0_u))),  //
+                   Decl(Let("v", Call("dot4U8Packed", "zero", Expr(1_u)))));
+
+    Options options;
+    options.polyfill_dot_4x8_packed = true;
+    ASTPrinter& gen = SanitizeAndBuild(options);
+
+    ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
+    EXPECT_EQ(gen.Result(), R"(#include <metal_stdlib>
+
+using namespace metal;
+
+template<typename T>
+T tint_dot4(vec<T,4> a, vec<T,4> b) {
+  return a[0]*b[0] + a[1]*b[1] + a[2]*b[2] + a[3]*b[3];
+}
+uint tint_dot4_u8_packed(uint a, uint b) {
+  uint4 const a_u8 = ((uint4(a) >> uint4(24u, 16u, 8u, 0u)) & uint4(255u));
+  uint4 const b_u8 = ((uint4(b) >> uint4(24u, 16u, 8u, 0u)) & uint4(255u));
+  return tint_dot4(a_u8, b_u8);
+}
+
+kernel void test_function() {
+  uint const zero = 0u;
+  uint const v = tint_dot4_u8_packed(zero, 1u);
+  return;
+}
+
+)");
+}
+
 }  // namespace
 }  // namespace tint::msl::writer
