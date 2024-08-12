@@ -695,29 +695,24 @@ std::string Disassemble(const std::vector<uint32_t>& data) {
 /// @returns true on success
 bool GenerateSpirv(const tint::Program& program, const Options& options) {
 #if TINT_BUILD_SPV_WRITER
-    // TODO(jrprice): Provide a way for the user to set non-default options.
     tint::spirv::writer::Options gen_options;
     gen_options.disable_robustness = !options.enable_robustness;
     gen_options.disable_workgroup_init = options.disable_workgroup_init;
     gen_options.use_storage_input_output_16 = options.use_storage_input_output_16;
     gen_options.bindings = tint::spirv::writer::GenerateBindings(program);
 
-    tint::Result<tint::spirv::writer::Output> result;
-    if (options.use_ir) {
-        // Convert the AST program to an IR module.
-        auto ir = tint::wgsl::reader::ProgramToLoweredIR(program);
-        if (ir != tint::Success) {
-            std::cerr << "Failed to generate IR: " << ir << "\n";
-            return false;
-        }
-        result = tint::spirv::writer::Generate(ir.Get(), gen_options);
-    } else {
-        result = tint::spirv::writer::Generate(program, gen_options);
+    // Convert the AST program to an IR module.
+    auto ir = tint::wgsl::reader::ProgramToLoweredIR(program);
+    if (ir != tint::Success) {
+        std::cerr << "Failed to generate IR: " << ir << "\n";
+        return false;
     }
 
+    // Generate SPIR-V from Tint IR.
+    auto result = tint::spirv::writer::Generate(ir.Get(), gen_options);
     if (result != tint::Success) {
         tint::cmd::PrintWGSL(std::cerr, program);
-        std::cerr << "Failed to generate: " << result.Failure() << "\n";
+        std::cerr << "Failed to generate SPIR-V: " << result.Failure() << "\n";
         return false;
     }
 
