@@ -235,6 +235,14 @@ func run() error {
 		}
 	}
 
+	if useIr {
+		for _, f := range formats {
+			if f != msl && f != hlslDXC && f != hlslFXC && f != glsl {
+				return fmt.Errorf("--use-ir is not valid with format '%s'", f)
+			}
+		}
+	}
+
 	defaultMSLExe := "xcrun"
 	if runtime.GOOS == "windows" {
 		defaultMSLExe = "metal.exe"
