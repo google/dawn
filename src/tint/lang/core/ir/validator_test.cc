@@ -1455,6 +1455,127 @@ note: # Disassembly
 )");
 }
 
+TEST_F(IR_ValidatorTest, Discard_TooManyOperands) {
+    auto* func = b.Function("foo", ty.void_());
+    b.Append(func->Block(), [&] {
+        auto* d = b.Discard();
+        d->SetOperands(Vector{b.Value(0_i)});
+        b.Return(func);
+    });
+
+    auto* ep = b.Function("ep", ty.void_());
+    ep->SetStage(Function::PipelineStage::kFragment);
+    b.Append(ep->Block(), [&] {
+        b.Call(func);
+        b.Return(ep);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_EQ(res.Failure().reason.Str(),
+              R"(:3:5 error: discard: expected exactly 0 operands, got 1
+    discard
+    ^^^^^^^
+
+:2:3 note: in block
+  $B1: {
+  ^^^
+
+note: # Disassembly
+%foo = func():void {
+  $B1: {
+    discard
+    ret
+  }
+}
+%ep = @fragment func():void {
+  $B2: {
+    %3:void = call %foo
+    ret
+  }
+}
+)");
+}
+
+TEST_F(IR_ValidatorTest, Discard_TooManyResults) {
+    auto* func = b.Function("foo", ty.void_());
+    b.Append(func->Block(), [&] {
+        auto* d = b.Discard();
+        d->SetResults(Vector{b.InstructionResult(ty.i32())});
+        b.Return(func);
+    });
+
+    auto* ep = b.Function("ep", ty.void_());
+    ep->SetStage(Function::PipelineStage::kFragment);
+    b.Append(ep->Block(), [&] {
+        b.Call(func);
+        b.Return(ep);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_EQ(res.Failure().reason.Str(),
+              R"(:3:5 error: discard: expected exactly 0 results, got 1
+    discard
+    ^^^^^^^
+
+:2:3 note: in block
+  $B1: {
+  ^^^
+
+note: # Disassembly
+%foo = func():void {
+  $B1: {
+    discard
+    ret
+  }
+}
+%ep = @fragment func():void {
+  $B2: {
+    %3:void = call %foo
+    ret
+  }
+}
+)");
+}
+
+TEST_F(IR_ValidatorTest, Discard_NotInFragment) {
+    auto* func = b.Function("foo", ty.void_());
+    b.Append(func->Block(), [&] {
+        b.Discard();
+        b.Return(func);
+    });
+
+    auto* ep = b.Function("ep", ty.void_());
+    ep->SetStage(Function::PipelineStage::kVertex);
+    b.Append(ep->Block(), [&] {
+        b.Call(func);
+        b.Return(ep);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_EQ(res.Failure().reason.Str(),
+              R"(:3:5 error: discard: cannot be called in non-fragment end point
+    discard
+    ^^^^^^^
+
+note: # Disassembly
+%foo = func():void {
+  $B1: {
+    discard
+    ret
+  }
+}
+%ep = @vertex func():void {
+  $B2: {
+    %3:void = call %foo
+    ret
+  }
+}
+)");
+}
+
 TEST_F(IR_ValidatorTest, Block_NoTerminator) {
     b.Function("my_func", ty.void_());
 

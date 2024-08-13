@@ -143,6 +143,19 @@ class Validator {
     Result<SuccessType> Run();
 
   private:
+    /// Runs validation to confirm the structural soundness of the module.
+    /// Also runs any validation that is not dependent on the entire module being
+    /// sound and sets up data structures for later checks.
+    void RunStructuralSoundnessChecks();
+
+    /// Checks that there are no orphaned instructions
+    /// Depends on CheckStructuralSoundness() having previously been run
+    void CheckForOrphanedInstructions();
+
+    /// Checks that there are no discards called by non-fragment entrypoints
+    /// Depends on CheckStructuralSoundness() having previously been run
+    void CheckForNonFragmentDiscards();
+
     /// @returns the IR disassembly, performing a disassemble if this is the first call.
     ir::Disassembler& Disassemble();
 
@@ -385,6 +398,12 @@ class Validator {
     /// @param convert the convert to validate
     void CheckConvert(const Convert* convert);
 
+    /// Validates the given discard
+    /// @note Does not validate that the discard is in a fragment shader, that
+    /// needs to be handled later in the validation.
+    /// @param discard the discard to validate
+    void CheckDiscard(const Discard* discard);
+
     /// Validates the given user call
     /// @param call the call to validate
     void CheckUserCall(const UserCall* call);
@@ -517,6 +536,44 @@ class Validator {
     /// values.
     void EndBlock();
 
+    /// Get the function that contains an instruction.
+    /// @param inst the instruction
+    /// @returns the function
+    const ir::Function* ContainingFunction(const ir::Instruction* inst) {
+        return block_to_function_.GetOrAdd(inst->Block(), [&] {  //
+            return ContainingFunction(inst->Block()->Parent());
+        });
+    }
+
+    /// Get any endpoints that call a function.
+    /// @param f the function
+    /// @returns all end points that call the function
+    Hashset<const ir::Function*, 4> ContainingEndPoints(const ir::Function* f) {
+        Hashset<const ir::Function*, 4> result{};
+        Hashset<const ir::Function*, 4> visited{f};
+
+        auto call_sites = user_func_calls_.GetOr(f, Hashset<const ir::UserCall*, 4>()).Vector();
+        while (!call_sites.IsEmpty()) {
+            auto call_site = call_sites.Pop();
+            auto calling_function = ContainingFunction(call_site);
+            if (visited.Contains(calling_function)) {
+                continue;
+            }
+            visited.Add(calling_function);
+
+            if (calling_function->Stage() != Function::PipelineStage::kUndefined) {
+                result.Add(calling_function);
+            }
+
+            for (auto new_call_sites :
+                 user_func_calls_.GetOr(f, Hashset<const ir::UserCall*, 4>())) {
+                call_sites.Push(new_call_sites);
+            }
+        }
+
+        return result;
+    }
+
     /// ScopeStack holds a stack of values that are currently in scope
     struct ScopeStack {
         void Push() { stack_.Push({}); }
@@ -544,6 +601,9 @@ class Validator {
     Vector<std::function<void()>, 16> tasks_;
     SymbolTable symbols_ = SymbolTable::Wrap(mod_.symbols);
     type::Manager type_mgr_ = type::Manager::Wrap(mod_.Types());
+    Hashmap<const ir::Block*, const ir::Function*, 64> block_to_function_{};
+    Hashmap<const ir::Function*, Hashset<const ir::UserCall*, 4>, 4> user_func_calls_;
+    Hashset<const ir::Discard*, 4> discards_;
 };
 
 Validator::Validator(const Module& mod, Capabilities capabilities)
@@ -559,6 +619,48 @@ Disassembler& Validator::Disassemble() {
 }
 
 Result<SuccessType> Validator::Run() {
+    RunStructuralSoundnessChecks();
+
+    CheckForOrphanedInstructions();
+    CheckForNonFragmentDiscards();
+
+    if (diagnostics_.ContainsErrors()) {
+        diagnostics_.AddNote(Source{}) << "# Disassembly\n" << Disassemble().Text();
+        return Failure{std::move(diagnostics_)};
+    }
+    return Success;
+}
+
+void Validator::CheckForOrphanedInstructions() {
+    if (diagnostics_.ContainsErrors()) {
+        return;
+    }
+
+    // Check for orphaned instructions.
+    for (auto* inst : mod_.Instructions()) {
+        if (!visited_instructions_.Contains(inst)) {
+            AddError(inst) << "orphaned instruction: " << inst->FriendlyName();
+        }
+    }
+}
+
+void Validator::CheckForNonFragmentDiscards() {
+    if (diagnostics_.ContainsErrors()) {
+        return;
+    }
+
+    // Check for discards in non-fragments
+    for (const auto& d : discards_) {
+        const auto* f = ContainingFunction(d);
+        for (const Function* ep : ContainingEndPoints(f)) {
+            if (ep->Stage() != Function::PipelineStage::kFragment) {
+                AddError(d) << "cannot be called in non-fragment end point";
+            }
+        }
+    }
+}
+
+void Validator::RunStructuralSoundnessChecks() {
     scope_stack_.Push();
     TINT_DEFER({
         scope_stack_.Pop();
@@ -578,23 +680,9 @@ Result<SuccessType> Validator::Run() {
     }
 
     for (auto& func : mod_.functions) {
+        block_to_function_.Add(func->Block(), func);
         CheckFunction(func);
     }
-
-    if (!diagnostics_.ContainsErrors()) {
-        // Check for orphaned instructions.
-        for (auto* inst : mod_.Instructions()) {
-            if (!visited_instructions_.Contains(inst)) {
-                AddError(inst) << "orphaned instruction: " << inst->FriendlyName();
-            }
-        }
-    }
-
-    if (diagnostics_.ContainsErrors()) {
-        diagnostics_.AddNote(Source{}) << "# Disassembly\n" << Disassemble().Text();
-        return Failure{std::move(diagnostics_)};
-    }
-    return Success;
 }
 
 diag::Diagnostic& Validator::AddError(const Instruction* inst) {
@@ -1287,14 +1375,26 @@ void Validator::CheckLet(const Let* let) {
 
 void Validator::CheckCall(const Call* call) {
     tint::Switch(
-        call,                                                            //
-        [&](const Bitcast* b) { CheckBitcast(b); },                      //
-        [&](const BuiltinCall* c) { CheckBuiltinCall(c); },              //
-        [&](const MemberBuiltinCall* c) { CheckMemberBuiltinCall(c); },  //
-        [&](const Construct* c) { CheckConstruct(c); },                  //
-        [&](const Convert* c) { CheckConvert(c); },                      //
-        [&](const Discard*) {},                                          //
-        [&](const UserCall* c) { CheckUserCall(c); },                    //
+        call,                                                                   //
+        [&](const Bitcast* b) { CheckBitcast(b); },                             //
+        [&](const BuiltinCall* c) { CheckBuiltinCall(c); },                     //
+        [&](const MemberBuiltinCall* c) { CheckMemberBuiltinCall(c); },         //
+        [&](const Construct* c) { CheckConstruct(c); },                         //
+        [&](const Convert* c) { CheckConvert(c); },                             //
+        [&](const Discard* d) {                                                 //
+            discards_.Add(d);                                                   //
+            CheckDiscard(d);                                                    //
+        },                                                                      //
+        [&](const UserCall* c) {                                                //
+            if (c->Target()) {                                                  //
+                auto calls =                                                    //
+                    user_func_calls_.GetOr(c->Target(),                         //
+                                           Hashset<const ir::UserCall*, 4>{});  //
+                calls.Add(c);                                                   //
+                user_func_calls_.Replace(c->Target(), calls);                   //
+            }                                                                   //
+            CheckUserCall(c);                                                   //
+        },                                                                      //
         [&](Default) {
             // Validation of custom IR instructions
         });
@@ -1397,6 +1497,10 @@ void Validator::CheckConstruct(const Construct* construct) {
 
 void Validator::CheckConvert(const Convert* convert) {
     CheckResultsAndOperands(convert, Convert::kNumResults, Convert::kNumOperands);
+}
+
+void Validator::CheckDiscard(const tint::core::ir::Discard* discard) {
+    CheckResultsAndOperands(discard, Discard::kNumResults, Discard::kNumOperands);
 }
 
 void Validator::CheckUserCall(const UserCall* call) {
