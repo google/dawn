@@ -1,0 +1,58 @@
+; SPIR-V
+; Version: 1.3
+; Generator: Google Tint Compiler; 1
+; Bound: 28
+; Schema: 0
+               OpCapability Shader
+               OpCapability GroupNonUniformShuffleRelative
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint Fragment %fragment_main "fragment_main"
+               OpEntryPoint GLCompute %compute_main "compute_main"
+               OpExecutionMode %fragment_main OriginUpperLeft
+               OpExecutionMode %compute_main LocalSize 1 1 1
+               OpMemberName %tint_symbol_1 0 "tint_symbol"
+               OpName %tint_symbol_1 "tint_symbol_1"
+               OpName %subgroupShuffleDown_d269eb "subgroupShuffleDown_d269eb"
+               OpName %res "res"
+               OpName %fragment_main "fragment_main"
+               OpName %compute_main "compute_main"
+               OpMemberDecorate %tint_symbol_1 0 Offset 0
+               OpDecorate %tint_symbol_1 Block
+               OpDecorate %1 DescriptorSet 0
+               OpDecorate %1 Binding 0
+        %int = OpTypeInt 32 1
+%tint_symbol_1 = OpTypeStruct %int
+%_ptr_StorageBuffer_tint_symbol_1 = OpTypePointer StorageBuffer %tint_symbol_1
+          %1 = OpVariable %_ptr_StorageBuffer_tint_symbol_1 StorageBuffer
+          %6 = OpTypeFunction %int
+       %uint = OpTypeInt 32 0
+     %uint_3 = OpConstant %uint 3
+      %int_1 = OpConstant %int 1
+     %uint_1 = OpConstant %uint 1
+%_ptr_Function_int = OpTypePointer Function %int
+       %void = OpTypeVoid
+         %18 = OpTypeFunction %void
+%_ptr_StorageBuffer_int = OpTypePointer StorageBuffer %int
+     %uint_0 = OpConstant %uint 0
+%subgroupShuffleDown_d269eb = OpFunction %int None %6
+          %7 = OpLabel
+        %res = OpVariable %_ptr_Function_int Function
+          %8 = OpGroupNonUniformShuffleDown %int %uint_3 %int_1 %uint_1
+               OpStore %res %8
+         %15 = OpLoad %int %res
+               OpReturnValue %15
+               OpFunctionEnd
+%fragment_main = OpFunction %void None %18
+         %19 = OpLabel
+         %20 = OpFunctionCall %int %subgroupShuffleDown_d269eb
+         %21 = OpAccessChain %_ptr_StorageBuffer_int %1 %uint_0
+               OpStore %21 %20
+               OpReturn
+               OpFunctionEnd
+%compute_main = OpFunction %void None %18
+         %25 = OpLabel
+         %26 = OpFunctionCall %int %subgroupShuffleDown_d269eb
+         %27 = OpAccessChain %_ptr_StorageBuffer_int %1 %uint_0
+               OpStore %27 %26
+               OpReturn
+               OpFunctionEnd

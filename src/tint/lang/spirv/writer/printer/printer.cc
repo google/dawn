@@ -1700,6 +1700,21 @@ class Printer {
                 op = spv::Op::OpGroupNonUniformShuffle;
                 operands.push_back(Constant(ir_.constant_values.Get(u32(spv::Scope::Subgroup))));
                 break;
+            case core::BuiltinFn::kSubgroupShuffleXor:
+                module_.PushCapability(SpvCapabilityGroupNonUniformShuffle);
+                op = spv::Op::OpGroupNonUniformShuffleXor;
+                operands.push_back(Constant(ir_.constant_values.Get(u32(spv::Scope::Subgroup))));
+                break;
+            case core::BuiltinFn::kSubgroupShuffleUp:
+                module_.PushCapability(SpvCapabilityGroupNonUniformShuffleRelative);
+                op = spv::Op::OpGroupNonUniformShuffleUp;
+                operands.push_back(Constant(ir_.constant_values.Get(u32(spv::Scope::Subgroup))));
+                break;
+            case core::BuiltinFn::kSubgroupShuffleDown:
+                module_.PushCapability(SpvCapabilityGroupNonUniformShuffleRelative);
+                op = spv::Op::OpGroupNonUniformShuffleDown;
+                operands.push_back(Constant(ir_.constant_values.Get(u32(spv::Scope::Subgroup))));
+                break;
             case core::BuiltinFn::kSubgroupAnd:
                 module_.PushCapability(SpvCapabilityGroupNonUniformArithmetic);
                 op = spv::Op::OpGroupNonUniformBitwiseAnd;

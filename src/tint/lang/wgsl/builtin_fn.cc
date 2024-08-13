@@ -420,6 +420,15 @@ BuiltinFn ParseBuiltinFn(std::string_view name) {
     if (name == "subgroupShuffle") {
         return BuiltinFn::kSubgroupShuffle;
     }
+    if (name == "subgroupShuffleXor") {
+        return BuiltinFn::kSubgroupShuffleXor;
+    }
+    if (name == "subgroupShuffleUp") {
+        return BuiltinFn::kSubgroupShuffleUp;
+    }
+    if (name == "subgroupShuffleDown") {
+        return BuiltinFn::kSubgroupShuffleDown;
+    }
     if (name == "subgroupAdd") {
         return BuiltinFn::kSubgroupAdd;
     }
@@ -717,6 +726,12 @@ const char* str(BuiltinFn i) {
             return "subgroupBroadcastFirst";
         case BuiltinFn::kSubgroupShuffle:
             return "subgroupShuffle";
+        case BuiltinFn::kSubgroupShuffleXor:
+            return "subgroupShuffleXor";
+        case BuiltinFn::kSubgroupShuffleUp:
+            return "subgroupShuffleUp";
+        case BuiltinFn::kSubgroupShuffleDown:
+            return "subgroupShuffleDown";
         case BuiltinFn::kSubgroupAdd:
             return "subgroupAdd";
         case BuiltinFn::kSubgroupExclusiveAdd:
@@ -818,6 +833,9 @@ bool IsSubgroup(BuiltinFn f) {
         case BuiltinFn::kSubgroupBroadcast:
         case BuiltinFn::kSubgroupBroadcastFirst:
         case BuiltinFn::kSubgroupShuffle:
+        case BuiltinFn::kSubgroupShuffleXor:
+        case BuiltinFn::kSubgroupShuffleUp:
+        case BuiltinFn::kSubgroupShuffleDown:
         case BuiltinFn::kSubgroupAdd:
         case BuiltinFn::kSubgroupExclusiveAdd:
         case BuiltinFn::kSubgroupMul:

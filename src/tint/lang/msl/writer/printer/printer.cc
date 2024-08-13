@@ -990,6 +990,15 @@ class Printer : public tint::TextGenerator {
             case core::BuiltinFn::kSubgroupShuffle:
                 out << "simd_shuffle";
                 break;
+            case core::BuiltinFn::kSubgroupShuffleXor:
+                out << "simd_shuffle_xor";
+                break;
+            case core::BuiltinFn::kSubgroupShuffleUp:
+                out << "simd_shuffle_up";
+                break;
+            case core::BuiltinFn::kSubgroupShuffleDown:
+                out << "simd_shuffle_down";
+                break;
             case core::BuiltinFn::kSubgroupAdd:
                 out << "simd_sum";
                 break;

@@ -1,0 +1,20 @@
+#include <metal_stdlib>
+
+using namespace metal;
+float3 subgroupShuffleDown_5d8b9f() {
+  float3 arg_0 = float3(1.0f);
+  uint arg_1 = 1u;
+  float3 res = simd_shuffle_down(arg_0,arg_1);
+  return res;
+}
+
+fragment void fragment_main(device packed_float3* tint_symbol [[buffer(0)]]) {
+  *(tint_symbol) = packed_float3(subgroupShuffleDown_5d8b9f());
+  return;
+}
+
+kernel void compute_main(device packed_float3* tint_symbol_1 [[buffer(0)]]) {
+  *(tint_symbol_1) = packed_float3(subgroupShuffleDown_5d8b9f());
+  return;
+}
+

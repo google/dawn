@@ -114,6 +114,9 @@ bool IsSubgroup(BuiltinFn f) {
         case BuiltinFn::kSubgroupBroadcast:
         case BuiltinFn::kSubgroupBroadcastFirst:
         case BuiltinFn::kSubgroupShuffle:
+        case BuiltinFn::kSubgroupShuffleXor:
+        case BuiltinFn::kSubgroupShuffleUp:
+        case BuiltinFn::kSubgroupShuffleDown:
         case BuiltinFn::kSubgroupAdd:
         case BuiltinFn::kSubgroupExclusiveAdd:
         case BuiltinFn::kSubgroupMul:

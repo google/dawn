@@ -1,0 +1,20 @@
+#include <metal_stdlib>
+
+using namespace metal;
+half subgroupShuffleXor_d224ab() {
+  half arg_0 = 1.0h;
+  uint arg_1 = 1u;
+  half res = simd_shuffle_xor(arg_0,arg_1);
+  return res;
+}
+
+fragment void fragment_main(device half* tint_symbol [[buffer(0)]]) {
+  *(tint_symbol) = subgroupShuffleXor_d224ab();
+  return;
+}
+
+kernel void compute_main(device half* tint_symbol_1 [[buffer(0)]]) {
+  *(tint_symbol_1) = subgroupShuffleXor_d224ab();
+  return;
+}
+

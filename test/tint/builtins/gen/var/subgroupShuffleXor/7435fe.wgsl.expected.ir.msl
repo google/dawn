@@ -1,0 +1,23 @@
+#include <metal_stdlib>
+using namespace metal;
+
+struct tint_module_vars_struct {
+  device int3* prevent_dce;
+};
+
+int3 subgroupShuffleXor_7435fe() {
+  int3 arg_0 = int3(1);
+  uint arg_1 = 1u;
+  int3 res = simd_shuffle_xor(arg_0, arg_1);
+  return res;
+}
+
+fragment void fragment_main(device int3* prevent_dce [[buffer(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.prevent_dce=prevent_dce};
+  (*tint_module_vars.prevent_dce) = subgroupShuffleXor_7435fe();
+}
+
+kernel void compute_main(device int3* prevent_dce [[buffer(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.prevent_dce=prevent_dce};
+  (*tint_module_vars.prevent_dce) = subgroupShuffleXor_7435fe();
+}

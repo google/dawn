@@ -294,6 +294,15 @@ class ASTPrinter : public tint::TextGenerator {
     bool EmitPacked4x8IntegerDotProductBuiltinCall(StringStream& out,
                                                    const ast::CallExpression* expr,
                                                    const sem::BuiltinFn* builtin);
+    /// Handles generating a call to the `WaveReadLaneAt` intrinsic for subgroupShuffleXor,
+    /// subgroupShuffleUp and subgroupShuffleDown
+    /// @param out the output stream
+    /// @param expr the call expression
+    /// @param builtin the semantic information for the builtin
+    /// @returns true if the call expression is emitted
+    bool EmitSubgroupShuffleBuiltinCall(StringStream& out,
+                                        const ast::CallExpression* expr,
+                                        const sem::BuiltinFn* builtin);
     /// Handles a case statement
     /// @param s the switch statement
     /// @param case_idx the index of the switch case in the switch statement

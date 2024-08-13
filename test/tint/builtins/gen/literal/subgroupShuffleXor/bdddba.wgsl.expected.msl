@@ -1,0 +1,18 @@
+#include <metal_stdlib>
+
+using namespace metal;
+int4 subgroupShuffleXor_bdddba() {
+  int4 res = simd_shuffle_xor(int4(1),1u);
+  return res;
+}
+
+fragment void fragment_main(device int4* tint_symbol [[buffer(0)]]) {
+  *(tint_symbol) = subgroupShuffleXor_bdddba();
+  return;
+}
+
+kernel void compute_main(device int4* tint_symbol_1 [[buffer(0)]]) {
+  *(tint_symbol_1) = subgroupShuffleXor_bdddba();
+  return;
+}
+

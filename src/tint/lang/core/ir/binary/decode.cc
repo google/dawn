@@ -1633,6 +1633,12 @@ struct Decoder {
                 return core::BuiltinFn::kSubgroupBroadcastFirst;
             case pb::BuiltinFn::subgroup_shuffle:
                 return core::BuiltinFn::kSubgroupShuffle;
+            case pb::BuiltinFn::subgroup_shuffle_xor:
+                return core::BuiltinFn::kSubgroupShuffleXor;
+            case pb::BuiltinFn::subgroup_shuffle_up:
+                return core::BuiltinFn::kSubgroupShuffleUp;
+            case pb::BuiltinFn::subgroup_shuffle_down:
+                return core::BuiltinFn::kSubgroupShuffleDown;
             case pb::BuiltinFn::input_attachment_load:
                 return core::BuiltinFn::kInputAttachmentLoad;
             case pb::BuiltinFn::subgroup_add:

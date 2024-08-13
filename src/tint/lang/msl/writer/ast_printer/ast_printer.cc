@@ -833,6 +833,45 @@ bool ASTPrinter::EmitBuiltinCall(StringStream& out,
             return true;
         }
 
+        case wgsl::BuiltinFn::kSubgroupShuffleXor: {
+            out << "simd_shuffle_xor(";
+            if (!EmitExpression(out, expr->args[0])) {
+                return false;
+            }
+            out << ",";
+            if (!EmitExpression(out, expr->args[1])) {
+                return false;
+            }
+            out << ")";
+            return true;
+        }
+
+        case wgsl::BuiltinFn::kSubgroupShuffleUp: {
+            out << "simd_shuffle_up(";
+            if (!EmitExpression(out, expr->args[0])) {
+                return false;
+            }
+            out << ",";
+            if (!EmitExpression(out, expr->args[1])) {
+                return false;
+            }
+            out << ")";
+            return true;
+        }
+
+        case wgsl::BuiltinFn::kSubgroupShuffleDown: {
+            out << "simd_shuffle_down(";
+            if (!EmitExpression(out, expr->args[0])) {
+                return false;
+            }
+            out << ",";
+            if (!EmitExpression(out, expr->args[1])) {
+                return false;
+            }
+            out << ")";
+            return true;
+        }
+
         case wgsl::BuiltinFn::kSubgroupAdd: {
             out << "simd_sum(";
             if (!EmitExpression(out, expr->args[0])) {

@@ -119,6 +119,9 @@ struct State {
                     case core::BuiltinFn::kSubgroupAnd:
                     case core::BuiltinFn::kSubgroupOr:
                     case core::BuiltinFn::kSubgroupXor:
+                    case core::BuiltinFn::kSubgroupShuffleXor:
+                    case core::BuiltinFn::kSubgroupShuffleUp:
+                    case core::BuiltinFn::kSubgroupShuffleDown:
                     case core::BuiltinFn::kTextureDimensions:
                     case core::BuiltinFn::kTextureGather:
                     case core::BuiltinFn::kTextureGatherCompare:
@@ -261,6 +264,11 @@ struct State {
                 case core::BuiltinFn::kSubgroupOr:
                 case core::BuiltinFn::kSubgroupXor:
                     BitcastToIntOverloadCall(call);
+                    break;
+                case core::BuiltinFn::kSubgroupShuffleXor:
+                case core::BuiltinFn::kSubgroupShuffleUp:
+                case core::BuiltinFn::kSubgroupShuffleDown:
+                    SubgroupShuffle(call);
                     break;
                 case core::BuiltinFn::kTextureDimensions:
                     TextureDimensions(call);
@@ -1741,6 +1749,41 @@ struct State {
             });
             call->Destroy();
         }
+    }
+
+    // The following subgroup builtin functions are translated to HLSL as follows:
+    // +---------------------+----------------------------------------------------------------+
+    // |        WGSL         |                              HLSL                              |
+    // +---------------------+----------------------------------------------------------------+
+    // | subgroupShuffleXor  | WaveReadLaneAt with index equal subgroup_invocation_id ^ mask  |
+    // | subgroupShuffleUp   | WaveReadLaneAt with index equal subgroup_invocation_id - delta |
+    // | subgroupShuffleDown | WaveReadLaneAt with index equal subgroup_invocation_id + delta |
+    // +---------------------+----------------------------------------------------------------+
+    void SubgroupShuffle(core::ir::CoreBuiltinCall* call) {
+        TINT_ASSERT(call->Args().Length() == 2);
+
+        b.InsertBefore(call, [&] {
+            auto* id = b.Call<hlsl::ir::BuiltinCall>(ty.u32(), hlsl::BuiltinFn::kWaveGetLaneIndex);
+            auto* arg2 = call->Args()[1];
+
+            core::ir::Instruction* inst = nullptr;
+            switch (call->Func()) {
+                case core::BuiltinFn::kSubgroupShuffleXor:
+                    inst = b.Xor(ty.u32(), id, arg2);
+                    break;
+                case core::BuiltinFn::kSubgroupShuffleUp:
+                    inst = b.Subtract(ty.u32(), id, arg2);
+                    break;
+                case core::BuiltinFn::kSubgroupShuffleDown:
+                    inst = b.Add(ty.u32(), id, arg2);
+                    break;
+                default:
+                    TINT_UNREACHABLE();
+            }
+            b.CallWithResult<hlsl::ir::BuiltinCall>(
+                call->DetachResult(), hlsl::BuiltinFn::kWaveReadLaneAt, call->Args()[0], inst);
+        });
+        call->Destroy();
     }
 };
 

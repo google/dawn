@@ -56,6 +56,8 @@ std::string_view ToString(ParameterUsage usage) {
             return "ddx";
         case ParameterUsage::kDdy:
             return "ddy";
+        case ParameterUsage::kDelta:
+            return "delta";
         case ParameterUsage::kDepth:
             return "depth";
         case ParameterUsage::kDepthRef:
@@ -70,6 +72,8 @@ std::string_view ToString(ParameterUsage usage) {
             return "level";
         case ParameterUsage::kLocation:
             return "location";
+        case ParameterUsage::kMask:
+            return "mask";
         case ParameterUsage::kNumLevels:
             return "num_levels";
         case ParameterUsage::kOffset:

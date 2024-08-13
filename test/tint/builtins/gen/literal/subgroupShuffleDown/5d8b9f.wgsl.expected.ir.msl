@@ -1,0 +1,21 @@
+#include <metal_stdlib>
+using namespace metal;
+
+struct tint_module_vars_struct {
+  device float3* prevent_dce;
+};
+
+float3 subgroupShuffleDown_5d8b9f() {
+  float3 res = simd_shuffle_down(float3(1.0f), 1u);
+  return res;
+}
+
+fragment void fragment_main(device float3* prevent_dce [[buffer(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.prevent_dce=prevent_dce};
+  (*tint_module_vars.prevent_dce) = subgroupShuffleDown_5d8b9f();
+}
+
+kernel void compute_main(device float3* prevent_dce [[buffer(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.prevent_dce=prevent_dce};
+  (*tint_module_vars.prevent_dce) = subgroupShuffleDown_5d8b9f();
+}

@@ -88,6 +88,10 @@ const char* str(BuiltinFn i) {
             return "unpack_s8s32";
         case BuiltinFn::kUnpackU8U32:
             return "unpack_u8u32";
+        case BuiltinFn::kWaveGetLaneIndex:
+            return "WaveGetLaneIndex";
+        case BuiltinFn::kWaveReadLaneAt:
+            return "WaveReadLaneAt";
         case BuiltinFn::kLoad:
             return "Load";
         case BuiltinFn::kLoad2:

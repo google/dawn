@@ -1145,6 +1145,12 @@ struct Encoder {
                 return pb::BuiltinFn::subgroup_broadcast_first;
             case core::BuiltinFn::kSubgroupShuffle:
                 return pb::BuiltinFn::subgroup_shuffle;
+            case core::BuiltinFn::kSubgroupShuffleXor:
+                return pb::BuiltinFn::subgroup_shuffle_xor;
+            case core::BuiltinFn::kSubgroupShuffleUp:
+                return pb::BuiltinFn::subgroup_shuffle_up;
+            case core::BuiltinFn::kSubgroupShuffleDown:
+                return pb::BuiltinFn::subgroup_shuffle_down;
             case core::BuiltinFn::kInputAttachmentLoad:
                 return pb::BuiltinFn::input_attachment_load;
             case core::BuiltinFn::kSubgroupAdd:

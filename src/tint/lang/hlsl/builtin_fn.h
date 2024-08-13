@@ -70,6 +70,8 @@ enum class BuiltinFn : uint8_t {
     kTextureStore,
     kUnpackS8S32,
     kUnpackU8U32,
+    kWaveGetLaneIndex,
+    kWaveReadLaneAt,
     kLoad,
     kLoad2,
     kLoad3,

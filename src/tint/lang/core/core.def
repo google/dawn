@@ -707,6 +707,12 @@ fn textureStore[C: iu32](texture: texture_storage_3d<u32_texel_format, writable>
 @must_use @stage("fragment", "compute") fn subgroupBroadcastFirst[N: num, T: fiu32_f16](value: vec<N, T>) -> vec<N, T>
 @must_use @stage("fragment", "compute") fn subgroupShuffle[T: fiu32_f16](value: T, sourceLaneIndex: iu32) -> T
 @must_use @stage("fragment", "compute") fn subgroupShuffle[N: num, T: fiu32_f16](value: vec<N, T>, sourceLaneIndex: iu32) -> vec<N, T>
+@must_use @stage("fragment", "compute") fn subgroupShuffleXor[T: fiu32_f16](value: T, mask: u32) -> T
+@must_use @stage("fragment", "compute") fn subgroupShuffleXor[N: num, T: fiu32_f16](value: vec<N, T>, mask: u32) -> vec<N, T>
+@must_use @stage("fragment", "compute") fn subgroupShuffleUp[T: fiu32_f16](value: T, delta: u32) -> T
+@must_use @stage("fragment", "compute") fn subgroupShuffleUp[N: num, T: fiu32_f16](value: vec<N, T>, delta: u32) -> vec<N, T>
+@must_use @stage("fragment", "compute") fn subgroupShuffleDown[T: fiu32_f16](value: T, delta: u32) -> T
+@must_use @stage("fragment", "compute") fn subgroupShuffleDown[N: num, T: fiu32_f16](value: vec<N, T>, delta: u32) -> vec<N, T>
 @must_use @stage("fragment", "compute") fn subgroupAdd[T: fiu32_f16](value: T) -> T
 @must_use @stage("fragment", "compute") fn subgroupAdd[N: num, T: fiu32_f16](value: vec<N, T>) -> vec<N, T>
 @must_use @stage("fragment", "compute") fn subgroupExclusiveAdd[T: fiu32_f16](value: T) -> T

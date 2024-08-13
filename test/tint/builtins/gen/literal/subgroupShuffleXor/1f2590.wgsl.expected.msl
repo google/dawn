@@ -1,0 +1,18 @@
+#include <metal_stdlib>
+
+using namespace metal;
+half3 subgroupShuffleXor_1f2590() {
+  half3 res = simd_shuffle_xor(half3(1.0h),1u);
+  return res;
+}
+
+fragment void fragment_main(device packed_half3* tint_symbol [[buffer(0)]]) {
+  *(tint_symbol) = packed_half3(subgroupShuffleXor_1f2590());
+  return;
+}
+
+kernel void compute_main(device packed_half3* tint_symbol_1 [[buffer(0)]]) {
+  *(tint_symbol_1) = packed_half3(subgroupShuffleXor_1f2590());
+  return;
+}
+

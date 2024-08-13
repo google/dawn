@@ -1257,6 +1257,11 @@ bool ASTPrinter::EmitBuiltinCall(StringStream& out,
     if (builtin->IsPacked4x8IntegerDotProductBuiltin()) {
         return EmitPacked4x8IntegerDotProductBuiltinCall(out, expr, builtin);
     }
+    if (type == wgsl::BuiltinFn::kSubgroupShuffleXor ||
+        type == wgsl::BuiltinFn::kSubgroupShuffleUp ||
+        type == wgsl::BuiltinFn::kSubgroupShuffleDown) {
+        return EmitSubgroupShuffleBuiltinCall(out, expr, builtin);
+    }
 
     auto name = generate_builtin_name(builtin);
     if (name.empty()) {
@@ -3016,6 +3021,47 @@ bool ASTPrinter::EmitTextureCall(StringStream& out,
                        << builtin->Fn();
         }
     }
+
+    return true;
+}
+
+// The following subgroup builtin functions are translated to HLSL as follows:
+// +---------------------+----------------------------------------------------------------+
+// |        WGSL         |                              HLSL                              |
+// +---------------------+----------------------------------------------------------------+
+// | subgroupShuffleXor  | WaveReadLaneAt with index equal subgroup_invocation_id ^ mask  |
+// | subgroupShuffleUp   | WaveReadLaneAt with index equal subgroup_invocation_id - delta |
+// | subgroupShuffleDown | WaveReadLaneAt with index equal subgroup_invocation_id + delta |
+// +---------------------+----------------------------------------------------------------+
+bool ASTPrinter::EmitSubgroupShuffleBuiltinCall(StringStream& out,
+                                                const ast::CallExpression* expr,
+                                                const sem::BuiltinFn* builtin) {
+    out << "WaveReadLaneAt(";
+
+    if (!EmitExpression(out, expr->args[0])) {
+        return false;
+    }
+
+    out << ", (WaveGetLaneIndex() ";
+
+    switch (builtin->Fn()) {
+        case wgsl::BuiltinFn::kSubgroupShuffleXor:
+            out << "^ ";
+            break;
+        case wgsl::BuiltinFn::kSubgroupShuffleUp:
+            out << "- ";
+            break;
+        case wgsl::BuiltinFn::kSubgroupShuffleDown:
+            out << "+ ";
+            break;
+        default:
+            TINT_UNREACHABLE();
+    }
+
+    if (!EmitExpression(out, expr->args[1])) {
+        return false;
+    }
+    out << "))";
 
     return true;
 }
