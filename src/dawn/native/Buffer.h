@@ -91,6 +91,8 @@ class BufferBase : public SharedResource {
     // |GetUsageExternalOnly| returns the usage with which the buffer was created using the
     // base WebGPU API. Additional usages may be added for internal state tracking. |GetUsage|
     // returns the union of base usage and the usages added internally.
+    // TODO(chromium:350497225): Rename |GetUsage| to |GetInternalUsage| to align with the same
+    // function in `TextureBase`.
     wgpu::BufferUsage GetUsage() const;
     wgpu::BufferUsage GetUsageExternalOnly() const;
 
@@ -175,6 +177,7 @@ class BufferBase : public SharedResource {
 
     const uint64_t mSize = 0;
     const wgpu::BufferUsage mUsage = wgpu::BufferUsage::None;
+    const wgpu::BufferUsage mInternalUsage = wgpu::BufferUsage::None;
     BufferState mState;
     bool mIsDataInitialized = false;
 

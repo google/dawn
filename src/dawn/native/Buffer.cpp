@@ -467,7 +467,8 @@ ResultOrError<UnpackedPtr<BufferDescriptor>> ValidateBufferDescriptor(
 BufferBase::BufferBase(DeviceBase* device, const UnpackedPtr<BufferDescriptor>& descriptor)
     : SharedResource(device, descriptor->label),
       mSize(descriptor->size),
-      mUsage(AddInternalUsages(device, descriptor->usage)),
+      mUsage(descriptor->usage),
+      mInternalUsage(AddInternalUsages(device, descriptor->usage)),
       mState(descriptor.Get<BufferHostMappedPointer>() ? BufferState::HostMappedPersistent
                                                        : BufferState::Unmapped) {
     GetObjectTrackingList()->Track(this);
@@ -479,6 +480,7 @@ BufferBase::BufferBase(DeviceBase* device,
     : SharedResource(device, tag, descriptor->label),
       mSize(descriptor->size),
       mUsage(descriptor->usage),
+      mInternalUsage(descriptor->usage),
       mState(descriptor->mappedAtCreation ? BufferState::MappedAtCreation : BufferState::Unmapped) {
     if (descriptor->mappedAtCreation) {
         mMapOffset = 0;
@@ -534,16 +536,16 @@ uint64_t BufferBase::GetAllocatedSize() const {
 
 wgpu::BufferUsage BufferBase::GetUsage() const {
     DAWN_ASSERT(!IsError());
-    return mUsage;
+    return mInternalUsage;
 }
 
 wgpu::BufferUsage BufferBase::GetUsageExternalOnly() const {
     DAWN_ASSERT(!IsError());
-    return GetUsage() & ~kAllInternalBufferUsages;
+    return mUsage;
 }
 
 wgpu::BufferUsage BufferBase::APIGetUsage() const {
-    return mUsage & ~kAllInternalBufferUsages;
+    return mUsage;
 }
 
 wgpu::BufferMapState BufferBase::APIGetMapState() const {
@@ -977,13 +979,13 @@ MaybeError BufferBase::ValidateMapAsync(wgpu::MapMode mode,
                     wgpu::MapMode::Write, wgpu::MapMode::Read);
 
     if (mode & wgpu::MapMode::Read) {
-        DAWN_INVALID_IF(!(mUsage & wgpu::BufferUsage::MapRead),
-                        "The buffer usages (%s) do not contain %s.", mUsage,
+        DAWN_INVALID_IF(!(mInternalUsage & wgpu::BufferUsage::MapRead),
+                        "The buffer usages (%s) do not contain %s.", mInternalUsage,
                         wgpu::BufferUsage::MapRead);
     } else {
         DAWN_ASSERT(mode & wgpu::MapMode::Write);
-        DAWN_INVALID_IF(!(mUsage & wgpu::BufferUsage::MapWrite),
-                        "The buffer usages (%s) do not contain %s.", mUsage,
+        DAWN_INVALID_IF(!(mInternalUsage & wgpu::BufferUsage::MapWrite),
+                        "The buffer usages (%s) do not contain %s.", mInternalUsage,
                         wgpu::BufferUsage::MapWrite);
     }
 

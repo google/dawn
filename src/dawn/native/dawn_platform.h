@@ -55,12 +55,6 @@ static constexpr wgpu::BufferUsage kReadOnlyStorageBuffer =
 static constexpr wgpu::BufferUsage kInternalCopySrcBuffer =
     static_cast<wgpu::BufferUsage>(1u << 29);
 
-// TODO(350497225): We should store Buffer's internal and external usage in separate member
-// variables, so that the external usage can be queried directly without bit hacks using this
-// special flag.
-static constexpr wgpu::BufferUsage kAllInternalBufferUsages =
-    kInternalStorageBuffer | kReadOnlyStorageBuffer | kInternalCopySrcBuffer;
-
 // Extra texture usages
 // Usage to denote an extra tag value used in system specific ways.
 //  - Used to store that attachments are used more than once in PassResourceUsageTracker.
