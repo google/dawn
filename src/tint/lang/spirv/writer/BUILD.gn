@@ -56,11 +56,6 @@ if (tint_build_spv_writer) {
       "${tint_src_dir}/lang/core/constant",
       "${tint_src_dir}/lang/core/ir",
       "${tint_src_dir}/lang/core/type",
-      "${tint_src_dir}/lang/wgsl",
-      "${tint_src_dir}/lang/wgsl/ast",
-      "${tint_src_dir}/lang/wgsl/features",
-      "${tint_src_dir}/lang/wgsl/program",
-      "${tint_src_dir}/lang/wgsl/sem",
       "${tint_src_dir}/utils/containers",
       "${tint_src_dir}/utils/diagnostic",
       "${tint_src_dir}/utils/ice",
@@ -82,7 +77,6 @@ if (tint_build_spv_writer) {
 
     if (tint_build_spv_writer) {
       deps += [
-        "${tint_src_dir}/lang/spirv/writer/ast_printer",
         "${tint_src_dir}/lang/spirv/writer/common",
         "${tint_src_dir}/lang/spirv/writer/printer",
         "${tint_src_dir}/lang/spirv/writer/raise",

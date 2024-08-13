@@ -30,7 +30,6 @@
 #include <memory>
 #include <utility>
 
-#include "src/tint/lang/spirv/writer/ast_printer/ast_printer.h"
 #include "src/tint/lang/spirv/writer/common/option_helpers.h"
 #include "src/tint/lang/spirv/writer/printer/printer.h"
 #include "src/tint/lang/spirv/writer/raise/raise.h"
@@ -64,41 +63,6 @@ Result<Output> Generate(core::ir::Module& ir, const Options& options) {
         return std::move(spirv.Failure());
     }
     output.spirv = std::move(spirv.Get());
-
-    return output;
-}
-
-Result<Output> Generate(const Program& program, const Options& options) {
-    if (!program.IsValid()) {
-        return Failure{program.Diagnostics()};
-    }
-
-    bool zero_initialize_workgroup_memory =
-        !options.disable_workgroup_init && options.use_zero_initialize_workgroup_memory_extension;
-
-    {
-        auto res = ValidateBindingOptions(options);
-        if (res != Success) {
-            return res.Failure();
-        }
-    }
-
-    Output output;
-
-    // Sanitize the program.
-    auto sanitized_result = Sanitize(program, options);
-    if (!sanitized_result.program.IsValid()) {
-        return Failure{sanitized_result.program.Diagnostics()};
-    }
-
-    // Generate the SPIR-V code.
-    auto impl =
-        std::make_unique<ASTPrinter>(sanitized_result.program, zero_initialize_workgroup_memory,
-                                     options.experimental_require_subgroup_uniform_control_flow);
-    if (!impl->Generate()) {
-        return Failure{impl->Diagnostics()};
-    }
-    output.spirv = std::move(impl->Result());
 
     return output;
 }

@@ -34,8 +34,6 @@
 #                       Do not modify this file directly
 ################################################################################
 
-include(lang/spirv/writer/ast_printer/BUILD.cmake)
-include(lang/spirv/writer/ast_raise/BUILD.cmake)
 include(lang/spirv/writer/common/BUILD.cmake)
 include(lang/spirv/writer/helpers/BUILD.cmake)
 include(lang/spirv/writer/printer/BUILD.cmake)
@@ -61,11 +59,6 @@ tint_target_add_dependencies(tint_lang_spirv_writer lib
   tint_lang_core_constant
   tint_lang_core_ir
   tint_lang_core_type
-  tint_lang_wgsl
-  tint_lang_wgsl_ast
-  tint_lang_wgsl_features
-  tint_lang_wgsl_program
-  tint_lang_wgsl_sem
   tint_utils_containers
   tint_utils_diagnostic
   tint_utils_ice
@@ -89,7 +82,6 @@ endif(TINT_BUILD_SPV_READER OR TINT_BUILD_SPV_WRITER)
 
 if(TINT_BUILD_SPV_WRITER)
   tint_target_add_dependencies(tint_lang_spirv_writer lib
-    tint_lang_spirv_writer_ast_printer
     tint_lang_spirv_writer_common
     tint_lang_spirv_writer_printer
     tint_lang_spirv_writer_raise
