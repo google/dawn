@@ -1036,14 +1036,12 @@ fn main() {
 }
 )";
     auto* expect = R"(
-fn f(tex_1 : texture_2d<f32>) -> u32 {
+fn f() -> u32 {
   return 1u;
 }
 
-@group(0) @binding(0) @internal(disable_validation__binding_point_collision) var t_1 : texture_2d<f32>;
-
 fn main() {
-  _ = f(t_1);
+  _ = f();
 }
 )";
 
@@ -1068,14 +1066,12 @@ fn main() {
 }
 )";
     auto* expect = R"(
-fn f(sampler1_1 : sampler) -> u32 {
+fn f() -> u32 {
   return 1u;
 }
 
-@group(0) @binding(0) @internal(disable_validation__binding_point_collision) var s_1 : sampler;
-
 fn main() {
-  _ = f(s_1);
+  _ = f();
 }
 )";
 
@@ -1102,16 +1098,12 @@ fn main() {
 }
 )";
     auto* expect = R"(
-fn f(sampler1_1 : sampler, tex_1 : texture_2d<f32>) -> u32 {
+fn f() -> u32 {
   return 1u;
 }
 
-@group(0) @binding(0) @internal(disable_validation__binding_point_collision) var s_1 : sampler;
-
-@group(0) @binding(0) @internal(disable_validation__binding_point_collision) var t_1 : texture_2d<f32>;
-
 fn main() {
-  _ = f(s_1, t_1);
+  _ = f();
 }
 )";
 
@@ -1140,18 +1132,14 @@ fn main() {
 }
 )";
     auto* expect = R"(
-fn f(sampler1_1 : sampler, tex3_1 : texture_2d_array<f32>, tex1_1 : texture_2d<f32>) -> u32 {
+fn f(tex3_1 : texture_2d_array<f32>) -> u32 {
   return (1u + textureNumLayers(tex3_1));
 }
 
-@group(0) @binding(0) @internal(disable_validation__binding_point_collision) var s_1 : sampler;
-
 @group(0) @binding(0) @internal(disable_validation__binding_point_collision) var t2_1 : texture_2d_array<f32>;
 
-@group(0) @binding(0) @internal(disable_validation__binding_point_collision) var t1_1 : texture_2d<f32>;
-
 fn main() {
-  _ = f(s_1, t2_1, t1_1);
+  _ = f(t2_1);
 }
 )";
 
@@ -1180,18 +1168,16 @@ fn main() {
 }
 )";
     auto* expect = R"(
-fn f_nested(tex_1 : texture_2d<f32>) -> u32 {
+fn f_nested() -> u32 {
   return 1u;
 }
 
-fn f(tex_2 : texture_2d<f32>) -> u32 {
-  return f_nested(tex_2);
+fn f() -> u32 {
+  return f_nested();
 }
 
-@group(0) @binding(0) @internal(disable_validation__binding_point_collision) var t_1 : texture_2d<f32>;
-
 fn main() {
-  _ = f(t_1);
+  _ = f();
 }
 )";
 
@@ -1223,20 +1209,59 @@ fn main() {
 )";
     auto* expect =
         R"(
-fn f_nested(sampler1_1 : sampler, tex_1 : texture_2d<f32>) -> u32 {
+fn f_nested() -> u32 {
   return 1u;
 }
 
-fn f(sampler1_2 : sampler, tex_2 : texture_2d<f32>) -> u32 {
-  return f_nested(sampler1_2, tex_2);
+fn f() -> u32 {
+  return f_nested();
 }
 
-@group(0) @binding(0) @internal(disable_validation__binding_point_collision) var s_1 : sampler;
-
-@group(0) @binding(0) @internal(disable_validation__binding_point_collision) var t_1 : texture_2d<f32>;
-
 fn main() {
-  _ = f(s_1, t_1);
+  _ = f();
+}
+)";
+
+    ast::transform::DataMap data;
+    Bindings binding;
+    data.Add<Bindings>(binding);
+    auto got = Run<CombineSamplers>(src, data);
+
+    EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(CombineSamplersTest, UnusedTextureAndSamplerFunctionParameter_Nested2) {
+    auto* src = R"(
+@group(0) @binding(1) var texture1 : texture_2d<f32>;
+@group(0) @binding(2) var texture2 : texture_2d<f32>;
+@group(0) @binding(3) var sampler1 : sampler;
+
+fn sample(t : texture_2d<f32>, s : sampler, coords : vec2<f32>, unused : texture_2d<f32>) -> vec4<f32> {
+  return textureSample(t, s, coords);
+}
+
+@fragment
+fn main(@location(0) coords : vec2<f32>) -> @location(0) vec4<f32> {
+  var a = sample(texture1, sampler1, coords, texture1);
+  var b = sample(texture1, sampler1, coords, texture2);
+  return a + b;
+}
+)";
+    auto* expect =
+        R"(
+@group(0) @binding(0) @internal(disable_validation__binding_point_collision) var placeholder_sampler : sampler;
+
+fn sample(t_s : texture_2d<f32>, coords : vec2<f32>) -> vec4<f32> {
+  return textureSample(t_s, placeholder_sampler, coords);
+}
+
+@group(0) @binding(0) @internal(disable_validation__binding_point_collision) var texture1_sampler1 : texture_2d<f32>;
+
+@fragment
+fn main(@location(0) coords : vec2<f32>) -> @location(0) vec4<f32> {
+  var a = sample(texture1_sampler1, coords);
+  var b = sample(texture1_sampler1, coords);
+  return (a + b);
 }
 )";
 

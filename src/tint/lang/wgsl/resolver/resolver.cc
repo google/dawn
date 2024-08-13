@@ -3143,47 +3143,18 @@ void Resolver::CollectTextureSamplerPairs(sem::Function* func,
     // argument passed to the current function. Leave global variables
     // as-is. Then add the mapped pair to the current function's list of
     // texture/sampler pairs.
-
-    Hashset<const sem::Variable*, 4> texture_sampler_set;
-
     for (sem::VariablePair pair : func->TextureSamplerPairs()) {
         const sem::Variable* texture = pair.first;
         const sem::Variable* sampler = pair.second;
-        if (auto* param = As<sem::Parameter>(texture)) {
+        if (auto* param = texture->As<sem::Parameter>()) {
             texture = args[param->Index()]->UnwrapLoad()->As<sem::VariableUser>()->Variable();
-            texture_sampler_set.Add(texture);
         }
-        if (auto* param = As<sem::Parameter>(sampler)) {
-            sampler = args[param->Index()]->UnwrapLoad()->As<sem::VariableUser>()->Variable();
-            texture_sampler_set.Add(sampler);
+        if (sampler) {
+            if (auto* param = sampler->As<sem::Parameter>()) {
+                sampler = args[param->Index()]->UnwrapLoad()->As<sem::VariableUser>()->Variable();
+            }
         }
         current_function_->AddTextureSamplerPair(texture, sampler);
-    }
-
-    // Add any possible texture/sampler not essentially passed to builtins from the function param.
-    // This could be unused texture/sampler or texture/sampler passed to builtins that are emulated.
-
-    const auto& signature = func->Signature();
-
-    for (size_t i = 0; i < signature.parameters.Length(); i++) {
-        auto* param = signature.parameters[i];
-        if (param->Type()->Is<core::type::Texture>()) {
-            auto* user = args[i]->UnwrapLoad()->As<sem::VariableUser>();
-            auto* texture = user->Variable();
-            if (!texture_sampler_set.Contains(texture)) {
-                current_function_->AddTextureSamplerPair(texture, nullptr);
-                func->AddTextureSamplerPair(param, nullptr);
-                texture_sampler_set.Add(texture);
-            }
-        } else if (param->Type()->Is<core::type::Sampler>()) {
-            auto* user = args[i]->UnwrapLoad()->As<sem::VariableUser>();
-            auto* sampler = user->Variable();
-            if (!texture_sampler_set.Contains(sampler)) {
-                current_function_->AddTextureSamplerPair(nullptr, sampler);
-                func->AddTextureSamplerPair(nullptr, param);
-                texture_sampler_set.Add(sampler);
-            }
-        }
     }
 }
 

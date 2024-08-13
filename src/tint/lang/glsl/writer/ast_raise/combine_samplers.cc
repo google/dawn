@@ -46,7 +46,7 @@ TINT_INSTANTIATE_TYPEINFO(tint::glsl::writer::CombineSamplers);
 namespace {
 
 bool IsGlobal(const tint::sem::VariablePair& pair) {
-    return (!pair.first || tint::Is<tint::sem::GlobalVariable>(pair.first)) &&
+    return tint::Is<tint::sem::GlobalVariable>(pair.first) &&
            (!pair.second || tint::Is<tint::sem::GlobalVariable>(pair.second));
 }
 
@@ -104,7 +104,7 @@ struct CombineSamplers::State {
     /// Creates a combined sampler global variables.
     /// (Note this is actually a Texture node at the AST level, but it will be
     /// written as the corresponding sampler (eg., sampler2D) on GLSL output.)
-    /// @param texture_var the texture (global) variable
+    /// @param texture_var the texture (global) variable (must be non-null)
     /// @param sampler_var the sampler (global) variable
     /// @param name the default name to use (may be overridden by map lookup)
     /// @returns the newly-created global variable
@@ -112,11 +112,9 @@ struct CombineSamplers::State {
                                               const sem::Variable* sampler_var,
                                               std::string name) {
         binding::CombinedTextureSamplerPair st_pair;
-        if (texture_var) {
-            st_pair.texture = *texture_var->As<sem::GlobalVariable>()->Attributes().binding_point;
-        } else {
-            st_pair.texture = bindings->placeholder_sampler_bind_point;
-        }
+
+        TINT_ASSERT(texture_var);
+        st_pair.texture = *texture_var->As<sem::GlobalVariable>()->Attributes().binding_point;
 
         if (sampler_var) {
             st_pair.sampler = *sampler_var->As<sem::GlobalVariable>()->Attributes().binding_point;
@@ -149,24 +147,17 @@ struct CombineSamplers::State {
     /// Creates Identifier for a given texture and sampler variable pair.
     /// Depth textures with no samplers are turned into the corresponding
     /// f32 texture (e.g., texture_depth_2d -> texture_2d<f32>).
-    /// Either texture or sampler could be nullptr, but cannot be nullptr at the same time.
-    /// The texture can only be nullptr, when the sampler is a dangling function parameter.
     /// @param texture the texture variable of interest
     /// @param sampler the texture variable of interest
     /// @returns the newly-created type
     ast::Type CreateCombinedASTTypeFor(const sem::Variable* texture, const sem::Variable* sampler) {
-        if (texture) {
-            const core::type::Type* texture_type = texture->Type()->UnwrapRef();
-            const core::type::DepthTexture* depth = texture_type->As<core::type::DepthTexture>();
-            if (depth && !sampler) {
-                return ctx.dst->ty.sampled_texture(depth->dim(), ctx.dst->ty.f32());
-            }
-            return CreateASTTypeFor(ctx, texture_type);
+        const core::type::Type* texture_type = texture->Type()->UnwrapRef();
+        const core::type::DepthTexture* depth = texture_type->As<core::type::DepthTexture>();
+        if (depth && !sampler) {
+            return ctx.dst->ty.sampled_texture(depth->dim(), ctx.dst->ty.f32());
         }
 
-        TINT_ASSERT(sampler != nullptr);
-        const core::type::Type* sampler_type = sampler->Type()->UnwrapRef();
-        return CreateASTTypeFor(ctx, sampler_type);
+        return CreateASTTypeFor(ctx, texture_type);
     }
 
     /// Insert a new texture/sampler pair into the combined samplers maps (global or local, as
@@ -179,16 +170,9 @@ struct CombineSamplers::State {
                     tint::Vector<const ast::Parameter*, 8>* params) {
         const sem::Variable* texture_var = pair.first;
         const sem::Variable* sampler_var = pair.second;
-        std::string name = "";
-
-        if (texture_var) {
-            name = texture_var->Declaration()->name->symbol.Name();
-        }
+        std::string name = texture_var->Declaration()->name->symbol.Name();
         if (sampler_var) {
-            if (!name.empty()) {
-                name += "_";
-            }
-            name += sampler_var->Declaration()->name->symbol.Name();
+            name += "_" + sampler_var->Declaration()->name->symbol.Name();
         }
         if (IsGlobal(pair)) {
             // Both texture and sampler are global; add a new global variable
@@ -247,10 +231,6 @@ struct CombineSamplers::State {
         // separate textures & samplers. Create new combined globals where found.
         ctx.ReplaceAll([&](const ast::Function* ast_fn) -> const ast::Function* {
             if (auto* fn = sem.Get(ast_fn)) {
-                auto pairs = fn->TextureSamplerPairs();
-                if (pairs.IsEmpty()) {
-                    return nullptr;
-                }
                 Vector<const ast::Parameter*, 8> params;
                 for (auto pair : fn->TextureSamplerPairs()) {
                     if (!pair.second) {

@@ -2339,27 +2339,13 @@ TEST_F(ResolverTest, TextureSampler_UnusedTextureSampleInFunctionPassedAsArgumen
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 
     auto inner_pairs = Sem().Get(inner_func)->TextureSamplerPairs();
-    ASSERT_EQ(inner_pairs.Length(), 2u);
-    auto* inner_pair_texture = As<sem::Parameter>(inner_pairs[0].first);
-    ASSERT_NE(inner_pair_texture, nullptr);
-    EXPECT_EQ(inner_pair_texture->Index(), 1u);
-    auto* inner_pair_sampler = As<sem::Parameter>(inner_pairs[1].second);
-    ASSERT_NE(inner_pair_sampler, nullptr);
-    EXPECT_EQ(inner_pair_sampler->Index(), 2u);
+    ASSERT_EQ(inner_pairs.Length(), 0u);
 
     auto middle_pairs = Sem().Get(middle_func)->TextureSamplerPairs();
-    ASSERT_EQ(middle_pairs.Length(), 2u);
-    auto* middle_pair_texture = As<sem::Parameter>(middle_pairs[0].first);
-    ASSERT_NE(middle_pair_texture, nullptr);
-    EXPECT_EQ(middle_pair_texture->Index(), 2u);
-    auto* middle_pair_sampler = As<sem::Parameter>(middle_pairs[1].second);
-    ASSERT_NE(middle_pair_sampler, nullptr);
-    EXPECT_EQ(middle_pair_sampler->Index(), 1u);
+    ASSERT_EQ(middle_pairs.Length(), 0u);
 
     auto outer_pairs = Sem().Get(outer_func)->TextureSamplerPairs();
-    ASSERT_EQ(outer_pairs.Length(), 2u);
-    EXPECT_TRUE(outer_pairs[0].first != nullptr);
-    EXPECT_TRUE(outer_pairs[1].second != nullptr);
+    ASSERT_EQ(outer_pairs.Length(), 0u);
 }
 
 TEST_F(ResolverTest, TextureSampler_TextureDimensions) {
