@@ -209,12 +209,22 @@ bool GenerateSpirv(const tint::Program& program) {
 #if TINT_BUILD_SPV_WRITER
     tint::spirv::writer::Options gen_options;
     gen_options.bindings = tint::spirv::writer::GenerateBindings(program);
-    auto result = tint::spirv::writer::Generate(program, gen_options);
-    if (result != tint::Success) {
-        tint::cmd::PrintWGSL(std::cerr, program);
-        std::cerr << "Failed to generate: " << result.Failure() << "\n";
+
+    // Convert the AST program to an IR module.
+    auto ir = tint::wgsl::reader::ProgramToLoweredIR(program);
+    if (ir != tint::Success) {
+        std::cerr << "Failed to generate IR: " << ir << "\n";
         return false;
     }
+
+    // Generate SPIR-V from Tint IR.
+    auto result = tint::spirv::writer::Generate(ir.Get(), gen_options);
+    if (result != tint::Success) {
+        tint::cmd::PrintWGSL(std::cerr, program);
+        std::cerr << "Failed to generate SPIR-V: " << result.Failure() << "\n";
+        return false;
+    }
+
     return true;
 #else
     (void)program;
