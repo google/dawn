@@ -259,10 +259,15 @@ if (tint_build_benchmarks) {
     public_deps = [ "//third_party/google_benchmark" ]
   }
   action("generate_benchmark_inputs") {
-    output_header = "${target_gen_dir}/cmd/bench/benchmark_inputs.h"
-    outputs = [ output_header ]
+    generated_header_relpath = "gen/src/tint/cmd/bench/benchmark_inputs.h"
+    generated_header_abspath = "${root_build_dir}/${generated_header_relpath}"
+    outputs = [ generated_header_abspath ]
     script = "${tint_src_dir}/cmd/bench/generate_benchmark_inputs.py"
-    args = [ rebase_path(output_header, root_build_dir) ]
+    depfile = "${generated_header_abspath}.d"
+    args = [
+      rebase_path(root_build_dir, root_build_dir),
+      generated_header_relpath,
+    ]
   }
 }
 
