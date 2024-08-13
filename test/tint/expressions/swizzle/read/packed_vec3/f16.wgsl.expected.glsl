@@ -7,8 +7,6 @@ void unused_entry_point() {
 }
 struct S {
   f16vec3 v;
-  uint pad;
-  uint pad_1;
 };
 
 layout(binding = 0, std140) uniform U_block_ubo {

@@ -2,9 +2,6 @@
 
 struct Constants {
   uint zero;
-  uint pad;
-  uint pad_1;
-  uint pad_2;
 };
 
 layout(binding = 0, std140) uniform constants_block_ubo {

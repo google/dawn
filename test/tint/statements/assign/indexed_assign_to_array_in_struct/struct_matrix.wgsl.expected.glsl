@@ -2,9 +2,6 @@
 
 struct Uniforms {
   uint i;
-  uint pad;
-  uint pad_1;
-  uint pad_2;
 };
 
 struct OuterS {

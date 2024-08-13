@@ -29,9 +29,6 @@ void tint_zero_workgroup_memory(uint local_idx) {
 
 struct S_1 {
   uint field0;
-  uint pad;
-  uint pad_1;
-  uint pad_2;
 };
 
 struct S_2 {

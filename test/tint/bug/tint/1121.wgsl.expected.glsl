@@ -30,8 +30,6 @@ struct Config {
   uint tileCountY;
   uint numTileLightSlot;
   uint tileSize;
-  uint pad;
-  uint pad_1;
 };
 
 layout(binding = 0, std140) uniform config_block_ubo {

@@ -2,9 +2,6 @@
 
 struct UBO {
   int dynamic_idx;
-  uint pad;
-  uint pad_1;
-  uint pad_2;
 };
 
 layout(binding = 0, std140) uniform ubo_block_ubo {

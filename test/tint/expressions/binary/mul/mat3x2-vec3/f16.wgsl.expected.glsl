@@ -7,8 +7,6 @@ struct S {
   f16mat3x2 matrix;
   uint pad;
   f16vec3 vector;
-  uint pad_1;
-  uint pad_2;
 };
 
 struct S_std140 {
@@ -17,8 +15,6 @@ struct S_std140 {
   f16vec2 matrix_2;
   uint pad;
   f16vec3 vector;
-  uint pad_1;
-  uint pad_2;
 };
 
 layout(binding = 0, std140) uniform data_block_std140_ubo {

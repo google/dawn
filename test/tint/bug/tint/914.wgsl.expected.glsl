@@ -26,7 +26,6 @@ struct Uniforms {
   uint dimAOuter;
   uint dimInner;
   uint dimBOuter;
-  uint pad;
 };
 
 layout(binding = 0, std430) buffer Matrix_ssbo {

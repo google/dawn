@@ -4,8 +4,6 @@ struct Uniforms {
   uvec2 aShape;
   uvec2 bShape;
   uvec2 outShape;
-  uint pad;
-  uint pad_1;
 };
 
 layout(binding = 0, std430) buffer Matrix_ssbo {

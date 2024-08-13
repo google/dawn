@@ -84,7 +84,6 @@ struct SimParams {
   float rule1Scale;
   float rule2Scale;
   float rule3Scale;
-  uint pad;
 };
 
 struct Particles {

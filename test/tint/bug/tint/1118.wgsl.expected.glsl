@@ -20,9 +20,6 @@ struct Material {
 
 struct Mesh {
   float visibility;
-  uint pad;
-  uint pad_1;
-  uint pad_2;
 };
 
 float fClipDistance3 = 0.0f;

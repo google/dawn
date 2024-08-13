@@ -3,8 +3,6 @@
 struct Uniforms {
   uint i;
   uint j;
-  uint pad;
-  uint pad_1;
 };
 
 layout(binding = 4, std140) uniform uniforms_block_ubo {

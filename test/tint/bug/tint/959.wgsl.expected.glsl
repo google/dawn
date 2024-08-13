@@ -4,9 +4,6 @@ precision highp int;
 
 struct S {
   float a;
-  uint pad;
-  uint pad_1;
-  uint pad_2;
 };
 
 layout(binding = 0, std430) buffer b0_block_ssbo {

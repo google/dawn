@@ -6,8 +6,6 @@ precision highp int;
 struct S {
   f16mat4x3 matrix;
   f16vec3 vector;
-  uint pad;
-  uint pad_1;
 };
 
 struct S_std140 {
@@ -16,8 +14,6 @@ struct S_std140 {
   f16vec3 matrix_2;
   f16vec3 matrix_3;
   f16vec3 vector;
-  uint pad;
-  uint pad_1;
 };
 
 layout(binding = 0, std140) uniform data_block_std140_ubo {

@@ -23,8 +23,6 @@ void tint_zero_workgroup_memory(uint local_idx) {
 struct Params {
   uint filterDim;
   uint blockDim;
-  uint pad;
-  uint pad_1;
 };
 
 layout(binding = 1, std140) uniform params_block_ubo {
@@ -34,9 +32,6 @@ layout(binding = 1, std140) uniform params_block_ubo {
 layout(binding = 2, rgba8) uniform highp writeonly image2D outputTex;
 struct Flip {
   uint value;
-  uint pad;
-  uint pad_1;
-  uint pad_2;
 };
 
 layout(binding = 3, std140) uniform flip_block_ubo {

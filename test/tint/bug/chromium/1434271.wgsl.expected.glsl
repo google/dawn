@@ -360,9 +360,6 @@ struct Particle {
 
 struct UBO {
   uint width;
-  uint pad;
-  uint pad_1;
-  uint pad_2;
 };
 
 layout(binding = 3, std140) uniform ubo_block_ubo {

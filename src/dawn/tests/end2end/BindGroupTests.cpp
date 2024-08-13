@@ -1082,9 +1082,6 @@ TEST_P(BindGroupTests, DrawThenChangePipelineTwiceAndBindGroup) {
 // Regression test for crbug.com/dawn/408 where dynamic offsets were applied in the wrong order.
 // Dynamic offsets should be applied in increasing order of binding number.
 TEST_P(BindGroupTests, DynamicOffsetOrder) {
-    // TODO(crbug.com/dawn/2295): diagnose this failure on Pixel 6 OpenGLES
-    DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsAndroid() && IsARM());
-
     // We will put the following values and the respective offsets into a buffer.
     // The test will ensure that the correct dynamic offset is applied to each buffer by reading the
     // value from an offset binding.

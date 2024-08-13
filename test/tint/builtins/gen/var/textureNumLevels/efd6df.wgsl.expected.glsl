@@ -4,9 +4,6 @@ precision highp int;
 
 struct tint_symbol_1 {
   uint texture_builtin_value_0;
-  uint pad;
-  uint pad_1;
-  uint pad_2;
 };
 
 layout(binding = 0, std140) uniform tint_symbol_2_block_ubo {
@@ -39,9 +36,6 @@ void main() {
 
 struct tint_symbol_1 {
   uint texture_builtin_value_0;
-  uint pad;
-  uint pad_1;
-  uint pad_2;
 };
 
 layout(binding = 0, std140) uniform tint_symbol_2_block_ubo {
@@ -76,9 +70,6 @@ void main() {
 layout(location = 0) flat out uint prevent_dce_1;
 struct tint_symbol_1 {
   uint texture_builtin_value_0;
-  uint pad;
-  uint pad_1;
-  uint pad_2;
 };
 
 layout(binding = 0, std140) uniform tint_symbol_2_block_ubo {

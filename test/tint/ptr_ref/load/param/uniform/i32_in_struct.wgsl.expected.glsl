@@ -2,9 +2,6 @@
 
 struct str {
   int i;
-  uint pad;
-  uint pad_1;
-  uint pad_2;
 };
 
 layout(binding = 0, std140) uniform S_block_ubo {
