@@ -1474,15 +1474,6 @@ struct BuiltinPolyfill::State {
                         }
                         return Symbol{};
 
-                    case wgsl::BuiltinFn::kQuantizeToF16:
-                        if (cfg.builtins.quantize_to_vec_f16) {
-                            if (auto* vec = builtin->ReturnType()->As<core::type::Vector>()) {
-                                return builtin_polyfills.GetOrAdd(
-                                    builtin, [&] { return quantizeToF16(vec); });
-                            }
-                        }
-                        return Symbol{};
-
                     case wgsl::BuiltinFn::kWorkgroupUniformLoad:
                         if (cfg.builtins.workgroup_uniform_load) {
                             return builtin_polyfills.GetOrAdd(builtin, [&] {

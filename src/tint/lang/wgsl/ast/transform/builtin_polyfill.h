@@ -96,9 +96,6 @@ class BuiltinPolyfill final : public Castable<BuiltinPolyfill, Transform> {
         bool sign_int = false;
         /// Should `textureSampleBaseClampToEdge()` be polyfilled for texture_2d<f32> textures?
         bool texture_sample_base_clamp_to_edge_2d_f32 = false;
-        /// Should the vector form of `quantizeToF16()` be polyfilled with a scalar implementation?
-        /// See crbug.com/tint/1741
-        bool quantize_to_vec_f16 = false;
         /// Should `workgroupUniformLoad()` be polyfilled?
         bool workgroup_uniform_load = false;
         /// Should `dot4I8Packed()` and `dot4U8Packed()` be polyfilled?
@@ -132,7 +129,6 @@ class BuiltinPolyfill final : public Castable<BuiltinPolyfill, Transform> {
                      saturate,
                      sign_int,
                      texture_sample_base_clamp_to_edge_2d_f32,
-                     quantize_to_vec_f16,
                      workgroup_uniform_load,
                      dot_4x8_packed,
                      pack_unpack_4x8,
