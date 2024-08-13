@@ -658,8 +658,7 @@ func (j job) run(cfg runConfig) {
 		// expectedFilePath is the path to the expected output file for the given test
 		expectedFilePath := j.file + ".expected."
 
-		// TODO(crbug.com/347699874): Remove the SPIR-V conditional when expectations have been moved.
-		if cfg.useIr || j.format == spvasm {
+		if cfg.useIr {
 			expectedFilePath += "ir."
 		}
 
