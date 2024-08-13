@@ -78,7 +78,7 @@
 #endif  // TINT_BUILD_WGSL_READER
 
 #if TINT_BUILD_SPV_WRITER
-#include "src/tint/lang/spirv/writer/helpers/ast_generate_bindings.h"
+#include "src/tint/lang/spirv/writer/helpers/generate_bindings.h"
 #include "src/tint/lang/spirv/writer/writer.h"
 #endif  // TINT_BUILD_SPV_WRITER
 
@@ -695,18 +695,18 @@ std::string Disassemble(const std::vector<uint32_t>& data) {
 /// @returns true on success
 bool GenerateSpirv(const tint::Program& program, const Options& options) {
 #if TINT_BUILD_SPV_WRITER
-    tint::spirv::writer::Options gen_options;
-    gen_options.disable_robustness = !options.enable_robustness;
-    gen_options.disable_workgroup_init = options.disable_workgroup_init;
-    gen_options.use_storage_input_output_16 = options.use_storage_input_output_16;
-    gen_options.bindings = tint::spirv::writer::GenerateBindings(program);
-
     // Convert the AST program to an IR module.
     auto ir = tint::wgsl::reader::ProgramToLoweredIR(program);
     if (ir != tint::Success) {
         std::cerr << "Failed to generate IR: " << ir << "\n";
         return false;
     }
+
+    tint::spirv::writer::Options gen_options;
+    gen_options.disable_robustness = !options.enable_robustness;
+    gen_options.disable_workgroup_init = options.disable_workgroup_init;
+    gen_options.use_storage_input_output_16 = options.use_storage_input_output_16;
+    gen_options.bindings = tint::spirv::writer::GenerateBindings(ir.Get());
 
     // Generate SPIR-V from Tint IR.
     auto result = tint::spirv::writer::Generate(ir.Get(), gen_options);
