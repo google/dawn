@@ -46,7 +46,7 @@ import "src/tint/lang/core/texel_format.def"
 // Enumerators                                                                //
 ////////////////////////////////////////////////////////////////////////////////
 
-// https://gpuweb.github.io/gpuweb/wgsl/#builtin-values
+// https://www.w3.org/TR/WGSL/#builtin-inputs-outputs
 enum builtin_value {
   position
   vertex_index

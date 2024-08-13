@@ -1,4 +1,4 @@
-// https://gpuweb.github.io/gpuweb/wgsl/#storage-class
+// https://www.w3.org/TR/WGSL/#address-space
 enum address_space {
   function
   private
