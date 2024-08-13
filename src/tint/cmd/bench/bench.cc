@@ -27,12 +27,9 @@
 
 #include "src/tint/cmd/bench/bench.h"
 
-#include <iostream>
 #include <utility>
 
-#include "src/tint/lang/spirv/reader/reader.h"
 #include "src/tint/lang/wgsl/reader/reader.h"
-#include "src/tint/lang/wgsl/writer/writer.h"
 #include "src/tint/utils/containers/hashmap.h"
 
 namespace tint::bench {
@@ -46,29 +43,7 @@ Hashmap<std::string, std::string, 16> kBenchmarkWgslShaders;
 bool Initialize() {
     // Populate the map from benchmark input name to WGSL shader.
     for (auto& benchmark : kBenchmarkInputs) {
-        if (!benchmark.wgsl.empty()) {
-            // If the input is WGSL, we just add it as is.
-            kBenchmarkWgslShaders.Add(benchmark.name, benchmark.wgsl);
-        } else if (!benchmark.spirv.empty()) {
-            // If the input is SPIR-V, we convert it to WGSL and add that.
-            tint::spirv::reader::Options spirv_opts;
-            spirv_opts.allow_non_uniform_derivatives = true;
-            auto program = tint::spirv::reader::Read(benchmark.spirv, spirv_opts);
-            if (!program.IsValid()) {
-                std::cerr << "Failed to convert '" << benchmark.name
-                          << "': " << program.Diagnostics() << "\n";
-                return false;
-            }
-            auto result = tint::wgsl::writer::Generate(program, {});
-            if (result != Success) {
-                std::cerr << "Failed to generate WGSL for '" << benchmark.name
-                          << "': " << result.Failure() << "\n";
-                return false;
-            }
-            kBenchmarkWgslShaders.Add(benchmark.name, result->wgsl);
-        } else {
-            TINT_UNREACHABLE();
-        }
+        kBenchmarkWgslShaders.Add(benchmark.name, benchmark.wgsl);
     }
 
     return true;

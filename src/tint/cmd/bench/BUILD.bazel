@@ -55,7 +55,6 @@ cc_library(
     "//src/tint/lang/wgsl/features",
     "//src/tint/lang/wgsl/program",
     "//src/tint/lang/wgsl/sem",
-    "//src/tint/lang/wgsl/writer/ir_to_program",
     "//src/tint/utils/containers",
     "//src/tint/utils/diagnostic",
     "//src/tint/utils/ice",
@@ -71,19 +70,8 @@ cc_library(
     "//src/tint/utils/traits",
     "@benchmark",
   ] + select({
-    ":tint_build_spv_reader": [
-      "//src/tint/lang/spirv/reader",
-      "//src/tint/lang/spirv/reader/common",
-    ],
-    "//conditions:default": [],
-  }) + select({
     ":tint_build_wgsl_reader": [
       "//src/tint/lang/wgsl/reader",
-    ],
-    "//conditions:default": [],
-  }) + select({
-    ":tint_build_wgsl_writer": [
-      "//src/tint/lang/wgsl/writer",
     ],
     "//conditions:default": [],
   }),
