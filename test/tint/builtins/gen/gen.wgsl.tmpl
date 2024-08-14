@@ -255,7 +255,7 @@ fn vertex_main() -> VertexOutput {
 // flags: --hlsl_shader_model 62
 
 {{/* HLSL Wave operations require Shader Model 6.0 (DXC) */}}
-{{-   else if HasPrefix $builtin_name "subgroup"}}
+{{-   else if or (HasPrefix $builtin_name "subgroup") (HasPrefix $builtin_name "quad")}}
 // [hlsl-dxc] flags: --hlsl_shader_model 60
 
 {{    end -}}
@@ -272,7 +272,7 @@ fn vertex_main() -> VertexOutput {
 {{-   $builtin_name := $permutation.Intrinsic.Name -}}
 
 {{- /* Emit 'enable subgroups' and 'enable subgroups_f16' if required */ -}}
-{{-   if HasPrefix $builtin_name "subgroup" }}
+{{-   if or (HasPrefix $builtin_name "subgroup") (HasPrefix $builtin_name "quad")}}
 enable subgroups;
 {{-     if OverloadUsesType $overload "f16"}}
 enable subgroups_f16;

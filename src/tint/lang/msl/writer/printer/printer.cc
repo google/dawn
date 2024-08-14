@@ -969,6 +969,9 @@ class Printer : public tint::TextGenerator {
             case core::BuiltinFn::kPack2X16Unorm:
                 out << "pack_float_to_unorm2x16";
                 break;
+            case core::BuiltinFn::kQuadBroadcast:
+                out << "quad_broadcast";
+                break;
             case core::BuiltinFn::kReverseBits:
                 out << "reverse_bits";
                 break;

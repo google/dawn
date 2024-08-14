@@ -186,6 +186,7 @@ enum class BuiltinFn : uint8_t {
     kSubgroupMax,
     kSubgroupAll,
     kSubgroupAny,
+    kQuadBroadcast,
     kNone,
 };
 
@@ -347,6 +348,7 @@ constexpr BuiltinFn kBuiltinFns[] = {
     BuiltinFn::kSubgroupMax,
     BuiltinFn::kSubgroupAll,
     BuiltinFn::kSubgroupAny,
+    BuiltinFn::kQuadBroadcast,
 };
 
 /// All builtin function names
@@ -490,6 +492,7 @@ constexpr const char* kBuiltinFnStrings[] = {
     "subgroupMax",
     "subgroupAll",
     "subgroupAny",
+    "quadBroadcast",
 };
 
 /// Determines if the given `f` is a coarse derivative.

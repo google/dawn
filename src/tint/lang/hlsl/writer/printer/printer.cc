@@ -1047,6 +1047,9 @@ class Printer : public tint::TextGenerator {
             case core::BuiltinFn::kSubgroupAny:
                 out << "WaveActiveAnyTrue";
                 break;
+            case core::BuiltinFn::kQuadBroadcast:
+                out << "QuadReadLaneAt";
+                break;
             default:
                 TINT_UNREACHABLE() << "unhandled: " << func;
         }

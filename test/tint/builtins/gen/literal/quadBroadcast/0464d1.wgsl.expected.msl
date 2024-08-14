@@ -1,0 +1,18 @@
+#include <metal_stdlib>
+
+using namespace metal;
+half2 quadBroadcast_0464d1() {
+  half2 res = quad_broadcast(half2(1.0h),1);
+  return res;
+}
+
+fragment void fragment_main(device half2* tint_symbol [[buffer(0)]]) {
+  *(tint_symbol) = quadBroadcast_0464d1();
+  return;
+}
+
+kernel void compute_main(device half2* tint_symbol_1 [[buffer(0)]]) {
+  *(tint_symbol_1) = quadBroadcast_0464d1();
+  return;
+}
+

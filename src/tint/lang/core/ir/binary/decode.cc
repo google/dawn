@@ -1663,6 +1663,8 @@ struct Decoder {
                 return core::BuiltinFn::kSubgroupAll;
             case pb::BuiltinFn::subgroup_any:
                 return core::BuiltinFn::kSubgroupAny;
+            case pb::BuiltinFn::quad_broadcast:
+                return core::BuiltinFn::kQuadBroadcast;
 
             case pb::BuiltinFn::BuiltinFn_INT_MIN_SENTINEL_DO_NOT_USE_:
             case pb::BuiltinFn::BuiltinFn_INT_MAX_SENTINEL_DO_NOT_USE_:

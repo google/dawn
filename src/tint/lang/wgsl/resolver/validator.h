@@ -544,6 +544,11 @@ class Validator {
     /// @returns true on success, false otherwise
     bool SubgroupBroadcast(const sem::Call* call) const;
 
+    /// Validates a quadBroadcast builtin function
+    /// @param call the builtin call to validate
+    /// @returns true on success, false otherwise
+    bool QuadBroadcast(const sem::Call* call) const;
+
     /// Validates an optional builtin function and its required extensions and language features.
     /// @param call the builtin call to validate
     /// @returns true on success, false otherwise

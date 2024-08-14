@@ -1175,6 +1175,8 @@ struct Encoder {
                 return pb::BuiltinFn::subgroup_all;
             case core::BuiltinFn::kSubgroupAny:
                 return pb::BuiltinFn::subgroup_any;
+            case core::BuiltinFn::kQuadBroadcast:
+                return pb::BuiltinFn::quad_broadcast;
             case core::BuiltinFn::kNone:
                 break;
         }

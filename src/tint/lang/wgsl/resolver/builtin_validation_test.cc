@@ -1116,6 +1116,42 @@ TEST_F(ResolverBuiltinValidationTest, SubgroupBroadcastLaneArgMustBeConst) {
         R"(12:34 error: the sourceLaneIndex argument of subgroupBroadcast must be a const-expression)");
 }
 
+TEST_F(ResolverBuiltinValidationTest, QuadBroadcastIdArgMustBeConst) {
+    Enable(wgsl::Extension::kSubgroups);
+    Func("func", tint::Empty, ty.void_(),
+         Vector{
+             Decl(Let("id", Expr(1_u))),
+             Ignore(Call("quadBroadcast", 1_f, Ident(Source{{12, 34}}, "id"))),
+         });
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(),
+              R"(12:34 error: the id argument of quadBroadcast must be a const-expression)");
+}
+
+TEST_F(ResolverBuiltinValidationTest, SubgroupBroadcastLaneArgMustBeNonNeg) {
+    Enable(wgsl::Extension::kSubgroups);
+    Func("func", tint::Empty, ty.u32(),
+         Vector{
+             Return(Call("subgroupBroadcast", 1_u, Expr(Source{{12, 34}}, -1_i))),
+         });
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(
+        r()->error(),
+        R"(12:34 error: the sourceLaneIndex argument of subgroupBroadcast must be greater than or equal to zero)");
+}
+
+TEST_F(ResolverBuiltinValidationTest, QuadBroadcastIdArgMustBeNonNeg) {
+    Enable(wgsl::Extension::kSubgroups);
+    Func("func", tint::Empty, ty.u32(),
+         Vector{
+             Return(Call("quadBroadcast", 1_u, Expr(Source{{12, 34}}, -1_i))),
+         });
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(
+        r()->error(),
+        R"(12:34 error: the id argument of quadBroadcast must be greater than or equal to zero)");
+}
+
 TEST_F(ResolverBuiltinValidationTest, TextureBarrier) {
     // fn func { textureBarrier(); }
     Func("func", tint::Empty, ty.void_(),

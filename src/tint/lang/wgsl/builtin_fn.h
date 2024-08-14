@@ -188,6 +188,7 @@ enum class BuiltinFn : uint8_t {
     kSubgroupMax,
     kSubgroupAll,
     kSubgroupAny,
+    kQuadBroadcast,
     kTintMaterialize,
     kNone,
 };
@@ -352,6 +353,7 @@ constexpr BuiltinFn kBuiltinFns[] = {
     BuiltinFn::kSubgroupMax,
     BuiltinFn::kSubgroupAll,
     BuiltinFn::kSubgroupAny,
+    BuiltinFn::kQuadBroadcast,
     BuiltinFn::kTintMaterialize,
 };
 
@@ -498,6 +500,7 @@ constexpr const char* kBuiltinFnStrings[] = {
     "subgroupMax",
     "subgroupAll",
     "subgroupAny",
+    "quadBroadcast",
     "__tint_materialize",
 };
 

@@ -663,6 +663,7 @@ class State {
                     case wgsl::BuiltinFn::kSubgroupMax:
                     case wgsl::BuiltinFn::kSubgroupAny:
                     case wgsl::BuiltinFn::kSubgroupAll:
+                    case wgsl::BuiltinFn::kQuadBroadcast:
                         Enable(wgsl::Extension::kChromiumExperimentalSubgroups);
                         break;
                     default:

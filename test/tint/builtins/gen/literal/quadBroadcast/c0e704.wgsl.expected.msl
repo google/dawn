@@ -1,0 +1,18 @@
+#include <metal_stdlib>
+
+using namespace metal;
+int2 quadBroadcast_c0e704() {
+  int2 res = quad_broadcast(int2(1),1);
+  return res;
+}
+
+fragment void fragment_main(device int2* tint_symbol [[buffer(0)]]) {
+  *(tint_symbol) = quadBroadcast_c0e704();
+  return;
+}
+
+kernel void compute_main(device int2* tint_symbol_1 [[buffer(0)]]) {
+  *(tint_symbol_1) = quadBroadcast_c0e704();
+  return;
+}
+

@@ -62,10 +62,14 @@ std::string_view ToString(ParameterUsage usage) {
             return "depth";
         case ParameterUsage::kDepthRef:
             return "depth_ref";
+        case ParameterUsage::kE:
+            return "e";
         case ParameterUsage::kElements:
             return "elements";
         case ParameterUsage::kHeight:
             return "height";
+        case ParameterUsage::kId:
+            return "id";
         case ParameterUsage::kInputAttachment:
             return "input_attachment";
         case ParameterUsage::kLevel:

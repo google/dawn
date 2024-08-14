@@ -1990,10 +1990,43 @@ bool Validator::SubgroupBroadcast(const sem::Call* call) const {
     }
 
     TINT_ASSERT(call->Arguments().Length() == 2);
-    auto* laneArg = call->Arguments()[1];
-    if (!laneArg->ConstantValue()) {
-        AddError(laneArg->Declaration()->source)
+    auto* id = call->Arguments()[1];
+    auto* constant_value = id->ConstantValue();
+
+    if (!constant_value) {
+        AddError(id->Declaration()->source)
             << "the sourceLaneIndex argument of subgroupBroadcast must be a const-expression";
+        return false;
+    }
+
+    if (id->Type()->is_signed_integer_scalar() && constant_value->ValueAs<i32>() < 0) {
+        AddError(id->Declaration()->source) << "the sourceLaneIndex argument of subgroupBroadcast "
+                                               "must be greater than or equal to zero";
+        return false;
+    }
+
+    return true;
+}
+
+bool Validator::QuadBroadcast(const sem::Call* call) const {
+    auto* builtin = call->Target()->As<sem::BuiltinFn>();
+    if (!builtin) {
+        return false;
+    }
+
+    TINT_ASSERT(call->Arguments().Length() == 2);
+    auto* id = call->Arguments()[1];
+    auto* constant_value = id->ConstantValue();
+
+    if (!constant_value) {
+        AddError(id->Declaration()->source)
+            << "the id argument of quadBroadcast must be a const-expression";
+        return false;
+    }
+
+    if (id->Type()->is_signed_integer_scalar() && constant_value->ValueAs<i32>() < 0) {
+        AddError(id->Declaration()->source)
+            << "the id argument of quadBroadcast must be greater than or equal to zero";
         return false;
     }
 

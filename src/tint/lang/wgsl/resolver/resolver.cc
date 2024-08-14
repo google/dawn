@@ -2468,6 +2468,12 @@ sem::Call* Resolver::BuiltinCall(const ast::CallExpression* expr,
             }
             break;
 
+        case wgsl::BuiltinFn::kQuadBroadcast:
+            if (!validator_.QuadBroadcast(call)) {
+                return nullptr;
+            }
+            break;
+
         case wgsl::BuiltinFn::kAtomicLoad:
             RegisterLoad(args[0]);
             break;

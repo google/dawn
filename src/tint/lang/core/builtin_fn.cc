@@ -456,6 +456,9 @@ BuiltinFn ParseBuiltinFn(std::string_view name) {
     if (name == "subgroupAny") {
         return BuiltinFn::kSubgroupAny;
     }
+    if (name == "quadBroadcast") {
+        return BuiltinFn::kQuadBroadcast;
+    }
     return BuiltinFn::kNone;
 }
 
@@ -741,6 +744,8 @@ const char* str(BuiltinFn i) {
             return "subgroupAll";
         case BuiltinFn::kSubgroupAny:
             return "subgroupAny";
+        case BuiltinFn::kQuadBroadcast:
+            return "quadBroadcast";
     }
     return "<unknown>";
 }

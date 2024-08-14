@@ -733,6 +733,8 @@ fn textureStore[C: iu32](texture: texture_storage_3d<u32_texel_format, writable>
 @must_use @stage("fragment", "compute") fn subgroupMax[N: num, T: fiu32_f16](value: vec<N, T>) -> vec<N, T>
 @must_use @stage("fragment", "compute") fn subgroupAll(bool) -> bool
 @must_use @stage("fragment", "compute") fn subgroupAny(bool) -> bool
+@must_use @stage("fragment", "compute") fn quadBroadcast[T: fiu32_f16](e: T, @const id: iu32) -> T
+@must_use @stage("fragment", "compute") fn quadBroadcast[N: num, T: fiu32_f16](e: vec<N, T>, @const id: iu32) -> vec<N, T>
 
 ////////////////////////////////////////////////////////////////////////////////
 // Value constructors                                                         //

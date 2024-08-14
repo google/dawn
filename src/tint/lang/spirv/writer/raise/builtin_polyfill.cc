@@ -87,6 +87,7 @@ struct State {
                     case core::BuiltinFn::kDot:
                     case core::BuiltinFn::kDot4I8Packed:
                     case core::BuiltinFn::kDot4U8Packed:
+                    case core::BuiltinFn::kQuadBroadcast:
                     case core::BuiltinFn::kSelect:
                     case core::BuiltinFn::kSubgroupBroadcast:
                     case core::BuiltinFn::kSubgroupShuffle:
@@ -141,6 +142,9 @@ struct State {
                 case core::BuiltinFn::kDot4I8Packed:
                 case core::BuiltinFn::kDot4U8Packed:
                     DotPacked4x8(builtin);
+                    break;
+                case core::BuiltinFn::kQuadBroadcast:
+                    QuadBroadcast(builtin);
                     break;
                 case core::BuiltinFn::kSelect:
                     Select(builtin);
@@ -912,6 +916,19 @@ struct State {
     /// Handle a SubgroupBroadcast() builtin.
     /// @param builtin the builtin call instruction
     void SubgroupBroadcast(core::ir::CoreBuiltinCall* builtin) {
+        TINT_ASSERT(builtin->Args().Length() == 2);
+        auto* id = builtin->Args()[1];
+        TINT_ASSERT(id->Is<core::ir::Constant>());
+
+        // For const signed int IDs, compile-time convert to u32 to maintain constness.
+        if (id->Type()->is_signed_integer_scalar()) {
+            builtin->SetArg(1, b.Constant(id->As<core::ir::Constant>()->Value()->ValueAs<u32>()));
+        }
+    }
+
+    /// Handle a QuadBroadcast() builtin.
+    /// @param builtin the builtin call instruction
+    void QuadBroadcast(core::ir::CoreBuiltinCall* builtin) {
         TINT_ASSERT(builtin->Args().Length() == 2);
         auto* id = builtin->Args()[1];
         TINT_ASSERT(id->Is<core::ir::Constant>());

@@ -319,6 +319,7 @@
 "private"
 "ptr"
 "push_constant"
+"quadBroadcast"
 "quantizeToF16"
 "r"
 "r32float"

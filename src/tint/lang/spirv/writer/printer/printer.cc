@@ -1598,6 +1598,11 @@ class Printer {
             case core::BuiltinFn::kPow:
                 glsl_ext_inst(GLSLstd450Pow);
                 break;
+            case core::BuiltinFn::kQuadBroadcast:
+                module_.PushCapability(SpvCapabilityGroupNonUniformQuad);
+                op = spv::Op::OpGroupNonUniformQuadBroadcast;
+                operands.push_back(Constant(ir_.constant_values.Get(u32(spv::Scope::Subgroup))));
+                break;
             case core::BuiltinFn::kQuantizeToF16:
                 op = spv::Op::OpQuantizeToF16;
                 break;
