@@ -111,8 +111,12 @@ const std::unordered_map<std::string, std::string> kBenchmarkInputs = {''',
         # Helper to emit a WGSL shader as a char initializer list.
         def emit_wgsl(input):
             print(f'    {{"{f}", {{', file=output, end='')
+            i = 0
             for char in input.read():
-                print(char, file=output, end=', ')
+                if (i % 16) == 0:
+                    print('\n    ', file=output, end='')
+                print(' ' + str(char), file=output, end=',')
+                i += 1
             print(f'}}}},', file=output)
 
         # Create a temporary directory for converting SPIR-V shaders to WGSL.
