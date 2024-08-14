@@ -650,4 +650,7 @@ enum BuiltinFn {
     subgroup_shuffle_up = 137;
     subgroup_shuffle_down = 138;
     quad_broadcast = 139;
+    quad_swap_x = 140;
+    quad_swap_y = 141;
+    quad_swap_diagonal = 142;
 }

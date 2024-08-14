@@ -1665,6 +1665,12 @@ struct Decoder {
                 return core::BuiltinFn::kSubgroupAny;
             case pb::BuiltinFn::quad_broadcast:
                 return core::BuiltinFn::kQuadBroadcast;
+            case pb::BuiltinFn::quad_swap_x:
+                return core::BuiltinFn::kQuadSwapX;
+            case pb::BuiltinFn::quad_swap_y:
+                return core::BuiltinFn::kQuadSwapY;
+            case pb::BuiltinFn::quad_swap_diagonal:
+                return core::BuiltinFn::kQuadSwapDiagonal;
 
             case pb::BuiltinFn::BuiltinFn_INT_MIN_SENTINEL_DO_NOT_USE_:
             case pb::BuiltinFn::BuiltinFn_INT_MAX_SENTINEL_DO_NOT_USE_:

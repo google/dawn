@@ -187,6 +187,9 @@ enum class BuiltinFn : uint8_t {
     kSubgroupAll,
     kSubgroupAny,
     kQuadBroadcast,
+    kQuadSwapX,
+    kQuadSwapY,
+    kQuadSwapDiagonal,
     kNone,
 };
 
@@ -349,6 +352,9 @@ constexpr BuiltinFn kBuiltinFns[] = {
     BuiltinFn::kSubgroupAll,
     BuiltinFn::kSubgroupAny,
     BuiltinFn::kQuadBroadcast,
+    BuiltinFn::kQuadSwapX,
+    BuiltinFn::kQuadSwapY,
+    BuiltinFn::kQuadSwapDiagonal,
 };
 
 /// All builtin function names
@@ -493,6 +499,9 @@ constexpr const char* kBuiltinFnStrings[] = {
     "subgroupAll",
     "subgroupAny",
     "quadBroadcast",
+    "quadSwapX",
+    "quadSwapY",
+    "quadSwapDiagonal",
 };
 
 /// Determines if the given `f` is a coarse derivative.

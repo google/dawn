@@ -664,6 +664,9 @@ class State {
                     case wgsl::BuiltinFn::kSubgroupAny:
                     case wgsl::BuiltinFn::kSubgroupAll:
                     case wgsl::BuiltinFn::kQuadBroadcast:
+                    case wgsl::BuiltinFn::kQuadSwapX:
+                    case wgsl::BuiltinFn::kQuadSwapY:
+                    case wgsl::BuiltinFn::kQuadSwapDiagonal:
                         Enable(wgsl::Extension::kChromiumExperimentalSubgroups);
                         break;
                     default:

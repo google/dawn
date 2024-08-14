@@ -655,6 +655,12 @@ match workgroup
 @must_use @stage("fragment", "compute") fn subgroupAny(bool) -> bool
 @must_use @stage("fragment", "compute") fn quadBroadcast[T: fiu32_f16](e: T, @const id: iu32) -> T
 @must_use @stage("fragment", "compute") fn quadBroadcast[N: num, T: fiu32_f16](e: vec<N, T>, @const id: iu32) -> vec<N, T>
+@must_use @stage("fragment", "compute") fn quadSwapX[T: fiu32_f16](e: T) -> T
+@must_use @stage("fragment", "compute") fn quadSwapX[N: num, T: fiu32_f16](e: vec<N, T>) -> vec<N, T>
+@must_use @stage("fragment", "compute") fn quadSwapY[T: fiu32_f16](e: T) -> T
+@must_use @stage("fragment", "compute") fn quadSwapY[N: num, T: fiu32_f16](e: vec<N, T>) -> vec<N, T>
+@must_use @stage("fragment", "compute") fn quadSwapDiagonal[T: fiu32_f16](e: T) -> T
+@must_use @stage("fragment", "compute") fn quadSwapDiagonal[N: num, T: fiu32_f16](e: vec<N, T>) -> vec<N, T>
 
 ////////////////////////////////////////////////////////////////////////////////
 // Value constructors                                                         //

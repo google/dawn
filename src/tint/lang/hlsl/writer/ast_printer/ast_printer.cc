@@ -3174,6 +3174,12 @@ std::string ASTPrinter::generate_builtin_name(const sem::BuiltinFn* builtin) {
             return "WaveActiveAnyTrue";
         case wgsl::BuiltinFn::kQuadBroadcast:
             return "QuadReadLaneAt";
+        case wgsl::BuiltinFn::kQuadSwapX:
+            return "QuadReadAcrossX";
+        case wgsl::BuiltinFn::kQuadSwapY:
+            return "QuadReadAcrossY";
+        case wgsl::BuiltinFn::kQuadSwapDiagonal:
+            return "QuadReadAcrossDiagonal";
         default:
             diagnostics_.AddError(Source{}) << "Unknown builtin method: " << builtin->str();
     }

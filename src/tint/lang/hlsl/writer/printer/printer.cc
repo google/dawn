@@ -1050,6 +1050,15 @@ class Printer : public tint::TextGenerator {
             case core::BuiltinFn::kQuadBroadcast:
                 out << "QuadReadLaneAt";
                 break;
+            case core::BuiltinFn::kQuadSwapX:
+                out << "QuadReadAcrossX";
+                break;
+            case core::BuiltinFn::kQuadSwapY:
+                out << "QuadReadAcrossY";
+                break;
+            case core::BuiltinFn::kQuadSwapDiagonal:
+                out << "QuadReadAcrossDiagonal";
+                break;
             default:
                 TINT_UNREACHABLE() << "unhandled: " << func;
         }

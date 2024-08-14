@@ -1408,6 +1408,9 @@ class Printer {
             operands.push_back(U32Operand(inst));
         };
 
+        // TODO(crbug.com/359883869): Clean up this emission logic so this flag isn't necessary.
+        bool args_emitted = false;
+
         // Determine the opcode.
         switch (builtin->Func()) {
             case core::BuiltinFn::kAbs:
@@ -1602,6 +1605,30 @@ class Printer {
                 module_.PushCapability(SpvCapabilityGroupNonUniformQuad);
                 op = spv::Op::OpGroupNonUniformQuadBroadcast;
                 operands.push_back(Constant(ir_.constant_values.Get(u32(spv::Scope::Subgroup))));
+                break;
+            case core::BuiltinFn::kQuadSwapX:
+                module_.PushCapability(SpvCapabilityGroupNonUniformQuad);
+                op = spv::Op::OpGroupNonUniformQuadSwap;
+                operands.push_back(Constant(ir_.constant_values.Get(u32(spv::Scope::Subgroup))));
+                operands.push_back(Value(builtin->Args()[0]));
+                operands.push_back(Constant(ir_.constant_values.Get(0_u)));  // Direction
+                args_emitted = true;
+                break;
+            case core::BuiltinFn::kQuadSwapY:
+                module_.PushCapability(SpvCapabilityGroupNonUniformQuad);
+                op = spv::Op::OpGroupNonUniformQuadSwap;
+                operands.push_back(Constant(ir_.constant_values.Get(u32(spv::Scope::Subgroup))));
+                operands.push_back(Value(builtin->Args()[0]));
+                operands.push_back(Constant(ir_.constant_values.Get(1_u)));  // Direction
+                args_emitted = true;
+                break;
+            case core::BuiltinFn::kQuadSwapDiagonal:
+                module_.PushCapability(SpvCapabilityGroupNonUniformQuad);
+                op = spv::Op::OpGroupNonUniformQuadSwap;
+                operands.push_back(Constant(ir_.constant_values.Get(u32(spv::Scope::Subgroup))));
+                operands.push_back(Value(builtin->Args()[0]));
+                operands.push_back(Constant(ir_.constant_values.Get(2_u)));  // Direction
+                args_emitted = true;
                 break;
             case core::BuiltinFn::kQuantizeToF16:
                 op = spv::Op::OpQuantizeToF16;
@@ -1833,8 +1860,10 @@ class Printer {
         TINT_ASSERT(op != spv::Op::Max);
 
         // Add the arguments to the builtin call.
-        for (auto* arg : builtin->Args()) {
-            operands.push_back(Value(arg));
+        if (!args_emitted) {
+            for (auto* arg : builtin->Args()) {
+                operands.push_back(Value(arg));
+            }
         }
 
         // Emit the instruction.

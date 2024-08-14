@@ -190,6 +190,9 @@ wgsl::BuiltinFn Convert(core::BuiltinFn fn) {
         CASE(kSubgroupAny)
         CASE(kSubgroupAll)
         CASE(kQuadBroadcast)
+        CASE(kQuadSwapX)
+        CASE(kQuadSwapY)
+        CASE(kQuadSwapDiagonal)
         case core::BuiltinFn::kNone:
             break;
     }

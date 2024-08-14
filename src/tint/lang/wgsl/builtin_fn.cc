@@ -465,6 +465,15 @@ BuiltinFn ParseBuiltinFn(std::string_view name) {
     if (name == "quadBroadcast") {
         return BuiltinFn::kQuadBroadcast;
     }
+    if (name == "quadSwapX") {
+        return BuiltinFn::kQuadSwapX;
+    }
+    if (name == "quadSwapY") {
+        return BuiltinFn::kQuadSwapY;
+    }
+    if (name == "quadSwapDiagonal") {
+        return BuiltinFn::kQuadSwapDiagonal;
+    }
     if (name == "__tint_materialize") {
         return BuiltinFn::kTintMaterialize;
     }
@@ -759,6 +768,12 @@ const char* str(BuiltinFn i) {
             return "subgroupAny";
         case BuiltinFn::kQuadBroadcast:
             return "quadBroadcast";
+        case BuiltinFn::kQuadSwapX:
+            return "quadSwapX";
+        case BuiltinFn::kQuadSwapY:
+            return "quadSwapY";
+        case BuiltinFn::kQuadSwapDiagonal:
+            return "quadSwapDiagonal";
         case BuiltinFn::kTintMaterialize:
             return "__tint_materialize";
     }
@@ -853,6 +868,9 @@ bool IsSubgroup(BuiltinFn f) {
         case BuiltinFn::kSubgroupAll:
         case BuiltinFn::kSubgroupAny:
         case BuiltinFn::kQuadBroadcast:
+        case BuiltinFn::kQuadSwapX:
+        case BuiltinFn::kQuadSwapY:
+        case BuiltinFn::kQuadSwapDiagonal:
             return true;
         default:
             return false;
