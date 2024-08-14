@@ -557,7 +557,8 @@ std::vector<Case> ClampCases() {
            Vec(T(42), T::Highest(), T(6))},       //
           Vec(T(0), T::Highest(), T(5))),
 
-        E({T(1), T(2), T(1)}, error_msg(T(2), T(1))),
+        E({T(1), T(2), T(1)}, error_msg(T(2), T(1))),  //
+        E({T(1), T(1), T(0)}, error_msg(T(1), T(0))),
         E({Vec(T(0), T(0)),         //
            Vec(T(1), T(2)),         //
            Vec(T(2), T(1))},        //

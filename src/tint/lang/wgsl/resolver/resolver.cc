@@ -26,6 +26,7 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "src/tint/lang/wgsl/resolver/resolver.h"
+#include <iostream>
 
 #include <algorithm>
 #include <cmath>
@@ -1971,6 +1972,23 @@ tint::Result<Vector<const core::constant::Value*, N>> Resolver::ConvertArguments
     return const_args;
 }
 
+template <size_t N>
+const core::constant::Value* Resolver::ConvertConstArgument(
+    const Vector<const sem::ValueExpression*, N>& args,
+    const sem::CallTarget* target,
+    unsigned i) {
+    TINT_ASSERT(i < args.Length());
+    if (const auto* const_arg = args[i]->ConstantValue()) {
+        const auto& params = target->Parameters();
+        TINT_ASSERT(i < params.Length());
+        // If successful, the conversion updates `const_arg`.
+        if (Convert(const_arg, params[i]->Type(), Source{})) {
+            return const_arg;
+        }
+    }
+    return nullptr;
+}
+
 sem::ValueExpression* Resolver::IndexAccessor(const ast::IndexAccessorExpression* expr) {
     auto* idx = Load(Materialize(sem_.GetVal(expr->index)));
     if (!idx) {
@@ -2495,6 +2513,26 @@ sem::Call* Resolver::BuiltinCall(const ast::CallExpression* expr,
             RegisterStore(args[0]);
             break;
 
+        default:
+            break;
+    }
+
+    // Check for errors when only some arguments are const or override.
+    // Const-eval checks error cases when all arguments are const or override.
+    switch (fn) {
+        case wgsl::BuiltinFn::kClamp: {
+            const auto* lowConst = ConvertConstArgument(args, target, 1);
+            const auto* highConst = ConvertConstArgument(args, target, 2);
+            if (lowConst && highConst) {
+                // Delegate error checking to the const-eval function, but use a harmless
+                // first argument.
+                auto fakeArgs = Vector{lowConst, lowConst, highConst};
+                auto res = const_eval_.clamp(call->Type(), fakeArgs, call->Declaration()->source);
+                if (res != Success) {
+                    return nullptr;
+                }
+            }
+        } break;
         default:
             break;
     }

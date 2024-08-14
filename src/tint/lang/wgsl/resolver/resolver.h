@@ -356,6 +356,16 @@ class Resolver {
         const Vector<const sem::ValueExpression*, N>& args,
         const sem::CallTarget* target);
 
+    /// Converts the value of `args`[`i`] to the type of the `i`th of the `target`.
+    /// Assumes `i` is a valid argument index.  Returns nullptr if the value is not
+    /// a constant, or can't be converted.
+    /// @returns the possibly converted argument
+    template <size_t N>
+    const core::constant::Value* ConvertConstArgument(
+        const Vector<const sem::ValueExpression*, N>& args,
+        const sem::CallTarget* target,
+        unsigned i);
+
     /// @param ty the type that may hold abstract numeric types
     /// @param target_ty the target type for the expression (variable type, parameter type, etc).
     ///        May be nullptr.
