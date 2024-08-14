@@ -33,10 +33,11 @@ and declares macros that will be used to register them all with Google Benchmark
 The SPIR-V shaders are converted to WGSL using Tint before being emitted.
 
 Usage:
-   generate_benchmark_inputs.py <tint>
+   generate_benchmark_inputs.py <tint> [--check-stale]
 """
 
 import argparse
+import filecmp
 import subprocess
 import sys
 import tempfile
@@ -46,11 +47,17 @@ from os import path
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('tint')
+    parser.add_argument('--check-stale', action=argparse.BooleanOptionalAction)
     args = parser.parse_args()
+    with tempfile.TemporaryDirectory() as tmpdir:
+        return generate(args, tmpdir)
 
+
+def generate(args, tmpdir: tempfile.TemporaryDirectory):
     script_dir = path.dirname(path.realpath(__file__))
     benchmark_dir = script_dir + '/../../../../test/tint/benchmark'
-    header_output_path = script_dir + '/inputs_bench.h'
+    tmp_header_output_path = tmpdir + '/inputs_bench.h'
+    final_header_output_path = script_dir + '/inputs_bench.h'
 
     # The list of benchmark inputs.
     benchmark_files = [
@@ -64,7 +71,8 @@ def main():
     ]
 
     # Generate the header file.
-    with open(header_output_path, 'w') as output:
+    output_path = tmp_header_output_path if args.check_stale else final_header_output_path
+    with open(output_path, 'w') as output:
         print('''// Copyright 2024 The Dawn & Tint Authors
 //
 // Redistribution and use in source and binary forms, with or without
@@ -119,27 +127,26 @@ const std::unordered_map<std::string, std::string> kBenchmarkInputs = {''',
                 i += 1
             print(f'}}}},', file=output)
 
-        # Create a temporary directory for converting SPIR-V shaders to WGSL.
-        with tempfile.TemporaryDirectory() as tmp:
-            # Add an entry to the array for each benchmark.
-            for f in benchmark_files:
-                if f.endswith('.wgsl'):
-                    # Emit the WGSL shader as is.
-                    with open(benchmark_dir + '/' + f, 'rb') as input:
-                        emit_wgsl(input)
-                elif f.endswith('.spv'):
-                    # Convert SPIR-V inputs to WGSL using Tint.
-                    tmpwgsl = tmp + '/tmp.wgsl'
-                    tint_args = [
-                        args.tint, '-o', tmpwgsl, '--format', 'wgsl', f,
-                        '--allow-non-uniform-derivatives'
-                    ]
-                    subprocess.run(tint_args, check=True)
-                    with open(tmpwgsl, 'rb') as input:
-                        emit_wgsl(input)
-                else:
-                    print('unhandled file extension: ' + f)
-                    return 1
+        # Add an entry to the array for each benchmark.
+        for f in benchmark_files:
+            fullpath = benchmark_dir + '/' + f
+            if f.endswith('.wgsl'):
+                # Emit the WGSL shader as is.
+                with open(fullpath, 'rb') as input:
+                    emit_wgsl(input)
+            elif f.endswith('.spv'):
+                # Convert SPIR-V inputs to WGSL using Tint.
+                tmpwgsl = tmpdir + '/tmp.wgsl'
+                tint_args = [
+                    args.tint, '-o', tmpwgsl, '--format', 'wgsl', fullpath,
+                    '--allow-non-uniform-derivatives'
+                ]
+                subprocess.run(tint_args, check=True)
+                with open(tmpwgsl, 'rb') as input:
+                    emit_wgsl(input)
+            else:
+                print('unhandled file extension: ' + f)
+                return 1
 
         print('};', file=output)
         print('', file=output)
@@ -158,6 +165,13 @@ const std::unordered_map<std::string, std::string> kBenchmarkInputs = {''',
 
 #endif  // SRC_TINT_CMD_BENCH_INPUTS_BENCH_H_''',
               file=output)
+
+    if args.check_stale:
+        if not filecmp.cmp(tmp_header_output_path,
+                           final_header_output_path,
+                           shallow=False):
+            print(f'{final_header_output_path} is stale')
+            return 1
 
 
 if __name__ == "__main__":
