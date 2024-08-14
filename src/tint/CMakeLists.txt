@@ -321,19 +321,14 @@ endif()
 ################################################################################
 # Benchmarks
 ################################################################################
-if(TINT_BUILD_BENCHMARKS)
+if(TINT_BUILD_BENCHMARKS AND TINT_BUILD_SPV_READER AND TINT_BUILD_WGSL_WRITER)
   set(SCRIPT "${TINT_ROOT_SOURCE_DIR}/src/tint/cmd/bench/generate_benchmark_inputs.py")
-  set(GENERATED_HEADER_REL_PATH "gen/src/tint/cmd/bench/benchmark_inputs.h")
-  set(GENERATED_HEADER_ABS_PATH "${Dawn_BINARY_DIR}/${GENERATED_HEADER_REL_PATH}")
-  set(ARGS ${Python3_EXECUTABLE} ${SCRIPT} ${Dawn_BINARY_DIR} ${GENERATED_HEADER_REL_PATH})
-  add_custom_command(
+  set(ARGS ${Python3_EXECUTABLE} ${SCRIPT} $<TARGET_FILE:tint_cmd_tint_cmd>)
+  add_custom_target(tint_generate_benchmark_inputs
     COMMAND ${ARGS}
-    OUTPUT ${GENERATED_HEADER_ABS_PATH}
-    DEPENDS ${SCRIPT}
-    DEPFILE ${GENERATED_HEADER_ABS_PATH}.d
-    COMMENT "Tint benchmark: Generating ${GENERATED_HEADER_ABS_PATH}."
+    DEPENDS ${SCRIPT} tint_cmd_tint_cmd
+    COMMENT "Tint benchmark: Generating inputs_bench.h"
   )
-  add_custom_target(tint_generate_benchmark_inputs DEPENDS ${GENERATED_HEADER_ABS_PATH})
 endif()
 
 ################################################################################
