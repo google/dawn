@@ -8,11 +8,15 @@ int2 subgroupBroadcast_3e6879() {
   return res;
 }
 
+void fragment_main() {
+  prevent_dce.Store2(0u, asuint(subgroupBroadcast_3e6879()));
+}
+
 [numthreads(1, 1, 1)]
 void compute_main() {
   prevent_dce.Store2(0u, asuint(subgroupBroadcast_3e6879()));
 }
 
 FXC validation failure:
-c:\src\dawn\Shader@0x0000022D74BECB40(5,14-38): error X3004: undeclared identifier 'WaveReadLaneAt'
+C:\src\dawn\Shader@0x00000248BF08EF40(5,14-38): error X3004: undeclared identifier 'WaveReadLaneAt'
 

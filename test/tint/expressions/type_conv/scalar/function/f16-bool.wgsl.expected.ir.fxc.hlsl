@@ -16,5 +16,5 @@ void unused_entry_point() {
 }
 
 FXC validation failure:
-c:\src\dawn\Shader@0x00000235E7D2F840(2,8-16): error X3000: unrecognized identifier 'float16_t'
+C:\src\dawn\Shader@0x000001F06ABF1F60(2,8-16): error X3000: unrecognized identifier 'float16_t'
 

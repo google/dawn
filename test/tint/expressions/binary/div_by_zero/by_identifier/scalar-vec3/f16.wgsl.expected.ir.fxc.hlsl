@@ -9,6 +9,6 @@ void f() {
 }
 
 FXC validation failure:
-c:\src\dawn\Shader@0x000001DF44F6F340(4,3-11): error X3000: unrecognized identifier 'float16_t'
-c:\src\dawn\Shader@0x000001DF44F6F340(4,13): error X3000: unrecognized identifier 'a'
+C:\src\dawn\Shader@0x000001E77D390D10(4,3-11): error X3000: unrecognized identifier 'float16_t'
+C:\src\dawn\Shader@0x000001E77D390D10(4,13): error X3000: unrecognized identifier 'a'
 

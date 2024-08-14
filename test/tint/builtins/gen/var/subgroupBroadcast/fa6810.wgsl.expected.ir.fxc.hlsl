@@ -1,0 +1,22 @@
+SKIP: FAILED
+
+
+RWByteAddressBuffer prevent_dce : register(u0);
+int2 subgroupBroadcast_fa6810() {
+  int2 arg_0 = (1).xx;
+  int2 res = WaveReadLaneAt(arg_0, 1);
+  return res;
+}
+
+void fragment_main() {
+  prevent_dce.Store2(0u, asuint(subgroupBroadcast_fa6810()));
+}
+
+[numthreads(1, 1, 1)]
+void compute_main() {
+  prevent_dce.Store2(0u, asuint(subgroupBroadcast_fa6810()));
+}
+
+FXC validation failure:
+C:\src\dawn\Shader@0x0000022C471CF040(5,14-37): error X3004: undeclared identifier 'WaveReadLaneAt'
+

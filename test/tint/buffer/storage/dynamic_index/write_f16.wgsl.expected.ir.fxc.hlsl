@@ -205,6 +205,6 @@ void main(main_inputs inputs) {
 }
 
 FXC validation failure:
-c:\src\dawn\Shader@0x00000167B0B17B10(7,28-36): error X3000: syntax error: unexpected token 'float16_t'
-c:\src\dawn\Shader@0x00000167B0B17B10(8,3-10): error X3018: invalid subscript 'Store'
+C:\src\dawn\Shader@0x000001E3A924A9E0(7,28-36): error X3000: syntax error: unexpected token 'float16_t'
+C:\src\dawn\Shader@0x000001E3A924A9E0(8,3-10): error X3018: invalid subscript 'Store'
 

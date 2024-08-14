@@ -1,0 +1,21 @@
+SKIP: FAILED
+
+
+RWByteAddressBuffer prevent_dce : register(u0);
+int2 subgroupExclusiveAdd_f0f712() {
+  int2 res = WavePrefixSum((1).xx);
+  return res;
+}
+
+void fragment_main() {
+  prevent_dce.Store2(0u, asuint(subgroupExclusiveAdd_f0f712()));
+}
+
+[numthreads(1, 1, 1)]
+void compute_main() {
+  prevent_dce.Store2(0u, asuint(subgroupExclusiveAdd_f0f712()));
+}
+
+FXC validation failure:
+C:\src\dawn\Shader@0x000001C0653C8F00(4,14-34): error X3004: undeclared identifier 'WavePrefixSum'
+

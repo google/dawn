@@ -8,11 +8,15 @@ uint4 subgroupBallot_1a8251() {
   return res;
 }
 
+void fragment_main() {
+  prevent_dce.Store4(0u, subgroupBallot_1a8251());
+}
+
 [numthreads(1, 1, 1)]
 void compute_main() {
   prevent_dce.Store4(0u, subgroupBallot_1a8251());
 }
 
 FXC validation failure:
-c:\src\dawn\Shader@0x000001C24C591AB0(5,15-37): error X3004: undeclared identifier 'WaveActiveBallot'
+C:\src\dawn\Shader@0x000001ACFADF9100(5,15-37): error X3004: undeclared identifier 'WaveActiveBallot'
 

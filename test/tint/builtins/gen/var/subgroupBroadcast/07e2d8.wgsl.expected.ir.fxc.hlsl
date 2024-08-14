@@ -8,11 +8,15 @@ float16_t subgroupBroadcast_07e2d8() {
   return res;
 }
 
+void fragment_main() {
+  prevent_dce.Store<float16_t>(0u, subgroupBroadcast_07e2d8());
+}
+
 [numthreads(1, 1, 1)]
 void compute_main() {
   prevent_dce.Store<float16_t>(0u, subgroupBroadcast_07e2d8());
 }
 
 FXC validation failure:
-c:\src\dawn\Shader@0x000002B085CC0180(3,1-9): error X3000: unrecognized identifier 'float16_t'
+C:\src\dawn\Shader@0x000001E883950700(3,1-9): error X3000: unrecognized identifier 'float16_t'
 

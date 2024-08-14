@@ -36,31 +36,7 @@ fn f() {
   let l_a_i_a_i_m_i_i : f32 = (*(p_a_i_a_i_m_i))[i()];
 }
 
-Failed to generate: :40:24 error: binary: %26 is not in scope
-    %25:u32 = add %24, %26
-                       ^^^
-
-:24:3 note: in block
-  $B3: {
-  ^^^
-
-:60:5 note: %26 declared here
-    %26:u32 = mul %48, 4u
-    ^^^^^^^
-
-:45:24 error: binary: %26 is not in scope
-    %32:u32 = add %31, %26
-                       ^^^
-
-:24:3 note: in block
-  $B3: {
-  ^^^
-
-:60:5 note: %26 declared here
-    %26:u32 = mul %48, 4u
-    ^^^^^^^
-
-:60:5 error: binary: no matching overload for 'operator * (i32, u32)'
+Failed to generate: :55:5 error: binary: no matching overload for 'operator * (i32, u32)'
 
 9 candidate operators:
  • 'operator * (T  ✓ , T  ✗ ) -> T' where:
@@ -82,7 +58,7 @@ Failed to generate: :40:24 error: binary: %26 is not in scope
  • 'operator * (matKxR<T>  ✗ , matCxK<T>  ✗ ) -> matCxR<T>' where:
       ✗  'T' is 'f32' or 'f16'
 
-    %26:u32 = mul %48, 4u
+    %43:u32 = mul %42, 4u
     ^^^^^^^^^^^^^^^^^^^^^
 
 :24:3 note: in block
@@ -127,101 +103,96 @@ $B1: {  # root
     %l_a:array<Outer, 4> = let %17
     %20:Outer = call %21, %10
     %l_a_i:Outer = let %20
-    %23:u32 = add %10, %13
-    %24:u32 = add %23, %16
-    %25:u32 = add %24, %26
-    %27:array<Inner, 4> = call %28, %25
-    %l_a_i_a:array<Inner, 4> = let %27
+    %23:array<Inner, 4> = call %24, %10
+    %l_a_i_a:array<Inner, 4> = let %23
+    %26:u32 = add %10, %13
+    %27:Inner = call %28, %26
+    %l_a_i_a_i:Inner = let %27
     %30:u32 = add %10, %13
-    %31:u32 = add %30, %16
-    %32:u32 = add %31, %26
-    %33:Inner = call %34, %32
-    %l_a_i_a_i:Inner = let %33
-    %36:u32 = add %10, %13
-    %37:mat2x3<f32> = call %38, %36
-    %l_a_i_a_i_m:mat2x3<f32> = let %37
-    %40:u32 = add %10, %13
-    %41:u32 = add %40, %16
-    %42:u32 = div %41, 16u
-    %43:ptr<uniform, vec4<u32>, read> = access %a, %42
-    %44:vec4<u32> = load %43
-    %45:vec3<u32> = swizzle %44, xyz
-    %46:vec3<f32> = bitcast %45
-    %l_a_i_a_i_m_i:vec3<f32> = let %46
-    %48:i32 = call %i
-    %26:u32 = mul %48, 4u
-    %49:u32 = add %10, %13
-    %50:u32 = add %49, %16
-    %51:u32 = add %50, %26
-    %52:u32 = div %51, 16u
-    %53:ptr<uniform, vec4<u32>, read> = access %a, %52
-    %54:u32 = mod %51, 16u
-    %55:u32 = div %54, 4u
-    %56:u32 = load_vector_element %53, %55
-    %57:f32 = bitcast %56
-    %l_a_i_a_i_m_i_i:f32 = let %57
+    %31:mat2x3<f32> = call %32, %30
+    %l_a_i_a_i_m:mat2x3<f32> = let %31
+    %34:u32 = add %10, %13
+    %35:u32 = add %34, %16
+    %36:u32 = div %35, 16u
+    %37:ptr<uniform, vec4<u32>, read> = access %a, %36
+    %38:vec4<u32> = load %37
+    %39:vec3<u32> = swizzle %38, xyz
+    %40:vec3<f32> = bitcast %39
+    %l_a_i_a_i_m_i:vec3<f32> = let %40
+    %42:i32 = call %i
+    %43:u32 = mul %42, 4u
+    %44:u32 = add %10, %13
+    %45:u32 = add %44, %16
+    %46:u32 = add %45, %43
+    %47:u32 = div %46, 16u
+    %48:ptr<uniform, vec4<u32>, read> = access %a, %47
+    %49:u32 = mod %46, 16u
+    %50:u32 = div %49, 4u
+    %51:u32 = load_vector_element %48, %50
+    %52:f32 = bitcast %51
+    %l_a_i_a_i_m_i_i:f32 = let %52
     ret
   }
 }
-%21 = func(%start_byte_offset:u32):Outer {
+%24 = func(%start_byte_offset:u32):array<Inner, 4> {
   $B4: {
-    %60:array<Inner, 4> = call %28, %start_byte_offset
-    %61:Outer = construct %60
-    ret %61
-  }
-}
-%28 = func(%start_byte_offset_1:u32):array<Inner, 4> {  # %start_byte_offset_1: 'start_byte_offset'
-  $B5: {
     %a_1:ptr<function, array<Inner, 4>, read_write> = var, array<Inner, 4>(Inner(mat2x3<f32>(vec3<f32>(0.0f))))  # %a_1: 'a'
-    loop [i: $B6, b: $B7, c: $B8] {  # loop_1
-      $B6: {  # initializer
-        next_iteration 0u  # -> $B7
+    loop [i: $B5, b: $B6, c: $B7] {  # loop_1
+      $B5: {  # initializer
+        next_iteration 0u  # -> $B6
       }
-      $B7 (%idx:u32): {  # body
-        %65:bool = gte %idx, 4u
-        if %65 [t: $B9] {  # if_1
-          $B9: {  # true
+      $B6 (%idx:u32): {  # body
+        %57:bool = gte %idx, 4u
+        if %57 [t: $B8] {  # if_1
+          $B8: {  # true
             exit_loop  # loop_1
           }
         }
-        %66:u32 = mul %idx, 64u
-        %67:u32 = add %start_byte_offset_1, %66
-        %68:ptr<function, Inner, read_write> = access %a_1, %idx
-        %69:Inner = call %34, %67
-        store %68, %69
-        continue  # -> $B8
+        %58:u32 = mul %idx, 64u
+        %59:u32 = add %start_byte_offset, %58
+        %60:ptr<function, Inner, read_write> = access %a_1, %idx
+        %61:Inner = call %28, %59
+        store %60, %61
+        continue  # -> $B7
       }
-      $B8: {  # continuing
-        %70:u32 = add %idx, 1u
-        next_iteration %70  # -> $B7
+      $B7: {  # continuing
+        %62:u32 = add %idx, 1u
+        next_iteration %62  # -> $B6
       }
     }
-    %71:array<Inner, 4> = load %a_1
-    ret %71
+    %63:array<Inner, 4> = load %a_1
+    ret %63
   }
 }
-%34 = func(%start_byte_offset_2:u32):Inner {  # %start_byte_offset_2: 'start_byte_offset'
+%28 = func(%start_byte_offset_1:u32):Inner {  # %start_byte_offset_1: 'start_byte_offset'
+  $B9: {
+    %65:mat2x3<f32> = call %32, %start_byte_offset_1
+    %66:Inner = construct %65
+    ret %66
+  }
+}
+%32 = func(%start_byte_offset_2:u32):mat2x3<f32> {  # %start_byte_offset_2: 'start_byte_offset'
   $B10: {
-    %73:mat2x3<f32> = call %38, %start_byte_offset_2
-    %74:Inner = construct %73
-    ret %74
+    %68:u32 = div %start_byte_offset_2, 16u
+    %69:ptr<uniform, vec4<u32>, read> = access %a, %68
+    %70:vec4<u32> = load %69
+    %71:vec3<u32> = swizzle %70, xyz
+    %72:vec3<f32> = bitcast %71
+    %73:u32 = add 16u, %start_byte_offset_2
+    %74:u32 = div %73, 16u
+    %75:ptr<uniform, vec4<u32>, read> = access %a, %74
+    %76:vec4<u32> = load %75
+    %77:vec3<u32> = swizzle %76, xyz
+    %78:vec3<f32> = bitcast %77
+    %79:mat2x3<f32> = construct %72, %78
+    ret %79
   }
 }
-%38 = func(%start_byte_offset_3:u32):mat2x3<f32> {  # %start_byte_offset_3: 'start_byte_offset'
+%21 = func(%start_byte_offset_3:u32):Outer {  # %start_byte_offset_3: 'start_byte_offset'
   $B11: {
-    %76:u32 = div %start_byte_offset_3, 16u
-    %77:ptr<uniform, vec4<u32>, read> = access %a, %76
-    %78:vec4<u32> = load %77
-    %79:vec3<u32> = swizzle %78, xyz
-    %80:vec3<f32> = bitcast %79
-    %81:u32 = add 16u, %start_byte_offset_3
-    %82:u32 = div %81, 16u
-    %83:ptr<uniform, vec4<u32>, read> = access %a, %82
-    %84:vec4<u32> = load %83
-    %85:vec3<u32> = swizzle %84, xyz
-    %86:vec3<f32> = bitcast %85
-    %87:mat2x3<f32> = construct %80, %86
-    ret %87
+    %81:array<Inner, 4> = call %24, %start_byte_offset_3
+    %82:Outer = construct %81
+    ret %82
   }
 }
 %18 = func(%start_byte_offset_4:u32):array<Outer, 4> {  # %start_byte_offset_4: 'start_byte_offset'
@@ -232,26 +203,26 @@ $B1: {  # root
         next_iteration 0u  # -> $B14
       }
       $B14 (%idx_1:u32): {  # body
-        %91:bool = gte %idx_1, 4u
-        if %91 [t: $B16] {  # if_2
+        %86:bool = gte %idx_1, 4u
+        if %86 [t: $B16] {  # if_2
           $B16: {  # true
             exit_loop  # loop_2
           }
         }
-        %92:u32 = mul %idx_1, 256u
-        %93:u32 = add %start_byte_offset_4, %92
-        %94:ptr<function, Outer, read_write> = access %a_2, %idx_1
-        %95:Outer = call %21, %93
-        store %94, %95
+        %87:u32 = mul %idx_1, 256u
+        %88:u32 = add %start_byte_offset_4, %87
+        %89:ptr<function, Outer, read_write> = access %a_2, %idx_1
+        %90:Outer = call %21, %88
+        store %89, %90
         continue  # -> $B15
       }
       $B15: {  # continuing
-        %96:u32 = add %idx_1, 1u
-        next_iteration %96  # -> $B14
+        %91:u32 = add %idx_1, 1u
+        next_iteration %91  # -> $B14
       }
     }
-    %97:array<Outer, 4> = load %a_2
-    ret %97
+    %92:array<Outer, 4> = load %a_2
+    ret %92
   }
 }
 

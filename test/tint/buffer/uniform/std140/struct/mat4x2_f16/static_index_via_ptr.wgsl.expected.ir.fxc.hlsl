@@ -91,14 +91,14 @@ ary_ret_1 v_20(uint start_byte_offset) {
 [numthreads(1, 1, 1)]
 void f() {
   Outer l_a[4] = v_20(0u);
-  Outer l_a_3 = v_17(900u);
-  Inner l_a_3_a[4] = v_12(900u);
-  Inner l_a_3_a_2 = v_10(900u);
-  matrix<float16_t, 4, 2> l_a_3_a_2_m = v_2(900u);
+  Outer l_a_3 = v_17(768u);
+  Inner l_a_3_a[4] = v_12(768u);
+  Inner l_a_3_a_2 = v_10(896u);
+  matrix<float16_t, 4, 2> l_a_3_a_2_m = v_2(896u);
   vector<float16_t, 2> l_a_3_a_2_m_1 = tint_bitcast_to_f16(a[56u].x);
   float16_t l_a_3_a_2_m_1_0 = float16_t(f16tof32(a[56u].y));
 }
 
 FXC validation failure:
-c:\src\dawn\Shader@0x000002350B942450(2,10-18): error X3000: syntax error: unexpected token 'float16_t'
+C:\src\dawn\Shader@0x000001F9499C5CE0(2,10-18): error X3000: syntax error: unexpected token 'float16_t'
 

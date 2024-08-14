@@ -16,5 +16,5 @@ void f() {
 }
 
 FXC validation failure:
-c:\src\dawn\Shader@0x000002B9C0F70F30(2,15-23): error X3000: syntax error: unexpected token 'float16_t'
+C:\src\dawn\Shader@0x000002B96067E770(2,15-23): error X3000: syntax error: unexpected token 'float16_t'
 

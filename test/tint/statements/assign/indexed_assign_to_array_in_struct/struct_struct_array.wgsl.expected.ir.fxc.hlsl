@@ -25,5 +25,5 @@ void main() {
 }
 
 FXC validation failure:
-c:\src\dawn\Shader@0x000001AAE87B5BA0(22,3-25): error X3500: array reference cannot be used as an l-value; not natively addressable
+C:\src\dawn\Shader@0x000001D004D41E80(22,3-25): error X3500: array reference cannot be used as an l-value; not natively addressable
 

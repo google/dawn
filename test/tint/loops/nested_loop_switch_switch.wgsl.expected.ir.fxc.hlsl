@@ -43,5 +43,5 @@ void main() {
 }
 
 FXC validation failure:
-c:\src\dawn\Shader@0x000002665D442960(21,15-23): error X3708: continue cannot be used in a switch
+C:\src\dawn\Shader@0x0000019B15A419E0(21,15-23): error X3708: continue cannot be used in a switch
 

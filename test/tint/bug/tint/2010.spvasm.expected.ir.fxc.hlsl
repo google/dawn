@@ -170,7 +170,7 @@ void main(main_inputs inputs) {
 }
 
 FXC validation failure:
-c:\src\dawn\Shader@0x0000022D8D60F2F0(130,3-66): error X3694: race condition writing to shared resource detected, consider making this write conditional.
-c:\src\dawn\Shader@0x0000022D8D60F2F0(162,3-10): error X3694: error location reached from this location
-c:\src\dawn\Shader@0x0000022D8D60F2F0(167,3-55): error X3694: error location reached from this location
+C:\src\dawn\Shader@0x000001A65ED6E110(130,3-66): error X3694: race condition writing to shared resource detected, consider making this write conditional.
+C:\src\dawn\Shader@0x000001A65ED6E110(162,3-10): error X3694: error location reached from this location
+C:\src\dawn\Shader@0x000001A65ED6E110(167,3-55): error X3694: error location reached from this location
 

@@ -18,5 +18,5 @@ void f(f_inputs inputs) {
 }
 
 FXC validation failure:
-c:\src\dawn\Shader@0x0000022BD30B0F50(14,17-22): error X3502: 'f': input parameter 'inputs' missing semantics
+C:\src\dawn\Shader@0x00000234BECCE570(14,17-22): error X3502: 'f': input parameter 'inputs' missing semantics
 

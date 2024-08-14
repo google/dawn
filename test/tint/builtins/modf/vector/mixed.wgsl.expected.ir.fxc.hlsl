@@ -19,7 +19,7 @@ void main() {
 }
 
 FXC validation failure:
-c:\src\dawn\Shader@0x000002B4F8076C00(11,28-43): error X3013: 'modf': no matching 1 parameter intrinsic function
-c:\src\dawn\Shader@0x000002B4F8076C00(11,28-43): error X3013: Possible intrinsic functions are:
-c:\src\dawn\Shader@0x000002B4F8076C00(11,28-43): error X3013:     modf(float|half|min10float|min16float, out float|half|min10float|min16float ip)
+C:\src\dawn\Shader@0x0000013591A8F780(11,28-43): error X3013: 'modf': no matching 1 parameter intrinsic function
+C:\src\dawn\Shader@0x0000013591A8F780(11,28-43): error X3013: Possible intrinsic functions are:
+C:\src\dawn\Shader@0x0000013591A8F780(11,28-43): error X3013:     modf(float|half|min10float|min16float, out float|half|min10float|min16float ip)
 

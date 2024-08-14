@@ -44,7 +44,7 @@ vertex_main_outputs vertex_main() {
 }
 
 FXC validation failure:
-c:\src\dawn\Shader@0x00000210270586C0(14,10-18): error X3000: syntax error: unexpected token 'float16_t'
-c:\src\dawn\Shader@0x00000210270586C0(15,10-18): error X3000: syntax error: unexpected token 'float16_t'
-c:\src\dawn\Shader@0x00000210270586C0(16,13-15): error X3004: undeclared identifier 'res'
+C:\src\dawn\Shader@0x00000162B4DBE2B0(14,10-18): error X3000: syntax error: unexpected token 'float16_t'
+C:\src\dawn\Shader@0x00000162B4DBE2B0(15,10-18): error X3000: syntax error: unexpected token 'float16_t'
+C:\src\dawn\Shader@0x00000162B4DBE2B0(16,13-15): error X3004: undeclared identifier 'res'
 

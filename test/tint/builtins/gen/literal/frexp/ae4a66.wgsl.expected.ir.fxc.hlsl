@@ -42,5 +42,5 @@ vertex_main_outputs vertex_main() {
 }
 
 FXC validation failure:
-c:\src\dawn\Shader@0x00000121AC39F320(2,10-18): error X3000: syntax error: unexpected token 'float16_t'
+C:\src\dawn\Shader@0x000001BAC34EE2F0(2,10-18): error X3000: syntax error: unexpected token 'float16_t'
 

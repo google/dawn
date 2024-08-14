@@ -14,5 +14,5 @@ void unused_entry_point() {
 }
 
 FXC validation failure:
-c:\src\dawn\Shader@0x0000020E68E2F8D0(4,3-9): error X3018: invalid subscript 'Store'
+C:\src\dawn\Shader@0x000001B6193EF610(4,3-9): error X3018: invalid subscript 'Store'
 

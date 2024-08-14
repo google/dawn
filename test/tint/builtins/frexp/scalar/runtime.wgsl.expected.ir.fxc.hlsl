@@ -17,7 +17,7 @@ void main() {
 }
 
 FXC validation failure:
-c:\src\dawn\Shader@0x0000027061073E10(10,24-41): error X3013: 'frexp': no matching 1 parameter intrinsic function
-c:\src\dawn\Shader@0x0000027061073E10(10,24-41): error X3013: Possible intrinsic functions are:
-c:\src\dawn\Shader@0x0000027061073E10(10,24-41): error X3013:     frexp(float|half, out float|half exp)
+C:\src\dawn\Shader@0x000001DD08D4F130(10,24-41): error X3013: 'frexp': no matching 1 parameter intrinsic function
+C:\src\dawn\Shader@0x000001DD08D4F130(10,24-41): error X3013: Possible intrinsic functions are:
+C:\src\dawn\Shader@0x000001DD08D4F130(10,24-41): error X3013:     frexp(float|half, out float|half exp)
 

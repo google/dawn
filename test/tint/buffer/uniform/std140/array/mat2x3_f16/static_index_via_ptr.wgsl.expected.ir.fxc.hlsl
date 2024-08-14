@@ -47,12 +47,12 @@ ary_ret v_6(uint start_byte_offset) {
 [numthreads(1, 1, 1)]
 void f() {
   matrix<float16_t, 2, 3> v_10[4] = v_6(0u);
-  matrix<float16_t, 2, 3> l_a_i = v_4(40u);
+  matrix<float16_t, 2, 3> l_a_i = v_4(32u);
   vector<float16_t, 3> l_a_i_i = tint_bitcast_to_f16(a[2u]).xyz;
   matrix<float16_t, 2, 3> l_a[4] = v_10;
   s.Store<float16_t>(0u, (((float16_t(f16tof32(a[2u].z)) + l_a[0][0][0u]) + l_a_i[0][0u]) + l_a_i_i[0u]));
 }
 
 FXC validation failure:
-c:\src\dawn\Shader@0x0000021D05D2F360(6,8-16): error X3000: syntax error: unexpected token 'float16_t'
+C:\src\dawn\Shader@0x00000207C946FA80(6,8-16): error X3000: syntax error: unexpected token 'float16_t'
 

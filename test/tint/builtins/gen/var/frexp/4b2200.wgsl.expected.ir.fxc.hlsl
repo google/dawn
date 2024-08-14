@@ -43,7 +43,7 @@ vertex_main_outputs vertex_main() {
 }
 
 FXC validation failure:
-c:\src\dawn\Shader@0x000001F4A74DF890(17,26-37): error X3013: 'frexp': no matching 1 parameter intrinsic function
-c:\src\dawn\Shader@0x000001F4A74DF890(17,26-37): error X3013: Possible intrinsic functions are:
-c:\src\dawn\Shader@0x000001F4A74DF890(17,26-37): error X3013:     frexp(float|half, out float|half exp)
+C:\src\dawn\Shader@0x00000140B0BE1FB0(17,26-37): error X3013: 'frexp': no matching 1 parameter intrinsic function
+C:\src\dawn\Shader@0x00000140B0BE1FB0(17,26-37): error X3013: Possible intrinsic functions are:
+C:\src\dawn\Shader@0x00000140B0BE1FB0(17,26-37): error X3013:     frexp(float|half, out float|half exp)
 

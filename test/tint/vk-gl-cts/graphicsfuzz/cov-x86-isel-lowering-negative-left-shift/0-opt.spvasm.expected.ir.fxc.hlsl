@@ -108,5 +108,5 @@ main_outputs main() {
 }
 
 FXC validation failure:
-c:\src\dawn\Shader@0x000001B3093B8FA0(55,17-25): error X3708: continue cannot be used in a switch
+C:\src\dawn\Shader@0x000001F536260480(55,17-25): error X3708: continue cannot be used in a switch
 

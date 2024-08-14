@@ -43,7 +43,7 @@ vertex_main_outputs vertex_main() {
 }
 
 FXC validation failure:
-c:\src\dawn\Shader@0x00000271B99DF670(17,30-40): error X3013: 'modf': no matching 1 parameter intrinsic function
-c:\src\dawn\Shader@0x00000271B99DF670(17,30-40): error X3013: Possible intrinsic functions are:
-c:\src\dawn\Shader@0x00000271B99DF670(17,30-40): error X3013:     modf(float|half|min10float|min16float, out float|half|min10float|min16float ip)
+C:\src\dawn\Shader@0x000001E0AD82F420(17,30-40): error X3013: 'modf': no matching 1 parameter intrinsic function
+C:\src\dawn\Shader@0x000001E0AD82F420(17,30-40): error X3013: Possible intrinsic functions are:
+C:\src\dawn\Shader@0x000001E0AD82F420(17,30-40): error X3013:     modf(float|half|min10float|min16float, out float|half|min10float|min16float ip)
 

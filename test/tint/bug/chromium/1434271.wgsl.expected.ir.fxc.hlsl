@@ -174,6 +174,6 @@ void export_level(export_level_inputs inputs) {
 }
 
 FXC validation failure:
-c:\src\dawn\Shader@0x000001F068812EA0(62,3-11): error X3000: unrecognized identifier 'float16_t'
-c:\src\dawn\Shader@0x000001F068812EA0(62,13-17): error X3000: unrecognized identifier 'arg_0'
+C:\src\dawn\Shader@0x0000018C00125070(62,3-11): error X3000: unrecognized identifier 'float16_t'
+C:\src\dawn\Shader@0x0000018C00125070(62,13-17): error X3000: unrecognized identifier 'arg_0'
 

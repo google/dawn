@@ -1,0 +1,21 @@
+SKIP: FAILED
+
+
+RWByteAddressBuffer prevent_dce : register(u0);
+float3 subgroupMin_836960() {
+  float3 res = WaveActiveMin((1.0f).xxx);
+  return res;
+}
+
+void fragment_main() {
+  prevent_dce.Store3(0u, asuint(subgroupMin_836960()));
+}
+
+[numthreads(1, 1, 1)]
+void compute_main() {
+  prevent_dce.Store3(0u, asuint(subgroupMin_836960()));
+}
+
+FXC validation failure:
+C:\src\dawn\Shader@0x00000170B2A1D960(4,16-40): error X3004: undeclared identifier 'WaveActiveMin'
+

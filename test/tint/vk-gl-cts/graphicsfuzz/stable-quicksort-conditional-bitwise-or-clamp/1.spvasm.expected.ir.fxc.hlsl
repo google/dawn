@@ -224,8 +224,8 @@ main_outputs main(main_inputs inputs) {
 }
 
 FXC validation failure:
-c:\src\dawn\Shader@0x000001E7744422A0(71,11-85): warning X3556: integer divides may be much slower, try using uints if possible.
-c:\src\dawn\Shader@0x000001E7744422A0(28,3-20): error X3500: array reference cannot be used as an l-value; not natively addressable
-c:\src\dawn\Shader@0x000001E7744422A0(45,5-15): error X3511: forced to unroll loop, but unrolling failed.
-c:\src\dawn\Shader@0x000001E7744422A0(110,5-15): error X3511: forced to unroll loop, but unrolling failed.
+C:\src\dawn\Shader@0x0000025161B977A0(71,11-85): warning X3556: integer divides may be much slower, try using uints if possible.
+C:\src\dawn\Shader@0x0000025161B977A0(28,3-20): error X3500: array reference cannot be used as an l-value; not natively addressable
+C:\src\dawn\Shader@0x0000025161B977A0(45,5-15): error X3511: forced to unroll loop, but unrolling failed.
+C:\src\dawn\Shader@0x0000025161B977A0(110,5-15): error X3511: forced to unroll loop, but unrolling failed.
 

@@ -1,6 +1,6 @@
 SKIP: FAILED
 
-..\..\src\tint\lang\hlsl\writer\printer\printer.cc:1452 internal compiler error: TINT_ASSERT(!name.empty())
+..\..\src\tint\lang\hlsl\writer\printer\printer.cc:1493 internal compiler error: TINT_ASSERT(!name.empty())
 ********************************************************************
 *  The tint shader compiler has encountered an unexpected error.   *
 *                                                                  *

@@ -30,5 +30,5 @@ frag_main_outputs frag_main(frag_main_inputs inputs) {
 }
 
 FXC validation failure:
-c:\src\dawn\Shader@0x000002090F418420(2,3-11): error X3000: unrecognized identifier 'float16_t'
+C:\src\dawn\Shader@0x0000021969D40070(2,3-11): error X3000: unrecognized identifier 'float16_t'
 
