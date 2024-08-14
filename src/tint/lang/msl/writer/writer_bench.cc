@@ -31,6 +31,7 @@
 #include "src/tint/lang/msl/writer/helpers/generate_bindings.h"
 #include "src/tint/lang/msl/writer/writer.h"
 #include "src/tint/lang/wgsl/ast/module.h"
+#include "src/tint/lang/wgsl/helpers/flatten_bindings.h"
 #include "src/tint/lang/wgsl/sem/variable.h"
 
 namespace tint::msl::writer {
@@ -42,7 +43,13 @@ void GenerateMSL_AST(benchmark::State& state, std::string input_name) {
         state.SkipWithError(res.Failure().reason.Str());
         return;
     }
-    auto& program = res->program;
+
+    // Remap resource numbers to a flat namespace.
+    const tint::Program* program = &res->program;
+    auto flattened = tint::wgsl::FlattenBindings(res->program);
+    if (flattened) {
+        program = &*flattened;
+    }
 
     tint::msl::writer::Options gen_options = {};
     gen_options.array_length_from_uniform.ubo_binding = 30;
@@ -62,10 +69,10 @@ void GenerateMSL_AST(benchmark::State& state, std::string input_name) {
                                                                           6);
     gen_options.array_length_from_uniform.bindpoint_to_size_index.emplace(tint::BindingPoint{0, 7},
                                                                           7);
-    gen_options.bindings = tint::msl::writer::GenerateBindings(res->program);
+    gen_options.bindings = tint::msl::writer::GenerateBindings(*program);
 
     for (auto _ : state) {
-        auto gen_res = Generate(program, gen_options);
+        auto gen_res = Generate(*program, gen_options);
         if (gen_res != Success) {
             state.SkipWithError(gen_res.Failure().reason.Str());
         }
