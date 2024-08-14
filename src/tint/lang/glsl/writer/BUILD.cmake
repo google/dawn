@@ -152,11 +152,11 @@ if(TINT_BUILD_GLSL_WRITER)
 endif(TINT_BUILD_GLSL_WRITER)
 
 endif(TINT_BUILD_GLSL_WRITER AND TINT_BUILD_GLSL_VALIDATOR)
-if(TINT_BUILD_GLSL_WRITER AND TINT_BUILD_SPV_READER AND TINT_BUILD_WGSL_READER AND TINT_BUILD_WGSL_WRITER)
+if(TINT_BUILD_GLSL_WRITER AND TINT_BUILD_WGSL_READER)
 ################################################################################
 # Target:    tint_lang_glsl_writer_bench
 # Kind:      bench
-# Condition: TINT_BUILD_GLSL_WRITER AND TINT_BUILD_SPV_READER AND TINT_BUILD_WGSL_READER AND TINT_BUILD_WGSL_WRITER
+# Condition: TINT_BUILD_GLSL_WRITER AND TINT_BUILD_WGSL_READER
 ################################################################################
 tint_add_target(tint_lang_glsl_writer_bench bench
   lang/glsl/writer/writer_bench.cc
@@ -199,13 +199,13 @@ if(TINT_BUILD_GLSL_WRITER)
   )
 endif(TINT_BUILD_GLSL_WRITER)
 
-if(TINT_BUILD_SPV_READER AND TINT_BUILD_WGSL_READER AND TINT_BUILD_WGSL_WRITER)
+if(TINT_BUILD_WGSL_READER)
   tint_target_add_dependencies(tint_lang_glsl_writer_bench bench
     tint_cmd_bench_bench
   )
-endif(TINT_BUILD_SPV_READER AND TINT_BUILD_WGSL_READER AND TINT_BUILD_WGSL_WRITER)
+endif(TINT_BUILD_WGSL_READER)
 
-endif(TINT_BUILD_GLSL_WRITER AND TINT_BUILD_SPV_READER AND TINT_BUILD_WGSL_READER AND TINT_BUILD_WGSL_WRITER)
+endif(TINT_BUILD_GLSL_WRITER AND TINT_BUILD_WGSL_READER)
 if(TINT_BUILD_GLSL_WRITER)
 ################################################################################
 # Target:    tint_lang_glsl_writer_fuzz

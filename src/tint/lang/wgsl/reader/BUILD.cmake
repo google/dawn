@@ -125,11 +125,11 @@ if(TINT_BUILD_WGSL_READER)
 endif(TINT_BUILD_WGSL_READER)
 
 endif(TINT_BUILD_WGSL_READER)
-if(TINT_BUILD_WGSL_READER AND TINT_BUILD_SPV_READER AND TINT_BUILD_WGSL_WRITER)
+if(TINT_BUILD_WGSL_READER)
 ################################################################################
 # Target:    tint_lang_wgsl_reader_bench
 # Kind:      bench
-# Condition: TINT_BUILD_WGSL_READER AND TINT_BUILD_SPV_READER AND TINT_BUILD_WGSL_WRITER
+# Condition: TINT_BUILD_WGSL_READER
 ################################################################################
 tint_add_target(tint_lang_wgsl_reader_bench bench
   lang/wgsl/reader/reader_bench.cc
@@ -166,16 +166,11 @@ tint_target_add_external_dependencies(tint_lang_wgsl_reader_bench bench
   "google-benchmark"
 )
 
-if(TINT_BUILD_SPV_READER AND TINT_BUILD_WGSL_READER AND TINT_BUILD_WGSL_WRITER)
-  tint_target_add_dependencies(tint_lang_wgsl_reader_bench bench
-    tint_cmd_bench_bench
-  )
-endif(TINT_BUILD_SPV_READER AND TINT_BUILD_WGSL_READER AND TINT_BUILD_WGSL_WRITER)
-
 if(TINT_BUILD_WGSL_READER)
   tint_target_add_dependencies(tint_lang_wgsl_reader_bench bench
+    tint_cmd_bench_bench
     tint_lang_wgsl_reader
   )
 endif(TINT_BUILD_WGSL_READER)
 
-endif(TINT_BUILD_WGSL_READER AND TINT_BUILD_SPV_READER AND TINT_BUILD_WGSL_WRITER)
+endif(TINT_BUILD_WGSL_READER)
