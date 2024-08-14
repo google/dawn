@@ -1145,7 +1145,7 @@ add_hlsl_hctgen("DxcDisassembler-inc") {
 }
 add_hlsl_hctgen("DxilValidation-inc") {
   mode = "DxilValidationInc"
-  output = "/include/dxc/HLSL/DxilValidation.inc"
+  output = "/include/dxc/DxilValidation/DxilValidation.inc"
   build_dir = true
 }
 add_hlsl_hctgen("DxcOptimizer-inc") {
@@ -1155,7 +1155,7 @@ add_hlsl_hctgen("DxcOptimizer-inc") {
 }
 add_hlsl_hctgen("DxilValidationImpl-inc") {
   mode = "DxilValidation"
-  output = "/lib/HLSL/DxilValidationImpl.inc"
+  output = "/lib/DxilValidation/DxilValidationImpl.inc"
   build_dir = true
 }
 add_hlsl_hctgen("gen_intrin_main_tables_15-h") {
@@ -1237,18 +1237,15 @@ template("dxcompiler_sourceset") {
 
   dxc_module(target_name) {
     forward_variables_from(invoker, "*")
-    if (!defined(defines)) {
-      defines = []
+    if (!defined(deps)) {
+      deps = []
     }
-
-    deps = [
+    deps += [
       ":AttrPCHRead-inc",
       ":AttrPCHWrite-inc",
       ":AttrParserStringSwitches-inc",
       ":DxcOptimizer-inc",
       ":DxilPIXPasses-inc",
-      ":DxilValidation-inc",
-      ":DxilValidationImpl-inc",
       ":clang-Driver-Options-inc",
       ":clang-basic-version-inc",
       ":clang-config-h",
@@ -1260,7 +1257,10 @@ template("dxcompiler_sourceset") {
     deps += ClangASTDeps
     deps += ClangSemaDeps
 
-    include_dirs = [
+    if (!defined(include_dirs)) {
+      include_dirs = []
+    }
+    include_dirs += [
       "${dawn_dxc_dir}/tools/clang/tools/dxcvalidator",
       "${target_gen_dir}/utils/version",  # hlsl_dxcversion_autogen
       "${target_gen_dir}/tools/clang/include",
@@ -1285,16 +1285,15 @@ template("dxcompiler_sourceset") {
       ]
     }
 
+    if (!defined(defines)) {
+      defines = []
+    }
     defines += [
       "DXC_API_IMPORT=",  # Don't import locally defined symbols
       "CINDEX_LINKAGE=",
       "LIBCLANG_CC=",
       "_CINDEX_LIB_",
     ]
-
-    if (defined(invoker.defines)) {
-      defines += invoker.defines
-    }
   }
 }
 
@@ -1467,6 +1466,22 @@ dxcompiler_sourceset("lib_dxilrootsignature") {
     "$dawn_dxc_dir/lib/DxilRootSignature/DxilRootSignatureValidator.cpp",
   ]
 }
+dxcompiler_sourceset("lib_dxilvalidation") {
+  target_type = "static_library"  # Ensure unused globals are stripped
+  deps = [
+    ":DxilValidation-inc",
+    ":DxilValidationImpl-inc",
+  ]
+  sources = [
+    "$dawn_dxc_dir/lib/DxilValidation/DxilContainerValidation.cpp",
+    "$dawn_dxc_dir/lib/DxilValidation/DxilValidation.cpp",
+    "$dawn_dxc_dir/lib/DxilValidation/DxilValidationUtils.cpp",
+  ]
+  include_dirs = [
+    "${target_gen_dir}/lib/DxilValidation",
+    "${target_gen_dir}/include/dxc/DxilValidation",
+  ]
+}
 dxcompiler_sourceset("lib_hlsl") {
   target_type = "static_library"  # Ensure unused globals are stripped
   sources = [
@@ -1501,7 +1516,6 @@ dxcompiler_sourceset("lib_hlsl") {
     "$dawn_dxc_dir/lib/HLSL/DxilTargetLowering.cpp",
     "$dawn_dxc_dir/lib/HLSL/DxilTargetTransformInfo.cpp",
     "$dawn_dxc_dir/lib/HLSL/DxilTranslateRawBuffer.cpp",
-    "$dawn_dxc_dir/lib/HLSL/DxilValidation.cpp",
     "$dawn_dxc_dir/lib/HLSL/HLDeadFunctionElimination.cpp",
     "$dawn_dxc_dir/lib/HLSL/HLExpandStoreIntrinsics.cpp",
     "$dawn_dxc_dir/lib/HLSL/HLLegalizeParameter.cpp",
@@ -2341,6 +2355,7 @@ loadable_module("dxcompiler") {
     ":lib_dxildia",
     ":lib_dxilpixpasses",
     ":lib_dxilrootsignature",
+    ":lib_dxilvalidation",
     ":lib_hlsl",
     ":lib_ir",
     ":lib_irreader",
