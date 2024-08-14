@@ -30,31 +30,15 @@
 #include <utility>
 
 #include "src/tint/lang/wgsl/reader/reader.h"
-#include "src/tint/utils/containers/hashmap.h"
 
 namespace tint::bench {
-namespace {
-
-// A map from benchmark input name to the corresponding WGSL shader.
-Hashmap<std::string, std::string, 16> kBenchmarkWgslShaders;
-
-}  // namespace
-
-bool Initialize() {
-    // Populate the map from benchmark input name to WGSL shader.
-    for (auto& benchmark : kBenchmarkInputs) {
-        kBenchmarkWgslShaders.Add(benchmark.name, benchmark.wgsl);
-    }
-
-    return true;
-}
 
 Result<Source::File> GetWgslFile(std::string name) {
-    auto wgsl = kBenchmarkWgslShaders.GetOr(name, "");
-    if (wgsl.empty()) {
+    auto wgsl = kBenchmarkInputs.find(name);
+    if (wgsl == kBenchmarkInputs.end()) {
         return Failure{"failed to find WGSL shader for '" + name + "'"};
     }
-    return tint::Source::File("<input>", wgsl);
+    return tint::Source::File("<input>", wgsl->second);
 }
 
 Result<ProgramAndFile> GetWgslProgram(std::string name) {

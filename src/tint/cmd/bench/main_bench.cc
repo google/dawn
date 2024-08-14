@@ -86,8 +86,5 @@ int main(int argc, char** argv) {
     if (benchmark::ReportUnrecognizedArguments(argc, argv)) {
         return 1;
     }
-    if (!tint::bench::Initialize()) {
-        return 1;
-    }
     benchmark::RunSpecifiedBenchmarks(new ChromePerfReporter);
 }

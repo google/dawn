@@ -48,11 +48,6 @@ struct ProgramAndFile {
     std::unique_ptr<Source::File> file;
 };
 
-/// Initializes the internal state for benchmarking.
-/// Must be called once by the benchmark executable entry point.
-/// @returns true on success, false of failure
-bool Initialize();
-
 /// GetWgslFile retrieves the WGSL for the benchmark input shader called @p name.
 /// Benchmarks that are SPIR-V shaders will have been converted to WGSL at startup.
 /// @param name the benchmark input name

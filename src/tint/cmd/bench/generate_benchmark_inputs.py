@@ -99,16 +99,13 @@ def main():
 #define SRC_TINT_CMD_BENCH_INPUTS_BENCH_H_
 
 #include <string>
+#include <unordered_map>
 
 // clang-format off
 
 namespace tint::bench {
 
-struct BenchmarkInput {
-    const char* name = nullptr;
-    const std::string wgsl;
-};
-const BenchmarkInput kBenchmarkInputs[] = {''',
+const std::unordered_map<std::string, std::string> kBenchmarkInputs = {''',
               file=output)
 
         # Helper to emit a WGSL shader as a char initializer list.
