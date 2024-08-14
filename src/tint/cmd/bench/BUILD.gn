@@ -47,6 +47,7 @@ if (tint_build_benchmarks) {
       sources = [
         "bench.cc",
         "bench.h",
+        "inputs_bench.h",
       ]
       deps = [
         "${tint_src_dir}:google_benchmark",

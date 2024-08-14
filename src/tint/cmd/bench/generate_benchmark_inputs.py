@@ -74,6 +74,8 @@ def main():
 #include <cstdint>
 #include <vector>
 
+// clang-format off
+
 namespace tint::bench {
 
 struct BenchmarkInput {
@@ -118,6 +120,8 @@ const BenchmarkInput kBenchmarkInputs[] = {''',
 
         print('''
 }  // namespace tint::bench
+
+// clang-format on
 
 #endif  // SRC_TINT_CMD_BENCH_BENCH_H_''',
               file=output)

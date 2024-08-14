@@ -259,7 +259,6 @@ endfunction()
 
 function(tint_bench_compile_options TARGET)
   tint_core_compile_options(${TARGET})
-  add_dependencies(${TARGET} tint_generate_benchmark_inputs)
   target_include_directories(${TARGET} PUBLIC "${DAWN_BUILD_GEN_DIR}")
   set_target_properties(${TARGET} PROPERTIES FOLDER "Benchmarks")
 endfunction()
