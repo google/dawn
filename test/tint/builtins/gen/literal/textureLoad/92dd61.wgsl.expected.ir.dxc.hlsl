@@ -1,9 +1,18 @@
-SKIP: FAILED
 
-..\..\src\tint\utils\containers\slice.h:216 internal compiler error: TINT_ASSERT(i < Length())
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
+RWByteAddressBuffer prevent_dce : register(u0);
+RWTexture1D<float4> arg_0 : register(u0, space1);
+float4 textureLoad_92dd61() {
+  RWTexture1D<float4> v = arg_0;
+  float4 res = float4(v.Load(int2(int(1u), 0)));
+  return res;
+}
+
+void fragment_main() {
+  prevent_dce.Store4(0u, asuint(textureLoad_92dd61()));
+}
+
+[numthreads(1, 1, 1)]
+void compute_main() {
+  prevent_dce.Store4(0u, asuint(textureLoad_92dd61()));
+}
+
