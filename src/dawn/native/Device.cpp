@@ -504,11 +504,7 @@ MaybeError DeviceBase::Initialize(Ref<QueueBase> defaultQueue) {
         mMutex = nullptr;
     }
 
-    // mAdapter is not set for mock test devices.
-    // TODO(crbug.com/dawn/1702): using a mock adapter could avoid the null checking.
-    if (mAdapter != nullptr) {
-        mAdapter->GetInstance()->AddDevice(this);
-    }
+    mAdapter->GetInstance()->AddDevice(this);
 
     return {};
 }
@@ -554,15 +550,11 @@ void DeviceBase::WillDropLastExternalRef() {
     // freed any device-scope memory needed to run the callback.
     mUncapturedErrorCallbackInfo = kEmptyUncapturedErrorCallbackInfo;
 
-    // mAdapter is not set for mock test devices.
-    // TODO(crbug.com/dawn/1702): using a mock adapter could avoid the null checking.
-    if (mAdapter != nullptr) {
-        mAdapter->GetInstance()->RemoveDevice(this);
+    mAdapter->GetInstance()->RemoveDevice(this);
 
-        // Once last external ref dropped, all callbacks should be forwarded to Instance's callback
-        // queue instead.
-        mCallbackTaskManager = mAdapter->GetInstance()->GetCallbackTaskManager();
-    }
+    // Once last external ref dropped, all callbacks should be forwarded to Instance's callback
+    // queue instead.
+    mCallbackTaskManager = mAdapter->GetInstance()->GetCallbackTaskManager();
 }
 
 void DeviceBase::DestroyObjects() {

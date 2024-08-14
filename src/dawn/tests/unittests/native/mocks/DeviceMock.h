@@ -49,15 +49,14 @@ class DeviceMock : public DeviceBase {
     using DeviceBase::ForceEnableFeatureForTesting;
     using DeviceBase::ForceSetToggleForTesting;
 
-    // TODO(lokokung): Use real DeviceBase constructor instead of mock specific one.
-    //       - Requires AdapterMock.
-    //       - Can probably remove GetPlatform overload.
-    //       - Allows removing ForceSetToggleForTesting calls.
-    DeviceMock();
+    // TODO(chromium:42240655):
+    // 1. Implement AdapterMock and use it in the constructor of DeviceMock
+    // 2. Remove ForceSetToggleForTesting calls
+    DeviceMock(AdapterBase* adapter,
+               const UnpackedPtr<DeviceDescriptor>& descriptor,
+               const TogglesState& deviceToggles,
+               Ref<DeviceLostEvent>&& lostEvent);
     ~DeviceMock() override;
-    dawn::platform::Platform* GetPlatform() const override;
-
-    dawn::native::InstanceBase* GetInstance() const override;
 
     // Mock specific functionality.
     QueueMock* GetQueueMock();
@@ -140,9 +139,6 @@ class DeviceMock : public DeviceBase {
     MOCK_METHOD(MaybeError, TickImpl, (), (override));
 
     MOCK_METHOD(void, DestroyImpl, (), (override));
-
-  private:
-    Ref<InstanceBase> mInstance;
 };
 
 }  // namespace dawn::native
