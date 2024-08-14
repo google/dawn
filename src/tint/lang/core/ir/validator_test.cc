@@ -7333,5 +7333,230 @@ note: # Disassembly
 )");
 }
 
+TEST_F(IR_ValidatorTest, Swizzle_MissingValue) {
+    auto* f = b.Function("my_func", ty.void_());
+    b.Append(f->Block(), [&] {
+        auto* var = b.Var(ty.ptr(function, ty.vec4<f32>()));
+        auto* swizzle = b.Swizzle(ty.vec4<f32>(), var, {3, 2, 1, 0});
+        swizzle->ClearOperands();
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_EQ(res.Failure().reason.Str(),
+              R"(:4:20 error: swizzle: expected exactly 1 operands, got 0
+    %3:vec4<f32> = swizzle undef, wzyx
+                   ^^^^^^^
+
+:2:3 note: in block
+  $B1: {
+  ^^^
+
+note: # Disassembly
+%my_func = func():void {
+  $B1: {
+    %2:ptr<function, vec4<f32>, read_write> = var
+    %3:vec4<f32> = swizzle undef, wzyx
+    ret
+  }
+}
+)");
+}
+
+TEST_F(IR_ValidatorTest, Swizzle_NullValue) {
+    auto* f = b.Function("my_func", ty.void_());
+    b.Append(f->Block(), [&] {
+        auto* var = b.Var(ty.ptr(function, ty.vec4<f32>()));
+        auto* swizzle = b.Swizzle(ty.vec4<f32>(), var, {3, 2, 1, 0});
+        swizzle->SetOperand(0, nullptr);
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_EQ(res.Failure().reason.Str(),
+              R"(error: swizzle: operand is undefined
+:2:3 note: in block
+  $B1: {
+  ^^^
+
+note: # Disassembly
+%my_func = func():void {
+  $B1: {
+    %2:ptr<function, vec4<f32>, read_write> = var
+    %3:vec4<f32> = swizzle undef, wzyx
+    ret
+  }
+}
+)");
+}
+
+TEST_F(IR_ValidatorTest, Swizzle_MissingResult) {
+    auto* f = b.Function("my_func", ty.void_());
+    b.Append(f->Block(), [&] {
+        auto* var = b.Var(ty.ptr(function, ty.vec4<f32>()));
+        auto* swizzle = b.Swizzle(ty.vec4<f32>(), var, {3, 2, 1, 0});
+        swizzle->ClearResults();
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_EQ(res.Failure().reason.Str(),
+              R"(:4:13 error: swizzle: expected exactly 1 results, got 0
+    undef = swizzle %2, wzyx
+            ^^^^^^^
+
+:2:3 note: in block
+  $B1: {
+  ^^^
+
+note: # Disassembly
+%my_func = func():void {
+  $B1: {
+    %2:ptr<function, vec4<f32>, read_write> = var
+    undef = swizzle %2, wzyx
+    ret
+  }
+}
+)");
+}
+
+TEST_F(IR_ValidatorTest, Swizzle_NullResult) {
+    auto* f = b.Function("my_func", ty.void_());
+    b.Append(f->Block(), [&] {
+        auto* var = b.Var(ty.ptr(function, ty.vec4<f32>()));
+        auto* swizzle = b.Swizzle(ty.vec4<f32>(), var, {3, 2, 1, 0});
+        swizzle->SetResults(Vector<ir::InstructionResult*, 1>{nullptr});
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_EQ(res.Failure().reason.Str(),
+              R"(:4:5 error: swizzle: result is undefined
+    undef = swizzle %2, wzyx
+    ^^^^^
+
+:2:3 note: in block
+  $B1: {
+  ^^^
+
+:4:5 error: swizzle: result is undefined
+    undef = swizzle %2, wzyx
+    ^^^^^
+
+:2:3 note: in block
+  $B1: {
+  ^^^
+
+note: # Disassembly
+%my_func = func():void {
+  $B1: {
+    %2:ptr<function, vec4<f32>, read_write> = var
+    undef = swizzle %2, wzyx
+    ret
+  }
+}
+)");
+}
+
+TEST_F(IR_ValidatorTest, Swizzle_NoIndices) {
+    auto* f = b.Function("my_func", ty.void_());
+    b.Append(f->Block(), [&] {
+        auto* var = b.Var(ty.ptr(function, ty.vec4<f32>()));
+        auto* swizzle = b.Swizzle(ty.vec4<f32>(), var, {3, 2, 1, 0});
+        auto indices = Vector<uint32_t, 0>();
+        swizzle->SetIndices(std::move(indices));
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_EQ(res.Failure().reason.Str(),
+              R"(:4:20 error: swizzle: expected at least 1 indices
+    %3:vec4<f32> = swizzle %2, 
+                   ^^^^^^^
+
+:2:3 note: in block
+  $B1: {
+  ^^^
+
+note: # Disassembly
+%my_func = func():void {
+  $B1: {
+    %2:ptr<function, vec4<f32>, read_write> = var
+    %3:vec4<f32> = swizzle %2, 
+    ret
+  }
+}
+)");
+}
+
+TEST_F(IR_ValidatorTest, Swizzle_TooManyIndices) {
+    auto* f = b.Function("my_func", ty.void_());
+    b.Append(f->Block(), [&] {
+        auto* var = b.Var(ty.ptr(function, ty.vec4<f32>()));
+        auto* swizzle = b.Swizzle(ty.vec4<f32>(), var, {3, 2, 1, 0});
+        auto indices = Vector<uint32_t, 5>{1, 1, 1, 1, 1};
+        swizzle->SetIndices(std::move(indices));
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_EQ(res.Failure().reason.Str(),
+              R"(:4:20 error: swizzle: expected at most 4 indices
+    %3:vec4<f32> = swizzle %2, yyyyy
+                   ^^^^^^^
+
+:2:3 note: in block
+  $B1: {
+  ^^^
+
+note: # Disassembly
+%my_func = func():void {
+  $B1: {
+    %2:ptr<function, vec4<f32>, read_write> = var
+    %3:vec4<f32> = swizzle %2, yyyyy
+    ret
+  }
+}
+)");
+}
+
+TEST_F(IR_ValidatorTest, Swizzle_InvalidIndices) {
+    auto* f = b.Function("my_func", ty.void_());
+    b.Append(f->Block(), [&] {
+        auto* var = b.Var(ty.ptr(function, ty.vec4<f32>()));
+        auto* swizzle = b.Swizzle(ty.vec4<f32>(), var, {3, 2, 1, 0});
+        auto indices = Vector<uint32_t, 4>{4, 3, 2, 1};
+        swizzle->SetIndices(std::move(indices));
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_EQ(res.Failure().reason.Str(),
+              R"(:4:20 error: swizzle: invalid index value
+    %3:vec4<f32> = swizzle %2, wzy
+                   ^^^^^^^
+
+:2:3 note: in block
+  $B1: {
+  ^^^
+
+note: # Disassembly
+%my_func = func():void {
+  $B1: {
+    %2:ptr<function, vec4<f32>, read_write> = var
+    %3:vec4<f32> = swizzle %2, wzy
+    ret
+  }
+}
+)");
+}
+
 }  // namespace
 }  // namespace tint::core::ir

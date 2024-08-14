@@ -440,6 +440,10 @@ class Validator {
     /// @param s the switch to validate
     void CheckSwitch(const Switch* s);
 
+    /// Validates the given swizzle
+    /// @param s the swizzle to validate
+    void CheckSwizzle(const Swizzle* s);
+
     /// Validates the given terminator
     /// @param b the terminator to validate
     void CheckTerminator(const Terminator* b);
@@ -1297,7 +1301,7 @@ void Validator::CheckInstruction(const Instruction* inst) {
         [&](const Store* s) { CheckStore(s); },                            //
         [&](const StoreVectorElement* s) { CheckStoreVectorElement(s); },  //
         [&](const Switch* s) { CheckSwitch(s); },                          //
-        [&](const Swizzle*) {},                                            //
+        [&](const Swizzle* s) { CheckSwizzle(s); },                        //
         [&](const Terminator* b) { CheckTerminator(b); },                  //
         [&](const Unary* u) { CheckUnary(u); },                            //
         [&](const Var* var) { CheckVar(var); },                            //
@@ -1825,6 +1829,27 @@ void Validator::CheckSwitch(const Switch* s) {
     }
 
     tasks_.Push([this, s] { control_stack_.Push(s); });
+}
+
+void Validator::CheckSwizzle(const Swizzle* s) {
+    if (!CheckResultsAndOperands(s, Swizzle::kNumResults, Swizzle::kNumOperands)) {
+        return;
+    }
+
+    auto indices = s->Indices();
+    if (indices.Length() < Swizzle::kMinNumIndices) {
+        AddError(s) << "expected at least " << Swizzle::kMinNumIndices << " indices";
+    }
+
+    if (indices.Length() > Swizzle::kMaxNumIndices) {
+        AddError(s) << "expected at most " << Swizzle::kMaxNumIndices << " indices";
+    }
+
+    for (auto& idx : indices) {
+        if (idx > Swizzle::kMaxIndexValue) {
+            AddError(s) << "invalid index value";
+        }
+    }
 }
 
 void Validator::CheckTerminator(const Terminator* b) {
