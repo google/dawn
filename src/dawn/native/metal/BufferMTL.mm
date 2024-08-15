@@ -71,7 +71,7 @@ Buffer::Buffer(DeviceBase* dev, const UnpackedPtr<BufferDescriptor>& desc)
 
 MaybeError Buffer::Initialize(bool mappedAtCreation) {
     MTLResourceOptions storageMode;
-    if (GetUsage() & kMappableBufferUsages) {
+    if (GetInternalUsage() & kMappableBufferUsages) {
         storageMode = MTLResourceStorageModeShared;
     } else {
         storageMode = MTLResourceStorageModePrivate;
@@ -86,7 +86,7 @@ MaybeError Buffer::Initialize(bool mappedAtCreation) {
     // Metal validation layer requires the size of uniform buffer and storage buffer to be no
     // less than the size of the buffer block defined in shader, and the overall size of the
     // buffer must be aligned to the largest alignment of its members.
-    if (GetUsage() &
+    if (GetInternalUsage() &
         (wgpu::BufferUsage::Uniform | wgpu::BufferUsage::Storage | kInternalStorageBuffer)) {
         DAWN_ASSERT(IsAligned(kMinUniformOrStorageBufferAlignment, alignment));
         alignment = kMinUniformOrStorageBufferAlignment;
@@ -96,7 +96,7 @@ MaybeError Buffer::Initialize(bool mappedAtCreation) {
     // 0-sized vertex buffer bindings are allowed, so we always need an additional 4 bytes
     // after the end.
     NSUInteger extraBytes = 0u;
-    if ((GetUsage() & wgpu::BufferUsage::Vertex) != 0) {
+    if ((GetInternalUsage() & wgpu::BufferUsage::Vertex) != 0) {
         extraBytes = 4u;
     }
 
@@ -189,7 +189,7 @@ id<MTLBuffer> Buffer::GetMTLBuffer() const {
 
 bool Buffer::IsCPUWritableAtCreation() const {
     // TODO(enga): Handle CPU-visible memory on UMA
-    return GetUsage() & kMappableBufferUsages;
+    return GetInternalUsage() & kMappableBufferUsages;
 }
 
 MaybeError Buffer::MapAtCreationImpl() {

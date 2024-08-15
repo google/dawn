@@ -88,13 +88,11 @@ class BufferBase : public SharedResource {
     uint64_t GetAllocatedSize() const;
     ExecutionSerial GetLastUsageSerial() const;
 
-    // |GetUsageExternalOnly| returns the usage with which the buffer was created using the
-    // base WebGPU API. Additional usages may be added for internal state tracking. |GetUsage|
-    // returns the union of base usage and the usages added internally.
-    // TODO(chromium:350497225): Rename |GetUsage| to |GetInternalUsage| to align with the same
-    // function in `TextureBase`.
+    // |GetUsage| returns the usage with which the buffer was created using the base WebGPU API.
+    // Additional usages may be added for internal state tracking. |GetInternalUsage| returns the
+    // union of base usage and the usages added internally.
+    wgpu::BufferUsage GetInternalUsage() const;
     wgpu::BufferUsage GetUsage() const;
-    wgpu::BufferUsage GetUsageExternalOnly() const;
 
     MaybeError MapAtCreation();
     void CallbackOnMapRequestCompleted(MapRequestID mapID, WGPUBufferMapAsyncStatus status);

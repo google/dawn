@@ -650,14 +650,15 @@ MaybeError ValidateCanUseAs(const TextureBase* texture,
 
 MaybeError ValidateCanUseAs(const BufferBase* buffer, wgpu::BufferUsage usage) {
     DAWN_ASSERT(wgpu::HasZeroOrOneBits(usage));
-    DAWN_INVALID_IF(!(buffer->GetUsageExternalOnly() & usage), "%s usage (%s) doesn't include %s.",
-                    buffer, buffer->GetUsageExternalOnly(), usage);
+    DAWN_INVALID_IF(!(buffer->GetUsage() & usage), "%s usage (%s) doesn't include %s.", buffer,
+                    buffer->GetUsage(), usage);
     return {};
 }
 
 MaybeError ValidateCanUseAsInternal(const BufferBase* buffer, wgpu::BufferUsage usage) {
-    DAWN_INVALID_IF(!(buffer->GetUsage() & usage), "%s internal usage (%s) doesn't include %s.",
-                    buffer, buffer->GetUsage(), usage);
+    DAWN_INVALID_IF(!(buffer->GetInternalUsage() & usage),
+                    "%s internal usage (%s) doesn't include %s.", buffer,
+                    buffer->GetInternalUsage(), usage);
     return {};
 }
 

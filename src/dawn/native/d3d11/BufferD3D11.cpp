@@ -243,7 +243,7 @@ class StagingBuffer final : public Buffer {
     }
 
     MaybeError InitializeInternal() override {
-        DAWN_ASSERT(IsStaging(GetUsage()));
+        DAWN_ASSERT(IsStaging(GetInternalUsage()));
 
         D3D11_BUFFER_DESC bufferDescriptor;
         bufferDescriptor.ByteWidth = mAllocatedSize;
@@ -271,7 +271,7 @@ class StagingBuffer final : public Buffer {
 
     MaybeError MapInternal(const ScopedCommandRecordingContext* commandContext,
                            wgpu::MapMode) override {
-        DAWN_ASSERT(IsMappable(GetUsage()));
+        DAWN_ASSERT(IsMappable(GetInternalUsage()));
         DAWN_ASSERT(!mMappedData);
 
         // Always map buffer with D3D11_MAP_READ_WRITE even for mapping wgpu::MapMode:Read, because
@@ -381,10 +381,10 @@ MaybeError Buffer::Initialize(bool mappedAtCreation,
     uint64_t size = std::max(GetSize(), uint64_t(4u));
     // The validation layer requires:
     // ByteWidth must be 12 or larger to be used with D3D11_RESOURCE_MISC_DRAWINDIRECT_ARGS.
-    if (GetUsage() & wgpu::BufferUsage::Indirect) {
+    if (GetInternalUsage() & wgpu::BufferUsage::Indirect) {
         size = std::max(size, uint64_t(12u));
     }
-    size_t alignment = D3D11BufferSizeAlignment(GetUsage());
+    size_t alignment = D3D11BufferSizeAlignment(GetInternalUsage());
     // Check for overflow, bufferDescriptor.ByteWidth is a UINT.
     if (size > std::numeric_limits<UINT>::max() - alignment) {
         // Alignment would overlow.
@@ -494,7 +494,7 @@ MaybeError Buffer::FinalizeMap(ScopedCommandRecordingContext* commandContext,
 }
 
 void Buffer::UnmapImpl() {
-    DAWN_ASSERT(IsMappable(GetUsage()));
+    DAWN_ASSERT(IsMappable(GetInternalUsage()));
     mMapReadySerial = kMaxExecutionSerial;
     if (mMappedData) {
         auto commandContext = ToBackend(GetDevice()->GetQueue())
@@ -826,11 +826,11 @@ void GPUUsableBuffer::SetStorageLabel(StorageType storageType) {
 }
 
 MaybeError GPUUsableBuffer::InitializeInternal() {
-    DAWN_ASSERT(!IsStaging(GetUsage()));
+    DAWN_ASSERT(!IsStaging(GetInternalUsage()));
 
     mStorages = {};
 
-    wgpu::BufferUsage usagesToHandle = GetUsage();
+    wgpu::BufferUsage usagesToHandle = GetInternalUsage();
 
     // We need to create a separate storage for uniform usage, because D3D11 doesn't allow constant
     // buffer to be used for other purposes.
@@ -916,7 +916,7 @@ ResultOrError<GPUUsableBuffer::Storage*> GPUUsableBuffer::GetOrCreateStorage(
             // Need to exclude GPU writable usages because CPU writable buffer is not GPU writable
             // in D3D11.
             auto nonUniformUsage =
-                GetUsage() & ~(kD3D11GPUWriteUsages | wgpu::BufferUsage::Uniform);
+                GetInternalUsage() & ~(kD3D11GPUWriteUsages | wgpu::BufferUsage::Uniform);
             bufferDescriptor.Usage = D3D11_USAGE_DYNAMIC;
             bufferDescriptor.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
             bufferDescriptor.BindFlags = D3D11BufferBindFlags(nonUniformUsage);
@@ -931,7 +931,7 @@ ResultOrError<GPUUsableBuffer::Storage*> GPUUsableBuffer::GetOrCreateStorage(
         case StorageType::GPUWritableNonConstantBuffer: {
             // Need to exclude mapping usages.
             const auto nonUniformUsage =
-                GetUsage() & ~(kMappableBufferUsages | wgpu::BufferUsage::Uniform);
+                GetInternalUsage() & ~(kMappableBufferUsages | wgpu::BufferUsage::Uniform);
             bufferDescriptor.Usage = D3D11_USAGE_DEFAULT;
             bufferDescriptor.CPUAccessFlags = 0;
             bufferDescriptor.BindFlags = D3D11BufferBindFlags(nonUniformUsage);
@@ -967,7 +967,7 @@ ResultOrError<GPUUsableBuffer::Storage*> GPUUsableBuffer::GetOrCreateDstCopyable
         return mStorages[StorageType::GPUWritableNonConstantBuffer].Get();
     }
 
-    if (GetUsage() & wgpu::BufferUsage::Uniform) {
+    if (GetInternalUsage() & wgpu::BufferUsage::Uniform) {
         return GetOrCreateStorage(StorageType::GPUCopyDstConstantBuffer);
     }
 
@@ -1038,7 +1038,7 @@ void GPUUsableBuffer::IncrStorageRevAndMakeLatest(
     dstStorage->SetRevision(dstStorage->GetRevision() + 1);
     mLastUpdatedStorage = dstStorage;
 
-    if (dstStorage->IsGPUWritable() && IsMappable(GetUsage())) {
+    if (dstStorage->IsGPUWritable() && IsMappable(GetInternalUsage())) {
         // If this buffer is mappable and the last updated storage is GPU writable, we need to
         // update the staging storage when the command buffer is flushed.
         // This is to make sure the staging storage will contain the up-to-date GPU modified data.
@@ -1048,7 +1048,7 @@ void GPUUsableBuffer::IncrStorageRevAndMakeLatest(
 
 MaybeError GPUUsableBuffer::SyncGPUWritesToStaging(
     const ScopedCommandRecordingContext* commandContext) {
-    DAWN_ASSERT(IsMappable(GetUsage()));
+    DAWN_ASSERT(IsMappable(GetInternalUsage()));
 
     // Only sync staging storage. Later other CPU writable storages can be updated by
     // copying from staging storage with Map(MAP_WRITE_DISCARD) which won't stall the CPU.

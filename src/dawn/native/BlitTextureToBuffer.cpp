@@ -1069,7 +1069,7 @@ MaybeError BlitTextureToBuffer(DeviceBase* device,
     const bool needsTempForOOBU32Write =
         shaderBindingOffset + shaderBindingSize > dst.buffer->GetSize();
     const bool needsTempForStorageUsage =
-        !(dst.buffer->GetUsage() & (kInternalStorageBuffer | wgpu::BufferUsage::Storage));
+        !(dst.buffer->GetInternalUsage() & (kInternalStorageBuffer | wgpu::BufferUsage::Storage));
     const bool useIntermediateCopyBuffer = needsTempForOOBU32Write || needsTempForStorageUsage;
     // Offset to copy to original buffer. Only relevant if useIntermediateCopyBuffer is true.
     uint64_t offsetInOriginalBuf = 0;

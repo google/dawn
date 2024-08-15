@@ -46,7 +46,8 @@ BufferMock::BufferMock(DeviceMock* device,
     ON_CALL(*this, DestroyImpl).WillByDefault([this] { this->BufferBase::DestroyImpl(); });
     ON_CALL(*this, GetMappedPointer).WillByDefault(Return(mBackingData.get()));
     ON_CALL(*this, IsCPUWritableAtCreation).WillByDefault([this] {
-        return (GetUsage() & (wgpu::BufferUsage::MapRead | wgpu::BufferUsage::MapWrite)) != 0;
+        return (GetInternalUsage() & (wgpu::BufferUsage::MapRead | wgpu::BufferUsage::MapWrite)) !=
+               0;
     });
 }
 

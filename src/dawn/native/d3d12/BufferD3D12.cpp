@@ -157,7 +157,7 @@ Buffer::Buffer(Device* device, const UnpackedPtr<BufferDescriptor>& descriptor)
 MaybeError Buffer::Initialize(bool mappedAtCreation) {
     // Allocate at least 4 bytes so clamped accesses are always in bounds.
     uint64_t size = std::max(GetSize(), uint64_t(4u));
-    size_t alignment = D3D12BufferSizeAlignment(GetUsage());
+    size_t alignment = D3D12BufferSizeAlignment(GetInternalUsage());
     if (size > std::numeric_limits<uint64_t>::max() - alignment) {
         // Alignment would overlow.
         return DAWN_OUT_OF_MEMORY_ERROR("Buffer allocation is too large");
@@ -177,9 +177,9 @@ MaybeError Buffer::Initialize(bool mappedAtCreation) {
     resourceDescriptor.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
     // Add CopyDst for non-mappable buffer initialization with mappedAtCreation
     // and robust resource initialization.
-    resourceDescriptor.Flags = D3D12ResourceFlags(GetUsage() | wgpu::BufferUsage::CopyDst);
+    resourceDescriptor.Flags = D3D12ResourceFlags(GetInternalUsage() | wgpu::BufferUsage::CopyDst);
 
-    auto heapType = D3D12HeapType(GetUsage());
+    auto heapType = D3D12HeapType(GetInternalUsage());
     mLastState = D3D12_RESOURCE_STATE_COMMON;
 
     switch (heapType) {
@@ -260,7 +260,7 @@ MaybeError Buffer::InitializeHostMapped(const BufferHostMappedPointer* hostMappe
     resourceDescriptor.SampleDesc.Quality = 0;
     resourceDescriptor.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
     resourceDescriptor.Flags =
-        D3D12ResourceFlags(GetUsage()) | D3D12_RESOURCE_FLAG_ALLOW_CROSS_ADAPTER;
+        D3D12ResourceFlags(GetInternalUsage()) | D3D12_RESOURCE_FLAG_ALLOW_CROSS_ADAPTER;
 
     D3D12_RESOURCE_ALLOCATION_INFO resourceInfo =
         device->GetD3D12Device()->GetResourceAllocationInfo(0, 1, &resourceDescriptor);
@@ -420,7 +420,7 @@ bool Buffer::IsCPUWritableAtCreation() const {
     // staging buffer, and copied from the staging buffer to the GPU memory of the current
     // buffer in the unmap() call.
     // TODO(enga): Handle CPU-visible memory on UMA
-    return (GetUsage() & wgpu::BufferUsage::MapWrite) != 0;
+    return (GetInternalUsage() & wgpu::BufferUsage::MapWrite) != 0;
 }
 
 MaybeError Buffer::MapInternal(bool isWrite, size_t offset, size_t size, const char* contextInfo) {
@@ -454,7 +454,7 @@ MaybeError Buffer::MapAtCreationImpl() {
     // We will use a staging buffer for MapRead buffers instead so we just clear the staging
     // buffer and initialize the original buffer by copying the staging buffer to the original
     // buffer one the first time Unmap() is called.
-    DAWN_ASSERT((GetUsage() & wgpu::BufferUsage::MapWrite) != 0);
+    DAWN_ASSERT((GetInternalUsage() & wgpu::BufferUsage::MapWrite) != 0);
 
     // The buffers with mappedAtCreation == true will be initialized in
     // BufferBase::MapAtCreation().
@@ -624,7 +624,7 @@ MaybeError Buffer::ClearBuffer(CommandRecordingContext* commandContext,
 
     // The state of the buffers on UPLOAD heap must always be GENERIC_READ and cannot be
     // changed away, so we can only clear such buffer with buffer mapping.
-    if (D3D12HeapType(GetUsage()) == D3D12_HEAP_TYPE_UPLOAD) {
+    if (D3D12HeapType(GetInternalUsage()) == D3D12_HEAP_TYPE_UPLOAD) {
         DAWN_TRY(MapInternal(true, static_cast<size_t>(offset), static_cast<size_t>(size),
                              "D3D12 map at clear buffer"));
         memset(mMappedData, clearValue, size);

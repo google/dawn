@@ -177,7 +177,7 @@ MaybeError Buffer::Initialize(bool mappedAtCreation) {
     constexpr size_t kAlignment = 4u;
 
     uint32_t extraBytes = 0u;
-    if (GetUsage() & (wgpu::BufferUsage::Vertex | wgpu::BufferUsage::Index)) {
+    if (GetInternalUsage() & (wgpu::BufferUsage::Vertex | wgpu::BufferUsage::Index)) {
         // vkCmdSetIndexBuffer and vkCmdSetVertexBuffer are invalid if the offset
         // is equal to the whole buffer size. Allocate at least one more byte so it
         // is valid to setVertex/IndexBuffer with a zero-sized range at the end
@@ -219,7 +219,7 @@ MaybeError Buffer::Initialize(bool mappedAtCreation) {
     createInfo.size = mAllocatedSize;
     // Add CopyDst for non-mappable buffer initialization with mappedAtCreation
     // and robust resource initialization.
-    createInfo.usage = VulkanBufferUsage(GetUsage() | wgpu::BufferUsage::CopyDst);
+    createInfo.usage = VulkanBufferUsage(GetInternalUsage() | wgpu::BufferUsage::CopyDst);
     createInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
     createInfo.queueFamilyIndexCount = 0;
     createInfo.pQueueFamilyIndices = 0;
@@ -234,9 +234,9 @@ MaybeError Buffer::Initialize(bool mappedAtCreation) {
     device->fn.GetBufferMemoryRequirements(device->GetVkDevice(), mHandle, &requirements);
 
     MemoryKind requestKind = MemoryKind::Linear;
-    if (GetUsage() & wgpu::BufferUsage::MapRead) {
+    if (GetInternalUsage() & wgpu::BufferUsage::MapRead) {
         requestKind = MemoryKind::LinearReadMappable;
-    } else if (GetUsage() & wgpu::BufferUsage::MapWrite) {
+    } else if (GetInternalUsage() & wgpu::BufferUsage::MapWrite) {
         requestKind = MemoryKind::LinearWriteMappable;
     }
     DAWN_TRY_ASSIGN(mMemoryAllocation,
@@ -298,7 +298,7 @@ MaybeError Buffer::InitializeHostMapped(const BufferHostMappedPointer* hostMappe
     createInfo.pNext = &externalMemoryCreateInfo;
     createInfo.flags = 0;
     createInfo.size = mAllocatedSize;
-    createInfo.usage = VulkanBufferUsage(GetUsage());
+    createInfo.usage = VulkanBufferUsage(GetInternalUsage());
     createInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
     createInfo.queueFamilyIndexCount = 0;
     createInfo.pQueueFamilyIndices = 0;
@@ -331,9 +331,9 @@ MaybeError Buffer::InitializeHostMapped(const BufferHostMappedPointer* hostMappe
     }
 
     MemoryKind requestKind;
-    if (GetUsage() & wgpu::BufferUsage::MapRead) {
+    if (GetInternalUsage() & wgpu::BufferUsage::MapRead) {
         requestKind = MemoryKind::LinearReadMappable;
-    } else if (GetUsage() & wgpu::BufferUsage::MapWrite) {
+    } else if (GetInternalUsage() & wgpu::BufferUsage::MapWrite) {
         requestKind = MemoryKind::LinearWriteMappable;
     } else {
         requestKind = MemoryKind::Linear;
@@ -420,7 +420,7 @@ bool Buffer::TrackUsageAndGetResourceBarrier(CommandRecordingContext* recordingC
         MarkUsedInPendingCommands();
     }
 
-    if (!isMapUsage && (GetUsage() & kMappableBufferUsages)) {
+    if (!isMapUsage && (GetInternalUsage() & kMappableBufferUsages)) {
         // The buffer is mappable and the requested usage is not map usage, we need to add it
         // into mappableBuffersForEagerTransition, so the buffer can be transitioned back to map
         // usages at end of the submit.
@@ -447,7 +447,7 @@ bool Buffer::TrackUsageAndGetResourceBarrier(CommandRecordingContext* recordingC
         if (usage & kReadOnlyShaderBufferUsages) {
             // Pre-emptively transition to all read-only shader buffer usages if one is used to
             // avoid unnecessary barriers later.
-            usage |= GetUsage() & kReadOnlyShaderBufferUsages;
+            usage |= GetInternalUsage() & kReadOnlyShaderBufferUsages;
         }
 
         mReadUsage |= usage;
@@ -561,7 +561,7 @@ MaybeError Buffer::UploadData(uint64_t bufferOffset, const void* data, size_t si
     Device* device = ToBackend(GetDevice());
 
     const bool isInUse = GetLastUsageSerial() > device->GetQueue()->GetCompletedCommandSerial();
-    const bool isMappable = GetUsage() & kMappableBufferUsages;
+    const bool isMappable = GetInternalUsage() & kMappableBufferUsages;
     // Get if buffer has pending writes on the GPU. Even if the write workload has finished, the
     // write may still need a barrier to make the write available.
     const bool hasPendingWrites = !IsSubset(mLastWriteUsage, wgpu::BufferUsage::MapWrite);
@@ -745,7 +745,7 @@ void Buffer::TransitionMappableBuffersEagerly(const VulkanFunctions& fn,
 
     size_t originalBufferCount = buffers.size();
     for (const Ref<Buffer>& buffer : buffers) {
-        wgpu::BufferUsage mapUsage = buffer->GetUsage() & kMappableBufferUsages;
+        wgpu::BufferUsage mapUsage = buffer->GetInternalUsage() & kMappableBufferUsages;
         DAWN_ASSERT(mapUsage == wgpu::BufferUsage::MapRead ||
                     mapUsage == wgpu::BufferUsage::MapWrite);
         VkBufferMemoryBarrier barrier;

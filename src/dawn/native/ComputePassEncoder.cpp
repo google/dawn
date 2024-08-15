@@ -322,7 +322,7 @@ ComputePassEncoder::TransformIndirectDispatchBuffer(Ref<BufferBase> indirectBuff
     Ref<BufferBase> validatedIndirectBuffer = scratchBuffer.GetBuffer();
 
     Ref<BindGroupBase> validationBindGroup;
-    DAWN_ASSERT(indirectBuffer->GetUsage() & kInternalStorageBuffer);
+    DAWN_ASSERT(indirectBuffer->GetInternalUsage() & kInternalStorageBuffer);
     DAWN_TRY_ASSIGN(validationBindGroup,
                     utils::MakeBindGroup(device, layout,
                                          {

@@ -534,12 +534,12 @@ uint64_t BufferBase::GetAllocatedSize() const {
     return mAllocatedSize;
 }
 
-wgpu::BufferUsage BufferBase::GetUsage() const {
+wgpu::BufferUsage BufferBase::GetInternalUsage() const {
     DAWN_ASSERT(!IsError());
     return mInternalUsage;
 }
 
-wgpu::BufferUsage BufferBase::GetUsageExternalOnly() const {
+wgpu::BufferUsage BufferBase::GetUsage() const {
     DAWN_ASSERT(!IsError());
     return mUsage;
 }
@@ -1134,7 +1134,7 @@ void BufferBase::DumpMemoryStatistics(MemoryDump* dump, const char* prefix) cons
     dump->AddScalar(name.c_str(), MemoryDump::kNameSize, MemoryDump::kUnitsBytes,
                     GetAllocatedSize());
     dump->AddString(name.c_str(), "label", GetLabel());
-    dump->AddString(name.c_str(), "usage", absl::StrFormat("%s", GetUsage()));
+    dump->AddString(name.c_str(), "usage", absl::StrFormat("%s", GetInternalUsage()));
 }
 
 }  // namespace dawn::native
