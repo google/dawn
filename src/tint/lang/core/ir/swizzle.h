@@ -46,7 +46,7 @@ class Swizzle final : public Castable<Swizzle, OperandInstruction<1, 1>> {
     static constexpr size_t kNumResults = 1;
 
     /// The fixed number of operands expected for swizzle instructions
-    /// @note indices for swizzle are handled seperately from the operands, so not included here
+    /// @note indices for swizzle are handled separately from the operands, so not included here
     static constexpr size_t kNumOperands = 1;
 
     /// Minimum number of indices expected for swizzle instructions

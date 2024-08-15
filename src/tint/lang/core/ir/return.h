@@ -49,6 +49,15 @@ class Return final : public Castable<Return, Terminator> {
     /// The offset in Operands() for the return argument
     static constexpr size_t kArgsOperandOffset = 1;
 
+    /// The fixed number of results returned by return instructions
+    static constexpr size_t kNumResults = 0;
+
+    /// The minimum number of operands accepted by return instructions
+    static constexpr size_t kMinOperands = 1;
+
+    /// The maximum number of operands accepted by return instructions
+    static constexpr size_t kMaxOperands = 2;
+
     /// Constructor (no operands)
     /// @param id the instruction id
     explicit Return(Id id);

@@ -5993,15 +5993,71 @@ TEST_F(IR_ValidatorTest, Return_WithValue) {
     EXPECT_EQ(ir::Validate(mod), Success);
 }
 
-TEST_F(IR_ValidatorTest, Return_NullFunction) {
-    auto* f = b.Function("my_func", ty.void_());
+TEST_F(IR_ValidatorTest, Return_UnexpectedResult) {
+    auto* f = b.Function("my_func", ty.i32());
     b.Append(f->Block(), [&] {  //
-        b.Return(nullptr);
+        auto* r = b.Return(f, 42_i);
+        r->SetResults(Vector{b.InstructionResult(ty.i32())});
     });
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.Str(), R"(:3:5 error: return: undefined function
+    EXPECT_EQ(res.Failure().reason.Str(), R"(:3:5 error: return: expected exactly 0 results, got 1
+    ret 42i
+    ^^^^^^^
+
+:2:3 note: in block
+  $B1: {
+  ^^^
+
+note: # Disassembly
+%my_func = func():i32 {
+  $B1: {
+    ret 42i
+  }
+}
+)");
+}
+
+TEST_F(IR_ValidatorTest, Return_NotFunction) {
+    auto* f = b.Function("my_func", ty.void_());
+    b.Append(f->Block(), [&] {  //
+        auto* var = b.Var(ty.ptr<function, f32>());
+        auto* r = b.Return(nullptr);
+        r->SetOperand(0, var->Result(0));
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_EQ(res.Failure().reason.Str(), R"(:4:5 error: return: expected function for first operand
+    ret
+    ^^^
+
+:2:3 note: in block
+  $B1: {
+  ^^^
+
+note: # Disassembly
+%my_func = func():void {
+  $B1: {
+    %2:ptr<function, f32, read_write> = var
+    ret
+  }
+}
+)");
+}
+
+TEST_F(IR_ValidatorTest, Return_MissingFunction) {
+    auto* f = b.Function("my_func", ty.void_());
+    b.Append(f->Block(), [&] {
+        auto* r = b.Return(f);
+        r->ClearOperands();
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_EQ(res.Failure().reason.Str(),
+              R"(:3:5 error: return: expected between 1 and 2 operands, got 0
     ret
     ^^^
 

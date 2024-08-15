@@ -263,9 +263,13 @@ class Validator {
     /// @param res the res
     void AddDeclarationNote(const InstructionResult* res);
 
-    /// @param decl the value, instruction or block to get the name for
+    /// @param decl the type, value, instruction or block to get the name for
     /// @returns the styled name for the given value, instruction or block
     StyledText NameOf(const CastableBase* decl);
+
+    // @param ty the type to get the name for
+    /// @returns the styled name for the given type
+    StyledText NameOf(const type::Type* ty);
 
     /// @param v the value to get the name for
     /// @returns the styled name for the given value
@@ -841,10 +845,16 @@ void Validator::AddDeclarationNote(const InstructionResult* res) {
 StyledText Validator::NameOf(const CastableBase* decl) {
     return tint::Switch(
         decl,  //
+        [&](const type::Type* ty) { return NameOf(ty); },
         [&](const Value* value) { return NameOf(value); },
         [&](const Instruction* inst) { return NameOf(inst); },
         [&](const Block* block) { return NameOf(block); },  //
         TINT_ICE_ON_NO_MATCH);
+}
+
+StyledText Validator::NameOf(const type::Type* ty) {
+    auto name = ty ? ty->FriendlyName() : "undef";
+    return StyledText{} << style::Type(name);
 }
 
 StyledText Validator::NameOf(const Value* value) {
@@ -852,11 +862,13 @@ StyledText Validator::NameOf(const Value* value) {
 }
 
 StyledText Validator::NameOf(const Instruction* inst) {
-    return StyledText{} << style::Instruction(inst->FriendlyName());
+    auto name = inst ? inst->FriendlyName() : "undef";
+    return StyledText{} << style::Instruction(name);
 }
 
 StyledText Validator::NameOf(const Block* block) {
-    return StyledText{} << style::Instruction(block->Parent()->FriendlyName()) << " block "
+    auto parent_name = block->Parent() ? block->Parent()->FriendlyName() : "undef";
+    return StyledText{} << style::Instruction(parent_name) << " block "
                         << Disassemble().NameOf(block);
 }
 
@@ -1967,11 +1979,19 @@ void Validator::CheckExitIf(const ExitIf* e) {
 }
 
 void Validator::CheckReturn(const Return* ret) {
-    auto* func = ret->Func();
-    if (func == nullptr) {
-        AddError(ret) << "undefined function";
+    if (!CheckResultsAndOperandRange(ret, Return::kNumResults, Return::kMinOperands,
+                                     Return::kMaxOperands)) {
         return;
     }
+
+    auto* func = ret->Func();
+    if (func == nullptr) {
+        // Func() returning nullptr after CheckResultsAndOperandRange is due to the first operand
+        // being not a function
+        AddError(ret) << "expected function for first operand";
+        return;
+    }
+
     if (func->ReturnType()->Is<core::type::Void>()) {
         if (ret->Value()) {
             AddError(ret) << "unexpected return value";
@@ -1980,10 +2000,8 @@ void Validator::CheckReturn(const Return* ret) {
         if (!ret->Value()) {
             AddError(ret) << "expected return value";
         } else if (ret->Value()->Type() != func->ReturnType()) {
-            AddError(ret) << "return value type "
-                          << style::Type(ret->Value()->Type()->FriendlyName())
-                          << " does not match function return type "
-                          << style::Type(func->ReturnType()->FriendlyName());
+            AddError(ret) << "return value type " << NameOf(ret->Value()->Type())
+                          << " does not match function return type " << NameOf(func->ReturnType());
         }
     }
 }
