@@ -5,7 +5,7 @@ float textureSampleCompareLevel_4cf3a2(depthcube_array<float, access::sample> ti
   float3 arg_2 = float3(1.0f);
   int arg_3 = 1;
   float arg_4 = 1.0f;
-  float res = tint_symbol_1.sample_compare(tint_symbol_2, arg_2, arg_3, arg_4, level(0));
+  float res = tint_symbol_1.sample_compare(tint_symbol_2, arg_2, max(0, arg_3), arg_4, level(0));
   return res;
 }
 

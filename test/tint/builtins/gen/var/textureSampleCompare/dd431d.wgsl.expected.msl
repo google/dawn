@@ -5,7 +5,7 @@ float textureSampleCompare_dd431d(depth2d_array<float, access::sample> tint_symb
   float2 arg_2 = float2(1.0f);
   int arg_3 = 1;
   float arg_4 = 1.0f;
-  float res = tint_symbol.sample_compare(tint_symbol_1, arg_2, arg_3, arg_4);
+  float res = tint_symbol.sample_compare(tint_symbol_1, arg_2, max(0, arg_3), arg_4);
   return res;
 }
 

@@ -8,7 +8,7 @@ struct tint_module_vars_struct {
 };
 
 float textureSampleCompare_af1051(tint_module_vars_struct tint_module_vars) {
-  float res = tint_module_vars.arg_0.sample_compare(tint_module_vars.arg_1, float2(1.0f), 1, 1.0f, int2(1));
+  float res = tint_module_vars.arg_0.sample_compare(tint_module_vars.arg_1, float2(1.0f), max(1, 0), 1.0f, int2(1));
   return res;
 }
 

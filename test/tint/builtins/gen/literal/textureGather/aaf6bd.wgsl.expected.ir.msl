@@ -18,7 +18,7 @@ struct vertex_main_outputs {
 };
 
 int4 textureGather_aaf6bd(tint_module_vars_struct tint_module_vars) {
-  int4 res = tint_module_vars.arg_1.gather(tint_module_vars.arg_2, float3(1.0f), 1, component::y);
+  int4 res = tint_module_vars.arg_1.gather(tint_module_vars.arg_2, float3(1.0f), max(1, 0), component::y);
   return res;
 }
 

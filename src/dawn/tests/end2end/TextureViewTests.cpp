@@ -27,6 +27,7 @@
 
 #include <algorithm>
 #include <array>
+#include <cstdint>
 #include <string>
 #include <vector>
 
@@ -303,7 +304,8 @@ class TextureViewSamplingTest : public TextureViewTestBase {
         Verify(textureView, fragmentShader, expected);
     }
 
-    std::string CreateFragmentShaderForCubeMapFace(uint32_t layer, bool isCubeMapArray) {
+    template <typename T>
+    std::string CreateFragmentShaderForCubeMapFace(T layer, bool isCubeMapArray) {
         // Reference: https://en.wikipedia.org/wiki/Cube_mapping
         const std::array<std::string, 6> kCoordsToCubeMapFace = {{
             " 1.,  tc, -sc",  // Positive X
@@ -315,8 +317,9 @@ class TextureViewSamplingTest : public TextureViewTestBase {
         }};
 
         const std::string textureType = isCubeMapArray ? "texture_cube_array" : "texture_cube";
-        const uint32_t cubeMapArrayIndex = layer / 6;
-        const std::string coordToCubeMapFace = kCoordsToCubeMapFace[layer % 6];
+        const T cubeMapArrayIndex = layer / 6;
+        // We clamp here to avoid invalid negative indices for signed type T.
+        const std::string coordToCubeMapFace = kCoordsToCubeMapFace[std::max(T(0), (layer % 6))];
 
         std::ostringstream stream;
         stream << R"(
@@ -410,6 +413,73 @@ TEST_P(TextureViewSamplingTest, Default2DArrayTexture) {
     const int expected =
         GenerateTestPixelValue(0, 0) + GenerateTestPixelValue(1, 0) + GenerateTestPixelValue(2, 0);
     Verify(textureView, fragmentShader, expected);
+}
+
+// Test sampling a 2D array with negative signed array index.
+TEST_P(TextureViewSamplingTest, 2DArrayTextureSignedNegativeIndex) {
+    // TODO(cwallez@chromium.org) understand what the issue is
+    DAWN_SUPPRESS_TEST_IF(IsVulkan() && IsNvidia());
+    constexpr int32_t kIntentionalInvalidNegativeIndex = -1;
+    constexpr uint32_t kLayers = 3;
+    for (int32_t array_idx = kIntentionalInvalidNegativeIndex;
+         array_idx < static_cast<int32_t>(kLayers); array_idx++) {
+        constexpr uint32_t kMipLevels = 1;
+        InitTexture(kLayers, kMipLevels);
+
+        wgpu::TextureViewDescriptor descriptor;
+        // (Off-topic) spot-test for defaulting of .aspect.
+        descriptor.aspect = wgpu::TextureAspect::Undefined;
+        descriptor.dimension = wgpu::TextureViewDimension::e2DArray;
+        wgpu::TextureView textureView = mTexture.CreateView(&descriptor);
+
+        std::ostringstream fragmentShader;
+        fragmentShader << R"(
+            @group(0) @binding(0) var sampler0 : sampler;
+            @group(0) @binding(1) var texture0 : texture_2d_array<f32>;
+
+            @fragment
+            fn main(@location(0) texCoord : vec2f) -> @location(0) vec4f {
+                let array_idx : i32 =  )"
+                       << array_idx << R"(;
+                return textureSample(texture0, sampler0, texCoord, array_idx);
+            }
+        )";
+
+        const int expected =
+            GenerateTestPixelValue(std::clamp(array_idx, 0, static_cast<int32_t>(kLayers - 1)), 0);
+        Verify(textureView, fragmentShader.str().c_str(), expected);
+    }
+}
+
+// Test sampling cube array with negative signed array index.
+TEST_P(TextureViewSamplingTest, CubeArrayTextureSignedNegativeIndex) {
+    // TODO(cwallez@chromium.org) understand what the issue is
+    DAWN_SUPPRESS_TEST_IF(IsVulkan() && IsNvidia());
+    // Cube map arrays are unsupported in Compatbility mode.
+    DAWN_TEST_UNSUPPORTED_IF(IsCompatibilityMode());
+    constexpr bool kIsCubeMapArray = true;
+    constexpr uint32_t kTextureViewLayerCount = 12;
+    constexpr uint32_t kTextureArrayLayers = kTextureViewLayerCount;
+
+    ASSERT_TRUE(kTextureViewLayerCount % 6 == 0);
+    wgpu::TextureViewDimension dimension = wgpu::TextureViewDimension::CubeArray;
+    constexpr uint32_t kMipLevels = 1u;
+    InitTexture(kTextureArrayLayers, kMipLevels, dimension);
+
+    wgpu::TextureViewDescriptor descriptor = mDefaultTextureViewDescriptor;
+    descriptor.dimension = dimension;
+    descriptor.arrayLayerCount = kTextureViewLayerCount;
+    wgpu::TextureView cubeMapTextureView = mTexture.CreateView(&descriptor);
+
+    // Check the data in the every face of the cube map (array) texture view.
+    constexpr int kIntentionalInvalidNegativeIndex = -kTextureViewLayerCount;
+    for (int layer = kIntentionalInvalidNegativeIndex;
+         layer < static_cast<int>(kTextureArrayLayers); ++layer) {
+        const std::string& fragmentShader =
+            CreateFragmentShaderForCubeMapFace(layer, kIsCubeMapArray);
+        int expected = GenerateTestPixelValue(std::max(0, layer), 0);
+        Verify(cubeMapTextureView, fragmentShader.c_str(), expected);
+    }
 }
 
 // Test sampling from a 2D texture view created on a 2D array texture.

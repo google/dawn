@@ -21,7 +21,9 @@ float4 textureGatherCompare_783e65(tint_module_vars_struct tint_module_vars) {
   float2 arg_2 = float2(1.0f);
   int arg_3 = 1;
   float arg_4 = 1.0f;
-  float4 res = tint_module_vars.arg_0.gather_compare(tint_module_vars.arg_1, arg_2, arg_3, arg_4);
+  float2 const v = arg_2;
+  float const v_1 = arg_4;
+  float4 res = tint_module_vars.arg_0.gather_compare(tint_module_vars.arg_1, v, max(arg_3, 0), v_1);
   return res;
 }
 
@@ -44,6 +46,6 @@ VertexOutput vertex_main_inner(tint_module_vars_struct tint_module_vars) {
 
 vertex vertex_main_outputs vertex_main(depth2d_array<float, access::sample> arg_0 [[texture(0)]], sampler arg_1 [[sampler(0)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.arg_0=arg_0, .arg_1=arg_1};
-  VertexOutput const v = vertex_main_inner(tint_module_vars);
-  return vertex_main_outputs{.VertexOutput_pos=v.pos, .VertexOutput_prevent_dce=v.prevent_dce};
+  VertexOutput const v_2 = vertex_main_inner(tint_module_vars);
+  return vertex_main_outputs{.VertexOutput_pos=v_2.pos, .VertexOutput_prevent_dce=v_2.prevent_dce};
 }

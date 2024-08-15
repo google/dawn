@@ -18,7 +18,8 @@ struct vertex_main_outputs {
 };
 
 float textureSampleCompareLevel_4cf3a2(tint_module_vars_struct tint_module_vars) {
-  float res = tint_module_vars.arg_0.sample_compare(tint_module_vars.arg_1, float3(1.0f), 1, 1.0f, level(0u));
+  int const v = max(1, 0);
+  float res = tint_module_vars.arg_0.sample_compare(tint_module_vars.arg_1, float3(1.0f), v, 1.0f, level(0u));
   return res;
 }
 
@@ -41,6 +42,6 @@ VertexOutput vertex_main_inner(tint_module_vars_struct tint_module_vars) {
 
 vertex vertex_main_outputs vertex_main(depthcube_array<float, access::sample> arg_0 [[texture(0)]], sampler arg_1 [[sampler(0)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.arg_0=arg_0, .arg_1=arg_1};
-  VertexOutput const v = vertex_main_inner(tint_module_vars);
-  return vertex_main_outputs{.VertexOutput_pos=v.pos, .VertexOutput_prevent_dce=v.prevent_dce};
+  VertexOutput const v_1 = vertex_main_inner(tint_module_vars);
+  return vertex_main_outputs{.VertexOutput_pos=v_1.pos, .VertexOutput_prevent_dce=v_1.prevent_dce};
 }

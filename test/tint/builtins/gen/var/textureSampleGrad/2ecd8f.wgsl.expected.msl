@@ -6,7 +6,7 @@ float4 textureSampleGrad_2ecd8f(texture2d_array<float, access::sample> tint_symb
   int arg_3 = 1;
   float2 arg_4 = float2(1.0f);
   float2 arg_5 = float2(1.0f);
-  float4 res = tint_symbol_1.sample(tint_symbol_2, arg_2, arg_3, gradient2d(arg_4, arg_5));
+  float4 res = tint_symbol_1.sample(tint_symbol_2, arg_2, max(0, arg_3), gradient2d(arg_4, arg_5));
   return res;
 }
 

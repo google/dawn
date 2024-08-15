@@ -18,7 +18,7 @@ struct vertex_main_outputs {
 };
 
 float4 textureGatherCompare_60d2d1(tint_module_vars_struct tint_module_vars) {
-  float4 res = tint_module_vars.arg_0.gather_compare(tint_module_vars.arg_1, float3(1.0f), 1, 1.0f);
+  float4 res = tint_module_vars.arg_0.gather_compare(tint_module_vars.arg_1, float3(1.0f), max(1, 0), 1.0f);
   return res;
 }
 

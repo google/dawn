@@ -71,7 +71,7 @@ std::string expected_texture_overload(ast::test::ValidTextureOverload overload) 
         case ValidTextureOverload::kGather2dOffsetF32:
             return R"(Texture.gather(Sampler, float2(1.0f, 2.0f), int2(3, 4), component::x))";
         case ValidTextureOverload::kGather2dArrayF32:
-            return R"(Texture.gather(Sampler, float2(1.0f, 2.0f), 3, int2(0), component::x))";
+            return R"(Texture.gather(Sampler, float2(1.0f, 2.0f), max(0, 3), int2(0), component::x))";
         case ValidTextureOverload::kGather2dArrayOffsetF32:
             return R"(Texture.gather(Sampler, float2(1.0f, 2.0f), 3u, int2(4, 5), component::x))";
         case ValidTextureOverload::kGatherCubeF32:
@@ -85,7 +85,7 @@ std::string expected_texture_overload(ast::test::ValidTextureOverload overload) 
         case ValidTextureOverload::kGatherDepth2dArrayF32:
             return R"(Texture.gather(Sampler, float2(1.0f, 2.0f), 3u))";
         case ValidTextureOverload::kGatherDepth2dArrayOffsetF32:
-            return R"(Texture.gather(Sampler, float2(1.0f, 2.0f), 3, int2(4, 5)))";
+            return R"(Texture.gather(Sampler, float2(1.0f, 2.0f), max(0, 3), int2(4, 5)))";
         case ValidTextureOverload::kGatherDepthCubeF32:
             return R"(Texture.gather(Sampler, float3(1.0f, 2.0f, 3.0f)))";
         case ValidTextureOverload::kGatherDepthCubeArrayF32:
@@ -95,9 +95,9 @@ std::string expected_texture_overload(ast::test::ValidTextureOverload overload) 
         case ValidTextureOverload::kGatherCompareDepth2dOffsetF32:
             return R"(Texture.gather_compare(Sampler, float2(1.0f, 2.0f), 3.0f, int2(4, 5)))";
         case ValidTextureOverload::kGatherCompareDepth2dArrayF32:
-            return R"(Texture.gather_compare(Sampler, float2(1.0f, 2.0f), 3, 4.0f))";
+            return R"(Texture.gather_compare(Sampler, float2(1.0f, 2.0f), max(0, 3), 4.0f))";
         case ValidTextureOverload::kGatherCompareDepth2dArrayOffsetF32:
-            return R"(Texture.gather_compare(Sampler, float2(1.0f, 2.0f), 3, 4.0f, int2(5, 6)))";
+            return R"(Texture.gather_compare(Sampler, float2(1.0f, 2.0f), max(0, 3), 4.0f, int2(5, 6)))";
         case ValidTextureOverload::kGatherCompareDepthCubeF32:
             return R"(Texture.gather_compare(Sampler, float3(1.0f, 2.0f, 3.0f), 4.0f))";
         case ValidTextureOverload::kGatherCompareDepthCubeArrayF32:
@@ -128,7 +128,7 @@ std::string expected_texture_overload(ast::test::ValidTextureOverload overload) 
         case ValidTextureOverload::kSample2dOffsetF32:
             return R"(Texture.sample(Sampler, float2(1.0f, 2.0f), int2(3, 4)))";
         case ValidTextureOverload::kSample2dArrayF32:
-            return R"(Texture.sample(Sampler, float2(1.0f, 2.0f), 3))";
+            return R"(Texture.sample(Sampler, float2(1.0f, 2.0f), max(0, 3)))";
         case ValidTextureOverload::kSample2dArrayOffsetF32:
             return R"(Texture.sample(Sampler, float2(1.0f, 2.0f), 3u, int2(4, 5)))";
         case ValidTextureOverload::kSample3dF32:
@@ -138,15 +138,15 @@ std::string expected_texture_overload(ast::test::ValidTextureOverload overload) 
         case ValidTextureOverload::kSampleCubeF32:
             return R"(Texture.sample(Sampler, float3(1.0f, 2.0f, 3.0f)))";
         case ValidTextureOverload::kSampleCubeArrayF32:
-            return R"(Texture.sample(Sampler, float3(1.0f, 2.0f, 3.0f), 4))";
+            return R"(Texture.sample(Sampler, float3(1.0f, 2.0f, 3.0f), max(0, 4)))";
         case ValidTextureOverload::kSampleDepth2dF32:
             return R"(Texture.sample(Sampler, float2(1.0f, 2.0f)))";
         case ValidTextureOverload::kSampleDepth2dOffsetF32:
             return R"(Texture.sample(Sampler, float2(1.0f, 2.0f), int2(3, 4)))";
         case ValidTextureOverload::kSampleDepth2dArrayF32:
-            return R"(Texture.sample(Sampler, float2(1.0f, 2.0f), 3))";
+            return R"(Texture.sample(Sampler, float2(1.0f, 2.0f), max(0, 3)))";
         case ValidTextureOverload::kSampleDepth2dArrayOffsetF32:
-            return R"(Texture.sample(Sampler, float2(1.0f, 2.0f), 3, int2(4, 5)))";
+            return R"(Texture.sample(Sampler, float2(1.0f, 2.0f), max(0, 3), int2(4, 5)))";
         case ValidTextureOverload::kSampleDepthCubeF32:
             return R"(Texture.sample(Sampler, float3(1.0f, 2.0f, 3.0f)))";
         case ValidTextureOverload::kSampleDepthCubeArrayF32:
@@ -158,7 +158,7 @@ std::string expected_texture_overload(ast::test::ValidTextureOverload overload) 
         case ValidTextureOverload::kSampleBias2dArrayF32:
             return R"(Texture.sample(Sampler, float2(1.0f, 2.0f), 4u, bias(3.0f)))";
         case ValidTextureOverload::kSampleBias2dArrayOffsetF32:
-            return R"(Texture.sample(Sampler, float2(1.0f, 2.0f), 3, bias(4.0f), int2(5, 6)))";
+            return R"(Texture.sample(Sampler, float2(1.0f, 2.0f), max(0, 3), bias(4.0f), int2(5, 6)))";
         case ValidTextureOverload::kSampleBias3dF32:
             return R"(Texture.sample(Sampler, float3(1.0f, 2.0f, 3.0f), bias(4.0f)))";
         case ValidTextureOverload::kSampleBias3dOffsetF32:
@@ -166,15 +166,15 @@ std::string expected_texture_overload(ast::test::ValidTextureOverload overload) 
         case ValidTextureOverload::kSampleBiasCubeF32:
             return R"(Texture.sample(Sampler, float3(1.0f, 2.0f, 3.0f), bias(4.0f)))";
         case ValidTextureOverload::kSampleBiasCubeArrayF32:
-            return R"(Texture.sample(Sampler, float3(1.0f, 2.0f, 3.0f), 3, bias(4.0f)))";
+            return R"(Texture.sample(Sampler, float3(1.0f, 2.0f, 3.0f), max(0, 3), bias(4.0f)))";
         case ValidTextureOverload::kSampleLevel2dF32:
             return R"(Texture.sample(Sampler, float2(1.0f, 2.0f), level(3.0f)))";
         case ValidTextureOverload::kSampleLevel2dOffsetF32:
             return R"(Texture.sample(Sampler, float2(1.0f, 2.0f), level(3.0f), int2(4, 5)))";
         case ValidTextureOverload::kSampleLevel2dArrayF32:
-            return R"(Texture.sample(Sampler, float2(1.0f, 2.0f), 3, level(4.0f)))";
+            return R"(Texture.sample(Sampler, float2(1.0f, 2.0f), max(0, 3), level(4.0f)))";
         case ValidTextureOverload::kSampleLevel2dArrayOffsetF32:
-            return R"(Texture.sample(Sampler, float2(1.0f, 2.0f), 3, level(4.0f), int2(5, 6)))";
+            return R"(Texture.sample(Sampler, float2(1.0f, 2.0f), max(0, 3), level(4.0f), int2(5, 6)))";
         case ValidTextureOverload::kSampleLevel3dF32:
             return R"(Texture.sample(Sampler, float3(1.0f, 2.0f, 3.0f), level(4.0f)))";
         case ValidTextureOverload::kSampleLevel3dOffsetF32:
@@ -182,7 +182,7 @@ std::string expected_texture_overload(ast::test::ValidTextureOverload overload) 
         case ValidTextureOverload::kSampleLevelCubeF32:
             return R"(Texture.sample(Sampler, float3(1.0f, 2.0f, 3.0f), level(4.0f)))";
         case ValidTextureOverload::kSampleLevelCubeArrayF32:
-            return R"(Texture.sample(Sampler, float3(1.0f, 2.0f, 3.0f), 4, level(5.0f)))";
+            return R"(Texture.sample(Sampler, float3(1.0f, 2.0f, 3.0f), max(0, 4), level(5.0f)))";
         case ValidTextureOverload::kSampleLevelDepth2dF32:
             return R"(Texture.sample(Sampler, float2(1.0f, 2.0f), level(3u)))";
         case ValidTextureOverload::kSampleLevelDepth2dOffsetF32:
@@ -194,13 +194,13 @@ std::string expected_texture_overload(ast::test::ValidTextureOverload overload) 
         case ValidTextureOverload::kSampleLevelDepthCubeF32:
             return R"(Texture.sample(Sampler, float3(1.0f, 2.0f, 3.0f), level(4)))";
         case ValidTextureOverload::kSampleLevelDepthCubeArrayF32:
-            return R"(Texture.sample(Sampler, float3(1.0f, 2.0f, 3.0f), 4, level(5)))";
+            return R"(Texture.sample(Sampler, float3(1.0f, 2.0f, 3.0f), max(0, 4), level(5)))";
         case ValidTextureOverload::kSampleGrad2dF32:
             return R"(Texture.sample(Sampler, float2(1.0f, 2.0f), gradient2d(float2(3.0f, 4.0f), float2(5.0f, 6.0f))))";
         case ValidTextureOverload::kSampleGrad2dOffsetF32:
             return R"(Texture.sample(Sampler, float2(1.0f, 2.0f), gradient2d(float2(3.0f, 4.0f), float2(5.0f, 6.0f)), int2(7)))";
         case ValidTextureOverload::kSampleGrad2dArrayF32:
-            return R"(Texture.sample(Sampler, float2(1.0f, 2.0f), 3, gradient2d(float2(4.0f, 5.0f), float2(6.0f, 7.0f))))";
+            return R"(Texture.sample(Sampler, float2(1.0f, 2.0f), max(0, 3), gradient2d(float2(4.0f, 5.0f), float2(6.0f, 7.0f))))";
         case ValidTextureOverload::kSampleGrad2dArrayOffsetF32:
             return R"(Texture.sample(Sampler, float2(1.0f, 2.0f), 3u, gradient2d(float2(4.0f, 5.0f), float2(6.0f, 7.0f)), int2(6, 7)))";
         case ValidTextureOverload::kSampleGrad3dF32:
@@ -216,25 +216,25 @@ std::string expected_texture_overload(ast::test::ValidTextureOverload overload) 
         case ValidTextureOverload::kSampleCompareDepth2dOffsetF32:
             return R"(Texture.sample_compare(Sampler, float2(1.0f, 2.0f), 3.0f, int2(4, 5)))";
         case ValidTextureOverload::kSampleCompareDepth2dArrayF32:
-            return R"(Texture.sample_compare(Sampler, float2(1.0f, 2.0f), 4, 3.0f))";
+            return R"(Texture.sample_compare(Sampler, float2(1.0f, 2.0f), max(0, 4), 3.0f))";
         case ValidTextureOverload::kSampleCompareDepth2dArrayOffsetF32:
             return R"(Texture.sample_compare(Sampler, float2(1.0f, 2.0f), 4u, 3.0f, int2(5, 6)))";
         case ValidTextureOverload::kSampleCompareDepthCubeF32:
             return R"(Texture.sample_compare(Sampler, float3(1.0f, 2.0f, 3.0f), 4.0f))";
         case ValidTextureOverload::kSampleCompareDepthCubeArrayF32:
-            return R"(Texture.sample_compare(Sampler, float3(1.0f, 2.0f, 3.0f), 4, 5.0f))";
+            return R"(Texture.sample_compare(Sampler, float3(1.0f, 2.0f, 3.0f), max(0, 4), 5.0f))";
         case ValidTextureOverload::kSampleCompareLevelDepth2dF32:
             return R"(Texture.sample_compare(Sampler, float2(1.0f, 2.0f), 3.0f, level(0)))";
         case ValidTextureOverload::kSampleCompareLevelDepth2dOffsetF32:
             return R"(Texture.sample_compare(Sampler, float2(1.0f, 2.0f), 3.0f, level(0), int2(4, 5)))";
         case ValidTextureOverload::kSampleCompareLevelDepth2dArrayF32:
-            return R"(Texture.sample_compare(Sampler, float2(1.0f, 2.0f), 3, 4.0f, level(0)))";
+            return R"(Texture.sample_compare(Sampler, float2(1.0f, 2.0f), max(0, 3), 4.0f, level(0)))";
         case ValidTextureOverload::kSampleCompareLevelDepth2dArrayOffsetF32:
-            return R"(Texture.sample_compare(Sampler, float2(1.0f, 2.0f), 3, 4.0f, level(0), int2(5, 6)))";
+            return R"(Texture.sample_compare(Sampler, float2(1.0f, 2.0f), max(0, 3), 4.0f, level(0), int2(5, 6)))";
         case ValidTextureOverload::kSampleCompareLevelDepthCubeF32:
             return R"(Texture.sample_compare(Sampler, float3(1.0f, 2.0f, 3.0f), 4.0f, level(0)))";
         case ValidTextureOverload::kSampleCompareLevelDepthCubeArrayF32:
-            return R"(Texture.sample_compare(Sampler, float3(1.0f, 2.0f, 3.0f), 4, 5.0f, level(0)))";
+            return R"(Texture.sample_compare(Sampler, float3(1.0f, 2.0f, 3.0f), max(0, 4), 5.0f, level(0)))";
         case ValidTextureOverload::kLoad1dLevelF32:
             return R"(Texture.read(uint(1u), 0))";
         case ValidTextureOverload::kLoad1dLevelU32:

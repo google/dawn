@@ -2,7 +2,7 @@
 
 using namespace metal;
 float4 textureSample_6717ca(texture2d_array<float, access::sample> tint_symbol, sampler tint_symbol_1) {
-  float4 res = tint_symbol.sample(tint_symbol_1, float2(1.0f), 1);
+  float4 res = tint_symbol.sample(tint_symbol_1, float2(1.0f), max(0, 1));
   return res;
 }
 

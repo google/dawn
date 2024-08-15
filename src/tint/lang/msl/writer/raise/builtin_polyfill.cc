@@ -630,6 +630,7 @@ struct State {
         auto* call = b.MemberCallWithResult<msl::ir::MemberBuiltinCall>(
             builtin->DetachResult(), msl::BuiltinFn::kGather, tex, std::move(args));
         call->InsertBefore(builtin);
+        TextureSampleClampArrayIndexHelper(call);
         builtin->Destroy();
     }
 
@@ -642,6 +643,7 @@ struct State {
             builtin->DetachResult(), msl::BuiltinFn::kGatherCompare, builtin->Args()[0],
             std::move(args));
         call->InsertBefore(builtin);
+        TextureSampleClampArrayIndexHelper(call);
         builtin->Destroy();
     }
 
@@ -696,6 +698,26 @@ struct State {
         builtin->Destroy();
     }
 
+    /// Replace texture sample call signed integer array argument with clamped code.
+    /// @param builtin the builtin call instruction
+    void TextureSampleClampArrayIndexHelper(msl::ir::MemberBuiltinCall* builtin) {
+        // The MSL intrinsic is a member function, so we split the first argument off as the
+        // object.
+        b.InsertBefore(builtin, [&] {
+            auto* tex = builtin->Object();
+            auto* tex_type = tex->Type()->As<core::type::Texture>();
+            if (IsTextureArray(tex_type->dim())) {
+                const uint32_t kArrayIndex = 2;
+                auto* index_arg = builtin->Args()[kArrayIndex];
+                if (index_arg->Type()->is_signed_integer_scalar()) {
+                    builtin->SetArg(kArrayIndex, b.Call(ty.i32(), core::BuiltinFn::kMax, index_arg,
+                                                        b.Zero<i32>())
+                                                     ->Result(0));
+                }
+            }
+        });
+    }
+
     /// Replace a textureNumLayers call with the equivalent MSL intrinsic.
     /// @param builtin the builtin call instruction
     void TextureNumLayers(core::ir::CoreBuiltinCall* builtin) {
@@ -722,6 +744,7 @@ struct State {
         auto* call = b.MemberCallWithResult<msl::ir::MemberBuiltinCall>(
             builtin->DetachResult(), msl::BuiltinFn::kSample, builtin->Args()[0], std::move(args));
         call->InsertBefore(builtin);
+        TextureSampleClampArrayIndexHelper(call);
         builtin->Destroy();
     }
 
@@ -741,11 +764,12 @@ struct State {
                 bias_idx = 3;
             }
             args[bias_idx] = b.Construct(ty.Get<msl::type::Bias>(), args[bias_idx])->Result(0);
-
-            // Call the `sample()` member function.
-            b.MemberCallWithResult<msl::ir::MemberBuiltinCall>(
-                builtin->DetachResult(), msl::BuiltinFn::kSample, tex, std::move(args));
         });
+        // Call the `sample()` member function.
+        auto* call = b.MemberCallWithResult<msl::ir::MemberBuiltinCall>(
+            builtin->DetachResult(), msl::BuiltinFn::kSample, tex, std::move(args));
+        call->InsertBefore(builtin);
+        TextureSampleClampArrayIndexHelper(call);
         builtin->Destroy();
     }
 
@@ -758,6 +782,7 @@ struct State {
             builtin->DetachResult(), msl::BuiltinFn::kSampleCompare, builtin->Args()[0],
             std::move(args));
         call->InsertBefore(builtin);
+        TextureSampleClampArrayIndexHelper(call);
         builtin->Destroy();
     }
 
@@ -780,11 +805,12 @@ struct State {
             } else {
                 args.Push(lod);
             }
-
-            // Call the `sample_compare()` member function.
-            b.MemberCallWithResult<msl::ir::MemberBuiltinCall>(
-                builtin->DetachResult(), msl::BuiltinFn::kSampleCompare, tex, std::move(args));
         });
+        // Call the `sample_compare()` member function.
+        auto* call = b.MemberCallWithResult<msl::ir::MemberBuiltinCall>(
+            builtin->DetachResult(), msl::BuiltinFn::kSampleCompare, tex, std::move(args));
+        call->InsertBefore(builtin);
+        TextureSampleClampArrayIndexHelper(call);
         builtin->Destroy();
     }
 
@@ -833,11 +859,12 @@ struct State {
                 args[args.Length() - 2] = args.Back();
             }
             args.Resize(args.Length() - 1);
-
-            // Call the `sample()` member function.
-            b.MemberCallWithResult<msl::ir::MemberBuiltinCall>(
-                builtin->DetachResult(), msl::BuiltinFn::kSample, tex, std::move(args));
         });
+        // Call the `sample()` member function.
+        auto* call = b.MemberCallWithResult<msl::ir::MemberBuiltinCall>(
+            builtin->DetachResult(), msl::BuiltinFn::kSample, tex, std::move(args));
+        call->InsertBefore(builtin);
+        TextureSampleClampArrayIndexHelper(call);
         builtin->Destroy();
     }
 
@@ -857,11 +884,12 @@ struct State {
                 lod_idx = 3;
             }
             args[lod_idx] = b.Construct(ty.Get<msl::type::Level>(), args[lod_idx])->Result(0);
-
-            // Call the `sample()` member function.
-            b.MemberCallWithResult<msl::ir::MemberBuiltinCall>(
-                builtin->DetachResult(), msl::BuiltinFn::kSample, tex, std::move(args));
         });
+        // Call the `sample()` member function.
+        auto* call = b.MemberCallWithResult<msl::ir::MemberBuiltinCall>(
+            builtin->DetachResult(), msl::BuiltinFn::kSample, tex, std::move(args));
+        call->InsertBefore(builtin);
+        TextureSampleClampArrayIndexHelper(call);
         builtin->Destroy();
     }
 

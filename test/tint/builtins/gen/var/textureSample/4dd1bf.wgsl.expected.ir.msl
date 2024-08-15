@@ -10,7 +10,8 @@ struct tint_module_vars_struct {
 float4 textureSample_4dd1bf(tint_module_vars_struct tint_module_vars) {
   float3 arg_2 = float3(1.0f);
   int arg_3 = 1;
-  float4 res = tint_module_vars.arg_0.sample(tint_module_vars.arg_1, arg_2, arg_3);
+  float3 const v = arg_2;
+  float4 res = tint_module_vars.arg_0.sample(tint_module_vars.arg_1, v, max(arg_3, 0));
   return res;
 }
 

@@ -1333,23 +1333,27 @@ bool ASTPrinter::EmitTextureCall(StringStream& out,
     }
 
     bool lod_param_is_named = true;
-
+    bool is_gather_or_sample = false;
     switch (builtin->Fn()) {
         case wgsl::BuiltinFn::kTextureSample:
         case wgsl::BuiltinFn::kTextureSampleBias:
         case wgsl::BuiltinFn::kTextureSampleLevel:
         case wgsl::BuiltinFn::kTextureSampleGrad:
             out << ".sample(";
+            is_gather_or_sample = true;
             break;
         case wgsl::BuiltinFn::kTextureSampleCompare:
         case wgsl::BuiltinFn::kTextureSampleCompareLevel:
             out << ".sample_compare(";
+            is_gather_or_sample = true;
             break;
         case wgsl::BuiltinFn::kTextureGather:
             out << ".gather(";
+            is_gather_or_sample = true;
             break;
         case wgsl::BuiltinFn::kTextureGatherCompare:
             out << ".gather_compare(";
+            is_gather_or_sample = true;
             break;
         case wgsl::BuiltinFn::kTextureLoad:
             out << ".read(";
@@ -1376,9 +1380,9 @@ bool ASTPrinter::EmitTextureCall(StringStream& out,
             maybe_write_comma();
 
             // Cast the coordinates to unsigned integers if necessary.
-            bool casted = false;
+            bool inside_params = false;
             if (usage == Usage::kCoords && e->Type()->UnwrapRef()->is_integer_scalar_or_vector()) {
-                casted = true;
+                inside_params = true;
                 switch (texture_type->dim()) {
                     case core::type::TextureDimension::k1d:
                         out << "uint(";
@@ -1389,17 +1393,24 @@ bool ASTPrinter::EmitTextureCall(StringStream& out,
                         break;
                     case core::type::TextureDimension::k3d:
                         out << "uint3(";
+
                         break;
                     default:
                         TINT_ICE() << "unhandled texture dimensionality";
                 }
+            } else if (usage == Usage::kArrayIndex &&
+                       e->Type()->UnwrapRef()->is_signed_integer_scalar() && is_gather_or_sample) {
+                // Array index access for signed integers is zero lower bound clamped to emulate the
+                // behavior of other platforms. See crbug.com/202355.
+                out << "max(0, ";
+                inside_params = true;
             }
 
             if (!EmitExpression(out, e->Declaration())) {
                 return false;
             }
 
-            if (casted) {
+            if (inside_params) {
                 out << ")";
             }
         }
