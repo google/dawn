@@ -155,6 +155,9 @@ void CheckMapping(const void* actual, const void* expected, size_t size) {
 
 // Test that the simplest map read works
 TEST_P(BufferMappingTests, MapRead_Basic) {
+    // crbug.com/358296955
+    DAWN_SUPPRESS_TEST_IF(IsMacOS() && IsAMD() && IsMetal());
+
     wgpu::Buffer buffer = CreateMapReadBuffer(4);
 
     uint32_t myData = 0x01020304;
@@ -169,6 +172,9 @@ TEST_P(BufferMappingTests, MapRead_Basic) {
 
 // Test map-reading a zero-sized buffer.
 TEST_P(BufferMappingTests, MapRead_ZeroSized) {
+    // crbug.com/358296955
+    DAWN_SUPPRESS_TEST_IF(IsMacOS() && IsAMD() && IsMetal());
+
     wgpu::Buffer buffer = CreateMapReadBuffer(0);
 
     MapAsyncAndWait(buffer, wgpu::MapMode::Read, 0, wgpu::kWholeMapSize);
@@ -178,6 +184,9 @@ TEST_P(BufferMappingTests, MapRead_ZeroSized) {
 
 // Test map-reading with a non-zero offset
 TEST_P(BufferMappingTests, MapRead_NonZeroOffset) {
+    // crbug.com/358296955
+    DAWN_SUPPRESS_TEST_IF(IsMacOS() && IsAMD() && IsMetal());
+
     wgpu::Buffer buffer = CreateMapReadBuffer(12);
 
     uint32_t myData[3] = {0x01020304, 0x05060708, 0x090A0B0C};

@@ -101,6 +101,9 @@ DAWN_INSTANTIATE_TEST(BufferHostMappedPointerNoFeatureTests,
 TEST_P(BufferHostMappedPointerTests, Alignment) {
     DAWN_TEST_UNSUPPORTED_IF(HasToggleEnabled("skip_validation"));
 
+    // crbug.com/358296955
+    DAWN_SUPPRESS_TEST_IF(IsMacOS() && IsAMD() && IsMetal());
+
     // Invalid: half required alignment
     ASSERT_DEVICE_ERROR(GetParam().mBackend->CreateHostMappedBuffer(
         device, wgpu::BufferUsage::CopySrc, mRequiredAlignment / 2u));
