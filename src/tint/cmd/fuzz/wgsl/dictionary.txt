@@ -169,6 +169,7 @@
 "chromium_testing_unimplemented"
 "chromium_testing_unsafe_experimental"
 "clamp"
+"clip_distances"
 "color"
 "compare_value"
 "compute"

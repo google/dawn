@@ -889,6 +889,8 @@ struct Encoder {
                 return pb::BuiltinValue::vertex_index;
             case core::BuiltinValue::kWorkgroupId:
                 return pb::BuiltinValue::workgroup_id;
+            case core::BuiltinValue::kClipDistances:
+                return pb::BuiltinValue::clip_distances;
             case core::BuiltinValue::kUndefined:
                 break;
         }

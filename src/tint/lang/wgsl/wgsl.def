@@ -70,6 +70,8 @@ enum diagnostic_severity {
 enum extension {
   // WGSL Extension "f16"
   f16
+  // WGSL Extension "clip_distances"
+  clip_distances
   // WGSL Extension "dual_source_blending"
   dual_source_blending
   // WGSL Extension "subgroups"

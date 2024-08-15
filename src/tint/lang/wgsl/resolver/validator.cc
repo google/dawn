@@ -1118,6 +1118,16 @@ bool Validator::BuiltinAttribute(const ast::BuiltinAttribute* attr,
                 return false;
             }
             break;
+        case core::BuiltinValue::kClipDistances:
+            // TODO(chromium:358408571): Add more validations on `clip_distances`.
+            if (!enabled_extensions_.Contains(wgsl::Extension::kClipDistances)) {
+                AddError(attr->source)
+                    << "use of " << style::Attribute("@builtin")
+                    << style::Code("(", style::Enum(builtin), ")")
+                    << " requires enabling extension " << style::Code("clip_distances");
+                return false;
+            }
+            break;
         default:
             break;
     }

@@ -45,6 +45,9 @@ BuiltinValue ParseBuiltinValue(std::string_view str) {
     if (str == "__point_size") {
         return BuiltinValue::kPointSize;
     }
+    if (str == "clip_distances") {
+        return BuiltinValue::kClipDistances;
+    }
     if (str == "frag_depth") {
         return BuiltinValue::kFragDepth;
     }
@@ -96,6 +99,8 @@ std::string_view ToString(BuiltinValue value) {
             return "undefined";
         case BuiltinValue::kPointSize:
             return "__point_size";
+        case BuiltinValue::kClipDistances:
+            return "clip_distances";
         case BuiltinValue::kFragDepth:
             return "frag_depth";
         case BuiltinValue::kFrontFacing:
