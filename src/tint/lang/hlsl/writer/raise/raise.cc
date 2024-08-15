@@ -172,14 +172,15 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
     // TODO(dsinclair): RemoveContinueInSwitch
 
     RUN_TRANSFORM(raise::ShaderIO, module);
+    // DemoteToHelper must come before any transform that introduces non-core instructions.
+    // Run after ShaderIO to ensure the discards are added to the entry point it introduces.
+    RUN_TRANSFORM(core::ir::transform::DemoteToHelper, module);
+
     RUN_TRANSFORM(raise::BinaryPolyfill, module);
     // BuiltinPolyfill must come after BinaryPolyfill and DecomposeStorageAccess as they add
     // builtins
     RUN_TRANSFORM(raise::BuiltinPolyfill, module);
     RUN_TRANSFORM(core::ir::transform::VectorizeScalarMatrixConstructors, module);
-
-    // DemoteToHelper must come before any transform that introduces non-core instructions.
-    RUN_TRANSFORM(core::ir::transform::DemoteToHelper, module);
 
     // These transforms need to be run last as various transforms introduce terminator arguments,
     // naming conflicts, and expressions that need to be explicitly not inlined.
