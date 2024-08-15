@@ -1,4 +1,4 @@
-SKIP: FAILED
+SKIP: INVALID
 
 struct modf_result_vec2_f16 {
   vector<float16_t, 2> fract;

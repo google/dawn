@@ -1,4 +1,4 @@
-SKIP: FAILED
+SKIP: INVALID
 
 
 static bool2 u = (true).xx;

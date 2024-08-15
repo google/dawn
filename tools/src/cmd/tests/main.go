@@ -372,8 +372,8 @@ func run() error {
 	}
 
 	type stats struct {
-		numTests, numPass, numSkip, numFail int
-		timeTaken                           time.Duration
+		numTests, numPass, numSkip, numFail, numValidTests, numInvalid int
+		timeTaken                                                      time.Duration
 	}
 
 	// Statistics per output format
@@ -484,6 +484,10 @@ func run() error {
 				yellow.Fprintf(row, alignCenter("SKIP", columnWidth))
 				rowAllPassed = false
 				stats.numSkip++
+			case invalid:
+				yellow.Fprintf(row, alignCenter("INVALID", columnWidth))
+				rowAllPassed = false
+				stats.numInvalid++
 			default:
 				fmt.Fprintf(row, alignCenter(result.code, columnWidth))
 				rowAllPassed = false
@@ -550,6 +554,7 @@ func run() error {
 	}
 	printStat(green, "PASS", func(s *stats) int { return s.numPass })
 	printStat(yellow, "SKIP", func(s *stats) int { return s.numSkip })
+	printStat(yellow, "INVALID", func(s *stats) int { return s.numInvalid })
 	printStat(red, "FAIL", func(s *stats) int { return s.numFail })
 
 	cyan.Printf(alignRight("TIME", filenameColumnWidth))
@@ -581,10 +586,15 @@ func run() error {
 		allStats.numTests += stats.numTests
 		allStats.numPass += stats.numPass
 		allStats.numSkip += stats.numSkip
+		allStats.numInvalid += stats.numInvalid
 		allStats.numFail += stats.numFail
 	}
 
-	fmt.Printf("%d tests run", allStats.numTests)
+	// Remove the invalid tests from the test count
+	allStats.numValidTests = allStats.numTests - allStats.numInvalid
+
+	fmt.Printf("%d tests run, ", allStats.numTests)
+	fmt.Printf("%d valid tests", allStats.numValidTests)
 	if allStats.numPass > 0 {
 		fmt.Printf(", ")
 		color.Set(color.FgGreen)
@@ -600,6 +610,14 @@ func run() error {
 		color.Unset()
 	} else {
 		fmt.Printf(", %d tests skipped", allStats.numSkip)
+	}
+	if allStats.numInvalid > 0 {
+		fmt.Printf(", ")
+		color.Set(color.FgYellow)
+		fmt.Printf("%d invalid tests", allStats.numInvalid)
+		color.Unset()
+	} else {
+		fmt.Printf(", %d invalid tests", allStats.numInvalid)
 	}
 	if allStats.numFail > 0 {
 		fmt.Printf(", ")
@@ -623,9 +641,10 @@ func run() error {
 type statusCode string
 
 const (
-	fail statusCode = "FAIL"
-	pass statusCode = "PASS"
-	skip statusCode = "SKIP"
+	fail    statusCode = "FAIL"
+	pass    statusCode = "PASS"
+	skip    statusCode = "SKIP"
+	invalid statusCode = "INVALID"
 )
 
 type status struct {
@@ -681,6 +700,10 @@ func (j job) run(cfg runConfig) {
 		skipped := false
 		if strings.HasPrefix(expected, "SKIP") { // Special SKIP token
 			skipped = true
+		}
+		invalid_test := false
+		if strings.HasPrefix(expected, "SKIP: INVALID") { // Special invalid test case token
+			invalid_test = true
 		}
 
 		expected = strings.ReplaceAll(expected, "\r\n", "\n")
@@ -769,23 +792,31 @@ func (j job) run(cfg runConfig) {
 			matched = true // test passed and matched expectations
 		}
 
+		var skip_str string = "FAILED"
+		if invalid_test {
+			skip_str = "INVALID"
+		}
+
 		switch {
 		case ok && matched:
 			// Test passed
 			return status{code: pass, timeTaken: timeTaken, passHashes: hashes}
 
 			//       --- Below this point the test has failed ---
-
 		case skipped:
 			if cfg.generateSkip {
-				saveExpectedFile(expectedFilePath, "SKIP: FAILED\n\n"+out)
+				saveExpectedFile(expectedFilePath, "SKIP: "+skip_str+"\n\n"+out)
 			}
-			return status{code: skip, timeTaken: timeTaken}
+			if invalid_test {
+				return status{code: invalid, timeTaken: timeTaken}
+			} else {
+				return status{code: skip, timeTaken: timeTaken}
+			}
 
 		case !ok:
 			// Compiler returned non-zero exit code
 			if cfg.generateSkip {
-				saveExpectedFile(expectedFilePath, "SKIP: FAILED\n\n"+out)
+				saveExpectedFile(expectedFilePath, "SKIP: "+skip_str+"\n\n"+out)
 			}
 			err := fmt.Errorf("%s", out)
 			return status{code: fail, err: err, timeTaken: timeTaken}
@@ -793,7 +824,7 @@ func (j job) run(cfg runConfig) {
 		default:
 			// Compiler returned zero exit code, or output was not as expected
 			if cfg.generateSkip {
-				saveExpectedFile(expectedFilePath, "SKIP: FAILED\n\n"+out)
+				saveExpectedFile(expectedFilePath, "SKIP: "+skip_str+"\n\n"+out)
 			}
 
 			// Expected output did not match

@@ -1,4 +1,4 @@
-SKIP: FAILED
+SKIP: INVALID
 
 
 static int4 u = (1).xxxx;

@@ -1,4 +1,4 @@
-SKIP: FAILED
+SKIP: INVALID
 
 struct VertexInputs0 {
   uint vertex_index;

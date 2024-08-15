@@ -1,4 +1,4 @@
-SKIP: FAILED
+SKIP: INVALID
 
 struct S {
   vector<float16_t, 3> v;

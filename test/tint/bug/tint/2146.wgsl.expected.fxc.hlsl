@@ -1,4 +1,4 @@
-SKIP: FAILED
+SKIP: INVALID
 
 void set_vector_element(inout vector<float16_t, 4> vec, int idx, float16_t val) {
   vec = (idx.xxxx == int4(0, 1, 2, 3)) ? val.xxxx : vec;

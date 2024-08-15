@@ -1,4 +1,4 @@
-SKIP: FAILED
+SKIP: INVALID
 
 
 static uint3 localId = (0u).xxx;

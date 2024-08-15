@@ -1,4 +1,4 @@
-SKIP: FAILED
+SKIP: INVALID
 
 RWByteAddressBuffer prevent_dce : register(u0, space2);
 

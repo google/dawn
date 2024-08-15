@@ -1,4 +1,4 @@
-SKIP: FAILED
+SKIP: INVALID
 
 uint tint_bitcast_from_f16(vector<float16_t, 2> src) {
   uint2 r = f32tof16(float2(src));

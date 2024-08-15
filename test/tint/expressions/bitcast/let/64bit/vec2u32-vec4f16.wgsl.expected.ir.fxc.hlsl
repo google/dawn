@@ -1,4 +1,4 @@
-SKIP: FAILED
+SKIP: INVALID
 
 
 vector<float16_t, 4> tint_bitcast_to_f16(uint2 src) {

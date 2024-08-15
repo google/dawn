@@ -1,4 +1,4 @@
-SKIP: FAILED
+SKIP: INVALID
 
 
 static vector<float16_t, 2> v = vector<float16_t, 2>(float16_t(0.0h), float16_t(1.0h));

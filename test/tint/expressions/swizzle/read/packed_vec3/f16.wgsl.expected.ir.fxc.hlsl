@@ -1,4 +1,4 @@
-SKIP: FAILED
+SKIP: INVALID
 
 
 cbuffer cbuffer_U : register(b0) {
