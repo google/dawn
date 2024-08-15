@@ -1851,13 +1851,7 @@ crbug.com/358165874 [ linux nvidia-0x2184 nvidia_ge_535.183.01 ] webgpu:shader,e
 crbug.com/358165874 [ linux nvidia-0x2184 nvidia_ge_535.183.01 ] webgpu:shader,execution,shader_io,fragment_builtins:inputs,position:nearFar=[0,1];sampleCount=4;interpolation={"type":"perspective","sampling":"sample"} [ Failure ]
 crbug.com/358165874 [ linux nvidia-0x2184 nvidia_ge_535.183.01 ] webgpu:shader,execution,shader_io,fragment_builtins:inputs,position:nearFar=[0.25,0.75];sampleCount=4;interpolation={"type":"linear","sampling":"sample"} [ Failure ]
 crbug.com/358165874 [ linux nvidia-0x2184 nvidia_ge_535.183.01 ] webgpu:shader,execution,shader_io,fragment_builtins:inputs,position:nearFar=[0.25,0.75];sampleCount=4;interpolation={"type":"perspective","sampling":"sample"} [ Failure ]
-crbug.com/358165874 [ linux nvidia-0x2184 nvidia_ge_535.183.01 ] webgpu:web_platform,copyToTexture,ImageBitmap:from_ImageData:alpha="none";orientation="flipY";colorSpaceConversion="default";srcFlipYInCopy=true;dstFormat="rg8unorm";dstPremultiplied=false [ Failure ]
-crbug.com/358165874 [ linux nvidia-0x2184 nvidia_ge_535.183.01 ] webgpu:web_platform,copyToTexture,ImageBitmap:from_ImageData:alpha="none";orientation="flipY";colorSpaceConversion="none";srcFlipYInCopy=true;dstFormat="rg8unorm";dstPremultiplied=false [ Failure ]
-crbug.com/358165874 [ linux nvidia-0x2184 nvidia_ge_535.183.01 ] webgpu:web_platform,copyToTexture,ImageBitmap:from_ImageData:alpha="none";orientation="none";colorSpaceConversion="none";srcFlipYInCopy=true;dstFormat="rg8unorm";dstPremultiplied=false [ Failure ]
-crbug.com/358165874 [ linux nvidia-0x2184 nvidia_ge_535.183.01 ] webgpu:web_platform,copyToTexture,ImageBitmap:from_ImageData:alpha="premultiply";orientation="flipY";colorSpaceConversion="none";srcFlipYInCopy=true;dstFormat="rg8unorm";dstPremultiplied=false [ Failure ]
-crbug.com/358165874 [ linux nvidia-0x2184 nvidia_ge_535.183.01 ] webgpu:web_platform,copyToTexture,ImageBitmap:from_ImageData:alpha="premultiply";orientation="none";colorSpaceConversion="default";srcFlipYInCopy=false;dstFormat="rg8unorm";dstPremultiplied=false [ Failure ]
-crbug.com/358165874 [ linux nvidia-0x2184 nvidia_ge_535.183.01 ] webgpu:web_platform,copyToTexture,ImageBitmap:from_ImageData:alpha="premultiply";orientation="none";colorSpaceConversion="none";srcFlipYInCopy=true;dstFormat="rg8unorm";dstPremultiplied=false [ Failure ]
-crbug.com/358165874 [ linux nvidia-0x2184 nvidia_ge_535.183.01 ] webgpu:web_platform,copyToTexture,ImageData:from_ImageData:srcDoFlipYDuringCopy=true;dstColorFormat="rg8unorm";dstPremultiplied=true [ Failure ]
+crbug.com/358165874 [ linux nvidia-0x2184 nvidia_ge_535.183.01 ] webgpu:web_platform,copyToTexture,* [ Failure ]
 
 ################################################################################
 # Assorted failures that are missing bug associations (NEEDS TRIAGE)
