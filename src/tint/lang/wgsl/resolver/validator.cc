@@ -103,6 +103,7 @@ namespace {
 
 constexpr size_t kMaxFunctionParameters = 255;
 constexpr size_t kMaxSwitchCaseSelectors = 16383;
+constexpr size_t kMaxClipDistancesSize = 8;
 
 bool IsValidStorageTextureDimension(core::type::TextureDimension dim) {
     switch (dim) {
@@ -1118,7 +1119,7 @@ bool Validator::BuiltinAttribute(const ast::BuiltinAttribute* attr,
                 return false;
             }
             break;
-        case core::BuiltinValue::kClipDistances:
+        case core::BuiltinValue::kClipDistances: {
             // TODO(chromium:358408571): Add more validations on `clip_distances`.
             if (!enabled_extensions_.Contains(wgsl::Extension::kClipDistances)) {
                 AddError(attr->source)
@@ -1127,7 +1128,19 @@ bool Validator::BuiltinAttribute(const ast::BuiltinAttribute* attr,
                     << " requires enabling extension " << style::Code("clip_distances");
                 return false;
             }
+            auto* arr = type->As<sem::Array>();
+            if (!(arr && arr->ElemType()->Is<core::type::F32>() &&
+                  arr->ConstantCount().has_value() &&
+                  *arr->ConstantCount() <= kMaxClipDistancesSize)) {
+                AddError(attr->source)
+                    << "store type of " << style::Attribute("@builtin")
+                    << style::Code("(", style::Enum(builtin), ")") << " must be "
+                    << style::Type("array<f32, N>") << " (N <= " << kMaxClipDistancesSize << ")";
+                return false;
+            }
+
             break;
+        }
         default:
             break;
     }
