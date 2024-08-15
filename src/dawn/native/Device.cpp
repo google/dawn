@@ -2444,10 +2444,6 @@ const TogglesState& DeviceBase::GetTogglesState() const {
     return mToggles;
 }
 
-void DeviceBase::ForceSetToggleForTesting(Toggle toggle, bool isEnabled) {
-    mToggles.ForceSet(toggle, isEnabled);
-}
-
 void DeviceBase::ForceEnableFeatureForTesting(Feature feature) {
     mEnabledFeatures.EnableFeature(feature);
     mFormatTable = BuildFormatTable(this);

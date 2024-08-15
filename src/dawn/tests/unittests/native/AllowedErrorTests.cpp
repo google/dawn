@@ -76,15 +76,16 @@ static constexpr std::string_view kVertexShader = R"(
 
 class AllowedErrorTests : public DawnMockTest {
   public:
-    AllowedErrorTests() : DawnMockTest() {
+    ~AllowedErrorTests() override { DropDevice(); }
+
+  protected:
+    void SetUp() override {
+        DawnMockTest::SetUp();
         device.SetDeviceLostCallback(mDeviceLostCb.Callback(), mDeviceLostCb.MakeUserdata(this));
         device.SetUncapturedErrorCallback(mDeviceErrorCb.Callback(),
                                           mDeviceErrorCb.MakeUserdata(this));
     }
 
-    ~AllowedErrorTests() override { DropDevice(); }
-
-  protected:
     // Device mock callbacks used throughout the tests.
     StrictMock<MockCallback<wgpu::DeviceLostCallback>> mDeviceLostCb;
     StrictMock<MockCallback<wgpu::ErrorCallback>> mDeviceErrorCb;

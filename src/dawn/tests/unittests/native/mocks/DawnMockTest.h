@@ -41,8 +41,11 @@ class DawnMockTest : public ::testing::Test {
     void ProcessEvents();
 
   protected:
+    void SetUp() override;
     void DropDevice();
 
+    DeviceDescriptor mDeviceDescriptor;
+    TogglesState mDeviceToggles;
     raw_ptr<::testing::NiceMock<DeviceMock>> mDeviceMock;
     wgpu::Device device;
 };

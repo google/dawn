@@ -47,11 +47,8 @@ class DeviceMock : public DeviceBase {
     // Exposes some protected functions for testing purposes.
     using DeviceBase::DestroyObjects;
     using DeviceBase::ForceEnableFeatureForTesting;
-    using DeviceBase::ForceSetToggleForTesting;
 
-    // TODO(chromium:42240655):
-    // 1. Implement AdapterMock and use it in the constructor of DeviceMock
-    // 2. Remove ForceSetToggleForTesting calls
+    // TODO(chromium:42240655): Implement AdapterMock and use it in the constructor of DeviceMock
     DeviceMock(AdapterBase* adapter,
                const UnpackedPtr<DeviceDescriptor>& descriptor,
                const TogglesState& deviceToggles,

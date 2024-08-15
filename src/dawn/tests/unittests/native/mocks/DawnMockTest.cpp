@@ -34,24 +34,23 @@
 
 namespace dawn::native {
 
-DawnMockTest::DawnMockTest() {
-    dawnProcSetProcs(&dawn::native::GetProcs());
+DawnMockTest::DawnMockTest() : mDeviceToggles(ToggleStage::Device) {}
 
+void DawnMockTest::SetUp() {
+    dawnProcSetProcs(&dawn::native::GetProcs());
     Ref<InstanceBase> instance = APICreateInstance(nullptr);
     const auto& adapters = instance->EnumerateAdapters();
     DAWN_ASSERT(!adapters.empty());
 
-    DeviceDescriptor deviceDescriptor = {};
-    auto result = ValidateAndUnpack(&deviceDescriptor);
+    auto result = ValidateAndUnpack(&mDeviceDescriptor);
     DAWN_ASSERT(result.IsSuccess());
     UnpackedPtr<DeviceDescriptor> packedDeviceDescriptor = result.AcquireSuccess();
 
     Ref<DeviceBase::DeviceLostEvent> lostEvent =
-        DeviceBase::DeviceLostEvent::Create(&deviceDescriptor);
-    TogglesState deviceToggles(ToggleStage::Device);
+        DeviceBase::DeviceLostEvent::Create(&mDeviceDescriptor);
 
     auto deviceMock = AcquireRef(new ::testing::NiceMock<DeviceMock>(
-        adapters[0].Get(), packedDeviceDescriptor, deviceToggles, std::move(lostEvent)));
+        adapters[0].Get(), packedDeviceDescriptor, mDeviceToggles, std::move(lostEvent)));
     mDeviceMock = deviceMock.Get();
     device = wgpu::Device::Acquire(ToAPI(ReturnToAPI<DeviceBase>(std::move(deviceMock))));
 }

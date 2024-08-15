@@ -465,7 +465,6 @@ class DeviceBase : public ErrorSink, public RefCountedWithExternalCount<RefCount
     // Constructor used only for mocking and testing.
     DeviceBase();
 
-    void ForceSetToggleForTesting(Toggle toggle, bool isEnabled);
     void ForceEnableFeatureForTesting(Feature feature);
 
     MaybeError Initialize(Ref<QueueBase> defaultQueue);

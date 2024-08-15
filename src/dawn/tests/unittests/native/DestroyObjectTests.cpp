@@ -103,7 +103,7 @@ class DestroyObjectTests : public DawnMockTest {
   public:
     DestroyObjectTests() : DawnMockTest() {
         // Skipping validation on descriptors as coverage for validation is already present.
-        mDeviceMock->ForceSetToggleForTesting(Toggle::SkipValidation, true);
+        mDeviceToggles.ForceSet(Toggle::SkipValidation, true);
     }
 };
 
