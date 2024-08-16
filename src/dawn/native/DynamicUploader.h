@@ -64,7 +64,7 @@ class DynamicUploader {
     ResultOrError<UploadHandle> Allocate(uint64_t allocationSize,
                                          ExecutionSerial serial,
                                          uint64_t offsetAlignment);
-    void Deallocate(ExecutionSerial lastCompletedSerial);
+    void Deallocate(ExecutionSerial lastCompletedSerial, bool freeAll = false);
 
     bool ShouldFlush();
 

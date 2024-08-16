@@ -116,6 +116,17 @@ class QueueBase : public ApiObjectBase, public ExecutionQueueBase {
 
     void DestroyImpl() override;
 
+    virtual MaybeError SubmitImpl(uint32_t commandCount, CommandBufferBase* const* commands) = 0;
+    virtual MaybeError WriteBufferImpl(BufferBase* buffer,
+                                       uint64_t bufferOffset,
+                                       const void* data,
+                                       size_t size);
+    virtual MaybeError WriteTextureImpl(const ImageCopyTexture& destination,
+                                        const void* data,
+                                        size_t dataSize,
+                                        const TextureDataLayout& dataLayout,
+                                        const Extent3D& writeSize);
+
   private:
     MaybeError WriteTextureInternal(const ImageCopyTexture* destination,
                                     const void* data,
@@ -130,17 +141,6 @@ class QueueBase : public ApiObjectBase, public ExecutionQueueBase {
                                                      const ImageCopyTexture* destination,
                                                      const Extent3D* copySize,
                                                      const CopyTextureForBrowserOptions* options);
-
-    virtual MaybeError SubmitImpl(uint32_t commandCount, CommandBufferBase* const* commands) = 0;
-    virtual MaybeError WriteBufferImpl(BufferBase* buffer,
-                                       uint64_t bufferOffset,
-                                       const void* data,
-                                       size_t size);
-    virtual MaybeError WriteTextureImpl(const ImageCopyTexture& destination,
-                                        const void* data,
-                                        size_t dataSize,
-                                        const TextureDataLayout& dataLayout,
-                                        const Extent3D& writeSize);
 
     MaybeError ValidateSubmit(uint32_t commandCount, CommandBufferBase* const* commands) const;
     MaybeError ValidateOnSubmittedWorkDone(wgpu::QueueWorkDoneStatus* status) const;

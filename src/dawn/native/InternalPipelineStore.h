@@ -64,6 +64,8 @@ struct InternalPipelineStore {
 
     Ref<ShaderModuleBase> placeholderFragmentShader;
 
+    void ResetScratchBuffers();
+
     // A scratch buffer suitable for use as a copy destination and storage binding.
     ScratchBuffer scratchStorage;
 

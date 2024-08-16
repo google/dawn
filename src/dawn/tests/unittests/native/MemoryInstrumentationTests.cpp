@@ -25,7 +25,9 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+#include <chrono>
 #include <string>
+#include <thread>
 #include <utility>
 
 #include "dawn/native/DawnNative.h"
@@ -205,6 +207,36 @@ TEST_F(MemoryInstrumentationTest, DumpMemoryStatistics) {
     EXPECT_EQ(
         ComputeEstimatedMemoryUsage(device.Get()),
         kBufferAllocatedSize + kMipmappedTextureSize + kMultisampleTextureSize + kETC2TextureSize);
+}
+
+TEST_F(MemoryInstrumentationTest, ReduceMemoryUsage) {
+    constexpr uint64_t kBufferSize = 32;
+    constexpr wgpu::BufferDescriptor kBufferDesc = {
+        .usage = wgpu::BufferUsage::Uniform | wgpu::BufferUsage::CopyDst,
+        .size = kBufferSize,
+    };
+    wgpu::Buffer uniformBuffer = device.CreateBuffer(&kBufferDesc);
+    EXPECT_TRUE(uniformBuffer);
+
+    std::array<uint8_t, kBufferSize> zeroes = {};
+    device.GetQueue().WriteBuffer(uniformBuffer, 0, zeroes.data(), zeroes.size());
+    device.GetQueue().Submit(0, nullptr);
+
+    uniformBuffer.Destroy();
+
+    wgpu::Future completionFuture = device.GetQueue().OnSubmittedWorkDone(
+        wgpu::CallbackMode::WaitAnyOnly, [](wgpu::QueueWorkDoneStatus status) {});
+
+    wgpu::WaitStatus waitStatus = wgpu::WaitStatus::TimedOut;
+    while (waitStatus != wgpu::WaitStatus::Success) {
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+        waitStatus = wgpu::Instance(ToAPI(mDeviceMock->GetInstance())).WaitAny(completionFuture, 0);
+    }
+
+    // DynamicUploader buffers will still be alive.
+    EXPECT_GT(ComputeEstimatedMemoryUsage(device.Get()), uint64_t(0));
+    ReduceMemoryUsage(device.Get());
+    EXPECT_EQ(ComputeEstimatedMemoryUsage(device.Get()), uint64_t(0));
 }
 
 }  // namespace

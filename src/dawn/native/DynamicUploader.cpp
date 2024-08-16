@@ -122,7 +122,7 @@ ResultOrError<UploadHandle> DynamicUploader::AllocateInternal(uint64_t allocatio
     return uploadHandle;
 }
 
-void DynamicUploader::Deallocate(ExecutionSerial lastCompletedSerial) {
+void DynamicUploader::Deallocate(ExecutionSerial lastCompletedSerial, bool freeAll) {
     // Reclaim memory within the ring buffers by ticking (or removing requests no longer
     // in-flight).
     size_t i = 0;
@@ -130,8 +130,9 @@ void DynamicUploader::Deallocate(ExecutionSerial lastCompletedSerial) {
         mRingBuffers[i]->mAllocator.Deallocate(lastCompletedSerial);
 
         // Never erase the last buffer as to prevent re-creating smaller buffers
-        // again. The last buffer is the largest.
-        if (mRingBuffers[i]->mAllocator.Empty() && i < mRingBuffers.size() - 1) {
+        // again unless explicitly asked to do so. The last buffer is the largest.
+        const bool shouldFree = (i < mRingBuffers.size() - 1) || freeAll;
+        if (mRingBuffers[i]->mAllocator.Empty() && shouldFree) {
             mRingBuffers.erase(mRingBuffers.begin() + i);
         } else {
             i++;
