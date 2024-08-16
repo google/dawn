@@ -31,9 +31,10 @@
 enum GPUFeatureName {
     "chromium-experimental-subgroups",
     "chromium-experimental-subgroup-uniform-control-flow",
-    // subgroups and subgroups-f16 features are not in webgpu.idl yet.
+    // subgroups, subgroups-f16 and multi-draw-indirect features are not in webgpu.idl yet.
     "subgroups",
     "subgroups-f16",
+    "multi-draw-indirect",
 };
 
 dictionary GPURequestAdapterOptions {
@@ -46,6 +47,15 @@ interface GPUAdapter {
 
 interface GPUCommandEncoder {
     undefined writeTimestamp(GPUQuerySet querySet, GPUSize32 queryIndex);
+};
+
+// Not in webgpu.idl yet.
+interface GPURenderPassEncoder {
+    undefined multiDrawIndirect(GPUBuffer indirectBuffer, GPUSize64 indirectOffset, GPUSize32 maxDrawCount,
+        GPUBuffer? drawCountBuffer, optional GPUSize64 drawCountBufferOffset = 0);
+    undefined multiDrawIndexedIndirect(GPUBuffer indirectBuffer, GPUSize64 indirectOffset,
+                                GPUSize32 maxDrawCount, GPUBuffer? drawCountBuffer = {},
+                                optional GPUSize64 drawCountBufferOffset = 0);
 };
 
 dictionary GPUTextureDescriptor {

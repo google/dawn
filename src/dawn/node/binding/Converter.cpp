@@ -1463,6 +1463,9 @@ bool Converter::Convert(wgpu::FeatureName& out, interop::GPUFeatureName in) {
         case interop::GPUFeatureName::kSubgroupsF16:
             out = wgpu::FeatureName::SubgroupsF16;
             return true;
+        case interop::GPUFeatureName::kMultiDrawIndirect:
+            out = wgpu::FeatureName::MultiDrawIndirect;
+            return true;
         case interop::GPUFeatureName::kChromiumExperimentalSubgroups:
             out = wgpu::FeatureName::ChromiumExperimentalSubgroups;
             return true;
@@ -1496,6 +1499,7 @@ bool Converter::Convert(interop::GPUFeatureName& out, wgpu::FeatureName in) {
         CASE(TimestampQuery, kTimestampQuery);
         CASE(Subgroups, kSubgroups);
         CASE(SubgroupsF16, kSubgroupsF16);
+        CASE(MultiDrawIndirect, kMultiDrawIndirect);
 
 #undef CASE
 
@@ -1552,7 +1556,6 @@ bool Converter::Convert(interop::GPUFeatureName& out, wgpu::FeatureName in) {
         case wgpu::FeatureName::YCbCrVulkanSamplers:
         case wgpu::FeatureName::DawnLoadResolveTexture:
         case wgpu::FeatureName::DawnPartialLoadResolveTexture:
-        case wgpu::FeatureName::MultiDrawIndirect:
             return false;
     }
     return false;

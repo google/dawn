@@ -258,6 +258,54 @@ void GPURenderPassEncoder::drawIndexedIndirect(
     enc_.DrawIndexedIndirect(b, o);
 }
 
+void GPURenderPassEncoder::multiDrawIndirect(
+    Napi::Env env,
+    interop::Interface<interop::GPUBuffer> indirectBuffer,
+    interop::GPUSize64 indirectOffset,
+    interop::GPUSize32 maxDrawCount,
+    std::optional<interop::Interface<interop::GPUBuffer>> countBuffer,
+    interop::GPUSize64 countBufferOffset) {
+    Converter conv(env);
+
+    wgpu::Buffer ib{};
+    wgpu::Buffer cb{};
+    uint64_t io = 0;
+    uint64_t co = 0;
+
+    if (!conv(ib, indirectBuffer) ||  //
+        !conv(io, indirectOffset) ||  //
+        !conv(cb, countBuffer) ||     //
+        !conv(co, countBufferOffset)) {
+        return;
+    }
+
+    enc_.MultiDrawIndirect(ib, io, maxDrawCount, cb, co);
+}
+
+void GPURenderPassEncoder::multiDrawIndexedIndirect(
+    Napi::Env env,
+    interop::Interface<interop::GPUBuffer> indirectBuffer,
+    interop::GPUSize64 indirectOffset,
+    interop::GPUSize32 maxDrawCount,
+    std::optional<interop::Interface<interop::GPUBuffer>> drawCountBuffer,
+    interop::GPUSize64 drawCountBufferOffset) {
+    Converter conv(env);
+
+    wgpu::Buffer ib{};
+    wgpu::Buffer cb{};
+    uint64_t io = 0;
+    uint64_t co = 0;
+
+    if (!conv(ib, indirectBuffer) ||   //
+        !conv(io, indirectOffset) ||   //
+        !conv(cb, drawCountBuffer) ||  //
+        !conv(co, drawCountBufferOffset)) {
+        return;
+    }
+
+    enc_.MultiDrawIndexedIndirect(ib, io, maxDrawCount, cb, co);
+}
+
 std::string GPURenderPassEncoder::getLabel(Napi::Env) {
     return label_;
 }
