@@ -72,7 +72,7 @@ def generate(args, tmpdir: tempfile.TemporaryDirectory):
 
     # Generate the header file.
     output_path = tmp_header_output_path if args.check_stale else final_header_output_path
-    with open(output_path, 'w') as output:
+    with open(output_path, 'w', newline='\n') as output:
         print('''// Copyright 2024 The Dawn & Tint Authors
 //
 // Redistribution and use in source and binary forms, with or without
