@@ -224,19 +224,26 @@ TEST_F(MemoryInstrumentationTest, ReduceMemoryUsage) {
 
     uniformBuffer.Destroy();
 
-    wgpu::Future completionFuture = device.GetQueue().OnSubmittedWorkDone(
-        wgpu::CallbackMode::WaitAnyOnly, [](wgpu::QueueWorkDoneStatus status) {});
-
-    wgpu::WaitStatus waitStatus = wgpu::WaitStatus::TimedOut;
-    while (waitStatus != wgpu::WaitStatus::Success) {
-        std::this_thread::sleep_for(std::chrono::milliseconds(100));
-        waitStatus = wgpu::Instance(ToAPI(mDeviceMock->GetInstance())).WaitAny(completionFuture, 0);
-    }
+    mDeviceMock->GetInstance()->APIProcessEvents();
 
     // DynamicUploader buffers will still be alive.
     EXPECT_GT(ComputeEstimatedMemoryUsage(device.Get()), uint64_t(0));
     ReduceMemoryUsage(device.Get());
+    // But not any more.
     EXPECT_EQ(ComputeEstimatedMemoryUsage(device.Get()), uint64_t(0));
+
+    // Check that DynamicUploader buffer is recreated again.
+    uniformBuffer = device.CreateBuffer(&kBufferDesc);
+    EXPECT_TRUE(uniformBuffer);
+
+    device.GetQueue().WriteBuffer(uniformBuffer, 0, zeroes.data(), zeroes.size());
+    device.GetQueue().Submit(0, nullptr);
+
+    uniformBuffer.Destroy();
+
+    mDeviceMock->GetInstance()->APIProcessEvents();
+
+    EXPECT_GT(ComputeEstimatedMemoryUsage(device.Get()), uint64_t(0));
 }
 
 }  // namespace
