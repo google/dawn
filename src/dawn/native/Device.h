@@ -127,12 +127,10 @@ class DeviceBase : public ErrorSink, public RefCountedWithExternalCount<RefCount
 
     MaybeError ValidateObject(const ApiObjectBase* object) const;
 
-    // TODO(dawn:1702) Remove virtual when we mock the adapter.
-    virtual InstanceBase* GetInstance() const;
-
+    InstanceBase* GetInstance() const;
     AdapterBase* GetAdapter() const;
     PhysicalDeviceBase* GetPhysicalDevice() const;
-    virtual dawn::platform::Platform* GetPlatform() const;
+    dawn::platform::Platform* GetPlatform() const;
 
     // Returns the Format corresponding to the wgpu::TextureFormat or an error if the format
     // isn't a valid wgpu::TextureFormat or isn't supported by this device.

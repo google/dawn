@@ -1869,12 +1869,8 @@ void DeviceBase::SetWGSLExtensionAllowList() {
     }
 
     // Language features are enabled instance-wide.
-    // mAdapter is not set for mock test devices.
-    // TODO(crbug.com/dawn/1702): using a mock adapter and instance could avoid the null checking.
-    if (mAdapter != nullptr) {
-        const auto& allowedFeatures = GetInstance()->GetAllowedWGSLLanguageFeatures();
-        mWGSLAllowedFeatures.features = {allowedFeatures.begin(), allowedFeatures.end()};
-    }
+    const auto& allowedFeatures = GetInstance()->GetAllowedWGSLLanguageFeatures();
+    mWGSLAllowedFeatures.features = {allowedFeatures.begin(), allowedFeatures.end()};
 }
 
 const tint::wgsl::AllowedFeatures& DeviceBase::GetWGSLAllowedFeatures() const {
