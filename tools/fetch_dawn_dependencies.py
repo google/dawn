@@ -88,7 +88,7 @@ parser.add_argument('-t',
                     action='store_true',
                     default=False,
                     help="""
-    Fetch dependencies needed for testing
+    Deprecated: Test dependencies are now always included.
     """)
 
 
@@ -108,17 +108,16 @@ def main(args):
         'third_party/markupsafe',
         'third_party/glslang/src',
         'third_party/google_benchmark/src',
+        'third_party/googletest',
         'third_party/spirv-headers/src',
         'third_party/spirv-tools/src',
         'third_party/vulkan-headers/src',
         'third_party/vulkan-loader/src',
         'third_party/vulkan-utility-libraries/src',
     ]
-
     if args.use_test_deps:
-        required_submodules += [
-            'third_party/googletest',
-        ]
+        log("""WARNING: --use-test-deps argument deprecated. 
+            Test dependencies are now always included.""")
 
     root_dir = Path(args.directory).resolve()
 
