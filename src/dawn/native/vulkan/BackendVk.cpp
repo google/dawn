@@ -125,6 +125,9 @@ constexpr SkippedMessage kSkippedMessages[] = {
      "stencil aspect during store with stencilStoreOp VK_ATTACHMENT_STORE_OP_STORE. Access info "
      "(usage: SYNC_LATE_FRAGMENT_TESTS_DEPTH_STENCIL_ATTACHMENT_WRITE, prior_usage: "
      "SYNC_FRAGMENT_SHADER_SHADER_SAMPLED_READ, read_barriers: VkPipelineStageFlags2(0)"},
+    // http://crbug.com/360147114
+    {"SYNC-HAZARD-WRITE-AFTER-READ",
+     "Submitted access info (submitted_usage: SYNC_CLEAR_TRANSFER_WRITE, command: vkCmdFillBuffer"},
 
     // http://crbug.com/dawn/1916
     {"SYNC-HAZARD-WRITE-AFTER-WRITE",
