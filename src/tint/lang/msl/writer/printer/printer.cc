@@ -877,7 +877,8 @@ class Printer : public tint::TextGenerator {
     }
 
     void EmitCoreBuiltinName(StringStream& out, core::BuiltinFn func) {
-        // TODO(crbug.com/354738715): Implement subgroupBallot in MSL IR backend.
+        // TODO(crbug.com/360166776): Implement subgroupBallot and quadSwap{X,Y,Diagonal} builtins
+        // in MSL IR backend.
         switch (func) {
             case core::BuiltinFn::kAbs:
             case core::BuiltinFn::kAcos:

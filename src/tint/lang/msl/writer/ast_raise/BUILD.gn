@@ -50,6 +50,8 @@ if (tint_build_msl_writer) {
       "packed_vec3.h",
       "pixel_local.cc",
       "pixel_local.h",
+      "quad_swap.cc",
+      "quad_swap.h",
       "subgroup_ballot.cc",
       "subgroup_ballot.h",
     ]
@@ -90,6 +92,7 @@ if (tint_build_unittests) {
         "module_scope_var_to_entry_point_param_test.cc",
         "packed_vec3_test.cc",
         "pixel_local_test.cc",
+        "quad_swap_test.cc",
         "subgroup_ballot_test.cc",
       ]
       deps = [

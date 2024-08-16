@@ -877,6 +877,17 @@ bool IsSubgroup(BuiltinFn f) {
     }
 }
 
+bool IsQuadSwap(BuiltinFn f) {
+    switch (f) {
+        case BuiltinFn::kQuadSwapX:
+        case BuiltinFn::kQuadSwapY:
+        case BuiltinFn::kQuadSwapDiagonal:
+            return true;
+        default:
+            return false;
+    }
+}
+
 bool HasSideEffects(BuiltinFn f) {
     switch (f) {
         case BuiltinFn::kAtomicAdd:

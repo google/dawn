@@ -113,6 +113,9 @@ class BuiltinFn final : public Castable<BuiltinFn, CallTarget> {
     /// chromium_experimental_subgroups)
     bool IsSubgroup() const;
 
+    /// @returns true if builtin is a quadSwap builtin
+    bool IsQuadSwap() const;
+
     /// @returns true if intrinsic may have side-effects (i.e. writes to at least
     /// one of its inputs)
     bool HasSideEffects() const;

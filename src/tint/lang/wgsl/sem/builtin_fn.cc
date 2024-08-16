@@ -108,6 +108,10 @@ bool BuiltinFn::IsSubgroup() const {
     return wgsl::IsSubgroup(fn_);
 }
 
+bool BuiltinFn::IsQuadSwap() const {
+    return wgsl::IsQuadSwap(fn_);
+}
+
 bool BuiltinFn::HasSideEffects() const {
     return wgsl::HasSideEffects(fn_);
 }

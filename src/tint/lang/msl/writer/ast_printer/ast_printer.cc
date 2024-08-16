@@ -57,6 +57,7 @@
 #include "src/tint/lang/msl/writer/ast_raise/module_scope_var_to_entry_point_param.h"
 #include "src/tint/lang/msl/writer/ast_raise/packed_vec3.h"
 #include "src/tint/lang/msl/writer/ast_raise/pixel_local.h"
+#include "src/tint/lang/msl/writer/ast_raise/quad_swap.h"
 #include "src/tint/lang/msl/writer/ast_raise/subgroup_ballot.h"
 #include "src/tint/lang/msl/writer/common/option_helpers.h"
 #include "src/tint/lang/msl/writer/common/printer_support.h"
@@ -244,6 +245,9 @@ SanitizedResult Sanitize(const Program& in, const Options& options) {
 
     // SubgroupBallot() must come after CanonicalizeEntryPointIO.
     manager.Add<SubgroupBallot>();
+
+    // QuadSwap() must come after CanonicalizeEntryPointIO.
+    manager.Add<QuadSwap>();
 
     // ArrayLengthFromUniform must come after SimplifyPointers, as
     // it assumes that the form of the array length argument is &var.array.
@@ -673,6 +677,19 @@ bool ASTPrinter::EmitFunctionCall(StringStream& out,
             return false;
         }
         out << "))";
+        return true;
+    }
+
+    if (ast::GetAttribute<QuadSwap::QuadShuffle>(fn->Declaration()->attributes) != nullptr) {
+        out << "quad_shuffle(";
+        if (!EmitExpression(out, call->Arguments()[0]->Declaration())) {
+            return false;
+        }
+        out << ",";
+        if (!EmitExpression(out, call->Arguments()[1]->Declaration())) {
+            return false;
+        }
+        out << ")";
         return true;
     }
 
@@ -2252,6 +2269,12 @@ bool ASTPrinter::EmitEntryPointFunction(const ast::Function* func) {
                     auto& attrs = param->attributes;
                     bool builtin_found = false;
                     for (auto* attr : attrs) {
+                        if (attr->Is<QuadSwap::ThreadIndexInQuadgroup>()) {
+                            out << " [[thread_index_in_quadgroup]]";
+                            builtin_found = true;
+                            continue;
+                        }
+
                         auto* builtin_attr = attr->As<ast::BuiltinAttribute>();
                         if (!builtin_attr) {
                             continue;
@@ -2264,6 +2287,7 @@ bool ASTPrinter::EmitEntryPointFunction(const ast::Function* func) {
                             diagnostics_.AddError(Source{}) << "unknown builtin";
                             return false;
                         }
+
                         out << " [[" << name << "]]";
                     }
                     if (TINT_UNLIKELY(!builtin_found)) {

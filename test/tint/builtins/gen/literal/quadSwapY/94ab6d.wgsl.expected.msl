@@ -1,23 +1,35 @@
-SKIP: FAILED
+#include <metal_stdlib>
+
+using namespace metal;
+struct tint_private_vars_struct {
+  uint tint_msl_thread_index_in_quadgroup;
+};
 
 
-enable subgroups;
+int tint_msl_quadSwapY(int e, thread tint_private_vars_struct* const tint_private_vars) {
+  return quad_shuffle(e,((*(tint_private_vars)).tint_msl_thread_index_in_quadgroup ^ 2u));
+}
 
-@group(0) @binding(0) var<storage, read_write> prevent_dce : i32;
-
-fn quadSwapY_94ab6d() -> i32 {
-  var res : i32 = quadSwapY(1i);
+int quadSwapY_94ab6d(thread tint_private_vars_struct* const tint_private_vars) {
+  int res = tint_msl_quadSwapY(1, tint_private_vars);
   return res;
 }
 
-@fragment
-fn fragment_main() {
-  prevent_dce = quadSwapY_94ab6d();
+fragment void fragment_main(device int* tint_symbol [[buffer(0)]], uint tint_thread_index_in_quadgroup [[thread_index_in_quadgroup]]) {
+  thread tint_private_vars_struct tint_private_vars = {};
+  {
+    tint_private_vars.tint_msl_thread_index_in_quadgroup = tint_thread_index_in_quadgroup;
+  }
+  *(tint_symbol) = quadSwapY_94ab6d(&(tint_private_vars));
+  return;
 }
 
-@compute @workgroup_size(1)
-fn compute_main() {
-  prevent_dce = quadSwapY_94ab6d();
+kernel void compute_main(device int* tint_symbol_1 [[buffer(0)]], uint tint_thread_index_in_quadgroup_1 [[thread_index_in_quadgroup]]) {
+  thread tint_private_vars_struct tint_private_vars = {};
+  {
+    tint_private_vars.tint_msl_thread_index_in_quadgroup = tint_thread_index_in_quadgroup_1;
+  }
+  *(tint_symbol_1) = quadSwapY_94ab6d(&(tint_private_vars));
+  return;
 }
 
-Failed to generate: error: Unknown import method: quadSwapY

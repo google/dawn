@@ -1,24 +1,36 @@
-SKIP: FAILED
+#include <metal_stdlib>
+
+using namespace metal;
+struct tint_private_vars_struct {
+  uint tint_msl_thread_index_in_quadgroup;
+};
 
 
-enable subgroups;
+float4 tint_msl_quadSwapY(float4 e, thread tint_private_vars_struct* const tint_private_vars) {
+  return quad_shuffle(e,((*(tint_private_vars)).tint_msl_thread_index_in_quadgroup ^ 2u));
+}
 
-@group(0) @binding(0) var<storage, read_write> prevent_dce : vec4<f32>;
-
-fn quadSwapY_b9d9e7() -> vec4<f32> {
-  var arg_0 = vec4<f32>(1.0f);
-  var res : vec4<f32> = quadSwapY(arg_0);
+float4 quadSwapY_b9d9e7(thread tint_private_vars_struct* const tint_private_vars) {
+  float4 arg_0 = float4(1.0f);
+  float4 res = tint_msl_quadSwapY(arg_0, tint_private_vars);
   return res;
 }
 
-@fragment
-fn fragment_main() {
-  prevent_dce = quadSwapY_b9d9e7();
+fragment void fragment_main(device float4* tint_symbol [[buffer(0)]], uint tint_thread_index_in_quadgroup [[thread_index_in_quadgroup]]) {
+  thread tint_private_vars_struct tint_private_vars = {};
+  {
+    tint_private_vars.tint_msl_thread_index_in_quadgroup = tint_thread_index_in_quadgroup;
+  }
+  *(tint_symbol) = quadSwapY_b9d9e7(&(tint_private_vars));
+  return;
 }
 
-@compute @workgroup_size(1)
-fn compute_main() {
-  prevent_dce = quadSwapY_b9d9e7();
+kernel void compute_main(device float4* tint_symbol_1 [[buffer(0)]], uint tint_thread_index_in_quadgroup_1 [[thread_index_in_quadgroup]]) {
+  thread tint_private_vars_struct tint_private_vars = {};
+  {
+    tint_private_vars.tint_msl_thread_index_in_quadgroup = tint_thread_index_in_quadgroup_1;
+  }
+  *(tint_symbol_1) = quadSwapY_b9d9e7(&(tint_private_vars));
+  return;
 }
 
-Failed to generate: error: Unknown import method: quadSwapY

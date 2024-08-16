@@ -1432,6 +1432,10 @@ bool Validator::EntryPoint(const sem::Function* func, ast::PipelineStage stage) 
                     invariant_attribute = invariant;
                     return InvariantAttribute(invariant, stage);
                 },
+                [&](const ast::InternalAttribute* internal) {
+                    pipeline_io_attribute = internal;
+                    return true;
+                },
                 [&](Default) { return true; });
 
             if (!ok) {
