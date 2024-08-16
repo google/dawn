@@ -1247,6 +1247,57 @@ MaybeError CommandBuffer::RecordRenderPass(CommandRecordingContext* recordingCon
                 break;
             }
 
+            case Command::MultiDrawIndirect: {
+                MultiDrawIndirectCmd* cmd = iter->NextCommand<MultiDrawIndirectCmd>();
+
+                Buffer* indirectBuffer = ToBackend(cmd->indirectBuffer.Get());
+                DAWN_ASSERT(indirectBuffer != nullptr);
+
+                // Count buffer is optional
+                Buffer* countBuffer = ToBackend(cmd->drawCountBuffer.Get());
+
+                descriptorSets.Apply(device, recordingContext, VK_PIPELINE_BIND_POINT_GRAPHICS);
+
+                if (countBuffer == nullptr) {
+                    device->fn.CmdDrawIndirect(commands, indirectBuffer->GetHandle(),
+                                               static_cast<VkDeviceSize>(cmd->indirectOffset),
+                                               cmd->maxDrawCount, kDrawIndirectSize);
+                } else {
+                    device->fn.CmdDrawIndirectCountKHR(
+                        commands, indirectBuffer->GetHandle(),
+                        static_cast<VkDeviceSize>(cmd->indirectOffset), countBuffer->GetHandle(),
+                        static_cast<VkDeviceSize>(cmd->drawCountOffset), cmd->maxDrawCount,
+                        kDrawIndirectSize);
+                }
+                break;
+            }
+            case Command::MultiDrawIndexedIndirect: {
+                MultiDrawIndexedIndirectCmd* cmd = iter->NextCommand<MultiDrawIndexedIndirectCmd>();
+
+                Buffer* indirectBuffer = ToBackend(cmd->indirectBuffer.Get());
+                DAWN_ASSERT(indirectBuffer != nullptr);
+
+                // Count buffer is optional
+                Buffer* countBuffer = ToBackend(cmd->drawCountBuffer.Get());
+
+                descriptorSets.Apply(device, recordingContext, VK_PIPELINE_BIND_POINT_GRAPHICS);
+
+                if (countBuffer == nullptr) {
+                    device->fn.CmdDrawIndexedIndirect(
+                        commands, indirectBuffer->GetHandle(),
+                        static_cast<VkDeviceSize>(cmd->indirectOffset), cmd->maxDrawCount,
+                        kDrawIndexedIndirectSize);
+                } else {
+                    device->fn.CmdDrawIndexedIndirectCountKHR(
+                        commands, indirectBuffer->GetHandle(),
+                        static_cast<VkDeviceSize>(cmd->indirectOffset), countBuffer->GetHandle(),
+                        static_cast<VkDeviceSize>(cmd->drawCountOffset), cmd->maxDrawCount,
+                        kDrawIndexedIndirectSize);
+                }
+
+                break;
+            }
+
             case Command::InsertDebugMarker: {
                 if (device->GetGlobalInfo().HasExt(InstanceExt::DebugUtils)) {
                     InsertDebugMarkerCmd* cmd = iter->NextCommand<InsertDebugMarkerCmd>();

@@ -381,10 +381,15 @@ void RenderEncoderBase::APIMultiDrawIndirect(BufferBase* indirectBuffer,
             cmd->drawCountBuffer = drawCountBuffer;
             cmd->drawCountOffset = drawCountBufferOffset;
 
+            mIndirectDrawMetadata.AddMultiDrawIndirect(cmd);
+
             // TODO(crbug.com/dawn/1166): Adding the indirectBuffer is needed for correct usage
             // validation, but it will unecessarily transition to indirectBuffer usage in the
             // backend.
             mUsageTracker.BufferUsedAs(indirectBuffer, wgpu::BufferUsage::Indirect);
+            if (drawCountBuffer != nullptr) {
+                mUsageTracker.BufferUsedAs(drawCountBuffer, wgpu::BufferUsage::Indirect);
+            }
 
             mDrawCount += maxDrawCount;
 
@@ -465,10 +470,18 @@ void RenderEncoderBase::APIMultiDrawIndexedIndirect(BufferBase* indirectBuffer,
             cmd->drawCountBuffer = drawCountBuffer;
             cmd->drawCountOffset = drawCountBufferOffset;
 
+            mIndirectDrawMetadata.AddMultiDrawIndexedIndirect(
+                mCommandBufferState.GetIndexBuffer(), mCommandBufferState.GetIndexFormat(),
+                mCommandBufferState.GetIndexBufferSize(),
+                mCommandBufferState.GetIndexBufferOffset(), cmd);
+
             // TODO(crbug.com/dawn/1166): Adding the indirectBuffer is needed for correct usage
             // validation, but it will unecessarily transition to indirectBuffer usage in the
             // backend.
             mUsageTracker.BufferUsedAs(indirectBuffer, wgpu::BufferUsage::Indirect);
+            if (drawCountBuffer != nullptr) {
+                mUsageTracker.BufferUsedAs(drawCountBuffer, wgpu::BufferUsage::Indirect);
+            }
 
             mDrawCount += maxDrawCount;
 
@@ -555,7 +568,7 @@ void RenderEncoderBase::APISetIndexBuffer(BufferBase* buffer,
                 }
             }
 
-            mCommandBufferState.SetIndexBuffer(format, offset, size);
+            mCommandBufferState.SetIndexBuffer(buffer, format, offset, size);
 
             SetIndexBufferCmd* cmd =
                 allocator->Allocate<SetIndexBufferCmd>(Command::SetIndexBuffer);

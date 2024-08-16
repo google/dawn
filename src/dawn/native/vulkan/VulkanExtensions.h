@@ -107,6 +107,7 @@ enum class DeviceExt {
     ImageFormatList,
     ShaderFloat16Int8,
     ShaderSubgroupExtendedTypes,
+    DrawIndirectCount,
 
     // Promoted to 1.3
     ShaderIntegerDotProduct,

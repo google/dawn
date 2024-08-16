@@ -198,6 +198,36 @@ TEST(Math, Align) {
     ASSERT_EQ(Align(static_cast<uint64_t>(0xFFFFFFFFFFFFFFFF), 1), 0xFFFFFFFFFFFFFFFFull);
 }
 
+// Tests for AlignDown
+TEST(Math, AlignDown) {
+    // 0 aligns to 0
+    ASSERT_EQ(AlignDown(0u, 4), 0u);
+    ASSERT_EQ(AlignDown(0u, 256), 0u);
+    ASSERT_EQ(AlignDown(0u, 512), 0u);
+
+    // Multiples align to self
+    ASSERT_EQ(AlignDown(8u, 8), 8u);
+    ASSERT_EQ(AlignDown(16u, 8), 16u);
+    ASSERT_EQ(AlignDown(24u, 8), 24u);
+    ASSERT_EQ(AlignDown(256u, 256), 256u);
+    ASSERT_EQ(AlignDown(512u, 256), 512u);
+    ASSERT_EQ(AlignDown(768u, 256), 768u);
+
+    // Alignment with 1 is self
+    for (uint32_t i = 0; i < 128; ++i) {
+        ASSERT_EQ(AlignDown(i, 1), i);
+    }
+
+    // Everything in the range (align, 2*align - 1) aligns down to align
+    for (uint32_t i = 1; i < 64; ++i) {
+        ASSERT_EQ(AlignDown(64 + i, 64), 64u);
+    }
+
+    // Test extrema
+    ASSERT_EQ(AlignDown(static_cast<uint64_t>(0xFFFFFFFF), 4), 0xFFFFFFFC);
+    ASSERT_EQ(AlignDown(static_cast<uint64_t>(0xFFFFFFFFFFFFFFFF), 1), 0xFFFFFFFFFFFFFFFFull);
+}
+
 TEST(Math, AlignSizeof) {
     // Basic types should align to self if alignment is a divisor.
     ASSERT_EQ((AlignSizeof<uint8_t, 1>()), 1u);

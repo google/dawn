@@ -78,6 +78,14 @@ T Align(T value, size_t alignment) {
     return (value + (alignmentT - 1)) & ~(alignmentT - 1);
 }
 
+template <typename T>
+T AlignDown(T value, size_t alignment) {
+    DAWN_ASSERT(IsPowerOfTwo(alignment));
+    DAWN_ASSERT(alignment != 0);
+    T alignmentT = static_cast<T>(alignment);
+    return value & ~(alignmentT - 1);
+}
+
 template <typename T, size_t Alignment>
 constexpr size_t AlignSizeof() {
     static_assert(Alignment != 0 && (Alignment & (Alignment - 1)) == 0,

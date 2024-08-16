@@ -536,6 +536,12 @@ ResultOrError<VulkanDeviceKnobs> Device::CreateDevice(VkPhysicalDevice vkPhysica
                           VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SAMPLER_YCBCR_CONVERSION_FEATURES);
     }
 
+    if (HasFeature(Feature::MultiDrawIndirect)) {
+        DAWN_ASSERT(usedKnobs.HasExt(DeviceExt::DrawIndirectCount) &&
+                    mDeviceInfo.features.multiDrawIndirect == VK_TRUE);
+        usedKnobs.features.multiDrawIndirect = VK_TRUE;
+    }
+
     // Find a universal queue family
     {
         // Note that GRAPHICS and COMPUTE imply TRANSFER so we don't need to check for it.
