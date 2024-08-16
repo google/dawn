@@ -3701,6 +3701,14 @@ Eval::Result Eval::smoothstep(const core::type::Type* ty,
         auto create = [&](auto low, auto high, auto x) -> Eval::Result {
             using NumberT = decltype(low);
 
+            if (low >= high) {
+                AddError(source) << "smoothstep called with 'low' (" << low
+                                 << ") not less than 'high' (" << high << ")";
+                if (!use_runtime_semantics_) {
+                    return error;
+                }
+            }
+
             auto err = [&] {
                 AddNote(source) << "when calculating smoothstep";
                 return error;

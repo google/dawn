@@ -1456,12 +1456,17 @@ INSTANTIATE_TEST_SUITE_P(ResolverBuiltinsValidationTest,
                          DataPacking2x16,
                          ::testing::Values("pack2x16snorm", "pack2x16unorm", "pack2x16float"));
 
+using ExprMaker = std::function<const ast::Expression*(ast::Builder*)>;
+template <typename T>
+ExprMaker Mk(core::Number<T> v) {
+    return [v](ast::Builder* b) -> const ast::Expression* { return b->Expr(v); };
+}
+
 // We''ll construct cases like this:
 // fn foo() {
 //   var s: STYPE;
 //   _ = clamp(s, LOW, HIGH);
 // }
-using ExprMaker = std::function<const ast::Expression*(ast::Builder*)>;
 struct ClampPartialConstCase {
     builder::ast_type_func_ptr sType;
     ExprMaker makeLow;
@@ -1471,10 +1476,6 @@ struct ClampPartialConstCase {
     std::string highStr = "";
 };
 
-template <typename T>
-ExprMaker Mk(core::Number<T> v) {
-    return [v](ast::Builder* b) -> const ast::Expression* { return b->Expr(v); };
-}
 using ClampPartialConst = ResolverBuiltinsValidationTestWithParams<ClampPartialConstCase>;
 
 TEST_P(ClampPartialConst, Scalar) {
@@ -1587,6 +1588,126 @@ std::vector<ClampPartialConstCase> clampCases() {
 }
 
 INSTANTIATE_TEST_SUITE_P(Clamp, ClampPartialConst, ::testing::ValuesIn(clampCases()));
+
+// We''ll construct cases like this:
+// fn foo() {
+//   var s: STYPE;
+//   _ = smoothstep(LOW, HIGH, s);
+// }
+struct SmoothstepPartialConstCase {
+    builder::ast_type_func_ptr sType;
+    ExprMaker makeLow;
+    ExprMaker makeHigh;
+    bool expectPass = true;
+    std::string lowStr = "";
+    std::string highStr = "";
+};
+
+using SmoothstepPartialConst = ResolverBuiltinsValidationTestWithParams<SmoothstepPartialConstCase>;
+
+TEST_P(SmoothstepPartialConst, Scalar) {
+    auto params = GetParam();
+    auto sTy = params.sType(*this);
+    const ast::Expression* low = params.makeLow(this);
+    const ast::Expression* high = params.makeHigh(this);
+    WrapInFunction(Var("s", sTy), Ignore(Call(Source{{12, 34}}, "smoothstep", low, high, "s")));
+
+    if (params.expectPass) {
+        EXPECT_TRUE(r()->Resolve());
+    } else {
+        EXPECT_FALSE(r()->Resolve());
+        StringStream ss;
+        ss << "12:34 error: smoothstep called with 'low' (" << params.lowStr
+           << ") not less than 'high' (" << params.highStr << ")";
+        auto expect = ss.str();
+        EXPECT_EQ(r()->error(), expect);
+    }
+}
+
+TEST_P(SmoothstepPartialConst, Vector) {
+    auto params = GetParam();
+    auto sTy = params.sType(*this);
+    const ast::Expression* low = params.makeLow(this);
+    const ast::Expression* high = params.makeHigh(this);
+    WrapInFunction(Var("s", sTy), Ignore(Call(Source{{12, 34}}, "smoothstep",
+                                              Call(Ident("vec3"), Expr(0_a), low, Expr(0_a)),
+                                              Call(Ident("vec3"), Expr(1_a), high, Expr(1_a)),
+                                              Call(Ident("vec3"), "s", "s", "s"))));
+
+    if (params.expectPass) {
+        EXPECT_TRUE(r()->Resolve());
+    } else {
+        EXPECT_FALSE(r()->Resolve());
+        StringStream ss;
+        ss << "12:34 error: smoothstep called with 'low' (" << params.lowStr
+           << ") not less than 'high' (" << params.highStr << ")";
+        auto expect = ss.str();
+        EXPECT_EQ(r()->error(), expect);
+    }
+}
+
+TEST_P(SmoothstepPartialConst, VectorMixedRuntimeConstNotChecked) {
+    auto params = GetParam();
+    auto sTy = params.sType(*this);
+    const ast::Expression* low = params.makeLow(this);
+    const ast::Expression* high = params.makeHigh(this);
+    // Some components of the low and high vector are runtime, so the other
+    // components are not checked, and therefore do not generate errors.
+    WrapInFunction(Var("s", sTy),
+                   Ignore(Call(Source{{12, 34}}, "smoothstep", Call(Ident("vec2"), "s", low),
+                               Call(Ident("vec2"), "s", high), Call(Ident("vec2"), "s", "s"))));
+
+    EXPECT_TRUE(r()->Resolve());
+}
+
+std::vector<SmoothstepPartialConstCase> smoothstepCases() {
+    return std::vector<SmoothstepPartialConstCase>{
+        // Simple passing cases.
+        {DataType<f32>::AST, Mk(1_a), Mk(2_a), true},    // low < high
+        {DataType<f32>::AST, Mk(1.0_a), Mk(2_a), true},  // AFloat AInt
+        {DataType<f32>::AST, Mk(1_a), Mk(2_f), true},    // AInt AFloat
+        {DataType<f32>::AST, Mk(1_a), Mk(2_f), true},    // AFloat f32
+        {DataType<f32>::AST, Mk(1_f), Mk(2.0_a), true},  // f32 AFloat
+        {DataType<f32>::AST, Mk(1_f), Mk(2_f), true},    // f32 f32
+
+        //  AInt AInt
+        {DataType<f32>::AST, Mk(1_a), Mk(1_a), false, "1.0", "1.0"},
+        {DataType<f32>::AST, Mk(1_a), Mk(0_a), false, "1.0", "0.0"},
+        //  AFloat AInt
+        {DataType<f32>::AST, Mk(1.0_a), Mk(1_a), false, "1.0", "1.0"},
+        {DataType<f32>::AST, Mk(1.0_a), Mk(0_a), false, "1.0", "0.0"},
+        //  AInt AFloat
+        {DataType<f32>::AST, Mk(1_a), Mk(1.0_a), false, "1.0", "1.0"},
+        {DataType<f32>::AST, Mk(1_a), Mk(0.0_a), false, "1.0", "0.0"},
+
+        //  AFloat AFloat
+        {DataType<f32>::AST, Mk(1.0_a), Mk(1.0_a), false, "1.0", "1.0"},
+        {DataType<f32>::AST, Mk(1.0_a), Mk(0.0_a), false, "1.0", "0.0"},
+
+        //  AInt f32
+        {DataType<f32>::AST, Mk(1_a), Mk(1_f), false, "1.0", "1.0"},
+        {DataType<f32>::AST, Mk(1_a), Mk(0_f), false, "1.0", "0.0"},
+        //  f32 AInt
+        {DataType<f32>::AST, Mk(1_f), Mk(1_a), false, "1.0", "1.0"},
+        {DataType<f32>::AST, Mk(1_f), Mk(0_a), false, "1.0", "0.0"},
+
+        //  AFloat f32
+        {DataType<f32>::AST, Mk(1.0_a), Mk(1_f), false, "1.0", "1.0"},
+        {DataType<f32>::AST, Mk(1.0_a), Mk(0_f), false, "1.0", "0.0"},
+
+        //  f32 AFloat
+        {DataType<f32>::AST, Mk(1_a), Mk(1.0_a), false, "1.0", "1.0"},
+        {DataType<f32>::AST, Mk(1_a), Mk(0.0_a), false, "1.0", "0.0"},
+
+        //  f32 f32
+        {DataType<f32>::AST, Mk(1_f), Mk(1.0_f), false, "1.0", "1.0"},
+        {DataType<f32>::AST, Mk(1_f), Mk(0.0_f), false, "1.0", "0.0"},
+    };
+}
+
+INSTANTIATE_TEST_SUITE_P(Smoothstep,
+                         SmoothstepPartialConst,
+                         ::testing::ValuesIn(smoothstepCases()));
 
 }  // namespace
 }  // namespace tint::resolver

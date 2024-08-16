@@ -1484,8 +1484,9 @@ crbug.com/42251283 [ qualcomm ] webgpu:shader,execution,expression,call,builtin,
 crbug.com/42251283 [ qualcomm ] webgpu:shader,execution,expression,call,builtin,dpdyCoarse:* [ Failure ]
 crbug.com/42251283 [ qualcomm ] webgpu:shader,execution,expression,call,builtin,dpdyFine:* [ Failure ]
 
-# crbug.com/bug/349420827: smoothstep execution failures
-crbug.com/dawn/349420827 webgpu:shader,validation,expression,call,builtin,smoothstep:* [ Failure ]
+# crbug.com/bug/350785841: smoothstep failures; needs CTS fixes to pass
+crbug.com/dawn/350785841 webgpu:shader,execution,expression,call,builtin,smoothstep:* [ Failure ]
+crbug.com/dawn/350785841 webgpu:shader,validation,expression,call,builtin,smoothstep:* [ Failure ]
 
 # crbug.com/bug/349425830: validation matrix mul overflow_mat_f16_internal
 crbug.com/dawn/349425830 [ amd mac ] webgpu:shader,validation,expression,matrix,mul:overflow_mat_f16_internal:lhs=1;c=2;r=2 [ Failure ]

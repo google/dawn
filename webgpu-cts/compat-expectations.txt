@@ -169,9 +169,9 @@ crbug.com/354152178 [ intel-0x4680 ] webgpu:shader,execution,expression,call,bui
 crbug.com/354152178 [ intel-0x9bc5 ] webgpu:shader,execution,expression,call,builtin,bitcast:ai_to_f32:* [ Failure ]
 crbug.com/354152178 [ nvidia-0x2184 ] webgpu:shader,execution,expression,call,builtin,bitcast:ai_to_f32:* [ Failure ]
 
-# crbug.com/bug/349420827: smoothstep execution
-crbug.com/dawn/349420827 [ intel-0x9bc5 ] webgpu:shader,validation,expression,call,builtin,smoothstep:* [ Failure ]
-crbug.com/dawn/349420827 [ nvidia-0x2184 ] webgpu:shader,validation,expression,call,builtin,smoothstep:* [ Failure ]
+# crbug.com/bug/350785841: smoothstep: needs CTS fixes to pass
+crbug.com/dawn/350785841 webgpu:shader,execution,expression,call,builtin,smoothstep:* [ Failure ]
+crbug.com/dawn/350785841 webgpu:shader,validation,expression,call,builtin,smoothstep:* [ Failure ]
 
 ### This section represents tests which may require CTS changes.
 
@@ -542,7 +542,6 @@ crbug.com/dawn/0000 [ intel-0x4680 ] webgpu:shader,execution,expression,call,bui
 crbug.com/dawn/0000 [ intel-0x4680 ] webgpu:shader,execution,expression,call,builtin,dpdyFine:* [ Failure ]
 crbug.com/dawn/0000 [ intel-0x4680 ] webgpu:shader,execution,expression,call,builtin,textureStore:out_of_bounds_array:* [ Failure ]
 crbug.com/dawn/0000 [ intel-0x4680 ] webgpu:shader,execution,robust_access_vertex:* [ Failure ]
-crbug.com/dawn/0000 [ intel-0x4680 ] webgpu:shader,validation,expression,call,builtin,smoothstep:* [ Failure ]
 crbug.com/dawn/0000 [ intel-0x4680 ] webgpu:web_platform,canvas,configure:viewFormats:* [ Failure ]
 crbug.com/dawn/0000 [ intel-0x4680 ] webgpu:web_platform,canvas,getCurrentTexture:multiple_frames:canvasType="offscreen" [ Failure ]
 crbug.com/dawn/0000 [ intel-0x4680 ] webgpu:web_platform,canvas,getCurrentTexture:resize:canvasType="offscreen" [ Failure ]
