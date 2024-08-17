@@ -1374,7 +1374,7 @@ std::vector<Case> InsertBitsCases() {
     };
 
     const char* error_msg =
-        "12:34 error: 'offset + 'count' must be less than or equal to the bit width of 'e'";
+        "12:34 error: 'offset' + 'count' must be less than or equal to the bit width of 'e'";
     ConcatInto(  //
         r, std::vector<Case>{
                E({T(1), T(1), UT(33), UT(0)}, error_msg),         //
@@ -1582,7 +1582,7 @@ std::vector<Case> ExtractBitsCases() {
     };
 
     const char* error_msg =
-        "12:34 error: 'offset + 'count' must be less than or equal to the bit width of 'e'";
+        "12:34 error: 'offset' + 'count' must be less than or equal to the bit width of 'e'";
     ConcatInto(  //
         r, std::vector<Case>{
                E({T(1), UT(33), UT(0)}, error_msg),

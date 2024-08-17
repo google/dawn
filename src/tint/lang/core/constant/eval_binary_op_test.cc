@@ -2207,7 +2207,7 @@ TEST_F(ConstEvalTest, NonShortCircuit_And_Invalid_BuiltinCall) {
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
-              "12:34 error: 'offset + 'count' must be less than or equal to the bit width of 'e'");
+              "12:34 error: 'offset' + 'count' must be less than or equal to the bit width of 'e'");
 }
 
 TEST_F(ConstEvalTest, ShortCircuit_And_Error_BuiltinCall) {
@@ -2255,7 +2255,7 @@ TEST_F(ConstEvalTest, NonShortCircuit_Or_Invalid_BuiltinCall) {
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
-              "12:34 error: 'offset + 'count' must be less than or equal to the bit width of 'e'");
+              "12:34 error: 'offset' + 'count' must be less than or equal to the bit width of 'e'");
 }
 
 TEST_F(ConstEvalTest, ShortCircuit_Or_Error_BuiltinCall) {

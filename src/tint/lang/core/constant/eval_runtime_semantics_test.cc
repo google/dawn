@@ -372,7 +372,7 @@ TEST_F(ConstEvalRuntimeSemanticsTest, ExtractBits_I32_TooManyBits) {
     ASSERT_EQ(result, Success);
     EXPECT_EQ(result.Get()->ValueAs<i32>(), 0x12);
     EXPECT_EQ(error(),
-              R"(warning: 'offset + 'count' must be less than or equal to the bit width of 'e')");
+              R"(warning: 'offset' + 'count' must be less than or equal to the bit width of 'e')");
 }
 
 TEST_F(ConstEvalRuntimeSemanticsTest, ExtractBits_U32_TooManyBits) {
@@ -383,7 +383,7 @@ TEST_F(ConstEvalRuntimeSemanticsTest, ExtractBits_U32_TooManyBits) {
     ASSERT_EQ(result, Success);
     EXPECT_EQ(result.Get()->ValueAs<u32>(), 0x12);
     EXPECT_EQ(error(),
-              R"(warning: 'offset + 'count' must be less than or equal to the bit width of 'e')");
+              R"(warning: 'offset' + 'count' must be less than or equal to the bit width of 'e')");
 }
 
 TEST_F(ConstEvalRuntimeSemanticsTest, InsertBits_I32_TooManyBits) {
@@ -395,7 +395,7 @@ TEST_F(ConstEvalRuntimeSemanticsTest, InsertBits_I32_TooManyBits) {
     ASSERT_EQ(result, Success);
     EXPECT_EQ(result.Get()->ValueAs<i32>(), 0x12345678);
     EXPECT_EQ(error(),
-              R"(warning: 'offset + 'count' must be less than or equal to the bit width of 'e')");
+              R"(warning: 'offset' + 'count' must be less than or equal to the bit width of 'e')");
 }
 
 TEST_F(ConstEvalRuntimeSemanticsTest, InsertBits_U32_TooManyBits) {
@@ -407,7 +407,7 @@ TEST_F(ConstEvalRuntimeSemanticsTest, InsertBits_U32_TooManyBits) {
     ASSERT_EQ(result, Success);
     EXPECT_EQ(result.Get()->ValueAs<u32>(), 0x12345678);
     EXPECT_EQ(error(),
-              R"(warning: 'offset + 'count' must be less than or equal to the bit width of 'e')");
+              R"(warning: 'offset' + 'count' must be less than or equal to the bit width of 'e')");
 }
 
 TEST_F(ConstEvalRuntimeSemanticsTest, InverseSqrt_F32_OutOfRange) {

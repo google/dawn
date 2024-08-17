@@ -83,8 +83,12 @@ std::ostream& operator<<(std::ostream& o, Compare c) {
     return o;
 }
 
+///////
+// clamp, smoothstep
+///////
+
 template <class Params>
-struct BuiltinPartialConstArgsErrorBase : public DawnTestWithParams<Params> {
+struct BuiltinPartialConstLowHighBase : public DawnTestWithParams<Params> {
     using DawnTestWithParams<Params>::GetParam;
     Phase mLowPhase = Phase::kConst;
     Phase mHighPhase = Phase::kConst;
@@ -95,15 +99,15 @@ using Builtin = std::string;
 using LowPhase = Phase;
 using HighPhase = Phase;
 using Scalar = bool;
-DAWN_TEST_PARAM_STRUCT(BuiltinPartialConstArgsErrorTestParams,
+DAWN_TEST_PARAM_STRUCT(BuiltinPartialConstLowHighParams,
                        Builtin,
                        LowPhase,
                        HighPhase,
                        Compare,
                        Scalar);
 
-class ShaderBuiltinPartialConstArgsErrorTest
-    : public BuiltinPartialConstArgsErrorBase<BuiltinPartialConstArgsErrorTestParams> {
+class ShaderBuiltinPartialConstLowHighTest
+    : public BuiltinPartialConstLowHighBase<BuiltinPartialConstLowHighParams> {
   protected:
     std::string Shader() {
         const auto builtin = GetParam().mBuiltin;
@@ -159,7 +163,7 @@ class ShaderBuiltinPartialConstArgsErrorTest
     }
 };
 
-TEST_P(ShaderBuiltinPartialConstArgsErrorTest, All) {
+TEST_P(ShaderBuiltinPartialConstLowHighTest, All) {
     const auto builtin = GetParam().mBuiltin;
     const auto lowPhase = GetParam().mLowPhase;
     const auto highPhase = GetParam().mHighPhase;
@@ -186,8 +190,7 @@ TEST_P(ShaderBuiltinPartialConstArgsErrorTest, All) {
     }
 }
 
-// DawnTestBase::CreateDeviceImpl always enables allow_unsafe_apis toggle.
-DAWN_INSTANTIATE_TEST_P(ShaderBuiltinPartialConstArgsErrorTest,
+DAWN_INSTANTIATE_TEST_P(ShaderBuiltinPartialConstLowHighTest,
                         {D3D11Backend(), D3D12Backend(), MetalBackend(), NullBackend(),
                          OpenGLBackend(), OpenGLESBackend(), VulkanBackend()},
                         {"clamp", "smoothstep"},                             // mBuiltin
@@ -195,6 +198,99 @@ DAWN_INSTANTIATE_TEST_P(ShaderBuiltinPartialConstArgsErrorTest,
                         {Phase::kConst, Phase::kOverride, Phase::kRuntime},  // mHighPhase
                         {Compare::kLess, Compare::kEqual, Compare::kMore},   // mCompare
                         {true, false});                                      // Scalar (else Vector)
+
+///////
+// insertBits
+///////
+
+template <class Params>
+struct BuiltinPartialConstOffsetCountBase : public DawnTestWithParams<Params> {
+    using DawnTestWithParams<Params>::GetParam;
+    Phase mOffsetPhase = Phase::kConst;
+    Phase mCountPhase = Phase::kConst;
+};
+
+using Builtin = std::string;
+using OffsetPhase = Phase;
+using CountPhase = Phase;
+using OffsetTooBig = bool;
+using CountTooBig = bool;
+DAWN_TEST_PARAM_STRUCT(BuiltinPartialConstOffsetCountParams,
+                       Builtin,
+                       OffsetPhase,
+                       CountPhase,
+                       OffsetTooBig,
+                       CountTooBig);
+
+class ShaderBuiltinPartialConstOffsetCountTest
+    : public BuiltinPartialConstOffsetCountBase<BuiltinPartialConstOffsetCountParams> {
+  protected:
+    std::string Shader() {
+        // Assume 32-bit integers.
+        const auto builtin = GetParam().mBuiltin;
+        const int offset_val = 16 + (GetParam().mOffsetTooBig ? 1 : 0);
+        const int count_val = 16 + (GetParam().mCountTooBig ? 1 : 0);
+
+        std::stringstream code;
+        auto module_var = [&](std::string ident, Phase p, float value) {
+            if (p != Phase::kRuntime) {
+                code << p << " " << ident << ": u32 = " << value << ";\n";
+            }
+        };
+        auto function_var = [&](std::string ident, Phase p, int value) {
+            if (p == Phase::kRuntime) {
+                code << "  var " << ident << ": u32 = " << value << ";\n";
+            }
+        };
+        module_var("offset", GetParam().mOffsetPhase, offset_val);
+        module_var("count", GetParam().mCountPhase, count_val);
+        code << "@compute @workgroup_size(1) fn main() {\n";
+        function_var("offset", GetParam().mOffsetPhase, offset_val);
+        function_var("count", GetParam().mCountPhase, count_val);
+        code << "  var s: u32 = 0;\n";
+        code << " _ = insertBits(s,s,offset,count);\n";
+        code << "}";
+        return code.str();
+    }
+};
+
+TEST_P(ShaderBuiltinPartialConstOffsetCountTest, All) {
+    const auto builtin = GetParam().mBuiltin;
+    const auto offsetPhase = GetParam().mOffsetPhase;
+    const auto countPhase = GetParam().mCountPhase;
+    const auto offsetTooBig = GetParam().mOffsetTooBig;
+    const auto countTooBig = GetParam().mCountTooBig;
+    const auto wgsl = Shader();
+
+    const bool expect_create_shader_error = (offsetTooBig || countTooBig)    //
+                                            && offsetPhase == Phase::kConst  //
+                                            && countPhase == Phase::kConst;
+
+    if (expect_create_shader_error) {
+        ASSERT_DEVICE_ERROR(utils::CreateShaderModule(device, wgsl));
+    } else {
+        const bool expect_pipeline_error = (offsetTooBig || countTooBig)      //
+                                           && offsetPhase != Phase::kRuntime  //
+                                           && countPhase != Phase::kRuntime;
+        auto shader = utils::CreateShaderModule(device, wgsl);
+        wgpu::ComputePipelineDescriptor desc;
+        desc.compute.module = shader;
+        if (expect_pipeline_error) {
+            ASSERT_DEVICE_ERROR(device.CreateComputePipeline(&desc));
+        } else {
+            device.CreateComputePipeline(&desc);
+        }
+    }
+}
+
+DAWN_INSTANTIATE_TEST_P(ShaderBuiltinPartialConstOffsetCountTest,
+                        {D3D11Backend(), D3D12Backend(), MetalBackend(), NullBackend(),
+                         OpenGLBackend(), OpenGLESBackend(), VulkanBackend()},
+                        {"insertBits"},                                      // mBuiltin
+                        {Phase::kConst, Phase::kOverride, Phase::kRuntime},  // mOffsetPhase
+                        {Phase::kConst, Phase::kOverride, Phase::kRuntime},  // mCountPhase
+                        {true, false},                                       // mOffsetTooBig
+                        {true, false});                                      // mCountTooBig
 
 }  // anonymous namespace
 }  // namespace dawn

@@ -2627,7 +2627,7 @@ Eval::Result Eval::extractBits(const core::type::Type* ty,
                 constexpr UT w = sizeof(UT) * 8;
                 if (o > w || c > w || (o + c) > w) {
                     AddError(source)
-                        << "'offset + 'count' must be less than or equal to the bit width of 'e'";
+                        << "'offset' + 'count' must be less than or equal to the bit width of 'e'";
                     if (use_runtime_semantics_) {
                         o = std::min(o, w);
                         c = std::min(c, w - o);
@@ -2896,7 +2896,7 @@ Eval::Result Eval::insertBits(const core::type::Type* ty,
                 constexpr UT w = sizeof(UT) * 8;
                 if (o > w || c > w || (o + c) > w) {
                     AddError(source)
-                        << "'offset + 'count' must be less than or equal to the bit width of 'e'";
+                        << "'offset' + 'count' must be less than or equal to the bit width of 'e'";
                     if (use_runtime_semantics_) {
                         o = std::min(o, w);
                         c = std::min(c, w - o);
