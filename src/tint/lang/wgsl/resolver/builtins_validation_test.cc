@@ -1823,5 +1823,118 @@ INSTANTIATE_TEST_SUITE_P(InsertBits,
                                             ::testing::ValuesIn({true}),
                                             ::testing::ValuesIn({true})));
 
+// We'll construct cases like this:
+// fn foo() {
+//   var e: ETYPE;
+//   _ = extractBits(e, COUNT, OFFSET);
+// }
+
+struct ExtractBitsPartialConstCase {
+    builder::ast_type_func_ptr eType;
+    ExprMaker makeOffset;
+    ExprMaker makeCount;
+    bool expectPass = true;
+    int width = 32;
+};
+
+using ExtractBitsPartialConst =
+    ResolverBuiltinsValidationTestWithParams<std::tuple<ExtractBitsPartialConstCase, bool, bool>>;
+
+TEST_P(ExtractBitsPartialConst, Scalar) {
+    auto [params, firstConst, secondConst] = GetParam();
+    auto eTy = params.eType(*this);
+    const ast::Expression* offset = params.makeOffset(this);
+    const ast::Expression* count = params.makeCount(this);
+    const ast::Variable* offsetDecl;
+    if (firstConst) {
+        offsetDecl = Const("offset", offset);
+    } else {
+        offsetDecl = Var("offset", offset);
+    }
+    const ast::Variable* countDecl;
+    if (secondConst) {
+        countDecl = Const("count", count);
+    } else {
+        countDecl = Var("count", count);
+    }
+    WrapInFunction(Var("e", eTy), offsetDecl, countDecl,
+                   Ignore(Call(Source{{12, 34}}, "extractBits", "e", "offset", "count")));
+
+    const auto expectPass = params.expectPass || !(firstConst && secondConst);
+
+    if (expectPass) {
+        EXPECT_TRUE(r()->Resolve());
+    } else {
+        EXPECT_FALSE(r()->Resolve());
+        const std::string expect =
+            "12:34 error: 'offset' + 'count' must be less than or equal to the bit width of 'e'";
+        EXPECT_EQ(r()->error(), expect);
+    }
+}
+
+TEST_P(ExtractBitsPartialConst, Vector) {
+    auto [params, firstConst, secondConst] = GetParam();
+    auto eTy = params.eType(*this);
+    const ast::Expression* offset = params.makeOffset(this);
+    const ast::Expression* count = params.makeCount(this);
+    const ast::Variable* offsetDecl;
+    if (firstConst) {
+        offsetDecl = Const("offset", offset);
+    } else {
+        offsetDecl = Var("offset", offset);
+    }
+    const ast::Variable* countDecl;
+    if (secondConst) {
+        countDecl = Const("count", count);
+    } else {
+        countDecl = Var("count", count);
+    }
+    WrapInFunction(Var("e", eTy), offsetDecl, countDecl,            //
+                   Ignore(Call(Source{{12, 34}}, "extractBits",     //
+                               Call(Ident("vec3"), "e", "e", "e"),  //
+                               "offset", "count")));
+
+    const auto expectPass = params.expectPass || !(firstConst && secondConst);
+
+    if (expectPass) {
+        EXPECT_TRUE(r()->Resolve());
+    } else {
+        EXPECT_FALSE(r()->Resolve());
+        const std::string expect =
+            "12:34 error: 'offset' + 'count' must be less than or equal to the bit width of 'e'";
+        EXPECT_EQ(r()->error(), expect);
+    }
+}
+
+std::vector<ExtractBitsPartialConstCase> extractBitsCases() {
+    return std::vector<ExtractBitsPartialConstCase>{
+        // Simple passing cases.
+        {DataType<u32>::AST, Mk(0_a), Mk(0_a), true},
+        {DataType<i32>::AST, Mk(0_a), Mk(0_a), true},
+        {DataType<u32>::AST, Mk(16_a), Mk(16_a), true},
+        {DataType<i32>::AST, Mk(16_a), Mk(16_a), true},
+        {DataType<u32>::AST, Mk(32_a), Mk(0_a), true},
+        {DataType<i32>::AST, Mk(32_a), Mk(0_a), true},
+        {DataType<u32>::AST, Mk(0_a), Mk(0_a), true},
+        {DataType<i32>::AST, Mk(0_a), Mk(0_a), true},
+        {DataType<u32>::AST, Mk(32_a), Mk(0_u), true},
+        {DataType<i32>::AST, Mk(32_u), Mk(0_a), true},
+
+        //  AInt AInt
+        {DataType<u32>::AST, Mk(0_a), Mk(33_a), false},
+        {DataType<u32>::AST, Mk(16_a), Mk(17_a), false},
+        {DataType<u32>::AST, Mk(33_a), Mk(0_a), false},
+
+        {DataType<i32>::AST, Mk(0_a), Mk(33_u), false},   // Aint u32
+        {DataType<i32>::AST, Mk(16_u), Mk(17_a), false},  // u32 AInt
+    };
+}
+
+INSTANTIATE_TEST_SUITE_P(ExtractBits,
+                         ExtractBitsPartialConst,
+                         ::testing::Combine(::testing::ValuesIn(extractBitsCases()),
+                                            ::testing::ValuesIn({true}),
+                                            ::testing::ValuesIn({true})));
+
 }  // namespace
 }  // namespace tint::resolver

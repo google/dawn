@@ -248,7 +248,12 @@ class ShaderBuiltinPartialConstOffsetCountTest
         function_var("offset", GetParam().mOffsetPhase, offset_val);
         function_var("count", GetParam().mCountPhase, count_val);
         code << "  var s: u32 = 0;\n";
-        code << " _ = insertBits(s,s,offset,count);\n";
+        if (builtin == "insertBits") {
+            code << " _ = insertBits(s,s,offset,count);\n";
+        }
+        if (builtin == "extractBits") {
+            code << " _ = extractBits(s,offset,count);\n";
+        }
         code << "}";
         return code.str();
     }
@@ -286,7 +291,7 @@ TEST_P(ShaderBuiltinPartialConstOffsetCountTest, All) {
 DAWN_INSTANTIATE_TEST_P(ShaderBuiltinPartialConstOffsetCountTest,
                         {D3D11Backend(), D3D12Backend(), MetalBackend(), NullBackend(),
                          OpenGLBackend(), OpenGLESBackend(), VulkanBackend()},
-                        {"insertBits"},                                      // mBuiltin
+                        {"insertBits", "extractBits"},                       // mBuiltin
                         {Phase::kConst, Phase::kOverride, Phase::kRuntime},  // mOffsetPhase
                         {Phase::kConst, Phase::kOverride, Phase::kRuntime},  // mCountPhase
                         {true, false},                                       // mOffsetTooBig

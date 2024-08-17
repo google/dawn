@@ -2533,6 +2533,19 @@ sem::Call* Resolver::BuiltinCall(const ast::CallExpression* expr,
                 }
             }
         } break;
+        case wgsl::BuiltinFn::kExtractBits: {
+            auto* offsetConst = ConvertConstArgument(args, target, 1);
+            auto* countConst = ConvertConstArgument(args, target, 2);
+            if (offsetConst && countConst) {
+                auto* zero = const_eval_.Zero(call->Type(), {}, Source{}).Get();
+                auto fakeArgs = Vector{zero, offsetConst, countConst};
+                auto res =
+                    const_eval_.extractBits(call->Type(), fakeArgs, call->Declaration()->source);
+                if (res != Success) {
+                    return nullptr;
+                }
+            }
+        } break;
         case wgsl::BuiltinFn::kInsertBits: {
             auto* offsetConst = ConvertConstArgument(args, target, 2);
             auto* countConst = ConvertConstArgument(args, target, 3);
