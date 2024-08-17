@@ -83,6 +83,23 @@ var LibraryWebGPU = {
       WebGPU._table[ptr] = value;
     },
 
+    // Future to promise management, and temporary list allocated up-front for
+    // WaitAny implementation on the promises. Note that all FutureIDs
+    // (uint64_t) are passed either as a low and high value or by pointer
+    // because they need to be passed back and forth between JS and C++, and JS
+    // is currently unable to pass a value to a C++ function as a uint64_t.
+    // This might be possible with -sWASM_BIGINT, but I was unable to get that
+    // to work properly at the time of writing.
+    _futures: [],
+    _futureInsert: (futureIdL, futureIdH, promise) => {
+#if ASYNCIFY
+      var futureId = futureIdH * 0x100000000 + futureIdL;
+      WebGPU._futures[futureId] =
+        new Promise((resolve) => promise.finally(resolve(futureId)));
+#endif
+    },
+    _waitAnyPromisesList: [],
+
     errorCallback: (callback, type, message, userdata) => {
       var sp = stackSave();
       var messagePtr = stringToUTF8OnStack(message);
@@ -452,12 +469,45 @@ var LibraryWebGPU = {
   },
 
   // ----------------------------------------------------------------------------
-  // Definitions for JS emwgpu functions (callable from webgpu.cpp)
+  // Definitions for standalone JS emwgpu functions (callable from webgpu.cpp)
   // ----------------------------------------------------------------------------
 
   emwgpuDelete: (id) => {
     delete WebGPU._table[id];
   },
+
+#if ASYNCIFY
+  // Returns a FutureID that was resolved, or kNullFutureId if timed out.
+  emwgpuWaitAny__async: true,
+  emwgpuWaitAny: (futurePtr, futureCount, timeoutNSPtr) => {
+    var promises = WebGPU._waitAnyPromisesList;
+    if (timeoutNSPtr) {
+      var timeoutMS = {{{ gpu.makeGetU64('timeoutNSPtr', 0) }}} / 1000000;
+      promises.length = futureCount + 1;
+      promise[futureCount] = new Promise((resolve) => setTimeout(resolve, timeoutMS, 0));
+    } else {
+      promises.length = futureCount;
+    }
+
+    for (var i = 0; i < futureCount; ++i) {
+      // If any of the FutureIDs are not tracked, it means it must be done.
+      var futureId = {{{ gpu.makeGetU64('(futurePtr + i * 8)', 0) }}};
+      if (!(futureId in WebGPU._futures)) {
+        return futureId;
+      }
+      promises[i] = WebGPU._futures[futureId];
+    }
+
+    var result = Asyncify.handleAsync(async () => {
+      return await Promise.race(promises);
+    });
+
+    // Clean up internal futures state.
+    delete WebGPU._futures[result];
+    WebGPU._waitAnyPromisesList.length = 0;
+    return result;
+  },
+#endif
 
   // --------------------------------------------------------------------------
   // WebGPU function definitions, with methods organized by "class".
@@ -1817,15 +1867,9 @@ var LibraryWebGPU = {
     return navigator["gpu"]["wgslLanguageFeatures"].has(WebGPU.WGSLFeatureName[featureEnumValue]);
   },
 
-  wgpuInstanceProcessEvents: (instance) => {
-    // TODO: This could probably be emulated with ASYNCIFY.
-#if ASSERTIONS
-    abort('wgpuInstanceProcessEvents is unsupported (use requestAnimationFrame via html5.h instead)');
-#endif
-  },
-
-  wgpuInstanceRequestAdapter__deps: ['$callUserCallback', '$stringToUTF8OnStack', 'emwgpuCreateAdapter'],
-  wgpuInstanceRequestAdapter: (instancePtr, options, callback, userdata) => {
+  emwgpuInstanceRequestAdapter__i53abi: false,
+  emwgpuInstanceRequestAdapter__deps: ['$callUserCallback', '$stringToUTF8OnStack', 'emwgpuCreateAdapter', 'emwgpuOnRequestAdapterCompleted'],
+  emwgpuInstanceRequestAdapter: (instancePtr, futureIdL, futureIdH, options) => {
     var opts;
     if (options) {
       {{{ gpu.makeCheckDescriptor('options') }}}
@@ -1838,37 +1882,35 @@ var LibraryWebGPU = {
     }
 
     if (!('gpu' in navigator)) {
-      var sp = stackSave();
-      var messagePtr = stringToUTF8OnStack('WebGPU not available on this browser (navigator.gpu is not available)');
-      {{{ makeDynCall('vippp', 'callback') }}}({{{ gpu.RequestAdapterStatus.Unavailable }}}, 0, messagePtr, userdata);
-      stackRestore(sp);
+      withStackSave(() => {
+        var messagePtr = stringToUTF8OnStack('WebGPU not available on this browser (navigator.gpu is not available)');
+        _emwgpuOnRequestAdapterCompleted(futureIdL, futureIdH, {{{ gpu.RequestAdapterStatus.Unavailable }}}, 0, messagePtr);
+      });
       return;
     }
 
     {{{ runtimeKeepalivePush() }}}
-    navigator["gpu"]["requestAdapter"](opts).then((adapter) => {
+    WebGPU._futureInsert(futureIdL, futureIdH, navigator["gpu"]["requestAdapter"](opts).then((adapter) => {
       {{{ runtimeKeepalivePop() }}}
-      callUserCallback(() => {
-        if (adapter) {
-          var adapterPtr = _emwgpuCreateAdapter();
-          WebGPU._tableInsert(adapterPtr, adapter);
-          {{{ makeDynCall('vippp', 'callback') }}}({{{ gpu.RequestAdapterStatus.Success }}}, adapterPtr, 0, userdata);
-        } else {
-          var sp = stackSave();
-          var messagePtr = stringToUTF8OnStack('WebGPU not available on this system (requestAdapter returned null)');
-          {{{ makeDynCall('vippp', 'callback') }}}({{{ gpu.RequestAdapterStatus.Unavailable }}}, 0, messagePtr, userdata);
-          stackRestore(sp);
-        }
-      });
+      if (adapter) {
+        var adapterPtr = _emwgpuCreateAdapter();
+        WebGPU._tableInsert(adapterPtr, adapter);
+        _emwgpuOnRequestAdapterCompleted(futureIdL, futureIdH, {{{ gpu.RequestAdapterStatus.Success }}}, adapterPtr, 0);
+      } else {
+        withStackSave(() => {
+          var messagePtr = stringToUTF8OnStack('WebGPU not available on this browser (requestAdapter returned null)');
+          _emwgpuOnRequestAdapterCompleted(futureIdL, futureIdH, {{{ gpu.RequestAdapterStatus.Unavailable }}}, 0, messagePtr);
+        });
+      }
+      return;
     }, (ex) => {
       {{{ runtimeKeepalivePop() }}}
-      callUserCallback(() => {
-        var sp = stackSave();
+      withStackSave(() => {
         var messagePtr = stringToUTF8OnStack(ex.message);
-        {{{ makeDynCall('vippp', 'callback') }}}({{{ gpu.RequestAdapterStatus.Error }}}, 0, messagePtr, userdata);
-        stackRestore(sp);
+        _emwgpuOnRequestAdapterCompleted(futureIdL, futureIdH, {{{ gpu.RequestAdapterStatus.Error }}}, 0, messagePtr);
       });
-    });
+      return;
+    }));
   },
 
   // --------------------------------------------------------------------------
@@ -2485,7 +2527,9 @@ for (var value in LibraryWebGPU.$WebGPU.FeatureName) {
 
 for (const key of Object.keys(LibraryWebGPU)) {
   if (typeof LibraryWebGPU[key] === 'function') {
-    LibraryWebGPU[key + '__i53abi'] = true;
+    if (!(key + '__i53abi' in LibraryWebGPU)) {
+      LibraryWebGPU[key + '__i53abi'] = true;
+    }
   }
 }
 

@@ -194,6 +194,8 @@ if (${DAWN_ENABLE_EMSCRIPTEN})
     target_link_options(emdawnwebgpu_config INTERFACE
         # We are using Dawn-generated bindings, not built-in ones
         "-sUSE_WEBGPU=0"
+        # We need Asyncify for Future implementation.
+        "-sASYNCIFY=1"
         # The JS libraries needed for bindings
         "--js-library=${EM_BUILD_GEN_DIR}/library_webgpu_enum_tables.js"
         "--js-library=${EM_BUILD_GEN_DIR}/library_webgpu_generated_struct_info.js"

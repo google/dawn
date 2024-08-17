@@ -271,38 +271,41 @@ int SampleBase::Run(unsigned int delay) {
     // Create the instance
     sample->instance = wgpu::CreateInstance(nullptr);
 
-    // Create the adapter, device, and set the emscripten loop via callbacks
+    // Synchronously create the adapter
+    sample->instance.WaitAny(
+        sample->instance.RequestAdapter(
+            &adapterOptions, wgpu::CallbackMode::WaitAnyOnly,
+            [](wgpu::RequestAdapterStatus status, wgpu::Adapter adapter, const char* message) {
+                if (status != wgpu::RequestAdapterStatus::Success) {
+                    dawn::ErrorLog() << "Failed to get an adapter:" << message;
+                    return;
+                }
+                sample->adapter = std::move(adapter);
+            }),
+        UINT64_MAX);
+    if (sample->adapter == nullptr) {
+        return 1;
+    }
+
+    // Create the device and set the emscripten loop via callbacks
     // TODO(crbug.com/42241221) Update to use the newer APIs once they are implemented in
     // Emscripten.
-    sample->instance.RequestAdapter(
-        &adapterOptions,
-        [](WGPURequestAdapterStatus status, WGPUAdapter adapter, const char* message,
-           void* userdata) {
-            if (status != WGPURequestAdapterStatus_Success) {
-                dawn::ErrorLog() << "Failed to get an adapter:" << message;
+    wgpu::DeviceDescriptor deviceDesc = {};
+    sample->adapter.RequestDevice(
+        &deviceDesc,
+        [](WGPURequestDeviceStatus status, WGPUDevice device, const char* message, void* userdata) {
+            if (status != WGPURequestDeviceStatus_Success) {
+                dawn::ErrorLog() << "Failed to get an device:" << message;
                 return;
             }
-            sample->adapter = wgpu::Adapter::Acquire(adapter);
+            sample->device = wgpu::Device::Acquire(device);
+            sample->queue = sample->device.GetQueue();
 
-            wgpu::DeviceDescriptor deviceDesc = {};
-            sample->adapter.RequestDevice(
-                &deviceDesc,
-                [](WGPURequestDeviceStatus status, WGPUDevice device, const char* message,
-                   void* userdata) {
-                    if (status != WGPURequestDeviceStatus_Success) {
-                        dawn::ErrorLog() << "Failed to get an device:" << message;
-                        return;
-                    }
-                    sample->device = wgpu::Device::Acquire(device);
-                    sample->queue = sample->device.GetQueue();
-
-                    if (sample->Setup()) {
-                        emscripten_set_main_loop([]() { sample->FrameImpl(); }, 0, false);
-                    } else {
-                        dawn::ErrorLog() << "Failed to setup sample";
-                    }
-                },
-                nullptr);
+            if (sample->Setup()) {
+                emscripten_set_main_loop([]() { sample->FrameImpl(); }, 0, false);
+            } else {
+                dawn::ErrorLog() << "Failed to setup sample";
+            }
         },
         nullptr);
 #endif  // __EMSCRIPTEN__
