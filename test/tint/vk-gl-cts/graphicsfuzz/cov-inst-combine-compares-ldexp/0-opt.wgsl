@@ -29,7 +29,7 @@ var<private> x_GLF_color : vec4<f32>;
 fn main_1() {
   let x_29 : f32 = x_5.x_GLF_uniform_float_values[0].el;
   let x_32 : f32 = x_5.x_GLF_uniform_float_values[0].el;
-  if ((ldexp(x_29, 10000) == x_32)) {
+  if ((ldexp(x_29, 100) == x_32)) {
     let x_38 : i32 = x_7.x_GLF_uniform_int_values[1].el;
     let x_41 : i32 = x_7.x_GLF_uniform_int_values[0].el;
     let x_44 : i32 = x_7.x_GLF_uniform_int_values[0].el;

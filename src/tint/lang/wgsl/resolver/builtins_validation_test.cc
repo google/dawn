@@ -28,6 +28,7 @@
 #include <functional>
 #include "src/tint/lang/core/builtin_value.h"
 #include "src/tint/lang/wgsl/ast/call_statement.h"
+#include "src/tint/lang/wgsl/extension.h"
 #include "src/tint/lang/wgsl/resolver/resolver_helper_test.h"
 #include "src/tint/utils/text/string_stream.h"
 
@@ -2002,6 +2003,89 @@ INSTANTIATE_TEST_SUITE_P(ExtractBits,
                          ::testing::Combine(::testing::ValuesIn(extractBitsCases()),
                                             ::testing::ValuesIn({true}),
                                             ::testing::ValuesIn({true})));
+
+// We'll construct cases like this:
+// fn foo() {
+//   var x: XTYPE;
+//   _ = ldexp(x, EXPONENT);
+// }
+
+struct LdexpPartialConstCase {
+    builder::ast_type_func_ptr eType;
+    ExprMaker makeExponent;
+    bool expectPass = true;
+    int highestAllowed = 128;
+};
+
+using LdexpPartialConst = ResolverBuiltinsValidationTestWithParams<LdexpPartialConstCase>;
+
+TEST_P(LdexpPartialConst, Scalar) {
+    auto params = GetParam();
+    auto xTy = params.eType(*this);
+    const ast::Expression* exponent = params.makeExponent(this);
+
+    Enable(wgsl::Extension::kF16);
+    WrapInFunction(Var("x", xTy), Ignore(Call(Source{{12, 34}}, "ldexp", "x", exponent)));
+
+    if (params.expectPass) {
+        EXPECT_TRUE(r()->Resolve());
+    } else {
+        EXPECT_FALSE(r()->Resolve());
+        const std::string expect = "12:34 error: e2 must be less than or equal to " +
+                                   std::to_string(params.highestAllowed);
+        EXPECT_EQ(r()->error(), expect);
+    }
+}
+
+TEST_P(LdexpPartialConst, Vector) {
+    auto params = GetParam();
+    auto xTy = params.eType(*this);
+    const ast::Expression* exponent = params.makeExponent(this);
+
+    Enable(wgsl::Extension::kF16);
+    WrapInFunction(Var("x", xTy),                                   //
+                   Ignore(Call(Source{{12, 34}}, "ldexp",           //
+                               Call(Ident("vec3"), "x", "x", "x"),  //
+                               Call(Ident("vec3"), Expr(0_a), exponent, Expr(1_a)))));
+
+    if (params.expectPass) {
+        EXPECT_TRUE(r()->Resolve());
+    } else {
+        EXPECT_FALSE(r()->Resolve());
+        const std::string expect = "12:34 error: e2 must be less than or equal to " +
+                                   std::to_string(params.highestAllowed);
+        EXPECT_EQ(r()->error(), expect);
+    }
+}
+
+std::vector<LdexpPartialConstCase> ldexpCases() {
+    // Abstract Float cases don't apply here, because if the first parameter
+    // is abstract float, then it must be const already.  So that case is
+    // already checked by the full const-eval rules.
+    return std::vector<LdexpPartialConstCase>{
+        // Simple passing cases.
+        {DataType<f32>::AST, Mk(128_a), true},
+        {DataType<f32>::AST, Mk(128_i), true},
+        {DataType<f32>::AST, Mk(-5000_a), true},
+        {DataType<f32>::AST, Mk(-5000_i), true},
+        {DataType<f16>::AST, Mk(16_a), true},
+        {DataType<f16>::AST, Mk(16_i), true},
+        {DataType<f16>::AST, Mk(-5000_a), true},
+        {DataType<f16>::AST, Mk(-5000_i), true},
+
+        // Failing cases
+        {DataType<f32>::AST, Mk(129_a), false, 128},
+        {DataType<f32>::AST, Mk(129_i), false, 128},
+        {DataType<f32>::AST, Mk(5000_a), false, 128},
+        {DataType<f32>::AST, Mk(5000_i), false, 128},
+        {DataType<f16>::AST, Mk(17_a), false, 16},
+        {DataType<f16>::AST, Mk(17_i), false, 16},
+        {DataType<f16>::AST, Mk(5000_a), false, 16},
+        {DataType<f16>::AST, Mk(5000_i), false, 16},
+    };
+}
+
+INSTANTIATE_TEST_SUITE_P(Ldexp, LdexpPartialConst, ::testing::ValuesIn(ldexpCases()));
 
 }  // namespace
 }  // namespace tint::resolver

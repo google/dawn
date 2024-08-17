@@ -2533,6 +2533,16 @@ sem::Call* Resolver::BuiltinCall(const ast::CallExpression* expr,
                 }
             }
         } break;
+        case wgsl::BuiltinFn::kLdexp:
+            if (auto* exponentConst = ConvertConstArgument(args, target, 1)) {
+                auto* zero = const_eval_.Zero(call->Type(), {}, Source{}).Get();
+                auto fakeArgs = Vector{zero, exponentConst};
+                auto res = const_eval_.ldexp(call->Type(), fakeArgs, call->Declaration()->source);
+                if (res != Success) {
+                    return nullptr;
+                }
+            }
+            break;
         case wgsl::BuiltinFn::kExtractBits: {
             auto* offsetConst = ConvertConstArgument(args, target, 1);
             auto* countConst = ConvertConstArgument(args, target, 2);
