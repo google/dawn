@@ -1476,16 +1476,32 @@ struct ClampPartialConstCase {
     std::string highStr = "";
 };
 
-using ClampPartialConst = ResolverBuiltinsValidationTestWithParams<ClampPartialConstCase>;
+using ClampPartialConst =
+    ResolverBuiltinsValidationTestWithParams<std::tuple<ClampPartialConstCase, bool, bool>>;
 
 TEST_P(ClampPartialConst, Scalar) {
-    auto params = GetParam();
+    auto [params, firstConst, secondConst] = GetParam();
     auto sTy = params.sType(*this);
     const ast::Expression* low = params.makeLow(this);
     const ast::Expression* high = params.makeHigh(this);
-    WrapInFunction(Var("s", sTy), Ignore(Call(Source{{12, 34}}, "clamp", "s", low, high)));
 
-    if (params.expectPass) {
+    const ast::Variable* lowDecl;
+    if (firstConst) {
+        lowDecl = Const("low", low);
+    } else {
+        lowDecl = Var("low", low);
+    }
+    const ast::Variable* highDecl;
+    if (secondConst) {
+        highDecl = Const("high", high);
+    } else {
+        highDecl = Var("high", high);
+    }
+    WrapInFunction(Var("s", sTy), lowDecl, highDecl,
+                   Ignore(Call(Source{{12, 34}}, "clamp", "s", "low", "high")));
+
+    const auto expectPass = params.expectPass || !(firstConst && secondConst);
+    if (expectPass) {
         EXPECT_TRUE(r()->Resolve());
     } else {
         EXPECT_FALSE(r()->Resolve());
@@ -1498,16 +1514,30 @@ TEST_P(ClampPartialConst, Scalar) {
 }
 
 TEST_P(ClampPartialConst, Vector) {
-    auto params = GetParam();
+    auto [params, firstConst, secondConst] = GetParam();
     auto sTy = params.sType(*this);
     const ast::Expression* low = params.makeLow(this);
     const ast::Expression* high = params.makeHigh(this);
-    WrapInFunction(Var("s", sTy),
-                   Ignore(Call(Source{{12, 34}}, "clamp", Call(Ident("vec3"), "s", "s", "s"),
-                               Call(Ident("vec3"), Expr(0_a), low, Expr(0_a)),
-                               Call(Ident("vec3"), Expr(1_a), high, Expr(1_a)))));
 
-    if (params.expectPass) {
+    const ast::Variable* lowDecl;
+    if (firstConst) {
+        lowDecl = Const("low", low);
+    } else {
+        lowDecl = Var("low", low);
+    }
+    const ast::Variable* highDecl;
+    if (secondConst) {
+        highDecl = Const("high", high);
+    } else {
+        highDecl = Var("high", high);
+    }
+    WrapInFunction(Var("s", sTy), lowDecl, highDecl,
+                   Ignore(Call(Source{{12, 34}}, "clamp", Call(Ident("vec3"), "s", "s", "s"),
+                               Call(Ident("vec3"), Expr(0_a), "low", Expr(0_a)),
+                               Call(Ident("vec3"), Expr(1_a), "high", Expr(1_a)))));
+
+    const auto expectPass = params.expectPass || !(firstConst && secondConst);
+    if (expectPass) {
         EXPECT_TRUE(r()->Resolve());
     } else {
         EXPECT_FALSE(r()->Resolve());
@@ -1520,7 +1550,7 @@ TEST_P(ClampPartialConst, Vector) {
 }
 
 TEST_P(ClampPartialConst, VectorMixedRuntimeConstNotChecked) {
-    auto params = GetParam();
+    auto [params, firstConst, secondConst] = GetParam();
     auto sTy = params.sType(*this);
     const ast::Expression* low = params.makeLow(this);
     const ast::Expression* high = params.makeHigh(this);
@@ -1587,7 +1617,11 @@ std::vector<ClampPartialConstCase> clampCases() {
     };
 }
 
-INSTANTIATE_TEST_SUITE_P(Clamp, ClampPartialConst, ::testing::ValuesIn(clampCases()));
+INSTANTIATE_TEST_SUITE_P(Clamp,
+                         ClampPartialConst,
+                         ::testing::Combine(::testing::ValuesIn(clampCases()),
+                                            ::testing::ValuesIn({true}),
+                                            ::testing::ValuesIn({true})));
 
 // We''ll construct cases like this:
 // fn foo() {
@@ -1603,16 +1637,32 @@ struct SmoothstepPartialConstCase {
     std::string highStr = "";
 };
 
-using SmoothstepPartialConst = ResolverBuiltinsValidationTestWithParams<SmoothstepPartialConstCase>;
+using SmoothstepPartialConst =
+    ResolverBuiltinsValidationTestWithParams<std::tuple<SmoothstepPartialConstCase, bool, bool>>;
 
 TEST_P(SmoothstepPartialConst, Scalar) {
-    auto params = GetParam();
+    auto [params, firstConst, secondConst] = GetParam();
     auto sTy = params.sType(*this);
     const ast::Expression* low = params.makeLow(this);
     const ast::Expression* high = params.makeHigh(this);
-    WrapInFunction(Var("s", sTy), Ignore(Call(Source{{12, 34}}, "smoothstep", low, high, "s")));
 
-    if (params.expectPass) {
+    const ast::Variable* lowDecl;
+    if (firstConst) {
+        lowDecl = Const("low", low);
+    } else {
+        lowDecl = Var("low", low);
+    }
+    const ast::Variable* highDecl;
+    if (secondConst) {
+        highDecl = Const("high", high);
+    } else {
+        highDecl = Var("high", high);
+    }
+    WrapInFunction(Var("s", sTy), lowDecl, highDecl,
+                   Ignore(Call(Source{{12, 34}}, "smoothstep", "low", "high", "s")));
+
+    const auto expectPass = params.expectPass || !(firstConst && secondConst);
+    if (expectPass) {
         EXPECT_TRUE(r()->Resolve());
     } else {
         EXPECT_FALSE(r()->Resolve());
@@ -1625,16 +1675,31 @@ TEST_P(SmoothstepPartialConst, Scalar) {
 }
 
 TEST_P(SmoothstepPartialConst, Vector) {
-    auto params = GetParam();
+    auto [params, firstConst, secondConst] = GetParam();
     auto sTy = params.sType(*this);
     const ast::Expression* low = params.makeLow(this);
     const ast::Expression* high = params.makeHigh(this);
-    WrapInFunction(Var("s", sTy), Ignore(Call(Source{{12, 34}}, "smoothstep",
-                                              Call(Ident("vec3"), Expr(0_a), low, Expr(0_a)),
-                                              Call(Ident("vec3"), Expr(1_a), high, Expr(1_a)),
-                                              Call(Ident("vec3"), "s", "s", "s"))));
 
-    if (params.expectPass) {
+    const ast::Variable* lowDecl;
+    if (firstConst) {
+        lowDecl = Const("low", low);
+    } else {
+        lowDecl = Var("low", low);
+    }
+    const ast::Variable* highDecl;
+    if (secondConst) {
+        highDecl = Const("high", high);
+    } else {
+        highDecl = Var("high", high);
+    }
+    WrapInFunction(Var("s", sTy), lowDecl, highDecl,
+                   Ignore(Call(Source{{12, 34}}, "smoothstep",
+                               Call(Ident("vec3"), Expr(0_a), "low", Expr(0_a)),
+                               Call(Ident("vec3"), Expr(1_a), "high", Expr(1_a)),
+                               Call(Ident("vec3"), "s", "s", "s"))));
+
+    const auto expectPass = params.expectPass || !(firstConst && secondConst);
+    if (expectPass) {
         EXPECT_TRUE(r()->Resolve());
     } else {
         EXPECT_FALSE(r()->Resolve());
@@ -1647,7 +1712,7 @@ TEST_P(SmoothstepPartialConst, Vector) {
 }
 
 TEST_P(SmoothstepPartialConst, VectorMixedRuntimeConstNotChecked) {
-    auto params = GetParam();
+    auto [params, firstConst, secondConst] = GetParam();
     auto sTy = params.sType(*this);
     const ast::Expression* low = params.makeLow(this);
     const ast::Expression* high = params.makeHigh(this);
@@ -1707,7 +1772,9 @@ std::vector<SmoothstepPartialConstCase> smoothstepCases() {
 
 INSTANTIATE_TEST_SUITE_P(Smoothstep,
                          SmoothstepPartialConst,
-                         ::testing::ValuesIn(smoothstepCases()));
+                         ::testing::Combine(::testing::ValuesIn(smoothstepCases()),
+                                            ::testing::ValuesIn({true}),
+                                            ::testing::ValuesIn({true})));
 
 // We'll construct cases like this:
 // fn foo() {
