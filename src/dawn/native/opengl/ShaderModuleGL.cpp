@@ -568,6 +568,11 @@ ResultOrError<GLuint> ShaderModule::CompileShader(
                                        /* fullSubgroups */ {}));
             }
 
+            // Intentionally assign entry point to empty to avoid a redundant 'SingleEntryPoint'
+            // transform in Tint.
+            // TODO(crbug.com/356424898): In the long run, we want to move SingleEntryPoint to Tint,
+            // but that has interactions with SubstituteOverrides which need to be handled first.
+            remappedEntryPoint = "";
             auto result = tint::glsl::writer::Generate(program, r.tintOptions, remappedEntryPoint);
             DAWN_INVALID_IF(result != tint::Success, "An error occurred while generating GLSL:\n%s",
                             result.Failure().reason.Str());
