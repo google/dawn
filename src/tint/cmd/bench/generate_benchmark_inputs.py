@@ -171,6 +171,25 @@ const std::unordered_map<std::string, std::string> kBenchmarkInputs = {''',
                            final_header_output_path,
                            shallow=False):
             print(f'{final_header_output_path} is stale')
+            print()
+
+            import difflib
+            with open(final_header_output_path) as f:
+                orig_lines = f.readlines()
+            with open(tmp_header_output_path) as f:
+                gen_lines = f.readlines()
+            for line in difflib.unified_diff(orig_lines,
+                                             gen_lines,
+                                             fromfile=final_header_output_path,
+                                             tofile=tmp_header_output_path):
+                print(line, end='')
+
+            print('''
+----------------
+To regenerate, run:
+  python3 src/tint/cmd/bench/generate_benchmark_inputs.py /path/to/tint.exe
+''')
+
             return 1
 
 
