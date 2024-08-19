@@ -121,6 +121,9 @@ const std::unordered_map<std::string, std::string> kBenchmarkInputs = {''',
             print(f'    {{"{f}", {{', file=output, end='')
             i = 0
             for char in input.read():
+                if char == ord('\r'):
+                    # Skip carriage return to make output consistent across platforms.
+                    continue
                 if (i % 16) == 0:
                     print('\n    ', file=output, end='')
                 print(' ' + str(char), file=output, end=',')
