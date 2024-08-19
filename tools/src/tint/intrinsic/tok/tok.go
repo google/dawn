@@ -43,6 +43,7 @@ const (
 	String       Kind = "string"
 	Match        Kind = "match"
 	Import       Kind = "import"
+	Implicit     Kind = "implicit"
 	Function     Kind = "fn"
 	Operator     Kind = "op"
 	Constructor  Kind = "ctor"

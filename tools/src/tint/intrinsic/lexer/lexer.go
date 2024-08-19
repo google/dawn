@@ -125,6 +125,8 @@ func (l *lexer) lex() error {
 					l.tok(n, tok.Match)
 				case "import":
 					l.tok(n, tok.Import)
+				case "implicit":
+					l.tok(n, tok.Implicit)
 				default:
 					l.tok(n, tok.Identifier)
 				}

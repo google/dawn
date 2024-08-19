@@ -139,96 +139,96 @@ match i32_texel_format
 // Builtin Functions                                                          //
 ////////////////////////////////////////////////////////////////////////////////
 
-fn asint[T: f32_u32](T) -> i32
-fn asint[T: f32_u32, N: num](vec<N, T>) -> vec<N, i32>
+implicit(T: f32_u32) fn asint(T) -> i32
+implicit(T: f32_u32, N: num) fn asint(vec<N, T>) -> vec<N, i32>
 
-fn asuint[T: f32_i32](T) -> u32
-fn asuint[T: f32_i32, N: num](vec<N, T>) -> vec<N, u32>
+implicit(T: f32_i32) fn asuint(T) -> u32
+implicit(T: f32_i32, N: num) fn asuint(vec<N, T>) -> vec<N, u32>
 
-fn asfloat[T: iu32](T) -> f32
-fn asfloat[T: iu32, N: num](vec<N, T>) -> vec<N, f32>
+implicit(T: iu32) fn asfloat(T) -> f32
+implicit(T: iu32, N: num) fn asfloat(vec<N, T>) -> vec<N, f32>
 
 fn dot4add_i8packed(u32, u32, ptr<function, i32, writable>) -> i32
 fn dot4add_u8packed(u32, u32, ptr<function, u32, writable>) -> u32
 
 fn f32tof16(f32) -> u32
-fn f32tof16[N: num](vec<N, f32>) -> vec<N, u32>
+implicit(N: num) fn f32tof16(vec<N, f32>) -> vec<N, u32>
 
 fn f16tof32(u32) -> f32
-fn f16tof32[N: num](vec<N, u32>) -> vec<N, f32>
+implicit(N: num) fn f16tof32(vec<N, u32>) -> vec<N, f32>
 
-fn InterlockedCompareExchange[T: iu32](ptr<workgroup, atomic<T>, read_write>,
+implicit(T: iu32) fn InterlockedCompareExchange(ptr<workgroup, atomic<T>, read_write>,
                                 compare_value: iu32,
                                         value: iu32,
                                original_value: ptr<function, iu32, read_write>)
-fn InterlockedExchange[T: iu32](ptr<workgroup, atomic<T>, read_write>,
+implicit(T: iu32) fn InterlockedExchange(ptr<workgroup, atomic<T>, read_write>,
                                  value: iu32,
                         original_value: ptr<function, iu32, read_write>)
-fn InterlockedAdd[T: iu32](ptr<workgroup, atomic<T>, read_write>,
+implicit(T: iu32) fn InterlockedAdd(ptr<workgroup, atomic<T>, read_write>,
                             value: iu32,
                    original_value: ptr<function, iu32, read_write>)
-fn InterlockedMax[T: iu32](ptr<workgroup, atomic<T>, read_write>,
+implicit(T: iu32) fn InterlockedMax(ptr<workgroup, atomic<T>, read_write>,
                             value: iu32,
                    original_value: ptr<function, iu32, read_write>)
-fn InterlockedMin[T: iu32](ptr<workgroup, atomic<T>, read_write>,
+implicit(T: iu32) fn InterlockedMin(ptr<workgroup, atomic<T>, read_write>,
                             value: iu32,
                    original_value: ptr<function, iu32, read_write>)
-fn InterlockedAnd[T: iu32](ptr<workgroup, atomic<T>, read_write>,
+implicit(T: iu32) fn InterlockedAnd(ptr<workgroup, atomic<T>, read_write>,
                             value: iu32,
                    original_value: ptr<function, iu32, read_write>)
-fn InterlockedOr[T: iu32](ptr<workgroup, atomic<T>, read_write>,
+implicit(T: iu32) fn InterlockedOr(ptr<workgroup, atomic<T>, read_write>,
                            value: iu32,
                   original_value: ptr<function, iu32, read_write>)
-fn InterlockedXor[T: iu32](ptr<workgroup, atomic<T>, read_write>,
+implicit(T: iu32) fn InterlockedXor(ptr<workgroup, atomic<T>, read_write>,
                             value: iu32,
                    original_value: ptr<function, iu32, read_write>)
 
 // Treat the HLSL matrices as transposed when used in `mul`
-fn mul [T: f32_f16, C: num, R: num](mat<R, C, T>, vec<C, T>) -> vec<R, T>
-fn mul [T: f32_f16, C: num, R: num](vec<R, T>, mat<R, C, T>) -> vec<C, T>
-fn mul [T: f32_f16, K: num, C: num, R: num](mat<R, K, T>, mat<K, C, T>) -> mat<R, C, T>
+implicit(T: f32_f16, C: num, R: num) fn mul (mat<R, C, T>, vec<C, T>) -> vec<R, T>
+implicit(T: f32_f16, C: num, R: num) fn mul (vec<R, T>, mat<R, C, T>) -> vec<C, T>
+implicit(T: f32_f16, K: num, C: num, R: num) fn mul (mat<R, K, T>, mat<K, C, T>) -> mat<R, C, T>
 
 fn pack_u8(vec4<u32>) -> uint8_t4_packed
 fn pack_s8(vec4<i32>) -> int8_t4_packed
 fn pack_clamp_s8(vec4<i32>) -> int8_t4_packed
 
-fn sign[T: fi32_f16](T) -> i32
-fn sign[N: num, T: fi32_f16](vec<N, T>) -> vec<N, i32>
+implicit(T: fi32_f16) fn sign(T) -> i32
+implicit(N: num, T: fi32_f16) fn sign(vec<N, T>) -> vec<N, i32>
 
-fn textureStore[C: iu32](texture: texture_storage_1d<f32_texel_format, writable>,
+implicit(C: iu32) fn textureStore(texture: texture_storage_1d<f32_texel_format, writable>,
                           coords: C,
                            value: vec4<f32>)
-fn textureStore[C: iu32](texture: texture_storage_2d<f32_texel_format, writable>,
+implicit(C: iu32) fn textureStore(texture: texture_storage_2d<f32_texel_format, writable>,
                           coords: vec2<C>,
                            value: vec4<f32>)
-fn textureStore[C: iu32](texture: texture_storage_2d_array<f32_texel_format, writable>,
+implicit(C: iu32) fn textureStore(texture: texture_storage_2d_array<f32_texel_format, writable>,
                           coords: vec3<C>,
                            value: vec4<f32>)
-fn textureStore[C: iu32](texture: texture_storage_3d<f32_texel_format, writable>,
+implicit(C: iu32) fn textureStore(texture: texture_storage_3d<f32_texel_format, writable>,
                           coords: vec3<C>,
                            value: vec4<f32>)
-fn textureStore[C: iu32](texture: texture_storage_1d<i32_texel_format, writable>,
+implicit(C: iu32) fn textureStore(texture: texture_storage_1d<i32_texel_format, writable>,
                           coords: C,
                            value: vec4<i32>)
-fn textureStore[C: iu32](texture: texture_storage_2d<i32_texel_format, writable>,
+implicit(C: iu32) fn textureStore(texture: texture_storage_2d<i32_texel_format, writable>,
                           coords: vec2<C>,
                            value: vec4<i32>)
-fn textureStore[C: iu32](texture: texture_storage_2d_array<i32_texel_format, writable>,
+implicit(C: iu32) fn textureStore(texture: texture_storage_2d_array<i32_texel_format, writable>,
                           coords: vec3<C>,
                            value: vec4<i32>)
-fn textureStore[C: iu32](texture: texture_storage_3d<i32_texel_format, writable>,
+implicit(C: iu32) fn textureStore(texture: texture_storage_3d<i32_texel_format, writable>,
                           coords: vec3<C>,
                            value: vec4<i32>)
-fn textureStore[C: iu32](texture: texture_storage_1d<u32_texel_format, writable>,
+implicit(C: iu32) fn textureStore(texture: texture_storage_1d<u32_texel_format, writable>,
                           coords: C,
                            value: vec4<u32>)
-fn textureStore[C: iu32](texture: texture_storage_2d<u32_texel_format, writable>,
+implicit(C: iu32) fn textureStore(texture: texture_storage_2d<u32_texel_format, writable>,
                           coords: vec2<C>,
                            value: vec4<u32>)
-fn textureStore[C: iu32](texture: texture_storage_2d_array<u32_texel_format, writable>,
+implicit(C: iu32) fn textureStore(texture: texture_storage_2d_array<u32_texel_format, writable>,
                           coords: vec3<C>,
                            value: vec4<u32>)
-fn textureStore[C: iu32](texture: texture_storage_3d<u32_texel_format, writable>,
+implicit(C: iu32) fn textureStore(texture: texture_storage_3d<u32_texel_format, writable>,
                           coords: vec3<C>,
                            value: vec4<u32>)
 
@@ -236,8 +236,8 @@ fn unpack_s8s32(int8_t4_packed) -> vec4<i32>
 fn unpack_u8u32(uint8_t4_packed) -> vec4<u32>
 
 fn WaveGetLaneIndex() -> u32
-fn WaveReadLaneAt[T: fiu32_f16](T, u32) -> T
-fn WaveReadLaneAt[N: num, T: fiu32_f16](vec<N, T>, u32) -> vec<N, T>
+implicit(T: fiu32_f16) fn WaveReadLaneAt(T, u32) -> T
+implicit(N: num, T: fiu32_f16) fn WaveReadLaneAt(vec<N, T>, u32) -> vec<N, T>
 
 ////////////////////////////////////////////////////////////////////////////////
 // Member Functions                                                           //
@@ -311,159 +311,159 @@ fn WaveReadLaneAt[N: num, T: fiu32_f16](vec<N, T>, u32) -> vec<N, T>
                            sampler: sampler,
                             coords: vec4<f32>) -> vec4<f32>
 
-@member_function fn GatherAlpha[T: fiu32](texture: texture_2d<T>,
+@member_function implicit(T: fiu32) fn GatherAlpha(texture: texture_2d<T>,
                                           sampler: sampler,
                                            coords: vec2<f32>) -> vec4<T>
-@member_function fn GatherAlpha[T: fiu32](texture: texture_2d<T>,
+@member_function implicit(T: fiu32) fn GatherAlpha(texture: texture_2d<T>,
                                           sampler: sampler,
                                            coords: vec2<f32>,
                                            offset: vec2<i32>) -> vec4<T>
-@member_function fn GatherAlpha[T: fiu32](texture: texture_2d_array<T>,
+@member_function implicit(T: fiu32) fn GatherAlpha(texture: texture_2d_array<T>,
                                           sampler: sampler,
                                            coords: vec3<f32>) -> vec4<T>
-@member_function fn GatherAlpha[T: fiu32](texture: texture_2d_array<T>,
+@member_function implicit(T: fiu32) fn GatherAlpha(texture: texture_2d_array<T>,
                                           sampler: sampler,
                                            coords: vec3<f32>,
                                            offset: vec2<i32>) -> vec4<T>
-@member_function fn GatherAlpha[T: fiu32](texture: texture_cube<T>,
+@member_function implicit(T: fiu32) fn GatherAlpha(texture: texture_cube<T>,
                                           sampler: sampler,
                                            coords: vec3<f32>) -> vec4<T>
-@member_function fn GatherAlpha[T: fiu32](texture: texture_cube_array<T>,
+@member_function implicit(T: fiu32) fn GatherAlpha(texture: texture_cube_array<T>,
                                           sampler: sampler,
                                            coords: vec4<f32>) -> vec4<T>
 
-@member_function fn GatherBlue[T: fiu32](texture: texture_2d<T>,
+@member_function implicit(T: fiu32) fn GatherBlue(texture: texture_2d<T>,
                                           sampler: sampler,
                                            coords: vec2<f32>) -> vec4<T>
-@member_function fn GatherBlue[T: fiu32](texture: texture_2d<T>,
+@member_function implicit(T: fiu32) fn GatherBlue(texture: texture_2d<T>,
                                           sampler: sampler,
                                            coords: vec2<f32>,
                                            offset: vec2<i32>) -> vec4<T>
-@member_function fn GatherBlue[T: fiu32](texture: texture_2d_array<T>,
+@member_function implicit(T: fiu32) fn GatherBlue(texture: texture_2d_array<T>,
                                           sampler: sampler,
                                            coords: vec3<f32>) -> vec4<T>
-@member_function fn GatherBlue[T: fiu32](texture: texture_2d_array<T>,
+@member_function implicit(T: fiu32) fn GatherBlue(texture: texture_2d_array<T>,
                                           sampler: sampler,
                                            coords: vec3<f32>,
                                            offset: vec2<i32>) -> vec4<T>
-@member_function fn GatherBlue[T: fiu32](texture: texture_cube<T>,
+@member_function implicit(T: fiu32) fn GatherBlue(texture: texture_cube<T>,
                                           sampler: sampler,
                                            coords: vec3<f32>) -> vec4<T>
-@member_function fn GatherBlue[T: fiu32](texture: texture_cube_array<T>,
+@member_function implicit(T: fiu32) fn GatherBlue(texture: texture_cube_array<T>,
                                           sampler: sampler,
                                            coords: vec4<f32>) -> vec4<T>
 
-@member_function fn GatherGreen[T: fiu32](texture: texture_2d<T>,
+@member_function implicit(T: fiu32) fn GatherGreen(texture: texture_2d<T>,
                                           sampler: sampler,
                                            coords: vec2<f32>) -> vec4<T>
-@member_function fn GatherGreen[T: fiu32](texture: texture_2d<T>,
+@member_function implicit(T: fiu32) fn GatherGreen(texture: texture_2d<T>,
                                           sampler: sampler,
                                            coords: vec2<f32>,
                                            offset: vec2<i32>) -> vec4<T>
-@member_function fn GatherGreen[T: fiu32](texture: texture_2d_array<T>,
+@member_function implicit(T: fiu32) fn GatherGreen(texture: texture_2d_array<T>,
                                           sampler: sampler,
                                            coords: vec3<f32>) -> vec4<T>
-@member_function fn GatherGreen[T: fiu32](texture: texture_2d_array<T>,
+@member_function implicit(T: fiu32) fn GatherGreen(texture: texture_2d_array<T>,
                                           sampler: sampler,
                                            coords: vec3<f32>,
                                            offset: vec2<i32>) -> vec4<T>
-@member_function fn GatherGreen[T: fiu32](texture: texture_cube<T>,
+@member_function implicit(T: fiu32) fn GatherGreen(texture: texture_cube<T>,
                                           sampler: sampler,
                                            coords: vec3<f32>) -> vec4<T>
-@member_function fn GatherGreen[T: fiu32](texture: texture_cube_array<T>,
+@member_function implicit(T: fiu32) fn GatherGreen(texture: texture_cube_array<T>,
                                           sampler: sampler,
                                            coords: vec4<f32>) -> vec4<T>
 
-@member_function fn GatherRed[T: fiu32](texture: texture_2d<T>,
+@member_function implicit(T: fiu32) fn GatherRed(texture: texture_2d<T>,
                                           sampler: sampler,
                                            coords: vec2<f32>) -> vec4<T>
-@member_function fn GatherRed[T: fiu32](texture: texture_2d<T>,
+@member_function implicit(T: fiu32) fn GatherRed(texture: texture_2d<T>,
                                           sampler: sampler,
                                            coords: vec2<f32>,
                                            offset: vec2<i32>) -> vec4<T>
-@member_function fn GatherRed[T: fiu32](texture: texture_2d_array<T>,
+@member_function implicit(T: fiu32) fn GatherRed(texture: texture_2d_array<T>,
                                           sampler: sampler,
                                            coords: vec3<f32>) -> vec4<T>
-@member_function fn GatherRed[T: fiu32](texture: texture_2d_array<T>,
+@member_function implicit(T: fiu32) fn GatherRed(texture: texture_2d_array<T>,
                                           sampler: sampler,
                                            coords: vec3<f32>,
                                            offset: vec2<i32>) -> vec4<T>
-@member_function fn GatherRed[T: fiu32](texture: texture_cube<T>,
+@member_function implicit(T: fiu32) fn GatherRed(texture: texture_cube<T>,
                                           sampler: sampler,
                                            coords: vec3<f32>) -> vec4<T>
-@member_function fn GatherRed[T: fiu32](texture: texture_cube_array<T>,
+@member_function implicit(T: fiu32) fn GatherRed(texture: texture_cube_array<T>,
                                           sampler: sampler,
                                            coords: vec4<f32>) -> vec4<T>
 
-@member_function fn GetDimensions[A: access](byte_address_buffer<A>, width: ptr<function, u32, writable>)
+@member_function implicit(A: access) fn GetDimensions(byte_address_buffer<A>, width: ptr<function, u32, writable>)
 
-@member_function fn GetDimensions[T: fiu32](texture: texture_1d<T>,
+@member_function implicit(T: fiu32) fn GetDimensions(texture: texture_1d<T>,
                                               width: ptr<function, u32, writable>)
-@member_function fn GetDimensions[T: fiu32](texture: texture_1d<T>,
+@member_function implicit(T: fiu32) fn GetDimensions(texture: texture_1d<T>,
                                               level: u32,
                                               width: ptr<function, u32, writable>,
                                               num_levels: ptr<function, u32, writable>)
 
-@member_function fn GetDimensions[F: texel_format, A: access](texture: texture_storage_1d<F, A>,
+@member_function implicit(F: texel_format, A: access) fn GetDimensions(texture: texture_storage_1d<F, A>,
                                                                 width: ptr<function, u32, writable>)
-@member_function fn GetDimensions[T: fiu32](texture: texture_2d<T>,
+@member_function implicit(T: fiu32) fn GetDimensions(texture: texture_2d<T>,
                                               width: ptr<function, u32, writable>,
                                              height: ptr<function, u32, writable>)
-@member_function fn GetDimensions[T: fiu32](texture: texture_2d<T>,
+@member_function implicit(T: fiu32) fn GetDimensions(texture: texture_2d<T>,
                                               level: u32,
                                               width: ptr<function, u32, writable>,
                                              height: ptr<function, u32, writable>,
                                          num_levels: ptr<function, u32, writable>)
-@member_function fn GetDimensions[F: texel_format, A: access](texture: texture_storage_2d<F, A>,
+@member_function implicit(F: texel_format, A: access) fn GetDimensions(texture: texture_storage_2d<F, A>,
                                                                 width: ptr<function, u32, writable>,
                                                                height: ptr<function, u32, writable>)
-@member_function fn GetDimensions[T: fiu32](texture: texture_2d_array<T>,
+@member_function implicit(T: fiu32) fn GetDimensions(texture: texture_2d_array<T>,
                                               width: ptr<function, u32, writable>,
                                              height: ptr<function, u32, writable>,
                                            elements: ptr<function, u32, writable>)
-@member_function fn GetDimensions[T: fiu32](texture: texture_2d_array<T>,
+@member_function implicit(T: fiu32) fn GetDimensions(texture: texture_2d_array<T>,
                                               level: u32,
                                               width: ptr<function, u32, writable>,
                                              height: ptr<function, u32, writable>,
                                            elements: ptr<function, u32, writable>,
                                          num_levels: ptr<function, u32, writable>)
-@member_function fn GetDimensions[F: texel_format, A: access](texture: texture_storage_2d_array<F, A>,
+@member_function implicit(F: texel_format, A: access) fn GetDimensions(texture: texture_storage_2d_array<F, A>,
                                                                 width: ptr<function, u32, writable>,
                                                                height: ptr<function, u32, writable>,
                                                              elements: ptr<function, u32, writable>)
-@member_function fn GetDimensions[T: fiu32](texture: texture_3d<T>,
+@member_function implicit(T: fiu32) fn GetDimensions(texture: texture_3d<T>,
                                               width: ptr<function, u32, writable>,
                                              height: ptr<function, u32, writable>,
                                               depth: ptr<function, u32, writable>)
-@member_function fn GetDimensions[T: fiu32](texture: texture_3d<T>,
+@member_function implicit(T: fiu32) fn GetDimensions(texture: texture_3d<T>,
                                               level: u32,
                                               width: ptr<function, u32, writable>,
                                              height: ptr<function, u32, writable>,
                                               depth: ptr<function, u32, writable>,
                                          num_levels: ptr<function, u32, writable>)
-@member_function fn GetDimensions[F: texel_format, A: access](texture: texture_storage_3d<F, A>,
+@member_function implicit(F: texel_format, A: access) fn GetDimensions(texture: texture_storage_3d<F, A>,
                                                                 width: ptr<function, u32, writable>,
                                                                height: ptr<function, u32, writable>,
                                                                 depth: ptr<function, u32, writable>)
-@member_function fn GetDimensions[T: fiu32](texture: texture_cube<T>,
+@member_function implicit(T: fiu32) fn GetDimensions(texture: texture_cube<T>,
                                               width: ptr<function, u32, writable>,
                                              height: ptr<function, u32, writable>)
-@member_function fn GetDimensions[T: fiu32](texture: texture_cube<T>,
+@member_function implicit(T: fiu32) fn GetDimensions(texture: texture_cube<T>,
                                               level: u32,
                                               width: ptr<function, u32, writable>,
                                              height: ptr<function, u32, writable>,
                                          num_levels: ptr<function, u32, writable>)
-@member_function fn GetDimensions[T: fiu32](texture: texture_cube_array<T>,
+@member_function implicit(T: fiu32) fn GetDimensions(texture: texture_cube_array<T>,
                                               width: ptr<function, u32, writable>,
                                              height: ptr<function, u32, writable>,
                                            elements: ptr<function, u32, writable>)
-@member_function fn GetDimensions[T: fiu32](texture: texture_cube_array<T>,
+@member_function implicit(T: fiu32) fn GetDimensions(texture: texture_cube_array<T>,
                                               level: u32,
                                               width: ptr<function, u32, writable>,
                                              height: ptr<function, u32, writable>,
                                            elements: ptr<function, u32, writable>,
                                          num_levels: ptr<function, u32, writable>)
-@member_function fn GetDimensions[T: fiu32](texture: texture_multisampled_2d<T>,
+@member_function implicit(T: fiu32) fn GetDimensions(texture: texture_multisampled_2d<T>,
                                               width: ptr<function, u32, writable>,
                                              height: ptr<function, u32, writable>,
                                             samples: ptr<function, u32, writable>)
@@ -508,13 +508,13 @@ fn WaveReadLaneAt[N: num, T: fiu32_f16](vec<N, T>, u32) -> vec<N, T>
                                    height: ptr<function, u32, writable>,
                                   samples: ptr<function, u32, writable>)
 
-@member_function fn Load[T: fiu32](texture: texture_1d<T>, location: vec2<i32>) -> vec4<T>
-@member_function fn Load[T: fiu32](texture: texture_2d<T>, location: vec3<i32>) -> vec4<T>
-@member_function fn Load[T: fiu32](texture: texture_2d_array<T>, location: vec4<i32>) -> vec4<T>
-@member_function fn Load[T: fiu32](texture: texture_multisampled_2d<T>,
+@member_function implicit(T: fiu32) fn Load(texture: texture_1d<T>, location: vec2<i32>) -> vec4<T>
+@member_function implicit(T: fiu32) fn Load(texture: texture_2d<T>, location: vec3<i32>) -> vec4<T>
+@member_function implicit(T: fiu32) fn Load(texture: texture_2d_array<T>, location: vec4<i32>) -> vec4<T>
+@member_function implicit(T: fiu32) fn Load(texture: texture_multisampled_2d<T>,
                                   location: vec2<i32>,
                               sample_index: i32) -> vec4<T>
-@member_function fn Load[T: fiu32](texture: texture_3d<T>, location: vec4<i32>) -> vec4<T>
+@member_function implicit(T: fiu32) fn Load(texture: texture_3d<T>, location: vec4<i32>) -> vec4<T>
 
 @member_function fn Load(texture: texture_depth_2d, location: vec3<i32>) -> vec4<f32>
 @member_function fn Load(texture: texture_depth_2d_array, location: vec4<i32>) -> vec4<f32>
@@ -522,32 +522,32 @@ fn WaveReadLaneAt[N: num, T: fiu32_f16](vec<N, T>, u32) -> vec<N, T>
                                   location: vec2<i32>,
                               sample_index: i32) -> vec4<f32>
 
-@member_function fn Load[F: f32_texel_format, A: readable](texture: texture_storage_1d<F, A>,
+@member_function implicit(F: f32_texel_format, A: readable) fn Load(texture: texture_storage_1d<F, A>,
                                                           location: vec2<i32>) -> vec4<f32>
-@member_function fn Load[F: f32_texel_format, A: readable](texture: texture_storage_2d<F, A>,
+@member_function implicit(F: f32_texel_format, A: readable) fn Load(texture: texture_storage_2d<F, A>,
                                                           location: vec3<i32>) -> vec4<f32>
-@member_function fn Load[F: f32_texel_format, A: readable](texture: texture_storage_2d_array<F, A>,
+@member_function implicit(F: f32_texel_format, A: readable) fn Load(texture: texture_storage_2d_array<F, A>,
                                                           location: vec4<i32>) -> vec4<f32>
-@member_function fn Load[F: f32_texel_format, A: readable](texture: texture_storage_3d<F, A>,
+@member_function implicit(F: f32_texel_format, A: readable) fn Load(texture: texture_storage_3d<F, A>,
                                                           location: vec4<i32>) -> vec4<f32>
 
-@member_function fn Load[F: u32_texel_format, A: readable](texture: texture_storage_1d<F, A>,
+@member_function implicit(F: u32_texel_format, A: readable) fn Load(texture: texture_storage_1d<F, A>,
                                                           location: vec2<i32>) -> vec4<u32>
-@member_function fn Load[F: u32_texel_format, A: readable](texture: texture_storage_2d<F, A>,
+@member_function implicit(F: u32_texel_format, A: readable) fn Load(texture: texture_storage_2d<F, A>,
                                                           location: vec3<i32>) -> vec4<u32>
-@member_function fn Load[F: u32_texel_format, A: readable](texture: texture_storage_2d_array<F, A>,
+@member_function implicit(F: u32_texel_format, A: readable) fn Load(texture: texture_storage_2d_array<F, A>,
                                                           location: vec4<i32>) -> vec4<u32>
-@member_function fn Load[F: u32_texel_format, A: readable](texture: texture_storage_3d<F, A>,
+@member_function implicit(F: u32_texel_format, A: readable) fn Load(texture: texture_storage_3d<F, A>,
                                                           location: vec4<i32>) -> vec4<u32>
 
 
-@member_function fn Load[F: i32_texel_format, A: readable](texture: texture_storage_1d<F, A>,
+@member_function implicit(F: i32_texel_format, A: readable) fn Load(texture: texture_storage_1d<F, A>,
                                                           location: vec2<i32>) -> vec4<i32>
-@member_function fn Load[F: i32_texel_format, A: readable](texture: texture_storage_2d<F, A>,
+@member_function implicit(F: i32_texel_format, A: readable) fn Load(texture: texture_storage_2d<F, A>,
                                                           location: vec3<i32>) -> vec4<i32>
-@member_function fn Load[F: i32_texel_format, A: readable](texture: texture_storage_2d_array<F, A>,
+@member_function implicit(F: i32_texel_format, A: readable) fn Load(texture: texture_storage_2d_array<F, A>,
                                                           location: vec4<i32>) -> vec4<i32>
-@member_function fn Load[F: i32_texel_format, A: readable](texture: texture_storage_3d<F, A>,
+@member_function implicit(F: i32_texel_format, A: readable) fn Load(texture: texture_storage_3d<F, A>,
                                                           location: vec4<i32>) -> vec4<i32>
 
 @member_function fn InterlockedCompareExchange(byte_address_buffer<read_write>,
@@ -830,4 +830,3 @@ fn WaveReadLaneAt[N: num, T: fiu32_f16](vec<N, T>, u32) -> vec<N, T>
                                 sampler: sampler,
                                  coords: vec4<f32>,
                                   level: f32) -> f32
-
