@@ -180,6 +180,13 @@ const core::type::Matrix* Manager::mat4x4(const core::type::Type* inner) {
     return mat(inner, 4, 4);
 }
 
+const core::type::SubgroupMatrix* Manager::subgroup_matrix(enum SubgroupMatrix::Kind kind,
+                                                           const core::type::Type* inner,
+                                                           uint32_t rows,
+                                                           uint32_t cols) {
+    return Get<core::type::SubgroupMatrix>(kind, inner, rows, cols);
+}
+
 const core::type::Array* Manager::array(const core::type::Type* elem_ty,
                                         uint32_t count,
                                         uint32_t stride /* = 0*/) {

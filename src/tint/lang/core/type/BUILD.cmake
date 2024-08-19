@@ -102,6 +102,8 @@ tint_add_target(tint_lang_core_type lib
   lang/core/type/storage_texture.h
   lang/core/type/struct.cc
   lang/core/type/struct.h
+  lang/core/type/subgroup_matrix.cc
+  lang/core/type/subgroup_matrix.h
   lang/core/type/texture.cc
   lang/core/type/texture.h
   lang/core/type/texture_dimension.cc
@@ -164,6 +166,7 @@ tint_add_target(tint_lang_core_type_test test
   lang/core/type/sampler_test.cc
   lang/core/type/storage_texture_test.cc
   lang/core/type/struct_test.cc
+  lang/core/type/subgroup_matrix_test.cc
   lang/core/type/texture_test.cc
   lang/core/type/type_test.cc
   lang/core/type/u32_test.cc
