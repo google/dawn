@@ -71,6 +71,8 @@ tint_add_target(tint_lang_core lib
   lang/core/number.h
   lang/core/parameter_usage.cc
   lang/core/parameter_usage.h
+  lang/core/subgroup_matrix_kind.cc
+  lang/core/subgroup_matrix_kind.h
   lang/core/texel_format.cc
   lang/core/texel_format.h
   lang/core/unary_op.cc

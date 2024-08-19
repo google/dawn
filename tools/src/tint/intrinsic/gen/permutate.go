@@ -369,6 +369,8 @@ func validate(fqn sem.FullyQualifiedName, uses *sem.StageUses) bool {
 		elTyName := elTy.Target.GetName()
 		switch {
 		case elTyName == "bool",
+			strings.Contains(elTyName, "i8"),
+			strings.Contains(elTyName, "u8"),
 			strings.Contains(elTyName, "sampler"),
 			strings.Contains(elTyName, "texture"),
 			IsAbstract(DeepestElementType(elTy)):

@@ -180,7 +180,7 @@ const core::type::Matrix* Manager::mat4x4(const core::type::Type* inner) {
     return mat(inner, 4, 4);
 }
 
-const core::type::SubgroupMatrix* Manager::subgroup_matrix(enum SubgroupMatrix::Kind kind,
+const core::type::SubgroupMatrix* Manager::subgroup_matrix(SubgroupMatrixKind kind,
                                                            const core::type::Type* inner,
                                                            uint32_t rows,
                                                            uint32_t cols) {

@@ -58,6 +58,9 @@ message Type {
         TypeExternalTexture external_texture = 13;
         TypeSampler sampler = 14;
         TypeInputAttachment input_attachment = 15;
+        TypeSubgroupMatrix subgroup_matrix_left = 16;
+        TypeSubgroupMatrix subgroup_matrix_right = 17;
+        TypeSubgroupMatrix subgroup_matrix_result = 18;
     }
 }
 
@@ -143,6 +146,12 @@ message TypeSampler {
 
 message TypeInputAttachment {
     uint32 sub_type = 1;  // Module.types
+}
+
+message TypeSubgroupMatrix {
+    uint32 sub_type = 1;  // Module.types
+    uint32 rows = 2;
+    uint32 columns = 3;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

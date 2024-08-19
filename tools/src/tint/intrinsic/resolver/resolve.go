@@ -423,10 +423,6 @@ func (r *resolver) intrinsic(
 	// Append the overload to the intrinsic
 	intrinsic.Overloads = append(intrinsic.Overloads, overload)
 
-	for _, num := range overload.ExplicitTemplates.Numbers() {
-		return fmt.Errorf("%v explicit number template parameters are not supported", num.AST().Source)
-	}
-
 	// Update high-water mark of templates
 	if n := len(overload.AllTemplates()); r.s.MaxTemplates < n {
 		r.s.MaxTemplates = n

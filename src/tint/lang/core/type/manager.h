@@ -431,7 +431,7 @@ class Manager final {
     /// @param rows the number of rows
     /// @param cols the number of columns
     /// @returns the subgroup_matrix type
-    const core::type::SubgroupMatrix* subgroup_matrix(enum SubgroupMatrix::Kind kind,
+    const core::type::SubgroupMatrix* subgroup_matrix(SubgroupMatrixKind kind,
                                                       const core::type::Type* inner,
                                                       uint32_t rows,
                                                       uint32_t cols);
@@ -443,7 +443,7 @@ class Manager final {
     const core::type::SubgroupMatrix* subgroup_matrix_left(const core::type::Type* inner,
                                                            uint32_t rows,
                                                            uint32_t cols) {
-        return subgroup_matrix(SubgroupMatrix::Kind::kLeft, inner, rows, cols);
+        return subgroup_matrix(SubgroupMatrixKind::kLeft, inner, rows, cols);
     }
 
     /// @param inner the inner type
@@ -453,7 +453,7 @@ class Manager final {
     const core::type::SubgroupMatrix* subgroup_matrix_right(const core::type::Type* inner,
                                                             uint32_t rows,
                                                             uint32_t cols) {
-        return subgroup_matrix(SubgroupMatrix::Kind::kRight, inner, rows, cols);
+        return subgroup_matrix(SubgroupMatrixKind::kRight, inner, rows, cols);
     }
 
     /// @param inner the inner type
@@ -463,7 +463,7 @@ class Manager final {
     const core::type::SubgroupMatrix* subgroup_matrix_result(const core::type::Type* inner,
                                                              uint32_t rows,
                                                              uint32_t cols) {
-        return subgroup_matrix(SubgroupMatrix::Kind::kResult, inner, rows, cols);
+        return subgroup_matrix(SubgroupMatrixKind::kResult, inner, rows, cols);
     }
 
     /// @tparam K the kind of the matrix
@@ -471,7 +471,7 @@ class Manager final {
     /// @tparam R the number of rows in the matrix
     /// @tparam C the number of columns in the matrix
     /// @returns a matrix with the given number of columns and rows
-    template <enum SubgroupMatrix::Kind K, typename T, uint32_t R, uint32_t C>
+    template <SubgroupMatrixKind K, typename T, uint32_t R, uint32_t C>
     const core::type::SubgroupMatrix* subgroup_matrix() {
         return subgroup_matrix(K, Get<T>(), C, R);
     }

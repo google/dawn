@@ -573,23 +573,6 @@ type f32
 			`file.txt:1:2 @member_function can only be used on a function with at least one parameter`,
 		}, {
 			`
-type f32
-fn f<N: num>()`,
-			`file.txt:2:6 explicit number template parameters are not supported`,
-		}, {
-			`
-enum e { a b c }
-fn f<N: e>()`,
-			`file.txt:2:6 explicit number template parameters are not supported`,
-		}, {
-			`
-enum e { a b }
-type T<E: e>
-match m: e.a
-fn f<E: m>(T<E>)`,
-			`file.txt:4:6 explicit number template parameters are not supported`,
-		}, {
-			`
 implicit(T) fn f<T>()`,
 			`file.txt:1:18 'T' already declared
 First declared here: file.txt:1:10`,

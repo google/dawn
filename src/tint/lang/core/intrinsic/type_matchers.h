@@ -266,6 +266,39 @@ constexpr auto MatchMat4X2 = MatchMat<4, 2>;
 constexpr auto MatchMat4X3 = MatchMat<4, 3>;
 constexpr auto MatchMat4X4 = MatchMat<4, 4>;
 
+inline bool MatchSubgroupMatrix(intrinsic::MatchState&,
+                                const type::Type* ty,
+                                intrinsic::Number& S,
+                                const type::Type*& T,
+                                intrinsic::Number& A,
+                                intrinsic::Number& B) {
+    if (ty->Is<intrinsic::Any>()) {
+        A = intrinsic::Number::any;
+        B = intrinsic::Number::any;
+        S = intrinsic::Number::any;
+        T = ty;
+        return true;
+    }
+    if (auto* sm = ty->As<type::SubgroupMatrix>()) {
+        A = sm->Rows();
+        B = sm->Columns();
+        S = intrinsic::Number(static_cast<uint32_t>(sm->Kind()));
+        T = sm->Type();
+        return true;
+    }
+    return false;
+}
+
+inline const type::SubgroupMatrix* BuildSubgroupMatrix(intrinsic::MatchState& state,
+                                                       const type::Type*,
+                                                       intrinsic::Number S,
+                                                       const type::Type* T,
+                                                       intrinsic::Number A,
+                                                       intrinsic::Number B) {
+    return state.types.subgroup_matrix(static_cast<core::SubgroupMatrixKind>(S.Value()), T,
+                                       A.Value(), B.Value());
+}
+
 inline bool MatchArray(intrinsic::MatchState&, const type::Type* ty, const type::Type*& T) {
     if (ty->Is<intrinsic::Any>()) {
         T = ty;

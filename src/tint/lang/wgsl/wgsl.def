@@ -123,6 +123,8 @@ enum language_feature {
 
 // https://gpuweb.github.io/gpuweb/wgsl/#plain-types-section
 type bool
+type i8
+type u8
 @precedence(5) @display("abstract-int")   type ia
 @precedence(4) @display("abstract-float") type fa
 @precedence(3) type i32

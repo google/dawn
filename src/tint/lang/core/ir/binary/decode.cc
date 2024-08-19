@@ -689,6 +689,15 @@ struct Decoder {
                 return CreateTypeSampler(type_in.sampler());
             case pb::Type::KindCase::kInputAttachment:
                 return CreateTypeInputAttachment(type_in.input_attachment());
+            case pb::Type::KindCase::kSubgroupMatrixLeft:
+                return CreateTypeSubgroupMatrix(SubgroupMatrixKind::kLeft,
+                                                type_in.subgroup_matrix_left());
+            case pb::Type::KindCase::kSubgroupMatrixRight:
+                return CreateTypeSubgroupMatrix(SubgroupMatrixKind::kRight,
+                                                type_in.subgroup_matrix_right());
+            case pb::Type::KindCase::kSubgroupMatrixResult:
+                return CreateTypeSubgroupMatrix(SubgroupMatrixKind::kResult,
+                                                type_in.subgroup_matrix_result());
             case pb::Type::KindCase::KIND_NOT_SET:
                 break;
         }
@@ -892,6 +901,14 @@ struct Decoder {
         const pb::TypeInputAttachment& input_in) {
         auto sub_type = Type(input_in.sub_type());
         return mod_out_.Types().Get<type::InputAttachment>(sub_type);
+    }
+
+    const type::SubgroupMatrix* CreateTypeSubgroupMatrix(
+        SubgroupMatrixKind kind,
+        const pb::TypeSubgroupMatrix& subgroup_matrix) {
+        return mod_out_.Types().Get<type::SubgroupMatrix>(kind, Type(subgroup_matrix.sub_type()),
+                                                          subgroup_matrix.rows(),
+                                                          subgroup_matrix.columns());
     }
 
     const type::Type* Type(size_t id) {

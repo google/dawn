@@ -70,6 +70,8 @@ libtint_source_set("core") {
     "number.h",
     "parameter_usage.cc",
     "parameter_usage.h",
+    "subgroup_matrix_kind.cc",
+    "subgroup_matrix_kind.h",
     "texel_format.cc",
     "texel_format.h",
     "unary_op.cc",
