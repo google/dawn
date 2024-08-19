@@ -99,6 +99,8 @@ uint32_t BuiltinOrder(core::BuiltinValue builtin) {
             return 12;
         case core::BuiltinValue::kPointSize:
             return 13;
+        case core::BuiltinValue::kClipDistances:
+            return 14;
         default:
             break;
     }

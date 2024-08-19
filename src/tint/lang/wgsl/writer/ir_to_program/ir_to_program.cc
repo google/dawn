@@ -255,6 +255,10 @@ class State {
                         Enable(wgsl::Extension::kChromiumExperimentalSubgroups);
                         attrs.Push(b.Builtin(core::BuiltinValue::kSubgroupSize));
                         break;
+                    case core::BuiltinValue::kClipDistances:
+                        Enable(wgsl::Extension::kClipDistances);
+                        attrs.Push(b.Builtin(core::BuiltinValue::kClipDistances));
+                        break;
                     default:
                         TINT_UNIMPLEMENTED() << builtin.value();
                 }
@@ -1068,6 +1072,8 @@ class State {
                 if (auto builtin = ir_attrs.builtin) {
                     if (RequiresSubgroups(*builtin)) {
                         Enable(wgsl::Extension::kChromiumExperimentalSubgroups);
+                    } else if (*builtin == core::BuiltinValue::kClipDistances) {
+                        Enable(wgsl::Extension::kClipDistances);
                     }
                     ast_attrs.Push(b.Builtin(*builtin));
                 }

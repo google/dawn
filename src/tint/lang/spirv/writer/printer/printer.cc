@@ -362,8 +362,8 @@ class Printer {
             case core::BuiltinValue::kWorkgroupId:
                 return SpvBuiltInWorkgroupId;
             case core::BuiltinValue::kClipDistances:
-                // TODO(chromium:358408571): Implement `clip_distances` on SPIR-V
-                TINT_UNIMPLEMENTED();
+                module_.PushCapability(SpvCapabilityClipDistance);
+                return SpvBuiltInClipDistance;
             case core::BuiltinValue::kUndefined:
                 return SpvBuiltInMax;
         }
