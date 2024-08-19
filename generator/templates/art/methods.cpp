@@ -143,7 +143,7 @@ jobject toByteBuffer(JNIEnv *env, const void* address, jlong size) {
     {% else %}
         {% if _kotlin_return.annotation == '*' %}
             //* Make a native container to accept the data output via parameter.
-            {{ as_cType(_kotlin_return.type.name) }} out;
+            {{ as_cType(_kotlin_return.type.name) }} out = {};
             args.{{ _kotlin_return.name.get() }} = &out;
         {% endif %}
         {{ 'auto result =' if _kotlin_return.type.name.get() != 'void' }}
