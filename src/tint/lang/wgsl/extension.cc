@@ -54,6 +54,9 @@ Extension ParseExtension(std::string_view str) {
     if (str == "chromium_experimental_push_constant") {
         return Extension::kChromiumExperimentalPushConstant;
     }
+    if (str == "chromium_experimental_subgroup_matrix") {
+        return Extension::kChromiumExperimentalSubgroupMatrix;
+    }
     if (str == "chromium_experimental_subgroups") {
         return Extension::kChromiumExperimentalSubgroups;
     }
@@ -96,6 +99,8 @@ std::string_view ToString(Extension value) {
             return "chromium_experimental_pixel_local";
         case Extension::kChromiumExperimentalPushConstant:
             return "chromium_experimental_push_constant";
+        case Extension::kChromiumExperimentalSubgroupMatrix:
+            return "chromium_experimental_subgroup_matrix";
         case Extension::kChromiumExperimentalSubgroups:
             return "chromium_experimental_subgroups";
         case Extension::kChromiumInternalGraphite:

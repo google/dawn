@@ -98,6 +98,8 @@ enum extension {
   // A Chromium-specific extension that enables framebuffer fetching.
   // Cannot be used with chromium_experimental_pixel_local
   chromium_experimental_framebuffer_fetch
+  // A Chromium-specific extension for subgroup matrix support
+  chromium_experimental_subgroup_matrix
 }
 
 // https://gpuweb.github.io/gpuweb/wgsl/#language-extensions-sec
