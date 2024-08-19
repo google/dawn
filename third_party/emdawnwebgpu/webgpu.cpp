@@ -83,6 +83,7 @@ class RefCounted : NonMovable {
 
   void Release() {
     if (mRefCount.fetch_sub(1u, std::memory_order_release) == 1u) {
+      std::atomic_thread_fence(std::memory_order_acquire);
       emwgpuDelete(this);
       delete this;
     }
