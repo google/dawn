@@ -115,15 +115,19 @@ ast::transform::Transform::ApplyResult PadStructs::Apply(const Program& src,
             uint32_t size = ty->Size();
             if (ty->Is<core::type::Struct>() && str->UsedAs(core::AddressSpace::kUniform)) {
                 // std140 structs should be padded out to 16 bytes.
-                size = tint::RoundUp(16u, size);
-                // Add @size and @align attribute to satisfy WGSL validator rules.
-                new_members.Push(b.Member(
-                    name, type,
-                    tint::Vector{b.MemberAlign(core::AInt(16u)), b.MemberSize(core::AInt(size))}));
+                uint32_t rounded_size = tint::RoundUp(16u, size);
+
+                // Add a @size attribute to satisfy WGSL validator rules.
+                // But do not add manual padding for the part of (rounded_size - size),
+                // which is implicitly padded by std140.
+                new_members.Push(
+                    b.Member(name, type, tint::Vector{b.MemberSize(core::AInt(rounded_size))}));
+
+                offset += rounded_size;
             } else {
                 new_members.Push(b.Member(name, type));
+                offset += size;
             }
-            offset += size;
         }
 
         uint32_t struct_size = str->Size();
