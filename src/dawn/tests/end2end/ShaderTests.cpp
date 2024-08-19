@@ -2198,7 +2198,7 @@ TEST_P(ShaderTests, FragDepthAndInstanceIndex) {
     desc.cFragment.module = module;
     desc.cFragment.targetCount = 0;
     wgpu::DepthStencilState* dsState = desc.EnableDepthStencil();
-    dsState->depthWriteEnabled = true;
+    dsState->depthWriteEnabled = wgpu::OptionalBool::True;
     dsState->depthCompare = wgpu::CompareFunction::Always;
 
     device.CreateRenderPipeline(&desc);

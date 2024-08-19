@@ -894,10 +894,6 @@ bool Converter::Convert(wgpu::ColorTargetState& out, const interop::GPUColorTarg
 bool Converter::Convert(wgpu::DepthStencilState& out, const interop::GPUDepthStencilState& in) {
     out = {};
 
-    auto depthWriteDefined = Allocate<wgpu::DepthStencilStateDepthWriteDefinedDawn>();
-    depthWriteDefined->depthWriteDefined = in.depthWriteEnabled.has_value();
-    out.nextInChain = depthWriteDefined;
-
     return Convert(out.format, in.format) && Convert(out.depthWriteEnabled, in.depthWriteEnabled) &&
            Convert(out.depthCompare, in.depthCompare) &&
            Convert(out.stencilFront, in.stencilFront) && Convert(out.stencilBack, in.stencilBack) &&
@@ -1696,6 +1692,11 @@ bool Converter::Convert(wgpu::PipelineLayout& out, const interop::GPUAutoLayoutM
 }
 
 bool Converter::Convert(wgpu::Bool& out, const bool& in) {
+    out = in;
+    return true;
+}
+
+bool Converter::Convert(wgpu::OptionalBool& out, const std::optional<bool>& in) {
     out = in;
     return true;
 }
