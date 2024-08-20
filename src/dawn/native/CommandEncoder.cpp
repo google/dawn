@@ -1078,12 +1078,8 @@ CommandEncoder::CommandEncoder(DeviceBase* device,
 
 CommandEncoder::CommandEncoder(DeviceBase* device, ObjectBase::ErrorTag tag, const char* label)
     : ApiObjectBase(device, tag, label),
-      mEncodingContext(device, this),
-      mUsageValidationMode(UsageValidationMode::Default) {
-    GetObjectTrackingList()->Track(this);
-
-    mEncodingContext.HandleError(DAWN_VALIDATION_ERROR("%s is invalid.", this));
-}
+      mEncodingContext(device, tag),
+      mUsageValidationMode(UsageValidationMode::Default) {}
 
 ObjectType CommandEncoder::GetType() const {
     return ObjectType::CommandEncoder;

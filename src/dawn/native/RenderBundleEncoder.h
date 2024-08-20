@@ -59,7 +59,7 @@ class RenderBundleEncoder final : public RenderEncoderBase {
 
     void DestroyImpl() override;
 
-    ResultOrError<Ref<RenderBundleBase>> FinishImpl(const RenderBundleDescriptor* descriptor);
+    ResultOrError<Ref<RenderBundleBase>> Finish(const RenderBundleDescriptor* descriptor);
     MaybeError ValidateFinish(const RenderPassResourceUsage& usages) const;
 
     EncodingContext mBundleEncodingContext;

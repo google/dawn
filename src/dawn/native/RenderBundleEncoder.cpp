@@ -115,7 +115,7 @@ RenderBundleEncoder::RenderBundleEncoder(DeviceBase* device,
 
 RenderBundleEncoder::RenderBundleEncoder(DeviceBase* device, ErrorTag errorTag, const char* label)
     : RenderEncoderBase(device, &mBundleEncodingContext, errorTag, label),
-      mBundleEncodingContext(device, this) {}
+      mBundleEncodingContext(device, errorTag) {}
 
 RenderBundleEncoder::~RenderBundleEncoder() {
     mEncodingContext = nullptr;
@@ -151,7 +151,7 @@ CommandIterator RenderBundleEncoder::AcquireCommands() {
 RenderBundleBase* RenderBundleEncoder::APIFinish(const RenderBundleDescriptor* descriptor) {
     Ref<RenderBundleBase> result;
 
-    if (GetDevice()->ConsumedError(FinishImpl(descriptor), &result, "calling %s.Finish(%s).", this,
+    if (GetDevice()->ConsumedError(Finish(descriptor), &result, "calling %s.Finish(%s).", this,
                                    descriptor)) {
         result = RenderBundleBase::MakeError(GetDevice(), descriptor ? descriptor->label : nullptr);
         result->SetEncoderLabel(this->GetLabel());
@@ -160,19 +160,17 @@ RenderBundleBase* RenderBundleEncoder::APIFinish(const RenderBundleDescriptor* d
     return ReturnToAPI(std::move(result));
 }
 
-ResultOrError<Ref<RenderBundleBase>> RenderBundleEncoder::FinishImpl(
+ResultOrError<Ref<RenderBundleBase>> RenderBundleEncoder::Finish(
     const RenderBundleDescriptor* descriptor) {
     mCommandBufferState.End();
-
     // Even if mBundleEncodingContext.Finish() validation fails, calling it will mutate the
     // internal state of the encoding context. Subsequent calls to encode commands will generate
     // errors.
     DAWN_TRY(mBundleEncodingContext.Finish());
+    DAWN_TRY(GetDevice()->ValidateIsAlive());
 
     RenderPassResourceUsage usages = mUsageTracker.AcquireResourceUsage();
     if (IsValidationEnabled()) {
-        DAWN_TRY(GetDevice()->ValidateObject(this));
-        DAWN_TRY(ValidateProgrammableEncoderEnd());
         DAWN_TRY(ValidateFinish(usages));
     }
 
@@ -184,6 +182,7 @@ ResultOrError<Ref<RenderBundleBase>> RenderBundleEncoder::FinishImpl(
 MaybeError RenderBundleEncoder::ValidateFinish(const RenderPassResourceUsage& usages) const {
     TRACE_EVENT0(GetDevice()->GetPlatform(), Validation, "RenderBundleEncoder::ValidateFinish");
     DAWN_TRY(GetDevice()->ValidateObject(this));
+    DAWN_TRY(ValidateProgrammableEncoderEnd());
     DAWN_TRY(ValidateSyncScopeResourceUsage(usages));
     return {};
 }

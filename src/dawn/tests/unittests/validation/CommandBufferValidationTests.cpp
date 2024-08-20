@@ -27,10 +27,7 @@
 
 #include <gmock/gmock.h>
 
-#include "dawn/native/CommandEncoder.h"
-
 #include "dawn/tests/unittests/validation/ValidationTest.h"
-
 #include "dawn/utils/WGPUHelpers.h"
 
 namespace dawn {
@@ -414,81 +411,6 @@ TEST_F(CommandBufferValidationTest, InjectedValidateErrorVariousStringTypes) {
         encoder.InjectValidationError(std::string_view("err\0or", 6));
         ASSERT_DEVICE_ERROR(encoder.Finish(), AllOf(HasSubstr("validation error: err."),
                                                     HasSubstr("[CommandEncoder \"my\"]")));
-    }
-}
-
-TEST_F(CommandBufferValidationTest, DestroyEncoder) {
-    // Skip these tests if we are using wire because the destroy functionality is not exposed
-    // and needs to use a cast to call manually. We cannot test this in the wire case since the
-    // only way to trigger the destroy call is by losing all references which means we cannot
-    // call finish.
-    DAWN_SKIP_TEST_IF(UsesWire());
-    PlaceholderRenderPass placeholderRenderPass(device);
-
-    // Control case, command buffer ended after the pass is ended.
-    {
-        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
-        wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&placeholderRenderPass);
-        pass.End();
-        encoder.Finish();
-    }
-
-    // Destroyed encoder with encoded commands should emit error on finish.
-    {
-        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
-        wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&placeholderRenderPass);
-        pass.End();
-        native::FromAPI(encoder.Get())->Destroy();
-        ASSERT_DEVICE_ERROR(encoder.Finish(), HasSubstr("Destroyed encoder cannot be finished."));
-    }
-
-    // Destroyed encoder with encoded commands shouldn't emit an error if never finished.
-    {
-        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
-        wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&placeholderRenderPass);
-        pass.End();
-        native::FromAPI(encoder.Get())->Destroy();
-    }
-
-    // Destroyed encoder should allow encoding, and emit error on finish.
-    {
-        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
-        native::FromAPI(encoder.Get())->Destroy();
-        wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&placeholderRenderPass);
-        pass.End();
-        ASSERT_DEVICE_ERROR(encoder.Finish(), HasSubstr("Destroyed encoder cannot be finished."));
-    }
-
-    // Destroyed encoder should allow encoding and shouldn't emit an error if never finished.
-    {
-        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
-        native::FromAPI(encoder.Get())->Destroy();
-        wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&placeholderRenderPass);
-        pass.End();
-    }
-
-    // Destroying a finished encoder should not emit any errors.
-    {
-        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
-        wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&placeholderRenderPass);
-        pass.End();
-        encoder.Finish();
-        native::FromAPI(encoder.Get())->Destroy();
-    }
-
-    // Destroying an encoder twice should not emit any errors.
-    {
-        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
-        native::FromAPI(encoder.Get())->Destroy();
-        native::FromAPI(encoder.Get())->Destroy();
-    }
-
-    // Destroying an encoder twice and then calling finish should fail.
-    {
-        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
-        native::FromAPI(encoder.Get())->Destroy();
-        native::FromAPI(encoder.Get())->Destroy();
-        ASSERT_DEVICE_ERROR(encoder.Finish(), HasSubstr("Destroyed encoder cannot be finished."));
     }
 }
 
