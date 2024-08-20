@@ -55,19 +55,25 @@ def main():
 
 def generate(args, tmpdir: tempfile.TemporaryDirectory):
     script_dir = path.dirname(path.realpath(__file__))
-    benchmark_dir = script_dir + '/../../../../test/tint/benchmark'
+    base_dir = script_dir + '/../../../../'
     tmp_header_output_path = tmpdir + '/inputs_bench.h'
     final_header_output_path = script_dir + '/inputs_bench.h'
 
     # The list of benchmark inputs.
     benchmark_files = [
-        "atan2-const-eval.wgsl",
-        "cluster-lights.wgsl",
-        "metaball-isosurface.wgsl",
-        "particles.wgsl",
-        "shadow-fragment.wgsl",
-        "skinned-shadowed-pbr-fragment.wgsl",
-        "skinned-shadowed-pbr-vertex.wgsl",
+        "test/tint/benchmark/atan2-const-eval.wgsl",
+        "test/tint/benchmark/cluster-lights.wgsl",
+        "test/tint/benchmark/metaball-isosurface.wgsl",
+        "test/tint/benchmark/particles.wgsl",
+        "test/tint/benchmark/shadow-fragment.wgsl",
+        "test/tint/benchmark/skinned-shadowed-pbr-fragment.wgsl",
+        "test/tint/benchmark/skinned-shadowed-pbr-vertex.wgsl",
+        "third_party/benchmark_shaders/unity_boat_attack/unity_webgpu_000002778DE78280.cs.spv",
+        "third_party/benchmark_shaders/unity_boat_attack/unity_webgpu_000002778DE78280.cs.wgsl",
+        "third_party/benchmark_shaders/unity_boat_attack/unity_webgpu_000002778F740030.fs.spv",
+        "third_party/benchmark_shaders/unity_boat_attack/unity_webgpu_000002778F740030.fs.wgsl",
+        "third_party/benchmark_shaders/unity_boat_attack/unity_webgpu_0000017E9E2D81A0.vs.spv",
+        "third_party/benchmark_shaders/unity_boat_attack/unity_webgpu_0000017E9E2D81A0.vs.wgsl",
     ]
 
     # Generate the header file.
@@ -132,7 +138,7 @@ const std::unordered_map<std::string, std::string> kBenchmarkInputs = {''',
 
         # Add an entry to the array for each benchmark.
         for f in benchmark_files:
-            fullpath = benchmark_dir + '/' + f
+            fullpath = base_dir + '/' + f
             if f.endswith('.wgsl'):
                 # Emit the WGSL shader as is.
                 with open(fullpath, 'rb') as input:
@@ -157,7 +163,9 @@ const std::unordered_map<std::string, std::string> kBenchmarkInputs = {''',
         # Define the macro that registers each of the inputs with Google Benchmark.
         print('#define TINT_BENCHMARK_PROGRAMS(FUNC) \\', file=output)
         for f in sorted(benchmark_files):
-            print(f'    BENCHMARK_CAPTURE(FUNC, {f}, "{f}"); \\', file=output)
+            name = f.split('/')[-1]
+            print(f'    BENCHMARK_CAPTURE(FUNC, {name}, "{f}"); \\',
+                  file=output)
         print('    TINT_REQUIRE_SEMICOLON', file=output)
         print('', file=output)
 
