@@ -469,11 +469,24 @@ var LibraryWebGPU = {
   },
 
   // ----------------------------------------------------------------------------
-  // Definitions for standalone JS emwgpu functions (callable from webgpu.cpp)
+  // Definitions for standalone JS emwgpu functions (callable from webgpu.cpp and
+  //   library_html5_html.js)
   // ----------------------------------------------------------------------------
 
   emwgpuDelete: (id) => {
     delete WebGPU._table[id];
+  },
+
+  // Extra helper that allow for directly inserting Devices (and their
+  // corresponding Queue) that is called from the HTML5 library since there
+  // isn't access to the C++ in webgpu.cpp there.
+  emwgpuTableInsertDevice__deps: ['emwgpuCreateDevice', 'emwgpuCreateQueue'],
+  emwgpuTableInsertDevice: (device) => {
+    var queuePtr = _emwgpuCreateQueue();
+    WebGPU._tableInsert(queuePtr, device.queue);
+    var devicePtr = _emwgpuCreateDevice(queuePtr);
+    WebGPU._tableInsert(devicePtr, device);
+    return devicePtr;
   },
 
 #if ASYNCIFY

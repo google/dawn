@@ -1,15 +1,15 @@
 {{{
   // Helper functions for code generation
   globalThis.html5_gpu = {
-    makeImportExport: (snake_case, CamelCase) => {
+    makeImportExport: (snake_case) => {
       return `
 LibraryHTML5WebGPU.emscripten_webgpu_import_${snake_case}__deps = ['$WebGPU', '$JsValStore'];
-LibraryHTML5WebGPU.emscripten_webgpu_import_${snake_case} = (handle) =>
-  WebGPU.mgr${CamelCase}.create(JsValStore.get(handle));
+LibraryHTML5WebGPU.emscripten_webgpu_import_${snake_case} = (ptr) =>
+  WebGPU._tableInsert(JsValStore.get(ptr));
 
 LibraryHTML5WebGPU.emscripten_webgpu_export_${snake_case}__deps = ['$WebGPU', '$JsValStore'];
-LibraryHTML5WebGPU.emscripten_webgpu_export_${snake_case} = (handle) =>
-  JsValStore.add(WebGPU.mgr${CamelCase}.get(handle));`
+LibraryHTML5WebGPU.emscripten_webgpu_export_${snake_case} = (ptr) =>
+  JsValStore.add(WebGPU._tableGet(ptr));`
     },
   };
   null;
@@ -48,46 +48,45 @@ var LibraryHTML5WebGPU = {
   emscripten_webgpu_release_js_handle__deps: ['$JsValStore'],
   emscripten_webgpu_release_js_handle: (id) => JsValStore.remove(id),
 
-  emscripten_webgpu_get_device__deps: ['$WebGPU'],
+  emscripten_webgpu_get_device__deps: ['$WebGPU', 'emwgpuTableInsertDevice', 'wgpuDeviceAddRef'],
   emscripten_webgpu_get_device: () => {
 #if ASSERTIONS
     assert(Module['preinitializedWebGPUDevice']);
 #endif
     if (WebGPU.preinitializedDeviceId === undefined) {
       var device = Module['preinitializedWebGPUDevice'];
-      var deviceWrapper = { queueId: WebGPU.mgrQueue.create(device["queue"]) };
-      WebGPU.preinitializedDeviceId = WebGPU.mgrDevice.create(device, deviceWrapper);
+      WebGPU.preinitializedDeviceId = _emwgpuTableInsertDevice(device);
     }
-    WebGPU.mgrDevice.reference(WebGPU.preinitializedDeviceId);
+    _wgpuDeviceAddRef(WebGPU.preinitializedDeviceId);
     return WebGPU.preinitializedDeviceId;
   },
 };
 
-{{{ html5_gpu.makeImportExport('surface', 'Surface') }}}
-{{{ html5_gpu.makeImportExport('swap_chain', 'SwapChain') }}}
+{{{ html5_gpu.makeImportExport('surface') }}}
+{{{ html5_gpu.makeImportExport('swap_chain') }}}
 
-{{{ html5_gpu.makeImportExport('device', 'Device') }}}
-{{{ html5_gpu.makeImportExport('queue', 'Queue') }}}
+{{{ html5_gpu.makeImportExport('device') }}}
+{{{ html5_gpu.makeImportExport('queue') }}}
 
-{{{ html5_gpu.makeImportExport('command_buffer', 'CommandBuffer') }}}
-{{{ html5_gpu.makeImportExport('command_encoder', 'CommandEncoder') }}}
-{{{ html5_gpu.makeImportExport('render_pass_encoder', 'RenderPassEncoder') }}}
-{{{ html5_gpu.makeImportExport('compute_pass_encoder', 'ComputePassEncoder') }}}
+{{{ html5_gpu.makeImportExport('command_buffer') }}}
+{{{ html5_gpu.makeImportExport('command_encoder') }}}
+{{{ html5_gpu.makeImportExport('render_pass_encoder') }}}
+{{{ html5_gpu.makeImportExport('compute_pass_encoder') }}}
 
-{{{ html5_gpu.makeImportExport('bind_group', 'BindGroup') }}}
-{{{ html5_gpu.makeImportExport('buffer', 'Buffer') }}}
-{{{ html5_gpu.makeImportExport('sampler', 'Sampler') }}}
-{{{ html5_gpu.makeImportExport('texture', 'Texture') }}}
-{{{ html5_gpu.makeImportExport('texture_view', 'TextureView') }}}
-{{{ html5_gpu.makeImportExport('query_set', 'QuerySet') }}}
+{{{ html5_gpu.makeImportExport('bind_group') }}}
+{{{ html5_gpu.makeImportExport('buffer') }}}
+{{{ html5_gpu.makeImportExport('sampler') }}}
+{{{ html5_gpu.makeImportExport('texture') }}}
+{{{ html5_gpu.makeImportExport('texture_view') }}}
+{{{ html5_gpu.makeImportExport('query_set') }}}
 
-{{{ html5_gpu.makeImportExport('bind_group_layout', 'BindGroupLayout') }}}
-{{{ html5_gpu.makeImportExport('pipeline_layout', 'PipelineLayout') }}}
-{{{ html5_gpu.makeImportExport('render_pipeline', 'RenderPipeline') }}}
-{{{ html5_gpu.makeImportExport('compute_pipeline', 'ComputePipeline') }}}
-{{{ html5_gpu.makeImportExport('shader_module', 'ShaderModule') }}}
+{{{ html5_gpu.makeImportExport('bind_group_layout') }}}
+{{{ html5_gpu.makeImportExport('pipeline_layout') }}}
+{{{ html5_gpu.makeImportExport('render_pipeline') }}}
+{{{ html5_gpu.makeImportExport('compute_pipeline') }}}
+{{{ html5_gpu.makeImportExport('shader_module') }}}
 
-{{{ html5_gpu.makeImportExport('render_bundle_encoder', 'RenderBundleEncoder') }}}
-{{{ html5_gpu.makeImportExport('render_bundle', 'RenderBundle') }}}
+{{{ html5_gpu.makeImportExport('render_bundle_encoder') }}}
+{{{ html5_gpu.makeImportExport('render_bundle') }}}
 
 mergeInto(LibraryManager.library, LibraryHTML5WebGPU);
