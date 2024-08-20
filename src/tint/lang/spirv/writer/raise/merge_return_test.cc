@@ -211,6 +211,43 @@ TEST_F(SpirvWriter_MergeReturnTest, IfElse_OneSideReturns) {
     EXPECT_EQ(expect, str());
 }
 
+TEST_F(SpirvWriter_MergeReturnTest, NoModify_EntryPoint_IfElse_OneSideReturns) {
+    auto* cond = b.FunctionParam(ty.bool_());
+    auto* func = b.Function("entrypointfunction", ty.void_(),
+                            core::ir::Function::PipelineStage::kCompute, {{2, 3, 4}});
+    func->SetParams({cond});
+    b.Append(func->Block(), [&] {
+        auto* ifelse = b.If(cond);
+        b.Append(ifelse->True(), [&] { b.Return(func); });
+        b.Append(ifelse->False(), [&] { b.ExitIf(ifelse); });
+
+        b.Return(func);
+    });
+
+    auto* src = R"(
+%entrypointfunction = @compute @workgroup_size(2, 3, 4) func(%2:bool):void {
+  $B1: {
+    if %2 [t: $B2, f: $B3] {  # if_1
+      $B2: {  # true
+        ret
+      }
+      $B3: {  # false
+        exit_if  # if_1
+      }
+    }
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = src;
+
+    Run(MergeReturn);
+
+    EXPECT_EQ(expect, str());
+}
+
 // This is the same as the above tests, but we create the return instructions in a different order
 // to make sure that creation order doesn't matter.
 TEST_F(SpirvWriter_MergeReturnTest, IfElse_OneSideReturns_ReturnsCreatedInDifferentOrder) {

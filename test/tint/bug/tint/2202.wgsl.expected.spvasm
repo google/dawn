@@ -26,11 +26,11 @@
                OpLoopMerge %12 %10 None
                OpBranch %9
           %9 = OpLabel
-               OpBranch %12
+               OpReturn
          %10 = OpLabel
                OpBranch %11
          %12 = OpLabel
-               OpBranch %8
+               OpUnreachable
           %6 = OpLabel
                OpBranch %7
           %8 = OpLabel
