@@ -121,15 +121,15 @@ deps = {
   # The //build, //tools/clang, and //tools/rust deps should all be updated
   # in unison, as there are dependencies between them.
   'build': {
-    'url': '{chromium_git}/chromium/src/build@5328cf8d5599a47ce0157bd390e7de050b3efe69',
+    'url': '{chromium_git}/chromium/src/build@a6c1c751fd8c18d9e051b12600aec2753c1712c3',
     'condition': 'dawn_standalone',
   },
   'tools/clang': {
-    'url': '{chromium_git}/chromium/src/tools/clang@303336503ee5018769a2681538289058dbd28947',
+    'url': '{chromium_git}/chromium/src/tools/clang@06a29b5bbf392c68d73dc8df9015163cc5a98c40',
     'condition': 'dawn_standalone',
   },
   'tools/rust': {
-    'url': '{chromium_git}/chromium/src/tools/rust@86af231a4eafdff5cc710204949b6b806954b926',
+    'url': '{chromium_git}/chromium/src/tools/rust@a69a8ecdbf7a19fb129ae57650cac9f704cb7cf9',
     'condition': 'dawn_standalone and checkout_rust',
   },
   'tools/clang/dsymutil': {
