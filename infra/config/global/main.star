@@ -231,12 +231,7 @@ def get_dimension(os, builder_name = None):
     if os.category == os_category.LINUX:
         return "Ubuntu-22.04"
     elif os.category == os_category.MAC:
-        if "cmake" in builder_name:
-            # CMake build runs Tint e2e tests, which must run on 11+ where the metal
-            # compiler (xcrun) supports texel fetch (chromium_experimental_framebuffer_fetch)
-            return "Mac-11|Mac-12|Mac-13"
-        else:
-            return "Mac-10.15|Mac-11"
+        return "Mac-11|Mac-12|Mac-13"
     elif os.category == os_category.WINDOWS:
         return "Windows-10"
 
