@@ -557,12 +557,16 @@ void PhysicalDevice::SetupBackendAdapterToggles(dawn::platform::Platform* platfo
     uint32_t deviceId = GetDeviceId();
     uint32_t vendorId = GetVendorId();
 
-    // On Intel Gen12 GPU, using shader model 6.6 will cause unexpected result when
-    // adding/subtracting I32/U32 vector/scalar with vector/scalar in constant initialized array.
-    // See https://crbug.com/tint/2189 and https://crbug.com/dawn/2470 for more information.
+    // On Intel Gen12 D3D driver < 32.0.101.5762, using shader model 6.6 will cause unexpected
+    // result when adding/subtracting I32/U32 vector/scalar with vector/scalar in constant
+    // initialized array. See https://crbug.com/tint/2189 and https://crbug.com/dawn/2470 for more
+    // information.
     if (gpu_info::IsIntelGen12HP(vendorId, deviceId) ||
         gpu_info::IsIntelGen12LP(vendorId, deviceId)) {
-        adapterToggles->Default(Toggle::D3D12DontUseShaderModel66OrHigher, true);
+        if (gpu_info::CompareWindowsDriverVersion(vendorId, GetDriverVersion(),
+                                                  {32, 0, 101, 5762}) == -1) {
+            adapterToggles->Default(Toggle::D3D12DontUseShaderModel66OrHigher, true);
+        }
     }
 
     // Workaround for textureDimensions() produces incorrect results with shader model 6.6 on Intel
