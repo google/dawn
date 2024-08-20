@@ -1196,6 +1196,15 @@ class Printer : public tint::TextGenerator {
                 }
             },                                                 //
             [&](const msl::type::Level*) { out << "level"; },  //
+            [&](const core::type::SubgroupMatrix* sm) {
+                TINT_ASSERT((sm->Type()->IsAnyOf<core::type::F32, core::type::F16>()));
+                TINT_ASSERT(sm->Columns() == 8);
+                TINT_ASSERT(sm->Rows() == 8);
+
+                out << "simdgroup_";
+                EmitType(out, sm->Type());
+                out << sm->Columns() << "x" << sm->Rows();
+            },
 
             TINT_ICE_ON_NO_MATCH);
     }
@@ -1619,6 +1628,13 @@ class Printer : public tint::TextGenerator {
             },
             [&](const core::type::Array*) { out << "{}"; },   //
             [&](const core::type::Struct*) { out << "{}"; },  //
+            [&](const core::type::SubgroupMatrix* sm) {
+                out << "make_filled_simdgroup_matrix<";
+                EmitType(out, sm->Type());
+                out << ", " << sm->Columns() << ", " << sm->Rows() << ">(";
+                EmitZeroValue(out, sm->Type());
+                out << ")";
+            },
             TINT_ICE_ON_NO_MATCH);
     }
 

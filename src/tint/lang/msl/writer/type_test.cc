@@ -1104,5 +1104,53 @@ INSTANTIATE_TEST_SUITE_P(MslWriterTest,
                                          MslStorageTextureData{core::type::TextureDimension::k3d,
                                                                "texture3d<float, access::write>"}));
 
+// Metal only supports f{16, 32} at (8x8). Bfloat is also supported but isn't in WGSL.
+TEST_F(MslWriterTest, EmitType_SubgroupMatrixLeft) {
+    auto* func = b.Function("foo", ty.void_());
+    b.Append(func->Block(), [&] {
+        b.Var("a", ty.ptr(core::AddressSpace::kPrivate, ty.subgroup_matrix_left(ty.f32(), 8, 8)));
+        b.Return(func);
+    });
+
+    ASSERT_TRUE(Generate({}, validate::MslVersion::kMsl_2_3)) << err_ << output_.msl;
+    EXPECT_EQ(output_.msl, MetalHeader() + R"(
+void foo() {
+  thread simdgroup_float8x8 a = make_filled_simdgroup_matrix<float, 8, 8>(0.0f);
+}
+)");
+}
+
+// Metal only supports f{16, 32} at (8x8). Bfloat is also supported but isn't in WGSL.
+TEST_F(MslWriterTest, EmitType_SubgroupMatrixRight) {
+    auto* func = b.Function("foo", ty.void_());
+    b.Append(func->Block(), [&] {
+        b.Var("a", ty.ptr(core::AddressSpace::kFunction, ty.subgroup_matrix_right(ty.f16(), 8, 8)));
+        b.Return(func);
+    });
+
+    ASSERT_TRUE(Generate({}, validate::MslVersion::kMsl_2_3)) << err_ << output_.msl;
+    EXPECT_EQ(output_.msl, MetalHeader() + R"(
+void foo() {
+  simdgroup_half8x8 a = make_filled_simdgroup_matrix<half, 8, 8>(0.0h);
+}
+)");
+}
+
+// Metal only supports f{16, 32} at (8x8). Bfloat is also supported but isn't in WGSL.
+TEST_F(MslWriterTest, EmitType_SubgroupMatrixResult) {
+    auto* func = b.Function("foo", ty.void_());
+    b.Append(func->Block(), [&] {
+        b.Var("a", ty.ptr(core::AddressSpace::kPrivate, ty.subgroup_matrix_result(ty.f32(), 8, 8)));
+        b.Return(func);
+    });
+
+    ASSERT_TRUE(Generate({}, validate::MslVersion::kMsl_2_3)) << err_ << output_.msl;
+    EXPECT_EQ(output_.msl, MetalHeader() + R"(
+void foo() {
+  thread simdgroup_float8x8 a = make_filled_simdgroup_matrix<float, 8, 8>(0.0f);
+}
+)");
+}
+
 }  // namespace
 }  // namespace tint::msl::writer
