@@ -128,6 +128,10 @@ TEST_P(BufferHostMappedPointerTests, Alignment) {
 // It should be GPU-visible immediately after creation.
 // Then, change the host pointer, and see changes reflected on the GPU.
 TEST_P(BufferHostMappedPointerTests, InitialDataAndCopySrc) {
+    // TODO(crbug.com/358296955): Re-enable this once it no longer causes
+    // subsequent tests to flakily crash.
+    DAWN_SUPPRESS_TEST_IF(IsMacOS() && IsAMD() && IsMetal());
+
     // Set up expected data.
     uint32_t bufferSize = mRequiredAlignment;
     std::vector<uint32_t> expected(bufferSize / sizeof(uint32_t));
