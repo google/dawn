@@ -69,9 +69,8 @@ struct State {
                 inst,  //
                 [&](ir::Access* access) {
                     // Check if accesses into this object should be clamped.
-                    auto* ptr = access->Object()->Type()->As<type::Pointer>();
-                    if (ptr) {
-                        if (ShouldClamp(ptr->AddressSpace())) {
+                    if (access->Object()->Type()->Is<type::Pointer>()) {
+                        if (ShouldClamp(access->Object())) {
                             accesses.Push(access);
                         }
                     } else {
@@ -81,16 +80,14 @@ struct State {
                     }
                 },
                 [&](ir::LoadVectorElement* lve) {
-                    // Check if loads from this address space should be clamped.
-                    auto* ptr = lve->From()->Type()->As<type::Pointer>();
-                    if (ShouldClamp(ptr->AddressSpace())) {
+                    // Check if loads from this value should be clamped.
+                    if (ShouldClamp(lve->From())) {
                         vector_loads.Push(lve);
                     }
                 },
                 [&](ir::StoreVectorElement* sve) {
-                    // Check if stores to this address space should be clamped.
-                    auto* ptr = sve->To()->Type()->As<type::Pointer>();
-                    if (ShouldClamp(ptr->AddressSpace())) {
+                    // Check if stores to this value should be clamped.
+                    if (ShouldClamp(sve->To())) {
                         vector_stores.Push(sve);
                     }
                 },
@@ -136,19 +133,15 @@ struct State {
                 ClampTextureCallArgs(call);
             });
         }
-
-        // TODO(jrprice): Handle config.bindings_ignored.
-        if (!config.bindings_ignored.empty()) {
-            // Also update robustness_fuzz.cc
-            TINT_UNIMPLEMENTED();
-        }
     }
 
-    /// Check if clamping should be applied to a particular address space.
-    /// @param addrspace the address space to check
-    /// @returns true if pointer accesses in @p param addrspace should be clamped
-    bool ShouldClamp(AddressSpace addrspace) {
-        switch (addrspace) {
+    /// Check if clamping should be applied to a particular value.
+    /// @param value the value to check. The value's type must be type::Pointer.
+    /// @returns true if pointer accesses in @p param should be clamped
+    bool ShouldClamp(Value* value) {
+        auto* ptr = value->Type()->As<type::Pointer>();
+        TINT_ASSERT(ptr);
+        switch (ptr->AddressSpace()) {
             case AddressSpace::kFunction:
                 return config.clamp_function;
             case AddressSpace::kPrivate:
@@ -156,9 +149,9 @@ struct State {
             case AddressSpace::kPushConstant:
                 return config.clamp_push_constant;
             case AddressSpace::kStorage:
-                return config.clamp_storage;
+                return config.clamp_storage && !IsRootVarIgnored(value);
             case AddressSpace::kUniform:
-                return config.clamp_uniform;
+                return config.clamp_uniform && !IsRootVarIgnored(value);
             case AddressSpace::kWorkgroup:
                 return config.clamp_workgroup;
             case AddressSpace::kUndefined:
@@ -336,6 +329,52 @@ struct State {
             default:
                 break;
         }
+    }
+
+    // Returns the root Var for `value` by walking up the chain of instructions,
+    // or nullptr if none is found.
+    Var* RootVarFor(Value* value) {
+        Var* result = nullptr;
+        while (value) {
+            TINT_ASSERT(value->Alive());
+            value = tint::Switch(
+                value,  //
+                [&](InstructionResult* res) {
+                    // value was emitted by an instruction
+                    auto* inst = res->Instruction();
+                    return tint::Switch(
+                        inst,
+                        [&](Access* access) {  //
+                            return access->Object();
+                        },
+                        [&](Let* let) {  //
+                            return let->Value();
+                        },
+                        [&](Var* var) {
+                            result = var;
+                            return nullptr;  // Done
+                        },
+                        TINT_ICE_ON_NO_MATCH);
+                },
+                [&](FunctionParam*) {
+                    // Cannot follow function params to vars
+                    return nullptr;
+                },  //
+                TINT_ICE_ON_NO_MATCH);
+        }
+        return result;
+    }
+
+    // Returns true if the binding for `value`'s root variable is in config.bindings_ignored.
+    bool IsRootVarIgnored(Value* value) {
+        if (auto* var = RootVarFor(value)) {
+            if (auto bp = var->BindingPoint()) {
+                if (config.bindings_ignored.find(*bp) != config.bindings_ignored.end()) {
+                    return true;  // Ignore this variable
+                }
+            }
+        }
+        return false;
     }
 };
 
