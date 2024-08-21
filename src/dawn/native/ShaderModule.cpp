@@ -1236,16 +1236,6 @@ MaybeError ValidateCompatibilityWithPipelineLayout(DeviceBase* device,
         const TextureBindingInfo& sampledTextureBindingInfo =
             std::get<TextureBindingInfo>(textureInfo.bindingLayout);
 
-        // Uint/Sint can't be statically used with a sampler, so they any
-        // texture bindings reflected must be float or depth textures. If
-        // the shader uses a float/depth texture but the bind group layout
-        // specifies a uint/sint texture binding,
-        // |ValidateCompatibilityWithBindGroupLayout| will fail since the
-        // sampleType does not match.
-        DAWN_ASSERT(sampledTextureBindingInfo.sampleType != wgpu::TextureSampleType::Undefined &&
-                    sampledTextureBindingInfo.sampleType != wgpu::TextureSampleType::Uint &&
-                    sampledTextureBindingInfo.sampleType != wgpu::TextureSampleType::Sint);
-
         DAWN_INVALID_IF(
             sampledTextureBindingInfo.sampleType == wgpu::TextureSampleType::UnfilterableFloat,
             "Texture binding (group:%u, binding:%u) is %s but used statically with a sampler "
