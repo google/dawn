@@ -18,6 +18,7 @@
                OpDecorate %tint_symbol_1 Block
                OpDecorate %1 DescriptorSet 0
                OpDecorate %1 Binding 0
+               OpDecorate %1 Coherent
         %int = OpTypeInt 32 1
       %v3int = OpTypeVector %int 3
           %S = OpTypeStruct %v3int

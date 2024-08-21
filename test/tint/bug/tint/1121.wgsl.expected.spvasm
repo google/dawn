@@ -75,6 +75,7 @@
                OpDecorate %LightsBuffer Block
                OpDecorate %lightsBuffer DescriptorSet 0
                OpDecorate %lightsBuffer Binding 0
+               OpDecorate %lightsBuffer Coherent
                OpMemberDecorate %TileLightIdData 0 Offset 0
                OpDecorate %_arr_uint_uint_64 ArrayStride 4
                OpMemberDecorate %TileLightIdData 1 Offset 4
@@ -84,6 +85,7 @@
                OpDecorate %tint_symbol_1 Block
                OpDecorate %9 DescriptorSet 1
                OpDecorate %9 Binding 0
+               OpDecorate %9 Coherent
                OpMemberDecorate %Config 0 Offset 0
                OpMemberDecorate %Config 1 Offset 4
                OpMemberDecorate %Config 2 Offset 8

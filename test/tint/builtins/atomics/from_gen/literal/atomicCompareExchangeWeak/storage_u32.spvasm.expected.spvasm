@@ -32,6 +32,7 @@
                OpDecorate %tint_symbol_1 Block
                OpDecorate %1 DescriptorSet 0
                OpDecorate %1 Binding 0
+               OpDecorate %1 Coherent
                OpMemberDecorate %x__atomic_compare_exchange_resultu32 0 Offset 0
                OpMemberDecorate %x__atomic_compare_exchange_resultu32 1 Offset 4
                OpMemberDecorate %__atomic_compare_exchange_result_u32 0 Offset 0

@@ -40,6 +40,7 @@
                OpDecorate %tint_symbol_3 Block
                OpDecorate %15 DescriptorSet 0
                OpDecorate %15 Binding 1
+               OpDecorate %15 Coherent
                OpDecorate %main_local_invocation_index_Input BuiltIn LocalInvocationIndex
                OpDecorate %_arr_int_uint_2 ArrayStride 4
                OpDecorate %_arr__arr_int_uint_2_uint_3 ArrayStride 8

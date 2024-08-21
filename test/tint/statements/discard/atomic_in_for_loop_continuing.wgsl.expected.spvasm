@@ -31,6 +31,7 @@
                OpDecorate %tint_symbol_1 Block
                OpDecorate %8 DescriptorSet 0
                OpDecorate %8 Binding 2
+               OpDecorate %8 Coherent
                OpDecorate %foo_loc0_Input Location 0
                OpDecorate %foo_loc1_Input Location 1
                OpDecorate %foo_loc0_Output Location 0

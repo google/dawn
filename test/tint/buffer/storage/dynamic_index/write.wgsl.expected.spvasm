@@ -95,6 +95,7 @@
                OpDecorate %S Block
                OpDecorate %sb DescriptorSet 0
                OpDecorate %sb Binding 0
+               OpDecorate %sb Coherent
                OpDecorate %main_local_invocation_index_Input BuiltIn LocalInvocationIndex
                OpDecorate %_arr_uint_uint_1 ArrayStride 4
       %float = OpTypeFloat 32

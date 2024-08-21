@@ -22,6 +22,7 @@
                OpDecorate %Outputs Block
                OpDecorate %outputs DescriptorSet 0
                OpDecorate %outputs Binding 1
+               OpDecorate %outputs Coherent
        %uint = OpTypeInt 32 0
 %_ptr_Private_uint = OpTypePointer Private %uint
      %uint_0 = OpConstant %uint 0

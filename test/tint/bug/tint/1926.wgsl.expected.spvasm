@@ -23,6 +23,7 @@
                OpDecorate %tint_symbol_1 Block
                OpDecorate %4 DescriptorSet 0
                OpDecorate %4 Binding 4
+               OpDecorate %4 Coherent
                OpDecorate %main_global_invocation_id_Input BuiltIn GlobalInvocationId
                OpDecorate %main_local_invocation_id_Input BuiltIn LocalInvocationId
                OpDecorate %main_local_invocation_index_Input BuiltIn LocalInvocationIndex

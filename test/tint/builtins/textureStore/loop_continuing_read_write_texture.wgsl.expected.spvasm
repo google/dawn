@@ -13,6 +13,7 @@
                OpName %unused_entry_point "unused_entry_point"
                OpDecorate %tex DescriptorSet 0
                OpDecorate %tex Binding 2
+               OpDecorate %tex Coherent
         %int = OpTypeInt 32 1
           %3 = OpTypeImage %int 2D 0 0 0 2 R32i
 %_ptr_UniformConstant_3 = OpTypePointer UniformConstant %3

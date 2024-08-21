@@ -31,6 +31,7 @@
                OpDecorate %tint_symbol_1 Block
                OpDecorate %1 DescriptorSet 0
                OpDecorate %1 Binding 0
+               OpDecorate %1 Coherent
                OpDecorate %vertex_main_position_Output BuiltIn Position
                OpDecorate %vertex_main_loc0_Output Location 0
                OpDecorate %vertex_main_loc0_Output Flat

@@ -32,6 +32,7 @@
                OpDecorate %tint_symbol_1 Block
                OpDecorate %1 DescriptorSet 0
                OpDecorate %1 Binding 0
+               OpDecorate %1 Coherent
                OpDecorate %_runtimearr_int ArrayStride 4
                OpMemberDecorate %SB_RO 0 Offset 0
                OpDecorate %SB_RO Block

@@ -25,6 +25,7 @@
                OpDecorate %tint_symbol_3 Block
                OpDecorate %5 DescriptorSet 0
                OpDecorate %5 Binding 1
+               OpDecorate %5 Coherent
        %half = OpTypeFloat 16
 %tint_symbol_1 = OpTypeStruct %half
 %_ptr_Uniform_tint_symbol_1 = OpTypePointer Uniform %tint_symbol_1

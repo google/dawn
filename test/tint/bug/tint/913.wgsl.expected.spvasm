@@ -47,6 +47,7 @@
                OpDecorate %OutputBuf Block
                OpDecorate %output DescriptorSet 0
                OpDecorate %output Binding 2
+               OpDecorate %output Coherent
                OpMemberDecorate %Uniforms 0 Offset 0
                OpMemberDecorate %Uniforms 1 Offset 4
                OpMemberDecorate %Uniforms 2 Offset 8

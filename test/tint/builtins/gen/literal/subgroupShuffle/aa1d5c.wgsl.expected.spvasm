@@ -23,6 +23,7 @@
                OpDecorate %tint_symbol_1 Block
                OpDecorate %1 DescriptorSet 0
                OpDecorate %1 Binding 0
+               OpDecorate %1 Coherent
        %half = OpTypeFloat 16
      %v2half = OpTypeVector %half 2
 %tint_symbol_1 = OpTypeStruct %v2half

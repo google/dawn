@@ -35,12 +35,9 @@
 #include "src/tint/lang/core/access.h"
 #include "src/tint/lang/core/address_space.h"
 #include "src/tint/lang/core/builtin_value.h"
-#include "src/tint/lang/core/constant/scalar.h"
-#include "src/tint/lang/core/constant/splat.h"
 #include "src/tint/lang/core/constant/value.h"
 #include "src/tint/lang/core/fluent_types.h"
 #include "src/tint/lang/core/ir/access.h"
-#include "src/tint/lang/core/ir/binary.h"
 #include "src/tint/lang/core/ir/bitcast.h"
 #include "src/tint/lang/core/ir/block.h"
 #include "src/tint/lang/core/ir/block_param.h"
@@ -104,7 +101,6 @@
 #include "src/tint/lang/spirv/writer/raise/builtin_polyfill.h"
 #include "src/tint/utils/containers/hashmap.h"
 #include "src/tint/utils/containers/vector.h"
-#include "src/tint/utils/diagnostic/diagnostic.h"
 #include "src/tint/utils/macros/scoped_assignment.h"
 #include "src/tint/utils/result/result.h"
 #include "src/tint/utils/rtti/switch.h"
@@ -842,8 +838,8 @@ class Printer {
     void EmitRootBlock(core::ir::Block* root_block) {
         for (auto* inst : *root_block) {
             Switch(
-                inst,                                          //
-                [&](core::ir::Var* v) { return EmitVar(v); },  //
+                inst,                                   //
+                [&](core::ir::Var* v) { EmitVar(v); },  //
                 TINT_ICE_ON_NO_MATCH);
         }
     }
@@ -2283,8 +2279,8 @@ class Printer {
 
                 // Add NonReadable and NonWritable decorations to storage textures and buffers.
                 auto* st = store_ty->As<core::type::StorageTexture>();
-                if (st || store_ty->Is<core::type::Struct>()) {
-                    auto access = st ? st->access() : ptr->Access();
+                auto access = st ? st->access() : ptr->Access();
+                if (st || ptr->AddressSpace() != core::AddressSpace::kHandle) {
                     if (access == core::Access::kRead) {
                         module_.PushAnnot(spv::Op::OpDecorate,
                                           {id, U32Operand(SpvDecorationNonWritable)});
@@ -2292,6 +2288,9 @@ class Printer {
                         module_.PushAnnot(spv::Op::OpDecorate,
                                           {id, U32Operand(SpvDecorationNonReadable)});
                     }
+                }
+                if (access == core::Access::kReadWrite) {
+                    module_.PushAnnot(spv::Op::OpDecorate, {id, U32Operand(SpvDecorationCoherent)});
                 }
 
                 auto iidx = var->InputAttachmentIndex();

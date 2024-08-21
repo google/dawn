@@ -16,6 +16,7 @@
                OpName %compute_main "compute_main"
                OpDecorate %arg_0 DescriptorSet 1
                OpDecorate %arg_0 Binding 0
+               OpDecorate %arg_0 Coherent
         %int = OpTypeInt 32 1
           %3 = OpTypeImage %int 2D 0 0 0 2 Rg32i
 %_ptr_UniformConstant_3 = OpTypePointer UniformConstant %3

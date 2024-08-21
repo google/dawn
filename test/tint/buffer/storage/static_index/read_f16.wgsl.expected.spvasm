@@ -191,6 +191,7 @@
                OpDecorate %tint_symbol_3 Block
                OpDecorate %45 DescriptorSet 0
                OpDecorate %45 Binding 1
+               OpDecorate %45 Coherent
       %float = OpTypeFloat 32
         %int = OpTypeInt 32 1
        %uint = OpTypeInt 32 0

@@ -38,6 +38,7 @@
                OpDecorate %tint_symbol_3 Block
                OpDecorate %10 DescriptorSet 0
                OpDecorate %10 Binding 1
+               OpDecorate %10 Coherent
       %float = OpTypeFloat 32
     %v3float = OpTypeVector %float 3
     %v4float = OpTypeVector %float 4

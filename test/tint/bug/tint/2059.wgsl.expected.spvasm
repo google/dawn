@@ -101,6 +101,7 @@
                OpDecorate %tint_symbol_1 Block
                OpDecorate %1 DescriptorSet 0
                OpDecorate %1 Binding 0
+               OpDecorate %1 Coherent
                OpMemberDecorate %S 0 Offset 0
                OpMemberDecorate %S 0 ColMajor
                OpMemberDecorate %S 0 MatrixStride 16
@@ -108,6 +109,7 @@
                OpDecorate %tint_symbol_3 Block
                OpDecorate %7 DescriptorSet 0
                OpDecorate %7 Binding 1
+               OpDecorate %7 Coherent
                OpDecorate %_arr_mat3v3float_uint_1 ArrayStride 48
                OpMemberDecorate %S2 0 Offset 0
                OpMemberDecorate %S2 0 ColMajor
@@ -116,32 +118,38 @@
                OpDecorate %tint_symbol_5 Block
                OpDecorate %11 DescriptorSet 0
                OpDecorate %11 Binding 2
+               OpDecorate %11 Coherent
                OpMemberDecorate %S3 0 Offset 0
                OpMemberDecorate %tint_symbol_7 0 Offset 0
                OpDecorate %tint_symbol_7 Block
                OpDecorate %18 DescriptorSet 0
                OpDecorate %18 Binding 3
+               OpDecorate %18 Coherent
                OpDecorate %_arr_S_uint_1 ArrayStride 48
                OpMemberDecorate %S4 0 Offset 0
                OpMemberDecorate %tint_symbol_9 0 Offset 0
                OpDecorate %tint_symbol_9 Block
                OpDecorate %22 DescriptorSet 0
                OpDecorate %22 Binding 4
+               OpDecorate %22 Coherent
                OpMemberDecorate %tint_symbol_11 0 Offset 0
                OpMemberDecorate %tint_symbol_11 0 ColMajor
                OpMemberDecorate %tint_symbol_11 0 MatrixStride 16
                OpDecorate %tint_symbol_11 Block
                OpDecorate %27 DescriptorSet 0
                OpDecorate %27 Binding 5
+               OpDecorate %27 Coherent
                OpMemberDecorate %tint_symbol_13 0 Offset 0
                OpDecorate %tint_symbol_13 Block
                OpDecorate %30 DescriptorSet 0
                OpDecorate %30 Binding 6
+               OpDecorate %30 Coherent
                OpDecorate %_arr_S2_uint_1 ArrayStride 48
                OpMemberDecorate %tint_symbol_15 0 Offset 0
                OpDecorate %tint_symbol_15 Block
                OpDecorate %33 DescriptorSet 0
                OpDecorate %33 Binding 7
+               OpDecorate %33 Coherent
                OpDecorate %_arr_uint_uint_2 ArrayStride 4
                OpDecorate %_arr_uint_uint_1 ArrayStride 4
       %float = OpTypeFloat 32

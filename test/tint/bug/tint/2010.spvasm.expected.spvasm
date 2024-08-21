@@ -86,6 +86,7 @@
                OpDecorate %S_4 Block
                OpDecorate %x_12 DescriptorSet 0
                OpDecorate %x_12 Binding 3
+               OpDecorate %x_12 Coherent
                OpDecorate %main_local_invocation_id_Input BuiltIn LocalInvocationId
                OpDecorate %main_local_invocation_index_Input BuiltIn LocalInvocationIndex
       %float = OpTypeFloat 32

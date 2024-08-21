@@ -114,6 +114,7 @@
                OpDecorate %tint_symbol_1 Block
                OpDecorate %29 DescriptorSet 0
                OpDecorate %29 Binding 1
+               OpDecorate %29 Coherent
                OpDecorate %main_local_invocation_index_Input BuiltIn LocalInvocationIndex
       %float = OpTypeFloat 32
         %int = OpTypeInt 32 1

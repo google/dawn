@@ -31,6 +31,7 @@
                OpDecorate %tint_symbol_1 Block
                OpDecorate %1 DescriptorSet 0
                OpDecorate %1 Binding 0
+               OpDecorate %1 Coherent
                OpDecorate %frag_main_loc0_Input Location 0
                OpDecorate %frag_main_loc1_Input Location 1
                OpDecorate %frag_main_loc1_Input Flat

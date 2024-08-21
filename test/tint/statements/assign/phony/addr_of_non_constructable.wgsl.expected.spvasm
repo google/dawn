@@ -16,6 +16,7 @@
                OpDecorate %S Block
                OpDecorate %s DescriptorSet 0
                OpDecorate %s Binding 0
+               OpDecorate %s Coherent
         %int = OpTypeInt 32 1
 %_runtimearr_int = OpTypeRuntimeArray %int
           %S = OpTypeStruct %_runtimearr_int

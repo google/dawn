@@ -32,12 +32,14 @@
                OpDecorate %tint_symbol_3 Block
                OpDecorate %6 DescriptorSet 1
                OpDecorate %6 Binding 1
+               OpDecorate %6 Coherent
                OpDecorate %_arr_int_uint_3 ArrayStride 4
                OpMemberDecorate %TestData 0 Offset 0
                OpMemberDecorate %tint_symbol_5 0 Offset 0
                OpDecorate %tint_symbol_5 Block
                OpDecorate %10 DescriptorSet 0
                OpDecorate %10 Binding 0
+               OpDecorate %10 Coherent
        %uint = OpTypeInt 32 0
   %Constants = OpTypeStruct %uint
 %tint_symbol_1 = OpTypeStruct %Constants

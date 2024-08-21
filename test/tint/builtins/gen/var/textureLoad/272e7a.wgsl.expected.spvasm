@@ -21,8 +21,10 @@
                OpDecorate %tint_symbol_1 Block
                OpDecorate %1 DescriptorSet 0
                OpDecorate %1 Binding 0
+               OpDecorate %1 Coherent
                OpDecorate %arg_0 DescriptorSet 1
                OpDecorate %arg_0 Binding 0
+               OpDecorate %arg_0 Coherent
       %float = OpTypeFloat 32
     %v4float = OpTypeVector %float 4
 %tint_symbol_1 = OpTypeStruct %v4float

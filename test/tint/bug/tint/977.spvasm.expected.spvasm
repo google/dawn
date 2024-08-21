@@ -48,6 +48,7 @@
                OpDecorate %ResultMatrix Block
                OpDecorate %resultMatrix DescriptorSet 0
                OpDecorate %resultMatrix Binding 2
+               OpDecorate %resultMatrix Coherent
                OpMemberDecorate %FirstMatrix 0 Offset 0
                OpDecorate %FirstMatrix Block
                OpDecorate %firstMatrix DescriptorSet 0

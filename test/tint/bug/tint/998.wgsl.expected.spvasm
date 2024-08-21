@@ -30,6 +30,7 @@
                OpDecorate %tint_symbol_3 Block
                OpDecorate %6 DescriptorSet 1
                OpDecorate %6 Binding 1
+               OpDecorate %6 Coherent
                OpDecorate %_arr_uint_uint_3 ArrayStride 4
                OpMemberDecorate %S 0 Offset 0
        %uint = OpTypeInt 32 0

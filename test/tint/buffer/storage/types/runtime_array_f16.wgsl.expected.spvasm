@@ -25,6 +25,7 @@
                OpDecorate %tint_symbol_3 Block
                OpDecorate %6 DescriptorSet 0
                OpDecorate %6 Binding 1
+               OpDecorate %6 Coherent
        %half = OpTypeFloat 16
 %_runtimearr_half = OpTypeRuntimeArray %half
 %tint_symbol_1 = OpTypeStruct %_runtimearr_half

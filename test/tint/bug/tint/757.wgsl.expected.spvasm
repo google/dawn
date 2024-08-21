@@ -35,6 +35,7 @@
                OpDecorate %Result Block
                OpDecorate %result DescriptorSet 0
                OpDecorate %result Binding 3
+               OpDecorate %result Coherent
                OpDecorate %main_global_invocation_id_Input BuiltIn GlobalInvocationId
         %int = OpTypeInt 32 1
   %Constants = OpTypeStruct %int

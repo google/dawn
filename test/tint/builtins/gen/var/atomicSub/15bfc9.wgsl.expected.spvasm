@@ -24,11 +24,13 @@
                OpDecorate %tint_symbol_1 Block
                OpDecorate %1 DescriptorSet 0
                OpDecorate %1 Binding 0
+               OpDecorate %1 Coherent
                OpMemberDecorate %SB_RW 0 Offset 0
                OpMemberDecorate %tint_symbol_3 0 Offset 0
                OpDecorate %tint_symbol_3 Block
                OpDecorate %5 DescriptorSet 0
                OpDecorate %5 Binding 1
+               OpDecorate %5 Coherent
        %uint = OpTypeInt 32 0
 %tint_symbol_1 = OpTypeStruct %uint
 %_ptr_StorageBuffer_tint_symbol_1 = OpTypePointer StorageBuffer %tint_symbol_1

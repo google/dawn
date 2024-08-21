@@ -89,6 +89,7 @@
                OpDecorate %secondMatrix NonWritable
                OpDecorate %resultMatrix DescriptorSet 0
                OpDecorate %resultMatrix Binding 2
+               OpDecorate %resultMatrix Coherent
                OpMemberDecorate %Uniforms 0 Offset 0
                OpMemberDecorate %Uniforms 1 Offset 4
                OpMemberDecorate %Uniforms 2 Offset 8

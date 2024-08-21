@@ -80,10 +80,12 @@
                OpDecorate %tint_symbol_3 Block
                OpDecorate %6 DescriptorSet 0
                OpDecorate %6 Binding 1
+               OpDecorate %6 Coherent
                OpMemberDecorate %tint_symbol_5 0 Offset 0
                OpDecorate %tint_symbol_5 Block
                OpDecorate %15 DescriptorSet 0
                OpDecorate %15 Binding 2
+               OpDecorate %15 Coherent
                OpDecorate %vert_main_loc0_Input Location 0
                OpDecorate %vert_main_loc1_Input Location 1
                OpDecorate %vert_main_loc2_Input Location 2

@@ -224,6 +224,10 @@ TEST_F(SpirvWriterTest, StorageVar_LoadAndStore) {
 
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST(R"(
+               OpDecorate %1 Coherent
+)");
+
+    EXPECT_INST(R"(
           %9 = OpAccessChain %_ptr_StorageBuffer_int %1 %uint_0
        %load = OpLoad %int %9
         %add = OpIAdd %int %load %int_1
@@ -438,11 +442,12 @@ TEST_F(SpirvWriterTest, ReadWriteStorageTextureVar) {
     EXPECT_INST(R"(
                OpDecorate %v DescriptorSet 0
                OpDecorate %v Binding 0
+               OpDecorate %v Coherent
 )");
     EXPECT_INST(R"(
           %3 = OpTypeImage %float 2D 0 0 0 2 Rgba8
 %_ptr_UniformConstant_3 = OpTypePointer UniformConstant %3
-          %v = OpVariable %_ptr_UniformConstant_3 UniformConstant   ; DescriptorSet 0, Binding 0
+          %v = OpVariable %_ptr_UniformConstant_3 UniformConstant   ; DescriptorSet 0, Binding 0, Coherent
 )");
 }
 

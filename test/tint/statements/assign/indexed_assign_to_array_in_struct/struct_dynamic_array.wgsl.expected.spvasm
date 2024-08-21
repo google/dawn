@@ -30,6 +30,7 @@
                OpDecorate %OuterS Block
                OpDecorate %s1 DescriptorSet 0
                OpDecorate %s1 Binding 0
+               OpDecorate %s1 Coherent
        %uint = OpTypeInt 32 0
    %Uniforms = OpTypeStruct %uint
 %tint_symbol_1 = OpTypeStruct %Uniforms

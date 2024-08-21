@@ -23,6 +23,7 @@
                OpDecorate %tint_symbol_1 Block
                OpDecorate %1 DescriptorSet 0
                OpDecorate %1 Binding 0
+               OpDecorate %1 Coherent
                OpDecorate %main_subgroup_invocation_id_Input BuiltIn SubgroupLocalInvocationId
                OpDecorate %main_subgroup_size_Input BuiltIn SubgroupSize
                OpMemberDecorate %ComputeInputs 0 Offset 0

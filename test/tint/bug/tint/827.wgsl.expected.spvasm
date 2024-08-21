@@ -22,6 +22,7 @@
                OpDecorate %Result Block
                OpDecorate %result DescriptorSet 0
                OpDecorate %result Binding 1
+               OpDecorate %result Coherent
                OpDecorate %main_global_invocation_id_Input BuiltIn GlobalInvocationId
       %float = OpTypeFloat 32
           %3 = OpTypeImage %float 2D 0 0 0 1 Unknown

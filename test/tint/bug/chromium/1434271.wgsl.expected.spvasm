@@ -129,6 +129,7 @@
                OpDecorate %Particles Block
                OpDecorate %data DescriptorSet 0
                OpDecorate %data Binding 1
+               OpDecorate %data Coherent
                OpDecorate %texture DescriptorSet 0
                OpDecorate %texture Binding 2
                OpMemberDecorate %UBO 0 Offset 0
@@ -145,6 +146,7 @@
                OpDecorate %buf_in NonWritable
                OpDecorate %buf_out DescriptorSet 0
                OpDecorate %buf_out Binding 5
+               OpDecorate %buf_out Coherent
                OpDecorate %tex_in DescriptorSet 0
                OpDecorate %tex_in Binding 6
                OpDecorate %tex_out DescriptorSet 0

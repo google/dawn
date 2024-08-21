@@ -21,6 +21,7 @@
                OpDecorate %tint_symbol_3 Block
                OpDecorate %6 DescriptorSet 0
                OpDecorate %6 Binding 1
+               OpDecorate %6 Coherent
        %uint = OpTypeInt 32 0
      %v2uint = OpTypeVector %uint 2
 %tint_symbol_1 = OpTypeStruct %v2uint

@@ -31,12 +31,14 @@
                OpDecorate %tint_symbol_3 Block
                OpDecorate %6 DescriptorSet 0
                OpDecorate %6 Binding 2
+               OpDecorate %6 Coherent
                OpDecorate %_arr_int_uint_4 ArrayStride 4
                OpMemberDecorate %SSBO 0 Offset 0
                OpMemberDecorate %tint_symbol_5 0 Offset 0
                OpDecorate %tint_symbol_5 Block
                OpDecorate %10 DescriptorSet 0
                OpDecorate %10 Binding 1
+               OpDecorate %10 Coherent
         %int = OpTypeInt 32 1
         %UBO = OpTypeStruct %int
 %tint_symbol_1 = OpTypeStruct %UBO

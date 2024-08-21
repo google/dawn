@@ -114,21 +114,25 @@
                OpDecorate %U32s Block
                OpDecorate %indices DescriptorSet 0
                OpDecorate %indices Binding 10
+               OpDecorate %indices Coherent
                OpDecorate %_runtimearr_float ArrayStride 4
                OpMemberDecorate %F32s 0 Offset 0
                OpDecorate %F32s Block
                OpDecorate %positions DescriptorSet 0
                OpDecorate %positions Binding 11
+               OpDecorate %positions Coherent
                OpDecorate %_runtimearr_uint_0 ArrayStride 4
                OpMemberDecorate %AU32s 0 Offset 0
                OpDecorate %AU32s Block
                OpDecorate %counters DescriptorSet 0
                OpDecorate %counters Binding 20
+               OpDecorate %counters Coherent
                OpDecorate %_runtimearr_int ArrayStride 4
                OpMemberDecorate %AI32s 0 Offset 0
                OpDecorate %AI32s Block
                OpDecorate %LUT DescriptorSet 0
                OpDecorate %LUT Binding 21
+               OpDecorate %LUT Coherent
                OpMemberDecorate %Dbg 0 Offset 0
                OpMemberDecorate %Dbg 1 Offset 4
                OpMemberDecorate %Dbg 2 Offset 8
@@ -145,6 +149,7 @@
                OpDecorate %tint_symbol_3 Block
                OpDecorate %25 DescriptorSet 0
                OpDecorate %25 Binding 50
+               OpDecorate %25 Coherent
                OpDecorate %main_count_global_invocation_id_Input BuiltIn GlobalInvocationId
        %uint = OpTypeInt 32 0
       %float = OpTypeFloat 32
