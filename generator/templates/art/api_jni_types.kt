@@ -57,31 +57,26 @@
     {%- if member.length == 'strlen' -%}
         Ljava/lang/String;
     {%- elif member.length and member.length != 'constant' -%}
-        {%- if member.type.category in ['bitmask', 'enum', 'function pointer', 'object', 'structure'] -%}
+        {%- if member.type.category in ['bitmask', 'enum'] -%}
             //*  JvmInline does not inline bitmask/enums in arrays.
             [L{{ jni_name(member.type) }};
-        {%- elif member.type.name.get() == 'uint32_t' -%}
-            [I
         {%- else -%}
-            {{ unreachable_code() }}
+            [{{ jni_signature_single_value(member.type) }}
         {%- endif -%}
-    {%- elif member.type.category in ['function pointer', 'object', 'structure'] -%}
-        L{{ jni_name(member.type) }};
-    {%- elif member.type.name.get() in ['int64_t', 'uint64_t', 'size_t', 'void *'] -%}
-        J
-    {%- elif member.type.name.get() in ['int32_t', 'uint32_t'] or member.type.category in ['bitmask', 'enum'] -%}
-        //*  JvmInline makes lone bitmask/enums appear as integer to JNI.
-        I
-    {%- elif member.type.name.get() in ['int16_t', 'uint16_t'] -%}
-        S
-    {%- elif member.type.name.get() == 'double' -%}
-        D
-    {%- elif member.type.name.get() == 'float' -%}
-        F
-    {%- elif member.type.name.get() == 'bool' -%}
-        Z
     {%- else -%}
-        {{ unreachable_code('Unsupported type: ' + member.type.name.get()) }}
+        {{ jni_signature_single_value(member.type) }}
+    {%- endif %}
+{% endmacro %}
+
+{% macro jni_signature_single_value(type) %}
+    {%- if type.category in ['function pointer', 'object', 'structure'] -%}
+        L{{ jni_name(type) }};
+    {%- elif type.category in ['bitmask', 'enum'] -%}
+        {{ jni_signatures['int32_t'] }}//*  JvmInline makes lone bitmask/enums appear as integer to JNI.
+    {%- elif type.category == 'native' -%}
+        {{ jni_signatures[type.name.get()] }}
+    {%- else -%}
+        {{ unreachable_code('Unsupported type: ' + type.name.get()) }}
     {%- endif -%}
 {% endmacro %}
 
