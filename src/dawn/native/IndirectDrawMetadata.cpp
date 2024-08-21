@@ -242,10 +242,12 @@ void IndirectDrawMetadata::ClearIndexedIndirectBufferValidationInfo() {
     mIndexedIndirectBufferValidationInfo.clear();
 }
 
-void IndirectDrawMetadata::AddMultiDrawIndirect(MultiDrawIndirectCmd* cmd) {
+void IndirectDrawMetadata::AddMultiDrawIndirect(bool duplicateBaseVertexInstance,
+                                                MultiDrawIndirectCmd* cmd) {
     IndirectMultiDraw multiDraw;
     multiDraw.type = DrawType::NonIndexed;
     multiDraw.cmd = cmd;
+    multiDraw.duplicateBaseVertexInstance = duplicateBaseVertexInstance;
     mMultiDraws.push_back(multiDraw);
 }
 
@@ -253,12 +255,14 @@ void IndirectDrawMetadata::AddMultiDrawIndexedIndirect(BufferBase* indexBuffer,
                                                        wgpu::IndexFormat indexFormat,
                                                        uint64_t indexBufferSize,
                                                        uint64_t indexBufferOffset,
+                                                       bool duplicateBaseVertexInstance,
                                                        MultiDrawIndexedIndirectCmd* cmd) {
     IndirectMultiDraw multiDraw;
     multiDraw.type = DrawType::Indexed;
     multiDraw.cmd = cmd;
     multiDraw.indexBufferSize = indexBufferSize;
     multiDraw.indexFormat = indexFormat;
+    multiDraw.duplicateBaseVertexInstance = duplicateBaseVertexInstance;
 
     mMultiDraws.push_back(multiDraw);
 }

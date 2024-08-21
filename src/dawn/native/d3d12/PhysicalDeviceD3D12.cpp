@@ -146,6 +146,7 @@ void PhysicalDevice::InitializeSupportedFeaturesImpl() {
     EnableFeature(Feature::SharedBufferMemoryD3D12Resource);
     EnableFeature(Feature::ShaderModuleCompilationOptions);
     EnableFeature(Feature::StaticSamplers);
+    EnableFeature(Feature::MultiDrawIndirect);
 
     if (AreTimestampQueriesSupported()) {
         EnableFeature(Feature::TimestampQuery);

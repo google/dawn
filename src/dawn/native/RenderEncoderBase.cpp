@@ -381,7 +381,11 @@ void RenderEncoderBase::APIMultiDrawIndirect(BufferBase* indirectBuffer,
             cmd->drawCountBuffer = drawCountBuffer;
             cmd->drawCountOffset = drawCountBufferOffset;
 
-            mIndirectDrawMetadata.AddMultiDrawIndirect(cmd);
+            bool duplicateBaseVertexInstance =
+                GetDevice()->ShouldDuplicateParametersForDrawIndirect(
+                    mCommandBufferState.GetRenderPipeline());
+
+            mIndirectDrawMetadata.AddMultiDrawIndirect(duplicateBaseVertexInstance, cmd);
 
             // TODO(crbug.com/dawn/1166): Adding the indirectBuffer is needed for correct usage
             // validation, but it will unecessarily transition to indirectBuffer usage in the
@@ -470,10 +474,14 @@ void RenderEncoderBase::APIMultiDrawIndexedIndirect(BufferBase* indirectBuffer,
             cmd->drawCountBuffer = drawCountBuffer;
             cmd->drawCountOffset = drawCountBufferOffset;
 
+            bool duplicateBaseVertexInstance =
+                GetDevice()->ShouldDuplicateParametersForDrawIndirect(
+                    mCommandBufferState.GetRenderPipeline());
+
             mIndirectDrawMetadata.AddMultiDrawIndexedIndirect(
                 mCommandBufferState.GetIndexBuffer(), mCommandBufferState.GetIndexFormat(),
                 mCommandBufferState.GetIndexBufferSize(),
-                mCommandBufferState.GetIndexBufferOffset(), cmd);
+                mCommandBufferState.GetIndexBufferOffset(), duplicateBaseVertexInstance, cmd);
 
             // TODO(crbug.com/dawn/1166): Adding the indirectBuffer is needed for correct usage
             // validation, but it will unecessarily transition to indirectBuffer usage in the

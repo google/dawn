@@ -82,8 +82,9 @@ class IndirectDrawMetadata : public NonCopyable {
     struct IndirectMultiDraw {
         DrawType type;
 
-        uint64_t indexBufferSize;
-        wgpu::IndexFormat indexFormat;
+        uint64_t indexBufferSize = 0;
+        wgpu::IndexFormat indexFormat = wgpu::IndexFormat::Undefined;
+        bool duplicateBaseVertexInstance;
 
         // When validation is enabled, the original indirect buffer is validated and copied to a new
         // indirect buffer containing only valid commands. The pointer to the command allocated in
@@ -166,12 +167,13 @@ class IndirectDrawMetadata : public NonCopyable {
                          bool duplicateBaseVertexInstance,
                          DrawIndirectCmd* cmd);
 
-    void AddMultiDrawIndirect(MultiDrawIndirectCmd* cmd);
+    void AddMultiDrawIndirect(bool duplicateBaseVertexInstance, MultiDrawIndirectCmd* cmd);
 
     void AddMultiDrawIndexedIndirect(BufferBase* indexBuffer,
                                      wgpu::IndexFormat indexFormat,
                                      uint64_t indexBufferSize,
                                      uint64_t indexBufferOffset,
+                                     bool duplicateBaseVertexInstance,
                                      MultiDrawIndexedIndirectCmd* cmd);
 
     void ClearIndexedIndirectBufferValidationInfo();

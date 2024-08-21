@@ -1594,6 +1594,56 @@ MaybeError CommandBuffer::RecordRenderPass(CommandRecordingContext* commandConte
                 break;
             }
 
+            case Command::MultiDrawIndirect: {
+                MultiDrawIndirectCmd* draw = iter->NextCommand<MultiDrawIndirectCmd>();
+
+                DAWN_TRY(bindingTracker->Apply(commandContext));
+                vertexBufferTracker.Apply(commandList, lastPipeline);
+
+                Buffer* indirectBuffer = ToBackend(draw->indirectBuffer.Get());
+                DAWN_ASSERT(indirectBuffer != nullptr);
+
+                Buffer* countBuffer = ToBackend(draw->drawCountBuffer.Get());
+
+                // There is no distinction between DrawIndirect and MultiDrawIndirect in D3D12.
+                // This is why we can use the same command signature for both.
+                ComPtr<ID3D12CommandSignature> signature =
+                    lastPipeline->GetDrawIndirectCommandSignature();
+
+                commandList->ExecuteIndirect(
+                    signature.Get(), draw->maxDrawCount, indirectBuffer->GetD3D12Resource(),
+                    draw->indirectOffset,
+                    countBuffer != nullptr ? countBuffer->GetD3D12Resource() : nullptr,
+                    countBuffer != nullptr ? draw->drawCountOffset : 0);
+
+                break;
+            }
+
+            case Command::MultiDrawIndexedIndirect: {
+                MultiDrawIndexedIndirectCmd* draw =
+                    iter->NextCommand<MultiDrawIndexedIndirectCmd>();
+
+                DAWN_TRY(bindingTracker->Apply(commandContext));
+                vertexBufferTracker.Apply(commandList, lastPipeline);
+
+                Buffer* indirectBuffer = ToBackend(draw->indirectBuffer.Get());
+                DAWN_ASSERT(indirectBuffer != nullptr);
+
+                Buffer* countBuffer = ToBackend(draw->drawCountBuffer.Get());
+
+                // There is no distinction between DrawIndexedIndirect and MultiDrawIndexedIndirect
+                // in D3D12. This is why we can use the same command signature for both.
+                ComPtr<ID3D12CommandSignature> signature =
+                    lastPipeline->GetDrawIndexedIndirectCommandSignature();
+
+                commandList->ExecuteIndirect(
+                    signature.Get(), draw->maxDrawCount, indirectBuffer->GetD3D12Resource(),
+                    draw->indirectOffset,
+                    countBuffer != nullptr ? countBuffer->GetD3D12Resource() : nullptr,
+                    countBuffer != nullptr ? draw->drawCountOffset : 0);
+                break;
+            }
+
             case Command::InsertDebugMarker: {
                 InsertDebugMarkerCmd* cmd = iter->NextCommand<InsertDebugMarkerCmd>();
                 const char* label = iter->NextData<char>(cmd->length + 1);

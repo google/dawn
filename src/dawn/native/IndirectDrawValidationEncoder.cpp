@@ -204,6 +204,15 @@ static const char sRenderValidationShaderSource[] = R"(
                 let inIndex = drawIndex * numInputParams;
                 let inputOffset = drawConstants.indirectOffsetInElements;
 
+                if (bool(drawConstants.flags & kDuplicateBaseVertexInstance)) {
+                    // first/baseVertex and firstInstance are always last two parameters
+                    let dupIndex = inputOffset + inIndex + numInputParams - 2u;
+                    outputParams.data[outIndex] = inputParams.data[dupIndex];
+                    outputParams.data[outIndex + 1u] = inputParams.data[dupIndex + 1u];
+
+                    outIndex = outIndex + 2u;
+                }
+
                 for(var i = 0u; i < numInputParams; i = i + 1u) {
                     outputParams.data[outIndex + i] = inputParams.data[inputOffset + inIndex + i];
                 }
@@ -266,9 +275,7 @@ static const char sRenderValidationShaderSource[] = R"(
 
            @compute @workgroup_size(kWorkgroupSize, 1, 1)
             fn validate_multi_draw(@builtin(global_invocation_id) id : vec3u) {
-
                 var drawCount = drawConstants.maxDrawCount;
-
                 var drawCountOffset = drawConstants.drawCountOffsetInElements;
 
                 if(bool(drawConstants.flags & kIndirectDrawCountBuffer)) {
@@ -277,6 +284,16 @@ static const char sRenderValidationShaderSource[] = R"(
                 }
 
                 if (id.x >= drawCount) {
+                    return;
+                }
+
+                if(!bool(drawConstants.flags & kValidationEnabled)) {
+                    set_pass_multi(id.x);
+                    return;
+                }
+
+                if (!bool(drawConstants.flags & kIndexedDraw)) {
+                    set_pass_multi(id.x);
                     return;
                 }
 
@@ -312,6 +329,17 @@ static const char sRenderValidationShaderSource[] = R"(
 
 
         )";
+
+static constexpr uint32_t GetOutputIndirectDrawSize(IndirectDrawMetadata::DrawType drawType,
+                                                    bool duplicateBaseVertexInstance) {
+    uint32_t drawSize = drawType == IndirectDrawMetadata::DrawType::Indexed
+                            ? kDrawIndexedIndirectSize
+                            : kDrawIndirectSize;
+    if (duplicateBaseVertexInstance) {
+        drawSize += 2 * sizeof(uint32_t);
+    }
+    return drawSize;
+}
 
 ResultOrError<dawn::Ref<ComputePipelineBase>> CreateRenderValidationPipelines(
     DeviceBase* device,
@@ -473,10 +501,8 @@ MaybeError EncodeIndirectDrawValidationCommands(DeviceBase* device,
             config.drawType == IndirectDrawMetadata::DrawType::Indexed ? kDrawIndexedIndirectSize
                                                                        : kDrawIndirectSize;
 
-        uint64_t outputIndirectSize = indirectDrawCommandSize;
-        if (config.duplicateBaseVertexInstance) {
-            outputIndirectSize += 2 * sizeof(uint32_t);
-        }
+        uint64_t outputIndirectSize =
+            GetOutputIndirectDrawSize(config.drawType, config.duplicateBaseVertexInstance);
 
         for (const IndirectDrawMetadata::IndirectValidationBatch& batch :
              validationInfo.GetBatches()) {
@@ -552,11 +578,22 @@ MaybeError EncodeIndirectDrawValidationCommands(DeviceBase* device,
     uint64_t outputParamsSizeForMultiDraw = 0;
     // Calculate size of output params for multi draws
     for (auto& draw : multiDraws) {
-        // Don't need to validate non-indexed draws.
-        if (draw.type == IndirectDrawMetadata::DrawType::NonIndexed) {
+        // Multi draw metadatas are added even if validation is disabled, because the Metal backend
+        // needs to convert all multi draws into an ICB. If validation is disabled, and the draw
+        // doesn't need duplication of base vertex and instance, we can skip the compute pass.
+        // In general, non-indexed multi draws don't need validation.
+        if ((draw.type == IndirectDrawMetadata::DrawType::NonIndexed ||
+             !device->IsValidationEnabled()) &&
+            !draw.duplicateBaseVertexInstance) {
             continue;
         }
-        outputParamsSizeForMultiDraw += draw.cmd->maxDrawCount * kDrawIndexedIndirectSize;
+
+        outputParamsSizeForMultiDraw +=
+            draw.cmd->maxDrawCount *
+            GetOutputIndirectDrawSize(draw.type, draw.duplicateBaseVertexInstance);
+
+        outputParamsSizeForMultiDraw =
+            Align(outputParamsSizeForMultiDraw, minStorageBufferOffsetAlignment);
 
         if (outputParamsSizeForMultiDraw > maxStorageBufferBindingSize) {
             return DAWN_INTERNAL_ERROR("Too many multiDrawIndexedIndirect calls to validate");
@@ -580,7 +617,8 @@ MaybeError EncodeIndirectDrawValidationCommands(DeviceBase* device,
     for (const Pass& pass : passes) {
         requiredBatchDataBufferSize = std::max(requiredBatchDataBufferSize, pass.batchDataSize);
     }
-    // Needs to at least be able to store a MultiDrawConstants struct for the multi draw validation.
+    // Needs to at least be able to store a MultiDrawConstants struct for the multi draw
+    // validation.
     requiredBatchDataBufferSize =
         std::max(requiredBatchDataBufferSize, static_cast<uint64_t>(sizeof(MultiDrawConstants)));
 
@@ -656,10 +694,10 @@ MaybeError EncodeIndirectDrawValidationCommands(DeviceBase* device,
         bindGroupDescriptor.entryCount = 3;
         bindGroupDescriptor.entries = bindings;
 
-        // Finally, we can now encode our validation and duplication passes. Each pass first does
-        // two WriteBuffer to get batch and pass data over to the GPU, followed by a single compute
-        // pass. The compute pass encodes a separate SetBindGroup and Dispatch command for each
-        // batch.
+        // Finally, we can now encode our validation and duplication passes. Each pass first
+        // does a WriteBuffer to get batch and pass data over to the GPU, followed by a single
+        // compute pass. The compute pass encodes a separate SetBindGroup and Dispatch command
+        // for each batch.
         for (const Pass& pass : passes) {
             commandEncoder->APIWriteBuffer(batchDataBuffer.GetBuffer(), 0,
                                            static_cast<const uint8_t*>(pass.batchData.get()),
@@ -724,12 +762,19 @@ MaybeError EncodeIndirectDrawValidationCommands(DeviceBase* device,
         uint64_t outputOffset = multiDrawOutputParamsOffset;
 
         for (auto& draw : multiDraws) {
-            if (draw.type == IndirectDrawMetadata::DrawType::NonIndexed) {
+            // If the draw meets these conditions, there is no need to run the compute pass,
+            // and there is no space allocated for the output params
+            if ((draw.type == IndirectDrawMetadata::DrawType::NonIndexed ||
+                 !device->IsValidationEnabled()) &&
+                !draw.duplicateBaseVertexInstance) {
                 continue;
             }
 
-            const size_t formatSize = IndexFormatSize(draw.indexFormat);
-            uint64_t numIndexBufferElements = draw.indexBufferSize / formatSize;
+            uint64_t numIndexBufferElements = 0;
+            if (draw.type == IndirectDrawMetadata::DrawType::Indexed) {
+                const size_t formatSize = IndexFormatSize(draw.indexFormat);
+                numIndexBufferElements = draw.indexBufferSize / formatSize;
+            }
 
             // Same struct for both indexed and non-indexed draws.
             MultiDrawIndirectCmd* cmd = draw.cmd;
@@ -748,9 +793,19 @@ MaybeError EncodeIndirectDrawValidationCommands(DeviceBase* device,
                 static_cast<uint32_t>(numIndexBufferElements & 0xFFFFFFFF);
             drawConstants.numIndexBufferElementsHigh =
                 static_cast<uint32_t>((numIndexBufferElements >> 32) & 0xFFFFFFFF);
-            drawConstants.flags = kIndexedDraw;
+
+            drawConstants.flags = 0;
+            if (device->IsValidationEnabled()) {
+                drawConstants.flags |= kValidationEnabled;
+            }
+            if (draw.type == IndirectDrawMetadata::DrawType::Indexed) {
+                drawConstants.flags |= kIndexedDraw;
+            }
             if (cmd->drawCountBuffer != nullptr) {
                 drawConstants.flags |= kIndirectDrawCountBuffer;
+            }
+            if (draw.duplicateBaseVertexInstance) {
+                drawConstants.flags |= kDuplicateBaseVertexInstance;
             }
 
             inputIndirectBinding.buffer = cmd->indirectBuffer.Get();
@@ -763,19 +818,23 @@ MaybeError EncodeIndirectDrawValidationCommands(DeviceBase* device,
 
             outputParamsBinding.buffer = outputParamsBuffer.GetBuffer();
             outputParamsBinding.offset = outputOffset;
+            outputParamsBinding.size =
+                draw.cmd->maxDrawCount *
+                GetOutputIndirectDrawSize(draw.type, draw.duplicateBaseVertexInstance);
 
             if (cmd->drawCountBuffer != nullptr) {
                 // If the drawCountBuffer is set, we need to bind it to the bind group.
                 // The drawCountBuffer is used to read the drawCount for the multi draw call.
-                // If the drawCount exceeds the maxDrawCount, it will be clamped to maxDrawCount.
+                // If the drawCount exceeds the maxDrawCount, it will be clamped to
+                // maxDrawCount.
                 drawCountBinding.buffer = cmd->drawCountBuffer.Get();
                 drawCountBinding.offset =
                     AlignDown(cmd->drawCountOffset, minStorageBufferOffsetAlignment);
             } else {
                 // This is an unused binding.
-                // Bind group entry for the drawCountBuffer is not needed however we need to bind
-                // something else than nullptr to the bind group entry to avoid validation errors.
-                // This buffer is never used in the shader, since there is a flag
+                // Bind group entry for the drawCountBuffer is not needed however we need to
+                // bind something else than nullptr to the bind group entry to avoid validation
+                // errors. This buffer is never used in the shader, since there is a flag
                 // (kIndirectDrawCountBuffer) to check if the drawCountBuffer is set.
                 drawCountBinding.buffer = cmd->indirectBuffer.Get();
                 drawCountBinding.offset = 0;
@@ -792,9 +851,6 @@ MaybeError EncodeIndirectDrawValidationCommands(DeviceBase* device,
             passEncoder->APISetPipeline(pipeline);
             passEncoder->APISetBindGroup(0, bindGroup.Get());
 
-            // TODO(crbug.com/356461286): After maxDrawCount has a limit we can
-            // dispatch exact number of workgroups without worrying about overflow:
-            // uint32_t workgroupCount = (cmd->maxDrawCount + kWorkgroupSize - 1u) / kWorkgroupSize;
             uint32_t workgroupCount = cmd->maxDrawCount / kWorkgroupSize;
             // Integer division rounds down so adding 1 if there is a remainder.
             workgroupCount += cmd->maxDrawCount % kWorkgroupSize == 0 ? 0 : 1;
@@ -802,12 +858,15 @@ MaybeError EncodeIndirectDrawValidationCommands(DeviceBase* device,
             passEncoder->APIEnd();
 
             // Update the draw command to use the validated indirect buffer.
-            // The drawCountBuffer doesn't need to be updated because if it exceeds the maxDrawCount
-            // it will be clamped to maxDrawCount.
+            // The drawCountBuffer doesn't need to be updated because if it exceeds the
+            // maxDrawCount it will be clamped to maxDrawCount.
             cmd->indirectBuffer = outputParamsBuffer.GetBuffer();
             cmd->indirectOffset = outputOffset;
 
-            outputOffset += cmd->maxDrawCount * kDrawIndexedIndirectSize;
+            // Proceed to the next output offset.
+            outputOffset += cmd->maxDrawCount *
+                            GetOutputIndirectDrawSize(draw.type, draw.duplicateBaseVertexInstance);
+            outputOffset = Align(outputOffset, minStorageBufferOffsetAlignment);
         }
     }
 

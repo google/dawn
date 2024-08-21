@@ -430,7 +430,188 @@ TEST_P(MultiDrawIndexedIndirectTest, ValidateMultiAndSingleDrawsInSingleRenderPa
     EXPECT_PIXEL_RGBA8_EQ(filled, renderPass.color, 3, 1);
 }
 
-DAWN_INSTANTIATE_TEST(MultiDrawIndexedIndirectTest, VulkanBackend());
+DAWN_INSTANTIATE_TEST(MultiDrawIndexedIndirectTest, VulkanBackend(), D3D12Backend());
+
+class MultiDrawIndexedIndirectUsingFirstVertexTest : public DawnTest {
+  protected:
+    std::vector<wgpu::FeatureName> GetRequiredFeatures() override {
+        if (!SupportsFeatures({wgpu::FeatureName::MultiDrawIndirect})) {
+            return {};
+        }
+        return {wgpu::FeatureName::MultiDrawIndirect};
+    }
+    virtual void SetupShaderModule() {
+        vsModule = utils::CreateShaderModule(device, R"(
+            struct VertexInput {
+                @builtin(vertex_index) id : u32,
+                @location(0) pos: vec4f,
+            };
+            @group(0) @binding(0) var<uniform> offset: array<vec4f, 2>;
+            @vertex
+            fn main(input: VertexInput) -> @builtin(position) vec4f {
+                return input.pos + offset[input.id / 3u];
+            })");
+        fsModule = utils::CreateShaderModule(device, R"(
+            @fragment fn main() -> @location(0) vec4f {
+                return vec4f(0.0, 1.0, 0.0, 1.0);
+            })");
+    }
+    void GeneralSetup() {
+        renderPass = utils::CreateBasicRenderPass(device, kRTSize, kRTSize);
+        SetupShaderModule();
+        utils::ComboRenderPipelineDescriptor descriptor;
+        descriptor.vertex.module = vsModule;
+        descriptor.cFragment.module = fsModule;
+        descriptor.primitive.topology = wgpu::PrimitiveTopology::TriangleStrip;
+        descriptor.primitive.stripIndexFormat = wgpu::IndexFormat::Uint32;
+        descriptor.vertex.bufferCount = 1;
+        descriptor.cBuffers[0].arrayStride = 4 * sizeof(float);
+        descriptor.cBuffers[0].attributeCount = 1;
+        descriptor.cAttributes[0].format = wgpu::VertexFormat::Float32x4;
+        descriptor.cTargets[0].format = renderPass.colorFormat;
+
+        pipeline = device.CreateRenderPipeline(&descriptor);
+
+        // Offset to the vertices, that needs correcting by the calibration offset from uniform
+        // buffer referenced by instance index to get filled triangle on screen.
+        constexpr float calibration = 99.0f;
+        vertexBuffer = dawn::utils::CreateBufferFromData<float>(
+            device, wgpu::BufferUsage::Vertex,
+            {// The bottom left triangle
+             -1.0f - calibration, 1.0f, 0.0f, 1.0f, 1.0f - calibration, -1.0f, 0.0f, 1.0f,
+             -1.0f - calibration, -1.0f, 0.0f, 1.0f,
+             // The top right triangle
+             -1.0f - calibration, 1.0f, 0.0f, 1.0f, 1.0f - calibration, -1.0f, 0.0f, 1.0f,
+             1.0f - calibration, 1.0f, 0.0f, 1.0f});
+
+        indexBuffer = dawn::utils::CreateBufferFromData<uint32_t>(device, wgpu::BufferUsage::Index,
+                                                                  {0, 1, 2});
+
+        // Providing calibration vec4f offset values
+        wgpu::Buffer uniformBuffer =
+            utils::CreateBufferFromData<float>(device, wgpu::BufferUsage::Uniform,
+                                               {
+                                                   // Bad calibration at [0]
+                                                   0.0,
+                                                   0.0,
+                                                   0.0,
+                                                   0.0,
+                                                   // Good calibration at [1]
+                                                   calibration,
+                                                   0.0,
+                                                   0.0,
+                                                   0.0,
+                                               });
+
+        bindGroup =
+            utils::MakeBindGroup(device, pipeline.GetBindGroupLayout(0), {{0, uniformBuffer}});
+    }
+    void SetUp() override {
+        DawnTest::SetUp();
+        DAWN_TEST_UNSUPPORTED_IF(!device.HasFeature(wgpu::FeatureName::MultiDrawIndirect));
+        GeneralSetup();
+    }
+    utils::BasicRenderPass renderPass;
+    wgpu::RenderPipeline pipeline;
+    wgpu::Buffer vertexBuffer;
+    wgpu::Buffer indexBuffer;
+    wgpu::BindGroup bindGroup;
+    wgpu::ShaderModule vsModule;
+    wgpu::ShaderModule fsModule;
+    // Test two DrawIndirect calls with different indirect offsets within one pass.
+    void Test(std::initializer_list<uint32_t> bufferList,
+              uint32_t maxDrawCount,
+              utils::RGBA8 bottomLeftExpected,
+              utils::RGBA8 topRightExpected) {
+        wgpu::Buffer indirectBuffer =
+            utils::CreateBufferFromData<uint32_t>(device, wgpu::BufferUsage::Indirect, bufferList);
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        {
+            wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass.renderPassInfo);
+            pass.SetPipeline(pipeline);
+            pass.SetVertexBuffer(0, vertexBuffer);
+            pass.SetBindGroup(0, bindGroup);
+            pass.SetIndexBuffer(indexBuffer, wgpu::IndexFormat::Uint32, 0);
+            pass.MultiDrawIndexedIndirect(indirectBuffer, 0, maxDrawCount, nullptr, 0);
+            pass.End();
+        }
+        wgpu::CommandBuffer commands = encoder.Finish();
+        queue.Submit(1, &commands);
+        EXPECT_PIXEL_RGBA8_EQ(bottomLeftExpected, renderPass.color, 1, 3);
+        EXPECT_PIXEL_RGBA8_EQ(topRightExpected, renderPass.color, 3, 1);
+    }
+};
+
+TEST_P(MultiDrawIndexedIndirectUsingFirstVertexTest, IndirectOffset) {
+    utils::RGBA8 filled(0, 255, 0, 255);
+    utils::RGBA8 notFilled(0, 0, 0, 0);
+
+    // Test an offset draw call, with indirect buffer containing 2 calls:
+    // 1) only the first 3 indices (bottom left triangle)
+    // 2) only the last 3 indices (top right triangle)
+    // #2 draw has the correct offset applied by vertex index
+    Test({3, 1, 0, 0, 0, 3, 1, 0, 3, 0}, 2, notFilled, filled);
+}
+
+DAWN_INSTANTIATE_TEST(MultiDrawIndexedIndirectUsingFirstVertexTest,
+                      VulkanBackend(),
+                      D3D12Backend());
+
+class MultiDrawIndexedIndirectUsingInstanceIndexTest
+    : public MultiDrawIndexedIndirectUsingFirstVertexTest {
+  protected:
+    std::vector<wgpu::FeatureName> GetRequiredFeatures() override {
+        if (!SupportsFeatures({wgpu::FeatureName::MultiDrawIndirect})) {
+            return {};
+        }
+        return {wgpu::FeatureName::MultiDrawIndirect};
+    }
+
+    void SetupShaderModule() override {
+        vsModule = utils::CreateShaderModule(device, R"(
+            struct VertexInput {
+                @builtin(instance_index) id : u32,
+                @location(0) pos: vec4f,
+            };
+
+            @group(0) @binding(0) var<uniform> offset: array<vec4f, 2>;
+
+            @vertex
+            fn main(input: VertexInput) -> @builtin(position) vec4f {
+                return input.pos + offset[input.id];
+            })");
+
+        fsModule = utils::CreateShaderModule(device, R"(
+            @fragment fn main() -> @location(0) vec4f {
+                return vec4f(0.0, 1.0, 0.0, 1.0);
+            })");
+    }
+
+    void SetUp() override {
+        DawnTest::SetUp();
+        DAWN_TEST_UNSUPPORTED_IF(!device.HasFeature(wgpu::FeatureName::MultiDrawIndirect));
+        GeneralSetup();
+    }
+};
+
+TEST_P(MultiDrawIndexedIndirectUsingInstanceIndexTest, IndirectOffset) {
+    utils::RGBA8 filled(0, 255, 0, 255);
+    utils::RGBA8 notFilled(0, 0, 0, 0);
+
+    // Test an offset draw call, with indirect buffer containing 2 calls:
+    // 1) only the first 3 indices (bottom left triangle)
+    // 2) only the last 3 indices (top right triangle)
+
+    // Test 1: #1 draw has the correct calibration referenced by instance index
+    Test({3, 1, 0, 0, 1, 3, 1, 0, 3, 0}, 2, filled, notFilled);
+
+    // Test 2: #2 draw has the correct offset applied by instance index
+    Test({3, 1, 0, 0, 0, 3, 1, 0, 3, 1}, 2, notFilled, filled);
+}
+
+DAWN_INSTANTIATE_TEST(MultiDrawIndexedIndirectUsingInstanceIndexTest,
+                      VulkanBackend(),
+                      D3D12Backend());
 
 }  // anonymous namespace
 }  // namespace dawn
