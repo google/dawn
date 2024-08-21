@@ -136,14 +136,6 @@ class Builder {
             /// @param i the instruction to insert
             void operator()(ir::Instruction* i) { block->Append(i); }
         };
-        /// Insertion point method that inserts the instruction to the front of #block
-        struct PrependToBlock {
-            /// The block to insert new instructions to the front of
-            ir::Block* block = nullptr;
-            /// The insertion point function
-            /// @param i the instruction to insert
-            void operator()(ir::Instruction* i) { block->Prepend(i); }
-        };
         /// Insertion point method that inserts the instruction after #after
         struct InsertAfter {
             /// The instruction to insert new instructions after
@@ -165,7 +157,6 @@ class Builder {
     /// A variant of different instruction insertion methods
     using InsertionPoint = std::variant<InsertionPoints::NoInsertion,
                                         InsertionPoints::AppendToBlock,
-                                        InsertionPoints::PrependToBlock,
                                         InsertionPoints::InsertAfter,
                                         InsertionPoints::InsertBefore>;
 
@@ -194,15 +185,6 @@ class Builder {
     template <typename FUNCTION>
     void Append(ir::Block* b, FUNCTION&& cb) {
         TINT_SCOPED_ASSIGNMENT(insertion_point_, InsertionPoints::AppendToBlock{b});
-        cb();
-    }
-
-    /// Calls @p cb with the builder prepending to block @p b
-    /// @param b the block to set as the block to prepend to
-    /// @param cb the function to call with the builder prepending to block @p b
-    template <typename FUNCTION>
-    void Prepend(ir::Block* b, FUNCTION&& cb) {
-        TINT_SCOPED_ASSIGNMENT(insertion_point_, InsertionPoints::PrependToBlock{b});
         cb();
     }
 

@@ -352,9 +352,9 @@ struct State {
             core::ir::Value* result = param;
             if (entry_point && var->Attributes().builtin == core::BuiltinValue::kSampleMask) {
                 // Construct an array from the scalar sample_mask builtin value for entry points.
-                b.Prepend(func->Block(), [&] {  //
-                    result = b.Construct(var->Result(0)->Type()->UnwrapPtr(), param)->Result(0);
-                });
+                auto* construct = b.Construct(var->Result(0)->Type()->UnwrapPtr(), param);
+                func->Block()->Prepend(construct);
+                result = construct->Result(0);
             }
             return result;
         });
