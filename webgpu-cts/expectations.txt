@@ -1496,34 +1496,12 @@ crbug.com/dawn/349425830 [ nvidia-0x2184 webgpu-dxc-enabled win10 ] webgpu:shade
 crbug.com/dawn/349425830 [ nvidia-0x2184 webgpu-dxc-enabled win10 ] webgpu:shader,validation,expression,matrix,mul:overflow_mat_f16_internal:lhs=1;c=4;r=3 [ Failure ]
 crbug.com/dawn/349425830 [ nvidia-0x2184 webgpu-dxc-enabled win10 ] webgpu:shader,validation,expression,matrix,mul:overflow_mat_f16_internal:lhs=1;c=4;r=4 [ Failure ]
 
-# crbug.com/351338448 "either" and "first" interpolation sampling is not implemented yet.
-crbug.com/351338448 webgpu:api,operation,memory_sync,buffer,multiple_buffers:wr:* [ Failure ]
-crbug.com/351338448 webgpu:api,operation,memory_sync,buffer,single_buffer:rw:* [ Failure ]
-crbug.com/351338448 webgpu:api,operation,memory_sync,buffer,single_buffer:wr:* [ Failure ]
-crbug.com/351338448 webgpu:api,operation,render_pipeline,sample_mask:alpha_to_coverage_mask:* [ Failure ]
-crbug.com/351338448 webgpu:api,operation,render_pipeline,sample_mask:fragment_output_mask:* [ Failure ]
-crbug.com/351338448 webgpu:api,operation,rendering,depth_clip_clamp:depth_clamp_and_clip:* [ Failure ]
-crbug.com/351338448 webgpu:api,operation,rendering,depth_clip_clamp:depth_test_input_clamped:* [ Failure ]
-crbug.com/351338448 webgpu:api,operation,rendering,draw:vertex_attributes,basic:* [ Failure ]
-crbug.com/351338448 webgpu:api,operation,storage_texture,read_only:basic:* [ Failure ]
-crbug.com/351338448 webgpu:api,operation,vertex_state,correctness:array_stride_zero:* [ Failure ]
-crbug.com/351338448 webgpu:api,operation,vertex_state,correctness:buffers_with_varying_step_mode: [ Failure ]
-crbug.com/351338448 webgpu:api,operation,vertex_state,correctness:max_buffers_and_attribs:* [ Failure ]
-crbug.com/351338448 webgpu:api,operation,vertex_state,correctness:non_zero_array_stride_and_attribute_offset:* [ Failure ]
-crbug.com/351338448 webgpu:api,operation,vertex_state,correctness:overlapping_attributes:* [ Failure ]
-crbug.com/351338448 webgpu:api,operation,vertex_state,correctness:setVertexBuffer_offset_and_attribute_offset:* [ Failure ]
-crbug.com/351338448 webgpu:api,operation,vertex_state,correctness:vertex_buffer_used_multiple_times_interleaved:* [ Failure ]
-crbug.com/351338448 webgpu:api,operation,vertex_state,correctness:vertex_buffer_used_multiple_times_overlapped:* [ Failure ]
-crbug.com/351338448 webgpu:api,operation,vertex_state,correctness:vertex_format_to_shader_format_conversion:* [ Failure ]
-crbug.com/351338448 webgpu:api,validation,render_pipeline,inter_stage:interpolation_type:isAsync=false;output="%40interpolate(flat,%20either)";input="%40interpolate(perspective)" [ Failure ]
-crbug.com/351338448 webgpu:api,validation,render_pipeline,inter_stage:type:* [ Failure ]
-crbug.com/351338448 webgpu:shader,execution,shader_io,fragment_builtins:inputs,front_facing:nearFar=[0,1];sampleCount=4;frontFace="cw";interpolation={"type":"flat","sampling":"first"} [ Failure ]
-crbug.com/351338448 webgpu:shader,execution,shader_io,fragment_builtins:inputs,front_facing:nearFar=[0.25,0.75];sampleCount=1;frontFace="ccw";interpolation={"type":"flat","sampling":"either"} [ Failure ]
-crbug.com/351338448 webgpu:shader,execution,shader_io,fragment_builtins:inputs,front_facing:nearFar=[0.25,0.75];sampleCount=1;frontFace="cw";interpolation={"type":"flat","sampling":"either"} [ Failure ]
-crbug.com/351338448 webgpu:shader,execution,shader_io,fragment_builtins:inputs,interStage:nearFar=[0.25,0.75];sampleCount=1;interpolation={"type":"flat","sampling":"either"} [ Failure ]
-crbug.com/351338448 webgpu:shader,execution,shader_io,fragment_builtins:inputs,sample_index:nearFar=[0,1];sampleCount=1;interpolation={"type":"flat","sampling":"either"} [ Failure ]
-crbug.com/351338448 webgpu:shader,execution,shader_io,user_io:passthrough:* [ Failure ]
-crbug.com/351338448 webgpu:shader,validation,shader_io,locations:type:* [ Failure ]
+# crbug.com/dawn/360916909:
+crbug.com/dawn/360916909 [ linux ] webgpu:api,operation,render_pipeline,sample_mask:fragment_output_mask:* [ Failure ]
+
+# crbug.com/dawn/360916910:
+crbug.com/dawn/360916910 [ linux ] webgpu:api,operation,storage_texture,read_only:basic:format="rgba8snorm";* [ Failure ]
+crbug.com/dawn/360916910 [ linux ] webgpu:api,operation,storage_texture,read_only:basic:format="rgba8unorm";* [ Failure ]
 
 # crbug.com/bug/349425541: validation matrix add_sub underflow_f16
 crbug.com/dawn/349425541 [ amd mac ] webgpu:shader,validation,expression,matrix,add_sub:underflow_f16:rhs=1;c=2;r=2 [ Failure ]
