@@ -36,7 +36,6 @@
         "bool": "jboolean",
         "double": "jdouble",
         "float": "jfloat",
-        "double": "jdouble",
         "size_t": "jlong",
         "int32_t": "jint",
         "uint16_t": "jshort",
