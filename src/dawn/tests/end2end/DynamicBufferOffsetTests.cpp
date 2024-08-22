@@ -409,6 +409,8 @@ TEST_P(DynamicBufferOffsetTests, InheritDynamicOffsetsRenderPipeline) {
     // TODO(crbug.com/1497726): Remove when test is no longer flaky on M2
     // devices.
     DAWN_SUPPRESS_TEST_IF(IsApple());
+    // TODO(crbug.com/40287156): Remove when test is no longer flaky on Pixel 6
+    DAWN_SUPPRESS_TEST_IF(IsVulkan() && IsAndroid() && IsARM());
 
     // Using default pipeline and setting dynamic offsets
     wgpu::RenderPipeline pipeline = CreateRenderPipeline();
