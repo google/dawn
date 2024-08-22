@@ -120,9 +120,8 @@ cc_library(
     "//conditions:default": [],
   }) + select({
     ":tint_build_spv_writer": [
+      "//src/tint/lang/spirv/writer",
       "//src/tint/lang/spirv/writer/common",
-      "//src/tint/lang/spirv/writer/printer",
-      "//src/tint/lang/spirv/writer/raise",
     ],
     "//conditions:default": [],
   }),

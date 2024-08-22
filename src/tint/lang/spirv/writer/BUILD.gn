@@ -142,10 +142,9 @@ if (tint_build_unittests) {
 
       if (tint_build_spv_writer) {
         deps += [
+          "${tint_src_dir}/lang/spirv/writer",
           "${tint_src_dir}/lang/spirv/writer/common",
           "${tint_src_dir}/lang/spirv/writer/common:unittests",
-          "${tint_src_dir}/lang/spirv/writer/printer",
-          "${tint_src_dir}/lang/spirv/writer/raise",
         ]
       }
     }

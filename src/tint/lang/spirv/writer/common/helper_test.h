@@ -45,8 +45,7 @@
 #include "src/tint/lang/core/type/sampled_texture.h"
 #include "src/tint/lang/core/type/storage_texture.h"
 #include "src/tint/lang/spirv/writer/common/spv_dump_test.h"
-#include "src/tint/lang/spirv/writer/printer/printer.h"
-#include "src/tint/lang/spirv/writer/raise/raise.h"
+#include "src/tint/lang/spirv/writer/writer.h"
 
 namespace tint::spirv::writer {
 
@@ -104,44 +103,27 @@ class SpirvWriterTestHelperBase : public BASE {
     /// SPIR-V output.
     std::string output_;
 
-    /// The generated SPIR-V
-    writer::Module spirv_;
-
     /// @returns the error string from the validation
     std::string Error() const { return err_; }
 
     /// Run the printer on the IR module and validate the result.
     /// @param options the optional writer options to use when raising the IR
-    /// @param zero_init_workgroup_memory  `true` to initialize all the variables in the Workgroup
     /// storage class with OpConstantNull
     /// @returns true if generation and validation succeeded
-    bool Generate(Options options = {}, bool zero_init_workgroup_memory = false) {
-        auto raised = Raise(mod, options);
-        if (raised != Success) {
-            err_ = raised.Failure().reason.Str();
+    bool Generate(Options options = {}) {
+        auto result = writer::Generate(mod, options);
+        if (result != Success) {
+            err_ = result.Failure().reason.Str();
             return false;
         }
 
-        if (zero_init_workgroup_memory) {
-            options.disable_workgroup_init = false;
-            options.use_zero_initialize_workgroup_memory_extension = true;
-        }
-
-        auto spirv = PrintModule(mod, options);
-        if (spirv != Success) {
-            err_ = spirv.Failure().reason.Str();
-            return false;
-        }
-
-        output_ = Disassemble(spirv->Code(), SPV_BINARY_TO_TEXT_OPTION_FRIENDLY_NAMES |
+        output_ = Disassemble(result->spirv, SPV_BINARY_TO_TEXT_OPTION_FRIENDLY_NAMES |
                                                  SPV_BINARY_TO_TEXT_OPTION_INDENT |
                                                  SPV_BINARY_TO_TEXT_OPTION_COMMENT);
 
-        if (!Validate(spirv->Code())) {
+        if (!Validate(result->spirv)) {
             return false;
         }
-
-        spirv_ = std::move(spirv.Get());
         return true;
     }
 
@@ -179,9 +161,6 @@ class SpirvWriterTestHelperBase : public BASE {
         err_ = std::move(spv_errors);
         return result;
     }
-
-    /// @returns the disassembled types from the generated module.
-    std::string DumpTypes() { return DumpInstructions(spirv_.Types()); }
 
     /// Helper to make a scalar type corresponding to the element type `type`.
     /// @param type the element type

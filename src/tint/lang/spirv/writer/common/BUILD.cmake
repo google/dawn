@@ -131,9 +131,8 @@ endif(TINT_BUILD_SPV_READER OR TINT_BUILD_SPV_WRITER)
 
 if(TINT_BUILD_SPV_WRITER)
   tint_target_add_dependencies(tint_lang_spirv_writer_common_test test
+    tint_lang_spirv_writer
     tint_lang_spirv_writer_common
-    tint_lang_spirv_writer_printer
-    tint_lang_spirv_writer_raise
   )
 endif(TINT_BUILD_SPV_WRITER)
 
