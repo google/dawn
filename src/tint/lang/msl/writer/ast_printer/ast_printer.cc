@@ -291,6 +291,7 @@ bool ASTPrinter::Generate() {
                 wgsl::Extension::kChromiumExperimentalSubgroups,
                 wgsl::Extension::kChromiumInternalGraphite,
                 wgsl::Extension::kChromiumInternalRelaxedUniformLayout,
+                wgsl::Extension::kClipDistances,
                 wgsl::Extension::kF16,
                 wgsl::Extension::kDualSourceBlending,
                 wgsl::Extension::kSubgroups,
@@ -2994,23 +2995,40 @@ bool ASTPrinter::EmitStructType(TextBuffer* b, const core::type::Struct* str) {
             add_byte_offset_comment(out, msl_offset);
         }
 
+        auto* ty = mem->Type();
+
+        // Emit attributes
+        auto& attributes = mem->Attributes();
+        std::string builtin_value_name;
+        if (auto builtin = attributes.builtin) {
+            builtin_value_name = BuiltinToAttribute(builtin.value());
+            if (builtin_value_name.empty()) {
+                diagnostics_.AddError(Source{}) << "unknown builtin";
+                return false;
+            }
+
+            // Emit `[[clip_distance]]` as a C-style f32 array
+            if (builtin == core::BuiltinValue::kClipDistances) {
+                const auto* arrayType = mem->Type()->As<core::type::Array>();
+                if (TINT_UNLIKELY(arrayType == nullptr ||
+                                  !arrayType->ConstantCount().has_value())) {
+                    TINT_ICE() << "The type of `clip_distances` is not a sized array";
+                } else {
+                    out << "float " << mem_name << " [[" << builtin_value_name << "]] ["
+                        << *arrayType->ConstantCount() << "];";
+                }
+                continue;
+            }
+        }
+
         if (!EmitType(out, mem->Type())) {
             return false;
         }
 
-        auto* ty = mem->Type();
-
         out << " " << mem_name;
-        // Emit attributes
-        auto& attributes = mem->Attributes();
 
-        if (auto builtin = attributes.builtin) {
-            auto name = BuiltinToAttribute(builtin.value());
-            if (name.empty()) {
-                diagnostics_.AddError(Source{}) << "unknown builtin";
-                return false;
-            }
-            out << " [[" << name << "]]";
+        if (!builtin_value_name.empty()) {
+            out << " [[" << builtin_value_name << "]]";
         }
 
         if (auto location = attributes.location) {

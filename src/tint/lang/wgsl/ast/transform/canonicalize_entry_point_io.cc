@@ -165,6 +165,8 @@ struct CanonicalizeEntryPointIO::State {
     Hashmap<const BuiltinAttribute*, core::BuiltinValue, 16> builtin_attrs;
     /// A map of builtin values to HLSL wave intrinsic functions.
     Hashmap<core::BuiltinValue, Symbol, 2> wave_intrinsics;
+    /// The array length of the struct member with builtin attribute `clip_distances`.
+    uint32_t clip_distances_size = 0;
 
     /// Constructor
     /// @param context the clone context
@@ -405,6 +407,17 @@ struct CanonicalizeEntryPointIO::State {
             !HasAttribute<InterpolateAttribute>(attrs)) {
             attrs.Push(b.Interpolate(core::InterpolationType::kFlat,
                                      core::InterpolationSampling::kUndefined));
+        }
+
+        if (cfg.shader_style == ShaderStyle::kMsl &&
+            func_ast->PipelineStage() == PipelineStage::kVertex &&
+            builtin_attr == core::BuiltinValue::kClipDistances) {
+            const auto* arrayType = type->As<core::type::Array>();
+            if (TINT_UNLIKELY(arrayType == nullptr || !arrayType->ConstantCount().has_value())) {
+                TINT_ICE() << "The type of `clip_distances` is not a sized array";
+            } else {
+                clip_distances_size = *arrayType->ConstantCount();
+            }
         }
 
         // In GLSL, if it's a builtin, override the name with the
@@ -682,13 +695,26 @@ struct CanonicalizeEntryPointIO::State {
             }
             member_names.insert(name.Name());
 
+            auto* builtin_attribute = GetAttribute<BuiltinAttribute>(outval.attributes);
+            if (cfg.shader_style == ShaderStyle::kMsl && builtin_attribute != nullptr &&
+                builtin_attribute->builtin == core::BuiltinValue::kClipDistances) {
+                Symbol clip_distances_inner_array = b.Symbols().New("tmp_inner_clip_distances");
+                assignments.Push(b.Decl(b.Let(clip_distances_inner_array, outval.value)));
+                for (uint32_t i = 0; i < clip_distances_size; ++i) {
+                    assignments.Push(
+                        b.Assign(b.IndexAccessor(b.MemberAccessor(wrapper_result, name), u32(i)),
+                                 b.IndexAccessor(clip_distances_inner_array, u32(i))));
+                }
+            } else {
+                assignments.Push(b.Assign(b.MemberAccessor(wrapper_result, name), outval.value));
+            }
+
             wrapper_struct_output_members.Push({
                 /* member */ b.Member(name, outval.type, std::move(outval.attributes)),
                 /* location */ outval.location,
                 /* blend_src */ outval.blend_src,
                 /* color */ std::nullopt,
             });
-            assignments.Push(b.Assign(b.MemberAccessor(wrapper_result, name), outval.value));
         }
 
         // Sort the struct members to satisfy HLSL interfacing matching rules.

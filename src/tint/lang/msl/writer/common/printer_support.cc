@@ -77,6 +77,8 @@ std::string BuiltinToAttribute(core::BuiltinValue builtin) {
             return "thread_index_in_simdgroup";
         case core::BuiltinValue::kSubgroupSize:
             return "threads_per_simdgroup";
+        case core::BuiltinValue::kClipDistances:
+            return "clip_distance";
         default:
             break;
     }
