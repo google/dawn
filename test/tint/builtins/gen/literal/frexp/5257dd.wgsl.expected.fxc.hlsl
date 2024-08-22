@@ -1,4 +1,4 @@
-SKIP: FAILED
+SKIP: INVALID
 
 struct frexp_result_f16 {
   float16_t fract;

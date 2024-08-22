@@ -1,4 +1,4 @@
-SKIP: FAILED
+SKIP: INVALID
 
 vector<float16_t, 4> tint_trunc(vector<float16_t, 4> param_0) {
   return param_0 < 0 ? ceil(param_0) : floor(param_0);

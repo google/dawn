@@ -1,4 +1,4 @@
-SKIP: FAILED
+SKIP: INVALID
 
 cbuffer cbuffer_a : register(b0) {
   uint4 a[4];

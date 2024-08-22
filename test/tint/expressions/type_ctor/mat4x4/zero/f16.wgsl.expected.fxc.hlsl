@@ -1,4 +1,4 @@
-SKIP: FAILED
+SKIP: INVALID
 
 static matrix<float16_t, 4, 4> m = matrix<float16_t, 4, 4>((float16_t(0.0h)).xxxx, (float16_t(0.0h)).xxxx, (float16_t(0.0h)).xxxx, (float16_t(0.0h)).xxxx);
 RWByteAddressBuffer tint_symbol : register(u0);

@@ -1,4 +1,4 @@
-SKIP: FAILED
+SKIP: INVALID
 
 float16_t tint_degrees(float16_t param_0) {
   return param_0 * 57.29577951308232286465;

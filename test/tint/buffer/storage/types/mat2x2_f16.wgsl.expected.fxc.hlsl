@@ -1,4 +1,4 @@
-SKIP: FAILED
+SKIP: INVALID
 
 ByteAddressBuffer tint_symbol : register(t0);
 RWByteAddressBuffer tint_symbol_1 : register(u1);

@@ -1,4 +1,4 @@
-SKIP: FAILED
+SKIP: INVALID
 
 RWByteAddressBuffer sb : register(u0);
 

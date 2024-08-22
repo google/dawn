@@ -1,4 +1,4 @@
-SKIP: FAILED
+SKIP: INVALID
 
 struct VertexOutputs {
   int loc0;

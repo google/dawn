@@ -1,4 +1,4 @@
-SKIP: FAILED
+SKIP: INVALID
 
 struct Interface {
   float col1;

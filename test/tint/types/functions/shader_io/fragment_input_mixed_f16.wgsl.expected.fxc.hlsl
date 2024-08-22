@@ -1,4 +1,4 @@
-SKIP: FAILED
+SKIP: INVALID
 
 struct FragmentInputs0 {
   float4 position;

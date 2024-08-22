@@ -1,4 +1,4 @@
-SKIP: FAILED
+SKIP: INVALID
 
 vector<float16_t, 4> tint_degrees(vector<float16_t, 4> param_0) {
   return param_0 * 57.29577951308232286465;

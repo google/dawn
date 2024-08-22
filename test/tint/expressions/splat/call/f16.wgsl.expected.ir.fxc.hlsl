@@ -1,4 +1,4 @@
-SKIP: FAILED
+SKIP: INVALID
 
 
 float16_t get_f16() {

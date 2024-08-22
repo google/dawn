@@ -1,4 +1,4 @@
-SKIP: FAILED
+SKIP: INVALID
 
 vector<float16_t, 4> tint_sinh(vector<float16_t, 4> x) {
   return log((x + sqrt(((x * x) + float16_t(1.0h)))));

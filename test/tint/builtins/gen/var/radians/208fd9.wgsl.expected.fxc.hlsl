@@ -1,4 +1,4 @@
-SKIP: FAILED
+SKIP: INVALID
 
 float16_t tint_radians(float16_t param_0) {
   return param_0 * 0.01745329251994329547;

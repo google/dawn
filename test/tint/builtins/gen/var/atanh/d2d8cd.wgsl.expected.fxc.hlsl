@@ -1,4 +1,4 @@
-SKIP: FAILED
+SKIP: INVALID
 
 float16_t tint_atanh(float16_t x) {
   return (log(((float16_t(1.0h) + x) / (float16_t(1.0h) - x))) * float16_t(0.5h));

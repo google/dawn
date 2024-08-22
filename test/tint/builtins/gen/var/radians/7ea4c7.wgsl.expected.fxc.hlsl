@@ -1,4 +1,4 @@
-SKIP: FAILED
+SKIP: INVALID
 
 vector<float16_t, 3> tint_radians(vector<float16_t, 3> param_0) {
   return param_0 * 0.01745329251994329547;

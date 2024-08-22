@@ -1,4 +1,4 @@
-SKIP: FAILED
+SKIP: INVALID
 
 struct S {
   int before;

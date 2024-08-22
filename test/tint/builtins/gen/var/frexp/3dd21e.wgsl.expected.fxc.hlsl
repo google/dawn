@@ -1,4 +1,4 @@
-SKIP: FAILED
+SKIP: INVALID
 
 struct frexp_result_vec4_f16 {
   vector<float16_t, 4> fract;

@@ -1,4 +1,4 @@
-SKIP: FAILED
+SKIP: INVALID
 
 struct main_inputs {
   nointerpolation int loc0 : TEXCOORD0;

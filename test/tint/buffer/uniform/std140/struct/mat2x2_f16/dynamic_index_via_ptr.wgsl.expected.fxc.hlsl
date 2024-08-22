@@ -1,4 +1,4 @@
-SKIP: FAILED
+SKIP: INVALID
 
 struct Inner {
   matrix<float16_t, 2, 2> m;

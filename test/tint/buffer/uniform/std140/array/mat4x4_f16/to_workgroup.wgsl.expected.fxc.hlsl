@@ -1,4 +1,4 @@
-SKIP: FAILED
+SKIP: INVALID
 
 groupshared matrix<float16_t, 4, 4> w[4];
 

@@ -1,4 +1,4 @@
-SKIP: FAILED
+SKIP: INVALID
 
 groupshared float16_t arg_0;
 

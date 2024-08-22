@@ -133,55 +133,55 @@ $B1: {  # root
     ret
   }
 }
-%32 = func(%start_byte_offset:u32):mat2x4<f32> {
+%24 = func(%start_byte_offset:u32):array<Inner, 4> {
   $B4: {
-    %54:u32 = div %start_byte_offset, 16u
-    %55:ptr<uniform, vec4<u32>, read> = access %a, %54
-    %56:vec4<u32> = load %55
-    %57:vec4<f32> = bitcast %56
-    %58:u32 = add 16u, %start_byte_offset
-    %59:u32 = div %58, 16u
-    %60:ptr<uniform, vec4<u32>, read> = access %a, %59
-    %61:vec4<u32> = load %60
-    %62:vec4<f32> = bitcast %61
-    %63:mat2x4<f32> = construct %57, %62
-    ret %63
-  }
-}
-%28 = func(%start_byte_offset_1:u32):Inner {  # %start_byte_offset_1: 'start_byte_offset'
-  $B5: {
-    %65:mat2x4<f32> = call %32, %start_byte_offset_1
-    %66:Inner = construct %65
-    ret %66
-  }
-}
-%24 = func(%start_byte_offset_2:u32):array<Inner, 4> {  # %start_byte_offset_2: 'start_byte_offset'
-  $B6: {
     %a_1:ptr<function, array<Inner, 4>, read_write> = var, array<Inner, 4>(Inner(mat2x4<f32>(vec4<f32>(0.0f))))  # %a_1: 'a'
-    loop [i: $B7, b: $B8, c: $B9] {  # loop_1
-      $B7: {  # initializer
-        next_iteration 0u  # -> $B8
+    loop [i: $B5, b: $B6, c: $B7] {  # loop_1
+      $B5: {  # initializer
+        next_iteration 0u  # -> $B6
       }
-      $B8 (%idx:u32): {  # body
-        %70:bool = gte %idx, 4u
-        if %70 [t: $B10] {  # if_1
-          $B10: {  # true
+      $B6 (%idx:u32): {  # body
+        %56:bool = gte %idx, 4u
+        if %56 [t: $B8] {  # if_1
+          $B8: {  # true
             exit_loop  # loop_1
           }
         }
-        %71:u32 = mul %idx, 64u
-        %72:u32 = add %start_byte_offset_2, %71
-        %73:ptr<function, Inner, read_write> = access %a_1, %idx
-        %74:Inner = call %28, %72
-        store %73, %74
-        continue  # -> $B9
+        %57:u32 = mul %idx, 64u
+        %58:u32 = add %start_byte_offset, %57
+        %59:ptr<function, Inner, read_write> = access %a_1, %idx
+        %60:Inner = call %28, %58
+        store %59, %60
+        continue  # -> $B7
       }
-      $B9: {  # continuing
-        %75:u32 = add %idx, 1u
-        next_iteration %75  # -> $B8
+      $B7: {  # continuing
+        %61:u32 = add %idx, 1u
+        next_iteration %61  # -> $B6
       }
     }
-    %76:array<Inner, 4> = load %a_1
+    %62:array<Inner, 4> = load %a_1
+    ret %62
+  }
+}
+%28 = func(%start_byte_offset_1:u32):Inner {  # %start_byte_offset_1: 'start_byte_offset'
+  $B9: {
+    %64:mat2x4<f32> = call %32, %start_byte_offset_1
+    %65:Inner = construct %64
+    ret %65
+  }
+}
+%32 = func(%start_byte_offset_2:u32):mat2x4<f32> {  # %start_byte_offset_2: 'start_byte_offset'
+  $B10: {
+    %67:u32 = div %start_byte_offset_2, 16u
+    %68:ptr<uniform, vec4<u32>, read> = access %a, %67
+    %69:vec4<u32> = load %68
+    %70:vec4<f32> = bitcast %69
+    %71:u32 = add 16u, %start_byte_offset_2
+    %72:u32 = div %71, 16u
+    %73:ptr<uniform, vec4<u32>, read> = access %a, %72
+    %74:vec4<u32> = load %73
+    %75:vec4<f32> = bitcast %74
+    %76:mat2x4<f32> = construct %70, %75
     ret %76
   }
 }

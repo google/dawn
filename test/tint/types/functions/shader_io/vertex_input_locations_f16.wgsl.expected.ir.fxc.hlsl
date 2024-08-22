@@ -1,4 +1,4 @@
-SKIP: FAILED
+SKIP: INVALID
 
 struct main_outputs {
   float4 tint_symbol : SV_Position;

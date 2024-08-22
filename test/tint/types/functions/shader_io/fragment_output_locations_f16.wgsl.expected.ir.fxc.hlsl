@@ -1,4 +1,4 @@
-SKIP: FAILED
+SKIP: INVALID
 
 struct main0_outputs {
   int tint_symbol : SV_Target0;

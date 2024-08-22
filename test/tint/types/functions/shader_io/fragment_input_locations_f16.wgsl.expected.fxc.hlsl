@@ -1,4 +1,4 @@
-SKIP: FAILED
+SKIP: INVALID
 
 struct tint_symbol_1 {
   nointerpolation int loc0 : TEXCOORD0;
