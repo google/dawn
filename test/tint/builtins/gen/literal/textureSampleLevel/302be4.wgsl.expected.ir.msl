@@ -18,8 +18,8 @@ struct vertex_main_outputs {
 };
 
 float4 textureSampleLevel_302be4(tint_module_vars_struct tint_module_vars) {
-  int const v = max(1, 0);
-  float4 res = tint_module_vars.arg_0.sample(tint_module_vars.arg_1, float2(1.0f), v, level(1.0f));
+  level const v = level(1.0f);
+  float4 res = tint_module_vars.arg_0.sample(tint_module_vars.arg_1, float2(1.0f), max(1, 0), v);
   return res;
 }
 

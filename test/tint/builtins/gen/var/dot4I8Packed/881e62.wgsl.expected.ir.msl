@@ -15,7 +15,7 @@ struct vertex_main_outputs {
   int VertexOutput_prevent_dce [[user(locn0)]] [[flat]];
 };
 
-int tint_packed_8bit_dot(int lhs, int rhs) {
+int tint_packed_8bit_dot(uint lhs, uint rhs) {
   char4 const v = as_type<char4>(lhs);
   char4 const v_1 = as_type<char4>(rhs);
   return int(((((v[0u] * v_1[0u]) + (v[1u] * v_1[1u])) + (v[2u] * v_1[2u])) + (v[3u] * v_1[3u])));

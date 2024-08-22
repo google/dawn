@@ -22,8 +22,6 @@ int tint_div_i32(int lhs, int rhs) {
 }
 
 void foo(int maybe_zero, tint_module_vars_struct tint_module_vars) {
-  (*tint_module_vars.a) = tint_div_i32((*tint_module_vars.a), 0);
-  (*tint_module_vars.a) = tint_mod_i32((*tint_module_vars.a), 0);
   (*tint_module_vars.a) = tint_div_i32((*tint_module_vars.a), maybe_zero);
   (*tint_module_vars.a) = tint_mod_i32((*tint_module_vars.a), maybe_zero);
   (*tint_module_vars.b) = ((*tint_module_vars.b) / 0.0f);

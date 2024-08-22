@@ -18,8 +18,8 @@ struct vertex_main_outputs {
 };
 
 float4 textureSampleGrad_d65515(tint_module_vars_struct tint_module_vars) {
-  int const v = max(1, 0);
-  float4 res = tint_module_vars.arg_0.sample(tint_module_vars.arg_1, float2(1.0f), v, gradient2d(float2(1.0f), float2(1.0f)), int2(1));
+  gradient2d const v = gradient2d(float2(1.0f), float2(1.0f));
+  float4 res = tint_module_vars.arg_0.sample(tint_module_vars.arg_1, float2(1.0f), max(1, 0), v, int2(1));
   return res;
 }
 
