@@ -40,6 +40,17 @@ TEST_F(SpirvWriterTest, ModuleHeader) {
     EXPECT_INST("OpMemoryModel Logical GLSL450");
 }
 
+TEST_F(SpirvWriterTest, ModuleHeader_VulkanMemoryModel) {
+    Options opts;
+    opts.use_vulkan_memory_model = true;
+
+    ASSERT_TRUE(Generate(opts)) << Error() << output_;
+    EXPECT_INST("OpExtension \"SPV_KHR_vulkan_memory_model\"");
+    EXPECT_INST("OpCapability VulkanMemoryModel");
+    EXPECT_INST("OpCapability VulkanMemoryModelDeviceScope");
+    EXPECT_INST("OpMemoryModel Logical Vulkan");
+}
+
 TEST_F(SpirvWriterTest, Unreachable) {
     auto* func = b.Function("foo", ty.void_());
     b.Append(func->Block(), [&] {

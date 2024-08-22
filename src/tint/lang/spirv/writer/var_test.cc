@@ -236,6 +236,71 @@ TEST_F(SpirvWriterTest, StorageVar_LoadAndStore) {
 )");
 }
 
+TEST_F(SpirvWriterTest, StorageVar_NoCoherentWithVulkan) {
+    auto* v = b.Var("v", ty.ptr<storage, i32, read_write>());
+    v->SetBindingPoint(0, 0);
+    mod.root_block->Append(v);
+
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kCompute,
+                            std::array{1u, 1u, 1u});
+    b.Append(func->Block(), [&] {
+        auto* load = b.Load(v);
+        auto* add = b.Add(ty.i32(), load, 1_i);
+        b.Store(v, add);
+        b.Return(func);
+        mod.SetName(load, "load");
+        mod.SetName(add, "add");
+    });
+
+    Options opts;
+    opts.use_vulkan_memory_model = true;
+
+    ASSERT_TRUE(Generate(opts)) << Error() << output_;
+    EXPECT_INST(R"(               OpCapability Shader
+               OpCapability VulkanMemoryModel
+               OpCapability VulkanMemoryModelDeviceScope
+               OpExtension "SPV_KHR_vulkan_memory_model"
+               OpMemoryModel Logical Vulkan
+               OpEntryPoint GLCompute %foo "foo"
+               OpExecutionMode %foo LocalSize 1 1 1
+
+               ; Debug Information
+               OpMemberName %tint_symbol_1 0 "tint_symbol"
+               OpName %tint_symbol_1 "tint_symbol_1"    ; id %3
+               OpName %foo "foo"                        ; id %5
+               OpName %load "load"                      ; id %13
+               OpName %add "add"                        ; id %14
+
+               ; Annotations
+               OpMemberDecorate %tint_symbol_1 0 Offset 0
+               OpDecorate %tint_symbol_1 Block
+               OpDecorate %1 DescriptorSet 0
+               OpDecorate %1 Binding 0
+
+               ; Types, variables and constants
+        %int = OpTypeInt 32 1
+%tint_symbol_1 = OpTypeStruct %int                  ; Block
+%_ptr_StorageBuffer_tint_symbol_1 = OpTypePointer StorageBuffer %tint_symbol_1
+          %1 = OpVariable %_ptr_StorageBuffer_tint_symbol_1 StorageBuffer   ; DescriptorSet 0, Binding 0
+       %void = OpTypeVoid
+          %7 = OpTypeFunction %void
+%_ptr_StorageBuffer_int = OpTypePointer StorageBuffer %int
+       %uint = OpTypeInt 32 0
+     %uint_0 = OpConstant %uint 0
+      %int_1 = OpConstant %int 1
+
+               ; Function foo
+        %foo = OpFunction %void None %7
+          %8 = OpLabel
+          %9 = OpAccessChain %_ptr_StorageBuffer_int %1 %uint_0
+       %load = OpLoad %int %9
+        %add = OpIAdd %int %load %int_1
+         %16 = OpAccessChain %_ptr_StorageBuffer_int %1 %uint_0
+               OpStore %16 %add
+               OpReturn
+               OpFunctionEnd)");
+}
+
 TEST_F(SpirvWriterTest, StorageVar_WriteOnly) {
     auto* v = b.Var("v", ty.ptr<storage, i32, write>());
     v->SetBindingPoint(0, 0);

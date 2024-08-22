@@ -32,6 +32,7 @@
 #include <vector>
 
 #include "src/tint/lang/spirv/writer/common/module.h"
+#include "src/tint/lang/spirv/writer/common/options.h"
 #include "src/tint/utils/result/result.h"
 
 // Forward declarations
@@ -43,16 +44,13 @@ namespace tint::spirv::writer {
 
 /// @returns the generated SPIR-V instructions on success, or failure
 /// @param module the Tint IR module to generate
-/// @param zero_init_workgroup_memory `true` to initialize all the variables in the Workgroup
-///                                   storage class with OpConstantNull
-tint::Result<std::vector<uint32_t>> Print(core::ir::Module& module,
-                                          bool zero_init_workgroup_memory);
+/// @param options the printer options
+tint::Result<std::vector<uint32_t>> Print(core::ir::Module& module, const Options& options);
 
 /// @returns the generated SPIR-V module on success, or failure
 /// @param module the Tint IR module to generate
-/// @param zero_init_workgroup_memory `true` to initialize all the variables in the Workgroup
-///                                   storage class with OpConstantNull
-tint::Result<Module> PrintModule(core::ir::Module& module, bool zero_init_workgroup_memory);
+/// @param options the printer options
+tint::Result<Module> PrintModule(core::ir::Module& module, const Options& options);
 
 }  // namespace tint::spirv::writer
 

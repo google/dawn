@@ -122,7 +122,12 @@ class SpirvWriterTestHelperBase : public BASE {
             return false;
         }
 
-        auto spirv = PrintModule(mod, zero_init_workgroup_memory);
+        if (zero_init_workgroup_memory) {
+            options.disable_workgroup_init = false;
+            options.use_zero_initialize_workgroup_memory_extension = true;
+        }
+
+        auto spirv = PrintModule(mod, options);
         if (spirv != Success) {
             err_ = spirv.Failure().reason.Str();
             return false;

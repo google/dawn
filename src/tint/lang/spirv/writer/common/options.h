@@ -178,6 +178,9 @@ struct Options {
     /// Set to `true` to disable the polyfills on integer division and modulo.
     bool disable_polyfill_integer_div_mod = false;
 
+    /// Set to `true` if the Vulkan Memory Model should be used
+    bool use_vulkan_memory_model = false;
+
     /// Reflect the fields of this class so that it can be used by tint::ForeachField()
     TINT_REFLECT(Options,
                  bindings,
@@ -193,7 +196,8 @@ struct Options {
                  pass_matrix_by_pointer,
                  experimental_require_subgroup_uniform_control_flow,
                  polyfill_dot_4x8_packed,
-                 disable_polyfill_integer_div_mod);
+                 disable_polyfill_integer_div_mod,
+                 use_vulkan_memory_model);
 };
 
 }  // namespace tint::spirv::writer

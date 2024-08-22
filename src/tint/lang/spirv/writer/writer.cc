@@ -40,9 +40,6 @@
 namespace tint::spirv::writer {
 
 Result<Output> Generate(core::ir::Module& ir, const Options& options) {
-    bool zero_initialize_workgroup_memory =
-        !options.disable_workgroup_init && options.use_zero_initialize_workgroup_memory_extension;
-
     {
         auto res = ValidateBindingOptions(options);
         if (res != Success) {
@@ -58,7 +55,7 @@ Result<Output> Generate(core::ir::Module& ir, const Options& options) {
     }
 
     // Generate the SPIR-V code.
-    auto spirv = Print(ir, zero_initialize_workgroup_memory);
+    auto spirv = Print(ir, options);
     if (spirv != Success) {
         return std::move(spirv.Failure());
     }
