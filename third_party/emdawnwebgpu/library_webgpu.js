@@ -95,7 +95,7 @@ var LibraryWebGPU = {
 #if ASYNCIFY
       var futureId = futureIdH * 0x100000000 + futureIdL;
       WebGPU._futures[futureId] =
-        new Promise((resolve) => promise.finally(resolve(futureId)));
+        new Promise((resolve) => promise.finally(() => resolve(futureId)));
 #endif
     },
     _waitAnyPromisesList: [],
