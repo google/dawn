@@ -1502,6 +1502,7 @@ crbug.com/dawn/360916909 [ linux ] webgpu:api,operation,render_pipeline,sample_m
 # crbug.com/dawn/360916910:
 crbug.com/dawn/360916910 [ linux ] webgpu:api,operation,storage_texture,read_only:basic:format="rgba8snorm";* [ Failure ]
 crbug.com/dawn/360916910 [ linux ] webgpu:api,operation,storage_texture,read_only:basic:format="rgba8unorm";* [ Failure ]
+crbug.com/dawn/360916910 [ linux ] webgpu:api,operation,storage_texture,read_only:basic:format="bgra8unorm";* [ Failure ]
 
 # crbug.com/bug/349425541: validation matrix add_sub underflow_f16
 crbug.com/dawn/349425541 [ amd mac ] webgpu:shader,validation,expression,matrix,add_sub:underflow_f16:rhs=1;c=2;r=2 [ Failure ]
