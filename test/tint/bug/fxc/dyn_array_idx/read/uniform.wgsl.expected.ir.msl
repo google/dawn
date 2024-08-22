@@ -14,12 +14,13 @@ struct tint_array {
 };
 
 struct UBO {
-  tint_array<int4, 4> data;
-  int dynamic_idx;
+  /* 0x0000 */ tint_array<int4, 4> data;
+  /* 0x0040 */ int dynamic_idx;
+  /* 0x0044 */ tint_array<int8_t, 12> tint_pad;
 };
 
 struct Result {
-  int out;
+  /* 0x0000 */ int out;
 };
 
 struct tint_module_vars_struct {

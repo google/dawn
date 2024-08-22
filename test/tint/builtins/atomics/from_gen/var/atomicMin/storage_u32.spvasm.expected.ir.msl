@@ -2,7 +2,7 @@
 using namespace metal;
 
 struct SB_RW_atomic {
-  atomic_uint arg_0;
+  /* 0x0000 */ atomic_uint arg_0;
 };
 
 struct tint_module_vars_struct {

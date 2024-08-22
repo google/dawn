@@ -2,25 +2,25 @@
 using namespace metal;
 
 struct Mat4x3_ {
-  float4 mx;
-  float4 my;
-  float4 mz;
+  /* 0x0000 */ float4 mx;
+  /* 0x0010 */ float4 my;
+  /* 0x0020 */ float4 mz;
 };
 
 struct Mat4x4_ {
-  float4 mx;
-  float4 my;
-  float4 mz;
-  float4 mw;
+  /* 0x0000 */ float4 mx;
+  /* 0x0010 */ float4 my;
+  /* 0x0020 */ float4 mz;
+  /* 0x0030 */ float4 mw;
 };
 
 struct Mat4x2_ {
-  float4 mx;
-  float4 my;
+  /* 0x0000 */ float4 mx;
+  /* 0x0010 */ float4 my;
 };
 
 struct ub_SceneParams {
-  Mat4x4_ u_Projection;
+  /* 0x0000 */ Mat4x4_ u_Projection;
 };
 
 template<typename T, size_t N>
@@ -36,12 +36,12 @@ struct tint_array {
 };
 
 struct ub_MaterialParams {
-  tint_array<Mat4x2_, 1> u_TexMtx;
-  float4 u_Misc0_;
+  /* 0x0000 */ tint_array<Mat4x2_, 1> u_TexMtx;
+  /* 0x0020 */ float4 u_Misc0_;
 };
 
 struct ub_PacketParams {
-  tint_array<Mat4x3_, 32> u_PosMtx;
+  /* 0x0000 */ tint_array<Mat4x3_, 32> u_PosMtx;
 };
 
 struct tint_module_vars_struct {

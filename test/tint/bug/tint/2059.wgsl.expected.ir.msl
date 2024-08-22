@@ -14,19 +14,19 @@ struct tint_array {
 };
 
 struct S2 {
-  tint_array<float3x3, 1> m;
+  /* 0x0000 */ tint_array<float3x3, 1> m;
 };
 
 struct S {
-  float3x3 m;
+  /* 0x0000 */ float3x3 m;
 };
 
 struct S4 {
-  tint_array<S, 1> s;
+  /* 0x0000 */ tint_array<S, 1> s;
 };
 
 struct S3 {
-  S s;
+  /* 0x0000 */ S s;
 };
 
 struct tint_module_vars_struct {

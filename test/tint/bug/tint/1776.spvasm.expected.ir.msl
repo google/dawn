@@ -14,12 +14,13 @@ struct tint_array {
 };
 
 struct S {
-  float4 a;
-  int b;
+  /* 0x0000 */ float4 a;
+  /* 0x0010 */ int b;
+  /* 0x0014 */ tint_array<int8_t, 12> tint_pad;
 };
 
 struct sb_block {
-  tint_array<S, 1> inner;
+  /* 0x0000 */ tint_array<S, 1> inner;
 };
 
 struct tint_module_vars_struct {

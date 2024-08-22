@@ -7,7 +7,7 @@ struct atomic_compare_exchange_result_u32 {
 };
 
 struct SB_RW {
-  atomic_uint arg_0;
+  /* 0x0000 */ atomic_uint arg_0;
 };
 
 struct tint_module_vars_struct {

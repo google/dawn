@@ -2,11 +2,11 @@
 using namespace metal;
 
 struct vertexUniformBuffer1 {
-  float2x2 transform1;
+  /* 0x0000 */ float2x2 transform1;
 };
 
 struct vertexUniformBuffer2 {
-  float2x2 transform2;
+  /* 0x0000 */ float2x2 transform2;
 };
 
 struct tint_module_vars_struct {

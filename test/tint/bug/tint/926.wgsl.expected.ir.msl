@@ -2,7 +2,7 @@
 using namespace metal;
 
 struct DrawIndirectArgs {
-  atomic_uint vertexCount;
+  /* 0x0000 */ atomic_uint vertexCount;
 };
 
 struct tint_module_vars_struct {

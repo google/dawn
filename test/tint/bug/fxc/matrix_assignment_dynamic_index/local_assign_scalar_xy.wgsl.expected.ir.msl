@@ -2,8 +2,8 @@
 using namespace metal;
 
 struct Uniforms {
-  uint i;
-  uint j;
+  /* 0x0000 */ uint i;
+  /* 0x0004 */ uint j;
 };
 
 struct tint_module_vars_struct {

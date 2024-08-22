@@ -2,8 +2,8 @@
 using namespace metal;
 
 struct Uniforms {
-  uint i;
-  uint j;
+  /* 0x0000 */ uint i;
+  /* 0x0004 */ uint j;
 };
 
 template<typename T, size_t N>
@@ -19,15 +19,15 @@ struct tint_array {
 };
 
 struct InnerS {
-  int v;
+  /* 0x0000 */ int v;
 };
 
 struct S1 {
-  tint_array<InnerS, 8> a2;
+  /* 0x0000 */ tint_array<InnerS, 8> a2;
 };
 
 struct OuterS {
-  tint_array<S1, 1> a1;
+  /* 0x0000 */ tint_array<S1, 1> a1;
 };
 
 struct tint_module_vars_struct {

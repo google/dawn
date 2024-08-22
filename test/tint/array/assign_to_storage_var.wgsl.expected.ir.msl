@@ -14,11 +14,11 @@ struct tint_array {
 };
 
 struct S {
-  tint_array<int4, 4> arr;
+  /* 0x0000 */ tint_array<int4, 4> arr;
 };
 
 struct S_nested {
-  tint_array<tint_array<tint_array<int, 2>, 3>, 4> arr;
+  /* 0x0000 */ tint_array<tint_array<tint_array<int, 2>, 3>, 4> arr;
 };
 
 struct tint_module_vars_struct {

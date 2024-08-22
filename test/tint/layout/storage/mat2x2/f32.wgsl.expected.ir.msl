@@ -2,7 +2,7 @@
 using namespace metal;
 
 struct SSBO {
-  float2x2 m;
+  /* 0x0000 */ float2x2 m;
 };
 
 struct tint_module_vars_struct {

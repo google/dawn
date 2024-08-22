@@ -14,39 +14,39 @@ struct tint_array {
 };
 
 struct LightData {
-  float4 position;
-  float3 color;
-  float radius;
+  /* 0x0000 */ float4 position;
+  /* 0x0010 */ float3 color;
+  /* 0x001c */ float radius;
 };
 
 struct LightsBuffer {
-  tint_array<LightData, 1> lights;
+  /* 0x0000 */ tint_array<LightData, 1> lights;
 };
 
 struct TileLightIdData {
-  atomic_uint count;
-  tint_array<uint, 64> lightId;
+  /* 0x0000 */ atomic_uint count;
+  /* 0x0004 */ tint_array<uint, 64> lightId;
 };
 
 struct Tiles {
-  tint_array<TileLightIdData, 4> data;
+  /* 0x0000 */ tint_array<TileLightIdData, 4> data;
 };
 
 struct Config {
-  uint numLights;
-  uint numTiles;
-  uint tileCountX;
-  uint tileCountY;
-  uint numTileLightSlot;
-  uint tileSize;
+  /* 0x0000 */ uint numLights;
+  /* 0x0004 */ uint numTiles;
+  /* 0x0008 */ uint tileCountX;
+  /* 0x000c */ uint tileCountY;
+  /* 0x0010 */ uint numTileLightSlot;
+  /* 0x0014 */ uint tileSize;
 };
 
 struct Uniforms {
-  float4 min;
-  float4 max;
-  float4x4 viewMatrix;
-  float4x4 projectionMatrix;
-  float4 fullScreenSize;
+  /* 0x0000 */ float4 min;
+  /* 0x0010 */ float4 max;
+  /* 0x0020 */ float4x4 viewMatrix;
+  /* 0x0060 */ float4x4 projectionMatrix;
+  /* 0x00a0 */ float4 fullScreenSize;
 };
 
 struct tint_module_vars_struct {

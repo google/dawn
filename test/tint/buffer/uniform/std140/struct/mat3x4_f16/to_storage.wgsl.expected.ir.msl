@@ -1,12 +1,6 @@
 #include <metal_stdlib>
 using namespace metal;
 
-struct S {
-  int before;
-  half3x4 m;
-  int after;
-};
-
 template<typename T, size_t N>
 struct tint_array {
   const constant T& operator[](size_t i) const constant { return elements[i]; }
@@ -17,6 +11,15 @@ struct tint_array {
   threadgroup T& operator[](size_t i) threadgroup { return elements[i]; }
   const threadgroup T& operator[](size_t i) const threadgroup { return elements[i]; }
   T elements[N];
+};
+
+struct S {
+  /* 0x0000 */ int before;
+  /* 0x0004 */ tint_array<int8_t, 4> tint_pad;
+  /* 0x0008 */ half3x4 m;
+  /* 0x0020 */ tint_array<int8_t, 32> tint_pad_1;
+  /* 0x0040 */ int after;
+  /* 0x0044 */ tint_array<int8_t, 60> tint_pad_2;
 };
 
 struct tint_module_vars_struct {

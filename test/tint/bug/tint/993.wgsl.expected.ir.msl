@@ -2,11 +2,11 @@
 using namespace metal;
 
 struct Constants {
-  uint zero;
+  /* 0x0000 */ uint zero;
 };
 
 struct Result {
-  uint value;
+  /* 0x0000 */ uint value;
 };
 
 template<typename T, size_t N>
@@ -22,7 +22,7 @@ struct tint_array {
 };
 
 struct TestData {
-  tint_array<atomic_int, 3> data;
+  /* 0x0000 */ tint_array<atomic_int, 3> data;
 };
 
 struct tint_module_vars_struct {

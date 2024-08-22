@@ -14,8 +14,8 @@ struct tint_array {
 };
 
 struct Buf {
-  uint count;
-  tint_array<uint, 50> data;
+  /* 0x0000 */ uint count;
+  /* 0x0004 */ tint_array<uint, 50> data;
 };
 
 struct tint_module_vars_struct {

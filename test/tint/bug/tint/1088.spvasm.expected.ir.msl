@@ -14,14 +14,16 @@ struct tint_array {
 };
 
 struct strided_arr {
-  float el;
+  /* 0x0000 */ float el;
+  /* 0x0004 */ tint_array<int8_t, 12> tint_pad_1;
 };
 
 struct LeftOver {
-  float4x4 worldViewProjection;
-  float time;
-  tint_array<float4x4, 2> test2;
-  tint_array<strided_arr, 4> test;
+  /* 0x0000 */ float4x4 worldViewProjection;
+  /* 0x0040 */ float time;
+  /* 0x0044 */ tint_array<int8_t, 12> tint_pad;
+  /* 0x0050 */ tint_array<float4x4, 2> test2;
+  /* 0x00d0 */ tint_array<strided_arr, 4> test;
 };
 
 struct tint_module_vars_struct {

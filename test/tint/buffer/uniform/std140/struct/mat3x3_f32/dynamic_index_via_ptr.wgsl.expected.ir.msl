@@ -14,11 +14,12 @@ struct tint_array {
 };
 
 struct Inner {
-  float3x3 m;
+  /* 0x0000 */ float3x3 m;
+  /* 0x0030 */ tint_array<int8_t, 16> tint_pad;
 };
 
 struct Outer {
-  tint_array<Inner, 4> a;
+  /* 0x0000 */ tint_array<Inner, 4> a;
 };
 
 struct tint_module_vars_struct {

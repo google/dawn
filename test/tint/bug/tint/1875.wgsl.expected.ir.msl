@@ -14,7 +14,7 @@ struct tint_array {
 };
 
 struct Outputs {
-  tint_array<uint, 1> data;
+  /* 0x0000 */ tint_array<uint, 1> data;
 };
 
 struct tint_module_vars_struct {

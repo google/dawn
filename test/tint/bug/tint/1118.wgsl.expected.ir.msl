@@ -2,19 +2,19 @@
 using namespace metal;
 
 struct Scene {
-  float4 vEyePosition;
+  /* 0x0000 */ float4 vEyePosition;
 };
 
 struct Material {
-  float4 vDiffuseColor;
-  float3 vAmbientColor;
-  float placeholder;
-  float3 vEmissiveColor;
-  float placeholder2;
+  /* 0x0000 */ float4 vDiffuseColor;
+  /* 0x0010 */ float3 vAmbientColor;
+  /* 0x001c */ float placeholder;
+  /* 0x0020 */ float3 vEmissiveColor;
+  /* 0x002c */ float placeholder2;
 };
 
 struct Mesh {
-  float visibility;
+  /* 0x0000 */ float visibility;
 };
 
 struct tint_module_vars_struct {

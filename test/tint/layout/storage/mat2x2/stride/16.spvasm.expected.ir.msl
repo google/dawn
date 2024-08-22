@@ -14,11 +14,12 @@ struct tint_array {
 };
 
 struct strided_arr {
-  float2 el;
+  /* 0x0000 */ float2 el;
+  /* 0x0008 */ tint_array<int8_t, 8> tint_pad;
 };
 
 struct SSBO {
-  tint_array<strided_arr, 2> m;
+  /* 0x0000 */ tint_array<strided_arr, 2> m;
 };
 
 struct tint_module_vars_struct {

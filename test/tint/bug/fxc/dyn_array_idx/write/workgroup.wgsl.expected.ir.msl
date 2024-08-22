@@ -2,11 +2,11 @@
 using namespace metal;
 
 struct UBO {
-  int dynamic_idx;
+  /* 0x0000 */ int dynamic_idx;
 };
 
 struct Result {
-  int out;
+  /* 0x0000 */ int out;
 };
 
 template<typename T, size_t N>

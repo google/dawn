@@ -14,7 +14,7 @@ struct tint_array {
 };
 
 struct SB_RO {
-  tint_array<float, 1> arg_0;
+  /* 0x0000 */ tint_array<float, 1> arg_0;
 };
 
 struct tint_module_vars_struct {

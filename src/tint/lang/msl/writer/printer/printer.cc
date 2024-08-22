@@ -138,6 +138,9 @@ class Printer : public tint::TextGenerator {
         // Module-scope declarations should have all been moved into the entry points.
         TINT_ASSERT(ir_.root_block->IsEmpty());
 
+        // Determine which structures will need to be emitted with host-shareable memory layouts.
+        FindHostShareableStructs();
+
         // Emit functions.
         for (auto* func : ir_.DependencyOrderedFunctions()) {
             EmitFunction(func);
@@ -169,6 +172,7 @@ class Printer : public tint::TextGenerator {
     /// Non-empty only if an invariant attribute has been generated.
     std::string invariant_define_name_;
 
+    Hashset<const core::type::Struct*, 16> host_shareable_structs_;
     std::unordered_set<const core::type::Struct*> emitted_structs_;
 
     /// The current function being emitted
@@ -211,6 +215,38 @@ class Printer : public tint::TextGenerator {
         Line() << "};";
 
         return array_template_name_;
+    }
+
+    /// Find all structures that are used in host-shareable address spaces and mark them as such so
+    /// that we know to pad the properly when we emit them.
+    void FindHostShareableStructs() {
+        // We only look at function parameters of entry points, since this is how binding resources
+        // are handled in MSL.
+        for (auto func : ir_.functions) {
+            if (func->Stage() == core::ir::Function::PipelineStage::kUndefined) {
+                continue;
+            }
+            for (auto* param : func->Params()) {
+                auto* ptr = param->Type()->As<core::type::Pointer>();
+                if (ptr && core::IsHostShareable(ptr->AddressSpace())) {
+                    // Look for structures at any nesting depth of this parameter's type.
+                    Vector<const core::type::Type*, 8> type_queue;
+                    type_queue.Push(ptr->StoreType());
+                    while (!type_queue.IsEmpty()) {
+                        auto* next = type_queue.Pop();
+                        if (auto* str = next->As<core::type::Struct>()) {
+                            // Record this structure as host-shareable.
+                            host_shareable_structs_.Add(str);
+                            for (auto* member : str->Members()) {
+                                type_queue.Push(member->Type());
+                            }
+                        } else if (auto* arr = next->As<core::type::Array>()) {
+                            type_queue.Push(arr->ElemType());
+                        }
+                    }
+                }
+            }
+        }
     }
 
     /// Check if a value is emitted as an actual pointer (instead of a reference).
@@ -1363,7 +1399,7 @@ class Printer : public tint::TextGenerator {
         TextBuffer str_buf;
         Line(&str_buf) << "\n" << "struct " << StructName(str) << " {";
 
-        bool is_host_shareable = str->IsHostShareable();
+        bool is_host_shareable = host_shareable_structs_.Contains(str);
 
         // Emits a `/* 0xnnnn */` byte offset comment for a struct member.
         auto add_byte_offset_comment = [&](StringStream& out, uint32_t offset) {

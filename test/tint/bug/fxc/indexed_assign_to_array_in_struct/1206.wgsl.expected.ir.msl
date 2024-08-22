@@ -14,18 +14,20 @@ struct tint_array {
 };
 
 struct Particle {
-  tint_array<float3, 8> position;
-  float lifetime;
-  float4 color;
-  float3 velocity;
+  /* 0x0000 */ tint_array<float3, 8> position;
+  /* 0x0080 */ float lifetime;
+  /* 0x0084 */ tint_array<int8_t, 12> tint_pad;
+  /* 0x0090 */ float4 color;
+  /* 0x00a0 */ float3 velocity;
+  /* 0x00ac */ tint_array<int8_t, 4> tint_pad_1;
 };
 
 struct Particles {
-  tint_array<Particle, 1> p;
+  /* 0x0000 */ tint_array<Particle, 1> p;
 };
 
 struct Simulation {
-  uint i;
+  /* 0x0000 */ uint i;
 };
 
 struct tint_module_vars_struct {

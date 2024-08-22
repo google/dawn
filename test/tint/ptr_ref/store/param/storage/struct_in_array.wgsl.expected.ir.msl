@@ -2,7 +2,7 @@
 using namespace metal;
 
 struct str {
-  int i;
+  /* 0x0000 */ int i;
 };
 
 template<typename T, size_t N>

@@ -9,14 +9,6 @@ struct FragmentInput {
   float4 color;
 };
 
-struct Uniforms {
-  float4x4 worldView;
-  float4x4 proj;
-  uint numPointLights;
-  uint color_source;
-  float4 color;
-};
-
 template<typename T, size_t N>
 struct tint_array {
   const constant T& operator[](size_t i) const constant { return elements[i]; }
@@ -27,6 +19,15 @@ struct tint_array {
   threadgroup T& operator[](size_t i) threadgroup { return elements[i]; }
   const threadgroup T& operator[](size_t i) const threadgroup { return elements[i]; }
   T elements[N];
+};
+
+struct Uniforms {
+  /* 0x0000 */ float4x4 worldView;
+  /* 0x0040 */ float4x4 proj;
+  /* 0x0080 */ uint numPointLights;
+  /* 0x0084 */ uint color_source;
+  /* 0x0088 */ tint_array<int8_t, 8> tint_pad;
+  /* 0x0090 */ float4 color;
 };
 
 struct PointLight {

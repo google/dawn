@@ -14,7 +14,7 @@ struct tint_array {
 };
 
 struct ResultMatrix {
-  tint_array<float, 1> numbers;
+  /* 0x0000 */ tint_array<float, 1> numbers;
 };
 
 struct FirstMatrix {

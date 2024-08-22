@@ -2,8 +2,8 @@
 using namespace metal;
 
 struct S {
-  float3 v;
-  uint i;
+  /* 0x0000 */ float3 v;
+  /* 0x000c */ uint i;
 };
 
 struct tint_module_vars_struct {

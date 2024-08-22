@@ -2,8 +2,8 @@
 using namespace metal;
 
 struct S {
-  float4x4 matrix_view;
-  float3x3 matrix_normal;
+  /* 0x0000 */ float4x4 matrix_view;
+  /* 0x0040 */ float3x3 matrix_normal;
 };
 
 struct tint_module_vars_struct {

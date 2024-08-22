@@ -2,7 +2,7 @@
 using namespace metal;
 
 struct S {
-  float a;
+  /* 0x0000 */ float a;
 };
 
 struct tint_module_vars_struct {

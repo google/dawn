@@ -19,19 +19,19 @@ struct S {
 };
 
 struct S_1 {
-  uint field0;
+  /* 0x0000 */ uint field0;
 };
 
 struct S_2 {
-  S_1 field0;
+  /* 0x0000 */ S_1 field0;
 };
 
 struct S_3 {
-  tint_array<float4, 1> field0;
+  /* 0x0000 */ tint_array<float4, 1> field0;
 };
 
 struct S_4 {
-  tint_array<float4, 1> field0;
+  /* 0x0000 */ tint_array<float4, 1> field0;
 };
 
 struct tint_module_vars_struct {

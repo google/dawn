@@ -14,7 +14,7 @@ struct tint_array {
 };
 
 struct str {
-  tint_array<int4, 4> arr;
+  /* 0x0000 */ tint_array<int4, 4> arr;
 };
 
 struct tint_module_vars_struct {

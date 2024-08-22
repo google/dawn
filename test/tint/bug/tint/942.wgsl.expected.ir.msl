@@ -2,12 +2,12 @@
 using namespace metal;
 
 struct Params {
-  uint filterDim;
-  uint blockDim;
+  /* 0x0000 */ uint filterDim;
+  /* 0x0004 */ uint blockDim;
 };
 
 struct Flip {
-  uint value;
+  /* 0x0000 */ uint value;
 };
 
 template<typename T, size_t N>

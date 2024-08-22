@@ -14,9 +14,11 @@ struct tint_array {
 };
 
 struct S {
-  int before;
-  float3x3 m;
-  int after;
+  /* 0x0000 */ int before;
+  /* 0x0004 */ tint_array<int8_t, 12> tint_pad;
+  /* 0x0010 */ float3x3 m;
+  /* 0x0040 */ int after;
+  /* 0x0044 */ tint_array<int8_t, 60> tint_pad_1;
 };
 
 struct tint_module_vars_struct {

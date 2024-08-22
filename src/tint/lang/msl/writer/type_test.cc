@@ -479,7 +479,6 @@ TEST_F(MslWriterTest, EmitType_Struct_Layout_NonComposites) {
                                    {mod.symbols.Register("z"), ty.f32()}};
 
     auto* s = MkStruct(mod, ty, "S", data);
-    s->AddUsage(core::AddressSpace::kStorage);
 
     // ALL_FIELDS() calls the macro FIELD(ADDR, TYPE, ARRAY_COUNT, NAME)
     // for each field of the structure s.
@@ -532,20 +531,20 @@ TEST_F(MslWriterTest, EmitType_Struct_Layout_NonComposites) {
     ALL_FIELDS()
 #undef FIELD
     expect << R"(};
-
-void foo() {
-  thread S a = {};
-}
 )";
 
-    auto* func = b.Function("foo", ty.void_());
+    auto* var = b.Var("a", ty.ptr(core::AddressSpace::kStorage, s));
+    var->SetBindingPoint(0, 0);
+    mod.root_block->Append(var);
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kCompute,
+                            std::array<uint32_t, 3>{1u, 1u, 1u});
     b.Append(func->Block(), [&] {
-        b.Var("a", ty.ptr(core::AddressSpace::kPrivate, s));
+        b.Load(var);
         b.Return(func);
     });
 
     ASSERT_TRUE(Generate()) << err_ << output_.msl;
-    EXPECT_EQ(output_.msl, expect.str());
+    EXPECT_THAT(output_.msl, testing::HasSubstr(expect.str()));
 
     // 1.4 Metal and C++14
     // The Metal programming language is a C++14-based Specification with
@@ -587,7 +586,6 @@ TEST_F(MslWriterTest, EmitType_Struct_Layout_Structures) {
                                                {mod.symbols.Register("c"), ty.f32()},
                                                {mod.symbols.Register("d"), inner_y},
                                                {mod.symbols.Register("e"), ty.f32()}});
-    const_cast<core::type::Struct*>(s)->AddUsage(core::AddressSpace::kStorage);
 
 // ALL_FIELDS() calls the macro FIELD(ADDR, TYPE, ARRAY_COUNT, NAME)
 // for each field of the structure s.
@@ -598,19 +596,22 @@ TEST_F(MslWriterTest, EmitType_Struct_Layout_Structures) {
     FIELD(0x0600, float, 0, c)           \
     FIELD(0x0604, inner_y, 0, d)         \
     FIELD(0x0808, float, 0, e)           \
-    FIELD(0x080c, int8_t, 500, tint_pad_1)
+    FIELD(0x080c, int8_t, 500, tint_pad_4)
 
     // Check that the generated string is as expected.
     StringStream expect;
     expect << MetalHeader() << MetalArray() << R"(
 struct inner_x {
-  int a;
-  float b;
+  /* 0x0000 */ int a;
+  /* 0x0004 */ tint_array<int8_t, 508> tint_pad_1;
+  /* 0x0200 */ float b;
+  /* 0x0204 */ tint_array<int8_t, 508> tint_pad_2;
 };
 
 struct inner_y {
-  int a;
-  float b;
+  /* 0x0000 */ int a;
+  /* 0x0004 */ tint_array<int8_t, 508> tint_pad_3;
+  /* 0x0200 */ float b;
 };
 
 )";
@@ -621,20 +622,20 @@ struct inner_y {
     ALL_FIELDS()
 #undef FIELD
     expect << R"(};
-
-void foo() {
-  thread S a = {};
-}
 )";
 
-    auto* func = b.Function("foo", ty.void_());
+    auto* var = b.Var("a", ty.ptr(core::AddressSpace::kStorage, s));
+    var->SetBindingPoint(0, 0);
+    mod.root_block->Append(var);
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kCompute,
+                            std::array<uint32_t, 3>{1u, 1u, 1u});
     b.Append(func->Block(), [&] {
-        b.Var("a", ty.ptr(core::AddressSpace::kPrivate, s));
+        b.Load(var);
         b.Return(func);
     });
 
     ASSERT_TRUE(Generate()) << err_ << output_.msl;
-    EXPECT_EQ(output_.msl, expect.str());
+    EXPECT_THAT(output_.msl, testing::HasSubstr(expect.str()));
 
     // 1.4 Metal and C++14
     // The Metal programming language is a C++14-based Specification with
@@ -694,7 +695,6 @@ TEST_F(MslWriterTest, EmitType_Struct_Layout_ArrayDefaultStride) {
                                                {mod.symbols.Register("d"), array_y},
                                                {mod.symbols.Register("e"), ty.f32()},
                                                {mod.symbols.Register("f"), array_z}});
-    const_cast<core::type::Struct*>(s)->AddUsage(core::AddressSpace::kStorage);
 
     // ALL_FIELDS() calls the macro FIELD(ADDR, TYPE, ARRAY_COUNT, NAME)
     // for each field of the structure s.
@@ -706,15 +706,17 @@ TEST_F(MslWriterTest, EmitType_Struct_Layout_ArrayDefaultStride) {
     FIELD(0x0200, inner, 4, d)           \
     FIELD(0x1200, float, 0, e)           \
     FIELD(0x1204, float, 1, f)           \
-    FIELD(0x1208, int8_t, 504, tint_pad_1)
+    FIELD(0x1208, int8_t, 504, tint_pad_3)
 
     // Check that the generated string is as expected.
     StringStream expect;
 
     expect << MetalHeader() << MetalArray() << R"(
 struct inner {
-  int a;
-  float b;
+  /* 0x0000 */ int a;
+  /* 0x0004 */ tint_array<int8_t, 508> tint_pad_1;
+  /* 0x0200 */ float b;
+  /* 0x0204 */ tint_array<int8_t, 508> tint_pad_2;
 };
 
 )";
@@ -725,20 +727,20 @@ struct inner {
     ALL_FIELDS()
 #undef FIELD
     expect << R"(};
-
-void foo() {
-  thread S a = {};
-}
 )";
 
-    auto* func = b.Function("foo", ty.void_());
+    auto* var = b.Var("a", ty.ptr(core::AddressSpace::kStorage, s));
+    var->SetBindingPoint(0, 0);
+    mod.root_block->Append(var);
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kCompute,
+                            std::array<uint32_t, 3>{1u, 1u, 1u});
     b.Append(func->Block(), [&] {
-        b.Var("a", ty.ptr(core::AddressSpace::kPrivate, s));
+        b.Load(var);
         b.Return(func);
     });
 
     ASSERT_TRUE(Generate()) << err_ << output_.msl;
-    EXPECT_EQ(output_.msl, expect.str());
+    EXPECT_THAT(output_.msl, testing::HasSubstr(expect.str()));
 
     // 1.4 Metal and C++14
     // The Metal programming language is a C++14-based Specification with
@@ -791,7 +793,6 @@ TEST_F(MslWriterTest, EmitType_Struct_Layout_ArrayVec3DefaultStride) {
                                                   {mod.symbols.Register("b"), array},
                                                   {mod.symbols.Register("c"), ty.i32()},
                                               });
-    const_cast<core::type::Struct*>(s)->AddUsage(core::AddressSpace::kStorage);
 
     // ALL_FIELDS() calls the macro FIELD(ADDR, TYPE, ARRAY_COUNT, NAME)
     // for each field of the structure s.
@@ -811,20 +812,20 @@ TEST_F(MslWriterTest, EmitType_Struct_Layout_ArrayVec3DefaultStride) {
     ALL_FIELDS()
 #undef FIELD
     expect << R"(};
-
-void foo() {
-  thread S a = {};
-}
 )";
 
-    auto* func = b.Function("foo", ty.void_());
+    auto* var = b.Var("a", ty.ptr(core::AddressSpace::kStorage, s));
+    var->SetBindingPoint(0, 0);
+    mod.root_block->Append(var);
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kCompute,
+                            std::array<uint32_t, 3>{1u, 1u, 1u});
     b.Append(func->Block(), [&] {
-        b.Var("a", ty.ptr(core::AddressSpace::kPrivate, s));
+        b.Load(var);
         b.Return(func);
     });
 
     ASSERT_TRUE(Generate()) << err_ << output_.msl;
-    EXPECT_EQ(output_.msl, expect.str());
+    EXPECT_THAT(output_.msl, testing::HasSubstr(expect.str()));
 }
 
 TEST_F(MslWriterTest, AttemptTintPadSymbolCollision) {
@@ -857,7 +858,6 @@ TEST_F(MslWriterTest, AttemptTintPadSymbolCollision) {
                                    {mod.symbols.Register("tint_pad_21"), ty.f32()}};
 
     auto* s = MkStruct(mod, ty, "S", data);
-    s->AddUsage(core::AddressSpace::kStorage);
 
     auto expect = MetalHeader() + MetalArray() + R"(
 struct S {
@@ -901,20 +901,20 @@ struct S {
   /* 0x0300 */ float tint_pad_21;
   /* 0x0304 */ tint_array<int8_t, 124> tint_pad_38;
 };
-
-void foo() {
-  thread S a = {};
-}
 )";
 
-    auto* func = b.Function("foo", ty.void_());
+    auto* var = b.Var("a", ty.ptr(core::AddressSpace::kStorage, s));
+    var->SetBindingPoint(0, 0);
+    mod.root_block->Append(var);
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kCompute,
+                            std::array<uint32_t, 3>{1u, 1u, 1u});
     b.Append(func->Block(), [&] {
-        b.Var("a", ty.ptr(core::AddressSpace::kPrivate, s));
+        b.Load(var);
         b.Return(func);
     });
 
     ASSERT_TRUE(Generate()) << err_ << output_.msl;
-    EXPECT_EQ(output_.msl, expect);
+    EXPECT_THAT(output_.msl, testing::HasSubstr(expect));
 }
 
 TEST_F(MslWriterTest, EmitType_Sampler) {
@@ -1075,7 +1075,7 @@ using MslWriterStorageTexturesTest = MslWriterTestWithParam<MslStorageTextureDat
 TEST_P(MslWriterStorageTexturesTest, Emit) {
     auto params = GetParam();
 
-    auto* f32 = const_cast<core::type::F32*>(ty.f32());
+    auto* f32 = ty.f32();
     auto s = ty.Get<core::type::StorageTexture>(params.dim, core::TexelFormat::kR32Float,
                                                 core::Access::kWrite, f32);
     auto* func = b.Function("foo", ty.void_());

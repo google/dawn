@@ -2,7 +2,7 @@
 using namespace metal;
 
 struct Constants {
-  uint zero;
+  /* 0x0000 */ uint zero;
 };
 
 template<typename T, size_t N>

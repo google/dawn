@@ -12,7 +12,7 @@ struct VertexInput {
 };
 
 struct Uniforms {
-  float4x4 modelViewProjectionMatrix;
+  /* 0x0000 */ float4x4 modelViewProjectionMatrix;
 };
 
 struct tint_module_vars_struct {

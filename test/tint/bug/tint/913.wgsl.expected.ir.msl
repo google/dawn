@@ -14,15 +14,15 @@ struct tint_array {
 };
 
 struct OutputBuf {
-  tint_array<uint, 1> result;
+  /* 0x0000 */ tint_array<uint, 1> result;
 };
 
 struct Uniforms {
-  uint dstTextureFlipY;
-  uint channelCount;
-  uint2 srcCopyOrigin;
-  uint2 dstCopyOrigin;
-  uint2 copySize;
+  /* 0x0000 */ uint dstTextureFlipY;
+  /* 0x0004 */ uint channelCount;
+  /* 0x0008 */ uint2 srcCopyOrigin;
+  /* 0x0010 */ uint2 dstCopyOrigin;
+  /* 0x0018 */ uint2 copySize;
 };
 
 struct tint_module_vars_struct {

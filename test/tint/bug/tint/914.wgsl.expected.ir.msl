@@ -14,13 +14,13 @@ struct tint_array {
 };
 
 struct Matrix {
-  tint_array<float, 1> numbers;
+  /* 0x0000 */ tint_array<float, 1> numbers;
 };
 
 struct Uniforms {
-  uint dimAOuter;
-  uint dimInner;
-  uint dimBOuter;
+  /* 0x0000 */ uint dimAOuter;
+  /* 0x0004 */ uint dimInner;
+  /* 0x0008 */ uint dimBOuter;
 };
 
 struct tint_module_vars_struct {

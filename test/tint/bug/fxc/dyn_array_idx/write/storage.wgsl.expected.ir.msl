@@ -2,11 +2,11 @@
 using namespace metal;
 
 struct UBO {
-  int dynamic_idx;
+  /* 0x0000 */ int dynamic_idx;
 };
 
 struct Result {
-  int out;
+  /* 0x0000 */ int out;
 };
 
 template<typename T, size_t N>
@@ -22,7 +22,7 @@ struct tint_array {
 };
 
 struct SSBO {
-  tint_array<int, 4> data;
+  /* 0x0000 */ tint_array<int, 4> data;
 };
 
 struct tint_module_vars_struct {

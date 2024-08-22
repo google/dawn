@@ -2,7 +2,7 @@
 using namespace metal;
 
 struct buf0 {
-  float4 r;
+  /* 0x0000 */ float4 r;
 };
 
 struct tint_module_vars_struct {

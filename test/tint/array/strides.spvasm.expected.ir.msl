@@ -1,10 +1,6 @@
 #include <metal_stdlib>
 using namespace metal;
 
-struct strided_arr {
-  float el;
-};
-
 template<typename T, size_t N>
 struct tint_array {
   const constant T& operator[](size_t i) const constant { return elements[i]; }
@@ -17,12 +13,18 @@ struct tint_array {
   T elements[N];
 };
 
+struct strided_arr {
+  /* 0x0000 */ float el;
+  /* 0x0004 */ tint_array<int8_t, 4> tint_pad;
+};
+
 struct strided_arr_1 {
-  tint_array<tint_array<strided_arr, 2>, 3> el;
+  /* 0x0000 */ tint_array<tint_array<strided_arr, 2>, 3> el;
+  /* 0x0030 */ tint_array<int8_t, 80> tint_pad_1;
 };
 
 struct S {
-  tint_array<strided_arr_1, 4> a;
+  /* 0x0000 */ tint_array<strided_arr_1, 4> a;
 };
 
 struct tint_module_vars_struct {
