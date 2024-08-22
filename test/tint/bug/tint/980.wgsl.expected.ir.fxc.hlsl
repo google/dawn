@@ -23,5 +23,5 @@ void main(main_inputs inputs) {
 }
 
 FXC validation failure:
-C:\src\dawn\Shader@0x00000259A3D6F8B0(9,3-15): error X3500: array reference cannot be used as an l-value; not natively addressable
+<scrubbed_path>(9,3-15): error X3500: array reference cannot be used as an l-value; not natively addressable
 

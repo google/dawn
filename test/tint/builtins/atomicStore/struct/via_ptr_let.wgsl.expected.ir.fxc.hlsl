@@ -32,5 +32,5 @@ void compute_main(compute_main_inputs inputs) {
 }
 
 FXC validation failure:
-C:\src\dawn\Shader@0x00000274E7E060E0(24,3-34): error X3549: interlocked targets must be groupshared or UAV elements
+<scrubbed_path>(24,3-34): error X3549: interlocked targets must be groupshared or UAV elements
 

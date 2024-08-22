@@ -17,5 +17,5 @@ void f() {
   vector<float16_t, 2> v = vector<float16_t, 2>(tint_symbol);
 }
 FXC validation failure:
-C:\src\dawn\Shader@0x0000028D9A413470(15,10-18): error X3000: syntax error: unexpected token 'float16_t'
+<scrubbed_path>(15,10-18): error X3000: syntax error: unexpected token 'float16_t'
 

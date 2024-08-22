@@ -179,6 +179,6 @@ void main(tint_symbol_1 tint_symbol) {
   return;
 }
 FXC validation failure:
-C:\src\dawn\Shader@0x0000023E8772C480(61,38-46): error X3000: syntax error: unexpected token 'float16_t'
-C:\src\dawn\Shader@0x0000023E8772C480(62,3-10): error X3018: invalid subscript 'Store'
+<scrubbed_path>(61,38-46): error X3000: syntax error: unexpected token 'float16_t'
+<scrubbed_path>(62,3-10): error X3018: invalid subscript 'Store'
 

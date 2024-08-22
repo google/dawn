@@ -17,5 +17,5 @@ void compute_main() {
 }
 
 FXC validation failure:
-C:\src\dawn\Shader@0x000001AA22DEC2F0(4,16-45): error X3004: undeclared identifier 'QuadReadLaneAt'
+<scrubbed_path>(4,16-45): error X3004: undeclared identifier 'QuadReadLaneAt'
 

@@ -18,5 +18,5 @@ void compute_main() {
 }
 
 FXC validation failure:
-C:\src\dawn\Shader@0x0000021B0F4DFB50(5,15-43): error X3004: undeclared identifier 'QuadReadAcrossDiagonal'
+<scrubbed_path>(5,15-43): error X3004: undeclared identifier 'QuadReadAcrossDiagonal'
 

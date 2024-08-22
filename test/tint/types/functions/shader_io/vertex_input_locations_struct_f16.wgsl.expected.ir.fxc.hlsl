@@ -40,5 +40,5 @@ main_outputs main(main_inputs inputs) {
 }
 
 FXC validation failure:
-C:\src\dawn\Shader@0x000001E2F8C7CC50(6,3-11): error X3000: unrecognized identifier 'float16_t'
+<scrubbed_path>(6,3-11): error X3000: unrecognized identifier 'float16_t'
 

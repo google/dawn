@@ -18,5 +18,5 @@ void compute_main() {
 }
 
 FXC validation failure:
-C:\src\dawn\Shader@0x000001797DFDDE70(5,14-37): error X3004: undeclared identifier 'WaveActiveAllTrue'
+<scrubbed_path>(5,14-37): error X3004: undeclared identifier 'WaveActiveAllTrue'
 

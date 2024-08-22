@@ -33,6 +33,6 @@ void main(tint_symbol_1 tint_symbol) {
   return;
 }
 FXC validation failure:
-C:\src\dawn\Shader@0x000001C7E09040B0(12,11-32): warning X3570: gradient instruction used in a loop with varying iteration, attempting to unroll the loop
-C:\src\dawn\Shader@0x000001C7E09040B0(11,5-22): error X3511: unable to unroll loop, loop does not appear to terminate in a timely manner (1024 iterations)
+<scrubbed_path>(12,11-32): warning X3570: gradient instruction used in a loop with varying iteration, attempting to unroll the loop
+<scrubbed_path>(11,5-22): error X3511: unable to unroll loop, loop does not appear to terminate in a timely manner (1024 iterations)
 

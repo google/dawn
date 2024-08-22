@@ -56,5 +56,5 @@ void f(tint_symbol_1 tint_symbol) {
   return;
 }
 FXC validation failure:
-C:\src\dawn\Shader@0x000001B31D3C3B50(1,20-28): error X3000: syntax error: unexpected token 'float16_t'
+<scrubbed_path>(1,20-28): error X3000: syntax error: unexpected token 'float16_t'
 

@@ -159,7 +159,7 @@ void main(tint_symbol_1 tint_symbol) {
   return;
 }
 FXC validation failure:
-C:\src\dawn\Shader@0x000001ED855A6FD0(139,3-141): error X3694: race condition writing to shared resource detected, consider making this write conditional.
-C:\src\dawn\Shader@0x000001ED855A6FD0(151,3-10): error X3694: error location reached from this location
-C:\src\dawn\Shader@0x000001ED855A6FD0(156,3-71): error X3694: error location reached from this location
+<scrubbed_path>(139,3-141): error X3694: race condition writing to shared resource detected, consider making this write conditional.
+<scrubbed_path>(151,3-10): error X3694: error location reached from this location
+<scrubbed_path>(156,3-71): error X3694: error location reached from this location
 

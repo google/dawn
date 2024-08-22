@@ -20,6 +20,6 @@ void foo() {
 }
 
 FXC validation failure:
-C:\src\dawn\Shader@0x000002396B306810(10,42-53): warning X4000: use of potentially uninitialized variable (x)
-C:\src\dawn\Shader@0x000002396B306810(10,42-53): error X4575: reading uninitialized value
+<scrubbed_path>(10,42-53): warning X4000: use of potentially uninitialized variable (x)
+<scrubbed_path>(10,42-53): error X4575: reading uninitialized value
 

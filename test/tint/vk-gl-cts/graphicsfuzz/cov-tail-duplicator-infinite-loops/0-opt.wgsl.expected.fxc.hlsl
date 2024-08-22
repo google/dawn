@@ -83,5 +83,5 @@ tint_symbol main() {
   return wrapper_result;
 }
 FXC validation failure:
-C:\src\dawn\Shader@0x0000020D200749C0(19,12-15): error X3696: infinite loop detected - loop never exits
+<scrubbed_path>(19,12-15): error X3696: infinite loop detected - loop never exits
 

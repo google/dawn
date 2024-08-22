@@ -18,5 +18,5 @@ void compute_main() {
   return;
 }
 FXC validation failure:
-C:\src\dawn\Shader@0x0000021EAA0E5660(4,13-30): error X3004: undeclared identifier 'QuadReadAcrossY'
+<scrubbed_path>(4,13-30): error X3004: undeclared identifier 'QuadReadAcrossY'
 

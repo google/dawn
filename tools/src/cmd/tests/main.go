@@ -672,6 +672,10 @@ type runConfig struct {
 	validationCache  validationCache
 }
 
+// Skips the path portion of FXC warning/error strings, matching the rest.
+// We use this to scrub the path to avoid generating needless diffs.
+var reFXCErrorStringHash = regexp.MustCompile(`(?:.*?)(\(.*?\): (?:warning|error).*)`)
+
 func (j job) run(cfg runConfig) {
 	j.result <- func() status {
 		// expectedFilePath is the path to the expected output file for the given test
@@ -795,6 +799,13 @@ func (j job) run(cfg runConfig) {
 		var skip_str string = "FAILED"
 		if invalid_test {
 			skip_str = "INVALID"
+		}
+
+		passed := ok && matched
+		if !passed {
+			if j.format == hlslFXC {
+				out = reFXCErrorStringHash.ReplaceAllString(out, `<scrubbed_path>${1}`)
+			}
 		}
 
 		switch {

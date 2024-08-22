@@ -73,5 +73,5 @@ void main(main_inputs inputs) {
 }
 
 FXC validation failure:
-C:\src\dawn\Shader@0x0000023250B37BB0(40,5-15): error X3511: forced to unroll loop, but unrolling failed.
+<scrubbed_path>(40,5-15): error X3511: forced to unroll loop, but unrolling failed.
 

@@ -18,5 +18,5 @@ void compute_main() {
 }
 
 FXC validation failure:
-C:\src\dawn\Shader@0x00000207B2B1C2D0(5,20-47): error X3004: undeclared identifier 'WaveActiveBitOr'
+<scrubbed_path>(5,20-47): error X3004: undeclared identifier 'WaveActiveBitOr'
 

@@ -146,37 +146,37 @@ $B1: {  # root
     ret
   }
 }
-%32 = func(%start_byte_offset:u32):mat2x2<f16> {
+%28 = func(%start_byte_offset:u32):Inner {
   $B4: {
-    %65:u32 = div %start_byte_offset, 16u
-    %66:ptr<uniform, vec4<u32>, read> = access %a, %65
-    %67:u32 = mod %start_byte_offset, 16u
-    %68:u32 = div %67, 4u
-    %69:vec4<u32> = load %66
-    %70:u32 = swizzle %69, z
-    %71:u32 = swizzle %69, x
-    %72:bool = eq %68, 2u
-    %73:u32 = hlsl.ternary %71, %70, %72
-    %74:vec2<f16> = bitcast %73
-    %75:u32 = add 4u, %start_byte_offset
-    %76:u32 = div %75, 16u
-    %77:ptr<uniform, vec4<u32>, read> = access %a, %76
-    %78:u32 = mod %75, 16u
-    %79:u32 = div %78, 4u
-    %80:vec4<u32> = load %77
-    %81:u32 = swizzle %80, z
-    %82:u32 = swizzle %80, x
-    %83:bool = eq %79, 2u
-    %84:u32 = hlsl.ternary %82, %81, %83
-    %85:vec2<f16> = bitcast %84
-    %86:mat2x2<f16> = construct %74, %85
-    ret %86
+    %65:mat2x2<f16> = call %32, %start_byte_offset
+    %66:Inner = construct %65
+    ret %66
   }
 }
-%28 = func(%start_byte_offset_1:u32):Inner {  # %start_byte_offset_1: 'start_byte_offset'
+%32 = func(%start_byte_offset_1:u32):mat2x2<f16> {  # %start_byte_offset_1: 'start_byte_offset'
   $B5: {
-    %88:mat2x2<f16> = call %32, %start_byte_offset_1
-    %89:Inner = construct %88
+    %68:u32 = div %start_byte_offset_1, 16u
+    %69:ptr<uniform, vec4<u32>, read> = access %a, %68
+    %70:u32 = mod %start_byte_offset_1, 16u
+    %71:u32 = div %70, 4u
+    %72:vec4<u32> = load %69
+    %73:u32 = swizzle %72, z
+    %74:u32 = swizzle %72, x
+    %75:bool = eq %71, 2u
+    %76:u32 = hlsl.ternary %74, %73, %75
+    %77:vec2<f16> = bitcast %76
+    %78:u32 = add 4u, %start_byte_offset_1
+    %79:u32 = div %78, 16u
+    %80:ptr<uniform, vec4<u32>, read> = access %a, %79
+    %81:u32 = mod %78, 16u
+    %82:u32 = div %81, 4u
+    %83:vec4<u32> = load %80
+    %84:u32 = swizzle %83, z
+    %85:u32 = swizzle %83, x
+    %86:bool = eq %82, 2u
+    %87:u32 = hlsl.ternary %85, %84, %86
+    %88:vec2<f16> = bitcast %87
+    %89:mat2x2<f16> = construct %77, %88
     ret %89
   }
 }

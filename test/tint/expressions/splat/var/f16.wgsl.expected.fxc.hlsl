@@ -12,6 +12,6 @@ void f() {
   vector<float16_t, 4> v4 = vector<float16_t, 4>((v).xxxx);
 }
 FXC validation failure:
-C:\src\dawn\Shader@0x00000252B6A50660(7,3-11): error X3000: unrecognized identifier 'float16_t'
-C:\src\dawn\Shader@0x00000252B6A50660(7,13): error X3000: unrecognized identifier 'v'
+<scrubbed_path>(7,3-11): error X3000: unrecognized identifier 'float16_t'
+<scrubbed_path>(7,13): error X3000: unrecognized identifier 'v'
 

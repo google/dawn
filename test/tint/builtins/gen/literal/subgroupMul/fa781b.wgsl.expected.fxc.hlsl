@@ -18,5 +18,5 @@ void compute_main() {
   return;
 }
 FXC validation failure:
-C:\src\dawn\Shader@0x000002B26F446AC0(4,15-41): error X3004: undeclared identifier 'WaveActiveProduct'
+<scrubbed_path>(4,15-41): error X3004: undeclared identifier 'WaveActiveProduct'
 

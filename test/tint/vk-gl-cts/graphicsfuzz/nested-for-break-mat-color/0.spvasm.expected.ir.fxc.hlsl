@@ -84,5 +84,5 @@ main_outputs main(main_inputs inputs) {
 }
 
 FXC validation failure:
-C:\src\dawn\Shader@0x0000014C0D024760(25,5-15): error X3511: unable to unroll loop, loop does not appear to terminate in a timely manner (435 iterations) or unrolled loop is too large, use the [unroll(n)] attribute to force an exact higher number
+<scrubbed_path>(25,5-15): error X3511: unable to unroll loop, loop does not appear to terminate in a timely manner (435 iterations) or unrolled loop is too large, use the [unroll(n)] attribute to force an exact higher number
 

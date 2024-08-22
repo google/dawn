@@ -11,7 +11,7 @@ void f() {
   vector<float16_t, 4> v4 = (float16_t(1.0h)).xxxx;
 }
 FXC validation failure:
-C:\src\dawn\Shader@0x0000011E8A753C40(7,10-18): error X3000: syntax error: unexpected token 'float16_t'
-C:\src\dawn\Shader@0x0000011E8A753C40(8,10-18): error X3000: syntax error: unexpected token 'float16_t'
-C:\src\dawn\Shader@0x0000011E8A753C40(9,10-18): error X3000: syntax error: unexpected token 'float16_t'
+<scrubbed_path>(7,10-18): error X3000: syntax error: unexpected token 'float16_t'
+<scrubbed_path>(8,10-18): error X3000: syntax error: unexpected token 'float16_t'
+<scrubbed_path>(9,10-18): error X3000: syntax error: unexpected token 'float16_t'
 

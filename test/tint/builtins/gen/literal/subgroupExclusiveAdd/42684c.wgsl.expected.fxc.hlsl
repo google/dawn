@@ -18,5 +18,5 @@ void compute_main() {
   return;
 }
 FXC validation failure:
-C:\src\dawn\Shader@0x000001BBCBCE12F0(4,14-30): error X3004: undeclared identifier 'WavePrefixSum'
+<scrubbed_path>(4,14-30): error X3004: undeclared identifier 'WavePrefixSum'
 

@@ -14,5 +14,5 @@ void f() {
   U.Store<float16_t>(4u, float16_t(3.0h));
 }
 FXC validation failure:
-C:\src\dawn\Shader@0x0000028B6B9F0CB0(9,3-9): error X3018: invalid subscript 'Store'
+<scrubbed_path>(9,3-9): error X3018: invalid subscript 'Store'
 

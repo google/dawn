@@ -18,5 +18,5 @@ void compute_main() {
   return;
 }
 FXC validation failure:
-C:\src\dawn\Shader@0x000001C3130CA890(4,14-30): error X3004: undeclared identifier 'WaveActiveSum'
+<scrubbed_path>(4,14-30): error X3004: undeclared identifier 'WaveActiveSum'
 

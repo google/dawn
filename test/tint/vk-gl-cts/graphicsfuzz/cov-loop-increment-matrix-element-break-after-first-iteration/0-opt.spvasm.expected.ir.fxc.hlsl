@@ -89,6 +89,6 @@ main_outputs main(main_inputs inputs) {
 }
 
 FXC validation failure:
-C:\src\dawn\Shader@0x00000125C4D32760(41,7-15): error X3500: array reference cannot be used as an l-value; not natively addressable
-C:\src\dawn\Shader@0x00000125C4D32760(30,5-15): error X3511: forced to unroll loop, but unrolling failed.
+<scrubbed_path>(41,7-15): error X3500: array reference cannot be used as an l-value; not natively addressable
+<scrubbed_path>(30,5-15): error X3511: forced to unroll loop, but unrolling failed.
 

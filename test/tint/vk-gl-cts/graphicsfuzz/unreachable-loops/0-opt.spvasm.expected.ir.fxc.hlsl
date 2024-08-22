@@ -55,6 +55,6 @@ main_outputs main() {
 }
 
 FXC validation failure:
-C:\src\dawn\Shader@0x00000210D0627B30(20,7-17): warning X3557: loop only executes for 0 iteration(s), forcing loop to unroll
-C:\src\dawn\Shader@0x00000210D0627B30(29,13-16): error X3696: infinite loop detected - loop never exits
+<scrubbed_path>(20,7-17): warning X3557: loop only executes for 0 iteration(s), forcing loop to unroll
+<scrubbed_path>(29,13-16): error X3696: infinite loop detected - loop never exits
 

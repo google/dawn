@@ -34,5 +34,5 @@ tint_symbol main() {
   return wrapper_result;
 }
 FXC validation failure:
-C:\src\dawn\Shader@0x0000022094813E30(6,3-11): error X3000: unrecognized identifier 'float16_t'
+<scrubbed_path>(6,3-11): error X3000: unrecognized identifier 'float16_t'
 

@@ -23,6 +23,6 @@ void main() {
   return;
 }
 FXC validation failure:
-C:\src\dawn\Shader@0x0000019081F238D0(1,38-46): error X3000: syntax error: unexpected token 'float16_t'
-C:\src\dawn\Shader@0x0000019081F238D0(2,3-5): error X3004: undeclared identifier 'vec'
+<scrubbed_path>(1,38-46): error X3000: syntax error: unexpected token 'float16_t'
+<scrubbed_path>(2,3-5): error X3004: undeclared identifier 'vec'
 

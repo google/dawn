@@ -11,5 +11,5 @@ void f() {
   uint4 v = uint4(u);
 }
 FXC validation failure:
-C:\src\dawn\Shader@0x0000023B79CDE610(6,15-23): error X3000: syntax error: unexpected token 'float16_t'
+<scrubbed_path>(6,15-23): error X3000: syntax error: unexpected token 'float16_t'
 

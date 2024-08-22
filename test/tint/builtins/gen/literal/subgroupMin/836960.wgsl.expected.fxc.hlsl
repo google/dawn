@@ -18,5 +18,5 @@ void compute_main() {
   return;
 }
 FXC validation failure:
-C:\src\dawn\Shader@0x0000016E3B739C80(4,16-40): error X3004: undeclared identifier 'WaveActiveMin'
+<scrubbed_path>(4,16-40): error X3004: undeclared identifier 'WaveActiveMin'
 

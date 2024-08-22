@@ -32,5 +32,5 @@ void f() {
   return;
 }
 FXC validation failure:
-C:\src\dawn\Shader@0x0000024567044BF0(3,11-25): error X3504: array index out of bounds
+<scrubbed_path>(3,11-25): error X3504: array index out of bounds
 

@@ -43,7 +43,7 @@ tint_symbol_1 vertex_main() {
   return wrapper_result;
 }
 FXC validation failure:
-C:\src\dawn\Shader@0x00000189ABF36650(4,10-18): error X3000: syntax error: unexpected token 'float16_t'
-C:\src\dawn\Shader@0x00000189ABF36650(5,10-18): error X3000: syntax error: unexpected token 'float16_t'
-C:\src\dawn\Shader@0x00000189ABF36650(6,12-14): error X3004: undeclared identifier 'res'
+<scrubbed_path>(4,10-18): error X3000: syntax error: unexpected token 'float16_t'
+<scrubbed_path>(5,10-18): error X3000: syntax error: unexpected token 'float16_t'
+<scrubbed_path>(6,12-14): error X3004: undeclared identifier 'res'
 

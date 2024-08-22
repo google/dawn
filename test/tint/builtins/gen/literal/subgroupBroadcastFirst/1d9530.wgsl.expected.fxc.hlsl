@@ -18,5 +18,5 @@ void compute_main() {
   return;
 }
 FXC validation failure:
-C:\src\dawn\Shader@0x0000017689CEE1D0(4,15-40): error X3004: undeclared identifier 'WaveReadLaneFirst'
+<scrubbed_path>(4,15-40): error X3004: undeclared identifier 'WaveReadLaneFirst'
 

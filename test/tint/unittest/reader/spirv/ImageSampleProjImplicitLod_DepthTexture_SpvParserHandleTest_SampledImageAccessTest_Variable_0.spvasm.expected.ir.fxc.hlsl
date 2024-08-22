@@ -30,5 +30,5 @@ void main() {
 }
 
 FXC validation failure:
-C:\src\dawn\Shader@0x00000284C692B050(23,17-91): error X3014: incorrect number of arguments to numeric-type constructor
+<scrubbed_path>(23,17-91): error X3014: incorrect number of arguments to numeric-type constructor
 

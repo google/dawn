@@ -18,5 +18,5 @@ void compute_main() {
   return;
 }
 FXC validation failure:
-C:\src\dawn\Shader@0x00000183C5010EB0(4,13-28): error X3004: undeclared identifier 'WaveActiveMax'
+<scrubbed_path>(4,13-28): error X3004: undeclared identifier 'WaveActiveMax'
 

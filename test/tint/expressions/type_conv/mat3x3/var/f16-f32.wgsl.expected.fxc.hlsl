@@ -11,5 +11,5 @@ void f() {
   float3x3 v = float3x3(u);
 }
 FXC validation failure:
-C:\src\dawn\Shader@0x00000172E846B830(6,15-23): error X3000: syntax error: unexpected token 'float16_t'
+<scrubbed_path>(6,15-23): error X3000: syntax error: unexpected token 'float16_t'
 

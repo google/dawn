@@ -18,5 +18,5 @@ void compute_main() {
   return;
 }
 FXC validation failure:
-C:\src\dawn\Shader@0x0000022474326B10(4,34-51): error X3004: undeclared identifier 'WaveGetLaneIndex'
+<scrubbed_path>(4,34-51): error X3004: undeclared identifier 'WaveGetLaneIndex'
 

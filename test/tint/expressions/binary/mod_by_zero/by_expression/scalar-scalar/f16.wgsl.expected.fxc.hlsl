@@ -16,5 +16,5 @@ void f() {
   return;
 }
 FXC validation failure:
-C:\src\dawn\Shader@0x000001D25595B000(1,1-9): error X3000: unrecognized identifier 'float16_t'
+<scrubbed_path>(1,1-9): error X3000: unrecognized identifier 'float16_t'
 

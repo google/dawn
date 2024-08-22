@@ -23,5 +23,5 @@ void main() {
 }
 
 FXC validation failure:
-C:\src\dawn\Shader@0x000001A4C0FB3880(5,11-14): error X3696: infinite loop detected - loop never exits
+<scrubbed_path>(5,11-14): error X3696: infinite loop detected - loop never exits
 

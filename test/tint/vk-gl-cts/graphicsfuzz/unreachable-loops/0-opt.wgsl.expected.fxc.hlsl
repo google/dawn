@@ -48,6 +48,6 @@ tint_symbol main() {
   return wrapper_result;
 }
 FXC validation failure:
-C:\src\dawn\Shader@0x0000027BF045FA70(12,5-16): warning X3557: loop only executes for 0 iteration(s), forcing loop to unroll
-C:\src\dawn\Shader@0x0000027BF045FA70(18,12-15): error X3696: infinite loop detected - loop never exits
+<scrubbed_path>(12,5-16): warning X3557: loop only executes for 0 iteration(s), forcing loop to unroll
+<scrubbed_path>(18,12-15): error X3696: infinite loop detected - loop never exits
 

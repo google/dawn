@@ -7,5 +7,5 @@ void unused_entry_point() {
 
 static vector<float16_t, 2> v = vector<float16_t, 2>(float16_t(0.0h), float16_t(1.0h));
 FXC validation failure:
-C:\src\dawn\Shader@0x00000179878F5E70(6,15-23): error X3000: syntax error: unexpected token 'float16_t'
+<scrubbed_path>(6,15-23): error X3000: syntax error: unexpected token 'float16_t'
 

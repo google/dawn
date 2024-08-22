@@ -49,7 +49,7 @@ vertex_main_outputs vertex_main() {
 }
 
 FXC validation failure:
-C:\src\dawn\Shader@0x0000017980376610(13,36-44): error X3000: syntax error: unexpected token 'float16_t'
-C:\src\dawn\Shader@0x0000017980376610(14,29-31): error X3004: undeclared identifier 'src'
-C:\src\dawn\Shader@0x0000017980376610(14,22-32): error X3014: incorrect number of arguments to numeric-type constructor
+<scrubbed_path>(13,36-44): error X3000: syntax error: unexpected token 'float16_t'
+<scrubbed_path>(14,29-31): error X3004: undeclared identifier 'src'
+<scrubbed_path>(14,22-32): error X3014: incorrect number of arguments to numeric-type constructor
 

@@ -17,5 +17,5 @@ void f() {
   float3x3 v = float3x3(tint_symbol);
 }
 FXC validation failure:
-C:\src\dawn\Shader@0x0000019348C85BE0(6,8-16): error X3000: unrecognized identifier 'float16_t'
+<scrubbed_path>(6,8-16): error X3000: unrecognized identifier 'float16_t'
 

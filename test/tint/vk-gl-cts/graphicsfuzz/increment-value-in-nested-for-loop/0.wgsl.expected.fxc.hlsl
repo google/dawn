@@ -288,10 +288,10 @@ tint_symbol_2 main(tint_symbol_1 tint_symbol) {
   return wrapper_result;
 }
 FXC validation failure:
-C:\src\dawn\Shader@0x0000023E21838B10(12,3-14): warning X3557: loop only executes for 0 iteration(s), forcing loop to unroll
-C:\src\dawn\Shader@0x0000023E21838B10(75,9-20): warning X3557: loop only executes for 0 iteration(s), forcing loop to unroll
-C:\src\dawn\Shader@0x0000023E21838B10(191,7-18): warning X3557: loop only executes for 0 iteration(s), forcing loop to unroll
-C:\src\dawn\Shader@0x0000023E21838B10(75,9-20): warning X3557: loop only executes for 0 iteration(s), forcing loop to unroll
-C:\src\dawn\Shader@0x0000023E21838B10(191,7-18): warning X3557: loop only executes for 0 iteration(s), forcing loop to unroll
-C:\src\dawn\Shader@0x0000023E21838B10(127,11-22): error X4029: infinite loop detected - loop never exits
+<scrubbed_path>(12,3-14): warning X3557: loop only executes for 0 iteration(s), forcing loop to unroll
+<scrubbed_path>(75,9-20): warning X3557: loop only executes for 0 iteration(s), forcing loop to unroll
+<scrubbed_path>(191,7-18): warning X3557: loop only executes for 0 iteration(s), forcing loop to unroll
+<scrubbed_path>(75,9-20): warning X3557: loop only executes for 0 iteration(s), forcing loop to unroll
+<scrubbed_path>(191,7-18): warning X3557: loop only executes for 0 iteration(s), forcing loop to unroll
+<scrubbed_path>(127,11-22): error X4029: infinite loop detected - loop never exits
 
