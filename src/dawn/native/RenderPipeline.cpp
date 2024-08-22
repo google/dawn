@@ -116,20 +116,23 @@ MaybeError ValidateVertexAttribute(DeviceBase* device,
     // No underflow is possible because the max vertex format size is smaller than
     // kMaxVertexBufferArrayStride.
     DAWN_ASSERT(kMaxVertexBufferArrayStride >= formatInfo.byteSize);
-    DAWN_INVALID_IF(
-        attribute->offset > kMaxVertexBufferArrayStride - formatInfo.byteSize,
-        "Attribute offset (%u) with format %s (size: %u) doesn't fit in the maximum vertex "
-        "buffer stride (%u).",
-        attribute->offset, attribute->format, formatInfo.byteSize, kMaxVertexBufferArrayStride);
+    DAWN_INVALID_IF(attribute->offset > kMaxVertexBufferArrayStride - formatInfo.byteSize,
+                    "Attribute offset (%u) + format size (%u for %s) must be <= the maximum vertex "
+                    "buffer stride (%u). Offsets larger than the maximum vertex buffer stride are "
+                    "accomodated by setting buffer offsets when calling setVertexBuffer, which the "
+                    "attribute offset is added to.",
+                    attribute->offset, formatInfo.byteSize, attribute->format,
+                    kMaxVertexBufferArrayStride);
 
     // No overflow is possible because the offset is already validated to be less
     // than kMaxVertexBufferArrayStride.
     DAWN_ASSERT(attribute->offset < kMaxVertexBufferArrayStride);
     DAWN_INVALID_IF(
         vertexBufferStride > 0 && attribute->offset + formatInfo.byteSize > vertexBufferStride,
-        "Attribute offset (%u) with format %s (size: %u) doesn't fit in the vertex buffer "
-        "stride (%u).",
-        attribute->offset, attribute->format, formatInfo.byteSize, vertexBufferStride);
+        "Attribute offset (%u) + format size (%u for %s) must be <= the vertex buffer stride (%u). "
+        "Offsets larger than the vertex buffer stride are accomodated by setting buffer offsets "
+        "when calling setVertexBuffer, which the attribute offset is added to.",
+        attribute->offset, formatInfo.byteSize, attribute->format, vertexBufferStride);
 
     DAWN_INVALID_IF(attribute->offset % std::min(4u, formatInfo.byteSize) != 0,
                     "Attribute offset (%u) in not a multiple of %u.", attribute->offset,
