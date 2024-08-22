@@ -17,5 +17,5 @@ void compute_main() {
 }
 
 FXC validation failure:
-C:\src\dawn\Shader@0x000002107D61EEC0(4,14-30): error X3004: undeclared identifier 'WaveIsFirstLane'
+C:\src\dawn\Shader@0x0000012C4AD66510(4,14-30): error X3004: undeclared identifier 'WaveIsFirstLane'
 

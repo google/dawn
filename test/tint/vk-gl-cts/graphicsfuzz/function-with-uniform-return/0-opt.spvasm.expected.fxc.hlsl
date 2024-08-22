@@ -7,9 +7,8 @@ cbuffer cbuffer_x_7 : register(b0) {
 static float4 x_GLF_color = float4(0.0f, 0.0f, 0.0f, 0.0f);
 
 float fx_() {
-  const float x_50 = gl_FragCoord.y;
-  if ((x_50 >= 0.0f)) {
-    const float x_55 = asfloat(x_7[0].y);
+  if ((gl_FragCoord.y >= 0.0f)) {
+    float x_55 = asfloat(x_7[0].y);
     return x_55;
   }
   while (true) {
@@ -28,21 +27,18 @@ void main_1() {
   float k0 = 0.0f;
   x2 = 1.0f;
   B = 1.0f;
-  const float x_34 = fx_();
+  float x_34 = fx_();
   x_GLF_color = float4(x_34, 0.0f, 0.0f, 1.0f);
   while (true) {
-    const float x_40 = x2;
-    if ((x_40 > 2.0f)) {
+    if ((x2 > 2.0f)) {
     } else {
       break;
     }
-    const float x_43 = fx_();
-    const float x_44 = fx_();
+    float x_43 = fx_();
+    float x_44 = fx_();
     k0 = (x_43 - x_44);
-    const float x_46 = k0;
-    B = x_46;
-    const float x_47 = B;
-    x2 = x_47;
+    B = k0;
+    x2 = B;
   }
   return;
 }
@@ -60,13 +56,16 @@ struct tint_symbol_2 {
 main_out main_inner(float4 gl_FragCoord_param) {
   gl_FragCoord = gl_FragCoord_param;
   main_1();
-  const main_out tint_symbol_3 = {x_GLF_color};
+  main_out tint_symbol_3 = {x_GLF_color};
   return tint_symbol_3;
 }
 
 tint_symbol_2 main(tint_symbol_1 tint_symbol) {
-  const main_out inner_result = main_inner(tint_symbol.gl_FragCoord_param);
+  main_out inner_result = main_inner(float4(tint_symbol.gl_FragCoord_param.xyz, (1.0f / tint_symbol.gl_FragCoord_param.w)));
   tint_symbol_2 wrapper_result = (tint_symbol_2)0;
   wrapper_result.x_GLF_color_1 = inner_result.x_GLF_color_1;
   return wrapper_result;
 }
+FXC validation failure:
+C:\src\dawn\Shader@0x0000028AD381C760(12,10-13): error X3696: infinite loop detected - loop never exits
+

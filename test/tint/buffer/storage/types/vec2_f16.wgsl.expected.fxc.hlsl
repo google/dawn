@@ -8,3 +8,6 @@ void main() {
   tint_symbol_1.Store<vector<float16_t, 2> >(0u, tint_symbol.Load<vector<float16_t, 2> >(0u));
   return;
 }
+FXC validation failure:
+C:\src\dawn\Shader@0x0000018882BC0670(6,3-21): error X3018: invalid subscript 'Store'
+

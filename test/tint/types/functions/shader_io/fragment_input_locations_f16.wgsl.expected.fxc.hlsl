@@ -10,15 +10,18 @@ struct tint_symbol_1 {
 };
 
 void main_inner(int loc0, uint loc1, float loc2, float4 loc3, float16_t loc4, vector<float16_t, 3> loc5) {
-  const int i = loc0;
-  const uint u = loc1;
-  const float f = loc2;
-  const float4 v = loc3;
-  const float16_t x = loc4;
-  const vector<float16_t, 3> y = loc5;
+  int i = loc0;
+  uint u = loc1;
+  float f = loc2;
+  float4 v = loc3;
+  float16_t x = loc4;
+  vector<float16_t, 3> y = loc5;
 }
 
 void main(tint_symbol_1 tint_symbol) {
   main_inner(tint_symbol.loc0, tint_symbol.loc1, tint_symbol.loc2, tint_symbol.loc3, tint_symbol.loc4, tint_symbol.loc5);
   return;
 }
+FXC validation failure:
+C:\src\dawn\Shader@0x0000023FB701C450(6,3-11): error X3000: unrecognized identifier 'float16_t'
+

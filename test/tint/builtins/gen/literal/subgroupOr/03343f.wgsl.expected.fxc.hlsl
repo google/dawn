@@ -8,11 +8,16 @@ int3 subgroupOr_03343f() {
   return res;
 }
 
+void fragment_main() {
+  prevent_dce.Store3(0u, asuint(subgroupOr_03343f()));
+  return;
+}
+
 [numthreads(1, 1, 1)]
 void compute_main() {
   prevent_dce.Store3(0u, asuint(subgroupOr_03343f()));
   return;
 }
 FXC validation failure:
-C:\src\dawn\Shader@0x0000016D913D2270(5,20-52): error X3004: undeclared identifier 'WaveActiveBitOr'
+C:\src\dawn\Shader@0x000001B628C70750(5,20-52): error X3004: undeclared identifier 'WaveActiveBitOr'
 

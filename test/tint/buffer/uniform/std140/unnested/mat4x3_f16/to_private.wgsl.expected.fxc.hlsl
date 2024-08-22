@@ -43,3 +43,6 @@ void f() {
   p[0][1] = float16_t(f16tof32(((u[0].z) & 0xFFFF)));
   return;
 }
+FXC validation failure:
+C:\src\dawn\Shader@0x00000234C08B6350(4,15-23): error X3000: syntax error: unexpected token 'float16_t'
+

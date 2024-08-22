@@ -1,41 +1,49 @@
 SKIP: FAILED
 
-RWByteAddressBuffer prevent_dce : register(u0, space2);
+RWByteAddressBuffer prevent_dce : register(u0);
 
-void prevent_dce_store(uint offset, matrix<float16_t, 2, 4> value) {
-  prevent_dce.Store<vector<float16_t, 4> >((offset + 0u), value[0u]);
-  prevent_dce.Store<vector<float16_t, 4> >((offset + 8u), value[1u]);
-}
-
-void transpose_5edd96() {
+int transpose_5edd96() {
   matrix<float16_t, 4, 2> arg_0 = matrix<float16_t, 4, 2>((float16_t(1.0h)).xx, (float16_t(1.0h)).xx, (float16_t(1.0h)).xx, (float16_t(1.0h)).xx);
   matrix<float16_t, 2, 4> res = transpose(arg_0);
-  prevent_dce_store(0u, res);
-}
-
-struct tint_symbol {
-  float4 value : SV_Position;
-};
-
-float4 vertex_main_inner() {
-  transpose_5edd96();
-  return (0.0f).xxxx;
-}
-
-tint_symbol vertex_main() {
-  const float4 inner_result = vertex_main_inner();
-  tint_symbol wrapper_result = (tint_symbol)0;
-  wrapper_result.value = inner_result;
-  return wrapper_result;
+  return ((res[0][0] == float16_t(0.0h)) ? 1 : 0);
 }
 
 void fragment_main() {
-  transpose_5edd96();
+  prevent_dce.Store(0u, asuint(transpose_5edd96()));
   return;
 }
 
 [numthreads(1, 1, 1)]
 void compute_main() {
-  transpose_5edd96();
+  prevent_dce.Store(0u, asuint(transpose_5edd96()));
   return;
 }
+
+struct VertexOutput {
+  float4 pos;
+  int prevent_dce;
+};
+struct tint_symbol_1 {
+  nointerpolation int prevent_dce : TEXCOORD0;
+  float4 pos : SV_Position;
+};
+
+VertexOutput vertex_main_inner() {
+  VertexOutput tint_symbol = (VertexOutput)0;
+  tint_symbol.pos = (0.0f).xxxx;
+  tint_symbol.prevent_dce = transpose_5edd96();
+  return tint_symbol;
+}
+
+tint_symbol_1 vertex_main() {
+  VertexOutput inner_result = vertex_main_inner();
+  tint_symbol_1 wrapper_result = (tint_symbol_1)0;
+  wrapper_result.pos = inner_result.pos;
+  wrapper_result.prevent_dce = inner_result.prevent_dce;
+  return wrapper_result;
+}
+FXC validation failure:
+C:\src\dawn\Shader@0x00000189ABF36650(4,10-18): error X3000: syntax error: unexpected token 'float16_t'
+C:\src\dawn\Shader@0x00000189ABF36650(5,10-18): error X3000: syntax error: unexpected token 'float16_t'
+C:\src\dawn\Shader@0x00000189ABF36650(6,12-14): error X3004: undeclared identifier 'res'
+

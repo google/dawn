@@ -9,10 +9,10 @@ vector<float16_t, 2> tint_bitcast_to_f16(float src) {
 
 [numthreads(1, 1, 1)]
 void f() {
-  const float a = 2.003662109375f;
-  const vector<float16_t, 2> b = tint_bitcast_to_f16(a);
+  float a = 2.003662109375f;
+  vector<float16_t, 2> b = tint_bitcast_to_f16(a);
   return;
 }
 FXC validation failure:
-D:\Projects\RampUp\dawn\test\tint\expressions\bitcast\Shader@0x000002C96174CDD0(1,8-16): error X3000: syntax error: unexpected token 'float16_t'
+C:\src\dawn\Shader@0x000001EDC932B090(1,8-16): error X3000: syntax error: unexpected token 'float16_t'
 

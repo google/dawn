@@ -8,5 +8,8 @@ void unused_entry_point() {
 static vector<float16_t, 3> u = (float16_t(1.0h)).xxx;
 
 void f() {
-  const float3 v = float3(u);
+  float3 v = float3(u);
 }
+FXC validation failure:
+C:\src\dawn\Shader@0x0000026EC4235D20(6,15-23): error X3000: syntax error: unexpected token 'float16_t'
+

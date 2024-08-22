@@ -19,3 +19,7 @@ void main() {
   tint_symbol_1_store(0u, tint_symbol_load(0u));
   return;
 }
+FXC validation failure:
+C:\src\dawn\Shader@0x000001F1DA9C3CA0(4,46-54): error X3000: syntax error: unexpected token 'float16_t'
+C:\src\dawn\Shader@0x000001F1DA9C3CA0(5,3-21): error X3018: invalid subscript 'Store'
+

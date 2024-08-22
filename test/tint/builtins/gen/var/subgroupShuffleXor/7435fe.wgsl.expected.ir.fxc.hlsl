@@ -1,4 +1,4 @@
-SKIP: Wave ops not supported before SM 6.0
+SKIP: FAILED
 
 
 RWByteAddressBuffer prevent_dce : register(u0);
@@ -19,4 +19,7 @@ void fragment_main() {
 void compute_main() {
   prevent_dce.Store3(0u, asuint(subgroupShuffleXor_7435fe()));
 }
+
+FXC validation failure:
+C:\src\dawn\Shader@0x0000024C685AFDB0(8,33-50): error X3004: undeclared identifier 'WaveGetLaneIndex'
 

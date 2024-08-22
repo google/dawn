@@ -8,5 +8,8 @@ void unused_entry_point() {
 static float16_t u = float16_t(1.0h);
 
 void f() {
-  const int v = int(u);
+  int v = int(u);
 }
+FXC validation failure:
+C:\src\dawn\Shader@0x000001C6030F4430(6,8-16): error X3000: unrecognized identifier 'float16_t'
+

@@ -15,22 +15,6 @@ void modf_8dbbbf() {
   modf_result_f16 res = tint_modf(arg_0);
 }
 
-struct tint_symbol {
-  float4 value : SV_Position;
-};
-
-float4 vertex_main_inner() {
-  modf_8dbbbf();
-  return (0.0f).xxxx;
-}
-
-tint_symbol vertex_main() {
-  const float4 inner_result = vertex_main_inner();
-  tint_symbol wrapper_result = (tint_symbol)0;
-  wrapper_result.value = inner_result;
-  return wrapper_result;
-}
-
 void fragment_main() {
   modf_8dbbbf();
   return;
@@ -41,3 +25,27 @@ void compute_main() {
   modf_8dbbbf();
   return;
 }
+
+struct VertexOutput {
+  float4 pos;
+};
+struct tint_symbol_1 {
+  float4 pos : SV_Position;
+};
+
+VertexOutput vertex_main_inner() {
+  VertexOutput tint_symbol = (VertexOutput)0;
+  tint_symbol.pos = (0.0f).xxxx;
+  modf_8dbbbf();
+  return tint_symbol;
+}
+
+tint_symbol_1 vertex_main() {
+  VertexOutput inner_result = vertex_main_inner();
+  tint_symbol_1 wrapper_result = (tint_symbol_1)0;
+  wrapper_result.pos = inner_result.pos;
+  return wrapper_result;
+}
+FXC validation failure:
+C:\src\dawn\Shader@0x00000206D068AE30(2,3-11): error X3000: unrecognized identifier 'float16_t'
+

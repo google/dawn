@@ -27,6 +27,9 @@ void main() {
   uint2 ubo_load_6 = data[1].zw;
   vector<float16_t, 2> ubo_load_6_xz = vector<float16_t, 2>(f16tof32(ubo_load_6 & 0xFFFF));
   float16_t ubo_load_6_y = f16tof32(ubo_load_6[0] >> 16);
-  const vector<float16_t, 3> x = mul(data_load_1(0u), vector<float16_t, 3>(ubo_load_6_xz[0], ubo_load_6_y, ubo_load_6_xz[1]));
+  vector<float16_t, 3> x = mul(data_load_1(0u), vector<float16_t, 3>(ubo_load_6_xz[0], ubo_load_6_y, ubo_load_6_xz[1]));
   return;
 }
+FXC validation failure:
+C:\src\dawn\Shader@0x000001FA0C578FC0(5,8-16): error X3000: syntax error: unexpected token 'float16_t'
+

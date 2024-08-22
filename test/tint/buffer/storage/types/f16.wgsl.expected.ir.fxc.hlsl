@@ -9,5 +9,5 @@ void main() {
 }
 
 FXC validation failure:
-C:\src\dawn\Shader@0x0000018D8C9B3B30(6,3-21): error X3018: invalid subscript 'Store'
+C:\src\dawn\Shader@0x0000014881472E20(6,3-21): error X3018: invalid subscript 'Store'
 

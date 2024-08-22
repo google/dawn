@@ -8,15 +8,15 @@ void main_1() {
   while (true) {
     uint x_2 = 0u;
     uint x_3 = 0u;
-    const bool x_101 = x_7;
-    const bool x_102 = x_8;
+    bool x_101 = x_7;
+    bool x_102 = x_8;
     x_2 = 0u;
     x_3 = 1u;
     if (x_101) {
       break;
     }
     while (true) {
-      const uint x_3_c20 = x_3;
+      uint x_3_c20 = x_3;
       x_2 = (x_2 + 1u);
       x_3 = x_3_c20;
       if (x_102) {
@@ -32,11 +32,8 @@ void main() {
   return;
 }
 DXC validation failure:
-warning: DXIL signing library (dxil.dll,libdxil.so) not found.  Resulting DXIL will not be signed for use in release environments.
-
 error: validation errors
-shader.hlsl:28: error: Loop must have break.
+hlsl.hlsl:28: error: Loop must have break.
 Validation failed.
-
 
 

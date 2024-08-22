@@ -14,6 +14,6 @@ void f() {
 }
 
 FXC validation failure:
-C:\src\dawn\Shader@0x0000020C74CC9B90(3,28-36): error X3000: syntax error: unexpected token 'float16_t'
-C:\src\dawn\Shader@0x0000020C74CC9B90(4,3-19): error X3018: invalid subscript 'Store'
+C:\src\dawn\Shader@0x00000183D74EB8A0(3,28-36): error X3000: syntax error: unexpected token 'float16_t'
+C:\src\dawn\Shader@0x00000183D74EB8A0(4,3-19): error X3018: invalid subscript 'Store'
 

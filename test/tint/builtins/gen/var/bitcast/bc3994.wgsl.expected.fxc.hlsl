@@ -7,40 +7,48 @@ vector<float16_t, 4> tint_bitcast_to_f16(uint2 src) {
   return vector<float16_t, 4>(t_low.x, t_high.x, t_low.y, t_high.y);
 }
 
-RWByteAddressBuffer prevent_dce : register(u0, space2);
+RWByteAddressBuffer prevent_dce : register(u0);
 
-void bitcast_bc3994() {
+vector<float16_t, 4> bitcast_bc3994() {
   uint2 arg_0 = (1u).xx;
   vector<float16_t, 4> res = tint_bitcast_to_f16(arg_0);
-  prevent_dce.Store<vector<float16_t, 4> >(0u, res);
-}
-
-struct tint_symbol {
-  float4 value : SV_Position;
-};
-
-float4 vertex_main_inner() {
-  bitcast_bc3994();
-  return (0.0f).xxxx;
-}
-
-tint_symbol vertex_main() {
-  float4 inner_result = vertex_main_inner();
-  tint_symbol wrapper_result = (tint_symbol)0;
-  wrapper_result.value = inner_result;
-  return wrapper_result;
+  return res;
 }
 
 void fragment_main() {
-  bitcast_bc3994();
+  prevent_dce.Store<vector<float16_t, 4> >(0u, bitcast_bc3994());
   return;
 }
 
 [numthreads(1, 1, 1)]
 void compute_main() {
-  bitcast_bc3994();
+  prevent_dce.Store<vector<float16_t, 4> >(0u, bitcast_bc3994());
   return;
 }
+
+struct VertexOutput {
+  float4 pos;
+  vector<float16_t, 4> prevent_dce;
+};
+struct tint_symbol_1 {
+  nointerpolation vector<float16_t, 4> prevent_dce : TEXCOORD0;
+  float4 pos : SV_Position;
+};
+
+VertexOutput vertex_main_inner() {
+  VertexOutput tint_symbol = (VertexOutput)0;
+  tint_symbol.pos = (0.0f).xxxx;
+  tint_symbol.prevent_dce = bitcast_bc3994();
+  return tint_symbol;
+}
+
+tint_symbol_1 vertex_main() {
+  VertexOutput inner_result = vertex_main_inner();
+  tint_symbol_1 wrapper_result = (tint_symbol_1)0;
+  wrapper_result.pos = inner_result.pos;
+  wrapper_result.prevent_dce = inner_result.prevent_dce;
+  return wrapper_result;
+}
 FXC validation failure:
-C:\src\dawn\Shader@0x000001C583CA1CC0(1,8-16): error X3000: syntax error: unexpected token 'float16_t'
+C:\src\dawn\Shader@0x000001DA64785780(1,8-16): error X3000: syntax error: unexpected token 'float16_t'
 

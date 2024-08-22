@@ -17,5 +17,5 @@ void compute_main() {
 }
 
 FXC validation failure:
-C:\src\dawn\Shader@0x000002BD9C54F4F0(4,14-40): error X3004: undeclared identifier 'WavePrefixProduct'
+C:\src\dawn\Shader@0x0000018DAA90F880(4,14-40): error X3004: undeclared identifier 'WavePrefixProduct'
 

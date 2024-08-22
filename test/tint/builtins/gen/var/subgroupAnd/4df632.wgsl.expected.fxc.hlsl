@@ -8,11 +8,16 @@ uint subgroupAnd_4df632() {
   return res;
 }
 
+void fragment_main() {
+  prevent_dce.Store(0u, asuint(subgroupAnd_4df632()));
+  return;
+}
+
 [numthreads(1, 1, 1)]
 void compute_main() {
   prevent_dce.Store(0u, asuint(subgroupAnd_4df632()));
   return;
 }
 FXC validation failure:
-C:\src\dawn\Shader@0x000001DBF3300A70(5,14-36): error X3004: undeclared identifier 'WaveActiveBitAnd'
+C:\src\dawn\Shader@0x0000021FB52E9510(5,14-36): error X3004: undeclared identifier 'WaveActiveBitAnd'
 

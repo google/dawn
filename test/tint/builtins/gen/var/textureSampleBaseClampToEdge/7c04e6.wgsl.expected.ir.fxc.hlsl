@@ -176,6 +176,6 @@ vertex_main_outputs vertex_main() {
 }
 
 FXC validation failure:
-C:\src\dawn\Shader@0x000001D7375AF640(55,137-143): error X3000: syntax error: unexpected token 'sampler'
-C:\src\dawn\Shader@0x000001D7375AF640(56,27-32): error X3004: undeclared identifier 'coords'
+C:\src\dawn\Shader@0x0000011C881F5890(55,137-143): error X3000: syntax error: unexpected token 'sampler'
+C:\src\dawn\Shader@0x0000011C881F5890(56,27-32): error X3004: undeclared identifier 'coords'
 

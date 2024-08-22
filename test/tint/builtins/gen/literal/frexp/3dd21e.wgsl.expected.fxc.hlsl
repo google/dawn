@@ -8,22 +8,6 @@ void frexp_3dd21e() {
   frexp_result_vec4_f16 res = {(float16_t(0.5h)).xxxx, (1).xxxx};
 }
 
-struct tint_symbol {
-  float4 value : SV_Position;
-};
-
-float4 vertex_main_inner() {
-  frexp_3dd21e();
-  return (0.0f).xxxx;
-}
-
-tint_symbol vertex_main() {
-  const float4 inner_result = vertex_main_inner();
-  tint_symbol wrapper_result = (tint_symbol)0;
-  wrapper_result.value = inner_result;
-  return wrapper_result;
-}
-
 void fragment_main() {
   frexp_3dd21e();
   return;
@@ -34,3 +18,27 @@ void compute_main() {
   frexp_3dd21e();
   return;
 }
+
+struct VertexOutput {
+  float4 pos;
+};
+struct tint_symbol_1 {
+  float4 pos : SV_Position;
+};
+
+VertexOutput vertex_main_inner() {
+  VertexOutput tint_symbol = (VertexOutput)0;
+  tint_symbol.pos = (0.0f).xxxx;
+  frexp_3dd21e();
+  return tint_symbol;
+}
+
+tint_symbol_1 vertex_main() {
+  VertexOutput inner_result = vertex_main_inner();
+  tint_symbol_1 wrapper_result = (tint_symbol_1)0;
+  wrapper_result.pos = inner_result.pos;
+  return wrapper_result;
+}
+FXC validation failure:
+C:\src\dawn\Shader@0x000001D1B79CFF20(2,10-18): error X3000: syntax error: unexpected token 'float16_t'
+

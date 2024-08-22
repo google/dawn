@@ -5,8 +5,8 @@ static bool x_7 = false;
 static bool x_8 = false;
 
 void main_1() {
-  const bool x_101 = x_7;
-  const bool x_102 = x_8;
+  bool x_101 = x_7;
+  bool x_102 = x_8;
   while (true) {
     uint x_2 = 0u;
     if (x_101) {
@@ -37,11 +37,8 @@ void main() {
   return;
 }
 DXC validation failure:
-warning: DXIL signing library (dxil.dll,libdxil.so) not found.  Resulting DXIL will not be signed for use in release environments.
-
 error: validation errors
-shader.hlsl:33: error: Loop must have break.
+hlsl.hlsl:33: error: Loop must have break.
 Validation failed.
-
 
 

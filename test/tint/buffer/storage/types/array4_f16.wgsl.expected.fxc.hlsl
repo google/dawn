@@ -28,3 +28,6 @@ void main() {
   tint_symbol_1_store(0u, tint_symbol_load(0u));
   return;
 }
+FXC validation failure:
+C:\src\dawn\Shader@0x0000015AA2BE4420(4,39-47): error X3000: unrecognized identifier 'float16_t'
+

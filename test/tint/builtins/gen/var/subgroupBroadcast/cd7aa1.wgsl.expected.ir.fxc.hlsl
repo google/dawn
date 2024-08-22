@@ -18,5 +18,5 @@ void compute_main() {
 }
 
 FXC validation failure:
-C:\src\dawn\Shader@0x000001E1B582F350(5,16-39): error X3004: undeclared identifier 'WaveReadLaneAt'
+C:\src\dawn\Shader@0x0000022A8F0F51E0(5,16-39): error X3004: undeclared identifier 'WaveReadLaneAt'
 

@@ -40,6 +40,6 @@ void main(main_inputs inputs) {
 }
 
 FXC validation failure:
-C:\src\dawn\Shader@0x000001BE0625E2F0(16,11-32): warning X3570: gradient instruction used in a loop with varying iteration, attempting to unroll the loop
-C:\src\dawn\Shader@0x000001BE0625E2F0(11,5-15): error X3511: unable to unroll loop, loop does not appear to terminate in a timely manner (1024 iterations)
+C:\src\dawn\Shader@0x000002C2D238ED10(16,11-32): warning X3570: gradient instruction used in a loop with varying iteration, attempting to unroll the loop
+C:\src\dawn\Shader@0x000002C2D238ED10(11,5-15): error X3511: unable to unroll loop, loop does not appear to terminate in a timely manner (1024 iterations)
 

@@ -3,6 +3,7 @@ SKIP: FAILED
 cbuffer cbuffer_u : register(b0) {
   uint4 u[4];
 };
+RWByteAddressBuffer s : register(u1);
 
 matrix<float16_t, 4, 2> u_load(uint offset) {
   const uint scalar_offset = ((offset + 0u)) / 4;
@@ -18,10 +19,14 @@ matrix<float16_t, 4, 2> u_load(uint offset) {
 
 [numthreads(1, 1, 1)]
 void f() {
-  const matrix<float16_t, 2, 4> t = transpose(u_load(32u));
+  matrix<float16_t, 2, 4> t = transpose(u_load(32u));
   uint ubo_load_4 = u[0].y;
-  const float16_t l = length(vector<float16_t, 2>(float16_t(f16tof32(ubo_load_4 & 0xFFFF)), float16_t(f16tof32(ubo_load_4 >> 16))).yx);
+  float16_t l = length(vector<float16_t, 2>(float16_t(f16tof32(ubo_load_4 & 0xFFFF)), float16_t(f16tof32(ubo_load_4 >> 16))).yx);
   uint ubo_load_5 = u[0].y;
-  const float16_t a = abs(vector<float16_t, 2>(float16_t(f16tof32(ubo_load_5 & 0xFFFF)), float16_t(f16tof32(ubo_load_5 >> 16))).yx.x);
+  float16_t a = abs(vector<float16_t, 2>(float16_t(f16tof32(ubo_load_5 & 0xFFFF)), float16_t(f16tof32(ubo_load_5 >> 16))).yx.x);
+  s.Store<float16_t>(0u, ((t[0].x + float16_t(l)) + float16_t(a)));
   return;
 }
+FXC validation failure:
+C:\src\dawn\Shader@0x0000028BBEB154D0(6,8-16): error X3000: syntax error: unexpected token 'float16_t'
+

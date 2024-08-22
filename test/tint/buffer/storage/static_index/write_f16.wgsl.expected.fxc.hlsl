@@ -156,15 +156,15 @@ void main() {
   sb.Store(8u, asuint(0u));
   sb.Store<float16_t>(12u, float16_t(0.0h));
   sb.Store2(16u, asuint((0.0f).xx));
-  sb.Store2(24u, asuint((0).xx));
+  sb.Store2(24u, asuint(int2((0).xx)));
   sb.Store2(32u, asuint((0u).xx));
   sb.Store<vector<float16_t, 2> >(40u, (float16_t(0.0h)).xx);
   sb.Store3(48u, asuint((0.0f).xxx));
-  sb.Store3(64u, asuint((0).xxx));
+  sb.Store3(64u, asuint(int3((0).xxx)));
   sb.Store3(80u, asuint((0u).xxx));
   sb.Store<vector<float16_t, 3> >(96u, (float16_t(0.0h)).xxx);
   sb.Store4(112u, asuint((0.0f).xxxx));
-  sb.Store4(128u, asuint((0).xxxx));
+  sb.Store4(128u, asuint(int4((0).xxxx)));
   sb.Store4(144u, asuint((0u).xxxx));
   sb.Store<vector<float16_t, 4> >(160u, (float16_t(0.0h)).xxxx);
   sb_store_16(168u, float2x2((0.0f).xx, (0.0f).xx));
@@ -185,13 +185,16 @@ void main() {
   sb_store_31(648u, matrix<float16_t, 4, 2>((float16_t(0.0h)).xx, (float16_t(0.0h)).xx, (float16_t(0.0h)).xx, (float16_t(0.0h)).xx));
   sb_store_32(664u, matrix<float16_t, 4, 3>((float16_t(0.0h)).xxx, (float16_t(0.0h)).xxx, (float16_t(0.0h)).xxx, (float16_t(0.0h)).xxx));
   sb_store_33(696u, matrix<float16_t, 4, 4>((float16_t(0.0h)).xxxx, (float16_t(0.0h)).xxxx, (float16_t(0.0h)).xxxx, (float16_t(0.0h)).xxxx));
-  const float3 tint_symbol[2] = (float3[2])0;
+  float3 tint_symbol[2] = (float3[2])0;
   sb_store_34(736u, tint_symbol);
-  const matrix<float16_t, 4, 2> tint_symbol_1[2] = (matrix<float16_t, 4, 2>[2])0;
+  matrix<float16_t, 4, 2> tint_symbol_1[2] = (matrix<float16_t, 4, 2>[2])0;
   sb_store_35(768u, tint_symbol_1);
-  const Inner tint_symbol_2 = (Inner)0;
+  Inner tint_symbol_2 = (Inner)0;
   sb_store_36(800u, tint_symbol_2);
-  const Inner tint_symbol_3[4] = (Inner[4])0;
+  Inner tint_symbol_3[4] = (Inner[4])0;
   sb_store_37(812u, tint_symbol_3);
   return;
 }
+FXC validation failure:
+C:\src\dawn\Shader@0x000001A572716CC0(4,3-11): error X3000: unrecognized identifier 'float16_t'
+

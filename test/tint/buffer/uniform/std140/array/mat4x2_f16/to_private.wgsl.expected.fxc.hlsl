@@ -3,6 +3,7 @@ SKIP: FAILED
 cbuffer cbuffer_u : register(b0) {
   uint4 u[4];
 };
+RWByteAddressBuffer s : register(u1);
 static matrix<float16_t, 4, 2> p[4] = (matrix<float16_t, 4, 2>[4])0;
 
 matrix<float16_t, 4, 2> u_load_1(uint offset) {
@@ -35,5 +36,9 @@ void f() {
   uint ubo_load_4 = u[0].y;
   p[1][0] = vector<float16_t, 2>(float16_t(f16tof32(ubo_load_4 & 0xFFFF)), float16_t(f16tof32(ubo_load_4 >> 16))).yx;
   p[1][0].x = float16_t(f16tof32(((u[0].y) & 0xFFFF)));
+  s.Store<float16_t>(0u, p[1][0].x);
   return;
 }
+FXC validation failure:
+C:\src\dawn\Shader@0x0000025909CD3FF0(5,15-23): error X3000: syntax error: unexpected token 'float16_t'
+

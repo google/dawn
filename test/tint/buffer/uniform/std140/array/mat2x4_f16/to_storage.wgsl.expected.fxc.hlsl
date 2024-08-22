@@ -55,3 +55,7 @@ void f() {
   s.Store<float16_t>(16u, float16_t(f16tof32(((u[0].z) & 0xFFFF))));
   return;
 }
+FXC validation failure:
+C:\src\dawn\Shader@0x000001649BA46310(6,36-44): error X3000: syntax error: unexpected token 'float16_t'
+C:\src\dawn\Shader@0x000001649BA46310(7,3-9): error X3018: invalid subscript 'Store'
+

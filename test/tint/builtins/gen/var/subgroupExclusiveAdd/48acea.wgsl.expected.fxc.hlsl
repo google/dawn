@@ -8,11 +8,16 @@ uint2 subgroupExclusiveAdd_48acea() {
   return res;
 }
 
+void fragment_main() {
+  prevent_dce.Store2(0u, asuint(subgroupExclusiveAdd_48acea()));
+  return;
+}
+
 [numthreads(1, 1, 1)]
 void compute_main() {
   prevent_dce.Store2(0u, asuint(subgroupExclusiveAdd_48acea()));
   return;
 }
 FXC validation failure:
-C:\src\dawn\Shader@0x000001CB9AB514C0(5,15-34): error X3004: undeclared identifier 'WavePrefixSum'
+C:\src\dawn\Shader@0x0000020CEC494ED0(5,15-34): error X3004: undeclared identifier 'WavePrefixSum'
 

@@ -43,5 +43,5 @@ vertex_main_outputs vertex_main() {
 }
 
 FXC validation failure:
-C:\src\dawn\Shader@0x0000026CC36CF4E0(3,3-11): error X3000: unrecognized identifier 'float16_t'
+C:\src\dawn\Shader@0x000002069F24F010(3,3-11): error X3000: unrecognized identifier 'float16_t'
 

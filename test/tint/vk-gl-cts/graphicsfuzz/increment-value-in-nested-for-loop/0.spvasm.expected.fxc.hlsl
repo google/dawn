@@ -1,5 +1,9 @@
 SKIP: FAILED
 
+int tint_ftoi(float v) {
+  return ((v < 2147483520.0f) ? ((v < -2147483648.0f) ? -2147483648 : int(v)) : 2147483647);
+}
+
 static float4 gl_FragCoord = float4(0.0f, 0.0f, 0.0f, 0.0f);
 cbuffer cbuffer_x_6 : register(b0) {
   uint4 x_6[1];
@@ -21,8 +25,8 @@ void main_1() {
     int x_120 = 0;
     int x_116 = 0;
     int x_161 = 0;
-    const float x_40 = asfloat(x_6[0].x);
-    const bool x_41 = (x_40 < -1.0f);
+    float x_40 = asfloat(x_6[0].x);
+    bool x_41 = (x_40 < -1.0f);
     x_45 = false;
     x_48 = 0;
     x_50 = 0;
@@ -35,7 +39,7 @@ void main_1() {
       int x_63 = 0;
       int x_51 = 0;
       int x_53 = 0;
-      const float x_55 = gl_FragCoord.y;
+      float x_55 = gl_FragCoord.y;
       x_111 = x_48;
       x_112 = x_45;
       if ((x_52 < ((x_55 > -1.0f) ? 10 : 100))) {
@@ -59,8 +63,7 @@ void main_1() {
           bool x_78 = false;
           int x_86 = 0;
           bool x_98 = false;
-          const float x_77 = gl_FragCoord.x;
-          x_78 = (x_77 < -1.0f);
+          x_78 = (gl_FragCoord.x < -1.0f);
           if (!((x_40 < 0.0f))) {
             if (x_78) {
               x_66 = 0;
@@ -108,8 +111,7 @@ void main_1() {
               break;
             }
             {
-              const float x_105 = float(x_52);
-              x_GLF_color = float4(x_105, x_105, x_105, x_105);
+              x_GLF_color = float4((float(x_52)).xxxx);
             }
           }
           x_51 = x_66;
@@ -152,9 +154,9 @@ void main_1() {
       int x_154 = 0;
       int x_119 = 0;
       int x_121 = 0;
-      const float x_123 = asfloat(x_6[0].y);
+      float x_123 = asfloat(x_6[0].y);
       x_161 = x_115;
-      if ((x_120 < int((x_123 + 1.0f)))) {
+      if ((x_120 < tint_ftoi((x_123 + 1.0f)))) {
       } else {
         break;
       }
@@ -162,8 +164,7 @@ void main_1() {
         bool x_135 = false;
         int x_143 = 0;
         bool x_155 = false;
-        const float x_134 = gl_FragCoord.x;
-        x_135 = (x_134 < -1.0f);
+        x_135 = (gl_FragCoord.x < -1.0f);
         if (!((x_40 < 0.0f))) {
           if (x_135) {
             x_119 = 0;
@@ -238,13 +239,21 @@ struct tint_symbol_2 {
 main_out main_inner(float4 gl_FragCoord_param) {
   gl_FragCoord = gl_FragCoord_param;
   main_1();
-  const main_out tint_symbol_3 = {x_GLF_color};
+  main_out tint_symbol_3 = {x_GLF_color};
   return tint_symbol_3;
 }
 
 tint_symbol_2 main(tint_symbol_1 tint_symbol) {
-  const main_out inner_result = main_inner(tint_symbol.gl_FragCoord_param);
+  main_out inner_result = main_inner(float4(tint_symbol.gl_FragCoord_param.xyz, (1.0f / tint_symbol.gl_FragCoord_param.w)));
   tint_symbol_2 wrapper_result = (tint_symbol_2)0;
   wrapper_result.x_GLF_color_1 = inner_result.x_GLF_color_1;
   return wrapper_result;
 }
+FXC validation failure:
+C:\src\dawn\Shader@0x0000013D63676B20(12,3-14): warning X3557: loop only executes for 0 iteration(s), forcing loop to unroll
+C:\src\dawn\Shader@0x0000013D63676B20(60,9-20): warning X3557: loop only executes for 0 iteration(s), forcing loop to unroll
+C:\src\dawn\Shader@0x0000013D63676B20(161,7-18): warning X3557: loop only executes for 0 iteration(s), forcing loop to unroll
+C:\src\dawn\Shader@0x0000013D63676B20(60,9-20): warning X3557: loop only executes for 0 iteration(s), forcing loop to unroll
+C:\src\dawn\Shader@0x0000013D63676B20(161,7-18): warning X3557: loop only executes for 0 iteration(s), forcing loop to unroll
+C:\src\dawn\Shader@0x0000013D63676B20(106,11-22): error X4029: infinite loop detected - loop never exits
+

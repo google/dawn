@@ -138,15 +138,15 @@ void main_inner(uint idx) {
   sb.Store(((800u * idx) + 8u), asuint(0u));
   sb.Store<float16_t>(((800u * idx) + 12u), float16_t(0.0h));
   sb.Store2(((800u * idx) + 16u), asuint((0.0f).xx));
-  sb.Store2(((800u * idx) + 24u), asuint((0).xx));
+  sb.Store2(((800u * idx) + 24u), asuint(int2((0).xx)));
   sb.Store2(((800u * idx) + 32u), asuint((0u).xx));
   sb.Store<vector<float16_t, 2> >(((800u * idx) + 40u), (float16_t(0.0h)).xx);
   sb.Store3(((800u * idx) + 48u), asuint((0.0f).xxx));
-  sb.Store3(((800u * idx) + 64u), asuint((0).xxx));
+  sb.Store3(((800u * idx) + 64u), asuint(int3((0).xxx)));
   sb.Store3(((800u * idx) + 80u), asuint((0u).xxx));
   sb.Store<vector<float16_t, 3> >(((800u * idx) + 96u), (float16_t(0.0h)).xxx);
   sb.Store4(((800u * idx) + 112u), asuint((0.0f).xxxx));
-  sb.Store4(((800u * idx) + 128u), asuint((0).xxxx));
+  sb.Store4(((800u * idx) + 128u), asuint(int4((0).xxxx)));
   sb.Store4(((800u * idx) + 144u), asuint((0u).xxxx));
   sb.Store<vector<float16_t, 4> >(((800u * idx) + 160u), (float16_t(0.0h)).xxxx);
   sb_store_16(((800u * idx) + 168u), float2x2((0.0f).xx, (0.0f).xx));
@@ -167,9 +167,9 @@ void main_inner(uint idx) {
   sb_store_31(((800u * idx) + 648u), matrix<float16_t, 4, 2>((float16_t(0.0h)).xx, (float16_t(0.0h)).xx, (float16_t(0.0h)).xx, (float16_t(0.0h)).xx));
   sb_store_32(((800u * idx) + 664u), matrix<float16_t, 4, 3>((float16_t(0.0h)).xxx, (float16_t(0.0h)).xxx, (float16_t(0.0h)).xxx, (float16_t(0.0h)).xxx));
   sb_store_33(((800u * idx) + 696u), matrix<float16_t, 4, 4>((float16_t(0.0h)).xxxx, (float16_t(0.0h)).xxxx, (float16_t(0.0h)).xxxx, (float16_t(0.0h)).xxxx));
-  const float3 tint_symbol_2[2] = (float3[2])0;
+  float3 tint_symbol_2[2] = (float3[2])0;
   sb_store_34(((800u * idx) + 736u), tint_symbol_2);
-  const matrix<float16_t, 4, 2> tint_symbol_3[2] = (matrix<float16_t, 4, 2>[2])0;
+  matrix<float16_t, 4, 2> tint_symbol_3[2] = (matrix<float16_t, 4, 2>[2])0;
   sb_store_35(((800u * idx) + 768u), tint_symbol_3);
 }
 
@@ -178,3 +178,7 @@ void main(tint_symbol_1 tint_symbol) {
   main_inner(tint_symbol.idx);
   return;
 }
+FXC validation failure:
+C:\src\dawn\Shader@0x0000023E8772C480(61,38-46): error X3000: syntax error: unexpected token 'float16_t'
+C:\src\dawn\Shader@0x0000023E8772C480(62,3-10): error X3018: invalid subscript 'Store'
+

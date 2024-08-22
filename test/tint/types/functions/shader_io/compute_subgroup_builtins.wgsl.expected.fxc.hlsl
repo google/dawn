@@ -11,3 +11,6 @@ void main() {
   main_inner(WaveGetLaneIndex(), WaveGetLaneCount());
   return;
 }
+FXC validation failure:
+C:\src\dawn\Shader@0x000001A2A5FE6E80(9,14-31): error X3004: undeclared identifier 'WaveGetLaneIndex'
+

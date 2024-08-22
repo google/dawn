@@ -120,6 +120,6 @@ main_outputs main(main_inputs inputs) {
 }
 
 FXC validation failure:
-C:\src\dawn\Shader@0x000002D580060330(21,19-25): warning X3556: integer divides may be much slower, try using uints if possible.
-C:\src\dawn\Shader@0x000002D580060330(85,5-15): error X3511: forced to unroll loop, but unrolling failed.
+C:\src\dawn\Shader@0x0000028C6C846F20(21,19-25): warning X3556: integer divides may be much slower, try using uints if possible.
+C:\src\dawn\Shader@0x0000028C6C846F20(85,5-15): error X3511: forced to unroll loop, but unrolling failed.
 

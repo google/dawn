@@ -290,8 +290,8 @@ main_outputs main() {
 }
 
 FXC validation failure:
-C:\src\dawn\Shader@0x000001F8B4A7FED0(40,5-15): warning X3557: loop only executes for 0 iteration(s), forcing loop to unroll
-C:\src\dawn\Shader@0x000001F8B4A7FED0(40,5-15): warning X3557: loop only executes for 0 iteration(s), forcing loop to unroll
-C:\src\dawn\Shader@0x000001F8B4A7FED0(89,3-20): error X3500: array reference cannot be used as an l-value; not natively addressable
-C:\src\dawn\Shader@0x000001F8B4A7FED0(206,5-15): error X3511: forced to unroll loop, but unrolling failed.
+C:\src\dawn\Shader@0x000002D63D7A3170(40,5-15): warning X3557: loop only executes for 0 iteration(s), forcing loop to unroll
+C:\src\dawn\Shader@0x000002D63D7A3170(40,5-15): warning X3557: loop only executes for 0 iteration(s), forcing loop to unroll
+C:\src\dawn\Shader@0x000002D63D7A3170(89,3-20): error X3500: array reference cannot be used as an l-value; not natively addressable
+C:\src\dawn\Shader@0x000002D63D7A3170(206,5-15): error X3511: forced to unroll loop, but unrolling failed.
 

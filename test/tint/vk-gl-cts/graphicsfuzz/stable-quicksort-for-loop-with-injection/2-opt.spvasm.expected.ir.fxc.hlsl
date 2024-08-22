@@ -216,5 +216,5 @@ main_outputs main(main_inputs inputs) {
 }
 
 FXC validation failure:
-C:\src\dawn\Shader@0x0000021E90678E60(139,5-15): error X3511: forced to unroll loop, but unrolling failed.
+C:\src\dawn\Shader@0x00000208A86E5070(139,5-15): error X3511: forced to unroll loop, but unrolling failed.
 

@@ -55,3 +55,8 @@ void f() {
   c(vector<float16_t, 4>(ubo_load_10_xz[0], ubo_load_10_yw[0], ubo_load_10_xz[1], ubo_load_10_yw[1]).ywxz.x);
   return;
 }
+FXC validation failure:
+C:\src\dawn\Shader@0x000001FD94798000(5,15-23): error X3000: syntax error: unexpected token 'float16_t'
+C:\src\dawn\Shader@0x000001FD94798000(8,15-23): error X3000: syntax error: unexpected token 'float16_t'
+C:\src\dawn\Shader@0x000001FD94798000(11,8-16): error X3000: unrecognized identifier 'float16_t'
+

@@ -13,6 +13,9 @@ uint2 m() {
 }
 
 void f() {
-  const uint2 tint_symbol = m();
+  uint2 tint_symbol = m();
   vector<float16_t, 2> v = vector<float16_t, 2>(tint_symbol);
 }
+FXC validation failure:
+C:\src\dawn\Shader@0x000001817ACC37F0(15,10-18): error X3000: syntax error: unexpected token 'float16_t'
+

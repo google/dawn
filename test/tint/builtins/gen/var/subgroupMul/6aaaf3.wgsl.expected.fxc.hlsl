@@ -8,11 +8,16 @@ vector<float16_t, 2> subgroupMul_6aaaf3() {
   return res;
 }
 
+void fragment_main() {
+  prevent_dce.Store<vector<float16_t, 2> >(0u, subgroupMul_6aaaf3());
+  return;
+}
+
 [numthreads(1, 1, 1)]
 void compute_main() {
   prevent_dce.Store<vector<float16_t, 2> >(0u, subgroupMul_6aaaf3());
   return;
 }
 FXC validation failure:
-C:\src\dawn\Shader@0x0000017C08E7C980(3,8-16): error X3000: syntax error: unexpected token 'float16_t'
+C:\src\dawn\Shader@0x0000019EB3B49BF0(3,8-16): error X3000: syntax error: unexpected token 'float16_t'
 

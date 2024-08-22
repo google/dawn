@@ -80,5 +80,5 @@ main5_outputs main5() {
 }
 
 FXC validation failure:
-C:\src\dawn\Shader@0x00000205EC46E6C0(18,3-11): error X3000: unrecognized identifier 'float16_t'
+C:\src\dawn\Shader@0x000001E21FF0A010(18,3-11): error X3000: unrecognized identifier 'float16_t'
 

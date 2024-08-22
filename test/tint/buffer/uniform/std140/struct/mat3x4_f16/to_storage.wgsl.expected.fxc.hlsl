@@ -54,7 +54,7 @@ matrix<float16_t, 3, 4> u_load_3(uint offset) {
 S u_load_1(uint offset) {
   const uint scalar_offset_3 = ((offset + 0u)) / 4;
   const uint scalar_offset_4 = ((offset + 64u)) / 4;
-  const S tint_symbol = {asint(u[scalar_offset_3 / 4][scalar_offset_3 % 4]), u_load_3((offset + 8u)), asint(u[scalar_offset_4 / 4][scalar_offset_4 % 4])};
+  S tint_symbol = {asint(u[scalar_offset_3 / 4][scalar_offset_3 % 4]), u_load_3((offset + 8u)), asint(u[scalar_offset_4 / 4][scalar_offset_4 % 4])};
   return tint_symbol;
 }
 
@@ -80,3 +80,6 @@ void f() {
   s.Store<vector<float16_t, 4> >(136u, vector<float16_t, 4>(ubo_load_6_xz[0], ubo_load_6_yw[0], ubo_load_6_xz[1], ubo_load_6_yw[1]).ywxz);
   return;
 }
+FXC validation failure:
+C:\src\dawn\Shader@0x000001E0C9BB4D00(3,10-18): error X3000: syntax error: unexpected token 'float16_t'
+

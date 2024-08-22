@@ -13,6 +13,9 @@ matrix<float16_t, 2, 4> m() {
 }
 
 void f() {
-  const matrix<float16_t, 2, 4> tint_symbol = m();
+  matrix<float16_t, 2, 4> tint_symbol = m();
   float2x4 v = float2x4(tint_symbol);
 }
+FXC validation failure:
+C:\src\dawn\Shader@0x000001C75FCEF060(6,8-16): error X3000: unrecognized identifier 'float16_t'
+

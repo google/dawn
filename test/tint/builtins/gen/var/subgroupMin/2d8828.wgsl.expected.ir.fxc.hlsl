@@ -18,5 +18,5 @@ void compute_main() {
 }
 
 FXC validation failure:
-C:\src\dawn\Shader@0x00000279099B9070(5,16-35): error X3004: undeclared identifier 'WaveActiveMin'
+C:\src\dawn\Shader@0x000002290D1306D0(5,16-35): error X3004: undeclared identifier 'WaveActiveMin'
 

@@ -13,7 +13,7 @@ void f() {
 }
 
 FXC validation failure:
-C:\src\dawn\Shader@0x000001B5ABF3FE30(2,35-43): error X3000: syntax error: unexpected token 'float16_t'
-C:\src\dawn\Shader@0x000001B5ABF3FE30(3,29-31): error X3004: undeclared identifier 'src'
-C:\src\dawn\Shader@0x000001B5ABF3FE30(3,22-32): error X3014: incorrect number of arguments to numeric-type constructor
+C:\src\dawn\Shader@0x000001DE4802B720(2,35-43): error X3000: syntax error: unexpected token 'float16_t'
+C:\src\dawn\Shader@0x000001DE4802B720(3,29-31): error X3004: undeclared identifier 'src'
+C:\src\dawn\Shader@0x000001DE4802B720(3,22-32): error X3014: incorrect number of arguments to numeric-type constructor
 

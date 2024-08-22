@@ -1,4 +1,4 @@
-SKIP: Wave ops not supported before SM 6.0
+SKIP: FAILED
 
 
 RWByteAddressBuffer prevent_dce : register(u0);
@@ -15,4 +15,7 @@ void fragment_main() {
 void compute_main() {
   prevent_dce.Store(0u, quadSwapY_0c4938());
 }
+
+FXC validation failure:
+C:\src\dawn\Shader@0x00000154558860C0(4,14-32): error X3004: undeclared identifier 'QuadReadAcrossY'
 

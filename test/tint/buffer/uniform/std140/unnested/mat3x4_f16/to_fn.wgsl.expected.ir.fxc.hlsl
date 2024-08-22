@@ -41,7 +41,7 @@ void f() {
 }
 
 FXC validation failure:
-C:\src\dawn\Shader@0x0000020E5416E4F0(5,15-23): error X3000: syntax error: unexpected token 'float16_t'
-C:\src\dawn\Shader@0x0000020E5416E4F0(8,15-23): error X3000: syntax error: unexpected token 'float16_t'
-C:\src\dawn\Shader@0x0000020E5416E4F0(11,8-16): error X3000: unrecognized identifier 'float16_t'
+C:\src\dawn\Shader@0x00000205B0618F80(5,15-23): error X3000: syntax error: unexpected token 'float16_t'
+C:\src\dawn\Shader@0x00000205B0618F80(8,15-23): error X3000: syntax error: unexpected token 'float16_t'
+C:\src\dawn\Shader@0x00000205B0618F80(11,8-16): error X3000: unrecognized identifier 'float16_t'
 

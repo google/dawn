@@ -18,5 +18,5 @@ void compute_main() {
 }
 
 FXC validation failure:
-C:\src\dawn\Shader@0x000001ACFADF9100(5,15-37): error X3004: undeclared identifier 'WaveActiveBallot'
+C:\src\dawn\Shader@0x000001F7A31646A0(5,15-37): error X3004: undeclared identifier 'WaveActiveBallot'
 

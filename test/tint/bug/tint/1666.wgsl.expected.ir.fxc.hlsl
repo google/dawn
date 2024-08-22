@@ -33,5 +33,5 @@ void f() {
 }
 
 FXC validation failure:
-C:\src\dawn\Shader@0x000001EBA7140850(5,11-25): error X3504: array index out of bounds
+C:\src\dawn\Shader@0x000002ED72BD6CB0(5,11-25): error X3504: array index out of bounds
 

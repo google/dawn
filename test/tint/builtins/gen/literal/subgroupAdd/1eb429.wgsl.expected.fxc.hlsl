@@ -7,11 +7,16 @@ int2 subgroupAdd_1eb429() {
   return res;
 }
 
+void fragment_main() {
+  prevent_dce.Store2(0u, asuint(subgroupAdd_1eb429()));
+  return;
+}
+
 [numthreads(1, 1, 1)]
 void compute_main() {
   prevent_dce.Store2(0u, asuint(subgroupAdd_1eb429()));
   return;
 }
 FXC validation failure:
-C:\src\dawn\Shader@0x0000018C2972F3E0(4,14-34): error X3004: undeclared identifier 'WaveActiveSum'
+C:\src\dawn\Shader@0x00000177F50B01B0(4,14-34): error X3004: undeclared identifier 'WaveActiveSum'
 

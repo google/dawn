@@ -1,4 +1,4 @@
-SKIP: Wave ops not support before SM6.0
+SKIP: FAILED
 
 RWByteAddressBuffer prevent_dce : register(u0);
 
@@ -8,8 +8,16 @@ vector<float16_t, 4> subgroupMin_cd3b9d() {
   return res;
 }
 
+void fragment_main() {
+  prevent_dce.Store<vector<float16_t, 4> >(0u, subgroupMin_cd3b9d());
+  return;
+}
+
 [numthreads(1, 1, 1)]
 void compute_main() {
   prevent_dce.Store<vector<float16_t, 4> >(0u, subgroupMin_cd3b9d());
   return;
 }
+FXC validation failure:
+C:\src\dawn\Shader@0x0000020021CBD730(3,8-16): error X3000: syntax error: unexpected token 'float16_t'
+

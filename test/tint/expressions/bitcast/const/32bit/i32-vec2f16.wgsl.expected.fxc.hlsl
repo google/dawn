@@ -2,9 +2,9 @@ SKIP: INVALID
 
 [numthreads(1, 1, 1)]
 void f() {
-  const vector<float16_t, 2> b = vector<float16_t, 2>(float16_t(1.0h), float16_t(2.0h));
+  vector<float16_t, 2> b = vector<float16_t, 2>(float16_t(1.0h), float16_t(2.0h));
   return;
 }
 FXC validation failure:
-D:\Projects\RampUp\dawn\test\tint\expressions\bitcast\Shader@0x000001ABDA989700(3,16-24): error X3000: syntax error: unexpected token 'float16_t'
+C:\src\dawn\Shader@0x00000256F9DF09D0(3,10-18): error X3000: syntax error: unexpected token 'float16_t'
 

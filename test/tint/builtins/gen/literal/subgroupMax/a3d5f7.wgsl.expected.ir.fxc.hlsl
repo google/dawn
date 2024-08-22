@@ -17,5 +17,5 @@ void compute_main() {
 }
 
 FXC validation failure:
-C:\src\dawn\Shader@0x0000017AB9C0CB10(4,14-36): error X3004: undeclared identifier 'WaveActiveMax'
+C:\src\dawn\Shader@0x000002498343B720(4,14-36): error X3004: undeclared identifier 'WaveActiveMax'
 

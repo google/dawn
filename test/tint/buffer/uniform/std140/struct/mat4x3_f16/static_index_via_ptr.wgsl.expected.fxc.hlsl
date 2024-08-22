@@ -36,7 +36,7 @@ matrix<float16_t, 4, 3> a_load_4(uint offset) {
 }
 
 Inner a_load_3(uint offset) {
-  const Inner tint_symbol = {a_load_4((offset + 0u))};
+  Inner tint_symbol = {a_load_4((offset + 0u))};
   return tint_symbol;
 }
 
@@ -52,7 +52,7 @@ a_load_2_ret a_load_2(uint offset) {
 }
 
 Outer a_load_1(uint offset) {
-  const Outer tint_symbol_1 = {a_load_2((offset + 0u))};
+  Outer tint_symbol_1 = {a_load_2((offset + 0u))};
   return tint_symbol_1;
 }
 
@@ -69,15 +69,18 @@ a_load_ret a_load(uint offset) {
 
 [numthreads(1, 1, 1)]
 void f() {
-  const Outer l_a[4] = a_load(0u);
-  const Outer l_a_3 = a_load_1(768u);
-  const Inner l_a_3_a[4] = a_load_2(768u);
-  const Inner l_a_3_a_2 = a_load_3(896u);
-  const matrix<float16_t, 4, 3> l_a_3_a_2_m = a_load_4(896u);
+  Outer l_a[4] = a_load(0u);
+  Outer l_a_3 = a_load_1(768u);
+  Inner l_a_3_a[4] = a_load_2(768u);
+  Inner l_a_3_a_2 = a_load_3(896u);
+  matrix<float16_t, 4, 3> l_a_3_a_2_m = a_load_4(896u);
   uint2 ubo_load_8 = a[56].zw;
   vector<float16_t, 2> ubo_load_8_xz = vector<float16_t, 2>(f16tof32(ubo_load_8 & 0xFFFF));
   float16_t ubo_load_8_y = f16tof32(ubo_load_8[0] >> 16);
-  const vector<float16_t, 3> l_a_3_a_2_m_1 = vector<float16_t, 3>(ubo_load_8_xz[0], ubo_load_8_y, ubo_load_8_xz[1]);
-  const float16_t l_a_3_a_2_m_1_0 = float16_t(f16tof32(((a[56].z) & 0xFFFF)));
+  vector<float16_t, 3> l_a_3_a_2_m_1 = vector<float16_t, 3>(ubo_load_8_xz[0], ubo_load_8_y, ubo_load_8_xz[1]);
+  float16_t l_a_3_a_2_m_1_0 = float16_t(f16tof32(((a[56].z) & 0xFFFF)));
   return;
 }
+FXC validation failure:
+C:\src\dawn\Shader@0x00000204FC5754E0(2,10-18): error X3000: syntax error: unexpected token 'float16_t'
+

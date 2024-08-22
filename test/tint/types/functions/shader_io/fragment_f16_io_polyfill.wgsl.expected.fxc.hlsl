@@ -25,3 +25,6 @@ tint_symbol_2 frag_main(tint_symbol_1 tint_symbol) {
   wrapper_result.b = inner_result.b;
   return wrapper_result;
 }
+FXC validation failure:
+C:\src\dawn\Shader@0x0000021D5A56D0B0(2,3-11): error X3000: unrecognized identifier 'float16_t'
+

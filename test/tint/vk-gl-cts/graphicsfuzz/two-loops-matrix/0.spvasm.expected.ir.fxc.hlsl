@@ -70,6 +70,6 @@ main_outputs main() {
 }
 
 FXC validation failure:
-C:\src\dawn\Shader@0x0000023E2E187420(28,7-20): error X3504: literal loop terminated early due to out of bounds array access
-C:\src\dawn\Shader@0x0000023E2E187420(22,5-15): warning X3557: loop only executes for 0 iteration(s), forcing loop to unroll
+C:\src\dawn\Shader@0x000001A396E9AAB0(28,7-20): error X3504: literal loop terminated early due to out of bounds array access
+C:\src\dawn\Shader@0x000001A396E9AAB0(22,5-15): warning X3557: loop only executes for 0 iteration(s), forcing loop to unroll
 

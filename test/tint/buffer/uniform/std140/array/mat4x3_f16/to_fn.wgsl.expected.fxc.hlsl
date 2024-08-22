@@ -3,17 +3,22 @@ SKIP: FAILED
 cbuffer cbuffer_u : register(b0) {
   uint4 u[8];
 };
+RWByteAddressBuffer s : register(u1);
 
-void a(matrix<float16_t, 4, 3> a_1[4]) {
+float16_t a(matrix<float16_t, 4, 3> a_1[4]) {
+  return a_1[0][0].x;
 }
 
-void b(matrix<float16_t, 4, 3> m) {
+float16_t b(matrix<float16_t, 4, 3> m) {
+  return m[0].x;
 }
 
-void c(vector<float16_t, 3> v) {
+float16_t c(vector<float16_t, 3> v) {
+  return v.x;
 }
 
-void d(float16_t f_1) {
+float16_t d(float16_t f_1) {
+  return f_1;
 }
 
 matrix<float16_t, 4, 3> u_load_1(uint offset) {
@@ -53,15 +58,19 @@ u_load_ret u_load(uint offset) {
 
 [numthreads(1, 1, 1)]
 void f() {
-  a(u_load(0u));
-  b(u_load_1(32u));
+  float16_t tint_symbol = a(u_load(0u));
+  float16_t tint_symbol_1 = b(u_load_1(32u));
   uint2 ubo_load_8 = u[2].xy;
   vector<float16_t, 2> ubo_load_8_xz = vector<float16_t, 2>(f16tof32(ubo_load_8 & 0xFFFF));
   float16_t ubo_load_8_y = f16tof32(ubo_load_8[0] >> 16);
-  c(vector<float16_t, 3>(ubo_load_8_xz[0], ubo_load_8_y, ubo_load_8_xz[1]).zxy);
+  float16_t tint_symbol_2 = c(vector<float16_t, 3>(ubo_load_8_xz[0], ubo_load_8_y, ubo_load_8_xz[1]).zxy);
   uint2 ubo_load_9 = u[2].xy;
   vector<float16_t, 2> ubo_load_9_xz = vector<float16_t, 2>(f16tof32(ubo_load_9 & 0xFFFF));
   float16_t ubo_load_9_y = f16tof32(ubo_load_9[0] >> 16);
-  d(vector<float16_t, 3>(ubo_load_9_xz[0], ubo_load_9_y, ubo_load_9_xz[1]).zxy.x);
+  float16_t tint_symbol_3 = d(vector<float16_t, 3>(ubo_load_9_xz[0], ubo_load_9_y, ubo_load_9_xz[1]).zxy.x);
+  s.Store<float16_t>(0u, (((tint_symbol + tint_symbol_1) + tint_symbol_2) + tint_symbol_3));
   return;
 }
+FXC validation failure:
+C:\src\dawn\Shader@0x000001798BD77F80(6,1-9): error X3000: unrecognized identifier 'float16_t'
+

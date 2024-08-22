@@ -1,4 +1,4 @@
-SKIP: Wave ops not support before SM6.0
+SKIP: FAILED
 
 RWByteAddressBuffer prevent_dce : register(u0);
 
@@ -8,8 +8,16 @@ uint2 subgroupMax_b8fb0e() {
   return res;
 }
 
+void fragment_main() {
+  prevent_dce.Store2(0u, asuint(subgroupMax_b8fb0e()));
+  return;
+}
+
 [numthreads(1, 1, 1)]
 void compute_main() {
   prevent_dce.Store2(0u, asuint(subgroupMax_b8fb0e()));
   return;
 }
+FXC validation failure:
+C:\src\dawn\Shader@0x0000025E04B6A830(5,15-34): error X3004: undeclared identifier 'WaveActiveMax'
+

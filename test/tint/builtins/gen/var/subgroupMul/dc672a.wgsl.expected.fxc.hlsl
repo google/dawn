@@ -8,11 +8,16 @@ uint2 subgroupMul_dc672a() {
   return res;
 }
 
+void fragment_main() {
+  prevent_dce.Store2(0u, asuint(subgroupMul_dc672a()));
+  return;
+}
+
 [numthreads(1, 1, 1)]
 void compute_main() {
   prevent_dce.Store2(0u, asuint(subgroupMul_dc672a()));
   return;
 }
 FXC validation failure:
-C:\src\dawn\Shader@0x0000012085D71720(5,15-38): error X3004: undeclared identifier 'WaveActiveProduct'
+C:\src\dawn\Shader@0x000002C5A061CEF0(5,15-38): error X3004: undeclared identifier 'WaveActiveProduct'
 

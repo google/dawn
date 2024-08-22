@@ -1,4 +1,4 @@
-SKIP: Wave ops not supported before SM 6.0
+SKIP: FAILED
 
 RWByteAddressBuffer prevent_dce : register(u0);
 
@@ -17,3 +17,6 @@ void compute_main() {
   prevent_dce.Store(0u, asuint(quadBroadcast_0639ea()));
   return;
 }
+FXC validation failure:
+C:\src\dawn\Shader@0x000001FA88846D30(4,13-33): error X3004: undeclared identifier 'QuadReadLaneAt'
+

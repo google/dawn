@@ -20,10 +20,13 @@ matrix<float16_t, 2, 2> m_load(uint offset) {
 
 [numthreads(1, 1, 1)]
 void f() {
-  const int p_m_i_save = i();
-  const matrix<float16_t, 2, 2> l_m = m_load(0u);
+  int p_m_i_save = i();
+  matrix<float16_t, 2, 2> l_m = m_load(0u);
   const uint scalar_offset_2 = ((4u * uint(p_m_i_save))) / 4;
   uint ubo_load_2 = m[scalar_offset_2 / 4][scalar_offset_2 % 4];
-  const vector<float16_t, 2> l_m_i = vector<float16_t, 2>(float16_t(f16tof32(ubo_load_2 & 0xFFFF)), float16_t(f16tof32(ubo_load_2 >> 16)));
+  vector<float16_t, 2> l_m_i = vector<float16_t, 2>(float16_t(f16tof32(ubo_load_2 & 0xFFFF)), float16_t(f16tof32(ubo_load_2 >> 16)));
   return;
 }
+FXC validation failure:
+C:\src\dawn\Shader@0x00000214163A8500(11,8-16): error X3000: syntax error: unexpected token 'float16_t'
+

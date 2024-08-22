@@ -8,8 +8,8 @@ cbuffer cbuffer_x_5 : register(b0) {
 void main_1() {
   int m = 0;
   x_GLF_color = float4(1.0f, 0.0f, 0.0f, 1.0f);
-  const float x_30 = asfloat(x_5[0].x);
-  const float x_32 = asfloat(x_5[0].y);
+  float x_30 = asfloat(x_5[0].x);
+  float x_32 = asfloat(x_5[0].y);
   if ((x_30 > x_32)) {
     while (true) {
       {
@@ -37,13 +37,17 @@ struct tint_symbol {
 
 main_out main_inner() {
   main_1();
-  const main_out tint_symbol_1 = {x_GLF_color};
+  main_out tint_symbol_1 = {x_GLF_color};
   return tint_symbol_1;
 }
 
 tint_symbol main() {
-  const main_out inner_result = main_inner();
+  main_out inner_result = main_inner();
   tint_symbol wrapper_result = (tint_symbol)0;
   wrapper_result.x_GLF_color_1 = inner_result.x_GLF_color_1;
   return wrapper_result;
 }
+FXC validation failure:
+C:\src\dawn\Shader@0x0000027BF045FA70(12,5-16): warning X3557: loop only executes for 0 iteration(s), forcing loop to unroll
+C:\src\dawn\Shader@0x0000027BF045FA70(18,12-15): error X3696: infinite loop detected - loop never exits
+

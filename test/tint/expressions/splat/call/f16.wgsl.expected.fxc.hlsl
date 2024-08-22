@@ -10,10 +10,13 @@ float16_t get_f16() {
 }
 
 void f() {
-  const float16_t tint_symbol = get_f16();
+  float16_t tint_symbol = get_f16();
   vector<float16_t, 2> v2 = vector<float16_t, 2>((tint_symbol).xx);
-  const float16_t tint_symbol_1 = get_f16();
+  float16_t tint_symbol_1 = get_f16();
   vector<float16_t, 3> v3 = vector<float16_t, 3>((tint_symbol_1).xxx);
-  const float16_t tint_symbol_2 = get_f16();
+  float16_t tint_symbol_2 = get_f16();
   vector<float16_t, 4> v4 = vector<float16_t, 4>((tint_symbol_2).xxxx);
 }
+FXC validation failure:
+C:\src\dawn\Shader@0x00000271C0F8AFA0(6,1-9): error X3000: unrecognized identifier 'float16_t'
+

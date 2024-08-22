@@ -8,11 +8,16 @@ int4 subgroupExclusiveMul_019660() {
   return res;
 }
 
+void fragment_main() {
+  prevent_dce.Store4(0u, asuint(subgroupExclusiveMul_019660()));
+  return;
+}
+
 [numthreads(1, 1, 1)]
 void compute_main() {
   prevent_dce.Store4(0u, asuint(subgroupExclusiveMul_019660()));
   return;
 }
 FXC validation failure:
-C:\src\dawn\Shader@0x000001FE2E29D430(5,14-37): error X3004: undeclared identifier 'WavePrefixProduct'
+C:\src\dawn\Shader@0x0000026B9938FD80(5,14-37): error X3004: undeclared identifier 'WavePrefixProduct'
 
