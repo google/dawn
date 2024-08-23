@@ -179,3 +179,5 @@ FXC validation failure:
 <scrubbed_path>(55,137-143): error X3000: syntax error: unexpected token 'sampler'
 <scrubbed_path>(56,27-32): error X3004: undeclared identifier 'coords'
 
+
+tint executable returned error: exit status 1

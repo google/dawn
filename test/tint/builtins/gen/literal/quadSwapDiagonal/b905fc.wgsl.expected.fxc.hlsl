@@ -20,3 +20,5 @@ void compute_main() {
 FXC validation failure:
 <scrubbed_path>(4,16-49): error X3004: undeclared identifier 'QuadReadAcrossDiagonal'
 
+
+tint executable returned error: exit status 1

@@ -23,3 +23,5 @@ FXC validation failure:
 <scrubbed_path>(11,24-40): error X3013: Possible intrinsic functions are:
 <scrubbed_path>(11,24-40): error X3013:     frexp(float|half, out float|half exp)
 
+
+tint executable returned error: exit status 1

@@ -47,3 +47,5 @@ FXC validation failure:
 <scrubbed_path>(5,10-18): error X3000: syntax error: unexpected token 'float16_t'
 <scrubbed_path>(6,12-14): error X3004: undeclared identifier 'res'
 
+
+tint executable returned error: exit status 1

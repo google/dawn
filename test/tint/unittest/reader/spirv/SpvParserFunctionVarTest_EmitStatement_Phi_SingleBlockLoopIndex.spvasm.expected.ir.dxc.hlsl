@@ -46,3 +46,5 @@ hlsl.hlsl:37: error: Loop must have break.
 Validation failed.
 
 
+
+tint executable returned error: exit status 1

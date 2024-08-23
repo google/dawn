@@ -116,3 +116,5 @@ $B1: {  # root
   }
 }
 
+
+tint executable returned error: exit status 1

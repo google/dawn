@@ -1,247 +1,117 @@
 SKIP: FAILED
 
-
-enable f16;
-
 struct Inner {
-  @size(64)
-  m : mat4x3<f16>,
-}
+  matrix<float16_t, 4, 3> m;
+};
 
 struct Outer {
-  a : array<Inner, 4>,
-}
+  Inner a[4];
+};
 
-@group(0) @binding(0) var<uniform> a : array<Outer, 4>;
 
-var<private> counter = 0;
-
-fn i() -> i32 {
-  counter++;
+cbuffer cbuffer_a : register(b0) {
+  uint4 a[64];
+};
+static int counter = 0;
+int i() {
+  counter = (counter + 1);
   return counter;
 }
 
-@compute @workgroup_size(1)
-fn f() {
-  let p_a = &(a);
-  let p_a_i = &((*(p_a))[i()]);
-  let p_a_i_a = &((*(p_a_i)).a);
-  let p_a_i_a_i = &((*(p_a_i_a))[i()]);
-  let p_a_i_a_i_m = &((*(p_a_i_a_i)).m);
-  let p_a_i_a_i_m_i = &((*(p_a_i_a_i_m))[i()]);
-  let l_a : array<Outer, 4> = *(p_a);
-  let l_a_i : Outer = *(p_a_i);
-  let l_a_i_a : array<Inner, 4> = *(p_a_i_a);
-  let l_a_i_a_i : Inner = *(p_a_i_a_i);
-  let l_a_i_a_i_m : mat4x3<f16> = *(p_a_i_a_i_m);
-  let l_a_i_a_i_m_i : vec3<f16> = *(p_a_i_a_i_m_i);
-  let l_a_i_a_i_m_i_i : f16 = (*(p_a_i_a_i_m_i))[i()];
+vector<float16_t, 4> tint_bitcast_to_f16(uint4 src) {
+  uint4 v = src;
+  uint4 mask = (65535u).xxxx;
+  uint4 shift = (16u).xxxx;
+  float4 t_low = f16tof32((v & mask));
+  float4 t_high = f16tof32(((v >> shift) & mask));
+  float16_t v_1 = float16_t(t_low.x);
+  float16_t v_2 = float16_t(t_high.x);
+  float16_t v_3 = float16_t(t_low.y);
+  return vector<float16_t, 4>(v_1, v_2, v_3, float16_t(t_high.y));
 }
 
-Failed to generate: :55:5 error: binary: no matching overload for 'operator * (i32, u32)'
-
-9 candidate operators:
- • 'operator * (T  ✓ , T  ✗ ) -> T' where:
-      ✓  'T' is 'f32', 'i32', 'u32' or 'f16'
- • 'operator * (vecN<T>  ✗ , T  ✓ ) -> vecN<T>' where:
-      ✓  'T' is 'f32', 'i32', 'u32' or 'f16'
- • 'operator * (T  ✓ , vecN<T>  ✗ ) -> vecN<T>' where:
-      ✓  'T' is 'f32', 'i32', 'u32' or 'f16'
- • 'operator * (T  ✗ , matNxM<T>  ✗ ) -> matNxM<T>' where:
-      ✗  'T' is 'f32' or 'f16'
- • 'operator * (matNxM<T>  ✗ , T  ✗ ) -> matNxM<T>' where:
-      ✗  'T' is 'f32' or 'f16'
- • 'operator * (vecN<T>  ✗ , vecN<T>  ✗ ) -> vecN<T>' where:
-      ✗  'T' is 'f32', 'i32', 'u32' or 'f16'
- • 'operator * (matCxR<T>  ✗ , vecC<T>  ✗ ) -> vecR<T>' where:
-      ✗  'T' is 'f32' or 'f16'
- • 'operator * (vecR<T>  ✗ , matCxR<T>  ✗ ) -> vecC<T>' where:
-      ✗  'T' is 'f32' or 'f16'
- • 'operator * (matKxR<T>  ✗ , matCxK<T>  ✗ ) -> matCxR<T>' where:
-      ✗  'T' is 'f32' or 'f16'
-
-    %43:u32 = mul %42, 2u
-    ^^^^^^^^^^^^^^^^^^^^^
-
-:24:3 note: in block
-  $B3: {
-  ^^^
-
-note: # Disassembly
-Inner = struct @align(8) {
-  m:mat4x3<f16> @offset(0)
+matrix<float16_t, 4, 3> v_4(uint start_byte_offset) {
+  vector<float16_t, 3> v_5 = tint_bitcast_to_f16(a[(start_byte_offset / 16u)]).xyz;
+  vector<float16_t, 3> v_6 = tint_bitcast_to_f16(a[((8u + start_byte_offset) / 16u)]).xyz;
+  vector<float16_t, 3> v_7 = tint_bitcast_to_f16(a[((16u + start_byte_offset) / 16u)]).xyz;
+  return matrix<float16_t, 4, 3>(v_5, v_6, v_7, tint_bitcast_to_f16(a[((24u + start_byte_offset) / 16u)]).xyz);
 }
 
-Outer = struct @align(8) {
-  a:array<Inner, 4> @offset(0)
+Inner v_8(uint start_byte_offset) {
+  Inner v_9 = {v_4(start_byte_offset)};
+  return v_9;
 }
 
-$B1: {  # root
-  %a:ptr<uniform, array<vec4<u32>, 64>, read> = var @binding_point(0, 0)
-  %counter:ptr<private, i32, read_write> = var, 0i
-}
-
-%i = func():i32 {
-  $B2: {
-    %4:i32 = load %counter
-    %5:i32 = add %4, 1i
-    store %counter, %5
-    %6:i32 = load %counter
-    ret %6
-  }
-}
-%f = @compute @workgroup_size(1, 1, 1) func():void {
-  $B3: {
-    %8:i32 = call %i
-    %9:u32 = convert %8
-    %10:u32 = mul 256u, %9
-    %11:i32 = call %i
-    %12:u32 = convert %11
-    %13:u32 = mul 64u, %12
-    %14:i32 = call %i
-    %15:u32 = convert %14
-    %16:u32 = mul 8u, %15
-    %17:array<Outer, 4> = call %18, 0u
-    %l_a:array<Outer, 4> = let %17
-    %20:Outer = call %21, %10
-    %l_a_i:Outer = let %20
-    %23:array<Inner, 4> = call %24, %10
-    %l_a_i_a:array<Inner, 4> = let %23
-    %26:u32 = add %10, %13
-    %27:Inner = call %28, %26
-    %l_a_i_a_i:Inner = let %27
-    %30:u32 = add %10, %13
-    %31:mat4x3<f16> = call %32, %30
-    %l_a_i_a_i_m:mat4x3<f16> = let %31
-    %34:u32 = add %10, %13
-    %35:u32 = add %34, %16
-    %36:u32 = div %35, 16u
-    %37:ptr<uniform, vec4<u32>, read> = access %a, %36
-    %38:vec4<u32> = load %37
-    %39:vec4<f16> = bitcast %38
-    %40:vec3<f16> = swizzle %39, xyz
-    %l_a_i_a_i_m_i:vec3<f16> = let %40
-    %42:i32 = call %i
-    %43:u32 = mul %42, 2u
-    %44:u32 = add %10, %13
-    %45:u32 = add %44, %16
-    %46:u32 = add %45, %43
-    %47:u32 = div %46, 16u
-    %48:ptr<uniform, vec4<u32>, read> = access %a, %47
-    %49:u32 = mod %46, 16u
-    %50:u32 = div %49, 4u
-    %51:u32 = load_vector_element %48, %50
-    %52:u32 = mod %46, 4u
-    %53:bool = eq %52, 0u
-    %54:u32 = hlsl.ternary 16u, 0u, %53
-    %55:u32 = shr %51, %54
-    %56:f32 = hlsl.f16tof32 %55
-    %57:f16 = convert %56
-    %l_a_i_a_i_m_i_i:f16 = let %57
-    ret
-  }
-}
-%21 = func(%start_byte_offset:u32):Outer {
-  $B4: {
-    %60:array<Inner, 4> = call %24, %start_byte_offset
-    %61:Outer = construct %60
-    ret %61
-  }
-}
-%24 = func(%start_byte_offset_1:u32):array<Inner, 4> {  # %start_byte_offset_1: 'start_byte_offset'
-  $B5: {
-    %a_1:ptr<function, array<Inner, 4>, read_write> = var, array<Inner, 4>(Inner(mat4x3<f16>(vec3<f16>(0.0h))))  # %a_1: 'a'
-    loop [i: $B6, b: $B7, c: $B8] {  # loop_1
-      $B6: {  # initializer
-        next_iteration 0u  # -> $B7
+typedef Inner ary_ret[4];
+ary_ret v_10(uint start_byte_offset) {
+  Inner a[4] = (Inner[4])0;
+  {
+    uint v_11 = 0u;
+    v_11 = 0u;
+    while(true) {
+      uint v_12 = v_11;
+      if ((v_12 >= 4u)) {
+        break;
       }
-      $B7 (%idx:u32): {  # body
-        %65:bool = gte %idx, 4u
-        if %65 [t: $B9] {  # if_1
-          $B9: {  # true
-            exit_loop  # loop_1
-          }
-        }
-        %66:u32 = mul %idx, 64u
-        %67:u32 = add %start_byte_offset_1, %66
-        %68:ptr<function, Inner, read_write> = access %a_1, %idx
-        %69:Inner = call %28, %67
-        store %68, %69
-        continue  # -> $B8
+      Inner v_13 = v_8((start_byte_offset + (v_12 * 64u)));
+      a[v_12] = v_13;
+      {
+        v_11 = (v_12 + 1u);
       }
-      $B8: {  # continuing
-        %70:u32 = add %idx, 1u
-        next_iteration %70  # -> $B7
-      }
+      continue;
     }
-    %71:array<Inner, 4> = load %a_1
-    ret %71
   }
-}
-%28 = func(%start_byte_offset_2:u32):Inner {  # %start_byte_offset_2: 'start_byte_offset'
-  $B10: {
-    %73:mat4x3<f16> = call %32, %start_byte_offset_2
-    %74:Inner = construct %73
-    ret %74
-  }
-}
-%32 = func(%start_byte_offset_3:u32):mat4x3<f16> {  # %start_byte_offset_3: 'start_byte_offset'
-  $B11: {
-    %76:u32 = div %start_byte_offset_3, 16u
-    %77:ptr<uniform, vec4<u32>, read> = access %a, %76
-    %78:vec4<u32> = load %77
-    %79:vec4<f16> = bitcast %78
-    %80:vec3<f16> = swizzle %79, xyz
-    %81:u32 = add 8u, %start_byte_offset_3
-    %82:u32 = div %81, 16u
-    %83:ptr<uniform, vec4<u32>, read> = access %a, %82
-    %84:vec4<u32> = load %83
-    %85:vec4<f16> = bitcast %84
-    %86:vec3<f16> = swizzle %85, xyz
-    %87:u32 = add 16u, %start_byte_offset_3
-    %88:u32 = div %87, 16u
-    %89:ptr<uniform, vec4<u32>, read> = access %a, %88
-    %90:vec4<u32> = load %89
-    %91:vec4<f16> = bitcast %90
-    %92:vec3<f16> = swizzle %91, xyz
-    %93:u32 = add 24u, %start_byte_offset_3
-    %94:u32 = div %93, 16u
-    %95:ptr<uniform, vec4<u32>, read> = access %a, %94
-    %96:vec4<u32> = load %95
-    %97:vec4<f16> = bitcast %96
-    %98:vec3<f16> = swizzle %97, xyz
-    %99:mat4x3<f16> = construct %80, %86, %92, %98
-    ret %99
-  }
-}
-%18 = func(%start_byte_offset_4:u32):array<Outer, 4> {  # %start_byte_offset_4: 'start_byte_offset'
-  $B12: {
-    %a_2:ptr<function, array<Outer, 4>, read_write> = var, array<Outer, 4>(Outer(array<Inner, 4>(Inner(mat4x3<f16>(vec3<f16>(0.0h))))))  # %a_2: 'a'
-    loop [i: $B13, b: $B14, c: $B15] {  # loop_2
-      $B13: {  # initializer
-        next_iteration 0u  # -> $B14
-      }
-      $B14 (%idx_1:u32): {  # body
-        %103:bool = gte %idx_1, 4u
-        if %103 [t: $B16] {  # if_2
-          $B16: {  # true
-            exit_loop  # loop_2
-          }
-        }
-        %104:u32 = mul %idx_1, 256u
-        %105:u32 = add %start_byte_offset_4, %104
-        %106:ptr<function, Outer, read_write> = access %a_2, %idx_1
-        %107:Outer = call %21, %105
-        store %106, %107
-        continue  # -> $B15
-      }
-      $B15: {  # continuing
-        %108:u32 = add %idx_1, 1u
-        next_iteration %108  # -> $B14
-      }
-    }
-    %109:array<Outer, 4> = load %a_2
-    ret %109
-  }
+  Inner v_14[4] = a;
+  return v_14;
 }
 
+Outer v_15(uint start_byte_offset) {
+  Inner v_16[4] = v_10(start_byte_offset);
+  Outer v_17 = {v_16};
+  return v_17;
+}
+
+typedef Outer ary_ret_1[4];
+ary_ret_1 v_18(uint start_byte_offset) {
+  Outer a[4] = (Outer[4])0;
+  {
+    uint v_19 = 0u;
+    v_19 = 0u;
+    while(true) {
+      uint v_20 = v_19;
+      if ((v_20 >= 4u)) {
+        break;
+      }
+      Outer v_21 = v_15((start_byte_offset + (v_20 * 256u)));
+      a[v_20] = v_21;
+      {
+        v_19 = (v_20 + 1u);
+      }
+      continue;
+    }
+  }
+  Outer v_22[4] = a;
+  return v_22;
+}
+
+[numthreads(1, 1, 1)]
+void f() {
+  uint v_23 = (256u * uint(i()));
+  uint v_24 = (64u * uint(i()));
+  uint v_25 = (8u * uint(i()));
+  Outer l_a[4] = v_18(0u);
+  Outer l_a_i = v_15(v_23);
+  Inner l_a_i_a[4] = v_10(v_23);
+  Inner l_a_i_a_i = v_8((v_23 + v_24));
+  matrix<float16_t, 4, 3> l_a_i_a_i_m = v_4((v_23 + v_24));
+  vector<float16_t, 3> l_a_i_a_i_m_i = tint_bitcast_to_f16(a[(((v_23 + v_24) + v_25) / 16u)]).xyz;
+  uint v_26 = (((v_23 + v_24) + v_25) + (uint(i()) * 2u));
+  uint v_27 = a[(v_26 / 16u)][((v_26 % 16u) / 4u)];
+  float16_t l_a_i_a_i_m_i_i = float16_t(f16tof32((v_27 >> ((((v_26 % 4u) == 0u)) ? (0u) : (16u)))));
+}
+
+FXC validation failure:
+<scrubbed_path>(2,10-18): error X3000: syntax error: unexpected token 'float16_t'
+
+
+tint executable returned error: exit status 1

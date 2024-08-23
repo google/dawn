@@ -19,3 +19,5 @@ void compute_main() {
 FXC validation failure:
 <scrubbed_path>(4,16-41): error X3004: undeclared identifier 'WaveActiveSum'
 
+
+tint executable returned error: exit status 1

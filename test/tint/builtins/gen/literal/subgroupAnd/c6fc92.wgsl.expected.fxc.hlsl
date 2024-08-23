@@ -20,3 +20,5 @@ void compute_main() {
 FXC validation failure:
 <scrubbed_path>(4,19-45): error X3004: undeclared identifier 'WaveActiveBitAnd'
 
+
+tint executable returned error: exit status 1

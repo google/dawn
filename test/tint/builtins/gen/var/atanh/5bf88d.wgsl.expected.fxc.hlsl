@@ -49,3 +49,5 @@ tint_symbol_1 vertex_main() {
 FXC validation failure:
 <scrubbed_path>(1,8-16): error X3000: syntax error: unexpected token 'float16_t'
 
+
+tint executable returned error: exit status 1

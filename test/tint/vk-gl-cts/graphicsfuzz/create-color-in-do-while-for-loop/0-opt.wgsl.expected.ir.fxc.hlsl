@@ -123,3 +123,5 @@ FXC validation failure:
 <scrubbed_path>(38,9-19): error X3511: forced to unroll loop, but unrolling failed.
 <scrubbed_path>(35,5-15): error X3511: forced to unroll loop, but unrolling failed.
 
+
+tint executable returned error: exit status 1

@@ -195,3 +195,5 @@ error: Total Thread Group Shared Memory storage is 49168, exceeded 32768.
 Validation failed.
 
 
+
+tint executable returned error: exit status 1

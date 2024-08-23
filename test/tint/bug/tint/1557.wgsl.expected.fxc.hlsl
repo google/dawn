@@ -43,3 +43,5 @@ void main() {
 FXC validation failure:
 internal error: no storage type for block output
 
+
+tint executable returned error: exit status 1

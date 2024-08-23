@@ -36,3 +36,5 @@ hlsl.hlsl:23:1: error: Semantic must be defined for all parameters of an entry f
 f_outputs f(f_inputs inputs) {
 ^
 
+
+tint executable returned error: exit status 1

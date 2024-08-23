@@ -7,3 +7,5 @@ SKIP: FAILED
 *  Please help us fix this issue by submitting a bug report at     *
 *  crbug.com/tint with the source program that triggered the bug.  *
 ********************************************************************
+
+tint executable returned error: exit status 0xc000001d

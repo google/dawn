@@ -32,3 +32,5 @@ void main() {
 FXC validation failure:
 <scrubbed_path>(23,17-91): error X3014: incorrect number of arguments to numeric-type constructor
 
+
+tint executable returned error: exit status 1

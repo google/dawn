@@ -19,3 +19,5 @@ void f(f_inputs inputs) {
 FXC validation failure:
 <scrubbed_path>(13,17-22): error X3502: 'f': input parameter 'inputs' missing semantics
 
+
+tint executable returned error: exit status 1

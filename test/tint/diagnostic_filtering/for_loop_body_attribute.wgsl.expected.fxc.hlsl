@@ -36,3 +36,5 @@ FXC validation failure:
 <scrubbed_path>(12,11-32): warning X3570: gradient instruction used in a loop with varying iteration, attempting to unroll the loop
 <scrubbed_path>(11,5-22): error X3511: unable to unroll loop, loop does not appear to terminate in a timely manner (1024 iterations)
 
+
+tint executable returned error: exit status 1

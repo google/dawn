@@ -21,3 +21,5 @@ FXC validation failure:
 <scrubbed_path>(10,28-44): error X3013: Possible intrinsic functions are:
 <scrubbed_path>(10,28-44): error X3013:     modf(float|half|min10float|min16float, out float|half|min10float|min16float ip)
 
+
+tint executable returned error: exit status 1

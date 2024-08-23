@@ -177,3 +177,5 @@ FXC validation failure:
 <scrubbed_path>(62,3-11): error X3000: unrecognized identifier 'float16_t'
 <scrubbed_path>(62,13-17): error X3000: unrecognized identifier 'arg_0'
 
+
+tint executable returned error: exit status 1

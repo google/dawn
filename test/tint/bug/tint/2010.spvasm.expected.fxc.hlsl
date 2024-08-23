@@ -163,3 +163,5 @@ FXC validation failure:
 <scrubbed_path>(151,3-10): error X3694: error location reached from this location
 <scrubbed_path>(156,3-71): error X3694: error location reached from this location
 
+
+tint executable returned error: exit status 1

@@ -26,3 +26,5 @@ FXC validation failure:
 <scrubbed_path>(1,38-46): error X3000: syntax error: unexpected token 'float16_t'
 <scrubbed_path>(2,3-5): error X3004: undeclared identifier 'vec'
 
+
+tint executable returned error: exit status 1

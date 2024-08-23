@@ -52,3 +52,5 @@ void main() {
 FXC validation failure:
 <scrubbed_path>(47,3-30): error X3500: array reference cannot be used as an l-value; not natively addressable
 
+
+tint executable returned error: exit status 1

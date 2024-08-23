@@ -69,3 +69,5 @@ tint_symbol_2 main(tint_symbol_1 tint_symbol) {
 FXC validation failure:
 <scrubbed_path>(12,10-13): error X3696: infinite loop detected - loop never exits
 
+
+tint executable returned error: exit status 1

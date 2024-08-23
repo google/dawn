@@ -34,3 +34,5 @@ void compute_main(compute_main_inputs inputs) {
 FXC validation failure:
 <scrubbed_path>(24,3-34): error X3549: interlocked targets must be groupshared or UAV elements
 
+
+tint executable returned error: exit status 1

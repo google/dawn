@@ -53,3 +53,5 @@ FXC validation failure:
 <scrubbed_path>(14,29-31): error X3004: undeclared identifier 'src'
 <scrubbed_path>(14,22-32): error X3014: incorrect number of arguments to numeric-type constructor
 
+
+tint executable returned error: exit status 1

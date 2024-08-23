@@ -491,3 +491,5 @@ FXC validation failure:
 <scrubbed_path>(13,3-11): error X3000: unrecognized identifier 'float16_t'
 <scrubbed_path>(13,13-22): error X3000: unrecognized identifier 'ubo_load_y'
 
+
+tint executable returned error: exit status 1

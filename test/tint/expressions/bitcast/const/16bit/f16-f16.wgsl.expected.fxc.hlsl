@@ -9,3 +9,5 @@ FXC validation failure:
 <scrubbed_path>(3,3-11): error X3000: unrecognized identifier 'float16_t'
 <scrubbed_path>(3,13): error X3000: unrecognized identifier 'b'
 
+
+tint executable returned error: exit status 1

@@ -47,3 +47,5 @@ hlsl.hlsl:17:25: error: use of undeclared identifier 'modf'
   modf_result_f16 res = modf(arg_0);
                         ^
 
+
+tint executable returned error: exit status 1

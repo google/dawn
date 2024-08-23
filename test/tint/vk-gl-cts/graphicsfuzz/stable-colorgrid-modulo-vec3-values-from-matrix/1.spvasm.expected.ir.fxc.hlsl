@@ -123,3 +123,5 @@ FXC validation failure:
 <scrubbed_path>(21,19-25): warning X3556: integer divides may be much slower, try using uints if possible.
 <scrubbed_path>(85,5-15): error X3511: forced to unroll loop, but unrolling failed.
 
+
+tint executable returned error: exit status 1

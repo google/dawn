@@ -46,3 +46,5 @@ void frag_main(frag_main_inputs inputs) {
 FXC validation failure:
 <scrubbed_path>(3,3-11): error X3000: unrecognized identifier 'float16_t'
 
+
+tint executable returned error: exit status 1

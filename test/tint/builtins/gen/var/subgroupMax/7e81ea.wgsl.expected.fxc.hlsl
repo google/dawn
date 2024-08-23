@@ -21,3 +21,5 @@ void compute_main() {
 FXC validation failure:
 <scrubbed_path>(5,16-35): error X3004: undeclared identifier 'WaveActiveMax'
 
+
+tint executable returned error: exit status 1

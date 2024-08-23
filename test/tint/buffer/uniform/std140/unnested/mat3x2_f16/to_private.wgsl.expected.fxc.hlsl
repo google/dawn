@@ -28,3 +28,5 @@ void f() {
 FXC validation failure:
 <scrubbed_path>(4,15-23): error X3000: syntax error: unexpected token 'float16_t'
 
+
+tint executable returned error: exit status 1

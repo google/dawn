@@ -69,3 +69,5 @@ void main() {
 FXC validation failure:
 <scrubbed_path>(2,3-11): error X3000: unrecognized identifier 'float16_t'
 
+
+tint executable returned error: exit status 1

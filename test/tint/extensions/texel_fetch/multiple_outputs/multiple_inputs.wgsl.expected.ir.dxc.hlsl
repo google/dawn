@@ -38,3 +38,5 @@ f_outputs f(f_inputs inputs) {
 ^
 hlsl.hlsl:24:1: error: Semantic must be defined for all parameters of an entry function or patch constant function
 
+
+tint executable returned error: exit status 1

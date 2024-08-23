@@ -89,3 +89,5 @@ main_outputs main(main_inputs inputs) {
 FXC validation failure:
 <scrubbed_path>(25,5-15): error X3511: forced to unroll loop, but unrolling failed.
 
+
+tint executable returned error: exit status 1

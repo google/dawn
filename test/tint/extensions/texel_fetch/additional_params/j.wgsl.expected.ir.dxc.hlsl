@@ -23,3 +23,5 @@ hlsl.hlsl:15:1: error: Semantic must be defined for all parameters of an entry f
 void f(f_inputs inputs) {
 ^
 
+
+tint executable returned error: exit status 1

@@ -21,3 +21,5 @@ void compute_main() {
 FXC validation failure:
 <scrubbed_path>(5,13-34): error X3004: undeclared identifier 'QuadReadAcrossY'
 
+
+tint executable returned error: exit status 1

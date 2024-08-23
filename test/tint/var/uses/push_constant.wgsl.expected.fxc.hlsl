@@ -41,3 +41,5 @@ fn main4() {
 }
 
 Failed to generate: error: unhandled address space push_constant
+
+tint executable returned error: exit status 1

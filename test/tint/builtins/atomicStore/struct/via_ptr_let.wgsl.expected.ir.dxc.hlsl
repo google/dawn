@@ -47,3 +47,5 @@ hlsl.hlsl:24:3: error: Atomic operation targets must be groupshared, Node Record
   InterlockedExchange(p1, 1u, v_1);
   ^
 
+
+tint executable returned error: exit status 1

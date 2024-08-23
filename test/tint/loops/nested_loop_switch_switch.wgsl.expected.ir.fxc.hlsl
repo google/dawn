@@ -45,3 +45,5 @@ void main() {
 FXC validation failure:
 <scrubbed_path>(21,15-23): error X3708: continue cannot be used in a switch
 
+
+tint executable returned error: exit status 1

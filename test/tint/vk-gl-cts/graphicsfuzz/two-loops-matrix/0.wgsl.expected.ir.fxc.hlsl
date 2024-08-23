@@ -82,3 +82,5 @@ FXC validation failure:
 <scrubbed_path>(29,7-20): error X3504: literal loop terminated early due to out of bounds array access
 <scrubbed_path>(22,5-15): warning X3557: loop only executes for 0 iteration(s), forcing loop to unroll
 
+
+tint executable returned error: exit status 1

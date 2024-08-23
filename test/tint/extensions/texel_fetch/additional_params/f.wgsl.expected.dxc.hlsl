@@ -20,3 +20,5 @@ Failed to generate: <dawn>/test/tint/extensions/texel_fetch/additional_params/f.
 enable chromium_experimental_framebuffer_fetch;
        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+
+tint executable returned error: exit status 1

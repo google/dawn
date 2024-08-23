@@ -127,3 +127,5 @@ FXC validation failure:
 <scrubbed_path>(61,7-14): error X3500: array reference cannot be used as an l-value; not natively addressable
 <scrubbed_path>(53,5-15): error X3511: forced to unroll loop, but unrolling failed.
 
+
+tint executable returned error: exit status 1

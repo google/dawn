@@ -20,3 +20,5 @@ void compute_main() {
 FXC validation failure:
 <scrubbed_path>(5,15-38): error X3004: undeclared identifier 'WaveReadLaneAt'
 
+
+tint executable returned error: exit status 1

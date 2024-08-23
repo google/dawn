@@ -34,3 +34,5 @@ void f() {
 FXC validation failure:
 <scrubbed_path>(3,11-25): error X3504: array index out of bounds
 
+
+tint executable returned error: exit status 1

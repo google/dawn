@@ -39,3 +39,5 @@ void main() {
 FXC validation failure:
 <scrubbed_path>(8,10-13): error X3696: infinite loop detected - loop never exits
 
+
+tint executable returned error: exit status 1

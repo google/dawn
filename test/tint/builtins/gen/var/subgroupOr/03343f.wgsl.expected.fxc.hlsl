@@ -21,3 +21,5 @@ void compute_main() {
 FXC validation failure:
 <scrubbed_path>(5,20-49): error X3004: undeclared identifier 'WaveActiveBitOr'
 
+
+tint executable returned error: exit status 1

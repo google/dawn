@@ -21,3 +21,5 @@ Failed to generate: <dawn>/test/tint/builtins/gen/literal/inputAttachmentLoad/31
 enable chromium_internal_input_attachments;
        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+
+tint executable returned error: exit status 1

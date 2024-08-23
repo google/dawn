@@ -58,3 +58,5 @@ FXC validation failure:
 <scrubbed_path>(20,7-17): warning X3557: loop only executes for 0 iteration(s), forcing loop to unroll
 <scrubbed_path>(29,13-16): error X3696: infinite loop detected - loop never exits
 
+
+tint executable returned error: exit status 1

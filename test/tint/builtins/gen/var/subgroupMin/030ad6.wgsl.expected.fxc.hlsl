@@ -21,3 +21,5 @@ void compute_main() {
 FXC validation failure:
 <scrubbed_path>(5,14-33): error X3004: undeclared identifier 'WaveActiveMin'
 
+
+tint executable returned error: exit status 1

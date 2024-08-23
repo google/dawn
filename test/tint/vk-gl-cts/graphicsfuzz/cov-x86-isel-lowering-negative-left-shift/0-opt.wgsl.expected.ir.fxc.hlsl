@@ -133,3 +133,5 @@ main_outputs main() {
 FXC validation failure:
 <scrubbed_path>(64,17-25): error X3708: continue cannot be used in a switch
 
+
+tint executable returned error: exit status 1

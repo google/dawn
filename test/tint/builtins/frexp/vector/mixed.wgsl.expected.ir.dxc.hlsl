@@ -23,3 +23,5 @@ hlsl.hlsl:11:29: error: use of undeclared identifier 'frexp'
   frexp_result_vec2_f32 v = frexp(runtime_in);
                             ^
 
+
+tint executable returned error: exit status 1

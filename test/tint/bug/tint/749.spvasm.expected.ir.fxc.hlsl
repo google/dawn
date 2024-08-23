@@ -5,3 +5,5 @@ error: line:256: ID '172' decorated with NoContraction multiple times is not all
 
 
 
+
+tint executable returned error: exit status 1

@@ -18,3 +18,5 @@ hlsl.hlsl:3:7: note: previous definition is here
   int a = 1;
       ^
 
+
+tint executable returned error: exit status 1

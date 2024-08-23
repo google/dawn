@@ -18,3 +18,5 @@ FXC validation failure:
 <scrubbed_path>(3,44-52): error X3000: syntax error: unexpected token 'float16_t'
 <scrubbed_path>(4,3-19): error X3018: invalid subscript 'Store'
 
+
+tint executable returned error: exit status 1

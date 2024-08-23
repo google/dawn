@@ -53,3 +53,5 @@ main_outputs main() {
 FXC validation failure:
 internal error: compilation aborted unexpectedly
 
+
+tint executable returned error: exit status 1

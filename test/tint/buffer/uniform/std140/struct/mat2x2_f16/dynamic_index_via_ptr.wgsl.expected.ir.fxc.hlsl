@@ -1,250 +1,114 @@
 SKIP: FAILED
 
-
-enable f16;
-
 struct Inner {
-  @size(64)
-  m : mat2x2<f16>,
-}
+  matrix<float16_t, 2, 2> m;
+};
 
 struct Outer {
-  a : array<Inner, 4>,
-}
+  Inner a[4];
+};
 
-@group(0) @binding(0) var<uniform> a : array<Outer, 4>;
 
-var<private> counter = 0;
-
-fn i() -> i32 {
-  counter++;
+cbuffer cbuffer_a : register(b0) {
+  uint4 a[64];
+};
+static int counter = 0;
+int i() {
+  counter = (counter + 1);
   return counter;
 }
 
-@compute @workgroup_size(1)
-fn f() {
-  let p_a = &(a);
-  let p_a_i = &((*(p_a))[i()]);
-  let p_a_i_a = &((*(p_a_i)).a);
-  let p_a_i_a_i = &((*(p_a_i_a))[i()]);
-  let p_a_i_a_i_m = &((*(p_a_i_a_i)).m);
-  let p_a_i_a_i_m_i = &((*(p_a_i_a_i_m))[i()]);
-  let l_a : array<Outer, 4> = *(p_a);
-  let l_a_i : Outer = *(p_a_i);
-  let l_a_i_a : array<Inner, 4> = *(p_a_i_a);
-  let l_a_i_a_i : Inner = *(p_a_i_a_i);
-  let l_a_i_a_i_m : mat2x2<f16> = *(p_a_i_a_i_m);
-  let l_a_i_a_i_m_i : vec2<f16> = *(p_a_i_a_i_m_i);
-  let l_a_i_a_i_m_i_i : f16 = (*(p_a_i_a_i_m_i))[i()];
+vector<float16_t, 2> tint_bitcast_to_f16(uint src) {
+  uint v = src;
+  float t_low = f16tof32((v & 65535u));
+  float t_high = f16tof32(((v >> 16u) & 65535u));
+  float16_t v_1 = float16_t(t_low);
+  return vector<float16_t, 2>(v_1, float16_t(t_high));
 }
 
-Failed to generate: :60:5 error: binary: no matching overload for 'operator * (i32, u32)'
-
-9 candidate operators:
- • 'operator * (T  ✓ , T  ✗ ) -> T' where:
-      ✓  'T' is 'f32', 'i32', 'u32' or 'f16'
- • 'operator * (vecN<T>  ✗ , T  ✓ ) -> vecN<T>' where:
-      ✓  'T' is 'f32', 'i32', 'u32' or 'f16'
- • 'operator * (T  ✓ , vecN<T>  ✗ ) -> vecN<T>' where:
-      ✓  'T' is 'f32', 'i32', 'u32' or 'f16'
- • 'operator * (T  ✗ , matNxM<T>  ✗ ) -> matNxM<T>' where:
-      ✗  'T' is 'f32' or 'f16'
- • 'operator * (matNxM<T>  ✗ , T  ✗ ) -> matNxM<T>' where:
-      ✗  'T' is 'f32' or 'f16'
- • 'operator * (vecN<T>  ✗ , vecN<T>  ✗ ) -> vecN<T>' where:
-      ✗  'T' is 'f32', 'i32', 'u32' or 'f16'
- • 'operator * (matCxR<T>  ✗ , vecC<T>  ✗ ) -> vecR<T>' where:
-      ✗  'T' is 'f32' or 'f16'
- • 'operator * (vecR<T>  ✗ , matCxR<T>  ✗ ) -> vecC<T>' where:
-      ✗  'T' is 'f32' or 'f16'
- • 'operator * (matKxR<T>  ✗ , matCxK<T>  ✗ ) -> matCxR<T>' where:
-      ✗  'T' is 'f32' or 'f16'
-
-    %48:u32 = mul %47, 2u
-    ^^^^^^^^^^^^^^^^^^^^^
-
-:24:3 note: in block
-  $B3: {
-  ^^^
-
-note: # Disassembly
-Inner = struct @align(4) {
-  m:mat2x2<f16> @offset(0)
+matrix<float16_t, 2, 2> v_2(uint start_byte_offset) {
+  uint4 v_3 = a[(start_byte_offset / 16u)];
+  vector<float16_t, 2> v_4 = tint_bitcast_to_f16((((((start_byte_offset % 16u) / 4u) == 2u)) ? (v_3.z) : (v_3.x)));
+  uint4 v_5 = a[((4u + start_byte_offset) / 16u)];
+  return matrix<float16_t, 2, 2>(v_4, tint_bitcast_to_f16(((((((4u + start_byte_offset) % 16u) / 4u) == 2u)) ? (v_5.z) : (v_5.x))));
 }
 
-Outer = struct @align(4) {
-  a:array<Inner, 4> @offset(0)
+Inner v_6(uint start_byte_offset) {
+  Inner v_7 = {v_2(start_byte_offset)};
+  return v_7;
 }
 
-$B1: {  # root
-  %a:ptr<uniform, array<vec4<u32>, 64>, read> = var @binding_point(0, 0)
-  %counter:ptr<private, i32, read_write> = var, 0i
-}
-
-%i = func():i32 {
-  $B2: {
-    %4:i32 = load %counter
-    %5:i32 = add %4, 1i
-    store %counter, %5
-    %6:i32 = load %counter
-    ret %6
-  }
-}
-%f = @compute @workgroup_size(1, 1, 1) func():void {
-  $B3: {
-    %8:i32 = call %i
-    %9:u32 = convert %8
-    %10:u32 = mul 256u, %9
-    %11:i32 = call %i
-    %12:u32 = convert %11
-    %13:u32 = mul 64u, %12
-    %14:i32 = call %i
-    %15:u32 = convert %14
-    %16:u32 = mul 4u, %15
-    %17:array<Outer, 4> = call %18, 0u
-    %l_a:array<Outer, 4> = let %17
-    %20:Outer = call %21, %10
-    %l_a_i:Outer = let %20
-    %23:array<Inner, 4> = call %24, %10
-    %l_a_i_a:array<Inner, 4> = let %23
-    %26:u32 = add %10, %13
-    %27:Inner = call %28, %26
-    %l_a_i_a_i:Inner = let %27
-    %30:u32 = add %10, %13
-    %31:mat2x2<f16> = call %32, %30
-    %l_a_i_a_i_m:mat2x2<f16> = let %31
-    %34:u32 = add %10, %13
-    %35:u32 = add %34, %16
-    %36:u32 = div %35, 16u
-    %37:ptr<uniform, vec4<u32>, read> = access %a, %36
-    %38:u32 = mod %35, 16u
-    %39:u32 = div %38, 4u
-    %40:vec4<u32> = load %37
-    %41:u32 = swizzle %40, z
-    %42:u32 = swizzle %40, x
-    %43:bool = eq %39, 2u
-    %44:u32 = hlsl.ternary %42, %41, %43
-    %45:vec2<f16> = bitcast %44
-    %l_a_i_a_i_m_i:vec2<f16> = let %45
-    %47:i32 = call %i
-    %48:u32 = mul %47, 2u
-    %49:u32 = add %10, %13
-    %50:u32 = add %49, %16
-    %51:u32 = add %50, %48
-    %52:u32 = div %51, 16u
-    %53:ptr<uniform, vec4<u32>, read> = access %a, %52
-    %54:u32 = mod %51, 16u
-    %55:u32 = div %54, 4u
-    %56:u32 = load_vector_element %53, %55
-    %57:u32 = mod %51, 4u
-    %58:bool = eq %57, 0u
-    %59:u32 = hlsl.ternary 16u, 0u, %58
-    %60:u32 = shr %56, %59
-    %61:f32 = hlsl.f16tof32 %60
-    %62:f16 = convert %61
-    %l_a_i_a_i_m_i_i:f16 = let %62
-    ret
-  }
-}
-%18 = func(%start_byte_offset:u32):array<Outer, 4> {
-  $B4: {
-    %a_1:ptr<function, array<Outer, 4>, read_write> = var, array<Outer, 4>(Outer(array<Inner, 4>(Inner(mat2x2<f16>(vec2<f16>(0.0h))))))  # %a_1: 'a'
-    loop [i: $B5, b: $B6, c: $B7] {  # loop_1
-      $B5: {  # initializer
-        next_iteration 0u  # -> $B6
+typedef Inner ary_ret[4];
+ary_ret v_8(uint start_byte_offset) {
+  Inner a[4] = (Inner[4])0;
+  {
+    uint v_9 = 0u;
+    v_9 = 0u;
+    while(true) {
+      uint v_10 = v_9;
+      if ((v_10 >= 4u)) {
+        break;
       }
-      $B6 (%idx:u32): {  # body
-        %67:bool = gte %idx, 4u
-        if %67 [t: $B8] {  # if_1
-          $B8: {  # true
-            exit_loop  # loop_1
-          }
-        }
-        %68:u32 = mul %idx, 256u
-        %69:u32 = add %start_byte_offset, %68
-        %70:ptr<function, Outer, read_write> = access %a_1, %idx
-        %71:Outer = call %21, %69
-        store %70, %71
-        continue  # -> $B7
+      Inner v_11 = v_6((start_byte_offset + (v_10 * 64u)));
+      a[v_10] = v_11;
+      {
+        v_9 = (v_10 + 1u);
       }
-      $B7: {  # continuing
-        %72:u32 = add %idx, 1u
-        next_iteration %72  # -> $B6
-      }
+      continue;
     }
-    %73:array<Outer, 4> = load %a_1
-    ret %73
   }
-}
-%21 = func(%start_byte_offset_1:u32):Outer {  # %start_byte_offset_1: 'start_byte_offset'
-  $B9: {
-    %75:array<Inner, 4> = call %24, %start_byte_offset_1
-    %76:Outer = construct %75
-    ret %76
-  }
-}
-%24 = func(%start_byte_offset_2:u32):array<Inner, 4> {  # %start_byte_offset_2: 'start_byte_offset'
-  $B10: {
-    %a_2:ptr<function, array<Inner, 4>, read_write> = var, array<Inner, 4>(Inner(mat2x2<f16>(vec2<f16>(0.0h))))  # %a_2: 'a'
-    loop [i: $B11, b: $B12, c: $B13] {  # loop_2
-      $B11: {  # initializer
-        next_iteration 0u  # -> $B12
-      }
-      $B12 (%idx_1:u32): {  # body
-        %80:bool = gte %idx_1, 4u
-        if %80 [t: $B14] {  # if_2
-          $B14: {  # true
-            exit_loop  # loop_2
-          }
-        }
-        %81:u32 = mul %idx_1, 64u
-        %82:u32 = add %start_byte_offset_2, %81
-        %83:ptr<function, Inner, read_write> = access %a_2, %idx_1
-        %84:Inner = call %28, %82
-        store %83, %84
-        continue  # -> $B13
-      }
-      $B13: {  # continuing
-        %85:u32 = add %idx_1, 1u
-        next_iteration %85  # -> $B12
-      }
-    }
-    %86:array<Inner, 4> = load %a_2
-    ret %86
-  }
-}
-%28 = func(%start_byte_offset_3:u32):Inner {  # %start_byte_offset_3: 'start_byte_offset'
-  $B15: {
-    %88:mat2x2<f16> = call %32, %start_byte_offset_3
-    %89:Inner = construct %88
-    ret %89
-  }
-}
-%32 = func(%start_byte_offset_4:u32):mat2x2<f16> {  # %start_byte_offset_4: 'start_byte_offset'
-  $B16: {
-    %91:u32 = div %start_byte_offset_4, 16u
-    %92:ptr<uniform, vec4<u32>, read> = access %a, %91
-    %93:u32 = mod %start_byte_offset_4, 16u
-    %94:u32 = div %93, 4u
-    %95:vec4<u32> = load %92
-    %96:u32 = swizzle %95, z
-    %97:u32 = swizzle %95, x
-    %98:bool = eq %94, 2u
-    %99:u32 = hlsl.ternary %97, %96, %98
-    %100:vec2<f16> = bitcast %99
-    %101:u32 = add 4u, %start_byte_offset_4
-    %102:u32 = div %101, 16u
-    %103:ptr<uniform, vec4<u32>, read> = access %a, %102
-    %104:u32 = mod %101, 16u
-    %105:u32 = div %104, 4u
-    %106:vec4<u32> = load %103
-    %107:u32 = swizzle %106, z
-    %108:u32 = swizzle %106, x
-    %109:bool = eq %105, 2u
-    %110:u32 = hlsl.ternary %108, %107, %109
-    %111:vec2<f16> = bitcast %110
-    %112:mat2x2<f16> = construct %100, %111
-    ret %112
-  }
+  Inner v_12[4] = a;
+  return v_12;
 }
 
+Outer v_13(uint start_byte_offset) {
+  Inner v_14[4] = v_8(start_byte_offset);
+  Outer v_15 = {v_14};
+  return v_15;
+}
+
+typedef Outer ary_ret_1[4];
+ary_ret_1 v_16(uint start_byte_offset) {
+  Outer a[4] = (Outer[4])0;
+  {
+    uint v_17 = 0u;
+    v_17 = 0u;
+    while(true) {
+      uint v_18 = v_17;
+      if ((v_18 >= 4u)) {
+        break;
+      }
+      Outer v_19 = v_13((start_byte_offset + (v_18 * 256u)));
+      a[v_18] = v_19;
+      {
+        v_17 = (v_18 + 1u);
+      }
+      continue;
+    }
+  }
+  Outer v_20[4] = a;
+  return v_20;
+}
+
+[numthreads(1, 1, 1)]
+void f() {
+  uint v_21 = (256u * uint(i()));
+  uint v_22 = (64u * uint(i()));
+  uint v_23 = (4u * uint(i()));
+  Outer l_a[4] = v_16(0u);
+  Outer l_a_i = v_13(v_21);
+  Inner l_a_i_a[4] = v_8(v_21);
+  Inner l_a_i_a_i = v_6((v_21 + v_22));
+  matrix<float16_t, 2, 2> l_a_i_a_i_m = v_2((v_21 + v_22));
+  uint4 v_24 = a[(((v_21 + v_22) + v_23) / 16u)];
+  vector<float16_t, 2> l_a_i_a_i_m_i = tint_bitcast_to_f16((((((((v_21 + v_22) + v_23) % 16u) / 4u) == 2u)) ? (v_24.z) : (v_24.x)));
+  uint v_25 = (((v_21 + v_22) + v_23) + (uint(i()) * 2u));
+  uint v_26 = a[(v_25 / 16u)][((v_25 % 16u) / 4u)];
+  float16_t l_a_i_a_i_m_i_i = float16_t(f16tof32((v_26 >> ((((v_25 % 4u) == 0u)) ? (0u) : (16u)))));
+}
+
+FXC validation failure:
+<scrubbed_path>(2,10-18): error X3000: syntax error: unexpected token 'float16_t'
+
+
+tint executable returned error: exit status 1

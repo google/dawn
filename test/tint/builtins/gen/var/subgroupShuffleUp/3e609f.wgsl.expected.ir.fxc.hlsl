@@ -23,3 +23,5 @@ void compute_main() {
 FXC validation failure:
 <scrubbed_path>(8,33-50): error X3004: undeclared identifier 'WaveGetLaneIndex'
 
+
+tint executable returned error: exit status 1

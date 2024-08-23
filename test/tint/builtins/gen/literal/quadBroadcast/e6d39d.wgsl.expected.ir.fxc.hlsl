@@ -19,3 +19,5 @@ void compute_main() {
 FXC validation failure:
 <scrubbed_path>(4,15-37): error X3004: undeclared identifier 'QuadReadLaneAt'
 
+
+tint executable returned error: exit status 1

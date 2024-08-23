@@ -34,3 +34,5 @@ hlsl.hlsl:23:24: error: too many elements in vector initialization (expected 4 e
   float4 x_79 = float4(x_20.Sample(x_10, (coords123.xy / coords123[2u])), 0.0f, 0.0f, 0.0f);
                        ^
 
+
+tint executable returned error: exit status 1
