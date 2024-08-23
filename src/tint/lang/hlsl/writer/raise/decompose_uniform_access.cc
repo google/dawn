@@ -279,7 +279,8 @@ struct State {
                 offset.byte_offset += (cnst->Value()->ValueAs<uint32_t>() * elem_byte_size);
             } else {
                 offset.byte_offset_expr.Push(
-                    b.Multiply(ty.u32(), lve->Index(), u32(elem_byte_size))->Result(0));
+                    b.Multiply(ty.u32(), b.Convert(ty.u32(), lve->Index()), u32(elem_byte_size))
+                        ->Result(0));
             }
 
             auto* byte_idx = OffsetToValue(offset);
