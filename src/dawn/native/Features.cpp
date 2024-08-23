@@ -191,9 +191,8 @@ static constexpr FeatureEnumAndInfo kFeatureInfo[] = {
     {Feature::DualSourceBlending,
      {"Support dual source blending. Enables Src1, OneMinusSrc1, Src1Alpha, and OneMinusSrc1Alpha "
       "blend factors along with @blend_src WGSL output attribute.",
-      "https://dawn.googlesource.com/dawn/+/refs/heads/main/docs/dawn/features/"
-      "dual_source_blending.md",
-      FeatureInfo::FeatureState::Experimental}},
+      "https://gpuweb.github.io/gpuweb/#dom-gpufeaturename-dual-source-blending",
+      FeatureInfo::FeatureState::Stable}},
     {Feature::D3D11MultithreadProtected,
      {"Enable ID3D11Multithread protection for interop with external users of the D3D11 device.",
       "https://dawn.googlesource.com/dawn/+/refs/heads/main/docs/dawn/features/"
