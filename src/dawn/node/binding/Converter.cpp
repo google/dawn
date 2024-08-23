@@ -801,6 +801,7 @@ bool Converter::Convert(wgpu::BlendComponent& out, const interop::GPUBlendCompon
 
 bool Converter::Convert(wgpu::BlendFactor& out, const interop::GPUBlendFactor& in) {
     out = wgpu::BlendFactor::Zero;
+    wgpu::FeatureName requiredFeature = wgpu::FeatureName(0u);
     switch (in) {
         case interop::GPUBlendFactor::kZero:
             out = wgpu::BlendFactor::Zero;
@@ -841,10 +842,37 @@ bool Converter::Convert(wgpu::BlendFactor& out, const interop::GPUBlendFactor& i
         case interop::GPUBlendFactor::kOneMinusConstant:
             out = wgpu::BlendFactor::OneMinusConstant;
             return true;
-        default:
+        case interop::GPUBlendFactor::kSrc1:
+            out = wgpu::BlendFactor::Src1;
+            requiredFeature = wgpu::FeatureName::DualSourceBlending;
+            return true;
+        case interop::GPUBlendFactor::kOneMinusSrc1:
+            out = wgpu::BlendFactor::OneMinusSrc1;
+            requiredFeature = wgpu::FeatureName::DualSourceBlending;
+            return true;
+        case interop::GPUBlendFactor::kSrc1Alpha:
+            out = wgpu::BlendFactor::Src1Alpha;
+            requiredFeature = wgpu::FeatureName::DualSourceBlending;
+            return true;
+        case interop::GPUBlendFactor::kOneMinusSrc1Alpha:
+            out = wgpu::BlendFactor::OneMinusSrc1Alpha;
+            requiredFeature = wgpu::FeatureName::DualSourceBlending;
             break;
+
+        default:
+            std::stringstream err;
+            err << "unknown GPUBlendFactor(" << static_cast<int>(in) << ")";
+            return Throw(err.str());
     }
-    return Throw("invalid value for GPUBlendFactor");
+
+    assert(requiredFeature != wgpu::FeatureName(0u));
+    if (!HasFeature(requiredFeature)) {
+        std::stringstream err;
+        err << "" << out << " requires feature '" << requiredFeature << "'";
+        return Throw(Napi::TypeError::New(env, err.str()));
+    }
+
+    return true;
 }
 
 bool Converter::Convert(wgpu::BlendOperation& out, const interop::GPUBlendOperation& in) {
@@ -1462,6 +1490,9 @@ bool Converter::Convert(wgpu::FeatureName& out, interop::GPUFeatureName in) {
         case interop::GPUFeatureName::kMultiDrawIndirect:
             out = wgpu::FeatureName::MultiDrawIndirect;
             return true;
+        case interop::GPUFeatureName::kDualSourceBlending:
+            out = wgpu::FeatureName::DualSourceBlending;
+            return true;
         case interop::GPUFeatureName::kChromiumExperimentalSubgroups:
             out = wgpu::FeatureName::ChromiumExperimentalSubgroups;
             return true;
@@ -1470,7 +1501,6 @@ bool Converter::Convert(wgpu::FeatureName& out, interop::GPUFeatureName in) {
             return true;
         case interop::GPUFeatureName::kTextureCompressionBcSliced3D:
         case interop::GPUFeatureName::kClipDistances:
-        case interop::GPUFeatureName::kDualSourceBlending:
             return false;
     }
     return false;
@@ -1500,6 +1530,7 @@ bool Converter::Convert(interop::GPUFeatureName& out, wgpu::FeatureName in) {
         CASE(Subgroups, kSubgroups);
         CASE(SubgroupsF16, kSubgroupsF16);
         CASE(MultiDrawIndirect, kMultiDrawIndirect);
+        CASE(DualSourceBlending, kDualSourceBlending);
 
 #undef CASE
 
@@ -1514,7 +1545,6 @@ bool Converter::Convert(interop::GPUFeatureName& out, wgpu::FeatureName in) {
         case wgpu::FeatureName::DawnMultiPlanarFormats:
         case wgpu::FeatureName::DawnNative:
         case wgpu::FeatureName::DrmFormatCapabilities:
-        case wgpu::FeatureName::DualSourceBlending:
         case wgpu::FeatureName::FormatCapabilities:
         case wgpu::FeatureName::FramebufferFetch:
         case wgpu::FeatureName::HostMappedPointer:
