@@ -964,6 +964,7 @@ func invoke(exe string, args ...string) (ok bool, output string) {
 			return false, fmt.Sprintf("test timed out after %v", testTimeout)
 		}
 		if str != "" {
+			str += fmt.Sprintf("\ntint executable returned error: %v\n", err.Error())
 			return false, str
 		}
 		return false, err.Error()

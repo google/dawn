@@ -169,7 +169,9 @@ bool WriteFile(const std::string& output_file, const std::string mode, const Con
         }
         return false;
     }
-    if (!use_stdout) {
+    if (use_stdout) {
+        fflush(file);
+    } else {
         fclose(file);
     }
 
