@@ -345,13 +345,13 @@ void RenderPipeline::ApplyDepthStencilState(const OpenGLFunctions& gl,
 
     // Depth writes only occur if depth is enabled
     if (descriptor->depthCompare == wgpu::CompareFunction::Always &&
-        descriptor->depthWriteEnabled != wgpu::OptionalBool::True) {
+        !descriptor->depthWriteEnabled) {
         gl.Disable(GL_DEPTH_TEST);
     } else {
         gl.Enable(GL_DEPTH_TEST);
     }
 
-    if (descriptor->depthWriteEnabled == wgpu::OptionalBool::True) {
+    if (descriptor->depthWriteEnabled) {
         gl.DepthMask(GL_TRUE);
     } else {
         gl.DepthMask(GL_FALSE);

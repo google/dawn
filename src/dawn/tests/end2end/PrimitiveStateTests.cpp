@@ -132,7 +132,7 @@ class DepthClippingTest : public DawnTest {
             descriptor.vertex.module = vsModule;
             descriptor.cFragment.module = fsModule;
             wgpu::DepthStencilState* depthStencil = descriptor.EnableDepthStencil();
-            depthStencil->depthWriteEnabled = wgpu::OptionalBool::True;
+            depthStencil->depthWriteEnabled = true;
             depthStencil->format = wgpu::TextureFormat::Depth24PlusStencil8;
 
             wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&descriptor);
@@ -312,7 +312,7 @@ TEST_P(DepthClippingTest, UnclippedNotClamped) {
             return vec4f(frag_pos.z / 4.0, 0.0, 0.0, 1.0);
         })");
     wgpu::DepthStencilState* depthStencil = descriptor.EnableDepthStencil();
-    depthStencil->depthWriteEnabled = wgpu::OptionalBool::True;
+    depthStencil->depthWriteEnabled = true;
     depthStencil->format = wgpu::TextureFormat::Depth24PlusStencil8;
 
     wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&descriptor);

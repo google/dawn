@@ -625,14 +625,6 @@
         "category": "native",
         "wasm type": "i"
     },
-    "optional bool": {
-        "category": "enum",
-        "values": [
-            {"value": 0, "name": "false"},
-            {"value": 1, "name": "true"},
-            {"value": 2, "name": "undefined", "jsrepr": "undefined"}
-        ]
-    },
     "string view": {
         "category": "structure",
         "members": [
@@ -3818,7 +3810,7 @@
         "extensible": "in",
         "members": [
             {"name": "format", "type": "texture format"},
-            {"name": "depth write enabled", "type": "optional bool", "default": "undefined"},
+            {"name": "depth write enabled", "type": "bool", "default": "false"},
             {"name": "depth compare", "type": "compare function", "default": "undefined"},
             {"name": "stencil front", "type": "stencil face state"},
             {"name": "stencil back", "type": "stencil face state"},

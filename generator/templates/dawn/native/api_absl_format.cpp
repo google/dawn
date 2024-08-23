@@ -85,9 +85,9 @@ namespace {{namespace}} {
                       absl::FormatSink* s) {
         if (spec.conversion_char() == absl::FormatConversionChar::s) {
             s->Append("{{as_cppType(type.name)}}::");
-            switch ({{as_cType(type.name)}}(value)) {
+            switch (value) {
             {% for value in type.values %}
-                case {{as_cEnum(type.name, value.name)}}:
+                case {{as_cppType(type.name)}}::{{as_cppEnum(value.name)}}:
                     s->Append("{{as_cppEnum(value.name)}}");
                     return {true};
             {% endfor %}
@@ -95,7 +95,7 @@ namespace {{namespace}} {
                 break;
             }
         }
-        s->Append(absl::StrFormat("%u", static_cast<{{as_cType(type.name)}}>(value)));
+        s->Append(absl::StrFormat("%u", static_cast<typename std::underlying_type<{{as_cppType(type.name)}}>::type>(value)));
         return {true};
     }
     {% endfor %}

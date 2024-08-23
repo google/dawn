@@ -126,7 +126,6 @@ dawn_json_generator("kotlin_gen") {
     "java/android/dawn/MapMode.kt",
     "java/android/dawn/MipmapFilterMode.kt",
     "java/android/dawn/MultisampleState.kt",
-    "java/android/dawn/OptionalBool.kt",
     "java/android/dawn/Origin3D.kt",
     "java/android/dawn/PipelineLayout.kt",
     "java/android/dawn/PipelineLayoutDescriptor.kt",

@@ -656,11 +656,10 @@ VkPipelineDepthStencilStateCreateInfo RenderPipeline::ComputeDepthStencilDesc() 
     // Depth writes only occur if depth is enabled
     depthStencilState.depthTestEnable =
         (descriptor->depthCompare == wgpu::CompareFunction::Always &&
-         descriptor->depthWriteEnabled != wgpu::OptionalBool::True)
+         !descriptor->depthWriteEnabled)
             ? VK_FALSE
             : VK_TRUE;
-    depthStencilState.depthWriteEnable =
-        descriptor->depthWriteEnabled == wgpu::OptionalBool::True ? VK_TRUE : VK_FALSE;
+    depthStencilState.depthWriteEnable = descriptor->depthWriteEnabled ? VK_TRUE : VK_FALSE;
     depthStencilState.depthCompareOp = ToVulkanCompareOp(descriptor->depthCompare);
     depthStencilState.depthBoundsTestEnable = false;
     depthStencilState.minDepthBounds = 0.0f;

@@ -93,7 +93,7 @@ class MultisampledSamplingTest : public DawnTest {
             desc.cAttributes[0].format = wgpu::VertexFormat::Float32x2;
 
             wgpu::DepthStencilState* depthStencil = desc.EnableDepthStencil(kDepthFormat);
-            depthStencil->depthWriteEnabled = wgpu::OptionalBool::True;
+            depthStencil->depthWriteEnabled = true;
 
             desc.multisample.count = kSampleCount;
             desc.cFragment.targetCount = 1;

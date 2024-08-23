@@ -56,7 +56,7 @@ TEST_P(FragDepthTests, FragDepthIsClampedToViewport) {
     pDesc.cFragment.targetCount = 0;
 
     wgpu::DepthStencilState* pDescDS = pDesc.EnableDepthStencil(kDepthFormat);
-    pDescDS->depthWriteEnabled = wgpu::OptionalBool::True;
+    pDescDS->depthWriteEnabled = true;
     pDescDS->depthCompare = wgpu::CompareFunction::Always;
     wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&pDesc);
 
@@ -119,7 +119,7 @@ TEST_P(FragDepthTests, ChangingPipelineLayoutDoesntInvalidateViewport) {
     upDesc.cFragment.targetCount = 0;
 
     wgpu::DepthStencilState* upDescDS = upDesc.EnableDepthStencil(kDepthFormat);
-    upDescDS->depthWriteEnabled = wgpu::OptionalBool::True;
+    upDescDS->depthWriteEnabled = true;
     upDescDS->depthCompare = wgpu::CompareFunction::Always;
     wgpu::RenderPipeline uniformPipeline = device.CreateRenderPipeline(&upDesc);
 
@@ -137,7 +137,7 @@ TEST_P(FragDepthTests, ChangingPipelineLayoutDoesntInvalidateViewport) {
     spDesc.cFragment.targetCount = 0;
 
     wgpu::DepthStencilState* spDescDS = spDesc.EnableDepthStencil(kDepthFormat);
-    spDescDS->depthWriteEnabled = wgpu::OptionalBool::True;
+    spDescDS->depthWriteEnabled = true;
     spDescDS->depthCompare = wgpu::CompareFunction::Always;
     wgpu::RenderPipeline storagePipeline = device.CreateRenderPipeline(&spDesc);
 
@@ -203,7 +203,7 @@ TEST_P(FragDepthTests, RasterizationClipBeforeFS) {
     pDesc.cFragment.targetCount = 0;
 
     wgpu::DepthStencilState* pDescDS = pDesc.EnableDepthStencil(kDepthFormat);
-    pDescDS->depthWriteEnabled = wgpu::OptionalBool::True;
+    pDescDS->depthWriteEnabled = true;
     pDescDS->depthCompare = wgpu::CompareFunction::Always;
     wgpu::RenderPipeline uniformPipeline = device.CreateRenderPipeline(&pDesc);
 

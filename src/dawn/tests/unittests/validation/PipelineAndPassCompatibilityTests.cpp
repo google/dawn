@@ -59,7 +59,7 @@ class RenderPipelineAndPassCompatibilityTests : public ValidationTest {
         // Enable depth/stencil write if needed
         wgpu::DepthStencilState* depthStencil = pipelineDescriptor.EnableDepthStencil(format);
         if (enableDepthWrite) {
-            depthStencil->depthWriteEnabled = wgpu::OptionalBool::True;
+            depthStencil->depthWriteEnabled = true;
         }
         if (enableStencilWrite) {
             depthStencil->stencilFront.failOp = wgpu::StencilOperation::Replace;

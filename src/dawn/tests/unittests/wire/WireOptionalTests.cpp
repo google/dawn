@@ -108,7 +108,7 @@ TEST_F(WireOptionalTests, OptionalStructPointer) {
 
     wgpu::DepthStencilState depthStencilState = {};
     depthStencilState.format = wgpu::TextureFormat::Depth24PlusStencil8;
-    depthStencilState.depthWriteEnabled = wgpu::OptionalBool::False;
+    depthStencilState.depthWriteEnabled = false;
     depthStencilState.depthCompare = wgpu::CompareFunction::Always;
     depthStencilState.stencilBack = stencilFace;
     depthStencilState.stencilFront = stencilFace;
@@ -158,7 +158,7 @@ TEST_F(WireOptionalTests, OptionalStructPointer) {
             apiDevice, MatchesLambda([](const WGPURenderPipelineDescriptor* desc) -> bool {
                 return desc->depthStencil != nullptr &&
                        desc->depthStencil->nextInChain == nullptr &&
-                       desc->depthStencil->depthWriteEnabled == WGPUOptionalBool_False &&
+                       desc->depthStencil->depthWriteEnabled == false &&
                        desc->depthStencil->depthCompare == WGPUCompareFunction_Always &&
                        desc->depthStencil->stencilBack.compare == WGPUCompareFunction_Always &&
                        desc->depthStencil->stencilBack.failOp == WGPUStencilOperation_Keep &&

@@ -125,7 +125,7 @@ class DepthBiasTests : public DawnTest {
         renderPipelineDesc.vertex.module = vertexModule;
         renderPipelineDesc.cFragment.module = fragmentModule;
         wgpu::DepthStencilState* depthStencil = renderPipelineDesc.EnableDepthStencil(depthFormat);
-        depthStencil->depthWriteEnabled = wgpu::OptionalBool::True;
+        depthStencil->depthWriteEnabled = true;
         depthStencil->depthBias = bias;
         depthStencil->depthBiasSlopeScale = biasSlopeScale;
         depthStencil->depthBiasClamp = biasClamp;

@@ -145,8 +145,7 @@ class EnumType(Type):
             value += prefix
 
             if value_name == "undefined":
-                if name != "optional bool":
-                    assert value == 0
+                assert value == 0
                 self.hasUndefined = True
             if value != lastValue + 1:
                 self.contiguousFromZero = False

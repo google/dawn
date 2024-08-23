@@ -337,19 +337,23 @@ MaybeError ValidateDepthStencilState(const DeviceBase* device,
 
     DAWN_INVALID_IF(
         format->HasDepth() && descriptor->depthCompare == wgpu::CompareFunction::Undefined &&
-            (descriptor->depthWriteEnabled == wgpu::OptionalBool::True ||
+            (descriptor->depthWriteEnabled ||
              descriptor->stencilFront.depthFailOp != wgpu::StencilOperation::Keep ||
              descriptor->stencilBack.depthFailOp != wgpu::StencilOperation::Keep),
         "Depth stencil format (%s) has a depth aspect and depthCompare is %s while it's actually "
-        "used by depthWriteEnabled (%s), or stencil front depth fail operation (%s), or "
+        "used by depthWriteEnabled (%u), or stencil front depth fail operation (%s), or "
         "stencil back depth fail operation (%s).",
         descriptor->format, wgpu::CompareFunction::Undefined, descriptor->depthWriteEnabled,
         descriptor->stencilFront.depthFailOp, descriptor->stencilBack.depthFailOp);
 
-    DAWN_INVALID_IF(
-        format->HasDepth() && descriptor->depthWriteEnabled == wgpu::OptionalBool::Undefined,
-        "Depth stencil format (%s) has a depth aspect and depthWriteEnabled is undefined.",
-        descriptor->format);
+    UnpackedPtr<DepthStencilState> unpacked;
+    DAWN_TRY_ASSIGN(unpacked, ValidateAndUnpack(descriptor));
+    if (const auto* depthWriteDefined = unpacked.Get<DepthStencilStateDepthWriteDefinedDawn>()) {
+        DAWN_INVALID_IF(
+            format->HasDepth() && !depthWriteDefined->depthWriteDefined,
+            "Depth stencil format (%s) has a depth aspect and depthWriteEnabled is undefined.",
+            descriptor->format);
+    }
 
     DAWN_INVALID_IF(
         !format->HasDepth() && descriptor->depthCompare != wgpu::CompareFunction::Always &&
@@ -360,9 +364,8 @@ MaybeError ValidateDepthStencilState(const DeviceBase* device,
         wgpu::CompareFunction::Undefined);
 
     DAWN_INVALID_IF(
-        !format->HasDepth() && descriptor->depthWriteEnabled == wgpu::OptionalBool::True,
-        "Depth stencil format (%s) doesn't have depth aspect while depthWriteEnabled (%s) "
-        "is true.",
+        !format->HasDepth() && descriptor->depthWriteEnabled,
+        "Depth stencil format (%s) doesn't have depth aspect while depthWriteEnabled (%u) is true.",
         descriptor->format, descriptor->depthWriteEnabled);
 
     if (!format->HasStencil()) {
@@ -975,16 +978,16 @@ RenderPipelineBase::RenderPipelineBase(DeviceBase* device,
         // Reify depth option for stencil-only formats
         const Format& format = device->GetValidInternalFormat(mDepthStencil.format);
         if (!format.HasDepth()) {
-            mDepthStencil.depthWriteEnabled = wgpu::OptionalBool::False;
+            mDepthStencil.depthWriteEnabled = false;
             mDepthStencil.depthCompare = wgpu::CompareFunction::Always;
         }
         if (format.HasDepth() && mDepthStencil.depthCompare == wgpu::CompareFunction::Undefined &&
-            mDepthStencil.depthWriteEnabled != wgpu::OptionalBool::True &&
+            !mDepthStencil.depthWriteEnabled &&
             mDepthStencil.stencilFront.depthFailOp == wgpu::StencilOperation::Keep &&
             mDepthStencil.stencilBack.depthFailOp == wgpu::StencilOperation::Keep) {
             mDepthStencil.depthCompare = wgpu::CompareFunction::Always;
         }
-        mWritesDepth = mDepthStencil.depthWriteEnabled == wgpu::OptionalBool::True;
+        mWritesDepth = mDepthStencil.depthWriteEnabled;
         if (mDepthStencil.stencilWriteMask) {
             if ((mPrimitive.cullMode != wgpu::CullMode::Front &&
                  (mDepthStencil.stencilFront.failOp != wgpu::StencilOperation::Keep ||

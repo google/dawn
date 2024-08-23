@@ -70,7 +70,7 @@ class ReadOnlyDepthStencilAttachmentTests
 
         wgpu::CompareFunction depthCompare = wgpu::CompareFunction::Always;
         wgpu::CompareFunction stencilCompare = wgpu::CompareFunction::Always;
-        wgpu::OptionalBool depthWriteEnabled = wgpu::OptionalBool::False;
+        bool depthWriteEnabled = false;
         bool stencilWriteEnabled = false;
 
         float depthClearValue = 0.0;
@@ -395,7 +395,7 @@ TEST_P(ReadOnlyDepthAndStencilAttachmentTests, ModifyDepthSampleStencil) {
     spec1.stencilClearValue = 42;
     spec1.depthClearValue = 0.2;
     spec1.depthCompare = wgpu::CompareFunction::LessEqual;
-    spec1.depthWriteEnabled = wgpu::OptionalBool::True;
+    spec1.depthWriteEnabled = true;
     auto render1 = DoRender(spec1);
 
     // Stencil was read successfully, but only in the bottom part.

@@ -555,12 +555,11 @@ D3D12_DEPTH_STENCIL_DESC RenderPipeline::ComputeDepthStencilDesc() {
     D3D12_DEPTH_STENCIL_DESC depthStencilDescriptor = {};
     depthStencilDescriptor.DepthEnable =
         (descriptor->depthCompare == wgpu::CompareFunction::Always &&
-         descriptor->depthWriteEnabled != wgpu::OptionalBool::True)
+         !descriptor->depthWriteEnabled)
             ? FALSE
             : TRUE;
     depthStencilDescriptor.DepthWriteMask =
-        descriptor->depthWriteEnabled == wgpu::OptionalBool::True ? D3D12_DEPTH_WRITE_MASK_ALL
-                                                                  : D3D12_DEPTH_WRITE_MASK_ZERO;
+        descriptor->depthWriteEnabled ? D3D12_DEPTH_WRITE_MASK_ALL : D3D12_DEPTH_WRITE_MASK_ZERO;
     depthStencilDescriptor.DepthFunc = ToD3D12ComparisonFunc(descriptor->depthCompare);
 
     depthStencilDescriptor.StencilEnable = UsesStencil() ? TRUE : FALSE;

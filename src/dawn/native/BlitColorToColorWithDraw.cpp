@@ -171,7 +171,7 @@ ResultOrError<Ref<RenderPipelineBase>> GetOrCreateExpandMultisamplePipeline(
     DepthStencilState depthStencilState = {};
     if (pipelineKey.depthStencilFormat != wgpu::TextureFormat::Undefined) {
         depthStencilState.format = pipelineKey.depthStencilFormat;
-        depthStencilState.depthWriteEnabled = wgpu::OptionalBool::False;
+        depthStencilState.depthWriteEnabled = false;
         depthStencilState.depthCompare = wgpu::CompareFunction::Always;
 
         renderPipelineDesc.depthStencil = &depthStencilState;

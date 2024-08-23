@@ -100,9 +100,7 @@ static T& AsNonConstReference(const T& value) {
     )
 {%- endmacro -%}
 
-//* Although 'optional bool' is defined as an enum value, in C++, we manually implement it to
-//* provide conversion utilities.
-{% for type in by_category["enum"] if type.name.get() != "optional bool" %}
+{% for type in by_category["enum"] %}
     {% set CppType = as_cppType(type.name) %}
     {% set CType = as_cType(type.name) %}
     enum class {{CppType}} : uint32_t {
@@ -154,67 +152,6 @@ class {{BoolCppType}} {
     // Default to false.
     {{BoolCType}} mValue = static_cast<{{BoolCType}}>(false);
 };
-
-// Special class for optional booleans in order to allow conversions.
-{% set OptionalBool = types["optional bool"] %}
-{% set OptionalBoolCppType = as_cppType(OptionalBool.name) %}
-{% set OptionalBoolCType = as_cType(OptionalBool.name) %}
-{% set OptionalBoolUndefined = as_cEnum(OptionalBool.name, find_by_name(OptionalBool.values, "undefined").name) %}
-class {{OptionalBoolCppType}} {
-  public:
-    constexpr {{OptionalBoolCppType}}() = default;
-    // NOLINTNEXTLINE(runtime/explicit) allow implicit construction
-    constexpr {{OptionalBoolCppType}}(bool value) : mValue(static_cast<{{OptionalBoolCType}}>(value)) {}
-    // NOLINTNEXTLINE(runtime/explicit) allow implicit construction
-    constexpr {{OptionalBoolCppType}}(std::optional<bool> value) :
-        mValue(value ? static_cast<{{OptionalBoolCType}}>(*value) : {{OptionalBoolUndefined}}) {}
-    // NOLINTNEXTLINE(runtime/explicit) allow implicit construction
-    constexpr {{OptionalBoolCppType}}({{OptionalBoolCType}} value): mValue(value) {}
-
-    // Define the values that are equivalent to the enums.
-    {% for value in OptionalBool.values %}
-        static const {{OptionalBoolCppType}} {{as_cppEnum(value.name)}};
-    {% endfor %}
-
-    // Assignment operators.
-    {{OptionalBoolCppType}}& operator=(const bool& value) {
-        mValue = static_cast<{{OptionalBoolCType}}>(value);
-        return *this;
-    }
-    {{OptionalBoolCppType}}& operator=(const std::optional<bool>& value) {
-        mValue = value ? static_cast<{{OptionalBoolCType}}>(*value) : {{OptionalBoolUndefined}};
-        return *this;
-    }
-    {{OptionalBoolCppType}}& operator=(const {{OptionalBoolCType}}& value) {
-        mValue = value;
-        return *this;
-    }
-
-    // Conversion functions.
-    operator {{OptionalBoolCType}}() const { return mValue; }
-    operator std::optional<bool>() const {
-        if (mValue == {{OptionalBoolUndefined}}) {
-            return std::nullopt;
-        }
-        return static_cast<bool>(mValue);
-    }
-
-    // Comparison functions.
-    bool operator==({{OptionalBoolCType}} rhs) const {
-        return mValue == rhs;
-    }
-    bool operator!=({{OptionalBoolCType}} rhs) const {
-        return mValue != rhs;
-    }
-
-  private:
-    friend struct std::hash<{{OptionalBoolCppType}}>;
-    // Default to undefined.
-    {{OptionalBoolCType}} mValue = {{OptionalBoolUndefined}};
-};
-{% for value in OptionalBool.values %}
-    inline const {{OptionalBoolCppType}} {{OptionalBoolCppType}}::{{as_cppEnum(value.name)}} = {{OptionalBoolCppType}}({{as_cEnum(OptionalBool.name, value.name)}});
-{% endfor %}
 
 // Helper class to wrap Status which allows implicit conversion to bool.
 // Used while callers switch to checking the Status enum instead of booleans.
@@ -1013,13 +950,6 @@ struct hash<{{metadata.namespace}}::{{BoolCppType}}> {
   public:
     size_t operator()(const {{metadata.namespace}}::{{BoolCppType}} &v) const {
         return hash<bool>()(v);
-    }
-};
-template <>
-struct hash<{{metadata.namespace}}::{{OptionalBoolCppType}}> {
-  public:
-    size_t operator()(const {{metadata.namespace}}::{{OptionalBoolCppType}} &v) const {
-        return hash<{{OptionalBoolCType}}>()(v.mValue);
     }
 };
 }  // namespace std

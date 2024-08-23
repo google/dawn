@@ -90,32 +90,32 @@ class VertexOnlyRenderPipelineTest : public DawnTest {
         // ignore the stencil component
         depthPipelineNoFragment =
             CreateRenderPipeline(wgpu::CompareFunction::Always, wgpu::StencilOperation::Keep,
-                                 wgpu::CompareFunction::Always, wgpu::OptionalBool::True, false);
+                                 wgpu::CompareFunction::Always, true, false);
         depthPipelineWithFragment =
             CreateRenderPipeline(wgpu::CompareFunction::Always, wgpu::StencilOperation::Keep,
-                                 wgpu::CompareFunction::Always, wgpu::OptionalBool::True, true);
+                                 wgpu::CompareFunction::Always, true, true);
 
         // Create a vertex-only render pipeline that only modify the stencil in DepthStencilView,
         // and ignore the depth component
         stencilPipelineNoFragment =
             CreateRenderPipeline(wgpu::CompareFunction::Always, wgpu::StencilOperation::Replace,
-                                 wgpu::CompareFunction::Always, wgpu::OptionalBool::False, false);
+                                 wgpu::CompareFunction::Always, false, false);
         stencilPipelineWithFragment =
             CreateRenderPipeline(wgpu::CompareFunction::Always, wgpu::StencilOperation::Replace,
-                                 wgpu::CompareFunction::Always, wgpu::OptionalBool::False, true);
+                                 wgpu::CompareFunction::Always, false, true);
 
         // Create a complete render pipeline that do both depth and stencil tests, and draw to color
         // attachment
-        fullPipeline = CreateRenderPipeline(
-            wgpu::CompareFunction::Equal, wgpu::StencilOperation::Keep,
-            wgpu::CompareFunction::GreaterEqual, wgpu::OptionalBool::False, true);
+        fullPipeline =
+            CreateRenderPipeline(wgpu::CompareFunction::Equal, wgpu::StencilOperation::Keep,
+                                 wgpu::CompareFunction::GreaterEqual, false, true);
     }
 
     wgpu::RenderPipeline CreateRenderPipeline(
         wgpu::CompareFunction stencilCompare = wgpu::CompareFunction::Always,
         wgpu::StencilOperation stencilPassOp = wgpu::StencilOperation::Keep,
         wgpu::CompareFunction depthCompare = wgpu::CompareFunction::Always,
-        wgpu::OptionalBool writeDepth = wgpu::OptionalBool::False,
+        bool writeDepth = false,
         bool useFragment = true) {
         wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, R"(
             @vertex

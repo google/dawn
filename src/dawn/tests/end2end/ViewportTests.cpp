@@ -122,7 +122,7 @@ class ViewportTest : public DawnTest {
         pipelineDesc.primitive.topology = wgpu::PrimitiveTopology::PointList;
         wgpu::DepthStencilState* depthStencil =
             pipelineDesc.EnableDepthStencil(wgpu::TextureFormat::Depth32Float);
-        depthStencil->depthWriteEnabled = wgpu::OptionalBool::True;
+        depthStencil->depthWriteEnabled = true;
         wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&pipelineDesc);
 
         // Create the texture that will store the post-viewport-transform depth.

@@ -43,7 +43,6 @@ class MappedNamedConstantsTest {
         MapAsyncStatus::class,
         MapMode::class,
         MipmapFilterMode::class,
-        OptionalBool::class,
         PopErrorScopeStatus::class,
         PowerPreference::class,
         PresentMode::class,

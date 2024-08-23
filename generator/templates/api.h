@@ -73,7 +73,6 @@
 #endif
 
 #define WGPU_BREAKING_CHANGE_DEPTH_CLIP_CONTROL
-#define WGPU_BREAKING_CHANGE_DEPTH_WRITE_ENABLED
 
 #include <stdint.h>
 #include <stddef.h>

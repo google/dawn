@@ -292,7 +292,7 @@ TEST_F(RenderPipelineValidationTest, DepthStencilAspectRequirement) {
         wgpu::DepthStencilState* depthStencil =
             descriptor.EnableDepthStencil(wgpu::TextureFormat::Depth24PlusStencil8);
         depthStencil->depthCompare = wgpu::CompareFunction::LessEqual;
-        depthStencil->depthWriteEnabled = wgpu::OptionalBool::True;
+        depthStencil->depthWriteEnabled = true;
         device.CreateRenderPipeline(&descriptor);
     }
 
@@ -305,7 +305,7 @@ TEST_F(RenderPipelineValidationTest, DepthStencilAspectRequirement) {
         wgpu::DepthStencilState* depthStencil =
             descriptor.EnableDepthStencil(wgpu::TextureFormat::Stencil8);
         depthStencil->depthCompare = wgpu::CompareFunction::LessEqual;
-        depthStencil->depthWriteEnabled = wgpu::OptionalBool::False;
+        depthStencil->depthWriteEnabled = false;
         ASSERT_DEVICE_ERROR(device.CreateRenderPipeline(&descriptor));
     }
 
@@ -318,7 +318,7 @@ TEST_F(RenderPipelineValidationTest, DepthStencilAspectRequirement) {
         wgpu::DepthStencilState* depthStencil =
             descriptor.EnableDepthStencil(wgpu::TextureFormat::Stencil8);
         depthStencil->depthCompare = wgpu::CompareFunction::Undefined;
-        depthStencil->depthWriteEnabled = wgpu::OptionalBool::True;
+        depthStencil->depthWriteEnabled = true;
         ASSERT_DEVICE_ERROR(device.CreateRenderPipeline(&descriptor));
     }
 }
@@ -1363,7 +1363,7 @@ TEST_F(RenderPipelineValidationTest, DepthCompareRequiredForFormatsWithDepth) {
     descriptor.vertex.module = vsModule;
     descriptor.cFragment.module = fsModule;
 
-    descriptor.cDepthStencil.depthWriteEnabled = wgpu::OptionalBool::True;
+    descriptor.cDepthStencil.depthWriteEnabled = true;
     descriptor.EnableDepthStencil(wgpu::TextureFormat::Depth32Float);
 
     // Control case: Always is valid for format with depth.
@@ -1375,30 +1375,30 @@ TEST_F(RenderPipelineValidationTest, DepthCompareRequiredForFormatsWithDepth) {
     ASSERT_DEVICE_ERROR(device.CreateRenderPipeline(&descriptor));
 
     // Undefined is valid though if depthCompare is not used by anything.
-    descriptor.cDepthStencil.depthWriteEnabled = wgpu::OptionalBool::False;
+    descriptor.cDepthStencil.depthWriteEnabled = false;
     descriptor.cDepthStencil.stencilFront.depthFailOp = wgpu::StencilOperation::Keep;
     descriptor.cDepthStencil.stencilBack.depthFailOp = wgpu::StencilOperation::Keep;
     device.CreateRenderPipeline(&descriptor);
 
     // Undefined is invalid if depthCompare is used by depthWriteEnabled.
-    descriptor.cDepthStencil.depthWriteEnabled = wgpu::OptionalBool::True;
+    descriptor.cDepthStencil.depthWriteEnabled = true;
     descriptor.cDepthStencil.stencilFront.depthFailOp = wgpu::StencilOperation::Keep;
     descriptor.cDepthStencil.stencilBack.depthFailOp = wgpu::StencilOperation::Keep;
     ASSERT_DEVICE_ERROR(device.CreateRenderPipeline(&descriptor));
 
     // Undefined is invalid if depthCompare is used by stencilFront.depthFailOp.
-    descriptor.cDepthStencil.depthWriteEnabled = wgpu::OptionalBool::False;
+    descriptor.cDepthStencil.depthWriteEnabled = false;
     descriptor.cDepthStencil.stencilFront.depthFailOp = wgpu::StencilOperation::Zero;
     descriptor.cDepthStencil.stencilBack.depthFailOp = wgpu::StencilOperation::Keep;
     ASSERT_DEVICE_ERROR(device.CreateRenderPipeline(&descriptor));
 
     // Undefined is invalid if depthCompare is used by stencilBack.depthFailOp.
-    descriptor.cDepthStencil.depthWriteEnabled = wgpu::OptionalBool::False;
+    descriptor.cDepthStencil.depthWriteEnabled = false;
     descriptor.cDepthStencil.stencilFront.depthFailOp = wgpu::StencilOperation::Keep;
     descriptor.cDepthStencil.stencilBack.depthFailOp = wgpu::StencilOperation::Zero;
     ASSERT_DEVICE_ERROR(device.CreateRenderPipeline(&descriptor));
 
-    descriptor.cDepthStencil.depthWriteEnabled = wgpu::OptionalBool::False;
+    descriptor.cDepthStencil.depthWriteEnabled = false;
     descriptor.cDepthStencil.stencilFront.depthFailOp = wgpu::StencilOperation::Keep;
     descriptor.cDepthStencil.stencilBack.depthFailOp = wgpu::StencilOperation::Keep;
     descriptor.EnableDepthStencil(wgpu::TextureFormat::Stencil8);
@@ -1423,35 +1423,32 @@ TEST_F(RenderPipelineValidationTest, DepthWriteEnabledRequiredForFormatsWithDept
         descriptor.EnableDepthStencil(wgpu::TextureFormat::Depth32Float);
 
     // Control case: Set depthWriteEnabled to false for format with depth.
-    depthStencil->depthWriteEnabled = wgpu::OptionalBool::False;
+    depthStencil->depthWriteEnabled = false;
     device.CreateRenderPipeline(&descriptor);
 
+    // When DepthStencilStateDepthWriteDefinedDawn struct is chained, depthWriteEnabled is now
+    // considered optional and depthWriteDefined needs to be true for formats with depth only.
+    wgpu::DepthStencilStateDepthWriteDefinedDawn depthWriteDefined;
     depthStencil = descriptor.EnableDepthStencil(wgpu::TextureFormat::Stencil8);
+    depthStencil->nextInChain = &depthWriteDefined;
 
-    // depthWriteEnabled set to undefined is valid for format with no depth.
-    depthStencil->depthWriteEnabled = wgpu::OptionalBool::Undefined;
+    // depthWriteDefined set to true is valid for format with no depth.
+    depthWriteDefined.depthWriteDefined = true;
     device.CreateRenderPipeline(&descriptor);
 
-    // depthWriteEnabled set to false is valid for format with no depth.
-    depthStencil->depthWriteEnabled = wgpu::OptionalBool::False;
+    // depthWriteDefined set to false is valid for format with no depth.
+    depthWriteDefined.depthWriteDefined = false;
     device.CreateRenderPipeline(&descriptor);
-
-    // Error case: depthWriteEnabled set to true is invalid for format with no depth.
-    depthStencil->depthWriteEnabled = wgpu::OptionalBool::True;
-    ASSERT_DEVICE_ERROR(device.CreateRenderPipeline(&descriptor));
 
     depthStencil = descriptor.EnableDepthStencil(wgpu::TextureFormat::Depth32Float);
+    depthStencil->nextInChain = &depthWriteDefined;
 
-    // depthWriteEnabled set to false is valid for format with depth.
-    depthStencil->depthWriteEnabled = wgpu::OptionalBool::False;
+    // depthWriteDefined set to true is valid for format with depth.
+    depthWriteDefined.depthWriteDefined = true;
     device.CreateRenderPipeline(&descriptor);
 
-    // depthWriteEnabled set to true is valid for format with depth.
-    depthStencil->depthWriteEnabled = wgpu::OptionalBool::True;
-    device.CreateRenderPipeline(&descriptor);
-
-    // Error case: depthWriteEnabled set to undefined is invalid for format with depth.
-    depthStencil->depthWriteEnabled = wgpu::OptionalBool::Undefined;
+    // Error case: depthWriteDefined set to false is invalid for format with depth.
+    depthWriteDefined.depthWriteDefined = false;
     ASSERT_DEVICE_ERROR(device.CreateRenderPipeline(&descriptor));
 }
 
