@@ -47,11 +47,6 @@ namespace tint::spirv::writer {
 /// @param options the printer options
 tint::Result<std::vector<uint32_t>> Print(core::ir::Module& module, const Options& options);
 
-/// @returns the generated SPIR-V module on success, or failure
-/// @param module the Tint IR module to generate
-/// @param options the printer options
-tint::Result<Module> PrintModule(core::ir::Module& module, const Options& options);
-
 }  // namespace tint::spirv::writer
 
 #endif  // SRC_TINT_LANG_SPIRV_WRITER_PRINTER_PRINTER_H_

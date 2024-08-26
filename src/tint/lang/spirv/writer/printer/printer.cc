@@ -204,20 +204,6 @@ class Printer {
         return std::move(writer.Result());
     }
 
-    /// @returns the generated SPIR-V module on success, or failure
-    Result<writer::Module> Module() {
-        if (auto res = Generate(); res != Success) {
-            return res.Failure();
-        }
-
-        // Serialize the module into binary SPIR-V.
-        BinaryWriter writer;
-        writer.WriteHeader(module_.IdBound(), kWriterVersion);
-        writer.WriteModule(module_);
-        module_.Code() = std::move(writer.Result());
-        return module_;
-    }
-
   private:
     core::ir::Module& ir_;
     core::ir::Builder b_;
@@ -2467,10 +2453,6 @@ class Printer {
 
 tint::Result<std::vector<uint32_t>> Print(core::ir::Module& module, const Options& options) {
     return Printer{module, options}.Code();
-}
-
-tint::Result<Module> PrintModule(core::ir::Module& module, const Options& options) {
-    return Printer{module, options}.Module();
 }
 
 }  // namespace tint::spirv::writer
