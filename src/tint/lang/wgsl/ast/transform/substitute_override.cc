@@ -120,7 +120,7 @@ Transform::ApplyResult SubstituteOverride::Apply(const Program& src,
     ctx.ReplaceAll([&](const IndexAccessorExpression* expr) -> const IndexAccessorExpression* {
         if (auto* sem = src.Sem().Get(expr)) {
             if (auto* access = sem->UnwrapMaterialize()->As<sem::IndexAccessorExpression>()) {
-                if (access->Object()->UnwrapMaterialize()->Type()->HoldsAbstract() &&
+                if (access->Object()->UnwrapMaterialize()->Type()->IsAbstract() &&
                     access->Index()->Stage() == core::EvaluationStage::kOverride) {
                     auto* obj = b.Call(wgsl::str(wgsl::BuiltinFn::kTintMaterialize),
                                        ctx.Clone(expr->object));

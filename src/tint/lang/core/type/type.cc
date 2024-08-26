@@ -157,16 +157,16 @@ bool Type::IsHandle() const {
     return IsAnyOf<Sampler, Texture>();
 }
 
-bool Type::HoldsAbstract() const {
+bool Type::IsAbstract() const {
     return Switch(
         this,  //
         [&](const AbstractNumeric*) { return true; },
-        [&](const Vector* v) { return v->Type()->HoldsAbstract(); },
-        [&](const Matrix* m) { return m->Type()->HoldsAbstract(); },
-        [&](const Array* a) { return a->ElemType()->HoldsAbstract(); },
+        [&](const Vector* v) { return v->Type()->IsAbstract(); },
+        [&](const Matrix* m) { return m->Type()->IsAbstract(); },
+        [&](const Array* a) { return a->ElemType()->IsAbstract(); },
         [&](const Struct* s) {
             for (auto* m : s->Members()) {
-                if (m->Type()->HoldsAbstract()) {
+                if (m->Type()->IsAbstract()) {
                     return true;
                 }
             }

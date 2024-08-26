@@ -60,7 +60,7 @@ Transform::ApplyResult PromoteInitializersToLet::Apply(const Program& src,
             return false;
         }
 
-        if (expr->Type()->HoldsAbstract()) {
+        if (expr->Type()->IsAbstract()) {
             // Do not hoist expressions that are not materialized, as doing so would cause
             // premature materialization.
             return false;

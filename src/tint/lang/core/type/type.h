@@ -163,10 +163,9 @@ class Type : public Castable<Type, UniqueNode> {
     bool IsNumericScalarOrVector() const;
     /// @returns true if this type is a handle type
     bool IsHandle() const;
-
-    /// @returns true if this type is an abstract-numeric or if the type holds an element that is an
-    /// abstract-numeric.
-    bool HoldsAbstract() const;
+    /// @returns true if this type is an abstract type. It could be a numeric directly or an
+    /// abstract container which holds an abstract numeric
+    bool IsAbstract() const;
 
     /// kNoConversion is returned from ConversionRank() when the implicit conversion is not
     /// permitted.

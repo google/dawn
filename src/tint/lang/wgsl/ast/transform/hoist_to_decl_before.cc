@@ -56,7 +56,7 @@ struct HoistToDeclBefore::State {
         switch (kind) {
             case VariableKind::kLet: {
                 auto* ty = ctx.src->Sem().GetVal(expr)->Type();
-                TINT_ASSERT(!ty->HoldsAbstract());
+                TINT_ASSERT(!ty->IsAbstract());
                 auto builder = [this, expr, name, ty] {
                     return b.Decl(b.Let(name, Transform::CreateASTTypeFor(ctx, ty),
                                         ctx.CloneWithoutTransform(expr)));
@@ -69,7 +69,7 @@ struct HoistToDeclBefore::State {
 
             case VariableKind::kVar: {
                 auto* ty = ctx.src->Sem().GetVal(expr)->Type();
-                TINT_ASSERT(!ty->HoldsAbstract());
+                TINT_ASSERT(!ty->IsAbstract());
                 auto builder = [this, expr, name, ty] {
                     return b.Decl(b.Var(name, Transform::CreateASTTypeFor(ctx, ty),
                                         ctx.CloneWithoutTransform(expr)));

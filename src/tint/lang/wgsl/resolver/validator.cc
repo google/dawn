@@ -1712,7 +1712,7 @@ bool Validator::BinaryExpression(const ast::Node* node,
             // If lhs value is a concrete type, and rhs is a const-expression greater than or equal
             // to the bit width of lhs, then it is a shader-creation error.
             const auto* elem_type = lhs->Type()->UnwrapRef()->DeepestElement();
-            if (!elem_type->HoldsAbstract() && rhs->Stage() == core::EvaluationStage::kConstant) {
+            if (!elem_type->IsAbstract() && rhs->Stage() == core::EvaluationStage::kConstant) {
                 const uint32_t bit_width = elem_type->Size() * 8;
                 auto* rhs_val = rhs->ConstantValue();
                 for (size_t i = 0, n = rhs_val->NumElements(); i < n; i++) {
