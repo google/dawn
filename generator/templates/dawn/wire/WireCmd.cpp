@@ -173,7 +173,7 @@
     {% endif %}
 
     //* Returns the required transfer size for `record` in addition to the transfer structure.
-    DAWN_DECLARE_UNUSED size_t {{Return}}{{name}}GetExtraRequiredSize([[maybe_unused]] const {{Return}}{{name}}{{Cmd}}& record) {
+    [[maybe_unused]] size_t {{Return}}{{name}}GetExtraRequiredSize([[maybe_unused]] const {{Return}}{{name}}{{Cmd}}& record) {
         size_t result = 0;
 
         //* Gather how much space will be needed for the extension chain.
@@ -232,7 +232,7 @@
 
     //* Serializes `record` into `transfer`, using `buffer` to get more space for pointed-to data
     //* and `provider` to serialize objects.
-    DAWN_DECLARE_UNUSED WireResult {{Return}}{{name}}Serialize(
+    [[maybe_unused]] WireResult {{Return}}{{name}}Serialize(
         const {{Return}}{{name}}{{Cmd}}& record,
         {{Return}}{{name}}Transfer* transfer,
         [[maybe_unused]] SerializeBuffer* buffer
@@ -331,7 +331,7 @@
     //* Deserializes `transfer` into `record` getting more serialized data from `buffer` and `size`
     //* if needed, using `allocator` to store pointed-to values and `resolver` to translate object
     //* Ids to actual objects.
-    DAWN_DECLARE_UNUSED WireResult {{Return}}{{name}}Deserialize(
+    [[maybe_unused]] WireResult {{Return}}{{name}}Deserialize(
         {{Return}}{{name}}{{Cmd}}* record,
         const volatile {{Return}}{{name}}Transfer* transfer,
         DeserializeBuffer* deserializeBuffer,
