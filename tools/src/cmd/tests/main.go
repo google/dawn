@@ -61,16 +61,19 @@ type outputFormat string
 const (
 	testTimeout = 2 * time.Minute
 
-	glsl    = outputFormat("glsl")
-	hlslFXC = outputFormat("hlsl-fxc")
-	hlslDXC = outputFormat("hlsl-dxc")
-	msl     = outputFormat("msl")
-	spvasm  = outputFormat("spvasm")
-	wgsl    = outputFormat("wgsl")
+	glsl      = outputFormat("glsl")
+	hlslFXC   = outputFormat("hlsl-fxc")
+	hlslFXCIR = outputFormat("hlsl-fxc-ir")
+	hlslDXC   = outputFormat("hlsl-dxc")
+	hlslDXCIR = outputFormat("hlsl-dxc-ir")
+	msl       = outputFormat("msl")
+	mslIR     = outputFormat("msl-ir")
+	spvasm    = outputFormat("spvasm")
+	wgsl      = outputFormat("wgsl")
 )
 
 // allOutputFormats holds all the supported outputFormats
-var allOutputFormats = []outputFormat{wgsl, spvasm, msl, hlslDXC, hlslFXC, glsl}
+var allOutputFormats = []outputFormat{wgsl, spvasm, msl, mslIR, hlslDXC, hlslDXCIR, hlslFXC, hlslFXCIR, glsl}
 
 // The root directory of the dawn project
 var dawnRoot = fileutils.DawnRoot()
@@ -135,15 +138,14 @@ func run() error {
 	var formatList, ignore, dxcPath, fxcPath, tintPath, xcrunPath string
 	var maxTableWidth int
 	numCPU := runtime.NumCPU()
-	verbose, useIr, generateExpected, generateSkip := false, false, false, false
-	flag.StringVar(&formatList, "format", "all", "comma separated list of formats to emit. Possible values are: all, wgsl, spvasm, msl, hlsl, hlsl-dxc, hlsl-fxc, glsl")
+	verbose, generateExpected, generateSkip := false, false, false
+	flag.StringVar(&formatList, "format", "all", "comma separated list of formats to emit. Possible values are: all, wgsl, spvasm, msl, hlsl, hlsl-dxc, hlsl-fxc, glsl, msl-ir, hlsl-ir, hlsl-dxc-ir, hlsl-fxc-ir")
 	flag.StringVar(&ignore, "ignore", "**.expected.*", "files to ignore in globs")
 	flag.StringVar(&dxcPath, "dxcompiler", "", "path to DXC DLL for validating HLSL output")
 	flag.StringVar(&fxcPath, "fxc", "", "path to FXC DLL for validating HLSL output")
 	flag.StringVar(&tintPath, "tint", defaultTintPath(), "path to the tint executable")
 	flag.StringVar(&xcrunPath, "xcrun", "", "path to xcrun executable for validating MSL output")
 	flag.BoolVar(&verbose, "verbose", false, "print all run tests, including rows that all pass")
-	flag.BoolVar(&useIr, "use-ir", false, "generate with the IR enabled")
 	flag.BoolVar(&generateExpected, "generate-expected", false, "create or update all expected outputs")
 	flag.BoolVar(&generateSkip, "generate-skip", false, "create or update all expected outputs that fail with SKIP")
 	flag.IntVar(&numCPU, "j", numCPU, "maximum number of concurrent threads to run tests")
@@ -235,14 +237,6 @@ func run() error {
 		}
 	}
 
-	if useIr {
-		for _, f := range formats {
-			if f != msl && f != hlslDXC && f != hlslFXC && f != glsl {
-				return fmt.Errorf("--use-ir is not valid with format '%s'", f)
-			}
-		}
-	}
-
 	defaultMSLExe := "xcrun"
 	if runtime.GOOS == "windows" {
 		defaultMSLExe = "metal.exe"
@@ -327,7 +321,6 @@ func run() error {
 		dxcPath:          dxcPath,
 		fxcPath:          fxcPath,
 		xcrunPath:        xcrunPath,
-		useIr:            useIr,
 		generateExpected: generateExpected,
 		generateSkip:     generateSkip,
 		validationCache:  validationCache,
@@ -666,7 +659,6 @@ type runConfig struct {
 	dxcPath          string
 	fxcPath          string
 	xcrunPath        string
-	useIr            bool
 	generateExpected bool
 	generateSkip     bool
 	validationCache  validationCache
@@ -681,7 +673,9 @@ func (j job) run(cfg runConfig) {
 		// expectedFilePath is the path to the expected output file for the given test
 		expectedFilePath := j.file + ".expected."
 
-		if cfg.useIr {
+		useIr := j.format == hlslDXCIR || j.format == hlslFXCIR || j.format == mslIR
+
+		if useIr {
 			expectedFilePath += "ir."
 		}
 
@@ -718,7 +712,7 @@ func (j job) run(cfg runConfig) {
 			"--print-hash",
 		}
 
-		if cfg.useIr {
+		if useIr {
 			args = append(args, "--use-ir")
 		}
 
@@ -739,16 +733,19 @@ func (j job) run(cfg runConfig) {
 			args = append(args, "--validate") // spirv-val and glslang are statically linked, always available
 			validate = true
 		case hlslDXC:
+		case hlslDXCIR:
 			if cfg.dxcPath != "" {
 				args = append(args, "--dxc", cfg.dxcPath)
 				validate = true
 			}
 		case hlslFXC:
+		case hlslFXCIR:
 			if cfg.fxcPath != "" {
 				args = append(args, "--fxc", cfg.fxcPath)
 				validate = true
 			}
 		case msl:
+		case mslIR:
 			if cfg.xcrunPath != "" {
 				args = append(args, "--xcrun", cfg.xcrunPath)
 				validate = true
@@ -803,7 +800,7 @@ func (j job) run(cfg runConfig) {
 
 		passed := ok && matched
 		if !passed {
-			if j.format == hlslFXC {
+			if j.format == hlslFXC || j.format == hlslFXCIR {
 				out = reFXCErrorStringHash.ReplaceAllString(out, `<scrubbed_path>${1}`)
 			}
 		}
@@ -1026,12 +1023,20 @@ func parseOutputFormats(s string) ([]outputFormat, error) {
 		return []outputFormat{spvasm}, nil
 	case "msl":
 		return []outputFormat{msl}, nil
+	case "msl-ir":
+		return []outputFormat{mslIR}, nil
 	case "hlsl":
 		return []outputFormat{hlslDXC, hlslFXC}, nil
 	case "hlsl-dxc":
 		return []outputFormat{hlslDXC}, nil
 	case "hlsl-fxc":
 		return []outputFormat{hlslFXC}, nil
+	case "hlsl-ir":
+		return []outputFormat{hlslDXCIR, hlslFXCIR}, nil
+	case "hlsl-dxc-ir":
+		return []outputFormat{hlslDXCIR}, nil
+	case "hlsl-fxc-ir":
+		return []outputFormat{hlslFXCIR}, nil
 	case "glsl":
 		return []outputFormat{glsl}, nil
 	default:
