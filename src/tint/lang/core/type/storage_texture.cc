@@ -41,7 +41,7 @@ namespace tint::core::type {
 StorageTexture::StorageTexture(TextureDimension dim,
                                core::TexelFormat format,
                                core::Access access,
-                               const Type* subtype)
+                               const type::Type* subtype)
     : Base(Hash(tint::TypeCode::Of<StorageTexture>().bits, dim, format, access), dim),
       texel_format_(format),
       access_(access),
@@ -51,14 +51,14 @@ StorageTexture::~StorageTexture() = default;
 
 bool StorageTexture::Equals(const UniqueNode& other) const {
     if (auto* o = other.As<StorageTexture>()) {
-        return o->dim() == dim() && o->texel_format_ == texel_format_ && o->access_ == access_;
+        return o->Dim() == Dim() && o->texel_format_ == texel_format_ && o->access_ == access_;
     }
     return false;
 }
 
 std::string StorageTexture::FriendlyName() const {
     StringStream out;
-    out << "texture_storage_" << dim() << "<" << texel_format_ << ", " << access_ << ">";
+    out << "texture_storage_" << Dim() << "<" << texel_format_ << ", " << access_ << ">";
     return out.str();
 }
 
@@ -100,7 +100,7 @@ Type* StorageTexture::SubtypeFor(core::TexelFormat format, Manager& type_mgr) {
 
 StorageTexture* StorageTexture::Clone(CloneContext& ctx) const {
     auto* ty = subtype_->Clone(ctx);
-    return ctx.dst.mgr->Get<StorageTexture>(dim(), texel_format_, access_, ty);
+    return ctx.dst.mgr->Get<StorageTexture>(Dim(), texel_format_, access_, ty);
 }
 
 }  // namespace tint::core::type

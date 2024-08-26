@@ -82,13 +82,13 @@ TEST_F(MultisampledTextureTest, IsTexture) {
 TEST_F(MultisampledTextureTest, Dim) {
     F32 f32;
     MultisampledTexture s(TextureDimension::k3d, &f32);
-    EXPECT_EQ(s.dim(), TextureDimension::k3d);
+    EXPECT_EQ(s.Dim(), TextureDimension::k3d);
 }
 
 TEST_F(MultisampledTextureTest, Type) {
     F32 f32;
     MultisampledTexture s(TextureDimension::k3d, &f32);
-    EXPECT_EQ(s.type(), &f32);
+    EXPECT_EQ(s.Type(), &f32);
 }
 
 TEST_F(MultisampledTextureTest, FriendlyName) {
@@ -104,8 +104,8 @@ TEST_F(MultisampledTextureTest, Clone) {
     core::type::CloneContext ctx{{nullptr}, {nullptr, &mgr}};
 
     auto* mt = a->Clone(ctx);
-    EXPECT_EQ(mt->dim(), TextureDimension::k2d);
-    EXPECT_TRUE(mt->type()->Is<F32>());
+    EXPECT_EQ(mt->Dim(), TextureDimension::k2d);
+    EXPECT_TRUE(mt->Type()->Is<F32>());
 }
 
 }  // namespace

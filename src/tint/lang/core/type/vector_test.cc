@@ -39,7 +39,7 @@ TEST_F(VectorTest, Creation) {
     auto* c = create<Vector>(create<F32>(), 2u);
     auto* d = create<Vector>(create<F32>(), 3u);
 
-    EXPECT_EQ(a->type(), create<I32>());
+    EXPECT_EQ(a->Type(), create<I32>());
     EXPECT_EQ(a->Width(), 2u);
 
     EXPECT_EQ(a, b);
@@ -54,7 +54,7 @@ TEST_F(VectorTest, Creation_Packed) {
 
     EXPECT_FALSE(v->Packed());
 
-    EXPECT_EQ(p1->type(), create<F32>());
+    EXPECT_EQ(p1->Type(), create<F32>());
     EXPECT_EQ(p1->Width(), 3u);
     EXPECT_TRUE(p1->Packed());
 
@@ -100,7 +100,7 @@ TEST_F(VectorTest, Clone) {
     core::type::CloneContext ctx{{nullptr}, {nullptr, &mgr}};
 
     auto* vec = a->Clone(ctx);
-    EXPECT_TRUE(vec->type()->Is<I32>());
+    EXPECT_TRUE(vec->Type()->Is<I32>());
     EXPECT_EQ(vec->Width(), 2u);
     EXPECT_FALSE(vec->Packed());
 }
@@ -112,7 +112,7 @@ TEST_F(VectorTest, Clone_Packed) {
     core::type::CloneContext ctx{{nullptr}, {nullptr, &mgr}};
 
     auto* vec = a->Clone(ctx);
-    EXPECT_TRUE(vec->type()->Is<I32>());
+    EXPECT_TRUE(vec->Type()->Is<I32>());
     EXPECT_EQ(vec->Width(), 3u);
     EXPECT_TRUE(vec->Packed());
 }

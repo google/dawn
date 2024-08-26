@@ -47,19 +47,19 @@ DepthTexture::~DepthTexture() = default;
 
 bool DepthTexture::Equals(const UniqueNode& other) const {
     if (auto* o = other.As<DepthTexture>()) {
-        return o->dim() == dim();
+        return o->Dim() == Dim();
     }
     return false;
 }
 
 std::string DepthTexture::FriendlyName() const {
     StringStream out;
-    out << "texture_depth_" << dim();
+    out << "texture_depth_" << Dim();
     return out.str();
 }
 
 DepthTexture* DepthTexture::Clone(CloneContext& ctx) const {
-    return ctx.dst.mgr->Get<DepthTexture>(dim());
+    return ctx.dst.mgr->Get<DepthTexture>(Dim());
 }
 
 bool DepthTexture::IsValidDimension(TextureDimension dim) {

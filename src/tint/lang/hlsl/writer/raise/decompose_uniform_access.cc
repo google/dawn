@@ -200,8 +200,8 @@ struct State {
             tint::Switch(
                 obj_ty,
                 [&](const core::type::Vector* v) {
-                    update_offset(idx_value, v->type()->Size());
-                    obj_ty = v->type();
+                    update_offset(idx_value, v->Type()->Size());
+                    obj_ty = v->Type();
                 },
                 [&](const core::type::Matrix* m) {
                     update_offset(idx_value, m->ColumnStride());
@@ -430,7 +430,7 @@ struct State {
         // A vec3 will be stored as a vec4, so we can bitcast as if we're a vec4 and swizzle out the
         // last element
         if (result_ty->Width() == 3) {
-            auto* bc = b.Bitcast(ty.vec4(result_ty->type()), b.Load(access));
+            auto* bc = b.Bitcast(ty.vec4(result_ty->Type()), b.Load(access));
             return b.Swizzle(result_ty, bc, {0, 1, 2});
         }
 
@@ -489,7 +489,7 @@ struct State {
 
             b.Append(fn->Block(), [&] {
                 Vector<core::ir::Value*, 4> values;
-                for (size_t i = 0; i < mat->columns(); ++i) {
+                for (size_t i = 0; i < mat->Columns(); ++i) {
                     uint32_t stride = static_cast<uint32_t>(i * mat->ColumnStride());
 
                     OffsetData od{stride, {start_byte_offset}};

@@ -406,13 +406,13 @@ struct Encoder {
 
     void TypeVector(pb::TypeVector& vector_out, const core::type::Vector* vector_in) {
         vector_out.set_width(vector_in->Width());
-        vector_out.set_element_type(Type(vector_in->type()));
+        vector_out.set_element_type(Type(vector_in->Type()));
     }
 
     void TypeMatrix(pb::TypeMatrix& matrix_out, const core::type::Matrix* matrix_in) {
-        matrix_out.set_num_columns(matrix_in->columns());
-        matrix_out.set_num_rows(matrix_in->rows());
-        matrix_out.set_element_type(Type(matrix_in->type()));
+        matrix_out.set_num_columns(matrix_in->Columns());
+        matrix_out.set_num_rows(matrix_in->Rows());
+        matrix_out.set_element_type(Type(matrix_in->Type()));
     }
 
     void TypePointer(pb::TypePointer& pointer_out, const core::type::Pointer* pointer_in) {
@@ -469,41 +469,41 @@ struct Encoder {
 
     void TypeDepthTexture(pb::TypeDepthTexture& texture_out,
                           const core::type::DepthTexture* texture_in) {
-        texture_out.set_dimension(TextureDimension(texture_in->dim()));
+        texture_out.set_dimension(TextureDimension(texture_in->Dim()));
     }
 
     void TypeSampledTexture(pb::TypeSampledTexture& texture_out,
                             const core::type::SampledTexture* texture_in) {
-        texture_out.set_dimension(TextureDimension(texture_in->dim()));
-        texture_out.set_sub_type(Type(texture_in->type()));
+        texture_out.set_dimension(TextureDimension(texture_in->Dim()));
+        texture_out.set_sub_type(Type(texture_in->Type()));
     }
 
     void TypeMultisampledTexture(pb::TypeMultisampledTexture& texture_out,
                                  const core::type::MultisampledTexture* texture_in) {
-        texture_out.set_dimension(TextureDimension(texture_in->dim()));
-        texture_out.set_sub_type(Type(texture_in->type()));
+        texture_out.set_dimension(TextureDimension(texture_in->Dim()));
+        texture_out.set_sub_type(Type(texture_in->Type()));
     }
 
     void TypeDepthMultisampledTexture(pb::TypeDepthMultisampledTexture& texture_out,
                                       const core::type::DepthMultisampledTexture* texture_in) {
-        texture_out.set_dimension(TextureDimension(texture_in->dim()));
+        texture_out.set_dimension(TextureDimension(texture_in->Dim()));
     }
 
     void TypeStorageTexture(pb::TypeStorageTexture& texture_out,
                             const core::type::StorageTexture* texture_in) {
-        texture_out.set_dimension(TextureDimension(texture_in->dim()));
-        texture_out.set_texel_format(TexelFormat(texture_in->texel_format()));
-        texture_out.set_access(AccessControl(texture_in->access()));
+        texture_out.set_dimension(TextureDimension(texture_in->Dim()));
+        texture_out.set_texel_format(TexelFormat(texture_in->TexelFormat()));
+        texture_out.set_access(AccessControl(texture_in->Access()));
     }
 
     void TypeExternalTexture(pb::TypeExternalTexture&, const core::type::ExternalTexture*) {}
     void TypeInputAttachment(pb::TypeInputAttachment& input_attachment_out,
                              const core::type::InputAttachment* input_attachment_in) {
-        input_attachment_out.set_sub_type(Type(input_attachment_in->type()));
+        input_attachment_out.set_sub_type(Type(input_attachment_in->Type()));
     }
 
     void TypeSampler(pb::TypeSampler& sampler_out, const core::type::Sampler* sampler_in) {
-        sampler_out.set_kind(SamplerKind(sampler_in->kind()));
+        sampler_out.set_kind(SamplerKind(sampler_in->Kind()));
     }
 
     ////////////////////////////////////////////////////////////////////////////

@@ -82,7 +82,7 @@ struct State {
             auto column_wise = [&](auto op) {
                 auto* mat = ty->As<core::type::Matrix>();
                 Vector<core::ir::Value*, 4> args;
-                for (uint32_t col = 0; col < mat->columns(); col++) {
+                for (uint32_t col = 0; col < mat->Columns(); col++) {
                     auto* lhs_col = b.Access(mat->ColumnType(), lhs, u32(col));
                     auto* rhs_col = b.Access(mat->ColumnType(), rhs, u32(col));
                     auto* add = b.Binary(op, mat->ColumnType(), lhs_col, rhs_col);
@@ -146,7 +146,7 @@ struct State {
         b.InsertBefore(convert, [&] {
             // Extract and convert each column separately.
             Vector<core::ir::Value*, 4> args;
-            for (uint32_t c = 0; c < out_mat->columns(); c++) {
+            for (uint32_t c = 0; c < out_mat->Columns(); c++) {
                 auto* col = b.Access(in_mat->ColumnType(), arg, u32(c));
                 auto* new_col = b.Convert(out_mat->ColumnType(), col);
                 args.Push(new_col->Result(0));

@@ -175,55 +175,55 @@ bool IntrinsicDataTypeFor(const core::type::Type* ty,
     if (auto* vec = ty->As<core::type::Vector>()) {
         switch (vec->Width()) {
             case 2:
-                if (vec->type()->Is<core::type::I32>()) {
+                if (vec->Type()->Is<core::type::I32>()) {
                     out = DecomposeMemoryAccess::Intrinsic::DataType::kVec2I32;
                     return true;
                 }
-                if (vec->type()->Is<core::type::U32>()) {
+                if (vec->Type()->Is<core::type::U32>()) {
                     out = DecomposeMemoryAccess::Intrinsic::DataType::kVec2U32;
                     return true;
                 }
-                if (vec->type()->Is<core::type::F32>()) {
+                if (vec->Type()->Is<core::type::F32>()) {
                     out = DecomposeMemoryAccess::Intrinsic::DataType::kVec2F32;
                     return true;
                 }
-                if (vec->type()->Is<core::type::F16>()) {
+                if (vec->Type()->Is<core::type::F16>()) {
                     out = DecomposeMemoryAccess::Intrinsic::DataType::kVec2F16;
                     return true;
                 }
                 break;
             case 3:
-                if (vec->type()->Is<core::type::I32>()) {
+                if (vec->Type()->Is<core::type::I32>()) {
                     out = DecomposeMemoryAccess::Intrinsic::DataType::kVec3I32;
                     return true;
                 }
-                if (vec->type()->Is<core::type::U32>()) {
+                if (vec->Type()->Is<core::type::U32>()) {
                     out = DecomposeMemoryAccess::Intrinsic::DataType::kVec3U32;
                     return true;
                 }
-                if (vec->type()->Is<core::type::F32>()) {
+                if (vec->Type()->Is<core::type::F32>()) {
                     out = DecomposeMemoryAccess::Intrinsic::DataType::kVec3F32;
                     return true;
                 }
-                if (vec->type()->Is<core::type::F16>()) {
+                if (vec->Type()->Is<core::type::F16>()) {
                     out = DecomposeMemoryAccess::Intrinsic::DataType::kVec3F16;
                     return true;
                 }
                 break;
             case 4:
-                if (vec->type()->Is<core::type::I32>()) {
+                if (vec->Type()->Is<core::type::I32>()) {
                     out = DecomposeMemoryAccess::Intrinsic::DataType::kVec4I32;
                     return true;
                 }
-                if (vec->type()->Is<core::type::U32>()) {
+                if (vec->Type()->Is<core::type::U32>()) {
                     out = DecomposeMemoryAccess::Intrinsic::DataType::kVec4U32;
                     return true;
                 }
-                if (vec->type()->Is<core::type::F32>()) {
+                if (vec->Type()->Is<core::type::F32>()) {
                     out = DecomposeMemoryAccess::Intrinsic::DataType::kVec4F32;
                     return true;
                 }
-                if (vec->type()->Is<core::type::F16>()) {
+                if (vec->Type()->Is<core::type::F16>()) {
                     out = DecomposeMemoryAccess::Intrinsic::DataType::kVec4F16;
                     return true;
                 }
@@ -533,7 +533,7 @@ struct DecomposeMemoryAccess::State {
                 if (auto* mat_ty = el_ty->As<core::type::Matrix>()) {
                     auto* vec_ty = mat_ty->ColumnType();
                     Symbol load = LoadFunc(vec_ty, address_space, buffer);
-                    for (uint32_t i = 0; i < mat_ty->columns(); i++) {
+                    for (uint32_t i = 0; i < mat_ty->Columns(); i++) {
                         auto* offset = b.Add("offset", u32(i * mat_ty->ColumnStride()));
                         values.Push(b.Call(load, offset));
                     }
@@ -612,7 +612,7 @@ struct DecomposeMemoryAccess::State {
                         auto* vec_ty = mat_ty->ColumnType();
                         Symbol store = StoreFunc(vec_ty, buffer);
                         Vector<const ast::Statement*, 4> stmts;
-                        for (uint32_t i = 0; i < mat_ty->columns(); i++) {
+                        for (uint32_t i = 0; i < mat_ty->Columns(); i++) {
                             auto* offset = b.Add("offset", u32(i * mat_ty->ColumnStride()));
                             auto* element = b.IndexAccessor("value", u32(i));
                             auto* call = b.Call(store, offset, element);
@@ -853,11 +853,11 @@ ast::transform::Transform::ApplyResult DecomposeMemoryAccess::Apply(
                 if (swizzle->Indices().Length() == 1) {
                     if (auto access = state.TakeAccess(accessor->object)) {
                         auto* vec_ty = access.type->As<core::type::Vector>();
-                        auto* offset = state.Mul(vec_ty->type()->Size(), swizzle->Indices()[0u]);
+                        auto* offset = state.Mul(vec_ty->Type()->Size(), swizzle->Indices()[0u]);
                         state.AddAccess(accessor, {
                                                       access.var,
                                                       state.Add(access.offset, offset),
-                                                      vec_ty->type(),
+                                                      vec_ty->Type(),
                                                   });
                     }
                 }
@@ -889,11 +889,11 @@ ast::transform::Transform::ApplyResult DecomposeMemoryAccess::Apply(
                     continue;
                 }
                 if (auto* vec_ty = access.type->As<core::type::Vector>()) {
-                    auto* offset = state.Mul(vec_ty->type()->Size(), accessor->index);
+                    auto* offset = state.Mul(vec_ty->Type()->Size(), accessor->index);
                     state.AddAccess(accessor, {
                                                   access.var,
                                                   state.Add(access.offset, offset),
-                                                  vec_ty->type(),
+                                                  vec_ty->Type(),
                                               });
                     continue;
                 }

@@ -69,7 +69,7 @@ struct State {
                 }
                 auto* storage_texture = ptr->StoreType()->As<core::type::StorageTexture>();
                 if (storage_texture &&
-                    storage_texture->texel_format() == core::TexelFormat::kBgra8Unorm) {
+                    storage_texture->TexelFormat() == core::TexelFormat::kBgra8Unorm) {
                     ReplaceVar(var, storage_texture);
                     to_remove.Push(var);
                 }
@@ -85,7 +85,7 @@ struct State {
                 auto* param = func->Params()[index];
                 auto* storage_texture = param->Type()->As<core::type::StorageTexture>();
                 if (storage_texture &&
-                    storage_texture->texel_format() == core::TexelFormat::kBgra8Unorm) {
+                    storage_texture->TexelFormat() == core::TexelFormat::kBgra8Unorm) {
                     ReplaceParameter(func, param, index, storage_texture);
                 }
             }
@@ -98,7 +98,7 @@ struct State {
     void ReplaceVar(Var* old_var, const core::type::StorageTexture* bgra8) {
         // Redeclare the variable with a rgba8unorm texel format.
         auto* rgba8 = ty.Get<core::type::StorageTexture>(
-            bgra8->dim(), core::TexelFormat::kRgba8Unorm, bgra8->access(), bgra8->type());
+            bgra8->Dim(), core::TexelFormat::kRgba8Unorm, bgra8->Access(), bgra8->Type());
         auto* new_var = b.Var(ty.ptr(handle, rgba8));
         auto bp = old_var->BindingPoint();
         new_var->SetBindingPoint(bp->group, bp->binding);
@@ -122,7 +122,7 @@ struct State {
                           const core::type::StorageTexture* bgra8) {
         // Redeclare the parameter with a rgba8unorm texel format.
         auto* rgba8 = ty.Get<core::type::StorageTexture>(
-            bgra8->dim(), core::TexelFormat::kRgba8Unorm, bgra8->access(), bgra8->type());
+            bgra8->Dim(), core::TexelFormat::kRgba8Unorm, bgra8->Access(), bgra8->Type());
         auto* new_param = b.FunctionParam(rgba8);
         if (auto name = ir.NameOf(old_param)) {
             ir.SetName(new_param, name.NameView());
@@ -156,7 +156,7 @@ struct State {
                     if (call->Func() == core::BuiltinFn::kTextureStore) {
                         // Swizzle the value argument of a `textureStore()` builtin.
                         auto* tex = old_value->Type()->As<core::type::StorageTexture>();
-                        auto index = core::type::IsTextureArray(tex->dim()) ? 3u : 2u;
+                        auto index = core::type::IsTextureArray(tex->Dim()) ? 3u : 2u;
                         auto* value = call->Args()[index];
                         auto* swizzle = b.Swizzle(value->Type(), value, Vector{2u, 1u, 0u, 3u});
                         swizzle->InsertBefore(call);

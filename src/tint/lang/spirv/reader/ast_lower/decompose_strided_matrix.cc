@@ -57,7 +57,7 @@ struct MatrixInfo {
 
     /// @returns the identifier of an array that holds an vector column for each row of the matrix.
     ast::Type array(ast::Builder* b) const {
-        return b->ty.array(b->ty.vec<f32>(matrix->rows()), u32(matrix->columns()),
+        return b->ty.array(b->ty.vec<f32>(matrix->Rows()), u32(matrix->Columns()),
                            Vector{
                                b->Stride(stride),
                            });
@@ -153,8 +153,8 @@ ast::transform::Transform::ApplyResult DecomposeStridedMatrix::Apply(
             if (auto info = decomposed.Get(access->Member())) {
                 auto fn = tint::GetOrAdd(mat_to_arr, *info, [&] {
                     auto name =
-                        b.Symbols().New("mat" + std::to_string(info->matrix->columns()) + "x" +
-                                        std::to_string(info->matrix->rows()) + "_stride_" +
+                        b.Symbols().New("mat" + std::to_string(info->matrix->Columns()) + "x" +
+                                        std::to_string(info->matrix->Rows()) + "_stride_" +
                                         std::to_string(info->stride) + "_to_arr");
 
                     auto matrix = [&] { return CreateASTTypeFor(ctx, info->matrix); };
@@ -162,7 +162,7 @@ ast::transform::Transform::ApplyResult DecomposeStridedMatrix::Apply(
 
                     auto mat = b.Sym("m");
                     Vector<const ast::Expression*, 4> columns;
-                    for (uint32_t i = 0; i < static_cast<uint32_t>(info->matrix->columns()); i++) {
+                    for (uint32_t i = 0; i < static_cast<uint32_t>(info->matrix->Columns()); i++) {
                         columns.Push(b.IndexAccessor(mat, u32(i)));
                     }
                     b.Func(name,
@@ -192,8 +192,8 @@ ast::transform::Transform::ApplyResult DecomposeStridedMatrix::Apply(
             if (auto info = decomposed.Get(access->Member())) {
                 auto fn = tint::GetOrAdd(arr_to_mat, *info, [&] {
                     auto name =
-                        b.Symbols().New("arr_to_mat" + std::to_string(info->matrix->columns()) +
-                                        "x" + std::to_string(info->matrix->rows()) + "_stride_" +
+                        b.Symbols().New("arr_to_mat" + std::to_string(info->matrix->Columns()) +
+                                        "x" + std::to_string(info->matrix->Rows()) + "_stride_" +
                                         std::to_string(info->stride));
 
                     auto matrix = [&] { return CreateASTTypeFor(ctx, info->matrix); };
@@ -201,7 +201,7 @@ ast::transform::Transform::ApplyResult DecomposeStridedMatrix::Apply(
 
                     auto arr = b.Sym("arr");
                     Vector<const ast::Expression*, 4> columns;
-                    for (uint32_t i = 0; i < static_cast<uint32_t>(info->matrix->columns()); i++) {
+                    for (uint32_t i = 0; i < static_cast<uint32_t>(info->matrix->Columns()); i++) {
                         columns.Push(b.IndexAccessor(arr, u32(i)));
                     }
                     b.Func(name,

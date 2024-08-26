@@ -736,7 +736,7 @@ class State {
             tint::Switch(
                 obj_ty,
                 [&](const core::type::Vector* vec) {
-                    TINT_DEFER(obj_ty = vec->type());
+                    TINT_DEFER(obj_ty = vec->Type());
                     expr = VectorMemberAccess(expr, index);
                 },
                 [&](const core::type::Matrix* mat) {
@@ -965,10 +965,10 @@ class State {
             [&](const core::type::F32*) { return b.ty.f32(); },  //
             [&](const core::type::Bool*) { return b.ty.bool_(); },
             [&](const core::type::Matrix* m) {
-                return b.ty.mat(Type(m->type()), m->columns(), m->rows());
+                return b.ty.mat(Type(m->Type()), m->Columns(), m->Rows());
             },
             [&](const core::type::Vector* v) {
-                auto el = Type(v->type());
+                auto el = Type(v->Type());
                 if (v->Packed()) {
                     TINT_ASSERT(v->Width() == 3u);
                     return b.ty(core::BuiltinType::kPackedVec3, el);
@@ -998,27 +998,27 @@ class State {
             },
             [&](const core::type::Struct* s) { return Struct(s); },
             [&](const core::type::Atomic* a) { return b.ty.atomic(Type(a->Type())); },
-            [&](const core::type::DepthTexture* t) { return b.ty.depth_texture(t->dim()); },
+            [&](const core::type::DepthTexture* t) { return b.ty.depth_texture(t->Dim()); },
             [&](const core::type::DepthMultisampledTexture* t) {
-                return b.ty.depth_multisampled_texture(t->dim());
+                return b.ty.depth_multisampled_texture(t->Dim());
             },
             [&](const core::type::ExternalTexture*) { return b.ty.external_texture(); },
             [&](const core::type::MultisampledTexture* t) {
-                auto el = Type(t->type());
-                return b.ty.multisampled_texture(t->dim(), el);
+                auto el = Type(t->Type());
+                return b.ty.multisampled_texture(t->Dim(), el);
             },
             [&](const core::type::SampledTexture* t) {
-                auto el = Type(t->type());
-                return b.ty.sampled_texture(t->dim(), el);
+                auto el = Type(t->Type());
+                return b.ty.sampled_texture(t->Dim(), el);
             },
             [&](const core::type::StorageTexture* t) {
                 if (RequiresChromiumInternalGraphite(t)) {
                     Enable(wgsl::Extension::kChromiumInternalGraphite);
                 }
 
-                return b.ty.storage_texture(t->dim(), t->texel_format(), t->access());
+                return b.ty.storage_texture(t->Dim(), t->TexelFormat(), t->Access());
             },
-            [&](const core::type::Sampler* s) { return b.ty.sampler(s->kind()); },
+            [&](const core::type::Sampler* s) { return b.ty.sampler(s->Kind()); },
             [&](const core::type::Pointer* p) {
                 // Note: type::Pointer always has an inferred access, but WGSL only allows an
                 // explicit access in the 'storage' address space.
@@ -1034,7 +1034,7 @@ class State {
             },
             [&](const core::type::InputAttachment* i) {
                 Enable(wgsl::Extension::kChromiumInternalInputAttachments);
-                auto el = Type(i->type());
+                auto el = Type(i->Type());
                 return b.ty.input_attachment(el);
             },  //
             TINT_ICE_ON_NO_MATCH);
@@ -1263,7 +1263,7 @@ class State {
     /// @returns true if the storage texture type requires the kChromiumInternalGraphite extension
     /// to be enabled.
     bool RequiresChromiumInternalGraphite(const core::type::StorageTexture* tex) {
-        return tex->texel_format() == core::TexelFormat::kR8Unorm;
+        return tex->TexelFormat() == core::TexelFormat::kR8Unorm;
     }
 };
 

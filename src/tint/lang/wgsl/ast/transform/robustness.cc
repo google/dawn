@@ -252,7 +252,7 @@ struct Robustness::State {
                     // Validation will have rejected any OOB accesses.
                     return nullptr;
                 }
-                return b.Expr(u32(mat->columns() - 1u));
+                return b.Expr(u32(mat->Columns() - 1u));
             },
             [&](const core::type::Array* arr) -> const Expression* {
                 if (arr->Count()->Is<core::type::RuntimeArrayCount>()) {

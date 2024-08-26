@@ -124,7 +124,7 @@ class ScopedBitCast {
         // If we need to promote from scalar to vector, bitcast the scalar to the
         // vector element type.
         if (curr_type->Is<core::type::Scalar>() && target_vec_type) {
-            target_type = target_vec_type->type();
+            target_type = target_vec_type->Type();
         }
 
         // Bit cast
@@ -1265,12 +1265,12 @@ bool ASTPrinter::EmitTextureCall(StringStream& out,
     };
 
     // MSL requires that `lod` is a constant 0 for 1D textures.
-    bool level_is_constant_zero = texture_type->dim() == core::type::TextureDimension::k1d;
+    bool level_is_constant_zero = texture_type->Dim() == core::type::TextureDimension::k1d;
 
     switch (builtin->Fn()) {
         case wgsl::BuiltinFn::kTextureDimensions: {
             std::vector<const char*> dims;
-            switch (texture_type->dim()) {
+            switch (texture_type->Dim()) {
                 case core::type::TextureDimension::kNone:
                     diagnostics_.AddError(Source{}) << "texture dimension is kNone";
                     return false;
@@ -1401,7 +1401,7 @@ bool ASTPrinter::EmitTextureCall(StringStream& out,
             bool inside_params = false;
             if (usage == Usage::kCoords && e->Type()->UnwrapRef()->is_integer_scalar_or_vector()) {
                 inside_params = true;
-                switch (texture_type->dim()) {
+                switch (texture_type->Dim()) {
                     case core::type::TextureDimension::k1d:
                         out << "uint(";
                         break;
@@ -1463,7 +1463,7 @@ bool ASTPrinter::EmitTextureCall(StringStream& out,
         out << "level(0)";
     }
     if (auto* ddx = arg(Usage::kDdx)) {
-        auto dim = texture_type->dim();
+        auto dim = texture_type->Dim();
         switch (dim) {
             case core::type::TextureDimension::k2d:
             case core::type::TextureDimension::k2dArray:
@@ -1508,7 +1508,7 @@ bool ASTPrinter::EmitTextureCall(StringStream& out,
         maybe_write_comma();
         if (!has_offset) {
             // offset argument may need to be provided if we have a component.
-            switch (texture_type->dim()) {
+            switch (texture_type->Dim()) {
                 case core::type::TextureDimension::k2d:
                 case core::type::TextureDimension::k2dArray:
                     out << "int2(0), ";
@@ -1542,7 +1542,7 @@ bool ASTPrinter::EmitTextureCall(StringStream& out,
     // written values are visible to subsequent reads from the same thread.
     if (auto* storage = texture_type->As<core::type::StorageTexture>();
         builtin->Fn() == wgsl::BuiltinFn::kTextureStore &&
-        storage->access() == core::Access::kReadWrite) {
+        storage->Access() == core::Access::kReadWrite) {
         out << "; ";
         texture_expr();
         out << ".fence()";
@@ -1556,7 +1556,7 @@ bool ASTPrinter::EmitDotCall(StringStream& out,
                              const sem::BuiltinFn* builtin) {
     auto* vec_ty = builtin->Parameters()[0]->Type()->As<core::type::Vector>();
     std::string fn = "dot";
-    if (vec_ty->type()->is_integer_scalar()) {
+    if (vec_ty->Type()->is_integer_scalar()) {
         // MSL does not have a builtin for dot() with integer vector types.
         // Generate the helper function if it hasn't been created already
         fn = tint::GetOrAdd(int_dot_funcs_, vec_ty->Width(), [&]() -> std::string {
@@ -1920,14 +1920,14 @@ bool ASTPrinter::EmitZeroValue(StringStream& out, const core::type::Type* type) 
             return true;
         },
         [&](const core::type::Vector* vec) {  //
-            return EmitZeroValue(out, vec->type());
+            return EmitZeroValue(out, vec->Type());
         },
         [&](const core::type::Matrix* mat) {
             if (!EmitType(out, mat)) {
                 return false;
             }
             ScopedParen sp(out);
-            return EmitZeroValue(out, mat->type());
+            return EmitZeroValue(out, mat->Type());
         },
         [&](const core::type::Array*) {
             out << "{}";
@@ -1994,7 +1994,7 @@ bool ASTPrinter::EmitConstant(StringStream& out, const core::constant::Value* co
 
             ScopedParen sp(out);
 
-            for (size_t i = 0; i < m->columns(); i++) {
+            for (size_t i = 0; i < m->Columns(); i++) {
                 if (i > 0) {
                     out << ", ";
                 }
@@ -2767,10 +2767,10 @@ bool ASTPrinter::EmitType(StringStream& out, const core::type::Type* type) {
             return true;
         },
         [&](const core::type::Matrix* mat) {
-            if (!EmitType(out, mat->type())) {
+            if (!EmitType(out, mat->Type())) {
                 return false;
             }
-            out << mat->columns() << "x" << mat->rows();
+            out << mat->Columns() << "x" << mat->Rows();
             return true;
         },
         [&](const core::type::Pointer* ptr) {
@@ -2815,7 +2815,7 @@ bool ASTPrinter::EmitType(StringStream& out, const core::type::Type* type) {
                 out << "texture";
             }
 
-            switch (tex->dim()) {
+            switch (tex->Dim()) {
                 case core::type::TextureDimension::k1d:
                     out << "1d";
                     break;
@@ -2856,16 +2856,16 @@ bool ASTPrinter::EmitType(StringStream& out, const core::type::Type* type) {
                     return true;
                 },
                 [&](const core::type::StorageTexture* storage) {
-                    if (!EmitType(out, storage->type())) {
+                    if (!EmitType(out, storage->Type())) {
                         return false;
                     }
 
                     std::string access_str;
-                    if (storage->access() == core::Access::kRead) {
+                    if (storage->Access() == core::Access::kRead) {
                         out << ", access::read";
-                    } else if (storage->access() == core::Access::kReadWrite) {
+                    } else if (storage->Access() == core::Access::kReadWrite) {
                         out << ", access::read_write";
-                    } else if (storage->access() == core::Access::kWrite) {
+                    } else if (storage->Access() == core::Access::kWrite) {
                         out << ", access::write";
                     } else {
                         diagnostics_.AddError(Source{})
@@ -2875,14 +2875,14 @@ bool ASTPrinter::EmitType(StringStream& out, const core::type::Type* type) {
                     return true;
                 },
                 [&](const core::type::MultisampledTexture* ms) {
-                    if (!EmitType(out, ms->type())) {
+                    if (!EmitType(out, ms->Type())) {
                         return false;
                     }
                     out << ", access::read";
                     return true;
                 },
                 [&](const core::type::SampledTexture* sampled) {
-                    if (!EmitType(out, sampled->type())) {
+                    if (!EmitType(out, sampled->Type())) {
                         return false;
                     }
                     out << ", access::sample";
@@ -2898,7 +2898,7 @@ bool ASTPrinter::EmitType(StringStream& out, const core::type::Type* type) {
             if (vec->Packed()) {
                 out << "packed_";
             }
-            if (!EmitType(out, vec->type())) {
+            if (!EmitType(out, vec->Type())) {
                 return false;
             }
             out << vec->Width();

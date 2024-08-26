@@ -77,7 +77,7 @@ struct State {
 
         // Collect consecutive scalars into column vectors.
         Vector<Value*, 4> columns;
-        for (uint32_t c = 0; c < mat->columns(); c++) {
+        for (uint32_t c = 0; c < mat->Columns(); c++) {
             Vector<Value*, 4> values;
             for (uint32_t r = 0; r < col->Width(); r++) {
                 values.Push(scalars[c * col->Width() + r]);

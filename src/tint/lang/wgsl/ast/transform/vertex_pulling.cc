@@ -187,7 +187,7 @@ AttributeWGSLType WGSLTypeOf(const core::type::Type* ty) {
             return {BaseWGSLType::kF16, 1};
         },
         [](const core::type::Vector* vec) -> AttributeWGSLType {
-            return {WGSLTypeOf(vec->type()).base_type, vec->Width()};
+            return {WGSLTypeOf(vec->Type()).base_type, vec->Width()};
         },
         [](Default) -> AttributeWGSLType {
             return {BaseWGSLType::kInvalid, 0};

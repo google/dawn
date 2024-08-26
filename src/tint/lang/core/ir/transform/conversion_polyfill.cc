@@ -100,13 +100,13 @@ struct State {
             StringStream name;
             name << "tint_";
             if (auto* src_vec = src_ty->As<type::Vector>()) {
-                name << "v" << src_vec->Width() << src_vec->type()->FriendlyName();
+                name << "v" << src_vec->Width() << src_vec->Type()->FriendlyName();
             } else {
                 name << src_ty->FriendlyName();
             }
             name << "_to_";
             if (auto* res_vec = res_ty->As<type::Vector>()) {
-                name << "v" << res_vec->Width() << res_vec->type()->FriendlyName();
+                name << "v" << res_vec->Width() << res_vec->Type()->FriendlyName();
             } else {
                 name << res_ty->FriendlyName();
             }

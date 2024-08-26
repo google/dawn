@@ -290,7 +290,7 @@ struct Std140::State {
                             fork_std140 = true;
                             // Replace the member with column vectors.
                             const auto name_prefix = PrefixForUniqueNames(
-                                str->Declaration(), member->Name(), mat->columns());
+                                str->Declaration(), member->Name(), mat->Columns());
 
                             // Build a struct member for each column of the matrix
                             auto column_members = DecomposedMatrixStructMembers(
@@ -407,9 +407,9 @@ struct Std140::State {
             [&](const core::type::Matrix* mat) {
                 if (MatrixNeedsDecomposing(mat)) {
                     auto std140_mat = std140_mats.GetOrAdd(mat, [&] {
-                        auto name = b.Symbols().New("mat" + std::to_string(mat->columns()) + "x" +
-                                                    std::to_string(mat->rows()) + "_" +
-                                                    mat->type()->FriendlyName());
+                        auto name = b.Symbols().New("mat" + std::to_string(mat->Columns()) + "x" +
+                                                    std::to_string(mat->Rows()) + "_" +
+                                                    mat->Type()->FriendlyName());
                         auto members =
                             DecomposedMatrixStructMembers(mat, "col", mat->Align(), mat->Size());
                         b.Structure(name, members);
@@ -454,7 +454,7 @@ struct Std140::State {
         uint32_t align,
         uint32_t size) {
         // Replace the member with column vectors.
-        const auto num_columns = mat->columns();
+        const auto num_columns = mat->Columns();
         const auto column_size = mat->ColumnType()->Size();
         const auto column_stride = mat->ColumnStride();
         // Build a struct member for each column of the matrix
@@ -636,8 +636,8 @@ struct Std140::State {
                 return "arr" + std::to_string(count.value()) + "_" + ConvertSuffix(arr->ElemType());
             },
             [&](const core::type::Matrix* mat) {
-                return "mat" + std::to_string(mat->columns()) + "x" + std::to_string(mat->rows()) +
-                       "_" + ConvertSuffix(mat->type());
+                return "mat" + std::to_string(mat->Columns()) + "x" + std::to_string(mat->Rows()) +
+                       "_" + ConvertSuffix(mat->Type());
             },
             [&](const core::type::F32*) { return "f32"; },  //
             [&](const core::type::F16*) { return "f16"; },  //
@@ -879,7 +879,7 @@ struct Std140::State {
         const core::type::Type* ret_ty = nullptr;
 
         // Build switch() cases for each column of the matrix
-        auto num_columns = chain.std140_mat_ty->columns();
+        auto num_columns = chain.std140_mat_ty->Columns();
         for (uint32_t column_idx = 0; column_idx < num_columns; column_idx++) {
             const Expression* expr = nullptr;
             const core::type::Type* ty = nullptr;
@@ -1082,7 +1082,7 @@ struct Std140::State {
                 [&](const core::type::Vector* vec) -> ExprTypeName {
                     auto* idx = dynamic_index(dyn_idx->slot);
                     auto* expr = b.IndexAccessor(lhs, idx);
-                    return {expr, vec->type(), name};
+                    return {expr, vec->Type(), name};
                 },  //
                 TINT_ICE_ON_NO_MATCH);
         }
@@ -1097,7 +1097,7 @@ struct Std140::State {
                         rhs += xyzw[el];
                     }
                     auto swizzle_ty = src.Types().Find<core::type::Vector>(
-                        vec->type(), static_cast<uint32_t>(swizzle->Length()));
+                        vec->Type(), static_cast<uint32_t>(swizzle->Length()));
                     auto* expr = b.MemberAccessor(lhs, rhs);
                     return {expr, swizzle_ty, rhs};
                 },  //
@@ -1124,7 +1124,7 @@ struct Std140::State {
             },  //
             [&](const core::type::Vector* vec) -> ExprTypeName {
                 auto* expr = b.IndexAccessor(lhs, idx);
-                return {expr, vec->type(), std::to_string(idx)};
+                return {expr, vec->Type(), std::to_string(idx)};
             },  //
             TINT_ICE_ON_NO_MATCH);
     }

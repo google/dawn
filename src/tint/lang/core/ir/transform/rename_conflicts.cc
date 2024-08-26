@@ -1,3 +1,4 @@
+
 // Copyright 2023 The Dawn & Tint Authors
 //
 // Redistribution and use in source and binary forms, with or without
@@ -222,13 +223,13 @@ struct State {
                 },
                 [&](const core::type::Vector* v) {
                     EnsureResolvesTo("vec" + tint::ToString(v->Width()), nullptr);
-                    return v->type();
+                    return v->Type();
                 },
                 [&](const core::type::Matrix* m) {
                     EnsureResolvesTo(
-                        "mat" + tint::ToString(m->columns()) + "x" + tint::ToString(m->rows()),
+                        "mat" + tint::ToString(m->Columns()) + "x" + tint::ToString(m->Rows()),
                         nullptr);
-                    return m->type();
+                    return m->Type();
                 },
                 [&](const core::type::Pointer* p) {
                     EnsureResolvesTo(tint::ToString(p->Access()), nullptr);

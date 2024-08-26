@@ -164,7 +164,7 @@ Function::VariableBindings Function::TransitivelyReferencedSamplerVariablesImpl(
     for (auto* global : TransitivelyReferencedGlobals()) {
         auto* unwrapped_type = global->Type()->UnwrapRef();
         auto* sampler = unwrapped_type->As<core::type::Sampler>();
-        if (sampler == nullptr || sampler->kind() != kind) {
+        if (sampler == nullptr || sampler->Kind() != kind) {
             continue;
         }
 

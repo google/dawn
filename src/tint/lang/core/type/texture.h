@@ -44,7 +44,7 @@ class Texture : public Castable<Texture, Type> {
     ~Texture() override;
 
     /// @returns the texture dimension
-    TextureDimension dim() const { return dim_; }
+    TextureDimension Dim() const { return dim_; }
 
   private:
     TextureDimension const dim_;

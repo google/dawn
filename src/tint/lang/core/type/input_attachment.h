@@ -39,7 +39,7 @@ class InputAttachment final : public Castable<InputAttachment, Texture> {
   public:
     /// Constructor
     /// @param type the data type of the input attachment
-    explicit InputAttachment(const Type* type);
+    explicit InputAttachment(const type::Type* type);
     /// Destructor
     ~InputAttachment() override;
 
@@ -48,7 +48,7 @@ class InputAttachment final : public Castable<InputAttachment, Texture> {
     bool Equals(const UniqueNode& other) const override;
 
     /// @returns the subtype of the input attachment
-    Type* type() const { return const_cast<Type*>(type_); }
+    const type::Type* Type() const { return type_; }
 
     /// @returns the name for this type that closely resembles how it would be
     /// declared in WGSL.
@@ -59,7 +59,7 @@ class InputAttachment final : public Castable<InputAttachment, Texture> {
     InputAttachment* Clone(CloneContext& ctx) const override;
 
   private:
-    const Type* const type_;
+    const type::Type* type_;
 };
 
 }  // namespace tint::core::type

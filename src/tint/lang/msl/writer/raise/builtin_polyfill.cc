@@ -348,7 +348,7 @@ struct State {
             auto* arg0 = builtin->Args()[0];
             auto* arg1 = builtin->Args()[1];
             auto* vec = arg0->Type()->As<core::type::Vector>();
-            if (vec->type()->is_integer_scalar()) {
+            if (vec->Type()->is_integer_scalar()) {
                 // Calls to `dot` with a integer arguments are replaced with helper functions, as
                 // MSL's `dot` builtin only supports floating point arguments.
                 auto* polyfill = integer_dot_polyfills.GetOrAdd(vec, [&] {
@@ -357,7 +357,7 @@ struct State {
                     //         let mul = lhs * rhs;
                     //         return mul[0] + mul[1] + mul[2] + mul[3];
                     //     }
-                    auto* el_ty = vec->type();
+                    auto* el_ty = vec->Type();
                     auto* lhs = b.FunctionParam("lhs", vec);
                     auto* rhs = b.FunctionParam("rhs", vec);
                     auto* func = b.Function("tint_dot", el_ty);
@@ -552,7 +552,7 @@ struct State {
     void TextureDimensions(core::ir::CoreBuiltinCall* builtin) {
         auto* tex = builtin->Args()[0];
         auto* type = tex->Type()->As<core::type::Texture>();
-        bool needs_lod_arg = type->dim() != core::type::TextureDimension::k1d &&
+        bool needs_lod_arg = type->Dim() != core::type::TextureDimension::k1d &&
                              !type->Is<core::type::MultisampledTexture>() &&
                              !type->Is<core::type::DepthMultisampledTexture>();
 
@@ -580,9 +580,9 @@ struct State {
                 values.Push(call->Result(0));
             };
             get_dim(msl::BuiltinFn::kGetWidth);
-            if (type->dim() != core::type::TextureDimension::k1d) {
+            if (type->Dim() != core::type::TextureDimension::k1d) {
                 get_dim(msl::BuiltinFn::kGetHeight);
-                if (type->dim() == core::type::TextureDimension::k3d) {
+                if (type->Dim() == core::type::TextureDimension::k3d) {
                     get_dim(msl::BuiltinFn::kGetDepth);
                 }
             }
@@ -612,8 +612,8 @@ struct State {
 
         // Add an offset argument if it was not provided.
         const bool has_offset = args.Back()->Type()->is_signed_integer_vector();
-        const bool needs_offset = tex_type->dim() == core::type::TextureDimension::k2d ||
-                                  tex_type->dim() == core::type::TextureDimension::k2dArray;
+        const bool needs_offset = tex_type->Dim() == core::type::TextureDimension::k2d ||
+                                  tex_type->Dim() == core::type::TextureDimension::k2dArray;
         if (needs_offset && !has_offset) {
             args.Push(b.Zero<vec2<i32>>());
         }
@@ -658,10 +658,10 @@ struct State {
         auto* coords = builtin->Args()[next_arg++];
         core::ir::Value* index = nullptr;
         core::ir::Value* lod_or_sample = nullptr;
-        if (tex_type->dim() == core::type::TextureDimension::k2dArray) {
+        if (tex_type->Dim() == core::type::TextureDimension::k2dArray) {
             index = builtin->Args()[next_arg++];
         }
-        if (tex_type->dim() != core::type::TextureDimension::k1d &&
+        if (tex_type->Dim() != core::type::TextureDimension::k1d &&
             !tex_type->Is<core::type::StorageTexture>()) {
             lod_or_sample = builtin->Args()[next_arg++];
         }
@@ -706,7 +706,7 @@ struct State {
         b.InsertBefore(builtin, [&] {
             auto* tex = builtin->Object();
             auto* tex_type = tex->Type()->As<core::type::Texture>();
-            if (IsTextureArray(tex_type->dim())) {
+            if (IsTextureArray(tex_type->Dim())) {
                 const uint32_t kArrayIndex = 2;
                 auto* index_arg = builtin->Args()[kArrayIndex];
                 if (index_arg->Type()->is_signed_integer_scalar()) {
@@ -759,8 +759,8 @@ struct State {
         b.InsertBefore(builtin, [&] {
             // Wrap the bias argument in a constructor for the MSL `bias` builtin type.
             uint32_t bias_idx = 2;
-            if (tex_type->dim() == core::type::TextureDimension::k2dArray ||
-                tex_type->dim() == core::type::TextureDimension::kCubeArray) {
+            if (tex_type->Dim() == core::type::TextureDimension::k2dArray ||
+                tex_type->Dim() == core::type::TextureDimension::kCubeArray) {
                 bias_idx = 3;
             }
             args[bias_idx] = b.Construct(ty.Get<msl::type::Bias>(), args[bias_idx])->Result(0);
@@ -825,8 +825,8 @@ struct State {
         b.InsertBefore(builtin, [&] {
             // Find the ddx and ddy arguments.
             uint32_t grad_idx = 2;
-            if (tex_type->dim() == core::type::TextureDimension::k2dArray ||
-                tex_type->dim() == core::type::TextureDimension::kCubeArray) {
+            if (tex_type->Dim() == core::type::TextureDimension::k2dArray ||
+                tex_type->Dim() == core::type::TextureDimension::kCubeArray) {
                 grad_idx = 3;
             }
             auto* ddx = args[grad_idx];
@@ -834,7 +834,7 @@ struct State {
 
             // Wrap the ddx and ddy arguments in a constructor for the MSL `gradient` builtin type.
             enum type::Gradient::Dim dim;
-            switch (tex_type->dim()) {
+            switch (tex_type->Dim()) {
                 case core::type::TextureDimension::k2d:
                 case core::type::TextureDimension::k2dArray:
                     dim = type::Gradient::Dim::k2d;
@@ -879,8 +879,8 @@ struct State {
         b.InsertBefore(builtin, [&] {
             // Wrap the LOD argument in a constructor for the MSL `level` builtin type.
             uint32_t lod_idx = 2;
-            if (tex_type->dim() == core::type::TextureDimension::k2dArray ||
-                tex_type->dim() == core::type::TextureDimension::kCubeArray) {
+            if (tex_type->Dim() == core::type::TextureDimension::k2dArray ||
+                tex_type->Dim() == core::type::TextureDimension::kCubeArray) {
                 lod_idx = 3;
             }
             args[lod_idx] = b.Construct(ty.Get<msl::type::Level>(), args[lod_idx])->Result(0);
@@ -902,7 +902,7 @@ struct State {
         auto* coords = builtin->Args()[1];
         core::ir::Value* value = nullptr;
         core::ir::Value* index = nullptr;
-        if (tex_type->dim() == core::type::TextureDimension::k2dArray) {
+        if (tex_type->Dim() == core::type::TextureDimension::k2dArray) {
             index = builtin->Args()[2];
             value = builtin->Args()[3];
         } else {
@@ -927,7 +927,7 @@ struct State {
 
             // If we are writing to a read-write texture, add a fence to ensure that the written
             // values are visible to subsequent reads from the same thread.
-            if (tex_type->access() == core::Access::kReadWrite) {
+            if (tex_type->Access() == core::Access::kReadWrite) {
                 b.MemberCall<msl::ir::MemberBuiltinCall>(ty.void_(), msl::BuiltinFn::kFence, tex);
             }
         });

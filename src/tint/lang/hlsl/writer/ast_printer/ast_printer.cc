@@ -481,7 +481,7 @@ bool ASTPrinter::EmitDynamicVectorAssignment(const ast::AssignmentStatement* stm
                 return "";
             }
             out << ", int idx, ";
-            if (!EmitTypeAndName(out, vec->type(), core::AddressSpace::kUndefined,
+            if (!EmitTypeAndName(out, vec->Type(), core::AddressSpace::kUndefined,
                                  core::Access::kUndefined, "val")) {
                 return "";
             }
@@ -556,7 +556,7 @@ bool ASTPrinter::EmitDynamicMatrixVectorAssignment(const ast::AssignmentStatemen
             Line(&helpers_) << "switch (col) {";
             {
                 ScopedIndent si2(&helpers_);
-                for (uint32_t i = 0; i < mat->columns(); ++i) {
+                for (uint32_t i = 0; i < mat->Columns(); ++i) {
                     Line(&helpers_) << "case " << i << ": mat[" << i << "] = val; break;";
                 }
             }
@@ -606,7 +606,7 @@ bool ASTPrinter::EmitDynamicMatrixScalarAssignment(const ast::AssignmentStatemen
                 return "";
             }
             out << ", int col, int row, ";
-            if (!EmitTypeAndName(out, mat->type(), core::AddressSpace::kUndefined,
+            if (!EmitTypeAndName(out, mat->Type(), core::AddressSpace::kUndefined,
                                  core::Access::kUndefined, "val")) {
                 return "";
             }
@@ -617,14 +617,14 @@ bool ASTPrinter::EmitDynamicMatrixScalarAssignment(const ast::AssignmentStatemen
             Line(&helpers_) << "switch (col) {";
             {
                 ScopedIndent si2(&helpers_);
-                for (uint32_t i = 0; i < mat->columns(); ++i) {
+                for (uint32_t i = 0; i < mat->Columns(); ++i) {
                     Line(&helpers_) << "case " << i << ":";
                     {
                         auto vec_name = "mat[" + std::to_string(i) + "]";
                         ScopedIndent si3(&helpers_);
                         {
                             auto out = Line(&helpers_);
-                            switch (mat->rows()) {
+                            switch (mat->Rows()) {
                                 case 2:
                                     out << vec_name
                                         << " = (row.xx == int2(0, 1)) ? val.xx : " << vec_name
@@ -2693,7 +2693,7 @@ bool ASTPrinter::EmitTextureCall(StringStream& out,
 
             switch (builtin->Fn()) {
                 case wgsl::BuiltinFn::kTextureDimensions:
-                    switch (texture_type->dim()) {
+                    switch (texture_type->Dim()) {
                         case core::type::TextureDimension::kNone:
                             TINT_ICE() << "texture dimension is kNone";
                         case core::type::TextureDimension::k1d:
@@ -2720,7 +2720,7 @@ bool ASTPrinter::EmitTextureCall(StringStream& out,
                     }
                     break;
                 case wgsl::BuiltinFn::kTextureNumLayers:
-                    switch (texture_type->dim()) {
+                    switch (texture_type->Dim()) {
                         default:
                             TINT_ICE() << "texture dimension is not arrayed";
                         case core::type::TextureDimension::k2dArray:
@@ -2734,7 +2734,7 @@ bool ASTPrinter::EmitTextureCall(StringStream& out,
                     }
                     break;
                 case wgsl::BuiltinFn::kTextureNumLevels:
-                    switch (texture_type->dim()) {
+                    switch (texture_type->Dim()) {
                         default:
                             TINT_ICE() << "texture dimension does not support mips";
                         case core::type::TextureDimension::k1d:
@@ -2755,7 +2755,7 @@ bool ASTPrinter::EmitTextureCall(StringStream& out,
                     }
                     break;
                 case wgsl::BuiltinFn::kTextureNumSamples:
-                    switch (texture_type->dim()) {
+                    switch (texture_type->Dim()) {
                         default:
                             TINT_ICE() << "texture dimension does not support multisampling";
                         case core::type::TextureDimension::k2d:
@@ -2886,7 +2886,7 @@ bool ASTPrinter::EmitTextureCall(StringStream& out,
                 break;
             }
             if (auto* storage_texture_type = texture_type->As<core::type::StorageTexture>()) {
-                if (storage_texture_type->access() == core::Access::kReadWrite) {
+                if (storage_texture_type->Access() == core::Access::kReadWrite) {
                     break;
                 }
             }
@@ -3522,10 +3522,10 @@ bool ASTPrinter::EmitHandleVariable(const ast::Var* var, const sem::Variable* se
             TINT_ICE() << "Rasterizer Ordered View type isn't storage texture";
         }
         out << "RasterizerOrderedTexture2D";
-        auto* component = ImageFormatToRWtextureType(storage->texel_format());
+        auto* component = ImageFormatToRWtextureType(storage->TexelFormat());
         if (TINT_UNLIKELY(!component)) {
             TINT_ICE() << "Unsupported StorageTexture TexelFormat: "
-                       << static_cast<int>(storage->texel_format());
+                       << static_cast<int>(storage->TexelFormat());
         }
         out << "<" << component << "> " << name;
     } else if (!EmitTypeAndName(out, type, sem->AddressSpace(), sem->Access(), name)) {
@@ -3537,7 +3537,7 @@ bool ASTPrinter::EmitHandleVariable(const ast::Var* var, const sem::Variable* se
     if (unwrapped_type->Is<core::type::Texture>()) {
         register_space = "t";
         if (auto* st = unwrapped_type->As<core::type::StorageTexture>();
-            st && st->access() != core::Access::kRead) {
+            st && st->Access() != core::Access::kRead) {
             register_space = "u";
         }
     } else if (unwrapped_type->Is<core::type::Sampler>()) {
@@ -3815,7 +3815,7 @@ bool ASTPrinter::EmitConstant(StringStream& out,
 
             ScopedParen sp(out);
 
-            for (size_t i = 0; i < m->columns(); i++) {
+            for (size_t i = 0; i < m->Columns(); i++) {
                 if (i > 0) {
                     out << ", ";
                 }
@@ -3975,7 +3975,7 @@ bool ASTPrinter::EmitValue(StringStream& out, const core::type::Type* type, int 
                 if (i != 0) {
                     out << ", ";
                 }
-                if (!EmitValue(out, vec->type(), value)) {
+                if (!EmitValue(out, vec->Type(), value)) {
                     return false;
                 }
             }
@@ -3987,11 +3987,11 @@ bool ASTPrinter::EmitValue(StringStream& out, const core::type::Type* type, int 
                 return false;
             }
             ScopedParen sp(out);
-            for (uint32_t i = 0; i < (mat->rows() * mat->columns()); i++) {
+            for (uint32_t i = 0; i < (mat->Rows() * mat->Columns()); i++) {
                 if (i != 0) {
                     out << ", ";
                 }
-                if (!EmitValue(out, mat->type(), value)) {
+                if (!EmitValue(out, mat->Type(), value)) {
                     return false;
                 }
             }
@@ -4440,16 +4440,16 @@ bool ASTPrinter::EmitType(StringStream& out,
             return true;
         },
         [&](const core::type::Matrix* mat) {
-            if (mat->type()->Is<core::type::F16>()) {
+            if (mat->Type()->Is<core::type::F16>()) {
                 // Use matrix<type, N, M> for f16 matrix
                 out << "matrix<";
-                if (!EmitType(out, mat->type(), address_space, access, "")) {
+                if (!EmitType(out, mat->Type(), address_space, access, "")) {
                     return false;
                 }
-                out << ", " << mat->columns() << ", " << mat->rows() << ">";
+                out << ", " << mat->Columns() << ", " << mat->Rows() << ">";
                 return true;
             }
-            if (!EmitType(out, mat->type(), address_space, access, "")) {
+            if (!EmitType(out, mat->Type(), address_space, access, "")) {
                 return false;
             }
             // Note: HLSL's matrices are declared as <type>NxM, where N is the
@@ -4459,7 +4459,7 @@ bool ASTPrinter::EmitType(StringStream& out,
             // on column vectors. To simplify everything we use the transpose of the
             // matrices. See:
             // https://docs.microsoft.com/en-us/windows/win32/direct3dhlsl/dx-graphics-hlsl-per-component-math#matrix-ordering
-            out << mat->columns() << "x" << mat->rows();
+            out << mat->Columns() << "x" << mat->Rows();
             return true;
         },
         [&](const core::type::Pointer*) -> bool {
@@ -4488,12 +4488,12 @@ bool ASTPrinter::EmitType(StringStream& out,
             auto* depth_ms = tex->As<core::type::DepthMultisampledTexture>();
             auto* sampled = tex->As<core::type::SampledTexture>();
 
-            if (storage && storage->access() != core::Access::kRead) {
+            if (storage && storage->Access() != core::Access::kRead) {
                 out << "RW";
             }
             out << "Texture";
 
-            switch (tex->dim()) {
+            switch (tex->Dim()) {
                 case core::type::TextureDimension::k1d:
                     out << "1D";
                     break;
@@ -4513,20 +4513,20 @@ bool ASTPrinter::EmitType(StringStream& out,
                     out << "CubeArray";
                     break;
                 default:
-                    TINT_UNREACHABLE() << "unexpected TextureDimension " << tex->dim();
+                    TINT_UNREACHABLE() << "unexpected TextureDimension " << tex->Dim();
             }
 
             if (storage) {
-                auto* component = ImageFormatToRWtextureType(storage->texel_format());
+                auto* component = ImageFormatToRWtextureType(storage->TexelFormat());
                 if (TINT_UNLIKELY(!component)) {
                     TINT_ICE() << "Unsupported StorageTexture TexelFormat: "
-                               << static_cast<int>(storage->texel_format());
+                               << static_cast<int>(storage->TexelFormat());
                 }
                 out << "<" << component << ">";
             } else if (depth_ms) {
                 out << "<float4>";
             } else if (sampled || ms) {
-                auto* subtype = sampled ? sampled->type() : ms->type();
+                auto* subtype = sampled ? sampled->Type() : ms->Type();
                 out << "<";
                 if (subtype->Is<core::type::F32>()) {
                     out << "float4";
@@ -4547,18 +4547,18 @@ bool ASTPrinter::EmitType(StringStream& out,
         },
         [&](const core::type::Vector* vec) {
             auto width = vec->Width();
-            if (vec->type()->Is<core::type::F32>() && width >= 1 && width <= 4) {
+            if (vec->Type()->Is<core::type::F32>() && width >= 1 && width <= 4) {
                 out << "float" << width;
-            } else if (vec->type()->Is<core::type::I32>() && width >= 1 && width <= 4) {
+            } else if (vec->Type()->Is<core::type::I32>() && width >= 1 && width <= 4) {
                 out << "int" << width;
-            } else if (vec->type()->Is<core::type::U32>() && width >= 1 && width <= 4) {
+            } else if (vec->Type()->Is<core::type::U32>() && width >= 1 && width <= 4) {
                 out << "uint" << width;
-            } else if (vec->type()->Is<core::type::Bool>() && width >= 1 && width <= 4) {
+            } else if (vec->Type()->Is<core::type::Bool>() && width >= 1 && width <= 4) {
                 out << "bool" << width;
             } else {
                 // For example, use "vector<float16_t, N>" for f16 vector.
                 out << "vector<";
-                if (!EmitType(out, vec->type(), address_space, access, "")) {
+                if (!EmitType(out, vec->Type(), address_space, access, "")) {
                     return false;
                 }
                 out << ", " << width << ">";

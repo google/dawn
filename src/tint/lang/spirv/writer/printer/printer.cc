@@ -149,14 +149,14 @@ const core::type::Type* DedupType(const core::type::Type* ty, core::type::Manage
 
         // Depth textures are always declared as sampled textures.
         [&](const core::type::DepthTexture* depth) {
-            return types.Get<core::type::SampledTexture>(depth->dim(), types.f32());
+            return types.Get<core::type::SampledTexture>(depth->Dim(), types.f32());
         },
         [&](const core::type::DepthMultisampledTexture* depth) {
-            return types.Get<core::type::MultisampledTexture>(depth->dim(), types.f32());
+            return types.Get<core::type::MultisampledTexture>(depth->Dim(), types.f32());
         },
         [&](const core::type::StorageTexture* st) -> const core::type::Type* {
-            return types.Get<core::type::StorageTexture>(st->dim(), st->texel_format(),
-                                                         core::Access::kRead, st->type());
+            return types.Get<core::type::StorageTexture>(st->Dim(), st->TexelFormat(),
+                                                         core::Access::kRead, st->Type());
         },
 
         // Both sampler types are the same in SPIR-V.
@@ -443,7 +443,7 @@ class Printer {
                 },
                 [&](const core::type::Matrix* mat) {
                     OperandList operands = {Type(ty), id};
-                    for (uint32_t i = 0; i < mat->columns(); i++) {
+                    for (uint32_t i = 0; i < mat->Columns(); i++) {
                         operands.push_back(Constant(constant->Index(i)));
                     }
                     module_.PushType(spv::Op::OpConstantComposite, operands);
@@ -517,11 +517,11 @@ class Printer {
                     module_.PushType(spv::Op::OpTypeFloat, {id, 16u});
                 },
                 [&](const core::type::Vector* vec) {
-                    module_.PushType(spv::Op::OpTypeVector, {id, Type(vec->type()), vec->Width()});
+                    module_.PushType(spv::Op::OpTypeVector, {id, Type(vec->Type()), vec->Width()});
                 },
                 [&](const core::type::Matrix* mat) {
                     module_.PushType(spv::Op::OpTypeMatrix,
-                                     {id, Type(mat->ColumnType()), mat->columns()});
+                                     {id, Type(mat->ColumnType()), mat->Columns()});
                 },
                 [&](const core::type::Array* arr) {
                     if (arr->ConstantCount()) {
@@ -599,12 +599,12 @@ class Printer {
 
             // Emit matrix layout decorations if necessary.
             if (auto* matrix_type = get_nested_matrix_type(member->Type())) {
-                const uint32_t effective_row_count = (matrix_type->rows() == 2) ? 2 : 4;
+                const uint32_t effective_row_count = (matrix_type->Rows() == 2) ? 2 : 4;
                 module_.PushAnnot(spv::Op::OpMemberDecorate,
                                   {id, member->Index(), U32Operand(SpvDecorationColMajor)});
                 module_.PushAnnot(spv::Op::OpMemberDecorate,
                                   {id, member->Index(), U32Operand(SpvDecorationMatrixStride),
-                                   Operand(effective_row_count * matrix_type->type()->Size())});
+                                   Operand(effective_row_count * matrix_type->Type()->Size())});
             }
 
             if (member->Name().IsValid()) {
@@ -630,15 +630,15 @@ class Printer {
     void EmitTextureType(uint32_t id, const core::type::Texture* texture) {
         uint32_t sampled_type = Switch(
             texture,  //
-            [&](const core::type::SampledTexture* t) { return Type(t->type()); },
-            [&](const core::type::MultisampledTexture* t) { return Type(t->type()); },
-            [&](const core::type::StorageTexture* t) { return Type(t->type()); },
-            [&](const core::type::InputAttachment* t) { return Type(t->type()); },  //
+            [&](const core::type::SampledTexture* t) { return Type(t->Type()); },
+            [&](const core::type::MultisampledTexture* t) { return Type(t->Type()); },
+            [&](const core::type::StorageTexture* t) { return Type(t->Type()); },
+            [&](const core::type::InputAttachment* t) { return Type(t->Type()); },  //
             TINT_ICE_ON_NO_MATCH);
 
         uint32_t dim = SpvDimMax;
         uint32_t array = 0u;
-        switch (texture->dim()) {
+        switch (texture->Dim()) {
             case core::type::TextureDimension::kNone: {
                 break;
             }
@@ -700,7 +700,7 @@ class Printer {
 
         uint32_t format = SpvImageFormat_::SpvImageFormatUnknown;
         if (auto* st = texture->As<core::type::StorageTexture>()) {
-            format = TexelFormat(st->texel_format());
+            format = TexelFormat(st->TexelFormat());
         }
 
         module_.PushType(spv::Op::OpTypeImage,
@@ -2293,7 +2293,7 @@ class Printer {
 
                 // Add NonReadable and NonWritable decorations to storage textures and buffers.
                 auto* st = store_ty->As<core::type::StorageTexture>();
-                auto access = st ? st->access() : ptr->Access();
+                auto access = st ? st->Access() : ptr->Access();
                 if (st || ptr->AddressSpace() != core::AddressSpace::kHandle) {
                     if (access == core::Access::kRead) {
                         module_.PushAnnot(spv::Op::OpDecorate,

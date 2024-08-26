@@ -1636,7 +1636,7 @@ class UniformityGraph {
                     // Loading from a read-write storage texture may produce a non-uniform value.
                     auto* storage =
                         builtin->Parameters()[0]->Type()->As<core::type::StorageTexture>();
-                    if (storage && storage->access() == core::Access::kReadWrite) {
+                    if (storage && storage->Access() == core::Access::kReadWrite) {
                         callsite_tag = {CallSiteTag::CallSiteNoRestriction};
                         function_tag = ReturnValueMayBeNonUniform;
                     }

@@ -40,9 +40,9 @@ TEST_F(MatrixTest, Creation) {
     auto* d = create<Matrix>(create<Vector>(create<I32>(), 2u), 4u);
     auto* e = create<Matrix>(create<Vector>(create<I32>(), 3u), 2u);
 
-    EXPECT_EQ(a->type(), create<I32>());
-    EXPECT_EQ(a->rows(), 3u);
-    EXPECT_EQ(a->columns(), 4u);
+    EXPECT_EQ(a->Type(), create<I32>());
+    EXPECT_EQ(a->Rows(), 3u);
+    EXPECT_EQ(a->Columns(), 4u);
 
     EXPECT_EQ(a, b);
     EXPECT_NE(a, c);
@@ -85,9 +85,9 @@ TEST_F(MatrixTest, Clone) {
     core::type::CloneContext ctx{{nullptr}, {nullptr, &mgr}};
 
     auto* mat = a->Clone(ctx);
-    EXPECT_TRUE(mat->type()->Is<I32>());
-    EXPECT_EQ(mat->rows(), 3u);
-    EXPECT_EQ(mat->columns(), 4u);
+    EXPECT_TRUE(mat->Type()->Is<I32>());
+    EXPECT_EQ(mat->Rows(), 3u);
+    EXPECT_EQ(mat->Columns(), 4u);
 }
 
 }  // namespace

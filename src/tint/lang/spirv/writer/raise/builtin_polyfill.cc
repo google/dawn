@@ -337,7 +337,7 @@ struct State {
             auto* v1 = builtin->Args()[0];
             auto* v2 = builtin->Args()[1];
             auto* vec = v1->Type()->As<core::type::Vector>();
-            auto* elty = vec->type();
+            auto* elty = vec->Type();
             for (uint32_t i = 0; i < vec->Width(); i++) {
                 b.InsertBefore(builtin, [&] {
                     auto* e1 = b.Access(elty, v1, u32(i));
@@ -481,7 +481,7 @@ struct State {
                                       core::ir::Value* array_idx,
                                       core::ir::Instruction* insertion_point) {
         auto* vec = coords->Type()->As<core::type::Vector>();
-        auto* element_ty = vec->type();
+        auto* element_ty = vec->Type();
 
         // Convert the index to match the coordinate type if needed.
         if (array_idx->Type() != element_ty) {
@@ -519,7 +519,7 @@ struct State {
         sampled_image->InsertBefore(builtin);
 
         // Append the array index to the coordinates if provided.
-        auto* array_idx = IsTextureArray(texture_ty->dim()) ? next_arg() : nullptr;
+        auto* array_idx = IsTextureArray(texture_ty->Dim()) ? next_arg() : nullptr;
         if (array_idx) {
             coords = AppendArrayIndex(coords, array_idx, builtin);
         }
@@ -624,7 +624,7 @@ struct State {
         sampled_image->InsertBefore(builtin);
 
         // Append the array index to the coordinates if provided.
-        auto* array_idx = IsTextureArray(texture_ty->dim()) ? next_arg() : nullptr;
+        auto* array_idx = IsTextureArray(texture_ty->Dim()) ? next_arg() : nullptr;
         if (array_idx) {
             coords = AppendArrayIndex(coords, array_idx, builtin);
         }
@@ -683,7 +683,7 @@ struct State {
         auto* texture_ty = texture->Type()->As<core::type::Texture>();
 
         // Append the array index to the coordinates if provided.
-        auto* array_idx = IsTextureArray(texture_ty->dim()) ? next_arg() : nullptr;
+        auto* array_idx = IsTextureArray(texture_ty->Dim()) ? next_arg() : nullptr;
         if (array_idx) {
             coords = AppendArrayIndex(coords, array_idx, builtin);
         }
@@ -741,7 +741,7 @@ struct State {
         auto* texture_ty = texture->Type()->As<core::type::Texture>();
 
         // Append the array index to the coordinates if provided.
-        auto* array_idx = IsTextureArray(texture_ty->dim()) ? next_arg() : nullptr;
+        auto* array_idx = IsTextureArray(texture_ty->Dim()) ? next_arg() : nullptr;
         if (array_idx) {
             coords = AppendArrayIndex(coords, array_idx, builtin);
         }
@@ -798,9 +798,9 @@ struct State {
 
         // Add an extra component to the result vector for arrayed textures.
         auto* result_ty = builtin->Result(0)->Type();
-        if (core::type::IsTextureArray(texture_ty->dim())) {
+        if (core::type::IsTextureArray(texture_ty->Dim())) {
             auto* vec = result_ty->As<core::type::Vector>();
-            result_ty = ty.vec(vec->type(), vec->Width() + 1);
+            result_ty = ty.vec(vec->Type(), vec->Width() + 1);
         }
 
         // Call the function.
@@ -809,7 +809,7 @@ struct State {
         result->InsertBefore(builtin);
 
         // Swizzle the first two components from the result for arrayed textures.
-        if (core::type::IsTextureArray(texture_ty->dim())) {
+        if (core::type::IsTextureArray(texture_ty->Dim())) {
             result = b.Swizzle(builtin->Result(0)->Type(), result, {0, 1});
             result->InsertBefore(builtin);
         }

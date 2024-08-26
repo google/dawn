@@ -2179,7 +2179,7 @@ const core::type::Type* Validator::GetVectorPtrElementType(const Instruction* in
     if (TINT_LIKELY(memory_view_ty)) {
         auto* vec_ty = memory_view_ty->StoreType()->As<core::type::Vector>();
         if (TINT_LIKELY(vec_ty)) {
-            return vec_ty->type();
+            return vec_ty->Type();
         }
     }
 

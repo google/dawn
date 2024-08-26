@@ -1820,7 +1820,7 @@ const core::type::Type* Resolver::ConcreteType(const core::type::Type* ty,
         [&](const core::type::AbstractFloat*) { return target_ty ? target_ty : f32(); },
         [&](const core::type::Vector* v) {
             return Switch(
-                v->type(),  //
+                v->Type(),  //
                 [&](const core::type::AbstractInt*) {
                     return target_ty ? target_ty : i32v(v->Width());
                 },
@@ -1829,9 +1829,9 @@ const core::type::Type* Resolver::ConcreteType(const core::type::Type* ty,
                 });
         },
         [&](const core::type::Matrix* m) {
-            return Switch(m->type(),  //
+            return Switch(m->Type(),  //
                           [&](const core::type::AbstractFloat*) {
-                              return target_ty ? target_ty : f32m(m->columns(), m->rows());
+                              return target_ty ? target_ty : f32m(m->Columns(), m->Rows());
                           });
         },
         [&](const sem::Array* a) -> const core::type::Type* {
@@ -2021,9 +2021,9 @@ sem::ValueExpression* Resolver::IndexAccessor(const ast::IndexAccessorExpression
     auto* ty = Switch(
         storage_ty,  //
         [&](const sem::Array* arr) { return arr->ElemType(); },
-        [&](const core::type::Vector* vec) { return vec->type(); },
+        [&](const core::type::Vector* vec) { return vec->Type(); },
         [&](const core::type::Matrix* mat) {
-            return b.create<core::type::Vector>(mat->type(), mat->rows());
+            return b.create<core::type::Vector>(mat->Type(), mat->Rows());
         },
         [&](Default) {
             AddError(expr->source) << "cannot index type '" << sem_.TypeNameOf(storage_ty) << "'";
@@ -2209,13 +2209,13 @@ sem::Call* Resolver::Call(const ast::CallExpression* expr) {
             [&](const core::type::Vector* v) {
                 if (v->Packed()) {
                     TINT_ASSERT(v->Width() == 3u);
-                    return ctor_or_conv(CtorConvIntrinsic::kPackedVec3, Vector{v->type()});
+                    return ctor_or_conv(CtorConvIntrinsic::kPackedVec3, Vector{v->Type()});
                 }
-                return ctor_or_conv(wgsl::intrinsic::VectorCtorConv(v->Width()), Vector{v->type()});
+                return ctor_or_conv(wgsl::intrinsic::VectorCtorConv(v->Width()), Vector{v->Type()});
             },
             [&](const core::type::Matrix* m) {
-                return ctor_or_conv(wgsl::intrinsic::MatrixCtorConv(m->columns(), m->rows()),
-                                    Vector{m->type()});
+                return ctor_or_conv(wgsl::intrinsic::MatrixCtorConv(m->Columns(), m->Rows()),
+                                    Vector{m->Type()});
             },
             [&](const sem::Array* arr) -> sem::Call* {
                 auto* call_target = array_ctors_.GetOrAdd(
@@ -3584,7 +3584,7 @@ sem::ValueExpression* Resolver::MemberAccessor(const ast::MemberAccessorExpressi
             const sem::ValueExpression* obj_expr = object;
             if (size == 1) {
                 // A single element swizzle is just the type of the vector.
-                ty = vec->type();
+                ty = vec->Type();
                 // If we're extracting from a memory view, we return a reference.
                 if (memory_view) {
                     ty = b.create<core::type::Reference>(memory_view->AddressSpace(), ty,
@@ -3593,7 +3593,7 @@ sem::ValueExpression* Resolver::MemberAccessor(const ast::MemberAccessorExpressi
             } else {
                 // The vector will have a number of components equal to the length of
                 // the swizzle.
-                ty = b.create<core::type::Vector>(vec->type(), static_cast<uint32_t>(size));
+                ty = b.create<core::type::Vector>(vec->Type(), static_cast<uint32_t>(size));
 
                 if (obj_expr->Type()->Is<core::type::Pointer>()) {
                     // If the LHS is a pointer, the load rule is invoked. We special case this

@@ -41,7 +41,7 @@ class MultisampledTexture final : public Castable<MultisampledTexture, Texture> 
     /// Constructor
     /// @param dim the dimensionality of the texture
     /// @param type the data type of the multisampled texture
-    MultisampledTexture(TextureDimension dim, const Type* type);
+    MultisampledTexture(TextureDimension dim, const type::Type* type);
 
     /// Destructor
     ~MultisampledTexture() override;
@@ -51,7 +51,7 @@ class MultisampledTexture final : public Castable<MultisampledTexture, Texture> 
     bool Equals(const UniqueNode& other) const override;
 
     /// @returns the subtype of the sampled texture
-    const Type* type() const { return type_; }
+    const type::Type* Type() const { return type_; }
 
     /// @returns the name for this type that closely resembles how it would be
     /// declared in WGSL.
@@ -62,7 +62,7 @@ class MultisampledTexture final : public Castable<MultisampledTexture, Texture> 
     MultisampledTexture* Clone(CloneContext& ctx) const override;
 
   private:
-    const Type* const type_;
+    const type::Type* const type_;
 };
 
 }  // namespace tint::core::type

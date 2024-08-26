@@ -63,13 +63,13 @@ class StorageTexture final : public Castable<StorageTexture, Texture> {
     bool Equals(const UniqueNode& other) const override;
 
     /// @returns the storage subtype
-    const Type* type() const { return subtype_; }
+    const type::Type* Type() const { return subtype_; }
 
     /// @returns the texel format
-    core::TexelFormat texel_format() const { return texel_format_; }
+    core::TexelFormat TexelFormat() const { return texel_format_; }
 
     /// @returns the access control
-    core::Access access() const { return access_; }
+    core::Access Access() const { return access_; }
 
     /// @returns the name for this type that closely resembles how it would be
     /// declared in WGSL.
@@ -78,7 +78,7 @@ class StorageTexture final : public Castable<StorageTexture, Texture> {
     /// @param format the storage texture image format
     /// @param type_mgr the Manager used to build the returned type
     /// @returns the storage texture subtype for the given TexelFormat
-    static Type* SubtypeFor(core::TexelFormat format, Manager& type_mgr);
+    static type::Type* SubtypeFor(core::TexelFormat format, Manager& type_mgr);
 
     /// @param ctx the clone context
     /// @returns a clone of this type
@@ -87,7 +87,7 @@ class StorageTexture final : public Castable<StorageTexture, Texture> {
   private:
     core::TexelFormat const texel_format_;
     core::Access const access_;
-    const Type* const subtype_;
+    const type::Type* const subtype_;
 };
 
 }  // namespace tint::core::type

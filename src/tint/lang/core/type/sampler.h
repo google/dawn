@@ -50,7 +50,7 @@ class Sampler final : public Castable<Sampler, Type> {
     bool Equals(const UniqueNode& other) const override;
 
     /// @returns the sampler type
-    SamplerKind kind() const { return kind_; }
+    SamplerKind Kind() const { return kind_; }
 
     /// @returns true if this is a comparison sampler
     bool IsComparison() const { return kind_ == SamplerKind::kComparisonSampler; }

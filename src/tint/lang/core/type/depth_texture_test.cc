@@ -77,7 +77,7 @@ TEST_F(DepthTextureTest, IsTexture) {
 
 TEST_F(DepthTextureTest, Dim) {
     DepthTexture d(TextureDimension::kCube);
-    EXPECT_EQ(d.dim(), TextureDimension::kCube);
+    EXPECT_EQ(d.Dim(), TextureDimension::kCube);
 }
 
 TEST_F(DepthTextureTest, FriendlyName) {
@@ -92,7 +92,7 @@ TEST_F(DepthTextureTest, Clone) {
     core::type::CloneContext ctx{{nullptr}, {nullptr, &mgr}};
 
     auto* dt = a->Clone(ctx);
-    EXPECT_EQ(dt->dim(), TextureDimension::k2d);
+    EXPECT_EQ(dt->Dim(), TextureDimension::k2d);
 }
 
 }  // namespace

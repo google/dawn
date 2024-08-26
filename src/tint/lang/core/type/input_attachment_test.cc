@@ -81,7 +81,7 @@ TEST_F(InputAttachmentTest, IsTexture) {
 TEST_F(InputAttachmentTest, Dim) {
     F32 f32;
     InputAttachment s(&f32);
-    EXPECT_EQ(s.dim(), TextureDimension::k2d);
+    EXPECT_EQ(s.Dim(), TextureDimension::k2d);
 }
 
 TEST_F(InputAttachmentTest, FriendlyName) {
@@ -99,11 +99,11 @@ TEST_F(InputAttachmentTest, Clone) {
 
     auto* c = a->Clone(ctx);
     ASSERT_TRUE(c->Is<InputAttachment>());
-    EXPECT_TRUE(c->type()->Is<F32>());
+    EXPECT_TRUE(c->Type()->Is<F32>());
 
     auto* d = b->Clone(ctx);
     ASSERT_TRUE(d->Is<InputAttachment>());
-    EXPECT_TRUE(d->type()->Is<I32>());
+    EXPECT_TRUE(d->Type()->Is<I32>());
 }
 
 }  // namespace

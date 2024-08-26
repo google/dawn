@@ -101,11 +101,11 @@ Type Transform::CreateASTTypeFor(program::CloneContext& ctx, const core::type::T
         return ctx.dst->ty.bool_();
     }
     if (auto* m = ty->As<core::type::Matrix>()) {
-        auto el = CreateASTTypeFor(ctx, m->type());
-        return ctx.dst->ty.mat(el, m->columns(), m->rows());
+        auto el = CreateASTTypeFor(ctx, m->Type());
+        return ctx.dst->ty.mat(el, m->Columns(), m->Rows());
     }
     if (auto* v = ty->As<core::type::Vector>()) {
-        auto el = CreateASTTypeFor(ctx, v->type());
+        auto el = CreateASTTypeFor(ctx, v->Type());
         if (v->Packed()) {
             TINT_ASSERT(v->Width() == 3u);
             return ctx.dst->ty(core::BuiltinType::kPackedVec3, el);
@@ -159,25 +159,25 @@ Type Transform::CreateASTTypeFor(program::CloneContext& ctx, const core::type::T
         return ctx.dst->ty.atomic(CreateASTTypeFor(ctx, a->Type()));
     }
     if (auto* t = ty->As<core::type::DepthTexture>()) {
-        return ctx.dst->ty.depth_texture(t->dim());
+        return ctx.dst->ty.depth_texture(t->Dim());
     }
     if (auto* t = ty->As<core::type::DepthMultisampledTexture>()) {
-        return ctx.dst->ty.depth_multisampled_texture(t->dim());
+        return ctx.dst->ty.depth_multisampled_texture(t->Dim());
     }
     if (ty->Is<core::type::ExternalTexture>()) {
         return ctx.dst->ty.external_texture();
     }
     if (auto* t = ty->As<core::type::MultisampledTexture>()) {
-        return ctx.dst->ty.multisampled_texture(t->dim(), CreateASTTypeFor(ctx, t->type()));
+        return ctx.dst->ty.multisampled_texture(t->Dim(), CreateASTTypeFor(ctx, t->Type()));
     }
     if (auto* t = ty->As<core::type::SampledTexture>()) {
-        return ctx.dst->ty.sampled_texture(t->dim(), CreateASTTypeFor(ctx, t->type()));
+        return ctx.dst->ty.sampled_texture(t->Dim(), CreateASTTypeFor(ctx, t->Type()));
     }
     if (auto* t = ty->As<core::type::StorageTexture>()) {
-        return ctx.dst->ty.storage_texture(t->dim(), t->texel_format(), t->access());
+        return ctx.dst->ty.storage_texture(t->Dim(), t->TexelFormat(), t->Access());
     }
     if (auto* s = ty->As<core::type::Sampler>()) {
-        return ctx.dst->ty.sampler(s->kind());
+        return ctx.dst->ty.sampler(s->Kind());
     }
     if (auto* p = ty->As<core::type::Pointer>()) {
         // Note: core::type::Pointer always has an inferred access, but WGSL only allows an explicit
@@ -188,7 +188,7 @@ Type Transform::CreateASTTypeFor(program::CloneContext& ctx, const core::type::T
         return ctx.dst->ty.ptr(address_space, CreateASTTypeFor(ctx, p->StoreType()), access);
     }
     if (auto* i = ty->As<core::type::InputAttachment>()) {
-        return ctx.dst->ty.input_attachment(CreateASTTypeFor(ctx, i->type()));
+        return ctx.dst->ty.input_attachment(CreateASTTypeFor(ctx, i->Type()));
     }
     TINT_UNREACHABLE() << "Unhandled type: " << ty->TypeInfo().name;
 }

@@ -566,7 +566,7 @@ class Printer : public tint::TextGenerator {
             register_space = 't';
 
             auto* st = ptr->StoreType()->As<core::type::StorageTexture>();
-            if (st && st->access() != core::Access::kRead) {
+            if (st && st->Access() != core::Access::kRead) {
                 register_space = 'u';
             }
         } else if (ptr->StoreType()->Is<core::type::Sampler>()) {
@@ -1232,7 +1232,7 @@ class Printer : public tint::TextGenerator {
         EmitType(out, m);
 
         const ScopedParen sp(out);
-        for (size_t i = 0; i < m->columns(); i++) {
+        for (size_t i = 0; i < m->Columns(); i++) {
             if (i > 0) {
                 out << ", ";
             }
@@ -1346,32 +1346,32 @@ class Printer : public tint::TextGenerator {
 
     void EmitVectorType(StringStream& out, const core::type::Vector* vec) {
         auto width = vec->Width();
-        if (vec->type()->Is<core::type::F32>()) {
+        if (vec->Type()->Is<core::type::F32>()) {
             out << "float" << width;
-        } else if (vec->type()->Is<core::type::I32>()) {
+        } else if (vec->Type()->Is<core::type::I32>()) {
             out << "int" << width;
-        } else if (vec->type()->Is<core::type::U32>()) {
+        } else if (vec->Type()->Is<core::type::U32>()) {
             out << "uint" << width;
-        } else if (vec->type()->Is<core::type::Bool>()) {
+        } else if (vec->Type()->Is<core::type::Bool>()) {
             out << "bool" << width;
         } else {
             // For example, use "vector<float16_t, N>" for f16 vector.
             out << "vector<";
-            EmitType(out, vec->type());
+            EmitType(out, vec->Type());
             out << ", " << width << ">";
         }
     }
 
     void EmitMatrixType(StringStream& out, const core::type::Matrix* mat) {
-        if (mat->type()->Is<core::type::F16>()) {
+        if (mat->Type()->Is<core::type::F16>()) {
             // Use matrix<type, N, M> for f16 matrix
             out << "matrix<";
-            EmitType(out, mat->type());
-            out << ", " << mat->columns() << ", " << mat->rows() << ">";
+            EmitType(out, mat->Type());
+            out << ", " << mat->Columns() << ", " << mat->Rows() << ">";
             return;
         }
 
-        EmitType(out, mat->type());
+        EmitType(out, mat->Type());
 
         // Note: HLSL's matrices are declared as <type>NxM, where N is the
         // number of rows and M is the number of columns. Despite HLSL's
@@ -1380,7 +1380,7 @@ class Printer : public tint::TextGenerator {
         // on column vectors. To simplify everything we use the transpose of the
         // matrices. See:
         // https://docs.microsoft.com/en-us/windows/win32/direct3dhlsl/dx-graphics-hlsl-per-component-math#matrix-ordering
-        out << mat->columns() << "x" << mat->rows();
+        out << mat->Columns() << "x" << mat->Rows();
     }
 
     void EmitTextureType(StringStream& out, const core::type::Texture* tex) {
@@ -1393,12 +1393,12 @@ class Printer : public tint::TextGenerator {
         auto* depth_ms = tex->As<core::type::DepthMultisampledTexture>();
         auto* sampled = tex->As<core::type::SampledTexture>();
 
-        if (storage && storage->access() != core::Access::kRead) {
+        if (storage && storage->Access() != core::Access::kRead) {
             out << "RW";
         }
         out << "Texture";
 
-        switch (tex->dim()) {
+        switch (tex->Dim()) {
             case core::type::TextureDimension::k1d:
                 out << "1D";
                 break;
@@ -1418,20 +1418,20 @@ class Printer : public tint::TextGenerator {
                 out << "CubeArray";
                 break;
             default:
-                TINT_UNREACHABLE() << "unexpected TextureDimension " << tex->dim();
+                TINT_UNREACHABLE() << "unexpected TextureDimension " << tex->Dim();
         }
 
         if (storage) {
-            auto* component = ImageFormatToRWtextureType(storage->texel_format());
+            auto* component = ImageFormatToRWtextureType(storage->TexelFormat());
             if (TINT_UNLIKELY(!component)) {
                 TINT_ICE() << "Unsupported StorageTexture TexelFormat: "
-                           << static_cast<int>(storage->texel_format());
+                           << static_cast<int>(storage->TexelFormat());
             }
             out << "<" << component << ">";
         } else if (depth_ms) {
             out << "<float4>";
         } else if (sampled || ms) {
-            auto* subtype = sampled ? sampled->type() : ms->type();
+            auto* subtype = sampled ? sampled->Type() : ms->Type();
             out << "<";
             if (subtype->Is<core::type::F32>()) {
                 out << "float4";

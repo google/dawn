@@ -124,8 +124,8 @@ struct State {
                         if (config.texture_sample_base_clamp_to_edge_2d_f32) {
                             auto* tex =
                                 builtin->Args()[0]->Type()->As<core::type::SampledTexture>();
-                            if (tex && tex->dim() == core::type::TextureDimension::k2d &&
-                                tex->type()->Is<core::type::F32>()) {
+                            if (tex && tex->Dim() == core::type::TextureDimension::k2d &&
+                                tex->Type()->Is<core::type::F32>()) {
                                 worklist.Push(builtin);
                             }
                         }

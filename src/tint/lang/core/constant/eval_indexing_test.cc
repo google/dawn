@@ -270,7 +270,7 @@ TEST_F(ConstEvalTest, Array_vec3_f32_Index) {
     ASSERT_NE(sem, nullptr);
     auto* vec = sem->Type()->As<core::type::Vector>();
     ASSERT_NE(vec, nullptr);
-    EXPECT_TRUE(vec->type()->Is<core::type::F32>());
+    EXPECT_TRUE(vec->Type()->Is<core::type::F32>());
     EXPECT_EQ(vec->Width(), 3u);
     EXPECT_TYPE(sem->ConstantValue()->Type(), sem->Type());
 
@@ -339,8 +339,8 @@ TEST_F(ConstEvalTest, ChainedIndex) {
         auto* ty = mat->Type()->As<core::type::Matrix>();
         ASSERT_NE(mat->Type(), nullptr);
         EXPECT_TRUE(ty->ColumnType()->Is<core::type::Vector>());
-        EXPECT_EQ(ty->columns(), 2u);
-        EXPECT_EQ(ty->rows(), 3u);
+        EXPECT_EQ(ty->Columns(), 2u);
+        EXPECT_EQ(ty->Rows(), 3u);
         EXPECT_EQ(mat->ConstantValue()->Type(), mat->Type());
         EXPECT_TRUE(mat->ConstantValue()->AnyZero());
         EXPECT_FALSE(mat->ConstantValue()->AllZero());
@@ -374,7 +374,7 @@ TEST_F(ConstEvalTest, ChainedIndex) {
         EXPECT_NE(vec, nullptr);
         auto* ty = vec->Type()->As<core::type::Vector>();
         ASSERT_NE(vec->Type(), nullptr);
-        EXPECT_TRUE(ty->type()->Is<core::type::F32>());
+        EXPECT_TRUE(ty->Type()->Is<core::type::F32>());
         EXPECT_EQ(ty->Width(), 3u);
         EXPECT_EQ(vec->ConstantValue()->Type(), vec->Type());
         EXPECT_TRUE(vec->ConstantValue()->AnyZero());

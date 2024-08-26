@@ -766,8 +766,8 @@ struct State {
         auto* tex = call->Args()[0];
         auto* tex_type = tex->Type()->As<core::type::Texture>();
 
-        TINT_ASSERT(tex_type->dim() == core::type::TextureDimension::k2dArray ||
-                    tex_type->dim() == core::type::TextureDimension::kCubeArray);
+        TINT_ASSERT(tex_type->Dim() == core::type::TextureDimension::k2dArray ||
+                    tex_type->Dim() == core::type::TextureDimension::kCubeArray);
 
         const core::type::Type* query_ty = ty.vec(ty.u32(), 3);
         b.InsertBefore(call, [&] {
@@ -792,7 +792,7 @@ struct State {
 
         Vector<uint32_t, 2> swizzle{};
         uint32_t query_size = 0;
-        switch (tex_type->dim()) {
+        switch (tex_type->Dim()) {
             case core::type::TextureDimension::kNone:
                 TINT_ICE() << "texture dimension is kNone";
             case core::type::TextureDimension::k1d:
@@ -842,7 +842,7 @@ struct State {
 
         Vector<uint32_t, 2> swizzle{};
         uint32_t query_size = 0;
-        switch (tex_type->dim()) {
+        switch (tex_type->Dim()) {
             case core::type::TextureDimension::kNone:
                 TINT_ICE() << "texture dimension is kNone";
             case core::type::TextureDimension::k1d:
@@ -921,7 +921,7 @@ struct State {
         auto* tex = call->Args()[0];
         auto* tex_type = tex->Type()->As<core::type::Texture>();
 
-        TINT_ASSERT(tex_type->dim() == core::type::TextureDimension::k2d);
+        TINT_ASSERT(tex_type->Dim() == core::type::TextureDimension::k2d);
         TINT_ASSERT((tex_type->IsAnyOf<core::type::DepthMultisampledTexture,
                                        core::type::MultisampledTexture>()));
 
@@ -950,9 +950,9 @@ struct State {
         Vector<uint32_t, 2> swizzle;
         const core::type::Type* ret_ty = tint::Switch(
             tex_type,  //
-            [&](const core::type::SampledTexture* sampled) { return sampled->type(); },
-            [&](const core::type::StorageTexture* storage) { return storage->type(); },
-            [&](const core::type::MultisampledTexture* ms) { return ms->type(); },
+            [&](const core::type::SampledTexture* sampled) { return sampled->Type(); },
+            [&](const core::type::StorageTexture* storage) { return storage->Type(); },
+            [&](const core::type::MultisampledTexture* ms) { return ms->Type(); },
             [&](const core::type::DepthTexture*) {
                 swizzle.Push(0u);
                 return ty.f32();
@@ -968,7 +968,7 @@ struct State {
         bool is_storage = tex_type->Is<core::type::StorageTexture>();
         b.InsertBefore(call, [&] {
             Vector<core::ir::Value*, 2> call_args;
-            switch (tex_type->dim()) {
+            switch (tex_type->Dim()) {
                 case core::type::TextureDimension::k1d: {
                     auto* coord = b.Convert(ty.i32(), args[1]);
                     core::ir::Value* lvl = nullptr;
@@ -1049,15 +1049,15 @@ struct State {
         new_args.Push(tex);
 
         b.InsertBefore(call, [&] {
-            if (tex_type->dim() == core::type::TextureDimension::k2dArray) {
+            if (tex_type->Dim() == core::type::TextureDimension::k2dArray) {
                 auto* coords = args[1];
                 auto* array_idx = args[2];
 
                 auto* coords_ty = coords->Type()->As<core::type::Vector>();
                 TINT_ASSERT(coords_ty);
 
-                auto* new_coords = b.Construct(ty.vec3(coords_ty->type()), coords,
-                                               b.Convert(coords_ty->type(), array_idx));
+                auto* new_coords = b.Construct(ty.vec3(coords_ty->Type()), coords,
+                                               b.Convert(coords_ty->Type(), array_idx));
                 new_args.Push(new_coords->Result(0));
 
                 new_args.Push(args[3]);
@@ -1117,7 +1117,7 @@ struct State {
 
             uint32_t offset_idx = 0;
 
-            switch (tex_type->dim()) {
+            switch (tex_type->Dim()) {
                 case core::type::TextureDimension::k2d:
                     params.Push(coords);
                     offset_idx = is_depth ? 3 : 4;
@@ -1160,7 +1160,7 @@ struct State {
             auto* tex_type = tex->Type()->As<core::type::Texture>();
             TINT_ASSERT(tex_type);
 
-            switch (tex_type->dim()) {
+            switch (tex_type->Dim()) {
                 case core::type::TextureDimension::k2d:
                     params.Push(coords);
                     params.Push(args[3]);
@@ -1209,7 +1209,7 @@ struct State {
             params.Push(args[1]);  // sampler
             core::ir::Value* coords = args[2];
 
-            switch (tex_type->dim()) {
+            switch (tex_type->Dim()) {
                 case core::type::TextureDimension::k1d:
                 case core::type::TextureDimension::k2d:
                     params.Push(coords);
@@ -1259,7 +1259,7 @@ struct State {
             params.Push(args[1]);  // sampler
             core::ir::Value* coords = args[2];
 
-            switch (tex_type->dim()) {
+            switch (tex_type->Dim()) {
                 case core::type::TextureDimension::k2d:
                     params.Push(coords);
                     params.Push(args[3]);  // bias
@@ -1318,7 +1318,7 @@ struct State {
             params.Push(args[1]);  // sampler
             core::ir::Value* coords = args[2];
 
-            switch (tex_type->dim()) {
+            switch (tex_type->Dim()) {
                 case core::type::TextureDimension::k2d:
                     params.Push(coords);
                     params.Push(args[3]);  // depth ref
@@ -1372,7 +1372,7 @@ struct State {
             params.Push(args[1]);  // sampler
             core::ir::Value* coords = args[2];
 
-            switch (tex_type->dim()) {
+            switch (tex_type->Dim()) {
                 case core::type::TextureDimension::k2d:
                     params.Push(coords);
                     params.Push(args[3]);  // ddx
@@ -1431,7 +1431,7 @@ struct State {
             params.Push(args[1]);  // sampler
             core::ir::Value* coords = args[2];
 
-            switch (tex_type->dim()) {
+            switch (tex_type->Dim()) {
                 case core::type::TextureDimension::k2d:
                     params.Push(coords);
                     params.Push(b.Convert<f32>(args[3])->Result(0));  // Level

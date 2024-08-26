@@ -133,7 +133,7 @@ const Value* Manager::Zero(const core::type::Type* type) {
     return Switch(
         type,  //
         [&](const core::type::Vector* v) -> const Value* {
-            auto* zero_el = Zero(v->type());
+            auto* zero_el = Zero(v->Type());
             return Splat(type, zero_el);
         },
         [&](const core::type::Matrix* m) -> const Value* {

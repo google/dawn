@@ -108,14 +108,14 @@ Transform::ApplyResult VectorizeScalarMatrixInitializers::Apply(const Program& s
         // 'element(uint32_t c, uint32_t r)' callback.
         auto build_mat = [&](auto&& element) {
             tint::Vector<const Expression*, 4> columns;
-            for (uint32_t c = 0; c < mat_type->columns(); c++) {
+            for (uint32_t c = 0; c < mat_type->Columns(); c++) {
                 tint::Vector<const Expression*, 4> row_values;
-                for (uint32_t r = 0; r < mat_type->rows(); r++) {
+                for (uint32_t r = 0; r < mat_type->Rows(); r++) {
                     row_values.Push(element(c, r));
                 }
 
                 // Construct the column vector.
-                columns.Push(b.vec(CreateASTTypeFor(ctx, mat_type->type()), mat_type->rows(),
+                columns.Push(b.vec(CreateASTTypeFor(ctx, mat_type->Type()), mat_type->Rows(),
                                    std::move(row_values)));
             }
             return b.Call(CreateASTTypeFor(ctx, mat_type), columns);
@@ -126,12 +126,12 @@ Transform::ApplyResult VectorizeScalarMatrixInitializers::Apply(const Program& s
             // This is done to ensure that the single argument value is only evaluated once, and
             // with the correct expression evaluation order.
             auto fn = tint::GetOrAdd(scalar_inits, mat_type, [&] {
-                auto name = b.Symbols().New("build_mat" + std::to_string(mat_type->columns()) +
-                                            "x" + std::to_string(mat_type->rows()));
+                auto name = b.Symbols().New("build_mat" + std::to_string(mat_type->Columns()) +
+                                            "x" + std::to_string(mat_type->Rows()));
                 b.Func(name,
                        tint::Vector{
                            // Single scalar parameter
-                           b.Param("value", CreateASTTypeFor(ctx, mat_type->type())),
+                           b.Param("value", CreateASTTypeFor(ctx, mat_type->Type())),
                        },
                        CreateASTTypeFor(ctx, mat_type),
                        tint::Vector{
@@ -144,9 +144,9 @@ Transform::ApplyResult VectorizeScalarMatrixInitializers::Apply(const Program& s
             return b.Call(fn, ctx.Clone(args[0]->Declaration()));
         }
 
-        if (TINT_LIKELY(args.Length() == mat_type->columns() * mat_type->rows())) {
+        if (TINT_LIKELY(args.Length() == mat_type->Columns() * mat_type->Rows())) {
             return build_mat([&](uint32_t c, uint32_t r) {
-                return ctx.Clone(args[c * mat_type->rows() + r]->Declaration());
+                return ctx.Clone(args[c * mat_type->Rows() + r]->Declaration());
             });
         }
 

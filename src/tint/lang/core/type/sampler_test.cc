@@ -39,8 +39,8 @@ TEST_F(SamplerTest, Creation) {
     auto* b = create<Sampler>(SamplerKind::kSampler);
     auto* c = create<Sampler>(SamplerKind::kComparisonSampler);
 
-    EXPECT_EQ(a->kind(), SamplerKind::kSampler);
-    EXPECT_EQ(c->kind(), SamplerKind::kComparisonSampler);
+    EXPECT_EQ(a->Kind(), SamplerKind::kSampler);
+    EXPECT_EQ(c->Kind(), SamplerKind::kComparisonSampler);
 
     EXPECT_FALSE(a->IsComparison());
     EXPECT_TRUE(c->IsComparison());
@@ -83,7 +83,7 @@ TEST_F(SamplerTest, Clone) {
     core::type::CloneContext ctx{{nullptr}, {nullptr, &mgr}};
 
     auto* mt = a->Clone(ctx);
-    EXPECT_EQ(mt->kind(), SamplerKind::kSampler);
+    EXPECT_EQ(mt->Kind(), SamplerKind::kSampler);
 }
 
 }  // namespace

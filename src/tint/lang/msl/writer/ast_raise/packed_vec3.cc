@@ -118,7 +118,7 @@ struct PackedVec3::State {
     ast::Type MakePackedVec3(const core::type::Type* ty) {
         auto* vec = ty->As<core::type::Vector>();
         TINT_ASSERT(vec != nullptr && vec->Width() == 3);
-        return b.ty(core::BuiltinType::kPackedVec3, CreateASTTypeFor(ctx, vec->type()));
+        return b.ty(core::BuiltinType::kPackedVec3, CreateASTTypeFor(ctx, vec->Type()));
     }
 
     /// Recursively rewrite a type using `__packed_vec3`, if needed.
@@ -141,7 +141,7 @@ struct PackedVec3::State {
                         // type, to avoid changing the array element stride.
                         return b.ty(packed_vec3_wrapper_struct_names.GetOrAdd(vec, [&] {
                             auto name = b.Symbols().New(
-                                "tint_packed_vec3_" + vec->type()->FriendlyName() +
+                                "tint_packed_vec3_" + vec->Type()->FriendlyName() +
                                 (array_element ? "_array_element" : "_struct_member"));
                             auto* member =
                                 b.Member(kStructMemberName, MakePackedVec3(vec),
@@ -159,7 +159,7 @@ struct PackedVec3::State {
                 // Rewrite the matrix as an array of columns that use the aligned wrapper struct.
                 auto new_col_type = RewriteType(mat->ColumnType(), /* array_element */ true);
                 if (new_col_type) {
-                    return b.ty.array(new_col_type, u32(mat->columns()));
+                    return b.ty.array(new_col_type, u32(mat->Columns()));
                 }
                 return {};
             },
@@ -284,7 +284,7 @@ struct PackedVec3::State {
                 copy_array_elements(arr->ConstantCount().value(), arr->ElemType());
             },
             [&](const core::type::Matrix* mat) {
-                copy_array_elements(mat->columns(), mat->ColumnType());
+                copy_array_elements(mat->Columns(), mat->ColumnType());
             },
             [&](const core::type::Struct* str) {
                 statements.Push(b.Decl(b.Var("result", out_type())));

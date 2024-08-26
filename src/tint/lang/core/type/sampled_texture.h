@@ -41,7 +41,7 @@ class SampledTexture final : public Castable<SampledTexture, Texture> {
     /// Constructor
     /// @param dim the dimensionality of the texture
     /// @param type the data type of the sampled texture
-    SampledTexture(TextureDimension dim, const Type* type);
+    SampledTexture(TextureDimension dim, const type::Type* type);
 
     /// Destructor
     ~SampledTexture() override;
@@ -51,7 +51,7 @@ class SampledTexture final : public Castable<SampledTexture, Texture> {
     bool Equals(const UniqueNode& other) const override;
 
     /// @returns the subtype of the sampled texture
-    Type* type() const { return const_cast<Type*>(type_); }
+    const type::Type* Type() const { return type_; }
 
     /// @returns the name for this type that closely resembles how it would be
     /// declared in WGSL.
@@ -62,7 +62,7 @@ class SampledTexture final : public Castable<SampledTexture, Texture> {
     SampledTexture* Clone(CloneContext& ctx) const override;
 
   private:
-    const Type* const type_;
+    const type::Type* type_;
 };
 
 }  // namespace tint::core::type

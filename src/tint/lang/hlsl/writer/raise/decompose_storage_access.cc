@@ -591,7 +591,7 @@ struct State {
 
             b.Append(fn->Block(), [&] {
                 Vector<core::ir::Value*, 4> values;
-                for (size_t i = 0; i < mat->columns(); ++i) {
+                for (size_t i = 0; i < mat->Columns(); ++i) {
                     auto* add = b.Add<u32>(p, u32(i * mat->ColumnStride()));
                     auto* load = MakeLoad(inst, var, mat->ColumnType(), add->Result(0));
                     values.Push(load->Result(0));
@@ -615,7 +615,7 @@ struct State {
 
             b.Append(fn->Block(), [&] {
                 Vector<core::ir::Value*, 4> values;
-                for (size_t i = 0; i < mat->columns(); ++i) {
+                for (size_t i = 0; i < mat->Columns(); ++i) {
                     auto* from = b.Access(mat->ColumnType(), obj, u32(i));
                     MakeStore(inst, var, from->Result(0),
                               b.Add<u32>(p, u32(i * mat->ColumnStride()))->Result(0));
@@ -714,8 +714,8 @@ struct State {
                 obj,  //
                 [&](const core::type::Vector* v) {
                     b.InsertBefore(
-                        a, [&] { UpdateOffsetData(idx_value, v->type()->Size(), &offset); });
-                    obj = v->type();
+                        a, [&] { UpdateOffsetData(idx_value, v->Type()->Size(), &offset); });
+                    obj = v->Type();
                 },
                 [&](const core::type::Matrix* m) {
                     b.InsertBefore(

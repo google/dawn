@@ -54,8 +54,8 @@ TEST_F(StorageTextureTest, Creation) {
         Create(TextureDimension::kCube, core::TexelFormat::kR32Float, core::Access::kReadWrite);
     auto* e = Create(TextureDimension::kCube, core::TexelFormat::kRgba32Float, core::Access::kRead);
 
-    EXPECT_TRUE(a->type()->Is<F32>());
-    EXPECT_EQ(a->dim(), TextureDimension::kCube);
+    EXPECT_TRUE(a->Type()->Is<F32>());
+    EXPECT_EQ(a->Dim(), TextureDimension::kCube);
 
     EXPECT_EQ(a, b);
     EXPECT_NE(a, c);
@@ -93,13 +93,13 @@ TEST_F(StorageTextureTest, Equals) {
 TEST_F(StorageTextureTest, Dim) {
     auto* s = Create(TextureDimension::k2dArray, core::TexelFormat::kRgba32Float,
                      core::Access::kReadWrite);
-    EXPECT_EQ(s->dim(), TextureDimension::k2dArray);
+    EXPECT_EQ(s->Dim(), TextureDimension::k2dArray);
 }
 
 TEST_F(StorageTextureTest, Format) {
     auto* s = Create(TextureDimension::k2dArray, core::TexelFormat::kRgba32Float,
                      core::Access::kReadWrite);
-    EXPECT_EQ(s->texel_format(), core::TexelFormat::kRgba32Float);
+    EXPECT_EQ(s->TexelFormat(), core::TexelFormat::kRgba32Float);
 }
 
 TEST_F(StorageTextureTest, FriendlyName) {
@@ -117,7 +117,7 @@ TEST_F(StorageTextureTest, F32) {
     ASSERT_TRUE(program.IsValid()) << program.Diagnostics();
     ASSERT_TRUE(s->Is<Texture>());
     ASSERT_TRUE(s->Is<StorageTexture>());
-    EXPECT_TRUE(s->As<StorageTexture>()->type()->Is<F32>());
+    EXPECT_TRUE(s->As<StorageTexture>()->Type()->Is<F32>());
 }
 
 TEST_F(StorageTextureTest, U32) {
@@ -130,7 +130,7 @@ TEST_F(StorageTextureTest, U32) {
     ASSERT_TRUE(program.IsValid()) << program.Diagnostics();
     ASSERT_TRUE(s->Is<Texture>());
     ASSERT_TRUE(s->Is<StorageTexture>());
-    EXPECT_TRUE(s->As<StorageTexture>()->type()->Is<U32>());
+    EXPECT_TRUE(s->As<StorageTexture>()->Type()->Is<U32>());
 }
 
 TEST_F(StorageTextureTest, I32) {
@@ -143,7 +143,7 @@ TEST_F(StorageTextureTest, I32) {
     ASSERT_TRUE(program.IsValid()) << program.Diagnostics();
     ASSERT_TRUE(s->Is<Texture>());
     ASSERT_TRUE(s->Is<StorageTexture>());
-    EXPECT_TRUE(s->As<StorageTexture>()->type()->Is<I32>());
+    EXPECT_TRUE(s->As<StorageTexture>()->Type()->Is<I32>());
 }
 
 TEST_F(StorageTextureTest, Clone) {
@@ -154,9 +154,9 @@ TEST_F(StorageTextureTest, Clone) {
     core::type::CloneContext ctx{{nullptr}, {nullptr, &mgr}};
 
     auto* mt = a->Clone(ctx);
-    EXPECT_EQ(mt->dim(), TextureDimension::kCube);
-    EXPECT_EQ(mt->texel_format(), core::TexelFormat::kRgba32Float);
-    EXPECT_TRUE(mt->type()->Is<F32>());
+    EXPECT_EQ(mt->Dim(), TextureDimension::kCube);
+    EXPECT_EQ(mt->TexelFormat(), core::TexelFormat::kRgba32Float);
+    EXPECT_TRUE(mt->Type()->Is<F32>());
 }
 
 }  // namespace

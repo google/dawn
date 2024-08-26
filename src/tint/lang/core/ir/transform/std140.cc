@@ -159,7 +159,7 @@ struct State {
                             member_index_map.Add(member, member_index);
                             auto* col = mat->ColumnType();
                             uint32_t offset = member->Offset();
-                            for (uint32_t i = 0; i < mat->columns(); i++) {
+                            for (uint32_t i = 0; i < mat->Columns(); i++) {
                                 StringStream ss;
                                 ss << member->Name().Name() << "_col" << std::to_string(i);
                                 new_members.Push(ty.Get<core::type::StructMember>(
@@ -202,13 +202,13 @@ struct State {
                         return mat;
                     }
                     StringStream name;
-                    name << "mat" << mat->columns() << "x" << mat->rows() << "_"
-                         << mat->ColumnType()->type()->FriendlyName() << "_std140";
+                    name << "mat" << mat->Columns() << "x" << mat->Rows() << "_"
+                         << mat->ColumnType()->Type()->FriendlyName() << "_std140";
                     Vector<core::type::StructMember*, 4> members;
                     // Decompose these matrices into a separate member for each column.
                     auto* col = mat->ColumnType();
                     uint32_t offset = 0;
-                    for (uint32_t i = 0; i < mat->columns(); i++) {
+                    for (uint32_t i = 0; i < mat->Columns(); i++) {
                         StringStream ss;
                         ss << "col" << std::to_string(i);
                         members.Push(ty.Get<core::type::StructMember>(
@@ -220,8 +220,8 @@ struct State {
                     // Create a new struct with the rewritten members.
                     return ty.Get<core::type::Struct>(
                         sym.New(name.str()), std::move(members), col->Align(),
-                        col->Align() * mat->columns(),
-                        (col->Align() * (mat->columns() - 1)) + col->Size());
+                        col->Align() * mat->Columns(),
+                        (col->Align() * (mat->Columns() - 1)) + col->Size());
                 },
                 [&](Default) {
                     // This type cannot contain a matrix, so no changes needed.
@@ -241,7 +241,7 @@ struct State {
         auto first_column = indices.Back()->As<Constant>()->Value()->ValueAs<uint32_t>();
         Vector<Value*, 4> column_indices(std::move(indices));
         Vector<Value*, 4> args;
-        for (uint32_t i = 0; i < mat->columns(); i++) {
+        for (uint32_t i = 0; i < mat->Columns(); i++) {
             column_indices.Back() = b.Constant(u32(first_column + i));
             if (is_ptr) {
                 auto* access = b.Access(ty.ptr(uniform, mat->ColumnType()), root, column_indices);
@@ -279,7 +279,7 @@ struct State {
                             if (auto* mat = NeedsDecomposing(member->Type())) {
                                 args.Push(
                                     RebuildMatrix(mat, input, Vector{b.Constant(u32(index))}));
-                                index += mat->columns();
+                                index += mat->Columns();
                             } else {
                                 // Extract and convert the member.
                                 auto* type = input_str->Element(index);

@@ -45,8 +45,8 @@ TEST_F(SampledTextureTest, Creation) {
     auto* c = create<SampledTexture>(TextureDimension::k2d, create<F32>());
     auto* d = create<SampledTexture>(TextureDimension::kCube, create<I32>());
 
-    EXPECT_TRUE(a->type()->Is<F32>());
-    EXPECT_EQ(a->dim(), TextureDimension::kCube);
+    EXPECT_TRUE(a->Type()->Is<F32>());
+    EXPECT_EQ(a->Dim(), TextureDimension::kCube);
 
     EXPECT_EQ(a, b);
     EXPECT_NE(a, c);
@@ -86,13 +86,13 @@ TEST_F(SampledTextureTest, IsTexture) {
 TEST_F(SampledTextureTest, Dim) {
     F32 f32;
     SampledTexture s(TextureDimension::k3d, &f32);
-    EXPECT_EQ(s.dim(), TextureDimension::k3d);
+    EXPECT_EQ(s.Dim(), TextureDimension::k3d);
 }
 
 TEST_F(SampledTextureTest, Type) {
     F32 f32;
     SampledTexture s(TextureDimension::k3d, &f32);
-    EXPECT_EQ(s.type(), &f32);
+    EXPECT_EQ(s.Type(), &f32);
 }
 
 TEST_F(SampledTextureTest, FriendlyName) {
@@ -108,8 +108,8 @@ TEST_F(SampledTextureTest, Clone) {
     core::type::CloneContext ctx{{nullptr}, {nullptr, &mgr}};
 
     auto* mt = a->Clone(ctx);
-    EXPECT_EQ(mt->dim(), TextureDimension::kCube);
-    EXPECT_TRUE(mt->type()->Is<F32>());
+    EXPECT_EQ(mt->Dim(), TextureDimension::kCube);
+    EXPECT_TRUE(mt->Type()->Is<F32>());
 }
 
 }  // namespace

@@ -92,7 +92,7 @@ Struct* CreateModfResult(Manager& types, SymbolTable& symbols, const Type* ty) {
         [&](const Vector* vec) {
             auto width = vec->Width();
             return Switch(
-                vec->type(),  //
+                vec->Type(),  //
                 [&](const F32*) { return build(kModfVecF32Names[width - 2], vec); },
                 [&](const F16*) { return build(kModfVecF16Names[width - 2], vec); },
                 [&](const AbstractFloat*) {
@@ -153,7 +153,7 @@ Struct* CreateFrexpResult(Manager& types, SymbolTable& symbols, const Type* ty) 
         [&](const Vector* vec) {
             auto width = vec->Width();
             return Switch(
-                vec->type(),  //
+                vec->Type(),  //
                 [&](const F32*) {
                     return build(kFrexpVecF32Names[width - 2], ty, types.vec(types.i32(), width));
                 },

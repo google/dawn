@@ -73,7 +73,7 @@ TEST_F(AppendVectorTest, Vec2i32_i32) {
     ASSERT_NE(ctor, nullptr);
     ASSERT_TRUE(ctor->ReturnType()->Is<core::type::Vector>());
     EXPECT_EQ(ctor->ReturnType()->As<core::type::Vector>()->Width(), 3u);
-    EXPECT_TRUE(ctor->ReturnType()->As<core::type::Vector>()->type()->Is<core::type::I32>());
+    EXPECT_TRUE(ctor->ReturnType()->As<core::type::Vector>()->Type()->Is<core::type::I32>());
     EXPECT_EQ(ctor->ReturnType(), call->Type());
 
     ASSERT_EQ(ctor->Parameters().Length(), 3u);
@@ -119,7 +119,7 @@ TEST_F(AppendVectorTest, Vec2i32_u32) {
     ASSERT_NE(ctor, nullptr);
     ASSERT_TRUE(ctor->ReturnType()->Is<core::type::Vector>());
     EXPECT_EQ(ctor->ReturnType()->As<core::type::Vector>()->Width(), 3u);
-    EXPECT_TRUE(ctor->ReturnType()->As<core::type::Vector>()->type()->Is<core::type::I32>());
+    EXPECT_TRUE(ctor->ReturnType()->As<core::type::Vector>()->Type()->Is<core::type::I32>());
     EXPECT_EQ(ctor->ReturnType(), call->Type());
 
     ASSERT_EQ(ctor->Parameters().Length(), 3u);
@@ -171,7 +171,7 @@ TEST_F(AppendVectorTest, Vec2i32FromVec2u32_u32) {
 
     ASSERT_TRUE(ctor->ReturnType()->Is<core::type::Vector>());
     EXPECT_EQ(ctor->ReturnType()->As<core::type::Vector>()->Width(), 3u);
-    EXPECT_TRUE(ctor->ReturnType()->As<core::type::Vector>()->type()->Is<core::type::I32>());
+    EXPECT_TRUE(ctor->ReturnType()->As<core::type::Vector>()->Type()->Is<core::type::I32>());
     EXPECT_EQ(ctor->ReturnType(), call->Type());
 
     ASSERT_EQ(ctor->Parameters().Length(), 2u);
@@ -215,7 +215,7 @@ TEST_F(AppendVectorTest, Vec2i32_f32) {
     ASSERT_NE(ctor, nullptr);
     ASSERT_TRUE(ctor->ReturnType()->Is<core::type::Vector>());
     EXPECT_EQ(ctor->ReturnType()->As<core::type::Vector>()->Width(), 3u);
-    EXPECT_TRUE(ctor->ReturnType()->As<core::type::Vector>()->type()->Is<core::type::I32>());
+    EXPECT_TRUE(ctor->ReturnType()->As<core::type::Vector>()->Type()->Is<core::type::I32>());
     EXPECT_EQ(ctor->ReturnType(), call->Type());
 
     ASSERT_EQ(ctor->Parameters().Length(), 3u);
@@ -259,7 +259,7 @@ TEST_F(AppendVectorTest, Vec3i32_i32) {
     ASSERT_NE(ctor, nullptr);
     ASSERT_TRUE(ctor->ReturnType()->Is<core::type::Vector>());
     EXPECT_EQ(ctor->ReturnType()->As<core::type::Vector>()->Width(), 4u);
-    EXPECT_TRUE(ctor->ReturnType()->As<core::type::Vector>()->type()->Is<core::type::I32>());
+    EXPECT_TRUE(ctor->ReturnType()->As<core::type::Vector>()->Type()->Is<core::type::I32>());
     EXPECT_EQ(ctor->ReturnType(), call->Type());
 
     ASSERT_EQ(ctor->Parameters().Length(), 4u);
@@ -298,7 +298,7 @@ TEST_F(AppendVectorTest, Vec2i32Var_i32) {
     ASSERT_NE(ctor, nullptr);
     ASSERT_TRUE(ctor->ReturnType()->Is<core::type::Vector>());
     EXPECT_EQ(ctor->ReturnType()->As<core::type::Vector>()->Width(), 3u);
-    EXPECT_TRUE(ctor->ReturnType()->As<core::type::Vector>()->type()->Is<core::type::I32>());
+    EXPECT_TRUE(ctor->ReturnType()->As<core::type::Vector>()->Type()->Is<core::type::I32>());
     EXPECT_EQ(ctor->ReturnType(), call->Type());
 
     ASSERT_EQ(ctor->Parameters().Length(), 2u);
@@ -339,7 +339,7 @@ TEST_F(AppendVectorTest, Vec2i32_i32Var) {
     ASSERT_NE(ctor, nullptr);
     ASSERT_TRUE(ctor->ReturnType()->Is<core::type::Vector>());
     EXPECT_EQ(ctor->ReturnType()->As<core::type::Vector>()->Width(), 3u);
-    EXPECT_TRUE(ctor->ReturnType()->As<core::type::Vector>()->type()->Is<core::type::I32>());
+    EXPECT_TRUE(ctor->ReturnType()->As<core::type::Vector>()->Type()->Is<core::type::I32>());
     EXPECT_EQ(ctor->ReturnType(), call->Type());
 
     ASSERT_EQ(ctor->Parameters().Length(), 3u);
@@ -378,7 +378,7 @@ TEST_F(AppendVectorTest, Vec2i32Var_i32Var) {
     ASSERT_NE(ctor, nullptr);
     ASSERT_TRUE(ctor->ReturnType()->Is<core::type::Vector>());
     EXPECT_EQ(ctor->ReturnType()->As<core::type::Vector>()->Width(), 3u);
-    EXPECT_TRUE(ctor->ReturnType()->As<core::type::Vector>()->type()->Is<core::type::I32>());
+    EXPECT_TRUE(ctor->ReturnType()->As<core::type::Vector>()->Type()->Is<core::type::I32>());
     EXPECT_EQ(ctor->ReturnType(), call->Type());
 
     ASSERT_EQ(ctor->Parameters().Length(), 2u);
@@ -420,7 +420,7 @@ TEST_F(AppendVectorTest, Vec2i32Var_f32Var) {
     ASSERT_NE(ctor, nullptr);
     ASSERT_TRUE(ctor->ReturnType()->Is<core::type::Vector>());
     EXPECT_EQ(ctor->ReturnType()->As<core::type::Vector>()->Width(), 3u);
-    EXPECT_TRUE(ctor->ReturnType()->As<core::type::Vector>()->type()->Is<core::type::I32>());
+    EXPECT_TRUE(ctor->ReturnType()->As<core::type::Vector>()->Type()->Is<core::type::I32>());
     EXPECT_EQ(ctor->ReturnType(), call->Type());
 
     ASSERT_EQ(ctor->Parameters().Length(), 2u);
@@ -458,7 +458,7 @@ TEST_F(AppendVectorTest, Vec2boolVar_boolVar) {
     ASSERT_NE(ctor, nullptr);
     ASSERT_TRUE(ctor->ReturnType()->Is<core::type::Vector>());
     EXPECT_EQ(ctor->ReturnType()->As<core::type::Vector>()->Width(), 3u);
-    EXPECT_TRUE(ctor->ReturnType()->As<core::type::Vector>()->type()->Is<core::type::Bool>());
+    EXPECT_TRUE(ctor->ReturnType()->As<core::type::Vector>()->Type()->Is<core::type::Bool>());
     EXPECT_EQ(ctor->ReturnType(), call->Type());
 
     ASSERT_EQ(ctor->Parameters().Length(), 2u);
@@ -500,7 +500,7 @@ TEST_F(AppendVectorTest, ZeroVec3i32_i32) {
     ASSERT_NE(ctor, nullptr);
     ASSERT_TRUE(ctor->ReturnType()->Is<core::type::Vector>());
     EXPECT_EQ(ctor->ReturnType()->As<core::type::Vector>()->Width(), 4u);
-    EXPECT_TRUE(ctor->ReturnType()->As<core::type::Vector>()->type()->Is<core::type::I32>());
+    EXPECT_TRUE(ctor->ReturnType()->As<core::type::Vector>()->Type()->Is<core::type::I32>());
     EXPECT_EQ(ctor->ReturnType(), call->Type());
 
     ASSERT_EQ(ctor->Parameters().Length(), 4u);

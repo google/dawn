@@ -47,19 +47,19 @@ DepthMultisampledTexture::~DepthMultisampledTexture() = default;
 
 bool DepthMultisampledTexture::Equals(const UniqueNode& other) const {
     if (auto* o = other.As<DepthMultisampledTexture>()) {
-        return o->dim() == dim();
+        return o->Dim() == Dim();
     }
     return false;
 }
 
 std::string DepthMultisampledTexture::FriendlyName() const {
     StringStream out;
-    out << "texture_depth_multisampled_" << dim();
+    out << "texture_depth_multisampled_" << Dim();
     return out.str();
 }
 
 DepthMultisampledTexture* DepthMultisampledTexture::Clone(CloneContext& ctx) const {
-    return ctx.dst.mgr->Get<DepthMultisampledTexture>(dim());
+    return ctx.dst.mgr->Get<DepthMultisampledTexture>(Dim());
 }
 
 bool DepthMultisampledTexture::IsValidDimension(TextureDimension dim) {

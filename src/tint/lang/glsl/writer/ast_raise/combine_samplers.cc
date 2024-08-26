@@ -154,7 +154,7 @@ struct CombineSamplers::State {
         const core::type::Type* texture_type = texture->Type()->UnwrapRef();
         const core::type::DepthTexture* depth = texture_type->As<core::type::DepthTexture>();
         if (depth && !sampler) {
-            return ctx.dst->ty.sampled_texture(depth->dim(), ctx.dst->ty.f32());
+            return ctx.dst->ty.sampled_texture(depth->Dim(), ctx.dst->ty.f32());
         }
 
         return CreateASTTypeFor(ctx, texture_type);
@@ -321,7 +321,7 @@ struct CombineSamplers::State {
                                                                          [new_pair];
                             args.Push(ctx.dst->Expr(var->name->symbol));
                         } else if (auto* sampler_type = type->As<core::type::Sampler>()) {
-                            core::type::SamplerKind kind = sampler_type->kind();
+                            core::type::SamplerKind kind = sampler_type->Kind();
                             int index = (kind == core::type::SamplerKind::kSampler) ? 0 : 1;
                             const ast::Variable*& p = placeholder_samplers_[index];
                             if (!p) {

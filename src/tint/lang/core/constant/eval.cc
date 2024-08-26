@@ -1201,7 +1201,7 @@ auto Eval::Dot4Func(const Source& source, const core::type::Type* elem_ty) {
 Eval::Result Eval::Dot(const Source& source, const Value* v1, const Value* v2) {
     auto* vec_ty = v1->Type()->As<core::type::Vector>();
     TINT_ASSERT(vec_ty);
-    auto* elem_ty = vec_ty->type();
+    auto* elem_ty = vec_ty->Type();
     switch (vec_ty->Width()) {
         case 2:
             return Dispatch_fia_fiu32_f16(   //
@@ -1375,10 +1375,10 @@ Eval::Result Eval::MatInitS(const core::type::Type* ty,
     auto* m = static_cast<const core::type::Matrix*>(ty);
 
     Vector<const Value*, 4> els;
-    for (uint32_t c = 0; c < m->columns(); c++) {
+    for (uint32_t c = 0; c < m->Columns(); c++) {
         Vector<const Value*, 4> column;
-        for (uint32_t r = 0; r < m->rows(); r++) {
-            auto i = r + c * m->rows();
+        for (uint32_t r = 0; r < m->Rows(); r++) {
+            auto i = r + c * m->Rows();
             column.Push(args[i]);
         }
         els.Push(mgr.Composite(m->ColumnType(), std::move(column)));
@@ -1645,11 +1645,11 @@ Eval::Result Eval::MultiplyMatVec(const core::type::Type* ty,
                                   const Source& source) {
     auto* mat_ty = args[0]->Type()->As<core::type::Matrix>();
     auto* vec_ty = args[1]->Type()->As<core::type::Vector>();
-    auto* elem_ty = vec_ty->type();
+    auto* elem_ty = vec_ty->Type();
 
     auto dot = [&](const Value* m, size_t row, const Value* v) {
         Eval::Result result;
-        switch (mat_ty->columns()) {
+        switch (mat_ty->Columns()) {
             case 2:
                 result = Dispatch_fa_f32_f16(Dot2Func(source, elem_ty),  //
                                              m->Index(0)->Index(row),    //
@@ -1681,7 +1681,7 @@ Eval::Result Eval::MultiplyMatVec(const core::type::Type* ty,
     };
 
     Vector<const Value*, 4> result;
-    for (size_t i = 0; i < mat_ty->rows(); ++i) {
+    for (size_t i = 0; i < mat_ty->Rows(); ++i) {
         auto r = dot(args[0], i, args[1]);  // matrix row i * vector
         if (r != Success) {
             return error;
@@ -1695,11 +1695,11 @@ Eval::Result Eval::MultiplyVecMat(const core::type::Type* ty,
                                   const Source& source) {
     auto* vec_ty = args[0]->Type()->As<core::type::Vector>();
     auto* mat_ty = args[1]->Type()->As<core::type::Matrix>();
-    auto* elem_ty = vec_ty->type();
+    auto* elem_ty = vec_ty->Type();
 
     auto dot = [&](const Value* v, const Value* m, size_t col) {
         Eval::Result result;
-        switch (mat_ty->rows()) {
+        switch (mat_ty->Rows()) {
             case 2:
                 result = Dispatch_fa_f32_f16(Dot2Func(source, elem_ty),  //
                                              m->Index(col)->Index(0),    //
@@ -1731,7 +1731,7 @@ Eval::Result Eval::MultiplyVecMat(const core::type::Type* ty,
     };
 
     Vector<const Value*, 4> result;
-    for (size_t i = 0; i < mat_ty->columns(); ++i) {
+    for (size_t i = 0; i < mat_ty->Columns(); ++i) {
         auto r = dot(args[0], args[1], i);  // vector * matrix col i
         if (r != Success) {
             return error;
@@ -1748,14 +1748,14 @@ Eval::Result Eval::MultiplyMatMat(const core::type::Type* ty,
     auto* mat2 = args[1];
     auto* mat1_ty = mat1->Type()->As<core::type::Matrix>();
     auto* mat2_ty = mat2->Type()->As<core::type::Matrix>();
-    auto* elem_ty = mat1_ty->type();
+    auto* elem_ty = mat1_ty->Type();
 
     auto dot = [&](const Value* m1, size_t row, const Value* m2, size_t col) {
         auto m1e = [&](size_t r, size_t c) { return m1->Index(c)->Index(r); };
         auto m2e = [&](size_t r, size_t c) { return m2->Index(c)->Index(r); };
 
         Eval::Result result;
-        switch (mat1_ty->columns()) {
+        switch (mat1_ty->Columns()) {
             case 2:
                 result = Dispatch_fa_f32_f16(Dot2Func(source, elem_ty),  //
                                              m1e(row, 0),                //
@@ -1788,9 +1788,9 @@ Eval::Result Eval::MultiplyMatMat(const core::type::Type* ty,
     };
 
     Vector<const Value*, 4> result_mat;
-    for (size_t c = 0; c < mat2_ty->columns(); ++c) {
+    for (size_t c = 0; c < mat2_ty->Columns(); ++c) {
         Vector<const Value*, 4> col_vec;
-        for (size_t r = 0; r < mat1_ty->rows(); ++r) {
+        for (size_t r = 0; r < mat1_ty->Rows(); ++r) {
             auto v = dot(mat1, r, mat2, c);  // mat1 row r * mat2 col c
             if (v != Success) {
                 return error;
@@ -2402,7 +2402,7 @@ Eval::Result Eval::cross(const core::type::Type* ty,
                          const Source& source) {
     auto* u = args[0];
     auto* v = args[1];
-    auto* elem_ty = u->Type()->As<core::type::Vector>()->type();
+    auto* elem_ty = u->Type()->As<core::type::Vector>()->Type();
 
     // cross product of a v3 is the determinant of the 3x3 matrix:
     //
@@ -2472,7 +2472,7 @@ Eval::Result Eval::determinant(const core::type::Type* ty,
         auto* m = args[0];
         auto* mat_ty = m->Type()->As<core::type::Matrix>();
         auto me = [&](size_t r, size_t c) { return m->Index(c)->Index(r); };
-        switch (mat_ty->rows()) {
+        switch (mat_ty->Rows()) {
             case 2:
                 return Dispatch_fa_f32_f16(Det2Func(source, ty),  //
                                            me(0, 0), me(1, 0),    //
@@ -3408,7 +3408,7 @@ Eval::Result Eval::reflect(const core::type::Type* ty,
         auto* e1 = args[0];
         auto* e2 = args[1];
         auto* vec_ty = ty->As<core::type::Vector>();
-        auto* el_ty = vec_ty->type();
+        auto* el_ty = vec_ty->Type();
 
         // dot(e2, e1)
         auto dot_e2_e1 = Dot(source, e2, e1);
@@ -3446,7 +3446,7 @@ Eval::Result Eval::refract(const core::type::Type* ty,
                            VectorRef<const Value*> args,
                            const Source& source) {
     auto* vec_ty = ty->As<core::type::Vector>();
-    auto* el_ty = vec_ty->type();
+    auto* el_ty = vec_ty->Type();
 
     auto compute_k = [&](auto e3, auto dot_e2_e1) -> Eval::Result {
         using NumberT = decltype(e3);
@@ -3812,9 +3812,9 @@ Eval::Result Eval::transpose(const core::type::Type* ty,
 
     // Produce column vectors from each row
     Vector<const Value*, 4> result_mat;
-    for (size_t r = 0; r < mat_ty->rows(); ++r) {
+    for (size_t r = 0; r < mat_ty->Rows(); ++r) {
         Vector<const Value*, 4> new_col_vec;
-        for (size_t c = 0; c < mat_ty->columns(); ++c) {
+        for (size_t c = 0; c < mat_ty->Columns(); ++c) {
             new_col_vec.Push(me(r, c));
         }
         result_mat.Push(mgr.Composite(result_mat_ty->ColumnType(), new_col_vec));

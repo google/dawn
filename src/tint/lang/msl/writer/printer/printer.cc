@@ -1299,7 +1299,7 @@ class Printer : public tint::TextGenerator {
         if (vec->Packed()) {
             out << "packed_";
         }
-        EmitType(out, vec->type());
+        EmitType(out, vec->Type());
         out << vec->Width();
     }
 
@@ -1307,8 +1307,8 @@ class Printer : public tint::TextGenerator {
     /// @param out the output stream
     /// @param mat the matrix to emit
     void EmitMatrixType(StringStream& out, const core::type::Matrix* mat) {
-        EmitType(out, mat->type());
-        out << mat->columns() << "x" << mat->rows();
+        EmitType(out, mat->Type());
+        out << mat->Columns() << "x" << mat->Rows();
     }
 
     /// Handles generating a texture declaration
@@ -1325,7 +1325,7 @@ class Printer : public tint::TextGenerator {
             out << "texture";
         }
 
-        switch (tex->dim()) {
+        switch (tex->Dim()) {
             case core::type::TextureDimension::k1d:
                 out << "1d";
                 break;
@@ -1358,26 +1358,26 @@ class Printer : public tint::TextGenerator {
             [&](const core::type::DepthTexture*) { out << "float, access::sample"; },
             [&](const core::type::DepthMultisampledTexture*) { out << "float, access::read"; },
             [&](const core::type::StorageTexture* storage) {
-                EmitType(out, storage->type());
+                EmitType(out, storage->Type());
                 out << ", ";
 
                 std::string access_str;
-                if (storage->access() == core::Access::kRead) {
+                if (storage->Access() == core::Access::kRead) {
                     out << "access::read";
-                } else if (storage->access() == core::Access::kReadWrite) {
+                } else if (storage->Access() == core::Access::kReadWrite) {
                     out << "access::read_write";
-                } else if (storage->access() == core::Access::kWrite) {
+                } else if (storage->Access() == core::Access::kWrite) {
                     out << "access::write";
                 } else {
                     TINT_IR_ICE(ir_) << "invalid access control for storage texture";
                 }
             },
             [&](const core::type::MultisampledTexture* ms) {
-                EmitType(out, ms->type());
+                EmitType(out, ms->Type());
                 out << ", access::read";
             },
             [&](const core::type::SampledTexture* sampled) {
-                EmitType(out, sampled->type());
+                EmitType(out, sampled->Type());
                 out << ", access::sample";
             },  //
             TINT_ICE_ON_NO_MATCH);
@@ -1607,7 +1607,7 @@ class Printer : public tint::TextGenerator {
             [&](const core::type::Matrix* m) {
                 EmitType(out, m);
                 ScopedParen sp(out);
-                emit_values(m->columns());
+                emit_values(m->Columns());
             },
             [&](const core::type::Array* a) {
                 EmitType(out, a);
@@ -1655,12 +1655,12 @@ class Printer : public tint::TextGenerator {
             [&](const core::type::F32*) { out << "0.0f"; },                           //
             [&](const core::type::I32*) { out << "0"; },                              //
             [&](const core::type::U32*) { out << "0u"; },                             //
-            [&](const core::type::Vector* vec) { EmitZeroValue(out, vec->type()); },  //
+            [&](const core::type::Vector* vec) { EmitZeroValue(out, vec->Type()); },  //
             [&](const core::type::Matrix* mat) {
                 EmitType(out, mat);
 
                 ScopedParen sp(out);
-                EmitZeroValue(out, mat->type());
+                EmitZeroValue(out, mat->Type());
             },
             [&](const core::type::Array*) { out << "{}"; },   //
             [&](const core::type::Struct*) { out << "{}"; },  //

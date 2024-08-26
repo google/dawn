@@ -92,7 +92,7 @@ const sem::Call* AppendVector(ProgramBuilder* b,
     auto* vector_ty = vector_sem->Type()->UnwrapRef();
     if (auto* vec = vector_ty->As<core::type::Vector>()) {
         packed_size = vec->Width() + 1;
-        packed_el_sem_ty = vec->type();
+        packed_el_sem_ty = vec->Type();
     } else {
         packed_size = 2;
         packed_el_sem_ty = vector_ty;

@@ -150,7 +150,7 @@ const core::type::Type* Builder::VectorPtrElementType(const core::type::Type* ty
         auto* vec_ty = vec_ptr_ty->StoreType()->As<core::type::Vector>();
         TINT_ASSERT(vec_ty);
         if (TINT_LIKELY(vec_ty)) {
-            return vec_ty->type();
+            return vec_ty->Type();
         }
     }
     return ir.Types().i32();

@@ -219,7 +219,7 @@ struct State {
                     return b.Constant(u32(vec->Width() - 1u));
                 },
                 [&](const type::Matrix* mat) -> ir::Value* {
-                    return b.Constant(u32(mat->columns() - 1u));
+                    return b.Constant(u32(mat->Columns() - 1u));
                 },
                 [&](const type::Array* arr) -> ir::Value* {
                     if (arr->ConstantCount()) {
@@ -311,7 +311,7 @@ struct State {
             case core::BuiltinFn::kTextureLoad: {
                 clamp_coords(1u);
                 uint32_t next_arg = 2u;
-                if (type::IsTextureArray(texture->dim())) {
+                if (type::IsTextureArray(texture->Dim())) {
                     clamp_array_index(next_arg++);
                 }
                 if (texture->IsAnyOf<type::SampledTexture, type::DepthTexture>()) {
@@ -321,7 +321,7 @@ struct State {
             }
             case core::BuiltinFn::kTextureStore: {
                 clamp_coords(1u);
-                if (type::IsTextureArray(texture->dim())) {
+                if (type::IsTextureArray(texture->Dim())) {
                     clamp_array_index(2u);
                 }
                 break;

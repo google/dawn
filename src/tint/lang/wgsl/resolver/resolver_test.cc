@@ -667,7 +667,7 @@ TEST_F(ResolverTest, Expr_Initializer_Type_Vec2) {
 
     ASSERT_NE(TypeOf(tc), nullptr);
     ASSERT_TRUE(TypeOf(tc)->Is<core::type::Vector>());
-    EXPECT_TRUE(TypeOf(tc)->As<core::type::Vector>()->type()->Is<core::type::F32>());
+    EXPECT_TRUE(TypeOf(tc)->As<core::type::Vector>()->Type()->Is<core::type::F32>());
     EXPECT_EQ(TypeOf(tc)->As<core::type::Vector>()->Width(), 2u);
 }
 
@@ -679,7 +679,7 @@ TEST_F(ResolverTest, Expr_Initializer_Type_Vec3) {
 
     ASSERT_NE(TypeOf(tc), nullptr);
     ASSERT_TRUE(TypeOf(tc)->Is<core::type::Vector>());
-    EXPECT_TRUE(TypeOf(tc)->As<core::type::Vector>()->type()->Is<core::type::F32>());
+    EXPECT_TRUE(TypeOf(tc)->As<core::type::Vector>()->Type()->Is<core::type::F32>());
     EXPECT_EQ(TypeOf(tc)->As<core::type::Vector>()->Width(), 3u);
 }
 
@@ -691,7 +691,7 @@ TEST_F(ResolverTest, Expr_Initializer_Type_Vec4) {
 
     ASSERT_NE(TypeOf(tc), nullptr);
     ASSERT_TRUE(TypeOf(tc)->Is<core::type::Vector>());
-    EXPECT_TRUE(TypeOf(tc)->As<core::type::Vector>()->type()->Is<core::type::F32>());
+    EXPECT_TRUE(TypeOf(tc)->As<core::type::Vector>()->Type()->Is<core::type::F32>());
     EXPECT_EQ(TypeOf(tc)->As<core::type::Vector>()->Width(), 4u);
 }
 
@@ -1300,7 +1300,7 @@ TEST_F(ResolverTest, Expr_MemberAccessor_VectorSwizzle) {
 
     ASSERT_NE(TypeOf(mem), nullptr);
     ASSERT_TRUE(TypeOf(mem)->Is<core::type::Vector>());
-    EXPECT_TRUE(TypeOf(mem)->As<core::type::Vector>()->type()->Is<core::type::F32>());
+    EXPECT_TRUE(TypeOf(mem)->As<core::type::Vector>()->Type()->Is<core::type::F32>());
     EXPECT_EQ(TypeOf(mem)->As<core::type::Vector>()->Width(), 4u);
     auto* sma = Sem().Get(mem)->As<sem::Swizzle>();
     ASSERT_NE(sma, nullptr);
@@ -1352,7 +1352,7 @@ TEST_F(ResolverTest, Expr_Accessor_MultiLevel) {
 
     ASSERT_NE(TypeOf(mem), nullptr);
     ASSERT_TRUE(TypeOf(mem)->Is<core::type::Vector>());
-    EXPECT_TRUE(TypeOf(mem)->As<core::type::Vector>()->type()->Is<core::type::F32>());
+    EXPECT_TRUE(TypeOf(mem)->As<core::type::Vector>()->Type()->Is<core::type::F32>());
     EXPECT_EQ(TypeOf(mem)->As<core::type::Vector>()->Width(), 2u);
     ASSERT_TRUE(Sem().Get(mem)->Is<sem::Swizzle>());
 }
@@ -1864,11 +1864,11 @@ TEST_P(UnaryOpExpressionTest, Expr_UnaryOp) {
     ASSERT_NE(TypeOf(der), nullptr);
     ASSERT_TRUE(TypeOf(der)->Is<core::type::Vector>());
     if (op == core::UnaryOp::kNot) {
-        EXPECT_TRUE(TypeOf(der)->As<core::type::Vector>()->type()->Is<core::type::Bool>());
+        EXPECT_TRUE(TypeOf(der)->As<core::type::Vector>()->Type()->Is<core::type::Bool>());
     } else if (op == core::UnaryOp::kNegation || op == core::UnaryOp::kComplement) {
-        EXPECT_TRUE(TypeOf(der)->As<core::type::Vector>()->type()->Is<core::type::I32>());
+        EXPECT_TRUE(TypeOf(der)->As<core::type::Vector>()->Type()->Is<core::type::I32>());
     } else {
-        EXPECT_TRUE(TypeOf(der)->As<core::type::Vector>()->type()->Is<core::type::F32>());
+        EXPECT_TRUE(TypeOf(der)->As<core::type::Vector>()->Type()->Is<core::type::F32>());
     }
     EXPECT_EQ(TypeOf(der)->As<core::type::Vector>()->Width(), 4u);
 }

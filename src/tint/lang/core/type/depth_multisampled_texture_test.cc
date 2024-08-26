@@ -63,7 +63,7 @@ TEST_F(DepthMultisampledTextureTest, Equals) {
 
 TEST_F(DepthMultisampledTextureTest, Dim) {
     DepthMultisampledTexture d(TextureDimension::k2d);
-    EXPECT_EQ(d.dim(), TextureDimension::k2d);
+    EXPECT_EQ(d.Dim(), TextureDimension::k2d);
 }
 
 TEST_F(DepthMultisampledTextureTest, FriendlyName) {
@@ -78,7 +78,7 @@ TEST_F(DepthMultisampledTextureTest, Clone) {
     core::type::CloneContext ctx{{nullptr}, {nullptr, &mgr}};
 
     auto* dt = a->Clone(ctx);
-    EXPECT_EQ(dt->dim(), TextureDimension::k2d);
+    EXPECT_EQ(dt->Dim(), TextureDimension::k2d);
 }
 
 }  // namespace

@@ -93,16 +93,16 @@ bool Type::is_float_scalar() const {
 }
 
 bool Type::is_float_matrix() const {
-    return Is([](const Matrix* m) { return m->type()->is_float_scalar(); });
+    return Is([](const Matrix* m) { return m->Type()->is_float_scalar(); });
 }
 
 bool Type::is_square_float_matrix() const {
     return Is(
-        [](const Matrix* m) { return m->type()->is_float_scalar() && m->rows() == m->columns(); });
+        [](const Matrix* m) { return m->Type()->is_float_scalar() && m->Rows() == m->Columns(); });
 }
 
 bool Type::is_float_vector() const {
-    return Is([](const Vector* v) { return v->type()->is_float_scalar(); });
+    return Is([](const Vector* v) { return v->Type()->is_float_scalar(); });
 }
 
 bool Type::is_float_scalar_or_vector() const {
@@ -126,11 +126,11 @@ bool Type::is_unsigned_integer_scalar() const {
 }
 
 bool Type::is_signed_integer_vector() const {
-    return Is([](const Vector* v) { return v->type()->IsAnyOf<I32, AbstractInt>(); });
+    return Is([](const Vector* v) { return v->Type()->IsAnyOf<I32, AbstractInt>(); });
 }
 
 bool Type::is_unsigned_integer_vector() const {
-    return Is([](const Vector* v) { return v->type()->Is<U32>(); });
+    return Is([](const Vector* v) { return v->Type()->Is<U32>(); });
 }
 
 bool Type::is_unsigned_integer_scalar_or_vector() const {
@@ -146,11 +146,11 @@ bool Type::is_integer_scalar_or_vector() const {
 }
 
 bool Type::is_abstract_integer_vector() const {
-    return Is([](const Vector* v) { return v->type()->Is<AbstractInt>(); });
+    return Is([](const Vector* v) { return v->Type()->Is<AbstractInt>(); });
 }
 
 bool Type::is_abstract_float_vector() const {
-    return Is([](const Vector* v) { return v->type()->Is<AbstractFloat>(); });
+    return Is([](const Vector* v) { return v->Type()->Is<AbstractFloat>(); });
 }
 
 bool Type::is_abstract_integer_scalar_or_vector() const {
@@ -162,7 +162,7 @@ bool Type::is_abstract_float_scalar_or_vector() const {
 }
 
 bool Type::is_bool_vector() const {
-    return Is([](const Vector* v) { return v->type()->Is<Bool>(); });
+    return Is([](const Vector* v) { return v->Type()->Is<Bool>(); });
 }
 
 bool Type::is_bool_scalar_or_vector() const {
@@ -170,11 +170,11 @@ bool Type::is_bool_scalar_or_vector() const {
 }
 
 bool Type::is_numeric_vector() const {
-    return Is([](const Vector* v) { return v->type()->Is<core::type::NumericScalar>(); });
+    return Is([](const Vector* v) { return v->Type()->Is<core::type::NumericScalar>(); });
 }
 
 bool Type::is_scalar_vector() const {
-    return Is([](const Vector* v) { return v->type()->Is<core::type::Scalar>(); });
+    return Is([](const Vector* v) { return v->Type()->Is<core::type::Scalar>(); });
 }
 
 bool Type::is_numeric_scalar_or_vector() const {
@@ -189,8 +189,8 @@ bool Type::HoldsAbstract() const {
     return Switch(
         this,  //
         [&](const AbstractNumeric*) { return true; },
-        [&](const Vector* v) { return v->type()->HoldsAbstract(); },
-        [&](const Matrix* m) { return m->type()->HoldsAbstract(); },
+        [&](const Vector* v) { return v->Type()->HoldsAbstract(); },
+        [&](const Matrix* m) { return m->Type()->HoldsAbstract(); },
         [&](const Array* a) { return a->ElemType()->HoldsAbstract(); },
         [&](const Struct* s) {
             for (auto* m : s->Members()) {
@@ -228,16 +228,16 @@ uint32_t Type::ConversionRank(const Type* from, const Type* to) {
         [&](const Vector* from_vec) {
             if (auto* to_vec = to->As<Vector>()) {
                 if (from_vec->Width() == to_vec->Width()) {
-                    return ConversionRank(from_vec->type(), to_vec->type());
+                    return ConversionRank(from_vec->Type(), to_vec->Type());
                 }
             }
             return kNoConversion;
         },
         [&](const Matrix* from_mat) {
             if (auto* to_mat = to->As<Matrix>()) {
-                if (from_mat->columns() == to_mat->columns() &&
-                    from_mat->rows() == to_mat->rows()) {
-                    return ConversionRank(from_mat->type(), to_mat->type());
+                if (from_mat->Columns() == to_mat->Columns() &&
+                    from_mat->Rows() == to_mat->Rows()) {
+                    return ConversionRank(from_mat->Type(), to_mat->Type());
                 }
             }
             return kNoConversion;

@@ -259,7 +259,7 @@ TEST_F(ConstEvalTest, Vec3_Convert_f32_to_i32) {
     ASSERT_NE(sem, nullptr);
     auto* vec = sem->Type()->As<core::type::Vector>();
     ASSERT_NE(vec, nullptr);
-    EXPECT_TRUE(vec->type()->Is<core::type::I32>());
+    EXPECT_TRUE(vec->Type()->Is<core::type::I32>());
     EXPECT_EQ(vec->Width(), 3u);
     EXPECT_TYPE(sem->ConstantValue()->Type(), sem->Type());
     EXPECT_FALSE(sem->ConstantValue()->AnyZero());
@@ -288,7 +288,7 @@ TEST_F(ConstEvalTest, Vec3_Convert_u32_to_f32) {
     ASSERT_NE(sem, nullptr);
     auto* vec = sem->Type()->As<core::type::Vector>();
     ASSERT_NE(vec, nullptr);
-    EXPECT_TRUE(vec->type()->Is<core::type::F32>());
+    EXPECT_TRUE(vec->Type()->Is<core::type::F32>());
     EXPECT_EQ(vec->Width(), 3u);
     EXPECT_TYPE(sem->ConstantValue()->Type(), sem->Type());
     EXPECT_FALSE(sem->ConstantValue()->AnyZero());
@@ -319,7 +319,7 @@ TEST_F(ConstEvalTest, Vec3_Convert_f16_to_i32) {
     EXPECT_NE(sem, nullptr);
     auto* vec = sem->Type()->As<core::type::Vector>();
     ASSERT_NE(vec, nullptr);
-    EXPECT_TRUE(vec->type()->Is<core::type::I32>());
+    EXPECT_TRUE(vec->Type()->Is<core::type::I32>());
     EXPECT_EQ(vec->Width(), 3u);
     EXPECT_TYPE(sem->ConstantValue()->Type(), sem->Type());
     EXPECT_FALSE(sem->ConstantValue()->AnyZero());
@@ -350,7 +350,7 @@ TEST_F(ConstEvalTest, Vec3_Convert_u32_to_f16) {
     EXPECT_NE(sem, nullptr);
     auto* vec = sem->Type()->As<core::type::Vector>();
     ASSERT_NE(vec, nullptr);
-    EXPECT_TRUE(vec->type()->Is<core::type::F16>());
+    EXPECT_TRUE(vec->Type()->Is<core::type::F16>());
     EXPECT_EQ(vec->Width(), 3u);
     EXPECT_TYPE(sem->ConstantValue()->Type(), sem->Type());
     EXPECT_FALSE(sem->ConstantValue()->AnyZero());
@@ -379,7 +379,7 @@ TEST_F(ConstEvalTest, Vec3_Convert_Large_f32_to_i32) {
     ASSERT_NE(sem, nullptr);
     auto* vec = sem->Type()->As<core::type::Vector>();
     ASSERT_NE(vec, nullptr);
-    EXPECT_TRUE(vec->type()->Is<core::type::I32>());
+    EXPECT_TRUE(vec->Type()->Is<core::type::I32>());
     EXPECT_EQ(vec->Width(), 3u);
     EXPECT_TYPE(sem->ConstantValue()->Type(), sem->Type());
     EXPECT_FALSE(sem->ConstantValue()->AnyZero());
@@ -408,7 +408,7 @@ TEST_F(ConstEvalTest, Vec3_Convert_Large_f32_to_u32) {
     ASSERT_NE(sem, nullptr);
     auto* vec = sem->Type()->As<core::type::Vector>();
     ASSERT_NE(vec, nullptr);
-    EXPECT_TRUE(vec->type()->Is<core::type::U32>());
+    EXPECT_TRUE(vec->Type()->Is<core::type::U32>());
     EXPECT_EQ(vec->Width(), 3u);
     EXPECT_TYPE(sem->ConstantValue()->Type(), sem->Type());
     EXPECT_TRUE(sem->ConstantValue()->AnyZero());
@@ -453,7 +453,7 @@ TEST_F(ConstEvalTest, Vec3_Convert_Small_f32_to_f16) {
     ASSERT_NE(sem, nullptr);
     auto* vec = sem->Type()->As<core::type::Vector>();
     ASSERT_NE(vec, nullptr);
-    EXPECT_TRUE(vec->type()->Is<core::type::F16>());
+    EXPECT_TRUE(vec->Type()->Is<core::type::F16>());
     EXPECT_EQ(vec->Width(), 3u);
     EXPECT_TYPE(sem->ConstantValue()->Type(), sem->Type());
     EXPECT_TRUE(sem->ConstantValue()->AnyZero());

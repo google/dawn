@@ -256,8 +256,8 @@ bool Validator::IsHostShareable(const core::type::Type* type) const {
     }
     return Switch(
         type,  //
-        [&](const core::type::Vector* vec) { return IsHostShareable(vec->type()); },
-        [&](const core::type::Matrix* mat) { return IsHostShareable(mat->type()); },
+        [&](const core::type::Vector* vec) { return IsHostShareable(vec->Type()); },
+        [&](const core::type::Matrix* mat) { return IsHostShareable(mat->Type()); },
         [&](const sem::Array* arr) { return IsHostShareable(arr->ElemType()); },
         [&](const core::type::Struct* str) {
             for (auto* member : str->Members()) {
@@ -404,7 +404,7 @@ bool Validator::Pointer(const ast::TemplatedIdentifier* a, const core::type::Poi
 }
 
 bool Validator::StorageTexture(const core::type::StorageTexture* t, const Source& source) const {
-    switch (t->access()) {
+    switch (t->Access()) {
         case core::Access::kRead:
             if (!allowed_features_.features.count(
                     wgsl::LanguageFeature::kReadonlyAndReadwriteStorageTextures)) {
@@ -430,27 +430,27 @@ bool Validator::StorageTexture(const core::type::StorageTexture* t, const Source
             return false;
     }
 
-    if (TINT_UNLIKELY(t->texel_format() == core::TexelFormat::kR8Unorm &&
+    if (TINT_UNLIKELY(t->TexelFormat() == core::TexelFormat::kR8Unorm &&
                       !enabled_extensions_.Contains(wgsl::Extension::kChromiumInternalGraphite))) {
         AddError(source) << style::Enum(core::TexelFormat::kR8Unorm) << " requires the "
                          << style::Code(wgsl::Extension::kChromiumInternalGraphite) << " extension";
         return false;
     }
 
-    if (!IsValidStorageTextureDimension(t->dim())) {
+    if (!IsValidStorageTextureDimension(t->Dim())) {
         AddError(source) << "cube dimensions for storage textures are not supported";
         return false;
     }
 
-    if (!IsValidStorageTextureTexelFormat(t->texel_format())) {
+    if (!IsValidStorageTextureTexelFormat(t->TexelFormat())) {
         AddError(source) << "image format must be one of the texel formats specified for storage "
                             "textures in https://gpuweb.github.io/gpuweb/wgsl/#texel-formats";
         return false;
     }
 
     if (mode_ == wgsl::ValidationMode::kCompat &&
-        IsInvalidStorageTextureTexelFormatInCompatibilityMode(t->texel_format())) {
-        AddError(source) << "format " << t->texel_format()
+        IsInvalidStorageTextureTexelFormatInCompatibilityMode(t->TexelFormat())) {
+        AddError(source) << "format " << t->TexelFormat()
                          << " is not supported as a storage texture in compatibility mode";
         return false;
     }
@@ -459,7 +459,7 @@ bool Validator::StorageTexture(const core::type::StorageTexture* t, const Source
 }
 
 bool Validator::SampledTexture(const core::type::SampledTexture* t, const Source& source) const {
-    if (!t->type()->UnwrapRef()->IsAnyOf<core::type::F32, core::type::I32, core::type::U32>()) {
+    if (!t->Type()->UnwrapRef()->IsAnyOf<core::type::F32, core::type::I32, core::type::U32>()) {
         AddError(source) << "texture_2d<type>: type must be f32, i32 or u32";
         return false;
     }
@@ -469,12 +469,12 @@ bool Validator::SampledTexture(const core::type::SampledTexture* t, const Source
 
 bool Validator::MultisampledTexture(const core::type::MultisampledTexture* t,
                                     const Source& source) const {
-    if (t->dim() != core::type::TextureDimension::k2d) {
+    if (t->Dim() != core::type::TextureDimension::k2d) {
         AddError(source) << "only 2d multisampled textures are supported";
         return false;
     }
 
-    if (!t->type()->UnwrapRef()->IsAnyOf<core::type::F32, core::type::I32, core::type::U32>()) {
+    if (!t->Type()->UnwrapRef()->IsAnyOf<core::type::F32, core::type::I32, core::type::U32>()) {
         AddError(source) << "texture_multisampled_2d<type>: type must be f32, i32 or u32";
         return false;
     }
@@ -489,7 +489,7 @@ bool Validator::InputAttachment(const core::type::InputAttachment* t, const Sour
                          << style::Code("chromium_internal_input_attachments");
         return false;
     }
-    if (!t->type()->UnwrapRef()->IsAnyOf<core::type::F32, core::type::I32, core::type::U32>()) {
+    if (!t->Type()->UnwrapRef()->IsAnyOf<core::type::F32, core::type::I32, core::type::U32>()) {
         AddError(source) << "input_attachment<type>: type must be f32, i32 or u32";
         return false;
     }
@@ -686,7 +686,7 @@ bool Validator::AddressSpaceLayout(const core::type::Type* store_ty,
                 if (arr->ElemType()->Is<core::type::Scalar>()) {
                     hint << "Consider using a vector or struct as the element type instead.";
                 } else if (auto* vec = arr->ElemType()->As<core::type::Vector>();
-                           vec && vec->type()->Size() == 4) {
+                           vec && vec->Type()->Size() == 4) {
                     hint << "Consider using a vec4 instead.";
                 } else if (arr->ElemType()->Is<sem::Struct>()) {
                     hint << "Consider using the " << style::Attribute("@size")
@@ -1004,7 +1004,7 @@ bool Validator::BuiltinAttribute(const ast::BuiltinAttribute* attr,
                 is_stage_mismatch = true;
             }
             auto* vec = type->As<core::type::Vector>();
-            if (!(vec && vec->Width() == 4 && vec->type()->Is<core::type::F32>())) {
+            if (!(vec && vec->Width() == 4 && vec->Type()->Is<core::type::F32>())) {
                 err_builtin_type("vec4<f32>");
                 return false;
             }
@@ -2348,8 +2348,8 @@ bool Validator::PipelineStages(VectorRef<sem::Function*> entry_points) const {
             }
             auto* storage = var->Type()->UnwrapRef()->As<core::type::StorageTexture>();
             if (stage == ast::PipelineStage::kVertex && storage &&
-                storage->access() != core::Access::kRead) {
-                AddError(source) << "storage texture with " << style::Enum(storage->access())
+                storage->Access() != core::Access::kRead) {
+                AddError(source) << "storage texture with " << style::Enum(storage->Access())
                                  << " access mode cannot be used by " << stage << " pipeline stage";
                 var_decl_note(var);
                 return false;

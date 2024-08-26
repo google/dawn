@@ -123,11 +123,11 @@ struct BuiltinPolyfill::State {
                     if (cfg.builtins.bgra8unorm) {
                         if (auto* ty_expr = src.Sem().Get<sem::TypeExpression>(expr)) {
                             if (auto* tex = ty_expr->Type()->As<core::type::StorageTexture>()) {
-                                if (tex->texel_format() == core::TexelFormat::kBgra8Unorm) {
+                                if (tex->TexelFormat() == core::TexelFormat::kBgra8Unorm) {
                                     ctx.Replace(expr, [this, tex] {
                                         return ctx.dst->Expr(ctx.dst->ty.storage_texture(
-                                            tex->dim(), core::TexelFormat::kRgba8Unorm,
-                                            tex->access()));
+                                            tex->Dim(), core::TexelFormat::kRgba8Unorm,
+                                            tex->Access()));
                                     });
                                     made_changes = true;
                                 }
@@ -1393,7 +1393,7 @@ struct BuiltinPolyfill::State {
                         if (cfg.builtins.reflect_vec2_f32) {
                             auto& sig = builtin->Signature();
                             auto* vec = sig.return_type->As<core::type::Vector>();
-                            if (vec && vec->Width() == 2 && vec->type()->Is<core::type::F32>()) {
+                            if (vec && vec->Width() == 2 && vec->Type()->Is<core::type::F32>()) {
                                 return builtin_polyfills.GetOrAdd(
                                     builtin, [&] { return reflect(builtin->ReturnType()); });
                             }
@@ -1422,7 +1422,7 @@ struct BuiltinPolyfill::State {
                             auto& sig = builtin->Signature();
                             auto* tex = sig.Parameter(core::ParameterUsage::kTexture);
                             if (auto* stex = tex->Type()->As<core::type::StorageTexture>()) {
-                                if (stex->texel_format() == core::TexelFormat::kBgra8Unorm) {
+                                if (stex->TexelFormat() == core::TexelFormat::kBgra8Unorm) {
                                     ctx.Replace(expr, [this, expr] {
                                         return ctx.dst->MemberAccessor(
                                             ctx.CloneWithoutTransform(expr), "bgra");
@@ -1438,7 +1438,7 @@ struct BuiltinPolyfill::State {
                             auto& sig = builtin->Signature();
                             auto* tex = sig.Parameter(core::ParameterUsage::kTexture);
                             if (auto* stex = tex->Type()->As<core::type::SampledTexture>()) {
-                                if (stex->type()->Is<core::type::F32>()) {
+                                if (stex->Type()->Is<core::type::F32>()) {
                                     return builtin_polyfills.GetOrAdd(builtin, [&] {
                                         return textureSampleBaseClampToEdge_2d_f32();
                                     });
@@ -1452,7 +1452,7 @@ struct BuiltinPolyfill::State {
                             auto& sig = builtin->Signature();
                             auto* tex = sig.Parameter(core::ParameterUsage::kTexture);
                             if (auto* stex = tex->Type()->As<core::type::StorageTexture>()) {
-                                if (stex->texel_format() == core::TexelFormat::kBgra8Unorm) {
+                                if (stex->TexelFormat() == core::TexelFormat::kBgra8Unorm) {
                                     size_t value_idx = static_cast<size_t>(
                                         sig.IndexOf(core::ParameterUsage::kValue));
                                     ctx.Replace(expr, [this, expr, value_idx] {

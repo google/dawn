@@ -118,7 +118,7 @@ struct State {
             StringStream name;
             name << "tint_" << (is_div ? "div_" : "mod_");
             if (auto* vec = result_ty->As<type::Vector>()) {
-                name << "v" << vec->Width() << vec->type()->FriendlyName();
+                name << "v" << vec->Width() << vec->Type()->FriendlyName();
             } else {
                 name << result_ty->FriendlyName();
             }

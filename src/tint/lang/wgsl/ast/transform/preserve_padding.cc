@@ -156,7 +156,7 @@ struct PreservePadding::State {
                 // Call a helper function that assigns each column separately.
                 return call_helper([&] {
                     tint::Vector<const Statement*, 4> body;
-                    for (uint32_t i = 0; i < mat->columns(); i++) {
+                    for (uint32_t i = 0; i < mat->Columns(); i++) {
                         body.Push(MakeAssignment(mat->ColumnType(),
                                                  b.IndexAccessor(b.Deref(kDestParamName), u32(i)),
                                                  b.IndexAccessor(kValueParamName, u32(i))));
