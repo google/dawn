@@ -409,7 +409,7 @@ void ASTPrinter::EmitBitcastCall(StringStream& out, const ast::CallExpression* c
     auto* src_type = TypeOf(arg)->UnwrapRef();
     auto* dst_type = TypeOf(call);
 
-    if (!dst_type->is_integer_scalar_or_vector() && !dst_type->is_float_scalar_or_vector()) {
+    if (!dst_type->IsIntegerScalarOrVector() && !dst_type->IsFloatScalarOrVector()) {
         diagnostics_.AddError(Source{})
             << "Unable to do bitcast to type " << dst_type->FriendlyName();
         return;
@@ -459,7 +459,7 @@ void ASTPrinter::EmitBitcastCall(StringStream& out, const ast::CallExpression* c
                     }
                     auto s = Line(&b);
                     s << "return ";
-                    if (dst_type->is_float_scalar_or_vector()) {
+                    if (dst_type->IsFloatScalarOrVector()) {
                         s << "uintBitsToFloat";
                     } else {
                         EmitType(s, dst_type, core::AddressSpace::kUndefined,
@@ -509,7 +509,7 @@ void ASTPrinter::EmitBitcastCall(StringStream& out, const ast::CallExpression* c
                         {
                             auto s = Line(&b);
                             s << "uvec2 r = ";
-                            if (src_type->is_float_scalar_or_vector()) {
+                            if (src_type->IsFloatScalarOrVector()) {
                                 s << "floatBitsToUint";
                             } else {
                                 s << "uvec2";
@@ -527,7 +527,7 @@ void ASTPrinter::EmitBitcastCall(StringStream& out, const ast::CallExpression* c
                         {
                             auto s = Line(&b);
                             s << "uint r = ";
-                            if (src_type->is_float_scalar_or_vector()) {
+                            if (src_type->IsFloatScalarOrVector()) {
                                 s << "floatBitsToUint";
                             } else {
                                 s << "uint";
@@ -547,17 +547,15 @@ void ASTPrinter::EmitBitcastCall(StringStream& out, const ast::CallExpression* c
             EmitExpression(out, arg);
         }
     } else {
-        if (src_type->is_float_scalar_or_vector() &&
-            dst_type->is_signed_integer_scalar_or_vector()) {
+        if (src_type->IsFloatScalarOrVector() && dst_type->IsSignedIntegerScalarOrVector()) {
             out << "floatBitsToInt";
-        } else if (src_type->is_float_scalar_or_vector() &&
-                   dst_type->is_unsigned_integer_scalar_or_vector()) {
+        } else if (src_type->IsFloatScalarOrVector() &&
+                   dst_type->IsUnsignedIntegerScalarOrVector()) {
             out << "floatBitsToUint";
-        } else if (src_type->is_signed_integer_scalar_or_vector() &&
-                   dst_type->is_float_scalar_or_vector()) {
+        } else if (src_type->IsSignedIntegerScalarOrVector() && dst_type->IsFloatScalarOrVector()) {
             out << "intBitsToFloat";
-        } else if (src_type->is_unsigned_integer_scalar_or_vector() &&
-                   dst_type->is_float_scalar_or_vector()) {
+        } else if (src_type->IsUnsignedIntegerScalarOrVector() &&
+                   dst_type->IsFloatScalarOrVector()) {
             out << "uintBitsToFloat";
         } else {
             EmitType(out, dst_type, core::AddressSpace::kUndefined, core::Access::kReadWrite, "");
@@ -720,14 +718,14 @@ void ASTPrinter::EmitBinary(StringStream& out, const ast::BinaryExpression* expr
     }
 
     if ((expr->op == core::BinaryOp::kAnd || expr->op == core::BinaryOp::kOr) &&
-        TypeOf(expr->lhs)->UnwrapRef()->is_bool_scalar_or_vector()) {
+        TypeOf(expr->lhs)->UnwrapRef()->IsBoolScalarOrVector()) {
         EmitBitwiseBoolOp(out, expr);
         return;
     }
 
     if (expr->op == core::BinaryOp::kModulo &&
-        (TypeOf(expr->lhs)->UnwrapRef()->is_float_scalar_or_vector() ||
-         TypeOf(expr->rhs)->UnwrapRef()->is_float_scalar_or_vector())) {
+        (TypeOf(expr->lhs)->UnwrapRef()->IsFloatScalarOrVector() ||
+         TypeOf(expr->rhs)->UnwrapRef()->IsFloatScalarOrVector())) {
         EmitFloatModulo(out, expr);
         return;
     }
@@ -888,7 +886,7 @@ void ASTPrinter::EmitBuiltinCall(StringStream& out,
     } else if (builtin->Fn() == wgsl::BuiltinFn::kFma && version_.IsES()) {
         EmitEmulatedFMA(out, expr);
     } else if (builtin->Fn() == wgsl::BuiltinFn::kAbs &&
-               TypeOf(expr->args[0])->UnwrapRef()->is_unsigned_integer_scalar_or_vector()) {
+               TypeOf(expr->args[0])->UnwrapRef()->IsUnsignedIntegerScalarOrVector()) {
         // GLSL does not support abs() on unsigned arguments. However, it's a no-op.
         EmitExpression(out, expr->args[0]);
     } else if ((builtin->Fn() == wgsl::BuiltinFn::kAny || builtin->Fn() == wgsl::BuiltinFn::kAll) &&
@@ -1171,7 +1169,7 @@ void ASTPrinter::EmitDotCall(StringStream& out,
                              const sem::BuiltinFn* builtin) {
     auto* vec_ty = builtin->Parameters()[0]->Type()->As<core::type::Vector>();
     std::string fn = "dot";
-    if (vec_ty->Type()->is_integer_scalar()) {
+    if (vec_ty->Type()->IsIntegerScalar()) {
         // GLSL does not have a builtin for dot() with integer vector types.
         // Generate the helper function if it hasn't been created already
         fn = tint::GetOrAdd(int_dot_funcs_, vec_ty, [&]() -> std::string {
@@ -1384,7 +1382,7 @@ void ASTPrinter::EmitTextureCall(StringStream& out,
 
     auto emit_expr_as_signed = [&](const ast::Expression* e) {
         auto* ty = TypeOf(e)->UnwrapRef();
-        if (!ty->is_unsigned_integer_scalar_or_vector()) {
+        if (!ty->IsUnsignedIntegerScalarOrVector()) {
             EmitExpression(out, e);
             return;
         }

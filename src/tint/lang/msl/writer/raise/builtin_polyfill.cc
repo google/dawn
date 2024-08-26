@@ -348,7 +348,7 @@ struct State {
             auto* arg0 = builtin->Args()[0];
             auto* arg1 = builtin->Args()[1];
             auto* vec = arg0->Type()->As<core::type::Vector>();
-            if (vec->Type()->is_integer_scalar()) {
+            if (vec->Type()->IsIntegerScalar()) {
                 // Calls to `dot` with a integer arguments are replaced with helper functions, as
                 // MSL's `dot` builtin only supports floating point arguments.
                 auto* polyfill = integer_dot_polyfills.GetOrAdd(vec, [&] {
@@ -530,7 +530,7 @@ struct State {
         b.InsertBefore(builtin, [&] {
             // Calls to `sign` with an integer argument are replaced with select operations:
             //   result = select(select(-1, 1, arg > 0), 0, arg == 0);
-            if (type->is_integer_scalar_or_vector()) {
+            if (type->IsIntegerScalarOrVector()) {
                 core::ir::Value* pos_one = b.MatchWidth(i32(1), type);
                 core::ir::Value* neg_one = b.MatchWidth(i32(-1), type);
                 const core::type::Type* bool_type = ty.match_width(ty.bool_(), type);
@@ -564,7 +564,7 @@ struct State {
                     lod = b.Value(u32(0));
                 } else {
                     lod = builtin->Args()[1];
-                    if (lod->Type()->is_signed_integer_scalar()) {
+                    if (lod->Type()->IsSignedIntegerScalar()) {
                         lod = b.Convert<u32>(lod)->Result(0);
                     }
                 }
@@ -611,7 +611,7 @@ struct State {
         auto* tex_type = tex->Type()->As<core::type::Texture>();
 
         // Add an offset argument if it was not provided.
-        const bool has_offset = args.Back()->Type()->is_signed_integer_vector();
+        const bool has_offset = args.Back()->Type()->IsSignedIntegerVector();
         const bool needs_offset = tex_type->Dim() == core::type::TextureDimension::k2d ||
                                   tex_type->Dim() == core::type::TextureDimension::k2dArray;
         if (needs_offset && !has_offset) {
@@ -668,7 +668,7 @@ struct State {
 
         b.InsertBefore(builtin, [&] {
             // Convert the coordinates to unsigned integers if necessary.
-            if (coords->Type()->is_signed_integer_scalar_or_vector()) {
+            if (coords->Type()->IsSignedIntegerScalarOrVector()) {
                 coords = b.Convert(ty.match_width(ty.u32(), coords->Type()), coords)->Result(0);
             }
 
@@ -709,7 +709,7 @@ struct State {
             if (IsTextureArray(tex_type->Dim())) {
                 const uint32_t kArrayIndex = 2;
                 auto* index_arg = builtin->Args()[kArrayIndex];
-                if (index_arg->Type()->is_signed_integer_scalar()) {
+                if (index_arg->Type()->IsSignedIntegerScalar()) {
                     builtin->SetArg(kArrayIndex, b.Call(ty.i32(), core::BuiltinFn::kMax, index_arg,
                                                         b.Zero<i32>())
                                                      ->Result(0));
@@ -854,7 +854,7 @@ struct State {
 
             // Resize the argument list as the gradient argument only takes up one argument.
             // Move the offset argument back one place if present.
-            const bool has_offset = args.Back()->Type()->is_signed_integer_vector();
+            const bool has_offset = args.Back()->Type()->IsSignedIntegerVector();
             if (has_offset) {
                 args[args.Length() - 2] = args.Back();
             }
@@ -911,7 +911,7 @@ struct State {
 
         b.InsertBefore(builtin, [&] {
             // Convert the coordinates to unsigned integers if necessary.
-            if (coords->Type()->is_signed_integer_scalar_or_vector()) {
+            if (coords->Type()->IsSignedIntegerScalarOrVector()) {
                 coords = b.Convert(ty.match_width(ty.u32(), coords->Type()), coords)->Result(0);
             }
 

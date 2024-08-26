@@ -239,7 +239,7 @@ struct State {
                     } else if (call->Func() == core::BuiltinFn::kTextureLoad) {
                         // Convert the coordinates to unsigned integers if necessary.
                         auto* coords = call->Args()[1];
-                        if (coords->Type()->is_signed_integer_vector()) {
+                        if (coords->Type()->IsSignedIntegerVector()) {
                             auto* convert = b.Convert(ty.vec2<u32>(), coords);
                             convert->InsertBefore(call);
                             coords = convert->Result(0);

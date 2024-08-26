@@ -59,7 +59,7 @@ struct State {
             if (auto* binary = inst->As<core::ir::Binary>()) {
                 switch (binary->Op()) {
                     case core::BinaryOp::kModulo: {
-                        if (binary->LHS()->Type()->is_float_scalar_or_vector()) {
+                        if (binary->LHS()->Type()->IsFloatScalarOrVector()) {
                             binary_worklist.Push(binary);
                         }
                         break;

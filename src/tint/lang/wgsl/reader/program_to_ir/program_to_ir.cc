@@ -423,7 +423,7 @@ class Impl {
     void EmitIncrementDecrement(const ast::IncrementDecrementStatement* stmt) {
         auto lhs = EmitExpression(stmt->lhs);
 
-        auto* one = program_.TypeOf(stmt->lhs)->UnwrapRef()->is_signed_integer_scalar()
+        auto* one = program_.TypeOf(stmt->lhs)->UnwrapRef()->IsSignedIntegerScalar()
                         ? builder_.Constant(1_i)
                         : builder_.Constant(1_u);
 

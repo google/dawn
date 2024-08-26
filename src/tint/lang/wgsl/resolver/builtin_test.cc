@@ -367,7 +367,7 @@ TEST_P(ResolverBuiltinTest_FloatBuiltin_IdenticalType, OneParam_Vector_f32) {
         EXPECT_TRUE(r()->Resolve()) << r()->error();
 
         ASSERT_NE(TypeOf(call), nullptr);
-        EXPECT_TRUE(TypeOf(call)->is_float_vector());
+        EXPECT_TRUE(TypeOf(call)->IsFloatVector());
         EXPECT_EQ(TypeOf(call)->As<core::type::Vector>()->Width(), 3u);
         ASSERT_NE(TypeOf(call)->As<core::type::Vector>()->Type(), nullptr);
         EXPECT_TRUE(TypeOf(call)->As<core::type::Vector>()->Type()->Is<core::type::F32>());
@@ -412,7 +412,7 @@ TEST_P(ResolverBuiltinTest_FloatBuiltin_IdenticalType, TwoParams_Vector_f32) {
         EXPECT_TRUE(r()->Resolve()) << r()->error();
 
         ASSERT_NE(TypeOf(call), nullptr);
-        EXPECT_TRUE(TypeOf(call)->is_float_vector());
+        EXPECT_TRUE(TypeOf(call)->IsFloatVector());
         EXPECT_EQ(TypeOf(call)->As<core::type::Vector>()->Width(), 3u);
         ASSERT_NE(TypeOf(call)->As<core::type::Vector>()->Type(), nullptr);
         EXPECT_TRUE(TypeOf(call)->As<core::type::Vector>()->Type()->Is<core::type::F32>());
@@ -458,7 +458,7 @@ TEST_P(ResolverBuiltinTest_FloatBuiltin_IdenticalType, ThreeParams_Vector_f32) {
         EXPECT_TRUE(r()->Resolve()) << r()->error();
 
         ASSERT_NE(TypeOf(call), nullptr);
-        EXPECT_TRUE(TypeOf(call)->is_float_vector());
+        EXPECT_TRUE(TypeOf(call)->IsFloatVector());
         EXPECT_EQ(TypeOf(call)->As<core::type::Vector>()->Width(), 3u);
         ASSERT_NE(TypeOf(call)->As<core::type::Vector>()->Type(), nullptr);
         EXPECT_TRUE(TypeOf(call)->As<core::type::Vector>()->Type()->Is<core::type::F32>());
@@ -505,7 +505,7 @@ TEST_P(ResolverBuiltinTest_FloatBuiltin_IdenticalType, FourParams_Vector_f32) {
         EXPECT_TRUE(r()->Resolve()) << r()->error();
 
         ASSERT_NE(TypeOf(call), nullptr);
-        EXPECT_TRUE(TypeOf(call)->is_float_vector());
+        EXPECT_TRUE(TypeOf(call)->IsFloatVector());
         EXPECT_EQ(TypeOf(call)->As<core::type::Vector>()->Width(), 3u);
         ASSERT_NE(TypeOf(call)->As<core::type::Vector>()->Type(), nullptr);
         EXPECT_TRUE(TypeOf(call)->As<core::type::Vector>()->Type()->Is<core::type::F32>());
@@ -563,7 +563,7 @@ TEST_P(ResolverBuiltinTest_FloatBuiltin_IdenticalType, OneParam_Vector_f16) {
         EXPECT_TRUE(r()->Resolve()) << r()->error();
 
         ASSERT_NE(TypeOf(call), nullptr);
-        EXPECT_TRUE(TypeOf(call)->is_float_vector());
+        EXPECT_TRUE(TypeOf(call)->IsFloatVector());
         EXPECT_EQ(TypeOf(call)->As<core::type::Vector>()->Width(), 3u);
         ASSERT_NE(TypeOf(call)->As<core::type::Vector>()->Type(), nullptr);
         EXPECT_TRUE(TypeOf(call)->As<core::type::Vector>()->Type()->Is<core::type::F16>());
@@ -612,7 +612,7 @@ TEST_P(ResolverBuiltinTest_FloatBuiltin_IdenticalType, TwoParams_Vector_f16) {
         EXPECT_TRUE(r()->Resolve()) << r()->error();
 
         ASSERT_NE(TypeOf(call), nullptr);
-        EXPECT_TRUE(TypeOf(call)->is_float_vector());
+        EXPECT_TRUE(TypeOf(call)->IsFloatVector());
         EXPECT_EQ(TypeOf(call)->As<core::type::Vector>()->Width(), 3u);
         ASSERT_NE(TypeOf(call)->As<core::type::Vector>()->Type(), nullptr);
         EXPECT_TRUE(TypeOf(call)->As<core::type::Vector>()->Type()->Is<core::type::F16>());
@@ -662,7 +662,7 @@ TEST_P(ResolverBuiltinTest_FloatBuiltin_IdenticalType, ThreeParams_Vector_f16) {
         EXPECT_TRUE(r()->Resolve()) << r()->error();
 
         ASSERT_NE(TypeOf(call), nullptr);
-        EXPECT_TRUE(TypeOf(call)->is_float_vector());
+        EXPECT_TRUE(TypeOf(call)->IsFloatVector());
         EXPECT_EQ(TypeOf(call)->As<core::type::Vector>()->Width(), 3u);
         ASSERT_NE(TypeOf(call)->As<core::type::Vector>()->Type(), nullptr);
         EXPECT_TRUE(TypeOf(call)->As<core::type::Vector>()->Type()->Is<core::type::F16>());
@@ -713,7 +713,7 @@ TEST_P(ResolverBuiltinTest_FloatBuiltin_IdenticalType, FourParams_Vector_f16) {
         EXPECT_TRUE(r()->Resolve()) << r()->error();
 
         ASSERT_NE(TypeOf(call), nullptr);
-        EXPECT_TRUE(TypeOf(call)->is_float_vector());
+        EXPECT_TRUE(TypeOf(call)->IsFloatVector());
         EXPECT_EQ(TypeOf(call)->As<core::type::Vector>()->Width(), 3u);
         ASSERT_NE(TypeOf(call)->As<core::type::Vector>()->Type(), nullptr);
         EXPECT_TRUE(TypeOf(call)->As<core::type::Vector>()->Type()->Is<core::type::F16>());
@@ -790,7 +790,7 @@ TEST_F(ResolverBuiltinFloatTest, Cross_f32) {
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 
     ASSERT_NE(TypeOf(call), nullptr);
-    EXPECT_TRUE(TypeOf(call)->is_float_vector());
+    EXPECT_TRUE(TypeOf(call)->IsFloatVector());
     EXPECT_EQ(TypeOf(call)->As<core::type::Vector>()->Width(), 3u);
     EXPECT_TRUE(TypeOf(call)->As<core::type::Vector>()->Type()->Is<core::type::F32>());
 }
@@ -804,7 +804,7 @@ TEST_F(ResolverBuiltinFloatTest, Cross_f16) {
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 
     ASSERT_NE(TypeOf(call), nullptr);
-    EXPECT_TRUE(TypeOf(call)->is_float_vector());
+    EXPECT_TRUE(TypeOf(call)->IsFloatVector());
     EXPECT_EQ(TypeOf(call)->As<core::type::Vector>()->Width(), 3u);
     EXPECT_TRUE(TypeOf(call)->As<core::type::Vector>()->Type()->Is<core::type::F16>());
 }
@@ -1218,7 +1218,7 @@ TEST_F(ResolverBuiltinFloatTest, Mix_VectorScalar_f32) {
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 
     ASSERT_NE(TypeOf(call), nullptr);
-    EXPECT_TRUE(TypeOf(call)->is_float_vector());
+    EXPECT_TRUE(TypeOf(call)->IsFloatVector());
     EXPECT_EQ(TypeOf(call)->As<core::type::Vector>()->Width(), 3u);
     ASSERT_NE(TypeOf(call)->As<core::type::Vector>()->Type(), nullptr);
     EXPECT_TRUE(TypeOf(call)->As<core::type::Vector>()->Type()->Is<core::type::F32>());
@@ -1233,7 +1233,7 @@ TEST_F(ResolverBuiltinFloatTest, Mix_VectorScalar_f16) {
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 
     ASSERT_NE(TypeOf(call), nullptr);
-    EXPECT_TRUE(TypeOf(call)->is_float_vector());
+    EXPECT_TRUE(TypeOf(call)->IsFloatVector());
     EXPECT_EQ(TypeOf(call)->As<core::type::Vector>()->Width(), 3u);
     ASSERT_NE(TypeOf(call)->As<core::type::Vector>()->Type(), nullptr);
     EXPECT_TRUE(TypeOf(call)->As<core::type::Vector>()->Type()->Is<core::type::F16>());
@@ -1450,7 +1450,7 @@ TEST_F(ResolverBuiltinFloatTest, Normalize_Vector_f32) {
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 
     ASSERT_NE(TypeOf(call), nullptr);
-    EXPECT_TRUE(TypeOf(call)->is_float_vector());
+    EXPECT_TRUE(TypeOf(call)->IsFloatVector());
     EXPECT_EQ(TypeOf(call)->As<core::type::Vector>()->Width(), 3u);
     EXPECT_TRUE(TypeOf(call)->As<core::type::Vector>()->Type()->Is<core::type::F32>());
 }
@@ -1464,7 +1464,7 @@ TEST_F(ResolverBuiltinFloatTest, Normalize_Vector_f16) {
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 
     ASSERT_NE(TypeOf(call), nullptr);
-    EXPECT_TRUE(TypeOf(call)->is_float_vector());
+    EXPECT_TRUE(TypeOf(call)->IsFloatVector());
     EXPECT_EQ(TypeOf(call)->As<core::type::Vector>()->Width(), 3u);
     EXPECT_TRUE(TypeOf(call)->As<core::type::Vector>()->Type()->Is<core::type::F16>());
 }
@@ -1549,7 +1549,7 @@ TEST_P(ResolverBuiltinTest_IntegerBuiltin_IdenticalType, OneParams_Vector_i32) {
         EXPECT_TRUE(r()->Resolve()) << r()->error();
 
         ASSERT_NE(TypeOf(call), nullptr);
-        EXPECT_TRUE(TypeOf(call)->is_signed_integer_vector());
+        EXPECT_TRUE(TypeOf(call)->IsSignedIntegerVector());
         EXPECT_EQ(TypeOf(call)->As<core::type::Vector>()->Width(), 3u);
         ASSERT_NE(TypeOf(call)->As<core::type::Vector>()->Type(), nullptr);
         EXPECT_TRUE(TypeOf(call)->As<core::type::Vector>()->Type()->Is<core::type::I32>());
@@ -1594,7 +1594,7 @@ TEST_P(ResolverBuiltinTest_IntegerBuiltin_IdenticalType, OneParams_Vector_u32) {
         EXPECT_TRUE(r()->Resolve()) << r()->error();
 
         ASSERT_NE(TypeOf(call), nullptr);
-        EXPECT_TRUE(TypeOf(call)->is_unsigned_integer_vector());
+        EXPECT_TRUE(TypeOf(call)->IsUnsignedIntegerVector());
         EXPECT_EQ(TypeOf(call)->As<core::type::Vector>()->Width(), 3u);
         ASSERT_NE(TypeOf(call)->As<core::type::Vector>()->Type(), nullptr);
         EXPECT_TRUE(TypeOf(call)->As<core::type::Vector>()->Type()->Is<core::type::U32>());
@@ -1639,7 +1639,7 @@ TEST_P(ResolverBuiltinTest_IntegerBuiltin_IdenticalType, TwoParams_Vector_i32) {
         EXPECT_TRUE(r()->Resolve()) << r()->error();
 
         ASSERT_NE(TypeOf(call), nullptr);
-        EXPECT_TRUE(TypeOf(call)->is_signed_integer_vector());
+        EXPECT_TRUE(TypeOf(call)->IsSignedIntegerVector());
         EXPECT_EQ(TypeOf(call)->As<core::type::Vector>()->Width(), 3u);
         ASSERT_NE(TypeOf(call)->As<core::type::Vector>()->Type(), nullptr);
         EXPECT_TRUE(TypeOf(call)->As<core::type::Vector>()->Type()->Is<core::type::I32>());
@@ -1684,7 +1684,7 @@ TEST_P(ResolverBuiltinTest_IntegerBuiltin_IdenticalType, TwoParams_Vector_u32) {
         EXPECT_TRUE(r()->Resolve()) << r()->error();
 
         ASSERT_NE(TypeOf(call), nullptr);
-        EXPECT_TRUE(TypeOf(call)->is_unsigned_integer_vector());
+        EXPECT_TRUE(TypeOf(call)->IsUnsignedIntegerVector());
         EXPECT_EQ(TypeOf(call)->As<core::type::Vector>()->Width(), 3u);
         ASSERT_NE(TypeOf(call)->As<core::type::Vector>()->Type(), nullptr);
         EXPECT_TRUE(TypeOf(call)->As<core::type::Vector>()->Type()->Is<core::type::U32>());
@@ -1730,7 +1730,7 @@ TEST_P(ResolverBuiltinTest_IntegerBuiltin_IdenticalType, ThreeParams_Vector_i32)
         EXPECT_TRUE(r()->Resolve()) << r()->error();
 
         ASSERT_NE(TypeOf(call), nullptr);
-        EXPECT_TRUE(TypeOf(call)->is_signed_integer_vector());
+        EXPECT_TRUE(TypeOf(call)->IsSignedIntegerVector());
         EXPECT_EQ(TypeOf(call)->As<core::type::Vector>()->Width(), 3u);
         ASSERT_NE(TypeOf(call)->As<core::type::Vector>()->Type(), nullptr);
         EXPECT_TRUE(TypeOf(call)->As<core::type::Vector>()->Type()->Is<core::type::I32>());
@@ -1777,7 +1777,7 @@ TEST_P(ResolverBuiltinTest_IntegerBuiltin_IdenticalType, ThreeParams_Vector_u32)
         EXPECT_TRUE(r()->Resolve()) << r()->error();
 
         ASSERT_NE(TypeOf(call), nullptr);
-        EXPECT_TRUE(TypeOf(call)->is_unsigned_integer_vector());
+        EXPECT_TRUE(TypeOf(call)->IsUnsignedIntegerVector());
         EXPECT_EQ(TypeOf(call)->As<core::type::Vector>()->Width(), 3u);
         ASSERT_NE(TypeOf(call)->As<core::type::Vector>()->Type(), nullptr);
         EXPECT_TRUE(TypeOf(call)->As<core::type::Vector>()->Type()->Is<core::type::U32>());
@@ -1824,7 +1824,7 @@ TEST_P(ResolverBuiltinTest_IntegerBuiltin_IdenticalType, FourParams_Vector_i32) 
         EXPECT_TRUE(r()->Resolve()) << r()->error();
 
         ASSERT_NE(TypeOf(call), nullptr);
-        EXPECT_TRUE(TypeOf(call)->is_signed_integer_vector());
+        EXPECT_TRUE(TypeOf(call)->IsSignedIntegerVector());
         EXPECT_EQ(TypeOf(call)->As<core::type::Vector>()->Width(), 3u);
         ASSERT_NE(TypeOf(call)->As<core::type::Vector>()->Type(), nullptr);
         EXPECT_TRUE(TypeOf(call)->As<core::type::Vector>()->Type()->Is<core::type::I32>());
@@ -1871,7 +1871,7 @@ TEST_P(ResolverBuiltinTest_IntegerBuiltin_IdenticalType, FourParams_Vector_u32) 
         EXPECT_TRUE(r()->Resolve()) << r()->error();
 
         ASSERT_NE(TypeOf(call), nullptr);
-        EXPECT_TRUE(TypeOf(call)->is_unsigned_integer_vector());
+        EXPECT_TRUE(TypeOf(call)->IsUnsignedIntegerVector());
         EXPECT_EQ(TypeOf(call)->As<core::type::Vector>()->Width(), 3u);
         ASSERT_NE(TypeOf(call)->As<core::type::Vector>()->Type(), nullptr);
         EXPECT_TRUE(TypeOf(call)->As<core::type::Vector>()->Type()->Is<core::type::U32>());
@@ -2725,7 +2725,7 @@ TEST_P(ResolverBuiltinTest_DataUnpacking, InferType) {
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
     ASSERT_NE(TypeOf(call), nullptr);
-    EXPECT_TRUE(TypeOf(call)->is_float_vector());
+    EXPECT_TRUE(TypeOf(call)->IsFloatVector());
     if (pack4) {
         EXPECT_EQ(TypeOf(call)->As<core::type::Vector>()->Width(), 4u);
     } else {

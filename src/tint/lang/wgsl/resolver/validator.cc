@@ -755,7 +755,7 @@ bool Validator::GlobalVariable(
                 return false;
             }
 
-            if (!var->declared_address_space && !global->Type()->UnwrapRef()->is_handle()) {
+            if (!var->declared_address_space && !global->Type()->UnwrapRef()->IsHandle()) {
                 AddError(decl->source) << "module-scope " << style::Keyword("var")
                                        << " declarations that are not of texture or sampler types "
                                           "must provide an address space";
@@ -833,7 +833,7 @@ bool Validator::Var(const sem::Variable* v) const {
         return false;
     }
 
-    if (store_ty->is_handle() && var->declared_address_space) {
+    if (store_ty->IsHandle() && var->declared_address_space) {
         // https://gpuweb.github.io/gpuweb/wgsl/#module-scope-variables
         // If the store type is a texture type or a sampler type, then the variable declaration must
         // not have a address space attribute. The address space will always be handle.
@@ -1018,7 +1018,7 @@ bool Validator::BuiltinAttribute(const ast::BuiltinAttribute* attr,
                 !(stage == ast::PipelineStage::kCompute && is_input)) {
                 is_stage_mismatch = true;
             }
-            if (!(type->is_unsigned_integer_vector() &&
+            if (!(type->IsUnsignedIntegerVector() &&
                   type->As<core::type::Vector>()->Width() == 3)) {
                 err_builtin_type("vec3<u32>");
                 return false;
@@ -1175,7 +1175,7 @@ bool Validator::InterpolateAttribute(const ast::InterpolateAttribute* attr,
         return false;
     }
 
-    if (type->is_integer_scalar_or_vector() && i_type != core::InterpolationType::kFlat) {
+    if (type->IsIntegerScalarOrVector() && i_type != core::InterpolationType::kFlat) {
         AddError(attr->source) << "interpolation type must be " << style::Enum("flat")
                                << " for integral user-defined IO types";
         return false;
@@ -1459,7 +1459,7 @@ bool Validator::EntryPoint(const sem::Function* func, ast::PipelineStage stage) 
             }
 
             if (pipeline_io_attribute && pipeline_io_attribute->Is<ast::LocationAttribute>()) {
-                if (ty->is_integer_scalar_or_vector() && !interpolate_attribute) {
+                if (ty->IsIntegerScalarOrVector() && !interpolate_attribute) {
                     if (decl->PipelineStage() == ast::PipelineStage::kVertex &&
                         param_or_ret == ParamOrRetType::kReturnType) {
                         AddError(source)
@@ -1733,7 +1733,7 @@ bool Validator::BinaryExpression(const ast::Node* node,
             // Integer division by zero should be checked for the partial evaluation case (only rhs
             // is const). FP division by zero is only invalid when the whole expression is
             // constant-evaluated.
-            if (rhs->Type()->is_integer_scalar_or_vector() &&
+            if (rhs->Type()->IsIntegerScalarOrVector() &&
                 rhs->Stage() == core::EvaluationStage::kConstant) {
                 if (rhs->ConstantValue()->AnyZero()) {
                     AddError(node->source) << "integer division by zero is invalid";
@@ -2028,7 +2028,7 @@ bool Validator::SubgroupBroadcast(const sem::Call* call) const {
         return false;
     }
 
-    if (id->Type()->is_signed_integer_scalar() && constant_value->ValueAs<i32>() < 0) {
+    if (id->Type()->IsSignedIntegerScalar() && constant_value->ValueAs<i32>() < 0) {
         AddError(id->Declaration()->source) << "the sourceLaneIndex argument of subgroupBroadcast "
                                                "must be greater than or equal to zero";
         return false;
@@ -2053,7 +2053,7 @@ bool Validator::QuadBroadcast(const sem::Call* call) const {
         return false;
     }
 
-    if (id->Type()->is_signed_integer_scalar() && constant_value->ValueAs<i32>() < 0) {
+    if (id->Type()->IsSignedIntegerScalar() && constant_value->ValueAs<i32>() < 0) {
         AddError(id->Declaration()->source)
             << "the id argument of quadBroadcast must be greater than or equal to zero";
         return false;
@@ -2287,7 +2287,7 @@ bool Validator::Vector(const core::type::Type* el_ty, const Source& source) cons
 }
 
 bool Validator::Matrix(const core::type::Type* el_ty, const Source& source) const {
-    if (!el_ty->is_float_scalar()) {
+    if (!el_ty->IsFloatScalar()) {
         AddError(source) << "matrix element type must be " << style::Type("f32") << " or "
                          << style::Type("f16");
         return false;
@@ -2662,7 +2662,7 @@ bool Validator::LocationAttribute(const ast::LocationAttribute* attr,
         return false;
     }
 
-    if (!type->is_numeric_scalar_or_vector()) {
+    if (!type->IsNumericScalarOrVector()) {
         std::string invalid_type = sem_.TypeNameOf(type);
         AddError(source) << "cannot apply " << style::Attribute("@location")
                          << " to declaration of type " << style::Type(invalid_type);
@@ -2696,7 +2696,7 @@ bool Validator::ColorAttribute(const ast::ColorAttribute* attr,
         return false;
     }
 
-    if (!type->is_numeric_scalar_or_vector()) {
+    if (!type->IsNumericScalarOrVector()) {
         std::string invalid_type = sem_.TypeNameOf(type);
         AddError(source) << "cannot apply " << style::Attribute("@color")
                          << " to declaration of type " << style::Type(invalid_type);
@@ -2764,7 +2764,7 @@ bool Validator::SwitchStatement(const ast::SwitchStatement* s) {
     }
 
     auto* cond_ty = sem_.TypeOf(s->condition);
-    if (!cond_ty->is_integer_scalar()) {
+    if (!cond_ty->IsIntegerScalar()) {
         AddError(s->condition->source)
             << "switch statement selector expression must be of a scalar integer type";
         return false;
@@ -2954,7 +2954,7 @@ bool Validator::IncrementDecrementStatement(const ast::IncrementDecrementStateme
         return false;
     }
 
-    if (!lhs_ref->StoreType()->is_integer_scalar()) {
+    if (!lhs_ref->StoreType()->IsIntegerScalar()) {
         const std::string kind = inc->increment ? "increment" : "decrement";
         AddError(lhs->source) << kind << " statement can only be applied to an integer scalar";
         return false;

@@ -130,53 +130,39 @@ class Type : public Castable<Type, UniqueNode> {
     inline bool HasFixedFootprint() const { return flags_.Contains(Flag::kFixedFootprint); }
 
     /// @returns true if this type is a float scalar
-    bool is_float_scalar() const;
+    bool IsFloatScalar() const;
     /// @returns true if this type is a float matrix
-    bool is_float_matrix() const;
-    /// @returns true if this type is a square float matrix
-    bool is_square_float_matrix() const;
+    bool IsFloatMatrix() const;
     /// @returns true if this type is a float vector
-    bool is_float_vector() const;
+    bool IsFloatVector() const;
     /// @returns true if this type is a float scalar or vector
-    bool is_float_scalar_or_vector() const;
-    /// @returns true if this type is a float scalar or vector or matrix
-    bool is_float_scalar_or_vector_or_matrix() const;
+    bool IsFloatScalarOrVector() const;
     /// @returns true if this type is an integer scalar
-    bool is_integer_scalar() const;
-    /// @returns true if this type is a signed integer scalar
-    bool is_signed_integer_scalar() const;
-    /// @returns true if this type is an unsigned integer scalar
-    bool is_unsigned_integer_scalar() const;
-    /// @returns true if this type is a signed integer vector
-    bool is_signed_integer_vector() const;
-    /// @returns true if this type is an unsigned vector
-    bool is_unsigned_integer_vector() const;
-    /// @returns true if this type is an unsigned scalar or vector
-    bool is_unsigned_integer_scalar_or_vector() const;
-    /// @returns true if this type is a signed scalar or vector
-    bool is_signed_integer_scalar_or_vector() const;
+    bool IsIntegerScalar() const;
     /// @returns true if this type is an integer scalar or vector
-    bool is_integer_scalar_or_vector() const;
-    /// @returns true if this type is an abstract integer vector
-    bool is_abstract_integer_vector() const;
-    /// @returns true if this type is an abstract float vector
-    bool is_abstract_float_vector() const;
+    bool IsIntegerScalarOrVector() const;
+    /// @returns true if this type is a signed integer scalar
+    bool IsSignedIntegerScalar() const;
+    /// @returns true if this type is a signed integer vector
+    bool IsSignedIntegerVector() const;
+    /// @returns true if this type is a signed scalar or vector
+    bool IsSignedIntegerScalarOrVector() const;
+    /// @returns true if this type is an unsigned integer scalar
+    bool IsUnsignedIntegerScalar() const;
+    /// @returns true if this type is an unsigned vector
+    bool IsUnsignedIntegerVector() const;
+    /// @returns true if this type is an unsigned scalar or vector
+    bool IsUnsignedIntegerScalarOrVector() const;
     /// @returns true if this type is an abstract integer scalar or vector
-    bool is_abstract_integer_scalar_or_vector() const;
-    /// @returns true if this type is an abstract float scalar or vector
-    bool is_abstract_float_scalar_or_vector() const;
-    /// @returns true if this type is a boolean vector
-    bool is_bool_vector() const;
+    bool IsAbstractScalarOrVector() const;
     /// @returns true if this type is boolean scalar or vector
-    bool is_bool_scalar_or_vector() const;
-    /// @returns true if this type is a numeric vector
-    bool is_numeric_vector() const;
+    bool IsBoolScalarOrVector() const;
     /// @returns true if this type is a vector of scalar type
-    bool is_scalar_vector() const;
+    bool IsScalarVector() const;
     /// @returns true if this type is a numeric scale or vector
-    bool is_numeric_scalar_or_vector() const;
+    bool IsNumericScalarOrVector() const;
     /// @returns true if this type is a handle type
-    bool is_handle() const;
+    bool IsHandle() const;
 
     /// @returns true if this type is an abstract-numeric or if the type holds an element that is an
     /// abstract-numeric.

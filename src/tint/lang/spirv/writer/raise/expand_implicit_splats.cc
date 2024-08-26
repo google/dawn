@@ -105,7 +105,7 @@ struct State {
     /// @param binary the binary instruction to modify
     void ExpandBinary(core::ir::Binary* binary) {
         auto* result_ty = binary->Result(0)->Type();
-        if (result_ty->is_float_vector() && binary->Op() == core::BinaryOp::kMultiply) {
+        if (result_ty->IsFloatVector() && binary->Op() == core::BinaryOp::kMultiply) {
             // Use OpVectorTimesScalar for floating point multiply.
             auto* vts = b.CallWithResult<spirv::ir::BuiltinCall>(
                 binary->DetachResult(), spirv::BuiltinFn::kVectorTimesScalar);

@@ -707,7 +707,7 @@ bool ASTPrinter::EmitBitcastCall(StringStream& out, const ast::CallExpression* c
     auto* src_el_type = src_type->DeepestElement();
     auto* dst_el_type = dst_type->DeepestElement();
 
-    if (!dst_el_type->is_integer_scalar() && !dst_el_type->is_float_scalar()) {
+    if (!dst_el_type->IsIntegerScalar() && !dst_el_type->IsFloatScalar()) {
         diagnostics_.AddError(Source{})
             << "Unable to do bitcast to type " << dst_el_type->FriendlyName();
         return false;
@@ -1278,10 +1278,10 @@ bool ASTPrinter::EmitBuiltinCall(StringStream& out,
         type == wgsl::BuiltinFn::kSubgroupXor) {
         auto* arg = call->Arguments()[0];
         auto* argType = arg->Type()->UnwrapRef();
-        if (argType->is_signed_integer_scalar_or_vector()) {
+        if (argType->IsSignedIntegerScalarOrVector()) {
             // Bitcast of literal int vectors fails in DXC so extract arg to a var. See
             // github.com/microsoft/DirectXShaderCompiler/issues/6851.
-            if (argType->is_signed_integer_vector() &&
+            if (argType->IsSignedIntegerVector() &&
                 arg->Stage() == core::EvaluationStage::kConstant) {
                 auto varName = UniqueIdentifier(kTempNamePrefix);
                 auto pre = Line();
@@ -1357,7 +1357,7 @@ bool ASTPrinter::EmitValueConstructor(StringStream& out,
     // Single parameter matrix initializers must be identity initializer.
     // It could also be conversions between f16 and f32 matrix when f16 is properly supported.
     if (type->Is<core::type::Matrix>() && call->Arguments().Length() == 1) {
-        if (!ctor->Parameters()[0]->Type()->UnwrapRef()->is_float_matrix()) {
+        if (!ctor->Parameters()[0]->Type()->UnwrapRef()->IsFloatMatrix()) {
             TINT_UNREACHABLE()
                 << "found a single-parameter matrix initializer that is not identity initializer";
         }
@@ -1368,7 +1368,7 @@ bool ASTPrinter::EmitValueConstructor(StringStream& out,
     // For single-value vector initializers, swizzle the scalar to the right
     // vector dimension using .x
     const bool is_single_value_vector_init =
-        type->is_scalar_vector() && call->Arguments().Length() == 1 &&
+        type->IsScalarVector() && call->Arguments().Length() == 1 &&
         ctor->Parameters()[0]->Type()->Is<core::type::Scalar>();
 
     if (brackets) {
@@ -2638,7 +2638,7 @@ bool ASTPrinter::EmitTextureOrStorageBufferCallArgExpression(StringStream& out,
     if (auto* sem = builder_.Sem().GetVal(expr)) {
         if (auto* constant = sem->ConstantValue()) {
             if (auto* splat = constant->As<core::constant::Splat>()) {
-                if (splat->Type()->is_signed_integer_vector()) {
+                if (splat->Type()->IsSignedIntegerVector()) {
                     if (!EmitType(out, constant->Type(), core::AddressSpace::kUndefined,
                                   core::Access::kUndefined, "")) {
                         return false;

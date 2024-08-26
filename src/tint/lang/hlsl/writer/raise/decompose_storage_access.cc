@@ -381,7 +381,7 @@ struct State {
                    core::ir::Value* from,
                    core::ir::Value* offset) {
         auto* store_ty = from->Type();
-        if (store_ty->is_numeric_scalar_or_vector()) {
+        if (store_ty->IsNumericScalarOrVector()) {
             MakeScalarOrVectorStore(var, from, offset);
             return;
         }
@@ -445,7 +445,7 @@ struct State {
                              core::ir::Var* var,
                              const core::type::Type* result_ty,
                              core::ir::Value* offset) {
-        if (result_ty->is_numeric_scalar_or_vector()) {
+        if (result_ty->IsNumericScalarOrVector()) {
             return MakeScalarOrVectorLoad(var, result_ty, offset);
         }
 

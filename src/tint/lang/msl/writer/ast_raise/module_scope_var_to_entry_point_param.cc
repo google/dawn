@@ -254,7 +254,7 @@ struct ModuleScopeVarToEntryPointParam::State {
 
         // Use a pointer for non-handle types.
         tint::Vector<const ast::Attribute*, 2> attributes;
-        if (!ty->is_handle()) {
+        if (!ty->IsHandle()) {
             param_type = sc == core::AddressSpace::kStorage
                              ? ctx.dst->ty.ptr(sc, param_type, var->Access())
                              : ctx.dst->ty.ptr(sc, param_type);
@@ -531,14 +531,14 @@ struct ModuleScopeVarToEntryPointParam::State {
                     }
 
                     auto new_var = it->second;
-                    bool is_handle = target_var->Type()->UnwrapRef()->is_handle();
+                    bool IsHandle = target_var->Type()->UnwrapRef()->IsHandle();
                     const ast::Expression* arg = ctx.dst->Expr(new_var.symbol);
                     if (new_var.is_wrapped) {
                         // The variable is wrapped in a struct, so we need to pass a pointer to the
                         // struct member instead.
                         arg = ctx.dst->AddressOf(
                             ctx.dst->MemberAccessor(ctx.dst->Deref(arg), kWrappedArrayMemberName));
-                    } else if (is_entry_point && !is_handle && !new_var.is_pointer) {
+                    } else if (is_entry_point && !IsHandle && !new_var.is_pointer) {
                         // We need to pass a pointer and we don't already have one, so take
                         // the address of the new variable.
                         arg = ctx.dst->AddressOf(arg);

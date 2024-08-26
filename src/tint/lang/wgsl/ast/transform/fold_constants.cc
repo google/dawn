@@ -102,9 +102,8 @@ struct State {
                 return nullptr;
             }
 
-            if (cv->Type()->HoldsAbstract() && !cv->Type()->is_float_scalar() &&
-                !cv->Type()->is_signed_integer_scalar() &&
-                !cv->Type()->is_unsigned_integer_scalar()) {
+            if (cv->Type()->HoldsAbstract() && !cv->Type()->IsFloatScalar() &&
+                !cv->Type()->IsSignedIntegerScalar() && !cv->Type()->IsUnsignedIntegerScalar()) {
                 return nullptr;
             }
 

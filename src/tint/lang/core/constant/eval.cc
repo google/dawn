@@ -1430,7 +1430,7 @@ Eval::Result Eval::bitcast(const core::type::Type* ty,
                            VectorRef<const Value*> args,
                            const Source& source) {
     auto* value = args[0];
-    bool is_abstract = value->Type()->is_abstract_integer_scalar_or_vector();
+    bool is_abstract = value->Type()->IsAbstractScalarOrVector();
 
     // Target type
     auto dst_elements = ty->Elements(ty->DeepestElement(), 1u);

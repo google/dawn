@@ -55,11 +55,11 @@ struct State {
         for (auto* inst : ir.Instructions()) {
             if (auto* binary = inst->As<core::ir::CoreBinary>()) {
                 if (binary->Op() == core::BinaryOp::kModulo &&
-                    binary->LHS()->Type()->is_float_scalar_or_vector()) {
+                    binary->LHS()->Type()->IsFloatScalarOrVector()) {
                     fmod_worklist.Push(binary);
                 } else if ((binary->Op() == core::BinaryOp::kAnd ||
                             binary->Op() == core::BinaryOp::kOr) &&
-                           binary->LHS()->Type()->is_bool_scalar_or_vector()) {
+                           binary->LHS()->Type()->IsBoolScalarOrVector()) {
                     logical_bool_worklist.Push(binary);
                 }
             }

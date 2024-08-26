@@ -519,7 +519,7 @@ bool ASTPrinter::EmitBinary(StringStream& out, const ast::BinaryExpression* expr
     };
 
     auto signed_type_of = [&](const core::type::Type* ty) -> const core::type::Type* {
-        if (ty->is_integer_scalar()) {
+        if (ty->IsIntegerScalar()) {
             return builder_.create<core::type::I32>();
         } else if (auto* v = ty->As<core::type::Vector>()) {
             return builder_.create<core::type::Vector>(builder_.create<core::type::I32>(),
@@ -529,7 +529,7 @@ bool ASTPrinter::EmitBinary(StringStream& out, const ast::BinaryExpression* expr
     };
 
     auto unsigned_type_of = [&](const core::type::Type* ty) -> const core::type::Type* {
-        if (ty->is_integer_scalar()) {
+        if (ty->IsIntegerScalar()) {
             return builder_.create<core::type::U32>();
         } else if (auto* v = ty->As<core::type::Vector>()) {
             return builder_.create<core::type::Vector>(builder_.create<core::type::U32>(),
@@ -542,7 +542,7 @@ bool ASTPrinter::EmitBinary(StringStream& out, const ast::BinaryExpression* expr
     auto* rhs_type = TypeOf(expr->rhs)->UnwrapRef();
 
     // Handle fmod
-    if (expr->op == core::BinaryOp::kModulo && lhs_type->is_float_scalar_or_vector()) {
+    if (expr->op == core::BinaryOp::kModulo && lhs_type->IsFloatScalarOrVector()) {
         out << "fmod";
         ScopedParen sp(out);
         if (!EmitExpression(out, expr->lhs)) {
@@ -557,8 +557,7 @@ bool ASTPrinter::EmitBinary(StringStream& out, const ast::BinaryExpression* expr
 
     // Handle +/-/* of signed values
     if ((expr->IsAdd() || expr->IsSubtract() || expr->IsMultiply()) &&
-        lhs_type->is_signed_integer_scalar_or_vector() &&
-        rhs_type->is_signed_integer_scalar_or_vector()) {
+        lhs_type->IsSignedIntegerScalarOrVector() && rhs_type->IsSignedIntegerScalarOrVector()) {
         // If lhs or rhs is a vector, use that type (support implicit scalar to
         // vector promotion)
         auto* target_type = lhs_type->Is<core::type::Vector>()
@@ -591,7 +590,7 @@ bool ASTPrinter::EmitBinary(StringStream& out, const ast::BinaryExpression* expr
     // TODO(crbug.com/tint/1077): This may not be necessary. The MSL spec
     // seems to imply that left shifting a signed value is treated the same as
     // left shifting an unsigned value, but we need to make sure.
-    if (expr->IsShiftLeft() && lhs_type->is_signed_integer_scalar_or_vector()) {
+    if (expr->IsShiftLeft() && lhs_type->IsSignedIntegerScalarOrVector()) {
         // Shift left: discards top bits, so convert first operand to unsigned
         // first, then convert result back to signed
         ScopedBitCast outer_int_cast(this, out, lhs_type, signed_type_of(lhs_type));
@@ -1399,7 +1398,7 @@ bool ASTPrinter::EmitTextureCall(StringStream& out,
 
             // Cast the coordinates to unsigned integers if necessary.
             bool inside_params = false;
-            if (usage == Usage::kCoords && e->Type()->UnwrapRef()->is_integer_scalar_or_vector()) {
+            if (usage == Usage::kCoords && e->Type()->UnwrapRef()->IsIntegerScalarOrVector()) {
                 inside_params = true;
                 switch (texture_type->Dim()) {
                     case core::type::TextureDimension::k1d:
@@ -1417,7 +1416,7 @@ bool ASTPrinter::EmitTextureCall(StringStream& out,
                         TINT_ICE() << "unhandled texture dimensionality";
                 }
             } else if (usage == Usage::kArrayIndex &&
-                       e->Type()->UnwrapRef()->is_signed_integer_scalar() && is_gather_or_sample) {
+                       e->Type()->UnwrapRef()->IsSignedIntegerScalar() && is_gather_or_sample) {
                 // Array index access for signed integers is zero lower bound clamped to emulate the
                 // behavior of other platforms. See crbug.com/202355.
                 out << "max(0, ";
@@ -1556,7 +1555,7 @@ bool ASTPrinter::EmitDotCall(StringStream& out,
                              const sem::BuiltinFn* builtin) {
     auto* vec_ty = builtin->Parameters()[0]->Type()->As<core::type::Vector>();
     std::string fn = "dot";
-    if (vec_ty->Type()->is_integer_scalar()) {
+    if (vec_ty->Type()->IsIntegerScalar()) {
         // MSL does not have a builtin for dot() with integer vector types.
         // Generate the helper function if it hasn't been created already
         fn = tint::GetOrAdd(int_dot_funcs_, vec_ty->Width(), [&]() -> std::string {
@@ -1748,7 +1747,7 @@ std::string ASTPrinter::generate_builtin_name(const sem::BuiltinFn* builtin) {
             out += "powr";
             break;
         case wgsl::BuiltinFn::kAbs:
-            if (builtin->ReturnType()->is_float_scalar_or_vector()) {
+            if (builtin->ReturnType()->IsFloatScalarOrVector()) {
                 out += "fabs";
             } else {
                 out += "abs";
@@ -1785,14 +1784,14 @@ std::string ASTPrinter::generate_builtin_name(const sem::BuiltinFn* builtin) {
             out += "fwidth";
             break;
         case wgsl::BuiltinFn::kMax:
-            if (builtin->ReturnType()->is_float_scalar_or_vector()) {
+            if (builtin->ReturnType()->IsFloatScalarOrVector()) {
                 out += "fmax";
             } else {
                 out += "max";
             }
             break;
         case wgsl::BuiltinFn::kMin:
-            if (builtin->ReturnType()->is_float_scalar_or_vector()) {
+            if (builtin->ReturnType()->IsFloatScalarOrVector()) {
                 out += "fmin";
             } else {
                 out += "min";
@@ -3103,7 +3102,7 @@ bool ASTPrinter::EmitUnaryOp(StringStream& out, const ast::UnaryOpExpression* ex
     // Handle `-e` when `e` is signed, so that we ensure that if `e` is the
     // largest negative value, it returns `e`.
     auto* expr_type = TypeOf(expr->expr)->UnwrapRef();
-    if (expr->op == core::UnaryOp::kNegation && expr_type->is_signed_integer_scalar_or_vector()) {
+    if (expr->op == core::UnaryOp::kNegation && expr_type->IsSignedIntegerScalarOrVector()) {
         auto fn = tint::GetOrAdd(unary_minus_funcs_, expr_type, [&]() -> std::string {
             // e.g.:
             // int tint_unary_minus(const int v) {

@@ -1596,7 +1596,7 @@ void Validator::CheckAccess(const Access* a) {
         };
 
         auto* index = a->Indices()[i];
-        if (TINT_UNLIKELY(!index->Type()->is_integer_scalar())) {
+        if (TINT_UNLIKELY(!index->Type()->IsIntegerScalar())) {
             err() << "index must be integer, got " << index->Type()->FriendlyName();
             return;
         }
@@ -1610,7 +1610,7 @@ void Validator::CheckAccess(const Access* a) {
 
         if (auto* const_index = index->As<ir::Constant>()) {
             auto* value = const_index->Value();
-            if (value->Type()->is_signed_integer_scalar()) {
+            if (value->Type()->IsSignedIntegerScalar()) {
                 // index is a signed integer scalar. Check that the index isn't negative.
                 // If the index is unsigned, we can skip this.
                 auto idx = value->ValueAs<AInt>();
@@ -1819,7 +1819,7 @@ void Validator::CheckLoopContinuing(const Loop* loop) {
 void Validator::CheckSwitch(const Switch* s) {
     CheckOperandNotNull(s, s->Condition(), If::kConditionOperandOffset);
 
-    if (s->Condition() && !s->Condition()->Type()->is_integer_scalar()) {
+    if (s->Condition() && !s->Condition()->Type()->IsIntegerScalar()) {
         AddError(s, Switch::kConditionOperandOffset) << "condition type must be an integer scalar";
     }
 

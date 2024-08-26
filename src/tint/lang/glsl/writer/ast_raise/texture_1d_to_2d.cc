@@ -171,7 +171,7 @@ struct Texture1DTo2D::State {
                     auto* coords = c->args[static_cast<size_t>(coords_index)];
 
                     const ast::LiteralExpression* half = nullptr;
-                    if (ctype->is_integer_scalar()) {
+                    if (ctype->IsIntegerScalar()) {
                         half = ctx.dst->Expr(0_a);
                     } else {
                         half = ctx.dst->Expr(0.5_a);

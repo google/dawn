@@ -416,7 +416,7 @@ struct Robustness::State {
         Symbol level_idx, num_levels;
         if (level_arg_idx >= 0) {
             auto* param = builtin->Parameters()[static_cast<size_t>(level_arg_idx)];
-            if (param->Type()->is_integer_scalar()) {
+            if (param->Type()->IsIntegerScalar()) {
                 // let level_idx = u32(level-arg);
                 level_idx = b.Symbols().New("level_idx");
                 auto* arg = expr->args[static_cast<size_t>(level_arg_idx)];
@@ -440,7 +440,7 @@ struct Robustness::State {
         Symbol coords;
         if (coords_arg_idx >= 0) {
             auto* param = builtin->Parameters()[static_cast<size_t>(coords_arg_idx)];
-            if (param->Type()->is_integer_scalar_or_vector()) {
+            if (param->Type()->IsIntegerScalarOrVector()) {
                 // let coords = u32(coords-arg)
                 coords = b.Symbols().New("coords");
                 auto* arg = expr->args[static_cast<size_t>(coords_arg_idx)];
@@ -507,7 +507,7 @@ struct Robustness::State {
         Symbol level_idx;
         if (level_arg_idx >= 0) {
             const auto* param = builtin->Parameters()[static_cast<size_t>(level_arg_idx)];
-            if (param->Type()->is_integer_scalar()) {
+            if (param->Type()->IsIntegerScalar()) {
                 const auto* arg = expr->args[static_cast<size_t>(level_arg_idx)];
                 level_idx = b.Symbols().New("level_idx");
                 const auto* num_levels =
@@ -523,7 +523,7 @@ struct Robustness::State {
         // Clamp the coordinates argument
         if (coords_arg_idx >= 0) {
             const auto* param = builtin->Parameters()[static_cast<size_t>(coords_arg_idx)];
-            if (param->Type()->is_integer_scalar_or_vector()) {
+            if (param->Type()->IsIntegerScalarOrVector()) {
                 auto* arg = expr->args[static_cast<size_t>(coords_arg_idx)];
                 const auto width = WidthOf(param->Type());
                 const auto* dimensions =
@@ -534,7 +534,7 @@ struct Robustness::State {
 
                 // dimensions is u32 or vecN<u32>
                 const auto* unsigned_max = b.Sub(dimensions, ScalarOrVec(b.Expr(1_a), width));
-                if (param->Type()->is_signed_integer_scalar_or_vector()) {
+                if (param->Type()->IsSignedIntegerScalarOrVector()) {
                     const auto* zero = ScalarOrVec(b.Expr(0_a), width);
                     const auto* signed_max = CastToSigned(unsigned_max, width);
                     ctx.Replace(arg,
@@ -552,7 +552,7 @@ struct Robustness::State {
             auto* num_layers = b.Call(wgsl::BuiltinFn::kTextureNumLayers, ctx.Clone(texture_arg));
 
             const auto* unsigned_max = b.Sub(num_layers, 1_a);
-            if (param->Type()->is_signed_integer_scalar()) {
+            if (param->Type()->IsSignedIntegerScalar()) {
                 const auto* signed_max = CastToSigned(unsigned_max, 1u);
                 ctx.Replace(arg, b.Call(wgsl::BuiltinFn::kClamp, ctx.Clone(arg), 0_a, signed_max));
             } else {
@@ -714,7 +714,7 @@ struct Robustness::State {
     /// expr->Declaration() cast to u32.
     const ast::Expression* CastToU32(const sem::ValueExpression* expr) {
         auto* idx = ctx.Clone(expr->Declaration());
-        if (expr->Type()->is_unsigned_integer_scalar()) {
+        if (expr->Type()->IsUnsignedIntegerScalar()) {
             return idx;
         }
         return b.Call<u32>(idx);  // u32(idx)

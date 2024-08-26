@@ -1162,7 +1162,7 @@ TEST_P(FloatAllMatching, Vec2) {
          });
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
-    EXPECT_TRUE(TypeOf(builtin)->is_float_vector());
+    EXPECT_TRUE(TypeOf(builtin)->IsFloatVector());
 }
 
 TEST_P(FloatAllMatching, Vec3) {
@@ -1183,7 +1183,7 @@ TEST_P(FloatAllMatching, Vec3) {
          });
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
-    EXPECT_TRUE(TypeOf(builtin)->is_float_vector());
+    EXPECT_TRUE(TypeOf(builtin)->IsFloatVector());
 }
 
 TEST_P(FloatAllMatching, Vec4) {
@@ -1204,7 +1204,7 @@ TEST_P(FloatAllMatching, Vec4) {
          });
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
-    EXPECT_TRUE(TypeOf(builtin)->is_float_vector());
+    EXPECT_TRUE(TypeOf(builtin)->IsFloatVector());
 }
 
 INSTANTIATE_TEST_SUITE_P(ResolverBuiltinsValidationTest,
@@ -1280,7 +1280,7 @@ TEST_P(IntegerAllMatching, Vec2Unsigned) {
     WrapInFunction(builtin);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
-    EXPECT_TRUE(TypeOf(builtin)->is_unsigned_integer_vector());
+    EXPECT_TRUE(TypeOf(builtin)->IsUnsignedIntegerVector());
 }
 
 TEST_P(IntegerAllMatching, Vec3Unsigned) {
@@ -1295,7 +1295,7 @@ TEST_P(IntegerAllMatching, Vec3Unsigned) {
     WrapInFunction(builtin);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
-    EXPECT_TRUE(TypeOf(builtin)->is_unsigned_integer_vector());
+    EXPECT_TRUE(TypeOf(builtin)->IsUnsignedIntegerVector());
 }
 
 TEST_P(IntegerAllMatching, Vec4Unsigned) {
@@ -1310,7 +1310,7 @@ TEST_P(IntegerAllMatching, Vec4Unsigned) {
     WrapInFunction(builtin);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
-    EXPECT_TRUE(TypeOf(builtin)->is_unsigned_integer_vector());
+    EXPECT_TRUE(TypeOf(builtin)->IsUnsignedIntegerVector());
 }
 
 TEST_P(IntegerAllMatching, ScalarSigned) {
@@ -1340,7 +1340,7 @@ TEST_P(IntegerAllMatching, Vec2Signed) {
     WrapInFunction(builtin);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
-    EXPECT_TRUE(TypeOf(builtin)->is_signed_integer_vector());
+    EXPECT_TRUE(TypeOf(builtin)->IsSignedIntegerVector());
 }
 
 TEST_P(IntegerAllMatching, Vec3Signed) {
@@ -1355,7 +1355,7 @@ TEST_P(IntegerAllMatching, Vec3Signed) {
     WrapInFunction(builtin);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
-    EXPECT_TRUE(TypeOf(builtin)->is_signed_integer_vector());
+    EXPECT_TRUE(TypeOf(builtin)->IsSignedIntegerVector());
 }
 
 TEST_P(IntegerAllMatching, Vec4Signed) {
@@ -1370,7 +1370,7 @@ TEST_P(IntegerAllMatching, Vec4Signed) {
     WrapInFunction(builtin);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
-    EXPECT_TRUE(TypeOf(builtin)->is_signed_integer_vector());
+    EXPECT_TRUE(TypeOf(builtin)->IsSignedIntegerVector());
 }
 
 INSTANTIATE_TEST_SUITE_P(ResolverBuiltinsValidationTest,

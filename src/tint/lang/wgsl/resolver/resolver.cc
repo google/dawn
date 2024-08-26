@@ -575,7 +575,7 @@ sem::Variable* Resolver::Var(const ast::Var* var, bool is_global) {
         // No declared address space. Infer from usage / type.
         if (!is_global) {
             sem->SetAddressSpace(core::AddressSpace::kFunction);
-        } else if (storage_ty->UnwrapRef()->is_handle()) {
+        } else if (storage_ty->UnwrapRef()->IsHandle()) {
             // https://gpuweb.github.io/gpuweb/wgsl/#module-scope-variables
             // If the store type is a texture type or a sampler type, then the
             // variable declaration must not have a address space attribute. The
@@ -3740,7 +3740,7 @@ sem::ValueExpression* Resolver::UnaryOp(const ast::UnaryOpExpression* unary) {
     switch (unary->op) {
         case core::UnaryOp::kAddressOf:
             if (auto* ref = expr_ty->As<core::type::Reference>()) {
-                if (ref->StoreType()->UnwrapRef()->is_handle()) {
+                if (ref->StoreType()->UnwrapRef()->IsHandle()) {
                     AddError(unary->expr->source)
                         << "cannot take the address of " << sem_.Describe(expr)
                         << " in handle address space";
@@ -4192,7 +4192,7 @@ const core::type::ArrayCount* Resolver::ArrayCount(const ast::Expression* count_
 
         case core::EvaluationStage::kConstant: {
             auto* count_val = count_sem->ConstantValue();
-            if (auto* ty = count_val->Type(); !ty->is_integer_scalar()) {
+            if (auto* ty = count_val->Type(); !ty->IsIntegerScalar()) {
                 AddError(count_expr->source)
                     << "array count must evaluate to a constant integer expression, but is type "
                     << style::Type(ty->FriendlyName());
@@ -4696,7 +4696,7 @@ sem::SwitchStatement* Resolver::SwitchStatement(const ast::SwitchStatement* stmt
             }
         }
         auto* common_ty = core::type::Type::Common(types);
-        if (!common_ty || !common_ty->is_integer_scalar()) {
+        if (!common_ty || !common_ty->IsIntegerScalar()) {
             // No common type found or the common type was abstract.
             // Pick i32 and let validation deal with any mismatches.
             common_ty = b.create<core::type::I32>();

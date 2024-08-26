@@ -291,7 +291,7 @@ struct State {
                 call->AppendArg(builtin->Args()[1]);
                 break;
             case core::BuiltinFn::kAtomicMax:
-                if (result_ty->is_signed_integer_scalar()) {
+                if (result_ty->IsSignedIntegerScalar()) {
                     call = build(spirv::BuiltinFn::kAtomicSmax);
                 } else {
                     call = build(spirv::BuiltinFn::kAtomicUmax);
@@ -299,7 +299,7 @@ struct State {
                 call->AppendArg(builtin->Args()[1]);
                 break;
             case core::BuiltinFn::kAtomicMin:
-                if (result_ty->is_signed_integer_scalar()) {
+                if (result_ty->IsSignedIntegerScalar()) {
                     call = build(spirv::BuiltinFn::kAtomicSmin);
                 } else {
                     call = build(spirv::BuiltinFn::kAtomicUmin);
@@ -331,7 +331,7 @@ struct State {
     void Dot(core::ir::CoreBuiltinCall* builtin) {
         // OpDot only supports floating point operands, so we need to polyfill the integer case.
         // TODO(crbug.com/tint/1267): If SPV_KHR_integer_dot_product is supported, use that instead.
-        if (builtin->Result(0)->Type()->is_integer_scalar()) {
+        if (builtin->Result(0)->Type()->IsIntegerScalar()) {
             core::ir::Instruction* sum = nullptr;
 
             auto* v1 = builtin->Args()[0];
@@ -447,7 +447,7 @@ struct State {
         }
         if (operands.lod) {
             image_operand_mask |= SpvImageOperandsLodMask;
-            if (requires_float_lod && operands.lod->Type()->is_integer_scalar()) {
+            if (requires_float_lod && operands.lod->Type()->IsIntegerScalar()) {
                 auto* convert = b.Convert(ty.f32(), operands.lod);
                 convert->InsertBefore(insertion_point);
                 operands.lod = convert->Result(0);
@@ -606,7 +606,7 @@ struct State {
         };
 
         auto* component = next_arg();
-        if (!component->Type()->is_integer_scalar()) {
+        if (!component->Type()->IsIntegerScalar()) {
             // The first argument wasn't the component, so it must be the texture instead.
             // Use constant zero for the component.
             component = b.Constant(0_u);
@@ -906,7 +906,7 @@ struct State {
         auto* id = builtin->Args()[1];
 
         // Id must be an unsigned integer scalar, so bitcast if necessary.
-        if (id->Type()->is_signed_integer_scalar()) {
+        if (id->Type()->IsSignedIntegerScalar()) {
             auto* cast = b.Bitcast(ty.u32(), id);
             cast->InsertBefore(builtin);
             builtin->SetArg(1, cast->Result(0));
@@ -921,7 +921,7 @@ struct State {
         TINT_ASSERT(id->Is<core::ir::Constant>());
 
         // For const signed int IDs, compile-time convert to u32 to maintain constness.
-        if (id->Type()->is_signed_integer_scalar()) {
+        if (id->Type()->IsSignedIntegerScalar()) {
             builtin->SetArg(1, b.Constant(id->As<core::ir::Constant>()->Value()->ValueAs<u32>()));
         }
     }
@@ -934,7 +934,7 @@ struct State {
         TINT_ASSERT(id->Is<core::ir::Constant>());
 
         // For const signed int IDs, compile-time convert to u32 to maintain constness.
-        if (id->Type()->is_signed_integer_scalar()) {
+        if (id->Type()->IsSignedIntegerScalar()) {
             builtin->SetArg(1, b.Constant(id->As<core::ir::Constant>()->Value()->ValueAs<u32>()));
         }
     }

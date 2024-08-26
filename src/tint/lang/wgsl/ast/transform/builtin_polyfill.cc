@@ -88,7 +88,7 @@ struct BuiltinPolyfill::State {
                         case core::BinaryOp::kDivide: {
                             if (cfg.builtins.int_div_mod) {
                                 auto* lhs_ty = src.TypeOf(bin_op->lhs)->UnwrapRef();
-                                if (lhs_ty->is_integer_scalar_or_vector()) {
+                                if (lhs_ty->IsIntegerScalarOrVector()) {
                                     ctx.Replace(bin_op,
                                                 [this, bin_op] { return IntDivMod(bin_op); });
                                     made_changes = true;
@@ -99,7 +99,7 @@ struct BuiltinPolyfill::State {
                         case core::BinaryOp::kModulo: {
                             if (cfg.builtins.int_div_mod) {
                                 auto* lhs_ty = src.TypeOf(bin_op->lhs)->UnwrapRef();
-                                if (lhs_ty->is_integer_scalar_or_vector()) {
+                                if (lhs_ty->IsIntegerScalarOrVector()) {
                                     ctx.Replace(bin_op,
                                                 [this, bin_op] { return IntDivMod(bin_op); });
                                     made_changes = true;
@@ -107,7 +107,7 @@ struct BuiltinPolyfill::State {
                             }
                             if (cfg.builtins.precise_float_mod) {
                                 auto* lhs_ty = src.TypeOf(bin_op->lhs)->UnwrapRef();
-                                if (lhs_ty->is_float_scalar_or_vector()) {
+                                if (lhs_ty->IsFloatScalarOrVector()) {
                                     ctx.Replace(bin_op,
                                                 [this, bin_op] { return PreciseFloatMod(bin_op); });
                                     made_changes = true;
@@ -477,7 +477,7 @@ struct BuiltinPolyfill::State {
         };
 
         const Expression* x = nullptr;
-        if (ty->is_unsigned_integer_scalar_or_vector()) {
+        if (ty->IsUnsignedIntegerScalarOrVector()) {
             x = b.Expr("v");
         } else {
             // If ty is signed, then the value is inverted if the sign is negative
@@ -622,7 +622,7 @@ struct BuiltinPolyfill::State {
 
         auto V = [&](auto value) -> const Expression* {
             const Expression* expr = b.Expr(value);
-            if (!ty->is_unsigned_integer_scalar_or_vector()) {
+            if (!ty->IsUnsignedIntegerScalarOrVector()) {
                 expr = b.Call<i32>(expr);
             }
             if (ty->Is<core::type::Vector>()) {
@@ -855,7 +855,7 @@ struct BuiltinPolyfill::State {
             AFloat high_condition;
             AInt high_limit;
         };
-        const bool is_signed = target->is_signed_integer_scalar_or_vector();
+        const bool is_signed = target->IsSignedIntegerScalarOrVector();
         const Limits limits = is_signed ? Limits{
                                               /* low_condition   */ -AFloat(0x80000000),
                                               /* low_limit  */ -AInt(0x80000000),
@@ -1160,7 +1160,7 @@ struct BuiltinPolyfill::State {
 
             auto* rhs_is_zero = b.Equal(rhs, ScalarOrVector(width, 0_a));
 
-            if (lhs_ty->is_signed_integer_scalar_or_vector()) {
+            if (lhs_ty->IsSignedIntegerScalarOrVector()) {
                 const auto bits = lhs_el_ty->Size() * 8;
                 auto min_int = AInt(AInt::kLowestValue >> (AInt::kNumBits - bits));
                 const Expression* lhs_is_min = b.Equal(lhs, ScalarOrVector(width, min_int));
@@ -1331,7 +1331,7 @@ struct BuiltinPolyfill::State {
                     case wgsl::BuiltinFn::kClamp:
                         if (cfg.builtins.clamp_int) {
                             auto& sig = builtin->Signature();
-                            if (sig.parameters[0]->Type()->is_integer_scalar_or_vector()) {
+                            if (sig.parameters[0]->Type()->IsIntegerScalarOrVector()) {
                                 return builtin_polyfills.GetOrAdd(
                                     builtin, [&] { return clampInteger(builtin->ReturnType()); });
                             }
@@ -1410,7 +1410,7 @@ struct BuiltinPolyfill::State {
                     case wgsl::BuiltinFn::kSign:
                         if (cfg.builtins.sign_int) {
                             auto* ty = builtin->ReturnType();
-                            if (ty->is_signed_integer_scalar_or_vector()) {
+                            if (ty->IsSignedIntegerScalarOrVector()) {
                                 return builtin_polyfills.GetOrAdd(builtin,
                                                                   [&] { return sign_int(ty); });
                             }

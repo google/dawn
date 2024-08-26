@@ -71,9 +71,9 @@ struct State {
             if (auto* convert = inst->As<ir::Convert>()) {
                 auto* src_ty = convert->Args()[0]->Type();
                 auto* res_ty = convert->Result(0)->Type();
-                if (config.ftoi &&                          //
-                    src_ty->is_float_scalar_or_vector() &&  //
-                    res_ty->is_integer_scalar_or_vector()) {
+                if (config.ftoi &&                      //
+                    src_ty->IsFloatScalarOrVector() &&  //
+                    res_ty->IsIntegerScalarOrVector()) {
                     ftoi_worklist.Push(convert);
                 }
             }
@@ -120,7 +120,7 @@ struct State {
             } limits;
 
             // Integer limits.
-            if (res_ty->is_signed_integer_scalar_or_vector()) {
+            if (res_ty->IsSignedIntegerScalarOrVector()) {
                 limits.low_limit_i = b.MatchWidth(i32(INT32_MIN), res_ty);
                 limits.high_limit_i = b.MatchWidth(i32(INT32_MAX), res_ty);
             } else {
@@ -130,7 +130,7 @@ struct State {
 
             // Largest integers representable in the source floating point format.
             if (src_el_ty->Is<type::F32>()) {
-                if (res_ty->is_signed_integer_scalar_or_vector()) {
+                if (res_ty->IsSignedIntegerScalarOrVector()) {
                     // INT32_MIN is -(2^31), which is exactly representable as an f32.
                     // INT32_MAX is (2^31 - 1), which is not exactly representable as an f32, so we
                     // instead use the next highest integer value in the f32 domain.
@@ -146,7 +146,7 @@ struct State {
                 }
             } else if (src_el_ty->Is<type::F16>()) {
                 constexpr float MAX_F16 = 65504;
-                if (res_ty->is_signed_integer_scalar_or_vector()) {
+                if (res_ty->IsSignedIntegerScalarOrVector()) {
                     limits.low_limit_f = b.MatchWidth(f16(-MAX_F16), res_ty);
                     limits.high_limit_f = b.MatchWidth(f16(MAX_F16), res_ty);
                 } else {

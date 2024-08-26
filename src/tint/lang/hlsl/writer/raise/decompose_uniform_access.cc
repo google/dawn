@@ -295,10 +295,10 @@ struct State {
                                     core::ir::Var* var,
                                     const core::type::Type* result_ty,
                                     core::ir::Value* byte_idx) {
-        if (result_ty->is_float_scalar() || result_ty->is_integer_scalar()) {
+        if (result_ty->IsFloatScalar() || result_ty->IsIntegerScalar()) {
             return MakeScalarLoad(var, result_ty, byte_idx);
         }
-        if (result_ty->is_scalar_vector()) {
+        if (result_ty->IsScalarVector()) {
             return MakeVectorLoad(var, result_ty->As<core::type::Vector>(), byte_idx);
         }
 

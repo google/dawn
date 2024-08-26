@@ -1750,14 +1750,14 @@ struct State {
         TINT_ASSERT(call->Args().Length() == 1);
         auto* arg = call->Args()[0];
         auto* arg_type = arg->Type()->UnwrapRef();
-        if (arg_type->is_signed_integer_scalar_or_vector()) {
+        if (arg_type->IsSignedIntegerScalarOrVector()) {
             auto* result_ty = call->Result(0)->Type();
             auto* u32_type = ty.match_width(ty.u32(), result_ty);
             b.InsertBefore(call, [&] {
                 core::ir::Value* val = arg;
                 // Bitcast of literal int vectors fails in DXC so extract arg to a var. See
                 // github.com/microsoft/DirectXShaderCompiler/issues/6851.
-                if (arg_type->is_signed_integer_vector() && arg->Is<core::ir::Constant>()) {
+                if (arg_type->IsSignedIntegerVector() && arg->Is<core::ir::Constant>()) {
                     val = b.Let("arg", arg)->Result(0);
                 }
                 auto* inner =

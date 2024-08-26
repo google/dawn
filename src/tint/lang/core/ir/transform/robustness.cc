@@ -168,7 +168,7 @@ struct State {
     /// @param value the value to convert
     /// @returns the converted value, or @p value if it is already a u32
     ir::Value* CastToU32(ir::Value* value) {
-        if (value->Type()->is_unsigned_integer_scalar_or_vector()) {
+        if (value->Type()->IsUnsignedIntegerScalarOrVector()) {
             return value;
         }
 

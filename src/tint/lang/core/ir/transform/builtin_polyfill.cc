@@ -71,7 +71,7 @@ struct State {
                 switch (builtin->Func()) {
                     case core::BuiltinFn::kClamp:
                         if (config.clamp_int &&
-                            builtin->Result(0)->Type()->is_integer_scalar_or_vector()) {
+                            builtin->Result(0)->Type()->IsIntegerScalarOrVector()) {
                             worklist.Push(builtin);
                         }
                         break;
@@ -269,7 +269,7 @@ struct State {
             // %result = (%b16 | %b8 | %b4 | %b2 | %b1) + %b0;
 
             auto* x = input;
-            if (result_ty->is_signed_integer_scalar_or_vector()) {
+            if (result_ty->IsSignedIntegerScalarOrVector()) {
                 x = b.Bitcast(uint_ty, x)->Result(0);
             }
             auto* b16 = b.Call(uint_ty, core::BuiltinFn::kSelect, V(0), V(16),
@@ -294,7 +294,7 @@ struct State {
                     uint_ty, b16,
                     b.Or(uint_ty, b8, b.Or(uint_ty, b4, b.Or(uint_ty, b2, b.Or(uint_ty, b1, b0))))),
                 b0);
-            if (result_ty->is_signed_integer_scalar_or_vector()) {
+            if (result_ty->IsSignedIntegerScalarOrVector()) {
                 result = b.Bitcast(result_ty, result);
             }
             result->SetResults(Vector{call->DetachResult()});
@@ -331,7 +331,7 @@ struct State {
             // %result = (%b16 | %b8 | %b4 | %b2 | %b1) + %b0;
 
             auto* x = input;
-            if (result_ty->is_signed_integer_scalar_or_vector()) {
+            if (result_ty->IsSignedIntegerScalarOrVector()) {
                 x = b.Bitcast(uint_ty, x)->Result(0);
             }
             auto* b16 = b.Call(uint_ty, core::BuiltinFn::kSelect, V(0), V(16),
@@ -354,7 +354,7 @@ struct State {
                 uint_ty,
                 b.Or(uint_ty, b16, b.Or(uint_ty, b8, b.Or(uint_ty, b4, b.Or(uint_ty, b2, b1)))),
                 b0);
-            if (result_ty->is_signed_integer_scalar_or_vector()) {
+            if (result_ty->IsSignedIntegerScalarOrVector()) {
                 result = b.Bitcast(result_ty, result);
             }
             result->SetResults(Vector{call->DetachResult()});
@@ -437,7 +437,7 @@ struct State {
             // %result = select(%result, 0xffffffff, %x == 0);
 
             auto* x = input;
-            if (result_ty->is_signed_integer_scalar_or_vector()) {
+            if (result_ty->IsSignedIntegerScalarOrVector()) {
                 x = b.Bitcast(uint_ty, x)->Result(0);
                 auto* inverted = b.Complement(uint_ty, x);
                 x = b.Call(uint_ty, core::BuiltinFn::kSelect, inverted, x,
@@ -462,7 +462,7 @@ struct State {
                 b.Or(uint_ty, b16, b.Or(uint_ty, b8, b.Or(uint_ty, b4, b.Or(uint_ty, b2, b1))));
             result = b.Call(uint_ty, core::BuiltinFn::kSelect, result, V(0xffffffff),
                             b.Equal(bool_ty, x, V(0)));
-            if (result_ty->is_signed_integer_scalar_or_vector()) {
+            if (result_ty->IsSignedIntegerScalarOrVector()) {
                 result = b.Bitcast(result_ty, result);
             }
             result->SetResults(Vector{call->DetachResult()});
@@ -499,7 +499,7 @@ struct State {
             // %result = select(%result, 0xffffffff, %x == 0);
 
             auto* x = input;
-            if (result_ty->is_signed_integer_scalar_or_vector()) {
+            if (result_ty->IsSignedIntegerScalarOrVector()) {
                 x = b.Bitcast(uint_ty, x)->Result(0);
             }
             auto* b16 = b.Call(uint_ty, core::BuiltinFn::kSelect, V(0), V(16),
@@ -520,7 +520,7 @@ struct State {
                 b.Or(uint_ty, b16, b.Or(uint_ty, b8, b.Or(uint_ty, b4, b.Or(uint_ty, b2, b1))));
             result = b.Call(uint_ty, core::BuiltinFn::kSelect, result, V(0xffffffff),
                             b.Equal(bool_ty, x, V(0)));
-            if (result_ty->is_signed_integer_scalar_or_vector()) {
+            if (result_ty->IsSignedIntegerScalarOrVector()) {
                 result = b.Bitcast(result_ty, result);
             }
             result->SetResults(Vector{call->DetachResult()});

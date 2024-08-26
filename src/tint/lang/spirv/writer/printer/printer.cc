@@ -1100,54 +1100,54 @@ class Printer {
         spv::Op op = spv::Op::Max;
         switch (binary->Op()) {
             case core::BinaryOp::kAdd: {
-                op = ty->is_integer_scalar_or_vector() ? spv::Op::OpIAdd : spv::Op::OpFAdd;
+                op = ty->IsIntegerScalarOrVector() ? spv::Op::OpIAdd : spv::Op::OpFAdd;
                 break;
             }
             case core::BinaryOp::kDivide: {
-                if (ty->is_signed_integer_scalar_or_vector()) {
+                if (ty->IsSignedIntegerScalarOrVector()) {
                     op = spv::Op::OpSDiv;
-                } else if (ty->is_unsigned_integer_scalar_or_vector()) {
+                } else if (ty->IsUnsignedIntegerScalarOrVector()) {
                     op = spv::Op::OpUDiv;
-                } else if (ty->is_float_scalar_or_vector()) {
+                } else if (ty->IsFloatScalarOrVector()) {
                     op = spv::Op::OpFDiv;
                 }
                 break;
             }
             case core::BinaryOp::kMultiply: {
-                if (ty->is_integer_scalar_or_vector()) {
+                if (ty->IsIntegerScalarOrVector()) {
                     op = spv::Op::OpIMul;
-                } else if (ty->is_float_scalar_or_vector()) {
+                } else if (ty->IsFloatScalarOrVector()) {
                     op = spv::Op::OpFMul;
                 }
                 break;
             }
             case core::BinaryOp::kSubtract: {
-                op = ty->is_integer_scalar_or_vector() ? spv::Op::OpISub : spv::Op::OpFSub;
+                op = ty->IsIntegerScalarOrVector() ? spv::Op::OpISub : spv::Op::OpFSub;
                 break;
             }
             case core::BinaryOp::kModulo: {
-                if (ty->is_signed_integer_scalar_or_vector()) {
+                if (ty->IsSignedIntegerScalarOrVector()) {
                     op = spv::Op::OpSRem;
-                } else if (ty->is_unsigned_integer_scalar_or_vector()) {
+                } else if (ty->IsUnsignedIntegerScalarOrVector()) {
                     op = spv::Op::OpUMod;
-                } else if (ty->is_float_scalar_or_vector()) {
+                } else if (ty->IsFloatScalarOrVector()) {
                     op = spv::Op::OpFRem;
                 }
                 break;
             }
 
             case core::BinaryOp::kAnd: {
-                if (ty->is_integer_scalar_or_vector()) {
+                if (ty->IsIntegerScalarOrVector()) {
                     op = spv::Op::OpBitwiseAnd;
-                } else if (ty->is_bool_scalar_or_vector()) {
+                } else if (ty->IsBoolScalarOrVector()) {
                     op = spv::Op::OpLogicalAnd;
                 }
                 break;
             }
             case core::BinaryOp::kOr: {
-                if (ty->is_integer_scalar_or_vector()) {
+                if (ty->IsIntegerScalarOrVector()) {
                     op = spv::Op::OpBitwiseOr;
-                } else if (ty->is_bool_scalar_or_vector()) {
+                } else if (ty->IsBoolScalarOrVector()) {
                     op = spv::Op::OpLogicalOr;
                 }
                 break;
@@ -1162,70 +1162,70 @@ class Printer {
                 break;
             }
             case core::BinaryOp::kShiftRight: {
-                if (ty->is_signed_integer_scalar_or_vector()) {
+                if (ty->IsSignedIntegerScalarOrVector()) {
                     op = spv::Op::OpShiftRightArithmetic;
-                } else if (ty->is_unsigned_integer_scalar_or_vector()) {
+                } else if (ty->IsUnsignedIntegerScalarOrVector()) {
                     op = spv::Op::OpShiftRightLogical;
                 }
                 break;
             }
 
             case core::BinaryOp::kEqual: {
-                if (lhs_ty->is_bool_scalar_or_vector()) {
+                if (lhs_ty->IsBoolScalarOrVector()) {
                     op = spv::Op::OpLogicalEqual;
-                } else if (lhs_ty->is_float_scalar_or_vector()) {
+                } else if (lhs_ty->IsFloatScalarOrVector()) {
                     op = spv::Op::OpFOrdEqual;
-                } else if (lhs_ty->is_integer_scalar_or_vector()) {
+                } else if (lhs_ty->IsIntegerScalarOrVector()) {
                     op = spv::Op::OpIEqual;
                 }
                 break;
             }
             case core::BinaryOp::kNotEqual: {
-                if (lhs_ty->is_bool_scalar_or_vector()) {
+                if (lhs_ty->IsBoolScalarOrVector()) {
                     op = spv::Op::OpLogicalNotEqual;
-                } else if (lhs_ty->is_float_scalar_or_vector()) {
+                } else if (lhs_ty->IsFloatScalarOrVector()) {
                     op = spv::Op::OpFOrdNotEqual;
-                } else if (lhs_ty->is_integer_scalar_or_vector()) {
+                } else if (lhs_ty->IsIntegerScalarOrVector()) {
                     op = spv::Op::OpINotEqual;
                 }
                 break;
             }
             case core::BinaryOp::kGreaterThan: {
-                if (lhs_ty->is_float_scalar_or_vector()) {
+                if (lhs_ty->IsFloatScalarOrVector()) {
                     op = spv::Op::OpFOrdGreaterThan;
-                } else if (lhs_ty->is_signed_integer_scalar_or_vector()) {
+                } else if (lhs_ty->IsSignedIntegerScalarOrVector()) {
                     op = spv::Op::OpSGreaterThan;
-                } else if (lhs_ty->is_unsigned_integer_scalar_or_vector()) {
+                } else if (lhs_ty->IsUnsignedIntegerScalarOrVector()) {
                     op = spv::Op::OpUGreaterThan;
                 }
                 break;
             }
             case core::BinaryOp::kGreaterThanEqual: {
-                if (lhs_ty->is_float_scalar_or_vector()) {
+                if (lhs_ty->IsFloatScalarOrVector()) {
                     op = spv::Op::OpFOrdGreaterThanEqual;
-                } else if (lhs_ty->is_signed_integer_scalar_or_vector()) {
+                } else if (lhs_ty->IsSignedIntegerScalarOrVector()) {
                     op = spv::Op::OpSGreaterThanEqual;
-                } else if (lhs_ty->is_unsigned_integer_scalar_or_vector()) {
+                } else if (lhs_ty->IsUnsignedIntegerScalarOrVector()) {
                     op = spv::Op::OpUGreaterThanEqual;
                 }
                 break;
             }
             case core::BinaryOp::kLessThan: {
-                if (lhs_ty->is_float_scalar_or_vector()) {
+                if (lhs_ty->IsFloatScalarOrVector()) {
                     op = spv::Op::OpFOrdLessThan;
-                } else if (lhs_ty->is_signed_integer_scalar_or_vector()) {
+                } else if (lhs_ty->IsSignedIntegerScalarOrVector()) {
                     op = spv::Op::OpSLessThan;
-                } else if (lhs_ty->is_unsigned_integer_scalar_or_vector()) {
+                } else if (lhs_ty->IsUnsignedIntegerScalarOrVector()) {
                     op = spv::Op::OpULessThan;
                 }
                 break;
             }
             case core::BinaryOp::kLessThanEqual: {
-                if (lhs_ty->is_float_scalar_or_vector()) {
+                if (lhs_ty->IsFloatScalarOrVector()) {
                     op = spv::Op::OpFOrdLessThanEqual;
-                } else if (lhs_ty->is_signed_integer_scalar_or_vector()) {
+                } else if (lhs_ty->IsSignedIntegerScalarOrVector()) {
                     op = spv::Op::OpSLessThanEqual;
-                } else if (lhs_ty->is_unsigned_integer_scalar_or_vector()) {
+                } else if (lhs_ty->IsUnsignedIntegerScalarOrVector()) {
                     op = spv::Op::OpULessThanEqual;
                 }
                 break;
@@ -1390,7 +1390,7 @@ class Printer {
         auto* result_ty = builtin->Result(0)->Type();
 
         if (builtin->Func() == core::BuiltinFn::kAbs &&
-            result_ty->is_unsigned_integer_scalar_or_vector()) {
+            result_ty->IsUnsignedIntegerScalarOrVector()) {
             // abs() is a no-op for unsigned integers.
             values_.Add(builtin->Result(0), Value(builtin->Args()[0]));
             return;
@@ -1427,9 +1427,9 @@ class Printer {
         // Determine the opcode.
         switch (builtin->Func()) {
             case core::BuiltinFn::kAbs:
-                if (result_ty->is_float_scalar_or_vector()) {
+                if (result_ty->IsFloatScalarOrVector()) {
                     glsl_ext_inst(GLSLstd450FAbs);
-                } else if (result_ty->is_signed_integer_scalar_or_vector()) {
+                } else if (result_ty->IsSignedIntegerScalarOrVector()) {
                     glsl_ext_inst(GLSLstd450SAbs);
                 }
                 break;
@@ -1461,11 +1461,11 @@ class Printer {
                 glsl_ext_inst(GLSLstd450Atanh);
                 break;
             case core::BuiltinFn::kClamp:
-                if (result_ty->is_float_scalar_or_vector()) {
+                if (result_ty->IsFloatScalarOrVector()) {
                     glsl_ext_inst(GLSLstd450NClamp);
-                } else if (result_ty->is_unsigned_integer_scalar_or_vector()) {
+                } else if (result_ty->IsUnsignedIntegerScalarOrVector()) {
                     glsl_ext_inst(GLSLstd450UClamp);
-                } else if (result_ty->is_signed_integer_scalar_or_vector()) {
+                } else if (result_ty->IsSignedIntegerScalarOrVector()) {
                     glsl_ext_inst(GLSLstd450SClamp);
                 }
                 break;
@@ -1522,8 +1522,8 @@ class Printer {
                 glsl_ext_inst(GLSLstd450Exp2);
                 break;
             case core::BuiltinFn::kExtractBits:
-                op = result_ty->is_signed_integer_scalar_or_vector() ? spv::Op::OpBitFieldSExtract
-                                                                     : spv::Op::OpBitFieldUExtract;
+                op = result_ty->IsSignedIntegerScalarOrVector() ? spv::Op::OpBitFieldSExtract
+                                                                : spv::Op::OpBitFieldUExtract;
                 break;
             case core::BuiltinFn::kFaceForward:
                 glsl_ext_inst(GLSLstd450FaceForward);
@@ -1570,20 +1570,20 @@ class Printer {
                 glsl_ext_inst(GLSLstd450Log2);
                 break;
             case core::BuiltinFn::kMax:
-                if (result_ty->is_float_scalar_or_vector()) {
+                if (result_ty->IsFloatScalarOrVector()) {
                     glsl_ext_inst(GLSLstd450FMax);
-                } else if (result_ty->is_signed_integer_scalar_or_vector()) {
+                } else if (result_ty->IsSignedIntegerScalarOrVector()) {
                     glsl_ext_inst(GLSLstd450SMax);
-                } else if (result_ty->is_unsigned_integer_scalar_or_vector()) {
+                } else if (result_ty->IsUnsignedIntegerScalarOrVector()) {
                     glsl_ext_inst(GLSLstd450UMax);
                 }
                 break;
             case core::BuiltinFn::kMin:
-                if (result_ty->is_float_scalar_or_vector()) {
+                if (result_ty->IsFloatScalarOrVector()) {
                     glsl_ext_inst(GLSLstd450FMin);
-                } else if (result_ty->is_signed_integer_scalar_or_vector()) {
+                } else if (result_ty->IsSignedIntegerScalarOrVector()) {
                     glsl_ext_inst(GLSLstd450SMin);
-                } else if (result_ty->is_unsigned_integer_scalar_or_vector()) {
+                } else if (result_ty->IsUnsignedIntegerScalarOrVector()) {
                     glsl_ext_inst(GLSLstd450UMin);
                 }
                 break;
@@ -1662,9 +1662,9 @@ class Printer {
                 glsl_ext_inst(GLSLstd450RoundEven);
                 break;
             case core::BuiltinFn::kSign:
-                if (result_ty->is_float_scalar_or_vector()) {
+                if (result_ty->IsFloatScalarOrVector()) {
                     glsl_ext_inst(GLSLstd450FSign);
-                } else if (result_ty->is_signed_integer_scalar_or_vector()) {
+                } else if (result_ty->IsSignedIntegerScalarOrVector()) {
                     glsl_ext_inst(GLSLstd450SSign);
                 }
                 break;
@@ -1694,29 +1694,29 @@ class Printer {
                 break;
             case core::BuiltinFn::kSubgroupAdd:
                 module_.PushCapability(SpvCapabilityGroupNonUniformArithmetic);
-                op = result_ty->is_integer_scalar_or_vector() ? spv::Op::OpGroupNonUniformIAdd
-                                                              : spv::Op::OpGroupNonUniformFAdd;
+                op = result_ty->IsIntegerScalarOrVector() ? spv::Op::OpGroupNonUniformIAdd
+                                                          : spv::Op::OpGroupNonUniformFAdd;
                 operands.push_back(Constant(ir_.constant_values.Get(u32(spv::Scope::Subgroup))));
                 operands.push_back(U32Operand(u32(spv::GroupOperation::Reduce)));
                 break;
             case core::BuiltinFn::kSubgroupExclusiveAdd:
                 module_.PushCapability(SpvCapabilityGroupNonUniformArithmetic);
-                op = result_ty->is_integer_scalar_or_vector() ? spv::Op::OpGroupNonUniformIAdd
-                                                              : spv::Op::OpGroupNonUniformFAdd;
+                op = result_ty->IsIntegerScalarOrVector() ? spv::Op::OpGroupNonUniformIAdd
+                                                          : spv::Op::OpGroupNonUniformFAdd;
                 operands.push_back(Constant(ir_.constant_values.Get(u32(spv::Scope::Subgroup))));
                 operands.push_back(U32Operand(u32(spv::GroupOperation::ExclusiveScan)));
                 break;
             case core::BuiltinFn::kSubgroupMul:
                 module_.PushCapability(SpvCapabilityGroupNonUniformArithmetic);
-                op = result_ty->is_integer_scalar_or_vector() ? spv::Op::OpGroupNonUniformIMul
-                                                              : spv::Op::OpGroupNonUniformFMul;
+                op = result_ty->IsIntegerScalarOrVector() ? spv::Op::OpGroupNonUniformIMul
+                                                          : spv::Op::OpGroupNonUniformFMul;
                 operands.push_back(Constant(ir_.constant_values.Get(u32(spv::Scope::Subgroup))));
                 operands.push_back(U32Operand(u32(spv::GroupOperation::Reduce)));
                 break;
             case core::BuiltinFn::kSubgroupExclusiveMul:
                 module_.PushCapability(SpvCapabilityGroupNonUniformArithmetic);
-                op = result_ty->is_integer_scalar_or_vector() ? spv::Op::OpGroupNonUniformIMul
-                                                              : spv::Op::OpGroupNonUniformFMul;
+                op = result_ty->IsIntegerScalarOrVector() ? spv::Op::OpGroupNonUniformIMul
+                                                          : spv::Op::OpGroupNonUniformFMul;
                 operands.push_back(Constant(ir_.constant_values.Get(u32(spv::Scope::Subgroup))));
                 operands.push_back(U32Operand(u32(spv::GroupOperation::ExclusiveScan)));
                 break;
@@ -1780,12 +1780,12 @@ class Printer {
                 break;
             case core::BuiltinFn::kSubgroupMin:
                 module_.PushCapability(SpvCapabilityGroupNonUniformArithmetic);
-                if (result_ty->is_float_scalar_or_vector()) {
+                if (result_ty->IsFloatScalarOrVector()) {
                     op = spv::Op::OpGroupNonUniformFMin;
-                } else if (result_ty->is_signed_integer_scalar_or_vector()) {
+                } else if (result_ty->IsSignedIntegerScalarOrVector()) {
                     op = spv::Op::OpGroupNonUniformSMin;
                 } else {
-                    TINT_ASSERT(result_ty->is_unsigned_integer_scalar_or_vector());
+                    TINT_ASSERT(result_ty->IsUnsignedIntegerScalarOrVector());
                     op = spv::Op::OpGroupNonUniformUMin;
                 }
                 operands.push_back(Constant(ir_.constant_values.Get(u32(spv::Scope::Subgroup))));
@@ -1793,12 +1793,12 @@ class Printer {
                 break;
             case core::BuiltinFn::kSubgroupMax:
                 module_.PushCapability(SpvCapabilityGroupNonUniformArithmetic);
-                if (result_ty->is_float_scalar_or_vector()) {
+                if (result_ty->IsFloatScalarOrVector()) {
                     op = spv::Op::OpGroupNonUniformFMax;
-                } else if (result_ty->is_signed_integer_scalar_or_vector()) {
+                } else if (result_ty->IsSignedIntegerScalarOrVector()) {
                     op = spv::Op::OpGroupNonUniformSMax;
                 } else {
-                    TINT_ASSERT(result_ty->is_unsigned_integer_scalar_or_vector());
+                    TINT_ASSERT(result_ty->IsUnsignedIntegerScalarOrVector());
                     op = spv::Op::OpGroupNonUniformUMax;
                 }
                 operands.push_back(Constant(ir_.constant_values.Get(u32(spv::Scope::Subgroup))));
@@ -1913,31 +1913,28 @@ class Printer {
         }
 
         spv::Op op = spv::Op::Max;
-        if (res_ty->is_signed_integer_scalar_or_vector() && arg_ty->is_float_scalar_or_vector()) {
+        if (res_ty->IsSignedIntegerScalarOrVector() && arg_ty->IsFloatScalarOrVector()) {
             // float to signed int.
             op = spv::Op::OpConvertFToS;
-        } else if (res_ty->is_unsigned_integer_scalar_or_vector() &&
-                   arg_ty->is_float_scalar_or_vector()) {
+        } else if (res_ty->IsUnsignedIntegerScalarOrVector() && arg_ty->IsFloatScalarOrVector()) {
             // float to unsigned int.
             op = spv::Op::OpConvertFToU;
-        } else if (res_ty->is_float_scalar_or_vector() &&
-                   arg_ty->is_signed_integer_scalar_or_vector()) {
+        } else if (res_ty->IsFloatScalarOrVector() && arg_ty->IsSignedIntegerScalarOrVector()) {
             // signed int to float.
             op = spv::Op::OpConvertSToF;
-        } else if (res_ty->is_float_scalar_or_vector() &&
-                   arg_ty->is_unsigned_integer_scalar_or_vector()) {
+        } else if (res_ty->IsFloatScalarOrVector() && arg_ty->IsUnsignedIntegerScalarOrVector()) {
             // unsigned int to float.
             op = spv::Op::OpConvertUToF;
-        } else if (res_ty->is_float_scalar_or_vector() && arg_ty->is_float_scalar_or_vector() &&
+        } else if (res_ty->IsFloatScalarOrVector() && arg_ty->IsFloatScalarOrVector() &&
                    res_ty->Size() != arg_ty->Size()) {
             // float to float (different bitwidth).
             op = spv::Op::OpFConvert;
-        } else if (res_ty->is_integer_scalar_or_vector() && arg_ty->is_integer_scalar_or_vector() &&
+        } else if (res_ty->IsIntegerScalarOrVector() && arg_ty->IsIntegerScalarOrVector() &&
                    res_ty->Size() == arg_ty->Size()) {
             // int to int (same bitwidth, different signedness).
             op = spv::Op::OpBitcast;
-        } else if (res_ty->is_bool_scalar_or_vector()) {
-            if (arg_ty->is_integer_scalar_or_vector()) {
+        } else if (res_ty->IsBoolScalarOrVector()) {
+            if (arg_ty->IsIntegerScalarOrVector()) {
                 // int to bool.
                 op = spv::Op::OpINotEqual;
             } else {
@@ -1945,7 +1942,7 @@ class Printer {
                 op = spv::Op::OpFUnordNotEqual;
             }
             operands.push_back(ConstantNull(arg_ty));
-        } else if (arg_ty->is_bool_scalar_or_vector()) {
+        } else if (arg_ty->IsBoolScalarOrVector()) {
             // Select between constant one and zero, splatting them to vectors if necessary.
             core::ir::Constant* one = nullptr;
             core::ir::Constant* zero = nullptr;
@@ -2145,9 +2142,9 @@ class Printer {
                 op = spv::Op::OpNot;
                 break;
             case core::UnaryOp::kNegation:
-                if (ty->is_float_scalar_or_vector()) {
+                if (ty->IsFloatScalarOrVector()) {
                     op = spv::Op::OpFNegate;
-                } else if (ty->is_signed_integer_scalar_or_vector()) {
+                } else if (ty->IsSignedIntegerScalarOrVector()) {
                     op = spv::Op::OpSNegate;
                 }
                 break;

@@ -309,7 +309,7 @@ struct CanonicalizeEntryPointIO::State {
             // TODO(crbug.com/tint/1224): Remove this once a flat interpolation attribute is
             // required for integers.
             if (func_ast->PipelineStage() == PipelineStage::kFragment &&
-                type->is_integer_scalar_or_vector() && !HasAttribute<InterpolateAttribute>(attrs) &&
+                type->IsIntegerScalarOrVector() && !HasAttribute<InterpolateAttribute>(attrs) &&
                 (HasAttribute<LocationAttribute>(attrs) ||
                  cfg.shader_style == ShaderStyle::kSpirv)) {
                 attrs.Push(b.Interpolate(core::InterpolationType::kFlat,
@@ -403,7 +403,7 @@ struct CanonicalizeEntryPointIO::State {
         // for integers.
         if (cfg.shader_style == ShaderStyle::kSpirv &&
             func_ast->PipelineStage() == PipelineStage::kVertex &&
-            type->is_integer_scalar_or_vector() && HasAttribute<LocationAttribute>(attrs) &&
+            type->IsIntegerScalarOrVector() && HasAttribute<LocationAttribute>(attrs) &&
             !HasAttribute<InterpolateAttribute>(attrs)) {
             attrs.Push(b.Interpolate(core::InterpolationType::kFlat,
                                      core::InterpolationSampling::kUndefined));
