@@ -442,5 +442,14 @@ TEST_F(CommandBufferValidationTest, EncodeAfterDeviceDestroyed) {
     }
 }
 
+// Test that an error is produced when encoding happens after ending a pass.
+TEST_F(CommandBufferValidationTest, EncodeAfterEndingPass) {
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+    wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
+    pass.End();
+    pass.PushDebugGroup("Foo");
+    ASSERT_DEVICE_ERROR(encoder.Finish());
+}
+
 }  // anonymous namespace
 }  // namespace dawn

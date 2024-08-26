@@ -115,11 +115,15 @@ class EncodingContext {
                     // change.
                     DAWN_INVALID_IF(encoder->IsError(), "Recording in an error %s.", encoder);
 
-                    // The top level encoder was used when a pass encoder was current.
-                    DAWN_ASSERT(mCurrentEncoder != mTopLevelEncoder);
+                    // This happens when the CommandEncoder is used while a pass is open.
+                    DAWN_INVALID_IF(encoder == mTopLevelEncoder,
+                                    "Recording in %s which is locked while %s is open.", encoder,
+                                    mCurrentEncoder);
+
+                    // The remaining case is when an encoder is ended but we still try to encode
+                    // commands in it.
                     return DAWN_VALIDATION_ERROR(
-                        "Command cannot be recorded while %s is locked and %s is currently open.",
-                        mTopLevelEncoder, mCurrentEncoder);
+                        "Commands cannot be recorded in %s which has already been ended.", encoder);
             }
         }
         return {};
