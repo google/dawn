@@ -66,6 +66,7 @@ absl_source_set("container") {
   deps = [
     ":algorithm",
     ":core_headers",
+    ":nullability",
     ":type_traits",
   ]
 }
@@ -111,6 +112,7 @@ absl_source_set("base") {
     ":cycleclock_internal",
     ":dynamic_annotations",
     ":log_severity",
+    ":nullability",
     ":raw_logging_internal",
     ":spinlock_wait",
     ":type_traits",
@@ -223,10 +225,7 @@ absl_source_set("nullability") {
 }
 
 absl_source_set("prefetch") {
-  public = [
-    "${dawn_abseil_dir}/absl/base/internal/prefetch.h",
-    "${dawn_abseil_dir}/absl/base/prefetch.h",
-  ]
+  public = [ "${dawn_abseil_dir}/absl/base/prefetch.h" ]
   deps = [
     ":config",
     ":core_headers",
@@ -340,9 +339,11 @@ absl_source_set("hash_function_defaults") {
   public =
       [ "${dawn_abseil_dir}/absl/container/internal/hash_function_defaults.h" ]
   deps = [
+    ":common",
     ":config",
     ":hash",
     ":string_view",
+    ":type_traits",
   ]
 }
 
@@ -396,6 +397,7 @@ absl_source_set("inlined_vector") {
 absl_source_set("inlined_vector_internal") {
   public = [ "${dawn_abseil_dir}/absl/container/internal/inlined_vector.h" ]
   deps = [
+    ":base_internal",
     ":compressed_tuple",
     ":config",
     ":core_headers",
@@ -714,7 +716,6 @@ absl_source_set("strings_internal") {
     "${dawn_abseil_dir}/absl/strings/internal/utf8.cc",
   ]
   public = [
-    "${dawn_abseil_dir}/absl/strings/internal/char_map.h",
     "${dawn_abseil_dir}/absl/strings/internal/escaping.h",
     "${dawn_abseil_dir}/absl/strings/internal/ostringstream.h",
     "${dawn_abseil_dir}/absl/strings/internal/resize_uninitialized.h",
@@ -740,7 +741,13 @@ absl_source_set("string_view") {
 
 absl_source_set("str_format") {
   public = [ "${dawn_abseil_dir}/absl/strings/str_format.h" ]
-  deps = [ ":str_format_internal" ]
+  deps = [
+    ":core_headers",
+    ":nullability",
+    ":span",
+    ":str_format_internal",
+    ":string_view",
+  ]
 }
 
 absl_source_set("str_format_internal") {
@@ -765,8 +772,12 @@ absl_source_set("str_format_internal") {
     ":bits",
     ":config",
     ":core_headers",
+    ":fixed_array",
     ":function_ref",
+    ":inlined_vector",
     ":int128",
+    ":span",
+    ":string_view",
     ":strings",
     ":type_traits",
     ":utility",

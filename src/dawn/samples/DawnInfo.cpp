@@ -33,7 +33,7 @@
 #include <string>
 #include <vector>
 
-#include "dawn/dawn_proc.h"
+#include "dawn/dawn_proc.h"  // nogncheck
 #include "dawn/native/DawnNative.h"
 
 namespace {

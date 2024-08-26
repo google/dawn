@@ -46,7 +46,7 @@
 
 #ifndef __EMSCRIPTEN__
 #include "GLFW/glfw3.h"
-#include "dawn/dawn_proc.h"
+#include "dawn/dawn_proc.h"  // nogncheck
 #include "dawn/native/DawnNative.h"
 #include "webgpu/webgpu_glfw.h"
 #else
