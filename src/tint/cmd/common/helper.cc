@@ -38,7 +38,6 @@
 #endif
 
 #if TINT_BUILD_WGSL_WRITER
-#include "src/tint/lang/wgsl/writer/ir_to_program/ir_to_program.h"
 #include "src/tint/lang/wgsl/writer/writer.h"
 #endif
 

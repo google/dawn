@@ -29,7 +29,6 @@
 
 #include "src/tint/api/tint.h"
 #include "src/tint/cmd/common/helper.h"
-#include "src/tint/lang/core/ir/module.h"
 
 #if TINT_BUILD_GLSL_WRITER
 #include "src/tint/lang/glsl/writer/helpers/generate_bindings.h"

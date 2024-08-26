@@ -29,6 +29,7 @@
 
 #include <utility>
 
+#include "src/tint/cmd/bench/inputs_bench.h"
 #include "src/tint/lang/wgsl/reader/reader.h"
 
 namespace tint::bench {

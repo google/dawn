@@ -54,7 +54,6 @@ tint_executable("info") {
     "${tint_src_dir}/lang/wgsl/inspector",
     "${tint_src_dir}/lang/wgsl/program",
     "${tint_src_dir}/lang/wgsl/sem",
-    "${tint_src_dir}/utils/command",
     "${tint_src_dir}/utils/containers",
     "${tint_src_dir}/utils/diagnostic",
     "${tint_src_dir}/utils/ice",
@@ -72,12 +71,5 @@ tint_executable("info") {
 
   if (tint_build_spv_reader) {
     deps += [ "${tint_src_dir}/lang/spirv/reader/common" ]
-  }
-
-  if (tint_build_spv_reader || tint_build_spv_writer) {
-    deps += [
-      "${tint_spirv_tools_dir}:spvtools_headers",
-      "${tint_spirv_tools_dir}:spvtools_val",
-    ]
   }
 }

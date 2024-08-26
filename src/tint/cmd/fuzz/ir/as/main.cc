@@ -29,7 +29,6 @@
 #include <iostream>
 #include <memory>
 #include <string>
-#include "src/tint/lang/wgsl/sem/variable.h"
 
 #include "src/tint/api/tint.h"
 #include "src/tint/cmd/common/helper.h"
@@ -39,7 +38,6 @@
 #include "src/tint/lang/core/ir/validator.h"
 #include "src/tint/lang/wgsl/ast/module.h"
 #include "src/tint/lang/wgsl/helpers/apply_substitute_overrides.h"
-#include "src/tint/lang/wgsl/helpers/flatten_bindings.h"
 #include "src/tint/lang/wgsl/reader/reader.h"
 #include "src/tint/utils/cli/cli.h"
 #include "src/tint/utils/containers/transform.h"

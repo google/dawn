@@ -30,13 +30,11 @@
 
 #include <memory>
 #include <string>
-#include <variant>
 
-#include "benchmark/benchmark.h"
-#include "src/tint/cmd/bench/inputs_bench.h"
+#include "benchmark/benchmark.h"              // IWYU pragma: export
+#include "src/tint/cmd/bench/inputs_bench.h"  // IWYU pragma: export
 #include "src/tint/lang/wgsl/program/program.h"
 #include "src/tint/utils/macros/compiler.h"
-#include "src/tint/utils/macros/concat.h"
 #include "src/tint/utils/result/result.h"
 
 namespace tint::bench {

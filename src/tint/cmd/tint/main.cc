@@ -43,7 +43,6 @@
 #include "src/tint/api/tint.h"
 #include "src/tint/cmd/common/helper.h"
 #include "src/tint/lang/core/ir/disassembler.h"
-#include "src/tint/lang/core/ir/module.h"
 #include "src/tint/lang/wgsl/ast/module.h"
 #include "src/tint/lang/wgsl/ast/transform/first_index_offset.h"
 #include "src/tint/lang/wgsl/ast/transform/manager.h"
@@ -57,21 +56,16 @@
 #include "src/tint/utils/containers/transform.h"
 #include "src/tint/utils/diagnostic/formatter.h"
 #include "src/tint/utils/macros/defer.h"
-#include "src/tint/utils/system/env.h"
-#include "src/tint/utils/system/terminal.h"
 #include "src/tint/utils/text/string.h"
 #include "src/tint/utils/text/string_stream.h"
 #include "src/tint/utils/text/styled_text.h"
 #include "src/tint/utils/text/styled_text_printer.h"
-#include "src/tint/utils/text/styled_text_theme.h"
 
 #if TINT_BUILD_WGSL_READER
 #include "src/tint/lang/wgsl/reader/program_to_ir/program_to_ir.h"
 #include "src/tint/lang/wgsl/reader/reader.h"
 
 #if TINT_BUILD_IR_BINARY
-#include "src/tint/lang/core/ir/binary/encode.h"
-#include "src/tint/lang/core/ir/validator.h"
 #include "src/tint/lang/wgsl/helpers/apply_substitute_overrides.h"
 #endif  // TINT_BUILD_IR_BINARY
 

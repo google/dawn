@@ -27,12 +27,10 @@
 
 #include <iostream>
 #include <string>
-#include <unordered_map>
 
 #include "src/tint/cmd/fuzz/wgsl/fuzz.h"
 #include "src/tint/utils/cli/cli.h"
 #include "src/tint/utils/command/command.h"
-#include "src/tint/utils/macros/defer.h"
 #include "src/tint/utils/text/base64.h"
 #include "src/tint/utils/text/string.h"
 

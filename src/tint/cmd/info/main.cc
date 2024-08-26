@@ -30,16 +30,9 @@
 
 #include "src/tint/utils/text/styled_text_printer.h"
 
-#if TINT_BUILD_SPV_READER
-#include "spirv-tools/libspirv.hpp"
-#endif  // TINT_BUILD_SPV_READER
-
 #include "src/tint/cmd/common/helper.h"
 #include "src/tint/lang/core/type/struct.h"
-#include "src/tint/lang/wgsl/ast/module.h"
 #include "src/tint/lang/wgsl/inspector/entry_point.h"
-#include "src/tint/utils/command/command.h"
-#include "src/tint/utils/containers/transform.h"
 #include "src/tint/utils/text/string.h"
 
 namespace {
