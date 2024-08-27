@@ -101,6 +101,7 @@ endif(TINT_BUILD_SPV_WRITER AND TINT_BUILD_WGSL_READER)
 if(TINT_BUILD_WGSL_READER)
   tint_target_add_dependencies(tint_cmd_bench_bench_cmd bench_cmd
     tint_cmd_bench_bench
+    tint_lang_core_ir_bench
     tint_lang_wgsl_reader_bench
   )
 endif(TINT_BUILD_WGSL_READER)

@@ -132,6 +132,7 @@ cc_binary(
   }) + select({
     ":tint_build_wgsl_reader": [
       "//src/tint/cmd/bench:bench",
+      "//src/tint/lang/core/ir:bench",
       "//src/tint/lang/wgsl/reader:bench",
     ],
     "//conditions:default": [],
