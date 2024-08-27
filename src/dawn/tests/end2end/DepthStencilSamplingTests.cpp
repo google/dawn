@@ -690,7 +690,7 @@ TEST_P(DepthStencilSamplingTest, CheckDepthTextureRange) {
     pDesc1.cTargets[0].format = wgpu::TextureFormat::R32Float;
     pDesc1.primitive.topology = wgpu::PrimitiveTopology::PointList;
     pDesc1.EnableDepthStencil(wgpu::TextureFormat::Depth24PlusStencil8);
-    pDesc1.cDepthStencil.depthWriteEnabled = true;
+    pDesc1.cDepthStencil.depthWriteEnabled = wgpu::OptionalBool::True;
     wgpu::RenderPipeline pipeline1 = device.CreateRenderPipeline(&pDesc1);
 
     // The second pipeline checks the depth texture and outputs 1 to a texel on success.

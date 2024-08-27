@@ -202,7 +202,7 @@ TEST_F(CompatValidationTest, CanNotCreatePipelineWithNonZeroDepthBiasClamp) {
 
     wgpu::DepthStencilState* depthStencil =
         testDescriptor.EnableDepthStencil(wgpu::TextureFormat::Depth24Plus);
-    depthStencil->depthWriteEnabled = true;
+    depthStencil->depthWriteEnabled = wgpu::OptionalBool::True;
     depthStencil->depthBias = 0;
     depthStencil->depthBiasSlopeScale = 0;
 

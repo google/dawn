@@ -168,6 +168,7 @@ ResultOrError<RenderPipelineBase*> GetOrCreateApplyClearValueWithDrawPipeline(
     renderPipelineDesc.fragment = &fragment;
     renderPipelineDesc.multisample.count = key.sampleCount;
     DepthStencilState depthStencilState = {};
+    depthStencilState.depthWriteEnabled = false;
     if (key.depthStencilFormat != wgpu::TextureFormat::Undefined) {
         depthStencilState.format = key.depthStencilFormat;
         renderPipelineDesc.depthStencil = &depthStencilState;

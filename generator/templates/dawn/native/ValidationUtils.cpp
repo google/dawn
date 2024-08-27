@@ -36,9 +36,9 @@ namespace {{native_namespace}} {
     {% set namespace = metadata.namespace %}
     {% for type in by_category["enum"] %}
         MaybeError Validate{{type.name.CamelCase()}}({{namespace}}::{{as_cppType(type.name)}} value) {
-            switch (value) {
+            switch ({{as_cType(type.name)}}(value)) {
                 {% for value in type.values if value.valid %}
-                    case {{namespace}}::{{as_cppType(type.name)}}::{{as_cppEnum(value.name)}}:
+                    case {{as_cEnum(type.name, value.name)}}:
                         return {};
                 {% endfor %}
                 default:

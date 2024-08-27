@@ -39,7 +39,7 @@
 
 namespace {{metadata.namespace}} {
 
-  {% for type in by_category["enum"] %}
+  {% for type in by_category["enum"] if type.name.get() != "optional bool" %}
       template <typename CharT, typename Traits>
       std::basic_ostream<CharT, Traits>& operator<<(std::basic_ostream<CharT, Traits>& o, {{as_cppType(type.name)}} value) {
           switch (value) {

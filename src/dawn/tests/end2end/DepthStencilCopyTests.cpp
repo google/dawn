@@ -216,7 +216,7 @@ class DepthStencilCopyTests : public DawnTestWithParams<DepthStencilCopyTestPara
                 @fragment fn main() {}
             )");
         } else {
-            depthStencil->depthWriteEnabled = true;
+            depthStencil->depthWriteEnabled = wgpu::OptionalBool::True;
             renderPipelineDesc.cFragment.module = utils::CreateShaderModule(device, std::string(R"(
                 @fragment fn main() -> @builtin(frag_depth) f32 {
                     return )" + std::to_string(regionDepth) + R"(;
@@ -1109,7 +1109,7 @@ class StencilCopyTests : public DepthStencilCopyTests {
                 renderPipelineDesc.EnableDepthStencil(GetParam().mTextureFormat);
             depthStencil->stencilFront.passOp = wgpu::StencilOperation::DecrementClamp;
             if (!hasDepth) {
-                depthStencil->depthWriteEnabled = false;
+                depthStencil->depthWriteEnabled = wgpu::OptionalBool::False;
                 depthStencil->depthCompare = wgpu::CompareFunction::Always;
             }
 
