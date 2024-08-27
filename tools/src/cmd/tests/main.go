@@ -229,7 +229,7 @@ func run() error {
 		formats = allOutputFormats
 	} else {
 		for _, f := range strings.Split(formatList, ",") {
-			parsed, err := parseOutputFormats(strings.TrimSpace(f))
+			parsed, err := parseOutputFormat(strings.TrimSpace(f))
 			if err != nil {
 				return err
 			}
@@ -675,15 +675,17 @@ func (j job) run(cfg runConfig) {
 
 		useIr := j.format == hlslDXCIR || j.format == hlslFXCIR || j.format == mslIR
 
-		if useIr {
-			expectedFilePath += "ir."
-		}
-
 		switch j.format {
 		case hlslDXC:
 			expectedFilePath += "dxc.hlsl"
+		case hlslDXCIR:
+			expectedFilePath += "ir.dxc.hlsl"
 		case hlslFXC:
 			expectedFilePath += "fxc.hlsl"
+		case hlslFXCIR:
+			expectedFilePath += "ir.fxc.hlsl"
+		case mslIR:
+			expectedFilePath += "ir.msl"
 		default:
 			expectedFilePath += string(j.format)
 		}
@@ -995,11 +997,18 @@ func parseFlags(path string) ([]cmdLineFlags, error) {
 		if len(m) == 3 {
 			formats := allOutputFormats
 			if m[1] != "" {
-				fmts, err := parseOutputFormats(strings.Trim(m[1], "[]"))
+				matchedFormat := strings.Trim(m[1], "[]")
+				fmts, err := parseOutputFormat(matchedFormat)
 				if err != nil {
 					return nil, err
 				}
 				formats = fmts
+
+				// Apply the same flags to "-ir" format, if it exists
+				fmts, err = parseOutputFormat(matchedFormat + "-ir")
+				if err == nil {
+					formats = append(formats, fmts...)
+				}
 			}
 			out = append(out, cmdLineFlags{
 				formats: container.NewSet(formats...),
@@ -1014,8 +1023,9 @@ func parseFlags(path string) ([]cmdLineFlags, error) {
 	return out, nil
 }
 
-// parseOutputFormats parses the outputFormat(s) from s.
-func parseOutputFormats(s string) ([]outputFormat, error) {
+// parseOutputFormat parses the outputFormat(s) from s, and
+// returns an array of the single parsed format.
+func parseOutputFormat(s string) ([]outputFormat, error) {
 	switch s {
 	case "wgsl":
 		return []outputFormat{wgsl}, nil

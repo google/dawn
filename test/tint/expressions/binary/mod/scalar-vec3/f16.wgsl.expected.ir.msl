@@ -1,8 +1,40 @@
-#include <metal_stdlib>
-using namespace metal;
+SKIP: FAILED
 
-kernel void f() {
-  half const a = 4.0h;
-  half3 const b = half3(1.0h, 2.0h, 3.0h);
-  half3 const r = fmod(a, b);
+
+enable f16;
+
+@compute @workgroup_size(1)
+fn f() {
+  let a = 4.0h;
+  let b = vec3<f16>(1.0h, 2.0h, 3.0h);
+  let r : vec3<f16> = (a % b);
 }
+
+Failed to generate: :5:20 error: msl.fmod: no matching call to 'msl.fmod(f16, vec3<f16>)'
+
+2 candidate functions:
+ • 'msl.fmod(T  ✓ , T  ✗ ) -> T' where:
+      ✓  'T' is 'f32' or 'f16'
+ • 'msl.fmod(vecN<T>  ✗ , vecN<T>  ✓ ) -> vecN<T>' where:
+      ✓  'T' is 'f32' or 'f16'
+
+    %4:vec3<f16> = msl.fmod %a, %b
+                   ^^^^^^^^
+
+:2:3 note: in block
+  $B1: {
+  ^^^
+
+note: # Disassembly
+%f = @compute @workgroup_size(1, 1, 1) func():void {
+  $B1: {
+    %a:f16 = let 4.0h
+    %b:vec3<f16> = let vec3<f16>(1.0h, 2.0h, 3.0h)
+    %4:vec3<f16> = msl.fmod %a, %b
+    %r:vec3<f16> = let %4
+    ret
+  }
+}
+
+
+tint executable returned error: exit status 1
