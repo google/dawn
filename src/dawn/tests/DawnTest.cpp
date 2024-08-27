@@ -874,7 +874,8 @@ bool DawnTestBase::IsNvidia() const {
 }
 
 bool DawnTestBase::IsQualcomm() const {
-    return gpu_info::IsQualcomm(mParam.adapterProperties.vendorID);
+    return gpu_info::IsQualcomm_PCI(mParam.adapterProperties.vendorID) ||
+           gpu_info::IsQualcomm_ACPI(mParam.adapterProperties.vendorID);
 }
 
 bool DawnTestBase::IsSwiftshader() const {

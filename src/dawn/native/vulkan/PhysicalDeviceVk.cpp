@@ -830,7 +830,7 @@ FeatureValidationResult PhysicalDevice::ValidateFeatureSupportedWithTogglesImpl(
 // Android devices with Qualcomm GPUs have a myriad of known issues. (dawn:1549)
 bool PhysicalDevice::IsAndroidQualcomm() const {
 #if DAWN_PLATFORM_IS(ANDROID)
-    return gpu_info::IsQualcomm(GetVendorId());
+    return gpu_info::IsQualcomm_PCI(GetVendorId());
 #else
     return false;
 #endif

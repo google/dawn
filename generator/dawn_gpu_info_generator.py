@@ -147,7 +147,11 @@ class DeviceSet:
 class Vendor:
     def __init__(self, name, json_data):
         self.name = Name(name)
+        self.name_override = None
         self.id = json_data['id']
+
+        if 'name_override' in json_data:
+            self.name_override = Name(json_data['name_override'])
 
         architecture_dict = {}
         internal_architecture_dict = {}

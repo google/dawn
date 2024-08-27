@@ -220,7 +220,8 @@
       }]
     },
 
-    "Qualcomm": {
+    "Qualcomm_PCI": {
+      "name_override": "Qualcomm",
       "id": "0x5143",
 
       "devices": [{
@@ -232,6 +233,11 @@
           "Adreno 7xx": ["0x07000000", "0x43000000"]
         }
       }]
+    },
+
+    "Qualcomm_ACPI": {
+      "name_override": "Qualcomm",
+      "id": "0x4D4F4351"
     },
 
     "Samsung": {

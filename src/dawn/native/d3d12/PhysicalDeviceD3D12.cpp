@@ -353,7 +353,7 @@ MaybeError PhysicalDevice::InitializeSupportedLimitsImpl(CombinedLimits* limits)
     // Max number of "constants" where each constant is a 16-byte float4
     limits->v1.maxUniformBufferBindingSize = D3D12_REQ_CONSTANT_BUFFER_ELEMENT_COUNT * 16;
 
-    if (gpu_info::IsQualcomm(GetVendorId())) {
+    if (gpu_info::IsQualcomm_ACPI(GetVendorId())) {
         // limit of number of texels in a buffer == (1 << 27)
         // D3D12_REQ_BUFFER_RESOURCE_TEXEL_COUNT_2_TO_EXP
         // This limit doesn't apply to a raw buffer, but only applies to

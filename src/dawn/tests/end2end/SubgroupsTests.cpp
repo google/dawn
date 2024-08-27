@@ -501,8 +501,8 @@ TEST_P(SubgroupsBroadcastTests, SubgroupBroadcast) {
 
     // TODO(351745820): Suppress the test for Qualcomm Adreno 6xx until we figure out why creating
     // compute pipeline with subgroupBroadcast shader fails on trybots using these devices.
-    DAWN_SUPPRESS_TEST_IF(gpu_info::IsQualcommAdreno6xx(GetParam().adapterProperties.vendorID,
-                                                        GetParam().adapterProperties.deviceID));
+    DAWN_SUPPRESS_TEST_IF(gpu_info::IsQualcomm_PCIAdreno6xx(GetParam().adapterProperties.vendorID,
+                                                            GetParam().adapterProperties.deviceID));
 
     for (uint32_t workgroupSize : {1, 2, 3, 4, 7, 8, 15, 16, 31, 32, 63, 64, 127, 128, 255, 256}) {
         TestBroadcastSubgroupSize(workgroupSize);

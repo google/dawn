@@ -55,7 +55,7 @@ const Vendor kVendors[] = {{"ATI", gpu_info::kVendorID_AMD},
                            {"Imagination", gpu_info::kVendorID_ImgTec},
                            {"Intel", gpu_info::kVendorID_Intel},
                            {"NVIDIA", gpu_info::kVendorID_Nvidia},
-                           {"Qualcomm", gpu_info::kVendorID_Qualcomm}};
+                           {"Qualcomm", gpu_info::kVendorID_Qualcomm_PCI}};
 
 uint32_t GetVendorIdFromVendors(const char* vendor) {
     uint32_t vendorId = 0;
