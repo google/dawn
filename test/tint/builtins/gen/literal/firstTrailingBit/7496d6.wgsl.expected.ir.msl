@@ -2,7 +2,7 @@
 using namespace metal;
 
 struct tint_module_vars_struct {
-  device int3* prevent_dce;
+  device packed_int3* prevent_dce;
 };
 
 struct VertexOutput {
@@ -20,14 +20,14 @@ int3 firstTrailingBit_7496d6() {
   return res;
 }
 
-fragment void fragment_main(device int3* prevent_dce [[buffer(0)]]) {
+fragment void fragment_main(device packed_int3* prevent_dce [[buffer(0)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.prevent_dce=prevent_dce};
-  (*tint_module_vars.prevent_dce) = firstTrailingBit_7496d6();
+  (*tint_module_vars.prevent_dce) = packed_int3(firstTrailingBit_7496d6());
 }
 
-kernel void compute_main(device int3* prevent_dce [[buffer(0)]]) {
+kernel void compute_main(device packed_int3* prevent_dce [[buffer(0)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.prevent_dce=prevent_dce};
-  (*tint_module_vars.prevent_dce) = firstTrailingBit_7496d6();
+  (*tint_module_vars.prevent_dce) = packed_int3(firstTrailingBit_7496d6());
 }
 
 VertexOutput vertex_main_inner() {

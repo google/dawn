@@ -13,14 +13,14 @@ struct tint_array {
   T elements[N];
 };
 
-struct LightData {
+struct LightData_packed_vec3 {
   /* 0x0000 */ float4 position;
-  /* 0x0010 */ float3 color;
+  /* 0x0010 */ packed_float3 color;
   /* 0x001c */ float radius;
 };
 
-struct LightsBuffer {
-  /* 0x0000 */ tint_array<LightData, 1> lights;
+struct LightsBuffer_packed_vec3 {
+  /* 0x0000 */ tint_array<LightData_packed_vec3, 1> lights;
 };
 
 struct TileLightIdData {
@@ -50,7 +50,7 @@ struct Uniforms {
 };
 
 struct tint_module_vars_struct {
-  device LightsBuffer* lightsBuffer;
+  device LightsBuffer_packed_vec3* lightsBuffer;
   device Tiles* tileLightId;
   const constant Config* config;
   const constant Uniforms* uniforms;
@@ -181,7 +181,7 @@ void tint_symbol_inner(uint3 GlobalInvocationID, tint_module_vars_struct tint_mo
   }
 }
 
-kernel void tint_symbol(uint3 GlobalInvocationID [[thread_position_in_grid]], device LightsBuffer* lightsBuffer [[buffer(2)]], device Tiles* tileLightId [[buffer(3)]], const constant Config* config [[buffer(0)]], const constant Uniforms* uniforms [[buffer(1)]]) {
+kernel void tint_symbol(uint3 GlobalInvocationID [[thread_position_in_grid]], device LightsBuffer_packed_vec3* lightsBuffer [[buffer(2)]], device Tiles* tileLightId [[buffer(3)]], const constant Config* config [[buffer(0)]], const constant Uniforms* uniforms [[buffer(1)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.lightsBuffer=lightsBuffer, .tileLightId=tileLightId, .config=config, .uniforms=uniforms};
   tint_symbol_inner(GlobalInvocationID, tint_module_vars);
 }

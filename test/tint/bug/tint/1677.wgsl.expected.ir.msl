@@ -13,20 +13,20 @@ struct tint_array {
   T elements[N];
 };
 
-struct Input {
-  /* 0x0000 */ int3 position;
+struct Input_packed_vec3 {
+  /* 0x0000 */ packed_int3 position;
   /* 0x000c */ tint_array<int8_t, 4> tint_pad;
 };
 
 struct tint_module_vars_struct {
-  const device Input* input;
+  const device Input_packed_vec3* input;
 };
 
 void tint_symbol_inner(uint3 id, tint_module_vars_struct tint_module_vars) {
-  int3 const pos = ((*tint_module_vars.input).position - int3(0));
+  int3 const pos = (int3((*tint_module_vars.input).position) - int3(0));
 }
 
-kernel void tint_symbol(uint3 id [[thread_position_in_grid]], const device Input* input [[buffer(0)]]) {
+kernel void tint_symbol(uint3 id [[thread_position_in_grid]], const device Input_packed_vec3* input [[buffer(0)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.input=input};
   tint_symbol_inner(id, tint_module_vars);
 }

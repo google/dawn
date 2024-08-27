@@ -13,14 +13,14 @@ struct tint_array {
   T elements[N];
 };
 
-struct Uniforms {
+struct Uniforms_packed_vec3 {
   /* 0x0000 */ uint numTriangles;
   /* 0x0004 */ uint gridSize;
   /* 0x0008 */ uint puuuuuuuuuuuuuuuuad1;
   /* 0x000c */ uint pad2;
-  /* 0x0010 */ float3 bbMin;
+  /* 0x0010 */ packed_float3 bbMin;
   /* 0x001c */ tint_array<int8_t, 4> tint_pad;
-  /* 0x0020 */ float3 bbMax;
+  /* 0x0020 */ packed_float3 bbMax;
   /* 0x002c */ tint_array<int8_t, 4> tint_pad_1;
 };
 
@@ -56,7 +56,7 @@ struct Dbg {
 };
 
 struct tint_module_vars_struct {
-  const constant Uniforms* uniforms;
+  const constant Uniforms_packed_vec3* uniforms;
   device U32s* indices;
   device F32s* positions;
   device AU32s* counters;
@@ -137,7 +137,7 @@ void main_count_inner(uint3 GlobalInvocationID, tint_module_vars_struct tint_mod
   int triangleOffset = atomic_fetch_add_explicit((&(*tint_module_vars.LUT).values[i1]), 1, memory_order_relaxed);
 }
 
-kernel void main_count(uint3 GlobalInvocationID [[thread_position_in_grid]], const constant Uniforms* uniforms [[buffer(0)]], device U32s* indices [[buffer(3)]], device F32s* positions [[buffer(4)]], device AU32s* counters [[buffer(2)]], device AI32s* LUT [[buffer(5)]], device Dbg* dbg [[buffer(1)]]) {
+kernel void main_count(uint3 GlobalInvocationID [[thread_position_in_grid]], const constant Uniforms_packed_vec3* uniforms [[buffer(0)]], device U32s* indices [[buffer(3)]], device F32s* positions [[buffer(4)]], device AU32s* counters [[buffer(2)]], device AI32s* LUT [[buffer(5)]], device Dbg* dbg [[buffer(1)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.uniforms=uniforms, .indices=indices, .positions=positions, .counters=counters, .LUT=LUT, .dbg=dbg};
   main_count_inner(GlobalInvocationID, tint_module_vars);
 }

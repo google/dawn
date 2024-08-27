@@ -5,11 +5,11 @@ struct Scene {
   /* 0x0000 */ float4 vEyePosition;
 };
 
-struct Material {
+struct Material_packed_vec3 {
   /* 0x0000 */ float4 vDiffuseColor;
-  /* 0x0010 */ float3 vAmbientColor;
+  /* 0x0010 */ packed_float3 vAmbientColor;
   /* 0x001c */ float placeholder;
-  /* 0x0020 */ float3 vEmissiveColor;
+  /* 0x0020 */ packed_float3 vEmissiveColor;
   /* 0x002c */ float placeholder2;
 };
 
@@ -21,7 +21,7 @@ struct tint_module_vars_struct {
   thread float* fClipDistance3;
   thread float* fClipDistance4;
   const constant Scene* x_29;
-  const constant Material* x_49;
+  const constant Material_packed_vec3* x_49;
   const constant Mesh* x_137;
   thread float4* glFragColor;
   thread bool* continue_execution;
@@ -88,12 +88,12 @@ void main_1(tint_module_vars_struct tint_module_vars) {
   shadow = 1.0f;
   refractionColor = float4(0.0f, 0.0f, 0.0f, 1.0f);
   reflectionColor = float4(0.0f, 0.0f, 0.0f, 1.0f);
-  float3 const x_94 = (*tint_module_vars.x_49).vEmissiveColor;
+  float3 const x_94 = float3((*tint_module_vars.x_49).vEmissiveColor);
   emissiveColor = x_94;
   float3 const x_96 = diffuseBase;
   float3 const x_97 = diffuseColor;
   float3 const x_99 = emissiveColor;
-  float3 const x_103 = (*tint_module_vars.x_49).vAmbientColor;
+  float3 const x_103 = float3((*tint_module_vars.x_49).vAmbientColor);
   float4 const x_108 = baseColor;
   float3 const v_1 = clamp((((x_96 * x_97) + x_99) + x_103), float3(0.0f), float3(1.0f));
   finalDiffuse = (v_1 * float3(x_108[0u], x_108[1u], x_108[2u]));
@@ -129,7 +129,7 @@ main_out tint_symbol_inner(float fClipDistance3_param, float fClipDistance4_para
   return v_3;
 }
 
-fragment tint_symbol_outputs tint_symbol(tint_symbol_inputs inputs [[stage_in]], const constant Scene* x_29 [[buffer(0)]], const constant Material* x_49 [[buffer(1)]], const constant Mesh* x_137 [[buffer(2)]]) {
+fragment tint_symbol_outputs tint_symbol(tint_symbol_inputs inputs [[stage_in]], const constant Scene* x_29 [[buffer(0)]], const constant Material_packed_vec3* x_49 [[buffer(1)]], const constant Mesh* x_137 [[buffer(2)]]) {
   thread float fClipDistance3 = 0.0f;
   thread float fClipDistance4 = 0.0f;
   thread float4 glFragColor = 0.0f;

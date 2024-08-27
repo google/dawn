@@ -48,6 +48,7 @@
 #include "src/tint/lang/msl/writer/raise/binary_polyfill.h"
 #include "src/tint/lang/msl/writer/raise/builtin_polyfill.h"
 #include "src/tint/lang/msl/writer/raise/module_scope_vars.h"
+#include "src/tint/lang/msl/writer/raise/packed_vec3.h"
 #include "src/tint/lang/msl/writer/raise/shader_io.h"
 
 namespace tint::msl::writer {
@@ -125,6 +126,7 @@ Result<RaiseResult> Raise(core::ir::Module& module, const Options& options) {
     RUN_TRANSFORM(core::ir::transform::DemoteToHelper, module);
 
     RUN_TRANSFORM(raise::ShaderIO, module, raise::ShaderIOConfig{options.emit_vertex_point_size});
+    RUN_TRANSFORM(raise::PackedVec3, module);
     RUN_TRANSFORM(raise::ModuleScopeVars, module);
     RUN_TRANSFORM(raise::BinaryPolyfill, module);
     RUN_TRANSFORM(raise::BuiltinPolyfill, module);

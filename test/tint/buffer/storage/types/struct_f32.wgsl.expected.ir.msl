@@ -13,35 +13,55 @@ struct tint_array {
   T elements[N];
 };
 
-struct Inner {
+struct Inner_packed_vec3 {
   /* 0x0000 */ float scalar_f32;
   /* 0x0004 */ tint_array<int8_t, 12> tint_pad;
-  /* 0x0010 */ float3 vec3_f32;
+  /* 0x0010 */ packed_float3 vec3_f32;
   /* 0x001c */ tint_array<int8_t, 4> tint_pad_1;
   /* 0x0020 */ float2x4 mat2x4_f32;
 };
 
+struct Inner {
+  float scalar_f32;
+  float3 vec3_f32;
+  float2x4 mat2x4_f32;
+};
+
+struct S_packed_vec3 {
+  /* 0x0000 */ Inner_packed_vec3 inner;
+};
+
 struct S {
-  /* 0x0000 */ Inner inner;
+  Inner inner;
 };
 
 struct tint_module_vars_struct {
-  const device S* in;
-  device S* out;
+  const device S_packed_vec3* in;
+  device S_packed_vec3* out;
 };
 
-void tint_store_and_preserve_padding_1(device Inner* const target, Inner value_param) {
+void tint_store_and_preserve_padding_1(device Inner_packed_vec3* const target, Inner value_param) {
   (*target).scalar_f32 = value_param.scalar_f32;
-  (*target).vec3_f32 = value_param.vec3_f32;
+  (*target).vec3_f32 = packed_float3(value_param.vec3_f32);
   (*target).mat2x4_f32 = value_param.mat2x4_f32;
 }
 
-void tint_store_and_preserve_padding(device S* const target, S value_param) {
+void tint_store_and_preserve_padding(device S_packed_vec3* const target, S value_param) {
   tint_store_and_preserve_padding_1((&(*target).inner), value_param.inner);
 }
 
-kernel void tint_symbol(const device S* in [[buffer(1)]], device S* out [[buffer(0)]]) {
+Inner tint_load_struct_packed_vec3_1(const device Inner_packed_vec3* const from) {
+  float const v = (*from).scalar_f32;
+  float3 const v_1 = float3((*from).vec3_f32);
+  return Inner{.scalar_f32=v, .vec3_f32=v_1, .mat2x4_f32=(*from).mat2x4_f32};
+}
+
+S tint_load_struct_packed_vec3(const device S_packed_vec3* const from) {
+  return S{.inner=tint_load_struct_packed_vec3_1((&(*from).inner))};
+}
+
+kernel void tint_symbol(const device S_packed_vec3* in [[buffer(1)]], device S_packed_vec3* out [[buffer(0)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.in=in, .out=out};
-  S const t = (*tint_module_vars.in);
+  S const t = tint_load_struct_packed_vec3(tint_module_vars.in);
   tint_store_and_preserve_padding(tint_module_vars.out, t);
 }

@@ -13,18 +13,19 @@ struct tint_array {
   T elements[N];
 };
 
-struct S {
+struct S_packed_vec3 {
   /* 0x0000 */ float3x2 tint_symbol;
   /* 0x0018 */ tint_array<int8_t, 8> tint_pad;
-  /* 0x0020 */ float3 vector;
+  /* 0x0020 */ packed_float3 vector;
   /* 0x002c */ tint_array<int8_t, 4> tint_pad_1;
 };
 
 struct tint_module_vars_struct {
-  const constant S* data;
+  const constant S_packed_vec3* data;
 };
 
-fragment void tint_symbol_1(const constant S* data [[buffer(0)]]) {
+fragment void tint_symbol_1(const constant S_packed_vec3* data [[buffer(0)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.data=data};
-  float2 const x = ((*tint_module_vars.data).tint_symbol * (*tint_module_vars.data).vector);
+  float3x2 const v = (*tint_module_vars.data).tint_symbol;
+  float2 const x = (v * float3((*tint_module_vars.data).vector));
 }

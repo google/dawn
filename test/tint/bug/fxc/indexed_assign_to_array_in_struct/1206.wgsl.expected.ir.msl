@@ -13,17 +13,29 @@ struct tint_array {
   T elements[N];
 };
 
-struct Particle {
-  /* 0x0000 */ tint_array<float3, 8> position;
-  /* 0x0080 */ float lifetime;
-  /* 0x0084 */ tint_array<int8_t, 12> tint_pad;
-  /* 0x0090 */ float4 color;
-  /* 0x00a0 */ float3 velocity;
-  /* 0x00ac */ tint_array<int8_t, 4> tint_pad_1;
+struct tint_packed_vec3_f32_array_element {
+  /* 0x0000 */ packed_float3 packed;
+  /* 0x000c */ tint_array<int8_t, 4> tint_pad;
 };
 
-struct Particles {
-  /* 0x0000 */ tint_array<Particle, 1> p;
+struct Particle {
+  tint_array<float3, 8> position;
+  float lifetime;
+  float4 color;
+  float3 velocity;
+};
+
+struct Particle_packed_vec3 {
+  /* 0x0000 */ tint_array<tint_packed_vec3_f32_array_element, 8> position;
+  /* 0x0080 */ float lifetime;
+  /* 0x0084 */ tint_array<int8_t, 12> tint_pad_1;
+  /* 0x0090 */ float4 color;
+  /* 0x00a0 */ packed_float3 velocity;
+  /* 0x00ac */ tint_array<int8_t, 4> tint_pad_2;
+};
+
+struct Particles_packed_vec3 {
+  /* 0x0000 */ tint_array<Particle_packed_vec3, 1> p;
 };
 
 struct Simulation {
@@ -31,12 +43,30 @@ struct Simulation {
 };
 
 struct tint_module_vars_struct {
-  const device Particles* particles;
+  const device Particles_packed_vec3* particles;
   const constant Simulation* sim;
 };
 
-kernel void tint_symbol(const device Particles* particles [[buffer(1)]], const constant Simulation* sim [[buffer(0)]]) {
+tint_array<float3, 8> tint_load_array_packed_vec3(const device tint_array<tint_packed_vec3_f32_array_element, 8>* const from) {
+  float3 const v = float3((*from)[0u].packed);
+  float3 const v_1 = float3((*from)[1u].packed);
+  float3 const v_2 = float3((*from)[2u].packed);
+  float3 const v_3 = float3((*from)[3u].packed);
+  float3 const v_4 = float3((*from)[4u].packed);
+  float3 const v_5 = float3((*from)[5u].packed);
+  float3 const v_6 = float3((*from)[6u].packed);
+  return tint_array<float3, 8>{v, v_1, v_2, v_3, v_4, v_5, v_6, float3((*from)[7u].packed)};
+}
+
+Particle tint_load_struct_packed_vec3(const device Particle_packed_vec3* const from) {
+  tint_array<float3, 8> const v_7 = tint_load_array_packed_vec3((&(*from).position));
+  float const v_8 = (*from).lifetime;
+  float4 const v_9 = (*from).color;
+  return Particle{.position=v_7, .lifetime=v_8, .color=v_9, .velocity=float3((*from).velocity)};
+}
+
+kernel void tint_symbol(const device Particles_packed_vec3* particles [[buffer(1)]], const constant Simulation* sim [[buffer(0)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.particles=particles, .sim=sim};
-  Particle particle = (*tint_module_vars.particles).p[0];
+  Particle particle = tint_load_struct_packed_vec3((&(*tint_module_vars.particles).p[0]));
   particle.position[(*tint_module_vars.sim).i] = particle.position[(*tint_module_vars.sim).i];
 }
