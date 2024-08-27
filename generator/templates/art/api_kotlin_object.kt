@@ -31,11 +31,11 @@ import java.nio.ByteBuffer
 
 {% from 'art/api_kotlin_types.kt' import kotlin_declaration, kotlin_definition with context %}
 
-class {{ obj.name.CamelCase() }}(val handle: Long): AutoCloseable {
+public class {{ obj.name.CamelCase() }}(public val handle: Long): AutoCloseable {
     {% for method in obj.methods if include_method(method) %}
         @FastNative
         @JvmName("{{ method.name.camelCase() }}")
-        external fun {{ method.name.camelCase() }}(
+        public external fun {{ method.name.camelCase() }}(
         //* TODO(b/341923892): rework async methods to use futures.
         {%- for arg in kotlin_record_members(method.arguments) %}
             {{- as_varName(arg.name) }}: {{ kotlin_definition(arg) }},{{ ' ' }}
@@ -46,7 +46,7 @@ class {{ obj.name.CamelCase() }}(val handle: Long): AutoCloseable {
             //* camelCase() (lower case first word). E.g. "get foo bar" translated to fooBar.
             {% set name = method.name.chunks[1] + method.name.chunks[2:] | map('title') | join %}
             @get:JvmName("{{ name }}")
-            val {{ name }} get() = {{ method.name.camelCase() }}()
+            public val {{ name }}: {{ kotlin_declaration(kotlin_return(method)) }} get() = {{ method.name.camelCase() }}()
 
         {% endif %}
     {% endfor %}

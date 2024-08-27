@@ -24,13 +24,16 @@
 //* CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 //* OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 //* OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+{% from 'art/api_kotlin_types.kt' import kotlin_declaration with context %}
 package {{ kotlin_package }}
 
-object Constants {
-    val UINT32_MAX = Integer.parseUnsignedInt("4294967295")
-    val UINT64_MAX = java.lang.Long.parseUnsignedLong("18446744073709551615")
-    val SIZE_MAX = UINT64_MAX
+public object Constants {
+    private val UINT32_MAX = Integer.parseUnsignedInt("4294967295")
+    private val UINT64_MAX = java.lang.Long.parseUnsignedLong("18446744073709551615")
+    private val SIZE_MAX = UINT64_MAX
+
     {% for constant in by_category['constant'] %}
-        val {{ as_ktName(constant.name.SNAKE_CASE() ) }} = {{ constant.value }}
+        public val {{ as_ktName(constant.name.SNAKE_CASE() ) }}:{{ ' ' }}
+            {{- kotlin_declaration(constant) }} = {{ constant.value }}
     {% endfor %}
 }

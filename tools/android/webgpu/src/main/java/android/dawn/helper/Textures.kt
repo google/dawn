@@ -4,7 +4,7 @@ import android.dawn.*
 import android.graphics.Bitmap
 import java.nio.ByteBuffer
 
-fun Bitmap.createGpuTexture(device: Device): Texture {
+public fun Bitmap.createGpuTexture(device: Device): Texture {
     val size = Extent3D(width = width, height = height)
     return device.createTexture(
         TextureDescriptor(
@@ -29,7 +29,7 @@ fun Bitmap.createGpuTexture(device: Device): Texture {
     }
 }
 
-suspend fun Texture.createBitmap(device: Device): Bitmap {
+public suspend fun Texture.createBitmap(device: Device): Bitmap {
     if (width % 64 > 0) {
         throw DawnException("Texture must be a multiple of 64. Was ${width}")
     }

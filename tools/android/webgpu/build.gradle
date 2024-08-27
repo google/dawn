@@ -64,6 +64,9 @@ android {
     kotlinOptions {
         jvmTarget = '17'
     }
+    kotlin {
+        explicitApi()
+    }
     compileOptions {
         targetCompatibility JavaVersion.VERSION_17
     }

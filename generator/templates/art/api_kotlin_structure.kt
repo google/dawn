@@ -27,16 +27,16 @@
 package {{ kotlin_package }}
 {% from 'art/api_kotlin_types.kt' import kotlin_definition with context %}
 
-class {{ structure.name.CamelCase() }}(
+public class {{ structure.name.CamelCase() }}(
     {% for member in kotlin_record_members(structure.members) %}
-        {# We supply a getter that is excluded from name manging to allow Inline Value Classed
+        {# We supply a getter that is excluded from name mangling to allow Inline Value Classed
            enums/bitmasks to be accessible as integers from the JVM adapter layer. #}
         {% if member.type.category in ['bitmask', 'enum'] %}
         {{'    '}}@get:JvmName("get{{ member.name.CamelCase() }}")
         {% endif %}
-        var {{ member.name.camelCase() }}: {{ kotlin_definition(member) }},
+        public var {{ member.name.camelCase() }}: {{ kotlin_definition(member) }},
     {% endfor %}
     {% for structure in chain_children[structure.name.get()] %}
-        var {{ structure.name.camelCase() }}: {{ structure.name.CamelCase() }}? = null,
+        public var {{ structure.name.camelCase() }}: {{ structure.name.CamelCase() }}? = null,
     {% endfor %}
 )

@@ -36,7 +36,7 @@ import kotlin.coroutines.suspendCoroutine
         in by_category['function pointer'] if len(function_pointer.name.chunks) > 1 %}
     //* Function pointers generally end in Callback which we replace with Return.
     {% set return_name = function_pointer.name.chunks[:-1] | map('title') | join + 'Return' %}
-    data class {{ return_name }}(
+    public data class {{ return_name }}(
         {% for arg in kotlin_record_members(function_pointer.arguments) %}
             val {{ as_varName(arg.name) }}: {{ kotlin_declaration(arg) }},
         {% endfor %})
@@ -48,10 +48,10 @@ import kotlin.coroutines.suspendCoroutine
     {% for method in obj.methods if is_async_method(method) %}
         {% set function_pointer = method.arguments[-2].type %}
         {% set return_name = function_pointer.name.chunks[:-1] | map('title') | join + 'Return' %}
-        suspend fun {{ obj.name.CamelCase() }}.{{ method.name.camelCase() }}(
+        public suspend fun {{ obj.name.CamelCase() }}.{{ method.name.camelCase() }}(
             {%- for arg in method.arguments[:-2] %}
                 {{- as_varName(arg.name) }}: {{ kotlin_definition(arg) }},
-            {%- endfor %}) = suspendCoroutine {
+            {%- endfor %}): {{ return_name }} = suspendCoroutine {
                 {{ method.name.camelCase() }}(
                     {%- for arg in method.arguments[:-2] %}
                         {{- as_varName(arg.name) }},
