@@ -48,6 +48,7 @@
 #include "src/tint/lang/core/ir/user_call.h"
 #include "src/tint/lang/core/ir/validator.h"
 #include "src/tint/lang/core/ir/var.h"
+#include "src/tint/lang/core/type/array.h"
 #include "src/tint/lang/core/type/bool.h"
 #include "src/tint/lang/core/type/f16.h"
 #include "src/tint/lang/core/type/f32.h"
@@ -288,6 +289,7 @@ class Printer : public tint::TextGenerator {
 
         tint::Switch(
             type,  //
+            [&](const core::type::Array* ary) { EmitArrayType(out, ary, name, name_printed); },
             [&](const core::type::Bool*) { out << "bool"; },
             [&](const core::type::I32*) { out << "int"; },
             [&](const core::type::U32*) { out << "uint"; },
@@ -303,6 +305,32 @@ class Printer : public tint::TextGenerator {
 
             // TODO(dsinclair): Handle remaining types
             TINT_ICE_ON_NO_MATCH);
+    }
+
+    void EmitArrayType(StringStream& out,
+                       const core::type::Array* ary,
+                       const std::string& name,
+                       bool* name_printed) {
+        EmitType(out, ary->DeepestElement());
+        if (!name.empty()) {
+            out << " " << name;
+            if (name_printed) {
+                *name_printed = true;
+            }
+        }
+
+        const core::type::Type* ty = ary;
+        while (auto* arr = ty->As<core::type::Array>()) {
+            if (arr->Count()->Is<core::type::RuntimeArrayCount>()) {
+                out << "[]";
+            } else {
+                auto count = arr->ConstantCount();
+                TINT_ASSERT(count.has_value());
+
+                out << "[" << count.value() << "]";
+            }
+            ty = arr->ElemType();
+        }
     }
 
     /// Emit a return instruction
@@ -382,6 +410,7 @@ class Printer : public tint::TextGenerator {
     void EmitConstant(StringStream& out, const core::constant::Value* c) {
         tint::Switch(
             c->Type(),  //
+            [&](const core::type::Array* ary) { EmitConstantArray(out, ary, c); },
             [&](const core::type::Bool*) { out << (c->ValueAs<AInt>() ? "true" : "false"); },
             [&](const core::type::I32*) { PrintI32(out, c->ValueAs<i32>()); },
             [&](const core::type::U32*) { out << c->ValueAs<AInt>() << "u"; },
@@ -392,9 +421,27 @@ class Printer : public tint::TextGenerator {
             TINT_ICE_ON_NO_MATCH);
     }
 
+    void EmitConstantArray(StringStream& out,
+                           const core::type::Array* ary,
+                           const core::constant::Value* c) {
+        EmitType(out, ary);
+        ScopedParen sp(out);
+
+        auto count = ary->ConstantCount();
+        TINT_ASSERT(count.has_value());
+
+        for (size_t i = 0; i < count; ++i) {
+            if (i > 0) {
+                out << ", ";
+            }
+            EmitConstant(out, c->Index(i));
+        }
+    }
+
     /// Emit an unreachable instruction
     void EmitUnreachable() { Line() << "/* unreachable */"; }
 };
+
 }  // namespace
 
 Result<std::string> Print(core::ir::Module& module, const Version& version) {

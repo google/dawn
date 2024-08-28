@@ -90,7 +90,7 @@ class GlslWriterTestHelperBase : public BASE {
         return true;
     }
 
-    /// @returns the metal header string
+    /// @returns the glsl header string
     std::string GlslHeader() const {
         std::stringstream ver;
         ver << "#version " << version.major_version << version.minor_version << "0";
