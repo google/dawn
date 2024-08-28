@@ -106,7 +106,7 @@ $B1: {  # root
 }
 )";
 
-    Run(BuiltinPolyfill);
+    Run(BuiltinPolyfill, false);
 
     EXPECT_EQ(expect, str());
 }
@@ -176,7 +176,7 @@ $B1: {  # root
 }
 )";
 
-    Run(BuiltinPolyfill);
+    Run(BuiltinPolyfill, false);
 
     EXPECT_EQ(expect, str());
 }
@@ -246,7 +246,7 @@ $B1: {  # root
 }
 )";
 
-    Run(BuiltinPolyfill);
+    Run(BuiltinPolyfill, false);
 
     EXPECT_EQ(expect, str());
 }
@@ -292,7 +292,7 @@ $B1: {  # root
 }
 )";
 
-    Run(BuiltinPolyfill);
+    Run(BuiltinPolyfill, false);
 
     EXPECT_EQ(expect, str());
 }
@@ -336,7 +336,7 @@ $B1: {  # root
 }
 )";
 
-    Run(BuiltinPolyfill);
+    Run(BuiltinPolyfill, false);
 
     EXPECT_EQ(expect, str());
 }
@@ -380,7 +380,7 @@ $B1: {  # root
 }
 )";
 
-    Run(BuiltinPolyfill);
+    Run(BuiltinPolyfill, false);
 
     EXPECT_EQ(expect, str());
 }
@@ -441,7 +441,7 @@ $B1: {  # root
 }
 )";
 
-    Run(BuiltinPolyfill);
+    Run(BuiltinPolyfill, false);
 
     EXPECT_EQ(expect, str());
 }
@@ -485,7 +485,7 @@ $B1: {  # root
 }
 )";
 
-    Run(BuiltinPolyfill);
+    Run(BuiltinPolyfill, false);
 
     EXPECT_EQ(expect, str());
 }
@@ -527,7 +527,7 @@ $B1: {  # root
 }
 )";
 
-    Run(BuiltinPolyfill);
+    Run(BuiltinPolyfill, false);
 
     EXPECT_EQ(expect, str());
 }
@@ -571,7 +571,7 @@ $B1: {  # root
 }
 )";
 
-    Run(BuiltinPolyfill);
+    Run(BuiltinPolyfill, false);
 
     EXPECT_EQ(expect, str());
 }
@@ -615,7 +615,7 @@ $B1: {  # root
 }
 )";
 
-    Run(BuiltinPolyfill);
+    Run(BuiltinPolyfill, false);
 
     EXPECT_EQ(expect, str());
 }
@@ -659,7 +659,7 @@ $B1: {  # root
 }
 )";
 
-    Run(BuiltinPolyfill);
+    Run(BuiltinPolyfill, false);
 
     EXPECT_EQ(expect, str());
 }
@@ -703,7 +703,7 @@ $B1: {  # root
 }
 )";
 
-    Run(BuiltinPolyfill);
+    Run(BuiltinPolyfill, false);
 
     EXPECT_EQ(expect, str());
 }
@@ -747,7 +747,7 @@ $B1: {  # root
 }
 )";
 
-    Run(BuiltinPolyfill);
+    Run(BuiltinPolyfill, false);
 
     EXPECT_EQ(expect, str());
 }
@@ -791,7 +791,7 @@ $B1: {  # root
 }
 )";
 
-    Run(BuiltinPolyfill);
+    Run(BuiltinPolyfill, false);
 
     EXPECT_EQ(expect, str());
 }
@@ -835,7 +835,7 @@ $B1: {  # root
 }
 )";
 
-    Run(BuiltinPolyfill);
+    Run(BuiltinPolyfill, false);
 
     EXPECT_EQ(expect, str());
 }
@@ -879,7 +879,7 @@ $B1: {  # root
 }
 )";
 
-    Run(BuiltinPolyfill);
+    Run(BuiltinPolyfill, false);
 
     EXPECT_EQ(expect, str());
 }
@@ -914,7 +914,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, Dot_Vec4f) {
 }
 )";
 
-    Run(BuiltinPolyfill);
+    Run(BuiltinPolyfill, false);
 
     EXPECT_EQ(expect, str());
 }
@@ -955,7 +955,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, Dot_Vec2i) {
 }
 )";
 
-    Run(BuiltinPolyfill);
+    Run(BuiltinPolyfill, false);
 
     EXPECT_EQ(expect, str());
 }
@@ -1004,7 +1004,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, Dot_Vec4u) {
 }
 )";
 
-    Run(BuiltinPolyfill);
+    Run(BuiltinPolyfill, false);
 
     EXPECT_EQ(expect, str());
 }
@@ -1039,7 +1039,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, Dot4I8Packed) {
 }
 )";
 
-    Run(BuiltinPolyfill);
+    Run(BuiltinPolyfill, false);
 
     EXPECT_EQ(expect, str());
 }
@@ -1074,7 +1074,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, Dot4U8Packed) {
 }
 )";
 
-    Run(BuiltinPolyfill);
+    Run(BuiltinPolyfill, false);
 
     EXPECT_EQ(expect, str());
 }
@@ -1110,7 +1110,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, Select_ScalarCondition_ScalarOperands) {
 }
 )";
 
-    Run(BuiltinPolyfill);
+    Run(BuiltinPolyfill, false);
 
     EXPECT_EQ(expect, str());
 }
@@ -1146,7 +1146,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, Select_VectorCondition_VectorOperands) {
 }
 )";
 
-    Run(BuiltinPolyfill);
+    Run(BuiltinPolyfill, false);
 
     EXPECT_EQ(expect, str());
 }
@@ -1183,7 +1183,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, Select_ScalarCondition_VectorOperands) {
 }
 )";
 
-    Run(BuiltinPolyfill);
+    Run(BuiltinPolyfill, false);
 
     EXPECT_EQ(expect, str());
 }
@@ -1220,7 +1220,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureLoad_2D) {
 }
 )";
 
-    Run(BuiltinPolyfill);
+    Run(BuiltinPolyfill, false);
 
     EXPECT_EQ(expect, str());
 }
@@ -1260,7 +1260,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureLoad_2DArray) {
 }
 )";
 
-    Run(BuiltinPolyfill);
+    Run(BuiltinPolyfill, false);
 
     EXPECT_EQ(expect, str());
 }
@@ -1301,7 +1301,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureLoad_2DArray_IndexDifferentType) 
 }
 )";
 
-    Run(BuiltinPolyfill);
+    Run(BuiltinPolyfill, false);
 
     EXPECT_EQ(expect, str());
 }
@@ -1338,7 +1338,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureLoad_Multisampled2D) {
 }
 )";
 
-    Run(BuiltinPolyfill);
+    Run(BuiltinPolyfill, false);
 
     EXPECT_EQ(expect, str());
 }
@@ -1376,7 +1376,85 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureLoad_Depth2D) {
 }
 )";
 
-    Run(BuiltinPolyfill);
+    Run(BuiltinPolyfill, false);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureLoad_Storage) {
+    auto format = core::TexelFormat::kR32Uint;
+    auto* t = b.FunctionParam(
+        "t", ty.Get<core::type::StorageTexture>(
+                 core::type::TextureDimension::k2d, format, core::Access::kReadWrite,
+                 core::type::StorageTexture::SubtypeFor(format, ty)));
+    auto* coords = b.FunctionParam("coords", ty.vec2<i32>());
+    auto* func = b.Function("foo", ty.vec4<u32>());
+    func->SetParams({t, coords});
+
+    b.Append(func->Block(), [&] {
+        auto* result = b.Call(ty.vec4<u32>(), core::BuiltinFn::kTextureLoad, t, coords);
+        b.Return(func, result);
+    });
+
+    auto* src = R"(
+%foo = func(%t:texture_storage_2d<r32uint, read_write>, %coords:vec2<i32>):vec4<u32> {
+  $B1: {
+    %4:vec4<u32> = textureLoad %t, %coords
+    ret %4
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = func(%t:texture_storage_2d<r32uint, read_write>, %coords:vec2<i32>):vec4<u32> {
+  $B1: {
+    %4:vec4<u32> = spirv.image_read %t, %coords, 0u
+    ret %4
+  }
+}
+)";
+
+    Run(BuiltinPolyfill, false);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureLoad_Storage_Vulkan) {
+    auto format = core::TexelFormat::kR32Uint;
+    auto* t = b.FunctionParam(
+        "t", ty.Get<core::type::StorageTexture>(
+                 core::type::TextureDimension::k2d, format, core::Access::kReadWrite,
+                 core::type::StorageTexture::SubtypeFor(format, ty)));
+    auto* coords = b.FunctionParam("coords", ty.vec2<i32>());
+    auto* func = b.Function("foo", ty.vec4<u32>());
+    func->SetParams({t, coords});
+
+    b.Append(func->Block(), [&] {
+        auto* result = b.Call(ty.vec4<u32>(), core::BuiltinFn::kTextureLoad, t, coords);
+        b.Return(func, result);
+    });
+
+    auto* src = R"(
+%foo = func(%t:texture_storage_2d<r32uint, read_write>, %coords:vec2<i32>):vec4<u32> {
+  $B1: {
+    %4:vec4<u32> = textureLoad %t, %coords
+    ret %4
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = func(%t:texture_storage_2d<r32uint, read_write>, %coords:vec2<i32>):vec4<u32> {
+  $B1: {
+    %4:vec4<u32> = spirv.image_read %t, %coords, 1024u
+    ret %4
+  }
+}
+)";
+
+    Run(BuiltinPolyfill, true);
 
     EXPECT_EQ(expect, str());
 }
@@ -1414,7 +1492,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureSample_1D) {
 }
 )";
 
-    Run(BuiltinPolyfill);
+    Run(BuiltinPolyfill, false);
 
     EXPECT_EQ(expect, str());
 }
@@ -1452,7 +1530,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureSample_2D) {
 }
 )";
 
-    Run(BuiltinPolyfill);
+    Run(BuiltinPolyfill, false);
 
     EXPECT_EQ(expect, str());
 }
@@ -1491,7 +1569,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureSample_2D_Offset) {
 }
 )";
 
-    Run(BuiltinPolyfill);
+    Run(BuiltinPolyfill, false);
 
     EXPECT_EQ(expect, str());
 }
@@ -1533,7 +1611,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureSample_2DArray_Offset) {
 }
 )";
 
-    Run(BuiltinPolyfill);
+    Run(BuiltinPolyfill, false);
 
     EXPECT_EQ(expect, str());
 }
@@ -1573,7 +1651,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureSampleBias_2D) {
 }
 )";
 
-    Run(BuiltinPolyfill);
+    Run(BuiltinPolyfill, false);
 
     EXPECT_EQ(expect, str());
 }
@@ -1613,7 +1691,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureSampleBias_2D_Offset) {
 }
 )";
 
-    Run(BuiltinPolyfill);
+    Run(BuiltinPolyfill, false);
 
     EXPECT_EQ(expect, str());
 }
@@ -1656,7 +1734,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureSampleBias_2DArray_Offset) {
 }
 )";
 
-    Run(BuiltinPolyfill);
+    Run(BuiltinPolyfill, false);
 
     EXPECT_EQ(expect, str());
 }
@@ -1695,7 +1773,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureSampleCompare_2D) {
 }
 )";
 
-    Run(BuiltinPolyfill);
+    Run(BuiltinPolyfill, false);
 
     EXPECT_EQ(expect, str());
 }
@@ -1735,7 +1813,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureSampleCompare_2D_Offset) {
 }
 )";
 
-    Run(BuiltinPolyfill);
+    Run(BuiltinPolyfill, false);
 
     EXPECT_EQ(expect, str());
 }
@@ -1778,7 +1856,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureSampleCompare_2DArray_Offset) {
 }
 )";
 
-    Run(BuiltinPolyfill);
+    Run(BuiltinPolyfill, false);
 
     EXPECT_EQ(expect, str());
 }
@@ -1818,7 +1896,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureSampleCompareLevel_2D) {
 }
 )";
 
-    Run(BuiltinPolyfill);
+    Run(BuiltinPolyfill, false);
 
     EXPECT_EQ(expect, str());
 }
@@ -1858,7 +1936,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureSampleCompareLevel_2D_Offset) {
 }
 )";
 
-    Run(BuiltinPolyfill);
+    Run(BuiltinPolyfill, false);
 
     EXPECT_EQ(expect, str());
 }
@@ -1901,7 +1979,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureSampleCompareLevel_2DArray_Offset
 }
 )";
 
-    Run(BuiltinPolyfill);
+    Run(BuiltinPolyfill, false);
 
     EXPECT_EQ(expect, str());
 }
@@ -1942,7 +2020,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureSampleGrad_2D) {
 }
 )";
 
-    Run(BuiltinPolyfill);
+    Run(BuiltinPolyfill, false);
 
     EXPECT_EQ(expect, str());
 }
@@ -1983,7 +2061,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureSampleGrad_2D_Offset) {
 }
 )";
 
-    Run(BuiltinPolyfill);
+    Run(BuiltinPolyfill, false);
 
     EXPECT_EQ(expect, str());
 }
@@ -2027,7 +2105,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureSampleGrad_2DArray_Offset) {
 }
 )";
 
-    Run(BuiltinPolyfill);
+    Run(BuiltinPolyfill, false);
 
     EXPECT_EQ(expect, str());
 }
@@ -2067,7 +2145,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureSampleLevel_2D) {
 }
 )";
 
-    Run(BuiltinPolyfill);
+    Run(BuiltinPolyfill, false);
 
     EXPECT_EQ(expect, str());
 }
@@ -2107,7 +2185,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureSampleLevel_2D_Offset) {
 }
 )";
 
-    Run(BuiltinPolyfill);
+    Run(BuiltinPolyfill, false);
 
     EXPECT_EQ(expect, str());
 }
@@ -2150,7 +2228,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureSampleLevel_2DArray_Offset) {
 }
 )";
 
-    Run(BuiltinPolyfill);
+    Run(BuiltinPolyfill, false);
 
     EXPECT_EQ(expect, str());
 }
@@ -2190,7 +2268,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureGather_2D) {
 }
 )";
 
-    Run(BuiltinPolyfill);
+    Run(BuiltinPolyfill, false);
 
     EXPECT_EQ(expect, str());
 }
@@ -2230,7 +2308,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureGather_2D_Offset) {
 }
 )";
 
-    Run(BuiltinPolyfill);
+    Run(BuiltinPolyfill, false);
 
     EXPECT_EQ(expect, str());
 }
@@ -2273,7 +2351,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureGather_2DArray_Offset) {
 }
 )";
 
-    Run(BuiltinPolyfill);
+    Run(BuiltinPolyfill, false);
 
     EXPECT_EQ(expect, str());
 }
@@ -2311,7 +2389,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureGather_Depth2D) {
 }
 )";
 
-    Run(BuiltinPolyfill);
+    Run(BuiltinPolyfill, false);
 
     EXPECT_EQ(expect, str());
 }
@@ -2351,7 +2429,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureGatherCompare_Depth2D) {
 }
 )";
 
-    Run(BuiltinPolyfill);
+    Run(BuiltinPolyfill, false);
 
     EXPECT_EQ(expect, str());
 }
@@ -2391,7 +2469,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureGatherCompare_Depth2D_Offset) {
 }
 )";
 
-    Run(BuiltinPolyfill);
+    Run(BuiltinPolyfill, false);
 
     EXPECT_EQ(expect, str());
 }
@@ -2434,7 +2512,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureGatherCompare_Depth2DArray) {
 }
 )";
 
-    Run(BuiltinPolyfill);
+    Run(BuiltinPolyfill, false);
 
     EXPECT_EQ(expect, str());
 }
@@ -2474,7 +2552,47 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureStore_2D) {
 }
 )";
 
-    Run(BuiltinPolyfill);
+    Run(BuiltinPolyfill, false);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureStore_2D_Vulkan) {
+    auto format = core::TexelFormat::kR32Uint;
+    auto* t = b.FunctionParam(
+        "t", ty.Get<core::type::StorageTexture>(
+                 core::type::TextureDimension::k2d, format, core::Access::kReadWrite,
+                 core::type::StorageTexture::SubtypeFor(format, ty)));
+    auto* coords = b.FunctionParam("coords", ty.vec2<i32>());
+    auto* texel = b.FunctionParam("texel", ty.vec4<u32>());
+    auto* func = b.Function("foo", ty.void_());
+    func->SetParams({t, coords, texel});
+
+    b.Append(func->Block(), [&] {
+        b.Call(ty.void_(), core::BuiltinFn::kTextureStore, t, coords, texel);
+        b.Return(func);
+    });
+
+    auto* src = R"(
+%foo = func(%t:texture_storage_2d<r32uint, read_write>, %coords:vec2<i32>, %texel:vec4<u32>):void {
+  $B1: {
+    %5:void = textureStore %t, %coords, %texel
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = func(%t:texture_storage_2d<r32uint, read_write>, %coords:vec2<i32>, %texel:vec4<u32>):void {
+  $B1: {
+    %5:void = spirv.image_write %t, %coords, %texel, 1024u
+    ret
+  }
+}
+)";
+
+    Run(BuiltinPolyfill, true);
 
     EXPECT_EQ(expect, str());
 }
@@ -2516,7 +2634,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureStore_2DArray) {
 }
 )";
 
-    Run(BuiltinPolyfill);
+    Run(BuiltinPolyfill, false);
 
     EXPECT_EQ(expect, str());
 }
@@ -2559,7 +2677,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureStore_2DArray_IndexDifferentType)
 }
 )";
 
-    Run(BuiltinPolyfill);
+    Run(BuiltinPolyfill, false);
 
     EXPECT_EQ(expect, str());
 }
@@ -2594,7 +2712,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureDimensions_2D_ImplicitLod) {
 }
 )";
 
-    Run(BuiltinPolyfill);
+    Run(BuiltinPolyfill, false);
 
     EXPECT_EQ(expect, str());
 }
@@ -2630,7 +2748,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureDimensions_2D_ExplicitLod) {
 }
 )";
 
-    Run(BuiltinPolyfill);
+    Run(BuiltinPolyfill, false);
 
     EXPECT_EQ(expect, str());
 }
@@ -2666,7 +2784,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureDimensions_2DArray) {
 }
 )";
 
-    Run(BuiltinPolyfill);
+    Run(BuiltinPolyfill, false);
 
     EXPECT_EQ(expect, str());
 }
@@ -2701,7 +2819,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureDimensions_Multisampled) {
 }
 )";
 
-    Run(BuiltinPolyfill);
+    Run(BuiltinPolyfill, false);
 
     EXPECT_EQ(expect, str());
 }
@@ -2737,7 +2855,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureNumLayers_2DArray) {
 }
 )";
 
-    Run(BuiltinPolyfill);
+    Run(BuiltinPolyfill, false);
 
     EXPECT_EQ(expect, str());
 }
@@ -2773,7 +2891,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureNumLayers_CubeArray) {
 }
 )";
 
-    Run(BuiltinPolyfill);
+    Run(BuiltinPolyfill, false);
 
     EXPECT_EQ(expect, str());
 }
@@ -2809,7 +2927,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureNumLayers_Depth2DArray) {
 }
 )";
 
-    Run(BuiltinPolyfill);
+    Run(BuiltinPolyfill, false);
 
     EXPECT_EQ(expect, str());
 }
@@ -2845,7 +2963,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureNumLayers_DepthCubeArray) {
 }
 )";
 
-    Run(BuiltinPolyfill);
+    Run(BuiltinPolyfill, false);
 
     EXPECT_EQ(expect, str());
 }
@@ -2884,7 +3002,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureNumLayers_Storage2DArray) {
 }
 )";
 
-    Run(BuiltinPolyfill);
+    Run(BuiltinPolyfill, false);
 
     EXPECT_EQ(expect, str());
 }
@@ -2911,7 +3029,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, QuantizeToF16_Scalar) {
 
     auto* expect = src;
 
-    Run(BuiltinPolyfill);
+    Run(BuiltinPolyfill, false);
 
     EXPECT_EQ(expect, str());
 }
@@ -2953,7 +3071,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, QuantizeToF16_Vector) {
 }
 )";
 
-    Run(BuiltinPolyfill);
+    Run(BuiltinPolyfill, false);
 
     EXPECT_EQ(expect, str());
 }
@@ -2987,7 +3105,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, InputAttachmentLoad) {
 }
 )";
 
-    Run(BuiltinPolyfill);
+    Run(BuiltinPolyfill, false);
 
     EXPECT_EQ(expect, str());
 }
@@ -3021,7 +3139,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, SubgroupShuffle) {
 }
 )";
 
-    Run(BuiltinPolyfill);
+    Run(BuiltinPolyfill, false);
 
     EXPECT_EQ(expect, str());
 }
@@ -3054,7 +3172,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, SubgroupBroadcastConstSignedId) {
 }
 )";
 
-    Run(BuiltinPolyfill);
+    Run(BuiltinPolyfill, false);
 
     EXPECT_EQ(expect, str());
 }
@@ -3087,7 +3205,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, QuadBroadcastConstSignedId) {
 }
 )";
 
-    Run(BuiltinPolyfill);
+    Run(BuiltinPolyfill, false);
 
     EXPECT_EQ(expect, str());
 }

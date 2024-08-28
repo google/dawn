@@ -1812,15 +1812,21 @@ class Printer {
             case core::BuiltinFn::kTanh:
                 glsl_ext_inst(GLSLstd450Tanh);
                 break;
-            case core::BuiltinFn::kTextureBarrier:
+            case core::BuiltinFn::kTextureBarrier: {
+                spv::MemorySemanticsMask memory_mask = spv::MemorySemanticsMask::ImageMemory |
+                                                       spv::MemorySemanticsMask::AcquireRelease;
+                if (options_.use_vulkan_memory_model) {
+                    memory_mask = memory_mask | spv::MemorySemanticsMask::MakeAvailable |
+                                  spv::MemorySemanticsMask::MakeVisible;
+                }
+
                 op = spv::Op::OpControlBarrier;
                 operands.clear();
                 operands.push_back(Constant(b_.ConstantValue(u32(spv::Scope::Workgroup))));
                 operands.push_back(Constant(b_.ConstantValue(u32(spv::Scope::Workgroup))));
-                operands.push_back(
-                    Constant(b_.ConstantValue(u32(spv::MemorySemanticsMask::ImageMemory |
-                                                  spv::MemorySemanticsMask::AcquireRelease))));
+                operands.push_back(Constant(b_.ConstantValue(u32(memory_mask))));
                 break;
+            }
             case core::BuiltinFn::kTextureNumLevels:
                 module_.PushCapability(SpvCapabilityImageQuery);
                 op = spv::Op::OpImageQueryLevels;

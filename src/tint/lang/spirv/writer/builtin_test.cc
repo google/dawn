@@ -1905,6 +1905,19 @@ TEST_F(SpirvWriterTest, Builtin_TextureBarrier) {
     EXPECT_INST("OpControlBarrier %uint_2 %uint_2 %uint_2056");
 }
 
+TEST_F(SpirvWriterTest, Builtin_TextureBarrier_Vulkan) {
+    auto* func = b.Function("foo", ty.void_());
+    b.Append(func->Block(), [&] {
+        b.Call(ty.void_(), core::BuiltinFn::kTextureBarrier);
+        b.Return(func);
+    });
+
+    Options opts{};
+    opts.use_vulkan_memory_model = true;
+    ASSERT_TRUE(Generate(opts)) << Error() << output_;
+    EXPECT_INST("OpControlBarrier %uint_2 %uint_2 %uint_26632");
+}
+
 TEST_F(SpirvWriterTest, Builtin_WorkgroupBarrier) {
     auto* func = b.Function("foo", ty.void_());
     b.Append(func->Block(), [&] {

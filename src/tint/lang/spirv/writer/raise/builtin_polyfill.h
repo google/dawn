@@ -46,8 +46,9 @@ namespace tint::spirv::writer::raise {
 /// BuiltinPolyfill is a transform that replaces calls to builtins with polyfills and calls to
 /// SPIR-V backend intrinsic functions.
 /// @param module the module to transform
+/// @param use_vulkan_memory_model set `true` to use the vulkan memory model
 /// @returns success or failure
-Result<SuccessType> BuiltinPolyfill(core::ir::Module& module);
+Result<SuccessType> BuiltinPolyfill(core::ir::Module& module, bool use_vulkan_memory_model);
 
 }  // namespace tint::spirv::writer::raise
 

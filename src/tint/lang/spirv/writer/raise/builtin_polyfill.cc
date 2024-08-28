@@ -59,6 +59,9 @@ struct State {
     /// The IR module.
     core::ir::Module& ir;
 
+    /// If we should use the vulkan memory model
+    bool use_vulkan_memory_model = false;
+
     /// The IR builder.
     core::ir::Builder b{ir};
 
@@ -432,13 +435,26 @@ struct State {
     /// @param requires_float_lod true if the lod needs to be a floating point value
     void AppendImageOperands(ImageOperands& operands,
                              Vector<core::ir::Value*, 8>& args,
-                             core::ir::Instruction* insertion_point,
+                             core::ir::CoreBuiltinCall* insertion_point,
                              bool requires_float_lod) {
         // Add a placeholder argument for the image operand mask, which we will fill in when we have
         // processed the image operands.
         uint32_t image_operand_mask = 0u;
         size_t mask_idx = args.Length();
         args.Push(nullptr);
+
+        // Append the NonPrivateTexel flag to Read/Write storage textures when we load/store them.
+        if (use_vulkan_memory_model) {
+            if (insertion_point->Func() == core::BuiltinFn::kTextureLoad ||
+                insertion_point->Func() == core::BuiltinFn::kTextureStore) {
+                if (auto* st =
+                        insertion_point->Args()[0]->Type()->As<core::type::StorageTexture>()) {
+                    if (st->Access() == core::Access::kReadWrite) {
+                        image_operand_mask |= SpvImageOperandsNonPrivateTexelMask;
+                    }
+                }
+            }
+        }
 
         // Add each of the optional image operands if used, updating the image operand mask.
         if (operands.bias) {
@@ -942,13 +958,13 @@ struct State {
 
 }  // namespace
 
-Result<SuccessType> BuiltinPolyfill(core::ir::Module& ir) {
+Result<SuccessType> BuiltinPolyfill(core::ir::Module& ir, bool use_vulkan_memory_model) {
     auto result = ValidateAndDumpIfNeeded(ir, "BuiltinPolyfill transform");
     if (result != Success) {
         return result.Failure();
     }
 
-    State{ir}.Process();
+    State{ir, use_vulkan_memory_model}.Process();
 
     return Success;
 }
