@@ -43,7 +43,7 @@ bool a() {
   return false;
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
-void unused_entry_point() {
+void main() {
 }
 )");
 }
@@ -58,7 +58,7 @@ bool a() {
   return true;
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
-void unused_entry_point() {
+void main() {
 }
 )");
 }
@@ -73,7 +73,7 @@ int a() {
   return -12345;
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
-void unused_entry_point() {
+void main() {
 }
 )");
 }
@@ -88,7 +88,7 @@ int a() {
   return (-2147483647 - 1);
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
-void unused_entry_point() {
+void main() {
 }
 )");
 }
@@ -103,7 +103,7 @@ uint a() {
   return 56779u;
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
-void unused_entry_point() {
+void main() {
 }
 )");
 }
@@ -119,7 +119,7 @@ float a() {
   return 1073741824.0f;
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
-void unused_entry_point() {
+void main() {
 }
 )");
 }
@@ -136,7 +136,7 @@ float16_t a() {
   return 32752.0hf;
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
-void unused_entry_point() {
+void main() {
 }
 )");
 }

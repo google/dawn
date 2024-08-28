@@ -55,7 +55,7 @@ TEST_F(GlslWriterTest, EmitType_Array) {
     ASSERT_TRUE(Generate()) << err_ << output_.glsl;
     EXPECT_EQ(output_.glsl, GlslHeader() + R"(
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
-void foo() {
+void main() {
   bool a[4] = bool[4](false, false, false, false);
 }
 )");
@@ -72,7 +72,7 @@ TEST_F(GlslWriterTest, EmitType_ArrayOfArray) {
     ASSERT_TRUE(Generate()) << err_ << output_.glsl;
     EXPECT_EQ(output_.glsl, GlslHeader() + R"(
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
-void foo() {
+void main() {
   bool a[5][4] = bool[5][4](bool[4](false, false, false, false), bool[4](false, false, false, false), bool[4](false, false, false, false), bool[4](false, false, false, false), bool[4](false, false, false, false));
 }
 )");
@@ -90,7 +90,7 @@ TEST_F(GlslWriterTest, EmitType_ArrayOfArrayOfArray) {
     ASSERT_TRUE(Generate()) << err_ << output_.glsl;
     EXPECT_EQ(output_.glsl, GlslHeader() + R"(
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
-void foo() {
+void main() {
   bool a[6][5][4] = bool[6][5][4](bool[5][4](bool[4](false, false, false, false), bool[4](false, false, false, false), bool[4](false, false, false, false), bool[4](false, false, false, false), bool[4](false, false, false, false)), bool[5][4](bool[4](false, false, false, false), bool[4](false, false, false, false), bool[4](false, false, false, false), bool[4](false, false, false, false), bool[4](false, false, false, false)), bool[5][4](bool[4](false, false, false, false), bool[4](false, false, false, false), bool[4](false, false, false, false), bool[4](false, false, false, false), bool[4](false, false, false, false)), bool[5][4](bool[4](false, false, false, false), bool[4](false, false, false, false), bool[4](false, false, false, false), bool[4](false, false, false, false), bool[4](false, false, false, false)), bool[5][4](bool[4](false, false, false, false), bool[4](false, false, false, false), bool[4](false, false, false, false), bool[4](false, false, false, false), bool[4](false, false, false, false)), bool[5][4](bool[4](false, false, false, false), bool[4](false, false, false, false), bool[4](false, false, false, false), bool[4](false, false, false, false), bool[4](false, false, false, false)));
 }
 )");
@@ -107,7 +107,7 @@ TEST_F(GlslWriterTest, EmitType_Bool) {
     ASSERT_TRUE(Generate()) << err_ << output_.glsl;
     EXPECT_EQ(output_.glsl, GlslHeader() + R"(
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
-void foo() {
+void main() {
   bool a = false;
 }
 )");
@@ -124,7 +124,7 @@ TEST_F(GlslWriterTest, EmitType_F32) {
     ASSERT_TRUE(Generate()) << err_ << output_.glsl;
     EXPECT_EQ(output_.glsl, GlslHeader() + R"(
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
-void foo() {
+void main() {
   float a = 0.0f;
 }
 )");
@@ -142,7 +142,7 @@ TEST_F(GlslWriterTest, EmitType_F16) {
     EXPECT_EQ(output_.glsl, GlslHeader() + R"(#extension GL_AMD_gpu_shader_half_float: require
 
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
-void foo() {
+void main() {
   float16_t a = 0.0hf;
 }
 )");
@@ -159,7 +159,7 @@ TEST_F(GlslWriterTest, EmitType_I32) {
     ASSERT_TRUE(Generate()) << err_ << output_.glsl;
     EXPECT_EQ(output_.glsl, GlslHeader() + R"(
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
-void foo() {
+void main() {
   int a = 0;
 }
 )");
@@ -176,7 +176,7 @@ TEST_F(GlslWriterTest, EmitType_Matrix_F32) {
     ASSERT_TRUE(Generate()) << err_ << output_.glsl;
     EXPECT_EQ(output_.glsl, GlslHeader() + R"(
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
-void foo() {
+void main() {
   mat2x3 a = mat2x3(vec3(0.0f), vec3(0.0f));
 }
 )");
@@ -193,7 +193,7 @@ TEST_F(GlslWriterTest, EmitType_MatrixSquare_F32) {
     ASSERT_TRUE(Generate()) << err_ << output_.glsl;
     EXPECT_EQ(output_.glsl, GlslHeader() + R"(
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
-void foo() {
+void main() {
   mat2 a = mat2(vec2(0.0f), vec2(0.0f));
 }
 )");
@@ -211,7 +211,7 @@ TEST_F(GlslWriterTest, EmitType_Matrix_F16) {
     EXPECT_EQ(output_.glsl, GlslHeader() + R"(#extension GL_AMD_gpu_shader_half_float: require
 
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
-void foo() {
+void main() {
   f16mat2x3 a = f16mat2x3(f16vec3(0.0hf), f16vec3(0.0hf));
 }
 )");
@@ -228,7 +228,7 @@ TEST_F(GlslWriterTest, EmitType_U32) {
     ASSERT_TRUE(Generate()) << err_ << output_.glsl;
     EXPECT_EQ(output_.glsl, GlslHeader() + R"(
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
-void foo() {
+void main() {
   uint a = 0u;
 }
 )");
@@ -245,7 +245,7 @@ TEST_F(GlslWriterTest, DISABLED_EmitType_Atomic_U32) {
     ASSERT_TRUE(Generate()) << err_ << output_.glsl;
     EXPECT_EQ(output_.glsl, GlslHeader() + R"(
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
-void foo(inout uint a) {
+void main(inout uint a) {
 }
 )");
 }
@@ -261,7 +261,7 @@ TEST_F(GlslWriterTest, DISABLED_EmitType_Atomic_I32) {
     ASSERT_TRUE(Generate()) << err_ << output_.glsl;
     EXPECT_EQ(output_.glsl, GlslHeader() + R"(
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
-void foo(inout int a) {
+void main(inout int a) {
 }
 )");
 }
@@ -277,7 +277,7 @@ TEST_F(GlslWriterTest, EmitType_Vector_F32) {
     ASSERT_TRUE(Generate()) << err_ << output_.glsl;
     EXPECT_EQ(output_.glsl, GlslHeader() + R"(
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
-void foo() {
+void main() {
   vec3 a = vec3(0.0f);
 }
 )");
@@ -295,7 +295,7 @@ TEST_F(GlslWriterTest, EmitType_Vector_F16) {
     EXPECT_EQ(output_.glsl, GlslHeader() + R"(#extension GL_AMD_gpu_shader_half_float: require
 
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
-void foo() {
+void main() {
   f16vec3 a = f16vec3(0.0hf);
 }
 )");
@@ -312,7 +312,7 @@ TEST_F(GlslWriterTest, EmitType_Vector_I32) {
     ASSERT_TRUE(Generate()) << err_ << output_.glsl;
     EXPECT_EQ(output_.glsl, GlslHeader() + R"(
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
-void foo() {
+void main() {
   ivec2 a = ivec2(0);
 }
 )");
@@ -329,7 +329,7 @@ TEST_F(GlslWriterTest, EmitType_Vector_U32) {
     ASSERT_TRUE(Generate()) << err_ << output_.glsl;
     EXPECT_EQ(output_.glsl, GlslHeader() + R"(
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
-void foo() {
+void main() {
   uvec4 a = uvec4(0u);
 }
 )");
@@ -346,7 +346,7 @@ TEST_F(GlslWriterTest, EmitType_Vector_bool) {
     ASSERT_TRUE(Generate()) << err_ << output_.glsl;
     EXPECT_EQ(output_.glsl, GlslHeader() + R"(
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
-void foo() {
+void main() {
   bvec3 a = bvec3(false);
 }
 )");
@@ -361,7 +361,7 @@ TEST_F(GlslWriterTest, EmitType_Void) {
     ASSERT_TRUE(Generate()) << err_ << output_.glsl;
     EXPECT_EQ(output_.glsl, GlslHeader() + R"(
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
-void foo() {
+void main() {
 }
 )");
 }
@@ -386,7 +386,7 @@ struct S {
 };
 
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
-void foo() {
+void main() {
   S a = S(0, 0.0f);
 }
 )");
@@ -413,7 +413,7 @@ struct S {
 };
 
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
-void foo() {
+void main() {
   S a = S(0, 0.0f);
   S b = S(0, 0.0f);
 }
@@ -451,7 +451,7 @@ struct S {
 };
 
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
-void foo() {
+void main() {
   S a = S(0, Inner(0u, vec4(0.0f)));
 }
 )");
@@ -468,7 +468,7 @@ TEST_F(GlslWriterTest, DISABLED_EmitType_Sampler) {
     ASSERT_TRUE(Generate()) << err_ << output_.glsl;
     EXPECT_EQ(output_.glsl, R"(
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
-void foo() {
+void main() {
 }
 )");
 }
@@ -484,7 +484,7 @@ TEST_F(GlslWriterTest, DISABLED_EmitType_SamplerComparison) {
     ASSERT_TRUE(Generate()) << err_ << output_.glsl;
     EXPECT_EQ(output_.glsl, R"(
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
-void foo() {
+void main() {
 }
 )");
 }
@@ -514,7 +514,7 @@ TEST_P(GlslWriterDepthTexturesTest, DISABLED_Emit) {
     ASSERT_TRUE(Generate()) << err_ << output_.glsl;
     EXPECT_EQ(output_.glsl, GlslHeader() + R"(
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
-void foo()" + params.result +
+void main()" + params.result +
                                 R"( a) {
 }
 )");
@@ -540,7 +540,7 @@ TEST_F(GlslWriterTest, DISABLED_EmitType_DepthMultisampledTexture) {
     ASSERT_TRUE(Generate()) << err_ << output_.glsl;
     EXPECT_EQ(output_.glsl, R"(
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
-void foo(sampler2DMS a) {
+void main(sampler2DMS a) {
 }
 )");
 }
@@ -590,7 +590,7 @@ TEST_P(GlslWriterSampledTexturesTest, DISABLED_Emit) {
     ASSERT_TRUE(Generate()) << err_ << output_.glsl;
     EXPECT_EQ(output_.glsl, R"(
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
-void foo()" + params.result +
+void main()" + params.result +
                                 R"( a) {
 }
 )");
@@ -638,7 +638,7 @@ TEST_F(GlslWriterTest, DISABLED_EmitType_MultisampledTexture) {
     ASSERT_TRUE(Generate()) << err_ << output_.glsl;
     EXPECT_EQ(output_.glsl, R"(
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
-void foo(usampler2DMS a) {
+void main(usampler2DMS a) {
 }
 )");
 }
@@ -669,7 +669,7 @@ TEST_P(GlslWriterStorageTexturesTest, DISABLED_Emit) {
     ASSERT_TRUE(Generate()) << err_ << output_.glsl;
     EXPECT_EQ(output_.glsl, R"(
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
-void foo()" + params.result +
+void main()" + params.result +
                                 R"( a) {
 }
 )");

@@ -185,7 +185,18 @@ class Printer : public tint::TextGenerator {
             // TODO(dsinclair): Handle return type attributes
 
             EmitType(out, func->ReturnType());
-            out << " " << ir_.NameOf(func).Name() << "(";
+            out << " ";
+
+            // Switch the entry point name to `main`. This makes the assumption that single entry
+            // point is always run for GLSL, which is has to be, there can be only one entry point.
+            // So, we swap the entry point name to `main` which is required for GLSL.
+            if (func->Stage() != core::ir::Function::PipelineStage::kUndefined) {
+                out << "main";
+            } else {
+                out << ir_.NameOf(func).Name();
+            }
+
+            out << "(";
 
             size_t i = 0;
             for (auto* param : func->Params()) {
