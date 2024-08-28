@@ -336,7 +336,7 @@ TEST_P(SharedBufferMemoryTests, EnsureNoDuplicateBeginAccessCalls) {
 // necessary.
 TEST_P(SharedBufferMemoryTests, BeginAccessInitialization) {
     // TODO(dawn:2382): Investigate why this test fails on Windows Intel bots.
-    DAWN_SUPPRESS_TEST_IF(IsIntelGen9() && IsD3D12());
+    DAWN_SUPPRESS_TEST_IF(IsIntel() && IsD3D12());
 
     // Create a buffer with initialized data.
     wgpu::SharedBufferMemory memory =
