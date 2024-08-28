@@ -30,6 +30,7 @@
 #include <string>
 #include <utility>
 
+#include "src/tint/lang/core/constant/splat.h"
 #include "src/tint/lang/core/ir/access.h"
 #include "src/tint/lang/core/ir/bitcast.h"
 #include "src/tint/lang/core/ir/construct.h"
@@ -55,6 +56,7 @@
 #include "src/tint/lang/core/type/i32.h"
 #include "src/tint/lang/core/type/pointer.h"
 #include "src/tint/lang/core/type/u32.h"
+#include "src/tint/lang/core/type/vector.h"
 #include "src/tint/lang/core/type/void.h"
 #include "src/tint/lang/glsl/writer/common/printer_support.h"
 #include "src/tint/lang/glsl/writer/common/version.h"
@@ -302,9 +304,26 @@ class Printer : public tint::TextGenerator {
             [&](const core::type::Pointer* p) {
                 EmitType(out, p->StoreType(), name, name_printed);
             },
+            [&](const core::type::Vector* v) { EmitVectorType(out, v); },
 
             // TODO(dsinclair): Handle remaining types
             TINT_ICE_ON_NO_MATCH);
+    }
+
+    void EmitVectorType(StringStream& out, const core::type::Vector* v) {
+        tint::Switch(
+            v->Type(),                       //
+            [&](const core::type::F32*) {},  //
+            [&](const core::type::F16*) {
+                EmitExtension(kAMDGpuShaderHalfFloat);
+                out << "f16";
+            },
+            [&](const core::type::I32*) { out << "i"; },
+            [&](const core::type::U32*) { out << "u"; },
+            [&](const core::type::Bool*) { out << "b"; },  //
+            TINT_ICE_ON_NO_MATCH);
+
+        out << "vec" << v->Width();
     }
 
     void EmitArrayType(StringStream& out,
@@ -416,9 +435,30 @@ class Printer : public tint::TextGenerator {
             [&](const core::type::U32*) { out << c->ValueAs<AInt>() << "u"; },
             [&](const core::type::F32*) { PrintF32(out, c->ValueAs<f32>()); },
             [&](const core::type::F16*) { PrintF16(out, c->ValueAs<f16>()); },
+            [&](const core::type::Vector* v) { EmitConstantVector(out, v, c); },
 
             // TODO(dsinclair): Emit remaining constant types
             TINT_ICE_ON_NO_MATCH);
+    }
+
+    void EmitConstantVector(StringStream& out,
+                            const core::type::Vector* v,
+                            const core::constant::Value* c) {
+        EmitType(out, v);
+
+        ScopedParen sp(out);
+
+        if (auto* splat = c->As<core::constant::Splat>()) {
+            EmitConstant(out, splat->el);
+            return;
+        }
+
+        for (size_t i = 0; i < v->Width(); ++i) {
+            if (i > 0) {
+                out << ", ";
+            }
+            EmitConstant(out, c->Index(i));
+        }
     }
 
     void EmitConstantArray(StringStream& out,

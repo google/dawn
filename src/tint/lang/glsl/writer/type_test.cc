@@ -250,8 +250,7 @@ void foo(inout int a) {
 )");
 }
 
-// TODO(dsinclair): Add vector support
-TEST_F(GlslWriterTest, DISABLED_EmitType_Vector_F32) {
+TEST_F(GlslWriterTest, EmitType_Vector_F32) {
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kCompute);
     func->SetWorkgroupSize(1, 1, 1);
     b.Append(func->Block(), [&] {
@@ -263,13 +262,12 @@ TEST_F(GlslWriterTest, DISABLED_EmitType_Vector_F32) {
     EXPECT_EQ(output_.glsl, GlslHeader() + R"(
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void foo() {
-  vec3 a = 0.0f;
+  vec3 a = vec3(0.0f);
 }
 )");
 }
 
-// TODO(dsinclair): Add vector support
-TEST_F(GlslWriterTest, DISABLED_EmitType_Vector_F16) {
+TEST_F(GlslWriterTest, EmitType_Vector_F16) {
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kCompute);
     func->SetWorkgroupSize(1, 1, 1);
     b.Append(func->Block(), [&] {
@@ -278,10 +276,62 @@ TEST_F(GlslWriterTest, DISABLED_EmitType_Vector_F16) {
     });
 
     ASSERT_TRUE(Generate()) << err_ << output_.glsl;
+    EXPECT_EQ(output_.glsl, GlslHeader() + R"(#extension GL_AMD_gpu_shader_half_float: require
+
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+void foo() {
+  f16vec3 a = f16vec3(0.0hf);
+}
+)");
+}
+
+TEST_F(GlslWriterTest, EmitType_Vector_I32) {
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kCompute);
+    func->SetWorkgroupSize(1, 1, 1);
+    b.Append(func->Block(), [&] {
+        b.Var("a", ty.ptr(core::AddressSpace::kPrivate, ty.vec2<i32>()));
+        b.Return(func);
+    });
+
+    ASSERT_TRUE(Generate()) << err_ << output_.glsl;
     EXPECT_EQ(output_.glsl, GlslHeader() + R"(
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void foo() {
-  f16vec3 a = 0.0h;
+  ivec2 a = ivec2(0);
+}
+)");
+}
+
+TEST_F(GlslWriterTest, EmitType_Vector_U32) {
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kCompute);
+    func->SetWorkgroupSize(1, 1, 1);
+    b.Append(func->Block(), [&] {
+        b.Var("a", ty.ptr(core::AddressSpace::kPrivate, ty.vec4<u32>()));
+        b.Return(func);
+    });
+
+    ASSERT_TRUE(Generate()) << err_ << output_.glsl;
+    EXPECT_EQ(output_.glsl, GlslHeader() + R"(
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+void foo() {
+  uvec4 a = uvec4(0u);
+}
+)");
+}
+
+TEST_F(GlslWriterTest, EmitType_Vector_bool) {
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kCompute);
+    func->SetWorkgroupSize(1, 1, 1);
+    b.Append(func->Block(), [&] {
+        b.Var("a", ty.ptr(core::AddressSpace::kPrivate, ty.vec3<bool>()));
+        b.Return(func);
+    });
+
+    ASSERT_TRUE(Generate()) << err_ << output_.glsl;
+    EXPECT_EQ(output_.glsl, GlslHeader() + R"(
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+void foo() {
+  bvec3 a = bvec3(false);
 }
 )");
 }
