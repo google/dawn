@@ -28,12 +28,6 @@
 #ifndef SRC_UTILS_COMPILER_H_
 #define SRC_UTILS_COMPILER_H_
 
-#if defined(__has_attribute)
-#define TINT_HAS_ATTRIBUTE(x) __has_attribute(x)
-#else
-#define TINT_HAS_ATTRIBUTE(x) 0
-#endif
-
 // DAWN_HAS_ATTRIBUTE
 //
 // A wrapper around `__has_attribute`. This test whether its operand is recognized by the compiler.

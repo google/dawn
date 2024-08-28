@@ -33,7 +33,7 @@
 
 #define TINT_REQUIRE_SEMICOLON static_assert(true)
 
-#if TINT_HAS_ATTRIBUTE(no_sanitize)
+#if DAWN_HAS_ATTRIBUTE(no_sanitize)
 #define TINT_NO_SANITIZE(instrumentation) __attribute__((no_sanitize(instrumentation)))
 #else
 #define TINT_NO_SANITIZE(instrumentation)
