@@ -68,3 +68,7 @@ tint_target_add_dependencies(tint_lang_wgsl_writer_syntax_tree_printer lib
   tint_utils_text
   tint_utils_traits
 )
+
+tint_target_add_external_dependencies(tint_lang_wgsl_writer_syntax_tree_printer lib
+  "src_utils"
+)

@@ -72,6 +72,7 @@ tint_target_add_dependencies(tint_cmd_bench_bench_cmd bench_cmd
 
 tint_target_add_external_dependencies(tint_cmd_bench_bench_cmd bench_cmd
   "google-benchmark"
+  "src_utils"
 )
 
 if(TINT_BUILD_GLSL_WRITER AND TINT_BUILD_WGSL_READER)
@@ -155,6 +156,7 @@ tint_target_add_dependencies(tint_cmd_bench_bench bench
 
 tint_target_add_external_dependencies(tint_cmd_bench_bench bench
   "google-benchmark"
+  "src_utils"
 )
 
 if(TINT_BUILD_WGSL_READER)

@@ -74,6 +74,7 @@ cc_library(
     "//src/tint/utils/symbol",
     "//src/tint/utils/text",
     "//src/tint/utils/traits",
+    "//src/utils",
   ],
   copts = COPTS,
   visibility = ["//visibility:public"],
@@ -120,6 +121,7 @@ cc_library(
     "//src/tint/utils/text",
     "//src/tint/utils/traits",
     "@gtest",
+    "//src/utils",
   ] + select({
     ":tint_build_wgsl_writer": [
       "//src/tint/lang/wgsl/writer",

@@ -157,6 +157,7 @@ cc_binary(
 {{-   else if eq $.Name "spirv-tools"           -}}"@spirv_tools",
 {{-   else if eq $.Name "thread"                -}}{{/* unsupported */}}
 {{-   else if eq $.Name "winsock"               -}}{{/* unsupported */}}
+{{-   else if eq $.Name "src_utils"             -}}"//src/utils",
 {{-   else                                      -}}{{Error (printf "unhandled external dependency '%v'" $.Name)}}
 {{-   end}}
 {{- end}}

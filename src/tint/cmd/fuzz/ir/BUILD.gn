@@ -34,6 +34,7 @@
 #                       Do not modify this file directly
 ################################################################################
 
+import("../../../../../scripts/dawn_overrides_with_defaults.gni")
 import("../../../../../scripts/tint_overrides_with_defaults.gni")
 
 import("${tint_src_dir}/tint.gni")
@@ -44,6 +45,7 @@ tint_fuzz_source_set("fuzz") {
     "fuzz.h",
   ]
   deps = [
+    "${dawn_root}/src/utils:utils",
     "${tint_src_dir}:thread",
     "${tint_src_dir}/api/common",
     "${tint_src_dir}/lang/core",
@@ -86,6 +88,7 @@ if (tint_build_ir_binary && tint_build_ir_fuzzer &&
     output_name = "tint_ir_fuzzer"
     sources = [ "main_fuzz.cc" ]
     deps = [
+      "${dawn_root}/src/utils:utils",
       "${tint_lpm_dir}:libprotobuf-mutator",
       "${tint_src_dir}/api/common",
       "${tint_src_dir}/cmd/fuzz/ir:fuzz",

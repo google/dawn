@@ -34,6 +34,7 @@
 #                       Do not modify this file directly
 ################################################################################
 
+import("../../../../scripts/dawn_overrides_with_defaults.gni")
 import("../../../../scripts/tint_overrides_with_defaults.gni")
 
 import("${tint_src_dir}/tint.gni")
@@ -44,7 +45,10 @@ libtint_source_set("socket") {
     "socket.cc",
     "socket.h",
   ]
-  deps = [ "${tint_src_dir}/utils/macros" ]
+  deps = [
+    "${dawn_root}/src/utils:utils",
+    "${tint_src_dir}/utils/macros",
+  ]
 
   if (tint_build_is_win) {
     deps += [ "${tint_src_dir}:winsock" ]

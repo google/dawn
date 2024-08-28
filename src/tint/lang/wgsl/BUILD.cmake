@@ -75,6 +75,10 @@ tint_target_add_dependencies(tint_lang_wgsl lib
   tint_utils_traits
 )
 
+tint_target_add_external_dependencies(tint_lang_wgsl lib
+  "src_utils"
+)
+
 ################################################################################
 # Target:    tint_lang_wgsl_test
 # Kind:      test
@@ -119,6 +123,7 @@ tint_target_add_dependencies(tint_lang_wgsl_test test
 
 tint_target_add_external_dependencies(tint_lang_wgsl_test test
   "gtest"
+  "src_utils"
 )
 
 if(TINT_BUILD_WGSL_READER)
@@ -165,6 +170,7 @@ tint_target_add_dependencies(tint_lang_wgsl_bench bench
 
 tint_target_add_external_dependencies(tint_lang_wgsl_bench bench
   "google-benchmark"
+  "src_utils"
 )
 
 ################################################################################
@@ -205,6 +211,10 @@ tint_target_add_dependencies(tint_lang_wgsl_fuzz fuzz
   tint_utils_symbol
   tint_utils_text
   tint_utils_traits
+)
+
+tint_target_add_external_dependencies(tint_lang_wgsl_fuzz fuzz
+  "src_utils"
 )
 
 if(TINT_BUILD_WGSL_READER)

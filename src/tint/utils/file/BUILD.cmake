@@ -48,6 +48,10 @@ tint_target_add_dependencies(tint_utils_file lib
   tint_utils_text
 )
 
+tint_target_add_external_dependencies(tint_utils_file lib
+  "src_utils"
+)
+
 if((NOT TINT_BUILD_IS_LINUX) AND (NOT TINT_BUILD_IS_MAC) AND (NOT TINT_BUILD_IS_WIN))
   tint_target_add_sources(tint_utils_file lib
     "utils/file/tmpfile_other.cc"

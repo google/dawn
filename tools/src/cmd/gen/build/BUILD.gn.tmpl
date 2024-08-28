@@ -1,5 +1,6 @@
 
 import("{{Repeat "../" .Depth}}../../../scripts/tint_overrides_with_defaults.gni")
+import("{{Repeat "../" .Depth}}../../../scripts/dawn_overrides_with_defaults.gni")
 
 import("${tint_src_dir}/tint.gni")
 
@@ -181,6 +182,7 @@ tint_fuzzer_test("{{$.Directory.Name}}") {
 {{-   else if eq $.Name "spirv-tools"           -}}"${tint_spirv_tools_dir}:spvtools_headers", "${tint_spirv_tools_dir}:spvtools_val",
 {{-   else if eq $.Name "thread"                -}}"${tint_src_dir}:thread",
 {{-   else if eq $.Name "winsock"               -}}"${tint_src_dir}:winsock",
+{{-   else if eq $.Name "src_utils"             -}}"${dawn_root}/src/utils:utils",
 {{-   else                                      -}}{{Error (printf "unhandled external dependency '%v'" $.Name)}}
 {{-   end}}
 {{- end}}

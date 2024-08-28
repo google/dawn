@@ -72,6 +72,7 @@ cc_library(
     "//src/tint/utils/symbol",
     "//src/tint/utils/text",
     "//src/tint/utils/traits",
+    "//src/utils",
   ] + select({
     ":tint_build_wgsl_reader": [
       "//src/tint/lang/wgsl/reader/parser",
@@ -104,6 +105,7 @@ cc_library(
     "//src/tint/utils/text",
     "//src/tint/utils/traits",
     "@gtest",
+    "//src/utils",
   ] + select({
     ":tint_build_wgsl_reader": [
       "//src/tint/lang/wgsl/reader",
@@ -145,6 +147,7 @@ cc_library(
     "//src/tint/utils/text",
     "//src/tint/utils/traits",
     "@benchmark",
+    "//src/utils",
   ] + select({
     ":tint_build_wgsl_reader": [
       "//src/tint/cmd/bench:bench",

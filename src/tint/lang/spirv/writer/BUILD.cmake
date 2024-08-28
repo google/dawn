@@ -74,6 +74,10 @@ tint_target_add_dependencies(tint_lang_spirv_writer lib
   tint_utils_traits
 )
 
+tint_target_add_external_dependencies(tint_lang_spirv_writer lib
+  "src_utils"
+)
+
 if(TINT_BUILD_SPV_READER OR TINT_BUILD_SPV_WRITER)
   tint_target_add_external_dependencies(tint_lang_spirv_writer lib
     "spirv-headers"
@@ -142,6 +146,7 @@ tint_target_add_dependencies(tint_lang_spirv_writer_test test
 
 tint_target_add_external_dependencies(tint_lang_spirv_writer_test test
   "gtest"
+  "src_utils"
 )
 
 if(TINT_BUILD_SPV_READER OR TINT_BUILD_SPV_WRITER)
@@ -199,6 +204,7 @@ tint_target_add_dependencies(tint_lang_spirv_writer_bench bench
 
 tint_target_add_external_dependencies(tint_lang_spirv_writer_bench bench
   "google-benchmark"
+  "src_utils"
 )
 
 if(TINT_BUILD_SPV_WRITER)
@@ -247,6 +253,10 @@ tint_target_add_dependencies(tint_lang_spirv_writer_fuzz fuzz
   tint_utils_symbol
   tint_utils_text
   tint_utils_traits
+)
+
+tint_target_add_external_dependencies(tint_lang_spirv_writer_fuzz fuzz
+  "src_utils"
 )
 
 if(TINT_BUILD_SPV_READER OR TINT_BUILD_SPV_WRITER)

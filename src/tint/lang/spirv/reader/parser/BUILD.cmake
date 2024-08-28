@@ -67,6 +67,10 @@ tint_target_add_dependencies(tint_lang_spirv_reader_parser lib
   tint_utils_traits
 )
 
+tint_target_add_external_dependencies(tint_lang_spirv_reader_parser lib
+  "src_utils"
+)
+
 if(TINT_BUILD_SPV_READER OR TINT_BUILD_SPV_WRITER)
   tint_target_add_dependencies(tint_lang_spirv_reader_parser lib
     tint_lang_spirv_validate
@@ -118,6 +122,7 @@ tint_target_add_dependencies(tint_lang_spirv_reader_parser_test test
 
 tint_target_add_external_dependencies(tint_lang_spirv_reader_parser_test test
   "gtest"
+  "src_utils"
 )
 
 if(TINT_BUILD_SPV_READER)

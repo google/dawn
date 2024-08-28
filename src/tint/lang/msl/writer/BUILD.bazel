@@ -71,6 +71,7 @@ cc_library(
     "//src/tint/utils/symbol",
     "//src/tint/utils/text",
     "//src/tint/utils/traits",
+    "//src/utils",
   ] + select({
     ":tint_build_msl_writer": [
       "//src/tint/lang/msl/writer/ast_printer",
@@ -120,6 +121,7 @@ cc_library(
     "//src/tint/utils/text",
     "//src/tint/utils/traits",
     "@gtest",
+    "//src/utils",
   ] + select({
     ":tint_build_msl_writer": [
       "//src/tint/lang/msl/validate",
@@ -162,6 +164,7 @@ cc_library(
     "//src/tint/utils/text",
     "//src/tint/utils/traits",
     "@benchmark",
+    "//src/utils",
   ] + select({
     ":tint_build_msl_writer": [
       "//src/tint/lang/msl/writer",

@@ -66,6 +66,7 @@ cc_library(
     "//src/tint/utils/symbol",
     "//src/tint/utils/text",
     "//src/tint/utils/traits",
+    "//src/utils",
   ],
   copts = COPTS,
   visibility = ["//visibility:public"],

@@ -269,6 +269,7 @@ target_include_directories(dawn_public_config INTERFACE
 # The internal config contains additional path but includes the dawn_public_config include paths
 add_library(dawn_internal_config INTERFACE)
 target_include_directories(dawn_internal_config INTERFACE
+    "${PROJECT_SOURCE_DIR}"
     "${DAWN_SRC_DIR}"
     "${DAWN_BUILD_GEN_DIR}/src"
 )
@@ -420,6 +421,9 @@ add_subdirectory(third_party)
 # BUILD_SHARED_LIBS=1, so always build it as static for now.
 set(BUILD_SHARED_LIBS_SAVED ${BUILD_SHARED_LIBS})
 set(BUILD_SHARED_LIBS 0)
+
+add_subdirectory(src/utils)
+
 # Only build Tint when we are not building under Emscripten.
 if (NOT ${DAWN_ENABLE_EMSCRIPTEN})
   add_subdirectory(src/tint)

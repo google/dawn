@@ -28,6 +28,8 @@
 #ifndef SRC_DAWN_COMMON_COMPILER_H_
 #define SRC_DAWN_COMMON_COMPILER_H_
 
+#include "src/utils/compiler.h"
+
 // Defines macros for compiler-specific functionality
 
 // DAWN_COMPILER_IS(CLANG|GCC|MSVC): Compiler detection
@@ -54,25 +56,6 @@
 // This can help avoid common mistakes like not including "Compiler.h" and falling into unwanted
 // code block as usage of undefined macro "function" will be blocked by the compiler.
 #define DAWN_COMPILER_IS(X) (1 == DAWN_COMPILER_IS_##X)
-
-// DAWN_HAS_ATTRIBUTE
-//
-// A wrapper around `__has_attribute`. This test whether its operand is recognized by the compiler.
-#if defined(__has_attribute)
-#define DAWN_HAS_ATTRIBUTE(x) __has_attribute(x)
-#else
-#define DAWN_HAS_ATTRIBUTE(x) 0
-#endif
-
-// DAWN_HAS_CPP_ATTRIBUTE
-//
-// A wrapper around `__has_cpp_attribute`. This test whether its operand is recognized by the
-// compiler.
-#if defined(__has_cpp_attribute)
-#define DAWN_HAS_CPP_ATTRIBUTE(x) __has_cpp_attribute(x)
-#else
-#define DAWN_HAS_CPP_ATTRIBUTE(x) 0
-#endif
 
 // DAWN_BUILTIN_UNREACHABLE()
 //

@@ -73,6 +73,7 @@ cc_library(
     "//src/tint/utils/symbol",
     "//src/tint/utils/text",
     "//src/tint/utils/traits",
+    "//src/utils",
   ] + select({
     ":tint_build_hlsl_writer": [
       "//src/tint/lang/hlsl/writer/ast_raise",
@@ -148,6 +149,7 @@ cc_library(
     "//src/tint/utils/text",
     "//src/tint/utils/traits",
     "@gtest",
+    "//src/utils",
   ] + select({
     ":tint_build_hlsl_writer": [
       "//src/tint/lang/hlsl/writer",

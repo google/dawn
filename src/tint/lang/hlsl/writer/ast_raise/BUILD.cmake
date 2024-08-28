@@ -83,6 +83,10 @@ tint_target_add_dependencies(tint_lang_hlsl_writer_ast_raise lib
   tint_utils_traits
 )
 
+tint_target_add_external_dependencies(tint_lang_hlsl_writer_ast_raise lib
+  "src_utils"
+)
+
 endif(TINT_BUILD_HLSL_WRITER)
 if(TINT_BUILD_HLSL_WRITER AND TINT_BUILD_WGSL_READER AND TINT_BUILD_WGSL_WRITER)
 ################################################################################
@@ -130,6 +134,7 @@ tint_target_add_dependencies(tint_lang_hlsl_writer_ast_raise_test test
 
 tint_target_add_external_dependencies(tint_lang_hlsl_writer_ast_raise_test test
   "gtest"
+  "src_utils"
 )
 
 if(TINT_BUILD_HLSL_WRITER)

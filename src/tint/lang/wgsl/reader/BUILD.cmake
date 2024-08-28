@@ -79,6 +79,10 @@ tint_target_add_dependencies(tint_lang_wgsl_reader lib
   tint_utils_traits
 )
 
+tint_target_add_external_dependencies(tint_lang_wgsl_reader lib
+  "src_utils"
+)
+
 if(TINT_BUILD_WGSL_READER)
   tint_target_add_dependencies(tint_lang_wgsl_reader lib
     tint_lang_wgsl_reader_parser
@@ -116,6 +120,7 @@ tint_target_add_dependencies(tint_lang_wgsl_reader_test test
 
 tint_target_add_external_dependencies(tint_lang_wgsl_reader_test test
   "gtest"
+  "src_utils"
 )
 
 if(TINT_BUILD_WGSL_READER)
@@ -164,6 +169,7 @@ tint_target_add_dependencies(tint_lang_wgsl_reader_bench bench
 
 tint_target_add_external_dependencies(tint_lang_wgsl_reader_bench bench
   "google-benchmark"
+  "src_utils"
 )
 
 if(TINT_BUILD_WGSL_READER)

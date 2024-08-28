@@ -74,6 +74,10 @@ tint_target_add_dependencies(tint_lang_wgsl_inspector lib
   tint_utils_traits
 )
 
+tint_target_add_external_dependencies(tint_lang_wgsl_inspector lib
+  "src_utils"
+)
+
 if(TINT_BUILD_WGSL_READER)
 ################################################################################
 # Target:    tint_lang_wgsl_inspector_test
@@ -119,6 +123,7 @@ tint_target_add_dependencies(tint_lang_wgsl_inspector_test test
 
 tint_target_add_external_dependencies(tint_lang_wgsl_inspector_test test
   "gtest"
+  "src_utils"
 )
 
 if(TINT_BUILD_WGSL_READER)

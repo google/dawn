@@ -34,6 +34,7 @@
 #                       Do not modify this file directly
 ################################################################################
 
+import("../../../../../../scripts/dawn_overrides_with_defaults.gni")
 import("../../../../../../scripts/tint_overrides_with_defaults.gni")
 
 import("${tint_src_dir}/tint.gni")
@@ -48,6 +49,7 @@ if (tint_build_spv_reader) {
       "options.h",
     ]
     deps = [
+      "${dawn_root}/src/utils:utils",
       "${tint_src_dir}/lang/wgsl",
       "${tint_src_dir}/lang/wgsl/common",
       "${tint_src_dir}/lang/wgsl/features",
@@ -70,6 +72,7 @@ if (tint_build_unittests) {
     tint_unittests_source_set("unittests") {
       sources = [ "helper_test.h" ]
       deps = [
+        "${dawn_root}/src/utils:utils",
         "${tint_src_dir}/utils/containers",
         "${tint_src_dir}/utils/diagnostic",
         "${tint_src_dir}/utils/ice",

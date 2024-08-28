@@ -71,6 +71,10 @@ tint_target_add_dependencies(tint_lang_wgsl_writer_ast_printer lib
   tint_utils_traits
 )
 
+tint_target_add_external_dependencies(tint_lang_wgsl_writer_ast_printer lib
+  "src_utils"
+)
+
 endif(TINT_BUILD_WGSL_WRITER)
 if(TINT_BUILD_WGSL_WRITER)
 ################################################################################
@@ -143,6 +147,7 @@ tint_target_add_dependencies(tint_lang_wgsl_writer_ast_printer_test test
 
 tint_target_add_external_dependencies(tint_lang_wgsl_writer_ast_printer_test test
   "gtest"
+  "src_utils"
 )
 
 if(TINT_BUILD_WGSL_WRITER)

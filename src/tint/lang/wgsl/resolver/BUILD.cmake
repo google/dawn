@@ -85,6 +85,10 @@ tint_target_add_dependencies(tint_lang_wgsl_resolver lib
   tint_utils_traits
 )
 
+tint_target_add_external_dependencies(tint_lang_wgsl_resolver lib
+  "src_utils"
+)
+
 ################################################################################
 # Target:    tint_lang_wgsl_resolver_test
 # Kind:      test
@@ -190,6 +194,7 @@ tint_target_add_dependencies(tint_lang_wgsl_resolver_test test
 
 tint_target_add_external_dependencies(tint_lang_wgsl_resolver_test test
   "gtest"
+  "src_utils"
 )
 
 if(TINT_BUILD_WGSL_READER)

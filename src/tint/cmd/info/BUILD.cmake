@@ -70,6 +70,10 @@ tint_target_add_dependencies(tint_cmd_info_cmd cmd
   tint_utils_traits
 )
 
+tint_target_add_external_dependencies(tint_cmd_info_cmd cmd
+  "src_utils"
+)
+
 if(TINT_BUILD_SPV_READER)
   tint_target_add_dependencies(tint_cmd_info_cmd cmd
     tint_lang_spirv_reader_common

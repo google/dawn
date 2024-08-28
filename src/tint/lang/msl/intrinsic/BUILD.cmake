@@ -65,3 +65,7 @@ tint_target_add_dependencies(tint_lang_msl_intrinsic lib
   tint_utils_text
   tint_utils_traits
 )
+
+tint_target_add_external_dependencies(tint_lang_msl_intrinsic lib
+  "src_utils"
+)

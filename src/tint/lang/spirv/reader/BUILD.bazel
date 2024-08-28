@@ -70,6 +70,7 @@ cc_library(
     "//src/tint/utils/symbol",
     "//src/tint/utils/text",
     "//src/tint/utils/traits",
+    "//src/utils",
   ] + select({
     ":tint_build_spv_reader": [
       "//src/tint/lang/spirv/reader/ast_parser",
@@ -113,6 +114,7 @@ cc_library(
     "//src/tint/utils/text",
     "//src/tint/utils/traits",
     "@gtest",
+    "//src/utils",
   ] + select({
     ":tint_build_spv_reader": [
       "//src/tint/lang/spirv/reader",

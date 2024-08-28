@@ -97,5 +97,10 @@
       "IncludePatterns": [
           "libprotobuf-mutator/**"
       ]
+    },
+    "src_utils": {
+        "IncludePatterns": [
+            "src/utils/*",
+        ]
     }
 }

@@ -72,6 +72,10 @@ tint_target_add_dependencies(tint_lang_msl_writer_printer lib
   tint_utils_traits
 )
 
+tint_target_add_external_dependencies(tint_lang_msl_writer_printer lib
+  "src_utils"
+)
+
 if(TINT_BUILD_MSL_WRITER)
   tint_target_add_dependencies(tint_lang_msl_writer_printer lib
     tint_lang_msl_writer_common

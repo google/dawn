@@ -69,6 +69,7 @@ cc_library(
     "//src/tint/utils/text",
     "//src/tint/utils/traits",
     "@benchmark",
+    "//src/utils",
   ] + select({
     ":tint_build_wgsl_reader": [
       "//src/tint/lang/wgsl/reader",
@@ -108,6 +109,7 @@ cc_binary(
     "//src/tint/utils/text",
     "//src/tint/utils/traits",
     "@benchmark",
+    "//src/utils",
   ] + select({
     ":tint_build_glsl_writer_and_tint_build_wgsl_reader": [
       "//src/tint/lang/glsl/writer:bench",

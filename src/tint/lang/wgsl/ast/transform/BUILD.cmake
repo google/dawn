@@ -143,6 +143,10 @@ tint_target_add_dependencies(tint_lang_wgsl_ast_transform lib
   tint_utils_traits
 )
 
+tint_target_add_external_dependencies(tint_lang_wgsl_ast_transform lib
+  "src_utils"
+)
+
 if(TINT_BUILD_WGSL_READER AND TINT_BUILD_WGSL_WRITER)
 ################################################################################
 # Target:    tint_lang_wgsl_ast_transform_test
@@ -226,6 +230,7 @@ tint_target_add_dependencies(tint_lang_wgsl_ast_transform_test test
 
 tint_target_add_external_dependencies(tint_lang_wgsl_ast_transform_test test
   "gtest"
+  "src_utils"
 )
 
 if(TINT_BUILD_WGSL_READER)

@@ -81,6 +81,7 @@ cc_library(
     "//src/tint/utils/symbol",
     "//src/tint/utils/text",
     "//src/tint/utils/traits",
+    "//src/utils",
   ] + select({
     ":tint_build_msl_writer": [
       "//src/tint/lang/msl/writer/common",
@@ -122,6 +123,7 @@ cc_library(
     "//src/tint/utils/text",
     "//src/tint/utils/traits",
     "@gtest",
+    "//src/utils",
   ] + select({
     ":tint_build_msl_writer": [
       "//src/tint/lang/msl/writer/raise",

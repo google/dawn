@@ -34,6 +34,7 @@
 #                       Do not modify this file directly
 ################################################################################
 
+import("../../../../scripts/dawn_overrides_with_defaults.gni")
 import("../../../../scripts/tint_overrides_with_defaults.gni")
 
 import("${tint_src_dir}/tint.gni")
@@ -50,6 +51,7 @@ libtint_source_set("strconv") {
     "parse_num.h",
   ]
   deps = [
+    "${dawn_root}/src/utils:utils",
     "${tint_src_dir}:abseil",
     "${tint_src_dir}/utils/containers",
     "${tint_src_dir}/utils/diagnostic",

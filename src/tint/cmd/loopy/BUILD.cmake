@@ -77,6 +77,10 @@ tint_target_add_dependencies(tint_cmd_loopy_cmd cmd
   tint_utils_traits
 )
 
+tint_target_add_external_dependencies(tint_cmd_loopy_cmd cmd
+  "src_utils"
+)
+
 if(TINT_BUILD_GLSL_WRITER)
   tint_target_add_dependencies(tint_cmd_loopy_cmd cmd
     tint_lang_glsl_writer

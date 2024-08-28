@@ -60,6 +60,7 @@ tint_target_add_dependencies(tint_utils_strconv lib
 
 tint_target_add_external_dependencies(tint_utils_strconv lib
   "abseil"
+  "src_utils"
 )
 
 ################################################################################

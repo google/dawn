@@ -75,6 +75,10 @@ tint_target_add_dependencies(tint_lang_wgsl_writer_ir_to_program lib
   tint_utils_traits
 )
 
+tint_target_add_external_dependencies(tint_lang_wgsl_writer_ir_to_program lib
+  "src_utils"
+)
+
 ################################################################################
 # Target:    tint_lang_wgsl_writer_ir_to_program_test
 # Kind:      test
@@ -117,6 +121,7 @@ tint_target_add_dependencies(tint_lang_wgsl_writer_ir_to_program_test test
 
 tint_target_add_external_dependencies(tint_lang_wgsl_writer_ir_to_program_test test
   "gtest"
+  "src_utils"
 )
 
 if(TINT_BUILD_WGSL_WRITER)

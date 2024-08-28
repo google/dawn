@@ -72,6 +72,7 @@ cc_binary(
     "//src/tint/utils/symbol",
     "//src/tint/utils/text",
     "//src/tint/utils/traits",
+    "//src/utils",
   ] + select({
     ":tint_build_ir_binary": [
       "//src/tint/lang/core/ir/binary",

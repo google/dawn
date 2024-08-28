@@ -77,6 +77,10 @@ tint_target_add_dependencies(tint_cmd_fuzz_ir_as_cmd cmd
   tint_utils_traits
 )
 
+tint_target_add_external_dependencies(tint_cmd_fuzz_ir_as_cmd cmd
+  "src_utils"
+)
+
 if(TINT_BUILD_IR_BINARY)
   tint_target_add_dependencies(tint_cmd_fuzz_ir_as_cmd cmd
     tint_lang_core_ir_binary

@@ -76,6 +76,10 @@ tint_target_add_dependencies(tint_lang_wgsl_helpers lib
   tint_utils_traits
 )
 
+tint_target_add_external_dependencies(tint_lang_wgsl_helpers lib
+  "src_utils"
+)
+
 ################################################################################
 # Target:    tint_lang_wgsl_helpers_test
 # Kind:      test
@@ -119,4 +123,5 @@ tint_target_add_dependencies(tint_lang_wgsl_helpers_test test
 
 tint_target_add_external_dependencies(tint_lang_wgsl_helpers_test test
   "gtest"
+  "src_utils"
 )

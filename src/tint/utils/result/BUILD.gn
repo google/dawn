@@ -34,6 +34,7 @@
 #                       Do not modify this file directly
 ################################################################################
 
+import("../../../../scripts/dawn_overrides_with_defaults.gni")
 import("../../../../scripts/tint_overrides_with_defaults.gni")
 
 import("${tint_src_dir}/tint.gni")
@@ -48,6 +49,7 @@ libtint_source_set("result") {
     "result.h",
   ]
   deps = [
+    "${dawn_root}/src/utils:utils",
     "${tint_src_dir}/utils/containers",
     "${tint_src_dir}/utils/diagnostic",
     "${tint_src_dir}/utils/ice",
@@ -63,6 +65,7 @@ if (tint_build_unittests) {
   tint_unittests_source_set("unittests") {
     sources = [ "result_test.cc" ]
     deps = [
+      "${dawn_root}/src/utils:utils",
       "${tint_src_dir}:gmock_and_gtest",
       "${tint_src_dir}/utils/containers",
       "${tint_src_dir}/utils/diagnostic",

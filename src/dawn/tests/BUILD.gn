@@ -47,6 +47,7 @@ group("tests") {
     ":dawn_perf_tests",
     ":dawn_unittests",
     "${dawn_root}/src/dawn/tests/benchmarks:dawn_benchmarks",
+    "${dawn_root}/src/utils",
   ]
 }
 

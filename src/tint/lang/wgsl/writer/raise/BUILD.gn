@@ -34,6 +34,7 @@
 #                       Do not modify this file directly
 ################################################################################
 
+import("../../../../../../scripts/dawn_overrides_with_defaults.gni")
 import("../../../../../../scripts/tint_overrides_with_defaults.gni")
 
 import("${tint_src_dir}/tint.gni")
@@ -52,6 +53,7 @@ libtint_source_set("raise") {
     "value_to_let.h",
   ]
   deps = [
+    "${dawn_root}/src/utils:utils",
     "${tint_src_dir}/api/common",
     "${tint_src_dir}/lang/core",
     "${tint_src_dir}/lang/core/constant",
@@ -85,6 +87,7 @@ if (tint_build_unittests) {
       "value_to_let_test.cc",
     ]
     deps = [
+      "${dawn_root}/src/utils:utils",
       "${tint_src_dir}:gmock_and_gtest",
       "${tint_src_dir}/api/common",
       "${tint_src_dir}/lang/core",
@@ -118,6 +121,7 @@ tint_fuzz_source_set("fuzz") {
     "value_to_let_fuzz.cc",
   ]
   deps = [
+    "${dawn_root}/src/utils:utils",
     "${tint_src_dir}/api/common",
     "${tint_src_dir}/cmd/fuzz/ir:fuzz",
     "${tint_src_dir}/lang/core",

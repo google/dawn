@@ -69,6 +69,10 @@ tint_target_add_dependencies(tint_lang_core_ir_binary lib
   tint_utils_traits
 )
 
+tint_target_add_external_dependencies(tint_lang_core_ir_binary lib
+  "src_utils"
+)
+
 if(TINT_BUILD_IR_BINARY)
   tint_target_add_dependencies(tint_lang_core_ir_binary lib
     tint_utils_protos_ir_proto
@@ -111,6 +115,7 @@ tint_target_add_dependencies(tint_lang_core_ir_binary_test test
 
 tint_target_add_external_dependencies(tint_lang_core_ir_binary_test test
   "gtest"
+  "src_utils"
 )
 
 if(TINT_BUILD_IR_BINARY)
@@ -151,6 +156,10 @@ tint_target_add_dependencies(tint_lang_core_ir_binary_fuzz fuzz
   tint_utils_symbol
   tint_utils_text
   tint_utils_traits
+)
+
+tint_target_add_external_dependencies(tint_lang_core_ir_binary_fuzz fuzz
+  "src_utils"
 )
 
 if(TINT_BUILD_IR_BINARY)

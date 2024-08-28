@@ -58,6 +58,10 @@ tint_target_add_dependencies(tint_api_common lib
   tint_utils_traits
 )
 
+tint_target_add_external_dependencies(tint_api_common lib
+  "src_utils"
+)
+
 ################################################################################
 # Target:    tint_api_common_test
 # Kind:      test
@@ -84,4 +88,5 @@ tint_target_add_dependencies(tint_api_common_test test
 
 tint_target_add_external_dependencies(tint_api_common_test test
   "gtest"
+  "src_utils"
 )

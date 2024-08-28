@@ -93,6 +93,10 @@ tint_target_add_dependencies(tint_lang_core lib
   tint_utils_traits
 )
 
+tint_target_add_external_dependencies(tint_lang_core lib
+  "src_utils"
+)
+
 ################################################################################
 # Target:    tint_lang_core_test
 # Kind:      test
@@ -136,6 +140,7 @@ tint_target_add_dependencies(tint_lang_core_test test
 
 tint_target_add_external_dependencies(tint_lang_core_test test
   "gtest"
+  "src_utils"
 )
 
 ################################################################################
@@ -170,4 +175,5 @@ tint_target_add_dependencies(tint_lang_core_bench bench
 
 tint_target_add_external_dependencies(tint_lang_core_bench bench
   "google-benchmark"
+  "src_utils"
 )

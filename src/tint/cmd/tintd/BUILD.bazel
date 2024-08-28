@@ -52,6 +52,7 @@ cc_binary(
     "//src/tint/utils/rtti",
     "//src/tint/utils/text",
     "//src/tint/utils/traits",
+    "//src/utils",
   ] + select({
     ":tint_build_tintd": [
       

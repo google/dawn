@@ -66,6 +66,10 @@ tint_target_add_dependencies(tint_lang_spirv_writer_helpers lib
   tint_utils_traits
 )
 
+tint_target_add_external_dependencies(tint_lang_spirv_writer_helpers lib
+  "src_utils"
+)
+
 if(TINT_BUILD_SPV_WRITER)
   tint_target_add_dependencies(tint_lang_spirv_writer_helpers lib
     tint_lang_spirv_writer_common

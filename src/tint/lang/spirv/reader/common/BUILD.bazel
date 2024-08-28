@@ -59,6 +59,7 @@ cc_library(
     "//src/tint/utils/rtti",
     "//src/tint/utils/text",
     "//src/tint/utils/traits",
+    "//src/utils",
   ],
   copts = COPTS,
   visibility = ["//visibility:public"],
@@ -80,6 +81,7 @@ cc_library(
     "//src/tint/utils/rtti",
     "//src/tint/utils/text",
     "//src/tint/utils/traits",
+    "//src/utils",
   ] + select({
     ":tint_build_spv_reader_or_tint_build_spv_writer": [
       "@spirv_tools",

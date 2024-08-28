@@ -34,6 +34,7 @@
 #                       Do not modify this file directly
 ################################################################################
 
+import("../../../../scripts/dawn_overrides_with_defaults.gni")
 import("../../../../scripts/tint_overrides_with_defaults.gni")
 
 import("${tint_src_dir}/tint.gni")
@@ -51,6 +52,7 @@ libtint_source_set("rtti") {
     "switch.h",
   ]
   deps = [
+    "${dawn_root}/src/utils:utils",
     "${tint_src_dir}/utils/ice",
     "${tint_src_dir}/utils/macros",
     "${tint_src_dir}/utils/math",
@@ -65,6 +67,7 @@ if (tint_build_unittests) {
       "switch_test.cc",
     ]
     deps = [
+      "${dawn_root}/src/utils:utils",
       "${tint_src_dir}:gmock_and_gtest",
       "${tint_src_dir}/utils/macros",
       "${tint_src_dir}/utils/math",
@@ -78,6 +81,7 @@ if (tint_build_benchmarks) {
   tint_benchmarks_source_set("bench") {
     sources = [ "switch_bench.cc" ]
     deps = [
+      "${dawn_root}/src/utils:utils",
       "${tint_src_dir}:google_benchmark",
       "${tint_src_dir}/utils/macros",
       "${tint_src_dir}/utils/math",

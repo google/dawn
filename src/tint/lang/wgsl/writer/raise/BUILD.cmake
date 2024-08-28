@@ -73,6 +73,10 @@ tint_target_add_dependencies(tint_lang_wgsl_writer_raise lib
   tint_utils_traits
 )
 
+tint_target_add_external_dependencies(tint_lang_wgsl_writer_raise lib
+  "src_utils"
+)
+
 ################################################################################
 # Target:    tint_lang_wgsl_writer_raise_test
 # Kind:      test
@@ -109,6 +113,7 @@ tint_target_add_dependencies(tint_lang_wgsl_writer_raise_test test
 
 tint_target_add_external_dependencies(tint_lang_wgsl_writer_raise_test test
   "gtest"
+  "src_utils"
 )
 
 ################################################################################
@@ -143,4 +148,8 @@ tint_target_add_dependencies(tint_lang_wgsl_writer_raise_fuzz fuzz
   tint_utils_symbol
   tint_utils_text
   tint_utils_traits
+)
+
+tint_target_add_external_dependencies(tint_lang_wgsl_writer_raise_fuzz fuzz
+  "src_utils"
 )

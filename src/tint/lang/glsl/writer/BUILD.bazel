@@ -71,6 +71,7 @@ cc_library(
     "//src/tint/utils/symbol",
     "//src/tint/utils/text",
     "//src/tint/utils/traits",
+    "//src/utils",
   ] + select({
     ":tint_build_glsl_writer": [
       "//src/tint/lang/glsl/writer/ast_printer",
@@ -125,6 +126,7 @@ cc_library(
     "//src/tint/utils/text",
     "//src/tint/utils/traits",
     "@gtest",
+    "//src/utils",
   ] + select({
     ":tint_build_glsl_validator": [
       "//src/tint/lang/glsl/validate",
@@ -171,6 +173,7 @@ cc_library(
     "//src/tint/utils/text",
     "//src/tint/utils/traits",
     "@benchmark",
+    "//src/utils",
   ] + select({
     ":tint_build_glsl_writer": [
       "//src/tint/lang/glsl/writer",

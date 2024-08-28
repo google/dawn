@@ -98,6 +98,7 @@ tint_target_add_dependencies(tint_lang_wgsl_ls lib
 )
 
 tint_target_add_external_dependencies(tint_lang_wgsl_ls lib
+  "src_utils"
   "thread"
 )
 
@@ -160,6 +161,7 @@ tint_target_add_dependencies(tint_lang_wgsl_ls_test test
 
 tint_target_add_external_dependencies(tint_lang_wgsl_ls_test test
   "gtest"
+  "src_utils"
 )
 
 if(TINT_BUILD_TINTD)

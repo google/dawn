@@ -34,6 +34,7 @@
 #                       Do not modify this file directly
 ################################################################################
 
+import("../../../../scripts/dawn_overrides_with_defaults.gni")
 import("../../../../scripts/tint_overrides_with_defaults.gni")
 
 import("${tint_src_dir}/tint.gni")
@@ -49,6 +50,7 @@ if (tint_build_benchmarks) {
         "bench.h",
       ]
       deps = [
+        "${dawn_root}/src/utils:utils",
         "${tint_src_dir}:google_benchmark",
         "${tint_src_dir}/api/common",
         "${tint_src_dir}/lang/core",
@@ -89,6 +91,7 @@ if (tint_build_benchmarks) {
       output_name = "tint_benchmark"
       sources = [ "main_bench.cc" ]
       deps = [
+        "${dawn_root}/src/utils:utils",
         "${tint_src_dir}:google_benchmark",
         "${tint_src_dir}/lang/core",
         "${tint_src_dir}/lang/core:bench",

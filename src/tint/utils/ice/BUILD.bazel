@@ -47,6 +47,7 @@ cc_library(
   deps = [
     "//src/tint/utils/debug",
     "//src/tint/utils/macros",
+    "//src/utils",
   ],
   copts = COPTS,
   visibility = ["//visibility:public"],
@@ -61,6 +62,7 @@ cc_library(
     "//src/tint/utils/ice",
     "//src/tint/utils/macros",
     "@gtest",
+    "//src/utils",
   ],
   copts = COPTS,
   visibility = ["//visibility:public"],

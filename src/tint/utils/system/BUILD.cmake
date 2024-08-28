@@ -53,6 +53,10 @@ tint_target_add_dependencies(tint_utils_system lib
   tint_utils_traits
 )
 
+tint_target_add_external_dependencies(tint_utils_system lib
+  "src_utils"
+)
+
 if((NOT TINT_BUILD_IS_LINUX) AND (NOT TINT_BUILD_IS_MAC) AND (NOT TINT_BUILD_IS_WIN))
   tint_target_add_sources(tint_utils_system lib
     "utils/system/terminal_other.cc"

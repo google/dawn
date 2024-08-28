@@ -48,6 +48,7 @@ tint_target_add_dependencies(tint_cmd_remote_compile_cmd cmd
 )
 
 tint_target_add_external_dependencies(tint_cmd_remote_compile_cmd cmd
+  "src_utils"
   "thread"
 )
 

@@ -74,6 +74,10 @@ tint_target_add_dependencies(tint_lang_wgsl_reader_program_to_ir lib
   tint_utils_traits
 )
 
+tint_target_add_external_dependencies(tint_lang_wgsl_reader_program_to_ir lib
+  "src_utils"
+)
+
 endif(TINT_BUILD_WGSL_READER)
 if(TINT_BUILD_WGSL_READER)
 ################################################################################
@@ -129,6 +133,7 @@ tint_target_add_dependencies(tint_lang_wgsl_reader_program_to_ir_test test
 
 tint_target_add_external_dependencies(tint_lang_wgsl_reader_program_to_ir_test test
   "gtest"
+  "src_utils"
 )
 
 if(TINT_BUILD_WGSL_READER)

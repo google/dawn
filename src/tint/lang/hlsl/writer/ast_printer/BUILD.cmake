@@ -76,6 +76,10 @@ tint_target_add_dependencies(tint_lang_hlsl_writer_ast_printer lib
   tint_utils_traits
 )
 
+tint_target_add_external_dependencies(tint_lang_hlsl_writer_ast_printer lib
+  "src_utils"
+)
+
 if(TINT_BUILD_HLSL_WRITER)
   tint_target_add_dependencies(tint_lang_hlsl_writer_ast_printer lib
     tint_lang_hlsl_writer_ast_raise
@@ -156,6 +160,7 @@ tint_target_add_dependencies(tint_lang_hlsl_writer_ast_printer_test test
 
 tint_target_add_external_dependencies(tint_lang_hlsl_writer_ast_printer_test test
   "gtest"
+  "src_utils"
 )
 
 if(TINT_BUILD_HLSL_WRITER)

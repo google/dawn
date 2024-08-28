@@ -48,6 +48,10 @@ tint_add_target(tint_utils_macros lib
   utils/macros/static_init.h
 )
 
+tint_target_add_external_dependencies(tint_utils_macros lib
+  "src_utils"
+)
+
 ################################################################################
 # Target:    tint_utils_macros_test
 # Kind:      test

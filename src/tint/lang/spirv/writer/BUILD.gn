@@ -34,6 +34,7 @@
 #                       Do not modify this file directly
 ################################################################################
 
+import("../../../../../scripts/dawn_overrides_with_defaults.gni")
 import("../../../../../scripts/tint_overrides_with_defaults.gni")
 
 import("${tint_src_dir}/tint.gni")
@@ -50,6 +51,7 @@ if (tint_build_spv_writer) {
       "writer.h",
     ]
     deps = [
+      "${dawn_root}/src/utils:utils",
       "${tint_src_dir}/api/common",
       "${tint_src_dir}/lang/core",
       "${tint_src_dir}/lang/core/common",
@@ -110,6 +112,7 @@ if (tint_build_unittests) {
         "writer_test.cc",
       ]
       deps = [
+        "${dawn_root}/src/utils:utils",
         "${tint_src_dir}:gmock_and_gtest",
         "${tint_src_dir}/api/common",
         "${tint_src_dir}/lang/core",
@@ -155,6 +158,7 @@ if (tint_build_benchmarks) {
     tint_benchmarks_source_set("bench") {
       sources = [ "writer_bench.cc" ]
       deps = [
+        "${dawn_root}/src/utils:utils",
         "${tint_src_dir}:google_benchmark",
         "${tint_src_dir}/api/common",
         "${tint_src_dir}/lang/core",
@@ -202,6 +206,7 @@ if (tint_build_spv_writer) {
   tint_fuzz_source_set("fuzz") {
     sources = [ "writer_ir_fuzz.cc" ]
     deps = [
+      "${dawn_root}/src/utils:utils",
       "${tint_src_dir}/api/common",
       "${tint_src_dir}/cmd/fuzz/ir:fuzz",
       "${tint_src_dir}/lang/core",

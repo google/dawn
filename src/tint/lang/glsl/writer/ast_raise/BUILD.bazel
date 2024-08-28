@@ -76,6 +76,7 @@ cc_library(
     "//src/tint/utils/symbol",
     "//src/tint/utils/text",
     "//src/tint/utils/traits",
+    "//src/utils",
   ] + select({
     ":tint_build_glsl_writer": [
       "//src/tint/lang/glsl/writer/common",
@@ -122,6 +123,7 @@ cc_library(
     "//src/tint/utils/text",
     "//src/tint/utils/traits",
     "@gtest",
+    "//src/utils",
   ] + select({
     ":tint_build_glsl_writer": [
       "//src/tint/lang/glsl/writer/ast_raise",

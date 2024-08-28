@@ -71,6 +71,7 @@ cc_library(
     "//src/tint/utils/symbol",
     "//src/tint/utils/text",
     "//src/tint/utils/traits",
+    "//src/utils",
   ] + select({
     ":tint_build_spv_reader": [
       "//src/tint/lang/spirv/reader",

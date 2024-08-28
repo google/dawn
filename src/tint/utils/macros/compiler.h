@@ -26,17 +26,12 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "src/tint/utils/macros/concat.h"
+#include "src/utils/compiler.h"
 
 #ifndef SRC_TINT_UTILS_MACROS_COMPILER_H_
 #define SRC_TINT_UTILS_MACROS_COMPILER_H_
 
 #define TINT_REQUIRE_SEMICOLON static_assert(true)
-
-#if defined(__has_attribute)
-#define TINT_HAS_ATTRIBUTE(x) __has_attribute(x)
-#else
-#define TINT_HAS_ATTRIBUTE(x) 0
-#endif
 
 #if TINT_HAS_ATTRIBUTE(no_sanitize)
 #define TINT_NO_SANITIZE(instrumentation) __attribute__((no_sanitize(instrumentation)))

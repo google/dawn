@@ -57,6 +57,10 @@ tint_target_add_dependencies(tint_cmd_tintd_cmd cmd
   tint_utils_traits
 )
 
+tint_target_add_external_dependencies(tint_cmd_tintd_cmd cmd
+  "src_utils"
+)
+
 if(TINT_BUILD_TINTD)
   tint_target_add_external_dependencies(tint_cmd_tintd_cmd cmd
     "langsvr"

@@ -48,6 +48,10 @@ tint_target_add_dependencies(tint_utils_ice lib
   tint_utils_macros
 )
 
+tint_target_add_external_dependencies(tint_utils_ice lib
+  "src_utils"
+)
+
 ################################################################################
 # Target:    tint_utils_ice_test
 # Kind:      test
@@ -63,4 +67,5 @@ tint_target_add_dependencies(tint_utils_ice_test test
 
 tint_target_add_external_dependencies(tint_utils_ice_test test
   "gtest"
+  "src_utils"
 )

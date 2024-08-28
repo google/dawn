@@ -55,6 +55,7 @@ cc_library(
     "//src/tint/utils/rtti",
     "//src/tint/utils/text",
     "//src/tint/utils/traits",
+    "//src/utils",
   ] + select({
     ":tint_build_spv_reader_or_tint_build_spv_writer": [
       "@spirv_tools",
@@ -82,6 +83,7 @@ cc_library(
     "//src/tint/utils/text",
     "//src/tint/utils/traits",
     "@gtest",
+    "//src/utils",
   ] + select({
     ":tint_build_spv_reader_or_tint_build_spv_writer": [
       "//src/tint/lang/spirv/validate",
