@@ -430,6 +430,7 @@ crbug.com/41490478 [ intel-0x3e9b mac webgpu-adapter-swiftshader ] webgpu:web_pl
 crbug.com/41490478 [ intel-0x3e9b mac webgpu-adapter-swiftshader ] webgpu:web_platform,external_texture,video:importExternalTexture,sampleWithVideoFrameWithVisibleRectParam:videoName="four-colors-h264-bt601.mp4";dstColorSpace="display-p3" [ Failure ]
 crbug.com/41490478 [ intel-0x3e9b mac webgpu-adapter-swiftshader ] webgpu:web_platform,external_texture,video:importExternalTexture,sampleWithVideoFrameWithVisibleRectParam:videoName="four-colors-h264-bt601.mp4";dstColorSpace="srgb" [ Failure ]
 crbug.com/41490478 [ intel ubuntu webgpu-adapter-default ] webgpu:web_platform,copyToTexture,video:copy_from_video:* [ Failure ]
+crbug.com/41490478 [ intel ubuntu webgpu-adapter-default ] webgpu:web_platform,external_texture,video:importExternalTexture,sample:* [ Failure ]
 
 # video tests fail on SwiftShader. Due to multiplanar formatted textures not
 # being handled properly in Chrome's WebGPU decoder.
