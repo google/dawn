@@ -366,8 +366,7 @@ void foo() {
 )");
 }
 
-// TODO(dsinclair): Add struct support
-TEST_F(GlslWriterTest, DISABLED_EmitType_Struct) {
+TEST_F(GlslWriterTest, EmitType_Struct) {
     auto* s = ty.Struct(mod.symbols.New("S"), {
                                                   {mod.symbols.Register("a"), ty.i32()},
                                                   {mod.symbols.Register("b"), ty.f32()},
@@ -388,40 +387,12 @@ struct S {
 
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void foo() {
-  S a = {};
+  S a = S(0, 0.0f);
 }
 )");
 }
 
-// TODO(dsinclair): Add struct support
-TEST_F(GlslWriterTest, DISABLED_EmitType_Struct_NameCollision) {
-    auto* s = ty.Struct(mod.symbols.New("S"), {
-                                                  {mod.symbols.Register("double"), ty.i32()},
-                                                  {mod.symbols.Register("float"), ty.f32()},
-                                              });
-    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kCompute);
-    func->SetWorkgroupSize(1, 1, 1);
-    b.Append(func->Block(), [&] {
-        b.Var("a", ty.ptr(core::AddressSpace::kPrivate, s));
-        b.Return(func);
-    });
-
-    ASSERT_TRUE(Generate()) << err_ << output_.glsl;
-    EXPECT_EQ(output_.glsl, GlslHeader() + R"(
-struct S {
-  int tint_symbol_1;
-  float tint_symbol_2;
-};
-
-layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
-void foo() {
-  S a = {};
-}
-)");
-}
-
-// TODO(dsinclair): Add struct support
-TEST_F(GlslWriterTest, DISABLED_EmitType_Struct_Dedup) {
+TEST_F(GlslWriterTest, EmitType_Struct_Dedup) {
     auto* s = ty.Struct(mod.symbols.New("S"), {
                                                   {mod.symbols.Register("a"), ty.i32()},
                                                   {mod.symbols.Register("b"), ty.f32()},
@@ -443,8 +414,45 @@ struct S {
 
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void foo() {
-  S a = {};
-  S b = {};
+  S a = S(0, 0.0f);
+  S b = S(0, 0.0f);
+}
+)");
+}
+
+TEST_F(GlslWriterTest, EmitType_Struct_Nested) {
+    auto* inner =
+        ty.Struct(mod.symbols.New("Inner"), {
+                                                {mod.symbols.Register("x"), ty.u32()},
+                                                {mod.symbols.Register("y"), ty.vec4<f32>()},
+                                            });
+
+    auto* s = ty.Struct(mod.symbols.New("S"), {
+                                                  {mod.symbols.Register("a"), ty.i32()},
+                                                  {mod.symbols.Register("b"), inner},
+                                              });
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kCompute);
+    func->SetWorkgroupSize(1, 1, 1);
+    b.Append(func->Block(), [&] {
+        b.Var("a", ty.ptr(core::AddressSpace::kPrivate, s));
+        b.Return(func);
+    });
+
+    ASSERT_TRUE(Generate()) << err_ << output_.glsl;
+    EXPECT_EQ(output_.glsl, GlslHeader() + R"(
+struct Inner {
+  uint x;
+  vec4 y;
+};
+
+struct S {
+  int a;
+  Inner b;
+};
+
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+void foo() {
+  S a = S(0, Inner(0u, vec4(0.0f)));
 }
 )");
 }

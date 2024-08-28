@@ -28,6 +28,8 @@
 #include "src/tint/lang/glsl/writer/printer/printer.h"
 
 #include <string>
+#include <unordered_map>
+#include <unordered_set>
 #include <utility>
 
 #include "src/tint/lang/core/constant/splat.h"
@@ -61,9 +63,11 @@
 #include "src/tint/lang/core/type/void.h"
 #include "src/tint/lang/glsl/writer/common/printer_support.h"
 #include "src/tint/lang/glsl/writer/common/version.h"
+#include "src/tint/utils/containers/map.h"
 #include "src/tint/utils/generator/text_generator.h"
 #include "src/tint/utils/macros/scoped_assignment.h"
 #include "src/tint/utils/rtti/switch.h"
+#include "src/tint/utils/text/string.h"
 
 using namespace tint::core::fluent_types;  // NOLINT
 
@@ -126,6 +130,12 @@ class Printer : public tint::TextGenerator {
     /// A hashmap of value to name
     Hashmap<const core::ir::Value*, std::string, 32> names_;
 
+    /// Map of builtin structure to unique generated name
+    std::unordered_map<const core::type::Struct*, std::string> builtin_struct_names_;
+
+    // The set of emitted structs
+    std::unordered_set<const core::type::Struct*> emitted_structs_;
+
     /// @returns the name of the given value, creating a new unique name if the value is unnamed in
     /// the module.
     std::string NameOf(const core::ir::Value* value) {
@@ -140,6 +150,19 @@ class Printer : public tint::TextGenerator {
     /// "tint_symbol" will be used.
     std::string UniqueIdentifier(const std::string& prefix /* = "" */) {
         return ir_.symbols.New(prefix).Name();
+    }
+
+    /// @param s the structure
+    /// @returns the name of the structure, taking special care of builtin structures that start
+    /// with double underscores. If the structure is a builtin, then the returned name will be a
+    /// unique name without the leading underscores.
+    std::string StructName(const core::type::Struct* s) {
+        auto name = s->Name().Name();
+        if (HasPrefix(name, "__")) {
+            name = tint::GetOrAdd(builtin_struct_names_, s,
+                                  [&] { return UniqueIdentifier(name.substr(2)); });
+        }
+        return name;
     }
 
     /// Emit the function
@@ -307,9 +330,40 @@ class Printer : public tint::TextGenerator {
             },
             [&](const core::type::Vector* v) { EmitVectorType(out, v); },
             [&](const core::type::Matrix* m) { EmitMatrixType(out, m); },
+            [&](const core::type::Struct* s) {
+                EmitStructType(s);
+                out << StructName(s);
+            },
 
             // TODO(dsinclair): Handle remaining types
             TINT_ICE_ON_NO_MATCH);
+    }
+
+    void EmitStructType(const core::type::Struct* str) {
+        auto it = emitted_structs_.emplace(str);
+        if (!it.second) {
+            return;
+        }
+
+        // This does not append directly to the preamble because a struct may require other
+        // structs to get emitted before it. So, the struct emits into a temporary text buffer, then
+        // anything it depends on will emit to the preamble first, and then it copies the text
+        // buffer into the preamble.
+        TextBuffer str_buf;
+        Line(&str_buf) << "\n" << "struct " << StructName(str) << " {";
+
+        str_buf.IncrementIndent();
+
+        for (auto* mem : str->Members()) {
+            auto out = Line(&str_buf);
+            EmitTypeAndName(out, mem->Type(), mem->Name().Name());
+            out << ";";
+        }
+
+        str_buf.DecrementIndent();
+        Line(&str_buf) << "};";
+
+        preamble_buffer_.Append(str_buf);
     }
 
     void EmitVectorType(StringStream& out, const core::type::Vector* v) {
@@ -450,9 +504,24 @@ class Printer : public tint::TextGenerator {
             [&](const core::type::F16*) { PrintF16(out, c->ValueAs<f16>()); },
             [&](const core::type::Vector* v) { EmitConstantVector(out, v, c); },
             [&](const core::type::Matrix* m) { EmitConstantMatrix(out, m, c); },
+            [&](const core::type::Struct* s) { EmitConstantStruct(out, s, c); },
 
             // TODO(dsinclair): Emit remaining constant types
             TINT_ICE_ON_NO_MATCH);
+    }
+
+    void EmitConstantStruct(StringStream& out,
+                            const core::type::Struct* s,
+                            const core::constant::Value* c) {
+        EmitType(out, s);
+        ScopedParen sp(out);
+
+        for (size_t i = 0; i < s->Members().Length(); ++i) {
+            if (i > 0) {
+                out << ", ";
+            }
+            EmitConstant(out, c->Index(i));
+        }
     }
 
     void EmitConstantVector(StringStream& out,
