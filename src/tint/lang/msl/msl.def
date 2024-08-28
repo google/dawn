@@ -328,6 +328,8 @@ implicit(N: num, T: f32_f16) fn distance(vec<N, T>, vec<N, T>) -> T
 implicit(N: num, T: f32_f16) fn dot(vec<N, T>, vec<N, T>) -> T
 implicit(T: f32_f16) fn fmod(T, T) -> T
 implicit(N: num, T: f32_f16) fn fmod(vec<N, T>, vec<N, T>) -> vec<N, T>
+implicit(N: num, T: f32_f16) fn fmod(T, vec<N, T>) -> vec<N, T>
+implicit(N: num, T: f32_f16) fn fmod(vec<N, T>, T) -> vec<N, T>
 implicit(T: f32_f16) fn frexp(T, i32) -> T
 implicit(N: num, T: f32_f16) fn frexp(vec<N, T>, vec<N, i32>) -> vec<N, T>
 implicit(N: num, T: f32_f16) fn length(vec<N, T>) -> T
