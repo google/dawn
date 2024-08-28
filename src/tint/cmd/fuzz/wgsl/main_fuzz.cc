@@ -137,5 +137,11 @@ extern "C" int LLVMFuzzerInitialize(int* argc, char*** argv) {
     options.dump = opt_dump.value.value_or(false);
 
     print_dxc_path_found(options.dxc);
+#if defined(TINT_ASAN_ENABLED) && !defined(NDEBUG)
+    // TODO(crbug.com/352402877): Avoid DXC timeouts on asan + debug fuzzer builds
+    std::cout << "DXC validation disabled in asan + debug builds" << std::endl;
+    options.dxc = "";
+#endif
+
     return 0;
 }
