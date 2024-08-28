@@ -151,6 +151,8 @@ template("tint_benchmarks_source_set") {
       if (!defined(invoker.deps)) {
         deps = []
       }
+
+      deps += [ "${tint_src_dir}:generate_benchmark_inputs" ]
     }
   }
 }

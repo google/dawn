@@ -124,7 +124,6 @@ if(TINT_BUILD_WGSL_READER)
 tint_add_target(tint_cmd_bench_bench bench
   cmd/bench/bench.cc
   cmd/bench/bench.h
-  cmd/bench/inputs_bench.h
 )
 
 tint_target_add_dependencies(tint_cmd_bench_bench bench

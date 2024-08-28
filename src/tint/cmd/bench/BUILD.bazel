@@ -42,7 +42,6 @@ cc_library(
   srcs = [
     "bench.cc",
     "bench.h",
-    "inputs_bench.h",
   ],
   deps = [
     "//src/tint/api/common",
