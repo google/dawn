@@ -39,7 +39,7 @@
                OpLoopMerge %13 %11 None
                OpBranch %10
          %10 = OpLabel
-         %17 = OpLoad %int %i
+         %17 = OpLoad %int %i None
          %18 = OpSLessThan %bool %17 %int_3
                OpSelectionMerge %21 None
                OpBranchConditional %18 %21 %22
@@ -48,7 +48,7 @@
          %21 = OpLabel
                OpBranch %11
          %11 = OpLabel
-         %23 = OpLoad %3 %tex
+         %23 = OpLoad %3 %tex None
                OpImageWrite %23 %25 %27 None
                OpBranch %12
          %13 = OpLabel

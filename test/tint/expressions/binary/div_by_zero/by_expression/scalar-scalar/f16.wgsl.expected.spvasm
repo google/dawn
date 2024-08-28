@@ -26,9 +26,9 @@
           %b = OpVariable %_ptr_Function_half Function
                OpStore %a %half_0x1p_0
                OpStore %b %half_0x0p_0
-         %11 = OpLoad %half %a
-         %12 = OpLoad %half %b
-         %13 = OpLoad %half %b
+         %11 = OpLoad %half %a None
+         %12 = OpLoad %half %b None
+         %13 = OpLoad %half %b None
          %14 = OpFAdd %half %12 %13
           %r = OpFDiv %half %11 %14
                OpReturn

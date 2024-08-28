@@ -28,10 +28,10 @@
           %v = OpVariable %_ptr_Function_v3float Function
                OpStore %v %9
          %10 = OpAccessChain %_ptr_Function_float %v %uint_1
-       %x_14 = OpLoad %float %10
-         %15 = OpLoad %v3float %v
+       %x_14 = OpLoad %float %10 None
+         %15 = OpLoad %v3float %v None
        %x_17 = OpVectorShuffle %v2float %15 %15 0 2
-         %18 = OpLoad %v3float %v
+         %18 = OpLoad %v3float %v None
        %x_19 = OpVectorShuffle %v3float %18 %18 0 2 1
                OpReturn
                OpFunctionEnd

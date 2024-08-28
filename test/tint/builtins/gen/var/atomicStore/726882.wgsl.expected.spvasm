@@ -33,7 +33,7 @@
           %9 = OpLabel
       %arg_1 = OpVariable %_ptr_Function_uint Function
                OpStore %arg_1 %uint_1
-         %13 = OpLoad %uint %arg_1
+         %13 = OpLoad %uint %arg_1 None
                OpAtomicStore %arg_0 %uint_2 %uint_0 %13
                OpReturn
                OpFunctionEnd
@@ -53,7 +53,7 @@
                OpFunctionEnd
 %compute_main = OpFunction %void None %8
          %30 = OpLabel
-         %31 = OpLoad %uint %compute_main_local_invocation_index_Input
+         %31 = OpLoad %uint %compute_main_local_invocation_index_Input None
          %32 = OpFunctionCall %void %compute_main_inner %31
                OpReturn
                OpFunctionEnd

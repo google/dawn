@@ -38,9 +38,9 @@
           %8 = OpLabel
           %m = OpVariable %_ptr_Function_mat3v3float Function %13
          %14 = OpAccessChain %_ptr_Function_v3float %m %int_1
-          %v = OpLoad %v3float %14
+          %v = OpLoad %v3float %14 None
           %f = OpCompositeExtract %float %v 1
          %20 = OpAccessChain %_ptr_StorageBuffer_float %1 %uint_0
-               OpStore %20 %f
+               OpStore %20 %f None
                OpReturn
                OpFunctionEnd

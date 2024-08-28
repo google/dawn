@@ -64,23 +64,23 @@
                OpLoopMerge %25 %23 None
                OpBranch %22
          %22 = OpLabel
-         %29 = OpLoad %int %i
+         %29 = OpLoad %int %i None
          %30 = OpSLessThan %bool %29 %int_4
                OpSelectionMerge %33 None
                OpBranchConditional %30 %33 %34
          %34 = OpLabel
                OpBranch %25
          %33 = OpLabel
-         %35 = OpLoad %int %i
+         %35 = OpLoad %int %i None
          %36 = OpIAdd %int %35 %int_1
-               OpStore %i %36
+               OpStore %i %36 None
                OpBranch %23
          %23 = OpLabel
          %38 = OpAccessChain %_ptr_Uniform_uint %1 %uint_0 %uint_0
-         %41 = OpLoad %uint %38
+         %41 = OpLoad %uint %38 None
          %42 = OpAccessChain %_ptr_Function_InnerS %s1 %uint_0 %41
-         %43 = OpLoad %InnerS %v
-               OpStore %42 %43
+         %43 = OpLoad %InnerS %v None
+               OpStore %42 %43 None
                OpBranch %24
          %25 = OpLabel
                OpReturn

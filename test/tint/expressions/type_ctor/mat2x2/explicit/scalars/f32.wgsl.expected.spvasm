@@ -40,8 +40,8 @@
      %uint_0 = OpConstant %uint 0
           %f = OpFunction %void None %18
          %19 = OpLabel
-         %20 = OpLoad %mat2v2float %m
+         %20 = OpLoad %mat2v2float %m None
          %21 = OpAccessChain %_ptr_StorageBuffer_mat2v2float %13 %uint_0
-               OpStore %21 %20
+               OpStore %21 %20 None
                OpReturn
                OpFunctionEnd

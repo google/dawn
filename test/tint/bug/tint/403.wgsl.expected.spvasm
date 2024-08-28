@@ -88,18 +88,18 @@
          %22 = OpLabel
   %indexable = OpVariable %_ptr_Function__arr_v2float_uint_3 Function %27
          %28 = OpAccessChain %_ptr_Uniform_v2float %1 %uint_0 %uint_0
-         %31 = OpLoad %v2float %28
+         %31 = OpLoad %v2float %28 None
          %32 = OpAccessChain %_ptr_Uniform_v2float %1 %uint_0 %uint_1
-         %34 = OpLoad %v2float %32
+         %34 = OpLoad %v2float %32 None
        %x_23 = OpCompositeConstruct %mat2v2float %31 %34
          %37 = OpAccessChain %_ptr_Uniform_v2float %7 %uint_0 %uint_0
-         %38 = OpLoad %v2float %37
+         %38 = OpLoad %v2float %37 None
          %39 = OpAccessChain %_ptr_Uniform_v2float %7 %uint_0 %uint_1
-         %40 = OpLoad %v2float %39
+         %40 = OpLoad %v2float %39 None
        %x_28 = OpCompositeConstruct %mat2v2float %38 %40
-               OpStore %indexable %42
+               OpStore %indexable %42 None
          %48 = OpAccessChain %_ptr_Function_v2float %indexable %gl_VertexIndex
-       %x_51 = OpLoad %v2float %48
+       %x_51 = OpLoad %v2float %48 None
          %51 = OpCompositeExtract %v2float %x_23 0
          %52 = OpCompositeExtract %v2float %x_28 0
          %53 = OpFAdd %v2float %51 %52
@@ -115,9 +115,9 @@
                OpFunctionEnd
        %main = OpFunction %void None %65
          %66 = OpLabel
-         %67 = OpLoad %uint %main_vertex_index_Input
+         %67 = OpLoad %uint %main_vertex_index_Input None
          %68 = OpFunctionCall %v4float %main_inner %67
-               OpStore %main_position_Output %68
-               OpStore %main___point_size_Output %float_1
+               OpStore %main_position_Output %68 None
+               OpStore %main___point_size_Output %float_1 None
                OpReturn
                OpFunctionEnd

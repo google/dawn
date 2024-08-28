@@ -42,23 +42,23 @@
       %arg_0 = OpVariable %_ptr_Function_v4int Function
         %res = OpVariable %_ptr_Function_v4int Function
                OpStore %arg_0 %11
-         %13 = OpLoad %v4int %arg_0
+         %13 = OpLoad %v4int %arg_0 None
          %14 = OpGroupNonUniformIMul %v4int %uint_3 Reduce %13
                OpStore %res %14
-         %18 = OpLoad %v4int %res
+         %18 = OpLoad %v4int %res None
                OpReturnValue %18
                OpFunctionEnd
 %fragment_main = OpFunction %void None %21
          %22 = OpLabel
          %23 = OpFunctionCall %v4int %subgroupMul_fab258
          %24 = OpAccessChain %_ptr_StorageBuffer_v4int %1 %uint_0
-               OpStore %24 %23
+               OpStore %24 %23 None
                OpReturn
                OpFunctionEnd
 %compute_main = OpFunction %void None %21
          %28 = OpLabel
          %29 = OpFunctionCall %v4int %subgroupMul_fab258
          %30 = OpAccessChain %_ptr_StorageBuffer_v4int %1 %uint_0
-               OpStore %30 %29
+               OpStore %30 %29 None
                OpReturn
                OpFunctionEnd

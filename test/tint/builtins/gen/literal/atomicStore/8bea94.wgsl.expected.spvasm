@@ -50,7 +50,7 @@
                OpFunctionEnd
 %compute_main = OpFunction %void None %9
          %29 = OpLabel
-         %30 = OpLoad %uint %compute_main_local_invocation_index_Input
+         %30 = OpLoad %uint %compute_main_local_invocation_index_Input None
          %31 = OpFunctionCall %void %compute_main_inner %30
                OpReturn
                OpFunctionEnd

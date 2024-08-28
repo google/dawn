@@ -30,7 +30,7 @@
      %uint_1 = OpConstant %uint 1
 %textureStore_09e4d5 = OpFunction %void None %7
           %8 = OpLabel
-          %9 = OpLoad %3 %arg_0
+          %9 = OpLoad %3 %arg_0 None
          %10 = OpVectorShuffle %v4float %11 %11 2 1 0 3
                OpImageWrite %9 %uint_1 %10 None
                OpReturn

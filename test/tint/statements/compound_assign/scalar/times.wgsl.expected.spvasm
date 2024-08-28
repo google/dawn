@@ -33,9 +33,9 @@
         %foo = OpFunction %void None %8
           %9 = OpLabel
          %10 = OpAccessChain %_ptr_StorageBuffer_int %1 %uint_0 %uint_0
-         %14 = OpLoad %int %10
+         %14 = OpLoad %int %10 None
          %15 = OpIMul %int %14 %int_2
-               OpStore %10 %15
+               OpStore %10 %15 None
                OpReturn
                OpFunctionEnd
 %unused_entry_point = OpFunction %void None %8

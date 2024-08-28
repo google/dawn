@@ -36,16 +36,16 @@
                OpSelectionMerge %17 None
                OpBranchConditional %14 %18 %17
          %18 = OpLabel
-               OpStore %v %19
+               OpStore %v %19 None
                OpBranch %17
          %17 = OpLabel
                OpControlBarrier %uint_2 %uint_2 %uint_264
-         %23 = OpLoad %mat2v3float %v
+         %23 = OpLoad %mat2v3float %v None
                OpReturn
                OpFunctionEnd
        %main = OpFunction %void None %25
          %26 = OpLabel
-         %27 = OpLoad %uint %main_local_invocation_index_Input
+         %27 = OpLoad %uint %main_local_invocation_index_Input None
          %28 = OpFunctionCall %void %main_inner %27
                OpReturn
                OpFunctionEnd

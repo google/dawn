@@ -45,7 +45,7 @@
                OpSelectionMerge %17 None
                OpBranchConditional %15 %18 %17
          %18 = OpLabel
-               OpStore %continue_execution %false
+               OpStore %continue_execution %false None
                OpBranch %17
          %17 = OpLabel
                OpReturnValue %x
@@ -61,7 +61,7 @@
                OpLoopMerge %30 %28 None
                OpBranch %27
          %27 = OpLabel
-         %31 = OpLoad %int %y
+         %31 = OpLoad %int %y None
           %r = OpFunctionCall %int %f %31
          %33 = OpIEqual %bool %r %int_0
                OpSelectionMerge %35 None
@@ -73,8 +73,8 @@
          %28 = OpLabel
                OpBranch %29
          %30 = OpLabel
-         %37 = OpLoad %int %y
-         %38 = OpLoad %bool %continue_execution
+         %37 = OpLoad %int %y None
+         %38 = OpLoad %bool %continue_execution None
          %39 = OpLogicalNot %bool %38
                OpSelectionMerge %40 None
                OpBranchConditional %39 %41 %40
@@ -85,8 +85,8 @@
                OpFunctionEnd
        %main = OpFunction %void None %44
          %45 = OpLabel
-         %46 = OpLoad %v3int %main_loc1_Input
+         %46 = OpLoad %v3int %main_loc1_Input None
          %47 = OpFunctionCall %int %main_inner %46
-               OpStore %main_loc2_Output %47
+               OpStore %main_loc2_Output %47 None
                OpReturn
                OpFunctionEnd

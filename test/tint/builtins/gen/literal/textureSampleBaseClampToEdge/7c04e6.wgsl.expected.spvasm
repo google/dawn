@@ -216,40 +216,40 @@
 %textureSampleBaseClampToEdge_7c04e6 = OpFunction %v4float None %29
          %30 = OpLabel
         %res = OpVariable %_ptr_Function_v4float Function
-         %31 = OpLoad %8 %arg_0_plane0
-         %32 = OpLoad %8 %arg_0_plane1
+         %31 = OpLoad %8 %arg_0_plane0 None
+         %32 = OpLoad %8 %arg_0_plane1 None
          %33 = OpAccessChain %_ptr_Uniform_tint_ExternalTextureParams_std140 %10 %uint_0
-         %36 = OpLoad %tint_ExternalTextureParams_std140 %33
+         %36 = OpLoad %tint_ExternalTextureParams_std140 %33 None
          %37 = OpFunctionCall %tint_ExternalTextureParams %convert_tint_ExternalTextureParams %36
-         %42 = OpLoad %22 %arg_1
+         %42 = OpLoad %22 %arg_1 None
          %43 = OpFunctionCall %v4float %tint_TextureSampleExternal %31 %32 %37 %42 %45
                OpStore %res %43
-         %49 = OpLoad %v4float %res
+         %49 = OpLoad %v4float %res None
                OpReturnValue %49
                OpFunctionEnd
 %fragment_main = OpFunction %void None %52
          %53 = OpLabel
          %54 = OpFunctionCall %v4float %textureSampleBaseClampToEdge_7c04e6
          %55 = OpAccessChain %_ptr_StorageBuffer_v4float %1 %uint_0
-               OpStore %55 %54
+               OpStore %55 %54 None
                OpReturn
                OpFunctionEnd
 %compute_main = OpFunction %void None %52
          %58 = OpLabel
          %59 = OpFunctionCall %v4float %textureSampleBaseClampToEdge_7c04e6
          %60 = OpAccessChain %_ptr_StorageBuffer_v4float %1 %uint_0
-               OpStore %60 %59
+               OpStore %60 %59 None
                OpReturn
                OpFunctionEnd
 %vertex_main_inner = OpFunction %VertexOutput None %63
          %64 = OpLabel
         %out = OpVariable %_ptr_Function_VertexOutput Function %67
          %68 = OpAccessChain %_ptr_Function_v4float %out %uint_0
-               OpStore %68 %69
+               OpStore %68 %69 None
          %70 = OpAccessChain %_ptr_Function_v4float %out %uint_1
          %72 = OpFunctionCall %v4float %textureSampleBaseClampToEdge_7c04e6
-               OpStore %70 %72
-         %73 = OpLoad %VertexOutput %out
+               OpStore %70 %72 None
+         %73 = OpLoad %VertexOutput %out None
                OpReturnValue %73
                OpFunctionEnd
 %tint_TextureSampleExternal = OpFunction %v4float None %79
@@ -345,10 +345,10 @@
         %158 = OpLabel
         %159 = OpFunctionCall %VertexOutput %vertex_main_inner
         %160 = OpCompositeExtract %v4float %159 0
-               OpStore %vertex_main_position_Output %160
+               OpStore %vertex_main_position_Output %160 None
         %161 = OpCompositeExtract %v4float %159 1
-               OpStore %vertex_main_loc0_Output %161
-               OpStore %vertex_main___point_size_Output %float_1
+               OpStore %vertex_main_loc0_Output %161 None
+               OpStore %vertex_main___point_size_Output %float_1 None
                OpReturn
                OpFunctionEnd
 %convert_tint_ExternalTextureParams = OpFunction %tint_ExternalTextureParams None %163

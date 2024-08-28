@@ -38,20 +38,20 @@
         %res = OpVariable %_ptr_Function_uint Function
           %8 = OpGroupNonUniformQuadSwap %uint %uint_3 %uint_1 %uint_0
                OpStore %res %8
-         %14 = OpLoad %uint %res
+         %14 = OpLoad %uint %res None
                OpReturnValue %14
                OpFunctionEnd
 %fragment_main = OpFunction %void None %17
          %18 = OpLabel
          %19 = OpFunctionCall %uint %quadSwapX_8203ad
          %20 = OpAccessChain %_ptr_StorageBuffer_uint %1 %uint_0
-               OpStore %20 %19
+               OpStore %20 %19 None
                OpReturn
                OpFunctionEnd
 %compute_main = OpFunction %void None %17
          %23 = OpLabel
          %24 = OpFunctionCall %uint %quadSwapX_8203ad
          %25 = OpAccessChain %_ptr_StorageBuffer_uint %1 %uint_0
-               OpStore %25 %24
+               OpStore %25 %24 None
                OpReturn
                OpFunctionEnd

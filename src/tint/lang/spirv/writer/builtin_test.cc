@@ -1881,6 +1881,19 @@ TEST_F(SpirvWriterTest, Builtin_StorageBarrier) {
     EXPECT_INST("OpControlBarrier %uint_2 %uint_2 %uint_72");
 }
 
+TEST_F(SpirvWriterTest, Builtin_StorageBarrier_VulkanMemoryModel) {
+    auto* func = b.Function("foo", ty.void_());
+    b.Append(func->Block(), [&] {
+        b.Call(ty.void_(), core::BuiltinFn::kStorageBarrier);
+        b.Return(func);
+    });
+
+    Options opts{};
+    opts.use_vulkan_memory_model = true;
+    ASSERT_TRUE(Generate(opts)) << Error() << output_;
+    EXPECT_INST("OpControlBarrier %uint_2 %uint_2 %uint_24648");
+}
+
 TEST_F(SpirvWriterTest, Builtin_TextureBarrier) {
     auto* func = b.Function("foo", ty.void_());
     b.Append(func->Block(), [&] {
@@ -1901,6 +1914,19 @@ TEST_F(SpirvWriterTest, Builtin_WorkgroupBarrier) {
 
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST("OpControlBarrier %uint_2 %uint_2 %uint_264");
+}
+
+TEST_F(SpirvWriterTest, Builtin_WorkgroupBarrier_VulkanMemoryModel) {
+    auto* func = b.Function("foo", ty.void_());
+    b.Append(func->Block(), [&] {
+        b.Call(ty.void_(), core::BuiltinFn::kWorkgroupBarrier);
+        b.Return(func);
+    });
+
+    Options opts{};
+    opts.use_vulkan_memory_model = true;
+    ASSERT_TRUE(Generate(opts)) << Error() << output_;
+    EXPECT_INST("OpControlBarrier %uint_2 %uint_2 %uint_24840");
 }
 
 TEST_F(SpirvWriterTest, Builtin_SubgroupBallot) {

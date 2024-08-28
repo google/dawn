@@ -32,19 +32,19 @@
       %deref = OpFunction %void None %8
           %9 = OpLabel
           %p = OpAccessChain %_ptr_StorageBuffer_v4int %1 %uint_0
-         %14 = OpLoad %v4int %p
+         %14 = OpLoad %v4int %p None
          %15 = OpVectorShuffle %v4int %14 %14 3 2 1 0
          %16 = OpAccessChain %_ptr_StorageBuffer_v4int %1 %uint_0
-               OpStore %16 %15
+               OpStore %16 %15 None
                OpReturn
                OpFunctionEnd
    %no_deref = OpFunction %void None %8
          %18 = OpLabel
         %p_0 = OpAccessChain %_ptr_StorageBuffer_v4int %1 %uint_0
-         %20 = OpLoad %v4int %p_0
+         %20 = OpLoad %v4int %p_0 None
          %21 = OpVectorShuffle %v4int %20 %20 3 2 1 0
          %22 = OpAccessChain %_ptr_StorageBuffer_v4int %1 %uint_0
-               OpStore %22 %21
+               OpStore %22 %21 None
                OpReturn
                OpFunctionEnd
        %main = OpFunction %void None %8

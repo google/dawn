@@ -20,11 +20,11 @@
           %4 = OpLabel
           %i = OpVariable %_ptr_Function_int Function %8
      %result = OpVariable %_ptr_Function_int Function %8
-         %10 = OpLoad %int %i
+         %10 = OpLoad %int %i None
                OpSelectionMerge %12 None
                OpSwitch %10 %11
          %11 = OpLabel
-               OpStore %result %int_44
+               OpStore %result %int_44 None
                OpBranch %12
          %12 = OpLabel
                OpReturn

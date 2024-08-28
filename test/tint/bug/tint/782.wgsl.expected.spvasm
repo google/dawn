@@ -24,8 +24,8 @@
           %4 = OpLabel
 %explicitStride = OpVariable %_ptr_Function__arr_int_uint_2 Function %11
 %implictStride = OpVariable %_ptr_Function__arr_int_uint_2 Function %11
-         %13 = OpLoad %_arr_int_uint_2 %explicitStride
-               OpStore %implictStride %13
+         %13 = OpLoad %_arr_int_uint_2 %explicitStride None
+               OpStore %implictStride %13 None
                OpReturn
                OpFunctionEnd
 %unused_entry_point = OpFunction %void None %3

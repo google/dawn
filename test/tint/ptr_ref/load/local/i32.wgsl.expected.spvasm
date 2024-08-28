@@ -20,7 +20,7 @@
           %4 = OpLabel
           %i = OpVariable %_ptr_Function_int Function
                OpStore %i %int_123
-          %9 = OpLoad %int %i
+          %9 = OpLoad %int %i None
           %u = OpIAdd %int %9 %int_1
                OpReturn
                OpFunctionEnd

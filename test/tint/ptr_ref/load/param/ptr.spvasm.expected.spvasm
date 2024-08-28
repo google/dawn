@@ -28,7 +28,7 @@
 %pointer_root = OpFunctionParameter %_ptr_Function_int
           %7 = OpLabel
           %8 = OpAccessChain %_ptr_Function_int %pointer_root
-        %x_9 = OpLoad %int %8
+        %x_9 = OpLoad %int %8 None
          %10 = OpIAdd %int %value %x_9
                OpReturnValue %10
                OpFunctionEnd
@@ -36,8 +36,8 @@
          %14 = OpLabel
           %i = OpVariable %_ptr_Function_int Function
                OpStore %i %int_0
-               OpStore %i %int_123
-       %x_19 = OpLoad %int %i
+               OpStore %i %int_123 None
+       %x_19 = OpLoad %int %i None
        %x_18 = OpFunctionCall %int %func %x_19 %i
                OpReturn
                OpFunctionEnd

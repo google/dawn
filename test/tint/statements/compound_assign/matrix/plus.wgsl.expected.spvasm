@@ -37,7 +37,7 @@
         %foo = OpFunction %void None %10
          %11 = OpLabel
          %12 = OpAccessChain %_ptr_StorageBuffer_mat4v4float %1 %uint_0 %uint_0
-         %16 = OpLoad %mat4v4float %12
+         %16 = OpLoad %mat4v4float %12 None
          %17 = OpCompositeExtract %v4float %16 0
          %18 = OpCompositeExtract %v4float %19 0
          %20 = OpFAdd %v4float %17 %18
@@ -51,7 +51,7 @@
          %28 = OpCompositeExtract %v4float %19 3
          %29 = OpFAdd %v4float %27 %28
          %30 = OpCompositeConstruct %mat4v4float %20 %23 %26 %29
-               OpStore %12 %30
+               OpStore %12 %30 None
                OpReturn
                OpFunctionEnd
 %unused_entry_point = OpFunction %void None %10

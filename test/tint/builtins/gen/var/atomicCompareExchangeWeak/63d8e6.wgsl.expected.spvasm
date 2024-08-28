@@ -52,8 +52,8 @@
                OpStore %arg_1 %uint_1
                OpStore %arg_2 %uint_1
          %14 = OpAccessChain %_ptr_StorageBuffer_uint %1 %uint_0 %uint_0
-         %17 = OpLoad %uint %arg_1
-         %18 = OpLoad %uint %arg_2
+         %17 = OpLoad %uint %arg_1 None
+         %18 = OpLoad %uint %arg_2 None
          %19 = OpAtomicCompareExchange %uint %14 %uint_1 %uint_0 %uint_0 %18 %17
          %20 = OpIEqual %bool %19 %17
          %23 = OpCompositeConstruct %__atomic_compare_exchange_result_u32 %19 %20

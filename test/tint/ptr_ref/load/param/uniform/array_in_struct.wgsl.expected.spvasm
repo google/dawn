@@ -38,7 +38,7 @@
        %func = OpFunction %_arr_v4int_uint_4 None %11
          %12 = OpLabel
          %13 = OpAccessChain %_ptr_Uniform__arr_v4int_uint_4 %1 %uint_0 %uint_0
-         %16 = OpLoad %_arr_v4int_uint_4 %13
+         %16 = OpLoad %_arr_v4int_uint_4 %13 None
                OpReturnValue %16
                OpFunctionEnd
        %main = OpFunction %void None %19

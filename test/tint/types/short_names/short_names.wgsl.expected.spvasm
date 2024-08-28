@@ -37,9 +37,9 @@
                OpFunctionEnd
        %main = OpFunction %void None %19
          %20 = OpLabel
-         %21 = OpLoad %uint %main_vertex_index_Input
+         %21 = OpLoad %uint %main_vertex_index_Input None
          %22 = OpFunctionCall %v4float %main_inner %21
-               OpStore %main_position_Output %22
-               OpStore %main___point_size_Output %float_1
+               OpStore %main_position_Output %22 None
+               OpStore %main___point_size_Output %float_1 None
                OpReturn
                OpFunctionEnd

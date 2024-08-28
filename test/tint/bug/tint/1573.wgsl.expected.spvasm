@@ -39,7 +39,7 @@
           %8 = OpLabel
       %value = OpVariable %_ptr_Function_uint Function
                OpStore %value %uint_42
-         %12 = OpLoad %uint %value
+         %12 = OpLoad %uint %value None
          %13 = OpAccessChain %_ptr_StorageBuffer_uint %1 %uint_0
          %16 = OpAtomicCompareExchange %uint %13 %uint_1 %uint_0 %uint_0 %12 %uint_0
          %18 = OpIEqual %bool %16 %uint_0

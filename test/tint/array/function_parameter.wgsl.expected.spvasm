@@ -77,6 +77,6 @@
          %37 = OpFAdd %float %v1 %v2
          %38 = OpFAdd %float %37 %v3
          %39 = OpAccessChain %_ptr_StorageBuffer_float %1 %uint_0
-               OpStore %39 %38
+               OpStore %39 %38 None
                OpReturn
                OpFunctionEnd

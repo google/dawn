@@ -64,16 +64,16 @@
                OpFunctionEnd
        %main = OpFunction %void None %29
          %30 = OpLabel
-         %31 = OpLoad %float %main_loc0_Input
+         %31 = OpLoad %float %main_loc0_Input None
          %32 = OpAccessChain %_ptr_Input_uint %main_sample_mask_Input %uint_0
-         %34 = OpLoad %uint %32
+         %34 = OpLoad %uint %32 None
          %35 = OpCompositeConstruct %FragIn %31 %34
-         %36 = OpLoad %float %main_loc1_Input
+         %36 = OpLoad %float %main_loc1_Input None
          %37 = OpFunctionCall %FragIn %main_inner %35 %36
          %38 = OpCompositeExtract %float %37 0
-               OpStore %main_loc0_Output %38
+               OpStore %main_loc0_Output %38 None
          %39 = OpCompositeExtract %uint %37 1
          %40 = OpAccessChain %_ptr_Output_uint %main_sample_mask_Output %uint_0
-               OpStore %40 %39
+               OpStore %40 %39 None
                OpReturn
                OpFunctionEnd

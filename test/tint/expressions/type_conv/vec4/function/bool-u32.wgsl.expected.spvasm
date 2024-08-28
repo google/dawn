@@ -29,8 +29,8 @@
 %_ptr_Function_v4uint = OpTypePointer Function %v4uint
           %m = OpFunction %v4bool None %7
           %8 = OpLabel
-               OpStore %t %true
-         %10 = OpLoad %bool %t
+               OpStore %t %true None
+         %10 = OpLoad %bool %t None
          %11 = OpCompositeConstruct %v4bool %10 %10 %10 %10
                OpReturnValue %11
                OpFunctionEnd

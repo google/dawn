@@ -41,7 +41,7 @@
           %b = OpFunctionParameter %uint
          %16 = OpLabel
          %17 = OpAccessChain %_ptr_PushConstant_float %1 %uint_0
-         %20 = OpLoad %float %17
+         %20 = OpLoad %float %17 None
          %21 = OpConvertUToF %float %b
          %22 = OpFAdd %float %20 %21
          %23 = OpCompositeConstruct %v4float %22 %22 %22 %22
@@ -49,9 +49,9 @@
                OpFunctionEnd
        %main = OpFunction %void None %26
          %27 = OpLabel
-         %28 = OpLoad %uint %main_instance_index_Input
+         %28 = OpLoad %uint %main_instance_index_Input None
          %29 = OpFunctionCall %v4float %main_inner %28
-               OpStore %main_position_Output %29
-               OpStore %main___point_size_Output %float_1
+               OpStore %main_position_Output %29 None
+               OpStore %main___point_size_Output %float_1 None
                OpReturn
                OpFunctionEnd

@@ -59,29 +59,29 @@
          %15 = OpLabel
           %f = OpVariable %_ptr_Function_float Function %18
           %v = OpVariable %_ptr_Function_v4float Function %9
-               OpStore %f %float_1
-         %22 = OpLoad %float %f
+               OpStore %f %float_1 None
+         %22 = OpLoad %float %f None
          %23 = OpExtInst %float %24 Sin %22
-         %25 = OpLoad %float %f
+         %25 = OpLoad %float %f None
          %26 = OpExtInst %float %24 Cos %25
-         %27 = OpLoad %float %f
+         %27 = OpLoad %float %f None
          %28 = OpExtInst %float %24 Exp2 %27
-         %29 = OpLoad %float %f
+         %29 = OpLoad %float %f None
          %30 = OpExtInst %float %24 Log %29
          %31 = OpCompositeConstruct %v4float %23 %26 %28 %30
-               OpStore %v %31
-         %32 = OpLoad %v4float %v
+               OpStore %v %31 None
+         %32 = OpLoad %v4float %v None
          %33 = OpAccessChain %_ptr_Uniform_v4float %1 %uint_0 %uint_0
-         %37 = OpLoad %v4float %33
+         %37 = OpLoad %v4float %33 None
          %38 = OpExtInst %float %24 Distance %32 %37
          %39 = OpFOrdLessThan %bool %38 %float_0_100000001
                OpSelectionMerge %42 None
                OpBranchConditional %39 %43 %44
          %43 = OpLabel
-               OpStore %x_GLF_color %45
+               OpStore %x_GLF_color %45 None
                OpBranch %42
          %44 = OpLabel
-               OpStore %x_GLF_color %9
+               OpStore %x_GLF_color %9 None
                OpBranch %42
          %42 = OpLabel
                OpReturn
@@ -89,7 +89,7 @@
  %main_inner = OpFunction %main_out None %49
          %50 = OpLabel
          %51 = OpFunctionCall %void %main_1
-         %52 = OpLoad %v4float %x_GLF_color
+         %52 = OpLoad %v4float %x_GLF_color None
          %53 = OpCompositeConstruct %main_out %52
                OpReturnValue %53
                OpFunctionEnd
@@ -97,6 +97,6 @@
          %55 = OpLabel
          %56 = OpFunctionCall %main_out %main_inner
          %57 = OpCompositeExtract %v4float %56 0
-               OpStore %main_loc0_Output %57
+               OpStore %main_loc0_Output %57 None
                OpReturn
                OpFunctionEnd

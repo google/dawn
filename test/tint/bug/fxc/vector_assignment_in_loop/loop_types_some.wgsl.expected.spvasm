@@ -98,56 +98,56 @@
                OpLoopMerge %61 %59 None
                OpBranch %58
          %58 = OpLabel
-         %65 = OpLoad %int %i
+         %65 = OpLoad %int %i None
          %66 = OpSLessThan %bool %65 %int_2
                OpSelectionMerge %68 None
                OpBranchConditional %66 %68 %69
          %69 = OpLabel
                OpBranch %61
          %68 = OpLabel
-         %70 = OpLoad %int %i
+         %70 = OpLoad %int %i None
          %71 = OpAccessChain %_ptr_Function_float %v2f %70
-               OpStore %71 %float_1
-         %74 = OpLoad %int %i
+               OpStore %71 %float_1 None
+         %74 = OpLoad %int %i None
          %75 = OpAccessChain %_ptr_Function_int %v2i %74
-               OpStore %75 %int_1
-         %77 = OpLoad %int %i
+               OpStore %75 %int_1 None
+         %77 = OpLoad %int %i None
          %78 = OpAccessChain %_ptr_Function_uint %v2u %77
-               OpStore %78 %uint_1
-         %81 = OpLoad %int %i
+               OpStore %78 %uint_1 None
+         %81 = OpLoad %int %i None
          %82 = OpAccessChain %_ptr_Function_bool %v2b %81
-               OpStore %82 %true
+               OpStore %82 %true None
                OpBranch %59
          %59 = OpLabel
-         %85 = OpLoad %int %i
+         %85 = OpLoad %int %i None
          %86 = OpIAdd %int %85 %int_1
-               OpStore %i %86
+               OpStore %i %86 None
                OpBranch %60
          %61 = OpLabel
                OpStore %i_0 %int_0
-         %88 = OpLoad %int %i_0
+         %88 = OpLoad %int %i_0 None
          %89 = OpAccessChain %_ptr_Function_float %v3f %88
-               OpStore %89 %float_1
-         %90 = OpLoad %int %i_0
+               OpStore %89 %float_1 None
+         %90 = OpLoad %int %i_0 None
          %91 = OpAccessChain %_ptr_Function_float %v4f %90
-               OpStore %91 %float_1
-         %92 = OpLoad %int %i_0
+               OpStore %91 %float_1 None
+         %92 = OpLoad %int %i_0 None
          %93 = OpAccessChain %_ptr_Function_int %v3i %92
-               OpStore %93 %int_1
-         %94 = OpLoad %int %i_0
+               OpStore %93 %int_1 None
+         %94 = OpLoad %int %i_0 None
          %95 = OpAccessChain %_ptr_Function_int %v4i %94
-               OpStore %95 %int_1
-         %96 = OpLoad %int %i_0
+               OpStore %95 %int_1 None
+         %96 = OpLoad %int %i_0 None
          %97 = OpAccessChain %_ptr_Function_uint %v3u %96
-               OpStore %97 %uint_1
-         %98 = OpLoad %int %i_0
+               OpStore %97 %uint_1 None
+         %98 = OpLoad %int %i_0 None
          %99 = OpAccessChain %_ptr_Function_uint %v4u %98
-               OpStore %99 %uint_1
-        %100 = OpLoad %int %i_0
+               OpStore %99 %uint_1 None
+        %100 = OpLoad %int %i_0 None
         %101 = OpAccessChain %_ptr_Function_bool %v3b %100
-               OpStore %101 %true
-        %102 = OpLoad %int %i_0
+               OpStore %101 %true None
+        %102 = OpLoad %int %i_0 None
         %103 = OpAccessChain %_ptr_Function_bool %v4b %102
-               OpStore %103 %true
+               OpStore %103 %true None
                OpReturn
                OpFunctionEnd

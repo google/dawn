@@ -74,19 +74,19 @@
          %34 = OpLabel
          %35 = OpFunctionCall %VertexOutput %vert_main1_inner
          %36 = OpCompositeExtract %v4float %35 0
-               OpStore %vert_main1_position_Output %36
+               OpStore %vert_main1_position_Output %36 None
          %37 = OpCompositeExtract %int %35 1
-               OpStore %vert_main1_loc0_Output %37
-               OpStore %vert_main1___point_size_Output %float_1
+               OpStore %vert_main1_loc0_Output %37 None
+               OpStore %vert_main1___point_size_Output %float_1 None
                OpReturn
                OpFunctionEnd
  %vert_main2 = OpFunction %void None %33
          %39 = OpLabel
          %40 = OpFunctionCall %VertexOutput %vert_main2_inner
          %41 = OpCompositeExtract %v4float %40 0
-               OpStore %vert_main2_position_Output %41
+               OpStore %vert_main2_position_Output %41 None
          %42 = OpCompositeExtract %int %40 1
-               OpStore %vert_main2_loc0_Output %42
-               OpStore %vert_main2___point_size_Output %float_1
+               OpStore %vert_main2_loc0_Output %42 None
+               OpStore %vert_main2___point_size_Output %float_1 None
                OpReturn
                OpFunctionEnd

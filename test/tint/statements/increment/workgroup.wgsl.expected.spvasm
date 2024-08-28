@@ -18,9 +18,9 @@
       %int_1 = OpConstant %int 1
        %main = OpFunction %void None %6
           %7 = OpLabel
-          %8 = OpLoad %int %i
+          %8 = OpLoad %int %i None
           %9 = OpIAdd %int %8 %int_1
-               OpStore %i %9
+               OpStore %i %9 None
                OpReturn
                OpFunctionEnd
 %unused_entry_point = OpFunction %void None %6

@@ -40,20 +40,20 @@
         %res = OpVariable %_ptr_Function_v2uint Function
           %9 = OpGroupNonUniformQuadBroadcast %v2uint %uint_3 %11 %uint_1
                OpStore %res %9
-         %15 = OpLoad %v2uint %res
+         %15 = OpLoad %v2uint %res None
                OpReturnValue %15
                OpFunctionEnd
 %fragment_main = OpFunction %void None %18
          %19 = OpLabel
          %20 = OpFunctionCall %v2uint %quadBroadcast_f60448
          %21 = OpAccessChain %_ptr_StorageBuffer_v2uint %1 %uint_0
-               OpStore %21 %20
+               OpStore %21 %20 None
                OpReturn
                OpFunctionEnd
 %compute_main = OpFunction %void None %18
          %25 = OpLabel
          %26 = OpFunctionCall %v2uint %quadBroadcast_f60448
          %27 = OpAccessChain %_ptr_StorageBuffer_v2uint %1 %uint_0
-               OpStore %27 %26
+               OpStore %27 %26 None
                OpReturn
                OpFunctionEnd

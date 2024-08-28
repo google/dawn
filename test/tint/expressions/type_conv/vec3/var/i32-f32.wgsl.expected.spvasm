@@ -23,7 +23,7 @@
     %v3float = OpTypeVector %float 3
           %f = OpFunction %void None %9
          %10 = OpLabel
-         %11 = OpLoad %v3int %u
+         %11 = OpLoad %v3int %u None
           %v = OpConvertSToF %v3float %11
                OpReturn
                OpFunctionEnd

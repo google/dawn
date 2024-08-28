@@ -52,7 +52,7 @@
      %uses_a = OpFunction %void None %13
          %14 = OpLabel
          %15 = OpAccessChain %_ptr_PushConstant_int %1 %uint_0
-        %foo = OpLoad %int %15
+        %foo = OpLoad %int %15 None
                OpReturn
                OpFunctionEnd
 %uses_uses_a = OpFunction %void None %13
@@ -63,7 +63,7 @@
      %uses_b = OpFunction %void None %13
          %24 = OpLabel
          %25 = OpAccessChain %_ptr_PushConstant_int %5 %uint_0
-      %foo_0 = OpLoad %int %25
+      %foo_0 = OpLoad %int %25 None
                OpReturn
                OpFunctionEnd
       %main1 = OpFunction %void None %13

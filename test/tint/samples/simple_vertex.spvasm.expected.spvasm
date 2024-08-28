@@ -33,13 +33,13 @@
     %float_1 = OpConstant %float 1
      %main_1 = OpFunction %void None %12
          %13 = OpLabel
-               OpStore %gl_Position %5
+               OpStore %gl_Position %5 None
                OpReturn
                OpFunctionEnd
  %main_inner = OpFunction %main_out None %16
          %17 = OpLabel
          %18 = OpFunctionCall %void %main_1
-         %19 = OpLoad %v4float %gl_Position
+         %19 = OpLoad %v4float %gl_Position None
          %20 = OpCompositeConstruct %main_out %19
                OpReturnValue %20
                OpFunctionEnd
@@ -47,7 +47,7 @@
          %22 = OpLabel
          %23 = OpFunctionCall %main_out %main_inner
          %24 = OpCompositeExtract %v4float %23 0
-               OpStore %main_position_Output %24
-               OpStore %main___point_size_Output %float_1
+               OpStore %main_position_Output %24 None
+               OpStore %main___point_size_Output %float_1 None
                OpReturn
                OpFunctionEnd

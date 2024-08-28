@@ -74,17 +74,17 @@
          %33 = OpLabel
          %34 = OpFunctionCall %FragmentOutputs %main_inner
          %35 = OpCompositeExtract %int %34 0
-               OpStore %main_loc0_Output %35
+               OpStore %main_loc0_Output %35 None
          %36 = OpCompositeExtract %float %34 1
-               OpStore %main_frag_depth_Output %36
+               OpStore %main_frag_depth_Output %36 None
          %37 = OpCompositeExtract %uint %34 2
-               OpStore %main_loc1_Output %37
+               OpStore %main_loc1_Output %37 None
          %38 = OpCompositeExtract %float %34 3
-               OpStore %main_loc2_Output %38
+               OpStore %main_loc2_Output %38 None
          %39 = OpCompositeExtract %uint %34 4
          %40 = OpAccessChain %_ptr_Output_uint %main_sample_mask_Output %uint_0
-               OpStore %40 %39
+               OpStore %40 %39 None
          %42 = OpCompositeExtract %v4float %34 5
-               OpStore %main_loc3_Output %42
+               OpStore %main_loc3_Output %42 None
                OpReturn
                OpFunctionEnd

@@ -54,8 +54,8 @@
      %uint_0 = OpConstant %uint 0
           %f = OpFunction %void None %32
          %33 = OpLabel
-         %34 = OpLoad %mat4v4float %m
+         %34 = OpLoad %mat4v4float %m None
          %35 = OpAccessChain %_ptr_StorageBuffer_mat4v4float %27 %uint_0
-               OpStore %35 %34
+               OpStore %35 %34 None
                OpReturn
                OpFunctionEnd

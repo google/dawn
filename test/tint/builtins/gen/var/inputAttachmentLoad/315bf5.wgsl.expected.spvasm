@@ -42,16 +42,16 @@
 %inputAttachmentLoad_315bf5 = OpFunction %v4int None %10
          %11 = OpLabel
         %res = OpVariable %_ptr_Function_v4int Function
-         %12 = OpLoad %8 %arg_0
+         %12 = OpLoad %8 %arg_0 None
          %13 = OpImageRead %v4int %12 %14
                OpStore %res %13
-         %18 = OpLoad %v4int %res
+         %18 = OpLoad %v4int %res None
                OpReturnValue %18
                OpFunctionEnd
 %fragment_main = OpFunction %void None %21
          %22 = OpLabel
          %23 = OpFunctionCall %v4int %inputAttachmentLoad_315bf5
          %24 = OpAccessChain %_ptr_StorageBuffer_v4int %1 %uint_0
-               OpStore %24 %23
+               OpStore %24 %23 None
                OpReturn
                OpFunctionEnd

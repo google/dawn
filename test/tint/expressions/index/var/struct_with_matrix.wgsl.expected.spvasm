@@ -39,7 +39,7 @@
                OpStore %a %11
          %12 = OpAccessChain %_ptr_Function_v4float %a %uint_1 %int_2
          %17 = OpAccessChain %_ptr_Function_float %12 %int_1
-         %20 = OpLoad %float %17
+         %20 = OpLoad %float %17 None
                OpReturnValue %20
                OpFunctionEnd
 %unused_entry_point = OpFunction %void None %23

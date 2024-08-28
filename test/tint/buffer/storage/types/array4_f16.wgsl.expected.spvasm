@@ -44,8 +44,8 @@
        %main = OpFunction %void None %13
          %14 = OpLabel
          %15 = OpAccessChain %_ptr_StorageBuffer__arr_half_uint_4 %1 %uint_0
-         %18 = OpLoad %_arr_half_uint_4 %15
+         %18 = OpLoad %_arr_half_uint_4 %15 None
          %19 = OpAccessChain %_ptr_StorageBuffer__arr_half_uint_4_0 %8 %uint_0
-               OpStore %19 %18
+               OpStore %19 %18 None
                OpReturn
                OpFunctionEnd

@@ -73,6 +73,6 @@
          %39 = OpCompositeExtract %float %a3 0 0 0
          %40 = OpFAdd %float %38 %39
          %41 = OpAccessChain %_ptr_StorageBuffer_float %1 %uint_0
-               OpStore %41 %40
+               OpStore %41 %40 None
                OpReturn
                OpFunctionEnd

@@ -45,13 +45,13 @@
       %main1 = OpFunction %void None %18
          %19 = OpLabel
          %20 = OpFunctionCall %float %main1_inner
-               OpStore %main1_frag_depth_Output %20
+               OpStore %main1_frag_depth_Output %20 None
                OpReturn
                OpFunctionEnd
       %main2 = OpFunction %void None %18
          %22 = OpLabel
          %23 = OpFunctionCall %uint %main2_inner
          %24 = OpAccessChain %_ptr_Output_uint %main2_sample_mask_Output %uint_0
-               OpStore %24 %23
+               OpStore %24 %23 None
                OpReturn
                OpFunctionEnd

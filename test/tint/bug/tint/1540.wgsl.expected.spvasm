@@ -25,7 +25,7 @@
           %4 = OpLabel
           %b = OpVariable %_ptr_Function_bool Function %8
           %v = OpVariable %_ptr_Function_S Function
-          %9 = OpLoad %bool %b
+          %9 = OpLoad %bool %b None
          %10 = OpLogicalAnd %bool %true %9
          %13 = OpCompositeConstruct %S %10
                OpStore %v %13

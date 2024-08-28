@@ -70,12 +70,12 @@
          %34 = OpVariable %_ptr_Function__arr_mat2v3half_uint_4 Function %37
          %17 = OpAccessChain %_ptr_Uniform__arr_mat2x3_f16_std140_uint_4 %1 %uint_0
          %20 = OpAccessChain %_ptr_Uniform_v3half %17 %int_2 %uint_0
-         %24 = OpLoad %v3half %20
+         %24 = OpLoad %v3half %20 None
          %25 = OpAccessChain %_ptr_Uniform_v3half %17 %int_2 %uint_1
-         %27 = OpLoad %v3half %25
+         %27 = OpLoad %v3half %25 None
       %l_a_i = OpCompositeConstruct %mat2v3half %24 %27
     %l_a_i_i = OpCompositeExtract %v3half %l_a_i 1
-         %31 = OpLoad %_arr_mat2x3_f16_std140_uint_4 %17
+         %31 = OpLoad %_arr_mat2x3_f16_std140_uint_4 %17 None
                OpStore %32 %31
                OpBranch %38
          %38 = OpLabel
@@ -93,17 +93,17 @@
          %47 = OpLabel
          %49 = OpAccessChain %_ptr_Function_mat2v3half %34 %43
          %51 = OpAccessChain %_ptr_Function_mat2x3_f16_std140 %32 %43
-         %53 = OpLoad %mat2x3_f16_std140 %51
+         %53 = OpLoad %mat2x3_f16_std140 %51 None
          %54 = OpCompositeExtract %v3half %53 0
          %55 = OpCompositeExtract %v3half %53 1
          %56 = OpCompositeConstruct %mat2v3half %54 %55
-               OpStore %49 %56
+               OpStore %49 %56 None
                OpBranch %40
          %40 = OpLabel
          %44 = OpIAdd %uint %43 %uint_1
                OpBranch %41
          %42 = OpLabel
-        %l_a = OpLoad %_arr_mat2v3half_uint_4 %34
+        %l_a = OpLoad %_arr_mat2v3half_uint_4 %34 None
          %58 = OpCompositeExtract %half %l_a_i_i 0
          %59 = OpCompositeExtract %half %l_a 0 0 0
          %60 = OpFAdd %half %58 %59
@@ -112,6 +112,6 @@
          %63 = OpCompositeExtract %half %l_a_i_i 0
          %64 = OpFAdd %half %62 %63
          %65 = OpAccessChain %_ptr_StorageBuffer_half %10 %uint_0
-               OpStore %65 %64
+               OpStore %65 %64 None
                OpReturn
                OpFunctionEnd

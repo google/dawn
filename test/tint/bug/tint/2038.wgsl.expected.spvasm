@@ -38,14 +38,14 @@
                OpBranchConditional %false %12 %11
          %12 = OpLabel
          %15 = OpAccessChain %_ptr_StorageBuffer_uint %1 %uint_0 %int_0
-               OpStore %15 %uint_1
+               OpStore %15 %uint_1 None
                OpBranch %11
          %11 = OpLabel
                OpSelectionMerge %21 None
                OpBranchConditional %false %22 %21
          %22 = OpLabel
          %23 = OpAccessChain %_ptr_StorageBuffer_uint %1 %uint_0 %int_1
-               OpStore %23 %uint_1
+               OpStore %23 %uint_1 None
                OpBranch %21
          %21 = OpLabel
                OpReturn

@@ -61,22 +61,22 @@
       %int_7 = OpConstant %int 7
      %uses_a = OpFunction %void None %13
          %14 = OpLabel
-         %15 = OpLoad %int %a
+         %15 = OpLoad %int %a None
          %16 = OpIAdd %int %15 %int_1
-               OpStore %a %16
+               OpStore %a %16 None
                OpReturn
                OpFunctionEnd
      %uses_b = OpFunction %void None %13
          %19 = OpLabel
-         %20 = OpLoad %int %b
+         %20 = OpLoad %int %b None
          %21 = OpIMul %int %20 %int_2
-               OpStore %b %21
+               OpStore %b %21 None
                OpReturn
                OpFunctionEnd
 %uses_a_and_b = OpFunction %void None %13
          %24 = OpLabel
-         %25 = OpLoad %int %a
-               OpStore %b %25
+         %25 = OpLoad %int %a None
+               OpStore %b %25 None
                OpReturn
                OpFunctionEnd
     %no_uses = OpFunction %void None %13
@@ -85,7 +85,7 @@
                OpFunctionEnd
       %outer = OpFunction %void None %13
          %29 = OpLabel
-               OpStore %a %int_0
+               OpStore %a %int_0 None
          %31 = OpFunctionCall %void %uses_a
          %32 = OpFunctionCall %void %uses_a_and_b
          %33 = OpFunctionCall %void %uses_b
@@ -99,11 +99,11 @@
                OpSelectionMerge %42 None
                OpBranchConditional %39 %43 %42
          %43 = OpLabel
-               OpStore %a %int_0
+               OpStore %a %int_0 None
                OpBranch %42
          %42 = OpLabel
                OpControlBarrier %uint_2 %uint_2 %uint_264
-               OpStore %a %int_42
+               OpStore %a %int_42 None
          %48 = OpFunctionCall %void %uses_a
                OpReturn
                OpFunctionEnd
@@ -114,11 +114,11 @@
                OpSelectionMerge %53 None
                OpBranchConditional %52 %54 %53
          %54 = OpLabel
-               OpStore %b %int_0
+               OpStore %b %int_0 None
                OpBranch %53
          %53 = OpLabel
                OpControlBarrier %uint_2 %uint_2 %uint_264
-               OpStore %b %int_7
+               OpStore %b %int_7 None
          %57 = OpFunctionCall %void %uses_b
                OpReturn
                OpFunctionEnd
@@ -129,8 +129,8 @@
                OpSelectionMerge %62 None
                OpBranchConditional %61 %63 %62
          %63 = OpLabel
-               OpStore %a %int_0
-               OpStore %b %int_0
+               OpStore %a %int_0 None
+               OpStore %b %int_0 None
                OpBranch %62
          %62 = OpLabel
                OpControlBarrier %uint_2 %uint_2 %uint_264
@@ -145,19 +145,19 @@
                OpFunctionEnd
       %main1 = OpFunction %void None %13
          %71 = OpLabel
-         %72 = OpLoad %uint %main1_local_invocation_index_Input
+         %72 = OpLoad %uint %main1_local_invocation_index_Input None
          %73 = OpFunctionCall %void %main1_inner %72
                OpReturn
                OpFunctionEnd
       %main2 = OpFunction %void None %13
          %75 = OpLabel
-         %76 = OpLoad %uint %main2_local_invocation_index_Input
+         %76 = OpLoad %uint %main2_local_invocation_index_Input None
          %77 = OpFunctionCall %void %main2_inner %76
                OpReturn
                OpFunctionEnd
       %main3 = OpFunction %void None %13
          %79 = OpLabel
-         %80 = OpLoad %uint %main3_local_invocation_index_Input
+         %80 = OpLoad %uint %main3_local_invocation_index_Input None
          %81 = OpFunctionCall %void %main3_inner %80
                OpReturn
                OpFunctionEnd

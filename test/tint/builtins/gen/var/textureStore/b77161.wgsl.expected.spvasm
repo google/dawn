@@ -37,9 +37,9 @@
       %arg_2 = OpVariable %_ptr_Function_v4uint Function
                OpStore %arg_1 %uint_1
                OpStore %arg_2 %15
-         %16 = OpLoad %3 %arg_0
-         %17 = OpLoad %uint %arg_1
-         %18 = OpLoad %v4uint %arg_2
+         %16 = OpLoad %3 %arg_0 None
+         %17 = OpLoad %uint %arg_1 None
+         %18 = OpLoad %v4uint %arg_2 None
                OpImageWrite %16 %17 %18 None
                OpReturn
                OpFunctionEnd

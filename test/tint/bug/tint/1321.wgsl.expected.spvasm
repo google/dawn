@@ -42,7 +42,7 @@
                OpLoopMerge %21 %19 None
                OpBranch %18
          %18 = OpLabel
-          %x = OpLoad %float %a
+          %x = OpLoad %float %a None
                OpBranch %21
          %19 = OpLabel
                OpBranch %20

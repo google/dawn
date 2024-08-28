@@ -34,8 +34,8 @@
        %main = OpFunction %void None %10
          %11 = OpLabel
         %res = OpVariable %_ptr_Function_v4float Function
-         %12 = OpLoad %3 %t
-         %13 = OpLoad %7 %s
+         %12 = OpLoad %3 %t None
+         %13 = OpLoad %7 %s None
          %14 = OpSampledImage %15 %12 %13
          %16 = OpImageGather %v4float %14 %18 %int_0 None
                OpStore %res %16

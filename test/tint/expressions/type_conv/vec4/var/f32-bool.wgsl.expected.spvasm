@@ -24,7 +24,7 @@
          %15 = OpConstantNull %v4float
           %f = OpFunction %void None %9
          %10 = OpLabel
-         %11 = OpLoad %v4float %u
+         %11 = OpLoad %v4float %u None
           %v = OpFUnordNotEqual %v4bool %11 %15
                OpReturn
                OpFunctionEnd

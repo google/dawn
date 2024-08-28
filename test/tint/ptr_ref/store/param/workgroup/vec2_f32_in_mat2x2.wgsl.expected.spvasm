@@ -44,7 +44,7 @@
          %15 = OpLabel
          %16 = OpCompositeExtract %uint %pointer_indices 0
          %17 = OpAccessChain %_ptr_Workgroup_v2float %S %16
-               OpStore %17 %19
+               OpStore %17 %19 None
                OpReturn
                OpFunctionEnd
  %main_inner = OpFunction %void None %22
@@ -54,7 +54,7 @@
                OpSelectionMerge %27 None
                OpBranchConditional %24 %28 %27
          %28 = OpLabel
-               OpStore %S %29
+               OpStore %S %29 None
                OpBranch %27
          %27 = OpLabel
                OpControlBarrier %uint_2 %uint_2 %uint_264
@@ -65,7 +65,7 @@
                OpFunctionEnd
        %main = OpFunction %void None %39
          %40 = OpLabel
-         %41 = OpLoad %uint %main_local_invocation_index_Input
+         %41 = OpLoad %uint %main_local_invocation_index_Input None
          %42 = OpFunctionCall %void %main_inner %41
                OpReturn
                OpFunctionEnd

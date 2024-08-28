@@ -23,7 +23,7 @@
 %pointer_root = OpFunctionParameter %_ptr_Function_int
           %8 = OpLabel
           %9 = OpAccessChain %_ptr_Function_int %pointer_root
-               OpStore %9 %value
+               OpStore %9 %value None
                OpReturn
                OpFunctionEnd
        %main = OpFunction %void None %11

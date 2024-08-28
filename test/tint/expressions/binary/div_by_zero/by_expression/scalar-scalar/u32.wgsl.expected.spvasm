@@ -28,9 +28,9 @@
           %b = OpVariable %_ptr_Function_uint Function
                OpStore %a %uint_1
                OpStore %b %uint_0
-         %11 = OpLoad %uint %a
-         %12 = OpLoad %uint %b
-         %13 = OpLoad %uint %b
+         %11 = OpLoad %uint %a None
+         %12 = OpLoad %uint %b None
+         %13 = OpLoad %uint %b None
          %14 = OpIAdd %uint %12 %13
           %r = OpFunctionCall %uint %tint_div_u32 %11 %14
                OpReturn

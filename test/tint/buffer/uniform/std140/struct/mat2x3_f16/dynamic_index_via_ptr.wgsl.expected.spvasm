@@ -99,10 +99,10 @@
         %119 = OpTypeFunction %Outer %Outer_std140
           %i = OpFunction %int None %17
          %18 = OpLabel
-         %19 = OpLoad %int %counter
+         %19 = OpLoad %int %counter None
          %20 = OpIAdd %int %19 %int_1
-               OpStore %counter %20
-         %22 = OpLoad %int %counter
+               OpStore %counter %20 None
+         %22 = OpLoad %int %counter None
                OpReturnValue %22
                OpFunctionEnd
           %f = OpFunction %void None %25
@@ -119,15 +119,15 @@
          %35 = OpFunctionCall %int %i
          %36 = OpAccessChain %_ptr_Uniform_Inner_std140 %33 %35
          %38 = OpAccessChain %_ptr_Uniform_v3half %36 %uint_0
-         %40 = OpLoad %v3half %38
+         %40 = OpLoad %v3half %38 None
          %41 = OpAccessChain %_ptr_Uniform_v3half %36 %uint_1
-         %43 = OpLoad %v3half %41
+         %43 = OpLoad %v3half %41 None
 %l_a_i_a_i_m = OpCompositeConstruct %mat2v3half %40 %43
                OpStore %46 %l_a_i_a_i_m
          %48 = OpFunctionCall %int %i
          %49 = OpAccessChain %_ptr_Function_v3half %46 %48
-%l_a_i_a_i_m_i = OpLoad %v3half %49
-         %52 = OpLoad %_arr_Outer_std140_uint_4 %27
+%l_a_i_a_i_m_i = OpLoad %v3half %49 None
+         %52 = OpLoad %_arr_Outer_std140_uint_4 %27 None
                OpStore %53 %52
                OpBranch %62
          %62 = OpLabel
@@ -145,18 +145,18 @@
          %71 = OpLabel
          %73 = OpAccessChain %_ptr_Function_Outer %55 %67
          %75 = OpAccessChain %_ptr_Function_Outer_std140 %53 %67
-         %77 = OpLoad %Outer_std140 %75
+         %77 = OpLoad %Outer_std140 %75 None
          %78 = OpFunctionCall %Outer %convert_Outer %77
-               OpStore %73 %78
+               OpStore %73 %78 None
                OpBranch %64
          %64 = OpLabel
          %68 = OpIAdd %uint %67 %uint_1
                OpBranch %65
          %66 = OpLabel
-        %l_a = OpLoad %_arr_Outer_uint_4 %55
-         %81 = OpLoad %Outer_std140 %31
+        %l_a = OpLoad %_arr_Outer_uint_4 %55 None
+         %81 = OpLoad %Outer_std140 %31 None
       %l_a_i = OpFunctionCall %Outer %convert_Outer %81
-         %83 = OpLoad %_arr_Inner_std140_uint_4 %33
+         %83 = OpLoad %_arr_Inner_std140_uint_4 %33 None
                OpStore %84 %83
                OpBranch %89
          %89 = OpLabel
@@ -174,16 +174,16 @@
          %97 = OpLabel
          %99 = OpAccessChain %_ptr_Function_Inner %86 %94
         %101 = OpAccessChain %_ptr_Function_Inner_std140 %84 %94
-        %103 = OpLoad %Inner_std140 %101
+        %103 = OpLoad %Inner_std140 %101 None
         %104 = OpFunctionCall %Inner %convert_Inner %103
-               OpStore %99 %104
+               OpStore %99 %104 None
                OpBranch %91
          %91 = OpLabel
          %95 = OpIAdd %uint %94 %uint_1
                OpBranch %92
          %93 = OpLabel
-    %l_a_i_a = OpLoad %_arr_Inner_uint_4 %86
-        %107 = OpLoad %Inner_std140 %36
+    %l_a_i_a = OpLoad %_arr_Inner_uint_4 %86 None
+        %107 = OpLoad %Inner_std140 %36 None
   %l_a_i_a_i = OpFunctionCall %Inner %convert_Inner %107
         %109 = OpFunctionCall %int %i
 %l_a_i_a_i_m_i_i = OpVectorExtractDynamic %half %l_a_i_a_i_m_i %109
@@ -221,15 +221,15 @@
         %132 = OpLabel
         %134 = OpAccessChain %_ptr_Function_Inner %123 %129
         %135 = OpAccessChain %_ptr_Function_Inner_std140 %122 %129
-        %136 = OpLoad %Inner_std140 %135
+        %136 = OpLoad %Inner_std140 %135 None
         %137 = OpFunctionCall %Inner %convert_Inner %136
-               OpStore %134 %137
+               OpStore %134 %137 None
                OpBranch %126
         %126 = OpLabel
         %130 = OpIAdd %uint %129 %uint_1
                OpBranch %127
         %128 = OpLabel
-        %138 = OpLoad %_arr_Inner_uint_4 %123
+        %138 = OpLoad %_arr_Inner_uint_4 %123 None
         %139 = OpCompositeConstruct %Outer %138
                OpReturnValue %139
                OpFunctionEnd

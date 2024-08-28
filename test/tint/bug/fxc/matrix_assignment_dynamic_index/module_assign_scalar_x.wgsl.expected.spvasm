@@ -44,9 +44,9 @@
        %main = OpFunction %void None %14
          %15 = OpLabel
          %16 = OpAccessChain %_ptr_Uniform_uint %1 %uint_0 %uint_0
-         %19 = OpLoad %uint %16
+         %19 = OpLoad %uint %16 None
          %20 = OpAccessChain %_ptr_Private_v4float %m1 %19
          %22 = OpAccessChain %_ptr_Private_float %20 %int_0
-               OpStore %22 %float_1
+               OpStore %22 %float_1 None
                OpReturn
                OpFunctionEnd

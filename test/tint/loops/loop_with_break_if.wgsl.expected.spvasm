@@ -35,17 +35,17 @@
                OpLoopMerge %16 %14 None
                OpBranch %13
          %13 = OpLabel
-         %17 = OpLoad %int %i
+         %17 = OpLoad %int %i None
          %18 = OpSGreaterThan %bool %17 %int_4
                OpSelectionMerge %20 None
                OpBranchConditional %18 %21 %20
          %21 = OpLabel
-         %22 = OpLoad %int %i
-               OpStore %continue_execution %false
-               OpStore %return_value %22
+         %22 = OpLoad %int %i None
+               OpStore %continue_execution %false None
+               OpStore %return_value %22 None
                OpBranch %20
          %20 = OpLabel
-         %24 = OpLoad %bool %continue_execution
+         %24 = OpLoad %bool %continue_execution None
                OpSelectionMerge %25 None
                OpBranchConditional %24 %26 %25
          %26 = OpLabel
@@ -53,22 +53,22 @@
          %25 = OpLabel
                OpBranch %16
          %14 = OpLabel
-         %27 = OpLoad %int %i
+         %27 = OpLoad %int %i None
          %28 = OpIAdd %int %27 %int_1
-               OpStore %i %28
-         %30 = OpLoad %int %i
+               OpStore %i %28 None
+         %30 = OpLoad %int %i None
          %31 = OpIEqual %bool %30 %int_4
                OpBranchConditional %31 %16 %15
          %16 = OpLabel
-         %32 = OpLoad %bool %continue_execution
+         %32 = OpLoad %bool %continue_execution None
                OpSelectionMerge %33 None
                OpBranchConditional %32 %34 %33
          %34 = OpLabel
-         %35 = OpLoad %int %i
-               OpStore %return_value %35
+         %35 = OpLoad %int %i None
+               OpStore %return_value %35 None
                OpBranch %33
          %33 = OpLabel
-         %36 = OpLoad %int %return_value
+         %36 = OpLoad %int %return_value None
                OpReturnValue %36
                OpFunctionEnd
 %unused_entry_point = OpFunction %void None %39

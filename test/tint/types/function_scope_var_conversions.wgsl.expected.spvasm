@@ -71,7 +71,7 @@
           %a = OpVariable %_ptr_Function_float Function
           %b = OpVariable %_ptr_Function_v2float Function
                OpStore %a %float_0
-          %9 = OpLoad %float %a
+          %9 = OpLoad %float %a None
          %11 = OpCompositeConstruct %v2float %float_1 %9
                OpStore %b %11
                OpReturn

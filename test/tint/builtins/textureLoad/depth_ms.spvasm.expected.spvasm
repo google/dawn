@@ -60,18 +60,18 @@
          %16 = OpLabel
         %res = OpVariable %_ptr_Function_float Function
                OpStore %res %float_0
-         %20 = OpLoad %3 %arg_0
+         %20 = OpLoad %3 %arg_0 None
          %21 = OpImageFetch %v4float %20 %22 Sample %int_1
          %26 = OpCompositeExtract %float %21 0
          %27 = OpCompositeConstruct %v4float %26 %float_0 %float_0 %float_0
          %28 = OpCompositeExtract %float %27 0
-               OpStore %res %28
+               OpStore %res %28 None
                OpReturn
                OpFunctionEnd
 %tint_symbol_2 = OpFunction %void None %31
 %tint_symbol = OpFunctionParameter %v4float
          %32 = OpLabel
-               OpStore %tint_symbol_1 %tint_symbol
+               OpStore %tint_symbol_1 %tint_symbol None
                OpReturn
                OpFunctionEnd
 %vertex_main_1 = OpFunction %void None %15
@@ -83,7 +83,7 @@
 %vertex_main_inner = OpFunction %vertex_main_out None %39
          %40 = OpLabel
          %41 = OpFunctionCall %void %vertex_main_1
-         %42 = OpLoad %v4float %tint_symbol_1
+         %42 = OpLoad %v4float %tint_symbol_1 None
          %43 = OpCompositeConstruct %vertex_main_out %42
                OpReturnValue %43
                OpFunctionEnd
@@ -111,7 +111,7 @@
          %57 = OpLabel
          %58 = OpFunctionCall %vertex_main_out %vertex_main_inner
          %59 = OpCompositeExtract %v4float %58 0
-               OpStore %vertex_main_position_Output %59
-               OpStore %vertex_main___point_size_Output %float_1
+               OpStore %vertex_main_position_Output %59 None
+               OpStore %vertex_main___point_size_Output %float_1 None
                OpReturn
                OpFunctionEnd

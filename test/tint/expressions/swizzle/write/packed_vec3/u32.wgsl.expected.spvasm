@@ -37,16 +37,16 @@
           %f = OpFunction %void None %9
          %10 = OpLabel
          %11 = OpAccessChain %_ptr_StorageBuffer_v3uint %1 %uint_0 %uint_0
-               OpStore %11 %14
+               OpStore %11 %14 None
          %18 = OpAccessChain %_ptr_StorageBuffer_v3uint %1 %uint_0 %uint_0
          %19 = OpAccessChain %_ptr_StorageBuffer_uint %18 %uint_0
-               OpStore %19 %uint_1
+               OpStore %19 %uint_1 None
          %21 = OpAccessChain %_ptr_StorageBuffer_v3uint %1 %uint_0 %uint_0
          %22 = OpAccessChain %_ptr_StorageBuffer_uint %21 %uint_1
-               OpStore %22 %uint_2
+               OpStore %22 %uint_2 None
          %23 = OpAccessChain %_ptr_StorageBuffer_v3uint %1 %uint_0 %uint_0
          %24 = OpAccessChain %_ptr_StorageBuffer_uint %23 %uint_2
-               OpStore %24 %uint_3
+               OpStore %24 %uint_3 None
                OpReturn
                OpFunctionEnd
 %unused_entry_point = OpFunction %void None %9

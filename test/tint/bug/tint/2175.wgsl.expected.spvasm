@@ -26,6 +26,6 @@
 %tint_symbol_3 = OpFunction %void None %7
           %8 = OpLabel
           %9 = OpAccessChain %_ptr_StorageBuffer_uint %1 %uint_0
-               OpStore %9 %uint_0
+               OpStore %9 %uint_0 None
                OpReturn
                OpFunctionEnd

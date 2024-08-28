@@ -29,7 +29,7 @@
           %7 = OpLabel
           %8 = OpAccessChain %_ptr_Function_v2float %x_201_root
           %9 = OpAccessChain %_ptr_Function_float %8 %uint_0
-      %x_212 = OpLoad %float %9
+      %x_212 = OpLoad %float %9 None
                OpReturnValue %x_212
                OpFunctionEnd
      %main_1 = OpFunction %void None %16

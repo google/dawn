@@ -72,12 +72,12 @@
                OpFunctionEnd
        %main = OpFunction %void None %30
          %31 = OpLabel
-         %32 = OpLoad %int %main_loc0_Input
-         %33 = OpLoad %uint %main_loc1_Input
-         %34 = OpLoad %float %main_loc2_Input
-         %35 = OpLoad %v4float %main_loc3_Input
-         %36 = OpLoad %half %main_loc4_Input
-         %37 = OpLoad %v3half %main_loc5_Input
+         %32 = OpLoad %int %main_loc0_Input None
+         %33 = OpLoad %uint %main_loc1_Input None
+         %34 = OpLoad %float %main_loc2_Input None
+         %35 = OpLoad %v4float %main_loc3_Input None
+         %36 = OpLoad %half %main_loc4_Input None
+         %37 = OpLoad %v3half %main_loc5_Input None
          %38 = OpFunctionCall %void %main_inner %32 %33 %34 %35 %36 %37
                OpReturn
                OpFunctionEnd

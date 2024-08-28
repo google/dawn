@@ -31,13 +31,13 @@
          %v3 = OpVariable %_ptr_Function_v3int Function
          %v4 = OpVariable %_ptr_Function_v4int Function
                OpStore %v %int_3
-          %9 = OpLoad %int %v
+          %9 = OpLoad %int %v None
          %11 = OpCompositeConstruct %v2int %9 %9
                OpStore %v2 %11
-         %14 = OpLoad %int %v
+         %14 = OpLoad %int %v None
          %16 = OpCompositeConstruct %v3int %14 %14 %14
                OpStore %v3 %16
-         %19 = OpLoad %int %v
+         %19 = OpLoad %int %v None
          %21 = OpCompositeConstruct %v4int %19 %19 %19 %19
                OpStore %v4 %21
                OpReturn

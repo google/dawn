@@ -47,25 +47,25 @@
 %textureLoad_3a2350 = OpFunction %v4uint None %10
          %11 = OpLabel
         %res = OpVariable %_ptr_Function_v4uint Function
-         %12 = OpLoad %8 %arg_0
+         %12 = OpLoad %8 %arg_0 None
          %14 = OpBitcast %int %uint_1
          %17 = OpCompositeConstruct %v3int %18 %14
          %21 = OpImageRead %v4uint %12 %17 None
                OpStore %res %21
-         %24 = OpLoad %v4uint %res
+         %24 = OpLoad %v4uint %res None
                OpReturnValue %24
                OpFunctionEnd
 %fragment_main = OpFunction %void None %27
          %28 = OpLabel
          %29 = OpFunctionCall %v4uint %textureLoad_3a2350
          %30 = OpAccessChain %_ptr_StorageBuffer_v4uint %1 %uint_0
-               OpStore %30 %29
+               OpStore %30 %29 None
                OpReturn
                OpFunctionEnd
 %compute_main = OpFunction %void None %27
          %34 = OpLabel
          %35 = OpFunctionCall %v4uint %textureLoad_3a2350
          %36 = OpAccessChain %_ptr_StorageBuffer_v4uint %1 %uint_0
-               OpStore %36 %35
+               OpStore %36 %35 None
                OpReturn
                OpFunctionEnd

@@ -185,10 +185,10 @@
          %23 = OpLabel
         %red = OpVariable %_ptr_Function_v4float Function
       %green = OpVariable %_ptr_Function_v4float Function
-         %24 = OpLoad %3 %t_plane0
-         %25 = OpLoad %3 %t_plane1
+         %24 = OpLoad %3 %t_plane0 None
+         %25 = OpLoad %3 %t_plane1 None
          %26 = OpAccessChain %_ptr_Uniform_tint_ExternalTextureParams_std140 %6 %uint_0
-         %29 = OpLoad %tint_ExternalTextureParams_std140 %26
+         %29 = OpLoad %tint_ExternalTextureParams_std140 %26 None
          %30 = OpFunctionCall %tint_ExternalTextureParams %convert_tint_ExternalTextureParams %29
          %35 = OpCompositeExtract %v2uint %30 12
          %36 = OpIAdd %v2uint %35 %37
@@ -197,13 +197,13 @@
          %45 = OpExtInst %v2uint %46 UMin %40 %39
          %47 = OpFunctionCall %v4float %tint_TextureLoadExternal %24 %25 %30 %45
                OpStore %red %47
-         %51 = OpLoad %19 %outImage
-         %52 = OpLoad %v4float %red
+         %51 = OpLoad %19 %outImage None
+         %52 = OpLoad %v4float %red None
                OpImageWrite %51 %54 %52 None
-         %55 = OpLoad %3 %t_plane0
-         %56 = OpLoad %3 %t_plane1
+         %55 = OpLoad %3 %t_plane0 None
+         %56 = OpLoad %3 %t_plane1 None
          %57 = OpAccessChain %_ptr_Uniform_tint_ExternalTextureParams_std140 %6 %uint_0
-         %58 = OpLoad %tint_ExternalTextureParams_std140 %57
+         %58 = OpLoad %tint_ExternalTextureParams_std140 %57 None
          %59 = OpFunctionCall %tint_ExternalTextureParams %convert_tint_ExternalTextureParams %58
          %60 = OpCompositeExtract %v2uint %59 12
          %61 = OpIAdd %v2uint %60 %37
@@ -212,8 +212,8 @@
          %67 = OpExtInst %v2uint %46 UMin %63 %62
          %68 = OpFunctionCall %v4float %tint_TextureLoadExternal %55 %56 %59 %67
                OpStore %green %68
-         %70 = OpLoad %19 %outImage
-         %71 = OpLoad %v4float %green
+         %70 = OpLoad %19 %outImage None
+         %71 = OpLoad %v4float %green None
                OpImageWrite %70 %73 %71 None
                OpReturn
                OpFunctionEnd

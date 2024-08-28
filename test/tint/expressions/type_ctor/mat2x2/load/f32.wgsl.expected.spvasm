@@ -35,8 +35,8 @@
          %10 = OpLabel
           %m = OpVariable %_ptr_Function_mat2v2float Function
                OpStore %m %13
-         %14 = OpLoad %mat2v2float %m
+         %14 = OpLoad %mat2v2float %m None
          %15 = OpAccessChain %_ptr_StorageBuffer_mat2v2float %1 %uint_0
-               OpStore %15 %14
+               OpStore %15 %14 None
                OpReturn
                OpFunctionEnd

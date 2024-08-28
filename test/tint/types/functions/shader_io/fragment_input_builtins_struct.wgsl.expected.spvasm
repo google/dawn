@@ -68,11 +68,11 @@
                OpFunctionEnd
        %main = OpFunction %void None %29
          %30 = OpLabel
-         %31 = OpLoad %v4float %main_position_Input
-         %32 = OpLoad %bool %main_front_facing_Input
-         %33 = OpLoad %uint %main_sample_index_Input
+         %31 = OpLoad %v4float %main_position_Input None
+         %32 = OpLoad %bool %main_front_facing_Input None
+         %33 = OpLoad %uint %main_sample_index_Input None
          %34 = OpAccessChain %_ptr_Input_uint %main_sample_mask_Input %uint_0
-         %36 = OpLoad %uint %34
+         %36 = OpLoad %uint %34 None
          %37 = OpCompositeConstruct %FragmentInputs %31 %32 %33 %36
          %38 = OpFunctionCall %void %main_inner %37
                OpReturn

@@ -59,8 +59,8 @@
         %vUV = OpFunctionParameter %v2float
          %18 = OpLabel
           %i = OpVariable %_ptr_Function_int Function
-         %19 = OpLoad %6 %randomTexture
-         %20 = OpLoad %3 %Sampler
+         %19 = OpLoad %6 %randomTexture None
+         %20 = OpLoad %3 %Sampler None
          %21 = OpSampledImage %22 %19 %20
          %23 = OpImageSampleImplicitLod %v4float %21 %vUV None
      %random = OpVectorShuffle %v3float %23 %23 0 1 2
@@ -70,7 +70,7 @@
                OpLoopMerge %33 %31 None
                OpBranch %30
          %30 = OpLabel
-         %34 = OpLoad %int %i
+         %34 = OpLoad %int %i None
          %35 = OpSLessThan %bool %34 %int_1
                OpSelectionMerge %38 None
                OpBranchConditional %35 %38 %39
@@ -114,14 +114,14 @@
                OpSelectionMerge %65 None
                OpBranchConditional %64 %66 %65
          %66 = OpLabel
-         %67 = OpLoad %int %i
+         %67 = OpLoad %int %i None
          %68 = OpIAdd %int %67 %int_1
-               OpStore %i %68
+               OpStore %i %68 None
                OpBranch %31
          %65 = OpLabel
-         %69 = OpLoad %int %i
+         %69 = OpLoad %int %i None
          %70 = OpIAdd %int %69 %int_1
-               OpStore %i %70
+               OpStore %i %70 None
                OpBranch %31
          %31 = OpLabel
                OpBranch %32
@@ -130,8 +130,8 @@
                OpFunctionEnd
        %main = OpFunction %void None %74
          %75 = OpLabel
-         %76 = OpLoad %v2float %main_loc0_Input
+         %76 = OpLoad %v2float %main_loc0_Input None
          %77 = OpFunctionCall %v4float %main_inner %76
-               OpStore %main_loc0_Output %77
+               OpStore %main_loc0_Output %77 None
                OpReturn
                OpFunctionEnd

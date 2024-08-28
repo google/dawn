@@ -47,10 +47,10 @@
         %res = OpVariable %_ptr_Function_int Function
                OpStore %arg_1 %int_0
                OpStore %res %int_0
-               OpStore %arg_1 %int_1
+               OpStore %arg_1 %int_1 None
          %15 = OpAccessChain %_ptr_StorageBuffer_int %1 %uint_0 %uint_0
        %x_13 = OpAtomicISub %int %15 %uint_1 %uint_0 %int_1
-               OpStore %res %x_13
+               OpStore %res %x_13 None
                OpReturn
                OpFunctionEnd
 %fragment_main_1 = OpFunction %void None %8

@@ -55,10 +55,10 @@
          %17 = OpLabel
          %18 = OpAccessChain %_ptr_StorageBuffer_int %10 %uint_0 %uint_0
          %21 = OpAccessChain %_ptr_Uniform_int %1 %uint_0 %uint_1
-         %24 = OpLoad %int %21
+         %24 = OpLoad %int %21 None
          %25 = OpAccessChain %_ptr_Uniform_v4int %1 %uint_0 %uint_0 %24
          %27 = OpAccessChain %_ptr_Uniform_int %25 %uint_0
-         %28 = OpLoad %int %27
-               OpStore %18 %28
+         %28 = OpLoad %int %27 None
+               OpStore %18 %28 None
                OpReturn
                OpFunctionEnd

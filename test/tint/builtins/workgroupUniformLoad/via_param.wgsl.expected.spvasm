@@ -36,7 +36,7 @@
          %13 = OpCompositeExtract %uint %p_indices 0
          %14 = OpAccessChain %_ptr_Workgroup_int %v %13
                OpControlBarrier %uint_2 %uint_2 %uint_264
-         %20 = OpLoad %int %14
+         %20 = OpLoad %int %14 None
                OpControlBarrier %uint_2 %uint_2 %uint_264
                OpReturnValue %20
                OpFunctionEnd

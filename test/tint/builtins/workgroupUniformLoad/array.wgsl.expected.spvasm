@@ -25,7 +25,7 @@
         %foo = OpFunction %_arr_int_uint_4 None %8
           %9 = OpLabel
                OpControlBarrier %uint_2 %uint_2 %uint_264
-         %14 = OpLoad %_arr_int_uint_4 %v
+         %14 = OpLoad %_arr_int_uint_4 %v None
                OpControlBarrier %uint_2 %uint_2 %uint_264
                OpReturnValue %14
                OpFunctionEnd

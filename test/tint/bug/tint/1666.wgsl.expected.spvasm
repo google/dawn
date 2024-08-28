@@ -73,7 +73,7 @@
      %matrix = OpFunction %void None %19
          %29 = OpLabel
          %31 = OpAccessChain %_ptr_Private_v2float %6 %idx_0
-        %x_0 = OpLoad %v2float %31
+        %x_0 = OpLoad %v2float %31 None
                OpReturn
                OpFunctionEnd
 %fixed_size_array = OpFunction %void None %19
@@ -81,13 +81,13 @@
          %40 = OpVariable %_ptr_Function__arr_int_uint_2 Function
                OpStore %40 %arr
          %42 = OpAccessChain %_ptr_Function_int %40 %idx
-        %x_1 = OpLoad %int %42
+        %x_1 = OpLoad %int %42 None
                OpReturn
                OpFunctionEnd
 %runtime_size_array = OpFunction %void None %19
          %46 = OpLabel
          %48 = OpAccessChain %_ptr_StorageBuffer_float %1 %uint_0 %idx_1
-        %x_2 = OpLoad %float %48
+        %x_2 = OpLoad %float %48 None
                OpReturn
                OpFunctionEnd
           %f = OpFunction %void None %19

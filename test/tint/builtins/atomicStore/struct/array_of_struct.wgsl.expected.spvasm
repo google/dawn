@@ -61,11 +61,11 @@
                OpBranch %19
          %24 = OpLabel
          %26 = OpAccessChain %_ptr_Workgroup_int %wg %20 %uint_0
-               OpStore %26 %int_0
+               OpStore %26 %int_0 None
          %30 = OpAccessChain %_ptr_Workgroup_uint %wg %20 %uint_1
                OpAtomicStore %30 %uint_2 %uint_0 %uint_0
          %35 = OpAccessChain %_ptr_Workgroup_uint_0 %wg %20 %uint_2
-               OpStore %35 %uint_0
+               OpStore %35 %uint_0 None
                OpBranch %17
          %17 = OpLabel
          %21 = OpIAdd %uint %20 %uint_1
@@ -78,7 +78,7 @@
                OpFunctionEnd
 %compute_main = OpFunction %void None %43
          %44 = OpLabel
-         %45 = OpLoad %uint %compute_main_local_invocation_index_Input
+         %45 = OpLoad %uint %compute_main_local_invocation_index_Input None
          %46 = OpFunctionCall %void %compute_main_inner %45
                OpReturn
                OpFunctionEnd

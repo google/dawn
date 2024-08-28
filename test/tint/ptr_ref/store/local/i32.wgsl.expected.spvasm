@@ -19,7 +19,7 @@
           %4 = OpLabel
           %i = OpVariable %_ptr_Function_int Function
                OpStore %i %int_123
-               OpStore %i %int_123
-               OpStore %i %int_123
+               OpStore %i %int_123 None
+               OpStore %i %int_123 None
                OpReturn
                OpFunctionEnd

@@ -38,6 +38,6 @@
           %m = OpVariable %_ptr_Function_mat3v3float Function
                OpStore %m %10
           %v = OpAccessChain %_ptr_Function_v3float %m %int_1
-               OpStore %v %27
+               OpStore %v %27 None
                OpReturn
                OpFunctionEnd

@@ -32,9 +32,9 @@
           %b = OpVariable %_ptr_Function_v3half Function
                OpStore %a %9
                OpStore %b %14
-         %17 = OpLoad %v3half %a
-         %18 = OpLoad %v3half %b
-         %19 = OpLoad %v3half %b
+         %17 = OpLoad %v3half %a None
+         %18 = OpLoad %v3half %b None
+         %19 = OpLoad %v3half %b None
          %20 = OpFAdd %v3half %18 %19
           %r = OpFRem %v3half %17 %20
                OpReturn

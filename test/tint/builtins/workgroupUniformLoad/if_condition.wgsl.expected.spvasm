@@ -35,23 +35,23 @@
 %continue_execution = OpVariable %_ptr_Function_bool Function
                OpStore %continue_execution %true
                OpControlBarrier %uint_2 %uint_2 %uint_264
-         %19 = OpLoad %bool %v
+         %19 = OpLoad %bool %v None
                OpControlBarrier %uint_2 %uint_2 %uint_264
                OpSelectionMerge %21 None
                OpBranchConditional %19 %22 %21
          %22 = OpLabel
-               OpStore %continue_execution %false
-               OpStore %return_value %int_42
+               OpStore %continue_execution %false None
+               OpStore %return_value %int_42 None
                OpBranch %21
          %21 = OpLabel
-         %25 = OpLoad %bool %continue_execution
+         %25 = OpLoad %bool %continue_execution None
                OpSelectionMerge %26 None
                OpBranchConditional %25 %27 %26
          %27 = OpLabel
-               OpStore %return_value %int_0
+               OpStore %return_value %int_0 None
                OpBranch %26
          %26 = OpLabel
-         %29 = OpLoad %int %return_value
+         %29 = OpLoad %int %return_value None
                OpReturnValue %29
                OpFunctionEnd
 %unused_entry_point = OpFunction %void None %31

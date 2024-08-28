@@ -23,8 +23,8 @@
           %b = OpVariable %_ptr_Function_float Function
                OpStore %a %float_1
                OpStore %b %float_0
-         %11 = OpLoad %float %a
-         %12 = OpLoad %float %b
+         %11 = OpLoad %float %a None
+         %12 = OpLoad %float %b None
           %r = OpFDiv %float %11 %12
                OpReturn
                OpFunctionEnd

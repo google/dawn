@@ -35,10 +35,10 @@
           %a = OpVariable %_ptr_Function_mat2v3float Function %10
           %b = OpVariable %_ptr_Function_v3float Function
          %11 = OpAccessChain %_ptr_Function_v3float %a %int_0
-         %15 = OpLoad %v3float %11
+         %15 = OpLoad %v3float %11 None
                OpStore %b %15
          %17 = OpAccessChain %_ptr_Function_v3float %a %int_0
-               OpStore %17 %18
+               OpStore %17 %18 None
                OpReturn
                OpFunctionEnd
    %no_deref = OpFunction %void None %3
@@ -46,10 +46,10 @@
         %a_0 = OpVariable %_ptr_Function_mat2v3float Function %10
         %b_0 = OpVariable %_ptr_Function_v3float Function
          %25 = OpAccessChain %_ptr_Function_v3float %a_0 %int_0
-         %26 = OpLoad %v3float %25
+         %26 = OpLoad %v3float %25 None
                OpStore %b_0 %26
          %28 = OpAccessChain %_ptr_Function_v3float %a_0 %int_0
-               OpStore %28 %18
+               OpStore %28 %18 None
                OpReturn
                OpFunctionEnd
        %main = OpFunction %void None %3

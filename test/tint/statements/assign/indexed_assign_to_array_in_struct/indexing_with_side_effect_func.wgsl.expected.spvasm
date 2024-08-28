@@ -62,10 +62,10 @@
      %uint_0 = OpConstant %uint 0
 %getNextIndex = OpFunction %uint None %10
          %11 = OpLabel
-         %12 = OpLoad %uint %nextIndex
+         %12 = OpLoad %uint %nextIndex None
          %13 = OpIAdd %uint %12 %uint_1
-               OpStore %nextIndex %13
-         %15 = OpLoad %uint %nextIndex
+               OpStore %nextIndex %13 None
+         %15 = OpLoad %uint %nextIndex None
                OpReturnValue %15
                OpFunctionEnd
        %main = OpFunction %void None %18
@@ -74,9 +74,9 @@
           %s = OpVariable %_ptr_Function_OuterS Function %32
          %33 = OpFunctionCall %uint %getNextIndex
          %34 = OpAccessChain %_ptr_Uniform_uint %5 %uint_0 %uint_1
-         %37 = OpLoad %uint %34
+         %37 = OpLoad %uint %34 None
          %38 = OpAccessChain %_ptr_Function_InnerS %s %uint_0 %33 %uint_0 %37
-         %39 = OpLoad %InnerS %v
-               OpStore %38 %39
+         %39 = OpLoad %InnerS %v None
+               OpStore %38 %39 None
                OpReturn
                OpFunctionEnd

@@ -38,9 +38,9 @@
       %arg_2 = OpVariable %_ptr_Function_v4float Function
                OpStore %arg_1 %int_1
                OpStore %arg_2 %16
-         %18 = OpLoad %3 %arg_0
-         %19 = OpLoad %int %arg_1
-         %20 = OpLoad %v4float %arg_2
+         %18 = OpLoad %3 %arg_0 None
+         %19 = OpLoad %int %arg_1 None
+         %20 = OpLoad %v4float %arg_2 None
          %21 = OpVectorShuffle %v4float %20 %20 2 1 0 3
                OpImageWrite %18 %19 %21 None
                OpReturn

@@ -81,16 +81,16 @@
          %39 = OpLabel
          %40 = OpFunctionCall %FragmentOutputs %main_inner
          %41 = OpCompositeExtract %int %40 0
-               OpStore %main_loc0_Output %41
+               OpStore %main_loc0_Output %41 None
          %42 = OpCompositeExtract %uint %40 1
-               OpStore %main_loc1_Output %42
+               OpStore %main_loc1_Output %42 None
          %43 = OpCompositeExtract %float %40 2
-               OpStore %main_loc2_Output %43
+               OpStore %main_loc2_Output %43 None
          %44 = OpCompositeExtract %v4float %40 3
-               OpStore %main_loc3_Output %44
+               OpStore %main_loc3_Output %44 None
          %45 = OpCompositeExtract %half %40 4
-               OpStore %main_loc4_Output %45
+               OpStore %main_loc4_Output %45 None
          %46 = OpCompositeExtract %v3half %40 5
-               OpStore %main_loc5_Output %46
+               OpStore %main_loc5_Output %46 None
                OpReturn
                OpFunctionEnd

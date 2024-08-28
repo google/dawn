@@ -37,9 +37,9 @@
         %foo = OpFunction %void None %10
          %11 = OpLabel
          %12 = OpAccessChain %_ptr_StorageBuffer_mat4v4float %1 %uint_0 %uint_0
-         %16 = OpLoad %mat4v4float %12
+         %16 = OpLoad %mat4v4float %12 None
          %17 = OpMatrixTimesScalar %mat4v4float %16 %float_2
-               OpStore %12 %17
+               OpStore %12 %17 None
                OpReturn
                OpFunctionEnd
 %unused_entry_point = OpFunction %void None %10

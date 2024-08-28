@@ -102,60 +102,60 @@
          %23 = OpLabel
                OpControlBarrier %uint_2 %uint_2 %uint_264
                OpStore %value %uint_42
-         %34 = OpLoad %uint %value
+         %34 = OpLoad %uint %value None
          %35 = OpAccessChain %_ptr_StorageBuffer_uint %1 %uint_0
          %37 = OpAtomicCompareExchange %uint %35 %uint_1 %uint_0 %uint_0 %34 %uint_0
          %39 = OpIEqual %bool %37 %uint_0
          %r1 = OpCompositeConstruct %__atomic_compare_exchange_result_u32 %37 %39
-         %42 = OpLoad %uint %value
+         %42 = OpLoad %uint %value None
          %43 = OpAccessChain %_ptr_StorageBuffer_uint %1 %uint_0
          %44 = OpAtomicCompareExchange %uint %43 %uint_1 %uint_0 %uint_0 %42 %uint_0
          %45 = OpIEqual %bool %44 %uint_0
          %r2 = OpCompositeConstruct %__atomic_compare_exchange_result_u32 %44 %45
-         %47 = OpLoad %uint %value
+         %47 = OpLoad %uint %value None
          %48 = OpAccessChain %_ptr_StorageBuffer_uint %1 %uint_0
          %49 = OpAtomicCompareExchange %uint %48 %uint_1 %uint_0 %uint_0 %47 %uint_0
          %50 = OpIEqual %bool %49 %uint_0
          %r3 = OpCompositeConstruct %__atomic_compare_exchange_result_u32 %49 %50
                OpStore %value_0 %int_42
-         %55 = OpLoad %int %value_0
+         %55 = OpLoad %int %value_0 None
          %56 = OpAccessChain %_ptr_StorageBuffer_int %5 %uint_0
          %58 = OpAtomicCompareExchange %int %56 %uint_1 %uint_0 %uint_0 %55 %int_0
          %59 = OpIEqual %bool %58 %int_0
        %r1_0 = OpCompositeConstruct %__atomic_compare_exchange_result_i32 %58 %59
-         %62 = OpLoad %int %value_0
+         %62 = OpLoad %int %value_0 None
          %63 = OpAccessChain %_ptr_StorageBuffer_int %5 %uint_0
          %64 = OpAtomicCompareExchange %int %63 %uint_1 %uint_0 %uint_0 %62 %int_0
          %65 = OpIEqual %bool %64 %int_0
        %r2_0 = OpCompositeConstruct %__atomic_compare_exchange_result_i32 %64 %65
-         %67 = OpLoad %int %value_0
+         %67 = OpLoad %int %value_0 None
          %68 = OpAccessChain %_ptr_StorageBuffer_int %5 %uint_0
          %69 = OpAtomicCompareExchange %int %68 %uint_1 %uint_0 %uint_0 %67 %int_0
          %70 = OpIEqual %bool %69 %int_0
        %r3_0 = OpCompositeConstruct %__atomic_compare_exchange_result_i32 %69 %70
                OpStore %value_1 %uint_42
-         %73 = OpLoad %uint %value_1
+         %73 = OpLoad %uint %value_1 None
          %74 = OpAtomicCompareExchange %uint %b_u32 %uint_2 %uint_0 %uint_0 %73 %uint_0
          %75 = OpIEqual %bool %74 %uint_0
        %r1_1 = OpCompositeConstruct %__atomic_compare_exchange_result_u32 %74 %75
-         %77 = OpLoad %uint %value_1
+         %77 = OpLoad %uint %value_1 None
          %78 = OpAtomicCompareExchange %uint %b_u32 %uint_2 %uint_0 %uint_0 %77 %uint_0
          %79 = OpIEqual %bool %78 %uint_0
        %r2_1 = OpCompositeConstruct %__atomic_compare_exchange_result_u32 %78 %79
-         %81 = OpLoad %uint %value_1
+         %81 = OpLoad %uint %value_1 None
          %82 = OpAtomicCompareExchange %uint %b_u32 %uint_2 %uint_0 %uint_0 %81 %uint_0
          %83 = OpIEqual %bool %82 %uint_0
        %r3_1 = OpCompositeConstruct %__atomic_compare_exchange_result_u32 %82 %83
                OpStore %value_2 %int_42
-         %86 = OpLoad %int %value_2
+         %86 = OpLoad %int %value_2 None
          %87 = OpAtomicCompareExchange %int %b_i32 %uint_2 %uint_0 %uint_0 %86 %int_0
          %88 = OpIEqual %bool %87 %int_0
        %r1_2 = OpCompositeConstruct %__atomic_compare_exchange_result_i32 %87 %88
-         %90 = OpLoad %int %value_2
+         %90 = OpLoad %int %value_2 None
          %91 = OpAtomicCompareExchange %int %b_i32 %uint_2 %uint_0 %uint_0 %90 %int_0
          %92 = OpIEqual %bool %91 %int_0
        %r2_2 = OpCompositeConstruct %__atomic_compare_exchange_result_i32 %91 %92
-         %94 = OpLoad %int %value_2
+         %94 = OpLoad %int %value_2 None
          %95 = OpAtomicCompareExchange %int %b_i32 %uint_2 %uint_0 %uint_0 %94 %int_0
          %96 = OpIEqual %bool %95 %int_0
        %r3_2 = OpCompositeConstruct %__atomic_compare_exchange_result_i32 %95 %96
@@ -163,7 +163,7 @@
                OpFunctionEnd
        %main = OpFunction %void None %99
         %100 = OpLabel
-        %101 = OpLoad %uint %main_local_invocation_index_Input
+        %101 = OpLoad %uint %main_local_invocation_index_Input None
         %102 = OpFunctionCall %void %main_inner %101
                OpReturn
                OpFunctionEnd

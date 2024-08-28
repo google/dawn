@@ -22,7 +22,7 @@
         %foo = OpFunction %bool None %5
           %6 = OpLabel
                OpControlBarrier %uint_2 %uint_2 %uint_264
-         %12 = OpLoad %bool %v
+         %12 = OpLoad %bool %v None
                OpControlBarrier %uint_2 %uint_2 %uint_264
                OpReturnValue %12
                OpFunctionEnd

@@ -88,11 +88,11 @@
                OpSelectionMerge %30 None
                OpBranchConditional %28 %31 %30
          %31 = OpLabel
-               OpStore %continue_execution %false
+               OpStore %continue_execution %false None
                OpBranch %30
          %30 = OpLabel
-         %33 = OpLoad %3 %t
-         %34 = OpLoad %7 %s
+         %33 = OpLoad %3 %t None
+         %34 = OpLoad %7 %s None
          %35 = OpSampledImage %36 %33 %34
          %37 = OpImageSampleImplicitLod %v4float %35 %coord None
          %39 = OpCompositeExtract %float %37 0
@@ -106,21 +106,21 @@
                OpLoopMerge %48 %46 None
                OpBranch %45
          %45 = OpLabel
-         %51 = OpLoad %int %i
+         %51 = OpLoad %int %i None
          %52 = OpSLessThan %bool %51 %int_10
                OpSelectionMerge %54 None
                OpBranchConditional %52 %54 %55
          %55 = OpLabel
                OpBranch %48
          %54 = OpLabel
-         %56 = OpLoad %int %i
-         %57 = OpLoad %int %result
+         %56 = OpLoad %int %i None
+         %57 = OpLoad %int %result None
          %58 = OpIAdd %int %57 %56
-               OpStore %result %58
+               OpStore %result %58 None
                OpBranch %46
          %46 = OpLabel
          %59 = OpAccessChain %_ptr_StorageBuffer_int %8 %uint_0
-         %63 = OpLoad %bool %continue_execution
+         %63 = OpLoad %bool %continue_execution None
                OpSelectionMerge %64 None
                OpBranchConditional %63 %65 %66
          %65 = OpLabel
@@ -130,11 +130,11 @@
                OpBranch %64
          %64 = OpLabel
          %70 = OpPhi %int %67 %65 %71 %66
-               OpStore %i %70
+               OpStore %i %70 None
                OpBranch %47
          %48 = OpLabel
-         %72 = OpLoad %int %result
-         %73 = OpLoad %bool %continue_execution
+         %72 = OpLoad %int %result None
+         %73 = OpLoad %bool %continue_execution None
          %74 = OpLogicalNot %bool %73
                OpSelectionMerge %75 None
                OpBranchConditional %74 %76 %75
@@ -155,9 +155,9 @@
                OpFunctionEnd
         %foo = OpFunction %void None %91
          %92 = OpLabel
-         %93 = OpLoad %float %foo_loc0_Input
-         %94 = OpLoad %v2float %foo_loc1_Input
+         %93 = OpLoad %float %foo_loc0_Input None
+         %94 = OpLoad %v2float %foo_loc1_Input None
          %95 = OpFunctionCall %int %foo_inner %93 %94
-               OpStore %foo_loc0_Output %95
+               OpStore %foo_loc0_Output %95 None
                OpReturn
                OpFunctionEnd

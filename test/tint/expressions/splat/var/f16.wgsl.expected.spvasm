@@ -34,13 +34,13 @@
          %v3 = OpVariable %_ptr_Function_v3half Function
          %v4 = OpVariable %_ptr_Function_v4half Function
                OpStore %v %half_0x1_8p_1
-          %9 = OpLoad %half %v
+          %9 = OpLoad %half %v None
          %11 = OpCompositeConstruct %v2half %9 %9
                OpStore %v2 %11
-         %14 = OpLoad %half %v
+         %14 = OpLoad %half %v None
          %16 = OpCompositeConstruct %v3half %14 %14 %14
                OpStore %v3 %16
-         %19 = OpLoad %half %v
+         %19 = OpLoad %half %v None
          %21 = OpCompositeConstruct %v4half %19 %19 %19 %19
                OpStore %v4 %21
                OpReturn

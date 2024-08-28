@@ -26,11 +26,11 @@
           %b = OpVariable %_ptr_Function_int Function
           %c = OpVariable %_ptr_Function_int Function
                OpStore %a %int_n2147483648
-          %8 = OpLoad %int %a
+          %8 = OpLoad %int %a None
           %9 = OpIAdd %int %8 %int_1
                OpStore %b %9
                OpStore %c %int_n2147483647
-         %14 = OpLoad %int %c
+         %14 = OpLoad %int %c None
                OpReturnValue %14
                OpFunctionEnd
 %unused_entry_point = OpFunction %void None %17

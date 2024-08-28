@@ -57,20 +57,20 @@
          %28 = OpUMod %uint %21 %uint_3
          %29 = OpUDiv %uint %21 %uint_3
          %30 = OpAccessChain %_ptr_Workgroup_int %zero %29 %28
-               OpStore %30 %int_0
+               OpStore %30 %int_0 None
                OpBranch %18
          %18 = OpLabel
          %22 = OpIAdd %uint %21 %uint_1
                OpBranch %19
          %20 = OpLabel
                OpControlBarrier %uint_2 %uint_2 %uint_264
-         %36 = OpLoad %_arr__arr_int_uint_3_uint_2 %zero
+         %36 = OpLoad %_arr__arr_int_uint_3_uint_2 %zero None
                OpStore %v %36
                OpReturn
                OpFunctionEnd
        %main = OpFunction %void None %40
          %41 = OpLabel
-         %42 = OpLoad %uint %main_local_invocation_index_Input
+         %42 = OpLoad %uint %main_local_invocation_index_Input None
          %43 = OpFunctionCall %void %main_inner %42
                OpReturn
                OpFunctionEnd

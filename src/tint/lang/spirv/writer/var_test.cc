@@ -233,14 +233,14 @@ TEST_F(SpirvWriterTest, StorageVar_LoadAndStore) {
 
     EXPECT_INST(R"(
           %9 = OpAccessChain %_ptr_StorageBuffer_int %1 %uint_0
-       %load = OpLoad %int %9
+       %load = OpLoad %int %9 None
         %add = OpIAdd %int %load %int_1
          %16 = OpAccessChain %_ptr_StorageBuffer_int %1 %uint_0
-               OpStore %16 %add
+               OpStore %16 %add None
 )");
 }
 
-TEST_F(SpirvWriterTest, StorageVar_NoCoherentWithVulkan) {
+TEST_F(SpirvWriterTest, StorageVar_WithVulkan) {
     auto* v = b.Var("v", ty.ptr<storage, i32, read_write>());
     v->SetBindingPoint(0, 0);
     mod.root_block->Append(v);
@@ -297,10 +297,94 @@ TEST_F(SpirvWriterTest, StorageVar_NoCoherentWithVulkan) {
         %foo = OpFunction %void None %7
           %8 = OpLabel
           %9 = OpAccessChain %_ptr_StorageBuffer_int %1 %uint_0
-       %load = OpLoad %int %9
+       %load = OpLoad %int %9 NonPrivatePointer
         %add = OpIAdd %int %load %int_1
          %16 = OpAccessChain %_ptr_StorageBuffer_int %1 %uint_0
-               OpStore %16 %add
+               OpStore %16 %add NonPrivatePointer
+               OpReturn
+               OpFunctionEnd)");
+}
+
+TEST_F(SpirvWriterTest, StorageVar_Workgroup_WithVulkan) {
+    auto* v = b.Var("v", ty.ptr<workgroup, i32, read_write>());
+    v->SetBindingPoint(0, 0);
+    mod.root_block->Append(v);
+
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kCompute,
+                            std::array{1u, 1u, 1u});
+    b.Append(func->Block(), [&] {
+        auto* load = b.Load(v);
+        auto* add = b.Add(ty.i32(), load, 1_i);
+        b.Store(v, add);
+        b.Return(func);
+        mod.SetName(load, "load");
+        mod.SetName(add, "add");
+    });
+
+    Options opts;
+    opts.use_vulkan_memory_model = true;
+
+    ASSERT_TRUE(Generate(opts)) << Error() << output_;
+    EXPECT_INST(R"(               OpCapability Shader
+               OpCapability VulkanMemoryModel
+               OpCapability VulkanMemoryModelDeviceScope
+               OpExtension "SPV_KHR_vulkan_memory_model"
+               OpMemoryModel Logical Vulkan
+               OpEntryPoint GLCompute %foo "foo" %foo_local_invocation_index_Input
+               OpExecutionMode %foo LocalSize 1 1 1
+
+               ; Debug Information
+               OpName %v "v"                        ; id %1
+               OpName %foo_local_invocation_index_Input "foo_local_invocation_index_Input"  ; id %4
+               OpName %foo_inner "foo_inner"                                                ; id %7
+               OpName %tint_local_index "tint_local_index"                                  ; id %9
+               OpName %load "load"                                                          ; id %21
+               OpName %add "add"                                                            ; id %22
+               OpName %foo "foo"                                                            ; id %24
+
+               ; Annotations
+               OpDecorate %foo_local_invocation_index_Input BuiltIn LocalInvocationIndex
+
+               ; Types, variables and constants
+        %int = OpTypeInt 32 1
+%_ptr_Workgroup_int = OpTypePointer Workgroup %int
+          %v = OpVariable %_ptr_Workgroup_int Workgroup
+       %uint = OpTypeInt 32 0
+%_ptr_Input_uint = OpTypePointer Input %uint
+%foo_local_invocation_index_Input = OpVariable %_ptr_Input_uint Input   ; BuiltIn LocalInvocationIndex
+       %void = OpTypeVoid
+         %10 = OpTypeFunction %void %uint
+     %uint_0 = OpConstant %uint 0
+       %bool = OpTypeBool
+      %int_0 = OpConstant %int 0
+     %uint_2 = OpConstant %uint 2
+ %uint_24840 = OpConstant %uint 24840
+      %int_1 = OpConstant %int 1
+         %25 = OpTypeFunction %void
+
+               ; Function foo_inner
+  %foo_inner = OpFunction %void None %10
+%tint_local_index = OpFunctionParameter %uint
+         %11 = OpLabel
+         %12 = OpIEqual %bool %tint_local_index %uint_0
+               OpSelectionMerge %15 None
+               OpBranchConditional %12 %16 %15
+         %16 = OpLabel
+               OpStore %v %int_0 NonPrivatePointer
+               OpBranch %15
+         %15 = OpLabel
+               OpControlBarrier %uint_2 %uint_2 %uint_24840
+       %load = OpLoad %int %v NonPrivatePointer
+        %add = OpIAdd %int %load %int_1
+               OpStore %v %add NonPrivatePointer
+               OpReturn
+               OpFunctionEnd
+
+               ; Function foo
+        %foo = OpFunction %void None %25
+         %26 = OpLabel
+         %27 = OpLoad %uint %foo_local_invocation_index_Input None
+         %28 = OpFunctionCall %void %foo_inner %27
                OpReturn
                OpFunctionEnd)");
 }
@@ -326,7 +410,7 @@ TEST_F(SpirvWriterTest, StorageVar_WriteOnly) {
 )");
     EXPECT_INST(R"(
           %9 = OpAccessChain %_ptr_StorageBuffer_int %1 %uint_0
-               OpStore %9 %int_42
+               OpStore %9 %int_42 None
 )");
 }
 
@@ -364,7 +448,7 @@ TEST_F(SpirvWriterTest, UniformVar_Load) {
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST(R"(
           %9 = OpAccessChain %_ptr_Uniform_int %1 %uint_0
-       %load = OpLoad %int %9
+       %load = OpLoad %int %9 None
 )");
 }
 
@@ -397,7 +481,7 @@ TEST_F(SpirvWriterTest, PushConstantVar_Load) {
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST(R"(
           %8 = OpAccessChain %_ptr_PushConstant_int %1 %uint_0
-       %load = OpLoad %int %8
+       %load = OpLoad %int %8 None
                OpReturnValue %load
 )");
 }

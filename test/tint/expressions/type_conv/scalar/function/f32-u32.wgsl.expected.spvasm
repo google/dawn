@@ -32,8 +32,8 @@
 %uint_4294967295 = OpConstant %uint 4294967295
           %m = OpFunction %float None %6
           %7 = OpLabel
-               OpStore %t %float_1
-          %9 = OpLoad %float %t
+               OpStore %t %float_1 None
+          %9 = OpLoad %float %t None
                OpReturnValue %9
                OpFunctionEnd
           %f = OpFunction %void None %12

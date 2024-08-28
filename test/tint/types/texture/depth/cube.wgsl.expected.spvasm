@@ -27,7 +27,7 @@
        %main = OpFunction %void None %7
           %8 = OpLabel
        %dims = OpVariable %_ptr_Function_v2uint Function
-          %9 = OpLoad %3 %t_f
+          %9 = OpLoad %3 %t_f None
          %10 = OpImageQuerySizeLod %v2uint %9 %int_0
                OpStore %dims %10
                OpReturn

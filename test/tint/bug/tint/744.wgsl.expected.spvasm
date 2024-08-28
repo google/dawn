@@ -89,10 +89,10 @@
  %resultCell = OpCompositeConstruct %v2uint %22 %23
          %25 = OpAccessChain %_ptr_Uniform_v2uint %9 %uint_0 %uint_0
          %28 = OpAccessChain %_ptr_Uniform_uint %25 %uint_1
-   %dimInner = OpLoad %uint %28
+   %dimInner = OpLoad %uint %28 None
          %32 = OpAccessChain %_ptr_Uniform_v2uint %9 %uint_0 %uint_2
          %34 = OpAccessChain %_ptr_Uniform_uint %32 %uint_1
-  %dimOutter = OpLoad %uint %34
+  %dimOutter = OpLoad %uint %34 None
                OpStore %result %uint_0
                OpBranch %38
          %38 = OpLabel
@@ -102,34 +102,34 @@
                OpLoopMerge %42 %40 None
                OpBranch %39
          %39 = OpLabel
-         %44 = OpLoad %uint %i
+         %44 = OpLoad %uint %i None
          %45 = OpULessThan %bool %44 %dimInner
                OpSelectionMerge %47 None
                OpBranchConditional %45 %47 %48
          %48 = OpLabel
                OpBranch %42
          %47 = OpLabel
-         %49 = OpLoad %uint %i
+         %49 = OpLoad %uint %i None
          %50 = OpCompositeExtract %uint %resultCell 0
          %51 = OpIMul %uint %50 %dimInner
           %a = OpIAdd %uint %49 %51
          %53 = OpCompositeExtract %uint %resultCell 1
-         %54 = OpLoad %uint %i
+         %54 = OpLoad %uint %i None
          %55 = OpIMul %uint %54 %dimOutter
           %b = OpIAdd %uint %53 %55
-         %57 = OpLoad %uint %result
+         %57 = OpLoad %uint %result None
          %58 = OpAccessChain %_ptr_StorageBuffer_uint %firstMatrix %uint_0 %a
-         %60 = OpLoad %uint %58
+         %60 = OpLoad %uint %58 None
          %61 = OpAccessChain %_ptr_StorageBuffer_uint %secondMatrix %uint_0 %b
-         %62 = OpLoad %uint %61
+         %62 = OpLoad %uint %61 None
          %63 = OpIMul %uint %60 %62
          %64 = OpIAdd %uint %57 %63
-               OpStore %result %64
+               OpStore %result %64 None
                OpBranch %40
          %40 = OpLabel
-         %65 = OpLoad %uint %i
+         %65 = OpLoad %uint %i None
          %66 = OpIAdd %uint %65 %uint_1
-               OpStore %i %66
+               OpStore %i %66 None
                OpBranch %41
          %42 = OpLabel
          %67 = OpCompositeExtract %uint %resultCell 1
@@ -137,13 +137,13 @@
          %69 = OpIMul %uint %68 %dimOutter
       %index = OpIAdd %uint %67 %69
          %71 = OpAccessChain %_ptr_StorageBuffer_uint_0 %resultMatrix %uint_0 %index
-         %73 = OpLoad %uint %result
-               OpStore %71 %73
+         %73 = OpLoad %uint %result None
+               OpStore %71 %73 None
                OpReturn
                OpFunctionEnd
        %main = OpFunction %void None %75
          %76 = OpLabel
-         %77 = OpLoad %v3uint %main_global_invocation_id_Input
+         %77 = OpLoad %v3uint %main_global_invocation_id_Input None
          %78 = OpFunctionCall %void %main_inner %77
                OpReturn
                OpFunctionEnd

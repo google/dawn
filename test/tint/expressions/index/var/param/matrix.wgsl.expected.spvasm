@@ -39,7 +39,7 @@
           %m = OpVariable %_ptr_Function_mat3v3float Function
                OpStore %m %11
          %24 = OpAccessChain %_ptr_Function_v3float %m %i
-         %26 = OpLoad %v3float %24
+         %26 = OpLoad %v3float %24 None
                OpReturnValue %26
                OpFunctionEnd
 %unused_entry_point = OpFunction %void None %29

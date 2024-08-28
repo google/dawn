@@ -24,7 +24,7 @@
         %foo = OpFunction %mat3v3float None %7
           %8 = OpLabel
                OpControlBarrier %uint_2 %uint_2 %uint_264
-         %14 = OpLoad %mat3v3float %v
+         %14 = OpLoad %mat3v3float %v None
                OpControlBarrier %uint_2 %uint_2 %uint_264
                OpReturnValue %14
                OpFunctionEnd

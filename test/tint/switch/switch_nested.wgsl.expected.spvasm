@@ -34,39 +34,39 @@
           %c = OpVariable %_ptr_Function_uint Function
                OpStore %continue_execution %true
                OpStore %a_0 %int_0
-         %13 = OpLoad %int %a_0
+         %13 = OpLoad %int %a_0 None
                OpSelectionMerge %16 None
                OpSwitch %13 %14 0 %15 2 %15 4 %15 1 %14
          %15 = OpLabel
                OpStore %b %uint_3
-         %21 = OpLoad %uint %b
+         %21 = OpLoad %uint %b None
                OpSelectionMerge %24 None
                OpSwitch %21 %22 0 %23 1 %22 2 %22 3 %22
          %23 = OpLabel
                OpBranch %24
          %22 = OpLabel
                OpStore %c %uint_123
-         %27 = OpLoad %uint %c
+         %27 = OpLoad %uint %c None
                OpSelectionMerge %30 None
                OpSwitch %27 %28 0 %29
          %29 = OpLabel
                OpBranch %30
          %28 = OpLabel
-               OpStore %continue_execution %false
+               OpStore %continue_execution %false None
                OpBranch %30
          %30 = OpLabel
-         %32 = OpLoad %bool %continue_execution
+         %32 = OpLoad %bool %continue_execution None
                OpSelectionMerge %33 None
                OpBranchConditional %32 %34 %33
          %34 = OpLabel
-               OpStore %continue_execution %false
+               OpStore %continue_execution %false None
                OpBranch %33
          %33 = OpLabel
                OpBranch %24
          %24 = OpLabel
                OpBranch %16
          %14 = OpLabel
-               OpStore %continue_execution %false
+               OpStore %continue_execution %false None
                OpBranch %16
          %16 = OpLabel
                OpReturn

@@ -59,14 +59,14 @@
          %15 = OpLabel
          %16 = OpAccessChain %_ptr_Uniform_v4float %1 %uint_0 %uint_0 %int_0
          %22 = OpAccessChain %_ptr_Uniform_float %16 %uint_2
-          %x = OpLoad %float %22
+          %x = OpLoad %float %22 None
          %26 = OpCompositeConstruct %v4float %x %float_0 %float_0 %float_1
                OpReturnValue %26
                OpFunctionEnd
        %main = OpFunction %void None %31
          %32 = OpLabel
          %33 = OpFunctionCall %v4float %main_inner
-               OpStore %main_position_Output %33
-               OpStore %main___point_size_Output %float_1
+               OpStore %main_position_Output %33 None
+               OpStore %main___point_size_Output %float_1 None
                OpReturn
                OpFunctionEnd

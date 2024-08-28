@@ -59,8 +59,8 @@
          %19 = OpExtInst %float %20 FSign %18
          %21 = OpFNegate %float %19
          %22 = OpAccessChain %_ptr_Function_float %normal %index
-               OpStore %22 %21
-         %24 = OpLoad %v3float %normal
+               OpStore %22 %21 None
+         %24 = OpLoad %v3float %normal None
          %25 = OpExtInst %v3float %20 Normalize %24
                OpReturnValue %25
                OpFunctionEnd
@@ -69,16 +69,16 @@
          %30 = OpLabel
          %31 = OpAccessChain %_ptr_StorageBuffer_v3float %1 %uint_0 %uint_0
          %34 = OpAccessChain %_ptr_StorageBuffer_uint %1 %uint_0 %uint_1
-         %37 = OpLoad %uint %34
+         %37 = OpLoad %uint %34 None
          %38 = OpAccessChain %_ptr_StorageBuffer_v3float %1 %uint_0 %uint_0
-         %39 = OpLoad %v3float %38
+         %39 = OpLoad %v3float %38 None
          %40 = OpFunctionCall %v3float %Bad %37 %39
-               OpStore %31 %40
+               OpStore %31 %40 None
                OpReturn
                OpFunctionEnd
        %main = OpFunction %void None %42
          %43 = OpLabel
-         %44 = OpLoad %uint %main_local_invocation_index_Input
+         %44 = OpLoad %uint %main_local_invocation_index_Input None
          %45 = OpFunctionCall %void %main_inner %44
                OpReturn
                OpFunctionEnd

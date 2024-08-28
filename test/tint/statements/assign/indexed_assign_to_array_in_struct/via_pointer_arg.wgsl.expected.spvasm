@@ -53,10 +53,10 @@
          %16 = OpLabel
           %v = OpVariable %_ptr_Function_InnerS Function %19
          %20 = OpAccessChain %_ptr_Uniform_uint %1 %uint_0 %uint_0
-         %23 = OpLoad %uint %20
+         %23 = OpLoad %uint %20 None
          %24 = OpAccessChain %_ptr_Function_InnerS %p_root %uint_0 %23
-         %25 = OpLoad %InnerS %v
-               OpStore %24 %25
+         %25 = OpLoad %InnerS %v None
+               OpStore %24 %25 None
                OpReturn
                OpFunctionEnd
        %main = OpFunction %void None %27

@@ -30,7 +30,7 @@
                OpStore %m %10
          %11 = OpAccessChain %_ptr_Function_v3float %m %int_1
          %15 = OpAccessChain %_ptr_Function_float %11 %uint_1
-       %x_16 = OpLoad %float %15
+       %x_16 = OpLoad %float %15 None
                OpReturn
                OpFunctionEnd
        %main = OpFunction %void None %3

@@ -88,41 +88,41 @@
         %v4b = OpVariable %_ptr_Function_v4bool Function %56
           %i = OpVariable %_ptr_Function_int Function
                OpStore %i %int_0
-         %60 = OpLoad %int %i
+         %60 = OpLoad %int %i None
          %61 = OpAccessChain %_ptr_Function_float %v2f %60
-               OpStore %61 %float_1
-         %64 = OpLoad %int %i
+               OpStore %61 %float_1 None
+         %64 = OpLoad %int %i None
          %65 = OpAccessChain %_ptr_Function_float %v3f %64
-               OpStore %65 %float_1
-         %66 = OpLoad %int %i
+               OpStore %65 %float_1 None
+         %66 = OpLoad %int %i None
          %67 = OpAccessChain %_ptr_Function_float %v4f %66
-               OpStore %67 %float_1
-         %68 = OpLoad %int %i
+               OpStore %67 %float_1 None
+         %68 = OpLoad %int %i None
          %69 = OpAccessChain %_ptr_Function_int %v2i %68
-               OpStore %69 %int_1
-         %71 = OpLoad %int %i
+               OpStore %69 %int_1 None
+         %71 = OpLoad %int %i None
          %72 = OpAccessChain %_ptr_Function_int %v3i %71
-               OpStore %72 %int_1
-         %73 = OpLoad %int %i
+               OpStore %72 %int_1 None
+         %73 = OpLoad %int %i None
          %74 = OpAccessChain %_ptr_Function_int %v4i %73
-               OpStore %74 %int_1
-         %75 = OpLoad %int %i
+               OpStore %74 %int_1 None
+         %75 = OpLoad %int %i None
          %76 = OpAccessChain %_ptr_Function_uint %v2u %75
-               OpStore %76 %uint_1
-         %79 = OpLoad %int %i
+               OpStore %76 %uint_1 None
+         %79 = OpLoad %int %i None
          %80 = OpAccessChain %_ptr_Function_uint %v3u %79
-               OpStore %80 %uint_1
-         %81 = OpLoad %int %i
+               OpStore %80 %uint_1 None
+         %81 = OpLoad %int %i None
          %82 = OpAccessChain %_ptr_Function_uint %v4u %81
-               OpStore %82 %uint_1
-         %83 = OpLoad %int %i
+               OpStore %82 %uint_1 None
+         %83 = OpLoad %int %i None
          %84 = OpAccessChain %_ptr_Function_bool %v2b %83
-               OpStore %84 %true
-         %87 = OpLoad %int %i
+               OpStore %84 %true None
+         %87 = OpLoad %int %i None
          %88 = OpAccessChain %_ptr_Function_bool %v3b %87
-               OpStore %88 %true
-         %89 = OpLoad %int %i
+               OpStore %88 %true None
+         %89 = OpLoad %int %i None
          %90 = OpAccessChain %_ptr_Function_bool %v4b %89
-               OpStore %90 %true
+               OpStore %90 %true None
                OpReturn
                OpFunctionEnd

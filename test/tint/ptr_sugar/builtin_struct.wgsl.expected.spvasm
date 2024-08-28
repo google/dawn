@@ -64,10 +64,10 @@
       %whole = OpVariable %_ptr_Function_float Function
                OpStore %a %9
          %12 = OpAccessChain %_ptr_Function_float %a %uint_0
-         %16 = OpLoad %float %12
+         %16 = OpLoad %float %12 None
                OpStore %fract %16
          %18 = OpAccessChain %_ptr_Function_float %a %uint_1
-         %20 = OpLoad %float %18
+         %20 = OpLoad %float %18 None
                OpStore %whole %20
                OpReturn
                OpFunctionEnd
@@ -78,10 +78,10 @@
     %whole_0 = OpVariable %_ptr_Function_float Function
                OpStore %a_0 %9
          %25 = OpAccessChain %_ptr_Function_float %a_0 %uint_0
-         %26 = OpLoad %float %25
+         %26 = OpLoad %float %25 None
                OpStore %fract_0 %26
          %28 = OpAccessChain %_ptr_Function_float %a_0 %uint_1
-         %29 = OpLoad %float %28
+         %29 = OpLoad %float %28 None
                OpStore %whole_0 %29
                OpReturn
                OpFunctionEnd
@@ -92,10 +92,10 @@
         %exp = OpVariable %_ptr_Function_int Function
                OpStore %a_1 %37
          %40 = OpAccessChain %_ptr_Function_float %a_1 %uint_0
-         %41 = OpLoad %float %40
+         %41 = OpLoad %float %40 None
                OpStore %fract_1 %41
          %43 = OpAccessChain %_ptr_Function_int %a_1 %uint_1
-         %45 = OpLoad %int %43
+         %45 = OpLoad %int %43 None
                OpStore %exp %45
                OpReturn
                OpFunctionEnd
@@ -106,10 +106,10 @@
       %exp_0 = OpVariable %_ptr_Function_int Function
                OpStore %a_2 %37
          %50 = OpAccessChain %_ptr_Function_float %a_2 %uint_0
-         %51 = OpLoad %float %50
+         %51 = OpLoad %float %50 None
                OpStore %fract_2 %51
          %53 = OpAccessChain %_ptr_Function_int %a_2 %uint_1
-         %54 = OpLoad %int %53
+         %54 = OpLoad %int %53 None
                OpStore %exp_0 %54
                OpReturn
                OpFunctionEnd

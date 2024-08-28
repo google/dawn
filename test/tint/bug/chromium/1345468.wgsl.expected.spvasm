@@ -38,11 +38,11 @@
           %a = OpVariable %_ptr_Function_v2float Function
           %b = OpVariable %_ptr_Function_int Function
                OpStore %i %int_1
-         %19 = OpLoad %int %i
+         %19 = OpLoad %int %i None
          %20 = OpAccessChain %_ptr_Private_v2float %1 %19
-         %22 = OpLoad %v2float %20
+         %22 = OpLoad %v2float %20 None
                OpStore %a %22
-         %25 = OpLoad %int %i
+         %25 = OpLoad %int %i None
          %26 = OpVectorExtractDynamic %int %27 %25
                OpStore %b %26
                OpReturn

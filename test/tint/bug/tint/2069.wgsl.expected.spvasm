@@ -25,6 +25,6 @@
          %10 = OpTypeFunction %void
        %main = OpFunction %void None %10
          %11 = OpLabel
-         %12 = OpLoad %__modf_result_f32 %v
+         %12 = OpLoad %__modf_result_f32 %v None
                OpReturn
                OpFunctionEnd

@@ -33,7 +33,7 @@
          %17 = OpConstantComposite %v4int %int_1 %int_1 %int_1 %int_1
 %textureStore_4c454f = OpFunction %void None %7
           %8 = OpLabel
-          %9 = OpLoad %3 %arg_0
+          %9 = OpLoad %3 %arg_0 None
          %12 = OpCompositeConstruct %v3uint %13 %uint_1
                OpImageWrite %9 %12 %17 None
                OpReturn

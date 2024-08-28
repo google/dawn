@@ -47,18 +47,18 @@
 %textureSampleCompare_3a5923 = OpFunction %float None %12
          %13 = OpLabel
         %res = OpVariable %_ptr_Function_float Function
-         %14 = OpLoad %7 %arg_0
-         %15 = OpLoad %10 %arg_1
+         %14 = OpLoad %7 %arg_0 None
+         %15 = OpLoad %10 %arg_1 None
          %16 = OpSampledImage %17 %14 %15
          %18 = OpImageSampleDrefImplicitLod %float %16 %19 %float_1 None
                OpStore %res %18
-         %24 = OpLoad %float %res
+         %24 = OpLoad %float %res None
                OpReturnValue %24
                OpFunctionEnd
 %fragment_main = OpFunction %void None %27
          %28 = OpLabel
          %29 = OpFunctionCall %float %textureSampleCompare_3a5923
          %30 = OpAccessChain %_ptr_StorageBuffer_float %1 %uint_0
-               OpStore %30 %29
+               OpStore %30 %29 None
                OpReturn
                OpFunctionEnd

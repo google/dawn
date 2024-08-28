@@ -23,7 +23,7 @@
         %foo = OpFunction %v4float None %6
           %7 = OpLabel
                OpControlBarrier %uint_2 %uint_2 %uint_264
-         %13 = OpLoad %v4float %v
+         %13 = OpLoad %v4float %v None
                OpControlBarrier %uint_2 %uint_2 %uint_264
                OpReturnValue %13
                OpFunctionEnd

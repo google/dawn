@@ -42,12 +42,12 @@
           %d = OpVariable %_ptr_Function_S Function
                OpStore %a_0 %9
          %10 = OpAccessChain %_ptr_Function_int %a_0 %uint_0
-          %b = OpLoad %int %10
-         %15 = OpLoad %v4int %a_0
+          %b = OpLoad %int %10 None
+         %15 = OpLoad %v4int %a_0 None
           %c = OpVectorShuffle %v4int %15 %15 2 2 1 1
                OpStore %d %24
          %25 = OpAccessChain %_ptr_Function_v3float %d %uint_0 %int_2
-         %28 = OpLoad %v3float %25
+         %28 = OpLoad %v3float %25 None
           %e = OpVectorShuffle %v3float %28 %28 1 2 0
                OpReturn
                OpFunctionEnd

@@ -45,25 +45,25 @@
         %res = OpVariable %_ptr_Function_uint Function
                OpStore %arg_0 %uint_1
                OpStore %arg_1 %int_1
-         %15 = OpLoad %uint %arg_0
-         %16 = OpLoad %int %arg_1
+         %15 = OpLoad %uint %arg_0 None
+         %16 = OpLoad %int %arg_1 None
          %17 = OpBitcast %uint %16
          %18 = OpGroupNonUniformShuffle %uint %uint_3 %15 %17
                OpStore %res %18
-         %21 = OpLoad %uint %res
+         %21 = OpLoad %uint %res None
                OpReturnValue %21
                OpFunctionEnd
 %fragment_main = OpFunction %void None %24
          %25 = OpLabel
          %26 = OpFunctionCall %uint %subgroupShuffle_54f328
          %27 = OpAccessChain %_ptr_StorageBuffer_uint %1 %uint_0
-               OpStore %27 %26
+               OpStore %27 %26 None
                OpReturn
                OpFunctionEnd
 %compute_main = OpFunction %void None %24
          %31 = OpLabel
          %32 = OpFunctionCall %uint %subgroupShuffle_54f328
          %33 = OpAccessChain %_ptr_StorageBuffer_uint %1 %uint_0
-               OpStore %33 %32
+               OpStore %33 %32 None
                OpReturn
                OpFunctionEnd

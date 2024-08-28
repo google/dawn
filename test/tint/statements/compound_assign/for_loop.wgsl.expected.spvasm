@@ -62,23 +62,23 @@
     %float_1 = OpConstant %float 1
        %idx1 = OpFunction %int None %15
          %16 = OpLabel
-         %17 = OpLoad %uint %i
+         %17 = OpLoad %uint %i None
          %18 = OpIAdd %uint %17 %uint_1
-               OpStore %i %18
+               OpStore %i %18 None
                OpReturnValue %int_1
                OpFunctionEnd
        %idx2 = OpFunction %int None %15
          %22 = OpLabel
-         %23 = OpLoad %uint %i
+         %23 = OpLoad %uint %i None
          %24 = OpIAdd %uint %23 %uint_2
-               OpStore %i %24
+               OpStore %i %24 None
                OpReturnValue %int_1
                OpFunctionEnd
        %idx3 = OpFunction %int None %15
          %27 = OpLabel
-         %28 = OpLoad %uint %i
+         %28 = OpLoad %uint %i None
          %29 = OpIAdd %uint %28 %uint_3
-               OpStore %i %29
+               OpStore %i %29 None
                OpReturnValue %int_1
                OpFunctionEnd
         %foo = OpFunction %void None %33
@@ -89,9 +89,9 @@
          %40 = OpLabel
          %45 = OpFunctionCall %int %idx1
          %46 = OpAccessChain %_ptr_Function_float %a %45
-         %48 = OpLoad %float %46
+         %48 = OpLoad %float %46 None
          %49 = OpFMul %float %48 %float_2
-               OpStore %46 %49
+               OpStore %46 %49 None
                OpBranch %43
          %43 = OpLabel
                OpLoopMerge %44 %42 None
@@ -99,7 +99,7 @@
          %41 = OpLabel
          %51 = OpFunctionCall %int %idx2
          %52 = OpAccessChain %_ptr_Function_float %a %51
-         %53 = OpLoad %float %52
+         %53 = OpLoad %float %52 None
          %54 = OpFOrdLessThan %bool %53 %float_10
                OpSelectionMerge %57 None
                OpBranchConditional %54 %57 %58
@@ -110,9 +110,9 @@
          %42 = OpLabel
          %59 = OpFunctionCall %int %idx3
          %60 = OpAccessChain %_ptr_Function_float %a %59
-         %61 = OpLoad %float %60
+         %61 = OpLoad %float %60 None
          %62 = OpFAdd %float %61 %float_1
-               OpStore %60 %62
+               OpStore %60 %62 None
                OpBranch %43
          %44 = OpLabel
                OpReturn

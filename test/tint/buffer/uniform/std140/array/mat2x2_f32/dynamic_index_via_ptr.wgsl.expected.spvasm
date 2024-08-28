@@ -70,10 +70,10 @@
 %_ptr_StorageBuffer_float = OpTypePointer StorageBuffer %float
           %i = OpFunction %int None %18
          %19 = OpLabel
-         %20 = OpLoad %int %counter
+         %20 = OpLoad %int %counter None
          %21 = OpIAdd %int %20 %int_1
-               OpStore %counter %21
-         %23 = OpLoad %int %counter
+               OpStore %counter %21 None
+         %23 = OpLoad %int %counter None
                OpReturnValue %23
                OpFunctionEnd
           %f = OpFunction %void None %26
@@ -84,15 +84,15 @@
          %28 = OpAccessChain %_ptr_Uniform__arr_mat2x2_f32_std140_uint_4 %1 %uint_0
          %31 = OpFunctionCall %int %i
          %32 = OpAccessChain %_ptr_Uniform_v2float %28 %31 %uint_0
-         %34 = OpLoad %v2float %32
+         %34 = OpLoad %v2float %32 None
          %35 = OpAccessChain %_ptr_Uniform_v2float %28 %31 %uint_1
-         %37 = OpLoad %v2float %35
+         %37 = OpLoad %v2float %35 None
       %l_a_i = OpCompositeConstruct %mat2v2float %34 %37
                OpStore %40 %l_a_i
          %42 = OpFunctionCall %int %i
          %43 = OpAccessChain %_ptr_Function_v2float %40 %42
-    %l_a_i_i = OpLoad %v2float %43
-         %46 = OpLoad %_arr_mat2x2_f32_std140_uint_4 %28
+    %l_a_i_i = OpLoad %v2float %43 None
+         %46 = OpLoad %_arr_mat2x2_f32_std140_uint_4 %28 None
                OpStore %47 %46
                OpBranch %53
          %53 = OpLabel
@@ -110,17 +110,17 @@
          %62 = OpLabel
          %64 = OpAccessChain %_ptr_Function_mat2v2float %49 %58
          %65 = OpAccessChain %_ptr_Function_mat2x2_f32_std140 %47 %58
-         %67 = OpLoad %mat2x2_f32_std140 %65
+         %67 = OpLoad %mat2x2_f32_std140 %65 None
          %68 = OpCompositeExtract %v2float %67 0
          %69 = OpCompositeExtract %v2float %67 1
          %70 = OpCompositeConstruct %mat2v2float %68 %69
-               OpStore %64 %70
+               OpStore %64 %70 None
                OpBranch %55
          %55 = OpLabel
          %59 = OpIAdd %uint %58 %uint_1
                OpBranch %56
          %57 = OpLabel
-        %l_a = OpLoad %_arr_mat2v2float_uint_4 %49
+        %l_a = OpLoad %_arr_mat2v2float_uint_4 %49 None
          %72 = OpCompositeExtract %float %l_a_i_i 0
          %73 = OpCompositeExtract %float %l_a 0 0 0
          %74 = OpFAdd %float %72 %73
@@ -129,6 +129,6 @@
          %77 = OpCompositeExtract %float %l_a_i_i 0
          %78 = OpFAdd %float %76 %77
          %79 = OpAccessChain %_ptr_StorageBuffer_float %10 %uint_0
-               OpStore %79 %78
+               OpStore %79 %78 None
                OpReturn
                OpFunctionEnd

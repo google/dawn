@@ -34,13 +34,13 @@
         %res = OpVariable %_ptr_Function_float Function
           %8 = OpDPdy %float %float_1
                OpStore %res %8
-         %12 = OpLoad %float %res
+         %12 = OpLoad %float %res None
                OpReturnValue %12
                OpFunctionEnd
 %fragment_main = OpFunction %void None %15
          %16 = OpLabel
          %17 = OpFunctionCall %float %dpdy_7f8d84
          %18 = OpAccessChain %_ptr_StorageBuffer_float %1 %uint_0
-               OpStore %18 %17
+               OpStore %18 %17 None
                OpReturn
                OpFunctionEnd

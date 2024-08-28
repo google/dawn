@@ -48,27 +48,27 @@
           %f = OpFunction %void None %12
          %13 = OpLabel
          %14 = OpAccessChain %_ptr_Uniform_v4half %1 %uint_0
-         %18 = OpLoad %v4half %14
+         %18 = OpLoad %v4half %14 None
          %19 = OpAccessChain %_ptr_Uniform_v4half %1 %uint_1
-         %21 = OpLoad %v4half %19
+         %21 = OpLoad %v4half %19 None
          %22 = OpAccessChain %_ptr_Uniform_v4half %1 %uint_2
-         %24 = OpLoad %v4half %22
+         %24 = OpLoad %v4half %22 None
          %25 = OpCompositeConstruct %mat3v4half %18 %21 %24
-               OpStore %p %25
+               OpStore %p %25 None
          %26 = OpAccessChain %_ptr_Private_v4half %p %int_1
          %30 = OpAccessChain %_ptr_Uniform_v4half %1 %uint_0
-         %31 = OpLoad %v4half %30
-               OpStore %26 %31
+         %31 = OpLoad %v4half %30 None
+               OpStore %26 %31 None
          %32 = OpAccessChain %_ptr_Private_v4half %p %int_1
          %33 = OpAccessChain %_ptr_Uniform_v4half %1 %uint_0
-         %34 = OpLoad %v4half %33
+         %34 = OpLoad %v4half %33 None
          %35 = OpVectorShuffle %v4half %34 %34 1 3 0 2
-               OpStore %32 %35
+               OpStore %32 %35 None
          %36 = OpAccessChain %_ptr_Private_v4half %p %int_0
          %38 = OpAccessChain %_ptr_Uniform_v4half %1 %uint_1
          %39 = OpAccessChain %_ptr_Uniform_half %38 %int_0
-         %41 = OpLoad %half %39
+         %41 = OpLoad %half %39 None
          %42 = OpAccessChain %_ptr_Private_half %36 %int_1
-               OpStore %42 %41
+               OpStore %42 %41 None
                OpReturn
                OpFunctionEnd

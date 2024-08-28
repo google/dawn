@@ -45,7 +45,7 @@
          %15 = OpLabel
          %16 = OpCompositeExtract %uint %pointer_indices 0
          %17 = OpAccessChain %_ptr_Uniform_str %1 %uint_0 %16
-         %20 = OpLoad %str %17
+         %20 = OpLoad %str %17 None
                OpReturnValue %20
                OpFunctionEnd
        %main = OpFunction %void None %23

@@ -60,16 +60,16 @@
         %idx = OpVariable %_ptr_Function_uint Function
                OpStore %idx %uint_0
          %21 = OpAccessChain %_ptr_Workgroup_int %wg %uint_0
-               OpStore %21 %int_0
+               OpStore %21 %int_0 None
          %24 = OpAccessChain %_ptr_Workgroup_uint %wg %uint_2
-               OpStore %24 %uint_0
-               OpStore %idx %local_invocation_index_2
+               OpStore %24 %uint_0 None
+               OpStore %idx %local_invocation_index_2 None
                OpBranch %29
          %29 = OpLabel
                OpLoopMerge %30 %28 None
                OpBranch %27
          %27 = OpLabel
-         %31 = OpLoad %uint %idx
+         %31 = OpLoad %uint %idx None
          %32 = OpULessThan %bool %31 %uint_10
          %34 = OpLogicalNot %bool %32
                OpSelectionMerge %35 None
@@ -77,14 +77,14 @@
          %36 = OpLabel
                OpBranch %30
          %35 = OpLabel
-       %x_35 = OpLoad %uint %idx
+       %x_35 = OpLoad %uint %idx None
          %38 = OpAccessChain %_ptr_Workgroup_uint_0 %wg %uint_1 %x_35
                OpAtomicStore %38 %uint_2 %uint_0 %uint_0
                OpBranch %28
          %28 = OpLabel
-         %42 = OpLoad %uint %idx
+         %42 = OpLoad %uint %idx None
          %43 = OpIAdd %uint %42 %uint_1
-               OpStore %idx %43
+               OpStore %idx %43 None
                OpBranch %29
          %30 = OpLabel
                OpControlBarrier %uint_2 %uint_2 %uint_264
@@ -94,7 +94,7 @@
                OpFunctionEnd
 %compute_main_1 = OpFunction %void None %50
          %51 = OpLabel
-       %x_53 = OpLoad %uint %local_invocation_index_1
+       %x_53 = OpLoad %uint %local_invocation_index_1 None
          %53 = OpFunctionCall %void %compute_main_inner %x_53
                OpReturn
                OpFunctionEnd
@@ -106,9 +106,9 @@
                OpBranchConditional %57 %59 %58
          %59 = OpLabel
          %60 = OpAccessChain %_ptr_Workgroup_int %wg %uint_0
-               OpStore %60 %int_0
+               OpStore %60 %int_0 None
          %61 = OpAccessChain %_ptr_Workgroup_uint %wg %uint_2
-               OpStore %61 %uint_0
+               OpStore %61 %uint_0 None
                OpBranch %58
          %58 = OpLabel
                OpBranch %62
@@ -133,13 +133,13 @@
                OpBranch %65
          %66 = OpLabel
                OpControlBarrier %uint_2 %uint_2 %uint_264
-               OpStore %local_invocation_index_1 %local_invocation_index_1_param
+               OpStore %local_invocation_index_1 %local_invocation_index_1_param None
          %75 = OpFunctionCall %void %compute_main_1
                OpReturn
                OpFunctionEnd
 %compute_main = OpFunction %void None %50
          %77 = OpLabel
-         %78 = OpLoad %uint %compute_main_local_invocation_index_Input
+         %78 = OpLoad %uint %compute_main_local_invocation_index_Input None
          %79 = OpFunctionCall %void %compute_main_inner_0 %78
                OpReturn
                OpFunctionEnd

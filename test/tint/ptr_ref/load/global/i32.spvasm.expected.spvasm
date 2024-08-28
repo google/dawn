@@ -20,7 +20,7 @@
       %int_1 = OpConstant %int 1
      %main_1 = OpFunction %void None %7
           %8 = OpLabel
-          %9 = OpLoad %int %I
+          %9 = OpLoad %int %I None
        %x_11 = OpIAdd %int %9 %int_1
                OpReturn
                OpFunctionEnd

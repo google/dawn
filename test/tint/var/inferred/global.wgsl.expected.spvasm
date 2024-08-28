@@ -100,21 +100,21 @@
          %55 = OpTypeFunction %void
           %f = OpFunction %void None %55
          %56 = OpLabel
-         %l1 = OpLoad %int %v1
-         %l2 = OpLoad %uint %v2
-         %l3 = OpLoad %float %v3
-         %l4 = OpLoad %v3int %v4
-         %l5 = OpLoad %v3uint %v5
-         %l6 = OpLoad %v3float %v6
-         %l7 = OpLoad %MyStruct %v7
-         %l8 = OpLoad %_arr_float_uint_10 %v8
-         %l9 = OpLoad %int %v9
-        %l10 = OpLoad %uint %v10
-        %l11 = OpLoad %float %v11
-        %l12 = OpLoad %MyStruct %v12
-        %l13 = OpLoad %MyStruct %v13
-        %l14 = OpLoad %_arr_float_uint_10 %v14
-        %l15 = OpLoad %v3int %v15
-        %l16 = OpLoad %v3float %v16
+         %l1 = OpLoad %int %v1 None
+         %l2 = OpLoad %uint %v2 None
+         %l3 = OpLoad %float %v3 None
+         %l4 = OpLoad %v3int %v4 None
+         %l5 = OpLoad %v3uint %v5 None
+         %l6 = OpLoad %v3float %v6 None
+         %l7 = OpLoad %MyStruct %v7 None
+         %l8 = OpLoad %_arr_float_uint_10 %v8 None
+         %l9 = OpLoad %int %v9 None
+        %l10 = OpLoad %uint %v10 None
+        %l11 = OpLoad %float %v11 None
+        %l12 = OpLoad %MyStruct %v12 None
+        %l13 = OpLoad %MyStruct %v13 None
+        %l14 = OpLoad %_arr_float_uint_10 %v14 None
+        %l15 = OpLoad %v3int %v15 None
+        %l16 = OpLoad %v3float %v16 None
                OpReturn
                OpFunctionEnd

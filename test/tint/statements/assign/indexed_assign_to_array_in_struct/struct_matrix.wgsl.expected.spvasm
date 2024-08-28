@@ -47,15 +47,15 @@
           %9 = OpLabel
          %s1 = OpVariable %_ptr_Function_OuterS Function %16
          %17 = OpAccessChain %_ptr_Uniform_uint %1 %uint_0 %uint_0
-         %20 = OpLoad %uint %17
+         %20 = OpLoad %uint %17 None
          %21 = OpAccessChain %_ptr_Function_v4float %s1 %uint_0 %20
-               OpStore %21 %23
+               OpStore %21 %23 None
          %25 = OpAccessChain %_ptr_Uniform_uint %1 %uint_0 %uint_0
-         %26 = OpLoad %uint %25
+         %26 = OpLoad %uint %25 None
          %27 = OpAccessChain %_ptr_Function_v4float %s1 %uint_0 %26
          %28 = OpAccessChain %_ptr_Uniform_uint %1 %uint_0 %uint_0
-         %29 = OpLoad %uint %28
+         %29 = OpLoad %uint %28 None
          %30 = OpAccessChain %_ptr_Function_float %27 %29
-               OpStore %30 %float_1
+               OpStore %30 %float_1 None
                OpReturn
                OpFunctionEnd

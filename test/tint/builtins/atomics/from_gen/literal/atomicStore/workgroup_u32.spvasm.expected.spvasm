@@ -50,7 +50,7 @@
                OpFunctionEnd
 %compute_main_1 = OpFunction %void None %11
          %26 = OpLabel
-       %x_28 = OpLoad %uint %local_invocation_index_1
+       %x_28 = OpLoad %uint %local_invocation_index_1 None
          %28 = OpFunctionCall %void %compute_main_inner %x_28
                OpReturn
                OpFunctionEnd
@@ -65,13 +65,13 @@
                OpBranch %34
          %34 = OpLabel
                OpControlBarrier %uint_2 %uint_2 %uint_264
-               OpStore %local_invocation_index_1 %local_invocation_index_1_param
+               OpStore %local_invocation_index_1 %local_invocation_index_1_param None
          %38 = OpFunctionCall %void %compute_main_1
                OpReturn
                OpFunctionEnd
 %compute_main = OpFunction %void None %11
          %40 = OpLabel
-         %41 = OpLoad %uint %compute_main_local_invocation_index_Input
+         %41 = OpLoad %uint %compute_main_local_invocation_index_Input None
          %42 = OpFunctionCall %void %compute_main_inner_0 %41
                OpReturn
                OpFunctionEnd

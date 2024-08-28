@@ -53,20 +53,20 @@
          %12 = OpAccessChain %_ptr_StorageBuffer_int %5 %uint_0 %uint_0
          %16 = OpAtomicLoad %int %12 %uint_1 %uint_0
                OpStore %res %16
-         %20 = OpLoad %int %res
+         %20 = OpLoad %int %res None
                OpReturnValue %20
                OpFunctionEnd
 %fragment_main = OpFunction %void None %23
          %24 = OpLabel
          %25 = OpFunctionCall %int %atomicLoad_0806ad
          %26 = OpAccessChain %_ptr_StorageBuffer_int_0 %1 %uint_0
-               OpStore %26 %25
+               OpStore %26 %25 None
                OpReturn
                OpFunctionEnd
 %compute_main = OpFunction %void None %23
          %29 = OpLabel
          %30 = OpFunctionCall %int %atomicLoad_0806ad
          %31 = OpAccessChain %_ptr_StorageBuffer_int_0 %1 %uint_0
-               OpStore %31 %30
+               OpStore %31 %30 None
                OpReturn
                OpFunctionEnd

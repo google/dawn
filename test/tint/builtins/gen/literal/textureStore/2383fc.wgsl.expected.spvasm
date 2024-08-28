@@ -32,7 +32,7 @@
          %19 = OpConstantComposite %v4uint %uint_1 %uint_1 %uint_1 %uint_1
 %textureStore_2383fc = OpFunction %void None %7
           %8 = OpLabel
-          %9 = OpLoad %3 %arg_0
+          %9 = OpLoad %3 %arg_0 None
          %10 = OpBitcast %uint %int_1
          %14 = OpCompositeConstruct %v3uint %15 %10
                OpImageWrite %9 %14 %19 None

@@ -40,22 +40,22 @@
       %int_7 = OpConstant %int 7
      %uses_a = OpFunction %void None %9
          %10 = OpLabel
-         %11 = OpLoad %int %a
+         %11 = OpLoad %int %a None
          %12 = OpIAdd %int %11 %int_1
-               OpStore %a %12
+               OpStore %a %12 None
                OpReturn
                OpFunctionEnd
      %uses_b = OpFunction %void None %9
          %15 = OpLabel
-         %16 = OpLoad %int %b
+         %16 = OpLoad %int %b None
          %17 = OpIMul %int %16 %int_2
-               OpStore %b %17
+               OpStore %b %17 None
                OpReturn
                OpFunctionEnd
 %uses_a_and_b = OpFunction %void None %9
          %20 = OpLabel
-         %21 = OpLoad %int %a
-               OpStore %b %21
+         %21 = OpLoad %int %a None
+               OpStore %b %21 None
                OpReturn
                OpFunctionEnd
     %no_uses = OpFunction %void None %9
@@ -64,7 +64,7 @@
                OpFunctionEnd
       %outer = OpFunction %void None %9
          %25 = OpLabel
-               OpStore %a %int_0
+               OpStore %a %int_0 None
          %27 = OpFunctionCall %void %uses_a
          %28 = OpFunctionCall %void %uses_a_and_b
          %29 = OpFunctionCall %void %uses_b
@@ -73,13 +73,13 @@
                OpFunctionEnd
       %main1 = OpFunction %void None %9
          %32 = OpLabel
-               OpStore %a %int_42
+               OpStore %a %int_42 None
          %34 = OpFunctionCall %void %uses_a
                OpReturn
                OpFunctionEnd
       %main2 = OpFunction %void None %9
          %36 = OpLabel
-               OpStore %b %int_7
+               OpStore %b %int_7 None
          %38 = OpFunctionCall %void %uses_b
                OpReturn
                OpFunctionEnd

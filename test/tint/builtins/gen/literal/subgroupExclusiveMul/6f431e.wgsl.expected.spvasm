@@ -42,20 +42,20 @@
         %res = OpVariable %_ptr_Function_half Function
           %8 = OpGroupNonUniformFMul %half %uint_3 ExclusiveScan %half_0x1p_0
                OpStore %res %8
-         %14 = OpLoad %half %res
+         %14 = OpLoad %half %res None
                OpReturnValue %14
                OpFunctionEnd
 %fragment_main = OpFunction %void None %17
          %18 = OpLabel
          %19 = OpFunctionCall %half %subgroupExclusiveMul_6f431e
          %20 = OpAccessChain %_ptr_StorageBuffer_half %1 %uint_0
-               OpStore %20 %19
+               OpStore %20 %19 None
                OpReturn
                OpFunctionEnd
 %compute_main = OpFunction %void None %17
          %24 = OpLabel
          %25 = OpFunctionCall %half %subgroupExclusiveMul_6f431e
          %26 = OpAccessChain %_ptr_StorageBuffer_half %1 %uint_0
-               OpStore %26 %25
+               OpStore %26 %25 None
                OpReturn
                OpFunctionEnd

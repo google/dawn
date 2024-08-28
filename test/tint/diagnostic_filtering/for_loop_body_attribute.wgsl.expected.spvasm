@@ -64,18 +64,18 @@
                OpBranch %19
          %19 = OpLabel
          %23 = OpAccessChain %_ptr_Function_float %v %uint_0
-         %27 = OpLoad %float %23
+         %27 = OpLoad %float %23 None
          %28 = OpFOrdGreaterThan %bool %x %27
                OpSelectionMerge %30 None
                OpBranchConditional %28 %30 %31
          %31 = OpLabel
                OpBranch %22
          %30 = OpLabel
-         %32 = OpLoad %3 %t
-         %33 = OpLoad %7 %s
+         %32 = OpLoad %3 %t None
+         %33 = OpLoad %7 %s None
          %34 = OpSampledImage %35 %32 %33
          %36 = OpImageSampleImplicitLod %v4float %34 %37 None
-               OpStore %v %36
+               OpStore %v %36 None
                OpBranch %20
          %20 = OpLabel
                OpBranch %21
@@ -84,7 +84,7 @@
                OpFunctionEnd
        %main = OpFunction %void None %40
          %41 = OpLabel
-         %42 = OpLoad %float %main_loc0_Input
+         %42 = OpLoad %float %main_loc0_Input None
          %43 = OpFunctionCall %void %main_inner %42
                OpReturn
                OpFunctionEnd

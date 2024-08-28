@@ -65,16 +65,16 @@
          %25 = OpLabel
         %out = OpVariable %_ptr_Function_VertexOutput Function %28
          %29 = OpAccessChain %_ptr_Function_v4float %out %uint_0
-               OpStore %29 %33
+               OpStore %29 %33 None
          %34 = OpFunctionCall %void %acos_069188
-         %35 = OpLoad %VertexOutput %out
+         %35 = OpLoad %VertexOutput %out None
                OpReturnValue %35
                OpFunctionEnd
 %vertex_main = OpFunction %void None %9
          %37 = OpLabel
          %38 = OpFunctionCall %VertexOutput %vertex_main_inner
          %39 = OpCompositeExtract %v4float %38 0
-               OpStore %vertex_main_position_Output %39
-               OpStore %vertex_main___point_size_Output %float_1
+               OpStore %vertex_main_position_Output %39 None
+               OpStore %vertex_main___point_size_Output %float_1 None
                OpReturn
                OpFunctionEnd

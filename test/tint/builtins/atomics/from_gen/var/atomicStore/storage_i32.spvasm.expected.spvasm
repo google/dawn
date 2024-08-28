@@ -44,8 +44,8 @@
           %9 = OpLabel
       %arg_1 = OpVariable %_ptr_Function_int Function
                OpStore %arg_1 %int_0
-               OpStore %arg_1 %int_1
-       %x_20 = OpLoad %int %arg_1
+               OpStore %arg_1 %int_1 None
+       %x_20 = OpLoad %int %arg_1 None
          %15 = OpAccessChain %_ptr_StorageBuffer_int %1 %uint_0 %uint_0
                OpAtomicStore %15 %uint_1 %uint_0 %x_20
                OpReturn

@@ -36,9 +36,9 @@
          %14 = OpLabel
                OpBranch %7
           %7 = OpLabel
-         %18 = OpLoad %int %i
+         %18 = OpLoad %int %i None
          %19 = OpIAdd %int %18 %int_1
-               OpStore %i %19
+               OpStore %i %19 None
                OpBranch %8
           %9 = OpLabel
                OpReturn

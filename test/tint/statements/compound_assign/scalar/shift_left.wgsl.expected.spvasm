@@ -34,10 +34,10 @@
         %foo = OpFunction %void None %8
           %9 = OpLabel
          %10 = OpAccessChain %_ptr_StorageBuffer_int %1 %uint_0 %uint_0
-         %14 = OpLoad %int %10
+         %14 = OpLoad %int %10 None
          %15 = OpBitwiseAnd %uint %uint_2 %uint_31
          %18 = OpShiftLeftLogical %int %14 %15
-               OpStore %10 %18
+               OpStore %10 %18 None
                OpReturn
                OpFunctionEnd
 %unused_entry_point = OpFunction %void None %8

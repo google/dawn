@@ -28,7 +28,7 @@
       %level = OpVariable %_ptr_Function_uint Function
                OpBranch %9
           %9 = OpLabel
-         %14 = OpLoad %3 %texture
+         %14 = OpLoad %3 %texture None
          %15 = OpImageQueryLevels %uint %14
                OpStore %level %15
                OpBranch %12
@@ -36,7 +36,7 @@
                OpLoopMerge %13 %11 None
                OpBranch %10
          %10 = OpLabel
-         %19 = OpLoad %uint %level
+         %19 = OpLoad %uint %level None
          %20 = OpUGreaterThan %bool %19 %uint_0
                OpSelectionMerge %23 None
                OpBranchConditional %20 %23 %24

@@ -40,8 +40,8 @@
        %main = OpFunction %void None %11
          %12 = OpLabel
          %13 = OpAccessChain %_ptr_Uniform_v4int %1 %uint_0
-          %x = OpLoad %v4int %13
+          %x = OpLoad %v4int %13 None
          %18 = OpAccessChain %_ptr_StorageBuffer_v4int %6 %uint_0
-               OpStore %18 %x
+               OpStore %18 %x None
                OpReturn
                OpFunctionEnd

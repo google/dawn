@@ -48,9 +48,9 @@
        %main = OpFunction %void None %13
          %14 = OpLabel
          %15 = OpAccessChain %_ptr_Uniform_v3uint %1 %uint_0 %uint_0
-         %18 = OpLoad %v3uint %15
+         %18 = OpLoad %v3uint %15 None
          %19 = OpAccessChain %_ptr_Uniform_v3uint %1 %uint_0 %uint_0
-         %20 = OpLoad %v3uint %19
+         %20 = OpLoad %v3uint %19 None
          %21 = OpCompositeExtract %uint %18 0
          %22 = OpCompositeExtract %uint %20 0
          %23 = OpIMul %uint %21 %22
@@ -65,7 +65,7 @@
          %32 = OpAccessChain %_ptr_StorageBuffer_uint %7 %uint_0 %uint_0
          %34 = OpAccessChain %_ptr_Uniform_v3uint %1 %uint_0 %uint_0
          %35 = OpAccessChain %_ptr_Uniform_uint %34 %uint_0
-         %37 = OpLoad %uint %35
-               OpStore %32 %37
+         %37 = OpLoad %uint %35 None
+               OpStore %32 %37 None
                OpReturn
                OpFunctionEnd

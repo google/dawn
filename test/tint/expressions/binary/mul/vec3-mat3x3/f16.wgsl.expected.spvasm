@@ -46,13 +46,13 @@
        %main = OpFunction %void None %9
          %10 = OpLabel
          %11 = OpAccessChain %_ptr_Uniform_v3half %1 %uint_0 %uint_3
-         %16 = OpLoad %v3half %11
+         %16 = OpLoad %v3half %11 None
          %17 = OpAccessChain %_ptr_Uniform_v3half %1 %uint_0 %uint_0
-         %18 = OpLoad %v3half %17
+         %18 = OpLoad %v3half %17 None
          %19 = OpAccessChain %_ptr_Uniform_v3half %1 %uint_0 %uint_1
-         %21 = OpLoad %v3half %19
+         %21 = OpLoad %v3half %19 None
          %22 = OpAccessChain %_ptr_Uniform_v3half %1 %uint_0 %uint_2
-         %24 = OpLoad %v3half %22
+         %24 = OpLoad %v3half %22 None
          %26 = OpCompositeConstruct %mat3v3half %18 %21 %24
           %x = OpVectorTimesMatrix %v3half %16 %26
                OpReturn

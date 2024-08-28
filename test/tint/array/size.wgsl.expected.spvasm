@@ -44,29 +44,29 @@
 %signed_constant = OpVariable %_ptr_Function__arr_float_uint_4 Function %14
 %unsigned_constant = OpVariable %_ptr_Function__arr_float_uint_4 Function %14
 %shr_const_expr = OpVariable %_ptr_Function__arr_float_uint_4 Function %14
-         %19 = OpLoad %_arr_float_uint_4 %signed_literal
-               OpStore %unsigned_literal %19
-         %20 = OpLoad %_arr_float_uint_4 %signed_literal
-               OpStore %signed_constant %20
-         %21 = OpLoad %_arr_float_uint_4 %signed_literal
-               OpStore %unsigned_constant %21
-         %22 = OpLoad %_arr_float_uint_4 %signed_literal
-               OpStore %shr_const_expr %22
+         %19 = OpLoad %_arr_float_uint_4 %signed_literal None
+               OpStore %unsigned_literal %19 None
+         %20 = OpLoad %_arr_float_uint_4 %signed_literal None
+               OpStore %signed_constant %20 None
+         %21 = OpLoad %_arr_float_uint_4 %signed_literal None
+               OpStore %unsigned_constant %21 None
+         %22 = OpLoad %_arr_float_uint_4 %signed_literal None
+               OpStore %shr_const_expr %22 None
          %23 = OpAccessChain %_ptr_Function_float %signed_literal %int_0
-         %27 = OpLoad %float %23
+         %27 = OpLoad %float %23 None
          %28 = OpAccessChain %_ptr_Function_float %unsigned_literal %int_0
-         %29 = OpLoad %float %28
+         %29 = OpLoad %float %28 None
          %30 = OpFAdd %float %27 %29
          %31 = OpAccessChain %_ptr_Function_float %signed_constant %int_0
-         %32 = OpLoad %float %31
+         %32 = OpLoad %float %31 None
          %33 = OpFAdd %float %30 %32
          %34 = OpAccessChain %_ptr_Function_float %unsigned_constant %int_0
-         %35 = OpLoad %float %34
+         %35 = OpLoad %float %34 None
          %36 = OpFAdd %float %33 %35
          %37 = OpAccessChain %_ptr_Function_float %shr_const_expr %int_0
-         %38 = OpLoad %float %37
+         %38 = OpLoad %float %37 None
          %39 = OpFAdd %float %36 %38
          %40 = OpAccessChain %_ptr_StorageBuffer_float %1 %uint_0
-               OpStore %40 %39
+               OpStore %40 %39 None
                OpReturn
                OpFunctionEnd

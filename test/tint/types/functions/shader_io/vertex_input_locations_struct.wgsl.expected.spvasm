@@ -67,13 +67,13 @@
                OpFunctionEnd
        %main = OpFunction %void None %29
          %30 = OpLabel
-         %31 = OpLoad %int %main_loc0_Input
-         %32 = OpLoad %uint %main_loc1_Input
-         %33 = OpLoad %float %main_loc2_Input
-         %34 = OpLoad %v4float %main_loc3_Input
+         %31 = OpLoad %int %main_loc0_Input None
+         %32 = OpLoad %uint %main_loc1_Input None
+         %33 = OpLoad %float %main_loc2_Input None
+         %34 = OpLoad %v4float %main_loc3_Input None
          %35 = OpCompositeConstruct %VertexInputs %31 %32 %33 %34
          %36 = OpFunctionCall %v4float %main_inner %35
-               OpStore %main_position_Output %36
-               OpStore %main___point_size_Output %float_1
+               OpStore %main_position_Output %36 None
+               OpStore %main___point_size_Output %float_1 None
                OpReturn
                OpFunctionEnd

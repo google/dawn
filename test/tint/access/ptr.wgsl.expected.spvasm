@@ -94,8 +94,8 @@
    %val_root = OpFunctionParameter %_ptr_Function_int
          %18 = OpLabel
          %19 = OpAccessChain %_ptr_Function_int %val_root
-         %20 = OpLoad %int %19
-         %21 = OpLoad %int %19
+         %20 = OpLoad %int %19 None
+         %21 = OpLoad %int %19 None
          %22 = OpFunctionCall %int %accept_value %21
          %23 = OpIAdd %int %20 %22
                OpReturnValue %23
@@ -104,7 +104,7 @@
  %val_root_0 = OpFunctionParameter %_ptr_Function_int
          %26 = OpLabel
          %27 = OpAccessChain %_ptr_Function_int %val_root_0
-         %28 = OpLoad %int %27
+         %28 = OpLoad %int %27 None
          %29 = OpFunctionCall %int %accept_ptr_deref_call_func %val_root_0
          %30 = OpIAdd %int %28 %29
                OpReturnValue %30
@@ -113,9 +113,9 @@
  %val_root_1 = OpFunctionParameter %_ptr_Function_S
          %36 = OpLabel
          %37 = OpAccessChain %_ptr_Function_int %val_root_1 %uint_0
-         %39 = OpLoad %int %37
+         %39 = OpLoad %int %37 None
          %40 = OpAccessChain %_ptr_Function_int %val_root_1 %uint_1
-         %42 = OpLoad %int %40
+         %42 = OpLoad %int %40 None
          %43 = OpIAdd %int %39 %42
                OpReturnValue %43
                OpFunctionEnd
@@ -123,22 +123,22 @@
  %val_root_2 = OpFunctionParameter %_ptr_Function_S
          %46 = OpLabel
           %b = OpAccessChain %_ptr_Function_int %val_root_2 %uint_0
-               OpStore %b %int_2
-         %49 = OpLoad %int %b
+               OpStore %b %int_2 None
+         %49 = OpLoad %int %b None
                OpReturnValue %49
                OpFunctionEnd
 %accept_ptr_vec_access_elements = OpFunction %int None %55
     %v1_root = OpFunctionParameter %_ptr_Function_v3float
          %56 = OpLabel
          %57 = OpAccessChain %_ptr_Function_v3float %v1_root
-         %58 = OpLoad %v3float %57
-         %59 = OpLoad %v3float %57
+         %58 = OpLoad %v3float %57 None
+         %59 = OpLoad %v3float %57 None
          %60 = OpExtInst %v3float %61 Cross %58 %59
          %62 = OpCompositeExtract %float %60 0
          %63 = OpAccessChain %_ptr_Function_float %57 %uint_0
-               OpStore %63 %62
+               OpStore %63 %62 None
          %65 = OpAccessChain %_ptr_Function_float %57 %uint_0
-         %66 = OpLoad %float %65
+         %66 = OpLoad %float %65 None
          %67 = OpFunctionCall %int %tint_f32_to_i32 %66
                OpReturnValue %67
                OpFunctionEnd
@@ -178,7 +178,7 @@
         %103 = OpIAdd %int %101 %102
         %104 = OpIAdd %int %103 %t1
         %105 = OpAccessChain %_ptr_StorageBuffer_int %1 %uint_0
-               OpStore %105 %104
+               OpStore %105 %104 None
                OpReturn
                OpFunctionEnd
 %tint_f32_to_i32 = OpFunction %int None %108
@@ -193,7 +193,7 @@
                OpFunctionEnd
        %main = OpFunction %void None %120
         %121 = OpLabel
-        %122 = OpLoad %uint %main_local_invocation_index_Input
+        %122 = OpLoad %uint %main_local_invocation_index_Input None
         %123 = OpFunctionCall %void %main_inner %122
                OpReturn
                OpFunctionEnd

@@ -47,24 +47,24 @@
         %res = OpVariable %_ptr_Function_v3int Function
                OpStore %arg_0 %11
                OpStore %arg_1 %uint_1
-         %17 = OpLoad %v3int %arg_0
-         %18 = OpLoad %uint %arg_1
+         %17 = OpLoad %v3int %arg_0 None
+         %18 = OpLoad %uint %arg_1 None
          %19 = OpGroupNonUniformShuffle %v3int %uint_3 %17 %18
                OpStore %res %19
-         %22 = OpLoad %v3int %res
+         %22 = OpLoad %v3int %res None
                OpReturnValue %22
                OpFunctionEnd
 %fragment_main = OpFunction %void None %25
          %26 = OpLabel
          %27 = OpFunctionCall %v3int %subgroupShuffle_b4bbb7
          %28 = OpAccessChain %_ptr_StorageBuffer_v3int %1 %uint_0
-               OpStore %28 %27
+               OpStore %28 %27 None
                OpReturn
                OpFunctionEnd
 %compute_main = OpFunction %void None %25
          %32 = OpLabel
          %33 = OpFunctionCall %v3int %subgroupShuffle_b4bbb7
          %34 = OpAccessChain %_ptr_StorageBuffer_v3int %1 %uint_0
-               OpStore %34 %33
+               OpStore %34 %33 None
                OpReturn
                OpFunctionEnd

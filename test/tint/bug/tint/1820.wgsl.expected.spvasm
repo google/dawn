@@ -48,7 +48,7 @@
         %baz = OpFunction %int None %17
         %x_0 = OpFunctionParameter %int
          %18 = OpLabel
-               OpStore %global %int_42
+               OpStore %global %int_42 None
                OpReturnValue %x_0
                OpFunctionEnd
         %bar = OpFunction %void None %9

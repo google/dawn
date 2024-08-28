@@ -40,18 +40,18 @@
       %int_5 = OpConstant %int 5
         %foo = OpFunction %int None %6
           %7 = OpLabel
-          %8 = OpLoad %int %counter
+          %8 = OpLoad %int %counter None
           %9 = OpIAdd %int %8 %int_1
-               OpStore %counter %9
-         %11 = OpLoad %int %counter
+               OpStore %counter %9 None
+         %11 = OpLoad %int %counter None
                OpReturnValue %11
                OpFunctionEnd
         %bar = OpFunction %int None %6
          %13 = OpLabel
-         %14 = OpLoad %int %counter
+         %14 = OpLoad %int %counter None
          %15 = OpIAdd %int %14 %int_2
-               OpStore %counter %15
-         %17 = OpLoad %int %counter
+               OpStore %counter %15 None
+         %17 = OpLoad %int %counter None
                OpReturnValue %17
                OpFunctionEnd
        %main = OpFunction %void None %20
@@ -62,10 +62,10 @@
          %31 = OpAccessChain %_ptr_Function_v4int %x %uint_0 %30
          %34 = OpFunctionCall %int %bar
          %35 = OpAccessChain %_ptr_Function_int %31 %34
-         %37 = OpLoad %int %35
+         %37 = OpLoad %int %35 None
          %38 = OpIAdd %int %37 %int_5
          %40 = OpAccessChain %_ptr_Function_int %31 %34
-               OpStore %40 %38
+               OpStore %40 %38 None
                OpReturn
                OpFunctionEnd
 %unused_entry_point = OpFunction %void None %20

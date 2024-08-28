@@ -42,7 +42,7 @@
         %res = OpVariable %_ptr_Function_bool Function
           %8 = OpGroupNonUniformElect %bool %uint_3
                OpStore %res %8
-         %14 = OpLoad %bool %res
+         %14 = OpLoad %bool %res None
          %15 = OpLogicalEqual %bool %14 %false
          %17 = OpSelect %int %15 %int_1 %int_0
                OpReturnValue %17
@@ -51,13 +51,13 @@
          %23 = OpLabel
          %24 = OpFunctionCall %int %subgroupElect_3943d6
          %25 = OpAccessChain %_ptr_StorageBuffer_int %1 %uint_0
-               OpStore %25 %24
+               OpStore %25 %24 None
                OpReturn
                OpFunctionEnd
 %compute_main = OpFunction %void None %22
          %29 = OpLabel
          %30 = OpFunctionCall %int %subgroupElect_3943d6
          %31 = OpAccessChain %_ptr_StorageBuffer_int %1 %uint_0
-               OpStore %31 %30
+               OpStore %31 %30 None
                OpReturn
                OpFunctionEnd

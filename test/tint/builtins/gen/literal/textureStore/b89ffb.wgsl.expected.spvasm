@@ -34,7 +34,7 @@
          %20 = OpConstantComposite %v2int %int_1 %int_1
 %textureStore_b89ffb = OpFunction %void None %7
           %8 = OpLabel
-          %9 = OpLoad %3 %arg_0
+          %9 = OpLoad %3 %arg_0 None
          %10 = OpVectorShuffle %v4float %11 %11 2 1 0 3
          %15 = OpBitcast %int %uint_1
          %19 = OpCompositeConstruct %v3int %20 %15

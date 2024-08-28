@@ -32,17 +32,17 @@
                OpBranch %9
           %9 = OpLabel
          %14 = OpAccessChain %_ptr_StorageBuffer_uint %1 %uint_0
-         %17 = OpLoad %uint %14
+         %17 = OpLoad %uint %14 None
          %18 = OpISub %uint %17 %uint_1
          %20 = OpAccessChain %_ptr_StorageBuffer_uint %1 %uint_0
-               OpStore %20 %18
+               OpStore %20 %18 None
                OpBranch %12
          %12 = OpLabel
                OpLoopMerge %13 %11 None
                OpBranch %10
          %10 = OpLabel
          %21 = OpAccessChain %_ptr_StorageBuffer_uint %1 %uint_0
-         %22 = OpLoad %uint %21
+         %22 = OpLoad %uint %21 None
          %23 = OpULessThan %bool %22 %uint_10
                OpSelectionMerge %26 None
                OpBranchConditional %23 %26 %27

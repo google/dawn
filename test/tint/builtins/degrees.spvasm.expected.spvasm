@@ -22,10 +22,10 @@
           %4 = OpLabel
           %a = OpVariable %_ptr_Function_float Function %8
           %b = OpVariable %_ptr_Function_float Function %8
-               OpStore %a %float_42
-         %11 = OpLoad %float %a
+               OpStore %a %float_42 None
+         %11 = OpLoad %float %a None
          %12 = OpExtInst %float %13 Degrees %11
-               OpStore %b %12
+               OpStore %b %12 None
                OpReturn
                OpFunctionEnd
        %main = OpFunction %void None %3

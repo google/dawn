@@ -200,10 +200,10 @@
 %doTextureLoad = OpFunction %void None %38
          %39 = OpLabel
         %res = OpVariable %_ptr_Function_v4float Function
-         %40 = OpLoad %3 %arg_0_plane0
-         %41 = OpLoad %3 %arg_0_plane1
+         %40 = OpLoad %3 %arg_0_plane0 None
+         %41 = OpLoad %3 %arg_0_plane1 None
          %42 = OpAccessChain %_ptr_Uniform_tint_ExternalTextureParams_std140 %6 %uint_0
-         %45 = OpLoad %tint_ExternalTextureParams_std140 %42
+         %45 = OpLoad %tint_ExternalTextureParams_std140 %42 None
          %46 = OpFunctionCall %tint_ExternalTextureParams %convert_tint_ExternalTextureParams %45
          %48 = OpFunctionCall %v4float %textureLoad2d %40 %41 %46 %49
                OpStore %res %48
@@ -314,8 +314,8 @@
 %vertex_main = OpFunction %void None %38
         %145 = OpLabel
         %146 = OpFunctionCall %v4float %vertex_main_inner
-               OpStore %vertex_main_position_Output %146
-               OpStore %vertex_main___point_size_Output %float_1
+               OpStore %vertex_main_position_Output %146 None
+               OpStore %vertex_main___point_size_Output %float_1 None
                OpReturn
                OpFunctionEnd
 %convert_tint_ExternalTextureParams = OpFunction %tint_ExternalTextureParams None %148

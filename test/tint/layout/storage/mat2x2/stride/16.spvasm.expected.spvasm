@@ -79,7 +79,7 @@
         %f_1 = OpFunction %void None %30
          %31 = OpLabel
          %32 = OpAccessChain %_ptr_StorageBuffer__arr_strided_arr_uint_2 %1 %uint_0 %uint_0
-         %35 = OpLoad %_arr_strided_arr_uint_2 %32
+         %35 = OpLoad %_arr_strided_arr_uint_2 %32 None
          %36 = OpFunctionCall %mat2v2float %arr_to_mat2x2_stride_16 %35
          %37 = OpFunctionCall %_arr_strided_arr_uint_2 %mat2x2_stride_16_to_arr %36
          %38 = OpFunctionCall %void %tint_store_and_preserve_padding %37
@@ -110,7 +110,7 @@
                OpBranch %52
          %57 = OpLabel
          %59 = OpAccessChain %_ptr_Function_strided_arr %46 %53
-         %61 = OpLoad %strided_arr %59
+         %61 = OpLoad %strided_arr %59 None
          %64 = OpCompositeConstruct %_arr_uint_uint_1 %53
          %65 = OpFunctionCall %void %tint_store_and_preserve_padding_0 %64 %61
                OpBranch %50
@@ -127,6 +127,6 @@
          %71 = OpCompositeExtract %uint %target_indices 0
          %72 = OpAccessChain %_ptr_StorageBuffer_v2float %1 %uint_0 %uint_0 %71 %uint_0
          %74 = OpCompositeExtract %v2float %value_param_0 0
-               OpStore %72 %74
+               OpStore %72 %74 None
                OpReturn
                OpFunctionEnd

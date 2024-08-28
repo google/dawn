@@ -27,7 +27,7 @@
        %main = OpFunction %void None %7
           %8 = OpLabel
           %9 = OpAccessChain %_ptr_Uniform_int %1 %uint_0
-         %13 = OpLoad %int %9
+         %13 = OpLoad %int %9 None
                OpSelectionMerge %16 None
                OpSwitch %13 %14 0 %15
          %15 = OpLabel

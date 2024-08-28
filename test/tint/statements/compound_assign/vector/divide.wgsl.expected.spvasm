@@ -48,9 +48,9 @@
         %foo = OpFunction %void None %9
          %10 = OpLabel
          %11 = OpAccessChain %_ptr_StorageBuffer_v4int %1 %uint_0 %uint_0
-         %15 = OpLoad %v4int %11
+         %15 = OpLoad %v4int %11 None
          %16 = OpFunctionCall %v4int %tint_div_v4i32 %15 %18
-               OpStore %11 %16
+               OpStore %11 %16 None
                OpReturn
                OpFunctionEnd
 %tint_div_v4i32 = OpFunction %v4int None %22

@@ -46,10 +46,10 @@
                OpStore %arg_1 %13
                OpStore %arg_2 %uint_1
                OpStore %arg_3 %22
-         %24 = OpLoad %3 %arg_0
-         %25 = OpLoad %v2int %arg_1
-         %26 = OpLoad %uint %arg_2
-         %27 = OpLoad %v4float %arg_3
+         %24 = OpLoad %3 %arg_0 None
+         %25 = OpLoad %v2int %arg_1 None
+         %26 = OpLoad %uint %arg_2 None
+         %27 = OpLoad %v4float %arg_3 None
          %28 = OpVectorShuffle %v4float %27 %27 2 1 0 3
          %29 = OpBitcast %int %26
          %31 = OpCompositeConstruct %v3int %25 %29

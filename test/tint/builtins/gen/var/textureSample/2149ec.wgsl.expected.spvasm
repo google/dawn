@@ -56,19 +56,19 @@
       %arg_2 = OpVariable %_ptr_Function_v3float Function
         %res = OpVariable %_ptr_Function_v4float Function
                OpStore %arg_2 %18
-         %20 = OpLoad %8 %arg_0
-         %21 = OpLoad %11 %arg_1
-         %22 = OpLoad %v3float %arg_2
+         %20 = OpLoad %8 %arg_0 None
+         %21 = OpLoad %11 %arg_1 None
+         %22 = OpLoad %v3float %arg_2 None
          %23 = OpSampledImage %24 %20 %21
          %25 = OpImageSampleImplicitLod %v4float %23 %22 ConstOffset %26
                OpStore %res %25
-         %32 = OpLoad %v4float %res
+         %32 = OpLoad %v4float %res None
                OpReturnValue %32
                OpFunctionEnd
 %fragment_main = OpFunction %void None %35
          %36 = OpLabel
          %37 = OpFunctionCall %v4float %textureSample_2149ec
          %38 = OpAccessChain %_ptr_StorageBuffer_v4float %1 %uint_0
-               OpStore %38 %37
+               OpStore %38 %37 None
                OpReturn
                OpFunctionEnd

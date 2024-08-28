@@ -19,7 +19,7 @@
       %false = OpConstantFalse %bool
           %f = OpFunction %void None %7
           %8 = OpLabel
-               OpStore %continue_execution %false
+               OpStore %continue_execution %false None
                OpReturn
                OpFunctionEnd
 %unused_entry_point = OpFunction %void None %7

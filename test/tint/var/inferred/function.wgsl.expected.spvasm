@@ -119,9 +119,9 @@
                OpStore %v4 %43
                OpStore %v5 %47
                OpStore %v6 %51
-         %52 = OpLoad %v3float %v6
-         %53 = OpLoad %v3float %v6
-         %54 = OpLoad %v3float %v6
+         %52 = OpLoad %v3float %v6 None
+         %53 = OpLoad %v3float %v6 None
+         %54 = OpLoad %v3float %v6 None
          %56 = OpCompositeConstruct %mat3v3float %52 %53 %54
                OpStore %v7 %56
                OpStore %v8 %61
@@ -147,6 +147,6 @@
        %main = OpFunction %void None %32
          %81 = OpLabel
          %82 = OpFunctionCall %v4float %main_inner
-               OpStore %main_loc0_Output %82
+               OpStore %main_loc0_Output %82 None
                OpReturn
                OpFunctionEnd

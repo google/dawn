@@ -71,9 +71,9 @@
                OpFunctionEnd
 %tint_symbol_5 = OpFunction %void None %42
          %43 = OpLabel
-         %44 = OpLoad %uint %tint_symbol_5_vertex_index_Input
+         %44 = OpLoad %uint %tint_symbol_5_vertex_index_Input None
          %45 = OpFunctionCall %v4float %tint_symbol_5_inner %44
-               OpStore %tint_symbol_5_position_Output %45
-               OpStore %tint_symbol_5___point_size_Output %float_1
+               OpStore %tint_symbol_5_position_Output %45 None
+               OpStore %tint_symbol_5___point_size_Output %float_1 None
                OpReturn
                OpFunctionEnd

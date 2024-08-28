@@ -37,7 +37,7 @@
        %main = OpFunction %void None %9
          %10 = OpLabel
          %11 = OpAccessChain %_ptr_Uniform_v3int %1 %uint_0 %uint_0
-         %15 = OpLoad %v3int %11
+         %15 = OpLoad %v3int %11 None
          %16 = OpBitwiseAnd %v3uint %17 %19
        %temp = OpShiftLeftLogical %v3int %15 %16
                OpReturn

@@ -40,8 +40,8 @@
          %28 = OpTypeFunction %void
     %f_inner = OpFunction %v4float None %12
          %13 = OpLabel
-         %14 = OpLoad %3 %t
-         %15 = OpLoad %7 %s
+         %14 = OpLoad %3 %t None
+         %15 = OpLoad %7 %s None
          %16 = OpSampledImage %17 %14 %15
          %18 = OpImageSampleImplicitLod %v4float %16 %19 ConstOffset %21
                OpReturnValue %18
@@ -49,6 +49,6 @@
           %f = OpFunction %void None %28
          %29 = OpLabel
          %30 = OpFunctionCall %v4float %f_inner
-               OpStore %f_loc0_Output %30
+               OpStore %f_loc0_Output %30 None
                OpReturn
                OpFunctionEnd

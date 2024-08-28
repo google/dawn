@@ -50,20 +50,20 @@
 %textureSample_d6b281 = OpFunction %v4float None %13
          %14 = OpLabel
         %res = OpVariable %_ptr_Function_v4float Function
-         %15 = OpLoad %8 %arg_0
-         %16 = OpLoad %11 %arg_1
+         %15 = OpLoad %8 %arg_0 None
+         %16 = OpLoad %11 %arg_1 None
          %17 = OpSampledImage %18 %15 %16
          %19 = OpConvertUToF %float %uint_1
          %23 = OpCompositeConstruct %v3float %24 %19
          %27 = OpImageSampleImplicitLod %v4float %17 %23 None
                OpStore %res %27
-         %30 = OpLoad %v4float %res
+         %30 = OpLoad %v4float %res None
                OpReturnValue %30
                OpFunctionEnd
 %fragment_main = OpFunction %void None %33
          %34 = OpLabel
          %35 = OpFunctionCall %v4float %textureSample_d6b281
          %36 = OpAccessChain %_ptr_StorageBuffer_v4float %1 %uint_0
-               OpStore %36 %35
+               OpStore %36 %35 None
                OpReturn
                OpFunctionEnd

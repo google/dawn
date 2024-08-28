@@ -24,7 +24,7 @@
          %17 = OpConstantNull %bool
 %call_discard = OpFunction %bool None %6
           %7 = OpLabel
-               OpStore %continue_execution %false
+               OpStore %continue_execution %false None
                OpReturnValue %true
                OpFunctionEnd
           %f = OpFunction %void None %11
@@ -33,7 +33,7 @@
 %also_unreachable = OpVariable %_ptr_Function_bool Function %17
          %13 = OpFunctionCall %bool %call_discard
                OpStore %v %13
-         %18 = OpLoad %bool %continue_execution
+         %18 = OpLoad %bool %continue_execution None
          %19 = OpLogicalNot %bool %18
                OpSelectionMerge %20 None
                OpBranchConditional %19 %21 %20

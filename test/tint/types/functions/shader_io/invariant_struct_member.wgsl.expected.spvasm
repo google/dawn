@@ -36,7 +36,7 @@
          %15 = OpLabel
          %16 = OpFunctionCall %Out %main_inner
          %17 = OpCompositeExtract %v4float %16 0
-               OpStore %main_position_Output %17
-               OpStore %main___point_size_Output %float_1
+               OpStore %main_position_Output %17 None
+               OpStore %main___point_size_Output %float_1 None
                OpReturn
                OpFunctionEnd

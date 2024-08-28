@@ -56,12 +56,12 @@
                OpSelectionMerge %23 None
                OpBranchConditional %20 %24 %23
          %24 = OpLabel
-               OpStore %sh_atomic_failed %uint_0
+               OpStore %sh_atomic_failed %uint_0 None
                OpBranch %23
          %23 = OpLabel
                OpControlBarrier %uint_2 %uint_2 %uint_264
                OpControlBarrier %uint_2 %uint_2 %uint_264
-     %failed = OpLoad %uint %sh_atomic_failed
+     %failed = OpLoad %uint %sh_atomic_failed None
                OpControlBarrier %uint_2 %uint_2 %uint_264
          %31 = OpCompositeExtract %uint %local_id 0
          %32 = OpIEqual %bool %31 %uint_0
@@ -69,16 +69,16 @@
                OpBranchConditional %32 %34 %33
          %34 = OpLabel
          %35 = OpAccessChain %_ptr_StorageBuffer_uint %4 %uint_0
-               OpStore %35 %failed
+               OpStore %35 %failed None
                OpBranch %33
          %33 = OpLabel
                OpReturn
                OpFunctionEnd
        %main = OpFunction %void None %38
          %39 = OpLabel
-         %40 = OpLoad %v3uint %main_global_invocation_id_Input
-         %41 = OpLoad %v3uint %main_local_invocation_id_Input
-         %42 = OpLoad %uint %main_local_invocation_index_Input
+         %40 = OpLoad %v3uint %main_global_invocation_id_Input None
+         %41 = OpLoad %v3uint %main_local_invocation_id_Input None
+         %42 = OpLoad %uint %main_local_invocation_index_Input None
          %43 = OpFunctionCall %void %main_inner %40 %41 %42
                OpReturn
                OpFunctionEnd

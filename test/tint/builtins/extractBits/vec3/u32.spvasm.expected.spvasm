@@ -31,9 +31,9 @@
                OpStore %v %9
                OpStore %offset_1 %uint_0
                OpStore %count %uint_0
-         %14 = OpLoad %v3uint %v
-         %15 = OpLoad %uint %offset_1
-         %16 = OpLoad %uint %count
+         %14 = OpLoad %v3uint %v None
+         %15 = OpLoad %uint %offset_1 None
+         %16 = OpLoad %uint %count None
          %17 = OpExtInst %uint %18 UMin %15 %uint_32
          %20 = OpISub %uint %uint_32 %17
          %21 = OpExtInst %uint %18 UMin %16 %20

@@ -84,16 +84,16 @@
                OpFunctionEnd
        %main = OpFunction %void None %20
          %21 = OpLabel
-         %22 = OpLoad %float %main_loc0_Input
-         %23 = OpLoad %float %main_loc1_Input
-         %24 = OpLoad %float %main_loc2_Input
-         %25 = OpLoad %float %main_loc3_Input
-         %26 = OpLoad %float %main_loc4_Input
-         %27 = OpLoad %float %main_loc5_Input
-         %28 = OpLoad %float %main_loc6_Input
-         %29 = OpLoad %float %main_loc7_Input
-         %30 = OpLoad %float %main_loc8_Input
-         %31 = OpLoad %float %main_loc9_Input
+         %22 = OpLoad %float %main_loc0_Input None
+         %23 = OpLoad %float %main_loc1_Input None
+         %24 = OpLoad %float %main_loc2_Input None
+         %25 = OpLoad %float %main_loc3_Input None
+         %26 = OpLoad %float %main_loc4_Input None
+         %27 = OpLoad %float %main_loc5_Input None
+         %28 = OpLoad %float %main_loc6_Input None
+         %29 = OpLoad %float %main_loc7_Input None
+         %30 = OpLoad %float %main_loc8_Input None
+         %31 = OpLoad %float %main_loc9_Input None
          %32 = OpCompositeConstruct %In %22 %23 %24 %25 %26 %27 %28 %29 %30 %31
          %33 = OpFunctionCall %void %main_inner %32
                OpReturn

@@ -42,14 +42,14 @@
        %main = OpFunction %void None %10
          %11 = OpLabel
    %srcValue = OpVariable %_ptr_Function_v4uint Function %15
-         %16 = OpLoad %3 %Src
+         %16 = OpLoad %3 %Src None
        %x_22 = OpImageFetch %v4uint %16 %18 Lod %int_0
-               OpStore %srcValue %x_22
+               OpStore %srcValue %x_22 None
          %22 = OpAccessChain %_ptr_Function_uint %srcValue %uint_0
-       %x_24 = OpLoad %uint %22
+       %x_24 = OpLoad %uint %22 None
        %x_25 = OpIAdd %uint %x_24 %uint_1
-       %x_27 = OpLoad %v4uint %srcValue
-         %29 = OpLoad %7 %Dst
+       %x_27 = OpLoad %v4uint %srcValue None
+         %29 = OpLoad %7 %Dst None
          %30 = OpVectorShuffle %v4uint %x_27 %x_27 0 0 0 0
                OpImageWrite %29 %18 %30 None
                OpReturn

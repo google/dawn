@@ -167,10 +167,10 @@
           %i = OpFunction %void None %19
          %20 = OpLabel
           %r = OpVariable %_ptr_Function_v4float Function
-         %21 = OpLoad %3 %t_plane0
-         %22 = OpLoad %3 %t_plane1
+         %21 = OpLoad %3 %t_plane0 None
+         %22 = OpLoad %3 %t_plane1 None
          %23 = OpAccessChain %_ptr_Uniform_tint_ExternalTextureParams_std140 %6 %uint_0
-         %26 = OpLoad %tint_ExternalTextureParams_std140 %23
+         %26 = OpLoad %tint_ExternalTextureParams_std140 %23 None
          %27 = OpFunctionCall %tint_ExternalTextureParams %convert_tint_ExternalTextureParams %26
          %32 = OpBitcast %v2uint %33
          %36 = OpFunctionCall %v4float %tint_TextureLoadExternal %21 %22 %27 %32

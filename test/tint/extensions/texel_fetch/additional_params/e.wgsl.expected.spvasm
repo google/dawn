@@ -52,8 +52,8 @@ SKIP: FAILED
                OpFunctionEnd
           %f = OpFunction %void None %24
          %25 = OpLabel
-         %26 = OpLoad %v4int %f_Input
-         %27 = OpLoad %v4float %f_position_Input
+         %26 = OpLoad %v4int %f_Input None
+         %27 = OpLoad %v4float %f_position_Input None
          %28 = OpCompositeConstruct %In %26 %27
          %29 = OpFunctionCall %void %f_inner %28
                OpReturn

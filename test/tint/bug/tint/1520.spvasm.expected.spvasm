@@ -168,11 +168,11 @@
        %x_65 = OpVariable %_ptr_Function_bool Function %14
        %x_66 = OpVariable %_ptr_Function_bool Function %14
          %41 = OpAccessChain %_ptr_Uniform_float %1 %uint_0 %uint_0
-         %45 = OpLoad %float %41
+         %45 = OpLoad %float %41 None
        %x_27 = OpFunctionCall %int %tint_f32_to_i32 %45
-               OpStore %unknown %x_27
-               OpStore %ok %true
-               OpStore %x_41 %false
+               OpStore %unknown %x_27 None
+               OpStore %ok %true None
+               OpStore %x_41 %false None
                OpSelectionMerge %50 None
                OpBranchConditional %true %51 %50
          %51 = OpLabel
@@ -180,60 +180,60 @@
          %53 = OpFunctionCall %v4int %tint_div_v4i32 %34 %52
          %55 = OpIEqual %v4bool %53 %34
          %57 = OpAll %bool %55
-               OpStore %x_40 %57
-         %58 = OpLoad %bool %x_40
-               OpStore %x_41 %58
+               OpStore %x_40 %57 None
+         %58 = OpLoad %bool %x_40 None
+               OpStore %x_41 %58 None
                OpBranch %50
          %50 = OpLabel
-         %59 = OpLoad %bool %x_41
-               OpStore %ok %59
+         %59 = OpLoad %bool %x_41 None
+               OpStore %ok %59 None
        %x_44 = OpCompositeConstruct %v4int %x_27 %x_27 %x_27 %x_27
-               OpStore %val %x_44
+               OpStore %val %x_44 None
        %x_47 = OpIAdd %v4int %x_44 %62
-               OpStore %val %x_47
+               OpStore %val %x_47 None
        %x_48 = OpISub %v4int %x_47 %62
-               OpStore %val %x_48
+               OpStore %val %x_48 None
        %x_49 = OpIAdd %v4int %x_48 %62
-               OpStore %val %x_49
+               OpStore %val %x_49 None
        %x_50 = OpISub %v4int %x_49 %62
-               OpStore %val %x_50
-               OpStore %x_55 %false
-         %67 = OpLoad %bool %x_41
+               OpStore %val %x_50 None
+               OpStore %x_55 %false None
+         %67 = OpLoad %bool %x_41 None
                OpSelectionMerge %68 None
                OpBranchConditional %67 %69 %68
          %69 = OpLabel
          %70 = OpIEqual %v4bool %x_50 %x_44
          %71 = OpAll %bool %70
-               OpStore %x_54 %71
-         %72 = OpLoad %bool %x_54
-               OpStore %x_55 %72
+               OpStore %x_54 %71 None
+         %72 = OpLoad %bool %x_54 None
+               OpStore %x_55 %72 None
                OpBranch %68
          %68 = OpLabel
-         %73 = OpLoad %bool %x_55
-               OpStore %ok %73
+         %73 = OpLoad %bool %x_55 None
+               OpStore %ok %73 None
        %x_58 = OpIMul %v4int %x_50 %75
-               OpStore %val %x_58
+               OpStore %val %x_58 None
        %x_59 = OpFunctionCall %v4int %tint_div_v4i32 %x_58 %75
-               OpStore %val %x_59
+               OpStore %val %x_59 None
        %x_60 = OpIMul %v4int %x_59 %75
-               OpStore %val %x_60
+               OpStore %val %x_60 None
        %x_61 = OpFunctionCall %v4int %tint_div_v4i32 %x_60 %75
-               OpStore %val %x_61
-               OpStore %x_66 %false
-         %80 = OpLoad %bool %x_55
+               OpStore %val %x_61 None
+               OpStore %x_66 %false None
+         %80 = OpLoad %bool %x_55 None
                OpSelectionMerge %81 None
                OpBranchConditional %80 %82 %81
          %82 = OpLabel
          %83 = OpIEqual %v4bool %x_61 %x_44
          %84 = OpAll %bool %83
-               OpStore %x_65 %84
-         %85 = OpLoad %bool %x_65
-               OpStore %x_66 %85
+               OpStore %x_65 %84 None
+         %85 = OpLoad %bool %x_65 None
+               OpStore %x_66 %85 None
                OpBranch %81
          %81 = OpLabel
-         %86 = OpLoad %bool %x_66
-               OpStore %ok %86
-         %87 = OpLoad %bool %x_66
+         %86 = OpLoad %bool %x_66 None
+               OpStore %ok %86 None
+         %87 = OpLoad %bool %x_66 None
                OpReturnValue %87
                OpFunctionEnd
      %main_1 = OpFunction %void None %90
@@ -252,13 +252,13 @@
       %x_111 = OpVariable %_ptr_Function_bool Function %14
       %x_114 = OpVariable %_ptr_Function_bool Function %14
       %x_115 = OpVariable %_ptr_Function_bool Function %14
-        %109 = OpLoad %v4float %vcolor_S0
-               OpStore %outputColor_S0 %109
+        %109 = OpLoad %v4float %vcolor_S0 None
+               OpStore %outputColor_S0 %109 None
         %110 = OpAccessChain %_ptr_Uniform_float %1 %uint_0 %uint_0
-       %x_77 = OpLoad %float %110
-               OpStore %x_8_unknown %x_77
-               OpStore %x_9_ok %true
-               OpStore %x_87 %false
+       %x_77 = OpLoad %float %110 None
+               OpStore %x_8_unknown %x_77 None
+               OpStore %x_9_ok %true None
+               OpStore %x_87 %false None
                OpSelectionMerge %112 None
                OpBranchConditional %true %113 %112
         %113 = OpLabel
@@ -266,98 +266,98 @@
         %115 = OpFDiv %v4float %10 %114
         %116 = OpFOrdEqual %v4bool %115 %10
         %117 = OpAll %bool %116
-               OpStore %x_86 %117
-        %118 = OpLoad %bool %x_86
-               OpStore %x_87 %118
+               OpStore %x_86 %117 None
+        %118 = OpLoad %bool %x_86 None
+               OpStore %x_87 %118 None
                OpBranch %112
         %112 = OpLabel
-        %119 = OpLoad %bool %x_87
-               OpStore %x_9_ok %119
+        %119 = OpLoad %bool %x_87 None
+               OpStore %x_9_ok %119 None
        %x_89 = OpCompositeConstruct %v4float %x_77 %x_77 %x_77 %x_77
-               OpStore %x_10_val %x_89
+               OpStore %x_10_val %x_89 None
        %x_92 = OpFAdd %v4float %x_89 %122
-               OpStore %x_10_val %x_92
+               OpStore %x_10_val %x_92 None
        %x_93 = OpFSub %v4float %x_92 %122
-               OpStore %x_10_val %x_93
+               OpStore %x_10_val %x_93 None
        %x_94 = OpFAdd %v4float %x_93 %122
-               OpStore %x_10_val %x_94
+               OpStore %x_10_val %x_94 None
        %x_95 = OpFSub %v4float %x_94 %122
-               OpStore %x_10_val %x_95
-               OpStore %x_100 %false
-        %127 = OpLoad %bool %x_87
+               OpStore %x_10_val %x_95 None
+               OpStore %x_100 %false None
+        %127 = OpLoad %bool %x_87 None
                OpSelectionMerge %128 None
                OpBranchConditional %127 %129 %128
         %129 = OpLabel
         %130 = OpFOrdEqual %v4bool %x_95 %x_89
         %131 = OpAll %bool %130
-               OpStore %x_99 %131
-        %132 = OpLoad %bool %x_99
-               OpStore %x_100 %132
+               OpStore %x_99 %131 None
+        %132 = OpLoad %bool %x_99 None
+               OpStore %x_100 %132 None
                OpBranch %128
         %128 = OpLabel
-        %133 = OpLoad %bool %x_100
-               OpStore %x_9_ok %133
+        %133 = OpLoad %bool %x_100 None
+               OpStore %x_9_ok %133 None
       %x_103 = OpFMul %v4float %x_95 %135
-               OpStore %x_10_val %x_103
+               OpStore %x_10_val %x_103 None
       %x_104 = OpFDiv %v4float %x_103 %135
-               OpStore %x_10_val %x_104
+               OpStore %x_10_val %x_104 None
       %x_105 = OpFMul %v4float %x_104 %135
-               OpStore %x_10_val %x_105
+               OpStore %x_10_val %x_105 None
       %x_106 = OpFDiv %v4float %x_105 %135
-               OpStore %x_10_val %x_106
-               OpStore %x_111 %false
-        %140 = OpLoad %bool %x_100
+               OpStore %x_10_val %x_106 None
+               OpStore %x_111 %false None
+        %140 = OpLoad %bool %x_100 None
                OpSelectionMerge %141 None
                OpBranchConditional %140 %142 %141
         %142 = OpLabel
         %143 = OpFOrdEqual %v4bool %x_106 %x_89
         %144 = OpAll %bool %143
-               OpStore %x_110 %144
-        %145 = OpLoad %bool %x_110
-               OpStore %x_111 %145
+               OpStore %x_110 %144 None
+        %145 = OpLoad %bool %x_110 None
+               OpStore %x_111 %145 None
                OpBranch %141
         %141 = OpLabel
-        %146 = OpLoad %bool %x_111
-               OpStore %x_9_ok %146
-               OpStore %x_115 %false
-        %147 = OpLoad %bool %x_111
+        %146 = OpLoad %bool %x_111 None
+               OpStore %x_9_ok %146 None
+               OpStore %x_115 %false None
+        %147 = OpLoad %bool %x_111 None
                OpSelectionMerge %148 None
                OpBranchConditional %147 %149 %148
         %149 = OpLabel
         %150 = OpFunctionCall %bool %test_int_S1_c0_b
-               OpStore %x_114 %150
-        %151 = OpLoad %bool %x_114
-               OpStore %x_115 %151
+               OpStore %x_114 %150 None
+        %151 = OpLoad %bool %x_114 None
+               OpStore %x_115 %151 None
                OpBranch %148
         %148 = OpLabel
-        %152 = OpLoad %bool %x_115
+        %152 = OpLoad %bool %x_115 None
                OpSelectionMerge %153 None
                OpBranchConditional %152 %154 %155
         %154 = OpLabel
         %156 = OpAccessChain %_ptr_Uniform_v4float %1 %uint_0 %uint_2
-        %159 = OpLoad %v4float %156
-               OpStore %x_116 %159
+        %159 = OpLoad %v4float %156 None
+               OpStore %x_116 %159 None
                OpBranch %153
         %155 = OpLabel
         %160 = OpAccessChain %_ptr_Uniform_v4float %1 %uint_0 %uint_1
-        %162 = OpLoad %v4float %160
-               OpStore %x_116 %162
+        %162 = OpLoad %v4float %160 None
+               OpStore %x_116 %162 None
                OpBranch %153
         %153 = OpLabel
-      %x_125 = OpLoad %v4float %x_116
-        %164 = OpLoad %v4float %x_116
-               OpStore %output_S1 %164
-               OpStore %sk_FragColor %x_125
+      %x_125 = OpLoad %v4float %x_116 None
+        %164 = OpLoad %v4float %x_116 None
+               OpStore %output_S1 %164 None
+               OpStore %sk_FragColor %x_125 None
                OpReturn
                OpFunctionEnd
  %main_inner = OpFunction %main_out None %169
 %sk_Clockwise_param = OpFunctionParameter %bool
 %vcolor_S0_param = OpFunctionParameter %v4float
         %170 = OpLabel
-               OpStore %sk_Clockwise %sk_Clockwise_param
-               OpStore %vcolor_S0 %vcolor_S0_param
+               OpStore %sk_Clockwise %sk_Clockwise_param None
+               OpStore %vcolor_S0 %vcolor_S0_param None
         %171 = OpFunctionCall %void %main_1
-        %172 = OpLoad %v4float %sk_FragColor
+        %172 = OpLoad %v4float %sk_FragColor None
         %173 = OpCompositeConstruct %main_out %172
                OpReturnValue %173
                OpFunctionEnd
@@ -386,10 +386,10 @@
                OpFunctionEnd
        %main = OpFunction %void None %90
         %201 = OpLabel
-        %202 = OpLoad %bool %main_front_facing_Input
-        %203 = OpLoad %v4float %main_loc0_Input
+        %202 = OpLoad %bool %main_front_facing_Input None
+        %203 = OpLoad %v4float %main_loc0_Input None
         %204 = OpFunctionCall %main_out %main_inner %202 %203
         %205 = OpCompositeExtract %v4float %204 0
-               OpStore %main_loc0_Output %205
+               OpStore %main_loc0_Output %205 None
                OpReturn
                OpFunctionEnd

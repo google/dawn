@@ -60,25 +60,25 @@
          %15 = OpLabel
 %orientation = OpVariable %_ptr_Function__arr_int_uint_6 Function %18
          %19 = OpAccessChain %_ptr_StorageBuffer__arr_int_uint_6 %1 %uint_0 %uint_0 %uint_3
-       %x_23 = OpLoad %_arr_int_uint_6 %19
+       %x_23 = OpLoad %_arr_int_uint_6 %19 None
          %24 = OpAccessChain %_ptr_Function_int %orientation %int_0
          %27 = OpCompositeExtract %int %x_23 0
-               OpStore %24 %27
+               OpStore %24 %27 None
          %28 = OpAccessChain %_ptr_Function_int %orientation %int_1
          %30 = OpCompositeExtract %int %x_23 1
-               OpStore %28 %30
+               OpStore %28 %30 None
          %31 = OpAccessChain %_ptr_Function_int %orientation %int_2
          %33 = OpCompositeExtract %int %x_23 2
-               OpStore %31 %33
+               OpStore %31 %33 None
          %34 = OpAccessChain %_ptr_Function_int %orientation %int_3
          %36 = OpCompositeExtract %int %x_23 3
-               OpStore %34 %36
+               OpStore %34 %36 None
          %37 = OpAccessChain %_ptr_Function_int %orientation %int_4
          %39 = OpCompositeExtract %int %x_23 4
-               OpStore %37 %39
+               OpStore %37 %39 None
          %40 = OpAccessChain %_ptr_Function_int %orientation %int_5
          %42 = OpCompositeExtract %int %x_23 5
-               OpStore %40 %42
+               OpStore %40 %42 None
                OpReturn
                OpFunctionEnd
        %main = OpFunction %void None %14

@@ -61,16 +61,16 @@
          %16 = OpLabel
         %res = OpVariable %_ptr_Function_v2int Function
                OpStore %res %21
-         %22 = OpLoad %3 %arg_0
+         %22 = OpLoad %3 %arg_0 None
          %23 = OpImageQuerySize %v2uint %22
          %26 = OpBitcast %v2int %23
-               OpStore %res %26
+               OpStore %res %26 None
                OpReturn
                OpFunctionEnd
 %tint_symbol_2 = OpFunction %void None %29
 %tint_symbol = OpFunctionParameter %v4float
          %30 = OpLabel
-               OpStore %tint_symbol_1 %tint_symbol
+               OpStore %tint_symbol_1 %tint_symbol None
                OpReturn
                OpFunctionEnd
 %vertex_main_1 = OpFunction %void None %15
@@ -82,7 +82,7 @@
 %vertex_main_inner = OpFunction %vertex_main_out None %37
          %38 = OpLabel
          %39 = OpFunctionCall %void %vertex_main_1
-         %40 = OpLoad %v4float %tint_symbol_1
+         %40 = OpLoad %v4float %tint_symbol_1 None
          %41 = OpCompositeConstruct %vertex_main_out %40
                OpReturnValue %41
                OpFunctionEnd
@@ -110,7 +110,7 @@
          %55 = OpLabel
          %56 = OpFunctionCall %vertex_main_out %vertex_main_inner
          %57 = OpCompositeExtract %v4float %56 0
-               OpStore %vertex_main_position_Output %57
-               OpStore %vertex_main___point_size_Output %float_1
+               OpStore %vertex_main_position_Output %57 None
+               OpStore %vertex_main___point_size_Output %float_1 None
                OpReturn
                OpFunctionEnd

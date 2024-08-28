@@ -28,9 +28,9 @@
           %b = OpVariable %_ptr_Function_float Function
                OpStore %a %9
                OpStore %b %float_0
-         %16 = OpLoad %v3float %a
-         %17 = OpLoad %float %b
-         %18 = OpLoad %float %b
+         %16 = OpLoad %v3float %a None
+         %17 = OpLoad %float %b None
+         %18 = OpLoad %float %b None
          %19 = OpFAdd %float %17 %18
          %20 = OpCompositeConstruct %v3float %19 %19 %19
           %r = OpFDiv %v3float %16 %20

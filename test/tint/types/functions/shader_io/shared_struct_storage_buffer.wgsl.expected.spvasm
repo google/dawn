@@ -72,20 +72,20 @@
          %25 = OpLabel
          %26 = OpAccessChain %_ptr_StorageBuffer_float %1 %uint_0 %uint_0
          %29 = OpCompositeExtract %float %value_param 0
-               OpStore %26 %29
+               OpStore %26 %29 None
          %30 = OpAccessChain %_ptr_StorageBuffer_uint %1 %uint_0 %uint_1
          %33 = OpCompositeExtract %uint %value_param 1
-               OpStore %30 %33
+               OpStore %30 %33 None
          %34 = OpAccessChain %_ptr_StorageBuffer_v4float %1 %uint_0 %uint_2
          %37 = OpCompositeExtract %v4float %value_param 2
-               OpStore %34 %37
+               OpStore %34 %37 None
                OpReturn
                OpFunctionEnd
   %frag_main = OpFunction %void None %39
          %40 = OpLabel
-         %41 = OpLoad %float %frag_main_loc0_Input
-         %42 = OpLoad %uint %frag_main_loc1_Input
-         %43 = OpLoad %v4float %frag_main_position_Input
+         %41 = OpLoad %float %frag_main_loc0_Input None
+         %42 = OpLoad %uint %frag_main_loc1_Input None
+         %43 = OpLoad %v4float %frag_main_position_Input None
          %44 = OpCompositeConstruct %S %41 %42 %43
          %45 = OpFunctionCall %void %frag_main_inner %44
                OpReturn

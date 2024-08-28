@@ -46,10 +46,10 @@
         %res = OpVariable %_ptr_Function_uint Function
                OpStore %arg_1 %uint_0
                OpStore %res %uint_0
-               OpStore %arg_1 %uint_1
-       %x_18 = OpLoad %uint %arg_1
+               OpStore %arg_1 %uint_1 None
+       %x_18 = OpLoad %uint %arg_1 None
        %x_14 = OpAtomicAnd %uint %arg_0 %uint_2 %uint_0 %x_18
-               OpStore %res %x_14
+               OpStore %res %x_14 None
                OpReturn
                OpFunctionEnd
 %compute_main_inner = OpFunction %void None %23
@@ -62,7 +62,7 @@
                OpFunctionEnd
 %compute_main_1 = OpFunction %void None %11
          %30 = OpLabel
-       %x_32 = OpLoad %uint %local_invocation_index_1
+       %x_32 = OpLoad %uint %local_invocation_index_1 None
          %32 = OpFunctionCall %void %compute_main_inner %x_32
                OpReturn
                OpFunctionEnd
@@ -77,13 +77,13 @@
                OpBranch %38
          %38 = OpLabel
                OpControlBarrier %uint_2 %uint_2 %uint_264
-               OpStore %local_invocation_index_1 %local_invocation_index_1_param
+               OpStore %local_invocation_index_1 %local_invocation_index_1_param None
          %42 = OpFunctionCall %void %compute_main_1
                OpReturn
                OpFunctionEnd
 %compute_main = OpFunction %void None %11
          %44 = OpLabel
-         %45 = OpLoad %uint %compute_main_local_invocation_index_Input
+         %45 = OpLoad %uint %compute_main_local_invocation_index_Input None
          %46 = OpFunctionCall %void %compute_main_inner_0 %45
                OpReturn
                OpFunctionEnd

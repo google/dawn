@@ -73,16 +73,16 @@
          %40 = OpVariable %_ptr_Function__arr_mat4v3float_uint_4 Function %43
          %17 = OpAccessChain %_ptr_Uniform__arr_mat4x3_f32_std140_uint_4 %1 %uint_0
          %20 = OpAccessChain %_ptr_Uniform_v3float %17 %int_2 %uint_0
-         %24 = OpLoad %v3float %20
+         %24 = OpLoad %v3float %20 None
          %25 = OpAccessChain %_ptr_Uniform_v3float %17 %int_2 %uint_1
-         %27 = OpLoad %v3float %25
+         %27 = OpLoad %v3float %25 None
          %28 = OpAccessChain %_ptr_Uniform_v3float %17 %int_2 %uint_2
-         %30 = OpLoad %v3float %28
+         %30 = OpLoad %v3float %28 None
          %31 = OpAccessChain %_ptr_Uniform_v3float %17 %int_2 %uint_3
-         %33 = OpLoad %v3float %31
+         %33 = OpLoad %v3float %31 None
       %l_a_i = OpCompositeConstruct %mat4v3float %24 %27 %30 %33
     %l_a_i_i = OpCompositeExtract %v3float %l_a_i 1
-         %37 = OpLoad %_arr_mat4x3_f32_std140_uint_4 %17
+         %37 = OpLoad %_arr_mat4x3_f32_std140_uint_4 %17 None
                OpStore %38 %37
                OpBranch %44
          %44 = OpLabel
@@ -100,19 +100,19 @@
          %53 = OpLabel
          %55 = OpAccessChain %_ptr_Function_mat4v3float %40 %49
          %57 = OpAccessChain %_ptr_Function_mat4x3_f32_std140 %38 %49
-         %59 = OpLoad %mat4x3_f32_std140 %57
+         %59 = OpLoad %mat4x3_f32_std140 %57 None
          %60 = OpCompositeExtract %v3float %59 0
          %61 = OpCompositeExtract %v3float %59 1
          %62 = OpCompositeExtract %v3float %59 2
          %63 = OpCompositeExtract %v3float %59 3
          %64 = OpCompositeConstruct %mat4v3float %60 %61 %62 %63
-               OpStore %55 %64
+               OpStore %55 %64 None
                OpBranch %46
          %46 = OpLabel
          %50 = OpIAdd %uint %49 %uint_1
                OpBranch %47
          %48 = OpLabel
-        %l_a = OpLoad %_arr_mat4v3float_uint_4 %40
+        %l_a = OpLoad %_arr_mat4v3float_uint_4 %40 None
          %66 = OpCompositeExtract %float %l_a_i_i 0
          %67 = OpCompositeExtract %float %l_a 0 0 0
          %68 = OpFAdd %float %66 %67
@@ -121,6 +121,6 @@
          %71 = OpCompositeExtract %float %l_a_i_i 0
          %72 = OpFAdd %float %70 %71
          %73 = OpAccessChain %_ptr_StorageBuffer_float %10 %uint_0
-               OpStore %73 %72
+               OpStore %73 %72 None
                OpReturn
                OpFunctionEnd

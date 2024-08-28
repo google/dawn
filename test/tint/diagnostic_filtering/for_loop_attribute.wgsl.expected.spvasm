@@ -52,7 +52,7 @@
                OpBranch %13
          %13 = OpLabel
          %17 = OpAccessChain %_ptr_Function_float %v %uint_0
-         %21 = OpLoad %float %17
+         %21 = OpLoad %float %17 None
          %22 = OpFOrdGreaterThan %bool %x %21
                OpSelectionMerge %24 None
                OpBranchConditional %22 %25 %26
@@ -77,7 +77,7 @@
                OpFunctionEnd
        %main = OpFunction %void None %36
          %37 = OpLabel
-         %38 = OpLoad %float %main_loc0_Input
+         %38 = OpLoad %float %main_loc0_Input None
          %39 = OpFunctionCall %void %main_inner %38
                OpReturn
                OpFunctionEnd

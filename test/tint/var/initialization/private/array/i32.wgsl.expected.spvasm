@@ -32,9 +32,9 @@
          %16 = OpLabel
          %v0 = OpVariable %_ptr_Function__arr_int_uint_3 Function
          %v1 = OpVariable %_ptr_Function__arr_int_uint_3 Function
-         %17 = OpLoad %_arr_int_uint_3 %zero
+         %17 = OpLoad %_arr_int_uint_3 %zero None
                OpStore %v0 %17
-         %20 = OpLoad %_arr_int_uint_3 %init
+         %20 = OpLoad %_arr_int_uint_3 %init None
                OpStore %v1 %20
                OpReturn
                OpFunctionEnd

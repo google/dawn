@@ -23,7 +23,7 @@
        %half = OpTypeFloat 16
           %f = OpFunction %void None %7
           %8 = OpLabel
-          %9 = OpLoad %uint %u
+          %9 = OpLoad %uint %u None
           %v = OpConvertUToF %half %9
                OpReturn
                OpFunctionEnd

@@ -54,12 +54,12 @@
          %21 = OpLabel
          %22 = OpAccessChain %_ptr_StorageBuffer_float %1 %uint_0 %uint_0
          %25 = OpCompositeExtract %float %value_param 0
-               OpStore %22 %25
+               OpStore %22 %25 None
          %26 = OpAccessChain %_ptr_StorageBuffer_uint %1 %uint_0 %uint_1
          %29 = OpCompositeExtract %uint %value_param 1
-               OpStore %26 %29
+               OpStore %26 %29 None
          %30 = OpAccessChain %_ptr_StorageBuffer_v4float %1 %uint_0 %uint_2
          %32 = OpCompositeExtract %v4float %value_param 2
-               OpStore %30 %32
+               OpStore %30 %32 None
                OpReturn
                OpFunctionEnd

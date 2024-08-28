@@ -27,10 +27,10 @@
           %a = OpVariable %_ptr_Function_int Function
           %6 = OpIAdd %int %int_1 %z
                OpStore %a %6
-         %10 = OpLoad %int %a
+         %10 = OpLoad %int %a None
          %11 = OpIAdd %int %10 %int_2
-               OpStore %a %11
-         %13 = OpLoad %int %a
+               OpStore %a %11 None
+         %13 = OpLoad %int %a None
                OpReturnValue %13
                OpFunctionEnd
           %b = OpFunction %void None %16
@@ -39,9 +39,9 @@
          %18 = OpFunctionCall %int %c %int_2
                OpStore %b_0 %18
          %20 = OpFunctionCall %int %c %int_3
-         %22 = OpLoad %int %b_0
+         %22 = OpLoad %int %b_0 None
          %23 = OpIAdd %int %22 %20
-               OpStore %b_0 %23
+               OpStore %b_0 %23 None
                OpReturn
                OpFunctionEnd
 %unused_entry_point = OpFunction %void None %16

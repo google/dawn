@@ -43,9 +43,9 @@
 %_ptr_Function_mat3v3float = OpTypePointer Function %mat3v3float
           %m = OpFunction %mat3v3half None %8
           %9 = OpLabel
-         %10 = OpLoad %half %t
+         %10 = OpLoad %half %t None
          %11 = OpFAdd %half %10 %half_0x1p_0
-               OpStore %t %11
+               OpStore %t %11 None
                OpReturnValue %13
                OpFunctionEnd
           %f = OpFunction %void None %27

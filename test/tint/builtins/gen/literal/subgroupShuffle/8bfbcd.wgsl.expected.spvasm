@@ -40,20 +40,20 @@
           %9 = OpBitcast %uint %int_1
          %11 = OpGroupNonUniformShuffle %int %uint_3 %int_1 %9
                OpStore %res %11
-         %15 = OpLoad %int %res
+         %15 = OpLoad %int %res None
                OpReturnValue %15
                OpFunctionEnd
 %fragment_main = OpFunction %void None %18
          %19 = OpLabel
          %20 = OpFunctionCall %int %subgroupShuffle_8bfbcd
          %21 = OpAccessChain %_ptr_StorageBuffer_int %1 %uint_0
-               OpStore %21 %20
+               OpStore %21 %20 None
                OpReturn
                OpFunctionEnd
 %compute_main = OpFunction %void None %18
          %25 = OpLabel
          %26 = OpFunctionCall %int %subgroupShuffle_8bfbcd
          %27 = OpAccessChain %_ptr_StorageBuffer_int %1 %uint_0
-               OpStore %27 %26
+               OpStore %27 %26 None
                OpReturn
                OpFunctionEnd

@@ -54,7 +54,7 @@
          %21 = OpCompositeExtract %uint %GlobalInvocationId 0
          %22 = OpIAdd %uint %19 %21
          %23 = OpAccessChain %_ptr_StorageBuffer_float %result %uint_0 %22
-         %26 = OpLoad %3 %tex
+         %26 = OpLoad %3 %tex None
          %27 = OpCompositeExtract %uint %GlobalInvocationId 0
          %29 = OpBitcast %int %27
          %30 = OpCompositeExtract %uint %GlobalInvocationId 1
@@ -62,12 +62,12 @@
          %33 = OpCompositeConstruct %v2int %29 %31
          %34 = OpImageFetch %v4float %26 %33 Lod %int_0
          %37 = OpCompositeExtract %float %34 0
-               OpStore %23 %37
+               OpStore %23 %37 None
                OpReturn
                OpFunctionEnd
        %main = OpFunction %void None %39
          %40 = OpLabel
-         %41 = OpLoad %v3uint %main_global_invocation_id_Input
+         %41 = OpLoad %v3uint %main_global_invocation_id_Input None
          %42 = OpFunctionCall %void %main_inner %41
                OpReturn
                OpFunctionEnd

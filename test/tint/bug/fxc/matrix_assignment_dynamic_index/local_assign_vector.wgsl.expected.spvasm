@@ -42,8 +42,8 @@
           %9 = OpLabel
          %m1 = OpVariable %_ptr_Function_mat2v4float Function %15
          %16 = OpAccessChain %_ptr_Uniform_uint %1 %uint_0 %uint_0
-         %19 = OpLoad %uint %16
+         %19 = OpLoad %uint %16 None
          %20 = OpAccessChain %_ptr_Function_v4float %m1 %19
-               OpStore %20 %22
+               OpStore %20 %22 None
                OpReturn
                OpFunctionEnd

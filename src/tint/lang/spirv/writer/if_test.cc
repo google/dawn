@@ -181,21 +181,21 @@ TEST_F(SpirvWriterTest, If_Phi_SingleValue_TrueReturn) {
                OpSelectionMerge %12 None
                OpBranchConditional %true %13 %14
          %13 = OpLabel
-               OpStore %continue_execution %false
-               OpStore %return_value %int_42
+               OpStore %continue_execution %false None
+               OpStore %return_value %int_42 None
                OpBranch %12
          %14 = OpLabel
                OpBranch %12
          %12 = OpLabel
          %17 = OpPhi %int %18 %13 %int_20 %14
-         %20 = OpLoad %bool %continue_execution
+         %20 = OpLoad %bool %continue_execution None
                OpSelectionMerge %21 None
                OpBranchConditional %20 %22 %21
          %22 = OpLabel
-               OpStore %return_value %17
+               OpStore %return_value %17 None
                OpBranch %21
          %21 = OpLabel
-         %23 = OpLoad %int %return_value
+         %23 = OpLoad %int %return_value None
                OpReturnValue %23
                OpFunctionEnd
 )");
@@ -223,19 +223,19 @@ TEST_F(SpirvWriterTest, If_Phi_SingleValue_FalseReturn) {
          %13 = OpLabel
                OpBranch %12
          %14 = OpLabel
-               OpStore %continue_execution %false
-               OpStore %return_value %int_42
+               OpStore %continue_execution %false None
+               OpStore %return_value %int_42 None
                OpBranch %12
          %12 = OpLabel
          %17 = OpPhi %int %int_10 %13 %19 %14
-         %20 = OpLoad %bool %continue_execution
+         %20 = OpLoad %bool %continue_execution None
                OpSelectionMerge %21 None
                OpBranchConditional %20 %22 %21
          %22 = OpLabel
-               OpStore %return_value %17
+               OpStore %return_value %17 None
                OpBranch %21
          %21 = OpLabel
-         %23 = OpLoad %int %return_value
+         %23 = OpLoad %int %return_value None
                OpReturnValue %23
                OpFunctionEnd
 )");

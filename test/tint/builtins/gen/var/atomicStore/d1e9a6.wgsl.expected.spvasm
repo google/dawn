@@ -41,7 +41,7 @@
       %arg_1 = OpVariable %_ptr_Function_int Function
                OpStore %arg_1 %int_1
          %13 = OpAccessChain %_ptr_StorageBuffer_int %1 %uint_0 %uint_0
-         %17 = OpLoad %int %arg_1
+         %17 = OpLoad %int %arg_1 None
                OpAtomicStore %13 %uint_1 %uint_0 %17
                OpReturn
                OpFunctionEnd

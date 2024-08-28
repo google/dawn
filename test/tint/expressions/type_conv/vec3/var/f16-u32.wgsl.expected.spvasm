@@ -37,7 +37,7 @@
          %30 = OpConstantComposite %v3uint %uint_4294967295 %uint_4294967295 %uint_4294967295
           %f = OpFunction %void None %9
          %10 = OpLabel
-         %11 = OpLoad %v3half %u
+         %11 = OpLoad %v3half %u None
           %v = OpFunctionCall %v3uint %tint_v3f16_to_v3u32 %11
                OpReturn
                OpFunctionEnd

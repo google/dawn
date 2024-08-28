@@ -44,6 +44,6 @@
          %20 = OpFAdd %v3float %18 %19
          %21 = OpFAdd %v3float %20 %swizzle3
          %22 = OpAccessChain %_ptr_StorageBuffer_v3float %1 %uint_0
-               OpStore %22 %21
+               OpStore %22 %21 None
                OpReturn
                OpFunctionEnd

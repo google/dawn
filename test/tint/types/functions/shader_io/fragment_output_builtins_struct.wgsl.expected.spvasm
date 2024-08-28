@@ -44,9 +44,9 @@
          %18 = OpLabel
          %19 = OpFunctionCall %FragmentOutputs %main_inner
          %20 = OpCompositeExtract %float %19 0
-               OpStore %main_frag_depth_Output %20
+               OpStore %main_frag_depth_Output %20 None
          %21 = OpCompositeExtract %uint %19 1
          %22 = OpAccessChain %_ptr_Output_uint %main_sample_mask_Output %uint_0
-               OpStore %22 %21
+               OpStore %22 %21 None
                OpReturn
                OpFunctionEnd

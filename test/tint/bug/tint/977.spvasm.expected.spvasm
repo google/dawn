@@ -122,20 +122,20 @@
                OpStore %continue_execution %true
          %36 = OpAccessChain %_ptr_Function_float %a_root
          %37 = OpAccessChain %_ptr_Function_float %b_root
-         %39 = OpLoad %float %37
+         %39 = OpLoad %float %37 None
          %40 = OpFOrdEqual %bool %39 %float_0
                OpSelectionMerge %42 None
                OpBranchConditional %40 %43 %42
          %43 = OpLabel
-               OpStore %continue_execution %false
-               OpStore %return_value %float_1
+               OpStore %continue_execution %false None
+               OpStore %return_value %float_1 None
                OpBranch %42
          %42 = OpLabel
-         %46 = OpLoad %bool %continue_execution
+         %46 = OpLoad %bool %continue_execution None
                OpSelectionMerge %47 None
                OpBranchConditional %46 %48 %47
          %48 = OpLabel
-       %x_21 = OpLoad %float %37
+       %x_21 = OpLoad %float %37 None
          %50 = OpFDiv %float %x_21 %float_2
          %52 = OpExtInst %float %53 Floor %50
          %54 = OpFMul %float %float_2 %52
@@ -146,28 +146,28 @@
                OpSelectionMerge %59 None
                OpBranchConditional %58 %60 %61
          %60 = OpLabel
-         %62 = OpLoad %float %36
+         %62 = OpLoad %float %36 None
          %63 = OpExtInst %float %53 FAbs %62
-         %64 = OpLoad %float %37
+         %64 = OpLoad %float %37 None
          %65 = OpExtInst %float %53 Pow %63 %64
-               OpStore %x_26 %65
+               OpStore %x_26 %65 None
                OpBranch %59
          %61 = OpLabel
-         %66 = OpLoad %float %36
+         %66 = OpLoad %float %36 None
          %67 = OpExtInst %float %53 FSign %66
-         %68 = OpLoad %float %36
+         %68 = OpLoad %float %36 None
          %69 = OpExtInst %float %53 FAbs %68
-         %70 = OpLoad %float %37
+         %70 = OpLoad %float %37 None
          %71 = OpExtInst %float %53 Pow %69 %70
          %72 = OpFMul %float %67 %71
-               OpStore %x_26 %72
+               OpStore %x_26 %72 None
                OpBranch %59
          %59 = OpLabel
-       %x_41 = OpLoad %float %x_26
-               OpStore %return_value %x_41
+       %x_41 = OpLoad %float %x_26 None
+               OpStore %return_value %x_41 None
                OpBranch %47
          %47 = OpLabel
-         %74 = OpLoad %float %return_value
+         %74 = OpLoad %float %return_value None
                OpReturnValue %74
                OpFunctionEnd
      %main_1 = OpFunction %void None %77
@@ -177,28 +177,28 @@
       %param = OpVariable %_ptr_Function_float Function %31
     %param_1 = OpVariable %_ptr_Function_float Function %31
          %85 = OpAccessChain %_ptr_Private_uint %gl_GlobalInvocationID %uint_0
-         %88 = OpLoad %uint %85
+         %88 = OpLoad %uint %85 None
          %89 = OpBitcast %int %88
-               OpStore %index %89
-               OpStore %a_1 %int_n10
-       %x_63 = OpLoad %int %index
-               OpStore %param %float_n4
-               OpStore %param_1 %float_n3
+               OpStore %index %89 None
+               OpStore %a_1 %int_n10 None
+       %x_63 = OpLoad %int %index None
+               OpStore %param %float_n4 None
+               OpStore %param_1 %float_n3 None
        %x_68 = OpFunctionCall %float %binaryOperation_f1_f1_ %param %param_1
          %95 = OpAccessChain %_ptr_StorageBuffer_float %resultMatrix %uint_0 %x_63
-               OpStore %95 %x_68
+               OpStore %95 %x_68 None
                OpReturn
                OpFunctionEnd
  %main_inner = OpFunction %void None %99
 %gl_GlobalInvocationID_param = OpFunctionParameter %v3uint
         %100 = OpLabel
-               OpStore %gl_GlobalInvocationID %gl_GlobalInvocationID_param
+               OpStore %gl_GlobalInvocationID %gl_GlobalInvocationID_param None
         %101 = OpFunctionCall %void %main_1
                OpReturn
                OpFunctionEnd
        %main = OpFunction %void None %77
         %103 = OpLabel
-        %104 = OpLoad %v3uint %main_global_invocation_id_Input
+        %104 = OpLoad %v3uint %main_global_invocation_id_Input None
         %105 = OpFunctionCall %void %main_inner %104
                OpReturn
                OpFunctionEnd

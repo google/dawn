@@ -35,7 +35,7 @@
          %20 = OpConstantComposite %v4float %float_1 %float_1 %float_1 %float_1
 %textureStore_658a74 = OpFunction %void None %7
           %8 = OpLabel
-          %9 = OpLoad %3 %arg_0
+          %9 = OpLoad %3 %arg_0 None
          %11 = OpBitcast %int %uint_1
          %15 = OpCompositeConstruct %v3int %16 %11
                OpImageWrite %9 %15 %20 None

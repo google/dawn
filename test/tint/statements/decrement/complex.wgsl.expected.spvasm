@@ -57,44 +57,44 @@
        %bool = OpTypeBool
        %idx1 = OpFunction %int None %15
          %16 = OpLabel
-         %17 = OpLoad %uint %v
+         %17 = OpLoad %uint %v None
          %18 = OpISub %uint %17 %uint_1
-               OpStore %v %18
+               OpStore %v %18 None
                OpReturnValue %int_1
                OpFunctionEnd
        %idx2 = OpFunction %int None %15
          %22 = OpLabel
-         %23 = OpLoad %uint %v
+         %23 = OpLoad %uint %v None
          %24 = OpISub %uint %23 %uint_1
-               OpStore %v %24
+               OpStore %v %24 None
                OpReturnValue %int_2
                OpFunctionEnd
        %idx3 = OpFunction %int None %15
          %27 = OpLabel
-         %28 = OpLoad %uint %v
+         %28 = OpLoad %uint %v None
          %29 = OpISub %uint %28 %uint_1
-               OpStore %v %29
+               OpStore %v %29 None
                OpReturnValue %int_3
                OpFunctionEnd
        %idx4 = OpFunction %int None %15
          %32 = OpLabel
-         %33 = OpLoad %uint %v
+         %33 = OpLoad %uint %v None
          %34 = OpISub %uint %33 %uint_1
-               OpStore %v %34
+               OpStore %v %34 None
                OpReturnValue %int_4
                OpFunctionEnd
        %idx5 = OpFunction %int None %15
          %37 = OpLabel
-         %38 = OpLoad %uint %v
+         %38 = OpLoad %uint %v None
          %39 = OpISub %uint %38 %uint_1
-               OpStore %v %39
+               OpStore %v %39 None
                OpReturnValue %int_0
                OpFunctionEnd
        %idx6 = OpFunction %int None %15
          %42 = OpLabel
-         %43 = OpLoad %uint %v
+         %43 = OpLoad %uint %v None
          %44 = OpISub %uint %43 %uint_1
-               OpStore %v %44
+               OpStore %v %44 None
                OpReturnValue %int_2
                OpFunctionEnd
        %main = OpFunction %void None %47
@@ -106,16 +106,16 @@
          %56 = OpAccessChain %_ptr_StorageBuffer_v4int %1 %uint_0 %54 %uint_0 %55
          %59 = OpFunctionCall %int %idx3
          %60 = OpAccessChain %_ptr_StorageBuffer_int %56 %59
-         %62 = OpLoad %int %60
+         %62 = OpLoad %int %60 None
          %63 = OpISub %int %62 %int_1
          %64 = OpAccessChain %_ptr_StorageBuffer_int %56 %59
-               OpStore %64 %63
+               OpStore %64 %63 None
                OpBranch %52
          %52 = OpLabel
                OpLoopMerge %53 %51 None
                OpBranch %50
          %50 = OpLabel
-         %65 = OpLoad %uint %v
+         %65 = OpLoad %uint %v None
          %66 = OpULessThan %bool %65 %uint_10
                OpSelectionMerge %69 None
                OpBranchConditional %66 %69 %70
@@ -129,10 +129,10 @@
          %73 = OpAccessChain %_ptr_StorageBuffer_v4int %1 %uint_0 %71 %uint_0 %72
          %74 = OpFunctionCall %int %idx6
          %75 = OpAccessChain %_ptr_StorageBuffer_int %73 %74
-         %76 = OpLoad %int %75
+         %76 = OpLoad %int %75 None
          %77 = OpISub %int %76 %int_1
          %78 = OpAccessChain %_ptr_StorageBuffer_int %73 %74
-               OpStore %78 %77
+               OpStore %78 %77 None
                OpBranch %52
          %53 = OpLabel
                OpReturn

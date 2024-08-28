@@ -24,7 +24,7 @@
                OpLoopMerge %12 %10 None
                OpBranch %9
           %9 = OpLabel
-               OpStore %continue_execution %false
+               OpStore %continue_execution %false None
                OpBranch %12
          %10 = OpLabel
                OpBranch %11

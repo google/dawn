@@ -31,7 +31,7 @@
          %15 = OpConstantComposite %v4float %float_1 %float_1 %float_1 %float_1
 %textureStore_dd7d81 = OpFunction %void None %7
           %8 = OpLabel
-          %9 = OpLoad %3 %arg_0
+          %9 = OpLoad %3 %arg_0 None
                OpImageWrite %9 %11 %15 None
                OpReturn
                OpFunctionEnd

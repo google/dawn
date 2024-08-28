@@ -22,7 +22,7 @@
        %func = OpFunction %v4float None %7
           %8 = OpLabel
           %9 = OpAccessChain %_ptr_Private_v4float %P
-         %10 = OpLoad %v4float %9
+         %10 = OpLoad %v4float %9 None
                OpReturnValue %10
                OpFunctionEnd
        %main = OpFunction %void None %13

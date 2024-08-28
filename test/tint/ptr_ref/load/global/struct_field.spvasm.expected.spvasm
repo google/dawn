@@ -30,8 +30,8 @@
           %9 = OpLabel
           %i = OpVariable %_ptr_Function_int Function %12
          %13 = OpAccessChain %_ptr_Private_int %V %uint_0
-         %17 = OpLoad %int %13
-               OpStore %i %17
+         %17 = OpLoad %int %13 None
+               OpStore %i %17 None
                OpReturn
                OpFunctionEnd
        %main = OpFunction %void None %8

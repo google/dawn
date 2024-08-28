@@ -35,9 +35,9 @@
                OpLoopMerge %13 %11 None
                OpBranch %10
          %10 = OpLabel
-         %17 = OpLoad %int %i
+         %17 = OpLoad %int %i None
                OpControlBarrier %uint_2 %uint_2 %uint_264
-         %22 = OpLoad %int %a
+         %22 = OpLoad %int %a None
                OpControlBarrier %uint_2 %uint_2 %uint_264
          %24 = OpSLessThan %bool %17 %22
                OpSelectionMerge %26 None
@@ -48,11 +48,11 @@
                OpBranch %11
          %11 = OpLabel
                OpControlBarrier %uint_2 %uint_2 %uint_264
-         %29 = OpLoad %int %b
+         %29 = OpLoad %int %b None
                OpControlBarrier %uint_2 %uint_2 %uint_264
-         %31 = OpLoad %int %i
+         %31 = OpLoad %int %i None
          %32 = OpIAdd %int %31 %29
-               OpStore %i %32
+               OpStore %i %32 None
                OpBranch %12
          %13 = OpLabel
                OpReturn

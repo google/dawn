@@ -68,10 +68,10 @@
                OpStore %arg_1 %int_0
                OpStore %arg_2 %int_0
                OpStore %res %18
-               OpStore %arg_1 %int_1
-               OpStore %arg_2 %int_1
-       %x_23 = OpLoad %int %arg_2
-       %x_24 = OpLoad %int %arg_1
+               OpStore %arg_1 %int_1 None
+               OpStore %arg_2 %int_1 None
+       %x_23 = OpLoad %int %arg_2 None
+       %x_24 = OpLoad %int %arg_1 None
          %22 = OpAccessChain %_ptr_StorageBuffer_int %1 %uint_0 %uint_0
          %26 = OpAtomicCompareExchange %int %22 %uint_1 %uint_0 %uint_0 %x_23 %x_24
          %28 = OpIEqual %bool %26 %x_24
@@ -79,7 +79,7 @@
 %old_value_1 = OpCompositeExtract %int %30 0
          %32 = OpIEqual %bool %old_value_1 %x_23
          %33 = OpCompositeConstruct %x__atomic_compare_exchange_resulti32 %old_value_1 %32
-               OpStore %res %33
+               OpStore %res %33 None
                OpReturn
                OpFunctionEnd
 %fragment_main_1 = OpFunction %void None %8

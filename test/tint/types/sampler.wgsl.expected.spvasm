@@ -45,13 +45,13 @@
          %15 = OpLabel
           %a = OpVariable %_ptr_Function_v4float Function
           %b = OpVariable %_ptr_Function_v4float Function
-         %16 = OpLoad %3 %t
-         %17 = OpLoad %9 %s
+         %16 = OpLoad %3 %t None
+         %17 = OpLoad %9 %s None
          %18 = OpSampledImage %19 %16 %17
          %20 = OpImageSampleImplicitLod %v4float %18 %22 None
                OpStore %a %20
-         %27 = OpLoad %3 %d
-         %28 = OpLoad %9 %sc
+         %27 = OpLoad %3 %d None
+         %28 = OpLoad %9 %sc None
          %29 = OpSampledImage %19 %27 %28
          %30 = OpImageDrefGather %v4float %29 %22 %float_1 None
                OpStore %b %30

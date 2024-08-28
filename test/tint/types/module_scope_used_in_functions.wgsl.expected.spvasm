@@ -77,22 +77,22 @@
                OpFunctionEnd
         %zoo = OpFunction %void None %20
          %23 = OpLabel
-         %24 = OpLoad %float %p
+         %24 = OpLoad %float %p None
          %25 = OpFMul %float %24 %b_0
-               OpStore %p %25
+               OpStore %p %25 None
                OpReturn
                OpFunctionEnd
         %bar = OpFunction %void None %30
           %a = OpFunctionParameter %float
           %b = OpFunctionParameter %float
          %31 = OpLabel
-               OpStore %p %a
-               OpStore %w %b
+               OpStore %p %a None
+               OpStore %w %b None
          %32 = OpAccessChain %_ptr_StorageBuffer_float %11 %uint_0 %int_0
          %37 = OpAccessChain %_ptr_StorageBuffer_v2float %7 %uint_0
          %39 = OpAccessChain %_ptr_StorageBuffer_float_0 %37 %uint_0
-         %41 = OpLoad %float %39
-               OpStore %32 %41
+         %41 = OpLoad %float %39 None
+               OpStore %32 %41 None
          %42 = OpFunctionCall %void %zoo
                OpReturn
                OpFunctionEnd
@@ -110,7 +110,7 @@
                OpSelectionMerge %55 None
                OpBranchConditional %53 %56 %55
          %56 = OpLabel
-               OpStore %w %float_0
+               OpStore %w %float_0 None
                OpBranch %55
          %55 = OpLabel
                OpControlBarrier %uint_2 %uint_2 %uint_264
@@ -119,7 +119,7 @@
                OpFunctionEnd
        %main = OpFunction %void None %20
          %64 = OpLabel
-         %65 = OpLoad %uint %main_local_invocation_index_Input
+         %65 = OpLoad %uint %main_local_invocation_index_Input None
          %66 = OpFunctionCall %void %main_inner %65
                OpReturn
                OpFunctionEnd

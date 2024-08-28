@@ -44,13 +44,13 @@
   %global_id = OpFunctionParameter %v3uint
          %16 = OpLabel
          %17 = OpAccessChain %_ptr_StorageBuffer_uint %1 %uint_0 %uint_0
-         %19 = OpLoad %uint %cubeVerts
+         %19 = OpLoad %uint %cubeVerts None
 %firstVertex = OpAtomicIAdd %uint %17 %uint_1 %uint_0 %19
                OpReturn
                OpFunctionEnd
 %computeMain = OpFunction %void None %23
          %24 = OpLabel
-         %25 = OpLoad %v3uint %computeMain_global_invocation_id_Input
+         %25 = OpLoad %v3uint %computeMain_global_invocation_id_Input None
          %26 = OpFunctionCall %void %computeMain_inner %25
                OpReturn
                OpFunctionEnd

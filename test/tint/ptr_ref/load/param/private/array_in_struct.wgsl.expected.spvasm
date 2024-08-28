@@ -31,7 +31,7 @@
        %func = OpFunction %_arr_int_uint_4 None %10
          %11 = OpLabel
          %12 = OpAccessChain %_ptr_Private__arr_int_uint_4 %P %uint_0
-         %15 = OpLoad %_arr_int_uint_4 %12
+         %15 = OpLoad %_arr_int_uint_4 %12 None
                OpReturnValue %15
                OpFunctionEnd
        %main = OpFunction %void None %18

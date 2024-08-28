@@ -86,27 +86,27 @@
                OpStore %30 %zv
          %32 = OpAccessChain %_ptr_Function_v2float %30 %InstanceIndex
          %34 = OpAccessChain %_ptr_Function_float %32 %uint_0
-          %z = OpLoad %float %34
+          %z = OpLoad %float %34 None
          %41 = OpAccessChain %_ptr_Function_v4float %output %uint_0
          %43 = OpCompositeConstruct %v4float %float_0_5 %float_0_5 %z %float_1
-               OpStore %41 %43
+               OpStore %41 %43 None
                OpStore %53 %colors
          %55 = OpAccessChain %_ptr_Function_v4float %output %uint_1
          %57 = OpAccessChain %_ptr_Function_v4float %53 %InstanceIndex
-         %58 = OpLoad %v4float %57
-               OpStore %55 %58
-         %59 = OpLoad %Output %output
+         %58 = OpLoad %v4float %57 None
+               OpStore %55 %58 None
+         %59 = OpLoad %Output %output None
                OpReturnValue %59
                OpFunctionEnd
        %main = OpFunction %void None %62
          %63 = OpLabel
-         %64 = OpLoad %uint %main_vertex_index_Input
-         %65 = OpLoad %uint %main_instance_index_Input
+         %64 = OpLoad %uint %main_vertex_index_Input None
+         %65 = OpLoad %uint %main_instance_index_Input None
          %66 = OpFunctionCall %Output %main_inner %64 %65
          %67 = OpCompositeExtract %v4float %66 0
-               OpStore %main_position_Output %67
+               OpStore %main_position_Output %67 None
          %68 = OpCompositeExtract %v4float %66 1
-               OpStore %main_loc0_Output %68
-               OpStore %main___point_size_Output %float_1
+               OpStore %main_loc0_Output %68 None
+               OpStore %main___point_size_Output %float_1 None
                OpReturn
                OpFunctionEnd

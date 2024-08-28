@@ -44,7 +44,7 @@
          %15 = OpLabel
          %16 = OpCompositeExtract %uint %pointer_indices 0
          %17 = OpAccessChain %_ptr_StorageBuffer_str %1 %uint_0 %16
-               OpStore %17 %20
+               OpStore %17 %20 None
                OpReturn
                OpFunctionEnd
        %main = OpFunction %void None %22

@@ -47,22 +47,22 @@
 %mat4v2float = OpTypeMatrix %v2float 4
           %i = OpFunction %int None %11
          %12 = OpLabel
-         %13 = OpLoad %int %counter
+         %13 = OpLoad %int %counter None
          %14 = OpIAdd %int %13 %int_1
-               OpStore %counter %14
-         %16 = OpLoad %int %counter
+               OpStore %counter %14 None
+         %16 = OpLoad %int %counter None
                OpReturnValue %16
                OpFunctionEnd
           %f = OpFunction %void None %19
          %20 = OpLabel
          %21 = OpAccessChain %_ptr_Uniform_v2float %1 %uint_0
-         %25 = OpLoad %v2float %21
+         %25 = OpLoad %v2float %21 None
          %26 = OpAccessChain %_ptr_Uniform_v2float %1 %uint_1
-         %28 = OpLoad %v2float %26
+         %28 = OpLoad %v2float %26 None
          %29 = OpAccessChain %_ptr_Uniform_v2float %1 %uint_2
-         %31 = OpLoad %v2float %29
+         %31 = OpLoad %v2float %29 None
          %32 = OpAccessChain %_ptr_Uniform_v2float %1 %uint_3
-         %34 = OpLoad %v2float %32
+         %34 = OpLoad %v2float %32 None
         %l_m = OpCompositeConstruct %mat4v2float %25 %28 %31 %34
       %l_m_1 = OpCompositeExtract %v2float %l_m 1
                OpReturn

@@ -26,7 +26,7 @@
          %17 = OpConstantNull %v2uint
           %f = OpFunction %void None %9
          %10 = OpLabel
-         %11 = OpLoad %v2bool %u
+         %11 = OpLoad %v2bool %u None
           %v = OpSelect %v2uint %11 %15 %17
                OpReturn
                OpFunctionEnd

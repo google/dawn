@@ -43,13 +43,13 @@
          %id = OpFunctionParameter %v3uint
          %15 = OpLabel
          %16 = OpAccessChain %_ptr_StorageBuffer_v3int %1 %uint_0 %uint_0
-         %19 = OpLoad %v3int %16
+         %19 = OpLoad %v3int %16 None
         %pos = OpISub %v3int %19 %21
                OpReturn
                OpFunctionEnd
        %main = OpFunction %void None %23
          %24 = OpLabel
-         %25 = OpLoad %v3uint %main_global_invocation_id_Input
+         %25 = OpLoad %v3uint %main_global_invocation_id_Input None
          %26 = OpFunctionCall %void %main_inner %25
                OpReturn
                OpFunctionEnd

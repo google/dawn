@@ -64,42 +64,42 @@
                OpLoopMerge %33 %31 None
                OpBranch %30
          %30 = OpLabel
-         %37 = OpLoad %int %i
+         %37 = OpLoad %int %i None
          %38 = OpSLessThan %bool %37 %int_2
                OpSelectionMerge %40 None
                OpBranchConditional %38 %40 %41
          %41 = OpLabel
                OpBranch %33
          %40 = OpLabel
-         %42 = OpLoad %int %i
+         %42 = OpLoad %int %i None
          %43 = OpAccessChain %_ptr_Function_float %v2f %42
-               OpStore %43 %float_1
-         %46 = OpLoad %int %i
+               OpStore %43 %float_1 None
+         %46 = OpLoad %int %i None
          %47 = OpAccessChain %_ptr_Function_int %v3i %46
-               OpStore %47 %int_1
-         %49 = OpLoad %int %i
+               OpStore %47 %int_1 None
+         %49 = OpLoad %int %i None
          %50 = OpAccessChain %_ptr_Function_uint %v4u %49
-               OpStore %50 %uint_1
-         %53 = OpLoad %int %i
+               OpStore %50 %uint_1 None
+         %53 = OpLoad %int %i None
          %54 = OpAccessChain %_ptr_Function_bool %v2b %53
-               OpStore %54 %true
-         %57 = OpLoad %int %i
+               OpStore %54 %true None
+         %57 = OpLoad %int %i None
          %58 = OpAccessChain %_ptr_Function_float %v2f_2 %57
-               OpStore %58 %float_1
-         %59 = OpLoad %int %i
+               OpStore %58 %float_1 None
+         %59 = OpLoad %int %i None
          %60 = OpAccessChain %_ptr_Function_int %v3i_2 %59
-               OpStore %60 %int_1
-         %61 = OpLoad %int %i
+               OpStore %60 %int_1 None
+         %61 = OpLoad %int %i None
          %62 = OpAccessChain %_ptr_Function_uint %v4u_2 %61
-               OpStore %62 %uint_1
-         %63 = OpLoad %int %i
+               OpStore %62 %uint_1 None
+         %63 = OpLoad %int %i None
          %64 = OpAccessChain %_ptr_Function_bool %v2b_2 %63
-               OpStore %64 %true
+               OpStore %64 %true None
                OpBranch %31
          %31 = OpLabel
-         %65 = OpLoad %int %i
+         %65 = OpLoad %int %i None
          %66 = OpIAdd %int %65 %int_1
-               OpStore %i %66
+               OpStore %i %66 None
                OpBranch %32
          %33 = OpLabel
                OpReturn

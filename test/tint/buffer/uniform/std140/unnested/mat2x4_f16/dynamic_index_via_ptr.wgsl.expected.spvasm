@@ -46,23 +46,23 @@
 %_ptr_Function_v4half = OpTypePointer Function %v4half
           %i = OpFunction %int None %11
          %12 = OpLabel
-         %13 = OpLoad %int %counter
+         %13 = OpLoad %int %counter None
          %14 = OpIAdd %int %13 %int_1
-               OpStore %counter %14
-         %16 = OpLoad %int %counter
+               OpStore %counter %14 None
+         %16 = OpLoad %int %counter None
                OpReturnValue %16
                OpFunctionEnd
           %f = OpFunction %void None %19
          %20 = OpLabel
          %31 = OpVariable %_ptr_Function_mat2v4half Function
          %21 = OpAccessChain %_ptr_Uniform_v4half %1 %uint_0
-         %25 = OpLoad %v4half %21
+         %25 = OpLoad %v4half %21 None
          %26 = OpAccessChain %_ptr_Uniform_v4half %1 %uint_1
-         %28 = OpLoad %v4half %26
+         %28 = OpLoad %v4half %26 None
         %l_m = OpCompositeConstruct %mat2v4half %25 %28
                OpStore %31 %l_m
          %33 = OpFunctionCall %int %i
          %34 = OpAccessChain %_ptr_Function_v4half %31 %33
-      %l_m_i = OpLoad %v4half %34
+      %l_m_i = OpLoad %v4half %34 None
                OpReturn
                OpFunctionEnd

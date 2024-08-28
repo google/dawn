@@ -77,7 +77,7 @@
          %23 = OpVariable %_ptr_Function__arr_mat4x2_f32_std140_uint_4 Function
          %25 = OpVariable %_ptr_Function__arr_mat4v2float_uint_4 Function %27
          %19 = OpAccessChain %_ptr_Uniform__arr_mat4x2_f32_std140_uint_4 %1 %uint_0
-         %22 = OpLoad %_arr_mat4x2_f32_std140_uint_4 %19
+         %22 = OpLoad %_arr_mat4x2_f32_std140_uint_4 %19 None
                OpStore %23 %22
                OpBranch %28
          %28 = OpLabel
@@ -95,42 +95,42 @@
          %37 = OpLabel
          %39 = OpAccessChain %_ptr_Function_mat4v2float %25 %33
          %41 = OpAccessChain %_ptr_Function_mat4x2_f32_std140 %23 %33
-         %43 = OpLoad %mat4x2_f32_std140 %41
+         %43 = OpLoad %mat4x2_f32_std140 %41 None
          %44 = OpCompositeExtract %v2float %43 0
          %45 = OpCompositeExtract %v2float %43 1
          %46 = OpCompositeExtract %v2float %43 2
          %47 = OpCompositeExtract %v2float %43 3
          %48 = OpCompositeConstruct %mat4v2float %44 %45 %46 %47
-               OpStore %39 %48
+               OpStore %39 %48 None
                OpBranch %30
          %30 = OpLabel
          %34 = OpIAdd %uint %33 %uint_1
                OpBranch %31
          %32 = OpLabel
-         %50 = OpLoad %_arr_mat4v2float_uint_4 %25
+         %50 = OpLoad %_arr_mat4v2float_uint_4 %25 None
          %51 = OpAccessChain %_ptr_StorageBuffer__arr_mat4v2float_uint_4 %10 %uint_0
-               OpStore %51 %50
+               OpStore %51 %50 None
          %53 = OpAccessChain %_ptr_StorageBuffer_mat4v2float %10 %uint_0 %int_1
          %57 = OpAccessChain %_ptr_Uniform_v2float %1 %uint_0 %int_2 %uint_0
-         %60 = OpLoad %v2float %57
+         %60 = OpLoad %v2float %57 None
          %61 = OpAccessChain %_ptr_Uniform_v2float %1 %uint_0 %int_2 %uint_1
-         %62 = OpLoad %v2float %61
+         %62 = OpLoad %v2float %61 None
          %63 = OpAccessChain %_ptr_Uniform_v2float %1 %uint_0 %int_2 %uint_2
-         %65 = OpLoad %v2float %63
+         %65 = OpLoad %v2float %63 None
          %66 = OpAccessChain %_ptr_Uniform_v2float %1 %uint_0 %int_2 %uint_3
-         %68 = OpLoad %v2float %66
+         %68 = OpLoad %v2float %66 None
          %69 = OpCompositeConstruct %mat4v2float %60 %62 %65 %68
-               OpStore %53 %69
+               OpStore %53 %69 None
          %70 = OpAccessChain %_ptr_StorageBuffer_v2float %10 %uint_0 %int_1 %int_0
          %73 = OpAccessChain %_ptr_Uniform_v2float %1 %uint_0 %int_0 %uint_1
-         %74 = OpLoad %v2float %73
+         %74 = OpLoad %v2float %73 None
          %75 = OpVectorShuffle %v2float %74 %74 1 0
-               OpStore %70 %75
+               OpStore %70 %75 None
          %76 = OpAccessChain %_ptr_StorageBuffer_v2float %10 %uint_0 %int_1 %int_0
          %77 = OpAccessChain %_ptr_Uniform_v2float %1 %uint_0 %int_0 %uint_1
          %78 = OpAccessChain %_ptr_Uniform_float %77 %uint_0
-         %80 = OpLoad %float %78
+         %80 = OpLoad %float %78 None
          %81 = OpAccessChain %_ptr_StorageBuffer_float %76 %uint_0
-               OpStore %81 %80
+               OpStore %81 %80 None
                OpReturn
                OpFunctionEnd

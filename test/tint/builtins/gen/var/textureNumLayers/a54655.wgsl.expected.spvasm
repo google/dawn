@@ -43,24 +43,24 @@
 %textureNumLayers_a54655 = OpFunction %uint None %10
          %11 = OpLabel
         %res = OpVariable %_ptr_Function_uint Function
-         %12 = OpLoad %7 %arg_0
+         %12 = OpLoad %7 %arg_0 None
          %13 = OpImageQuerySize %v3uint %12
          %15 = OpCompositeExtract %uint %13 2
                OpStore %res %15
-         %18 = OpLoad %uint %res
+         %18 = OpLoad %uint %res None
                OpReturnValue %18
                OpFunctionEnd
 %fragment_main = OpFunction %void None %21
          %22 = OpLabel
          %23 = OpFunctionCall %uint %textureNumLayers_a54655
          %24 = OpAccessChain %_ptr_StorageBuffer_uint %1 %uint_0
-               OpStore %24 %23
+               OpStore %24 %23 None
                OpReturn
                OpFunctionEnd
 %compute_main = OpFunction %void None %21
          %28 = OpLabel
          %29 = OpFunctionCall %uint %textureNumLayers_a54655
          %30 = OpAccessChain %_ptr_StorageBuffer_uint %1 %uint_0
-               OpStore %30 %29
+               OpStore %30 %29 None
                OpReturn
                OpFunctionEnd

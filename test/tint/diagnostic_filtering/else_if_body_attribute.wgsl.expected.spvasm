@@ -59,8 +59,8 @@
                OpSelectionMerge %21 None
                OpBranchConditional %20 %22 %21
          %22 = OpLabel
-         %23 = OpLoad %3 %t
-         %24 = OpLoad %7 %s
+         %23 = OpLoad %3 %t None
+         %24 = OpLoad %7 %s None
          %25 = OpSampledImage %26 %23 %24
          %27 = OpImageSampleImplicitLod %v4float %25 %29 None
                OpBranch %21
@@ -71,7 +71,7 @@
                OpFunctionEnd
        %main = OpFunction %void None %32
          %33 = OpLabel
-         %34 = OpLoad %float %main_loc0_Input
+         %34 = OpLoad %float %main_loc0_Input None
          %35 = OpFunctionCall %void %main_inner %34
                OpReturn
                OpFunctionEnd

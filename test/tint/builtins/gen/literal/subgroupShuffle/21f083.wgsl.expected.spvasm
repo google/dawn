@@ -43,20 +43,20 @@
           %9 = OpBitcast %uint %int_1
          %12 = OpGroupNonUniformShuffle %v2uint %uint_3 %14 %9
                OpStore %res %12
-         %18 = OpLoad %v2uint %res
+         %18 = OpLoad %v2uint %res None
                OpReturnValue %18
                OpFunctionEnd
 %fragment_main = OpFunction %void None %21
          %22 = OpLabel
          %23 = OpFunctionCall %v2uint %subgroupShuffle_21f083
          %24 = OpAccessChain %_ptr_StorageBuffer_v2uint %1 %uint_0
-               OpStore %24 %23
+               OpStore %24 %23 None
                OpReturn
                OpFunctionEnd
 %compute_main = OpFunction %void None %21
          %28 = OpLabel
          %29 = OpFunctionCall %v2uint %subgroupShuffle_21f083
          %30 = OpAccessChain %_ptr_StorageBuffer_v2uint %1 %uint_0
-               OpStore %30 %29
+               OpStore %30 %29 None
                OpReturn
                OpFunctionEnd

@@ -204,49 +204,49 @@
        %main = OpFunction %void None %33
          %34 = OpLabel
          %35 = OpAccessChain %_ptr_StorageBuffer_float %1 %uint_0 %uint_0
-               OpStore %35 %float_0
+               OpStore %35 %float_0 None
          %39 = OpAccessChain %_ptr_StorageBuffer_int %1 %uint_0 %uint_1
-               OpStore %39 %int_0
+               OpStore %39 %int_0 None
          %43 = OpAccessChain %_ptr_StorageBuffer_uint %1 %uint_0 %uint_2
-               OpStore %43 %uint_0
+               OpStore %43 %uint_0 None
          %45 = OpAccessChain %_ptr_StorageBuffer_v2float %1 %uint_0 %uint_3
-               OpStore %45 %48
+               OpStore %45 %48 None
          %49 = OpAccessChain %_ptr_StorageBuffer_v2int %1 %uint_0 %uint_4
-               OpStore %49 %51
+               OpStore %49 %51 None
          %52 = OpAccessChain %_ptr_StorageBuffer_v2uint %1 %uint_0 %uint_5
-               OpStore %52 %55
+               OpStore %52 %55 None
          %56 = OpAccessChain %_ptr_StorageBuffer_v3float %1 %uint_0 %uint_6
-               OpStore %56 %59
+               OpStore %56 %59 None
          %60 = OpAccessChain %_ptr_StorageBuffer_v3int %1 %uint_0 %uint_7
-               OpStore %60 %63
+               OpStore %60 %63 None
          %64 = OpAccessChain %_ptr_StorageBuffer_v3uint %1 %uint_0 %uint_8
-               OpStore %64 %67
+               OpStore %64 %67 None
          %68 = OpAccessChain %_ptr_StorageBuffer_v4float %1 %uint_0 %uint_9
-               OpStore %68 %71
+               OpStore %68 %71 None
          %72 = OpAccessChain %_ptr_StorageBuffer_v4int %1 %uint_0 %uint_10
-               OpStore %72 %75
+               OpStore %72 %75 None
          %76 = OpAccessChain %_ptr_StorageBuffer_v4uint %1 %uint_0 %uint_11
-               OpStore %76 %79
+               OpStore %76 %79 None
          %80 = OpAccessChain %_ptr_StorageBuffer_mat2v2float %1 %uint_0 %uint_12
-               OpStore %80 %83
+               OpStore %80 %83 None
          %84 = OpFunctionCall %void %tint_store_and_preserve_padding %86
          %87 = OpAccessChain %_ptr_StorageBuffer_mat2v4float %1 %uint_0 %uint_14
-               OpStore %87 %90
+               OpStore %87 %90 None
          %91 = OpAccessChain %_ptr_StorageBuffer_mat3v2float %1 %uint_0 %uint_15
-               OpStore %91 %94
+               OpStore %91 %94 None
          %95 = OpFunctionCall %void %tint_store_and_preserve_padding_0 %97
          %98 = OpAccessChain %_ptr_StorageBuffer_mat3v4float %1 %uint_0 %uint_17
-               OpStore %98 %101
+               OpStore %98 %101 None
         %102 = OpAccessChain %_ptr_StorageBuffer_mat4v2float %1 %uint_0 %uint_18
-               OpStore %102 %105
+               OpStore %102 %105 None
         %106 = OpFunctionCall %void %tint_store_and_preserve_padding_1 %108
         %109 = OpAccessChain %_ptr_StorageBuffer_mat4v4float %1 %uint_0 %uint_20
-               OpStore %109 %112
+               OpStore %109 %112 None
         %113 = OpFunctionCall %void %tint_store_and_preserve_padding_2 %115
         %116 = OpAccessChain %_ptr_StorageBuffer_Inner %1 %uint_0 %uint_22
-               OpStore %116 %119
+               OpStore %116 %119 None
         %120 = OpAccessChain %_ptr_StorageBuffer__arr_Inner_uint_4 %1 %uint_0 %uint_23
-               OpStore %120 %123
+               OpStore %120 %123 None
                OpReturn
                OpFunctionEnd
 %tint_store_and_preserve_padding = OpFunction %void None %125
@@ -254,10 +254,10 @@
         %126 = OpLabel
         %127 = OpAccessChain %_ptr_StorageBuffer_v3float %1 %uint_0 %uint_13 %uint_0
         %129 = OpCompositeExtract %v3float %value_param 0
-               OpStore %127 %129
+               OpStore %127 %129 None
         %130 = OpAccessChain %_ptr_StorageBuffer_v3float %1 %uint_0 %uint_13 %uint_1
         %131 = OpCompositeExtract %v3float %value_param 1
-               OpStore %130 %131
+               OpStore %130 %131 None
                OpReturn
                OpFunctionEnd
 %tint_store_and_preserve_padding_0 = OpFunction %void None %133
@@ -265,13 +265,13 @@
         %134 = OpLabel
         %135 = OpAccessChain %_ptr_StorageBuffer_v3float %1 %uint_0 %uint_16 %uint_0
         %137 = OpCompositeExtract %v3float %value_param_0 0
-               OpStore %135 %137
+               OpStore %135 %137 None
         %138 = OpAccessChain %_ptr_StorageBuffer_v3float %1 %uint_0 %uint_16 %uint_1
         %139 = OpCompositeExtract %v3float %value_param_0 1
-               OpStore %138 %139
+               OpStore %138 %139 None
         %140 = OpAccessChain %_ptr_StorageBuffer_v3float %1 %uint_0 %uint_16 %uint_2
         %141 = OpCompositeExtract %v3float %value_param_0 2
-               OpStore %140 %141
+               OpStore %140 %141 None
                OpReturn
                OpFunctionEnd
 %tint_store_and_preserve_padding_1 = OpFunction %void None %143
@@ -279,16 +279,16 @@
         %144 = OpLabel
         %145 = OpAccessChain %_ptr_StorageBuffer_v3float %1 %uint_0 %uint_19 %uint_0
         %147 = OpCompositeExtract %v3float %value_param_1 0
-               OpStore %145 %147
+               OpStore %145 %147 None
         %148 = OpAccessChain %_ptr_StorageBuffer_v3float %1 %uint_0 %uint_19 %uint_1
         %149 = OpCompositeExtract %v3float %value_param_1 1
-               OpStore %148 %149
+               OpStore %148 %149 None
         %150 = OpAccessChain %_ptr_StorageBuffer_v3float %1 %uint_0 %uint_19 %uint_2
         %151 = OpCompositeExtract %v3float %value_param_1 2
-               OpStore %150 %151
+               OpStore %150 %151 None
         %152 = OpAccessChain %_ptr_StorageBuffer_v3float %1 %uint_0 %uint_19 %uint_3
         %153 = OpCompositeExtract %v3float %value_param_1 3
-               OpStore %152 %153
+               OpStore %152 %153 None
                OpReturn
                OpFunctionEnd
 %tint_store_and_preserve_padding_2 = OpFunction %void None %155
@@ -312,8 +312,8 @@
         %168 = OpLabel
         %170 = OpAccessChain %_ptr_StorageBuffer_v3float %1 %uint_0 %uint_21 %164
         %172 = OpAccessChain %_ptr_Function_v3float %157 %164
-        %174 = OpLoad %v3float %172
-               OpStore %170 %174
+        %174 = OpLoad %v3float %172 None
+               OpStore %170 %174 None
                OpBranch %161
         %161 = OpLabel
         %165 = OpIAdd %uint %164 %uint_1

@@ -51,9 +51,9 @@
          %26 = OpLabel
          %27 = OpFunctionCall %VertexOutputs %main_inner
          %28 = OpCompositeExtract %v4float %27 0
-               OpStore %main_position_Output %28
+               OpStore %main_position_Output %28 None
          %29 = OpCompositeExtract %_arr_float_uint_1 %27 1
-               OpStore %main_clip_distances_Output %29
-               OpStore %main___point_size_Output %float_1
+               OpStore %main_clip_distances_Output %29 None
+               OpStore %main___point_size_Output %float_1 None
                OpReturn
                OpFunctionEnd

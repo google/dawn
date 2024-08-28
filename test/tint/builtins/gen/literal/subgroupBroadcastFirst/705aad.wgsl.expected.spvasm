@@ -44,20 +44,20 @@
         %res = OpVariable %_ptr_Function_v4half Function
           %9 = OpGroupNonUniformBroadcastFirst %v4half %uint_3 %12
                OpStore %res %9
-         %16 = OpLoad %v4half %res
+         %16 = OpLoad %v4half %res None
                OpReturnValue %16
                OpFunctionEnd
 %fragment_main = OpFunction %void None %19
          %20 = OpLabel
          %21 = OpFunctionCall %v4half %subgroupBroadcastFirst_705aad
          %22 = OpAccessChain %_ptr_StorageBuffer_v4half %1 %uint_0
-               OpStore %22 %21
+               OpStore %22 %21 None
                OpReturn
                OpFunctionEnd
 %compute_main = OpFunction %void None %19
          %26 = OpLabel
          %27 = OpFunctionCall %v4half %subgroupBroadcastFirst_705aad
          %28 = OpAccessChain %_ptr_StorageBuffer_v4half %1 %uint_0
-               OpStore %28 %27
+               OpStore %28 %27 None
                OpReturn
                OpFunctionEnd

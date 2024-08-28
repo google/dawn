@@ -36,9 +36,9 @@
           %b = OpVariable %_ptr_Function_v3uint Function
                OpStore %a %uint_4
                OpStore %b %12
-         %15 = OpLoad %uint %a
-         %16 = OpLoad %v3uint %b
-         %17 = OpLoad %v3uint %b
+         %15 = OpLoad %uint %a None
+         %16 = OpLoad %v3uint %b None
+         %17 = OpLoad %v3uint %b None
          %18 = OpIAdd %v3uint %16 %17
          %19 = OpCompositeConstruct %v3uint %15 %15 %15
           %r = OpFunctionCall %v3uint %tint_mod_v3u32 %19 %18

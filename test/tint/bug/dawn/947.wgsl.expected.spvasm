@@ -130,49 +130,49 @@
                OpStore %texcoord %39
          %51 = OpAccessChain %_ptr_Function_v4float %output %uint_1
          %54 = OpAccessChain %_ptr_Function_v2float %texcoord %VertexIndex
-         %56 = OpLoad %v2float %54
+         %56 = OpLoad %v2float %54 None
          %57 = OpVectorTimesScalar %v2float %56 %float_2
          %58 = OpFSub %v2float %57 %59
          %61 = OpCompositeConstruct %v4float %58 %float_0 %float_1
-               OpStore %51 %61
+               OpStore %51 %61 None
          %62 = OpAccessChain %_ptr_Uniform_v2float %1 %uint_0 %uint_0
          %65 = OpAccessChain %_ptr_Uniform_float %62 %uint_1
-         %67 = OpLoad %float %65
+         %67 = OpLoad %float %65 None
          %68 = OpFOrdLessThan %bool %67 %float_0
                OpStore %flipY %68
-         %71 = OpLoad %bool %flipY
+         %71 = OpLoad %bool %flipY None
                OpSelectionMerge %72 None
                OpBranchConditional %71 %73 %74
          %73 = OpLabel
          %75 = OpAccessChain %_ptr_Function_v2float %output %uint_0
          %76 = OpAccessChain %_ptr_Function_v2float %texcoord %VertexIndex
-         %77 = OpLoad %v2float %76
+         %77 = OpLoad %v2float %76 None
          %78 = OpAccessChain %_ptr_Uniform_v2float %1 %uint_0 %uint_0
-         %79 = OpLoad %v2float %78
+         %79 = OpLoad %v2float %78 None
          %80 = OpFMul %v2float %77 %79
          %81 = OpAccessChain %_ptr_Uniform_v2float %1 %uint_0 %uint_1
-         %82 = OpLoad %v2float %81
+         %82 = OpLoad %v2float %81 None
          %83 = OpFAdd %v2float %80 %82
          %84 = OpFMul %v2float %83 %85
          %87 = OpFAdd %v2float %84 %88
-               OpStore %75 %87
+               OpStore %75 %87 None
                OpBranch %72
          %74 = OpLabel
          %89 = OpAccessChain %_ptr_Function_v2float %output %uint_0
          %90 = OpAccessChain %_ptr_Function_v2float %texcoord %VertexIndex
-         %91 = OpLoad %v2float %90
+         %91 = OpLoad %v2float %90 None
          %92 = OpFMul %v2float %91 %85
          %93 = OpFAdd %v2float %92 %88
          %94 = OpAccessChain %_ptr_Uniform_v2float %1 %uint_0 %uint_0
-         %95 = OpLoad %v2float %94
+         %95 = OpLoad %v2float %94 None
          %96 = OpFMul %v2float %93 %95
          %97 = OpAccessChain %_ptr_Uniform_v2float %1 %uint_0 %uint_1
-         %98 = OpLoad %v2float %97
+         %98 = OpLoad %v2float %97 None
          %99 = OpFAdd %v2float %96 %98
-               OpStore %89 %99
+               OpStore %89 %99 None
                OpBranch %72
          %72 = OpLabel
-        %100 = OpLoad %VertexOutputs %output
+        %100 = OpLoad %VertexOutputs %output None
                OpReturnValue %100
                OpFunctionEnd
 %fs_main_inner = OpFunction %v4float None %103
@@ -182,19 +182,19 @@
    %srcColor = OpVariable %_ptr_Function_v4float Function
         %105 = OpExtInst %v2float %106 NClamp %texcoord_0 %107 %59
                OpStore %clampedTexcoord %105
-        %109 = OpLoad %v2float %clampedTexcoord
+        %109 = OpLoad %v2float %clampedTexcoord None
         %110 = OpFOrdEqual %v2bool %109 %texcoord_0
         %112 = OpAll %bool %110
         %113 = OpLogicalNot %bool %112
                OpSelectionMerge %114 None
                OpBranchConditional %113 %115 %114
         %115 = OpLabel
-               OpStore %continue_execution %false
+               OpStore %continue_execution %false None
                OpBranch %114
         %114 = OpLabel
                OpStore %srcColor %118
-        %119 = OpLoad %v4float %srcColor
-        %120 = OpLoad %bool %continue_execution
+        %119 = OpLoad %v4float %srcColor None
+        %120 = OpLoad %bool %continue_execution None
         %121 = OpLogicalNot %bool %120
                OpSelectionMerge %122 None
                OpBranchConditional %121 %123 %122
@@ -205,19 +205,19 @@
                OpFunctionEnd
     %vs_main = OpFunction %void None %126
         %127 = OpLabel
-        %128 = OpLoad %uint %vs_main_vertex_index_Input
+        %128 = OpLoad %uint %vs_main_vertex_index_Input None
         %129 = OpFunctionCall %VertexOutputs %vs_main_inner %128
         %130 = OpCompositeExtract %v2float %129 0
-               OpStore %vs_main_loc0_Output %130
+               OpStore %vs_main_loc0_Output %130 None
         %131 = OpCompositeExtract %v4float %129 1
-               OpStore %vs_main_position_Output %131
-               OpStore %vs_main___point_size_Output %float_1
+               OpStore %vs_main_position_Output %131 None
+               OpStore %vs_main___point_size_Output %float_1 None
                OpReturn
                OpFunctionEnd
     %fs_main = OpFunction %void None %126
         %133 = OpLabel
-        %134 = OpLoad %v2float %fs_main_loc0_Input
+        %134 = OpLoad %v2float %fs_main_loc0_Input None
         %135 = OpFunctionCall %v4float %fs_main_inner %134
-               OpStore %fs_main_loc0_Output %135
+               OpStore %fs_main_loc0_Output %135 None
                OpReturn
                OpFunctionEnd

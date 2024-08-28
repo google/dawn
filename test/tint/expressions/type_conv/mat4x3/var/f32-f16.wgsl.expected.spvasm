@@ -45,7 +45,7 @@
           %f = OpFunction %void None %25
          %26 = OpLabel
           %v = OpVariable %_ptr_Function_mat4v3half Function
-         %27 = OpLoad %mat4v3float %u
+         %27 = OpLoad %mat4v3float %u None
          %28 = OpCompositeExtract %v3float %27 0
          %31 = OpFConvert %v3half %28
          %32 = OpCompositeExtract %v3float %27 1

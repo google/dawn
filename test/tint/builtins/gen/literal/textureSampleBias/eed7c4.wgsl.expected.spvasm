@@ -51,20 +51,20 @@
 %textureSampleBias_eed7c4 = OpFunction %v4float None %13
          %14 = OpLabel
         %res = OpVariable %_ptr_Function_v4float Function
-         %15 = OpLoad %8 %arg_0
-         %16 = OpLoad %11 %arg_1
+         %15 = OpLoad %8 %arg_0 None
+         %16 = OpLoad %11 %arg_1 None
          %17 = OpSampledImage %18 %15 %16
          %19 = OpConvertSToF %float %int_1
          %22 = OpCompositeConstruct %v4float %23 %19
          %26 = OpImageSampleImplicitLod %v4float %17 %22 Bias %float_1
                OpStore %res %26
-         %29 = OpLoad %v4float %res
+         %29 = OpLoad %v4float %res None
                OpReturnValue %29
                OpFunctionEnd
 %fragment_main = OpFunction %void None %32
          %33 = OpLabel
          %34 = OpFunctionCall %v4float %textureSampleBias_eed7c4
          %35 = OpAccessChain %_ptr_StorageBuffer_v4float %1 %uint_0
-               OpStore %35 %34
+               OpStore %35 %34 None
                OpReturn
                OpFunctionEnd

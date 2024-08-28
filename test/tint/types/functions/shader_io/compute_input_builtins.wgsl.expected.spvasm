@@ -56,11 +56,11 @@
                OpFunctionEnd
        %main = OpFunction %void None %28
          %29 = OpLabel
-         %30 = OpLoad %v3uint %main_local_invocation_id_Input
-         %31 = OpLoad %uint %main_local_invocation_index_Input
-         %32 = OpLoad %v3uint %main_global_invocation_id_Input
-         %33 = OpLoad %v3uint %main_workgroup_id_Input
-         %34 = OpLoad %v3uint %main_num_workgroups_Input
+         %30 = OpLoad %v3uint %main_local_invocation_id_Input None
+         %31 = OpLoad %uint %main_local_invocation_index_Input None
+         %32 = OpLoad %v3uint %main_global_invocation_id_Input None
+         %33 = OpLoad %v3uint %main_workgroup_id_Input None
+         %34 = OpLoad %v3uint %main_num_workgroups_Input None
          %35 = OpFunctionCall %void %main_inner %30 %31 %32 %33 %34
                OpReturn
                OpFunctionEnd

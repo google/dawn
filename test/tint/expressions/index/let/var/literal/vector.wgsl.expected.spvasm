@@ -27,7 +27,7 @@
           %4 = OpLabel
           %i = OpVariable %_ptr_Function_int Function
                OpStore %i %int_1
-         %14 = OpLoad %int %i
+         %14 = OpLoad %int %i None
          %15 = OpVectorExtractDynamic %float %v %14
                OpReturnValue %15
                OpFunctionEnd

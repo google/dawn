@@ -52,10 +52,10 @@
   %foo_inner = OpFunction %int None %12
          %13 = OpLabel
           %x = OpVariable %_ptr_Function_int Function
-               OpStore %continue_execution %false
+               OpStore %continue_execution %false None
                OpStore %x %int_0
          %18 = OpAccessChain %_ptr_StorageBuffer_int %1 %uint_0
-         %22 = OpLoad %bool %continue_execution
+         %22 = OpLoad %bool %continue_execution None
                OpSelectionMerge %23 None
                OpBranchConditional %22 %24 %25
          %24 = OpLabel
@@ -72,11 +72,11 @@
                OpBranchConditional %34 %36 %35
          %36 = OpLabel
          %37 = OpCompositeExtract %int %result 0
-               OpStore %x %37
+               OpStore %x %37 None
                OpBranch %35
          %35 = OpLabel
-         %38 = OpLoad %int %x
-         %39 = OpLoad %bool %continue_execution
+         %38 = OpLoad %int %x None
+         %39 = OpLoad %bool %continue_execution None
          %40 = OpLogicalNot %bool %39
                OpSelectionMerge %41 None
                OpBranchConditional %40 %42 %41
@@ -88,6 +88,6 @@
         %foo = OpFunction %void None %45
          %46 = OpLabel
          %47 = OpFunctionCall %int %foo_inner
-               OpStore %foo_loc0_Output %47
+               OpStore %foo_loc0_Output %47 None
                OpReturn
                OpFunctionEnd

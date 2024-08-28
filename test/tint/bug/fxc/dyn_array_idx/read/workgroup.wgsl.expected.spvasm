@@ -84,7 +84,7 @@
                OpBranch %27
          %32 = OpLabel
          %34 = OpAccessChain %_ptr_Workgroup_int %s %uint_0 %28
-               OpStore %34 %int_0
+               OpStore %34 %int_0 None
                OpBranch %25
          %25 = OpLabel
          %29 = OpIAdd %uint %28 %uint_1
@@ -93,15 +93,15 @@
                OpControlBarrier %uint_2 %uint_2 %uint_264
          %42 = OpAccessChain %_ptr_StorageBuffer_int %6 %uint_0 %uint_0
          %44 = OpAccessChain %_ptr_Uniform_int %1 %uint_0 %uint_0
-         %46 = OpLoad %int %44
+         %46 = OpLoad %int %44 None
          %47 = OpAccessChain %_ptr_Workgroup_int %s %uint_0 %46
-         %48 = OpLoad %int %47
-               OpStore %42 %48
+         %48 = OpLoad %int %47 None
+               OpStore %42 %48 None
                OpReturn
                OpFunctionEnd
           %f = OpFunction %void None %50
          %51 = OpLabel
-         %52 = OpLoad %uint %f_local_invocation_index_Input
+         %52 = OpLoad %uint %f_local_invocation_index_Input None
          %53 = OpFunctionCall %void %f_inner %52
                OpReturn
                OpFunctionEnd

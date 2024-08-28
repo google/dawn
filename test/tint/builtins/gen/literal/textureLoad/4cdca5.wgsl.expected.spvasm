@@ -78,46 +78,46 @@
 %textureLoad_4cdca5 = OpFunction %v4int None %18
          %19 = OpLabel
         %res = OpVariable %_ptr_Function_v4int Function
-         %20 = OpLoad %8 %arg_0
+         %20 = OpLoad %8 %arg_0 None
          %21 = OpBitcast %int %uint_1
          %25 = OpCompositeConstruct %v3int %26 %21
          %29 = OpImageRead %v4int %20 %25 None
                OpStore %res %29
-         %32 = OpLoad %v4int %res
+         %32 = OpLoad %v4int %res None
                OpReturnValue %32
                OpFunctionEnd
 %fragment_main = OpFunction %void None %35
          %36 = OpLabel
          %37 = OpFunctionCall %v4int %textureLoad_4cdca5
          %38 = OpAccessChain %_ptr_StorageBuffer_v4int %1 %uint_0
-               OpStore %38 %37
+               OpStore %38 %37 None
                OpReturn
                OpFunctionEnd
 %compute_main = OpFunction %void None %35
          %42 = OpLabel
          %43 = OpFunctionCall %v4int %textureLoad_4cdca5
          %44 = OpAccessChain %_ptr_StorageBuffer_v4int %1 %uint_0
-               OpStore %44 %43
+               OpStore %44 %43 None
                OpReturn
                OpFunctionEnd
 %vertex_main_inner = OpFunction %VertexOutput None %47
          %48 = OpLabel
         %out = OpVariable %_ptr_Function_VertexOutput Function %51
          %52 = OpAccessChain %_ptr_Function_v4float %out %uint_0
-               OpStore %52 %54
+               OpStore %52 %54 None
          %55 = OpAccessChain %_ptr_Function_v4int %out %uint_1
          %56 = OpFunctionCall %v4int %textureLoad_4cdca5
-               OpStore %55 %56
-         %57 = OpLoad %VertexOutput %out
+               OpStore %55 %56 None
+         %57 = OpLoad %VertexOutput %out None
                OpReturnValue %57
                OpFunctionEnd
 %vertex_main = OpFunction %void None %35
          %59 = OpLabel
          %60 = OpFunctionCall %VertexOutput %vertex_main_inner
          %61 = OpCompositeExtract %v4float %60 0
-               OpStore %vertex_main_position_Output %61
+               OpStore %vertex_main_position_Output %61 None
          %62 = OpCompositeExtract %v4int %60 1
-               OpStore %vertex_main_loc0_Output %62
-               OpStore %vertex_main___point_size_Output %float_1
+               OpStore %vertex_main_loc0_Output %62 None
+               OpStore %vertex_main___point_size_Output %float_1 None
                OpReturn
                OpFunctionEnd

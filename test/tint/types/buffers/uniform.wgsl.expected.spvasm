@@ -35,7 +35,7 @@
           %a = OpVariable %_ptr_Function_float Function
          %10 = OpAccessChain %_ptr_Uniform_v2float %1 %uint_0
          %14 = OpAccessChain %_ptr_Uniform_float %10 %int_0
-         %18 = OpLoad %float %14
+         %18 = OpLoad %float %14 None
                OpStore %a %18
                OpReturn
                OpFunctionEnd

@@ -32,7 +32,7 @@
        %func = OpFunction %void None %10
          %11 = OpLabel
          %12 = OpAccessChain %_ptr_Workgroup_v4float %S
-               OpStore %12 %13
+               OpStore %12 %13 None
                OpReturn
                OpFunctionEnd
  %main_inner = OpFunction %void None %16
@@ -42,7 +42,7 @@
                OpSelectionMerge %21 None
                OpBranchConditional %18 %22 %21
          %22 = OpLabel
-               OpStore %S %13
+               OpStore %S %13 None
                OpBranch %21
          %21 = OpLabel
                OpControlBarrier %uint_2 %uint_2 %uint_264
@@ -51,7 +51,7 @@
                OpFunctionEnd
        %main = OpFunction %void None %10
          %28 = OpLabel
-         %29 = OpLoad %uint %main_local_invocation_index_Input
+         %29 = OpLoad %uint %main_local_invocation_index_Input None
          %30 = OpFunctionCall %void %main_inner %29
                OpReturn
                OpFunctionEnd

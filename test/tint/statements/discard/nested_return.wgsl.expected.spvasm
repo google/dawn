@@ -34,15 +34,15 @@
        %main = OpFunction %void None %11
          %12 = OpLabel
          %13 = OpAccessChain %_ptr_StorageBuffer_int %1 %uint_0
-         %17 = OpLoad %int %13
+         %17 = OpLoad %int %13 None
          %18 = OpSLessThan %bool %17 %int_0
                OpSelectionMerge %20 None
                OpBranchConditional %18 %21 %20
          %21 = OpLabel
-               OpStore %continue_execution %false
+               OpStore %continue_execution %false None
                OpBranch %20
          %20 = OpLabel
-         %23 = OpLoad %bool %continue_execution
+         %23 = OpLoad %bool %continue_execution None
          %24 = OpLogicalNot %bool %23
                OpSelectionMerge %25 None
                OpBranchConditional %24 %26 %25

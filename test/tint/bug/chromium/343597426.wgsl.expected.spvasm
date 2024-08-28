@@ -37,10 +37,10 @@
                OpSelectionMerge %16 None
                OpBranchConditional %b %17 %16
          %17 = OpLabel
-               OpStore %continue_execution %false
+               OpStore %continue_execution %false None
                OpBranch %16
          %16 = OpLabel
-         %19 = OpLoad %bool %continue_execution
+         %19 = OpLoad %bool %continue_execution None
                OpSelectionMerge %20 None
                OpBranchConditional %19 %21 %20
          %21 = OpLabel
@@ -50,10 +50,10 @@
                OpSelectionMerge %24 None
                OpBranchConditional %d %25 %24
          %25 = OpLabel
-               OpStore %continue_execution %false
+               OpStore %continue_execution %false None
                OpBranch %24
          %24 = OpLabel
-         %26 = OpLoad %bool %continue_execution
+         %26 = OpLoad %bool %continue_execution None
                OpSelectionMerge %27 None
                OpBranchConditional %26 %28 %27
          %28 = OpLabel

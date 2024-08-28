@@ -30,16 +30,16 @@
           %b = OpVariable %_ptr_Function_float Function
           %v = OpVariable %_ptr_Function_v3float Function
                OpStore %b %float_0
-         %11 = OpLoad %float %b
+         %11 = OpLoad %float %b None
          %13 = OpCompositeConstruct %v3float %11 %11 %11
                OpStore %v %13
-         %16 = OpLoad %v3float %v
+         %16 = OpLoad %v3float %v None
          %17 = OpCompositeConstruct %v4float %16 %float_1
                OpReturnValue %17
                OpFunctionEnd
   %frag_main = OpFunction %void None %21
          %22 = OpLabel
          %23 = OpFunctionCall %v4float %frag_main_inner
-               OpStore %frag_main_loc0_Output %23
+               OpStore %frag_main_loc0_Output %23 None
                OpReturn
                OpFunctionEnd

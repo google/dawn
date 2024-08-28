@@ -52,6 +52,6 @@
          %22 = OpLabel
          %23 = OpAccessChain %_ptr_StorageBuffer_uint %1 %uint_0 %int_0
          %27 = OpFunctionCall %uint %f0
-               OpStore %23 %27
+               OpStore %23 %27 None
                OpReturn
                OpFunctionEnd

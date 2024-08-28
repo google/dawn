@@ -65,12 +65,12 @@
           %f = OpFunction %void None %19
          %20 = OpLabel
          %21 = OpAccessChain %_ptr_Uniform_int %1 %uint_0 %uint_0
-         %24 = OpLoad %int %21
+         %24 = OpLoad %int %21 None
          %25 = OpAccessChain %_ptr_StorageBuffer_int %10 %uint_0 %uint_0 %24
-               OpStore %25 %int_1
+               OpStore %25 %int_1 None
          %28 = OpAccessChain %_ptr_StorageBuffer_int %6 %uint_0 %uint_0
          %29 = OpAccessChain %_ptr_StorageBuffer_int %10 %uint_0 %uint_0 %int_3
-         %31 = OpLoad %int %29
-               OpStore %28 %31
+         %31 = OpLoad %int %29 None
+               OpStore %28 %31 None
                OpReturn
                OpFunctionEnd

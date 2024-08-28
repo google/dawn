@@ -43,14 +43,14 @@
 %in_vertex_index = OpFunctionParameter %uint
          %23 = OpLabel
          %24 = OpAccessChain %_ptr_Private_v4float %10 %in_vertex_index
-         %26 = OpLoad %v4float %24
+         %26 = OpLoad %v4float %24 None
                OpReturnValue %26
                OpFunctionEnd
     %vs_main = OpFunction %void None %29
          %30 = OpLabel
-         %31 = OpLoad %uint %vs_main_vertex_index_Input
+         %31 = OpLoad %uint %vs_main_vertex_index_Input None
          %32 = OpFunctionCall %v4float %vs_main_inner %31
-               OpStore %vs_main_position_Output %32
-               OpStore %vs_main___point_size_Output %float_1
+               OpStore %vs_main_position_Output %32 None
+               OpStore %vs_main___point_size_Output %float_1 None
                OpReturn
                OpFunctionEnd

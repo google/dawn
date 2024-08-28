@@ -27,7 +27,7 @@
           %l = OpConstant %float 0.141120002
           %d = OpFunction %void None %7
           %8 = OpLabel
-          %9 = OpLoad %3 %arg_0
+          %9 = OpLoad %3 %arg_0 None
          %10 = OpImageFetch %v4int %9 %int_1 Lod %int_0
                OpReturn
                OpFunctionEnd

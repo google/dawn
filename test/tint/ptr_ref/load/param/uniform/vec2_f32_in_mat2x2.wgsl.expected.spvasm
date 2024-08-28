@@ -45,13 +45,13 @@
          %22 = OpVariable %_ptr_Function_mat2v2float Function
          %13 = OpCompositeExtract %uint %pointer_indices 0
          %14 = OpAccessChain %_ptr_Uniform_v2float %1 %uint_0
-         %17 = OpLoad %v2float %14
+         %17 = OpLoad %v2float %14 None
          %18 = OpAccessChain %_ptr_Uniform_v2float %1 %uint_1
-         %19 = OpLoad %v2float %18
+         %19 = OpLoad %v2float %18 None
          %21 = OpCompositeConstruct %mat2v2float %17 %19
                OpStore %22 %21
          %24 = OpAccessChain %_ptr_Function_v2float %22 %13
-         %26 = OpLoad %v2float %24
+         %26 = OpLoad %v2float %24 None
                OpReturnValue %26
                OpFunctionEnd
        %main = OpFunction %void None %29

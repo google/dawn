@@ -55,23 +55,23 @@
         %res = OpVariable %_ptr_Function_int Function
                OpStore %arg_1 %int_1
          %15 = OpAccessChain %_ptr_StorageBuffer_int %5 %uint_0 %uint_0
-         %19 = OpLoad %int %arg_1
+         %19 = OpLoad %int %arg_1 None
          %20 = OpAtomicExchange %int %15 %uint_1 %uint_0 %19
                OpStore %res %20
-         %23 = OpLoad %int %res
+         %23 = OpLoad %int %res None
                OpReturnValue %23
                OpFunctionEnd
 %fragment_main = OpFunction %void None %26
          %27 = OpLabel
          %28 = OpFunctionCall %int %atomicExchange_f2e22f
          %29 = OpAccessChain %_ptr_StorageBuffer_int_0 %1 %uint_0
-               OpStore %29 %28
+               OpStore %29 %28 None
                OpReturn
                OpFunctionEnd
 %compute_main = OpFunction %void None %26
          %32 = OpLabel
          %33 = OpFunctionCall %int %atomicExchange_f2e22f
          %34 = OpAccessChain %_ptr_StorageBuffer_int_0 %1 %uint_0
-               OpStore %34 %33
+               OpStore %34 %33 None
                OpReturn
                OpFunctionEnd

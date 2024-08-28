@@ -56,7 +56,7 @@
      %uint_3 = OpConstant %uint 3
           %f = OpFunction %void None %28
          %29 = OpLabel
-         %30 = OpLoad %mat4v3float %m
+         %30 = OpLoad %mat4v3float %m None
          %31 = OpFunctionCall %void %tint_store_and_preserve_padding %30
                OpReturn
                OpFunctionEnd
@@ -65,15 +65,15 @@
          %35 = OpLabel
          %36 = OpAccessChain %_ptr_StorageBuffer_v3float %23 %uint_0 %uint_0
          %40 = OpCompositeExtract %v3float %value_param 0
-               OpStore %36 %40
+               OpStore %36 %40 None
          %41 = OpAccessChain %_ptr_StorageBuffer_v3float %23 %uint_0 %uint_1
          %43 = OpCompositeExtract %v3float %value_param 1
-               OpStore %41 %43
+               OpStore %41 %43 None
          %44 = OpAccessChain %_ptr_StorageBuffer_v3float %23 %uint_0 %uint_2
          %46 = OpCompositeExtract %v3float %value_param 2
-               OpStore %44 %46
+               OpStore %44 %46 None
          %47 = OpAccessChain %_ptr_StorageBuffer_v3float %23 %uint_0 %uint_3
          %49 = OpCompositeExtract %v3float %value_param 3
-               OpStore %47 %49
+               OpStore %47 %49 None
                OpReturn
                OpFunctionEnd

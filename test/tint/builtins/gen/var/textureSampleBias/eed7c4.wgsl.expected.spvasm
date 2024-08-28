@@ -63,23 +63,23 @@
                OpStore %arg_2 %18
                OpStore %arg_3 %int_1
                OpStore %arg_4 %float_1
-         %26 = OpLoad %8 %arg_0
-         %27 = OpLoad %11 %arg_1
-         %28 = OpLoad %v3float %arg_2
-         %29 = OpLoad %int %arg_3
-         %30 = OpLoad %float %arg_4
+         %26 = OpLoad %8 %arg_0 None
+         %27 = OpLoad %11 %arg_1 None
+         %28 = OpLoad %v3float %arg_2 None
+         %29 = OpLoad %int %arg_3 None
+         %30 = OpLoad %float %arg_4 None
          %31 = OpSampledImage %32 %26 %27
          %33 = OpConvertSToF %float %29
          %34 = OpCompositeConstruct %v4float %28 %33
          %35 = OpImageSampleImplicitLod %v4float %31 %34 Bias %30
                OpStore %res %35
-         %38 = OpLoad %v4float %res
+         %38 = OpLoad %v4float %res None
                OpReturnValue %38
                OpFunctionEnd
 %fragment_main = OpFunction %void None %41
          %42 = OpLabel
          %43 = OpFunctionCall %v4float %textureSampleBias_eed7c4
          %44 = OpAccessChain %_ptr_StorageBuffer_v4float %1 %uint_0
-               OpStore %44 %43
+               OpStore %44 %43 None
                OpReturn
                OpFunctionEnd

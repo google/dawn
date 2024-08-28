@@ -84,23 +84,23 @@
          %23 = OpLabel
          %24 = OpFunctionCall %Out %main_inner
          %25 = OpCompositeExtract %v4float %24 0
-               OpStore %main_position_Output %25
+               OpStore %main_position_Output %25 None
          %26 = OpCompositeExtract %float %24 1
-               OpStore %main_loc0_Output %26
+               OpStore %main_loc0_Output %26 None
          %27 = OpCompositeExtract %float %24 2
-               OpStore %main_loc1_Output %27
+               OpStore %main_loc1_Output %27 None
          %28 = OpCompositeExtract %float %24 3
-               OpStore %main_loc2_Output %28
+               OpStore %main_loc2_Output %28 None
          %29 = OpCompositeExtract %float %24 4
-               OpStore %main_loc3_Output %29
+               OpStore %main_loc3_Output %29 None
          %30 = OpCompositeExtract %float %24 5
-               OpStore %main_loc4_Output %30
+               OpStore %main_loc4_Output %30 None
          %31 = OpCompositeExtract %float %24 6
-               OpStore %main_loc5_Output %31
+               OpStore %main_loc5_Output %31 None
          %32 = OpCompositeExtract %float %24 7
-               OpStore %main_loc6_Output %32
+               OpStore %main_loc6_Output %32 None
          %33 = OpCompositeExtract %float %24 8
-               OpStore %main_loc7_Output %33
-               OpStore %main___point_size_Output %float_1
+               OpStore %main_loc7_Output %33 None
+               OpStore %main___point_size_Output %float_1 None
                OpReturn
                OpFunctionEnd

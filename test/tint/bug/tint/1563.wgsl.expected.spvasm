@@ -34,7 +34,7 @@
          %17 = OpBitcast %uint %oob
          %18 = OpExtInst %uint %10 UMin %17 %uint_3
          %19 = OpAccessChain %_ptr_Function_float %v %18
-               OpStore %19 %b
+               OpStore %19 %b None
                OpReturnValue %b
                OpFunctionEnd
 %unused_entry_point = OpFunction %void None %23

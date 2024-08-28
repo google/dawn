@@ -57,17 +57,17 @@
           %f = OpFunction %void None %15
          %16 = OpLabel
          %17 = OpAccessChain %_ptr_Uniform_v2float %1 %uint_0 %int_2 %uint_0
-         %22 = OpLoad %v2float %17
+         %22 = OpLoad %v2float %17 None
          %23 = OpAccessChain %_ptr_Uniform_v2float %1 %uint_0 %int_2 %uint_1
-         %25 = OpLoad %v2float %23
+         %25 = OpLoad %v2float %23 None
          %27 = OpCompositeConstruct %mat2v2float %22 %25
           %t = OpTranspose %mat2v2float %27
          %29 = OpAccessChain %_ptr_Uniform_v2float %1 %uint_0 %int_0 %uint_1
-         %31 = OpLoad %v2float %29
+         %31 = OpLoad %v2float %29 None
          %32 = OpVectorShuffle %v2float %31 %31 1 0
           %l = OpExtInst %float %34 Length %32
          %35 = OpAccessChain %_ptr_Uniform_v2float %1 %uint_0 %int_0 %uint_1
-         %36 = OpLoad %v2float %35
+         %36 = OpLoad %v2float %35 None
          %37 = OpVectorShuffle %v2float %36 %36 1 0
          %38 = OpCompositeExtract %float %37 0
           %a = OpExtInst %float %34 FAbs %38
@@ -75,6 +75,6 @@
          %41 = OpFAdd %float %40 %l
          %42 = OpFAdd %float %41 %a
          %43 = OpAccessChain %_ptr_StorageBuffer_float %10 %uint_0
-               OpStore %43 %42
+               OpStore %43 %42 None
                OpReturn
                OpFunctionEnd

@@ -43,7 +43,7 @@
          %12 = OpLabel
          %13 = OpAccessChain %_ptr_StorageBuffer_float %6 %uint_0 %int_0
          %19 = OpAccessChain %_ptr_StorageBuffer_float_0 %1 %uint_0 %int_0
-         %21 = OpLoad %float %19
-               OpStore %13 %21
+         %21 = OpLoad %float %19 None
+               OpStore %13 %21 None
                OpReturn
                OpFunctionEnd

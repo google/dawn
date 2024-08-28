@@ -41,6 +41,6 @@
        %main = OpFunction %void None %7
          %22 = OpLabel
          %23 = OpFunctionCall %v4float %main_inner
-               OpStore %main_loc0_Output %23
+               OpStore %main_loc0_Output %23 None
                OpReturn
                OpFunctionEnd

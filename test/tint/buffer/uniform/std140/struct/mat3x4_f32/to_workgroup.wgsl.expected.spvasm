@@ -83,7 +83,7 @@
                OpBranch %25
          %30 = OpLabel
          %32 = OpAccessChain %_ptr_Workgroup_S %w %26
-               OpStore %32 %34
+               OpStore %32 %34 None
                OpBranch %23
          %23 = OpLabel
          %27 = OpIAdd %uint %26 %uint_1
@@ -91,26 +91,26 @@
          %25 = OpLabel
                OpControlBarrier %uint_2 %uint_2 %uint_264
          %39 = OpAccessChain %_ptr_Uniform__arr_S_uint_4 %1 %uint_0
-         %42 = OpLoad %_arr_S_uint_4 %39
-               OpStore %w %42
+         %42 = OpLoad %_arr_S_uint_4 %39 None
+               OpStore %w %42 None
          %43 = OpAccessChain %_ptr_Workgroup_S %w %int_1
          %45 = OpAccessChain %_ptr_Uniform_S %1 %uint_0 %int_2
-         %48 = OpLoad %S %45
-               OpStore %43 %48
+         %48 = OpLoad %S %45 None
+               OpStore %43 %48 None
          %49 = OpAccessChain %_ptr_Workgroup_mat3v4float %w %int_3 %uint_1
          %52 = OpAccessChain %_ptr_Uniform_mat3v4float %1 %uint_0 %int_2 %uint_1
-         %54 = OpLoad %mat3v4float %52
-               OpStore %49 %54
+         %54 = OpLoad %mat3v4float %52 None
+               OpStore %49 %54 None
          %55 = OpAccessChain %_ptr_Workgroup_v4float %w %int_1 %uint_1 %int_0
          %58 = OpAccessChain %_ptr_Uniform_v4float %1 %uint_0 %int_0 %uint_1 %int_1
-         %60 = OpLoad %v4float %58
+         %60 = OpLoad %v4float %58 None
          %61 = OpVectorShuffle %v4float %60 %60 1 3 0 2
-               OpStore %55 %61
+               OpStore %55 %61 None
                OpReturn
                OpFunctionEnd
           %f = OpFunction %void None %63
          %64 = OpLabel
-         %65 = OpLoad %uint %f_local_invocation_index_Input
+         %65 = OpLoad %uint %f_local_invocation_index_Input None
          %66 = OpFunctionCall %void %f_inner %65
                OpReturn
                OpFunctionEnd

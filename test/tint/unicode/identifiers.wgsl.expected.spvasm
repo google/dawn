@@ -28,7 +28,7 @@
 %________________________________________ = OpFunction %void None %10
          %11 = OpLabel
 %_________________________________0 = OpVariable %_ptr_Function_int Function %14
-         %15 = OpLoad %int %_________________________________0
+         %15 = OpLoad %int %_________________________________0 None
 %________________________ = OpFunctionCall %float %________________________________ %15
                OpReturn
                OpFunctionEnd

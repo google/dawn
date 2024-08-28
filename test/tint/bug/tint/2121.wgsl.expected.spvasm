@@ -46,22 +46,22 @@
         %pos = OpVariable %_ptr_Function_v4float Function
                OpStore %pos %16
          %21 = OpAccessChain %_ptr_Function_v4float %out_root %uint_0
-         %24 = OpLoad %v4float %pos
-               OpStore %21 %24
+         %24 = OpLoad %v4float %pos None
+               OpStore %21 %24 None
                OpReturn
                OpFunctionEnd
  %main_inner = OpFunction %VSOut None %26
          %27 = OpLabel
         %out = OpVariable %_ptr_Function_VSOut Function %29
          %30 = OpFunctionCall %void %foo %out
-         %31 = OpLoad %VSOut %out
+         %31 = OpLoad %VSOut %out None
                OpReturnValue %31
                OpFunctionEnd
        %main = OpFunction %void None %33
          %34 = OpLabel
          %35 = OpFunctionCall %VSOut %main_inner
          %36 = OpCompositeExtract %v4float %35 0
-               OpStore %main_position_Output %36
-               OpStore %main___point_size_Output %float_1
+               OpStore %main_position_Output %36 None
+               OpStore %main___point_size_Output %float_1 None
                OpReturn
                OpFunctionEnd

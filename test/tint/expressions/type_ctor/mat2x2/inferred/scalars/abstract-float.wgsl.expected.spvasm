@@ -38,6 +38,6 @@
           %f = OpFunction %void None %9
          %10 = OpLabel
          %11 = OpAccessChain %_ptr_StorageBuffer_mat2v2float %1 %uint_0
-               OpStore %11 %15
+               OpStore %11 %15 None
                OpReturn
                OpFunctionEnd

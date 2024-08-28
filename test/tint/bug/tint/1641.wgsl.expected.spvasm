@@ -45,14 +45,14 @@
  %main_inner = OpFunction %v4float None %20
          %21 = OpLabel
          %24 = OpAccessChain %_ptr_Private_v3float %7 %zero %uint_0
-         %27 = OpLoad %v3float %24
+         %27 = OpLoad %v3float %24 None
          %28 = OpCompositeConstruct %v4float %27 %float_1
                OpReturnValue %28
                OpFunctionEnd
        %main = OpFunction %void None %31
          %32 = OpLabel
          %33 = OpFunctionCall %v4float %main_inner
-               OpStore %main_position_Output %33
-               OpStore %main___point_size_Output %float_1
+               OpStore %main_position_Output %33 None
+               OpStore %main___point_size_Output %float_1 None
                OpReturn
                OpFunctionEnd

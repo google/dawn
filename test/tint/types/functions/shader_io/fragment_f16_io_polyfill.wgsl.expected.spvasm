@@ -56,16 +56,16 @@
                OpFunctionEnd
   %frag_main = OpFunction %void None %26
          %27 = OpLabel
-         %28 = OpLoad %float %frag_main_loc1_Input
+         %28 = OpLoad %float %frag_main_loc1_Input None
          %29 = OpFConvert %half %28
-         %30 = OpLoad %v4float %frag_main_loc2_Input
+         %30 = OpLoad %v4float %frag_main_loc2_Input None
          %31 = OpFConvert %v4half %30
          %32 = OpFunctionCall %Outputs %frag_main_inner %29 %31
          %33 = OpCompositeExtract %half %32 0
          %34 = OpFConvert %float %33
-               OpStore %frag_main_loc1_Output %34
+               OpStore %frag_main_loc1_Output %34 None
          %35 = OpCompositeExtract %v4half %32 1
          %36 = OpFConvert %v4float %35
-               OpStore %frag_main_loc2_Output %36
+               OpStore %frag_main_loc2_Output %36 None
                OpReturn
                OpFunctionEnd

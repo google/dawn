@@ -34,7 +34,7 @@
           %8 = OpLabel
           %i = OpVariable %_ptr_Function_int Function
           %9 = OpAccessChain %_ptr_StorageBuffer_int %1 %uint_0
-         %13 = OpLoad %int %9
+         %13 = OpLoad %int %9 None
                OpStore %i %13
                OpBranch %18
          %18 = OpLabel
@@ -48,31 +48,31 @@
                OpLoopMerge %23 %21 None
                OpBranch %20
          %20 = OpLabel
-         %24 = OpLoad %int %i
+         %24 = OpLoad %int %i None
          %25 = OpSGreaterThan %bool %24 %int_5
                OpSelectionMerge %28 None
                OpBranchConditional %25 %29 %30
          %29 = OpLabel
-         %31 = OpLoad %int %i
+         %31 = OpLoad %int %i None
          %32 = OpIMul %int %31 %int_2
-               OpStore %i %32
+               OpStore %i %32 None
                OpBranch %23
          %30 = OpLabel
-         %34 = OpLoad %int %i
+         %34 = OpLoad %int %i None
          %35 = OpIMul %int %34 %int_2
-               OpStore %i %35
+               OpStore %i %35 None
                OpBranch %23
          %28 = OpLabel
                OpBranch %23
          %21 = OpLabel
                OpBranch %22
          %23 = OpLabel
-         %36 = OpLoad %int %i
+         %36 = OpLoad %int %i None
          %37 = OpSGreaterThan %bool %36 %int_10
                OpBranchConditional %37 %19 %18
          %19 = OpLabel
-         %39 = OpLoad %int %i
+         %39 = OpLoad %int %i None
          %40 = OpAccessChain %_ptr_StorageBuffer_int %1 %uint_0
-               OpStore %40 %39
+               OpStore %40 %39 None
                OpReturn
                OpFunctionEnd

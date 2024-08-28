@@ -63,7 +63,7 @@
                OpFunctionEnd
        %main = OpFunction %void None %25
          %26 = OpLabel
-         %27 = OpLoad %float %main_loc0_Input
+         %27 = OpLoad %float %main_loc0_Input None
          %28 = OpFunctionCall %void %main_inner %27
                OpReturn
                OpFunctionEnd

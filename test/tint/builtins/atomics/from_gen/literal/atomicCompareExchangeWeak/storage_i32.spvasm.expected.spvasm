@@ -65,7 +65,7 @@
 %old_value_1 = OpCompositeExtract %int %24 0
          %26 = OpIEqual %bool %old_value_1 %int_1
          %27 = OpCompositeConstruct %x__atomic_compare_exchange_resulti32 %old_value_1 %26
-               OpStore %res %27
+               OpStore %res %27 None
                OpReturn
                OpFunctionEnd
 %fragment_main_1 = OpFunction %void None %8

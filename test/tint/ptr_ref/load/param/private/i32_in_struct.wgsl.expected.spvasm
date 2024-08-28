@@ -28,7 +28,7 @@
        %func = OpFunction %int None %7
           %8 = OpLabel
           %9 = OpAccessChain %_ptr_Private_int %P %uint_0
-         %13 = OpLoad %int %9
+         %13 = OpLoad %int %9 None
                OpReturnValue %13
                OpFunctionEnd
        %main = OpFunction %void None %16

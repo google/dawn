@@ -25,7 +25,7 @@
           %f = OpFunction %void None %10
          %11 = OpLabel
           %v = OpVariable %_ptr_Function__arr_uint_uint_2 Function
-         %12 = OpLoad %_arr_uint_uint_2 %arr
+         %12 = OpLoad %_arr_uint_uint_2 %arr None
                OpStore %v %12
                OpReturn
                OpFunctionEnd

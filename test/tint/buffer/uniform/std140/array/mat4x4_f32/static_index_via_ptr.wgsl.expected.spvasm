@@ -59,11 +59,11 @@
         %p_a = OpAccessChain %_ptr_Uniform__arr_mat4v4float_uint_4 %1 %uint_0
       %p_a_2 = OpAccessChain %_ptr_Uniform_mat4v4float %p_a %int_2
     %p_a_2_1 = OpAccessChain %_ptr_Uniform_v4float %p_a_2 %int_1
-        %l_a = OpLoad %_arr_mat4v4float_uint_4 %p_a
-      %l_a_i = OpLoad %mat4v4float %p_a_2
-    %l_a_i_i = OpLoad %v4float %p_a_2_1
+        %l_a = OpLoad %_arr_mat4v4float_uint_4 %p_a None
+      %l_a_i = OpLoad %mat4v4float %p_a_2 None
+    %l_a_i_i = OpLoad %v4float %p_a_2_1 None
          %30 = OpAccessChain %_ptr_Uniform_float %p_a_2_1 %uint_0
-         %32 = OpLoad %float %30
+         %32 = OpLoad %float %30 None
          %33 = OpCompositeExtract %float %l_a 0 0 0
          %34 = OpFAdd %float %32 %33
          %35 = OpCompositeExtract %float %l_a_i 0 0
@@ -71,6 +71,6 @@
          %37 = OpCompositeExtract %float %l_a_i_i 0
          %38 = OpFAdd %float %36 %37
          %39 = OpAccessChain %_ptr_StorageBuffer_float %10 %uint_0
-               OpStore %39 %38
+               OpStore %39 %38 None
                OpReturn
                OpFunctionEnd

@@ -58,21 +58,21 @@
  %dst_struct = OpVariable %_ptr_Function_S Function %17
   %dst_array = OpVariable %_ptr_Function__arr__arr_int_uint_4_uint_2 Function %22
          %23 = OpAccessChain %_ptr_Function__arr_int_uint_4 %dst_struct %uint_0
-               OpStore %23 %src
+               OpStore %23 %src None
          %25 = OpAccessChain %_ptr_Function__arr_int_uint_4 %dst_array %int_1
-               OpStore %25 %src
-               OpStore %dst %src
+               OpStore %25 %src None
+               OpStore %dst %src None
          %27 = OpAccessChain %_ptr_Function__arr_int_uint_4 %dst_struct %uint_0
-               OpStore %27 %src
+               OpStore %27 %src None
          %28 = OpAccessChain %_ptr_Function__arr_int_uint_4 %dst_array %int_0
-               OpStore %28 %src
+               OpStore %28 %src None
          %30 = OpAccessChain %_ptr_Function_int %dst %int_0
-         %32 = OpLoad %int %30
+         %32 = OpLoad %int %30 None
          %33 = OpAccessChain %_ptr_Function_int %dst_struct %uint_0 %int_0
-         %34 = OpLoad %int %33
+         %34 = OpLoad %int %33 None
          %35 = OpIAdd %int %32 %34
          %36 = OpAccessChain %_ptr_Function_int %dst_array %int_0 %int_0
-         %37 = OpLoad %int %36
+         %37 = OpLoad %int %36 None
          %38 = OpIAdd %int %35 %37
                OpReturnValue %38
                OpFunctionEnd
@@ -80,6 +80,6 @@
          %42 = OpLabel
          %43 = OpFunctionCall %int %foo
          %44 = OpAccessChain %_ptr_StorageBuffer_int %1 %uint_0
-               OpStore %44 %43
+               OpStore %44 %43 None
                OpReturn
                OpFunctionEnd

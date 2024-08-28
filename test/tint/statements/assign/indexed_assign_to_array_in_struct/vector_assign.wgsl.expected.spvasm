@@ -60,17 +60,17 @@
          %s1 = OpVariable %_ptr_Function_OuterS Function %21
           %v = OpVariable %_ptr_Function_v3float Function %26
          %27 = OpAccessChain %_ptr_Uniform_uint %1 %uint_0 %uint_0
-         %30 = OpLoad %uint %27
+         %30 = OpLoad %uint %27 None
          %31 = OpAccessChain %_ptr_Function_uint %s1 %uint_0 %30
-         %33 = OpLoad %uint %31
+         %33 = OpLoad %uint %31 None
          %34 = OpAccessChain %_ptr_Function_float %v %33
-               OpStore %34 %float_1
+               OpStore %34 %float_1 None
          %37 = OpAccessChain %_ptr_Uniform_uint %1 %uint_0 %uint_0
-         %38 = OpLoad %uint %37
+         %38 = OpLoad %uint %37 None
          %39 = OpAccessChain %_ptr_Function_uint %s1 %uint_0 %38
-         %40 = OpLoad %uint %39
+         %40 = OpLoad %uint %39 None
          %41 = OpFunctionCall %uint %f %40
          %42 = OpAccessChain %_ptr_Function_float %v %41
-               OpStore %42 %float_1
+               OpStore %42 %float_1 None
                OpReturn
                OpFunctionEnd

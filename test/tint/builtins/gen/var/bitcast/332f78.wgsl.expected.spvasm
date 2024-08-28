@@ -74,44 +74,44 @@
       %arg_0 = OpVariable %_ptr_Function_v3int Function
         %res = OpVariable %_ptr_Function_v3float Function
                OpStore %arg_0 %20
-         %22 = OpLoad %v3int %arg_0
+         %22 = OpLoad %v3int %arg_0 None
          %23 = OpBitcast %v3float %22
                OpStore %res %23
-         %26 = OpLoad %v3float %res
+         %26 = OpLoad %v3float %res None
                OpReturnValue %26
                OpFunctionEnd
 %fragment_main = OpFunction %void None %29
          %30 = OpLabel
          %31 = OpFunctionCall %v3float %bitcast_332f78
          %32 = OpAccessChain %_ptr_StorageBuffer_v3float %1 %uint_0
-               OpStore %32 %31
+               OpStore %32 %31 None
                OpReturn
                OpFunctionEnd
 %compute_main = OpFunction %void None %29
          %37 = OpLabel
          %38 = OpFunctionCall %v3float %bitcast_332f78
          %39 = OpAccessChain %_ptr_StorageBuffer_v3float %1 %uint_0
-               OpStore %39 %38
+               OpStore %39 %38 None
                OpReturn
                OpFunctionEnd
 %vertex_main_inner = OpFunction %VertexOutput None %42
          %43 = OpLabel
         %out = OpVariable %_ptr_Function_VertexOutput Function %46
          %47 = OpAccessChain %_ptr_Function_v4float %out %uint_0
-               OpStore %47 %49
+               OpStore %47 %49 None
          %50 = OpAccessChain %_ptr_Function_v3float %out %uint_1
          %52 = OpFunctionCall %v3float %bitcast_332f78
-               OpStore %50 %52
-         %53 = OpLoad %VertexOutput %out
+               OpStore %50 %52 None
+         %53 = OpLoad %VertexOutput %out None
                OpReturnValue %53
                OpFunctionEnd
 %vertex_main = OpFunction %void None %29
          %55 = OpLabel
          %56 = OpFunctionCall %VertexOutput %vertex_main_inner
          %57 = OpCompositeExtract %v4float %56 0
-               OpStore %vertex_main_position_Output %57
+               OpStore %vertex_main_position_Output %57 None
          %58 = OpCompositeExtract %v3float %56 1
-               OpStore %vertex_main_loc0_Output %58
-               OpStore %vertex_main___point_size_Output %float_1
+               OpStore %vertex_main_loc0_Output %58 None
+               OpStore %vertex_main___point_size_Output %float_1 None
                OpReturn
                OpFunctionEnd

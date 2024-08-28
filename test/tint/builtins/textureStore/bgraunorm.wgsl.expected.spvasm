@@ -32,7 +32,7 @@
          %18 = OpConstantComposite %v2int %int_9 %int_8
 %fragment_main = OpFunction %void None %7
           %8 = OpLabel
-         %15 = OpLoad %3 %tex
+         %15 = OpLoad %3 %tex None
          %16 = OpVectorShuffle %v4float %value %value 2 1 0 3
                OpImageWrite %15 %18 %16 None
                OpReturn

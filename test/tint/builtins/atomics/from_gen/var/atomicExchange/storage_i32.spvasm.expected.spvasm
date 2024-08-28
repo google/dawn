@@ -48,11 +48,11 @@
         %res = OpVariable %_ptr_Function_int Function
                OpStore %arg_1 %int_0
                OpStore %res %int_0
-               OpStore %arg_1 %int_1
-       %x_20 = OpLoad %int %arg_1
+               OpStore %arg_1 %int_1 None
+       %x_20 = OpLoad %int %arg_1 None
          %16 = OpAccessChain %_ptr_StorageBuffer_int %1 %uint_0 %uint_0
        %x_13 = OpAtomicExchange %int %16 %uint_1 %uint_0 %x_20
-               OpStore %res %x_13
+               OpStore %res %x_13 None
                OpReturn
                OpFunctionEnd
 %fragment_main_1 = OpFunction %void None %8

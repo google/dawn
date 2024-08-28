@@ -34,7 +34,7 @@
        %main = OpFunction %void None %8
           %9 = OpLabel
           %p = OpAccessChain %_ptr_Uniform_int %1 %uint_0 %uint_0
-         %14 = OpLoad %int %p
+         %14 = OpLoad %int %p None
           %u = OpIAdd %int %14 %int_1
                OpReturn
                OpFunctionEnd

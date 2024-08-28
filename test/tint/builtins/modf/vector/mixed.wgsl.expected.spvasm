@@ -43,11 +43,11 @@
         %res = OpVariable %_ptr_Function___modf_result_vec2_f32 Function
                OpStore %res %13
          %20 = OpExtInst %__modf_result_vec2_f32 %21 ModfStruct %runtime_in
-               OpStore %res %20
-               OpStore %res %13
+               OpStore %res %20 None
+               OpStore %res %13 None
          %22 = OpAccessChain %_ptr_Function_v2float %res %uint_0
-      %fract = OpLoad %v2float %22
+      %fract = OpLoad %v2float %22 None
          %27 = OpAccessChain %_ptr_Function_v2float %res %uint_1
-      %whole = OpLoad %v2float %27
+      %whole = OpLoad %v2float %27 None
                OpReturn
                OpFunctionEnd

@@ -33,9 +33,9 @@
           %f = OpFunction %void None %13
          %14 = OpLabel
          %15 = OpAccessChain %_ptr_Workgroup_float %a %int_0
-          %x = OpLoad %float %15
+          %x = OpLoad %float %15 None
          %20 = OpAccessChain %_ptr_Workgroup_float %b %int_0
-          %y = OpLoad %float %20
+          %y = OpLoad %float %20 None
                OpReturn
                OpFunctionEnd
 %unused_entry_point = OpFunction %void None %13

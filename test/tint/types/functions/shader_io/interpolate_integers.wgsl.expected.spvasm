@@ -106,27 +106,27 @@
          %43 = OpLabel
          %44 = OpFunctionCall %Interface %vert_main_inner
          %45 = OpCompositeExtract %int %44 0
-               OpStore %vert_main_loc0_Output %45
+               OpStore %vert_main_loc0_Output %45 None
          %46 = OpCompositeExtract %uint %44 1
-               OpStore %vert_main_loc1_Output %46
+               OpStore %vert_main_loc1_Output %46 None
          %47 = OpCompositeExtract %v4int %44 2
-               OpStore %vert_main_loc2_Output %47
+               OpStore %vert_main_loc2_Output %47 None
          %48 = OpCompositeExtract %v4uint %44 3
-               OpStore %vert_main_loc3_Output %48
+               OpStore %vert_main_loc3_Output %48 None
          %49 = OpCompositeExtract %v4float %44 4
-               OpStore %vert_main_position_Output %49
-               OpStore %vert_main___point_size_Output %float_1
+               OpStore %vert_main_position_Output %49 None
+               OpStore %vert_main___point_size_Output %float_1 None
                OpReturn
                OpFunctionEnd
   %frag_main = OpFunction %void None %42
          %52 = OpLabel
-         %53 = OpLoad %int %frag_main_loc0_Input
-         %54 = OpLoad %uint %frag_main_loc1_Input
-         %55 = OpLoad %v4int %frag_main_loc2_Input
-         %56 = OpLoad %v4uint %frag_main_loc3_Input
-         %57 = OpLoad %v4float %frag_main_position_Input
+         %53 = OpLoad %int %frag_main_loc0_Input None
+         %54 = OpLoad %uint %frag_main_loc1_Input None
+         %55 = OpLoad %v4int %frag_main_loc2_Input None
+         %56 = OpLoad %v4uint %frag_main_loc3_Input None
+         %57 = OpLoad %v4float %frag_main_position_Input None
          %58 = OpCompositeConstruct %Interface %53 %54 %55 %56 %57
          %59 = OpFunctionCall %int %frag_main_inner %58
-               OpStore %frag_main_loc0_Output %59
+               OpStore %frag_main_loc0_Output %59 None
                OpReturn
                OpFunctionEnd

@@ -31,8 +31,8 @@
           %b = OpVariable %_ptr_Function_half Function
                OpStore %a %9
                OpStore %b %half_0x0p_0
-         %16 = OpLoad %v3half %a
-         %17 = OpLoad %half %b
+         %16 = OpLoad %v3half %a None
+         %17 = OpLoad %half %b None
          %18 = OpCompositeConstruct %v3half %17 %17 %17
           %r = OpFDiv %v3half %16 %18
                OpReturn

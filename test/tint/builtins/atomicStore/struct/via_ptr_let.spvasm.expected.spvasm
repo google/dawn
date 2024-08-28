@@ -51,11 +51,11 @@
 %local_invocation_index_2 = OpFunctionParameter %uint
          %15 = OpLabel
          %16 = OpAccessChain %_ptr_Workgroup_int %wg %uint_0
-               OpStore %16 %int_0
+               OpStore %16 %int_0 None
          %20 = OpAccessChain %_ptr_Workgroup_uint %wg %uint_1
                OpAtomicStore %20 %uint_2 %uint_0 %uint_0
          %25 = OpAccessChain %_ptr_Workgroup_uint_0 %wg %uint_2
-               OpStore %25 %uint_0
+               OpStore %25 %uint_0 None
                OpControlBarrier %uint_2 %uint_2 %uint_264
          %29 = OpAccessChain %_ptr_Workgroup_uint %wg %uint_1
                OpAtomicStore %29 %uint_2 %uint_0 %uint_1
@@ -63,7 +63,7 @@
                OpFunctionEnd
 %compute_main_1 = OpFunction %void None %32
          %33 = OpLabel
-       %x_35 = OpLoad %uint %local_invocation_index_1
+       %x_35 = OpLoad %uint %local_invocation_index_1 None
          %35 = OpFunctionCall %void %compute_main_inner %x_35
                OpReturn
                OpFunctionEnd
@@ -75,21 +75,21 @@
                OpBranchConditional %39 %42 %41
          %42 = OpLabel
          %43 = OpAccessChain %_ptr_Workgroup_int %wg %uint_0
-               OpStore %43 %int_0
+               OpStore %43 %int_0 None
          %44 = OpAccessChain %_ptr_Workgroup_uint %wg %uint_1
                OpAtomicStore %44 %uint_2 %uint_0 %uint_0
          %46 = OpAccessChain %_ptr_Workgroup_uint_0 %wg %uint_2
-               OpStore %46 %uint_0
+               OpStore %46 %uint_0 None
                OpBranch %41
          %41 = OpLabel
                OpControlBarrier %uint_2 %uint_2 %uint_264
-               OpStore %local_invocation_index_1 %local_invocation_index_1_param
+               OpStore %local_invocation_index_1 %local_invocation_index_1_param None
          %48 = OpFunctionCall %void %compute_main_1
                OpReturn
                OpFunctionEnd
 %compute_main = OpFunction %void None %32
          %50 = OpLabel
-         %51 = OpLoad %uint %compute_main_local_invocation_index_Input
+         %51 = OpLoad %uint %compute_main_local_invocation_index_Input None
          %52 = OpFunctionCall %void %compute_main_inner_0 %51
                OpReturn
                OpFunctionEnd

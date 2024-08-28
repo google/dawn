@@ -44,18 +44,18 @@
  %mat2v3half = OpTypeMatrix %v3half 2
           %i = OpFunction %int None %11
          %12 = OpLabel
-         %13 = OpLoad %int %counter
+         %13 = OpLoad %int %counter None
          %14 = OpIAdd %int %13 %int_1
-               OpStore %counter %14
-         %16 = OpLoad %int %counter
+               OpStore %counter %14 None
+         %16 = OpLoad %int %counter None
                OpReturnValue %16
                OpFunctionEnd
           %f = OpFunction %void None %19
          %20 = OpLabel
          %21 = OpAccessChain %_ptr_Uniform_v3half %1 %uint_0
-         %25 = OpLoad %v3half %21
+         %25 = OpLoad %v3half %21 None
          %26 = OpAccessChain %_ptr_Uniform_v3half %1 %uint_1
-         %28 = OpLoad %v3half %26
+         %28 = OpLoad %v3half %26 None
         %l_m = OpCompositeConstruct %mat2v3half %25 %28
       %l_m_1 = OpCompositeExtract %v3half %l_m 1
                OpReturn

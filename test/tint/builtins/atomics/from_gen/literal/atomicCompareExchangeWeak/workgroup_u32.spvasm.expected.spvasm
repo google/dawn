@@ -62,7 +62,7 @@
 %old_value_1 = OpCompositeExtract %uint %24 0
          %26 = OpIEqual %bool %old_value_1 %uint_1
          %27 = OpCompositeConstruct %x__atomic_compare_exchange_resultu32 %old_value_1 %26
-               OpStore %res %27
+               OpStore %res %27 None
                OpReturn
                OpFunctionEnd
 %compute_main_inner = OpFunction %void None %30
@@ -75,7 +75,7 @@
                OpFunctionEnd
 %compute_main_1 = OpFunction %void None %11
          %37 = OpLabel
-       %x_35 = OpLoad %uint %local_invocation_index_1
+       %x_35 = OpLoad %uint %local_invocation_index_1 None
          %39 = OpFunctionCall %void %compute_main_inner %x_35
                OpReturn
                OpFunctionEnd
@@ -90,13 +90,13 @@
                OpBranch %44
          %44 = OpLabel
                OpControlBarrier %uint_2 %uint_2 %uint_264
-               OpStore %local_invocation_index_1 %local_invocation_index_1_param
+               OpStore %local_invocation_index_1 %local_invocation_index_1_param None
          %48 = OpFunctionCall %void %compute_main_1
                OpReturn
                OpFunctionEnd
 %compute_main = OpFunction %void None %11
          %50 = OpLabel
-         %51 = OpLoad %uint %compute_main_local_invocation_index_Input
+         %51 = OpLoad %uint %compute_main_local_invocation_index_Input None
          %52 = OpFunctionCall %void %compute_main_inner_0 %51
                OpReturn
                OpFunctionEnd

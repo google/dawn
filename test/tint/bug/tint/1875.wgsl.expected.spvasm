@@ -42,12 +42,12 @@
 %push_output = OpFunction %void None %12
       %value = OpFunctionParameter %uint
          %13 = OpLabel
-         %14 = OpLoad %uint %count
+         %14 = OpLoad %uint %count None
          %15 = OpAccessChain %_ptr_StorageBuffer_uint %outputs %uint_0 %14
-               OpStore %15 %value
-         %17 = OpLoad %uint %count
+               OpStore %15 %value None
+         %17 = OpLoad %uint %count None
          %18 = OpIAdd %uint %17 %uint_1
-               OpStore %count %18
+               OpStore %count %18 None
                OpReturn
                OpFunctionEnd
        %main = OpFunction %void None %21
@@ -58,20 +58,20 @@
                OpStore %a %uint_0
                OpStore %b %uint_10
                OpStore %c %uint_4294967294
-         %29 = OpLoad %uint %a
+         %29 = OpLoad %uint %a None
          %30 = OpIAdd %uint %29 %uint_1
-               OpStore %a %30
-         %31 = OpLoad %uint %b
+               OpStore %a %30 None
+         %31 = OpLoad %uint %b None
          %32 = OpIAdd %uint %31 %uint_1
-               OpStore %b %32
-         %33 = OpLoad %uint %c
+               OpStore %b %32 None
+         %33 = OpLoad %uint %c None
          %34 = OpIAdd %uint %33 %uint_1
-               OpStore %c %34
-         %35 = OpLoad %uint %a
+               OpStore %c %34 None
+         %35 = OpLoad %uint %a None
          %36 = OpFunctionCall %void %push_output %35
-         %37 = OpLoad %uint %b
+         %37 = OpLoad %uint %b None
          %38 = OpFunctionCall %void %push_output %37
-         %39 = OpLoad %uint %c
+         %39 = OpLoad %uint %c None
          %40 = OpFunctionCall %void %push_output %39
                OpReturn
                OpFunctionEnd

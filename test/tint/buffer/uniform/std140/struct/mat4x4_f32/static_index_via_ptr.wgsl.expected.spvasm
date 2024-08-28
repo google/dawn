@@ -73,13 +73,13 @@
   %p_a_3_a_2 = OpAccessChain %_ptr_Uniform_Inner %p_a_3_a %int_2
 %p_a_3_a_2_m = OpAccessChain %_ptr_Uniform_mat4v4float %p_a_3_a_2 %uint_0
 %p_a_3_a_2_m_1 = OpAccessChain %_ptr_Uniform_v4float %p_a_3_a_2_m %int_1
-        %l_a = OpLoad %_arr_Outer_uint_4 %p_a
-      %l_a_3 = OpLoad %Outer %p_a_3
-    %l_a_3_a = OpLoad %_arr_Inner_uint_4 %p_a_3_a
-  %l_a_3_a_2 = OpLoad %Inner %p_a_3_a_2
-%l_a_3_a_2_m = OpLoad %mat4v4float %p_a_3_a_2_m
-%l_a_3_a_2_m_1 = OpLoad %v4float %p_a_3_a_2_m_1
+        %l_a = OpLoad %_arr_Outer_uint_4 %p_a None
+      %l_a_3 = OpLoad %Outer %p_a_3 None
+    %l_a_3_a = OpLoad %_arr_Inner_uint_4 %p_a_3_a None
+  %l_a_3_a_2 = OpLoad %Inner %p_a_3_a_2 None
+%l_a_3_a_2_m = OpLoad %mat4v4float %p_a_3_a_2_m None
+%l_a_3_a_2_m_1 = OpLoad %v4float %p_a_3_a_2_m_1 None
          %40 = OpAccessChain %_ptr_Uniform_float %p_a_3_a_2_m_1 %int_0
-%l_a_3_a_2_m_1_0 = OpLoad %float %40
+%l_a_3_a_2_m_1_0 = OpLoad %float %40 None
                OpReturn
                OpFunctionEnd

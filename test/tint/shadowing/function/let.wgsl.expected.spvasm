@@ -23,7 +23,7 @@
         %a_0 = OpVariable %_ptr_Function_int Function
           %b = OpVariable %_ptr_Function_int Function
                OpStore %a_0 %a_1
-          %9 = OpLoad %int %a_0
+          %9 = OpLoad %int %a_0 None
                OpStore %b %9
                OpReturn
                OpFunctionEnd

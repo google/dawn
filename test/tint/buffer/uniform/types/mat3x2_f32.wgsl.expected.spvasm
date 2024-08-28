@@ -49,13 +49,13 @@
        %main = OpFunction %void None %12
          %13 = OpLabel
          %14 = OpAccessChain %_ptr_Uniform_v2float %1 %uint_0
-         %18 = OpLoad %v2float %14
+         %18 = OpLoad %v2float %14 None
          %19 = OpAccessChain %_ptr_Uniform_v2float %1 %uint_1
-         %21 = OpLoad %v2float %19
+         %21 = OpLoad %v2float %19 None
          %22 = OpAccessChain %_ptr_Uniform_v2float %1 %uint_2
-         %24 = OpLoad %v2float %22
+         %24 = OpLoad %v2float %22 None
           %x = OpCompositeConstruct %mat3v2float %18 %21 %24
          %26 = OpAccessChain %_ptr_StorageBuffer_mat3v2float %6 %uint_0
-               OpStore %26 %x
+               OpStore %26 %x None
                OpReturn
                OpFunctionEnd

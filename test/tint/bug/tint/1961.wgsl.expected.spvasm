@@ -23,7 +23,7 @@
           %y = OpVariable %_ptr_Function_bool Function
                OpStore %x %false
                OpStore %y %false
-         %10 = OpLoad %bool %x
+         %10 = OpLoad %bool %x None
                OpSelectionMerge %11 None
                OpBranchConditional %10 %12 %13
          %12 = OpLabel

@@ -38,20 +38,20 @@
         %foo = OpFunction %uint None %14
          %15 = OpLabel
          %16 = OpAccessChain %_ptr_StorageBuffer_uint %1 %uint_0
-         %18 = OpLoad %uint %16
+         %18 = OpLoad %uint %16 None
          %19 = OpAccessChain %_ptr_Private_uint %5 %18
-         %21 = OpLoad %uint %19
+         %21 = OpLoad %uint %19 None
                OpReturnValue %21
                OpFunctionEnd
        %main = OpFunction %void None %24
          %25 = OpLabel
          %26 = OpAccessChain %_ptr_StorageBuffer_uint %1 %uint_0
-         %27 = OpLoad %uint %26
+         %27 = OpLoad %uint %26 None
          %28 = OpAccessChain %_ptr_Private_uint %5 %27
-          %v = OpLoad %uint %28
+          %v = OpLoad %uint %28 None
          %30 = OpFunctionCall %uint %foo
          %31 = OpIAdd %uint %v %30
          %32 = OpAccessChain %_ptr_StorageBuffer_uint %1 %uint_0
-               OpStore %32 %31
+               OpStore %32 %31 None
                OpReturn
                OpFunctionEnd

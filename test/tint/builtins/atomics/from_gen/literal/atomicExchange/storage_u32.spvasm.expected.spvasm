@@ -43,7 +43,7 @@
                OpStore %res %uint_0
          %13 = OpAccessChain %_ptr_StorageBuffer_uint %1 %uint_0 %uint_0
         %x_9 = OpAtomicExchange %uint %13 %uint_1 %uint_0 %uint_1
-               OpStore %res %x_9
+               OpStore %res %x_9 None
                OpReturn
                OpFunctionEnd
 %fragment_main_1 = OpFunction %void None %8

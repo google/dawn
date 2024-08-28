@@ -54,14 +54,14 @@
           %f = OpFunction %void None %14
          %15 = OpLabel
          %16 = OpAccessChain %_ptr_Uniform_mat2v4float %1 %uint_0 %int_2 %uint_1
-         %21 = OpLoad %mat2v4float %16
+         %21 = OpLoad %mat2v4float %16 None
           %t = OpTranspose %mat4v2float %21
          %25 = OpAccessChain %_ptr_Uniform_v4float %1 %uint_0 %int_0 %uint_1 %int_1
-         %29 = OpLoad %v4float %25
+         %29 = OpLoad %v4float %25 None
          %30 = OpVectorShuffle %v4float %29 %29 1 3 0 2
           %l = OpExtInst %float %32 Length %30
          %33 = OpAccessChain %_ptr_Uniform_v4float %1 %uint_0 %int_0 %uint_1 %int_1
-         %34 = OpLoad %v4float %33
+         %34 = OpLoad %v4float %33 None
          %35 = OpVectorShuffle %v4float %34 %34 1 3 0 2
          %36 = OpCompositeExtract %float %35 0
           %a = OpExtInst %float %32 FAbs %36

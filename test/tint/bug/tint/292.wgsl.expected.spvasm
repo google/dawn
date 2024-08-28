@@ -35,7 +35,7 @@
       %light = OpVariable %_ptr_Function_v3float Function
 %negative_light = OpVariable %_ptr_Function_v3float Function
                OpStore %light %13
-         %17 = OpLoad %v3float %light
+         %17 = OpLoad %v3float %light None
          %18 = OpFNegate %v3float %17
                OpStore %negative_light %18
                OpReturnValue %20
@@ -43,7 +43,7 @@
        %main = OpFunction %void None %23
          %24 = OpLabel
          %25 = OpFunctionCall %v4float %main_inner
-               OpStore %main_position_Output %25
-               OpStore %main___point_size_Output %float_1
+               OpStore %main_position_Output %25 None
+               OpStore %main___point_size_Output %float_1 None
                OpReturn
                OpFunctionEnd

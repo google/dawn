@@ -46,7 +46,7 @@
                OpBranchConditional %13 %17 %16
          %17 = OpLabel
          %18 = OpAccessChain %_ptr_Workgroup_int %wg %uint_0
-               OpStore %18 %int_0
+               OpStore %18 %int_0 None
          %21 = OpAccessChain %_ptr_Workgroup_uint %wg %uint_1
                OpAtomicStore %21 %uint_2 %uint_0 %uint_0
          %26 = OpAccessChain %_ptr_Workgroup_uint %wg %uint_2
@@ -62,7 +62,7 @@
                OpFunctionEnd
 %compute_main = OpFunction %void None %35
          %36 = OpLabel
-         %37 = OpLoad %uint %compute_main_local_invocation_index_Input
+         %37 = OpLoad %uint %compute_main_local_invocation_index_Input None
          %38 = OpFunctionCall %void %compute_main_inner %37
                OpReturn
                OpFunctionEnd

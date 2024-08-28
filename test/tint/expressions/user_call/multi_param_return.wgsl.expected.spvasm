@@ -35,10 +35,10 @@
          %10 = OpIAdd %int %8 %y
          %11 = OpIAdd %int %10 %z
                OpStore %a %11
-         %14 = OpLoad %int %a
+         %14 = OpLoad %int %a None
          %15 = OpIAdd %int %14 %int_2
-               OpStore %a %15
-         %17 = OpLoad %int %a
+               OpStore %a %15 None
+         %17 = OpLoad %int %a None
                OpReturnValue %17
                OpFunctionEnd
           %b = OpFunction %void None %20
@@ -47,9 +47,9 @@
          %22 = OpFunctionCall %int %c %int_2 %int_3 %int_4
                OpStore %b_0 %22
          %26 = OpFunctionCall %int %c %int_3 %int_4 %int_5
-         %28 = OpLoad %int %b_0
+         %28 = OpLoad %int %b_0 None
          %29 = OpIAdd %int %28 %26
-               OpStore %b_0 %29
+               OpStore %b_0 %29 None
                OpReturn
                OpFunctionEnd
 %unused_entry_point = OpFunction %void None %20

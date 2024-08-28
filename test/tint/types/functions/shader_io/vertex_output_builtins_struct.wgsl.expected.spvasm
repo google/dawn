@@ -39,7 +39,7 @@
          %20 = OpLabel
          %21 = OpFunctionCall %VertexOutputs %main_inner
          %22 = OpCompositeExtract %v4float %21 0
-               OpStore %main_position_Output %22
-               OpStore %main___point_size_Output %float_1
+               OpStore %main_position_Output %22 None
+               OpStore %main___point_size_Output %float_1 None
                OpReturn
                OpFunctionEnd

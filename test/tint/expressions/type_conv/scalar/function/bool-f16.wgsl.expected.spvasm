@@ -29,8 +29,8 @@
 %_ptr_Function_half = OpTypePointer Function %half
           %m = OpFunction %bool None %6
           %7 = OpLabel
-               OpStore %t %true
-          %9 = OpLoad %bool %t
+               OpStore %t %true None
+          %9 = OpLoad %bool %t None
                OpReturnValue %9
                OpFunctionEnd
           %f = OpFunction %void None %12

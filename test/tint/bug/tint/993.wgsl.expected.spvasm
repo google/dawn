@@ -67,7 +67,7 @@
     %runTest = OpFunction %int None %18
          %19 = OpLabel
          %20 = OpAccessChain %_ptr_Uniform_uint %1 %uint_0 %uint_0
-         %23 = OpLoad %uint %20
+         %23 = OpLoad %uint %20 None
          %24 = OpIAdd %uint %uint_0 %23
          %25 = OpAccessChain %_ptr_StorageBuffer_int %10 %uint_0 %uint_0 %24
          %27 = OpAtomicLoad %int %25 %uint_1 %uint_0
@@ -78,6 +78,6 @@
          %33 = OpAccessChain %_ptr_StorageBuffer_uint %6 %uint_0 %uint_0
          %35 = OpFunctionCall %int %runTest
          %36 = OpBitcast %uint %35
-               OpStore %33 %36
+               OpStore %33 %36 None
                OpReturn
                OpFunctionEnd

@@ -59,8 +59,8 @@
         %fIn = OpFunctionParameter %FragmentInput
          %19 = OpLabel
        %fOut = OpVariable %_ptr_Function_FragmentOutput Function %31
-         %20 = OpLoad %3 %depthMap
-         %21 = OpLoad %7 %texSampler
+         %20 = OpLoad %3 %depthMap None
+         %21 = OpLoad %7 %texSampler None
          %22 = OpCompositeExtract %v2float %fIn 0
          %23 = OpSampledImage %24 %20 %21
          %25 = OpImageSampleImplicitLod %v4float %23 %22 None
@@ -68,16 +68,16 @@
       %color = OpCompositeConstruct %v3float %sample %sample %sample
          %32 = OpAccessChain %_ptr_Function_v4float %fOut %uint_0
          %36 = OpCompositeConstruct %v4float %color %float_1
-               OpStore %32 %36
-         %38 = OpLoad %FragmentOutput %fOut
+               OpStore %32 %36 None
+         %38 = OpLoad %FragmentOutput %fOut None
                OpReturnValue %38
                OpFunctionEnd
        %main = OpFunction %void None %41
          %42 = OpLabel
-         %43 = OpLoad %v2float %main_loc2_Input
+         %43 = OpLoad %v2float %main_loc2_Input None
          %44 = OpCompositeConstruct %FragmentInput %43
          %45 = OpFunctionCall %FragmentOutput %main_inner %44
          %46 = OpCompositeExtract %v4float %45 0
-               OpStore %main_loc0_Output %46
+               OpStore %main_loc0_Output %46 None
                OpReturn
                OpFunctionEnd

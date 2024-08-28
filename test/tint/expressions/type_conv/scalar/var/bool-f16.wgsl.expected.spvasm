@@ -25,7 +25,7 @@
 %half_0x0p_0 = OpConstant %half 0x0p+0
           %f = OpFunction %void None %7
           %8 = OpLabel
-          %9 = OpLoad %bool %u
+          %9 = OpLoad %bool %u None
           %v = OpSelect %half %9 %half_0x1p_0 %half_0x0p_0
                OpReturn
                OpFunctionEnd

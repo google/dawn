@@ -31,13 +31,13 @@
          %v3 = OpVariable %_ptr_Function_v3bool Function
          %v4 = OpVariable %_ptr_Function_v4bool Function
                OpStore %v %true
-          %9 = OpLoad %bool %v
+          %9 = OpLoad %bool %v None
          %11 = OpCompositeConstruct %v2bool %9 %9
                OpStore %v2 %11
-         %14 = OpLoad %bool %v
+         %14 = OpLoad %bool %v None
          %16 = OpCompositeConstruct %v3bool %14 %14 %14
                OpStore %v3 %16
-         %19 = OpLoad %bool %v
+         %19 = OpLoad %bool %v None
          %21 = OpCompositeConstruct %v4bool %19 %19 %19 %19
                OpStore %v4 %21
                OpReturn

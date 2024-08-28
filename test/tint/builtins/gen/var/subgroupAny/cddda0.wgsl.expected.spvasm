@@ -44,10 +44,10 @@
       %arg_0 = OpVariable %_ptr_Function_bool Function
         %res = OpVariable %_ptr_Function_bool Function
                OpStore %arg_0 %true
-         %12 = OpLoad %bool %arg_0
+         %12 = OpLoad %bool %arg_0 None
          %13 = OpGroupNonUniformAny %bool %uint_3 %12
                OpStore %res %13
-         %17 = OpLoad %bool %res
+         %17 = OpLoad %bool %res None
          %18 = OpLogicalEqual %bool %17 %false
          %20 = OpSelect %int %18 %int_1 %int_0
                OpReturnValue %20
@@ -56,13 +56,13 @@
          %26 = OpLabel
          %27 = OpFunctionCall %int %subgroupAny_cddda0
          %28 = OpAccessChain %_ptr_StorageBuffer_int %1 %uint_0
-               OpStore %28 %27
+               OpStore %28 %27 None
                OpReturn
                OpFunctionEnd
 %compute_main = OpFunction %void None %25
          %32 = OpLabel
          %33 = OpFunctionCall %int %subgroupAny_cddda0
          %34 = OpAccessChain %_ptr_StorageBuffer_int %1 %uint_0
-               OpStore %34 %33
+               OpStore %34 %33 None
                OpReturn
                OpFunctionEnd

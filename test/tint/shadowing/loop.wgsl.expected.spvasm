@@ -45,26 +45,26 @@
                OpLoopMerge %18 %16 None
                OpBranch %15
          %15 = OpLabel
-         %19 = OpLoad %int %i
+         %19 = OpLoad %int %i None
          %20 = OpAccessChain %_ptr_StorageBuffer_int %1 %uint_0 %19
-         %23 = OpLoad %int %20
+         %23 = OpLoad %int %20 None
                OpStore %x %23
                OpBranch %16
          %16 = OpLabel
-         %25 = OpLoad %int %x
+         %25 = OpLoad %int %x None
          %26 = OpAccessChain %_ptr_StorageBuffer_int %1 %uint_0 %25
-         %27 = OpLoad %int %26
+         %27 = OpLoad %int %26 None
                OpStore %x_0 %27
-         %29 = OpLoad %int %x_0
-         %30 = OpLoad %int %i
+         %29 = OpLoad %int %x_0 None
+         %30 = OpLoad %int %i None
          %31 = OpIAdd %int %30 %29
-               OpStore %i %31
-         %32 = OpLoad %int %i
+               OpStore %i %31 None
+         %32 = OpLoad %int %i None
          %33 = OpSGreaterThan %bool %32 %int_10
                OpBranchConditional %33 %18 %17
          %18 = OpLabel
          %36 = OpAccessChain %_ptr_StorageBuffer_int %1 %uint_0 %int_0
-         %37 = OpLoad %int %i
-               OpStore %36 %37
+         %37 = OpLoad %int %i None
+               OpStore %36 %37 None
                OpReturn
                OpFunctionEnd

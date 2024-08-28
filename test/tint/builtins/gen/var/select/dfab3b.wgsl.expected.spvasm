@@ -56,7 +56,7 @@
       %arg_2 = OpVariable %_ptr_Function_bool Function
         %res = OpVariable %_ptr_Function_v3int Function
                OpStore %arg_2 %true
-         %15 = OpLoad %bool %arg_2
+         %15 = OpLoad %bool %arg_2 None
          %17 = OpCompositeConstruct %v3bool %15 %15 %15
          %18 = OpSelect %v3int %17 %21 %21
                OpStore %res %18
@@ -76,16 +76,16 @@
          %34 = OpLabel
         %out = OpVariable %_ptr_Function_VertexOutput Function %37
          %38 = OpAccessChain %_ptr_Function_v4float %out %uint_0
-               OpStore %38 %42
+               OpStore %38 %42 None
          %43 = OpFunctionCall %void %select_dfab3b
-         %44 = OpLoad %VertexOutput %out
+         %44 = OpLoad %VertexOutput %out None
                OpReturnValue %44
                OpFunctionEnd
 %vertex_main = OpFunction %void None %9
          %46 = OpLabel
          %47 = OpFunctionCall %VertexOutput %vertex_main_inner
          %48 = OpCompositeExtract %v4float %47 0
-               OpStore %vertex_main_position_Output %48
-               OpStore %vertex_main___point_size_Output %float_1
+               OpStore %vertex_main_position_Output %48 None
+               OpStore %vertex_main___point_size_Output %float_1 None
                OpReturn
                OpFunctionEnd

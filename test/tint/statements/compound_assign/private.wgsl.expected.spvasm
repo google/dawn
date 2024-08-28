@@ -43,15 +43,15 @@
       %int_1 = OpConstant %int 1
         %foo = OpFunction %void None %17
          %18 = OpLabel
-         %19 = OpLoad %int %a
+         %19 = OpLoad %int %a None
          %20 = OpFunctionCall %int %tint_div_i32 %19 %int_2
-               OpStore %a %20
-         %23 = OpLoad %v4float %b
+               OpStore %a %20 None
+         %23 = OpLoad %v4float %b None
          %24 = OpVectorTimesMatrix %v4float %23 %25
-               OpStore %b %24
-         %27 = OpLoad %mat2v2float %c
+               OpStore %b %24 None
+         %27 = OpLoad %mat2v2float %c None
          %28 = OpMatrixTimesScalar %mat2v2float %27 %float_2
-               OpStore %c %28
+               OpStore %c %28 None
                OpReturn
                OpFunctionEnd
 %tint_div_i32 = OpFunction %int None %32

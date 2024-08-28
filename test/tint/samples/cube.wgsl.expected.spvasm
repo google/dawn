@@ -88,14 +88,14 @@
      %output = OpVariable %_ptr_Function_VertexOutput Function %26
          %27 = OpAccessChain %_ptr_Function_v4float %output %uint_1
          %31 = OpAccessChain %_ptr_Uniform_mat4v4float %1 %uint_0 %uint_0
-         %34 = OpLoad %mat4v4float %31
+         %34 = OpLoad %mat4v4float %31 None
          %35 = OpCompositeExtract %v4float %input 0
          %36 = OpMatrixTimesVector %v4float %34 %35
-               OpStore %27 %36
+               OpStore %27 %36 None
          %37 = OpAccessChain %_ptr_Function_v4float %output %uint_0
          %38 = OpCompositeExtract %v4float %input 1
-               OpStore %37 %38
-         %39 = OpLoad %VertexOutput %output
+               OpStore %37 %38 None
+         %39 = OpLoad %VertexOutput %output None
                OpReturnValue %39
                OpFunctionEnd
 %frag_main_inner = OpFunction %v4float None %42
@@ -105,21 +105,21 @@
                OpFunctionEnd
    %vtx_main = OpFunction %void None %46
          %47 = OpLabel
-         %48 = OpLoad %v4float %vtx_main_loc0_Input
-         %49 = OpLoad %v4float %vtx_main_loc1_Input
+         %48 = OpLoad %v4float %vtx_main_loc0_Input None
+         %49 = OpLoad %v4float %vtx_main_loc1_Input None
          %50 = OpCompositeConstruct %VertexInput %48 %49
          %51 = OpFunctionCall %VertexOutput %vtx_main_inner %50
          %52 = OpCompositeExtract %v4float %51 0
-               OpStore %vtx_main_loc0_Output %52
+               OpStore %vtx_main_loc0_Output %52 None
          %53 = OpCompositeExtract %v4float %51 1
-               OpStore %vtx_main_position_Output %53
-               OpStore %vtx_main___point_size_Output %float_1
+               OpStore %vtx_main_position_Output %53 None
+               OpStore %vtx_main___point_size_Output %float_1 None
                OpReturn
                OpFunctionEnd
   %frag_main = OpFunction %void None %46
          %56 = OpLabel
-         %57 = OpLoad %v4float %frag_main_loc0_Input
+         %57 = OpLoad %v4float %frag_main_loc0_Input None
          %58 = OpFunctionCall %v4float %frag_main_inner %57
-               OpStore %frag_main_loc0_Output %58
+               OpStore %frag_main_loc0_Output %58 None
                OpReturn
                OpFunctionEnd

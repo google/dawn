@@ -51,25 +51,25 @@
         %res = OpVariable %_ptr_Function_v2half Function
                OpStore %arg_0 %11
                OpStore %arg_1 %int_1
-         %17 = OpLoad %v2half %arg_0
-         %18 = OpLoad %int %arg_1
+         %17 = OpLoad %v2half %arg_0 None
+         %18 = OpLoad %int %arg_1 None
          %20 = OpBitcast %uint %18
          %21 = OpGroupNonUniformShuffle %v2half %uint_3 %17 %20
                OpStore %res %21
-         %24 = OpLoad %v2half %res
+         %24 = OpLoad %v2half %res None
                OpReturnValue %24
                OpFunctionEnd
 %fragment_main = OpFunction %void None %27
          %28 = OpLabel
          %29 = OpFunctionCall %v2half %subgroupShuffle_8c3fd2
          %30 = OpAccessChain %_ptr_StorageBuffer_v2half %1 %uint_0
-               OpStore %30 %29
+               OpStore %30 %29 None
                OpReturn
                OpFunctionEnd
 %compute_main = OpFunction %void None %27
          %34 = OpLabel
          %35 = OpFunctionCall %v2half %subgroupShuffle_8c3fd2
          %36 = OpAccessChain %_ptr_StorageBuffer_v2half %1 %uint_0
-               OpStore %36 %35
+               OpStore %36 %35 None
                OpReturn
                OpFunctionEnd

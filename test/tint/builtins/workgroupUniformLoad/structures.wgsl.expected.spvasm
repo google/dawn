@@ -44,7 +44,7 @@
         %foo = OpFunction %Outer None %15
          %16 = OpLabel
                OpControlBarrier %uint_2 %uint_2 %uint_264
-         %21 = OpLoad %Outer %v
+         %21 = OpLoad %Outer %v None
                OpControlBarrier %uint_2 %uint_2 %uint_264
                OpReturnValue %21
                OpFunctionEnd

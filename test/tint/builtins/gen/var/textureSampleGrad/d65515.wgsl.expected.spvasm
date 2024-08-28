@@ -97,52 +97,52 @@
                OpStore %arg_3 %int_1
                OpStore %arg_4 %23
                OpStore %arg_5 %23
-         %31 = OpLoad %8 %arg_0
-         %32 = OpLoad %11 %arg_1
-         %33 = OpLoad %v2float %arg_2
-         %34 = OpLoad %int %arg_3
-         %35 = OpLoad %v2float %arg_4
-         %36 = OpLoad %v2float %arg_5
+         %31 = OpLoad %8 %arg_0 None
+         %32 = OpLoad %11 %arg_1 None
+         %33 = OpLoad %v2float %arg_2 None
+         %34 = OpLoad %int %arg_3 None
+         %35 = OpLoad %v2float %arg_4 None
+         %36 = OpLoad %v2float %arg_5 None
          %37 = OpSampledImage %38 %31 %32
          %39 = OpConvertSToF %float %34
          %41 = OpCompositeConstruct %v3float %33 %39
          %42 = OpImageSampleExplicitLod %v4float %37 %41 Grad|ConstOffset %35 %36 %43
                OpStore %res %42
-         %47 = OpLoad %v4float %res
+         %47 = OpLoad %v4float %res None
                OpReturnValue %47
                OpFunctionEnd
 %fragment_main = OpFunction %void None %50
          %51 = OpLabel
          %52 = OpFunctionCall %v4float %textureSampleGrad_d65515
          %53 = OpAccessChain %_ptr_StorageBuffer_v4float %1 %uint_0
-               OpStore %53 %52
+               OpStore %53 %52 None
                OpReturn
                OpFunctionEnd
 %compute_main = OpFunction %void None %50
          %58 = OpLabel
          %59 = OpFunctionCall %v4float %textureSampleGrad_d65515
          %60 = OpAccessChain %_ptr_StorageBuffer_v4float %1 %uint_0
-               OpStore %60 %59
+               OpStore %60 %59 None
                OpReturn
                OpFunctionEnd
 %vertex_main_inner = OpFunction %VertexOutput None %63
          %64 = OpLabel
         %out = OpVariable %_ptr_Function_VertexOutput Function %67
          %68 = OpAccessChain %_ptr_Function_v4float %out %uint_0
-               OpStore %68 %69
+               OpStore %68 %69 None
          %70 = OpAccessChain %_ptr_Function_v4float %out %uint_1
          %72 = OpFunctionCall %v4float %textureSampleGrad_d65515
-               OpStore %70 %72
-         %73 = OpLoad %VertexOutput %out
+               OpStore %70 %72 None
+         %73 = OpLoad %VertexOutput %out None
                OpReturnValue %73
                OpFunctionEnd
 %vertex_main = OpFunction %void None %50
          %75 = OpLabel
          %76 = OpFunctionCall %VertexOutput %vertex_main_inner
          %77 = OpCompositeExtract %v4float %76 0
-               OpStore %vertex_main_position_Output %77
+               OpStore %vertex_main_position_Output %77 None
          %78 = OpCompositeExtract %v4float %76 1
-               OpStore %vertex_main_loc0_Output %78
-               OpStore %vertex_main___point_size_Output %float_1
+               OpStore %vertex_main_loc0_Output %78 None
+               OpStore %vertex_main___point_size_Output %float_1 None
                OpReturn
                OpFunctionEnd

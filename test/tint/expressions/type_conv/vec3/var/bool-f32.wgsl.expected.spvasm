@@ -26,7 +26,7 @@
          %17 = OpConstantNull %v3float
           %f = OpFunction %void None %9
          %10 = OpLabel
-         %11 = OpLoad %v3bool %u
+         %11 = OpLoad %v3bool %u None
           %v = OpSelect %v3float %11 %15 %17
                OpReturn
                OpFunctionEnd

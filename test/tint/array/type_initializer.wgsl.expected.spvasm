@@ -130,6 +130,6 @@
          %94 = OpCompositeExtract %int %subexpr_nested_nonempty_with_expr 0
          %95 = OpIAdd %int %93 %94
          %96 = OpAccessChain %_ptr_StorageBuffer_int %1 %uint_0
-               OpStore %96 %95
+               OpStore %96 %95 None
                OpReturn
                OpFunctionEnd

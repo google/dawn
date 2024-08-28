@@ -43,23 +43,23 @@
 %textureDimensions_4b26ef = OpFunction %v3uint None %11
          %12 = OpLabel
         %res = OpVariable %_ptr_Function_v3uint Function
-         %13 = OpLoad %8 %arg_0
+         %13 = OpLoad %8 %arg_0 None
          %14 = OpImageQuerySize %v3uint %13
                OpStore %res %14
-         %17 = OpLoad %v3uint %res
+         %17 = OpLoad %v3uint %res None
                OpReturnValue %17
                OpFunctionEnd
 %fragment_main = OpFunction %void None %20
          %21 = OpLabel
          %22 = OpFunctionCall %v3uint %textureDimensions_4b26ef
          %23 = OpAccessChain %_ptr_StorageBuffer_v3uint %1 %uint_0
-               OpStore %23 %22
+               OpStore %23 %22 None
                OpReturn
                OpFunctionEnd
 %compute_main = OpFunction %void None %20
          %27 = OpLabel
          %28 = OpFunctionCall %v3uint %textureDimensions_4b26ef
          %29 = OpAccessChain %_ptr_StorageBuffer_v3uint %1 %uint_0
-               OpStore %29 %28
+               OpStore %29 %28 None
                OpReturn
                OpFunctionEnd

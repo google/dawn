@@ -38,14 +38,14 @@
          %13 = OpLabel
           %b = OpVariable %_ptr_Function_int Function
          %_b = OpVariable %_ptr_Function_int Function
-         %14 = OpLoad %int %a
+         %14 = OpLoad %int %a None
                OpStore %b %14
-         %17 = OpLoad %int %_a
+         %17 = OpLoad %int %_a None
                OpStore %_b %17
-         %19 = OpLoad %int %b
-         %20 = OpLoad %int %_b
+         %19 = OpLoad %int %b None
+         %20 = OpLoad %int %_b None
          %21 = OpIAdd %int %19 %20
          %22 = OpAccessChain %_ptr_StorageBuffer_int %1 %uint_0
-               OpStore %22 %21
+               OpStore %22 %21 None
                OpReturn
                OpFunctionEnd

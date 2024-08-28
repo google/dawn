@@ -280,7 +280,7 @@
       %arg_0 = OpVariable %_ptr_Function_half Function
         %res = OpVariable %_ptr_Function_half Function
                OpStore %arg_0 %half_0x0p_0
-         %69 = OpLoad %half %arg_0
+         %69 = OpLoad %half %arg_0 None
          %70 = OpExtInst %half %71 Asinh %69
                OpStore %res %70
                OpReturn
@@ -307,33 +307,33 @@
    %position = OpVariable %_ptr_Function_v3float Function
         %out = OpVariable %_ptr_Function_VertexOutput Function %113
          %90 = OpAccessChain %_ptr_Uniform_v3float %6 %uint_0 %uint_1
-         %94 = OpLoad %v3float %90
+         %94 = OpLoad %v3float %90 None
          %95 = OpAccessChain %_ptr_Uniform_v3float %6 %uint_0 %uint_2
-         %97 = OpLoad %v3float %95
+         %97 = OpLoad %v3float %95 None
          %99 = OpCompositeConstruct %mat2v3float %94 %97
         %100 = OpCompositeExtract %v2float %in 2
         %101 = OpMatrixTimesVector %v3float %99 %100
                OpStore %quad_pos %101
         %104 = OpCompositeExtract %v3float %in 0
-        %105 = OpLoad %v3float %quad_pos
+        %105 = OpLoad %v3float %quad_pos None
         %106 = OpCompositeConstruct %v3float %float_0_00999999978 %float_0_00999999978 %float_0_00999999978
         %108 = OpFAdd %v3float %105 %106
         %109 = OpFSub %v3float %104 %108
                OpStore %position %109
         %114 = OpAccessChain %_ptr_Function_v4float %out %uint_0
         %116 = OpAccessChain %_ptr_Uniform_mat4v4float %6 %uint_0 %uint_0
-        %118 = OpLoad %mat4v4float %116
-        %119 = OpLoad %v3float %position
+        %118 = OpLoad %mat4v4float %116 None
+        %119 = OpLoad %v3float %position None
         %120 = OpCompositeConstruct %v4float %119 %float_1
         %122 = OpMatrixTimesVector %v4float %118 %120
-               OpStore %114 %122
+               OpStore %114 %122 None
         %123 = OpAccessChain %_ptr_Function_v4float %out %uint_1
         %124 = OpCompositeExtract %v4float %in 1
-               OpStore %123 %124
+               OpStore %123 %124 None
         %125 = OpAccessChain %_ptr_Function_v2float %out %uint_2
         %127 = OpCompositeExtract %v2float %in 2
-               OpStore %125 %127
-        %128 = OpLoad %VertexOutput %out
+               OpStore %125 %127 None
+        %128 = OpLoad %VertexOutput %out None
                OpReturnValue %128
                OpFunctionEnd
 %simulate_inner = OpFunction %void None %131
@@ -341,21 +341,21 @@
         %132 = OpLabel
    %particle = OpVariable %_ptr_Function_Particle Function
         %133 = OpAccessChain %_ptr_Uniform_v4float %13 %uint_0 %uint_1
-        %135 = OpLoad %v4float %133
+        %135 = OpLoad %v4float %133 None
         %136 = OpVectorShuffle %v2float %135 %135 0 1
         %137 = OpVectorShuffle %v2uint %GlobalInvocationID %GlobalInvocationID 0 1
         %139 = OpConvertUToF %v2float %137
         %140 = OpFMul %v2float %136 %139
         %141 = OpAccessChain %_ptr_Uniform_v4float %13 %uint_0 %uint_1
-        %142 = OpLoad %v4float %141
+        %142 = OpLoad %v4float %141 None
         %143 = OpVectorShuffle %v2float %142 %142 2 3
         %144 = OpFMul %v2float %140 %143
-               OpStore %rand_seed %144
+               OpStore %rand_seed %144 None
         %idx = OpCompositeExtract %uint %GlobalInvocationID 0
         %146 = OpAccessChain %_ptr_StorageBuffer_Particle %data %uint_0 %idx
-        %148 = OpLoad %Particle %146
+        %148 = OpLoad %Particle %146 None
                OpStore %particle %148
-        %151 = OpLoad %Particle %particle
+        %151 = OpLoad %Particle %particle None
         %153 = OpCompositeConstruct %_arr_uint_uint_1 %idx
         %154 = OpFunctionCall %void %tint_store_and_preserve_padding %153 %151
                OpReturn
@@ -364,7 +364,7 @@
       %coord = OpFunctionParameter %v3uint
         %158 = OpLabel
         %159 = OpVectorShuffle %v2uint %coord %coord 0 1
-        %160 = OpLoad %41 %tex_out
+        %160 = OpLoad %41 %tex_out None
         %161 = OpImageQuerySize %v2uint %160
         %162 = OpULessThan %v2bool %159 %161
         %165 = OpAll %bool %162
@@ -374,7 +374,7 @@
         %168 = OpCompositeExtract %uint %coord 0
         %169 = OpCompositeExtract %uint %coord 1
         %170 = OpAccessChain %_ptr_Uniform_uint %25 %uint_0 %uint_0
-        %172 = OpLoad %uint %170
+        %172 = OpLoad %uint %170 None
         %173 = OpIMul %uint %169 %172
         %174 = OpBitwiseAnd %uint %173 %uint_31
  %dst_offset = OpShiftLeftLogical %uint %168 %174
@@ -384,33 +384,33 @@
         %180 = OpBitwiseAnd %uint %uint_2 %uint_31
         %181 = OpShiftRightLogical %uint %179 %180
         %182 = OpAccessChain %_ptr_Uniform_uint %25 %uint_0 %uint_0
-        %183 = OpLoad %uint %182
+        %183 = OpLoad %uint %182 None
         %184 = OpIMul %uint %181 %183
  %src_offset = OpIAdd %uint %178 %184
         %186 = OpBitwiseAnd %uint %uint_0 %uint_31
         %187 = OpShiftLeftLogical %uint %src_offset %186
         %188 = OpAccessChain %_ptr_StorageBuffer_float %buf_in %uint_0 %187
-          %a = OpLoad %float %188
+          %a = OpLoad %float %188 None
         %191 = OpIAdd %uint %src_offset %uint_1
         %192 = OpAccessChain %_ptr_StorageBuffer_float %buf_in %uint_0 %191
-          %b = OpLoad %float %192
+          %b = OpLoad %float %192 None
         %194 = OpIAdd %uint %src_offset %uint_1
         %195 = OpAccessChain %_ptr_Uniform_uint %25 %uint_0 %uint_0
-        %196 = OpLoad %uint %195
+        %196 = OpLoad %uint %195 None
         %197 = OpIAdd %uint %194 %196
         %198 = OpAccessChain %_ptr_StorageBuffer_float %buf_in %uint_0 %197
-          %c = OpLoad %float %198
+          %c = OpLoad %float %198 None
         %200 = OpIAdd %uint %src_offset %uint_1
         %201 = OpAccessChain %_ptr_Uniform_uint %25 %uint_0 %uint_0
-        %202 = OpLoad %uint %201
+        %202 = OpLoad %uint %201 None
         %203 = OpIAdd %uint %200 %202
         %204 = OpAccessChain %_ptr_StorageBuffer_float %buf_in %uint_0 %203
-          %d = OpLoad %float %204
+          %d = OpLoad %float %204 None
         %206 = OpCompositeConstruct %v4float %a %b %c %d
         %sum = OpDot %float %206 %208
         %209 = OpAccessChain %_ptr_StorageBuffer_float_0 %buf_out %uint_0 %dst_offset
         %211 = OpFRem %float %sum %float_4
-               OpStore %209 %211
+               OpStore %209 %211 None
         %213 = OpFMul %float %a %b
         %214 = OpFDiv %float %a %b
         %215 = OpFAdd %float %214 %c
@@ -418,7 +418,7 @@
         %217 = OpExtInst %float %71 FMax %sum %float_0
         %219 = OpCompositeConstruct %v4float %217 %217 %217 %217
 %probabilities = OpFAdd %v4float %216 %219
-        %221 = OpLoad %41 %tex_out
+        %221 = OpLoad %41 %tex_out None
         %222 = OpVectorShuffle %v2uint %coord %coord 0 1
         %225 = OpBitcast %v2int %222
                OpImageWrite %221 %225 %probabilities None
@@ -433,50 +433,50 @@
         %231 = OpCompositeExtract %uint %target_indices 0
         %232 = OpAccessChain %_ptr_StorageBuffer_v3float %data %uint_0 %231 %uint_0
         %234 = OpCompositeExtract %v3float %value_param 0
-               OpStore %232 %234
+               OpStore %232 %234 None
         %235 = OpAccessChain %_ptr_StorageBuffer_float_0 %data %uint_0 %231 %uint_1
         %236 = OpCompositeExtract %float %value_param 1
-               OpStore %235 %236
+               OpStore %235 %236 None
         %237 = OpAccessChain %_ptr_StorageBuffer_v4float %data %uint_0 %231 %uint_2
         %239 = OpCompositeExtract %v4float %value_param 2
-               OpStore %237 %239
+               OpStore %237 %239 None
         %240 = OpAccessChain %_ptr_StorageBuffer_v2float %data %uint_0 %231 %uint_3
         %243 = OpCompositeExtract %v2float %value_param 3
-               OpStore %240 %243
+               OpStore %240 %243 None
                OpReturn
                OpFunctionEnd
 %vertex_main = OpFunction %void None %63
         %245 = OpLabel
         %246 = OpFunctionCall %v4float %vertex_main_inner
-               OpStore %vertex_main_position_Output %246
-               OpStore %vertex_main___point_size_Output %float_1
+               OpStore %vertex_main_position_Output %246 None
+               OpStore %vertex_main___point_size_Output %float_1 None
                OpReturn
                OpFunctionEnd
     %vs_main = OpFunction %void None %63
         %248 = OpLabel
-        %249 = OpLoad %v3float %vs_main_loc0_Input
-        %250 = OpLoad %v4float %vs_main_loc1_Input
-        %251 = OpLoad %v2float %vs_main_loc2_Input
+        %249 = OpLoad %v3float %vs_main_loc0_Input None
+        %250 = OpLoad %v4float %vs_main_loc1_Input None
+        %251 = OpLoad %v2float %vs_main_loc2_Input None
         %252 = OpCompositeConstruct %VertexInput %249 %250 %251
         %253 = OpFunctionCall %VertexOutput %vs_main_inner %252
         %254 = OpCompositeExtract %v4float %253 0
-               OpStore %vs_main_position_Output %254
+               OpStore %vs_main_position_Output %254 None
         %255 = OpCompositeExtract %v4float %253 1
-               OpStore %vs_main_loc0_Output %255
+               OpStore %vs_main_loc0_Output %255 None
         %256 = OpCompositeExtract %v2float %253 2
-               OpStore %vs_main_loc1_Output %256
-               OpStore %vs_main___point_size_Output %float_1
+               OpStore %vs_main_loc1_Output %256 None
+               OpStore %vs_main___point_size_Output %float_1 None
                OpReturn
                OpFunctionEnd
    %simulate = OpFunction %void None %63
         %258 = OpLabel
-        %259 = OpLoad %v3uint %simulate_global_invocation_id_Input
+        %259 = OpLoad %v3uint %simulate_global_invocation_id_Input None
         %260 = OpFunctionCall %void %simulate_inner %259
                OpReturn
                OpFunctionEnd
 %export_level = OpFunction %void None %63
         %262 = OpLabel
-        %263 = OpLoad %v3uint %export_level_global_invocation_id_Input
+        %263 = OpLoad %v3uint %export_level_global_invocation_id_Input None
         %264 = OpFunctionCall %void %export_level_inner %263
                OpReturn
                OpFunctionEnd

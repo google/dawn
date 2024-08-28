@@ -85,10 +85,10 @@
          %30 = OpCompositeExtract %uint %GlobalInvocationID 0
          %31 = OpIAdd %uint %29 %30
                OpStore %flatIndex %31
-         %34 = OpLoad %uint %flatIndex
+         %34 = OpLoad %uint %flatIndex None
          %35 = OpIMul %uint %34 %uint_1
-               OpStore %flatIndex %35
-         %37 = OpLoad %8 %myTexture
+               OpStore %flatIndex %35 None
+         %37 = OpLoad %8 %myTexture None
          %38 = OpVectorShuffle %v2uint %GlobalInvocationID %GlobalInvocationID 0 1
          %41 = OpBitcast %v2int %38
          %43 = OpCompositeConstruct %v3int %41 %int_0
@@ -102,32 +102,32 @@
                OpLoopMerge %53 %51 None
                OpBranch %50
          %50 = OpLabel
-         %56 = OpLoad %uint %i
+         %56 = OpLoad %uint %i None
          %57 = OpULessThan %bool %56 %uint_1
                OpSelectionMerge %59 None
                OpBranchConditional %57 %59 %60
          %60 = OpLabel
                OpBranch %53
          %59 = OpLabel
-         %61 = OpLoad %uint %flatIndex
-         %62 = OpLoad %uint %i
+         %61 = OpLoad %uint %flatIndex None
+         %62 = OpLoad %uint %i None
          %63 = OpIAdd %uint %61 %62
          %64 = OpAccessChain %_ptr_StorageBuffer_float %result %uint_0 %63
          %66 = OpAccessChain %_ptr_Function_float %texel %uint_0
-         %68 = OpLoad %float %66
-               OpStore %64 %68
+         %68 = OpLoad %float %66 None
+               OpStore %64 %68 None
                OpBranch %51
          %51 = OpLabel
-         %69 = OpLoad %uint %i
+         %69 = OpLoad %uint %i None
          %70 = OpIAdd %uint %69 %uint_1
-               OpStore %i %70
+               OpStore %i %70 None
                OpBranch %52
          %53 = OpLabel
                OpReturn
                OpFunctionEnd
        %main = OpFunction %void None %72
          %73 = OpLabel
-         %74 = OpLoad %v3uint %main_global_invocation_id_Input
+         %74 = OpLoad %v3uint %main_global_invocation_id_Input None
          %75 = OpFunctionCall %void %main_inner %74
                OpReturn
                OpFunctionEnd

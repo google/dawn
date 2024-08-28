@@ -21,7 +21,7 @@
           %x = OpFunction %void None %7
           %8 = OpLabel
           %9 = OpAccessChain %_ptr_Private_float %v
-               OpStore %9 %float_0
+               OpStore %9 %float_0 None
                OpReturn
                OpFunctionEnd
           %g = OpFunction %void None %7

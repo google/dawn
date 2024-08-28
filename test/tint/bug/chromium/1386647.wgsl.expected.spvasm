@@ -51,7 +51,7 @@
                OpFunctionEnd
           %f = OpFunction %void None %30
          %31 = OpLabel
-         %32 = OpLoad %v3uint %f_global_invocation_id_Input
+         %32 = OpLoad %v3uint %f_global_invocation_id_Input None
          %33 = OpFunctionCall %void %f_inner %32
                OpReturn
                OpFunctionEnd

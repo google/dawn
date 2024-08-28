@@ -55,15 +55,15 @@
        %main = OpFunction %void None %12
          %13 = OpLabel
          %14 = OpAccessChain %_ptr_Uniform_v4half %1 %uint_0
-         %18 = OpLoad %v4half %14
+         %18 = OpLoad %v4half %14 None
          %19 = OpAccessChain %_ptr_Uniform_v4half %1 %uint_1
-         %21 = OpLoad %v4half %19
+         %21 = OpLoad %v4half %19 None
          %22 = OpAccessChain %_ptr_Uniform_v4half %1 %uint_2
-         %24 = OpLoad %v4half %22
+         %24 = OpLoad %v4half %22 None
          %25 = OpAccessChain %_ptr_Uniform_v4half %1 %uint_3
-         %27 = OpLoad %v4half %25
+         %27 = OpLoad %v4half %25 None
           %x = OpCompositeConstruct %mat4v4half %18 %21 %24 %27
          %29 = OpAccessChain %_ptr_StorageBuffer_mat4v4half %6 %uint_0
-               OpStore %29 %x
+               OpStore %29 %x None
                OpReturn
                OpFunctionEnd

@@ -339,8 +339,8 @@ TEST_F(SpirvWriterTest, Function_ShaderIO_VertexPointSize) {
        %main = OpFunction %void None %14
          %15 = OpLabel
          %16 = OpFunctionCall %v4float %main_inner
-               OpStore %main_position_Output %16
-               OpStore %main___point_size_Output %float_1
+               OpStore %main_position_Output %16 None
+               OpStore %main___point_size_Output %float_1 None
                OpReturn
                OpFunctionEnd
 )");
@@ -366,9 +366,9 @@ TEST_F(SpirvWriterTest, Function_ShaderIO_F16_Input_WithCapability) {
     EXPECT_INST(R"(
        %main = OpFunction %void None %16
          %17 = OpLabel
-         %18 = OpLoad %v4half %main_loc1_Input
+         %18 = OpLoad %v4half %main_loc1_Input None
          %19 = OpFunctionCall %v4float %main_inner %18
-               OpStore %main_loc2_Output %19
+               OpStore %main_loc2_Output %19 None
                OpReturn
                OpFunctionEnd
 )");
@@ -393,10 +393,10 @@ TEST_F(SpirvWriterTest, Function_ShaderIO_F16_Input_WithoutCapability) {
     EXPECT_INST(R"(
        %main = OpFunction %void None %16
          %17 = OpLabel
-         %18 = OpLoad %v4float %main_loc1_Input
+         %18 = OpLoad %v4float %main_loc1_Input None
          %19 = OpFConvert %v4half %18
          %20 = OpFunctionCall %v4float %main_inner %19
-               OpStore %main_loc2_Output %20
+               OpStore %main_loc2_Output %20 None
                OpReturn
                OpFunctionEnd
 )");
@@ -422,9 +422,9 @@ TEST_F(SpirvWriterTest, Function_ShaderIO_F16_Output_WithCapability) {
     EXPECT_INST(R"(
        %main = OpFunction %void None %16
          %17 = OpLabel
-         %18 = OpLoad %v4float %main_loc1_Input
+         %18 = OpLoad %v4float %main_loc1_Input None
          %19 = OpFunctionCall %v4half %main_inner %18
-               OpStore %main_loc2_Output %19
+               OpStore %main_loc2_Output %19 None
                OpReturn
                OpFunctionEnd
 )");
@@ -449,10 +449,10 @@ TEST_F(SpirvWriterTest, Function_ShaderIO_F16_Output_WithoutCapability) {
     EXPECT_INST(R"(
        %main = OpFunction %void None %16
          %17 = OpLabel
-         %18 = OpLoad %v4float %main_loc1_Input
+         %18 = OpLoad %v4float %main_loc1_Input None
          %19 = OpFunctionCall %v4half %main_inner %18
          %20 = OpFConvert %v4float %19
-               OpStore %main_loc2_Output %20
+               OpStore %main_loc2_Output %20 None
                OpReturn
                OpFunctionEnd
 )");
@@ -510,9 +510,9 @@ TEST_F(SpirvWriterTest, Function_ShaderIO_DualSourceBlend) {
          %15 = OpLabel
          %16 = OpFunctionCall %Outputs %main_inner
          %17 = OpCompositeExtract %float %16 0
-               OpStore %main_loc0_idx0_Output %17
+               OpStore %main_loc0_idx0_Output %17 None
          %18 = OpCompositeExtract %float %16 1
-               OpStore %main_loc0_idx1_Output %18
+               OpStore %main_loc0_idx1_Output %18 None
                OpReturn
                OpFunctionEnd
 )");
@@ -553,8 +553,8 @@ TEST_F(SpirvWriterTest, Function_PassMatrixByPointer) {
      %scalar = OpFunctionParameter %float
          %14 = OpFunctionParameter %_ptr_Function_mat3v3float
          %16 = OpLabel
-         %17 = OpLoad %mat3v3float %14
-         %18 = OpLoad %mat3v3float %12
+         %17 = OpLoad %mat3v3float %14 None
+         %18 = OpLoad %mat3v3float %12 None
          %19 = OpMatrixTimesScalar %mat3v3float %18 %scalar
          %20 = OpCompositeExtract %v3float %19 0
          %21 = OpCompositeExtract %v3float %17 0
@@ -575,9 +575,9 @@ TEST_F(SpirvWriterTest, Function_PassMatrixByPointer) {
          %40 = OpVariable %_ptr_Function_mat3v3float Function
          %41 = OpVariable %_ptr_Function_mat3v3float Function
          %33 = OpAccessChain %_ptr_Private_mat3v3float %var %uint_0
-         %36 = OpLoad %mat3v3float %33
+         %36 = OpLoad %mat3v3float %33 None
          %37 = OpAccessChain %_ptr_Private_mat3v3float %var %uint_1
-         %39 = OpLoad %mat3v3float %37
+         %39 = OpLoad %mat3v3float %37 None
                OpStore %40 %36
                OpStore %41 %39
          %42 = OpFunctionCall %mat3v3float %target %40 %float_2 %41

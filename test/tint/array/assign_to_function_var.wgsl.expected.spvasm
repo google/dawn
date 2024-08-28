@@ -109,28 +109,28 @@
         %dst = OpVariable %_ptr_Function__arr_v4int_uint_4 Function %src_let
  %dst_nested = OpVariable %_ptr_Function__arr__arr__arr_int_uint_2_uint_3_uint_4 Function %62
  %src_nested = OpVariable %_ptr_Function__arr__arr__arr_int_uint_2_uint_3_uint_4 Function %62
-               OpStore %dst %35
-               OpStore %dst %src_param
+               OpStore %dst %35 None
+               OpStore %dst %src_param None
          %42 = OpFunctionCall %_arr_v4int_uint_4 %ret_arr
-               OpStore %dst %42
-               OpStore %dst %src_let
-         %43 = OpLoad %_arr_v4int_uint_4 %src_function
-               OpStore %dst %43
-         %44 = OpLoad %_arr_v4int_uint_4 %src_private
-               OpStore %dst %44
-         %45 = OpLoad %_arr_v4int_uint_4 %src_workgroup
-               OpStore %dst %45
+               OpStore %dst %42 None
+               OpStore %dst %src_let None
+         %43 = OpLoad %_arr_v4int_uint_4 %src_function None
+               OpStore %dst %43 None
+         %44 = OpLoad %_arr_v4int_uint_4 %src_private None
+               OpStore %dst %44 None
+         %45 = OpLoad %_arr_v4int_uint_4 %src_workgroup None
+               OpStore %dst %45 None
          %46 = OpFunctionCall %S %ret_struct_arr
          %47 = OpCompositeExtract %_arr_v4int_uint_4 %46 0
-               OpStore %dst %47
+               OpStore %dst %47 None
          %48 = OpAccessChain %_ptr_Uniform__arr_v4int_uint_4 %11 %uint_0 %uint_0
-         %51 = OpLoad %_arr_v4int_uint_4 %48
-               OpStore %dst %51
+         %51 = OpLoad %_arr_v4int_uint_4 %48 None
+               OpStore %dst %51 None
          %52 = OpAccessChain %_ptr_StorageBuffer__arr_v4int_uint_4 %15 %uint_0 %uint_0
-         %54 = OpLoad %_arr_v4int_uint_4 %52
-               OpStore %dst %54
-         %64 = OpLoad %_arr__arr__arr_int_uint_2_uint_3_uint_4 %src_nested
-               OpStore %dst_nested %64
+         %54 = OpLoad %_arr_v4int_uint_4 %52 None
+               OpStore %dst %54 None
+         %64 = OpLoad %_arr__arr__arr_int_uint_2_uint_3_uint_4 %src_nested None
+               OpStore %dst_nested %64 None
                OpReturn
                OpFunctionEnd
  %main_inner = OpFunction %void None %67
@@ -151,7 +151,7 @@
                OpBranch %73
          %78 = OpLabel
          %80 = OpAccessChain %_ptr_Workgroup_v4int %src_workgroup %74
-               OpStore %80 %82
+               OpStore %80 %82 None
                OpBranch %71
          %71 = OpLabel
          %75 = OpIAdd %uint %74 %uint_1
@@ -163,7 +163,7 @@
                OpFunctionEnd
        %main = OpFunction %void None %88
          %89 = OpLabel
-         %90 = OpLoad %uint %main_local_invocation_index_Input
+         %90 = OpLoad %uint %main_local_invocation_index_Input None
          %91 = OpFunctionCall %void %main_inner %90
                OpReturn
                OpFunctionEnd

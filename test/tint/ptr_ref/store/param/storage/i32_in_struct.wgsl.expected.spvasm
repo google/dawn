@@ -33,7 +33,7 @@
        %func = OpFunction %void None %8
           %9 = OpLabel
          %10 = OpAccessChain %_ptr_StorageBuffer_int %1 %uint_0 %uint_0
-               OpStore %10 %int_42
+               OpStore %10 %int_42 None
                OpReturn
                OpFunctionEnd
        %main = OpFunction %void None %8

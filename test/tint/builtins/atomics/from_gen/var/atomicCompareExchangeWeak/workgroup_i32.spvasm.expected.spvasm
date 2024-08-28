@@ -67,17 +67,17 @@
                OpStore %arg_1 %int_0
                OpStore %arg_2 %int_0
                OpStore %res %22
-               OpStore %arg_1 %int_1
-               OpStore %arg_2 %int_1
-       %x_22 = OpLoad %int %arg_2
-       %x_23 = OpLoad %int %arg_1
+               OpStore %arg_1 %int_1 None
+               OpStore %arg_2 %int_1 None
+       %x_22 = OpLoad %int %arg_2 None
+       %x_23 = OpLoad %int %arg_1 None
          %26 = OpAtomicCompareExchange %int %arg_0 %uint_2 %uint_0 %uint_0 %x_22 %x_23
          %29 = OpIEqual %bool %26 %x_23
          %31 = OpCompositeConstruct %__atomic_compare_exchange_result_i32 %26 %29
 %old_value_1 = OpCompositeExtract %int %31 0
          %33 = OpIEqual %bool %old_value_1 %x_22
          %34 = OpCompositeConstruct %x__atomic_compare_exchange_resulti32 %old_value_1 %33
-               OpStore %res %34
+               OpStore %res %34 None
                OpReturn
                OpFunctionEnd
 %compute_main_inner = OpFunction %void None %37
@@ -90,7 +90,7 @@
                OpFunctionEnd
 %compute_main_1 = OpFunction %void None %12
          %44 = OpLabel
-       %x_41 = OpLoad %uint %local_invocation_index_1
+       %x_41 = OpLoad %uint %local_invocation_index_1 None
          %46 = OpFunctionCall %void %compute_main_inner %x_41
                OpReturn
                OpFunctionEnd
@@ -105,13 +105,13 @@
                OpBranch %51
          %51 = OpLabel
                OpControlBarrier %uint_2 %uint_2 %uint_264
-               OpStore %local_invocation_index_1 %local_invocation_index_1_param
+               OpStore %local_invocation_index_1 %local_invocation_index_1_param None
          %55 = OpFunctionCall %void %compute_main_1
                OpReturn
                OpFunctionEnd
 %compute_main = OpFunction %void None %12
          %57 = OpLabel
-         %58 = OpLoad %uint %compute_main_local_invocation_index_Input
+         %58 = OpLoad %uint %compute_main_local_invocation_index_Input None
          %59 = OpFunctionCall %void %compute_main_inner_0 %58
                OpReturn
                OpFunctionEnd

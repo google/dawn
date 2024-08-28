@@ -70,10 +70,10 @@
 %_ptr_Uniform_float = OpTypePointer Uniform %float
           %i = OpFunction %int None %18
          %19 = OpLabel
-         %20 = OpLoad %int %counter
+         %20 = OpLoad %int %counter None
          %21 = OpIAdd %int %20 %int_1
-               OpStore %counter %21
-         %23 = OpLoad %int %counter
+               OpStore %counter %21 None
+         %23 = OpLoad %int %counter None
                OpReturnValue %23
                OpFunctionEnd
           %f = OpFunction %void None %26
@@ -87,14 +87,14 @@
 %p_a_i_a_i_m = OpAccessChain %_ptr_Uniform_mat3v4float %p_a_i_a_i %uint_0
          %41 = OpFunctionCall %int %i
 %p_a_i_a_i_m_i = OpAccessChain %_ptr_Uniform_v4float %p_a_i_a_i_m %41
-        %l_a = OpLoad %_arr_Outer_uint_4 %p_a
-      %l_a_i = OpLoad %Outer %p_a_i
-    %l_a_i_a = OpLoad %_arr_Inner_uint_4 %p_a_i_a
-  %l_a_i_a_i = OpLoad %Inner %p_a_i_a_i
-%l_a_i_a_i_m = OpLoad %mat3v4float %p_a_i_a_i_m
-%l_a_i_a_i_m_i = OpLoad %v4float %p_a_i_a_i_m_i
+        %l_a = OpLoad %_arr_Outer_uint_4 %p_a None
+      %l_a_i = OpLoad %Outer %p_a_i None
+    %l_a_i_a = OpLoad %_arr_Inner_uint_4 %p_a_i_a None
+  %l_a_i_a_i = OpLoad %Inner %p_a_i_a_i None
+%l_a_i_a_i_m = OpLoad %mat3v4float %p_a_i_a_i_m None
+%l_a_i_a_i_m_i = OpLoad %v4float %p_a_i_a_i_m_i None
          %50 = OpFunctionCall %int %i
          %51 = OpAccessChain %_ptr_Uniform_float %p_a_i_a_i_m_i %50
-%l_a_i_a_i_m_i_i = OpLoad %float %51
+%l_a_i_a_i_m_i_i = OpLoad %float %51 None
                OpReturn
                OpFunctionEnd

@@ -64,27 +64,27 @@
          %18 = OpLabel
         %vb2 = OpVariable %_ptr_Function_v2bool Function %23
          %24 = OpAccessChain %_ptr_Private_float %my_global %uint_2
-         %28 = OpLoad %float %24
+         %28 = OpLoad %float %24 None
          %29 = OpFOrdNotEqual %bool %28 %float_0
          %31 = OpAccessChain %_ptr_Function_bool %vb2 %uint_0
-               OpStore %31 %29
+               OpStore %31 %29 None
          %34 = OpAccessChain %_ptr_Uniform_float %6 %uint_0
-         %36 = OpLoad %float %34
+         %36 = OpLoad %float %34 None
          %37 = OpFOrdEqual %bool %36 %float_n1
          %39 = OpAccessChain %_ptr_Function_bool %vb2 %uint_0
-               OpStore %39 %37
+               OpStore %39 %37 None
          %40 = OpAccessChain %_ptr_Uniform_float %6 %uint_0
-         %41 = OpLoad %float %40
+         %41 = OpLoad %float %40 None
          %42 = OpFOrdEqual %bool %41 %float_n1
          %43 = OpCompositeConstruct %v2bool %42 %false
-               OpStore %vb2 %43
+               OpStore %vb2 %43 None
          %45 = OpAccessChain %_ptr_Function_bool %vb2 %uint_0
-         %46 = OpLoad %bool %45
+         %46 = OpLoad %bool %45 None
                OpSelectionMerge %47 None
                OpBranchConditional %46 %48 %47
          %48 = OpLabel
-         %49 = OpLoad %11 %my_texture
-         %50 = OpLoad %14 %my_sampler
+         %49 = OpLoad %11 %my_texture None
+         %50 = OpLoad %14 %my_sampler None
          %51 = OpSampledImage %52 %49 %50
           %r = OpImageSampleImplicitLod %v4float %51 %54 Bias %float_0
                OpBranch %47
@@ -95,23 +95,23 @@
          %57 = OpLabel
       %vb2_0 = OpVariable %_ptr_Function_v2bool Function %23
          %59 = OpAccessChain %_ptr_Private_float %my_global %uint_2
-         %60 = OpLoad %float %59
+         %60 = OpLoad %float %59 None
          %61 = OpFOrdNotEqual %bool %60 %float_0
          %62 = OpAccessChain %_ptr_Function_bool %vb2_0 %uint_0
-               OpStore %62 %61
+               OpStore %62 %61 None
          %63 = OpAccessChain %_ptr_Uniform_float %6 %uint_0
-         %64 = OpLoad %float %63
+         %64 = OpLoad %float %63 None
          %65 = OpFOrdEqual %bool %64 %float_n1
          %66 = OpAccessChain %_ptr_Function_bool %vb2_0 %uint_0
-               OpStore %66 %65
-               OpStore %vb2_0 %23
+               OpStore %66 %65 None
+               OpStore %vb2_0 %23 None
          %67 = OpAccessChain %_ptr_Function_bool %vb2_0 %uint_0
-         %68 = OpLoad %bool %67
+         %68 = OpLoad %bool %67 None
                OpSelectionMerge %69 None
                OpBranchConditional %68 %70 %69
          %70 = OpLabel
-         %71 = OpLoad %11 %my_texture
-         %72 = OpLoad %14 %my_sampler
+         %71 = OpLoad %11 %my_texture None
+         %72 = OpLoad %14 %my_sampler None
          %73 = OpSampledImage %52 %71 %72
         %r_0 = OpImageSampleImplicitLod %v4float %73 %54 Bias %float_0
                OpBranch %69

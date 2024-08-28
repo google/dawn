@@ -38,16 +38,16 @@
       %arg_0 = OpVariable %_ptr_Function_v4float Function
         %res = OpVariable %_ptr_Function_v4float Function
                OpStore %arg_0 %11
-         %13 = OpLoad %v4float %arg_0
+         %13 = OpLoad %v4float %arg_0 None
          %14 = OpFwidthCoarse %v4float %13
                OpStore %res %14
-         %16 = OpLoad %v4float %res
+         %16 = OpLoad %v4float %res None
                OpReturnValue %16
                OpFunctionEnd
 %fragment_main = OpFunction %void None %19
          %20 = OpLabel
          %21 = OpFunctionCall %v4float %fwidthCoarse_4e4fc4
          %22 = OpAccessChain %_ptr_StorageBuffer_v4float %1 %uint_0
-               OpStore %22 %21
+               OpStore %22 %21 None
                OpReturn
                OpFunctionEnd

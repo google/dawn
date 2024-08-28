@@ -58,7 +58,7 @@
       %arg_0 = OpVariable %_ptr_Function_v4float Function
         %res = OpVariable %_ptr_Function___frexp_result_vec4_f32 Function
                OpStore %arg_0 %13
-         %15 = OpLoad %v4float %arg_0
+         %15 = OpLoad %v4float %arg_0 None
          %16 = OpExtInst %__frexp_result_vec4_f32 %20 FrexpStruct %15
                OpStore %res %16
                OpReturn
@@ -77,16 +77,16 @@
          %32 = OpLabel
         %out = OpVariable %_ptr_Function_VertexOutput Function %35
          %36 = OpAccessChain %_ptr_Function_v4float %out %uint_0
-               OpStore %36 %39
+               OpStore %36 %39 None
          %40 = OpFunctionCall %void %frexp_77af93
-         %41 = OpLoad %VertexOutput %out
+         %41 = OpLoad %VertexOutput %out None
                OpReturnValue %41
                OpFunctionEnd
 %vertex_main = OpFunction %void None %9
          %43 = OpLabel
          %44 = OpFunctionCall %VertexOutput %vertex_main_inner
          %45 = OpCompositeExtract %v4float %44 0
-               OpStore %vertex_main_position_Output %45
-               OpStore %vertex_main___point_size_Output %float_1
+               OpStore %vertex_main_position_Output %45 None
+               OpStore %vertex_main___point_size_Output %float_1 None
                OpReturn
                OpFunctionEnd

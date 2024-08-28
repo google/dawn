@@ -21,8 +21,8 @@
           %9 = OpTypeFunction %void
        %main = OpFunction %void None %9
          %10 = OpLabel
-         %11 = OpLoad %float %a
-         %12 = OpLoad %float %b
+         %11 = OpLoad %float %a None
+         %12 = OpLoad %float %b None
           %x = OpFAdd %float %11 %12
                OpReturn
                OpFunctionEnd

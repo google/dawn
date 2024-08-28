@@ -40,8 +40,8 @@
          %37 = OpConstantComposite %v2uint %uint_4294967295 %uint_4294967295
           %m = OpFunction %v2half None %7
           %8 = OpLabel
-               OpStore %t %half_0x1p_0
-         %10 = OpLoad %half %t
+               OpStore %t %half_0x1p_0 None
+         %10 = OpLoad %half %t None
          %11 = OpCompositeConstruct %v2half %10 %10
                OpReturnValue %11
                OpFunctionEnd

@@ -53,15 +53,15 @@
          %17 = OpLabel
        %cond = OpPhi %bool %20 %18 %false %19
          %23 = OpSelect %float %cond %b %a
-               OpStore %11 %23
+               OpStore %11 %23 None
                OpReturn
                OpFunctionEnd
         %foo = OpFunction %void None %25
          %26 = OpLabel
       %param = OpVariable %_ptr_Function_float Function %28
          %29 = OpFunctionCall %void %bar %param
-         %30 = OpLoad %float %param
+         %30 = OpLoad %float %param None
          %31 = OpAccessChain %_ptr_StorageBuffer_float %1 %uint_0
-               OpStore %31 %30
+               OpStore %31 %30 None
                OpReturn
                OpFunctionEnd

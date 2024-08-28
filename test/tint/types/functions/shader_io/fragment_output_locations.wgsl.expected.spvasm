@@ -73,24 +73,24 @@
       %main0 = OpFunction %void None %34
          %35 = OpLabel
          %36 = OpFunctionCall %int %main0_inner
-               OpStore %main0_loc0_Output %36
+               OpStore %main0_loc0_Output %36 None
                OpReturn
                OpFunctionEnd
       %main1 = OpFunction %void None %34
          %38 = OpLabel
          %39 = OpFunctionCall %uint %main1_inner
-               OpStore %main1_loc1_Output %39
+               OpStore %main1_loc1_Output %39 None
                OpReturn
                OpFunctionEnd
       %main2 = OpFunction %void None %34
          %41 = OpLabel
          %42 = OpFunctionCall %float %main2_inner
-               OpStore %main2_loc2_Output %42
+               OpStore %main2_loc2_Output %42 None
                OpReturn
                OpFunctionEnd
       %main3 = OpFunction %void None %34
          %44 = OpLabel
          %45 = OpFunctionCall %v4float %main3_inner
-               OpStore %main3_loc3_Output %45
+               OpStore %main3_loc3_Output %45 None
                OpReturn
                OpFunctionEnd

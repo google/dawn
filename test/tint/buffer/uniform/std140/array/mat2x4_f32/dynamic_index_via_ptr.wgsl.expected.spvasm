@@ -61,10 +61,10 @@
 %_ptr_StorageBuffer_float = OpTypePointer StorageBuffer %float
           %i = OpFunction %int None %18
          %19 = OpLabel
-         %20 = OpLoad %int %counter
+         %20 = OpLoad %int %counter None
          %21 = OpIAdd %int %20 %int_1
-               OpStore %counter %21
-         %23 = OpLoad %int %counter
+               OpStore %counter %21 None
+         %23 = OpLoad %int %counter None
                OpReturnValue %23
                OpFunctionEnd
           %f = OpFunction %void None %26
@@ -74,11 +74,11 @@
       %p_a_i = OpAccessChain %_ptr_Uniform_mat2v4float %p_a %31
          %34 = OpFunctionCall %int %i
     %p_a_i_i = OpAccessChain %_ptr_Uniform_v4float %p_a_i %34
-        %l_a = OpLoad %_arr_mat2v4float_uint_4 %p_a
-      %l_a_i = OpLoad %mat2v4float %p_a_i
-    %l_a_i_i = OpLoad %v4float %p_a_i_i
+        %l_a = OpLoad %_arr_mat2v4float_uint_4 %p_a None
+      %l_a_i = OpLoad %mat2v4float %p_a_i None
+    %l_a_i_i = OpLoad %v4float %p_a_i_i None
          %40 = OpAccessChain %_ptr_Uniform_float %p_a_i_i %uint_0
-         %42 = OpLoad %float %40
+         %42 = OpLoad %float %40 None
          %43 = OpCompositeExtract %float %l_a 0 0 0
          %44 = OpFAdd %float %42 %43
          %45 = OpCompositeExtract %float %l_a_i 0 0
@@ -86,6 +86,6 @@
          %47 = OpCompositeExtract %float %l_a_i_i 0
          %48 = OpFAdd %float %46 %47
          %49 = OpAccessChain %_ptr_StorageBuffer_float %10 %uint_0
-               OpStore %49 %48
+               OpStore %49 %48 None
                OpReturn
                OpFunctionEnd

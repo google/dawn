@@ -45,7 +45,7 @@
 %globalId2Index = OpFunction %uint None %13
          %14 = OpLabel
          %15 = OpAccessChain %_ptr_Private_uint %globalId %uint_0
-         %17 = OpLoad %uint %15
+         %17 = OpLoad %uint %15 None
                OpReturnValue %17
                OpFunctionEnd
        %main = OpFunction %void None %20
@@ -53,9 +53,9 @@
           %a = OpVariable %_ptr_Function_v4half Function
                OpStore %a %26
          %28 = OpAccessChain %_ptr_Function_half %a %int_0
-         %32 = OpLoad %half %28
+         %32 = OpLoad %half %28 None
          %33 = OpFAdd %half %32 %b
          %34 = OpAccessChain %_ptr_Function_half %a %int_0
-               OpStore %34 %33
+               OpStore %34 %33 None
                OpReturn
                OpFunctionEnd

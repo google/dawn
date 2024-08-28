@@ -80,25 +80,25 @@
          %52 = OpConstantNull %v3uint
        %main = OpFunction %void None %45
          %46 = OpLabel
-               OpStore %bool_var1 %false
-               OpStore %bool_var2 %false
-               OpStore %bool_var3 %false
-               OpStore %i32_var1 %int_0
-               OpStore %i32_var2 %int_0
-               OpStore %i32_var3 %int_0
-               OpStore %u32_var1 %uint_0
-               OpStore %u32_var2 %uint_0
-               OpStore %u32_var3 %uint_0
-               OpStore %v3bool_var1 %49
-               OpStore %v3bool_var2 %49
-               OpStore %v3bool_var3 %49
-               OpStore %v3bool_var4 %49
-               OpStore %v4bool_var5 %50
-               OpStore %v3i32_var1 %51
-               OpStore %v3i32_var2 %51
-               OpStore %v3i32_var3 %51
-               OpStore %v3u32_var1 %52
-               OpStore %v3u32_var2 %52
-               OpStore %v3u32_var3 %52
+               OpStore %bool_var1 %false None
+               OpStore %bool_var2 %false None
+               OpStore %bool_var3 %false None
+               OpStore %i32_var1 %int_0 None
+               OpStore %i32_var2 %int_0 None
+               OpStore %i32_var3 %int_0 None
+               OpStore %u32_var1 %uint_0 None
+               OpStore %u32_var2 %uint_0 None
+               OpStore %u32_var3 %uint_0 None
+               OpStore %v3bool_var1 %49 None
+               OpStore %v3bool_var2 %49 None
+               OpStore %v3bool_var3 %49 None
+               OpStore %v3bool_var4 %49 None
+               OpStore %v4bool_var5 %50 None
+               OpStore %v3i32_var1 %51 None
+               OpStore %v3i32_var2 %51 None
+               OpStore %v3i32_var3 %51 None
+               OpStore %v3u32_var1 %52 None
+               OpStore %v3u32_var2 %52 None
+               OpStore %v3u32_var3 %52 None
                OpReturn
                OpFunctionEnd

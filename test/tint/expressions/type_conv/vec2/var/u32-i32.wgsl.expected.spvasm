@@ -23,7 +23,7 @@
       %v2int = OpTypeVector %int 2
           %f = OpFunction %void None %9
          %10 = OpLabel
-         %11 = OpLoad %v2uint %u
+         %11 = OpLoad %v2uint %u None
           %v = OpBitcast %v2int %11
                OpReturn
                OpFunctionEnd

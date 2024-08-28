@@ -22,7 +22,7 @@
      %uint_0 = OpConstant %uint 0
           %f = OpFunction %void None %7
           %8 = OpLabel
-          %9 = OpLoad %bool %u
+          %9 = OpLoad %bool %u None
           %v = OpSelect %uint %9 %uint_1 %uint_0
                OpReturn
                OpFunctionEnd

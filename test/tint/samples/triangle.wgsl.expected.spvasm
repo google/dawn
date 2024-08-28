@@ -55,7 +55,7 @@
 %VertexIndex = OpFunctionParameter %uint
          %26 = OpLabel
          %27 = OpAccessChain %_ptr_Private_v2float %11 %VertexIndex
-         %29 = OpLoad %v2float %27
+         %29 = OpLoad %v2float %27 None
          %30 = OpCompositeConstruct %v4float %29 %float_0 %float_1
                OpReturnValue %30
                OpFunctionEnd
@@ -65,15 +65,15 @@
                OpFunctionEnd
    %vtx_main = OpFunction %void None %38
          %39 = OpLabel
-         %40 = OpLoad %uint %vtx_main_vertex_index_Input
+         %40 = OpLoad %uint %vtx_main_vertex_index_Input None
          %41 = OpFunctionCall %v4float %vtx_main_inner %40
-               OpStore %vtx_main_position_Output %41
-               OpStore %vtx_main___point_size_Output %float_1
+               OpStore %vtx_main_position_Output %41 None
+               OpStore %vtx_main___point_size_Output %float_1 None
                OpReturn
                OpFunctionEnd
   %frag_main = OpFunction %void None %38
          %43 = OpLabel
          %44 = OpFunctionCall %v4float %frag_main_inner
-               OpStore %frag_main_loc0_Output %44
+               OpStore %frag_main_loc0_Output %44 None
                OpReturn
                OpFunctionEnd

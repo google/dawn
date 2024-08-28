@@ -134,7 +134,7 @@ TEST_F(SpirvWriterTest, Access_Matrix_Pointer_DynamicIndex) {
          %20 = OpBitcast %uint %idx
          %21 = OpExtInst %uint %16 UMin %20 %uint_1
          %22 = OpAccessChain %_ptr_Function_float %result_vector %21
-%result_scalar = OpLoad %float %22
+%result_scalar = OpLoad %float %22 None
 )");
 }
 
@@ -266,7 +266,7 @@ TEST_F(SpirvWriterTest, LoadVectorElement_DynamicIndex) {
          %12 = OpBitcast %uint %idx
          %13 = OpExtInst %uint %14 UMin %12 %uint_3
          %16 = OpAccessChain %_ptr_Function_int %vec %13
-     %result = OpLoad %int %16
+     %result = OpLoad %int %16 None
 )");
 }
 
@@ -298,7 +298,7 @@ TEST_F(SpirvWriterTest, StoreVectorElement_DynamicIndex) {
          %12 = OpBitcast %uint %idx
          %13 = OpExtInst %uint %14 UMin %12 %uint_3
          %16 = OpAccessChain %_ptr_Function_int %vec %13
-               OpStore %16 %int_42
+               OpStore %16 %int_42 None
 )");
 }
 

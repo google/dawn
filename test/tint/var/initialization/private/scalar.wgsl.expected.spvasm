@@ -17,6 +17,6 @@
           %7 = OpTypeFunction %void
        %main = OpFunction %void None %7
           %8 = OpLabel
-          %9 = OpLoad %int %v
+          %9 = OpLoad %int %v None
                OpReturn
                OpFunctionEnd

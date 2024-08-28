@@ -47,16 +47,16 @@
                OpLoopMerge %18 %16 None
                OpBranch %15
          %15 = OpLabel
-         %19 = OpLoad %int %j
+         %19 = OpLoad %int %j None
          %20 = OpSGreaterThanEqual %bool %19 %int_1
                OpSelectionMerge %23 None
                OpBranchConditional %20 %24 %23
          %24 = OpLabel
                OpBranch %18
          %23 = OpLabel
-         %25 = OpLoad %int %j
+         %25 = OpLoad %int %j None
          %26 = OpIAdd %int %25 %int_1
-               OpStore %j %26
+               OpStore %j %26 None
          %27 = OpFunctionCall %int %f
                OpStore %k %27
                OpBranch %16
@@ -68,12 +68,12 @@
        %main = OpFunction %void None %11
          %30 = OpLabel
          %31 = OpAccessChain %_ptr_Uniform_int %1 %uint_0
-         %35 = OpLoad %int %31
+         %35 = OpLoad %int %31 None
                OpSelectionMerge %38 None
                OpSwitch %35 %36 0 %37
          %37 = OpLabel
          %39 = OpAccessChain %_ptr_Uniform_int %1 %uint_0
-         %40 = OpLoad %int %39
+         %40 = OpLoad %int %39 None
                OpSelectionMerge %43 None
                OpSwitch %40 %41 0 %42
          %42 = OpLabel

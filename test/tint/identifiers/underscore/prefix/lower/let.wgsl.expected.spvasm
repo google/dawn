@@ -35,6 +35,6 @@
          %11 = OpIAdd %int %10 %a
          %12 = OpIAdd %int %11 %a
          %13 = OpAccessChain %_ptr_StorageBuffer_int %1 %uint_0
-               OpStore %13 %12
+               OpStore %13 %12 None
                OpReturn
                OpFunctionEnd

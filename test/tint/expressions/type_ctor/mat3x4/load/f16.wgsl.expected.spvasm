@@ -38,8 +38,8 @@
          %10 = OpLabel
           %m = OpVariable %_ptr_Function_mat3v4half Function
                OpStore %m %13
-         %14 = OpLoad %mat3v4half %m
+         %14 = OpLoad %mat3v4half %m None
          %15 = OpAccessChain %_ptr_StorageBuffer_mat3v4half %1 %uint_0
-               OpStore %15 %14
+               OpStore %15 %14 None
                OpReturn
                OpFunctionEnd

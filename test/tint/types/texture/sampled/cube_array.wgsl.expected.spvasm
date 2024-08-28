@@ -45,15 +45,15 @@
       %fdims = OpVariable %_ptr_Function_v2uint Function
       %idims = OpVariable %_ptr_Function_v2uint Function
       %udims = OpVariable %_ptr_Function_v2uint Function
-         %17 = OpLoad %3 %t_f
+         %17 = OpLoad %3 %t_f None
          %18 = OpImageQuerySizeLod %v3uint %17 %int_1
          %21 = OpVectorShuffle %v2uint %18 %18 0 1
                OpStore %fdims %21
-         %25 = OpLoad %7 %t_i
+         %25 = OpLoad %7 %t_i None
          %26 = OpImageQuerySizeLod %v3uint %25 %int_1
          %27 = OpVectorShuffle %v2uint %26 %26 0 1
                OpStore %idims %27
-         %29 = OpLoad %11 %t_u
+         %29 = OpLoad %11 %t_u None
          %30 = OpImageQuerySizeLod %v3uint %29 %int_1
          %31 = OpVectorShuffle %v2uint %30 %30 0 1
                OpStore %udims %31

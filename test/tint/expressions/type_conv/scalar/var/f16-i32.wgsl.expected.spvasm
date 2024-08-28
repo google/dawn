@@ -31,7 +31,7 @@
 %int_2147483647 = OpConstant %int 2147483647
           %f = OpFunction %void None %7
           %8 = OpLabel
-          %9 = OpLoad %half %u
+          %9 = OpLoad %half %u None
           %v = OpFunctionCall %int %tint_f16_to_i32 %9
                OpReturn
                OpFunctionEnd

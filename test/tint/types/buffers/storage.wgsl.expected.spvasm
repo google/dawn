@@ -34,7 +34,7 @@
           %9 = OpLabel
           %a = OpVariable %_ptr_Function_float Function
          %10 = OpAccessChain %_ptr_StorageBuffer_float %1 %uint_0 %int_0
-         %16 = OpLoad %float %10
+         %16 = OpLoad %float %10 None
                OpStore %a %16
                OpReturn
                OpFunctionEnd

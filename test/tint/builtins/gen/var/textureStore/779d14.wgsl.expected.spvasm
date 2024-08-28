@@ -42,10 +42,10 @@
                OpStore %arg_1 %12
                OpStore %arg_2 %uint_1
                OpStore %arg_3 %19
-         %20 = OpLoad %3 %arg_0
-         %21 = OpLoad %v2uint %arg_1
-         %22 = OpLoad %uint %arg_2
-         %23 = OpLoad %v4uint %arg_3
+         %20 = OpLoad %3 %arg_0 None
+         %21 = OpLoad %v2uint %arg_1 None
+         %22 = OpLoad %uint %arg_2 None
+         %23 = OpLoad %v4uint %arg_3 None
          %25 = OpCompositeConstruct %v3uint %21 %22
                OpImageWrite %20 %25 %23 None
                OpReturn

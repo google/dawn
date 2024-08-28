@@ -163,52 +163,52 @@
       %dim14 = OpVariable %_ptr_Function_uint Function
       %dim15 = OpVariable %_ptr_Function_uint Function
       %dim16 = OpVariable %_ptr_Function_uint Function
-         %56 = OpLoad %3 %t_rgba8unorm
+         %56 = OpLoad %3 %t_rgba8unorm None
          %57 = OpImageQuerySize %uint %56
                OpStore %dim1 %57
-         %60 = OpLoad %7 %t_rgba8snorm
+         %60 = OpLoad %7 %t_rgba8snorm None
          %61 = OpImageQuerySize %uint %60
                OpStore %dim2 %61
-         %63 = OpLoad %10 %t_rgba8uint
+         %63 = OpLoad %10 %t_rgba8uint None
          %64 = OpImageQuerySize %uint %63
                OpStore %dim3 %64
-         %66 = OpLoad %14 %t_rgba8sint
+         %66 = OpLoad %14 %t_rgba8sint None
          %67 = OpImageQuerySize %uint %66
                OpStore %dim4 %67
-         %69 = OpLoad %18 %t_rgba16uint
+         %69 = OpLoad %18 %t_rgba16uint None
          %70 = OpImageQuerySize %uint %69
                OpStore %dim5 %70
-         %72 = OpLoad %21 %t_rgba16sint
+         %72 = OpLoad %21 %t_rgba16sint None
          %73 = OpImageQuerySize %uint %72
                OpStore %dim6 %73
-         %75 = OpLoad %24 %t_rgba16float
+         %75 = OpLoad %24 %t_rgba16float None
          %76 = OpImageQuerySize %uint %75
                OpStore %dim7 %76
-         %78 = OpLoad %27 %t_r32uint
+         %78 = OpLoad %27 %t_r32uint None
          %79 = OpImageQuerySize %uint %78
                OpStore %dim8 %79
-         %81 = OpLoad %30 %t_r32sint
+         %81 = OpLoad %30 %t_r32sint None
          %82 = OpImageQuerySize %uint %81
                OpStore %dim9 %82
-         %84 = OpLoad %33 %t_r32float
+         %84 = OpLoad %33 %t_r32float None
          %85 = OpImageQuerySize %uint %84
                OpStore %dim10 %85
-         %87 = OpLoad %36 %t_rg32uint
+         %87 = OpLoad %36 %t_rg32uint None
          %88 = OpImageQuerySize %uint %87
                OpStore %dim11 %88
-         %90 = OpLoad %39 %t_rg32sint
+         %90 = OpLoad %39 %t_rg32sint None
          %91 = OpImageQuerySize %uint %90
                OpStore %dim12 %91
-         %93 = OpLoad %42 %t_rg32float
+         %93 = OpLoad %42 %t_rg32float None
          %94 = OpImageQuerySize %uint %93
                OpStore %dim13 %94
-         %96 = OpLoad %45 %t_rgba32uint
+         %96 = OpLoad %45 %t_rgba32uint None
          %97 = OpImageQuerySize %uint %96
                OpStore %dim14 %97
-         %99 = OpLoad %48 %t_rgba32sint
+         %99 = OpLoad %48 %t_rgba32sint None
         %100 = OpImageQuerySize %uint %99
                OpStore %dim15 %100
-        %102 = OpLoad %51 %t_rgba32float
+        %102 = OpLoad %51 %t_rgba32float None
         %103 = OpImageQuerySize %uint %102
                OpStore %dim16 %103
                OpReturn

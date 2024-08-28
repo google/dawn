@@ -29,8 +29,8 @@
 %_ptr_Function_v4half = OpTypePointer Function %v4half
           %m = OpFunction %v4float None %7
           %8 = OpLabel
-               OpStore %t %float_1
-         %10 = OpLoad %float %t
+               OpStore %t %float_1 None
+         %10 = OpLoad %float %t None
          %11 = OpCompositeConstruct %v4float %10 %10 %10 %10
                OpReturnValue %11
                OpFunctionEnd

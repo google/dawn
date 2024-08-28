@@ -31,10 +31,10 @@
           %a = OpVariable %_ptr_Function_v3int Function %9
           %b = OpVariable %_ptr_Function_int Function
          %10 = OpAccessChain %_ptr_Function_int %a %uint_0
-         %14 = OpLoad %int %10
+         %14 = OpLoad %int %10 None
                OpStore %b %14
          %16 = OpAccessChain %_ptr_Function_int %a %uint_0
-               OpStore %16 %int_42
+               OpStore %16 %int_42 None
                OpReturn
                OpFunctionEnd
    %no_deref = OpFunction %void None %3
@@ -42,10 +42,10 @@
         %a_0 = OpVariable %_ptr_Function_v3int Function %9
         %b_0 = OpVariable %_ptr_Function_int Function
          %21 = OpAccessChain %_ptr_Function_int %a_0 %uint_0
-         %22 = OpLoad %int %21
+         %22 = OpLoad %int %21 None
                OpStore %b_0 %22
          %24 = OpAccessChain %_ptr_Function_int %a_0 %uint_0
-               OpStore %24 %int_42
+               OpStore %24 %int_42 None
                OpReturn
                OpFunctionEnd
        %main = OpFunction %void None %3

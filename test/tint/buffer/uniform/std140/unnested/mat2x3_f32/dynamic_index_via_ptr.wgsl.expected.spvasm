@@ -43,23 +43,23 @@
 %_ptr_Function_v3float = OpTypePointer Function %v3float
           %i = OpFunction %int None %11
          %12 = OpLabel
-         %13 = OpLoad %int %counter
+         %13 = OpLoad %int %counter None
          %14 = OpIAdd %int %13 %int_1
-               OpStore %counter %14
-         %16 = OpLoad %int %counter
+               OpStore %counter %14 None
+         %16 = OpLoad %int %counter None
                OpReturnValue %16
                OpFunctionEnd
           %f = OpFunction %void None %19
          %20 = OpLabel
          %31 = OpVariable %_ptr_Function_mat2v3float Function
          %21 = OpAccessChain %_ptr_Uniform_v3float %1 %uint_0
-         %25 = OpLoad %v3float %21
+         %25 = OpLoad %v3float %21 None
          %26 = OpAccessChain %_ptr_Uniform_v3float %1 %uint_1
-         %28 = OpLoad %v3float %26
+         %28 = OpLoad %v3float %26 None
         %l_m = OpCompositeConstruct %mat2v3float %25 %28
                OpStore %31 %l_m
          %33 = OpFunctionCall %int %i
          %34 = OpAccessChain %_ptr_Function_v3float %31 %33
-      %l_m_i = OpLoad %v3float %34
+      %l_m_i = OpLoad %v3float %34 None
                OpReturn
                OpFunctionEnd

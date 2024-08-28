@@ -37,8 +37,8 @@
      %uint_0 = OpConstant %uint 0
           %f = OpFunction %void None %12
          %13 = OpLabel
-         %14 = OpLoad %mat3v2half %m
+         %14 = OpLoad %mat3v2half %m None
          %15 = OpAccessChain %_ptr_StorageBuffer_mat3v2half %7 %uint_0
-               OpStore %15 %14
+               OpStore %15 %14 None
                OpReturn
                OpFunctionEnd

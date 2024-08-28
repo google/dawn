@@ -75,9 +75,9 @@
       %arg_0 = OpVariable %_ptr_Function_bool Function
         %res = OpVariable %_ptr_Function_bool Function
                OpStore %arg_0 %true
-         %20 = OpLoad %bool %arg_0
+         %20 = OpLoad %bool %arg_0 None
                OpStore %res %20
-         %22 = OpLoad %bool %res
+         %22 = OpLoad %bool %res None
          %23 = OpLogicalEqual %bool %22 %false
          %25 = OpSelect %int %23 %int_1 %int_0
                OpReturnValue %25
@@ -86,34 +86,34 @@
          %31 = OpLabel
          %32 = OpFunctionCall %int %any_2ab91a
          %33 = OpAccessChain %_ptr_StorageBuffer_int %1 %uint_0
-               OpStore %33 %32
+               OpStore %33 %32 None
                OpReturn
                OpFunctionEnd
 %compute_main = OpFunction %void None %30
          %38 = OpLabel
          %39 = OpFunctionCall %int %any_2ab91a
          %40 = OpAccessChain %_ptr_StorageBuffer_int %1 %uint_0
-               OpStore %40 %39
+               OpStore %40 %39 None
                OpReturn
                OpFunctionEnd
 %vertex_main_inner = OpFunction %VertexOutput None %43
          %44 = OpLabel
         %out = OpVariable %_ptr_Function_VertexOutput Function %47
          %48 = OpAccessChain %_ptr_Function_v4float %out %uint_0
-               OpStore %48 %50
+               OpStore %48 %50 None
          %51 = OpAccessChain %_ptr_Function_int %out %uint_1
          %54 = OpFunctionCall %int %any_2ab91a
-               OpStore %51 %54
-         %55 = OpLoad %VertexOutput %out
+               OpStore %51 %54 None
+         %55 = OpLoad %VertexOutput %out None
                OpReturnValue %55
                OpFunctionEnd
 %vertex_main = OpFunction %void None %30
          %57 = OpLabel
          %58 = OpFunctionCall %VertexOutput %vertex_main_inner
          %59 = OpCompositeExtract %v4float %58 0
-               OpStore %vertex_main_position_Output %59
+               OpStore %vertex_main_position_Output %59 None
          %60 = OpCompositeExtract %int %58 1
-               OpStore %vertex_main_loc0_Output %60
-               OpStore %vertex_main___point_size_Output %float_1
+               OpStore %vertex_main_loc0_Output %60 None
+               OpStore %vertex_main___point_size_Output %float_1 None
                OpReturn
                OpFunctionEnd

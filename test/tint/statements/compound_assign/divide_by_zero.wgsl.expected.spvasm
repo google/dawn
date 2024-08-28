@@ -39,26 +39,26 @@
         %foo = OpFunction %void None %12
  %maybe_zero = OpFunctionParameter %int
          %13 = OpLabel
-         %14 = OpLoad %int %a
+         %14 = OpLoad %int %a None
          %15 = OpFunctionCall %int %tint_div_i32 %14 %maybe_zero
-               OpStore %a %15
-         %17 = OpLoad %int %a
+               OpStore %a %15 None
+         %17 = OpLoad %int %a None
          %18 = OpFunctionCall %int %tint_mod_i32 %17 %maybe_zero
-               OpStore %a %18
-         %20 = OpLoad %float %b
+               OpStore %a %18 None
+         %20 = OpLoad %float %b None
          %21 = OpFDiv %float %20 %float_0
-               OpStore %b %21
-         %23 = OpLoad %float %b
+               OpStore %b %21 None
+         %23 = OpLoad %float %b None
          %24 = OpFRem %float %23 %float_0
-               OpStore %b %24
+               OpStore %b %24 None
          %25 = OpConvertSToF %float %maybe_zero
-         %26 = OpLoad %float %b
+         %26 = OpLoad %float %b None
          %27 = OpFDiv %float %26 %25
-               OpStore %b %27
+               OpStore %b %27 None
          %28 = OpConvertSToF %float %maybe_zero
-         %29 = OpLoad %float %b
+         %29 = OpLoad %float %b None
          %30 = OpFRem %float %29 %28
-               OpStore %b %30
+               OpStore %b %30 None
                OpReturn
                OpFunctionEnd
 %tint_div_i32 = OpFunction %int None %33

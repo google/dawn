@@ -26,7 +26,7 @@
      %v3half = OpTypeVector %half 3
           %f = OpFunction %void None %9
          %10 = OpLabel
-         %11 = OpLoad %v3uint %u
+         %11 = OpLoad %v3uint %u None
           %v = OpConvertUToF %v3half %11
                OpReturn
                OpFunctionEnd

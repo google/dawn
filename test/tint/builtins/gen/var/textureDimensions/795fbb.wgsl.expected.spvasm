@@ -44,24 +44,24 @@
 %textureDimensions_795fbb = OpFunction %v2uint None %11
          %12 = OpLabel
         %res = OpVariable %_ptr_Function_v2uint Function
-         %13 = OpLoad %8 %arg_0
+         %13 = OpLoad %8 %arg_0 None
          %14 = OpImageQuerySize %v3uint %13
          %16 = OpVectorShuffle %v2uint %14 %14 0 1
                OpStore %res %16
-         %19 = OpLoad %v2uint %res
+         %19 = OpLoad %v2uint %res None
                OpReturnValue %19
                OpFunctionEnd
 %fragment_main = OpFunction %void None %22
          %23 = OpLabel
          %24 = OpFunctionCall %v2uint %textureDimensions_795fbb
          %25 = OpAccessChain %_ptr_StorageBuffer_v2uint %1 %uint_0
-               OpStore %25 %24
+               OpStore %25 %24 None
                OpReturn
                OpFunctionEnd
 %compute_main = OpFunction %void None %22
          %29 = OpLabel
          %30 = OpFunctionCall %v2uint %textureDimensions_795fbb
          %31 = OpAccessChain %_ptr_StorageBuffer_v2uint %1 %uint_0
-               OpStore %31 %30
+               OpStore %31 %30 None
                OpReturn
                OpFunctionEnd

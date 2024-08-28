@@ -47,6 +47,6 @@
           %v = OpCompositeExtract %v3float %m 1
           %f = OpCompositeExtract %float %v 1
          %26 = OpAccessChain %_ptr_StorageBuffer_float %1 %uint_0
-               OpStore %26 %f
+               OpStore %26 %f None
                OpReturn
                OpFunctionEnd

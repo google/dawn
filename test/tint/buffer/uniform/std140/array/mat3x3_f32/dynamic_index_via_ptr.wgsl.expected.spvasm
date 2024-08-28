@@ -73,10 +73,10 @@
 %_ptr_StorageBuffer_float = OpTypePointer StorageBuffer %float
           %i = OpFunction %int None %18
          %19 = OpLabel
-         %20 = OpLoad %int %counter
+         %20 = OpLoad %int %counter None
          %21 = OpIAdd %int %20 %int_1
-               OpStore %counter %21
-         %23 = OpLoad %int %counter
+               OpStore %counter %21 None
+         %23 = OpLoad %int %counter None
                OpReturnValue %23
                OpFunctionEnd
           %f = OpFunction %void None %26
@@ -87,17 +87,17 @@
          %28 = OpAccessChain %_ptr_Uniform__arr_mat3x3_f32_std140_uint_4 %1 %uint_0
          %31 = OpFunctionCall %int %i
          %32 = OpAccessChain %_ptr_Uniform_v3float %28 %31 %uint_0
-         %34 = OpLoad %v3float %32
+         %34 = OpLoad %v3float %32 None
          %35 = OpAccessChain %_ptr_Uniform_v3float %28 %31 %uint_1
-         %37 = OpLoad %v3float %35
+         %37 = OpLoad %v3float %35 None
          %38 = OpAccessChain %_ptr_Uniform_v3float %28 %31 %uint_2
-         %40 = OpLoad %v3float %38
+         %40 = OpLoad %v3float %38 None
       %l_a_i = OpCompositeConstruct %mat3v3float %34 %37 %40
                OpStore %43 %l_a_i
          %45 = OpFunctionCall %int %i
          %46 = OpAccessChain %_ptr_Function_v3float %43 %45
-    %l_a_i_i = OpLoad %v3float %46
-         %49 = OpLoad %_arr_mat3x3_f32_std140_uint_4 %28
+    %l_a_i_i = OpLoad %v3float %46 None
+         %49 = OpLoad %_arr_mat3x3_f32_std140_uint_4 %28 None
                OpStore %50 %49
                OpBranch %56
          %56 = OpLabel
@@ -115,18 +115,18 @@
          %65 = OpLabel
          %67 = OpAccessChain %_ptr_Function_mat3v3float %52 %61
          %68 = OpAccessChain %_ptr_Function_mat3x3_f32_std140 %50 %61
-         %70 = OpLoad %mat3x3_f32_std140 %68
+         %70 = OpLoad %mat3x3_f32_std140 %68 None
          %71 = OpCompositeExtract %v3float %70 0
          %72 = OpCompositeExtract %v3float %70 1
          %73 = OpCompositeExtract %v3float %70 2
          %74 = OpCompositeConstruct %mat3v3float %71 %72 %73
-               OpStore %67 %74
+               OpStore %67 %74 None
                OpBranch %58
          %58 = OpLabel
          %62 = OpIAdd %uint %61 %uint_1
                OpBranch %59
          %60 = OpLabel
-        %l_a = OpLoad %_arr_mat3v3float_uint_4 %52
+        %l_a = OpLoad %_arr_mat3v3float_uint_4 %52 None
          %76 = OpCompositeExtract %float %l_a_i_i 0
          %77 = OpCompositeExtract %float %l_a 0 0 0
          %78 = OpFAdd %float %76 %77
@@ -135,6 +135,6 @@
          %81 = OpCompositeExtract %float %l_a_i_i 0
          %82 = OpFAdd %float %80 %81
          %83 = OpAccessChain %_ptr_StorageBuffer_float %10 %uint_0
-               OpStore %83 %82
+               OpStore %83 %82 None
                OpReturn
                OpFunctionEnd

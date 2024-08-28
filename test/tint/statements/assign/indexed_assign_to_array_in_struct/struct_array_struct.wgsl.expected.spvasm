@@ -54,9 +54,9 @@
           %v = OpVariable %_ptr_Function_InnerS Function %14
          %s1 = OpVariable %_ptr_Function_OuterS Function %21
          %22 = OpAccessChain %_ptr_Uniform_uint %1 %uint_0 %uint_0
-         %25 = OpLoad %uint %22
+         %25 = OpLoad %uint %22 None
          %26 = OpAccessChain %_ptr_Function_InnerS %s1 %uint_0 %25 %uint_0
-         %27 = OpLoad %InnerS %v
-               OpStore %26 %27
+         %27 = OpLoad %InnerS %v None
+               OpStore %26 %27 None
                OpReturn
                OpFunctionEnd

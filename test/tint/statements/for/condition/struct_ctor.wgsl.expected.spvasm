@@ -25,7 +25,7 @@
                OpLoopMerge %12 %10 None
                OpBranch %9
           %9 = OpLabel
-         %13 = OpLoad %int %i
+         %13 = OpLoad %int %i None
          %14 = OpSLessThan %bool %13 %int_1
                OpSelectionMerge %17 None
                OpBranchConditional %14 %17 %18

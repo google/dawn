@@ -58,20 +58,20 @@
           %f = OpFunction %void None %17
          %18 = OpLabel
          %19 = OpAccessChain %_ptr_Uniform__arr_S_uint_4 %1 %uint_0
-         %22 = OpLoad %_arr_S_uint_4 %19
-               OpStore %p %22
+         %22 = OpLoad %_arr_S_uint_4 %19 None
+               OpStore %p %22 None
          %23 = OpAccessChain %_ptr_Private_S %p %int_1
          %26 = OpAccessChain %_ptr_Uniform_S %1 %uint_0 %int_2
-         %29 = OpLoad %S %26
-               OpStore %23 %29
+         %29 = OpLoad %S %26 None
+               OpStore %23 %29 None
          %30 = OpAccessChain %_ptr_Private_mat4v4float %p %int_3 %uint_1
          %34 = OpAccessChain %_ptr_Uniform_mat4v4float %1 %uint_0 %int_2 %uint_1
-         %36 = OpLoad %mat4v4float %34
-               OpStore %30 %36
+         %36 = OpLoad %mat4v4float %34 None
+               OpStore %30 %36 None
          %37 = OpAccessChain %_ptr_Private_v4float %p %int_1 %uint_1 %int_0
          %40 = OpAccessChain %_ptr_Uniform_v4float %1 %uint_0 %int_0 %uint_1 %int_1
-         %42 = OpLoad %v4float %40
+         %42 = OpLoad %v4float %40 None
          %43 = OpVectorShuffle %v4float %42 %42 1 3 0 2
-               OpStore %37 %43
+               OpStore %37 %43 None
                OpReturn
                OpFunctionEnd

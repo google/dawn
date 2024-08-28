@@ -57,23 +57,23 @@
           %f = OpFunction %void None %15
          %16 = OpLabel
          %17 = OpAccessChain %_ptr_Uniform__arr_mat4v4float_uint_4 %1 %uint_0
-         %20 = OpLoad %_arr_mat4v4float_uint_4 %17
+         %20 = OpLoad %_arr_mat4v4float_uint_4 %17 None
          %21 = OpAccessChain %_ptr_StorageBuffer__arr_mat4v4float_uint_4 %10 %uint_0
-               OpStore %21 %20
+               OpStore %21 %20 None
          %23 = OpAccessChain %_ptr_StorageBuffer_mat4v4float %10 %uint_0 %int_1
          %27 = OpAccessChain %_ptr_Uniform_mat4v4float %1 %uint_0 %int_2
-         %30 = OpLoad %mat4v4float %27
-               OpStore %23 %30
+         %30 = OpLoad %mat4v4float %27 None
+               OpStore %23 %30 None
          %31 = OpAccessChain %_ptr_StorageBuffer_v4float %10 %uint_0 %int_1 %int_0
          %34 = OpAccessChain %_ptr_Uniform_v4float %1 %uint_0 %int_0 %int_1
-         %36 = OpLoad %v4float %34
+         %36 = OpLoad %v4float %34 None
          %37 = OpVectorShuffle %v4float %36 %36 1 3 0 2
-               OpStore %31 %37
+               OpStore %31 %37 None
          %38 = OpAccessChain %_ptr_StorageBuffer_v4float %10 %uint_0 %int_1 %int_0
          %39 = OpAccessChain %_ptr_Uniform_v4float %1 %uint_0 %int_0 %int_1
          %40 = OpAccessChain %_ptr_Uniform_float %39 %uint_0
-         %42 = OpLoad %float %40
+         %42 = OpLoad %float %40 None
          %43 = OpAccessChain %_ptr_StorageBuffer_float %38 %uint_0
-               OpStore %43 %42
+               OpStore %43 %42 None
                OpReturn
                OpFunctionEnd

@@ -59,7 +59,7 @@
 %doTextureLoad = OpFunction %void None %22
          %23 = OpLabel
         %res = OpVariable %_ptr_Function_v4int Function
-         %24 = OpLoad %3 %arg_0
+         %24 = OpLoad %3 %arg_0 None
          %25 = OpFunctionCall %v4int %textureLoad2d %24 %26 %int_0
                OpStore %res %25
                OpReturn
@@ -82,7 +82,7 @@
 %vertex_main = OpFunction %void None %22
          %42 = OpLabel
          %43 = OpFunctionCall %v4float %vertex_main_inner
-               OpStore %vertex_main_position_Output %43
-               OpStore %vertex_main___point_size_Output %float_1
+               OpStore %vertex_main_position_Output %43 None
+               OpStore %vertex_main___point_size_Output %float_1 None
                OpReturn
                OpFunctionEnd

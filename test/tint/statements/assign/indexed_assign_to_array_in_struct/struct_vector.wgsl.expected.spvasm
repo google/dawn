@@ -44,8 +44,8 @@
          %s1 = OpVariable %_ptr_Function_OuterS Function %15
          %16 = OpAccessChain %_ptr_Function_v3float %s1 %uint_0
          %19 = OpAccessChain %_ptr_Uniform_uint %1 %uint_0 %uint_0
-         %21 = OpLoad %uint %19
+         %21 = OpLoad %uint %19 None
          %22 = OpAccessChain %_ptr_Function_float %16 %21
-               OpStore %22 %float_1
+               OpStore %22 %float_1 None
                OpReturn
                OpFunctionEnd

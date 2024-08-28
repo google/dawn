@@ -220,41 +220,41 @@
       %arg_2 = OpVariable %_ptr_Function_v2float Function
         %res = OpVariable %_ptr_Function_v4float Function
                OpStore %arg_2 %33
-         %35 = OpLoad %8 %arg_0_plane0
-         %36 = OpLoad %8 %arg_0_plane1
+         %35 = OpLoad %8 %arg_0_plane0 None
+         %36 = OpLoad %8 %arg_0_plane1 None
          %37 = OpAccessChain %_ptr_Uniform_tint_ExternalTextureParams_std140 %10 %uint_0
-         %40 = OpLoad %tint_ExternalTextureParams_std140 %37
+         %40 = OpLoad %tint_ExternalTextureParams_std140 %37 None
          %41 = OpFunctionCall %tint_ExternalTextureParams %convert_tint_ExternalTextureParams %40
-         %46 = OpLoad %22 %arg_1
-         %47 = OpLoad %v2float %arg_2
+         %46 = OpLoad %22 %arg_1 None
+         %47 = OpLoad %v2float %arg_2 None
          %48 = OpFunctionCall %v4float %tint_TextureSampleExternal %35 %36 %41 %46 %47
                OpStore %res %48
-         %52 = OpLoad %v4float %res
+         %52 = OpLoad %v4float %res None
                OpReturnValue %52
                OpFunctionEnd
 %fragment_main = OpFunction %void None %55
          %56 = OpLabel
          %57 = OpFunctionCall %v4float %textureSampleBaseClampToEdge_7c04e6
          %58 = OpAccessChain %_ptr_StorageBuffer_v4float %1 %uint_0
-               OpStore %58 %57
+               OpStore %58 %57 None
                OpReturn
                OpFunctionEnd
 %compute_main = OpFunction %void None %55
          %61 = OpLabel
          %62 = OpFunctionCall %v4float %textureSampleBaseClampToEdge_7c04e6
          %63 = OpAccessChain %_ptr_StorageBuffer_v4float %1 %uint_0
-               OpStore %63 %62
+               OpStore %63 %62 None
                OpReturn
                OpFunctionEnd
 %vertex_main_inner = OpFunction %VertexOutput None %66
          %67 = OpLabel
         %out = OpVariable %_ptr_Function_VertexOutput Function %70
          %71 = OpAccessChain %_ptr_Function_v4float %out %uint_0
-               OpStore %71 %72
+               OpStore %71 %72 None
          %73 = OpAccessChain %_ptr_Function_v4float %out %uint_1
          %75 = OpFunctionCall %v4float %textureSampleBaseClampToEdge_7c04e6
-               OpStore %73 %75
-         %76 = OpLoad %VertexOutput %out
+               OpStore %73 %75 None
+         %76 = OpLoad %VertexOutput %out None
                OpReturnValue %76
                OpFunctionEnd
 %tint_TextureSampleExternal = OpFunction %v4float None %82
@@ -350,10 +350,10 @@
         %161 = OpLabel
         %162 = OpFunctionCall %VertexOutput %vertex_main_inner
         %163 = OpCompositeExtract %v4float %162 0
-               OpStore %vertex_main_position_Output %163
+               OpStore %vertex_main_position_Output %163 None
         %164 = OpCompositeExtract %v4float %162 1
-               OpStore %vertex_main_loc0_Output %164
-               OpStore %vertex_main___point_size_Output %float_1
+               OpStore %vertex_main_loc0_Output %164 None
+               OpStore %vertex_main___point_size_Output %float_1 None
                OpReturn
                OpFunctionEnd
 %convert_tint_ExternalTextureParams = OpFunction %tint_ExternalTextureParams None %166

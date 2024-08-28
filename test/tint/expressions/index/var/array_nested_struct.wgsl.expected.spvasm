@@ -37,7 +37,7 @@
           %a = OpVariable %_ptr_Function__arr_S_uint_2 Function
                OpStore %a %13
          %14 = OpAccessChain %_ptr_Function_uint %a %int_1 %uint_1 %int_1
-         %18 = OpLoad %uint %14
+         %18 = OpLoad %uint %14 None
                OpReturnValue %18
                OpFunctionEnd
 %unused_entry_point = OpFunction %void None %21

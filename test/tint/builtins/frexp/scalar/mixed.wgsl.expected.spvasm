@@ -38,11 +38,11 @@
         %res = OpVariable %_ptr_Function___frexp_result_f32 Function
                OpStore %res %11
          %14 = OpExtInst %__frexp_result_f32 %15 FrexpStruct %runtime_in
-               OpStore %res %14
-               OpStore %res %11
+               OpStore %res %14 None
+               OpStore %res %11 None
          %16 = OpAccessChain %_ptr_Function_float %res %uint_0
-      %fract = OpLoad %float %16
+      %fract = OpLoad %float %16 None
          %21 = OpAccessChain %_ptr_Function_int %res %uint_1
-        %exp = OpLoad %int %21
+        %exp = OpLoad %int %21 None
                OpReturn
                OpFunctionEnd

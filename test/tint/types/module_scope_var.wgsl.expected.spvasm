@@ -90,26 +90,26 @@
                OpSelectionMerge %54 None
                OpBranchConditional %52 %55 %54
          %55 = OpLabel
-               OpStore %wg_var %float_0
+               OpStore %wg_var %float_0 None
                OpBranch %54
          %54 = OpLabel
                OpControlBarrier %uint_2 %uint_2 %uint_264
-               OpStore %bool_var %false
-               OpStore %i32_var %int_0
-               OpStore %u32_var %uint_0
-               OpStore %f32_var %float_0
-               OpStore %v2i32_var %20
-               OpStore %v3u32_var %24
-               OpStore %v4f32_var %28
-               OpStore %m2x3_var %33
-               OpStore %arr_var %38
-               OpStore %struct_var %42
-               OpStore %wg_var %float_42
+               OpStore %bool_var %false None
+               OpStore %i32_var %int_0 None
+               OpStore %u32_var %uint_0 None
+               OpStore %f32_var %float_0 None
+               OpStore %v2i32_var %20 None
+               OpStore %v3u32_var %24 None
+               OpStore %v4f32_var %28 None
+               OpStore %m2x3_var %33 None
+               OpStore %arr_var %38 None
+               OpStore %struct_var %42 None
+               OpStore %wg_var %float_42 None
                OpReturn
                OpFunctionEnd
        %main = OpFunction %void None %64
          %65 = OpLabel
-         %66 = OpLoad %uint %main_local_invocation_index_Input
+         %66 = OpLoad %uint %main_local_invocation_index_Input None
          %67 = OpFunctionCall %void %main_inner %66
                OpReturn
                OpFunctionEnd
