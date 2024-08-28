@@ -54,6 +54,7 @@
 #include "src/tint/lang/core/type/f16.h"
 #include "src/tint/lang/core/type/f32.h"
 #include "src/tint/lang/core/type/i32.h"
+#include "src/tint/lang/core/type/matrix.h"
 #include "src/tint/lang/core/type/pointer.h"
 #include "src/tint/lang/core/type/u32.h"
 #include "src/tint/lang/core/type/vector.h"
@@ -305,6 +306,7 @@ class Printer : public tint::TextGenerator {
                 EmitType(out, p->StoreType(), name, name_printed);
             },
             [&](const core::type::Vector* v) { EmitVectorType(out, v); },
+            [&](const core::type::Matrix* m) { EmitMatrixType(out, m); },
 
             // TODO(dsinclair): Handle remaining types
             TINT_ICE_ON_NO_MATCH);
@@ -324,6 +326,17 @@ class Printer : public tint::TextGenerator {
             TINT_ICE_ON_NO_MATCH);
 
         out << "vec" << v->Width();
+    }
+
+    void EmitMatrixType(StringStream& out, const core::type::Matrix* m) {
+        if (m->Type()->Is<core::type::F16>()) {
+            EmitExtension(kAMDGpuShaderHalfFloat);
+            out << "f16";
+        }
+        out << "mat" << m->Columns();
+        if (m->Rows() != m->Columns()) {
+            out << "x" << m->Rows();
+        }
     }
 
     void EmitArrayType(StringStream& out,
@@ -436,6 +449,7 @@ class Printer : public tint::TextGenerator {
             [&](const core::type::F32*) { PrintF32(out, c->ValueAs<f32>()); },
             [&](const core::type::F16*) { PrintF16(out, c->ValueAs<f16>()); },
             [&](const core::type::Vector* v) { EmitConstantVector(out, v, c); },
+            [&](const core::type::Matrix* m) { EmitConstantMatrix(out, m, c); },
 
             // TODO(dsinclair): Emit remaining constant types
             TINT_ICE_ON_NO_MATCH);
@@ -458,6 +472,20 @@ class Printer : public tint::TextGenerator {
                 out << ", ";
             }
             EmitConstant(out, c->Index(i));
+        }
+    }
+
+    void EmitConstantMatrix(StringStream& out,
+                            const core::type::Matrix* m,
+                            const core::constant::Value* c) {
+        EmitType(out, m);
+        ScopedParen sp(out);
+
+        for (size_t col_idx = 0; col_idx < m->Columns(); ++col_idx) {
+            if (col_idx > 0) {
+                out << ", ";
+            }
+            EmitConstant(out, c->Index(col_idx));
         }
     }
 

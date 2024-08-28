@@ -165,8 +165,7 @@ void foo() {
 )");
 }
 
-// TODO(dsinclair): Add matrix support
-TEST_F(GlslWriterTest, DISABLED_EmitType_Matrix_F32) {
+TEST_F(GlslWriterTest, EmitType_Matrix_F32) {
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kCompute);
     func->SetWorkgroupSize(1, 1, 1);
     b.Append(func->Block(), [&] {
@@ -178,13 +177,29 @@ TEST_F(GlslWriterTest, DISABLED_EmitType_Matrix_F32) {
     EXPECT_EQ(output_.glsl, GlslHeader() + R"(
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void foo() {
-  mat2x3 a = mat2x3(0.0f);
+  mat2x3 a = mat2x3(vec3(0.0f), vec3(0.0f));
 }
 )");
 }
 
-// TODO(dsinclair): Add matrix support
-TEST_F(GlslWriterTest, DISABLED_EmitType_Matrix_F16) {
+TEST_F(GlslWriterTest, EmitType_MatrixSquare_F32) {
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kCompute);
+    func->SetWorkgroupSize(1, 1, 1);
+    b.Append(func->Block(), [&] {
+        b.Var("a", ty.ptr(core::AddressSpace::kPrivate, ty.mat2x2<f32>()));
+        b.Return(func);
+    });
+
+    ASSERT_TRUE(Generate()) << err_ << output_.glsl;
+    EXPECT_EQ(output_.glsl, GlslHeader() + R"(
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+void foo() {
+  mat2 a = mat2(vec2(0.0f), vec2(0.0f));
+}
+)");
+}
+
+TEST_F(GlslWriterTest, EmitType_Matrix_F16) {
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kCompute);
     func->SetWorkgroupSize(1, 1, 1);
     b.Append(func->Block(), [&] {
@@ -193,10 +208,11 @@ TEST_F(GlslWriterTest, DISABLED_EmitType_Matrix_F16) {
     });
 
     ASSERT_TRUE(Generate()) << err_ << output_.glsl;
-    EXPECT_EQ(output_.glsl, GlslHeader() + R"(
+    EXPECT_EQ(output_.glsl, GlslHeader() + R"(#extension GL_AMD_gpu_shader_half_float: require
+
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void foo() {
-  f16mat2x3 a = f16mat2x3(0.0h);
+  f16mat2x3 a = f16mat2x3(f16vec3(0.0hf), f16vec3(0.0hf));
 }
 )");
 }
