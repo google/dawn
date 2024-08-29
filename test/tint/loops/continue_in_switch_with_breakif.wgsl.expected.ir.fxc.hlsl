@@ -1,3 +1,5 @@
+SKIP: FAILED
+
 
 [numthreads(1, 1, 1)]
 void f() {
@@ -27,3 +29,8 @@ void f() {
   }
 }
 
+FXC validation failure:
+<scrubbed_path>(14,11-19): error X3708: continue cannot be used in a switch
+
+
+tint executable returned error: exit status 1
