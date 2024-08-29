@@ -80,9 +80,24 @@ class ChromePerfReporter final : public benchmark::BenchmarkReporter {
     void Finalize() override {}
 };
 
+bool ParseExtraCommandLineArgs(int argc, char** argv) {
+    for (int i = 1; i < argc; i++) {
+        // Accept the flags that are passed by the Chromium perf waterfall, which treats this
+        // executable as a GoogleTest binary.
+        if (strcmp(argv[i], "--verbose") != 0 &&
+            strcmp(argv[i], "--test-launcher-print-test-stdio=always") != 0 &&
+            strcmp(argv[i], "--test-launcher-total-shards=1") != 0 &&
+            strcmp(argv[i], "--test-launcher-shard-index=0") != 0) {
+            std::cerr << "Unrecognized command-line argument: " << argv[i] << "\n";
+            return false;
+        }
+    }
+    return true;
+}
+
 int main(int argc, char** argv) {
     benchmark::Initialize(&argc, argv);
-    if (benchmark::ReportUnrecognizedArguments(argc, argv)) {
+    if (!ParseExtraCommandLineArgs(argc, argv)) {
         return 1;
     }
     benchmark::RunSpecifiedBenchmarks(new ChromePerfReporter);
