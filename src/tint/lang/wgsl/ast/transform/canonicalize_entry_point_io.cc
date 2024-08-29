@@ -748,12 +748,13 @@ struct CanonicalizeEntryPointIO::State {
             };
 
         auto TranslateClipDistancesIntoVector =
-            [&](const Symbol& new_member, uint32_t vector_size,
+            [&](const Symbol& new_member, uint32_t vector_size, uint32_t inner_array_offset,
                 tint::VectorRef<const ast::Attribute*>&& new_member_attributes) {
                 for (uint32_t i = 0; i < vector_size; ++i) {
                     assignments->Push(b.Assign(
                         b.IndexAccessor(b.MemberAccessor(wrapper_struct_name, new_member), u32(i)),
-                        b.IndexAccessor(clip_distances_inner_array_name, u32(i))));
+                        b.IndexAccessor(clip_distances_inner_array_name,
+                                        u32(inner_array_offset + i))));
                 }
                 wrapper_struct_output_members.Push({
                     /* member */ b.Member(new_member, b.ty.vec(b.ty.f32(), vector_size),
@@ -775,7 +776,7 @@ struct CanonicalizeEntryPointIO::State {
 
         // floatN clip_distance_0 : SV_ClipDistance0;
         uint32_t clip_distance0_size = std::min(clip_distances_size, 4u);
-        TranslateClipDistancesIntoVector(new_member_0, clip_distance0_size,
+        TranslateClipDistancesIntoVector(new_member_0, clip_distance0_size, 0,
                                          std::move(attribute_vector_0));
 
         // It is enough to just generate SV_ClipDistance0.
@@ -795,7 +796,7 @@ struct CanonicalizeEntryPointIO::State {
 
         // floatN clip_distance_1 : SV_ClipDistance1;
         uint32_t clip_distances1_size = clip_distances_size - 4u;
-        TranslateClipDistancesIntoVector(new_member_1, clip_distances1_size,
+        TranslateClipDistancesIntoVector(new_member_1, clip_distances1_size, 4u,
                                          std::move(attribute_vector_1));
     }
 
