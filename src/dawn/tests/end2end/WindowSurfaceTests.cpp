@@ -99,8 +99,7 @@ class WindowSurfaceInstanceTests : public testing::Test {
 // descriptor).
 TEST_F(WindowSurfaceInstanceTests, ControlCase) {
     GLFWwindow* window = CreateWindow();
-    std::unique_ptr<wgpu::ChainedStruct> chainedDescriptor =
-        wgpu::glfw::SetupWindowAndGetSurfaceDescriptor(window);
+    auto chainedDescriptor = wgpu::glfw::SetupWindowAndGetSurfaceDescriptor(window);
 
     wgpu::SurfaceDescriptor descriptor;
     descriptor.nextInChain = chainedDescriptor.get();
@@ -141,10 +140,8 @@ TEST_F(WindowSurfaceInstanceTests, HTMLCanvasDescriptor) {
 // Test that it is invalid to give two valid chained descriptors
 TEST_F(WindowSurfaceInstanceTests, TwoChainedDescriptors) {
     GLFWwindow* window = CreateWindow();
-    std::unique_ptr<wgpu::ChainedStruct> chainedDescriptor1 =
-        wgpu::glfw::SetupWindowAndGetSurfaceDescriptor(window);
-    std::unique_ptr<wgpu::ChainedStruct> chainedDescriptor2 =
-        wgpu::glfw::SetupWindowAndGetSurfaceDescriptor(window);
+    auto chainedDescriptor1 = wgpu::glfw::SetupWindowAndGetSurfaceDescriptor(window);
+    auto chainedDescriptor2 = wgpu::glfw::SetupWindowAndGetSurfaceDescriptor(window);
 
     wgpu::SurfaceDescriptor descriptor;
     descriptor.nextInChain = chainedDescriptor1.get();
@@ -158,8 +155,7 @@ TEST_F(WindowSurfaceInstanceTests, TwoChainedDescriptors) {
 // Tests that GLFWUtils returns a descriptor of HWND type
 TEST_F(WindowSurfaceInstanceTests, CorrectSTypeHWND) {
     GLFWwindow* window = CreateWindow();
-    std::unique_ptr<wgpu::ChainedStruct> chainedDescriptor =
-        wgpu::glfw::SetupWindowAndGetSurfaceDescriptor(window);
+    auto chainedDescriptor = wgpu::glfw::SetupWindowAndGetSurfaceDescriptor(window);
     ASSERT_EQ(chainedDescriptor->sType, wgpu::SType::SurfaceDescriptorFromWindowsHWND);
 }
 
@@ -194,8 +190,7 @@ TEST_F(WindowSurfaceInstanceTests, HWNDSurfacesAreInvalid) {
 // Tests that GLFWUtils returns a descriptor of Xlib type
 TEST_F(WindowSurfaceInstanceTests, CorrectSTypeXlib) {
     GLFWwindow* window = CreateWindow();
-    std::unique_ptr<wgpu::ChainedStruct> chainedDescriptor =
-        wgpu::glfw::SetupWindowAndGetSurfaceDescriptor(window);
+    auto chainedDescriptor = wgpu::glfw::SetupWindowAndGetSurfaceDescriptor(window);
     ASSERT_EQ(chainedDescriptor->sType, wgpu::SType::SurfaceDescriptorFromXlibWindow);
 }
 
@@ -234,8 +229,7 @@ TEST_F(WindowSurfaceInstanceTests, XlibSurfacesAreInvalid) {
 // Tests that GLFWUtils returns a descriptor of Metal type
 TEST_F(WindowSurfaceInstanceTests, CorrectSTypeMetal) {
     GLFWwindow* window = CreateWindow();
-    std::unique_ptr<wgpu::ChainedStruct> chainedDescriptor =
-        wgpu::glfw::SetupWindowAndGetSurfaceDescriptor(window);
+    auto chainedDescriptor = wgpu::glfw::SetupWindowAndGetSurfaceDescriptor(window);
     ASSERT_EQ(chainedDescriptor->sType, wgpu::SType::SurfaceDescriptorFromMetalLayer);
 }
 

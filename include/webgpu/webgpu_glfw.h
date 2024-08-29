@@ -63,8 +63,8 @@ WGPU_GLFW_EXPORT wgpu::Surface CreateSurfaceForWindow(const wgpu::Instance& inst
 // Use for testing only. Does everything that CreateSurfaceForWindow does except the call to
 // CreateSurface. Useful to be able to modify the descriptor for testing, or when trying to
 // avoid using the global proc table.
-WGPU_GLFW_EXPORT std::unique_ptr<wgpu::ChainedStruct> SetupWindowAndGetSurfaceDescriptor(
-    GLFWwindow* window);
+WGPU_GLFW_EXPORT std::unique_ptr<wgpu::ChainedStruct, void (*)(wgpu::ChainedStruct*)>
+SetupWindowAndGetSurfaceDescriptor(GLFWwindow* window);
 
 }  // namespace wgpu::glfw
 

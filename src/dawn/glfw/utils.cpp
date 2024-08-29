@@ -48,8 +48,7 @@
 namespace wgpu::glfw {
 
 wgpu::Surface CreateSurfaceForWindow(const wgpu::Instance& instance, GLFWwindow* window) {
-    std::unique_ptr<wgpu::ChainedStruct> chainedDescriptor =
-        SetupWindowAndGetSurfaceDescriptor(window);
+    auto chainedDescriptor = SetupWindowAndGetSurfaceDescriptor(window);
 
     wgpu::SurfaceDescriptor descriptor;
     descriptor.nextInChain = chainedDescriptor.get();
@@ -59,47 +58,53 @@ wgpu::Surface CreateSurfaceForWindow(const wgpu::Instance& instance, GLFWwindow*
 }
 
 // SetupWindowAndGetSurfaceDescriptorCocoa defined in GLFWUtils_metal.mm
-std::unique_ptr<wgpu::ChainedStruct> SetupWindowAndGetSurfaceDescriptorCocoa(GLFWwindow* window);
+std::unique_ptr<wgpu::ChainedStruct, void (*)(wgpu::ChainedStruct*)>
+SetupWindowAndGetSurfaceDescriptorCocoa(GLFWwindow* window);
 
-std::unique_ptr<wgpu::ChainedStruct> SetupWindowAndGetSurfaceDescriptor(GLFWwindow* window) {
+std::unique_ptr<wgpu::ChainedStruct, void (*)(wgpu::ChainedStruct*)>
+SetupWindowAndGetSurfaceDescriptor(GLFWwindow* window) {
     if (glfwGetWindowAttrib(window, GLFW_CLIENT_API) != GLFW_NO_API) {
         dawn::ErrorLog() << "GL context was created on the window. Disable context creation by "
                             "setting the GLFW_CLIENT_API hint to GLFW_NO_API.";
-        return nullptr;
+        return {nullptr, [](wgpu::ChainedStruct*) {}};
     }
 #if DAWN_PLATFORM_IS(WINDOWS)
-    std::unique_ptr<wgpu::SurfaceDescriptorFromWindowsHWND> desc =
-        std::make_unique<wgpu::SurfaceDescriptorFromWindowsHWND>();
+    wgpu::SurfaceDescriptorFromWindowsHWND* desc = new wgpu::SurfaceDescriptorFromWindowsHWND();
     desc->hwnd = glfwGetWin32Window(window);
     desc->hinstance = GetModuleHandle(nullptr);
-    return std::move(desc);
+    return {desc, [](wgpu::ChainedStruct* desc) {
+                delete reinterpret_cast<wgpu::SurfaceDescriptorFromWindowsHWND*>(desc);
+            }};
 #elif defined(DAWN_ENABLE_BACKEND_METAL)
     return SetupWindowAndGetSurfaceDescriptorCocoa(window);
 #elif defined(DAWN_USE_WAYLAND) || defined(DAWN_USE_X11)
 #if defined(GLFW_PLATFORM_WAYLAND) && defined(DAWN_USE_WAYLAND)
     if (glfwGetPlatform() == GLFW_PLATFORM_WAYLAND) {
-        std::unique_ptr<wgpu::SurfaceDescriptorFromWaylandSurface> desc =
-            std::make_unique<wgpu::SurfaceDescriptorFromWaylandSurface>();
+        wgpu::SurfaceDescriptorFromWaylandSurface* desc =
+            new wgpu::SurfaceDescriptorFromWaylandSurface();
         desc->display = glfwGetWaylandDisplay();
         desc->surface = glfwGetWaylandWindow(window);
-        return std::move(desc);
+        return {desc, [](wgpu::ChainedStruct* desc) {
+                    delete reinterpret_cast<wgpu::SurfaceDescriptorFromWaylandSurface*>(desc);
+                }};
     } else  // NOLINT(readability/braces)
 #endif
 #if defined(DAWN_USE_X11)
     {
-        std::unique_ptr<wgpu::SurfaceDescriptorFromXlibWindow> desc =
-            std::make_unique<wgpu::SurfaceDescriptorFromXlibWindow>();
+        wgpu::SurfaceDescriptorFromXlibWindow* desc = new wgpu::SurfaceDescriptorFromXlibWindow();
         desc->display = glfwGetX11Display();
         desc->window = glfwGetX11Window(window);
-        return std::move(desc);
+        return {desc, [](wgpu::ChainedStruct* desc) {
+                    delete reinterpret_cast<wgpu::SurfaceDescriptorFromXlibWindow*>(desc);
+                }};
     }
 #else
     {
-        return nullptr;
+        return {nullptr, [](wgpu::ChainedStruct*) {}};
     }
 #endif
 #else
-    return nullptr;
+    return {nullptr, [](wgpu::ChainedStruct*) {}};
 #endif
 }
 
