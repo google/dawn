@@ -642,7 +642,7 @@ def dawn_cmake_standalone_builder(name, clang, debug, cpu, asan, ubsan, experime
             builder = "dawn:try/" + name,
         )
 
-def _add_branch_verifiers(builder_name, os, min_milestone = None, includable_only = False):
+def _add_branch_verifiers(builder_name, os, min_milestone = None, includable_only = False, disable_reuse = False):
     for milestone, details in ACTIVE_MILESTONES.items():
         if os not in details.platforms:
             continue
@@ -652,6 +652,7 @@ def _add_branch_verifiers(builder_name, os, min_milestone = None, includable_onl
             cq_group = "Dawn-CQ-" + milestone,
             builder = "{}:try/{}".format(details.chromium_project, builder_name),
             includable_only = includable_only,
+            disable_reuse = disable_reuse,
         )
 
 # We use the DEPS version for branches because ToT builders do not make sense on
@@ -933,15 +934,14 @@ luci.cq_tryjob_verifier(
     includable_only = True,
 )
 
-# This is separate from the "presubmit" builder for now since we do not want
-# it branched yet.
-# TODO(crbug.com/352816949): Decide whether or not we want this branched
-# long-term.
+# This is separate from the "presubmit" builder since we need branch-specific
+# branch builders unlike stock presubmit.
 luci.cq_tryjob_verifier(
     cq_group = "Dawn-CQ",
     builder = "chromium:try/dawn-chromium-presubmit",
     disable_reuse = True,
 )
+_add_branch_verifiers("dawn-chromium-presubmit", "linux", min_milestone = 130, disable_reuse = True)
 
 # Views
 
