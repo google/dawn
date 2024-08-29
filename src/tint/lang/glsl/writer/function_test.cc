@@ -58,5 +58,19 @@ void main() {
 )");
 }
 
+TEST_F(GlslWriterTest, Function_Fragment_Precision) {
+    auto* func = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    func->Block()->Append(b.Return(func));
+
+    ASSERT_TRUE(Generate()) << err_ << output_.glsl;
+    EXPECT_EQ(output_.glsl, GlslHeader() + R"(precision highp float;
+precision highp int;
+
+
+void main() {
+}
+)");
+}
+
 }  // namespace
 }  // namespace tint::glsl::writer

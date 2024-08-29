@@ -185,6 +185,13 @@ class Printer : public tint::TextGenerator {
             EmitType(out, func->ReturnType());
             out << " ";
 
+            // Fragment shaders need a precision statement
+            if (func->Stage() == core::ir::Function::PipelineStage::kFragment) {
+                auto pre = Line(&preamble_buffer_);
+                pre << "precision highp float;\n";
+                pre << "precision highp int;\n";
+            }
+
             // Switch the entry point name to `main`. This makes the assumption that single entry
             // point is always run for GLSL, which is has to be, there can be only one entry point.
             // So, we swap the entry point name to `main` which is required for GLSL.
