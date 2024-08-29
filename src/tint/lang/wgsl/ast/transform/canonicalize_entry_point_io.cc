@@ -49,6 +49,7 @@ using namespace tint::core::fluent_types;     // NOLINT
 TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::CanonicalizeEntryPointIO);
 TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::CanonicalizeEntryPointIO::Config);
 TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::CanonicalizeEntryPointIO::HLSLWaveIntrinsic);
+TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::CanonicalizeEntryPointIO::HLSLClipDistance1);
 
 namespace tint::ast::transform {
 
@@ -165,7 +166,8 @@ struct CanonicalizeEntryPointIO::State {
     Hashmap<const BuiltinAttribute*, core::BuiltinValue, 16> builtin_attrs;
     /// A map of builtin values to HLSL wave intrinsic functions.
     Hashmap<core::BuiltinValue, Symbol, 2> wave_intrinsics;
-    /// The array length of the struct member with builtin attribute `clip_distances`.
+    /// The array length of the struct member with builtin attribute `clip_distances`. Now it is
+    /// only set and used on HLSL and MSL backends.
     uint32_t clip_distances_size = 0;
 
     /// Constructor
@@ -409,7 +411,7 @@ struct CanonicalizeEntryPointIO::State {
                                      core::InterpolationSampling::kUndefined));
         }
 
-        if (cfg.shader_style == ShaderStyle::kMsl &&
+        if ((cfg.shader_style == ShaderStyle::kMsl || cfg.shader_style == ShaderStyle::kHlsl) &&
             func_ast->PipelineStage() == PipelineStage::kVertex &&
             builtin_attr == core::BuiltinValue::kClipDistances) {
             const auto* arrayType = type->As<core::type::Array>();
@@ -676,6 +678,127 @@ struct CanonicalizeEntryPointIO::State {
         wrapper_ep_parameters.Push(param);
     }
 
+    /// Get an existing member symbol from a set of member names or create a new symbol
+    /// @param member_names the set of the existing member names
+    /// @param symbol_name the name of the symbol
+    /// @returns the symbol that represents the member name we want
+    Symbol GetOrCreateMemberName(std::unordered_set<std::string>* member_names,
+                                 std::string symbol_name) {
+        Symbol member_name;
+        if (member_names->count(symbol_name)) {
+            member_name = b.Symbols().New(symbol_name);
+        } else {
+            member_name = b.Symbols().Register(symbol_name);
+        }
+        member_names->insert(member_name.Name());
+        return member_name;
+    }
+
+    /// Handle `clip_distances` in MSL
+    /// @param assignments the assignments to the members of the output wrapper struct
+    /// @param member_names the set that contains all the member names in the output wrapper struct
+    /// @param clip_distances_inner_array_name the `clip_distances` member in inner struct
+    /// @param wrapper_struct_name the name of the output wrapper struct
+    /// @param old_struct_member the information of the old output wrapper struct member
+    void HandleClipDistancesInMSL(tint::Vector<const Statement*, 8>* assignments,
+                                  std::unordered_set<std::string>* member_names,
+                                  const Symbol& clip_distances_inner_array_name,
+                                  const Symbol& wrapper_struct_name,
+                                  const OutputValue& old_struct_member) {
+        auto new_member = GetOrCreateMemberName(member_names, "clip_distance");
+
+        for (uint32_t i = 0; i < clip_distances_size; ++i) {
+            assignments->Push(
+                b.Assign(b.IndexAccessor(b.MemberAccessor(wrapper_struct_name, new_member), u32(i)),
+                         b.IndexAccessor(clip_distances_inner_array_name, u32(i))));
+        }
+        wrapper_struct_output_members.Push({
+            /* member */ b.Member(new_member, old_struct_member.type,
+                                  std::move(old_struct_member.attributes)),
+            /* location */ std::nullopt,
+            /* blend_src */ std::nullopt,
+            /* color */ std::nullopt,
+        });
+    }
+
+    /// Handle `clip_distances` in HLSL
+    /// @param assignments the assignments to the members of the output wrapper struct
+    /// @param member_names the set that contains all the member names in the output wrapper struct
+    /// @param clip_distances_inner_array_name the `clip_distances` member in inner struct
+    /// @param wrapper_struct_name the symbol of the output wrapper struct
+    /// @param old_struct_member_attributes the attributes of the old `clip_distances` member
+    void HandleClipDistancesInHLSL(
+        tint::Vector<const Statement*, 8>* assignments,
+        std::unordered_set<std::string>* member_names,
+        const Symbol& clip_distances_inner_array_name,
+        const Symbol& wrapper_struct_name,
+        tint::Vector<const Attribute*, 8>&& old_struct_member_attributes) {
+        auto TranslateClipDistancesIntoF32 =
+            [&](const Symbol& new_member, core::u32 inner_array_index,
+                tint::VectorRef<const ast::Attribute*>&& new_member_attributes) {
+                assignments->Push(
+                    b.Assign(b.MemberAccessor(wrapper_struct_name, new_member),
+                             b.IndexAccessor(clip_distances_inner_array_name, inner_array_index)));
+                wrapper_struct_output_members.Push({
+                    /* member */ b.Member(new_member, b.ty.f32(), std::move(new_member_attributes)),
+                    /* location */ std::nullopt,
+                    /* blend_src */ std::nullopt,
+                    /* color */ std::nullopt,
+                });
+            };
+
+        auto TranslateClipDistancesIntoVector =
+            [&](const Symbol& new_member, uint32_t vector_size,
+                tint::VectorRef<const ast::Attribute*>&& new_member_attributes) {
+                for (uint32_t i = 0; i < vector_size; ++i) {
+                    assignments->Push(b.Assign(
+                        b.IndexAccessor(b.MemberAccessor(wrapper_struct_name, new_member), u32(i)),
+                        b.IndexAccessor(clip_distances_inner_array_name, u32(i))));
+                }
+                wrapper_struct_output_members.Push({
+                    /* member */ b.Member(new_member, b.ty.vec(b.ty.f32(), vector_size),
+                                          std::move(new_member_attributes)),
+                    /* location */ std::nullopt,
+                    /* blend_src */ std::nullopt,
+                    /* color */ std::nullopt,
+                });
+            };
+
+        // float clip_distance_0 : SV_ClipDistance0;
+        auto attribute_vector_0 = std::move(old_struct_member_attributes);
+        attribute_vector_0.Push(b.Disable(ast::DisabledValidation::kIgnoreClipDistancesType));
+        auto new_member_0 = GetOrCreateMemberName(member_names, "clip_distance_0");
+        if (clip_distances_size == 1u) {
+            TranslateClipDistancesIntoF32(new_member_0, 0_u, std::move(attribute_vector_0));
+            return;
+        }
+
+        // floatN clip_distance_0 : SV_ClipDistance0;
+        uint32_t clip_distance0_size = std::min(clip_distances_size, 4u);
+        TranslateClipDistancesIntoVector(new_member_0, clip_distance0_size,
+                                         std::move(attribute_vector_0));
+
+        // It is enough to just generate SV_ClipDistance0.
+        if (clip_distances_size <= 4u) {
+            return;
+        }
+
+        // float clip_distance_1 : SV_ClipDistance1;
+        auto attribute_vector_1 =
+            Vector{b.ASTNodes().Create<HLSLClipDistance1>(b.ID(), b.AllocateNodeID())};
+        auto new_member_1 = GetOrCreateMemberName(member_names, "clip_distance_1");
+
+        if (clip_distances_size == 5u) {
+            TranslateClipDistancesIntoF32(new_member_1, 4_u, std::move(attribute_vector_1));
+            return;
+        }
+
+        // floatN clip_distance_1 : SV_ClipDistance1;
+        uint32_t clip_distances1_size = clip_distances_size - 4u;
+        TranslateClipDistancesIntoVector(new_member_1, clip_distances1_size,
+                                         std::move(attribute_vector_1));
+    }
+
     /// Create and return the wrapper function's struct result object.
     /// @returns the struct type
     Struct* CreateOutputStruct() {
@@ -686,28 +809,38 @@ struct CanonicalizeEntryPointIO::State {
         // Create the struct members and their corresponding assignment statements.
         std::unordered_set<std::string> member_names;
         for (auto& outval : wrapper_output_values) {
-            // Use the original output name, unless that is already taken.
-            Symbol name;
-            if (member_names.count(outval.name)) {
-                name = b.Symbols().New(outval.name);
-            } else {
-                name = b.Symbols().Register(outval.name);
-            }
-            member_names.insert(name.Name());
-
             auto* builtin_attribute = GetAttribute<BuiltinAttribute>(outval.attributes);
-            if (cfg.shader_style == ShaderStyle::kMsl && builtin_attribute != nullptr &&
+            if ((cfg.shader_style == ShaderStyle::kMsl || cfg.shader_style == ShaderStyle::kHlsl) &&
+                builtin_attribute != nullptr &&
                 builtin_attribute->builtin == core::BuiltinValue::kClipDistances) {
                 Symbol clip_distances_inner_array = b.Symbols().New("tmp_inner_clip_distances");
-                assignments.Push(b.Decl(b.Let(clip_distances_inner_array, outval.value)));
-                for (uint32_t i = 0; i < clip_distances_size; ++i) {
-                    assignments.Push(
-                        b.Assign(b.IndexAccessor(b.MemberAccessor(wrapper_result, name), u32(i)),
-                                 b.IndexAccessor(clip_distances_inner_array, u32(i))));
+
+                switch (cfg.shader_style) {
+                    case ShaderStyle::kMsl:
+                        assignments.Push(b.Decl(b.Let(clip_distances_inner_array, outval.value)));
+                        HandleClipDistancesInMSL(&assignments, &member_names,
+                                                 clip_distances_inner_array, wrapper_result,
+                                                 outval);
+                        break;
+                    case ShaderStyle::kHlsl:
+                        // Consume outval.type in the let statement as in HLSL `SV_ClipDistance`
+                        // always has different type.
+                        assignments.Push(
+                            b.Decl(b.Let(clip_distances_inner_array, outval.type, outval.value)));
+                        HandleClipDistancesInHLSL(&assignments, &member_names,
+                                                  clip_distances_inner_array, wrapper_result,
+                                                  std::move(outval.attributes));
+                        break;
+                    default:
+                        break;
                 }
-            } else {
-                assignments.Push(b.Assign(b.MemberAccessor(wrapper_result, name), outval.value));
+                continue;
             }
+
+            // Use the original output name, unless that is already taken.
+            Symbol name = GetOrCreateMemberName(&member_names, outval.name);
+
+            assignments.Push(b.Assign(b.MemberAccessor(wrapper_result, name), outval.value));
 
             wrapper_struct_output_members.Push({
                 /* member */ b.Member(name, outval.type, std::move(outval.attributes)),
@@ -1066,6 +1199,21 @@ const CanonicalizeEntryPointIO::HLSLWaveIntrinsic*
 CanonicalizeEntryPointIO::HLSLWaveIntrinsic::Clone(ast::CloneContext& ctx) const {
     return ctx.dst->ASTNodes().Create<CanonicalizeEntryPointIO::HLSLWaveIntrinsic>(
         ctx.dst->ID(), ctx.dst->AllocateNodeID(), op);
+}
+
+CanonicalizeEntryPointIO::HLSLClipDistance1::HLSLClipDistance1(GenerationID pid, NodeID nid)
+    : Base(pid, nid, Empty) {}
+
+CanonicalizeEntryPointIO::HLSLClipDistance1::~HLSLClipDistance1() = default;
+
+std::string CanonicalizeEntryPointIO::HLSLClipDistance1::InternalName() const {
+    return "SV_ClipDistance1";
+}
+
+const CanonicalizeEntryPointIO::HLSLClipDistance1*
+CanonicalizeEntryPointIO::HLSLClipDistance1::Clone(ast::CloneContext& ctx) const {
+    return ctx.dst->ASTNodes().Create<CanonicalizeEntryPointIO::HLSLClipDistance1>(
+        ctx.dst->ID(), ctx.dst->AllocateNodeID());
 }
 
 }  // namespace tint::ast::transform

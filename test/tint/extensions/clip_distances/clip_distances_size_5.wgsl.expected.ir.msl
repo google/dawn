@@ -15,16 +15,16 @@ struct tint_array {
 
 struct VertexOutputs {
   float4 position;
-  tint_array<float, 1> clipDistance;
+  tint_array<float, 5> clipDistance;
 };
 
 struct tint_symbol_outputs {
   float4 VertexOutputs_position [[position]];
-  tint_array<float, 1> VertexOutputs_clipDistance [[clip_distance]];
+  tint_array<float, 5> VertexOutputs_clipDistance [[clip_distance]];
 };
 
 VertexOutputs tint_symbol_inner() {
-  return VertexOutputs{.position=float4(1.0f, 2.0f, 3.0f, 4.0f), .clipDistance=tint_array<float, 1>{}};
+  return VertexOutputs{.position=float4(1.0f, 2.0f, 3.0f, 4.0f), .clipDistance=tint_array<float, 5>{}};
 }
 
 vertex tint_symbol_outputs tint_symbol() {

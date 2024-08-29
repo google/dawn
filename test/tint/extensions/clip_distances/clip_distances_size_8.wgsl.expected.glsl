@@ -19,3 +19,5 @@ Failed to generate: <dawn>/test/tint/extensions/clip_distances/clip_distances_si
 enable clip_distances;
        ^^^^^^^^^^^^^^
 
+
+tint executable returned error: exit status 1

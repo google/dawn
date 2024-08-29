@@ -397,6 +397,7 @@ bool ASTPrinter::Generate() {
                 wgsl::Extension::kChromiumExperimentalPushConstant,
                 wgsl::Extension::kChromiumExperimentalSubgroups,
                 wgsl::Extension::kChromiumInternalGraphite,
+                wgsl::Extension::kClipDistances,
                 wgsl::Extension::kF16,
                 wgsl::Extension::kDualSourceBlending,
                 wgsl::Extension::kSubgroups,
@@ -445,7 +446,7 @@ bool ASTPrinter::Generate() {
                     // instead of true structure.
                     // Structures used as uniform buffer are read from an array of
                     // vectors instead of true structure.
-                    return EmitStructType(current_buffer_, ty);
+                    return EmitStructType(current_buffer_, ty, str->members);
                 }
                 return true;
             },
@@ -3635,6 +3636,8 @@ std::string ASTPrinter::builtin_to_attribute(core::BuiltinValue builtin) const {
             return "SV_SampleIndex";
         case core::BuiltinValue::kSampleMask:
             return "SV_Coverage";
+        case core::BuiltinValue::kClipDistances:
+            return "SV_ClipDistance0";
         default:
             break;
     }
@@ -4590,16 +4593,24 @@ bool ASTPrinter::EmitTypeAndName(StringStream& out,
     return true;
 }
 
-bool ASTPrinter::EmitStructType(TextBuffer* b, const core::type::Struct* str) {
+bool ASTPrinter::EmitStructType(TextBuffer* b,
+                                const core::type::Struct* str,
+                                VectorRef<const ast::StructMember*> ast_struct_members) {
     auto it = emitted_structs_.emplace(str);
     if (!it.second) {
         return true;
     }
 
+    const auto struct_type_members = str->Members();
+    size_t struct_type_member_length = struct_type_members.Length();
+    TINT_ASSERT(ast_struct_members.IsEmpty() ||
+                (struct_type_member_length == ast_struct_members.Length()));
+
     Line(b) << "struct " << StructName(str) << " {";
     {
         ScopedIndent si(b);
-        for (auto* mem : str->Members()) {
+        for (size_t i = 0; i < struct_type_member_length; ++i) {
+            auto* mem = struct_type_members[i];
             auto mem_name = mem->Name().Name();
             auto* ty = mem->Type();
             auto out = Line(b);
@@ -4654,6 +4665,11 @@ bool ASTPrinter::EmitStructType(TextBuffer* b, const core::type::Struct* str) {
                 // stricter and therefore provides the necessary guarantees.
                 // See discussion here: https://github.com/gpuweb/gpuweb/issues/893
                 pre += "precise ";
+            }
+            if (!ast_struct_members.IsEmpty() &&
+                ast::HasAttribute<ast::transform::CanonicalizeEntryPointIO::HLSLClipDistance1>(
+                    ast_struct_members[i]->attributes)) {
+                post += " : SV_ClipDistance1";
             }
 
             out << pre;

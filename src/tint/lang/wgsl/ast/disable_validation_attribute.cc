@@ -60,6 +60,8 @@ std::string DisableValidationAttribute::InternalName() const {
             return "disable_validation__ignore_pointer_aliasing";
         case DisabledValidation::kIgnoreStructMemberLimit:
             return "disable_validation__ignore_struct_member";
+        case DisabledValidation::kIgnoreClipDistancesType:
+            return "disable_validation__ignore_clip_distances_type";
     }
     return "<invalid>";
 }

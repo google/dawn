@@ -462,8 +462,11 @@ class ASTPrinter : public tint::TextGenerator {
     /// this function will simply return `true` without emitting anything.
     /// @param buffer the text buffer that the type declaration will be written to
     /// @param ty the struct to generate
+    /// @param ast_struct_members the definition of struct members in the AST if not empty.
     /// @returns true if the struct is emitted
-    bool EmitStructType(TextBuffer* buffer, const core::type::Struct* ty);
+    bool EmitStructType(TextBuffer* buffer,
+                        const core::type::Struct* ty,
+                        VectorRef<const ast::StructMember*> ast_struct_members = Empty);
     /// Handles a unary op expression
     /// @param out the output stream
     /// @param expr the expression to emit

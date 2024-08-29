@@ -185,6 +185,25 @@ class CanonicalizeEntryPointIO final : public Castable<CanonicalizeEntryPointIO,
         const Op op;
     };
 
+    /// HLSLClipDistance1 is an InternalAttribute that is used to represent `SV_ClipDistance1`.
+    class HLSLClipDistance1 final : public Castable<HLSLClipDistance1, InternalAttribute> {
+      public:
+        /// Constructor
+        /// @param pid the identifier of the program that owns this node
+        /// @param nid the unique node identifier
+        HLSLClipDistance1(GenerationID pid, NodeID nid);
+        /// Destructor
+        ~HLSLClipDistance1() override;
+
+        /// @copydoc InternalAttribute::InternalName
+        std::string InternalName() const override;
+
+        /// Performs a deep clone of this object using the program::CloneContext `ctx`.
+        /// @param ctx the clone context
+        /// @return the newly cloned object
+        const HLSLClipDistance1* Clone(CloneContext& ctx) const override;
+    };
+
     /// Constructor
     CanonicalizeEntryPointIO();
     ~CanonicalizeEntryPointIO() override;

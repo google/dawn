@@ -60,6 +60,9 @@ enum class DisabledValidation {
     kIgnorePointerAliasing,
     /// When applied to a struct, validation of max number of members is skipped.
     kIgnoreStructMemberLimit,
+    /// When applied to a struct member, validation of the type of the builtin `clip_distances` is
+    /// skipped.
+    kIgnoreClipDistancesType,
 };
 
 /// An internal attribute used to tell the validator to ignore specific

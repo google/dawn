@@ -1,5 +1,3 @@
-SKIP: FAILED
-
 #include <metal_stdlib>
 using namespace metal;
 
@@ -33,10 +31,3 @@ vertex tint_symbol_outputs tint_symbol() {
   VertexOutputs const v = tint_symbol_inner();
   return tint_symbol_outputs{.VertexOutputs_position=v.position, .VertexOutputs_clipDistance=v.clipDistance};
 }
-program_source:23:53: error: type 'tint_array<float, 8>' is not valid for attribute 'clip_distance'
-  tint_array<float, 8> VertexOutputs_clipDistance [[clip_distance]];
-                                                    ^~~~~~~~~~~~~
-program_source:30:8: error: invalid return type 'tint_symbol_outputs' for vertex function
-vertex tint_symbol_outputs tint_symbol() {
-       ^
-
