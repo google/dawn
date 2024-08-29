@@ -33,12 +33,6 @@
 
 #define TINT_REQUIRE_SEMICOLON static_assert(true)
 
-#if DAWN_HAS_ATTRIBUTE(no_sanitize)
-#define TINT_NO_SANITIZE(instrumentation) __attribute__((no_sanitize(instrumentation)))
-#else
-#define TINT_NO_SANITIZE(instrumentation)
-#endif
-
 #if defined(_MSC_VER) && !defined(__clang__)
 ////////////////////////////////////////////////////////////////////////////////
 // MSVC

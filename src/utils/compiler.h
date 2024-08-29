@@ -101,4 +101,14 @@
 #define DAWN_UNLIKELY(x) (x)
 #endif
 
+// DAWN_NO_SANITIZE(instrumentation)
+//
+// Annotate a function or a global variable declaration to specify that a particular instrumentation
+// or set of instrumentations should not be applied.
+#if DAWN_HAS_ATTRIBUTE(no_sanitize)
+#define DAWN_NO_SANITIZE(instrumentation) __attribute__((no_sanitize(instrumentation)))
+#else
+#define DAWN_NO_SANITIZE(instrumentation)
+#endif
+
 #endif  // SRC_UTILS_COMPILER_H_

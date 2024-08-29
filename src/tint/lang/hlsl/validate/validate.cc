@@ -65,7 +65,7 @@ using PFN_DXC_CREATE_INSTANCE = HRESULT(__stdcall*)(REFCLSID rclsid,
 // Wrap the call to DxcCreateInstance via the dlsym-loaded function pointer
 // to disable UBSAN on it. This is to workaround a known UBSAN false
 // positive: https://github.com/google/sanitizers/issues/911
-TINT_NO_SANITIZE("undefined")
+DAWN_NO_SANITIZE("undefined")
 HRESULT CallDxcCreateInstance(PFN_DXC_CREATE_INSTANCE dxc_create_instance,
                               CComPtr<IDxcCompiler3>& dxc_compiler) {
     return dxc_create_instance(CLSID_DxcCompiler, IID_PPV_ARGS(&dxc_compiler));
