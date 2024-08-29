@@ -1,13 +1,13 @@
 #include <metal_stdlib>
 using namespace metal;
 
-kernel void tint_symbol() {
-  uint out = 0u;
+kernel void f() {
+  int i = 0;
   {
     while(true) {
       bool tint_continue = false;
-      switch(2) {
-        case 1:
+      switch(i) {
+        case 0:
         {
           tint_continue = true;
           break;
@@ -19,13 +19,14 @@ kernel void tint_symbol() {
       }
       if (tint_continue) {
         {
-          if (true) { break; }
+          i = (i + 1);
+          if ((i >= 4)) { break; }
         }
         continue;
       }
-      out = (out + 1u);
       {
-        if (true) { break; }
+        i = (i + 1);
+        if ((i >= 4)) { break; }
       }
       continue;
     }
