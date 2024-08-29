@@ -29,8 +29,6 @@
 
 #include <atomic>
 #include <cstdint>
-#include <unordered_map>
-#include <unordered_set>
 #include <utility>
 
 #include "src/tint/lang/core/constant/composite.h"
@@ -158,7 +156,7 @@ class Printer : public tint::TextGenerator {
     PrintResult result_;
 
     /// Map of builtin structure to unique generated name
-    std::unordered_map<const core::type::Struct*, std::string> builtin_struct_names_;
+    Hashmap<const core::type::Struct*, std::string, 4> builtin_struct_names_;
 
     core::ir::Module& ir_;
 
@@ -173,7 +171,7 @@ class Printer : public tint::TextGenerator {
     std::string invariant_define_name_;
 
     Hashset<const core::type::Struct*, 16> host_shareable_structs_;
-    std::unordered_set<const core::type::Struct*> emitted_structs_;
+    Hashset<const core::type::Struct*, 4> emitted_structs_;
 
     /// The current function being emitted
     const core::ir::Function* current_function_ = nullptr;
@@ -1387,8 +1385,7 @@ class Printer : public tint::TextGenerator {
     /// this function will simply return without emitting anything.
     /// @param str the struct to generate
     void EmitStructType(const core::type::Struct* str) {
-        auto it = emitted_structs_.emplace(str);
-        if (!it.second) {
+        if (!emitted_structs_.Add(str)) {
             return;
         }
 
@@ -1681,8 +1678,8 @@ class Printer : public tint::TextGenerator {
     std::string StructName(const core::type::Struct* s) {
         auto name = s->Name().Name();
         if (HasPrefix(name, "__")) {
-            name = tint::GetOrAdd(builtin_struct_names_, s,
-                                  [&] { return UniqueIdentifier(name.substr(2)); });
+            name =
+                builtin_struct_names_.GetOrAdd(s, [&] { return UniqueIdentifier(name.substr(2)); });
         }
         return name;
     }

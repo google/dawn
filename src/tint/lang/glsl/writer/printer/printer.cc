@@ -28,8 +28,6 @@
 #include "src/tint/lang/glsl/writer/printer/printer.h"
 
 #include <string>
-#include <unordered_map>
-#include <unordered_set>
 #include <utility>
 
 #include "src/tint/lang/core/constant/splat.h"
@@ -131,10 +129,10 @@ class Printer : public tint::TextGenerator {
     Hashmap<const core::ir::Value*, std::string, 32> names_;
 
     /// Map of builtin structure to unique generated name
-    std::unordered_map<const core::type::Struct*, std::string> builtin_struct_names_;
+    Hashmap<const core::type::Struct*, std::string, 4> builtin_struct_names_;
 
     // The set of emitted structs
-    std::unordered_set<const core::type::Struct*> emitted_structs_;
+    Hashset<const core::type::Struct*, 4> emitted_structs_;
 
     /// @returns the name of the given value, creating a new unique name if the value is unnamed in
     /// the module.
@@ -159,8 +157,8 @@ class Printer : public tint::TextGenerator {
     std::string StructName(const core::type::Struct* s) {
         auto name = s->Name().Name();
         if (HasPrefix(name, "__")) {
-            name = tint::GetOrAdd(builtin_struct_names_, s,
-                                  [&] { return UniqueIdentifier(name.substr(2)); });
+            name =
+                builtin_struct_names_.GetOrAdd(s, [&] { return UniqueIdentifier(name.substr(2)); });
         }
         return name;
     }
@@ -351,8 +349,7 @@ class Printer : public tint::TextGenerator {
     }
 
     void EmitStructType(const core::type::Struct* str) {
-        auto it = emitted_structs_.emplace(str);
-        if (!it.second) {
+        if (!emitted_structs_.Add(str)) {
             return;
         }
 
