@@ -1295,7 +1295,7 @@ class Builder {
             !traits::IsTypeOrDerived<std::remove_pointer_t<std::decay_t<VALUE>>, core::type::Type>>>
     ir::Var* Var(std::string_view name, VALUE&& init) {
         auto* val = Value(std::forward<VALUE>(init));
-        if (TINT_UNLIKELY(!val)) {
+        if (DAWN_UNLIKELY(!val)) {
             TINT_ASSERT(val);
             return nullptr;
         }
@@ -1350,7 +1350,7 @@ class Builder {
     template <typename VALUE>
     ir::Let* Let(std::string_view name, VALUE&& value) {
         auto* val = Value(std::forward<VALUE>(value));
-        if (TINT_UNLIKELY(!val)) {
+        if (DAWN_UNLIKELY(!val)) {
             TINT_ASSERT(val);
             return nullptr;
         }

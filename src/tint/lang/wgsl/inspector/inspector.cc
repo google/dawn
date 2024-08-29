@@ -1008,7 +1008,7 @@ std::vector<PixelLocalMemberType> Inspector::ComputePixelLocalMemberTypes(
 
 template <size_t N, typename F>
 void Inspector::GetOriginatingResources(std::array<const ast::Expression*, N> exprs, F&& callback) {
-    if (TINT_UNLIKELY(!program_.IsValid())) {
+    if (DAWN_UNLIKELY(!program_.IsValid())) {
         TINT_ICE() << "attempting to get originating resources in invalid program";
         return;
     }

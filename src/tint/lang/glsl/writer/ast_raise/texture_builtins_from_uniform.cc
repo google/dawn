@@ -331,7 +331,7 @@ struct TextureBuiltinsFromUniform::State {
 
                     auto* ty = global_sem->Type()->UnwrapRef();
                     auto* str = ty->As<sem::Struct>();
-                    if (TINT_UNLIKELY(!str)) {
+                    if (DAWN_UNLIKELY(!str)) {
                         TINT_ICE()
                             << "existing ubo binding " << cfg->ubo_binding << " is not a struct.";
                     }

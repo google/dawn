@@ -80,7 +80,7 @@ class BumpAllocator {
     /// @param size_in_bytes the number of bytes to allocate
     /// @returns the pointer to the allocated memory or `nullptr` if the memory can not be allocated
     std::byte* Allocate(size_t size_in_bytes) {
-        if (TINT_UNLIKELY(data.current_offset + size_in_bytes < size_in_bytes)) {
+        if (DAWN_UNLIKELY(data.current_offset + size_in_bytes < size_in_bytes)) {
             return nullptr;  // integer overflow
         }
         if (data.current_offset + size_in_bytes > data.current_data_size) {
@@ -89,7 +89,7 @@ class BumpAllocator {
             size_t data_size = std::max(size_in_bytes, kDefaultBlockDataSize);
             data.current = Bitcast<BlockHeader*>(new (std::nothrow)
                                                      std::byte[sizeof(BlockHeader) + data_size]);
-            if (TINT_UNLIKELY(!data.current)) {
+            if (DAWN_UNLIKELY(!data.current)) {
                 return nullptr;  // out of memory
             }
             data.current->next = nullptr;

@@ -38,7 +38,7 @@
 namespace tint::wgsl::reader {
 
 Program Parse(const Source::File* file, const Options& options) {
-    if (TINT_UNLIKELY(file->content.data.size() >
+    if (DAWN_UNLIKELY(file->content.data.size() >
                       static_cast<size_t>(std::numeric_limits<uint32_t>::max()))) {
         ProgramBuilder b;
         b.Diagnostics().AddError(tint::Source{}) << "WGSL source must be 0xffffffff bytes or fewer";

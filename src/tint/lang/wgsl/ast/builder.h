@@ -658,7 +658,7 @@ class Builder {
         /// @param rows number of rows for the matrix
         /// @return a matrix of @p type
         ast::Type mat(const Source& source, ast::Type type, uint32_t columns, uint32_t rows) const {
-            if (TINT_LIKELY(columns >= 2 && columns <= 4 && rows >= 2 && rows <= 4)) {
+            if (DAWN_LIKELY(columns >= 2 && columns <= 4 && rows >= 2 && rows <= 4)) {
                 static constexpr const char* names[] = {
                     "mat2x2", "mat2x3", "mat2x4",  //
                     "mat3x2", "mat3x3", "mat3x4",  //

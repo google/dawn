@@ -59,7 +59,7 @@ class SemHelper {
     auto* Get(const AST* ast) const {
         using T = sem::Info::GetResultType<SEM, AST>;
         auto* sem = builder_->Sem().Get(ast);
-        if (TINT_UNLIKELY(!sem)) {
+        if (DAWN_UNLIKELY(!sem)) {
             TINT_ICE() << "AST node '" << ast->TypeInfo().name << "' had no semantic info\n"
                        << "At: " << ast->source << "\n"
                        << "Pointer: " << ast;
@@ -81,8 +81,8 @@ class SemHelper {
     /// @returns nullptr if @p expr is nullptr, or @p expr cast to sem::ValueExpression if the cast
     /// is successful, otherwise an error diagnostic is raised.
     sem::ValueExpression* AsValueExpression(sem::Expression* expr) const {
-        if (TINT_LIKELY(expr)) {
-            if (auto* val_expr = expr->As<sem::ValueExpression>(); TINT_LIKELY(val_expr)) {
+        if (DAWN_LIKELY(expr)) {
+            if (auto* val_expr = expr->As<sem::ValueExpression>(); DAWN_LIKELY(val_expr)) {
                 return val_expr;
             }
             ErrorExpectedValueExpr(expr);
@@ -102,7 +102,7 @@ class SemHelper {
     /// @returns the sem node for @p ast
     const core::type::Type* GetType(const ast::Expression* ast) const {
         auto* expr = AsTypeExpression(Get(ast));
-        if (TINT_LIKELY(expr)) {
+        if (DAWN_LIKELY(expr)) {
             return expr->Type();
         }
         return nullptr;
@@ -112,9 +112,9 @@ class SemHelper {
     /// @returns nullptr if @p expr is nullptr, or @p expr cast to sem::Function if the cast is
     /// successful, otherwise an error diagnostic is raised.
     sem::FunctionExpression* AsFunctionExpression(sem::Expression* expr) const {
-        if (TINT_LIKELY(expr)) {
+        if (DAWN_LIKELY(expr)) {
             auto* fn_expr = expr->As<sem::FunctionExpression>();
-            if (TINT_LIKELY(fn_expr)) {
+            if (DAWN_LIKELY(fn_expr)) {
                 return fn_expr;
             }
             ErrorUnexpectedExprKind(expr, "function");
@@ -127,9 +127,9 @@ class SemHelper {
     /// sem::BuiltinEnumExpression<core::AddressSpace> if the cast is successful, otherwise an
     /// error diagnostic is raised.
     sem::BuiltinEnumExpression<core::AddressSpace>* AsAddressSpace(sem::Expression* expr) const {
-        if (TINT_LIKELY(expr)) {
+        if (DAWN_LIKELY(expr)) {
             auto* enum_expr = expr->As<sem::BuiltinEnumExpression<core::AddressSpace>>();
-            if (TINT_LIKELY(enum_expr)) {
+            if (DAWN_LIKELY(enum_expr)) {
                 return enum_expr;
             }
             ErrorUnexpectedExprKind(expr, "address space", core::kAddressSpaceStrings);
@@ -144,7 +144,7 @@ class SemHelper {
     /// @returns the sem node for @p ast
     core::AddressSpace GetAddressSpace(const ast::Expression* ast) const {
         auto* expr = AsAddressSpace(Get(ast));
-        if (TINT_LIKELY(expr)) {
+        if (DAWN_LIKELY(expr)) {
             return expr->Value();
         }
         return core::AddressSpace::kUndefined;
@@ -155,9 +155,9 @@ class SemHelper {
     /// sem::BuiltinEnumExpression<core::type::TexelFormat> if the cast is successful, otherwise an
     /// error diagnostic is raised.
     sem::BuiltinEnumExpression<core::TexelFormat>* AsTexelFormat(sem::Expression* expr) const {
-        if (TINT_LIKELY(expr)) {
+        if (DAWN_LIKELY(expr)) {
             auto* enum_expr = expr->As<sem::BuiltinEnumExpression<core::TexelFormat>>();
-            if (TINT_LIKELY(enum_expr)) {
+            if (DAWN_LIKELY(enum_expr)) {
                 return enum_expr;
             }
             ErrorUnexpectedExprKind(expr, "texel format", core::kTexelFormatStrings);
@@ -172,7 +172,7 @@ class SemHelper {
     /// @returns the sem node for @p ast
     core::TexelFormat GetTexelFormat(const ast::Expression* ast) const {
         auto* expr = AsTexelFormat(Get(ast));
-        if (TINT_LIKELY(expr)) {
+        if (DAWN_LIKELY(expr)) {
             return expr->Value();
         }
         return core::TexelFormat::kUndefined;
@@ -183,9 +183,9 @@ class SemHelper {
     /// sem::BuiltinEnumExpression<core::Access> if the cast is successful, otherwise an error
     /// diagnostic is raised.
     sem::BuiltinEnumExpression<core::Access>* AsAccess(sem::Expression* expr) const {
-        if (TINT_LIKELY(expr)) {
+        if (DAWN_LIKELY(expr)) {
             auto* enum_expr = expr->As<sem::BuiltinEnumExpression<core::Access>>();
-            if (TINT_LIKELY(enum_expr)) {
+            if (DAWN_LIKELY(enum_expr)) {
                 return enum_expr;
             }
             ErrorUnexpectedExprKind(expr, "access", core::kAccessStrings);
@@ -200,7 +200,7 @@ class SemHelper {
     /// @returns the sem node for @p ast
     core::Access GetAccess(const ast::Expression* ast) const {
         auto* expr = AsAccess(Get(ast));
-        if (TINT_LIKELY(expr)) {
+        if (DAWN_LIKELY(expr)) {
             return expr->Value();
         }
         return core::Access::kUndefined;

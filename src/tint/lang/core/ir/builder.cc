@@ -146,10 +146,10 @@ ir::Unused* Builder::Unused() {
 const core::type::Type* Builder::VectorPtrElementType(const core::type::Type* type) {
     auto* vec_ptr_ty = type->As<core::type::Pointer>();
     TINT_ASSERT(vec_ptr_ty);
-    if (TINT_LIKELY(vec_ptr_ty)) {
+    if (DAWN_LIKELY(vec_ptr_ty)) {
         auto* vec_ty = vec_ptr_ty->StoreType()->As<core::type::Vector>();
         TINT_ASSERT(vec_ty);
-        if (TINT_LIKELY(vec_ty)) {
+        if (DAWN_LIKELY(vec_ty)) {
             return vec_ty->Type();
         }
     }

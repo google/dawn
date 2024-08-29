@@ -83,9 +83,6 @@
     __pragma(warning(push)) TINT_DISABLE_WARNING_UNUSED_PARAMETER TINT_REQUIRE_SEMICOLON
 #define TINT_END_DISABLE_PROTOBUF_WARNINGS() __pragma(warning(pop)) TINT_REQUIRE_SEMICOLON
 
-#define TINT_UNLIKELY(x) x /* currently no-op */
-#define TINT_LIKELY(x) x   /* currently no-op */
-
 #if defined(__SANITIZE_ADDRESS__)
 #define TINT_ASAN_ENABLED
 #endif
@@ -166,9 +163,6 @@
     TINT_REQUIRE_SEMICOLON
 // clang-format on
 
-#define TINT_UNLIKELY(x) __builtin_expect(!!(x), false)
-#define TINT_LIKELY(x) __builtin_expect(!!(x), true)
-
 #if __has_feature(address_sanitizer)
 #define TINT_ASAN_ENABLED
 #endif
@@ -241,9 +235,6 @@
     TINT_REQUIRE_SEMICOLON
 // clang-format on
 
-#define TINT_UNLIKELY(x) __builtin_expect(!!(x), false)
-#define TINT_LIKELY(x) __builtin_expect(!!(x), true)
-
 #if defined(__SANITIZE_ADDRESS__)
 #define TINT_ASAN_ENABLED
 #endif
@@ -260,8 +251,6 @@
 #define TINT_END_DISABLE_WARNING(name) TINT_REQUIRE_SEMICOLON
 #define TINT_BEGIN_DISABLE_PROTOBUF_WARNINGS() TINT_REQUIRE_SEMICOLON
 #define TINT_END_DISABLE_PROTOBUF_WARNINGS() TINT_REQUIRE_SEMICOLON
-#define TINT_UNLIKELY(x) x
-#define TINT_LIKELY(x) x
 
 #endif
 

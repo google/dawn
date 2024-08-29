@@ -1264,7 +1264,7 @@ class Printer : public tint::TextGenerator {
             out << "atomic_int";
             return;
         }
-        if (TINT_LIKELY(atomic->Type()->Is<core::type::U32>())) {
+        if (DAWN_LIKELY(atomic->Type()->Is<core::type::U32>())) {
             out << "atomic_uint";
             return;
         }
@@ -1313,7 +1313,7 @@ class Printer : public tint::TextGenerator {
     /// @param out the output stream
     /// @param tex the texture to emit
     void EmitTextureType(StringStream& out, const core::type::Texture* tex) {
-        if (TINT_UNLIKELY(tex->Is<core::type::ExternalTexture>())) {
+        if (DAWN_UNLIKELY(tex->Is<core::type::ExternalTexture>())) {
             TINT_IR_ICE(ir_) << "Multiplanar external texture transform was not run.";
         }
 
@@ -1425,7 +1425,7 @@ class Printer : public tint::TextGenerator {
             auto ir_offset = mem->Offset();
 
             if (is_host_shareable) {
-                if (TINT_UNLIKELY(ir_offset < msl_offset)) {
+                if (DAWN_UNLIKELY(ir_offset < msl_offset)) {
                     // Unimplementable layout
                     TINT_IR_ICE(ir_) << "Structure member offset (" << ir_offset
                                      << ") is behind MSL offset (" << msl_offset << ")";
@@ -1458,7 +1458,7 @@ class Printer : public tint::TextGenerator {
 
             if (auto location = attributes.location) {
                 auto& pipeline_stage_uses = str->PipelineStageUses();
-                if (TINT_UNLIKELY(pipeline_stage_uses.Count() != 1)) {
+                if (DAWN_UNLIKELY(pipeline_stage_uses.Count() != 1)) {
                     TINT_IR_ICE(ir_) << "invalid entry point IO struct uses";
                 }
 
@@ -1470,7 +1470,7 @@ class Printer : public tint::TextGenerator {
                 } else if (pipeline_stage_uses.Contains(
                                core::type::PipelineStageUsage::kFragmentInput)) {
                     out << " [[user(locn" << location.value() << ")]]";
-                } else if (TINT_LIKELY(pipeline_stage_uses.Contains(
+                } else if (DAWN_LIKELY(pipeline_stage_uses.Contains(
                                core::type::PipelineStageUsage::kFragmentOutput))) {
                     out << " [[color(" << location.value() << ")]]";
                     if (auto blend_src = attributes.blend_src) {
@@ -1518,7 +1518,7 @@ class Printer : public tint::TextGenerator {
             if (is_host_shareable) {
                 // Calculate new MSL offset
                 auto size_align = MslPackedTypeSizeAndAlign(ty);
-                if (TINT_UNLIKELY(msl_offset % size_align.align)) {
+                if (DAWN_UNLIKELY(msl_offset % size_align.align)) {
                     TINT_IR_ICE(ir_) << "Misaligned MSL structure member " << mem_name << " : "
                                      << ty->FriendlyName() << " offset: " << msl_offset
                                      << " align: " << size_align.align;

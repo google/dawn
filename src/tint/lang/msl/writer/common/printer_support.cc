@@ -206,7 +206,7 @@ SizeAndAlign MslPackedTypeSizeAndAlign(const core::type::Type* ty) {
         },
 
         [&](const core::type::Array* arr) {
-            if (TINT_UNLIKELY(!arr->IsStrideImplicit())) {
+            if (DAWN_UNLIKELY(!arr->IsStrideImplicit())) {
                 TINT_ICE()
                     << "arrays with explicit strides should not exist past the SPIR-V reader";
             }

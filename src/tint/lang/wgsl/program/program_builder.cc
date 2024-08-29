@@ -73,7 +73,7 @@ ProgramBuilder ProgramBuilder::Wrap(const Program& program) {
 }
 
 void ProgramBuilder::AssertNotMoved() const {
-    if (TINT_UNLIKELY(moved_)) {
+    if (DAWN_UNLIKELY(moved_)) {
         TINT_ICE() << "Attempting to use ProgramBuilder after it has been moved";
     }
 }

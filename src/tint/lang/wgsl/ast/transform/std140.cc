@@ -430,7 +430,7 @@ struct Std140::State {
                         attrs.Push(b.create<StrideAttribute>(arr->Stride()));
                     }
                     auto count = arr->ConstantCount();
-                    if (TINT_UNLIKELY(!count)) {
+                    if (DAWN_UNLIKELY(!count)) {
                         // Non-constant counts should not be possible:
                         // * Override-expression counts can only be applied to workgroup arrays, and
                         //   this method only handles types transitively used as uniform buffers.
@@ -517,7 +517,7 @@ struct Std140::State {
                         access.indices.Push(UniformVariable{});
                         return Action::kStop;
                     }
-                    if (TINT_LIKELY(user->Variable()->Type()->Is<core::type::Pointer>())) {
+                    if (DAWN_LIKELY(user->Variable()->Type()->Is<core::type::Pointer>())) {
                         // Found a pointer. As the root identifier is a uniform buffer variable,
                         // this must be a pointer-let. Continue traversing from the let
                         // initializer.
@@ -626,7 +626,7 @@ struct Std140::State {
             [&](const core::type::Struct* str) { return str->Name().Name(); },
             [&](const core::type::Array* arr) {
                 auto count = arr->ConstantCount();
-                if (TINT_UNLIKELY(!count)) {
+                if (DAWN_UNLIKELY(!count)) {
                     // Non-constant counts should not be possible:
                     // * Override-expression counts can only be applied to workgroup arrays, and
                     //   this method only handles types transitively used as uniform buffers.
@@ -705,7 +705,7 @@ struct Std140::State {
                 [&](const core::type::Matrix* mat) {
                     // Reassemble a std140 matrix from the structure of column vector members.
                     auto std140_mat = std140_mats.Get(mat);
-                    if (TINT_LIKELY(std140_mat)) {
+                    if (DAWN_LIKELY(std140_mat)) {
                         tint::Vector<const Expression*, 8> args;
                         // std140 decomposed matrix. Reassemble.
                         auto mat_ty = CreateASTTypeFor(ctx, mat);
@@ -727,7 +727,7 @@ struct Std140::State {
                     auto* dst_el = b.IndexAccessor(var, i);
                     auto* src_el = Convert(arr->ElemType(), b.IndexAccessor(param, i));
                     auto count = arr->ConstantCount();
-                    if (TINT_UNLIKELY(!count)) {
+                    if (DAWN_UNLIKELY(!count)) {
                         // Non-constant counts should not be possible:
                         // * Override-expression counts can only be applied to workgroup arrays, and
                         //   this method only handles types transitively used as uniform buffers.

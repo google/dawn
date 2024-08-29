@@ -706,7 +706,7 @@ struct DependencyAnalysis {
 
             sorted_.Add(global->node);
 
-            if (TINT_UNLIKELY(!stack.IsEmpty())) {
+            if (DAWN_UNLIKELY(!stack.IsEmpty())) {
                 // Each stack.push() must have a corresponding stack.pop_back().
                 TINT_ICE() << "stack not empty after returning from TraverseDependencies()";
             }
@@ -718,7 +718,7 @@ struct DependencyAnalysis {
     /// @note will raise an ICE if the edge is not found.
     DependencyInfo DepInfoFor(const Global* from, const Global* to) const {
         auto info = dependency_edges_.Get(DependencyEdge{from, to});
-        if (TINT_LIKELY(info)) {
+        if (DAWN_LIKELY(info)) {
             return *info;
         }
         TINT_ICE() << "failed to find dependency info for edge: '" << NameOf(from->node) << "' -> '"

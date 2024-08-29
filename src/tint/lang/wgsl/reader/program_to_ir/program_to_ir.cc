@@ -1004,7 +1004,7 @@ class Impl {
 
             void EmitIdentifier(const ast::IdentifierExpression* i) {
                 auto* v = impl.scopes_.Get(i->identifier->symbol);
-                if (TINT_UNLIKELY(!v)) {
+                if (DAWN_UNLIKELY(!v)) {
                     impl.AddError(i->source)
                         << "unable to find identifier " << i->identifier->symbol.Name();
                     return;

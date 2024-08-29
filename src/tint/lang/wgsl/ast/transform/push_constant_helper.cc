@@ -47,7 +47,7 @@ PushConstantHelper::PushConstantHelper(program::CloneContext& c) : ctx(c) {
             if (v->AddressSpace() == core::AddressSpace::kPushConstant) {
                 push_constants_var = var;
                 auto* str = v->Type()->UnwrapRef()->As<sem::Struct>();
-                if (TINT_UNLIKELY(!str)) {
+                if (DAWN_UNLIKELY(!str)) {
                     TINT_ICE() << "expected var<push_constant> type to be struct. Was "
                                   "AddBlockAttribute run?";
                 }
@@ -63,7 +63,7 @@ PushConstantHelper::PushConstantHelper(program::CloneContext& c) : ctx(c) {
 
 void PushConstantHelper::InsertMember(const char* name, ast::Type type, uint32_t offset) {
     auto& member = member_map[offset];
-    if (TINT_UNLIKELY(member != nullptr)) {
+    if (DAWN_UNLIKELY(member != nullptr)) {
         ctx.dst->Diagnostics().AddError(Source{}) << "struct member offset collision";
     }
     member = ctx.dst->Member(name, type, Vector{ctx.dst->MemberOffset(core::AInt(offset))});

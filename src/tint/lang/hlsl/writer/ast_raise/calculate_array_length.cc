@@ -164,7 +164,7 @@ ast::transform::Transform::ApplyResult CalculateArrayLength::Apply(const Program
                     //   arrayLength(&array_var)
                     auto* arg = call_expr->args[0];
                     auto* address_of = arg->As<ast::UnaryOpExpression>();
-                    if (TINT_UNLIKELY(!address_of || address_of->op != core::UnaryOp::kAddressOf)) {
+                    if (DAWN_UNLIKELY(!address_of || address_of->op != core::UnaryOp::kAddressOf)) {
                         TINT_ICE()
                             << "arrayLength() expected address-of, got " << arg->TypeInfo().name;
                     }
@@ -173,11 +173,11 @@ ast::transform::Transform::ApplyResult CalculateArrayLength::Apply(const Program
                         storage_buffer_expr = accessor->object;
                     }
                     auto* storage_buffer_sem = sem.Get<sem::VariableUser>(storage_buffer_expr);
-                    if (TINT_UNLIKELY(!storage_buffer_sem)) {
+                    if (DAWN_UNLIKELY(!storage_buffer_sem)) {
                         TINT_ICE() << "expected form of arrayLength argument to be &array_var or "
                                       "&struct_var.array_member";
                     }
-                    if (TINT_UNLIKELY(storage_buffer_sem->Type()->Is<core::type::Pointer>())) {
+                    if (DAWN_UNLIKELY(storage_buffer_sem->Type()->Is<core::type::Pointer>())) {
                         TINT_ICE()
                             << "storage buffer variable should not be a pointer. These should have "
                                "been removed by the SimplifyPointers transform";
@@ -229,7 +229,7 @@ ast::transform::Transform::ApplyResult CalculateArrayLength::Apply(const Program
                                 },
                                 [&](const core::type::Array* arr) { return arr; });
 
-                            if (TINT_UNLIKELY(!array_type)) {
+                            if (DAWN_UNLIKELY(!array_type)) {
                                 TINT_ICE() << "expected form of arrayLength argument to be "
                                               "&array_var or &struct_var.array_member";
                             }

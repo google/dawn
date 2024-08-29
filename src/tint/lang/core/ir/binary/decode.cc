@@ -169,7 +169,7 @@ struct Decoder {
     /// @returns @p number if finite, otherwise 0.
     template <typename T>
     Number<T> CheckFinite(Number<T> number) {
-        if (TINT_UNLIKELY(!std::isfinite(number.value))) {
+        if (DAWN_UNLIKELY(!std::isfinite(number.value))) {
             Error() << "value must be finite";
             return Number<T>{};
         }
@@ -255,7 +255,7 @@ struct Decoder {
         Vector<FunctionParam*, 8> params_out;
         for (auto param_in : fn_in.parameters()) {
             auto* param_out = ValueAs<FunctionParam>(param_in);
-            if (TINT_LIKELY(param_out)) {
+            if (DAWN_LIKELY(param_out)) {
                 params_out.Push(param_out);
             }
         }
@@ -276,7 +276,7 @@ struct Decoder {
     }
 
     ir::Function* Function(uint32_t id) {
-        if (TINT_UNLIKELY(id >= mod_out_.functions.Length())) {
+        if (DAWN_UNLIKELY(id >= mod_out_.functions.Length())) {
             Error() << "function id " << id << " out of range";
             return nullptr;
         }
@@ -311,7 +311,7 @@ struct Decoder {
             Vector<ir::BlockParam*, 8> params;
             for (auto param_in : block_in.parameters()) {
                 auto* param_out = ValueAs<BlockParam>(param_in);
-                if (TINT_LIKELY(param_out)) {
+                if (DAWN_LIKELY(param_out)) {
                     params.Push(param_out);
                 }
             }
@@ -323,7 +323,7 @@ struct Decoder {
     }
 
     ir::Block* Block(uint32_t id) {
-        if (TINT_UNLIKELY(id >= blocks_.Length())) {
+        if (DAWN_UNLIKELY(id >= blocks_.Length())) {
             Error() << "block id " << id << " out of range";
             return b.Block();
         }
@@ -333,7 +333,7 @@ struct Decoder {
     template <typename T>
     T* BlockAs(uint32_t id) {
         auto* block = Block(id);
-        if (auto cast = As<T>(block); TINT_LIKELY(cast)) {
+        if (auto cast = As<T>(block); DAWN_LIKELY(cast)) {
             return cast;
         }
         Error() << "block " << id << " is " << (block ? block->TypeInfo().name : "<null>")
@@ -454,7 +454,7 @@ struct Decoder {
             auto num_next_iter_values = inst_in.break_if().num_next_iter_values();
             bool is_valid =
                 inst_out->Operands().Length() >= num_next_iter_values + BreakIf::kArgsOperandOffset;
-            if (TINT_LIKELY(is_valid)) {
+            if (DAWN_LIKELY(is_valid)) {
                 static_cast<BreakIf*>(inst_out)->SetNumNextIterValues(
                     inst_in.break_if().num_next_iter_values());
             } else {
@@ -732,7 +732,7 @@ struct Decoder {
 
     const type::Type* CreateTypeVector(const pb::TypeVector& vector_in) {
         const auto width = vector_in.width();
-        if (TINT_UNLIKELY(width < 2 || width > 4)) {
+        if (DAWN_UNLIKELY(width < 2 || width > 4)) {
             Error() << "invalid vector width";
             return mod_out_.Types().invalid();
         }
@@ -743,7 +743,7 @@ struct Decoder {
     const type::Type* CreateTypeMatrix(const pb::TypeMatrix& matrix_in) {
         const auto rows = matrix_in.num_rows();
         const auto cols = matrix_in.num_columns();
-        if (TINT_UNLIKELY(rows < 2 || rows > 4 || cols < 2 || cols > 4)) {
+        if (DAWN_UNLIKELY(rows < 2 || rows > 4 || cols < 2 || cols > 4)) {
             Error() << "invalid matrix dimensions";
             return mod_out_.Types().invalid();
         }
@@ -761,7 +761,7 @@ struct Decoder {
 
     const type::Type* CreateTypeStruct(const pb::TypeStruct& struct_in) {
         auto struct_name = struct_in.name();
-        if (TINT_UNLIKELY(struct_name.empty())) {
+        if (DAWN_UNLIKELY(struct_name.empty())) {
             Error() << "struct must have a name";
             return mod_out_.Types().invalid();
         }
@@ -774,7 +774,7 @@ struct Decoder {
         uint32_t offset = 0;
         for (auto& member_in : struct_in.member()) {
             auto member_name = member_in.name();
-            if (TINT_UNLIKELY(member_name.empty())) {
+            if (DAWN_UNLIKELY(member_name.empty())) {
                 Error() << "struct member must have a name";
                 return mod_out_.Types().invalid();
             }
@@ -783,11 +783,11 @@ struct Decoder {
             auto index = static_cast<uint32_t>(members_out.Length());
             auto align = member_in.align();
             auto size = member_in.size();
-            if (TINT_UNLIKELY(align == 0)) {
+            if (DAWN_UNLIKELY(align == 0)) {
                 Error() << "struct member must have non-zero alignment";
                 align = 1;
             }
-            if (TINT_UNLIKELY(size == 0)) {
+            if (DAWN_UNLIKELY(size == 0)) {
                 Error() << "struct member must have non-zero size";
                 size = 1;
             }
@@ -818,7 +818,7 @@ struct Decoder {
             offset += size;
             members_out.Push(member_out);
         }
-        if (TINT_UNLIKELY(members_out.IsEmpty())) {
+        if (DAWN_UNLIKELY(members_out.IsEmpty())) {
             Error() << "struct requires at least one member";
             return mod_out_.Types().invalid();
         }
@@ -912,7 +912,7 @@ struct Decoder {
     }
 
     const type::Type* Type(size_t id) {
-        if (TINT_UNLIKELY(id >= types_.Length())) {
+        if (DAWN_UNLIKELY(id >= types_.Length())) {
             Error() << "type id " << id << " out of range";
             return mod_out_.Types().invalid();
         }
@@ -1006,7 +1006,7 @@ struct Decoder {
     ir::Constant* Constant(uint32_t value_id) { return b.Constant(ConstantValue(value_id)); }
 
     ir::Value* Value(uint32_t id) {
-        if (TINT_UNLIKELY(id > values_.Length())) {
+        if (DAWN_UNLIKELY(id > values_.Length())) {
             Error() << "value id " << id << " out of range";
             return nullptr;
         }
@@ -1016,7 +1016,7 @@ struct Decoder {
     template <typename T>
     T* ValueAs(uint32_t id) {
         auto* value = Value(id);
-        if (auto cast = As<T>(value); TINT_LIKELY(cast)) {
+        if (auto cast = As<T>(value); DAWN_LIKELY(cast)) {
             return cast;
         }
         Error() << "value " << id << " is " << (value ? value->TypeInfo().name : "<null>")
@@ -1066,11 +1066,11 @@ struct Decoder {
         auto* type = Type(composite_in.type());
         auto type_elements = type->Elements();
         size_t num_values = static_cast<size_t>(composite_in.elements().size());
-        if (TINT_UNLIKELY(type_elements.count == 0)) {
+        if (DAWN_UNLIKELY(type_elements.count == 0)) {
             Error() << "cannot create a composite of type " << type->FriendlyName();
             return b.InvalidConstant()->Value();
         }
-        if (TINT_UNLIKELY(type_elements.count != num_values)) {
+        if (DAWN_UNLIKELY(type_elements.count != num_values)) {
             Error() << "constant composite type " << type->FriendlyName() << " expects "
                     << type_elements.count << " elements, but " << num_values << " values encoded";
             return b.InvalidConstant()->Value();
@@ -1079,7 +1079,7 @@ struct Decoder {
         for (auto element_id : composite_in.elements()) {
             uint32_t i = static_cast<uint32_t>(elements_out.Length());
             auto* value = ConstantValue(element_id);
-            if (auto* el_type = type->Element(i); TINT_UNLIKELY(value->Type() != el_type)) {
+            if (auto* el_type = type->Element(i); DAWN_UNLIKELY(value->Type() != el_type)) {
                 Error() << "constant composite element value type " << value->Type()->FriendlyName()
                         << " does not match element type " << el_type->FriendlyName();
                 return b.InvalidConstant()->Value();
@@ -1092,14 +1092,14 @@ struct Decoder {
     const core::constant::Value* CreateConstantSplat(const pb::ConstantValueSplat& splat_in) {
         auto* type = Type(splat_in.type());
         uint32_t num_elements = type->Elements().count;
-        if (TINT_UNLIKELY(num_elements == 0)) {
+        if (DAWN_UNLIKELY(num_elements == 0)) {
             Error() << "cannot create a splat of type " << type->FriendlyName();
             return b.InvalidConstant()->Value();
         }
         auto* value = ConstantValue(splat_in.elements());
         for (uint32_t i = 0; i < num_elements; i++) {
             auto* el_type = type->Element(i);
-            if (TINT_UNLIKELY(el_type != value->Type())) {
+            if (DAWN_UNLIKELY(el_type != value->Type())) {
                 Error() << "constant splat element value type " << value->Type()->FriendlyName()
                         << " does not match element " << i << " type " << el_type->FriendlyName();
                 return b.InvalidConstant()->Value();
@@ -1109,7 +1109,7 @@ struct Decoder {
     }
 
     const core::constant::Value* ConstantValue(uint32_t id) {
-        if (TINT_UNLIKELY(id >= constant_values_.Length())) {
+        if (DAWN_UNLIKELY(id >= constant_values_.Length())) {
             Error() << "constant value id " << id << " out of range";
             return b.InvalidConstant()->Value();
         }

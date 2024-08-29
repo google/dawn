@@ -75,7 +75,7 @@ void Builder::MarkAsMoved() {
 }
 
 void Builder::AssertNotMoved() const {
-    if (TINT_UNLIKELY(moved_)) {
+    if (DAWN_UNLIKELY(moved_)) {
         TINT_ICE() << "Attempting to use Builder after it has been moved";
     }
 }

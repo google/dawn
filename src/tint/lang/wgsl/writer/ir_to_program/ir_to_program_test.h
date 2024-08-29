@@ -67,7 +67,7 @@ class IRToProgramTest : public core::ir::IRTestHelper {
             !traits::IsTypeOrDerived<std::remove_pointer_t<std::decay_t<VALUE>>, core::type::Type>>>
     core::ir::Var* Var(std::string_view name, VALUE&& init) {
         auto* val = b.Value(std::forward<VALUE>(init));
-        if (TINT_UNLIKELY(!val)) {
+        if (DAWN_UNLIKELY(!val)) {
             TINT_ASSERT(val);
             return nullptr;
         }

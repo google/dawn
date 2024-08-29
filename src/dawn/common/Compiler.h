@@ -32,60 +32,6 @@
 
 // Defines macros for compiler-specific functionality
 
-// DAWN_COMPILER_IS(CLANG|GCC|MSVC): Compiler detection
-//
-// Note: clang masquerades as GCC on POSIX and as MSVC on Windows. It must be checked first.
-#if defined(__clang__)
-#define DAWN_COMPILER_IS_CLANG 1
-#define DAWN_COMPILER_IS_GCC 0
-#define DAWN_COMPILER_IS_MSVC 0
-#elif defined(__GNUC__)
-#define DAWN_COMPILER_IS_CLANG 0
-#define DAWN_COMPILER_IS_GCC 1
-#define DAWN_COMPILER_IS_MSVC 0
-#elif defined(_MSC_VER)
-#define DAWN_COMPILER_IS_CLANG 0
-#define DAWN_COMPILER_IS_GCC 0
-#define DAWN_COMPILER_IS_MSVC 1
-#else
-#error "Unsupported compiler"
-#endif
-
-// Use #if DAWN_COMPILER_IS(XXX) for compiler specific code.
-// Do not use #ifdef or the naked macro DAWN_COMPILER_IS_XXX.
-// This can help avoid common mistakes like not including "Compiler.h" and falling into unwanted
-// code block as usage of undefined macro "function" will be blocked by the compiler.
-#define DAWN_COMPILER_IS(X) (1 == DAWN_COMPILER_IS_##X)
-
-// DAWN_BUILTIN_UNREACHABLE()
-//
-// Hints the compiler that a code path is unreachable.
-#if DAWN_COMPILER_IS(MSVC)
-#define DAWN_BUILTIN_UNREACHABLE() __assume(false)
-#else
-#define DAWN_BUILTIN_UNREACHABLE() __builtin_unreachable()
-#endif
-
-// DAWN_LIKELY(EXPR)
-//
-// Where available, hints the compiler that the expression will be true to help it generate code
-// that leads to better branch prediction.
-#if DAWN_COMPILER_IS(GCC) || DAWN_COMPILER_IS(CLANG)
-#define DAWN_LIKELY(x) __builtin_expect(!!(x), 1)
-#else
-#define DAWN_LIKELY(x) (x)
-#endif
-
-// DAWN_UNLIKELY(EXPR)
-//
-// Where available, hints the compiler that the expression will be false to help it generate code
-// that leads to better branch prediction.
-#if DAWN_COMPILER_IS(GCC) || DAWN_COMPILER_IS(CLANG)
-#define DAWN_UNLIKELY(x) __builtin_expect(!!(x), 0)
-#else
-#define DAWN_UNLIKELY(x) (x)
-#endif
-
 // DAWN_NO_SANITIZE(instrumentation)
 //
 // Annotate a function or a global variable declaration to specify that a particular instrumentation

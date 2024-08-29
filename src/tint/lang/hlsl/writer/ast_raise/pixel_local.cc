@@ -326,7 +326,7 @@ struct PixelLocal::State {
                 [&](const core::type::F32*) { return core::TexelFormat::kR32Float; },
                 TINT_ICE_ON_NO_MATCH);
             auto rov_format = ROVTexelFormat(member->Index());
-            if (TINT_UNLIKELY(rov_format != Success)) {
+            if (DAWN_UNLIKELY(rov_format != Success)) {
                 return rov_format.Failure();
             }
             auto rov_type = b.ty.storage_texture(core::type::TextureDimension::k2d,
@@ -464,7 +464,7 @@ struct PixelLocal::State {
     /// @param field_index the pixel local field index
     uint32_t ROVRegisterIndex(uint32_t field_index) {
         auto idx = cfg.pls_member_to_rov_reg.Get(field_index);
-        if (TINT_UNLIKELY(!idx)) {
+        if (DAWN_UNLIKELY(!idx)) {
             b.Diagnostics().AddError(Source{})
                 << "PixelLocal::Config::attachments missing entry for field " << field_index;
             return 0;
@@ -476,7 +476,7 @@ struct PixelLocal::State {
     /// @param field_index the pixel local field index
     Result<core::TexelFormat> ROVTexelFormat(uint32_t field_index) {
         auto format = cfg.pls_member_to_rov_format.Get(field_index);
-        if (TINT_UNLIKELY(!format)) {
+        if (DAWN_UNLIKELY(!format)) {
             diag::Diagnostic err;
             err.severity = diag::Severity::Error;
             err.message << "PixelLocal::Config::attachments missing entry for field "

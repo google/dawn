@@ -112,7 +112,7 @@ void SetInternalCompilerErrorReporter(InternalCompilerErrorReporter* reporter);
 /// The ICE message contains the callsite's file and line.
 #define TINT_ASSERT(condition)                           \
     do {                                                 \
-        if (TINT_UNLIKELY(!(condition))) {               \
+        if (DAWN_UNLIKELY(!(condition))) {               \
             TINT_ICE() << "TINT_ASSERT(" #condition ")"; \
         }                                                \
     } while (false)

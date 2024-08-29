@@ -874,12 +874,12 @@ StyledText Validator::NameOf(const Block* block) {
 
 bool Validator::CheckResult(const Instruction* inst, size_t idx) {
     auto* result = inst->Result(idx);
-    if (TINT_UNLIKELY(result == nullptr)) {
+    if (DAWN_UNLIKELY(result == nullptr)) {
         AddResultError(inst, idx) << "result is undefined";
         return false;
     }
 
-    if (TINT_UNLIKELY(result->Type() == nullptr)) {
+    if (DAWN_UNLIKELY(result->Type() == nullptr)) {
         AddResultError(inst, idx) << "result type is undefined";
         return false;
     }
@@ -889,7 +889,7 @@ bool Validator::CheckResult(const Instruction* inst, size_t idx) {
 
 bool Validator::CheckResults(const ir::Instruction* inst, std::optional<size_t> count = {}) {
     if (count.has_value()) {
-        if (TINT_UNLIKELY(inst->Results().Length() != count.value())) {
+        if (DAWN_UNLIKELY(inst->Results().Length() != count.value())) {
             AddError(inst) << "expected exactly " << count.value() << " results, got "
                            << inst->Results().Length();
             return false;
@@ -898,7 +898,7 @@ bool Validator::CheckResults(const ir::Instruction* inst, std::optional<size_t> 
 
     bool passed = true;
     for (size_t i = 0; i < inst->Results().Length(); i++) {
-        if (TINT_UNLIKELY(!CheckResult(inst, i))) {
+        if (DAWN_UNLIKELY(!CheckResult(inst, i))) {
             passed = false;
         }
     }
@@ -907,20 +907,20 @@ bool Validator::CheckResults(const ir::Instruction* inst, std::optional<size_t> 
 
 bool Validator::CheckOperand(const Instruction* inst, size_t idx) {
     auto* operand = inst->Operand(idx);
-    if (TINT_UNLIKELY(operand == nullptr)) {
+    if (DAWN_UNLIKELY(operand == nullptr)) {
         AddError(inst, idx) << "operand is undefined";
         return false;
     }
 
     // ir::Unused is a internal value used by some transforms to track unused entries, and is
     // removed as part of generating an output shader.
-    if (TINT_UNLIKELY(operand->Is<ir::Unused>())) {
+    if (DAWN_UNLIKELY(operand->Is<ir::Unused>())) {
         return true;
     }
 
     // ir::Function does not have a meaningful type, so does not override the default Type()
     // behaviour.
-    if (TINT_UNLIKELY(!operand->Is<ir::Function>() && operand->Type() == nullptr)) {
+    if (DAWN_UNLIKELY(!operand->Is<ir::Function>() && operand->Type() == nullptr)) {
         AddError(inst, idx) << "operand type is undefined";
         return false;
     }
@@ -931,7 +931,7 @@ bool Validator::CheckOperand(const Instruction* inst, size_t idx) {
 bool Validator::CheckOperands(const ir::Instruction* inst,
                               size_t min_count,
                               std::optional<size_t> max_count) {
-    if (TINT_UNLIKELY(inst->Operands().Length() < min_count)) {
+    if (DAWN_UNLIKELY(inst->Operands().Length() < min_count)) {
         if (max_count.has_value()) {
             AddError(inst) << "expected between " << min_count << " and " << max_count.value()
                            << " operands, got " << inst->Operands().Length();
@@ -942,7 +942,7 @@ bool Validator::CheckOperands(const ir::Instruction* inst,
         return false;
     }
 
-    if (TINT_UNLIKELY(max_count.has_value() && inst->Operands().Length() > max_count.value())) {
+    if (DAWN_UNLIKELY(max_count.has_value() && inst->Operands().Length() > max_count.value())) {
         AddError(inst) << "expected between " << min_count << " and " << max_count.value()
                        << " operands, got " << inst->Operands().Length();
         return false;
@@ -950,7 +950,7 @@ bool Validator::CheckOperands(const ir::Instruction* inst,
 
     bool passed = true;
     for (size_t i = 0; i < inst->Operands().Length(); i++) {
-        if (TINT_UNLIKELY(!CheckOperand(inst, i))) {
+        if (DAWN_UNLIKELY(!CheckOperand(inst, i))) {
             passed = false;
         }
     }
@@ -959,7 +959,7 @@ bool Validator::CheckOperands(const ir::Instruction* inst,
 
 bool Validator::CheckOperands(const ir::Instruction* inst, std::optional<size_t> count = {}) {
     if (count.has_value()) {
-        if (TINT_UNLIKELY(inst->Operands().Length() != count.value())) {
+        if (DAWN_UNLIKELY(inst->Operands().Length() != count.value())) {
             AddError(inst) << "expected exactly " << count.value() << " operands, got "
                            << inst->Operands().Length();
             return false;
@@ -968,7 +968,7 @@ bool Validator::CheckOperands(const ir::Instruction* inst, std::optional<size_t>
 
     bool passed = true;
     for (size_t i = 0; i < inst->Operands().Length(); i++) {
-        if (TINT_UNLIKELY(!CheckOperand(inst, i))) {
+        if (DAWN_UNLIKELY(!CheckOperand(inst, i))) {
             passed = false;
         }
     }
@@ -1146,7 +1146,7 @@ void Validator::CheckFunction(const Function* func) {
     }
 
     if (func->Stage() == Function::PipelineStage::kCompute) {
-        if (TINT_UNLIKELY(!func->WorkgroupSize().has_value())) {
+        if (DAWN_UNLIKELY(!func->WorkgroupSize().has_value())) {
             AddError(func) << "compute entry point requires workgroup size attribute";
         }
     }
@@ -1157,20 +1157,20 @@ void Validator::CheckFunction(const Function* func) {
         Capabilities{Capability::kAllowRefTypes});
 
     if (func->Stage() != Function::PipelineStage::kUndefined) {
-        if (TINT_UNLIKELY(mod_.NameOf(func).Name().empty())) {
+        if (DAWN_UNLIKELY(mod_.NameOf(func).Name().empty())) {
             AddError(func) << "entry points must have names";
         }
     }
 
     // void needs to be filtered out, since it isn't constructible, but used in the IR when no
     // return is specified.
-    if (TINT_UNLIKELY(!func->ReturnType()->Is<core::type::Void>() &&
+    if (DAWN_UNLIKELY(!func->ReturnType()->Is<core::type::Void>() &&
                       !func->ReturnType()->IsConstructible())) {
         AddError(func) << "function return type must be constructible";
     }
 
     if (func->Stage() != Function::PipelineStage::kFragment) {
-        if (TINT_UNLIKELY(func->ReturnBuiltin().has_value() &&
+        if (DAWN_UNLIKELY(func->ReturnBuiltin().has_value() &&
                           func->ReturnBuiltin().value() == BuiltinValue::kFragDepth)) {
             AddError(func) << "frag_depth can only be declared for fragment entry points";
         }
@@ -1596,7 +1596,7 @@ void Validator::CheckAccess(const Access* a) {
         };
 
         auto* index = a->Indices()[i];
-        if (TINT_UNLIKELY(!index->Type()->IsIntegerScalar())) {
+        if (DAWN_UNLIKELY(!index->Type()->IsIntegerScalar())) {
             err() << "index must be integer, got " << index->Type()->FriendlyName();
             return;
         }
@@ -1614,7 +1614,7 @@ void Validator::CheckAccess(const Access* a) {
                 // index is a signed integer scalar. Check that the index isn't negative.
                 // If the index is unsigned, we can skip this.
                 auto idx = value->ValueAs<AInt>();
-                if (TINT_UNLIKELY(idx < 0)) {
+                if (DAWN_UNLIKELY(idx < 0)) {
                     err() << "constant index must be positive, got " << idx;
                     return;
                 }
@@ -1622,7 +1622,7 @@ void Validator::CheckAccess(const Access* a) {
 
             auto idx = value->ValueAs<uint32_t>();
             auto* el = ty->Element(idx);
-            if (TINT_UNLIKELY(!el)) {
+            if (DAWN_UNLIKELY(!el)) {
                 // Is index in bounds?
                 if (auto el_count = ty->Elements().count; el_count != 0 && idx >= el_count) {
                     err() << "index out of bounds for type " << desc_of(in_kind, ty);
@@ -1635,7 +1635,7 @@ void Validator::CheckAccess(const Access* a) {
             ty = el;
         } else {
             auto* el = ty->Elements().type;
-            if (TINT_UNLIKELY(!el)) {
+            if (DAWN_UNLIKELY(!el)) {
                 err() << "type " << desc_of(in_kind, ty) << " cannot be dynamically indexed";
                 return;
             }
@@ -1659,7 +1659,7 @@ void Validator::CheckAccess(const Access* a) {
         // Otherwise, result types should exactly match.
         ok = ty == want;
     }
-    if (TINT_UNLIKELY(!ok)) {
+    if (DAWN_UNLIKELY(!ok)) {
         AddError(a) << "result of access chain is type " << desc_of(in_kind, ty)
                     << " but instruction type is " << style::Type(want->FriendlyName());
     }
@@ -2166,19 +2166,19 @@ void Validator::CheckOperandsMatchTarget(const Instruction* source_inst,
 
 const core::type::Type* Validator::GetVectorPtrElementType(const Instruction* inst, size_t idx) {
     auto* operand = inst->Operands()[idx];
-    if (TINT_UNLIKELY(!operand)) {
+    if (DAWN_UNLIKELY(!operand)) {
         return nullptr;
     }
 
     auto* type = operand->Type();
-    if (TINT_UNLIKELY(!type)) {
+    if (DAWN_UNLIKELY(!type)) {
         return nullptr;
     }
 
     auto* memory_view_ty = type->As<core::type::MemoryView>();
-    if (TINT_LIKELY(memory_view_ty)) {
+    if (DAWN_LIKELY(memory_view_ty)) {
         auto* vec_ty = memory_view_ty->StoreType()->As<core::type::Vector>();
-        if (TINT_LIKELY(vec_ty)) {
+        if (DAWN_LIKELY(vec_ty)) {
             return vec_ty->Type();
         }
     }

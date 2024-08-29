@@ -143,7 +143,7 @@ ast::transform::Transform::ApplyResult DecomposeStridedArray::Apply(
     // Example: `arr[i]` -> `arr[i].el`
     ctx.ReplaceAll([&](const ast::IndexAccessorExpression* idx) -> const ast::Expression* {
         if (auto* ty = src.TypeOf(idx->object)) {
-            if (TINT_UNLIKELY(ty->Is<core::type::Pointer>())) {
+            if (DAWN_UNLIKELY(ty->Is<core::type::Pointer>())) {
                 TINT_ICE() << "lhs of index accessor expression should not be a pointer. These "
                               "should have been removed by the SimplifyPointers transform";
             }

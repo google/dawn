@@ -68,7 +68,7 @@ const constant::Value* Manager::Composite(const core::type::Type* type,
     bool all_equal = true;
     auto* first = elements.Front();
     for (auto* el : elements) {
-        if (TINT_UNLIKELY(!el)) {
+        if (DAWN_UNLIKELY(!el)) {
             return nullptr;
         }
         if (!any_zero && el->AnyZero()) {

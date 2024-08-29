@@ -236,7 +236,7 @@ const core::type::Reference* Manager::ref(core::AddressSpace address_space,
 }
 
 core::type::Struct* Manager::Struct(Symbol name, VectorRef<const StructMember*> members) {
-    if (auto* existing = Find<type::Struct>(name); TINT_UNLIKELY(existing)) {
+    if (auto* existing = Find<type::Struct>(name); DAWN_UNLIKELY(existing)) {
         TINT_ICE() << "attempting to construct two structs named " << name.NameView();
     }
 
@@ -250,7 +250,7 @@ core::type::Struct* Manager::Struct(Symbol name, VectorRef<const StructMember*> 
 }
 
 core::type::Struct* Manager::Struct(Symbol name, VectorRef<StructMemberDesc> md) {
-    if (auto* existing = Find<type::Struct>(name); TINT_UNLIKELY(existing)) {
+    if (auto* existing = Find<type::Struct>(name); DAWN_UNLIKELY(existing)) {
         TINT_ICE() << "attempting to construct two structs named " << name.NameView();
     }
 

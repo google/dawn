@@ -1317,7 +1317,7 @@ class Printer : public tint::TextGenerator {
         const core::type::Type* base_type = ary;
         std::vector<uint32_t> sizes;
         while (auto* arr = base_type->As<core::type::Array>()) {
-            if (TINT_UNLIKELY(arr->Count()->Is<core::type::RuntimeArrayCount>())) {
+            if (DAWN_UNLIKELY(arr->Count()->Is<core::type::RuntimeArrayCount>())) {
                 TINT_ICE() << "runtime arrays may only exist in storage buffers, which "
                               "should have "
                               "been transformed into a ByteAddressBuffer";
@@ -1382,7 +1382,7 @@ class Printer : public tint::TextGenerator {
     }
 
     void EmitTextureType(StringStream& out, const core::type::Texture* tex) {
-        if (TINT_UNLIKELY(tex->Is<core::type::ExternalTexture>())) {
+        if (DAWN_UNLIKELY(tex->Is<core::type::ExternalTexture>())) {
             TINT_ICE() << "Multiplanar external texture transform was not run.";
         }
 
@@ -1421,7 +1421,7 @@ class Printer : public tint::TextGenerator {
 
         if (storage) {
             auto* component = ImageFormatToRWtextureType(storage->TexelFormat());
-            if (TINT_UNLIKELY(!component)) {
+            if (DAWN_UNLIKELY(!component)) {
                 TINT_ICE() << "Unsupported StorageTexture TexelFormat: "
                            << static_cast<int>(storage->TexelFormat());
             }
@@ -1435,7 +1435,7 @@ class Printer : public tint::TextGenerator {
                 out << "float4";
             } else if (subtype->Is<core::type::I32>()) {
                 out << "int4";
-            } else if (TINT_LIKELY(subtype->Is<core::type::U32>())) {
+            } else if (DAWN_LIKELY(subtype->Is<core::type::U32>())) {
                 out << "uint4";
             } else {
                 TINT_ICE() << "Unsupported multisampled texture type";
@@ -1472,7 +1472,7 @@ class Printer : public tint::TextGenerator {
                 std::string post;
                 if (auto location = attributes.location) {
                     auto& pipeline_stage_uses = str->PipelineStageUses();
-                    if (TINT_UNLIKELY(pipeline_stage_uses.Count() != 1)) {
+                    if (DAWN_UNLIKELY(pipeline_stage_uses.Count() != 1)) {
                         TINT_ICE() << "invalid entry point IO struct uses";
                     }
                     if (pipeline_stage_uses.Contains(
@@ -1484,7 +1484,7 @@ class Printer : public tint::TextGenerator {
                     } else if (pipeline_stage_uses.Contains(
                                    core::type::PipelineStageUsage::kFragmentInput)) {
                         post += " : TEXCOORD" + std::to_string(location.value());
-                    } else if (TINT_LIKELY(pipeline_stage_uses.Contains(
+                    } else if (DAWN_LIKELY(pipeline_stage_uses.Contains(
                                    core::type::PipelineStageUsage::kFragmentOutput))) {
                         if (auto blend_src = attributes.blend_src) {
                             post += " : SV_Target" +

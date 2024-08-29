@@ -767,7 +767,7 @@ class State {
         auto* vec = Expr(s->Object());
         Vector<char, 4> components;
         for (uint32_t i : s->Indices()) {
-            if (TINT_UNLIKELY(i >= 4)) {
+            if (DAWN_UNLIKELY(i >= 4)) {
                 TINT_ICE() << "invalid swizzle index: " << i;
             }
             components.Push("xyzw"[i]);
@@ -857,7 +857,7 @@ class State {
             [&](const core::ir::Constant* c) { return Constant(c); },
             [&](Default) -> const ast::Expression* {
                 auto lookup = bindings_.Get(value);
-                if (TINT_UNLIKELY(!lookup)) {
+                if (DAWN_UNLIKELY(!lookup)) {
                     TINT_ICE() << "Expr(" << (value ? value->TypeInfo().name : "null")
                                << ") value has no expression";
                 }
@@ -991,7 +991,7 @@ class State {
                     return b.ty.array(el, std::move(attrs));
                 }
                 auto count = a->ConstantCount();
-                if (TINT_UNLIKELY(!count)) {
+                if (DAWN_UNLIKELY(!count)) {
                     TINT_ICE() << core::type::Array::kErrExpectedConstantCount;
                 }
                 return b.ty.array(el, u32(count.value()), std::move(attrs));
@@ -1121,7 +1121,7 @@ class State {
         TINT_ASSERT(value);
         if (value->IsUsed()) {
             // Value will be inlined at its place of usage.
-            if (TINT_UNLIKELY(!bindings_.Add(value, InlinedValue{expr}))) {
+            if (DAWN_UNLIKELY(!bindings_.Add(value, InlinedValue{expr}))) {
                 TINT_ICE() << "Bind(" << value->TypeInfo().name << ") called twice for same value";
             }
         } else {
@@ -1133,7 +1133,7 @@ class State {
     /// name.
     void Bind(const core::ir::Value* value, Symbol name) {
         TINT_ASSERT(value);
-        if (TINT_UNLIKELY(!bindings_.Add(value, VariableValue{name}))) {
+        if (DAWN_UNLIKELY(!bindings_.Add(value, VariableValue{name}))) {
             TINT_ICE() << "Bind(" << value->TypeInfo().name << ") called twice for same value";
         }
     }

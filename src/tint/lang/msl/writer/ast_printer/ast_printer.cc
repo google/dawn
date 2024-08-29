@@ -1239,7 +1239,7 @@ bool ASTPrinter::EmitTextureCall(StringStream& out,
     };
 
     auto* texture = arg(Usage::kTexture)->Declaration();
-    if (TINT_UNLIKELY(!texture)) {
+    if (DAWN_UNLIKELY(!texture)) {
         TINT_ICE() << "missing texture arg";
     }
 
@@ -2183,12 +2183,12 @@ bool ASTPrinter::EmitEntryPointFunction(const ast::Function* func) {
     // attribute have a value of zero.
     const uint32_t kInvalidBindingIndex = std::numeric_limits<uint32_t>::max();
     auto get_binding_index = [&](const ast::Parameter* param) -> uint32_t {
-        if (TINT_UNLIKELY(!param->HasBindingPoint())) {
+        if (DAWN_UNLIKELY(!param->HasBindingPoint())) {
             TINT_ICE() << "missing binding attributes for entry point parameter";
         }
         auto* param_sem = builder_.Sem().Get(param);
         auto bp = param_sem->Attributes().binding_point;
-        if (TINT_UNLIKELY(bp->group != 0)) {
+        if (DAWN_UNLIKELY(bp->group != 0)) {
             TINT_ICE() << "encountered non-zero resource group index (use BindingRemapper to fix)";
         }
         return bp->binding;
@@ -2290,7 +2290,7 @@ bool ASTPrinter::EmitEntryPointFunction(const ast::Function* func) {
 
                         out << " [[" << name << "]]";
                     }
-                    if (TINT_UNLIKELY(!builtin_found)) {
+                    if (DAWN_UNLIKELY(!builtin_found)) {
                         TINT_ICE() << "Unsupported entry point parameter";
                     }
                     return true;
@@ -2723,7 +2723,7 @@ bool ASTPrinter::EmitType(StringStream& out, const core::type::Type* type) {
                 out << "atomic_int";
                 return true;
             }
-            if (TINT_LIKELY(atomic->Type()->Is<core::type::U32>())) {
+            if (DAWN_LIKELY(atomic->Type()->Is<core::type::U32>())) {
                 out << "atomic_uint";
                 return true;
             }
@@ -2804,7 +2804,7 @@ bool ASTPrinter::EmitType(StringStream& out, const core::type::Type* type) {
             return true;
         },
         [&](const core::type::Texture* tex) {
-            if (TINT_UNLIKELY(tex->Is<core::type::ExternalTexture>())) {
+            if (DAWN_UNLIKELY(tex->Is<core::type::ExternalTexture>())) {
                 TINT_ICE() << "Multiplanar external texture transform was not run.";
             }
 
@@ -2979,7 +2979,7 @@ bool ASTPrinter::EmitStructType(TextBuffer* b, const core::type::Struct* str) {
         auto wgsl_offset = mem->Offset();
 
         if (is_host_shareable) {
-            if (TINT_UNLIKELY(wgsl_offset < msl_offset)) {
+            if (DAWN_UNLIKELY(wgsl_offset < msl_offset)) {
                 // Unimplementable layout
                 TINT_ICE() << "Structure member WGSL offset (" << wgsl_offset
                            << ") is behind MSL offset (" << msl_offset << ")";
@@ -3009,7 +3009,7 @@ bool ASTPrinter::EmitStructType(TextBuffer* b, const core::type::Struct* str) {
             // Emit `[[clip_distance]]` as a C-style f32 array
             if (builtin == core::BuiltinValue::kClipDistances) {
                 const auto* arrayType = mem->Type()->As<core::type::Array>();
-                if (TINT_UNLIKELY(arrayType == nullptr ||
+                if (DAWN_UNLIKELY(arrayType == nullptr ||
                                   !arrayType->ConstantCount().has_value())) {
                     TINT_ICE() << "The type of `clip_distances` is not a sized array";
                 } else {
@@ -3032,7 +3032,7 @@ bool ASTPrinter::EmitStructType(TextBuffer* b, const core::type::Struct* str) {
 
         if (auto location = attributes.location) {
             auto& pipeline_stage_uses = str->PipelineStageUses();
-            if (TINT_UNLIKELY(pipeline_stage_uses.Count() != 1)) {
+            if (DAWN_UNLIKELY(pipeline_stage_uses.Count() != 1)) {
                 TINT_ICE() << "invalid entry point IO struct uses for " << str->Name().NameView();
             }
 
@@ -3044,7 +3044,7 @@ bool ASTPrinter::EmitStructType(TextBuffer* b, const core::type::Struct* str) {
             } else if (pipeline_stage_uses.Contains(
                            core::type::PipelineStageUsage::kFragmentInput)) {
                 out << " [[user(locn" + std::to_string(location.value()) + ")]]";
-            } else if (TINT_LIKELY(pipeline_stage_uses.Contains(
+            } else if (DAWN_LIKELY(pipeline_stage_uses.Contains(
                            core::type::PipelineStageUsage::kFragmentOutput))) {
                 if (auto blend_src = attributes.blend_src) {
                     out << " [[color(" + std::to_string(location.value()) + ") index(" +
@@ -3080,7 +3080,7 @@ bool ASTPrinter::EmitStructType(TextBuffer* b, const core::type::Struct* str) {
         if (is_host_shareable) {
             // Calculate new MSL offset
             auto size_align = MslPackedTypeSizeAndAlign(ty);
-            if (TINT_UNLIKELY(msl_offset % size_align.align)) {
+            if (DAWN_UNLIKELY(msl_offset % size_align.align)) {
                 TINT_ICE() << "Misaligned MSL structure member " << ty->FriendlyName() << " "
                            << mem_name;
             }

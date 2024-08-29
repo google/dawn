@@ -220,7 +220,7 @@ Result<Overload, StyledText> MatchIntrinsic(Context& context,
     }
 
     // How many candidates matched?
-    if (TINT_UNLIKELY(num_matched == 0)) {
+    if (DAWN_UNLIKELY(num_matched == 0)) {
         // Perform the full scoring of each overload
         for (size_t overload_idx = 0; overload_idx < num_overloads; overload_idx++) {
             auto& overload = context.data[intrinsic.overloads + overload_idx];
@@ -245,7 +245,7 @@ Result<Overload, StyledText> MatchIntrinsic(Context& context,
     } else {
         auto result =
             ResolveCandidate(context, std::move(candidates), intrinsic_name, template_args, args);
-        if (TINT_UNLIKELY(result != Success)) {
+        if (DAWN_UNLIKELY(result != Success)) {
             return result.Failure();
         }
         match = result.Get();
@@ -258,7 +258,7 @@ Result<Overload, StyledText> MatchIntrinsic(Context& context,
         return_type =
             context.Match(match.templates, *match.overload, matcher_indices, earliest_eval_stage)
                 .Type(&any);
-        if (TINT_UNLIKELY(!return_type)) {
+        if (DAWN_UNLIKELY(!return_type)) {
             StyledText err;
             err << "MatchState.MatchState() returned null";
             TINT_ICE() << err.Plain();

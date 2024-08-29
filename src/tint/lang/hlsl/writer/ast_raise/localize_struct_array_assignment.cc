@@ -184,7 +184,7 @@ struct LocalizeStructArrayAssignment::State {
                 // Indexing a member access expr?
                 if (auto* ma = ia->object->As<ast::MemberAccessorExpression>()) {
                     const auto* ma_ty = src.TypeOf(ma);
-                    if (TINT_UNLIKELY(ma_ty->Is<core::type::Pointer>())) {
+                    if (DAWN_UNLIKELY(ma_ty->Is<core::type::Pointer>())) {
                         TINT_ICE()
                             << "lhs of index accessor expression should not be a pointer. These "
                                "should have been removed by the SimplifyPointers transform";
@@ -208,7 +208,7 @@ struct LocalizeStructArrayAssignment::State {
     std::pair<const core::type::Type*, core::AddressSpace> GetOriginatingTypeAndAddressSpace(
         const ast::AssignmentStatement* assign_stmt) {
         auto* root_ident = src.Sem().GetVal(assign_stmt->lhs)->RootIdentifier();
-        if (TINT_UNLIKELY(!root_ident)) {
+        if (DAWN_UNLIKELY(!root_ident)) {
             TINT_ICE() << "Unable to determine originating variable for lhs of assignment "
                           "statement";
         }

@@ -45,7 +45,7 @@ class ScopeStack {
     /// Push a new scope on to the stack
     void Push() {
         depth_++;
-        if (TINT_LIKELY(stack_.Length() >= depth_)) {
+        if (DAWN_LIKELY(stack_.Length() >= depth_)) {
             Top().Clear();
         } else {
             stack_.Push({});

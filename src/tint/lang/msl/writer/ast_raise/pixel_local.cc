@@ -247,7 +247,7 @@ struct PixelLocal::State {
     /// @param field_index the pixel local field index
     uint32_t AttachmentIndex(uint32_t field_index) {
         auto idx = cfg.attachments.Get(field_index);
-        if (TINT_UNLIKELY(!idx)) {
+        if (DAWN_UNLIKELY(!idx)) {
             b.Diagnostics().AddError(Source{})
                 << "PixelLocal::Config::attachments missing entry for field " << field_index;
             return 0;

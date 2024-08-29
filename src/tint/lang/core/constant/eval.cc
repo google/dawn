@@ -442,7 +442,7 @@ const Value* ConvertInternal(const Value* root_value,
                 pending.Push(ActionBuildComposite{el_count, convert->target_ty});
 
                 if (auto* str = convert->target_ty->As<core::type::Struct>()) {
-                    if (TINT_UNLIKELY(str->Members().Length() != el_count)) {
+                    if (DAWN_UNLIKELY(str->Members().Length() != el_count)) {
                         TINT_ICE()
                             << "const-eval conversion of structure has mismatched element counts";
                     }
@@ -2058,7 +2058,7 @@ Eval::Result Eval::ShiftLeft(const core::type::Type* ty,
         return Dispatch_ia_iu32(create, c0, c1);
     };
 
-    if (TINT_UNLIKELY(!args[1]->Type()->DeepestElement()->Is<core::type::U32>())) {
+    if (DAWN_UNLIKELY(!args[1]->Type()->DeepestElement()->Is<core::type::U32>())) {
         TINT_ICE() << "Element type of rhs of ShiftLeft must be a u32";
     }
 
@@ -2123,7 +2123,7 @@ Eval::Result Eval::ShiftRight(const core::type::Type* ty,
         return Dispatch_ia_iu32(create, c0, c1);
     };
 
-    if (TINT_UNLIKELY(!args[1]->Type()->DeepestElement()->Is<core::type::U32>())) {
+    if (DAWN_UNLIKELY(!args[1]->Type()->DeepestElement()->Is<core::type::U32>())) {
         TINT_ICE() << "Element type of rhs of ShiftLeft must be a u32";
     }
 

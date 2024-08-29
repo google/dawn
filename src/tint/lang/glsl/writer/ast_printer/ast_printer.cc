@@ -619,7 +619,7 @@ void ASTPrinter::EmitBitwiseBoolOp(StringStream& out, const ast::BinaryExpressio
     // Emit operator.
     if (expr->op == core::BinaryOp::kAnd) {
         out << " & ";
-    } else if (TINT_LIKELY(expr->op == core::BinaryOp::kOr)) {
+    } else if (DAWN_LIKELY(expr->op == core::BinaryOp::kOr)) {
         out << " | ";
     } else {
         TINT_ICE() << "unexpected binary op: " << expr->op;
@@ -1356,7 +1356,7 @@ void ASTPrinter::EmitTextureCall(StringStream& out,
     };
 
     auto* texture = arg(Usage::kTexture);
-    if (TINT_UNLIKELY(!texture)) {
+    if (DAWN_UNLIKELY(!texture)) {
         TINT_ICE() << "missing texture argument";
     }
 
@@ -1541,7 +1541,7 @@ void ASTPrinter::EmitTextureCall(StringStream& out,
     out << ", ";
 
     auto* param_coords = arg(Usage::kCoords);
-    if (TINT_UNLIKELY(!param_coords)) {
+    if (DAWN_UNLIKELY(!param_coords)) {
         TINT_ICE() << "missing coords argument";
     }
 
@@ -1630,7 +1630,7 @@ void ASTPrinter::EmitTextureCall(StringStream& out,
             out << "xyz"[i];
         }
     }
-    if (TINT_UNLIKELY(wgsl_ret_width > glsl_ret_width)) {
+    if (DAWN_UNLIKELY(wgsl_ret_width > glsl_ret_width)) {
         TINT_ICE() << "WGSL return width (" << wgsl_ret_width
                    << ") is wider than GLSL return width (" << glsl_ret_width << ") for "
                    << builtin->Fn();
@@ -1939,7 +1939,7 @@ void ASTPrinter::EmitGlobalVariable(const ast::Variable* global) {
 void ASTPrinter::EmitUniformVariable(const ast::Var* var, const sem::GlobalVariable* sem) {
     auto* type = sem->Type()->UnwrapRef();
     auto* str = type->As<core::type::Struct>();
-    if (TINT_UNLIKELY(!str)) {
+    if (DAWN_UNLIKELY(!str)) {
         TINT_ICE() << "storage variable must be of struct type";
     }
     auto bp = *sem->Attributes().binding_point;
@@ -1957,7 +1957,7 @@ void ASTPrinter::EmitUniformVariable(const ast::Var* var, const sem::GlobalVaria
 void ASTPrinter::EmitStorageVariable(const ast::Var* var, const sem::GlobalVariable* sem) {
     auto* type = sem->Type()->UnwrapRef();
     auto* str = type->As<core::type::Struct>();
-    if (TINT_UNLIKELY(!str)) {
+    if (DAWN_UNLIKELY(!str)) {
         TINT_ICE() << "storage variable must be of struct type";
     }
     auto bp = *sem->Attributes().binding_point;
@@ -2207,7 +2207,7 @@ void ASTPrinter::EmitEntryPointFunction(const ast::Function* func) {
         for (auto* var : func->params) {
             auto* sem = builder_.Sem().Get(var);
             auto* type = sem->Type();
-            if (TINT_UNLIKELY(!type->Is<core::type::Struct>())) {
+            if (DAWN_UNLIKELY(!type->Is<core::type::Struct>())) {
                 // ICE likely indicates that the CanonicalizeEntryPointIO transform was
                 // not run, or a builtin parameter was added after it was run.
                 TINT_ICE() << "Unsupported non-struct entry point parameter";
@@ -2716,14 +2716,14 @@ void ASTPrinter::EmitType(StringStream& out,
         if (mat->Rows() != mat->Columns()) {
             out << "x" << mat->Rows();
         }
-    } else if (TINT_UNLIKELY(type->Is<core::type::Pointer>())) {
+    } else if (DAWN_UNLIKELY(type->Is<core::type::Pointer>())) {
         TINT_ICE() << "Attempting to emit pointer type. These should have been removed with the "
                       "SimplifyPointers transform";
     } else if (type->Is<core::type::Sampler>()) {
     } else if (auto* str = type->As<core::type::Struct>()) {
         out << StructName(str);
     } else if (auto* tex = type->As<core::type::Texture>()) {
-        if (TINT_UNLIKELY(tex->Is<core::type::ExternalTexture>())) {
+        if (DAWN_UNLIKELY(tex->Is<core::type::ExternalTexture>())) {
             TINT_ICE() << "Multiplanar external texture transform was not run.";
         }
 
@@ -2771,7 +2771,7 @@ void ASTPrinter::EmitType(StringStream& out,
         if (!subtype || subtype->Is<core::type::F32>()) {
         } else if (subtype->Is<core::type::I32>()) {
             out << "i";
-        } else if (TINT_LIKELY(subtype->Is<core::type::U32>())) {
+        } else if (DAWN_LIKELY(subtype->Is<core::type::U32>())) {
             out << "u";
         } else {
             TINT_ICE() << "Unsupported texture type";

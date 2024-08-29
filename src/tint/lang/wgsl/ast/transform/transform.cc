@@ -74,7 +74,7 @@ void Transform::RemoveStatement(program::CloneContext& ctx, const Statement* stm
         ctx.Remove(block->Declaration()->statements, stmt);
         return;
     }
-    if (TINT_LIKELY(tint::Is<sem::ForLoopStatement>(sem->Parent()))) {
+    if (DAWN_LIKELY(tint::Is<sem::ForLoopStatement>(sem->Parent()))) {
         ctx.Replace(stmt, static_cast<Expression*>(nullptr));
         return;
     }
@@ -144,7 +144,7 @@ Type Transform::CreateASTTypeFor(program::CloneContext& ctx, const core::type::T
             return ctx.dst->ty.array(el, count, std::move(attrs));
         }
         auto count = a->ConstantCount();
-        if (TINT_UNLIKELY(!count)) {
+        if (DAWN_UNLIKELY(!count)) {
             TINT_ICE() << core::type::Array::kErrExpectedConstantCount;
         }
         return ctx.dst->ty.array(el, u32(count.value()), std::move(attrs));

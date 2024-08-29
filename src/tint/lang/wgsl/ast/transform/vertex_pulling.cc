@@ -786,13 +786,13 @@ struct VertexPulling::State {
             auto* sem = src.Sem().Get(param);
             info.type = sem->Type();
 
-            if (TINT_UNLIKELY(!sem->Attributes().location.has_value())) {
+            if (DAWN_UNLIKELY(!sem->Attributes().location.has_value())) {
                 TINT_ICE() << "Location missing value";
             }
             location_info[sem->Attributes().location.value()] = info;
         } else {
             auto* builtin_attr = GetAttribute<BuiltinAttribute>(param->attributes);
-            if (TINT_UNLIKELY(!builtin_attr)) {
+            if (DAWN_UNLIKELY(!builtin_attr)) {
                 TINT_ICE() << "Invalid entry point parameter";
             }
             auto builtin = builtin_attr->builtin;
@@ -845,7 +845,7 @@ struct VertexPulling::State {
                 has_locations = true;
             } else {
                 auto* builtin_attr = GetAttribute<BuiltinAttribute>(member->attributes);
-                if (TINT_UNLIKELY(!builtin_attr)) {
+                if (DAWN_UNLIKELY(!builtin_attr)) {
                     TINT_ICE() << "Invalid entry point parameter";
                 }
                 auto builtin = builtin_attr->builtin;

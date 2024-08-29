@@ -87,7 +87,7 @@ struct State {
                 }
                 auto* ptr = var->Result(0)->Type()->As<core::type::Pointer>();
                 if (ptr->StoreType()->Is<core::type::ExternalTexture>()) {
-                    if (auto res = ReplaceVar(var); TINT_UNLIKELY(res != Success)) {
+                    if (auto res = ReplaceVar(var); DAWN_UNLIKELY(res != Success)) {
                         return res.Failure();
                     }
                     to_remove.Push(var);
@@ -123,7 +123,7 @@ struct State {
         auto name = ir.NameOf(old_var);
         auto bp = old_var->BindingPoint();
         auto itr = multiplanar_map.find(bp.value());
-        if (TINT_UNLIKELY(itr == multiplanar_map.end())) {
+        if (DAWN_UNLIKELY(itr == multiplanar_map.end())) {
             std::stringstream err;
             err << "ExternalTextureOptions missing binding entry for " << bp.value();
             return Failure{err.str()};
