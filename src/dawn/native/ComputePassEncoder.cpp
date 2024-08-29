@@ -371,12 +371,7 @@ void ComputePassEncoder::APIDispatchWorkgroupsIndirect(BufferBase* indirectBuffe
             }
 
             SyncScopeUsageTracker scope;
-            scope.BufferUsedAs(indirectBuffer, wgpu::BufferUsage::Indirect);
             mUsageTracker.AddReferencedBuffer(indirectBuffer);
-            // TODO(crbug.com/dawn/1166): If validation is enabled, adding |indirectBuffer|
-            // is needed for correct usage validation even though it will only be bound for
-            // storage. This will unecessarily transition the |indirectBuffer| in
-            // the backend.
 
             Ref<BufferBase> indirectBufferRef = indirectBuffer;
 
@@ -399,10 +394,18 @@ void ComputePassEncoder::APIDispatchWorkgroupsIndirect(BufferBase* indirectBuffe
             // If we have created a new scratch dispatch indirect buffer in
             // TransformIndirectDispatchBuffer(), we need to track it in mUsageTracker.
             if (indirectBufferRef.Get() != indirectBuffer) {
-                // |indirectBufferRef| was replaced with a scratch buffer. Add it to the
-                // synchronization scope.
-                scope.BufferUsedAs(indirectBufferRef.Get(), wgpu::BufferUsage::Indirect);
+                // |indirectBufferRef| was replaced with a scratch buffer, so we just need to track
+                // it for backend resource tracking and not for frontend validation.
+                scope.BufferUsedAs(indirectBufferRef.Get(),
+                                   kIndirectBufferForBackendResourceTracking);
                 mUsageTracker.AddReferencedBuffer(indirectBufferRef.Get());
+
+                // Then we can just track indirectBuffer for frontend validation and ignore its
+                // indirect buffer usage in backend resource tracking.
+                scope.BufferUsedAs(indirectBuffer, kIndirectBufferForFrontendValidation);
+            } else {
+                scope.BufferUsedAs(indirectBuffer, wgpu::BufferUsage::Indirect |
+                                                       kIndirectBufferForBackendResourceTracking);
             }
 
             AddDispatchSyncScope(std::move(scope));

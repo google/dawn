@@ -107,7 +107,7 @@ VkPipelineStageFlags VulkanPipelineStage(wgpu::BufferUsage usage, wgpu::ShaderSt
             flags |= VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT;
         }
     }
-    if (usage & wgpu::BufferUsage::Indirect) {
+    if (usage & kIndirectBufferForBackendResourceTracking) {
         flags |= VK_PIPELINE_STAGE_DRAW_INDIRECT_BIT;
     }
     if (usage & wgpu::BufferUsage::QueryResolve) {
@@ -147,7 +147,7 @@ VkAccessFlags VulkanAccessFlags(wgpu::BufferUsage usage) {
     if (usage & kReadOnlyStorageBuffer) {
         flags |= VK_ACCESS_SHADER_READ_BIT;
     }
-    if (usage & wgpu::BufferUsage::Indirect) {
+    if (usage & kIndirectBufferForBackendResourceTracking) {
         flags |= VK_ACCESS_INDIRECT_COMMAND_READ_BIT;
     }
     if (usage & wgpu::BufferUsage::QueryResolve) {

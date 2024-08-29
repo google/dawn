@@ -55,6 +55,18 @@ static constexpr wgpu::BufferUsage kReadOnlyStorageBuffer =
 static constexpr wgpu::BufferUsage kInternalCopySrcBuffer =
     static_cast<wgpu::BufferUsage>(1u << 29);
 
+// Add an extra buffer usage (indirect-for-backend-resource-tracking) for backend resource
+// tracking. We won't do buffer usage transitions when the new buffer usage only contains
+// wgpu::BufferUsage::Indirect and doesn't contain kInternalIndirectBufferForBackendResourceTracking
+// on the backends.
+static constexpr wgpu::BufferUsage kIndirectBufferForBackendResourceTracking =
+    static_cast<wgpu::BufferUsage>(1u << 28);
+
+// Define `kIndirectBufferForFrontendValidation` as an alias of wgpu::BufferUsage::Indirect just
+// for front-end validation on the indirect buffer usage.
+static constexpr wgpu::BufferUsage kIndirectBufferForFrontendValidation =
+    wgpu::BufferUsage::Indirect;
+
 // Extra texture usages
 // Usage to denote an extra tag value used in system specific ways.
 //  - Used to store that attachments are used more than once in PassResourceUsageTracker.

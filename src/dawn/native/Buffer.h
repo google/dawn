@@ -57,7 +57,7 @@ ResultOrError<UnpackedPtr<BufferDescriptor>> ValidateBufferDescriptor(
 static constexpr wgpu::BufferUsage kReadOnlyBufferUsages =
     wgpu::BufferUsage::MapRead | wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::Index |
     wgpu::BufferUsage::Vertex | wgpu::BufferUsage::Uniform | kReadOnlyStorageBuffer |
-    wgpu::BufferUsage::Indirect;
+    kIndirectBufferForFrontendValidation | kIndirectBufferForBackendResourceTracking;
 
 static constexpr wgpu::BufferUsage kMappableBufferUsages =
     wgpu::BufferUsage::MapRead | wgpu::BufferUsage::MapWrite;

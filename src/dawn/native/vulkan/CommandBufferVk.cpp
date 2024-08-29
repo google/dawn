@@ -209,10 +209,22 @@ MaybeError TransitionAndClearForSyncScope(Device* device,
         VkPipelineStageFlags srcStages = 0;
         VkPipelineStageFlags dstStages = 0;
 
+        // `kIndirectBufferForFrontendValidation` is only for the front-end validation and should be
+        // totally ignored in the backend resource tracking because:
+        // 1. When old usage contains kIndirectBufferForFrontendValidation while new usage just
+        //    removes kIndirectBufferForFrontendValidation, the barrier is actually unnecessary.
+        // 2. When usage == kIndirectBufferForFrontendValidation, dstStages would be NONE, which is
+        //    not allowed by Vulkan SPEC unless synchronization2 is enabled.
+        // We remove `kIndirectBufferForFrontendValidation` in this function instead of in the
+        // function `BufferVk::TrackUsageAndGetResourceBarrier()` because on Vulkan backend this
+        // is the only place that we need to handle `kIndirectBufferForFrontendValidation`.
+        wgpu::BufferUsage usage =
+            scope.bufferSyncInfos[i].usage & (~kIndirectBufferForFrontendValidation);
+
         VkBufferMemoryBarrier bufferBarrier;
-        if (buffer->TrackUsageAndGetResourceBarrier(
-                recordingContext, scope.bufferSyncInfos[i].usage,
-                scope.bufferSyncInfos[i].shaderStages, &bufferBarrier, &srcStages, &dstStages)) {
+        if (buffer->TrackUsageAndGetResourceBarrier(recordingContext, usage,
+                                                    scope.bufferSyncInfos[i].shaderStages,
+                                                    &bufferBarrier, &srcStages, &dstStages)) {
             MergeBufferBarrier((dstStages & vertexStages) ? &vertexBarriers : &nonVertexBarriers,
                                srcStages, dstStages, bufferBarrier);
         }

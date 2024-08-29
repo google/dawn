@@ -585,6 +585,9 @@ MaybeError EncodeIndirectDrawValidationCommands(DeviceBase* device,
         if ((draw.type == IndirectDrawMetadata::DrawType::NonIndexed ||
              !device->IsValidationEnabled()) &&
             !draw.duplicateBaseVertexInstance) {
+            // We will use the original indirect buffer directly as the indirect buffer.
+            usageTracker->BufferUsedAs(draw.cmd->indirectBuffer.Get(),
+                                       kIndirectBufferForBackendResourceTracking);
             continue;
         }
 
@@ -625,8 +628,10 @@ MaybeError EncodeIndirectDrawValidationCommands(DeviceBase* device,
     DAWN_TRY(outputParamsBuffer.EnsureCapacity(outputParamsSize));
     DAWN_TRY(batchDataBuffer.EnsureCapacity(requiredBatchDataBufferSize));
 
-    // We swap the indirect buffer used so we need to explicitly add the usage.
-    usageTracker->BufferUsedAs(outputParamsBuffer.GetBuffer(), wgpu::BufferUsage::Indirect);
+    // We swap the indirect buffer used so we need to explicitly add the usage. `outputParamsBuffer`
+    // is an internal buffer so we don't need to validate it against the resource usage scope rules.
+    usageTracker->BufferUsedAs(outputParamsBuffer.GetBuffer(),
+                               kIndirectBufferForBackendResourceTracking);
 
     // Now we allocate and populate host-side batch data to be copied to the GPU.
     for (Pass& pass : passes) {

@@ -84,7 +84,7 @@ D3D12_RESOURCE_STATES D3D12BufferUsage(wgpu::BufferUsage usage) {
         resourceState |= (D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE |
                           D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
     }
-    if (usage & wgpu::BufferUsage::Indirect) {
+    if (usage & kIndirectBufferForBackendResourceTracking) {
         resourceState |= D3D12_RESOURCE_STATE_INDIRECT_ARGUMENT;
     }
     if (usage & wgpu::BufferUsage::QueryResolve) {

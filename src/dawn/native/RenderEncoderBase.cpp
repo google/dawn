@@ -233,15 +233,19 @@ void RenderEncoderBase::APIDrawIndirect(BufferBase* indirectBuffer, uint64_t ind
 
                 mIndirectDrawMetadata.AddIndirectDraw(indirectBuffer, indirectOffset,
                                                       duplicateBaseVertexInstance, cmd);
+
+                // We only set usage as `kIndirectBufferForFrontendValidation` so that the indirect
+                // usage can be ignored in the backends because `indirectBuffer` is actually not
+                // used as an indirect buffer.
+                mUsageTracker.BufferUsedAs(indirectBuffer, kIndirectBufferForFrontendValidation);
             } else {
                 cmd->indirectBuffer = indirectBuffer;
                 cmd->indirectOffset = indirectOffset;
-            }
 
-            // TODO(crbug.com/dawn/1166): Adding the indirectBuffer is needed for correct usage
-            // validation, but it will unnecessarily transition to indirectBuffer usage in the
-            // backend.
-            mUsageTracker.BufferUsedAs(indirectBuffer, wgpu::BufferUsage::Indirect);
+                mUsageTracker.BufferUsedAs(indirectBuffer,
+                                           kIndirectBufferForFrontendValidation |
+                                               kIndirectBufferForBackendResourceTracking);
+            }
 
             mDrawCount++;
 
@@ -294,15 +298,19 @@ void RenderEncoderBase::APIDrawIndexedIndirect(BufferBase* indirectBuffer,
                     mCommandBufferState.GetIndexFormat(), mCommandBufferState.GetIndexBufferSize(),
                     mCommandBufferState.GetIndexBufferOffset(), indirectBuffer, indirectOffset,
                     duplicateBaseVertexInstance, cmd);
+
+                // We only set usage as `kIndirectBufferForFrontendValidation` so that the indirect
+                // usage can be ignored in the backends because `indirectBuffer` is actually not
+                // used as an indirect buffer.
+                mUsageTracker.BufferUsedAs(indirectBuffer, kIndirectBufferForFrontendValidation);
             } else {
                 cmd->indirectBuffer = indirectBuffer;
                 cmd->indirectOffset = indirectOffset;
-            }
 
-            // TODO(crbug.com/dawn/1166): Adding the indirectBuffer is needed for correct usage
-            // validation, but it will unecessarily transition to indirectBuffer usage in the
-            // backend.
-            mUsageTracker.BufferUsedAs(indirectBuffer, wgpu::BufferUsage::Indirect);
+                mUsageTracker.BufferUsedAs(indirectBuffer,
+                                           kIndirectBufferForFrontendValidation |
+                                               kIndirectBufferForBackendResourceTracking);
+            }
 
             mDrawCount++;
 
@@ -387,12 +395,23 @@ void RenderEncoderBase::APIMultiDrawIndirect(BufferBase* indirectBuffer,
 
             mIndirectDrawMetadata.AddMultiDrawIndirect(duplicateBaseVertexInstance, cmd);
 
-            // TODO(crbug.com/dawn/1166): Adding the indirectBuffer is needed for correct usage
-            // validation, but it will unecessarily transition to indirectBuffer usage in the
-            // backend.
-            mUsageTracker.BufferUsedAs(indirectBuffer, wgpu::BufferUsage::Indirect);
+            if (GetDevice()->IsValidationEnabled() ||
+                GetDevice()->MayRequireDuplicationOfIndirectParameters()) {
+                // We only set usage as `kIndirectBufferForFrontendValidation` because
+                // `indirectBuffer` may not be used as an indirect buffer. The usage of
+                // `indirectBuffer` may be updated in `EncodeIndirectDrawValidationCommands()` in
+                // `EncodingContext::ExitRenderPass()`, which is only called when above conditions
+                // are both met.
+                mUsageTracker.BufferUsedAs(indirectBuffer, kIndirectBufferForFrontendValidation);
+            } else {
+                mUsageTracker.BufferUsedAs(indirectBuffer,
+                                           kIndirectBufferForFrontendValidation |
+                                               kIndirectBufferForBackendResourceTracking);
+            }
             if (drawCountBuffer != nullptr) {
-                mUsageTracker.BufferUsedAs(drawCountBuffer, wgpu::BufferUsage::Indirect);
+                mUsageTracker.BufferUsedAs(drawCountBuffer,
+                                           kIndirectBufferForFrontendValidation |
+                                               kIndirectBufferForBackendResourceTracking);
             }
 
             mDrawCount += maxDrawCount;
@@ -483,12 +502,23 @@ void RenderEncoderBase::APIMultiDrawIndexedIndirect(BufferBase* indirectBuffer,
                 mCommandBufferState.GetIndexBufferSize(),
                 mCommandBufferState.GetIndexBufferOffset(), duplicateBaseVertexInstance, cmd);
 
-            // TODO(crbug.com/dawn/1166): Adding the indirectBuffer is needed for correct usage
-            // validation, but it will unecessarily transition to indirectBuffer usage in the
-            // backend.
-            mUsageTracker.BufferUsedAs(indirectBuffer, wgpu::BufferUsage::Indirect);
+            if (GetDevice()->IsValidationEnabled() ||
+                GetDevice()->MayRequireDuplicationOfIndirectParameters()) {
+                // We only set usage as `kIndirectBufferForFrontendValidation` because
+                // `indirectBuffer` may not be used as an indirect buffer. The usage of
+                // `indirectBuffer` may be updated in `EncodeIndirectDrawValidationCommands()` in
+                // `EncodingContext::ExitRenderPass()`, which is only called when above conditions
+                // are both met.
+                mUsageTracker.BufferUsedAs(indirectBuffer, kIndirectBufferForFrontendValidation);
+            } else {
+                mUsageTracker.BufferUsedAs(indirectBuffer,
+                                           kIndirectBufferForFrontendValidation |
+                                               kIndirectBufferForBackendResourceTracking);
+            }
             if (drawCountBuffer != nullptr) {
-                mUsageTracker.BufferUsedAs(drawCountBuffer, wgpu::BufferUsage::Indirect);
+                mUsageTracker.BufferUsedAs(drawCountBuffer,
+                                           kIndirectBufferForFrontendValidation |
+                                               kIndirectBufferForBackendResourceTracking);
             }
 
             mDrawCount += maxDrawCount;
