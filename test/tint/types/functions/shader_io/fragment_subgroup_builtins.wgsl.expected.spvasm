@@ -1,0 +1,56 @@
+; SPIR-V
+; Version: 1.3
+; Generator: Google Tint Compiler; 1
+; Bound: 24
+; Schema: 0
+               OpCapability Shader
+               OpCapability GroupNonUniform
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint Fragment %main "main" %main_subgroup_invocation_id_Input %main_subgroup_size_Input
+               OpExecutionMode %main OriginUpperLeft
+               OpMemberName %tint_symbol_1 0 "tint_symbol"
+               OpName %tint_symbol_1 "tint_symbol_1"
+               OpName %main_subgroup_invocation_id_Input "main_subgroup_invocation_id_Input"
+               OpName %main_subgroup_size_Input "main_subgroup_size_Input"
+               OpName %main_inner "main_inner"
+               OpName %subgroup_invocation_id "subgroup_invocation_id"
+               OpName %subgroup_size "subgroup_size"
+               OpName %main "main"
+               OpDecorate %_runtimearr_uint ArrayStride 4
+               OpMemberDecorate %tint_symbol_1 0 Offset 0
+               OpDecorate %tint_symbol_1 Block
+               OpDecorate %1 DescriptorSet 0
+               OpDecorate %1 Binding 0
+               OpDecorate %1 Coherent
+               OpDecorate %main_subgroup_invocation_id_Input Flat
+               OpDecorate %main_subgroup_invocation_id_Input BuiltIn SubgroupLocalInvocationId
+               OpDecorate %main_subgroup_size_Input Flat
+               OpDecorate %main_subgroup_size_Input BuiltIn SubgroupSize
+       %uint = OpTypeInt 32 0
+%_runtimearr_uint = OpTypeRuntimeArray %uint
+%tint_symbol_1 = OpTypeStruct %_runtimearr_uint
+%_ptr_StorageBuffer_tint_symbol_1 = OpTypePointer StorageBuffer %tint_symbol_1
+          %1 = OpVariable %_ptr_StorageBuffer_tint_symbol_1 StorageBuffer
+%_ptr_Input_uint = OpTypePointer Input %uint
+%main_subgroup_invocation_id_Input = OpVariable %_ptr_Input_uint Input
+%main_subgroup_size_Input = OpVariable %_ptr_Input_uint Input
+       %void = OpTypeVoid
+         %13 = OpTypeFunction %void %uint %uint
+%_ptr_StorageBuffer_uint = OpTypePointer StorageBuffer %uint
+     %uint_0 = OpConstant %uint 0
+         %19 = OpTypeFunction %void
+ %main_inner = OpFunction %void None %13
+%subgroup_invocation_id = OpFunctionParameter %uint
+%subgroup_size = OpFunctionParameter %uint
+         %14 = OpLabel
+         %15 = OpAccessChain %_ptr_StorageBuffer_uint %1 %uint_0 %subgroup_invocation_id
+               OpStore %15 %subgroup_size None
+               OpReturn
+               OpFunctionEnd
+       %main = OpFunction %void None %19
+         %20 = OpLabel
+         %21 = OpLoad %uint %main_subgroup_invocation_id_Input None
+         %22 = OpLoad %uint %main_subgroup_size_Input None
+         %23 = OpFunctionCall %void %main_inner %21 %22
+               OpReturn
+               OpFunctionEnd

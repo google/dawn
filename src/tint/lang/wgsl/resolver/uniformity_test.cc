@@ -635,7 +635,12 @@ test:9:7 note: parameter 's' of 'main' may be non-uniform
 class FragmentBuiltin : public UniformityAnalysisTestBase,
                         public ::testing::TestWithParam<BuiltinEntry> {};
 TEST_P(FragmentBuiltin, AsParam) {
-    std::string src = R"(
+    std::string src = std::string((GetParam().name == "subgroup_size")
+                                      ? R"(enable chromium_experimental_subgroups;
+)"
+                                      : R"(
+                                      )") +
+                      R"(
 @fragment
 fn main(@builtin()" + GetParam().name +
                       R"() b : )" + GetParam().type + R"() {
@@ -649,15 +654,15 @@ fn main(@builtin()" + GetParam().name +
     RunTest(src, should_pass);
     if (!should_pass) {
         EXPECT_EQ(error_,
-                  R"(test:5:9 error: 'dpdx' must only be called from uniform control flow
+                  R"(test:6:9 error: 'dpdx' must only be called from uniform control flow
     _ = dpdx(0.5);
         ^^^^^^^^^
 
-test:4:3 note: control flow depends on possibly non-uniform value
+test:5:3 note: control flow depends on possibly non-uniform value
   if (u32(vec4(b).x) == 0u) {
   ^^
 
-test:4:16 note: builtin 'b' of 'main' may be non-uniform
+test:5:16 note: builtin 'b' of 'main' may be non-uniform
   if (u32(vec4(b).x) == 0u) {
                ^
 )");
@@ -665,7 +670,12 @@ test:4:16 note: builtin 'b' of 'main' may be non-uniform
 }
 
 TEST_P(FragmentBuiltin, InStruct) {
-    std::string src = R"(
+    std::string src = std::string((GetParam().name == "subgroup_size")
+                                      ? R"(enable chromium_experimental_subgroups;
+)"
+                                      : R"(
+                                      )") +
+                      R"(
 struct S {
   @builtin()" + GetParam().name +
                       R"() b : )" + GetParam().type + R"(
@@ -683,15 +693,15 @@ fn main(s : S) {
     RunTest(src, should_pass);
     if (!should_pass) {
         EXPECT_EQ(error_,
-                  R"(test:9:9 error: 'dpdx' must only be called from uniform control flow
+                  R"(test:10:9 error: 'dpdx' must only be called from uniform control flow
     _ = dpdx(0.5);
         ^^^^^^^^^
 
-test:8:3 note: control flow depends on possibly non-uniform value
+test:9:3 note: control flow depends on possibly non-uniform value
   if (u32(vec4(s.b).x) == 0u) {
   ^^
 
-test:8:16 note: parameter 's' of 'main' may be non-uniform
+test:9:16 note: parameter 's' of 'main' may be non-uniform
   if (u32(vec4(s.b).x) == 0u) {
                ^
 )");
@@ -703,7 +713,8 @@ INSTANTIATE_TEST_SUITE_P(UniformityAnalysisTest,
                          ::testing::Values(BuiltinEntry{"position", "vec4<f32>", false},
                                            BuiltinEntry{"front_facing", "bool", false},
                                            BuiltinEntry{"sample_index", "u32", false},
-                                           BuiltinEntry{"sample_mask", "u32", false}),
+                                           BuiltinEntry{"sample_mask", "u32", false},
+                                           BuiltinEntry{"subgroup_size", "u32", false}),
                          [](const ::testing::TestParamInfo<FragmentBuiltin::ParamType>& p) {
                              return p.param.name;
                          });

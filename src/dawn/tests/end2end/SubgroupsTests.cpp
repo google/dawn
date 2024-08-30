@@ -25,12 +25,14 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+#include <cstdint>
 #include <string>
 #include <vector>
 
 #include "dawn/common/GPUInfo.h"
 #include "dawn/common/Math.h"
 #include "dawn/tests/DawnTest.h"
+#include "dawn/utils/ComboRenderPipelineDescriptor.h"
 #include "dawn/utils/WGPUHelpers.h"
 
 namespace dawn {
@@ -240,6 +242,118 @@ TEST_P(SubgroupsShaderTests, ReadSubgroupSize) {
 
 // DawnTestBase::CreateDeviceImpl always enables allow_unsafe_apis toggle.
 DAWN_INSTANTIATE_TEST_P(SubgroupsShaderTests,
+                        {D3D12Backend(), D3D12Backend({}, {"use_dxc"}), MetalBackend(),
+                         VulkanBackend()},
+                        {false, true}  // UseChromiumExperimentalSubgroups
+);
+
+class SubgroupsShaderTestsFragment : public SubgroupsTestsBase<SubgroupsShaderTestsParams> {
+  protected:
+    // Testing reading subgroup_size in fragment shader. There is no workgroup size here and
+    // subgroup_size is varying.
+    void FragmentSubgroupSizeTest() {
+        wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, R"(
+            @vertex
+            fn main(@builtin(vertex_index) VertexIndex : u32) -> @builtin(position) vec4f {
+                var pos = array(
+                    vec2f(-1.0, -1.0),
+                    vec2f(-1.0,  1.0),
+                    vec2f( 1.0, -1.0),
+                    vec2f( 1.0,  1.0),
+                    vec2f(-1.0,  1.0),
+                    vec2f( 1.0, -1.0));
+                return vec4f(pos[VertexIndex], 0.5, 1.0);
+            })");
+
+        std::stringstream fsCode;
+        {
+            EnableExtensions(fsCode);
+            fsCode << R"(
+            @group(0) @binding(0) var<storage, read_write> output : array<u32>;
+            @fragment fn main(@builtin(subgroup_size) sg_size : u32) -> @location(0) vec4f {
+                output[0] = sg_size;
+                return vec4f(0.0, 1.0, 0.0, 1.0);
+            })";
+        }
+
+        wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, fsCode.str().c_str());
+
+        utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, 100, 100);
+        utils::ComboRenderPipelineDescriptor descriptor;
+        descriptor.vertex.module = vsModule;
+        descriptor.cFragment.module = fsModule;
+        descriptor.cTargets[0].format = renderPass.colorFormat;
+
+        auto pipeline = device.CreateRenderPipeline(&descriptor);
+
+        constexpr uint32_t kArrayNumElements = 1u;
+        uint32_t outputBufferSizeInBytes = sizeof(uint32_t) * kArrayNumElements;
+        wgpu::BufferDescriptor outputBufferDesc;
+        outputBufferDesc.size = outputBufferSizeInBytes;
+        outputBufferDesc.usage = wgpu::BufferUsage::Storage | wgpu::BufferUsage::CopySrc;
+        wgpu::Buffer outputBuffer = device.CreateBuffer(&outputBufferDesc);
+        wgpu::BindGroup bindGroup = utils::MakeBindGroup(device, pipeline.GetBindGroupLayout(0),
+                                                         {
+                                                             {0, outputBuffer},
+                                                         });
+
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        {
+            wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass.renderPassInfo);
+            pass.SetPipeline(pipeline);
+            pass.SetBindGroup(0, bindGroup);
+            pass.Draw(6);
+            pass.End();
+        }
+
+        wgpu::CommandBuffer commands = encoder.Finish();
+        queue.Submit(1, &commands);
+
+        // Check that the fragment shader ran.
+        EXPECT_PIXEL_RGBA8_EQ(utils::RGBA8::kGreen, renderPass.color, 0, 0);
+        EXPECT_PIXEL_RGBA8_EQ(utils::RGBA8::kGreen, renderPass.color, 0, 99);
+        EXPECT_PIXEL_RGBA8_EQ(utils::RGBA8::kGreen, renderPass.color, 99, 0);
+        EXPECT_PIXEL_RGBA8_EQ(utils::RGBA8::kGreen, renderPass.color, 99, 99);
+
+        EXPECT_BUFFER(outputBuffer, 0, outputBufferSizeInBytes, new ExpectReadSubgroupSizeOutput());
+    }
+
+  private:
+    class ExpectReadSubgroupSizeOutput : public dawn::detail::Expectation {
+      public:
+        ExpectReadSubgroupSizeOutput() {}
+        testing::AssertionResult Check(const void* data, size_t size) override {
+            DAWN_ASSERT(size == sizeof(int32_t));
+            const uint32_t* actual = static_cast<const uint32_t*>(data);
+            const uint32_t& outputSubgroupSizeAt0 = actual[0];
+            // Subgroup size can vary across fragment invocation (unlike compute) but we could still
+            // improve this check by using the min and max subgroup size for the device.
+            if (!(
+                    // subgroup_size should be at least 1
+                    (1 <= outputSubgroupSizeAt0) &&
+                    // subgroup_size should be no larger than 128
+                    (outputSubgroupSizeAt0 <= 128) &&
+                    // subgroup_size should be a power of 2
+                    (IsPowerOfTwo(outputSubgroupSizeAt0)))) {
+                testing::AssertionResult result = testing::AssertionFailure()
+                                                  << "Got invalid subgroup_size output: "
+                                                  << outputSubgroupSizeAt0;
+                return result;
+            }
+            return testing::AssertionSuccess();
+        }
+    };
+};
+
+// Test that subgroup_size builtin attribute read by each invocation is valid and identical for any
+// workgroup size between 1 and 256.
+TEST_P(SubgroupsShaderTestsFragment, ReadSubgroupSize) {
+    DAWN_TEST_UNSUPPORTED_IF(!IsSubgroupsEnabledInWGSL());
+    FragmentSubgroupSizeTest();
+}
+
+// DawnTestBase::CreateDeviceImpl always enables allow_unsafe_apis toggle.
+DAWN_INSTANTIATE_TEST_P(SubgroupsShaderTestsFragment,
                         {D3D12Backend(), D3D12Backend({}, {"use_dxc"}), MetalBackend(),
                          VulkanBackend()},
                         {false, true}  // UseChromiumExperimentalSubgroups
