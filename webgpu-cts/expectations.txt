@@ -1610,6 +1610,17 @@ crbug.com/dawn/0000 [ android-14 arm dawn-no-backend-validation webgpu-adapter-d
 crbug.com/dawn/0000 [ android-14 ] webgpu:shader,validation,expression,call,builtin,subgroupBroadcast:id_type:type="i32" [ Failure ]
 crbug.com/dawn/0000 [ android-14 ] webgpu:shader,validation,uniformity,uniformity:fragment_builtin_values:builtin="subgroup_size";type="u32" [ Failure ]
 
+# Flakes on Dawn try Mac Intel
+crbug.com/dawn/0000 [ intel-0x3e9b mac webgpu-adapter-default ] webgpu:api,operation,render_pipeline,sample_mask:fragment_output_mask:* [ Failure ]
+crbug.com/dawn/0000 [ intel-0x3e9b mac webgpu-adapter-default ] webgpu:web_platform,canvas,readbackFromWebGPUCanvas:drawTo2DCanvas:* [ Failure ]
+crbug.com/dawn/0000 [ intel-0x3e9b mac webgpu-adapter-default ] webgpu:web_platform,canvas,readbackFromWebGPUCanvas:offscreenCanvas,snapshot:* [ Failure ]
+crbug.com/dawn/0000 [ intel-0x3e9b mac webgpu-adapter-default ] webgpu:web_platform,copyToTexture,ImageBitmap:copy_subrect_from_2D_Canvas:* [ Failure ]
+crbug.com/dawn/0000 [ intel-0x3e9b mac webgpu-adapter-default ] webgpu:web_platform,copyToTexture,ImageBitmap:from_canvas:* [ Failure ]
+crbug.com/dawn/0000 [ intel-0x3e9b mac webgpu-adapter-default ] webgpu:web_platform,copyToTexture,ImageData:copy_subrect_from_ImageData:* [ Failure ]
+crbug.com/dawn/0000 [ intel-0x3e9b mac webgpu-adapter-default ] webgpu:web_platform,copyToTexture,canvas:color_space_conversion:* [ Failure ]
+crbug.com/dawn/0000 [ intel-0x3e9b mac webgpu-adapter-default ] webgpu:web_platform,copyToTexture,canvas:copy_contents_from_2d_context_canvas:* [ Failure ]
+crbug.com/dawn/0000 [ intel-0x3e9b mac webgpu-adapter-default ] webgpu:web_platform,copyToTexture,video:copy_from_video:* [ Failure ]
+
 # untriaged failures
 crbug.com/dawn/0000 [ intel-0x3e9b ] webgpu:shader,execution,expression,call,builtin,fwidthFine:f32:vectorize="_undef_";non_uniform_discard=true [ Failure ]
 crbug.com/dawn/0000 [ intel-0x3e9b ] webgpu:shader,execution,expression,call,builtin,fwidthFine:f32:vectorize=4;non_uniform_discard=true [ Failure ]
