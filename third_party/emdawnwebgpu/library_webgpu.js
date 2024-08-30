@@ -480,13 +480,14 @@ var LibraryWebGPU = {
   // Extra helper that allow for directly inserting Devices (and their
   // corresponding Queue) that is called from the HTML5 library since there
   // isn't access to the C++ in webgpu.cpp there.
-  emwgpuTableInsertDevice__deps: ['emwgpuCreateDevice', 'emwgpuCreateQueue'],
+  emwgpuTableInsertDevice__deps: ['emwgpuCreateDevice', 'emwgpuCreateQueue', 'wgpuCreateInstance'],
   emwgpuTableInsertDevice: (device) => {
+    var instancePtr = _wgpuCreateInstance();
     var queuePtr = _emwgpuCreateQueue();
     WebGPU._tableInsert(queuePtr, device.queue);
-    var devicePtr = _emwgpuCreateDevice(queuePtr);
+    var devicePtr = _emwgpuCreateDevice(instancePtr, queuePtr);
     WebGPU._tableInsert(devicePtr, device);
-    return devicePtr;
+    return { instancePtr, devicePtr };
   },
 
 #if ASYNCIFY
@@ -612,8 +613,14 @@ var LibraryWebGPU = {
     return adapter.features.has(WebGPU.FeatureName[featureEnumValue]);
   },
 
-  wgpuAdapterRequestDevice__deps: ['$callUserCallback', '$stringToUTF8OnStack', 'emwgpuCreateDevice', 'emwgpuCreateQueue'],
-  wgpuAdapterRequestDevice: (adapterPtr, descriptor, callback, userdata) => {
+  emwgpuAdapterRequestDevice__i53abi: false,
+  emwgpuAdapterRequestDevice__deps: ['$callUserCallback', '$stringToUTF8OnStack', 'emwgpuCreateQueue', 'emwgpuOnDeviceLostCompleted', 'emwgpuOnRequestDeviceCompleted', 'emwgpuOnUncapturedError'],
+  emwgpuAdapterRequestDevice: (
+    adapterPtr,
+    futureIdL, futureIdH,
+    deviceLostFutureIdL, deviceLostFutureIdH,
+    devicePtr, queuePtr, descriptor
+  ) => {
     var adapter = WebGPU._tableGet(adapterPtr);
 
     var desc = {};
@@ -689,39 +696,57 @@ var LibraryWebGPU = {
         desc["defaultQueue"] = defaultQueueDesc;
       }
 
-      var deviceLostCallbackPtr = {{{ makeGetValue('descriptor', C_STRUCTS.WGPUDeviceDescriptor.deviceLostCallbackInfo + C_STRUCTS.WGPUDeviceLostCallbackInfo.callback, '*') }}};
-      var deviceLostUserdataPtr = {{{ makeGetValue('descriptor', C_STRUCTS.WGPUDeviceDescriptor.deviceLostCallbackInfo + C_STRUCTS.WGPUDeviceLostCallbackInfo.userdata, '*') }}};
-
       var labelPtr = {{{ makeGetValue('descriptor', C_STRUCTS.WGPUDeviceDescriptor.label, '*') }}};
       if (labelPtr) desc["label"] = UTF8ToString(labelPtr);
     }
 
     {{{ runtimeKeepalivePush() }}}
-    adapter.requestDevice(desc).then((device) => {
+    var hasDeviceLostFutureId = !!deviceLostFutureIdH || !!deviceLostFutureIdL;
+    WebGPU._futureInsert(futureIdL, futureIdH, adapter.requestDevice(desc).then((device) => {
       {{{ runtimeKeepalivePop() }}}
-      callUserCallback(() => {
-        var queuePtr = _emwgpuCreateQueue();
-        WebGPU._tableInsert(queuePtr, device.queue);
+      WebGPU._tableInsert(queuePtr, device.queue);
+      WebGPU._tableInsert(devicePtr, device);
 
-        var devicePtr = _emwgpuCreateDevice(queuePtr);
-        WebGPU._tableInsert(devicePtr, device);
-        if (deviceLostCallbackPtr) {
-          device.lost.then((info) => {
-            callUserCallback(() => WebGPU.errorCallback(deviceLostCallbackPtr,
-              WebGPU.Int_DeviceLostReason[info.reason], info.message, deviceLostUserdataPtr));
+      // Set up device lost promise resolution.
+      if (hasDeviceLostFutureId) {
+        WebGPU._futureInsert(deviceLostFutureIdL, deviceLostFutureIdH, device.lost.then((info) => {
+          // Unset the uncaptured error handler.
+          device.onuncapturederror = (ev) => {};
+          withStackSave(() => {
+            var messagePtr = stringToUTF8OnStack(info.message);
+            _emwgpuOnDeviceLostCompleted(deviceLostFutureIdL, deviceLostFutureIdH, WebGPU.Int_DeviceLostReason[info.reason], messagePtr);
           });
-        }
-        {{{ makeDynCall('vippp', 'callback') }}}({{{ gpu.RequestDeviceStatus.Success }}}, devicePtr, 0, userdata);
-      });
-    }, function(ex) {
+        }));
+      }
+
+      // Set up uncaptured error handlers.
+#if ASSERTIONS
+      assert(typeof GPUValidationError != 'undefined');
+      assert(typeof GPUOutOfMemoryError != 'undefined');
+      assert(typeof GPUInternalError != 'undefined');
+#endif
+      device.onuncapturederror = (ev) => {
+          var type = {{{ gpu.ErrorType.Unknown }}};;
+          if (ev.error instanceof GPUValidationError) type = {{{ gpu.ErrorType.Validation }}};
+          else if (ev.error instanceof GPUOutOfMemoryError) type = {{{ gpu.ErrorType.OutOfMemory }}};
+          else if (ev.error instanceof GPUInternalError) type = {{{ gpu.ErrorType.Internal }}};
+          withStackSave(() => {
+            var messagePtr = stringToUTF8OnStack(ev.error.message);
+            _emwgpuOnUncapturedError(devicePtr, type, messagePtr);
+          });
+      };
+
+      _emwgpuOnRequestDeviceCompleted(futureIdL, futureIdH, {{{ gpu.RequestDeviceStatus.Success }}}, devicePtr, 0);
+    }, (ex) => {
       {{{ runtimeKeepalivePop() }}}
-      callUserCallback(() => {
-        var sp = stackSave();
+      withStackSave(() => {
         var messagePtr = stringToUTF8OnStack(ex.message);
-        {{{ makeDynCall('vippp', 'callback') }}}({{{ gpu.RequestDeviceStatus.Error }}}, 0, messagePtr, userdata);
-        stackRestore(sp);
+        _emwgpuOnRequestDeviceCompleted(futureIdL, futureIdH, {{{ gpu.RequestDeviceStatus.Error }}}, devicePtr, messagePtr);
+        if (deviceLostFutureId) {
+          _emwgpuOnDeviceLostCompleted(deviceLostFutureIdL, deviceLostFutureIdH, {{{ gpu.DeviceLostReason.FailedCreation }}}, messagePtr);
+        }
       });
-    });
+    }));
   },
 
   // --------------------------------------------------------------------------
@@ -1814,6 +1839,7 @@ var LibraryWebGPU = {
     device.label = UTF8ToString(labelPtr);
   },
 
+  // TODO(42241415) Remove this after verifying that it's not used and/or updating users.
   wgpuDeviceSetUncapturedErrorCallback__deps: ['$callUserCallback'],
   wgpuDeviceSetUncapturedErrorCallback: (devicePtr, callback, userdata) => {
     var device = WebGPU._tableGet(devicePtr);
@@ -1906,7 +1932,7 @@ var LibraryWebGPU = {
     WebGPU._futureInsert(futureIdL, futureIdH, navigator["gpu"]["requestAdapter"](opts).then((adapter) => {
       {{{ runtimeKeepalivePop() }}}
       if (adapter) {
-        var adapterPtr = _emwgpuCreateAdapter();
+        var adapterPtr = _emwgpuCreateAdapter(instancePtr);
         WebGPU._tableInsert(adapterPtr, adapter);
         _emwgpuOnRequestAdapterCompleted(futureIdL, futureIdH, {{{ gpu.RequestAdapterStatus.Success }}}, adapterPtr, 0);
       } else {

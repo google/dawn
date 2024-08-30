@@ -19,6 +19,7 @@
 #include <mutex>
 #include <optional>
 #include <set>
+#include <tuple>
 #include <unordered_map>
 #include <utility>
 #include <vector>
@@ -40,6 +41,12 @@ FutureID emwgpuWaitAny(FutureID const* futurePtr,
                        uint64_t const* timeoutNSPtr);
 
 // Future/async operation that need to be forwarded to JS.
+void emwgpuAdapterRequestDevice(WGPUAdapter adapter,
+                                FutureID futureId,
+                                FutureID deviceLostFutureId,
+                                WGPUDevice device,
+                                WGPUQueue queue,
+                                const WGPUDeviceDescriptor* descriptor);
 void emwgpuInstanceRequestAdapter(WGPUInstance instance,
                                   FutureID futureId,
                                   const WGPURequestAdapterOptions* options);
@@ -245,7 +252,6 @@ auto ReturnToAPI(Ref<T*>&& object) {
 // X Macro to help generate boilerplate code for all passthrough object types.
 // Passthrough objects refer to objects that are implemented via JS objects.
 #define WGPU_PASSTHROUGH_OBJECTS(X) \
-  X(Adapter)             \
   X(BindGroup)           \
   X(BindGroupLayout)     \
   X(Buffer)              \
@@ -277,7 +283,9 @@ enum class EventCompletionType {
   Shutdown,
 };
 enum class EventType {
+  DeviceLost,
   RequestAdapter,
+  RequestDevice,
 };
 
 class EventManager;
@@ -300,6 +308,27 @@ class TrackedEvent : NonMovable {
   const InstanceID mInstanceId;
   const WGPUCallbackMode mMode;
   bool mIsReady = false;
+};
+
+// Compositable class for objects that provide entry point(s) that produce
+// Events, i.e. returns a Future.
+//
+// Note that while it would be nice to make it so that C++ entry points
+// implemented in here, and called from JS could use this abstraction in
+// signatures, pointers passed between JS and C++ in WASM do not cast properly
+// and results in undefined behavior. As an example, given:
+//   (1) WGPUAdapter emwgpuCreateAdapter(const EventSource* source);
+//   (2) WGPUAdapter emwgpuCreateAdapter(WGPUInstance instance);
+// I tried to use (1), but when calling from JS, the pointer is not correctly
+// adjusted so the value we end up getting when calling GetInstanceId() is some
+// garbage.
+class EventSource {
+ public:
+  explicit EventSource(InstanceID instanceId) : mInstanceId(instanceId) {}
+  InstanceID GetInstanceId() const { return mInstanceId; }
+
+ private:
+  const InstanceID mInstanceId = 0;
 };
 
 // Thread-safe EventManager class that tracks all events.
@@ -542,9 +571,101 @@ static EventManager& GetEventManager() {
   struct WGPU##Name##Impl final : public RefCounted {};
 WGPU_PASSTHROUGH_OBJECTS(DEFINE_WGPU_DEFAULT_STRUCT)
 
+// Instance is specially implemented in order to handle Futures implementation.
+struct WGPUInstanceImpl final : public RefCounted, public EventSource {
+ public:
+  WGPUInstanceImpl();
+  ~WGPUInstanceImpl();
+
+  void ProcessEvents();
+  WGPUWaitStatus WaitAny(size_t count,
+                         WGPUFutureWaitInfo* infos,
+                         uint64_t timeoutNS);
+
+ private:
+  static InstanceID GetNextInstanceId();
+};
+
+struct WGPUAdapterImpl final : public RefCounted, public EventSource {
+ public:
+  WGPUAdapterImpl(const EventSource* source);
+};
+
+// Device is specially implemented in order to handle refcounting the Queue.
+struct WGPUDeviceImpl final : public RefCountedWithExternalCount,
+                              public EventSource {
+ public:
+  // Reservation constructor used when calling RequestDevice.
+  WGPUDeviceImpl(const EventSource* source,
+                 const WGPUDeviceDescriptor* descriptor,
+                 WGPUQueue queue);
+  // Injection constructor used when we already have a backing Device.
+  WGPUDeviceImpl(const EventSource* source, WGPUQueue queue);
+
+  WGPUQueue GetQueue() const;
+
+  void OnDeviceLost(WGPUDeviceLostReason reason, const char* message);
+  void OnUncapturedError(WGPUErrorType type, char const* message);
+
+ private:
+  void WillDropLastExternalRef() override;
+
+  Ref<WGPUQueue> mQueue;
+  WGPUUncapturedErrorCallbackInfo2 mUncapturedErrorCallbackInfo =
+      WGPU_UNCAPTURED_ERROR_CALLBACK_INFO_2_INIT;
+  FutureID mDeviceLostFutureId = kNullFutureId;
+};
+
 // ----------------------------------------------------------------------------
 // Future events.
 // ----------------------------------------------------------------------------
+
+class DeviceLostEvent final : public TrackedEvent {
+ public:
+  static constexpr EventType kType = EventType::DeviceLost;
+
+  DeviceLostEvent(InstanceID instance,
+                  WGPUDevice device,
+                  const WGPUDeviceLostCallbackInfo2& callbackInfo)
+      : TrackedEvent(instance, callbackInfo.mode),
+        mCallback(callbackInfo.callback),
+        mUserdata1(callbackInfo.userdata1),
+        mUserdata2(callbackInfo.userdata2),
+        mDevice(device) {
+    assert(mDevice);
+  }
+
+  EventType GetType() override { return kType; }
+
+  void ReadyHook(WGPUDeviceLostReason reason, const char* message) {
+    mReason = reason;
+    mMessage = message;
+  }
+
+  void Complete(FutureID futureId, EventCompletionType type) override {
+    if (type == EventCompletionType::Shutdown) {
+      mReason = WGPUDeviceLostReason_InstanceDropped;
+      mMessage = "A valid external Instance reference no longer exists.";
+    }
+    if (mCallback) {
+      WGPUDevice device = mReason != WGPUDeviceLostReason_FailedCreation
+                              ? mDevice.Get()
+                              : nullptr;
+      mCallback(&device, mReason, mMessage ? mMessage->c_str() : nullptr,
+                mUserdata1, mUserdata2);
+    }
+  }
+
+ private:
+  WGPUDeviceLostCallback2 mCallback = nullptr;
+  void* mUserdata1 = nullptr;
+  void* mUserdata2 = nullptr;
+
+  Ref<WGPUDevice> mDevice;
+
+  WGPUDeviceLostReason mReason;
+  std::optional<std::string> mMessage;
+};
 
 class RequestAdapterEvent final : public TrackedEvent {
  public:
@@ -591,50 +712,136 @@ class RequestAdapterEvent final : public TrackedEvent {
   std::optional<std::string> mMessage = std::nullopt;
 };
 
+class RequestDeviceEvent final : public TrackedEvent {
+ public:
+  static constexpr EventType kType = EventType::RequestDevice;
+
+  RequestDeviceEvent(InstanceID instance,
+                     const WGPURequestDeviceCallbackInfo2& callbackInfo)
+      : TrackedEvent(instance, callbackInfo.mode),
+        mCallback(callbackInfo.callback),
+        mUserdata1(callbackInfo.userdata1),
+        mUserdata2(callbackInfo.userdata2) {}
+
+  EventType GetType() override { return kType; }
+
+  void ReadyHook(WGPURequestDeviceStatus status,
+                 WGPUDevice device,
+                 const char* message) {
+    mStatus = status;
+    mDevice.Acquire(device);
+    mMessage = message;
+  }
+
+  void Complete(FutureID futureId, EventCompletionType type) override {
+    if (type == EventCompletionType::Shutdown) {
+      mStatus = WGPURequestDeviceStatus_InstanceDropped;
+      mMessage = "A valid external Instance reference no longer exists.";
+    }
+    if (mCallback) {
+      mCallback(mStatus,
+                mStatus == WGPURequestDeviceStatus_Success
+                    ? ReturnToAPI(std::move(mDevice))
+                    : nullptr,
+                mMessage ? mMessage->c_str() : nullptr, mUserdata1, mUserdata2);
+    }
+  }
+
+ private:
+  WGPURequestDeviceCallback2 mCallback = nullptr;
+  void* mUserdata1 = nullptr;
+  void* mUserdata2 = nullptr;
+
+  WGPURequestDeviceStatus mStatus;
+  Ref<WGPUDevice> mDevice;
+  std::optional<std::string> mMessage = std::nullopt;
+};
+
 // ----------------------------------------------------------------------------
 // WGPU struct implementations.
 // ----------------------------------------------------------------------------
 
-// Instance is specially implemented in order to handle Futures implementation.
-struct WGPUInstanceImpl : public RefCounted {
- public:
-  WGPUInstanceImpl() {
-    mId = GetNextInstanceId();
-    GetEventManager().RegisterInstance(mId);
+// ----------------------------------------------------------------------------
+// WGPUAdapterImpl implementations.
+// ----------------------------------------------------------------------------
+
+WGPUAdapterImpl::WGPUAdapterImpl(const EventSource* source)
+    : EventSource(source->GetInstanceId()) {}
+
+// ----------------------------------------------------------------------------
+// WGPUInstanceImpl implementations.
+// ----------------------------------------------------------------------------
+
+WGPUInstanceImpl::WGPUInstanceImpl() : EventSource(GetNextInstanceId()) {
+  GetEventManager().RegisterInstance(GetInstanceId());
+}
+WGPUInstanceImpl::~WGPUInstanceImpl() {
+  GetEventManager().UnregisterInstance(GetInstanceId());
+}
+
+void WGPUInstanceImpl::ProcessEvents() {
+  GetEventManager().ProcessEvents(GetInstanceId());
+}
+
+WGPUWaitStatus WGPUInstanceImpl::WaitAny(size_t count,
+                                         WGPUFutureWaitInfo* infos,
+                                         uint64_t timeoutNS) {
+  return GetEventManager().WaitAny(GetInstanceId(), count, infos, timeoutNS);
+}
+
+InstanceID WGPUInstanceImpl::GetNextInstanceId() {
+  static std::atomic<InstanceID> kNextInstanceId = 1;
+  return kNextInstanceId++;
+}
+
+// ----------------------------------------------------------------------------
+// WGPUDeviceImpl implementations.
+// ----------------------------------------------------------------------------
+
+WGPUDeviceImpl::WGPUDeviceImpl(const EventSource* source,
+                               const WGPUDeviceDescriptor* descriptor,
+                               WGPUQueue queue)
+    : EventSource(source->GetInstanceId()),
+      mUncapturedErrorCallbackInfo(descriptor->uncapturedErrorCallbackInfo2) {
+  // Create the DeviceLostEvent now.
+  std::tie(mDeviceLostFutureId, std::ignore) =
+      GetEventManager().TrackEvent(std::make_unique<DeviceLostEvent>(
+          source->GetInstanceId(), this, descriptor->deviceLostCallbackInfo2));
+  mQueue.Acquire(queue);
+}
+
+WGPUDeviceImpl::WGPUDeviceImpl(const EventSource* source, WGPUQueue queue)
+    : EventSource(source->GetInstanceId()) {
+  mQueue.Acquire(queue);
+}
+
+WGPUQueue WGPUDeviceImpl::GetQueue() const {
+  auto queue = mQueue;
+  return ReturnToAPI(std::move(queue));
+}
+
+void WGPUDeviceImpl::OnDeviceLost(WGPUDeviceLostReason reason,
+                                  const char* message) {
+  if (mDeviceLostFutureId != kNullFutureId) {
+    GetEventManager().SetFutureReady<DeviceLostEvent>(mDeviceLostFutureId,
+                                                      reason, message);
   }
-  ~WGPUInstanceImpl() { GetEventManager().UnregisterInstance(mId); }
-  InstanceID GetId() const { return mId; }
+  mDeviceLostFutureId = kNullFutureId;
+}
 
-  void ProcessEvents() { GetEventManager().ProcessEvents(mId); }
-
-  WGPUWaitStatus WaitAny(size_t count,
-                         WGPUFutureWaitInfo* infos,
-                         uint64_t timeoutNS) {
-    return GetEventManager().WaitAny(mId, count, infos, timeoutNS);
+void WGPUDeviceImpl::OnUncapturedError(WGPUErrorType type,
+                                       char const* message) {
+  if (mUncapturedErrorCallbackInfo.callback) {
+    WGPUDeviceImpl* device = this;
+    mUncapturedErrorCallbackInfo.callback(
+        &device, type, message, mUncapturedErrorCallbackInfo.userdata1,
+        mUncapturedErrorCallbackInfo.userdata2);
   }
+}
 
- private:
-  static InstanceID GetNextInstanceId() {
-    static std::atomic<InstanceID> kNextInstanceId = 1;
-    return kNextInstanceId++;
-  }
-
-  InstanceID mId;
-};
-
-// Device is specially implemented in order to handle refcounting the Queue.
-struct WGPUDeviceImpl : public RefCounted {
- public:
-  WGPUDeviceImpl(WGPUQueue queue) { mQueue.Acquire(queue); }
-
-  WGPUQueue GetQueue() {
-    auto queue = mQueue;
-    return ReturnToAPI(std::move(queue));
-  }
-
- private:
-  Ref<WGPUQueue> mQueue;
-};
+void WGPUDeviceImpl::WillDropLastExternalRef() {
+  OnDeviceLost(WGPUDeviceLostReason_Destroyed, "Device was destroyed.");
+}
 
 // ----------------------------------------------------------------------------
 // Definitions for C++ emwgpu functions (callable from library_webgpu.js)
@@ -649,17 +856,53 @@ extern "C" {
   }
 WGPU_PASSTHROUGH_OBJECTS(DEFINE_EMWGPU_DEFAULT_CREATE)
 
-WGPUDevice emwgpuCreateDevice(WGPUQueue queue) {
-  return new WGPUDeviceImpl(queue);
+WGPUAdapter emwgpuCreateAdapter(WGPUInstance instance) {
+  return new WGPUAdapterImpl(instance);
+}
+
+WGPUDevice emwgpuCreateDevice(WGPUInstance instance, WGPUQueue queue) {
+  return new WGPUDeviceImpl(instance, queue);
 }
 
 // Future event callbacks.
+void emwgpuOnDeviceLostCompleted(FutureID futureId,
+                                 WGPUDeviceLostReason reason,
+                                 const char* message) {
+  GetEventManager().SetFutureReady<DeviceLostEvent>(futureId, reason, message);
+}
 void emwgpuOnRequestAdapterCompleted(FutureID futureId,
                                      WGPURequestAdapterStatus status,
                                      WGPUAdapter adapter,
                                      const char* message) {
   GetEventManager().SetFutureReady<RequestAdapterEvent>(futureId, status,
                                                         adapter, message);
+}
+void emwgpuOnRequestDeviceCompleted(FutureID futureId,
+                                    WGPURequestDeviceStatus status,
+                                    WGPUDevice device,
+                                    const char* message) {
+  // This handler should always have a device since we pre-allocate it before
+  // calling out to JS.
+  assert(device);
+  if (status == WGPURequestDeviceStatus_Success) {
+    GetEventManager().SetFutureReady<RequestDeviceEvent>(futureId, status,
+                                                         device, message);
+  } else {
+    // If the request failed, we need to resolve the DeviceLostEvent.
+    device->OnDeviceLost(WGPUDeviceLostReason_FailedCreation,
+                         "Device failed at creation.");
+    GetEventManager().SetFutureReady<RequestDeviceEvent>(futureId, status,
+                                                         nullptr, message);
+  }
+}
+
+// Uncaptured error handler is similar to the Future event callbacks, but it
+// doesn't go through the EventManager and just calls the callback on the Device
+// immediately.
+void emwgpuOnUncapturedError(WGPUDevice device,
+                             WGPUErrorType type,
+                             char const* message) {
+  device->OnUncapturedError(type, message);
 }
 
 }  // extern "C"
@@ -709,6 +952,48 @@ void wgpuSurfaceCapabilitiesFreeMembers(WGPUSurfaceCapabilities) {
 // ----------------------------------------------------------------------------
 // Methods of Adapter
 // ----------------------------------------------------------------------------
+
+void wgpuAdapterRequestDevice(WGPUAdapter adapter,
+                              const WGPUDeviceDescriptor* descriptor,
+                              WGPURequestDeviceCallback callback,
+                              void* userdata) {
+  WGPURequestDeviceCallbackInfo2 callbackInfo = {};
+  callbackInfo.mode = WGPUCallbackMode_AllowSpontaneous;
+  callbackInfo.callback = [](WGPURequestDeviceStatus status, WGPUDevice device,
+                             char const* message, void* callback,
+                             void* userdata) {
+    auto cb = reinterpret_cast<WGPURequestDeviceCallback>(callback);
+    cb(status, device, message, userdata);
+  };
+  callbackInfo.userdata1 = reinterpret_cast<void*>(callback);
+  callbackInfo.userdata2 = userdata;
+  wgpuAdapterRequestDevice2(adapter, descriptor, callbackInfo);
+}
+
+WGPUFuture wgpuAdapterRequestDevice2(
+    WGPUAdapter adapter,
+    const WGPUDeviceDescriptor* descriptor,
+    WGPURequestDeviceCallbackInfo2 callbackInfo) {
+  auto [futureId, tracked] =
+      GetEventManager().TrackEvent(std::make_unique<RequestDeviceEvent>(
+          adapter->GetInstanceId(), callbackInfo));
+  if (!tracked) {
+    return WGPUFuture{kNullFutureId};
+  }
+
+  // For RequestDevice, we always create a Device and Queue up front. The
+  // Device is also immediately associated with the DeviceLostEvent.
+  WGPUQueue queue = new WGPUQueueImpl();
+  WGPUDevice device = new WGPUDeviceImpl(adapter, descriptor, queue);
+
+  auto [deviceLostFutureId, _] = GetEventManager().TrackEvent(
+      std::make_unique<DeviceLostEvent>(adapter->GetInstanceId(), device,
+                                        descriptor->deviceLostCallbackInfo2));
+
+  emwgpuAdapterRequestDevice(adapter, futureId, deviceLostFutureId, device,
+                             queue, descriptor);
+  return WGPUFuture{futureId};
+}
 
 // ----------------------------------------------------------------------------
 // Methods of BindGroup
@@ -775,8 +1060,9 @@ WGPUFuture wgpuInstanceRequestAdapter2(
     WGPUInstance instance,
     WGPURequestAdapterOptions const* options,
     WGPURequestAdapterCallbackInfo2 callbackInfo) {
-  auto [futureId, tracked] = GetEventManager().TrackEvent(
-      std::make_unique<RequestAdapterEvent>(instance->GetId(), callbackInfo));
+  auto [futureId, tracked] =
+      GetEventManager().TrackEvent(std::make_unique<RequestAdapterEvent>(
+          instance->GetInstanceId(), callbackInfo));
   if (!tracked) {
     return WGPUFuture{kNullFutureId};
   }
