@@ -454,14 +454,16 @@ class Printer : public tint::TextGenerator {
 
     void EmitVar(StringStream& out, const core::ir::Var* var) {
         EmitTypeAndName(out, var->Result(0)->Type(), NameOf(var->Result(0)));
-        out << " = ";
 
+        auto* ptr = var->Result(0)->Type()->As<core::type::Pointer>();
+        auto space = ptr->AddressSpace();
         if (var->Initializer()) {
+            out << " = ";
             EmitValue(out, var->Initializer());
-        } else {
-            auto* ptr = var->Result(0)->Type()->As<core::type::Pointer>();
+        } else if (space == core::AddressSpace::kPrivate ||
+                   space == core::AddressSpace::kFunction) {
             TINT_ASSERT(ptr);
-
+            out << " = ";
             EmitZeroValue(out, ptr->UnwrapPtr());
         }
         out << ";";
