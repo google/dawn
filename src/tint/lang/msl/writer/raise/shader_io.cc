@@ -74,6 +74,9 @@ struct StateImpl : core::ir::transform::ShaderIOBackendState {
     /// The output values to return from the entry point.
     Vector<core::ir::Value*, 4> output_values;
 
+    /// The index of the fixed sample mask builtin, if it was added.
+    std::optional<uint32_t> fixed_sample_mask_index;
+
     /// Constructor
     StateImpl(core::ir::Module& mod,
               core::ir::Function* f,
@@ -132,6 +135,12 @@ struct StateImpl : core::ir::transform::ShaderIOBackendState {
 
     /// @copydoc ShaderIO::BackendState::FinalizeOutputs
     const core::type::Type* FinalizeOutputs() override {
+        // Add a fixed sample mask builtin for fragment shaders if needed.
+        if (config.fixed_sample_mask != UINT32_MAX &&
+            func->Stage() == core::ir::Function::PipelineStage::kFragment) {
+            AddFixedSampleMaskOutput();
+        }
+
         if (outputs.IsEmpty()) {
             return ty.void_();
         }
@@ -163,7 +172,12 @@ struct StateImpl : core::ir::transform::ShaderIOBackendState {
     }
 
     /// @copydoc ShaderIO::BackendState::SetOutput
-    void SetOutput(core::ir::Builder&, uint32_t idx, core::ir::Value* value) override {
+    void SetOutput(core::ir::Builder& builder, uint32_t idx, core::ir::Value* value) override {
+        // If this a sample mask builtin, combine with the fixed sample mask if provided.
+        if (config.fixed_sample_mask != UINT32_MAX &&
+            outputs[idx].attributes.builtin == core::BuiltinValue::kSampleMask) {
+            value = builder.And<u32>(value, u32(config.fixed_sample_mask))->Result(0);
+        }
         output_values[idx] = value;
     }
 
@@ -172,11 +186,39 @@ struct StateImpl : core::ir::transform::ShaderIOBackendState {
         if (!output_struct) {
             return nullptr;
         }
+
+        // If we created a fixed sample mask builtin, set the value from the provided mask.
+        if (fixed_sample_mask_index) {
+            output_values[fixed_sample_mask_index.value()] =
+                builder.Constant(u32(config.fixed_sample_mask));
+        }
+
         return builder.Construct(output_struct, std::move(output_values))->Result(0);
     }
 
     /// @copydoc ShaderIO::BackendState::NeedsVertexPointSize
     bool NeedsVertexPointSize() const override { return config.emit_vertex_point_size; }
+
+    /// Add a fixed sample mask builtin output, unless a user-declared one already exists.
+    void AddFixedSampleMaskOutput() {
+        // Check if a user-defined sample mask builtin is present.
+        for (auto& output : outputs) {
+            if (output.attributes.builtin == core::BuiltinValue::kSampleMask) {
+                return;
+            }
+        }
+
+        // Create a new builtin sample mask output.
+        fixed_sample_mask_index = AddOutput(ir.symbols.New("tint_sample_mask"), ty.u32(),
+                                            core::IOAttributes{
+                                                /* location */ std::nullopt,
+                                                /* index */ std::nullopt,
+                                                /* color */ std::nullopt,
+                                                /* builtin */ core::BuiltinValue::kSampleMask,
+                                                /* interpolation */ std::nullopt,
+                                                /* invariant */ false,
+                                            });
+    }
 };
 }  // namespace
 

@@ -127,7 +127,8 @@ Result<RaiseResult> Raise(core::ir::Module& module, const Options& options) {
     // DemoteToHelper must come before any transform that introduces non-core instructions.
     RUN_TRANSFORM(core::ir::transform::DemoteToHelper, module);
 
-    RUN_TRANSFORM(raise::ShaderIO, module, raise::ShaderIOConfig{options.emit_vertex_point_size});
+    RUN_TRANSFORM(raise::ShaderIO, module,
+                  raise::ShaderIOConfig{options.emit_vertex_point_size, options.fixed_sample_mask});
     RUN_TRANSFORM(raise::PackedVec3, module);
     RUN_TRANSFORM(raise::ModuleScopeVars, module);
     RUN_TRANSFORM(raise::BinaryPolyfill, module);

@@ -1118,6 +1118,189 @@ foo_inputs = struct @align(4) {
     EXPECT_EQ(expect, str());
 }
 
+TEST_F(MslWriter_ShaderIOTest, UserSuppliedMask_WithoutFixedSampleMask) {
+    core::IOAttributes loc;
+    loc.location = 1u;
+    core::IOAttributes mask;
+    mask.builtin = core::BuiltinValue::kSampleMask;
+    auto* outputs =
+        ty.Struct(mod.symbols.New("Outputs"), {
+                                                  {mod.symbols.New("color"), ty.vec4<f32>(), loc},
+                                                  {mod.symbols.New("mask"), ty.u32(), mask},
+                                              });
+
+    auto* ep = b.Function("foo", outputs);
+    ep->SetStage(core::ir::Function::PipelineStage::kFragment);
+
+    b.Append(ep->Block(), [&] {  //
+        b.Return(ep,
+                 b.Construct(outputs, b.Splat(ty.vec4<f32>(), 0.5_f), b.Constant(u32(0x10203040))));
+    });
+
+    auto* src = R"(
+Outputs = struct @align(16) {
+  color:vec4<f32> @offset(0), @location(1)
+  mask:u32 @offset(16), @builtin(sample_mask)
+}
+
+%foo = @fragment func():Outputs {
+  $B1: {
+    %2:Outputs = construct vec4<f32>(0.5f), 270544960u
+    ret %2
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+Outputs = struct @align(16) {
+  color:vec4<f32> @offset(0)
+  mask:u32 @offset(16)
+}
+
+foo_outputs = struct @align(16) {
+  Outputs_color:vec4<f32> @offset(0), @location(1)
+  Outputs_mask:u32 @offset(16), @builtin(sample_mask)
+}
+
+%foo_inner = func():Outputs {
+  $B1: {
+    %2:Outputs = construct vec4<f32>(0.5f), 270544960u
+    ret %2
+  }
+}
+%foo = @fragment func():foo_outputs {
+  $B2: {
+    %4:Outputs = call %foo_inner
+    %5:vec4<f32> = access %4, 0u
+    %6:u32 = access %4, 1u
+    %7:foo_outputs = construct %5, %6
+    ret %7
+  }
+}
+)";
+
+    ShaderIOConfig config;
+    Run(ShaderIO, config);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(MslWriter_ShaderIOTest, FixedSampleMask) {
+    auto* ep = b.Function("foo", ty.vec4<f32>());
+    ep->SetStage(core::ir::Function::PipelineStage::kFragment);
+    ep->SetReturnLocation(0u);
+
+    b.Append(ep->Block(), [&] {  //
+        b.Return(ep, b.Splat(ty.vec4<f32>(), 0.5_f));
+    });
+
+    auto* src = R"(
+%foo = @fragment func():vec4<f32> [@location(0)] {
+  $B1: {
+    ret vec4<f32>(0.5f)
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+foo_outputs = struct @align(16) {
+  tint_symbol:vec4<f32> @offset(0), @location(0)
+  tint_sample_mask:u32 @offset(16), @builtin(sample_mask)
+}
+
+%foo_inner = func():vec4<f32> {
+  $B1: {
+    ret vec4<f32>(0.5f)
+  }
+}
+%foo = @fragment func():foo_outputs {
+  $B2: {
+    %3:vec4<f32> = call %foo_inner
+    %4:foo_outputs = construct %3, 12345678u
+    ret %4
+  }
+}
+)";
+
+    ShaderIOConfig config;
+    config.fixed_sample_mask = 12345678u;
+    Run(ShaderIO, config);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(MslWriter_ShaderIOTest, FixedSampleMask_WithUserSuppliedMask) {
+    core::IOAttributes loc;
+    loc.location = 1u;
+    core::IOAttributes mask;
+    mask.builtin = core::BuiltinValue::kSampleMask;
+    auto* outputs =
+        ty.Struct(mod.symbols.New("Outputs"), {
+                                                  {mod.symbols.New("color"), ty.vec4<f32>(), loc},
+                                                  {mod.symbols.New("mask"), ty.u32(), mask},
+                                              });
+
+    auto* ep = b.Function("foo", outputs);
+    ep->SetStage(core::ir::Function::PipelineStage::kFragment);
+
+    b.Append(ep->Block(), [&] {  //
+        b.Return(ep,
+                 b.Construct(outputs, b.Splat(ty.vec4<f32>(), 0.5_f), b.Constant(u32(0x10203040))));
+    });
+
+    auto* src = R"(
+Outputs = struct @align(16) {
+  color:vec4<f32> @offset(0), @location(1)
+  mask:u32 @offset(16), @builtin(sample_mask)
+}
+
+%foo = @fragment func():Outputs {
+  $B1: {
+    %2:Outputs = construct vec4<f32>(0.5f), 270544960u
+    ret %2
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+Outputs = struct @align(16) {
+  color:vec4<f32> @offset(0)
+  mask:u32 @offset(16)
+}
+
+foo_outputs = struct @align(16) {
+  Outputs_color:vec4<f32> @offset(0), @location(1)
+  Outputs_mask:u32 @offset(16), @builtin(sample_mask)
+}
+
+%foo_inner = func():Outputs {
+  $B1: {
+    %2:Outputs = construct vec4<f32>(0.5f), 270544960u
+    ret %2
+  }
+}
+%foo = @fragment func():foo_outputs {
+  $B2: {
+    %4:Outputs = call %foo_inner
+    %5:vec4<f32> = access %4, 0u
+    %6:u32 = access %4, 1u
+    %7:u32 = and %6, 12345678u
+    %8:foo_outputs = construct %5, %7
+    ret %8
+  }
+}
+)";
+
+    ShaderIOConfig config;
+    config.fixed_sample_mask = 12345678u;
+    Run(ShaderIO, config);
+
+    EXPECT_EQ(expect, str());
+}
+
 TEST_F(MslWriter_ShaderIOTest, Color_Struct) {
     auto* str_ty =
         ty.Struct(mod.symbols.New("Inputs"), {
