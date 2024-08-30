@@ -49,6 +49,7 @@
 #include "src/tint/lang/core/ir/user_call.h"
 #include "src/tint/lang/core/ir/validator.h"
 #include "src/tint/lang/core/ir/var.h"
+#include "src/tint/lang/core/texel_format.h"
 #include "src/tint/lang/core/type/array.h"
 #include "src/tint/lang/core/type/bool.h"
 #include "src/tint/lang/core/type/f16.h"
@@ -56,6 +57,7 @@
 #include "src/tint/lang/core/type/i32.h"
 #include "src/tint/lang/core/type/matrix.h"
 #include "src/tint/lang/core/type/pointer.h"
+#include "src/tint/lang/core/type/storage_texture.h"
 #include "src/tint/lang/core/type/u32.h"
 #include "src/tint/lang/core/type/vector.h"
 #include "src/tint/lang/core/type/void.h"
@@ -350,6 +352,7 @@ class Printer : public tint::TextGenerator {
                 EmitStructType(s);
                 out << StructName(s);
             },
+            [&](const core::type::Texture* t) { EmitTextureType(out, t); },
 
             // TODO(dsinclair): Handle remaining types
             TINT_ICE_ON_NO_MATCH);
@@ -431,6 +434,76 @@ class Printer : public tint::TextGenerator {
                 out << "[" << count.value() << "]";
             }
             ty = arr->ElemType();
+        }
+    }
+
+    void EmitTextureType(StringStream& out, const core::type::Texture* t) {
+        TINT_ASSERT(!t->Is<core::type::ExternalTexture>());
+
+        auto* storage = t->As<core::type::StorageTexture>();
+
+        out << "highp ";
+
+        if (storage) {
+            switch (storage->Access()) {
+                case core::Access::kRead:
+                    out << "readonly ";
+                    break;
+                case core::Access::kWrite:
+                    out << "writeonly ";
+                    break;
+                case core::Access::kReadWrite: {
+                    // ESSL 3.1 SPEC (chapter 4.9, Memory Access Qualifiers):
+                    // Except for image variables qualified with the format qualifiers r32f, r32i,
+                    // and r32ui, image variables must specify either memory qualifier readonly or
+                    // the memory qualifier writeonly.
+                    switch (storage->TexelFormat()) {
+                        case core::TexelFormat::kR32Float:
+                        case core::TexelFormat::kR32Sint:
+                        case core::TexelFormat::kR32Uint:
+                            break;
+                        default:
+                            TINT_UNREACHABLE();
+                    }
+                    break;
+                }
+                default:
+                    TINT_UNREACHABLE();
+            }
+        }
+        auto* subtype = storage ? storage->Type() : nullptr;
+
+        tint::Switch(
+            subtype,                         //
+            [&](const core::type::F32*) {},  //
+            [&](const core::type::I32*) { out << "i"; },
+            [&](const core::type::U32*) { out << "u"; },  //
+            TINT_ICE_ON_NO_MATCH);
+
+        out << "image";
+
+        switch (t->Dim()) {
+            case core::type::TextureDimension::k1d:
+                TINT_ASSERT(!storage);
+                out << "1D";
+                break;
+            case core::type::TextureDimension::k2d:
+                out << "2D";
+                break;
+            case core::type::TextureDimension::k2dArray:
+                out << "2DArray";
+                break;
+            case core::type::TextureDimension::k3d:
+                out << "3D";
+                break;
+            case core::type::TextureDimension::kCube:
+                out << "Cube";
+                break;
+            case core::type::TextureDimension::kCubeArray:
+                out << "CubeArray";
+                break;
+            default:
+                TINT_UNREACHABLE();
         }
     }
 

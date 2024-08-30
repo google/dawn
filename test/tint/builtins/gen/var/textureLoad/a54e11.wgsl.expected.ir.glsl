@@ -1,6 +1,6 @@
-SKIP: FAILED
+SKIP: INVALID
 
-<dawn>/src/tint/lang/glsl/writer/printer/printer.cc:350 internal compiler error: Switch() matched no cases. Type: tint::core::type::StorageTexture
+<dawn>/src/tint/lang/glsl/writer/printer/printer.cc:466 internal compiler error: TINT_UNREACHABLE 
 ********************************************************************
 *  The tint shader compiler has encountered an unexpected error.   *
 *                                                                  *
@@ -8,4 +8,4 @@ SKIP: FAILED
 *  crbug.com/tint with the source program that triggered the bug.  *
 ********************************************************************
 
-tint executable returned error: signal: illegal instruction
+tint executable returned error: signal: trace/BPT trap
