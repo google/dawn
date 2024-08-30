@@ -147,6 +147,7 @@ void PhysicalDevice::InitializeSupportedFeaturesImpl() {
     EnableFeature(Feature::ShaderModuleCompilationOptions);
     EnableFeature(Feature::StaticSamplers);
     EnableFeature(Feature::MultiDrawIndirect);
+    EnableFeature(Feature::ClipDistances);
 
     if (AreTimestampQueriesSupported()) {
         EnableFeature(Feature::TimestampQuery);

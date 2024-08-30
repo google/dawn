@@ -143,6 +143,7 @@ void PhysicalDevice::InitializeSupportedFeaturesImpl() {
     EnableFeature(Feature::SurfaceCapabilities);
     EnableFeature(Feature::D3D11MultithreadProtected);
     EnableFeature(Feature::DualSourceBlending);
+    EnableFeature(Feature::ClipDistances);
     EnableFeature(Feature::Unorm16TextureFormats);
     EnableFeature(Feature::Snorm16TextureFormats);
     EnableFeature(Feature::Norm16TextureFormats);

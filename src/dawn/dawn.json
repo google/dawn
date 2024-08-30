@@ -2677,7 +2677,8 @@
 
             {"value": 53, "name": "dawn load resolve texture", "tags": ["dawn"]},
             {"value": 54, "name": "dawn partial load resolve texture", "tags": ["dawn"]},
-            {"value": 55, "name": "multi draw indirect", "tags": ["dawn"]}
+            {"value": 55, "name": "multi draw indirect", "tags": ["dawn"]},
+            {"value": 56, "name": "clip distances", "tags": ["dawn"]}
         ]
     },
     "filter mode": {

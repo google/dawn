@@ -1531,6 +1531,7 @@ bool Converter::Convert(interop::GPUFeatureName& out, wgpu::FeatureName in) {
         CASE(SubgroupsF16, kSubgroupsF16);
         CASE(MultiDrawIndirect, kMultiDrawIndirect);
         CASE(DualSourceBlending, kDualSourceBlending);
+        CASE(ClipDistances, kClipDistances);
 
 #undef CASE
 

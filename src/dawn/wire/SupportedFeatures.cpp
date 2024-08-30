@@ -112,6 +112,7 @@ bool IsFeatureSupported(WGPUFeatureName feature) {
         case WGPUFeatureName_DawnPartialLoadResolveTexture:
         case WGPUFeatureName_Subgroups:
         case WGPUFeatureName_SubgroupsF16:
+        case WGPUFeatureName_ClipDistances:
             return true;
     }
 

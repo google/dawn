@@ -393,7 +393,10 @@ static constexpr FeatureEnumAndInfo kFeatureInfo[] = {
       "https://dawn.googlesource.com/dawn/+/refs/heads/main/docs/dawn/features/"
       "multi_draw_indirect.md",
       FeatureInfo::FeatureState::Experimental}},
-};
+    {Feature::ClipDistances,
+     {"Support the \"enable clip_distances;\" directive in WGSL.",
+      "https://gpuweb.github.io/gpuweb/#dom-gpufeaturename-clip-distances",
+      FeatureInfo::FeatureState::Experimental}}};
 
 }  // anonymous namespace
 

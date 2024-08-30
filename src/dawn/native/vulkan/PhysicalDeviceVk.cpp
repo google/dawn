@@ -248,6 +248,10 @@ void PhysicalDevice::InitializeSupportedFeaturesImpl() {
         EnableFeature(Feature::R8UnormStorage);
     }
 
+    if (mDeviceInfo.features.shaderClipDistance == VK_TRUE) {
+        EnableFeature(Feature::ClipDistances);
+    }
+
     bool shaderF16Enabled = false;
     if (mDeviceInfo.HasExt(DeviceExt::ShaderFloat16Int8) &&
         mDeviceInfo.HasExt(DeviceExt::_16BitStorage) &&

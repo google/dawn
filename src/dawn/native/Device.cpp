@@ -1867,6 +1867,9 @@ void DeviceBase::SetWGSLExtensionAllowList() {
         mWGSLAllowedFeatures.extensions.insert(
             tint::wgsl::Extension::kChromiumExperimentalFramebufferFetch);
     }
+    if (mEnabledFeatures.IsEnabled(Feature::ClipDistances)) {
+        mWGSLAllowedFeatures.extensions.insert(tint::wgsl::Extension::kClipDistances);
+    }
 
     // Language features are enabled instance-wide.
     const auto& allowedFeatures = GetInstance()->GetAllowedWGSLLanguageFeatures();
