@@ -1,8 +1,11 @@
-#version 310 es
+SKIP: FAILED
 
-void f(inout float p) {
-  float x = p;
-}
-layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
-void main() {
-}
+<dawn>/src/tint/lang/glsl/writer/printer/printer.cc:264 internal compiler error: TINT_ASSERT(!l->Result(0)->Type()->Is<core::type::Pointer>())
+********************************************************************
+*  The tint shader compiler has encountered an unexpected error.   *
+*                                                                  *
+*  Please help us fix this issue by submitting a bug report at     *
+*  crbug.com/tint with the source program that triggered the bug.  *
+********************************************************************
+
+tint executable returned error: signal: trace/BPT trap

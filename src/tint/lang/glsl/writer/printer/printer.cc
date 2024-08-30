@@ -261,6 +261,8 @@ class Printer : public tint::TextGenerator {
     }
 
     void EmitLet(const core::ir::Let* l) {
+        TINT_ASSERT(!l->Result(0)->Type()->Is<core::type::Pointer>());
+
         auto out = Line();
 
         // TODO(dsinclair): Investigate using `const` here as well, the AST printer doesn't emit
@@ -551,16 +553,19 @@ class Printer : public tint::TextGenerator {
 
     void EmitValue(StringStream& out, const core::ir::Value* v) {
         tint::Switch(
-            v,                                                           //
-            [&](const core::ir::Constant* c) { EmitConstant(out, c); },  //
+            v,  //
+            [&](const core::ir::Constant* c) { EmitConstant(out, c); },
             [&](const core::ir::InstructionResult* r) {
                 tint::Switch(
-                    r->Instruction(),                                                  //
-                    [&](const core::ir::UserCall* c) { EmitUserCall(out, c); },        //
-                    [&](const core::ir::Var* var) { out << NameOf(var->Result(0)); },  //
+                    r->Instruction(),  //
+                    [&](const core::ir::Let* l) { out << NameOf(l->Result(0)); },
+                    [&](const core::ir::UserCall* c) { EmitUserCall(out, c); },
+                    [&](const core::ir::Var* var) { out << NameOf(var->Result(0)); },
+
                     TINT_ICE_ON_NO_MATCH);
             },
             [&](const core::ir::FunctionParam* p) { out << NameOf(p); },  //
+
             TINT_ICE_ON_NO_MATCH);
     }
 
