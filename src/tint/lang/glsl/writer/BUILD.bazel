@@ -88,6 +88,7 @@ cc_library(
   name = "test",
   alwayslink = True,
   srcs = [
+    "builtin_test.cc",
     "call_test.cc",
     "constant_test.cc",
     "function_test.cc",

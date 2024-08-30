@@ -30,11 +30,13 @@
 #include <string>
 #include <utility>
 
+#include "src/tint/lang/core/builtin_fn.h"
 #include "src/tint/lang/core/constant/splat.h"
 #include "src/tint/lang/core/ir/access.h"
 #include "src/tint/lang/core/ir/bitcast.h"
 #include "src/tint/lang/core/ir/construct.h"
 #include "src/tint/lang/core/ir/core_binary.h"
+#include "src/tint/lang/core/ir/core_builtin_call.h"
 #include "src/tint/lang/core/ir/core_unary.h"
 #include "src/tint/lang/core/ir/exit_if.h"
 #include "src/tint/lang/core/ir/function.h"
@@ -81,11 +83,11 @@ class Printer : public tint::TextGenerator {
   public:
     /// Constructor
     /// @param module the Tint IR module to generate
-    explicit Printer(core::ir::Module& module) : ir_(module) {}
-
     /// @param version the GLSL version information
+    Printer(core::ir::Module& module, const Version& version) : ir_(module), version_(version) {}
+
     /// @returns the generated GLSL shader
-    tint::Result<std::string> Generate(const Version& version) {
+    tint::Result<std::string> Generate() {
         auto valid = core::ir::ValidateAndDumpIfNeeded(ir_, "GLSL writer");
         if (valid != Success) {
             return std::move(valid.Failure());
@@ -95,8 +97,8 @@ class Printer : public tint::TextGenerator {
             TINT_SCOPED_ASSIGNMENT(current_buffer_, &preamble_buffer_);
 
             auto out = Line();
-            out << "#version " << version.major_version << version.minor_version << "0";
-            if (version.IsES()) {
+            out << "#version " << version_.major_version << version_.minor_version << "0";
+            if (version_.IsES()) {
                 out << " es";
             }
         }
@@ -116,6 +118,8 @@ class Printer : public tint::TextGenerator {
 
   private:
     core::ir::Module& ir_;
+
+    const Version& version_;
 
     /// The buffer holding preamble text
     TextBuffer preamble_buffer_;
@@ -558,6 +562,7 @@ class Printer : public tint::TextGenerator {
             [&](const core::ir::InstructionResult* r) {
                 tint::Switch(
                     r->Instruction(),  //
+                    [&](const core::ir::CoreBuiltinCall* c) { EmitCoreBuiltinCall(out, c); },
                     [&](const core::ir::Let* l) { out << NameOf(l->Result(0)); },
                     [&](const core::ir::UserCall* c) { EmitUserCall(out, c); },
                     [&](const core::ir::Var* var) { out << NameOf(var->Result(0)); },
@@ -567,6 +572,164 @@ class Printer : public tint::TextGenerator {
             [&](const core::ir::FunctionParam* p) { out << NameOf(p); },  //
 
             TINT_ICE_ON_NO_MATCH);
+    }
+
+    void EmitCoreBuiltinCall(StringStream& out, const core::ir::CoreBuiltinCall* c) {
+        EmitCoreBuiltinName(out, c->Func());
+
+        ScopedParen sp(out);
+        size_t i = 0;
+        for (const auto* arg : c->Args()) {
+            if (i > 0) {
+                out << ", ";
+            }
+            ++i;
+
+            EmitValue(out, arg);
+        }
+    }
+
+    void EmitCoreBuiltinName(StringStream& out, core::BuiltinFn func) {
+        switch (func) {
+            case core::BuiltinFn::kAbs:
+            case core::BuiltinFn::kAcos:
+            case core::BuiltinFn::kAcosh:
+            case core::BuiltinFn::kAll:
+            case core::BuiltinFn::kAny:
+            case core::BuiltinFn::kAsin:
+            case core::BuiltinFn::kAsinh:
+            case core::BuiltinFn::kAtan:
+            case core::BuiltinFn::kAtanh:
+            case core::BuiltinFn::kCeil:
+            case core::BuiltinFn::kClamp:
+            case core::BuiltinFn::kCos:
+            case core::BuiltinFn::kCosh:
+            case core::BuiltinFn::kCross:
+            case core::BuiltinFn::kDeterminant:
+            case core::BuiltinFn::kDistance:
+            case core::BuiltinFn::kDot:
+            case core::BuiltinFn::kExp:
+            case core::BuiltinFn::kExp2:
+            case core::BuiltinFn::kFloor:
+            case core::BuiltinFn::kFrexp:
+            case core::BuiltinFn::kLdexp:
+            case core::BuiltinFn::kLength:
+            case core::BuiltinFn::kLog:
+            case core::BuiltinFn::kLog2:
+            case core::BuiltinFn::kMax:
+            case core::BuiltinFn::kMin:
+            case core::BuiltinFn::kModf:
+            case core::BuiltinFn::kNormalize:
+            case core::BuiltinFn::kPow:
+            case core::BuiltinFn::kReflect:
+            case core::BuiltinFn::kRefract:
+            case core::BuiltinFn::kRound:
+            case core::BuiltinFn::kSign:
+            case core::BuiltinFn::kSin:
+            case core::BuiltinFn::kSinh:
+            case core::BuiltinFn::kSqrt:
+            case core::BuiltinFn::kStep:
+            case core::BuiltinFn::kTan:
+            case core::BuiltinFn::kTanh:
+            case core::BuiltinFn::kTranspose:
+            case core::BuiltinFn::kTrunc:
+                out << func;
+                break;
+            case core::BuiltinFn::kAtan2:
+                out << "atan";
+                break;
+            case core::BuiltinFn::kCountOneBits:
+                out << "bitCount";
+                break;
+            case core::BuiltinFn::kDpdx:
+                out << "dFdx";
+                break;
+            case core::BuiltinFn::kDpdxCoarse:
+                if (version_.IsES()) {
+                    out << "dFdx";
+                }
+                out << "dFdxCoarse";
+                break;
+            case core::BuiltinFn::kDpdxFine:
+                if (version_.IsES()) {
+                    out << "dFdx";
+                }
+                out << "dFdxFine";
+                break;
+            case core::BuiltinFn::kDpdy:
+                out << "dFdy";
+                break;
+            case core::BuiltinFn::kDpdyCoarse:
+                if (version_.IsES()) {
+                    out << "dFdy";
+                }
+                out << "dFdyCoarse";
+                break;
+            case core::BuiltinFn::kDpdyFine:
+                if (version_.IsES()) {
+                    out << "dFdy";
+                }
+                out << "dFdyFine";
+                break;
+            case core::BuiltinFn::kFaceForward:
+                out << "faceforward";
+                break;
+            case core::BuiltinFn::kFract:
+                out << "fract";
+                break;
+            case core::BuiltinFn::kFma:
+                out << "fma";
+                break;
+            case core::BuiltinFn::kFwidth:
+            case core::BuiltinFn::kFwidthCoarse:
+            case core::BuiltinFn::kFwidthFine:
+                out << "fwidth";
+                break;
+            case core::BuiltinFn::kInverseSqrt:
+                out << "inversesqrt";
+                break;
+            case core::BuiltinFn::kMix:
+                out << "mix";
+                break;
+            case core::BuiltinFn::kPack2X16Float:
+                out << "packHalf2x16";
+                break;
+            case core::BuiltinFn::kPack2X16Snorm:
+                out << "packSnorm2x16";
+                break;
+            case core::BuiltinFn::kPack2X16Unorm:
+                out << "packUnorm2x16";
+                break;
+            case core::BuiltinFn::kPack4X8Snorm:
+                out << "packSnorm4x8";
+                break;
+            case core::BuiltinFn::kPack4X8Unorm:
+                out << "packUnorm4x8";
+                break;
+            case core::BuiltinFn::kReverseBits:
+                out << "bitfieldReverse";
+                break;
+            case core::BuiltinFn::kSmoothstep:
+                out << "smoothstep";
+                break;
+            case core::BuiltinFn::kUnpack2X16Float:
+                out << "unpackHalf2x16";
+                break;
+            case core::BuiltinFn::kUnpack2X16Snorm:
+                out << "unpackSnorm2x16";
+                break;
+            case core::BuiltinFn::kUnpack2X16Unorm:
+                out << "unpackUnorm2x16";
+                break;
+            case core::BuiltinFn::kUnpack4X8Snorm:
+                out << "unpackSnorm4x8";
+                break;
+            case core::BuiltinFn::kUnpack4X8Unorm:
+                out << "unpackUnorm4x8";
+                break;
+            default:
+                TINT_UNREACHABLE() << "unhandled core builtin: " << func;
+        }
     }
 
     /// Emits a user call instruction
@@ -677,7 +840,7 @@ class Printer : public tint::TextGenerator {
 }  // namespace
 
 Result<std::string> Print(core::ir::Module& module, const Version& version) {
-    return Printer{module}.Generate(version);
+    return Printer{module, version}.Generate();
 }
 
 }  // namespace tint::glsl::writer
