@@ -27,11 +27,10 @@
 
 #include "src/tint/lang/msl/writer/raise/packed_vec3.h"
 
-#include <utility>
-
+#include "gtest/gtest.h"
 #include "src/tint/lang/core/fluent_types.h"
 #include "src/tint/lang/core/ir/transform/helper_test.h"
-#include "src/tint/lang/core/type/sampled_texture.h"
+#include "src/tint/lang/core/number.h"
 
 using namespace tint::core::fluent_types;     // NOLINT
 using namespace tint::core::number_suffixes;  // NOLINT

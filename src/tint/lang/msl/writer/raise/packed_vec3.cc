@@ -27,10 +27,12 @@
 
 #include "src/tint/lang/msl/writer/raise/packed_vec3.h"
 
+#include <cstdint>
 #include <utility>
 
 #include "src/tint/lang/core/ir/builder.h"
 #include "src/tint/lang/core/ir/validator.h"
+#include "src/tint/lang/core/type/manager.h"
 
 namespace tint::msl::writer::raise {
 namespace {
