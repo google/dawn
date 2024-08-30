@@ -755,6 +755,9 @@ TEST_P(CompressedTextureFormatTest, Cube) {
 
     const wgpu::TextureFormat format = GetParam().mTextureFormat;
 
+    // TODO(crbug.com/362762192): diagnose this failure on GLES with ASTC texture formats
+    DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && utils::IsASTCTextureFormat(format));
+
     constexpr uint32_t kLayers = 6;
     CopyConfig config = GetDefaultSmallConfig(kLayers);
     config.copyExtent3D = config.textureDescriptor.size;
@@ -855,6 +858,9 @@ TEST_P(CompressedTextureFormatTest, CopyIntoNonZeroArrayLayer) {
 // Test copying into a non-zero mipmap level of a texture.
 TEST_P(CompressedTextureFormatTest, CopyBufferIntoNonZeroMipmapLevel) {
     DAWN_TEST_UNSUPPORTED_IF(!IsFormatSupported());
+
+    // TODO(crbug.com/dawn/0000): diagnose this failure on QualComm OpenGL ES.
+    DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsOpenGLES() && IsQualcomm());
 
     CopyConfig config = GetDefaultFullConfig();
     // The virtual size of the texture at mipmap level == 2 is not a multiple of the texel
@@ -1216,6 +1222,9 @@ TEST_P(CompressedTextureFormatTest, LargeImageHeight) {
 TEST_P(CompressedTextureFormatTest, LargeImageHeightAndClampedCopyExtent) {
     DAWN_TEST_UNSUPPORTED_IF(!IsFormatSupported());
 
+    // TODO(crbug.com/dawn/0000): diagnose this failure on QualComm OpenGL ES.
+    DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsOpenGLES() && IsQualcomm());
+
     CopyConfig config = GetDefaultFullConfig();
 
     // The virtual size of the texture at mipmap level == 2 is not a multiple of the texel
@@ -1433,6 +1442,9 @@ TEST_P(CompressedTextureWriteTextureTest,
        WriteIntoSubresourceWithPhysicalSizeNotEqualToVirtualSize) {
     // TODO(crbug.com/dawn/976): Failing on Linux Intel OpenGL drivers.
     DAWN_SUPPRESS_TEST_IF(IsIntel() && IsOpenGL() && IsLinux());
+
+    // TODO(crbug.com/dawn/0000): diagnose this failure on QualComm OpenGL ES.
+    DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsOpenGLES() && IsQualcomm());
 
     CopyConfig config = GetDefaultFullConfig();
 

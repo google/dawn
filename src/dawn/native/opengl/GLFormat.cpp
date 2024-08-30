@@ -132,9 +132,52 @@ GLFormatTable BuildGLFormatTable(GLenum internalFormatForBGRA) {
         AddFormat(wgpu::TextureFormat::BC7RGBAUnorm, GL_COMPRESSED_RGBA_BPTC_UNORM, GL_RGBA, GL_UNSIGNED_BYTE, Type::Float);
         AddFormat(wgpu::TextureFormat::BC7RGBAUnormSrgb, GL_COMPRESSED_SRGB_ALPHA_BPTC_UNORM, GL_RGBA, GL_UNSIGNED_BYTE, Type::Float);
 
-    // clang-format on
+        // ASTC compressed formats
+        AddFormat(wgpu::TextureFormat::ASTC4x4Unorm, GL_COMPRESSED_RGBA_ASTC_4x4, GL_RGBA, GL_UNSIGNED_BYTE, Type::Float);
+        AddFormat(wgpu::TextureFormat::ASTC5x4Unorm, GL_COMPRESSED_RGBA_ASTC_5x4, GL_RGBA, GL_UNSIGNED_BYTE, Type::Float);
+        AddFormat(wgpu::TextureFormat::ASTC5x5Unorm, GL_COMPRESSED_RGBA_ASTC_5x5, GL_RGBA, GL_UNSIGNED_BYTE, Type::Float);
+        AddFormat(wgpu::TextureFormat::ASTC6x5Unorm, GL_COMPRESSED_RGBA_ASTC_6x5, GL_RGBA, GL_UNSIGNED_BYTE, Type::Float);
+        AddFormat(wgpu::TextureFormat::ASTC6x6Unorm, GL_COMPRESSED_RGBA_ASTC_6x6, GL_RGBA, GL_UNSIGNED_BYTE, Type::Float);
+        AddFormat(wgpu::TextureFormat::ASTC8x5Unorm, GL_COMPRESSED_RGBA_ASTC_8x5, GL_RGBA, GL_UNSIGNED_BYTE, Type::Float);
+        AddFormat(wgpu::TextureFormat::ASTC8x6Unorm, GL_COMPRESSED_RGBA_ASTC_8x6, GL_RGBA, GL_UNSIGNED_BYTE, Type::Float);
+        AddFormat(wgpu::TextureFormat::ASTC8x8Unorm, GL_COMPRESSED_RGBA_ASTC_8x8, GL_RGBA, GL_UNSIGNED_BYTE, Type::Float);
+        AddFormat(wgpu::TextureFormat::ASTC10x5Unorm, GL_COMPRESSED_RGBA_ASTC_10x5, GL_RGBA, GL_UNSIGNED_BYTE, Type::Float);
+        AddFormat(wgpu::TextureFormat::ASTC10x6Unorm, GL_COMPRESSED_RGBA_ASTC_10x6, GL_RGBA, GL_UNSIGNED_BYTE, Type::Float);
+        AddFormat(wgpu::TextureFormat::ASTC10x8Unorm, GL_COMPRESSED_RGBA_ASTC_10x8, GL_RGBA, GL_UNSIGNED_BYTE, Type::Float);
+        AddFormat(wgpu::TextureFormat::ASTC10x10Unorm, GL_COMPRESSED_RGBA_ASTC_10x10, GL_RGBA, GL_UNSIGNED_BYTE, Type::Float);
+        AddFormat(wgpu::TextureFormat::ASTC12x10Unorm, GL_COMPRESSED_RGBA_ASTC_12x10, GL_RGBA, GL_UNSIGNED_BYTE, Type::Float);
+        AddFormat(wgpu::TextureFormat::ASTC12x12Unorm, GL_COMPRESSED_RGBA_ASTC_12x12, GL_RGBA, GL_UNSIGNED_BYTE, Type::Float);
 
-    return table;
+        AddFormat(wgpu::TextureFormat::ASTC4x4UnormSrgb, GL_COMPRESSED_SRGB8_ALPHA8_ASTC_4x4, GL_RGBA, GL_UNSIGNED_BYTE, Type::Float);
+        AddFormat(wgpu::TextureFormat::ASTC5x4UnormSrgb, GL_COMPRESSED_SRGB8_ALPHA8_ASTC_5x4, GL_RGBA, GL_UNSIGNED_BYTE, Type::Float);
+        AddFormat(wgpu::TextureFormat::ASTC5x5UnormSrgb, GL_COMPRESSED_SRGB8_ALPHA8_ASTC_5x5, GL_RGBA, GL_UNSIGNED_BYTE, Type::Float);
+        AddFormat(wgpu::TextureFormat::ASTC6x5UnormSrgb, GL_COMPRESSED_SRGB8_ALPHA8_ASTC_6x5, GL_RGBA, GL_UNSIGNED_BYTE, Type::Float);
+        AddFormat(wgpu::TextureFormat::ASTC6x6UnormSrgb, GL_COMPRESSED_SRGB8_ALPHA8_ASTC_6x6, GL_RGBA, GL_UNSIGNED_BYTE, Type::Float);
+        AddFormat(wgpu::TextureFormat::ASTC8x5UnormSrgb, GL_COMPRESSED_SRGB8_ALPHA8_ASTC_8x5, GL_RGBA, GL_UNSIGNED_BYTE, Type::Float);
+        AddFormat(wgpu::TextureFormat::ASTC8x6UnormSrgb, GL_COMPRESSED_SRGB8_ALPHA8_ASTC_8x6, GL_RGBA, GL_UNSIGNED_BYTE, Type::Float);
+        AddFormat(wgpu::TextureFormat::ASTC8x8UnormSrgb, GL_COMPRESSED_SRGB8_ALPHA8_ASTC_8x8, GL_RGBA, GL_UNSIGNED_BYTE, Type::Float);
+        AddFormat(wgpu::TextureFormat::ASTC10x5UnormSrgb, GL_COMPRESSED_SRGB8_ALPHA8_ASTC_10x5, GL_RGBA, GL_UNSIGNED_BYTE, Type::Float);
+        AddFormat(wgpu::TextureFormat::ASTC10x6UnormSrgb, GL_COMPRESSED_SRGB8_ALPHA8_ASTC_10x6, GL_RGBA, GL_UNSIGNED_BYTE, Type::Float);
+        AddFormat(wgpu::TextureFormat::ASTC10x8UnormSrgb, GL_COMPRESSED_SRGB8_ALPHA8_ASTC_10x8, GL_RGBA, GL_UNSIGNED_BYTE, Type::Float);
+        AddFormat(wgpu::TextureFormat::ASTC10x10UnormSrgb, GL_COMPRESSED_SRGB8_ALPHA8_ASTC_10x10, GL_RGBA, GL_UNSIGNED_BYTE, Type::Float);
+        AddFormat(wgpu::TextureFormat::ASTC12x10UnormSrgb, GL_COMPRESSED_SRGB8_ALPHA8_ASTC_12x10, GL_RGBA, GL_UNSIGNED_BYTE, Type::Float);
+        AddFormat(wgpu::TextureFormat::ASTC12x12UnormSrgb, GL_COMPRESSED_SRGB8_ALPHA8_ASTC_12x12, GL_RGBA, GL_UNSIGNED_BYTE, Type::Float);
+
+        // ETC compressed formats
+        AddFormat(wgpu::TextureFormat::EACR11Unorm, GL_COMPRESSED_R11_EAC, GL_RED, GL_UNSIGNED_BYTE, Type::Float);
+        AddFormat(wgpu::TextureFormat::EACR11Snorm, GL_COMPRESSED_SIGNED_R11_EAC, GL_RED, GL_BYTE, Type::Float);
+        AddFormat(wgpu::TextureFormat::EACRG11Unorm, GL_COMPRESSED_RG11_EAC, GL_RG, GL_UNSIGNED_SHORT, Type::Float);
+        AddFormat(wgpu::TextureFormat::EACRG11Snorm, GL_COMPRESSED_SIGNED_RG11_EAC, GL_RG, GL_SHORT, Type::Float);
+        AddFormat(wgpu::TextureFormat::ETC2RGB8Unorm, GL_COMPRESSED_RGB8_ETC2, GL_RGB, GL_UNSIGNED_BYTE, Type::Float);
+        AddFormat(wgpu::TextureFormat::ETC2RGB8UnormSrgb, GL_COMPRESSED_SRGB8_ETC2, GL_RGB, GL_UNSIGNED_BYTE, Type::Float);
+        AddFormat(wgpu::TextureFormat::ETC2RGB8A1Unorm, GL_COMPRESSED_RGB8_PUNCHTHROUGH_ALPHA1_ETC2, GL_RGBA, GL_UNSIGNED_BYTE, Type::Float);
+        AddFormat(wgpu::TextureFormat::ETC2RGB8A1UnormSrgb, GL_COMPRESSED_SRGB8_PUNCHTHROUGH_ALPHA1_ETC2, GL_RGBA, GL_UNSIGNED_BYTE, Type::Float);
+        AddFormat(wgpu::TextureFormat::ETC2RGBA8Unorm, GL_COMPRESSED_RGBA8_ETC2_EAC, GL_RGBA, GL_UNSIGNED_BYTE, Type::Float);
+        AddFormat(wgpu::TextureFormat::ETC2RGBA8UnormSrgb, GL_COMPRESSED_SRGB8_ALPHA8_ETC2_EAC, GL_RGBA, GL_UNSIGNED_BYTE, Type::Float);
+
+        // clang-format on
+
+        return table;
 }
 
 }  // namespace dawn::native::opengl
