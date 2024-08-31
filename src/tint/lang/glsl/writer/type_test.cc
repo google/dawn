@@ -559,19 +559,19 @@ INSTANTIATE_TEST_SUITE_P(
         GlslDepthTextureData{core::type::TextureDimension::kCube, "samplerCubeShadow"},
         GlslDepthTextureData{core::type::TextureDimension::kCubeArray, "samplerCubeArrayShadow"}));
 
-// TODO(dsinclair): Add depth multisampled support
-TEST_F(GlslWriterTest, DISABLED_EmitType_DepthMultisampledTexture) {
+TEST_F(GlslWriterTest, EmitType_DepthMultisampledTexture) {
     auto* t = ty.Get<core::type::DepthMultisampledTexture>(core::type::TextureDimension::k2d);
-    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kCompute);
+    auto* func = b.Function("foo", ty.void_());
     auto* param = b.FunctionParam("a", t);
     func->SetParams({param});
-    func->SetWorkgroupSize(1, 1, 1);
     b.Append(func->Block(), [&] { b.Return(func); });
 
     ASSERT_TRUE(Generate()) << err_ << output_.glsl;
-    EXPECT_EQ(output_.glsl, R"(
+    EXPECT_EQ(output_.glsl, GlslHeader() + R"(
+void foo(highp sampler2DMS a) {
+}
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
-void main(sampler2DMS a) {
+void main() {
 }
 )");
 }

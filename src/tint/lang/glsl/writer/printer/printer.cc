@@ -54,6 +54,7 @@
 #include "src/tint/lang/core/texel_format.h"
 #include "src/tint/lang/core/type/array.h"
 #include "src/tint/lang/core/type/bool.h"
+#include "src/tint/lang/core/type/depth_multisampled_texture.h"
 #include "src/tint/lang/core/type/depth_texture.h"
 #include "src/tint/lang/core/type/f16.h"
 #include "src/tint/lang/core/type/f32.h"
@@ -452,6 +453,7 @@ class Printer : public tint::TextGenerator {
         auto* storage = t->As<core::type::StorageTexture>();
         auto* sampled = t->As<core::type::SampledTexture>();
         auto* ms = t->As<core::type::MultisampledTexture>();
+        auto* depth_ms = t->As<core::type::DepthMultisampledTexture>();
 
         out << "highp ";
 
@@ -504,7 +506,7 @@ class Printer : public tint::TextGenerator {
                 break;
             case core::type::TextureDimension::k2d:
                 out << "2D";
-                if (ms) {
+                if (ms || depth_ms) {
                     out << "MS";
                 }
                 break;
