@@ -54,6 +54,7 @@
 #include "src/tint/lang/core/texel_format.h"
 #include "src/tint/lang/core/type/array.h"
 #include "src/tint/lang/core/type/bool.h"
+#include "src/tint/lang/core/type/depth_texture.h"
 #include "src/tint/lang/core/type/f16.h"
 #include "src/tint/lang/core/type/f32.h"
 #include "src/tint/lang/core/type/i32.h"
@@ -481,12 +482,14 @@ class Printer : public tint::TextGenerator {
         }
         auto* subtype = sampled ? sampled->Type() : storage ? storage->Type() : nullptr;
 
-        tint::Switch(
-            subtype,                         //
-            [&](const core::type::F32*) {},  //
-            [&](const core::type::I32*) { out << "i"; },
-            [&](const core::type::U32*) { out << "u"; },  //
-            TINT_ICE_ON_NO_MATCH);
+        if (subtype) {
+            tint::Switch(
+                subtype,                         //
+                [&](const core::type::F32*) {},  //
+                [&](const core::type::I32*) { out << "i"; },
+                [&](const core::type::U32*) { out << "u"; },  //
+                TINT_ICE_ON_NO_MATCH);
+        }
 
         out << (storage ? "image" : "sampler");
 
@@ -511,6 +514,9 @@ class Printer : public tint::TextGenerator {
                 break;
             default:
                 TINT_UNREACHABLE();
+        }
+        if (t->Is<core::type::DepthTexture>()) {
+            out << "Shadow";
         }
     }
 

@@ -499,29 +499,60 @@ inline std::ostream& operator<<(std::ostream& out, GlslDepthTextureData data) {
     out << str.str();
     return out;
 }
-using GlslWriterDepthTexturesTest = GlslWriterTestWithParam<GlslDepthTextureData>;
-// TODO(dsinclair): Add depth texture support
-TEST_P(GlslWriterDepthTexturesTest, DISABLED_Emit) {
+using GlslWriterDepthTextureESTest = GlslWriterTestWithParam<GlslDepthTextureData>;
+TEST_P(GlslWriterDepthTextureESTest, Emit) {
     auto params = GetParam();
 
     auto* t = ty.Get<core::type::DepthTexture>(params.dim);
-    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kCompute);
+    auto* func = b.Function("foo", ty.void_());
     auto* param = b.FunctionParam("a", t);
     func->SetParams({param});
-    func->SetWorkgroupSize(1, 1, 1);
     b.Append(func->Block(), [&] { b.Return(func); });
 
     ASSERT_TRUE(Generate()) << err_ << output_.glsl;
     EXPECT_EQ(output_.glsl, GlslHeader() + R"(
-layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
-void main()" + params.result +
+void foo(highp )" + params.result +
                                 R"( a) {
+}
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+void main() {
 }
 )");
 }
 INSTANTIATE_TEST_SUITE_P(
     GlslWriterTest,
-    GlslWriterDepthTexturesTest,
+    GlslWriterDepthTextureESTest,
+    testing::Values(
+        GlslDepthTextureData{core::type::TextureDimension::k2d, "sampler2DShadow"},
+        GlslDepthTextureData{core::type::TextureDimension::k2dArray, "sampler2DArrayShadow"},
+        GlslDepthTextureData{core::type::TextureDimension::kCube, "samplerCubeShadow"}));
+
+using GlslWriterDepthTextureNonESTest = GlslWriterTestWithParam<GlslDepthTextureData>;
+TEST_P(GlslWriterDepthTextureNonESTest, Emit) {
+    auto params = GetParam();
+
+    auto* t = ty.Get<core::type::DepthTexture>(params.dim);
+    auto* func = b.Function("foo", ty.void_());
+    auto* param = b.FunctionParam("a", t);
+    func->SetParams({param});
+    b.Append(func->Block(), [&] { b.Return(func); });
+
+    Options opts{};
+    opts.version = Version(Version::Standard::kDesktop, 4, 6);
+    ASSERT_TRUE(Generate(opts)) << err_ << output_.glsl;
+    EXPECT_EQ(output_.glsl, R"(#version 460
+
+void foo(highp )" + params.result +
+                                R"( a) {
+}
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+void main() {
+}
+)");
+}
+INSTANTIATE_TEST_SUITE_P(
+    GlslWriterTest,
+    GlslWriterDepthTextureNonESTest,
     testing::Values(
         GlslDepthTextureData{core::type::TextureDimension::k2d, "sampler2DShadow"},
         GlslDepthTextureData{core::type::TextureDimension::k2dArray, "sampler2DArrayShadow"},
