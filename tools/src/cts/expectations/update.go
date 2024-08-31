@@ -708,19 +708,28 @@ func (u *updater) expectationsForRoot(
 func (u *updater) resultsToExpectations(results result.List, bug, comment string) []Expectation {
 	results.Sort()
 
-	out := make([]Expectation, len(results))
-	for i, r := range results {
+	out := make([]Expectation, 0, len(results))
+	addedExpectations := container.NewSet[string]()
+	for _, r := range results {
 		q := r.Query.String()
 		if r.Query.Target() == query.Tests && !r.Query.IsWildcard() {
 			// The expectation validator wants a trailing ':' for test queries
 			q += query.TargetDelimiter
 		}
-		out[i] = Expectation{
+		e := Expectation{
 			Bug:     bug,
 			Tags:    u.in.Tags.RemoveLowerPriorityTags(r.Tags),
 			Query:   q,
 			Status:  []string{string(r.Status)},
 			Comment: comment,
+		}
+		key := e.AsExpectationFileString()
+		// We keep track of all expectations we've added so far to avoid cases where
+		// two distinct results create the same expectation due to
+		// RemoveLowerPriorityTags removing the distinguishing tags.
+		if !addedExpectations.Contains(key) {
+			out = append(out, e)
+			addedExpectations.Add(key)
 		}
 	}
 

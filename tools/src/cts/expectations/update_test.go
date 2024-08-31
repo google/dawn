@@ -25,17 +25,17 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-package expectations_test
+package expectations
 
 import (
 	"strings"
 	"testing"
 
 	"dawn.googlesource.com/dawn/tools/src/container"
-	"dawn.googlesource.com/dawn/tools/src/cts/expectations"
 	"dawn.googlesource.com/dawn/tools/src/cts/query"
 	"dawn.googlesource.com/dawn/tools/src/cts/result"
 	"github.com/google/go-cmp/cmp"
+	"github.com/stretchr/testify/assert"
 )
 
 var Q = query.Parse
@@ -55,7 +55,7 @@ func TestUpdate(t *testing.T) {
 		expectations string
 		results      result.List
 		updated      string
-		diagnostics  expectations.Diagnostics
+		diagnostics  Diagnostics
 		err          string
 	}
 	for _, test := range []Test{
@@ -90,14 +90,14 @@ some:other,test:* [ Failure ]
 crbug.com/a/123 a:missing,test,result:* [ Failure ]
 crbug.com/a/123 [ tag ] another:missing,test,result:* [ Failure ]
 `,
-			diagnostics: expectations.Diagnostics{
+			diagnostics: Diagnostics{
 				{
-					Severity: expectations.Note,
+					Severity: Note,
 					Line:     headerLines + 3,
 					Message:  "no results found for query 'a:missing,test,result:*'",
 				},
 				{
-					Severity: expectations.Note,
+					Severity: Note,
 					Line:     headerLines + 4,
 					Message:  "no results found for query 'another:missing,test,result:*' with tags [tag]",
 				},
@@ -127,9 +127,9 @@ crbug.com/a/123 a:missing,test,result:* [ Failure ]
 
 some:other,test:* [ Failure ]
 `,
-			diagnostics: expectations.Diagnostics{
+			diagnostics: Diagnostics{
 				{
-					Severity: expectations.Note,
+					Severity: Note,
 					Line:     headerLines + 2,
 					Message:  "no results found for query 'a:missing,test,result:*'",
 				},
@@ -159,14 +159,14 @@ some:other,test:* [ Failure ]
 			updated: `
 some:other,test:* [ Failure ]
 `,
-			diagnostics: expectations.Diagnostics{
+			diagnostics: Diagnostics{
 				{
-					Severity: expectations.Warning,
+					Severity: Warning,
 					Line:     headerLines + 3,
 					Message:  "no tests exist with query 'an:unknown,test:*' - removing",
 				},
 				{
-					Severity: expectations.Warning,
+					Severity: Warning,
 					Line:     headerLines + 4,
 					Message:  "no tests exist with query 'another:unknown:test' - removing",
 				},
@@ -194,9 +194,9 @@ some:other,test:* [ Failure ]
 			updated: `
 some:other,test:* [ Failure ]
 `,
-			diagnostics: expectations.Diagnostics{
+			diagnostics: Diagnostics{
 				{
-					Severity: expectations.Warning,
+					Severity: Warning,
 					Line:     headerLines + 2,
 					Message:  "no tests exist with query 'an:unknown,test:*' - removing",
 				},
@@ -220,9 +220,9 @@ some:other,test:* [ Failure ]
 # ##ROLLER_MUTABLE##
 a:b,c:* [ Failure ]
 `,
-			diagnostics: expectations.Diagnostics{
+			diagnostics: Diagnostics{
 				{
-					Severity: expectations.Note,
+					Severity: Note,
 					Line:     headerLines + 4,
 					Message:  "expectation is fully covered by previous expectations",
 				},
@@ -319,9 +319,9 @@ crbug.com/a/123 [ gpu-b os-b ] a:b,c:* [ Failure ]
 # ##ROLLER_MUTABLE##
 crbug.com/a/123 [ os-b ] a:b,c:* [ Failure ]
 `,
-			diagnostics: expectations.Diagnostics{
+			diagnostics: Diagnostics{
 				{
-					Severity: expectations.Note,
+					Severity: Note,
 					Line:     headerLines + 4,
 					Message:  "expectation is fully covered by previous expectations",
 				},
@@ -350,9 +350,9 @@ crbug.com/a/123 [ gpu-b os-b ] a:b,c:d:* [ Failure ]
 # ##ROLLER_MUTABLE##
 crbug.com/a/123 [ os-b ] a:b,c:d:* [ Failure ]
 `,
-			diagnostics: expectations.Diagnostics{
+			diagnostics: Diagnostics{
 				{
-					Severity: expectations.Note,
+					Severity: Note,
 					Line:     headerLines + 4,
 					Message:  "expectation is fully covered by previous expectations",
 				},
@@ -423,9 +423,9 @@ crbug.com/a/123 [ gpu-b os-b ] a:b,c:d:* [ Failure ]
 crbug.com/a/123 [ gpu-a os-a ] a:b,c:d:* [ Failure ]
 crbug.com/a/123 [ gpu-b os-b ] a:b,c:d:* [ Failure ]
 `,
-			diagnostics: expectations.Diagnostics{
+			diagnostics: Diagnostics{
 				{
-					Severity: expectations.Note,
+					Severity: Note,
 					Line:     headerLines + 2,
 					Message:  "test now passes",
 				},
@@ -445,9 +445,9 @@ crbug.com/a/123 a:b,c:d:* [ Failure ]
 			updated: `
 crbug.com/a/123 a:b,c:d:* [ Failure ]
 `,
-			diagnostics: expectations.Diagnostics{
+			diagnostics: Diagnostics{
 				{
-					Severity: expectations.Note,
+					Severity: Note,
 					Line:     headerLines + 2,
 					Message:  "all 4 tests now pass",
 				},
@@ -787,7 +787,7 @@ crbug.com/dawn/0000 a:b,c:29:* [ Failure ]
 `,
 		},
 	} {
-		ex, err := expectations.Parse("expectations.txt", header+test.expectations)
+		ex, err := Parse("expectations.txt", header+test.expectations)
 		if err != nil {
 			t.Fatalf("'%v': expectations.Parse():\n%v", test.name, err)
 		}
@@ -822,4 +822,135 @@ crbug.com/dawn/0000 a:b,c:29:* [ Failure ]
 			t.Errorf("'%v': updated was not as expected:\n%v", test.name, diff)
 		}
 	}
+}
+
+func createGenericUpdater(t *testing.T) updater {
+	header := `
+# BEGIN TAG HEADER
+# OS
+# tags: [ linux win10 ]
+# GPU
+# tags: [ intel
+#         nvidia nvidia-0x2184 ]
+# Driver
+# tags: [ nvidia_ge_31.0.15.4601 nvidia_lt_31.0.15.4601
+#         nvidia_ge_535.183.01 nvidia_lt_535.183.01 ]
+# END TAG HEADER
+`
+	inContent, err := Parse("expectations.txt", header)
+	if err != nil {
+		t.Fatalf("Failed to parse expectations: %v", err)
+	}
+
+	u := updater{
+		in: inContent,
+	}
+	return u
+}
+
+// Tests basic result -> expectation conversion.
+func TestResultsToExpectationsBasic(t *testing.T) {
+	results := result.List{
+		{
+			Query:  query.Parse("webgpu:shader,execution,memory_layout:read_layout:"),
+			Tags:   result.NewTags("linux", "nvidia"),
+			Status: result.Failure,
+		},
+		{
+			Query:  query.Parse("webgpu:shader,execution,memory_model,barrier:"),
+			Tags:   result.NewTags("win10", "intel"),
+			Status: result.Failure,
+		},
+	}
+
+	expectedOutput := []Expectation{
+		{
+			Bug:     "crbug.com/1234",
+			Tags:    result.NewTags("linux", "nvidia"),
+			Query:   "webgpu:shader,execution,memory_layout:read_layout:",
+			Status:  []string{"Failure"},
+			Comment: "comment",
+		},
+		{
+			Bug:     "crbug.com/1234",
+			Tags:    result.NewTags("win10", "intel"),
+			Query:   "webgpu:shader,execution,memory_model,barrier",
+			Status:  []string{"Failure"},
+			Comment: "comment",
+		},
+	}
+
+	u := createGenericUpdater(t)
+	output := u.resultsToExpectations(results, "crbug.com/1234", "comment")
+	assert.Equal(t, output, expectedOutput)
+}
+
+// Tests behavior when two unique results end up creating the same expectation
+// due to lower priority tags being removed.
+func TestResultsToExpectationsOverlappingExpectations(t *testing.T) {
+	results := result.List{
+		{
+			Query:  query.Parse("webgpu:shader,execution,memory_layout:read_layout:"),
+			Tags:   result.NewTags("nvidia", "nvidia-0x2184", "nvidia_ge_31.0.15.4601", "nvidia_lt_535.183.01"),
+			Status: result.Failure,
+		},
+		{
+			Query:  query.Parse("webgpu:shader,execution,memory_layout:read_layout:"),
+			Tags:   result.NewTags("nvidia", "nvidia-0x2184", "nvidia_lt_31.0.15.4601", "nvidia_lt_535.183.01"),
+			Status: result.Failure,
+		},
+	}
+
+	expectedOutput := []Expectation{
+		{
+			Bug:     "crbug.com/1234",
+			Tags:    result.NewTags("nvidia-0x2184", "nvidia_lt_535.183.01"),
+			Query:   "webgpu:shader,execution,memory_layout:read_layout:",
+			Status:  []string{"Failure"},
+			Comment: "comment",
+		},
+	}
+
+	u := createGenericUpdater(t)
+	output := u.resultsToExpectations(results, "crbug.com/1234", "comment")
+	assert.Equal(t, output, expectedOutput)
+}
+
+// Tests behavior related to automatic inclusion of a trailing :.
+func TestResultsToExpectationsTrailingColon(t *testing.T) {
+	results := result.List{
+		// Should automatically have a : added since it's a test query.
+		{
+			Query:  query.Parse("webgpu:shader,execution,memory_layout:read_layout"),
+			Tags:   result.NewTags("linux", "nvidia"),
+			Status: result.Failure,
+		},
+		// Should not have a : added since it is a wildcard query.
+		{
+			Query:  query.Parse("webgpu:shader,execution,*"),
+			Tags:   result.NewTags("win10", "intel"),
+			Status: result.Failure,
+		},
+	}
+
+	expectedOutput := []Expectation{
+		{
+			Bug:     "crbug.com/1234",
+			Tags:    result.NewTags("win10", "intel"),
+			Query:   "webgpu:shader,execution,*",
+			Status:  []string{"Failure"},
+			Comment: "comment",
+		},
+		{
+			Bug:     "crbug.com/1234",
+			Tags:    result.NewTags("linux", "nvidia"),
+			Query:   "webgpu:shader,execution,memory_layout:read_layout:",
+			Status:  []string{"Failure"},
+			Comment: "comment",
+		},
+	}
+
+	u := createGenericUpdater(t)
+	output := u.resultsToExpectations(results, "crbug.com/1234", "comment")
+	assert.Equal(t, output, expectedOutput)
 }

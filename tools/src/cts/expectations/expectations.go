@@ -120,19 +120,7 @@ func (c Content) Write(w io.Writer) error {
 			}
 		}
 		for _, expectation := range chunk.Expectations {
-			parts := []string{}
-			if expectation.Bug != "" {
-				parts = append(parts, expectation.Bug)
-			}
-			if len(expectation.Tags) > 0 {
-				parts = append(parts, fmt.Sprintf("[ %v ]", strings.Join(expectation.Tags.List(), " ")))
-			}
-			parts = append(parts, expectation.Query)
-			parts = append(parts, fmt.Sprintf("[ %v ]", strings.Join(expectation.Status, " ")))
-			if expectation.Comment != "" {
-				parts = append(parts, expectation.Comment)
-			}
-			if _, err := fmt.Fprintln(w, strings.Join(parts, " ")); err != nil {
+			if _, err := fmt.Fprintln(w, expectation.AsExpectationFileString()); err != nil {
 				return err
 			}
 		}
@@ -170,6 +158,24 @@ func (c Chunk) Clone() Chunk {
 		expectations[i] = e.Clone()
 	}
 	return Chunk{comments, expectations}
+}
+
+// AsExpectationFileString returns the human-readable form of the expectation
+// that matches the syntax of the expectation files.
+func (e Expectation) AsExpectationFileString() string {
+	parts := []string{}
+	if e.Bug != "" {
+		parts = append(parts, e.Bug)
+	}
+	if len(e.Tags) > 0 {
+		parts = append(parts, fmt.Sprintf("[ %v ]", strings.Join(e.Tags.List(), " ")))
+	}
+	parts = append(parts, e.Query)
+	parts = append(parts, fmt.Sprintf("[ %v ]", strings.Join(e.Status, " ")))
+	if e.Comment != "" {
+		parts = append(parts, e.Comment)
+	}
+	return strings.Join(parts, " ")
 }
 
 // Clone makes a deep-copy of the Expectation.

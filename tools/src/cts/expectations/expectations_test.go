@@ -30,7 +30,10 @@ package expectations
 import (
 	"testing"
 
+	"dawn.googlesource.com/dawn/tools/src/cts/result"
+
 	"github.com/google/go-cmp/cmp"
+	"github.com/stretchr/testify/assert"
 )
 
 // Tests behavior of Content.Format()
@@ -122,4 +125,51 @@ crbug.com/3 [ intel ] d [ Failure ]
 	if diff := cmp.Diff(expectations.String(), expected_content); diff != "" {
 		t.Errorf("Format produced unexpected output: %v", diff)
 	}
+}
+
+func TestExpectationAsExpectationFileString(t *testing.T) {
+	// Full expectation.
+	e := Expectation{
+		Bug:     "crbug.com/1234",
+		Tags:    result.NewTags("linux", "nvidia"),
+		Query:   "query",
+		Status:  []string{"Failure", "Slow"},
+		Comment: "# comment",
+	}
+	assert.Equal(t, e.AsExpectationFileString(), "crbug.com/1234 [ linux nvidia ] query [ Failure Slow ] # comment")
+
+	// No bug.
+	e = Expectation{
+		Tags:    result.NewTags("linux", "nvidia"),
+		Query:   "query",
+		Status:  []string{"Failure", "Slow"},
+		Comment: "# comment",
+	}
+	assert.Equal(t, e.AsExpectationFileString(), "[ linux nvidia ] query [ Failure Slow ] # comment")
+
+	// No tags.
+	e = Expectation{
+		Bug:     "crbug.com/1234",
+		Tags:    result.NewTags(),
+		Query:   "query",
+		Status:  []string{"Failure", "Slow"},
+		Comment: "# comment",
+	}
+	assert.Equal(t, e.AsExpectationFileString(), "crbug.com/1234 query [ Failure Slow ] # comment")
+
+	// No comment.
+	e = Expectation{
+		Bug:    "crbug.com/1234",
+		Tags:   result.NewTags("linux", "nvidia"),
+		Query:  "query",
+		Status: []string{"Failure", "Slow"},
+	}
+	assert.Equal(t, e.AsExpectationFileString(), "crbug.com/1234 [ linux nvidia ] query [ Failure Slow ]")
+
+	// Minimal expectation.
+	e = Expectation{
+		Query:  "query",
+		Status: []string{"Failure", "Slow"},
+	}
+	assert.Equal(t, e.AsExpectationFileString(), "query [ Failure Slow ]")
 }
