@@ -98,6 +98,7 @@ if (tint_build_unittests) {
         "constant_test.cc",
         "function_test.cc",
         "type_test.cc",
+        "unary_test.cc",
         "var_and_let_test.cc",
       ]
       deps = [
