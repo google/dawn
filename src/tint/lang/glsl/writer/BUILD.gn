@@ -92,6 +92,7 @@ if (tint_build_unittests) {
   if (tint_build_glsl_writer && tint_build_glsl_validator) {
     tint_unittests_source_set("unittests") {
       sources = [
+        "binary_test.cc",
         "builtin_test.cc",
         "call_test.cc",
         "constant_test.cc",

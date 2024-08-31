@@ -561,7 +561,8 @@ class Printer : public tint::TextGenerator {
             [&](const core::ir::Constant* c) { EmitConstant(out, c); },
             [&](const core::ir::InstructionResult* r) {
                 tint::Switch(
-                    r->Instruction(),  //
+                    r->Instruction(),                                            //
+                    [&](const core::ir::CoreBinary* b) { EmitBinary(out, b); },  //
                     [&](const core::ir::CoreBuiltinCall* c) { EmitCoreBuiltinCall(out, c); },
                     [&](const core::ir::Let* l) { out << NameOf(l->Result(0)); },
                     [&](const core::ir::UserCall* c) { EmitUserCall(out, c); },
@@ -572,6 +573,58 @@ class Printer : public tint::TextGenerator {
             [&](const core::ir::FunctionParam* p) { out << NameOf(p); },  //
 
             TINT_ICE_ON_NO_MATCH);
+    }
+
+    /// Emit a binary instruction
+    /// @param b the binary instruction
+    void EmitBinary(StringStream& out, const core::ir::CoreBinary* b) {
+        auto kind = [&] {
+            switch (b->Op()) {
+                case core::BinaryOp::kAdd:
+                    return "+";
+                case core::BinaryOp::kSubtract:
+                    return "-";
+                case core::BinaryOp::kMultiply:
+                    return "*";
+                case core::BinaryOp::kDivide:
+                    return "/";
+                case core::BinaryOp::kModulo:
+                    return "%";
+                case core::BinaryOp::kAnd:
+                    return "&";
+                case core::BinaryOp::kOr:
+                    return "|";
+                case core::BinaryOp::kXor:
+                    return "^";
+                case core::BinaryOp::kEqual:
+                    return "==";
+                case core::BinaryOp::kNotEqual:
+                    return "!=";
+                case core::BinaryOp::kLessThan:
+                    return "<";
+                case core::BinaryOp::kGreaterThan:
+                    return ">";
+                case core::BinaryOp::kLessThanEqual:
+                    return "<=";
+                case core::BinaryOp::kGreaterThanEqual:
+                    return ">=";
+                case core::BinaryOp::kShiftLeft:
+                    return "<<";
+                case core::BinaryOp::kShiftRight:
+                    return ">>";
+                case core::BinaryOp::kLogicalAnd:
+                case core::BinaryOp::kLogicalOr:
+                    // These should have been replaced by if statements as GLSL is not
+                    // short-circuting.
+                    TINT_UNREACHABLE() << "logical and/or should not be present";
+            }
+            return "<error>";
+        };
+
+        ScopedParen sp(out);
+        EmitValue(out, b->LHS());
+        out << " " << kind() << " ";
+        EmitValue(out, b->RHS());
     }
 
     void EmitCoreBuiltinCall(StringStream& out, const core::ir::CoreBuiltinCall* c) {

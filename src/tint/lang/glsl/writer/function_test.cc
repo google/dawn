@@ -35,7 +35,8 @@ TEST_F(GlslWriterTest, Function_Empty) {
     func->SetWorkgroupSize(1, 1, 1);
     func->Block()->Append(b.Return(func));
 
-    ASSERT_TRUE(Generate(tint::ast::PipelineStage::kCompute)) << err_ << output_.glsl;
+    Options opts{};
+    ASSERT_TRUE(Generate(opts, tint::ast::PipelineStage::kCompute)) << err_ << output_.glsl;
     EXPECT_EQ(output_.glsl, GlslHeader() + R"(
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
