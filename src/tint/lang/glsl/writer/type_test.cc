@@ -716,22 +716,98 @@ INSTANTIATE_TEST_SUITE_P(
         GlslTextureData{core::type::TextureDimension::kCubeArray, TextureDataType::kU32,
                         "usamplerCubeArray"}));
 
-// TODO(dsinclair): Add multisampled texture support
-TEST_F(GlslWriterTest, DISABLED_EmitType_MultisampledTexture) {
-    auto* ms = ty.Get<core::type::MultisampledTexture>(core::type::TextureDimension::k2d, ty.u32());
-    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kCompute);
+using GlslWriterMultisampledTextureESTest = GlslWriterTestWithParam<GlslTextureData>;
+TEST_P(GlslWriterMultisampledTextureESTest, Emit) {
+    auto params = GetParam();
+
+    const core::type::Type* subtype = nullptr;
+    switch (params.datatype) {
+        case TextureDataType::kF32:
+            subtype = ty.f32();
+            break;
+        case TextureDataType::kI32:
+            subtype = ty.i32();
+            break;
+        case TextureDataType::kU32:
+            subtype = ty.u32();
+            break;
+    }
+
+    auto* ms = ty.Get<core::type::MultisampledTexture>(params.dim, subtype);
+    auto* func = b.Function("foo", ty.void_());
     auto* param = b.FunctionParam("a", ms);
     func->SetParams({param});
-    func->SetWorkgroupSize(1, 1, 1);
     b.Append(func->Block(), [&] { b.Return(func); });
 
     ASSERT_TRUE(Generate()) << err_ << output_.glsl;
-    EXPECT_EQ(output_.glsl, R"(
+    EXPECT_EQ(output_.glsl, GlslHeader() + R"(
+void foo(highp )" + params.result +
+                                R"( a) {
+}
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
-void main(usampler2DMS a) {
+void main() {
 }
 )");
 }
+INSTANTIATE_TEST_SUITE_P(GlslWriterTest,
+                         GlslWriterMultisampledTextureESTest,
+                         testing::Values(GlslTextureData{core::type::TextureDimension::k2d,
+                                                         TextureDataType::kF32, "sampler2DMS"},
+                                         GlslTextureData{core::type::TextureDimension::k2d,
+                                                         TextureDataType::kI32, "isampler2DMS"},
+                                         GlslTextureData{core::type::TextureDimension::k2d,
+                                                         TextureDataType::kU32, "usampler2DMS"}));
+
+using GlslWriterMultisampledTextureNonESTest = GlslWriterTestWithParam<GlslTextureData>;
+TEST_P(GlslWriterMultisampledTextureNonESTest, Emit) {
+    auto params = GetParam();
+
+    const core::type::Type* subtype = nullptr;
+    switch (params.datatype) {
+        case TextureDataType::kF32:
+            subtype = ty.f32();
+            break;
+        case TextureDataType::kI32:
+            subtype = ty.i32();
+            break;
+        case TextureDataType::kU32:
+            subtype = ty.u32();
+            break;
+    }
+    auto* ms = ty.Get<core::type::MultisampledTexture>(params.dim, subtype);
+    auto* func = b.Function("foo", ty.void_());
+    auto* param = b.FunctionParam("a", ms);
+    func->SetParams({param});
+    b.Append(func->Block(), [&] { b.Return(func); });
+
+    Options opts{};
+    opts.version = Version(Version::Standard::kDesktop, 4, 6);
+    ASSERT_TRUE(Generate(opts)) << err_ << output_.glsl;
+    EXPECT_EQ(output_.glsl, R"(#version 460
+
+void foo(highp )" + params.result +
+                                R"( a) {
+}
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+void main() {
+}
+)");
+}
+INSTANTIATE_TEST_SUITE_P(
+    GlslWriterTest,
+    GlslWriterMultisampledTextureNonESTest,
+    testing::Values(
+        GlslTextureData{core::type::TextureDimension::k2d, TextureDataType::kF32, "sampler2DMS"},
+        GlslTextureData{core::type::TextureDimension::k2dArray, TextureDataType::kF32,
+                        "sampler2DMSArray"},
+
+        GlslTextureData{core::type::TextureDimension::k2d, TextureDataType::kI32, "isampler2DMS"},
+        GlslTextureData{core::type::TextureDimension::k2dArray, TextureDataType::kI32,
+                        "isampler2DMSArray"},
+
+        GlslTextureData{core::type::TextureDimension::k2d, TextureDataType::kU32, "usampler2DMS"},
+        GlslTextureData{core::type::TextureDimension::k2dArray, TextureDataType::kU32,
+                        "usampler2DMSArray"}));
 
 struct GlslStorageTextureData {
     core::type::TextureDimension dim;

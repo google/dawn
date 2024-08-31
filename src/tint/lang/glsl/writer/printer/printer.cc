@@ -59,6 +59,7 @@
 #include "src/tint/lang/core/type/f32.h"
 #include "src/tint/lang/core/type/i32.h"
 #include "src/tint/lang/core/type/matrix.h"
+#include "src/tint/lang/core/type/multisampled_texture.h"
 #include "src/tint/lang/core/type/pointer.h"
 #include "src/tint/lang/core/type/sampled_texture.h"
 #include "src/tint/lang/core/type/storage_texture.h"
@@ -450,6 +451,7 @@ class Printer : public tint::TextGenerator {
 
         auto* storage = t->As<core::type::StorageTexture>();
         auto* sampled = t->As<core::type::SampledTexture>();
+        auto* ms = t->As<core::type::MultisampledTexture>();
 
         out << "highp ";
 
@@ -480,7 +482,10 @@ class Printer : public tint::TextGenerator {
                     TINT_UNREACHABLE();
             }
         }
-        auto* subtype = sampled ? sampled->Type() : storage ? storage->Type() : nullptr;
+        auto* subtype = sampled   ? sampled->Type()
+                        : storage ? storage->Type()
+                        : ms      ? ms->Type()
+                                  : nullptr;
 
         if (subtype) {
             tint::Switch(
@@ -499,9 +504,16 @@ class Printer : public tint::TextGenerator {
                 break;
             case core::type::TextureDimension::k2d:
                 out << "2D";
+                if (ms) {
+                    out << "MS";
+                }
                 break;
             case core::type::TextureDimension::k2dArray:
-                out << "2DArray";
+                out << "2D";
+                if (ms) {
+                    out << "MS";
+                }
+                out << "Array";
                 break;
             case core::type::TextureDimension::k3d:
                 out << "3D";
