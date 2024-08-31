@@ -492,7 +492,6 @@ class Printer : public tint::TextGenerator {
 
         switch (t->Dim()) {
             case core::type::TextureDimension::k1d:
-                TINT_ASSERT(!storage);
                 out << "1D";
                 break;
             case core::type::TextureDimension::k2d:
