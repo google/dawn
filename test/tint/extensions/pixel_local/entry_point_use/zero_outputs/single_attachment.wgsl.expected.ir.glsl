@@ -1,11 +1,13 @@
-SKIP: FAILED
+#version 310 es
 
-<dawn>/src/tint/lang/glsl/writer/printer/printer.cc:252 internal compiler error: Switch() matched no cases. Type: tint::core::ir::Store
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
+struct PixelLocal {
+  uint a;
+};
+precision highp float;
+precision highp int;
 
-tint executable returned error: signal: illegal instruction
+
+PixelLocal P;
+void main() {
+  P.a = (P.a + 42u);
+}

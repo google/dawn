@@ -114,7 +114,7 @@ class Printer : public tint::TextGenerator {
         EmitBlock(ir_.root_block);
 
         // Emit functions.
-        for (auto& func : ir_.functions) {
+        for (auto& func : ir_.DependencyOrderedFunctions()) {
             EmitFunction(func);
         }
 
@@ -305,6 +305,30 @@ class Printer : public tint::TextGenerator {
             }
         }
         Line() << "}";
+    }
+
+    /// Emit an access instruction
+    void EmitAccess(StringStream& out, const core::ir::Access* a) {
+        EmitValue(out, a->Object());
+
+        auto* current_type = a->Object()->Type()->UnwrapPtr();
+        for (auto* index : a->Indices()) {
+            TINT_ASSERT(current_type);
+            Switch(
+                current_type,  //
+                [&](const core::type::Struct* s) {
+                    auto* c = index->As<core::ir::Constant>();
+                    auto* member = s->Members()[c->Value()->ValueAs<uint32_t>()];
+                    out << "." << member->Name().Name();
+                    current_type = member->Type();
+                },
+                [&](Default) {
+                    out << "[";
+                    EmitValue(out, index);
+                    out << "]";
+                    current_type = current_type->Element(0);
+                });
+        }
     }
 
     void EmitLet(const core::ir::Let* l) {
@@ -621,7 +645,8 @@ class Printer : public tint::TextGenerator {
             [&](const core::ir::Constant* c) { EmitConstant(out, c); },
             [&](const core::ir::InstructionResult* r) {
                 tint::Switch(
-                    r->Instruction(),  //
+                    r->Instruction(),                                        //
+                    [&](const core::ir::Access* a) { EmitAccess(out, a); },  //
                     [&](const core::ir::CoreBinary* b) { EmitBinary(out, b); },
                     [&](const core::ir::CoreBuiltinCall* c) { EmitCoreBuiltinCall(out, c); },
                     [&](const core::ir::CoreUnary* u) { EmitUnary(out, u); },

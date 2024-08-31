@@ -1,11 +1,18 @@
-SKIP: FAILED
+#version 310 es
+precision highp float;
+precision highp int;
 
-<dawn>/src/tint/lang/glsl/writer/printer/printer.cc:252 internal compiler error: Switch() matched no cases. Type: tint::core::ir::Store
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
 
-tint executable returned error: signal: illegal instruction
+float s;
+void main() {
+  float signed_literal[4] = float[4](0.0f, 0.0f, 0.0f, 0.0f);
+  float unsigned_literal[4] = float[4](0.0f, 0.0f, 0.0f, 0.0f);
+  float signed_constant[4] = float[4](0.0f, 0.0f, 0.0f, 0.0f);
+  float unsigned_constant[4] = float[4](0.0f, 0.0f, 0.0f, 0.0f);
+  float shr_const_expr[4] = float[4](0.0f, 0.0f, 0.0f, 0.0f);
+  unsigned_literal = signed_literal;
+  signed_constant = signed_literal;
+  unsigned_constant = signed_literal;
+  shr_const_expr = signed_literal;
+  s = ((((signed_literal[0] + unsigned_literal[0]) + signed_constant[0]) + unsigned_constant[0]) + shr_const_expr[0]);
+}
