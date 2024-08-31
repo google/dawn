@@ -202,7 +202,6 @@ crbug.com/dawn/2407 [ graphite-disabled intel-0x9bc5 win ] webgpu:web_platform,c
 # non-zero-copy path and that's not implemented yet for compute shaders.
 crbug.com/41487285 [ amd webgpu-adapter-swiftshader ] webgpu:web_platform,external_texture,video:importExternalTexture,compute:* [ Failure ]
 crbug.com/41487285 [ apple-angle-metal-renderer:-apple-m2 mac webgpu-adapter-swiftshader ] webgpu:web_platform,external_texture,video:importExternalTexture,compute:* [ Failure ]
-crbug.com/41487285 [ dawn-no-backend-validation intel-0x9bc5 webgpu-adapter-default webgpu-dxc-disabled win10 ] webgpu:web_platform,external_texture,video:importExternalTexture,compute:* [ Failure ]
 crbug.com/41487285 [ dawn-no-backend-validation intel-0x9bc5 webgpu-adapter-default webgpu-dxc-enabled win10 ] webgpu:web_platform,external_texture,video:importExternalTexture,compute:* [ Failure ]
 crbug.com/41487285 [ intel-0x3e9b mac webgpu-adapter-swiftshader ] webgpu:web_platform,external_texture,video:importExternalTexture,compute:* [ Failure ]
 crbug.com/41487285 [ linux ] webgpu:web_platform,external_texture,video:importExternalTexture,compute:videoName="four-colors-vp9-bt601-hflip.mp4";* [ Failure ]
@@ -1615,7 +1614,6 @@ crbug.com/dawn/0000 [ android-14 ] webgpu:shader,execution,shader_io,fragment_bu
 crbug.com/dawn/0000 [ android-14 arm ] webgpu:shader,validation,expression,call,builtin,ldexp:partial_values:* [ Failure ]
 crbug.com/dawn/0000 [ android-14 arm dawn-backend-validation webgpu-adapter-default webgpu-no-worker ] webgpu:api,validation,render_pipeline,depth_stencil_state:depth_bias:* [ Failure ]
 crbug.com/dawn/0000 [ android-14 arm dawn-no-backend-validation webgpu-adapter-default webgpu-no-worker ] webgpu:api,validation,render_pipeline,depth_stencil_state:depth_bias:* [ Failure ]
-crbug.com/dawn/0000 [ android-14 ] webgpu:shader,validation,expression,call,builtin,subgroupBroadcast:id_type:type="i32" [ Failure ]
 crbug.com/dawn/0000 [ android-14 ] webgpu:shader,validation,uniformity,uniformity:fragment_builtin_values:builtin="subgroup_size";type="u32" [ Failure ]
 
 # Flakes on Dawn try Mac Intel
@@ -1652,10 +1650,7 @@ crbug.com/dawn/0000 [ android-r dawn-backend-validation qualcomm webgpu-adapter-
 crbug.com/dawn/0000 [ android-r dawn-backend-validation qualcomm webgpu-adapter-default webgpu-no-worker ] webgpu:api,operation,render_pipeline,overrides:shared_shader_module:isAsync=true [ RetryOnFailure ]
 crbug.com/dawn/0000 [ android-r dawn-no-backend-validation qualcomm webgpu-adapter-default webgpu-no-worker ] webgpu:api,operation,render_pipeline,overrides:multi_entry_points:isAsync=true [ RetryOnFailure ]
 crbug.com/dawn/0000 [ android-t dawn-backend-validation ] webgpu:shader,execution,memory_model,coherence:corr:memType="atomic_storage";testType="intra_workgroup" [ RetryOnFailure ]
-crbug.com/dawn/0000 [ dawn-backend-validation intel-0x3e9b mac webgpu-adapter-default webgpu-no-worker ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="CopyToTexture";format="depth32float-stencil8" [ RetryOnFailure ]
 crbug.com/dawn/0000 [ dawn-backend-validation intel-0x4680 webgpu-adapter-default webgpu-no-worker win10 ] webgpu:web_platform,copyToTexture,ImageBitmap:from_ImageData:alpha="premultiply";orientation="none";colorSpaceConversion="default";srcFlipYInCopy=false;dstFormat="rg32float";dstPremultiplied=false [ RetryOnFailure ]
-crbug.com/dawn/0000 [ dawn-backend-validation intel-0x9bc5 target-cpu-64 ubuntu ] webgpu:shader,execution,robust_access:linear_memory:addressSpace="storage";storageMode="read_write";access="write";dynamicOffset=true;containerType="array";shadowingMode="none";isAtomic=false;baseType="u32" [ RetryOnFailure ]
-crbug.com/dawn/0000 [ dawn-backend-validation intel-0x9bc5 webgpu-adapter-default webgpu-no-worker win10 ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="CopyToBuffer";format="rgba32sint" [ RetryOnFailure ]
 crbug.com/dawn/0000 [ dawn-no-backend-validation nvidia-0x2184 webgpu-adapter-default webgpu-dedicated-worker win10 ] webgpu:web_platform,copyToTexture,canvas:copy_contents_from_gpu_context_canvas:canvasType="offscreen";srcAndDstInSameGPUDevice=false;dstColorFormat="bgra8unorm";srcAlphaMode="premultiplied";dstAlphaMode="premultiplied";srcDoFlipYDuringCopy=true [ RetryOnFailure ]
 
 ################################################################################
