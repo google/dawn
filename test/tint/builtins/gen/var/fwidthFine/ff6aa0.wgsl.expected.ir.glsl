@@ -1,11 +1,14 @@
-SKIP: FAILED
+#version 310 es
+precision highp float;
+precision highp int;
 
-<dawn>/src/tint/lang/glsl/writer/printer/printer.cc:482 internal compiler error: Switch() matched no cases. Type: tint::core::ir::CoreBuiltinCall
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
 
-tint executable returned error: signal: illegal instruction
+vec2 prevent_dce;
+vec2 fwidthFine_ff6aa0() {
+  vec2 arg_0 = vec2(1.0f);
+  vec2 res = fwidth(arg_0);
+  return res;
+}
+void main() {
+  prevent_dce = fwidthFine_ff6aa0();
+}

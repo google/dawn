@@ -46,6 +46,7 @@
 #include "src/tint/lang/core/ir/module.h"
 #include "src/tint/lang/core/ir/next_iteration.h"
 #include "src/tint/lang/core/ir/return.h"
+#include "src/tint/lang/core/ir/store.h"
 #include "src/tint/lang/core/ir/swizzle.h"
 #include "src/tint/lang/core/ir/unreachable.h"
 #include "src/tint/lang/core/ir/user_call.h"
@@ -250,6 +251,7 @@ class Printer : public tint::TextGenerator {
                 [&](const core::ir::Call* i) { EmitCallStmt(i); },         //
                 [&](const core::ir::Let* i) { EmitLet(i); },               //
                 [&](const core::ir::Return* r) { EmitReturn(r); },         //
+                [&](const core::ir::Store* s) { EmitStore(s); },           //
                 [&](const core::ir::Unreachable*) { EmitUnreachable(); },  //
                 [&](const core::ir::Var* v) { EmitVar(Line(), v); },       //
 
@@ -587,6 +589,8 @@ class Printer : public tint::TextGenerator {
                     [&](const core::ir::CoreBuiltinCall* c) { EmitCoreBuiltinCall(out, c); },
                     [&](const core::ir::CoreUnary* u) { EmitUnary(out, u); },
                     [&](const core::ir::Let* l) { out << NameOf(l->Result(0)); },
+                    [&](const core::ir::Load* l) { EmitLoad(out, l); },
+                    [&](const core::ir::Store* s) { EmitStore(s); },
                     [&](const core::ir::UserCall* c) { EmitUserCall(out, c); },
                     [&](const core::ir::Var* var) { out << NameOf(var->Result(0)); },
 
@@ -595,6 +599,21 @@ class Printer : public tint::TextGenerator {
             [&](const core::ir::FunctionParam* p) { out << NameOf(p); },  //
 
             TINT_ICE_ON_NO_MATCH);
+    }
+
+    /// Emit Load
+    /// @param out the output stream to write to
+    /// @param load the load
+    void EmitLoad(StringStream& out, const core::ir::Load* load) { EmitValue(out, load->From()); }
+
+    /// Emit a store
+    void EmitStore(const core::ir::Store* s) {
+        auto out = Line();
+
+        EmitValue(out, s->To());
+        out << " = ";
+        EmitValue(out, s->From());
+        out << ";";
     }
 
     void EmitUnary(StringStream& out, const core::ir::CoreUnary* u) {
