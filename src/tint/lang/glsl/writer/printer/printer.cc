@@ -59,6 +59,7 @@
 #include "src/tint/lang/core/type/i32.h"
 #include "src/tint/lang/core/type/matrix.h"
 #include "src/tint/lang/core/type/pointer.h"
+#include "src/tint/lang/core/type/sampled_texture.h"
 #include "src/tint/lang/core/type/storage_texture.h"
 #include "src/tint/lang/core/type/u32.h"
 #include "src/tint/lang/core/type/vector.h"
@@ -447,6 +448,7 @@ class Printer : public tint::TextGenerator {
         TINT_ASSERT(!t->Is<core::type::ExternalTexture>());
 
         auto* storage = t->As<core::type::StorageTexture>();
+        auto* sampled = t->As<core::type::SampledTexture>();
 
         out << "highp ";
 
@@ -477,7 +479,7 @@ class Printer : public tint::TextGenerator {
                     TINT_UNREACHABLE();
             }
         }
-        auto* subtype = storage ? storage->Type() : nullptr;
+        auto* subtype = sampled ? sampled->Type() : storage ? storage->Type() : nullptr;
 
         tint::Switch(
             subtype,                         //
@@ -486,7 +488,7 @@ class Printer : public tint::TextGenerator {
             [&](const core::type::U32*) { out << "u"; },  //
             TINT_ICE_ON_NO_MATCH);
 
-        out << "image";
+        out << (storage ? "image" : "sampler");
 
         switch (t->Dim()) {
             case core::type::TextureDimension::k1d:

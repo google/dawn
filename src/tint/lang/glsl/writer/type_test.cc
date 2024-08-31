@@ -562,9 +562,8 @@ inline std::ostream& operator<<(std::ostream& out, GlslTextureData data) {
     out << str.str();
     return out;
 }
-using GlslWriterSampledTexturesTest = GlslWriterTestWithParam<GlslTextureData>;
-// TODO(dsinclair): Add sampled texture support
-TEST_P(GlslWriterSampledTexturesTest, DISABLED_Emit) {
+using GlslWriterSampledTextureESTest = GlslWriterTestWithParam<GlslTextureData>;
+TEST_P(GlslWriterSampledTextureESTest, Emit) {
     auto params = GetParam();
 
     const core::type::Type* subtype = nullptr;
@@ -573,7 +572,7 @@ TEST_P(GlslWriterSampledTexturesTest, DISABLED_Emit) {
             subtype = ty.f32();
             break;
         case TextureDataType::kI32:
-            subtype = ty.u32();
+            subtype = ty.i32();
             break;
         case TextureDataType::kU32:
             subtype = ty.u32();
@@ -581,23 +580,83 @@ TEST_P(GlslWriterSampledTexturesTest, DISABLED_Emit) {
     }
 
     auto* t = ty.Get<core::type::SampledTexture>(params.dim, subtype);
-    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kCompute);
+    auto* func = b.Function("foo", ty.void_());
     auto* param = b.FunctionParam("a", t);
     func->SetParams({param});
-    func->SetWorkgroupSize(1, 1, 1);
     b.Append(func->Block(), [&] { b.Return(func); });
 
     ASSERT_TRUE(Generate()) << err_ << output_.glsl;
-    EXPECT_EQ(output_.glsl, R"(
-layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
-void main()" + params.result +
+    EXPECT_EQ(output_.glsl, GlslHeader() + R"(
+void foo(highp )" + params.result +
                                 R"( a) {
+}
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+void main() {
 }
 )");
 }
 INSTANTIATE_TEST_SUITE_P(
     GlslWriterTest,
-    GlslWriterSampledTexturesTest,
+    GlslWriterSampledTextureESTest,
+    testing::Values(
+        GlslTextureData{core::type::TextureDimension::k2d, TextureDataType::kF32, "sampler2D"},
+        GlslTextureData{core::type::TextureDimension::k2dArray, TextureDataType::kF32,
+                        "sampler2DArray"},
+        GlslTextureData{core::type::TextureDimension::k3d, TextureDataType::kF32, "sampler3D"},
+        GlslTextureData{core::type::TextureDimension::kCube, TextureDataType::kF32, "samplerCube"},
+
+        GlslTextureData{core::type::TextureDimension::k2d, TextureDataType::kI32, "isampler2D"},
+        GlslTextureData{core::type::TextureDimension::k2dArray, TextureDataType::kI32,
+                        "isampler2DArray"},
+        GlslTextureData{core::type::TextureDimension::k3d, TextureDataType::kI32, "isampler3D"},
+        GlslTextureData{core::type::TextureDimension::kCube, TextureDataType::kI32, "isamplerCube"},
+
+        GlslTextureData{core::type::TextureDimension::k2d, TextureDataType::kU32, "usampler2D"},
+        GlslTextureData{core::type::TextureDimension::k2dArray, TextureDataType::kU32,
+                        "usampler2DArray"},
+        GlslTextureData{core::type::TextureDimension::k3d, TextureDataType::kU32, "usampler3D"},
+        GlslTextureData{core::type::TextureDimension::kCube, TextureDataType::kU32,
+                        "usamplerCube"}));
+
+using GlslWriterSampledTextureNonESTest = GlslWriterTestWithParam<GlslTextureData>;
+TEST_P(GlslWriterSampledTextureNonESTest, Emit) {
+    auto params = GetParam();
+
+    const core::type::Type* subtype = nullptr;
+    switch (params.datatype) {
+        case TextureDataType::kF32:
+            subtype = ty.f32();
+            break;
+        case TextureDataType::kI32:
+            subtype = ty.i32();
+            break;
+        case TextureDataType::kU32:
+            subtype = ty.u32();
+            break;
+    }
+
+    auto* t = ty.Get<core::type::SampledTexture>(params.dim, subtype);
+    auto* func = b.Function("foo", ty.void_());
+    auto* param = b.FunctionParam("a", t);
+    func->SetParams({param});
+    b.Append(func->Block(), [&] { b.Return(func); });
+
+    Options opts{};
+    opts.version = Version(Version::Standard::kDesktop, 4, 6);
+    ASSERT_TRUE(Generate(opts)) << err_ << output_.glsl;
+    EXPECT_EQ(output_.glsl, R"(#version 460
+
+void foo(highp )" + params.result +
+                                R"( a) {
+}
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+void main() {
+}
+)");
+}
+INSTANTIATE_TEST_SUITE_P(
+    GlslWriterTest,
+    GlslWriterSampledTextureNonESTest,
     testing::Values(
         GlslTextureData{core::type::TextureDimension::k1d, TextureDataType::kF32, "sampler1D"},
         GlslTextureData{core::type::TextureDimension::k2d, TextureDataType::kF32, "sampler2D"},
@@ -613,7 +672,7 @@ INSTANTIATE_TEST_SUITE_P(
         GlslTextureData{core::type::TextureDimension::k2dArray, TextureDataType::kI32,
                         "isampler2DArray"},
         GlslTextureData{core::type::TextureDimension::k3d, TextureDataType::kI32, "isampler3D"},
-        GlslTextureData{core::type::TextureDimension::kCube, TextureDataType::kI32, "samplerCube"},
+        GlslTextureData{core::type::TextureDimension::kCube, TextureDataType::kI32, "isamplerCube"},
         GlslTextureData{core::type::TextureDimension::kCubeArray, TextureDataType::kI32,
                         "isamplerCubeArray"},
 
