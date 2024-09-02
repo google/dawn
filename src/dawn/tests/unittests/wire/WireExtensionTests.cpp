@@ -45,118 +45,99 @@ class WireExtensionTests : public WireTest {
 // Serialize/Deserializes a chained struct correctly.
 TEST_F(WireExtensionTests, ChainedStruct) {
     wgpu::ShaderModuleDescriptor shaderModuleDesc = {};
+    wgpu::ShaderModuleWGSLDescriptor clientExt = {};
+    shaderModuleDesc.nextInChain = &clientExt;
+    clientExt.code = "/* comment */";
+
     WGPUShaderModule apiShaderModule = api.GetNewShaderModule();
     wgpu::ShaderModule shaderModule = device.CreateShaderModule(&shaderModuleDesc);
-    EXPECT_CALL(api, DeviceCreateShaderModule(apiDevice, _)).WillOnce(Return(apiShaderModule));
-    FlushClient();
+    EXPECT_CALL(api, DeviceCreateShaderModule(apiDevice, _))
+        .WillOnce(Invoke([&](Unused,
+                             const WGPUShaderModuleDescriptor* serverDesc) -> WGPUShaderModule {
+            const auto* ext =
+                reinterpret_cast<const WGPUShaderModuleWGSLDescriptor*>(serverDesc->nextInChain);
+            EXPECT_EQ(ext->chain.sType, WGPUSType_ShaderModuleWGSLDescriptor);
+            EXPECT_STREQ(ext->code, clientExt.code);
+            EXPECT_EQ(ext->chain.next, nullptr);
 
-    wgpu::PrimitiveDepthClipControl clientExt;
-    clientExt.unclippedDepth = true;
-
-    wgpu::RenderPipelineDescriptor renderPipelineDesc;
-    renderPipelineDesc.vertex.module = shaderModule;
-    renderPipelineDesc.primitive.nextInChain = &clientExt;
-
-    wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&renderPipelineDesc);
-    EXPECT_CALL(api, DeviceCreateRenderPipeline(apiDevice, NotNull()))
-        .WillOnce(Invoke(
-            [&](Unused, const WGPURenderPipelineDescriptor* serverDesc) -> WGPURenderPipeline {
-                const auto* ext = reinterpret_cast<const WGPUPrimitiveDepthClipControl*>(
-                    serverDesc->primitive.nextInChain);
-                EXPECT_EQ(ext->chain.sType, WGPUSType_PrimitiveDepthClipControl);
-                EXPECT_EQ(ext->unclippedDepth, true);
-                EXPECT_EQ(ext->chain.next, nullptr);
-
-                return api.GetNewRenderPipeline();
-            }));
+            return apiShaderModule;
+        }));
     FlushClient();
 }
 
 // Serialize/Deserializes multiple chained structs correctly.
-TEST_F(WireExtensionTests, MutlipleChainedStructs) {
+TEST_F(WireExtensionTests, MultipleChainedStructs) {
     wgpu::ShaderModuleDescriptor shaderModuleDesc = {};
-    WGPUShaderModule apiShaderModule = api.GetNewShaderModule();
-    wgpu::ShaderModule shaderModule = device.CreateShaderModule(&shaderModuleDesc);
-    EXPECT_CALL(api, DeviceCreateShaderModule(apiDevice, _)).WillOnce(Return(apiShaderModule));
-    FlushClient();
 
-    wgpu::PrimitiveDepthClipControl clientExt2;
-    clientExt2.unclippedDepth = false;
+    wgpu::ShaderModuleWGSLDescriptor clientExt2 = {};
+    clientExt2.code = "/* comment 2 */";
 
-    wgpu::PrimitiveDepthClipControl clientExt1;
+    wgpu::ShaderModuleWGSLDescriptor clientExt1 = {};
+    clientExt1.code = "/* comment 1 */";
     clientExt1.nextInChain = &clientExt2;
-    clientExt1.unclippedDepth = true;
+    shaderModuleDesc.nextInChain = &clientExt1;
 
-    wgpu::RenderPipelineDescriptor renderPipelineDesc;
-    renderPipelineDesc.vertex.module = shaderModule;
-    renderPipelineDesc.primitive.nextInChain = &clientExt1;
+    WGPUShaderModule apiShaderModule = api.GetNewShaderModule();
+    wgpu::ShaderModule shaderModule1 = device.CreateShaderModule(&shaderModuleDesc);
+    EXPECT_CALL(api, DeviceCreateShaderModule(apiDevice, _))
+        .WillOnce(Invoke([&](Unused,
+                             const WGPUShaderModuleDescriptor* serverDesc) -> WGPUShaderModule {
+            const auto* ext1 =
+                reinterpret_cast<const WGPUShaderModuleWGSLDescriptor*>(serverDesc->nextInChain);
+            EXPECT_EQ(ext1->chain.sType, WGPUSType_ShaderModuleWGSLDescriptor);
+            EXPECT_STREQ(ext1->code, clientExt1.code);
 
-    wgpu::RenderPipeline pipeline1 = device.CreateRenderPipeline(&renderPipelineDesc);
-    EXPECT_CALL(api, DeviceCreateRenderPipeline(apiDevice, NotNull()))
-        .WillOnce(Invoke(
-            [&](Unused, const WGPURenderPipelineDescriptor* serverDesc) -> WGPURenderPipeline {
-                const auto* ext1 = reinterpret_cast<const WGPUPrimitiveDepthClipControl*>(
-                    serverDesc->primitive.nextInChain);
-                EXPECT_EQ(ext1->chain.sType, WGPUSType_PrimitiveDepthClipControl);
-                EXPECT_EQ(ext1->unclippedDepth, true);
+            const auto* ext2 =
+                reinterpret_cast<const WGPUShaderModuleWGSLDescriptor*>(ext1->chain.next);
+            EXPECT_EQ(ext2->chain.sType, WGPUSType_ShaderModuleWGSLDescriptor);
+            EXPECT_STREQ(ext2->code, clientExt2.code);
+            EXPECT_EQ(ext2->chain.next, nullptr);
 
-                const auto* ext2 =
-                    reinterpret_cast<const WGPUPrimitiveDepthClipControl*>(ext1->chain.next);
-                EXPECT_EQ(ext2->chain.sType, WGPUSType_PrimitiveDepthClipControl);
-                EXPECT_EQ(ext2->unclippedDepth, false);
-                EXPECT_EQ(ext2->chain.next, nullptr);
-
-                return api.GetNewRenderPipeline();
-            }));
+            return apiShaderModule;
+        }));
     FlushClient();
 
     // Swap the order of the chained structs.
-    renderPipelineDesc.primitive.nextInChain = &clientExt2;
+    shaderModuleDesc.nextInChain = &clientExt2;
     clientExt2.nextInChain = &clientExt1;
     clientExt1.nextInChain = nullptr;
 
-    wgpu::RenderPipeline pipeline2 = device.CreateRenderPipeline(&renderPipelineDesc);
-    EXPECT_CALL(api, DeviceCreateRenderPipeline(apiDevice, NotNull()))
-        .WillOnce(Invoke(
-            [&](Unused, const WGPURenderPipelineDescriptor* serverDesc) -> WGPURenderPipeline {
-                const auto* ext2 = reinterpret_cast<const WGPUPrimitiveDepthClipControl*>(
-                    serverDesc->primitive.nextInChain);
-                EXPECT_EQ(ext2->chain.sType, WGPUSType_PrimitiveDepthClipControl);
-                EXPECT_EQ(ext2->unclippedDepth, false);
+    wgpu::ShaderModule shaderModule2 = device.CreateShaderModule(&shaderModuleDesc);
+    EXPECT_CALL(api, DeviceCreateShaderModule(apiDevice, _))
+        .WillOnce(Invoke([&](Unused,
+                             const WGPUShaderModuleDescriptor* serverDesc) -> WGPUShaderModule {
+            const auto* ext2 =
+                reinterpret_cast<const WGPUShaderModuleWGSLDescriptor*>(serverDesc->nextInChain);
+            EXPECT_EQ(ext2->chain.sType, WGPUSType_ShaderModuleWGSLDescriptor);
+            EXPECT_STREQ(ext2->code, clientExt2.code);
 
-                const auto* ext1 =
-                    reinterpret_cast<const WGPUPrimitiveDepthClipControl*>(ext2->chain.next);
-                EXPECT_EQ(ext1->chain.sType, WGPUSType_PrimitiveDepthClipControl);
-                EXPECT_EQ(ext1->unclippedDepth, true);
-                EXPECT_EQ(ext1->chain.next, nullptr);
+            const auto* ext1 =
+                reinterpret_cast<const WGPUShaderModuleWGSLDescriptor*>(ext2->chain.next);
+            EXPECT_EQ(ext1->chain.sType, WGPUSType_ShaderModuleWGSLDescriptor);
+            EXPECT_STREQ(ext1->code, clientExt1.code);
+            EXPECT_EQ(ext1->chain.next, nullptr);
 
-                return api.GetNewRenderPipeline();
-            }));
+            return apiShaderModule;
+        }));
     FlushClient();
 }
 
 // Test that a chained struct with Invalid sType passes through as Invalid.
 TEST_F(WireExtensionTests, InvalidSType) {
     wgpu::ShaderModuleDescriptor shaderModuleDesc = {};
-    WGPUShaderModule apiShaderModule = api.GetNewShaderModule();
-    wgpu::ShaderModule shaderModule = device.CreateShaderModule(&shaderModuleDesc);
-    EXPECT_CALL(api, DeviceCreateShaderModule(apiDevice, _)).WillOnce(Return(apiShaderModule));
-    FlushClient();
-
-    wgpu::PrimitiveDepthClipControl clientExt = {};
+    wgpu::ShaderModuleWGSLDescriptor clientExt = {};
+    shaderModuleDesc.nextInChain = &clientExt;
     clientExt.sType = wgpu::SType(0);
 
-    wgpu::RenderPipelineDescriptor renderPipelineDesc;
-    renderPipelineDesc.vertex.module = shaderModule;
-    renderPipelineDesc.primitive.nextInChain = &clientExt;
+    WGPUShaderModule apiShaderModule = api.GetNewShaderModule();
+    wgpu::ShaderModule shaderModule = device.CreateShaderModule(&shaderModuleDesc);
+    EXPECT_CALL(api, DeviceCreateShaderModule(apiDevice, _))
+        .WillOnce(
+            Invoke([&](Unused, const WGPUShaderModuleDescriptor* serverDesc) -> WGPUShaderModule {
+                EXPECT_EQ(serverDesc->nextInChain->sType, WGPUSType(0));
+                EXPECT_EQ(serverDesc->nextInChain->next, nullptr);
 
-    wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&renderPipelineDesc);
-    EXPECT_CALL(api, DeviceCreateRenderPipeline(apiDevice, NotNull()))
-        .WillOnce(Invoke(
-            [&](Unused, const WGPURenderPipelineDescriptor* serverDesc) -> WGPURenderPipeline {
-                EXPECT_EQ(serverDesc->primitive.nextInChain->sType, WGPUSType(0));
-                EXPECT_EQ(serverDesc->primitive.nextInChain->next, nullptr);
-                return api.GetNewRenderPipeline();
+                return apiShaderModule;
             }));
     FlushClient();
 }
@@ -164,25 +145,19 @@ TEST_F(WireExtensionTests, InvalidSType) {
 // Test that a chained struct with unknown sType passes through as Invalid.
 TEST_F(WireExtensionTests, UnknownSType) {
     wgpu::ShaderModuleDescriptor shaderModuleDesc = {};
-    WGPUShaderModule apiShaderModule = api.GetNewShaderModule();
-    wgpu::ShaderModule shaderModule = device.CreateShaderModule(&shaderModuleDesc);
-    EXPECT_CALL(api, DeviceCreateShaderModule(apiDevice, _)).WillOnce(Return(apiShaderModule));
-    FlushClient();
-
-    wgpu::PrimitiveDepthClipControl clientExt = {};
+    wgpu::ShaderModuleWGSLDescriptor clientExt = {};
+    shaderModuleDesc.nextInChain = &clientExt;
     clientExt.sType = static_cast<wgpu::SType>(-1);
 
-    wgpu::RenderPipelineDescriptor renderPipelineDesc;
-    renderPipelineDesc.vertex.module = shaderModule;
-    renderPipelineDesc.primitive.nextInChain = &clientExt;
+    WGPUShaderModule apiShaderModule = api.GetNewShaderModule();
+    wgpu::ShaderModule shaderModule = device.CreateShaderModule(&shaderModuleDesc);
+    EXPECT_CALL(api, DeviceCreateShaderModule(apiDevice, _))
+        .WillOnce(
+            Invoke([&](Unused, const WGPUShaderModuleDescriptor* serverDesc) -> WGPUShaderModule {
+                EXPECT_EQ(serverDesc->nextInChain->sType, WGPUSType(0));
+                EXPECT_EQ(serverDesc->nextInChain->next, nullptr);
 
-    wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&renderPipelineDesc);
-    EXPECT_CALL(api, DeviceCreateRenderPipeline(apiDevice, NotNull()))
-        .WillOnce(Invoke(
-            [&](Unused, const WGPURenderPipelineDescriptor* serverDesc) -> WGPURenderPipeline {
-                EXPECT_EQ(serverDesc->primitive.nextInChain->sType, WGPUSType(0));
-                EXPECT_EQ(serverDesc->primitive.nextInChain->next, nullptr);
-                return api.GetNewRenderPipeline();
+                return apiShaderModule;
             }));
     FlushClient();
 }
@@ -191,57 +166,52 @@ TEST_F(WireExtensionTests, UnknownSType) {
 // sType passes through as Invalid.
 TEST_F(WireExtensionTests, ValidAndInvalidSTypeInChain) {
     WGPUShaderModuleDescriptor shaderModuleDesc = {};
-    WGPUShaderModule apiShaderModule = api.GetNewShaderModule();
-    WGPUShaderModule shaderModule = wgpuDeviceCreateShaderModule(cDevice, &shaderModuleDesc);
-    EXPECT_CALL(api, DeviceCreateShaderModule(apiDevice, _)).WillOnce(Return(apiShaderModule));
-    FlushClient();
 
-    WGPUPrimitiveDepthClipControl clientExt2 = {};
+    WGPUShaderModuleWGSLDescriptor clientExt2 = {};
     clientExt2.chain.sType = WGPUSType(0);
     clientExt2.chain.next = nullptr;
 
-    WGPUPrimitiveDepthClipControl clientExt1 = {};
-    clientExt1.chain.sType = WGPUSType_PrimitiveDepthClipControl;
+    WGPUShaderModuleWGSLDescriptor clientExt1 = {};
+    clientExt1.chain.sType = WGPUSType_ShaderModuleWGSLDescriptor;
     clientExt1.chain.next = &clientExt2.chain;
-    clientExt1.unclippedDepth = true;
+    clientExt1.code = "/* comment 1 */";
+    shaderModuleDesc.nextInChain = &clientExt1.chain;
 
-    WGPURenderPipelineDescriptor renderPipelineDesc = {};
-    renderPipelineDesc.vertex.module = shaderModule;
-    renderPipelineDesc.primitive.nextInChain = &clientExt1.chain;
+    WGPUShaderModule apiShaderModule = api.GetNewShaderModule();
+    wgpu::ShaderModule shaderModule1 = wgpuDeviceCreateShaderModule(cDevice, &shaderModuleDesc);
+    EXPECT_CALL(api, DeviceCreateShaderModule(apiDevice, _))
+        .WillOnce(Invoke([&](Unused,
+                             const WGPUShaderModuleDescriptor* serverDesc) -> WGPUShaderModule {
+            const auto* ext =
+                reinterpret_cast<const WGPUShaderModuleWGSLDescriptor*>(serverDesc->nextInChain);
+            EXPECT_EQ(ext->chain.sType, clientExt1.chain.sType);
+            EXPECT_STREQ(ext->code, clientExt1.code);
 
-    wgpuDeviceCreateRenderPipeline(cDevice, &renderPipelineDesc);
-    EXPECT_CALL(api, DeviceCreateRenderPipeline(apiDevice, NotNull()))
-        .WillOnce(Invoke(
-            [&](Unused, const WGPURenderPipelineDescriptor* serverDesc) -> WGPURenderPipeline {
-                const auto* ext = reinterpret_cast<const WGPUPrimitiveDepthClipControl*>(
-                    serverDesc->primitive.nextInChain);
-                EXPECT_EQ(ext->chain.sType, clientExt1.chain.sType);
-                EXPECT_EQ(ext->unclippedDepth, true);
+            EXPECT_EQ(ext->chain.next->sType, WGPUSType(0));
+            EXPECT_EQ(ext->chain.next->next, nullptr);
 
-                EXPECT_EQ(ext->chain.next->sType, WGPUSType(0));
-                EXPECT_EQ(ext->chain.next->next, nullptr);
-                return api.GetNewRenderPipeline();
-            }));
+            return apiShaderModule;
+        }));
     FlushClient();
 
     // Swap the order of the chained structs.
-    renderPipelineDesc.primitive.nextInChain = &clientExt2.chain;
+    shaderModuleDesc.nextInChain = &clientExt2.chain;
     clientExt2.chain.next = &clientExt1.chain;
     clientExt1.chain.next = nullptr;
 
-    wgpuDeviceCreateRenderPipeline(cDevice, &renderPipelineDesc);
-    EXPECT_CALL(api, DeviceCreateRenderPipeline(apiDevice, NotNull()))
-        .WillOnce(Invoke(
-            [&](Unused, const WGPURenderPipelineDescriptor* serverDesc) -> WGPURenderPipeline {
-                EXPECT_EQ(serverDesc->primitive.nextInChain->sType, WGPUSType(0));
+    wgpu::ShaderModule shaderModule2 = wgpuDeviceCreateShaderModule(cDevice, &shaderModuleDesc);
+    EXPECT_CALL(api, DeviceCreateShaderModule(apiDevice, _))
+        .WillOnce(
+            Invoke([&](Unused, const WGPUShaderModuleDescriptor* serverDesc) -> WGPUShaderModule {
+                EXPECT_EQ(serverDesc->nextInChain->sType, WGPUSType(0));
 
-                const auto* ext = reinterpret_cast<const WGPUPrimitiveDepthClipControl*>(
-                    serverDesc->primitive.nextInChain->next);
+                const auto* ext = reinterpret_cast<const WGPUShaderModuleWGSLDescriptor*>(
+                    serverDesc->nextInChain->next);
                 EXPECT_EQ(ext->chain.sType, clientExt1.chain.sType);
-                EXPECT_EQ(ext->unclippedDepth, true);
+                EXPECT_STREQ(ext->code, clientExt1.code);
                 EXPECT_EQ(ext->chain.next, nullptr);
 
-                return api.GetNewRenderPipeline();
+                return apiShaderModule;
             }));
     FlushClient();
 }

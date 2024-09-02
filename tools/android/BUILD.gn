@@ -135,7 +135,6 @@ dawn_json_generator("kotlin_gen") {
     "java/android/dawn/PopErrorScopeStatus.kt",
     "java/android/dawn/PowerPreference.kt",
     "java/android/dawn/PresentMode.kt",
-    "java/android/dawn/PrimitiveDepthClipControl.kt",
     "java/android/dawn/PrimitiveState.kt",
     "java/android/dawn/PrimitiveTopology.kt",
     "java/android/dawn/Proc.kt",

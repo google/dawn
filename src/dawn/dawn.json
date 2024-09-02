@@ -3805,15 +3805,6 @@
         ]
     },
 
-    "primitive depth clip control": {
-        "category": "structure",
-        "chained": "in",
-        "chain roots": ["primitive state"],
-        "members": [
-            {"name": "unclipped depth", "type": "bool", "default": "false"}
-        ]
-    },
-
     "depth stencil state": {
         "category": "structure",
         "extensible": "in",
@@ -4247,9 +4238,8 @@
         "values": [
             {"value": 1, "name": "shader module SPIRV descriptor"},
             {"value": 2, "name": "shader module WGSL descriptor"},
-            {"value": 3, "name": "primitive depth clip control"},
-            {"value": 4, "name": "render pass descriptor max draw count"},
-            {"value": 5, "name": "render pass descriptor expand resolve rect"},
+            {"value": 3, "name": "render pass descriptor max draw count"},
+            {"value": 4, "name": "render pass descriptor expand resolve rect"},
 
             {"value": 0, "name": "texture binding view dimension descriptor", "tags": ["compat"]},
 
