@@ -1613,6 +1613,13 @@ crbug.com/dawn/0000 [ android-14 ] webgpu:shader,validation,uniformity,uniformit
 crbug.com/dawn/0000 [ android-14 arm ] webgpu:shader,validation,expression,call,builtin,ldexp:partial_values:* [ Failure ]
 crbug.com/dawn/0000 [ android-14 arm dawn-backend-validation webgpu-adapter-default webgpu-no-worker ] webgpu:api,validation,render_pipeline,depth_stencil_state:depth_bias:* [ Failure ]
 crbug.com/dawn/0000 [ android-14 arm dawn-no-backend-validation webgpu-adapter-default webgpu-no-worker ] webgpu:api,validation,render_pipeline,depth_stencil_state:depth_bias:* [ Failure ]
+crbug.com/dawn/0000 [ android-14 arm ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:depth_2d_coords:format="depth16unorm" [ Failure ]
+crbug.com/dawn/0000 [ android-14 arm ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:depth_2d_coords:format="depth32float" [ Failure ]
+crbug.com/dawn/0000 [ android-14 arm ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:depth_array_2d_coords:format="depth16unorm" [ Failure ]
+crbug.com/dawn/0000 [ android-14 arm ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:depth_array_2d_coords:format="depth32float" [ Failure ]
+crbug.com/dawn/0000 [ android-14 arm ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:sampled_2d_coords:* [ Failure ]
+crbug.com/dawn/0000 [ android-14 arm ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:sampled_3d_coords:* [ Failure ]
+crbug.com/dawn/0000 [ android-14 arm ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:sampled_array_2d_coords:* [ Failure ]
 
 # Flakes on Dawn try Mac Intel
 crbug.com/dawn/0000 [ intel-0x3e9b mac webgpu-adapter-default ] webgpu:api,operation,render_pipeline,sample_mask:fragment_output_mask:* [ Failure ]
