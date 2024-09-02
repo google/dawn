@@ -1,4 +1,4 @@
-SKIP: FAILED
+SKIP: INVALID
 
 ../../src/tint/lang/wgsl/helpers/flatten_bindings.cc:78 internal compiler error: TINT_UNREACHABLE 
 ********************************************************************

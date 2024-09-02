@@ -1,4 +1,4 @@
-SKIP: FAILED
+SKIP: INVALID
 
 ../../src/tint/lang/msl/writer/raise/module_scope_vars.cc:239 internal compiler error: TINT_UNREACHABLE unhandled address space: push_constant
 ********************************************************************
