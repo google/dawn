@@ -2926,8 +2926,8 @@
         "category": "enum",
         "values": [
             {"value": 0, "name": "undefined", "jsrepr": "undefined"},
-            {"value": 1, "name": "clear"},
-            {"value": 2, "name": "load"},
+            {"value": 1, "name": "load"},
+            {"value": 2, "name": "clear"},
             {"value": 3, "name": "expand resolve texture", "tags": ["dawn"]}
         ]
     },
