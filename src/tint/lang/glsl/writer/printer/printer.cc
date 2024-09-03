@@ -799,8 +799,9 @@ class Printer : public tint::TextGenerator {
             [&](const core::ir::Constant* c) { EmitConstant(out, c); },
             [&](const core::ir::InstructionResult* r) {
                 tint::Switch(
-                    r->Instruction(),                                        //
-                    [&](const core::ir::Access* a) { EmitAccess(out, a); },  //
+                    r->Instruction(),  //
+                    [&](const core::ir::Access* a) { EmitAccess(out, a); },
+                    [&](const core::ir::Construct* c) { EmitConstruct(out, c); },
                     [&](const core::ir::CoreBinary* b) { EmitBinary(out, b); },
                     [&](const core::ir::CoreBuiltinCall* c) { EmitCoreBuiltinCall(out, c); },
                     [&](const core::ir::CoreUnary* u) { EmitUnary(out, u); },
@@ -817,6 +818,40 @@ class Printer : public tint::TextGenerator {
             [&](const core::ir::FunctionParam* p) { out << NameOf(p); },  //
 
             TINT_ICE_ON_NO_MATCH);
+    }
+
+    /// Emit a constructor
+    void EmitConstruct(StringStream& out, const core::ir::Construct* c) {
+        if (c->Args().IsEmpty()) {
+            EmitZeroValue(out, c->Result(0)->Type());
+            return;
+        }
+
+        auto emit_args = [&]() {
+            out << "(";
+
+            size_t i = 0;
+            for (auto* arg : c->Args()) {
+                if (i > 0) {
+                    out << ", ";
+                }
+                EmitValue(out, arg);
+                i++;
+            }
+            out << ")";
+        };
+
+        Switch(
+            c->Result(0)->Type(),
+            [&](const core::type::Struct* struct_ty) {
+                EmitStructType(struct_ty);
+                out << StructName(struct_ty);
+                emit_args();
+            },
+            [&](Default) {
+                EmitType(out, c->Result(0)->Type());
+                emit_args();
+            });
     }
 
     /// Emit Load

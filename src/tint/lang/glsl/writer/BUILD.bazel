@@ -93,6 +93,7 @@ cc_library(
     "builtin_test.cc",
     "call_test.cc",
     "constant_test.cc",
+    "constructor_test.cc",
     "function_test.cc",
     "if_test.cc",
     "loop_test.cc",

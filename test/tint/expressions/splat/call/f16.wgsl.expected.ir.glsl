@@ -1,11 +1,14 @@
-SKIP: FAILED
+#version 310 es
+#extension GL_AMD_gpu_shader_half_float: require
 
-<dawn>/src/tint/lang/glsl/writer/printer/printer.cc:482 internal compiler error: Switch() matched no cases. Type: tint::core::ir::Construct
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
-
-tint executable returned error: signal: illegal instruction
+float16_t get_f16() {
+  return 1.0hf;
+}
+void f() {
+  f16vec2 v2 = f16vec2(get_f16());
+  f16vec3 v3 = f16vec3(get_f16());
+  f16vec4 v4 = f16vec4(get_f16());
+}
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+void main() {
+}

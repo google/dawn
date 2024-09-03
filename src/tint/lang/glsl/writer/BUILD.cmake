@@ -107,6 +107,7 @@ tint_add_target(tint_lang_glsl_writer_test test
   lang/glsl/writer/builtin_test.cc
   lang/glsl/writer/call_test.cc
   lang/glsl/writer/constant_test.cc
+  lang/glsl/writer/constructor_test.cc
   lang/glsl/writer/function_test.cc
   lang/glsl/writer/if_test.cc
   lang/glsl/writer/loop_test.cc
