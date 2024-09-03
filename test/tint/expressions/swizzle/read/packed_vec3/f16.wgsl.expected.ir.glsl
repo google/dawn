@@ -1,11 +1,134 @@
-SKIP: FAILED
+#version 310 es
+#extension GL_AMD_gpu_shader_half_float: require
 
-<dawn>/src/tint/lang/glsl/writer/printer/printer.cc:482 internal compiler error: Switch() matched no cases. Type: tint::core::ir::Load
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
+struct S {
+  f16vec3 v;
+};
 
-tint executable returned error: signal: illegal instruction
+uniform S U;
+void f() {
+  f16vec3 v = U.v;
+  float16_t x = U.v.x;
+  float16_t y = U.v.y;
+  float16_t z = U.v.z;
+  f16vec2 xx = U.v.xx;
+  f16vec2 xy = U.v.xy;
+  f16vec2 xz = U.v.xz;
+  f16vec2 yx = U.v.yx;
+  f16vec2 yy = U.v.yy;
+  f16vec2 yz = U.v.yz;
+  f16vec2 zx = U.v.zx;
+  f16vec2 zy = U.v.zy;
+  f16vec2 zz = U.v.zz;
+  f16vec3 xxx = U.v.xxx;
+  f16vec3 xxy = U.v.xxy;
+  f16vec3 xxz = U.v.xxz;
+  f16vec3 xyx = U.v.xyx;
+  f16vec3 xyy = U.v.xyy;
+  f16vec3 xyz = U.v.xyz;
+  f16vec3 xzx = U.v.xzx;
+  f16vec3 xzy = U.v.xzy;
+  f16vec3 xzz = U.v.xzz;
+  f16vec3 yxx = U.v.yxx;
+  f16vec3 yxy = U.v.yxy;
+  f16vec3 yxz = U.v.yxz;
+  f16vec3 yyx = U.v.yyx;
+  f16vec3 yyy = U.v.yyy;
+  f16vec3 yyz = U.v.yyz;
+  f16vec3 yzx = U.v.yzx;
+  f16vec3 yzy = U.v.yzy;
+  f16vec3 yzz = U.v.yzz;
+  f16vec3 zxx = U.v.zxx;
+  f16vec3 zxy = U.v.zxy;
+  f16vec3 zxz = U.v.zxz;
+  f16vec3 zyx = U.v.zyx;
+  f16vec3 zyy = U.v.zyy;
+  f16vec3 zyz = U.v.zyz;
+  f16vec3 zzx = U.v.zzx;
+  f16vec3 zzy = U.v.zzy;
+  f16vec3 zzz = U.v.zzz;
+  f16vec4 xxxx = U.v.xxxx;
+  f16vec4 xxxy = U.v.xxxy;
+  f16vec4 xxxz = U.v.xxxz;
+  f16vec4 xxyx = U.v.xxyx;
+  f16vec4 xxyy = U.v.xxyy;
+  f16vec4 xxyz = U.v.xxyz;
+  f16vec4 xxzx = U.v.xxzx;
+  f16vec4 xxzy = U.v.xxzy;
+  f16vec4 xxzz = U.v.xxzz;
+  f16vec4 xyxx = U.v.xyxx;
+  f16vec4 xyxy = U.v.xyxy;
+  f16vec4 xyxz = U.v.xyxz;
+  f16vec4 xyyx = U.v.xyyx;
+  f16vec4 xyyy = U.v.xyyy;
+  f16vec4 xyyz = U.v.xyyz;
+  f16vec4 xyzx = U.v.xyzx;
+  f16vec4 xyzy = U.v.xyzy;
+  f16vec4 xyzz = U.v.xyzz;
+  f16vec4 xzxx = U.v.xzxx;
+  f16vec4 xzxy = U.v.xzxy;
+  f16vec4 xzxz = U.v.xzxz;
+  f16vec4 xzyx = U.v.xzyx;
+  f16vec4 xzyy = U.v.xzyy;
+  f16vec4 xzyz = U.v.xzyz;
+  f16vec4 xzzx = U.v.xzzx;
+  f16vec4 xzzy = U.v.xzzy;
+  f16vec4 xzzz = U.v.xzzz;
+  f16vec4 yxxx = U.v.yxxx;
+  f16vec4 yxxy = U.v.yxxy;
+  f16vec4 yxxz = U.v.yxxz;
+  f16vec4 yxyx = U.v.yxyx;
+  f16vec4 yxyy = U.v.yxyy;
+  f16vec4 yxyz = U.v.yxyz;
+  f16vec4 yxzx = U.v.yxzx;
+  f16vec4 yxzy = U.v.yxzy;
+  f16vec4 yxzz = U.v.yxzz;
+  f16vec4 yyxx = U.v.yyxx;
+  f16vec4 yyxy = U.v.yyxy;
+  f16vec4 yyxz = U.v.yyxz;
+  f16vec4 yyyx = U.v.yyyx;
+  f16vec4 yyyy = U.v.yyyy;
+  f16vec4 yyyz = U.v.yyyz;
+  f16vec4 yyzx = U.v.yyzx;
+  f16vec4 yyzy = U.v.yyzy;
+  f16vec4 yyzz = U.v.yyzz;
+  f16vec4 yzxx = U.v.yzxx;
+  f16vec4 yzxy = U.v.yzxy;
+  f16vec4 yzxz = U.v.yzxz;
+  f16vec4 yzyx = U.v.yzyx;
+  f16vec4 yzyy = U.v.yzyy;
+  f16vec4 yzyz = U.v.yzyz;
+  f16vec4 yzzx = U.v.yzzx;
+  f16vec4 yzzy = U.v.yzzy;
+  f16vec4 yzzz = U.v.yzzz;
+  f16vec4 zxxx = U.v.zxxx;
+  f16vec4 zxxy = U.v.zxxy;
+  f16vec4 zxxz = U.v.zxxz;
+  f16vec4 zxyx = U.v.zxyx;
+  f16vec4 zxyy = U.v.zxyy;
+  f16vec4 zxyz = U.v.zxyz;
+  f16vec4 zxzx = U.v.zxzx;
+  f16vec4 zxzy = U.v.zxzy;
+  f16vec4 zxzz = U.v.zxzz;
+  f16vec4 zyxx = U.v.zyxx;
+  f16vec4 zyxy = U.v.zyxy;
+  f16vec4 zyxz = U.v.zyxz;
+  f16vec4 zyyx = U.v.zyyx;
+  f16vec4 zyyy = U.v.zyyy;
+  f16vec4 zyyz = U.v.zyyz;
+  f16vec4 zyzx = U.v.zyzx;
+  f16vec4 zyzy = U.v.zyzy;
+  f16vec4 zyzz = U.v.zyzz;
+  f16vec4 zzxx = U.v.zzxx;
+  f16vec4 zzxy = U.v.zzxy;
+  f16vec4 zzxz = U.v.zzxz;
+  f16vec4 zzyx = U.v.zzyx;
+  f16vec4 zzyy = U.v.zzyy;
+  f16vec4 zzyz = U.v.zzyz;
+  f16vec4 zzzx = U.v.zzzx;
+  f16vec4 zzzy = U.v.zzzy;
+  f16vec4 zzzz = U.v.zzzz;
+}
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+void main() {
+}

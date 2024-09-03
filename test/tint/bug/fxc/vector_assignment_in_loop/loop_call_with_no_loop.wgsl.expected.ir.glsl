@@ -1,11 +1,30 @@
-SKIP: FAILED
+#version 310 es
 
-<dawn>/src/tint/lang/glsl/writer/printer/printer.cc:252 internal compiler error: Switch() matched no cases. Type: tint::core::ir::StoreVectorElement
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
-
-tint executable returned error: signal: illegal instruction
+vec2 v2f = vec2(0.0f);
+ivec3 v3i = ivec3(0);
+uvec4 v4u = uvec4(0u);
+bvec2 v2b = bvec2(false);
+void foo() {
+  int i = 0;
+  v2f[i] = 1.0f;
+  v3i[i] = 1;
+  v4u[i] = 1u;
+  v2b[i] = true;
+}
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+void main() {
+  {
+    int i = 0;
+    while(true) {
+      if ((i < 2)) {
+      } else {
+        break;
+      }
+      foo();
+      {
+        i = (i + 1);
+      }
+      continue;
+    }
+  }
+}

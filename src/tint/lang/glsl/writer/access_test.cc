@@ -88,8 +88,7 @@ void main() {
 )");
 }
 
-// TODO(dsinclair): Support LoadVectorElement
-TEST_F(GlslWriterTest, DISABLED_AccessVector) {
+TEST_F(GlslWriterTest, AccessVector) {
     auto* func = b.Function("a", ty.void_(), core::ir::Function::PipelineStage::kCompute);
     func->SetWorkgroupSize(1, 1, 1);
 
@@ -101,12 +100,15 @@ TEST_F(GlslWriterTest, DISABLED_AccessVector) {
 
     ASSERT_TRUE(Generate()) << err_ << output_.glsl;
     EXPECT_EQ(output_.glsl, GlslHeader() + R"(
-
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+void main() {
+  vec3 v = vec3(0.0f);
+  float x = v.y;
+}
 )");
 }
 
-// TODO(dsinclair): Support LoadVectorElement
-TEST_F(GlslWriterTest, DISABLED_AccessMatrix) {
+TEST_F(GlslWriterTest, AccessMatrix) {
     auto* func = b.Function("a", ty.void_(), core::ir::Function::PipelineStage::kCompute);
     func->SetWorkgroupSize(1, 1, 1);
 
@@ -119,12 +121,15 @@ TEST_F(GlslWriterTest, DISABLED_AccessMatrix) {
 
     ASSERT_TRUE(Generate()) << err_ << output_.glsl;
     EXPECT_EQ(output_.glsl, GlslHeader() + R"(
-
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+void main() {
+  mat4 v = mat4(vec4(0.0f), vec4(0.0f), vec4(0.0f), vec4(0.0f));
+  float x = v[1u].z;
+}
 )");
 }
 
-// TODO(dsinclair): Support StoreVectorElement
-TEST_F(GlslWriterTest, DISABLED_AccessStoreVectorElementConstantIndex) {
+TEST_F(GlslWriterTest, AccessStoreVectorElementConstantIndex) {
     auto* func = b.Function("foo", ty.void_());
     b.Append(func->Block(), [&] {
         auto* vec_var = b.Var("vec", ty.ptr<function, vec4<i32>>());
@@ -134,11 +139,17 @@ TEST_F(GlslWriterTest, DISABLED_AccessStoreVectorElementConstantIndex) {
 
     ASSERT_TRUE(Generate()) << err_ << output_.glsl;
     EXPECT_EQ(output_.glsl, GlslHeader() + R"(
-
+void foo() {
+  ivec4 vec = ivec4(0);
+  vec[1u] = 42;
+}
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+void main() {
+}
 )");
 }
 
-// TODO(dsinclair): Support StoreVectorElement
+// TODO(dsinclair): Needs ir::Convert
 TEST_F(GlslWriterTest, DISABLED_AccessStoreVectorElementDynamicIndex) {
     auto* idx = b.FunctionParam("idx", ty.i32());
     auto* func = b.Function("foo", ty.void_());
@@ -204,8 +215,7 @@ void main() {
 )");
 }
 
-// TODO(dsinclair): Support swizzle
-TEST_F(GlslWriterTest, DISABLED_AccessSwizzle) {
+TEST_F(GlslWriterTest, AccessSwizzle) {
     auto* f = b.Function("a", ty.void_(), core::ir::Function::PipelineStage::kCompute);
     f->SetWorkgroupSize(1, 1, 1);
 
@@ -217,12 +227,15 @@ TEST_F(GlslWriterTest, DISABLED_AccessSwizzle) {
 
     ASSERT_TRUE(Generate()) << err_ << output_.glsl;
     EXPECT_EQ(output_.glsl, GlslHeader() + R"(
-
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+void main() {
+  vec3 v = vec3(0.0f);
+  float b = v.y;
+}
 )");
 }
 
-// TODO(dsinclair): Support swizzle
-TEST_F(GlslWriterTest, DISABLED_AccessSwizzleMulti) {
+TEST_F(GlslWriterTest, AccessSwizzleMulti) {
     auto* f = b.Function("a", ty.void_(), core::ir::Function::PipelineStage::kCompute);
     f->SetWorkgroupSize(1, 1, 1);
 
@@ -234,12 +247,15 @@ TEST_F(GlslWriterTest, DISABLED_AccessSwizzleMulti) {
 
     ASSERT_TRUE(Generate()) << err_ << output_.glsl;
     EXPECT_EQ(output_.glsl, GlslHeader() + R"(
-
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+void main() {
+  vec4 v = vec4(0.0f);
+  vec4 b = v.wzyx;
+}
 )");
 }
 
-// TODO(dsinclair): Support LoadVectorElement
-TEST_F(GlslWriterTest, DISABLED_AccessStorageVector) {
+TEST_F(GlslWriterTest, AccessStorageVector) {
     auto* var = b.Var<storage, vec4<f32>, core::Access::kRead>("v");
     var->SetBindingPoint(0, 0);
 
@@ -255,13 +271,22 @@ TEST_F(GlslWriterTest, DISABLED_AccessStorageVector) {
     });
 
     ASSERT_TRUE(Generate()) << err_ << output_.glsl;
-    EXPECT_EQ(output_.glsl, GlslHeader() + R"(
+    EXPECT_EQ(output_.glsl, GlslHeader() + R"(precision highp float;
+precision highp int;
 
+
+vec4 v;
+void main() {
+  vec4 a = v;
+  float b = v.x;
+  float c = v.y;
+  float d = v.z;
+  float e = v.w;
+}
 )");
 }
 
-// TODO(dsinclair): Support LoadVectorElement
-TEST_F(GlslWriterTest, DISABLED_AccessStorageVectorF16) {
+TEST_F(GlslWriterTest, AccessStorageVectorF16) {
     auto* var = b.Var<storage, vec4<f16>, core::Access::kRead>("v");
     var->SetBindingPoint(0, 0);
 
@@ -277,13 +302,23 @@ TEST_F(GlslWriterTest, DISABLED_AccessStorageVectorF16) {
     });
 
     ASSERT_TRUE(Generate()) << err_ << output_.glsl;
-    EXPECT_EQ(output_.glsl, GlslHeader() + R"(
+    EXPECT_EQ(output_.glsl, GlslHeader() + R"(#extension GL_AMD_gpu_shader_half_float: require
+precision highp float;
+precision highp int;
 
+
+f16vec4 v;
+void main() {
+  f16vec4 a = v;
+  float16_t b = v.x;
+  float16_t c = v.y;
+  float16_t d = v.z;
+  float16_t e = v.w;
+}
 )");
 }
 
-// TODO(dsinclair): Support LoadVectorElement
-TEST_F(GlslWriterTest, DISABLED_AccessStorageMatrix) {
+TEST_F(GlslWriterTest, AccessStorageMatrix) {
     auto* var = b.Var<storage, mat4x4<f32>, core::Access::kRead>("v");
     var->SetBindingPoint(0, 0);
 
@@ -298,8 +333,16 @@ TEST_F(GlslWriterTest, DISABLED_AccessStorageMatrix) {
     });
 
     ASSERT_TRUE(Generate()) << err_ << output_.glsl;
-    EXPECT_EQ(output_.glsl, GlslHeader() + R"(
+    EXPECT_EQ(output_.glsl, GlslHeader() + R"(precision highp float;
+precision highp int;
 
+
+mat4 v;
+void main() {
+  mat4 a = v;
+  vec4 b = v[3u];
+  float c = v[1u].z;
+}
 )");
 }
 
@@ -366,8 +409,7 @@ void main() {
 )");
 }
 
-// TODO(dsinclair): Support LoadVectorElement
-TEST_F(GlslWriterTest, DISABLED_AccessStorageNested) {
+TEST_F(GlslWriterTest, AccessStorageNested) {
     auto* Inner =
         ty.Struct(mod.symbols.New("Inner"), {
                                                 {mod.symbols.New("s"), ty.mat3x3<f32>()},
@@ -398,12 +440,33 @@ TEST_F(GlslWriterTest, DISABLED_AccessStorageNested) {
 
     ASSERT_TRUE(Generate()) << err_ << output_.glsl;
     EXPECT_EQ(output_.glsl, GlslHeader() + R"(
+struct Inner {
+  mat3 s;
+  vec3 t[5];
+};
 
+struct Outer {
+  float x;
+  Inner y;
+};
+
+struct SB {
+  int a;
+  Outer b;
+};
+precision highp float;
+precision highp int;
+
+
+SB v;
+void main() {
+  SB a = v;
+  float b = v.b.y.t[3u].z;
+}
 )");
 }
 
-// TODO(dsinclair): Support StoreVectorElement
-TEST_F(GlslWriterTest, DISABLED_AccessStorageStoreVector) {
+TEST_F(GlslWriterTest, AccessStorageStoreVector) {
     auto* var = b.Var<storage, vec4<f32>, core::Access::kReadWrite>("v");
     var->SetBindingPoint(0, 0);
 
@@ -418,13 +481,21 @@ TEST_F(GlslWriterTest, DISABLED_AccessStorageStoreVector) {
     });
 
     ASSERT_TRUE(Generate()) << err_ << output_.glsl;
-    EXPECT_EQ(output_.glsl, GlslHeader() + R"(
+    EXPECT_EQ(output_.glsl, GlslHeader() + R"(precision highp float;
+precision highp int;
 
+
+vec4 v;
+void main() {
+  v[0u] = 2.0f;
+  v[1u] = 4.0f;
+  v[2u] = 8.0f;
+  v[3u] = 16.0f;
+}
 )");
 }
 
-// TODO(dsinclair): Support LoadVectorElement
-TEST_F(GlslWriterTest, DISABLED_AccessDirectVariable) {
+TEST_F(GlslWriterTest, AccessDirectVariable) {
     auto* var1 = b.Var<storage, vec4<f32>, core::Access::kRead>("v1");
     var1->SetBindingPoint(0, 0);
     b.ir.root_block->Append(var1);
@@ -449,8 +520,22 @@ TEST_F(GlslWriterTest, DISABLED_AccessDirectVariable) {
     });
 
     ASSERT_TRUE(Generate()) << err_ << output_.glsl;
-    EXPECT_EQ(output_.glsl, GlslHeader() + R"(
+    EXPECT_EQ(output_.glsl, GlslHeader() + R"(precision highp float;
+precision highp int;
 
+
+vec4 v1;
+vec4 v2;
+void bar() {
+  float a = v1.y;
+}
+void bar_1() {
+  float a = v2.y;
+}
+void main() {
+  bar();
+  bar_1();
+}
 )");
 }
 
@@ -735,8 +820,7 @@ void main() {
 )");
 }
 
-// TODO(dsinclair): Handle LoadVectorElement
-TEST_F(GlslWriterTest, DISABLED_AccessUniformVector) {
+TEST_F(GlslWriterTest, AccessUniformVector) {
     auto* var = b.Var<uniform, vec4<f32>, core::Access::kRead>("v");
     var->SetBindingPoint(0, 0);
 
@@ -752,13 +836,22 @@ TEST_F(GlslWriterTest, DISABLED_AccessUniformVector) {
     });
 
     ASSERT_TRUE(Generate()) << err_ << output_.glsl;
-    EXPECT_EQ(output_.glsl, GlslHeader() + R"(
+    EXPECT_EQ(output_.glsl, GlslHeader() + R"(precision highp float;
+precision highp int;
 
+
+uniform vec4 v;
+void main() {
+  vec4 a = v;
+  float b = v.x;
+  float c = v.y;
+  float d = v.z;
+  float e = v.w;
+}
 )");
 }
 
-// TODO(dsinclair): Support LoadVectorElement
-TEST_F(GlslWriterTest, DISABLED_AccessUniformVectorF16) {
+TEST_F(GlslWriterTest, AccessUniformVectorF16) {
     auto* var = b.Var<uniform, vec4<f16>, core::Access::kRead>("v");
     var->SetBindingPoint(0, 0);
 
@@ -775,13 +868,24 @@ TEST_F(GlslWriterTest, DISABLED_AccessUniformVectorF16) {
     });
 
     ASSERT_TRUE(Generate()) << err_ << output_.glsl;
-    EXPECT_EQ(output_.glsl, GlslHeader() + R"(
+    EXPECT_EQ(output_.glsl, GlslHeader() + R"(#extension GL_AMD_gpu_shader_half_float: require
+precision highp float;
+precision highp int;
 
+
+uniform f16vec4 v;
+void main() {
+  uint x = 1u;
+  f16vec4 a = v;
+  float16_t b = v.x;
+  float16_t c = v[min(x, 3u)];
+  float16_t d = v.z;
+  float16_t e = v.w;
+}
 )");
 }
 
-// TODO(dsinclair): support LoadVectorElement
-TEST_F(GlslWriterTest, DISABLED_AccessUniformMatrix) {
+TEST_F(GlslWriterTest, AccessUniformMatrix) {
     auto* var = b.Var<uniform, mat4x4<f32>, core::Access::kRead>("v");
     var->SetBindingPoint(0, 0);
 
@@ -796,13 +900,20 @@ TEST_F(GlslWriterTest, DISABLED_AccessUniformMatrix) {
     });
 
     ASSERT_TRUE(Generate()) << err_ << output_.glsl;
-    EXPECT_EQ(output_.glsl, GlslHeader() + R"(
+    EXPECT_EQ(output_.glsl, GlslHeader() + R"(precision highp float;
+precision highp int;
 
+
+uniform mat4 v;
+void main() {
+  mat4 a = v;
+  vec4 b = v[3u];
+  float c = v[1u].z;
+}
 )");
 }
 
-// TODO(dsinclair): Support LoadVectorElement
-TEST_F(GlslWriterTest, DISABLED_AccessUniformMatrix2x3) {
+TEST_F(GlslWriterTest, AccessUniformMatrix2x3) {
     auto* var = b.Var<uniform, mat2x3<f32>, core::Access::kRead>("v");
     var->SetBindingPoint(0, 0);
 
@@ -817,13 +928,20 @@ TEST_F(GlslWriterTest, DISABLED_AccessUniformMatrix2x3) {
     });
 
     ASSERT_TRUE(Generate()) << err_ << output_.glsl;
-    EXPECT_EQ(output_.glsl, GlslHeader() + R"(
+    EXPECT_EQ(output_.glsl, GlslHeader() + R"(precision highp float;
+precision highp int;
 
+
+uniform mat2x3 v;
+void main() {
+  mat2x3 a = v;
+  vec3 b = v[1u];
+  float c = v[1u].z;
+}
 )");
 }
 
-// TODO(dsinclair): Support LoadVectorElement
-TEST_F(GlslWriterTest, DISABLED_AccessUniformMat2x3F16) {
+TEST_F(GlslWriterTest, AccessUniformMat2x3F16) {
     auto* var = b.Var<uniform, mat2x3<f16>, core::Access::kRead>("v");
     var->SetBindingPoint(0, 0);
     b.ir.root_block->Append(var);
@@ -837,13 +955,21 @@ TEST_F(GlslWriterTest, DISABLED_AccessUniformMat2x3F16) {
     });
 
     ASSERT_TRUE(Generate()) << err_ << output_.glsl;
-    EXPECT_EQ(output_.glsl, GlslHeader() + R"(
+    EXPECT_EQ(output_.glsl, GlslHeader() + R"(#extension GL_AMD_gpu_shader_half_float: require
+precision highp float;
+precision highp int;
 
+
+uniform f16mat2x3 v;
+void main() {
+  f16mat2x3 a = v;
+  f16vec3 b = v[1u];
+  float16_t c = v[1u].z;
+}
 )");
 }
 
-// TODO(dsinclair): Support LoadVectorElement
-TEST_F(GlslWriterTest, DISABLED_AccessUniformMatrix3x2) {
+TEST_F(GlslWriterTest, AccessUniformMatrix3x2) {
     auto* var = b.Var<uniform, mat3x2<f32>, core::Access::kRead>("v");
     var->SetBindingPoint(0, 0);
 
@@ -858,13 +984,20 @@ TEST_F(GlslWriterTest, DISABLED_AccessUniformMatrix3x2) {
     });
 
     ASSERT_TRUE(Generate()) << err_ << output_.glsl;
-    EXPECT_EQ(output_.glsl, GlslHeader() + R"(
+    EXPECT_EQ(output_.glsl, GlslHeader() + R"(precision highp float;
+precision highp int;
 
+
+uniform mat3x2 v;
+void main() {
+  mat3x2 a = v;
+  vec2 b = v[1u];
+  float c = v[1u].y;
+}
 )");
 }
 
-// TODO(dsinclair): Support LoadVectorElement
-TEST_F(GlslWriterTest, DISABLED_AccessUniformMatrix2x2) {
+TEST_F(GlslWriterTest, AccessUniformMatrix2x2) {
     auto* var = b.Var<uniform, mat2x2<f32>, core::Access::kRead>("v");
     var->SetBindingPoint(0, 0);
 
@@ -879,13 +1012,20 @@ TEST_F(GlslWriterTest, DISABLED_AccessUniformMatrix2x2) {
     });
 
     ASSERT_TRUE(Generate()) << err_ << output_.glsl;
-    EXPECT_EQ(output_.glsl, GlslHeader() + R"(
+    EXPECT_EQ(output_.glsl, GlslHeader() + R"(precision highp float;
+precision highp int;
 
+
+uniform mat2 v;
+void main() {
+  mat2 a = v;
+  vec2 b = v[1u];
+  float c = v[1u].y;
+}
 )");
 }
 
-// TODO(dsinclair): Support LoadVectorElement
-TEST_F(GlslWriterTest, DISABLED_AccessUniformMatrix2x2F16) {
+TEST_F(GlslWriterTest, AccessUniformMatrix2x2F16) {
     auto* var = b.Var<uniform, mat2x2<f16>, core::Access::kRead>("v");
     var->SetBindingPoint(0, 0);
 
@@ -900,8 +1040,17 @@ TEST_F(GlslWriterTest, DISABLED_AccessUniformMatrix2x2F16) {
     });
 
     ASSERT_TRUE(Generate()) << err_ << output_.glsl;
-    EXPECT_EQ(output_.glsl, GlslHeader() + R"(
+    EXPECT_EQ(output_.glsl, GlslHeader() + R"(#extension GL_AMD_gpu_shader_half_float: require
+precision highp float;
+precision highp int;
 
+
+uniform f16mat2 v;
+void main() {
+  f16mat2 a = v;
+  f16vec2 b = v[1u];
+  float16_t c = v[1u].y;
+}
 )");
 }
 
@@ -1043,8 +1192,7 @@ void main() {
 )");
 }
 
-// TODO(dsinclair): Support LoadVectorElement
-TEST_F(GlslWriterTest, DISABLED_AccessUniformStructNested) {
+TEST_F(GlslWriterTest, AccessUniformStructNested) {
     auto* Inner =
         ty.Struct(mod.symbols.New("Inner"), {
                                                 {mod.symbols.New("s"), ty.mat3x3<f32>()},
@@ -1075,7 +1223,29 @@ TEST_F(GlslWriterTest, DISABLED_AccessUniformStructNested) {
 
     ASSERT_TRUE(Generate()) << err_ << output_.glsl;
     EXPECT_EQ(output_.glsl, GlslHeader() + R"(
+struct Inner {
+  mat3 s;
+  vec3 t[5];
+};
 
+struct Outer {
+  float x;
+  Inner y;
+};
+
+struct SB {
+  int a;
+  Outer b;
+};
+precision highp float;
+precision highp int;
+
+
+uniform SB v;
+void main() {
+  SB a = v;
+  float b = v.b.y.t[3u].z;
+}
 )");
 }
 
@@ -1126,8 +1296,7 @@ void main() {
 )");
 }
 
-// TODO(dsinclair): Support StoreVectorElement
-TEST_F(GlslWriterTest, DISABLED_AccessStoreVectorElement) {
+TEST_F(GlslWriterTest, AccessStoreVectorElement) {
     auto* var = b.Var<storage, vec3<f32>, core::Access::kReadWrite>("v");
     var->SetBindingPoint(0, 0);
 
@@ -1140,13 +1309,18 @@ TEST_F(GlslWriterTest, DISABLED_AccessStoreVectorElement) {
     });
 
     ASSERT_TRUE(Generate()) << err_ << output_.glsl;
-    EXPECT_EQ(output_.glsl, GlslHeader() + R"(
+    EXPECT_EQ(output_.glsl, GlslHeader() + R"(precision highp float;
+precision highp int;
 
+
+vec3 v;
+void main() {
+  v[1u] = 2.0f;
+}
 )");
 }
 
-// TODO(dsinclair): Support StoreVectorElement
-TEST_F(GlslWriterTest, DISABLED_AccessStoreVectorElementF16) {
+TEST_F(GlslWriterTest, AccessStoreVectorElementF16) {
     auto* var = b.Var<storage, vec3<f16>, core::Access::kReadWrite>("v");
     var->SetBindingPoint(0, 0);
 
@@ -1159,8 +1333,15 @@ TEST_F(GlslWriterTest, DISABLED_AccessStoreVectorElementF16) {
     });
 
     ASSERT_TRUE(Generate()) << err_ << output_.glsl;
-    EXPECT_EQ(output_.glsl, GlslHeader() + R"(
+    EXPECT_EQ(output_.glsl, GlslHeader() + R"(#extension GL_AMD_gpu_shader_half_float: require
+precision highp float;
+precision highp int;
 
+
+f16vec3 v;
+void main() {
+  v[1u] = 2.0hf;
+}
 )");
 }
 
@@ -1213,8 +1394,7 @@ void main() {
 )");
 }
 
-// TODO(dsinclair): Support StoreVectorElement
-TEST_F(GlslWriterTest, DISABLED_AccessStoreMatrixElement) {
+TEST_F(GlslWriterTest, AccessStoreMatrixElement) {
     auto* var = b.Var<storage, mat4x4<f32>, core::Access::kReadWrite>("v");
     var->SetBindingPoint(0, 0);
 
@@ -1227,13 +1407,18 @@ TEST_F(GlslWriterTest, DISABLED_AccessStoreMatrixElement) {
     });
 
     ASSERT_TRUE(Generate()) << err_ << output_.glsl;
-    EXPECT_EQ(output_.glsl, GlslHeader() + R"(
+    EXPECT_EQ(output_.glsl, GlslHeader() + R"(precision highp float;
+precision highp int;
 
+
+mat4 v;
+void main() {
+  v[1u][2u] = 5.0f;
+}
 )");
 }
 
-// TODO(dsinclair): Support StoreVectorElement
-TEST_F(GlslWriterTest, DISABLED_AccessStoreMatrixElementF16) {
+TEST_F(GlslWriterTest, AccessStoreMatrixElementF16) {
     auto* var = b.Var<storage, mat3x2<f16>, core::Access::kReadWrite>("v");
     var->SetBindingPoint(0, 0);
 
@@ -1246,8 +1431,15 @@ TEST_F(GlslWriterTest, DISABLED_AccessStoreMatrixElementF16) {
     });
 
     ASSERT_TRUE(Generate()) << err_ << output_.glsl;
-    EXPECT_EQ(output_.glsl, GlslHeader() + R"(
+    EXPECT_EQ(output_.glsl, GlslHeader() + R"(#extension GL_AMD_gpu_shader_half_float: require
+precision highp float;
+precision highp int;
 
+
+f16mat3x2 v;
+void main() {
+  v[2u][1u] = 5.0hf;
+}
 )");
 }
 
@@ -1394,8 +1586,7 @@ void main() {
 )");
 }
 
-// TODO(dsinclair): Support Loop
-TEST_F(GlslWriterTest, DISABLED_AccessStoreArray) {
+TEST_F(GlslWriterTest, AccessStoreArray) {
     auto* var = b.Var<storage, array<vec3<f32>, 5>, core::Access::kReadWrite>("v");
     var->SetBindingPoint(0, 0);
 
@@ -1408,8 +1599,32 @@ TEST_F(GlslWriterTest, DISABLED_AccessStoreArray) {
     });
 
     ASSERT_TRUE(Generate()) << err_ << output_.glsl;
-    EXPECT_EQ(output_.glsl, GlslHeader() + R"(
+    EXPECT_EQ(output_.glsl, GlslHeader() + R"(precision highp float;
+precision highp int;
 
+
+vec3 v[5];
+void tint_store_and_preserve_padding(inout vec3 target[5], vec3 value_param[5]) {
+  {
+    uint v_1 = 0u;
+    v_1 = 0u;
+    while(true) {
+      uint v_2 = v_1;
+      if ((v_2 >= 5u)) {
+        break;
+      }
+      target[v_2] = value_param[v_2];
+      {
+        v_1 = (v_2 + 1u);
+      }
+      continue;
+    }
+  }
+}
+void main() {
+  vec3 ary[5] = vec3[5](vec3(0.0f), vec3(0.0f), vec3(0.0f), vec3(0.0f), vec3(0.0f));
+  tint_store_and_preserve_padding(v, ary);
+}
 )");
 }
 
@@ -1599,8 +1814,7 @@ void main() {
 )");
 }
 
-// TODO(dsinclair): Support Loop
-TEST_F(GlslWriterTest, DISABLED_AccessStoreStructComplex) {
+TEST_F(GlslWriterTest, AccessStoreStructComplex) {
     auto* Inner =
         ty.Struct(mod.symbols.New("Inner"), {
                                                 {mod.symbols.New("s"), ty.mat3x3<f32>()},
@@ -1629,12 +1843,67 @@ TEST_F(GlslWriterTest, DISABLED_AccessStoreStructComplex) {
 
     ASSERT_TRUE(Generate()) << err_ << output_.glsl;
     EXPECT_EQ(output_.glsl, GlslHeader() + R"(
+struct Inner {
+  mat3 s;
+  vec3 t[5];
+};
 
+struct Outer {
+  float x;
+  Inner y;
+};
+
+struct SB {
+  int a;
+  Outer b;
+};
+precision highp float;
+precision highp int;
+
+
+SB v;
+void tint_store_and_preserve_padding_4(inout vec3 target[5], vec3 value_param[5]) {
+  {
+    uint v_1 = 0u;
+    v_1 = 0u;
+    while(true) {
+      uint v_2 = v_1;
+      if ((v_2 >= 5u)) {
+        break;
+      }
+      target[v_2] = value_param[v_2];
+      {
+        v_1 = (v_2 + 1u);
+      }
+      continue;
+    }
+  }
+}
+void tint_store_and_preserve_padding_3(inout mat3 target, mat3 value_param) {
+  target[0u] = value_param[0u];
+  target[1u] = value_param[1u];
+  target[2u] = value_param[2u];
+}
+void tint_store_and_preserve_padding_2(inout Inner target, Inner value_param) {
+  tint_store_and_preserve_padding_3(target.s, value_param.s);
+  tint_store_and_preserve_padding_4(target.t, value_param.t);
+}
+void tint_store_and_preserve_padding_1(inout Outer target, Outer value_param) {
+  target.x = value_param.x;
+  tint_store_and_preserve_padding_2(target.y, value_param.y);
+}
+void tint_store_and_preserve_padding(inout SB target, SB value_param) {
+  target.a = value_param.a;
+  tint_store_and_preserve_padding_1(target.b, value_param.b);
+}
+void main() {
+  SB s = SB(0, Outer(0.0f, Inner(mat3(vec3(0.0f), vec3(0.0f), vec3(0.0f)), vec3[5](vec3(0.0f), vec3(0.0f), vec3(0.0f), vec3(0.0f), vec3(0.0f)))));
+  tint_store_and_preserve_padding(v, s);
+}
 )");
 }
 
-// TODO(dsinclair): Support LoadVectorElement
-TEST_F(GlslWriterTest, DISABLED_AccessChainReused) {
+TEST_F(GlslWriterTest, AccessChainReused) {
     auto* sb = ty.Struct(mod.symbols.New("SB"), {
                                                     {mod.symbols.New("a"), ty.i32()},
                                                     {mod.symbols.New("b"), ty.vec3<f32>()},
@@ -1654,12 +1923,23 @@ TEST_F(GlslWriterTest, DISABLED_AccessChainReused) {
 
     ASSERT_TRUE(Generate()) << err_ << output_.glsl;
     EXPECT_EQ(output_.glsl, GlslHeader() + R"(
+struct SB {
+  int a;
+  vec3 b;
+};
+precision highp float;
+precision highp int;
 
+
+SB v;
+void main() {
+  float b = v.b.y;
+  float c = v.b.z;
+}
 )");
 }
 
-// TODO(dsinclair): Support LoadVectorElement
-TEST_F(GlslWriterTest, DISABLED_UniformAccessChainReused) {
+TEST_F(GlslWriterTest, AccessUniformChainReused) {
     auto* sb = ty.Struct(mod.symbols.New("SB"), {
                                                     {mod.symbols.New("c"), ty.f32()},
                                                     {mod.symbols.New("d"), ty.vec3<f32>()},
@@ -1679,7 +1959,19 @@ TEST_F(GlslWriterTest, DISABLED_UniformAccessChainReused) {
 
     ASSERT_TRUE(Generate()) << err_ << output_.glsl;
     EXPECT_EQ(output_.glsl, GlslHeader() + R"(
+struct SB {
+  float c;
+  vec3 d;
+};
+precision highp float;
+precision highp int;
 
+
+uniform SB v;
+void main() {
+  float b = v.d.y;
+  float c = v.d.z;
+}
 )");
 }
 
