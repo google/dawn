@@ -593,8 +593,7 @@ class Printer : public tint::TextGenerator {
             out << " = ";
             EmitValue(out, var->Initializer());
         } else if (space == core::AddressSpace::kPrivate ||
-                   space == core::AddressSpace::kFunction ||
-                   space == core::AddressSpace::kUndefined) {
+                   space == core::AddressSpace::kFunction) {
             out << " = ";
             EmitZeroValue(out, ptr->UnwrapPtr());
         }
