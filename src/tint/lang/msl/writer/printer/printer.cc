@@ -866,6 +866,11 @@ class Printer : public tint::TextGenerator {
 
             out << ")";
             return;
+        } else if (c->Func() == msl::BuiltinFn::kSimdBallot) {
+            out << "as_type<uint2>((simd_vote::vote_t)simd_ballot(";
+            EmitValue(out, c->Args()[0]);
+            out << "))";
+            return;
         }
 
         out << c->Func() << "(";

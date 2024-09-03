@@ -79,6 +79,7 @@ enum class BuiltinFn : uint8_t {
     kModf,
     kSign,
     kThreadgroupBarrier,
+    kSimdBallot,
     kNone,
 };
 

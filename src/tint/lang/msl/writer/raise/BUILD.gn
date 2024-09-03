@@ -57,6 +57,8 @@ if (tint_build_msl_writer) {
       "raise.h",
       "shader_io.cc",
       "shader_io.h",
+      "simd_ballot.cc",
+      "simd_ballot.h",
     ]
     deps = [
       "${dawn_root}/src/utils:utils",
@@ -102,6 +104,7 @@ if (tint_build_unittests) {
         "module_scope_vars_test.cc",
         "packed_vec3_test.cc",
         "shader_io_test.cc",
+        "simd_ballot_test.cc",
       ]
       deps = [
         "${dawn_root}/src/utils:utils",

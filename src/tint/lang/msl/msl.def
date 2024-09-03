@@ -339,6 +339,8 @@ implicit(T: f32_f16) fn sign(T) -> T
 implicit(N: num, T: f32_f16) fn sign(vec<N, T>) -> vec<N, T>
 @stage("compute") fn threadgroup_barrier(u32)
 
+@stage("fragment", "compute") fn simd_ballot(bool) -> vec2<u32>
+
 ////////////////////////////////////////////////////////////////////////////////
 // Binary Operators                                                           //
 ////////////////////////////////////////////////////////////////////////////////
