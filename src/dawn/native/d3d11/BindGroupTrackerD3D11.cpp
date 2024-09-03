@@ -150,7 +150,7 @@ BindGroupTracker::~BindGroupTracker() {
     } else {
         for (BindGroupIndex index :
              IterateBitSet(mLastAppliedPipelineLayout->GetBindGroupLayoutsMask())) {
-            UnApplyBindGroup(index);
+            UnapplyComputeBindings(index);
         }
     }
     // All slots should be unbound here.
@@ -271,7 +271,7 @@ MaybeError BindGroupTracker::Apply() {
         // render pass. So we don't need to do this inside render passes.
         BindGroupMask groupsToUnset = previousGroups & (~inheritedGroups | mDirtyBindGroups);
         for (BindGroupIndex index : IterateBitSet(groupsToUnset)) {
-            UnApplyBindGroup(index);
+            UnapplyComputeBindings(index);
         }
     }
 
@@ -456,7 +456,8 @@ MaybeError BindGroupTracker::ApplyBindGroup(BindGroupIndex index) {
     return {};
 }
 
-void BindGroupTracker::UnApplyBindGroup(BindGroupIndex index) {
+void BindGroupTracker::UnapplyComputeBindings(BindGroupIndex index) {
+    DAWN_ASSERT(!mIsRenderPass);
     auto* deviceContext = mCommandContext->GetD3D11DeviceContext4();
     BindGroupLayoutInternalBase* groupLayout =
         mLastAppliedPipelineLayout->GetBindGroupLayout(index);
@@ -466,6 +467,9 @@ void BindGroupTracker::UnApplyBindGroup(BindGroupIndex index) {
         const BindingInfo& bindingInfo = groupLayout->GetBindingInfo(bindingIndex);
         const uint32_t bindingSlot = indices[bindingIndex];
         const auto bindingVisibility = bindingInfo.visibility & mVisibleStages;
+        if (!(bindingVisibility & wgpu::ShaderStage::Compute)) {
+            continue;
+        }
 
         MatchVariant(
             bindingInfo.bindingLayout,
@@ -473,18 +477,8 @@ void BindGroupTracker::UnApplyBindGroup(BindGroupIndex index) {
                 switch (layout.type) {
                     case wgpu::BufferBindingType::Uniform: {
                         ID3D11Buffer* nullBuffer = nullptr;
-                        if (bindingVisibility & wgpu::ShaderStage::Vertex) {
-                            deviceContext->VSSetConstantBuffers1(bindingSlot, 1, &nullBuffer,
-                                                                 nullptr, nullptr);
-                        }
-                        if (bindingVisibility & wgpu::ShaderStage::Fragment) {
-                            deviceContext->PSSetConstantBuffers1(bindingSlot, 1, &nullBuffer,
-                                                                 nullptr, nullptr);
-                        }
-                        if (bindingVisibility & wgpu::ShaderStage::Compute) {
-                            deviceContext->CSSetConstantBuffers1(bindingSlot, 1, &nullBuffer,
-                                                                 nullptr, nullptr);
-                        }
+                        deviceContext->CSSetConstantBuffers1(bindingSlot, 1, &nullBuffer, nullptr,
+                                                             nullptr);
                         break;
                     }
                     case wgpu::BufferBindingType::Storage:
@@ -493,28 +487,12 @@ void BindGroupTracker::UnApplyBindGroup(BindGroupIndex index) {
                             IsSubset(bindingInfo.visibility,
                                      wgpu::ShaderStage::Fragment | wgpu::ShaderStage::Compute));
                         ID3D11UnorderedAccessView* nullUAV = nullptr;
-                        if (bindingVisibility & wgpu::ShaderStage::Fragment) {
-                            deviceContext->OMSetRenderTargetsAndUnorderedAccessViews(
-                                D3D11_KEEP_RENDER_TARGETS_AND_DEPTH_STENCIL, nullptr, nullptr,
-                                bindingSlot, 1, &nullUAV, nullptr);
-                        }
-                        if (bindingVisibility & wgpu::ShaderStage::Compute) {
-                            deviceContext->CSSetUnorderedAccessViews(bindingSlot, 1, &nullUAV,
-                                                                     nullptr);
-                        }
+                        deviceContext->CSSetUnorderedAccessViews(bindingSlot, 1, &nullUAV, nullptr);
                         break;
                     }
                     case wgpu::BufferBindingType::ReadOnlyStorage: {
                         ID3D11ShaderResourceView* nullSRV = nullptr;
-                        if (bindingVisibility & wgpu::ShaderStage::Vertex) {
-                            deviceContext->VSSetShaderResources(bindingSlot, 1, &nullSRV);
-                        }
-                        if (bindingVisibility & wgpu::ShaderStage::Fragment) {
-                            deviceContext->PSSetShaderResources(bindingSlot, 1, &nullSRV);
-                        }
-                        if (bindingVisibility & wgpu::ShaderStage::Compute) {
-                            deviceContext->CSSetShaderResources(bindingSlot, 1, &nullSRV);
-                        }
+                        deviceContext->CSSetShaderResources(bindingSlot, 1, &nullSRV);
                         break;
                     }
                     case wgpu::BufferBindingType::Undefined:
@@ -528,55 +506,23 @@ void BindGroupTracker::UnApplyBindGroup(BindGroupIndex index) {
             },
             [&](const SamplerBindingInfo&) {
                 ID3D11SamplerState* nullSampler = nullptr;
-                if (bindingVisibility & wgpu::ShaderStage::Vertex) {
-                    deviceContext->VSSetSamplers(bindingSlot, 1, &nullSampler);
-                }
-                if (bindingVisibility & wgpu::ShaderStage::Fragment) {
-                    deviceContext->PSSetSamplers(bindingSlot, 1, &nullSampler);
-                }
-                if (bindingVisibility & wgpu::ShaderStage::Compute) {
-                    deviceContext->CSSetSamplers(bindingSlot, 1, &nullSampler);
-                }
+                deviceContext->CSSetSamplers(bindingSlot, 1, &nullSampler);
             },
             [&](const TextureBindingInfo&) {
                 ID3D11ShaderResourceView* nullSRV = nullptr;
-                if (bindingVisibility & wgpu::ShaderStage::Vertex) {
-                    deviceContext->VSSetShaderResources(bindingSlot, 1, &nullSRV);
-                }
-                if (bindingVisibility & wgpu::ShaderStage::Fragment) {
-                    deviceContext->PSSetShaderResources(bindingSlot, 1, &nullSRV);
-                }
-                if (bindingVisibility & wgpu::ShaderStage::Compute) {
-                    deviceContext->CSSetShaderResources(bindingSlot, 1, &nullSRV);
-                }
+                deviceContext->CSSetShaderResources(bindingSlot, 1, &nullSRV);
             },
             [&](const StorageTextureBindingInfo& layout) {
                 switch (layout.access) {
                     case wgpu::StorageTextureAccess::WriteOnly:
                     case wgpu::StorageTextureAccess::ReadWrite: {
                         ID3D11UnorderedAccessView* nullUAV = nullptr;
-                        if (bindingVisibility & wgpu::ShaderStage::Fragment) {
-                            deviceContext->OMSetRenderTargetsAndUnorderedAccessViews(
-                                D3D11_KEEP_RENDER_TARGETS_AND_DEPTH_STENCIL, nullptr, nullptr,
-                                bindingSlot, 1, &nullUAV, nullptr);
-                        }
-                        if (bindingVisibility & wgpu::ShaderStage::Compute) {
-                            deviceContext->CSSetUnorderedAccessViews(bindingSlot, 1, &nullUAV,
-                                                                     nullptr);
-                        }
+                        deviceContext->CSSetUnorderedAccessViews(bindingSlot, 1, &nullUAV, nullptr);
                         break;
                     }
                     case wgpu::StorageTextureAccess::ReadOnly: {
                         ID3D11ShaderResourceView* nullSRV = nullptr;
-                        if (bindingVisibility & wgpu::ShaderStage::Vertex) {
-                            deviceContext->VSSetShaderResources(bindingSlot, 1, &nullSRV);
-                        }
-                        if (bindingVisibility & wgpu::ShaderStage::Fragment) {
-                            deviceContext->PSSetShaderResources(bindingSlot, 1, &nullSRV);
-                        }
-                        if (bindingVisibility & wgpu::ShaderStage::Compute) {
-                            deviceContext->CSSetShaderResources(bindingSlot, 1, &nullSRV);
-                        }
+                        deviceContext->CSSetShaderResources(bindingSlot, 1, &nullSRV);
                         break;
                     }
                     default:
