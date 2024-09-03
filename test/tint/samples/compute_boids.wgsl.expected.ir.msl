@@ -150,11 +150,15 @@ void comp_main_inner(uint3 gl_GlobalInvocationID, tint_module_vars_struct tint_m
 }
 
 vertex vert_main_outputs vert_main(vert_main_inputs inputs [[stage_in]]) {
-  return vert_main_outputs{.tint_symbol=vert_main_inner(inputs.a_particlePos, inputs.a_particleVel, inputs.a_pos)};
+  vert_main_outputs tint_wrapper_result = {};
+  tint_wrapper_result.tint_symbol = vert_main_inner(inputs.a_particlePos, inputs.a_particleVel, inputs.a_pos);
+  return tint_wrapper_result;
 }
 
 fragment frag_main_outputs frag_main() {
-  return frag_main_outputs{.tint_symbol_1=frag_main_inner()};
+  frag_main_outputs tint_wrapper_result = {};
+  tint_wrapper_result.tint_symbol_1 = frag_main_inner();
+  return tint_wrapper_result;
 }
 
 kernel void comp_main(uint3 gl_GlobalInvocationID [[thread_position_in_grid]], const constant SimParams* params [[buffer(0)]], device Particles* particlesA [[buffer(1)]], device Particles* particlesB [[buffer(2)]]) {

@@ -20,5 +20,8 @@ FragOutput frag_main_inner() {
 
 fragment frag_main_outputs frag_main() {
   FragOutput const v = frag_main_inner();
-  return frag_main_outputs{.FragOutput_color=v.color, .FragOutput_blend=v.blend};
+  frag_main_outputs tint_wrapper_result = {};
+  tint_wrapper_result.FragOutput_color = v.color;
+  tint_wrapper_result.FragOutput_blend = v.blend;
+  return tint_wrapper_result;
 }

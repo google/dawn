@@ -25,5 +25,12 @@ FragmentOutputs tint_symbol_inner() {
 
 fragment tint_symbol_outputs tint_symbol() {
   FragmentOutputs const v = tint_symbol_inner();
-  return tint_symbol_outputs{.FragmentOutputs_loc0=v.loc0, .FragmentOutputs_loc1=v.loc1, .FragmentOutputs_loc2=v.loc2, .FragmentOutputs_loc3=v.loc3, .FragmentOutputs_loc4=v.loc4, .FragmentOutputs_loc5=v.loc5};
+  tint_symbol_outputs tint_wrapper_result = {};
+  tint_wrapper_result.FragmentOutputs_loc0 = v.loc0;
+  tint_wrapper_result.FragmentOutputs_loc1 = v.loc1;
+  tint_wrapper_result.FragmentOutputs_loc2 = v.loc2;
+  tint_wrapper_result.FragmentOutputs_loc3 = v.loc3;
+  tint_wrapper_result.FragmentOutputs_loc4 = v.loc4;
+  tint_wrapper_result.FragmentOutputs_loc5 = v.loc5;
+  return tint_wrapper_result;
 }

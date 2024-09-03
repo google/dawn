@@ -35,5 +35,8 @@ Output tint_symbol_inner(uint VertexIndex, uint InstanceIndex) {
 
 vertex tint_symbol_outputs tint_symbol(uint VertexIndex [[vertex_id]], uint InstanceIndex [[instance_id]]) {
   Output const v = tint_symbol_inner(VertexIndex, InstanceIndex);
-  return tint_symbol_outputs{.Output_Position=v.Position, .Output_color=v.color};
+  tint_symbol_outputs tint_wrapper_result = {};
+  tint_wrapper_result.Output_Position = v.Position;
+  tint_wrapper_result.Output_color = v.color;
+  return tint_wrapper_result;
 }

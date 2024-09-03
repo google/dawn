@@ -144,5 +144,7 @@ kernel void compute_main(texture2d<float, access::sample> arg_0_plane0 [[texture
 
 vertex vertex_main_outputs vertex_main(texture2d<float, access::sample> arg_0_plane0 [[texture(0)]], texture2d<float, access::sample> arg_0_plane1 [[texture(1)]], const constant tint_ExternalTextureParams_packed_vec3* arg_0_params [[buffer(2)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.arg_0_plane0=arg_0_plane0, .arg_0_plane1=arg_0_plane1, .arg_0_params=arg_0_params};
-  return vertex_main_outputs{.tint_symbol_1=vertex_main_inner(tint_module_vars)};
+  vertex_main_outputs tint_wrapper_result = {};
+  tint_wrapper_result.tint_symbol_1 = vertex_main_inner(tint_module_vars);
+  return tint_wrapper_result;
 }

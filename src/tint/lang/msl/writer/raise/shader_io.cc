@@ -193,7 +193,28 @@ struct StateImpl : core::ir::transform::ShaderIOBackendState {
                 builder.Constant(u32(config.fixed_sample_mask));
         }
 
-        return builder.Construct(output_struct, std::move(output_values))->Result(0);
+        // Copy all of the outputs into a local variable and then return that.
+        // We need to do this because the clip distances array has to be assigned one element at a
+        // time and cannot be inlined as part of a single struct constructor.
+        auto* result = builder.Var("tint_wrapper_result", ty.ptr<function>(output_struct));
+        for (uint32_t i = 0; i < output_values.Length(); i++) {
+            if (outputs[i].attributes.builtin == core::BuiltinValue::kClipDistances) {
+                // Copy each clip distance to the result array.
+                auto* arr = outputs[i].type->As<core::type::Array>();
+                TINT_ASSERT(arr && arr->ConstantCount());
+                for (uint32_t d = 0; d < arr->ConstantCount(); d++) {
+                    auto* to = builder.Access<ptr<function, f32>>(result, u32(i), u32(d));
+                    auto* from = builder.Access<f32>(output_values[i], u32(d));
+                    builder.Store(to, from);
+                }
+            } else {
+                // Copy the output directly to the corresponding member of the result structure.
+                builder.Store(
+                    builder.Access(ty.ptr<function>(output_values[i]->Type()), result, u32(i)),
+                    output_values[i]);
+            }
+        }
+        return builder.Load(result)->Result(0);
     }
 
     /// @copydoc ShaderIO::BackendState::NeedsVertexPointSize

@@ -25,5 +25,8 @@ FragIn tint_symbol_inner(FragIn in, float b) {
 
 fragment tint_symbol_outputs tint_symbol(tint_symbol_inputs inputs [[stage_in]], uint FragIn_mask [[sample_mask]]) {
   FragIn const v = tint_symbol_inner(FragIn{.a=inputs.FragIn_a, .mask=FragIn_mask}, inputs.b);
-  return tint_symbol_outputs{.FragIn_a=v.a, .FragIn_mask=v.mask};
+  tint_symbol_outputs tint_wrapper_result = {};
+  tint_wrapper_result.FragIn_a = v.a;
+  tint_wrapper_result.FragIn_mask = v.mask;
+  return tint_wrapper_result;
 }

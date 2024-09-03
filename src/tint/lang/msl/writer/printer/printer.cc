@@ -1465,6 +1465,16 @@ class Printer : public tint::TextGenerator {
 
             auto* ty = mem->Type();
 
+            // The clip distances builtin is an array, but needs to be emitted as a C-style array
+            // instead of using Tint's array wrapper. Additionally, the builtin attribute needs to
+            // be emitted after the member name and before the array count.
+            if (mem->Attributes().builtin == core::BuiltinValue::kClipDistances) {
+                auto* arr = ty->As<core::type::Array>();
+                out << "float " << mem_name << " [[clip_distance]] ["
+                    << arr->ConstantCount().value_or(0) << "];";
+                continue;
+            }
+
             EmitType(out, ty);
             out << " " << mem_name;
 

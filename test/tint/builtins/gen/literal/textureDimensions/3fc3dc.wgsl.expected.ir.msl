@@ -42,5 +42,8 @@ VertexOutput vertex_main_inner(tint_module_vars_struct tint_module_vars) {
 vertex vertex_main_outputs vertex_main(texture2d_array<float, access::sample> arg_0 [[texture(0)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.arg_0=arg_0};
   VertexOutput const v_1 = vertex_main_inner(tint_module_vars);
-  return vertex_main_outputs{.VertexOutput_pos=v_1.pos, .VertexOutput_prevent_dce=v_1.prevent_dce};
+  vertex_main_outputs tint_wrapper_result = {};
+  tint_wrapper_result.VertexOutput_pos = v_1.pos;
+  tint_wrapper_result.VertexOutput_prevent_dce = v_1.prevent_dce;
+  return tint_wrapper_result;
 }

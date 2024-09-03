@@ -82,5 +82,8 @@ vertex tint_symbol_outputs tint_symbol(tint_symbol_inputs inputs [[stage_in]], c
   thread float4 gl_Position = 0.0f;
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.position_1=(&position_1), .x_14=x_14, .vUV=(&vUV), .uv=(&uv), .normal=(&normal), .gl_Position=(&gl_Position)};
   main_out const v_3 = tint_symbol_inner(inputs.position_1_param, inputs.uv_param, inputs.normal_param, tint_module_vars);
-  return tint_symbol_outputs{.main_out_gl_Position=v_3.gl_Position, .main_out_vUV_1=v_3.vUV_1};
+  tint_symbol_outputs tint_wrapper_result = {};
+  tint_wrapper_result.main_out_gl_Position = v_3.gl_Position;
+  tint_wrapper_result.main_out_vUV_1 = v_3.vUV_1;
+  return tint_wrapper_result;
 }

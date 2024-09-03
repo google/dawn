@@ -51,9 +51,14 @@ float4 frag_main_inner(float4 fragColor) {
 vertex vtx_main_outputs vtx_main(vtx_main_inputs inputs [[stage_in]], const constant Uniforms* uniforms [[buffer(0)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.uniforms=uniforms};
   VertexOutput const v = vtx_main_inner(VertexInput{.cur_position=inputs.VertexInput_cur_position, .color=inputs.VertexInput_color}, tint_module_vars);
-  return vtx_main_outputs{.VertexOutput_vtxFragColor=v.vtxFragColor, .VertexOutput_Position=v.Position};
+  vtx_main_outputs tint_wrapper_result = {};
+  tint_wrapper_result.VertexOutput_vtxFragColor = v.vtxFragColor;
+  tint_wrapper_result.VertexOutput_Position = v.Position;
+  return tint_wrapper_result;
 }
 
 fragment frag_main_outputs frag_main(frag_main_inputs inputs [[stage_in]]) {
-  return frag_main_outputs{.tint_symbol=frag_main_inner(inputs.fragColor)};
+  frag_main_outputs tint_wrapper_result = {};
+  tint_wrapper_result.tint_symbol = frag_main_inner(inputs.fragColor);
+  return tint_wrapper_result;
 }

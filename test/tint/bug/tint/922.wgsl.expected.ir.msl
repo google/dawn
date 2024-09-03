@@ -331,5 +331,9 @@ vertex tint_symbol_outputs tint_symbol(tint_symbol_inputs inputs [[stage_in]], c
   thread float4 gl_Position = 0.0f;
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.global=global, .global1=global1, .global2=global2, .a_Position1=(&a_Position1), .a_UV1=(&a_UV1), .a_Color1=(&a_Color1), .a_Normal1=(&a_Normal1), .a_PosMtxIdx1=(&a_PosMtxIdx1), .v_Color=(&v_Color), .v_TexCoord=(&v_TexCoord), .gl_Position=(&gl_Position)};
   VertexOutput const v_10 = tint_symbol_inner(inputs.a_Position, inputs.a_UV, inputs.a_Color, inputs.a_Normal, inputs.a_PosMtxIdx, tint_module_vars);
-  return tint_symbol_outputs{.VertexOutput_v_Color=v_10.v_Color, .VertexOutput_v_TexCoord=v_10.v_TexCoord, .VertexOutput_member=v_10.member};
+  tint_symbol_outputs tint_wrapper_result = {};
+  tint_wrapper_result.VertexOutput_v_Color = v_10.v_Color;
+  tint_wrapper_result.VertexOutput_v_TexCoord = v_10.v_TexCoord;
+  tint_wrapper_result.VertexOutput_member = v_10.member;
+  return tint_wrapper_result;
 }

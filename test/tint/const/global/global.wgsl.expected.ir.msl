@@ -30,5 +30,7 @@ float4 tint_symbol_inner() {
 }
 
 fragment tint_symbol_outputs tint_symbol() {
-  return tint_symbol_outputs{.tint_symbol_1=tint_symbol_inner()};
+  tint_symbol_outputs tint_wrapper_result = {};
+  tint_wrapper_result.tint_symbol_1 = tint_symbol_inner();
+  return tint_wrapper_result;
 }

@@ -17,5 +17,8 @@ FragmentOutputs tint_symbol_inner() {
 
 fragment tint_symbol_outputs tint_symbol() {
   FragmentOutputs const v = tint_symbol_inner();
-  return tint_symbol_outputs{.FragmentOutputs_frag_depth=v.frag_depth, .FragmentOutputs_sample_mask=v.sample_mask};
+  tint_symbol_outputs tint_wrapper_result = {};
+  tint_wrapper_result.FragmentOutputs_frag_depth = v.frag_depth;
+  tint_wrapper_result.FragmentOutputs_sample_mask = v.sample_mask;
+  return tint_wrapper_result;
 }

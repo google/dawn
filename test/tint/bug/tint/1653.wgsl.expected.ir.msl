@@ -22,5 +22,7 @@ float4 vs_main_inner(uint in_vertex_index) {
 }
 
 vertex vs_main_outputs vs_main(uint in_vertex_index [[vertex_id]]) {
-  return vs_main_outputs{.tint_symbol=vs_main_inner(in_vertex_index)};
+  vs_main_outputs tint_wrapper_result = {};
+  tint_wrapper_result.tint_symbol = vs_main_inner(in_vertex_index);
+  return tint_wrapper_result;
 }

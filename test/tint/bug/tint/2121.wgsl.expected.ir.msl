@@ -21,5 +21,7 @@ VSOut tint_symbol_inner() {
 }
 
 vertex tint_symbol_outputs tint_symbol() {
-  return tint_symbol_outputs{.VSOut_pos=tint_symbol_inner().pos};
+  tint_symbol_outputs tint_wrapper_result = {};
+  tint_wrapper_result.VSOut_pos = tint_symbol_inner().pos;
+  return tint_wrapper_result;
 }

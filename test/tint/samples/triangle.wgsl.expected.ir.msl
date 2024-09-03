@@ -30,9 +30,13 @@ float4 frag_main_inner() {
 }
 
 vertex vtx_main_outputs vtx_main(uint VertexIndex [[vertex_id]]) {
-  return vtx_main_outputs{.tint_symbol=vtx_main_inner(VertexIndex)};
+  vtx_main_outputs tint_wrapper_result = {};
+  tint_wrapper_result.tint_symbol = vtx_main_inner(VertexIndex);
+  return tint_wrapper_result;
 }
 
 fragment frag_main_outputs frag_main() {
-  return frag_main_outputs{.tint_symbol_1=frag_main_inner()};
+  frag_main_outputs tint_wrapper_result = {};
+  tint_wrapper_result.tint_symbol_1 = frag_main_inner();
+  return tint_wrapper_result;
 }

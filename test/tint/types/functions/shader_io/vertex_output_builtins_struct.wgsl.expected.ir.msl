@@ -14,5 +14,7 @@ VertexOutputs tint_symbol_inner() {
 }
 
 vertex tint_symbol_outputs tint_symbol() {
-  return tint_symbol_outputs{.VertexOutputs_position=tint_symbol_inner().position};
+  tint_symbol_outputs tint_wrapper_result = {};
+  tint_wrapper_result.VertexOutputs_position = tint_symbol_inner().position;
+  return tint_wrapper_result;
 }

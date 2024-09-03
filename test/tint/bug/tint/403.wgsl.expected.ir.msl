@@ -43,5 +43,7 @@ float4 tint_symbol_inner(uint gl_VertexIndex, tint_module_vars_struct tint_modul
 
 vertex tint_symbol_outputs tint_symbol(uint gl_VertexIndex [[vertex_id]], const constant vertexUniformBuffer1* x_20 [[buffer(0)]], const constant vertexUniformBuffer2* x_26 [[buffer(1)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.x_20=x_20, .x_26=x_26};
-  return tint_symbol_outputs{.tint_symbol_1=tint_symbol_inner(gl_VertexIndex, tint_module_vars)};
+  tint_symbol_outputs tint_wrapper_result = {};
+  tint_wrapper_result.tint_symbol_1 = tint_symbol_inner(gl_VertexIndex, tint_module_vars);
+  return tint_wrapper_result;
 }

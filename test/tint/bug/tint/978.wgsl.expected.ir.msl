@@ -32,5 +32,7 @@ FragmentOutput tint_symbol_inner(FragmentInput fIn, tint_module_vars_struct tint
 
 fragment tint_symbol_outputs tint_symbol(tint_symbol_inputs inputs [[stage_in]], depth2d<float, access::sample> depthMap [[texture(0)]], sampler texSampler [[sampler(0)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.depthMap=depthMap, .texSampler=texSampler};
-  return tint_symbol_outputs{.FragmentOutput_color=tint_symbol_inner(FragmentInput{.vUv=inputs.FragmentInput_vUv}, tint_module_vars).color};
+  tint_symbol_outputs tint_wrapper_result = {};
+  tint_wrapper_result.FragmentOutput_color = tint_symbol_inner(FragmentInput{.vUv=inputs.FragmentInput_vUv}, tint_module_vars).color;
+  return tint_wrapper_result;
 }

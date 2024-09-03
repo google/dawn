@@ -22,5 +22,8 @@ Outputs frag_main_inner(half loc1, half4 loc2) {
 
 fragment frag_main_outputs frag_main(frag_main_inputs inputs [[stage_in]]) {
   Outputs const v = frag_main_inner(inputs.loc1, inputs.loc2);
-  return frag_main_outputs{.Outputs_a=v.a, .Outputs_b=v.b};
+  frag_main_outputs tint_wrapper_result = {};
+  tint_wrapper_result.Outputs_a = v.a;
+  tint_wrapper_result.Outputs_b = v.b;
+  return tint_wrapper_result;
 }

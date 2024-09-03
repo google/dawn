@@ -23,5 +23,9 @@ Out f_inner(float4 fbf) {
 
 fragment f_outputs f(f_inputs inputs [[stage_in]]) {
   Out const v = f_inner(inputs.fbf);
-  return f_outputs{.Out_x=v.x, .Out_y=v.y, .Out_z=v.z};
+  f_outputs tint_wrapper_result = {};
+  tint_wrapper_result.Out_x = v.x;
+  tint_wrapper_result.Out_y = v.y;
+  tint_wrapper_result.Out_z = v.z;
+  return tint_wrapper_result;
 }

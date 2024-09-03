@@ -18,9 +18,13 @@ uint main2_inner() {
 }
 
 fragment main1_outputs main1() {
-  return main1_outputs{.tint_symbol=main1_inner()};
+  main1_outputs tint_wrapper_result = {};
+  tint_wrapper_result.tint_symbol = main1_inner();
+  return tint_wrapper_result;
 }
 
 fragment main2_outputs main2() {
-  return main2_outputs{.tint_symbol_1=main2_inner()};
+  main2_outputs tint_wrapper_result = {};
+  tint_wrapper_result.tint_symbol_1 = main2_inner();
+  return tint_wrapper_result;
 }

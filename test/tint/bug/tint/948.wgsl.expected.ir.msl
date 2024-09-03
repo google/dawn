@@ -271,5 +271,7 @@ fragment tint_symbol_outputs tint_symbol(tint_symbol_inputs inputs [[stage_in]],
   thread float3 vPosition = 0.0f;
   thread float2 vUV = 0.0f;
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.x_20=x_20, .frameMapTexture=frameMapTexture, .frameMapSampler=frameMapSampler, .tUV=(&tUV), .tileMapsTexture0=tileMapsTexture0, .tileMapsSampler=tileMapsSampler, .tileMapsTexture1=tileMapsTexture1, .animationMapTexture=animationMapTexture, .animationMapSampler=animationMapSampler, .mt=(&mt), .spriteSheetTexture=spriteSheetTexture, .spriteSheetSampler=spriteSheetSampler, .glFragColor=(&glFragColor), .tileID_1=(&tileID_1), .levelUnits=(&levelUnits), .stageUnits_1=(&stageUnits_1), .vPosition=(&vPosition), .vUV=(&vUV)};
-  return tint_symbol_outputs{.main_out_glFragColor_1=tint_symbol_inner(inputs.tUV_param, inputs.tileID_1_param, inputs.levelUnits_param, inputs.stageUnits_1_param, inputs.vPosition_param, inputs.vUV_param, tint_module_vars).glFragColor_1};
+  tint_symbol_outputs tint_wrapper_result = {};
+  tint_wrapper_result.main_out_glFragColor_1 = tint_symbol_inner(inputs.tUV_param, inputs.tileID_1_param, inputs.levelUnits_param, inputs.stageUnits_1_param, inputs.vPosition_param, inputs.vUV_param, tint_module_vars).glFragColor_1;
+  return tint_wrapper_result;
 }

@@ -50,25 +50,37 @@ half3 main5_inner() {
 }
 
 fragment main0_outputs main0() {
-  return main0_outputs{.tint_symbol=main0_inner()};
+  main0_outputs tint_wrapper_result = {};
+  tint_wrapper_result.tint_symbol = main0_inner();
+  return tint_wrapper_result;
 }
 
 fragment main1_outputs main1() {
-  return main1_outputs{.tint_symbol_1=main1_inner()};
+  main1_outputs tint_wrapper_result = {};
+  tint_wrapper_result.tint_symbol_1 = main1_inner();
+  return tint_wrapper_result;
 }
 
 fragment main2_outputs main2() {
-  return main2_outputs{.tint_symbol_2=main2_inner()};
+  main2_outputs tint_wrapper_result = {};
+  tint_wrapper_result.tint_symbol_2 = main2_inner();
+  return tint_wrapper_result;
 }
 
 fragment main3_outputs main3() {
-  return main3_outputs{.tint_symbol_3=main3_inner()};
+  main3_outputs tint_wrapper_result = {};
+  tint_wrapper_result.tint_symbol_3 = main3_inner();
+  return tint_wrapper_result;
 }
 
 fragment main4_outputs main4() {
-  return main4_outputs{.tint_symbol_4=main4_inner()};
+  main4_outputs tint_wrapper_result = {};
+  tint_wrapper_result.tint_symbol_4 = main4_inner();
+  return tint_wrapper_result;
 }
 
 fragment main5_outputs main5() {
-  return main5_outputs{.tint_symbol_5=main5_inner()};
+  main5_outputs tint_wrapper_result = {};
+  tint_wrapper_result.tint_symbol_5 = main5_inner();
+  return tint_wrapper_result;
 }

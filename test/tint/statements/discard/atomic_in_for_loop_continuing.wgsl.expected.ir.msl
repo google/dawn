@@ -57,5 +57,7 @@ int foo_inner(float in, float2 coord, tint_module_vars_struct tint_module_vars) 
 fragment foo_outputs foo(foo_inputs inputs [[stage_in]], texture2d<float, access::sample> t [[texture(0)]], sampler s [[sampler(0)]], device atomic_int* a [[buffer(0)]]) {
   thread bool continue_execution = true;
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.t=t, .s=s, .a=a, .continue_execution=(&continue_execution)};
-  return foo_outputs{.tint_symbol=foo_inner(inputs.in, inputs.coord, tint_module_vars)};
+  foo_outputs tint_wrapper_result = {};
+  tint_wrapper_result.tint_symbol = foo_inner(inputs.in, inputs.coord, tint_module_vars);
+  return tint_wrapper_result;
 }

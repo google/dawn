@@ -191,5 +191,7 @@ fragment tint_symbol_outputs tint_symbol(bool sk_Clockwise_param [[front_facing]
   thread bool sk_Clockwise = false;
   thread float4 vcolor_S0 = 0.0f;
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.x_4=x_4, .sk_FragColor=(&sk_FragColor), .sk_Clockwise=(&sk_Clockwise), .vcolor_S0=(&vcolor_S0)};
-  return tint_symbol_outputs{.main_out_sk_FragColor_1=tint_symbol_inner(sk_Clockwise_param, inputs.vcolor_S0_param, tint_module_vars).sk_FragColor_1};
+  tint_symbol_outputs tint_wrapper_result = {};
+  tint_wrapper_result.main_out_sk_FragColor_1 = tint_symbol_inner(sk_Clockwise_param, inputs.vcolor_S0_param, tint_module_vars).sk_FragColor_1;
+  return tint_wrapper_result;
 }
