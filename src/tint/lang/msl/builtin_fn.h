@@ -80,6 +80,7 @@ enum class BuiltinFn : uint8_t {
     kSign,
     kThreadgroupBarrier,
     kSimdBallot,
+    kQuadShuffleXor,
     kNone,
 };
 

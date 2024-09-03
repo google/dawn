@@ -108,6 +108,9 @@ struct State {
                     case core::BuiltinFn::kLength:
                     case core::BuiltinFn::kModf:
                     case core::BuiltinFn::kPack2X16Float:
+                    case core::BuiltinFn::kQuadSwapDiagonal:
+                    case core::BuiltinFn::kQuadSwapX:
+                    case core::BuiltinFn::kQuadSwapY:
                     case core::BuiltinFn::kQuantizeToF16:
                     case core::BuiltinFn::kSign:
                     case core::BuiltinFn::kTextureDimensions:
@@ -254,6 +257,17 @@ struct State {
                     break;
                 case core::BuiltinFn::kTextureBarrier:
                     ThreadgroupBarrier(builtin, BarrierType::kTexture);
+                    break;
+
+                // QuadSwap builtins.
+                case core::BuiltinFn::kQuadSwapDiagonal:
+                    QuadSwap(builtin, 0b11);
+                    break;
+                case core::BuiltinFn::kQuadSwapX:
+                    QuadSwap(builtin, 0b01);
+                    break;
+                case core::BuiltinFn::kQuadSwapY:
+                    QuadSwap(builtin, 0b10);
                     break;
 
                 // Pack/unpack builtins.
@@ -942,6 +956,18 @@ struct State {
         auto args = Vector<core::ir::Value*, 1>{b.Constant(u32(type))};
         auto* call = b.CallWithResult<msl::ir::BuiltinCall>(
             builtin->DetachResult(), msl::BuiltinFn::kThreadgroupBarrier, std::move(args));
+        call->InsertBefore(builtin);
+        builtin->Destroy();
+    }
+
+    /// Replace a quadSwap* builtin with the `quad_shuffle_xor()` intrinsic.
+    /// @param builtin the builtin call instruction
+    /// @param mask the shuffle mask
+    void QuadSwap(core::ir::CoreBuiltinCall* builtin, uint32_t mask) {
+        // Replace the builtin call with a call to the msl.quad_shuffle_xor intrinsic.
+        auto args = Vector<core::ir::Value*, 2>{builtin->Args()[0], b.Constant(u32(mask))};
+        auto* call = b.CallWithResult<msl::ir::BuiltinCall>(
+            builtin->DetachResult(), msl::BuiltinFn::kQuadShuffleXor, std::move(args));
         call->InsertBefore(builtin);
         builtin->Destroy();
     }
