@@ -41,6 +41,7 @@
 #include "src/tint/lang/core/ir/exit_if.h"
 #include "src/tint/lang/core/ir/exit_switch.h"
 #include "src/tint/lang/core/ir/function.h"
+#include "src/tint/lang/core/ir/if.h"
 #include "src/tint/lang/core/ir/let.h"
 #include "src/tint/lang/core/ir/load.h"
 #include "src/tint/lang/core/ir/load_vector_element.h"
@@ -249,15 +250,17 @@ class Printer : public tint::TextGenerator {
 
         for (auto* inst : *block) {
             tint::Switch(
-                inst,                                                      //
-                [&](const core::ir::Call* i) { EmitCallStmt(i); },         //
-                [&](const core::ir::ExitSwitch*) { EmitExitSwitch(); },    //
-                [&](const core::ir::Let* i) { EmitLet(i); },               //
-                [&](const core::ir::Return* r) { EmitReturn(r); },         //
-                [&](const core::ir::Store* s) { EmitStore(s); },           //
-                [&](const core::ir::Switch* i) { EmitSwitch(i); },         //
-                [&](const core::ir::Unreachable*) { EmitUnreachable(); },  //
-                [&](const core::ir::Var* v) { EmitVar(Line(), v); },       //
+                inst,                                                                    //
+                [&](const core::ir::Call* i) { EmitCallStmt(i); },                       //
+                [&](const core::ir::ExitIf*) { /* do nothing handled by transform */ },  //
+                [&](const core::ir::ExitSwitch*) { EmitExitSwitch(); },                  //
+                [&](const core::ir::If* i) { EmitIf(i); },                               //
+                [&](const core::ir::Let* i) { EmitLet(i); },                             //
+                [&](const core::ir::Return* r) { EmitReturn(r); },                       //
+                [&](const core::ir::Store* s) { EmitStore(s); },                         //
+                [&](const core::ir::Switch* i) { EmitSwitch(i); },                       //
+                [&](const core::ir::Unreachable*) { EmitUnreachable(); },                //
+                [&](const core::ir::Var* v) { EmitVar(Line(), v); },                     //
 
                 [&](const core::ir::NextIteration*) { /* do nothing */ },                //
                 [&](const core::ir::ExitIf*) { /* do nothing handled by transform */ },  //
@@ -272,6 +275,31 @@ class Printer : public tint::TextGenerator {
                 [&](const core::ir::Swizzle*) { /* inlined */ },                         //
                 TINT_ICE_ON_NO_MATCH);
         }
+    }
+
+    /// Emit an if instruction
+    /// @param if_ the if instruction
+    void EmitIf(const core::ir::If* if_) {
+        {
+            auto out = Line();
+            out << "if (";
+            EmitValue(out, if_->Condition());
+            out << ") {";
+        }
+
+        {
+            const ScopedIndent si(current_buffer_);
+            EmitBlock(if_->True());
+        }
+
+        if (if_->False() && !if_->False()->IsEmpty()) {
+            Line() << "} else {";
+
+            const ScopedIndent si(current_buffer_);
+            EmitBlock(if_->False());
+        }
+
+        Line() << "}";
     }
 
     void EmitExitSwitch() { Line() << "break;"; }
