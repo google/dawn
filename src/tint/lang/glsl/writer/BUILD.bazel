@@ -94,6 +94,7 @@ cc_library(
     "call_test.cc",
     "constant_test.cc",
     "constructor_test.cc",
+    "convert_test.cc",
     "function_test.cc",
     "if_test.cc",
     "loop_test.cc",
