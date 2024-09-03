@@ -5,9 +5,13 @@ struct tint_module_vars_struct {
   device uint* i;
 };
 
+#define TINT_ISOLATE_UB(VOLATILE_NAME) \
+  volatile bool VOLATILE_NAME = true; \
+  if (VOLATILE_NAME)
+
 void tint_symbol(tint_module_vars_struct tint_module_vars) {
   {
-    while(true) {
+    TINT_ISOLATE_UB(tint_volatile_true) while(true) {
       if (((*tint_module_vars.i) < 10u)) {
       } else {
         break;

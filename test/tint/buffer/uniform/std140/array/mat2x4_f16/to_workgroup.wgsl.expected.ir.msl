@@ -18,6 +18,10 @@ struct tint_module_vars_struct {
   threadgroup tint_array<half2x4, 4>* w;
 };
 
+#define TINT_ISOLATE_UB(VOLATILE_NAME) \
+  volatile bool VOLATILE_NAME = true; \
+  if (VOLATILE_NAME)
+
 struct tint_symbol_1 {
   tint_array<half2x4, 4> tint_symbol;
 };
@@ -26,7 +30,7 @@ void f_inner(uint tint_local_index, tint_module_vars_struct tint_module_vars) {
   {
     uint v = 0u;
     v = tint_local_index;
-    while(true) {
+    TINT_ISOLATE_UB(tint_volatile_true) while(true) {
       uint const v_1 = v;
       if ((v_1 >= 4u)) {
         break;

@@ -182,6 +182,10 @@ class Printer : public tint::TextGenerator {
     /// Non-empty only if the template has been generated.
     std::string array_template_name_;
 
+    /// The name of the macro used to prevent UB affecting later control flow.
+    /// Do not use this directly, instead call IsolateUB().
+    std::string isolate_ub_macro_name_;
+
     /// Block to emit for a continuing
     std::function<void()> emit_continuing_;
 
@@ -213,6 +217,21 @@ class Printer : public tint::TextGenerator {
         Line() << "};";
 
         return array_template_name_;
+    }
+
+    /// @returns a call to the TINT_ISOLATE_UB macro, creating that macro on first call
+    std::string IsolateUB() {
+        if (isolate_ub_macro_name_.empty()) {
+            TINT_SCOPED_ASSIGNMENT(current_buffer_, &preamble_buffer_);
+            isolate_ub_macro_name_ = UniqueIdentifier("TINT_ISOLATE_UB");
+            Line();
+            Line() << "#define " << isolate_ub_macro_name_ << "(VOLATILE_NAME) \\";
+            Line() << "  volatile bool VOLATILE_NAME = true; \\";
+            Line() << "  if (VOLATILE_NAME)";
+        }
+        StringStream ss;
+        ss << isolate_ub_macro_name_ << "(" << UniqueIdentifier("tint_volatile_true") << ")";
+        return ss.str();
     }
 
     /// Find all structures that are used in host-shareable address spaces and mark them as such so
@@ -652,7 +671,7 @@ class Printer : public tint::TextGenerator {
             ScopedIndent init(current_buffer_);
             EmitBlock(l->Initializer());
 
-            Line() << "while(true) {";
+            Line() << IsolateUB() << " while(true) {";
             {
                 ScopedIndent si(current_buffer_);
                 EmitBlock(l->Body());

@@ -13,13 +13,17 @@
 #include <metal_stdlib>
 using namespace metal;
 
+#define TINT_ISOLATE_UB(VOLATILE_NAME) \
+  volatile bool VOLATILE_NAME = true; \
+  if (VOLATILE_NAME)
+
 struct tint_symbol_inputs {
   float x [[user(locn0)]];
 };
 
 void tint_symbol_inner(float x) {
   {
-    while(true) {
+    TINT_ISOLATE_UB(tint_volatile_true) while(true) {
       dfdx(1.0f);
       {
         if ((x > 0.0f)) { break; }

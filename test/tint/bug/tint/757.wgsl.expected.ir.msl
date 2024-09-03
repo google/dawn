@@ -27,13 +27,17 @@ struct tint_module_vars_struct {
   device Result* result;
 };
 
+#define TINT_ISOLATE_UB(VOLATILE_NAME) \
+  volatile bool VOLATILE_NAME = true; \
+  if (VOLATILE_NAME)
+
 void tint_symbol_inner(uint3 GlobalInvocationID, tint_module_vars_struct tint_module_vars) {
   uint flatIndex = (((4u * GlobalInvocationID[2u]) + (2u * GlobalInvocationID[1u])) + GlobalInvocationID[0u]);
   flatIndex = (flatIndex * 1u);
   float4 texel = tint_module_vars.myTexture.read(uint2(int2(GlobalInvocationID.xy)), 0, 0);
   {
     uint i = 0u;
-    while(true) {
+    TINT_ISOLATE_UB(tint_volatile_true) while(true) {
       if ((i < 1u)) {
       } else {
         break;

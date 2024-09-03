@@ -18,6 +18,10 @@ struct tint_packed_vec3_f32_array_element {
   /* 0x000c */ tint_array<int8_t, 4> tint_pad;
 };
 
+#define TINT_ISOLATE_UB(VOLATILE_NAME) \
+  volatile bool VOLATILE_NAME = true; \
+  if (VOLATILE_NAME)
+
 struct S2_packed_vec3 {
   /* 0x0000 */ tint_array<tint_array<tint_packed_vec3_f32_array_element, 3>, 1> m;
 };
@@ -71,7 +75,7 @@ void tint_store_and_preserve_padding_3(device tint_array<tint_array<tint_packed_
   {
     uint v = 0u;
     v = 0u;
-    while(true) {
+    TINT_ISOLATE_UB(tint_volatile_true) while(true) {
       uint const v_1 = v;
       if ((v_1 >= 1u)) {
         break;
@@ -93,7 +97,7 @@ void tint_store_and_preserve_padding_7(device tint_array<S2_packed_vec3, 1>* con
   {
     uint v_2 = 0u;
     v_2 = 0u;
-    while(true) {
+    TINT_ISOLATE_UB(tint_volatile_true_1) while(true) {
       uint const v_3 = v_2;
       if ((v_3 >= 1u)) {
         break;
@@ -115,7 +119,7 @@ void tint_store_and_preserve_padding_6(device tint_array<S_packed_vec3, 1>* cons
   {
     uint v_4 = 0u;
     v_4 = 0u;
-    while(true) {
+    TINT_ISOLATE_UB(tint_volatile_true_2) while(true) {
       uint const v_5 = v_4;
       if ((v_5 >= 1u)) {
         break;
@@ -142,7 +146,7 @@ kernel void tint_symbol(device tint_array<tint_packed_vec3_f32_array_element, 3>
   float3x3 m = float3x3(0.0f);
   {
     uint c = 0u;
-    while(true) {
+    TINT_ISOLATE_UB(tint_volatile_true_3) while(true) {
       if ((c < 3u)) {
       } else {
         break;

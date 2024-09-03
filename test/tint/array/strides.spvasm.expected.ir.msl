@@ -18,6 +18,10 @@ struct strided_arr {
   /* 0x0004 */ tint_array<int8_t, 4> tint_pad;
 };
 
+#define TINT_ISOLATE_UB(VOLATILE_NAME) \
+  volatile bool VOLATILE_NAME = true; \
+  if (VOLATILE_NAME)
+
 struct strided_arr_1 {
   /* 0x0000 */ tint_array<tint_array<strided_arr, 2>, 3> el;
   /* 0x0030 */ tint_array<int8_t, 80> tint_pad_1;
@@ -39,7 +43,7 @@ void tint_store_and_preserve_padding_3(device tint_array<strided_arr, 2>* const 
   {
     uint v = 0u;
     v = 0u;
-    while(true) {
+    TINT_ISOLATE_UB(tint_volatile_true) while(true) {
       uint const v_1 = v;
       if ((v_1 >= 2u)) {
         break;
@@ -57,7 +61,7 @@ void tint_store_and_preserve_padding_2(device tint_array<tint_array<strided_arr,
   {
     uint v_2 = 0u;
     v_2 = 0u;
-    while(true) {
+    TINT_ISOLATE_UB(tint_volatile_true_1) while(true) {
       uint const v_3 = v_2;
       if ((v_3 >= 3u)) {
         break;
@@ -79,7 +83,7 @@ void tint_store_and_preserve_padding(device tint_array<strided_arr_1, 4>* const 
   {
     uint v_4 = 0u;
     v_4 = 0u;
-    while(true) {
+    TINT_ISOLATE_UB(tint_volatile_true_2) while(true) {
       uint const v_5 = v_4;
       if ((v_5 >= 4u)) {
         break;

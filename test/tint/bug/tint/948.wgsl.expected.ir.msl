@@ -48,6 +48,10 @@ struct tint_module_vars_struct {
   thread float2* vUV;
 };
 
+#define TINT_ISOLATE_UB(VOLATILE_NAME) \
+  volatile bool VOLATILE_NAME = true; \
+  if (VOLATILE_NAME)
+
 struct main_out {
   float4 glFragColor_1;
 };
@@ -118,7 +122,7 @@ void main_1(tint_module_vars_struct tint_module_vars) {
   stageUnits = (float2(1.0f) / x_111);
   i = 0;
   {
-    while(true) {
+    TINT_ISOLATE_UB(tint_volatile_true) while(true) {
       int const x_122 = i;
       if ((x_122 < 2)) {
       } else {
@@ -159,7 +163,7 @@ void main_1(tint_module_vars_struct tint_module_vars) {
         (*tint_module_vars.mt) = fmod((x_181 * x_184), 1.0f);
         f = 0.0f;
         {
-          while(true) {
+          TINT_ISOLATE_UB(tint_volatile_true_1) while(true) {
             float const x_193 = f;
             if ((x_193 < 8.0f)) {
             } else {

@@ -31,6 +31,10 @@ struct tint_module_vars_struct {
   threadgroup tint_array<tint_array<float3, 256>, 4>* tile;
 };
 
+#define TINT_ISOLATE_UB(VOLATILE_NAME) \
+  volatile bool VOLATILE_NAME = true; \
+  if (VOLATILE_NAME)
+
 struct tint_symbol_2 {
   tint_array<tint_array<float3, 256>, 4> tint_symbol_1;
 };
@@ -43,7 +47,7 @@ void tint_symbol_inner(uint3 WorkGroupID, uint3 LocalInvocationID, uint tint_loc
   {
     uint v = 0u;
     v = tint_local_index;
-    while(true) {
+    TINT_ISOLATE_UB(tint_volatile_true) while(true) {
       uint const v_1 = v;
       if ((v_1 >= 1024u)) {
         break;
@@ -64,14 +68,14 @@ void tint_symbol_inner(uint3 WorkGroupID, uint3 LocalInvocationID, uint tint_loc
   uint2 const baseIndex = (v_4 - uint2(filterOffset, 0u));
   {
     uint r = 0u;
-    while(true) {
+    TINT_ISOLATE_UB(tint_volatile_true_1) while(true) {
       if ((r < 4u)) {
       } else {
         break;
       }
       {
         uint c = 0u;
-        while(true) {
+        TINT_ISOLATE_UB(tint_volatile_true_2) while(true) {
           if ((c < 4u)) {
           } else {
             break;
@@ -99,14 +103,14 @@ void tint_symbol_inner(uint3 WorkGroupID, uint3 LocalInvocationID, uint tint_loc
   threadgroup_barrier(mem_flags::mem_threadgroup);
   {
     uint r = 0u;
-    while(true) {
+    TINT_ISOLATE_UB(tint_volatile_true_3) while(true) {
       if ((r < 4u)) {
       } else {
         break;
       }
       {
         uint c = 0u;
-        while(true) {
+        TINT_ISOLATE_UB(tint_volatile_true_4) while(true) {
           if ((c < 4u)) {
           } else {
             break;
@@ -132,7 +136,7 @@ void tint_symbol_inner(uint3 WorkGroupID, uint3 LocalInvocationID, uint tint_loc
             float3 acc = float3(0.0f);
             {
               uint f = 0u;
-              while(true) {
+              TINT_ISOLATE_UB(tint_volatile_true_5) while(true) {
                 if ((f < (*tint_module_vars.params).filterDim)) {
                 } else {
                   break;

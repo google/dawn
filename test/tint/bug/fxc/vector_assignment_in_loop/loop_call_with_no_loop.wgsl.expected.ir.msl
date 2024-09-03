@@ -8,6 +8,10 @@ struct tint_module_vars_struct {
   thread bool2* v2b;
 };
 
+#define TINT_ISOLATE_UB(VOLATILE_NAME) \
+  volatile bool VOLATILE_NAME = true; \
+  if (VOLATILE_NAME)
+
 void foo(tint_module_vars_struct tint_module_vars) {
   int i = 0;
   (*tint_module_vars.v2f)[i] = 1.0f;
@@ -24,7 +28,7 @@ kernel void tint_symbol() {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.v2f=(&v2f), .v3i=(&v3i), .v4u=(&v4u), .v2b=(&v2b)};
   {
     int i = 0;
-    while(true) {
+    TINT_ISOLATE_UB(tint_volatile_true) while(true) {
       if ((i < 2)) {
       } else {
         break;

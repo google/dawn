@@ -30,6 +30,10 @@ struct tint_module_vars_struct {
   device S_nested* dst_nested;
 };
 
+#define TINT_ISOLATE_UB(VOLATILE_NAME) \
+  volatile bool VOLATILE_NAME = true; \
+  if (VOLATILE_NAME)
+
 struct tint_symbol_2 {
   tint_array<int4, 4> tint_symbol_1;
 };
@@ -63,7 +67,7 @@ void tint_symbol_inner(uint tint_local_index, tint_module_vars_struct tint_modul
   {
     uint v = 0u;
     v = tint_local_index;
-    while(true) {
+    TINT_ISOLATE_UB(tint_volatile_true) while(true) {
       uint const v_1 = v;
       if ((v_1 >= 4u)) {
         break;

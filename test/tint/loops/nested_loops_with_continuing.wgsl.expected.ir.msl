@@ -1,16 +1,20 @@
 #include <metal_stdlib>
 using namespace metal;
 
+#define TINT_ISOLATE_UB(VOLATILE_NAME) \
+  volatile bool VOLATILE_NAME = true; \
+  if (VOLATILE_NAME)
+
 int f() {
   int i = 0;
   int j = 0;
   {
-    while(true) {
+    TINT_ISOLATE_UB(tint_volatile_true) while(true) {
       if ((i > 4)) {
         return 1;
       }
       {
-        while(true) {
+        TINT_ISOLATE_UB(tint_volatile_true_1) while(true) {
           if ((j > 4)) {
             return 2;
           }

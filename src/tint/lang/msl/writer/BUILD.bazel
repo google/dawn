@@ -95,6 +95,7 @@ cc_library(
     "helper_test.h",
     "if_test.cc",
     "let_test.cc",
+    "loop_test.cc",
     "return_test.cc",
     "type_test.cc",
     "var_test.cc",

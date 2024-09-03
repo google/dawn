@@ -1,10 +1,14 @@
 #include <metal_stdlib>
 using namespace metal;
 
+#define TINT_ISOLATE_UB(VOLATILE_NAME) \
+  volatile bool VOLATILE_NAME = true; \
+  if (VOLATILE_NAME)
+
 void f() {
   {
     int i0520 = 0;
-    while(true) {
+    TINT_ISOLATE_UB(tint_volatile_true) while(true) {
       if (false) {
       } else {
         break;
@@ -16,7 +20,7 @@ void f() {
   }
   {
     int i62 = 0;
-    while(true) {
+    TINT_ISOLATE_UB(tint_volatile_true_1) while(true) {
       if (false) {
       } else {
         break;
@@ -28,7 +32,7 @@ void f() {
   }
   {
     int i0520 = 0;
-    while(true) {
+    TINT_ISOLATE_UB(tint_volatile_true_2) while(true) {
       if (false) {
       } else {
         break;
@@ -40,7 +44,7 @@ void f() {
   }
   {
     int i62 = 0;
-    while(true) {
+    TINT_ISOLATE_UB(tint_volatile_true_3) while(true) {
       if (false) {
       } else {
         break;
@@ -52,7 +56,7 @@ void f() {
   }
   {
     int i62 = 0;
-    while(true) {
+    TINT_ISOLATE_UB(tint_volatile_true_4) while(true) {
       if (false) {
       } else {
         break;
@@ -64,7 +68,7 @@ void f() {
   }
   {
     int i60 = 0;
-    while(true) {
+    TINT_ISOLATE_UB(tint_volatile_true_5) while(true) {
       if (false) {
       } else {
         break;
@@ -76,7 +80,7 @@ void f() {
   }
   {
     int i62 = 0;
-    while(true) {
+    TINT_ISOLATE_UB(tint_volatile_true_6) while(true) {
       if (false) {
       } else {
         break;
@@ -88,7 +92,7 @@ void f() {
   }
   {
     int i60 = 0;
-    while(true) {
+    TINT_ISOLATE_UB(tint_volatile_true_7) while(true) {
       if (false) {
       } else {
         break;

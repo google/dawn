@@ -32,6 +32,10 @@ struct tint_module_vars_struct {
   threadgroup tint_array<tint_array<float, 64>, 64>* mm_Bsub;
 };
 
+#define TINT_ISOLATE_UB(VOLATILE_NAME) \
+  volatile bool VOLATILE_NAME = true; \
+  if (VOLATILE_NAME)
+
 struct tint_symbol_3 {
   tint_array<tint_array<float, 64>, 64> tint_symbol_1;
   tint_array<tint_array<float, 64>, 64> tint_symbol_2;
@@ -86,7 +90,7 @@ void tint_symbol_inner(uint3 local_id, uint3 global_id, uint tint_local_index, t
   {
     uint v_3 = 0u;
     v_3 = tint_local_index;
-    while(true) {
+    TINT_ISOLATE_UB(tint_volatile_true) while(true) {
       uint const v_4 = v_3;
       if ((v_4 >= 4096u)) {
         break;
@@ -110,7 +114,7 @@ void tint_symbol_inner(uint3 local_id, uint3 global_id, uint tint_local_index, t
   tint_array<float, 4> BCached = {};
   {
     uint index = 0u;
-    while(true) {
+    TINT_ISOLATE_UB(tint_volatile_true_1) while(true) {
       if ((index < 16u)) {
       } else {
         break;
@@ -128,21 +132,21 @@ void tint_symbol_inner(uint3 local_id, uint3 global_id, uint tint_local_index, t
   uint const tileRowB = (local_id[1u] * RowPerThreadB);
   {
     uint t = 0u;
-    while(true) {
+    TINT_ISOLATE_UB(tint_volatile_true_2) while(true) {
       if ((t < numTiles)) {
       } else {
         break;
       }
       {
         uint innerRow = 0u;
-        while(true) {
+        TINT_ISOLATE_UB(tint_volatile_true_3) while(true) {
           if ((innerRow < 4u)) {
           } else {
             break;
           }
           {
             uint innerCol = 0u;
-            while(true) {
+            TINT_ISOLATE_UB(tint_volatile_true_4) while(true) {
               if ((innerCol < ColPerThreadA)) {
               } else {
                 break;
@@ -164,14 +168,14 @@ void tint_symbol_inner(uint3 local_id, uint3 global_id, uint tint_local_index, t
       }
       {
         uint innerRow = 0u;
-        while(true) {
+        TINT_ISOLATE_UB(tint_volatile_true_5) while(true) {
           if ((innerRow < RowPerThreadB)) {
           } else {
             break;
           }
           {
             uint innerCol = 0u;
-            while(true) {
+            TINT_ISOLATE_UB(tint_volatile_true_6) while(true) {
               if ((innerCol < 4u)) {
               } else {
                 break;
@@ -195,14 +199,14 @@ void tint_symbol_inner(uint3 local_id, uint3 global_id, uint tint_local_index, t
       threadgroup_barrier(mem_flags::mem_threadgroup);
       {
         uint k = 0u;
-        while(true) {
+        TINT_ISOLATE_UB(tint_volatile_true_7) while(true) {
           if ((k < 64u)) {
           } else {
             break;
           }
           {
             uint inner = 0u;
-            while(true) {
+            TINT_ISOLATE_UB(tint_volatile_true_8) while(true) {
               if ((inner < 4u)) {
               } else {
                 break;
@@ -216,7 +220,7 @@ void tint_symbol_inner(uint3 local_id, uint3 global_id, uint tint_local_index, t
           }
           {
             uint innerRow = 0u;
-            while(true) {
+            TINT_ISOLATE_UB(tint_volatile_true_9) while(true) {
               if ((innerRow < 4u)) {
               } else {
                 break;
@@ -224,7 +228,7 @@ void tint_symbol_inner(uint3 local_id, uint3 global_id, uint tint_local_index, t
               ACached = (*tint_module_vars.mm_Asub)[(tileRow + innerRow)][k];
               {
                 uint innerCol = 0u;
-                while(true) {
+                TINT_ISOLATE_UB(tint_volatile_true_10) while(true) {
                   if ((innerCol < 4u)) {
                   } else {
                     break;
@@ -258,14 +262,14 @@ void tint_symbol_inner(uint3 local_id, uint3 global_id, uint tint_local_index, t
   }
   {
     uint innerRow = 0u;
-    while(true) {
+    TINT_ISOLATE_UB(tint_volatile_true_11) while(true) {
       if ((innerRow < 4u)) {
       } else {
         break;
       }
       {
         uint innerCol = 0u;
-        while(true) {
+        TINT_ISOLATE_UB(tint_volatile_true_12) while(true) {
           if ((innerCol < 4u)) {
           } else {
             break;

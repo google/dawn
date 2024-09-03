@@ -5,9 +5,13 @@ struct tint_module_vars_struct {
   thread bool* continue_execution;
 };
 
+#define TINT_ISOLATE_UB(VOLATILE_NAME) \
+  volatile bool VOLATILE_NAME = true; \
+  if (VOLATILE_NAME)
+
 void f(tint_module_vars_struct tint_module_vars) {
   {
-    while(true) {
+    TINT_ISOLATE_UB(tint_volatile_true) while(true) {
       (*tint_module_vars.continue_execution) = false;
       return;
     }
