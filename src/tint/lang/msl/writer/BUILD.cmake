@@ -166,9 +166,11 @@ tint_target_add_dependencies(tint_lang_msl_writer_bench bench
   tint_api_common
   tint_lang_core
   tint_lang_core_constant
+  tint_lang_core_ir
   tint_lang_core_type
   tint_lang_wgsl
   tint_lang_wgsl_ast
+  tint_lang_wgsl_common
   tint_lang_wgsl_features
   tint_lang_wgsl_helpers
   tint_lang_wgsl_program
@@ -204,6 +206,7 @@ endif(TINT_BUILD_MSL_WRITER)
 if(TINT_BUILD_WGSL_READER)
   tint_target_add_dependencies(tint_lang_msl_writer_bench bench
     tint_cmd_bench_bench
+    tint_lang_wgsl_reader
   )
 endif(TINT_BUILD_WGSL_READER)
 

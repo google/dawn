@@ -32,10 +32,60 @@
 #include "src/tint/lang/msl/writer/writer.h"
 #include "src/tint/lang/wgsl/ast/module.h"
 #include "src/tint/lang/wgsl/helpers/flatten_bindings.h"
+#include "src/tint/lang/wgsl/reader/reader.h"
 #include "src/tint/lang/wgsl/sem/variable.h"
 
 namespace tint::msl::writer {
 namespace {
+
+void GenerateMSL(benchmark::State& state, std::string input_name) {
+    auto res = bench::GetWgslProgram(input_name);
+    if (res != Success) {
+        state.SkipWithError(res.Failure().reason.Str());
+        return;
+    }
+
+    // Remap resource numbers to a flat namespace.
+    const tint::Program* program = &res->program;
+    auto flattened = tint::wgsl::FlattenBindings(res->program);
+    if (flattened) {
+        program = &*flattened;
+    }
+
+    tint::msl::writer::Options gen_options = {};
+    gen_options.array_length_from_uniform.ubo_binding = 30;
+    gen_options.array_length_from_uniform.bindpoint_to_size_index.emplace(tint::BindingPoint{0, 0},
+                                                                          0);
+    gen_options.array_length_from_uniform.bindpoint_to_size_index.emplace(tint::BindingPoint{0, 1},
+                                                                          1);
+    gen_options.array_length_from_uniform.bindpoint_to_size_index.emplace(tint::BindingPoint{0, 2},
+                                                                          2);
+    gen_options.array_length_from_uniform.bindpoint_to_size_index.emplace(tint::BindingPoint{0, 3},
+                                                                          3);
+    gen_options.array_length_from_uniform.bindpoint_to_size_index.emplace(tint::BindingPoint{0, 4},
+                                                                          4);
+    gen_options.array_length_from_uniform.bindpoint_to_size_index.emplace(tint::BindingPoint{0, 5},
+                                                                          5);
+    gen_options.array_length_from_uniform.bindpoint_to_size_index.emplace(tint::BindingPoint{0, 6},
+                                                                          6);
+    gen_options.array_length_from_uniform.bindpoint_to_size_index.emplace(tint::BindingPoint{0, 7},
+                                                                          7);
+    gen_options.bindings = tint::msl::writer::GenerateBindings(*program);
+
+    for (auto _ : state) {
+        // Convert the AST program to an IR module.
+        auto ir = tint::wgsl::reader::ProgramToLoweredIR(*program);
+        if (ir != Success) {
+            state.SkipWithError(ir.Failure().reason.Str());
+            return;
+        }
+
+        auto gen_res = Generate(ir.Get(), gen_options);
+        if (gen_res != Success) {
+            state.SkipWithError(gen_res.Failure().reason.Str());
+        }
+    }
+}
 
 void GenerateMSL_AST(benchmark::State& state, std::string input_name) {
     auto res = bench::GetWgslProgram(input_name);
@@ -79,6 +129,7 @@ void GenerateMSL_AST(benchmark::State& state, std::string input_name) {
     }
 }
 
+TINT_BENCHMARK_PROGRAMS(GenerateMSL);
 TINT_BENCHMARK_PROGRAMS(GenerateMSL_AST);
 
 }  // namespace
