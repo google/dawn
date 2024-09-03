@@ -1,8 +1,8 @@
 #version 310 es
 
-float arr[2] = float[2](vec2(1.0f), vec2(2.0f));
+vec2 arr[2] = vec2[2](vec2(1.0f), vec2(2.0f));
 void f() {
-  float v[2] = arr;
+  vec2 v[2] = arr;
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {

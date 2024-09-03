@@ -1510,7 +1510,7 @@ TEST_F(GlslWriterTest, AccessStoreStructNested) {
     EXPECT_EQ(output_.glsl, GlslHeader() + R"(
 struct Inner {
   mat3 s;
-  float t[5];
+  vec3 t[5];
 };
 
 struct Outer {

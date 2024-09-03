@@ -587,26 +587,28 @@ class Printer : public tint::TextGenerator {
                        const core::type::Array* ary,
                        const std::string& name,
                        bool* name_printed) {
-        EmitType(out, ary->DeepestElement());
+        std::stringstream args;
+        const core::type::Type* ty = ary;
+        while (auto* arr = ty->As<core::type::Array>()) {
+            if (arr->Count()->Is<core::type::RuntimeArrayCount>()) {
+                args << "[]";
+            } else {
+                auto count = arr->ConstantCount();
+                TINT_ASSERT(count.has_value());
+
+                args << "[" << count.value() << "]";
+            }
+            ty = arr->ElemType();
+        }
+
+        EmitType(out, ty);
         if (!name.empty()) {
             out << " " << name;
             if (name_printed) {
                 *name_printed = true;
             }
         }
-
-        const core::type::Type* ty = ary;
-        while (auto* arr = ty->As<core::type::Array>()) {
-            if (arr->Count()->Is<core::type::RuntimeArrayCount>()) {
-                out << "[]";
-            } else {
-                auto count = arr->ConstantCount();
-                TINT_ASSERT(count.has_value());
-
-                out << "[" << count.value() << "]";
-            }
-            ty = arr->ElemType();
-        }
+        out << args.str();
     }
 
     void EmitTextureType(StringStream& out, const core::type::Texture* t) {
