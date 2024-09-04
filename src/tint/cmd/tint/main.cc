@@ -1056,6 +1056,23 @@ bool GenerateGlsl([[maybe_unused]] const tint::Program& program,
 
     auto generate = [&](const tint::Program& prg, const std::string entry_point_name,
                         [[maybe_unused]] tint::ast::PipelineStage stage) -> bool {
+        // The GLSL backend assumes single entry point
+        tint::ast::transform::Manager transform_manager;
+        tint::ast::transform::DataMap transform_inputs;
+
+        if (options.use_ir && !entry_point_name.empty()) {
+            transform_manager.append(std::make_unique<tint::ast::transform::SingleEntryPoint>());
+            transform_inputs.Add<tint::ast::transform::SingleEntryPoint::Config>(entry_point_name);
+        }
+
+        tint::ast::transform::DataMap outputs;
+        auto single_prog = transform_manager.Run(prg, std::move(transform_inputs), outputs);
+        if (!single_prog.IsValid()) {
+            tint::cmd::PrintWGSL(std::cerr, single_prog);
+            std::cerr << single_prog.Diagnostics() << "\n";
+            return 1;
+        }
+
         tint::glsl::writer::Options gen_options;
         gen_options.disable_robustness = !options.enable_robustness;
         gen_options.bindings = tint::glsl::writer::GenerateBindings(program);
@@ -1092,17 +1109,17 @@ bool GenerateGlsl([[maybe_unused]] const tint::Program& program,
         tint::Result<tint::glsl::writer::Output> result;
         if (options.use_ir) {
             // Convert the AST program to an IR module.
-            auto ir = tint::wgsl::reader::ProgramToLoweredIR(prg);
+            auto ir = tint::wgsl::reader::ProgramToLoweredIR(single_prog);
             if (ir != tint::Success) {
                 std::cerr << "Failed to generate IR: " << ir << "\n";
                 return false;
             }
-            result = tint::glsl::writer::Generate(ir.Get(), gen_options, entry_point_name);
+            result = tint::glsl::writer::Generate(ir.Get(), gen_options, "");
         } else {
-            result = tint::glsl::writer::Generate(prg, gen_options, entry_point_name);
+            result = tint::glsl::writer::Generate(single_prog, gen_options, entry_point_name);
         }
         if (result != tint::Success) {
-            tint::cmd::PrintWGSL(std::cerr, prg);
+            tint::cmd::PrintWGSL(std::cerr, single_prog);
             std::cerr << "Failed to generate: " << result.Failure() << "\n";
             return false;
         }

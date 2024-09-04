@@ -6,7 +6,3 @@ void main() {
   int b = 1;
   int c = (a + 1);
 }
-void f1() {
-  int a = 1;
-  int b = ((-2147483647 - 1) - a);
-}

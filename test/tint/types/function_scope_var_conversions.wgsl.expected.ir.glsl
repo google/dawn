@@ -1,9 +1,5 @@
 #version 310 es
 
-void constant_with_non_constant() {
-  float a = 0.0f;
-  vec2 b = vec2(1.0f, a);
-}
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
   bool bool_var1 = true;
