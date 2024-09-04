@@ -58,4 +58,14 @@ S ret_struct() {
 }
 
 kernel void tint_symbol() {
+  bool const a = ret_bool();
+  int const b = ret_i32();
+  uint const c = ret_u32();
+  float const d = ret_f32();
+  int2 const e = ret_v2i32();
+  uint3 const f = ret_v3u32();
+  float4 const g = ret_v4f32();
+  float2x3 const h = ret_m2x3();
+  tint_array<float, 4> const i = ret_arr();
+  S const j = ret_struct();
 }
