@@ -371,7 +371,7 @@ INSTANTIATE_TEST_SUITE_P(MslWriterTest,
                          MslWriterBinaryTest_ShiftSignedOverflowDefinedBehaviour_Chained,
                          testing::ValuesIn(shift_signed_overflow_defined_behaviour_chained_cases));
 
-TEST_F(MslWriterTest, DISABLED_BinaryModF32) {
+TEST_F(MslWriterTest, BinaryModF32) {
     auto* func = b.Function("foo", ty.void_());
     b.Append(func->Block(), [&] {
         auto* left = b.Var("left", ty.ptr<core::AddressSpace::kFunction, f32>());
@@ -391,10 +391,11 @@ void foo() {
   float left = 0.0f;
   float right = 0.0f;
   float const val = fmod(left, right);
+}
 )");
 }
 
-TEST_F(MslWriterTest, DISABLED_BinaryModF16) {
+TEST_F(MslWriterTest, BinaryModF16) {
     auto* func = b.Function("foo", ty.void_());
     b.Append(func->Block(), [&] {
         auto* left = b.Var("left", ty.ptr<core::AddressSpace::kFunction, f16>());
@@ -414,10 +415,11 @@ void foo() {
   half left = 0.0h;
   half right = 0.0h;
   half const val = fmod(left, right);
+}
 )");
 }
 
-TEST_F(MslWriterTest, DISABLED_BinaryModVec3F32) {
+TEST_F(MslWriterTest, BinaryModVec3F32) {
     auto* func = b.Function("foo", ty.void_());
     b.Append(func->Block(), [&] {
         auto* left = b.Var("left", ty.ptr(core::AddressSpace::kFunction, ty.vec3<f32>()));
@@ -437,10 +439,11 @@ void foo() {
   float3 left = 0.0f;
   float3 right = 0.0f;
   float3 const val = fmod(left, right);
+}
 )");
 }
 
-TEST_F(MslWriterTest, DISABLED_BinaryModVec3F16) {
+TEST_F(MslWriterTest, BinaryModVec3F16) {
     auto* func = b.Function("foo", ty.void_());
     b.Append(func->Block(), [&] {
         auto* left = b.Var("left", ty.ptr(core::AddressSpace::kFunction, ty.vec3<f16>()));
@@ -460,6 +463,7 @@ void foo() {
   half3 left = 0.0h;
   half3 right = 0.0h;
   half3 const val = fmod(left, right);
+}
 )");
 }
 
