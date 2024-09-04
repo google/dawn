@@ -260,13 +260,13 @@ INSTANTIATE_TEST_SUITE_P(MslWriterTest,
                          testing::ValuesIn(signed_overflow_defined_behaviour_cases));
 
 using MslWriterBinaryTest_ShiftSignedOverflowDefinedBehaviour = MslWriterTestWithParam<BinaryData>;
-TEST_P(MslWriterBinaryTest_ShiftSignedOverflowDefinedBehaviour, DISABLED_Emit) {
+TEST_P(MslWriterBinaryTest_ShiftSignedOverflowDefinedBehaviour, Emit) {
     auto params = GetParam();
 
     auto* func = b.Function("foo", ty.void_());
     b.Append(func->Block(), [&] {
-        auto* l = b.Let("a", b.Constant(1_i));
-        auto* r = b.Let("b", b.Constant(2_u));
+        auto* l = b.Let("left", b.Constant(1_i));
+        auto* r = b.Let("right", b.Constant(2_u));
         auto* bin = b.Binary(params.op, ty.i32(), l, r);
         b.Let("val", bin);
         b.Return(func);
@@ -284,26 +284,23 @@ void foo() {
 }
 
 constexpr BinaryData shift_signed_overflow_defined_behaviour_cases[] = {
-    {"as_type<int>((as_type<uint>(left) << right))", core::BinaryOp::kShiftLeft},
-    {"(left >> right)", core::BinaryOp::kShiftRight}};
+    {"as_type<int>((as_type<uint>(left) << (right & 31u)))", core::BinaryOp::kShiftLeft},
+    {"(left >> (right & 31u))", core::BinaryOp::kShiftRight}};
 INSTANTIATE_TEST_SUITE_P(MslWriterTest,
                          MslWriterBinaryTest_ShiftSignedOverflowDefinedBehaviour,
                          testing::ValuesIn(shift_signed_overflow_defined_behaviour_cases));
 
 using MslWriterBinaryTest_SignedOverflowDefinedBehaviour_Chained =
     MslWriterTestWithParam<BinaryData>;
-TEST_P(MslWriterBinaryTest_SignedOverflowDefinedBehaviour_Chained, DISABLED_Emit) {
+TEST_P(MslWriterBinaryTest_SignedOverflowDefinedBehaviour_Chained, Emit) {
     auto params = GetParam();
 
     auto* func = b.Function("foo", ty.void_());
     b.Append(func->Block(), [&] {
-        auto* left = b.Var("left", ty.ptr<core::AddressSpace::kFunction, i32>());
-        auto* right = b.Var("right", ty.ptr<core::AddressSpace::kFunction, i32>());
-
-        auto* l = b.Load(left);
-        auto* r = b.Load(right);
-        auto* expr1 = b.Binary(params.op, ty.i32(), l, r);
-        auto* expr2 = b.Binary(params.op, ty.i32(), expr1, r);
+        auto* left = b.Let("left", 1_i);
+        auto* right = b.Let("right", 2_i);
+        auto* expr1 = b.Binary(params.op, ty.i32(), left, right);
+        auto* expr2 = b.Binary(params.op, ty.i32(), expr1, right);
 
         b.Let("val", expr2);
         b.Return(func);
@@ -312,22 +309,19 @@ TEST_P(MslWriterBinaryTest_SignedOverflowDefinedBehaviour_Chained, DISABLED_Emit
     ASSERT_TRUE(Generate()) << err_ << output_.msl;
     EXPECT_EQ(output_.msl, MetalHeader() + R"(
 void foo() {
-  int const left = 0;
-  int const right = 0;
-  int const v = right;
+  int const left = 1;
+  int const right = 2;
   int const val = )" + params.result +
                                R"(;
+}
 )");
 }
 constexpr BinaryData signed_overflow_defined_behaviour_chained_cases[] = {
-    {R"(as_type<int>((as_type<uint>(as_type<int>((as_type<uint>(left) + as_type<uint>(right)))) +
-    as_type<uint>(right))))",
+    {R"(as_type<int>((as_type<uint>(as_type<int>((as_type<uint>(left) + as_type<uint>(right)))) + as_type<uint>(right))))",
      core::BinaryOp::kAdd},
-    {R"(as_type<int>((as_type<uint>(as_type<int>((as_type<uint>(left) - as_type<uint>(right)))) -
-    as_type<uint>(right))))",
+    {R"(as_type<int>((as_type<uint>(as_type<int>((as_type<uint>(left) - as_type<uint>(right)))) - as_type<uint>(right))))",
      core::BinaryOp::kSubtract},
-    {R"(as_type<int>((as_type<uint>(as_type<int>((as_type<uint>(left) * as_type<uint>(right)))) *
-    as_type<uint>(right))))",
+    {R"(as_type<int>((as_type<uint>(as_type<int>((as_type<uint>(left) * as_type<uint>(right)))) * as_type<uint>(right))))",
      core::BinaryOp::kMultiply}};
 INSTANTIATE_TEST_SUITE_P(MslWriterTest,
                          MslWriterBinaryTest_SignedOverflowDefinedBehaviour_Chained,
@@ -335,18 +329,15 @@ INSTANTIATE_TEST_SUITE_P(MslWriterTest,
 
 using MslWriterBinaryTest_ShiftSignedOverflowDefinedBehaviour_Chained =
     MslWriterTestWithParam<BinaryData>;
-TEST_P(MslWriterBinaryTest_ShiftSignedOverflowDefinedBehaviour_Chained, DISABLED_Emit) {
+TEST_P(MslWriterBinaryTest_ShiftSignedOverflowDefinedBehaviour_Chained, Emit) {
     auto params = GetParam();
 
     auto* func = b.Function("foo", ty.void_());
     b.Append(func->Block(), [&] {
-        auto* left = b.Var("left", ty.ptr<core::AddressSpace::kFunction, i32>());
-        auto* right = b.Var("right", ty.ptr<core::AddressSpace::kFunction, u32>());
-
-        auto* l = b.Load(left);
-        auto* r = b.Load(right);
-        auto* expr1 = b.Binary(params.op, ty.i32(), l, r);
-        auto* expr2 = b.Binary(params.op, ty.i32(), expr1, r);
+        auto* left = b.Let("left", b.Constant(1_i));
+        auto* right = b.Let("right", b.Constant(2_u));
+        auto* expr1 = b.Binary(params.op, ty.i32(), left, right);
+        auto* expr2 = b.Binary(params.op, ty.i32(), expr1, right);
 
         b.Let("val", expr2);
         b.Return(func);
@@ -355,17 +346,17 @@ TEST_P(MslWriterBinaryTest_ShiftSignedOverflowDefinedBehaviour_Chained, DISABLED
     ASSERT_TRUE(Generate()) << err_ << output_.msl;
     EXPECT_EQ(output_.msl, MetalHeader() + R"(
 void foo() {
-  int left = 0;
-  uint right = 0u;
-  uint const v = right;
+  int const left = 1;
+  uint const right = 2u;
   int const val = )" + params.result +
                                R"(;
+}
 )");
 }
 constexpr BinaryData shift_signed_overflow_defined_behaviour_chained_cases[] = {
-    {R"(as_type<int>((as_type<uint>(as_type<int>((as_type<uint>(left) << right))) << right)))",
+    {R"(as_type<int>((as_type<uint>(as_type<int>((as_type<uint>(left) << (right & 31u)))) << (right & 31u))))",
      core::BinaryOp::kShiftLeft},
-    {R"(((left >> right) >> right))", core::BinaryOp::kShiftRight},
+    {R"(((left >> (right & 31u)) >> (right & 31u)))", core::BinaryOp::kShiftRight},
 };
 INSTANTIATE_TEST_SUITE_P(MslWriterTest,
                          MslWriterBinaryTest_ShiftSignedOverflowDefinedBehaviour_Chained,
