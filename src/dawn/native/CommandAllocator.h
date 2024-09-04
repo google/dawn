@@ -209,6 +209,8 @@ class CommandAllocator : public NonCopyable {
 
     const char* CopyAsNullTerminatedString(std::string_view in);
 
+    size_t GetCommandBlocksCount() const;
+
   private:
     // This is used for some internal computations and can be any power of two as long as code
     // using the CommandAllocator passes the static_asserts.
