@@ -27,5 +27,6 @@ void main() {
   uint3 v3u32_var3 = (1u).xxx;
   bool3 v3bool_var4 = (true).xxx;
   bool4 v4bool_var5 = bool4(true, false, true, false);
+  constant_with_non_constant();
 }
 

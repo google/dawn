@@ -1,5 +1,10 @@
 #version 310 es
 
+void constant_with_non_constant() {
+  float a = 0.0f;
+  vec2 b = vec2(1.0f, a);
+}
+
 void tint_symbol() {
   bool bool_var1 = true;
   bool bool_var2 = true;
@@ -22,6 +27,7 @@ void tint_symbol() {
   uvec3 v3u32_var3 = uvec3(1u);
   bvec3 v3bool_var4 = bvec3(true);
   bvec4 v4bool_var5 = bvec4(true, false, true, false);
+  constant_with_non_constant();
 }
 
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;

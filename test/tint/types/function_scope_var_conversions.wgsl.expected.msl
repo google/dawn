@@ -28,6 +28,7 @@ kernel void tint_symbol() {
   uint3 v3u32_var3 = uint3(1u);
   bool3 v3bool_var4 = bool3(true);
   bool4 v4bool_var5 = bool4(true, false, true, false);
+  constant_with_non_constant();
   return;
 }
 

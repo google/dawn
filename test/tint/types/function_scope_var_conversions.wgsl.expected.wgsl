@@ -26,4 +26,5 @@ fn main() {
   var v3u32_var3 : vec3<u32> = vec3<u32>(vec3<bool>(true));
   var v3bool_var4 : vec3<bool> = vec3<bool>(vec2<bool>(vec2<f32>(123.0)), true);
   var v4bool_var5 : vec4<bool> = vec4<bool>(vec2<bool>(vec2<f32>(123.0, 0.0)), vec2<bool>(true, bool(f32(0.0))));
+  constant_with_non_constant();
 }
