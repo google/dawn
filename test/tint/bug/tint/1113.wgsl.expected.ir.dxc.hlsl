@@ -102,9 +102,10 @@ void main_count_inner(uint3 GlobalInvocationID) {
   float3 center = (((p0 + p1) + p2) / 3.0f);
   float3 voxelPos = toVoxelPos(center);
   uint voxelIndex = toIndex1D(uniforms[0u].y, voxelPos);
-  uint v_16 = 0u;
-  counters.InterlockedAdd(uint(0u), 1u, v_16);
-  uint acefg = v_16;
+  uint v_16 = (uint(voxelIndex) * 4u);
+  uint v_17 = 0u;
+  counters.InterlockedAdd(uint(0u), 1u, v_17);
+  uint acefg = v_17;
   if ((triangleIndex == 0u)) {
     dbg.Store(16u, uniforms[0u].y);
     dbg.Store(32u, asuint(center.x));
@@ -120,19 +121,21 @@ void main_create_lut_inner(uint3 GlobalInvocationID) {
   if ((voxelIndex >= maxVoxels)) {
     return;
   }
-  uint v_17 = 0u;
-  counters.InterlockedOr(uint(0u), 0u, v_17);
-  uint numTriangles = v_17;
+  uint v_18 = (uint(voxelIndex) * 4u);
+  uint v_19 = 0u;
+  counters.InterlockedOr(uint(0u), 0u, v_19);
+  uint numTriangles = v_19;
   int offset = -1;
   if ((numTriangles > 0u)) {
-    uint v_18 = numTriangles;
-    uint v_19 = 0u;
-    dbg.InterlockedAdd(uint(0u), v_18, v_19);
-    offset = int(v_19);
+    uint v_20 = numTriangles;
+    uint v_21 = 0u;
+    dbg.InterlockedAdd(uint(0u), v_20, v_21);
+    offset = int(v_21);
   }
-  int v_20 = offset;
-  int v_21 = 0;
-  LUT.InterlockedExchange(int(0u), v_20, v_21);
+  uint v_22 = (uint(voxelIndex) * 4u);
+  int v_23 = offset;
+  int v_24 = 0;
+  LUT.InterlockedExchange(int(0u), v_23, v_24);
 }
 
 void main_sort_triangles_inner(uint3 GlobalInvocationID) {
@@ -150,9 +153,10 @@ void main_sort_triangles_inner(uint3 GlobalInvocationID) {
   float3 center = (((p0 + p1) + p2) / 3.0f);
   float3 voxelPos = toVoxelPos(center);
   uint voxelIndex = toIndex1D(uniforms[0u].y, voxelPos);
-  int v_22 = 0;
-  LUT.InterlockedAdd(int(0u), 1, v_22);
-  int triangleOffset = v_22;
+  uint v_25 = (uint(voxelIndex) * 4u);
+  int v_26 = 0;
+  LUT.InterlockedAdd(int(0u), 1, v_26);
+  int triangleOffset = v_26;
 }
 
 [numthreads(128, 1, 1)]

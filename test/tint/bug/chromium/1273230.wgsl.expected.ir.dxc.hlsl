@@ -97,9 +97,10 @@ void main_count_inner(uint3 GlobalInvocationID) {
   float3 center = (((p0 + p2) + p1) / 3.0f);
   float3 voxelPos = toVoxelPos(p1);
   uint lIndex = toIndex1D(uniforms[0u].y, p0);
-  int v_16 = 0;
-  LUT.InterlockedAdd(int(0u), 1, v_16);
-  int triangleOffset = v_16;
+  uint v_16 = (uint(i1) * 4u);
+  int v_17 = 0;
+  LUT.InterlockedAdd(int(0u), 1, v_17);
+  int triangleOffset = v_17;
 }
 
 [numthreads(128, 1, 1)]

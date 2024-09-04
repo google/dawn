@@ -506,6 +506,198 @@ $B1: {  # root
     EXPECT_EQ(str(), expect);
 }
 
+TEST_F(IR_ValueToLetTest, Call_WithUseThatIsNeverUsed) {
+    auto* v = b.Var<private_, i32>("v");
+    mod.root_block->Append(v);
+
+    auto* foo = b.Function("foo", ty.i32());
+    b.Append(foo->Block(), [&] {
+        b.Store(v, 42_i);
+        b.Return(foo, 1_i);
+    });
+
+    auto* fn = b.Function("F", ty.void_());
+    b.Append(fn->Block(), [&] {
+        auto* c = b.Name("call", b.Call<i32>(foo));
+        b.Name("add", b.Add<i32>(c, 1_i));
+        b.Return(fn);
+    });
+
+    auto* src = R"(
+$B1: {  # root
+  %v:ptr<private, i32, read_write> = var
+}
+
+%foo = func():i32 {
+  $B2: {
+    store %v, 42i
+    ret 1i
+  }
+}
+%F = func():void {
+  $B3: {
+    %call:i32 = call %foo
+    %add:i32 = add %call, 1i
+    ret
+  }
+}
+)";
+    EXPECT_EQ(str(), src);
+
+    auto* expect = R"(
+$B1: {  # root
+  %v:ptr<private, i32, read_write> = var
+}
+
+%foo = func():i32 {
+  $B2: {
+    store %v, 42i
+    ret 1i
+  }
+}
+%F = func():void {
+  $B3: {
+    %call:i32 = call %foo
+    %5:i32 = add %call, 1i
+    %add:i32 = let %5
+    ret
+  }
+}
+)";
+
+    Run(ValueToLet);
+
+    EXPECT_EQ(str(), expect);
+}
+
+TEST_F(IR_ValueToLetTest, ConstructIsNeverUsed) {
+    auto* v = b.Var<private_, i32>("v");
+    mod.root_block->Append(v);
+
+    auto* foo = b.Function("foo", ty.i32());
+    b.Append(foo->Block(), [&] {
+        b.Store(v, 42_i);
+        b.Return(foo, 1_i);
+    });
+
+    auto* fn = b.Function("F", ty.void_());
+    b.Append(fn->Block(), [&] {
+        auto* c = b.Name("call", b.Call<i32>(foo));
+        b.Name("construct", b.Construct<vec4<i32>>(c));
+        b.Return(fn);
+    });
+
+    auto* src = R"(
+$B1: {  # root
+  %v:ptr<private, i32, read_write> = var
+}
+
+%foo = func():i32 {
+  $B2: {
+    store %v, 42i
+    ret 1i
+  }
+}
+%F = func():void {
+  $B3: {
+    %call:i32 = call %foo
+    %construct:vec4<i32> = construct %call
+    ret
+  }
+}
+)";
+    EXPECT_EQ(str(), src);
+
+    auto* expect = R"(
+$B1: {  # root
+  %v:ptr<private, i32, read_write> = var
+}
+
+%foo = func():i32 {
+  $B2: {
+    store %v, 42i
+    ret 1i
+  }
+}
+%F = func():void {
+  $B3: {
+    %call:i32 = call %foo
+    %5:vec4<i32> = construct %call
+    %construct:vec4<i32> = let %5
+    ret
+  }
+}
+)";
+
+    Run(ValueToLet);
+
+    EXPECT_EQ(str(), expect);
+}
+
+TEST_F(IR_ValueToLetTest, ConvertIsNeverUsed) {
+    auto* v = b.Var<private_, i32>("v");
+    mod.root_block->Append(v);
+
+    auto* foo = b.Function("foo", ty.i32());
+    b.Append(foo->Block(), [&] {
+        b.Store(v, 42_i);
+        b.Return(foo, 1_i);
+    });
+
+    auto* fn = b.Function("F", ty.void_());
+    b.Append(fn->Block(), [&] {
+        auto* c = b.Name("call", b.Call<i32>(foo));
+        b.Name("convert", b.Convert<u32>(c));
+        b.Return(fn);
+    });
+
+    auto* src = R"(
+$B1: {  # root
+  %v:ptr<private, i32, read_write> = var
+}
+
+%foo = func():i32 {
+  $B2: {
+    store %v, 42i
+    ret 1i
+  }
+}
+%F = func():void {
+  $B3: {
+    %call:i32 = call %foo
+    %convert:u32 = convert %call
+    ret
+  }
+}
+)";
+    EXPECT_EQ(str(), src);
+
+    auto* expect = R"(
+$B1: {  # root
+  %v:ptr<private, i32, read_write> = var
+}
+
+%foo = func():i32 {
+  $B2: {
+    store %v, 42i
+    ret 1i
+  }
+}
+%F = func():void {
+  $B3: {
+    %call:i32 = call %foo
+    %5:u32 = convert %call
+    %convert:u32 = let %5
+    ret
+  }
+}
+)";
+
+    Run(ValueToLet);
+
+    EXPECT_EQ(str(), expect);
+}
+
 TEST_F(IR_ValueToLetTest, TwoCalls_ThenUseReturnValues) {
     auto* i = b.Var<private_, i32>("i");
     b.ir.root_block->Append(i);
