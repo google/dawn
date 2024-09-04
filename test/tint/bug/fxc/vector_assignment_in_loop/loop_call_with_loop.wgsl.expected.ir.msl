@@ -25,7 +25,7 @@ void foo(tint_module_vars_struct tint_module_vars) {
       (*tint_module_vars.v4u)[i] = 1u;
       (*tint_module_vars.v2b)[i] = true;
       {
-        i = (i + 1);
+        i = as_type<int>((as_type<uint>(i) + as_type<uint>(1)));
       }
       continue;
     }
@@ -47,7 +47,7 @@ kernel void tint_symbol() {
       }
       foo(tint_module_vars);
       {
-        i = (i + 1);
+        i = as_type<int>((as_type<uint>(i) + as_type<uint>(1)));
       }
       continue;
     }

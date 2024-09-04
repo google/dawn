@@ -14,7 +14,7 @@ int tint_mod_i32(int lhs, int rhs) {
   bool const v_2 = bool((v_1 & uint((rhs == -1))));
   uint const v_3 = uint((rhs == 0));
   int const v_4 = select(rhs, 1, bool((v_3 | uint(v_2))));
-  return (lhs - ((lhs / v_4) * v_4));
+  return as_type<int>((as_type<uint>(lhs) - as_type<uint>(as_type<int>((as_type<uint>((lhs / v_4)) * as_type<uint>(v_4))))));
 }
 
 void foo(tint_module_vars_struct tint_module_vars) {

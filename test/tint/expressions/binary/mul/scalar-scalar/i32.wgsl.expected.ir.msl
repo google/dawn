@@ -4,5 +4,5 @@ using namespace metal;
 kernel void f() {
   int const a = 1;
   int const b = 2;
-  int const r = (a * b);
+  int const r = as_type<int>((as_type<uint>(a) * as_type<uint>(b)));
 }

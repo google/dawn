@@ -21,16 +21,16 @@ int accept_value(int val) {
 
 int accept_ptr_deref_call_func(thread int* const val) {
   int const v = (*val);
-  return (v + accept_value((*val)));
+  return as_type<int>((as_type<uint>(v) + as_type<uint>(accept_value((*val)))));
 }
 
 int accept_ptr_deref_pass_through(thread int* const val) {
   int const v_1 = (*val);
-  return (v_1 + accept_ptr_deref_call_func(val));
+  return as_type<int>((as_type<uint>(v_1) + as_type<uint>(accept_ptr_deref_call_func(val))));
 }
 
 int accept_ptr_to_struct_and_access(thread S* const val) {
-  return ((*val).a + (*val).b);
+  return as_type<int>((as_type<uint>((*val).a) + as_type<uint>((*val).b)));
 }
 
 int accept_ptr_to_struct_access_pass_ptr(thread S* const val) {
@@ -63,11 +63,11 @@ void tint_symbol_inner(uint tint_local_index, tint_module_vars_struct tint_modul
   float3 v4 = float3(0.0f);
   int const t1 = atomic_load_explicit(tint_module_vars.g1, memory_order_relaxed);
   int const v_2 = accept_ptr_deref_pass_through((&v1));
-  int const v_3 = (v_2 + accept_ptr_to_struct_and_access((&v2)));
-  int const v_4 = (v_3 + accept_ptr_to_struct_and_access(v3));
-  int const v_5 = (v_4 + accept_ptr_vec_access_elements((&v4)));
-  int const v_6 = (v_5 + accept_ptr_to_struct_access_pass_ptr((&v2)));
-  (*tint_module_vars.s) = ((v_6 + call_builtin_with_mod_scope_ptr(tint_module_vars)) + t1);
+  int const v_3 = as_type<int>((as_type<uint>(v_2) + as_type<uint>(accept_ptr_to_struct_and_access((&v2)))));
+  int const v_4 = as_type<int>((as_type<uint>(v_3) + as_type<uint>(accept_ptr_to_struct_and_access(v3))));
+  int const v_5 = as_type<int>((as_type<uint>(v_4) + as_type<uint>(accept_ptr_vec_access_elements((&v4)))));
+  int const v_6 = as_type<int>((as_type<uint>(v_5) + as_type<uint>(accept_ptr_to_struct_access_pass_ptr((&v2)))));
+  (*tint_module_vars.s) = as_type<int>((as_type<uint>(as_type<int>((as_type<uint>(v_6) + as_type<uint>(call_builtin_with_mod_scope_ptr(tint_module_vars))))) + as_type<uint>(t1)));
 }
 
 kernel void tint_symbol(uint tint_local_index [[thread_index_in_threadgroup]], device int* s [[buffer(0)]], threadgroup tint_symbol_2* v_7 [[threadgroup(0)]]) {

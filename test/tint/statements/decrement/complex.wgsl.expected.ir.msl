@@ -61,7 +61,7 @@ void tint_symbol_1(tint_module_vars_struct tint_module_vars) {
     int const v_1 = idx1(tint_module_vars);
     device int4* const v_2 = (&(*tint_module_vars.tint_symbol)[v_1].a[idx2(tint_module_vars)]);
     int const v_3 = idx3(tint_module_vars);
-    (*v_2)[v_3] = ((*v_2)[v_3] - 1);
+    (*v_2)[v_3] = as_type<int>((as_type<uint>((*v_2)[v_3]) - as_type<uint>(1)));
     TINT_ISOLATE_UB(tint_volatile_true) while(true) {
       if (((*tint_module_vars.v) < 10u)) {
       } else {
@@ -71,7 +71,7 @@ void tint_symbol_1(tint_module_vars_struct tint_module_vars) {
         int const v_4 = idx4(tint_module_vars);
         device int4* const v_5 = (&(*tint_module_vars.tint_symbol)[v_4].a[idx5(tint_module_vars)]);
         int const v_6 = idx6(tint_module_vars);
-        (*v_5)[v_6] = ((*v_5)[v_6] - 1);
+        (*v_5)[v_6] = as_type<int>((as_type<uint>((*v_5)[v_6]) - as_type<uint>(1)));
       }
       continue;
     }

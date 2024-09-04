@@ -24,7 +24,7 @@ kernel void tint_symbol() {
             case 0:
             {
               {
-                j = (j + 2);
+                j = as_type<int>((as_type<uint>(j) + as_type<uint>(2)));
               }
               continue;
             }
@@ -34,13 +34,13 @@ kernel void tint_symbol() {
             }
           }
           {
-            j = (j + 2);
+            j = as_type<int>((as_type<uint>(j) + as_type<uint>(2)));
           }
           continue;
         }
       }
       {
-        i = (i + 2);
+        i = as_type<int>((as_type<uint>(i) + as_type<uint>(2)));
       }
       continue;
     }

@@ -10,13 +10,13 @@ int f() {
   int j = 0;
   {
     TINT_ISOLATE_UB(tint_volatile_true) while(true) {
-      i = (i + 1);
+      i = as_type<int>((as_type<uint>(i) + as_type<uint>(1)));
       if ((i > 4)) {
         return 1;
       }
       {
         TINT_ISOLATE_UB(tint_volatile_true_1) while(true) {
-          j = (j + 1);
+          j = as_type<int>((as_type<uint>(j) + as_type<uint>(1)));
           if ((j > 4)) {
             return 2;
           }

@@ -22,12 +22,12 @@ struct S {
 };
 
 int foo(tint_module_vars_struct tint_module_vars) {
-  (*tint_module_vars.counter) = ((*tint_module_vars.counter) + 1);
+  (*tint_module_vars.counter) = as_type<int>((as_type<uint>((*tint_module_vars.counter)) + as_type<uint>(1)));
   return (*tint_module_vars.counter);
 }
 
 int bar(tint_module_vars_struct tint_module_vars) {
-  (*tint_module_vars.counter) = ((*tint_module_vars.counter) + 2);
+  (*tint_module_vars.counter) = as_type<int>((as_type<uint>((*tint_module_vars.counter)) + as_type<uint>(2)));
   return (*tint_module_vars.counter);
 }
 
@@ -36,5 +36,5 @@ void tint_symbol(tint_module_vars_struct tint_module_vars) {
   thread S* const p = (&x);
   thread int4* const v = (&(*p).a[foo(tint_module_vars)]);
   int const v_1 = bar(tint_module_vars);
-  (*v)[v_1] = ((*v)[v_1] + 5);
+  (*v)[v_1] = as_type<int>((as_type<uint>((*v)[v_1]) + as_type<uint>(5)));
 }

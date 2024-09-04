@@ -11,5 +11,5 @@ int tint_div_i32(int lhs, int rhs) {
 kernel void f() {
   int a = 1;
   int b = 0;
-  int const r = tint_div_i32(a, (b + b));
+  int const r = tint_div_i32(a, as_type<int>((as_type<uint>(b) + as_type<uint>(b))));
 }

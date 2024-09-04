@@ -75,7 +75,7 @@ void foo_inner(uint tint_local_index, tint_module_vars_struct tint_module_vars) 
     (*tint_module_vars.b) = 0;
   }
   threadgroup_barrier(mem_flags::mem_threadgroup);
-  (*tint_module_vars.a) = ((*tint_module_vars.a) + (*tint_module_vars.b));
+  (*tint_module_vars.a) = as_type<int>((as_type<uint>((*tint_module_vars.a)) + as_type<uint>((*tint_module_vars.b))));
 }
 
 kernel void bar() {

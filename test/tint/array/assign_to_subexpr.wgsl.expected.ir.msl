@@ -34,7 +34,7 @@ int foo() {
   (*dst_ptr) = src;
   (*dst_struct_ptr).arr = src;
   (*dst_array_ptr)[0] = src;
-  return (((*dst_ptr)[0] + (*dst_struct_ptr).arr[0]) + (*dst_array_ptr)[0][0]);
+  return as_type<int>((as_type<uint>(as_type<int>((as_type<uint>((*dst_ptr)[0]) + as_type<uint>((*dst_struct_ptr).arr[0])))) + as_type<uint>((*dst_array_ptr)[0][0])));
 }
 
 kernel void tint_symbol(device int* s [[buffer(0)]]) {

@@ -37,7 +37,7 @@ fragment void tint_symbol(device int* non_uniform_global [[buffer(0)]], device f
           return;
         }
         {
-          i = (i + 1);
+          i = as_type<int>((as_type<uint>(i) + as_type<uint>(1)));
           if ((i == 5)) { break; }
         }
         continue;

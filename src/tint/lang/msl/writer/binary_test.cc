@@ -202,13 +202,13 @@ INSTANTIATE_TEST_SUITE_P(
                     BinaryData{"(left >= right)", core::BinaryOp::kGreaterThanEqual}));
 
 using MslWriterBinaryTest_SignedOverflowDefinedBehaviour = MslWriterTestWithParam<BinaryData>;
-TEST_P(MslWriterBinaryTest_SignedOverflowDefinedBehaviour, DISABLED_Emit) {
+TEST_P(MslWriterBinaryTest_SignedOverflowDefinedBehaviour, Emit_Scalar) {
     auto params = GetParam();
 
     auto* func = b.Function("foo", ty.void_());
     b.Append(func->Block(), [&] {
-        auto* l = b.Let("a", b.Constant(1_i));
-        auto* r = b.Let("b", b.Constant(3_i));
+        auto* l = b.Let("left", b.Constant(1_i));
+        auto* r = b.Let("right", b.Constant(3_i));
 
         auto* bin = b.Binary(params.op, ty.i32(), l, r);
         b.Let("val", bin);
@@ -220,16 +220,41 @@ TEST_P(MslWriterBinaryTest_SignedOverflowDefinedBehaviour, DISABLED_Emit) {
 void foo() {
   int const left = 1;
   int const right = 3;
-  int const val = )" + params.result +
-                               R"(;
+  int const val = as_type<int>((as_type<uint>(left) )" +
+                               params.result + R"( as_type<uint>(right)));
+}
+)");
+}
+
+TEST_P(MslWriterBinaryTest_SignedOverflowDefinedBehaviour, Emit_Vector) {
+    auto params = GetParam();
+
+    auto* func = b.Function("foo", ty.void_());
+    b.Append(func->Block(), [&] {
+        auto* l = b.Let("left", b.Splat<vec4<i32>>(1_i));
+        auto* r = b.Let("right", b.Splat<vec4<i32>>(3_i));
+
+        auto* bin = b.Binary(params.op, ty.vec4<i32>(), l, r);
+        b.Let("val", bin);
+        b.Return(func);
+    });
+
+    ASSERT_TRUE(Generate()) << err_ << output_.msl;
+    EXPECT_EQ(output_.msl, MetalHeader() + R"(
+void foo() {
+  int4 const left = int4(1);
+  int4 const right = int4(3);
+  int4 const val = as_type<int4>((as_type<uint4>(left) )" +
+                               params.result + R"( as_type<uint4>(right)));
 }
 )");
 }
 
 constexpr BinaryData signed_overflow_defined_behaviour_cases[] = {
-    {"as_type<int>((as_type<uint>(left) + as_type<uint>(right)))", core::BinaryOp::kAdd},
-    {"as_type<int>((as_type<uint>(left) - as_type<uint>(right)))", core::BinaryOp::kSubtract},
-    {"as_type<int>((as_type<uint>(left) * as_type<uint>(right)))", core::BinaryOp::kMultiply}};
+    {"+", core::BinaryOp::kAdd},
+    {"-", core::BinaryOp::kSubtract},
+    {"*", core::BinaryOp::kMultiply},
+};
 INSTANTIATE_TEST_SUITE_P(MslWriterTest,
                          MslWriterBinaryTest_SignedOverflowDefinedBehaviour,
                          testing::ValuesIn(signed_overflow_defined_behaviour_cases));

@@ -29,7 +29,7 @@ kernel void foo(device tint_array<int, 10>* output [[buffer(0)]]) {
       int x = (*tint_module_vars.output)[i];
       {
         int x = (*tint_module_vars.output)[x];
-        i = (i + x);
+        i = as_type<int>((as_type<uint>(i) + as_type<uint>(x)));
         if ((i > 10)) { break; }
       }
       continue;

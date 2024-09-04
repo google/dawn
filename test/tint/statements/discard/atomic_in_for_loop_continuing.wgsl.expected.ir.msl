@@ -37,7 +37,7 @@ int foo_inner(float in, float2 coord, tint_module_vars_struct tint_module_vars) 
       } else {
         break;
       }
-      result = (result + i);
+      result = as_type<int>((as_type<uint>(result) + as_type<uint>(i)));
       {
         int v = 0;
         if ((*tint_module_vars.continue_execution)) {

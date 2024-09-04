@@ -11,5 +11,5 @@ kernel void f(device int* s [[buffer(0)]]) {
   int const _a = a;
   int const b = a;
   int const _b = _a;
-  (*tint_module_vars.s) = (((a + _a) + b) + _b);
+  (*tint_module_vars.s) = as_type<int>((as_type<uint>(as_type<int>((as_type<uint>(as_type<int>((as_type<uint>(a) + as_type<uint>(_a)))) + as_type<uint>(b)))) + as_type<uint>(_b)));
 }

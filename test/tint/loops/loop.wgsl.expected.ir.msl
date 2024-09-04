@@ -9,7 +9,7 @@ int f() {
   int i = 0;
   {
     TINT_ISOLATE_UB(tint_volatile_true) while(true) {
-      i = (i + 1);
+      i = as_type<int>((as_type<uint>(i) + as_type<uint>(1)));
       if ((i > 4)) {
         return i;
       }

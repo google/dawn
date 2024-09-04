@@ -103,11 +103,11 @@ void tint_symbol_inner(uint3 GlobalInvocationID, tint_module_vars_struct tint_mo
           } else {
             break;
           }
-          int2 tilePixel0Idx = int2((x * TILE_SIZE), (y * TILE_SIZE));
+          int2 tilePixel0Idx = int2(as_type<int>((as_type<uint>(x) * as_type<uint>(TILE_SIZE))), as_type<int>((as_type<uint>(y) * as_type<uint>(TILE_SIZE))));
           float2 const v_5 = (2.0f * float2(tilePixel0Idx));
           float2 floorCoord = ((v_5 / (*tint_module_vars.uniforms).fullScreenSize.xy) - float2(1.0f));
           int2 const v_6 = tilePixel0Idx;
-          float2 const v_7 = (2.0f * float2((v_6 + int2(TILE_SIZE))));
+          float2 const v_7 = (2.0f * float2(as_type<int2>((as_type<uint2>(v_6) + as_type<uint2>(int2(TILE_SIZE))))));
           float2 ceilCoord = ((v_7 / (*tint_module_vars.uniforms).fullScreenSize.xy) - float2(1.0f));
           float2 viewFloorCoord = float2((((-(viewNear) * floorCoord[0u]) - (M[2][0] * viewNear)) / M[0][0]), (((-(viewNear) * floorCoord[1u]) - (M[2][1] * viewNear)) / M[1][1]));
           float2 viewCeilCoord = float2((((-(viewNear) * ceilCoord[0u]) - (M[2][0] * viewNear)) / M[0][0]), (((-(viewNear) * ceilCoord[1u]) - (M[2][1] * viewNear)) / M[1][1]));
@@ -149,7 +149,7 @@ void tint_symbol_inner(uint3 GlobalInvocationID, tint_module_vars_struct tint_mo
             }
           }
           if ((dp >= 0.0f)) {
-            uint tileId = uint((x + (y * TILE_COUNT_X)));
+            uint tileId = uint(as_type<int>((as_type<uint>(x) + as_type<uint>(as_type<int>((as_type<uint>(y) * as_type<uint>(TILE_COUNT_X)))))));
             bool v_9 = false;
             if ((tileId < 0u)) {
               v_9 = true;
@@ -158,27 +158,27 @@ void tint_symbol_inner(uint3 GlobalInvocationID, tint_module_vars_struct tint_mo
             }
             if (v_9) {
               {
-                x = (x + 1);
+                x = as_type<int>((as_type<uint>(x) + as_type<uint>(1)));
               }
               continue;
             }
             uint offset = atomic_fetch_add_explicit((&(*tint_module_vars.tileLightId).data[tileId].count), 1u, memory_order_relaxed);
             if ((offset >= (*tint_module_vars.config).numTileLightSlot)) {
               {
-                x = (x + 1);
+                x = as_type<int>((as_type<uint>(x) + as_type<uint>(1)));
               }
               continue;
             }
             (*tint_module_vars.tileLightId).data[tileId].lightId[offset] = GlobalInvocationID[0u];
           }
           {
-            x = (x + 1);
+            x = as_type<int>((as_type<uint>(x) + as_type<uint>(1)));
           }
           continue;
         }
       }
       {
-        y = (y + 1);
+        y = as_type<int>((as_type<uint>(y) + as_type<uint>(1)));
       }
       continue;
     }

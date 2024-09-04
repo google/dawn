@@ -18,10 +18,10 @@ kernel void tint_symbol_1(device int* tint_symbol [[buffer(0)]]) {
         {
           TINT_ISOLATE_UB(tint_volatile_true_1) while(true) {
             if ((i > 5)) {
-              i = (i * 2);
+              i = as_type<int>((as_type<uint>(i) * as_type<uint>(2)));
               break;
             } else {
-              i = (i * 2);
+              i = as_type<int>((as_type<uint>(i) * as_type<uint>(2)));
               break;
             }
             /* unreachable */

@@ -21,11 +21,11 @@ struct tint_symbol_2 {
 };
 
 void uses_a(tint_module_vars_struct tint_module_vars) {
-  (*tint_module_vars.a) = ((*tint_module_vars.a) + 1);
+  (*tint_module_vars.a) = as_type<int>((as_type<uint>((*tint_module_vars.a)) + as_type<uint>(1)));
 }
 
 void uses_b(tint_module_vars_struct tint_module_vars) {
-  (*tint_module_vars.b) = ((*tint_module_vars.b) * 2);
+  (*tint_module_vars.b) = as_type<int>((as_type<uint>((*tint_module_vars.b)) * as_type<uint>(2)));
 }
 
 void uses_a_and_b(tint_module_vars_struct tint_module_vars) {
