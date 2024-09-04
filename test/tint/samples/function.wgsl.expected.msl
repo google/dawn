@@ -6,6 +6,7 @@ float tint_symbol() {
 }
 
 kernel void ep() {
+  float const a = tint_symbol();
   return;
 }
 

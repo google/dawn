@@ -5,5 +5,6 @@ float main() {
 
 [numthreads(2, 1, 1)]
 void ep() {
+  float a = main();
 }
 
