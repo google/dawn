@@ -396,8 +396,11 @@ TEST_P(SurfaceTests, ResizingWindowAndSurface) {
 
 // Test switching devices on the same adapter.
 TEST_P(SurfaceTests, SwitchingDevice) {
-    // TODO(https://crbug.com/dawn/2116): Disabled due to new Validation Layer failures.
-    DAWN_SUPPRESS_TEST_IF(IsVulkan());
+    // TODO(https://crbug.com/dawn/2116): VVLs crash because oldSwapchain is from a different
+    // device. The spec says it is ok if it is only the same instance but clarifications yet to be
+    // published by Khronos are that the spec is wrong and should require the swapchain to be from
+    // the same device.
+    DAWN_SUPPRESS_TEST_IF(IsVulkan() && IsBackendValidationEnabled());
 
     wgpu::Device device2 = CreateDevice();
 
