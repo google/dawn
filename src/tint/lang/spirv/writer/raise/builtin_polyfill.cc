@@ -198,7 +198,7 @@ struct State {
     /// @param value the literal value
     /// @returns the literal operand
     spirv::ir::LiteralOperand* Literal(u32 value) {
-        return ir.allocators.values.Create<spirv::ir::LiteralOperand>(b.ConstantValue(value));
+        return ir.CreateValue<spirv::ir::LiteralOperand>(b.ConstantValue(value));
     }
 
     /// Handle an `arrayLength()` builtin.

@@ -60,7 +60,7 @@ TEST_F(IR_IfDeathTest, Fail_NullTrueBlock) {
         {
             Module mod;
             Builder b{mod};
-            If if_(mod.NextInstructionId(), b.Constant(false), nullptr, b.Block());
+            mod.CreateInstruction<If>(b.Constant(false), nullptr, b.Block());
         },
         "internal compiler error");
 }
@@ -70,7 +70,7 @@ TEST_F(IR_IfDeathTest, Fail_NullFalseBlock) {
         {
             Module mod;
             Builder b{mod};
-            If if_(mod.NextInstructionId(), b.Constant(false), b.Block(), nullptr);
+            mod.CreateInstruction<If>(b.Constant(false), b.Block(), nullptr);
         },
         "internal compiler error");
 }

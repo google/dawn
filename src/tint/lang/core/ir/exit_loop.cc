@@ -51,7 +51,7 @@ ExitLoop::~ExitLoop() = default;
 ExitLoop* ExitLoop::Clone(CloneContext& ctx) {
     auto* loop = ctx.Remap(Loop());
     auto args = ctx.Remap<ExitLoop::kDefaultNumOperands>(Args());
-    return ctx.ir.allocators.instructions.Create<ExitLoop>(ctx.ir.NextInstructionId(), loop, args);
+    return ctx.ir.CreateInstruction<ExitLoop>(loop, args);
 }
 
 void ExitLoop::SetLoop(ir::Loop* l) {

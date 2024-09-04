@@ -62,8 +62,7 @@ Loop* Loop::Clone(CloneContext& ctx) {
     auto* new_body = ctx.ir.blocks.Create<MultiInBlock>();
     auto* new_continuing = ctx.ir.blocks.Create<MultiInBlock>();
 
-    auto* new_loop = ctx.ir.allocators.instructions.Create<Loop>(
-        ctx.ir.NextInstructionId(), new_init, new_body, new_continuing);
+    auto* new_loop = ctx.ir.CreateInstruction<Loop>(new_init, new_body, new_continuing);
     ctx.Replace(this, new_loop);
 
     initializer_->CloneInto(ctx, new_init);

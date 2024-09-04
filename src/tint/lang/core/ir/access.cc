@@ -52,8 +52,7 @@ Access* Access::Clone(CloneContext& ctx) {
     auto new_result = ctx.Clone(Result(0));
     auto obj = ctx.Remap(Object());
     auto indices = ctx.Remap<Access::kDefaultNumOperands>(Indices());
-    return ctx.ir.allocators.instructions.Create<Access>(ctx.ir.NextInstructionId(), new_result,
-                                                         obj, indices);
+    return ctx.ir.CreateInstruction<Access>(new_result, obj, indices);
 }
 //! @endcond
 

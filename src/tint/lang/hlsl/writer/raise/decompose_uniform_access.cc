@@ -347,8 +347,8 @@ struct State {
             auto* cond = b.Equal(ty.bool_(), b.Modulo(ty.u32(), byte_idx, 4_u), 0_u);
 
             Vector<core::ir::Value*, 3> args{false_, true_, cond->Result(0)};
-            auto* shift_amt = b.ir.allocators.instructions.Create<hlsl::ir::Ternary>(
-                b.ir.NextInstructionId(), b.InstructionResult(ty.u32()), args);
+            auto* shift_amt =
+                b.ir.CreateInstruction<hlsl::ir::Ternary>(b.InstructionResult(ty.u32()), args);
             b.Append(shift_amt);
 
             load = b.ShiftRight(ty.u32(), load, shift_amt);
@@ -408,8 +408,8 @@ struct State {
                 Vector<core::ir::Value*, 3> args{sw_rhs->Result(0), sw_lhs->Result(0),
                                                  cond->Result(0)};
 
-                load = b.ir.allocators.instructions.Create<hlsl::ir::Ternary>(
-                    b.ir.NextInstructionId(), b.InstructionResult(ty.vec2<u32>()), args);
+                load = b.ir.CreateInstruction<hlsl::ir::Ternary>(
+                    b.InstructionResult(ty.vec2<u32>()), args);
                 b.Append(load);
             }
         } else {
@@ -454,8 +454,8 @@ struct State {
                 Vector<core::ir::Value*, 3> args{sw_rhs->Result(0), sw_lhs->Result(0),
                                                  cond->Result(0)};
 
-                load = b.ir.allocators.instructions.Create<hlsl::ir::Ternary>(
-                    b.ir.NextInstructionId(), b.InstructionResult(ty.u32()), args);
+                load =
+                    b.ir.CreateInstruction<hlsl::ir::Ternary>(b.InstructionResult(ty.u32()), args);
                 b.Append(load);
             }
             return b.Bitcast(result_ty, load);

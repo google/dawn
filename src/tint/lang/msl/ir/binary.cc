@@ -50,8 +50,7 @@ Binary* Binary::Clone(core::ir::CloneContext& ctx) {
     auto* new_result = ctx.Clone(Result(0));
     auto* new_rhs = ctx.Remap(RHS());
     auto* new_lhs = ctx.Remap(LHS());
-    return ctx.ir.allocators.instructions.Create<Binary>(ctx.ir.NextInstructionId(), new_result,
-                                                         Op(), new_lhs, new_rhs);
+    return ctx.ir.CreateInstruction<Binary>(new_result, Op(), new_lhs, new_rhs);
 }
 
 }  // namespace tint::msl::ir

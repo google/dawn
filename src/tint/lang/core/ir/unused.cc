@@ -39,7 +39,7 @@ Unused::Unused() = default;
 Unused::~Unused() = default;
 
 Unused* Unused::Clone(CloneContext& ctx) {
-    return ctx.ir.allocators.values.Create<Unused>();
+    return ctx.ir.CreateValue<Unused>();
 }
 
 }  // namespace tint::core::ir

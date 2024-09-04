@@ -288,8 +288,8 @@ struct State {
     /// @param builtin the builtin call instruction
     void AtomicCall(core::ir::CoreBuiltinCall* builtin, msl::BuiltinFn intrinsic) {
         auto args = Vector<core::ir::Value*, 4>{builtin->Args()};
-        args.Push(ir.allocators.values.Create<msl::ir::MemoryOrder>(
-            b.ConstantValue(u32(std::memory_order_relaxed))));
+        args.Push(
+            ir.CreateValue<msl::ir::MemoryOrder>(b.ConstantValue(u32(std::memory_order_relaxed))));
         auto* call = b.CallWithResult<msl::ir::BuiltinCall>(builtin->DetachResult(), intrinsic,
                                                             std::move(args));
         call->InsertBefore(builtin);
@@ -315,7 +315,7 @@ struct State {
             func->SetParams({ptr, cmp, val});
             b.Append(func->Block(), [&] {
                 auto* old_value = b.Var<function>("old_value", cmp)->Result(0);
-                auto* order = ir.allocators.values.Create<msl::ir::MemoryOrder>(
+                auto* order = ir.CreateValue<msl::ir::MemoryOrder>(
                     b.ConstantValue(u32(std::memory_order_relaxed)));
                 auto* call = b.Call<msl::ir::BuiltinCall>(
                     ty.bool_(), BuiltinFn::kAtomicCompareExchangeWeakExplicit,
@@ -637,7 +637,7 @@ struct State {
             if (component->Type()->Is<core::type::I32>()) {
                 component = b.Constant(component->Value()->ValueAs<u32>());
             }
-            args.Push(ir.allocators.values.Create<msl::ir::Component>(component->Value()));
+            args.Push(ir.CreateValue<msl::ir::Component>(component->Value()));
         }
 
         // Call the `gather()` member function.

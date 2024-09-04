@@ -41,7 +41,7 @@ FunctionParam::FunctionParam(const core::type::Type* ty) : type_(ty) {}
 FunctionParam::~FunctionParam() = default;
 
 FunctionParam* FunctionParam::Clone(CloneContext& ctx) {
-    auto* out = ctx.ir.allocators.values.Create<FunctionParam>(type_);
+    auto* out = ctx.ir.CreateValue<FunctionParam>(type_);
     out->binding_point_ = binding_point_;
     out->attributes_ = attributes_;
 

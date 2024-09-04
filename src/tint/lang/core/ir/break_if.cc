@@ -66,8 +66,7 @@ BreakIf* BreakIf::Clone(CloneContext& ctx) {
     auto* loop = ctx.Remap(loop_);
     auto* cond = ctx.Remap(Condition());
     auto args = ctx.Remap<BreakIf::kDefaultNumOperands>(Args());
-    return ctx.ir.allocators.instructions.Create<BreakIf>(ctx.ir.NextInstructionId(), cond, loop,
-                                                          args);
+    return ctx.ir.CreateInstruction<BreakIf>(cond, loop, args);
 }
 
 void BreakIf::SetLoop(ir::Loop* loop) {

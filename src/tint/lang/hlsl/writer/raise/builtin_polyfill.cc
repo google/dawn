@@ -507,8 +507,7 @@ struct State {
 
     void Select(core::ir::CoreBuiltinCall* call) {
         Vector<core::ir::Value*, 4> args = call->Args();
-        auto* ternary = b.ir.allocators.instructions.Create<hlsl::ir::Ternary>(
-            b.ir.NextInstructionId(), call->DetachResult(), args);
+        auto* ternary = b.ir.CreateInstruction<hlsl::ir::Ternary>(call->DetachResult(), args);
         ternary->InsertBefore(call);
         call->Destroy();
     }
@@ -528,8 +527,7 @@ struct State {
             args.Push(b.Call(type, core::BuiltinFn::kCeil, val)->Result(0));
             args.Push(b.LessThan(ty.match_width(ty.bool_(), type), val, b.Zero(type))->Result(0));
         });
-        auto* trunc = b.ir.allocators.instructions.Create<hlsl::ir::Ternary>(
-            b.ir.NextInstructionId(), call->DetachResult(), args);
+        auto* trunc = b.ir.CreateInstruction<hlsl::ir::Ternary>(call->DetachResult(), args);
         trunc->InsertBefore(call);
 
         call->Destroy();

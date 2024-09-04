@@ -45,8 +45,7 @@ CoreUnary::~CoreUnary() = default;
 CoreUnary* CoreUnary::Clone(CloneContext& ctx) {
     auto* new_result = ctx.Clone(Result(0));
     auto* val = ctx.Remap(Val());
-    return ctx.ir.allocators.instructions.Create<CoreUnary>(ctx.ir.NextInstructionId(), new_result,
-                                                            Op(), val);
+    return ctx.ir.CreateInstruction<CoreUnary>(new_result, Op(), val);
 }
 
 const core::intrinsic::TableData& CoreUnary::TableData() const {

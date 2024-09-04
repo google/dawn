@@ -51,8 +51,7 @@ BuiltinCall::~BuiltinCall() = default;
 BuiltinCall* BuiltinCall::Clone(core::ir::CloneContext& ctx) {
     auto* new_result = ctx.Clone(Result(0));
     auto new_args = ctx.Clone<BuiltinCall::kDefaultNumOperands>(Args());
-    return ctx.ir.allocators.instructions.Create<BuiltinCall>(ctx.ir.NextInstructionId(),
-                                                              new_result, fn_, new_args);
+    return ctx.ir.CreateInstruction<BuiltinCall>(new_result, fn_, new_args);
 }
 
 }  // namespace tint::wgsl::ir

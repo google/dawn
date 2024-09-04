@@ -53,8 +53,7 @@ StoreVectorElement* StoreVectorElement::Clone(CloneContext& ctx) {
     auto* to = ctx.Remap(To());
     auto* idx = ctx.Remap(Index());
     auto* val = ctx.Remap(Value());
-    return ctx.ir.allocators.instructions.Create<StoreVectorElement>(ctx.ir.NextInstructionId(), to,
-                                                                     idx, val);
+    return ctx.ir.CreateInstruction<StoreVectorElement>(to, idx, val);
 }
 
 }  // namespace tint::core::ir

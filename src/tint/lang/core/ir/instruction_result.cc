@@ -51,7 +51,7 @@ void InstructionResult::Destroy() {
 InstructionResult* InstructionResult::Clone(CloneContext& ctx) {
     // Do not clone the `Instruction`. It will be set when this result is placed in the new parent
     // instruction.
-    return ctx.ir.allocators.values.Create<InstructionResult>(type_);
+    return ctx.ir.CreateValue<InstructionResult>(type_);
 }
 
 }  // namespace tint::core::ir

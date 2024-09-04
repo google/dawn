@@ -50,8 +50,7 @@ Function::Function(const core::type::Type* rt,
 Function::~Function() = default;
 
 Function* Function::Clone(CloneContext& ctx) {
-    auto* new_func =
-        ctx.ir.allocators.values.Create<Function>(return_.type, pipeline_stage_, workgroup_size_);
+    auto* new_func = ctx.ir.CreateValue<Function>(return_.type, pipeline_stage_, workgroup_size_);
     new_func->block_ = ctx.ir.blocks.Create<ir::Block>();
     new_func->SetParams(ctx.Clone<1>(params_.Slice()));
     new_func->return_.attributes = return_.attributes;

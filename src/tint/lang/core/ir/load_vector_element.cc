@@ -56,8 +56,7 @@ LoadVectorElement* LoadVectorElement::Clone(CloneContext& ctx) {
     auto* new_result = ctx.Clone(Result(0));
     auto* from = ctx.Remap(From());
     auto* index = ctx.Remap(Index());
-    return ctx.ir.allocators.instructions.Create<LoadVectorElement>(ctx.ir.NextInstructionId(),
-                                                                    new_result, from, index);
+    return ctx.ir.CreateInstruction<LoadVectorElement>(new_result, from, index);
 }
 
 }  // namespace tint::core::ir

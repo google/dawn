@@ -39,7 +39,7 @@ TerminateInvocation::TerminateInvocation(Id id) : Base(id) {}
 TerminateInvocation::~TerminateInvocation() = default;
 
 TerminateInvocation* TerminateInvocation::Clone(CloneContext& ctx) {
-    return ctx.ir.allocators.instructions.Create<TerminateInvocation>(ctx.ir.NextInstructionId());
+    return ctx.ir.CreateInstruction<TerminateInvocation>();
 }
 
 }  // namespace tint::core::ir

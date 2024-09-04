@@ -39,7 +39,7 @@ Unreachable::Unreachable(Instruction::Id id) : Base(id) {}
 Unreachable::~Unreachable() = default;
 
 Unreachable* Unreachable::Clone(CloneContext& ctx) {
-    return ctx.ir.allocators.instructions.Create<Unreachable>(ctx.ir.NextInstructionId());
+    return ctx.ir.CreateInstruction<Unreachable>();
 }
 
 }  // namespace tint::core::ir

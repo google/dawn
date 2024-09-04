@@ -54,7 +54,7 @@ MultiInBlock* Builder::MultiInBlock() {
 Function* Builder::Function(const core::type::Type* return_type,
                             Function::PipelineStage stage,
                             std::optional<std::array<uint32_t, 3>> wg_size) {
-    auto* ir_func = ir.allocators.values.Create<ir::Function>(return_type, stage, wg_size);
+    auto* ir_func = ir.CreateValue<ir::Function>(return_type, stage, wg_size);
     ir_func->SetBlock(Block());
     ir.functions.Push(ir_func);
     return ir_func;
@@ -70,8 +70,7 @@ Function* Builder::Function(std::string_view name,
 }
 
 ir::Loop* Builder::Loop() {
-    return Append(ir.allocators.instructions.Create<ir::Loop>(ir.NextInstructionId(), Block(),
-                                                              MultiInBlock(), MultiInBlock()));
+    return Append(ir.CreateInstruction<ir::Loop>(Block(), MultiInBlock(), MultiInBlock()));
 }
 
 Block* Builder::Case(ir::Switch* s, VectorRef<ir::Constant*> values) {
@@ -96,12 +95,11 @@ Block* Builder::Case(ir::Switch* s, std::initializer_list<ir::Constant*> selecto
 }
 
 ir::Discard* Builder::Discard() {
-    return Append(ir.allocators.instructions.Create<ir::Discard>(ir.NextInstructionId()));
+    return Append(ir.CreateInstruction<ir::Discard>());
 }
 
 ir::Var* Builder::Var(const core::type::MemoryView* type) {
-    return Append(ir.allocators.instructions.Create<ir::Var>(ir.NextInstructionId(),
-                                                             InstructionResult(type)));
+    return Append(ir.CreateInstruction<ir::Var>(InstructionResult(type)));
 }
 
 ir::Var* Builder::Var(std::string_view name, const core::type::MemoryView* type) {
@@ -111,36 +109,35 @@ ir::Var* Builder::Var(std::string_view name, const core::type::MemoryView* type)
 }
 
 ir::BlockParam* Builder::BlockParam(const core::type::Type* type) {
-    return ir.allocators.values.Create<ir::BlockParam>(type);
+    return ir.CreateValue<ir::BlockParam>(type);
 }
 
 ir::BlockParam* Builder::BlockParam(std::string_view name, const core::type::Type* type) {
-    auto* param = ir.allocators.values.Create<ir::BlockParam>(type);
+    auto* param = ir.CreateValue<ir::BlockParam>(type);
     ir.SetName(param, name);
     return param;
 }
 
 ir::FunctionParam* Builder::FunctionParam(const core::type::Type* type) {
-    return ir.allocators.values.Create<ir::FunctionParam>(type);
+    return ir.CreateValue<ir::FunctionParam>(type);
 }
 
 ir::FunctionParam* Builder::FunctionParam(std::string_view name, const core::type::Type* type) {
-    auto* param = ir.allocators.values.Create<ir::FunctionParam>(type);
+    auto* param = ir.CreateValue<ir::FunctionParam>(type);
     ir.SetName(param, name);
     return param;
 }
 
 ir::TerminateInvocation* Builder::TerminateInvocation() {
-    return Append(
-        ir.allocators.instructions.Create<ir::TerminateInvocation>(ir.NextInstructionId()));
+    return Append(ir.CreateInstruction<ir::TerminateInvocation>());
 }
 
 ir::Unreachable* Builder::Unreachable() {
-    return Append(ir.allocators.instructions.Create<ir::Unreachable>(ir.NextInstructionId()));
+    return Append(ir.CreateInstruction<ir::Unreachable>());
 }
 
 ir::Unused* Builder::Unused() {
-    return ir.allocators.values.Create<ir::Unused>();
+    return ir.CreateValue<ir::Unused>();
 }
 
 const core::type::Type* Builder::VectorPtrElementType(const core::type::Type* type) {

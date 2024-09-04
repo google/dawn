@@ -51,8 +51,7 @@ ExitSwitch::~ExitSwitch() = default;
 ExitSwitch* ExitSwitch::Clone(CloneContext& ctx) {
     auto* switch_ = ctx.Remap(Switch());
     auto args = ctx.Remap<ExitSwitch::kDefaultNumOperands>(Args());
-    return ctx.ir.allocators.instructions.Create<ExitSwitch>(ctx.ir.NextInstructionId(), switch_,
-                                                             args);
+    return ctx.ir.CreateInstruction<ExitSwitch>(switch_, args);
 }
 
 void ExitSwitch::SetSwitch(ir::Switch* s) {
