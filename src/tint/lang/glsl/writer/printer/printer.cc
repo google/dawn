@@ -560,6 +560,7 @@ class Printer : public tint::TextGenerator {
         tint::Switch(
             type,  //
             [&](const core::type::Array* ary) { EmitArrayType(out, ary, name, name_printed); },
+            [&](const core::type::Atomic* a) { EmitType(out, a->Type(), name, name_printed); },
             [&](const core::type::Bool*) { out << "bool"; },
             [&](const core::type::I32*) { out << "int"; },
             [&](const core::type::U32*) { out << "uint"; },
