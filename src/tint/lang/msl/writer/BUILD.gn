@@ -192,12 +192,14 @@ if (tint_build_benchmarks) {
 }
 if (tint_build_msl_writer) {
   tint_fuzz_source_set("fuzz") {
-    sources = []
+    sources = [ "writer_fuzz.cc" ]
     deps = [
       "${dawn_root}/src/utils:utils",
       "${tint_src_dir}/api/common",
+      "${tint_src_dir}/cmd/fuzz/ir:fuzz",
       "${tint_src_dir}/lang/core",
       "${tint_src_dir}/lang/core/constant",
+      "${tint_src_dir}/lang/core/ir",
       "${tint_src_dir}/lang/core/type",
       "${tint_src_dir}/lang/wgsl",
       "${tint_src_dir}/lang/wgsl/ast",
