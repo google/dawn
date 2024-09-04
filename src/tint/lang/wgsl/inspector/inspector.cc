@@ -207,6 +207,7 @@ EntryPoint Inspector::GetEntryPoint(const tint::ast::Function* func) {
             core::BuiltinValue::kSampleMask, sem->ReturnType(), func->return_type_attributes);
         entry_point.frag_depth_used = ContainsBuiltin(
             core::BuiltinValue::kFragDepth, sem->ReturnType(), func->return_type_attributes);
+        entry_point.clip_distances_size = GetClipDistancesBuiltinSize(sem->ReturnType());
     }
 
     for (auto* var : sem->TransitivelyReferencedGlobals()) {
@@ -688,6 +689,25 @@ bool Inspector::ContainsBuiltin(core::BuiltinValue builtin,
         return false;
     }
     return builtin_declaration->builtin == builtin;
+}
+
+std::optional<uint32_t> Inspector::GetClipDistancesBuiltinSize(const core::type::Type* type) const {
+    auto* unwrapped_type = type->UnwrapRef();
+
+    if (auto* struct_ty = unwrapped_type->As<sem::Struct>()) {
+        for (auto* member : struct_ty->Members()) {
+            if (ContainsBuiltin(core::BuiltinValue::kClipDistances, member->Type(),
+                                member->Declaration()->attributes)) {
+                auto* array_type = member->Type()->As<core::type::Array>();
+                if (DAWN_UNLIKELY(array_type == nullptr)) {
+                    TINT_ICE() << "clip_distances is not an array";
+                }
+                return array_type->ConstantCount();
+            }
+        }
+    }
+
+    return std::nullopt;
 }
 
 std::vector<ResourceBinding> Inspector::GetStorageBufferResourceBindingsImpl(

@@ -207,6 +207,9 @@ struct EntryPoint {
     bool vertex_index_used = false;
     /// Does the entry point use the instance_index builtin
     bool instance_index_used = false;
+    /// The array length of the clip_distances builtin. Holding no value means the clip_distances
+    /// is not used.
+    std::optional<uint32_t> clip_distances_size;
 };
 
 }  // namespace tint::inspector

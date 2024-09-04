@@ -1587,6 +1587,51 @@ TEST_F(InspectorGetEntryPointTest, FragDepthStructReferenced) {
     EXPECT_TRUE(result[0].frag_depth_used);
 }
 
+TEST_F(InspectorGetEntryPointTest, ClipDistancesReferenced) {
+    Enable(wgsl::Extension::kClipDistances);
+
+    Structure("out_struct", Vector{Member("inner_clip_distances", ty.array<f32, 8>(),
+                                          Vector{Builtin(core::BuiltinValue::kClipDistances)}),
+                                   Member("inner_position", ty.vec4<f32>(),
+                                          Vector{Builtin(core::BuiltinValue::kPosition)})});
+    Func("ep_func", tint::Empty, ty("out_struct"),
+         Vector{
+             Decl(Var("out_var", ty("out_struct"))),
+             Return("out_var"),
+         },
+         Vector{
+             Stage(ast::PipelineStage::kVertex),
+         });
+
+    Inspector& inspector = Build();
+
+    auto result = inspector.GetEntryPoints();
+
+    ASSERT_EQ(1u, result.size());
+    EXPECT_TRUE(result[0].clip_distances_size.has_value());
+    EXPECT_EQ(8u, *result[0].clip_distances_size);
+}
+
+TEST_F(InspectorGetEntryPointTest, ClipDistancesNotReferenced) {
+    Structure("out_struct", Vector{Member("inner_position", ty.vec4<f32>(),
+                                          Vector{Builtin(core::BuiltinValue::kPosition)})});
+    Func("ep_func", tint::Empty, ty("out_struct"),
+         Vector{
+             Decl(Var("out_var", ty("out_struct"))),
+             Return("out_var"),
+         },
+         Vector{
+             Stage(ast::PipelineStage::kVertex),
+         });
+
+    Inspector& inspector = Build();
+
+    auto result = inspector.GetEntryPoints();
+
+    ASSERT_EQ(1u, result.size());
+    EXPECT_FALSE(result[0].clip_distances_size.has_value());
+}
+
 TEST_F(InspectorGetEntryPointTest, ImplicitInterpolate) {
     Structure("in_struct", Vector{
                                Member("struct_inner", ty.f32(), Vector{Location(0_a)}),

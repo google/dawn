@@ -225,7 +225,10 @@ class Inspector {
     bool ContainsBuiltin(core::BuiltinValue builtin,
                          const core::type::Type* type,
                          VectorRef<const ast::Attribute*> attributes) const;
-
+    /// Get the array length of the builtin clip_distances when it is used.
+    /// @param type the type of the variable
+    /// @returns the array length of the builtin clip_distances or empty when it is not used
+    std::optional<uint32_t> GetClipDistancesBuiltinSize(const core::type::Type* type) const;
     /// Gathers all the texture resource bindings of the given type for the given
     /// entry point.
     /// @param entry_point name of the entry point to get information about.
