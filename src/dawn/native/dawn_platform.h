@@ -74,7 +74,7 @@ static constexpr wgpu::BufferUsage kIndirectBufferForFrontendValidation =
 static constexpr wgpu::TextureUsage kReservedTextureUsage =
     static_cast<wgpu::TextureUsage>(1u << 31);
 
-// Extrea texture usages for textures that are used with the presentation engine.
+// Extra texture usages for textures that are used with the presentation engine.
 // Acquire is that Dawn is acquiring the texture from the presentation engine while Release is Dawn
 // releasing is to the presentation engine.
 static constexpr wgpu::TextureUsage kPresentAcquireTextureUsage =

@@ -488,7 +488,7 @@ ResultOrError<SwapChainTextureInfo> SwapChain::GetCurrentTextureInternal(bool is
         device->GetVkDevice(), mSwapChain, std::numeric_limits<uint64_t>::max(), semaphore,
         VkFence{}, &mLastImageIndex));
 
-    if (result == VK_SUCCESS) {
+    if (result == VK_SUCCESS || result == VK_SUBOPTIMAL_KHR) {
         // TODO(crbug.com/dawn/269) put the semaphore on the texture so it is waited on when
         // used instead of directly on the recording context?
         ToBackend(device->GetQueue())

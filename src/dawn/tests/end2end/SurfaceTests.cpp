@@ -351,9 +351,6 @@ TEST_P(SurfaceTests, ResizingSurfaceOnly) {
 
 // Test resizing the window but not the surface.
 TEST_P(SurfaceTests, ResizingWindowOnly) {
-    // TODO(crbug.com/1503912): Failing new ValidateImageAcquireWait in Vulkan Validation Layer.
-    DAWN_SUPPRESS_TEST_IF(IsBackendValidationEnabled() && IsWindows() && IsVulkan() && IsIntel());
-
     wgpu::Surface surface = CreateTestSurface();
     wgpu::SurfaceConfiguration config = GetPreferredConfiguration(surface);
     wgpu::SurfaceTexture surfaceTexture;
