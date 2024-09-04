@@ -1,11 +1,21 @@
 SKIP: FAILED
 
-<dawn>/src/tint/lang/glsl/writer/printer/printer.cc:482 internal compiler error: Switch() matched no cases. Type: tint::core::ir::Construct
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
+#version 310 es
+precision highp float;
+precision highp int;
 
-tint executable returned error: signal: illegal instruction
+
+vec4 main() {
+  float b = 0.0f;
+  vec3 v = vec3(b);
+  return vec4(v, 1.0f);
+}
+error: Error parsing GLSL shader:
+ERROR: 0:6: 'float' :  entry point cannot return a value
+ERROR: 0:6: '' : compilation terminated 
+ERROR: 2 compilation errors.  No code generated.
+
+
+
+
+tint executable returned error: exit status 1

@@ -1,11 +1,42 @@
 SKIP: FAILED
 
-<dawn>/src/tint/lang/glsl/writer/printer/printer.cc:482 internal compiler error: Switch() matched no cases. Type: tint::core::ir::Construct
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
+#version 310 es
+precision highp float;
+precision highp int;
 
-tint executable returned error: signal: illegal instruction
+
+vec4 main(uint VertexIndex) {
+  return vec4(vec2[3](vec2(0.0f, 0.5f), vec2(-0.5f), vec2(0.5f, -0.5f))[VertexIndex], 0.0f, 1.0f);
+}
+vec4 main() {
+  return vec4(1.0f, 0.0f, 0.0f, 1.0f);
+}
+error: Error parsing GLSL shader:
+ERROR: 0:6: 'main' : function cannot take any parameter(s) 
+ERROR: 0:6: 'float' :  entry point cannot return a value
+ERROR: 0:6: '' : compilation terminated 
+ERROR: 3 compilation errors.  No code generated.
+
+
+
+#version 310 es
+precision highp float;
+precision highp int;
+
+
+vec4 main(uint VertexIndex) {
+  return vec4(vec2[3](vec2(0.0f, 0.5f), vec2(-0.5f), vec2(0.5f, -0.5f))[VertexIndex], 0.0f, 1.0f);
+}
+vec4 main() {
+  return vec4(1.0f, 0.0f, 0.0f, 1.0f);
+}
+error: Error parsing GLSL shader:
+ERROR: 0:6: 'main' : function cannot take any parameter(s) 
+ERROR: 0:6: 'float' :  entry point cannot return a value
+ERROR: 0:6: '' : compilation terminated 
+ERROR: 3 compilation errors.  No code generated.
+
+
+
+
+tint executable returned error: exit status 1

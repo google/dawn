@@ -1,31 +1,84 @@
 SKIP: FAILED
 
-<dawn>/src/tint/lang/glsl/writer/printer/printer.cc:509:16: runtime error: member call on null pointer of type 'tint::core::constant::Value'
-SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior <dawn>/src/tint/lang/glsl/writer/printer/printer.cc:509:16 in 
-AddressSanitizer:DEADLYSIGNAL
-=================================================================
-==1757161==ERROR: AddressSanitizer: SEGV on unknown address 0x000000000000 (pc 0x55f6a834a4d3 bp 0x7ffe0ffdb760 sp 0x7ffe0ffdb580 T0)
-==1757161==The signal is caused by a READ memory access.
-==1757161==Hint: address points to the zero page.
-    #0 0x55f6a834a4d3 in tint::glsl::writer::(anonymous namespace)::Printer::EmitConstant(tint::StringStream&, tint::core::constant::Value const*) <dawn>/src/tint/lang/glsl/writer/printer/printer.cc:509:16
-    #1 0x55f6a835d17c in tint::glsl::writer::(anonymous namespace)::Printer::EmitZeroValue(tint::StringStream&, tint::core::type::Type const*) <dawn>/src/tint/lang/glsl/writer/printer/printer.cc:470:9
-    #2 0x55f6a835cfd1 in tint::glsl::writer::(anonymous namespace)::Printer::EmitVar(tint::StringStream&, tint::core::ir::Var const*) <dawn>/src/tint/lang/glsl/writer/printer/printer.cc:461:13
-    #3 0x55f6a835c72f in tint::glsl::writer::(anonymous namespace)::Printer::EmitBlock(tint::core::ir::Block const*)::'lambda'(tint::core::ir::Var const*)::operator()(tint::core::ir::Var const*) const <dawn>/src/tint/lang/glsl/writer/printer/printer.cc:239:47
-    #4 0x55f6a8347704 in auto auto tint::Switch<tint::detail::Infer, tint::core::ir::Instruction const, tint::glsl::writer::(anonymous namespace)::Printer::EmitBlock(tint::core::ir::Block const*)::'lambda'(tint::core::ir::Call const*), tint::glsl::writer::(anonymous namespace)::Printer::EmitBlock(tint::core::ir::Block const*)::'lambda'(tint::core::ir::Let const*), tint::glsl::writer::(anonymous namespace)::Printer::EmitBlock(tint::core::ir::Block const*)::'lambda'(tint::core::ir::Return const*), tint::glsl::writer::(anonymous namespace)::Printer::EmitBlock(tint::core::ir::Block const*)::'lambda'(tint::core::ir::Unreachable const*), tint::glsl::writer::(anonymous namespace)::Printer::EmitBlock(tint::core::ir::Block const*)::'lambda'(tint::core::ir::Var const*), tint::glsl::writer::(anonymous namespace)::Printer::EmitBlock(tint::core::ir::Block const*)::'lambda'(tint::core::ir::NextIteration const*), tint::glsl::writer::(anonymous namespace)::Printer::EmitBlock(tint::core::ir::Block const*)::'lambda'(tint::core::ir::ExitIf const*), tint::glsl::writer::(anonymous namespace)::Printer::EmitBlock(tint::core::ir::Block const*)::'lambda'(tint::core::ir::Access const*), tint::glsl::writer::(anonymous namespace)::Printer::EmitBlock(tint::core::ir::Block const*)::'lambda'(tint::core::ir::Bitcast const*), tint::glsl::writer::(anonymous namespace)::Printer::EmitBlock(tint::core::ir::Block const*)::'lambda'(tint::core::ir::Construct const*), tint::glsl::writer::(anonymous namespace)::Printer::EmitBlock(tint::core::ir::Block const*)::'lambda'(tint::core::ir::CoreBinary const*), tint::glsl::writer::(anonymous namespace)::Printer::EmitBlock(tint::core::ir::Block const*)::'lambda'(tint::core::ir::CoreUnary const*), tint::glsl::writer::(anonymous namespace)::Printer::EmitBlock(tint::core::ir::Block const*)::'lambda'(tint::core::ir::Load const*), tint::glsl::writer::(anonymous namespace)::Printer::EmitBlock(tint::core::ir::Block const*)::'lambda'(tint::core::ir::LoadVectorElement const*), tint::glsl::writer::(anonymous namespace)::Printer::EmitBlock(tint::core::ir::Block const*)::'lambda'(tint::core::ir::Swizzle const*), tint::SwitchMustMatchCase>(tint::core::ir::Instruction const*, tint::glsl::writer::(anonymous namespace)::Printer::EmitBlock(tint::core::ir::Block const*)::'lambda'(tint::core::ir::Call const*)&&, tint::glsl::writer::(anonymous namespace)::Printer::EmitBlock(tint::core::ir::Block const*)::'lambda'(tint::core::ir::Let const*)&&, tint::glsl::writer::(anonymous namespace)::Printer::EmitBlock(tint::core::ir::Block const*)::'lambda'(tint::core::ir::Return const*)&&, tint::glsl::writer::(anonymous namespace)::Printer::EmitBlock(tint::core::ir::Block const*)::'lambda'(tint::core::ir::Unreachable const*)&&, tint::glsl::writer::(anonymous namespace)::Printer::EmitBlock(tint::core::ir::Block const*)::'lambda'(tint::core::ir::Var const*)&&, tint::glsl::writer::(anonymous namespace)::Printer::EmitBlock(tint::core::ir::Block const*)::'lambda'(tint::core::ir::NextIteration const*)&&, tint::glsl::writer::(anonymous namespace)::Printer::EmitBlock(tint::core::ir::Block const*)::'lambda'(tint::core::ir::ExitIf const*)&&, tint::glsl::writer::(anonymous namespace)::Printer::EmitBlock(tint::core::ir::Block const*)::'lambda'(tint::core::ir::Access const*)&&, tint::glsl::writer::(anonymous namespace)::Printer::EmitBlock(tint::core::ir::Block const*)::'lambda'(tint::core::ir::Bitcast const*)&&, tint::glsl::writer::(anonymous namespace)::Printer::EmitBlock(tint::core::ir::Block const*)::'lambda'(tint::core::ir::Construct const*)&&, tint::glsl::writer::(anonymous namespace)::Printer::EmitBlock(tint::core::ir::Block const*)::'lambda'(tint::core::ir::CoreBinary const*)&&, tint::glsl::writer::(anonymous namespace)::Printer::EmitBlock(tint::core::ir::Block const*)::'lambda'(tint::core::ir::CoreUnary const*)&&, tint::glsl::writer::(anonymous namespace)::Printer::EmitBlock(tint::core::ir::Block const*)::'lambda'(tint::core::ir::Load const*)&&, tint::glsl::writer::(anonymous namespace)::Printer::EmitBlock(tint::core::ir::Block const*)::'lambda'(tint::core::ir::LoadVectorElement const*)&&, tint::glsl::writer::(anonymous namespace)::Printer::EmitBlock(tint::core::ir::Block const*)::'lambda'(tint::core::ir::Swizzle const*)&&, tint::SwitchMustMatchCase&&)::'lambda'(auto&&)::operator()<tint::glsl::writer::(anonymous namespace)::Printer::EmitBlock(tint::core::ir::Block const*)::'lambda'(tint::core::ir::Var const*)>(auto&&) const <dawn>/src/tint/utils/rtti/switch.h:347:25
-    #5 0x55f6a8346a63 in auto tint::Switch<tint::detail::Infer, tint::core::ir::Instruction const, tint::glsl::writer::(anonymous namespace)::Printer::EmitBlock(tint::core::ir::Block const*)::'lambda'(tint::core::ir::Call const*), tint::glsl::writer::(anonymous namespace)::Printer::EmitBlock(tint::core::ir::Block const*)::'lambda'(tint::core::ir::Let const*), tint::glsl::writer::(anonymous namespace)::Printer::EmitBlock(tint::core::ir::Block const*)::'lambda'(tint::core::ir::Return const*), tint::glsl::writer::(anonymous namespace)::Printer::EmitBlock(tint::core::ir::Block const*)::'lambda'(tint::core::ir::Unreachable const*), tint::glsl::writer::(anonymous namespace)::Printer::EmitBlock(tint::core::ir::Block const*)::'lambda'(tint::core::ir::Var const*), tint::glsl::writer::(anonymous namespace)::Printer::EmitBlock(tint::core::ir::Block const*)::'lambda'(tint::core::ir::NextIteration const*), tint::glsl::writer::(anonymous namespace)::Printer::EmitBlock(tint::core::ir::Block const*)::'lambda'(tint::core::ir::ExitIf const*), tint::glsl::writer::(anonymous namespace)::Printer::EmitBlock(tint::core::ir::Block const*)::'lambda'(tint::core::ir::Access const*), tint::glsl::writer::(anonymous namespace)::Printer::EmitBlock(tint::core::ir::Block const*)::'lambda'(tint::core::ir::Bitcast const*), tint::glsl::writer::(anonymous namespace)::Printer::EmitBlock(tint::core::ir::Block const*)::'lambda'(tint::core::ir::Construct const*), tint::glsl::writer::(anonymous namespace)::Printer::EmitBlock(tint::core::ir::Block const*)::'lambda'(tint::core::ir::CoreBinary const*), tint::glsl::writer::(anonymous namespace)::Printer::EmitBlock(tint::core::ir::Block const*)::'lambda'(tint::core::ir::CoreUnary const*), tint::glsl::writer::(anonymous namespace)::Printer::EmitBlock(tint::core::ir::Block const*)::'lambda'(tint::core::ir::Load const*), tint::glsl::writer::(anonymous namespace)::Printer::EmitBlock(tint::core::ir::Block const*)::'lambda'(tint::core::ir::LoadVectorElement const*), tint::glsl::writer::(anonymous namespace)::Printer::EmitBlock(tint::core::ir::Block const*)::'lambda'(tint::core::ir::Swizzle const*), tint::SwitchMustMatchCase>(tint::core::ir::Instruction const*, tint::glsl::writer::(anonymous namespace)::Printer::EmitBlock(tint::core::ir::Block const*)::'lambda'(tint::core::ir::Call const*)&&, tint::glsl::writer::(anonymous namespace)::Printer::EmitBlock(tint::core::ir::Block const*)::'lambda'(tint::core::ir::Let const*)&&, tint::glsl::writer::(anonymous namespace)::Printer::EmitBlock(tint::core::ir::Block const*)::'lambda'(tint::core::ir::Return const*)&&, tint::glsl::writer::(anonymous namespace)::Printer::EmitBlock(tint::core::ir::Block const*)::'lambda'(tint::core::ir::Unreachable const*)&&, tint::glsl::writer::(anonymous namespace)::Printer::EmitBlock(tint::core::ir::Block const*)::'lambda'(tint::core::ir::Var const*)&&, tint::glsl::writer::(anonymous namespace)::Printer::EmitBlock(tint::core::ir::Block const*)::'lambda'(tint::core::ir::NextIteration const*)&&, tint::glsl::writer::(anonymous namespace)::Printer::EmitBlock(tint::core::ir::Block const*)::'lambda'(tint::core::ir::ExitIf const*)&&, tint::glsl::writer::(anonymous namespace)::Printer::EmitBlock(tint::core::ir::Block const*)::'lambda'(tint::core::ir::Access const*)&&, tint::glsl::writer::(anonymous namespace)::Printer::EmitBlock(tint::core::ir::Block const*)::'lambda'(tint::core::ir::Bitcast const*)&&, tint::glsl::writer::(anonymous namespace)::Printer::EmitBlock(tint::core::ir::Block const*)::'lambda'(tint::core::ir::Construct const*)&&, tint::glsl::writer::(anonymous namespace)::Printer::EmitBlock(tint::core::ir::Block const*)::'lambda'(tint::core::ir::CoreBinary const*)&&, tint::glsl::writer::(anonymous namespace)::Printer::EmitBlock(tint::core::ir::Block const*)::'lambda'(tint::core::ir::CoreUnary const*)&&, tint::glsl::writer::(anonymous namespace)::Printer::EmitBlock(tint::core::ir::Block const*)::'lambda'(tint::core::ir::Load const*)&&, tint::glsl::writer::(anonymous namespace)::Printer::EmitBlock(tint::core::ir::Block const*)::'lambda'(tint::core::ir::LoadVectorElement const*)&&, tint::glsl::writer::(anonymous namespace)::Printer::EmitBlock(tint::core::ir::Block const*)::'lambda'(tint::core::ir::Swizzle const*)&&, tint::SwitchMustMatchCase&&) <dawn>/src/tint/utils/rtti/switch.h:358:22
-    #6 0x55f6a834493a in tint::glsl::writer::(anonymous namespace)::Printer::EmitBlock(tint::core::ir::Block const*) <dawn>/src/tint/lang/glsl/writer/printer/printer.cc:233:13
-    #7 0x55f6a8343b21 in tint::glsl::writer::(anonymous namespace)::Printer::Generate[abi:cxx11](tint::glsl::writer::Version const&) <dawn>/src/tint/lang/glsl/writer/printer/printer.cc:105:9
-    #8 0x55f6a834302b in tint::glsl::writer::Print[abi:cxx11](tint::core::ir::Module&, tint::glsl::writer::Version const&) <dawn>/src/tint/lang/glsl/writer/printer/printer.cc:596:28
-    #9 0x55f6a7e8febb in tint::glsl::writer::Generate(tint::core::ir::Module&, tint::glsl::writer::Options const&, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>> const&) <dawn>/src/tint/lang/glsl/writer/writer.cc:48:19
-    #10 0x55f6a76ab455 in (anonymous namespace)::GenerateGlsl(tint::Program const&, (anonymous namespace)::Options const&)::$_0::operator()(tint::Program const&, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>>, tint::ast::PipelineStage) const <dawn>/src/tint/cmd/tint/main.cc:1100:22
-    #11 0x55f6a7693d35 in (anonymous namespace)::GenerateGlsl(tint::Program const&, (anonymous namespace)::Options const&) <dawn>/src/tint/cmd/tint/main.cc:1157:20
-    #12 0x55f6a767b861 in main <dawn>/src/tint/cmd/tint/main.cc:1434:23
-    #13 0x7f7499337b89 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
-    #14 0x7f7499337c44 in __libc_start_main csu/../csu/libc-start.c:360:3
-    #15 0x55f6a75a0000 in _start (<dawn>/out/Debug/tint+0x2b08000) (BuildId: e8af56752221240d6aa5bbe38e8d6c485d94acd9)
+#version 310 es
 
-AddressSanitizer can not provide additional info.
-SUMMARY: AddressSanitizer: SEGV <dawn>/src/tint/lang/glsl/writer/printer/printer.cc:509:16 in tint::glsl::writer::(anonymous namespace)::Printer::EmitConstant(tint::StringStream&, tint::core::constant::Value const*)
-==1757161==ABORTING
+struct Camera {
+  mat4 projection;
+  mat4 inverseProjection;
+  mat4 view;
+  vec3 position;
+  float time;
+  vec2 outputSize;
+  float zNear;
+  float zFar;
+};
+
+struct Joints {
+  mat4 matrices[];
+};
+
+struct VertexInput {
+  vec4 position;
+  vec3 normal;
+  vec4 tangent;
+  vec2 texcoord;
+  uvec4 joints;
+  vec4 weights;
+  vec4 instance0;
+  vec4 instance1;
+  vec4 instance2;
+  vec4 instance3;
+  vec4 instanceColor;
+};
+
+struct VertexOutput {
+  vec4 position;
+  vec3 worldPos;
+  vec3 view;
+  vec2 texcoord;
+  vec2 texcoord2;
+  vec4 color;
+  vec4 instanceColor;
+  vec3 normal;
+  vec3 tangent;
+  vec3 bitangent;
+};
+
+uniform Camera camera;
+Joints joint;
+Joints inverseBind;
+mat4 getInstanceMatrix(VertexInput tint_symbol) {
+  return mat4(tint_symbol.instance0, tint_symbol.instance1, tint_symbol.instance2, tint_symbol.instance3);
+}
+mat4 getSkinMatrix(VertexInput tint_symbol) {
+  mat4 joint0 = (joint.matrices[tint_symbol.joints[0u]] * inverseBind.matrices[tint_symbol.joints[0u]]);
+  mat4 joint1 = (joint.matrices[tint_symbol.joints[1u]] * inverseBind.matrices[tint_symbol.joints[1u]]);
+  mat4 joint2 = (joint.matrices[tint_symbol.joints[2u]] * inverseBind.matrices[tint_symbol.joints[2u]]);
+  mat4 joint3 = (joint.matrices[tint_symbol.joints[3u]] * inverseBind.matrices[tint_symbol.joints[3u]]);
+  mat4 skinMatrix = ((((joint0 * tint_symbol.weights[0u]) + (joint1 * tint_symbol.weights[1u])) + (joint2 * tint_symbol.weights[2u])) + (joint3 * tint_symbol.weights[3u]));
+  return skinMatrix;
+}
+VertexOutput main(VertexInput tint_symbol) {
+  VertexOutput tint_symbol_1 = VertexOutput(vec4(0.0f), vec3(0.0f), vec3(0.0f), vec2(0.0f), vec2(0.0f), vec4(0.0f), vec4(0.0f), vec3(0.0f), vec3(0.0f), vec3(0.0f));
+  mat4 modelMatrix = getSkinMatrix(tint_symbol);
+  tint_symbol_1.normal = normalize((modelMatrix * vec4(tint_symbol.normal, 0.0f)).xyz);
+  tint_symbol_1.tangent = normalize((modelMatrix * vec4(tint_symbol.tangent.xyz, 0.0f)).xyz);
+  tint_symbol_1.bitangent = (cross(tint_symbol_1.normal, tint_symbol_1.tangent) * tint_symbol.tangent[3u]);
+  tint_symbol_1.color = vec4(1.0f);
+  tint_symbol_1.texcoord = tint_symbol.texcoord;
+  tint_symbol_1.instanceColor = tint_symbol.instanceColor;
+  vec4 modelPos = (modelMatrix * tint_symbol.position);
+  tint_symbol_1.worldPos = modelPos.xyz;
+  tint_symbol_1.view = (camera.position - modelPos.xyz);
+  tint_symbol_1.position = ((camera.projection * camera.view) * modelPos);
+  return tint_symbol_1;
+}
+error: Error parsing GLSL shader:
+ERROR: 0:15: '' : array size required 
+ERROR: 0:16: '' : compilation terminated 
+ERROR: 2 compilation errors.  No code generated.
+
+
+
 
 tint executable returned error: exit status 1

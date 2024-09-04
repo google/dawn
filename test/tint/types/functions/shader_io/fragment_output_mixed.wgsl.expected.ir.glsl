@@ -10,6 +10,9 @@ struct FragmentOutputs {
   uint sample_mask;
   vec4 loc3;
 };
+precision highp float;
+precision highp int;
+
 
 FragmentOutputs main() {
   return FragmentOutputs(1, 2.0f, 1u, 1.0f, 2u, vec4(1.0f, 2.0f, 3.0f, 4.0f));

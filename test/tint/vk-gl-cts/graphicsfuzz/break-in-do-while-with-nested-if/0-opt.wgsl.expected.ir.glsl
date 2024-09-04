@@ -1,11 +1,55 @@
 SKIP: FAILED
 
-<dawn>/src/tint/lang/glsl/writer/printer/printer.cc:252 internal compiler error: Switch() matched no cases. Type: tint::core::ir::Store
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
+#version 310 es
 
-tint executable returned error: signal: illegal instruction
+struct buf0 {
+  vec2 injectionSwitch;
+};
+
+struct main_out {
+  vec4 x_GLF_color_1;
+};
+precision highp float;
+precision highp int;
+
+
+vec4 x_GLF_color = vec4(0.0f);
+uniform buf0 x_5;
+void main_1() {
+  bool GLF_live12c5 = false;
+  x_GLF_color = vec4(1.0f, 0.0f, 0.0f, 1.0f);
+  {
+    while(true) {
+      float x_31 = x_5.injectionSwitch.y;
+      if ((x_31 < 0.0f)) {
+        GLF_live12c5 = false;
+        bool x_35 = GLF_live12c5;
+        if (x_35) {
+          {
+            if (true) { break; }
+          }
+          continue;
+        } else {
+          {
+            if (true) { break; }
+          }
+          continue;
+        }
+      }
+      break;
+    }
+  }
+}
+main_out main() {
+  main_1();
+  return main_out(x_GLF_color);
+}
+error: Error parsing GLSL shader:
+ERROR: 0:4: 'float' : type requires declaration of default precision qualifier 
+ERROR: 0:4: '' : compilation terminated 
+ERROR: 2 compilation errors.  No code generated.
+
+
+
+
+tint executable returned error: exit status 1

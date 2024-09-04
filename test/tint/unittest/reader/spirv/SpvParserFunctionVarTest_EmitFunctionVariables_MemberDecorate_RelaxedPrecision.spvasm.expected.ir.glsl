@@ -5,6 +5,9 @@ SKIP: FAILED
 struct strct {
   float field0;
 };
+precision highp float;
+precision highp int;
+
 
 void main_1() {
   strct myvar = strct(0.0f);

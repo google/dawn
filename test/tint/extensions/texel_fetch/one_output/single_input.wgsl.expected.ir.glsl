@@ -1,14 +1,18 @@
 SKIP: FAILED
 
 #version 310 es
+precision highp float;
+precision highp int;
+
 
 vec4 main(vec4 fbf) {
   return fbf;
 }
 error: Error parsing GLSL shader:
-ERROR: 0:3: 'float' : type requires declaration of default precision qualifier 
-ERROR: 0:3: '' : compilation terminated 
-ERROR: 2 compilation errors.  No code generated.
+ERROR: 0:6: 'main' : function cannot take any parameter(s) 
+ERROR: 0:6: 'float' :  entry point cannot return a value
+ERROR: 0:6: '' : compilation terminated 
+ERROR: 3 compilation errors.  No code generated.
 
 
 

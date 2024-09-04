@@ -1,6 +1,9 @@
 SKIP: FAILED
 
 #version 310 es
+precision highp float;
+precision highp int;
+
 
 struct In {
   float none;
@@ -18,8 +21,8 @@ struct In {
 void main(In tint_symbol_2) {
 }
 error: Error parsing GLSL shader:
-ERROR: 0:4: 'float' : type requires declaration of default precision qualifier 
-ERROR: 0:4: '' : compilation terminated 
+ERROR: 0:19: 'main' : function cannot take any parameter(s) 
+ERROR: 0:19: '' : compilation terminated 
 ERROR: 2 compilation errors.  No code generated.
 
 

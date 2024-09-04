@@ -8,6 +8,9 @@ struct FragmentOutputs {
   float loc2;
   vec4 loc3;
 };
+precision highp float;
+precision highp int;
+
 
 FragmentOutputs main() {
   return FragmentOutputs(1, 1u, 1.0f, vec4(1.0f, 2.0f, 3.0f, 4.0f));

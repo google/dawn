@@ -1,11 +1,23 @@
 SKIP: FAILED
 
-<dawn>/src/tint/lang/glsl/writer/printer/printer.cc:252 internal compiler error: Switch() matched no cases. Type: tint::core::ir::Store
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
+#version 310 es
+precision highp float;
+precision highp int;
 
-tint executable returned error: signal: illegal instruction
+
+uint x_1[1] = uint[1](0u);
+void main_1() {
+}
+void main(uint x_1_param) {
+  x_1[0] = x_1_param;
+  main_1();
+}
+error: Error parsing GLSL shader:
+ERROR: 0:9: 'main' : function cannot take any parameter(s) 
+ERROR: 0:9: '' : compilation terminated 
+ERROR: 2 compilation errors.  No code generated.
+
+
+
+
+tint executable returned error: exit status 1

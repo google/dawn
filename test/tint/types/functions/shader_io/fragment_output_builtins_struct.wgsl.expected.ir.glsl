@@ -6,6 +6,9 @@ struct FragmentOutputs {
   float frag_depth;
   uint sample_mask;
 };
+precision highp float;
+precision highp int;
+
 
 FragmentOutputs main() {
   return FragmentOutputs(1.0f, 1u);

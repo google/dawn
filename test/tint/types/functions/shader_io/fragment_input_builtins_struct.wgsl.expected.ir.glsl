@@ -1,11 +1,29 @@
 SKIP: FAILED
 
-<dawn>/src/tint/lang/glsl/writer/printer/printer.cc:252 internal compiler error: Switch() matched no cases. Type: tint::core::ir::If
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
+#version 310 es
+precision highp float;
+precision highp int;
 
-tint executable returned error: signal: illegal instruction
+
+struct FragmentInputs {
+  vec4 position;
+  bool front_facing;
+  uint sample_index;
+  uint sample_mask;
+};
+
+void main(FragmentInputs inputs) {
+  if (inputs.front_facing) {
+    vec4 foo = inputs.position;
+    uint bar = (inputs.sample_index + inputs.sample_mask);
+  }
+}
+error: Error parsing GLSL shader:
+ERROR: 0:13: 'main' : function cannot take any parameter(s) 
+ERROR: 0:13: '' : compilation terminated 
+ERROR: 2 compilation errors.  No code generated.
+
+
+
+
+tint executable returned error: exit status 1

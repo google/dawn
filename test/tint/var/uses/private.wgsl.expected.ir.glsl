@@ -1,11 +1,200 @@
 SKIP: FAILED
 
-<dawn>/src/tint/lang/glsl/writer/printer/printer.cc:252 internal compiler error: Switch() matched no cases. Type: tint::core::ir::Store
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
+#version 310 es
 
-tint executable returned error: signal: illegal instruction
+int a = 0;
+int b = 0;
+int c = 0;
+void uses_a() {
+  a = (a + 1);
+}
+void uses_b() {
+  b = (b * 2);
+}
+void uses_a_and_b() {
+  b = a;
+}
+void no_uses() {
+}
+void outer() {
+  a = 0;
+  uses_a();
+  uses_a_and_b();
+  uses_b();
+  no_uses();
+}
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+void main() {
+  a = 42;
+  uses_a();
+}
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+void main() {
+  b = 7;
+  uses_b();
+}
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+void main() {
+  outer();
+  no_uses();
+}
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+void main() {
+  no_uses();
+}
+error: Error parsing GLSL shader:
+ERROR: 0:30: 'main' : function already has a body 
+ERROR: 0:30: '' : compilation terminated 
+ERROR: 2 compilation errors.  No code generated.
+
+
+
+#version 310 es
+
+int a = 0;
+int b = 0;
+int c = 0;
+void uses_a() {
+  a = (a + 1);
+}
+void uses_b() {
+  b = (b * 2);
+}
+void uses_a_and_b() {
+  b = a;
+}
+void no_uses() {
+}
+void outer() {
+  a = 0;
+  uses_a();
+  uses_a_and_b();
+  uses_b();
+  no_uses();
+}
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+void main() {
+  a = 42;
+  uses_a();
+}
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+void main() {
+  b = 7;
+  uses_b();
+}
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+void main() {
+  outer();
+  no_uses();
+}
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+void main() {
+  no_uses();
+}
+error: Error parsing GLSL shader:
+ERROR: 0:30: 'main' : function already has a body 
+ERROR: 0:30: '' : compilation terminated 
+ERROR: 2 compilation errors.  No code generated.
+
+
+
+#version 310 es
+
+int a = 0;
+int b = 0;
+int c = 0;
+void uses_a() {
+  a = (a + 1);
+}
+void uses_b() {
+  b = (b * 2);
+}
+void uses_a_and_b() {
+  b = a;
+}
+void no_uses() {
+}
+void outer() {
+  a = 0;
+  uses_a();
+  uses_a_and_b();
+  uses_b();
+  no_uses();
+}
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+void main() {
+  a = 42;
+  uses_a();
+}
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+void main() {
+  b = 7;
+  uses_b();
+}
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+void main() {
+  outer();
+  no_uses();
+}
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+void main() {
+  no_uses();
+}
+error: Error parsing GLSL shader:
+ERROR: 0:30: 'main' : function already has a body 
+ERROR: 0:30: '' : compilation terminated 
+ERROR: 2 compilation errors.  No code generated.
+
+
+
+#version 310 es
+
+int a = 0;
+int b = 0;
+int c = 0;
+void uses_a() {
+  a = (a + 1);
+}
+void uses_b() {
+  b = (b * 2);
+}
+void uses_a_and_b() {
+  b = a;
+}
+void no_uses() {
+}
+void outer() {
+  a = 0;
+  uses_a();
+  uses_a_and_b();
+  uses_b();
+  no_uses();
+}
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+void main() {
+  a = 42;
+  uses_a();
+}
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+void main() {
+  b = 7;
+  uses_b();
+}
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+void main() {
+  outer();
+  no_uses();
+}
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+void main() {
+  no_uses();
+}
+error: Error parsing GLSL shader:
+ERROR: 0:30: 'main' : function already has a body 
+ERROR: 0:30: '' : compilation terminated 
+ERROR: 2 compilation errors.  No code generated.
+
+
+
+
+tint executable returned error: exit status 1

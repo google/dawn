@@ -1,11 +1,22 @@
 SKIP: FAILED
 
-<dawn>/src/tint/lang/glsl/writer/printer/printer.cc:350 internal compiler error: Switch() matched no cases. Type: tint::core::type::SampledTexture
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
+#version 310 es
+precision highp float;
+precision highp int;
 
-tint executable returned error: signal: illegal instruction
+
+uniform highp sampler1D x_10;
+void main_1() {
+}
+void main() {
+  main_1();
+}
+error: Error parsing GLSL shader:
+ERROR: 0:6: 'sampler1D' : Reserved word. 
+ERROR: 0:6: '' : compilation terminated 
+ERROR: 2 compilation errors.  No code generated.
+
+
+
+
+tint executable returned error: exit status 1

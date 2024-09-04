@@ -13,6 +13,9 @@ struct FragmentOutputs {
   float16_t loc4;
   f16vec3 loc5;
 };
+precision highp float;
+precision highp int;
+
 
 FragmentOutputs main() {
   return FragmentOutputs(1, 2.0f, 1u, 1.0f, 2u, vec4(1.0f, 2.0f, 3.0f, 4.0f), 2.25hf, f16vec3(3.0hf, 5.0hf, 8.0hf));

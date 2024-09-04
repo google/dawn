@@ -5,8 +5,11 @@ SKIP: FAILED
 struct S {
   mat3x2 field0;
 };
+precision highp float;
+precision highp int;
 
-S myvar = S(mat3x2(vec2(0.0f), vec2(0.0f), vec2(0.0f)));
+
+S myvar;
 void main_1() {
 }
 void main() {

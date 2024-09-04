@@ -9,8 +9,11 @@ struct strided_arr {
 struct S {
   strided_arr field0[3];
 };
+precision highp float;
+precision highp int;
 
-S myvar = S(strided_arr[3](strided_arr(vec2(0.0f)), strided_arr(vec2(0.0f)), strided_arr(vec2(0.0f))));
+
+S myvar;
 void main_1() {
 }
 void main() {

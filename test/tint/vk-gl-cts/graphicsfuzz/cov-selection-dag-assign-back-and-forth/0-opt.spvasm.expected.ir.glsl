@@ -1,11 +1,44 @@
 SKIP: FAILED
 
-<dawn>/src/tint/lang/glsl/writer/printer/printer.cc:482 internal compiler error: Switch() matched no cases. Type: tint::core::ir::Convert
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
+#version 310 es
 
-tint executable returned error: signal: illegal instruction
+struct strided_arr {
+  int el;
+};
+
+struct buf0 {
+  strided_arr x_GLF_uniform_int_values[2];
+};
+
+struct main_out {
+  vec4 x_GLF_color_1;
+};
+precision highp float;
+precision highp int;
+
+
+vec4 x_GLF_color = vec4(0.0f);
+uniform buf0 x_5;
+void main_1() {
+  vec4 v = vec4(0.0f);
+  float v_1 = float(x_5.x_GLF_uniform_int_values[0].el);
+  float v_2 = float(x_5.x_GLF_uniform_int_values[1].el);
+  float v_3 = float(x_5.x_GLF_uniform_int_values[1].el);
+  x_GLF_color = vec4(v_1, v_2, v_3, float(x_5.x_GLF_uniform_int_values[0].el));
+  v = x_GLF_color;
+  x_GLF_color = vec4(0.0f);
+  x_GLF_color = v;
+}
+main_out main() {
+  main_1();
+  return main_out(x_GLF_color);
+}
+error: Error parsing GLSL shader:
+ERROR: 0:12: 'float' : type requires declaration of default precision qualifier 
+ERROR: 0:12: '' : compilation terminated 
+ERROR: 2 compilation errors.  No code generated.
+
+
+
+
+tint executable returned error: exit status 1

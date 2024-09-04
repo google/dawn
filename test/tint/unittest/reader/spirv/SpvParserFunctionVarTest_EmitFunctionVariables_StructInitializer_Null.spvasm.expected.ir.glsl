@@ -7,6 +7,9 @@ struct S {
   float field1;
   uint field2[2];
 };
+precision highp float;
+precision highp int;
+
 
 void main_1() {
   S x_200 = S(0u, 0.0f, uint[2](0u, 0u));

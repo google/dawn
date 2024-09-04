@@ -12,7 +12,7 @@ SKIP: FAILED
   switch (i32(x)) @diagnostic(warning, derivative_uniformity) {
               ^
 
-<dawn>/src/tint/lang/glsl/writer/printer/printer.cc:252 internal compiler error: Switch() matched no cases. Type: tint::core::ir::Switch
+<dawn>/src/tint/lang/glsl/writer/printer/printer.cc:1116 internal compiler error: TINT_UNREACHABLE unhandled core builtin: select
 ********************************************************************
 *  The tint shader compiler has encountered an unexpected error.   *
 *                                                                  *
@@ -20,4 +20,4 @@ SKIP: FAILED
 *  crbug.com/tint with the source program that triggered the bug.  *
 ********************************************************************
 
-tint executable returned error: signal: illegal instruction
+tint executable returned error: signal: trace/BPT trap

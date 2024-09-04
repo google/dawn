@@ -8,6 +8,9 @@ struct S {
   int field2;
   float field3;
 };
+precision highp float;
+precision highp int;
+
 
 void main_1() {
   S x_11 = S(false, 0u, 0, 0.0f);

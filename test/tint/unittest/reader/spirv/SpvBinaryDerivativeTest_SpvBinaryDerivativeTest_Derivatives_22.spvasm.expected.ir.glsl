@@ -1,11 +1,24 @@
 SKIP: FAILED
 
-<dawn>/src/tint/lang/glsl/writer/printer/printer.cc:482 internal compiler error: Switch() matched no cases. Type: tint::core::ir::CoreBuiltinCall
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
+#version 310 es
+precision highp float;
+precision highp int;
 
-tint executable returned error: signal: illegal instruction
+
+void main_1() {
+  vec2 x_1 = vec2(50.0f, 60.0f);
+  vec2 x_2 = dFdydFdyCoarse(x_1);
+}
+void main() {
+  main_1();
+}
+error: Error parsing GLSL shader:
+ERROR: 0:8: 'dFdydFdyCoarse' : no matching overloaded function found 
+ERROR: 0:8: '=' :  cannot convert from ' const float' to ' temp highp 2-component vector of float'
+ERROR: 0:8: '' : compilation terminated 
+ERROR: 3 compilation errors.  No code generated.
+
+
+
+
+tint executable returned error: exit status 1
