@@ -283,34 +283,32 @@ void foo() {
 )");
 }
 
-// TODO(dsinclair): How do we create a pointer type ... ?
-TEST_F(MslWriterTest, DISABLED_EmitType_Pointer_Workgroup) {
+TEST_F(MslWriterTest, EmitType_Pointer_Workgroup) {
     auto* func = b.Function("foo", ty.void_());
-    b.Append(func->Block(), [&] {
-        b.Var("a", ty.ptr<workgroup, f32, read_write>());
+    auto* param = b.FunctionParam("param", ty.ptr<workgroup, f32>());
+    func->SetParams({param});
+    b.Append(func->Block(), [&] {  //
         b.Return(func);
     });
 
     ASSERT_TRUE(Generate()) << err_ << output_.msl;
     EXPECT_EQ(output_.msl, MetalHeader() + R"(
-void foo() {
-  threadgroup float* a;
+void foo(threadgroup float* const param) {
 }
 )");
 }
 
-// TODO(dsinclair): How do we create a pointer type ... ?
-TEST_F(MslWriterTest, DISABLED_EmitType_Pointer_Const) {
+TEST_F(MslWriterTest, EmitType_Pointer_Const) {
     auto* func = b.Function("foo", ty.void_());
-    b.Append(func->Block(), [&] {
-        b.Var("a", ty.ptr<function, f32>());
+    auto* param = b.FunctionParam("param", ty.ptr<storage, i32, read>());
+    func->SetParams({param});
+    b.Append(func->Block(), [&] {  //
         b.Return(func);
     });
 
     ASSERT_TRUE(Generate()) << err_ << output_.msl;
     EXPECT_EQ(output_.msl, MetalHeader() + R"(
-void foo() {
-  const thread float* a = 0.0f;
+void foo(const device int* const param) {
 }
 )");
 }

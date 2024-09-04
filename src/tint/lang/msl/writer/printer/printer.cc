@@ -348,8 +348,6 @@ class Printer : public tint::TextGenerator {
                 result_.workgroup_allocations.insert({func_name, {}});
             }
 
-            // TODO(dsinclair): Handle return type attributes
-
             EmitType(out, func->ReturnType());
             out << " " << func_name << "(";
 
@@ -934,8 +932,6 @@ class Printer : public tint::TextGenerator {
     }
 
     void EmitCoreBuiltinName(StringStream& out, core::BuiltinFn func) {
-        // TODO(crbug.com/360166776): Implement subgroupBallot and quadSwap{X,Y,Diagonal} builtins
-        // in MSL IR backend.
         switch (func) {
             case core::BuiltinFn::kAbs:
             case core::BuiltinFn::kAcos:
