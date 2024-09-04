@@ -62,7 +62,6 @@ Result<Output> Generate(core::ir::Module& ir, const Options& options) {
     output.workgroup_allocations = std::move(result->workgroup_allocations);
     output.needs_storage_buffer_sizes = raise_result->needs_storage_buffer_sizes;
     output.has_invariant_attribute = result->has_invariant_attribute;
-    // TODO(crbug.com/42251016): Set used_array_length_from_uniform_indices.
     return output;
 }
 
@@ -86,8 +85,6 @@ Result<Output> Generate(const Program& program, const Options& options) {
         return Failure{sanitized_result.program.Diagnostics()};
     }
     output.needs_storage_buffer_sizes = sanitized_result.needs_storage_buffer_sizes;
-    output.used_array_length_from_uniform_indices =
-        std::move(sanitized_result.used_array_length_from_uniform_indices);
 
     // Generate the MSL code.
     auto impl = std::make_unique<ASTPrinter>(sanitized_result.program);

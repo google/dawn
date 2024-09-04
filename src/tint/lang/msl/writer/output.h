@@ -64,10 +64,6 @@ struct Output {
     /// Each entry in the vector is the size of the workgroup allocation that
     /// should be created for that index.
     std::unordered_map<std::string, std::vector<uint32_t>> workgroup_allocations;
-
-    /// Indices into the array_length_from_uniform binding that are statically
-    /// used.
-    std::unordered_set<uint32_t> used_array_length_from_uniform_indices;
 };
 
 }  // namespace tint::msl::writer

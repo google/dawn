@@ -79,9 +79,6 @@ struct SanitizedResult {
     Program program;
     /// True if the shader needs a UBO of buffer sizes.
     bool needs_storage_buffer_sizes = false;
-    /// Indices into the array_length_from_uniform binding that are statically
-    /// used.
-    std::unordered_set<uint32_t> used_array_length_from_uniform_indices;
 };
 
 /// Sanitize a program in preparation for generating MSL.

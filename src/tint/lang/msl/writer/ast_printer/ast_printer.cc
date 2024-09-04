@@ -271,9 +271,8 @@ SanitizedResult Sanitize(const Program& in, const Options& options) {
         return result;
     }
     if (auto* res = outputs.Get<ast::transform::ArrayLengthFromUniform::Result>()) {
-        result.used_array_length_from_uniform_indices = std::move(res->used_size_indices);
+        result.needs_storage_buffer_sizes = !res->used_size_indices.empty();
     }
-    result.needs_storage_buffer_sizes = !result.used_array_length_from_uniform_indices.empty();
     return result;
 }
 
