@@ -90,6 +90,8 @@ const char* str(BuiltinFn i) {
             return "unpack_u8u32";
         case BuiltinFn::kWaveGetLaneIndex:
             return "WaveGetLaneIndex";
+        case BuiltinFn::kWaveGetLaneCount:
+            return "WaveGetLaneCount";
         case BuiltinFn::kWaveReadLaneAt:
             return "WaveReadLaneAt";
         case BuiltinFn::kLoad:

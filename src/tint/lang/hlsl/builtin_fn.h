@@ -71,6 +71,7 @@ enum class BuiltinFn : uint8_t {
     kUnpackS8S32,
     kUnpackU8U32,
     kWaveGetLaneIndex,
+    kWaveGetLaneCount,
     kWaveReadLaneAt,
     kLoad,
     kLoad2,

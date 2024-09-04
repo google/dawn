@@ -1069,5 +1069,150 @@ cmp_inputs = struct @align(16) {
     EXPECT_EQ(expect, str());
 }
 
+TEST_F(HlslWriterTransformTest, ShaderIOParameters_Subgroup_NonStruct) {
+    auto* subgroup_invocation_id = b.FunctionParam("id", ty.u32());
+    subgroup_invocation_id->SetBuiltin(core::BuiltinValue::kSubgroupInvocationId);
+
+    auto* subgroup_size = b.FunctionParam("size", ty.u32());
+    subgroup_size->SetBuiltin(core::BuiltinValue::kSubgroupSize);
+
+    auto* ep = b.Function("foo", ty.u32(), core::ir::Function::PipelineStage::kFragment);
+    ep->SetParams({subgroup_invocation_id, subgroup_size});
+
+    b.Append(ep->Block(), [&] {
+        auto* r = b.Multiply(ty.u32(), subgroup_invocation_id, subgroup_size);
+        b.Return(ep, r);
+    });
+
+    auto* src = R"(
+%foo = @fragment func(%id:u32 [@subgroup_invocation_id], %size:u32 [@subgroup_size]):u32 {
+  $B1: {
+    %4:u32 = mul %id, %size
+    ret %4
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+foo_outputs = struct @align(4) {
+  tint_symbol:u32 @offset(0)
+}
+
+%foo_inner = func(%id:u32, %size:u32):u32 {
+  $B1: {
+    %4:u32 = mul %id, %size
+    ret %4
+  }
+}
+%foo = @fragment func():foo_outputs {
+  $B2: {
+    %6:u32 = hlsl.WaveGetLaneIndex
+    %7:u32 = hlsl.WaveGetLaneCount
+    %8:u32 = call %foo_inner, %6, %7
+    %9:foo_outputs = construct %8
+    ret %9
+  }
+}
+)";
+
+    Run(ShaderIO);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(HlslWriterTransformTest, ShaderIOParameters_Subgroup_Struct) {
+    auto* str_ty = ty.Struct(mod.symbols.New("Inputs"),
+                             {
+                                 {
+                                     mod.symbols.New("id"),
+                                     ty.u32(),
+                                     core::IOAttributes{
+                                         /* location */ std::nullopt,
+                                         /* blend_src */ std::nullopt,
+                                         /* color */ std::nullopt,
+                                         /* builtin */ core::BuiltinValue::kSubgroupInvocationId,
+                                         /* interpolation */ std::nullopt,
+                                         /* invariant */ false,
+                                     },
+                                 },
+                                 {
+                                     mod.symbols.New("size"),
+                                     ty.u32(),
+                                     core::IOAttributes{
+                                         /* location */ std::nullopt,
+                                         /* blend_src */ std::nullopt,
+                                         /* color */ std::nullopt,
+                                         /* builtin */ core::BuiltinValue::kSubgroupSize,
+                                         /* interpolation */ std::nullopt,
+                                         /* invariant */ false,
+                                     },
+                                 },
+                             });
+
+    auto* str_param = b.FunctionParam("inputs", str_ty);
+
+    auto* ep = b.Function("foo", ty.u32(), core::ir::Function::PipelineStage::kFragment);
+    ep->SetParams({str_param});
+
+    b.Append(ep->Block(), [&] {
+        auto* subgroup_invocation_id = b.Access(ty.u32(), str_param, 0_i);
+        auto* subgroup_size = b.Access(ty.u32(), str_param, 1_i);
+        auto* r = b.Multiply(ty.u32(), subgroup_invocation_id, subgroup_size);
+        b.Return(ep, r);
+    });
+
+    auto* src = R"(
+Inputs = struct @align(4) {
+  id:u32 @offset(0), @builtin(subgroup_invocation_id)
+  size:u32 @offset(4), @builtin(subgroup_size)
+}
+
+%foo = @fragment func(%inputs:Inputs):u32 {
+  $B1: {
+    %3:u32 = access %inputs, 0i
+    %4:u32 = access %inputs, 1i
+    %5:u32 = mul %3, %4
+    ret %5
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+Inputs = struct @align(4) {
+  id:u32 @offset(0)
+  size:u32 @offset(4)
+}
+
+foo_outputs = struct @align(4) {
+  tint_symbol:u32 @offset(0)
+}
+
+%foo_inner = func(%inputs:Inputs):u32 {
+  $B1: {
+    %3:u32 = access %inputs, 0i
+    %4:u32 = access %inputs, 1i
+    %5:u32 = mul %3, %4
+    ret %5
+  }
+}
+%foo = @fragment func():foo_outputs {
+  $B2: {
+    %7:u32 = hlsl.WaveGetLaneIndex
+    %8:u32 = hlsl.WaveGetLaneCount
+    %9:Inputs = construct %7, %8
+    %10:u32 = call %foo_inner, %9
+    %11:foo_outputs = construct %10
+    ret %11
+  }
+}
+)";
+
+    Run(ShaderIO);
+
+    EXPECT_EQ(expect, str());
+}
+
 }  // namespace
 }  // namespace tint::hlsl::writer::raise

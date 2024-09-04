@@ -93,7 +93,7 @@ struct StateImpl : core::ir::transform::ShaderIOBackendState {
         core::ir::FunctionParam* input_struct_param = nullptr;
         uint32_t input_struct_param_index = 0xffffffff;
 
-        for (auto input : inputs) {
+        for (auto& input : inputs) {
             if (input.attributes.builtin) {
                 auto* param = b.FunctionParam(input.name.Name(), input.type);
                 param->SetInvariant(input.attributes.invariant);

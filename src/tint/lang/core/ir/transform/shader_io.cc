@@ -106,8 +106,8 @@ struct State {
         TINT_DEFER(backend = nullptr);
 
         // Process the parameters and return value to prepare for building a wrapper function.
-        GatherInputs();
-        GatherOutput();
+        GatherInputs();  // Calls backend->AddInput() for each input
+        GatherOutput();  // Calls backend->AddOutput() for each output
 
         // Add an output for the vertex point size if needed.
         std::optional<uint32_t> vertex_point_size_index;
@@ -166,14 +166,17 @@ struct State {
                     auto attributes = member->Attributes();
                     if (attributes.interpolation &&
                         ep->Stage() != Function::PipelineStage::kFragment) {
+                        // Strip interpolation on non-fragment inputs
                         attributes.interpolation = {};
                     }
-                    backend->AddInput(ir.symbols.Register(name), member->Type(), attributes);
+                    backend->AddInput(ir.symbols.Register(name), member->Type(),
+                                      std::move(attributes));
                 }
             } else {
                 // Pull out the IO attributes and remove them from the parameter.
                 auto attributes = param->Attributes();
                 if (attributes.interpolation && ep->Stage() != Function::PipelineStage::kFragment) {
+                    // Strip interpolation on non-fragment inputs
                     attributes.interpolation = {};
                 }
                 param->SetAttributes({});
@@ -195,6 +198,7 @@ struct State {
                 auto name = str->Name().Name() + "_" + member->Name().Name();
                 auto attributes = member->Attributes();
                 if (attributes.interpolation && ep->Stage() != Function::PipelineStage::kVertex) {
+                    // Strip interpolation on non-vertex outputs
                     attributes.interpolation = {};
                 }
                 backend->AddOutput(ir.symbols.Register(name), member->Type(), attributes);
@@ -203,6 +207,7 @@ struct State {
             // Pull out the IO attributes and remove them from the original function.
             auto attributes = ep->ReturnAttributes();
             if (attributes.interpolation && ep->Stage() != Function::PipelineStage::kVertex) {
+                // Strip interpolation on non-vertex outputs
                 attributes.interpolation = {};
             }
             ep->SetReturnAttributes({});

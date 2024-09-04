@@ -1,11 +1,12 @@
-SKIP: FAILED
 
-..\..\src\tint\lang\hlsl\writer\raise\shader_io.cc:101 internal compiler error: TINT_UNREACHABLE 
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
+RWByteAddressBuffer output : register(u0);
+void main_inner(uint subgroup_invocation_id, uint subgroup_size) {
+  output.Store((0u + (uint(subgroup_invocation_id) * 4u)), subgroup_size);
+}
 
-tint executable returned error: exit status 0xc000001d
+[numthreads(1, 1, 1)]
+void main() {
+  uint v = WaveGetLaneIndex();
+  main_inner(v, WaveGetLaneCount());
+}
+

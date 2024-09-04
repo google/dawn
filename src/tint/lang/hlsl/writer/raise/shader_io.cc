@@ -35,6 +35,8 @@
 #include "src/tint/lang/core/ir/module.h"
 #include "src/tint/lang/core/ir/transform/shader_io.h"
 #include "src/tint/lang/core/ir/validator.h"
+#include "src/tint/lang/hlsl/builtin_fn.h"
+#include "src/tint/lang/hlsl/ir/builtin_call.h"
 
 using namespace tint::core::fluent_types;     // NOLINT
 using namespace tint::core::number_suffixes;  // NOLINT
@@ -58,6 +60,10 @@ struct StateImpl : core::ir::transform::ShaderIOBackendState {
 
     /// The output values to return from the entry point.
     Vector<core::ir::Value*, 4> output_values;
+
+    // Indices of subgroup invocation id and size, if set
+    std::optional<uint32_t> subgroup_invocation_id_index;
+    std::optional<uint32_t> subgroup_size_index;
 
     /// Constructor
     StateImpl(core::ir::Module& mod, core::ir::Function* f) : ShaderIOBackendState(mod, f) {}
@@ -169,23 +175,34 @@ struct StateImpl : core::ir::transform::ShaderIOBackendState {
 
         Vector<MemberInfo, 4> input_data;
         for (uint32_t i = 0; i < inputs.Length(); ++i) {
+            // If subgroup invocation id or size, save the index for GetInput
+            if (auto builtin = inputs[i].attributes.builtin) {
+                if (*builtin == core::BuiltinValue::kSubgroupInvocationId) {
+                    subgroup_invocation_id_index = i;
+                    continue;
+                } else if (*builtin == core::BuiltinValue::kSubgroupSize) {
+                    subgroup_size_index = i;
+                    continue;
+                }
+            }
+
             input_data.Push(MemberInfo{inputs[i], i});
         }
 
-        input_indices.Resize(inputs.Length());
+        input_indices.Resize(input_data.Length());
 
         // Sort the struct members to satisfy HLSL interfacing matching rules.
         std::sort(input_data.begin(), input_data.end(),
                   [&](auto& x, auto& y) { return StructMemberComparator(x, y); });
 
-        for (auto input : input_data) {
+        for (auto& input : input_data) {
             input_indices[input.idx] = static_cast<uint32_t>(input_struct_members.Length());
             input_struct_members.Push(input.member);
         }
 
         if (!input_struct_members.IsEmpty()) {
-            auto* input_struct =
-                ty.Struct(ir.symbols.New(ir.NameOf(func).Name() + "_inputs"), input_struct_members);
+            auto* input_struct = ty.Struct(ir.symbols.New(ir.NameOf(func).Name() + "_inputs"),
+                                           std::move(input_struct_members));
             switch (func->Stage()) {
                 case core::ir::Function::PipelineStage::kFragment:
                     input_struct->AddUsage(core::type::PipelineStageUsage::kFragmentInput);
@@ -248,6 +265,17 @@ struct StateImpl : core::ir::transform::ShaderIOBackendState {
 
     /// @copydoc ShaderIO::BackendState::GetInput
     core::ir::Value* GetInput(core::ir::Builder& builder, uint32_t idx) override {
+        if (subgroup_invocation_id_index == idx) {
+            return builder
+                .Call<hlsl::ir::BuiltinCall>(ty.u32(), hlsl::BuiltinFn::kWaveGetLaneIndex)
+                ->Result(0);
+        }
+        if (subgroup_size_index == idx) {
+            return builder
+                .Call<hlsl::ir::BuiltinCall>(ty.u32(), hlsl::BuiltinFn::kWaveGetLaneCount)
+                ->Result(0);
+        }
+
         auto index = input_indices[idx];
 
         core::ir::Value* v = builder.Access(inputs[idx].type, input_param, u32(index))->Result(0);
