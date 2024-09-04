@@ -51,6 +51,9 @@ Accesses AccessesFor(ir::Instruction* inst) {
         [&](const ir::Store*) { return Access::kStore; },               //
         [&](const ir::StoreVectorElement*) { return Access::kStore; },  //
         [&](const ir::Call*) {
+            if (inst->IsAnyOf<core::ir::Bitcast>()) {
+                return Accesses{};
+            }
             return Accesses{Access::kLoad, Access::kStore};
         },
         [&](Default) { return Accesses{}; });

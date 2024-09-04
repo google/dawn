@@ -97,6 +97,33 @@ TEST_F(IR_ValueToLetTest, NoModify_Unsequenced) {
 
     EXPECT_EQ(str(), expect);
 }
+
+TEST_F(IR_ValueToLetTest, NoModify_Bitcast) {
+    auto* fn = b.Function("F", ty.u32());
+    b.Append(fn->Block(), [&] {
+        auto* x = b.Let("x", 1_i);
+        auto* y = b.Bitcast<u32>(x);
+        b.Return(fn, y);
+    });
+
+    auto* src = R"(
+%F = func():u32 {
+  $B1: {
+    %x:i32 = let 1i
+    %3:u32 = bitcast %x
+    ret %3
+  }
+}
+)";
+    EXPECT_EQ(str(), src);
+
+    auto* expect = src;
+
+    Run(ValueToLet);
+
+    EXPECT_EQ(str(), expect);
+}
+
 TEST_F(IR_ValueToLetTest, NoModify_SequencedValueUsedWithNonSequenced) {
     auto* i = b.Var<private_, i32>("i");
     b.ir.root_block->Append(i);
