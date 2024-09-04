@@ -1025,31 +1025,31 @@ class Printer : public tint::TextGenerator {
                 out << "dFdx";
                 break;
             case core::BuiltinFn::kDpdxCoarse:
-                if (version_.IsES()) {
-                    out << "dFdx";
+                out << "dFdx";
+                if (version_.IsDesktop()) {
+                    out << "Coarse";
                 }
-                out << "dFdxCoarse";
                 break;
             case core::BuiltinFn::kDpdxFine:
-                if (version_.IsES()) {
-                    out << "dFdx";
+                out << "dFdx";
+                if (version_.IsDesktop()) {
+                    out << "Fine";
                 }
-                out << "dFdxFine";
                 break;
             case core::BuiltinFn::kDpdy:
                 out << "dFdy";
                 break;
             case core::BuiltinFn::kDpdyCoarse:
-                if (version_.IsES()) {
-                    out << "dFdy";
+                out << "dFdy";
+                if (version_.IsDesktop()) {
+                    out << "Coarse";
                 }
-                out << "dFdyCoarse";
                 break;
             case core::BuiltinFn::kDpdyFine:
-                if (version_.IsES()) {
-                    out << "dFdy";
+                out << "dFdy";
+                if (version_.IsDesktop()) {
+                    out << "Fine";
                 }
-                out << "dFdyFine";
                 break;
             case core::BuiltinFn::kFaceForward:
                 out << "faceforward";
