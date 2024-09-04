@@ -22,6 +22,12 @@ void foo(bool param_bool, int param_i32, uint param_u32, float param_f32, int2 p
 }
 
 kernel void tint_symbol() {
+  tint_array<float, 4> const a = tint_array<float, 4>{};
+  float b = 1.0f;
+  float4 c = float4(0.0f);
+  tint_array<float, 4> d = tint_array<float, 4>{};
+  S const tint_symbol_1 = S{};
+  foo(true, 1, 1u, 1.0f, int2(3), uint3(4u), float4(5.0f), float2x3(float3(0.0f), float3(0.0f)), a, tint_symbol_1, &(b), &(c), &(d));
   return;
 }
 
