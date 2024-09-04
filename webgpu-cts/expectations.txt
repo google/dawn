@@ -82,7 +82,7 @@
 # results: [ Failure RetryOnFailure Skip Slow ]
 # END TAG HEADER
 
-# Last rolled: 2024-09-02 08:05:51PM
+# Last rolled: 2024-09-03 06:24:43PM
 
 # conflicts_allowed: true
 
@@ -2047,5 +2047,40 @@ crbug.com/dawn/0000 [ dawn-no-backend-validation nvidia-0x2184 webgpu-dxc-enable
 
 crbug.com/dawn/0000 [ angle-opengl dawn-backend-validation desktop display-server-x graphite-disabled intel-0x9bc5 no-asan no-clang-coverage oop-c passthrough release renderer-skia-vulkan target-cpu-64 ubuntu webgpu-adapter-default webgpu-no-worker ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:depth_2d_coords:format="depth16unorm" [ Failure ]
 
-crbug.com/dawn/0000 [ android-r android-pixel-4 ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:sampled_3d_coords:* [ Failure ]
+crbug.com/dawn/0000 [ android-pixel-4 android-r ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:sampled_3d_coords:* [ Failure ]
 
+crbug.com/dawn/0000 [ amd-0x7340 dawn-no-backend-validation ] webgpu:shader,execution,expression,call,builtin,textureLoad:sampled_1d:format="rg8snorm" [ RetryOnFailure ]
+crbug.com/dawn/0000 [ android-r dawn-backend-validation ] webgpu:shader,execution,expression,call,builtin,textureLoad:storage_textures_2d:format="rgba8uint" [ RetryOnFailure ]
+crbug.com/dawn/0000 [ android-r dawn-backend-validation qualcomm ] webgpu:shader,execution,expression,call,builtin,textureSample:sampled_2d_coords:format="astc-4x4-unorm";samplePoints="spiral" [ RetryOnFailure ]
+crbug.com/dawn/0000 [ android-r dawn-backend-validation qualcomm ] webgpu:shader,execution,expression,call,builtin,textureSample:sampled_2d_coords:format="astc-6x6-unorm";samplePoints="spiral" [ RetryOnFailure ]
+crbug.com/dawn/0000 [ android-r dawn-backend-validation qualcomm ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:sampled_array_2d_coords:format="eac-r11snorm" [ RetryOnFailure ]
+crbug.com/dawn/0000 [ android-r dawn-backend-validation qualcomm ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:sampled_array_3d_coords:format="astc-10x5-unorm" [ RetryOnFailure ]
+crbug.com/dawn/0000 [ android-r dawn-backend-validation qualcomm ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:sampled_array_3d_coords:format="rgba8unorm" [ RetryOnFailure ]
+crbug.com/dawn/0000 [ android-r dawn-no-backend-validation ] webgpu:shader,execution,expression,call,builtin,textureLoad:sampled_1d:format="rgba16float" [ RetryOnFailure ]
+crbug.com/dawn/0000 [ android-r dawn-no-backend-validation ] webgpu:shader,execution,expression,call,builtin,textureLoad:sampled_2d:format="r8sint" [ RetryOnFailure ]
+crbug.com/dawn/0000 [ android-r dawn-no-backend-validation qualcomm ] webgpu:shader,execution,expression,call,builtin,textureSample:sampled_2d_coords:format="astc-10x8-unorm-srgb";samplePoints="spiral" [ RetryOnFailure ]
+crbug.com/dawn/0000 [ android-r dawn-no-backend-validation qualcomm ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:sampled_2d_coords:format="astc-10x10-unorm-srgb" [ RetryOnFailure ]
+crbug.com/dawn/0000 [ android-r dawn-no-backend-validation qualcomm ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:sampled_2d_coords:format="astc-6x6-unorm-srgb" [ RetryOnFailure ]
+crbug.com/dawn/0000 [ android-r dawn-no-backend-validation qualcomm ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:sampled_2d_coords:format="astc-8x5-unorm-srgb" [ RetryOnFailure ]
+crbug.com/dawn/0000 [ android-r dawn-no-backend-validation qualcomm ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:sampled_array_2d_coords:format="etc2-rgb8a1unorm-srgb" [ RetryOnFailure ]
+crbug.com/dawn/0000 [ android-r dawn-no-backend-validation qualcomm ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:sampled_array_3d_coords:format="astc-4x4-unorm-srgb" [ RetryOnFailure ]
+crbug.com/dawn/0000 [ angle-metal dawn-no-backend-validation desktop graphite-enabled intel-0x3e9b mac mac-x86_64 no-asan no-clang-coverage oop-c passthrough release renderer-skia-gl target-cpu-64 webgpu-adapter-default webgpu-no-worker ] webgpu:api,operation,vertex_state,correctness:vertex_buffer_used_multiple_times_interleaved:format="sint32x3" [ RetryOnFailure ]
+crbug.com/dawn/0000 [ angle-metal dawn-no-backend-validation desktop graphite-enabled intel-0x3e9b mac mac-x86_64 no-asan no-clang-coverage oop-c passthrough release renderer-skia-gl target-cpu-64 webgpu-adapter-default webgpu-no-worker ] webgpu:shader,execution,expression,call,builtin,dpdx:f32:vectorize=4;non_uniform_discard=false [ RetryOnFailure ]
+crbug.com/dawn/0000 [ angle-metal dawn-no-backend-validation desktop graphite-enabled intel-0x3e9b mac mac-x86_64 no-asan no-clang-coverage oop-c passthrough release renderer-skia-gl target-cpu-64 webgpu-adapter-default webgpu-no-worker ] webgpu:shader,execution,expression,call,builtin,dpdy:f32:vectorize=2;non_uniform_discard=true [ RetryOnFailure ]
+crbug.com/dawn/0000 [ dawn-backend-validation qualcomm ] webgpu:shader,execution,expression,call,builtin,textureSample:sampled_3d_coords:format="etc2-rgba8unorm-srgb";viewDimension="cube";samplePoints="spiral" [ RetryOnFailure ]
+crbug.com/dawn/0000 [ dawn-backend-validation qualcomm ] webgpu:shader,execution,expression,call,builtin,textureSample:sampled_3d_coords:format="rg16float";viewDimension="3d";samplePoints="spiral" [ RetryOnFailure ]
+crbug.com/dawn/0000 [ dawn-backend-validation qualcomm ] webgpu:shader,execution,expression,call,builtin,textureSample:sampled_3d_coords:format="rg8unorm";viewDimension="3d";samplePoints="texel-centre" [ RetryOnFailure ]
+crbug.com/dawn/0000 [ dawn-no-backend-validation qualcomm ] webgpu:shader,execution,expression,call,builtin,textureSample:sampled_3d_coords:format="astc-10x5-unorm-srgb";viewDimension="cube";samplePoints="cube-edges" [ RetryOnFailure ]
+crbug.com/dawn/0000 [ dawn-no-backend-validation qualcomm ] webgpu:shader,execution,expression,call,builtin,textureSample:sampled_3d_coords:format="etc2-rgb8a1unorm";viewDimension="cube";samplePoints="texel-centre" [ RetryOnFailure ]
+crbug.com/dawn/0000 [ dawn-no-backend-validation qualcomm ] webgpu:shader,execution,expression,call,builtin,textureSample:sampled_3d_coords:format="rgb9e5ufloat";viewDimension="cube";samplePoints="cube-edges" [ RetryOnFailure ]
+
+crbug.com/dawn/0000 [ dawn-backend-validation intel-0x9bc5 ubuntu ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:depth_2d_coords:format="depth32float" [ Failure ]
+
+crbug.com/dawn/0000 [ android-pixel-4 qualcomm ] webgpu:api,validation,capability_checks,limits,maxSamplersPerShaderStage:createPipeline,at_over:* [ Failure ]
+crbug.com/dawn/0000 [ android-pixel-4 qualcomm ] webgpu:shader,execution,expression,call,builtin,textureLoad:sampled_1d:format="rg16float" [ Failure ]
+crbug.com/dawn/0000 [ android-pixel-4 qualcomm ] webgpu:shader,execution,expression,call,builtin,textureLoad:sampled_2d:format="rg8sint" [ Failure ]
+crbug.com/dawn/0000 [ android-pixel-4 qualcomm ] webgpu:shader,execution,expression,call,builtin,textureLoad:storage_textures_1d:format="rgba8sint" [ Failure ]
+crbug.com/dawn/0000 [ android-pixel-4 qualcomm ] webgpu:shader,execution,expression,call,builtin,textureSample:* [ Failure ]
+crbug.com/dawn/0000 [ android-pixel-4 qualcomm ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:sampled_2d_coords:format="eac-r11unorm" [ Failure ]
+crbug.com/dawn/0000 [ android-pixel-4 qualcomm ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:sampled_array_3d_coords:format="astc-6x6-unorm" [ Failure ]
+crbug.com/dawn/0000 [ android-pixel-4 qualcomm ] webgpu:web_platform,canvas,readbackFromWebGPUCanvas:drawTo2DCanvas:format="bgra8unorm";alphaMode="opaque";colorSpace="display-p3";webgpuCanvasType="offscreen";canvas2DType="offscreen" [ Failure ]
