@@ -1,16 +1,20 @@
 #version 310 es
 #extension GL_AMD_gpu_shader_half_float: require
 
-struct S {
+struct S_std140 {
   int before;
-  f16mat2x3 m;
+  f16vec3 m_col0;
+  f16vec3 m_col1;
   int after;
 };
 
-uniform S u[4];
+layout(binding = 0, std140)
+uniform tint_symbol_1_std140_1_ubo {
+  S_std140 tint_symbol[4];
+} v;
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
-  f16mat3x2 t = transpose(u[2].m);
-  float16_t l = length(u[0].m[1].zxy);
-  float16_t a = abs(u[0].m[1].zxy[0u]);
+  f16mat3x2 t = transpose(f16mat2x3(v.tint_symbol[2].m_col0, v.tint_symbol[2].m_col1));
+  float16_t l = length(v.tint_symbol[0].m_col1.zxy);
+  float16_t a = abs(v.tint_symbol[0].m_col1.zxy[0u]);
 }

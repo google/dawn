@@ -3,7 +3,10 @@ precision highp float;
 precision highp int;
 
 
-uniform vec2 weights;
+layout(binding = 0, std140)
+uniform tint_symbol_2_1_ubo {
+  vec2 tint_symbol_1;
+} v;
 void main() {
-  float a = weights.x;
+  float a = v.tint_symbol_1.x;
 }

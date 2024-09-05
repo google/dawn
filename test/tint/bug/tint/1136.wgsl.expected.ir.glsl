@@ -4,9 +4,12 @@ struct Buffer {
   uint data;
 };
 
-Buffer tint_symbol;
+layout(binding = 0, std430)
+buffer tint_symbol_3_1_ssbo {
+  Buffer tint_symbol_2;
+} v;
 void tint_symbol_1() {
-  tint_symbol.data = (tint_symbol.data + 1u);
+  v.tint_symbol_2.data = (v.tint_symbol_2.data + 1u);
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {

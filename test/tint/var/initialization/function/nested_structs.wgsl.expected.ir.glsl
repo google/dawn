@@ -12,11 +12,14 @@ struct S3 {
   S2 s2;
 };
 
-int tint_symbol;
+layout(binding = 0, std430)
+buffer tint_symbol_3_1_ssbo {
+  int tint_symbol_2;
+} v;
 int f(S3 s3) {
   return s3.s2.s1.i;
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
-  tint_symbol = f(S3(S2(S1(42))));
+  v.tint_symbol_2 = f(S3(S2(S1(42))));
 }

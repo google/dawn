@@ -3,11 +3,14 @@ precision highp float;
 precision highp int;
 
 
-vec3 prevent_dce;
+layout(binding = 0, std430)
+buffer tint_symbol_1_1_ssbo {
+  vec3 tint_symbol;
+} v;
 vec3 fwidth_5d1b39() {
   vec3 res = fwidth(vec3(1.0f));
   return res;
 }
 void main() {
-  prevent_dce = fwidth_5d1b39();
+  v.tint_symbol = fwidth_5d1b39();
 }

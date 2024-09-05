@@ -3,26 +3,32 @@ precision highp float;
 precision highp int;
 
 
-int non_uniform_global;
-float tint_symbol;
+layout(binding = 0, std430)
+buffer tint_symbol_3_1_ssbo {
+  int tint_symbol_2;
+} v;
+layout(binding = 1, std430)
+buffer tint_symbol_5_1_ssbo {
+  float tint_symbol_4;
+} v_1;
 bool continue_execution = true;
 void main() {
-  if ((non_uniform_global < 0)) {
+  if ((v.tint_symbol_2 < 0)) {
     continue_execution = false;
   }
-  float v = dFdx(1.0f);
+  float v_2 = dFdx(1.0f);
   if (continue_execution) {
-    tint_symbol = v;
+    v_1.tint_symbol_4 = v_2;
   }
-  if ((tint_symbol < 0.0f)) {
+  if ((v_1.tint_symbol_4 < 0.0f)) {
     int i = 0;
     {
       while(true) {
-        float v_1 = tint_symbol;
-        if ((v_1 > float(i))) {
-          float v_2 = float(i);
+        float v_3 = v_1.tint_symbol_4;
+        if ((v_3 > float(i))) {
+          float v_4 = float(i);
           if (continue_execution) {
-            tint_symbol = v_2;
+            v_1.tint_symbol_4 = v_4;
           }
           if (!(continue_execution)) {
             discard;

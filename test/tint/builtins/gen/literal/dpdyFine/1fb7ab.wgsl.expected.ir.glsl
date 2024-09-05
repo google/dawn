@@ -3,11 +3,14 @@ precision highp float;
 precision highp int;
 
 
-vec3 prevent_dce;
+layout(binding = 0, std430)
+buffer tint_symbol_1_1_ssbo {
+  vec3 tint_symbol;
+} v;
 vec3 dpdyFine_1fb7ab() {
   vec3 res = dFdy(vec3(1.0f));
   return res;
 }
 void main() {
-  prevent_dce = dpdyFine_1fb7ab();
+  v.tint_symbol = dpdyFine_1fb7ab();
 }

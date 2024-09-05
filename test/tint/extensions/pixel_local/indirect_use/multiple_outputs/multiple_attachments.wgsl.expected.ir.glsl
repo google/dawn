@@ -1,4 +1,4 @@
-SKIP: FAILED
+SKIP: INVALID
 
 #version 310 es
 
@@ -34,8 +34,8 @@ Out main() {
   return Out(vec4(10.0f), vec4(20.0f), vec4(30.0f));
 }
 error: Error parsing GLSL shader:
-ERROR: 0:6: 'float' : type requires declaration of default precision qualifier 
-ERROR: 0:6: '' : compilation terminated 
+ERROR: 0:6: 'float' : type requires declaration of default precision qualifier
+ERROR: 0:6: '' : compilation terminated
 ERROR: 2 compilation errors.  No code generated.
 
 

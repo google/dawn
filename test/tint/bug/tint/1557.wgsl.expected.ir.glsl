@@ -1,6 +1,9 @@
 #version 310 es
 
-uniform int u;
+layout(binding = 0, std140)
+uniform tint_symbol_2_1_ubo {
+  int tint_symbol_1;
+} v;
 int f() {
   return 0;
 }
@@ -21,10 +24,10 @@ void g() {
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
-  switch(u) {
+  switch(v.tint_symbol_1) {
     case 0:
     {
-      switch(u) {
+      switch(v.tint_symbol_1) {
         case 0:
         {
           break;

@@ -6,10 +6,13 @@ struct S {
   int after;
 };
 
-uniform S u[4];
+layout(binding = 0, std140)
+uniform tint_symbol_1_1_ubo {
+  S tint_symbol[4];
+} v;
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
-  mat4 t = transpose(u[2].m);
-  float l = length(u[0].m[1].ywxz);
-  float a = abs(u[0].m[1].ywxz[0u]);
+  mat4 t = transpose(v.tint_symbol[2].m);
+  float l = length(v.tint_symbol[0].m[1].ywxz);
+  float a = abs(v.tint_symbol[0].m[1].ywxz[0u]);
 }

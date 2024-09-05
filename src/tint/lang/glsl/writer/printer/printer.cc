@@ -94,6 +94,13 @@ namespace tint::glsl::writer {
 namespace {
 
 constexpr const char* kAMDGpuShaderHalfFloat = "GL_AMD_gpu_shader_half_float";
+constexpr const char* kOESSampleVariables = "GL_OES_sample_variables";
+constexpr const char* kEXTBlendFuncExtended = "GL_EXT_blend_func_extended";
+
+enum class LayoutFormat : uint8_t {
+    kStd140,
+    kStd430,
+};
 
 /// PIMPL class for the MSL generator
 class Printer : public tint::TextGenerator {
@@ -120,8 +127,7 @@ class Printer : public tint::TextGenerator {
             }
         }
 
-        // Emit module-scope declarations.
-        EmitBlock(ir_.root_block);
+        EmitRootBlock();
 
         // Emit functions.
         for (auto& func : ir_.DependencyOrderedFunctions()) {
@@ -187,6 +193,18 @@ class Printer : public tint::TextGenerator {
                 builtin_struct_names_.GetOrAdd(s, [&] { return UniqueIdentifier(name.substr(2)); });
         }
         return name;
+    }
+
+    void EmitRootBlock() {
+        TINT_SCOPED_ASSIGNMENT(current_block_, ir_.root_block);
+
+        for (auto* inst : *ir_.root_block) {
+            tint::Switch(
+                inst,  //
+                [&](core::ir::Var* v) { EmitGlobalVar(v); },
+
+                TINT_ICE_ON_NO_MATCH);
+        }
     }
 
     /// Emit the function
@@ -772,10 +790,10 @@ class Printer : public tint::TextGenerator {
     }
 
     void EmitVar(StringStream& out, const core::ir::Var* var) {
-        EmitTypeAndName(out, var->Result(0)->Type(), NameOf(var->Result(0)));
-
         auto* ptr = var->Result(0)->Type()->As<core::type::Pointer>();
         auto space = ptr->AddressSpace();
+
+        EmitTypeAndName(out, var->Result(0)->Type(), NameOf(var->Result(0)));
         if (var->Initializer()) {
             out << " = ";
             EmitValue(out, var->Initializer());
@@ -786,6 +804,257 @@ class Printer : public tint::TextGenerator {
             EmitZeroValue(out, ptr->UnwrapPtr());
         }
         out << ";";
+    }
+
+    void EmitGlobalVar(core::ir::Var* var) {
+        auto* ptr = var->Result(0)->Type()->As<core::type::Pointer>();
+        auto space = ptr->AddressSpace();
+
+        switch (space) {
+            case core::AddressSpace::kStorage:
+                EmitStorageVar(var);
+                break;
+            case core::AddressSpace::kUniform:
+                EmitUniformVar(var);
+                break;
+            case core::AddressSpace::kWorkgroup:
+                EmitWorkgroupVar(var);
+                break;
+            case core::AddressSpace::kHandle:
+                EmitHandleVar(var);
+                break;
+            case core::AddressSpace::kPushConstant:
+                EmitPushConstantVar(var);
+                break;
+            case core::AddressSpace::kIn:
+            case core::AddressSpace::kOut:
+                EmitIOVar(var);
+                break;
+            case core::AddressSpace::kPixelLocal:
+                TINT_UNREACHABLE() << "PixelLocal not supported";
+            default: {
+                auto out = Line();
+                EmitVar(out, var);
+                break;
+            }
+        }
+    }
+
+    void EmitStorageVar(core::ir::Var* var) {
+        const auto& bp = var->BindingPoint();
+        TINT_ASSERT(bp.has_value());
+
+        EmitLayoutBinding(Line(), bp.value(), std::nullopt, {LayoutFormat::kStd430});
+
+        auto* ptr = var->Result(0)->Type()->As<core::type::Pointer>();
+        EmitVarStruct("buffer", NameOf(var->Result(0)), "ssbo",
+                      ptr->UnwrapPtr()->As<core::type::Struct>());
+    }
+
+    void EmitUniformVar(core::ir::Var* var) {
+        const auto& bp = var->BindingPoint();
+        TINT_ASSERT(bp.has_value());
+
+        EmitLayoutBinding(Line(), bp.value(), std::nullopt, {LayoutFormat::kStd140});
+
+        auto* ptr = var->Result(0)->Type()->As<core::type::Pointer>();
+        EmitVarStruct("uniform", NameOf(var->Result(0)), "ubo",
+                      ptr->UnwrapPtr()->As<core::type::Struct>());
+    }
+
+    void EmitWorkgroupVar(core::ir::Var* var) {
+        auto out = Line();
+        out << "shared ";
+        EmitVar(out, var);
+    }
+
+    void EmitHandleVar(core::ir::Var* var) {
+        auto* ptr = var->Result(0)->Type()->As<core::type::Pointer>();
+
+        // GLSL ignores sampler variables.
+        if (ptr->UnwrapPtr()->Is<core::type::Sampler>()) {
+            return;
+        }
+
+        auto out = Line();
+        if (auto* storage = ptr->UnwrapPtr()->As<core::type::StorageTexture>()) {
+            const auto& bp = var->BindingPoint();
+
+            TINT_ASSERT(bp.has_value());
+            EmitLayoutBinding(out, bp.value(), {storage->TexelFormat()}, std::nullopt);
+            out << " ";
+        }
+
+        EmitVar(out, var);
+    }
+
+    void EmitPushConstantVar(core::ir::Var* var) {
+        auto out = Line();
+        EmitLayoutLocation(out, {0}, std::nullopt);
+        EmitVar(out, var);
+    }
+
+    void EmitIOVar(core::ir::Var* var) {
+        auto& attrs = var->Attributes();
+
+        if (attrs.builtin.has_value()) {
+            if (version_.IsES() && (attrs.builtin == tint::core::BuiltinValue::kSampleIndex ||
+                                    attrs.builtin == tint::core::BuiltinValue::kSampleMask)) {
+                EmitExtension(kOESSampleVariables);
+            }
+
+            // Do not emit builtin (gl_) variables.
+            return;
+        }
+
+        auto out = Line();
+        EmitLayoutLocation(out, attrs.location, attrs.blend_src);
+        if (attrs.interpolation.has_value()) {
+            EmitInterpolation(out, attrs.interpolation.value());
+        }
+        EmitVar(out, var);
+    }
+
+    void EmitVarStruct(std::string_view kind,
+                       std::string_view name,
+                       std::string_view type_suffix,
+                       const core::type::Struct* str) {
+        TINT_ASSERT(str);
+
+        Line() << kind << " " << UniqueIdentifier(StructName(str)) << "_" << type_suffix << " {";
+
+        {
+            ScopedIndent si(current_buffer_);
+
+            for (auto* mem : str->Members()) {
+                auto out = Line();
+                EmitTypeAndName(out, mem->Type(), mem->Name().Name());
+                out << ";";
+            }
+        }
+
+        Line() << "} " << name << ";";
+    }
+
+    void EmitLayoutLocation(StringStream& out,
+                            std::optional<uint32_t> location,
+                            std::optional<uint32_t> blend_src) {
+        if (location.has_value()) {
+            out << "layout(location = " << location.value();
+            if (blend_src.has_value()) {
+                EmitExtension(kEXTBlendFuncExtended);
+
+                out << ", index = " << blend_src.value();
+            }
+            out << ") ";
+        }
+    }
+
+    void EmitLayoutBinding(StringStream& out,
+                           const tint::BindingPoint& bp,
+                           std::optional<core::TexelFormat> texel_format,
+                           std::optional<LayoutFormat> layout_format) {
+        TINT_ASSERT(!(texel_format.has_value() && layout_format.has_value()));
+
+        out << "layout(binding = " << bp.binding;
+
+        if (layout_format.has_value()) {
+            out << ", ";
+            switch (layout_format.value()) {
+                case LayoutFormat::kStd140:
+                    out << "std140";
+                    break;
+                case LayoutFormat::kStd430:
+                    out << "std430";
+                    break;
+            }
+        }
+
+        if (texel_format.has_value()) {
+            out << ", ";
+            switch (texel_format.value()) {
+                case core::TexelFormat::kBgra8Unorm:
+                    TINT_ICE() << "bgra8unorm should have been polyfilled to rgba8unorm";
+                case core::TexelFormat::kR32Uint:
+                    out << "r32ui";
+                    break;
+                case core::TexelFormat::kR32Sint:
+                    out << "r32i";
+                    break;
+                case core::TexelFormat::kR32Float:
+                    out << "r32f";
+                    break;
+                case core::TexelFormat::kRgba8Unorm:
+                    out << "rgba8";
+                    break;
+                case core::TexelFormat::kRgba8Snorm:
+                    out << "rgba8_snorm";
+                    break;
+                case core::TexelFormat::kRgba8Uint:
+                    out << "rgba8ui";
+                    break;
+                case core::TexelFormat::kRgba8Sint:
+                    out << "rgba8i";
+                    break;
+                case core::TexelFormat::kRg32Uint:
+                    out << "rg32ui";
+                    break;
+                case core::TexelFormat::kRg32Sint:
+                    out << "rg32i";
+                    break;
+                case core::TexelFormat::kRg32Float:
+                    out << "rg32f";
+                    break;
+                case core::TexelFormat::kRgba16Uint:
+                    out << "rgba16ui";
+                    break;
+                case core::TexelFormat::kRgba16Sint:
+                    out << "rgba16i";
+                    break;
+                case core::TexelFormat::kRgba16Float:
+                    out << "rgba16f";
+                    break;
+                case core::TexelFormat::kRgba32Uint:
+                    out << "rgba32ui";
+                    break;
+                case core::TexelFormat::kRgba32Sint:
+                    out << "rgba32i";
+                    break;
+                case core::TexelFormat::kRgba32Float:
+                    out << "rgba32f";
+                    break;
+                case core::TexelFormat::kR8Unorm:
+                    out << "r8";
+                    break;
+                case core::TexelFormat::kUndefined:
+                    TINT_UNREACHABLE() << "invalid texel format";
+            }
+        }
+        out << ")";
+    }
+
+    void EmitInterpolation(StringStream& out, const core::Interpolation& interp) {
+        switch (interp.type) {
+            case core::InterpolationType::kPerspective:
+            case core::InterpolationType::kLinear:
+            case core::InterpolationType::kUndefined:
+                break;
+            case core::InterpolationType::kFlat:
+                out << "flat ";
+                break;
+        }
+
+        switch (interp.sampling) {
+            case core::InterpolationSampling::kCentroid:
+                out << "centroid ";
+                break;
+            case core::InterpolationSampling::kSample:
+            case core::InterpolationSampling::kCenter:
+            case core::InterpolationSampling::kFirst:
+            case core::InterpolationSampling::kEither:
+            case core::InterpolationSampling::kUndefined:
+                break;
+        }
     }
 
     /// Emits the zero value for the given type

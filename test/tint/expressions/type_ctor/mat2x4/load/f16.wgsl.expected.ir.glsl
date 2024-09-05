@@ -1,9 +1,12 @@
 #version 310 es
 #extension GL_AMD_gpu_shader_half_float: require
 
-f16mat2x4 tint_symbol;
+layout(binding = 0, std430)
+buffer tint_symbol_2_1_ssbo {
+  f16mat2x4 tint_symbol_1;
+} v;
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
   f16mat2x4 m = f16mat2x4(f16vec4(0.0hf), f16vec4(0.0hf));
-  tint_symbol = f16mat2x4(m);
+  v.tint_symbol_1 = f16mat2x4(m);
 }

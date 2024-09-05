@@ -25,8 +25,8 @@
                OpName %S "S"
                OpName %p "p"
                OpName %f "f"
-               OpName %convert_S "convert_S"
-               OpName %input "input"
+               OpName %tint_convert_S "tint_convert_S"
+               OpName %tint_input "tint_input"
                OpMemberDecorate %S_std140 0 Offset 0
                OpMemberDecorate %S_std140 1 Offset 4
                OpMemberDecorate %S_std140 2 Offset 8
@@ -107,7 +107,7 @@
          %40 = OpAccessChain %_ptr_Function_S %27 %34
          %42 = OpAccessChain %_ptr_Function_S_std140 %25 %34
          %44 = OpLoad %S_std140 %42 None
-         %45 = OpFunctionCall %S %convert_S %44
+         %45 = OpFunctionCall %S %tint_convert_S %44
                OpStore %40 %45 None
                OpBranch %31
          %31 = OpLabel
@@ -119,7 +119,7 @@
          %49 = OpAccessChain %_ptr_Private_S %p %int_1
          %52 = OpAccessChain %_ptr_Uniform_S_std140 %1 %uint_0 %int_2
          %55 = OpLoad %S_std140 %52 None
-         %56 = OpFunctionCall %S %convert_S %55
+         %56 = OpFunctionCall %S %tint_convert_S %55
                OpStore %49 %56 None
          %57 = OpAccessChain %_ptr_Private_mat4v2half %p %int_3 %uint_1
          %60 = OpAccessChain %_ptr_Uniform_v2half %1 %uint_0 %int_2 %uint_1
@@ -139,16 +139,16 @@
                OpStore %72 %77 None
                OpReturn
                OpFunctionEnd
-  %convert_S = OpFunction %S None %79
-      %input = OpFunctionParameter %S_std140
+%tint_convert_S = OpFunction %S None %79
+ %tint_input = OpFunctionParameter %S_std140
          %80 = OpLabel
-         %81 = OpCompositeExtract %int %input 0
-         %82 = OpCompositeExtract %v2half %input 1
-         %83 = OpCompositeExtract %v2half %input 2
-         %84 = OpCompositeExtract %v2half %input 3
-         %85 = OpCompositeExtract %v2half %input 4
+         %81 = OpCompositeExtract %int %tint_input 0
+         %82 = OpCompositeExtract %v2half %tint_input 1
+         %83 = OpCompositeExtract %v2half %tint_input 2
+         %84 = OpCompositeExtract %v2half %tint_input 3
+         %85 = OpCompositeExtract %v2half %tint_input 4
          %86 = OpCompositeConstruct %mat4v2half %82 %83 %84 %85
-         %87 = OpCompositeExtract %int %input 5
+         %87 = OpCompositeExtract %int %tint_input 5
          %88 = OpCompositeConstruct %S %81 %86 %87
                OpReturnValue %88
                OpFunctionEnd

@@ -3,10 +3,13 @@ precision highp float;
 precision highp int;
 
 
-int non_uniform_global;
+layout(binding = 0, std430)
+buffer tint_symbol_2_1_ssbo {
+  int tint_symbol_1;
+} v;
 bool continue_execution = true;
 void main() {
-  if ((non_uniform_global < 0)) {
+  if ((v.tint_symbol_1 < 0)) {
     continue_execution = false;
   }
   if (!(continue_execution)) {

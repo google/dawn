@@ -5,18 +5,23 @@ void main() {
   uint tint_symbol_1 = 0u;
   {
     while(true) {
+      bool tint_continue = false;
       switch(2) {
         case 1:
         {
-          {
-            if (true) { break; }
-          }
-          continue;
+          tint_continue = true;
+          break;
         }
         default:
         {
           break;
         }
+      }
+      if (tint_continue) {
+        {
+          if (true) { break; }
+        }
+        continue;
       }
       tint_symbol_1 = (tint_symbol_1 + 1u);
       {

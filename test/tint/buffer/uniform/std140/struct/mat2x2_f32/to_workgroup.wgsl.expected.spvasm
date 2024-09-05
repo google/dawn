@@ -23,8 +23,8 @@
                OpName %f_inner "f_inner"
                OpName %tint_local_index "tint_local_index"
                OpName %f "f"
-               OpName %convert_S "convert_S"
-               OpName %input "input"
+               OpName %tint_convert_S "tint_convert_S"
+               OpName %tint_input "tint_input"
                OpMemberDecorate %S_std140 0 Offset 0
                OpMemberDecorate %S_std140 1 Offset 8
                OpMemberDecorate %S_std140 2 Offset 16
@@ -131,7 +131,7 @@
          %60 = OpAccessChain %_ptr_Function_S %47 %55
          %62 = OpAccessChain %_ptr_Function_S_std140 %45 %55
          %64 = OpLoad %S_std140 %62 None
-         %65 = OpFunctionCall %S %convert_S %64
+         %65 = OpFunctionCall %S %tint_convert_S %64
                OpStore %60 %65 None
                OpBranch %52
          %52 = OpLabel
@@ -143,7 +143,7 @@
          %68 = OpAccessChain %_ptr_Workgroup_S %w %int_1
          %70 = OpAccessChain %_ptr_Uniform_S_std140 %1 %uint_0 %int_2
          %73 = OpLoad %S_std140 %70 None
-         %74 = OpFunctionCall %S %convert_S %73
+         %74 = OpFunctionCall %S %tint_convert_S %73
                OpStore %68 %74 None
          %75 = OpAccessChain %_ptr_Workgroup_mat2v2float %w %int_3 %uint_1
          %78 = OpAccessChain %_ptr_Uniform_v2float %1 %uint_0 %int_2 %uint_1
@@ -165,14 +165,14 @@
          %94 = OpFunctionCall %void %f_inner %93
                OpReturn
                OpFunctionEnd
-  %convert_S = OpFunction %S None %96
-      %input = OpFunctionParameter %S_std140
+%tint_convert_S = OpFunction %S None %96
+ %tint_input = OpFunctionParameter %S_std140
          %97 = OpLabel
-         %98 = OpCompositeExtract %int %input 0
-         %99 = OpCompositeExtract %v2float %input 1
-        %100 = OpCompositeExtract %v2float %input 2
+         %98 = OpCompositeExtract %int %tint_input 0
+         %99 = OpCompositeExtract %v2float %tint_input 1
+        %100 = OpCompositeExtract %v2float %tint_input 2
         %101 = OpCompositeConstruct %mat2v2float %99 %100
-        %102 = OpCompositeExtract %int %input 3
+        %102 = OpCompositeExtract %int %tint_input 3
         %103 = OpCompositeConstruct %S %98 %101 %102
                OpReturnValue %103
                OpFunctionEnd

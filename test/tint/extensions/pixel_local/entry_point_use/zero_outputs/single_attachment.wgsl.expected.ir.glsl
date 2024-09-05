@@ -1,4 +1,4 @@
-#version 310 es
+SKIP: INVALID
 
 struct PixelLocal {
   uint a;

@@ -1,13 +1,42 @@
 #version 310 es
 
-uniform mat3 u[4];
-float s;
+struct mat3x3_f32_std140 {
+  vec3 col0;
+  vec3 col1;
+  vec3 col2;
+};
+
+layout(binding = 0, std140)
+uniform tint_symbol_1_std140_1_ubo {
+  mat3x3_f32_std140 tint_symbol[4];
+} v;
+layout(binding = 1, std430)
+buffer tint_symbol_3_1_ssbo {
+  float tint_symbol_2;
+} v_1;
 mat3 p[4] = mat3[4](mat3(vec3(0.0f), vec3(0.0f), vec3(0.0f)), mat3(vec3(0.0f), vec3(0.0f), vec3(0.0f)), mat3(vec3(0.0f), vec3(0.0f), vec3(0.0f)), mat3(vec3(0.0f), vec3(0.0f), vec3(0.0f)));
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
-  p = u;
-  p[1] = u[2];
-  p[1][0] = u[0][1].zxy;
-  p[1][0][0u] = u[0][1].x;
-  s = p[1][0].x;
+  mat3x3_f32_std140 v_2[4] = v.tint_symbol;
+  mat3 v_3[4] = mat3[4](mat3(vec3(0.0f), vec3(0.0f), vec3(0.0f)), mat3(vec3(0.0f), vec3(0.0f), vec3(0.0f)), mat3(vec3(0.0f), vec3(0.0f), vec3(0.0f)), mat3(vec3(0.0f), vec3(0.0f), vec3(0.0f)));
+  {
+    uint v_4 = 0u;
+    v_4 = 0u;
+    while(true) {
+      uint v_5 = v_4;
+      if ((v_5 >= 4u)) {
+        break;
+      }
+      v_3[v_5] = mat3(v_2[v_5].col0, v_2[v_5].col1, v_2[v_5].col2);
+      {
+        v_4 = (v_5 + 1u);
+      }
+      continue;
+    }
+  }
+  p = v_3;
+  p[1] = mat3(v.tint_symbol[2].col0, v.tint_symbol[2].col1, v.tint_symbol[2].col2);
+  p[1][0] = v.tint_symbol[0].col1.zxy;
+  p[1][0][0u] = v.tint_symbol[0].col1.x;
+  v_1.tint_symbol_2 = p[1][0].x;
 }

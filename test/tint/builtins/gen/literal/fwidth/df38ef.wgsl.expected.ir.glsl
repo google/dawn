@@ -3,11 +3,14 @@ precision highp float;
 precision highp int;
 
 
-float prevent_dce;
+layout(binding = 0, std430)
+buffer tint_symbol_1_1_ssbo {
+  float tint_symbol;
+} v;
 float fwidth_df38ef() {
   float res = fwidth(1.0f);
   return res;
 }
 void main() {
-  prevent_dce = fwidth_df38ef();
+  v.tint_symbol = fwidth_df38ef();
 }

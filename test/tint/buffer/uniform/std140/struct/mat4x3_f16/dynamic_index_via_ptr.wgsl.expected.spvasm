@@ -33,10 +33,10 @@
                OpName %l_a_i_a_i_m "l_a_i_a_i_m"
                OpName %l_a_i_a_i_m_i "l_a_i_a_i_m_i"
                OpName %l_a_i_a_i_m_i_i "l_a_i_a_i_m_i_i"
-               OpName %convert_Inner "convert_Inner"
-               OpName %input "input"
-               OpName %convert_Outer "convert_Outer"
-               OpName %input_0 "input"
+               OpName %tint_convert_Inner "tint_convert_Inner"
+               OpName %tint_input "tint_input"
+               OpName %tint_convert_Outer "tint_convert_Outer"
+               OpName %tint_input_0 "tint_input"
                OpMemberDecorate %Inner_std140 0 Offset 0
                OpMemberDecorate %Inner_std140 1 Offset 8
                OpMemberDecorate %Inner_std140 2 Offset 16
@@ -156,7 +156,7 @@
          %79 = OpAccessChain %_ptr_Function_Outer %61 %73
          %81 = OpAccessChain %_ptr_Function_Outer_std140 %59 %73
          %83 = OpLoad %Outer_std140 %81 None
-         %84 = OpFunctionCall %Outer %convert_Outer %83
+         %84 = OpFunctionCall %Outer %tint_convert_Outer %83
                OpStore %79 %84 None
                OpBranch %70
          %70 = OpLabel
@@ -165,7 +165,7 @@
          %72 = OpLabel
         %l_a = OpLoad %_arr_Outer_uint_4 %61 None
          %87 = OpLoad %Outer_std140 %31 None
-      %l_a_i = OpFunctionCall %Outer %convert_Outer %87
+      %l_a_i = OpFunctionCall %Outer %tint_convert_Outer %87
          %89 = OpLoad %_arr_Inner_std140_uint_4 %33 None
                OpStore %90 %89
                OpBranch %95
@@ -185,7 +185,7 @@
         %105 = OpAccessChain %_ptr_Function_Inner %92 %100
         %107 = OpAccessChain %_ptr_Function_Inner_std140 %90 %100
         %109 = OpLoad %Inner_std140 %107 None
-        %110 = OpFunctionCall %Inner %convert_Inner %109
+        %110 = OpFunctionCall %Inner %tint_convert_Inner %109
                OpStore %105 %110 None
                OpBranch %97
          %97 = OpLabel
@@ -194,28 +194,28 @@
          %99 = OpLabel
     %l_a_i_a = OpLoad %_arr_Inner_uint_4 %92 None
         %113 = OpLoad %Inner_std140 %36 None
-  %l_a_i_a_i = OpFunctionCall %Inner %convert_Inner %113
+  %l_a_i_a_i = OpFunctionCall %Inner %tint_convert_Inner %113
         %115 = OpFunctionCall %int %i
 %l_a_i_a_i_m_i_i = OpVectorExtractDynamic %half %l_a_i_a_i_m_i %115
                OpReturn
                OpFunctionEnd
-%convert_Inner = OpFunction %Inner None %118
-      %input = OpFunctionParameter %Inner_std140
+%tint_convert_Inner = OpFunction %Inner None %118
+ %tint_input = OpFunctionParameter %Inner_std140
         %119 = OpLabel
-        %120 = OpCompositeExtract %v3half %input 0
-        %121 = OpCompositeExtract %v3half %input 1
-        %122 = OpCompositeExtract %v3half %input 2
-        %123 = OpCompositeExtract %v3half %input 3
+        %120 = OpCompositeExtract %v3half %tint_input 0
+        %121 = OpCompositeExtract %v3half %tint_input 1
+        %122 = OpCompositeExtract %v3half %tint_input 2
+        %123 = OpCompositeExtract %v3half %tint_input 3
         %124 = OpCompositeConstruct %mat4v3half %120 %121 %122 %123
         %125 = OpCompositeConstruct %Inner %124
                OpReturnValue %125
                OpFunctionEnd
-%convert_Outer = OpFunction %Outer None %127
-    %input_0 = OpFunctionParameter %Outer_std140
+%tint_convert_Outer = OpFunction %Outer None %127
+%tint_input_0 = OpFunctionParameter %Outer_std140
         %128 = OpLabel
         %130 = OpVariable %_ptr_Function__arr_Inner_std140_uint_4 Function
         %131 = OpVariable %_ptr_Function__arr_Inner_uint_4 Function %94
-        %129 = OpCompositeExtract %_arr_Inner_std140_uint_4 %input_0 0
+        %129 = OpCompositeExtract %_arr_Inner_std140_uint_4 %tint_input_0 0
                OpStore %130 %129
                OpBranch %132
         %132 = OpLabel
@@ -234,7 +234,7 @@
         %142 = OpAccessChain %_ptr_Function_Inner %131 %137
         %143 = OpAccessChain %_ptr_Function_Inner_std140 %130 %137
         %144 = OpLoad %Inner_std140 %143 None
-        %145 = OpFunctionCall %Inner %convert_Inner %144
+        %145 = OpFunctionCall %Inner %tint_convert_Inner %144
                OpStore %142 %145 None
                OpBranch %134
         %134 = OpLabel

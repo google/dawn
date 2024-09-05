@@ -1,4 +1,4 @@
-SKIP: FAILED
+SKIP: INVALID
 
 #version 310 es
 
@@ -27,8 +27,8 @@ void main() {
   f2();
 }
 error: Error parsing GLSL shader:
-ERROR: 0:6: 'float' : type requires declaration of default precision qualifier 
-ERROR: 0:6: '' : compilation terminated 
+ERROR: 0:6: 'float' : type requires declaration of default precision qualifier
+ERROR: 0:6: '' : compilation terminated
 ERROR: 2 compilation errors.  No code generated.
 
 

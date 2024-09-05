@@ -1,11 +1,14 @@
 #version 310 es
 
-uniform int b;
+layout(binding = 0, std140)
+uniform tint_symbol_2_1_ubo {
+  int tint_symbol_1;
+} v;
 bool func_3() {
   {
     int i = 0;
     while(true) {
-      if ((i < b)) {
+      if ((i < v.tint_symbol_1)) {
       } else {
         break;
       }

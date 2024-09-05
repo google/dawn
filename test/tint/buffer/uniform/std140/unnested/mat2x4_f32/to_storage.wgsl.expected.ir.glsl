@@ -1,11 +1,17 @@
 #version 310 es
 
-uniform mat2x4 u;
-mat2x4 s;
+layout(binding = 0, std140)
+uniform tint_symbol_1_1_ubo {
+  mat2x4 tint_symbol;
+} v;
+layout(binding = 1, std430)
+buffer tint_symbol_3_1_ssbo {
+  mat2x4 tint_symbol_2;
+} v_1;
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
-  s = u;
-  s[1] = u[0];
-  s[1] = u[0].ywxz;
-  s[0][1] = u[1].x;
+  v_1.tint_symbol_2 = v.tint_symbol;
+  v_1.tint_symbol_2[1] = v.tint_symbol[0];
+  v_1.tint_symbol_2[1] = v.tint_symbol[0].ywxz;
+  v_1.tint_symbol_2[0][1] = v.tint_symbol[1].x;
 }

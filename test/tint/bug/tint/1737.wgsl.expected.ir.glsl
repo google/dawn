@@ -1,7 +1,7 @@
 #version 310 es
 
-float a[10];
-float b[20];
+shared float a[10];
+shared float b[20];
 void f() {
   float x = a[0];
   float y = b[0];

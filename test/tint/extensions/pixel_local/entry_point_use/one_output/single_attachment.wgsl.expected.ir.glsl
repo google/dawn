@@ -1,4 +1,4 @@
-SKIP: FAILED
+SKIP: INVALID
 
 #version 310 es
 
@@ -16,7 +16,7 @@ vec4 main() {
 }
 error: Error parsing GLSL shader:
 ERROR: 0:11: 'float' :  entry point cannot return a value
-ERROR: 0:11: '' : compilation terminated 
+ERROR: 0:11: '' : compilation terminated
 ERROR: 2 compilation errors.  No code generated.
 
 

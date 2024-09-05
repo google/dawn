@@ -3,7 +3,10 @@ precision highp float;
 precision highp int;
 
 
-float s;
+layout(binding = 0, std430)
+buffer tint_symbol_2_1_ssbo {
+  float tint_symbol_1;
+} v;
 void main() {
   float signed_literal[4] = float[4](0.0f, 0.0f, 0.0f, 0.0f);
   float unsigned_literal[4] = float[4](0.0f, 0.0f, 0.0f, 0.0f);
@@ -14,5 +17,5 @@ void main() {
   signed_constant = signed_literal;
   unsigned_constant = signed_literal;
   shr_const_expr = signed_literal;
-  s = ((((signed_literal[0] + unsigned_literal[0]) + signed_constant[0]) + unsigned_constant[0]) + shr_const_expr[0]);
+  v.tint_symbol_1 = ((((signed_literal[0] + unsigned_literal[0]) + signed_constant[0]) + unsigned_constant[0]) + shr_const_expr[0]);
 }

@@ -1,19 +1,12 @@
-SKIP: FAILED
-
 #version 310 es
 precision highp float;
 precision highp int;
 
 
-float weights[];
+layout(binding = 0, std430)
+buffer tint_symbol_2_1_ssbo {
+  float tint_symbol_1[];
+} v;
 void main() {
-  float a = weights[0];
+  float a = v.tint_symbol_1[0];
 }
-error: Error parsing GLSL shader:
-ERROR: 0:6: '' : array size required 
-ERROR: 1 compilation errors.  No code generated.
-
-
-
-
-tint executable returned error: exit status 1

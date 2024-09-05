@@ -69,8 +69,8 @@
                OpName %tint_GammaCorrection "tint_GammaCorrection"
                OpName %v "v"
                OpName %params_0 "params"
-               OpName %convert_tint_ExternalTextureParams "convert_tint_ExternalTextureParams"
-               OpName %input "input"
+               OpName %tint_convert_tint_ExternalTextureParams "tint_convert_tint_ExternalTextureParams"
+               OpName %tint_input "tint_input"
                OpDecorate %t_plane0 DescriptorSet 0
                OpDecorate %t_plane0 Binding 0
                OpDecorate %t_plane1 DescriptorSet 0
@@ -189,7 +189,7 @@
          %25 = OpLoad %3 %t_plane1 None
          %26 = OpAccessChain %_ptr_Uniform_tint_ExternalTextureParams_std140 %6 %uint_0
          %29 = OpLoad %tint_ExternalTextureParams_std140 %26 None
-         %30 = OpFunctionCall %tint_ExternalTextureParams %convert_tint_ExternalTextureParams %29
+         %30 = OpFunctionCall %tint_ExternalTextureParams %tint_convert_tint_ExternalTextureParams %29
          %35 = OpCompositeExtract %v2uint %30 12
          %36 = OpIAdd %v2uint %35 %37
          %39 = OpISub %v2uint %36 %37
@@ -204,7 +204,7 @@
          %56 = OpLoad %3 %t_plane1 None
          %57 = OpAccessChain %_ptr_Uniform_tint_ExternalTextureParams_std140 %6 %uint_0
          %58 = OpLoad %tint_ExternalTextureParams_std140 %57 None
-         %59 = OpFunctionCall %tint_ExternalTextureParams %convert_tint_ExternalTextureParams %58
+         %59 = OpFunctionCall %tint_ExternalTextureParams %tint_convert_tint_ExternalTextureParams %58
          %60 = OpCompositeExtract %v2uint %59 12
          %61 = OpIAdd %v2uint %60 %37
          %62 = OpISub %v2uint %61 %37
@@ -304,32 +304,32 @@
         %154 = OpSelect %v3float %141 %146 %153
                OpReturnValue %154
                OpFunctionEnd
-%convert_tint_ExternalTextureParams = OpFunction %tint_ExternalTextureParams None %156
-      %input = OpFunctionParameter %tint_ExternalTextureParams_std140
+%tint_convert_tint_ExternalTextureParams = OpFunction %tint_ExternalTextureParams None %156
+ %tint_input = OpFunctionParameter %tint_ExternalTextureParams_std140
         %157 = OpLabel
-        %158 = OpCompositeExtract %uint %input 0
-        %159 = OpCompositeExtract %uint %input 1
-        %160 = OpCompositeExtract %mat3v4float %input 2
-        %161 = OpCompositeExtract %tint_GammaTransferParams %input 3
-        %162 = OpCompositeExtract %tint_GammaTransferParams %input 4
-        %163 = OpCompositeExtract %v3float %input 5
-        %164 = OpCompositeExtract %v3float %input 6
-        %165 = OpCompositeExtract %v3float %input 7
+        %158 = OpCompositeExtract %uint %tint_input 0
+        %159 = OpCompositeExtract %uint %tint_input 1
+        %160 = OpCompositeExtract %mat3v4float %tint_input 2
+        %161 = OpCompositeExtract %tint_GammaTransferParams %tint_input 3
+        %162 = OpCompositeExtract %tint_GammaTransferParams %tint_input 4
+        %163 = OpCompositeExtract %v3float %tint_input 5
+        %164 = OpCompositeExtract %v3float %tint_input 6
+        %165 = OpCompositeExtract %v3float %tint_input 7
         %166 = OpCompositeConstruct %mat3v3float %163 %164 %165
-        %167 = OpCompositeExtract %v2float %input 8
-        %168 = OpCompositeExtract %v2float %input 9
-        %169 = OpCompositeExtract %v2float %input 10
+        %167 = OpCompositeExtract %v2float %tint_input 8
+        %168 = OpCompositeExtract %v2float %tint_input 9
+        %169 = OpCompositeExtract %v2float %tint_input 10
         %170 = OpCompositeConstruct %mat3v2float %167 %168 %169
-        %171 = OpCompositeExtract %v2float %input 11
-        %172 = OpCompositeExtract %v2float %input 12
-        %173 = OpCompositeExtract %v2float %input 13
+        %171 = OpCompositeExtract %v2float %tint_input 11
+        %172 = OpCompositeExtract %v2float %tint_input 12
+        %173 = OpCompositeExtract %v2float %tint_input 13
         %174 = OpCompositeConstruct %mat3v2float %171 %172 %173
-        %175 = OpCompositeExtract %v2float %input 14
-        %176 = OpCompositeExtract %v2float %input 15
-        %177 = OpCompositeExtract %v2float %input 16
-        %178 = OpCompositeExtract %v2float %input 17
-        %179 = OpCompositeExtract %v2uint %input 18
-        %180 = OpCompositeExtract %v2float %input 19
+        %175 = OpCompositeExtract %v2float %tint_input 14
+        %176 = OpCompositeExtract %v2float %tint_input 15
+        %177 = OpCompositeExtract %v2float %tint_input 16
+        %178 = OpCompositeExtract %v2float %tint_input 17
+        %179 = OpCompositeExtract %v2uint %tint_input 18
+        %180 = OpCompositeExtract %v2float %tint_input 19
         %181 = OpCompositeConstruct %tint_ExternalTextureParams %158 %159 %160 %161 %162 %166 %170 %174 %175 %176 %177 %178 %179 %180
                OpReturnValue %181
                OpFunctionEnd

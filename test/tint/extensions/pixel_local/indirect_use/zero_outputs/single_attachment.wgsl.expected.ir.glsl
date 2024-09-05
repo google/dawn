@@ -1,3 +1,5 @@
+SKIP: INVALID
+
 #version 310 es
 
 struct PixelLocal {

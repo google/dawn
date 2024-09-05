@@ -1,9 +1,12 @@
 #version 310 es
 
-uvec4 a;
+layout(binding = 0, std430)
+buffer tint_symbol_2_1_ssbo {
+  uvec4 tint_symbol_1;
+} v;
 void tint_symbol() {
-  a[1] = (a.y + 1u);
-  a[2u] = (a.z + 1u);
+  v.tint_symbol_1[1] = (v.tint_symbol_1.y + 1u);
+  v.tint_symbol_1[2u] = (v.tint_symbol_1.z + 1u);
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {

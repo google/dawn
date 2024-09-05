@@ -1,5 +1,3 @@
-SKIP: FAILED
-
 #version 310 es
 
 struct Uniforms {
@@ -10,23 +8,16 @@ struct InnerS {
   int v;
 };
 
-struct OuterS {
+layout(binding = 4, std140)
+uniform tint_symbol_2_1_ubo {
+  Uniforms tint_symbol_1;
+} v_1;
+layout(binding = 0, std430)
+buffer OuterS_1_ssbo {
   InnerS a1[];
-};
-
-uniform Uniforms uniforms;
-OuterS s1;
+} s1;
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
   InnerS v = InnerS(0);
-  s1.a1[uniforms.i] = v;
+  s1.a1[v_1.tint_symbol_1.i] = v;
 }
-error: Error parsing GLSL shader:
-ERROR: 0:12: '' : array size required 
-ERROR: 0:13: '' : compilation terminated 
-ERROR: 2 compilation errors.  No code generated.
-
-
-
-
-tint executable returned error: exit status 1

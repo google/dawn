@@ -6,8 +6,14 @@ struct S {
   int after;
 };
 
-uniform S u[4];
-S s[4];
+layout(binding = 0, std140)
+uniform tint_symbol_1_1_ubo {
+  S tint_symbol[4];
+} v;
+layout(binding = 1, std430)
+buffer tint_symbol_3_1_ssbo {
+  S tint_symbol_2[4];
+} v_1;
 void tint_store_and_preserve_padding_1(inout S target, S value_param) {
   target.before = value_param.before;
   target.m = value_param.m;
@@ -15,16 +21,16 @@ void tint_store_and_preserve_padding_1(inout S target, S value_param) {
 }
 void tint_store_and_preserve_padding(inout S target[4], S value_param[4]) {
   {
-    uint v = 0u;
-    v = 0u;
+    uint v_2 = 0u;
+    v_2 = 0u;
     while(true) {
-      uint v_1 = v;
-      if ((v_1 >= 4u)) {
+      uint v_3 = v_2;
+      if ((v_3 >= 4u)) {
         break;
       }
-      tint_store_and_preserve_padding_1(target[v_1], value_param[v_1]);
+      tint_store_and_preserve_padding_1(target[v_3], value_param[v_3]);
       {
-        v = (v_1 + 1u);
+        v_2 = (v_3 + 1u);
       }
       continue;
     }
@@ -32,8 +38,8 @@ void tint_store_and_preserve_padding(inout S target[4], S value_param[4]) {
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
-  tint_store_and_preserve_padding(s, u);
-  tint_store_and_preserve_padding_1(s[1], u[2]);
-  s[3].m = u[2].m;
-  s[1].m[0] = u[0].m[1].ywxz;
+  tint_store_and_preserve_padding(v_1.tint_symbol_2, v.tint_symbol);
+  tint_store_and_preserve_padding_1(v_1.tint_symbol_2[1], v.tint_symbol[2]);
+  v_1.tint_symbol_2[3].m = v.tint_symbol[2].m;
+  v_1.tint_symbol_2[1].m[0] = v.tint_symbol[0].m[1].ywxz;
 }

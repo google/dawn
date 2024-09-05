@@ -1,11 +1,14 @@
 #version 310 es
 
-uint i;
+layout(binding = 0, std430)
+buffer tint_symbol_2_1_ssbo {
+  uint tint_symbol_1;
+} v;
 void tint_symbol() {
   {
-    i = (i - 1u);
+    v.tint_symbol_1 = (v.tint_symbol_1 - 1u);
     while(true) {
-      if ((i < 10u)) {
+      if ((v.tint_symbol_1 < 10u)) {
       } else {
         break;
       }

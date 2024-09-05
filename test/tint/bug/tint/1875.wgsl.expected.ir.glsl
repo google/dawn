@@ -1,13 +1,10 @@
-SKIP: FAILED
-
 #version 310 es
 
-struct Outputs {
-  uint data[];
-};
-
 uint count = 0u;
-Outputs outputs;
+layout(binding = 1, std430)
+buffer Outputs_1_ssbo {
+  uint data[];
+} outputs;
 void push_output(uint value) {
   outputs.data[count] = value;
   count = (count + 1u);
@@ -24,12 +21,3 @@ void main() {
   push_output(b);
   push_output(c);
 }
-error: Error parsing GLSL shader:
-ERROR: 0:4: '' : array size required 
-ERROR: 0:5: '' : compilation terminated 
-ERROR: 2 compilation errors.  No code generated.
-
-
-
-
-tint executable returned error: exit status 1

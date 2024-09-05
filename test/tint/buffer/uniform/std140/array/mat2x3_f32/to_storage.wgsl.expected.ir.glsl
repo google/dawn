@@ -1,23 +1,34 @@
 #version 310 es
 
-uniform mat2x3 u[4];
-mat2x3 s[4];
+struct mat2x3_f32_std140 {
+  vec3 col0;
+  vec3 col1;
+};
+
+layout(binding = 0, std140)
+uniform tint_symbol_1_std140_1_ubo {
+  mat2x3_f32_std140 tint_symbol[4];
+} v;
+layout(binding = 1, std430)
+buffer tint_symbol_3_1_ssbo {
+  mat2x3 tint_symbol_2[4];
+} v_1;
 void tint_store_and_preserve_padding_1(inout mat2x3 target, mat2x3 value_param) {
   target[0u] = value_param[0u];
   target[1u] = value_param[1u];
 }
 void tint_store_and_preserve_padding(inout mat2x3 target[4], mat2x3 value_param[4]) {
   {
-    uint v = 0u;
-    v = 0u;
+    uint v_2 = 0u;
+    v_2 = 0u;
     while(true) {
-      uint v_1 = v;
-      if ((v_1 >= 4u)) {
+      uint v_3 = v_2;
+      if ((v_3 >= 4u)) {
         break;
       }
-      tint_store_and_preserve_padding_1(target[v_1], value_param[v_1]);
+      tint_store_and_preserve_padding_1(target[v_3], value_param[v_3]);
       {
-        v = (v_1 + 1u);
+        v_2 = (v_3 + 1u);
       }
       continue;
     }
@@ -25,8 +36,25 @@ void tint_store_and_preserve_padding(inout mat2x3 target[4], mat2x3 value_param[
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
-  tint_store_and_preserve_padding(s, u);
-  tint_store_and_preserve_padding_1(s[1], u[2]);
-  s[1][0] = u[0][1].zxy;
-  s[1][0][0u] = u[0][1].x;
+  mat2x3_f32_std140 v_4[4] = v.tint_symbol;
+  mat2x3 v_5[4] = mat2x3[4](mat2x3(vec3(0.0f), vec3(0.0f)), mat2x3(vec3(0.0f), vec3(0.0f)), mat2x3(vec3(0.0f), vec3(0.0f)), mat2x3(vec3(0.0f), vec3(0.0f)));
+  {
+    uint v_6 = 0u;
+    v_6 = 0u;
+    while(true) {
+      uint v_7 = v_6;
+      if ((v_7 >= 4u)) {
+        break;
+      }
+      v_5[v_7] = mat2x3(v_4[v_7].col0, v_4[v_7].col1);
+      {
+        v_6 = (v_7 + 1u);
+      }
+      continue;
+    }
+  }
+  tint_store_and_preserve_padding(v_1.tint_symbol_2, v_5);
+  tint_store_and_preserve_padding_1(v_1.tint_symbol_2[1], mat2x3(v.tint_symbol[2].col0, v.tint_symbol[2].col1));
+  v_1.tint_symbol_2[1][0] = v.tint_symbol[0].col1.zxy;
+  v_1.tint_symbol_2[1][0][0u] = v.tint_symbol[0].col1.x;
 }

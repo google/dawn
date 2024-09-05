@@ -269,8 +269,8 @@ struct State {
                 // Create a helper function that converts the struct to the original type.
                 auto* helper = convert_helpers.GetOrAdd(str, [&] {
                     auto* input_str = source->Type()->As<core::type::Struct>();
-                    auto* func = b.Function("convert_" + str->FriendlyName(), str);
-                    auto* input = b.FunctionParam("input", input_str);
+                    auto* func = b.Function("tint_convert_" + str->FriendlyName(), str);
+                    auto* input = b.FunctionParam("tint_input", input_str);
                     func->SetParams({input});
                     b.Append(func->Block(), [&] {
                         uint32_t index = 0;

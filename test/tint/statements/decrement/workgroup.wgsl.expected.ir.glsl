@@ -1,6 +1,6 @@
 #version 310 es
 
-int i;
+shared int i;
 void tint_symbol() {
   i = (i - 1);
 }
