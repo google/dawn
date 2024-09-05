@@ -1617,6 +1617,16 @@ crbug.com/dawn/0000 [ android-14 arm ] webgpu:shader,execution,expression,call,b
 crbug.com/dawn/0000 [ android-14 arm ] webgpu:shader,validation,expression,call,builtin,ldexp:partial_values:* [ Failure ]
 crbug.com/dawn/0000 [ android-14 arm dawn-backend-validation webgpu-adapter-default webgpu-no-worker ] webgpu:api,validation,render_pipeline,depth_stencil_state:depth_bias:* [ Failure ]
 crbug.com/dawn/0000 [ android-14 arm dawn-no-backend-validation webgpu-adapter-default webgpu-no-worker ] webgpu:api,validation,render_pipeline,depth_stencil_state:depth_bias:* [ Failure ]
+crbug.com/dawn/0000 [ android-14 arm ] webgpu:api,validation,render_pipeline,misc:vertex_state_only:* [ Failure ]
+crbug.com/dawn/0000 [ android-14 arm ] webgpu:shader,execution,shader_io,fragment_builtins:subgroup_invocation_id:* [ Failure ]
+crbug.com/dawn/0000 [ android-14 arm ] webgpu:shader,execution,expression,call,builtin,textureGather:depth_2d_coords:* [ Failure ]
+crbug.com/dawn/0000 [ android-14 arm ] webgpu:shader,execution,expression,call,builtin,textureGather:depth_array_2d_coords:* [ Failure ]
+crbug.com/dawn/0000 [ android-14 arm ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_2d_coords:* [ Failure ]
+crbug.com/dawn/0000 [ android-14 arm ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_array_2d_coords:* [ Failure ]
+crbug.com/dawn/0000 [ android-14 arm ] webgpu:shader,execution,expression,call,builtin,textureGatherCompare:array_2d_coords:* [ Failure ]
+crbug.com/dawn/0000 [ android-14 arm ] webgpu:shader,execution,expression,call,builtin,textureGatherCompare:sampled_2d_coords:* [ Failure ]
+crbug.com/dawn/0000 [ android-14 arm ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:depth_3d_coords:* [ Failure ]
+crbug.com/dawn/0000 [ android-14 arm ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:sampled_array_3d_coords:* [ Failure ]
 
 # Flakes on Dawn try Mac Intel
 crbug.com/dawn/0000 [ intel-0x3e9b mac webgpu-adapter-default ] webgpu:api,operation,render_pipeline,sample_mask:fragment_output_mask:* [ Failure ]
