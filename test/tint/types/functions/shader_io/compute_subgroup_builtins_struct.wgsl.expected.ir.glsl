@@ -1,4 +1,4 @@
-SKIP: FAILED
+SKIP: INVALID
 
 #version 310 es
 
@@ -13,7 +13,7 @@ void main(ComputeInputs inputs) {
   tint_symbol[inputs.subgroup_invocation_id] = inputs.subgroup_size;
 }
 error: Error parsing GLSL shader:
-ERROR: 0:8: '' : array size required 
+ERROR: 0:8: '' : array size required
 ERROR: 1 compilation errors.  No code generated.
 
 
