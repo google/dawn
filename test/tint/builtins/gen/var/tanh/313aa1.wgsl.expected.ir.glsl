@@ -2,7 +2,6 @@
 precision highp float;
 precision highp int;
 
-
 void tanh_313aa1() {
   float res = 0.76159417629241943359f;
 }
@@ -19,6 +18,7 @@ void main() {
   tanh_313aa1();
 }
 #version 310 es
+
 
 struct VertexOutput {
   vec4 pos;

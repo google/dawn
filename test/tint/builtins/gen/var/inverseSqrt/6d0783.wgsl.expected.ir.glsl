@@ -2,7 +2,6 @@
 precision highp float;
 precision highp int;
 
-
 void inverseSqrt_6d0783() {
   vec3 res = vec3(1.0f);
 }
@@ -19,6 +18,7 @@ void main() {
   inverseSqrt_6d0783();
 }
 #version 310 es
+
 
 struct VertexOutput {
   vec4 pos;

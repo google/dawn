@@ -2,7 +2,6 @@
 precision highp float;
 precision highp int;
 
-
 void fract_2eddfe() {
   float res = 0.25f;
 }
@@ -19,6 +18,7 @@ void main() {
   fract_2eddfe();
 }
 #version 310 es
+
 
 struct VertexOutput {
   vec4 pos;

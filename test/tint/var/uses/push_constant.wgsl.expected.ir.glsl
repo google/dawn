@@ -1,5 +1,6 @@
 #version 310 es
 
+
 struct tint_symbol_1 {
   int tint_symbol;
 };
@@ -13,6 +14,7 @@ void main() {
   uses_a();
 }
 #version 310 es
+
 
 struct tint_symbol_1 {
   int tint_symbol;
@@ -30,6 +32,7 @@ void main() {
   uses_uses_a();
 }
 #version 310 es
+
 
 struct tint_symbol_1 {
   int tint_symbol;

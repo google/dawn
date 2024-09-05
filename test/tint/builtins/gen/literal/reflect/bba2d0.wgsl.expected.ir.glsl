@@ -2,7 +2,6 @@
 precision highp float;
 precision highp int;
 
-
 void reflect_bba2d0() {
   vec2 res = vec2(-3.0f);
 }
@@ -19,6 +18,7 @@ void main() {
   reflect_bba2d0();
 }
 #version 310 es
+
 
 struct VertexOutput {
   vec4 pos;

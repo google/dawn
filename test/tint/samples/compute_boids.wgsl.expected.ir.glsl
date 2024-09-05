@@ -21,7 +21,6 @@ void main() {
 precision highp float;
 precision highp int;
 
-
 layout(location = 0) out vec4 frag_main_loc0_Output;
 vec4 frag_main_inner() {
   return vec4(1.0f);
@@ -30,6 +29,7 @@ void main() {
   frag_main_loc0_Output = frag_main_inner();
 }
 #version 310 es
+
 
 struct SimParams {
   float deltaT;

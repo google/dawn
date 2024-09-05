@@ -1,13 +1,13 @@
 #version 310 es
 #extension GL_AMD_gpu_shader_half_float: require
+precision highp float;
+precision highp int;
+
 
 struct modf_result_vec3_f16 {
   f16vec3 fract;
   f16vec3 whole;
 };
-precision highp float;
-precision highp int;
-
 
 void modf_45005f() {
   modf_result_vec3_f16 res = modf_result_vec3_f16(f16vec3(-0.5hf), f16vec3(-1.0hf));
@@ -17,6 +17,7 @@ void main() {
 }
 #version 310 es
 #extension GL_AMD_gpu_shader_half_float: require
+
 
 struct modf_result_vec3_f16 {
   f16vec3 fract;
@@ -32,6 +33,7 @@ void main() {
 }
 #version 310 es
 #extension GL_AMD_gpu_shader_half_float: require
+
 
 struct modf_result_vec3_f16 {
   f16vec3 fract;

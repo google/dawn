@@ -2,7 +2,6 @@
 precision highp float;
 precision highp int;
 
-
 void select_dfab3b() {
   ivec3 res = ivec3(1);
 }
@@ -19,6 +18,7 @@ void main() {
   select_dfab3b();
 }
 #version 310 es
+
 
 struct VertexOutput {
   vec4 pos;

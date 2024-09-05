@@ -2,7 +2,6 @@
 precision highp float;
 precision highp int;
 
-
 void radians_524a91() {
   vec4 res = vec4(0.01745329238474369049f);
 }
@@ -19,6 +18,7 @@ void main() {
   radians_524a91();
 }
 #version 310 es
+
 
 struct VertexOutput {
   vec4 pos;

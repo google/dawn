@@ -607,6 +607,7 @@ TEST_F(GlslWriterTest, Constructor_Type_Struct) {
 
     ASSERT_TRUE(Generate()) << err_ << output_.glsl;
     EXPECT_EQ(output_.glsl, GlslHeader() + R"(
+
 struct S {
   int a;
   float b;
@@ -636,6 +637,7 @@ TEST_F(GlslWriterTest, Constructor_Type_Struct_Empty) {
 
     ASSERT_TRUE(Generate()) << err_ << output_.glsl;
     EXPECT_EQ(output_.glsl, GlslHeader() + R"(
+
 struct S {
   int a;
   float b;

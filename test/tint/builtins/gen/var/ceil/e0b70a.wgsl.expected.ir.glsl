@@ -2,7 +2,6 @@
 precision highp float;
 precision highp int;
 
-
 void ceil_e0b70a() {
   float res = 2.0f;
 }
@@ -19,6 +18,7 @@ void main() {
   ceil_e0b70a();
 }
 #version 310 es
+
 
 struct VertexOutput {
   vec4 pos;

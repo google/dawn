@@ -1,5 +1,6 @@
 #version 310 es
 
+
 struct Uniforms {
   mat4 modelViewProjectionMatrix;
 };
@@ -38,7 +39,6 @@ void main() {
 #version 310 es
 precision highp float;
 precision highp int;
-
 
 layout(location = 0) in vec4 frag_main_loc0_Input;
 layout(location = 0) out vec4 frag_main_loc0_Output;

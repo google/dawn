@@ -2,7 +2,6 @@
 precision highp float;
 precision highp int;
 
-
 void cross_1d7933() {
   vec3 res = vec3(0.0f);
 }
@@ -19,6 +18,7 @@ void main() {
   cross_1d7933();
 }
 #version 310 es
+
 
 struct VertexOutput {
   vec4 pos;

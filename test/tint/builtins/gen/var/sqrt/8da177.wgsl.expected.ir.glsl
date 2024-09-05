@@ -2,7 +2,6 @@
 precision highp float;
 precision highp int;
 
-
 void sqrt_8da177() {
   float res = 1.0f;
 }
@@ -19,6 +18,7 @@ void main() {
   sqrt_8da177();
 }
 #version 310 es
+
 
 struct VertexOutput {
   vec4 pos;

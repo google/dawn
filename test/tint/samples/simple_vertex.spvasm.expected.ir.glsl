@@ -1,5 +1,6 @@
 #version 310 es
 
+
 struct main_out {
   vec4 tint_symbol;
 };

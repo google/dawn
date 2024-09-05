@@ -2,7 +2,6 @@
 precision highp float;
 precision highp int;
 
-
 void abs_c3321c() {
   ivec3 res = ivec3(1);
 }
@@ -19,6 +18,7 @@ void main() {
   abs_c3321c();
 }
 #version 310 es
+
 
 struct VertexOutput {
   vec4 pos;

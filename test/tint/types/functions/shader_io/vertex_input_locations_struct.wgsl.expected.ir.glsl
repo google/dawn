@@ -1,5 +1,6 @@
 #version 310 es
 
+
 struct VertexInputs {
   int loc0;
   uint loc1;

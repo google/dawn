@@ -2,7 +2,6 @@
 precision highp float;
 precision highp int;
 
-
 void transpose_70ca11() {
   mat3x2 res = mat3x2(vec2(1.0f), vec2(1.0f), vec2(1.0f));
 }
@@ -19,6 +18,7 @@ void main() {
   transpose_70ca11();
 }
 #version 310 es
+
 
 struct VertexOutput {
   vec4 pos;

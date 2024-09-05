@@ -1,5 +1,6 @@
 #version 310 es
 
+
 struct Inner {
   float scalar_f32;
   int scalar_i32;

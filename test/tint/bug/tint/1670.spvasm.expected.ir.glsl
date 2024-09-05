@@ -2,7 +2,6 @@
 precision highp float;
 precision highp int;
 
-
 void main_1() {
   mat2 m2i = mat2(vec2(0.0f), vec2(0.0f));
   mat2 m2 = mat2(vec2(0.0f), vec2(0.0f));

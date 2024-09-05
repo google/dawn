@@ -2,7 +2,6 @@
 precision highp float;
 precision highp int;
 
-
 void atan2_c4be45() {
   vec4 res = vec4(0.78539818525314331055f);
 }
@@ -19,6 +18,7 @@ void main() {
   atan2_c4be45();
 }
 #version 310 es
+
 
 struct VertexOutput {
   vec4 pos;

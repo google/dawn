@@ -1,5 +1,6 @@
 #version 310 es
 
+
 struct Out {
   vec4 pos;
 };

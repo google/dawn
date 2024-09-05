@@ -2,7 +2,6 @@
 precision highp float;
 precision highp int;
 
-
 layout(binding = 0, std430)
 buffer tint_symbol_1_1_ssbo {
   uint tint_symbol;
@@ -31,6 +30,7 @@ void main() {
   v.tint_symbol = pack2x16float_0e97b3();
 }
 #version 310 es
+
 
 struct VertexOutput {
   vec4 pos;

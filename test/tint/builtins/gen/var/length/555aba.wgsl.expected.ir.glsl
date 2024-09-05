@@ -2,7 +2,6 @@
 precision highp float;
 precision highp int;
 
-
 void length_555aba() {
   float res = 0.0f;
 }
@@ -19,6 +18,7 @@ void main() {
   length_555aba();
 }
 #version 310 es
+
 
 struct VertexOutput {
   vec4 pos;

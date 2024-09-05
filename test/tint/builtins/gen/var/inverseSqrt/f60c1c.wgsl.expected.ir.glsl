@@ -2,7 +2,6 @@
 precision highp float;
 precision highp int;
 
-
 void inverseSqrt_f60c1c() {
   vec2 res = vec2(1.0f);
 }
@@ -19,6 +18,7 @@ void main() {
   inverseSqrt_f60c1c();
 }
 #version 310 es
+
 
 struct VertexOutput {
   vec4 pos;

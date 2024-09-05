@@ -1,5 +1,8 @@
 #version 310 es
 #extension GL_AMD_gpu_shader_half_float: require
+precision highp float;
+precision highp int;
+
 
 struct S_std140 {
   f16vec3 matrix_col0;
@@ -8,9 +11,6 @@ struct S_std140 {
   f16vec3 matrix_col3;
   f16vec3 vector;
 };
-precision highp float;
-precision highp int;
-
 
 layout(binding = 0, std140)
 uniform tint_symbol_2_std140_1_ubo {

@@ -1,5 +1,6 @@
 #version 310 es
 
+
 struct frexp_result_f32 {
   float fract;
   int exp;

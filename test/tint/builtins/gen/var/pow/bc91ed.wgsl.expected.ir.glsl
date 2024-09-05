@@ -2,7 +2,6 @@
 precision highp float;
 precision highp int;
 
-
 void pow_bc91ed() {
   vec2 res = vec2(1.0f);
 }
@@ -19,6 +18,7 @@ void main() {
   pow_bc91ed();
 }
 #version 310 es
+
 
 struct VertexOutput {
   vec4 pos;

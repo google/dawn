@@ -2,7 +2,6 @@
 precision highp float;
 precision highp int;
 
-
 void refract_8c192a() {
   vec4 res = vec4(-7.0f);
 }
@@ -19,6 +18,7 @@ void main() {
   refract_8c192a();
 }
 #version 310 es
+
 
 struct VertexOutput {
   vec4 pos;

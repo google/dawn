@@ -2,7 +2,6 @@
 precision highp float;
 precision highp int;
 
-
 void transpose_66fce8() {
   mat3 res = mat3(vec3(1.0f), vec3(1.0f), vec3(1.0f));
 }
@@ -19,6 +18,7 @@ void main() {
   transpose_66fce8();
 }
 #version 310 es
+
 
 struct VertexOutput {
   vec4 pos;

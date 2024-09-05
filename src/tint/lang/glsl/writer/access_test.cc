@@ -75,6 +75,7 @@ TEST_F(GlslWriterTest, AccessStruct) {
 
     ASSERT_TRUE(Generate()) << err_ << output_.glsl;
     EXPECT_EQ(output_.glsl, GlslHeader() + R"(
+
 struct S {
   int a;
   float b;
@@ -196,6 +197,7 @@ TEST_F(GlslWriterTest, AccessNested) {
 
     ASSERT_TRUE(Generate()) << err_ << output_.glsl;
     EXPECT_EQ(output_.glsl, GlslHeader() + R"(
+
 struct A {
   int d;
   float e[3];
@@ -274,7 +276,6 @@ TEST_F(GlslWriterTest, AccessStorageVector) {
     EXPECT_EQ(output_.glsl, GlslHeader() + R"(precision highp float;
 precision highp int;
 
-
 layout(binding = 0, std430)
 buffer tint_symbol_1_1_ssbo {
   vec4 tint_symbol;
@@ -309,7 +310,6 @@ TEST_F(GlslWriterTest, AccessStorageVectorF16) {
 precision highp float;
 precision highp int;
 
-
 layout(binding = 0, std430)
 buffer tint_symbol_1_1_ssbo {
   f16vec4 tint_symbol;
@@ -342,7 +342,6 @@ TEST_F(GlslWriterTest, AccessStorageMatrix) {
     EXPECT_EQ(output_.glsl, GlslHeader() + R"(precision highp float;
 precision highp int;
 
-
 layout(binding = 0, std430)
 buffer tint_symbol_1_1_ssbo {
   mat4 tint_symbol;
@@ -370,7 +369,6 @@ TEST_F(GlslWriterTest, AccessStorageArray) {
     ASSERT_TRUE(Generate()) << err_ << output_.glsl;
     EXPECT_EQ(output_.glsl, GlslHeader() + R"(precision highp float;
 precision highp int;
-
 
 layout(binding = 0, std430)
 buffer tint_symbol_1_1_ssbo {
@@ -401,14 +399,14 @@ TEST_F(GlslWriterTest, AccessStorageStruct) {
     });
 
     ASSERT_TRUE(Generate()) << err_ << output_.glsl;
-    EXPECT_EQ(output_.glsl, GlslHeader() + R"(
+    EXPECT_EQ(output_.glsl, GlslHeader() + R"(precision highp float;
+precision highp int;
+
+
 struct SB {
   int a;
   float b;
 };
-precision highp float;
-precision highp int;
-
 
 layout(binding = 0, std430)
 buffer tint_symbol_1_1_ssbo {
@@ -451,7 +449,10 @@ TEST_F(GlslWriterTest, AccessStorageNested) {
     });
 
     ASSERT_TRUE(Generate()) << err_ << output_.glsl;
-    EXPECT_EQ(output_.glsl, GlslHeader() + R"(
+    EXPECT_EQ(output_.glsl, GlslHeader() + R"(precision highp float;
+precision highp int;
+
+
 struct Inner {
   mat3 s;
   vec3 t[5];
@@ -466,9 +467,6 @@ struct SB {
   int a;
   Outer b;
 };
-precision highp float;
-precision highp int;
-
 
 layout(binding = 0, std430)
 buffer tint_symbol_1_1_ssbo {
@@ -498,7 +496,6 @@ TEST_F(GlslWriterTest, AccessStorageStoreVector) {
     ASSERT_TRUE(Generate()) << err_ << output_.glsl;
     EXPECT_EQ(output_.glsl, GlslHeader() + R"(precision highp float;
 precision highp int;
-
 
 layout(binding = 0, std430)
 buffer tint_symbol_1_1_ssbo {
@@ -540,7 +537,6 @@ TEST_F(GlslWriterTest, AccessDirectVariable) {
     ASSERT_TRUE(Generate()) << err_ << output_.glsl;
     EXPECT_EQ(output_.glsl, GlslHeader() + R"(precision highp float;
 precision highp int;
-
 
 layout(binding = 0, std430)
 buffer tint_symbol_1_1_ssbo {
@@ -587,7 +583,10 @@ TEST_F(GlslWriterTest, AccessChainFromUnnamedAccessChain) {
     });
 
     ASSERT_TRUE(Generate()) << err_ << output_.glsl;
-    EXPECT_EQ(output_.glsl, GlslHeader() + R"(
+    EXPECT_EQ(output_.glsl, GlslHeader() + R"(precision highp float;
+precision highp int;
+
+
 struct Inner {
   float c;
   uint d;
@@ -597,9 +596,6 @@ struct SB {
   int a;
   Inner b;
 };
-precision highp float;
-precision highp int;
-
 
 layout(binding = 0, std430)
 buffer tint_symbol_1_1_ssbo {
@@ -746,7 +742,10 @@ TEST_F(GlslWriterTest, AccessUniformChainFromUnnamedAccessChain) {
     });
 
     ASSERT_TRUE(Generate()) << err_ << output_.glsl;
-    EXPECT_EQ(output_.glsl, GlslHeader() + R"(
+    EXPECT_EQ(output_.glsl, GlslHeader() + R"(precision highp float;
+precision highp int;
+
+
 struct Inner {
   float c;
   uint d;
@@ -756,9 +755,6 @@ struct SB {
   int a;
   Inner b;
 };
-precision highp float;
-precision highp int;
-
 
 layout(binding = 0, std140)
 uniform tint_symbol_1_1_ubo {
@@ -818,7 +814,6 @@ TEST_F(GlslWriterTest, AccessUniformScalar) {
     EXPECT_EQ(output_.glsl, GlslHeader() + R"(precision highp float;
 precision highp int;
 
-
 layout(binding = 0, std140)
 uniform tint_symbol_1_1_ubo {
   float tint_symbol;
@@ -844,7 +839,6 @@ TEST_F(GlslWriterTest, AccessUniformScalarF16) {
     EXPECT_EQ(output_.glsl, GlslHeader() + R"(#extension GL_AMD_gpu_shader_half_float: require
 precision highp float;
 precision highp int;
-
 
 layout(binding = 0, std140)
 uniform tint_symbol_1_1_ubo {
@@ -874,7 +868,6 @@ TEST_F(GlslWriterTest, AccessUniformVector) {
     ASSERT_TRUE(Generate()) << err_ << output_.glsl;
     EXPECT_EQ(output_.glsl, GlslHeader() + R"(precision highp float;
 precision highp int;
-
 
 layout(binding = 0, std140)
 uniform tint_symbol_1_1_ubo {
@@ -911,7 +904,6 @@ TEST_F(GlslWriterTest, AccessUniformVectorF16) {
 precision highp float;
 precision highp int;
 
-
 layout(binding = 0, std140)
 uniform tint_symbol_1_1_ubo {
   f16vec4 tint_symbol;
@@ -945,7 +937,6 @@ TEST_F(GlslWriterTest, AccessUniformMatrix) {
     EXPECT_EQ(output_.glsl, GlslHeader() + R"(precision highp float;
 precision highp int;
 
-
 layout(binding = 0, std140)
 uniform tint_symbol_1_1_ubo {
   mat4 tint_symbol;
@@ -975,7 +966,6 @@ TEST_F(GlslWriterTest, AccessUniformMatrix2x3) {
     ASSERT_TRUE(Generate()) << err_ << output_.glsl;
     EXPECT_EQ(output_.glsl, GlslHeader() + R"(precision highp float;
 precision highp int;
-
 
 layout(binding = 0, std140)
 uniform tint_symbol_1_std140_1_ubo {
@@ -1008,7 +998,6 @@ TEST_F(GlslWriterTest, AccessUniformMat2x3F16) {
 precision highp float;
 precision highp int;
 
-
 layout(binding = 0, std140)
 uniform tint_symbol_1_std140_1_ubo {
   f16vec3 tint_symbol_col0;
@@ -1039,7 +1028,6 @@ TEST_F(GlslWriterTest, AccessUniformMatrix3x2) {
     ASSERT_TRUE(Generate()) << err_ << output_.glsl;
     EXPECT_EQ(output_.glsl, GlslHeader() + R"(precision highp float;
 precision highp int;
-
 
 layout(binding = 0, std140)
 uniform tint_symbol_1_std140_1_ubo {
@@ -1073,7 +1061,6 @@ TEST_F(GlslWriterTest, AccessUniformMatrix2x2) {
     EXPECT_EQ(output_.glsl, GlslHeader() + R"(precision highp float;
 precision highp int;
 
-
 layout(binding = 0, std140)
 uniform tint_symbol_1_std140_1_ubo {
   vec2 tint_symbol_col0;
@@ -1106,7 +1093,6 @@ TEST_F(GlslWriterTest, AccessUniformMatrix2x2F16) {
 precision highp float;
 precision highp int;
 
-
 layout(binding = 0, std140)
 uniform tint_symbol_1_std140_1_ubo {
   f16vec2 tint_symbol_col0;
@@ -1136,7 +1122,6 @@ TEST_F(GlslWriterTest, AccessUniformArray) {
     EXPECT_EQ(output_.glsl, GlslHeader() + R"(precision highp float;
 precision highp int;
 
-
 layout(binding = 0, std140)
 uniform tint_symbol_1_1_ubo {
   vec3 tint_symbol[5];
@@ -1165,7 +1150,6 @@ TEST_F(GlslWriterTest, AccessUniformArrayF16) {
 precision highp float;
 precision highp int;
 
-
 layout(binding = 0, std140)
 uniform tint_symbol_1_1_ubo {
   f16vec3 tint_symbol[5];
@@ -1192,7 +1176,6 @@ TEST_F(GlslWriterTest, AccessUniformArrayWhichCanHaveSizesOtherThenFive) {
     ASSERT_TRUE(Generate()) << err_ << output_.glsl;
     EXPECT_EQ(output_.glsl, GlslHeader() + R"(precision highp float;
 precision highp int;
-
 
 layout(binding = 0, std140)
 uniform tint_symbol_1_1_ubo {
@@ -1223,14 +1206,14 @@ TEST_F(GlslWriterTest, AccessUniformStruct) {
     });
 
     ASSERT_TRUE(Generate()) << err_ << output_.glsl;
-    EXPECT_EQ(output_.glsl, GlslHeader() + R"(
+    EXPECT_EQ(output_.glsl, GlslHeader() + R"(precision highp float;
+precision highp int;
+
+
 struct SB {
   int a;
   float b;
 };
-precision highp float;
-precision highp int;
-
 
 layout(binding = 0, std140)
 uniform tint_symbol_1_1_ubo {
@@ -1262,14 +1245,14 @@ TEST_F(GlslWriterTest, AccessUniformStructF16) {
 
     ASSERT_TRUE(Generate()) << err_ << output_.glsl;
     EXPECT_EQ(output_.glsl, GlslHeader() + R"(#extension GL_AMD_gpu_shader_half_float: require
+precision highp float;
+precision highp int;
+
 
 struct SB {
   int a;
   float16_t b;
 };
-precision highp float;
-precision highp int;
-
 
 layout(binding = 0, std140)
 uniform tint_symbol_1_1_ubo {
@@ -1312,7 +1295,10 @@ TEST_F(GlslWriterTest, AccessUniformStructNested) {
     });
 
     ASSERT_TRUE(Generate()) << err_ << output_.glsl;
-    EXPECT_EQ(output_.glsl, GlslHeader() + R"(
+    EXPECT_EQ(output_.glsl, GlslHeader() + R"(precision highp float;
+precision highp int;
+
+
 struct Inner_std140 {
   vec3 s_col0;
   vec3 s_col1;
@@ -1344,9 +1330,6 @@ struct SB {
   int a;
   Outer b;
 };
-precision highp float;
-precision highp int;
-
 
 layout(binding = 0, std140)
 uniform tint_symbol_1_std140_1_ubo {
@@ -1383,7 +1366,6 @@ TEST_F(GlslWriterTest, AccessStoreScalar) {
     EXPECT_EQ(output_.glsl, GlslHeader() + R"(precision highp float;
 precision highp int;
 
-
 layout(binding = 0, std430)
 buffer tint_symbol_1_1_ssbo {
   float tint_symbol;
@@ -1410,7 +1392,6 @@ TEST_F(GlslWriterTest, AccessStoreScalarF16) {
 precision highp float;
 precision highp int;
 
-
 layout(binding = 0, std430)
 buffer tint_symbol_1_1_ssbo {
   float16_t tint_symbol;
@@ -1436,7 +1417,6 @@ TEST_F(GlslWriterTest, AccessStoreVectorElement) {
     ASSERT_TRUE(Generate()) << err_ << output_.glsl;
     EXPECT_EQ(output_.glsl, GlslHeader() + R"(precision highp float;
 precision highp int;
-
 
 layout(binding = 0, std430)
 buffer tint_symbol_1_1_ssbo {
@@ -1465,7 +1445,6 @@ TEST_F(GlslWriterTest, AccessStoreVectorElementF16) {
 precision highp float;
 precision highp int;
 
-
 layout(binding = 0, std430)
 buffer tint_symbol_1_1_ssbo {
   f16vec3 tint_symbol;
@@ -1491,7 +1470,6 @@ TEST_F(GlslWriterTest, AccessStoreVector) {
     ASSERT_TRUE(Generate()) << err_ << output_.glsl;
     EXPECT_EQ(output_.glsl, GlslHeader() + R"(precision highp float;
 precision highp int;
-
 
 layout(binding = 0, std430)
 buffer tint_symbol_1_1_ssbo {
@@ -1520,7 +1498,6 @@ TEST_F(GlslWriterTest, AccessStoreVectorF16) {
 precision highp float;
 precision highp int;
 
-
 layout(binding = 0, std430)
 buffer tint_symbol_1_1_ssbo {
   f16vec3 tint_symbol;
@@ -1546,7 +1523,6 @@ TEST_F(GlslWriterTest, AccessStoreMatrixElement) {
     ASSERT_TRUE(Generate()) << err_ << output_.glsl;
     EXPECT_EQ(output_.glsl, GlslHeader() + R"(precision highp float;
 precision highp int;
-
 
 layout(binding = 0, std430)
 buffer tint_symbol_1_1_ssbo {
@@ -1575,7 +1551,6 @@ TEST_F(GlslWriterTest, AccessStoreMatrixElementF16) {
 precision highp float;
 precision highp int;
 
-
 layout(binding = 0, std430)
 buffer tint_symbol_1_1_ssbo {
   f16mat3x2 tint_symbol;
@@ -1601,7 +1576,6 @@ TEST_F(GlslWriterTest, AccessStoreMatrixColumn) {
     ASSERT_TRUE(Generate()) << err_ << output_.glsl;
     EXPECT_EQ(output_.glsl, GlslHeader() + R"(precision highp float;
 precision highp int;
-
 
 layout(binding = 0, std430)
 buffer tint_symbol_1_1_ssbo {
@@ -1630,7 +1604,6 @@ TEST_F(GlslWriterTest, AccessStoreMatrixColumnF16) {
 precision highp float;
 precision highp int;
 
-
 layout(binding = 0, std430)
 buffer tint_symbol_1_1_ssbo {
   f16mat2x3 tint_symbol;
@@ -1655,7 +1628,6 @@ TEST_F(GlslWriterTest, AccessStoreMatrix) {
     ASSERT_TRUE(Generate()) << err_ << output_.glsl;
     EXPECT_EQ(output_.glsl, GlslHeader() + R"(precision highp float;
 precision highp int;
-
 
 layout(binding = 0, std430)
 buffer tint_symbol_1_1_ssbo {
@@ -1683,7 +1655,6 @@ TEST_F(GlslWriterTest, AccessStoreMatrixF16) {
 precision highp float;
 precision highp int;
 
-
 layout(binding = 0, std430)
 buffer tint_symbol_1_1_ssbo {
   f16mat4 tint_symbol;
@@ -1708,7 +1679,6 @@ TEST_F(GlslWriterTest, AccessStoreArrayElement) {
     ASSERT_TRUE(Generate()) << err_ << output_.glsl;
     EXPECT_EQ(output_.glsl, GlslHeader() + R"(precision highp float;
 precision highp int;
-
 
 layout(binding = 0, std430)
 buffer tint_symbol_1_1_ssbo {
@@ -1736,7 +1706,6 @@ TEST_F(GlslWriterTest, AccessStoreArrayElementF16) {
 precision highp float;
 precision highp int;
 
-
 layout(binding = 0, std430)
 buffer tint_symbol_1_1_ssbo {
   float16_t tint_symbol[5];
@@ -1762,7 +1731,6 @@ TEST_F(GlslWriterTest, AccessStoreArray) {
     ASSERT_TRUE(Generate()) << err_ << output_.glsl;
     EXPECT_EQ(output_.glsl, GlslHeader() + R"(precision highp float;
 precision highp int;
-
 
 layout(binding = 0, std430)
 buffer tint_symbol_1_1_ssbo {
@@ -1809,14 +1777,14 @@ TEST_F(GlslWriterTest, AccessStoreStructMember) {
     });
 
     ASSERT_TRUE(Generate()) << err_ << output_.glsl;
-    EXPECT_EQ(output_.glsl, GlslHeader() + R"(
+    EXPECT_EQ(output_.glsl, GlslHeader() + R"(precision highp float;
+precision highp int;
+
+
 struct SB {
   int a;
   float b;
 };
-precision highp float;
-precision highp int;
-
 
 layout(binding = 0, std430)
 buffer tint_symbol_1_1_ssbo {
@@ -1846,14 +1814,14 @@ TEST_F(GlslWriterTest, AccessStoreStructMemberF16) {
 
     ASSERT_TRUE(Generate()) << err_ << output_.glsl;
     EXPECT_EQ(output_.glsl, GlslHeader() + R"(#extension GL_AMD_gpu_shader_half_float: require
+precision highp float;
+precision highp int;
+
 
 struct SB {
   int a;
   float16_t b;
 };
-precision highp float;
-precision highp int;
-
 
 layout(binding = 0, std430)
 buffer tint_symbol_1_1_ssbo {
@@ -1892,7 +1860,10 @@ TEST_F(GlslWriterTest, AccessStoreStructNested) {
     });
 
     ASSERT_TRUE(Generate()) << err_ << output_.glsl;
-    EXPECT_EQ(output_.glsl, GlslHeader() + R"(
+    EXPECT_EQ(output_.glsl, GlslHeader() + R"(precision highp float;
+precision highp int;
+
+
 struct Inner {
   mat3 s;
   vec3 t[5];
@@ -1907,9 +1878,6 @@ struct SB {
   int a;
   Outer b;
 };
-precision highp float;
-precision highp int;
-
 
 layout(binding = 0, std430)
 buffer tint_symbol_1_1_ssbo {
@@ -1948,7 +1916,10 @@ TEST_F(GlslWriterTest, AccessStoreStruct) {
     });
 
     ASSERT_TRUE(Generate()) << err_ << output_.glsl;
-    EXPECT_EQ(output_.glsl, GlslHeader() + R"(
+    EXPECT_EQ(output_.glsl, GlslHeader() + R"(precision highp float;
+precision highp int;
+
+
 struct Inner {
   float s;
   vec3 t;
@@ -1963,9 +1934,6 @@ struct SB {
   int a;
   Outer b;
 };
-precision highp float;
-precision highp int;
-
 
 layout(binding = 0, std430)
 buffer tint_symbol_1_1_ssbo {
@@ -2018,7 +1986,10 @@ TEST_F(GlslWriterTest, AccessStoreStructComplex) {
     });
 
     ASSERT_TRUE(Generate()) << err_ << output_.glsl;
-    EXPECT_EQ(output_.glsl, GlslHeader() + R"(
+    EXPECT_EQ(output_.glsl, GlslHeader() + R"(precision highp float;
+precision highp int;
+
+
 struct Inner {
   mat3 s;
   vec3 t[5];
@@ -2033,9 +2004,6 @@ struct SB {
   int a;
   Outer b;
 };
-precision highp float;
-precision highp int;
-
 
 layout(binding = 0, std430)
 buffer tint_symbol_1_1_ssbo {
@@ -2101,14 +2069,14 @@ TEST_F(GlslWriterTest, AccessChainReused) {
     });
 
     ASSERT_TRUE(Generate()) << err_ << output_.glsl;
-    EXPECT_EQ(output_.glsl, GlslHeader() + R"(
+    EXPECT_EQ(output_.glsl, GlslHeader() + R"(precision highp float;
+precision highp int;
+
+
 struct SB {
   int a;
   vec3 b;
 };
-precision highp float;
-precision highp int;
-
 
 layout(binding = 0, std430)
 buffer tint_symbol_1_1_ssbo {
@@ -2140,14 +2108,14 @@ TEST_F(GlslWriterTest, AccessUniformChainReused) {
     });
 
     ASSERT_TRUE(Generate()) << err_ << output_.glsl;
-    EXPECT_EQ(output_.glsl, GlslHeader() + R"(
+    EXPECT_EQ(output_.glsl, GlslHeader() + R"(precision highp float;
+precision highp int;
+
+
 struct SB {
   float c;
   vec3 d;
 };
-precision highp float;
-precision highp int;
-
 
 layout(binding = 0, std140)
 uniform tint_symbol_1_1_ubo {

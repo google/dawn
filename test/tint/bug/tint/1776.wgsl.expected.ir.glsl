@@ -1,5 +1,6 @@
 #version 310 es
 
+
 struct S {
   vec4 a;
   int b;

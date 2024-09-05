@@ -2,7 +2,6 @@
 precision highp float;
 precision highp int;
 
-
 void select_17441a() {
   vec4 res = vec4(1.0f);
 }
@@ -19,6 +18,7 @@ void main() {
   select_17441a();
 }
 #version 310 es
+
 
 struct VertexOutput {
   vec4 pos;

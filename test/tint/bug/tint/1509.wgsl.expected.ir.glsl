@@ -2,7 +2,6 @@
 precision highp float;
 precision highp int;
 
-
 uint v0 = 0u;
 uint v1 = 0u;
 uint v2 = 0u;

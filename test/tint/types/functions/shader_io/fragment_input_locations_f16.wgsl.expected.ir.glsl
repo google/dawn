@@ -3,7 +3,6 @@
 precision highp float;
 precision highp int;
 
-
 layout(location = 0) flat in int tint_symbol_loc0_Input;
 layout(location = 1) flat in uint tint_symbol_loc1_Input;
 layout(location = 2) in float tint_symbol_loc2_Input;

@@ -1,5 +1,6 @@
 #version 310 es
 
+
 struct S {
   int before;
   mat2x4 m;

@@ -1,5 +1,6 @@
 #version 310 es
 
+
 struct tint_GammaTransferParams {
   float G;
   float A;

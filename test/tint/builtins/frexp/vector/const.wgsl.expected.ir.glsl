@@ -1,5 +1,6 @@
 #version 310 es
 
+
 struct frexp_result_vec2_f32 {
   vec2 fract;
   ivec2 exp;

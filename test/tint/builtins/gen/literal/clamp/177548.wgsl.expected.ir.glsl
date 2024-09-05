@@ -2,7 +2,6 @@
 precision highp float;
 precision highp int;
 
-
 void clamp_177548() {
   ivec2 res = ivec2(1);
 }
@@ -19,6 +18,7 @@ void main() {
   clamp_177548();
 }
 #version 310 es
+
 
 struct VertexOutput {
   vec4 pos;

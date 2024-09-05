@@ -1,6 +1,7 @@
 #version 310 es
 #extension GL_AMD_gpu_shader_half_float: require
 
+
 struct Inner_std140 {
   f16vec4 m_col0;
   f16vec4 m_col1;

@@ -1,5 +1,6 @@
 #version 310 es
 
+
 struct modf_result_vec2_f32 {
   vec2 fract;
   vec2 whole;

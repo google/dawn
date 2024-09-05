@@ -1,6 +1,7 @@
-SKIP: FAILED
-
 #version 310 es
+precision highp float;
+precision highp int;
+
 
 struct sspp962805860buildInformationS {
   vec4 footprint;
@@ -12,14 +13,14 @@ struct sspp962805860buildInformationS {
 struct x_B4_BuildInformation {
   sspp962805860buildInformationS passthru;
 };
-precision highp float;
-precision highp int;
 
-
-x_B4_BuildInformation sspp962805860buildInformation;
+layout(binding = 2, std430)
+buffer tint_symbol_2_1_ssbo {
+  x_B4_BuildInformation tint_symbol_1;
+} v;
 void main_1() {
   int orientation[6] = int[6](0, 0, 0, 0, 0, 0);
-  int x_23[6] = sspp962805860buildInformation.passthru.orientation;
+  int x_23[6] = v.tint_symbol_1.passthru.orientation;
   orientation[0] = x_23[0u];
   orientation[1] = x_23[1u];
   orientation[2] = x_23[2u];
@@ -30,12 +31,3 @@ void main_1() {
 void main() {
   main_1();
 }
-error: Error parsing GLSL shader:
-ERROR: 0:4: 'float' : type requires declaration of default precision qualifier 
-ERROR: 0:4: '' : compilation terminated 
-ERROR: 2 compilation errors.  No code generated.
-
-
-
-
-tint executable returned error: exit status 1

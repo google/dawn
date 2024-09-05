@@ -2,7 +2,6 @@
 precision highp float;
 precision highp int;
 
-
 void sinh_c4df74() {
   float res = 1.17520117759704589844f;
 }
@@ -19,6 +18,7 @@ void main() {
   sinh_c4df74();
 }
 #version 310 es
+
 
 struct VertexOutput {
   vec4 pos;

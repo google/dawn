@@ -2,7 +2,6 @@
 precision highp float;
 precision highp int;
 
-
 void atanh_c5dc32() {
   float res = 0.54930615425109863281f;
 }
@@ -19,6 +18,7 @@ void main() {
   atanh_c5dc32();
 }
 #version 310 es
+
 
 struct VertexOutput {
   vec4 pos;

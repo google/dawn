@@ -2,7 +2,6 @@
 precision highp float;
 precision highp int;
 
-
 void asinh_cf8603() {
   vec4 res = vec4(0.88137358427047729492f);
 }
@@ -19,6 +18,7 @@ void main() {
   asinh_cf8603();
 }
 #version 310 es
+
 
 struct VertexOutput {
   vec4 pos;

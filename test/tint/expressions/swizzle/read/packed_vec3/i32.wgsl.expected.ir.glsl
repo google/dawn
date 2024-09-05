@@ -1,5 +1,6 @@
 #version 310 es
 
+
 struct S {
   ivec3 v;
 };

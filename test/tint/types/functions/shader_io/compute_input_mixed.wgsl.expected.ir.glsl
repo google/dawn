@@ -1,5 +1,6 @@
 #version 310 es
 
+
 struct ComputeInputs0 {
   uvec3 local_invocation_id;
 };

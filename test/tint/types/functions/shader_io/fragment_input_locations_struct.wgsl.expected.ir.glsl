@@ -1,5 +1,3 @@
-SKIP: FAILED
-
 #version 310 es
 precision highp float;
 precision highp int;
@@ -12,18 +10,16 @@ struct FragmentInputs {
   vec4 loc3;
 };
 
-void main(FragmentInputs inputs) {
+layout(location = 0) flat in int tint_symbol_loc0_Input;
+layout(location = 1) flat in uint tint_symbol_loc1_Input;
+layout(location = 2) in float tint_symbol_loc2_Input;
+layout(location = 3) in vec4 tint_symbol_loc3_Input;
+void tint_symbol_inner(FragmentInputs inputs) {
   int i = inputs.loc0;
   uint u = inputs.loc1;
   float f = inputs.loc2;
   vec4 v = inputs.loc3;
 }
-error: Error parsing GLSL shader:
-ERROR: 0:13: 'main' : function cannot take any parameter(s) 
-ERROR: 0:13: '' : compilation terminated 
-ERROR: 2 compilation errors.  No code generated.
-
-
-
-
-tint executable returned error: exit status 1
+void main() {
+  tint_symbol_inner(FragmentInputs(tint_symbol_loc0_Input, tint_symbol_loc1_Input, tint_symbol_loc2_Input, tint_symbol_loc3_Input));
+}

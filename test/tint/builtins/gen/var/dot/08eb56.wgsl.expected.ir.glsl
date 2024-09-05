@@ -2,7 +2,6 @@
 precision highp float;
 precision highp int;
 
-
 void dot_08eb56() {
   float res = 4.0f;
 }
@@ -19,6 +18,7 @@ void main() {
   dot_08eb56();
 }
 #version 310 es
+
 
 struct VertexOutput {
   vec4 pos;

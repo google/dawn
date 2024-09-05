@@ -1,5 +1,6 @@
 #version 310 es
 
+
 struct A {
   float a[1000000];
 };

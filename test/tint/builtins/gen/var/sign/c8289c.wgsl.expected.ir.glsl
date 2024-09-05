@@ -2,7 +2,6 @@
 precision highp float;
 precision highp int;
 
-
 void sign_c8289c() {
   float res = 1.0f;
 }
@@ -19,6 +18,7 @@ void main() {
   sign_c8289c();
 }
 #version 310 es
+
 
 struct VertexOutput {
   vec4 pos;

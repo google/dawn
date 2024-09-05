@@ -2,7 +2,6 @@
 precision highp float;
 precision highp int;
 
-
 layout(location = 0) out vec4 frag_main_loc0_Output;
 vec4 frag_main_inner() {
   float b = 0.0f;

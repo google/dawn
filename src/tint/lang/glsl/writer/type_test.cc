@@ -110,6 +110,7 @@ TEST_F(GlslWriterTest, EmitType_StructArrayVec) {
 
     ASSERT_TRUE(Generate()) << err_ << output_.glsl;
     EXPECT_EQ(output_.glsl, GlslHeader() + R"(
+
 struct Inner {
   vec3 t[5];
 };
@@ -399,6 +400,7 @@ TEST_F(GlslWriterTest, EmitType_Struct) {
 
     ASSERT_TRUE(Generate()) << err_ << output_.glsl;
     EXPECT_EQ(output_.glsl, GlslHeader() + R"(
+
 struct S {
   int a;
   float b;
@@ -426,6 +428,7 @@ TEST_F(GlslWriterTest, EmitType_Struct_Dedup) {
 
     ASSERT_TRUE(Generate()) << err_ << output_.glsl;
     EXPECT_EQ(output_.glsl, GlslHeader() + R"(
+
 struct S {
   int a;
   float b;
@@ -459,6 +462,7 @@ TEST_F(GlslWriterTest, EmitType_Struct_Nested) {
 
     ASSERT_TRUE(Generate()) << err_ << output_.glsl;
     EXPECT_EQ(output_.glsl, GlslHeader() + R"(
+
 struct Inner {
   uint x;
   vec4 y;

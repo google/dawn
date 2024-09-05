@@ -2,7 +2,6 @@
 precision highp float;
 precision highp int;
 
-
 void asinh_51079e() {
   vec3 res = vec3(0.88137358427047729492f);
 }
@@ -19,6 +18,7 @@ void main() {
   asinh_51079e();
 }
 #version 310 es
+
 
 struct VertexOutput {
   vec4 pos;

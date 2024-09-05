@@ -2,7 +2,6 @@
 precision highp float;
 precision highp int;
 
-
 bool continue_execution = true;
 layout(location = 1) flat in ivec3 tint_symbol_loc1_Input;
 layout(location = 2) out int tint_symbol_loc2_Output;

@@ -1,5 +1,6 @@
 #version 310 es
 
+
 struct VertexOutputs {
   vec4 position;
 };

@@ -2,7 +2,6 @@
 precision highp float;
 precision highp int;
 
-
 void max_de6b87() {
   vec2 res = vec2(1.0f);
 }
@@ -19,6 +18,7 @@ void main() {
   max_de6b87();
 }
 #version 310 es
+
 
 struct VertexOutput {
   vec4 pos;

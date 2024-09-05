@@ -2,7 +2,6 @@
 precision highp float;
 precision highp int;
 
-
 void refract_cf1629() {
   vec2 res = vec2(-3.0f);
 }
@@ -19,6 +18,7 @@ void main() {
   refract_cf1629();
 }
 #version 310 es
+
 
 struct VertexOutput {
   vec4 pos;

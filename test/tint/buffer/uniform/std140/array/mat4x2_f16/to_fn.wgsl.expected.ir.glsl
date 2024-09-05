@@ -1,6 +1,7 @@
 #version 310 es
 #extension GL_AMD_gpu_shader_half_float: require
 
+
 struct mat4x2_f16_std140 {
   f16vec2 col0;
   f16vec2 col1;

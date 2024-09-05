@@ -2,7 +2,6 @@
 precision highp float;
 precision highp int;
 
-
 void acos_4dac75() {
   vec4 res = vec4(0.25f);
 }
@@ -19,6 +18,7 @@ void main() {
   acos_4dac75();
 }
 #version 310 es
+
 
 struct VertexOutput {
   vec4 pos;

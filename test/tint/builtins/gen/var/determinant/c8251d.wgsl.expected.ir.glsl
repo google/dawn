@@ -2,7 +2,6 @@
 precision highp float;
 precision highp int;
 
-
 void determinant_c8251d() {
   float res = 0.0f;
 }
@@ -19,6 +18,7 @@ void main() {
   determinant_c8251d();
 }
 #version 310 es
+
 
 struct VertexOutput {
   vec4 pos;

@@ -2,7 +2,6 @@
 precision highp float;
 precision highp int;
 
-
 void saturate_78b37c() {
   float res = 1.0f;
 }
@@ -19,6 +18,7 @@ void main() {
   saturate_78b37c();
 }
 #version 310 es
+
 
 struct VertexOutput {
   vec4 pos;

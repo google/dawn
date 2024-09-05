@@ -2,7 +2,6 @@
 precision highp float;
 precision highp int;
 
-
 void faceForward_fe522b() {
   vec3 res = vec3(-1.0f);
 }
@@ -19,6 +18,7 @@ void main() {
   faceForward_fe522b();
 }
 #version 310 es
+
 
 struct VertexOutput {
   vec4 pos;

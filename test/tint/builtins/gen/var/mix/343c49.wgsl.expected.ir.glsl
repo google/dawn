@@ -2,7 +2,6 @@
 precision highp float;
 precision highp int;
 
-
 void mix_343c49() {
   vec3 res = vec3(1.0f);
 }
@@ -19,6 +18,7 @@ void main() {
   mix_343c49();
 }
 #version 310 es
+
 
 struct VertexOutput {
   vec4 pos;

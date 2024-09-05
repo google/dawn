@@ -2,7 +2,6 @@
 precision highp float;
 precision highp int;
 
-
 void asin_0bac07() {
   vec3 res = vec3(0.5f);
 }
@@ -19,6 +18,7 @@ void main() {
   asin_0bac07();
 }
 #version 310 es
+
 
 struct VertexOutput {
   vec4 pos;

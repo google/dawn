@@ -1,25 +1,20 @@
-SKIP: FAILED
-
 #version 310 es
-
-struct S {
-  mat3x2 matrix;
-  vec3 vector;
-};
 precision highp float;
 precision highp int;
 
 
-uniform S data;
+struct S_std140 {
+  vec2 matrix_col0;
+  vec2 matrix_col1;
+  vec2 matrix_col2;
+  vec3 vector;
+};
+
+layout(binding = 0, std140)
+uniform tint_symbol_2_std140_1_ubo {
+  S_std140 tint_symbol_1;
+} v;
 void main() {
-  vec2 x = (data.matrix * data.vector);
+  mat3x2 v_1 = mat3x2(v.tint_symbol_1.matrix_col0, v.tint_symbol_1.matrix_col1, v.tint_symbol_1.matrix_col2);
+  vec2 x = (v_1 * v.tint_symbol_1.vector);
 }
-error: Error parsing GLSL shader:
-ERROR: 0:4: 'float' : type requires declaration of default precision qualifier 
-ERROR: 0:4: '' : compilation terminated 
-ERROR: 2 compilation errors.  No code generated.
-
-
-
-
-tint executable returned error: exit status 1

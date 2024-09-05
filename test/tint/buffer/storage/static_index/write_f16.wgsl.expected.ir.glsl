@@ -1,6 +1,7 @@
 #version 310 es
 #extension GL_AMD_gpu_shader_half_float: require
 
+
 struct Inner {
   int scalar_i32;
   float scalar_f32;

@@ -2,7 +2,6 @@
 precision highp float;
 precision highp int;
 
-
 void min_794711() {
   float res = 1.0f;
 }
@@ -19,6 +18,7 @@ void main() {
   min_794711();
 }
 #version 310 es
+
 
 struct VertexOutput {
   vec4 pos;

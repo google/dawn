@@ -2,7 +2,6 @@
 precision highp float;
 precision highp int;
 
-
 void sign_ab6301() {
   vec3 res = vec3(1.0f);
 }
@@ -19,6 +18,7 @@ void main() {
   sign_ab6301();
 }
 #version 310 es
+
 
 struct VertexOutput {
   vec4 pos;

@@ -2,7 +2,6 @@
 precision highp float;
 precision highp int;
 
-
 layout(location = 0) out int main0_loc0_Output;
 int main0_inner() {
   return 1;
@@ -13,7 +12,6 @@ void main() {
 #version 310 es
 precision highp float;
 precision highp int;
-
 
 layout(location = 1) out uint main1_loc1_Output;
 uint main1_inner() {
@@ -26,7 +24,6 @@ void main() {
 precision highp float;
 precision highp int;
 
-
 layout(location = 2) out float main2_loc2_Output;
 float main2_inner() {
   return 1.0f;
@@ -37,7 +34,6 @@ void main() {
 #version 310 es
 precision highp float;
 precision highp int;
-
 
 layout(location = 3) out vec4 main3_loc3_Output;
 vec4 main3_inner() {

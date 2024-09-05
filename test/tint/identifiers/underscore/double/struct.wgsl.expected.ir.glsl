@@ -1,5 +1,6 @@
 #version 310 es
 
+
 struct tint_symbol {
   int tint_symbol_1;
 };

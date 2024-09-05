@@ -2,7 +2,6 @@
 precision highp float;
 precision highp int;
 
-
 void sign_f5da6a() {
   vec4 res = vec4(1.0f);
 }
@@ -19,6 +18,7 @@ void main() {
   sign_f5da6a();
 }
 #version 310 es
+
 
 struct VertexOutput {
   vec4 pos;

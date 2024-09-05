@@ -2,7 +2,6 @@
 precision highp float;
 precision highp int;
 
-
 void reflect_a8baf2() {
   vec3 res = vec3(-5.0f);
 }
@@ -19,6 +18,7 @@ void main() {
   reflect_a8baf2();
 }
 #version 310 es
+
 
 struct VertexOutput {
   vec4 pos;

@@ -1,6 +1,7 @@
-SKIP: FAILED
-
 #version 310 es
+precision highp float;
+precision highp int;
+
 
 struct FragmentOutputs {
   int loc0;
@@ -8,19 +9,18 @@ struct FragmentOutputs {
   float loc2;
   vec4 loc3;
 };
-precision highp float;
-precision highp int;
 
-
-FragmentOutputs main() {
+layout(location = 0) out int tint_symbol_loc0_Output;
+layout(location = 1) out uint tint_symbol_loc1_Output;
+layout(location = 2) out float tint_symbol_loc2_Output;
+layout(location = 3) out vec4 tint_symbol_loc3_Output;
+FragmentOutputs tint_symbol_inner() {
   return FragmentOutputs(1, 1u, 1.0f, vec4(1.0f, 2.0f, 3.0f, 4.0f));
 }
-error: Error parsing GLSL shader:
-ERROR: 0:6: 'float' : type requires declaration of default precision qualifier 
-ERROR: 0:6: '' : compilation terminated 
-ERROR: 2 compilation errors.  No code generated.
-
-
-
-
-tint executable returned error: exit status 1
+void main() {
+  FragmentOutputs v = tint_symbol_inner();
+  tint_symbol_loc0_Output = v.loc0;
+  tint_symbol_loc1_Output = v.loc1;
+  tint_symbol_loc2_Output = v.loc2;
+  tint_symbol_loc3_Output = v.loc3;
+}

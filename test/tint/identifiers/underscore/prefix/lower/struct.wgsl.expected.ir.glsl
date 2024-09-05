@@ -1,5 +1,6 @@
 #version 310 es
 
+
 struct _a {
   int _b;
 };

@@ -1,5 +1,6 @@
 #version 310 es
 
+
 struct S {
   vec3 v;
   uint i;

@@ -14,7 +14,6 @@
 precision highp float;
 precision highp int;
 
-
 layout(location = 0) in float tint_symbol_loc0_Input;
 void tint_symbol_inner(float x) {
   vec4 v = vec4(0.0f);

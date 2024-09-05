@@ -2,7 +2,6 @@
 precision highp float;
 precision highp int;
 
-
 void distance_ac5535() {
   float res = 0.0f;
 }
@@ -19,6 +18,7 @@ void main() {
   distance_ac5535();
 }
 #version 310 es
+
 
 struct VertexOutput {
   vec4 pos;

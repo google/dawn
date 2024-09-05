@@ -1,5 +1,6 @@
 #version 310 es
 
+
 struct str {
   ivec4 arr[4];
 };

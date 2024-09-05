@@ -1,6 +1,7 @@
 #version 310 es
 #extension GL_AMD_gpu_shader_half_float: require
 
+
 struct VertexOutputs {
   int loc0;
   uint loc1;

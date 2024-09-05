@@ -2,7 +2,6 @@
 precision highp float;
 precision highp int;
 
-
 void ldexp_a6126e() {
   ivec3 arg_1 = ivec3(1);
   vec3 res = ldexp(vec3(1.0f), arg_1);
@@ -21,6 +20,7 @@ void main() {
   ldexp_a6126e();
 }
 #version 310 es
+
 
 struct VertexOutput {
   vec4 pos;

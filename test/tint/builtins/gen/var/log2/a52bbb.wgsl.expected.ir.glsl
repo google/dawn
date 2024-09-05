@@ -2,7 +2,6 @@
 precision highp float;
 precision highp int;
 
-
 void log2_a52bbb() {
   vec4 res = vec4(0.0f);
 }
@@ -19,6 +18,7 @@ void main() {
   log2_a52bbb();
 }
 #version 310 es
+
 
 struct VertexOutput {
   vec4 pos;

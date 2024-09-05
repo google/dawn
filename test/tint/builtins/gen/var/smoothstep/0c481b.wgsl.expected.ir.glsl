@@ -2,7 +2,6 @@
 precision highp float;
 precision highp int;
 
-
 void smoothstep_0c481b() {
   vec2 res = vec2(0.5f);
 }
@@ -19,6 +18,7 @@ void main() {
   smoothstep_0c481b();
 }
 #version 310 es
+
 
 struct VertexOutput {
   vec4 pos;

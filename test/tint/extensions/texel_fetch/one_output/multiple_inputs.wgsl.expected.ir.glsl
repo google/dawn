@@ -2,7 +2,6 @@
 precision highp float;
 precision highp int;
 
-
 in vec4 f_Input;
 in vec4 f_Input_1;
 layout(location = 0) out vec4 f_loc0_Output;

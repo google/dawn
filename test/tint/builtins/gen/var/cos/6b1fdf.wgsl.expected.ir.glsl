@@ -2,7 +2,6 @@
 precision highp float;
 precision highp int;
 
-
 void cos_6b1fdf() {
   vec3 res = vec3(1.0f);
 }
@@ -19,6 +18,7 @@ void main() {
   cos_6b1fdf();
 }
 #version 310 es
+
 
 struct VertexOutput {
   vec4 pos;

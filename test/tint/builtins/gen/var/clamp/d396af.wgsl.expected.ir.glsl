@@ -2,7 +2,6 @@
 precision highp float;
 precision highp int;
 
-
 void clamp_d396af() {
   ivec4 res = ivec4(1);
 }
@@ -19,6 +18,7 @@ void main() {
   clamp_d396af();
 }
 #version 310 es
+
 
 struct VertexOutput {
   vec4 pos;

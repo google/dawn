@@ -1,5 +1,6 @@
 #version 310 es
 
+
 struct UniformBuffer {
   ivec3 d;
 };

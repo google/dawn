@@ -2,7 +2,6 @@
 precision highp float;
 precision highp int;
 
-
 void trunc_c12555() {
   vec2 res = vec2(1.0f);
 }
@@ -19,6 +18,7 @@ void main() {
   trunc_c12555();
 }
 #version 310 es
+
 
 struct VertexOutput {
   vec4 pos;

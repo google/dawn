@@ -1,5 +1,6 @@
 #version 310 es
 
+
 struct S {
   mat2 m;
 };

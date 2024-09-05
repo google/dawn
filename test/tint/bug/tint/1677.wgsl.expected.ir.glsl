@@ -1,5 +1,6 @@
 #version 310 es
 
+
 struct Input {
   ivec3 position;
 };

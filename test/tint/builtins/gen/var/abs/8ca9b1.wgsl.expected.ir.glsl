@@ -2,7 +2,6 @@
 precision highp float;
 precision highp int;
 
-
 void abs_8ca9b1() {
   ivec4 res = ivec4(1);
 }
@@ -19,6 +18,7 @@ void main() {
   abs_8ca9b1();
 }
 #version 310 es
+
 
 struct VertexOutput {
   vec4 pos;

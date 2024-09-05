@@ -1,5 +1,6 @@
 #version 310 es
 
+
 struct strided_arr {
   vec2 el;
 };

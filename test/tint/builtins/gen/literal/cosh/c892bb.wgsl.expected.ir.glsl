@@ -2,7 +2,6 @@
 precision highp float;
 precision highp int;
 
-
 void cosh_c892bb() {
   float res = 1.0f;
 }
@@ -19,6 +18,7 @@ void main() {
   cosh_c892bb();
 }
 #version 310 es
+
 
 struct VertexOutput {
   vec4 pos;

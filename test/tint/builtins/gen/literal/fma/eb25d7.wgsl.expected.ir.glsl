@@ -2,7 +2,6 @@
 precision highp float;
 precision highp int;
 
-
 void fma_eb25d7() {
   vec3 res = vec3(2.0f);
 }
@@ -19,6 +18,7 @@ void main() {
   fma_eb25d7();
 }
 #version 310 es
+
 
 struct VertexOutput {
   vec4 pos;

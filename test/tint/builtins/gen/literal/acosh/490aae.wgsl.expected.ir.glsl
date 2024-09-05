@@ -2,7 +2,6 @@
 precision highp float;
 precision highp int;
 
-
 void acosh_490aae() {
   vec4 res = vec4(1.0f);
 }
@@ -19,6 +18,7 @@ void main() {
   acosh_490aae();
 }
 #version 310 es
+
 
 struct VertexOutput {
   vec4 pos;

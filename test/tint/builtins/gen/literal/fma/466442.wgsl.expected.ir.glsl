@@ -2,7 +2,6 @@
 precision highp float;
 precision highp int;
 
-
 void fma_466442() {
   float res = 2.0f;
 }
@@ -19,6 +18,7 @@ void main() {
   fma_466442();
 }
 #version 310 es
+
 
 struct VertexOutput {
   vec4 pos;

@@ -2,7 +2,6 @@
 precision highp float;
 precision highp int;
 
-
 void degrees_fafa7e() {
   float res = 57.295780181884765625f;
 }
@@ -19,6 +18,7 @@ void main() {
   degrees_fafa7e();
 }
 #version 310 es
+
 
 struct VertexOutput {
   vec4 pos;

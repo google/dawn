@@ -1,5 +1,6 @@
 #version 310 es
 
+
 struct Particle {
   vec3 position[8];
   float lifetime;

@@ -2,7 +2,6 @@
 precision highp float;
 precision highp int;
 
-
 in vec4 f_Input;
 in vec4 f_Input_1;
 void g(float a, float b) {

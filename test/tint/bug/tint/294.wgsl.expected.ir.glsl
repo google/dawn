@@ -1,5 +1,6 @@
 #version 310 es
 
+
 struct Light {
   vec3 position;
   vec3 colour;

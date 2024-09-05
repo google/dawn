@@ -2,7 +2,6 @@
 precision highp float;
 precision highp int;
 
-
 void log_b8088d() {
   vec3 res = vec3(0.0f);
 }
@@ -19,6 +18,7 @@ void main() {
   log_b8088d();
 }
 #version 310 es
+
 
 struct VertexOutput {
   vec4 pos;

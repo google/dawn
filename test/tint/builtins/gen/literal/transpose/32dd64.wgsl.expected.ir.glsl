@@ -2,7 +2,6 @@
 precision highp float;
 precision highp int;
 
-
 void transpose_32dd64() {
   mat4x3 res = mat4x3(vec3(1.0f), vec3(1.0f), vec3(1.0f), vec3(1.0f));
 }
@@ -19,6 +18,7 @@ void main() {
   transpose_32dd64();
 }
 #version 310 es
+
 
 struct VertexOutput {
   vec4 pos;

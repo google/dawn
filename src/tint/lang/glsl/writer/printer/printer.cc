@@ -118,7 +118,7 @@ class Printer : public tint::TextGenerator {
         }
 
         {
-            TINT_SCOPED_ASSIGNMENT(current_buffer_, &preamble_buffer_);
+            TINT_SCOPED_ASSIGNMENT(current_buffer_, &header_buffer_);
 
             auto out = Line();
             out << "#version " << version_.major_version << version_.minor_version << "0";
@@ -135,7 +135,17 @@ class Printer : public tint::TextGenerator {
         }
 
         StringStream ss;
-        ss << preamble_buffer_.String() << '\n' << main_buffer_.String();
+        auto header = header_buffer_.String();
+        if (!header.empty()) {
+            ss << header << "\n";
+        }
+
+        auto preamble = preamble_buffer_.String();
+        if (!preamble.empty()) {
+            ss << preamble << "\n";
+        }
+        ss << main_buffer_.String();
+
         return ss.str();
     }
 
@@ -143,6 +153,9 @@ class Printer : public tint::TextGenerator {
     core::ir::Module& ir_;
 
     const Version& version_;
+
+    /// The buffer holding header text
+    TextBuffer header_buffer_;
 
     /// The buffer holding preamble text
     TextBuffer preamble_buffer_;
@@ -231,9 +244,9 @@ class Printer : public tint::TextGenerator {
 
             // Fragment shaders need a precision statement
             if (func->Stage() == core::ir::Function::PipelineStage::kFragment) {
-                auto pre = Line(&preamble_buffer_);
+                auto pre = Line(&header_buffer_);
                 pre << "precision highp float;\n";
-                pre << "precision highp int;\n";
+                pre << "precision highp int;";
             }
 
             // Switch the entry point name to `main`. This makes the assumption that single entry
@@ -529,7 +542,7 @@ class Printer : public tint::TextGenerator {
         }
         emitted_extensions_.Add(name);
 
-        TINT_SCOPED_ASSIGNMENT(current_buffer_, &preamble_buffer_);
+        TINT_SCOPED_ASSIGNMENT(current_buffer_, &header_buffer_);
 
         Line() << "#extension " << name << ": require";
     }

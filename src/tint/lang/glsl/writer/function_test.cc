@@ -67,7 +67,6 @@ TEST_F(GlslWriterTest, Function_Fragment_Precision) {
     EXPECT_EQ(output_.glsl, GlslHeader() + R"(precision highp float;
 precision highp int;
 
-
 void main() {
 }
 )");

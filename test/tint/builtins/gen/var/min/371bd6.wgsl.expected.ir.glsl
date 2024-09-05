@@ -2,7 +2,6 @@
 precision highp float;
 precision highp int;
 
-
 void min_371bd6() {
   ivec3 res = ivec3(1);
 }
@@ -19,6 +18,7 @@ void main() {
   min_371bd6();
 }
 #version 310 es
+
 
 struct VertexOutput {
   vec4 pos;

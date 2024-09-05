@@ -2,7 +2,6 @@
 precision highp float;
 precision highp int;
 
-
 float tint_symbol_2(int tint_symbol_3) {
   return float(tint_symbol_3);
 }

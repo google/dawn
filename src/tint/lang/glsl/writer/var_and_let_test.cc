@@ -154,7 +154,6 @@ TEST_F(GlslWriterTest, VarIn) {
     EXPECT_EQ(output_.glsl, GlslHeader() + R"(precision highp float;
 precision highp int;
 
-
 layout(location = 1) flat in uint v;
 void main() {
 }
@@ -178,7 +177,6 @@ TEST_F(GlslWriterTest, VarOutBlendSrc) {
 precision highp float;
 precision highp int;
 
-
 layout(location = 1, index = 1) out uint v;
 void main() {
 }
@@ -201,7 +199,6 @@ TEST_F(GlslWriterTest, VarOutBuiltin) {
     EXPECT_EQ(output_.glsl, GlslHeader() + R"(precision highp float;
 precision highp int;
 
-
 void main() {
 }
 )");
@@ -223,7 +220,6 @@ TEST_F(GlslWriterTest, VarBuiltinSampleIndex_ES) {
 precision highp float;
 precision highp int;
 
-
 void main() {
 }
 )");
@@ -244,7 +240,6 @@ TEST_F(GlslWriterTest, VarBuiltinSampleMask_ES) {
     EXPECT_EQ(output_.glsl, GlslHeader() + R"(#extension GL_OES_sample_variables: require
 precision highp float;
 precision highp int;
-
 
 void main() {
 }
@@ -268,7 +263,6 @@ TEST_F(GlslWriterTest, VarBuiltinSampled_NonES) {
     EXPECT_EQ(output_.glsl, R"(#version 460
 precision highp float;
 precision highp int;
-
 
 void main() {
 }
@@ -306,6 +300,7 @@ TEST_F(GlslWriterTest, VarStorageStruct) {
 
     ASSERT_TRUE(Generate()) << err_ << output_.glsl;
     EXPECT_EQ(output_.glsl, GlslHeader() + R"(
+
 struct SB {
   int a;
   float b;

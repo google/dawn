@@ -2,7 +2,6 @@
 precision highp float;
 precision highp int;
 
-
 void ldexp_fdbc7b() {
   float res = 2.0f;
 }
@@ -19,6 +18,7 @@ void main() {
   ldexp_fdbc7b();
 }
 #version 310 es
+
 
 struct VertexOutput {
   vec4 pos;

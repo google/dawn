@@ -2,7 +2,6 @@
 precision highp float;
 precision highp int;
 
-
 void sin_a9ab19() {
   float res = 1.0f;
 }
@@ -19,6 +18,7 @@ void main() {
   sin_a9ab19();
 }
 #version 310 es
+
 
 struct VertexOutput {
   vec4 pos;

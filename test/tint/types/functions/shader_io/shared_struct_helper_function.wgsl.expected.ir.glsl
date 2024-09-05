@@ -1,5 +1,6 @@
 #version 310 es
 
+
 struct VertexOutput {
   vec4 pos;
   int loc0;
@@ -21,6 +22,7 @@ void main() {
   gl_PointSize = 1.0f;
 }
 #version 310 es
+
 
 struct VertexOutput {
   vec4 pos;

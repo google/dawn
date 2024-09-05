@@ -2,7 +2,6 @@
 precision highp float;
 precision highp int;
 
-
 void normalize_4eaf61() {
   vec4 res = vec4(0.5f);
 }
@@ -19,6 +18,7 @@ void main() {
   normalize_4eaf61();
 }
 #version 310 es
+
 
 struct VertexOutput {
   vec4 pos;
