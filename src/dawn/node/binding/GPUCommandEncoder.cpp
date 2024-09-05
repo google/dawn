@@ -55,7 +55,7 @@ interop::Interface<interop::GPURenderPassEncoder> GPUCommandEncoder::beginRender
     Converter conv(env, device_);
 
     wgpu::RenderPassDescriptor desc{};
-    wgpu::RenderPassDescriptorMaxDrawCount maxDrawCountDesc{};
+    wgpu::RenderPassMaxDrawCount maxDrawCountDesc{};
     desc.nextInChain = &maxDrawCountDesc;
 
     if (!conv(desc.colorAttachments, desc.colorAttachmentCount, descriptor.colorAttachments) ||

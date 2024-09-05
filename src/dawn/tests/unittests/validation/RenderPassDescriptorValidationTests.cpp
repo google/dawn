@@ -760,7 +760,7 @@ TEST_F(RenderPassDescriptorValidationTest, MaxDrawCount) {
     wgpu::Buffer indexedIndirectBuffer =
         utils::CreateBufferFromData<uint32_t>(device, wgpu::BufferUsage::Indirect, {3, 1, 0, 0, 0});
 
-    wgpu::RenderPassDescriptorMaxDrawCount maxDrawCount;
+    wgpu::RenderPassMaxDrawCount maxDrawCount;
     maxDrawCount.maxDrawCount = kMaxDrawCount;
 
     // Valid. drawCount is less than the default maxDrawCount.

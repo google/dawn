@@ -59,8 +59,8 @@ void GetCustomSerializedData(const fuzzing::Command& command,
             WGPUShaderModuleDescriptor cmd_descriptor;
             memset(&cmd_descriptor, 0, sizeof(struct WGPUShaderModuleDescriptor));
 
-            WGPUShaderModuleWGSLDescriptor wgsl_desc = {};
-            wgsl_desc.chain.sType = WGPUSType_ShaderModuleWGSLDescriptor;
+            WGPUShaderSourceWGSL wgsl_desc = {};
+            wgsl_desc.chain.sType = WGPUSType_ShaderSourceWGSL;
 
             if (DAWNLPM_FUZZ_TINT && command.devicecreateshadermodule().has_code()) {
                 wgsl_desc.code = command.devicecreateshadermodule().code().c_str();

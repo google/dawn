@@ -218,10 +218,10 @@ TEST_F(ShaderModuleValidationTest, NoChainedDescriptor) {
 TEST_F(ShaderModuleValidationTest, MultipleChainedDescriptor_WgslAndSpirv) {
     uint32_t code = 42;
     wgpu::ShaderModuleDescriptor desc = {};
-    wgpu::ShaderModuleSPIRVDescriptor spirv_desc = {};
+    wgpu::ShaderSourceSPIRV spirv_desc = {};
     spirv_desc.code = &code;
     spirv_desc.codeSize = 1;
-    wgpu::ShaderModuleWGSLDescriptor wgsl_desc = {};
+    wgpu::ShaderSourceWGSL wgsl_desc = {};
     wgsl_desc.code = "";
     wgsl_desc.nextInChain = &spirv_desc;
     desc.nextInChain = &wgsl_desc;
@@ -233,7 +233,7 @@ TEST_F(ShaderModuleValidationTest, MultipleChainedDescriptor_WgslAndSpirv) {
 TEST_F(ShaderModuleValidationTest, MultipleChainedDescriptor_WgslAndDawnSpirvOptions) {
     wgpu::ShaderModuleDescriptor desc = {};
     wgpu::DawnShaderModuleSPIRVOptionsDescriptor spirv_options_desc = {};
-    wgpu::ShaderModuleWGSLDescriptor wgsl_desc = {};
+    wgpu::ShaderSourceWGSL wgsl_desc = {};
     wgsl_desc.nextInChain = &spirv_options_desc;
     wgsl_desc.code = "";
     desc.nextInChain = &wgsl_desc;
@@ -252,7 +252,7 @@ TEST_F(ShaderModuleValidationTest, OnlySpirvOptionsDescriptor) {
 // Test that it is invalid to pass ShaderModuleCompilationOptions if the feature is not enabled.
 TEST_F(ShaderModuleValidationTest, ShaderModuleCompilationOptionsNoFeature) {
     wgpu::ShaderModuleDescriptor desc = {};
-    wgpu::ShaderModuleWGSLDescriptor wgslDesc = {};
+    wgpu::ShaderSourceWGSL wgslDesc = {};
     wgslDesc.code = "@compute @workgroup_size(1) fn main() {}";
 
     wgpu::ShaderModuleCompilationOptions compilationOptions = {};
@@ -727,7 +727,7 @@ TEST_F(ShaderModuleValidationTest, MissingDecorations) {
 
 // Test creating an error shader module with device.CreateErrorShaderModule()
 TEST_F(ShaderModuleValidationTest, CreateErrorShaderModule) {
-    wgpu::ShaderModuleWGSLDescriptor wgslDesc = {};
+    wgpu::ShaderSourceWGSL wgslDesc = {};
     wgpu::ShaderModuleDescriptor descriptor = {};
     descriptor.nextInChain = &wgslDesc;
     wgslDesc.code = "@compute @workgroup_size(1) fn main() {}";
@@ -906,7 +906,7 @@ TEST_F(ShaderModuleExtensionValidationTestUnsafeAllFeatures, AllExtensionsAllowe
 // Test it is valid to chain ShaderModuleCompilationOptions and path true/false for strictMath.
 TEST_F(ShaderModuleExtensionValidationTestUnsafeAllFeatures, ShaderModuleCompilationOptions) {
     wgpu::ShaderModuleDescriptor desc = {};
-    wgpu::ShaderModuleWGSLDescriptor wgslDesc = {};
+    wgpu::ShaderSourceWGSL wgslDesc = {};
     wgslDesc.code = "@compute @workgroup_size(1) fn main() {}";
 
     wgpu::ShaderModuleCompilationOptions compilationOptions = {};

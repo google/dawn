@@ -161,32 +161,32 @@ TEST(ChainUtilsTests, ValidateAndUnpackDuplicateAdditionalExtensions) {
                 HasSubstr("Duplicate"));
 }
 
-using B1 = Branch<ShaderModuleWGSLDescriptor>;
-using B2 = Branch<ShaderModuleSPIRVDescriptor>;
-using B2Ext = Branch<ShaderModuleSPIRVDescriptor, DawnShaderModuleSPIRVOptionsDescriptor>;
+using B1 = Branch<ShaderSourceWGSL>;
+using B2 = Branch<ShaderSourceSPIRV>;
+using B2Ext = Branch<ShaderSourceSPIRV, DawnShaderModuleSPIRVOptionsDescriptor>;
 
 // Validates exacly 1 branch and ensures that there are no other extensions.
 TEST(ChainUtilsTests, ValidateBranchesOneValidBranch) {
     ShaderModuleDescriptor desc;
     // Either allowed branches should validate successfully and return the expected enum.
     {
-        ShaderModuleWGSLDescriptor chain;
+        ShaderSourceWGSL chain;
         desc.nextInChain = &chain;
         auto unpacked = ValidateAndUnpack(&desc).AcquireSuccess();
         EXPECT_EQ((unpacked.ValidateBranches<B1, B2>().AcquireSuccess()),
-                  wgpu::SType::ShaderModuleWGSLDescriptor);
+                  wgpu::SType::ShaderSourceWGSL);
     }
     {
-        ShaderModuleSPIRVDescriptor chain;
+        ShaderSourceSPIRV chain;
         desc.nextInChain = &chain;
         auto unpacked = ValidateAndUnpack(&desc).AcquireSuccess();
         EXPECT_EQ((unpacked.ValidateBranches<B1, B2>().AcquireSuccess()),
-                  wgpu::SType::ShaderModuleSPIRVDescriptor);
+                  wgpu::SType::ShaderSourceSPIRV);
 
         // Extensions are optional so validation should still pass when the extension is not
         // provided.
         EXPECT_EQ((unpacked.ValidateBranches<B1, B2Ext>().AcquireSuccess()),
-                  wgpu::SType::ShaderModuleSPIRVDescriptor);
+                  wgpu::SType::ShaderSourceSPIRV);
     }
 }
 
@@ -204,7 +204,7 @@ TEST(ChainUtilsTests, ValidateBranchesInvalidBranch) {
 TEST(ChainUtilsTests, ValidateBranchesInvalidExtension) {
     ShaderModuleDescriptor desc;
     {
-        ShaderModuleWGSLDescriptor chain1;
+        ShaderSourceWGSL chain1;
         DawnShaderModuleSPIRVOptionsDescriptor chain2;
         desc.nextInChain = &chain1;
         chain1.nextInChain = &chain2;
@@ -213,7 +213,7 @@ TEST(ChainUtilsTests, ValidateBranchesInvalidExtension) {
         EXPECT_NE((unpacked.ValidateBranches<B1, B2Ext>().AcquireError()), nullptr);
     }
     {
-        ShaderModuleSPIRVDescriptor chain1;
+        ShaderSourceSPIRV chain1;
         DawnShaderModuleSPIRVOptionsDescriptor chain2;
         desc.nextInChain = &chain1;
         chain1.nextInChain = &chain2;
@@ -225,13 +225,13 @@ TEST(ChainUtilsTests, ValidateBranchesInvalidExtension) {
 // Branches that allow extensions pass successfully.
 TEST(ChainUtilsTests, ValidateBranchesAllowedExtensions) {
     ShaderModuleDescriptor desc;
-    ShaderModuleSPIRVDescriptor chain1;
+    ShaderSourceSPIRV chain1;
     DawnShaderModuleSPIRVOptionsDescriptor chain2;
     desc.nextInChain = &chain1;
     chain1.nextInChain = &chain2;
     auto unpacked = ValidateAndUnpack(&desc).AcquireSuccess();
     EXPECT_EQ((unpacked.ValidateBranches<B1, B2Ext>().AcquireSuccess()),
-              wgpu::SType::ShaderModuleSPIRVDescriptor);
+              wgpu::SType::ShaderSourceSPIRV);
 }
 
 // Unrealistic branching for ChainedStructOut testing. Note that this setup does not make sense.

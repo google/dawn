@@ -222,7 +222,7 @@ TEST_F(RequestDeviceValidationTest, LowerIsBetter) {
 
 // Test that it is an error to request limits with an invalid chained struct
 TEST_F(RequestDeviceValidationTest, InvalidChainedStruct) {
-    wgpu::RenderPassDescriptorMaxDrawCount maxDrawCount = {};
+    wgpu::RenderPassMaxDrawCount maxDrawCount = {};
     wgpu::RequiredLimits limits = {};
     limits.nextInChain = &maxDrawCount;
 

@@ -207,12 +207,14 @@
     "special items": {
         "client_side_structures": [
             "FutureWaitInfo",
-            "SurfaceDescriptorFromMetalLayer",
-            "SurfaceDescriptorFromWindowsHWND",
-            "SurfaceDescriptorFromXlibWindow",
             "SurfaceDescriptorFromWindowsCoreWindow",
             "SurfaceDescriptorFromWindowsSwapChainPanel",
-            "SurfaceDescriptorFromAndroidNativeWindow"
+            "SurfaceSourceMetalLayer",
+            "SurfaceSourceWindowsHWND",
+            "SurfaceSourceXlibWindow",
+            "SurfaceSourceWaylandSurface",
+            "SurfaceSourceAndroidNativeWindow",
+            "SurfaceSourceXCBWindow"
         ],
         "client_side_commands": [
             "AdapterCreateDevice",

@@ -55,10 +55,10 @@ SetupWindowAndGetSurfaceDescriptorCocoa(GLFWwindow* window) {
         // Use retina if the window was created with retina support.
         [[view layer] setContentsScale:[nsWindow backingScaleFactor]];
 
-        wgpu::SurfaceDescriptorFromMetalLayer* desc = new wgpu::SurfaceDescriptorFromMetalLayer();
+        wgpu::SurfaceSourceMetalLayer* desc = new wgpu::SurfaceSourceMetalLayer();
         desc->layer = [view layer];
         return {desc, [](wgpu::ChainedStruct* desc) {
-                    delete reinterpret_cast<wgpu::SurfaceDescriptorFromMetalLayer*>(desc);
+                    delete reinterpret_cast<wgpu::SurfaceSourceMetalLayer*>(desc);
                 }};
     }
 }

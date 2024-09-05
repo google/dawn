@@ -631,7 +631,7 @@ TEST_F(DestroyObjectTests, ShaderModuleNativeExplicit) {
 }
 
 TEST_F(DestroyObjectTests, ShaderModuleImplicit) {
-    ShaderModuleWGSLDescriptor wgslDesc = {};
+    ShaderSourceWGSL wgslDesc = {};
     wgslDesc.code = kVertexShader.data();
     ShaderModuleDescriptor desc = {};
     desc.nextInChain = &wgslDesc;
@@ -829,7 +829,7 @@ TEST_F(DestroyObjectTests, DestroyObjectsApiExplicit) {
     Ref<ShaderModuleMock> csModuleMock;
     wgpu::ShaderModule csModule;
     {
-        ShaderModuleWGSLDescriptor wgslDesc = {};
+        ShaderSourceWGSL wgslDesc = {};
         wgslDesc.code = kComputeShader.data();
         ShaderModuleDescriptor desc = {};
         desc.nextInChain = &wgslDesc;
@@ -843,7 +843,7 @@ TEST_F(DestroyObjectTests, DestroyObjectsApiExplicit) {
     Ref<ShaderModuleMock> vsModuleMock;
     wgpu::ShaderModule vsModule;
     {
-        ShaderModuleWGSLDescriptor wgslDesc = {};
+        ShaderSourceWGSL wgslDesc = {};
         wgslDesc.code = kVertexShader.data();
         ShaderModuleDescriptor desc = {};
         desc.nextInChain = &wgslDesc;

@@ -27,7 +27,7 @@ class ImageTest {
 
             val shaderModule = device.createShaderModule(
                 ShaderModuleDescriptor(
-                    shaderModuleWGSLDescriptor = ShaderModuleWGSLDescriptor(
+                    shaderModuleWGSLDescriptor = ShaderSourceWGSL(
                         code = appContext.assets.open("triangle/shader.wgsl").asString()
                     )
                 )

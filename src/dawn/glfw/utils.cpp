@@ -69,33 +69,32 @@ SetupWindowAndGetSurfaceDescriptor(GLFWwindow* window) {
         return {nullptr, [](wgpu::ChainedStruct*) {}};
     }
 #if DAWN_PLATFORM_IS(WINDOWS)
-    wgpu::SurfaceDescriptorFromWindowsHWND* desc = new wgpu::SurfaceDescriptorFromWindowsHWND();
+    wgpu::SurfaceSourceWindowsHWND* desc = new wgpu::SurfaceSourceWindowsHWND();
     desc->hwnd = glfwGetWin32Window(window);
     desc->hinstance = GetModuleHandle(nullptr);
     return {desc, [](wgpu::ChainedStruct* desc) {
-                delete reinterpret_cast<wgpu::SurfaceDescriptorFromWindowsHWND*>(desc);
+                delete reinterpret_cast<wgpu::SurfaceSourceWindowsHWND*>(desc);
             }};
 #elif defined(DAWN_ENABLE_BACKEND_METAL)
     return SetupWindowAndGetSurfaceDescriptorCocoa(window);
 #elif defined(DAWN_USE_WAYLAND) || defined(DAWN_USE_X11)
 #if defined(GLFW_PLATFORM_WAYLAND) && defined(DAWN_USE_WAYLAND)
     if (glfwGetPlatform() == GLFW_PLATFORM_WAYLAND) {
-        wgpu::SurfaceDescriptorFromWaylandSurface* desc =
-            new wgpu::SurfaceDescriptorFromWaylandSurface();
+        wgpu::SurfaceSourceWaylandSurface* desc = new wgpu::SurfaceSourceWaylandSurface();
         desc->display = glfwGetWaylandDisplay();
         desc->surface = glfwGetWaylandWindow(window);
         return {desc, [](wgpu::ChainedStruct* desc) {
-                    delete reinterpret_cast<wgpu::SurfaceDescriptorFromWaylandSurface*>(desc);
+                    delete reinterpret_cast<wgpu::SurfaceSourceWaylandSurface*>(desc);
                 }};
     } else  // NOLINT(readability/braces)
 #endif
 #if defined(DAWN_USE_X11)
     {
-        wgpu::SurfaceDescriptorFromXlibWindow* desc = new wgpu::SurfaceDescriptorFromXlibWindow();
+        wgpu::SurfaceSourceXlibWindow* desc = new wgpu::SurfaceSourceXlibWindow();
         desc->display = glfwGetX11Display();
         desc->window = glfwGetX11Window(window);
         return {desc, [](wgpu::ChainedStruct* desc) {
-                    delete reinterpret_cast<wgpu::SurfaceDescriptorFromXlibWindow*>(desc);
+                    delete reinterpret_cast<wgpu::SurfaceSourceXlibWindow*>(desc);
                 }};
     }
 #else

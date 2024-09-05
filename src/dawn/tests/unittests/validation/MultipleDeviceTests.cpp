@@ -51,7 +51,7 @@ TEST_F(MultipleDeviceTest, ValidatesSameDevice) {
 // Test that CreatePipelineAsync fails creation with an Error status if it uses
 // objects from a different device.
 TEST_F(MultipleDeviceTest, ValidatesSameDeviceCreatePipelineAsync) {
-    wgpu::ShaderModuleWGSLDescriptor wgslDesc = {};
+    wgpu::ShaderSourceWGSL wgslDesc = {};
     wgslDesc.code = R"(
          @compute @workgroup_size(1, 1, 1) fn main() {
         }

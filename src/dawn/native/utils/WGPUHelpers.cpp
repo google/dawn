@@ -51,7 +51,7 @@ ResultOrError<Ref<ShaderModuleBase>> CreateShaderModule(
     DeviceBase* device,
     const char* source,
     const std::vector<tint::wgsl::Extension>& internalExtensions) {
-    ShaderModuleWGSLDescriptor wgslDesc;
+    ShaderSourceWGSL wgslDesc;
     wgslDesc.code = source;
     ShaderModuleDescriptor descriptor;
     descriptor.nextInChain = &wgslDesc;
