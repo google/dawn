@@ -47,6 +47,7 @@
 #include "src/tint/lang/core/ir/transform/vectorize_scalar_matrix_constructors.h"
 #include "src/tint/lang/core/ir/transform/zero_init_workgroup_memory.h"
 #include "src/tint/lang/glsl/writer/common/option_helpers.h"
+#include "src/tint/lang/glsl/writer/raise/shader_io.h"
 
 namespace tint::glsl::writer {
 
@@ -108,11 +109,8 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
 
     RUN_TRANSFORM(core::ir::transform::BlockDecoratedStructs, module);
 
-    // TODO(dsinclair): SingleEntryPoint
     // TODO(dsinclair): TextureBuiltinsFromUniform
     // TODO(dsinclair): OffsetFirstIndex
-    // TODO(dsinclair): ClampFragDepth
-    // TODO(dsinclair): ShaderIO
     // TODO(dsinclair): CombineSamplers
     // TODO(dsinclair): PadStructs
     // TODO(dsinclair): Texture1DTo2D
@@ -132,6 +130,8 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
     RUN_TRANSFORM(core::ir::transform::DemoteToHelper, module);
 
     RUN_TRANSFORM(core::ir::transform::AddEmptyEntryPoint, module);
+
+    RUN_TRANSFORM(raise::ShaderIO, module, raise::ShaderIOConfig{options.depth_range_offsets});
 
     RUN_TRANSFORM(core::ir::transform::Std140, module);
 

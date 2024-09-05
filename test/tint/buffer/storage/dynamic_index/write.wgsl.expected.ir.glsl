@@ -1,5 +1,3 @@
-SKIP: FAILED
-
 #version 310 es
 
 struct Inner {
@@ -27,11 +25,10 @@ struct Inner {
   vec3 arr2_vec3_f32[2];
 };
 
-struct S {
+layout(binding = 0, std430)
+buffer S_1_ssbo {
   Inner arr[];
-};
-
-S sb;
+} sb;
 void tint_store_and_preserve_padding_3(inout vec3 target[2], vec3 value_param[2]) {
   {
     uint v = 0u;
@@ -64,8 +61,7 @@ void tint_store_and_preserve_padding(inout mat2x3 target, mat2x3 value_param) {
   target[0u] = value_param[0u];
   target[1u] = value_param[1u];
 }
-layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
-void main(uint idx) {
+void tint_symbol_inner(uint idx) {
   sb.arr[idx].scalar_f32 = 0.0f;
   sb.arr[idx].scalar_i32 = 0;
   sb.arr[idx].scalar_u32 = 0u;
@@ -89,12 +85,7 @@ void main(uint idx) {
   sb.arr[idx].mat4x4_f32 = mat4(vec4(0.0f), vec4(0.0f), vec4(0.0f), vec4(0.0f));
   tint_store_and_preserve_padding_3(sb.arr[idx].arr2_vec3_f32, vec3[2](vec3(0.0f), vec3(0.0f)));
 }
-error: Error parsing GLSL shader:
-ERROR: 0:29: '' : array size required 
-ERROR: 0:30: '' : compilation terminated 
-ERROR: 2 compilation errors.  No code generated.
-
-
-
-
-tint executable returned error: exit status 1
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+void main() {
+  tint_symbol_inner(gl_LocalInvocationIndex);
+}

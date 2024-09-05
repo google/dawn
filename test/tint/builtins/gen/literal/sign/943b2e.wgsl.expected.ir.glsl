@@ -1,9 +1,24 @@
-SKIP: FAILED
-
 #version 310 es
 precision highp float;
 precision highp int;
 
+
+void sign_943b2e() {
+  ivec2 res = ivec2(1);
+}
+void main() {
+  sign_943b2e();
+}
+#version 310 es
+
+void sign_943b2e() {
+  ivec2 res = ivec2(1);
+}
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+void main() {
+  sign_943b2e();
+}
+#version 310 es
 
 struct VertexOutput {
   vec4 pos;
@@ -12,89 +27,15 @@ struct VertexOutput {
 void sign_943b2e() {
   ivec2 res = ivec2(1);
 }
-void main() {
-  sign_943b2e();
-}
-layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
-void main() {
-  sign_943b2e();
-}
-VertexOutput main() {
+VertexOutput vertex_main_inner() {
   VertexOutput tint_symbol = VertexOutput(vec4(0.0f));
   tint_symbol.pos = vec4(0.0f);
   sign_943b2e();
   return tint_symbol;
 }
-error: Error parsing GLSL shader:
-ERROR: 0:16: 'local_size_x' : there is no such layout identifier for this stage taking an assigned value 
-ERROR: 0:16: '' : compilation terminated 
-ERROR: 2 compilation errors.  No code generated.
-
-
-
-#version 310 es
-precision highp float;
-precision highp int;
-
-
-struct VertexOutput {
-  vec4 pos;
-};
-
-void sign_943b2e() {
-  ivec2 res = ivec2(1);
-}
 void main() {
-  sign_943b2e();
+  gl_Position = vertex_main_inner().pos;
+  gl_Position[1u] = -(gl_Position.y);
+  gl_Position[2u] = ((2.0f * gl_Position.z) - gl_Position.w);
+  gl_PointSize = 1.0f;
 }
-layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
-void main() {
-  sign_943b2e();
-}
-VertexOutput main() {
-  VertexOutput tint_symbol = VertexOutput(vec4(0.0f));
-  tint_symbol.pos = vec4(0.0f);
-  sign_943b2e();
-  return tint_symbol;
-}
-error: Error parsing GLSL shader:
-ERROR: 0:17: 'main' : function already has a body 
-ERROR: 0:17: '' : compilation terminated 
-ERROR: 2 compilation errors.  No code generated.
-
-
-
-#version 310 es
-precision highp float;
-precision highp int;
-
-
-struct VertexOutput {
-  vec4 pos;
-};
-
-void sign_943b2e() {
-  ivec2 res = ivec2(1);
-}
-void main() {
-  sign_943b2e();
-}
-layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
-void main() {
-  sign_943b2e();
-}
-VertexOutput main() {
-  VertexOutput tint_symbol = VertexOutput(vec4(0.0f));
-  tint_symbol.pos = vec4(0.0f);
-  sign_943b2e();
-  return tint_symbol;
-}
-error: Error parsing GLSL shader:
-ERROR: 0:16: 'local_size_x' : there is no such layout identifier for this stage taking an assigned value 
-ERROR: 0:16: '' : compilation terminated 
-ERROR: 2 compilation errors.  No code generated.
-
-
-
-
-tint executable returned error: exit status 1

@@ -1,18 +1,18 @@
-SKIP: FAILED
-
 #version 310 es
 precision highp float;
 precision highp int;
 
 
 bool continue_execution = true;
+layout(location = 1) flat in ivec3 tint_symbol_loc1_Input;
+layout(location = 2) out int tint_symbol_loc2_Output;
 int f(int x) {
   if ((x == 10)) {
     continue_execution = false;
   }
   return x;
 }
-int main(ivec3 x) {
+int tint_symbol_inner(ivec3 x) {
   int y = x[0u];
   {
     while(true) {
@@ -30,13 +30,6 @@ int main(ivec3 x) {
   }
   return y;
 }
-error: Error parsing GLSL shader:
-ERROR: 0:13: 'main' : function cannot take any parameter(s) 
-ERROR: 0:13: 'int' :  entry point cannot return a value
-ERROR: 0:13: '' : compilation terminated 
-ERROR: 3 compilation errors.  No code generated.
-
-
-
-
-tint executable returned error: exit status 1
+void main() {
+  tint_symbol_loc2_Output = tint_symbol_inner(tint_symbol_loc1_Input);
+}

@@ -101,6 +101,7 @@ if (tint_build_unittests) {
       deps += [
         "${tint_src_dir}/lang/glsl/writer/ast_printer:unittests",
         "${tint_src_dir}/lang/glsl/writer/common:unittests",
+        "${tint_src_dir}/lang/glsl/writer/raise:unittests",
       ]
     }
 

@@ -1,5 +1,3 @@
-SKIP: FAILED
-
 #version 310 es
 #extension GL_AMD_gpu_shader_half_float: require
 
@@ -11,33 +9,12 @@ precision highp float;
 precision highp int;
 
 
-struct VertexOutput {
-  vec4 pos;
-};
-
 void frexp_3dd21e() {
   frexp_result_vec4_f16 res = frexp_result_vec4_f16(f16vec4(0.5hf), ivec4(1));
 }
 void main() {
   frexp_3dd21e();
 }
-layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
-void main() {
-  frexp_3dd21e();
-}
-VertexOutput main() {
-  VertexOutput tint_symbol = VertexOutput(vec4(0.0f));
-  tint_symbol.pos = vec4(0.0f);
-  frexp_3dd21e();
-  return tint_symbol;
-}
-error: Error parsing GLSL shader:
-ERROR: 0:22: 'local_size_x' : there is no such layout identifier for this stage taking an assigned value 
-ERROR: 0:22: '' : compilation terminated 
-ERROR: 2 compilation errors.  No code generated.
-
-
-
 #version 310 es
 #extension GL_AMD_gpu_shader_half_float: require
 
@@ -45,37 +22,14 @@ struct frexp_result_vec4_f16 {
   f16vec4 fract;
   ivec4 exp;
 };
-precision highp float;
-precision highp int;
-
-
-struct VertexOutput {
-  vec4 pos;
-};
 
 void frexp_3dd21e() {
   frexp_result_vec4_f16 res = frexp_result_vec4_f16(f16vec4(0.5hf), ivec4(1));
-}
-void main() {
-  frexp_3dd21e();
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
   frexp_3dd21e();
 }
-VertexOutput main() {
-  VertexOutput tint_symbol = VertexOutput(vec4(0.0f));
-  tint_symbol.pos = vec4(0.0f);
-  frexp_3dd21e();
-  return tint_symbol;
-}
-error: Error parsing GLSL shader:
-ERROR: 0:23: 'main' : function already has a body 
-ERROR: 0:23: '' : compilation terminated 
-ERROR: 2 compilation errors.  No code generated.
-
-
-
 #version 310 es
 #extension GL_AMD_gpu_shader_half_float: require
 
@@ -83,9 +37,6 @@ struct frexp_result_vec4_f16 {
   f16vec4 fract;
   ivec4 exp;
 };
-precision highp float;
-precision highp int;
-
 
 struct VertexOutput {
   vec4 pos;
@@ -94,25 +45,15 @@ struct VertexOutput {
 void frexp_3dd21e() {
   frexp_result_vec4_f16 res = frexp_result_vec4_f16(f16vec4(0.5hf), ivec4(1));
 }
-void main() {
-  frexp_3dd21e();
-}
-layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
-void main() {
-  frexp_3dd21e();
-}
-VertexOutput main() {
+VertexOutput vertex_main_inner() {
   VertexOutput tint_symbol = VertexOutput(vec4(0.0f));
   tint_symbol.pos = vec4(0.0f);
   frexp_3dd21e();
   return tint_symbol;
 }
-error: Error parsing GLSL shader:
-ERROR: 0:22: 'local_size_x' : there is no such layout identifier for this stage taking an assigned value 
-ERROR: 0:22: '' : compilation terminated 
-ERROR: 2 compilation errors.  No code generated.
-
-
-
-
-tint executable returned error: exit status 1
+void main() {
+  gl_Position = vertex_main_inner().pos;
+  gl_Position[1u] = -(gl_Position.y);
+  gl_Position[2u] = ((2.0f * gl_Position.z) - gl_Position.w);
+  gl_PointSize = 1.0f;
+}

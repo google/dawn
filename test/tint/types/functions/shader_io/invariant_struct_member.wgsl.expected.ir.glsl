@@ -1,20 +1,15 @@
-SKIP: FAILED
-
 #version 310 es
 
 struct Out {
   vec4 pos;
 };
 
-Out main() {
+Out tint_symbol_inner() {
   return Out(vec4(0.0f));
 }
-error: Error parsing GLSL shader:
-ERROR: 0:7: 'structure' :  entry point cannot return a value
-ERROR: 0:7: '' : compilation terminated 
-ERROR: 2 compilation errors.  No code generated.
-
-
-
-
-tint executable returned error: exit status 1
+void main() {
+  gl_Position = tint_symbol_inner().pos;
+  gl_Position[1u] = -(gl_Position.y);
+  gl_Position[2u] = ((2.0f * gl_Position.z) - gl_Position.w);
+  gl_PointSize = 1.0f;
+}

@@ -1,5 +1,3 @@
-SKIP: FAILED
-
 #version 310 es
 
 struct S {
@@ -7,22 +5,19 @@ struct S {
   uint i;
 };
 
-S io;
+layout(binding = 0, std430)
+buffer tint_symbol_2_1_ssbo {
+  S tint_symbol_1;
+} v_1;
 vec3 Bad(uint index, vec3 rd) {
   vec3 normal = vec3(0.0f);
   normal[index] = -(sign(rd[index]));
   return normalize(normal);
 }
-layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
-void main(uint idx) {
-  io.v = Bad(io.i, io.v);
+void tint_symbol_inner(uint idx) {
+  v_1.tint_symbol_1.v = Bad(v_1.tint_symbol_1.i, v_1.tint_symbol_1.v);
 }
-error: Error parsing GLSL shader:
-ERROR: 0:15: 'main' : function cannot take any parameter(s) 
-ERROR: 0:15: '' : compilation terminated 
-ERROR: 2 compilation errors.  No code generated.
-
-
-
-
-tint executable returned error: exit status 1
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+void main() {
+  tint_symbol_inner(gl_LocalInvocationIndex);
+}

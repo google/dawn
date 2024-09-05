@@ -1,21 +1,14 @@
-SKIP: FAILED
-
 #version 310 es
 precision highp float;
 precision highp int;
 
 
-vec4 main() {
+layout(location = 0) out vec4 frag_main_loc0_Output;
+vec4 frag_main_inner() {
   float b = 0.0f;
   vec3 v = vec3(b);
   return vec4(v, 1.0f);
 }
-error: Error parsing GLSL shader:
-ERROR: 0:6: 'float' :  entry point cannot return a value
-ERROR: 0:6: '' : compilation terminated 
-ERROR: 2 compilation errors.  No code generated.
-
-
-
-
-tint executable returned error: exit status 1
+void main() {
+  frag_main_loc0_Output = frag_main_inner();
+}

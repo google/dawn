@@ -1,5 +1,3 @@
-SKIP: FAILED
-
 #version 310 es
 
 struct Uniforms {
@@ -15,63 +13,38 @@ struct VertexInput {
   vec4 cur_position;
   vec4 color;
 };
-precision highp float;
-precision highp int;
 
-
-uniform Uniforms uniforms;
-VertexOutput main(VertexInput tint_symbol) {
+layout(binding = 0, std140)
+uniform tint_symbol_3_1_ubo {
+  Uniforms tint_symbol_2;
+} v;
+layout(location = 0) in vec4 vtx_main_loc0_Input;
+layout(location = 1) in vec4 vtx_main_loc1_Input;
+layout(location = 0) out vec4 vtx_main_loc0_Output;
+VertexOutput vtx_main_inner(VertexInput tint_symbol) {
   VertexOutput tint_symbol_1 = VertexOutput(vec4(0.0f), vec4(0.0f));
-  tint_symbol_1.Position = (uniforms.modelViewProjectionMatrix * tint_symbol.cur_position);
+  tint_symbol_1.Position = (v.tint_symbol_2.modelViewProjectionMatrix * tint_symbol.cur_position);
   tint_symbol_1.vtxFragColor = tint_symbol.color;
   return tint_symbol_1;
 }
-vec4 main(vec4 fragColor) {
-  return fragColor;
+void main() {
+  VertexOutput v_1 = vtx_main_inner(VertexInput(vtx_main_loc0_Input, vtx_main_loc1_Input));
+  vtx_main_loc0_Output = v_1.vtxFragColor;
+  gl_Position = v_1.Position;
+  gl_Position[1u] = -(gl_Position.y);
+  gl_Position[2u] = ((2.0f * gl_Position.z) - gl_Position.w);
+  gl_PointSize = 1.0f;
 }
-error: Error parsing GLSL shader:
-ERROR: 0:21: 'main' : function cannot take any parameter(s) 
-ERROR: 0:21: 'structure' :  entry point cannot return a value
-ERROR: 0:21: '' : compilation terminated 
-ERROR: 3 compilation errors.  No code generated.
-
-
-
 #version 310 es
-
-struct Uniforms {
-  mat4 modelViewProjectionMatrix;
-};
-
-struct VertexOutput {
-  vec4 vtxFragColor;
-  vec4 Position;
-};
-
-struct VertexInput {
-  vec4 cur_position;
-  vec4 color;
-};
 precision highp float;
 precision highp int;
 
 
-uniform Uniforms uniforms;
-VertexOutput main(VertexInput tint_symbol) {
-  VertexOutput tint_symbol_1 = VertexOutput(vec4(0.0f), vec4(0.0f));
-  tint_symbol_1.Position = (uniforms.modelViewProjectionMatrix * tint_symbol.cur_position);
-  tint_symbol_1.vtxFragColor = tint_symbol.color;
-  return tint_symbol_1;
-}
-vec4 main(vec4 fragColor) {
+layout(location = 0) in vec4 frag_main_loc0_Input;
+layout(location = 0) out vec4 frag_main_loc0_Output;
+vec4 frag_main_inner(vec4 fragColor) {
   return fragColor;
 }
-error: Error parsing GLSL shader:
-ERROR: 0:4: 'float' : type requires declaration of default precision qualifier 
-ERROR: 0:4: '' : compilation terminated 
-ERROR: 2 compilation errors.  No code generated.
-
-
-
-
-tint executable returned error: exit status 1
+void main() {
+  frag_main_loc0_Output = frag_main_inner(frag_main_loc0_Input);
+}

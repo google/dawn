@@ -1,5 +1,3 @@
-SKIP: FAILED
-
 #version 310 es
 
 struct ComputeInputs {
@@ -10,16 +8,10 @@ struct ComputeInputs {
   uvec3 num_workgroups;
 };
 
-layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
-void main(ComputeInputs inputs) {
+void tint_symbol_inner(ComputeInputs inputs) {
   uint foo = ((((inputs.local_invocation_id[0u] + inputs.local_invocation_index) + inputs.global_invocation_id[0u]) + inputs.workgroup_id[0u]) + inputs.num_workgroups[0u]);
 }
-error: Error parsing GLSL shader:
-ERROR: 0:12: 'main' : function cannot take any parameter(s) 
-ERROR: 0:12: '' : compilation terminated 
-ERROR: 2 compilation errors.  No code generated.
-
-
-
-
-tint executable returned error: exit status 1
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+void main() {
+  tint_symbol_inner(ComputeInputs(gl_LocalInvocationID, gl_LocalInvocationIndex, gl_GlobalInvocationID, gl_WorkGroupID, gl_NumWorkGroups));
+}

@@ -1,21 +1,14 @@
-SKIP: INVALID
-
 #version 310 es
 precision highp float;
 precision highp int;
 
 
+in vec4 f_Input;
 void g(float a) {
 }
-void main(vec4 fbf) {
+void f_inner(vec4 fbf) {
   g(fbf[1u]);
 }
-error: Error parsing GLSL shader:
-ERROR: 0:8: 'main' : function cannot take any parameter(s) 
-ERROR: 0:8: '' : compilation terminated 
-ERROR: 2 compilation errors.  No code generated.
-
-
-
-
-tint executable returned error: exit status 1
+void main() {
+  f_inner(f_Input);
+}

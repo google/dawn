@@ -1,5 +1,3 @@
-SKIP: FAILED
-
 #version 310 es
 
 struct VertexOutput {
@@ -7,22 +5,21 @@ struct VertexOutput {
   int loc0;
 };
 
+layout(location = 0) flat out int vert_main1_loc0_Output;
 VertexOutput foo(float x) {
   return VertexOutput(vec4(x, x, x, 1.0f), 42);
 }
-VertexOutput main() {
+VertexOutput vert_main1_inner() {
   return foo(0.5f);
 }
-VertexOutput main() {
-  return foo(0.25f);
+void main() {
+  VertexOutput v = vert_main1_inner();
+  gl_Position = v.pos;
+  gl_Position[1u] = -(gl_Position.y);
+  gl_Position[2u] = ((2.0f * gl_Position.z) - gl_Position.w);
+  vert_main1_loc0_Output = v.loc0;
+  gl_PointSize = 1.0f;
 }
-error: Error parsing GLSL shader:
-ERROR: 0:11: 'structure' :  entry point cannot return a value
-ERROR: 0:11: '' : compilation terminated 
-ERROR: 2 compilation errors.  No code generated.
-
-
-
 #version 310 es
 
 struct VertexOutput {
@@ -30,21 +27,18 @@ struct VertexOutput {
   int loc0;
 };
 
+layout(location = 0) flat out int vert_main2_loc0_Output;
 VertexOutput foo(float x) {
   return VertexOutput(vec4(x, x, x, 1.0f), 42);
 }
-VertexOutput main() {
-  return foo(0.5f);
-}
-VertexOutput main() {
+VertexOutput vert_main2_inner() {
   return foo(0.25f);
 }
-error: Error parsing GLSL shader:
-ERROR: 0:11: 'structure' :  entry point cannot return a value
-ERROR: 0:11: '' : compilation terminated 
-ERROR: 2 compilation errors.  No code generated.
-
-
-
-
-tint executable returned error: exit status 1
+void main() {
+  VertexOutput v = vert_main2_inner();
+  gl_Position = v.pos;
+  gl_Position[1u] = -(gl_Position.y);
+  gl_Position[2u] = ((2.0f * gl_Position.z) - gl_Position.w);
+  vert_main2_loc0_Output = v.loc0;
+  gl_PointSize = 1.0f;
+}

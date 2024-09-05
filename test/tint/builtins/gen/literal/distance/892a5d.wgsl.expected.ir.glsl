@@ -1,112 +1,59 @@
-SKIP: FAILED
-
 #version 310 es
 #extension GL_AMD_gpu_shader_half_float: require
 precision highp float;
 precision highp int;
 
 
-struct VertexOutput {
-  vec4 pos;
-  float16_t prevent_dce;
-};
-
-float16_t prevent_dce;
+layout(binding = 0, std430)
+buffer tint_symbol_1_1_ssbo {
+  float16_t tint_symbol;
+} v;
 float16_t distance_892a5d() {
   float16_t res = 0.0hf;
   return res;
 }
 void main() {
-  prevent_dce = distance_892a5d();
+  v.tint_symbol = distance_892a5d();
 }
-layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
-void main() {
-  prevent_dce = distance_892a5d();
-}
-VertexOutput main() {
-  VertexOutput tint_symbol = VertexOutput(vec4(0.0f), 0.0hf);
-  tint_symbol.pos = vec4(0.0f);
-  tint_symbol.prevent_dce = distance_892a5d();
-  return tint_symbol;
-}
-error: Error parsing GLSL shader:
-ERROR: 0:20: 'local_size_x' : there is no such layout identifier for this stage taking an assigned value 
-ERROR: 0:20: '' : compilation terminated 
-ERROR: 2 compilation errors.  No code generated.
-
-
-
 #version 310 es
 #extension GL_AMD_gpu_shader_half_float: require
-precision highp float;
-precision highp int;
 
-
-struct VertexOutput {
-  vec4 pos;
-  float16_t prevent_dce;
-};
-
-float16_t prevent_dce;
+layout(binding = 0, std430)
+buffer tint_symbol_1_1_ssbo {
+  float16_t tint_symbol;
+} v;
 float16_t distance_892a5d() {
   float16_t res = 0.0hf;
   return res;
 }
-void main() {
-  prevent_dce = distance_892a5d();
-}
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
-  prevent_dce = distance_892a5d();
+  v.tint_symbol = distance_892a5d();
 }
-VertexOutput main() {
-  VertexOutput tint_symbol = VertexOutput(vec4(0.0f), 0.0hf);
-  tint_symbol.pos = vec4(0.0f);
-  tint_symbol.prevent_dce = distance_892a5d();
-  return tint_symbol;
-}
-error: Error parsing GLSL shader:
-ERROR: 0:21: 'main' : function already has a body 
-ERROR: 0:21: '' : compilation terminated 
-ERROR: 2 compilation errors.  No code generated.
-
-
-
 #version 310 es
 #extension GL_AMD_gpu_shader_half_float: require
-precision highp float;
-precision highp int;
-
 
 struct VertexOutput {
   vec4 pos;
   float16_t prevent_dce;
 };
 
-float16_t prevent_dce;
+layout(location = 0) flat out float16_t vertex_main_loc0_Output;
 float16_t distance_892a5d() {
   float16_t res = 0.0hf;
   return res;
 }
-void main() {
-  prevent_dce = distance_892a5d();
-}
-layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
-void main() {
-  prevent_dce = distance_892a5d();
-}
-VertexOutput main() {
+VertexOutput vertex_main_inner() {
   VertexOutput tint_symbol = VertexOutput(vec4(0.0f), 0.0hf);
   tint_symbol.pos = vec4(0.0f);
   tint_symbol.prevent_dce = distance_892a5d();
   return tint_symbol;
 }
-error: Error parsing GLSL shader:
-ERROR: 0:20: 'local_size_x' : there is no such layout identifier for this stage taking an assigned value 
-ERROR: 0:20: '' : compilation terminated 
-ERROR: 2 compilation errors.  No code generated.
-
-
-
-
-tint executable returned error: exit status 1
+void main() {
+  VertexOutput v = vertex_main_inner();
+  gl_Position = v.pos;
+  gl_Position[1u] = -(gl_Position.y);
+  gl_Position[2u] = ((2.0f * gl_Position.z) - gl_Position.w);
+  vertex_main_loc0_Output = v.prevent_dce;
+  gl_PointSize = 1.0f;
+}

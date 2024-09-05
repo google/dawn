@@ -1,5 +1,3 @@
-SKIP: FAILED
-
 <dawn>/test/tint/diagnostic_filtering/loop_attribute.wgsl:5:9 warning: 'dpdx' must only be called from uniform control flow
     _ = dpdx(1.0);
         ^^^^^^^^^
@@ -17,7 +15,8 @@ precision highp float;
 precision highp int;
 
 
-void main(float x) {
+layout(location = 0) in float tint_symbol_loc0_Input;
+void tint_symbol_inner(float x) {
   {
     while(true) {
       dFdx(1.0f);
@@ -28,12 +27,6 @@ void main(float x) {
     }
   }
 }
-error: Error parsing GLSL shader:
-ERROR: 0:6: 'main' : function cannot take any parameter(s) 
-ERROR: 0:6: '' : compilation terminated 
-ERROR: 2 compilation errors.  No code generated.
-
-
-
-
-tint executable returned error: exit status 1
+void main() {
+  tint_symbol_inner(tint_symbol_loc0_Input);
+}
