@@ -63,38 +63,6 @@ class ResolverCompatibilityModeTestWithParam : public TestHelper, public testing
     }
 };
 
-using ResolverCompatibilityModeTest_StorageTexture = ResolverCompatibilityModeTestWithParam<
-    std::tuple<core::type::TextureDimension, core::TexelFormat>>;
-
-TEST_P(ResolverCompatibilityModeTest_StorageTexture, RGStorageTextures) {
-    // @group(2) @binding(1) var tex: texture_storage_xxx<formatxxx, read_write>
-    auto dim = std::get<0>(GetParam());
-    auto fmt = std::get<1>(GetParam());
-    auto t = ty.storage_texture(Source{{12, 34}}, dim, fmt, core::Access::kReadWrite);
-    GlobalVar("tex", t,
-              Vector{
-                  Group(2_a),
-                  Binding(1_a),
-              });
-
-    StringStream err;
-    err << "12:34 error: format " << fmt
-        << " is not supported as a storage texture in compatibility mode";
-
-    EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), err.str());
-}
-
-INSTANTIATE_TEST_SUITE_P(ResolverCompatibilityModeTest,
-                         ResolverCompatibilityModeTest_StorageTexture,
-                         testing::Combine(testing::Values(core::type::TextureDimension::k1d,
-                                                          core::type::TextureDimension::k2d,
-                                                          core::type::TextureDimension::k2dArray,
-                                                          core::type::TextureDimension::k3d),
-                                          testing::Values(core::TexelFormat::kRg32Float,
-                                                          core::TexelFormat::kRg32Sint,
-                                                          core::TexelFormat::kRg32Uint)));
-
 TEST_F(ResolverCompatibilityModeTest, LinearInterpolation_Parameter) {
     // @fragment
     // fn main(@location(1) @interpolate(linear) value : f32) {

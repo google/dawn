@@ -143,17 +143,6 @@ bool IsValidStorageTextureTexelFormat(core::TexelFormat format) {
     }
 }
 
-bool IsInvalidStorageTextureTexelFormatInCompatibilityMode(core::TexelFormat format) {
-    switch (format) {
-        case core::TexelFormat::kRg32Float:
-        case core::TexelFormat::kRg32Sint:
-        case core::TexelFormat::kRg32Uint:
-            return true;
-        default:
-            return false;
-    }
-}
-
 template <typename CALLBACK>
 void TraverseCallChain(const sem::Function* from, const sem::Function* to, CALLBACK&& callback) {
     for (auto* f : from->TransitivelyCalledFunctions()) {
@@ -445,13 +434,6 @@ bool Validator::StorageTexture(const core::type::StorageTexture* t, const Source
     if (!IsValidStorageTextureTexelFormat(t->TexelFormat())) {
         AddError(source) << "image format must be one of the texel formats specified for storage "
                             "textures in https://gpuweb.github.io/gpuweb/wgsl/#texel-formats";
-        return false;
-    }
-
-    if (mode_ == wgsl::ValidationMode::kCompat &&
-        IsInvalidStorageTextureTexelFormatInCompatibilityMode(t->TexelFormat())) {
-        AddError(source) << "format " << t->TexelFormat()
-                         << " is not supported as a storage texture in compatibility mode";
         return false;
     }
 
