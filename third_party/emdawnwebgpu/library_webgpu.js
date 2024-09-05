@@ -159,7 +159,7 @@ var LibraryWebGPU = {
       var layoutPtr = ptr + {{{ C_STRUCTS.WGPUImageCopyBuffer.layout }}};
       var bufferCopyView = WebGPU.makeTextureDataLayout(layoutPtr);
       bufferCopyView["buffer"] = WebGPU._tableGet(
-        {{{ makeGetValue('ptr', C_STRUCTS.WGPUImageCopyBuffer.buffer, '*') }}});
+        {{{ makeGetValue('ptr', C_STRUCTS.WGPUImageCopyBuffer.buffer, '*') }}}).object;
       return bufferCopyView;
     },
 
@@ -608,7 +608,7 @@ var LibraryWebGPU = {
   },
 
   emwgpuAdapterRequestDevice__i53abi: false,
-  emwgpuAdapterRequestDevice__deps: ['$callUserCallback', '$stringToUTF8OnStack', 'emwgpuCreateQueue', 'emwgpuOnDeviceLostCompleted', 'emwgpuOnRequestDeviceCompleted', 'emwgpuOnUncapturedError'],
+  emwgpuAdapterRequestDevice__deps: ['$withStackSave', '$callUserCallback', '$stringToUTF8OnStack', 'emwgpuCreateQueue', 'emwgpuOnDeviceLostCompleted', 'emwgpuOnRequestDeviceCompleted', 'emwgpuOnUncapturedError'],
   emwgpuAdapterRequestDevice: (
     adapterPtr,
     futureIdL, futureIdH,
@@ -736,7 +736,7 @@ var LibraryWebGPU = {
       withStackSave(() => {
         var messagePtr = stringToUTF8OnStack(ex.message);
         _emwgpuOnRequestDeviceCompleted(futureIdL, futureIdH, {{{ gpu.RequestDeviceStatus.Error }}}, devicePtr, messagePtr);
-        if (deviceLostFutureId) {
+        if (hasDeviceLostFutureId) {
           _emwgpuOnDeviceLostCompleted(deviceLostFutureIdL, deviceLostFutureIdH, {{{ gpu.DeviceLostReason.FailedCreation }}}, messagePtr);
         }
       });
@@ -1086,8 +1086,8 @@ var LibraryWebGPU = {
 
   wgpuCommandEncoderCopyBufferToBuffer: (encoderPtr, srcPtr, srcOffset, dstPtr, dstOffset, size) => {
     var commandEncoder = WebGPU._tableGet(encoderPtr);
-    var src = WebGPU._tableGet(srcPtr);
-    var dst = WebGPU._tableGet(dstPtr);
+    var src = WebGPU._tableGet(srcPtr).object;
+    var dst = WebGPU._tableGet(dstPtr).object;
     commandEncoder.copyBufferToBuffer(src, srcOffset, dst, dstOffset, size);
   },
 
@@ -1901,7 +1901,7 @@ var LibraryWebGPU = {
   },
 
   emwgpuInstanceRequestAdapter__i53abi: false,
-  emwgpuInstanceRequestAdapter__deps: ['$callUserCallback', '$stringToUTF8OnStack', 'emwgpuCreateAdapter', 'emwgpuOnRequestAdapterCompleted'],
+  emwgpuInstanceRequestAdapter__deps: ['$withStackSave', '$callUserCallback', '$stringToUTF8OnStack', 'emwgpuCreateAdapter', 'emwgpuOnRequestAdapterCompleted'],
   emwgpuInstanceRequestAdapter: (instancePtr, futureIdL, futureIdH, options) => {
     var opts;
     if (options) {
