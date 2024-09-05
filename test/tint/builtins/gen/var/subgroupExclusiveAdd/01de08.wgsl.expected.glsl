@@ -1,4 +1,4 @@
-SKIP: FAILED
+SKIP: INVALID
 
 
 enable f16;

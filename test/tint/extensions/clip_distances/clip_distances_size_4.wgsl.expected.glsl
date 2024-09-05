@@ -1,4 +1,4 @@
-SKIP: FAILED
+SKIP: INVALID
 
 
 enable clip_distances;

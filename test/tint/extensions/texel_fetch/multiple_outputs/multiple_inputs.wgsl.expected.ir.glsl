@@ -1,4 +1,4 @@
-SKIP: FAILED
+SKIP: INVALID
 
 #version 310 es
 
