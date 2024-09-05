@@ -1250,7 +1250,7 @@
     "composite alpha mode": {
         "category": "enum",
         "values": [
-            {"value": 0, "name": "auto"},
+            {"value": 0, "name": "auto", "jsrepr": "undefined"},
             {"value": 1, "name": "opaque"},
             {"value": 2, "name": "premultiplied"},
             {"value": 3, "name": "unpremultiplied"},
