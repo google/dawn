@@ -551,8 +551,23 @@ struct State {
             [&](const core::type::F32*) { fn = BuiltinFn::kAsfloat; },  //
             TINT_ICE_ON_NO_MATCH);
 
+        // TODO(crbug.com/361794783): work around DXC failing on 'as' casts of constant integral
+        // splats by wrapping it with an explicit vector constructor.
+        // e.g. asuint(123.xx) -> asuint(int2(123.xx)))
+        bool castToSrcType = false;
+        auto* src_type = bitcast->Val()->Type();
+        if (src_type->IsIntegerVector()) {
+            if (auto* c = bitcast->Val()->As<core::ir::Constant>()) {
+                castToSrcType = c->Value()->Is<core::constant::Splat>();
+            }
+        }
+
         b.InsertBefore(bitcast, [&] {
-            b.CallWithResult<hlsl::ir::BuiltinCall>(bitcast->DetachResult(), fn, bitcast->Val());
+            auto* source = bitcast->Val();
+            if (castToSrcType) {
+                source = b.Construct(src_type, source)->Result(0);
+            }
+            b.CallWithResult<hlsl::ir::BuiltinCall>(bitcast->DetachResult(), fn, source);
         });
         bitcast->Destroy();
     }

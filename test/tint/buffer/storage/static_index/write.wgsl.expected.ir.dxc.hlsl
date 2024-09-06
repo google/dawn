@@ -1,5 +1,3 @@
-SKIP: FAILED
-
 struct Inner {
   int scalar_i32;
   float scalar_f32;
@@ -109,13 +107,13 @@ void main() {
   sb.Store(4u, asuint(0));
   sb.Store(8u, 0u);
   sb.Store2(16u, asuint((0.0f).xx));
-  sb.Store2(24u, asuint((0).xx));
+  sb.Store2(24u, asuint(int2((0).xx)));
   sb.Store2(32u, (0u).xx);
   sb.Store3(48u, asuint((0.0f).xxx));
-  sb.Store3(64u, asuint((0).xxx));
+  sb.Store3(64u, asuint(int3((0).xxx)));
   sb.Store3(80u, (0u).xxx);
   sb.Store4(96u, asuint((0.0f).xxxx));
-  sb.Store4(112u, asuint((0).xxxx));
+  sb.Store4(112u, asuint(int4((0).xxxx)));
   sb.Store4(128u, (0u).xxxx);
   v_16(144u, float2x2((0.0f).xx, (0.0f).xx));
   v_15(160u, float2x3((0.0f).xxx, (0.0f).xxx));
@@ -134,5 +132,3 @@ void main() {
   v_1(552u, v_19);
 }
 
-
-tint executable returned error: exit status 0xe0000001

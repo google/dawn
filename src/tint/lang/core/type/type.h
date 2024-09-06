@@ -139,6 +139,8 @@ class Type : public Castable<Type, UniqueNode> {
     bool IsFloatScalarOrVector() const;
     /// @returns true if this type is an integer scalar
     bool IsIntegerScalar() const;
+    /// @returns true if this type is a integer vector
+    bool IsIntegerVector() const;
     /// @returns true if this type is an integer scalar or vector
     bool IsIntegerScalarOrVector() const;
     /// @returns true if this type is a signed integer scalar

@@ -1,5 +1,3 @@
-SKIP: FAILED
-
 struct main_inputs {
   uint idx : SV_GroupIndex;
 };
@@ -160,19 +158,19 @@ void main_inner(uint idx) {
   uint v_26 = (16u + (uint(idx) * 800u));
   sb.Store2(v_26, asuint((0.0f).xx));
   uint v_27 = (24u + (uint(idx) * 800u));
-  sb.Store2(v_27, asuint((0).xx));
+  sb.Store2(v_27, asuint(int2((0).xx)));
   sb.Store2((32u + (uint(idx) * 800u)), (0u).xx);
   sb.Store<vector<float16_t, 2> >((40u + (uint(idx) * 800u)), (float16_t(0.0h)).xx);
   uint v_28 = (48u + (uint(idx) * 800u));
   sb.Store3(v_28, asuint((0.0f).xxx));
   uint v_29 = (64u + (uint(idx) * 800u));
-  sb.Store3(v_29, asuint((0).xxx));
+  sb.Store3(v_29, asuint(int3((0).xxx)));
   sb.Store3((80u + (uint(idx) * 800u)), (0u).xxx);
   sb.Store<vector<float16_t, 3> >((96u + (uint(idx) * 800u)), (float16_t(0.0h)).xxx);
   uint v_30 = (112u + (uint(idx) * 800u));
   sb.Store4(v_30, asuint((0.0f).xxxx));
   uint v_31 = (128u + (uint(idx) * 800u));
-  sb.Store4(v_31, asuint((0).xxxx));
+  sb.Store4(v_31, asuint(int4((0).xxxx)));
   sb.Store4((144u + (uint(idx) * 800u)), (0u).xxxx);
   sb.Store<vector<float16_t, 4> >((160u + (uint(idx) * 800u)), (float16_t(0.0h)).xxxx);
   v_23((168u + (uint(idx) * 800u)), float2x2((0.0f).xx, (0.0f).xx));
@@ -204,5 +202,3 @@ void main(main_inputs inputs) {
   main_inner(inputs.idx);
 }
 
-
-tint executable returned error: exit status 0xe0000001

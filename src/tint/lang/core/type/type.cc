@@ -108,6 +108,10 @@ bool Type::IsIntegerScalar() const {
     return IsAnyOf<U32, I32>();
 }
 
+bool Type::IsIntegerVector() const {
+    return Is([](const Vector* v) { return v->Type()->IsIntegerScalar(); });
+}
+
 bool Type::IsSignedIntegerScalar() const {
     return IsAnyOf<I32, AbstractInt>();
 }
