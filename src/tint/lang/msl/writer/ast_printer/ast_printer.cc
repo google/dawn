@@ -202,7 +202,7 @@ SanitizedResult Sanitize(const Program& in, const Options& options) {
         polyfills.sign_int = true;
         polyfills.texture_sample_base_clamp_to_edge_2d_f32 = true;
         polyfills.workgroup_uniform_load = true;
-        polyfills.dot_4x8_packed = options.polyfill_dot_4x8_packed;
+        polyfills.dot_4x8_packed = true;
         polyfills.pack_unpack_4x8 = true;
         polyfills.pack_4xu8_clamp = true;
         data.Add<ast::transform::BuiltinPolyfill::Config>(polyfills);
@@ -736,10 +736,6 @@ bool ASTPrinter::EmitBuiltinCall(StringStream& out,
             return EmitDegreesCall(out, expr, builtin);
         case wgsl::BuiltinFn::kRadians:
             return EmitRadiansCall(out, expr, builtin);
-        case wgsl::BuiltinFn::kDot4I8Packed:
-            return EmitDot4I8PackedCall(out, expr, builtin);
-        case wgsl::BuiltinFn::kDot4U8Packed:
-            return EmitDot4U8PackedCall(out, expr, builtin);
 
         case wgsl::BuiltinFn::kPack2X16Float:
         case wgsl::BuiltinFn::kUnpack2X16Float: {
@@ -1592,32 +1588,6 @@ bool ASTPrinter::EmitDotCall(StringStream& out,
     }
     out << ")";
     return true;
-}
-
-bool ASTPrinter::EmitDot4I8PackedCall(StringStream& out,
-                                      const ast::CallExpression* expr,
-                                      const sem::BuiltinFn* builtin) {
-    return CallBuiltinHelper(
-        out, expr, builtin, [&](TextBuffer* b, const std::vector<std::string>& params) {
-            Line(b) << "char4 vec1 = as_type<char4>(" << params[0] << ");";
-            Line(b) << "char4 vec2 = as_type<char4>(" << params[1] << ");";
-            Line(b) << "return vec1[0] * vec2[0] + vec1[1] * vec2[1] + vec1[2] * vec2[2] + vec1[3] "
-                       "* vec2[3];";
-            return true;
-        });
-}
-
-bool ASTPrinter::EmitDot4U8PackedCall(StringStream& out,
-                                      const ast::CallExpression* expr,
-                                      const sem::BuiltinFn* builtin) {
-    return CallBuiltinHelper(
-        out, expr, builtin, [&](TextBuffer* b, const std::vector<std::string>& params) {
-            Line(b) << "uchar4 vec1 = as_type<uchar4>(" << params[0] << ");";
-            Line(b) << "uchar4 vec2 = as_type<uchar4>(" << params[1] << ");";
-            Line(b) << "return vec1[0] * vec2[0] + vec1[1] * vec2[1] + vec1[2] * vec2[2] + vec1[3] "
-                       "* vec2[3];";
-            return true;
-        });
 }
 
 bool ASTPrinter::EmitModfCall(StringStream& out,

@@ -79,9 +79,6 @@ struct State {
     /// A map from an integer vector type to a dot polyfill.
     Hashmap<const core::type::Vector*, core::ir::Function*, 4> integer_dot_polyfills{};
 
-    /// A map from an integer type to a packed 8-bit dot polyfill.
-    Hashmap<const core::type::Type*, core::ir::Function*, 2> packed_8bit_integer_dot_polyfills{};
-
     /// Process the module.
     void Process() {
         // Find the builtins that need replacing.
@@ -102,8 +99,6 @@ struct State {
                     case core::BuiltinFn::kAtomicXor:
                     case core::BuiltinFn::kDistance:
                     case core::BuiltinFn::kDot:
-                    case core::BuiltinFn::kDot4I8Packed:
-                    case core::BuiltinFn::kDot4U8Packed:
                     case core::BuiltinFn::kFrexp:
                     case core::BuiltinFn::kLength:
                     case core::BuiltinFn::kModf:
@@ -183,10 +178,6 @@ struct State {
                     break;
                 case core::BuiltinFn::kDot:
                     Dot(builtin);
-                    break;
-                case core::BuiltinFn::kDot4I8Packed:
-                case core::BuiltinFn::kDot4U8Packed:
-                    Dot4x8Packed(builtin);
                     break;
                 case core::BuiltinFn::kFrexp:
                     Frexp(builtin);
@@ -391,51 +382,6 @@ struct State {
                 b.CallWithResult<msl::ir::BuiltinCall>(builtin->DetachResult(),
                                                        msl::BuiltinFn::kDot, arg0, arg1);
             }
-        });
-        builtin->Destroy();
-    }
-
-    /// Polyfill a packed 8-bit dot product call.
-    /// @param builtin the builtin call instruction
-    void Dot4x8Packed(core::ir::CoreBuiltinCall* builtin) {
-        b.InsertBefore(builtin, [&] {
-            auto* arg0 = builtin->Args()[0];
-            auto* arg1 = builtin->Args()[1];
-            auto* int32 = builtin->Result(0)->Type();
-            auto* int8 = int32->Is<core::type::I32>()
-                             ? static_cast<const core::type::Type*>(ty.i8())
-                             : static_cast<const core::type::Type*>(ty.u8());
-            // Calls to packed 8-bit dot products are polyfilled by casting to [u]char4, performing
-            // the dot product, and converting the result to a {i,u}32:
-            //   uchar4 vec1 = as_type<uchar4>(param_0);
-            //   uchar4 vec2 = as_type<uchar4>(param_1);
-            //   result = uint(vec1[0] * vec2[0] + vec1[1] * vec2[1]
-            //               + vec1[2] * vec2[2] + vec1[3] * vec2[3]);
-            auto* polyfill = packed_8bit_integer_dot_polyfills.GetOrAdd(int32, [&] {
-                auto* lhs_32 = b.FunctionParam("lhs", ty.u32());
-                auto* rhs_32 = b.FunctionParam("rhs", ty.u32());
-                auto* func = b.Function("tint_packed_8bit_dot", int32);
-                func->SetParams({lhs_32, rhs_32});
-                b.Append(func->Block(), [&] {
-                    auto* lhs = b.Bitcast(ty.vec4(int8), lhs_32);
-                    auto* rhs = b.Bitcast(ty.vec4(int8), rhs_32);
-                    core::ir::Value* sum = nullptr;
-                    for (uint32_t i = 0; i < 4; i++) {
-                        auto* l = b.Access(int8, lhs, u32(i));
-                        auto* r = b.Access(int8, rhs, u32(i));
-                        auto* mul = b.Binary<ir::Binary>(core::BinaryOp::kMultiply, int8, l, r);
-                        if (sum) {
-                            auto* add = b.Binary<ir::Binary>(core::BinaryOp::kAdd, int8, sum, mul);
-                            sum = add->Result(0);
-                        } else {
-                            sum = mul->Result(0);
-                        }
-                    }
-                    b.Return(func, b.Convert(int32, sum));
-                });
-                return func;
-            });
-            b.CallWithResult(builtin->DetachResult(), polyfill, arg0, arg1);
         });
         builtin->Destroy();
     }

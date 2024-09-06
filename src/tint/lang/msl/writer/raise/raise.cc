@@ -84,6 +84,7 @@ Result<RaiseResult> Raise(core::ir::Module& module, const Options& options) {
         core::ir::transform::BuiltinPolyfillConfig core_polyfills{};
         core_polyfills.clamp_int = true;
         core_polyfills.degrees = true;
+        core_polyfills.dot_4x8_packed = true;
         core_polyfills.extract_bits = core::ir::transform::BuiltinPolyfillLevel::kClampOrRangeCheck;
         core_polyfills.first_leading_bit = true;
         core_polyfills.first_trailing_bit = true;

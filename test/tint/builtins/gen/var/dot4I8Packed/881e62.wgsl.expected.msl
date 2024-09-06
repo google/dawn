@@ -2,16 +2,20 @@
 
 using namespace metal;
 
-int tint_dot4I8Packed(uint param_0, uint param_1) {
-  char4 vec1 = as_type<char4>(param_0);
-  char4 vec2 = as_type<char4>(param_1);
-  return vec1[0] * vec2[0] + vec1[1] * vec2[1] + vec1[2] * vec2[2] + vec1[3] * vec2[3];
+template<typename T>
+T tint_dot4(vec<T,4> a, vec<T,4> b) {
+  return a[0]*b[0] + a[1]*b[1] + a[2]*b[2] + a[3]*b[3];
+}
+int tint_dot4_i8_packed(uint a, uint b) {
+  int4 const a_i8 = (as_type<int4>((uint4(a) << uint4(24u, 16u, 8u, 0u))) >> uint4(24u));
+  int4 const b_i8 = (as_type<int4>((uint4(b) << uint4(24u, 16u, 8u, 0u))) >> uint4(24u));
+  return tint_dot4(a_i8, b_i8);
 }
 
 int dot4I8Packed_881e62() {
   uint arg_0 = 1u;
   uint arg_1 = 1u;
-  int res = tint_dot4I8Packed(arg_0, arg_1);
+  int res = tint_dot4_i8_packed(arg_0, arg_1);
   return res;
 }
 

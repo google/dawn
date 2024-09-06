@@ -552,14 +552,6 @@ void PhysicalDevice::SetupBackendDeviceToggles(dawn::platform::Platform* platfor
         deviceToggles->Default(
             Toggle::MetalUseBothDepthAndStencilAttachmentsForCombinedDepthStencilFormats, true);
     }
-
-    // Packed 4x8 integer dot products fail on Macbook Pro 16" with AMD Radeon Pro 5300M,
-    // which are the RDNA1 architecture.
-    // Conservatively, polyfill these functions on RDNA1 and RDNA2.
-    // crbug.com/355485146
-    if (gpu_info::IsAMDRDNA1(vendorId, deviceId) || gpu_info::IsAMDRDNA2(vendorId, deviceId)) {
-        deviceToggles->Default(Toggle::PolyFillPacked4x8DotProduct, true);
-    }
 #endif
 }
 
