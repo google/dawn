@@ -965,8 +965,7 @@ def as_wasmType(x):
         if x.category == 'enum':
             return 'i'
         elif x.category == 'bitmask':
-            # TODO(crbug.com/347732150): Change to 'j' when bitmasks are 64-bit
-            return 'i'
+            return 'j'
         elif x.category in ['object', 'function pointer']:
             return 'p'
         elif x.category == 'native':

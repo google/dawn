@@ -84,7 +84,9 @@ class RefCounted : NonMovable {
   static constexpr bool HasExternalRefCount = false;
 
   void AddRef() {
-    assert(mRefCount.fetch_add(1u, std::memory_order_relaxed) >= 1);
+    [[maybe_unused]] uint64_t oldRefCount =
+        mRefCount.fetch_add(1u, std::memory_order_relaxed);
+    assert(oldRefCount >= 1);
   }
 
   void Release() {
@@ -135,11 +137,7 @@ class Ref {
                 "Cannot make a Ref<T> when T is not a Refcounted type.");
 
   Ref() : mValue(nullptr) {}
-  ~Ref() {
-    if (mValue) {
-      mValue->Release();
-    }
-  }
+  ~Ref() { Release(mValue); }
 
   // Constructors from nullptr.
   // NOLINTNEXTLINE(runtime/explicit)

@@ -703,7 +703,9 @@ var LibraryWebGPU = {
 
       // Set up device lost promise resolution.
       if (hasDeviceLostFutureId) {
+        {{{ runtimeKeepalivePush() }}}
         WebGPU._futureInsert(deviceLostFutureIdL, deviceLostFutureIdH, device.lost.then((info) => {
+          {{{ runtimeKeepalivePop() }}}
           // Unset the uncaptured error handler.
           device.onuncapturederror = (ev) => {};
           withStackSave(() => {
