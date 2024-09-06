@@ -235,35 +235,45 @@ TEST_P(SurfaceTests, ReconfigureBasic) {
 TEST_P(SurfaceTests, ReconfigureAfterGetCurrentTexture) {
     wgpu::Surface surface = CreateTestSurface();
     wgpu::SurfaceConfiguration config = GetPreferredConfiguration(surface);
-    wgpu::SurfaceTexture surfaceTexture;
 
-    surface.Configure(&config);
-    surface.GetCurrentTexture(&surfaceTexture);
-    ClearTexture(surfaceTexture.texture, {1.0, 0.0, 0.0, 1.0});
+    {
+        surface.Configure(&config);
+        wgpu::SurfaceTexture surfaceTexture;
+        surface.GetCurrentTexture(&surfaceTexture);
+        ClearTexture(surfaceTexture.texture, {1.0, 0.0, 0.0, 1.0});
+    }
 
-    surface.Configure(&config);
-    surface.GetCurrentTexture(&surfaceTexture);
-    ClearTexture(surfaceTexture.texture, {0.0, 1.0, 0.0, 1.0});
-    surface.Present();
+    {
+        surface.Configure(&config);
+        wgpu::SurfaceTexture surfaceTexture;
+        surface.GetCurrentTexture(&surfaceTexture);
+        ClearTexture(surfaceTexture.texture, {0.0, 1.0, 0.0, 1.0});
+        surface.Present();
+    }
 }
 
 // Test unconfiguring then reconfiguring the surface
 TEST_P(SurfaceTests, ReconfigureAfterUnconfigure) {
     wgpu::Surface surface = CreateTestSurface();
     wgpu::SurfaceConfiguration config = GetPreferredConfiguration(surface);
-    wgpu::SurfaceTexture surfaceTexture;
 
-    surface.Configure(&config);
-    surface.GetCurrentTexture(&surfaceTexture);
-    ClearTexture(surfaceTexture.texture, {1.0, 0.0, 0.0, 1.0});
-    surface.Present();
+    {
+        surface.Configure(&config);
+        wgpu::SurfaceTexture surfaceTexture;
+        surface.GetCurrentTexture(&surfaceTexture);
+        ClearTexture(surfaceTexture.texture, {1.0, 0.0, 0.0, 1.0});
+        surface.Present();
+    }
 
     surface.Unconfigure();
 
-    surface.Configure(&config);
-    surface.GetCurrentTexture(&surfaceTexture);
-    ClearTexture(surfaceTexture.texture, {0.0, 1.0, 0.0, 1.0});
-    surface.Present();
+    {
+        surface.Configure(&config);
+        wgpu::SurfaceTexture surfaceTexture;
+        surface.GetCurrentTexture(&surfaceTexture);
+        ClearTexture(surfaceTexture.texture, {0.0, 1.0, 0.0, 1.0});
+        surface.Present();
+    }
 }
 
 // Test unconfiguring after GetCurrentTexture but before the Present
@@ -299,7 +309,6 @@ TEST_P(SurfaceTests, SwitchPresentMode) {
 
     wgpu::Surface surface1 = CreateTestSurface();
     wgpu::Surface surface2 = CreateTestSurface();
-    wgpu::SurfaceTexture surfaceTexture;
 
     wgpu::SurfaceCapabilities capabilities;
     surface1.GetCapabilities(adapter, &capabilities);
@@ -315,19 +324,26 @@ TEST_P(SurfaceTests, SwitchPresentMode) {
 
             wgpu::SurfaceConfiguration config = GetPreferredConfiguration(surface1);
 
-            config.presentMode = mode1;
-            surface1.Configure(&config);
-            surface1.GetCurrentTexture(&surfaceTexture);
-            ClearTexture(surfaceTexture.texture, {0.0, 0.0, 0.0, 1.0});
-            surface1.Present();
-            surface1.Unconfigure();
+            {
+                config.presentMode = mode1;
+                surface1.Configure(&config);
 
-            config.presentMode = mode2;
-            surface2.Configure(&config);
-            surface2.GetCurrentTexture(&surfaceTexture);
-            ClearTexture(surfaceTexture.texture, {0.0, 0.0, 0.0, 1.0});
-            surface2.Present();
-            surface2.Unconfigure();
+                wgpu::SurfaceTexture surfaceTexture;
+                surface1.GetCurrentTexture(&surfaceTexture);
+                ClearTexture(surfaceTexture.texture, {0.0, 0.0, 0.0, 1.0});
+                surface1.Present();
+            }
+
+            {
+                config.presentMode = mode2;
+                surface2.Configure(&config);
+
+                wgpu::SurfaceTexture surfaceTexture;
+                surface2.GetCurrentTexture(&surfaceTexture);
+                ClearTexture(surfaceTexture.texture, {0.0, 0.0, 0.0, 1.0});
+                surface2.Present();
+                surface2.Unconfigure();
+            }
         }
     }
 }
@@ -335,7 +351,6 @@ TEST_P(SurfaceTests, SwitchPresentMode) {
 // Test resizing the surface and without resizing the window.
 TEST_P(SurfaceTests, ResizingSurfaceOnly) {
     wgpu::Surface surface = CreateTestSurface();
-    wgpu::SurfaceTexture surfaceTexture;
 
     for (int i = 0; i < 10; i++) {
         wgpu::SurfaceConfiguration config = GetPreferredConfiguration(surface);
@@ -343,6 +358,7 @@ TEST_P(SurfaceTests, ResizingSurfaceOnly) {
         config.height -= i * 10;
 
         surface.Configure(&config);
+        wgpu::SurfaceTexture surfaceTexture;
         surface.GetCurrentTexture(&surfaceTexture);
         ClearTexture(surfaceTexture.texture, {0.05f * i, 0.0, 0.0, 1.0});
         surface.Present();
@@ -353,7 +369,6 @@ TEST_P(SurfaceTests, ResizingSurfaceOnly) {
 TEST_P(SurfaceTests, ResizingWindowOnly) {
     wgpu::Surface surface = CreateTestSurface();
     wgpu::SurfaceConfiguration config = GetPreferredConfiguration(surface);
-    wgpu::SurfaceTexture surfaceTexture;
 
     surface.Configure(&config);
 
@@ -361,6 +376,7 @@ TEST_P(SurfaceTests, ResizingWindowOnly) {
         glfwSetWindowSize(window.get(), 400 - 10 * i, 400 + 10 * i);
         glfwPollEvents();
 
+        wgpu::SurfaceTexture surfaceTexture;
         surface.GetCurrentTexture(&surfaceTexture);
         ClearTexture(surfaceTexture.texture, {0.05f * i, 0.0, 0.0, 1.0});
         surface.Present();
@@ -373,7 +389,6 @@ TEST_P(SurfaceTests, ResizingWindowAndSurface) {
     DAWN_SUPPRESS_TEST_IF(IsLinux() && IsVulkan() && IsNvidia());
 
     wgpu::Surface surface = CreateTestSurface();
-    wgpu::SurfaceTexture surfaceTexture;
 
     for (int i = 0; i < 10; i++) {
         glfwSetWindowSize(window.get(), 400 - 10 * i, 400 + 10 * i);
@@ -388,6 +403,7 @@ TEST_P(SurfaceTests, ResizingWindowAndSurface) {
         config.height = height;
         surface.Configure(&config);
 
+        wgpu::SurfaceTexture surfaceTexture;
         surface.GetCurrentTexture(&surfaceTexture);
         ClearTexture(surfaceTexture.texture, {0.05f * i, 0.0, 0.0, 1.0});
         surface.Present();
@@ -405,7 +421,6 @@ TEST_P(SurfaceTests, SwitchingDevice) {
     wgpu::Device device2 = CreateDevice();
 
     wgpu::Surface surface = CreateTestSurface();
-    wgpu::SurfaceTexture surfaceTexture;
 
     wgpu::SurfaceConfiguration config = GetPreferredConfiguration(surface);
 
@@ -419,6 +434,7 @@ TEST_P(SurfaceTests, SwitchingDevice) {
 
         config.device = deviceToUse;
         surface.Configure(&config);
+        wgpu::SurfaceTexture surfaceTexture;
         surface.GetCurrentTexture(&surfaceTexture);
         ClearTexture(surfaceTexture.texture, {0.0, 1.0, 0.0, 1.0}, deviceToUse);
         surface.Present();
