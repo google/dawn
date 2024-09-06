@@ -43,7 +43,7 @@
     makeCheckDescriptor: function(descriptor) {
       // Assert descriptor is non-null, then that its nextInChain is null.
       // For descriptors that aren't the first in the chain (e.g
-      // ShaderModuleSPIRVDescriptor), there is no .nextInChain pointer, but
+      // ShaderSourceSPIRV), there is no .nextInChain pointer, but
       // instead a ChainedStruct object: .chain. So we need to check if
       // .chain.nextInChain is null. As long as nextInChain and chain are always
       // the first member in the struct, descriptor.nextInChain and
@@ -1041,12 +1041,12 @@ var LibraryWebGPU = {
       if (nextInChainPtr !== 0) {
         var sType = {{{ gpu.makeGetU32('nextInChainPtr', C_STRUCTS.WGPUChainedStruct.sType) }}};
 #if ASSERTIONS
-        assert(sType === {{{ gpu.SType.RenderPassDescriptorMaxDrawCount }}});
+        assert(sType === {{{ gpu.SType.RenderPassMaxDrawCount }}});
         assert(0 === {{{ makeGetValue('nextInChainPtr', C_STRUCTS.WGPUChainedStruct.next, '*') }}});
 #endif
-        var renderPassDescriptorMaxDrawCount = nextInChainPtr;
-        {{{ gpu.makeCheckDescriptor('renderPassDescriptorMaxDrawCount') }}}
-        maxDrawCount = {{{ gpu.makeGetU64('renderPassDescriptorMaxDrawCount', C_STRUCTS.WGPURenderPassDescriptorMaxDrawCount.maxDrawCount) }}};
+        var renderPassMaxDrawCount = nextInChainPtr;
+        {{{ gpu.makeCheckDescriptor('renderPassMaxDrawCount') }}}
+        maxDrawCount = {{{ gpu.makeGetU64('renderPassMaxDrawCount', C_STRUCTS.WGPURenderPassMaxDrawCount.maxDrawCount) }}};
       }
 
       var desc = {
@@ -1663,9 +1663,9 @@ var LibraryWebGPU = {
     if (labelPtr) desc["label"] = UTF8ToString(labelPtr);
 
     switch (sType) {
-      case {{{ gpu.SType.ShaderModuleSPIRVDescriptor }}}: {
-        var count = {{{ gpu.makeGetU32('nextInChainPtr', C_STRUCTS.WGPUShaderModuleSPIRVDescriptor.codeSize) }}};
-        var start = {{{ makeGetValue('nextInChainPtr', C_STRUCTS.WGPUShaderModuleSPIRVDescriptor.code, '*') }}};
+      case {{{ gpu.SType.ShaderSourceSPIRV }}}: {
+        var count = {{{ gpu.makeGetU32('nextInChainPtr', C_STRUCTS.WGPUShaderSourceSPIRV.codeSize) }}};
+        var start = {{{ makeGetValue('nextInChainPtr', C_STRUCTS.WGPUShaderSourceSPIRV.code, '*') }}};
         var offset = {{{ getHeapOffset('start', 'u32') }}};
 #if PTHREADS
         // Chrome can't currently handle a SharedArrayBuffer view here, so make a copy.
@@ -1675,8 +1675,8 @@ var LibraryWebGPU = {
 #endif
         break;
       }
-      case {{{ gpu.SType.ShaderModuleWGSLDescriptor }}}: {
-        var sourcePtr = {{{ makeGetValue('nextInChainPtr', C_STRUCTS.WGPUShaderModuleWGSLDescriptor.code, '*') }}};
+      case {{{ gpu.SType.ShaderSourceWGSL }}}: {
+        var sourcePtr = {{{ makeGetValue('nextInChainPtr', C_STRUCTS.WGPUShaderSourceWGSL.code, '*') }}};
         if (sourcePtr) {
           desc["code"] = UTF8ToString(sourcePtr);
         }
@@ -1867,13 +1867,13 @@ var LibraryWebGPU = {
     var nextInChainPtr = {{{ makeGetValue('descriptor', C_STRUCTS.WGPUSurfaceDescriptor.nextInChain, '*') }}};
 #if ASSERTIONS
     assert(nextInChainPtr !== 0);
-    assert({{{ gpu.SType.SurfaceDescriptorFromCanvasHTMLSelector }}} ===
+    assert({{{ gpu.SType.SurfaceSourceCanvasHTMLSelector_Emscripten }}} ===
       {{{ gpu.makeGetU32('nextInChainPtr', C_STRUCTS.WGPUChainedStruct.sType) }}});
 #endif
-    var descriptorFromCanvasHTMLSelector = nextInChainPtr;
+    var sourceCanvasHTMLSelector = nextInChainPtr;
 
-    {{{ gpu.makeCheckDescriptor('descriptorFromCanvasHTMLSelector') }}}
-    var selectorPtr = {{{ makeGetValue('descriptorFromCanvasHTMLSelector', C_STRUCTS.WGPUSurfaceDescriptorFromCanvasHTMLSelector.selector, '*') }}};
+    {{{ gpu.makeCheckDescriptor('sourceCanvasHTMLSelector') }}}
+    var selectorPtr = {{{ makeGetValue('sourceCanvasHTMLSelector', C_STRUCTS.WGPUSurfaceSourceCanvasHTMLSelector_Emscripten.selector, '*') }}};
     {{{ gpu.makeCheck('selectorPtr') }}}
     var canvas = findCanvasEventTarget(selectorPtr);
 #if OFFSCREENCANVAS_SUPPORT
