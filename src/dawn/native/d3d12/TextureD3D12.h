@@ -55,9 +55,11 @@ class Texture final : public d3d::Texture {
   public:
     static ResultOrError<Ref<Texture>> Create(Device* device,
                                               const UnpackedPtr<TextureDescriptor>& descriptor);
-    static ResultOrError<Ref<Texture>> Create(Device* device,
-                                              const UnpackedPtr<TextureDescriptor>& descriptor,
-                                              ComPtr<ID3D12Resource> d3d12Texture);
+    static ResultOrError<Ref<Texture>> CreateForSwapChain(
+        Device* device,
+        const UnpackedPtr<TextureDescriptor>& descriptor,
+        ComPtr<ID3D12Resource> d3d12Texture,
+        D3D12_RESOURCE_STATES state);
     static ResultOrError<Ref<Texture>> CreateFromSharedTextureMemory(
         SharedTextureMemory* memory,
         const UnpackedPtr<TextureDescriptor>& descriptor);
@@ -109,6 +111,8 @@ class Texture final : public d3d::Texture {
     // all subresources are now in the COMMON state.
     void ResetSubresourceStateAndDecayToCommon();
 
+    D3D12_RESOURCE_STATES GetCurrentStateForSwapChain() const;
+
   private:
     using Base = d3d::Texture;
 
@@ -120,7 +124,8 @@ class Texture final : public d3d::Texture {
                                            Ref<d3d::KeyedMutex> keyedMutex,
                                            std::vector<FenceAndSignalValue> waitFences,
                                            bool isSwapChainTexture);
-    MaybeError InitializeAsSwapChainTexture(ComPtr<ID3D12Resource> d3d12Texture);
+    MaybeError InitializeAsSwapChainTexture(ComPtr<ID3D12Resource> d3d12Texture,
+                                            D3D12_RESOURCE_STATES state);
 
     void SetLabelHelper(const char* prefix);
 

@@ -66,8 +66,17 @@ class SwapChain final : public d3d::SwapChain {
     // swapchain and buffers are removed, as that's a constraint for some DXGI operations.
     MaybeError DetachAndWaitForDeallocation() override;
 
-    std::vector<ComPtr<ID3D12Resource>> mBuffers;
-    std::vector<ExecutionSerial> mBufferLastUsedSerials;
+    struct Buffer {
+        ComPtr<ID3D12Resource> resource;
+        // Pretend all the buffers were last used at the beginning of time.
+        ExecutionSerial lastUsed = ExecutionSerial(0);
+        // SwapChain textures are as if in the COMMON state when first queried.
+        // We need to keep the state and not always assume COMMON because when a swapchain is
+        // reused, the underlying resource might have been transitioned when wrapped in the
+        // different wgpu::Texture already, and we need to remember that.
+        D3D12_RESOURCE_STATES acquireState = D3D12_RESOURCE_STATE_COMMON;
+    };
+    std::vector<Buffer> mBuffers;
     uint32_t mCurrentBuffer = 0;
 
     Ref<Texture> mApiTexture;

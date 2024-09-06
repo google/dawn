@@ -150,11 +150,13 @@ ResultOrError<Ref<Texture>> Texture::Create(Device* device,
 }
 
 // static
-ResultOrError<Ref<Texture>> Texture::Create(Device* device,
-                                            const UnpackedPtr<TextureDescriptor>& descriptor,
-                                            ComPtr<ID3D12Resource> d3d12Texture) {
+ResultOrError<Ref<Texture>> Texture::CreateForSwapChain(
+    Device* device,
+    const UnpackedPtr<TextureDescriptor>& descriptor,
+    ComPtr<ID3D12Resource> d3d12Texture,
+    D3D12_RESOURCE_STATES state) {
     Ref<Texture> dawnTexture = AcquireRef(new Texture(device, descriptor));
-    DAWN_TRY(dawnTexture->InitializeAsSwapChainTexture(std::move(d3d12Texture)));
+    DAWN_TRY(dawnTexture->InitializeAsSwapChainTexture(std::move(d3d12Texture), state));
     return std::move(dawnTexture);
 }
 
@@ -271,12 +273,16 @@ MaybeError Texture::InitializeAsInternalTexture() {
     return {};
 }
 
-MaybeError Texture::InitializeAsSwapChainTexture(ComPtr<ID3D12Resource> d3d12Texture) {
+MaybeError Texture::InitializeAsSwapChainTexture(ComPtr<ID3D12Resource> d3d12Texture,
+                                                 D3D12_RESOURCE_STATES state) {
     AllocationInfo info;
     info.mMethod = AllocationMethod::kExternal;
 
     D3D12_RESOURCE_DESC desc = d3d12Texture->GetDesc();
     mD3D12ResourceFlags = desc.Flags;
+
+    // Replace the default state of COMMON with what's passed in this constructor.
+    mSubresourceStateAndDecay.Fill({state, kMaxExecutionSerial, false});
 
     // When creating the ResourceHeapAllocation, the resource heap is set to nullptr because the
     // texture is owned externally. The texture's owning entity must remain responsible for
@@ -623,6 +629,11 @@ void Texture::TrackUsageAndGetResourceBarrierForPass(
             D3D12_RESOURCE_STATES newState = D3D12TextureUsage(syncInfo.usage, GetFormat());
             TransitionSubresourceRange(barriers, mergeRange, state, newState, pendingCommandSerial);
         });
+}
+
+D3D12_RESOURCE_STATES Texture::GetCurrentStateForSwapChain() const {
+    DAWN_ASSERT(GetFormat().aspects == Aspect::Color);
+    return mSubresourceStateAndDecay.Get(Aspect::Color, 0, 0).lastState;
 }
 
 SubresourceStorage<Texture::StateAndDecay> Texture::InitialSubresourceStateAndDecay() const {

@@ -247,7 +247,7 @@ TEST_P(SurfaceTests, ReconfigureAfterGetCurrentTexture) {
     surface.Present();
 }
 
-// Test inconfiguring then reconfiguring the surface
+// Test unconfiguring then reconfiguring the surface
 TEST_P(SurfaceTests, ReconfigureAfterUnconfigure) {
     wgpu::Surface surface = CreateTestSurface();
     wgpu::SurfaceConfiguration config = GetPreferredConfiguration(surface);
