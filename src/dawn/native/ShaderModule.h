@@ -279,6 +279,7 @@ struct EntryPointMetadata {
     bool usesSampleMaskOutput = false;
     bool usesSampleIndex = false;
     bool usesVertexIndex = false;
+    bool usesTextureLoadWithDepthTexture = false;
 };
 
 class ShaderModuleBase : public RefCountedWithExternalCount<ApiObjectBase>,

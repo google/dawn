@@ -94,6 +94,11 @@ ResultOrError<ShaderModuleEntryPoint> ValidateProgrammableStage(DeviceBase* devi
         DAWN_TRY(ValidateCompatibilityWithPipelineLayout(device, metadata, layout));
     }
 
+    DAWN_INVALID_IF(device->IsCompatibilityMode() && metadata.usesTextureLoadWithDepthTexture,
+                    "textureLoad can not be used with depth textures in compatibility mode in "
+                    "stage (%s), entry point \"%s\"",
+                    metadata.stage, entryPoint.name);
+
     // Validate if overridable constants exist in shader module
     // pipelineBase is not yet constructed at this moment so iterate constants from descriptor
     size_t numUninitializedConstants = metadata.uninitializedOverrides.size();

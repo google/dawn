@@ -35,7 +35,6 @@
 #include <utility>
 
 #include "src/tint/lang/core/fluent_types.h"
-#include "src/tint/lang/core/parameter_usage.h"
 #include "src/tint/lang/core/type/abstract_numeric.h"
 #include "src/tint/lang/core/type/atomic.h"
 #include "src/tint/lang/core/type/depth_multisampled_texture.h"
@@ -68,7 +67,6 @@
 #include "src/tint/lang/wgsl/ast/unary_op_expression.h"
 #include "src/tint/lang/wgsl/ast/variable_decl_statement.h"
 #include "src/tint/lang/wgsl/ast/workgroup_attribute.h"
-#include "src/tint/lang/wgsl/builtin_fn.h"
 #include "src/tint/lang/wgsl/sem/array.h"
 #include "src/tint/lang/wgsl/sem/break_if_statement.h"
 #include "src/tint/lang/wgsl/sem/call.h"
@@ -1911,19 +1909,6 @@ bool Validator::TextureBuiltinFn(const sem::Call* call) const {
 
     std::string func_name = builtin->str();
     auto& signature = builtin->Signature();
-
-    if (mode_ == wgsl::ValidationMode::kCompat) {
-        if (builtin->Fn() == wgsl::BuiltinFn::kTextureLoad) {
-            auto* arg = call->Arguments()[0];
-            if (arg->Type()
-                    ->IsAnyOf<core::type::DepthTexture, core::type::DepthMultisampledTexture>()) {
-                AddError(arg->Declaration()->source)
-                    << "use of " << arg->Type()->FriendlyName()
-                    << " with textureLoad is not allowed in compatibility mode";
-                return false;
-            }
-        }
-    }
 
     auto check_arg_is_constexpr = [&](core::ParameterUsage usage, int min, int max) {
         auto signed_index = signature.IndexOf(usage);

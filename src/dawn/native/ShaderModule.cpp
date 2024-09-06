@@ -670,6 +670,8 @@ ResultOrError<std::unique_ptr<EntryPointMetadata>> ReflectEntryPointUsingTint(
         metadata->usesNumWorkgroups = entryPoint.num_workgroups_used;
     }
 
+    metadata->usesTextureLoadWithDepthTexture = entryPoint.has_texture_load_with_depth_texture;
+
     const CombinedLimits& limits = device->GetLimits();
     const uint32_t maxVertexAttributes = limits.v1.maxVertexAttributes;
     const uint32_t maxInterStageShaderVariables = limits.v1.maxInterStageShaderVariables;

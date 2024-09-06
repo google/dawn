@@ -213,7 +213,48 @@ TEST_F(CompatValidationTest, CanNotCreatePipelineWithNonZeroDepthBiasClamp) {
     ASSERT_DEVICE_ERROR(device.CreateRenderPipeline(&testDescriptor));
 }
 
-TEST_F(CompatValidationTest, CanNotUseFragmentShaderWithSampleMask) {
+TEST_F(CompatValidationTest, CanNotCreatePipelineWithTextureLoadOfDepthTexture) {
+    wgpu::ShaderModule module = utils::CreateShaderModule(device, R"(
+        @group(0) @binding(0) var<storage, read_write> dstBuf : array<vec4f>;
+        @group(0) @binding(1) var tex1 : texture_2d<f32>;
+        @group(0) @binding(2) var tex2 : texture_depth_2d;
+        @group(0) @binding(3) var tex3 : texture_depth_2d_array;
+        @group(0) @binding(4) var tex4 : texture_depth_multisampled_2d;
+
+        @compute @workgroup_size(1) fn main1() {
+            dstBuf[0] = textureLoad(tex1, vec2(0), 0);
+        }
+
+        @compute @workgroup_size(1) fn main2() {
+            dstBuf[0] = vec4f(textureLoad(tex2, vec2(0), 0));
+        }
+
+        @compute @workgroup_size(1) fn main3() {
+            dstBuf[0] = vec4f(textureLoad(tex3, vec2(0), 0, 0));
+        }
+
+        @compute @workgroup_size(1) fn main4() {
+            dstBuf[4] = vec4f(textureLoad(tex4, vec2(0), 0));
+        }
+    )");
+
+    const char* entryPoints[] = {"main1", "main2", "main3", "main4"};
+    for (auto entryPoint : entryPoints) {
+        wgpu::ComputePipelineDescriptor pDesc;
+        pDesc.compute.module = module;
+        pDesc.compute.entryPoint = entryPoint;
+        if (entryPoint == entryPoints[0]) {
+            device.CreateComputePipeline(&pDesc);
+        } else {
+            ASSERT_DEVICE_ERROR(
+                device.CreateComputePipeline(&pDesc),
+                testing::HasSubstr(
+                    "textureLoad can not be used with depth textures in compatibility mode"));
+        }
+    }
+}
+
+TEST_F(CompatValidationTest, CanNotUseSampleMask) {
     wgpu::ShaderModule moduleSampleMaskOutput = utils::CreateShaderModule(device, R"(
         @vertex fn vs() -> @builtin(position) vec4f {
             return vec4f(1);
