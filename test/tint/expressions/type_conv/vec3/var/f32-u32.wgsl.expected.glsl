@@ -10,7 +10,7 @@ void unused_entry_point() {
   return;
 }
 uvec3 tint_ftou(vec3 v) {
-  return tint_select(uvec3(4294967295u), tint_select(uvec3(v), uvec3(0u), lessThan(v, vec3(0.0f))), lessThan(v, vec3(4294967040.0f)));
+  return tint_select(uvec3(4294967295u), tint_select(uvec3(v), uvec3(0u), lessThan(v, vec3(0.0f))), lessThanEqual(v, vec3(4294967040.0f)));
 }
 
 vec3 u = vec3(1.0f);

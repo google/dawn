@@ -6,7 +6,7 @@ struct tint_private_vars_struct {
 };
 
 uint2 tint_ftou(float2 v) {
-  return select(uint2(4294967295u), select(uint2(v), uint2(0u), (v < float2(0.0f))), (v < float2(4294967040.0f)));
+  return select(uint2(4294967295u), select(uint2(v), uint2(0u), (v < float2(0.0f))), (v <= float2(4294967040.0f)));
 }
 
 float2 m(thread tint_private_vars_struct* const tint_private_vars) {

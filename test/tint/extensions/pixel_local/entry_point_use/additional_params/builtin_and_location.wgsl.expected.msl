@@ -31,7 +31,7 @@ struct tint_symbol_2 {
 };
 
 uint tint_ftou(float v) {
-  return select(4294967295u, select(uint(v), 0u, (v < 0.0f)), (v < 4294967040.0f));
+  return select(4294967295u, select(uint(v), 0u, (v < 0.0f)), (v <= 4294967040.0f));
 }
 
 void f_inner(float4 pos, float4 uv, thread tint_private_vars_struct* const tint_private_vars) {

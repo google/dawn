@@ -1,5 +1,3 @@
-SKIP: FAILED
-
 
 void f() {
   int a = 1;

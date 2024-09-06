@@ -6,7 +6,7 @@ struct tint_private_vars_struct {
 };
 
 int tint_ftoi(float v) {
-  return select(2147483647, select(int(v), (-2147483647 - 1), (v < -2147483648.0f)), (v < 2147483520.0f));
+  return select(2147483647, select(int(v), (-2147483647 - 1), (v < -2147483648.0f)), (v <= 2147483520.0f));
 }
 
 void foo(float x) {

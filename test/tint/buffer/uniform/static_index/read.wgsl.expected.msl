@@ -80,7 +80,7 @@ tint_array<float3, 2> tint_unpack_vec3_in_composite_3(tint_array<tint_packed_vec
 }
 
 int tint_ftoi(float v) {
-  return select(2147483647, select(int(v), (-2147483647 - 1), (v < -2147483648.0f)), (v < 2147483520.0f));
+  return select(2147483647, select(int(v), (-2147483647 - 1), (v < -2147483648.0f)), (v <= 2147483520.0f));
 }
 
 struct S {

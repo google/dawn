@@ -28,6 +28,7 @@
 #include "src/tint/lang/wgsl/ast/transform/builtin_polyfill.h"
 
 #include <algorithm>
+#include <cstdint>
 #include <tuple>
 #include <unordered_map>
 #include <utility>
@@ -856,18 +857,21 @@ struct BuiltinPolyfill::State {
             AInt high_limit;
         };
         const bool is_signed = target->IsSignedIntegerScalarOrVector();
-        const Limits limits = is_signed ? Limits{
-                                              /* low_condition   */ -AFloat(0x80000000),
-                                              /* low_limit  */ -AInt(0x80000000),
-                                              /* high_condition  */ AFloat(0x7fffff80),
-                                              /* high_limit */ AInt(0x7fffffff),
-                                          }
-                                        : Limits{
-                                              /* low_condition   */ AFloat(0),
-                                              /* low_limit  */ AInt(0),
-                                              /* high_condition  */ AFloat(0xffffff00),
-                                              /* high_limit */ AInt(0xffffffff),
-                                          };
+        const uint32_t largest_signed_integer_float = 0x7fffff80;
+        const uint32_t largest_unsigned_integer_float = 0xffffff00;
+        const Limits limits =
+            is_signed ? Limits{
+                            /* low_condition   */ -AFloat(0x80000000),
+                            /* low_limit  */ -AInt(0x80000000),
+                            /* high_condition  */ AFloat(largest_signed_integer_float),
+                            /* high_limit */ AInt(0x7fffffff),
+                        }
+                      : Limits{
+                            /* low_condition   */ AFloat(0),
+                            /* low_limit  */ AInt(0),
+                            /* high_condition  */ AFloat(largest_unsigned_integer_float),
+                            /* high_limit */ AInt(0xffffffff),
+                        };
 
         const uint32_t width = WidthOf(target);
 
@@ -877,11 +881,14 @@ struct BuiltinPolyfill::State {
                                   ScalarOrVector(width, limits.low_limit),  //
                                   b.LessThan("v", ScalarOrVector(width, limits.low_condition)));
 
-        // select(high_limit, select_low, v < high_condition)
-        auto* select_high = b.Call(wgsl::BuiltinFn::kSelect,                  //
-                                   ScalarOrVector(width, limits.high_limit),  //
-                                   select_low,                                //
-                                   b.LessThan("v", ScalarOrVector(width, limits.high_condition)));
+        // select(high_limit, select_low, v <= high_condition)
+        // The equality test in the 'LessThanEqual' is used to ensure that the largest integer float
+        // will be converted to an integer.
+        auto* select_high =
+            b.Call(wgsl::BuiltinFn::kSelect,                  //
+                   ScalarOrVector(width, limits.high_limit),  //
+                   select_low,                                //
+                   b.LessThanEqual("v", ScalarOrVector(width, limits.high_condition)));
 
         auto name = b.Symbols().New(is_signed ? "tint_ftoi" : "tint_ftou");
         b.Func(name, tint::Vector{b.Param("v", T(source))}, T(target),

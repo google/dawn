@@ -4,7 +4,7 @@ void unused_entry_point() {
 }
 
 uint4 tint_ftou(float4 v) {
-  return ((v < (4294967040.0f).xxxx) ? ((v < (0.0f).xxxx) ? (0u).xxxx : uint4(v)) : (4294967295u).xxxx);
+  return ((v <= (4294967040.0f).xxxx) ? ((v < (0.0f).xxxx) ? (0u).xxxx : uint4(v)) : (4294967295u).xxxx);
 }
 
 static float t = 0.0f;

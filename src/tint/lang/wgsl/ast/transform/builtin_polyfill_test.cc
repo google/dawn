@@ -962,7 +962,7 @@ fn f() {
 )";
     auto* expect = R"(
 fn tint_ftoi(v : f32) -> i32 {
-  return select(2147483647, select(i32(v), -2147483648, (v < -2147483648.0)), (v < 2147483520.0));
+  return select(2147483647, select(i32(v), -2147483648, (v < -2147483648.0)), (v <= 2147483520.0));
 }
 
 fn f() {
@@ -985,7 +985,7 @@ fn f() {
 )";
     auto* expect = R"(
 fn tint_ftou(v : f32) -> u32 {
-  return select(4294967295, select(u32(v), 0, (v < 0.0)), (v < 4294967040.0));
+  return select(4294967295, select(u32(v), 0, (v < 0.0)), (v <= 4294967040.0));
 }
 
 fn f() {
@@ -1008,7 +1008,7 @@ fn f() {
 )";
     auto* expect = R"(
 fn tint_ftoi(v : vec3<f32>) -> vec3<i32> {
-  return select(vec3(2147483647), select(vec3<i32>(v), vec3(-2147483648), (v < vec3(-2147483648.0))), (v < vec3(2147483520.0)));
+  return select(vec3(2147483647), select(vec3<i32>(v), vec3(-2147483648), (v < vec3(-2147483648.0))), (v <= vec3(2147483520.0)));
 }
 
 fn f() {
@@ -1031,7 +1031,7 @@ fn f() {
 )";
     auto* expect = R"(
 fn tint_ftou(v : vec3<f32>) -> vec3<u32> {
-  return select(vec3(4294967295), select(vec3<u32>(v), vec3(0), (v < vec3(0.0))), (v < vec3(4294967040.0)));
+  return select(vec3(4294967295), select(vec3<u32>(v), vec3(0), (v < vec3(0.0))), (v <= vec3(4294967040.0)));
 }
 
 fn f() {

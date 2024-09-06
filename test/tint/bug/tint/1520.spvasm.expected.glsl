@@ -8,7 +8,7 @@ ivec4 tint_select(ivec4 param_0, ivec4 param_1, bvec4 param_2) {
 
 
 int tint_ftoi(float v) {
-  return ((v < 2147483520.0f) ? ((v < -2147483648.0f) ? (-2147483647 - 1) : int(v)) : 2147483647);
+  return ((v <= 2147483520.0f) ? ((v < -2147483648.0f) ? (-2147483647 - 1) : int(v)) : 2147483647);
 }
 
 layout(location = 0) in vec4 vcolor_S0_param_1;

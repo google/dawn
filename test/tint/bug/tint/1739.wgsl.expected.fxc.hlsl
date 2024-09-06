@@ -1,5 +1,5 @@
 uint2 tint_ftou(float2 v) {
-  return ((v < (4294967040.0f).xx) ? ((v < (0.0f).xx) ? (0u).xx : uint2(v)) : (4294967295u).xx);
+  return ((v <= (4294967040.0f).xx) ? ((v < (0.0f).xx) ? (0u).xx : uint2(v)) : (4294967295u).xx);
 }
 
 struct GammaTransferParams {

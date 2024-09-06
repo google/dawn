@@ -1,5 +1,5 @@
 uint3 tint_ftou(float3 v) {
-  return ((v < (4294967040.0f).xxx) ? ((v < (0.0f).xxx) ? (0u).xxx : uint3(v)) : (4294967295u).xxx);
+  return ((v <= (4294967040.0f).xxx) ? ((v < (0.0f).xxx) ? (0u).xxx : uint3(v)) : (4294967295u).xxx);
 }
 
 void marg8uintin() {

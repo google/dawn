@@ -31,7 +31,7 @@ struct tint_symbol_1 {
 };
 
 uint tint_ftou(float v) {
-  return ((v < 4294967040.0f) ? ((v < 0.0f) ? 0u : uint(v)) : 4294967295u);
+  return ((v <= 4294967040.0f) ? ((v < 0.0f) ? 0u : uint(v)) : 4294967295u);
 }
 
 void f_inner(float4 a, float4 b) {

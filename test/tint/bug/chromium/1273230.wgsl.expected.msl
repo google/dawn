@@ -26,7 +26,7 @@ struct Uniforms_tint_packed_vec3 {
 };
 
 uint3 tint_ftou(float3 v) {
-  return select(uint3(4294967295u), select(uint3(v), uint3(0u), (v < float3(0.0f))), (v < float3(4294967040.0f)));
+  return select(uint3(4294967295u), select(uint3(v), uint3(0u), (v < float3(0.0f))), (v <= float3(4294967040.0f)));
 }
 
 void marg8uintin() {

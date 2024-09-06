@@ -19,7 +19,7 @@ struct tint_array {
   if (VOLATILE_NAME)
 
 uint4 tint_ftou(float4 v) {
-  return select(uint4(4294967295u), select(uint4(v), uint4(0u), (v < float4(0.0f))), (v < float4(4294967040.0f)));
+  return select(uint4(4294967295u), select(uint4(v), uint4(0u), (v < float4(0.0f))), (v <= float4(4294967040.0f)));
 }
 
 struct Uniforms {

@@ -10,7 +10,7 @@ void unused_entry_point() {
   return;
 }
 uvec4 tint_ftou(vec4 v) {
-  return tint_select(uvec4(4294967295u), tint_select(uvec4(v), uvec4(0u), lessThan(v, vec4(0.0f))), lessThan(v, vec4(4294967040.0f)));
+  return tint_select(uvec4(4294967295u), tint_select(uvec4(v), uvec4(0u), lessThan(v, vec4(0.0f))), lessThanEqual(v, vec4(4294967040.0f)));
 }
 
 float t = 0.0f;
