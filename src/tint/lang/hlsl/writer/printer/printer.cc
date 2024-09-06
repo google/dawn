@@ -794,15 +794,17 @@ class Printer : public tint::TextGenerator {
                 EmitType(out, c->Result(0)->Type());
                 out << "(";  // For the type constructor
 
-                // We swizzle a single value, in order to do so, wrap it in it more brackets.
-                if (c->Args().Length() == 1) {
+                // Swizzle single value if it's not already the right type
+                // (typically a single scalar value).
+                const bool swizzle_value =
+                    (c->Args().Length() == 1) && (c->Args()[0]->Type() != c->Result(0)->Type());
+                if (swizzle_value) {
                     out << "(";
                 }
 
                 emit_args();
 
-                // Swizzle a single value constructor
-                if (c->Args().Length() == 1) {
+                if (swizzle_value) {
                     out << ")." << std::string(vec->Width(), 'x');
                 }
 

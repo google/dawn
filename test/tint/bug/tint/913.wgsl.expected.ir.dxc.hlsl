@@ -20,7 +20,7 @@ void main_inner(uint3 GlobalInvocationID) {
   uint2 v_1 = (0u).xx;
   tint_symbol.GetDimensions(v_1[0u], v_1[1u]);
   uint2 dstSize = v_1;
-  uint2 dstTexCoord = uint2((GlobalInvocationID.xy).xx);
+  uint2 dstTexCoord = uint2(GlobalInvocationID.xy);
   float4 nonCoveredColor = float4(0.0f, 1.0f, 0.0f, 1.0f);
   bool success = true;
   bool v_2 = false;

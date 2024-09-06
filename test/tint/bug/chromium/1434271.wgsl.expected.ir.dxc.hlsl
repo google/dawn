@@ -127,7 +127,7 @@ void simulate_inner(uint3 GlobalInvocationID) {
 void export_level_inner(uint3 coord) {
   uint2 v_18 = (0u).xx;
   tex_out.GetDimensions(v_18[0u], v_18[1u]);
-  if (all((coord.xy < uint2((v_18).xx)))) {
+  if (all((coord.xy < uint2(v_18)))) {
     uint dst_offset = (coord[0u] << ((coord[1u] * ubo[0u].x) & 31u));
     uint src_offset = ((coord[0u] - 2u) + ((coord[1u] >> (2u & 31u)) * ubo[0u].x));
     float a = asfloat(buf_in.Load((0u + (uint((src_offset << (0u & 31u))) * 4u))));
