@@ -223,7 +223,8 @@ MaybeError ValidatePassTimestampWrites(const DeviceBase* device,
 MaybeError ValidateWriteBuffer(const DeviceBase* device,
                                const BufferBase* buffer,
                                uint64_t bufferOffset,
-                               uint64_t size) {
+                               uint64_t size,
+                               UsageValidationMode mode) {
     DAWN_TRY(device->ValidateObject(buffer));
 
     DAWN_INVALID_IF(bufferOffset % 4 != 0, "BufferOffset (%u) is not a multiple of 4.",
@@ -236,7 +237,7 @@ MaybeError ValidateWriteBuffer(const DeviceBase* device,
                     "Write range (bufferOffset: %u, size: %u) does not fit in %s size (%u).",
                     bufferOffset, size, buffer, bufferSize);
 
-    DAWN_TRY(ValidateCanUseAs(buffer, wgpu::BufferUsage::CopyDst));
+    DAWN_TRY(ValidateCanUseAs(buffer, wgpu::BufferUsage::CopyDst, mode));
 
     return {};
 }
@@ -648,17 +649,21 @@ MaybeError ValidateCanUseAs(const TextureBase* texture,
     return {};
 }
 
-MaybeError ValidateCanUseAs(const BufferBase* buffer, wgpu::BufferUsage usage) {
-    DAWN_ASSERT(wgpu::HasZeroOrOneBits(usage));
-    DAWN_INVALID_IF(!(buffer->GetUsage() & usage), "%s usage (%s) doesn't include %s.", buffer,
-                    buffer->GetUsage(), usage);
-    return {};
-}
-
-MaybeError ValidateCanUseAsInternal(const BufferBase* buffer, wgpu::BufferUsage usage) {
-    DAWN_INVALID_IF(!(buffer->GetInternalUsage() & usage),
-                    "%s internal usage (%s) doesn't include %s.", buffer,
-                    buffer->GetInternalUsage(), usage);
+MaybeError ValidateCanUseAs(const BufferBase* buffer,
+                            wgpu::BufferUsage usage,
+                            UsageValidationMode mode) {
+    switch (mode) {
+        case UsageValidationMode::Default:
+            DAWN_ASSERT(wgpu::HasZeroOrOneBits(usage));
+            DAWN_INVALID_IF(!(buffer->GetUsage() & usage), "%s usage (%s) doesn't include %s.",
+                            buffer, buffer->GetUsage(), usage);
+            break;
+        case UsageValidationMode::Internal:
+            DAWN_INVALID_IF(!(buffer->GetInternalUsage() & usage),
+                            "%s internal usage (%s) doesn't include %s.", buffer,
+                            buffer->GetInternalUsage(), usage);
+            break;
+    }
     return {};
 }
 

@@ -352,7 +352,10 @@ void ComputePassEncoder::APIDispatchWorkgroupsIndirect(BufferBase* indirectBuffe
         [&](CommandAllocator* allocator) -> MaybeError {
             if (IsValidationEnabled()) {
                 DAWN_TRY(GetDevice()->ValidateObject(indirectBuffer));
-                DAWN_TRY(ValidateCanUseAs(indirectBuffer, wgpu::BufferUsage::Indirect));
+                // TODO(chromium:42240463): validate indirectBuffer usage with the usage validation
+                // mode of mCommandEncoder
+                DAWN_TRY(ValidateCanUseAs(indirectBuffer, wgpu::BufferUsage::Indirect,
+                                          UsageValidationMode::Default));
                 DAWN_TRY(mCommandBufferState.ValidateCanDispatch());
 
                 DAWN_INVALID_IF(indirectOffset % 4 != 0,

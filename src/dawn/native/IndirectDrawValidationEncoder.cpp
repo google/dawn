@@ -722,7 +722,8 @@ MaybeError EncodeIndirectDrawValidationCommands(DeviceBase* device,
                 outputParamsBinding.size = batch.outputParamsSize;
 
                 Ref<BindGroupBase> bindGroup;
-                DAWN_TRY_ASSIGN(bindGroup, device->CreateBindGroup(&bindGroupDescriptor));
+                DAWN_TRY_ASSIGN(bindGroup, device->CreateBindGroup(&bindGroupDescriptor,
+                                                                   UsageValidationMode::Internal));
 
                 const uint32_t numDrawsRoundedUp =
                     (batch.batchInfo->numDraws + kWorkgroupSize - 1) / kWorkgroupSize;
@@ -846,7 +847,8 @@ MaybeError EncodeIndirectDrawValidationCommands(DeviceBase* device,
             }
 
             Ref<BindGroupBase> bindGroup;
-            DAWN_TRY_ASSIGN(bindGroup, device->CreateBindGroup(&bindGroupDescriptor));
+            DAWN_TRY_ASSIGN(bindGroup, device->CreateBindGroup(&bindGroupDescriptor,
+                                                               UsageValidationMode::Internal));
 
             commandEncoder->APIWriteBuffer(drawConstantsBuffer.GetBuffer(), 0,
                                            reinterpret_cast<const uint8_t*>(&drawConstants),

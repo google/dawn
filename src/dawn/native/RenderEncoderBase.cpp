@@ -202,7 +202,11 @@ void RenderEncoderBase::APIDrawIndirect(BufferBase* indirectBuffer, uint64_t ind
         [&](CommandAllocator* allocator) -> MaybeError {
             if (IsValidationEnabled()) {
                 DAWN_TRY(GetDevice()->ValidateObject(indirectBuffer));
-                DAWN_TRY(ValidateCanUseAs(indirectBuffer, wgpu::BufferUsage::Indirect));
+                // TODO(chromium:42240463): validate indirectBuffer usage with internal usage
+                // validation mode when we support creating RenderBundle with internal usage
+                // validation mode
+                DAWN_TRY(ValidateCanUseAs(indirectBuffer, wgpu::BufferUsage::Indirect,
+                                          UsageValidationMode::Default));
                 DAWN_TRY(mCommandBufferState.ValidateCanDraw());
                 if (GetDevice()->IsCompatibilityMode()) {
                     DAWN_TRY(mCommandBufferState.ValidateNoDifferentTextureViewsOnSameTexture());
@@ -261,7 +265,11 @@ void RenderEncoderBase::APIDrawIndexedIndirect(BufferBase* indirectBuffer,
         [&](CommandAllocator* allocator) -> MaybeError {
             if (IsValidationEnabled()) {
                 DAWN_TRY(GetDevice()->ValidateObject(indirectBuffer));
-                DAWN_TRY(ValidateCanUseAs(indirectBuffer, wgpu::BufferUsage::Indirect));
+                // TODO(chromium:42240463): validate indirectBuffer usage with internal usage
+                // validation mode when we support creating RenderBundle with internal usage
+                // validation mode
+                DAWN_TRY(ValidateCanUseAs(indirectBuffer, wgpu::BufferUsage::Indirect,
+                                          UsageValidationMode::Default));
                 DAWN_TRY(mCommandBufferState.ValidateCanDrawIndexed());
                 if (GetDevice()->IsCompatibilityMode()) {
                     DAWN_TRY(mCommandBufferState.ValidateNoDifferentTextureViewsOnSameTexture());
@@ -332,7 +340,11 @@ void RenderEncoderBase::APIMultiDrawIndirect(BufferBase* indirectBuffer,
                                 "%s is not enabled.", wgpu::FeatureName::MultiDrawIndirect);
 
                 DAWN_TRY(GetDevice()->ValidateObject(indirectBuffer));
-                DAWN_TRY(ValidateCanUseAs(indirectBuffer, wgpu::BufferUsage::Indirect));
+                // TODO(chromium:42240463): validate indirectBuffer usage with internal usage
+                // validation mode when we support creating RenderBundle with internal usage
+                // validation mode
+                DAWN_TRY(ValidateCanUseAs(indirectBuffer, wgpu::BufferUsage::Indirect,
+                                          UsageValidationMode::Default));
 
                 DAWN_INVALID_IF(indirectOffset % 4 != 0,
                                 "Indirect offset (%u) is not a multiple of 4.", indirectOffset);
@@ -353,7 +365,11 @@ void RenderEncoderBase::APIMultiDrawIndirect(BufferBase* indirectBuffer,
                 // draw count buffer is optional
                 if (drawCountBuffer != nullptr) {
                     DAWN_TRY(GetDevice()->ValidateObject(drawCountBuffer));
-                    DAWN_TRY(ValidateCanUseAs(drawCountBuffer, wgpu::BufferUsage::Indirect));
+                    // TODO(chromium:42240463): validate indirectBuffer usage with internal usage
+                    // validation mode when we support creating RenderBundle with internal usage
+                    // validation mode
+                    DAWN_TRY(ValidateCanUseAs(drawCountBuffer, wgpu::BufferUsage::Indirect,
+                                              UsageValidationMode::Default));
 
                     DAWN_INVALID_IF(drawCountBufferOffset % 4 != 0,
                                     "Draw count buffer offset (%u) is not a multiple of 4.",
@@ -435,7 +451,11 @@ void RenderEncoderBase::APIMultiDrawIndexedIndirect(BufferBase* indirectBuffer,
                                 "%s is not enabled.", wgpu::FeatureName::MultiDrawIndirect);
 
                 DAWN_TRY(GetDevice()->ValidateObject(indirectBuffer));
-                DAWN_TRY(ValidateCanUseAs(indirectBuffer, wgpu::BufferUsage::Indirect));
+                // TODO(chromium:42240463): validate indirectBuffer usage with internal usage
+                // validation mode when we support creating RenderBundle with internal usage
+                // validation mode
+                DAWN_TRY(ValidateCanUseAs(indirectBuffer, wgpu::BufferUsage::Indirect,
+                                          UsageValidationMode::Default));
 
                 DAWN_INVALID_IF(indirectOffset % 4 != 0,
                                 "Indirect offset (%u) is not a multiple of 4.", indirectOffset);
@@ -457,7 +477,11 @@ void RenderEncoderBase::APIMultiDrawIndexedIndirect(BufferBase* indirectBuffer,
                 // draw count buffer is optional
                 if (drawCountBuffer != nullptr) {
                     DAWN_TRY(GetDevice()->ValidateObject(drawCountBuffer));
-                    DAWN_TRY(ValidateCanUseAs(drawCountBuffer, wgpu::BufferUsage::Indirect));
+                    // TODO(chromium:42240463): validate indirectBuffer usage with internal usage
+                    // validation mode when we support creating RenderBundle with internal usage
+                    // validation mode
+                    DAWN_TRY(ValidateCanUseAs(drawCountBuffer, wgpu::BufferUsage::Indirect,
+                                              UsageValidationMode::Default));
 
                     DAWN_INVALID_IF(drawCountBufferOffset % 4 != 0,
                                     "Draw count buffer offset (%u) is not a multiple of 4.",
@@ -571,7 +595,11 @@ void RenderEncoderBase::APISetIndexBuffer(BufferBase* buffer,
         [&](CommandAllocator* allocator) -> MaybeError {
             if (IsValidationEnabled()) {
                 DAWN_TRY(GetDevice()->ValidateObject(buffer));
-                DAWN_TRY(ValidateCanUseAs(buffer, wgpu::BufferUsage::Index));
+                // TODO(chromium:42240463): validate indirectBuffer usage with internal usage
+                // validation mode when we support creating RenderBundle with internal usage
+                // validation mode
+                DAWN_TRY(ValidateCanUseAs(buffer, wgpu::BufferUsage::Index,
+                                          UsageValidationMode::Default));
 
                 DAWN_TRY(ValidateIndexFormat(format));
 
@@ -641,7 +669,11 @@ void RenderEncoderBase::APISetVertexBuffer(uint32_t slot,
                         "Size (%u) must be either 0 or wgpu::kWholeSize if buffer is null", size);
                 } else {
                     DAWN_TRY(GetDevice()->ValidateObject(buffer));
-                    DAWN_TRY(ValidateCanUseAs(buffer, wgpu::BufferUsage::Vertex));
+                    // TODO(chromium:42240463): validate indirectBuffer usage with internal usage
+                    // validation mode when we support creating RenderBundle with internal usage
+                    // validation mode
+                    DAWN_TRY(ValidateCanUseAs(buffer, wgpu::BufferUsage::Vertex,
+                                              UsageValidationMode::Default));
                     DAWN_INVALID_IF(offset % 4 != 0,
                                     "Vertex buffer offset (%u) is not a multiple of 4", offset);
 

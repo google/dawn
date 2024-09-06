@@ -61,7 +61,8 @@ MaybeError ValidatePassTimestampWrites(const DeviceBase* device,
 MaybeError ValidateWriteBuffer(const DeviceBase* device,
                                const BufferBase* buffer,
                                uint64_t bufferOffset,
-                               uint64_t size);
+                               uint64_t size,
+                               UsageValidationMode mode);
 
 template <typename A, typename B>
 DAWN_FORCE_INLINE uint64_t Safe32x32(A a, B b) {
@@ -113,8 +114,9 @@ MaybeError ValidateTextureToTextureCopyRestrictions(DeviceBase const* device,
 MaybeError ValidateCanUseAs(const TextureBase* texture,
                             wgpu::TextureUsage usage,
                             UsageValidationMode mode);
-MaybeError ValidateCanUseAs(const BufferBase* buffer, wgpu::BufferUsage usage);
-MaybeError ValidateCanUseAsInternal(const BufferBase* buffer, wgpu::BufferUsage usage);
+MaybeError ValidateCanUseAs(const BufferBase* buffer,
+                            wgpu::BufferUsage usage,
+                            UsageValidationMode mode);
 
 using ColorAttachmentFormats = absl::InlinedVector<const Format*, kMaxColorAttachments>;
 MaybeError ValidateColorAttachmentBytesPerSample(DeviceBase* device,
