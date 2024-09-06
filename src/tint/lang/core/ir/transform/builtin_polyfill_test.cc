@@ -1340,6 +1340,88 @@ TEST_F(IR_BuiltinPolyfillTest, FirstTrailingBit_Vec4I32) {
     EXPECT_EQ(expect, str());
 }
 
+TEST_F(IR_BuiltinPolyfillTest, FwidthFine_NoPolyfill) {
+    Build(core::BuiltinFn::kFwidthFine, ty.f32(), Vector{ty.f32()});
+    auto* src = R"(
+%foo = func(%arg:f32):f32 {
+  $B1: {
+    %result:f32 = fwidthFine %arg
+    ret %result
+  }
+}
+)";
+    auto* expect = src;
+
+    EXPECT_EQ(src, str());
+
+    BuiltinPolyfillConfig config;
+    config.fwidth_fine = false;
+    Run(BuiltinPolyfill, config);
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(IR_BuiltinPolyfillTest, FirstLeadingBit_F32) {
+    Build(core::BuiltinFn::kFwidthFine, ty.f32(), Vector{ty.f32()});
+    auto* src = R"(
+%foo = func(%arg:f32):f32 {
+  $B1: {
+    %result:f32 = fwidthFine %arg
+    ret %result
+  }
+}
+)";
+    auto* expect = R"(
+%foo = func(%arg:f32):f32 {
+  $B1: {
+    %3:f32 = dpdxFine %arg
+    %4:f32 = dpdyFine %arg
+    %5:f32 = abs %3
+    %6:f32 = abs %4
+    %7:f32 = add %5, %6
+    ret %7
+  }
+}
+)";
+
+    EXPECT_EQ(src, str());
+
+    BuiltinPolyfillConfig config;
+    config.fwidth_fine = true;
+    Run(BuiltinPolyfill, config);
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(IR_BuiltinPolyfillTest, FirstLeadingBit_Vector) {
+    Build(core::BuiltinFn::kFwidthFine, ty.vec4<f32>(), Vector{ty.vec4<f32>()});
+    auto* src = R"(
+%foo = func(%arg:vec4<f32>):vec4<f32> {
+  $B1: {
+    %result:vec4<f32> = fwidthFine %arg
+    ret %result
+  }
+}
+)";
+    auto* expect = R"(
+%foo = func(%arg:vec4<f32>):vec4<f32> {
+  $B1: {
+    %3:vec4<f32> = dpdxFine %arg
+    %4:vec4<f32> = dpdyFine %arg
+    %5:vec4<f32> = abs %3
+    %6:vec4<f32> = abs %4
+    %7:vec4<f32> = add %5, %6
+    ret %7
+  }
+}
+)";
+
+    EXPECT_EQ(src, str());
+
+    BuiltinPolyfillConfig config;
+    config.fwidth_fine = true;
+    Run(BuiltinPolyfill, config);
+    EXPECT_EQ(expect, str());
+}
+
 TEST_F(IR_BuiltinPolyfillTest, InsertBits_NoPolyfill) {
     Build(core::BuiltinFn::kInsertBits, ty.u32(), Vector{ty.u32(), ty.u32(), ty.u32(), ty.u32()});
     auto* src = R"(

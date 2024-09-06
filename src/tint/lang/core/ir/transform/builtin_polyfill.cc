@@ -105,6 +105,11 @@ struct State {
                             worklist.Push(builtin);
                         }
                         break;
+                    case core::BuiltinFn::kFwidthFine:
+                        if (config.fwidth_fine) {
+                            worklist.Push(builtin);
+                        }
+                        break;
                     case core::BuiltinFn::kInsertBits:
                         if (config.insert_bits != BuiltinPolyfillLevel::kNone) {
                             worklist.Push(builtin);
@@ -182,6 +187,9 @@ struct State {
                     break;
                 case core::BuiltinFn::kFirstTrailingBit:
                     FirstTrailingBit(builtin);
+                    break;
+                case core::BuiltinFn::kFwidthFine:
+                    FwidthFine(builtin);
                     break;
                 case core::BuiltinFn::kInsertBits:
                     InsertBits(builtin);
@@ -524,6 +532,22 @@ struct State {
                 result = b.Bitcast(result_ty, result);
             }
             result->SetResults(Vector{call->DetachResult()});
+        });
+        call->Destroy();
+    }
+
+    /// Polyfill a `fwidthFine()` builtin call.
+    /// @param call the builtin call instruction
+    void FwidthFine(ir::CoreBuiltinCall* call) {
+        auto* value = call->Args()[0];
+        auto* type = value->Type();
+        b.InsertBefore(call, [&] {
+            auto* dpdx = b.Call(type, core::BuiltinFn::kDpdxFine, value);
+            auto* dpdy = b.Call(type, core::BuiltinFn::kDpdyFine, value);
+            auto* abs_dpdx = b.Call(type, core::BuiltinFn::kAbs, dpdx);
+            auto* abs_dpdy = b.Call(type, core::BuiltinFn::kAbs, dpdy);
+            auto* result = b.Add(type, abs_dpdx, abs_dpdy);
+            call->Result(0)->ReplaceAllUsesWith(result->Result(0));
         });
         call->Destroy();
     }

@@ -88,6 +88,7 @@ Result<RaiseResult> Raise(core::ir::Module& module, const Options& options) {
         core_polyfills.extract_bits = core::ir::transform::BuiltinPolyfillLevel::kClampOrRangeCheck;
         core_polyfills.first_leading_bit = true;
         core_polyfills.first_trailing_bit = true;
+        core_polyfills.fwidth_fine = true;
         core_polyfills.insert_bits = core::ir::transform::BuiltinPolyfillLevel::kClampOrRangeCheck;
         core_polyfills.pack_unpack_4x8 = true;
         core_polyfills.pack_4xu8_clamp = true;

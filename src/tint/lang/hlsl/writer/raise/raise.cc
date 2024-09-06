@@ -109,7 +109,7 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
         core_polyfills.extract_bits = core::ir::transform::BuiltinPolyfillLevel::kFull;
         core_polyfills.first_leading_bit = true;
         core_polyfills.first_trailing_bit = true;
-        // core_polyfills.fwidth_fine = true;
+        core_polyfills.fwidth_fine = true;
         core_polyfills.insert_bits = core::ir::transform::BuiltinPolyfillLevel::kFull;
         // core_polyfills.int_div_mod = !options.disable_polyfill_integer_div_mod;
 

@@ -1005,7 +1005,6 @@ class Printer : public tint::TextGenerator {
                 break;
             case core::BuiltinFn::kFwidth:
             case core::BuiltinFn::kFwidthCoarse:
-            case core::BuiltinFn::kFwidthFine:
                 out << "fwidth";
                 break;
             case core::BuiltinFn::kFaceForward:
