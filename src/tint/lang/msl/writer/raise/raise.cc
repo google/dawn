@@ -52,6 +52,7 @@
 #include "src/tint/lang/msl/writer/raise/packed_vec3.h"
 #include "src/tint/lang/msl/writer/raise/shader_io.h"
 #include "src/tint/lang/msl/writer/raise/simd_ballot.h"
+#include "src/tint/lang/msl/writer/raise/unary_polyfill.h"
 
 namespace tint::msl::writer {
 
@@ -135,6 +136,7 @@ Result<RaiseResult> Raise(core::ir::Module& module, const Options& options) {
     RUN_TRANSFORM(raise::PackedVec3, module);
     RUN_TRANSFORM(raise::SimdBallot, module);
     RUN_TRANSFORM(raise::ModuleScopeVars, module);
+    RUN_TRANSFORM(raise::UnaryPolyfill, module);
     RUN_TRANSFORM(raise::BinaryPolyfill, module);
     RUN_TRANSFORM(raise::BuiltinPolyfill, module);
 
