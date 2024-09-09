@@ -411,26 +411,26 @@ struct State {
             } break;
             case BuiltinPolyfillLevel::kFull: {
                 // Replace:
-                //    result = extractBits(v, offset, count)
+                //    result = extractBits(e, offset, count)
                 // With:
                 //   let s = min(offset, 32u);
-                //   let e = min(32u, (s + count));
-                //   let shl = (32u - e);
-                //   let shr = (shl + s);
-                //   let shl_result = select(i32(), (v << shl), (shl < 32u));
+                //   let t = min(32u, (s + count));
+                //   let shl = (32u - t);
+                //   let shr = (shl + s
+                //   let shl_result = select(i32(), (e << shl), (shl < 32u));
                 //   result = select(((shl_result >> 31u) >> 1u), (shl_result >> shr), (shr < 32u));
                 // }
-                auto* v = call->Args()[0];
-                auto* result_ty = v->Type();
+                auto* e = call->Args()[0];
+                auto* result_ty = e->Type();
                 auto* uint_ty = ty.match_width(ty.u32(), result_ty);
                 auto V = [&](uint32_t u) { return b.MatchWidth(u32(u), result_ty); };
                 b.InsertBefore(call, [&] {
                     auto* s = b.Call<u32>(core::BuiltinFn::kMin, offset, 32_u);
-                    auto* e = b.Call<u32>(core::BuiltinFn::kMin, 32_u, b.Add(ty.u32(), s, count));
-                    auto* shl = b.Subtract<u32>(32_u, e);
+                    auto* t = b.Call<u32>(core::BuiltinFn::kMin, 32_u, b.Add(ty.u32(), s, count));
+                    auto* shl = b.Subtract<u32>(32_u, t);
                     auto* shr = b.Add<u32>(shl, s);
                     auto* f1 = b.Zero(result_ty);
-                    auto* t1 = b.ShiftLeft(result_ty, v, b.Construct(uint_ty, shl));
+                    auto* t1 = b.ShiftLeft(result_ty, e, b.Construct(uint_ty, shl));
                     auto* shl_result = b.Call(result_ty, core::BuiltinFn::kSelect, f1, t1,
                                               b.LessThan<bool>(shl, 32_u));
                     auto* f2 =
@@ -592,19 +592,54 @@ struct State {
             case BuiltinPolyfillLevel::kClampOrRangeCheck: {
                 b.InsertBefore(call, [&] {
                     // Replace:
-                    //    insertBits(e, offset, count)
+                    //    insertBits(e, newbits, offset, count)
                     // With:
                     //    let o = min(offset, 32);
                     //    let c = min(count, w - o);
-                    //    insertBits(e, o, c);
+                    //    insertBits(e, newbits, o, c);
                     auto* o = b.Call(ty.u32(), core::BuiltinFn::kMin, offset, 32_u);
                     auto* c = b.Call(ty.u32(), core::BuiltinFn::kMin, count,
                                      b.Subtract(ty.u32(), 32_u, o));
                     call->SetOperand(ir::CoreBuiltinCall::kArgsOperandOffset + 2, o->Result(0));
                     call->SetOperand(ir::CoreBuiltinCall::kArgsOperandOffset + 3, c->Result(0));
                 });
-                break;
-            }
+            } break;
+            case BuiltinPolyfillLevel::kFull: {
+                // Replace:
+                //    result = insertBits(e, newbits, offset, count)
+                // With:
+                //   let oc = (offset + count);
+                //   let mask = ((select(0u, (1u << offset), (offset < 32u)) - 1u)
+                //              ^ (select(0u, (1u << oc), (oc < 32u)) - 1u));
+                //   result = ((select(i32(), (newbits << offset), (offset < 32u)) & i32(mask))
+                //              | (e & i32(~(mask))));
+                auto* e = call->Args()[0];
+                auto* newbits = call->Args()[1];
+                auto* result_ty = e->Type();
+                auto* uint_ty = ty.match_width(ty.u32(), result_ty);
+                b.InsertBefore(call, [&] {
+                    auto* oc = b.Add<u32>(offset, count);
+                    auto* t1 = b.ShiftLeft<u32>(1_u, offset);
+                    auto* s1 = b.Call<u32>(core::BuiltinFn::kSelect, b.Zero<u32>(), t1,
+                                           b.LessThan<bool>(offset, 32_u));
+                    auto* t2 = b.ShiftLeft<u32>(1_u, oc);
+                    auto* s2 = b.Call<u32>(core::BuiltinFn::kSelect, b.Zero<u32>(), t2,
+                                           b.LessThan<bool>(oc, 32_u));
+                    auto* mask_lhs = b.Subtract<u32>(s1, 1_u);
+                    auto* mask_rhs = b.Subtract<u32>(s2, 1_u);
+                    auto* mask = b.Xor<u32>(mask_lhs, mask_rhs);
+                    auto* f3 = b.Zero(result_ty);
+                    auto* t3 = b.ShiftLeft(result_ty, newbits, b.Construct(uint_ty, offset));
+                    auto* s3 = b.Call(result_ty, core::BuiltinFn::kSelect, f3, t3,
+                                      b.LessThan<bool>(offset, 32_u));
+                    auto* result_lhs = b.And(result_ty, s3, b.Construct(result_ty, mask));
+                    auto* result_rhs =
+                        b.And(result_ty, e, b.Construct(result_ty, b.Complement<u32>(mask)));
+                    auto* result = b.Or(result_ty, result_lhs, result_rhs);
+                    result->SetResults(Vector{call->DetachResult()});
+                });
+                call->Destroy();
+            } break;
             default:
                 TINT_UNIMPLEMENTED() << "insertBits polyfill level";
         }
