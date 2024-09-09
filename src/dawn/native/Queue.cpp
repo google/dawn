@@ -448,8 +448,7 @@ MaybeError QueueBase::WriteBuffer(BufferBase* buffer,
                                   size_t size) {
     DAWN_TRY(GetDevice()->ValidateIsAlive());
     DAWN_TRY(GetDevice()->ValidateObject(this));
-    DAWN_TRY(
-        ValidateWriteBuffer(GetDevice(), buffer, bufferOffset, size, UsageValidationMode::Default));
+    DAWN_TRY(ValidateWriteBuffer(GetDevice(), buffer, bufferOffset, size));
     DAWN_TRY(buffer->ValidateCanUseOnQueueNow());
     return WriteBufferImpl(buffer, bufferOffset, data, size);
 }

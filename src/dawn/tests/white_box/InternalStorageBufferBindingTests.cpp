@@ -28,18 +28,11 @@
 #include <utility>
 #include <vector>
 
-#include "dawn/native/BindGroup.h"
 #include "dawn/native/BindGroupLayout.h"
-#include "dawn/native/CommandBuffer.h"
-#include "dawn/native/CommandEncoder.h"
-#include "dawn/native/ComputePassEncoder.h"
-#include "dawn/native/ComputePipeline.h"
 #include "dawn/native/Device.h"
-#include "dawn/native/PipelineLayout.h"
-#include "dawn/native/Queue.h"
 #include "dawn/native/dawn_platform.h"
-#include "dawn/native/utils/WGPUHelpers.h"
 #include "dawn/tests/DawnTest.h"
+#include "dawn/utils/WGPUHelpers.h"
 
 namespace dawn {
 namespace {
@@ -54,11 +47,8 @@ class InternalStorageBufferBindingTests : public DawnTest {
         DAWN_TEST_UNSUPPORTED_IF(UsesWire());
     }
 
-    Ref<native::ComputePipelineBase> CreateComputePipelineWithInternalStorage() {
-        native::DeviceBase* nativeDevice = native::FromAPI(device.Get());
-
-        Ref<native::ShaderModuleBase> shaderModule =
-            native::utils::CreateShaderModule(nativeDevice, R"(
+    wgpu::ComputePipeline CreateComputePipelineWithInternalStorage() {
+        wgpu::ShaderModule module = utils::CreateShaderModule(device, R"(
             struct Buf {
                 data : array<u32, 4>
             }
@@ -69,24 +59,37 @@ class InternalStorageBufferBindingTests : public DawnTest {
             fn main(@builtin(global_invocation_id) GlobalInvocationID : vec3u) {
                 buf.data[GlobalInvocationID.x] = buf.data[GlobalInvocationID.x] + 0x1234u;
             }
-        )")
-                .AcquireSuccess();
+        )");
 
         // Create binding group layout with internal storage buffer binding type
+        native::BindGroupLayoutEntry bglEntry;
+        bglEntry.binding = 0;
+        bglEntry.buffer.type = native::kInternalStorageBufferBinding;
+        bglEntry.visibility = wgpu::ShaderStage::Compute;
+
+        native::BindGroupLayoutDescriptor bglDesc;
+        bglDesc.entryCount = 1;
+        bglDesc.entries = &bglEntry;
+
+        native::DeviceBase* nativeDevice = native::FromAPI(device.Get());
+
         Ref<native::BindGroupLayoutBase> bglRef =
-            native::utils::MakeBindGroupLayout(
-                nativeDevice,
-                {{0, wgpu::ShaderStage::Compute, native::kInternalStorageBufferBinding}}, true)
-                .AcquireSuccess();
+            nativeDevice->CreateBindGroupLayout(&bglDesc, true).AcquireSuccess();
+
+        wgpu::BindGroupLayout bgl =
+            wgpu::BindGroupLayout::Acquire(native::ToAPI(ReturnToAPI(std::move(bglRef))));
 
         // Create pipeline layout
-        Ref<native::PipelineLayoutBase> layout =
-            native::utils::MakeBasicPipelineLayout(nativeDevice, bglRef).AcquireSuccess();
+        wgpu::PipelineLayoutDescriptor plDesc;
+        plDesc.bindGroupLayoutCount = 1;
+        plDesc.bindGroupLayouts = &bgl;
+        wgpu::PipelineLayout layout = device.CreatePipelineLayout(&plDesc);
 
-        native::ComputePipelineDescriptor pipelineDesc = {};
-        pipelineDesc.compute.module = shaderModule.Get();
-        pipelineDesc.layout = layout.Get();
-        return nativeDevice->CreateComputePipeline(&pipelineDesc).AcquireSuccess();
+        wgpu::ComputePipelineDescriptor pipelineDesc = {};
+        pipelineDesc.layout = layout;
+        pipelineDesc.compute.module = module;
+
+        return device.CreateComputePipeline(&pipelineDesc);
     }
 };
 
@@ -96,37 +99,28 @@ TEST_P(InternalStorageBufferBindingTests, QueryResolveBufferBoundAsInternalStora
     std::vector<uint32_t> data(kNumValues, 0);
     std::vector<uint32_t> expected(kNumValues, 0x1234u * kIterations);
 
-    native::DeviceBase* nativeDevice = native::FromAPI(device.Get());
-
     uint64_t bufferSize = static_cast<uint64_t>(data.size() * sizeof(uint32_t));
-    Ref<native::BufferBase> buffer =
-        native::utils::CreateBufferFromData(nativeDevice,
-                                            wgpu::BufferUsage::QueryResolve |
-                                                wgpu::BufferUsage::CopySrc |
-                                                wgpu::BufferUsage::CopyDst,
-                                            data.data(), bufferSize)
-            .AcquireSuccess();
+    wgpu::Buffer buffer =
+        utils::CreateBufferFromData(device, data.data(), bufferSize,
+                                    wgpu::BufferUsage::QueryResolve | wgpu::BufferUsage::CopySrc);
 
-    Ref<native::ComputePipelineBase> pipeline = CreateComputePipelineWithInternalStorage();
-    Ref<native::BindGroupLayoutBase> bindGroupLayout =
-        pipeline->GetBindGroupLayout(0).AcquireSuccess();
-    Ref<native::BindGroupBase> bindGroup =
-        native::utils::MakeBindGroup(nativeDevice, bindGroupLayout, {{0, buffer.Get()}},
-                                     native::UsageValidationMode::Internal)
-            .AcquireSuccess();
+    wgpu::ComputePipeline pipeline = CreateComputePipelineWithInternalStorage();
 
-    Ref<native::CommandEncoderBase> encoder = nativeDevice->CreateCommandEncoder().AcquireSuccess();
-    Ref<native::ComputePassEncoderBase> pass = encoder->BeginComputePass();
-    pass->APISetPipeline(pipeline.Get());
-    pass->APISetBindGroup(0, bindGroup.Get());
+    wgpu::BindGroup bindGroup =
+        utils::MakeBindGroup(device, pipeline.GetBindGroupLayout(0), {{0, buffer, 0, bufferSize}});
+
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+    wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
+    pass.SetPipeline(pipeline);
+    pass.SetBindGroup(0, bindGroup);
     for (uint32_t i = 0; i < kIterations; ++i) {
-        pass->APIDispatchWorkgroups(kNumValues);
+        pass.DispatchWorkgroups(kNumValues);
     }
-    pass->APIEnd();
-    Ref<native::CommandBufferBase> commandBuffer = encoder->Finish().AcquireSuccess();
-    nativeDevice->GetQueue()->APISubmit(1, &commandBuffer.Get());
+    pass.End();
+    wgpu::CommandBuffer commands = encoder.Finish();
+    queue.Submit(1, &commands);
 
-    EXPECT_BUFFER_U32_RANGE_EQ(expected.data(), native::ToAPI(buffer.Get()), 0, kNumValues);
+    EXPECT_BUFFER_U32_RANGE_EQ(expected.data(), buffer, 0, kNumValues);
 }
 
 DAWN_INSTANTIATE_TEST(InternalStorageBufferBindingTests,

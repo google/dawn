@@ -51,8 +51,7 @@ namespace {
 
 MaybeError ValidateBufferBinding(const DeviceBase* device,
                                  const BindGroupEntry& entry,
-                                 const BufferBindingInfo& layout,
-                                 UsageValidationMode mode) {
+                                 const BufferBindingInfo& layout) {
     DAWN_INVALID_IF(entry.buffer == nullptr, "Binding entry buffer not set.");
 
     DAWN_INVALID_IF(entry.sampler != nullptr || entry.textureView != nullptr,
@@ -116,7 +115,9 @@ MaybeError ValidateBufferBinding(const DeviceBase* device,
                     "Offset (%u) of %s does not satisfy the minimum %s alignment (%u).",
                     entry.offset, entry.buffer, layout.type, requiredBindingAlignment);
 
-    DAWN_TRY(ValidateCanUseAs(entry.buffer, requiredUsage, mode));
+    DAWN_INVALID_IF(!(entry.buffer->GetInternalUsage() & requiredUsage),
+                    "Binding usage (%s) of %s doesn't match expected usage (%s).",
+                    entry.buffer->GetUsage(), entry.buffer, requiredUsage);
 
     DAWN_INVALID_IF(bindingSize < layout.minBindingSize,
                     "Binding size (%u) of %s is smaller than the minimum binding size (%u).",
@@ -375,7 +376,8 @@ MaybeError ValidateBindGroupDescriptor(DeviceBase* device,
         DAWN_TRY(MatchVariant(
             bindingInfo.bindingLayout,
             [&](const BufferBindingInfo& layout) -> MaybeError {
-                DAWN_TRY_CONTEXT(ValidateBufferBinding(device, entry, layout, mode),
+                // TODO(dawn:1485): Validate buffer binding with usage validation mode.
+                DAWN_TRY_CONTEXT(ValidateBufferBinding(device, entry, layout),
                                  "validating entries[%u] as a Buffer."
                                  "\nExpected entry layout: %s",
                                  i, layout);
