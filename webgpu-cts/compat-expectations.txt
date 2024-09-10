@@ -142,12 +142,6 @@ crbug.com/dawn/2502 [ intel-0x9bc5 linux mesa_ge_23.2 ] webgpu:api,operation,sto
 crbug.com/dawn/2502 [ intel-0x9bc5 linux mesa_ge_23.2 ] webgpu:api,operation,storage_texture,read_write:basic:format="r32uint";shaderStage="fragment";textureDimension="3d";depthOrArrayLayers=2 [ Failure ]
 crbug.com/dawn/2502 [ intel-0x9bc5 linux mesa_ge_23.2 ] webgpu:shader,execution,memory_model,atomicity:atomicity:memType="atomic_storage";testType="inter_workgroup" [ Failure ]
 
-# validation of shader_io location type
-crbug.com/351375039 webgpu:shader,validation,shader_io,locations:type:* [ Failure ]
-
-# validation of clamp low_high
-crbug.com/351378281 webgpu:shader,validation,expression,call,builtin,clamp:low_high:* [ Failure ]
-
 # Failures due to splitting off worker tests (crbug.com/330501141)
 crbug.com/dawn/2478 webgpu:api,validation,buffer,mapping:mapAsync,earlyRejection: [ Failure ]
 crbug.com/dawn/2478 webgpu:api,validation,buffer,mapping:mapAsync,state,mappingPending: [ Failure ]
@@ -169,10 +163,6 @@ crbug.com/341327472 [ intel-0x4680 linux ] webgpu:api,validation,state,device_lo
 crbug.com/354152178 [ intel-0x4680 ] webgpu:shader,execution,expression,call,builtin,bitcast:ai_to_f32:* [ Failure ]
 crbug.com/354152178 [ intel-0x9bc5 ] webgpu:shader,execution,expression,call,builtin,bitcast:ai_to_f32:* [ Failure ]
 crbug.com/354152178 [ nvidia-0x2184 ] webgpu:shader,execution,expression,call,builtin,bitcast:ai_to_f32:* [ Failure ]
-
-# crbug.com/bug/350785841: smoothstep: needs CTS fixes to pass
-crbug.com/dawn/350785841 webgpu:shader,execution,expression,call,builtin,smoothstep:* [ Failure ]
-crbug.com/dawn/350785841 webgpu:shader,validation,expression,call,builtin,smoothstep:* [ Failure ]
 
 # Temporarily skipped due to the removal of `maxInterStageShaderComponents` has not been completed in the below tests
 crbug.com/364338810 webgpu:api,validation,capability_checks,limits,maxInterStageShaderComponents:* [ Skip ]

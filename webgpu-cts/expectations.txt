@@ -1268,7 +1268,6 @@ crbug.com/351372334 webgpu:shader,validation,expression,call,builtin,insertBits:
 # some missing tint validation errors
 crbug.com/350775869 webgpu:shader,validation,expression,call,builtin,ldexp:partial_values:stage="constant";* [ Failure ]
 crbug.com/350775869 webgpu:shader,validation,expression,call,builtin,ldexp:partial_values:stage="override";* [ Failure ]
-crbug.com/351378281 webgpu:shader,validation,expression,call,builtin,clamp:low_high:* [ Failure ]
 
 # Derivative tests
 crbug.com/42251283 [ intel-0x3e9b ] webgpu:shader,execution,expression,call,builtin,dpdxFine:* [ Failure ]
@@ -1297,10 +1296,6 @@ crbug.com/42251283 [ nvidia-0x2184 ] webgpu:shader,execution,expression,call,bui
 crbug.com/42251283 [ nvidia-0x2184 ] webgpu:shader,execution,expression,call,builtin,dpdyFine:f32:vectorize=2;non_uniform_discard=true [ Failure ]
 crbug.com/42251283 [ nvidia-0x2184 ] webgpu:shader,execution,expression,call,builtin,dpdyFine:f32:vectorize=3;non_uniform_discard=true [ Failure ]
 crbug.com/42251283 [ nvidia-0x2184 ] webgpu:shader,execution,expression,call,builtin,dpdyFine:f32:vectorize=4;non_uniform_discard=true [ Failure ]
-
-# crbug.com/bug/350785841: smoothstep failures; needs CTS fixes to pass
-crbug.com/dawn/350785841 webgpu:shader,execution,expression,call,builtin,smoothstep:* [ Failure ]
-crbug.com/dawn/350785841 webgpu:shader,validation,expression,call,builtin,smoothstep:* [ Failure ]
 
 # crbug.com/bug/349425830: validation matrix mul overflow_mat_f16_internal
 crbug.com/dawn/349425830 [ amd mac ] webgpu:shader,validation,expression,matrix,mul:overflow_mat_f16_internal:lhs=1;c=2;r=2 [ Failure ]
