@@ -9,7 +9,7 @@ void textureStore_145061(tint_module_vars_struct tint_module_vars) {
   uint2 arg_1 = uint2(1u);
   uint4 arg_2 = uint4(1u);
   tint_module_vars.arg_0.write(arg_2, arg_1);
-  tint_module_vars.arg_0.fence();
+  const_cast<texture2d<uint, access::read_write>thread &>(tint_module_vars.arg_0).fence();
 }
 
 fragment void fragment_main(texture2d<uint, access::read_write> arg_0 [[texture(0)]]) {

@@ -1,0 +1,8 @@
+#include <metal_stdlib>
+
+using namespace metal;
+kernel void tint_symbol(texture2d<float, access::read_write> tint_symbol_1 [[texture(0)]]) {
+  tint_symbol_1.write(float4(0.0f), uint2(int2(0))); tint_symbol_1.fence();
+  return;
+}
+

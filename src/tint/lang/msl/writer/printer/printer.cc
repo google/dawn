@@ -902,7 +902,20 @@ class Printer : public tint::TextGenerator {
     }
 
     void EmitMslMemberBuiltinCall(StringStream& out, const msl::ir::MemberBuiltinCall* c) {
-        EmitValue(out, c->Object());
+        if (c->Func() == BuiltinFn::kFence) {
+            // If this is a fence builtin, we need to `const_cast<>` the object to remove the
+            // `const` qualifier. We do this to work around an MSL bug that prevents us from being
+            // able to use texture fence intrinsics when texture handles are stored inside
+            // const-qualified structures (see crbug.com/365570202).
+            out << "const_cast<";
+            EmitType(out, c->Object()->Type());
+            out << "thread &>(";
+            EmitValue(out, c->Object());
+            out << ")";
+        } else {
+            EmitValue(out, c->Object());
+        }
+
         out << "." << c->Func() << "(";
         bool needs_comma = false;
         for (const auto* arg : c->Args()) {
