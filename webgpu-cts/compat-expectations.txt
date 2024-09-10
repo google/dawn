@@ -184,23 +184,6 @@ crbug.com/dawn/2086 [ nvidia-0x2184 ] webgpu:web_platform,canvas,configure:viewF
 
 ### This section represents unimplemented features in Tint, Chrome or core WebGPU
 
-# abstract_float conversions, also failing in Core WebGPU
-crbug.com/tint/2225 webgpu:shader,execution,expression,unary,u32_conversion:abstract_float:* [ Failure ]
-crbug.com/tint/2225 [ intel-0x9bc5 ] webgpu:shader,execution,expression,unary,i32_conversion:abstract_float:* [ Failure ]
-crbug.com/tint/2225 [ nvidia-0x2184 ] webgpu:shader,execution,expression,unary,i32_conversion:abstract_float:* [ Failure ]
-
-# scalar_vector_out_of_range reliably failing
-# Also failing in core WebGPU
-crbug.com/tint/2218 [ intel-0x9bc5 ] webgpu:shader,validation,expression,binary,div_rem:scalar_vector_out_of_range:* [ Failure ]
-crbug.com/tint/2218 [ nvidia-0x2184 ] webgpu:shader,validation,expression,binary,div_rem:scalar_vector_out_of_range:* [ Failure ]
-
-# Implement "context dependent names do not use name resolution"
-# Also failing in core WebGPU
-crbug.com/tint/2219 webgpu:shader,validation,decl,context_dependent_resolution:interpolation_sampling_names:* [ Failure ]
-crbug.com/tint/2219 webgpu:shader,validation,decl,context_dependent_resolution:interpolation_type_names:* [ Failure ]
-crbug.com/tint/2219 [ intel-0x9bc5 ] webgpu:shader,validation,decl,context_dependent_resolution:builtin_value_names:* [ Failure ]
-crbug.com/tint/2219 [ nvidia-0x2184 ] webgpu:shader,validation,decl,context_dependent_resolution:builtin_value_names:* [ Failure ]
-
 ### This section represents issues that are likely bugs in ANGLE
 
 # failures with 1-bit LSB errors on shader expression tests
