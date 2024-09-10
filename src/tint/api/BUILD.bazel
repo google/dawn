@@ -56,6 +56,7 @@ cc_library(
     "//src/tint/lang/wgsl/ast/transform",
     "//src/tint/lang/wgsl/common",
     "//src/tint/lang/wgsl/features",
+    "//src/tint/lang/wgsl/inspector",
     "//src/tint/lang/wgsl/program",
     "//src/tint/lang/wgsl/sem",
     "//src/tint/lang/wgsl/writer/ir_to_program",

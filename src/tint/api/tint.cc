@@ -55,7 +55,8 @@
 #endif
 
 #if TINT_BUILD_WGSL_READER
-#include "src/tint/lang/wgsl/reader/reader.h"  // nogncheck
+#include "src/tint/lang/wgsl/inspector/inspector.h"  // nogncheck
+#include "src/tint/lang/wgsl/reader/reader.h"        // nogncheck
 #endif
 
 #if TINT_BUILD_WGSL_WRITER
