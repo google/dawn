@@ -878,6 +878,7 @@ class MaxInterStageShaderVariablesLimitTests : public MaxLimitTests {
         bool hasSampleMask;
         bool hasSampleIndex;
         bool hasFrontFacing;
+        std::optional<uint32_t> clipDistancesSize;
     };
 
     void DoTest(const MaxInterStageLimitTestsSpec& spec) {
@@ -888,6 +889,18 @@ class MaxInterStageShaderVariablesLimitTests : public MaxLimitTests {
         wgpu::RenderPipeline pipeline = CreateRenderPipeline(spec);
         EXPECT_NE(nullptr, pipeline.Get());
     }
+
+  protected:
+    std::vector<wgpu::FeatureName> GetRequiredFeatures() override {
+        std::vector<wgpu::FeatureName> requiredFeatures = {};
+        if (SupportsFeatures({wgpu::FeatureName::ClipDistances})) {
+            requiredFeatures.push_back(wgpu::FeatureName::ClipDistances);
+            mSupportsClipDistances = true;
+        }
+        return requiredFeatures;
+    }
+
+    bool mSupportsClipDistances = false;
 
   private:
     // Allocate the inter-stage shader variables that consume as many inter-stage shader variables
@@ -902,13 +915,30 @@ class MaxInterStageShaderVariablesLimitTests : public MaxLimitTests {
         if (spec.hasFrontFacing || spec.hasSampleIndex || spec.hasSampleMask) {
             ++builtinVariableCount;
         }
+        if (spec.clipDistancesSize.has_value()) {
+            builtinVariableCount += dawn::RoundUp(*spec.clipDistancesSize, 4) / 4;
+        }
         return baseLimits.maxInterStageShaderVariables - builtinVariableCount;
     }
 
-    std::string GetInterStageVariableDeclarations(uint32_t interStageVariableCount) {
+    std::string GetInterStageVariableDeclarations(uint32_t interStageVariableCount,
+                                                  const MaxInterStageLimitTestsSpec& spec) {
         std::stringstream stream;
 
         stream << "struct VertexOut {\n";
+
+        for (uint32_t location = 0; location < interStageVariableCount; ++location) {
+            stream << "@location(" << location << ") color" << location << " : vec4f, \n";
+        }
+
+        if (spec.clipDistancesSize.has_value()) {
+            stream << "@builtin(clip_distances) clipDistances : array<f32, "
+                   << *spec.clipDistancesSize << ">,\n";
+        }
+
+        stream << "@builtin(position) pos : vec4f\n}\n";
+
+        stream << "struct FragmentInput {\n";
 
         for (uint32_t location = 0; location < interStageVariableCount; ++location) {
             stream << "@location(" << location << ") color" << location << " : vec4f, \n";
@@ -922,8 +952,13 @@ class MaxInterStageShaderVariablesLimitTests : public MaxLimitTests {
     wgpu::ShaderModule GetShaderModuleForTest(const MaxInterStageLimitTestsSpec& spec) {
         std::stringstream stream;
 
+        if (spec.clipDistancesSize.has_value()) {
+            DAWN_ASSERT(mSupportsClipDistances);
+            stream << "enable clip_distances;\n";
+        }
+
         uint32_t interStageVariableCount = GetInterStageVariableCount(spec);
-        stream << GetInterStageVariableDeclarations(interStageVariableCount) << "\n"
+        stream << GetInterStageVariableDeclarations(interStageVariableCount, spec) << "\n"
                << GetVertexShaderForTest(interStageVariableCount) << "\n"
                << GetFragmentShaderForTest(interStageVariableCount, spec) << "\n";
         return utils::CreateShaderModule(device, stream.str().c_str());
@@ -961,7 +996,7 @@ class MaxInterStageShaderVariablesLimitTests : public MaxLimitTests {
                                          const MaxInterStageLimitTestsSpec& spec) {
         std::stringstream stream;
 
-        stream << "@fragment fn fs_main(input: VertexOut";
+        stream << "@fragment fn fs_main(input: FragmentInput";
         if (spec.hasFrontFacing) {
             stream << ", @builtin(front_facing) isFront : bool";
         }
@@ -1075,6 +1110,31 @@ TEST_P(MaxInterStageShaderVariablesLimitTests, RenderPointList_SampleMask_Sample
     spec.hasSampleIndex = true;
     spec.hasFrontFacing = true;
     DoTest(spec);
+}
+
+// Tests that maxInterStageShaderVariables works for a render pipeline with
+// @builtin(clip_distances).
+TEST_P(MaxInterStageShaderVariablesLimitTests, ClipDistances) {
+    DAWN_TEST_UNSUPPORTED_IF(!mSupportsClipDistances);
+
+    MaxInterStageLimitTestsSpec spec = {};
+    for (uint32_t clipDistanceSize = 1; clipDistanceSize <= 8; ++clipDistanceSize) {
+        spec.clipDistancesSize = clipDistanceSize;
+        DoTest(spec);
+    }
+}
+
+// Tests that maxInterStageShaderVariables works for a render pipeline with PointList primitive and
+// @builtin(clip_distances).
+TEST_P(MaxInterStageShaderVariablesLimitTests, RenderPointList_ClipDistances) {
+    DAWN_TEST_UNSUPPORTED_IF(!mSupportsClipDistances);
+
+    MaxInterStageLimitTestsSpec spec = {};
+    for (uint32_t clipDistanceSize = 1; clipDistanceSize <= 8; ++clipDistanceSize) {
+        spec.clipDistancesSize = clipDistanceSize;
+        spec.renderPointLists = true;
+        DoTest(spec);
+    }
 }
 
 DAWN_INSTANTIATE_TEST(MaxInterStageShaderVariablesLimitTests,

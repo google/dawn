@@ -66,7 +66,6 @@ inline uint32_t Log2Ceil(uint64_t v) {
 
 uint64_t NextPowerOfTwo(uint64_t n);
 bool IsPtrAligned(const void* ptr, size_t alignment);
-void* AlignVoidPtr(void* ptr, size_t alignment);
 bool IsAligned(uint32_t value, size_t alignment);
 
 template <typename T>
