@@ -675,7 +675,6 @@ ResultOrError<std::unique_ptr<EntryPointMetadata>> ReflectEntryPointUsingTint(
     const CombinedLimits& limits = device->GetLimits();
     const uint32_t maxVertexAttributes = limits.v1.maxVertexAttributes;
     const uint32_t maxInterStageShaderVariables = limits.v1.maxInterStageShaderVariables;
-    const uint32_t maxInterStageShaderComponents = limits.v1.maxInterStageShaderComponents;
 
     metadata->usedInterStageVariables.resize(maxInterStageShaderVariables);
     metadata->interStageVariables.resize(maxInterStageShaderVariables);
@@ -725,10 +724,10 @@ ResultOrError<std::unique_ptr<EntryPointMetadata>> ReflectEntryPointUsingTint(
         }
 
         // Other vertex metadata.
-        metadata->totalInterStageShaderComponents = 4 * entryPoint.output_variables.size();
-        DelayedInvalidIf(metadata->totalInterStageShaderComponents > maxInterStageShaderComponents,
-                         "Total vertex output components count (%u) exceeds the maximum (%u).",
-                         metadata->totalInterStageShaderComponents, maxInterStageShaderComponents);
+        metadata->totalInterStageShaderVariables = entryPoint.output_variables.size();
+        DelayedInvalidIf(metadata->totalInterStageShaderVariables > maxInterStageShaderVariables,
+                         "Total vertex output variables count (%u) exceeds the maximum (%u).",
+                         metadata->totalInterStageShaderVariables, maxInterStageShaderVariables);
 
         metadata->usesVertexIndex = entryPoint.vertex_index_used;
         metadata->usesInstanceIndex = entryPoint.instance_index_used;
@@ -768,26 +767,22 @@ ResultOrError<std::unique_ptr<EntryPointMetadata>> ReflectEntryPointUsingTint(
             metadata->interStageVariables[location] = variable;
         }
 
-        uint32_t totalInterStageShaderComponents = 4 * entryPoint.input_variables.size();
+        uint32_t totalInterStageShaderVariables = entryPoint.input_variables.size();
 
         // Other fragment metadata
-        if (entryPoint.front_facing_used) {
-            totalInterStageShaderComponents += 1;
-        }
-        if (entryPoint.input_sample_mask_used) {
-            totalInterStageShaderComponents += 1;
-        }
         metadata->usesSampleMaskOutput = entryPoint.output_sample_mask_used;
         metadata->usesSampleIndex = entryPoint.sample_index_used;
-        if (entryPoint.sample_index_used) {
-            totalInterStageShaderComponents += 1;
+        if (entryPoint.front_facing_used || entryPoint.input_sample_mask_used ||
+            entryPoint.sample_index_used) {
+            ++totalInterStageShaderVariables;
         }
         metadata->usesFragDepth = entryPoint.frag_depth_used;
 
-        metadata->totalInterStageShaderComponents = totalInterStageShaderComponents;
-        DelayedInvalidIf(totalInterStageShaderComponents > maxInterStageShaderComponents,
-                         "Total fragment input components count (%u) exceeds the maximum (%u).",
-                         totalInterStageShaderComponents, maxInterStageShaderComponents);
+        metadata->totalInterStageShaderVariables = totalInterStageShaderVariables;
+        // TODO(chromium:364338810): Print out the usage of built-in variables in the error message
+        DelayedInvalidIf(totalInterStageShaderVariables > maxInterStageShaderVariables,
+                         "Total fragment input variables count (%u) exceeds the maximum (%u).",
+                         totalInterStageShaderVariables, maxInterStageShaderVariables);
 
         // Fragment output reflection.
         uint32_t maxColorAttachments = limits.v1.maxColorAttachments;

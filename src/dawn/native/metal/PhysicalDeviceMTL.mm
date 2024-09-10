@@ -895,7 +895,8 @@ MaybeError PhysicalDevice::InitializeSupportedLimitsImpl(CombinedLimits* limits)
     uint32_t vendorId = GetVendorId();
     if (gpu_info::IsApple(vendorId)) {
         limits->v1.maxInterStageShaderComponents = mtlLimits.maxFragmentInputComponents;
-        limits->v1.maxInterStageShaderVariables = mtlLimits.maxFragmentInputs;
+        limits->v1.maxInterStageShaderVariables =
+            std::min(mtlLimits.maxFragmentInputs, mtlLimits.maxFragmentInputComponents / 4);
     } else {
         // On non-Apple macOS each built-in consumes one individual inter-stage shader variable.
         limits->v1.maxInterStageShaderVariables = mtlLimits.maxFragmentInputs - 4;

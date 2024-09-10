@@ -174,6 +174,10 @@ crbug.com/354152178 [ nvidia-0x2184 ] webgpu:shader,execution,expression,call,bu
 crbug.com/dawn/350785841 webgpu:shader,execution,expression,call,builtin,smoothstep:* [ Failure ]
 crbug.com/dawn/350785841 webgpu:shader,validation,expression,call,builtin,smoothstep:* [ Failure ]
 
+# Temporarily skipped due to the removal of `maxInterStageShaderComponents` has not been completed in the below tests
+crbug.com/364338810 webgpu:api,validation,capability_checks,limits,maxInterStageShaderComponents:* [ Skip ]
+crbug.com/364338810 webgpu:api,validation,render_pipeline,inter_stage:max_components_count,* [ Skip ]
+
 ### This section represents tests which may require CTS changes.
 
 # ANGLETextureSharing is not supported

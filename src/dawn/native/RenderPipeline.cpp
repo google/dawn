@@ -203,12 +203,12 @@ ResultOrError<ShaderModuleEntryPoint> ValidateVertexState(
     const EntryPointMetadata& vertexMetadata = descriptor->module->GetEntryPoint(entryPoint.name);
     if (primitiveTopology == wgpu::PrimitiveTopology::PointList) {
         DAWN_INVALID_IF(
-            vertexMetadata.totalInterStageShaderComponents + 1 >
-                limits.v1.maxInterStageShaderComponents,
-            "Total vertex output components count (%u) exceeds the maximum (%u) when primitive "
-            "topology is %s as another component is implicitly used for the point size.",
-            vertexMetadata.totalInterStageShaderComponents,
-            limits.v1.maxInterStageShaderComponents - 1, primitiveTopology);
+            vertexMetadata.totalInterStageShaderVariables + 1 >
+                limits.v1.maxInterStageShaderVariables,
+            "Total vertex output variables count (%u) exceeds the maximum (%u) when primitive "
+            "topology is %s as another variable is implicitly used for the point size.",
+            vertexMetadata.totalInterStageShaderVariables,
+            limits.v1.maxInterStageShaderVariables - 1, primitiveTopology);
     }
 
     VertexAttributeMask attributesSetMask;

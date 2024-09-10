@@ -870,8 +870,8 @@ DAWN_INSTANTIATE_TEST(MaxLimitTests,
                       OpenGLESBackend(),
                       VulkanBackend());
 
-// Verifies the limits maxInterStageShaderVariables and maxInterStageShaderComponents work correctly
-class MaxInterStageLimitTests : public MaxLimitTests {
+// Verifies the limits maxInterStageShaderVariables work correctly
+class MaxInterStageShaderVariablesLimitTests : public MaxLimitTests {
   public:
     struct MaxInterStageLimitTestsSpec {
         bool renderPointLists;
@@ -891,20 +891,18 @@ class MaxInterStageLimitTests : public MaxLimitTests {
 
   private:
     // Allocate the inter-stage shader variables that consume as many inter-stage shader variables
-    // and components as possible.
+    // as possible.
     uint32_t GetInterStageVariableCount(const MaxInterStageLimitTestsSpec& spec) {
         wgpu::Limits baseLimits = GetAdapterLimits().limits;
 
-        uint32_t builtinCount = static_cast<uint32_t>(spec.renderPointLists) +
-                                static_cast<uint32_t>(spec.hasFrontFacing) +
-                                static_cast<uint32_t>(spec.hasSampleIndex) +
-                                static_cast<uint32_t>(spec.hasSampleMask);
-        uint32_t userDefinedInterStageComponents =
-            baseLimits.maxInterStageShaderComponents - builtinCount;
-
-        // Each user-defined inter-stage shader variable always consumes 4 scalar components.
-        DAWN_ASSERT(baseLimits.maxInterStageShaderVariables >= userDefinedInterStageComponents / 4);
-        return userDefinedInterStageComponents / 4;
+        uint32_t builtinVariableCount = 0;
+        if (spec.renderPointLists) {
+            ++builtinVariableCount;
+        }
+        if (spec.hasFrontFacing || spec.hasSampleIndex || spec.hasSampleMask) {
+            ++builtinVariableCount;
+        }
+        return baseLimits.maxInterStageShaderVariables - builtinVariableCount;
     }
 
     std::string GetInterStageVariableDeclarations(uint32_t interStageVariableCount) {
@@ -1010,54 +1008,48 @@ class MaxInterStageLimitTests : public MaxLimitTests {
     }
 };
 
-// Tests that both maxInterStageShaderComponents and maxInterStageShaderVariables work for a render
-// pipeline with no built-in variables.
-TEST_P(MaxInterStageLimitTests, NoBuiltins) {
+// Tests that maxInterStageShaderVariables works for a render pipeline with no built-in variables.
+TEST_P(MaxInterStageShaderVariablesLimitTests, NoBuiltins) {
     MaxInterStageLimitTestsSpec spec = {};
     DoTest(spec);
 }
 
-// Tests that both maxInterStageShaderComponents and maxInterStageShaderVariables work for a render
-// pipeline with @builtin(sample_mask). On D3D SV_Coverage doesn't consume an independent float4
-// register.
-TEST_P(MaxInterStageLimitTests, SampleMask) {
+// Tests that maxInterStageShaderVariables works for a render pipeline with @builtin(sample_mask).
+// On D3D SV_Coverage doesn't consume an independent float4 register.
+TEST_P(MaxInterStageShaderVariablesLimitTests, SampleMask) {
     MaxInterStageLimitTestsSpec spec = {};
     spec.hasSampleMask = true;
     DoTest(spec);
 }
 
-// Tests that both maxInterStageShaderComponents and maxInterStageShaderVariables work for a render
-// pipeline with @builtin(sample_index). On D3D SV_SampleIndex consumes an independent float4
-// register.
-TEST_P(MaxInterStageLimitTests, SampleIndex) {
+// Tests that maxInterStageShaderVariables works for a render pipeline with @builtin(sample_index).
+// On D3D SV_SampleIndex consumes an independent float4 register.
+TEST_P(MaxInterStageShaderVariablesLimitTests, SampleIndex) {
     MaxInterStageLimitTestsSpec spec = {};
     spec.hasSampleIndex = true;
     DoTest(spec);
 }
 
-// Tests that both maxInterStageShaderComponents and maxInterStageShaderVariables work for a render
-// pipeline with @builtin(front_facing). On D3D SV_IsFrontFace consumes an independent float4
-// register.
-TEST_P(MaxInterStageLimitTests, FrontFacing) {
+// Tests that maxInterStageShaderVariables works for a render pipeline with @builtin(front_facing).
+// On D3D SV_IsFrontFace consumes an independent float4 register.
+TEST_P(MaxInterStageShaderVariablesLimitTests, FrontFacing) {
     MaxInterStageLimitTestsSpec spec = {};
     spec.hasFrontFacing = true;
     DoTest(spec);
 }
 
-// Tests that both maxInterStageShaderComponents and maxInterStageShaderVariables work for a render
-// pipeline with @builtin(front_facing). On D3D SV_IsFrontFace and SV_SampleIndex consume one
-// independent float4 register.
-TEST_P(MaxInterStageLimitTests, SampleIndex_FrontFacing) {
+// Tests that maxInterStageShaderVariables works for a render pipeline with @builtin(front_facing).
+// On D3D SV_IsFrontFace and SV_SampleIndex consume one independent float4 register.
+TEST_P(MaxInterStageShaderVariablesLimitTests, SampleIndex_FrontFacing) {
     MaxInterStageLimitTestsSpec spec = {};
     spec.hasSampleIndex = true;
     spec.hasFrontFacing = true;
     DoTest(spec);
 }
 
-// Tests that both maxInterStageShaderComponents and maxInterStageShaderVariables work for a render
-// pipeline with @builtin(sample_mask),
+// Tests that maxInterStageShaderVariables works for a render pipeline with @builtin(sample_mask),
 // @builtin(sample_index) and @builtin(front_facing).
-TEST_P(MaxInterStageLimitTests, SampleMask_SampleIndex_FrontFacing) {
+TEST_P(MaxInterStageShaderVariablesLimitTests, SampleMask_SampleIndex_FrontFacing) {
     MaxInterStageLimitTestsSpec spec = {};
     spec.hasSampleMask = true;
     spec.hasSampleIndex = true;
@@ -1065,20 +1057,18 @@ TEST_P(MaxInterStageLimitTests, SampleMask_SampleIndex_FrontFacing) {
     DoTest(spec);
 }
 
-// Tests that both maxInterStageShaderComponents and maxInterStageShaderVariables work for a render
-// pipeline with PointList primitive topology. On Vulkan when the primitive topology is PointList,
-// the SPIR-V builtin PointSize must be declared in vertex shader, which will consume 1 inter-stage
-// shader component.
-TEST_P(MaxInterStageLimitTests, RenderPointList) {
+// Tests that maxInterStageShaderVariables works for a render pipeline with PointList primitive
+// topology. On Vulkan when the primitive topology is PointList, the SPIR-V builtin PointSize must
+// be declared in vertex shader, which will consume 1 inter-stage shader variable.
+TEST_P(MaxInterStageShaderVariablesLimitTests, RenderPointList) {
     MaxInterStageLimitTestsSpec spec = {};
     spec.renderPointLists = true;
     DoTest(spec);
 }
 
-// Tests that both maxInterStageShaderComponents and maxInterStageShaderVariables work for a render
-// pipeline with PointList primitive topology, @builtin(sample_mask),
-// @builtin(sample_index) and @builtin(front_facing).
-TEST_P(MaxInterStageLimitTests, RenderPointList_SampleMask_SampleIndex_FrontFacing) {
+// Tests that maxInterStageShaderVariables works for a render pipeline with PointList primitive
+// topology, @builtin(sample_mask), @builtin(sample_index) and @builtin(front_facing).
+TEST_P(MaxInterStageShaderVariablesLimitTests, RenderPointList_SampleMask_SampleIndex_FrontFacing) {
     MaxInterStageLimitTestsSpec spec = {};
     spec.renderPointLists = true;
     spec.hasSampleMask = true;
@@ -1087,7 +1077,7 @@ TEST_P(MaxInterStageLimitTests, RenderPointList_SampleMask_SampleIndex_FrontFaci
     DoTest(spec);
 }
 
-DAWN_INSTANTIATE_TEST(MaxInterStageLimitTests,
+DAWN_INSTANTIATE_TEST(MaxInterStageShaderVariablesLimitTests,
                       D3D11Backend(),
                       D3D12Backend({}, {"use_dxc"}),
                       D3D12Backend({"use_dxc"}),

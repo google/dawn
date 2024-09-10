@@ -318,7 +318,7 @@ TEST_F(ShaderModuleValidationTest, GetCompilationMessages) {
 }
 
 // Validate the maximum location of effective inter-stage variables cannot be greater than 16
-// (kMaxInterStageShaderVariables == kMaxInterStageShaderComponents / 4).
+// (kMaxInterStageShaderVariables).
 TEST_F(ShaderModuleValidationTest, MaximumShaderIOLocations) {
     auto CheckTestPipeline = [&](bool success, uint32_t maximumOutputLocation,
                                  wgpu::ShaderStage failingShaderStage) {
@@ -415,34 +415,22 @@ TEST_F(ShaderModuleValidationTest, MaximumShaderIOLocations) {
     CheckTestPipeline(false, kMaxInterStageShaderVariables, wgpu::ShaderStage::Fragment);
 }
 
-// Validate the maximum number of total inter-stage user-defined variable component count and
-// built-in variables cannot exceed kMaxInterStageShaderComponents.
-TEST_F(ShaderModuleValidationTest, MaximumInterStageShaderComponents) {
+// Validate the number of total inter-stage user-defined variables count and built-in variables
+// cannot exceed kMaxInterStageShaderVariables.
+TEST_F(ShaderModuleValidationTest, MaximumInterStageShaderVariables) {
     auto CheckTestPipeline = [&](bool success,
-                                 uint32_t totalUserDefinedInterStageShaderComponentCount,
+                                 uint32_t totalUserDefinedInterStageShaderVariablesCount,
                                  wgpu::ShaderStage failingShaderStage,
                                  const char* extraBuiltInDeclarations = "",
                                  bool usePointListAsPrimitiveType = false) {
-        // Build the ShaderIO struct containing totalUserDefinedInterStageShaderComponentCount
-        // components. Components are added in two parts, a bunch of vec4s, then one additional
-        // variable for the remaining components.
+        // Build the ShaderIO struct containing totalUserDefinedInterStageShaderVariablesCount
+        // variables.
         std::ostringstream stream;
         stream << "struct ShaderIO {\n" << extraBuiltInDeclarations << "\n";
-        uint32_t vec4InputLocations = totalUserDefinedInterStageShaderComponentCount / 4;
+        uint32_t vec4InputLocations = totalUserDefinedInterStageShaderVariablesCount;
 
         for (uint32_t location = 0; location < vec4InputLocations; ++location) {
             stream << "@location(" << location << ") var" << location << ": vec4f,\n";
-        }
-
-        uint32_t lastComponentCount = totalUserDefinedInterStageShaderComponentCount % 4;
-        if (lastComponentCount > 0) {
-            stream << "@location(" << vec4InputLocations << ") var" << vec4InputLocations << ": ";
-            if (lastComponentCount == 1) {
-                stream << "f32,";
-            } else {
-                stream << " vec" << lastComponentCount << "f,";
-            }
-            stream << "\n";
         }
 
         if (failingShaderStage == wgpu::ShaderStage::Vertex) {
@@ -525,48 +513,48 @@ TEST_F(ShaderModuleValidationTest, MaximumInterStageShaderComponents) {
     };
 
     // Verify when there is no input builtin variable in a fragment shader, the total user-defined
-    // input component count must be less than kMaxInterStageShaderComponents.
+    // input variables count must be less than kMaxInterStageShaderVariables.
     {
-        CheckTestPipeline(true, kMaxInterStageShaderComponents, wgpu::ShaderStage::Fragment);
-        CheckTestPipeline(false, kMaxInterStageShaderComponents + 1, wgpu::ShaderStage::Fragment);
+        CheckTestPipeline(true, kMaxInterStageShaderVariables, wgpu::ShaderStage::Fragment);
+        CheckTestPipeline(false, kMaxInterStageShaderVariables + 1, wgpu::ShaderStage::Fragment);
     }
 
-    // Verify the total user-defined vertex output component count must be less than
-    // kMaxInterStageShaderComponents.
+    // Verify the total user-defined vertex output variables count must be less than
+    // kMaxInterStageShaderVariables.
     {
-        CheckTestPipeline(true, kMaxInterStageShaderComponents, wgpu::ShaderStage::Vertex);
-        CheckTestPipeline(false, kMaxInterStageShaderComponents + 1, wgpu::ShaderStage::Vertex);
+        CheckTestPipeline(true, kMaxInterStageShaderVariables, wgpu::ShaderStage::Vertex);
+        CheckTestPipeline(false, kMaxInterStageShaderVariables + 1, wgpu::ShaderStage::Vertex);
     }
 
-    // Verify the total user-defined vertex output component count must be less than or equal to
-    // (kMaxInterStageShaderComponents - 4) when the primitive topology is PointList.
+    // Verify the total user-defined vertex output variables count must be less than or equal to
+    // (kMaxInterStageShaderVariables - 1) when the primitive topology is PointList.
     {
         constexpr bool kUsePointListAsPrimitiveTopology = true;
         const char* kExtraBuiltins = "";
 
         {
-            uint32_t componentCount = kMaxInterStageShaderComponents - 4;
-            CheckTestPipeline(true, componentCount, wgpu::ShaderStage::Vertex, kExtraBuiltins,
+            uint32_t variablesCount = kMaxInterStageShaderVariables - 1;
+            CheckTestPipeline(true, variablesCount, wgpu::ShaderStage::Vertex, kExtraBuiltins,
                               kUsePointListAsPrimitiveTopology);
         }
         {
-            uint32_t componentCount = kMaxInterStageShaderComponents - 3;
-            CheckTestPipeline(false, componentCount, wgpu::ShaderStage::Vertex, kExtraBuiltins,
+            uint32_t variablesCount = kMaxInterStageShaderVariables;
+            CheckTestPipeline(false, variablesCount, wgpu::ShaderStage::Vertex, kExtraBuiltins,
                               kUsePointListAsPrimitiveTopology);
         }
     }
 
     // @builtin(position) in fragment shaders shouldn't be counted into the maximum inter-stage
-    // component count.
+    // variables count.
     {
-        CheckTestPipeline(true, kMaxInterStageShaderComponents, wgpu::ShaderStage::Fragment,
+        CheckTestPipeline(true, kMaxInterStageShaderVariables, wgpu::ShaderStage::Fragment,
                           "@builtin(position) fragCoord : vec4f,");
     }
 
     // @builtin(front_facing), @builtin(sample_index) and @builtin(sample_mask) should all be
-    // counted into the maximum inter-stage component count. Then the maximum user-defined
-    // inter-stage shader components can only be (kMaxInterStageShaderComponents - 4) because each
-    // user-defined inter-stage shader variable always consumes 4 scalar components.
+    // counted into the maximum inter-stage variables count. Then the maximum user-defined
+    // inter-stage shader variables can only be (kMaxInterStageShaderVariables - 1) because these
+    // user-defined inter-stage shader variables always consume 1 shader variable.
     {
         constexpr uint8_t kMaskFrontFacing = 1;
         constexpr uint8_t kMaskSampleIndex = 1 << 1;
@@ -584,13 +572,13 @@ TEST_F(ShaderModuleValidationTest, MaximumInterStageShaderComponents) {
             }
 
             {
-                uint32_t componentCount = kMaxInterStageShaderComponents - 4;
-                CheckTestPipeline(true, componentCount, wgpu::ShaderStage::Fragment,
+                uint32_t variablesCount = kMaxInterStageShaderVariables - 1;
+                CheckTestPipeline(true, variablesCount, wgpu::ShaderStage::Fragment,
                                   builtInDeclarations.c_str());
             }
             {
-                uint32_t componentCount = kMaxInterStageShaderComponents - 3;
-                CheckTestPipeline(false, componentCount, wgpu::ShaderStage::Fragment,
+                uint32_t variablesCount = kMaxInterStageShaderVariables;
+                CheckTestPipeline(false, variablesCount, wgpu::ShaderStage::Fragment,
                                   builtInDeclarations.c_str());
             }
         }

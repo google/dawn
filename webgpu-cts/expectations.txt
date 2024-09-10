@@ -104,6 +104,10 @@ crbug.com/1344876 [ webgpu-adapter-swiftshader win ] webgpu:web_platform,copyToT
 crbug.com/1344876 [ webgpu-adapter-swiftshader win ] webgpu:web_platform,copyToTexture,canvas:copy_contents_from_2d_context_canvas:* [ Skip ]
 crbug.com/1344876 [ webgpu-adapter-swiftshader win ] webgpu:web_platform,copyToTexture,canvas:copy_contents_from_gl_context_canvas:* [ Skip ]
 
+# Temporarily skipped due to the removal of `maxInterStageShaderComponents` has not been completed in the below tests
+crbug.com/364338810 webgpu:api,validation,capability_checks,limits,maxInterStageShaderComponents:* [ Skip ]
+crbug.com/364338810 webgpu:api,validation,render_pipeline,inter_stage:max_components_count,* [ Skip ]
+
 # SharedWorker is not available on Android
 crbug.com/dawn/2486 [ android webgpu-shared-worker ] * [ Skip ]
 
@@ -984,9 +988,6 @@ crbug.com/tint/1974 [ android-t ] webgpu:shader,execution,expression,call,builti
 crbug.com/tint/1974 [ android-t ] webgpu:shader,execution,expression,call,builtin,atomics,atomicXor:xor_workgroup:workgroupSize=2;dispatchSize=4;mapId="remap";scalarType="u32" [ Failure ]
 crbug.com/tint/1974 [ android-t ] webgpu:shader,execution,expression,call,builtin,atomics,atomicXor:xor_workgroup:workgroupSize=2;dispatchSize=8;mapId="remap";scalarType="i32" [ Failure ]
 crbug.com/tint/1974 [ android-t ] webgpu:shader,execution,expression,call,builtin,atomics,atomicXor:xor_workgroup:workgroupSize=2;dispatchSize=8;mapId="remap";scalarType="u32" [ Failure ]
-
-# maxInterStageShaderComponents limit tests fail with CreateGraphicsPipelines fail with <Unknown VkResult> on Android Qualcomm (Pixel 4)
-crbug.com/tint/2061 [ qualcomm ] webgpu:api,validation,capability_checks,limits,maxInterStageShaderComponents:* [ Failure ]
 
 # Shader corr failing flakily on Android ARM (Pixel 6)
 crbug.com/dawn/1991 [ android-t ] webgpu:shader,execution,memory_model,coherence:corr:memType="atomic_storage";testType="inter_workgroup" [ RetryOnFailure ]
