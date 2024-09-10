@@ -729,10 +729,22 @@ ResultOrError<std::unique_ptr<EntryPointMetadata>> ReflectEntryPointUsingTint(
             metadata->totalInterStageShaderVariables +=
                 RoundUp(*entryPoint.clip_distances_size, 4) / 4;
         }
-        // TODO(chromium:364338810): Print out the usage of built-in variables in the error message
-        DelayedInvalidIf(metadata->totalInterStageShaderVariables > maxInterStageShaderVariables,
-                         "Total vertex output variables count (%u) exceeds the maximum (%u).",
-                         metadata->totalInterStageShaderVariables, maxInterStageShaderVariables);
+
+        if (metadata->totalInterStageShaderVariables > maxInterStageShaderVariables) {
+            size_t userDefinedOutputVariables = entryPoint.output_variables.size();
+
+            std::ostringstream builtinInfo;
+            if (entryPoint.clip_distances_size.has_value()) {
+                builtinInfo << " + " << RoundUp(*entryPoint.clip_distances_size, 4) / 4
+                            << " (clip_distances)";
+            }
+
+            metadata->infringedLimitErrors.push_back(absl::StrFormat(
+                "Total vertex output variables count (%u = %u (user-defined)%s) exceeds the "
+                "maximum (%u).",
+                metadata->totalInterStageShaderVariables, userDefinedOutputVariables,
+                builtinInfo.str(), maxInterStageShaderVariables));
+        }
 
         metadata->usesVertexIndex = entryPoint.vertex_index_used;
         metadata->usesInstanceIndex = entryPoint.instance_index_used;
@@ -784,10 +796,39 @@ ResultOrError<std::unique_ptr<EntryPointMetadata>> ReflectEntryPointUsingTint(
         metadata->usesFragDepth = entryPoint.frag_depth_used;
 
         metadata->totalInterStageShaderVariables = totalInterStageShaderVariables;
-        // TODO(chromium:364338810): Print out the usage of built-in variables in the error message
-        DelayedInvalidIf(totalInterStageShaderVariables > maxInterStageShaderVariables,
-                         "Total fragment input variables count (%u) exceeds the maximum (%u).",
-                         totalInterStageShaderVariables, maxInterStageShaderVariables);
+        if (metadata->totalInterStageShaderVariables > maxInterStageShaderVariables) {
+            size_t userDefinedInputVariables = entryPoint.input_variables.size();
+
+            std::ostringstream builtinInfo;
+            if (metadata->totalInterStageShaderVariables > userDefinedInputVariables) {
+                builtinInfo << " + 1 (";
+                bool isFirst = true;
+                if (entryPoint.front_facing_used) {
+                    builtinInfo << "front_facing";
+                    isFirst = false;
+                }
+                if (entryPoint.input_sample_mask_used) {
+                    if (!isFirst) {
+                        builtinInfo << "|";
+                    }
+                    builtinInfo << "sample_mask";
+                    isFirst = false;
+                }
+                if (entryPoint.sample_index_used) {
+                    if (!isFirst) {
+                        builtinInfo << "|";
+                    }
+                    builtinInfo << "sample_index";
+                    isFirst = false;
+                }
+            }
+
+            metadata->infringedLimitErrors.push_back(absl::StrFormat(
+                "Total fragment input variables count (%u = %u (user-defined)%s) exceeds the "
+                "maximum (%u).",
+                metadata->totalInterStageShaderVariables, userDefinedInputVariables,
+                builtinInfo.str(), maxInterStageShaderVariables));
+        }
 
         // Fragment output reflection.
         uint32_t maxColorAttachments = limits.v1.maxColorAttachments;
