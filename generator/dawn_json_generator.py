@@ -428,18 +428,6 @@ def linked_record_members(json_data, types):
     return members
 
 
-def mark_lengths_non_serializable_lpm(record_members):
-    # Remove member length values from command metadata,
-    # these are set to the length of the protobuf array.
-    for record_member in record_members:
-        lengths = set()
-        for member in record_member.members:
-            lengths.add(member.length)
-
-        for member in record_member.members:
-            if member in lengths:
-                member.skip_serialize = True
-
 ############################################################
 # PARSE
 ############################################################
@@ -707,104 +695,6 @@ def compute_wire_params(api_params, wire_json):
     wire_params.update(wire_json.get('special items', {}))
 
     return wire_params
-
-############################################################
-# DAWN LPM FUZZ STUFF
-############################################################
-
-
-def compute_lpm_params(api_and_wire_params, lpm_json):
-    # Start with all commands in dawn.json and dawn_wire.json
-    lpm_params = api_and_wire_params.copy()
-
-    # Commands that are built through codegen
-    generated_commands = []
-
-    # All commands, including hand written commands that we can't generate
-    # through codegen
-    all_commands = []
-
-    # Remove blocklisted commands from protobuf generation params
-    blocklisted_cmds_proto = lpm_json.get('blocklisted_cmds')
-    custom_cmds_proto = lpm_json.get('custom_cmds')
-    for command in lpm_params['cmd_records']['command']:
-        blocklisted = command.name.get() in blocklisted_cmds_proto
-        custom = command.name.get() in custom_cmds_proto
-
-        if blocklisted:
-            continue
-
-        if not custom:
-            generated_commands.append(command)
-        all_commands.append(command)
-
-    # Set all fields that are marked as the "length" of another field to
-    # skip_serialize. The values passed by libprotobuf-mutator will cause
-    # an instant crash during serialization if these don't match the length
-    # of the data they are passing. These values aren't used in
-    # deserialization.
-    mark_lengths_non_serializable_lpm(
-        api_and_wire_params['cmd_records']['command'])
-    mark_lengths_non_serializable_lpm(
-        api_and_wire_params['by_category']['structure'])
-
-    lpm_params['cmd_records'] = {
-        'proto_generated_commands': generated_commands,
-        'proto_all_commands': all_commands,
-        'cpp_generated_commands': generated_commands,
-        'lpm_info': lpm_json.get("lpm_info")
-    }
-
-    return lpm_params
-
-
-def as_protobufTypeLPM(member):
-    assert 'type' in member.json_data
-
-    if member.type.name.native:
-        typ = member.json_data['type']
-        cpp_to_protobuf_type = {
-            "bool": "bool",
-            "float": "float",
-            "double": "double",
-            "int8_t": "int32",
-            "int16_t": "int32",
-            "int32_t": "int32",
-            "int64_t": "int64",
-            "uint8_t": "uint32",
-            "uint16_t": "uint32",
-            "uint32_t": "uint32",
-            "uint64_t": "uint64",
-            "size_t": "uint64",
-        }
-
-        assert typ in cpp_to_protobuf_type
-
-        return cpp_to_protobuf_type[typ]
-
-    return member.type.name.CamelCase()
-
-
-# Helper that generates names for protobuf grammars from contents
-# of dawn*.json like files. example: membera
-def as_protobufNameLPM(*names):
-    # `descriptor` is a reserved keyword in lib-protobuf-mutator
-    if (names[0].concatcase() == "descriptor"):
-        return "desc"
-    return as_varName(*names)
-
-
-# Helper to generate member accesses within C++ of protobuf objects
-# example: cmd.membera().memberb()
-def as_protobufMemberNameLPM(*names):
-    # `descriptor` is a reserved keyword in lib-protobuf-mutator
-    if (names[0].concatcase() == "descriptor"):
-        return "desc"
-    return ''.join([name.concatcase().lower() for name in names])
-
-
-def unreachable_code(msg="unreachable_code"):
-    assert False, msg
 
 
 ############################################################
@@ -1122,6 +1012,10 @@ def is_wire_serializable(type):
             and type.name.get() != 'void *')
 
 
+def unreachable_code(msg="unreachable_code"):
+    assert False, msg
+
+
 def make_base_render_params(metadata):
     c_prefix = metadata.c_prefix
 
@@ -1180,7 +1074,7 @@ def make_base_render_params(metadata):
             'has_callbackInfoStruct': has_callbackInfoStruct,
             'find_by_name': find_by_name,
             'print': print,
-            'unreachable_code': unreachable_code
+            'unreachable_code': unreachable_code,
         }
 
 
@@ -1191,7 +1085,7 @@ class MultiGeneratorFromDawnJSON(Generator):
     def add_commandline_arguments(self, parser):
         allowed_targets = [
             'dawn_headers', 'cpp_headers', 'cpp', 'proc', 'mock_api', 'wire',
-            'native_utils', 'dawn_lpmfuzz_cpp', 'dawn_lpmfuzz_proto', 'kotlin'
+            'native_utils', 'kotlin'
         ]
 
         parser.add_argument('--dawn-json',
@@ -1206,10 +1100,6 @@ class MultiGeneratorFromDawnJSON(Generator):
                             default=None,
                             type=str,
                             help='The KOTLIN JSON definition to use.')
-        parser.add_argument("--lpm-json",
-                            default=None,
-                            type=str,
-                            help='The DAWN LPM FUZZER definitions to use.')
         parser.add_argument(
             '--targets',
             required=True,
@@ -1233,11 +1123,6 @@ class MultiGeneratorFromDawnJSON(Generator):
         if args.kotlin_json:
             with open(args.kotlin_json) as f:
                 kotlin_json = json.loads(f.read())
-
-        lpm_json = None
-        if args.lpm_json:
-            with open(args.lpm_json) as f:
-                lpm_json = json.loads(f.read())
 
         renders = []
         imported_templates = []
@@ -1535,70 +1420,6 @@ class MultiGeneratorFromDawnJSON(Generator):
                            'src/dawn/wire/server/WGPUTraits_autogen.h',
                            wire_params))
 
-
-        if 'dawn_lpmfuzz_proto' in targets:
-            params_dawn_wire = parse_json(
-                loaded_json,
-                enabled_tags=['compat', 'dawn', 'deprecated'],
-                disabled_tags=['native'])
-            api_and_wire_params = compute_wire_params(params_dawn_wire,
-                                                      wire_json)
-
-            fuzzer_params = compute_lpm_params(api_and_wire_params, lpm_json)
-
-            lpm_params = [
-                RENDER_PARAMS_BASE, params_dawn_wire, {
-                    'as_protobufTypeLPM': as_protobufTypeLPM,
-                    'as_protobufNameLPM': as_protobufNameLPM,
-                    'unreachable': unreachable_code
-                }, api_and_wire_params, fuzzer_params
-            ]
-
-            renders.append(
-                FileRender('dawn/fuzzers/lpmfuzz/dawn_lpm.proto',
-                           'src/dawn/fuzzers/lpmfuzz/dawn_lpm_autogen.proto',
-                           lpm_params))
-
-            renders.append(
-                FileRender(
-                    'dawn/fuzzers/lpmfuzz/dawn_object_types_lpm.proto',
-                    'src/dawn/fuzzers/lpmfuzz/dawn_object_types_lpm_autogen.proto',
-                    lpm_params))
-
-        if 'dawn_lpmfuzz_cpp' in targets:
-            params_dawn_wire = parse_json(
-                loaded_json,
-                enabled_tags=['compat', 'dawn', 'deprecated'],
-                disabled_tags=['native'])
-            api_and_wire_params = compute_wire_params(params_dawn_wire,
-                                                      wire_json)
-
-            fuzzer_params = compute_lpm_params(api_and_wire_params, lpm_json)
-
-            lpm_params = [
-                RENDER_PARAMS_BASE, params_dawn_wire, {
-                    'as_protobufMemberName': as_protobufMemberNameLPM
-                }, api_and_wire_params, fuzzer_params
-            ]
-
-            renders.append(
-                FileRender(
-                    'dawn/fuzzers/lpmfuzz/DawnLPMSerializer.cpp',
-                    'src/dawn/fuzzers/lpmfuzz/DawnLPMSerializer_autogen.cpp',
-                    lpm_params))
-
-            renders.append(
-                FileRender(
-                    'dawn/fuzzers/lpmfuzz/DawnLPMSerializer.h',
-                    'src/dawn/fuzzers/lpmfuzz/DawnLPMSerializer_autogen.h',
-                    lpm_params))
-
-            renders.append(
-                FileRender(
-                    'dawn/fuzzers/lpmfuzz/DawnLPMConstants.h',
-                    'src/dawn/fuzzers/lpmfuzz/DawnLPMConstants_autogen.h',
-                    lpm_params))
-
         if 'kotlin' in targets:
             params_kotlin = compute_kotlin_params(loaded_json, kotlin_json)
             kt_file_path = params_kotlin['kotlin_package'].replace('.', '/')
@@ -1686,8 +1507,6 @@ class MultiGeneratorFromDawnJSON(Generator):
             deps += [os.path.abspath(args.wire_json)]
         if args.kotlin_json != None:
             deps += [os.path.abspath(args.kotlin_json)]
-        if args.lpm_json != None:
-            deps += [os.path.abspath(args.lpm_json)]
         return deps
 
 
