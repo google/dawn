@@ -83,6 +83,8 @@ class Device final : public DeviceBase {
     bool UseCounterSamplingAtCommandBoundary() const;
     bool UseCounterSamplingAtStageBoundary() const;
 
+    bool BackendWillValidateMultiDraw() const override;
+
     // Get a MTLBuffer that can be used as a mock in a no-op blit encoder based on filling this
     // single-byte buffer
     id<MTLBuffer> GetMockBlitMtlBuffer();

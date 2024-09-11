@@ -167,7 +167,7 @@ TEST_P(MultiDrawIndirectTest, IndirectOffset) {
     Test({3, 1, 0, 0, 3, 1, 3, 0}, kDrawIndirectSize, 1, notFilled, filled);
 }
 
-DAWN_INSTANTIATE_TEST(MultiDrawIndirectTest, VulkanBackend(), D3D12Backend());
+DAWN_INSTANTIATE_TEST(MultiDrawIndirectTest, VulkanBackend(), D3D12Backend(), MetalBackend());
 
 class MultiDrawIndirectUsingFirstVertexTest : public DawnTest {
   protected:
@@ -280,7 +280,10 @@ TEST_P(MultiDrawIndirectUsingFirstVertexTest, IndirectOffset) {
     Test({3, 1, 0, 0, 3, 1, 3, 0}, 2, notFilled, filled);
 }
 
-DAWN_INSTANTIATE_TEST(MultiDrawIndirectUsingFirstVertexTest, VulkanBackend(), D3D12Backend());
+DAWN_INSTANTIATE_TEST(MultiDrawIndirectUsingFirstVertexTest,
+                      VulkanBackend(),
+                      D3D12Backend(),
+                      MetalBackend());
 
 class MultiDrawIndirectUsingInstanceIndexTest : public MultiDrawIndirectUsingFirstVertexTest {
   protected:
@@ -330,7 +333,10 @@ TEST_P(MultiDrawIndirectUsingInstanceIndexTest, IndirectOffset) {
     Test({3, 1, 0, 0, 3, 1, 3, 1}, 2, notFilled, filled);
 }
 
-DAWN_INSTANTIATE_TEST(MultiDrawIndirectUsingInstanceIndexTest, VulkanBackend(), D3D12Backend());
+DAWN_INSTANTIATE_TEST(MultiDrawIndirectUsingInstanceIndexTest,
+                      VulkanBackend(),
+                      D3D12Backend(),
+                      MetalBackend());
 
 }  // namespace
 }  // namespace dawn

@@ -57,6 +57,10 @@ EncodingContext::~EncodingContext() {
 
 void EncodingContext::Destroy() {
     mDebugGroupLabels.clear();
+
+    if (!mWereIndirectDrawMetadataAcquired) {
+        mIndirectDrawMetadata.clear();
+    }
     if (!mWereCommandsAcquired) {
         CommandIterator commands = AcquireCommands();
         FreeCommands(&commands);
@@ -158,6 +162,8 @@ MaybeError EncodingContext::ExitRenderPass(const ApiObjectBase* passEncoder,
         CommitCommands(std::move(renderCommands));
     }
 
+    mIndirectDrawMetadata.emplace_back(std::move(indirectDrawMetadata));
+
     mRenderPassUsages.push_back(usageTracker.AcquireResourceUsage());
     return {};
 }
@@ -200,6 +206,12 @@ ComputePassUsages EncodingContext::AcquireComputePassUsages() {
     DAWN_ASSERT(!mWereComputePassUsagesAcquired);
     mWereComputePassUsagesAcquired = true;
     return std::move(mComputePassUsages);
+}
+
+std::vector<IndirectDrawMetadata> EncodingContext::AcquireIndirectDrawMetadata() {
+    DAWN_ASSERT(!mWereIndirectDrawMetadataAcquired);
+    mWereIndirectDrawMetadataAcquired = true;
+    return std::move(mIndirectDrawMetadata);
 }
 
 void EncodingContext::PushDebugGroupLabel(std::string_view groupLabel) {

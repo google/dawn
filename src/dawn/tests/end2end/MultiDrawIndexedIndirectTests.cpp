@@ -430,7 +430,10 @@ TEST_P(MultiDrawIndexedIndirectTest, ValidateMultiAndSingleDrawsInSingleRenderPa
     EXPECT_PIXEL_RGBA8_EQ(filled, renderPass.color, 3, 1);
 }
 
-DAWN_INSTANTIATE_TEST(MultiDrawIndexedIndirectTest, VulkanBackend(), D3D12Backend());
+DAWN_INSTANTIATE_TEST(MultiDrawIndexedIndirectTest,
+                      VulkanBackend(),
+                      D3D12Backend(),
+                      MetalBackend());
 
 class MultiDrawIndexedIndirectUsingFirstVertexTest : public DawnTest {
   protected:
@@ -555,7 +558,8 @@ TEST_P(MultiDrawIndexedIndirectUsingFirstVertexTest, IndirectOffset) {
 
 DAWN_INSTANTIATE_TEST(MultiDrawIndexedIndirectUsingFirstVertexTest,
                       VulkanBackend(),
-                      D3D12Backend());
+                      D3D12Backend(),
+                      MetalBackend());
 
 class MultiDrawIndexedIndirectUsingInstanceIndexTest
     : public MultiDrawIndexedIndirectUsingFirstVertexTest {
@@ -611,7 +615,8 @@ TEST_P(MultiDrawIndexedIndirectUsingInstanceIndexTest, IndirectOffset) {
 
 DAWN_INSTANTIATE_TEST(MultiDrawIndexedIndirectUsingInstanceIndexTest,
                       VulkanBackend(),
-                      D3D12Backend());
+                      D3D12Backend(),
+                      MetalBackend());
 
 }  // anonymous namespace
 }  // namespace dawn

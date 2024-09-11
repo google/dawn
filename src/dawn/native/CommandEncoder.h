@@ -29,6 +29,7 @@
 #define SRC_DAWN_NATIVE_COMMANDENCODER_H_
 
 #include <string>
+#include <vector>
 
 #include "absl/container/flat_hash_set.h"
 #include "dawn/common/NonMovable.h"
@@ -60,6 +61,7 @@ class CommandEncoder final : public ApiObjectBase {
 
     CommandIterator AcquireCommands();
     CommandBufferResourceUsage AcquireResourceUsages();
+    std::vector<IndirectDrawMetadata> AcquireIndirectDrawMetadata();
 
     void TrackUsedQuerySet(QuerySetBase* querySet);
     void TrackQueryAvailability(QuerySetBase* querySet, uint32_t queryIndex);

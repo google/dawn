@@ -411,6 +411,10 @@ bool Device::UseCounterSamplingAtStageBoundary() const {
     return mCounterSamplingAtStageBoundary;
 }
 
+bool Device::BackendWillValidateMultiDraw() const {
+    return true;
+}
+
 id<MTLBuffer> Device::GetMockBlitMtlBuffer() {
     if (mMockBlitMtlBuffer == nullptr) {
         mMockBlitMtlBuffer.Acquire(

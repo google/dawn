@@ -393,7 +393,9 @@ void RenderEncoderBase::APIMultiDrawIndirect(BufferBase* indirectBuffer,
                 GetDevice()->ShouldDuplicateParametersForDrawIndirect(
                     mCommandBufferState.GetRenderPipeline());
 
-            mIndirectDrawMetadata.AddMultiDrawIndirect(duplicateBaseVertexInstance, cmd);
+            mIndirectDrawMetadata.AddMultiDrawIndirect(
+                mCommandBufferState.GetRenderPipeline()->GetPrimitiveTopology(),
+                duplicateBaseVertexInstance, cmd);
 
             if (GetDevice()->IsValidationEnabled() ||
                 GetDevice()->MayRequireDuplicationOfIndirectParameters()) {
@@ -500,7 +502,9 @@ void RenderEncoderBase::APIMultiDrawIndexedIndirect(BufferBase* indirectBuffer,
             mIndirectDrawMetadata.AddMultiDrawIndexedIndirect(
                 mCommandBufferState.GetIndexBuffer(), mCommandBufferState.GetIndexFormat(),
                 mCommandBufferState.GetIndexBufferSize(),
-                mCommandBufferState.GetIndexBufferOffset(), duplicateBaseVertexInstance, cmd);
+                mCommandBufferState.GetIndexBufferOffset(),
+                mCommandBufferState.GetRenderPipeline()->GetPrimitiveTopology(),
+                duplicateBaseVertexInstance, cmd);
 
             if (GetDevice()->IsValidationEnabled() ||
                 GetDevice()->MayRequireDuplicationOfIndirectParameters()) {

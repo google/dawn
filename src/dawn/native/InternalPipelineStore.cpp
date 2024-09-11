@@ -41,9 +41,6 @@ InternalPipelineStore::InternalPipelineStore(DeviceBase* device)
     : scratchStorage(device, wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::Storage),
       scratchIndirectStorage(
           device,
-          wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::Indirect | wgpu::BufferUsage::Storage),
-      scratchMultiDrawStorage(
-          device,
           wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::Indirect | wgpu::BufferUsage::Storage) {}
 
 InternalPipelineStore::~InternalPipelineStore() = default;

@@ -921,6 +921,23 @@ MaybeError CommandBuffer::FillCommands(CommandRecordingContext* commandContext) 
                                             commandContext));
                 commandContext->EndBlit();
 
+                // Before beginning, we encode a compute pass that converts multi draws into an ICB
+                // if they exist.
+                auto& indirectMetadata = GetIndirectDrawMetadata();
+                const IndirectDrawMetadata& metadata = indirectMetadata[nextRenderPassNumber];
+                const auto& multiDraws = metadata.GetIndirectMultiDraws();
+
+                std::vector<MultiDrawExecutionData> multiDrawExecutions;
+
+                if (!multiDraws.empty()) {
+                    id<MTLComputeCommandEncoder> computeEnc = commandContext->BeginCompute();
+
+                    DAWN_TRY_ASSIGN(multiDrawExecutions,
+                                    PrepareMultiDraws(GetDevice(), computeEnc, multiDraws));
+
+                    commandContext->EndCompute();
+                }
+
                 LazyClearRenderPassAttachments(cmd);
                 if (cmd->attachmentState->HasDepthStencilAttachment() &&
                     ToBackend(cmd->depthStencilAttachment.view->GetTexture())
@@ -944,7 +961,8 @@ MaybeError CommandBuffer::FillCommands(CommandRecordingContext* commandContext) 
                             encoder, cmd,
                             device->IsToggleEnabled(Toggle::MetalFillEmptyOcclusionQueriesWithZero)
                                 ? &emptyOcclusionQueries
-                                : nullptr);
+                                : nullptr,
+                            multiDrawExecutions);
                     },
                     cmd));
                 for (const auto& [querySet, queryIndex] : emptyOcclusionQueries) {
@@ -1308,6 +1326,7 @@ MaybeError CommandBuffer::FillCommands(CommandRecordingContext* commandContext) 
     }
 
     commandContext->EndBlit();
+
     return {};
 }
 
@@ -1480,15 +1499,18 @@ MaybeError CommandBuffer::EncodeComputePass(CommandRecordingContext* commandCont
     DAWN_UNREACHABLE();
 }
 
-MaybeError CommandBuffer::EncodeRenderPass(id<MTLRenderCommandEncoder> encoder,
-                                           BeginRenderPassCmd* renderPassCmd,
-                                           EmptyOcclusionQueries* emptyOcclusionQueries) {
+MaybeError CommandBuffer::EncodeRenderPass(
+    id<MTLRenderCommandEncoder> encoder,
+    BeginRenderPassCmd* renderPassCmd,
+    EmptyOcclusionQueries* emptyOcclusionQueries,
+    const std::vector<MultiDrawExecutionData>& multiDrawExecutions) {
     bool enableVertexPulling = GetDevice()->IsToggleEnabled(Toggle::MetalEnableVertexPulling);
     RenderPipeline* lastPipeline = nullptr;
     id<MTLBuffer> indexBuffer = nullptr;
     uint32_t indexBufferBaseOffset = 0;
     MTLIndexType indexBufferType;
     uint64_t indexFormatSize = 0;
+    uint32_t multiDrawIndex = 0;
 
     bool didDrawInCurrentOcclusionQuery = false;
 
@@ -1616,6 +1638,29 @@ MaybeError CommandBuffer::EncodeRenderPass(id<MTLRenderCommandEncoder> encoder,
                                 indirectBuffer:indirectBuffer
                           indirectBufferOffset:draw->indirectOffset];
                 didDrawInCurrentOcclusionQuery = true;
+                break;
+            }
+
+            case Command::MultiDrawIndirect: {
+                iter->NextCommand<MultiDrawIndirectCmd>();
+
+                vertexBuffers.Apply(encoder, lastPipeline, enableVertexPulling);
+                bindGroups.Apply(encoder);
+                storageBufferLengths.Apply(encoder, lastPipeline, enableVertexPulling);
+
+                ExecuteMultiDraw(multiDrawExecutions[multiDrawIndex], encoder);
+                multiDrawIndex++;
+                break;
+            }
+            case Command::MultiDrawIndexedIndirect: {
+                iter->NextCommand<MultiDrawIndexedIndirectCmd>();
+
+                vertexBuffers.Apply(encoder, lastPipeline, enableVertexPulling);
+                bindGroups.Apply(encoder);
+                storageBufferLengths.Apply(encoder, lastPipeline, enableVertexPulling);
+
+                ExecuteMultiDraw(multiDrawExecutions[multiDrawIndex], encoder);
+                multiDrawIndex++;
                 break;
             }
 

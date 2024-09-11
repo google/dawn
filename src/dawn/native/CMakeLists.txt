@@ -495,6 +495,8 @@ if (DAWN_ENABLE_METAL)
         "metal/ComputePipelineMTL.h"
         "metal/DeviceMTL.h"
         "metal/Forward.h"
+        "metal/MultiDrawEncoder.h"
+        "metal/MultiDrawEncoder.mm"
         "metal/PhysicalDeviceMTL.h"
         "metal/PipelineLayoutMTL.h"
         "metal/QuerySetMTL.h"

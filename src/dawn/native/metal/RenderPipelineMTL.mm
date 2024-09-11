@@ -347,6 +347,10 @@ MaybeError RenderPipeline::InitializeImpl() {
     NSRef<NSString> label = MakeDebugName(GetDevice(), "Dawn_RenderPipeline", GetLabel());
     descriptorMTL.label = label.Get();
 
+    // Only put this flag on if the feature is enabled because it may have a performance cost.
+    descriptorMTL.supportIndirectCommandBuffers =
+        GetDevice()->HasFeature(Feature::MultiDrawIndirect);
+
     NSRef<MTLVertexDescriptor> vertexDesc;
     if (GetDevice()->IsToggleEnabled(Toggle::MetalEnableVertexPulling)) {
         vertexDesc = AcquireNSRef([MTLVertexDescriptor new]);

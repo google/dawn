@@ -172,6 +172,7 @@ class EncodingContext {
     const ComputePassUsages& GetComputePassUsages() const;
     RenderPassUsages AcquireRenderPassUsages();
     ComputePassUsages AcquireComputePassUsages();
+    std::vector<IndirectDrawMetadata> AcquireIndirectDrawMetadata();
 
     void PushDebugGroupLabel(std::string_view groupLabel);
     void PopDebugGroupLabel();
@@ -196,6 +197,10 @@ class EncodingContext {
     bool mWereRenderPassUsagesAcquired = false;
     ComputePassUsages mComputePassUsages;
     bool mWereComputePassUsagesAcquired = false;
+
+    // One for each render pass.
+    std::vector<IndirectDrawMetadata> mIndirectDrawMetadata;
+    bool mWereIndirectDrawMetadataAcquired = false;
 
     CommandAllocator mPendingCommands;
 

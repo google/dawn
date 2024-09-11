@@ -404,6 +404,8 @@ class DeviceBase : public ErrorSink, public RefCountedWithExternalCount<RefCount
     virtual bool ShouldDuplicateParametersForDrawIndirect(
         const RenderPipelineBase* renderPipelineBase) const;
 
+    virtual bool BackendWillValidateMultiDraw() const;
+
     // For OpenGL/OpenGL ES, we must apply the index buffer offset from SetIndexBuffer to the
     // firstIndex parameter in indirect buffers. This happens in the validation since it
     // copies the indirect buffers and updates them while validating.
