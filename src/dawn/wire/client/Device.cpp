@@ -67,10 +67,9 @@ class PopErrorScopeEvent final : public TrackedEvent {
             mStatus = WGPUPopErrorScopeStatus_InstanceDropped;
             mMessage = std::nullopt;
         }
-        void* userdata1 = mUserdata1.ExtractAsDangling();
-        void* userdata2 = mUserdata2.ExtractAsDangling();
         if (mCallback) {
-            mCallback(mStatus, mType, mMessage ? mMessage->c_str() : nullptr, userdata1, userdata2);
+            mCallback(mStatus, mType, mMessage ? mMessage->c_str() : nullptr,
+                      mUserdata1.ExtractAsDangling(), mUserdata2.ExtractAsDangling());
         }
     }
 
