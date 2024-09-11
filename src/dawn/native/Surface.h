@@ -40,9 +40,9 @@
 
 #include "dawn/common/Platform.h"
 
-#if DAWN_PLATFORM_IS(WINDOWS)
+#if defined(DAWN_USE_WINDOWS_UI)
 #include "dawn/native/d3d/d3d_platform.h"
-#endif  // DAWN_PLATFORM_IS(WINDOWS)
+#endif  // defined(DAWN_USE_WINDOWS_UI)
 
 // Forward declare IUnknown
 // GetCoreWindow needs to return an IUnknown pointer
