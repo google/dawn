@@ -102,11 +102,11 @@ TEST(ChainUtilsTests, ValidateAndUnpack) {
 
 // Nominal unpacking valid descriptors should return the expected descriptors in the unpacked type.
 TEST(ChainUtilsTests, ValidateAndUnpackOut) {
-    // DawnAdapterPropertiesPowerPreference is a valid extension for AdapterProperties.
-    AdapterProperties properties;
+    // DawnAdapterPropertiesPowerPreference is a valid extension for AdapterInfo.
+    AdapterInfo info;
     DawnAdapterPropertiesPowerPreference chain;
-    properties.nextInChain = &chain;
-    auto unpacked = ValidateAndUnpack(&properties).AcquireSuccess();
+    info.nextInChain = &chain;
+    auto unpacked = ValidateAndUnpack(&info).AcquireSuccess();
     auto ext = unpacked.Get<DawnAdapterPropertiesPowerPreference>();
     EXPECT_EQ(ext, &chain);
 
@@ -128,13 +128,13 @@ TEST(ChainUtilsTests, ValidateAndUnpackDuplicate) {
 
 // Duplicate valid extensions cause an error.
 TEST(ChainUtilsTests, ValidateAndUnpackOutDuplicate) {
-    // DawnAdapterPropertiesPowerPreference is a valid extension for AdapterProperties.
-    AdapterProperties properties;
+    // DawnAdapterPropertiesPowerPreference is a valid extension for AdapterInfo.
+    AdapterInfo info;
     DawnAdapterPropertiesPowerPreference chain1;
     DawnAdapterPropertiesPowerPreference chain2;
-    properties.nextInChain = &chain1;
+    info.nextInChain = &chain1;
     chain1.nextInChain = &chain2;
-    EXPECT_THAT(ValidateAndUnpack(&properties).AcquireError()->GetFormattedMessage(),
+    EXPECT_THAT(ValidateAndUnpack(&info).AcquireError()->GetFormattedMessage(),
                 HasSubstr("Duplicate"));
 }
 

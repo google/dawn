@@ -125,11 +125,36 @@ wgpu::Status AdapterBase::APIGetLimits(SupportedLimits* limits) const {
 wgpu::Status AdapterBase::APIGetInfo(AdapterInfo* info) const {
     DAWN_ASSERT(info != nullptr);
 
-    AdapterProperties properties = {};
-    properties.nextInChain = info->nextInChain;
-    if (GetPropertiesInternal(&properties) == wgpu::Status::Error) {
+    UnpackedPtr<AdapterInfo> unpacked;
+    if (mInstance->ConsumedError(ValidateAndUnpack(info), &unpacked)) {
         return wgpu::Status::Error;
     }
+
+    bool hadError = false;
+    if (unpacked.Get<AdapterPropertiesMemoryHeaps>() != nullptr &&
+        !mSupportedFeatures.IsEnabled(wgpu::FeatureName::AdapterPropertiesMemoryHeaps)) {
+        hadError |= mInstance->ConsumedError(
+            DAWN_VALIDATION_ERROR("Feature AdapterPropertiesMemoryHeaps is not available."));
+    }
+    if (unpacked.Get<AdapterPropertiesD3D>() != nullptr &&
+        !mSupportedFeatures.IsEnabled(wgpu::FeatureName::AdapterPropertiesD3D)) {
+        hadError |= mInstance->ConsumedError(
+            DAWN_VALIDATION_ERROR("Feature AdapterPropertiesD3D is not available."));
+    }
+    if (unpacked.Get<AdapterPropertiesVk>() != nullptr &&
+        !mSupportedFeatures.IsEnabled(wgpu::FeatureName::AdapterPropertiesVk)) {
+        hadError |= mInstance->ConsumedError(
+            DAWN_VALIDATION_ERROR("Feature AdapterPropertiesVk is not available."));
+    }
+    if (hadError) {
+        return wgpu::Status::Error;
+    }
+
+    if (auto* powerPreferenceDesc = unpacked.Get<DawnAdapterPropertiesPowerPreference>()) {
+        powerPreferenceDesc->powerPreference = mPowerPreference;
+    }
+
+    mPhysicalDevice->PopulateBackendProperties(unpacked);
 
     // Get lengths, with null terminators.
     size_t vendorCLen = mPhysicalDevice->GetVendorName().length() + 1;
@@ -165,86 +190,9 @@ wgpu::Status AdapterBase::APIGetInfo(AdapterInfo* info) const {
     return wgpu::Status::Success;
 }
 
-wgpu::Status AdapterBase::APIGetProperties(AdapterProperties* properties) const {
-    mInstance->EmitDeprecationWarning("GetProperties is deprecated, use GetInfo instead.");
-    return GetPropertiesInternal(properties);
-}
-
-wgpu::Status AdapterBase::GetPropertiesInternal(AdapterProperties* properties) const {
-    DAWN_ASSERT(properties != nullptr);
-    UnpackedPtr<AdapterProperties> unpacked;
-    if (mInstance->ConsumedError(ValidateAndUnpack(properties), &unpacked)) {
-        return wgpu::Status::Error;
-    }
-
-    bool hadError = false;
-    if (unpacked.Get<AdapterPropertiesMemoryHeaps>() != nullptr &&
-        !mSupportedFeatures.IsEnabled(wgpu::FeatureName::AdapterPropertiesMemoryHeaps)) {
-        hadError |= mInstance->ConsumedError(
-            DAWN_VALIDATION_ERROR("Feature AdapterPropertiesMemoryHeaps is not available."));
-    }
-    if (unpacked.Get<AdapterPropertiesD3D>() != nullptr &&
-        !mSupportedFeatures.IsEnabled(wgpu::FeatureName::AdapterPropertiesD3D)) {
-        hadError |= mInstance->ConsumedError(
-            DAWN_VALIDATION_ERROR("Feature AdapterPropertiesD3D is not available."));
-    }
-    if (unpacked.Get<AdapterPropertiesVk>() != nullptr &&
-        !mSupportedFeatures.IsEnabled(wgpu::FeatureName::AdapterPropertiesVk)) {
-        hadError |= mInstance->ConsumedError(
-            DAWN_VALIDATION_ERROR("Feature AdapterPropertiesVk is not available."));
-    }
-    if (hadError) {
-        return wgpu::Status::Error;
-    }
-
-    if (auto* powerPreferenceDesc = unpacked.Get<DawnAdapterPropertiesPowerPreference>()) {
-        powerPreferenceDesc->powerPreference = mPowerPreference;
-    }
-
-    mPhysicalDevice->PopulateBackendProperties(unpacked);
-
-    properties->vendorID = mPhysicalDevice->GetVendorId();
-    properties->deviceID = mPhysicalDevice->GetDeviceId();
-    properties->adapterType = mPhysicalDevice->GetAdapterType();
-    properties->backendType = mPhysicalDevice->GetBackendType();
-    properties->compatibilityMode = mFeatureLevel == FeatureLevel::Compatibility;
-
-    // Get lengths, with null terminators.
-    size_t vendorNameCLen = mPhysicalDevice->GetVendorName().length() + 1;
-    size_t architectureCLen = mPhysicalDevice->GetArchitectureName().length() + 1;
-    size_t nameCLen = mPhysicalDevice->GetName().length() + 1;
-    size_t driverDescriptionCLen = mPhysicalDevice->GetDriverDescription().length() + 1;
-
-    // Allocate space for all strings.
-    char* ptr = new char[vendorNameCLen + architectureCLen + nameCLen + driverDescriptionCLen];
-
-    properties->vendorName = ptr;
-    memcpy(ptr, mPhysicalDevice->GetVendorName().c_str(), vendorNameCLen);
-    ptr += vendorNameCLen;
-
-    properties->architecture = ptr;
-    memcpy(ptr, mPhysicalDevice->GetArchitectureName().c_str(), architectureCLen);
-    ptr += architectureCLen;
-
-    properties->name = ptr;
-    memcpy(ptr, mPhysicalDevice->GetName().c_str(), nameCLen);
-    ptr += nameCLen;
-
-    properties->driverDescription = ptr;
-    memcpy(ptr, mPhysicalDevice->GetDriverDescription().c_str(), driverDescriptionCLen);
-    ptr += driverDescriptionCLen;
-
-    return wgpu::Status::Success;
-}
-
 void APIAdapterInfoFreeMembers(WGPUAdapterInfo info) {
     // This single delete is enough because everything is a single allocation.
     delete[] info.vendor;
-}
-
-void APIAdapterPropertiesFreeMembers(WGPUAdapterProperties properties) {
-    // This single delete is enough because everything is a single allocation.
-    delete[] properties.vendorName;
 }
 
 void APIAdapterPropertiesMemoryHeapsFreeMembers(

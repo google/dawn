@@ -97,14 +97,6 @@ wgpu::Status Adapter::GetInfo(WGPUAdapterInfo* info) const {
     return mImpl->APIGetInfo(FromAPI(info));
 }
 
-wgpu::Status Adapter::GetProperties(wgpu::AdapterProperties* properties) const {
-    return GetProperties(reinterpret_cast<WGPUAdapterProperties*>(properties));
-}
-
-wgpu::Status Adapter::GetProperties(WGPUAdapterProperties* properties) const {
-    return mImpl->APIGetProperties(FromAPI(properties));
-}
-
 WGPUAdapter Adapter::Get() const {
     return ToAPI(mImpl);
 }

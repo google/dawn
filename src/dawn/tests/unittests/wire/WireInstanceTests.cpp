@@ -188,17 +188,6 @@ TEST_P(WireInstanceTests, RequestAdapterSuccess) {
                 EXPECT_EQ(info.vendorID, fakeInfo.vendorID);
                 EXPECT_EQ(info.deviceID, fakeInfo.deviceID);
 
-                WGPUAdapterProperties properties = {};
-                wgpuAdapterGetProperties(adapter, &properties);
-                EXPECT_EQ(properties.vendorID, fakeInfo.vendorID);
-                EXPECT_STREQ(properties.vendorName, fakeInfo.vendor);
-                EXPECT_STREQ(properties.architecture, fakeInfo.architecture);
-                EXPECT_EQ(properties.deviceID, fakeInfo.deviceID);
-                EXPECT_STREQ(properties.name, fakeInfo.device);
-                EXPECT_STREQ(properties.driverDescription, fakeInfo.description);
-                EXPECT_EQ(properties.backendType, fakeInfo.backendType);
-                EXPECT_EQ(properties.adapterType, fakeInfo.adapterType);
-
                 WGPUSupportedLimits limits = {};
                 EXPECT_EQ(wgpuAdapterGetLimits(adapter, &limits), WGPUStatus_Success);
                 EXPECT_EQ(limits.limits.maxTextureDimension1D,
@@ -321,17 +310,17 @@ TEST_P(WireInstanceTests, RequestAdapterPassesChainedProperties) {
     ExpectWireCallbacksWhen([&](auto& mockCb) {
         EXPECT_CALL(mockCb, Call(WGPURequestAdapterStatus_Success, NotNull(), nullptr, nullptr))
             .WillOnce(WithArg<1>(Invoke([&](WGPUAdapter adapter) {
-                // Request properties without a chained struct.
+                // Request info without a chained struct.
                 // It should be nullptr.
-                WGPUAdapterProperties properties = {};
-                wgpuAdapterGetProperties(adapter, &properties);
-                EXPECT_EQ(properties.nextInChain, nullptr);
+                WGPUAdapterInfo info = {};
+                wgpuAdapterGetInfo(adapter, &info);
+                EXPECT_EQ(info.nextInChain, nullptr);
 
                 // Request the memory heap properties.
                 WGPUAdapterPropertiesMemoryHeaps memoryHeapProperties = {};
                 memoryHeapProperties.chain.sType = WGPUSType_AdapterPropertiesMemoryHeaps;
-                properties.nextInChain = &memoryHeapProperties.chain;
-                wgpuAdapterGetProperties(adapter, &properties);
+                info.nextInChain = &memoryHeapProperties.chain;
+                wgpuAdapterGetInfo(adapter, &info);
 
                 // Expect everything matches the fake properties returned by the server.
                 EXPECT_EQ(memoryHeapProperties.heapCount, fakeMemoryHeapProperties.heapCount);
@@ -345,16 +334,16 @@ TEST_P(WireInstanceTests, RequestAdapterPassesChainedProperties) {
                 // Get the D3D properties.
                 WGPUAdapterPropertiesD3D d3dProperties = {};
                 d3dProperties.chain.sType = WGPUSType_AdapterPropertiesD3D;
-                properties.nextInChain = &d3dProperties.chain;
-                wgpuAdapterGetProperties(adapter, &properties);
+                info.nextInChain = &d3dProperties.chain;
+                wgpuAdapterGetInfo(adapter, &info);
                 // Expect them to match.
                 EXPECT_EQ(d3dProperties.shaderModel, fakeD3DProperties.shaderModel);
 
                 // Get the Vulkan properties.
                 WGPUAdapterPropertiesVk vkProperties = {};
                 vkProperties.chain.sType = WGPUSType_AdapterPropertiesVk;
-                properties.nextInChain = &vkProperties.chain;
-                wgpuAdapterGetProperties(adapter, &properties);
+                info.nextInChain = &vkProperties.chain;
+                wgpuAdapterGetInfo(adapter, &info);
                 // Expect them to match.
                 EXPECT_EQ(vkProperties.driverVersion, fakeVkProperties.driverVersion);
             })));

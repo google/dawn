@@ -50,9 +50,7 @@ class Adapter final : public ObjectWithEventsBase {
     void SetLimits(const WGPUSupportedLimits* limits);
     void SetFeatures(const WGPUFeatureName* features, uint32_t featuresCount);
     void SetInfo(const WGPUAdapterInfo* info);
-    void SetProperties(const WGPUAdapterInfo* info);
     WGPUStatus GetInfo(WGPUAdapterInfo* info) const;
-    WGPUStatus GetProperties(WGPUAdapterProperties* properties) const;
     void RequestDevice(const WGPUDeviceDescriptor* descriptor,
                        WGPURequestDeviceCallback callback,
                        void* userdata);
@@ -69,7 +67,6 @@ class Adapter final : public ObjectWithEventsBase {
 
   private:
     LimitsAndFeatures mLimitsAndFeatures;
-    WGPUAdapterProperties mProperties;
     WGPUAdapterInfo mInfo;
     std::vector<WGPUMemoryHeapInfo> mMemoryHeapInfo;
     WGPUAdapterPropertiesD3D mD3DProperties;

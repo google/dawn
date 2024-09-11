@@ -59,16 +59,14 @@ class AdapterCreationTest : public ::testing::TestWithParam<std::optional<wgpu::
             for (native::Adapter& nativeAdapter : nativeInstance->EnumerateAdapters()) {
                 anyAdapterAvailable = true;
 
-                wgpu::AdapterProperties properties;
-                nativeAdapter.GetProperties(&properties);
-                if (properties.compatibilityMode) {
+                wgpu::AdapterInfo info;
+                nativeAdapter.GetInfo(&info);
+                if (info.compatibilityMode) {
                     continue;
                 }
-                swiftShaderAvailable |=
-                    gpu_info::IsGoogleSwiftshader(properties.vendorID, properties.deviceID);
-                discreteGPUAvailable |= properties.adapterType == wgpu::AdapterType::DiscreteGPU;
-                integratedGPUAvailable |=
-                    properties.adapterType == wgpu::AdapterType::IntegratedGPU;
+                swiftShaderAvailable |= gpu_info::IsGoogleSwiftshader(info.vendorID, info.deviceID);
+                discreteGPUAvailable |= info.adapterType == wgpu::AdapterType::DiscreteGPU;
+                integratedGPUAvailable |= info.adapterType == wgpu::AdapterType::IntegratedGPU;
             }
         }
 
@@ -180,12 +178,6 @@ TEST_P(AdapterCreationTest, FallbackAdapter) {
     wgpu::Adapter adapter = wgpu::Adapter::Acquire(cAdapter);
     EXPECT_EQ(adapter != nullptr, swiftShaderAvailable);
     if (adapter != nullptr) {
-        wgpu::AdapterProperties properties;
-        adapter.GetProperties(&properties);
-
-        EXPECT_EQ(properties.adapterType, wgpu::AdapterType::CPU);
-        EXPECT_TRUE(gpu_info::IsGoogleSwiftshader(properties.vendorID, properties.deviceID));
-
         wgpu::AdapterInfo info;
         adapter.GetInfo(&info);
 
@@ -214,16 +206,12 @@ TEST_P(AdapterCreationTest, PreferHighPerformance) {
     wgpu::Adapter adapter = wgpu::Adapter::Acquire(cAdapter);
     EXPECT_EQ(adapter != nullptr, anyAdapterAvailable);
     if (discreteGPUAvailable) {
-        wgpu::AdapterProperties properties;
-        wgpu::DawnAdapterPropertiesPowerPreference powerPreferenceProperties;
-        properties.nextInChain = &powerPreferenceProperties;
-        adapter.GetProperties(&properties);
-        EXPECT_EQ(properties.adapterType, wgpu::AdapterType::DiscreteGPU);
-        EXPECT_EQ(powerPreferenceProperties.powerPreference, options.powerPreference);
-
         wgpu::AdapterInfo info;
+        wgpu::DawnAdapterPropertiesPowerPreference powerPreferenceProperties;
+        info.nextInChain = &powerPreferenceProperties;
         adapter.GetInfo(&info);
         EXPECT_EQ(info.adapterType, wgpu::AdapterType::DiscreteGPU);
+        EXPECT_EQ(powerPreferenceProperties.powerPreference, options.powerPreference);
     }
 }
 
@@ -247,16 +235,12 @@ TEST_P(AdapterCreationTest, PreferLowPower) {
     wgpu::Adapter adapter = wgpu::Adapter::Acquire(cAdapter);
     EXPECT_EQ(adapter != nullptr, anyAdapterAvailable);
     if (integratedGPUAvailable) {
-        wgpu::AdapterProperties properties;
-        wgpu::DawnAdapterPropertiesPowerPreference powerPreferenceProperties;
-        properties.nextInChain = &powerPreferenceProperties;
-        adapter.GetProperties(&properties);
-        EXPECT_EQ(properties.adapterType, wgpu::AdapterType::IntegratedGPU);
-        EXPECT_EQ(powerPreferenceProperties.powerPreference, options.powerPreference);
-
         wgpu::AdapterInfo info;
+        wgpu::DawnAdapterPropertiesPowerPreference powerPreferenceProperties;
+        info.nextInChain = &powerPreferenceProperties;
         adapter.GetInfo(&info);
         EXPECT_EQ(info.adapterType, wgpu::AdapterType::IntegratedGPU);
+        EXPECT_EQ(powerPreferenceProperties.powerPreference, options.powerPreference);
     }
 }
 
@@ -274,10 +258,6 @@ TEST_P(AdapterCreationTest, Compatibility) {
 
     wgpu::Adapter adapter = wgpu::Adapter::Acquire(cAdapter);
     EXPECT_EQ(adapter != nullptr, anyAdapterAvailable);
-
-    wgpu::AdapterProperties properties;
-    adapter.GetProperties(&properties);
-    EXPECT_TRUE(properties.compatibilityMode);
 
     wgpu::AdapterInfo info;
     adapter.GetInfo(&info);
@@ -297,10 +277,6 @@ TEST_P(AdapterCreationTest, NonCompatibility) {
 
     wgpu::Adapter adapter = wgpu::Adapter::Acquire(cAdapter);
     EXPECT_EQ(adapter != nullptr, anyAdapterAvailable);
-
-    wgpu::AdapterProperties properties;
-    adapter.GetProperties(&properties);
-    EXPECT_FALSE(properties.compatibilityMode);
 
     wgpu::AdapterInfo info;
     adapter.GetInfo(&info);
@@ -322,189 +298,6 @@ TEST_P(AdapterCreationTest, GetInstance) {
     EXPECT_EQ(adapter != nullptr, anyAdapterAvailable);
 
     EXPECT_EQ(adapter.GetInstance().Get(), instance.Get());
-}
-
-// Test that calling AdapterGetProperties returns separate allocations for strings.
-// However, the string contents are equivalent.
-TEST_P(AdapterCreationTest, PropertiesUnique) {
-    wgpu::RequestAdapterOptions options = {};
-
-    MockCallback<WGPURequestAdapterCallback> cb;
-
-    WGPUAdapter cAdapter = nullptr;
-    EXPECT_CALL(cb, Call(WGPURequestAdapterStatus_Success, _, nullptr, this))
-        .WillOnce(SaveArg<1>(&cAdapter));
-    RequestAdapter(instance, &options, cb.Callback(), cb.MakeUserdata(this));
-
-    wgpu::Adapter adapter = wgpu::Adapter::Acquire(cAdapter);
-    EXPECT_EQ(adapter != nullptr, anyAdapterAvailable);
-    if (!adapter) {
-        return;
-    }
-
-    wgpu::AdapterProperties properties1;
-    wgpu::AdapterProperties properties2;
-    adapter.GetProperties(&properties1);
-    adapter.GetProperties(&properties2);
-
-    EXPECT_NE(properties1.vendorName, properties2.vendorName);
-    EXPECT_STREQ(properties1.vendorName, properties2.vendorName);
-    EXPECT_NE(properties1.architecture, properties2.architecture);
-    EXPECT_STREQ(properties1.architecture, properties2.architecture);
-    EXPECT_NE(properties1.name, properties2.name);
-    EXPECT_STREQ(properties1.name, properties2.name);
-    EXPECT_NE(properties1.driverDescription, properties2.driverDescription);
-    EXPECT_STREQ(properties1.driverDescription, properties2.driverDescription);
-}
-
-// Test move assignment of the adapter properties.
-TEST_P(AdapterCreationTest, PropertiesMoveAssign) {
-    wgpu::RequestAdapterOptions options = {};
-
-    MockCallback<WGPURequestAdapterCallback> cb;
-
-    WGPUAdapter cAdapter = nullptr;
-    EXPECT_CALL(cb, Call(WGPURequestAdapterStatus_Success, _, nullptr, this))
-        .WillOnce(SaveArg<1>(&cAdapter));
-    RequestAdapter(instance, &options, cb.Callback(), cb.MakeUserdata(this));
-
-    wgpu::Adapter adapter = wgpu::Adapter::Acquire(cAdapter);
-    EXPECT_EQ(adapter != nullptr, anyAdapterAvailable);
-    if (!adapter) {
-        return;
-    }
-
-    wgpu::AdapterProperties properties1;
-    wgpu::AdapterProperties properties2;
-    adapter.GetProperties(&properties1);
-    adapter.GetProperties(&properties2);
-
-    uint32_t vendorID = properties1.vendorID;
-    std::string vendorName = properties1.vendorName;
-    std::string architecture = properties1.architecture;
-    uint32_t deviceID = properties1.deviceID;
-    std::string name = properties1.name;
-    std::string driverDescription = properties1.driverDescription;
-    wgpu::AdapterType adapterType = properties1.adapterType;
-    wgpu::BackendType backendType = properties1.backendType;
-    bool compatibilityMode = properties1.compatibilityMode;
-
-    properties2 = std::move(properties1);
-
-    // Expect properties2 to have properties1's old contents.
-    EXPECT_EQ(properties2.vendorID, vendorID);
-    EXPECT_STREQ(properties2.vendorName, vendorName.c_str());
-    EXPECT_STREQ(properties2.architecture, architecture.c_str());
-    EXPECT_EQ(properties2.deviceID, deviceID);
-    EXPECT_STREQ(properties2.name, name.c_str());
-    EXPECT_STREQ(properties2.driverDescription, driverDescription.c_str());
-    EXPECT_EQ(properties2.adapterType, adapterType);
-    EXPECT_EQ(properties2.backendType, backendType);
-    EXPECT_EQ(properties2.compatibilityMode, compatibilityMode);
-
-    // Expect properties1 to be empty.
-    EXPECT_EQ(properties1.vendorID, 0u);
-    EXPECT_EQ(properties1.vendorName, nullptr);
-    EXPECT_EQ(properties1.architecture, nullptr);
-    EXPECT_EQ(properties1.deviceID, 0u);
-    EXPECT_EQ(properties1.name, nullptr);
-    EXPECT_EQ(properties1.driverDescription, nullptr);
-    EXPECT_EQ(properties1.adapterType, static_cast<wgpu::AdapterType>(0));
-    EXPECT_EQ(properties1.backendType, static_cast<wgpu::BackendType>(0));
-    EXPECT_EQ(properties1.compatibilityMode, false);
-}
-
-// Test move construction of the adapter properties.
-TEST_P(AdapterCreationTest, PropertiesMoveConstruct) {
-    wgpu::RequestAdapterOptions options = {};
-
-    MockCallback<WGPURequestAdapterCallback> cb;
-
-    WGPUAdapter cAdapter = nullptr;
-    EXPECT_CALL(cb, Call(WGPURequestAdapterStatus_Success, _, nullptr, this))
-        .WillOnce(SaveArg<1>(&cAdapter));
-    RequestAdapter(instance, &options, cb.Callback(), cb.MakeUserdata(this));
-
-    wgpu::Adapter adapter = wgpu::Adapter::Acquire(cAdapter);
-    EXPECT_EQ(adapter != nullptr, anyAdapterAvailable);
-    if (!adapter) {
-        return;
-    }
-
-    wgpu::AdapterProperties properties1;
-    adapter.GetProperties(&properties1);
-
-    uint32_t vendorID = properties1.vendorID;
-    std::string vendorName = properties1.vendorName;
-    std::string architecture = properties1.architecture;
-    uint32_t deviceID = properties1.deviceID;
-    std::string name = properties1.name;
-    std::string driverDescription = properties1.driverDescription;
-    wgpu::AdapterType adapterType = properties1.adapterType;
-    wgpu::BackendType backendType = properties1.backendType;
-    bool compatibilityMode = properties1.compatibilityMode;
-
-    wgpu::AdapterProperties properties2(std::move(properties1));
-
-    // Expect properties2 to have properties1's old contents.
-    EXPECT_EQ(properties2.vendorID, vendorID);
-    EXPECT_STREQ(properties2.vendorName, vendorName.c_str());
-    EXPECT_STREQ(properties2.architecture, architecture.c_str());
-    EXPECT_EQ(properties2.deviceID, deviceID);
-    EXPECT_STREQ(properties2.name, name.c_str());
-    EXPECT_STREQ(properties2.driverDescription, driverDescription.c_str());
-    EXPECT_EQ(properties2.adapterType, adapterType);
-    EXPECT_EQ(properties2.backendType, backendType);
-    EXPECT_EQ(properties2.compatibilityMode, compatibilityMode);
-
-    // Expect properties1 to be empty.
-    EXPECT_EQ(properties1.vendorID, 0u);
-    EXPECT_EQ(properties1.vendorName, nullptr);
-    EXPECT_EQ(properties1.architecture, nullptr);
-    EXPECT_EQ(properties1.deviceID, 0u);
-    EXPECT_EQ(properties1.name, nullptr);
-    EXPECT_EQ(properties1.driverDescription, nullptr);
-    EXPECT_EQ(properties1.adapterType, static_cast<wgpu::AdapterType>(0));
-    EXPECT_EQ(properties1.backendType, static_cast<wgpu::BackendType>(0));
-    EXPECT_EQ(properties1.compatibilityMode, false);
-}
-
-// Test that the adapter properties can outlive the adapter.
-TEST_P(AdapterCreationTest, PropertiesOutliveAdapter) {
-    wgpu::RequestAdapterOptions options = {};
-
-    MockCallback<WGPURequestAdapterCallback> cb;
-
-    WGPUAdapter cAdapter = nullptr;
-    EXPECT_CALL(cb, Call(WGPURequestAdapterStatus_Success, _, nullptr, this))
-        .WillOnce(SaveArg<1>(&cAdapter));
-    RequestAdapter(instance, &options, cb.Callback(), cb.MakeUserdata(this));
-
-    wgpu::Adapter adapter = wgpu::Adapter::Acquire(cAdapter);
-    EXPECT_EQ(adapter != nullptr, anyAdapterAvailable);
-    if (!adapter) {
-        return;
-    }
-
-    wgpu::AdapterProperties properties;
-    adapter.GetProperties(&properties);
-
-    // Make a copy of the properties.
-    std::string vendorName = properties.vendorName;
-    std::string architecture = properties.architecture;
-    std::string name = properties.name;
-    std::string driverDescription = properties.driverDescription;
-
-    // Release the adapter.
-    adapter = nullptr;
-
-    // Ensure we still read the properties (pointers are still valid).
-    // Check the values are equal to make sure they haven't been overwritten,
-    // and to make sure the compiler can't elide no-op pointer reads.
-    EXPECT_EQ(properties.vendorName, vendorName);
-    EXPECT_EQ(properties.architecture, architecture);
-    EXPECT_EQ(properties.name, name);
-    EXPECT_EQ(properties.driverDescription, driverDescription);
 }
 
 // Test that calling AdapterGetInfo returns separate allocations for strings.

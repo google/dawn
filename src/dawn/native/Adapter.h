@@ -62,7 +62,6 @@ class AdapterBase : public RefCounted, public WeakRefSupport<AdapterBase> {
     InstanceBase* APIGetInstance() const;
     wgpu::Status APIGetLimits(SupportedLimits* limits) const;
     wgpu::Status APIGetInfo(AdapterInfo* info) const;
-    wgpu::Status APIGetProperties(AdapterProperties* properties) const;
     bool APIHasFeature(wgpu::FeatureName feature) const;
     size_t APIEnumerateFeatures(wgpu::FeatureName* features) const;
     void APIRequestDevice(const DeviceDescriptor* descriptor,
@@ -93,8 +92,6 @@ class AdapterBase : public RefCounted, public WeakRefSupport<AdapterBase> {
     const std::string& GetName() const;
 
   private:
-    wgpu::Status GetPropertiesInternal(AdapterProperties* properties) const;
-
     std::pair<Ref<DeviceBase::DeviceLostEvent>, ResultOrError<Ref<DeviceBase>>> CreateDevice(
         const DeviceDescriptor* rawDescriptor);
     ResultOrError<Ref<DeviceBase>> CreateDeviceInternal(const DeviceDescriptor* rawDescriptor,

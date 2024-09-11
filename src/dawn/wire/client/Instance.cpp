@@ -77,7 +77,6 @@ class RequestAdapterEvent : public TrackedEvent {
         }
         if (status == WGPURequestAdapterStatus_Success) {
             mAdapter->SetInfo(info);
-            mAdapter->SetProperties(info);
             mAdapter->SetLimits(limits);
             mAdapter->SetFeatures(features, featuresCount);
         }

@@ -196,19 +196,6 @@ void Adapter::SetInfo(const WGPUAdapterInfo* info) {
     }
 }
 
-void Adapter::SetProperties(const WGPUAdapterInfo* info) {
-    mProperties.nextInChain = nullptr;
-    mProperties.vendorID = info->vendorID;
-    mProperties.vendorName = info->vendor;
-    mProperties.architecture = info->architecture;
-    mProperties.deviceID = info->deviceID;
-    mProperties.name = info->device;
-    mProperties.driverDescription = info->description;
-    mProperties.adapterType = info->adapterType;
-    mProperties.backendType = info->backendType;
-    mProperties.compatibilityMode = info->compatibilityMode;
-}
-
 WGPUStatus Adapter::GetInfo(WGPUAdapterInfo* info) const {
     // Loop through the chained struct.
     WGPUChainedStructOut* chain = info->nextInChain;
@@ -268,69 +255,6 @@ WGPUStatus Adapter::GetInfo(WGPUAdapterInfo* info) const {
     info->description = ptr;
     memcpy(ptr, mInfo.description, descriptionCLen);
     ptr += descriptionCLen;
-
-    return WGPUStatus_Success;
-}
-
-WGPUStatus Adapter::GetProperties(WGPUAdapterProperties* properties) const {
-    // Loop through the chained struct.
-    WGPUChainedStructOut* chain = properties->nextInChain;
-    while (chain != nullptr) {
-        switch (chain->sType) {
-            case WGPUSType_AdapterPropertiesMemoryHeaps: {
-                // Copy `mMemoryHeapInfo` into a new allocation.
-                auto* memoryHeapProperties =
-                    reinterpret_cast<WGPUAdapterPropertiesMemoryHeaps*>(chain);
-                size_t heapCount = mMemoryHeapInfo.size();
-                auto* heapInfo = new WGPUMemoryHeapInfo[heapCount];
-                memcpy(heapInfo, mMemoryHeapInfo.data(), sizeof(WGPUMemoryHeapInfo) * heapCount);
-                // Write out the pointer and count to the heap properties out-struct.
-                memoryHeapProperties->heapCount = heapCount;
-                memoryHeapProperties->heapInfo = heapInfo;
-                break;
-            }
-            case WGPUSType_AdapterPropertiesD3D: {
-                auto* d3dProperties = reinterpret_cast<WGPUAdapterPropertiesD3D*>(chain);
-                d3dProperties->shaderModel = mD3DProperties.shaderModel;
-                break;
-            }
-            case WGPUSType_AdapterPropertiesVk: {
-                auto* vkProperties = reinterpret_cast<WGPUAdapterPropertiesVk*>(chain);
-                vkProperties->driverVersion = mVkProperties.driverVersion;
-                break;
-            }
-            default:
-                break;
-        }
-        chain = chain->next;
-    }
-
-    *properties = mProperties;
-
-    // Get lengths, with null terminators.
-    size_t vendorNameCLen = strlen(mProperties.vendorName) + 1;
-    size_t architectureCLen = strlen(mProperties.architecture) + 1;
-    size_t nameCLen = strlen(mProperties.name) + 1;
-    size_t driverDescriptionCLen = strlen(mProperties.driverDescription) + 1;
-
-    // Allocate space for all strings.
-    char* ptr = new char[vendorNameCLen + architectureCLen + nameCLen + driverDescriptionCLen];
-
-    properties->vendorName = ptr;
-    memcpy(ptr, mProperties.vendorName, vendorNameCLen);
-    ptr += vendorNameCLen;
-
-    properties->architecture = ptr;
-    memcpy(ptr, mProperties.architecture, architectureCLen);
-    ptr += architectureCLen;
-
-    properties->name = ptr;
-    memcpy(ptr, mProperties.name, nameCLen);
-    ptr += nameCLen;
-
-    properties->driverDescription = ptr;
-    memcpy(ptr, mProperties.driverDescription, driverDescriptionCLen);
-    ptr += driverDescriptionCLen;
 
     return WGPUStatus_Success;
 }
@@ -450,12 +374,6 @@ WGPUStatus Adapter::GetFormatCapabilities(WGPUTextureFormat format,
 DAWN_WIRE_EXPORT void wgpuDawnWireClientAdapterInfoFreeMembers(WGPUAdapterInfo info) {
     // This single delete is enough because everything is a single allocation.
     delete[] info.vendor;
-}
-
-DAWN_WIRE_EXPORT void wgpuDawnWireClientAdapterPropertiesFreeMembers(
-    WGPUAdapterProperties properties) {
-    // This single delete is enough because everything is a single allocation.
-    delete[] properties.vendorName;
 }
 
 DAWN_WIRE_EXPORT void wgpuDawnWireClientAdapterPropertiesMemoryHeapsFreeMembers(

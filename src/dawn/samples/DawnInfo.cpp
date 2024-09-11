@@ -119,16 +119,16 @@ std::string AsHex(uint32_t val) {
     return hex.str();
 }
 
-std::string AdapterPropertiesToString(const wgpu::AdapterProperties& props) {
+std::string AdapterInfoToString(const wgpu::AdapterInfo& info) {
     std::stringstream out;
-    out << "VendorID: " << AsHex(props.vendorID) << "\n";
-    out << "Vendor: " << props.vendorName << "\n";
-    out << "Architecture: " << props.architecture << "\n";
-    out << "DeviceID: " << AsHex(props.deviceID) << "\n";
-    out << "Name: " << props.name << "\n";
-    out << "Driver description: " << props.driverDescription << "\n";
-    out << "Adapter Type: " << AdapterTypeToString(props.adapterType) << "\n";
-    out << "Backend Type: " << BackendTypeToString(props.backendType) << "\n";
+    out << "VendorID: " << AsHex(info.vendorID) << "\n";
+    out << "Vendor: " << info.vendor << "\n";
+    out << "Architecture: " << info.architecture << "\n";
+    out << "DeviceID: " << AsHex(info.deviceID) << "\n";
+    out << "Name: " << info.device << "\n";
+    out << "Driver description: " << info.description << "\n";
+    out << "Adapter Type: " << AdapterTypeToString(info.adapterType) << "\n";
+    out << "Backend Type: " << BackendTypeToString(info.backendType) << "\n";
 
     return out.str();
 }
@@ -221,14 +221,14 @@ std::string LimitsToString(const wgpu::Limits& limits, const std::string& indent
     return out.str();
 }
 
-void DumpAdapterProperties(const wgpu::Adapter& adapter) {
+void DumpAdapterInfo(const wgpu::Adapter& adapter) {
     wgpu::DawnAdapterPropertiesPowerPreference power_props{};
 
-    wgpu::AdapterProperties properties{};
-    properties.nextInChain = &power_props;
+    wgpu::AdapterInfo info{};
+    info.nextInChain = &power_props;
 
-    adapter.GetProperties(&properties);
-    std::cout << AdapterPropertiesToString(properties);
+    adapter.GetInfo(&info);
+    std::cout << AdapterInfoToString(info);
     std::cout << "Power: " << PowerPreferenceToString(power_props) << "\n";
     std::cout << "\n";
 }
@@ -262,7 +262,7 @@ void DumpAdapter(const wgpu::Adapter& adapter) {
     std::cout << "Adapter\n";
     std::cout << "=======\n";
 
-    DumpAdapterProperties(adapter);
+    DumpAdapterInfo(adapter);
     DumpAdapterFeatures(adapter);
     DumpAdapterLimits(adapter);
 }

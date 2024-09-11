@@ -40,10 +40,10 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
     return DawnWireServerFuzzer::Run(
         data, size,
         [](const dawn::native::Adapter& adapter) {
-            wgpu::AdapterProperties properties;
-            adapter.GetProperties(&properties);
+            wgpu::AdapterInfo info;
+            adapter.GetInfo(&info);
 
-            return dawn::gpu_info::IsGoogleSwiftshader(properties.vendorID, properties.deviceID);
+            return dawn::gpu_info::IsGoogleSwiftshader(info.vendorID, info.deviceID);
         },
         true /* supportsErrorInjection */);
 }

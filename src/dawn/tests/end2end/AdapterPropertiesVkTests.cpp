@@ -39,26 +39,14 @@ class AdapterPropertiesVkTest : public DawnTest {};
 TEST_P(AdapterPropertiesVkTest, GetVkProperties) {
     DAWN_TEST_UNSUPPORTED_IF(!adapter.HasFeature(wgpu::FeatureName::AdapterPropertiesVk));
 
-    {
-        wgpu::AdapterProperties properties;
-        wgpu::AdapterPropertiesVk vkProperties;
-        properties.nextInChain = &vkProperties;
+    wgpu::AdapterInfo info;
+    wgpu::AdapterPropertiesVk vkProperties;
+    info.nextInChain = &vkProperties;
 
-        EXPECT_DEPRECATION_WARNING(adapter.GetProperties(&properties));
+    adapter.GetInfo(&info);
 
-        // The driver version should be set to something but it depends on the hardware.
-        EXPECT_NE(vkProperties.driverVersion, 0u);
-    }
-    {
-        wgpu::AdapterInfo info;
-        wgpu::AdapterPropertiesVk vkProperties;
-        info.nextInChain = &vkProperties;
-
-        adapter.GetInfo(&info);
-
-        // The driver version should be set to something but it depends on the hardware.
-        EXPECT_NE(vkProperties.driverVersion, 0u);
-    }
+    // The driver version should be set to something but it depends on the hardware.
+    EXPECT_NE(vkProperties.driverVersion, 0u);
 }
 
 DAWN_INSTANTIATE_TEST(AdapterPropertiesVkTest, VulkanBackend());

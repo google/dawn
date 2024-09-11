@@ -38,9 +38,9 @@ extern "C" int LLVMFuzzerInitialize(int* argc, char*** argv) {
 
 DEFINE_PROTO_FUZZER(const fuzzing::Program& program) {
     DawnLPMFuzzer::Run(program, [](const dawn::native::Adapter& adapter) {
-        wgpu::AdapterProperties properties;
-        adapter.GetProperties(&properties);
+        wgpu::AdapterInfo info;
+        adapter.GetInfo(&info);
 
-        return dawn::gpu_info::IsGoogleSwiftshader(properties.vendorID, properties.deviceID);
+        return dawn::gpu_info::IsGoogleSwiftshader(info.vendorID, info.deviceID);
     });
 }

@@ -39,10 +39,10 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
     return DawnWireServerFuzzer::Run(
         data, size,
         [](const dawn::native::Adapter& adapter) {
-            wgpu::AdapterProperties properties;
-            adapter.GetProperties(&properties);
-            return properties.backendType == wgpu::BackendType::D3D12 &&
-                   properties.adapterType == wgpu::AdapterType::CPU;
+            wgpu::AdapterInfo info;
+            adapter.GetInfo(&info);
+            return info.backendType == wgpu::BackendType::D3D12 &&
+                   info.adapterType == wgpu::AdapterType::CPU;
         },
         true /* supportsErrorInjection */);
 }

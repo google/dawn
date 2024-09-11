@@ -116,7 +116,7 @@ class PhysicalDeviceBase : public RefCounted {
                                                                 const TogglesState& toggles) const;
 
     // Populate backend properties. Ownership of allocations written are owned by the caller.
-    virtual void PopulateBackendProperties(UnpackedPtr<AdapterProperties>& properties) const = 0;
+    virtual void PopulateBackendProperties(UnpackedPtr<AdapterInfo>& info) const = 0;
 
     // Populate backend format capabilities. Ownership of allocations written are owned by the
     // caller.
