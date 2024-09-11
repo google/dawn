@@ -294,20 +294,20 @@ crbug.com/dawn/2430 [ linux ] webgpu:api,operation,storage_texture,read_only:bas
 ### This section represents platform-specific issues that are likely unfixable
 ### in Compat
 
-# error_scope validation tests with errorType="out-of-memory" are failing
-# Crash in PartitionAlloc due to the NV GL driver malloc()ing 2GB+ blocks
-crbug.com/dawn/2168 [ linux ] webgpu:api,validation,error_scope:current_scope:errorFilter="out-of-memory";stackDepth=1 [ Failure ]
-crbug.com/dawn/2168 [ linux ] webgpu:api,validation,error_scope:current_scope:errorFilter="out-of-memory";stackDepth=10 [ Failure ]
-crbug.com/dawn/2168 [ linux ] webgpu:api,validation,error_scope:current_scope:errorFilter="out-of-memory";stackDepth=100 [ Failure ]
-crbug.com/dawn/2168 [ linux ] webgpu:api,validation,error_scope:current_scope:errorFilter="out-of-memory";stackDepth=1000 [ Failure ]
-crbug.com/dawn/2168 [ linux ] webgpu:api,validation,error_scope:current_scope:errorFilter="out-of-memory";stackDepth=100000 [ Failure ]
-crbug.com/dawn/2168 [ linux ] webgpu:api,validation,error_scope:parent_scope:errorFilter="out-of-memory";stackDepth=1 [ Failure ]
-crbug.com/dawn/2168 [ linux ] webgpu:api,validation,error_scope:parent_scope:errorFilter="out-of-memory";stackDepth=10 [ Failure ]
-crbug.com/dawn/2168 [ linux ] webgpu:api,validation,error_scope:parent_scope:errorFilter="out-of-memory";stackDepth=100 [ Failure ]
-crbug.com/dawn/2168 [ linux ] webgpu:api,validation,error_scope:parent_scope:errorFilter="out-of-memory";stackDepth=1000 [ Failure ]
-crbug.com/dawn/2168 [ linux ] webgpu:api,validation,error_scope:simple:errorType="out-of-memory";errorFilter="internal" [ Failure ]
-crbug.com/dawn/2168 [ linux ] webgpu:api,validation,error_scope:simple:errorType="out-of-memory";errorFilter="out-of-memory" [ Failure ]
-crbug.com/dawn/2168 [ linux ] webgpu:api,validation,error_scope:simple:errorType="out-of-memory";errorFilter="validation" [ Failure ]
+# error_scope validation tests with errorType="out-of-memory" are failing on all platforms
+# On NVidia, crashes in PartitionAlloc due to the NV GL driver malloc()ing 2GB+ blocks
+crbug.com/dawn/2168 webgpu:api,validation,error_scope:current_scope:errorFilter="out-of-memory";stackDepth=1 [ Failure ]
+crbug.com/dawn/2168 webgpu:api,validation,error_scope:current_scope:errorFilter="out-of-memory";stackDepth=10 [ Failure ]
+crbug.com/dawn/2168 webgpu:api,validation,error_scope:current_scope:errorFilter="out-of-memory";stackDepth=100 [ Failure ]
+crbug.com/dawn/2168 webgpu:api,validation,error_scope:current_scope:errorFilter="out-of-memory";stackDepth=1000 [ Failure ]
+crbug.com/dawn/2168 webgpu:api,validation,error_scope:current_scope:errorFilter="out-of-memory";stackDepth=100000 [ Failure ]
+crbug.com/dawn/2168 webgpu:api,validation,error_scope:parent_scope:errorFilter="out-of-memory";stackDepth=1 [ Failure ]
+crbug.com/dawn/2168 webgpu:api,validation,error_scope:parent_scope:errorFilter="out-of-memory";stackDepth=10 [ Failure ]
+crbug.com/dawn/2168 webgpu:api,validation,error_scope:parent_scope:errorFilter="out-of-memory";stackDepth=100 [ Failure ]
+crbug.com/dawn/2168 webgpu:api,validation,error_scope:parent_scope:errorFilter="out-of-memory";stackDepth=1000 [ Failure ]
+crbug.com/dawn/2168 webgpu:api,validation,error_scope:simple:errorType="out-of-memory";errorFilter="internal" [ Failure ]
+crbug.com/dawn/2168 webgpu:api,validation,error_scope:simple:errorType="out-of-memory";errorFilter="out-of-memory" [ Failure ]
+crbug.com/dawn/2168 webgpu:api,validation,error_scope:simple:errorType="out-of-memory";errorFilter="validation" [ Failure ]
 
 # clamp expression tests failing on NVidia
 crbug.com/dawn/2319 [ nvidia-0x2184 ] webgpu:shader,execution,expression,call,builtin,clamp:f32:* [ Failure ]
@@ -847,7 +847,6 @@ crbug.com/361116751 [ android android-pixel-6 ] webgpu:api,validation,capability
 crbug.com/361116751 [ android android-pixel-6 ] webgpu:api,validation,capability_checks,limits,maxStorageBuffersPerShaderStage:createPipeline,at_over:limitTest="underDefault";testValueName="atLimit";async=true;bindingCombination="vertexAndFragmentWithPossibleVertexStageOverflow";order="forward";bindGroupTest="sameGroup" [ Skip ]
 crbug.com/361116751 [ android android-pixel-6 ] webgpu:api,validation,capability_checks,limits,maxStorageBuffersPerShaderStage:createPipeline,at_over:limitTest="underDefault";testValueName="atLimit";async=true;bindingCombination="vertexAndFragmentWithPossibleVertexStageOverflow";order="shiftByHalf";bindGroupTest="differentGroups" [ Skip ]
 crbug.com/361116751 [ android android-pixel-6 ] webgpu:api,validation,capability_checks,limits,maxStorageBuffersPerShaderStage:createPipeline,at_over:limitTest="underDefault";testValueName="atLimit";async=true;bindingCombination="vertexAndFragmentWithPossibleVertexStageOverflow";order="shiftByHalf";bindGroupTest="sameGroup" [ Skip ]
-crbug.com/361116751 [ android android-pixel-6 ] webgpu:api,validation,error_scope:current_scope:errorFilter="out-of-memory";stackDepth=1 [ Skip ]
 crbug.com/361116751 [ android android-pixel-6 ] webgpu:api,validation,layout_shader_compat:pipeline_layout_shader_exact_match:bindingInPipelineLayout="readonlyStorageBuf";bindingInShader="readonlyStorageBuf" [ Skip ]
 crbug.com/361116751 [ android android-pixel-6 ] webgpu:api,validation,layout_shader_compat:pipeline_layout_shader_exact_match:bindingInPipelineLayout="readonlyStorageTex";bindingInShader="readonlyStorageTex" [ Skip ]
 crbug.com/361116751 [ android android-pixel-6 ] webgpu:api,validation,render_pipeline,resource_compatibility:resource_compatibility:stage="vertex";apiResource="read-only-storage_buffer" [ Skip ]
@@ -924,18 +923,7 @@ crbug.com/361116751 [ android android-pixel-6 ] webgpu:api,operation,storage_tex
 crbug.com/dawn/0000 [ android arm ] webgpu:api,operation,rendering,depth_bias:depth_bias:quadAngle=0;bias=8388608;biasSlopeScale=0;biasClamp=0 [ Failure ]
 crbug.com/dawn/0000 [ android arm ] webgpu:api,operation,rendering,depth_bias:depth_bias_24bit_format:format="depth24plus";quadAngle=0;bias=8388608;biasSlopeScale=0;biasClamp=0 [ Failure ]
 crbug.com/dawn/0000 [ android arm ] webgpu:api,operation,rendering,depth_bias:depth_bias_24bit_format:format="depth24plus-stencil8";quadAngle=0;bias=8388608;biasSlopeScale=0;biasClamp=0 [ Failure ]
-crbug.com/dawn/0000 [ android arm ] webgpu:api,validation,error_scope:current_scope:errorFilter="out-of-memory";stackDepth=10 [ Failure ]
-crbug.com/dawn/0000 [ android arm ] webgpu:api,validation,error_scope:current_scope:errorFilter="out-of-memory";stackDepth=100 [ Failure ]
-crbug.com/dawn/0000 [ android arm ] webgpu:api,validation,error_scope:current_scope:errorFilter="out-of-memory";stackDepth=1000 [ Failure ]
-crbug.com/dawn/0000 [ android arm ] webgpu:api,validation,error_scope:current_scope:errorFilter="out-of-memory";stackDepth=100000 [ Failure ]
 crbug.com/dawn/0000 [ android arm ] webgpu:api,validation,error_scope:current_scope:errorFilter="validation";stackDepth=100000 [ Failure ]
-crbug.com/dawn/0000 [ android arm ] webgpu:api,validation,error_scope:parent_scope:errorFilter="out-of-memory";stackDepth=1 [ Failure ]
-crbug.com/dawn/0000 [ android arm ] webgpu:api,validation,error_scope:parent_scope:errorFilter="out-of-memory";stackDepth=10 [ Failure ]
-crbug.com/dawn/0000 [ android arm ] webgpu:api,validation,error_scope:parent_scope:errorFilter="out-of-memory";stackDepth=100 [ Failure ]
-crbug.com/dawn/0000 [ android arm ] webgpu:api,validation,error_scope:parent_scope:errorFilter="out-of-memory";stackDepth=1000 [ Failure ]
-crbug.com/dawn/0000 [ android arm ] webgpu:api,validation,error_scope:simple:errorType="out-of-memory";errorFilter="internal" [ Failure ]
-crbug.com/dawn/0000 [ android arm ] webgpu:api,validation,error_scope:simple:errorType="out-of-memory";errorFilter="out-of-memory" [ Failure ]
-crbug.com/dawn/0000 [ android arm ] webgpu:api,validation,error_scope:simple:errorType="out-of-memory";errorFilter="validation" [ Failure ]
 crbug.com/dawn/0000 [ android arm ] webgpu:compat,api,validation,render_pipeline,unsupported_wgsl:interpolate:success=false;interpolate="%40interpolate(flat)";entryPoint="fsWithInterpolationUsage1";async=false [ Failure ]
 crbug.com/dawn/0000 [ android arm ] webgpu:compat,api,validation,render_pipeline,unsupported_wgsl:interpolate:success=false;interpolate="%40interpolate(flat)";entryPoint="fsWithInterpolationUsage1";async=true [ Failure ]
 crbug.com/dawn/0000 [ android arm ] webgpu:compat,api,validation,render_pipeline,unsupported_wgsl:interpolate:success=false;interpolate="%40interpolate(flat)";entryPoint="fsWithInterpolationUsage2";async=false [ Failure ]
