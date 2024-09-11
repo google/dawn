@@ -159,6 +159,9 @@ crbug.com/341327472 [ intel-0x4680 linux ] webgpu:api,validation,state,device_lo
 # This section represents things that are probably fixable in Dawn.
 ################################################################################
 
+# depth_bias validation failures (also failing in Core)
+crbug.com/365922174 webgpu:api,validation,render_pipeline,depth_stencil_state:depth_bias:* [ Failure ]
+
 # bitcast ai_to_f32 failures; precision issue?
 crbug.com/354152178 [ intel-0x4680 ] webgpu:shader,execution,expression,call,builtin,bitcast:ai_to_f32:* [ Failure ]
 crbug.com/354152178 [ intel-0x9bc5 ] webgpu:shader,execution,expression,call,builtin,bitcast:ai_to_f32:* [ Failure ]
@@ -907,16 +910,6 @@ crbug.com/dawn/0000 [ android arm ] webgpu:api,validation,error_scope:parent_sco
 crbug.com/dawn/0000 [ android arm ] webgpu:api,validation,error_scope:simple:errorType="out-of-memory";errorFilter="internal" [ Failure ]
 crbug.com/dawn/0000 [ android arm ] webgpu:api,validation,error_scope:simple:errorType="out-of-memory";errorFilter="out-of-memory" [ Failure ]
 crbug.com/dawn/0000 [ android arm ] webgpu:api,validation,error_scope:simple:errorType="out-of-memory";errorFilter="validation" [ Failure ]
-crbug.com/dawn/0000 [ android arm ] webgpu:api,validation,render_pipeline,depth_stencil_state:depth_bias:isAsync=false;topology="line-list" [ Failure ]
-crbug.com/dawn/0000 [ android arm ] webgpu:api,validation,render_pipeline,depth_stencil_state:depth_bias:isAsync=false;topology="line-strip" [ Failure ]
-crbug.com/dawn/0000 [ android arm ] webgpu:api,validation,render_pipeline,depth_stencil_state:depth_bias:isAsync=false;topology="point-list" [ Failure ]
-crbug.com/dawn/0000 [ android arm ] webgpu:api,validation,render_pipeline,depth_stencil_state:depth_bias:isAsync=false;topology="triangle-list" [ Failure ]
-crbug.com/dawn/0000 [ android arm ] webgpu:api,validation,render_pipeline,depth_stencil_state:depth_bias:isAsync=false;topology="triangle-strip" [ Failure ]
-crbug.com/dawn/0000 [ android arm ] webgpu:api,validation,render_pipeline,depth_stencil_state:depth_bias:isAsync=true;topology="line-list" [ Failure ]
-crbug.com/dawn/0000 [ android arm ] webgpu:api,validation,render_pipeline,depth_stencil_state:depth_bias:isAsync=true;topology="line-strip" [ Failure ]
-crbug.com/dawn/0000 [ android arm ] webgpu:api,validation,render_pipeline,depth_stencil_state:depth_bias:isAsync=true;topology="point-list" [ Failure ]
-crbug.com/dawn/0000 [ android arm ] webgpu:api,validation,render_pipeline,depth_stencil_state:depth_bias:isAsync=true;topology="triangle-list" [ Failure ]
-crbug.com/dawn/0000 [ android arm ] webgpu:api,validation,render_pipeline,depth_stencil_state:depth_bias:isAsync=true;topology="triangle-strip" [ Failure ]
 crbug.com/dawn/0000 [ android arm ] webgpu:compat,api,validation,render_pipeline,unsupported_wgsl:interpolate:success=false;interpolate="%40interpolate(flat)";entryPoint="fsWithInterpolationUsage1";async=false [ Failure ]
 crbug.com/dawn/0000 [ android arm ] webgpu:compat,api,validation,render_pipeline,unsupported_wgsl:interpolate:success=false;interpolate="%40interpolate(flat)";entryPoint="fsWithInterpolationUsage1";async=true [ Failure ]
 crbug.com/dawn/0000 [ android arm ] webgpu:compat,api,validation,render_pipeline,unsupported_wgsl:interpolate:success=false;interpolate="%40interpolate(flat)";entryPoint="fsWithInterpolationUsage2";async=false [ Failure ]
@@ -1729,7 +1722,6 @@ crbug.com/dawn/0000 webgpu:shader,execution,expression,call,builtin,textureSampl
 crbug.com/dawn/0000 webgpu:shader,validation,decl,var:address_space_access_mode:address_space="storage";access_mode="read";trailing_comma=true [ Failure ]
 crbug.com/dawn/0000 webgpu:shader,validation,decl,var:address_space_access_mode:address_space="storage";access_mode="read_write";trailing_comma=true [ Failure ]
 crbug.com/dawn/0000 webgpu:web_platform,external_texture,video:importExternalTexture,cameraCapture:* [ Failure ]
-crbug.com/dawn/0000 [ angle-opengl dawn-no-backend-validation desktop display-server-x graphite-disabled intel-0x4680 no-asan no-clang-coverage oop-c passthrough release renderer-skia-gl target-cpu-64 ubuntu webgpu-adapter-default webgpu-no-worker ] webgpu:api,validation,render_pipeline,depth_stencil_state:depth_bias:* [ Failure ]
 crbug.com/dawn/0000 [ angle-opengl dawn-no-backend-validation desktop display-server-x graphite-disabled intel-0x4680 no-asan no-clang-coverage oop-c passthrough release renderer-skia-gl target-cpu-64 ubuntu webgpu-adapter-default webgpu-no-worker ] webgpu:compat,api,validation,render_pipeline,unsupported_wgsl:* [ Failure ]
 crbug.com/dawn/0000 [ angle-opengl dawn-no-backend-validation desktop display-server-x graphite-disabled intel-0x4680 no-asan no-clang-coverage oop-c passthrough release renderer-skia-gl target-cpu-64 ubuntu webgpu-adapter-default webgpu-no-worker ] webgpu:shader,execution,expression,call,builtin,dpdxFine:* [ Failure ]
 crbug.com/dawn/0000 [ angle-opengl dawn-no-backend-validation desktop display-server-x graphite-disabled intel-0x4680 no-asan no-clang-coverage oop-c passthrough release renderer-skia-gl target-cpu-64 ubuntu webgpu-adapter-default webgpu-no-worker ] webgpu:shader,execution,expression,call,builtin,dpdyFine:* [ Failure ]
@@ -1741,7 +1733,6 @@ crbug.com/dawn/0000 [ angle-opengl dawn-no-backend-validation desktop display-se
 crbug.com/dawn/0000 [ angle-opengl dawn-no-backend-validation desktop display-server-x graphite-disabled intel-0x4680 no-asan no-clang-coverage oop-c passthrough release renderer-skia-gl target-cpu-64 ubuntu webgpu-adapter-default webgpu-no-worker ] webgpu:shader,validation,types,textures:storage_texture_types:* [ Failure ]
 crbug.com/dawn/0000 [ angle-opengl dawn-no-backend-validation desktop display-server-x graphite-disabled intel-0x4680 no-asan no-clang-coverage oop-c passthrough release renderer-skia-gl target-cpu-64 ubuntu webgpu-adapter-default webgpu-no-worker ] webgpu:web_platform,canvas,configure:viewFormats:* [ Failure ]
 crbug.com/dawn/0000 [ angle-opengl dawn-no-backend-validation desktop display-server-x graphite-disabled intel-0x4680 no-asan no-clang-coverage oop-c passthrough release renderer-skia-gl target-cpu-64 ubuntu webgpu-adapter-default webgpu-no-worker ] webgpu:web_platform,canvas,getCurrentTexture:multiple_frames:canvasType="offscreen" [ Failure ]
-crbug.com/dawn/0000 [ angle-opengl dawn-no-backend-validation desktop display-server-x graphite-disabled intel-0x9bc5 no-asan no-clang-coverage oop-c passthrough release renderer-skia-gl target-cpu-64 ubuntu webgpu-adapter-default webgpu-no-worker ] webgpu:api,validation,render_pipeline,depth_stencil_state:depth_bias:* [ Failure ]
 crbug.com/dawn/0000 [ angle-opengl dawn-no-backend-validation desktop display-server-x graphite-disabled intel-0x9bc5 no-asan no-clang-coverage oop-c passthrough release renderer-skia-gl target-cpu-64 ubuntu webgpu-adapter-default webgpu-no-worker ] webgpu:compat,api,validation,render_pipeline,unsupported_wgsl:* [ Failure ]
 crbug.com/dawn/0000 [ angle-opengl dawn-no-backend-validation desktop display-server-x graphite-disabled intel-0x9bc5 no-asan no-clang-coverage oop-c passthrough release renderer-skia-gl target-cpu-64 ubuntu webgpu-adapter-default webgpu-no-worker ] webgpu:shader,execution,expression,call,builtin,fwidthFine:* [ Failure ]
 crbug.com/dawn/0000 [ angle-opengl dawn-no-backend-validation desktop display-server-x graphite-disabled intel-0x9bc5 no-asan no-clang-coverage oop-c passthrough release renderer-skia-gl target-cpu-64 ubuntu webgpu-adapter-default webgpu-no-worker ] webgpu:shader,execution,expression,call,builtin,textureGather:depth_2d_coords:* [ Failure ]
@@ -1749,7 +1740,6 @@ crbug.com/dawn/0000 [ angle-opengl dawn-no-backend-validation desktop display-se
 crbug.com/dawn/0000 [ angle-opengl dawn-no-backend-validation desktop display-server-x graphite-disabled intel-0x9bc5 no-asan no-clang-coverage oop-c passthrough release renderer-skia-gl target-cpu-64 ubuntu webgpu-adapter-default webgpu-no-worker ] webgpu:shader,execution,expression,call,builtin,textureStore:out_of_bounds_array:* [ Failure ]
 crbug.com/dawn/0000 [ angle-opengl dawn-no-backend-validation desktop display-server-x graphite-disabled intel-0x9bc5 no-asan no-clang-coverage oop-c passthrough release renderer-skia-gl target-cpu-64 ubuntu webgpu-adapter-default webgpu-no-worker ] webgpu:shader,validation,shader_io,interpolate:type_and_sampling:* [ Failure ]
 crbug.com/dawn/0000 [ angle-opengl dawn-no-backend-validation desktop display-server-x graphite-disabled intel-0x9bc5 no-asan no-clang-coverage oop-c passthrough release renderer-skia-gl target-cpu-64 ubuntu webgpu-adapter-default webgpu-no-worker ] webgpu:shader,validation,types,textures:storage_texture_types:* [ Failure ]
-crbug.com/dawn/0000 [ angle-opengl dawn-no-backend-validation desktop display-server-x graphite-disabled no-asan no-clang-coverage nvidia-0x2184 oop-c passthrough release renderer-skia-gl target-cpu-64 ubuntu webgpu-adapter-default webgpu-no-worker ] webgpu:api,validation,render_pipeline,depth_stencil_state:depth_bias:* [ Failure ]
 crbug.com/dawn/0000 [ angle-opengl dawn-no-backend-validation desktop display-server-x graphite-disabled no-asan no-clang-coverage nvidia-0x2184 oop-c passthrough release renderer-skia-gl target-cpu-64 ubuntu webgpu-adapter-default webgpu-no-worker ] webgpu:compat,api,validation,render_pipeline,unsupported_wgsl:* [ Failure ]
 crbug.com/dawn/0000 [ angle-opengl dawn-no-backend-validation desktop display-server-x graphite-disabled no-asan no-clang-coverage nvidia-0x2184 oop-c passthrough release renderer-skia-gl target-cpu-64 ubuntu webgpu-adapter-default webgpu-no-worker ] webgpu:shader,execution,expression,call,builtin,textureNumLayers:storage:* [ Failure ]
 crbug.com/dawn/0000 [ angle-opengl dawn-no-backend-validation desktop display-server-x graphite-disabled no-asan no-clang-coverage nvidia-0x2184 oop-c passthrough release renderer-skia-gl target-cpu-64 ubuntu webgpu-adapter-default webgpu-no-worker ] webgpu:shader,execution,expression,call,builtin,textureStore:out_of_bounds_array:* [ Failure ]
