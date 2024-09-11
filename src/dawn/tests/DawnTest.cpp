@@ -727,16 +727,10 @@ DawnTestBase::DawnTestBase(const AdapterTestParam& param) : mParam(param) {
         DAWN_ASSERT(callbackInfo.mode == WGPUCallbackMode_AllowSpontaneous);
 
         // Use the required toggles of test case when creating adapter.
-        const auto& enabledToggles = gCurrentTest->mParam.forceEnabledWorkarounds;
-        const auto& disabledToggles = gCurrentTest->mParam.forceDisabledWorkarounds;
-        wgpu::DawnTogglesDescriptor adapterToggles;
-        adapterToggles.enabledToggleCount = enabledToggles.size();
-        adapterToggles.enabledToggles = enabledToggles.data();
-        adapterToggles.disabledToggleCount = disabledToggles.size();
-        adapterToggles.disabledToggles = disabledToggles.data();
+        ParamTogglesHelper deviceTogglesHelper(gCurrentTest->mParam, native::ToggleStage::Adapter);
 
         wgpu::RequestAdapterOptions adapterOptions;
-        adapterOptions.nextInChain = &adapterToggles;
+        adapterOptions.nextInChain = &deviceTogglesHelper.togglesDesc;
         adapterOptions.backendType = gCurrentTest->mParam.adapterProperties.backendType;
         adapterOptions.compatibilityMode = gCurrentTest->mParam.adapterProperties.compatibilityMode;
 
