@@ -1221,7 +1221,7 @@ Ref<RenderPassEncoder> CommandEncoder::BeginRenderPass(const RenderPassDescripto
 
             DAWN_ASSERT(validationState.IsValidState());
 
-            DAWN_TRY(clearWithDrawHelper.Initialize(this, *descriptor));
+            DAWN_TRY(clearWithDrawHelper.Initialize(this, descriptor));
             DAWN_TRY(renderpassWorkaroundsHelper.Initialize(this, descriptor));
 
             mEncodingContext.WillBeginRenderPass();
