@@ -283,10 +283,6 @@ crbug.com/tint/2130 [ intel-0x9bc5 win10 ] webgpu:shader,execution,robust_access
 # Will be fixed by the MSL IR conversion
 crbug.com/dawn/344983134 [ mac ] webgpu:shader,execution,limits:function_parameters: [ Failure ]
 
-# Crashes inside Metal driver on all GPUs.
-crbug.com/366037039 [ mac ] webgpu:shader,execution,memory_layout:read_layout:case="vec3i_size12";aspace="workgroup" [ Failure ]
-crbug.com/366037039 [ mac ] webgpu:shader,execution,memory_layout:write_layout:case="vec3i_size12";aspace="workgroup" [ Failure ]
-
 crbug.com/341282610 [ dawn-backend-validation intel-0x4680 linux ] webgpu:api,operation,command_buffer,image_copy:mip_levels:initMethod="WriteTexture";checkMethod="FullCopyT2B";* [ Failure ]
 crbug.com/341282612 [ intel-0x4680 linux ] webgpu:shader,validation,expression,call,builtin,normalize:values:* [ Failure ]
 crbug.com/341282612 [ intel-0x4680 linux ] webgpu:shader,validation,expression,call,builtin,refract:values:* [ Failure ]

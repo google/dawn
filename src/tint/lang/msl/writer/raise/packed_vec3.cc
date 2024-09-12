@@ -80,7 +80,7 @@ struct State {
                 continue;
             }
             auto* ptr = var->Result(0)->Type()->As<core::type::Pointer>();
-            if (!core::IsHostShareable(ptr->AddressSpace())) {
+            if (!AddressSpaceNeedsPacking(ptr->AddressSpace())) {
                 continue;
             }
 
@@ -100,7 +100,7 @@ struct State {
         for (auto func : ir.functions) {
             for (auto* param : func->Params()) {
                 auto* ptr = param->Type()->As<core::type::Pointer>();
-                if (!ptr || !core::IsHostShareable(ptr->AddressSpace())) {
+                if (!ptr || !AddressSpaceNeedsPacking(ptr->AddressSpace())) {
                     continue;
                 }
 
@@ -115,6 +115,14 @@ struct State {
                 }
             }
         }
+    }
+
+    /// @returns true if @p addrspace requires vec3 types to be packed
+    bool AddressSpaceNeedsPacking(core::AddressSpace addrspace) {
+        // Host-shareable address spaces need to be packed to match the memory layout on the host.
+        // The workgroup address space needs to be packed so that the size of generated threadgroup
+        // variables matches the size of the original WGSL declarations.
+        return core::IsHostShareable(addrspace) || addrspace == core::AddressSpace::kWorkgroup;
     }
 
     /// Rewrite a type if necessary, decomposing contained matrices.

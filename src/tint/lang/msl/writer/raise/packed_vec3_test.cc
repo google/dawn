@@ -163,6 +163,48 @@ $B1: {  # root
     EXPECT_EQ(expect, str());
 }
 
+TEST_F(MslWriter_PackedVec3Test, WorkgroupVar_Vec3) {
+    auto* var = b.Var<workgroup, vec3<u32>>("v");
+    mod.root_block->Append(var);
+
+    auto* func = b.Function("foo", ty.vec3<u32>());
+    b.Append(func->Block(), [&] {  //
+        b.Return(func, b.Load(var));
+    });
+
+    auto* src = R"(
+$B1: {  # root
+  %v:ptr<workgroup, vec3<u32>, read_write> = var
+}
+
+%foo = func():vec3<u32> {
+  $B2: {
+    %3:vec3<u32> = load %v
+    ret %3
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+$B1: {  # root
+  %v:ptr<workgroup, __packed_vec3<u32>, read_write> = var
+}
+
+%foo = func():vec3<u32> {
+  $B2: {
+    %3:__packed_vec3<u32> = load %v
+    %4:vec3<u32> = convert %3
+    ret %4
+  }
+}
+)";
+
+    Run(PackedVec3);
+
+    EXPECT_EQ(expect, str());
+}
+
 TEST_F(MslWriter_PackedVec3Test, UniformVar_Vec3) {
     auto* var = b.Var<uniform, vec3<u32>>("v");
     var->SetBindingPoint(0, 0);
