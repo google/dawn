@@ -92,16 +92,16 @@
         }                                                       \
     } while (0)
 
-#define EXPECT_DEPRECATION_WARNINGS(statement, n)                                        \
-    do {                                                                                 \
-        FlushWire();                                                                     \
-        uint64_t warningsBefore = mDawnInstance->GetDeprecationWarningCountForTesting(); \
-        EXPECT_EQ(mLastWarningCount, warningsBefore);                                    \
-        statement;                                                                       \
-        FlushWire();                                                                     \
-        uint64_t warningsAfter = mDawnInstance->GetDeprecationWarningCountForTesting();  \
-        EXPECT_EQ(warningsAfter, warningsBefore + n);                                    \
-        mLastWarningCount = warningsAfter;                                               \
+#define EXPECT_DEPRECATION_WARNINGS(statement, n)                          \
+    do {                                                                   \
+        FlushWire();                                                       \
+        uint64_t warningsBefore = GetInstanceDeprecationCountForTesting(); \
+        EXPECT_EQ(mLastWarningCount, warningsBefore);                      \
+        statement;                                                         \
+        FlushWire();                                                       \
+        uint64_t warningsAfter = GetInstanceDeprecationCountForTesting();  \
+        EXPECT_EQ(warningsAfter, warningsBefore + n);                      \
+        mLastWarningCount = warningsAfter;                                 \
     } while (0)
 #define EXPECT_DEPRECATION_WARNING(statement) EXPECT_DEPRECATION_WARNINGS(statement, 1)
 
@@ -180,6 +180,7 @@ class ValidationTest : public testing::Test {
     void SetUp(const wgpu::InstanceDescriptor* nativeDesc,
                const wgpu::InstanceDescriptor* wireDesc = nullptr);
 
+    uint64_t GetInstanceDeprecationCountForTesting();
     // Helps compute expected deprecated warning count for creating device with given descriptor.
     uint32_t GetDeviceCreationDeprecationWarningExpectation(
         const wgpu::DeviceDescriptor& descriptor);

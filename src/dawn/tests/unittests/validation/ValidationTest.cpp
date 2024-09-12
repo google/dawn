@@ -305,6 +305,10 @@ dawn::utils::WireHelper* ValidationTest::GetWireHelper() const {
     return mWireHelper.get();
 }
 
+uint64_t ValidationTest::GetInstanceDeprecationCountForTesting() {
+    return mDawnInstance->GetDeprecationWarningCountForTesting();
+}
+
 uint32_t ValidationTest::GetDeviceCreationDeprecationWarningExpectation(
     const wgpu::DeviceDescriptor& descriptor) {
     uint32_t expectedDeprecatedCount = 0;
