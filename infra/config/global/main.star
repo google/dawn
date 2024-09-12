@@ -61,7 +61,10 @@ luci.project(
             roles = [
                 acl.SCHEDULER_OWNER,
             ],
-            groups = "project-dawn-admins",
+            groups = [
+                "project-dawn-admins",
+                "project-dawn-schedulers",
+            ],
         ),
         acl.entry(
             roles = [
