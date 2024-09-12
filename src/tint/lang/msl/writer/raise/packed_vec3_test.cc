@@ -3297,5 +3297,400 @@ $B1: {  # root
     EXPECT_EQ(expect, str());
 }
 
+TEST_F(MslWriter_PackedVec3Test, MultipleAddressSpaces_LoadArray) {
+    auto* uvar = b.Var<uniform, array<vec3<f32>, 2>>("u");
+    uvar->SetBindingPoint(0, 0);
+    mod.root_block->Append(uvar);
+    auto* svar = b.Var<storage, array<vec3<f32>, 2>>("s");
+    svar->SetBindingPoint(0, 1);
+    mod.root_block->Append(svar);
+    auto* wvar = b.Var<workgroup, array<vec3<f32>, 2>>("w");
+    mod.root_block->Append(wvar);
+
+    auto* func = b.Function("foo", ty.void_());
+    b.Append(func->Block(), [&] {  //
+        b.Let("u_load", b.Load(uvar));
+        b.Let("s_load", b.Load(svar));
+        b.Let("w_load", b.Load(wvar));
+        b.Return(func);
+    });
+
+    auto* src = R"(
+$B1: {  # root
+  %u:ptr<uniform, array<vec3<f32>, 2>, read> = var @binding_point(0, 0)
+  %s:ptr<storage, array<vec3<f32>, 2>, read_write> = var @binding_point(0, 1)
+  %w:ptr<workgroup, array<vec3<f32>, 2>, read_write> = var
+}
+
+%foo = func():void {
+  $B2: {
+    %5:array<vec3<f32>, 2> = load %u
+    %u_load:array<vec3<f32>, 2> = let %5
+    %7:array<vec3<f32>, 2> = load %s
+    %s_load:array<vec3<f32>, 2> = let %7
+    %9:array<vec3<f32>, 2> = load %w
+    %w_load:array<vec3<f32>, 2> = let %9
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+tint_packed_vec3_f32_array_element = struct @align(16) {
+  packed:__packed_vec3<f32> @offset(0)
+}
+
+$B1: {  # root
+  %u:ptr<uniform, array<tint_packed_vec3_f32_array_element, 2>, read> = var @binding_point(0, 0)
+  %s:ptr<storage, array<tint_packed_vec3_f32_array_element, 2>, read_write> = var @binding_point(0, 1)
+  %w:ptr<workgroup, array<tint_packed_vec3_f32_array_element, 2>, read_write> = var
+}
+
+%foo = func():void {
+  $B2: {
+    %5:array<vec3<f32>, 2> = call %tint_load_array_packed_vec3, %u
+    %u_load:array<vec3<f32>, 2> = let %5
+    %8:array<vec3<f32>, 2> = call %tint_load_array_packed_vec3_1, %s
+    %s_load:array<vec3<f32>, 2> = let %8
+    %11:array<vec3<f32>, 2> = call %tint_load_array_packed_vec3_2, %w
+    %w_load:array<vec3<f32>, 2> = let %11
+    ret
+  }
+}
+%tint_load_array_packed_vec3 = func(%from:ptr<uniform, array<tint_packed_vec3_f32_array_element, 2>, read>):array<vec3<f32>, 2> {
+  $B3: {
+    %15:ptr<uniform, __packed_vec3<f32>, read> = access %from, 0u, 0u
+    %16:__packed_vec3<f32> = load %15
+    %17:vec3<f32> = convert %16
+    %18:ptr<uniform, __packed_vec3<f32>, read> = access %from, 1u, 0u
+    %19:__packed_vec3<f32> = load %18
+    %20:vec3<f32> = convert %19
+    %21:array<vec3<f32>, 2> = construct %17, %20
+    ret %21
+  }
+}
+%tint_load_array_packed_vec3_1 = func(%from_1:ptr<storage, array<tint_packed_vec3_f32_array_element, 2>, read_write>):array<vec3<f32>, 2> {  # %from_1: 'from'
+  $B4: {
+    %23:ptr<storage, __packed_vec3<f32>, read_write> = access %from_1, 0u, 0u
+    %24:__packed_vec3<f32> = load %23
+    %25:vec3<f32> = convert %24
+    %26:ptr<storage, __packed_vec3<f32>, read_write> = access %from_1, 1u, 0u
+    %27:__packed_vec3<f32> = load %26
+    %28:vec3<f32> = convert %27
+    %29:array<vec3<f32>, 2> = construct %25, %28
+    ret %29
+  }
+}
+%tint_load_array_packed_vec3_2 = func(%from_2:ptr<workgroup, array<tint_packed_vec3_f32_array_element, 2>, read_write>):array<vec3<f32>, 2> {  # %from_2: 'from'
+  $B5: {
+    %31:ptr<workgroup, __packed_vec3<f32>, read_write> = access %from_2, 0u, 0u
+    %32:__packed_vec3<f32> = load %31
+    %33:vec3<f32> = convert %32
+    %34:ptr<workgroup, __packed_vec3<f32>, read_write> = access %from_2, 1u, 0u
+    %35:__packed_vec3<f32> = load %34
+    %36:vec3<f32> = convert %35
+    %37:array<vec3<f32>, 2> = construct %33, %36
+    ret %37
+  }
+}
+)";
+
+    Run(PackedVec3);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(MslWriter_PackedVec3Test, MultipleAddressSpaces_StoreArray) {
+    auto* svar = b.Var<storage, array<vec3<f32>, 2>>("s");
+    svar->SetBindingPoint(0, 0);
+    mod.root_block->Append(svar);
+    auto* wvar = b.Var<workgroup, array<vec3<f32>, 2>>("w");
+    mod.root_block->Append(wvar);
+
+    auto* func = b.Function("foo", ty.void_());
+    b.Append(func->Block(), [&] {  //
+        b.Store(svar, b.Zero<array<vec3<f32>, 2>>());
+        b.Store(wvar, b.Zero<array<vec3<f32>, 2>>());
+        b.Return(func);
+    });
+
+    auto* src = R"(
+$B1: {  # root
+  %s:ptr<storage, array<vec3<f32>, 2>, read_write> = var @binding_point(0, 0)
+  %w:ptr<workgroup, array<vec3<f32>, 2>, read_write> = var
+}
+
+%foo = func():void {
+  $B2: {
+    store %s, array<vec3<f32>, 2>(vec3<f32>(0.0f))
+    store %w, array<vec3<f32>, 2>(vec3<f32>(0.0f))
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+tint_packed_vec3_f32_array_element = struct @align(16) {
+  packed:__packed_vec3<f32> @offset(0)
+}
+
+$B1: {  # root
+  %s:ptr<storage, array<tint_packed_vec3_f32_array_element, 2>, read_write> = var @binding_point(0, 0)
+  %w:ptr<workgroup, array<tint_packed_vec3_f32_array_element, 2>, read_write> = var
+}
+
+%foo = func():void {
+  $B2: {
+    %4:void = call %tint_store_array_packed_vec3, %s, array<vec3<f32>, 2>(vec3<f32>(0.0f))
+    %6:void = call %tint_store_array_packed_vec3_1, %w, array<vec3<f32>, 2>(vec3<f32>(0.0f))
+    ret
+  }
+}
+%tint_store_array_packed_vec3 = func(%to:ptr<storage, array<tint_packed_vec3_f32_array_element, 2>, read_write>, %value:array<vec3<f32>, 2>):void {
+  $B3: {
+    %10:vec3<f32> = access %value, 0u
+    %11:ptr<storage, __packed_vec3<f32>, read_write> = access %to, 0u, 0u
+    %12:__packed_vec3<f32> = convert %10
+    store %11, %12
+    %13:vec3<f32> = access %value, 1u
+    %14:ptr<storage, __packed_vec3<f32>, read_write> = access %to, 1u, 0u
+    %15:__packed_vec3<f32> = convert %13
+    store %14, %15
+    ret
+  }
+}
+%tint_store_array_packed_vec3_1 = func(%to_1:ptr<workgroup, array<tint_packed_vec3_f32_array_element, 2>, read_write>, %value_1:array<vec3<f32>, 2>):void {  # %to_1: 'to', %value_1: 'value'
+  $B4: {
+    %18:vec3<f32> = access %value_1, 0u
+    %19:ptr<workgroup, __packed_vec3<f32>, read_write> = access %to_1, 0u, 0u
+    %20:__packed_vec3<f32> = convert %18
+    store %19, %20
+    %21:vec3<f32> = access %value_1, 1u
+    %22:ptr<workgroup, __packed_vec3<f32>, read_write> = access %to_1, 1u, 0u
+    %23:__packed_vec3<f32> = convert %21
+    store %22, %23
+    ret
+  }
+}
+)";
+
+    Run(PackedVec3);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(MslWriter_PackedVec3Test, MultipleAddressSpaces_LoadStruct) {
+    auto* s = ty.Struct(mod.symbols.New("S"), {
+                                                  {mod.symbols.Register("vec"), ty.vec3<u32>()},
+                                                  {mod.symbols.Register("u"), ty.u32()},
+                                              });
+
+    auto* uvar = b.Var("u", ty.ptr<uniform>(s));
+    uvar->SetBindingPoint(0, 0);
+    mod.root_block->Append(uvar);
+    auto* svar = b.Var("s", ty.ptr<storage>(s));
+    svar->SetBindingPoint(0, 1);
+    mod.root_block->Append(svar);
+    auto* wvar = b.Var("w", ty.ptr<workgroup>(s));
+    mod.root_block->Append(wvar);
+
+    auto* func = b.Function("foo", ty.void_());
+    b.Append(func->Block(), [&] {  //
+        b.Let("u_load", b.Load(uvar));
+        b.Let("s_load", b.Load(svar));
+        b.Let("w_load", b.Load(wvar));
+        b.Return(func);
+    });
+
+    auto* src = R"(
+S = struct @align(16) {
+  vec:vec3<u32> @offset(0)
+  u:u32 @offset(12)
+}
+
+$B1: {  # root
+  %u:ptr<uniform, S, read> = var @binding_point(0, 0)
+  %s:ptr<storage, S, read_write> = var @binding_point(0, 1)
+  %w:ptr<workgroup, S, read_write> = var
+}
+
+%foo = func():void {
+  $B2: {
+    %5:S = load %u
+    %u_load:S = let %5
+    %7:S = load %s
+    %s_load:S = let %7
+    %9:S = load %w
+    %w_load:S = let %9
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+S = struct @align(16) {
+  vec:vec3<u32> @offset(0)
+  u:u32 @offset(12)
+}
+
+S_packed_vec3 = struct @align(16) {
+  vec:__packed_vec3<u32> @offset(0)
+  u:u32 @offset(12)
+}
+
+$B1: {  # root
+  %u:ptr<uniform, S_packed_vec3, read> = var @binding_point(0, 0)
+  %s:ptr<storage, S_packed_vec3, read_write> = var @binding_point(0, 1)
+  %w:ptr<workgroup, S_packed_vec3, read_write> = var
+}
+
+%foo = func():void {
+  $B2: {
+    %5:S = call %tint_load_struct_packed_vec3, %u
+    %u_load:S = let %5
+    %8:S = call %tint_load_struct_packed_vec3_1, %s
+    %s_load:S = let %8
+    %11:S = call %tint_load_struct_packed_vec3_2, %w
+    %w_load:S = let %11
+    ret
+  }
+}
+%tint_load_struct_packed_vec3 = func(%from:ptr<uniform, S_packed_vec3, read>):S {
+  $B3: {
+    %15:ptr<uniform, __packed_vec3<u32>, read> = access %from, 0u
+    %16:__packed_vec3<u32> = load %15
+    %17:vec3<u32> = convert %16
+    %18:ptr<uniform, u32, read> = access %from, 1u
+    %19:u32 = load %18
+    %20:S = construct %17, %19
+    ret %20
+  }
+}
+%tint_load_struct_packed_vec3_1 = func(%from_1:ptr<storage, S_packed_vec3, read_write>):S {  # %from_1: 'from'
+  $B4: {
+    %22:ptr<storage, __packed_vec3<u32>, read_write> = access %from_1, 0u
+    %23:__packed_vec3<u32> = load %22
+    %24:vec3<u32> = convert %23
+    %25:ptr<storage, u32, read_write> = access %from_1, 1u
+    %26:u32 = load %25
+    %27:S = construct %24, %26
+    ret %27
+  }
+}
+%tint_load_struct_packed_vec3_2 = func(%from_2:ptr<workgroup, S_packed_vec3, read_write>):S {  # %from_2: 'from'
+  $B5: {
+    %29:ptr<workgroup, __packed_vec3<u32>, read_write> = access %from_2, 0u
+    %30:__packed_vec3<u32> = load %29
+    %31:vec3<u32> = convert %30
+    %32:ptr<workgroup, u32, read_write> = access %from_2, 1u
+    %33:u32 = load %32
+    %34:S = construct %31, %33
+    ret %34
+  }
+}
+)";
+
+    Run(PackedVec3);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(MslWriter_PackedVec3Test, MultipleAddressSpaces_StoreStruct) {
+    auto* s = ty.Struct(mod.symbols.New("S"), {
+                                                  {mod.symbols.Register("vec"), ty.vec3<u32>()},
+                                                  {mod.symbols.Register("u"), ty.u32()},
+                                              });
+
+    auto* svar = b.Var("s", ty.ptr<storage>(s));
+    svar->SetBindingPoint(0, 0);
+    mod.root_block->Append(svar);
+    auto* wvar = b.Var("w", ty.ptr<workgroup>(s));
+    mod.root_block->Append(wvar);
+
+    auto* func = b.Function("foo", ty.void_());
+    b.Append(func->Block(), [&] {  //
+        b.Store(svar, b.Zero(s));
+        b.Store(wvar, b.Zero(s));
+        b.Return(func);
+    });
+
+    auto* src = R"(
+S = struct @align(16) {
+  vec:vec3<u32> @offset(0)
+  u:u32 @offset(12)
+}
+
+$B1: {  # root
+  %s:ptr<storage, S, read_write> = var @binding_point(0, 0)
+  %w:ptr<workgroup, S, read_write> = var
+}
+
+%foo = func():void {
+  $B2: {
+    store %s, S(vec3<u32>(0u), 0u)
+    store %w, S(vec3<u32>(0u), 0u)
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+S = struct @align(16) {
+  vec:vec3<u32> @offset(0)
+  u:u32 @offset(12)
+}
+
+S_packed_vec3 = struct @align(16) {
+  vec:__packed_vec3<u32> @offset(0)
+  u:u32 @offset(12)
+}
+
+$B1: {  # root
+  %s:ptr<storage, S_packed_vec3, read_write> = var @binding_point(0, 0)
+  %w:ptr<workgroup, S_packed_vec3, read_write> = var
+}
+
+%foo = func():void {
+  $B2: {
+    %4:void = call %tint_store_array_packed_vec3, %s, S(vec3<u32>(0u), 0u)
+    %6:void = call %tint_store_array_packed_vec3_1, %w, S(vec3<u32>(0u), 0u)
+    ret
+  }
+}
+%tint_store_array_packed_vec3 = func(%to:ptr<storage, S_packed_vec3, read_write>, %value:S):void {
+  $B3: {
+    %10:vec3<u32> = access %value, 0u
+    %11:ptr<storage, __packed_vec3<u32>, read_write> = access %to, 0u
+    %12:__packed_vec3<u32> = convert %10
+    store %11, %12
+    %13:u32 = access %value, 1u
+    %14:ptr<storage, u32, read_write> = access %to, 1u
+    store %14, %13
+    ret
+  }
+}
+%tint_store_array_packed_vec3_1 = func(%to_1:ptr<workgroup, S_packed_vec3, read_write>, %value_1:S):void {  # %to_1: 'to', %value_1: 'value'
+  $B4: {
+    %17:vec3<u32> = access %value_1, 0u
+    %18:ptr<workgroup, __packed_vec3<u32>, read_write> = access %to_1, 0u
+    %19:__packed_vec3<u32> = convert %17
+    store %18, %19
+    %20:u32 = access %value_1, 1u
+    %21:ptr<workgroup, u32, read_write> = access %to_1, 1u
+    store %21, %20
+    ret
+  }
+}
+)";
+
+    Run(PackedVec3);
+
+    EXPECT_EQ(expect, str());
+}
+
 }  // namespace
 }  // namespace tint::msl::writer::raise

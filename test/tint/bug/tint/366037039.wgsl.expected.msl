@@ -1,0 +1,72 @@
+#include <metal_stdlib>
+
+using namespace metal;
+
+template<typename T, size_t N>
+struct tint_array {
+    const constant T& operator[](size_t i) const constant { return elements[i]; }
+    device T& operator[](size_t i) device { return elements[i]; }
+    const device T& operator[](size_t i) const device { return elements[i]; }
+    thread T& operator[](size_t i) thread { return elements[i]; }
+    const thread T& operator[](size_t i) const thread { return elements[i]; }
+    threadgroup T& operator[](size_t i) threadgroup { return elements[i]; }
+    const threadgroup T& operator[](size_t i) const threadgroup { return elements[i]; }
+    T elements[N];
+};
+
+#define TINT_ISOLATE_UB(VOLATILE_NAME) \
+  volatile bool VOLATILE_NAME = true; \
+  if (VOLATILE_NAME)
+
+struct tint_packed_vec3_u32_array_element {
+  /* 0x0000 */ packed_uint3 elements;
+  /* 0x000c */ tint_array<int8_t, 4> tint_pad;
+};
+
+struct S_tint_packed_vec3 {
+  /* 0x0000 */ packed_uint3 a;
+  /* 0x000c */ uint b;
+  /* 0x0010 */ tint_array<tint_packed_vec3_u32_array_element, 4> c;
+};
+
+tint_array<uint3, 4> tint_unpack_vec3_in_composite(tint_array<tint_packed_vec3_u32_array_element, 4> in) {
+  tint_array<uint3, 4> result = tint_array<uint3, 4>{uint3(in[0].elements), uint3(in[1].elements), uint3(in[2].elements), uint3(in[3].elements)};
+  return result;
+}
+
+struct S {
+  uint3 a;
+  uint b;
+  tint_array<uint3, 4> c;
+};
+
+S tint_unpack_vec3_in_composite_1(S_tint_packed_vec3 in) {
+  S result = {};
+  result.a = uint3(in.a);
+  result.b = in.b;
+  result.c = tint_unpack_vec3_in_composite(in.c);
+  return result;
+}
+
+void assign_and_preserve_padding_1(device tint_array<tint_packed_vec3_u32_array_element, 4>* const dest, tint_array<uint3, 4> value) {
+  TINT_ISOLATE_UB(tint_volatile_true) for(uint i = 0u; (i < 4u); i = (i + 1u)) {
+    (*(dest))[i].elements = packed_uint3(value[i]);
+  }
+}
+
+void assign_and_preserve_padding(device S_tint_packed_vec3* const dest, S value) {
+  (*(dest)).a = packed_uint3(value.a);
+  (*(dest)).b = value.b;
+  assign_and_preserve_padding_1(&((*(dest)).c), value.c);
+}
+
+void foo(const constant S_tint_packed_vec3* const tint_symbol_2, device S_tint_packed_vec3* const tint_symbol_3, threadgroup S* const tint_symbol_4) {
+  S const u = tint_unpack_vec3_in_composite_1(*(tint_symbol_2));
+  S const s = tint_unpack_vec3_in_composite_1(*(tint_symbol_3));
+  S const w = tint_unpack_vec3_in_composite_1(*(tint_symbol_3));
+  S const tint_symbol = S{};
+  assign_and_preserve_padding(tint_symbol_3, tint_symbol);
+  S const tint_symbol_1 = S{};
+  *(tint_symbol_4) = tint_symbol_1;
+}
+
