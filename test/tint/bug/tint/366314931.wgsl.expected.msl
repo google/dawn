@@ -1,0 +1,33 @@
+#include <metal_stdlib>
+
+using namespace metal;
+struct S_tint_packed_vec3 {
+  /* 0x0000 */ packed_uint3 v;
+  /* 0x000c */ atomic_uint u;
+};
+
+struct S {
+  uint3 v;
+  atomic_uint u;
+};
+
+void tint_zero_workgroup_memory(uint local_idx, threadgroup S* const tint_symbol_1) {
+  if ((local_idx < 1u)) {
+    (*(tint_symbol_1)).v = uint3(0u);
+    atomic_store_explicit(&((*(tint_symbol_1)).u), 0u, memory_order_relaxed);
+  }
+  threadgroup_barrier(mem_flags::mem_threadgroup);
+}
+
+void tint_symbol_inner(uint local_invocation_index, threadgroup S* const tint_symbol_2, device S_tint_packed_vec3* const tint_symbol_3) {
+  tint_zero_workgroup_memory(local_invocation_index, tint_symbol_2);
+  uint const x = atomic_load_explicit(&((*(tint_symbol_2)).u), memory_order_relaxed);
+  atomic_store_explicit(&((*(tint_symbol_3)).u), x, memory_order_relaxed);
+}
+
+kernel void tint_symbol(device S_tint_packed_vec3* tint_symbol_5 [[buffer(0)]], uint local_invocation_index [[thread_index_in_threadgroup]]) {
+  threadgroup S tint_symbol_4;
+  tint_symbol_inner(local_invocation_index, &(tint_symbol_4), tint_symbol_5);
+  return;
+}
+

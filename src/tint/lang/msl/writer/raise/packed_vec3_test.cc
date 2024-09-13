@@ -3692,5 +3692,137 @@ $B1: {  # root
     EXPECT_EQ(expect, str());
 }
 
+TEST_F(MslWriter_PackedVec3Test, AtomicOnPackedStructMember) {
+    auto* s = ty.Struct(mod.symbols.New("S"), {
+                                                  {mod.symbols.Register("vec"), ty.vec3<u32>()},
+                                                  {mod.symbols.Register("u"), ty.atomic<u32>()},
+                                              });
+
+    auto* var = b.Var("v", ty.ptr<workgroup>(s));
+    mod.root_block->Append(var);
+
+    auto* func = b.Function("foo", ty.u32());
+    b.Append(func->Block(), [&] {  //
+        auto* p = b.Access<ptr<workgroup, atomic<u32>>>(var, 1_u);
+        auto* result = b.Call<u32>(core::BuiltinFn::kAtomicLoad, p);
+        b.Return(func, result);
+    });
+
+    auto* src = R"(
+S = struct @align(16) {
+  vec:vec3<u32> @offset(0)
+  u:atomic<u32> @offset(12)
+}
+
+$B1: {  # root
+  %v:ptr<workgroup, S, read_write> = var
+}
+
+%foo = func():u32 {
+  $B2: {
+    %3:ptr<workgroup, atomic<u32>, read_write> = access %v, 1u
+    %4:u32 = atomicLoad %3
+    ret %4
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+S = struct @align(16) {
+  vec:vec3<u32> @offset(0)
+  u:atomic<u32> @offset(12)
+}
+
+S_packed_vec3 = struct @align(16) {
+  vec:__packed_vec3<u32> @offset(0)
+  u:atomic<u32> @offset(12)
+}
+
+$B1: {  # root
+  %v:ptr<workgroup, S_packed_vec3, read_write> = var
+}
+
+%foo = func():u32 {
+  $B2: {
+    %3:ptr<workgroup, atomic<u32>, read_write> = access %v, 1u
+    %4:u32 = atomicLoad %3
+    ret %4
+  }
+}
+)";
+
+    Run(PackedVec3);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(MslWriter_PackedVec3Test, AtomicOnPackedStructMember_ViaLet) {
+    auto* s = ty.Struct(mod.symbols.New("S"), {
+                                                  {mod.symbols.Register("vec"), ty.vec3<u32>()},
+                                                  {mod.symbols.Register("u"), ty.atomic<u32>()},
+                                              });
+
+    auto* var = b.Var("v", ty.ptr<workgroup>(s));
+    mod.root_block->Append(var);
+
+    auto* func = b.Function("foo", ty.u32());
+    b.Append(func->Block(), [&] {  //
+        auto* p = b.Let("p", b.Access<ptr<workgroup, atomic<u32>>>(var, 1_u));
+        auto* result = b.Call<u32>(core::BuiltinFn::kAtomicLoad, p);
+        b.Return(func, result);
+    });
+
+    auto* src = R"(
+S = struct @align(16) {
+  vec:vec3<u32> @offset(0)
+  u:atomic<u32> @offset(12)
+}
+
+$B1: {  # root
+  %v:ptr<workgroup, S, read_write> = var
+}
+
+%foo = func():u32 {
+  $B2: {
+    %3:ptr<workgroup, atomic<u32>, read_write> = access %v, 1u
+    %p:ptr<workgroup, atomic<u32>, read_write> = let %3
+    %5:u32 = atomicLoad %p
+    ret %5
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+S = struct @align(16) {
+  vec:vec3<u32> @offset(0)
+  u:atomic<u32> @offset(12)
+}
+
+S_packed_vec3 = struct @align(16) {
+  vec:__packed_vec3<u32> @offset(0)
+  u:atomic<u32> @offset(12)
+}
+
+$B1: {  # root
+  %v:ptr<workgroup, S_packed_vec3, read_write> = var
+}
+
+%foo = func():u32 {
+  $B2: {
+    %3:ptr<workgroup, atomic<u32>, read_write> = access %v, 1u
+    %p:ptr<workgroup, atomic<u32>, read_write> = let %3
+    %5:u32 = atomicLoad %p
+    ret %5
+  }
+}
+)";
+
+    Run(PackedVec3);
+
+    EXPECT_EQ(expect, str());
+}
+
 }  // namespace
 }  // namespace tint::msl::writer::raise

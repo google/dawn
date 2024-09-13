@@ -291,12 +291,12 @@ struct State {
                 auto* packed_result_type = RewriteType(unpacked_result_type);
                 let->Result(0)->SetType(packed_result_type);
                 let->Result(0)->ForEachUseSorted([&](core::ir::Usage let_use) {  //
-                    UpdateUsage(let_use, unpacked_result_type->UnwrapPtr(), packed_result_type);
+                    UpdateUsage(let_use, unpacked_result_type, packed_result_type);
                 });
             },
             [&](core::ir::Load* load) {
                 b.InsertAfter(load, [&] {
-                    auto* result = LoadPackedToUnpacked(unpacked_type, load->From());
+                    auto* result = LoadPackedToUnpacked(unpacked_type->UnwrapPtr(), load->From());
                     load->Result(0)->ReplaceAllUsesWith(result);
                 });
                 load->Destroy();
@@ -327,7 +327,7 @@ struct State {
         // Rebuild the indices of the access instruction.
         // Walk through the intermediate types that the access chain will be traversing, and
         // check for packed vectors that would be wrapped in structures.
-        auto* obj_type = unpacked_type;
+        auto* obj_type = unpacked_type->UnwrapPtr();
         Vector<core::ir::Value*, 4> operands;
         operands.Push(access->Object());
         for (auto* idx : access->Indices()) {
@@ -354,7 +354,7 @@ struct State {
         access->SetOperands(std::move(operands));
         access->Result(0)->SetType(packed_result_type);
         access->Result(0)->ForEachUseSorted([&](core::ir::Usage access_use) {  //
-            UpdateUsage(access_use, unpacked_result_type->UnwrapPtr(), packed_result_type);
+            UpdateUsage(access_use, unpacked_result_type, packed_result_type);
         });
     }
 
