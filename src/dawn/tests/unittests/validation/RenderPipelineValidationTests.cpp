@@ -3409,5 +3409,61 @@ TEST_F(ClipDistancesValidationTest, ClipDistancesAgainstMaxInterStageShaderVaria
     }
 }
 
+// Tests that using @builtin(clip_distances) will decrease the maximum location of the inter-stage
+// shader variable, while the PointList primitive topology doesn't affect the maximum location of
+// the inter-stage shader variable.
+TEST_F(ClipDistancesValidationTest, ClipDistancesAgainstMaxInterStageLocation) {
+    constexpr std::array<wgpu::PrimitiveTopology, 2> kPrimitives = {
+        {wgpu::PrimitiveTopology::TriangleList, wgpu::PrimitiveTopology::PointList}};
+    for (wgpu::PrimitiveTopology primitive : kPrimitives) {
+        for (uint32_t clipDistancesSize = 1; clipDistancesSize <= 8; ++clipDistancesSize) {
+            for (uint32_t location = kMaxInterStageShaderVariables - 3u;
+                 location < kMaxInterStageShaderVariables; ++location) {
+                std::stringstream stream;
+                stream << R"(
+                    enable clip_distances;
+                    struct VertexOut {
+                        @location()"
+                       << location << ") color : vec4f,\n"
+                       << R"(
+                        @builtin(clip_distances) clipDistances : array<f32, )"
+                       << clipDistancesSize << ">,\n"
+                       << R"(
+                        @builtin(position) pos : vec4f,
+                     }
+                     struct FragmentIn {
+                         @location()"
+                       << location << ") color : vec4f,\n"
+                       << R"(
+                         @builtin(position) pos : vec4f,
+                     }
+                     @vertex
+                     fn vsMain() -> VertexOut {
+                         var vout : VertexOut;
+                         return vout;
+                     }
+                     @fragment
+                     fn fsMain(fragIn : FragmentIn) -> @location(0) vec4f {
+                         return fragIn.pos;
+                     })";
+
+                wgpu::ShaderModule shaderModule = utils::CreateShaderModule(device, stream.str());
+                utils::ComboRenderPipelineDescriptor descriptor;
+                descriptor.vertex.module = shaderModule;
+                descriptor.cFragment.module = shaderModule;
+                descriptor.primitive.topology = primitive;
+
+                uint32_t slotsForClipDistances = Align(clipDistancesSize, 4u) / 4;
+                uint32_t maxLocation = kMaxInterStageShaderVariables - 1 - slotsForClipDistances;
+                if (location > maxLocation) {
+                    ASSERT_DEVICE_ERROR(device.CreateRenderPipeline(&descriptor));
+                } else {
+                    device.CreateRenderPipeline(&descriptor);
+                }
+            }
+        }
+    }
+}
+
 }  // anonymous namespace
 }  // namespace dawn

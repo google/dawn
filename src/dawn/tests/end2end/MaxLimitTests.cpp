@@ -886,8 +886,7 @@ class MaxInterStageShaderVariablesLimitTests : public MaxLimitTests {
         DAWN_TEST_UNSUPPORTED_IF(IsCompatibilityMode() &&
                                  (spec.hasSampleIndex || spec.hasSampleMask));
 
-        wgpu::RenderPipeline pipeline = CreateRenderPipeline(spec);
-        EXPECT_NE(nullptr, pipeline.Get());
+        CreateRenderPipeline(spec);
     }
 
   protected:
@@ -916,7 +915,7 @@ class MaxInterStageShaderVariablesLimitTests : public MaxLimitTests {
             ++builtinVariableCount;
         }
         if (spec.clipDistancesSize.has_value()) {
-            builtinVariableCount += dawn::RoundUp(*spec.clipDistancesSize, 4) / 4;
+            builtinVariableCount += RoundUp(*spec.clipDistancesSize, 4) / 4;
         }
         return baseLimits.maxInterStageShaderVariables - builtinVariableCount;
     }
@@ -1137,6 +1136,59 @@ TEST_P(MaxInterStageShaderVariablesLimitTests, RenderPointList_ClipDistances) {
     }
 }
 
+// Tests that using @builtin(clip_distances) will decrease the maximum location of the inter-stage
+// shader variable, while the PointList primitive topology doesn't affect the maximum location of
+// the inter-stage shader variable.
+TEST_P(MaxInterStageShaderVariablesLimitTests, MaxLocation_ClipDistances) {
+    DAWN_TEST_UNSUPPORTED_IF(!mSupportsClipDistances);
+
+    wgpu::Limits baseLimits = GetAdapterLimits().limits;
+
+    constexpr std::array<wgpu::PrimitiveTopology, 2> kPrimitives = {
+        {wgpu::PrimitiveTopology::TriangleList, wgpu::PrimitiveTopology::PointList}};
+    for (wgpu::PrimitiveTopology primitive : kPrimitives) {
+        for (uint32_t clipDistanceSize = 1; clipDistanceSize <= 8; ++clipDistanceSize) {
+            uint32_t colorLocation =
+                baseLimits.maxInterStageShaderVariables - 1 - RoundUp(clipDistanceSize, 4) / 4;
+            std::stringstream stream;
+            stream << R"(
+    enable clip_distances;
+    struct VertexOut {
+        @location()"
+                   << colorLocation << ") color : vec4f,\n"
+                   << R"(
+        @builtin(clip_distances) clipDistances : array<f32, )"
+                   << clipDistanceSize << ">,\n"
+                   << R"(
+        @builtin(position) pos : vec4f,
+    }
+    struct FragmentIn {
+        @location()"
+                   << colorLocation << ") color : vec4f,\n"
+                   << R"(
+        @builtin(position) pos : vec4f,
+    }
+    @vertex fn vsMain() -> VertexOut {
+        var vout : VertexOut;
+        return vout;
+    }
+    @fragment fn fsMain(fragIn : FragmentIn) -> @location(0) vec4f {
+        return fragIn.pos;
+    })";
+
+            wgpu::ShaderModule shaderModule = utils::CreateShaderModule(device, stream.str());
+            utils::ComboRenderPipelineDescriptor descriptor;
+            descriptor.vertex.module = shaderModule;
+            descriptor.cFragment.module = shaderModule;
+            descriptor.vertex.bufferCount = 0;
+            descriptor.cBuffers[0].attributeCount = 0;
+            descriptor.cTargets[0].format = wgpu::TextureFormat::RGBA8Unorm;
+            descriptor.primitive.topology = primitive;
+            device.CreateRenderPipeline(&descriptor);
+        }
+    }
+}
+
 DAWN_INSTANTIATE_TEST(MaxInterStageShaderVariablesLimitTests,
                       D3D11Backend(),
                       D3D12Backend({}, {"use_dxc"}),
@@ -1154,10 +1206,7 @@ class MaxVertexAttributesPipelineCreationTests : public MaxLimitTests {
         bool hasInstanceIndex;
     };
 
-    void DoTest(const TestSpec& spec) {
-        wgpu::RenderPipeline pipeline = CreateRenderPipeline(spec);
-        EXPECT_NE(nullptr, pipeline.Get());
-    }
+    void DoTest(const TestSpec& spec) { CreateRenderPipeline(spec); }
 
   private:
     wgpu::RenderPipeline CreateRenderPipeline(const TestSpec& spec) {

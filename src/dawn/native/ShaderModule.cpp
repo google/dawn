@@ -697,7 +697,12 @@ ResultOrError<std::unique_ptr<EntryPointMetadata>> ReflectEntryPointUsingTint(
             metadata->usedVertexInputs.set(location);
         }
 
-        // Vertex ouput (inter-stage variables) reflection.
+        // Vertex output (inter-stage variables) reflection.
+        uint32_t clipDistancesSlots = 0;
+        if (entryPoint.clip_distances_size.has_value()) {
+            clipDistancesSlots = RoundUp(*entryPoint.clip_distances_size, 4) / 4;
+        }
+        uint32_t minInvalidLocation = maxInterStageShaderVariables - clipDistancesSlots;
         for (const auto& outputVar : entryPoint.output_variables) {
             EntryPointMetadata::InterStageVariableInfo variable;
             variable.name = outputVar.variable_name;
@@ -712,10 +717,19 @@ ResultOrError<std::unique_ptr<EntryPointMetadata>> ReflectEntryPointUsingTint(
                                 outputVar.interpolation_sampling));
 
             uint32_t location = outputVar.attributes.location.value();
-            if (DelayedInvalidIf(location >= maxInterStageShaderVariables,
-                                 "Vertex output variable \"%s\" has a location (%u) that "
-                                 "is greater than or equal to (%u).",
-                                 outputVar.name, location, maxInterStageShaderVariables)) {
+            if (location >= minInvalidLocation) {
+                if (clipDistancesSlots > 0) {
+                    metadata->infringedLimitErrors.push_back(absl::StrFormat(
+                        "Vertex output variable \"%s\" has a location (%u) that "
+                        "is too large. It should be less than (%u = %u - %u (clip_distances)).",
+                        outputVar.name, location, minInvalidLocation, maxInterStageShaderVariables,
+                        clipDistancesSlots));
+                } else {
+                    metadata->infringedLimitErrors.push_back(
+                        absl::StrFormat("Vertex output variable \"%s\" has a location (%u) that "
+                                        "is too large. It should be less than (%u).",
+                                        outputVar.name, location, minInvalidLocation));
+                }
                 continue;
             }
 
@@ -724,12 +738,8 @@ ResultOrError<std::unique_ptr<EntryPointMetadata>> ReflectEntryPointUsingTint(
         }
 
         // Other vertex metadata.
-        metadata->totalInterStageShaderVariables = entryPoint.output_variables.size();
-        if (entryPoint.clip_distances_size.has_value()) {
-            metadata->totalInterStageShaderVariables +=
-                RoundUp(*entryPoint.clip_distances_size, 4) / 4;
-        }
-
+        metadata->totalInterStageShaderVariables =
+            entryPoint.output_variables.size() + clipDistancesSlots;
         if (metadata->totalInterStageShaderVariables > maxInterStageShaderVariables) {
             size_t userDefinedOutputVariables = entryPoint.output_variables.size();
 
