@@ -314,6 +314,10 @@ crbug.com/dawn/2319 [ nvidia-0x2184 ] webgpu:shader,execution,expression,call,bu
 crbug.com/dawn/2319 [ nvidia-0x2184 ] webgpu:shader,execution,expression,call,builtin,clamp:i32:* [ Failure ]
 crbug.com/dawn/2319 [ nvidia-0x2184 ] webgpu:shader,execution,expression,call,builtin,clamp:u32:* [ Failure ]
 
+# flat issues - should clear up with cts roll
+crbug.com/357047899 webgpu:shader,validation,shader_io,interpolate:integral_types:* [ Failure ]
+crbug.com/357047899 webgpu:shader,validation,shader_io,interpolate:interpolation_validation:attr="trailing_comma_one_arg" [ Failure ]
+
 # alpha_to_coverage occlusion query tests failing on Intel
 crbug.com/dawn/2248 [ intel-0x9bc5 ] webgpu:api,operation,command_buffer,queries,occlusionQuery:occlusion_query,alpha_to_coverage:writeMask=0;renderMode="direct";bufferOffset="non-zero";querySetOffset="non-zero";alpha=0 [ Failure ]
 crbug.com/dawn/2248 [ intel-0x9bc5 ] webgpu:api,operation,command_buffer,queries,occlusionQuery:occlusion_query,alpha_to_coverage:writeMask=0;renderMode="direct";bufferOffset="non-zero";querySetOffset="non-zero";alpha=0.25 [ Failure ]

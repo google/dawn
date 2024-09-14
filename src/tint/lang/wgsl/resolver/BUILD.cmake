@@ -111,7 +111,6 @@ tint_add_target(tint_lang_wgsl_resolver_test test
   lang/wgsl/resolver/call_test.cc
   lang/wgsl/resolver/call_validation_test.cc
   lang/wgsl/resolver/clip_distances_extension_test.cc
-  lang/wgsl/resolver/compatibility_mode_test.cc
   lang/wgsl/resolver/compound_assignment_validation_test.cc
   lang/wgsl/resolver/compound_statement_test.cc
   lang/wgsl/resolver/const_assert_test.cc

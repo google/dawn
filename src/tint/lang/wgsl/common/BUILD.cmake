@@ -41,7 +41,6 @@
 tint_add_target(tint_lang_wgsl_common lib
   lang/wgsl/common/allowed_features.h
   lang/wgsl/common/common.cc
-  lang/wgsl/common/validation_mode.h
 )
 
 tint_target_add_dependencies(tint_lang_wgsl_common lib

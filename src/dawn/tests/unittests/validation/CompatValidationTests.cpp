@@ -367,15 +367,44 @@ TEST_F(CompatValidationTest, CanNotUseShaderWithUnsupportedInterpolateTypeOrSamp
                 v.color = vec4f(1);
                 return v;
             }
+            @fragment fn fsWithoutBadInterpolationUsage() -> @location(0) vec4f {
+                return vec4f(1);
+            }
+            @fragment fn fsWithBadInterpolationUsage1(v: Vertex) -> @location(0) vec4f {
+                return vec4f(1);
+            }
+            @fragment fn fsWithBadInterpolationUsage2(v: Vertex) -> @location(0) vec4f {
+                return v.pos;
+            }
+            @fragment fn fsWithBadInterpolationUsage3(v: Vertex) -> @location(0) vec4f {
+                return v.color;
+            }
         )",
                                     interpolateParam);
-        if (strcmp(interpolateParam, "perspective") == 0) {
-            wgpu::ShaderModule moduleInterpolationLinear =
-                utils::CreateShaderModule(device, wgsl.c_str());
-        } else {
-            ASSERT_DEVICE_ERROR(wgpu::ShaderModule moduleInterpolationLinear =
-                                    utils::CreateShaderModule(device, wgsl.c_str()),
-                                testing::HasSubstr("in compatibility mode"));
+        wgpu::ShaderModule moduleInterpolationLinear =
+            utils::CreateShaderModule(device, wgsl.c_str());
+
+        static const char* entryPoints[] = {
+            "fsWithoutBadInterpolationUsage",
+            "fsWithBadInterpolationUsage1",
+            "fsWithBadInterpolationUsage2",
+            "fsWithBadInterpolationUsage3",
+        };
+        for (auto entryPoint : entryPoints) {
+            utils::ComboRenderPipelineDescriptor descriptor;
+            descriptor.vertex.module = moduleInterpolationLinear;
+            descriptor.cFragment.module = moduleInterpolationLinear;
+            descriptor.cFragment.entryPoint = entryPoint;
+
+            bool shouldSucceed =
+                entryPoint == entryPoints[0] || interpolateParam == interpolateParams[0];
+
+            if (shouldSucceed) {
+                device.CreateRenderPipeline(&descriptor);
+            } else {
+                ASSERT_DEVICE_ERROR(device.CreateRenderPipeline(&descriptor),
+                                    testing::HasSubstr("in compatibility mode"));
+            }
         }
     }
 }

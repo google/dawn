@@ -47,7 +47,6 @@ libtint_source_set("common") {
   sources = [
     "allowed_features.h",
     "common.cc",
-    "validation_mode.h",
   ]
   deps = [
     "${dawn_root}/src/utils:utils",

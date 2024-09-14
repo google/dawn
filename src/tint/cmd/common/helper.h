@@ -33,7 +33,6 @@
 #include <string>
 #include <vector>
 
-#include "src/tint/lang/wgsl/common/validation_mode.h"
 #include "src/tint/lang/wgsl/inspector/inspector.h"
 #include "src/tint/utils/diagnostic/source.h"
 
@@ -78,8 +77,6 @@ void PrintInspectorBindings(tint::inspector::Inspector& inspector);
 struct LoadProgramOptions {
     /// The file to be loaded
     std::string filename;
-    /// The WGSL validation mode to use.
-    tint::wgsl::ValidationMode mode = tint::wgsl::ValidationMode::kFull;
 #if TINT_BUILD_SPV_READER
     /// Spirv-reader options
     bool use_ir = false;

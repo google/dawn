@@ -110,7 +110,6 @@ cc_library(
     "call_test.cc",
     "call_validation_test.cc",
     "clip_distances_extension_test.cc",
-    "compatibility_mode_test.cc",
     "compound_assignment_validation_test.cc",
     "compound_statement_test.cc",
     "const_assert_test.cc",

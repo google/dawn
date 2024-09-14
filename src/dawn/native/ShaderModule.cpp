@@ -352,11 +352,9 @@ ResultOrError<PixelLocalMemberType> FromTintPixelLocalMemberType(
 
 ResultOrError<tint::Program> ParseWGSL(const tint::Source::File* file,
                                        const tint::wgsl::AllowedFeatures& allowedFeatures,
-                                       const tint::wgsl::ValidationMode mode,
                                        const std::vector<tint::wgsl::Extension>& internalExtensions,
                                        OwnedCompilationMessages* outMessages) {
     tint::wgsl::reader::Options options;
-    options.mode = mode;
     options.allowed_features = allowedFeatures;
     options.allowed_features.extensions.insert(internalExtensions.begin(),
                                                internalExtensions.end());
@@ -1204,10 +1202,8 @@ MaybeError ValidateAndParseShaderModule(
     }
 
     tint::Program program;
-    auto validationMode = device->IsCompatibilityMode() ? tint::wgsl::ValidationMode::kCompat
-                                                        : tint::wgsl::ValidationMode::kFull;
     DAWN_TRY_ASSIGN(program, ParseWGSL(tintFile.get(), device->GetWGSLAllowedFeatures(),
-                                       validationMode, internalExtensions, outMessages));
+                                       internalExtensions, outMessages));
 
     parseResult->tintProgram = AcquireRef(new TintProgram(std::move(program), std::move(tintFile)));
 
