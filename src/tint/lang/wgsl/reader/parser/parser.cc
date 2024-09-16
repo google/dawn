@@ -832,7 +832,7 @@ Expect<Parser::TypedIdentifier> Parser::expect_ident_with_type_specifier(std::st
 }
 
 // variable_qualifier
-//   : _template_args_start expression (COMMA expression)? _template_args_end
+//   : _template_args_start expression (COMMA expression)? COMMA? _template_args_end
 Maybe<Parser::VariableQualifier> Parser::variable_qualifier() {
     if (!peek_is(Token::Type::kTemplateArgsLeft) && !peek_is(Token::Type::kLessThan)) {
         // Note: kLessThan will give a sensible error at expect_template_arg_block()
@@ -845,11 +845,14 @@ Maybe<Parser::VariableQualifier> Parser::variable_qualifier() {
         if (address_space.errored) {
             return Failure::kErrored;
         }
+        // The first expression in this condition also matches trailing comma.
         if (match(Token::Type::kComma) && !peek().Is(Token::Type::kTemplateArgsRight)) {
             auto access = expect_expression("'var' access mode");
             if (access.errored) {
                 return Failure::kErrored;
             }
+            // Allow for trailing comma.
+            match(Token::Type::kComma);
             return VariableQualifier{address_space.value, access.value};
         }
         return VariableQualifier{address_space.value};
