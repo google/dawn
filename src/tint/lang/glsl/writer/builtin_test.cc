@@ -68,5 +68,54 @@ void main() {
 )");
 }
 
+TEST_F(GlslWriterTest, BuiltinSelectScalar) {
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        auto* x = b.Let("x", 1_i);
+        auto* y = b.Let("y", 2_i);
+
+        auto* c = b.Call(ty.i32(), core::BuiltinFn::kSelect, x, y, true);
+        b.Let("w", c);
+        b.Return(func);
+    });
+
+    ASSERT_TRUE(Generate()) << err_ << output_.glsl;
+    EXPECT_EQ(output_.glsl, GlslHeader() + R"(precision highp float;
+precision highp int;
+
+void main() {
+  int x = 1;
+  int y = 2;
+  int w = ((true) ? (y) : (x));
+}
+)");
+}
+
+TEST_F(GlslWriterTest, BuiltinSelectVector) {
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        auto* x = b.Let("x", b.Construct<vec2<i32>>(1_i, 2_i));
+        auto* y = b.Let("y", b.Construct<vec2<i32>>(3_i, 4_i));
+        auto* cmp = b.Construct<vec2<bool>>(true, false);
+
+        auto* c = b.Call(ty.vec2<i32>(), core::BuiltinFn::kSelect, x, y, cmp);
+        b.Let("w", c);
+        b.Return(func);
+    });
+
+    ASSERT_TRUE(Generate()) << err_ << output_.glsl;
+    EXPECT_EQ(output_.glsl, GlslHeader() + R"(precision highp float;
+precision highp int;
+
+void main() {
+  ivec2 x = ivec2(1, 2);
+  ivec2 y = ivec2(3, 4);
+  bvec2 v = bvec2(true, false);
+  int v_1 = ((v.x) ? (y.x) : (x.x));
+  ivec2 w = ivec2(v_1, ((v.y) ? (y.y) : (x.y)));
+}
+)");
+}
+
 }  // namespace
 }  // namespace tint::glsl::writer

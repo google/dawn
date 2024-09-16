@@ -80,6 +80,7 @@
 #include "src/tint/lang/core/type/u32.h"
 #include "src/tint/lang/core/type/vector.h"
 #include "src/tint/lang/core/type/void.h"
+#include "src/tint/lang/glsl/ir/ternary.h"
 #include "src/tint/lang/glsl/writer/common/printer_support.h"
 #include "src/tint/lang/glsl/writer/common/version.h"
 #include "src/tint/utils/containers/map.h"
@@ -1098,11 +1099,24 @@ class Printer : public tint::TextGenerator {
                     [&](const core::ir::UserCall* c) { EmitUserCall(out, c); },
                     [&](const core::ir::Var* var) { out << NameOf(var->Result(0)); },
 
+                    [&](const glsl::ir::Ternary* t) { EmitTernary(out, t); },  //
+
                     TINT_ICE_ON_NO_MATCH);
             },
             [&](const core::ir::FunctionParam* p) { out << NameOf(p); },  //
 
             TINT_ICE_ON_NO_MATCH);
+    }
+
+    void EmitTernary(StringStream& out, const glsl::ir::Ternary* t) {
+        out << "((";
+        EmitValue(out, t->Cmp());
+        out << ") ? (";
+        EmitValue(out, t->True());
+        out << ") : (";
+        EmitValue(out, t->False());
+        out << "))";
+        return;
     }
 
     /// Emit a convert instruction

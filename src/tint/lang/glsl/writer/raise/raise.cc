@@ -47,6 +47,7 @@
 #include "src/tint/lang/core/ir/transform/vectorize_scalar_matrix_constructors.h"
 #include "src/tint/lang/core/ir/transform/zero_init_workgroup_memory.h"
 #include "src/tint/lang/glsl/writer/common/option_helpers.h"
+#include "src/tint/lang/glsl/writer/raise/builtin_polyfill.h"
 #include "src/tint/lang/glsl/writer/raise/shader_io.h"
 
 namespace tint::glsl::writer {
@@ -121,6 +122,8 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
     if (!options.disable_workgroup_init) {
         RUN_TRANSFORM(core::ir::transform::ZeroInitWorkgroupMemory, module);
     }
+
+    RUN_TRANSFORM(raise::BuiltinPolyfill, module);
 
     RUN_TRANSFORM(core::ir::transform::PreservePadding, module);
     RUN_TRANSFORM(core::ir::transform::VectorizeScalarMatrixConstructors, module);

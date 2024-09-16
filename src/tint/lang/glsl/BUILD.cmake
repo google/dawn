@@ -34,5 +34,6 @@
 #                       Do not modify this file directly
 ################################################################################
 
+include(lang/glsl/ir/BUILD.cmake)
 include(lang/glsl/validate/BUILD.cmake)
 include(lang/glsl/writer/BUILD.cmake)
