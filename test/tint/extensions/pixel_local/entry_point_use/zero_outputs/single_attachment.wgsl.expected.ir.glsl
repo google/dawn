@@ -1,13 +1,11 @@
 SKIP: INVALID
 
-struct PixelLocal {
-  uint a;
-};
-precision highp float;
-precision highp int;
+<dawn>/src/tint/lang/glsl/writer/printer/printer.cc:849 internal compiler error: TINT_UNREACHABLE PixelLocal not supported
+********************************************************************
+*  The tint shader compiler has encountered an unexpected error.   *
+*                                                                  *
+*  Please help us fix this issue by submitting a bug report at     *
+*  crbug.com/tint with the source program that triggered the bug.  *
+********************************************************************
 
-
-PixelLocal P;
-void main() {
-  P.a = (P.a + 42u);
-}
+tint executable returned error: signal: trace/BPT trap

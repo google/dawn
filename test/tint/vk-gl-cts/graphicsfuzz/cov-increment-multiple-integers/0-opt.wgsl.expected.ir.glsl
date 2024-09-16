@@ -1,6 +1,9 @@
 SKIP: FAILED
 
 #version 310 es
+precision highp float;
+precision highp int;
+
 
 struct strided_arr {
   int el;
@@ -13,12 +16,13 @@ struct buf0 {
 struct main_out {
   vec4 x_GLF_color_1;
 };
-precision highp float;
-precision highp int;
 
-
-uniform buf0 x_6;
+layout(binding = 0, std140)
+uniform tint_symbol_2_1_ubo {
+  buf0 tint_symbol_1;
+} v;
 vec4 x_GLF_color = vec4(0.0f);
+layout(location = 0) out vec4 tint_symbol_loc0_Output;
 void main_1() {
   int a = 0;
   int b = 0;
@@ -27,15 +31,15 @@ void main_1() {
   bool x_83 = false;
   bool x_77_phi = false;
   bool x_84_phi = false;
-  int x_31 = x_6.x_GLF_uniform_int_values[0].el;
+  int x_31 = v.tint_symbol_1.x_GLF_uniform_int_values[0].el;
   a = x_31;
-  int x_33 = x_6.x_GLF_uniform_int_values[2].el;
+  int x_33 = v.tint_symbol_1.x_GLF_uniform_int_values[2].el;
   b = x_33;
   c = 1;
   {
     while(true) {
       int x_38 = b;
-      int x_40 = x_6.x_GLF_uniform_int_values[4].el;
+      int x_40 = v.tint_symbol_1.x_GLF_uniform_int_values[4].el;
       int x_42 = a;
       if (((x_38 < x_40) & (x_42 < 10))) {
       } else {
@@ -59,7 +63,7 @@ void main_1() {
   {
     while(true) {
       int x_60 = a;
-      int x_62 = x_6.x_GLF_uniform_int_values[1].el;
+      int x_62 = v.tint_symbol_1.x_GLF_uniform_int_values[1].el;
       if ((x_60 < x_62)) {
       } else {
         break;
@@ -72,12 +76,12 @@ void main_1() {
     }
   }
   int x_67 = a;
-  int x_69 = x_6.x_GLF_uniform_int_values[1].el;
+  int x_69 = v.tint_symbol_1.x_GLF_uniform_int_values[1].el;
   bool x_70 = (x_67 == x_69);
   x_77_phi = x_70;
   if (x_70) {
     int x_73 = b;
-    int x_75 = x_6.x_GLF_uniform_int_values[3].el;
+    int x_75 = v.tint_symbol_1.x_GLF_uniform_int_values[3].el;
     x_76 = (x_73 == x_75);
     x_77_phi = x_76;
   }
@@ -85,33 +89,36 @@ void main_1() {
   x_84_phi = x_77;
   if (x_77) {
     int x_80 = c;
-    int x_82 = x_6.x_GLF_uniform_int_values[3].el;
+    int x_82 = v.tint_symbol_1.x_GLF_uniform_int_values[3].el;
     x_83 = (x_80 == x_82);
     x_84_phi = x_83;
   }
   bool x_84 = x_84_phi;
   if (x_84) {
-    int x_89 = x_6.x_GLF_uniform_int_values[2].el;
-    int x_92 = x_6.x_GLF_uniform_int_values[0].el;
-    int x_95 = x_6.x_GLF_uniform_int_values[0].el;
-    int x_98 = x_6.x_GLF_uniform_int_values[2].el;
-    float v = float(x_89);
-    float v_1 = float(x_92);
-    float v_2 = float(x_95);
-    x_GLF_color = vec4(v, v_1, v_2, float(x_98));
+    int x_89 = v.tint_symbol_1.x_GLF_uniform_int_values[2].el;
+    int x_92 = v.tint_symbol_1.x_GLF_uniform_int_values[0].el;
+    int x_95 = v.tint_symbol_1.x_GLF_uniform_int_values[0].el;
+    int x_98 = v.tint_symbol_1.x_GLF_uniform_int_values[2].el;
+    float v_1 = float(x_89);
+    float v_2 = float(x_92);
+    float v_3 = float(x_95);
+    x_GLF_color = vec4(v_1, v_2, v_3, float(x_98));
   } else {
-    int x_102 = x_6.x_GLF_uniform_int_values[0].el;
+    int x_102 = v.tint_symbol_1.x_GLF_uniform_int_values[0].el;
     float x_103 = float(x_102);
     x_GLF_color = vec4(x_103, x_103, x_103, x_103);
   }
 }
-main_out main() {
+main_out tint_symbol_inner() {
   main_1();
   return main_out(x_GLF_color);
 }
+void main() {
+  tint_symbol_loc0_Output = tint_symbol_inner().x_GLF_color_1;
+}
 error: Error parsing GLSL shader:
-ERROR: 0:12: 'float' : type requires declaration of default precision qualifier 
-ERROR: 0:12: '' : compilation terminated 
+ERROR: 0:42: '&' :  wrong operand types: no operation '&' exists that takes a left-hand operand of type ' temp bool' and a right operand of type ' temp bool' (or there is no acceptable conversion)
+ERROR: 0:42: '' : compilation terminated 
 ERROR: 2 compilation errors.  No code generated.
 
 

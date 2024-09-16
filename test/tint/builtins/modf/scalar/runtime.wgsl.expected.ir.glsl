@@ -2,6 +2,7 @@ SKIP: FAILED
 
 #version 310 es
 
+
 struct modf_result_f32 {
   float fract;
   float whole;
@@ -15,9 +16,9 @@ void main() {
   float whole = res.whole;
 }
 error: Error parsing GLSL shader:
-ERROR: 0:11: 'modf' : no matching overloaded function found 
-ERROR: 0:11: '=' :  cannot convert from ' const float' to ' temp structure{ global highp float fract,  global highp float whole}'
-ERROR: 0:11: '' : compilation terminated 
+ERROR: 0:12: 'modf' : no matching overloaded function found 
+ERROR: 0:12: '=' :  cannot convert from ' const float' to ' temp structure{ global highp float fract,  global highp float whole}'
+ERROR: 0:12: '' : compilation terminated 
 ERROR: 3 compilation errors.  No code generated.
 
 

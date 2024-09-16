@@ -1,6 +1,6 @@
 SKIP: INVALID
 
-<dawn>/src/tint/lang/glsl/writer/printer/printer.cc:489 internal compiler error: TINT_ASSERT(!l->Result(0)->Type()->Is<core::type::Pointer>())
+<dawn>/src/tint/lang/glsl/writer/printer/printer.cc:849 internal compiler error: TINT_UNREACHABLE PixelLocal not supported
 ********************************************************************
 *  The tint shader compiler has encountered an unexpected error.   *
 *                                                                  *

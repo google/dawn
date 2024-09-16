@@ -1,6 +1,9 @@
 SKIP: FAILED
 
 #version 310 es
+precision highp float;
+precision highp int;
+
 
 struct buf0 {
   vec2 resolution;
@@ -9,13 +12,14 @@ struct buf0 {
 struct main_out {
   vec4 x_GLF_color_1;
 };
-precision highp float;
-precision highp int;
 
-
-uniform buf0 x_15;
+layout(binding = 0, std140)
+uniform tint_symbol_4_1_ubo {
+  buf0 tint_symbol_3;
+} v;
 vec4 tint_symbol = vec4(0.0f);
 vec4 x_GLF_color = vec4(0.0f);
+layout(location = 0) out vec4 tint_symbol_1_loc0_Output;
 float cross2d_vf2_vf2_(inout vec2 a, inout vec2 b) {
   float x_85 = a.x;
   float x_87 = b.y;
@@ -41,7 +45,7 @@ int pointInTriangle_vf2_vf2_vf2_vf2_(inout vec2 p, inout vec2 a_1, inout vec2 b_
   bool x_174 = false;
   bool x_205 = false;
   bool x_206 = false;
-  if ((x_15.resolution.x == x_15.resolution.y)) {
+  if ((v.tint_symbol_3.resolution.x == v.tint_symbol_3.resolution.y)) {
     float x_107 = c.y;
     vec2 x_108 = vec2(0.0f, x_107);
     if (true) {
@@ -107,7 +111,7 @@ void main_1() {
   vec2 param_7 = vec2(0.0f);
   vec2 param_8 = vec2(0.0f);
   vec2 param_9 = vec2(0.0f);
-  pos = (tint_symbol.xy / x_15.resolution);
+  pos = (tint_symbol.xy / v.tint_symbol_3.resolution);
   param_6 = pos;
   param_7 = vec2(0.69999998807907104492f, 0.30000001192092895508f);
   param_8 = vec2(0.5f, 0.89999997615814208984f);
@@ -119,14 +123,17 @@ void main_1() {
     x_GLF_color = vec4(0.0f, 0.0f, 0.0f, 1.0f);
   }
 }
-main_out main(vec4 tint_symbol_2) {
+main_out tint_symbol_1_inner(vec4 tint_symbol_2) {
   tint_symbol = tint_symbol_2;
   main_1();
   return main_out(x_GLF_color);
 }
+void main() {
+  tint_symbol_1_loc0_Output = tint_symbol_1_inner(gl_FragCoord).x_GLF_color_1;
+}
 error: Error parsing GLSL shader:
-ERROR: 0:4: 'float' : type requires declaration of default precision qualifier 
-ERROR: 0:4: '' : compilation terminated 
+ERROR: 0:78: '&' :  wrong operand types: no operation '&' exists that takes a left-hand operand of type ' temp bool' and a right operand of type ' temp bool' (or there is no acceptable conversion)
+ERROR: 0:78: '' : compilation terminated 
 ERROR: 2 compilation errors.  No code generated.
 
 

@@ -10,14 +10,18 @@ struct In {
   vec4 pos;
 };
 
+in ivec4 f_Input;
 void g(int a, float b) {
 }
-void main(In tint_symbol) {
+void f_inner(In tint_symbol) {
   g(tint_symbol.fbf[3u], tint_symbol.pos[0u]);
 }
+void main() {
+  f_inner(In(f_Input, gl_FragCoord));
+}
 error: Error parsing GLSL shader:
-ERROR: 0:13: 'main' : function cannot take any parameter(s) 
-ERROR: 0:13: '' : compilation terminated 
+ERROR: 0:11: 'int' : must be qualified as flat in
+ERROR: 0:11: '' : compilation terminated 
 ERROR: 2 compilation errors.  No code generated.
 
 

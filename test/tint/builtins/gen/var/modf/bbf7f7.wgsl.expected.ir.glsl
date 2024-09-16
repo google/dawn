@@ -1,17 +1,13 @@
 SKIP: FAILED
 
 #version 310 es
-
-struct modf_result_f32 {
-  float fract;
-  float whole;
-};
 precision highp float;
 precision highp int;
 
 
-struct VertexOutput {
-  vec4 pos;
+struct modf_result_f32 {
+  float fract;
+  float whole;
 };
 
 void modf_bbf7f7() {
@@ -21,71 +17,45 @@ void modf_bbf7f7() {
 void main() {
   modf_bbf7f7();
 }
-layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
-void main() {
-  modf_bbf7f7();
-}
-VertexOutput main() {
-  VertexOutput tint_symbol = VertexOutput(vec4(0.0f));
-  tint_symbol.pos = vec4(0.0f);
-  modf_bbf7f7();
-  return tint_symbol;
-}
 error: Error parsing GLSL shader:
-ERROR: 0:4: 'float' : type requires declaration of default precision qualifier 
-ERROR: 0:4: '' : compilation terminated 
-ERROR: 2 compilation errors.  No code generated.
-
-
-
-#version 310 es
-
-struct modf_result_f32 {
-  float fract;
-  float whole;
-};
-precision highp float;
-precision highp int;
-
-
-struct VertexOutput {
-  vec4 pos;
-};
-
-void modf_bbf7f7() {
-  float arg_0 = -1.5f;
-  modf_result_f32 res = modf(arg_0);
-}
-void main() {
-  modf_bbf7f7();
-}
-layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
-void main() {
-  modf_bbf7f7();
-}
-VertexOutput main() {
-  VertexOutput tint_symbol = VertexOutput(vec4(0.0f));
-  tint_symbol.pos = vec4(0.0f);
-  modf_bbf7f7();
-  return tint_symbol;
-}
-error: Error parsing GLSL shader:
-ERROR: 0:17: 'modf' : no matching overloaded function found 
-ERROR: 0:17: '=' :  cannot convert from ' const float' to ' temp structure{ global highp float fract,  global highp float whole}'
-ERROR: 0:17: '' : compilation terminated 
+ERROR: 0:13: 'modf' : no matching overloaded function found 
+ERROR: 0:13: '=' :  cannot convert from ' const float' to ' temp structure{ global highp float fract,  global highp float whole}'
+ERROR: 0:13: '' : compilation terminated 
 ERROR: 3 compilation errors.  No code generated.
 
 
 
 #version 310 es
 
+
 struct modf_result_f32 {
   float fract;
   float whole;
 };
-precision highp float;
-precision highp int;
 
+void modf_bbf7f7() {
+  float arg_0 = -1.5f;
+  modf_result_f32 res = modf(arg_0);
+}
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+void main() {
+  modf_bbf7f7();
+}
+error: Error parsing GLSL shader:
+ERROR: 0:11: 'modf' : no matching overloaded function found 
+ERROR: 0:11: '=' :  cannot convert from ' const float' to ' temp structure{ global highp float fract,  global highp float whole}'
+ERROR: 0:11: '' : compilation terminated 
+ERROR: 3 compilation errors.  No code generated.
+
+
+
+#version 310 es
+
+
+struct modf_result_f32 {
+  float fract;
+  float whole;
+};
 
 struct VertexOutput {
   vec4 pos;
@@ -95,23 +65,22 @@ void modf_bbf7f7() {
   float arg_0 = -1.5f;
   modf_result_f32 res = modf(arg_0);
 }
-void main() {
-  modf_bbf7f7();
-}
-layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
-void main() {
-  modf_bbf7f7();
-}
-VertexOutput main() {
+VertexOutput vertex_main_inner() {
   VertexOutput tint_symbol = VertexOutput(vec4(0.0f));
   tint_symbol.pos = vec4(0.0f);
   modf_bbf7f7();
   return tint_symbol;
 }
+void main() {
+  gl_Position = vertex_main_inner().pos;
+  gl_Position[1u] = -(gl_Position.y);
+  gl_Position[2u] = ((2.0f * gl_Position.z) - gl_Position.w);
+  gl_PointSize = 1.0f;
+}
 error: Error parsing GLSL shader:
-ERROR: 0:17: 'modf' : no matching overloaded function found 
-ERROR: 0:17: '=' :  cannot convert from ' const float' to ' temp structure{ global highp float fract,  global highp float whole}'
-ERROR: 0:17: '' : compilation terminated 
+ERROR: 0:15: 'modf' : no matching overloaded function found 
+ERROR: 0:15: '=' :  cannot convert from ' const float' to ' temp structure{ global highp float fract,  global highp float whole}'
+ERROR: 0:15: '' : compilation terminated 
 ERROR: 3 compilation errors.  No code generated.
 
 

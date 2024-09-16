@@ -1,16 +1,17 @@
 SKIP: FAILED
 
 #version 310 es
-
-struct main_out {
-  vec4 x_GLF_color_1;
-};
 precision highp float;
 precision highp int;
 
 
+struct main_out {
+  vec4 x_GLF_color_1;
+};
+
 vec4 tint_symbol = vec4(0.0f);
 vec4 x_GLF_color = vec4(0.0f);
+layout(location = 0) out vec4 tint_symbol_1_loc0_Output;
 void main_1() {
   int i = 0;
   i = 2;
@@ -30,14 +31,17 @@ void main_1() {
     x_GLF_color = vec4(0.0f);
   }
 }
-main_out main(vec4 tint_symbol_2) {
+main_out tint_symbol_1_inner(vec4 tint_symbol_2) {
   tint_symbol = tint_symbol_2;
   main_1();
   return main_out(x_GLF_color);
 }
+void main() {
+  tint_symbol_1_loc0_Output = tint_symbol_1_inner(gl_FragCoord).x_GLF_color_1;
+}
 error: Error parsing GLSL shader:
-ERROR: 0:4: 'float' : type requires declaration of default precision qualifier 
-ERROR: 0:4: '' : compilation terminated 
+ERROR: 0:21: '&' :  wrong operand types: no operation '&' exists that takes a left-hand operand of type ' temp bool' and a right operand of type ' const bool' (or there is no acceptable conversion)
+ERROR: 0:21: '' : compilation terminated 
 ERROR: 2 compilation errors.  No code generated.
 
 

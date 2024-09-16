@@ -2,6 +2,7 @@ SKIP: FAILED
 
 #version 310 es
 
+
 struct S {
   bool e;
 };
@@ -12,8 +13,8 @@ void main() {
   S v = S((true & b));
 }
 error: Error parsing GLSL shader:
-ERROR: 0:10: '&' :  wrong operand types: no operation '&' exists that takes a left-hand operand of type ' const bool' and a right operand of type ' temp bool' (or there is no acceptable conversion)
-ERROR: 0:10: '' : compilation terminated 
+ERROR: 0:11: '&' :  wrong operand types: no operation '&' exists that takes a left-hand operand of type ' const bool' and a right operand of type ' temp bool' (or there is no acceptable conversion)
+ERROR: 0:11: '' : compilation terminated 
 ERROR: 2 compilation errors.  No code generated.
 
 
