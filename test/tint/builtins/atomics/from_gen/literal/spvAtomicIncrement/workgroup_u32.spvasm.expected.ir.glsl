@@ -1,11 +1,30 @@
-SKIP: FAILED
+#version 310 es
 
-<dawn>/src/tint/lang/glsl/writer/printer/printer.cc:1423 internal compiler error: TINT_UNREACHABLE unhandled core builtin: atomicAdd
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
-
-tint executable returned error: signal: trace/BPT trap
+uint local_invocation_index_1 = 0u;
+shared uint arg_0;
+void atomicAdd_d5db1d() {
+  uint res = 0u;
+  uint x_10 = atomicAdd(arg_0, 1u);
+  res = x_10;
+}
+void compute_main_inner(uint local_invocation_index_2) {
+  atomicExchange(arg_0, 0u);
+  barrier();
+  atomicAdd_d5db1d();
+}
+void compute_main_1() {
+  uint x_30 = local_invocation_index_1;
+  compute_main_inner(x_30);
+}
+void compute_main_inner_1(uint local_invocation_index_1_param) {
+  if ((local_invocation_index_1_param == 0u)) {
+    atomicExchange(arg_0, 0u);
+  }
+  barrier();
+  local_invocation_index_1 = local_invocation_index_1_param;
+  compute_main_1();
+}
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+void main() {
+  compute_main_inner_1(gl_LocalInvocationIndex);
+}

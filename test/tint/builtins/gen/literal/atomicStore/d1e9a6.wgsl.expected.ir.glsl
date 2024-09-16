@@ -1,11 +1,37 @@
-SKIP: FAILED
+#version 310 es
+precision highp float;
+precision highp int;
 
-<dawn>/src/tint/lang/glsl/writer/printer/printer.cc:1423 internal compiler error: TINT_UNREACHABLE unhandled core builtin: atomicStore
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
 
-tint executable returned error: signal: trace/BPT trap
+struct SB_RW {
+  int arg_0;
+};
+
+layout(binding = 0, std430)
+buffer tint_symbol_1_1_ssbo {
+  SB_RW tint_symbol;
+} v;
+void atomicStore_d1e9a6() {
+  atomicExchange(v.tint_symbol.arg_0, 1);
+}
+void main() {
+  atomicStore_d1e9a6();
+}
+#version 310 es
+
+
+struct SB_RW {
+  int arg_0;
+};
+
+layout(binding = 0, std430)
+buffer tint_symbol_1_1_ssbo {
+  SB_RW tint_symbol;
+} v;
+void atomicStore_d1e9a6() {
+  atomicExchange(v.tint_symbol.arg_0, 1);
+}
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+void main() {
+  atomicStore_d1e9a6();
+}

@@ -1292,6 +1292,13 @@ class Printer : public tint::TextGenerator {
             case core::BuiltinFn::kAsinh:
             case core::BuiltinFn::kAtan:
             case core::BuiltinFn::kAtanh:
+            case core::BuiltinFn::kAtomicAdd:
+            case core::BuiltinFn::kAtomicAnd:
+            case core::BuiltinFn::kAtomicExchange:
+            case core::BuiltinFn::kAtomicMax:
+            case core::BuiltinFn::kAtomicMin:
+            case core::BuiltinFn::kAtomicOr:
+            case core::BuiltinFn::kAtomicXor:
             case core::BuiltinFn::kCeil:
             case core::BuiltinFn::kClamp:
             case core::BuiltinFn::kCos:
@@ -1329,6 +1336,11 @@ class Printer : public tint::TextGenerator {
                 break;
             case core::BuiltinFn::kAtan2:
                 out << "atan";
+                break;
+            case core::BuiltinFn::kAtomicStore:
+                // GLSL does not have an atomicStore, so we emulate it with
+                // atomicExchange.
+                out << "atomicExchange";
                 break;
             case core::BuiltinFn::kCountOneBits:
                 out << "bitCount";

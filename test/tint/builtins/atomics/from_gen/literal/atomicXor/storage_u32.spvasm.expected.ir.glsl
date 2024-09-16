@@ -1,11 +1,47 @@
-SKIP: FAILED
+#version 310 es
+precision highp float;
+precision highp int;
 
-<dawn>/src/tint/lang/glsl/writer/printer/printer.cc:1423 internal compiler error: TINT_UNREACHABLE unhandled core builtin: atomicXor
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
 
-tint executable returned error: signal: trace/BPT trap
+struct SB_RW_atomic {
+  uint arg_0;
+};
+
+layout(binding = 0, std430)
+buffer tint_symbol_1_1_ssbo {
+  SB_RW_atomic tint_symbol;
+} v;
+void atomicXor_54510e() {
+  uint res = 0u;
+  uint x_9 = atomicXor(v.tint_symbol.arg_0, 1u);
+  res = x_9;
+}
+void fragment_main_1() {
+  atomicXor_54510e();
+}
+void main() {
+  fragment_main_1();
+}
+#version 310 es
+
+
+struct SB_RW_atomic {
+  uint arg_0;
+};
+
+layout(binding = 0, std430)
+buffer tint_symbol_1_1_ssbo {
+  SB_RW_atomic tint_symbol;
+} v;
+void atomicXor_54510e() {
+  uint res = 0u;
+  uint x_9 = atomicXor(v.tint_symbol.arg_0, 1u);
+  res = x_9;
+}
+void compute_main_1() {
+  atomicXor_54510e();
+}
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+void main() {
+  compute_main_1();
+}
