@@ -42,7 +42,10 @@
     "INTERNAL__HAVE_EMDAWNWEBGPU_HEADER": {
         "category": "structure",
         "tags": ["emscripten"],
-        "members": []
+        "_comment": "TODO(issues.chromium.org/issues/366932309): The struct must have at least one field.",
+        "members": [
+            {"name": "unused", "type": "bool", "default": "false"}
+        ]
     },
 
     "create instance": {
