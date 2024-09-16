@@ -2541,6 +2541,66 @@ TEST_F(ConstEvalTest, ShortCircuit_Or_MixedConstantAndRuntime) {
 }
 
 ////////////////////////////////////////////////
+// Short-Circuit templated identifier arguments
+////////////////////////////////////////////////
+
+TEST_F(ConstEvalTest, ShortCircuit_And_ArrayElementCountTooSmall) {
+    // const one = 1;
+    // const result = (one == 0) && array<bool, 3-4>()[0];
+    GlobalConst("one", Expr(1_a));
+    auto* lhs = Equal("one", 0_a);
+    auto* count = Sub(3_a, 4_a);
+    auto* rhs = IndexAccessor(Call(ty.array(ty.bool_(), count)), 0_a);
+    auto* binary = LogicalAnd(lhs, rhs);
+    GlobalConst("result", binary);
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(), "error: array count (-1) must be greater than 0");
+}
+
+TEST_F(ConstEvalTest, ShortCircuit_Or_ArrayElementCountTooSmall) {
+    // const one = 1;
+    // const result = (one == 1) || array<bool, 3-4>()[0];
+    GlobalConst("one", Expr(1_a));
+    auto* lhs = Equal("one", 1_a);
+    auto* count = Sub(3_a, 4_a);
+    auto* rhs = IndexAccessor(Call(ty.array(ty.bool_(), count)), 0_a);
+    auto* binary = LogicalOr(lhs, rhs);
+    GlobalConst("result", binary);
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(), "error: array count (-1) must be greater than 0");
+}
+
+TEST_F(ConstEvalTest, ShortCircuit_And_InvalidArrayElementCount) {
+    // const one = 1;
+    // const result = (one == 0) && array<bool, u32(sqrt(-1))>()[0];
+    GlobalConst("one", Expr(1_a));
+    auto* lhs = Equal("one", 0_a);
+    auto* count = Call("u32", Call("sqrt", -1_a));
+    auto* rhs = IndexAccessor(Call(ty.array(ty.bool_(), count)), 0_a);
+    auto* binary = LogicalAnd(lhs, rhs);
+    GlobalConst("result", binary);
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(), "error: sqrt must be called with a value >= 0");
+}
+
+TEST_F(ConstEvalTest, ShortCircuit_Or_InvalidArrayElementCount) {
+    // const one = 1;
+    // const result = (one == 1) || array<bool, u32(sqrt(-1))>()[0];
+    GlobalConst("one", Expr(1_a));
+    auto* lhs = Equal("one", 1_a);
+    auto* count = Call("u32", Call("sqrt", -1_a));
+    auto* rhs = IndexAccessor(Call(ty.array(ty.bool_(), count)), 0_a);
+    auto* binary = LogicalOr(lhs, rhs);
+    GlobalConst("result", binary);
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(), "error: sqrt must be called with a value >= 0");
+}
+
+////////////////////////////////////////////////
 // Short-Circuit Nested
 ////////////////////////////////////////////////
 

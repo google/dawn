@@ -1592,6 +1592,13 @@ sem::Expression* Resolver::Expression(const ast::Expression* root) {
                     auto r = ast::TraverseExpressions(  //
                         (*binary)->rhs, [&](const ast::Expression* e) {
                             not_evaluated_.Add(e);
+                            if (e->Is<ast::IdentifierExpression>()) {
+                                // Template arguments are still evaluated when the outer identifier
+                                // expression is skipped. This happens in expressions like:
+                                //    false && array<T, N>()[i]
+                                // where we still need to evaluate and validate `N`.
+                                return ast::TraverseAction::Skip;
+                            }
                             return ast::TraverseAction::Descend;
                         });
                     if (!r) {
@@ -4171,10 +4178,7 @@ const core::type::ArrayCount* Resolver::ArrayCount(const ast::Expression* count_
 
     switch (count_sem->Stage()) {
         case core::EvaluationStage::kNotEvaluated:
-            // Happens in expressions like:
-            //    false && array<T, N>()[i]
-            // The end result will not be used, so just make N=1.
-            return b.create<core::type::ConstantArrayCount>(static_cast<uint32_t>(1));
+            ICE(count_expr->source) << "array element count was not evaluated";
 
         case core::EvaluationStage::kOverride: {
             // array count is an override expression.
