@@ -51,6 +51,8 @@ cc_library(
     "//src/tint/lang/core/intrinsic",
     "//src/tint/lang/core/ir",
     "//src/tint/lang/core/type",
+    "//src/tint/lang/glsl",
+    "//src/tint/lang/glsl/intrinsic",
     "//src/tint/lang/glsl/ir",
     "//src/tint/utils/containers",
     "//src/tint/utils/diagnostic",

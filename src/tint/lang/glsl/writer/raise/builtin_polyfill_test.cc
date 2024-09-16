@@ -120,5 +120,100 @@ TEST_F(GlslWriter_BuiltinPolyfillTest, SelectVector) {
     EXPECT_EQ(expect, str());
 }
 
+TEST_F(GlslWriter_BuiltinPolyfillTest, StorageBarrier) {
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kCompute);
+    func->SetWorkgroupSize(1, 1, 1);
+    b.Append(func->Block(), [&] {
+        b.Call(ty.void_(), core::BuiltinFn::kStorageBarrier);
+        b.Return(func);
+    });
+
+    auto* src = R"(
+%foo = @compute @workgroup_size(1, 1, 1) func():void {
+  $B1: {
+    %2:void = storageBarrier
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = @compute @workgroup_size(1, 1, 1) func():void {
+  $B1: {
+    %2:void = glsl.barrier
+    %3:void = glsl.memoryBarrierBuffer
+    ret
+  }
+}
+)";
+
+    Run(BuiltinPolyfill);
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(GlslWriter_BuiltinPolyfillTest, TextureBarrier) {
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kCompute);
+    func->SetWorkgroupSize(1, 1, 1);
+    b.Append(func->Block(), [&] {
+        b.Call(ty.void_(), core::BuiltinFn::kTextureBarrier);
+        b.Return(func);
+    });
+
+    auto* src = R"(
+%foo = @compute @workgroup_size(1, 1, 1) func():void {
+  $B1: {
+    %2:void = textureBarrier
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = @compute @workgroup_size(1, 1, 1) func():void {
+  $B1: {
+    %2:void = glsl.barrier
+    %3:void = glsl.memoryBarrierImage
+    ret
+  }
+}
+)";
+
+    Run(BuiltinPolyfill);
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(GlslWriter_BuiltinPolyfillTest, WorkgroupBarrier) {
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kCompute);
+    func->SetWorkgroupSize(1, 1, 1);
+    b.Append(func->Block(), [&] {
+        b.Call(ty.void_(), core::BuiltinFn::kWorkgroupBarrier);
+        b.Return(func);
+    });
+
+    auto* src = R"(
+%foo = @compute @workgroup_size(1, 1, 1) func():void {
+  $B1: {
+    %2:void = workgroupBarrier
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = @compute @workgroup_size(1, 1, 1) func():void {
+  $B1: {
+    %2:void = glsl.barrier
+    ret
+  }
+}
+)";
+
+    Run(BuiltinPolyfill);
+    EXPECT_EQ(expect, str());
+}
+
 }  // namespace
 }  // namespace tint::glsl::writer::raise

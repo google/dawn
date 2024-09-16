@@ -39,6 +39,8 @@
 # Kind:      lib
 ################################################################################
 tint_add_target(tint_lang_glsl_ir lib
+  lang/glsl/ir/builtin_call.cc
+  lang/glsl/ir/builtin_call.h
   lang/glsl/ir/ternary.cc
   lang/glsl/ir/ternary.h
 )
@@ -47,8 +49,11 @@ tint_target_add_dependencies(tint_lang_glsl_ir lib
   tint_api_common
   tint_lang_core
   tint_lang_core_constant
+  tint_lang_core_intrinsic
   tint_lang_core_ir
   tint_lang_core_type
+  tint_lang_glsl
+  tint_lang_glsl_intrinsic
   tint_utils_containers
   tint_utils_diagnostic
   tint_utils_ice
@@ -73,6 +78,7 @@ tint_target_add_external_dependencies(tint_lang_glsl_ir lib
 # Kind:      test
 ################################################################################
 tint_add_target(tint_lang_glsl_ir_test test
+  lang/glsl/ir/builtin_call_test.cc
   lang/glsl/ir/ternary_test.cc
 )
 
@@ -84,6 +90,8 @@ tint_target_add_dependencies(tint_lang_glsl_ir_test test
   tint_lang_core_ir
   tint_lang_core_ir_test
   tint_lang_core_type
+  tint_lang_glsl
+  tint_lang_glsl_intrinsic
   tint_lang_glsl_ir
   tint_utils_containers
   tint_utils_diagnostic

@@ -1,11 +1,17 @@
-SKIP: FAILED
+#version 310 es
 
-<dawn>/src/tint/lang/glsl/writer/printer/printer.cc:1116 internal compiler error: TINT_UNREACHABLE unhandled core builtin: workgroupBarrier
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
-
-tint executable returned error: signal: trace/BPT trap
+shared vec4 S;
+vec4 func() {
+  return S;
+}
+void tint_symbol_inner(uint tint_local_index) {
+  if ((tint_local_index == 0u)) {
+    S = vec4(0.0f);
+  }
+  barrier();
+  vec4 r = func();
+}
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+void main() {
+  tint_symbol_inner(gl_LocalInvocationIndex);
+}

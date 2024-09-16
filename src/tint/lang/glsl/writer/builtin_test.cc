@@ -117,5 +117,58 @@ void main() {
 )");
 }
 
+TEST_F(GlslWriterTest, BuiltinStorageBarrier) {
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kCompute);
+    func->SetWorkgroupSize(1, 1, 1);
+    b.Append(func->Block(), [&] {
+        b.Call(ty.void_(), core::BuiltinFn::kStorageBarrier);
+        b.Return(func);
+    });
+
+    ASSERT_TRUE(Generate()) << err_ << output_.glsl;
+    EXPECT_EQ(output_.glsl, GlslHeader() + R"(
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+void main() {
+  barrier();
+  memoryBarrierBuffer();
+}
+)");
+}
+
+TEST_F(GlslWriterTest, BuiltinTextureBarrier) {
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kCompute);
+    func->SetWorkgroupSize(1, 1, 1);
+    b.Append(func->Block(), [&] {
+        b.Call(ty.void_(), core::BuiltinFn::kTextureBarrier);
+        b.Return(func);
+    });
+
+    ASSERT_TRUE(Generate()) << err_ << output_.glsl;
+    EXPECT_EQ(output_.glsl, GlslHeader() + R"(
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+void main() {
+  barrier();
+  memoryBarrierImage();
+}
+)");
+}
+
+TEST_F(GlslWriterTest, BuiltinWorkgroupBarrier) {
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kCompute);
+    func->SetWorkgroupSize(1, 1, 1);
+    b.Append(func->Block(), [&] {
+        b.Call(ty.void_(), core::BuiltinFn::kWorkgroupBarrier);
+        b.Return(func);
+    });
+
+    ASSERT_TRUE(Generate()) << err_ << output_.glsl;
+    EXPECT_EQ(output_.glsl, GlslHeader() + R"(
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+void main() {
+  barrier();
+}
+)");
+}
+
 }  // namespace
 }  // namespace tint::glsl::writer

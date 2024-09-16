@@ -58,6 +58,8 @@ tint_target_add_dependencies(tint_lang_glsl_writer_raise lib
   tint_lang_core_ir
   tint_lang_core_ir_transform
   tint_lang_core_type
+  tint_lang_glsl
+  tint_lang_glsl_intrinsic
   tint_lang_glsl_ir
   tint_lang_wgsl
   tint_lang_wgsl_ast

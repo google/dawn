@@ -34,6 +34,20 @@
 #                       Do not modify this file directly
 ################################################################################
 
+include(lang/glsl/intrinsic/BUILD.cmake)
 include(lang/glsl/ir/BUILD.cmake)
 include(lang/glsl/validate/BUILD.cmake)
 include(lang/glsl/writer/BUILD.cmake)
+
+################################################################################
+# Target:    tint_lang_glsl
+# Kind:      lib
+################################################################################
+tint_add_target(tint_lang_glsl lib
+  lang/glsl/builtin_fn.cc
+  lang/glsl/builtin_fn.h
+)
+
+tint_target_add_dependencies(tint_lang_glsl lib
+  tint_utils_traits
+)

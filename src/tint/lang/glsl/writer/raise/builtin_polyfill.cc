@@ -34,6 +34,8 @@
 #include "src/tint/lang/core/ir/builder.h"
 #include "src/tint/lang/core/ir/module.h"
 #include "src/tint/lang/core/ir/validator.h"
+#include "src/tint/lang/glsl/builtin_fn.h"
+#include "src/tint/lang/glsl/ir/builtin_call.h"
 #include "src/tint/lang/glsl/ir/ternary.h"
 
 namespace tint::glsl::writer::raise {
@@ -66,6 +68,9 @@ struct State {
             if (auto* call = inst->As<core::ir::CoreBuiltinCall>()) {
                 switch (call->Func()) {
                     case core::BuiltinFn::kSelect:
+                    case core::BuiltinFn::kStorageBarrier:
+                    case core::BuiltinFn::kTextureBarrier:
+                    case core::BuiltinFn::kWorkgroupBarrier:
                         call_worklist.Push(call);
                         break;
                     default:
@@ -81,10 +86,35 @@ struct State {
                 case core::BuiltinFn::kSelect:
                     Select(call);
                     break;
+                case core::BuiltinFn::kStorageBarrier:
+                case core::BuiltinFn::kTextureBarrier:
+                case core::BuiltinFn::kWorkgroupBarrier:
+                    Barrier(call);
+                    break;
                 default:
                     TINT_UNREACHABLE();
             }
         }
+    }
+
+    void Barrier(core::ir::CoreBuiltinCall* call) {
+        b.InsertBefore(call, [&] {
+            b.Call<glsl::ir::BuiltinCall>(ty.void_(), glsl::BuiltinFn::kBarrier);
+
+            switch (call->Func()) {
+                case core::BuiltinFn::kStorageBarrier:
+                    b.Call<glsl::ir::BuiltinCall>(ty.void_(),
+                                                  glsl::BuiltinFn::kMemoryBarrierBuffer);
+                    break;
+                case core::BuiltinFn::kTextureBarrier:
+                    b.Call<glsl::ir::BuiltinCall>(ty.void_(), glsl::BuiltinFn::kMemoryBarrierImage);
+                    break;
+                default:
+                    break;
+            }
+        });
+
+        call->Destroy();
     }
 
     void Select(core::ir::CoreBuiltinCall* call) {
