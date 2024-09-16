@@ -43,11 +43,11 @@ BinaryWriter::~BinaryWriter() = default;
 
 void BinaryWriter::WriteModule(const Module& module) {
     out_.reserve(module.TotalSize());
-    module.Iterate([this](const Instruction& inst) { this->process_instruction(inst); });
+    module.Iterate([this](const Instruction& inst) { this->ProcessInstruction(inst); });
 }
 
 void BinaryWriter::WriteInstruction(const Instruction& inst) {
-    process_instruction(inst);
+    ProcessInstruction(inst);
 }
 
 void BinaryWriter::WriteHeader(uint32_t bound, uint32_t version) {
@@ -58,14 +58,14 @@ void BinaryWriter::WriteHeader(uint32_t bound, uint32_t version) {
     out_.push_back(0);
 }
 
-void BinaryWriter::process_instruction(const Instruction& inst) {
-    out_.push_back(inst.word_length() << 16 | static_cast<uint32_t>(inst.opcode()));
-    for (const auto& op : inst.operands()) {
-        process_op(op);
+void BinaryWriter::ProcessInstruction(const Instruction& inst) {
+    out_.push_back(inst.WordLength() << 16 | static_cast<uint32_t>(inst.Opcode()));
+    for (const auto& op : inst.Operands()) {
+        ProcessOp(op);
     }
 }
 
-void BinaryWriter::process_op(const Operand& op) {
+void BinaryWriter::ProcessOp(const Operand& op) {
     if (auto* i = std::get_if<uint32_t>(&op)) {
         out_.push_back(*i);
         return;

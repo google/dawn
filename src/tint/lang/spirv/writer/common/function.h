@@ -60,50 +60,50 @@ class Function {
 
     /// Iterates over the function call the cb on each instruction
     /// @param cb the callback to call
-    void iterate(std::function<void(const Instruction&)> cb) const;
+    void Iterate(std::function<void(const Instruction&)> cb) const;
 
     /// @returns the declaration
-    const Instruction& declaration() const { return declaration_; }
+    const Instruction& Declaration() const { return declaration_; }
 
     /// @returns the label ID for the function entry block
-    uint32_t label_id() const { return std::get<uint32_t>(label_op_); }
+    uint32_t LabelId() const { return std::get<uint32_t>(label_op_); }
 
     /// Adds an instruction to the instruction list
     /// @param op the op to set
     /// @param operands the operands for the instruction
-    void push_inst(spv::Op op, const OperandList& operands) {
+    void PushInst(spv::Op op, const OperandList& operands) {
         instructions_.push_back(Instruction{op, operands});
     }
     /// @returns the instruction list
-    const InstructionList& instructions() const { return instructions_; }
+    const InstructionList& Instructions() const { return instructions_; }
 
     /// Adds a variable to the variable list
     /// @param operands the operands for the variable
-    void push_var(const OperandList& operands) {
+    void PushVar(const OperandList& operands) {
         vars_.push_back(Instruction{spv::Op::OpVariable, operands});
     }
     /// @returns the variable list
-    const InstructionList& variables() const { return vars_; }
+    const InstructionList& Variables() const { return vars_; }
 
     /// @returns the word length of the function
-    uint32_t word_length() const {
+    uint32_t WordLength() const {
         // 1 for the Label and 1 for the FunctionEnd
-        uint32_t size = 2 + declaration_.word_length();
+        uint32_t size = 2 + declaration_.WordLength();
 
         for (const auto& param : params_) {
-            size += param.word_length();
+            size += param.WordLength();
         }
         for (const auto& var : vars_) {
-            size += var.word_length();
+            size += var.WordLength();
         }
         for (const auto& inst : instructions_) {
-            size += inst.word_length();
+            size += inst.WordLength();
         }
         return size;
     }
 
     /// @returns true if the function has a valid declaration
-    explicit operator bool() const { return declaration_.opcode() == spv::Op::OpFunction; }
+    explicit operator bool() const { return declaration_.Opcode() == spv::Op::OpFunction; }
 
   private:
     Instruction declaration_;

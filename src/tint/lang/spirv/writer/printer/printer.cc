@@ -849,17 +849,17 @@ class Printer {
     void EmitBlock(core::ir::Block* block) {
         // Emit the label.
         // Skip if this is the function's entry block, as it will be emitted by the function object.
-        if (!current_function_.instructions().empty()) {
-            current_function_.push_inst(spv::Op::OpLabel, {Label(block)});
+        if (!current_function_.Instructions().empty()) {
+            current_function_.PushInst(spv::Op::OpLabel, {Label(block)});
         }
 
         // If there are no instructions in the block, it's a dead end, so we shouldn't be able to
         // get here to begin with.
         if (block->IsEmpty()) {
             if (!block->Parent()->Results().IsEmpty()) {
-                current_function_.push_inst(spv::Op::OpBranch, {GetMergeLabel(block->Parent())});
+                current_function_.PushInst(spv::Op::OpBranch, {GetMergeLabel(block->Parent())});
             } else {
-                current_function_.push_inst(spv::Op::OpUnreachable, {});
+                current_function_.PushInst(spv::Op::OpUnreachable, {});
             }
             return;
         }
@@ -887,7 +887,7 @@ class Printer {
                 ops.push_back(GetTerminatorBlockLabel(incoming));
             }
 
-            current_function_.push_inst(spv::Op::OpPhi, std::move(ops));
+            current_function_.PushInst(spv::Op::OpPhi, std::move(ops));
         }
     }
 
@@ -939,40 +939,40 @@ class Printer {
                     TINT_ASSERT(t->Args().Length() == 1u);
                     OperandList operands;
                     operands.push_back(Value(t->Args()[0]));
-                    current_function_.push_inst(spv::Op::OpReturnValue, operands);
+                    current_function_.PushInst(spv::Op::OpReturnValue, operands);
                 } else {
-                    current_function_.push_inst(spv::Op::OpReturn, {});
+                    current_function_.PushInst(spv::Op::OpReturn, {});
                 }
                 return;
             },
             [&](core::ir::BreakIf* breakif) {
-                current_function_.push_inst(spv::Op::OpBranchConditional,
-                                            {
-                                                Value(breakif->Condition()),
-                                                loop_merge_label_,
-                                                loop_header_label_,
-                                            });
+                current_function_.PushInst(spv::Op::OpBranchConditional,
+                                           {
+                                               Value(breakif->Condition()),
+                                               loop_merge_label_,
+                                               loop_header_label_,
+                                           });
             },
             [&](core::ir::Continue* cont) {
-                current_function_.push_inst(spv::Op::OpBranch, {Label(cont->Loop()->Continuing())});
+                current_function_.PushInst(spv::Op::OpBranch, {Label(cont->Loop()->Continuing())});
             },
             [&](core::ir::ExitIf*) {
-                current_function_.push_inst(spv::Op::OpBranch, {if_merge_label_});
+                current_function_.PushInst(spv::Op::OpBranch, {if_merge_label_});
             },
             [&](core::ir::ExitLoop*) {
-                current_function_.push_inst(spv::Op::OpBranch, {loop_merge_label_});
+                current_function_.PushInst(spv::Op::OpBranch, {loop_merge_label_});
             },
             [&](core::ir::ExitSwitch*) {
-                current_function_.push_inst(spv::Op::OpBranch, {switch_merge_label_});
+                current_function_.PushInst(spv::Op::OpBranch, {switch_merge_label_});
             },
             [&](core::ir::NextIteration*) {
-                current_function_.push_inst(spv::Op::OpBranch, {loop_header_label_});
+                current_function_.PushInst(spv::Op::OpBranch, {loop_header_label_});
             },
             [&](core::ir::TerminateInvocation*) {
-                current_function_.push_inst(spv::Op::OpKill, {});
+                current_function_.PushInst(spv::Op::OpKill, {});
             },
             [&](core::ir::Unreachable*) {
-                current_function_.push_inst(spv::Op::OpUnreachable, {});
+                current_function_.PushInst(spv::Op::OpUnreachable, {});
             },  //
             TINT_ICE_ON_NO_MATCH);
     }
@@ -1003,10 +1003,10 @@ class Printer {
         }
 
         // Emit the OpSelectionMerge and OpBranchConditional instructions.
-        current_function_.push_inst(spv::Op::OpSelectionMerge,
-                                    {merge_label, U32Operand(SpvSelectionControlMaskNone)});
-        current_function_.push_inst(spv::Op::OpBranchConditional,
-                                    {Value(i->Condition()), true_label, false_label});
+        current_function_.PushInst(spv::Op::OpSelectionMerge,
+                                   {merge_label, U32Operand(SpvSelectionControlMaskNone)});
+        current_function_.PushInst(spv::Op::OpBranchConditional,
+                                   {Value(i->Condition()), true_label, false_label});
 
         // Emit the `true` and `false` blocks, if they're not being skipped.
         if (true_label != merge_label) {
@@ -1016,7 +1016,7 @@ class Printer {
             EmitBlock(false_block);
         }
 
-        current_function_.push_inst(spv::Op::OpLabel, {merge_label});
+        current_function_.PushInst(spv::Op::OpLabel, {merge_label});
 
         // Emit the OpPhis for the ExitIfs
         EmitExitPhis(i);
@@ -1035,7 +1035,7 @@ class Printer {
             for (auto* idx : access->Indices()) {
                 operands.push_back(Value(idx));
             }
-            current_function_.push_inst(spv::Op::OpAccessChain, std::move(operands));
+            current_function_.PushInst(spv::Op::OpAccessChain, std::move(operands));
             return;
         }
 
@@ -1061,16 +1061,16 @@ class Printer {
                     vec_id = module_.NextId();
                     operands[0] = Type(source_ty);
                     operands[1] = vec_id;
-                    current_function_.push_inst(spv::Op::OpCompositeExtract, std::move(operands));
+                    current_function_.PushInst(spv::Op::OpCompositeExtract, std::move(operands));
                 }
 
                 // Now emit the OpVectorExtractDynamic instruction.
                 operands = {Type(ty), id, vec_id, Value(idx)};
-                current_function_.push_inst(spv::Op::OpVectorExtractDynamic, std::move(operands));
+                current_function_.PushInst(spv::Op::OpVectorExtractDynamic, std::move(operands));
                 return;
             }
         }
-        current_function_.push_inst(spv::Op::OpCompositeExtract, std::move(operands));
+        current_function_.PushInst(spv::Op::OpCompositeExtract, std::move(operands));
     }
 
     /// Emit a binary instruction.
@@ -1221,7 +1221,7 @@ class Printer {
         }
 
         // Emit the instruction.
-        current_function_.push_inst(op, {Type(ty), id, lhs, rhs});
+        current_function_.PushInst(op, {Type(ty), id, lhs, rhs});
     }
 
     /// Emit a bitcast instruction.
@@ -1232,8 +1232,8 @@ class Printer {
             values_.Add(bitcast->Result(0), Value(bitcast->Val()));
             return;
         }
-        current_function_.push_inst(spv::Op::OpBitcast,
-                                    {Type(ty), Value(bitcast), Value(bitcast->Val())});
+        current_function_.PushInst(spv::Op::OpBitcast,
+                                   {Type(ty), Value(bitcast), Value(bitcast->Val())});
     }
 
     /// Emit a builtin function call instruction.
@@ -1367,7 +1367,7 @@ class Printer {
         for (auto* arg : builtin->Args()) {
             operands.push_back(Value(arg));
         }
-        current_function_.push_inst(op, operands);
+        current_function_.PushInst(op, operands);
     }
 
     /// Emit a builtin function call instruction.
@@ -1884,7 +1884,7 @@ class Printer {
         }
 
         // Emit the instruction.
-        current_function_.push_inst(op, operands);
+        current_function_.PushInst(op, operands);
     }
 
     /// Emit a construct instruction.
@@ -1902,7 +1902,7 @@ class Printer {
         for (auto* arg : construct->Args()) {
             operands.push_back(Value(arg));
         }
-        current_function_.push_inst(spv::Op::OpCompositeConstruct, std::move(operands));
+        current_function_.PushInst(spv::Op::OpCompositeConstruct, std::move(operands));
     }
 
     /// Emit a convert instruction.
@@ -1983,7 +1983,7 @@ class Printer {
             TINT_ICE() << "unhandled convert instruction";
         }
 
-        current_function_.push_inst(op, std::move(operands));
+        current_function_.PushInst(op, std::move(operands));
     }
 
     SpvMemoryAccessMask MemoryAccessMaskForPointer(const core::type::Pointer* ptr) {
@@ -2002,10 +2002,10 @@ class Printer {
     /// Emit a load instruction.
     /// @param load the load instruction to emit
     void EmitLoad(core::ir::Load* load) {
-        current_function_.push_inst(
-            spv::Op::OpLoad, {Type(load->Result(0)->Type()), Value(load), Value(load->From()),
-                              U32Operand(MemoryAccessMaskForPointer(
-                                  load->From()->Type()->As<core::type::Pointer>()))});
+        current_function_.PushInst(spv::Op::OpLoad,
+                                   {Type(load->Result(0)->Type()), Value(load), Value(load->From()),
+                                    U32Operand(MemoryAccessMaskForPointer(
+                                        load->From()->Type()->As<core::type::Pointer>()))});
     }
 
     /// Emit a load vector element instruction.
@@ -2015,12 +2015,12 @@ class Printer {
         auto* el_ty = load->Result(0)->Type();
         auto* el_ptr_ty = ir_.Types().ptr(vec_ptr_ty->AddressSpace(), el_ty, vec_ptr_ty->Access());
         auto el_ptr_id = module_.NextId();
-        current_function_.push_inst(
+        current_function_.PushInst(
             spv::Op::OpAccessChain,
             {Type(el_ptr_ty), el_ptr_id, Value(load->From()), Value(load->Index())});
-        current_function_.push_inst(spv::Op::OpLoad,
-                                    {Type(load->Result(0)->Type()), Value(load), el_ptr_id,
-                                     U32Operand(MemoryAccessMaskForPointer(vec_ptr_ty))});
+        current_function_.PushInst(spv::Op::OpLoad,
+                                   {Type(load->Result(0)->Type()), Value(load), el_ptr_id,
+                                    U32Operand(MemoryAccessMaskForPointer(vec_ptr_ty))});
     }
 
     /// Emit a loop instruction.
@@ -2038,23 +2038,23 @@ class Printer {
 
         if (init_label != 0) {
             // Emit the loop initializer.
-            current_function_.push_inst(spv::Op::OpBranch, {init_label});
+            current_function_.PushInst(spv::Op::OpBranch, {init_label});
             EmitBlock(loop->Initializer());
         } else {
             // No initializer. Branch to body.
-            current_function_.push_inst(spv::Op::OpBranch, {header_label});
+            current_function_.PushInst(spv::Op::OpBranch, {header_label});
         }
 
         // Emit the loop body header, which contains the OpLoopMerge and OpPhis.
         // This then unconditionally branches to body_label
-        current_function_.push_inst(spv::Op::OpLabel, {header_label});
+        current_function_.PushInst(spv::Op::OpLabel, {header_label});
         EmitIncomingPhis(loop->Body());
-        current_function_.push_inst(spv::Op::OpLoopMerge, {merge_label, continuing_label,
-                                                           U32Operand(SpvLoopControlMaskNone)});
-        current_function_.push_inst(spv::Op::OpBranch, {body_label});
+        current_function_.PushInst(spv::Op::OpLoopMerge, {merge_label, continuing_label,
+                                                          U32Operand(SpvLoopControlMaskNone)});
+        current_function_.PushInst(spv::Op::OpBranch, {body_label});
 
         // Emit the loop body
-        current_function_.push_inst(spv::Op::OpLabel, {body_label});
+        current_function_.PushInst(spv::Op::OpLabel, {body_label});
         EmitBlockInstructions(loop->Body());
 
         // Emit the loop continuing block.
@@ -2062,12 +2062,12 @@ class Printer {
             EmitBlock(loop->Continuing());
         } else {
             // We still need to emit a continuing block with a back-edge, even if it is unreachable.
-            current_function_.push_inst(spv::Op::OpLabel, {continuing_label});
-            current_function_.push_inst(spv::Op::OpBranch, {header_label});
+            current_function_.PushInst(spv::Op::OpLabel, {continuing_label});
+            current_function_.PushInst(spv::Op::OpBranch, {header_label});
         }
 
         // Emit the loop merge block.
-        current_function_.push_inst(spv::Op::OpLabel, {merge_label});
+        current_function_.PushInst(spv::Op::OpLabel, {merge_label});
 
         // Emit the OpPhis for the ExitLoops
         EmitExitPhis(loop);
@@ -2104,9 +2104,9 @@ class Printer {
         TINT_SCOPED_ASSIGNMENT(switch_merge_label_, merge_label);
 
         // Emit the OpSelectionMerge and OpSwitch instructions.
-        current_function_.push_inst(spv::Op::OpSelectionMerge,
-                                    {merge_label, U32Operand(SpvSelectionControlMaskNone)});
-        current_function_.push_inst(spv::Op::OpSwitch, switch_operands);
+        current_function_.PushInst(spv::Op::OpSelectionMerge,
+                                   {merge_label, U32Operand(SpvSelectionControlMaskNone)});
+        current_function_.PushInst(spv::Op::OpSwitch, switch_operands);
 
         // Emit the cases.
         for (auto& c : swtch->Cases()) {
@@ -2114,7 +2114,7 @@ class Printer {
         }
 
         // Emit the switch merge block.
-        current_function_.push_inst(spv::Op::OpLabel, {merge_label});
+        current_function_.PushInst(spv::Op::OpLabel, {merge_label});
 
         // Emit the OpPhis for the ExitSwitches
         EmitExitPhis(swtch);
@@ -2129,16 +2129,16 @@ class Printer {
         for (auto idx : swizzle->Indices()) {
             operands.push_back(idx);
         }
-        current_function_.push_inst(spv::Op::OpVectorShuffle, operands);
+        current_function_.PushInst(spv::Op::OpVectorShuffle, operands);
     }
 
     /// Emit a store instruction.
     /// @param store the store instruction to emit
     void EmitStore(core::ir::Store* store) {
-        current_function_.push_inst(spv::Op::OpStore,
-                                    {Value(store->To()), Value(store->From()),
-                                     U32Operand(MemoryAccessMaskForPointer(
-                                         store->To()->Type()->As<core::type::Pointer>()))});
+        current_function_.PushInst(spv::Op::OpStore,
+                                   {Value(store->To()), Value(store->From()),
+                                    U32Operand(MemoryAccessMaskForPointer(
+                                        store->To()->Type()->As<core::type::Pointer>()))});
     }
 
     /// Emit a store vector element instruction.
@@ -2148,10 +2148,10 @@ class Printer {
         auto* el_ty = store->Value()->Type();
         auto* el_ptr_ty = ir_.Types().ptr(vec_ptr_ty->AddressSpace(), el_ty, vec_ptr_ty->Access());
         auto el_ptr_id = module_.NextId();
-        current_function_.push_inst(
+        current_function_.PushInst(
             spv::Op::OpAccessChain,
             {Type(el_ptr_ty), el_ptr_id, Value(store->To()), Value(store->Index())});
-        current_function_.push_inst(
+        current_function_.PushInst(
             spv::Op::OpStore,
             {el_ptr_id, Value(store->Value()), U32Operand(MemoryAccessMaskForPointer(vec_ptr_ty))});
     }
@@ -2179,7 +2179,7 @@ class Printer {
             default:
                 TINT_UNIMPLEMENTED() << unary->Op();
         }
-        current_function_.push_inst(op, {Type(ty), id, Value(unary->Val())});
+        current_function_.PushInst(op, {Type(ty), id, Value(unary->Val())});
     }
 
     /// Emit a user call instruction.
@@ -2190,7 +2190,7 @@ class Printer {
         for (auto* arg : call->Args()) {
             operands.push_back(Value(arg));
         }
-        current_function_.push_inst(spv::Op::OpFunctionCall, operands);
+        current_function_.PushInst(spv::Op::OpFunctionCall, operands);
     }
 
     /// Emit IO attributes.
@@ -2257,10 +2257,10 @@ class Printer {
             case core::AddressSpace::kFunction: {
                 TINT_ASSERT(current_function_);
                 if (var->Initializer()) {
-                    current_function_.push_var({ty, id, U32Operand(SpvStorageClassFunction)});
-                    current_function_.push_inst(spv::Op::OpStore, {id, Value(var->Initializer())});
+                    current_function_.PushVar({ty, id, U32Operand(SpvStorageClassFunction)});
+                    current_function_.PushInst(spv::Op::OpStore, {id, Value(var->Initializer())});
                 } else {
-                    current_function_.push_var(
+                    current_function_.PushVar(
                         {ty, id, U32Operand(SpvStorageClassFunction), ConstantNull(store_ty)});
                 }
                 break;
@@ -2406,7 +2406,7 @@ class Printer {
                 }
                 ops.push_back(branch.label);
             }
-            current_function_.push_inst(spv::Op::OpPhi, std::move(ops));
+            current_function_.PushInst(spv::Op::OpPhi, std::move(ops));
         }
     }
 

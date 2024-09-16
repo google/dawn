@@ -62,8 +62,8 @@ class BinaryWriter {
     std::vector<uint32_t>& Result() { return out_; }
 
   private:
-    void process_instruction(const Instruction& inst);
-    void process_op(const Operand& op);
+    void ProcessInstruction(const Instruction& inst);
+    void ProcessOp(const Operand& op);
 
     std::vector<uint32_t> out_;
 };
