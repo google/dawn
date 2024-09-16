@@ -50,6 +50,8 @@ enum class BuiltinFn : uint8_t {
     kBarrier,
     kMemoryBarrierBuffer,
     kMemoryBarrierImage,
+    kAtomicCompSwap,
+    kAtomicSub,
     kNone,
 };
 

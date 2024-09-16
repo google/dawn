@@ -35,21 +35,42 @@
 // See docs/tint/intrinsic_definition_files.md for syntax                     //
 ////////////////////////////////////////////////////////////////////////////////
 
+import "src/tint/lang/core/address_space.def"
+import "src/tint/lang/core/access.def"
 
 ////////////////////////////////////////////////////////////////////////////////
 // Types                                                                      //
 ////////////////////////////////////////////////////////////////////////////////
 
+type i32
+type u32
+type atomic<T>
+type ptr<S: address_space, T, A: access>
 
 ////////////////////////////////////////////////////////////////////////////////
 // Type matchers                                                              //
 ////////////////////////////////////////////////////////////////////////////////
 
+match iu32: i32 | u32
+
+match read_write: access.read_write
+
+match workgroup_or_storage:
+  address_space.storage |
+  address_space.workgroup
 
 ////////////////////////////////////////////////////////////////////////////////
 // Builtin Functions                                                          //
 ////////////////////////////////////////////////////////////////////////////////
 
-fn barrier()
-fn memoryBarrierBuffer()
-fn memoryBarrierImage()
+@stage("compute") fn barrier()
+@stage("compute") fn memoryBarrierBuffer()
+@stage("compute") fn memoryBarrierImage()
+
+@stage("fragment", "compute") implicit(T: iu32) fn atomicCompSwap(
+                                    ptr<workgroup_or_storage, atomic<T>, read_write>,
+                                    compare_value: u32,
+                                    value: u32) -> T
+@stage("fragment", "compute") implicit(T: iu32, S: workgroup_or_storage) fn atomicSub(
+                                    ptr<S, atomic<T>, read_write>,
+                                    T) -> T

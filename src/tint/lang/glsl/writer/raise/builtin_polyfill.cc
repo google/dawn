@@ -67,6 +67,9 @@ struct State {
         for (auto* inst : ir.Instructions()) {
             if (auto* call = inst->As<core::ir::CoreBuiltinCall>()) {
                 switch (call->Func()) {
+                    case core::BuiltinFn::kAtomicCompareExchangeWeak:
+                    case core::BuiltinFn::kAtomicSub:
+                    case core::BuiltinFn::kAtomicLoad:
                     case core::BuiltinFn::kSelect:
                     case core::BuiltinFn::kStorageBarrier:
                     case core::BuiltinFn::kTextureBarrier:
@@ -83,6 +86,15 @@ struct State {
         // Replace the builtin calls that we found
         for (auto* call : call_worklist) {
             switch (call->Func()) {
+                case core::BuiltinFn::kAtomicCompareExchangeWeak:
+                    AtomicCompareExchangeWeak(call);
+                    break;
+                case core::BuiltinFn::kAtomicSub:
+                    AtomicSub(call);
+                    break;
+                case core::BuiltinFn::kAtomicLoad:
+                    AtomicLoad(call);
+                    break;
                 case core::BuiltinFn::kSelect:
                     Select(call);
                     break;
@@ -95,6 +107,59 @@ struct State {
                     TINT_UNREACHABLE();
             }
         }
+    }
+
+    void AtomicCompareExchangeWeak(core::ir::BuiltinCall* call) {
+        auto args = call->Args();
+        auto* type = args[1]->Type();
+
+        auto* dest = args[0];
+        auto* compare_value = args[1];
+        auto* value = args[2];
+
+        auto* result_type = call->Result(0)->Type();
+
+        b.InsertBefore(call, [&] {
+            auto* swap = b.Call<glsl::ir::BuiltinCall>(
+                type, glsl::BuiltinFn::kAtomicCompSwap,
+                Vector<core::ir::Value*, 3>{dest, b.Bitcast(ty.u32(), compare_value)->Result(0),
+                                            b.Bitcast(ty.u32(), value)->Result(0)});
+
+            auto* exchanged = b.Equal(ty.bool_(), swap, compare_value);
+
+            auto* result = b.Construct(result_type, swap, exchanged)->Result(0);
+            call->Result(0)->ReplaceAllUsesWith(result);
+        });
+        call->Destroy();
+    }
+
+    void AtomicSub(core::ir::BuiltinCall* call) {
+        b.InsertBefore(call, [&] {
+            auto args = call->Args();
+
+            if (args[1]->Type()->Is<core::type::I32>()) {
+                b.CallWithResult(call->DetachResult(), core::BuiltinFn::kAtomicAdd, args[0],
+                                 b.Negation(args[1]->Type(), args[1]));
+            } else {
+                // Negating a u32 isn't possible in the IR, so pass a fake GLSL function and handle
+                // in the printer.
+                b.CallWithResult<glsl::ir::BuiltinCall>(
+                    call->DetachResult(), glsl::BuiltinFn::kAtomicSub,
+                    Vector<core::ir::Value*, 2>{args[0], args[1]});
+            }
+        });
+        call->Destroy();
+    }
+
+    void AtomicLoad(core::ir::CoreBuiltinCall* call) {
+        // GLSL does not have an atomicLoad, so we emulate it with atomicOr using 0 as the OR value
+        b.InsertBefore(call, [&] {
+            auto args = call->Args();
+            b.CallWithResult(
+                call->DetachResult(), core::BuiltinFn::kAtomicOr, args[0],
+                b.Zero(args[0]->Type()->UnwrapPtr()->As<core::type::Atomic>()->Type()));
+        });
+        call->Destroy();
     }
 
     void Barrier(core::ir::CoreBuiltinCall* call) {

@@ -1111,6 +1111,23 @@ class Printer : public tint::TextGenerator {
     }
 
     void EmitGlslBuiltinCall(StringStream& out, const glsl::ir::BuiltinCall* c) {
+        // The atomic subtract is an add in GLSL. If the value is a u32, it just negates the u32 and
+        // GLSL handles it. We don't have u32 negation in the IR, so fake it in the printer.
+        if (c->Func() == glsl::BuiltinFn::kAtomicSub) {
+            out << "atomicAdd";
+            {
+                ScopedParen sp(out);
+
+                EmitValue(out, c->Args()[0]);
+                out << ", -";
+                {
+                    ScopedParen argSP(out);
+                    EmitValue(out, c->Args()[1]);
+                }
+            }
+            return;
+        }
+
         out << c->Func() << "(";
         bool needs_comma = false;
         for (const auto* arg : c->Args()) {

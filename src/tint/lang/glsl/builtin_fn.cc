@@ -48,6 +48,10 @@ const char* str(BuiltinFn i) {
             return "memoryBarrierBuffer";
         case BuiltinFn::kMemoryBarrierImage:
             return "memoryBarrierImage";
+        case BuiltinFn::kAtomicCompSwap:
+            return "atomicCompSwap";
+        case BuiltinFn::kAtomicSub:
+            return "atomicSub";
     }
     return "<unknown>";
 }

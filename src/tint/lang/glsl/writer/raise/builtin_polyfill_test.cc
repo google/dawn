@@ -215,5 +215,201 @@ TEST_F(GlslWriter_BuiltinPolyfillTest, WorkgroupBarrier) {
     EXPECT_EQ(expect, str());
 }
 
+TEST_F(GlslWriter_BuiltinPolyfillTest, AtomicCompareExchangeWeak) {
+    auto* var = b.Var("v", workgroup, ty.atomic<i32>(), core::Access::kReadWrite);
+    var->SetBindingPoint(0, 0);
+    b.ir.root_block->Append(var);
+
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kCompute);
+    func->SetWorkgroupSize(1, 1, 1);
+    b.Append(func->Block(), [&] {
+        b.Let("x", b.Call(core::type::CreateAtomicCompareExchangeResult(ty, mod.symbols, ty.i32()),
+                          core::BuiltinFn::kAtomicCompareExchangeWeak, var, 123_i, 345_i));
+        b.Return(func);
+    });
+
+    auto* src = R"(
+__atomic_compare_exchange_result_i32 = struct @align(4) {
+  old_value:i32 @offset(0)
+  exchanged:bool @offset(4)
+}
+
+$B1: {  # root
+  %v:ptr<workgroup, atomic<i32>, read_write> = var @binding_point(0, 0)
+}
+
+%foo = @compute @workgroup_size(1, 1, 1) func():void {
+  $B2: {
+    %3:__atomic_compare_exchange_result_i32 = atomicCompareExchangeWeak %v, 123i, 345i
+    %x:__atomic_compare_exchange_result_i32 = let %3
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+__atomic_compare_exchange_result_i32 = struct @align(4) {
+  old_value:i32 @offset(0)
+  exchanged:bool @offset(4)
+}
+
+$B1: {  # root
+  %v:ptr<workgroup, atomic<i32>, read_write> = var @binding_point(0, 0)
+}
+
+%foo = @compute @workgroup_size(1, 1, 1) func():void {
+  $B2: {
+    %3:u32 = bitcast 123i
+    %4:u32 = bitcast 345i
+    %5:i32 = glsl.atomicCompSwap %v, %3, %4
+    %6:bool = eq %5, 123i
+    %7:__atomic_compare_exchange_result_i32 = construct %5, %6
+    %x:__atomic_compare_exchange_result_i32 = let %7
+    ret
+  }
+}
+)";
+
+    Run(BuiltinPolyfill);
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(GlslWriter_BuiltinPolyfillTest, AtomicSub) {
+    auto* var = b.Var("v", workgroup, ty.atomic<i32>(), core::Access::kReadWrite);
+    var->SetBindingPoint(0, 0);
+    b.ir.root_block->Append(var);
+
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kCompute);
+    func->SetWorkgroupSize(1, 1, 1);
+    b.Append(func->Block(), [&] {
+        b.Let("x", b.Call(ty.i32(), core::BuiltinFn::kAtomicSub, var, 123_i));
+        b.Return(func);
+    });
+
+    auto* src = R"(
+$B1: {  # root
+  %v:ptr<workgroup, atomic<i32>, read_write> = var @binding_point(0, 0)
+}
+
+%foo = @compute @workgroup_size(1, 1, 1) func():void {
+  $B2: {
+    %3:i32 = atomicSub %v, 123i
+    %x:i32 = let %3
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+$B1: {  # root
+  %v:ptr<workgroup, atomic<i32>, read_write> = var @binding_point(0, 0)
+}
+
+%foo = @compute @workgroup_size(1, 1, 1) func():void {
+  $B2: {
+    %3:i32 = negation 123i
+    %4:i32 = atomicAdd %v, %3
+    %x:i32 = let %4
+    ret
+  }
+}
+)";
+
+    Run(BuiltinPolyfill);
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(GlslWriter_BuiltinPolyfillTest, AtomicSub_u32) {
+    auto* var = b.Var("v", workgroup, ty.atomic<u32>(), core::Access::kReadWrite);
+    var->SetBindingPoint(0, 0);
+    b.ir.root_block->Append(var);
+
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kCompute);
+    func->SetWorkgroupSize(1, 1, 1);
+    b.Append(func->Block(), [&] {
+        b.Let("x", b.Call(ty.u32(), core::BuiltinFn::kAtomicSub, var, 123_u));
+        b.Return(func);
+    });
+
+    auto* src = R"(
+$B1: {  # root
+  %v:ptr<workgroup, atomic<u32>, read_write> = var @binding_point(0, 0)
+}
+
+%foo = @compute @workgroup_size(1, 1, 1) func():void {
+  $B2: {
+    %3:u32 = atomicSub %v, 123u
+    %x:u32 = let %3
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+$B1: {  # root
+  %v:ptr<workgroup, atomic<u32>, read_write> = var @binding_point(0, 0)
+}
+
+%foo = @compute @workgroup_size(1, 1, 1) func():void {
+  $B2: {
+    %3:u32 = glsl.atomicSub %v, 123u
+    %x:u32 = let %3
+    ret
+  }
+}
+)";
+
+    Run(BuiltinPolyfill);
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(GlslWriter_BuiltinPolyfillTest, AtomicLoad) {
+    auto* var = b.Var("v", workgroup, ty.atomic<i32>(), core::Access::kReadWrite);
+    var->SetBindingPoint(0, 0);
+    b.ir.root_block->Append(var);
+
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kCompute);
+    func->SetWorkgroupSize(1, 1, 1);
+    b.Append(func->Block(), [&] {
+        b.Let("x", b.Call(ty.i32(), core::BuiltinFn::kAtomicLoad, var));
+        b.Return(func);
+    });
+
+    auto* src = R"(
+$B1: {  # root
+  %v:ptr<workgroup, atomic<i32>, read_write> = var @binding_point(0, 0)
+}
+
+%foo = @compute @workgroup_size(1, 1, 1) func():void {
+  $B2: {
+    %3:i32 = atomicLoad %v
+    %x:i32 = let %3
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+$B1: {  # root
+  %v:ptr<workgroup, atomic<i32>, read_write> = var @binding_point(0, 0)
+}
+
+%foo = @compute @workgroup_size(1, 1, 1) func():void {
+  $B2: {
+    %3:i32 = atomicOr %v, 0i
+    %x:i32 = let %3
+    ret
+  }
+}
+)";
+
+    Run(BuiltinPolyfill);
+    EXPECT_EQ(expect, str());
+}
+
 }  // namespace
 }  // namespace tint::glsl::writer::raise
