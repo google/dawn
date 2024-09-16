@@ -66,7 +66,12 @@ MaybeError ValidateSpirv(DeviceBase* device,
         device->EmitLog(wgpuLogLevel, ss.str().c_str());
     });
 
-    const bool valid = spirvTools.Validate(spirv, wordCount);
+    // Don't prepare to emit friendly names. The preparation costs
+    // time by scanning the whole module and building a string table.
+    spvtools::ValidatorOptions val_opts;
+    val_opts.SetFriendlyNames(false);
+
+    const bool valid = spirvTools.Validate(spirv, wordCount, val_opts);
     if (dumpSpirv || !valid) {
         std::ostringstream dumpedMsg;
         std::string disassembly;

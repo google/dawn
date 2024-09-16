@@ -64,7 +64,12 @@ Result<SuccessType> Validate(Slice<const uint32_t> spirv, spv_target_env target_
             diags.Push(std::move(diag));
         });
 
-    if (tools.Validate(spirv.data, spirv.len)) {
+    // Don't prepare to emit friendly names. The preparation costs
+    // time by scanning the whole module and building a string table.
+    spvtools::ValidatorOptions val_opts;
+    val_opts.SetFriendlyNames(false);
+
+    if (tools.Validate(spirv.data, spirv.len, val_opts)) {
         return Success;
     }
 
