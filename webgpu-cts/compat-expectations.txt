@@ -82,7 +82,7 @@
 # results: [ Failure RetryOnFailure Skip Slow ]
 # END TAG HEADER
 
-# Last rolled: 2024-09-05 01:29:48PM
+# Last rolled: 2024-09-14 07:18:52AM
 
 # Flaky on all platforms
 crbug.com/42251085 webgpu:shader,validation,expression,call,builtin,log:values:stage="override";type="f32" [ RetryOnFailure ]
@@ -166,10 +166,6 @@ crbug.com/365922174 webgpu:api,validation,render_pipeline,depth_stencil_state:de
 crbug.com/354152178 [ intel-0x4680 ] webgpu:shader,execution,expression,call,builtin,bitcast:ai_to_f32:* [ Failure ]
 crbug.com/354152178 [ intel-0x9bc5 ] webgpu:shader,execution,expression,call,builtin,bitcast:ai_to_f32:* [ Failure ]
 crbug.com/354152178 [ nvidia-0x2184 ] webgpu:shader,execution,expression,call,builtin,bitcast:ai_to_f32:* [ Failure ]
-
-# Temporarily skipped due to the removal of `maxInterStageShaderComponents` has not been completed in the below tests
-crbug.com/364338810 webgpu:api,validation,capability_checks,limits,maxInterStageShaderComponents:* [ Skip ]
-crbug.com/364338810 webgpu:api,validation,render_pipeline,inter_stage:max_components_count,* [ Skip ]
 
 ### This section represents tests which may require CTS changes.
 
@@ -346,8 +342,8 @@ crbug.com/dawn/2123 [ linux nvidia-0x2184 ] webgpu:api,validation,capability_che
 crbug.com/dawn/2123 [ linux nvidia-0x2184 ] webgpu:api,validation,capability_checks,limits,maxStorageBuffersPerShaderStage:createPipeline,at_over:limitTest="atMaximum";testValueName="atLimit";async=true;bindingCombination="vertexAndFragmentWithPossibleVertexStageOverflow";order="shiftByHalf";bindGroupTest="sameGroup" [ Failure ]
 
 # Zero init issues, but only with batch__=9 (NVidia driver bug)
-crbug.com/dawn/2125 [ nvidia-0x2184 ] webgpu:shader,execution,zero_init:compute,zero_init:addressSpace="private";workgroupSize=[1,1,1];batch__=9 [ Failure ]
 crbug.com/dawn/2125 [ nvidia-0x2184 ] webgpu:shader,execution,zero_init:compute,zero_init:addressSpace="function";workgroupSize=[1,1,1];batch__=9 [ Failure ]
+crbug.com/dawn/2125 [ nvidia-0x2184 ] webgpu:shader,execution,zero_init:compute,zero_init:addressSpace="private";workgroupSize=[1,1,1];batch__=9 [ Failure ]
 
 # copyTextureToTexture failures on Intel
 crbug.com/dawn/2208 [ intel-0x9bc5 linux ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,array:srcFormat="r8snorm";dstFormat="r8snorm";dimension="2d" [ Failure ]
@@ -1423,7 +1419,6 @@ crbug.com/dawn/0000 [ android arm ] webgpu:api,validation,encoding,cmds,render,d
 crbug.com/dawn/0000 [ android arm ] webgpu:api,validation,encoding,cmds,render,draw:vertex_buffer_OOB:type="drawIndirect";VBSize="zero";IBSize="exact";AStride="zero" [ RetryOnFailure ]
 
 # memory_sync also flaky on Android (too flaky for RetryOnFailure)
-crbug.com/dawn/0000 [ android arm ] webgpu:api,operation,memory_sync,buffer,single_buffer:ww:boundary="command-buffer";writeOps=["storage","t2b-copy"];contexts=["render-bundle-encoder","command-encoder"] [ Failure ]
 crbug.com/dawn/0000 [ android arm ] webgpu:api,operation,memory_sync,buffer,multiple_buffers:wr:boundary="command-buffer";readOp="input-indirect-dispatch";readContext="compute-pass-encoder";writeOp="b2b-copy";writeContext="command-encoder" [ Failure ]
 crbug.com/dawn/0000 [ android arm ] webgpu:api,operation,memory_sync,buffer,multiple_buffers:wr:boundary="command-buffer";readOp="input-indirect-dispatch";readContext="compute-pass-encoder";writeOp="storage";writeContext="render-bundle-encoder" [ Failure ]
 crbug.com/dawn/0000 [ android arm ] webgpu:api,operation,memory_sync,buffer,multiple_buffers:wr:boundary="command-buffer";readOp="input-indirect-dispatch";readContext="compute-pass-encoder";writeOp="storage";writeContext="render-pass-encoder" [ Failure ]
@@ -1442,6 +1437,7 @@ crbug.com/dawn/0000 [ android arm ] webgpu:api,operation,memory_sync,buffer,sing
 crbug.com/dawn/0000 [ android arm ] webgpu:api,operation,memory_sync,buffer,single_buffer:wr:boundary="queue-op";readOp="input-indirect";readContext="render-bundle-encoder";writeOp="b2b-copy";writeContext="command-encoder" [ Failure ]
 crbug.com/dawn/0000 [ android arm ] webgpu:api,operation,memory_sync,buffer,single_buffer:wr:boundary="queue-op";readOp="input-indirect-dispatch";readContext="compute-pass-encoder";writeOp="b2b-copy";writeContext="command-encoder" [ Failure ]
 crbug.com/dawn/0000 [ android arm ] webgpu:api,operation,memory_sync,buffer,single_buffer:wr:boundary="queue-op";readOp="input-indirect-dispatch";readContext="compute-pass-encoder";writeOp="storage";writeContext="render-bundle-encoder" [ Failure ]
+crbug.com/dawn/0000 [ android arm ] webgpu:api,operation,memory_sync,buffer,single_buffer:ww:boundary="command-buffer";writeOps=["storage","t2b-copy"];contexts=["render-bundle-encoder","command-encoder"] [ Failure ]
 
 # rendering,depth_bias failures on Pixel 6
 crbug.com/366411883 [ android arm ] webgpu:api,operation,rendering,depth_bias:depth_bias:quadAngle=0;bias=8388608;biasSlopeScale=0;biasClamp=0 [ Failure ]
@@ -1578,8 +1574,8 @@ crbug.com/364917742 [ android arm ] webgpu:api,operation,command_buffer,image_co
 
 # Compressed texture canvas configure failures on Pixel 6
 # Error is: "VALIDATION FAILED: Validation succeeded unexpectedly."
-crbug.com/364904749 [ android arm ] webgpu:web_platform,canvas,configure:viewFormats:canvasType="offscreen";format="rgba16float";viewFormatFeature="texture-compression-etc2" [ Failure ]
 crbug.com/364904749 [ android arm ] webgpu:web_platform,canvas,configure:viewFormats:canvasType="offscreen";format="rgba16float";viewFormatFeature="texture-compression-astc" [ Failure ]
+crbug.com/364904749 [ android arm ] webgpu:web_platform,canvas,configure:viewFormats:canvasType="offscreen";format="rgba16float";viewFormatFeature="texture-compression-etc2" [ Failure ]
 crbug.com/364904749 [ android arm ] webgpu:web_platform,canvas,configure:viewFormats:canvasType="offscreen";format="rgba8unorm";viewFormatFeature="texture-compression-astc" [ Failure ]
 crbug.com/364904749 [ android arm ] webgpu:web_platform,canvas,configure:viewFormats:canvasType="offscreen";format="rgba8unorm";viewFormatFeature="texture-compression-etc2" [ Failure ]
 crbug.com/364904749 [ android arm ] webgpu:web_platform,canvas,configure:viewFormats:canvasType="onscreen";format="rgba16float";viewFormatFeature="texture-compression-astc" [ Failure ]
@@ -1597,7 +1593,6 @@ crbug.com/dawn/366000875 webgpu:shader,validation,decl,var:var_access_mode_bad_o
 # New flakes. Please triage - will be discarded/regenerated by the next roll:
 # ##ROLLER_DISCARD_AND_REWRITE##
 ################################################################################
-crbug.com/dawn/0000 [ angle-opengl dawn-no-backend-validation desktop display-server-x graphite-disabled intel-0x9bc5 no-asan no-clang-coverage oop-c passthrough release renderer-skia-gl target-cpu-64 ubuntu webgpu-adapter-default webgpu-no-worker ] webgpu:shader,execution,robust_access_vertex:* [ RetryOnFailure ]
 crbug.com/dawn/0000 [ intel-0x9bc5 ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="1d";readMethod="CopyToTexture";format="r8snorm" [ RetryOnFailure ]
 crbug.com/dawn/0000 [ intel-0x9bc5 ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="1d";readMethod="CopyToTexture";format="rgba8snorm" [ RetryOnFailure ]
 crbug.com/dawn/0000 [ intel-0x9bc5 ] webgpu:shader,execution,expression,binary,af_matrix_scalar_multiplication:matrix_scalar:inputSource="const";cols=4;rows=4 [ RetryOnFailure ]
@@ -1621,6 +1616,7 @@ crbug.com/dawn/0000 [ intel-0x9bc5 ] webgpu:shader,execution,expression,call,bui
 crbug.com/dawn/0000 [ intel-0x9bc5 ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:sampled_array_2d_coords:format="astc-10x6-unorm" [ RetryOnFailure ]
 crbug.com/dawn/0000 [ intel-0x9bc5 ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:sampled_array_2d_coords:format="astc-10x6-unorm-srgb" [ RetryOnFailure ]
 crbug.com/dawn/0000 [ intel-0x9bc5 ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:sampled_array_2d_coords:format="astc-4x4-unorm-srgb" [ RetryOnFailure ]
+crbug.com/dawn/0000 [ intel-0x9bc5 ] webgpu:shader,execution,robust_access_vertex:* [ RetryOnFailure ]
 crbug.com/dawn/0000 [ nvidia-0x2184 ] webgpu:api,operation,adapter,requestAdapter:requestAdapter:powerPreference="high-performance";forceFallbackAdapter=false [ RetryOnFailure ]
 crbug.com/dawn/0000 [ nvidia-0x2184 ] webgpu:api,operation,adapter,requestDevice:limit,better_than_supported:limit="maxColorAttachmentBytesPerSample" [ RetryOnFailure ]
 crbug.com/dawn/0000 [ nvidia-0x2184 ] webgpu:shader,execution,expression,binary,af_matrix_addition:matrix:inputSource="const";cols=4;rows=4 [ RetryOnFailure ]
@@ -1637,6 +1633,7 @@ crbug.com/dawn/0000 webgpu:api,validation,render_pipeline,misc:vertex_state_only
 crbug.com/dawn/0000 webgpu:shader,execution,expression,call,builtin,determinant:f32:inputSource="const";dim=2 [ Failure ]
 crbug.com/dawn/0000 webgpu:shader,execution,expression,call,builtin,textureNumLayers:arrayed:texture_type="texture_depth_2d_array" [ Failure ]
 crbug.com/dawn/0000 webgpu:shader,execution,expression,call,builtin,textureNumLayers:sampled:texture_type="texture_2d_array" [ Failure ]
+crbug.com/dawn/0000 webgpu:shader,execution,expression,call,builtin,textureNumLayers:storage:* [ Failure ]
 crbug.com/dawn/0000 webgpu:shader,execution,expression,call,builtin,textureNumLevels:depth:texture_type="texture_depth_2d_array";view_type="full" [ Failure ]
 crbug.com/dawn/0000 webgpu:shader,execution,expression,call,builtin,textureNumLevels:depth:texture_type="texture_depth_2d_array";view_type="partial" [ Failure ]
 crbug.com/dawn/0000 webgpu:shader,execution,expression,call,builtin,textureNumLevels:depth:texture_type="texture_depth_cube";view_type="full" [ Failure ]
@@ -1648,31 +1645,24 @@ crbug.com/dawn/0000 webgpu:shader,execution,expression,call,builtin,textureSampl
 crbug.com/dawn/0000 webgpu:shader,execution,expression,call,builtin,textureSampleLevel:depth_3d_coords:format="depth32float";viewDimension="cube" [ Failure ]
 crbug.com/dawn/0000 webgpu:shader,execution,expression,call,builtin,textureSampleLevel:depth_array_2d_coords:* [ Failure ]
 crbug.com/dawn/0000 webgpu:web_platform,external_texture,video:importExternalTexture,cameraCapture:* [ Failure ]
-crbug.com/dawn/0000 [ angle-opengl dawn-no-backend-validation desktop display-server-x graphite-disabled intel-0x4680 no-asan no-clang-coverage oop-c passthrough release renderer-skia-gl target-cpu-64 ubuntu webgpu-adapter-default webgpu-no-worker ] webgpu:compat,api,validation,render_pipeline,unsupported_wgsl:* [ Failure ]
-crbug.com/dawn/0000 [ angle-opengl dawn-no-backend-validation desktop display-server-x graphite-disabled intel-0x4680 no-asan no-clang-coverage oop-c passthrough release renderer-skia-gl target-cpu-64 ubuntu webgpu-adapter-default webgpu-no-worker ] webgpu:shader,execution,expression,call,builtin,dpdxFine:* [ Failure ]
-crbug.com/dawn/0000 [ angle-opengl dawn-no-backend-validation desktop display-server-x graphite-disabled intel-0x4680 no-asan no-clang-coverage oop-c passthrough release renderer-skia-gl target-cpu-64 ubuntu webgpu-adapter-default webgpu-no-worker ] webgpu:shader,execution,expression,call,builtin,dpdyFine:* [ Failure ]
-crbug.com/dawn/0000 [ angle-opengl dawn-no-backend-validation desktop display-server-x graphite-disabled intel-0x4680 no-asan no-clang-coverage oop-c passthrough release renderer-skia-gl target-cpu-64 ubuntu webgpu-adapter-default webgpu-no-worker ] webgpu:shader,execution,expression,call,builtin,textureGather:depth_2d_coords:* [ Failure ]
-crbug.com/dawn/0000 [ angle-opengl dawn-no-backend-validation desktop display-server-x graphite-disabled intel-0x4680 no-asan no-clang-coverage oop-c passthrough release renderer-skia-gl target-cpu-64 ubuntu webgpu-adapter-default webgpu-no-worker ] webgpu:shader,execution,expression,call,builtin,textureNumLayers:storage:* [ Failure ]
-crbug.com/dawn/0000 [ angle-opengl dawn-no-backend-validation desktop display-server-x graphite-disabled intel-0x4680 no-asan no-clang-coverage oop-c passthrough release renderer-skia-gl target-cpu-64 ubuntu webgpu-adapter-default webgpu-no-worker ] webgpu:shader,execution,expression,call,builtin,textureStore:out_of_bounds_array:* [ Failure ]
-crbug.com/dawn/0000 [ angle-opengl dawn-no-backend-validation desktop display-server-x graphite-disabled intel-0x4680 no-asan no-clang-coverage oop-c passthrough release renderer-skia-gl target-cpu-64 ubuntu webgpu-adapter-default webgpu-no-worker ] webgpu:shader,execution,robust_access_vertex:* [ Failure ]
-crbug.com/dawn/0000 [ angle-opengl dawn-no-backend-validation desktop display-server-x graphite-disabled intel-0x4680 no-asan no-clang-coverage oop-c passthrough release renderer-skia-gl target-cpu-64 ubuntu webgpu-adapter-default webgpu-no-worker ] webgpu:web_platform,canvas,configure:viewFormats:* [ Failure ]
-crbug.com/dawn/0000 [ angle-opengl dawn-no-backend-validation desktop display-server-x graphite-disabled intel-0x4680 no-asan no-clang-coverage oop-c passthrough release renderer-skia-gl target-cpu-64 ubuntu webgpu-adapter-default webgpu-no-worker ] webgpu:web_platform,canvas,getCurrentTexture:multiple_frames:canvasType="offscreen" [ Failure ]
-crbug.com/dawn/0000 [ angle-opengl dawn-no-backend-validation desktop display-server-x graphite-disabled intel-0x9bc5 no-asan no-clang-coverage oop-c passthrough release renderer-skia-gl target-cpu-64 ubuntu webgpu-adapter-default webgpu-no-worker ] webgpu:compat,api,validation,render_pipeline,unsupported_wgsl:* [ Failure ]
-crbug.com/dawn/0000 [ angle-opengl dawn-no-backend-validation desktop display-server-x graphite-disabled intel-0x9bc5 no-asan no-clang-coverage oop-c passthrough release renderer-skia-gl target-cpu-64 ubuntu webgpu-adapter-default webgpu-no-worker ] webgpu:shader,execution,expression,call,builtin,fwidthFine:* [ Failure ]
-crbug.com/dawn/0000 [ angle-opengl dawn-no-backend-validation desktop display-server-x graphite-disabled intel-0x9bc5 no-asan no-clang-coverage oop-c passthrough release renderer-skia-gl target-cpu-64 ubuntu webgpu-adapter-default webgpu-no-worker ] webgpu:shader,execution,expression,call,builtin,textureGather:depth_2d_coords:* [ Failure ]
-crbug.com/dawn/0000 [ angle-opengl dawn-no-backend-validation desktop display-server-x graphite-disabled intel-0x9bc5 no-asan no-clang-coverage oop-c passthrough release renderer-skia-gl target-cpu-64 ubuntu webgpu-adapter-default webgpu-no-worker ] webgpu:shader,execution,expression,call,builtin,textureNumLayers:storage:* [ Failure ]
-crbug.com/dawn/0000 [ angle-opengl dawn-no-backend-validation desktop display-server-x graphite-disabled intel-0x9bc5 no-asan no-clang-coverage oop-c passthrough release renderer-skia-gl target-cpu-64 ubuntu webgpu-adapter-default webgpu-no-worker ] webgpu:shader,execution,expression,call,builtin,textureStore:out_of_bounds_array:* [ Failure ]
-crbug.com/dawn/0000 [ angle-opengl dawn-no-backend-validation desktop display-server-x graphite-disabled no-asan no-clang-coverage nvidia-0x2184 oop-c passthrough release renderer-skia-gl target-cpu-64 ubuntu webgpu-adapter-default webgpu-no-worker ] webgpu:compat,api,validation,render_pipeline,unsupported_wgsl:* [ Failure ]
-crbug.com/dawn/0000 [ angle-opengl dawn-no-backend-validation desktop display-server-x graphite-disabled no-asan no-clang-coverage nvidia-0x2184 oop-c passthrough release renderer-skia-gl target-cpu-64 ubuntu webgpu-adapter-default webgpu-no-worker ] webgpu:shader,execution,expression,call,builtin,textureNumLayers:storage:* [ Failure ]
-crbug.com/dawn/0000 [ angle-opengl dawn-no-backend-validation desktop display-server-x graphite-disabled no-asan no-clang-coverage nvidia-0x2184 oop-c passthrough release renderer-skia-gl target-cpu-64 ubuntu webgpu-adapter-default webgpu-no-worker ] webgpu:shader,execution,expression,call,builtin,textureStore:out_of_bounds_array:* [ Failure ]
-crbug.com/dawn/0000 [ angle-opengl dawn-no-backend-validation desktop display-server-x graphite-disabled no-asan no-clang-coverage nvidia-0x2184 oop-c passthrough release renderer-skia-gl target-cpu-64 ubuntu webgpu-adapter-default webgpu-no-worker ] webgpu:shader,execution,limits:function_variable_combined_byte_size:* [ Failure ]
+crbug.com/dawn/0000 [ intel-0x4680 ] webgpu:shader,execution,expression,call,builtin,dpdxFine:* [ Failure ]
+crbug.com/dawn/0000 [ intel-0x4680 ] webgpu:shader,execution,expression,call,builtin,dpdyFine:* [ Failure ]
+crbug.com/dawn/0000 [ intel-0x4680 ] webgpu:shader,execution,expression,call,builtin,textureGather:depth_2d_coords:* [ Failure ]
 crbug.com/dawn/0000 [ intel-0x4680 ] webgpu:shader,execution,expression,call,builtin,textureGather:depth_3d_coords:* [ Failure ]
 crbug.com/dawn/0000 [ intel-0x4680 ] webgpu:shader,execution,expression,call,builtin,textureGather:depth_array_2d_coords:format="depth16unorm";minFilter="nearest" [ Failure ]
 crbug.com/dawn/0000 [ intel-0x4680 ] webgpu:shader,execution,expression,call,builtin,textureGather:depth_array_2d_coords:format="depth32float";minFilter="nearest" [ Failure ]
+crbug.com/dawn/0000 [ intel-0x4680 ] webgpu:shader,execution,expression,call,builtin,textureStore:out_of_bounds_array:* [ Failure ]
+crbug.com/dawn/0000 [ intel-0x4680 ] webgpu:shader,execution,robust_access_vertex:* [ Failure ]
+crbug.com/dawn/0000 [ intel-0x4680 ] webgpu:web_platform,canvas,configure:viewFormats:* [ Failure ]
+crbug.com/dawn/0000 [ intel-0x4680 ] webgpu:web_platform,canvas,getCurrentTexture:multiple_frames:canvasType="offscreen" [ Failure ]
 crbug.com/dawn/0000 [ intel-0x4680 ] webgpu:web_platform,canvas,getCurrentTexture:resize:canvasType="offscreen" [ Failure ]
+crbug.com/dawn/0000 [ intel-0x9bc5 ] webgpu:shader,execution,expression,call,builtin,fwidthFine:* [ Failure ]
+crbug.com/dawn/0000 [ intel-0x9bc5 ] webgpu:shader,execution,expression,call,builtin,textureGather:depth_2d_coords:* [ Failure ]
 crbug.com/dawn/0000 [ intel-0x9bc5 ] webgpu:shader,execution,expression,call,builtin,textureGather:depth_3d_coords:* [ Failure ]
 crbug.com/dawn/0000 [ intel-0x9bc5 ] webgpu:shader,execution,expression,call,builtin,textureGather:depth_array_2d_coords:format="depth16unorm";minFilter="nearest" [ Failure ]
 crbug.com/dawn/0000 [ intel-0x9bc5 ] webgpu:shader,execution,expression,call,builtin,textureGather:depth_array_2d_coords:format="depth32float";minFilter="nearest" [ Failure ]
-crbug.com/dawn/0000 [ intel-0x9bc5 ] webgpu:shader,execution,limits:switch_case_selectors: [ Failure ]
+crbug.com/dawn/0000 [ intel-0x9bc5 ] webgpu:shader,execution,expression,call,builtin,textureStore:out_of_bounds_array:* [ Failure ]
+crbug.com/dawn/0000 [ nvidia-0x2184 ] webgpu:shader,execution,expression,call,builtin,textureStore:out_of_bounds_array:* [ Failure ]
 crbug.com/dawn/0000 [ nvidia-0x2184 ] webgpu:shader,execution,limits:const_array_elements: [ Failure ]
+crbug.com/dawn/0000 [ nvidia-0x2184 ] webgpu:shader,execution,limits:function_variable_combined_byte_size:* [ Failure ]
 crbug.com/dawn/0000 [ nvidia-0x2184 ] webgpu:shader,execution,limits:private_array_combined_byte_size:* [ Failure ]
