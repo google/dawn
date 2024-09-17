@@ -170,8 +170,7 @@ void main() {
 )");
 }
 
-// TODO(dsinclair): Needs bitcast
-TEST_F(GlslWriterTest, DISABLED_BuiltinStorageAtomicCompareExchangeWeak) {
+TEST_F(GlslWriterTest, BuiltinStorageAtomicCompareExchangeWeak) {
     auto* sb = ty.Struct(mod.symbols.New("SB"), {
                                                     {mod.symbols.New("padding"), ty.vec4<f32>()},
                                                     {mod.symbols.New("a"), ty.atomic<i32>()},
@@ -192,25 +191,33 @@ TEST_F(GlslWriterTest, DISABLED_BuiltinStorageAtomicCompareExchangeWeak) {
     });
 
     ASSERT_TRUE(Generate()) << err_ << output_.glsl;
-    EXPECT_EQ(output_.glsl, GlslHeader() + R"(struct atomic_compare_exchange_result_i32 {
+    EXPECT_EQ(output_.glsl, GlslHeader() + R"(precision highp float;
+precision highp int;
+
+
+struct SB {
+  vec4 padding;
+  int a;
+  uint b;
+};
+
+struct atomic_compare_exchange_result_i32 {
   int old_value;
   bool exchanged;
 };
 
-
-RWByteAddressBuffer v : register(u0);
-void foo() {
-  int v_1 = 0;
-  v.InterlockedCompareExchange(int(16u), 123, 345, v_1);
-  int v_2 = v_1;
-  atomic_compare_exchange_result_i32 x = {v_2, (v_2 == 123)};
+layout(binding = 0, std430)
+buffer tint_symbol_1_1_ssbo {
+  SB tint_symbol;
+} v_1;
+void main() {
+  int v_2 = atomicCompSwap(v_1.tint_symbol.a, 123, 345);
+  atomic_compare_exchange_result_i32 x = atomic_compare_exchange_result_i32(v_2, (v_2 == 123));
 }
-
 )");
 }
 
-// TODO(dsinclair): Needs bitcast
-TEST_F(GlslWriterTest, DISABLED_BuiltinStorageAtomicCompareExchangeWeakDirect) {
+TEST_F(GlslWriterTest, BuiltinStorageAtomicCompareExchangeWeakDirect) {
     auto* var = b.Var("v", storage, ty.atomic<i32>(), core::Access::kReadWrite);
     var->SetBindingPoint(0, 0);
     b.ir.root_block->Append(var);
@@ -223,20 +230,23 @@ TEST_F(GlslWriterTest, DISABLED_BuiltinStorageAtomicCompareExchangeWeakDirect) {
     });
 
     ASSERT_TRUE(Generate()) << err_ << output_.glsl;
-    EXPECT_EQ(output_.glsl, GlslHeader() + R"(struct atomic_compare_exchange_result_i32 {
+    EXPECT_EQ(output_.glsl, GlslHeader() + R"(precision highp float;
+precision highp int;
+
+
+struct atomic_compare_exchange_result_i32 {
   int old_value;
   bool exchanged;
 };
 
-
-RWByteAddressBuffer v : register(u0);
-void foo() {
-  int v_1 = 0;
-  v.InterlockedCompareExchange(int(0u), 123, 345, v_1);
-  int v_2 = v_1;
-  atomic_compare_exchange_result_i32 x = {v_2, (v_2 == 123)};
+layout(binding = 0, std430)
+buffer tint_symbol_1_1_ssbo {
+  int tint_symbol;
+} v_1;
+void main() {
+  int v_2 = atomicCompSwap(v_1.tint_symbol, 123, 345);
+  atomic_compare_exchange_result_i32 x = atomic_compare_exchange_result_i32(v_2, (v_2 == 123));
 }
-
 )");
 }
 
@@ -331,8 +341,7 @@ void main() {
 )");
 }
 
-// TODO(dsinclair): Needs bitcast
-TEST_F(GlslWriterTest, DISABLED_BuiltinWorkgroupAtomicCompareExchangeWeak) {
+TEST_F(GlslWriterTest, BuiltinWorkgroupAtomicCompareExchangeWeak) {
     auto* sb = ty.Struct(mod.symbols.New("SB"), {
                                                     {mod.symbols.New("padding"), ty.vec4<f32>()},
                                                     {mod.symbols.New("a"), ty.atomic<i32>()},
@@ -353,8 +362,10 @@ TEST_F(GlslWriterTest, DISABLED_BuiltinWorkgroupAtomicCompareExchangeWeak) {
     });
 
     ASSERT_TRUE(Generate()) << err_ << output_.glsl;
-    EXPECT_EQ(output_.glsl, GlslHeader() + R"(struct SB {
-  float4 padding;
+    EXPECT_EQ(output_.glsl, GlslHeader() + R"(
+
+struct SB {
+  vec4 padding;
   int a;
   uint b;
 };
@@ -364,32 +375,173 @@ struct atomic_compare_exchange_result_i32 {
   bool exchanged;
 };
 
-struct foo_inputs {
-  uint tint_local_index : SV_GroupIndex;
-};
-
-
-groupshared SB v;
+shared SB v;
 void foo_inner(uint tint_local_index) {
   if ((tint_local_index == 0u)) {
-    v.padding = (0.0f).xxxx;
-    int v_1 = 0;
-    InterlockedExchange(v.a, 0, v_1);
-    uint v_2 = 0u;
-    InterlockedExchange(v.b, 0u, v_2);
+    v.padding = vec4(0.0f);
+    atomicExchange(v.a, 0);
+    atomicExchange(v.b, 0u);
   }
-  GroupMemoryBarrierWithGroupSync();
-  int v_3 = 0;
-  InterlockedCompareExchange(v.a, 123, 345, v_3);
-  int v_4 = v_3;
-  atomic_compare_exchange_result_i32 x = {v_4, (v_4 == 123)};
+  barrier();
+  int v_1 = atomicCompSwap(v.a, 123, 345);
+  atomic_compare_exchange_result_i32 x = atomic_compare_exchange_result_i32(v_1, (v_1 == 123));
+}
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+void main() {
+  foo_inner(gl_LocalInvocationIndex);
+}
+)");
 }
 
-[numthreads(1, 1, 1)]
-void foo(foo_inputs inputs) {
-  foo_inner(inputs.tint_local_index);
+TEST_F(GlslWriterTest, BuiltinBitcast_FloatToFloat) {
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        auto* a = b.Let("a", 1_f);
+        b.Let("x", b.Bitcast<f32>(a));
+        b.Return(func);
+    });
+
+    ASSERT_TRUE(Generate()) << err_ << output_.glsl;
+    EXPECT_EQ(output_.glsl, GlslHeader() + R"(precision highp float;
+precision highp int;
+
+void main() {
+  float a = 1.0f;
+  float x = a;
+}
+)");
 }
 
+TEST_F(GlslWriterTest, BuiltinBitcast_IntToFloat) {
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        auto* a = b.Let("a", 1_i);
+        b.Let("x", b.Bitcast<f32>(a));
+        b.Return(func);
+    });
+
+    ASSERT_TRUE(Generate()) << err_ << output_.glsl;
+    EXPECT_EQ(output_.glsl, GlslHeader() + R"(precision highp float;
+precision highp int;
+
+void main() {
+  int a = 1;
+  float x = intBitsToFloat(a);
+}
+)");
+}
+
+TEST_F(GlslWriterTest, BuiltinBitcast_UintToFloat) {
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        auto* a = b.Let("a", 1_u);
+        b.Let("x", b.Bitcast<f32>(a));
+        b.Return(func);
+    });
+
+    ASSERT_TRUE(Generate()) << err_ << output_.glsl;
+    EXPECT_EQ(output_.glsl, GlslHeader() + R"(precision highp float;
+precision highp int;
+
+void main() {
+  uint a = 1u;
+  float x = uintBitsToFloat(a);
+}
+)");
+}
+
+TEST_F(GlslWriterTest, BuiltinBitcast_Vec3UintToVec3Float) {
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        auto* a = b.Let("a", b.Splat<vec3<u32>>(1_u));
+        b.Let("x", b.Bitcast<vec3<f32>>(a));
+        b.Return(func);
+    });
+
+    ASSERT_TRUE(Generate()) << err_ << output_.glsl;
+    EXPECT_EQ(output_.glsl, GlslHeader() + R"(precision highp float;
+precision highp int;
+
+void main() {
+  uvec3 a = uvec3(1u);
+  vec3 x = uintBitsToFloat(a);
+}
+)");
+}
+
+TEST_F(GlslWriterTest, BuiltinBitcast_FloatToInt) {
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        auto* a = b.Let("a", 1_f);
+        b.Let("x", b.Bitcast<i32>(a));
+        b.Return(func);
+    });
+
+    ASSERT_TRUE(Generate()) << err_ << output_.glsl;
+    EXPECT_EQ(output_.glsl, GlslHeader() + R"(precision highp float;
+precision highp int;
+
+void main() {
+  float a = 1.0f;
+  int x = floatBitsToInt(a);
+}
+)");
+}
+
+TEST_F(GlslWriterTest, BuiltinBitcast_FloatToUint) {
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        auto* a = b.Let("a", 1_f);
+        b.Let("x", b.Bitcast<u32>(a));
+        b.Return(func);
+    });
+
+    ASSERT_TRUE(Generate()) << err_ << output_.glsl;
+    EXPECT_EQ(output_.glsl, GlslHeader() + R"(precision highp float;
+precision highp int;
+
+void main() {
+  float a = 1.0f;
+  uint x = floatBitsToUint(a);
+}
+)");
+}
+
+TEST_F(GlslWriterTest, BuiltinBitcast_UintToInt) {
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        auto* a = b.Let("a", 1_u);
+        b.Let("x", b.Bitcast<i32>(a));
+        b.Return(func);
+    });
+
+    ASSERT_TRUE(Generate()) << err_ << output_.glsl;
+    EXPECT_EQ(output_.glsl, GlslHeader() + R"(precision highp float;
+precision highp int;
+
+void main() {
+  uint a = 1u;
+  int x = int(a);
+}
+)");
+}
+
+TEST_F(GlslWriterTest, BuiltinBitcast_IntToUint) {
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        auto* a = b.Let("a", 1_i);
+        b.Let("x", b.Bitcast<u32>(a));
+        b.Return(func);
+    });
+
+    ASSERT_TRUE(Generate()) << err_ << output_.glsl;
+    EXPECT_EQ(output_.glsl, GlslHeader() + R"(precision highp float;
+precision highp int;
+
+void main() {
+  int a = 1;
+  uint x = uint(a);
+}
 )");
 }
 

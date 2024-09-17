@@ -52,6 +52,14 @@ const char* str(BuiltinFn i) {
             return "atomicCompSwap";
         case BuiltinFn::kAtomicSub:
             return "atomicSub";
+        case BuiltinFn::kFloatBitsToInt:
+            return "floatBitsToInt";
+        case BuiltinFn::kFloatBitsToUint:
+            return "floatBitsToUint";
+        case BuiltinFn::kIntBitsToFloat:
+            return "intBitsToFloat";
+        case BuiltinFn::kUintBitsToFloat:
+            return "uintBitsToFloat";
     }
     return "<unknown>";
 }

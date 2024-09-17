@@ -61,10 +61,19 @@ struct State {
         tint::UnorderedKeyWrapper<std::tuple<const core::type::Type*, const core::type::Type*>>;
     Hashmap<BitcastType, core::ir::Function*, 4> bitcast_funcs_{};
 
+    // The bitcast worklist is a member because some polyfills add bitcast calls. When they do, they
+    // can add the bitcast to the worklist to be fixed up as needed.
+    Vector<core::ir::Bitcast*, 4> bitcast_worklist{};
+
     /// Process the module.
     void Process() {
         Vector<core::ir::CoreBuiltinCall*, 4> call_worklist;
         for (auto* inst : ir.Instructions()) {
+            if (auto* bitcast = inst->As<core::ir::Bitcast>()) {
+                bitcast_worklist.Push(bitcast);
+                continue;
+            }
+
             if (auto* call = inst->As<core::ir::CoreBuiltinCall>()) {
                 switch (call->Func()) {
                     case core::BuiltinFn::kAtomicCompareExchangeWeak:
@@ -107,6 +116,75 @@ struct State {
                     TINT_UNREACHABLE();
             }
         }
+
+        // Replace the bitcasts that we found. These are done after the other builtins as some of
+        // them also create bitcasts which will need to be updated.
+        for (auto* bitcast : bitcast_worklist) {
+            auto* src_type = bitcast->Val()->Type();
+            auto* dst_type = bitcast->Result(0)->Type();
+            auto* dst_deepest = dst_type->DeepestElement();
+
+            if (src_type == dst_type) {
+                ReplaceBitcastWithValue(bitcast);
+            } else if (src_type->DeepestElement()->Is<core::type::F16>()) {
+                // TODO(dsinclair): Polyfill from f16
+                TINT_UNREACHABLE();
+            } else if (dst_deepest->Is<core::type::F16>()) {
+                // TODO(dsinclair): Polyfill to f16
+                TINT_UNREACHABLE();
+            } else if (src_type->DeepestElement()->Is<core::type::F32>()) {
+                ReplaceBitcastFromF32(bitcast);
+            } else if (dst_type->DeepestElement()->Is<core::type::F32>()) {
+                ReplaceBitcastToF32(bitcast);
+            } else {
+                ReplaceBitcast(bitcast);
+            }
+        }
+    }
+
+    void ReplaceBitcastWithValue(core::ir::Bitcast* bitcast) {
+        bitcast->Result(0)->ReplaceAllUsesWith(bitcast->Val());
+        bitcast->Destroy();
+    }
+
+    void ReplaceBitcastFromF32(core::ir::Bitcast* bitcast) {
+        auto* dst_type = bitcast->Result(0)->Type();
+        auto* dst_deepest = dst_type->DeepestElement();
+
+        BuiltinFn fn = BuiltinFn::kNone;
+        tint::Switch(
+            dst_deepest,                                                        //
+            [&](const core::type::I32*) { fn = BuiltinFn::kFloatBitsToInt; },   //
+            [&](const core::type::U32*) { fn = BuiltinFn::kFloatBitsToUint; },  //
+            TINT_ICE_ON_NO_MATCH);
+
+        b.InsertBefore(bitcast, [&] {
+            b.CallWithResult<glsl::ir::BuiltinCall>(bitcast->DetachResult(), fn, bitcast->Val());
+        });
+        bitcast->Destroy();
+    }
+
+    void ReplaceBitcastToF32(core::ir::Bitcast* bitcast) {
+        auto* src_type = bitcast->Val()->Type();
+        auto* src_deepest = src_type->DeepestElement();
+
+        BuiltinFn fn = BuiltinFn::kNone;
+        tint::Switch(
+            src_deepest,                                                        //
+            [&](const core::type::I32*) { fn = BuiltinFn::kIntBitsToFloat; },   //
+            [&](const core::type::U32*) { fn = BuiltinFn::kUintBitsToFloat; },  //
+            TINT_ICE_ON_NO_MATCH);
+
+        b.InsertBefore(bitcast, [&] {
+            b.CallWithResult<glsl::ir::BuiltinCall>(bitcast->DetachResult(), fn, bitcast->Val());
+        });
+        bitcast->Destroy();
+    }
+
+    void ReplaceBitcast(core::ir::Bitcast* bitcast) {
+        b.InsertBefore(bitcast,
+                       [&] { b.ConvertWithResult(bitcast->DetachResult(), bitcast->Val()); });
+        bitcast->Destroy();
     }
 
     void AtomicCompareExchangeWeak(core::ir::BuiltinCall* call) {
@@ -120,10 +198,16 @@ struct State {
         auto* result_type = call->Result(0)->Type();
 
         b.InsertBefore(call, [&] {
+            auto* bitcast_cmp_value = b.Bitcast(type, compare_value);
+            auto* bitcast_value = b.Bitcast(type, value);
+
+            bitcast_worklist.Push(bitcast_cmp_value);
+            bitcast_worklist.Push(bitcast_value);
+
             auto* swap = b.Call<glsl::ir::BuiltinCall>(
                 type, glsl::BuiltinFn::kAtomicCompSwap,
-                Vector<core::ir::Value*, 3>{dest, b.Bitcast(ty.u32(), compare_value)->Result(0),
-                                            b.Bitcast(ty.u32(), value)->Result(0)});
+                Vector<core::ir::Value*, 3>{dest, bitcast_cmp_value->Result(0),
+                                            bitcast_value->Result(0)});
 
             auto* exchanged = b.Equal(ty.bool_(), swap, compare_value);
 

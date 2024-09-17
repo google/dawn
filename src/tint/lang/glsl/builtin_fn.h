@@ -52,6 +52,10 @@ enum class BuiltinFn : uint8_t {
     kMemoryBarrierImage,
     kAtomicCompSwap,
     kAtomicSub,
+    kFloatBitsToInt,
+    kFloatBitsToUint,
+    kIntBitsToFloat,
+    kUintBitsToFloat,
     kNone,
 };
 

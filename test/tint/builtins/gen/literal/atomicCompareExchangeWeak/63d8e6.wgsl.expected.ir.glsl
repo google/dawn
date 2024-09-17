@@ -1,11 +1,49 @@
-SKIP: FAILED
+#version 310 es
+precision highp float;
+precision highp int;
 
-<dawn>/src/tint/lang/glsl/writer/printer/printer.cc:1423 internal compiler error: TINT_UNREACHABLE unhandled core builtin: atomicCompareExchangeWeak
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
 
-tint executable returned error: signal: trace/BPT trap
+struct SB_RW {
+  uint arg_0;
+};
+
+struct atomic_compare_exchange_result_u32 {
+  uint old_value;
+  bool exchanged;
+};
+
+layout(binding = 0, std430)
+buffer tint_symbol_1_1_ssbo {
+  SB_RW tint_symbol;
+} v;
+void atomicCompareExchangeWeak_63d8e6() {
+  uint v_1 = atomicCompSwap(v.tint_symbol.arg_0, 1u, 1u);
+  atomic_compare_exchange_result_u32 res = atomic_compare_exchange_result_u32(v_1, (v_1 == 1u));
+}
+void main() {
+  atomicCompareExchangeWeak_63d8e6();
+}
+#version 310 es
+
+
+struct SB_RW {
+  uint arg_0;
+};
+
+struct atomic_compare_exchange_result_u32 {
+  uint old_value;
+  bool exchanged;
+};
+
+layout(binding = 0, std430)
+buffer tint_symbol_1_1_ssbo {
+  SB_RW tint_symbol;
+} v;
+void atomicCompareExchangeWeak_63d8e6() {
+  uint v_1 = atomicCompSwap(v.tint_symbol.arg_0, 1u, 1u);
+  atomic_compare_exchange_result_u32 res = atomic_compare_exchange_result_u32(v_1, (v_1 == 1u));
+}
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+void main() {
+  atomicCompareExchangeWeak_63d8e6();
+}

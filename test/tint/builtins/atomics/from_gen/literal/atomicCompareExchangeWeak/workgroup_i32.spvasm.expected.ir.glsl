@@ -1,11 +1,43 @@
-SKIP: FAILED
+#version 310 es
 
-<dawn>/src/tint/lang/glsl/writer/printer/printer.cc:1423 internal compiler error: TINT_UNREACHABLE unhandled core builtin: atomicCompareExchangeWeak
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
 
-tint executable returned error: signal: trace/BPT trap
+struct tint_symbol {
+  int old_value;
+  bool exchanged;
+};
+
+struct atomic_compare_exchange_result_i32 {
+  int old_value;
+  bool exchanged;
+};
+
+uint local_invocation_index_1 = 0u;
+shared int arg_0;
+void atomicCompareExchangeWeak_e88938() {
+  tint_symbol res = tint_symbol(0, false);
+  int v = atomicCompSwap(arg_0, 1, 1);
+  int old_value_1 = atomic_compare_exchange_result_i32(v, (v == 1)).old_value;
+  int x_18 = old_value_1;
+  res = tint_symbol(x_18, (x_18 == 1));
+}
+void compute_main_inner(uint local_invocation_index_2) {
+  atomicExchange(arg_0, 0);
+  barrier();
+  atomicCompareExchangeWeak_e88938();
+}
+void compute_main_1() {
+  uint x_36 = local_invocation_index_1;
+  compute_main_inner(x_36);
+}
+void compute_main_inner_1(uint local_invocation_index_1_param) {
+  if ((local_invocation_index_1_param == 0u)) {
+    atomicExchange(arg_0, 0);
+  }
+  barrier();
+  local_invocation_index_1 = local_invocation_index_1_param;
+  compute_main_1();
+}
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+void main() {
+  compute_main_inner_1(gl_LocalInvocationIndex);
+}

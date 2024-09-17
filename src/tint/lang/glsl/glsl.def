@@ -42,10 +42,12 @@ import "src/tint/lang/core/access.def"
 // Types                                                                      //
 ////////////////////////////////////////////////////////////////////////////////
 
+type f32
 type i32
 type u32
 type atomic<T>
 type ptr<S: address_space, T, A: access>
+@display("vec{N}<{T}>")     type vec<N: num, T>
 
 ////////////////////////////////////////////////////////////////////////////////
 // Type matchers                                                              //
@@ -69,8 +71,19 @@ match workgroup_or_storage:
 
 @stage("fragment", "compute") implicit(T: iu32) fn atomicCompSwap(
                                     ptr<workgroup_or_storage, atomic<T>, read_write>,
-                                    compare_value: u32,
-                                    value: u32) -> T
+                                    compare_value: T,
+                                    value: T) -> T
 @stage("fragment", "compute") implicit(T: iu32, S: workgroup_or_storage) fn atomicSub(
                                     ptr<S, atomic<T>, read_write>,
                                     T) -> T
+
+fn floatBitsToInt(value: f32) -> i32
+implicit(N: num) fn floatBitsToInt(value: vec<N, f32>) -> vec<N, i32>
+fn floatBitsToUint(value: f32) -> u32
+implicit(N: num) fn floatBitsToUint(value: vec<N, f32>) -> vec<N, u32>
+
+fn intBitsToFloat(value: i32) -> f32
+implicit(N: num) fn intBitsToFloat(value: vec<N, i32>) -> vec<N, f32>
+fn uintBitsToFloat(value: u32) -> f32
+implicit(N: num) fn uintBitsToFloat(value: vec<N, u32>) -> vec<N, f32>
+

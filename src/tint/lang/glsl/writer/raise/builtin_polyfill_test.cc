@@ -260,12 +260,10 @@ $B1: {  # root
 
 %foo = @compute @workgroup_size(1, 1, 1) func():void {
   $B2: {
-    %3:u32 = bitcast 123i
-    %4:u32 = bitcast 345i
-    %5:i32 = glsl.atomicCompSwap %v, %3, %4
-    %6:bool = eq %5, 123i
-    %7:__atomic_compare_exchange_result_i32 = construct %5, %6
-    %x:__atomic_compare_exchange_result_i32 = let %7
+    %3:i32 = glsl.atomicCompSwap %v, 123i, 345i
+    %4:bool = eq %3, 123i
+    %5:__atomic_compare_exchange_result_i32 = construct %3, %4
+    %x:__atomic_compare_exchange_result_i32 = let %5
     ret
   }
 }
@@ -402,6 +400,285 @@ $B1: {  # root
   $B2: {
     %3:i32 = atomicOr %v, 0i
     %x:i32 = let %3
+    ret
+  }
+}
+)";
+
+    Run(BuiltinPolyfill);
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(GlslWriter_BuiltinPolyfillTest, BitcastFloatToFloat) {
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        auto* a = b.Let("a", 1_f);
+        b.Let("x", b.Bitcast<f32>(a));
+        b.Return(func);
+    });
+
+    auto* src = R"(
+%foo = @fragment func():void {
+  $B1: {
+    %a:f32 = let 1.0f
+    %3:f32 = bitcast %a
+    %x:f32 = let %3
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = @fragment func():void {
+  $B1: {
+    %a:f32 = let 1.0f
+    %x:f32 = let %a
+    ret
+  }
+}
+)";
+
+    Run(BuiltinPolyfill);
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(GlslWriter_BuiltinPolyfillTest, BitcastIntToFloat) {
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        auto* a = b.Let("a", 1_i);
+        b.Let("x", b.Bitcast<f32>(a));
+        b.Return(func);
+    });
+
+    auto* src = R"(
+%foo = @fragment func():void {
+  $B1: {
+    %a:i32 = let 1i
+    %3:f32 = bitcast %a
+    %x:f32 = let %3
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = @fragment func():void {
+  $B1: {
+    %a:i32 = let 1i
+    %3:f32 = glsl.intBitsToFloat %a
+    %x:f32 = let %3
+    ret
+  }
+}
+)";
+
+    Run(BuiltinPolyfill);
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(GlslWriter_BuiltinPolyfillTest, BitcastUintToFloat) {
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        auto* a = b.Let("a", 1_u);
+        b.Let("x", b.Bitcast<f32>(a));
+        b.Return(func);
+    });
+
+    auto* src = R"(
+%foo = @fragment func():void {
+  $B1: {
+    %a:u32 = let 1u
+    %3:f32 = bitcast %a
+    %x:f32 = let %3
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = @fragment func():void {
+  $B1: {
+    %a:u32 = let 1u
+    %3:f32 = glsl.uintBitsToFloat %a
+    %x:f32 = let %3
+    ret
+  }
+}
+)";
+
+    Run(BuiltinPolyfill);
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(GlslWriter_BuiltinPolyfillTest, BitcastVec3UintToVec3Float) {
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        auto* a = b.Let("a", b.Splat<vec3<u32>>(1_u));
+        b.Let("x", b.Bitcast<vec3<f32>>(a));
+        b.Return(func);
+    });
+
+    auto* src = R"(
+%foo = @fragment func():void {
+  $B1: {
+    %a:vec3<u32> = let vec3<u32>(1u)
+    %3:vec3<f32> = bitcast %a
+    %x:vec3<f32> = let %3
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = @fragment func():void {
+  $B1: {
+    %a:vec3<u32> = let vec3<u32>(1u)
+    %3:vec3<f32> = glsl.uintBitsToFloat %a
+    %x:vec3<f32> = let %3
+    ret
+  }
+}
+)";
+
+    Run(BuiltinPolyfill);
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(GlslWriter_BuiltinPolyfillTest, BitcastFloatToInt) {
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        auto* a = b.Let("a", 1_f);
+        b.Let("x", b.Bitcast<i32>(a));
+        b.Return(func);
+    });
+
+    auto* src = R"(
+%foo = @fragment func():void {
+  $B1: {
+    %a:f32 = let 1.0f
+    %3:i32 = bitcast %a
+    %x:i32 = let %3
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = @fragment func():void {
+  $B1: {
+    %a:f32 = let 1.0f
+    %3:i32 = glsl.floatBitsToInt %a
+    %x:i32 = let %3
+    ret
+  }
+}
+)";
+
+    Run(BuiltinPolyfill);
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(GlslWriter_BuiltinPolyfillTest, BitcastFloatToUint) {
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        auto* a = b.Let("a", 1_f);
+        b.Let("x", b.Bitcast<u32>(a));
+        b.Return(func);
+    });
+
+    auto* src = R"(
+%foo = @fragment func():void {
+  $B1: {
+    %a:f32 = let 1.0f
+    %3:u32 = bitcast %a
+    %x:u32 = let %3
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = @fragment func():void {
+  $B1: {
+    %a:f32 = let 1.0f
+    %3:u32 = glsl.floatBitsToUint %a
+    %x:u32 = let %3
+    ret
+  }
+}
+)";
+
+    Run(BuiltinPolyfill);
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(GlslWriter_BuiltinPolyfillTest, BitcastUintToInt) {
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        auto* a = b.Let("a", 1_u);
+        b.Let("x", b.Bitcast<i32>(a));
+        b.Return(func);
+    });
+
+    auto* src = R"(
+%foo = @fragment func():void {
+  $B1: {
+    %a:u32 = let 1u
+    %3:i32 = bitcast %a
+    %x:i32 = let %3
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = @fragment func():void {
+  $B1: {
+    %a:u32 = let 1u
+    %3:i32 = convert %a
+    %x:i32 = let %3
+    ret
+  }
+}
+)";
+
+    Run(BuiltinPolyfill);
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(GlslWriter_BuiltinPolyfillTest, BitcastIntToUint) {
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        auto* a = b.Let("a", 1_i);
+        b.Let("x", b.Bitcast<u32>(a));
+        b.Return(func);
+    });
+
+    auto* src = R"(
+%foo = @fragment func():void {
+  $B1: {
+    %a:i32 = let 1i
+    %3:u32 = bitcast %a
+    %x:u32 = let %3
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = @fragment func():void {
+  $B1: {
+    %a:i32 = let 1i
+    %3:u32 = convert %a
+    %x:u32 = let %3
     ret
   }
 }
