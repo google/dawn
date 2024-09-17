@@ -688,5 +688,551 @@ TEST_F(GlslWriter_BuiltinPolyfillTest, BitcastIntToUint) {
     EXPECT_EQ(expect, str());
 }
 
+TEST_F(GlslWriter_BuiltinPolyfillTest, BitcastI32ToVec2F16) {
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        auto* a = b.Let("a", 1_i);
+        b.Let("x", b.Bitcast<vec2<f16>>(a));
+        b.Return(func);
+    });
+
+    auto* src = R"(
+%foo = @fragment func():void {
+  $B1: {
+    %a:i32 = let 1i
+    %3:vec2<f16> = bitcast %a
+    %x:vec2<f16> = let %3
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = @fragment func():void {
+  $B1: {
+    %a:i32 = let 1i
+    %3:vec2<f16> = call %tint_bitcast_to_f16, %a
+    %x:vec2<f16> = let %3
+    ret
+  }
+}
+%tint_bitcast_to_f16 = func(%src:i32):vec2<f16> {
+  $B2: {
+    %7:u32 = convert %src
+    %8:vec2<f16> = glsl.unpackFloat2x16 %7
+    ret %8
+  }
+}
+)";
+
+    Run(BuiltinPolyfill);
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(GlslWriter_BuiltinPolyfillTest, BitcastVec2F16ToI32) {
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        auto* a = b.Let("a", b.Construct<vec2<f16>>(1_h, 2_h));
+        b.Let("x", b.Bitcast<i32>(a));
+        b.Return(func);
+    });
+
+    auto* src = R"(
+%foo = @fragment func():void {
+  $B1: {
+    %2:vec2<f16> = construct 1.0h, 2.0h
+    %a:vec2<f16> = let %2
+    %4:i32 = bitcast %a
+    %x:i32 = let %4
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = @fragment func():void {
+  $B1: {
+    %2:vec2<f16> = construct 1.0h, 2.0h
+    %a:vec2<f16> = let %2
+    %4:i32 = call %tint_bitcast_from_f16, %a
+    %x:i32 = let %4
+    ret
+  }
+}
+%tint_bitcast_from_f16 = func(%src:vec2<f16>):i32 {
+  $B2: {
+    %8:u32 = glsl.packFloat2x16 %src
+    %9:i32 = convert %8
+    ret %9
+  }
+}
+)";
+
+    Run(BuiltinPolyfill);
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(GlslWriter_BuiltinPolyfillTest, BitcastU32ToVec2F16) {
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        auto* a = b.Let("a", 1_u);
+        b.Let("x", b.Bitcast<vec2<f16>>(a));
+        b.Return(func);
+    });
+
+    auto* src = R"(
+%foo = @fragment func():void {
+  $B1: {
+    %a:u32 = let 1u
+    %3:vec2<f16> = bitcast %a
+    %x:vec2<f16> = let %3
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = @fragment func():void {
+  $B1: {
+    %a:u32 = let 1u
+    %3:vec2<f16> = call %tint_bitcast_to_f16, %a
+    %x:vec2<f16> = let %3
+    ret
+  }
+}
+%tint_bitcast_to_f16 = func(%src:u32):vec2<f16> {
+  $B2: {
+    %7:u32 = convert %src
+    %8:vec2<f16> = glsl.unpackFloat2x16 %7
+    ret %8
+  }
+}
+)";
+
+    Run(BuiltinPolyfill);
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(GlslWriter_BuiltinPolyfillTest, BitcastVec2F16ToU32) {
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        auto* a = b.Let("a", b.Construct<vec2<f16>>(1_h, 2_h));
+        b.Let("x", b.Bitcast<u32>(a));
+        b.Return(func);
+    });
+
+    auto* src = R"(
+%foo = @fragment func():void {
+  $B1: {
+    %2:vec2<f16> = construct 1.0h, 2.0h
+    %a:vec2<f16> = let %2
+    %4:u32 = bitcast %a
+    %x:u32 = let %4
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = @fragment func():void {
+  $B1: {
+    %2:vec2<f16> = construct 1.0h, 2.0h
+    %a:vec2<f16> = let %2
+    %4:u32 = call %tint_bitcast_from_f16, %a
+    %x:u32 = let %4
+    ret
+  }
+}
+%tint_bitcast_from_f16 = func(%src:vec2<f16>):u32 {
+  $B2: {
+    %8:u32 = glsl.packFloat2x16 %src
+    %9:u32 = convert %8
+    ret %9
+  }
+}
+)";
+
+    Run(BuiltinPolyfill);
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(GlslWriter_BuiltinPolyfillTest, BitcastF32ToVec2F16) {
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        auto* a = b.Let("a", 1_f);
+        b.Let("x", b.Bitcast<vec2<f16>>(a));
+        b.Return(func);
+    });
+
+    auto* src = R"(
+%foo = @fragment func():void {
+  $B1: {
+    %a:f32 = let 1.0f
+    %3:vec2<f16> = bitcast %a
+    %x:vec2<f16> = let %3
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = @fragment func():void {
+  $B1: {
+    %a:f32 = let 1.0f
+    %3:vec2<f16> = call %tint_bitcast_to_f16, %a
+    %x:vec2<f16> = let %3
+    ret
+  }
+}
+%tint_bitcast_to_f16 = func(%src:f32):vec2<f16> {
+  $B2: {
+    %7:u32 = glsl.floatBitsToUint %src
+    %8:vec2<f16> = glsl.unpackFloat2x16 %7
+    ret %8
+  }
+}
+)";
+
+    Run(BuiltinPolyfill);
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(GlslWriter_BuiltinPolyfillTest, BitcastVec2F16ToF32) {
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        auto* a = b.Let("a", b.Construct<vec2<f16>>(1_h, 2_h));
+        b.Let("x", b.Bitcast<f32>(a));
+        b.Return(func);
+    });
+
+    auto* src = R"(
+%foo = @fragment func():void {
+  $B1: {
+    %2:vec2<f16> = construct 1.0h, 2.0h
+    %a:vec2<f16> = let %2
+    %4:f32 = bitcast %a
+    %x:f32 = let %4
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = @fragment func():void {
+  $B1: {
+    %2:vec2<f16> = construct 1.0h, 2.0h
+    %a:vec2<f16> = let %2
+    %4:f32 = call %tint_bitcast_from_f16, %a
+    %x:f32 = let %4
+    ret
+  }
+}
+%tint_bitcast_from_f16 = func(%src:vec2<f16>):f32 {
+  $B2: {
+    %8:u32 = glsl.packFloat2x16 %src
+    %9:f32 = glsl.uintBitsToFloat %8
+    ret %9
+  }
+}
+)";
+
+    Run(BuiltinPolyfill);
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(GlslWriter_BuiltinPolyfillTest, BitcastVec2I32ToVec4F16) {
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        auto* a = b.Let("a", b.Construct<vec2<i32>>(1_i, 2_i));
+        b.Let("x", b.Bitcast<vec4<f16>>(a));
+        b.Return(func);
+    });
+
+    auto* src = R"(
+%foo = @fragment func():void {
+  $B1: {
+    %2:vec2<i32> = construct 1i, 2i
+    %a:vec2<i32> = let %2
+    %4:vec4<f16> = bitcast %a
+    %x:vec4<f16> = let %4
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = @fragment func():void {
+  $B1: {
+    %2:vec2<i32> = construct 1i, 2i
+    %a:vec2<i32> = let %2
+    %4:vec4<f16> = call %tint_bitcast_to_f16, %a
+    %x:vec4<f16> = let %4
+    ret
+  }
+}
+%tint_bitcast_to_f16 = func(%src:vec2<i32>):vec4<f16> {
+  $B2: {
+    %8:vec2<u32> = convert %src
+    %9:u32 = swizzle %8, x
+    %10:vec2<f16> = glsl.unpackFloat2x16 %9
+    %11:u32 = swizzle %8, y
+    %12:vec2<f16> = glsl.unpackFloat2x16 %11
+    %13:vec4<f16> = construct %10, %12
+    ret %13
+  }
+}
+)";
+
+    Run(BuiltinPolyfill);
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(GlslWriter_BuiltinPolyfillTest, BitcastVec4F16ToVec2I32) {
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        auto* a = b.Let("a", b.Construct<vec4<f16>>(1_h, 2_h, 3_h, 4_h));
+        b.Let("x", b.Bitcast<vec2<i32>>(a));
+        b.Return(func);
+    });
+
+    auto* src = R"(
+%foo = @fragment func():void {
+  $B1: {
+    %2:vec4<f16> = construct 1.0h, 2.0h, 3.0h, 4.0h
+    %a:vec4<f16> = let %2
+    %4:vec2<i32> = bitcast %a
+    %x:vec2<i32> = let %4
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = @fragment func():void {
+  $B1: {
+    %2:vec4<f16> = construct 1.0h, 2.0h, 3.0h, 4.0h
+    %a:vec4<f16> = let %2
+    %4:vec2<i32> = call %tint_bitcast_from_f16, %a
+    %x:vec2<i32> = let %4
+    ret
+  }
+}
+%tint_bitcast_from_f16 = func(%src:vec4<f16>):vec2<i32> {
+  $B2: {
+    %8:vec2<f16> = swizzle %src, xy
+    %9:u32 = glsl.packFloat2x16 %8
+    %10:vec2<f16> = swizzle %src, zw
+    %11:u32 = glsl.packFloat2x16 %10
+    %12:vec2<u32> = construct %9, %11
+    %13:vec2<i32> = convert %12
+    ret %13
+  }
+}
+)";
+
+    Run(BuiltinPolyfill);
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(GlslWriter_BuiltinPolyfillTest, BitcastVec2U32ToVec4F16) {
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        auto* a = b.Let("a", b.Construct<vec2<u32>>(1_u, 2_u));
+        b.Let("x", b.Bitcast<vec4<f16>>(a));
+        b.Return(func);
+    });
+
+    auto* src = R"(
+%foo = @fragment func():void {
+  $B1: {
+    %2:vec2<u32> = construct 1u, 2u
+    %a:vec2<u32> = let %2
+    %4:vec4<f16> = bitcast %a
+    %x:vec4<f16> = let %4
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = @fragment func():void {
+  $B1: {
+    %2:vec2<u32> = construct 1u, 2u
+    %a:vec2<u32> = let %2
+    %4:vec4<f16> = call %tint_bitcast_to_f16, %a
+    %x:vec4<f16> = let %4
+    ret
+  }
+}
+%tint_bitcast_to_f16 = func(%src:vec2<u32>):vec4<f16> {
+  $B2: {
+    %8:vec2<u32> = convert %src
+    %9:u32 = swizzle %8, x
+    %10:vec2<f16> = glsl.unpackFloat2x16 %9
+    %11:u32 = swizzle %8, y
+    %12:vec2<f16> = glsl.unpackFloat2x16 %11
+    %13:vec4<f16> = construct %10, %12
+    ret %13
+  }
+}
+)";
+
+    Run(BuiltinPolyfill);
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(GlslWriter_BuiltinPolyfillTest, BitcastVec4F16ToVec2U32) {
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        auto* a = b.Let("a", b.Construct<vec4<f16>>(1_h, 2_h, 3_h, 4_h));
+        b.Let("x", b.Bitcast<vec2<u32>>(a));
+        b.Return(func);
+    });
+
+    auto* src = R"(
+%foo = @fragment func():void {
+  $B1: {
+    %2:vec4<f16> = construct 1.0h, 2.0h, 3.0h, 4.0h
+    %a:vec4<f16> = let %2
+    %4:vec2<u32> = bitcast %a
+    %x:vec2<u32> = let %4
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = @fragment func():void {
+  $B1: {
+    %2:vec4<f16> = construct 1.0h, 2.0h, 3.0h, 4.0h
+    %a:vec4<f16> = let %2
+    %4:vec2<u32> = call %tint_bitcast_from_f16, %a
+    %x:vec2<u32> = let %4
+    ret
+  }
+}
+%tint_bitcast_from_f16 = func(%src:vec4<f16>):vec2<u32> {
+  $B2: {
+    %8:vec2<f16> = swizzle %src, xy
+    %9:u32 = glsl.packFloat2x16 %8
+    %10:vec2<f16> = swizzle %src, zw
+    %11:u32 = glsl.packFloat2x16 %10
+    %12:vec2<u32> = construct %9, %11
+    %13:vec2<u32> = convert %12
+    ret %13
+  }
+}
+)";
+
+    Run(BuiltinPolyfill);
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(GlslWriter_BuiltinPolyfillTest, BitcastVec2F32ToVec4F16) {
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        auto* a = b.Let("a", b.Construct<vec2<f32>>(1_f, 2_f));
+        b.Let("x", b.Bitcast<vec4<f16>>(a));
+        b.Return(func);
+    });
+
+    auto* src = R"(
+%foo = @fragment func():void {
+  $B1: {
+    %2:vec2<f32> = construct 1.0f, 2.0f
+    %a:vec2<f32> = let %2
+    %4:vec4<f16> = bitcast %a
+    %x:vec4<f16> = let %4
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = @fragment func():void {
+  $B1: {
+    %2:vec2<f32> = construct 1.0f, 2.0f
+    %a:vec2<f32> = let %2
+    %4:vec4<f16> = call %tint_bitcast_to_f16, %a
+    %x:vec4<f16> = let %4
+    ret
+  }
+}
+%tint_bitcast_to_f16 = func(%src:vec2<f32>):vec4<f16> {
+  $B2: {
+    %8:vec2<u32> = glsl.floatBitsToUint %src
+    %9:u32 = swizzle %8, x
+    %10:vec2<f16> = glsl.unpackFloat2x16 %9
+    %11:u32 = swizzle %8, y
+    %12:vec2<f16> = glsl.unpackFloat2x16 %11
+    %13:vec4<f16> = construct %10, %12
+    ret %13
+  }
+}
+)";
+
+    Run(BuiltinPolyfill);
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(GlslWriter_BuiltinPolyfillTest, BitcastVec4F16ToVec2F32) {
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        auto* a = b.Let("a", b.Construct<vec4<f16>>(1_h, 2_h, 3_h, 4_h));
+        b.Let("x", b.Bitcast<vec2<f32>>(a));
+        b.Return(func);
+    });
+
+    auto* src = R"(
+%foo = @fragment func():void {
+  $B1: {
+    %2:vec4<f16> = construct 1.0h, 2.0h, 3.0h, 4.0h
+    %a:vec4<f16> = let %2
+    %4:vec2<f32> = bitcast %a
+    %x:vec2<f32> = let %4
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = @fragment func():void {
+  $B1: {
+    %2:vec4<f16> = construct 1.0h, 2.0h, 3.0h, 4.0h
+    %a:vec4<f16> = let %2
+    %4:vec2<f32> = call %tint_bitcast_from_f16, %a
+    %x:vec2<f32> = let %4
+    ret
+  }
+}
+%tint_bitcast_from_f16 = func(%src:vec4<f16>):vec2<f32> {
+  $B2: {
+    %8:vec2<f16> = swizzle %src, xy
+    %9:u32 = glsl.packFloat2x16 %8
+    %10:vec2<f16> = swizzle %src, zw
+    %11:u32 = glsl.packFloat2x16 %10
+    %12:vec2<u32> = construct %9, %11
+    %13:vec2<f32> = glsl.uintBitsToFloat %12
+    ret %13
+  }
+}
+)";
+
+    Run(BuiltinPolyfill);
+    EXPECT_EQ(expect, str());
+}
+
 }  // namespace
 }  // namespace tint::glsl::writer::raise

@@ -545,5 +545,290 @@ void main() {
 )");
 }
 
+TEST_F(GlslWriterTest, BuiltinBitcast_I32ToVec2F16) {
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        auto* a = b.Let("a", 1_i);
+        b.Let("x", b.Bitcast<vec2<f16>>(a));
+        b.Return(func);
+    });
+
+    ASSERT_TRUE(Generate()) << err_ << output_.glsl;
+    EXPECT_EQ(output_.glsl, GlslHeader() + R"(#extension GL_AMD_gpu_shader_half_float: require
+precision highp float;
+precision highp int;
+
+f16vec2 tint_bitcast_to_f16(int src) {
+  return unpackFloat2x16(uint(src));
+}
+void main() {
+  int a = 1;
+  f16vec2 x = tint_bitcast_to_f16(a);
+}
+)");
+}
+
+TEST_F(GlslWriterTest, BuiltinBitcast_Vec2F16ToI32) {
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        auto* a = b.Let("a", b.Construct<vec2<f16>>(1_h, 2_h));
+        b.Let("x", b.Bitcast<i32>(a));
+        b.Return(func);
+    });
+
+    ASSERT_TRUE(Generate()) << err_ << output_.glsl;
+    EXPECT_EQ(output_.glsl, GlslHeader() + R"(#extension GL_AMD_gpu_shader_half_float: require
+precision highp float;
+precision highp int;
+
+int tint_bitcast_from_f16(f16vec2 src) {
+  return int(packFloat2x16(src));
+}
+void main() {
+  f16vec2 a = f16vec2(1.0hf, 2.0hf);
+  int x = tint_bitcast_from_f16(a);
+}
+)");
+}
+
+TEST_F(GlslWriterTest, BuiltinBitcast_U32ToVec2F16) {
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        auto* a = b.Let("a", 1_u);
+        b.Let("x", b.Bitcast<vec2<f16>>(a));
+        b.Return(func);
+    });
+
+    ASSERT_TRUE(Generate()) << err_ << output_.glsl;
+    EXPECT_EQ(output_.glsl, GlslHeader() + R"(#extension GL_AMD_gpu_shader_half_float: require
+precision highp float;
+precision highp int;
+
+f16vec2 tint_bitcast_to_f16(uint src) {
+  return unpackFloat2x16(uint(src));
+}
+void main() {
+  uint a = 1u;
+  f16vec2 x = tint_bitcast_to_f16(a);
+}
+)");
+}
+
+TEST_F(GlslWriterTest, BuiltinBitcast_Vec2F16ToU32) {
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        auto* a = b.Let("a", b.Construct<vec2<f16>>(1_h, 2_h));
+        b.Let("x", b.Bitcast<u32>(a));
+        b.Return(func);
+    });
+
+    ASSERT_TRUE(Generate()) << err_ << output_.glsl;
+    EXPECT_EQ(output_.glsl, GlslHeader() + R"(#extension GL_AMD_gpu_shader_half_float: require
+precision highp float;
+precision highp int;
+
+uint tint_bitcast_from_f16(f16vec2 src) {
+  return uint(packFloat2x16(src));
+}
+void main() {
+  f16vec2 a = f16vec2(1.0hf, 2.0hf);
+  uint x = tint_bitcast_from_f16(a);
+}
+)");
+}
+
+TEST_F(GlslWriterTest, BuiltinBitcast_F32ToVec2F16) {
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        auto* a = b.Let("a", 1_f);
+        b.Let("x", b.Bitcast<vec2<f16>>(a));
+        b.Return(func);
+    });
+
+    ASSERT_TRUE(Generate()) << err_ << output_.glsl;
+    EXPECT_EQ(output_.glsl, GlslHeader() + R"(#extension GL_AMD_gpu_shader_half_float: require
+precision highp float;
+precision highp int;
+
+f16vec2 tint_bitcast_to_f16(float src) {
+  return unpackFloat2x16(floatBitsToUint(src));
+}
+void main() {
+  float a = 1.0f;
+  f16vec2 x = tint_bitcast_to_f16(a);
+}
+)");
+}
+
+TEST_F(GlslWriterTest, BuiltinBitcast_Vec2F16ToF32) {
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        auto* a = b.Let("a", b.Construct<vec2<f16>>(1_h, 2_h));
+        b.Let("x", b.Bitcast<f32>(a));
+        b.Return(func);
+    });
+
+    ASSERT_TRUE(Generate()) << err_ << output_.glsl;
+    EXPECT_EQ(output_.glsl, GlslHeader() + R"(#extension GL_AMD_gpu_shader_half_float: require
+precision highp float;
+precision highp int;
+
+float tint_bitcast_from_f16(f16vec2 src) {
+  return uintBitsToFloat(packFloat2x16(src));
+}
+void main() {
+  f16vec2 a = f16vec2(1.0hf, 2.0hf);
+  float x = tint_bitcast_from_f16(a);
+}
+)");
+}
+
+TEST_F(GlslWriterTest, BuiltinBitcast_Vec2I32ToVec4F16) {
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        auto* a = b.Let("a", b.Construct<vec2<i32>>(1_i, 2_i));
+        b.Let("x", b.Bitcast<vec4<f16>>(a));
+        b.Return(func);
+    });
+
+    ASSERT_TRUE(Generate()) << err_ << output_.glsl;
+    EXPECT_EQ(output_.glsl, GlslHeader() + R"(#extension GL_AMD_gpu_shader_half_float: require
+precision highp float;
+precision highp int;
+
+f16vec4 tint_bitcast_to_f16(ivec2 src) {
+  uvec2 v = uvec2(src);
+  f16vec2 v_1 = unpackFloat2x16(v.x);
+  return f16vec4(v_1, unpackFloat2x16(v.y));
+}
+void main() {
+  ivec2 a = ivec2(1, 2);
+  f16vec4 x = tint_bitcast_to_f16(a);
+}
+)");
+}
+
+TEST_F(GlslWriterTest, BuiltinBitcast_Vec4F16ToVec2I32) {
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        auto* a = b.Let("a", b.Construct<vec4<f16>>(1_h, 2_h, 3_h, 4_h));
+        b.Let("x", b.Bitcast<vec2<i32>>(a));
+        b.Return(func);
+    });
+
+    ASSERT_TRUE(Generate()) << err_ << output_.glsl;
+    EXPECT_EQ(output_.glsl, GlslHeader() + R"(#extension GL_AMD_gpu_shader_half_float: require
+precision highp float;
+precision highp int;
+
+ivec2 tint_bitcast_from_f16(f16vec4 src) {
+  uint v = packFloat2x16(src.xy);
+  return ivec2(uvec2(v, packFloat2x16(src.zw)));
+}
+void main() {
+  f16vec4 a = f16vec4(1.0hf, 2.0hf, 3.0hf, 4.0hf);
+  ivec2 x = tint_bitcast_from_f16(a);
+}
+)");
+}
+
+TEST_F(GlslWriterTest, BuiltinBitcast_Vec2U32ToVec4F16) {
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        auto* a = b.Let("a", b.Construct<vec2<u32>>(1_u, 2_u));
+        b.Let("x", b.Bitcast<vec4<f16>>(a));
+        b.Return(func);
+    });
+
+    ASSERT_TRUE(Generate()) << err_ << output_.glsl;
+    EXPECT_EQ(output_.glsl, GlslHeader() + R"(#extension GL_AMD_gpu_shader_half_float: require
+precision highp float;
+precision highp int;
+
+f16vec4 tint_bitcast_to_f16(uvec2 src) {
+  uvec2 v = uvec2(src);
+  f16vec2 v_1 = unpackFloat2x16(v.x);
+  return f16vec4(v_1, unpackFloat2x16(v.y));
+}
+void main() {
+  uvec2 a = uvec2(1u, 2u);
+  f16vec4 x = tint_bitcast_to_f16(a);
+}
+)");
+}
+
+TEST_F(GlslWriterTest, BuiltinBitcast_Vec4F16ToVec2U32) {
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        auto* a = b.Let("a", b.Construct<vec4<f16>>(1_h, 2_h, 3_h, 4_h));
+        b.Let("x", b.Bitcast<vec2<u32>>(a));
+        b.Return(func);
+    });
+
+    ASSERT_TRUE(Generate()) << err_ << output_.glsl;
+    EXPECT_EQ(output_.glsl, GlslHeader() + R"(#extension GL_AMD_gpu_shader_half_float: require
+precision highp float;
+precision highp int;
+
+uvec2 tint_bitcast_from_f16(f16vec4 src) {
+  uint v = packFloat2x16(src.xy);
+  return uvec2(uvec2(v, packFloat2x16(src.zw)));
+}
+void main() {
+  f16vec4 a = f16vec4(1.0hf, 2.0hf, 3.0hf, 4.0hf);
+  uvec2 x = tint_bitcast_from_f16(a);
+}
+)");
+}
+
+TEST_F(GlslWriterTest, BuiltinBitcast_Vec2F32ToVec4F16) {
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        auto* a = b.Let("a", b.Construct<vec2<f32>>(1_f, 2_f));
+        b.Let("x", b.Bitcast<vec4<f16>>(a));
+        b.Return(func);
+    });
+
+    ASSERT_TRUE(Generate()) << err_ << output_.glsl;
+    EXPECT_EQ(output_.glsl, GlslHeader() + R"(#extension GL_AMD_gpu_shader_half_float: require
+precision highp float;
+precision highp int;
+
+f16vec4 tint_bitcast_to_f16(vec2 src) {
+  uvec2 v = floatBitsToUint(src);
+  f16vec2 v_1 = unpackFloat2x16(v.x);
+  return f16vec4(v_1, unpackFloat2x16(v.y));
+}
+void main() {
+  vec2 a = vec2(1.0f, 2.0f);
+  f16vec4 x = tint_bitcast_to_f16(a);
+}
+)");
+}
+
+TEST_F(GlslWriterTest, BuiltinBitcast_Vec4F16ToVec2F32) {
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        auto* a = b.Let("a", b.Construct<vec4<f16>>(1_h, 2_h, 3_h, 4_h));
+        b.Let("x", b.Bitcast<vec2<f32>>(a));
+        b.Return(func);
+    });
+
+    ASSERT_TRUE(Generate()) << err_ << output_.glsl;
+    EXPECT_EQ(output_.glsl, GlslHeader() + R"(#extension GL_AMD_gpu_shader_half_float: require
+precision highp float;
+precision highp int;
+
+vec2 tint_bitcast_from_f16(f16vec4 src) {
+  uint v = packFloat2x16(src.xy);
+  return uintBitsToFloat(uvec2(v, packFloat2x16(src.zw)));
+}
+void main() {
+  f16vec4 a = f16vec4(1.0hf, 2.0hf, 3.0hf, 4.0hf);
+  vec2 x = tint_bitcast_from_f16(a);
+}
+)");
+}
+
 }  // namespace
 }  // namespace tint::glsl::writer

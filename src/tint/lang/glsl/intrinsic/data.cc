@@ -74,6 +74,20 @@ using TemplateTypeMatcher = tint::core::intrinsic::TemplateTypeMatcher<N>;
 
 // clang-format off
 
+/// TypeMatcher for 'type f16'
+constexpr TypeMatcher kF16Matcher {
+/* match */ [](MatchState& state, const Type* ty) -> const Type* {
+    if (!MatchF16(state, ty)) {
+      return nullptr;
+    }
+    return BuildF16(state, ty);
+  },
+/* print */ []([[maybe_unused]] MatchState* state, StyledText& out) {
+    out << style::Type("f16");
+  }
+};
+
+
 /// TypeMatcher for 'type f32'
 constexpr TypeMatcher kF32Matcher {
 /* match */ [](MatchState& state, const Type* ty) -> const Type* {
@@ -168,6 +182,26 @@ constexpr TypeMatcher kPtrMatcher {
 };
 
 
+/// TypeMatcher for 'type vec2'
+constexpr TypeMatcher kVec2Matcher {
+/* match */ [](MatchState& state, const Type* ty) -> const Type* {
+  const Type* T = nullptr;
+    if (!MatchVec2(state, ty, T)) {
+      return nullptr;
+    }
+    T = state.Type(T);
+    if (T == nullptr) {
+      return nullptr;
+    }
+    return BuildVec2(state, ty, T);
+  },
+/* print */ []([[maybe_unused]] MatchState* state, StyledText& out) {StyledText T;
+  state->PrintType(T);
+    out << style::Type("vec2", "<", T, ">");
+  }
+};
+
+
 /// TypeMatcher for 'type vec'
 constexpr TypeMatcher kVecMatcher {
 /* match */ [](MatchState& state, const Type* ty) -> const Type* {
@@ -246,13 +280,15 @@ constexpr NumberMatcher kWorkgroupOrStorageMatcher {
 constexpr TypeMatcher kTypeMatchers[] = {
   /* [0] */ TemplateTypeMatcher<0>::matcher,
   /* [1] */ TemplateTypeMatcher<1>::matcher,
-  /* [2] */ kF32Matcher,
-  /* [3] */ kI32Matcher,
-  /* [4] */ kU32Matcher,
-  /* [5] */ kAtomicMatcher,
-  /* [6] */ kPtrMatcher,
-  /* [7] */ kVecMatcher,
-  /* [8] */ kIu32Matcher,
+  /* [2] */ kF16Matcher,
+  /* [3] */ kF32Matcher,
+  /* [4] */ kI32Matcher,
+  /* [5] */ kU32Matcher,
+  /* [6] */ kAtomicMatcher,
+  /* [7] */ kPtrMatcher,
+  /* [8] */ kVec2Matcher,
+  /* [9] */ kVecMatcher,
+  /* [10] */ kIu32Matcher,
 };
 
 /// The template numbers, and number matchers
@@ -264,26 +300,28 @@ constexpr NumberMatcher kNumberMatchers[] = {
 };
 
 constexpr MatcherIndex kMatcherIndices[] = {
-  /* [0] */ MatcherIndex(6),
+  /* [0] */ MatcherIndex(7),
   /* [1] */ MatcherIndex(3),
-  /* [2] */ MatcherIndex(5),
+  /* [2] */ MatcherIndex(6),
   /* [3] */ MatcherIndex(0),
   /* [4] */ MatcherIndex(2),
-  /* [5] */ MatcherIndex(6),
+  /* [5] */ MatcherIndex(7),
   /* [6] */ MatcherIndex(1),
-  /* [7] */ MatcherIndex(5),
+  /* [7] */ MatcherIndex(6),
   /* [8] */ MatcherIndex(0),
   /* [9] */ MatcherIndex(2),
-  /* [10] */ MatcherIndex(7),
+  /* [10] */ MatcherIndex(9),
   /* [11] */ MatcherIndex(0),
-  /* [12] */ MatcherIndex(3),
-  /* [13] */ MatcherIndex(7),
+  /* [12] */ MatcherIndex(4),
+  /* [13] */ MatcherIndex(9),
   /* [14] */ MatcherIndex(0),
-  /* [15] */ MatcherIndex(2),
-  /* [16] */ MatcherIndex(7),
+  /* [15] */ MatcherIndex(3),
+  /* [16] */ MatcherIndex(9),
   /* [17] */ MatcherIndex(0),
-  /* [18] */ MatcherIndex(4),
+  /* [18] */ MatcherIndex(5),
   /* [19] */ MatcherIndex(8),
+  /* [20] */ MatcherIndex(2),
+  /* [21] */ MatcherIndex(10),
 };
 
 static_assert(MatcherIndicesIndex::CanIndex(kMatcherIndices),
@@ -318,7 +356,7 @@ constexpr ParameterInfo kParameters[] = {
   {
     /* [5] */
     /* usage */ core::ParameterUsage::kValue,
-    /* matcher_indices */ MatcherIndicesIndex(4),
+    /* matcher_indices */ MatcherIndicesIndex(1),
   },
   {
     /* [6] */
@@ -328,7 +366,7 @@ constexpr ParameterInfo kParameters[] = {
   {
     /* [7] */
     /* usage */ core::ParameterUsage::kValue,
-    /* matcher_indices */ MatcherIndicesIndex(1),
+    /* matcher_indices */ MatcherIndicesIndex(12),
   },
   {
     /* [8] */
@@ -345,6 +383,11 @@ constexpr ParameterInfo kParameters[] = {
     /* usage */ core::ParameterUsage::kValue,
     /* matcher_indices */ MatcherIndicesIndex(16),
   },
+  {
+    /* [11] */
+    /* usage */ core::ParameterUsage::kValue,
+    /* matcher_indices */ MatcherIndicesIndex(19),
+  },
 };
 
 static_assert(ParameterIndex::CanIndex(kParameters),
@@ -354,7 +397,7 @@ constexpr TemplateInfo kTemplates[] = {
   {
     /* [0] */
     /* name */ "T",
-    /* matcher_indices */ MatcherIndicesIndex(19),
+    /* matcher_indices */ MatcherIndicesIndex(21),
     /* kind */ TemplateInfo::Kind::kType,
   },
   {
@@ -383,7 +426,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* num_templates   */ 0,
     /* templates */ TemplateIndex(/* invalid */),
     /* parameters */ ParameterIndex(5),
-    /* return_matcher_indices */ MatcherIndicesIndex(1),
+    /* return_matcher_indices */ MatcherIndicesIndex(12),
     /* const_eval_fn */ ConstEvalFunctionIndex(/* invalid */),
   },
   {
@@ -427,7 +470,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* num_templates   */ 0,
     /* templates */ TemplateIndex(/* invalid */),
     /* parameters */ ParameterIndex(7),
-    /* return_matcher_indices */ MatcherIndicesIndex(4),
+    /* return_matcher_indices */ MatcherIndicesIndex(1),
     /* const_eval_fn */ ConstEvalFunctionIndex(/* invalid */),
   },
   {
@@ -449,7 +492,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* num_templates   */ 0,
     /* templates */ TemplateIndex(/* invalid */),
     /* parameters */ ParameterIndex(9),
-    /* return_matcher_indices */ MatcherIndicesIndex(4),
+    /* return_matcher_indices */ MatcherIndicesIndex(1),
     /* const_eval_fn */ ConstEvalFunctionIndex(/* invalid */),
   },
   {
@@ -494,6 +537,28 @@ constexpr OverloadInfo kOverloads[] = {
     /* templates */ TemplateIndex(0),
     /* parameters */ ParameterIndex(3),
     /* return_matcher_indices */ MatcherIndicesIndex(3),
+    /* const_eval_fn */ ConstEvalFunctionIndex(/* invalid */),
+  },
+  {
+    /* [11] */
+    /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* num_parameters */ 1,
+    /* num_explicit_templates */ 0,
+    /* num_templates   */ 0,
+    /* templates */ TemplateIndex(/* invalid */),
+    /* parameters */ ParameterIndex(11),
+    /* return_matcher_indices */ MatcherIndicesIndex(18),
+    /* const_eval_fn */ ConstEvalFunctionIndex(/* invalid */),
+  },
+  {
+    /* [12] */
+    /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* num_parameters */ 1,
+    /* num_explicit_templates */ 0,
+    /* num_templates   */ 0,
+    /* templates */ TemplateIndex(/* invalid */),
+    /* parameters */ ParameterIndex(9),
+    /* return_matcher_indices */ MatcherIndicesIndex(19),
     /* const_eval_fn */ ConstEvalFunctionIndex(/* invalid */),
   },
 };
@@ -559,6 +624,18 @@ constexpr IntrinsicInfo kBuiltins[] = {
     /* fn uintBitsToFloat[N : num](value: vec<N, u32>) -> vec<N, f32> */
     /* num overloads */ 2,
     /* overloads */ OverloadIndex(6),
+  },
+  {
+    /* [9] */
+    /* fn packFloat2x16(value: vec2<f16>) -> u32 */
+    /* num overloads */ 1,
+    /* overloads */ OverloadIndex(11),
+  },
+  {
+    /* [10] */
+    /* fn unpackFloat2x16(value: u32) -> vec2<f16> */
+    /* num overloads */ 1,
+    /* overloads */ OverloadIndex(12),
   },
 };
 
