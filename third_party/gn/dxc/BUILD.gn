@@ -2298,6 +2298,7 @@ dxcompiler_sourceset("dxcompiler_sources") {
     "$dawn_dxc_dir/tools/clang/tools/dxcompiler/dxcvalidator.cpp",
     "$dawn_dxc_dir/tools/clang/tools/dxcompiler/dxillib.cpp",
   ]
+  deps = [ ":DxcDisassembler-inc" ]
 }
 
 dxcompiler_sourceset("dxcvalidator_lib") {
