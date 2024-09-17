@@ -99,6 +99,7 @@ using namespace tint::core::fluent_types;  // NOLINT
 namespace tint::resolver {
 namespace {
 
+constexpr size_t kMaxArrayConstructorElements = 32767;
 constexpr size_t kMaxFunctionParameters = 255;
 constexpr size_t kMaxSwitchCaseSelectors = 16383;
 constexpr size_t kMaxClipDistancesSize = 8;
@@ -2203,6 +2204,11 @@ bool Validator::ArrayConstructor(const ast::CallExpression* ctor,
         std::string fm = values.Length() < count ? "few" : "many";
         AddError(ctor->source) << "array constructor has too " << fm << " elements: expected "
                                << count << ", found " << values.Length();
+        return false;
+    }
+    if (values.Length() > kMaxArrayConstructorElements) {
+        AddError(ctor->target->source) << "array constructor has excessive number of elements (>"
+                                       << kMaxArrayConstructorElements << ")";
         return false;
     }
     return true;
