@@ -153,6 +153,19 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
         RUN_TRANSFORM(core::ir::transform::Robustness, module, config);
     }
 
+    if (!options.disable_workgroup_init) {
+        // Must run before ShaderIO as it may introduce a builtin parameter (local_invocation_index)
+        RUN_TRANSFORM(core::ir::transform::ZeroInitWorkgroupMemory, module);
+    }
+
+    // ShaderIO must be run before DecomposeUniformAccess because it might
+    // introduce a uniform buffer for kNumWorkgroups.
+    {
+        raise::ShaderIOConfig config;
+        config.num_workgroups_binding = options.root_constant_binding_point;
+        RUN_TRANSFORM(raise::ShaderIO, module, config);
+    }
+
     RUN_TRANSFORM(core::ir::transform::DirectVariableAccess, module,
                   core::ir::transform::DirectVariableAccessOptions{});
     // DecomposeStorageAccess must come after Robustness and DirectVariableAccess
@@ -160,18 +173,12 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
     // Comes after DecomposeStorageAccess.
     RUN_TRANSFORM(raise::DecomposeUniformAccess, module);
 
-    if (!options.disable_workgroup_init) {
-        RUN_TRANSFORM(core::ir::transform::ZeroInitWorkgroupMemory, module);
-    }
-
     // TODO(dsinclair): LocalizeStructArrayAssignment
     // TODO(dsinclair): PixelLocal transform
     // TODO(dsinclair): TruncateInterstageVariables
-    // TODO(dsinclair): NumWorkgroupsFromUniform
     // TODO(dsinclair): CalculateArrayLength
     // TODO(dsinclair): RemoveContinueInSwitch
 
-    RUN_TRANSFORM(raise::ShaderIO, module);
     // DemoteToHelper must come before any transform that introduces non-core instructions.
     // Run after ShaderIO to ensure the discards are added to the entry point it introduces.
     RUN_TRANSFORM(core::ir::transform::DemoteToHelper, module);

@@ -55,7 +55,7 @@ TEST_F(HlslWriterTransformTest, ShaderIONoInputsOrOutputs) {
 
     auto* expect = src;
 
-    Run(ShaderIO);
+    Run(ShaderIO, ShaderIOConfig{});
 
     EXPECT_EQ(expect, str());
 }
@@ -140,7 +140,7 @@ foo_inputs = struct @align(16) {
 }
 )";
 
-    Run(ShaderIO);
+    Run(ShaderIO, ShaderIOConfig{});
 
     EXPECT_EQ(expect, str());
 }
@@ -294,7 +294,7 @@ foo_inputs = struct @align(16) {
 }
 )";
 
-    Run(ShaderIO);
+    Run(ShaderIO, ShaderIOConfig{});
 
     EXPECT_EQ(expect, str());
 }
@@ -419,7 +419,7 @@ foo_inputs = struct @align(16) {
 }
 )";
 
-    Run(ShaderIO);
+    Run(ShaderIO, ShaderIOConfig{});
 
     EXPECT_EQ(expect, str());
 }
@@ -461,7 +461,7 @@ foo_outputs = struct @align(16) {
 }
 )";
 
-    Run(ShaderIO);
+    Run(ShaderIO, ShaderIOConfig{});
 
     EXPECT_EQ(expect, str());
 }
@@ -502,7 +502,7 @@ foo_outputs = struct @align(16) {
 }
 )";
 
-    Run(ShaderIO);
+    Run(ShaderIO, ShaderIOConfig{});
 
     EXPECT_EQ(expect, str());
 }
@@ -607,7 +607,7 @@ foo_outputs = struct @align(16) {
 }
 )";
 
-    Run(ShaderIO);
+    Run(ShaderIO, ShaderIOConfig{});
 
     EXPECT_EQ(expect, str());
 }
@@ -687,7 +687,7 @@ foo_outputs = struct @align(4) {
 }
 )";
 
-    Run(ShaderIO);
+    Run(ShaderIO, ShaderIOConfig{});
 
     EXPECT_EQ(expect, str());
 }
@@ -835,7 +835,7 @@ frag_outputs = struct @align(16) {
 }
 )";
 
-    Run(ShaderIO);
+    Run(ShaderIO, ShaderIOConfig{});
 
     EXPECT_EQ(expect, str());
 }
@@ -929,7 +929,7 @@ $B1: {  # root
 }
 )";
 
-    Run(ShaderIO);
+    Run(ShaderIO, ShaderIOConfig{});
 
     EXPECT_EQ(expect, str());
 }
@@ -1016,7 +1016,7 @@ $B1: {  # root
 }
 )";
 
-    Run(ShaderIO);
+    Run(ShaderIO, ShaderIOConfig{});
 
     EXPECT_EQ(expect, str());
 }
@@ -1064,7 +1064,7 @@ cmp_inputs = struct @align(16) {
 }
 )";
 
-    Run(ShaderIO);
+    Run(ShaderIO, ShaderIOConfig{});
 
     EXPECT_EQ(expect, str());
 }
@@ -1116,7 +1116,7 @@ foo_outputs = struct @align(4) {
 }
 )";
 
-    Run(ShaderIO);
+    Run(ShaderIO, ShaderIOConfig{});
 
     EXPECT_EQ(expect, str());
 }
@@ -1209,7 +1209,278 @@ foo_outputs = struct @align(4) {
 }
 )";
 
-    Run(ShaderIO);
+    Run(ShaderIO, ShaderIOConfig{});
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(HlslWriterTransformTest, ShaderIOParameters_NumWorkgroups_NonStruct) {
+    auto* num_workgroups = b.FunctionParam("num_wgs", ty.vec3<u32>());
+    num_workgroups->SetBuiltin(core::BuiltinValue::kNumWorkgroups);
+
+    auto* ep = b.Function("foo", ty.vec3<u32>(), core::ir::Function::PipelineStage::kCompute);
+    ep->SetParams({num_workgroups});
+    ep->SetWorkgroupSize(1, 1, 1);
+
+    b.Append(ep->Block(), [&] {
+        auto* r = b.Multiply(ty.vec3<u32>(), num_workgroups, num_workgroups);
+        b.Return(ep, r);
+    });
+
+    auto* src = R"(
+%foo = @compute @workgroup_size(1, 1, 1) func(%num_wgs:vec3<u32> [@num_workgroups]):vec3<u32> {
+  $B1: {
+    %3:vec3<u32> = mul %num_wgs, %num_wgs
+    ret %3
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+foo_outputs = struct @align(16) {
+  tint_symbol:vec3<u32> @offset(0)
+}
+
+$B1: {  # root
+  %tint_num_workgroups:ptr<uniform, vec3<u32>, read> = var @binding_point(0, 0)
+}
+
+%foo_inner = func(%num_wgs:vec3<u32>):vec3<u32> {
+  $B2: {
+    %4:vec3<u32> = mul %num_wgs, %num_wgs
+    ret %4
+  }
+}
+%foo = @compute @workgroup_size(1, 1, 1) func():foo_outputs {
+  $B3: {
+    %6:vec3<u32> = load %tint_num_workgroups
+    %7:vec3<u32> = call %foo_inner, %6
+    %8:foo_outputs = construct %7
+    ret %8
+  }
+}
+)";
+
+    Run(ShaderIO, ShaderIOConfig{});
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(HlslWriterTransformTest, ShaderIOParameters_NumWorkgroups_Struct) {
+    auto* str_ty = ty.Struct(mod.symbols.New("Inputs"),
+                             {
+                                 {
+                                     mod.symbols.New("num_wgs"),
+                                     ty.vec3<u32>(),
+                                     core::IOAttributes{
+                                         /* location */ std::nullopt,
+                                         /* blend_src */ std::nullopt,
+                                         /* color */ std::nullopt,
+                                         /* builtin */ core::BuiltinValue::kNumWorkgroups,
+                                         /* interpolation */ std::nullopt,
+                                         /* invariant */ false,
+                                     },
+                                 },
+                             });
+
+    auto* str_param = b.FunctionParam("inputs", str_ty);
+
+    auto* ep = b.Function("foo", ty.vec3<u32>(), core::ir::Function::PipelineStage::kCompute);
+    ep->SetParams({str_param});
+    ep->SetWorkgroupSize(1, 1, 1);
+
+    b.Append(ep->Block(), [&] {
+        auto* num_workgroups = b.Access(ty.vec3<u32>(), str_param, 0_i);
+        auto* r = b.Multiply(ty.vec3<u32>(), num_workgroups, num_workgroups);
+        b.Return(ep, r);
+    });
+
+    auto* src = R"(
+Inputs = struct @align(16) {
+  num_wgs:vec3<u32> @offset(0), @builtin(num_workgroups)
+}
+
+%foo = @compute @workgroup_size(1, 1, 1) func(%inputs:Inputs):vec3<u32> {
+  $B1: {
+    %3:vec3<u32> = access %inputs, 0i
+    %4:vec3<u32> = mul %3, %3
+    ret %4
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+Inputs = struct @align(16) {
+  num_wgs:vec3<u32> @offset(0)
+}
+
+foo_outputs = struct @align(16) {
+  tint_symbol:vec3<u32> @offset(0)
+}
+
+$B1: {  # root
+  %tint_num_workgroups:ptr<uniform, vec3<u32>, read> = var @binding_point(0, 0)
+}
+
+%foo_inner = func(%inputs:Inputs):vec3<u32> {
+  $B2: {
+    %4:vec3<u32> = access %inputs, 0i
+    %5:vec3<u32> = mul %4, %4
+    ret %5
+  }
+}
+%foo = @compute @workgroup_size(1, 1, 1) func():foo_outputs {
+  $B3: {
+    %7:vec3<u32> = load %tint_num_workgroups
+    %8:Inputs = construct %7
+    %9:vec3<u32> = call %foo_inner, %8
+    %10:foo_outputs = construct %9
+    ret %10
+  }
+}
+)";
+
+    Run(ShaderIO, ShaderIOConfig{});
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(HlslWriterTransformTest, ShaderIOParameters_NumWorkgroups_ExplicitBinding) {
+    auto* num_workgroups = b.FunctionParam("num_wgs", ty.vec3<u32>());
+    num_workgroups->SetBuiltin(core::BuiltinValue::kNumWorkgroups);
+
+    auto* ep = b.Function("foo", ty.vec3<u32>(), core::ir::Function::PipelineStage::kCompute);
+    ep->SetParams({num_workgroups});
+    ep->SetWorkgroupSize(1, 1, 1);
+
+    b.Append(ep->Block(), [&] {
+        auto* r = b.Multiply(ty.vec3<u32>(), num_workgroups, num_workgroups);
+        b.Return(ep, r);
+    });
+
+    auto* src = R"(
+%foo = @compute @workgroup_size(1, 1, 1) func(%num_wgs:vec3<u32> [@num_workgroups]):vec3<u32> {
+  $B1: {
+    %3:vec3<u32> = mul %num_wgs, %num_wgs
+    ret %3
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+foo_outputs = struct @align(16) {
+  tint_symbol:vec3<u32> @offset(0)
+}
+
+$B1: {  # root
+  %tint_num_workgroups:ptr<uniform, vec3<u32>, read> = var @binding_point(1, 23)
+}
+
+%foo_inner = func(%num_wgs:vec3<u32>):vec3<u32> {
+  $B2: {
+    %4:vec3<u32> = mul %num_wgs, %num_wgs
+    ret %4
+  }
+}
+%foo = @compute @workgroup_size(1, 1, 1) func():foo_outputs {
+  $B3: {
+    %6:vec3<u32> = load %tint_num_workgroups
+    %7:vec3<u32> = call %foo_inner, %6
+    %8:foo_outputs = construct %7
+    ret %8
+  }
+}
+)";
+
+    ShaderIOConfig config;
+    config.num_workgroups_binding = {1u, 23u};
+    Run(ShaderIO, config);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(HlslWriterTransformTest, ShaderIOParameters_NumWorkgroups_AutoBinding) {
+    auto* num_workgroups = b.FunctionParam("num_wgs", ty.vec3<u32>());
+    num_workgroups->SetBuiltin(core::BuiltinValue::kNumWorkgroups);
+
+    auto* ep = b.Function("foo", ty.vec3<u32>(), core::ir::Function::PipelineStage::kCompute);
+    ep->SetParams({num_workgroups});
+    ep->SetWorkgroupSize(1, 1, 1);
+
+    b.Append(ep->Block(), [&] {
+        auto* r = b.Multiply(ty.vec3<u32>(), num_workgroups, num_workgroups);
+        b.Return(ep, r);
+    });
+
+    b.Append(mod.root_block, [&] {
+        for (uint32_t group = 0; group < 10; ++group) {
+            auto* v = b.Var<core::AddressSpace::kStorage, i32>();
+            v->SetBindingPoint(group, group + 1u);
+        }
+    });
+
+    auto* src = R"(
+$B1: {  # root
+  %1:ptr<storage, i32, read_write> = var @binding_point(0, 1)
+  %2:ptr<storage, i32, read_write> = var @binding_point(1, 2)
+  %3:ptr<storage, i32, read_write> = var @binding_point(2, 3)
+  %4:ptr<storage, i32, read_write> = var @binding_point(3, 4)
+  %5:ptr<storage, i32, read_write> = var @binding_point(4, 5)
+  %6:ptr<storage, i32, read_write> = var @binding_point(5, 6)
+  %7:ptr<storage, i32, read_write> = var @binding_point(6, 7)
+  %8:ptr<storage, i32, read_write> = var @binding_point(7, 8)
+  %9:ptr<storage, i32, read_write> = var @binding_point(8, 9)
+  %10:ptr<storage, i32, read_write> = var @binding_point(9, 10)
+}
+
+%foo = @compute @workgroup_size(1, 1, 1) func(%num_wgs:vec3<u32> [@num_workgroups]):vec3<u32> {
+  $B2: {
+    %13:vec3<u32> = mul %num_wgs, %num_wgs
+    ret %13
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+foo_outputs = struct @align(16) {
+  tint_symbol:vec3<u32> @offset(0)
+}
+
+$B1: {  # root
+  %1:ptr<storage, i32, read_write> = var @binding_point(0, 1)
+  %2:ptr<storage, i32, read_write> = var @binding_point(1, 2)
+  %3:ptr<storage, i32, read_write> = var @binding_point(2, 3)
+  %4:ptr<storage, i32, read_write> = var @binding_point(3, 4)
+  %5:ptr<storage, i32, read_write> = var @binding_point(4, 5)
+  %6:ptr<storage, i32, read_write> = var @binding_point(5, 6)
+  %7:ptr<storage, i32, read_write> = var @binding_point(6, 7)
+  %8:ptr<storage, i32, read_write> = var @binding_point(7, 8)
+  %9:ptr<storage, i32, read_write> = var @binding_point(8, 9)
+  %10:ptr<storage, i32, read_write> = var @binding_point(9, 10)
+  %tint_num_workgroups:ptr<uniform, vec3<u32>, read> = var @binding_point(10, 0)
+}
+
+%foo_inner = func(%num_wgs:vec3<u32>):vec3<u32> {
+  $B2: {
+    %14:vec3<u32> = mul %num_wgs, %num_wgs
+    ret %14
+  }
+}
+%foo = @compute @workgroup_size(1, 1, 1) func():foo_outputs {
+  $B3: {
+    %16:vec3<u32> = load %tint_num_workgroups
+    %17:vec3<u32> = call %foo_inner, %16
+    %18:foo_outputs = construct %17
+    ret %18
+  }
+}
+)";
+
+    Run(ShaderIO, ShaderIOConfig{});
 
     EXPECT_EQ(expect, str());
 }
