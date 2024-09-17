@@ -177,5 +177,15 @@
             "mac",
             "win"
         ]
+    },
+    "130": {
+        "name": "m130",
+        "chromium_project": "chromium-m130",
+        "ref": "refs/heads/chromium/6723",
+        "platforms": [
+            "linux",
+            "mac",
+            "win"
+        ]
     }
 }
