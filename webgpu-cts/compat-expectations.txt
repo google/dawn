@@ -98,15 +98,6 @@ crbug.com/dawn/2083 [ intel-0x9bc5 linux ] webgpu:api,operation,memory_sync,text
 crbug.com/dawn/2083 [ intel-0x9bc5 linux ] webgpu:api,operation,memory_sync,texture,same_subresource:ww:boundary="command-buffer";first={"op":"storage","in":"render-pass-encoder"};second={"op":"b2t-copy","in":"command-encoder"} [ Failure ]
 crbug.com/dawn/2083 [ intel-0x9bc5 linux ] webgpu:api,operation,memory_sync,texture,same_subresource:ww:boundary="command-buffer";first={"op":"storage","in":"render-pass-encoder"};second={"op":"t2t-copy","in":"command-encoder"} [ Failure ]
 
-# Transformed video external texture failures with compute
-# These are failing because external texture transforms are now used for the
-# non-zero-copy path and that's not implemented yet for compute shaders.
-crbug.com/41487285 [ linux ] webgpu:web_platform,external_texture,video:importExternalTexture,compute:videoName="four-colors-vp9-bt601-hflip.mp4";* [ Failure ]
-crbug.com/41487285 [ linux ] webgpu:web_platform,external_texture,video:importExternalTexture,compute:videoName="four-colors-vp9-bt601-rotate-180.mp4";* [ Failure ]
-crbug.com/41487285 [ linux ] webgpu:web_platform,external_texture,video:importExternalTexture,compute:videoName="four-colors-vp9-bt601-rotate-270.mp4";* [ Failure ]
-crbug.com/41487285 [ linux ] webgpu:web_platform,external_texture,video:importExternalTexture,compute:videoName="four-colors-vp9-bt601-rotate-90.mp4";* [ Failure ]
-crbug.com/41487285 [ linux ] webgpu:web_platform,external_texture,video:importExternalTexture,compute:videoName="four-colors-vp9-bt601-vflip.mp4";* [ Failure ]
-
 # Failures due to Linux/Intel UHD 630 OS/driver upgrade
 crbug.com/dawn/2502 [ intel-0x9bc5 linux mesa_ge_23.2 ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,array:srcFormat="rgba8unorm";dstFormat="rgba8unorm-srgb";dimension="3d" [ Failure ]
 crbug.com/dawn/2502 [ intel-0x9bc5 linux mesa_ge_23.2 ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,array:srcFormat="rgba8unorm-srgb";dstFormat="rgba8unorm-srgb";dimension="3d" [ Failure ]
@@ -162,6 +153,31 @@ crbug.com/341327472 [ intel-0x4680 linux ] webgpu:api,validation,state,device_lo
 # depth_bias validation failures (also failing in Core)
 crbug.com/365922174 webgpu:api,validation,render_pipeline,depth_stencil_state:depth_bias:* [ Failure ]
 
+# error_scope validation tests with errorType="out-of-memory" are failing on all platforms
+# On NVidia, crashes in PartitionAlloc due to the NV GL driver malloc()ing 2GB+ blocks
+crbug.com/dawn/2168 webgpu:api,validation,error_scope:current_scope:errorFilter="out-of-memory";stackDepth=1 [ Failure ]
+crbug.com/dawn/2168 webgpu:api,validation,error_scope:current_scope:errorFilter="out-of-memory";stackDepth=10 [ Failure ]
+crbug.com/dawn/2168 webgpu:api,validation,error_scope:current_scope:errorFilter="out-of-memory";stackDepth=100 [ Failure ]
+crbug.com/dawn/2168 webgpu:api,validation,error_scope:current_scope:errorFilter="out-of-memory";stackDepth=1000 [ Failure ]
+crbug.com/dawn/2168 webgpu:api,validation,error_scope:current_scope:errorFilter="out-of-memory";stackDepth=100000 [ Failure ]
+crbug.com/dawn/2168 webgpu:api,validation,error_scope:parent_scope:errorFilter="out-of-memory";stackDepth=1 [ Failure ]
+crbug.com/dawn/2168 webgpu:api,validation,error_scope:parent_scope:errorFilter="out-of-memory";stackDepth=10 [ Failure ]
+crbug.com/dawn/2168 webgpu:api,validation,error_scope:parent_scope:errorFilter="out-of-memory";stackDepth=100 [ Failure ]
+crbug.com/dawn/2168 webgpu:api,validation,error_scope:parent_scope:errorFilter="out-of-memory";stackDepth=1000 [ Failure ]
+crbug.com/dawn/2168 webgpu:api,validation,error_scope:simple:errorType="out-of-memory";errorFilter="internal" [ Failure ]
+crbug.com/dawn/2168 webgpu:api,validation,error_scope:simple:errorType="out-of-memory";errorFilter="out-of-memory" [ Failure ]
+crbug.com/dawn/2168 webgpu:api,validation,error_scope:simple:errorType="out-of-memory";errorFilter="validation" [ Failure ]
+
+# textureStore() out_of_bounds_array tests crashing
+crbug.com/dawn/367440985 webgpu:shader,execution,expression,call,builtin,textureStore:out_of_bounds_array:baseLevel=0;arrayLevels=2;type="i32" [ Failure ]
+crbug.com/dawn/367440985 webgpu:shader,execution,expression,call,builtin,textureStore:out_of_bounds_array:baseLevel=0;arrayLevels=2;type="u32" [ Failure ]
+crbug.com/dawn/367440985 webgpu:shader,execution,expression,call,builtin,textureStore:out_of_bounds_array:baseLevel=0;arrayLevels=3;type="i32" [ Failure ]
+crbug.com/dawn/367440985 webgpu:shader,execution,expression,call,builtin,textureStore:out_of_bounds_array:baseLevel=0;arrayLevels=3;type="u32" [ Failure ]
+crbug.com/dawn/367440985 webgpu:shader,execution,expression,call,builtin,textureStore:out_of_bounds_array:baseLevel=1;arrayLevels=2;type="i32" [ Failure ]
+crbug.com/dawn/367440985 webgpu:shader,execution,expression,call,builtin,textureStore:out_of_bounds_array:baseLevel=1;arrayLevels=2;type="u32" [ Failure ]
+crbug.com/dawn/367440985 webgpu:shader,execution,expression,call,builtin,textureStore:out_of_bounds_array:baseLevel=1;arrayLevels=3;type="i32" [ Failure ]
+crbug.com/dawn/367440985 webgpu:shader,execution,expression,call,builtin,textureStore:out_of_bounds_array:baseLevel=1;arrayLevels=3;type="u32" [ Failure ]
+
 # bitcast ai_to_f32 failures; precision issue?
 crbug.com/354152178 [ intel-0x4680 ] webgpu:shader,execution,expression,call,builtin,bitcast:ai_to_f32:* [ Failure ]
 crbug.com/354152178 [ intel-0x9bc5 ] webgpu:shader,execution,expression,call,builtin,bitcast:ai_to_f32:* [ Failure ]
@@ -184,6 +200,14 @@ crbug.com/dawn/2086 [ nvidia-0x2184 ] webgpu:web_platform,canvas,configure:viewF
 ### This section represents unimplemented features in Tint, Chrome or core WebGPU
 
 ### This section represents issues that are likely bugs in ANGLE
+
+# crbug.com/353552533 ANGLE Vulkan returns wrong values for gl_FragCoord when multisampling.
+crbug.com/353552533 [ angle-vulkan ] webgpu:shader,execution,shader_io,fragment_builtins:inputs,front_facing:nearFar=[0,1];sampleCount=4;frontFace="ccw";interpolation={"type":"flat","sampling":"either"} [ Failure ]
+crbug.com/353552533 [ angle-vulkan ] webgpu:shader,execution,shader_io,fragment_builtins:inputs,front_facing:nearFar=[0,1];sampleCount=4;frontFace="cw";interpolation={"type":"flat","sampling":"either"} [ Failure ]
+crbug.com/353552533 [ angle-vulkan ] webgpu:shader,execution,shader_io,fragment_builtins:inputs,front_facing:nearFar=[0.25,0.75];sampleCount=4;frontFace="ccw";interpolation={"type":"flat","sampling":"either"} [ Failure ]
+crbug.com/353552533 [ angle-vulkan ] webgpu:shader,execution,shader_io,fragment_builtins:inputs,front_facing:nearFar=[0.25,0.75];sampleCount=4;frontFace="cw";interpolation={"type":"flat","sampling":"either"} [ Failure ]
+crbug.com/353552533 [ angle-vulkan ] webgpu:shader,execution,shader_io,fragment_builtins:inputs,position:nearFar=[0,1];sampleCount=4;interpolation={"type":"flat","sampling":"either"} [ Failure ]
+crbug.com/353552533 [ angle-vulkan ] webgpu:shader,execution,shader_io,fragment_builtins:inputs,position:nearFar=[0.25,0.75];sampleCount=4;interpolation={"type":"flat","sampling":"either"} [ Failure ]
 
 # failures with 1-bit LSB errors on shader expression tests
 # passes on ANGLE/SwiftShader and ANGLE/Vulkan, so likely a bug in ANGLE/GL
@@ -246,25 +270,49 @@ crbug.com/dawn/2430 [ linux ] webgpu:api,operation,storage_texture,read_only:bas
 ### This section represents platform-specific issues that are likely unfixable
 ### in Compat
 
-# error_scope validation tests with errorType="out-of-memory" are failing on all platforms
-# On NVidia, crashes in PartitionAlloc due to the NV GL driver malloc()ing 2GB+ blocks
-crbug.com/dawn/2168 webgpu:api,validation,error_scope:current_scope:errorFilter="out-of-memory";stackDepth=1 [ Failure ]
-crbug.com/dawn/2168 webgpu:api,validation,error_scope:current_scope:errorFilter="out-of-memory";stackDepth=10 [ Failure ]
-crbug.com/dawn/2168 webgpu:api,validation,error_scope:current_scope:errorFilter="out-of-memory";stackDepth=100 [ Failure ]
-crbug.com/dawn/2168 webgpu:api,validation,error_scope:current_scope:errorFilter="out-of-memory";stackDepth=1000 [ Failure ]
-crbug.com/dawn/2168 webgpu:api,validation,error_scope:current_scope:errorFilter="out-of-memory";stackDepth=100000 [ Failure ]
-crbug.com/dawn/2168 webgpu:api,validation,error_scope:parent_scope:errorFilter="out-of-memory";stackDepth=1 [ Failure ]
-crbug.com/dawn/2168 webgpu:api,validation,error_scope:parent_scope:errorFilter="out-of-memory";stackDepth=10 [ Failure ]
-crbug.com/dawn/2168 webgpu:api,validation,error_scope:parent_scope:errorFilter="out-of-memory";stackDepth=100 [ Failure ]
-crbug.com/dawn/2168 webgpu:api,validation,error_scope:parent_scope:errorFilter="out-of-memory";stackDepth=1000 [ Failure ]
-crbug.com/dawn/2168 webgpu:api,validation,error_scope:simple:errorType="out-of-memory";errorFilter="internal" [ Failure ]
-crbug.com/dawn/2168 webgpu:api,validation,error_scope:simple:errorType="out-of-memory";errorFilter="out-of-memory" [ Failure ]
-crbug.com/dawn/2168 webgpu:api,validation,error_scope:simple:errorType="out-of-memory";errorFilter="validation" [ Failure ]
-
 # clamp expression tests failing on NVidia
-crbug.com/dawn/2319 [ nvidia-0x2184 ] webgpu:shader,execution,expression,call,builtin,clamp:f32:* [ Failure ]
-crbug.com/dawn/2319 [ nvidia-0x2184 ] webgpu:shader,execution,expression,call,builtin,clamp:i32:* [ Failure ]
-crbug.com/dawn/2319 [ nvidia-0x2184 ] webgpu:shader,execution,expression,call,builtin,clamp:u32:* [ Failure ]
+crbug.com/dawn/2319 [ nvidia-0x2184 ] webgpu:shader,execution,expression,call,builtin,clamp:u32:inputSource="storage_rw";vectorize=4 [ Failure ]
+crbug.com/dawn/2319 [ nvidia-0x2184 ] webgpu:shader,execution,expression,call,builtin,clamp:f32:inputSource="uniform";vectorize=4 [ Failure ]
+crbug.com/dawn/2319 [ nvidia-0x2184 ] webgpu:shader,execution,expression,call,builtin,clamp:i32:inputSource="uniform";vectorize=2 [ Failure ]
+crbug.com/dawn/2319 [ nvidia-0x2184 ] webgpu:shader,execution,expression,call,builtin,clamp:f32:inputSource="storage_r";vectorize=3 [ Failure ]
+crbug.com/dawn/2319 [ nvidia-0x2184 ] webgpu:shader,execution,expression,call,builtin,clamp:i32:inputSource="storage_r";vectorize="_undef_" [ Failure ]
+crbug.com/dawn/2319 [ nvidia-0x2184 ] webgpu:shader,execution,expression,call,builtin,clamp:f32:inputSource="storage_rw";vectorize=4 [ Failure ]
+crbug.com/dawn/2319 [ nvidia-0x2184 ] webgpu:shader,execution,expression,call,builtin,clamp:u32:inputSource="storage_r";vectorize=4 [ Failure ]
+crbug.com/dawn/2319 [ nvidia-0x2184 ] webgpu:shader,execution,expression,call,builtin,clamp:i32:inputSource="storage_rw";vectorize=2 [ Failure ]
+crbug.com/dawn/2319 [ nvidia-0x2184 ] webgpu:shader,execution,expression,call,builtin,clamp:i32:inputSource="uniform";vectorize=3 [ Failure ]
+crbug.com/dawn/2319 [ nvidia-0x2184 ] webgpu:shader,execution,expression,call,builtin,clamp:u32:inputSource="uniform";vectorize="_undef_" [ Failure ]
+crbug.com/dawn/2319 [ nvidia-0x2184 ] webgpu:shader,execution,expression,call,builtin,clamp:f32:inputSource="storage_rw";vectorize=3 [ Failure ]
+crbug.com/dawn/2319 [ nvidia-0x2184 ] webgpu:shader,execution,expression,call,builtin,clamp:u32:inputSource="storage_r";vectorize=3 [ Failure ]
+crbug.com/dawn/2319 [ nvidia-0x2184 ] webgpu:shader,execution,expression,call,builtin,clamp:i32:inputSource="storage_rw";vectorize="_undef_" [ Failure ]
+crbug.com/dawn/2319 [ nvidia-0x2184 ] webgpu:shader,execution,expression,call,builtin,clamp:i32:inputSource="uniform";vectorize=4 [ Failure ]
+crbug.com/dawn/2319 [ nvidia-0x2184 ] webgpu:shader,execution,expression,call,builtin,clamp:u32:inputSource="uniform";vectorize=2 [ Failure ]
+crbug.com/dawn/2319 [ nvidia-0x2184 ] webgpu:shader,execution,expression,call,builtin,clamp:i32:inputSource="storage_r";vectorize=3 [ Failure ]
+crbug.com/dawn/2319 [ nvidia-0x2184 ] webgpu:shader,execution,expression,call,builtin,clamp:f32:inputSource="storage_rw";vectorize="_undef_" [ Failure ]
+crbug.com/dawn/2319 [ nvidia-0x2184 ] webgpu:shader,execution,expression,call,builtin,clamp:u32:inputSource="storage_r";vectorize="_undef_" [ Failure ]
+crbug.com/dawn/2319 [ nvidia-0x2184 ] webgpu:shader,execution,expression,call,builtin,clamp:f32:inputSource="storage_r";vectorize="_undef_" [ Failure ]
+crbug.com/dawn/2319 [ nvidia-0x2184 ] webgpu:shader,execution,expression,call,builtin,clamp:u32:inputSource="uniform";vectorize=3 [ Failure ]
+crbug.com/dawn/2319 [ nvidia-0x2184 ] webgpu:shader,execution,expression,call,builtin,clamp:i32:inputSource="storage_r";vectorize=2 [ Failure ]
+crbug.com/dawn/2319 [ nvidia-0x2184 ] webgpu:shader,execution,expression,call,builtin,clamp:f32:inputSource="storage_r";vectorize=4 [ Failure ]
+crbug.com/dawn/2319 [ nvidia-0x2184 ] webgpu:shader,execution,expression,call,builtin,clamp:u32:inputSource="storage_rw";vectorize=3 [ Failure ]
+crbug.com/dawn/2319 [ nvidia-0x2184 ] webgpu:shader,execution,expression,call,builtin,clamp:i32:inputSource="uniform";vectorize="_undef_" [ Failure ]
+crbug.com/dawn/2319 [ nvidia-0x2184 ] webgpu:shader,execution,expression,call,builtin,clamp:f32:inputSource="uniform";vectorize=3 [ Failure ]
+crbug.com/dawn/2319 [ nvidia-0x2184 ] webgpu:shader,execution,expression,call,builtin,clamp:f32:inputSource="storage_r";vectorize=2 [ Failure ]
+crbug.com/dawn/2319 [ nvidia-0x2184 ] webgpu:shader,execution,expression,call,builtin,clamp:u32:inputSource="uniform";vectorize=4 [ Failure ]
+crbug.com/dawn/2319 [ nvidia-0x2184 ] webgpu:shader,execution,expression,call,builtin,clamp:i32:inputSource="storage_r";vectorize=4 [ Failure ]
+crbug.com/dawn/2319 [ nvidia-0x2184 ] webgpu:shader,execution,expression,call,builtin,clamp:f32:inputSource="storage_rw";vectorize=2 [ Failure ]
+crbug.com/dawn/2319 [ nvidia-0x2184 ] webgpu:shader,execution,expression,call,builtin,clamp:u32:inputSource="storage_r";vectorize=2 [ Failure ]
+crbug.com/dawn/2319 [ nvidia-0x2184 ] webgpu:shader,execution,expression,call,builtin,clamp:i32:inputSource="storage_rw";vectorize=3 [ Failure ]
+crbug.com/dawn/2319 [ nvidia-0x2184 ] webgpu:shader,execution,expression,call,builtin,clamp:f32:inputSource="uniform";vectorize="_undef_" [ Failure ]
+crbug.com/dawn/2319 [ nvidia-0x2184 ] webgpu:shader,execution,expression,call,builtin,clamp:u32:inputSource="storage_rw";vectorize="_undef_" [ Failure ]
+crbug.com/dawn/2319 [ nvidia-0x2184 ] webgpu:shader,execution,expression,call,builtin,clamp:f32:inputSource="uniform";vectorize=2 [ Failure ]
+crbug.com/dawn/2319 [ nvidia-0x2184 ] webgpu:shader,execution,expression,call,builtin,clamp:i32:inputSource="storage_rw";vectorize=4 [ Failure ]
+crbug.com/dawn/2319 [ nvidia-0x2184 ] webgpu:shader,execution,expression,call,builtin,clamp:u32:inputSource="storage_rw";vectorize=2 [ Failure ]
+
+# limits:function_variable_combined_byte_size failing on NVidia
+crbug.com/dawn/0000 [ nvidia-0x2184 ] webgpu:shader,execution,limits:function_variable_combined_byte_size:type="u32" [ Failure ]
+crbug.com/dawn/0000 [ nvidia-0x2184 ] webgpu:shader,execution,limits:function_variable_combined_byte_size:type="bool" [ Failure ]
+crbug.com/dawn/0000 [ nvidia-0x2184 ] webgpu:shader,execution,limits:private_array_combined_byte_size:type="u32" [ Failure ]
+crbug.com/dawn/0000 [ nvidia-0x2184 ] webgpu:shader,execution,limits:private_array_combined_byte_size:type="bool" [ Failure ]
 
 # alpha_to_coverage occlusion query tests failing on Intel
 crbug.com/dawn/2248 [ intel-0x9bc5 ] webgpu:api,operation,command_buffer,queries,occlusionQuery:occlusion_query,alpha_to_coverage:writeMask=0;renderMode="direct";bufferOffset="non-zero";querySetOffset="non-zero";alpha=0 [ Failure ]
@@ -351,14 +399,6 @@ crbug.com/dawn/2208 [ intel-0x9bc5 linux ] webgpu:api,operation,command_buffer,c
 crbug.com/dawn/2208 [ intel-0x9bc5 linux ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,non_array:srcFormat="r8snorm";dstFormat="r8snorm";dimension="3d" [ Failure ]
 crbug.com/dawn/2208 [ intel-0x9bc5 linux ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,non_array:srcFormat="rg8snorm";dstFormat="rg8snorm";dimension="2d" [ Failure ]
 crbug.com/dawn/2208 [ intel-0x9bc5 linux ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,non_array:srcFormat="rg8snorm";dstFormat="rg8snorm";dimension="3d" [ Failure ]
-
-# crbug.com/353552533 ANGLE Vulkan returns wrong values for gl_FragCoord when multisampling.
-crbug.com/353552533 webgpu:shader,execution,shader_io,fragment_builtins:inputs,front_facing:nearFar=[0,1];sampleCount=4;frontFace="ccw";interpolation={"type":"flat","sampling":"either"} [ Failure ]
-crbug.com/353552533 webgpu:shader,execution,shader_io,fragment_builtins:inputs,front_facing:nearFar=[0,1];sampleCount=4;frontFace="cw";interpolation={"type":"flat","sampling":"either"} [ Failure ]
-crbug.com/353552533 webgpu:shader,execution,shader_io,fragment_builtins:inputs,front_facing:nearFar=[0.25,0.75];sampleCount=4;frontFace="ccw";interpolation={"type":"flat","sampling":"either"} [ Failure ]
-crbug.com/353552533 webgpu:shader,execution,shader_io,fragment_builtins:inputs,front_facing:nearFar=[0.25,0.75];sampleCount=4;frontFace="cw";interpolation={"type":"flat","sampling":"either"} [ Failure ]
-crbug.com/353552533 webgpu:shader,execution,shader_io,fragment_builtins:inputs,position:nearFar=[0,1];sampleCount=4;interpolation={"type":"flat","sampling":"either"} [ Failure ]
-crbug.com/353552533 webgpu:shader,execution,shader_io,fragment_builtins:inputs,position:nearFar=[0.25,0.75];sampleCount=4;interpolation={"type":"flat","sampling":"either"} [ Failure ]
 
 # primitive_restart failures on Pixel 6; these pass on Pixel 7 Pro
 crbug.com/dawn/0000 [ android-pixel-6 ] webgpu:api,operation,vertex_state,index_format:primitive_restart:indexFormat="uint32";primitiveTopology="line-list" [ Failure ]
@@ -1196,14 +1236,6 @@ crbug.com/dawn/0000 [ android arm ] webgpu:shader,execution,expression,call,buil
 crbug.com/dawn/0000 [ android arm ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:sampled_array_2d_coords:format="rgba8snorm" [ Failure ]
 crbug.com/dawn/0000 [ android arm ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:sampled_array_2d_coords:format="rgba8unorm" [ Failure ]
 crbug.com/dawn/0000 [ android arm ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:sampled_array_2d_coords:format="rgba8unorm-srgb" [ Failure ]
-crbug.com/dawn/0000 [ android arm ] webgpu:shader,execution,expression,call,builtin,textureStore:out_of_bounds_array:baseLevel=0;arrayLevels=2;type="i32" [ Failure ]
-crbug.com/dawn/0000 [ android arm ] webgpu:shader,execution,expression,call,builtin,textureStore:out_of_bounds_array:baseLevel=0;arrayLevels=2;type="u32" [ Failure ]
-crbug.com/dawn/0000 [ android arm ] webgpu:shader,execution,expression,call,builtin,textureStore:out_of_bounds_array:baseLevel=0;arrayLevels=3;type="i32" [ Failure ]
-crbug.com/dawn/0000 [ android arm ] webgpu:shader,execution,expression,call,builtin,textureStore:out_of_bounds_array:baseLevel=0;arrayLevels=3;type="u32" [ Failure ]
-crbug.com/dawn/0000 [ android arm ] webgpu:shader,execution,expression,call,builtin,textureStore:out_of_bounds_array:baseLevel=1;arrayLevels=2;type="i32" [ Failure ]
-crbug.com/dawn/0000 [ android arm ] webgpu:shader,execution,expression,call,builtin,textureStore:out_of_bounds_array:baseLevel=1;arrayLevels=2;type="u32" [ Failure ]
-crbug.com/dawn/0000 [ android arm ] webgpu:shader,execution,expression,call,builtin,textureStore:out_of_bounds_array:baseLevel=1;arrayLevels=3;type="i32" [ Failure ]
-crbug.com/dawn/0000 [ android arm ] webgpu:shader,execution,expression,call,builtin,textureStore:out_of_bounds_array:baseLevel=1;arrayLevels=3;type="u32" [ Failure ]
 crbug.com/dawn/0000 [ android arm ] webgpu:shader,execution,limits:const_array_elements: [ Failure ]
 crbug.com/dawn/0000 [ android arm ] webgpu:shader,execution,robust_access_vertex:vertex_buffer_access:indexed=false;indirect=true;drawCallTestParameter="firstVertex";type="float32x2";additionalBuffers=0;partialLastNumber=false;offsetVertexBuffer=false [ Failure ]
 crbug.com/dawn/0000 [ android arm ] webgpu:shader,execution,robust_access_vertex:vertex_buffer_access:indexed=false;indirect=true;drawCallTestParameter="firstVertex";type="float32x2";additionalBuffers=0;partialLastNumber=false;offsetVertexBuffer=true [ Failure ]
@@ -1645,7 +1677,6 @@ crbug.com/dawn/0000 [ intel-0x4680 ] webgpu:shader,execution,expression,call,bui
 crbug.com/dawn/0000 [ intel-0x4680 ] webgpu:shader,execution,expression,call,builtin,textureGather:depth_3d_coords:* [ Failure ]
 crbug.com/dawn/0000 [ intel-0x4680 ] webgpu:shader,execution,expression,call,builtin,textureGather:depth_array_2d_coords:format="depth16unorm";minFilter="nearest" [ Failure ]
 crbug.com/dawn/0000 [ intel-0x4680 ] webgpu:shader,execution,expression,call,builtin,textureGather:depth_array_2d_coords:format="depth32float";minFilter="nearest" [ Failure ]
-crbug.com/dawn/0000 [ intel-0x4680 ] webgpu:shader,execution,expression,call,builtin,textureStore:out_of_bounds_array:* [ Failure ]
 crbug.com/dawn/0000 [ intel-0x4680 ] webgpu:shader,execution,robust_access_vertex:* [ Failure ]
 crbug.com/dawn/0000 [ intel-0x4680 ] webgpu:web_platform,canvas,configure:viewFormats:* [ Failure ]
 crbug.com/dawn/0000 [ intel-0x4680 ] webgpu:web_platform,canvas,getCurrentTexture:multiple_frames:canvasType="offscreen" [ Failure ]
@@ -1655,8 +1686,4 @@ crbug.com/dawn/0000 [ intel-0x9bc5 ] webgpu:shader,execution,expression,call,bui
 crbug.com/dawn/0000 [ intel-0x9bc5 ] webgpu:shader,execution,expression,call,builtin,textureGather:depth_3d_coords:* [ Failure ]
 crbug.com/dawn/0000 [ intel-0x9bc5 ] webgpu:shader,execution,expression,call,builtin,textureGather:depth_array_2d_coords:format="depth16unorm";minFilter="nearest" [ Failure ]
 crbug.com/dawn/0000 [ intel-0x9bc5 ] webgpu:shader,execution,expression,call,builtin,textureGather:depth_array_2d_coords:format="depth32float";minFilter="nearest" [ Failure ]
-crbug.com/dawn/0000 [ intel-0x9bc5 ] webgpu:shader,execution,expression,call,builtin,textureStore:out_of_bounds_array:* [ Failure ]
-crbug.com/dawn/0000 [ nvidia-0x2184 ] webgpu:shader,execution,expression,call,builtin,textureStore:out_of_bounds_array:* [ Failure ]
 crbug.com/dawn/0000 [ nvidia-0x2184 ] webgpu:shader,execution,limits:const_array_elements: [ Failure ]
-crbug.com/dawn/0000 [ nvidia-0x2184 ] webgpu:shader,execution,limits:function_variable_combined_byte_size:* [ Failure ]
-crbug.com/dawn/0000 [ nvidia-0x2184 ] webgpu:shader,execution,limits:private_array_combined_byte_size:* [ Failure ]
