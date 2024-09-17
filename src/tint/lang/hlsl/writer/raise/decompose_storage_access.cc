@@ -412,7 +412,7 @@ struct State {
                                  core::ir::Value* offset) {
         bool is_f16 = from->Type()->DeepestElement()->Is<core::type::F16>();
 
-        const core::type::Type* cast_ty = ty.match_width(ty.u32(), from->Type());
+        const core::type::Type* cast_ty = ty.MatchWidth(ty.u32(), from->Type());
         auto fn = is_f16 ? BuiltinFn::kStoreF16 : BuiltinFn::kStore;
         if (auto* vec = from->Type()->As<core::type::Vector>()) {
             switch (vec->Width()) {
@@ -481,9 +481,9 @@ struct State {
         const core::type::Type* load_ty = nullptr;
         // An `f16` load returns an `f16` instead of a `u32`
         if (is_f16) {
-            load_ty = ty.match_width(ty.f16(), result_ty);
+            load_ty = ty.MatchWidth(ty.f16(), result_ty);
         } else {
-            load_ty = ty.match_width(ty.u32(), result_ty);
+            load_ty = ty.MatchWidth(ty.u32(), result_ty);
         }
 
         auto fn = is_f16 ? BuiltinFn::kLoadF16 : BuiltinFn::kLoad;

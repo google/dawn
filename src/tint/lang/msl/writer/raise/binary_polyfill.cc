@@ -105,7 +105,7 @@ struct State {
         // integers. Make this explicit in the IR and then convert the result of the binary
         // instruction back to a boolean.
         auto* result_ty = binary->Result(0)->Type();
-        auto* int_ty = ty.match_width(ty.u32(), result_ty);
+        auto* int_ty = ty.MatchWidth(ty.u32(), result_ty);
         b.InsertBefore(binary, [&] {
             auto* int_lhs = b.Convert(int_ty, binary->LHS());
             auto* int_rhs = b.Convert(int_ty, binary->RHS());
@@ -122,9 +122,9 @@ struct State {
         // unsigned integers, perform the operation, and then bitcast the result back to a signed
         // integer.
         auto* signed_result_ty = binary->Result(0)->Type();
-        auto* unsigned_result_ty = ty.match_width(ty.u32(), signed_result_ty);
-        auto* unsigned_lhs_ty = ty.match_width(ty.u32(), binary->LHS()->Type());
-        auto* unsigned_rhs_ty = ty.match_width(ty.u32(), binary->RHS()->Type());
+        auto* unsigned_result_ty = ty.MatchWidth(ty.u32(), signed_result_ty);
+        auto* unsigned_lhs_ty = ty.MatchWidth(ty.u32(), binary->LHS()->Type());
+        auto* unsigned_rhs_ty = ty.MatchWidth(ty.u32(), binary->RHS()->Type());
         b.InsertBefore(binary, [&] {
             auto* uint_lhs = b.Bitcast(unsigned_lhs_ty, binary->LHS());
             auto* uint_rhs = b.Bitcast(unsigned_rhs_ty, binary->RHS());
@@ -142,7 +142,7 @@ struct State {
         // in MSL too, so we bitcast to an unsigned integer, perform the shift, and bitcast the
         // result back to a signed integer.
         auto* signed_ty = binary->Result(0)->Type();
-        auto* unsigned_ty = ty.match_width(ty.u32(), signed_ty);
+        auto* unsigned_ty = ty.MatchWidth(ty.u32(), signed_ty);
         b.InsertBefore(binary, [&] {
             auto* unsigned_lhs = b.Bitcast(unsigned_ty, binary->LHS());
             auto* unsigned_binary =

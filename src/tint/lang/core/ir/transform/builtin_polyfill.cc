@@ -253,8 +253,8 @@ struct State {
     void CountLeadingZeros(ir::CoreBuiltinCall* call) {
         auto* input = call->Args()[0];
         auto* result_ty = input->Type();
-        auto* uint_ty = ty.match_width(ty.u32(), result_ty);
-        auto* bool_ty = ty.match_width(ty.bool_(), result_ty);
+        auto* uint_ty = ty.MatchWidth(ty.u32(), result_ty);
+        auto* bool_ty = ty.MatchWidth(ty.bool_(), result_ty);
 
         // Make an u32 constant with the same component count as result_ty.
         auto V = [&](uint32_t u) { return b.MatchWidth(u32(u), result_ty); };
@@ -315,8 +315,8 @@ struct State {
     void CountTrailingZeros(ir::CoreBuiltinCall* call) {
         auto* input = call->Args()[0];
         auto* result_ty = input->Type();
-        auto* uint_ty = ty.match_width(ty.u32(), result_ty);
-        auto* bool_ty = ty.match_width(ty.bool_(), result_ty);
+        auto* uint_ty = ty.MatchWidth(ty.u32(), result_ty);
+        auto* bool_ty = ty.MatchWidth(ty.bool_(), result_ty);
 
         // Make an u32 constant with the same component count as result_ty.
         auto V = [&](uint32_t u) { return b.MatchWidth(u32(u), result_ty); };
@@ -422,7 +422,7 @@ struct State {
                 // }
                 auto* e = call->Args()[0];
                 auto* result_ty = e->Type();
-                auto* uint_ty = ty.match_width(ty.u32(), result_ty);
+                auto* uint_ty = ty.MatchWidth(ty.u32(), result_ty);
                 auto V = [&](uint32_t u) { return b.MatchWidth(u32(u), result_ty); };
                 b.InsertBefore(call, [&] {
                     auto* s = b.Call<u32>(core::BuiltinFn::kMin, offset, 32_u);
@@ -451,8 +451,8 @@ struct State {
     void FirstLeadingBit(ir::CoreBuiltinCall* call) {
         auto* input = call->Args()[0];
         auto* result_ty = input->Type();
-        auto* uint_ty = ty.match_width(ty.u32(), result_ty);
-        auto* bool_ty = ty.match_width(ty.bool_(), result_ty);
+        auto* uint_ty = ty.MatchWidth(ty.u32(), result_ty);
+        auto* bool_ty = ty.MatchWidth(ty.bool_(), result_ty);
 
         // Make an u32 constant with the same component count as result_ty.
         auto V = [&](uint32_t u) { return b.MatchWidth(u32(u), result_ty); };
@@ -513,8 +513,8 @@ struct State {
     void FirstTrailingBit(ir::CoreBuiltinCall* call) {
         auto* input = call->Args()[0];
         auto* result_ty = input->Type();
-        auto* uint_ty = ty.match_width(ty.u32(), result_ty);
-        auto* bool_ty = ty.match_width(ty.bool_(), result_ty);
+        auto* uint_ty = ty.MatchWidth(ty.u32(), result_ty);
+        auto* bool_ty = ty.MatchWidth(ty.bool_(), result_ty);
 
         // Make an u32 constant with the same component count as result_ty.
         auto V = [&](uint32_t u) { return b.MatchWidth(u32(u), result_ty); };
@@ -616,7 +616,7 @@ struct State {
                 auto* e = call->Args()[0];
                 auto* newbits = call->Args()[1];
                 auto* result_ty = e->Type();
-                auto* uint_ty = ty.match_width(ty.u32(), result_ty);
+                auto* uint_ty = ty.MatchWidth(ty.u32(), result_ty);
                 b.InsertBefore(call, [&] {
                     auto* oc = b.Add<u32>(offset, count);
                     auto* t1 = b.ShiftLeft<u32>(1_u, offset);

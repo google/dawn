@@ -417,7 +417,7 @@ class Builder {
     ir::Constant* MatchWidth(ARG&& value, const core::type::Type* match) {
         auto* element = Constant(std::forward<ARG>(value));
         if (match->Is<core::type::Vector>()) {
-            return Splat(ir.Types().match_width(element->Type(), match), element);
+            return Splat(ir.Types().MatchWidth(element->Type(), match), element);
         }
         return element;
     }

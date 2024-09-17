@@ -162,7 +162,7 @@ struct State {
             auto* value = b.FunctionParam("value", src_ty);
             func->SetParams({value});
             b.Append(func->Block(), [&] {
-                auto* bool_ty = ty.match_width(ty.bool_(), res_ty);
+                auto* bool_ty = ty.MatchWidth(ty.bool_(), res_ty);
                 auto* converted = b.Convert(res_ty, value);
 
                 // low = select(low_limit_i, i32(value), value >= low_limit_f)

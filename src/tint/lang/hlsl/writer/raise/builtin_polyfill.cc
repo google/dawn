@@ -525,7 +525,7 @@ struct State {
         b.InsertBefore(call, [&] {
             args.Push(b.Call(type, core::BuiltinFn::kFloor, val)->Result(0));
             args.Push(b.Call(type, core::BuiltinFn::kCeil, val)->Result(0));
-            args.Push(b.LessThan(ty.match_width(ty.bool_(), type), val, b.Zero(type))->Result(0));
+            args.Push(b.LessThan(ty.MatchWidth(ty.bool_(), type), val, b.Zero(type))->Result(0));
         });
         auto* trunc = b.ir.CreateInstruction<hlsl::ir::Ternary>(call->DetachResult(), args);
         trunc->InsertBefore(call);
@@ -682,8 +682,8 @@ struct State {
                 auto* src = b.FunctionParam("src", src_type);
                 f->SetParams({src});
                 b.Append(f->Block(), [&] {
-                    const core::type::Type* uint_ty = ty.match_width(ty.u32(), src_type);
-                    const core::type::Type* float_ty = ty.match_width(ty.f32(), src_type);
+                    const core::type::Type* uint_ty = ty.MatchWidth(ty.u32(), src_type);
+                    const core::type::Type* float_ty = ty.MatchWidth(ty.f32(), src_type);
 
                     core::ir::Instruction* v = nullptr;
                     tint::Switch(
@@ -1746,7 +1746,7 @@ struct State {
     }
 
     void QuantizeToF16(core::ir::CoreBuiltinCall* call) {
-        auto* u32_type = ty.match_width(ty.u32(), call->Result(0)->Type());
+        auto* u32_type = ty.MatchWidth(ty.u32(), call->Result(0)->Type());
         b.InsertBefore(call, [&] {
             auto* inner = b.Call<hlsl::ir::BuiltinCall>(u32_type, hlsl::BuiltinFn::kF32Tof16,
                                                         call->Args()[0]);
@@ -1765,7 +1765,7 @@ struct State {
         auto* arg_type = arg->Type()->UnwrapRef();
         if (arg_type->IsSignedIntegerScalarOrVector()) {
             auto* result_ty = call->Result(0)->Type();
-            auto* u32_type = ty.match_width(ty.u32(), result_ty);
+            auto* u32_type = ty.MatchWidth(ty.u32(), result_ty);
             b.InsertBefore(call, [&] {
                 core::ir::Value* val = arg;
                 // Bitcast of literal int vectors fails in DXC so extract arg to a var. See

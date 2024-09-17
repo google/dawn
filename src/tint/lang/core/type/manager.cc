@@ -110,8 +110,8 @@ const core::type::Vector* Manager::packed_vec(const core::type::Type* inner, uin
     return Get<core::type::Vector>(inner, size, true);
 }
 
-const core::type::Type* Manager::match_width(const core::type::Type* el_ty,
-                                             const core::type::Type* match) {
+const core::type::Type* Manager::MatchWidth(const core::type::Type* el_ty,
+                                            const core::type::Type* match) {
     if (auto* m = match->As<core::type::Vector>()) {
         return vec(el_ty, m->Width());
     }
