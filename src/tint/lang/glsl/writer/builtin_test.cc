@@ -1014,5 +1014,138 @@ void main() {
 )");
 }
 
+TEST_F(GlslWriterTest, TextureNumLayers_2DArray) {
+    auto* var =
+        b.Var("v", handle,
+              ty.Get<core::type::SampledTexture>(core::type::TextureDimension::k2dArray, ty.f32()),
+              core::Access::kReadWrite);
+    var->SetBindingPoint(0, 0);
+    b.ir.root_block->Append(var);
+
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        b.Let("x", b.Call(ty.u32(), core::BuiltinFn::kTextureNumLayers, b.Load(var)));
+        b.Return(func);
+    });
+
+    ASSERT_TRUE(Generate()) << err_ << output_.glsl;
+    EXPECT_EQ(output_.glsl, GlslHeader() + R"(precision highp float;
+precision highp int;
+
+uniform highp sampler2DArray v;
+void main() {
+  uint x = uint(textureSize(v, 0).z);
+}
+)");
+}
+
+TEST_F(GlslWriterTest, TextureNumLayers_Depth2DArray) {
+    auto* var =
+        b.Var("v", handle, ty.Get<core::type::DepthTexture>(core::type::TextureDimension::k2dArray),
+              core::Access::kReadWrite);
+    var->SetBindingPoint(0, 0);
+    b.ir.root_block->Append(var);
+
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        b.Let("x", b.Call(ty.u32(), core::BuiltinFn::kTextureNumLayers, b.Load(var)));
+        b.Return(func);
+    });
+
+    ASSERT_TRUE(Generate()) << err_ << output_.glsl;
+    EXPECT_EQ(output_.glsl, GlslHeader() + R"(precision highp float;
+precision highp int;
+
+uniform highp sampler2DArrayShadow v;
+void main() {
+  uint x = uint(textureSize(v, 0).z);
+}
+)");
+}
+
+TEST_F(GlslWriterTest, TextureNumLayers_CubeArray) {
+    auto* var = b.Var(
+        "v", handle,
+        ty.Get<core::type::SampledTexture>(core::type::TextureDimension::kCubeArray, ty.f32()),
+        core::Access::kReadWrite);
+    var->SetBindingPoint(0, 0);
+    b.ir.root_block->Append(var);
+
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        b.Let("x", b.Call(ty.u32(), core::BuiltinFn::kTextureNumLayers, b.Load(var)));
+        b.Return(func);
+    });
+
+    Options opts{};
+    opts.version = Version(Version::Standard::kDesktop, 4, 6);
+    ASSERT_TRUE(Generate(opts)) << err_ << output_.glsl;
+    EXPECT_EQ(output_.glsl, R"(#version 460
+precision highp float;
+precision highp int;
+
+uniform highp samplerCubeArray v;
+void main() {
+  uint x = uint(textureSize(v, 0).z);
+}
+)");
+}
+
+TEST_F(GlslWriterTest, TextureNumLayers_DepthCubeArray) {
+    auto* var = b.Var("v", handle,
+                      ty.Get<core::type::DepthTexture>(core::type::TextureDimension::kCubeArray),
+                      core::Access::kReadWrite);
+    var->SetBindingPoint(0, 0);
+    b.ir.root_block->Append(var);
+
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        b.Let("x", b.Call(ty.u32(), core::BuiltinFn::kTextureNumLayers, b.Load(var)));
+        b.Return(func);
+    });
+
+    Options opts{};
+    opts.version = Version(Version::Standard::kDesktop, 4, 6);
+    ASSERT_TRUE(Generate(opts)) << err_ << output_.glsl;
+    EXPECT_EQ(output_.glsl, R"(#version 460
+precision highp float;
+precision highp int;
+
+uniform highp samplerCubeArrayShadow v;
+void main() {
+  uint x = uint(textureSize(v, 0).z);
+}
+)");
+}
+
+TEST_F(GlslWriterTest, TextureNumLayers_Storage2DArray) {
+    auto* storage_ty = ty.Get<core::type::StorageTexture>(
+        core::type::TextureDimension::k2dArray, core::TexelFormat::kRg32Float, core::Access::kRead,
+        core::type::StorageTexture::SubtypeFor(core::TexelFormat::kRg32Float, ty));
+
+    auto* var = b.Var("v", handle, storage_ty, core::Access::kReadWrite);
+    var->SetBindingPoint(0, 0);
+    b.ir.root_block->Append(var);
+
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        b.Let("x", b.Call(ty.u32(), core::BuiltinFn::kTextureNumLayers, b.Load(var)));
+        b.Return(func);
+    });
+
+    Options opts{};
+    opts.version = Version(Version::Standard::kDesktop, 4, 6);
+    ASSERT_TRUE(Generate(opts)) << err_ << output_.glsl;
+    EXPECT_EQ(output_.glsl, R"(#version 460
+precision highp float;
+precision highp int;
+
+layout(binding = 0, rg32f) uniform highp readonly image2DArray v;
+void main() {
+  uint x = uint(imageSize(v).z);
+}
+)");
+}
+
 }  // namespace
 }  // namespace tint::glsl::writer

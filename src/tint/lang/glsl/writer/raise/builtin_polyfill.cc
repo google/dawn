@@ -74,6 +74,7 @@ struct State {
                     case core::BuiltinFn::kStorageBarrier:
                     case core::BuiltinFn::kTextureBarrier:
                     case core::BuiltinFn::kTextureDimensions:
+                    case core::BuiltinFn::kTextureNumLayers:
                     case core::BuiltinFn::kWorkgroupBarrier:
                         call_worklist.Push(call);
                         break;
@@ -115,6 +116,9 @@ struct State {
                     break;
                 case core::BuiltinFn::kTextureDimensions:
                     TextureDimensions(call);
+                    break;
+                case core::BuiltinFn::kTextureNumLayers:
+                    TextureNumLayers(call);
                     break;
                 default:
                     TINT_UNREACHABLE();
@@ -211,6 +215,37 @@ struct State {
             }
 
             b.BitcastWithResult(call->DetachResult(), result);
+        });
+        call->Destroy();
+    }
+
+    // `textureNumLayers` returns an unsigned scalar in WGSL. `textureSize` and `imageSize`
+    // return a signed scalar / vector in GLSL.
+    //
+    // For the `textureSize` and `imageSize` calls the valid WGSL values always produce a `vec3` in
+    // GLSL so we extract the `z` component for the number of layers.
+    void TextureNumLayers(core::ir::BuiltinCall* call) {
+        b.InsertBefore(call, [&] {
+            auto args = call->Args();
+            auto* tex = args[0]->Type()->As<core::type::Texture>();
+
+            auto func = glsl::BuiltinFn::kTextureSize;
+            if (tex->Is<core::type::StorageTexture>()) {
+                func = glsl::BuiltinFn::kImageSize;
+            }
+
+            Vector<core::ir::Value*, 2> new_args;
+            new_args.Push(args[0]);
+
+            // Non-storage textures require a LOD
+            if (!tex->Is<core::type::StorageTexture>()) {
+                new_args.Push(b.Constant(0_i));
+            }
+
+            auto* new_call = b.Call<glsl::ir::BuiltinCall>(ty.vec(ty.i32(), 3), func, new_args);
+
+            auto* swizzle = b.Swizzle(ty.i32(), new_call, {2});
+            b.BitcastWithResult(call->DetachResult(), swizzle->Result(0));
         });
         call->Destroy();
     }

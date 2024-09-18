@@ -721,5 +721,259 @@ TEST_F(GlslWriter_BuiltinPolyfillTest, InsertBits) {
     EXPECT_EQ(expect, str());
 }
 
+TEST_F(GlslWriter_BuiltinPolyfillTest, TextureNumLayers_2DArray) {
+    auto* var =
+        b.Var("v", handle,
+              ty.Get<core::type::SampledTexture>(core::type::TextureDimension::k2dArray, ty.f32()),
+              core::Access::kReadWrite);
+    var->SetBindingPoint(0, 0);
+    b.ir.root_block->Append(var);
+
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        b.Let("x", b.Call(ty.u32(), core::BuiltinFn::kTextureNumLayers, b.Load(var)));
+        b.Return(func);
+    });
+
+    auto* src = R"(
+$B1: {  # root
+  %v:ptr<handle, texture_2d_array<f32>, read_write> = var @binding_point(0, 0)
+}
+
+%foo = @fragment func():void {
+  $B2: {
+    %3:texture_2d_array<f32> = load %v
+    %4:u32 = textureNumLayers %3
+    %x:u32 = let %4
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+$B1: {  # root
+  %v:ptr<handle, texture_2d_array<f32>, read_write> = var @binding_point(0, 0)
+}
+
+%foo = @fragment func():void {
+  $B2: {
+    %3:texture_2d_array<f32> = load %v
+    %4:vec3<i32> = glsl.textureSize %3, 0i
+    %5:i32 = swizzle %4, z
+    %6:u32 = bitcast %5
+    %x:u32 = let %6
+    ret
+  }
+}
+)";
+
+    Run(BuiltinPolyfill);
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(GlslWriter_BuiltinPolyfillTest, TextureNumLayers_Depth2DArray) {
+    auto* var =
+        b.Var("v", handle, ty.Get<core::type::DepthTexture>(core::type::TextureDimension::k2dArray),
+              core::Access::kReadWrite);
+    var->SetBindingPoint(0, 0);
+    b.ir.root_block->Append(var);
+
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        b.Let("x", b.Call(ty.u32(), core::BuiltinFn::kTextureNumLayers, b.Load(var)));
+        b.Return(func);
+    });
+
+    auto* src = R"(
+$B1: {  # root
+  %v:ptr<handle, texture_depth_2d_array, read_write> = var @binding_point(0, 0)
+}
+
+%foo = @fragment func():void {
+  $B2: {
+    %3:texture_depth_2d_array = load %v
+    %4:u32 = textureNumLayers %3
+    %x:u32 = let %4
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+$B1: {  # root
+  %v:ptr<handle, texture_depth_2d_array, read_write> = var @binding_point(0, 0)
+}
+
+%foo = @fragment func():void {
+  $B2: {
+    %3:texture_depth_2d_array = load %v
+    %4:vec3<i32> = glsl.textureSize %3, 0i
+    %5:i32 = swizzle %4, z
+    %6:u32 = bitcast %5
+    %x:u32 = let %6
+    ret
+  }
+}
+)";
+
+    Run(BuiltinPolyfill);
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(GlslWriter_BuiltinPolyfillTest, TextureNumLayers_CubeArray) {
+    auto* var = b.Var(
+        "v", handle,
+        ty.Get<core::type::SampledTexture>(core::type::TextureDimension::kCubeArray, ty.f32()),
+        core::Access::kReadWrite);
+    var->SetBindingPoint(0, 0);
+    b.ir.root_block->Append(var);
+
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        b.Let("x", b.Call(ty.u32(), core::BuiltinFn::kTextureNumLayers, b.Load(var)));
+        b.Return(func);
+    });
+
+    auto* src = R"(
+$B1: {  # root
+  %v:ptr<handle, texture_cube_array<f32>, read_write> = var @binding_point(0, 0)
+}
+
+%foo = @fragment func():void {
+  $B2: {
+    %3:texture_cube_array<f32> = load %v
+    %4:u32 = textureNumLayers %3
+    %x:u32 = let %4
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+$B1: {  # root
+  %v:ptr<handle, texture_cube_array<f32>, read_write> = var @binding_point(0, 0)
+}
+
+%foo = @fragment func():void {
+  $B2: {
+    %3:texture_cube_array<f32> = load %v
+    %4:vec3<i32> = glsl.textureSize %3, 0i
+    %5:i32 = swizzle %4, z
+    %6:u32 = bitcast %5
+    %x:u32 = let %6
+    ret
+  }
+}
+)";
+
+    Run(BuiltinPolyfill);
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(GlslWriter_BuiltinPolyfillTest, TextureNumLayers_DepthCubeArray) {
+    auto* var = b.Var("v", handle,
+                      ty.Get<core::type::DepthTexture>(core::type::TextureDimension::kCubeArray),
+                      core::Access::kReadWrite);
+    var->SetBindingPoint(0, 0);
+    b.ir.root_block->Append(var);
+
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        b.Let("x", b.Call(ty.u32(), core::BuiltinFn::kTextureNumLayers, b.Load(var)));
+        b.Return(func);
+    });
+
+    auto* src = R"(
+$B1: {  # root
+  %v:ptr<handle, texture_depth_cube_array, read_write> = var @binding_point(0, 0)
+}
+
+%foo = @fragment func():void {
+  $B2: {
+    %3:texture_depth_cube_array = load %v
+    %4:u32 = textureNumLayers %3
+    %x:u32 = let %4
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+$B1: {  # root
+  %v:ptr<handle, texture_depth_cube_array, read_write> = var @binding_point(0, 0)
+}
+
+%foo = @fragment func():void {
+  $B2: {
+    %3:texture_depth_cube_array = load %v
+    %4:vec3<i32> = glsl.textureSize %3, 0i
+    %5:i32 = swizzle %4, z
+    %6:u32 = bitcast %5
+    %x:u32 = let %6
+    ret
+  }
+}
+)";
+
+    Run(BuiltinPolyfill);
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(GlslWriter_BuiltinPolyfillTest, TextureNumLayers_Storage2DArray) {
+    auto* storage_ty = ty.Get<core::type::StorageTexture>(
+        core::type::TextureDimension::k2dArray, core::TexelFormat::kRg32Float, core::Access::kRead,
+        core::type::StorageTexture::SubtypeFor(core::TexelFormat::kRg32Float, ty));
+
+    auto* var = b.Var("v", handle, storage_ty, core::Access::kReadWrite);
+    var->SetBindingPoint(0, 0);
+    b.ir.root_block->Append(var);
+
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        b.Let("x", b.Call(ty.u32(), core::BuiltinFn::kTextureNumLayers, b.Load(var)));
+        b.Return(func);
+    });
+
+    auto* src = R"(
+$B1: {  # root
+  %v:ptr<handle, texture_storage_2d_array<rg32float, read>, read_write> = var @binding_point(0, 0)
+}
+
+%foo = @fragment func():void {
+  $B2: {
+    %3:texture_storage_2d_array<rg32float, read> = load %v
+    %4:u32 = textureNumLayers %3
+    %x:u32 = let %4
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+$B1: {  # root
+  %v:ptr<handle, texture_storage_2d_array<rg32float, read>, read_write> = var @binding_point(0, 0)
+}
+
+%foo = @fragment func():void {
+  $B2: {
+    %3:texture_storage_2d_array<rg32float, read> = load %v
+    %4:vec3<i32> = glsl.imageSize %3
+    %5:i32 = swizzle %4, z
+    %6:u32 = bitcast %5
+    %x:u32 = let %6
+    ret
+  }
+}
+)";
+
+    Run(BuiltinPolyfill);
+    EXPECT_EQ(expect, str());
+}
+
 }  // namespace
 }  // namespace tint::glsl::writer::raise
