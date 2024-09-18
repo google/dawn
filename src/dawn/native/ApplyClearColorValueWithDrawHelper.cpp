@@ -388,7 +388,7 @@ bool ShouldApplyClearColorWithDraw(const DeviceBase* device,
     if (loadOp != wgpu::LoadOp::Clear) {
         return false;
     }
-    if (clearWithDrawForBigInt) {
+    if (!clearWithDraw && clearWithDrawForBigInt) {
         return NeedsBigIntClear(view->GetFormat(), clearValue);
     }
 
@@ -448,15 +448,17 @@ bool GetKeyOfApplyClearColorValueWithDrawPipelines(
     if (const auto* pls = renderPassDescriptor.Get<RenderPassPixelLocalStorage>()) {
         key->hasPLS = true;
         key->totalPixelLocalStorageSize = pls->totalPixelLocalStorageSize;
-        key->plsAttachments = std::vector<wgpu::PipelineLayoutStorageAttachment>(
-            pls->totalPixelLocalStorageSize / kPLSSlotByteSize,
-            {nullptr, 0, wgpu::TextureFormat::Undefined});
-        for (size_t i = 0; i < pls->storageAttachmentCount; i++) {
-            size_t slot = pls->storageAttachments[i].offset / kPLSSlotByteSize;
-            key->plsAttachments[slot].format =
-                pls->storageAttachments[i].storage->GetFormat().format;
-            key->plsAttachments[slot].offset = pls->storageAttachments[i].offset;
+        for (size_t i = 0; i < pls->storageAttachmentCount; ++i) {
+            wgpu::PipelineLayoutStorageAttachment attachment{};
+            attachment.format = pls->storageAttachments[i].storage->GetFormat().format;
+            attachment.offset = pls->storageAttachments[i].offset;
+            key->plsAttachments.push_back(std::move(attachment));
         }
+        // Sort the PLS attachments by offset to make sure the order is deterministic.
+        std::sort(
+            key->plsAttachments.begin(), key->plsAttachments.end(),
+            [](const wgpu::PipelineLayoutStorageAttachment& a,
+               const wgpu::PipelineLayoutStorageAttachment& b) { return a.offset < b.offset; });
     }
 
     return true;
