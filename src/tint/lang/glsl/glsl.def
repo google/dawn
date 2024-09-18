@@ -37,6 +37,7 @@
 
 import "src/tint/lang/core/address_space.def"
 import "src/tint/lang/core/access.def"
+import "src/tint/lang/core/texel_format.def"
 
 ////////////////////////////////////////////////////////////////////////////////
 // Types                                                                      //
@@ -50,13 +51,33 @@ type atomic<T>
 type ptr<S: address_space, T, A: access>
 
 type vec2<T>
+type vec3<T>
+type vec4<T>
 @display("vec{N}<{T}>")     type vec<N: num, T>
+
+type texture_1d<T>
+type texture_2d<T>
+type texture_2d_array<T>
+type texture_3d<T>
+type texture_cube<T>
+type texture_cube_array<T>
+type texture_multisampled_2d<T>
+type texture_depth_2d
+type texture_depth_2d_array
+type texture_depth_cube
+type texture_depth_cube_array
+type texture_depth_multisampled_2d
+type texture_storage_1d<F: texel_format, A: access>
+type texture_storage_2d<F: texel_format, A: access>
+type texture_storage_2d_array<F: texel_format, A: access>
+type texture_storage_3d<F: texel_format, A: access>
 
 ////////////////////////////////////////////////////////////////////////////////
 // Type matchers                                                              //
 ////////////////////////////////////////////////////////////////////////////////
 
 match iu32: i32 | u32
+match fiu32: f32 | i32 | u32
 
 match read_write: access.read_write
 
@@ -92,3 +113,36 @@ implicit(N: num) fn uintBitsToFloat(value: vec<N, u32>) -> vec<N, f32>
 
 fn packFloat2x16(value: vec2<f16>) -> u32
 fn unpackFloat2x16(value: u32) -> vec2<f16>
+
+@must_use implicit(T: fiu32) fn textureSize(texture: texture_1d<T>,
+                                            level: i32) -> i32
+@must_use implicit(T: fiu32) fn textureSize(texture: texture_2d<T>,
+                                            level: i32) -> vec2<i32>
+@must_use implicit(T: fiu32) fn textureSize(texture: texture_2d_array<T>,
+                                            level: i32) -> vec3<i32>
+@must_use implicit(T: fiu32) fn textureSize(texture: texture_3d<T>,
+                                            level: i32) -> vec3<i32>
+@must_use implicit(T: fiu32) fn textureSize(texture: texture_cube<T>,
+                                            level: i32) -> vec2<i32>
+@must_use implicit(T: fiu32) fn textureSize(texture: texture_cube_array<T>,
+                                            level: i32) -> vec3<i32>
+@must_use fn textureSize(texture: texture_depth_2d,
+                         level: i32) -> vec2<i32>
+@must_use fn textureSize(texture: texture_depth_2d_array,
+                         level: i32) -> vec3<i32>
+@must_use fn textureSize(texture: texture_depth_cube,
+                         level: i32) -> vec2<i32>
+@must_use fn textureSize(texture: texture_depth_cube_array,
+                        level: i32) -> vec3<i32>
+
+@must_use implicit(T: fiu32) fn textureSize(texture: texture_multisampled_2d<T>) -> vec2<i32>
+@must_use fn textureSize(texture: texture_depth_multisampled_2d) -> vec2<i32>
+
+@must_use implicit(F: texel_format, A: access) fn imageSize(
+                                            texture: texture_storage_1d<F, A>) -> i32
+@must_use implicit(F: texel_format, A: access) fn imageSize(
+                                            texture: texture_storage_2d<F, A>) -> vec2<i32>
+@must_use implicit(F: texel_format, A: access) fn imageSize(
+                                            texture: texture_storage_2d_array<F, A>) -> vec3<i32>
+@must_use implicit(F: texel_format, A: access) fn imageSize(
+                                            texture: texture_storage_3d<F, A>) -> vec3<i32>

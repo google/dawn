@@ -64,6 +64,10 @@ const char* str(BuiltinFn i) {
             return "packFloat2x16";
         case BuiltinFn::kUnpackFloat2X16:
             return "unpackFloat2x16";
+        case BuiltinFn::kTextureSize:
+            return "textureSize";
+        case BuiltinFn::kImageSize:
+            return "imageSize";
     }
     return "<unknown>";
 }

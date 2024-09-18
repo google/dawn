@@ -34,6 +34,9 @@
 #include "src/tint/lang/core/ir/builder.h"
 #include "src/tint/lang/core/ir/module.h"
 #include "src/tint/lang/core/ir/validator.h"
+#include "src/tint/lang/core/type/depth_multisampled_texture.h"
+#include "src/tint/lang/core/type/multisampled_texture.h"
+#include "src/tint/lang/core/type/storage_texture.h"
 #include "src/tint/lang/glsl/builtin_fn.h"
 #include "src/tint/lang/glsl/ir/builtin_call.h"
 #include "src/tint/lang/glsl/ir/ternary.h"
@@ -82,6 +85,7 @@ struct State {
                     case core::BuiltinFn::kSelect:
                     case core::BuiltinFn::kStorageBarrier:
                     case core::BuiltinFn::kTextureBarrier:
+                    case core::BuiltinFn::kTextureDimensions:
                     case core::BuiltinFn::kWorkgroupBarrier:
                         call_worklist.Push(call);
                         break;
@@ -111,6 +115,9 @@ struct State {
                 case core::BuiltinFn::kTextureBarrier:
                 case core::BuiltinFn::kWorkgroupBarrier:
                     Barrier(call);
+                    break;
+                case core::BuiltinFn::kTextureDimensions:
+                    TextureDimensions(call);
                     break;
                 default:
                     TINT_UNREACHABLE();
@@ -321,6 +328,65 @@ struct State {
         b.InsertBefore(bitcast,
                        [&] { b.CallWithResult(bitcast->DetachResult(), f, bitcast->Args()[0]); });
         bitcast->Destroy();
+    }
+
+    // `textureDimensions` returns an unsigned scalar / vector in WGSL. `textureSize` and
+    // `imageSize` return a signed scalar / vector in GLSL.  So, we  need to cast the result to
+    // the needed WGSL type.
+    void TextureDimensions(core::ir::BuiltinCall* call) {
+        auto args = call->Args();
+        auto* tex = args[0]->Type()->As<core::type::Texture>();
+
+        b.InsertBefore(call, [&] {
+            auto func = glsl::BuiltinFn::kTextureSize;
+            if (tex->Is<core::type::StorageTexture>()) {
+                func = glsl::BuiltinFn::kImageSize;
+            }
+
+            Vector<core::ir::Value*, 2> new_args;
+            new_args.Push(args[0]);
+
+            if (!(tex->Is<core::type::StorageTexture>() ||
+                  tex->Is<core::type::MultisampledTexture>() ||
+                  tex->Is<core::type::DepthMultisampledTexture>())) {
+                // Add a LOD to any texture other then storage, and multi-sampled textures which
+                // does not already have an LOD.
+                if (args.Length() == 1) {
+                    new_args.Push(b.Constant(0_i));
+                } else {
+                    // Make sure the LOD is a i32
+                    auto* bc = b.Bitcast(ty.i32(), args[1]);
+                    bitcast_worklist.Push(bc);
+                    new_args.Push(bc->Result(0));
+                }
+            }
+
+            auto ret_type = call->Result(0)->Type();
+
+            // In GLSL the array dimensions return a 3rd parameter.
+            if (tex->Dim() == core::type::TextureDimension::k2dArray ||
+                tex->Dim() == core::type::TextureDimension::kCubeArray) {
+                ret_type = ty.vec(ty.i32(), 3);
+            } else {
+                ret_type = ty.MatchWidth(ty.i32(), call->Result(0)->Type());
+            }
+
+            core::ir::Value* result =
+                b.Call<glsl::ir::BuiltinCall>(ret_type, func, new_args)->Result(0);
+
+            // `textureSize` on array samplers returns the array size in the final component, WGSL
+            // requires a 2 component response, so drop the array size
+            if (tex->Dim() == core::type::TextureDimension::k2dArray ||
+                tex->Dim() == core::type::TextureDimension::kCubeArray) {
+                ret_type = ty.MatchWidth(ty.i32(), call->Result(0)->Type());
+                result = b.Swizzle(ret_type, result, {0, 1})->Result(0);
+            }
+
+            auto* ret_bc = b.Bitcast(call->Result(0)->Type(), result);
+            bitcast_worklist.Push(ret_bc);
+            call->Result(0)->ReplaceAllUsesWith(ret_bc->Result(0));
+        });
+        call->Destroy();
     }
 
     void AtomicCompareExchangeWeak(core::ir::BuiltinCall* call) {

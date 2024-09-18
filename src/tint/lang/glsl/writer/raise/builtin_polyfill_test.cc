@@ -1234,5 +1234,214 @@ TEST_F(GlslWriter_BuiltinPolyfillTest, BitcastVec4F16ToVec2F32) {
     EXPECT_EQ(expect, str());
 }
 
+TEST_F(GlslWriter_BuiltinPolyfillTest, TextureDimensions_1d) {
+    auto* t = b.FunctionParam(
+        "t", ty.Get<core::type::SampledTexture>(core::type::TextureDimension::k1d, ty.f32()));
+    auto* func = b.Function("foo", ty.u32());
+    func->SetParams({t});
+    b.Append(func->Block(), [&] {
+        auto* result = b.Call<u32>(core::BuiltinFn::kTextureDimensions, t);
+        b.Return(func, result);
+    });
+
+    auto* src = R"(
+%foo = func(%t:texture_1d<f32>):u32 {
+  $B1: {
+    %3:u32 = textureDimensions %t
+    ret %3
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = func(%t:texture_1d<f32>):u32 {
+  $B1: {
+    %3:i32 = glsl.textureSize %t, 0i
+    %4:u32 = convert %3
+    ret %4
+  }
+}
+)";
+
+    Run(BuiltinPolyfill);
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(GlslWriter_BuiltinPolyfillTest, TextureDimensions_2d_WithoutLod) {
+    auto* t = b.FunctionParam(
+        "t", ty.Get<core::type::SampledTexture>(core::type::TextureDimension::k2d, ty.f32()));
+    auto* func = b.Function("foo", ty.vec2<u32>());
+    func->SetParams({t});
+    b.Append(func->Block(), [&] {
+        auto* result = b.Call<vec2<u32>>(core::BuiltinFn::kTextureDimensions, t);
+        b.Return(func, result);
+    });
+
+    auto* src = R"(
+%foo = func(%t:texture_2d<f32>):vec2<u32> {
+  $B1: {
+    %3:vec2<u32> = textureDimensions %t
+    ret %3
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = func(%t:texture_2d<f32>):vec2<u32> {
+  $B1: {
+    %3:vec2<i32> = glsl.textureSize %t, 0i
+    %4:vec2<u32> = convert %3
+    ret %4
+  }
+}
+)";
+
+    Run(BuiltinPolyfill);
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(GlslWriter_BuiltinPolyfillTest, TextureDimensions_2d_WithU32Lod) {
+    auto* t = b.FunctionParam(
+        "t", ty.Get<core::type::SampledTexture>(core::type::TextureDimension::k2d, ty.f32()));
+    auto* func = b.Function("foo", ty.vec2<u32>());
+    func->SetParams({t});
+    b.Append(func->Block(), [&] {
+        auto* result = b.Call<vec2<u32>>(core::BuiltinFn::kTextureDimensions, t, 3_u);
+        b.Return(func, result);
+    });
+
+    auto* src = R"(
+%foo = func(%t:texture_2d<f32>):vec2<u32> {
+  $B1: {
+    %3:vec2<u32> = textureDimensions %t, 3u
+    ret %3
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = func(%t:texture_2d<f32>):vec2<u32> {
+  $B1: {
+    %3:i32 = convert 3u
+    %4:vec2<i32> = glsl.textureSize %t, %3
+    %5:vec2<u32> = convert %4
+    ret %5
+  }
+}
+)";
+
+    Run(BuiltinPolyfill);
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(GlslWriter_BuiltinPolyfillTest, TextureDimensions_2dArray) {
+    auto* t = b.FunctionParam(
+        "t", ty.Get<core::type::SampledTexture>(core::type::TextureDimension::k2dArray, ty.f32()));
+    auto* func = b.Function("foo", ty.vec2<u32>());
+    func->SetParams({t});
+    b.Append(func->Block(), [&] {
+        auto* result = b.Call<vec2<u32>>(core::BuiltinFn::kTextureDimensions, t);
+        b.Return(func, result);
+    });
+
+    auto* src = R"(
+%foo = func(%t:texture_2d_array<f32>):vec2<u32> {
+  $B1: {
+    %3:vec2<u32> = textureDimensions %t
+    ret %3
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = func(%t:texture_2d_array<f32>):vec2<u32> {
+  $B1: {
+    %3:vec3<i32> = glsl.textureSize %t, 0i
+    %4:vec2<i32> = swizzle %3, xy
+    %5:vec2<u32> = convert %4
+    ret %5
+  }
+}
+)";
+
+    Run(BuiltinPolyfill);
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(GlslWriter_BuiltinPolyfillTest, TextureDimensions_Storage2D) {
+    auto* t = b.FunctionParam(
+        "t",
+        ty.Get<core::type::StorageTexture>(
+            core::type::TextureDimension::k2d, core::TexelFormat::kRg32Float, core::Access::kRead,
+            core::type::StorageTexture::SubtypeFor(core::TexelFormat::kRg32Float, ty)));
+    auto* func = b.Function("foo", ty.vec2<u32>());
+    func->SetParams({t});
+    b.Append(func->Block(), [&] {
+        auto* result = b.Call<vec2<u32>>(core::BuiltinFn::kTextureDimensions, t);
+        b.Return(func, result);
+    });
+
+    auto* src = R"(
+%foo = func(%t:texture_storage_2d<rg32float, read>):vec2<u32> {
+  $B1: {
+    %3:vec2<u32> = textureDimensions %t
+    ret %3
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = func(%t:texture_storage_2d<rg32float, read>):vec2<u32> {
+  $B1: {
+    %3:vec2<i32> = glsl.imageSize %t
+    %4:vec2<u32> = convert %3
+    ret %4
+  }
+}
+)";
+
+    Run(BuiltinPolyfill);
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(GlslWriter_BuiltinPolyfillTest, TextureDimensions_DepthMultisampled) {
+    auto* t = b.FunctionParam(
+        "t", ty.Get<core::type::DepthMultisampledTexture>(core::type::TextureDimension::k2d));
+    auto* func = b.Function("foo", ty.vec2<u32>());
+    func->SetParams({t});
+    b.Append(func->Block(), [&] {
+        auto* result = b.Call<vec2<u32>>(core::BuiltinFn::kTextureDimensions, t);
+        b.Return(func, result);
+    });
+
+    auto* src = R"(
+%foo = func(%t:texture_depth_multisampled_2d):vec2<u32> {
+  $B1: {
+    %3:vec2<u32> = textureDimensions %t
+    ret %3
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = func(%t:texture_depth_multisampled_2d):vec2<u32> {
+  $B1: {
+    %3:vec2<i32> = glsl.textureSize %t
+    %4:vec2<u32> = convert %3
+    ret %4
+  }
+}
+)";
+
+    Run(BuiltinPolyfill);
+    EXPECT_EQ(expect, str());
+}
+
 }  // namespace
 }  // namespace tint::glsl::writer::raise
