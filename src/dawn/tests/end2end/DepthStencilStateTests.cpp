@@ -42,9 +42,6 @@ class DepthStencilStateTest : public DawnTest {
     void SetUp() override {
         DawnTest::SetUp();
 
-        // TODO(crbug.com/dawn/737): Test output is wrong with D3D12 + WARP.
-        DAWN_SUPPRESS_TEST_IF(IsD3D12() && IsWARP());
-
         wgpu::TextureDescriptor renderTargetDescriptor;
         renderTargetDescriptor.dimension = wgpu::TextureDimension::e2D;
         renderTargetDescriptor.size.width = kRTSize;
