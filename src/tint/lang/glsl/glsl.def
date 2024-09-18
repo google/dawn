@@ -114,6 +114,9 @@ implicit(N: num) fn uintBitsToFloat(value: vec<N, u32>) -> vec<N, f32>
 implicit(T: iu32) fn bitCount(value: T) -> i32
 implicit(T: iu32, N: num) fn bitCount(value: vec<N, T>) -> vec<N, i32>
 
+implicit(T: iu32) fn bitfieldExtract(value: T, offset: i32, bits: i32) -> T
+implicit(T: iu32, N: num) fn bitfieldExtract(value: vec<N, T>, offset: i32, bits: i32) -> vec<N, T>
+
 fn packFloat2x16(value: vec2<f16>) -> u32
 fn unpackFloat2x16(value: u32) -> vec2<f16>
 

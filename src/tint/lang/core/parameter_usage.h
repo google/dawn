@@ -49,6 +49,7 @@ namespace tint::core {
 enum class ParameterUsage : uint8_t {
     kArrayIndex,
     kBias,
+    kBits,
     kCompareValue,
     kComponent,
     kCoords,

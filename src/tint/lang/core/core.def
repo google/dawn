@@ -230,6 +230,7 @@ enum attribute {
 
 // These are parameter usages which show up in other def files but not in core.def.
 enum usages {
+  bits
   depth
   compare_value
   elements

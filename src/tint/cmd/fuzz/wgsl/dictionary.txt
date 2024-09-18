@@ -147,6 +147,7 @@
 "bgra8unorm"
 "binding"
 "bitcast"
+"bits"
 "blend_src"
 "bool"
 "break"

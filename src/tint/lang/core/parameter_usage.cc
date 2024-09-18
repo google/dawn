@@ -46,6 +46,8 @@ std::string_view ToString(ParameterUsage usage) {
             return "array_index";
         case ParameterUsage::kBias:
             return "bias";
+        case ParameterUsage::kBits:
+            return "bits";
         case ParameterUsage::kCompareValue:
             return "compare_value";
         case ParameterUsage::kComponent:

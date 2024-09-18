@@ -83,6 +83,7 @@ struct State {
                     case core::BuiltinFn::kAtomicSub:
                     case core::BuiltinFn::kAtomicLoad:
                     case core::BuiltinFn::kCountOneBits:
+                    case core::BuiltinFn::kExtractBits:
                     case core::BuiltinFn::kSelect:
                     case core::BuiltinFn::kStorageBarrier:
                     case core::BuiltinFn::kTextureBarrier:
@@ -111,6 +112,9 @@ struct State {
                     break;
                 case core::BuiltinFn::kCountOneBits:
                     CountOneBits(call);
+                    break;
+                case core::BuiltinFn::kExtractBits:
+                    ExtractBits(call);
                     break;
                 case core::BuiltinFn::kSelect:
                     Select(call);
@@ -149,6 +153,18 @@ struct State {
                 ReplaceBitcast(bitcast);
             }
         }
+    }
+
+    void ExtractBits(core::ir::Call* call) {
+        b.InsertBefore(call, [&] {
+            auto args = call->Args();
+            auto* offset = b.Convert(ty.i32(), args[1]);
+            auto* bits = b.Convert(ty.i32(), args[2]);
+
+            b.CallWithResult<glsl::ir::BuiltinCall>(
+                call->DetachResult(), glsl::BuiltinFn::kBitfieldExtract, args[0], offset, bits);
+        });
+        call->Destroy();
     }
 
     // GLSL `bitCount` always returns an `i32` so we need to convert it. Convert to a `bitCount`
