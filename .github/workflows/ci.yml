@@ -32,8 +32,8 @@ jobs:
         include:
           - os: macos-latest
             toolchain: clang
-            c_compiler: $(brew --prefix llvm@15)/bin/clang
-            cpp_compiler: $(brew --prefix llvm@15)/bin/clang++
+            c_compiler: clang
+            cpp_compiler: clang++
             env:
               MACOSX_DEPLOYMENT_TARGET: "11.0"
             container: null
