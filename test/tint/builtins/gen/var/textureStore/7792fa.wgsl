@@ -34,6 +34,8 @@
 //                       Do not modify this file directly
 ////////////////////////////////////////////////////////////////////////////////
 
+
+// flags: --glsl-desktop
 @group(1) @binding(0) var arg_0: texture_storage_3d<rg32sint, read_write>;
 
 // fn textureStore(texture: texture_storage_3d<rg32sint, read_write>, coords: vec3<u32>, value: vec4<i32>)

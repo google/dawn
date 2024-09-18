@@ -35,6 +35,8 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
+// flags: --glsl-desktop
+
 @group(0) @binding(0) var<storage, read_write> prevent_dce : vec4<i32>;
 
 @group(1) @binding(1) var arg_1: texture_cube_array<i32>;

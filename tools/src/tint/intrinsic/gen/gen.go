@@ -612,6 +612,23 @@ func OverloadUsesReadWriteStorageTexture(overload sem.Overload) bool {
 	return false
 }
 
+// OverloadUsesGLESTexture returns true if the overload uses a texture value for GLSL ES 3.10
+func OverloadNeedsDesktopGLSL(overload sem.Overload) bool {
+	for _, param := range overload.Parameters {
+		if strings.HasPrefix(param.Type.Target.GetName(), "texture_storage") {
+			fmt := param.Type.TemplateArguments[0].(sem.FullyQualifiedName).Target.GetName()
+			if fmt == "rg32uint" || fmt == "rg32sint" || fmt == "rg32float" || fmt == "r8unorm" {
+				return true
+			}
+		}
+		if strings.HasPrefix(param.Type.Target.GetName(), "texture_cube_array") ||
+			strings.HasPrefix(param.Type.Target.GetName(), "texture_depth_cube_array") {
+			return true
+		}
+	}
+	return false
+}
+
 func loadOrMinusOne(p *int) int {
 	if p != nil {
 		return *p

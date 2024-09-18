@@ -319,6 +319,7 @@ func generate(tmplPath, outPath string, cache *genCache, writeFile WriteFile) er
 		"IsHostShareable":                     gen.IsHostShareable,
 		"OverloadUsesType":                    gen.OverloadUsesType,
 		"OverloadUsesReadWriteStorageTexture": gen.OverloadUsesReadWriteStorageTexture,
+		"OverloadNeedsDesktopGLSL":            gen.OverloadNeedsDesktopGLSL,
 		"IsFirstIn":                           isFirstIn,
 		"IsLastIn":                            isLastIn,
 		"LoadIntrinsics":                      func(path string) *intrinsicCache { return g.cache.intrinsics(path) },
