@@ -41,6 +41,8 @@ if(TINT_BUILD_GLSL_WRITER)
 # Condition: TINT_BUILD_GLSL_WRITER
 ################################################################################
 tint_add_target(tint_lang_glsl_writer_raise lib
+  lang/glsl/writer/raise/bitcast_polyfill.cc
+  lang/glsl/writer/raise/bitcast_polyfill.h
   lang/glsl/writer/raise/builtin_polyfill.cc
   lang/glsl/writer/raise/builtin_polyfill.h
   lang/glsl/writer/raise/raise.cc
@@ -99,6 +101,7 @@ if(TINT_BUILD_GLSL_WRITER)
 # Condition: TINT_BUILD_GLSL_WRITER
 ################################################################################
 tint_add_target(tint_lang_glsl_writer_raise_test test
+  lang/glsl/writer/raise/bitcast_polyfill_test.cc
   lang/glsl/writer/raise/builtin_polyfill_test.cc
   lang/glsl/writer/raise/shader_io_test.cc
 )

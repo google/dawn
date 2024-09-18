@@ -998,6 +998,15 @@ class Builder {
         return Bitcast(type, value);
     }
 
+    /// Creates a bitcast instruction
+    /// @param result the result
+    /// @param val the value being bitcast
+    /// @returns the instruction
+    template <typename VAL>
+    ir::Bitcast* BitcastWithResult(ir::InstructionResult* result, VAL&& val) {
+        return Append(ir.CreateInstruction<ir::Bitcast>(result, val));
+    }
+
     /// Creates a discard instruction
     /// @returns the instruction
     ir::Discard* Discard();
