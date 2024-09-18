@@ -217,6 +217,10 @@ struct Options {
     tint::hlsl::writer::PixelLocalOptions pixel_local_options;
 #endif  // TINT_BUILD_HLSL_WRITER
 
+#if TINT_BUILD_GLSL_WRITER
+    bool glsl_desktop = false;
+#endif  // TINT_BUILD_GLSL_WRITER
+
 #if TINT_BUILD_MSL_WRITER
     std::string xcrun_path;
 #endif  // TINT_BULD_MSL_WRITER
@@ -322,6 +326,12 @@ When specified, automatically enables HLSL validation with DXC)",
                                   Parameter{"path"});
     TINT_DEFER(opts->dxc_path = dxc_path.value.value_or(""));
 #endif  // TINT_BUILD_HLSL_WRITER
+
+#if TINT_BUILD_GLSL_WRITER
+    auto& glsl_desktop = options.Add<BoolOption>(
+        "glsl-desktop", "Set the version to the desktop GL instead of ES", Default{false});
+    TINT_DEFER(opts->glsl_desktop = *glsl_desktop.value);
+#endif  // TINT_BUILD_GLSL_WRITER
 
 #if TINT_BUILD_MSL_WRITER
     auto& xcrun =
@@ -1067,6 +1077,14 @@ bool GenerateGlsl([[maybe_unused]] const tint::Program& program,
         }
 
         tint::glsl::writer::Options gen_options;
+
+        if (options.glsl_desktop) {
+            gen_options.version =
+                tint::glsl::writer::Version(tint::glsl::writer::Version::Standard::kDesktop, 4, 6);
+        } else {
+            gen_options.version = tint::glsl::writer::Version();
+        }
+
         gen_options.disable_robustness = !options.enable_robustness;
         gen_options.bindings = tint::glsl::writer::GenerateBindings(program);
 
