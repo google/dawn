@@ -144,6 +144,7 @@ crbug.com/341327470 [ intel-0x4680 linux ] webgpu:shader,execution,expression,ca
 crbug.com/341327470 [ intel-0x4680 linux ] webgpu:shader,execution,expression,call,builtin,fwidthFine:f32:* [ Failure ]
 crbug.com/341327471 [ intel-0x4680 linux ] webgpu:web_platform,canvas,getCurrentTexture:multiple_frames:canvasType="onscreen" [ Failure ]
 crbug.com/341327471 [ intel-0x4680 linux ] webgpu:web_platform,canvas,getCurrentTexture:resize:canvasType="onscreen" [ Failure ]
+crbug.com/341327472 [ intel-0x4680 linux ] webgpu:api,validation,state,device_lost,destroy:* [ Failure ]
 
 ################################################################################
 # This section represents things that are probably fixable in Dawn.
@@ -346,34 +347,6 @@ crbug.com/dawn/2248 [ intel-0x9bc5 ] webgpu:api,operation,command_buffer,queries
 crbug.com/dawn/2248 [ intel-0x9bc5 ] webgpu:api,operation,command_buffer,queries,occlusionQuery:occlusion_query,alpha_to_coverage:writeMask=0;renderMode="render-bundle";bufferOffset="zero";querySetOffset="zero";alpha=0.25 [ Failure ]
 crbug.com/dawn/2248 [ intel-0x9bc5 ] webgpu:api,operation,command_buffer,queries,occlusionQuery:occlusion_query,alpha_to_coverage:writeMask=0;renderMode="render-bundle";bufferOffset="zero";querySetOffset="zero";alpha=0.5 [ Failure ]
 crbug.com/dawn/2248 [ intel-0x9bc5 ] webgpu:api,operation,command_buffer,queries,occlusionQuery:occlusion_query,alpha_to_coverage:writeMask=0;renderMode="render-bundle";bufferOffset="zero";querySetOffset="zero";alpha=0.75 [ Failure ]
-
-# device_lost,destroy:createBindGroup failures (storage buffer only) on Intel 770
-crbug.com/341327472 [ intel-0x4680 linux ] webgpu:api,validation,state,device_lost,destroy:createBindGroup:resourceType="storageBuf";entry={"buffer":{"type":"storage"}};awaitLost=true [ Failure ]
-crbug.com/341327472 [ intel-0x4680 linux ] webgpu:api,validation,state,device_lost,destroy:createBindGroup:resourceType="storageBuf";entry={"buffer":{"type":"storage"}};awaitLost=false [ Failure ]
-
-# robust_access_vertex failures on Intel
-crbug.com/dawn/0000 [ intel ] webgpu:shader,execution,robust_access_vertex:vertex_buffer_access:indexed=true;indirect=false;drawCallTestParameter="baseVertex";type="float32";additionalBuffers=4;partialLastNumber=true;offsetVertexBuffer=true [ Failure ]
-crbug.com/dawn/0000 [ intel ] webgpu:shader,execution,robust_access_vertex:vertex_buffer_access:indexed=true;indirect=false;drawCallTestParameter="baseVertex";type="float32";additionalBuffers=4;partialLastNumber=true;offsetVertexBuffer=false [ Failure ]
-crbug.com/dawn/0000 [ intel ] webgpu:shader,execution,robust_access_vertex:vertex_buffer_access:indexed=true;indirect=false;drawCallTestParameter="baseVertex";type="float32x3";additionalBuffers=4;partialLastNumber=false;offsetVertexBuffer=false [ Failure ]
-crbug.com/dawn/0000 [ intel ] webgpu:shader,execution,robust_access_vertex:vertex_buffer_access:indexed=true;indirect=false;drawCallTestParameter="baseVertex";type="float32x2";additionalBuffers=4;partialLastNumber=false;offsetVertexBuffer=true [ Failure ]
-crbug.com/dawn/0000 [ intel ] webgpu:shader,execution,robust_access_vertex:vertex_buffer_access:indexed=true;indirect=false;drawCallTestParameter="baseVertex";type="float32x4";additionalBuffers=0;partialLastNumber=true;offsetVertexBuffer=true [ Failure ]
-crbug.com/dawn/0000 [ intel ] webgpu:shader,execution,robust_access_vertex:vertex_buffer_access:indexed=true;indirect=false;drawCallTestParameter="baseVertex";type="float32x2";additionalBuffers=0;partialLastNumber=false;offsetVertexBuffer=false [ Failure ]
-crbug.com/dawn/0000 [ intel ] webgpu:shader,execution,robust_access_vertex:vertex_buffer_access:indexed=true;indirect=false;drawCallTestParameter="baseVertex";type="float32x2";additionalBuffers=0;partialLastNumber=false;offsetVertexBuffer=true [ Failure ]
-crbug.com/dawn/0000 [ intel ] webgpu:shader,execution,robust_access_vertex:vertex_buffer_access:indexed=true;indirect=false;drawCallTestParameter="baseVertex";type="float32x3";additionalBuffers=4;partialLastNumber=true;offsetVertexBuffer=true [ Failure ]
-crbug.com/dawn/0000 [ intel ] webgpu:shader,execution,robust_access_vertex:vertex_buffer_access:indexed=true;indirect=false;drawCallTestParameter="baseVertex";type="float32";additionalBuffers=4;partialLastNumber=false;offsetVertexBuffer=false [ Failure ]
-crbug.com/dawn/0000 [ intel ] webgpu:shader,execution,robust_access_vertex:vertex_buffer_access:indexed=true;indirect=false;drawCallTestParameter="baseVertex";type="float32x3";additionalBuffers=0;partialLastNumber=true;offsetVertexBuffer=false [ Failure ]
-crbug.com/dawn/0000 [ intel ] webgpu:shader,execution,robust_access_vertex:vertex_buffer_access:indexed=true;indirect=false;drawCallTestParameter="baseVertex";type="float32x2";additionalBuffers=4;partialLastNumber=true;offsetVertexBuffer=false [ Failure ]
-crbug.com/dawn/0000 [ intel ] webgpu:shader,execution,robust_access_vertex:vertex_buffer_access:indexed=true;indirect=false;drawCallTestParameter="baseVertex";type="float32x4";additionalBuffers=4;partialLastNumber=false;offsetVertexBuffer=false [ Failure ]
-crbug.com/dawn/0000 [ intel ] webgpu:shader,execution,robust_access_vertex:vertex_buffer_access:indexed=true;indirect=false;drawCallTestParameter="baseVertex";type="float32x3";additionalBuffers=0;partialLastNumber=true;offsetVertexBuffer=true [ Failure ]
-crbug.com/dawn/0000 [ intel ] webgpu:shader,execution,robust_access_vertex:vertex_buffer_access:indexed=true;indirect=false;drawCallTestParameter="baseVertex";type="float32";additionalBuffers=4;partialLastNumber=false;offsetVertexBuffer=true [ Failure ]
-crbug.com/dawn/0000 [ intel ] webgpu:shader,execution,robust_access_vertex:vertex_buffer_access:indexed=true;indirect=false;drawCallTestParameter="baseVertex";type="float32x2";additionalBuffers=0;partialLastNumber=true;offsetVertexBuffer=false [ Failure ]
-crbug.com/dawn/0000 [ intel ] webgpu:shader,execution,robust_access_vertex:vertex_buffer_access:indexed=true;indirect=false;drawCallTestParameter="baseVertex";type="float32x2";additionalBuffers=4;partialLastNumber=true;offsetVertexBuffer=true [ Failure ]
-crbug.com/dawn/0000 [ intel ] webgpu:shader,execution,robust_access_vertex:vertex_buffer_access:indexed=true;indirect=false;drawCallTestParameter="baseVertex";type="float32";additionalBuffers=0;partialLastNumber=true;offsetVertexBuffer=false [ Failure ]
-crbug.com/dawn/0000 [ intel ] webgpu:shader,execution,robust_access_vertex:vertex_buffer_access:indexed=true;indirect=false;drawCallTestParameter="baseVertex";type="float32x2";additionalBuffers=0;partialLastNumber=true;offsetVertexBuffer=true [ Failure ]
-crbug.com/dawn/0000 [ intel ] webgpu:shader,execution,robust_access_vertex:vertex_buffer_access:indexed=true;indirect=false;drawCallTestParameter="baseVertex";type="float32x2";additionalBuffers=4;partialLastNumber=false;offsetVertexBuffer=false [ Failure ]
-crbug.com/dawn/0000 [ intel ] webgpu:shader,execution,robust_access_vertex:vertex_buffer_access:indexed=true;indirect=false;drawCallTestParameter="baseVertex";type="float32";additionalBuffers=0;partialLastNumber=true;offsetVertexBuffer=true [ Failure ]
-crbug.com/dawn/0000 [ intel ] webgpu:shader,execution,robust_access_vertex:vertex_buffer_access:indexed=true;indirect=false;drawCallTestParameter="baseVertex";type="float32x3";additionalBuffers=0;partialLastNumber=false;offsetVertexBuffer=true [ Failure ]
-crbug.com/dawn/0000 [ intel ] webgpu:shader,execution,robust_access_vertex:vertex_buffer_access:indexed=true;indirect=false;drawCallTestParameter="baseVertex";type="float32x4";additionalBuffers=4;partialLastNumber=true;offsetVertexBuffer=true [ Failure ]
 
 # getCurrentTexture failures
 crbug.com/dawn/2114 [ intel-0x9bc5 linux ] webgpu:web_platform,canvas,getCurrentTexture:multiple_frames:* [ Failure ]
@@ -1669,6 +1642,7 @@ crbug.com/dawn/0000 [ intel-0x9bc5 ] webgpu:shader,execution,expression,call,bui
 crbug.com/dawn/0000 [ intel-0x9bc5 ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:sampled_array_2d_coords:format="astc-10x6-unorm" [ RetryOnFailure ]
 crbug.com/dawn/0000 [ intel-0x9bc5 ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:sampled_array_2d_coords:format="astc-10x6-unorm-srgb" [ RetryOnFailure ]
 crbug.com/dawn/0000 [ intel-0x9bc5 ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:sampled_array_2d_coords:format="astc-4x4-unorm-srgb" [ RetryOnFailure ]
+crbug.com/dawn/0000 [ intel-0x9bc5 ] webgpu:shader,execution,robust_access_vertex:* [ RetryOnFailure ]
 crbug.com/dawn/0000 [ nvidia-0x2184 ] webgpu:api,operation,adapter,requestAdapter:requestAdapter:powerPreference="high-performance";forceFallbackAdapter=false [ RetryOnFailure ]
 crbug.com/dawn/0000 [ nvidia-0x2184 ] webgpu:api,operation,adapter,requestDevice:limit,better_than_supported:limit="maxColorAttachmentBytesPerSample" [ RetryOnFailure ]
 crbug.com/dawn/0000 [ nvidia-0x2184 ] webgpu:shader,execution,expression,binary,af_matrix_addition:matrix:inputSource="const";cols=4;rows=4 [ RetryOnFailure ]
@@ -1703,6 +1677,7 @@ crbug.com/dawn/0000 [ intel-0x4680 ] webgpu:shader,execution,expression,call,bui
 crbug.com/dawn/0000 [ intel-0x4680 ] webgpu:shader,execution,expression,call,builtin,textureGather:depth_3d_coords:* [ Failure ]
 crbug.com/dawn/0000 [ intel-0x4680 ] webgpu:shader,execution,expression,call,builtin,textureGather:depth_array_2d_coords:format="depth16unorm";minFilter="nearest" [ Failure ]
 crbug.com/dawn/0000 [ intel-0x4680 ] webgpu:shader,execution,expression,call,builtin,textureGather:depth_array_2d_coords:format="depth32float";minFilter="nearest" [ Failure ]
+crbug.com/dawn/0000 [ intel-0x4680 ] webgpu:shader,execution,robust_access_vertex:* [ Failure ]
 crbug.com/dawn/0000 [ intel-0x4680 ] webgpu:web_platform,canvas,configure:viewFormats:* [ Failure ]
 crbug.com/dawn/0000 [ intel-0x4680 ] webgpu:web_platform,canvas,getCurrentTexture:multiple_frames:canvasType="offscreen" [ Failure ]
 crbug.com/dawn/0000 [ intel-0x4680 ] webgpu:web_platform,canvas,getCurrentTexture:resize:canvasType="offscreen" [ Failure ]
