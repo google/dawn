@@ -137,10 +137,6 @@ uint32_t GPUSupportedLimits::getMaxVertexBufferArrayStride(Napi::Env) {
     return limits_.limits.maxVertexBufferArrayStride;
 }
 
-uint32_t GPUSupportedLimits::getMaxInterStageShaderComponents(Napi::Env) {
-    return limits_.limits.maxInterStageShaderComponents;
-}
-
 uint32_t GPUSupportedLimits::getMaxInterStageShaderVariables(Napi::Env) {
     return limits_.limits.maxInterStageShaderVariables;
 }

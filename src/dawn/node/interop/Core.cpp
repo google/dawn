@@ -201,4 +201,9 @@ Napi::Value Converter<UndefinedType>::ToJS(Napi::Env env, UndefinedType) {
     return env.Undefined();
 }
 
+std::ostream& operator<<(std::ostream& o, const UndefinedType&) {
+    o << "<undefined>";
+    return o;
+}
+
 }  // namespace wgpu::interop
