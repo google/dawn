@@ -348,6 +348,10 @@ crbug.com/dawn/2248 [ intel-0x9bc5 ] webgpu:api,operation,command_buffer,queries
 crbug.com/dawn/2248 [ intel-0x9bc5 ] webgpu:api,operation,command_buffer,queries,occlusionQuery:occlusion_query,alpha_to_coverage:writeMask=0;renderMode="render-bundle";bufferOffset="zero";querySetOffset="zero";alpha=0.5 [ Failure ]
 crbug.com/dawn/2248 [ intel-0x9bc5 ] webgpu:api,operation,command_buffer,queries,occlusionQuery:occlusion_query,alpha_to_coverage:writeMask=0;renderMode="render-bundle";bufferOffset="zero";querySetOffset="zero";alpha=0.75 [ Failure ]
 
+# textureStore:out_of_bounds_array failures on Intel 770
+crbug.com/dawn/0000 [ intel-0x4680 ] webgpu:shader,execution,expression,call,builtin,textureStore:out_of_bounds_array:baseLevel=0;arrayLevels=1;type="i32" [ Failure ]
+crbug.com/dawn/0000 [ intel-0x4680 ] webgpu:shader,execution,expression,call,builtin,textureStore:out_of_bounds_array:baseLevel=0;arrayLevels=1;type="u32" [ Failure ]
+
 # getCurrentTexture failures
 crbug.com/dawn/2114 [ intel-0x9bc5 linux ] webgpu:web_platform,canvas,getCurrentTexture:multiple_frames:* [ Failure ]
 crbug.com/dawn/2114 [ intel-0x9bc5 linux ] webgpu:web_platform,canvas,getCurrentTexture:resize:* [ Failure ]
