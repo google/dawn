@@ -82,6 +82,7 @@ struct State {
                     case core::BuiltinFn::kAtomicCompareExchangeWeak:
                     case core::BuiltinFn::kAtomicSub:
                     case core::BuiltinFn::kAtomicLoad:
+                    case core::BuiltinFn::kCountOneBits:
                     case core::BuiltinFn::kSelect:
                     case core::BuiltinFn::kStorageBarrier:
                     case core::BuiltinFn::kTextureBarrier:
@@ -107,6 +108,9 @@ struct State {
                     break;
                 case core::BuiltinFn::kAtomicLoad:
                     AtomicLoad(call);
+                    break;
+                case core::BuiltinFn::kCountOneBits:
+                    CountOneBits(call);
                     break;
                 case core::BuiltinFn::kSelect:
                     Select(call);
@@ -145,6 +149,19 @@ struct State {
                 ReplaceBitcast(bitcast);
             }
         }
+    }
+
+    // GLSL `bitCount` always returns an `i32` so we need to convert it. Convert to a `bitCount`
+    // call to make it clear this isn't `countOneBits`.
+    void CountOneBits(core::ir::Call* call) {
+        auto* result_ty = call->Result(0)->Type();
+
+        b.InsertBefore(call, [&] {
+            auto* c = b.Call<glsl::ir::BuiltinCall>(ty.MatchWidth(ty.i32(), result_ty),
+                                                    glsl::BuiltinFn::kBitCount, call->Args()[0]);
+            b.ConvertWithResult(call->DetachResult(), c);
+        });
+        call->Destroy();
     }
 
     void ReplaceBitcastWithValue(core::ir::Bitcast* bitcast) {

@@ -1359,9 +1359,6 @@ class Printer : public tint::TextGenerator {
                 // atomicExchange.
                 out << "atomicExchange";
                 break;
-            case core::BuiltinFn::kCountOneBits:
-                out << "bitCount";
-                break;
             case core::BuiltinFn::kDpdx:
                 out << "dFdx";
                 break;

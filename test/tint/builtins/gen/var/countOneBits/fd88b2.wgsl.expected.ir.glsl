@@ -8,7 +8,7 @@ buffer tint_symbol_1_1_ssbo {
 } v;
 int countOneBits_fd88b2() {
   int arg_0 = 1;
-  int res = bitCount(arg_0);
+  int res = int(bitCount(arg_0));
   return res;
 }
 void main() {
@@ -22,7 +22,7 @@ buffer tint_symbol_1_1_ssbo {
 } v;
 int countOneBits_fd88b2() {
   int arg_0 = 1;
-  int res = bitCount(arg_0);
+  int res = int(bitCount(arg_0));
   return res;
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
@@ -40,7 +40,7 @@ struct VertexOutput {
 layout(location = 0) flat out int vertex_main_loc0_Output;
 int countOneBits_fd88b2() {
   int arg_0 = 1;
-  int res = bitCount(arg_0);
+  int res = int(bitCount(arg_0));
   return res;
 }
 VertexOutput vertex_main_inner() {

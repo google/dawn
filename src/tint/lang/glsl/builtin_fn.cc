@@ -60,6 +60,8 @@ const char* str(BuiltinFn i) {
             return "intBitsToFloat";
         case BuiltinFn::kUintBitsToFloat:
             return "uintBitsToFloat";
+        case BuiltinFn::kBitCount:
+            return "bitCount";
         case BuiltinFn::kPackFloat2X16:
             return "packFloat2x16";
         case BuiltinFn::kUnpackFloat2X16:

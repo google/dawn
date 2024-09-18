@@ -957,5 +957,22 @@ void main() {
 )");
 }
 
+TEST_F(GlslWriterTest, CountOneBits) {
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        b.Let("x", b.Call(ty.u32(), core::BuiltinFn::kCountOneBits, 1_u));
+        b.Return(func);
+    });
+
+    ASSERT_TRUE(Generate()) << err_ << output_.glsl;
+    EXPECT_EQ(output_.glsl, GlslHeader() + R"(precision highp float;
+precision highp int;
+
+void main() {
+  uint x = uint(bitCount(1u));
+}
+)");
+}
+
 }  // namespace
 }  // namespace tint::glsl::writer

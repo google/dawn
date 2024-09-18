@@ -1,5 +1,3 @@
-SKIP: FAILED
-
 #version 310 es
 precision highp float;
 precision highp int;
@@ -10,19 +8,12 @@ buffer tint_symbol_1_1_ssbo {
 } v;
 uvec2 countOneBits_94fd81() {
   uvec2 arg_0 = uvec2(1u);
-  uvec2 res = bitCount(arg_0);
+  uvec2 res = uvec2(bitCount(arg_0));
   return res;
 }
 void main() {
   v.tint_symbol = countOneBits_94fd81();
 }
-error: Error parsing GLSL shader:
-ERROR: 0:11: '=' :  cannot convert from ' global lowp 2-component vector of int' to ' temp highp 2-component vector of uint'
-ERROR: 0:11: '' : compilation terminated 
-ERROR: 2 compilation errors.  No code generated.
-
-
-
 #version 310 es
 
 layout(binding = 0, std430)
@@ -31,20 +22,13 @@ buffer tint_symbol_1_1_ssbo {
 } v;
 uvec2 countOneBits_94fd81() {
   uvec2 arg_0 = uvec2(1u);
-  uvec2 res = bitCount(arg_0);
+  uvec2 res = uvec2(bitCount(arg_0));
   return res;
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
   v.tint_symbol = countOneBits_94fd81();
 }
-error: Error parsing GLSL shader:
-ERROR: 0:9: '=' :  cannot convert from ' global lowp 2-component vector of int' to ' temp highp 2-component vector of uint'
-ERROR: 0:9: '' : compilation terminated 
-ERROR: 2 compilation errors.  No code generated.
-
-
-
 #version 310 es
 
 
@@ -56,7 +40,7 @@ struct VertexOutput {
 layout(location = 0) flat out uvec2 vertex_main_loc0_Output;
 uvec2 countOneBits_94fd81() {
   uvec2 arg_0 = uvec2(1u);
-  uvec2 res = bitCount(arg_0);
+  uvec2 res = uvec2(bitCount(arg_0));
   return res;
 }
 VertexOutput vertex_main_inner() {
@@ -73,12 +57,3 @@ void main() {
   vertex_main_loc0_Output = v.prevent_dce;
   gl_PointSize = 1.0f;
 }
-error: Error parsing GLSL shader:
-ERROR: 0:12: '=' :  cannot convert from ' global lowp 2-component vector of int' to ' temp highp 2-component vector of uint'
-ERROR: 0:12: '' : compilation terminated 
-ERROR: 2 compilation errors.  No code generated.
-
-
-
-
-tint executable returned error: exit status 1
