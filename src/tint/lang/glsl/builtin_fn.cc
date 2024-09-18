@@ -64,6 +64,8 @@ const char* str(BuiltinFn i) {
             return "bitCount";
         case BuiltinFn::kBitfieldExtract:
             return "bitfieldExtract";
+        case BuiltinFn::kBitfieldInsert:
+            return "bitfieldInsert";
         case BuiltinFn::kPackFloat2X16:
             return "packFloat2x16";
         case BuiltinFn::kUnpackFloat2X16:

@@ -994,5 +994,25 @@ void main() {
 )");
 }
 
+TEST_F(GlslWriterTest, InsertBits) {
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        b.Let("x", b.Call(ty.u32(), core::BuiltinFn::kInsertBits, 1_u, 2_u, 3_u, 4_u));
+        b.Return(func);
+    });
+
+    ASSERT_TRUE(Generate()) << err_ << output_.glsl;
+    EXPECT_EQ(output_.glsl, GlslHeader() + R"(precision highp float;
+precision highp int;
+
+void main() {
+  uint v = min(3u, 32u);
+  uint v_1 = min(4u, (32u - v));
+  int v_2 = int(v);
+  uint x = bitfieldInsert(1u, 2u, v_2, int(v_1));
+}
+)");
+}
+
 }  // namespace
 }  // namespace tint::glsl::writer

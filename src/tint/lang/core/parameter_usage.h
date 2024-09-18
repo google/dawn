@@ -48,6 +48,7 @@ namespace tint::core {
 /// overload position
 enum class ParameterUsage : uint8_t {
     kArrayIndex,
+    kBase,
     kBias,
     kBits,
     kCompareValue,
@@ -63,6 +64,7 @@ enum class ParameterUsage : uint8_t {
     kHeight,
     kId,
     kInputAttachment,
+    kInsert,
     kLevel,
     kLocation,
     kMask,
