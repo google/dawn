@@ -274,6 +274,8 @@ const char* const kReservedKeywordsGLSL[] = {
     "modf",
     "namespace",
     "noinline",
+    "non_coherent",
+    "noncoherent",
     "noperspective",
     "normalize",
     "not",
