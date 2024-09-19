@@ -248,10 +248,11 @@ src/webgpu/api/validation/buffer/create.spec.ts
 src/webgpu/api/validation/buffer/destroy.spec.ts
 src/webgpu/api/validation/buffer/mapping.spec.ts
 src/webgpu/api/validation/buffer/threading.spec.ts
+src/webgpu/api/validation/capability_checks/limits/limit_utils.ts
+src/webgpu/api/validation/capability_checks/features/clip_distances.spec.ts
 src/webgpu/api/validation/capability_checks/features/query_types.spec.ts
 src/webgpu/util/create_elements.ts
 src/webgpu/api/validation/capability_checks/features/texture_formats.spec.ts
-src/webgpu/api/validation/capability_checks/limits/limit_utils.ts
 src/webgpu/api/validation/capability_checks/limits/maxBindGroups.spec.ts
 src/webgpu/api/validation/capability_checks/limits/maxBindGroupsPlusVertexBuffers.spec.ts
 src/webgpu/api/validation/capability_checks/limits/maxBindingsPerBindGroup.spec.ts
@@ -716,6 +717,7 @@ src/webgpu/shader/execution/shader_io/compute_builtins.spec.ts
 src/webgpu/shader/execution/shader_io/fragment_builtins.spec.ts
 src/webgpu/shader/execution/shader_io/shared_structs.spec.ts
 src/webgpu/shader/execution/shader_io/user_io.spec.ts
+src/webgpu/shader/execution/shader_io/vertex_builtins.spec.ts
 src/webgpu/shader/execution/shader_io/workgroup_size.spec.ts
 src/webgpu/shader/execution/statement/compound.spec.ts
 src/webgpu/shader/execution/statement/discard.spec.ts
@@ -745,6 +747,7 @@ src/webgpu/shader/validation/expression/binary/bitwise_shift.spec.ts
 src/webgpu/shader/validation/expression/binary/comparison.spec.ts
 src/webgpu/shader/validation/expression/binary/div_rem.spec.ts
 src/webgpu/shader/validation/expression/binary/parse.spec.ts
+src/webgpu/shader/validation/expression/binary/short_circuiting_and_or.spec.ts
 src/webgpu/shader/validation/expression/call/builtin/abs.spec.ts
 src/webgpu/shader/validation/expression/call/builtin/acos.spec.ts
 src/webgpu/shader/validation/expression/call/builtin/acosh.spec.ts
