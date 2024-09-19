@@ -174,6 +174,7 @@ crbug.com/dawn/2331 [ dawn-backend-validation intel-0x9bc5 ubuntu ] webgpu:api,v
 crbug.com/dawn/2331 [ dawn-backend-validation intel-0x9bc5 ubuntu ] webgpu:api,validation,render_pipeline,inter_stage:* [ RetryOnFailure ]
 crbug.com/dawn/2331 [ dawn-backend-validation intel-0x9bc5 ubuntu ] webgpu:api,validation,render_pipeline,overrides:* [ RetryOnFailure ]
 crbug.com/dawn/2332 [ dawn-backend-validation intel-0x9bc5 ubuntu ] webgpu:api,operation,command_buffer,image_copy:origins_and_extents:initMethod="WriteTexture";checkMethod="FullCopyT2B";* [ RetryOnFailure ]
+crbug.com/41489034 [ dawn-backend-validation intel-0x9bc5 ubuntu ] webgpu:web_platform,canvas,configure:viewFormats:* [ RetryOnFailure ]
 
 # Miscellaneous flakes that are too flaky for retry
 crbug.com/1515477 webgpu:api,validation,gpu_external_texture_expiration:use_import_to_refresh: [ Failure ]
