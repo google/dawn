@@ -118,7 +118,7 @@ implicit(T: iu32) fn bitfieldExtract(value: T, offset: i32, bits: i32) -> T
 implicit(T: iu32, N: num) fn bitfieldExtract(value: vec<N, T>, offset: i32, bits: i32) -> vec<N, T>
 
 implicit(T: iu32) fn bitfieldInsert(base: T, insert: T, offset: i32, bits: i32) -> T
-implicit(T: iu32, N: num) fn bitfieldExtract(base: vec<N, T>,
+implicit(T: iu32, N: num) fn bitfieldInsert(base: vec<N, T>,
                                              insert: vec<N, T>,
                                              offset: i32,
                                              bits: i32) -> vec<N, T>

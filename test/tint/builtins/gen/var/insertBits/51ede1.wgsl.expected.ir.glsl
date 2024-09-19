@@ -1,234 +1,86 @@
-SKIP: FAILED
+#version 310 es
+precision highp float;
+precision highp int;
 
-
-@group(0) @binding(0) var<storage, read_write> prevent_dce : vec4<u32>;
-
-fn insertBits_51ede1() -> vec4<u32> {
-  var arg_0 = vec4<u32>(1u);
-  var arg_1 = vec4<u32>(1u);
-  var arg_2 = 1u;
-  var arg_3 = 1u;
-  var res : vec4<u32> = insertBits(arg_0, arg_1, arg_2, arg_3);
+layout(binding = 0, std430)
+buffer tint_symbol_1_1_ssbo {
+  uvec4 tint_symbol;
+} v;
+uvec4 insertBits_51ede1() {
+  uvec4 arg_0 = uvec4(1u);
+  uvec4 arg_1 = uvec4(1u);
+  uint arg_2 = 1u;
+  uint arg_3 = 1u;
+  uvec4 v_1 = arg_0;
+  uvec4 v_2 = arg_1;
+  uint v_3 = arg_3;
+  uint v_4 = min(arg_2, 32u);
+  uint v_5 = min(v_3, (32u - v_4));
+  int v_6 = int(v_4);
+  uvec4 res = bitfieldInsert(v_1, v_2, v_6, int(v_5));
   return res;
 }
-
-struct VertexOutput {
-  @builtin(position)
-  pos : vec4<f32>,
-  @location(0) @interpolate(flat)
-  prevent_dce : vec4<u32>,
+void main() {
+  v.tint_symbol = insertBits_51ede1();
 }
+#version 310 es
 
-@fragment
-fn fragment_main() {
-  prevent_dce = insertBits_51ede1();
-}
-
-Failed to generate: :24:21 error: glsl.bitfieldInsert: no matching call to 'glsl.bitfieldInsert(vec4<u32>, vec4<u32>, i32, i32)'
-
-1 candidate function:
- • 'glsl.bitfieldInsert(base: T  ✗ , insert: T  ✗ , offset: i32  ✓ , bits: i32  ✓ ) -> T' where:
-      ✗  'T' is 'i32' or 'u32'
-
-    %16:vec4<u32> = glsl.bitfieldInsert %7, %8, %14, %15
-                    ^^^^^^^^^^^^^^^^^^^
-
-:10:3 note: in block
-  $B2: {
-  ^^^
-
-note: # Disassembly
-tint_symbol_1 = struct @align(16), @block {
-  tint_symbol:vec4<u32> @offset(0)
-}
-
-$B1: {  # root
-  %1:ptr<storage, tint_symbol_1, read_write> = var @binding_point(0, 0)
-}
-
-%insertBits_51ede1 = func():vec4<u32> {
-  $B2: {
-    %arg_0:ptr<function, vec4<u32>, read_write> = var, vec4<u32>(1u)
-    %arg_1:ptr<function, vec4<u32>, read_write> = var, vec4<u32>(1u)
-    %arg_2:ptr<function, u32, read_write> = var, 1u
-    %arg_3:ptr<function, u32, read_write> = var, 1u
-    %7:vec4<u32> = load %arg_0
-    %8:vec4<u32> = load %arg_1
-    %9:u32 = load %arg_2
-    %10:u32 = load %arg_3
-    %11:u32 = min %9, 32u
-    %12:u32 = sub 32u, %11
-    %13:u32 = min %10, %12
-    %14:i32 = convert %11
-    %15:i32 = convert %13
-    %16:vec4<u32> = glsl.bitfieldInsert %7, %8, %14, %15
-    %res:ptr<function, vec4<u32>, read_write> = var, %16
-    %18:vec4<u32> = load %res
-    ret %18
-  }
-}
-%fragment_main = @fragment func():void {
-  $B3: {
-    %20:vec4<u32> = call %insertBits_51ede1
-    %21:ptr<storage, vec4<u32>, read_write> = access %1, 0u
-    store %21, %20
-    ret
-  }
-}
-
-
-@group(0) @binding(0) var<storage, read_write> prevent_dce : vec4<u32>;
-
-fn insertBits_51ede1() -> vec4<u32> {
-  var arg_0 = vec4<u32>(1u);
-  var arg_1 = vec4<u32>(1u);
-  var arg_2 = 1u;
-  var arg_3 = 1u;
-  var res : vec4<u32> = insertBits(arg_0, arg_1, arg_2, arg_3);
+layout(binding = 0, std430)
+buffer tint_symbol_1_1_ssbo {
+  uvec4 tint_symbol;
+} v;
+uvec4 insertBits_51ede1() {
+  uvec4 arg_0 = uvec4(1u);
+  uvec4 arg_1 = uvec4(1u);
+  uint arg_2 = 1u;
+  uint arg_3 = 1u;
+  uvec4 v_1 = arg_0;
+  uvec4 v_2 = arg_1;
+  uint v_3 = arg_3;
+  uint v_4 = min(arg_2, 32u);
+  uint v_5 = min(v_3, (32u - v_4));
+  int v_6 = int(v_4);
+  uvec4 res = bitfieldInsert(v_1, v_2, v_6, int(v_5));
   return res;
 }
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+void main() {
+  v.tint_symbol = insertBits_51ede1();
+}
+#version 310 es
+
 
 struct VertexOutput {
-  @builtin(position)
-  pos : vec4<f32>,
-  @location(0) @interpolate(flat)
-  prevent_dce : vec4<u32>,
-}
+  vec4 pos;
+  uvec4 prevent_dce;
+};
 
-@compute @workgroup_size(1)
-fn compute_main() {
-  prevent_dce = insertBits_51ede1();
-}
-
-Failed to generate: :24:21 error: glsl.bitfieldInsert: no matching call to 'glsl.bitfieldInsert(vec4<u32>, vec4<u32>, i32, i32)'
-
-1 candidate function:
- • 'glsl.bitfieldInsert(base: T  ✗ , insert: T  ✗ , offset: i32  ✓ , bits: i32  ✓ ) -> T' where:
-      ✗  'T' is 'i32' or 'u32'
-
-    %16:vec4<u32> = glsl.bitfieldInsert %7, %8, %14, %15
-                    ^^^^^^^^^^^^^^^^^^^
-
-:10:3 note: in block
-  $B2: {
-  ^^^
-
-note: # Disassembly
-tint_symbol_1 = struct @align(16), @block {
-  tint_symbol:vec4<u32> @offset(0)
-}
-
-$B1: {  # root
-  %1:ptr<storage, tint_symbol_1, read_write> = var @binding_point(0, 0)
-}
-
-%insertBits_51ede1 = func():vec4<u32> {
-  $B2: {
-    %arg_0:ptr<function, vec4<u32>, read_write> = var, vec4<u32>(1u)
-    %arg_1:ptr<function, vec4<u32>, read_write> = var, vec4<u32>(1u)
-    %arg_2:ptr<function, u32, read_write> = var, 1u
-    %arg_3:ptr<function, u32, read_write> = var, 1u
-    %7:vec4<u32> = load %arg_0
-    %8:vec4<u32> = load %arg_1
-    %9:u32 = load %arg_2
-    %10:u32 = load %arg_3
-    %11:u32 = min %9, 32u
-    %12:u32 = sub 32u, %11
-    %13:u32 = min %10, %12
-    %14:i32 = convert %11
-    %15:i32 = convert %13
-    %16:vec4<u32> = glsl.bitfieldInsert %7, %8, %14, %15
-    %res:ptr<function, vec4<u32>, read_write> = var, %16
-    %18:vec4<u32> = load %res
-    ret %18
-  }
-}
-%compute_main = @compute @workgroup_size(1, 1, 1) func():void {
-  $B3: {
-    %20:vec4<u32> = call %insertBits_51ede1
-    %21:ptr<storage, vec4<u32>, read_write> = access %1, 0u
-    store %21, %20
-    ret
-  }
-}
-
-
-fn insertBits_51ede1() -> vec4<u32> {
-  var arg_0 = vec4<u32>(1u);
-  var arg_1 = vec4<u32>(1u);
-  var arg_2 = 1u;
-  var arg_3 = 1u;
-  var res : vec4<u32> = insertBits(arg_0, arg_1, arg_2, arg_3);
+layout(location = 0) flat out uvec4 vertex_main_loc0_Output;
+uvec4 insertBits_51ede1() {
+  uvec4 arg_0 = uvec4(1u);
+  uvec4 arg_1 = uvec4(1u);
+  uint arg_2 = 1u;
+  uint arg_3 = 1u;
+  uvec4 v = arg_0;
+  uvec4 v_1 = arg_1;
+  uint v_2 = arg_3;
+  uint v_3 = min(arg_2, 32u);
+  uint v_4 = min(v_2, (32u - v_3));
+  int v_5 = int(v_3);
+  uvec4 res = bitfieldInsert(v, v_1, v_5, int(v_4));
   return res;
 }
-
-struct VertexOutput {
-  @builtin(position)
-  pos : vec4<f32>,
-  @location(0) @interpolate(flat)
-  prevent_dce : vec4<u32>,
-}
-
-@vertex
-fn vertex_main() -> VertexOutput {
-  var tint_symbol : VertexOutput;
-  tint_symbol.pos = vec4<f32>();
+VertexOutput vertex_main_inner() {
+  VertexOutput tint_symbol = VertexOutput(vec4(0.0f), uvec4(0u));
+  tint_symbol.pos = vec4(0.0f);
   tint_symbol.prevent_dce = insertBits_51ede1();
   return tint_symbol;
 }
-
-Failed to generate: :21:21 error: glsl.bitfieldInsert: no matching call to 'glsl.bitfieldInsert(vec4<u32>, vec4<u32>, i32, i32)'
-
-1 candidate function:
- • 'glsl.bitfieldInsert(base: T  ✗ , insert: T  ✗ , offset: i32  ✓ , bits: i32  ✓ ) -> T' where:
-      ✗  'T' is 'i32' or 'u32'
-
-    %15:vec4<u32> = glsl.bitfieldInsert %6, %7, %13, %14
-                    ^^^^^^^^^^^^^^^^^^^
-
-:7:3 note: in block
-  $B1: {
-  ^^^
-
-note: # Disassembly
-VertexOutput = struct @align(16) {
-  pos:vec4<f32> @offset(0), @builtin(position)
-  prevent_dce:vec4<u32> @offset(16), @location(0), @interpolate(flat)
+void main() {
+  VertexOutput v_6 = vertex_main_inner();
+  gl_Position = v_6.pos;
+  gl_Position[1u] = -(gl_Position.y);
+  gl_Position[2u] = ((2.0f * gl_Position.z) - gl_Position.w);
+  vertex_main_loc0_Output = v_6.prevent_dce;
+  gl_PointSize = 1.0f;
 }
-
-%insertBits_51ede1 = func():vec4<u32> {
-  $B1: {
-    %arg_0:ptr<function, vec4<u32>, read_write> = var, vec4<u32>(1u)
-    %arg_1:ptr<function, vec4<u32>, read_write> = var, vec4<u32>(1u)
-    %arg_2:ptr<function, u32, read_write> = var, 1u
-    %arg_3:ptr<function, u32, read_write> = var, 1u
-    %6:vec4<u32> = load %arg_0
-    %7:vec4<u32> = load %arg_1
-    %8:u32 = load %arg_2
-    %9:u32 = load %arg_3
-    %10:u32 = min %8, 32u
-    %11:u32 = sub 32u, %10
-    %12:u32 = min %9, %11
-    %13:i32 = convert %10
-    %14:i32 = convert %12
-    %15:vec4<u32> = glsl.bitfieldInsert %6, %7, %13, %14
-    %res:ptr<function, vec4<u32>, read_write> = var, %15
-    %17:vec4<u32> = load %res
-    ret %17
-  }
-}
-%vertex_main = @vertex func():VertexOutput {
-  $B2: {
-    %tint_symbol:ptr<function, VertexOutput, read_write> = var
-    %20:ptr<function, vec4<f32>, read_write> = access %tint_symbol, 0u
-    store %20, vec4<f32>(0.0f)
-    %21:ptr<function, vec4<u32>, read_write> = access %tint_symbol, 1u
-    %22:vec4<u32> = call %insertBits_51ede1
-    store %21, %22
-    %23:VertexOutput = load %tint_symbol
-    ret %23
-  }
-}
-
-
-tint executable returned error: exit status 1
