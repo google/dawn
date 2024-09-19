@@ -2932,6 +2932,36 @@ TEST_F(InternalAttributeDepsTest, Dependency) {
 }  // namespace
 }  // namespace InternalAttributeDeps
 
+namespace RowMajorAttributeTests {
+
+using RowMajorAttributeTest = ResolverTest;
+
+TEST_F(RowMajorAttributeTest, StructMember_Matrix) {
+    Structure("S", Vector{
+                       Member(Source{{12, 34}}, "m", ty.mat3x4<f32>(), Vector{RowMajor()}),
+                   });
+
+    EXPECT_TRUE(r()->Resolve()) << r()->error();
+}
+
+TEST_F(RowMajorAttributeTest, StructMember_NonMatrix) {
+    Structure("S", Vector{
+                       Member(Source{{12, 34}}, "f", ty.vec4<f32>(), Vector{RowMajor()}),
+                   });
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(), R"(error: '@row_major' can only be applied to matrices)");
+}
+
+TEST_F(RowMajorAttributeTest, Variable) {
+    GlobalVar(Source{{12, 34}}, "v", ty.mat3x4<f32>(), Vector{RowMajor()});
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(), R"(error: '@row_major' is not valid for module-scope 'var')");
+}
+
+}  // namespace RowMajorAttributeTests
+
 }  // namespace tint::resolver
 
 TINT_INSTANTIATE_TYPEINFO(tint::resolver::InternalAttributeDeps::TestAttribute);
