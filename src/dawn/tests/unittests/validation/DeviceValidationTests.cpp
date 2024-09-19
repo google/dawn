@@ -26,6 +26,7 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <utility>
+#include <vector>
 
 #include "dawn/native/Device.h"
 #include "dawn/native/dawn_platform.h"
@@ -232,6 +233,54 @@ TEST_F(RequestDeviceValidationTest, InvalidChainedStruct) {
         .Times(1);
     adapter.RequestDevice(&descriptor, wgpu::CallbackMode::AllowSpontaneous,
                           mRequestDeviceCallback.Callback());
+}
+
+// Test that requiring subroups-f16 feature requires subgroups and shader-f16 features as well
+// TODO(349125474): Decide if this validation is needed, see
+// https://github.com/gpuweb/gpuweb/issues/4734 for detail.
+TEST_F(RequestDeviceValidationTest, SubgroupsF16FeatureDependency) {
+    for (bool requireShaderF16 : {false, true}) {
+        for (bool requireSubgroups : {false, true}) {
+            // TODO(349125474): Remove deprecated ChromiumExperimentalSubgroups.
+            for (bool requireChromiumExperimentalSubgroups : {false, true}) {
+                std::vector<wgpu::FeatureName> features;
+                if (requireShaderF16) {
+                    features.push_back(wgpu::FeatureName::ShaderF16);
+                }
+                if (requireSubgroups) {
+                    features.push_back(wgpu::FeatureName::Subgroups);
+                }
+                if (requireChromiumExperimentalSubgroups) {
+                    features.push_back(wgpu::FeatureName::ChromiumExperimentalSubgroups);
+                }
+                features.push_back(wgpu::FeatureName::SubgroupsF16);
+
+                wgpu::DeviceDescriptor descriptor;
+                descriptor.requiredFeatureCount = features.size();
+                descriptor.requiredFeatures = features.data();
+
+                // Device request with subgroups-f16 feature can only success if shader-f16 feature
+                // and subgroups or chromium-experimental-subgroups features are required as well.
+                const bool isSuccess =
+                    (requireSubgroups || requireChromiumExperimentalSubgroups) && requireShaderF16;
+
+                if (isSuccess) {
+                    EXPECT_CALL(mRequestDeviceCallback,
+                                Call(wgpu::RequestDeviceStatus::Success, NotNull(), IsNull()))
+                        .Times(1);
+                } else {
+                    EXPECT_CALL(mRequestDeviceCallback,
+                                Call(wgpu::RequestDeviceStatus::Error, IsNull(), NotNull()))
+                        .Times(1);
+                }
+
+                EXPECT_DEPRECATION_WARNINGS(
+                    adapter.RequestDevice(&descriptor, wgpu::CallbackMode::AllowSpontaneous,
+                                          mRequestDeviceCallback.Callback()),
+                    GetDeviceCreationDeprecationWarningExpectation(descriptor));
+            }
+        }
+    }
 }
 
 class DeviceTickValidationTest : public ValidationTest {};
