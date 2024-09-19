@@ -40,7 +40,7 @@
 #include "dawn/native/utils/WGPUHelpers.h"
 
 #if DAWN_PLATFORM_IS(WINDOWS)
-#include <Windows.h>
+#include "dawn/common/windows_with_undefs.h"
 #endif  // DAWN_PLATFORM_IS(WINDOWS)
 
 #if defined(DAWN_USE_WINDOWS_UI)
