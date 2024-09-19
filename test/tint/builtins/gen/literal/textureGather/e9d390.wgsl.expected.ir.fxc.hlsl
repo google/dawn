@@ -13,9 +13,7 @@ RWByteAddressBuffer prevent_dce : register(u0);
 Texture2DArray<int4> arg_1 : register(t1, space1);
 SamplerState arg_2 : register(s2, space1);
 int4 textureGather_e9d390() {
-  Texture2DArray<int4> v = arg_1;
-  SamplerState v_1 = arg_2;
-  int4 res = v.GatherGreen(v_1, float3((1.0f).xx, float(int(1))), (int(1)).xx);
+  int4 res = arg_1.GatherGreen(arg_2, float3((1.0f).xx, float(int(1))), (int(1)).xx);
   return res;
 }
 
@@ -32,15 +30,15 @@ VertexOutput vertex_main_inner() {
   VertexOutput tint_symbol = (VertexOutput)0;
   tint_symbol.pos = (0.0f).xxxx;
   tint_symbol.prevent_dce = textureGather_e9d390();
-  VertexOutput v_2 = tint_symbol;
-  return v_2;
+  VertexOutput v = tint_symbol;
+  return v;
 }
 
 vertex_main_outputs vertex_main() {
-  VertexOutput v_3 = vertex_main_inner();
-  VertexOutput v_4 = v_3;
-  VertexOutput v_5 = v_3;
-  vertex_main_outputs v_6 = {v_5.prevent_dce, v_4.pos};
-  return v_6;
+  VertexOutput v_1 = vertex_main_inner();
+  VertexOutput v_2 = v_1;
+  VertexOutput v_3 = v_1;
+  vertex_main_outputs v_4 = {v_3.prevent_dce, v_2.pos};
+  return v_4;
 }
 

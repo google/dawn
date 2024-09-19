@@ -15,12 +15,11 @@ float textureLoad_c16e00() {
   int2 arg_1 = (int(1)).xx;
   uint arg_2 = 1u;
   int arg_3 = int(1);
-  Texture2DArray v = arg_0;
-  uint v_1 = arg_2;
-  int v_2 = arg_3;
-  int2 v_3 = int2(arg_1);
-  int v_4 = int(v_1);
-  float res = v.Load(int4(v_3, v_4, int(v_2))).x;
+  uint v = arg_2;
+  int v_1 = arg_3;
+  int2 v_2 = int2(arg_1);
+  int v_3 = int(v);
+  float res = arg_0.Load(int4(v_2, v_3, int(v_1))).x;
   return res;
 }
 
@@ -37,15 +36,15 @@ VertexOutput vertex_main_inner() {
   VertexOutput tint_symbol = (VertexOutput)0;
   tint_symbol.pos = (0.0f).xxxx;
   tint_symbol.prevent_dce = textureLoad_c16e00();
-  VertexOutput v_5 = tint_symbol;
-  return v_5;
+  VertexOutput v_4 = tint_symbol;
+  return v_4;
 }
 
 vertex_main_outputs vertex_main() {
-  VertexOutput v_6 = vertex_main_inner();
-  VertexOutput v_7 = v_6;
-  VertexOutput v_8 = v_6;
-  vertex_main_outputs v_9 = {v_8.prevent_dce, v_7.pos};
-  return v_9;
+  VertexOutput v_5 = vertex_main_inner();
+  VertexOutput v_6 = v_5;
+  VertexOutput v_7 = v_5;
+  vertex_main_outputs v_8 = {v_7.prevent_dce, v_6.pos};
+  return v_8;
 }
 

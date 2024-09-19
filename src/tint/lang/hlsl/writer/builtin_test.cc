@@ -1117,9 +1117,8 @@ TEST_F(HlslWriterTest, BuiltinTextureLoad_1DF32) {
     EXPECT_EQ(output_.hlsl, R"(
 Texture1D<float4> v : register(t0);
 void foo() {
-  Texture1D<float4> v_1 = v;
-  int v_2 = int(1u);
-  float4 x = float4(v_1.Load(int2(v_2, int(3u))));
+  int v_1 = int(1u);
+  float4 x = float4(v.Load(int2(v_1, int(3u))));
 }
 
 )");
@@ -1145,9 +1144,8 @@ TEST_F(HlslWriterTest, BuiltinTextureLoad_2DLevelI32) {
     EXPECT_EQ(output_.hlsl, R"(
 Texture2D<int4> v : register(t0);
 void foo() {
-  Texture2D<int4> v_1 = v;
-  int2 v_2 = int2(uint2(1u, 2u));
-  int4 x = int4(v_1.Load(int3(v_2, int(3u))));
+  int2 v_1 = int2(uint2(1u, 2u));
+  int4 x = int4(v.Load(int3(v_1, int(3u))));
 }
 
 )");
@@ -1173,9 +1171,8 @@ TEST_F(HlslWriterTest, BuiltinTextureLoad_3DLevelU32) {
     EXPECT_EQ(output_.hlsl, R"(
 Texture3D<float4> v : register(t0);
 void foo() {
-  Texture3D<float4> v_1 = v;
-  int3 v_2 = int3(int3(int(1), int(2), int(3)));
-  float4 x = float4(v_1.Load(int4(v_2, int(4u))));
+  int3 v_1 = int3(int3(int(1), int(2), int(3)));
+  float4 x = float4(v.Load(int4(v_1, int(4u))));
 }
 
 )");
@@ -1201,9 +1198,8 @@ TEST_F(HlslWriterTest, BuiltinTextureLoad_Multisampled2DI32) {
     EXPECT_EQ(output_.hlsl, R"(
 Texture2DMS<int4> v : register(t0);
 void foo() {
-  Texture2DMS<int4> v_1 = v;
-  int2 v_2 = int2(int2(int(1), int(2)));
-  int4 x = int4(v_1.Load(v_2, int(int(3))));
+  int2 v_1 = int2(int2(int(1), int(2)));
+  int4 x = int4(v.Load(v_1, int(int(3))));
 }
 
 )");
@@ -1229,10 +1225,8 @@ TEST_F(HlslWriterTest, BuiltinTextureLoad_Depth2DLevelF32) {
     EXPECT_EQ(output_.hlsl, R"(
 Texture2D v : register(t0);
 void foo() {
-  int2 v_1 = int2(int(1), int(2));
-  Texture2D v_2 = v;
-  int2 v_3 = int2(v_1);
-  float x = v_2.Load(int3(v_3, int(3u))).x;
+  int2 v_1 = int2(int2(int(1), int(2)));
+  float x = v.Load(int3(v_1, int(3u))).x;
 }
 
 )");
@@ -1260,10 +1254,9 @@ TEST_F(HlslWriterTest, BuiltinTextureLoad_Depth2DArrayLevelF32) {
     EXPECT_EQ(output_.hlsl, R"(
 Texture2DArray v : register(t0);
 void foo() {
-  Texture2DArray v_1 = v;
-  int2 v_2 = int2(int2(int(1), int(2)));
-  int v_3 = int(3u);
-  float x = v_1.Load(int4(v_2, v_3, int(int(4)))).x;
+  int2 v_1 = int2(int2(int(1), int(2)));
+  int v_2 = int(3u);
+  float x = v.Load(int4(v_1, v_2, int(int(4)))).x;
 }
 
 )");
@@ -1289,9 +1282,8 @@ TEST_F(HlslWriterTest, BuiltinTextureLoad_DepthMultisampledF32) {
     EXPECT_EQ(output_.hlsl, R"(
 Texture2DMS<float4> v : register(t0);
 void foo() {
-  Texture2DMS<float4> v_1 = v;
-  int2 v_2 = int2(int2(int(1), int(2)));
-  float x = v_1.Load(v_2, int(3u)).x;
+  int2 v_1 = int2(int2(int(1), int(2)));
+  float x = v.Load(v_1, int(3u)).x;
 }
 
 )");
@@ -1372,8 +1364,7 @@ TEST_F(HlslWriterTest, BuiltinTextureStoreArray) {
     EXPECT_EQ(output_.hlsl, R"(
 RWTexture2DArray<float4> v : register(u0);
 void foo() {
-  RWTexture2DArray<float4> v_1 = v;
-  v_1[int3(int2(int(1), int(2)), int(3u))] = float4(0.5f, 0.40000000596046447754f, 0.30000001192092895508f, 1.0f);
+  v[int3(int2(int(1), int(2)), int(3u))] = float4(0.5f, 0.40000000596046447754f, 0.30000001192092895508f, 1.0f);
 }
 
 )");
@@ -1411,8 +1402,7 @@ TEST_F(HlslWriterTest, BuiltinTextureGatherCompare_Depth2d) {
 Texture2D v : register(t0);
 SamplerComparisonState v_1 : register(s1);
 void foo() {
-  float2 v_2 = float2(1.0f, 2.0f);
-  float4 x = v.GatherCmp(v_1, v_2, 3.0f);
+  float4 x = v.GatherCmp(v_1, float2(1.0f, 2.0f), 3.0f);
 }
 
 )");
@@ -1452,8 +1442,7 @@ Texture2D v : register(t0);
 SamplerComparisonState v_1 : register(s1);
 void foo() {
   float2 v_2 = float2(1.0f, 2.0f);
-  int2 v_3 = int2(int(4), int(5));
-  float4 x = v.GatherCmp(v_1, v_2, 3.0f, v_3);
+  float4 x = v.GatherCmp(v_1, v_2, 3.0f, int2(int(4), int(5)));
 }
 
 )");
@@ -1493,9 +1482,7 @@ TextureCubeArray v : register(t0);
 SamplerComparisonState v_1 : register(s1);
 void foo() {
   float3 v_2 = float3(1.0f, 2.0f, 2.5f);
-  TextureCubeArray v_3 = v;
-  SamplerComparisonState v_4 = v_1;
-  float4 x = v_3.GatherCmp(v_4, float4(v_2, float(6u)), 3.0f);
+  float4 x = v.GatherCmp(v_1, float4(v_2, float(6u)), 3.0f);
 }
 
 )");
@@ -1537,9 +1524,7 @@ SamplerComparisonState v_1 : register(s1);
 void foo() {
   float2 v_2 = float2(1.0f, 2.0f);
   int2 v_3 = int2(int(4), int(5));
-  Texture2DArray v_4 = v;
-  SamplerComparisonState v_5 = v_1;
-  float4 x = v_4.GatherCmp(v_5, float3(v_2, float(int(6))), 3.0f, v_3);
+  float4 x = v.GatherCmp(v_1, float3(v_2, float(int(6))), 3.0f, v_3);
 }
 
 )");
@@ -1575,8 +1560,7 @@ TEST_F(HlslWriterTest, BuiltinTextureGather_Alpha) {
 Texture2D<int4> v : register(t0);
 SamplerState v_1 : register(s1);
 void foo() {
-  float2 v_2 = float2(1.0f, 2.0f);
-  int4 x = v.GatherAlpha(v_1, v_2);
+  int4 x = v.GatherAlpha(v_1, float2(1.0f, 2.0f));
 }
 
 )");
@@ -1612,8 +1596,7 @@ TEST_F(HlslWriterTest, BuiltinTextureGather_RedOffset) {
 Texture2D<int4> v : register(t0);
 SamplerState v_1 : register(s1);
 void foo() {
-  float2 v_2 = float2(1.0f, 2.0f);
-  int4 x = v.GatherRed(v_1, v_2, int2(int(1), int(3)));
+  int4 x = v.GatherRed(v_1, float2(1.0f, 2.0f), int2(int(1), int(3)));
 }
 
 )");
@@ -1651,9 +1634,7 @@ Texture2DArray<int4> v : register(t0);
 SamplerState v_1 : register(s1);
 void foo() {
   float2 v_2 = float2(1.0f, 2.0f);
-  Texture2DArray<int4> v_3 = v;
-  SamplerState v_4 = v_1;
-  int4 x = v_3.GatherGreen(v_4, float3(v_2, float(1u)));
+  int4 x = v.GatherGreen(v_1, float3(v_2, float(1u)));
 }
 
 )");
@@ -1693,9 +1674,7 @@ Texture2DArray<int4> v : register(t0);
 SamplerState v_1 : register(s1);
 void foo() {
   float2 v_2 = float2(1.0f, 2.0f);
-  Texture2DArray<int4> v_3 = v;
-  SamplerState v_4 = v_1;
-  int4 x = v_3.GatherBlue(v_4, float3(v_2, float(int(1))), int2(int(1), int(2)));
+  int4 x = v.GatherBlue(v_1, float3(v_2, float(int(1))), int2(int(1), int(2)));
 }
 
 )");
@@ -1731,8 +1710,7 @@ TEST_F(HlslWriterTest, BuiltinTextureGather_Depth) {
 Texture2D v : register(t0);
 SamplerState v_1 : register(s1);
 void foo() {
-  float2 v_2 = float2(1.0f, 2.0f);
-  float4 x = v.Gather(v_1, v_2);
+  float4 x = v.Gather(v_1, float2(1.0f, 2.0f));
 }
 
 )");
@@ -1768,8 +1746,7 @@ TEST_F(HlslWriterTest, BuiltinTextureGather_DepthOffset) {
 Texture2D v : register(t0);
 SamplerState v_1 : register(s1);
 void foo() {
-  float2 v_2 = float2(1.0f, 2.0f);
-  float4 x = v.Gather(v_1, v_2, int2(int(3), int(4)));
+  float4 x = v.Gather(v_1, float2(1.0f, 2.0f), int2(int(3), int(4)));
 }
 
 )");
@@ -1806,9 +1783,7 @@ Texture2DArray v : register(t0);
 SamplerState v_1 : register(s1);
 void foo() {
   float2 v_2 = float2(1.0f, 2.0f);
-  Texture2DArray v_3 = v;
-  SamplerState v_4 = v_1;
-  float4 x = v_3.Gather(v_4, float3(v_2, float(int(4))));
+  float4 x = v.Gather(v_1, float3(v_2, float(int(4))));
 }
 
 )");
@@ -1847,9 +1822,7 @@ Texture2DArray v : register(t0);
 SamplerState v_1 : register(s1);
 void foo() {
   float2 v_2 = float2(1.0f, 2.0f);
-  Texture2DArray v_3 = v;
-  SamplerState v_4 = v_1;
-  float4 x = v_3.Gather(v_4, float3(v_2, float(4u)), int2(int(4), int(5)));
+  float4 x = v.Gather(v_1, float3(v_2, float(4u)), int2(int(4), int(5)));
 }
 
 )");
@@ -2521,8 +2494,7 @@ TEST_F(HlslWriterTest, BuiltinTextureSample_2d) {
 Texture2D<float4> v : register(t0);
 SamplerState v_1 : register(s1);
 void foo() {
-  float2 v_2 = float2(1.0f, 2.0f);
-  float4 x = v.Sample(v_1, v_2);
+  float4 x = v.Sample(v_1, float2(1.0f, 2.0f));
 }
 
 )");
@@ -2557,8 +2529,7 @@ TEST_F(HlslWriterTest, BuiltinTextureSample_2d_Offset) {
 Texture2D<float4> v : register(t0);
 SamplerState v_1 : register(s1);
 void foo() {
-  float2 v_2 = float2(1.0f, 2.0f);
-  float4 x = v.Sample(v_1, v_2, int2(int(4), int(5)));
+  float4 x = v.Sample(v_1, float2(1.0f, 2.0f), int2(int(4), int(5)));
 }
 
 )");
@@ -2594,9 +2565,7 @@ Texture2DArray<float4> v : register(t0);
 SamplerState v_1 : register(s1);
 void foo() {
   float2 v_2 = float2(1.0f, 2.0f);
-  Texture2DArray<float4> v_3 = v;
-  SamplerState v_4 = v_1;
-  float4 x = v_3.Sample(v_4, float3(v_2, float(4u)));
+  float4 x = v.Sample(v_1, float3(v_2, float(4u)));
 }
 
 )");
@@ -2634,9 +2603,7 @@ Texture2DArray<float4> v : register(t0);
 SamplerState v_1 : register(s1);
 void foo() {
   float2 v_2 = float2(1.0f, 2.0f);
-  Texture2DArray<float4> v_3 = v;
-  SamplerState v_4 = v_1;
-  float4 x = v_3.Sample(v_4, float3(v_2, float(4u)), int2(int(4), int(5)));
+  float4 x = v.Sample(v_1, float3(v_2, float(4u)), int2(int(4), int(5)));
 }
 
 )");
@@ -2670,8 +2637,7 @@ TEST_F(HlslWriterTest, BuiltinTextureSample_3d) {
 Texture3D<float4> v : register(t0);
 SamplerState v_1 : register(s1);
 void foo() {
-  float3 v_2 = float3(1.0f, 2.0f, 3.0f);
-  float4 x = v.Sample(v_1, v_2);
+  float4 x = v.Sample(v_1, float3(1.0f, 2.0f, 3.0f));
 }
 
 )");
@@ -2706,8 +2672,7 @@ TEST_F(HlslWriterTest, BuiltinTextureSample_3d_Offset) {
 Texture3D<float4> v : register(t0);
 SamplerState v_1 : register(s1);
 void foo() {
-  float3 v_2 = float3(1.0f, 2.0f, 3.0f);
-  float4 x = v.Sample(v_1, v_2, int3(int(4), int(5), int(6)));
+  float4 x = v.Sample(v_1, float3(1.0f, 2.0f, 3.0f), int3(int(4), int(5), int(6)));
 }
 
 )");
@@ -2741,8 +2706,7 @@ TEST_F(HlslWriterTest, BuiltinTextureSample_Cube) {
 TextureCube<float4> v : register(t0);
 SamplerState v_1 : register(s1);
 void foo() {
-  float3 v_2 = float3(1.0f, 2.0f, 3.0f);
-  float4 x = v.Sample(v_1, v_2);
+  float4 x = v.Sample(v_1, float3(1.0f, 2.0f, 3.0f));
 }
 
 )");
@@ -2778,9 +2742,7 @@ TextureCubeArray<float4> v : register(t0);
 SamplerState v_1 : register(s1);
 void foo() {
   float3 v_2 = float3(1.0f, 2.0f, 3.0f);
-  TextureCubeArray<float4> v_3 = v;
-  SamplerState v_4 = v_1;
-  float4 x = v_3.Sample(v_4, float4(v_2, float(4u)));
+  float4 x = v.Sample(v_1, float4(v_2, float(4u)));
 }
 
 )");
@@ -2814,8 +2776,7 @@ TEST_F(HlslWriterTest, BuiltinTextureSampleBias_2d) {
 Texture2D<float4> v : register(t0);
 SamplerState v_1 : register(s1);
 void foo() {
-  float2 v_2 = float2(1.0f, 2.0f);
-  float4 x = v.SampleBias(v_1, v_2, 3.0f);
+  float4 x = v.SampleBias(v_1, float2(1.0f, 2.0f), 3.0f);
 }
 
 )");
@@ -2851,8 +2812,7 @@ TEST_F(HlslWriterTest, BuiltinTextureSampleBias_2d_Offset) {
 Texture2D<float4> v : register(t0);
 SamplerState v_1 : register(s1);
 void foo() {
-  float2 v_2 = float2(1.0f, 2.0f);
-  float4 x = v.SampleBias(v_1, v_2, 3.0f, int2(int(4), int(5)));
+  float4 x = v.SampleBias(v_1, float2(1.0f, 2.0f), 3.0f, int2(int(4), int(5)));
 }
 
 )");
@@ -2889,9 +2849,7 @@ Texture2DArray<float4> v : register(t0);
 SamplerState v_1 : register(s1);
 void foo() {
   float2 v_2 = float2(1.0f, 2.0f);
-  Texture2DArray<float4> v_3 = v;
-  SamplerState v_4 = v_1;
-  float4 x = v_3.SampleBias(v_4, float3(v_2, float(4u)), 3.0f);
+  float4 x = v.SampleBias(v_1, float3(v_2, float(4u)), 3.0f);
 }
 
 )");
@@ -2929,9 +2887,7 @@ Texture2DArray<float4> v : register(t0);
 SamplerState v_1 : register(s1);
 void foo() {
   float2 v_2 = float2(1.0f, 2.0f);
-  Texture2DArray<float4> v_3 = v;
-  SamplerState v_4 = v_1;
-  float4 x = v_3.SampleBias(v_4, float3(v_2, float(4u)), 3.0f, int2(int(4), int(5)));
+  float4 x = v.SampleBias(v_1, float3(v_2, float(4u)), 3.0f, int2(int(4), int(5)));
 }
 
 )");
@@ -2965,8 +2921,7 @@ TEST_F(HlslWriterTest, BuiltinTextureSampleBias_3d) {
 Texture3D<float4> v : register(t0);
 SamplerState v_1 : register(s1);
 void foo() {
-  float3 v_2 = float3(1.0f, 2.0f, 3.0f);
-  float4 x = v.SampleBias(v_1, v_2, 3.0f);
+  float4 x = v.SampleBias(v_1, float3(1.0f, 2.0f, 3.0f), 3.0f);
 }
 
 )");
@@ -3002,8 +2957,7 @@ TEST_F(HlslWriterTest, BuiltinTextureSampleBias_3d_Offset) {
 Texture3D<float4> v : register(t0);
 SamplerState v_1 : register(s1);
 void foo() {
-  float3 v_2 = float3(1.0f, 2.0f, 3.0f);
-  float4 x = v.SampleBias(v_1, v_2, 3.0f, int3(int(4), int(5), int(6)));
+  float4 x = v.SampleBias(v_1, float3(1.0f, 2.0f, 3.0f), 3.0f, int3(int(4), int(5), int(6)));
 }
 
 )");
@@ -3037,8 +2991,7 @@ TEST_F(HlslWriterTest, BuiltinTextureSampleBias_Cube) {
 TextureCube<float4> v : register(t0);
 SamplerState v_1 : register(s1);
 void foo() {
-  float3 v_2 = float3(1.0f, 2.0f, 3.0f);
-  float4 x = v.SampleBias(v_1, v_2, 3.0f);
+  float4 x = v.SampleBias(v_1, float3(1.0f, 2.0f, 3.0f), 3.0f);
 }
 
 )");
@@ -3075,9 +3028,7 @@ TextureCubeArray<float4> v : register(t0);
 SamplerState v_1 : register(s1);
 void foo() {
   float3 v_2 = float3(1.0f, 2.0f, 3.0f);
-  TextureCubeArray<float4> v_3 = v;
-  SamplerState v_4 = v_1;
-  float4 x = v_3.SampleBias(v_4, float4(v_2, float(4u)), 3.0f);
+  float4 x = v.SampleBias(v_1, float4(v_2, float(4u)), 3.0f);
 }
 
 )");
@@ -3111,8 +3062,7 @@ TEST_F(HlslWriterTest, BuiltinTextureSampleCompare_2d) {
 Texture2D v : register(t0);
 SamplerComparisonState v_1 : register(s1);
 void foo() {
-  float2 v_2 = float2(1.0f, 2.0f);
-  float x = v.SampleCmp(v_1, v_2, 3.0f);
+  float x = v.SampleCmp(v_1, float2(1.0f, 2.0f), 3.0f);
 }
 
 )");
@@ -3147,8 +3097,7 @@ TEST_F(HlslWriterTest, BuiltinTextureSampleCompare_2d_Offset) {
 Texture2D v : register(t0);
 SamplerComparisonState v_1 : register(s1);
 void foo() {
-  float2 v_2 = float2(1.0f, 2.0f);
-  float x = v.SampleCmp(v_1, v_2, 3.0f, int2(int(4), int(5)));
+  float x = v.SampleCmp(v_1, float2(1.0f, 2.0f), 3.0f, int2(int(4), int(5)));
 }
 
 )");
@@ -3185,9 +3134,7 @@ Texture2DArray v : register(t0);
 SamplerComparisonState v_1 : register(s1);
 void foo() {
   float2 v_2 = float2(1.0f, 2.0f);
-  Texture2DArray v_3 = v;
-  SamplerComparisonState v_4 = v_1;
-  float x = v_3.SampleCmp(v_4, float3(v_2, float(4u)), 3.0f);
+  float x = v.SampleCmp(v_1, float3(v_2, float(4u)), 3.0f);
 }
 
 )");
@@ -3225,9 +3172,7 @@ Texture2DArray v : register(t0);
 SamplerComparisonState v_1 : register(s1);
 void foo() {
   float2 v_2 = float2(1.0f, 2.0f);
-  Texture2DArray v_3 = v;
-  SamplerComparisonState v_4 = v_1;
-  float x = v_3.SampleCmp(v_4, float3(v_2, float(4u)), 3.0f, int2(int(4), int(5)));
+  float x = v.SampleCmp(v_1, float3(v_2, float(4u)), 3.0f, int2(int(4), int(5)));
 }
 
 )");
@@ -3261,8 +3206,7 @@ TEST_F(HlslWriterTest, BuiltinTextureSampleCompare_Cube) {
 TextureCube v : register(t0);
 SamplerComparisonState v_1 : register(s1);
 void foo() {
-  float3 v_2 = float3(1.0f, 2.0f, 3.0f);
-  float x = v.SampleCmp(v_1, v_2, 3.0f);
+  float x = v.SampleCmp(v_1, float3(1.0f, 2.0f, 3.0f), 3.0f);
 }
 
 )");
@@ -3299,9 +3243,7 @@ TextureCubeArray v : register(t0);
 SamplerComparisonState v_1 : register(s1);
 void foo() {
   float3 v_2 = float3(1.0f, 2.0f, 3.0f);
-  TextureCubeArray v_3 = v;
-  SamplerComparisonState v_4 = v_1;
-  float x = v_3.SampleCmp(v_4, float4(v_2, float(4u)), 3.0f);
+  float x = v.SampleCmp(v_1, float4(v_2, float(4u)), 3.0f);
 }
 
 )");
@@ -3335,8 +3277,7 @@ TEST_F(HlslWriterTest, BuiltinTextureSampleCompareLevel_2d) {
 Texture2D v : register(t0);
 SamplerComparisonState v_1 : register(s1);
 void foo() {
-  float2 v_2 = float2(1.0f, 2.0f);
-  float x = v.SampleCmpLevelZero(v_1, v_2, 3.0f);
+  float x = v.SampleCmpLevelZero(v_1, float2(1.0f, 2.0f), 3.0f);
 }
 
 )");
@@ -3372,8 +3313,7 @@ TEST_F(HlslWriterTest, BuiltinTextureSampleCompareLevel_2d_Offset) {
 Texture2D v : register(t0);
 SamplerComparisonState v_1 : register(s1);
 void foo() {
-  float2 v_2 = float2(1.0f, 2.0f);
-  float x = v.SampleCmpLevelZero(v_1, v_2, 3.0f, int2(int(4), int(5)));
+  float x = v.SampleCmpLevelZero(v_1, float2(1.0f, 2.0f), 3.0f, int2(int(4), int(5)));
 }
 
 )");
@@ -3410,9 +3350,7 @@ Texture2DArray v : register(t0);
 SamplerComparisonState v_1 : register(s1);
 void foo() {
   float2 v_2 = float2(1.0f, 2.0f);
-  Texture2DArray v_3 = v;
-  SamplerComparisonState v_4 = v_1;
-  float x = v_3.SampleCmpLevelZero(v_4, float3(v_2, float(4u)), 3.0f);
+  float x = v.SampleCmpLevelZero(v_1, float3(v_2, float(4u)), 3.0f);
 }
 
 )");
@@ -3450,9 +3388,7 @@ Texture2DArray v : register(t0);
 SamplerComparisonState v_1 : register(s1);
 void foo() {
   float2 v_2 = float2(1.0f, 2.0f);
-  Texture2DArray v_3 = v;
-  SamplerComparisonState v_4 = v_1;
-  float x = v_3.SampleCmpLevelZero(v_4, float3(v_2, float(4u)), 3.0f, int2(int(4), int(5)));
+  float x = v.SampleCmpLevelZero(v_1, float3(v_2, float(4u)), 3.0f, int2(int(4), int(5)));
 }
 
 )");
@@ -3486,8 +3422,7 @@ TEST_F(HlslWriterTest, BuiltinTextureSampleCompareLevel_Cube) {
 TextureCube v : register(t0);
 SamplerComparisonState v_1 : register(s1);
 void foo() {
-  float3 v_2 = float3(1.0f, 2.0f, 3.0f);
-  float x = v.SampleCmpLevelZero(v_1, v_2, 3.0f);
+  float x = v.SampleCmpLevelZero(v_1, float3(1.0f, 2.0f, 3.0f), 3.0f);
 }
 
 )");
@@ -3524,9 +3459,7 @@ TextureCubeArray v : register(t0);
 SamplerComparisonState v_1 : register(s1);
 void foo() {
   float3 v_2 = float3(1.0f, 2.0f, 3.0f);
-  TextureCubeArray v_3 = v;
-  SamplerComparisonState v_4 = v_1;
-  float x = v_3.SampleCmpLevelZero(v_4, float4(v_2, float(4u)), 3.0f);
+  float x = v.SampleCmpLevelZero(v_1, float4(v_2, float(4u)), 3.0f);
 }
 
 )");
@@ -3564,8 +3497,7 @@ SamplerState v_1 : register(s1);
 void foo() {
   float2 v_2 = float2(1.0f, 2.0f);
   float2 v_3 = float2(3.0f, 4.0f);
-  float2 v_4 = float2(5.0f, 6.0f);
-  float4 x = v.SampleGrad(v_1, v_2, v_3, v_4);
+  float4 x = v.SampleGrad(v_1, v_2, v_3, float2(5.0f, 6.0f));
 }
 
 )");
@@ -3605,8 +3537,7 @@ SamplerState v_1 : register(s1);
 void foo() {
   float2 v_2 = float2(1.0f, 2.0f);
   float2 v_3 = float2(3.0f, 4.0f);
-  float2 v_4 = float2(5.0f, 6.0f);
-  float4 x = v.SampleGrad(v_1, v_2, v_3, v_4, int2(int(4), int(5)));
+  float4 x = v.SampleGrad(v_1, v_2, v_3, float2(5.0f, 6.0f), int2(int(4), int(5)));
 }
 
 )");
@@ -3647,9 +3578,7 @@ void foo() {
   float2 v_2 = float2(1.0f, 2.0f);
   float2 v_3 = float2(3.0f, 4.0f);
   float2 v_4 = float2(5.0f, 6.0f);
-  Texture2DArray<float4> v_5 = v;
-  SamplerState v_6 = v_1;
-  float4 x = v_5.SampleGrad(v_6, float3(v_2, float(4u)), v_3, v_4);
+  float4 x = v.SampleGrad(v_1, float3(v_2, float(4u)), v_3, v_4);
 }
 
 )");
@@ -3691,9 +3620,7 @@ void foo() {
   float2 v_2 = float2(1.0f, 2.0f);
   float2 v_3 = float2(3.0f, 4.0f);
   float2 v_4 = float2(5.0f, 6.0f);
-  Texture2DArray<float4> v_5 = v;
-  SamplerState v_6 = v_1;
-  float4 x = v_5.SampleGrad(v_6, float3(v_2, float(4u)), v_3, v_4, int2(int(4), int(5)));
+  float4 x = v.SampleGrad(v_1, float3(v_2, float(4u)), v_3, v_4, int2(int(4), int(5)));
 }
 
 )");
@@ -3731,8 +3658,7 @@ SamplerState v_1 : register(s1);
 void foo() {
   float3 v_2 = float3(1.0f, 2.0f, 3.0f);
   float3 v_3 = float3(3.0f, 4.0f, 5.0f);
-  float3 v_4 = float3(6.0f, 7.0f, 8.0f);
-  float4 x = v.SampleGrad(v_1, v_2, v_3, v_4);
+  float4 x = v.SampleGrad(v_1, v_2, v_3, float3(6.0f, 7.0f, 8.0f));
 }
 
 )");
@@ -3772,8 +3698,7 @@ SamplerState v_1 : register(s1);
 void foo() {
   float3 v_2 = float3(1.0f, 2.0f, 3.0f);
   float3 v_3 = float3(3.0f, 4.0f, 5.0f);
-  float3 v_4 = float3(6.0f, 7.0f, 8.0f);
-  float4 x = v.SampleGrad(v_1, v_2, v_3, v_4, int3(int(4), int(5), int(6)));
+  float4 x = v.SampleGrad(v_1, v_2, v_3, float3(6.0f, 7.0f, 8.0f), int3(int(4), int(5), int(6)));
 }
 
 )");
@@ -3811,8 +3736,7 @@ SamplerState v_1 : register(s1);
 void foo() {
   float3 v_2 = float3(1.0f, 2.0f, 3.0f);
   float3 v_3 = float3(3.0f, 4.0f, 5.0f);
-  float3 v_4 = float3(6.0f, 7.0f, 8.0f);
-  float4 x = v.SampleGrad(v_1, v_2, v_3, v_4);
+  float4 x = v.SampleGrad(v_1, v_2, v_3, float3(6.0f, 7.0f, 8.0f));
 }
 
 )");
@@ -3853,9 +3777,7 @@ void foo() {
   float3 v_2 = float3(1.0f, 2.0f, 3.0f);
   float3 v_3 = float3(3.0f, 4.0f, 5.0f);
   float3 v_4 = float3(6.0f, 7.0f, 8.0f);
-  TextureCubeArray<float4> v_5 = v;
-  SamplerState v_6 = v_1;
-  float4 x = v_5.SampleGrad(v_6, float4(v_2, float(4u)), v_3, v_4);
+  float4 x = v.SampleGrad(v_1, float4(v_2, float(4u)), v_3, v_4);
 }
 
 )");
@@ -3889,8 +3811,7 @@ TEST_F(HlslWriterTest, BuiltinTextureSample_Depth2d) {
 Texture2D v : register(t0);
 SamplerState v_1 : register(s1);
 void foo() {
-  float2 v_2 = float2(1.0f, 2.0f);
-  float x = v.Sample(v_1, v_2);
+  float x = v.Sample(v_1, float2(1.0f, 2.0f));
 }
 
 )");
@@ -3925,8 +3846,7 @@ TEST_F(HlslWriterTest, BuiltinTextureSample_Depth2d_Offset) {
 Texture2D v : register(t0);
 SamplerState v_1 : register(s1);
 void foo() {
-  float2 v_2 = float2(1.0f, 2.0f);
-  float x = v.Sample(v_1, v_2, int2(int(4), int(5)));
+  float x = v.Sample(v_1, float2(1.0f, 2.0f), int2(int(4), int(5)));
 }
 
 )");
@@ -3962,9 +3882,7 @@ Texture2DArray v : register(t0);
 SamplerState v_1 : register(s1);
 void foo() {
   float2 v_2 = float2(1.0f, 2.0f);
-  Texture2DArray v_3 = v;
-  SamplerState v_4 = v_1;
-  float x = v_3.Sample(v_4, float3(v_2, float(4u)));
+  float x = v.Sample(v_1, float3(v_2, float(4u)));
 }
 
 )");
@@ -4001,9 +3919,7 @@ Texture2DArray v : register(t0);
 SamplerState v_1 : register(s1);
 void foo() {
   float2 v_2 = float2(1.0f, 2.0f);
-  Texture2DArray v_3 = v;
-  SamplerState v_4 = v_1;
-  float x = v_3.Sample(v_4, float3(v_2, float(4u)), int2(int(4), int(5)));
+  float x = v.Sample(v_1, float3(v_2, float(4u)), int2(int(4), int(5)));
 }
 
 )");
@@ -4039,9 +3955,7 @@ TextureCubeArray v : register(t0);
 SamplerState v_1 : register(s1);
 void foo() {
   float3 v_2 = float3(1.0f, 2.0f, 3.0f);
-  TextureCubeArray v_3 = v;
-  SamplerState v_4 = v_1;
-  float x = v_3.Sample(v_4, float4(v_2, float(4u)));
+  float x = v.Sample(v_1, float4(v_2, float(4u)));
 }
 
 )");
@@ -4076,9 +3990,7 @@ Texture2D<float4> v : register(t0);
 SamplerState v_1 : register(s1);
 void foo() {
   float2 v_2 = float2(1.0f, 2.0f);
-  Texture2D<float4> v_3 = v;
-  SamplerState v_4 = v_1;
-  float4 x = v_3.SampleLevel(v_4, v_2, float(3.0f));
+  float4 x = v.SampleLevel(v_1, v_2, float(3.0f));
 }
 
 )");
@@ -4115,9 +4027,7 @@ Texture2D<float4> v : register(t0);
 SamplerState v_1 : register(s1);
 void foo() {
   float2 v_2 = float2(1.0f, 2.0f);
-  Texture2D<float4> v_3 = v;
-  SamplerState v_4 = v_1;
-  float4 x = v_3.SampleLevel(v_4, v_2, float(3.0f), int2(int(4), int(5)));
+  float4 x = v.SampleLevel(v_1, v_2, float(3.0f), int2(int(4), int(5)));
 }
 
 )");
@@ -4154,10 +4064,8 @@ Texture2DArray<float4> v : register(t0);
 SamplerState v_1 : register(s1);
 void foo() {
   float2 v_2 = float2(1.0f, 2.0f);
-  Texture2DArray<float4> v_3 = v;
-  SamplerState v_4 = v_1;
-  float3 v_5 = float3(v_2, float(4u));
-  float4 x = v_3.SampleLevel(v_4, v_5, float(3.0f));
+  float3 v_3 = float3(v_2, float(4u));
+  float4 x = v.SampleLevel(v_1, v_3, float(3.0f));
 }
 
 )");
@@ -4195,10 +4103,8 @@ Texture2DArray<float4> v : register(t0);
 SamplerState v_1 : register(s1);
 void foo() {
   float2 v_2 = float2(1.0f, 2.0f);
-  Texture2DArray<float4> v_3 = v;
-  SamplerState v_4 = v_1;
-  float3 v_5 = float3(v_2, float(4u));
-  float4 x = v_3.SampleLevel(v_4, v_5, float(3.0f), int2(int(4), int(5)));
+  float3 v_3 = float3(v_2, float(4u));
+  float4 x = v.SampleLevel(v_1, v_3, float(3.0f), int2(int(4), int(5)));
 }
 
 )");
@@ -4233,9 +4139,7 @@ Texture3D<float4> v : register(t0);
 SamplerState v_1 : register(s1);
 void foo() {
   float3 v_2 = float3(1.0f, 2.0f, 3.0f);
-  Texture3D<float4> v_3 = v;
-  SamplerState v_4 = v_1;
-  float4 x = v_3.SampleLevel(v_4, v_2, float(3.0f));
+  float4 x = v.SampleLevel(v_1, v_2, float(3.0f));
 }
 
 )");
@@ -4272,9 +4176,7 @@ Texture3D<float4> v : register(t0);
 SamplerState v_1 : register(s1);
 void foo() {
   float3 v_2 = float3(1.0f, 2.0f, 3.0f);
-  Texture3D<float4> v_3 = v;
-  SamplerState v_4 = v_1;
-  float4 x = v_3.SampleLevel(v_4, v_2, float(3.0f), int3(int(4), int(5), int(6)));
+  float4 x = v.SampleLevel(v_1, v_2, float(3.0f), int3(int(4), int(5), int(6)));
 }
 
 )");
@@ -4309,9 +4211,7 @@ TextureCube<float4> v : register(t0);
 SamplerState v_1 : register(s1);
 void foo() {
   float3 v_2 = float3(1.0f, 2.0f, 3.0f);
-  TextureCube<float4> v_3 = v;
-  SamplerState v_4 = v_1;
-  float4 x = v_3.SampleLevel(v_4, v_2, float(3.0f));
+  float4 x = v.SampleLevel(v_1, v_2, float(3.0f));
 }
 
 )");
@@ -4348,10 +4248,8 @@ TextureCubeArray<float4> v : register(t0);
 SamplerState v_1 : register(s1);
 void foo() {
   float3 v_2 = float3(1.0f, 2.0f, 3.0f);
-  TextureCubeArray<float4> v_3 = v;
-  SamplerState v_4 = v_1;
-  float4 v_5 = float4(v_2, float(4u));
-  float4 x = v_3.SampleLevel(v_4, v_5, float(3.0f));
+  float4 v_3 = float4(v_2, float(4u));
+  float4 x = v.SampleLevel(v_1, v_3, float(3.0f));
 }
 
 )");
@@ -4386,9 +4284,7 @@ Texture2D v : register(t0);
 SamplerState v_1 : register(s1);
 void foo() {
   float2 v_2 = float2(1.0f, 2.0f);
-  Texture2D v_3 = v;
-  SamplerState v_4 = v_1;
-  float x = v_3.SampleLevel(v_4, v_2, float(int(3)));
+  float x = v.SampleLevel(v_1, v_2, float(int(3)));
 }
 
 )");
@@ -4424,9 +4320,7 @@ Texture2D v : register(t0);
 SamplerState v_1 : register(s1);
 void foo() {
   float2 v_2 = float2(1.0f, 2.0f);
-  Texture2D v_3 = v;
-  SamplerState v_4 = v_1;
-  float x = v_3.SampleLevel(v_4, v_2, float(int(3)), int2(int(4), int(5)));
+  float x = v.SampleLevel(v_1, v_2, float(int(3)), int2(int(4), int(5)));
 }
 
 )");
@@ -4462,10 +4356,8 @@ Texture2DArray v : register(t0);
 SamplerState v_1 : register(s1);
 void foo() {
   float2 v_2 = float2(1.0f, 2.0f);
-  Texture2DArray v_3 = v;
-  SamplerState v_4 = v_1;
-  float3 v_5 = float3(v_2, float(4u));
-  float x = v_3.SampleLevel(v_4, v_5, float(3u));
+  float3 v_3 = float3(v_2, float(4u));
+  float x = v.SampleLevel(v_1, v_3, float(3u));
 }
 
 )");
@@ -4503,10 +4395,8 @@ Texture2DArray v : register(t0);
 SamplerState v_1 : register(s1);
 void foo() {
   float2 v_2 = float2(1.0f, 2.0f);
-  Texture2DArray v_3 = v;
-  SamplerState v_4 = v_1;
-  float3 v_5 = float3(v_2, float(4u));
-  float x = v_3.SampleLevel(v_4, v_5, float(int(3)), int2(int(4), int(5)));
+  float3 v_3 = float3(v_2, float(4u));
+  float x = v.SampleLevel(v_1, v_3, float(int(3)), int2(int(4), int(5)));
 }
 
 )");
@@ -4542,10 +4432,8 @@ TextureCubeArray v : register(t0);
 SamplerState v_1 : register(s1);
 void foo() {
   float3 v_2 = float3(1.0f, 2.0f, 3.0f);
-  TextureCubeArray v_3 = v;
-  SamplerState v_4 = v_1;
-  float4 v_5 = float4(v_2, float(4u));
-  float x = v_3.SampleLevel(v_4, v_5, float(3u));
+  float4 v_3 = float4(v_2, float(4u));
+  float x = v.SampleLevel(v_1, v_3, float(3u));
 }
 
 )");

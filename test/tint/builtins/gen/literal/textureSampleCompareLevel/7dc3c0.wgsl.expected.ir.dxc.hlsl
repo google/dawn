@@ -13,9 +13,7 @@ RWByteAddressBuffer prevent_dce : register(u0);
 Texture2DArray arg_0 : register(t0, space1);
 SamplerComparisonState arg_1 : register(s1, space1);
 float textureSampleCompareLevel_7dc3c0() {
-  Texture2DArray v = arg_0;
-  SamplerComparisonState v_1 = arg_1;
-  float res = v.SampleCmpLevelZero(v_1, float3((1.0f).xx, float(1u)), 1.0f);
+  float res = arg_0.SampleCmpLevelZero(arg_1, float3((1.0f).xx, float(1u)), 1.0f);
   return res;
 }
 
@@ -32,15 +30,15 @@ VertexOutput vertex_main_inner() {
   VertexOutput tint_symbol = (VertexOutput)0;
   tint_symbol.pos = (0.0f).xxxx;
   tint_symbol.prevent_dce = textureSampleCompareLevel_7dc3c0();
-  VertexOutput v_2 = tint_symbol;
-  return v_2;
+  VertexOutput v = tint_symbol;
+  return v;
 }
 
 vertex_main_outputs vertex_main() {
-  VertexOutput v_3 = vertex_main_inner();
-  VertexOutput v_4 = v_3;
-  VertexOutput v_5 = v_3;
-  vertex_main_outputs v_6 = {v_5.prevent_dce, v_4.pos};
-  return v_6;
+  VertexOutput v_1 = vertex_main_inner();
+  VertexOutput v_2 = v_1;
+  VertexOutput v_3 = v_1;
+  vertex_main_outputs v_4 = {v_3.prevent_dce, v_2.pos};
+  return v_4;
 }
 

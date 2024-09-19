@@ -5,10 +5,8 @@ SamplerState arg_1 : register(s1, space1);
 float textureSample_60bf45() {
   float2 arg_2 = (1.0f).xx;
   int arg_3 = int(1);
-  Texture2DArray v = arg_0;
-  SamplerState v_1 = arg_1;
-  float2 v_2 = arg_2;
-  float res = v.Sample(v_1, float3(v_2, float(arg_3)), (int(1)).xx);
+  float2 v = arg_2;
+  float res = arg_0.Sample(arg_1, float3(v, float(arg_3)), (int(1)).xx);
   return res;
 }
 

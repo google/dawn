@@ -134,10 +134,8 @@ tint_ExternalTextureParams v_39(uint start_byte_offset) {
 
 [numthreads(1, 1, 1)]
 void i() {
-  Texture2D<float4> v_62 = t_plane0;
-  Texture2D<float4> v_63 = t_plane1;
-  tint_ExternalTextureParams v_64 = v_39(0u);
-  tint_ExternalTextureParams v_65 = v_64;
-  float4 r = tint_TextureLoadExternal(v_62, v_63, v_65, uint2((int(0)).xx));
+  tint_ExternalTextureParams v_62 = v_39(0u);
+  tint_ExternalTextureParams v_63 = v_62;
+  float4 r = tint_TextureLoadExternal(t_plane0, t_plane1, v_63, uint2((int(0)).xx));
 }
 

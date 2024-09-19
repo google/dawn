@@ -144,10 +144,8 @@ tint_ExternalTextureParams v_39(uint start_byte_offset) {
 }
 
 float4 textureLoad_1bfdfb() {
-  Texture2D<float4> v_62 = arg_0_plane0;
-  Texture2D<float4> v_63 = arg_0_plane1;
-  tint_ExternalTextureParams v_64 = v_39(0u);
-  float4 res = tint_TextureLoadExternal(v_62, v_63, v_64, (1u).xx);
+  tint_ExternalTextureParams v_62 = v_39(0u);
+  float4 res = tint_TextureLoadExternal(arg_0_plane0, arg_0_plane1, v_62, (1u).xx);
   return res;
 }
 
@@ -164,15 +162,15 @@ VertexOutput vertex_main_inner() {
   VertexOutput tint_symbol = (VertexOutput)0;
   tint_symbol.pos = (0.0f).xxxx;
   tint_symbol.prevent_dce = textureLoad_1bfdfb();
-  VertexOutput v_65 = tint_symbol;
-  return v_65;
+  VertexOutput v_63 = tint_symbol;
+  return v_63;
 }
 
 vertex_main_outputs vertex_main() {
-  VertexOutput v_66 = vertex_main_inner();
-  VertexOutput v_67 = v_66;
-  VertexOutput v_68 = v_66;
-  vertex_main_outputs v_69 = {v_68.prevent_dce, v_67.pos};
-  return v_69;
+  VertexOutput v_64 = vertex_main_inner();
+  VertexOutput v_65 = v_64;
+  VertexOutput v_66 = v_64;
+  vertex_main_outputs v_67 = {v_66.prevent_dce, v_65.pos};
+  return v_67;
 }
 

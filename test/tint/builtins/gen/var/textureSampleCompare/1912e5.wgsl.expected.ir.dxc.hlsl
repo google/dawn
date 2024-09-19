@@ -6,11 +6,9 @@ float textureSampleCompare_1912e5() {
   float3 arg_2 = (1.0f).xxx;
   uint arg_3 = 1u;
   float arg_4 = 1.0f;
-  TextureCubeArray v = arg_0;
-  SamplerComparisonState v_1 = arg_1;
-  float3 v_2 = arg_2;
-  float v_3 = arg_4;
-  float res = v.SampleCmp(v_1, float4(v_2, float(arg_3)), v_3);
+  float3 v = arg_2;
+  float v_1 = arg_4;
+  float res = arg_0.SampleCmp(arg_1, float4(v, float(arg_3)), v_1);
   return res;
 }
 

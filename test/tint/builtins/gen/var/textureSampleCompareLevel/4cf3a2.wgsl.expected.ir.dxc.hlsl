@@ -16,11 +16,9 @@ float textureSampleCompareLevel_4cf3a2() {
   float3 arg_2 = (1.0f).xxx;
   int arg_3 = int(1);
   float arg_4 = 1.0f;
-  TextureCubeArray v = arg_0;
-  SamplerComparisonState v_1 = arg_1;
-  float3 v_2 = arg_2;
-  float v_3 = arg_4;
-  float res = v.SampleCmpLevelZero(v_1, float4(v_2, float(arg_3)), v_3);
+  float3 v = arg_2;
+  float v_1 = arg_4;
+  float res = arg_0.SampleCmpLevelZero(arg_1, float4(v, float(arg_3)), v_1);
   return res;
 }
 
@@ -37,15 +35,15 @@ VertexOutput vertex_main_inner() {
   VertexOutput tint_symbol = (VertexOutput)0;
   tint_symbol.pos = (0.0f).xxxx;
   tint_symbol.prevent_dce = textureSampleCompareLevel_4cf3a2();
-  VertexOutput v_4 = tint_symbol;
-  return v_4;
+  VertexOutput v_2 = tint_symbol;
+  return v_2;
 }
 
 vertex_main_outputs vertex_main() {
-  VertexOutput v_5 = vertex_main_inner();
-  VertexOutput v_6 = v_5;
-  VertexOutput v_7 = v_5;
-  vertex_main_outputs v_8 = {v_7.prevent_dce, v_6.pos};
-  return v_8;
+  VertexOutput v_3 = vertex_main_inner();
+  VertexOutput v_4 = v_3;
+  VertexOutput v_5 = v_3;
+  vertex_main_outputs v_6 = {v_5.prevent_dce, v_4.pos};
+  return v_6;
 }
 

@@ -6,11 +6,9 @@ float4 textureSampleBias_eed7c4() {
   float3 arg_2 = (1.0f).xxx;
   int arg_3 = int(1);
   float arg_4 = 1.0f;
-  TextureCubeArray<float4> v = arg_0;
-  SamplerState v_1 = arg_1;
-  float3 v_2 = arg_2;
-  float v_3 = arg_4;
-  float4 res = v.SampleBias(v_1, float4(v_2, float(arg_3)), v_3);
+  float3 v = arg_2;
+  float v_1 = arg_4;
+  float4 res = arg_0.SampleBias(arg_1, float4(v, float(arg_3)), v_1);
   return res;
 }
 

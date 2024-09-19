@@ -16,12 +16,10 @@ float4 textureSampleLevel_0bdd9a() {
   float3 arg_2 = (1.0f).xxx;
   int arg_3 = int(1);
   float arg_4 = 1.0f;
-  TextureCubeArray<float4> v = arg_0;
-  SamplerState v_1 = arg_1;
-  float3 v_2 = arg_2;
-  float v_3 = arg_4;
-  float4 v_4 = float4(v_2, float(arg_3));
-  float4 res = v.SampleLevel(v_1, v_4, float(v_3));
+  float3 v = arg_2;
+  float v_1 = arg_4;
+  float4 v_2 = float4(v, float(arg_3));
+  float4 res = arg_0.SampleLevel(arg_1, v_2, float(v_1));
   return res;
 }
 
@@ -38,15 +36,15 @@ VertexOutput vertex_main_inner() {
   VertexOutput tint_symbol = (VertexOutput)0;
   tint_symbol.pos = (0.0f).xxxx;
   tint_symbol.prevent_dce = textureSampleLevel_0bdd9a();
-  VertexOutput v_5 = tint_symbol;
-  return v_5;
+  VertexOutput v_3 = tint_symbol;
+  return v_3;
 }
 
 vertex_main_outputs vertex_main() {
-  VertexOutput v_6 = vertex_main_inner();
-  VertexOutput v_7 = v_6;
-  VertexOutput v_8 = v_6;
-  vertex_main_outputs v_9 = {v_8.prevent_dce, v_7.pos};
-  return v_9;
+  VertexOutput v_4 = vertex_main_inner();
+  VertexOutput v_5 = v_4;
+  VertexOutput v_6 = v_4;
+  vertex_main_outputs v_7 = {v_6.prevent_dce, v_5.pos};
+  return v_7;
 }
 

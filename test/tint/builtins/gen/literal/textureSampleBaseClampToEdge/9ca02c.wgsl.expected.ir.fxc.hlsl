@@ -13,13 +13,11 @@ RWByteAddressBuffer prevent_dce : register(u0);
 Texture2D<float4> arg_0 : register(t0, space1);
 SamplerState arg_1 : register(s1, space1);
 float4 textureSampleBaseClampToEdge_9ca02c() {
-  Texture2D<float4> v = arg_0;
-  SamplerState v_1 = arg_1;
-  uint2 v_2 = (0u).xx;
-  v.GetDimensions(v_2[0u], v_2[1u]);
-  float2 v_3 = ((0.5f).xx / float2(v_2));
-  float2 v_4 = clamp((1.0f).xx, v_3, ((1.0f).xx - v_3));
-  float4 res = v.SampleLevel(v_1, v_4, float(0.0f));
+  uint2 v = (0u).xx;
+  arg_0.GetDimensions(v[0u], v[1u]);
+  float2 v_1 = ((0.5f).xx / float2(v));
+  float2 v_2 = clamp((1.0f).xx, v_1, ((1.0f).xx - v_1));
+  float4 res = arg_0.SampleLevel(arg_1, v_2, float(0.0f));
   return res;
 }
 
@@ -36,15 +34,15 @@ VertexOutput vertex_main_inner() {
   VertexOutput tint_symbol = (VertexOutput)0;
   tint_symbol.pos = (0.0f).xxxx;
   tint_symbol.prevent_dce = textureSampleBaseClampToEdge_9ca02c();
-  VertexOutput v_5 = tint_symbol;
-  return v_5;
+  VertexOutput v_3 = tint_symbol;
+  return v_3;
 }
 
 vertex_main_outputs vertex_main() {
-  VertexOutput v_6 = vertex_main_inner();
-  VertexOutput v_7 = v_6;
-  VertexOutput v_8 = v_6;
-  vertex_main_outputs v_9 = {v_8.prevent_dce, v_7.pos};
-  return v_9;
+  VertexOutput v_4 = vertex_main_inner();
+  VertexOutput v_5 = v_4;
+  VertexOutput v_6 = v_4;
+  vertex_main_outputs v_7 = {v_6.prevent_dce, v_5.pos};
+  return v_7;
 }
 

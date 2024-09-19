@@ -1,5 +1,3 @@
-SKIP: FAILED
-
 #version 310 es
 precision highp float;
 precision highp int;
@@ -10,21 +8,12 @@ buffer tint_symbol_1_1_ssbo {
 } v;
 uniform highp usampler3D arg_0;
 uvec3 textureDimensions_6e6c7a() {
-  highp usampler3D v_1 = arg_0;
-  uvec3 res = uvec3(textureSize(v_1, int(1u)));
+  uvec3 res = uvec3(textureSize(arg_0, int(1u)));
   return res;
 }
 void main() {
   v.tint_symbol = textureDimensions_6e6c7a();
 }
-error: Error parsing GLSL shader:
-ERROR: 0:11: 'usampler3D' : sampler/image types can only be used in uniform variables or function parameters: v_1
-ERROR: 0:11: '=' :  cannot convert from ' uniform highp usampler3D' to ' temp highp usampler3D'
-ERROR: 0:11: '' : compilation terminated 
-ERROR: 3 compilation errors.  No code generated.
-
-
-
 #version 310 es
 
 layout(binding = 0, std430)
@@ -33,22 +22,13 @@ buffer tint_symbol_1_1_ssbo {
 } v;
 uniform highp usampler3D arg_0;
 uvec3 textureDimensions_6e6c7a() {
-  highp usampler3D v_1 = arg_0;
-  uvec3 res = uvec3(textureSize(v_1, int(1u)));
+  uvec3 res = uvec3(textureSize(arg_0, int(1u)));
   return res;
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
   v.tint_symbol = textureDimensions_6e6c7a();
 }
-error: Error parsing GLSL shader:
-ERROR: 0:9: 'usampler3D' : sampler/image types can only be used in uniform variables or function parameters: v_1
-ERROR: 0:9: '=' :  cannot convert from ' uniform highp usampler3D' to ' temp highp usampler3D'
-ERROR: 0:9: '' : compilation terminated 
-ERROR: 3 compilation errors.  No code generated.
-
-
-
 #version 310 es
 
 
@@ -60,8 +40,7 @@ struct VertexOutput {
 uniform highp usampler3D arg_0;
 layout(location = 0) flat out uvec3 vertex_main_loc0_Output;
 uvec3 textureDimensions_6e6c7a() {
-  highp usampler3D v = arg_0;
-  uvec3 res = uvec3(textureSize(v, int(1u)));
+  uvec3 res = uvec3(textureSize(arg_0, int(1u)));
   return res;
 }
 VertexOutput vertex_main_inner() {
@@ -71,20 +50,10 @@ VertexOutput vertex_main_inner() {
   return tint_symbol;
 }
 void main() {
-  VertexOutput v_1 = vertex_main_inner();
-  gl_Position = v_1.pos;
+  VertexOutput v = vertex_main_inner();
+  gl_Position = v.pos;
   gl_Position[1u] = -(gl_Position.y);
   gl_Position[2u] = ((2.0f * gl_Position.z) - gl_Position.w);
-  vertex_main_loc0_Output = v_1.prevent_dce;
+  vertex_main_loc0_Output = v.prevent_dce;
   gl_PointSize = 1.0f;
 }
-error: Error parsing GLSL shader:
-ERROR: 0:12: 'usampler3D' : sampler/image types can only be used in uniform variables or function parameters: v
-ERROR: 0:12: '=' :  cannot convert from ' uniform highp usampler3D' to ' temp highp usampler3D'
-ERROR: 0:12: '' : compilation terminated 
-ERROR: 3 compilation errors.  No code generated.
-
-
-
-
-tint executable returned error: exit status 1

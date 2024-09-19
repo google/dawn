@@ -44,9 +44,8 @@ void main_inner(uint3 GlobalInvocationID) {
   if (v_4) {
     bool v_5 = false;
     if (success) {
-      Texture2D<float4> v_6 = tint_symbol;
-      int2 v_7 = int2(int2(dstTexCoord));
-      v_5 = all((float4(v_6.Load(int3(v_7, int(int(0))))) == nonCoveredColor));
+      int2 v_6 = int2(int2(dstTexCoord));
+      v_5 = all((float4(tint_symbol.Load(int3(v_6, int(int(0))))) == nonCoveredColor));
     } else {
       v_5 = false;
     }
@@ -56,52 +55,50 @@ void main_inner(uint3 GlobalInvocationID) {
     if ((uniforms[0u].x == 1u)) {
       srcTexCoord[1u] = ((srcSize[1u] - srcTexCoord.y) - 1u);
     }
-    Texture2D<float4> v_8 = src;
-    int2 v_9 = int2(int2(srcTexCoord));
-    float4 srcColor = float4(v_8.Load(int3(v_9, int(int(0)))));
-    Texture2D<float4> v_10 = tint_symbol;
-    int2 v_11 = int2(int2(dstTexCoord));
-    float4 dstColor = float4(v_10.Load(int3(v_11, int(int(0)))));
+    int2 v_7 = int2(int2(srcTexCoord));
+    float4 srcColor = float4(src.Load(int3(v_7, int(int(0)))));
+    int2 v_8 = int2(int2(dstTexCoord));
+    float4 dstColor = float4(tint_symbol.Load(int3(v_8, int(int(0)))));
     if ((uniforms[0u].y == 2u)) {
-      bool v_12 = false;
+      bool v_9 = false;
       if (success) {
-        v_12 = aboutEqual(dstColor[0u], srcColor[0u]);
+        v_9 = aboutEqual(dstColor[0u], srcColor[0u]);
+      } else {
+        v_9 = false;
+      }
+      bool v_10 = false;
+      if (v_9) {
+        v_10 = aboutEqual(dstColor[1u], srcColor[1u]);
+      } else {
+        v_10 = false;
+      }
+      success = v_10;
+    } else {
+      bool v_11 = false;
+      if (success) {
+        v_11 = aboutEqual(dstColor[0u], srcColor[0u]);
+      } else {
+        v_11 = false;
+      }
+      bool v_12 = false;
+      if (v_11) {
+        v_12 = aboutEqual(dstColor[1u], srcColor[1u]);
       } else {
         v_12 = false;
       }
       bool v_13 = false;
       if (v_12) {
-        v_13 = aboutEqual(dstColor[1u], srcColor[1u]);
+        v_13 = aboutEqual(dstColor[2u], srcColor[2u]);
       } else {
         v_13 = false;
       }
-      success = v_13;
-    } else {
       bool v_14 = false;
-      if (success) {
-        v_14 = aboutEqual(dstColor[0u], srcColor[0u]);
+      if (v_13) {
+        v_14 = aboutEqual(dstColor[3u], srcColor[3u]);
       } else {
         v_14 = false;
       }
-      bool v_15 = false;
-      if (v_14) {
-        v_15 = aboutEqual(dstColor[1u], srcColor[1u]);
-      } else {
-        v_15 = false;
-      }
-      bool v_16 = false;
-      if (v_15) {
-        v_16 = aboutEqual(dstColor[2u], srcColor[2u]);
-      } else {
-        v_16 = false;
-      }
-      bool v_17 = false;
-      if (v_16) {
-        v_17 = aboutEqual(dstColor[3u], srcColor[3u]);
-      } else {
-        v_17 = false;
-      }
-      success = v_17;
+      success = v_14;
     }
   }
   uint outputIndex = ((GlobalInvocationID[1u] * dstSize[0u]) + GlobalInvocationID[0u]);

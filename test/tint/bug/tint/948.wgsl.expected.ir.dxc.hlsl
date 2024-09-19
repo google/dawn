@@ -42,20 +42,14 @@ float4x4 getFrameData_f1_(inout float frameID) {
   float x_25 = asfloat(x_20[6u].w);
   fX = (x_15 / x_25);
   float x_37 = fX;
-  Texture2D<float4> v = frameMapTexture;
-  SamplerState v_1 = frameMapSampler;
-  float4 x_40 = v.SampleBias(v_1, float2(x_37, 0.0f), 0.0f);
+  float4 x_40 = frameMapTexture.SampleBias(frameMapSampler, float2(x_37, 0.0f), 0.0f);
   float x_44 = fX;
-  Texture2D<float4> v_2 = frameMapTexture;
-  SamplerState v_3 = frameMapSampler;
-  float4 x_47 = v_2.SampleBias(v_3, float2(x_44, 0.25f), 0.0f);
+  float4 x_47 = frameMapTexture.SampleBias(frameMapSampler, float2(x_44, 0.25f), 0.0f);
   float x_51 = fX;
-  Texture2D<float4> v_4 = frameMapTexture;
-  SamplerState v_5 = frameMapSampler;
-  float4 x_54 = v_4.SampleBias(v_5, float2(x_51, 0.5f), 0.0f);
-  float4 v_6 = float4(x_40[0u], x_40[1u], x_40[2u], x_40[3u]);
-  float4 v_7 = float4(x_47[0u], x_47[1u], x_47[2u], x_47[3u]);
-  return float4x4(v_6, v_7, float4(x_54[0u], x_54[1u], x_54[2u], x_54[3u]), (0.0f).xxxx);
+  float4 x_54 = frameMapTexture.SampleBias(frameMapSampler, float2(x_51, 0.5f), 0.0f);
+  float4 v = float4(x_40[0u], x_40[1u], x_40[2u], x_40[3u]);
+  float4 v_1 = float4(x_47[0u], x_47[1u], x_47[2u], x_47[3u]);
+  return float4x4(v, v_1, float4(x_54[0u], x_54[1u], x_54[2u], x_54[3u]), (0.0f).xxxx);
 }
 
 void main_1() {
@@ -123,17 +117,15 @@ void main_1() {
       }
       float x_166 = frameID_1;
       float x_169 = asfloat(x_20[6u].w);
-      Texture2D<float4> v_8 = animationMapTexture;
-      SamplerState v_9 = animationMapSampler;
-      float4 x_172 = v_8.SampleBias(v_9, float2(((x_166 + 0.5f) / x_169), 0.0f), 0.0f);
+      float4 x_172 = animationMapTexture.SampleBias(animationMapSampler, float2(((x_166 + 0.5f) / x_169), 0.0f), 0.0f);
       animationData = x_172;
       float x_174 = animationData.y;
       if ((x_174 > 0.0f)) {
         float x_181 = asfloat(x_20[0u].x);
         float x_184 = animationData.z;
-        float v_10 = ((x_181 * x_184) / 1.0f);
-        float v_11 = floor(v_10);
-        mt = (((x_181 * x_184) - (((v_10 < 0.0f)) ? (ceil(v_10)) : (v_11))) * 1.0f);
+        float v_2 = ((x_181 * x_184) / 1.0f);
+        float v_3 = floor(v_2);
+        mt = (((x_181 * x_184) - (((v_2 < 0.0f)) ? (ceil(v_2)) : (v_3))) * 1.0f);
         f = 0.0f;
         {
           while(true) {
@@ -174,8 +166,8 @@ void main_1() {
       offset_1 = (float2(x_235[0u], x_235[1u]) * x_237);
       float4 x_241 = frameData[int(2)];
       float4 x_244 = frameData[int(0)];
-      float2 v_12 = float2(x_241[0u], x_241[1u]);
-      ratio = (v_12 / float2(x_244[3u], x_244[2u]));
+      float2 v_4 = float2(x_241[0u], x_241[1u]);
+      ratio = (v_4 / float2(x_244[3u], x_244[2u]));
       float x_248 = frameData[int(2)].z;
       if ((x_248 == 1.0f)) {
         float2 x_252 = tileUV;
@@ -200,9 +192,9 @@ void main_1() {
         float4 x_290 = color;
         float4 x_292 = nc;
         float x_295 = nc.w;
-        float3 v_13 = float3(x_290[0u], x_290[1u], x_290[2u]);
-        float3 v_14 = float3(x_292[0u], x_292[1u], x_292[2u]);
-        mixed = lerp(v_13, v_14, float3(x_295, x_295, x_295));
+        float3 v_5 = float3(x_290[0u], x_290[1u], x_290[2u]);
+        float3 v_6 = float3(x_292[0u], x_292[1u], x_292[2u]);
+        mixed = lerp(v_5, v_6, float3(x_295, x_295, x_295));
         float3 x_298 = mixed;
         float x_299 = alpha;
         color = float4(x_298[0u], x_298[1u], x_298[2u], x_299);
@@ -231,13 +223,13 @@ main_out main_inner(float2 tUV_param, float2 tileID_1_param, float2 levelUnits_p
   vPosition = vPosition_param;
   vUV = vUV_param;
   main_1();
-  main_out v_15 = {glFragColor};
-  return v_15;
+  main_out v_7 = {glFragColor};
+  return v_7;
 }
 
 main_outputs main(main_inputs inputs) {
-  main_out v_16 = main_inner(inputs.tUV_param, inputs.tileID_1_param, inputs.levelUnits_param, inputs.stageUnits_1_param, inputs.vPosition_param, inputs.vUV_param);
-  main_outputs v_17 = {v_16.glFragColor_1};
-  return v_17;
+  main_out v_8 = main_inner(inputs.tUV_param, inputs.tileID_1_param, inputs.levelUnits_param, inputs.stageUnits_1_param, inputs.vPosition_param, inputs.vUV_param);
+  main_outputs v_9 = {v_8.glFragColor_1};
+  return v_9;
 }
 
