@@ -50,3 +50,5 @@ Failed to generate: <dawn>/test/tint/builtins/gen/var/subgroupBroadcastFirst/e82
 enable subgroups;
        ^^^^^^^^^
 
+
+tint executable returned error: exit status 1

@@ -1,6 +1,6 @@
 SKIP: FAILED
 
-<dawn>/src/tint/lang/glsl/writer/printer/printer.cc:1106 internal compiler error: Switch() matched no cases. Type: tint::core::ir::Bitcast
+<dawn>/src/tint/lang/glsl/writer/printer/printer.cc:521 internal compiler error: TINT_ASSERT(!l->Result(0)->Type()->Is<core::type::Pointer>())
 ********************************************************************
 *  The tint shader compiler has encountered an unexpected error.   *
 *                                                                  *

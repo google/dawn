@@ -72,7 +72,7 @@ vec4 fs_main_inner(VertexOutput tint_symbol) {
 void main() {
   fs_main_loc0_Output = fs_main_inner(VertexOutput(gl_FragCoord, fs_main_loc0_Input, fs_main_loc1_Input));
 }
-<dawn>/src/tint/lang/glsl/writer/printer/printer.cc:1423 internal compiler error: TINT_UNREACHABLE unhandled core builtin: textureNumLevels
+<dawn>/src/tint/lang/glsl/writer/printer/printer.cc:1451 internal compiler error: TINT_UNREACHABLE unhandled core builtin: textureNumLevels
 ********************************************************************
 *  The tint shader compiler has encountered an unexpected error.   *
 *                                                                  *

@@ -52,3 +52,5 @@ Failed to generate: <dawn>/test/tint/builtins/gen/literal/subgroupShuffle/821df9
 enable subgroups;
        ^^^^^^^^^
 
+
+tint executable returned error: exit status 1

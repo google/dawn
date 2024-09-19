@@ -1,6 +1,6 @@
 SKIP: FAILED
 
-<dawn>/src/tint/lang/glsl/writer/printer/printer.cc:1423 internal compiler error: TINT_UNREACHABLE unhandled core builtin: textureDimensions
+<dawn>/src/tint/lang/glsl/writer/printer/printer.cc:618 internal compiler error: Switch() matched no cases. Type: tint::core::type::Sampler
 ********************************************************************
 *  The tint shader compiler has encountered an unexpected error.   *
 *                                                                  *

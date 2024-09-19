@@ -48,3 +48,5 @@ Failed to generate: <dawn>/test/tint/builtins/gen/literal/quadSwapX/8203ad.wgsl:
 enable subgroups;
        ^^^^^^^^^
 
+
+tint executable returned error: exit status 1

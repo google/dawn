@@ -1,6 +1,6 @@
 SKIP: FAILED
 
-<dawn>/src/tint/lang/glsl/writer/printer/printer.cc:1423 internal compiler error: TINT_UNREACHABLE unhandled core builtin: atomicCompareExchangeWeak
+<dawn>/src/tint/lang/core/ir/transform/demote_to_helper.cc:208 internal compiler error: TINT_UNREACHABLE unexpected non-core instruction
 ********************************************************************
 *  The tint shader compiler has encountered an unexpected error.   *
 *                                                                  *

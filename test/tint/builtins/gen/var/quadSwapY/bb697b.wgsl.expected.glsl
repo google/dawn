@@ -50,3 +50,5 @@ Failed to generate: <dawn>/test/tint/builtins/gen/var/quadSwapY/bb697b.wgsl:41:8
 enable subgroups;
        ^^^^^^^^^
 
+
+tint executable returned error: exit status 1

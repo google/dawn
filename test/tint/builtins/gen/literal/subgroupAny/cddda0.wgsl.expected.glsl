@@ -48,3 +48,5 @@ Failed to generate: <dawn>/test/tint/builtins/gen/literal/subgroupAny/cddda0.wgs
 enable subgroups;
        ^^^^^^^^^
 
+
+tint executable returned error: exit status 1

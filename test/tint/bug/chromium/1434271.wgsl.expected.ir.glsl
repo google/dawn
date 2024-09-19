@@ -131,7 +131,7 @@ layout(local_size_x = 64, local_size_y = 1, local_size_z = 1) in;
 void main() {
   simulate_inner(gl_GlobalInvocationID);
 }
-<dawn>/src/tint/lang/glsl/writer/printer/printer.cc:1423 internal compiler error: TINT_UNREACHABLE unhandled core builtin: textureDimensions
+<dawn>/src/tint/lang/glsl/writer/printer/printer.cc:1451 internal compiler error: TINT_UNREACHABLE unhandled core builtin: textureStore
 ********************************************************************
 *  The tint shader compiler has encountered an unexpected error.   *
 *                                                                  *

@@ -19,3 +19,5 @@ Failed to generate: <dawn>/test/tint/extensions/pixel_local/entry_point_use/one_
 enable chromium_experimental_pixel_local;
        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+
+tint executable returned error: exit status 1

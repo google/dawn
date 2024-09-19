@@ -2,6 +2,7 @@ SKIP: FAILED
 
 #version 310 es
 precision highp float;
+precision highp int;
 
 uniform highp samplerCubeArray x_20_1;
 void main_1() {
@@ -34,9 +35,11 @@ void main() {
   return;
 }
 error: Error parsing GLSL shader:
-ERROR: 0:4: 'samplerCubeArray' : Reserved word. 
-ERROR: 0:4: '' : compilation terminated 
+ERROR: 0:5: 'samplerCubeArray' : Reserved word. 
+ERROR: 0:5: '' : compilation terminated 
 ERROR: 2 compilation errors.  No code generated.
 
 
 
+
+tint executable returned error: exit status 1

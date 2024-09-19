@@ -1,6 +1,6 @@
 SKIP: FAILED
 
-<dawn>/src/tint/lang/glsl/writer/printer/printer.cc:992 internal compiler error: bgra8unorm should have been polyfilled to rgba8unorm
+<dawn>/src/tint/lang/glsl/writer/printer/printer.cc:994 internal compiler error: bgra8unorm should have been polyfilled to rgba8unorm
 ********************************************************************
 *  The tint shader compiler has encountered an unexpected error.   *
 *                                                                  *

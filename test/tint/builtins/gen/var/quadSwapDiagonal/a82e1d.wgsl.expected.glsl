@@ -50,3 +50,5 @@ Failed to generate: <dawn>/test/tint/builtins/gen/var/quadSwapDiagonal/a82e1d.wg
 enable subgroups;
        ^^^^^^^^^
 
+
+tint executable returned error: exit status 1

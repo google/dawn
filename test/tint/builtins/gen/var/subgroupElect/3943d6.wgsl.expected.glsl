@@ -48,3 +48,5 @@ Failed to generate: <dawn>/test/tint/builtins/gen/var/subgroupElect/3943d6.wgsl:
 enable subgroups;
        ^^^^^^^^^
 
+
+tint executable returned error: exit status 1

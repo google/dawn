@@ -56,3 +56,5 @@ Failed to generate: <dawn>/test/tint/builtins/gen/var/subgroupShuffleUp/bbf7f4.w
 enable subgroups;
        ^^^^^^^^^
 
+
+tint executable returned error: exit status 1

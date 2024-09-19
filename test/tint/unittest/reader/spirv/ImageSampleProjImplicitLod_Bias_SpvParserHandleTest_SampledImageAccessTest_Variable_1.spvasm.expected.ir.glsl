@@ -1,6 +1,6 @@
 SKIP: FAILED
 
-<dawn>/src/tint/lang/glsl/writer/printer/printer.cc:1423 internal compiler error: TINT_UNREACHABLE unhandled core builtin: textureSampleBias
+<dawn>/src/tint/lang/glsl/writer/printer/printer.cc:1451 internal compiler error: TINT_UNREACHABLE unhandled core builtin: textureSampleBias
 ********************************************************************
 *  The tint shader compiler has encountered an unexpected error.   *
 *                                                                  *
