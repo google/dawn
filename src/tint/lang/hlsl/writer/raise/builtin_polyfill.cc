@@ -923,7 +923,8 @@ struct State {
                                                       tex, args);
             query = b.Load(query);
             if (!swizzle.IsEmpty()) {
-                query = b.Swizzle(ty.vec2<u32>(), query, swizzle);
+                query = b.Swizzle(ty.vec(ty.u32(), static_cast<uint32_t>(swizzle.Length())), query,
+                                  swizzle);
             }
             call->Result(0)->ReplaceAllUsesWith(query->Result(0));
         });
