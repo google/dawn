@@ -15,7 +15,7 @@ float4 textureLoad_f348d9() {
   Texture2DArray<float4> v = arg_0;
   int2 v_1 = int2((1u).xx);
   int v_2 = int(1u);
-  float4 res = float4(v.Load(int4(v_1, v_2, int(1))));
+  float4 res = float4(v.Load(int4(v_1, v_2, int(int(1)))));
   return res;
 }
 

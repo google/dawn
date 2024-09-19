@@ -20,7 +20,7 @@ float textureSampleCompareLevel_bcb3dd() {
   SamplerComparisonState v_1 = arg_1;
   float2 v_2 = arg_2;
   float v_3 = arg_4;
-  float res = v.SampleCmpLevelZero(v_1, float3(v_2, float(arg_3)), v_3, (1).xx);
+  float res = v.SampleCmpLevelZero(v_1, float3(v_2, float(arg_3)), v_3, (int(1)).xx);
   return res;
 }
 

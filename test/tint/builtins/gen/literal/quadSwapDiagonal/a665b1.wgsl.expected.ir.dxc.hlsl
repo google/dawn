@@ -1,7 +1,7 @@
 
 RWByteAddressBuffer prevent_dce : register(u0);
 int4 quadSwapDiagonal_a665b1() {
-  int4 res = QuadReadAcrossDiagonal((1).xxxx);
+  int4 res = QuadReadAcrossDiagonal((int(1)).xxxx);
   return res;
 }
 

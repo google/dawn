@@ -5,8 +5,8 @@ int func(int value, inout int pointer) {
 }
 
 void main_1() {
-  int i = 0;
-  i = 123;
+  int i = int(0);
+  i = int(123);
   int x_19 = i;
   int x_18 = func(x_19, i);
 }

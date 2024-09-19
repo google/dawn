@@ -144,7 +144,7 @@ tint_ExternalTextureParams v_39(uint start_byte_offset) {
 }
 
 float4 textureLoad_8acf41() {
-  int2 arg_1 = (1).xx;
+  int2 arg_1 = (int(1)).xx;
   Texture2D<float4> v_62 = arg_0_plane0;
   Texture2D<float4> v_63 = arg_0_plane1;
   tint_ExternalTextureParams v_64 = v_39(0u);

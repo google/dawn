@@ -138,6 +138,6 @@ void i() {
   Texture2D<float4> v_63 = t_plane1;
   tint_ExternalTextureParams v_64 = v_39(0u);
   tint_ExternalTextureParams v_65 = v_64;
-  float4 r = tint_TextureLoadExternal(v_62, v_63, v_65, uint2((0).xx));
+  float4 r = tint_TextureLoadExternal(v_62, v_63, v_65, uint2((int(0)).xx));
 }
 

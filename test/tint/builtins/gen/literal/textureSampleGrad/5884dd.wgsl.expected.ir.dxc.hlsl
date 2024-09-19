@@ -1,5 +1,3 @@
-SKIP: FAILED
-
 struct VertexOutput {
   float4 pos;
   float4 prevent_dce;
@@ -15,7 +13,7 @@ RWByteAddressBuffer prevent_dce : register(u0);
 Texture3D<float4> arg_0 : register(t0, space1);
 SamplerState arg_1 : register(s1, space1);
 float4 textureSampleGrad_5884dd() {
-  float4 res = arg_0.SampleGrad(arg_1, (1.0f).xxx, (1.0f).xxx, (1.0f).xxx, (1).xxx);
+  float4 res = arg_0.SampleGrad(arg_1, (1.0f).xxx, (1.0f).xxx, (1.0f).xxx, (int(1)).xxx);
   return res;
 }
 
@@ -44,5 +42,3 @@ vertex_main_outputs vertex_main() {
   return v_4;
 }
 
-
-tint executable returned error: exit status 0xe0000001

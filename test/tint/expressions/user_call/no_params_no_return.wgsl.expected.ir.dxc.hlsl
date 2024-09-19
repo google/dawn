@@ -1,7 +1,7 @@
 
 void c() {
-  int a = 1;
-  a = (a + 2);
+  int a = int(1);
+  a = (a + int(2));
 }
 
 void b() {

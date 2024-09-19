@@ -1,7 +1,7 @@
 
 RWTexture1D<int4> arg_0 : register(u0, space1);
 void textureStore_f64d69() {
-  arg_0[1] = (1).xxxx;
+  arg_0[int(1)] = (int(1)).xxxx;
 }
 
 void fragment_main() {

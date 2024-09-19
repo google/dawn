@@ -11,7 +11,7 @@ struct vertex_main_outputs {
 
 RWByteAddressBuffer prevent_dce : register(u0);
 int2 extractBits_a99a8d() {
-  int2 res = (0).xx;
+  int2 res = (int(0)).xx;
   return res;
 }
 

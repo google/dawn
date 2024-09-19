@@ -8,7 +8,7 @@ struct vertex_main_outputs {
 
 
 void sign_3bdab6() {
-  int4 res = (1).xxxx;
+  int4 res = (int(1)).xxxx;
 }
 
 void fragment_main() {

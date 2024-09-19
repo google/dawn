@@ -10,7 +10,7 @@ struct vertex_main_outputs {
 Texture2DMS<float4> arg_0 : register(t0, space1);
 static float4 tint_symbol_1 = (0.0f).xxxx;
 void textureDimensions_f60bdb() {
-  int2 res = (0).xx;
+  int2 res = (int(0)).xx;
   uint3 v = (0u).xxx;
   arg_0.GetDimensions(v[0u], v[1u], v[2u]);
   res = int2(v.xy);

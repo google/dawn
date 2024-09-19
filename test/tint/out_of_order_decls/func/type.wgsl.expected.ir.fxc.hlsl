@@ -1,5 +1,5 @@
 
 void f() {
-  int b = 0;
+  int b = int(0);
 }
 

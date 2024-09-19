@@ -19,17 +19,17 @@ static float4 sk_FragColor = (0.0f).xxxx;
 static bool sk_Clockwise = false;
 static float4 vcolor_S0 = (0.0f).xxxx;
 int4 tint_div_v4i32(int4 lhs, int4 rhs) {
-  return (lhs / ((((rhs == (0).xxxx) | ((lhs == (-2147483648).xxxx) & (rhs == (-1).xxxx)))) ? ((1).xxxx) : (rhs)));
+  return (lhs / ((((rhs == (int(0)).xxxx) | ((lhs == (int(-2147483648)).xxxx) & (rhs == (int(-1)).xxxx)))) ? ((int(1)).xxxx) : (rhs)));
 }
 
 int tint_f32_to_i32(float value) {
-  return (((value <= 2147483520.0f)) ? ((((value >= -2147483648.0f)) ? (int(value)) : (-2147483648))) : (2147483647));
+  return (((value <= 2147483520.0f)) ? ((((value >= -2147483648.0f)) ? (int(value)) : (int(-2147483648)))) : (int(2147483647)));
 }
 
 bool test_int_S1_c0_b() {
-  int unknown = 0;
+  int unknown = int(0);
   bool ok = false;
-  int4 val = (0).xxxx;
+  int4 val = (int(0)).xxxx;
   bool x_40 = false;
   bool x_41 = false;
   bool x_54 = false;
@@ -41,19 +41,19 @@ bool test_int_S1_c0_b() {
   ok = true;
   x_41 = false;
   if (true) {
-    x_40 = all((tint_div_v4i32((0).xxxx, int4((x_27).xxxx)) == (0).xxxx));
+    x_40 = all((tint_div_v4i32((int(0)).xxxx, int4((x_27).xxxx)) == (int(0)).xxxx));
     x_41 = x_40;
   }
   ok = x_41;
   int4 x_44 = int4((x_27).xxxx);
   val = x_44;
-  int4 x_47 = (x_44 + (1).xxxx);
+  int4 x_47 = (x_44 + (int(1)).xxxx);
   val = x_47;
-  int4 x_48 = (x_47 - (1).xxxx);
+  int4 x_48 = (x_47 - (int(1)).xxxx);
   val = x_48;
-  int4 x_49 = (x_48 + (1).xxxx);
+  int4 x_49 = (x_48 + (int(1)).xxxx);
   val = x_49;
-  int4 x_50 = (x_49 - (1).xxxx);
+  int4 x_50 = (x_49 - (int(1)).xxxx);
   val = x_50;
   x_55 = false;
   if (x_41) {
@@ -61,13 +61,13 @@ bool test_int_S1_c0_b() {
     x_55 = x_54;
   }
   ok = x_55;
-  int4 x_58 = (x_50 * (2).xxxx);
+  int4 x_58 = (x_50 * (int(2)).xxxx);
   val = x_58;
-  int4 x_59 = tint_div_v4i32(x_58, (2).xxxx);
+  int4 x_59 = tint_div_v4i32(x_58, (int(2)).xxxx);
   val = x_59;
-  int4 x_60 = (x_59 * (2).xxxx);
+  int4 x_60 = (x_59 * (int(2)).xxxx);
   val = x_60;
-  int4 x_61 = tint_div_v4i32(x_60, (2).xxxx);
+  int4 x_61 = tint_div_v4i32(x_60, (int(2)).xxxx);
   val = x_61;
   x_66 = false;
   if (x_55) {

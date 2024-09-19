@@ -13,7 +13,7 @@ struct vertex_main_outputs {
 
 
 void frexp_34bbfb() {
-  frexp_result_vec4_f32 res = {(0.5f).xxxx, (1).xxxx};
+  frexp_result_vec4_f32 res = {(0.5f).xxxx, (int(1)).xxxx};
 }
 
 void fragment_main() {

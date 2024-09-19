@@ -12,7 +12,7 @@ struct vertex_main_outputs {
 RWByteAddressBuffer prevent_dce : register(u0);
 TextureCube<uint4> arg_0 : register(t0, space1);
 uint2 textureDimensions_9cd4ca() {
-  int arg_1 = 1;
+  int arg_1 = int(1);
   TextureCube<uint4> v = arg_0;
   uint3 v_1 = (0u).xxx;
   v.GetDimensions(uint(arg_1), v_1[0u], v_1[1u], v_1[2u]);

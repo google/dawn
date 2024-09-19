@@ -12,9 +12,9 @@ struct vertex_main_outputs {
 RWByteAddressBuffer prevent_dce : register(u0);
 Texture2DArray<float4> arg_0 : register(t0, space1);
 float4 textureLoad_4acb64() {
-  int2 arg_1 = (1).xx;
+  int2 arg_1 = (int(1)).xx;
   uint arg_2 = 1u;
-  int arg_3 = 1;
+  int arg_3 = int(1);
   Texture2DArray<float4> v = arg_0;
   uint v_1 = arg_2;
   int v_2 = arg_3;

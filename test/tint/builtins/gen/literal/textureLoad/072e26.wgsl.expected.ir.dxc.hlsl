@@ -13,8 +13,8 @@ RWByteAddressBuffer prevent_dce : register(u0);
 Texture2DArray<float4> arg_0 : register(t0, space1);
 float4 textureLoad_072e26() {
   Texture2DArray<float4> v = arg_0;
-  int2 v_1 = int2((1).xx);
-  float4 res = float4(v.Load(int4(v_1, int(1), 0)));
+  int2 v_1 = int2((int(1)).xx);
+  float4 res = float4(v.Load(int4(v_1, int(int(1)), int(0))));
   return res;
 }
 

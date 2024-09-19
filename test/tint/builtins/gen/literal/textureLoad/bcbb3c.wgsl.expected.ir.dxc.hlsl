@@ -14,7 +14,7 @@ Texture3D<float4> arg_0 : register(t0, space1);
 float4 textureLoad_bcbb3c() {
   Texture3D<float4> v = arg_0;
   int3 v_1 = int3((1u).xxx);
-  float4 res = float4(v.Load(int4(v_1, int(1))));
+  float4 res = float4(v.Load(int4(v_1, int(int(1)))));
   return res;
 }
 

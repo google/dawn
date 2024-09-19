@@ -14,7 +14,7 @@ Texture2DArray arg_0 : register(t0, space1);
 SamplerComparisonState arg_1 : register(s1, space1);
 float4 textureGatherCompare_783e65() {
   float2 arg_2 = (1.0f).xx;
-  int arg_3 = 1;
+  int arg_3 = int(1);
   float arg_4 = 1.0f;
   Texture2DArray v = arg_0;
   SamplerComparisonState v_1 = arg_1;

@@ -29,12 +29,12 @@ float binaryOperation_f1_f1_(inout float a, inout float b) {
 }
 
 void main_1() {
-  int index = 0;
-  int a_1 = 0;
+  int index = int(0);
+  int a_1 = int(0);
   float param = 0.0f;
   float param_1 = 0.0f;
   index = asint(gl_GlobalInvocationID.x);
-  a_1 = -10;
+  a_1 = int(-10);
   int x_63 = index;
   param = -4.0f;
   param_1 = -3.0f;

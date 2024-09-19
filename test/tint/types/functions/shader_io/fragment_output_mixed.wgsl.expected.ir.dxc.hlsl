@@ -18,7 +18,7 @@ struct main_outputs {
 
 
 FragmentOutputs main_inner() {
-  FragmentOutputs v = {1, 2.0f, 1u, 1.0f, 2u, float4(1.0f, 2.0f, 3.0f, 4.0f)};
+  FragmentOutputs v = {int(1), 2.0f, 1u, 1.0f, 2u, float4(1.0f, 2.0f, 3.0f, 4.0f)};
   return v;
 }
 

@@ -11,7 +11,7 @@ struct vertex_main_outputs {
 
 RWByteAddressBuffer prevent_dce : register(u0);
 int4 unpack4xI8_830900() {
-  int4 res = int4(1, 0, 0, 0);
+  int4 res = int4(int(1), int(0), int(0), int(0));
   return res;
 }
 

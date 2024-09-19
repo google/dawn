@@ -12,8 +12,8 @@ static float4 tint_symbol_1 = (0.0f).xxxx;
 void textureLoad_6273b1() {
   float res = 0.0f;
   Texture2DMS<float4> v = arg_0;
-  int2 v_1 = int2((0).xx);
-  res = float4(v.Load(v_1, int(1)).x, 0.0f, 0.0f, 0.0f)[0u];
+  int2 v_1 = int2((int(0)).xx);
+  res = float4(v.Load(v_1, int(int(1))).x, 0.0f, 0.0f, 0.0f)[0u];
 }
 
 void tint_symbol_2(float4 tint_symbol) {

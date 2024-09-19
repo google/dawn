@@ -15,7 +15,7 @@ struct vert_main2_outputs {
 
 
 VertexOutput foo(float x) {
-  VertexOutput v = {float4(x, x, x, 1.0f), 42};
+  VertexOutput v = {float4(x, x, x, 1.0f), int(42)};
   return v;
 }
 

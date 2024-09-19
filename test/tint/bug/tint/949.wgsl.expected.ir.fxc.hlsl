@@ -103,11 +103,11 @@ float3x3 transposeMat3_mf33_(inout float3x3 inMatrix) {
   float3 i1 = (0.0f).xxx;
   float3 i2 = (0.0f).xxx;
   float3x3 outMatrix = float3x3((0.0f).xxx, (0.0f).xxx, (0.0f).xxx);
-  float3 x_60 = inMatrix[0];
+  float3 x_60 = inMatrix[int(0)];
   i0 = x_60;
-  float3 x_64 = inMatrix[1];
+  float3 x_64 = inMatrix[int(1)];
   i1 = x_64;
-  float3 x_68 = inMatrix[2];
+  float3 x_68 = inMatrix[int(2)];
   i2 = x_68;
   float x_73 = i0.x;
   float x_75 = i1.x;
@@ -203,7 +203,7 @@ void main_1() {
   float2 vLastOffset = (0.0f).xx;
   float lastSampledHeight = 0.0f;
   float currSampledHeight = 0.0f;
-  int i = 0;
+  int i = int(0);
   float delta1 = 0.0f;
   float delta2 = 0.0f;
   float ratio = 0.0f;
@@ -301,11 +301,11 @@ void main_1() {
   vLastOffset = (0.0f).xx;
   lastSampledHeight = 1.0f;
   currSampledHeight = 1.0f;
-  i = 0;
+  i = int(0);
   {
     while(true) {
       int x_388 = i;
-      if ((x_388 < 15)) {
+      if ((x_388 < int(15))) {
       } else {
         break;
       }
@@ -348,7 +348,7 @@ void main_1() {
       }
       {
         int x_441 = i;
-        i = (x_441 + 1);
+        i = (x_441 + int(1));
       }
       continue;
     }

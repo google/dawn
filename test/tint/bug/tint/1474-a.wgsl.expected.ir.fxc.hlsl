@@ -17,6 +17,6 @@ void main() {
       continue;
     }
   }
-  int x = 5;
+  int x = int(5);
 }
 

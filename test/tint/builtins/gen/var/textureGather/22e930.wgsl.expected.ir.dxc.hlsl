@@ -14,7 +14,7 @@ Texture2DArray<float4> arg_1 : register(t1, space1);
 SamplerState arg_2 : register(s2, space1);
 float4 textureGather_22e930() {
   float2 arg_3 = (1.0f).xx;
-  int arg_4 = 1;
+  int arg_4 = int(1);
   Texture2DArray<float4> v = arg_1;
   SamplerState v_1 = arg_2;
   float2 v_2 = arg_3;

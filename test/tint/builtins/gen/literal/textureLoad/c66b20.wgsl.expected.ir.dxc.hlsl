@@ -13,7 +13,7 @@ RWByteAddressBuffer prevent_dce : register(u0);
 Texture2D<int4> arg_0 : register(t0, space1);
 int4 textureLoad_c66b20() {
   Texture2D<int4> v = arg_0;
-  int4 res = int4(v.Load(int3(int2((1u).xx), 0)));
+  int4 res = int4(v.Load(int3(int2((1u).xx), int(0))));
   return res;
 }
 

@@ -1,9 +1,9 @@
 
 void main_1() {
-  int i = 0;
-  i = 123;
-  i = 123;
-  i = 123;
+  int i = int(0);
+  i = int(123);
+  i = int(123);
+  i = int(123);
 }
 
 [numthreads(1, 1, 1)]

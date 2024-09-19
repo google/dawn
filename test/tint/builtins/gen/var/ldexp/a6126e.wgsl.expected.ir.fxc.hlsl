@@ -8,7 +8,7 @@ struct vertex_main_outputs {
 
 
 void ldexp_a6126e() {
-  int3 arg_1 = (1).xxx;
+  int3 arg_1 = (int(1)).xxx;
   float3 res = ldexp((1.0f).xxx, arg_1);
 }
 

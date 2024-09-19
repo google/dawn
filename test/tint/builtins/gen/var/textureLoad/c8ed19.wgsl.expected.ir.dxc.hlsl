@@ -17,7 +17,7 @@ uint4 textureLoad_c8ed19() {
   Texture2DArray<uint4> v = arg_0;
   uint v_1 = arg_2;
   int2 v_2 = int2(arg_1);
-  uint4 res = uint4(v.Load(int4(v_2, int(v_1), 0)));
+  uint4 res = uint4(v.Load(int4(v_2, int(v_1), int(0))));
   return res;
 }
 

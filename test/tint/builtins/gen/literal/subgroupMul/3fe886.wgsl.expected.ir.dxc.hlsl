@@ -1,7 +1,7 @@
 
 RWByteAddressBuffer prevent_dce : register(u0);
 int subgroupMul_3fe886() {
-  int res = WaveActiveProduct(1);
+  int res = WaveActiveProduct(int(1));
   return res;
 }
 

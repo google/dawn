@@ -1,7 +1,7 @@
 
 RWByteAddressBuffer prevent_dce : register(u0);
 int3 subgroupExclusiveAdd_c08160() {
-  int3 res = WavePrefixSum((1).xxx);
+  int3 res = WavePrefixSum((int(1)).xxx);
   return res;
 }
 

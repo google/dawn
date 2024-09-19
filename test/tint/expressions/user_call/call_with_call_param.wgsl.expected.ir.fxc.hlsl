@@ -4,7 +4,7 @@ float b(int i) {
 }
 
 int c(uint u) {
-  return 1;
+  return int(1);
 }
 
 void a() {

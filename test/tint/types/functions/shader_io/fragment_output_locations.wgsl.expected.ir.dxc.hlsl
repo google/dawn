@@ -16,7 +16,7 @@ struct main3_outputs {
 
 
 int main0_inner() {
-  return 1;
+  return int(1);
 }
 
 uint main1_inner() {

@@ -3,17 +3,17 @@ RWByteAddressBuffer v : register(u0);
 static uint i = 0u;
 int idx1() {
   i = (i + 1u);
-  return 1;
+  return int(1);
 }
 
 int idx2() {
   i = (i + 2u);
-  return 1;
+  return int(1);
 }
 
 int idx3() {
   i = (i + 3u);
-  return 1;
+  return int(1);
 }
 
 void foo() {

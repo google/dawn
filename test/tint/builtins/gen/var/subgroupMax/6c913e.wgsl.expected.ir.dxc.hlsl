@@ -1,7 +1,7 @@
 
 RWByteAddressBuffer prevent_dce : register(u0);
 int subgroupMax_6c913e() {
-  int arg_0 = 1;
+  int arg_0 = int(1);
   int res = WaveActiveMax(arg_0);
   return res;
 }

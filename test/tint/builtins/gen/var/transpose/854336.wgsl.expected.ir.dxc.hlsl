@@ -13,7 +13,7 @@ RWByteAddressBuffer prevent_dce : register(u0);
 int transpose_854336() {
   float3x3 arg_0 = float3x3((1.0f).xxx, (1.0f).xxx, (1.0f).xxx);
   float3x3 res = transpose(arg_0);
-  return (((res[0].x == 0.0f)) ? (1) : (0));
+  return (((res[int(0)].x == 0.0f)) ? (int(1)) : (int(0)));
 }
 
 void fragment_main() {

@@ -8,7 +8,7 @@ struct vertex_main_outputs {
 
 
 void max_19070a() {
-  int4 res = (1).xxxx;
+  int4 res = (int(1)).xxxx;
 }
 
 void fragment_main() {

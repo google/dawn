@@ -9,7 +9,7 @@ struct main_inputs {
 
 static bool continue_execution = true;
 int f(int x) {
-  if ((x == 10)) {
+  if ((x == int(10))) {
     continue_execution = false;
   }
   return x;
@@ -20,7 +20,7 @@ int main_inner(int3 x) {
   {
     while(true) {
       int r = f(y);
-      if ((r == 0)) {
+      if ((r == int(0))) {
         break;
       }
       {

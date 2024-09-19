@@ -15,7 +15,7 @@ int select_fb7e53() {
   bool2 arg_1 = (true).xx;
   bool arg_2 = true;
   bool2 res = ((arg_2) ? (arg_1) : (arg_0));
-  return ((all((res == (false).xx))) ? (1) : (0));
+  return ((all((res == (false).xx))) ? (int(1)) : (int(0)));
 }
 
 void fragment_main() {

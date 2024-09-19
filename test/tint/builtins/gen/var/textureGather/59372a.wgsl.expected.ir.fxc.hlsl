@@ -18,7 +18,7 @@ float4 textureGather_59372a() {
   Texture2DArray<float4> v = arg_1;
   SamplerState v_1 = arg_2;
   float2 v_2 = arg_3;
-  float4 res = v.GatherGreen(v_1, float3(v_2, float(arg_4)), (1).xx);
+  float4 res = v.GatherGreen(v_1, float3(v_2, float(arg_4)), (int(1)).xx);
   return res;
 }
 

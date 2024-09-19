@@ -1,8 +1,8 @@
 
 RWByteAddressBuffer prevent_dce : register(u0);
 int2 subgroupBroadcast_fa6810() {
-  int2 arg_0 = (1).xx;
-  int2 res = WaveReadLaneAt(arg_0, 1);
+  int2 arg_0 = (int(1)).xx;
+  int2 res = WaveReadLaneAt(arg_0, int(1));
   return res;
 }
 

@@ -15,8 +15,8 @@ SamplerState arg_1 : register(s1, space1);
 float textureSampleLevel_1bf73e() {
   Texture2DArray v = arg_0;
   SamplerState v_1 = arg_1;
-  float3 v_2 = float3((1.0f).xx, float(1));
-  float res = v.SampleLevel(v_1, v_2, float(1));
+  float3 v_2 = float3((1.0f).xx, float(int(1)));
+  float res = v.SampleLevel(v_1, v_2, float(int(1)));
   return res;
 }
 

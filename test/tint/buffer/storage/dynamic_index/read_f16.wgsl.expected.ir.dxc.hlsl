@@ -6,11 +6,11 @@ struct main_inputs {
 ByteAddressBuffer sb : register(t0);
 RWByteAddressBuffer s : register(u1);
 int tint_f32_to_i32(float value) {
-  return (((value <= 2147483520.0f)) ? ((((value >= -2147483648.0f)) ? (int(value)) : (-2147483648))) : (2147483647));
+  return (((value <= 2147483520.0f)) ? ((((value >= -2147483648.0f)) ? (int(value)) : (int(-2147483648)))) : (int(2147483647)));
 }
 
 int tint_f16_to_i32(float16_t value) {
-  return (((value <= float16_t(65504.0h))) ? ((((value >= float16_t(-65504.0h))) ? (int(value)) : (-2147483648))) : (2147483647));
+  return (((value <= float16_t(65504.0h))) ? ((((value >= float16_t(-65504.0h))) ? (int(value)) : (int(-2147483648)))) : (int(2147483647)));
 }
 
 matrix<float16_t, 4, 2> v(uint offset) {
@@ -214,28 +214,28 @@ void main_inner(uint idx) {
   int v_73 = ((v_72 + tint_f32_to_i32(vec4_f32[2u])) + vec4_i32[2u]);
   int v_74 = (v_73 + int(vec4_u32[2u]));
   int v_75 = (v_74 + tint_f16_to_i32(vec4_f16[2u]));
-  int v_76 = (v_75 + tint_f32_to_i32(mat2x2_f32[0][0u]));
-  int v_77 = (v_76 + tint_f32_to_i32(mat2x3_f32[0][0u]));
-  int v_78 = (v_77 + tint_f32_to_i32(mat2x4_f32[0][0u]));
-  int v_79 = (v_78 + tint_f32_to_i32(mat3x2_f32[0][0u]));
-  int v_80 = (v_79 + tint_f32_to_i32(mat3x3_f32[0][0u]));
-  int v_81 = (v_80 + tint_f32_to_i32(mat3x4_f32[0][0u]));
-  int v_82 = (v_81 + tint_f32_to_i32(mat4x2_f32[0][0u]));
-  int v_83 = (v_82 + tint_f32_to_i32(mat4x3_f32[0][0u]));
-  int v_84 = (v_83 + tint_f32_to_i32(mat4x4_f32[0][0u]));
-  int v_85 = (v_84 + tint_f16_to_i32(mat2x2_f16[0][0u]));
-  int v_86 = (v_85 + tint_f16_to_i32(mat2x3_f16[0][0u]));
-  int v_87 = (v_86 + tint_f16_to_i32(mat2x4_f16[0][0u]));
-  int v_88 = (v_87 + tint_f16_to_i32(mat3x2_f16[0][0u]));
-  int v_89 = (v_88 + tint_f16_to_i32(mat3x3_f16[0][0u]));
-  int v_90 = (v_89 + tint_f16_to_i32(mat3x4_f16[0][0u]));
-  int v_91 = (v_90 + tint_f16_to_i32(mat4x2_f16[0][0u]));
-  int v_92 = (v_91 + tint_f16_to_i32(mat4x3_f16[0][0u]));
-  int v_93 = (v_92 + tint_f16_to_i32(mat4x4_f16[0][0u]));
+  int v_76 = (v_75 + tint_f32_to_i32(mat2x2_f32[int(0)][0u]));
+  int v_77 = (v_76 + tint_f32_to_i32(mat2x3_f32[int(0)][0u]));
+  int v_78 = (v_77 + tint_f32_to_i32(mat2x4_f32[int(0)][0u]));
+  int v_79 = (v_78 + tint_f32_to_i32(mat3x2_f32[int(0)][0u]));
+  int v_80 = (v_79 + tint_f32_to_i32(mat3x3_f32[int(0)][0u]));
+  int v_81 = (v_80 + tint_f32_to_i32(mat3x4_f32[int(0)][0u]));
+  int v_82 = (v_81 + tint_f32_to_i32(mat4x2_f32[int(0)][0u]));
+  int v_83 = (v_82 + tint_f32_to_i32(mat4x3_f32[int(0)][0u]));
+  int v_84 = (v_83 + tint_f32_to_i32(mat4x4_f32[int(0)][0u]));
+  int v_85 = (v_84 + tint_f16_to_i32(mat2x2_f16[int(0)][0u]));
+  int v_86 = (v_85 + tint_f16_to_i32(mat2x3_f16[int(0)][0u]));
+  int v_87 = (v_86 + tint_f16_to_i32(mat2x4_f16[int(0)][0u]));
+  int v_88 = (v_87 + tint_f16_to_i32(mat3x2_f16[int(0)][0u]));
+  int v_89 = (v_88 + tint_f16_to_i32(mat3x3_f16[int(0)][0u]));
+  int v_90 = (v_89 + tint_f16_to_i32(mat3x4_f16[int(0)][0u]));
+  int v_91 = (v_90 + tint_f16_to_i32(mat4x2_f16[int(0)][0u]));
+  int v_92 = (v_91 + tint_f16_to_i32(mat4x3_f16[int(0)][0u]));
+  int v_93 = (v_92 + tint_f16_to_i32(mat4x4_f16[int(0)][0u]));
   matrix<float16_t, 4, 2> arr2_mat4x2_f16[2] = v_63;
-  int v_94 = (v_93 + tint_f16_to_i32(arr2_mat4x2_f16[0][0][0u]));
+  int v_94 = (v_93 + tint_f16_to_i32(arr2_mat4x2_f16[int(0)][int(0)][0u]));
   float3 arr2_vec3_f32[2] = v_62;
-  s.Store(0u, asuint((v_94 + tint_f32_to_i32(arr2_vec3_f32[0][0u]))));
+  s.Store(0u, asuint((v_94 + tint_f32_to_i32(arr2_vec3_f32[int(0)][0u]))));
 }
 
 [numthreads(1, 1, 1)]

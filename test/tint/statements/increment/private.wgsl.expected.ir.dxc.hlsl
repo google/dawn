@@ -1,7 +1,7 @@
 
-static int i = 0;
+static int i = int(0);
 void main() {
-  i = (i + 1);
+  i = (i + int(1));
 }
 
 [numthreads(1, 1, 1)]

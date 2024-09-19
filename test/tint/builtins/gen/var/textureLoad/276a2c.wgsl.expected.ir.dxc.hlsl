@@ -12,9 +12,9 @@ struct vertex_main_outputs {
 RWByteAddressBuffer prevent_dce : register(u0);
 Texture1D<uint4> arg_0 : register(t0, space1);
 uint4 textureLoad_276a2c() {
-  int arg_1 = 1;
+  int arg_1 = int(1);
   Texture1D<uint4> v = arg_0;
-  uint4 res = uint4(v.Load(int2(int(arg_1), 0)));
+  uint4 res = uint4(v.Load(int2(int(arg_1), int(0))));
   return res;
 }
 

@@ -2,7 +2,7 @@
 RWTexture2DArray<float4> arg_0 : register(u0, space1);
 void textureStore_d55e65() {
   RWTexture2DArray<float4> v = arg_0;
-  v[uint3((1u).xx, uint(1))] = (1.0f).xxxx;
+  v[uint3((1u).xx, uint(int(1)))] = (1.0f).xxxx;
 }
 
 void fragment_main() {

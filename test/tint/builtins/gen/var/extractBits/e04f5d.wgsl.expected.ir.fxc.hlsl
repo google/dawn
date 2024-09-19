@@ -11,14 +11,14 @@ struct vertex_main_outputs {
 
 RWByteAddressBuffer prevent_dce : register(u0);
 int3 extractBits_e04f5d() {
-  int3 arg_0 = (1).xxx;
+  int3 arg_0 = (int(1)).xxx;
   uint arg_1 = 1u;
   uint arg_2 = 1u;
   int3 v = arg_0;
   uint v_1 = arg_2;
   uint v_2 = min(arg_1, 32u);
   uint v_3 = (32u - min(32u, (v_2 + v_1)));
-  int3 v_4 = (((v_3 < 32u)) ? ((v << uint3((v_3).xxx))) : ((0).xxx));
+  int3 v_4 = (((v_3 < 32u)) ? ((v << uint3((v_3).xxx))) : ((int(0)).xxx));
   int3 res = ((((v_3 + v_2) < 32u)) ? ((v_4 >> uint3(((v_3 + v_2)).xxx))) : (((v_4 >> (31u).xxx) >> (1u).xxx)));
   return res;
 }

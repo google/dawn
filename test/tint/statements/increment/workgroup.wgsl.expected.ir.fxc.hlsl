@@ -1,7 +1,7 @@
 
 groupshared int i;
 void main() {
-  i = (i + 1);
+  i = (i + int(1));
 }
 
 [numthreads(1, 1, 1)]

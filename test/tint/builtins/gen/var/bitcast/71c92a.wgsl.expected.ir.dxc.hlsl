@@ -23,7 +23,7 @@ vector<float16_t, 4> tint_bitcast_to_f16(int2 src) {
 }
 
 vector<float16_t, 4> bitcast_71c92a() {
-  int2 arg_0 = (1).xx;
+  int2 arg_0 = (int(1)).xx;
   vector<float16_t, 4> res = tint_bitcast_to_f16(arg_0);
   return res;
 }

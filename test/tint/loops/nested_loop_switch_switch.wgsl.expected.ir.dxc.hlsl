@@ -1,22 +1,22 @@
 
 [numthreads(1, 1, 1)]
 void main() {
-  int j = 0;
+  int j = int(0);
   {
-    int i = 0;
+    int i = int(0);
     while(true) {
-      if ((i < 2)) {
+      if ((i < int(2))) {
       } else {
         break;
       }
       switch(i) {
-        case 0:
+        case int(0):
         {
           switch(j) {
-            case 0:
+            case int(0):
             {
               {
-                i = (i + 2);
+                i = (i + int(2));
               }
               continue;
             }
@@ -33,7 +33,7 @@ void main() {
         }
       }
       {
-        i = (i + 2);
+        i = (i + int(2));
       }
       continue;
     }

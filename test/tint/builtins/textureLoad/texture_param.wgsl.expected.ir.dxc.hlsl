@@ -10,7 +10,7 @@ int4 textureLoad2d(Texture2D<int4> tint_symbol, int2 coords, int level) {
 }
 
 void doTextureLoad() {
-  int4 res = textureLoad2d(arg_0, (0).xx, 0);
+  int4 res = textureLoad2d(arg_0, (int(0)).xx, int(0));
 }
 
 float4 vertex_main_inner() {

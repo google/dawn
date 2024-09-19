@@ -2,9 +2,9 @@
 RWByteAddressBuffer prevent_dce : register(u0);
 RWByteAddressBuffer sb_rw : register(u1);
 int atomicAdd_d32fe4() {
-  int arg_1 = 1;
+  int arg_1 = int(1);
   int v = arg_1;
-  int v_1 = 0;
+  int v_1 = int(0);
   sb_rw.InterlockedAdd(int(0u), v, v_1);
   int res = v_1;
   return res;

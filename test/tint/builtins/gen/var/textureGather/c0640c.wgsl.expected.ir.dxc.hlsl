@@ -14,7 +14,7 @@ TextureCubeArray<int4> arg_1 : register(t1, space1);
 SamplerState arg_2 : register(s2, space1);
 int4 textureGather_c0640c() {
   float3 arg_3 = (1.0f).xxx;
-  int arg_4 = 1;
+  int arg_4 = int(1);
   TextureCubeArray<int4> v = arg_1;
   SamplerState v_1 = arg_2;
   float3 v_2 = arg_3;

@@ -12,7 +12,7 @@ struct main_inputs {
 
 
 float4 main_inner(uint VertexIndex) {
-  vec4f v = {1};
+  vec4f v = {int(1)};
   vec4f s = v;
   float f = float(s.i);
   bool b = bool(f);

@@ -48,7 +48,7 @@ TEST_F(HlslWriterTest, UnaryComplement) {
     EXPECT_EQ(output_.hlsl, R"(
 [numthreads(1, 1, 1)]
 void foo() {
-  int a = 0;
+  int a = int(0);
   int b = ~(a);
 }
 

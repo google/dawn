@@ -5,6 +5,6 @@ int f(int a, int b, int c) {
 
 [numthreads(1, 1, 1)]
 void main() {
-  f(1, 2, 3);
+  f(int(1), int(2), int(3));
 }
 

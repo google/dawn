@@ -1,7 +1,7 @@
 
 RWByteAddressBuffer buf : register(u1);
 int g() {
-  return 0;
+  return int(0);
 }
 
 int f() {
@@ -12,7 +12,7 @@ int f() {
     }
   }
   int o = g();
-  return 0;
+  return int(0);
 }
 
 [numthreads(1, 1, 1)]

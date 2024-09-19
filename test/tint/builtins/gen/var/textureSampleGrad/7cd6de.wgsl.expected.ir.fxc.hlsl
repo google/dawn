@@ -22,7 +22,7 @@ float4 textureSampleGrad_7cd6de() {
   float2 v_2 = arg_2;
   float2 v_3 = arg_4;
   float2 v_4 = arg_5;
-  float4 res = v.SampleGrad(v_1, float3(v_2, float(arg_3)), v_3, v_4, (1).xx);
+  float4 res = v.SampleGrad(v_1, float3(v_2, float(arg_3)), v_3, v_4, (int(1)).xx);
   return res;
 }
 

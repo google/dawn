@@ -1,6 +1,6 @@
 
 void f() {
-  int a = 1;
+  int a = int(1);
   int v = int(a);
 }
 

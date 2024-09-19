@@ -39,7 +39,7 @@ void main_inner(uint3 WorkGroupID, uint3 LocalInvocationID, uint tint_local_inde
   uint filterOffset = tint_div_u32((params[0u].x - 1u), 2u);
   Texture2D<float4> v_2 = inputTex;
   uint3 v_3 = (0u).xxx;
-  v_2.GetDimensions(uint(0), v_3[0u], v_3[1u], v_3[2u]);
+  v_2.GetDimensions(uint(int(0)), v_3[0u], v_3[1u], v_3[2u]);
   uint2 dims = v_3.xy;
   uint2 v_4 = ((WorkGroupID.xy * uint2(params[0u].y, 4u)) + (LocalInvocationID.xy * uint2(4u, 1u)));
   uint2 baseIndex = (v_4 - uint2(filterOffset, 0u));

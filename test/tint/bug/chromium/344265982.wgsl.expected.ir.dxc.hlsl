@@ -2,29 +2,29 @@
 RWByteAddressBuffer buffer : register(u0);
 void foo() {
   {
-    int i = 0;
+    int i = int(0);
     while(true) {
-      if ((i < 4)) {
+      if ((i < int(4))) {
       } else {
         break;
       }
       switch(asint(buffer.Load((0u + (uint(i) * 4u))))) {
-        case 1:
+        case int(1):
         {
           {
-            i = (i + 1);
+            i = (i + int(1));
           }
           continue;
         }
         default:
         {
           uint v = (0u + (uint(i) * 4u));
-          buffer.Store(v, asuint(2));
+          buffer.Store(v, asuint(int(2)));
           break;
         }
       }
       {
-        i = (i + 1);
+        i = (i + int(1));
       }
       continue;
     }

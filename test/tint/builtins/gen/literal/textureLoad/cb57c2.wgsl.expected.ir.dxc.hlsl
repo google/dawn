@@ -15,7 +15,7 @@ float textureLoad_cb57c2() {
   Texture2DArray v = arg_0;
   int2 v_1 = int2((1u).xx);
   int v_2 = int(1u);
-  float res = v.Load(int4(v_1, v_2, int(1))).x;
+  float res = v.Load(int4(v_1, v_2, int(int(1)))).x;
   return res;
 }
 

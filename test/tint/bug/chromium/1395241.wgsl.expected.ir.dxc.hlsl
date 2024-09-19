@@ -1,6 +1,6 @@
 
 void fr6snorm() {
-  int bzbxttch = 2;
+  int bzbxttch = int(2);
 }
 
 [numthreads(1, 1, 1)]

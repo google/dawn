@@ -19,7 +19,7 @@ void compute_main_inner(uint tint_local_index) {
       if ((v_1 >= 10u)) {
         break;
       }
-      wg[v_1].x = 0;
+      wg[v_1].x = int(0);
       uint v_2 = 0u;
       InterlockedExchange(wg[v_1].a, 0u, v_2);
       wg[v_1].y = 0u;
@@ -31,7 +31,7 @@ void compute_main_inner(uint tint_local_index) {
   }
   GroupMemoryBarrierWithGroupSync();
   uint v_3 = 0u;
-  InterlockedExchange(wg[4].a, 1u, v_3);
+  InterlockedExchange(wg[int(4)].a, 1u, v_3);
 }
 
 [numthreads(1, 1, 1)]

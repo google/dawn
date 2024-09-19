@@ -14,7 +14,7 @@ Texture2D<int4> arg_0 : register(t0, space1);
 int4 textureLoad_620caa() {
   uint2 arg_1 = (1u).xx;
   Texture2D<int4> v = arg_0;
-  int4 res = int4(v.Load(int3(int2(arg_1), 0)));
+  int4 res = int4(v.Load(int3(int2(arg_1), int(0))));
   return res;
 }
 

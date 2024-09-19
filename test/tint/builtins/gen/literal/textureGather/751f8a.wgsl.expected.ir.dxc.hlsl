@@ -15,7 +15,7 @@ SamplerState arg_2 : register(s2, space1);
 float4 textureGather_751f8a() {
   TextureCubeArray<float4> v = arg_1;
   SamplerState v_1 = arg_2;
-  float4 res = v.GatherGreen(v_1, float4((1.0f).xxx, float(1)));
+  float4 res = v.GatherGreen(v_1, float4((1.0f).xxx, float(int(1))));
   return res;
 }
 

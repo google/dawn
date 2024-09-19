@@ -1,11 +1,11 @@
 
 RWByteAddressBuffer sb_rw : register(u0);
 void atomicXor_c1b78c() {
-  int arg_1 = 0;
-  int res = 0;
-  arg_1 = 1;
+  int arg_1 = int(0);
+  int res = int(0);
+  arg_1 = int(1);
   int x_20 = arg_1;
-  int v = 0;
+  int v = int(0);
   sb_rw.InterlockedXor(int(0u), x_20, v);
   int x_13 = v;
   res = x_13;

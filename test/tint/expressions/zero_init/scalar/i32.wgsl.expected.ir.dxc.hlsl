@@ -1,6 +1,6 @@
 
 void f() {
-  int v = 0;
+  int v = int(0);
 }
 
 [numthreads(1, 1, 1)]

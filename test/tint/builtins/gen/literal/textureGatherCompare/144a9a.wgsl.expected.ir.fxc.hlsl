@@ -15,7 +15,7 @@ SamplerComparisonState arg_1 : register(s1, space1);
 float4 textureGatherCompare_144a9a() {
   Texture2DArray v = arg_0;
   SamplerComparisonState v_1 = arg_1;
-  float4 res = v.GatherCmp(v_1, float3((1.0f).xx, float(1u)), 1.0f, (1).xx);
+  float4 res = v.GatherCmp(v_1, float3((1.0f).xx, float(1u)), 1.0f, (int(1)).xx);
   return res;
 }
 

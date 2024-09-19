@@ -1,7 +1,7 @@
 
 void f() {
   {
-    int i0520 = 0;
+    int i0520 = int(0);
     while(true) {
       if (false) {
       } else {
@@ -13,7 +13,7 @@ void f() {
     }
   }
   {
-    int i62 = 0;
+    int i62 = int(0);
     while(true) {
       if (false) {
       } else {
@@ -25,7 +25,7 @@ void f() {
     }
   }
   {
-    int i0520 = 0;
+    int i0520 = int(0);
     while(true) {
       if (false) {
       } else {
@@ -37,7 +37,7 @@ void f() {
     }
   }
   {
-    int i62 = 0;
+    int i62 = int(0);
     while(true) {
       if (false) {
       } else {
@@ -49,7 +49,7 @@ void f() {
     }
   }
   {
-    int i62 = 0;
+    int i62 = int(0);
     while(true) {
       if (false) {
       } else {
@@ -61,7 +61,7 @@ void f() {
     }
   }
   {
-    int i60 = 0;
+    int i60 = int(0);
     while(true) {
       if (false) {
       } else {
@@ -73,7 +73,7 @@ void f() {
     }
   }
   {
-    int i62 = 0;
+    int i62 = int(0);
     while(true) {
       if (false) {
       } else {
@@ -85,7 +85,7 @@ void f() {
     }
   }
   {
-    int i60 = 0;
+    int i60 = int(0);
     while(true) {
       if (false) {
       } else {

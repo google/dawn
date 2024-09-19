@@ -12,8 +12,8 @@ struct vertex_main_outputs {
 RWByteAddressBuffer prevent_dce : register(u0);
 Texture3D<int4> arg_0 : register(t0, space1);
 int4 textureLoad_4fd803() {
-  int3 arg_1 = (1).xxx;
-  int arg_2 = 1;
+  int3 arg_1 = (int(1)).xxx;
+  int arg_2 = int(1);
   Texture3D<int4> v = arg_0;
   int v_1 = arg_2;
   int3 v_2 = int3(arg_1);

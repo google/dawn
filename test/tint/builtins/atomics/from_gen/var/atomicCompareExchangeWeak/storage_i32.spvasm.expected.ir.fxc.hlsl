@@ -11,14 +11,14 @@ struct atomic_compare_exchange_result_i32 {
 
 RWByteAddressBuffer sb_rw : register(u0);
 void atomicCompareExchangeWeak_1bd40a() {
-  int arg_1 = 0;
-  int arg_2 = 0;
+  int arg_1 = int(0);
+  int arg_2 = int(0);
   x__atomic_compare_exchange_resulti32 res = (x__atomic_compare_exchange_resulti32)0;
-  arg_1 = 1;
-  arg_2 = 1;
+  arg_1 = int(1);
+  arg_2 = int(1);
   int x_23 = arg_2;
   int x_24 = arg_1;
-  int v = 0;
+  int v = int(0);
   sb_rw.InterlockedCompareExchange(int(0u), x_24, x_23, v);
   int v_1 = v;
   atomic_compare_exchange_result_i32 v_2 = {v_1, (v_1 == x_24)};

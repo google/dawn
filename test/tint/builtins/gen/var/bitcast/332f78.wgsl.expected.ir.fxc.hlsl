@@ -11,7 +11,7 @@ struct vertex_main_outputs {
 
 RWByteAddressBuffer prevent_dce : register(u0);
 float3 bitcast_332f78() {
-  int3 arg_0 = (1).xxx;
+  int3 arg_0 = (int(1)).xxx;
   float3 res = asfloat(arg_0);
   return res;
 }

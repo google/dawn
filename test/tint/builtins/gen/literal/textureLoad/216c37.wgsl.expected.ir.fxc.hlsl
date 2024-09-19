@@ -14,7 +14,7 @@ Texture1D<uint4> arg_0 : register(t0, space1);
 uint4 textureLoad_216c37() {
   Texture1D<uint4> v = arg_0;
   int v_1 = int(1u);
-  uint4 res = uint4(v.Load(int2(v_1, int(1))));
+  uint4 res = uint4(v.Load(int2(v_1, int(int(1)))));
   return res;
 }
 

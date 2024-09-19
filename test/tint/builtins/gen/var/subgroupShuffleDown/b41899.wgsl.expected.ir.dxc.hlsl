@@ -1,7 +1,7 @@
 
 RWByteAddressBuffer prevent_dce : register(u0);
 int2 subgroupShuffleDown_b41899() {
-  int2 arg_0 = (1).xx;
+  int2 arg_0 = (int(1)).xx;
   uint arg_1 = 1u;
   int2 v = arg_0;
   uint v_1 = arg_1;

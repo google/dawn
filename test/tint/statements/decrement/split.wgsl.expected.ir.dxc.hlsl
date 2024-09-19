@@ -1,6 +1,6 @@
 
 void main() {
-  int b = 2;
+  int b = int(2);
   int c = (b - -(b));
 }
 

@@ -1,9 +1,9 @@
 
 RWByteAddressBuffer sb_rw : register(u0);
 void atomicLoad_0806ad() {
-  int res = 0;
-  int v = 0;
-  sb_rw.InterlockedOr(int(0u), 0, v);
+  int res = int(0);
+  int v = int(0);
+  sb_rw.InterlockedOr(int(0u), int(0), v);
   int x_9 = v;
   res = x_9;
 }

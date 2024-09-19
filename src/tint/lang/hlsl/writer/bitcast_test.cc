@@ -49,7 +49,7 @@ TEST_F(HlslWriterTest, BitcastIdentityNumeric) {
     ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
     EXPECT_EQ(output_.hlsl, R"(
 void foo() {
-  int a = 1;
+  int a = int(1);
   int bc = a;
 }
 
@@ -85,7 +85,7 @@ TEST_F(HlslWriterTest, BitcastToFloat) {
     ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
     EXPECT_EQ(output_.hlsl, R"(
 void foo() {
-  int a = 1;
+  int a = int(1);
   float bc = asfloat(a);
 }
 
@@ -121,7 +121,7 @@ TEST_F(HlslWriterTest, BitcastToUint) {
     ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
     EXPECT_EQ(output_.hlsl, R"(
 void foo() {
-  int a = 1;
+  int a = int(1);
   uint bc = asuint(a);
 }
 
@@ -208,7 +208,7 @@ vector<float16_t, 2> tint_bitcast_to_f16(int src) {
 }
 
 void foo() {
-  int a = 1;
+  int a = int(1);
   vector<float16_t, 2> b = tint_bitcast_to_f16(a);
   float c = 1.0f;
   vector<float16_t, 2> d = tint_bitcast_to_f16_1(c);
@@ -311,7 +311,7 @@ vector<float16_t, 4> tint_bitcast_to_f16(int2 src) {
 }
 
 void foo() {
-  int2 a = int2(1, 2);
+  int2 a = int2(int(1), int(2));
   vector<float16_t, 4> b = tint_bitcast_to_f16(a);
   float2 c = float2(1.0f, 2.0f);
   vector<float16_t, 4> d = tint_bitcast_to_f16_1(c);

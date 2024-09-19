@@ -8,17 +8,17 @@ void main() {
       {
         {
           while(true) {
-            if ((i > 5)) {
-              i = (i * 2);
+            if ((i > int(5))) {
+              i = (i * int(2));
               break;
             } else {
-              i = (i * 2);
+              i = (i * int(2));
               break;
             }
             /* unreachable */
           }
         }
-        if ((i > 10)) { break; }
+        if ((i > int(10))) { break; }
       }
       continue;
     }

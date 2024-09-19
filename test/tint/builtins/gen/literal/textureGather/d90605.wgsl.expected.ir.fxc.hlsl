@@ -15,7 +15,7 @@ SamplerState arg_1 : register(s1, space1);
 float4 textureGather_d90605() {
   Texture2DArray v = arg_0;
   SamplerState v_1 = arg_1;
-  float4 res = v.Gather(v_1, float3((1.0f).xx, float(1)), (1).xx);
+  float4 res = v.Gather(v_1, float3((1.0f).xx, float(int(1))), (int(1)).xx);
   return res;
 }
 

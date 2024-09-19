@@ -13,7 +13,7 @@ RWByteAddressBuffer prevent_dce : register(u0);
 int all_bd2dba() {
   bool3 arg_0 = (true).xxx;
   bool res = all(arg_0);
-  return ((all((res == false))) ? (1) : (0));
+  return ((all((res == false))) ? (int(1)) : (int(0)));
 }
 
 void fragment_main() {

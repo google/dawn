@@ -1,19 +1,19 @@
 
 int f() {
-  int i = 0;
-  int j = 0;
+  int i = int(0);
+  int j = int(0);
   {
     while(true) {
-      if ((i > 4)) {
-        return 1;
+      if ((i > int(4))) {
+        return int(1);
       }
       {
         while(true) {
-          if ((j > 4)) {
-            return 2;
+          if ((j > int(4))) {
+            return int(2);
           }
           {
-            j = (j + 1);
+            j = (j + int(1));
           }
           continue;
         }

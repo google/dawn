@@ -1,5 +1,3 @@
-SKIP: FAILED
-
 struct VertexOutput {
   float4 pos;
   float4 prevent_dce;
@@ -17,8 +15,8 @@ SamplerState arg_1 : register(s1, space1);
 float4 textureSampleLevel_b7c55c() {
   Texture2DArray<float4> v = arg_0;
   SamplerState v_1 = arg_1;
-  float3 v_2 = float3((1.0f).xx, float(1));
-  float4 res = v.SampleLevel(v_1, v_2, float(1.0f), (1).xx);
+  float3 v_2 = float3((1.0f).xx, float(int(1)));
+  float4 res = v.SampleLevel(v_1, v_2, float(1.0f), (int(1)).xx);
   return res;
 }
 
@@ -47,5 +45,3 @@ vertex_main_outputs vertex_main() {
   return v_7;
 }
 
-
-tint executable returned error: exit status 0xe0000001

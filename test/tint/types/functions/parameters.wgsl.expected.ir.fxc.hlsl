@@ -14,6 +14,6 @@ void main() {
   float d[4] = (float[4])0;
   float a[4] = v;
   S v_1 = (S)0;
-  foo(true, 1, 1u, 1.0f, (3).xx, (4u).xxx, (5.0f).xxxx, float2x3((0.0f).xxx, (0.0f).xxx), a, v_1, b, c, d);
+  foo(true, int(1), 1u, 1.0f, (int(3)).xx, (4u).xxx, (5.0f).xxxx, float2x3((0.0f).xxx, (0.0f).xxx), a, v_1, b, c, d);
 }
 

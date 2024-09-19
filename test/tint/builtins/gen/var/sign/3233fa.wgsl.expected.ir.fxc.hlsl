@@ -11,7 +11,7 @@ struct vertex_main_outputs {
 
 RWByteAddressBuffer prevent_dce : register(u0);
 int sign_3233fa() {
-  int arg_0 = 1;
+  int arg_0 = int(1);
   int res = int(sign(arg_0));
   return res;
 }

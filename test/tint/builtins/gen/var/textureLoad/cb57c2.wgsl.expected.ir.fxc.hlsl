@@ -14,7 +14,7 @@ Texture2DArray arg_0 : register(t0, space1);
 float textureLoad_cb57c2() {
   uint2 arg_1 = (1u).xx;
   uint arg_2 = 1u;
-  int arg_3 = 1;
+  int arg_3 = int(1);
   Texture2DArray v = arg_0;
   uint v_1 = arg_2;
   int v_2 = arg_3;

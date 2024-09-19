@@ -1,9 +1,9 @@
 
 RWByteAddressBuffer sb_rw : register(u0);
 void atomicMin_8e38dc() {
-  int res = 0;
-  int v = 0;
-  sb_rw.InterlockedMin(int(0u), 1, v);
+  int res = int(0);
+  int v = int(0);
+  sb_rw.InterlockedMin(int(0u), int(1), v);
   int x_9 = v;
   res = x_9;
 }

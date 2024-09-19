@@ -15,7 +15,7 @@ SamplerState arg_1 : register(s1, space1);
 float textureSampleLevel_ff11bc() {
   float3 arg_2 = (1.0f).xxx;
   uint arg_3 = 1u;
-  int arg_4 = 1;
+  int arg_4 = int(1);
   TextureCubeArray v = arg_0;
   SamplerState v_1 = arg_1;
   float3 v_2 = arg_2;

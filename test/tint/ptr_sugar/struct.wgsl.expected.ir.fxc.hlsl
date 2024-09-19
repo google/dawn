@@ -7,14 +7,14 @@ void deref() {
   S a = (S)0;
   S p = a;
   int b = p.x;
-  p.x = 42;
+  p.x = int(42);
 }
 
 void no_deref() {
   S a = (S)0;
   S p = a;
   int b = p.x;
-  p.x = 42;
+  p.x = int(42);
 }
 
 [numthreads(1, 1, 1)]

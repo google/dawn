@@ -146,7 +146,7 @@ ary_ret_2 v_20(uint start_byte_offset) {
 
 void foo(int4 src_param[4]) {
   int4 src_function[4] = (int4[4])0;
-  int4 v_24[4] = {(1).xxxx, (2).xxxx, (3).xxxx, (3).xxxx};
+  int4 v_24[4] = {(int(1)).xxxx, (int(2)).xxxx, (int(3)).xxxx, (int(3)).xxxx};
   v_13(0u, v_24);
   v_13(0u, src_param);
   int4 v_25[4] = ret_arr();
@@ -181,7 +181,7 @@ void main_inner(uint tint_local_index) {
       if ((v_36 >= 4u)) {
         break;
       }
-      src_workgroup[v_36] = (0).xxxx;
+      src_workgroup[v_36] = (int(0)).xxxx;
       {
         v_35 = (v_36 + 1u);
       }

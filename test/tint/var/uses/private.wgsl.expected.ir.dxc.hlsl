@@ -1,13 +1,13 @@
 
-static int a = 0;
-static int b = 0;
-static int c = 0;
+static int a = int(0);
+static int b = int(0);
+static int c = int(0);
 void uses_a() {
-  a = (a + 1);
+  a = (a + int(1));
 }
 
 void uses_b() {
-  b = (b * 2);
+  b = (b * int(2));
 }
 
 void uses_a_and_b() {
@@ -18,7 +18,7 @@ void no_uses() {
 }
 
 void outer() {
-  a = 0;
+  a = int(0);
   uses_a();
   uses_a_and_b();
   uses_b();
@@ -27,13 +27,13 @@ void outer() {
 
 [numthreads(1, 1, 1)]
 void main1() {
-  a = 42;
+  a = int(42);
   uses_a();
 }
 
 [numthreads(1, 1, 1)]
 void main2() {
-  b = 7;
+  b = int(7);
   uses_b();
 }
 

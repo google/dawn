@@ -24,14 +24,14 @@ void no_deref_modf() {
 }
 
 void deref_frexp() {
-  frexp_result_f32 a = {0.75f, 1};
+  frexp_result_f32 a = {0.75f, int(1)};
   frexp_result_f32 p = a;
   float fract = p.fract;
   int exp = p.exp;
 }
 
 void no_deref_frexp() {
-  frexp_result_f32 a = {0.75f, 1};
+  frexp_result_f32 a = {0.75f, int(1)};
   frexp_result_f32 p = a;
   float fract = p.fract;
   int exp = p.exp;

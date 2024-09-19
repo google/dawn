@@ -5,7 +5,7 @@ SamplerState arg_1 : register(s1, space1);
 float4 textureSample_4dd1bf() {
   TextureCubeArray<float4> v = arg_0;
   SamplerState v_1 = arg_1;
-  float4 res = v.Sample(v_1, float4((1.0f).xxx, float(1)));
+  float4 res = v.Sample(v_1, float4((1.0f).xxx, float(int(1))));
   return res;
 }
 

@@ -9,7 +9,7 @@ struct vertex_main_outputs {
 
 void select_dfab3b() {
   bool arg_2 = true;
-  int3 res = ((arg_2) ? ((1).xxx) : ((1).xxx));
+  int3 res = ((arg_2) ? ((int(1)).xxx) : ((int(1)).xxx));
 }
 
 void fragment_main() {

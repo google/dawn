@@ -1157,7 +1157,7 @@ class Printer : public tint::TextGenerator {
             [&](const core::type::Bool*) { out << (c->ValueAs<AInt>() ? "true" : "false"); },
             [&](const core::type::F16*) { EmitConstantF16(out, c); },
             [&](const core::type::F32*) { PrintF32(out, c->ValueAs<f32>()); },
-            [&](const core::type::I32*) { out << c->ValueAs<i32>(); },
+            [&](const core::type::I32*) { PrintI32(out, c->ValueAs<i32>()); },
             [&](const core::type::U32*) { out << c->ValueAs<AInt>() << "u"; },
             [&](const core::type::Array* a) { EmitConstantArray(out, c, a); },
             [&](const core::type::Vector* v) { EmitConstantVector(out, c, v); },
@@ -1614,6 +1614,14 @@ class Printer : public tint::TextGenerator {
                 builtin_struct_names_.GetOrAdd(s, [&] { return UniqueIdentifier(name.substr(2)); });
         }
         return name;
+    }
+
+    void PrintI32(StringStream& out, int32_t value) {
+        // TODO(crbug.com/368092875): DXC workaround: unless we compile with '-HV 202x', constant
+        // signed integral values are interpreted 64-bit ints. Apart from this not matching our
+        // intent, there are bugs in DXC when handling 64-bit integer splats. Always emit as a
+        // 32-bit signed int.
+        out << "int(" << value << ")";
     }
 
     void PrintF32(StringStream& out, float value) {

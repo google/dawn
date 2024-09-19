@@ -49,9 +49,9 @@ TEST_F(HlslWriterTest, Switch) {
     EXPECT_EQ(output_.hlsl, R"(
 [numthreads(1, 1, 1)]
 void foo() {
-  int a = 0;
+  int a = int(0);
   switch(a) {
-    case 5:
+    case int(5):
     {
       break;
     }
@@ -81,9 +81,9 @@ TEST_F(HlslWriterTest, SwitchMixedDefault) {
     EXPECT_EQ(output_.hlsl, R"(
 [numthreads(1, 1, 1)]
 void foo() {
-  int a = 0;
+  int a = int(0);
   switch(a) {
-    case 5:
+    case int(5):
     default:
     {
       break;
@@ -123,12 +123,12 @@ TEST_F(HlslWriterTest, SwitchOnlyDefaultCaseNoSideEffectsConditionDXC) {
     EXPECT_EQ(output_.hlsl, R"(
 [numthreads(1, 1, 1)]
 void foo() {
-  int cond = 0;
-  int a = 0;
+  int cond = int(0);
+  int a = int(0);
   switch(cond) {
     default:
     {
-      a = 42;
+      a = int(42);
       break;
     }
   }
@@ -179,10 +179,10 @@ TEST_F(HlslWriterTest, SwitchOnlyDefaultCaseSideEffectsConditionDXC) {
 
     ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
     EXPECT_EQ(output_.hlsl, R"(
-static int global = 0;
-static int a = 0;
+static int global = int(0);
+static int a = int(0);
 int bar() {
-  global = 84;
+  global = int(84);
   return global;
 }
 
@@ -191,7 +191,7 @@ void foo() {
   switch(bar()) {
     default:
     {
-      a = 42;
+      a = int(42);
       break;
     }
   }
@@ -232,13 +232,13 @@ TEST_F(HlslWriterTest, SwitchOnlyDefaultCaseNoSideEffectsConditionFXC) {
     EXPECT_EQ(output_.hlsl, R"(
 [numthreads(1, 1, 1)]
 void foo() {
-  int cond = 0;
-  int a = 0;
+  int cond = int(0);
+  int a = int(0);
   switch(cond) {
     default:
-    case 0:
+    case int(0):
     {
-      a = 42;
+      a = int(42);
       break;
     }
   }
@@ -292,10 +292,10 @@ TEST_F(HlslWriterTest, SwitchOnlyDefaultCaseSideEffectsConditionFXC) {
 
     ASSERT_TRUE(Generate(options)) << err_ << output_.hlsl;
     EXPECT_EQ(output_.hlsl, R"(
-static int global = 0;
-static int a = 0;
+static int global = int(0);
+static int a = int(0);
 int bar() {
-  global = 84;
+  global = int(84);
   return global;
 }
 
@@ -303,9 +303,9 @@ int bar() {
 void foo() {
   switch(bar()) {
     default:
-    case 0:
+    case int(0):
     {
-      a = 42;
+      a = int(42);
       break;
     }
   }

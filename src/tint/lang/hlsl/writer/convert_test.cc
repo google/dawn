@@ -43,7 +43,7 @@ TEST_F(HlslWriterTest, ConvertU32) {
     ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
     EXPECT_EQ(output_.hlsl, R"(
 uint a() {
-  int v = 2;
+  int v = int(2);
   return uint(v);
 }
 

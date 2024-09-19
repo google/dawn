@@ -14,7 +14,7 @@ Texture2DArray<int4> arg_0 : register(t0, space1);
 uint2 textureDimensions_fdf6e9() {
   Texture2DArray<int4> v = arg_0;
   uint4 v_1 = (0u).xxxx;
-  v.GetDimensions(uint(1), v_1[0u], v_1[1u], v_1[2u], v_1[3u]);
+  v.GetDimensions(uint(int(1)), v_1[0u], v_1[1u], v_1[2u], v_1[3u]);
   uint2 res = v_1.xy;
   return res;
 }

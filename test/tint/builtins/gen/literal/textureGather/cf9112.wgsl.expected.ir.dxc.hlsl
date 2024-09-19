@@ -1,5 +1,3 @@
-SKIP: FAILED
-
 struct VertexOutput {
   float4 pos;
   int4 prevent_dce;
@@ -17,7 +15,7 @@ SamplerState arg_2 : register(s2, space1);
 int4 textureGather_cf9112() {
   Texture2DArray<int4> v = arg_1;
   SamplerState v_1 = arg_2;
-  int4 res = v.GatherGreen(v_1, float3((1.0f).xx, float(1u)), (1).xx);
+  int4 res = v.GatherGreen(v_1, float3((1.0f).xx, float(1u)), (int(1)).xx);
   return res;
 }
 
@@ -46,5 +44,3 @@ vertex_main_outputs vertex_main() {
   return v_6;
 }
 
-
-tint executable returned error: exit status 0xe0000001

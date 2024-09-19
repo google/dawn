@@ -8,7 +8,7 @@ struct vertex_main_outputs {
 
 
 void dot_eb9fbf() {
-  int res = 4;
+  int res = int(4);
 }
 
 void fragment_main() {

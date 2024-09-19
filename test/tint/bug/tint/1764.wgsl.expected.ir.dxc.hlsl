@@ -13,7 +13,7 @@ void main_inner(uint tint_local_index) {
       if ((v_1 >= 246u)) {
         break;
       }
-      W[v_1] = 0;
+      W[v_1] = int(0);
       {
         v = (v_1 + 1u);
       }
@@ -22,7 +22,7 @@ void main_inner(uint tint_local_index) {
   }
   GroupMemoryBarrierWithGroupSync();
   int p[246] = W;
-  p[0] = 42;
+  p[int(0)] = int(42);
 }
 
 [numthreads(1, 1, 1)]

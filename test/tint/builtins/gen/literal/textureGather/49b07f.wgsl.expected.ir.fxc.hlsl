@@ -13,7 +13,7 @@ RWByteAddressBuffer prevent_dce : register(u0);
 Texture2D<uint4> arg_1 : register(t1, space1);
 SamplerState arg_2 : register(s2, space1);
 uint4 textureGather_49b07f() {
-  uint4 res = arg_1.GatherGreen(arg_2, (1.0f).xx, (1).xx);
+  uint4 res = arg_1.GatherGreen(arg_2, (1.0f).xx, (int(1)).xx);
   return res;
 }
 

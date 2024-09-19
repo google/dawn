@@ -14,7 +14,7 @@ Texture2DArray arg_0 : register(t0, space1);
 SamplerState arg_1 : register(s1, space1);
 float textureSampleLevel_2974eb() {
   float2 arg_2 = (1.0f).xx;
-  int arg_3 = 1;
+  int arg_3 = int(1);
   uint arg_4 = 1u;
   Texture2DArray v = arg_0;
   SamplerState v_1 = arg_1;

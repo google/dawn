@@ -8,7 +8,7 @@ struct vertex_main_outputs {
 
 
 void max_caa3d7() {
-  int res = 1;
+  int res = int(1);
 }
 
 void fragment_main() {

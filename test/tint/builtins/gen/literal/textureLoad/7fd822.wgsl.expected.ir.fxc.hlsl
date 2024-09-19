@@ -14,7 +14,7 @@ Texture2D arg_0 : register(t0, space1);
 float textureLoad_7fd822() {
   Texture2D v = arg_0;
   int2 v_1 = int2((1u).xx);
-  float res = v.Load(int3(v_1, int(1))).x;
+  float res = v.Load(int3(v_1, int(int(1)))).x;
   return res;
 }
 

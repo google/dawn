@@ -1,7 +1,7 @@
 
 RWByteAddressBuffer prevent_dce : register(u0);
 int2 quadSwapX_b1a5fe() {
-  int2 res = QuadReadAcrossX((1).xx);
+  int2 res = QuadReadAcrossX((int(1)).xx);
   return res;
 }
 

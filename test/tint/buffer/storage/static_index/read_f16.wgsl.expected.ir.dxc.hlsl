@@ -8,11 +8,11 @@ struct Inner {
 ByteAddressBuffer sb : register(t0);
 RWByteAddressBuffer s : register(u1);
 int tint_f16_to_i32(float16_t value) {
-  return (((value <= float16_t(65504.0h))) ? ((((value >= float16_t(-65504.0h))) ? (int(value)) : (-2147483648))) : (2147483647));
+  return (((value <= float16_t(65504.0h))) ? ((((value >= float16_t(-65504.0h))) ? (int(value)) : (int(-2147483648)))) : (int(2147483647)));
 }
 
 int tint_f32_to_i32(float value) {
-  return (((value <= 2147483520.0f)) ? ((((value >= -2147483648.0f)) ? (int(value)) : (-2147483648))) : (2147483647));
+  return (((value <= 2147483520.0f)) ? ((((value >= -2147483648.0f)) ? (int(value)) : (int(-2147483648)))) : (int(2147483647)));
 }
 
 Inner v(uint offset) {
@@ -249,29 +249,29 @@ void main() {
   int v_84 = ((v_83 + tint_f32_to_i32(vec4_f32[2u])) + vec4_i32[2u]);
   int v_85 = (v_84 + int(vec4_u32[2u]));
   int v_86 = (v_85 + tint_f16_to_i32(vec4_f16[2u]));
-  int v_87 = (v_86 + tint_f32_to_i32(mat2x2_f32[0][0u]));
-  int v_88 = (v_87 + tint_f32_to_i32(mat2x3_f32[0][0u]));
-  int v_89 = (v_88 + tint_f32_to_i32(mat2x4_f32[0][0u]));
-  int v_90 = (v_89 + tint_f32_to_i32(mat3x2_f32[0][0u]));
-  int v_91 = (v_90 + tint_f32_to_i32(mat3x3_f32[0][0u]));
-  int v_92 = (v_91 + tint_f32_to_i32(mat3x4_f32[0][0u]));
-  int v_93 = (v_92 + tint_f32_to_i32(mat4x2_f32[0][0u]));
-  int v_94 = (v_93 + tint_f32_to_i32(mat4x3_f32[0][0u]));
-  int v_95 = (v_94 + tint_f32_to_i32(mat4x4_f32[0][0u]));
-  int v_96 = (v_95 + tint_f16_to_i32(mat2x2_f16[0][0u]));
-  int v_97 = (v_96 + tint_f16_to_i32(mat2x3_f16[0][0u]));
-  int v_98 = (v_97 + tint_f16_to_i32(mat2x4_f16[0][0u]));
-  int v_99 = (v_98 + tint_f16_to_i32(mat3x2_f16[0][0u]));
-  int v_100 = (v_99 + tint_f16_to_i32(mat3x3_f16[0][0u]));
-  int v_101 = (v_100 + tint_f16_to_i32(mat3x4_f16[0][0u]));
-  int v_102 = (v_101 + tint_f16_to_i32(mat4x2_f16[0][0u]));
-  int v_103 = (v_102 + tint_f16_to_i32(mat4x3_f16[0][0u]));
-  int v_104 = (v_103 + tint_f16_to_i32(mat4x4_f16[0][0u]));
+  int v_87 = (v_86 + tint_f32_to_i32(mat2x2_f32[int(0)][0u]));
+  int v_88 = (v_87 + tint_f32_to_i32(mat2x3_f32[int(0)][0u]));
+  int v_89 = (v_88 + tint_f32_to_i32(mat2x4_f32[int(0)][0u]));
+  int v_90 = (v_89 + tint_f32_to_i32(mat3x2_f32[int(0)][0u]));
+  int v_91 = (v_90 + tint_f32_to_i32(mat3x3_f32[int(0)][0u]));
+  int v_92 = (v_91 + tint_f32_to_i32(mat3x4_f32[int(0)][0u]));
+  int v_93 = (v_92 + tint_f32_to_i32(mat4x2_f32[int(0)][0u]));
+  int v_94 = (v_93 + tint_f32_to_i32(mat4x3_f32[int(0)][0u]));
+  int v_95 = (v_94 + tint_f32_to_i32(mat4x4_f32[int(0)][0u]));
+  int v_96 = (v_95 + tint_f16_to_i32(mat2x2_f16[int(0)][0u]));
+  int v_97 = (v_96 + tint_f16_to_i32(mat2x3_f16[int(0)][0u]));
+  int v_98 = (v_97 + tint_f16_to_i32(mat2x4_f16[int(0)][0u]));
+  int v_99 = (v_98 + tint_f16_to_i32(mat3x2_f16[int(0)][0u]));
+  int v_100 = (v_99 + tint_f16_to_i32(mat3x3_f16[int(0)][0u]));
+  int v_101 = (v_100 + tint_f16_to_i32(mat3x4_f16[int(0)][0u]));
+  int v_102 = (v_101 + tint_f16_to_i32(mat4x2_f16[int(0)][0u]));
+  int v_103 = (v_102 + tint_f16_to_i32(mat4x3_f16[int(0)][0u]));
+  int v_104 = (v_103 + tint_f16_to_i32(mat4x4_f16[int(0)][0u]));
   float3 arr2_vec3_f32[2] = v_71;
-  int v_105 = (v_104 + tint_f32_to_i32(arr2_vec3_f32[0][0u]));
+  int v_105 = (v_104 + tint_f32_to_i32(arr2_vec3_f32[int(0)][0u]));
   matrix<float16_t, 4, 2> arr2_mat4x2_f16[2] = v_72;
   Inner struct_inner = v_73;
   Inner array_struct_inner[4] = v_74;
-  s.Store(0u, asuint((((v_105 + tint_f16_to_i32(arr2_mat4x2_f16[0][0][0u])) + struct_inner.scalar_i32) + array_struct_inner[0].scalar_i32)));
+  s.Store(0u, asuint((((v_105 + tint_f16_to_i32(arr2_mat4x2_f16[int(0)][int(0)][0u])) + struct_inner.scalar_i32) + array_struct_inner[int(0)].scalar_i32)));
 }
 

@@ -11,8 +11,8 @@ struct vertex_main_outputs {
 
 RWByteAddressBuffer prevent_dce : register(u0);
 int3 min_a45171() {
-  int3 arg_0 = (1).xxx;
-  int3 arg_1 = (1).xxx;
+  int3 arg_0 = (int(1)).xxx;
+  int3 arg_1 = (int(1)).xxx;
   int3 res = min(arg_0, arg_1);
   return res;
 }

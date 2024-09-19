@@ -158,13 +158,13 @@ void main() {
   Texture2D<float4> v_76 = t_plane1;
   tint_ExternalTextureParams v_77 = v_52(0u);
   tint_ExternalTextureParams v_78 = v_77;
-  float4 red = tint_TextureLoadExternal(v_75, v_76, v_78, uint2((10).xx));
-  outImage[(0).xx] = red;
+  float4 red = tint_TextureLoadExternal(v_75, v_76, v_78, uint2((int(10)).xx));
+  outImage[(int(0)).xx] = red;
   Texture2D<float4> v_79 = t_plane0;
   Texture2D<float4> v_80 = t_plane1;
   tint_ExternalTextureParams v_81 = v_52(0u);
   tint_ExternalTextureParams v_82 = v_81;
-  float4 green = tint_TextureLoadExternal(v_79, v_80, v_82, uint2(int2(70, 118)));
-  outImage[int2(1, 0)] = green;
+  float4 green = tint_TextureLoadExternal(v_79, v_80, v_82, uint2(int2(int(70), int(118))));
+  outImage[int2(int(1), int(0))] = green;
 }
 

@@ -1,10 +1,10 @@
 
 void a() {
-  int a_1 = 0;
+  int a_1 = int(0);
   switch(a_1) {
-    case 0:
-    case 2:
-    case 4:
+    case int(0):
+    case int(2):
+    case int(4):
     {
       uint b = 3u;
       switch(b) {
@@ -33,7 +33,7 @@ void a() {
       }
       break;
     }
-    case 1:
+    case int(1):
     default:
     {
       return;

@@ -15,11 +15,11 @@ groupshared int a;
 groupshared int b;
 groupshared int c;
 void uses_a() {
-  a = (a + 1);
+  a = (a + int(1));
 }
 
 void uses_b() {
-  b = (b * 2);
+  b = (b * int(2));
 }
 
 void uses_a_and_b() {
@@ -30,7 +30,7 @@ void no_uses() {
 }
 
 void outer() {
-  a = 0;
+  a = int(0);
   uses_a();
   uses_a_and_b();
   uses_b();
@@ -39,26 +39,26 @@ void outer() {
 
 void main1_inner(uint tint_local_index) {
   if ((tint_local_index == 0u)) {
-    a = 0;
+    a = int(0);
   }
   GroupMemoryBarrierWithGroupSync();
-  a = 42;
+  a = int(42);
   uses_a();
 }
 
 void main2_inner(uint tint_local_index) {
   if ((tint_local_index == 0u)) {
-    b = 0;
+    b = int(0);
   }
   GroupMemoryBarrierWithGroupSync();
-  b = 7;
+  b = int(7);
   uses_b();
 }
 
 void main3_inner(uint tint_local_index) {
   if ((tint_local_index == 0u)) {
-    a = 0;
-    b = 0;
+    a = int(0);
+    b = int(0);
   }
   GroupMemoryBarrierWithGroupSync();
   outer();

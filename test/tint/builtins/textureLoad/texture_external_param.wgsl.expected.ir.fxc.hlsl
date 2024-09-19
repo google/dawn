@@ -144,7 +144,7 @@ void doTextureLoad() {
   Texture2D<float4> v_62 = arg_0_plane0;
   Texture2D<float4> v_63 = arg_0_plane1;
   tint_ExternalTextureParams v_64 = v_39(0u);
-  float4 res = textureLoad2d(v_62, v_63, v_64, (0).xx);
+  float4 res = textureLoad2d(v_62, v_63, v_64, (int(0)).xx);
 }
 
 float4 vertex_main_inner() {

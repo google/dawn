@@ -12,10 +12,10 @@ Texture2D<float4> randomTexture : register(t1);
 Texture2D<float4> depthTexture : register(t2);
 float4 main_inner(float2 vUV) {
   float3 random = randomTexture.Sample(tint_symbol, vUV).xyz;
-  int i = 0;
+  int i = int(0);
   {
     while(true) {
-      if ((i < 1)) {
+      if ((i < int(1))) {
       } else {
         break;
       }
@@ -39,13 +39,13 @@ float4 main_inner(float2 vUV) {
         v_2 = (offset[1u] > 1.0f);
       }
       if (v_2) {
-        i = (i + 1);
+        i = (i + int(1));
         {
         }
         continue;
       }
       float sampleDepth = 0.0f;
-      i = (i + 1);
+      i = (i + int(1));
       {
       }
       continue;

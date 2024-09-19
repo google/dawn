@@ -71,7 +71,7 @@ ary_ret_2 v_6(uint start_byte_offset) {
 void foo(int4 src_param[4]) {
   int4 src_function[4] = (int4[4])0;
   int4 tint_symbol[4] = (int4[4])0;
-  int4 v_10[4] = {(1).xxxx, (2).xxxx, (3).xxxx, (3).xxxx};
+  int4 v_10[4] = {(int(1)).xxxx, (int(2)).xxxx, (int(3)).xxxx, (int(3)).xxxx};
   tint_symbol = v_10;
   tint_symbol = src_param;
   int4 v_11[4] = ret_arr();
@@ -107,7 +107,7 @@ void main_inner(uint tint_local_index) {
       if ((v_22 >= 4u)) {
         break;
       }
-      src_workgroup[v_22] = (0).xxxx;
+      src_workgroup[v_22] = (int(0)).xxxx;
       {
         v_21 = (v_22 + 1u);
       }

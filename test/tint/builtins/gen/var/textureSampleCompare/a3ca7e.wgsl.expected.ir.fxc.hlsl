@@ -4,7 +4,7 @@ TextureCubeArray arg_0 : register(t0, space1);
 SamplerComparisonState arg_1 : register(s1, space1);
 float textureSampleCompare_a3ca7e() {
   float3 arg_2 = (1.0f).xxx;
-  int arg_3 = 1;
+  int arg_3 = int(1);
   float arg_4 = 1.0f;
   TextureCubeArray v = arg_0;
   SamplerComparisonState v_1 = arg_1;

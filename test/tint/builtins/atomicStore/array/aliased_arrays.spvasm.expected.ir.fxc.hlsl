@@ -37,7 +37,7 @@ void compute_main_inner(uint local_invocation_index_2) {
   }
   GroupMemoryBarrierWithGroupSync();
   uint v_4 = 0u;
-  InterlockedExchange(wg[2][1][0], 1u, v_4);
+  InterlockedExchange(wg[int(2)][int(1)][int(0)], 1u, v_4);
 }
 
 void compute_main_1() {

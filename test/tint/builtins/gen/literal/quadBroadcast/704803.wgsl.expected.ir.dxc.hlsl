@@ -1,7 +1,7 @@
 
 RWByteAddressBuffer prevent_dce : register(u0);
 int3 quadBroadcast_704803() {
-  int3 res = QuadReadLaneAt((1).xxx, 1);
+  int3 res = QuadReadLaneAt((int(1)).xxx, int(1));
   return res;
 }
 

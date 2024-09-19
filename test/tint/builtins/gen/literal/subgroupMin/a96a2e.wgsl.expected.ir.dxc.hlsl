@@ -1,7 +1,7 @@
 
 RWByteAddressBuffer prevent_dce : register(u0);
 int subgroupMin_a96a2e() {
-  int res = WaveActiveMin(1);
+  int res = WaveActiveMin(int(1));
   return res;
 }
 

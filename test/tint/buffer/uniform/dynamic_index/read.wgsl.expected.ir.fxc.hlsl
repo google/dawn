@@ -8,7 +8,7 @@ cbuffer cbuffer_ub : register(b0) {
 };
 RWByteAddressBuffer s : register(u1);
 int tint_f32_to_i32(float value) {
-  return (((value <= 2147483520.0f)) ? ((((value >= -2147483648.0f)) ? (int(value)) : (-2147483648))) : (2147483647));
+  return (((value <= 2147483520.0f)) ? ((((value >= -2147483648.0f)) ? (int(value)) : (int(-2147483648)))) : (int(2147483647)));
 }
 
 typedef float3 ary_ret[2];
@@ -136,17 +136,17 @@ void main_inner(uint idx) {
   int v_55 = (v_54 + int(vec3_u32[1u]));
   int v_56 = ((v_55 + tint_f32_to_i32(vec4_f32[2u])) + vec4_i32[2u]);
   int v_57 = (v_56 + int(vec4_u32[2u]));
-  int v_58 = (v_57 + tint_f32_to_i32(mat2x2_f32[0][0u]));
-  int v_59 = (v_58 + tint_f32_to_i32(mat2x3_f32[0][0u]));
-  int v_60 = (v_59 + tint_f32_to_i32(mat2x4_f32[0][0u]));
-  int v_61 = (v_60 + tint_f32_to_i32(mat3x2_f32[0][0u]));
-  int v_62 = (v_61 + tint_f32_to_i32(mat3x3_f32[0][0u]));
-  int v_63 = (v_62 + tint_f32_to_i32(mat3x4_f32[0][0u]));
-  int v_64 = (v_63 + tint_f32_to_i32(mat4x2_f32[0][0u]));
-  int v_65 = (v_64 + tint_f32_to_i32(mat4x3_f32[0][0u]));
-  int v_66 = (v_65 + tint_f32_to_i32(mat4x4_f32[0][0u]));
+  int v_58 = (v_57 + tint_f32_to_i32(mat2x2_f32[int(0)][0u]));
+  int v_59 = (v_58 + tint_f32_to_i32(mat2x3_f32[int(0)][0u]));
+  int v_60 = (v_59 + tint_f32_to_i32(mat2x4_f32[int(0)][0u]));
+  int v_61 = (v_60 + tint_f32_to_i32(mat3x2_f32[int(0)][0u]));
+  int v_62 = (v_61 + tint_f32_to_i32(mat3x3_f32[int(0)][0u]));
+  int v_63 = (v_62 + tint_f32_to_i32(mat3x4_f32[int(0)][0u]));
+  int v_64 = (v_63 + tint_f32_to_i32(mat4x2_f32[int(0)][0u]));
+  int v_65 = (v_64 + tint_f32_to_i32(mat4x3_f32[int(0)][0u]));
+  int v_66 = (v_65 + tint_f32_to_i32(mat4x4_f32[int(0)][0u]));
   float3 arr2_vec3_f32[2] = v_49;
-  s.Store(0u, asuint((v_66 + tint_f32_to_i32(arr2_vec3_f32[0][0u]))));
+  s.Store(0u, asuint((v_66 + tint_f32_to_i32(arr2_vec3_f32[int(0)][0u]))));
 }
 
 [numthreads(1, 1, 1)]

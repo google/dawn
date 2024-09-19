@@ -2,14 +2,14 @@
 RWTexture2D<int4> tex : register(u2);
 void foo() {
   {
-    int i = 0;
+    int i = int(0);
     while(true) {
-      if ((i < 3)) {
+      if ((i < int(3))) {
       } else {
         break;
       }
       {
-        tex[(0).xx] = (0).xxxx;
+        tex[(int(0)).xx] = (int(0)).xxxx;
       }
       continue;
     }

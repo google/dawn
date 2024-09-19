@@ -18,7 +18,7 @@ uint4 textureGather_ce5578() {
   Texture2DArray<uint4> v = arg_1;
   SamplerState v_1 = arg_2;
   float2 v_2 = arg_3;
-  uint4 res = v.GatherGreen(v_1, float3(v_2, float(arg_4)), (1).xx);
+  uint4 res = v.GatherGreen(v_1, float3(v_2, float(arg_4)), (int(1)).xx);
   return res;
 }
 

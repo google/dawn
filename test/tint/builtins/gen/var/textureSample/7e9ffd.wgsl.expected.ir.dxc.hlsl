@@ -4,7 +4,7 @@ Texture2DArray arg_0 : register(t0, space1);
 SamplerState arg_1 : register(s1, space1);
 float textureSample_7e9ffd() {
   float2 arg_2 = (1.0f).xx;
-  int arg_3 = 1;
+  int arg_3 = int(1);
   Texture2DArray v = arg_0;
   SamplerState v_1 = arg_1;
   float2 v_2 = arg_2;

@@ -16,7 +16,7 @@ struct main_outputs {
 
 
 VertexOutputs main_inner() {
-  VertexOutputs v = {1, 1u, 1.0f, float4(1.0f, 2.0f, 3.0f, 4.0f), (0.0f).xxxx};
+  VertexOutputs v = {int(1), 1u, 1.0f, float4(1.0f, 2.0f, 3.0f, 4.0f), (0.0f).xxxx};
   return v;
 }
 

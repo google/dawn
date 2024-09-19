@@ -30,12 +30,12 @@ int accept_ptr_to_struct_and_access(inout S val) {
 
 int accept_ptr_to_struct_access_pass_ptr(inout S val) {
   int b = val.a;
-  b = 2;
+  b = int(2);
   return b;
 }
 
 int tint_f32_to_i32(float value) {
-  return (((value <= 2147483520.0f)) ? ((((value >= -2147483648.0f)) ? (int(value)) : (-2147483648))) : (2147483647));
+  return (((value <= 2147483520.0f)) ? ((((value >= -2147483648.0f)) ? (int(value)) : (int(-2147483648)))) : (int(2147483647)));
 }
 
 int accept_ptr_vec_access_elements(inout float3 v1) {
@@ -44,23 +44,23 @@ int accept_ptr_vec_access_elements(inout float3 v1) {
 }
 
 int call_builtin_with_mod_scope_ptr() {
-  int v_2 = 0;
-  InterlockedOr(g1, 0, v_2);
+  int v_2 = int(0);
+  InterlockedOr(g1, int(0), v_2);
   return v_2;
 }
 
 void main_inner(uint tint_local_index) {
   if ((tint_local_index == 0u)) {
-    int v_3 = 0;
-    InterlockedExchange(g1, 0, v_3);
+    int v_3 = int(0);
+    InterlockedExchange(g1, int(0), v_3);
   }
   GroupMemoryBarrierWithGroupSync();
-  int v1 = 0;
+  int v1 = int(0);
   S v2 = (S)0;
   S v3 = v2;
   float3 v4 = (0.0f).xxx;
-  int v_4 = 0;
-  InterlockedOr(g1, 0, v_4);
+  int v_4 = int(0);
+  InterlockedOr(g1, int(0), v_4);
   int t1 = v_4;
   int v_5 = accept_ptr_deref_pass_through(v1);
   int v_6 = (v_5 + accept_ptr_to_struct_and_access(v2));

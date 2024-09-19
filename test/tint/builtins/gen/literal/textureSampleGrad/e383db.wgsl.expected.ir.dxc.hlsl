@@ -15,7 +15,7 @@ SamplerState arg_1 : register(s1, space1);
 float4 textureSampleGrad_e383db() {
   TextureCubeArray<float4> v = arg_0;
   SamplerState v_1 = arg_1;
-  float4 res = v.SampleGrad(v_1, float4((1.0f).xxx, float(1)), (1.0f).xxx, (1.0f).xxx);
+  float4 res = v.SampleGrad(v_1, float4((1.0f).xxx, float(int(1))), (1.0f).xxx, (1.0f).xxx);
   return res;
 }
 

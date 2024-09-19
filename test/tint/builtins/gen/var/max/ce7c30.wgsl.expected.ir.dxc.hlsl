@@ -11,8 +11,8 @@ struct vertex_main_outputs {
 
 RWByteAddressBuffer prevent_dce : register(u0);
 int max_ce7c30() {
-  int arg_0 = 1;
-  int arg_1 = 1;
+  int arg_0 = int(1);
+  int arg_1 = int(1);
   int res = max(arg_0, arg_1);
   return res;
 }

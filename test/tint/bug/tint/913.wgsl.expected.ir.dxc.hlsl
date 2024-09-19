@@ -46,7 +46,7 @@ void main_inner(uint3 GlobalInvocationID) {
     if (success) {
       Texture2D<float4> v_6 = tint_symbol;
       int2 v_7 = int2(int2(dstTexCoord));
-      v_5 = all((float4(v_6.Load(int3(v_7, int(0)))) == nonCoveredColor));
+      v_5 = all((float4(v_6.Load(int3(v_7, int(int(0))))) == nonCoveredColor));
     } else {
       v_5 = false;
     }
@@ -58,10 +58,10 @@ void main_inner(uint3 GlobalInvocationID) {
     }
     Texture2D<float4> v_8 = src;
     int2 v_9 = int2(int2(srcTexCoord));
-    float4 srcColor = float4(v_8.Load(int3(v_9, int(0))));
+    float4 srcColor = float4(v_8.Load(int3(v_9, int(int(0)))));
     Texture2D<float4> v_10 = tint_symbol;
     int2 v_11 = int2(int2(dstTexCoord));
-    float4 dstColor = float4(v_10.Load(int3(v_11, int(0))));
+    float4 dstColor = float4(v_10.Load(int3(v_11, int(int(0)))));
     if ((uniforms[0u].y == 2u)) {
       bool v_12 = false;
       if (success) {

@@ -13,8 +13,8 @@ void main_inner(uint3 GlobalInvocationID) {
   flatIndex = (flatIndex * 1u);
   Texture2DArray<float4> v = myTexture;
   int2 v_1 = int2(int2(GlobalInvocationID.xy));
-  int v_2 = int(0);
-  float4 texel = float4(v.Load(int4(v_1, v_2, int(0))));
+  int v_2 = int(int(0));
+  float4 texel = float4(v.Load(int4(v_1, v_2, int(int(0)))));
   {
     uint i = 0u;
     while(true) {

@@ -51,8 +51,8 @@ void f() {
   S v_13[4] = v_8(0u);
   p = v_13;
   S v_14 = v_4(384u);
-  p[1] = v_14;
-  p[3].m = v(400u);
-  p[1].m[0] = asfloat(u[2u].xyz).zxy;
+  p[int(1)] = v_14;
+  p[int(3)].m = v(400u);
+  p[int(1)].m[int(0)] = asfloat(u[2u].xyz).zxy;
 }
 

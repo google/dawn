@@ -9,7 +9,7 @@ struct vertex_main_outputs {
 
 void select_b93806() {
   bool3 arg_2 = (true).xxx;
-  int3 res = ((arg_2) ? ((1).xxx) : ((1).xxx));
+  int3 res = ((arg_2) ? ((int(1)).xxx) : ((int(1)).xxx));
 }
 
 void fragment_main() {

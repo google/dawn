@@ -4,7 +4,7 @@ RWTexture3D<int4> arg_0 : register(u0, space1);
 int4 textureLoad_61e2e8() {
   uint3 arg_1 = (1u).xxx;
   RWTexture3D<int4> v = arg_0;
-  int4 res = int4(v.Load(int4(int3(arg_1), 0)));
+  int4 res = int4(v.Load(int4(int3(arg_1), int(0))));
   return res;
 }
 

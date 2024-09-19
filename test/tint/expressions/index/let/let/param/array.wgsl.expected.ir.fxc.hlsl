@@ -1,6 +1,6 @@
 
 int f(int x) {
-  int v[8] = {1, 2, 3, 4, 5, 6, 7, 8};
+  int v[8] = {int(1), int(2), int(3), int(4), int(5), int(6), int(7), int(8)};
   int i = x;
   int a[8] = v;
   return a[i];

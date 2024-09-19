@@ -7,14 +7,14 @@ struct S {
 void main() {
   bool bool_var = false;
   bool bool_let = false;
-  int i32_var = 0;
-  int i32_let = 0;
+  int i32_var = int(0);
+  int i32_let = int(0);
   uint u32_var = 0u;
   uint u32_let = 0u;
   float f32_var = 0.0f;
   float f32_let = 0.0f;
-  int2 v2i32_var = (0).xx;
-  int2 v2i32_let = (0).xx;
+  int2 v2i32_var = (int(0)).xx;
+  int2 v2i32_let = (int(0)).xx;
   uint3 v3u32_var = (0u).xxx;
   uint3 v3u32_let = (0u).xxx;
   float4 v4f32_var = (0.0f).xxxx;

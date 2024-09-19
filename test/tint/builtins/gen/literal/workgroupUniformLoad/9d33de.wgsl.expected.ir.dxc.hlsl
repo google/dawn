@@ -15,7 +15,7 @@ int workgroupUniformLoad_9d33de() {
 
 void compute_main_inner(uint tint_local_index) {
   if ((tint_local_index == 0u)) {
-    arg_0 = 0;
+    arg_0 = int(0);
   }
   GroupMemoryBarrierWithGroupSync();
   prevent_dce.Store(0u, asuint(workgroupUniformLoad_9d33de()));

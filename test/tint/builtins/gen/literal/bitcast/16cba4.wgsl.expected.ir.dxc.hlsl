@@ -11,7 +11,7 @@ struct vertex_main_outputs {
 
 RWByteAddressBuffer prevent_dce : register(u0);
 int bitcast_16cba4() {
-  int res = 1065353216;
+  int res = int(1065353216);
   return res;
 }
 

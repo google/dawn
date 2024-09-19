@@ -1,5 +1,3 @@
-SKIP: FAILED
-
 struct VertexOutput {
   float4 pos;
   float4 prevent_dce;
@@ -24,7 +22,7 @@ float4 textureSampleGrad_7cd6de() {
   float2 v_2 = arg_2;
   float2 v_3 = arg_4;
   float2 v_4 = arg_5;
-  float4 res = v.SampleGrad(v_1, float3(v_2, float(arg_3)), v_3, v_4, (1).xx);
+  float4 res = v.SampleGrad(v_1, float3(v_2, float(arg_3)), v_3, v_4, (int(1)).xx);
   return res;
 }
 
@@ -53,5 +51,3 @@ vertex_main_outputs vertex_main() {
   return v_9;
 }
 
-
-tint executable returned error: exit status 0xe0000001

@@ -2,7 +2,7 @@
 RWTexture3D<int4> arg_0 : register(u0, space1);
 void textureStore_cb3b0b() {
   uint3 arg_1 = (1u).xxx;
-  int4 arg_2 = (1).xxxx;
+  int4 arg_2 = (int(1)).xxxx;
   arg_0[arg_1] = arg_2;
 }
 

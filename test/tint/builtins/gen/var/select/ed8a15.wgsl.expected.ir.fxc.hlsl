@@ -11,8 +11,8 @@ struct vertex_main_outputs {
 
 RWByteAddressBuffer prevent_dce : register(u0);
 int select_ed8a15() {
-  int arg_0 = 1;
-  int arg_1 = 1;
+  int arg_0 = int(1);
+  int arg_1 = int(1);
   bool arg_2 = true;
   int res = ((arg_2) ? (arg_1) : (arg_0));
   return res;

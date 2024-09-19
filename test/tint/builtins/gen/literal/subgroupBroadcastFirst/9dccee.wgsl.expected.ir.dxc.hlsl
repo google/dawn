@@ -1,7 +1,7 @@
 
 RWByteAddressBuffer prevent_dce : register(u0);
 int4 subgroupBroadcastFirst_9dccee() {
-  int4 res = WaveReadLaneFirst((1).xxxx);
+  int4 res = WaveReadLaneFirst((int(1)).xxxx);
   return res;
 }
 

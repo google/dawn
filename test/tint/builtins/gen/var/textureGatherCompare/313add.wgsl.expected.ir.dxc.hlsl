@@ -1,5 +1,3 @@
-SKIP: FAILED
-
 struct VertexOutput {
   float4 pos;
   float4 prevent_dce;
@@ -17,7 +15,7 @@ SamplerComparisonState arg_1 : register(s1, space1);
 float4 textureGatherCompare_313add() {
   float2 arg_2 = (1.0f).xx;
   float arg_3 = 1.0f;
-  float4 res = arg_0.GatherCmp(arg_1, arg_2, arg_3, (1).xx);
+  float4 res = arg_0.GatherCmp(arg_1, arg_2, arg_3, (int(1)).xx);
   return res;
 }
 
@@ -46,5 +44,3 @@ vertex_main_outputs vertex_main() {
   return v_4;
 }
 
-
-tint executable returned error: exit status 0xe0000001

@@ -16,7 +16,7 @@ float textureSampleLevel_cdfe0f() {
   Texture2DArray v = arg_0;
   SamplerState v_1 = arg_1;
   float3 v_2 = float3((1.0f).xx, float(1u));
-  float res = v.SampleLevel(v_1, v_2, float(1u), (1).xx);
+  float res = v.SampleLevel(v_1, v_2, float(1u), (int(1)).xx);
   return res;
 }
 

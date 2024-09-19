@@ -1,5 +1,5 @@
 
-static int3 v = (0).xxx;
+static int3 v = (int(0)).xxx;
 [numthreads(1, 1, 1)]
 void main() {
 }

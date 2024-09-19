@@ -5,7 +5,7 @@ struct S {
 
 static S V = (S)0;
 void main_1() {
-  int i = 0;
+  int i = int(0);
   i = V.i;
 }
 

@@ -13,8 +13,8 @@ RWByteAddressBuffer prevent_dce : register(u0);
 Texture2DArray<uint4> arg_0 : register(t0, space1);
 uint4 textureLoad_53e142() {
   uint2 arg_1 = (1u).xx;
-  int arg_2 = 1;
-  int arg_3 = 1;
+  int arg_2 = int(1);
+  int arg_3 = int(1);
   Texture2DArray<uint4> v = arg_0;
   int v_1 = arg_2;
   int v_2 = arg_3;

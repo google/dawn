@@ -148,7 +148,7 @@ float4 textureLoad_8acf41() {
   Texture2D<float4> v_63 = arg_0_plane1;
   tint_ExternalTextureParams v_64 = v_39(0u);
   tint_ExternalTextureParams v_65 = v_64;
-  float4 res = tint_TextureLoadExternal(v_62, v_63, v_65, uint2((1).xx));
+  float4 res = tint_TextureLoadExternal(v_62, v_63, v_65, uint2((int(1)).xx));
   return res;
 }
 

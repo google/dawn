@@ -65,7 +65,7 @@ void main_1() {
   float2 sheetUnits = (0.0f).xx;
   float spriteUnits = 0.0f;
   float2 stageUnits = (0.0f).xx;
-  int i = 0;
+  int i = int(0);
   float frameID_1 = 0.0f;
   float4 animationData = (0.0f).xxxx;
   float f = 0.0f;
@@ -90,17 +90,17 @@ void main_1() {
   spriteUnits = (1.0f / x_106);
   float2 x_111 = asfloat(x_20[5u].zw);
   stageUnits = ((1.0f).xx / x_111);
-  i = 0;
+  i = int(0);
   {
     while(true) {
       int x_122 = i;
-      if ((x_122 < 2)) {
+      if ((x_122 < int(2))) {
       } else {
         break;
       }
       int x_126 = i;
       switch(x_126) {
-        case 1:
+        case int(1):
         {
           float2 x_150 = tileID;
           float2 x_154 = asfloat(x_20[5u].zw);
@@ -108,7 +108,7 @@ void main_1() {
           frameID_1 = x_156[0u];
           break;
         }
-        case 0:
+        case int(0):
         {
           float2 x_136 = tileID;
           float2 x_140 = asfloat(x_20[5u].zw);
@@ -166,23 +166,23 @@ void main_1() {
       param = (x_222 + 0.5f);
       float4x4 x_225 = getFrameData_f1_(param);
       frameData = x_225;
-      float4 x_228 = frameData[0];
+      float4 x_228 = frameData[int(0)];
       float2 x_231 = asfloat(x_20[6u].xy);
       frameSize = (float2(x_228[3u], x_228[2u]) / x_231);
-      float4 x_235 = frameData[0];
+      float4 x_235 = frameData[int(0)];
       float2 x_237 = sheetUnits;
       offset_1 = (float2(x_235[0u], x_235[1u]) * x_237);
-      float4 x_241 = frameData[2];
-      float4 x_244 = frameData[0];
+      float4 x_241 = frameData[int(2)];
+      float4 x_244 = frameData[int(0)];
       float2 v_12 = float2(x_241[0u], x_241[1u]);
       ratio = (v_12 / float2(x_244[3u], x_244[2u]));
-      float x_248 = frameData[2].z;
+      float x_248 = frameData[int(2)].z;
       if ((x_248 == 1.0f)) {
         float2 x_252 = tileUV;
         tileUV = float2(x_252[1u], x_252[0u]);
       }
       int x_254 = i;
-      if ((x_254 == 0)) {
+      if ((x_254 == int(0))) {
         float2 x_263 = tileUV;
         float2 x_264 = frameSize;
         float2 x_266 = offset_1;
@@ -209,7 +209,7 @@ void main_1() {
       }
       {
         int x_304 = i;
-        i = (x_304 + 1);
+        i = (x_304 + int(1));
       }
       continue;
     }

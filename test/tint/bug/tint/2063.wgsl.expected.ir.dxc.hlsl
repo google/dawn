@@ -6,12 +6,12 @@ struct compute_main_inputs {
 groupshared int arg_0;
 void compute_main_inner(uint tint_local_index) {
   if ((tint_local_index == 0u)) {
-    int v = 0;
-    InterlockedExchange(arg_0, 0, v);
+    int v = int(0);
+    InterlockedExchange(arg_0, int(0), v);
   }
   GroupMemoryBarrierWithGroupSync();
-  int v_1 = 0;
-  InterlockedAdd(arg_0, -(-1), v_1);
+  int v_1 = int(0);
+  InterlockedAdd(arg_0, -(int(-1)), v_1);
   int res = v_1;
 }
 

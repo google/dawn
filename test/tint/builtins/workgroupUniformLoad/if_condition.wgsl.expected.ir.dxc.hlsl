@@ -5,9 +5,9 @@ int foo() {
   bool v_1 = v;
   GroupMemoryBarrierWithGroupSync();
   if (v_1) {
-    return 42;
+    return int(42);
   }
-  return 0;
+  return int(0);
 }
 
 [numthreads(1, 1, 1)]

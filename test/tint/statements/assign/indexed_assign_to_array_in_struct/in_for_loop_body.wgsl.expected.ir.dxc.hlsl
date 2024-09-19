@@ -15,16 +15,16 @@ void main() {
   InnerS v = (InnerS)0;
   OuterS s1 = (OuterS)0;
   {
-    int i = 0;
+    int i = int(0);
     while(true) {
-      if ((i < 4)) {
+      if ((i < int(4))) {
       } else {
         break;
       }
       InnerS v_1 = v;
       s1.a1[uniforms[0u].x] = v_1;
       {
-        i = (i + 1);
+        i = (i + int(1));
       }
       continue;
     }

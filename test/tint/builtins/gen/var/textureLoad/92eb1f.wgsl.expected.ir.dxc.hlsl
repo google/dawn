@@ -13,7 +13,7 @@ RWByteAddressBuffer prevent_dce : register(u0);
 Texture3D<uint4> arg_0 : register(t0, space1);
 uint4 textureLoad_92eb1f() {
   uint3 arg_1 = (1u).xxx;
-  int arg_2 = 1;
+  int arg_2 = int(1);
   Texture3D<uint4> v = arg_0;
   int v_1 = arg_2;
   int3 v_2 = int3(arg_1);

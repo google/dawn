@@ -8,7 +8,7 @@ struct vertex_main_outputs {
 
 
 void min_371bd6() {
-  int3 res = (1).xxx;
+  int3 res = (int(1)).xxx;
 }
 
 void fragment_main() {

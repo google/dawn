@@ -14,7 +14,7 @@ Texture2DMS<float4> arg_0 : register(t0, space1);
 float4 textureLoad_f0abad() {
   Texture2DMS<float4> v = arg_0;
   int2 v_1 = int2((1u).xx);
-  float4 res = float4(v.Load(v_1, int(1)));
+  float4 res = float4(v.Load(v_1, int(int(1))));
   return res;
 }
 

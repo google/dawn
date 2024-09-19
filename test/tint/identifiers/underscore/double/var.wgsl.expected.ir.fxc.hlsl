@@ -1,7 +1,7 @@
 
 RWByteAddressBuffer s : register(u0);
-static int a = 1;
-static int a__ = 2;
+static int a = int(1);
+static int a__ = int(2);
 [numthreads(1, 1, 1)]
 void f() {
   int b = a;
