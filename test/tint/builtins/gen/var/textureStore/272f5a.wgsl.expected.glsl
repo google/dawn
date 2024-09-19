@@ -1,6 +1,6 @@
 #version 460
 
-layout(binding = 0, r8) uniform highp writeonly image2DArray arg_0;
+layout(binding = 0, r8) uniform highp image2DArray arg_0;
 void textureStore_272f5a() {
   ivec2 arg_1 = ivec2(1);
   uint arg_2 = 1u;
@@ -18,7 +18,7 @@ void main() {
 }
 #version 460
 
-layout(binding = 0, r8) uniform highp writeonly image2DArray arg_0;
+layout(binding = 0, r8) uniform highp image2DArray arg_0;
 void textureStore_272f5a() {
   ivec2 arg_1 = ivec2(1);
   uint arg_2 = 1u;

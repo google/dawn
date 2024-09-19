@@ -1,6 +1,6 @@
 #version 460
 
-layout(binding = 0, rg32f) uniform highp writeonly image3D arg_0;
+layout(binding = 0, rg32f) uniform highp image3D arg_0;
 void textureStore_7b8f86() {
   uvec3 arg_1 = uvec3(1u);
   vec4 arg_2 = vec4(1.0f);
@@ -17,7 +17,7 @@ void main() {
 }
 #version 460
 
-layout(binding = 0, rg32f) uniform highp writeonly image3D arg_0;
+layout(binding = 0, rg32f) uniform highp image3D arg_0;
 void textureStore_7b8f86() {
   uvec3 arg_1 = uvec3(1u);
   vec4 arg_2 = vec4(1.0f);

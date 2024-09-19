@@ -1,6 +1,6 @@
 #version 460
 
-layout(binding = 0, r8) uniform highp writeonly image3D arg_0;
+layout(binding = 0, r8) uniform highp image3D arg_0;
 void textureStore_ed6198() {
   imageStore(arg_0, ivec3(1), vec4(1.0f));
 }
@@ -15,7 +15,7 @@ void main() {
 }
 #version 460
 
-layout(binding = 0, r8) uniform highp writeonly image3D arg_0;
+layout(binding = 0, r8) uniform highp image3D arg_0;
 void textureStore_ed6198() {
   imageStore(arg_0, ivec3(1), vec4(1.0f));
 }

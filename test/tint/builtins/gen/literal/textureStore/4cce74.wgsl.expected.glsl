@@ -1,6 +1,6 @@
 #version 460
 
-layout(binding = 0, rg32ui) uniform highp writeonly uimage2D arg_0;
+layout(binding = 0, rg32ui) uniform highp uimage2D arg_0;
 void textureStore_4cce74() {
   imageStore(arg_0, ivec2(1, 0), uvec4(1u));
 }
@@ -15,7 +15,7 @@ void main() {
 }
 #version 460
 
-layout(binding = 0, rg32ui) uniform highp writeonly uimage2D arg_0;
+layout(binding = 0, rg32ui) uniform highp uimage2D arg_0;
 void textureStore_4cce74() {
   imageStore(arg_0, ivec2(1, 0), uvec4(1u));
 }

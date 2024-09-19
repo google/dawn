@@ -4,7 +4,7 @@ layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
   uint inner;
 } prevent_dce;
 
-layout(binding = 0, r8) uniform highp writeonly image2DArray arg_0;
+layout(binding = 0, r8) uniform highp image2DArray arg_0;
 uint textureNumLayers_aac630() {
   uint res = uint(imageSize(arg_0).z);
   return res;
@@ -24,7 +24,7 @@ layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
   uint inner;
 } prevent_dce;
 
-layout(binding = 0, r8) uniform highp writeonly image2DArray arg_0;
+layout(binding = 0, r8) uniform highp image2DArray arg_0;
 uint textureNumLayers_aac630() {
   uint res = uint(imageSize(arg_0).z);
   return res;
