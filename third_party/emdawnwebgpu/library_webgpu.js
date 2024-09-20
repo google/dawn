@@ -588,7 +588,7 @@ var LibraryWebGPU = {
   },
 
   emwgpuAdapterRequestDevice__i53abi: false,
-  emwgpuAdapterRequestDevice__deps: ['$withStackSave', '$callUserCallback', '$stringToUTF8OnStack', 'emwgpuCreateQueue', 'emwgpuOnDeviceLostCompleted', 'emwgpuOnRequestDeviceCompleted', 'emwgpuOnUncapturedError'],
+  emwgpuAdapterRequestDevice__deps: ['$stringToUTF8OnStack', 'emwgpuCreateQueue', 'emwgpuOnDeviceLostCompleted', 'emwgpuOnRequestDeviceCompleted', 'emwgpuOnUncapturedError'],
   emwgpuAdapterRequestDevice: (
     adapterPtr,
     futureIdL, futureIdH,
@@ -688,10 +688,10 @@ var LibraryWebGPU = {
           {{{ runtimeKeepalivePop() }}}
           // Unset the uncaptured error handler.
           device.onuncapturederror = (ev) => {};
-          withStackSave(() => {
-            var messagePtr = stringToUTF8OnStack(info.message);
-            _emwgpuOnDeviceLostCompleted(deviceLostFutureIdL, deviceLostFutureIdH, WebGPU.Int_DeviceLostReason[info.reason], messagePtr);
-          });
+          var sp = stackSave();
+          var messagePtr = stringToUTF8OnStack(info.message);
+          _emwgpuOnDeviceLostCompleted(deviceLostFutureIdL, deviceLostFutureIdH, WebGPU.Int_DeviceLostReason[info.reason], messagePtr);
+          stackRestore(sp);
         }));
       }
 
@@ -706,22 +706,22 @@ var LibraryWebGPU = {
           if (ev.error instanceof GPUValidationError) type = {{{ gpu.ErrorType.Validation }}};
           else if (ev.error instanceof GPUOutOfMemoryError) type = {{{ gpu.ErrorType.OutOfMemory }}};
           else if (ev.error instanceof GPUInternalError) type = {{{ gpu.ErrorType.Internal }}};
-          withStackSave(() => {
-            var messagePtr = stringToUTF8OnStack(ev.error.message);
-            _emwgpuOnUncapturedError(devicePtr, type, messagePtr);
-          });
+          var sp = stackSave();
+          var messagePtr = stringToUTF8OnStack(ev.error.message);
+          _emwgpuOnUncapturedError(devicePtr, type, messagePtr);
+          stackRestore(sp);
       };
 
       _emwgpuOnRequestDeviceCompleted(futureIdL, futureIdH, {{{ gpu.RequestDeviceStatus.Success }}}, devicePtr, 0);
     }, (ex) => {
       {{{ runtimeKeepalivePop() }}}
-      withStackSave(() => {
-        var messagePtr = stringToUTF8OnStack(ex.message);
-        _emwgpuOnRequestDeviceCompleted(futureIdL, futureIdH, {{{ gpu.RequestDeviceStatus.Error }}}, devicePtr, messagePtr);
-        if (hasDeviceLostFutureId) {
-          _emwgpuOnDeviceLostCompleted(deviceLostFutureIdL, deviceLostFutureIdH, {{{ gpu.DeviceLostReason.FailedCreation }}}, messagePtr);
-        }
-      });
+      var sp = stackSave();
+      var messagePtr = stringToUTF8OnStack(ex.message);
+      _emwgpuOnRequestDeviceCompleted(futureIdL, futureIdH, {{{ gpu.RequestDeviceStatus.Error }}}, devicePtr, messagePtr);
+      if (hasDeviceLostFutureId) {
+        _emwgpuOnDeviceLostCompleted(deviceLostFutureIdL, deviceLostFutureIdH, {{{ gpu.DeviceLostReason.FailedCreation }}}, messagePtr);
+      }
+      stackRestore(sp);
     }));
   },
 
@@ -1883,7 +1883,7 @@ var LibraryWebGPU = {
   },
 
   emwgpuInstanceRequestAdapter__i53abi: false,
-  emwgpuInstanceRequestAdapter__deps: ['$withStackSave', '$callUserCallback', '$stringToUTF8OnStack', 'emwgpuCreateAdapter', 'emwgpuOnRequestAdapterCompleted'],
+  emwgpuInstanceRequestAdapter__deps: ['$callUserCallback', '$stringToUTF8OnStack', 'emwgpuCreateAdapter', 'emwgpuOnRequestAdapterCompleted'],
   emwgpuInstanceRequestAdapter: (instancePtr, futureIdL, futureIdH, options) => {
     var opts;
     if (options) {
@@ -1897,10 +1897,10 @@ var LibraryWebGPU = {
     }
 
     if (!('gpu' in navigator)) {
-      withStackSave(() => {
-        var messagePtr = stringToUTF8OnStack('WebGPU not available on this browser (navigator.gpu is not available)');
-        _emwgpuOnRequestAdapterCompleted(futureIdL, futureIdH, {{{ gpu.RequestAdapterStatus.Unavailable }}}, 0, messagePtr);
-      });
+      var sp = stackSave();
+      var messagePtr = stringToUTF8OnStack('WebGPU not available on this browser (navigator.gpu is not available)');
+      _emwgpuOnRequestAdapterCompleted(futureIdL, futureIdH, {{{ gpu.RequestAdapterStatus.Unavailable }}}, 0, messagePtr);
+      stackRestore(sp);
       return;
     }
 
@@ -1912,18 +1912,18 @@ var LibraryWebGPU = {
         WebGPU._tableInsert(adapterPtr, adapter);
         _emwgpuOnRequestAdapterCompleted(futureIdL, futureIdH, {{{ gpu.RequestAdapterStatus.Success }}}, adapterPtr, 0);
       } else {
-        withStackSave(() => {
-          var messagePtr = stringToUTF8OnStack('WebGPU not available on this browser (requestAdapter returned null)');
-          _emwgpuOnRequestAdapterCompleted(futureIdL, futureIdH, {{{ gpu.RequestAdapterStatus.Unavailable }}}, 0, messagePtr);
-        });
+        var sp = stackSave();
+        var messagePtr = stringToUTF8OnStack('WebGPU not available on this browser (requestAdapter returned null)');
+        _emwgpuOnRequestAdapterCompleted(futureIdL, futureIdH, {{{ gpu.RequestAdapterStatus.Unavailable }}}, 0, messagePtr);
+        stackRestore(sp);
       }
       return;
     }, (ex) => {
       {{{ runtimeKeepalivePop() }}}
-      withStackSave(() => {
-        var messagePtr = stringToUTF8OnStack(ex.message);
-        _emwgpuOnRequestAdapterCompleted(futureIdL, futureIdH, {{{ gpu.RequestAdapterStatus.Error }}}, 0, messagePtr);
-      });
+      var sp = stackSave();
+      var messagePtr = stringToUTF8OnStack(ex.message);
+      _emwgpuOnRequestAdapterCompleted(futureIdL, futureIdH, {{{ gpu.RequestAdapterStatus.Error }}}, 0, messagePtr);
+      stackRestore(sp);
       return;
     }));
   },
