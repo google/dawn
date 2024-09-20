@@ -120,10 +120,9 @@ MaybeError SwapChain::Initialize(SwapChainBase* previousSwapChain) {
         SwapChain* previousVulkanSwapChain = ToBackend(previousSwapChain);
 
         // TODO(crbug.com/dawn/269): Figure out switching a single surface between multiple
-        // Vulkan devices on different VkInstances. Probably needs to block too!
-        VkInstance previousInstance = ToBackend(previousSwapChain->GetDevice())->GetVkInstance();
-        DAWN_INVALID_IF(previousInstance != ToBackend(GetDevice())->GetVkInstance(),
-                        "Vulkan SwapChain cannot switch between Vulkan instances.");
+        // Vulkan devices. Probably needs to block too!
+        DAWN_INVALID_IF(previousSwapChain->GetDevice() != GetDevice(),
+                        "Vulkan SwapChain cannot switch between devices.");
 
         // The previous swapchain is a dawn::native::vulkan::SwapChain so we can reuse its
         // VkSurfaceKHR provided since they are on the same instance.
