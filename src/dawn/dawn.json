@@ -618,14 +618,14 @@
         "category": "structure",
         "members": [
             {"name": "data", "type": "char", "annotation": "const*", "optional": true},
-            {"name": "length", "type": "size_t", "default": "SIZE_MAX"}
+            {"name": "length", "type": "size_t", "default": "WGPU_STRLEN"}
         ]
     },
     "nullable string view": {
         "category": "structure",
         "members": [
             {"name": "data", "type": "char", "annotation": "const*", "optional": true},
-            {"name": "length", "type": "size_t", "default": "SIZE_MAX"}
+            {"name": "length", "type": "size_t", "default": "WGPU_STRLEN"}
         ]
     },
     "buffer": {
@@ -4774,6 +4774,11 @@
         "category": "constant",
         "type": "uint32_t",
         "value":  "UINT32_MAX"
+    },
+    "strlen" : {
+        "category": "constant",
+        "type": "size_t",
+        "value":  "SIZE_MAX"
     },
     "ObjectType": {
       "_comment": "Only used for the wire",
