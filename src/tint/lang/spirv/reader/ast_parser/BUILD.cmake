@@ -146,6 +146,7 @@ tint_add_target(tint_lang_spirv_reader_ast_parser_test test
   lang/spirv/reader/ast_parser/named_types_test.cc
   lang/spirv/reader/ast_parser/namer_test.cc
   lang/spirv/reader/ast_parser/parser_test.cc
+  lang/spirv/reader/ast_parser/row_major_matrix_test.cc
   lang/spirv/reader/ast_parser/spirv_tools_helpers_test.cc
   lang/spirv/reader/ast_parser/spirv_tools_helpers_test.h
   lang/spirv/reader/ast_parser/type_test.cc
@@ -164,6 +165,7 @@ tint_target_add_dependencies(tint_lang_spirv_reader_ast_parser_test test
   tint_lang_wgsl_features
   tint_lang_wgsl_program
   tint_lang_wgsl_sem
+  tint_lang_wgsl_writer_ir_to_program
   tint_utils_containers
   tint_utils_diagnostic
   tint_utils_generator
@@ -202,6 +204,7 @@ endif(TINT_BUILD_SPV_READER OR TINT_BUILD_SPV_WRITER)
 
 if(TINT_BUILD_WGSL_WRITER)
   tint_target_add_dependencies(tint_lang_spirv_reader_ast_parser_test test
+    tint_lang_wgsl_writer
     tint_lang_wgsl_writer_ast_printer
   )
 endif(TINT_BUILD_WGSL_WRITER)

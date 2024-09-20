@@ -138,6 +138,7 @@ cc_library(
     "named_types_test.cc",
     "namer_test.cc",
     "parser_test.cc",
+    "row_major_matrix_test.cc",
     "spirv_tools_helpers_test.cc",
     "spirv_tools_helpers_test.h",
     "type_test.cc",
@@ -155,6 +156,7 @@ cc_library(
     "//src/tint/lang/wgsl/features",
     "//src/tint/lang/wgsl/program",
     "//src/tint/lang/wgsl/sem",
+    "//src/tint/lang/wgsl/writer/ir_to_program",
     "//src/tint/utils/containers",
     "//src/tint/utils/diagnostic",
     "//src/tint/utils/generator",
@@ -186,6 +188,7 @@ cc_library(
     "//conditions:default": [],
   }) + select({
     ":tint_build_wgsl_writer": [
+      "//src/tint/lang/wgsl/writer",
       "//src/tint/lang/wgsl/writer/ast_printer",
     ],
     "//conditions:default": [],

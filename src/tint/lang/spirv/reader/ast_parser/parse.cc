@@ -34,6 +34,7 @@
 #include "src/tint/lang/spirv/reader/ast_lower/decompose_strided_matrix.h"
 #include "src/tint/lang/spirv/reader/ast_lower/fold_trivial_lets.h"
 #include "src/tint/lang/spirv/reader/ast_lower/pass_workgroup_id_as_argument.h"
+#include "src/tint/lang/spirv/reader/ast_lower/transpose_row_major.h"
 #include "src/tint/lang/spirv/reader/ast_parser/ast_parser.h"
 #include "src/tint/lang/wgsl/ast/transform/manager.h"
 #include "src/tint/lang/wgsl/ast/transform/remove_unreachable_statements.h"
@@ -115,6 +116,7 @@ Program Parse(const std::vector<uint32_t>& input, const Options& options) {
     manager.Add<ast::transform::SimplifyPointers>();
     manager.Add<FoldTrivialLets>();
     manager.Add<PassWorkgroupIdAsArgument>();
+    manager.Add<TransposeRowMajor>();
     manager.Add<DecomposeStridedMatrix>();
     manager.Add<DecomposeStridedArray>();
     manager.Add<ast::transform::RemoveUnreachableStatements>();

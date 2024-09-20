@@ -146,6 +146,7 @@ if (tint_build_unittests) {
         "named_types_test.cc",
         "namer_test.cc",
         "parser_test.cc",
+        "row_major_matrix_test.cc",
         "spirv_tools_helpers_test.cc",
         "spirv_tools_helpers_test.h",
         "type_test.cc",
@@ -165,6 +166,7 @@ if (tint_build_unittests) {
         "${tint_src_dir}/lang/wgsl/features",
         "${tint_src_dir}/lang/wgsl/program",
         "${tint_src_dir}/lang/wgsl/sem",
+        "${tint_src_dir}/lang/wgsl/writer/ir_to_program",
         "${tint_src_dir}/utils/containers",
         "${tint_src_dir}/utils/diagnostic",
         "${tint_src_dir}/utils/generator",
@@ -200,7 +202,10 @@ if (tint_build_unittests) {
       }
 
       if (tint_build_wgsl_writer) {
-        deps += [ "${tint_src_dir}/lang/wgsl/writer/ast_printer" ]
+        deps += [
+          "${tint_src_dir}/lang/wgsl/writer",
+          "${tint_src_dir}/lang/wgsl/writer/ast_printer",
+        ]
       }
       public_configs = [ "${tint_spirv_tools_dir}/:spvtools_internal_config" ]
     }

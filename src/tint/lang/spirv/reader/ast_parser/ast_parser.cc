@@ -42,6 +42,7 @@
 #include "src/tint/lang/wgsl/ast/disable_validation_attribute.h"
 #include "src/tint/lang/wgsl/ast/id_attribute.h"
 #include "src/tint/lang/wgsl/ast/interpolate_attribute.h"
+#include "src/tint/lang/wgsl/ast/row_major_attribute.h"
 #include "src/tint/lang/wgsl/ast/unary_op_expression.h"
 #include "src/tint/lang/wgsl/resolver/resolve.h"
 #include "src/tint/utils/containers/unique_vector.h"
@@ -506,9 +507,12 @@ Attributes ASTParser::ConvertMemberDecoration(uint32_t struct_type_id,
         case spv::Decoration::RelaxedPrecision:  // WGSL doesn't support relaxed precision.
             break;
         case spv::Decoration::RowMajor:
-            Fail() << "WGSL does not support row-major matrices: can't "
-                      "translate member "
-                   << member_index << " of " << ShowType(struct_type_id);
+            if (!member_ty->Is<Matrix>()) {
+                Fail() << "row-major matrix layout not currently supported on type "
+                       << member_ty->String();
+                break;
+            }
+            out.Add(create<ast::RowMajorAttribute>(Source{}));
             break;
         case spv::Decoration::MatrixStride: {
             if (decoration.size() != 2) {
