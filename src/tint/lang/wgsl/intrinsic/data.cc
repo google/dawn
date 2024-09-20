@@ -12301,102 +12301,116 @@ constexpr IntrinsicInfo kBuiltins[] = {
   },
   {
     /* [131] */
+    /* fn subgroupInclusiveAdd[T : fiu32_f16](value: T) -> T */
+    /* fn subgroupInclusiveAdd[N : num, T : fiu32_f16](value: vec<N, T>) -> vec<N, T> */
+    /* num overloads */ 2,
+    /* overloads */ OverloadIndex(483),
+  },
+  {
+    /* [132] */
     /* fn subgroupExclusiveAdd[T : fiu32_f16](value: T) -> T */
     /* fn subgroupExclusiveAdd[N : num, T : fiu32_f16](value: vec<N, T>) -> vec<N, T> */
     /* num overloads */ 2,
     /* overloads */ OverloadIndex(483),
   },
   {
-    /* [132] */
+    /* [133] */
     /* fn subgroupMul[T : fiu32_f16](value: T) -> T */
     /* fn subgroupMul[N : num, T : fiu32_f16](value: vec<N, T>) -> vec<N, T> */
     /* num overloads */ 2,
     /* overloads */ OverloadIndex(483),
   },
   {
-    /* [133] */
+    /* [134] */
+    /* fn subgroupInclusiveMul[T : fiu32_f16](value: T) -> T */
+    /* fn subgroupInclusiveMul[N : num, T : fiu32_f16](value: vec<N, T>) -> vec<N, T> */
+    /* num overloads */ 2,
+    /* overloads */ OverloadIndex(483),
+  },
+  {
+    /* [135] */
     /* fn subgroupExclusiveMul[T : fiu32_f16](value: T) -> T */
     /* fn subgroupExclusiveMul[N : num, T : fiu32_f16](value: vec<N, T>) -> vec<N, T> */
     /* num overloads */ 2,
     /* overloads */ OverloadIndex(483),
   },
   {
-    /* [134] */
+    /* [136] */
     /* fn subgroupAnd[T : iu32](value: T) -> T */
     /* fn subgroupAnd[N : num, T : iu32](value: vec<N, T>) -> vec<N, T> */
     /* num overloads */ 2,
     /* overloads */ OverloadIndex(489),
   },
   {
-    /* [135] */
+    /* [137] */
     /* fn subgroupOr[T : iu32](value: T) -> T */
     /* fn subgroupOr[N : num, T : iu32](value: vec<N, T>) -> vec<N, T> */
     /* num overloads */ 2,
     /* overloads */ OverloadIndex(489),
   },
   {
-    /* [136] */
+    /* [138] */
     /* fn subgroupXor[T : iu32](value: T) -> T */
     /* fn subgroupXor[N : num, T : iu32](value: vec<N, T>) -> vec<N, T> */
     /* num overloads */ 2,
     /* overloads */ OverloadIndex(489),
   },
   {
-    /* [137] */
+    /* [139] */
     /* fn subgroupMin[T : fiu32_f16](value: T) -> T */
     /* fn subgroupMin[N : num, T : fiu32_f16](value: vec<N, T>) -> vec<N, T> */
     /* num overloads */ 2,
     /* overloads */ OverloadIndex(483),
   },
   {
-    /* [138] */
+    /* [140] */
     /* fn subgroupMax[T : fiu32_f16](value: T) -> T */
     /* fn subgroupMax[N : num, T : fiu32_f16](value: vec<N, T>) -> vec<N, T> */
     /* num overloads */ 2,
     /* overloads */ OverloadIndex(483),
   },
   {
-    /* [139] */
+    /* [141] */
     /* fn subgroupAll(bool) -> bool */
     /* num overloads */ 1,
     /* overloads */ OverloadIndex(556),
   },
   {
-    /* [140] */
+    /* [142] */
     /* fn subgroupAny(bool) -> bool */
     /* num overloads */ 1,
     /* overloads */ OverloadIndex(556),
   },
   {
-    /* [141] */
+    /* [143] */
     /* fn quadBroadcast[T : fiu32_f16](e: T, @const id: iu32) -> T */
     /* fn quadBroadcast[N : num, T : fiu32_f16](e: vec<N, T>, @const id: iu32) -> vec<N, T> */
     /* num overloads */ 2,
     /* overloads */ OverloadIndex(491),
   },
   {
-    /* [142] */
+    /* [144] */
     /* fn quadSwapX[T : fiu32_f16](e: T) -> T */
     /* fn quadSwapX[N : num, T : fiu32_f16](e: vec<N, T>) -> vec<N, T> */
     /* num overloads */ 2,
     /* overloads */ OverloadIndex(493),
   },
   {
-    /* [143] */
+    /* [145] */
     /* fn quadSwapY[T : fiu32_f16](e: T) -> T */
     /* fn quadSwapY[N : num, T : fiu32_f16](e: vec<N, T>) -> vec<N, T> */
     /* num overloads */ 2,
     /* overloads */ OverloadIndex(493),
   },
   {
-    /* [144] */
+    /* [146] */
     /* fn quadSwapDiagonal[T : fiu32_f16](e: T) -> T */
     /* fn quadSwapDiagonal[N : num, T : fiu32_f16](e: vec<N, T>) -> vec<N, T> */
     /* num overloads */ 2,
     /* overloads */ OverloadIndex(493),
   },
   {
-    /* [145] */
+    /* [147] */
     /* fn __tint_materialize[T](T) -> T */
     /* num overloads */ 1,
     /* overloads */ OverloadIndex(557),

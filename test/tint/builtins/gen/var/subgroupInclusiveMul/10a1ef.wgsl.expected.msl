@@ -1,0 +1,19 @@
+#include <metal_stdlib>
+
+using namespace metal;
+half subgroupInclusiveMul_10a1ef() {
+  half arg_0 = 1.0h;
+  half res = simd_prefix_inclusive_product(arg_0);
+  return res;
+}
+
+fragment void fragment_main(device half* tint_symbol [[buffer(0)]]) {
+  *(tint_symbol) = subgroupInclusiveMul_10a1ef();
+  return;
+}
+
+kernel void compute_main(device half* tint_symbol_1 [[buffer(0)]]) {
+  *(tint_symbol_1) = subgroupInclusiveMul_10a1ef();
+  return;
+}
+

@@ -1071,11 +1071,17 @@ class Printer : public tint::TextGenerator {
             case core::BuiltinFn::kSubgroupAdd:
                 out << "simd_sum";
                 break;
+            case core::BuiltinFn::kSubgroupInclusiveAdd:
+                out << "simd_prefix_inclusive_sum";
+                break;
             case core::BuiltinFn::kSubgroupExclusiveAdd:
                 out << "simd_prefix_exclusive_sum";
                 break;
             case core::BuiltinFn::kSubgroupMul:
                 out << "simd_product";
+                break;
+            case core::BuiltinFn::kSubgroupInclusiveMul:
+                out << "simd_prefix_inclusive_product";
                 break;
             case core::BuiltinFn::kSubgroupExclusiveMul:
                 out << "simd_prefix_exclusive_product";

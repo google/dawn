@@ -1665,10 +1665,14 @@ struct Decoder {
                 return core::BuiltinFn::kInputAttachmentLoad;
             case pb::BuiltinFn::subgroup_add:
                 return core::BuiltinFn::kSubgroupAdd;
+            case pb::BuiltinFn::subgroup_inclusive_add:
+                return core::BuiltinFn::kSubgroupInclusiveAdd;
             case pb::BuiltinFn::subgroup_exclusive_add:
                 return core::BuiltinFn::kSubgroupExclusiveAdd;
             case pb::BuiltinFn::subgroup_mul:
                 return core::BuiltinFn::kSubgroupMul;
+            case pb::BuiltinFn::subgroup_inclusive_mul:
+                return core::BuiltinFn::kSubgroupInclusiveMul;
             case pb::BuiltinFn::subgroup_exclusive_mul:
                 return core::BuiltinFn::kSubgroupExclusiveMul;
             case pb::BuiltinFn::subgroup_and:

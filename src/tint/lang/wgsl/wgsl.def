@@ -641,10 +641,14 @@ match workgroup
 @must_use @stage("fragment", "compute") implicit(N: num, T: fiu32_f16) fn subgroupShuffleDown(value: vec<N, T>, delta: u32) -> vec<N, T>
 @must_use @stage("fragment", "compute") implicit(T: fiu32_f16) fn subgroupAdd(value: T) -> T
 @must_use @stage("fragment", "compute") implicit(N: num, T: fiu32_f16) fn subgroupAdd(value: vec<N, T>) -> vec<N, T>
+@must_use @stage("fragment", "compute") implicit(T: fiu32_f16) fn subgroupInclusiveAdd(value: T) -> T
+@must_use @stage("fragment", "compute") implicit(N: num, T: fiu32_f16) fn subgroupInclusiveAdd(value: vec<N, T>) -> vec<N, T>
 @must_use @stage("fragment", "compute") implicit(T: fiu32_f16) fn subgroupExclusiveAdd(value: T) -> T
 @must_use @stage("fragment", "compute") implicit(N: num, T: fiu32_f16) fn subgroupExclusiveAdd(value: vec<N, T>) -> vec<N, T>
 @must_use @stage("fragment", "compute") implicit(T: fiu32_f16) fn subgroupMul(value: T) -> T
 @must_use @stage("fragment", "compute") implicit(N: num, T: fiu32_f16) fn subgroupMul(value: vec<N, T>) -> vec<N, T>
+@must_use @stage("fragment", "compute") implicit(T: fiu32_f16) fn subgroupInclusiveMul(value: T) -> T
+@must_use @stage("fragment", "compute") implicit(N: num, T: fiu32_f16) fn subgroupInclusiveMul(value: vec<N, T>) -> vec<N, T>
 @must_use @stage("fragment", "compute") implicit(T: fiu32_f16) fn subgroupExclusiveMul(value: T) -> T
 @must_use @stage("fragment", "compute") implicit(N: num, T: fiu32_f16) fn subgroupExclusiveMul(value: vec<N, T>) -> vec<N, T>
 @must_use @stage("fragment", "compute") implicit(T: iu32) fn subgroupAnd(value: T) -> T

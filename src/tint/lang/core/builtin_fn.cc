@@ -426,11 +426,17 @@ BuiltinFn ParseBuiltinFn(std::string_view name) {
     if (name == "subgroupAdd") {
         return BuiltinFn::kSubgroupAdd;
     }
+    if (name == "subgroupInclusiveAdd") {
+        return BuiltinFn::kSubgroupInclusiveAdd;
+    }
     if (name == "subgroupExclusiveAdd") {
         return BuiltinFn::kSubgroupExclusiveAdd;
     }
     if (name == "subgroupMul") {
         return BuiltinFn::kSubgroupMul;
+    }
+    if (name == "subgroupInclusiveMul") {
+        return BuiltinFn::kSubgroupInclusiveMul;
     }
     if (name == "subgroupExclusiveMul") {
         return BuiltinFn::kSubgroupExclusiveMul;
@@ -733,10 +739,14 @@ const char* str(BuiltinFn i) {
             return "subgroupShuffleDown";
         case BuiltinFn::kSubgroupAdd:
             return "subgroupAdd";
+        case BuiltinFn::kSubgroupInclusiveAdd:
+            return "subgroupInclusiveAdd";
         case BuiltinFn::kSubgroupExclusiveAdd:
             return "subgroupExclusiveAdd";
         case BuiltinFn::kSubgroupMul:
             return "subgroupMul";
+        case BuiltinFn::kSubgroupInclusiveMul:
+            return "subgroupInclusiveMul";
         case BuiltinFn::kSubgroupExclusiveMul:
             return "subgroupExclusiveMul";
         case BuiltinFn::kSubgroupAnd:

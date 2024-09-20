@@ -1157,10 +1157,14 @@ struct Encoder {
                 return pb::BuiltinFn::input_attachment_load;
             case core::BuiltinFn::kSubgroupAdd:
                 return pb::BuiltinFn::subgroup_add;
+            case core::BuiltinFn::kSubgroupInclusiveAdd:
+                return pb::BuiltinFn::subgroup_inclusive_add;
             case core::BuiltinFn::kSubgroupExclusiveAdd:
                 return pb::BuiltinFn::subgroup_exclusive_add;
             case core::BuiltinFn::kSubgroupMul:
                 return pb::BuiltinFn::subgroup_mul;
+            case core::BuiltinFn::kSubgroupInclusiveMul:
+                return pb::BuiltinFn::subgroup_inclusive_mul;
             case core::BuiltinFn::kSubgroupExclusiveMul:
                 return pb::BuiltinFn::subgroup_exclusive_mul;
             case core::BuiltinFn::kSubgroupAnd:

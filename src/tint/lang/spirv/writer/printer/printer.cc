@@ -1691,6 +1691,13 @@ class Printer {
                 operands.push_back(Constant(ir_.constant_values.Get(u32(spv::Scope::Subgroup))));
                 operands.push_back(U32Operand(u32(spv::GroupOperation::Reduce)));
                 break;
+            case core::BuiltinFn::kSubgroupInclusiveAdd:
+                module_.PushCapability(SpvCapabilityGroupNonUniformArithmetic);
+                op = result_ty->IsIntegerScalarOrVector() ? spv::Op::OpGroupNonUniformIAdd
+                                                          : spv::Op::OpGroupNonUniformFAdd;
+                operands.push_back(Constant(ir_.constant_values.Get(u32(spv::Scope::Subgroup))));
+                operands.push_back(U32Operand(u32(spv::GroupOperation::InclusiveScan)));
+                break;
             case core::BuiltinFn::kSubgroupExclusiveAdd:
                 module_.PushCapability(SpvCapabilityGroupNonUniformArithmetic);
                 op = result_ty->IsIntegerScalarOrVector() ? spv::Op::OpGroupNonUniformIAdd
@@ -1704,6 +1711,13 @@ class Printer {
                                                           : spv::Op::OpGroupNonUniformFMul;
                 operands.push_back(Constant(ir_.constant_values.Get(u32(spv::Scope::Subgroup))));
                 operands.push_back(U32Operand(u32(spv::GroupOperation::Reduce)));
+                break;
+            case core::BuiltinFn::kSubgroupInclusiveMul:
+                module_.PushCapability(SpvCapabilityGroupNonUniformArithmetic);
+                op = result_ty->IsIntegerScalarOrVector() ? spv::Op::OpGroupNonUniformIMul
+                                                          : spv::Op::OpGroupNonUniformFMul;
+                operands.push_back(Constant(ir_.constant_values.Get(u32(spv::Scope::Subgroup))));
+                operands.push_back(U32Operand(u32(spv::GroupOperation::InclusiveScan)));
                 break;
             case core::BuiltinFn::kSubgroupExclusiveMul:
                 module_.PushCapability(SpvCapabilityGroupNonUniformArithmetic);

@@ -122,6 +122,8 @@ struct State {
                     case core::BuiltinFn::kSubgroupShuffleXor:
                     case core::BuiltinFn::kSubgroupShuffleUp:
                     case core::BuiltinFn::kSubgroupShuffleDown:
+                    case core::BuiltinFn::kSubgroupInclusiveAdd:
+                    case core::BuiltinFn::kSubgroupInclusiveMul:
                     case core::BuiltinFn::kTextureDimensions:
                     case core::BuiltinFn::kTextureGather:
                     case core::BuiltinFn::kTextureGatherCompare:
@@ -269,6 +271,10 @@ struct State {
                 case core::BuiltinFn::kSubgroupShuffleUp:
                 case core::BuiltinFn::kSubgroupShuffleDown:
                     SubgroupShuffle(call);
+                    break;
+                case core::BuiltinFn::kSubgroupInclusiveAdd:
+                case core::BuiltinFn::kSubgroupInclusiveMul:
+                    SubgroupInclusive(call);
                     break;
                 case core::BuiltinFn::kTextureDimensions:
                     TextureDimensions(call);
@@ -1817,6 +1823,49 @@ struct State {
         });
         call->Destroy();
     }
+
+    // The following subgroup builtin functions are translated to HLSL as follows:
+    // +-----------------------+----------------------+
+    // |        WGSL           |       HLSL           |
+    // +-----------------------+----------------------+
+    // | subgroupInclusiveAdd  | WavePrefixSum(x) + x |
+    // | subgroupInclusiveMul  | WavePrefixMul(x) * x |
+    // +-----------------------+----------------------+
+    void SubgroupInclusive(core::ir::CoreBuiltinCall* call) {
+        TINT_ASSERT(call->Args().Length() == 1);
+        b.InsertBefore(call, [&] {
+            auto builtin_sel = core::BuiltinFn::kNone;
+
+            switch (call->Func()) {
+                case core::BuiltinFn::kSubgroupInclusiveAdd:
+                    builtin_sel = core::BuiltinFn::kSubgroupExclusiveAdd;
+                    break;
+                case core::BuiltinFn::kSubgroupInclusiveMul:
+                    builtin_sel = core::BuiltinFn::kSubgroupExclusiveMul;
+                    break;
+                default:
+                    TINT_UNREACHABLE();
+            }
+
+            auto* arg1 = call->Args()[0];
+            auto call_type = arg1->Type();
+            auto* exclusive_call = b.Call<core::ir::CoreBuiltinCall>(call_type, builtin_sel, arg1);
+
+            core::ir::Instruction* inst = nullptr;
+            switch (call->Func()) {
+                case core::BuiltinFn::kSubgroupInclusiveAdd:
+                    inst = b.Add(call_type, exclusive_call, arg1);
+                    break;
+                case core::BuiltinFn::kSubgroupInclusiveMul:
+                    inst = b.Multiply(call_type, exclusive_call, arg1);
+                    break;
+                default:
+                    TINT_UNREACHABLE();
+            }
+            call->Result(0)->ReplaceAllUsesWith(inst->Result(0));
+        });
+        call->Destroy();
+    }
 };
 
 }  // namespace
@@ -1828,7 +1877,6 @@ Result<SuccessType> BuiltinPolyfill(core::ir::Module& ir) {
     }
 
     State{ir}.Process();
-
     return Success;
 }
 

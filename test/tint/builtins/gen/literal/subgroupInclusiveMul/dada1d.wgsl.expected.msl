@@ -1,0 +1,18 @@
+#include <metal_stdlib>
+
+using namespace metal;
+uint2 subgroupInclusiveMul_dada1d() {
+  uint2 res = simd_prefix_inclusive_product(uint2(1u));
+  return res;
+}
+
+fragment void fragment_main(device uint2* tint_symbol [[buffer(0)]]) {
+  *(tint_symbol) = subgroupInclusiveMul_dada1d();
+  return;
+}
+
+kernel void compute_main(device uint2* tint_symbol_1 [[buffer(0)]]) {
+  *(tint_symbol_1) = subgroupInclusiveMul_dada1d();
+  return;
+}
+

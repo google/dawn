@@ -25,6 +25,7 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+#include <cmath>
 #include <cstdint>
 #include <string>
 #include <vector>
@@ -802,6 +803,211 @@ DAWN_INSTANTIATE_TEST_P(SubgroupsFullSubgroupsTests,
                          VulkanBackend()},
                         {false, true}  // UseChromiumExperimentalSubgroups
 );
+
+// Core functions that may be polyfilled
+enum class SubgroupIntrinsicOp : uint8_t {
+    Add,
+    Mul,
+};
+
+std::ostream& operator<<(std::ostream& o, SubgroupIntrinsicOp subgroup_op) {
+    switch (subgroup_op) {
+        case SubgroupIntrinsicOp::Add:
+            o << "subgroupInclusiveAdd";
+            break;
+        case SubgroupIntrinsicOp::Mul:
+            o << "subgroupInclusiveMul";
+            break;
+    }
+    return o;
+}
+
+enum class SubgroupOpDataType : uint8_t {
+    U32,
+    I32,
+    F32,
+    F16,
+};
+
+std::ostream& operator<<(std::ostream& o, SubgroupOpDataType subgroupOpType) {
+    switch (subgroupOpType) {
+        case SubgroupOpDataType::F32:
+            o << "f32";
+            break;
+        case SubgroupOpDataType::F16:
+            o << "f16";
+            break;
+        case SubgroupOpDataType::U32:
+            o << "u32";
+            break;
+        case SubgroupOpDataType::I32:
+            o << "i32";
+            break;
+    }
+    return o;
+}
+
+DAWN_TEST_PARAM_STRUCT(SubgroupsShaderInclusiveTestsParams,
+                       UseChromiumExperimentalSubgroups,
+                       SubgroupIntrinsicOp,
+                       SubgroupOpDataType);
+
+// Subgroup inclusive operations are polyfilled on some backends (HLSL) so it is convenient to
+// execution test them here. This is only to establish that the polyfill is working as expected and
+// not to evaluate the accuracy of these subgroup operations.
+// As noted elsewhere, it is very difficult to test product (mul) for integers as subgroup sizes
+// greater than bits of the type (32) will overflow for even the smallest constant (2).
+class SubgroupsShaderInclusiveTest
+    : public SubgroupsTestsBase<SubgroupsShaderInclusiveTestsParams> {
+  protected:
+    void TestReadSubgroupSize(uint32_t workgroupSize) {
+        auto shaderModule = CreateShaderModuleForReadSubgroupSize(workgroupSize, kValueInShader);
+
+        wgpu::ComputePipelineDescriptor csDesc;
+        csDesc.compute.module = shaderModule;
+        auto pipeline = device.CreateComputePipeline(&csDesc);
+
+        uint32_t outputBufferSizeInBytes = workgroupSize * sizeof(float);
+        wgpu::BufferDescriptor outputBufferDesc;
+        outputBufferDesc.size = outputBufferSizeInBytes;
+        outputBufferDesc.usage = wgpu::BufferUsage::Storage | wgpu::BufferUsage::CopySrc;
+        wgpu::Buffer outputBuffer = device.CreateBuffer(&outputBufferDesc);
+
+        wgpu::BindGroup bindGroup = utils::MakeBindGroup(device, pipeline.GetBindGroupLayout(0),
+                                                         {
+                                                             {0, outputBuffer},
+                                                         });
+
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
+        pass.SetPipeline(pipeline);
+        pass.SetBindGroup(0, bindGroup);
+        pass.DispatchWorkgroups(1);
+        pass.End();
+        wgpu::CommandBuffer commands = encoder.Finish();
+        queue.Submit(1, &commands);
+
+        EXPECT_BUFFER(outputBuffer, 0, outputBufferSizeInBytes,
+                      new ExpectReadSubgroupSizeOutput(workgroupSize));
+    }
+
+  private:
+    static constexpr float kValueInShader = 1.05f;
+
+    wgpu::ShaderModule CreateShaderModuleForReadSubgroupSize(uint32_t workgroupSize,
+                                                             float common_value) {
+        DAWN_ASSERT((1 <= workgroupSize) && (workgroupSize <= 256));
+        std::stringstream code;
+        EnableExtensions(code) << R"(
+const workgroupSize = )" << workgroupSize
+                               << R"(u;
+
+@group(0) @binding(0) var<storage, read_write> output : array<f32, workgroupSize>;
+
+@compute @workgroup_size(workgroupSize, 1, 1)
+fn main(
+    @builtin(local_invocation_id) local_id : vec3u
+) {
+    let a:)" << GetParam().mSubgroupOpDataType
+                               << R"( =  )" << GetParam().mSubgroupOpDataType << R"( ( )"
+                               << common_value << R"( );;
+    output[local_id.x] = f32( )"
+                               << GetParam().mSubgroupIntrinsicOp << R"( (a));
+}
+)";
+        return utils::CreateShaderModule(device, code.str().c_str());
+    }
+
+    class ExpectReadSubgroupSizeOutput : public dawn::detail::Expectation {
+      public:
+        explicit ExpectReadSubgroupSizeOutput(uint32_t workgroupSize)
+            : mWorkgroupSize(workgroupSize) {}
+        testing::AssertionResult Check(const void* data, size_t size) override {
+            DAWN_ASSERT(size == sizeof(float) * mWorkgroupSize);
+            const float* actual = static_cast<const float*>(data);
+
+            auto approximate_f = [](float actual, float expected) {
+                return abs(actual - expected) / abs(expected) < (kValueInShader / 2.0f);
+            };
+
+            // Floor initial value in shader to simulate integer casting.
+            const float init_value = (GetParam().mSubgroupOpDataType == SubgroupOpDataType::U32 ||
+                                      GetParam().mSubgroupOpDataType == SubgroupOpDataType::I32)
+                                         ? std::floor(kValueInShader)
+                                         : kValueInShader;
+            float expected_value = init_value;
+            for (uint32_t i = 0; i < mWorkgroupSize; i++) {
+                if (!approximate_f(actual[i], expected_value)) {
+                    // This could be the next subgroup so retest with the initial value.
+                    float old_expected_value = expected_value;
+                    expected_value = init_value;
+                    if (!approximate_f(actual[i], expected_value)) {
+                        testing::AssertionResult result =
+                            testing::AssertionFailure()
+                            << "Unexpected result for " << GetParam().mSubgroupIntrinsicOp
+                            << " for type " << GetParam().mSubgroupOpDataType << " for element "
+                            << i << " of a workgroup size of " << mWorkgroupSize
+                            << ". The actual value was " << actual[i] << " and the expected was "
+                            << expected_value << " or " << old_expected_value;
+
+                        return result;
+                    }
+                }
+
+                if (GetParam().mSubgroupIntrinsicOp == SubgroupIntrinsicOp::Add) {
+                    expected_value += kValueInShader;
+                } else if (GetParam().mSubgroupIntrinsicOp == SubgroupIntrinsicOp::Mul) {
+                    expected_value *= kValueInShader;
+                }
+            }
+
+            return testing::AssertionSuccess();
+        }
+
+      private:
+        uint32_t mWorkgroupSize;
+    };
+};
+
+TEST_P(SubgroupsShaderInclusiveTest, InclusiveExecution) {
+    if (GetParam().mSubgroupOpDataType == SubgroupOpDataType::F16) {
+        DAWN_TEST_UNSUPPORTED_IF(!IsSubgroupsF16SupportedByBackend());
+
+        // TODO(361330160): The f16 implementation does not seem produce correct values in
+        // execution. It is not clear if this is due to something wrong with the polyfill or the
+        // underlying exclusive implementation.
+        // This was observed for D3D12 NVIDIA GeForce GTX 1660
+        DAWN_SUPPRESS_TEST_IF(gpu_info::IsNvidiaTuring(GetParam().adapterProperties.vendorID,
+                                                       GetParam().adapterProperties.deviceID));
+
+        DAWN_ASSERT(IsShaderF16EnabledInWGSL() && IsSubgroupsEnabledInWGSL() &&
+                    IsSubgroupsF16EnabledInWGSL());
+    } else {
+        DAWN_TEST_UNSUPPORTED_IF(!IsSubgroupsEnabledInWGSL());
+    }
+    DAWN_TEST_UNSUPPORTED_IF(!IsChromiumExperimentalSubgroupsRequired());
+
+    // TODO(351745820): Suppress the test for Qualcomm Adreno 6xx until we figure out why creating
+    // compute pipeline with subgroupBroadcast shader fails on trybots using these devices.
+    DAWN_SUPPRESS_TEST_IF(gpu_info::IsQualcomm_PCIAdreno6xx(GetParam().adapterProperties.vendorID,
+                                                            GetParam().adapterProperties.deviceID));
+
+    for (uint32_t workgroupSize : {1, 2, 3, 4, 7, 8, 15, 16, 31, 32, 63, 64, 127, 128, 255, 256}) {
+        TestReadSubgroupSize(workgroupSize);
+    }
+}
+
+DAWN_INSTANTIATE_TEST_P(SubgroupsShaderInclusiveTest,
+                        {D3D12Backend(), D3D12Backend({}, {"use_dxc"}), MetalBackend(),
+                         VulkanBackend()},
+                        {false, true},  // UseChromiumExperimentalSubgroups
+                        {SubgroupIntrinsicOp::Add, SubgroupIntrinsicOp::Mul},
+                        {
+                            SubgroupOpDataType::F32,
+                            SubgroupOpDataType::F16,
+                            SubgroupOpDataType::U32,
+                            SubgroupOpDataType::I32,
+                        });
 
 }  // anonymous namespace
 }  // namespace dawn

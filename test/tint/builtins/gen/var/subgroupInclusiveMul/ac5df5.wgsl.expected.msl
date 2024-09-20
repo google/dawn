@@ -1,0 +1,19 @@
+#include <metal_stdlib>
+
+using namespace metal;
+half2 subgroupInclusiveMul_ac5df5() {
+  half2 arg_0 = half2(1.0h);
+  half2 res = simd_prefix_inclusive_product(arg_0);
+  return res;
+}
+
+fragment void fragment_main(device half2* tint_symbol [[buffer(0)]]) {
+  *(tint_symbol) = subgroupInclusiveMul_ac5df5();
+  return;
+}
+
+kernel void compute_main(device half2* tint_symbol_1 [[buffer(0)]]) {
+  *(tint_symbol_1) = subgroupInclusiveMul_ac5df5();
+  return;
+}
+

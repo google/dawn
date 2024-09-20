@@ -1,0 +1,18 @@
+#include <metal_stdlib>
+
+using namespace metal;
+int2 subgroupInclusiveMul_e713f5() {
+  int2 res = simd_prefix_inclusive_product(int2(1));
+  return res;
+}
+
+fragment void fragment_main(device int2* tint_symbol [[buffer(0)]]) {
+  *(tint_symbol) = subgroupInclusiveMul_e713f5();
+  return;
+}
+
+kernel void compute_main(device int2* tint_symbol_1 [[buffer(0)]]) {
+  *(tint_symbol_1) = subgroupInclusiveMul_e713f5();
+  return;
+}
+

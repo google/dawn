@@ -7002,6 +7002,78 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, SubgroupShuffleXor) {
     EXPECT_EQ(expect, str());
 }
 
+TEST_F(HlslWriter_BuiltinPolyfillTest, SubgroupInclusiveAdd) {
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        auto* let_a = b.Let("a", 2_f);
+        b.Let("b", b.Call(ty.f32(), core::BuiltinFn::kSubgroupInclusiveAdd, let_a->Result(0)));
+        b.Return(func);
+    });
+
+    auto* src = R"(
+%foo = @fragment func():void {
+  $B1: {
+    %a:f32 = let 2.0f
+    %3:f32 = subgroupInclusiveAdd %a
+    %b:f32 = let %3
+    ret
+  }
+}
+)";
+
+    ASSERT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = @fragment func():void {
+  $B1: {
+    %a:f32 = let 2.0f
+    %3:f32 = subgroupExclusiveAdd %a
+    %4:f32 = add %3, %a
+    %b:f32 = let %4
+    ret
+  }
+}
+)";
+    Run(BuiltinPolyfill);
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(HlslWriter_BuiltinPolyfillTest, SubgroupInclusiveMul) {
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        auto* let_a = b.Let("a", 2_f);
+        b.Let("b", b.Call(ty.f32(), core::BuiltinFn::kSubgroupInclusiveMul, let_a->Result(0)));
+        b.Return(func);
+    });
+
+    auto* src = R"(
+%foo = @fragment func():void {
+  $B1: {
+    %a:f32 = let 2.0f
+    %3:f32 = subgroupInclusiveMul %a
+    %b:f32 = let %3
+    ret
+  }
+}
+)";
+
+    ASSERT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = @fragment func():void {
+  $B1: {
+    %a:f32 = let 2.0f
+    %3:f32 = subgroupExclusiveMul %a
+    %4:f32 = mul %3, %a
+    %b:f32 = let %4
+    ret
+  }
+}
+)";
+    Run(BuiltinPolyfill);
+    EXPECT_EQ(expect, str());
+}
+
 TEST_F(HlslWriter_BuiltinPolyfillTest, SubgroupShuffleUp) {
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {

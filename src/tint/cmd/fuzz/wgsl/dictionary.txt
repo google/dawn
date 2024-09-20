@@ -390,6 +390,8 @@
 "subgroupElect"
 "subgroupExclusiveAdd"
 "subgroupExclusiveMul"
+"subgroupInclusiveAdd"
+"subgroupInclusiveMul"
 "subgroupMax"
 "subgroupMin"
 "subgroupMul"

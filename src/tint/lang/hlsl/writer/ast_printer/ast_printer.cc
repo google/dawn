@@ -1264,6 +1264,10 @@ bool ASTPrinter::EmitBuiltinCall(StringStream& out,
         return EmitSubgroupShuffleBuiltinCall(out, expr, builtin);
     }
 
+    if (type == wgsl::BuiltinFn::kSubgroupInclusiveAdd ||
+        type == wgsl::BuiltinFn::kSubgroupInclusiveMul) {
+        return EmitSubgroupInclusiveBuiltinCall(out, expr, builtin);
+    }
     auto name = generate_builtin_name(builtin);
     if (name.empty()) {
         return false;
@@ -3063,6 +3067,54 @@ bool ASTPrinter::EmitSubgroupShuffleBuiltinCall(StringStream& out,
         return false;
     }
     out << "))";
+
+    return true;
+}
+
+// The following subgroup builtin functions are translated to HLSL as follows:
+// +-----------------------+----------------------+
+// |        WGSL           |       HLSL           |
+// +-----------------------+----------------------+
+// | subgroupInclusiveAdd  | WavePrefixSum(x) + x |
+// | subgroupInclusiveMul  | WavePrefixMul(x) * x |
+// +-----------------------+----------------------+
+bool ASTPrinter::EmitSubgroupInclusiveBuiltinCall(StringStream& out,
+                                                  const ast::CallExpression* expr,
+                                                  const sem::BuiltinFn* builtin) {
+    switch (builtin->Fn()) {
+        case wgsl::BuiltinFn::kSubgroupInclusiveAdd:
+            out << "(WavePrefixSum(";
+            break;
+        case wgsl::BuiltinFn::kSubgroupInclusiveMul:
+            out << "(WavePrefixProduct(";
+            break;
+        default:
+            TINT_UNREACHABLE();
+    }
+
+    if (!EmitExpression(out, expr->args[0])) {
+        return false;
+    }
+
+    out << ") ";
+
+    switch (builtin->Fn()) {
+        case wgsl::BuiltinFn::kSubgroupInclusiveAdd:
+            out << "+";
+            break;
+        case wgsl::BuiltinFn::kSubgroupInclusiveMul:
+            out << "*";
+            break;
+        default:
+            TINT_UNREACHABLE();
+    }
+    // Add a space after the operand to be more consistent with IR generated code.
+    out << " ";
+    if (!EmitExpression(out, expr->args[0])) {
+        return false;
+    }
+
+    out << ")";
 
     return true;
 }

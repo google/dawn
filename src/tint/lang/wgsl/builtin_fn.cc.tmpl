@@ -118,8 +118,10 @@ bool IsSubgroup(BuiltinFn f) {
         case BuiltinFn::kSubgroupShuffleUp:
         case BuiltinFn::kSubgroupShuffleDown:
         case BuiltinFn::kSubgroupAdd:
+        case BuiltinFn::kSubgroupInclusiveAdd:
         case BuiltinFn::kSubgroupExclusiveAdd:
         case BuiltinFn::kSubgroupMul:
+        case BuiltinFn::kSubgroupInclusiveMul:
         case BuiltinFn::kSubgroupExclusiveMul:
         case BuiltinFn::kSubgroupAnd:
         case BuiltinFn::kSubgroupOr:

@@ -1,0 +1,19 @@
+#include <metal_stdlib>
+
+using namespace metal;
+uint subgroupInclusiveMul_89437b() {
+  uint arg_0 = 1u;
+  uint res = simd_prefix_inclusive_product(arg_0);
+  return res;
+}
+
+fragment void fragment_main(device uint* tint_symbol [[buffer(0)]]) {
+  *(tint_symbol) = subgroupInclusiveMul_89437b();
+  return;
+}
+
+kernel void compute_main(device uint* tint_symbol_1 [[buffer(0)]]) {
+  *(tint_symbol_1) = subgroupInclusiveMul_89437b();
+  return;
+}
+
