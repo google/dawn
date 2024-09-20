@@ -1,11 +1,62 @@
-SKIP: FAILED
+#version 310 es
+precision highp float;
+precision highp int;
 
-<dawn>/src/tint/lang/glsl/writer/printer/printer.cc:1451 internal compiler error: TINT_UNREACHABLE unhandled core builtin: textureLoad
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
+layout(binding = 0, std430)
+buffer tint_symbol_1_1_ssbo {
+  ivec4 tint_symbol;
+} v;
+layout(binding = 0, rgba16i) uniform highp readonly iimage2DArray arg_0;
+ivec4 textureLoad_313c73() {
+  ivec2 v_1 = ivec2(uvec2(1u));
+  ivec4 res = imageLoad(arg_0, ivec3(v_1, int(1u)));
+  return res;
+}
+void main() {
+  v.tint_symbol = textureLoad_313c73();
+}
+#version 310 es
 
-tint executable returned error: signal: trace/BPT trap
+layout(binding = 0, std430)
+buffer tint_symbol_1_1_ssbo {
+  ivec4 tint_symbol;
+} v;
+layout(binding = 0, rgba16i) uniform highp readonly iimage2DArray arg_0;
+ivec4 textureLoad_313c73() {
+  ivec2 v_1 = ivec2(uvec2(1u));
+  ivec4 res = imageLoad(arg_0, ivec3(v_1, int(1u)));
+  return res;
+}
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+void main() {
+  v.tint_symbol = textureLoad_313c73();
+}
+#version 310 es
+
+
+struct VertexOutput {
+  vec4 pos;
+  ivec4 prevent_dce;
+};
+
+layout(binding = 0, rgba16i) uniform highp readonly iimage2DArray arg_0;
+layout(location = 0) flat out ivec4 vertex_main_loc0_Output;
+ivec4 textureLoad_313c73() {
+  ivec2 v = ivec2(uvec2(1u));
+  ivec4 res = imageLoad(arg_0, ivec3(v, int(1u)));
+  return res;
+}
+VertexOutput vertex_main_inner() {
+  VertexOutput tint_symbol = VertexOutput(vec4(0.0f), ivec4(0));
+  tint_symbol.pos = vec4(0.0f);
+  tint_symbol.prevent_dce = textureLoad_313c73();
+  return tint_symbol;
+}
+void main() {
+  VertexOutput v_1 = vertex_main_inner();
+  gl_Position = v_1.pos;
+  gl_Position[1u] = -(gl_Position.y);
+  gl_Position[2u] = ((2.0f * gl_Position.z) - gl_Position.w);
+  vertex_main_loc0_Output = v_1.prevent_dce;
+  gl_PointSize = 1.0f;
+}

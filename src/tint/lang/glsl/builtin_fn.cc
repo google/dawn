@@ -74,6 +74,10 @@ const char* str(BuiltinFn i) {
             return "textureSize";
         case BuiltinFn::kImageSize:
             return "imageSize";
+        case BuiltinFn::kTexelFetch:
+            return "texelFetch";
+        case BuiltinFn::kImageLoad:
+            return "imageLoad";
     }
     return "<unknown>";
 }

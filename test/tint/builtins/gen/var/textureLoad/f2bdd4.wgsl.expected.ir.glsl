@@ -1,11 +1,39 @@
-SKIP: INVALID
+#version 460
+precision highp float;
+precision highp int;
 
-<dawn>/src/tint/lang/glsl/writer/printer/printer.cc:1451 internal compiler error: TINT_UNREACHABLE unhandled core builtin: textureLoad
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
+layout(binding = 0, std430)
+buffer tint_symbol_1_1_ssbo {
+  vec4 tint_symbol;
+} v;
+layout(binding = 0, r8) uniform highp image2DArray arg_0;
+vec4 textureLoad_f2bdd4() {
+  uvec2 arg_1 = uvec2(1u);
+  uint arg_2 = 1u;
+  uint v_1 = arg_2;
+  ivec2 v_2 = ivec2(arg_1);
+  vec4 res = imageLoad(arg_0, ivec3(v_2, int(v_1)));
+  return res;
+}
+void main() {
+  v.tint_symbol = textureLoad_f2bdd4();
+}
+#version 460
 
-tint executable returned error: signal: trace/BPT trap
+layout(binding = 0, std430)
+buffer tint_symbol_1_1_ssbo {
+  vec4 tint_symbol;
+} v;
+layout(binding = 0, r8) uniform highp image2DArray arg_0;
+vec4 textureLoad_f2bdd4() {
+  uvec2 arg_1 = uvec2(1u);
+  uint arg_2 = 1u;
+  uint v_1 = arg_2;
+  ivec2 v_2 = ivec2(arg_1);
+  vec4 res = imageLoad(arg_0, ivec3(v_2, int(v_1)));
+  return res;
+}
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+void main() {
+  v.tint_symbol = textureLoad_f2bdd4();
+}

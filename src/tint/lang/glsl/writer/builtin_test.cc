@@ -1147,5 +1147,150 @@ void main() {
 )");
 }
 
+TEST_F(GlslWriterTest, BuiltinTextureLoad_1DF32) {
+    auto* t = b.Var(ty.ptr(
+        handle, ty.Get<core::type::SampledTexture>(core::type::TextureDimension::k1d, ty.f32())));
+    t->SetBindingPoint(0, 0);
+    b.ir.root_block->Append(t);
+
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        auto* coords = b.Value(1_u);
+        auto* level = b.Value(3_u);
+        b.Let("x", b.Call<vec4<f32>>(core::BuiltinFn::kTextureLoad, b.Load(t), coords, level));
+        b.Return(func);
+    });
+
+    Options opts;
+    opts.disable_robustness = true;
+    opts.version = Version(Version::Standard::kDesktop, 4, 6);
+    ASSERT_TRUE(Generate(opts)) << err_ << output_.glsl;
+    EXPECT_EQ(output_.glsl, R"(#version 460
+precision highp float;
+precision highp int;
+
+uniform highp sampler1D v;
+void main() {
+  int v_1 = int(1u);
+  vec4 x = texelFetch(v, v_1, int(3u));
+}
+)");
+}
+
+TEST_F(GlslWriterTest, BuiltinTextureLoad_2DLevelI32) {
+    auto* t = b.Var(ty.ptr(
+        handle, ty.Get<core::type::SampledTexture>(core::type::TextureDimension::k2d, ty.i32())));
+    t->SetBindingPoint(0, 0);
+    b.ir.root_block->Append(t);
+
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        auto* coords = b.Composite(ty.vec2<u32>(), 1_u, 2_u);
+        auto* level = b.Value(3_u);
+        b.Let("x", b.Call<vec4<i32>>(core::BuiltinFn::kTextureLoad, b.Load(t), coords, level));
+        b.Return(func);
+    });
+
+    Options opts;
+    opts.disable_robustness = true;
+    ASSERT_TRUE(Generate(opts)) << err_ << output_.glsl;
+    EXPECT_EQ(output_.glsl, GlslHeader() + R"(precision highp float;
+precision highp int;
+
+uniform highp isampler2D v;
+void main() {
+  ivec2 v_1 = ivec2(uvec2(1u, 2u));
+  ivec4 x = texelFetch(v, v_1, int(3u));
+}
+)");
+}
+
+TEST_F(GlslWriterTest, BuiltinTextureLoad_3DLevelU32) {
+    auto* t = b.Var(ty.ptr(
+        handle, ty.Get<core::type::SampledTexture>(core::type::TextureDimension::k3d, ty.f32())));
+    t->SetBindingPoint(0, 0);
+    b.ir.root_block->Append(t);
+
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        auto* coords = b.Composite(ty.vec3<i32>(), 1_i, 2_i, 3_i);
+        auto* level = b.Value(4_u);
+        b.Let("x", b.Call<vec4<f32>>(core::BuiltinFn::kTextureLoad, b.Load(t), coords, level));
+        b.Return(func);
+    });
+
+    Options opts;
+    opts.disable_robustness = true;
+    ASSERT_TRUE(Generate(opts)) << err_ << output_.glsl;
+    EXPECT_EQ(output_.glsl, GlslHeader() + R"(precision highp float;
+precision highp int;
+
+uniform highp sampler3D v;
+void main() {
+  ivec3 v_1 = ivec3(ivec3(1, 2, 3));
+  vec4 x = texelFetch(v, v_1, int(4u));
+}
+)");
+}
+
+TEST_F(GlslWriterTest, BuiltinTextureLoad_Multisampled2DI32) {
+    auto* t = b.Var(ty.ptr(handle, ty.Get<core::type::MultisampledTexture>(
+                                       core::type::TextureDimension::k2d, ty.i32())));
+    t->SetBindingPoint(0, 0);
+    b.ir.root_block->Append(t);
+
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        auto* coords = b.Composite(ty.vec2<i32>(), 1_i, 2_i);
+        auto* sample_idx = b.Value(3_i);
+        b.Let("x", b.Call<vec4<i32>>(core::BuiltinFn::kTextureLoad, b.Load(t), coords, sample_idx));
+        b.Return(func);
+    });
+
+    Options opts;
+    opts.disable_robustness = true;
+    ASSERT_TRUE(Generate(opts)) << err_ << output_.glsl;
+    EXPECT_EQ(output_.glsl, GlslHeader() + R"(precision highp float;
+precision highp int;
+
+uniform highp isampler2DMS v;
+void main() {
+  ivec2 v_1 = ivec2(ivec2(1, 2));
+  ivec4 x = texelFetch(v, v_1, int(3));
+}
+)");
+}
+
+TEST_F(GlslWriterTest, BuiltinTextureLoad_Storage2D) {
+    auto* t = b.Var(ty.ptr(
+        handle,
+        ty.Get<core::type::StorageTexture>(
+            core::type::TextureDimension::k2d, core::TexelFormat::kRg32Float, core::Access::kRead,
+            core::type::StorageTexture::SubtypeFor(core::TexelFormat::kRg32Float, ty))));
+    t->SetBindingPoint(0, 0);
+    b.ir.root_block->Append(t);
+
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        auto* coords = b.Construct(ty.vec2<i32>(), b.Value(1_i), b.Value(2_i));
+        b.Let("x", b.Call<vec4<f32>>(core::BuiltinFn::kTextureLoad, b.Load(t), coords));
+        b.Return(func);
+    });
+
+    Options opts;
+    opts.disable_robustness = true;
+    opts.version = Version(Version::Standard::kDesktop, 4, 6);
+    ASSERT_TRUE(Generate(opts)) << err_ << output_.glsl;
+    EXPECT_EQ(output_.glsl, R"(#version 460
+precision highp float;
+precision highp int;
+
+layout(binding = 0, rg32f) uniform highp readonly image2D v;
+void main() {
+  vec4 x = imageLoad(v, ivec2(ivec2(1, 2)));
+}
+)");
+}
+
 }  // namespace
 }  // namespace tint::glsl::writer
