@@ -243,8 +243,14 @@ TEST_F(AllowedErrorTests, CreateComputePipeline) {
 TEST_F(AllowedErrorTests, CreateRenderPipeline) {
     Ref<ShaderModuleMock> vsModule = ShaderModuleMock::Create(mDeviceMock, kVertexShader.data());
 
+    DepthStencilState ds = {};
+    ds.format = wgpu::TextureFormat::Depth32Float;
+    ds.depthWriteEnabled = wgpu::OptionalBool::True;
+    ds.depthCompare = wgpu::CompareFunction::Always;
+
     RenderPipelineDescriptor desc = {};
     desc.vertex.module = vsModule.Get();
+    desc.depthStencil = &ds;
 
     Ref<RenderPipelineMock> renderPipelineMock = RenderPipelineMock::Create(mDeviceMock, &desc);
     EXPECT_CALL(*renderPipelineMock.Get(), InitializeImpl)
@@ -288,8 +294,14 @@ TEST_F(AllowedErrorTests, CreateComputePipelineInternalError) {
 TEST_F(AllowedErrorTests, CreateRenderPipelineInternalError) {
     Ref<ShaderModuleMock> vsModule = ShaderModuleMock::Create(mDeviceMock, kVertexShader.data());
 
+    DepthStencilState ds = {};
+    ds.format = wgpu::TextureFormat::Depth32Float;
+    ds.depthWriteEnabled = wgpu::OptionalBool::True;
+    ds.depthCompare = wgpu::CompareFunction::Always;
+
     RenderPipelineDescriptor desc = {};
     desc.vertex.module = vsModule.Get();
+    desc.depthStencil = &ds;
 
     Ref<RenderPipelineMock> renderPipelineMock = RenderPipelineMock::Create(mDeviceMock, &desc);
     EXPECT_CALL(*renderPipelineMock.Get(), InitializeImpl)
@@ -341,8 +353,14 @@ TEST_F(AllowedErrorTests, CreateComputePipelineAsync) {
 TEST_F(AllowedErrorTests, CreateRenderPipelineAsync) {
     Ref<ShaderModuleMock> vsModule = ShaderModuleMock::Create(mDeviceMock, kVertexShader.data());
 
+    DepthStencilState ds = {};
+    ds.format = wgpu::TextureFormat::Depth32Float;
+    ds.depthWriteEnabled = wgpu::OptionalBool::True;
+    ds.depthCompare = wgpu::CompareFunction::Always;
+
     RenderPipelineDescriptor desc = {};
     desc.vertex.module = vsModule.Get();
+    desc.depthStencil = &ds;
 
     Ref<RenderPipelineMock> renderPipelineMock = RenderPipelineMock::Create(mDeviceMock, &desc);
     EXPECT_CALL(*renderPipelineMock.Get(), InitializeImpl)
@@ -395,8 +413,14 @@ TEST_F(AllowedErrorTests, CreateComputePipelineAsyncInternalError) {
 TEST_F(AllowedErrorTests, CreateRenderPipelineAsyncInternalError) {
     Ref<ShaderModuleMock> vsModule = ShaderModuleMock::Create(mDeviceMock, kVertexShader.data());
 
+    DepthStencilState ds = {};
+    ds.format = wgpu::TextureFormat::Depth32Float;
+    ds.depthWriteEnabled = wgpu::OptionalBool::True;
+    ds.depthCompare = wgpu::CompareFunction::Always;
+
     RenderPipelineDescriptor desc = {};
     desc.vertex.module = vsModule.Get();
+    desc.depthStencil = &ds;
 
     Ref<RenderPipelineMock> renderPipelineMock = RenderPipelineMock::Create(mDeviceMock, &desc);
     EXPECT_CALL(*renderPipelineMock.Get(), InitializeImpl)

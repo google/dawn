@@ -1029,6 +1029,27 @@ TEST_F(RenderPipelineValidationTest, VertexOnlyPipelineRequireDepthStencilAttach
     }
 }
 
+// Tests that render pipeline without attachments are disallowed.
+TEST_F(RenderPipelineValidationTest, NoAttachments) {
+    utils::ComboRenderPipelineDescriptor desc;
+    desc.vertex.module = vsModule;
+    desc.fragment = nullptr;
+    ASSERT_DEVICE_ERROR(device.CreateRenderPipeline(&desc));
+
+    // Setting a fragment state with no targets is also 0 attachments.
+    wgpu::FragmentState fragment;
+    fragment.targetCount = 0;
+    fragment.module = utils::CreateShaderModule(device, R"(
+        @fragment fn fs() {}
+    )");
+    desc.fragment = &fragment;
+    ASSERT_DEVICE_ERROR(device.CreateRenderPipeline(&desc));
+
+    // Control case, with a DS attachment, creating the pipeline is allowed.
+    desc.EnableDepthStencil(wgpu::TextureFormat::Depth32Float);
+    device.CreateRenderPipeline(&desc);
+}
+
 // Tests that the sample count of the render pipeline must be valid
 // when the alphaToCoverage mode is enabled.
 TEST_F(RenderPipelineValidationTest, AlphaToCoverageAndSampleCount) {
