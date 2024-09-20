@@ -529,10 +529,6 @@ var LibraryWebGPU = {
   // Standalone (non-method) functions
   // --------------------------------------------------------------------------
 
-  wgpuAdapterPropertiesFreeMembers: (value) => {
-    // wgpuAdapterGetProperties doesn't currently allocate anything.
-  },
-
   wgpuGetInstanceFeatures: (featuresPtr) => {
     abort('TODO: wgpuGetInstanceFeatures unimplemented');
     return 0;
@@ -584,22 +580,6 @@ var LibraryWebGPU = {
     var adapter = WebGPU._tableGet(adapterPtr);
     WebGPU.fillLimitStruct(adapter.limits, limitsOutPtr);
     return 1;
-  },
-
-  wgpuAdapterGetProperties__deps: ['$warnOnce'],
-  wgpuAdapterGetProperties: (adapterPtr, properties) => {
-    warnOnce('wgpuAdapterGetProperties is deprecated, use wgpuAdapterGetInfo instead');
-
-    {{{ gpu.makeCheckDescriptor('properties') }}}
-    {{{ makeSetValue('properties', C_STRUCTS.WGPUAdapterProperties.vendorID, '0', 'i32') }}};
-    {{{ makeSetValue('properties', C_STRUCTS.WGPUAdapterProperties.vendorName, '0', 'i32') }}};
-    {{{ makeSetValue('properties', C_STRUCTS.WGPUAdapterProperties.architecture, '0', 'i32') }}};
-    {{{ makeSetValue('properties', C_STRUCTS.WGPUAdapterProperties.deviceID, '0', 'i32') }}};
-    {{{ makeSetValue('properties', C_STRUCTS.WGPUAdapterProperties.name, '0', 'i32') }}};
-    {{{ makeSetValue('properties', C_STRUCTS.WGPUAdapterProperties.driverDescription, '0', 'i32') }}};
-    {{{ makeSetValue('properties', C_STRUCTS.WGPUAdapterProperties.adapterType, gpu.AdapterType.Unknown, 'i32') }}};
-    {{{ makeSetValue('properties', C_STRUCTS.WGPUAdapterProperties.backendType, gpu.BackendType.WebGPU, 'i32') }}};
-    {{{ makeSetValue('properties', C_STRUCTS.WGPUAdapterProperties.compatibilityMode, '0', 'i32') }}};
   },
 
   wgpuAdapterHasFeature: (adapterPtr, featureEnumValue) => {
