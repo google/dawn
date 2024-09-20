@@ -256,9 +256,9 @@ crbug.com/368241689 [ android arm ] webgpu:web_platform,canvas,readbackFromWebGP
 crbug.com/368241689 [ android arm ] webgpu:web_platform,canvas,readbackFromWebGPUCanvas:onscreenCanvas,uploadToWebGL:format="rgba8unorm";alphaMode="opaque";webgl="webgl2";upload="texSubImage2D" [ Failure ]
 
 # canvas,getCurrentTexture:multiple_frames failures
-# The "onscreen" variant is failing on all platforms; "offscreen" only failing on Intel 630
+# The "onscreen" variant is failing on all platforms; "offscreen" only failing on Intel
 crbug.com/341327471 webgpu:web_platform,canvas,getCurrentTexture:multiple_frames:canvasType="onscreen" [ Failure ]
-crbug.com/dawn/2114 [ intel-0x9bc5 linux ] webgpu:web_platform,canvas,getCurrentTexture:multiple_frames:canvasType="offscreen" [ Failure ]
+crbug.com/dawn/2114 [ intel linux ] webgpu:web_platform,canvas,getCurrentTexture:multiple_frames:canvasType="offscreen" [ Failure ]
 
 ### This section represents issues that are likely bugs in ANGLE
 
@@ -1281,6 +1281,10 @@ crbug.com/365974434 [ android arm ] webgpu:shader,execution,robust_access_vertex
 crbug.com/365974434 [ android arm ] webgpu:shader,execution,robust_access_vertex:vertex_buffer_access:indexed=true;indirect=true;drawCallTestParameter="vertexCountInIndexBuffer";type="float32x2";additionalBuffers=0;partialLastNumber=true;offsetVertexBuffer=true [ Failure ]
 crbug.com/365974434 [ android arm ] webgpu:shader,execution,robust_access_vertex:vertex_buffer_access:indexed=true;indirect=true;drawCallTestParameter="vertexCountInIndexBuffer";type="float32x4";additionalBuffers=0;partialLastNumber=false;offsetVertexBuffer=true [ Failure ]
 crbug.com/365974434 [ android arm ] webgpu:shader,execution,robust_access_vertex:vertex_buffer_access:indexed=true;indirect=true;drawCallTestParameter="vertexCountInIndexBuffer";type="float32x4";additionalBuffers=0;partialLastNumber=true;offsetVertexBuffer=true [ Failure ]
+crbug.com/365974434 [ android arm ] webgpu:shader,execution,robust_access_vertex:vertex_buffer_access:indexed=true;indirect=false;drawCallTestParameter="baseVertex";type="float32x3";additionalBuffers=4;partialLastNumber=false;offsetVertexBuffer=true [ Failure ]
+crbug.com/365974434 [ android arm ] webgpu:shader,execution,robust_access_vertex:vertex_buffer_access:indexed=true;indirect=false;drawCallTestParameter="baseVertex";type="float32x3";additionalBuffers=4;partialLastNumber=true;offsetVertexBuffer=true [ Failure ]
+crbug.com/365974434 [ android arm ] webgpu:shader,execution,robust_access_vertex:vertex_buffer_access:indexed=true;indirect=false;drawCallTestParameter="baseVertex";type="float32";additionalBuffers=0;partialLastNumber=false;offsetVertexBuffer=false [ Failure ]
+crbug.com/365974434 [ android arm ] webgpu:shader,execution,robust_access_vertex:vertex_buffer_access:indexed=true;indirect=false;drawCallTestParameter="baseVertex";type="float32x3";additionalBuffers=4;partialLastNumber=true;offsetVertexBuffer=false [ Failure ]
 
 # memory_sync also flaky on Android (too flaky for RetryOnFailure)
 crbug.com/dawn/0000 [ android arm ] webgpu:api,operation,memory_sync,buffer,multiple_buffers:wr:boundary="command-buffer";readOp="input-indirect-dispatch";readContext="compute-pass-encoder";writeOp="b2b-copy";writeContext="command-encoder" [ Failure ]
