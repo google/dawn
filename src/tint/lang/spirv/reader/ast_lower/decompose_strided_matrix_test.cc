@@ -220,7 +220,6 @@ struct S {
   @size(16)
   padding_0 : u32,
   /* @offset(16u) */
-  @stride(8) @internal(disable_validation__ignore_stride)
   m : mat2x2<f32>,
 }
 
@@ -231,6 +230,100 @@ fn f() {
   let x : mat2x2<f32> = s.m;
 }
 )";
+
+    auto got = Run<Unshadow, SimplifyPointers, DecomposeStridedMatrix>(resolver::Resolve(b));
+
+    EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(DecomposeStridedMatrixTest, ReadUniformArrayOfMatrix_DefaultStride) {
+    // struct S {
+    //   @offset(16) @stride(8)
+    //   @internal(ignore_stride_attribute)
+    //   a : array<array<mat2x2<f32>, 4>, 4>,
+    // };
+    // @group(0) @binding(0) var<uniform> s : S;
+    //
+    // @compute @workgroup_size(1)
+    // fn f() {
+    //   let x : mat2x2<f32> = s.m;
+    // }
+    ProgramBuilder b;
+    auto* S = b.Structure(
+        "S", Vector{
+                 b.Member("m", b.ty.array(b.ty.array(b.ty.mat2x2<f32>(), 4_a), 4_a),
+                          Vector{
+                              b.MemberOffset(16_u),
+                              b.create<ast::StrideAttribute>(8u),
+                              b.Disable(ast::DisabledValidation::kIgnoreStrideAttribute),
+                          }),
+             });
+    b.GlobalVar("s", b.ty.Of(S), core::AddressSpace::kUniform, b.Group(0_a), b.Binding(0_a));
+    b.Func("f", tint::Empty, b.ty.void_(),
+           Vector{
+               b.Decl(b.Let("x", b.ty.array(b.ty.array(b.ty.mat2x2<f32>(), 4_a), 4_a),
+                            b.MemberAccessor("s", "m"))),
+           },
+           Vector{
+               b.Stage(ast::PipelineStage::kCompute),
+               b.WorkgroupSize(1_i),
+           });
+
+    auto* expect = R"(
+struct S {
+  @size(16)
+  padding_0 : u32,
+  /* @offset(16u) */
+  m : array<array<mat2x2<f32>, 4>, 4>,
+}
+
+@group(0) @binding(0) var<uniform> s : S;
+
+@compute @workgroup_size(1i)
+fn f() {
+  let x : array<array<mat2x2<f32>, 4>, 4> = s.m;
+}
+)";
+
+    auto got = Run<Unshadow, SimplifyPointers, DecomposeStridedMatrix>(resolver::Resolve(b));
+
+    EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(DecomposeStridedMatrixTest, ReadUniformArrayOfMatrix_CustomStride) {
+    // struct S {
+    //   @offset(16) @stride(16)
+    //   @internal(ignore_stride_attribute)
+    //   a : array<array<mat2x2<f32>, 4>, 4>,
+    // };
+    // @group(0) @binding(0) var<uniform> s : S;
+    //
+    // @compute @workgroup_size(1)
+    // fn f() {
+    //   let x : mat2x2<f32> = s.m;
+    // }
+    ProgramBuilder b;
+    auto* S = b.Structure(
+        "S", Vector{
+                 b.Member("m", b.ty.array(b.ty.array(b.ty.mat2x2<f32>(), 4_a), 4_a),
+                          Vector{
+                              b.MemberOffset(16_u),
+                              b.create<ast::StrideAttribute>(16u),
+                              b.Disable(ast::DisabledValidation::kIgnoreStrideAttribute),
+                          }),
+             });
+    b.GlobalVar("s", b.ty.Of(S), core::AddressSpace::kUniform, b.Group(0_a), b.Binding(0_a));
+    b.Func("f", tint::Empty, b.ty.void_(),
+           Vector{
+               b.Decl(b.Let("x", b.ty.array(b.ty.array(b.ty.mat2x2<f32>(), 4_a), 4_a),
+                            b.MemberAccessor("s", "m"))),
+           },
+           Vector{
+               b.Stage(ast::PipelineStage::kCompute),
+               b.WorkgroupSize(1_i),
+           });
+
+    auto* expect = R"(error: custom matrix strides not currently supported on array of matrices)";
 
     auto got = Run<Unshadow, SimplifyPointers, DecomposeStridedMatrix>(resolver::Resolve(b));
 

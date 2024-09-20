@@ -517,7 +517,6 @@ Attributes ASTParser::ConvertMemberDecoration(uint32_t struct_type_id,
                        << ShowType(struct_type_id);
                 break;
             }
-            uint32_t stride = decoration[1];
             auto* ty = member_ty->UnwrapAlias();
             while (auto* arr = ty->As<Array>()) {
                 ty = arr->type->UnwrapAlias();
@@ -527,14 +526,12 @@ Attributes ASTParser::ConvertMemberDecoration(uint32_t struct_type_id,
                 Fail() << "MatrixStride cannot be applied to type " << ty->String();
                 break;
             }
-            uint32_t natural_stride = (mat->rows == 2) ? 8 : 16;
-            if (stride == natural_stride) {
-                break;  // Decoration matches the natural stride for the matrix
-            }
-            if (!member_ty->Is<Matrix>()) {
-                Fail() << "custom matrix strides not currently supported on array of matrices";
-                break;
-            }
+
+            // Note: We do not know at this point whether the matrix is laid out as row-major or
+            // column-major, and therefore do not know the "natural" stride. So we add the stride
+            // attribute unconditionally, and let the DecomposeStridedMatrix transform determine if
+            // anything needs to be done.
+
             out.Add(create<ast::StrideAttribute>(Source{}, decoration[1]));
             out.Add(builder_.ASTNodes().Create<ast::DisableValidationAttribute>(
                 builder_.ID(), builder_.AllocateNodeID(),
