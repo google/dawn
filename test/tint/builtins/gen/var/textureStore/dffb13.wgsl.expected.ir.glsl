@@ -1,11 +1,31 @@
-SKIP: FAILED
+#version 460
+precision highp float;
+precision highp int;
 
-<dawn>/src/tint/lang/glsl/writer/printer/printer.cc:1451 internal compiler error: TINT_UNREACHABLE unhandled core builtin: textureStore
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
+layout(binding = 0, rg32ui) uniform highp writeonly uimage2DArray arg_0;
+void textureStore_dffb13() {
+  ivec2 arg_1 = ivec2(1);
+  uint arg_2 = 1u;
+  uvec4 arg_3 = uvec4(1u);
+  ivec2 v = arg_1;
+  uvec4 v_1 = arg_3;
+  imageStore(arg_0, ivec3(v, int(arg_2)), v_1);
+}
+void main() {
+  textureStore_dffb13();
+}
+#version 460
 
-tint executable returned error: signal: trace/BPT trap
+layout(binding = 0, rg32ui) uniform highp writeonly uimage2DArray arg_0;
+void textureStore_dffb13() {
+  ivec2 arg_1 = ivec2(1);
+  uint arg_2 = 1u;
+  uvec4 arg_3 = uvec4(1u);
+  ivec2 v = arg_1;
+  uvec4 v_1 = arg_3;
+  imageStore(arg_0, ivec3(v, int(arg_2)), v_1);
+}
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+void main() {
+  textureStore_dffb13();
+}

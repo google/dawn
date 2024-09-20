@@ -1292,5 +1292,92 @@ void main() {
 )");
 }
 
+TEST_F(GlslWriterTest, BuiltinTextureStore1D) {
+    auto* t = b.Var(ty.ptr(
+        handle,
+        ty.Get<core::type::StorageTexture>(
+            core::type::TextureDimension::k1d, core::TexelFormat::kR32Float, core::Access::kWrite,
+            core::type::StorageTexture::SubtypeFor(core::TexelFormat::kR32Float, ty))));
+    t->SetBindingPoint(0, 0);
+    b.ir.root_block->Append(t);
+
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        auto* coords = b.Value(1_i);
+        auto* value = b.Composite(ty.vec4<f32>(), .5_f, 0_f, 0_f, 1_f);
+        b.Call(ty.void_(), core::BuiltinFn::kTextureStore, b.Load(t), coords, value);
+        b.Return(func);
+    });
+
+    Options opts;
+    opts.version = Version(Version::Standard::kDesktop, 4, 6);
+    ASSERT_TRUE(Generate(opts)) << err_ << output_.glsl;
+    EXPECT_EQ(output_.glsl, R"(#version 460
+precision highp float;
+precision highp int;
+
+layout(binding = 0, r32f) uniform highp writeonly image1D v;
+void main() {
+  imageStore(v, 1, vec4(0.5f, 0.0f, 0.0f, 1.0f));
+}
+)");
+}
+
+TEST_F(GlslWriterTest, BuiltinTextureStore3D) {
+    auto* t = b.Var(ty.ptr(
+        handle,
+        ty.Get<core::type::StorageTexture>(
+            core::type::TextureDimension::k3d, core::TexelFormat::kR32Float, core::Access::kWrite,
+            core::type::StorageTexture::SubtypeFor(core::TexelFormat::kR32Float, ty))));
+    t->SetBindingPoint(0, 0);
+    b.ir.root_block->Append(t);
+
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        auto* coords = b.Composite(ty.vec3<i32>(), 1_i, 2_i, 3_i);
+        auto* value = b.Composite(ty.vec4<f32>(), .5_f, 0_f, 0_f, 1_f);
+        b.Call(ty.void_(), core::BuiltinFn::kTextureStore, b.Load(t), coords, value);
+        b.Return(func);
+    });
+
+    ASSERT_TRUE(Generate()) << err_ << output_.glsl;
+    EXPECT_EQ(output_.glsl, GlslHeader() + R"(precision highp float;
+precision highp int;
+
+layout(binding = 0, r32f) uniform highp writeonly image3D v;
+void main() {
+  imageStore(v, ivec3(1, 2, 3), vec4(0.5f, 0.0f, 0.0f, 1.0f));
+}
+)");
+}
+
+TEST_F(GlslWriterTest, BuiltinTextureStoreArray) {
+    auto* t = b.Var(ty.ptr(
+        handle, ty.Get<core::type::StorageTexture>(
+                    core::type::TextureDimension::k2dArray, core::TexelFormat::kRgba32Float,
+                    core::Access::kWrite,
+                    core::type::StorageTexture::SubtypeFor(core::TexelFormat::kR32Float, ty))));
+    t->SetBindingPoint(0, 0);
+    b.ir.root_block->Append(t);
+
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        auto* coords = b.Composite(ty.vec2<i32>(), 1_i, 2_i);
+        auto* value = b.Composite(ty.vec4<f32>(), .5_f, .4_f, .3_f, 1_f);
+        b.Call(ty.void_(), core::BuiltinFn::kTextureStore, b.Load(t), coords, 3_u, value);
+        b.Return(func);
+    });
+
+    ASSERT_TRUE(Generate()) << err_ << output_.glsl;
+    EXPECT_EQ(output_.glsl, GlslHeader() + R"(precision highp float;
+precision highp int;
+
+layout(binding = 0, rgba32f) uniform highp writeonly image2DArray v;
+void main() {
+  imageStore(v, ivec3(ivec2(1, 2), int(3u)), vec4(0.5f, 0.40000000596046447754f, 0.30000001192092895508f, 1.0f));
+}
+)");
+}
+
 }  // namespace
 }  // namespace tint::glsl::writer

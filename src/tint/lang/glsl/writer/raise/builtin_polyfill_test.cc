@@ -1166,5 +1166,160 @@ TEST_F(GlslWriter_BuiltinPolyfillTest, TextureLoad_Storage2D) {
     EXPECT_EQ(expect, str());
 }
 
+TEST_F(GlslWriter_BuiltinPolyfillTest, TextureStore1D) {
+    auto* t = b.Var(ty.ptr(
+        handle, ty.Get<core::type::StorageTexture>(
+                    core::type::TextureDimension::k1d, core::TexelFormat::kR32Float,
+                    core::Access::kReadWrite,
+                    core::type::StorageTexture::SubtypeFor(core::TexelFormat::kR32Float, ty))));
+    t->SetBindingPoint(0, 0);
+    b.ir.root_block->Append(t);
+
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        auto* coords = b.Value(1_i);
+        auto* value = b.Composite(ty.vec4<f32>(), .5_f, 0_f, 0_f, 1_f);
+        b.Call(ty.void_(), core::BuiltinFn::kTextureStore, b.Load(t), coords, value);
+        b.Return(func);
+    });
+
+    auto* src = R"(
+$B1: {  # root
+  %1:ptr<handle, texture_storage_1d<r32float, read_write>, read> = var @binding_point(0, 0)
+}
+
+%foo = @fragment func():void {
+  $B2: {
+    %3:texture_storage_1d<r32float, read_write> = load %1
+    %4:void = textureStore %3, 1i, vec4<f32>(0.5f, 0.0f, 0.0f, 1.0f)
+    ret
+  }
+}
+)";
+    ASSERT_EQ(src, str());
+
+    auto* expect = R"(
+$B1: {  # root
+  %1:ptr<handle, texture_storage_1d<r32float, read_write>, read> = var @binding_point(0, 0)
+}
+
+%foo = @fragment func():void {
+  $B2: {
+    %3:texture_storage_1d<r32float, read_write> = load %1
+    %4:void = glsl.imageStore %3, 1i, vec4<f32>(0.5f, 0.0f, 0.0f, 1.0f)
+    ret
+  }
+}
+)";
+
+    Run(BuiltinPolyfill);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(GlslWriter_BuiltinPolyfillTest, TextureStore3D) {
+    auto* t = b.Var(ty.ptr(
+        handle, ty.Get<core::type::StorageTexture>(
+                    core::type::TextureDimension::k3d, core::TexelFormat::kR32Float,
+                    core::Access::kReadWrite,
+                    core::type::StorageTexture::SubtypeFor(core::TexelFormat::kR32Float, ty))));
+    t->SetBindingPoint(0, 0);
+    b.ir.root_block->Append(t);
+
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        auto* coords = b.Composite(ty.vec3<i32>(), 1_i, 2_i, 3_i);
+        auto* value = b.Composite(ty.vec4<f32>(), .5_f, 0_f, 0_f, 1_f);
+        b.Call(ty.void_(), core::BuiltinFn::kTextureStore, b.Load(t), coords, value);
+        b.Return(func);
+    });
+
+    auto* src = R"(
+$B1: {  # root
+  %1:ptr<handle, texture_storage_3d<r32float, read_write>, read> = var @binding_point(0, 0)
+}
+
+%foo = @fragment func():void {
+  $B2: {
+    %3:texture_storage_3d<r32float, read_write> = load %1
+    %4:void = textureStore %3, vec3<i32>(1i, 2i, 3i), vec4<f32>(0.5f, 0.0f, 0.0f, 1.0f)
+    ret
+  }
+}
+)";
+    ASSERT_EQ(src, str());
+
+    auto* expect = R"(
+$B1: {  # root
+  %1:ptr<handle, texture_storage_3d<r32float, read_write>, read> = var @binding_point(0, 0)
+}
+
+%foo = @fragment func():void {
+  $B2: {
+    %3:texture_storage_3d<r32float, read_write> = load %1
+    %4:void = glsl.imageStore %3, vec3<i32>(1i, 2i, 3i), vec4<f32>(0.5f, 0.0f, 0.0f, 1.0f)
+    ret
+  }
+}
+)";
+
+    Run(BuiltinPolyfill);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(GlslWriter_BuiltinPolyfillTest, TextureStoreArray) {
+    auto* t = b.Var(ty.ptr(
+        handle, ty.Get<core::type::StorageTexture>(
+                    core::type::TextureDimension::k2dArray, core::TexelFormat::kRgba32Float,
+                    core::Access::kReadWrite,
+                    core::type::StorageTexture::SubtypeFor(core::TexelFormat::kR32Float, ty))));
+    t->SetBindingPoint(0, 0);
+    b.ir.root_block->Append(t);
+
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        auto* coords = b.Composite(ty.vec2<i32>(), 1_i, 2_i);
+        auto* value = b.Composite(ty.vec4<f32>(), .5_f, .4_f, .3_f, 1_f);
+        b.Call(ty.void_(), core::BuiltinFn::kTextureStore, b.Load(t), coords, 3_u, value);
+        b.Return(func);
+    });
+
+    auto* src = R"(
+$B1: {  # root
+  %1:ptr<handle, texture_storage_2d_array<rgba32float, read_write>, read> = var @binding_point(0, 0)
+}
+
+%foo = @fragment func():void {
+  $B2: {
+    %3:texture_storage_2d_array<rgba32float, read_write> = load %1
+    %4:void = textureStore %3, vec2<i32>(1i, 2i), 3u, vec4<f32>(0.5f, 0.40000000596046447754f, 0.30000001192092895508f, 1.0f)
+    ret
+  }
+}
+)";
+    ASSERT_EQ(src, str());
+
+    auto* expect = R"(
+$B1: {  # root
+  %1:ptr<handle, texture_storage_2d_array<rgba32float, read_write>, read> = var @binding_point(0, 0)
+}
+
+%foo = @fragment func():void {
+  $B2: {
+    %3:texture_storage_2d_array<rgba32float, read_write> = load %1
+    %4:i32 = convert 3u
+    %5:vec3<i32> = construct vec2<i32>(1i, 2i), %4
+    %6:void = glsl.imageStore %3, %5, vec4<f32>(0.5f, 0.40000000596046447754f, 0.30000001192092895508f, 1.0f)
+    ret
+  }
+}
+)";
+
+    Run(BuiltinPolyfill);
+
+    EXPECT_EQ(expect, str());
+}
+
 }  // namespace
 }  // namespace tint::glsl::writer::raise

@@ -78,6 +78,8 @@ const char* str(BuiltinFn i) {
             return "texelFetch";
         case BuiltinFn::kImageLoad:
             return "imageLoad";
+        case BuiltinFn::kImageStore:
+            return "imageStore";
     }
     return "<unknown>";
 }

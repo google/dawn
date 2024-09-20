@@ -79,6 +79,7 @@ struct State {
                     case core::BuiltinFn::kTextureDimensions:
                     case core::BuiltinFn::kTextureLoad:
                     case core::BuiltinFn::kTextureNumLayers:
+                    case core::BuiltinFn::kTextureStore:
                     case core::BuiltinFn::kWorkgroupBarrier:
                         call_worklist.Push(call);
                         break;
@@ -126,6 +127,9 @@ struct State {
                     break;
                 case core::BuiltinFn::kTextureNumLayers:
                     TextureNumLayers(call);
+                    break;
+                case core::BuiltinFn::kTextureStore:
+                    TextureStore(call);
                     break;
                 default:
                     TINT_UNREACHABLE();
@@ -320,6 +324,39 @@ struct State {
 
             b.CallWithResult<glsl::ir::BuiltinCall>(call->DetachResult(), func,
                                                     std::move(call_args));
+        });
+        call->Destroy();
+    }
+
+    void TextureStore(core::ir::BuiltinCall* call) {
+        auto args = call->Args();
+        auto* tex = args[0];
+        auto* tex_type = tex->Type()->As<core::type::StorageTexture>();
+        TINT_ASSERT(tex_type);
+
+        Vector<core::ir::Value*, 3> new_args;
+        new_args.Push(tex);
+
+        b.InsertBefore(call, [&] {
+            if (tex_type->Dim() == core::type::TextureDimension::k2dArray) {
+                auto* coords = args[1];
+                auto* array_idx = args[2];
+
+                auto* coords_ty = coords->Type()->As<core::type::Vector>();
+                TINT_ASSERT(coords_ty);
+
+                auto* new_coords = b.Construct(ty.vec3(coords_ty->Type()), coords,
+                                               b.Convert(coords_ty->Type(), array_idx));
+                new_args.Push(new_coords->Result(0));
+
+                new_args.Push(args[3]);
+            } else {
+                new_args.Push(args[1]);
+                new_args.Push(args[2]);
+            }
+
+            b.CallWithResult<glsl::ir::BuiltinCall>(
+                call->DetachResult(), glsl::BuiltinFn::kImageStore, std::move(new_args));
         });
         call->Destroy();
     }

@@ -65,6 +65,7 @@ enum class BuiltinFn : uint8_t {
     kImageSize,
     kTexelFetch,
     kImageLoad,
+    kImageStore,
     kNone,
 };
 
