@@ -166,7 +166,7 @@ MaybeError ValidateSampledTextureBinding(DeviceBase* device,
             static_cast<SharedTextureMemoryContents*>(texture->GetSharedResourceMemoryContents())
                 ->GetExternalFormatSupportedSampleTypes();
     }
-    DAWN_TRY(ValidateCanUseAs(texture, wgpu::TextureUsage::TextureBinding, mode));
+    DAWN_TRY(ValidateCanUseAs(view, wgpu::TextureUsage::TextureBinding, mode));
 
     DAWN_INVALID_IF(texture->IsMultisampledTexture() != layout.multisampled,
                     "Sample count (%u) of %s doesn't match expectation (multisampled: %d).",
@@ -210,7 +210,7 @@ MaybeError ValidateStorageTextureBinding(DeviceBase* device,
     TextureViewBase* view = entry.textureView;
     TextureBase* texture = view->GetTexture();
 
-    DAWN_TRY(ValidateCanUseAs(texture, wgpu::TextureUsage::StorageBinding, mode));
+    DAWN_TRY(ValidateCanUseAs(view, wgpu::TextureUsage::StorageBinding, mode));
 
     DAWN_ASSERT(!texture->IsMultisampledTexture());
 
