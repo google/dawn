@@ -256,6 +256,10 @@ absl::FormatConvertResult<absl::FormatConversionCharSet::kString> AbslFormatConv
     const absl::FormatConversionSpec& spec,
     absl::FormatSink* s);
 
+//
+// Others
+//
+
 template <typename I, typename T>
 absl::FormatConvertResult<absl::FormatConversionCharSet::kString> AbslFormatConvert(
     const ityp::span<I, T>& values,

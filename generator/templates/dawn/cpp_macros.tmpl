@@ -26,6 +26,8 @@
 //* OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 {% macro wgpu_string_constructors(CppType, is_nullable) %}
+    inline constexpr {{CppType}}() noexcept = default;
+
     // NOLINTNEXTLINE(runtime/explicit) allow implicit construction
     inline constexpr {{CppType}}(const std::string_view& sv) noexcept {
         this->data = sv.data();
@@ -41,8 +43,6 @@
         this->length = length;
     }
     {% if is_nullable %}
-        inline constexpr {{CppType}}() noexcept = default;
-
         // NOLINTNEXTLINE(runtime/explicit) allow implicit construction
         inline constexpr {{CppType}}(std::nullptr_t) {
             this->data = nullptr;

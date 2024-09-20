@@ -336,9 +336,9 @@ TEST(WireCreatePipelineAsyncTestNullBackend, ServerDeletedBeforeCallback) {
     ASSERT_TRUE(c2sBuf->Flush());
     ASSERT_TRUE(s2cBuf->Flush());
 
-    WGPUShaderSourceWGSL wgslDesc = {};
+    WGPUShaderSourceWGSL wgslDesc = WGPU_SHADER_SOURCE_WGSL_INIT;
     wgslDesc.chain.sType = WGPUSType_ShaderSourceWGSL;
-    wgslDesc.code = "@compute @workgroup_size(64) fn main() {}";
+    wgslDesc.code.data = "@compute @workgroup_size(64) fn main() {}";
 
     WGPUShaderModuleDescriptor smDesc = {};
     smDesc.nextInChain = &wgslDesc.chain;

@@ -44,7 +44,9 @@
 {% endmacro %}
 
 {% macro to_jni_type(type) %}
-    {% if type.category in ['function pointer', 'object', 'structure'] %}
+    {% if type.name.get() == "string view" %}
+        jstring
+    {% elif type.category in ['function pointer', 'object', 'structure'] %}
         jobject
     {% elif type.category in ['bitmask', 'enum'] %}
         jint

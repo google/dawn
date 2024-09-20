@@ -3990,7 +3990,7 @@
         "chained": "in",
         "chain roots": ["shader module descriptor"],
         "members": [
-            {"name": "code", "type": "char", "annotation": "const*", "length": "strlen"}
+            {"name": "code", "type": "string view"}
         ]
     },
     "dawn shader module SPIRV options descriptor": {
