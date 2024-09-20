@@ -344,6 +344,8 @@ MaybeError Queue::SubmitPendingCommands() {
     // Transition eagerly all used external textures for export.
     for (auto* texture : mRecordingContext.externalTexturesForEagerTransition) {
         texture->TransitionEagerlyForExport(&mRecordingContext);
+
+        // TODO(330385376): Remove once ExternalImageDescriptorVk is removed.
         std::vector<VkSemaphore> waitRequirements = texture->AcquireWaitRequirements();
         mRecordingContext.waitSemaphores.insert(mRecordingContext.waitSemaphores.end(),
                                                 waitRequirements.begin(), waitRequirements.end());

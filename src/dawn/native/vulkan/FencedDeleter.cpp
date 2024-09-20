@@ -37,6 +37,7 @@ FencedDeleter::FencedDeleter(Device* device) : mDevice(device) {}
 FencedDeleter::~FencedDeleter() {
     DAWN_ASSERT(mBuffersToDelete.Empty());
     DAWN_ASSERT(mDescriptorPoolsToDelete.Empty());
+    DAWN_ASSERT(mFencesToDelete.Empty());
     DAWN_ASSERT(mFramebuffersToDelete.Empty());
     DAWN_ASSERT(mImagesToDelete.Empty());
     DAWN_ASSERT(mImageViewsToDelete.Empty());
@@ -63,6 +64,10 @@ void FencedDeleter::DeleteWhenUnused(VkDescriptorPool pool) {
 
 void FencedDeleter::DeleteWhenUnused(VkDeviceMemory memory) {
     mMemoriesToDelete.Enqueue(memory, mDevice->GetQueue()->GetPendingCommandSerial());
+}
+
+void FencedDeleter::DeleteWhenUnused(VkFence fence) {
+    mFencesToDelete.Enqueue(fence, mDevice->GetQueue()->GetPendingCommandSerial());
 }
 
 void FencedDeleter::DeleteWhenUnused(VkFramebuffer framebuffer) {
@@ -147,6 +152,11 @@ void FencedDeleter::Tick(ExecutionSerial completedSerial) {
         mDevice->fn.DestroyRenderPass(vkDevice, renderPass, nullptr);
     }
     mRenderPassesToDelete.ClearUpTo(completedSerial);
+
+    for (VkFence fence : mFencesToDelete.IterateUpTo(completedSerial)) {
+        mDevice->fn.DestroyFence(vkDevice, fence, nullptr);
+    }
+    mFencesToDelete.ClearUpTo(completedSerial);
 
     for (VkFramebuffer framebuffer : mFramebuffersToDelete.IterateUpTo(completedSerial)) {
         mDevice->fn.DestroyFramebuffer(vkDevice, framebuffer, nullptr);

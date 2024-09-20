@@ -45,6 +45,7 @@ class FencedDeleter {
     void DeleteWhenUnused(VkBuffer buffer);
     void DeleteWhenUnused(VkDescriptorPool pool);
     void DeleteWhenUnused(VkDeviceMemory memory);
+    void DeleteWhenUnused(VkFence fence);
     void DeleteWhenUnused(VkFramebuffer framebuffer);
     void DeleteWhenUnused(VkImage image);
     void DeleteWhenUnused(VkImageView view);
@@ -66,6 +67,7 @@ class FencedDeleter {
     SerialQueue<ExecutionSerial, VkBuffer> mBuffersToDelete;
     SerialQueue<ExecutionSerial, VkDescriptorPool> mDescriptorPoolsToDelete;
     SerialQueue<ExecutionSerial, VkDeviceMemory> mMemoriesToDelete;
+    SerialQueue<ExecutionSerial, VkFence> mFencesToDelete;
     SerialQueue<ExecutionSerial, VkFramebuffer> mFramebuffersToDelete;
     SerialQueue<ExecutionSerial, VkImage> mImagesToDelete;
     SerialQueue<ExecutionSerial, VkImageView> mImageViewsToDelete;
