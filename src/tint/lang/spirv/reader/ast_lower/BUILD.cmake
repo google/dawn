@@ -51,6 +51,8 @@ tint_add_target(tint_lang_spirv_reader_ast_lower lib
   lang/spirv/reader/ast_lower/fold_trivial_lets.h
   lang/spirv/reader/ast_lower/pass_workgroup_id_as_argument.cc
   lang/spirv/reader/ast_lower/pass_workgroup_id_as_argument.h
+  lang/spirv/reader/ast_lower/transpose_row_major.cc
+  lang/spirv/reader/ast_lower/transpose_row_major.h
 )
 
 tint_target_add_dependencies(tint_lang_spirv_reader_ast_lower lib
@@ -98,6 +100,7 @@ tint_add_target(tint_lang_spirv_reader_ast_lower_test test
   lang/spirv/reader/ast_lower/decompose_strided_matrix_test.cc
   lang/spirv/reader/ast_lower/fold_trivial_lets_test.cc
   lang/spirv/reader/ast_lower/pass_workgroup_id_as_argument_test.cc
+  lang/spirv/reader/ast_lower/transpose_row_major_test.cc
 )
 
 tint_target_add_dependencies(tint_lang_spirv_reader_ast_lower_test test

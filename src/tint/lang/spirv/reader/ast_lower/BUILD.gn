@@ -55,6 +55,8 @@ if (tint_build_spv_reader) {
       "fold_trivial_lets.h",
       "pass_workgroup_id_as_argument.cc",
       "pass_workgroup_id_as_argument.h",
+      "transpose_row_major.cc",
+      "transpose_row_major.h",
     ]
     deps = [
       "${dawn_root}/src/utils:utils",
@@ -96,6 +98,7 @@ if (tint_build_unittests) {
         "decompose_strided_matrix_test.cc",
         "fold_trivial_lets_test.cc",
         "pass_workgroup_id_as_argument_test.cc",
+        "transpose_row_major_test.cc",
       ]
       deps = [
         "${dawn_root}/src/utils:utils",
