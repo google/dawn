@@ -10,7 +10,7 @@ void atomicAdd_794055() {
   int res = int(0);
   arg_1 = int(1);
   int v = int(0);
-  InterlockedAdd(arg_0, -(int(1)), v);
+  InterlockedAdd(arg_0, (int(0) - int(1)), v);
   int x_15 = v;
   res = x_15;
 }

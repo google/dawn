@@ -8,7 +8,7 @@ groupshared int arg_0;
 int atomicSub_77883a() {
   int arg_1 = int(1);
   int v = int(0);
-  InterlockedAdd(arg_0, -(arg_1), v);
+  InterlockedAdd(arg_0, (int(0) - arg_1), v);
   int res = v;
   return res;
 }

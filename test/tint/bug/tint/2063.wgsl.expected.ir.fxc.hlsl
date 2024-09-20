@@ -11,7 +11,7 @@ void compute_main_inner(uint tint_local_index) {
   }
   GroupMemoryBarrierWithGroupSync();
   int v_1 = int(0);
-  InterlockedAdd(arg_0, -(int(-1)), v_1);
+  InterlockedAdd(arg_0, (int(0) - int(-1)), v_1);
   int res = v_1;
 }
 

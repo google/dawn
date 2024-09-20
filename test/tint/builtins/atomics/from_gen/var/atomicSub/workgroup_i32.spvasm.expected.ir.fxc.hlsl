@@ -11,7 +11,7 @@ void atomicSub_77883a() {
   arg_1 = int(1);
   int x_19 = arg_1;
   int v = int(0);
-  InterlockedAdd(arg_0, -(x_19), v);
+  InterlockedAdd(arg_0, (int(0) - x_19), v);
   int x_15 = v;
   res = x_15;
 }

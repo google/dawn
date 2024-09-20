@@ -587,6 +587,8 @@ TEST_F(HlslWriterTest, BuiltinWorkgroupAtomicSub) {
     b.Append(func->Block(), [&] {
         b.Let("x", b.Call(ty.i32(), core::BuiltinFn::kAtomicSub,
                           b.Access(ty.ptr<workgroup, atomic<i32>, read_write>(), var, 1_u), 123_i));
+        b.Let("x", b.Call(ty.u32(), core::BuiltinFn::kAtomicSub,
+                          b.Access(ty.ptr<workgroup, atomic<u32>, read_write>(), var, 2_u), 123_u));
         b.Return(func);
     });
 
@@ -613,8 +615,11 @@ void foo_inner(uint tint_local_index) {
   }
   GroupMemoryBarrierWithGroupSync();
   int v_3 = int(0);
-  InterlockedAdd(v.a, -(int(123)), v_3);
+  InterlockedAdd(v.a, (int(0) - int(123)), v_3);
   int x = v_3;
+  uint v_4 = 0u;
+  InterlockedAdd(v.b, (0u - 123u), v_4);
+  uint x_1 = v_4;
 }
 
 [numthreads(1, 1, 1)]

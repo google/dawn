@@ -450,8 +450,7 @@ struct State {
         b.InsertBefore(call, [&] {
             auto* original_value = b.Var(ty.ptr(function, type));
             original_value->SetInitializer(b.Zero(type));
-
-            auto* val = b.Negation(type, args[1]);
+            auto* val = b.Subtract(type, b.Zero(type), args[1]);
             b.Call<hlsl::ir::BuiltinCall>(ty.void_(), BuiltinFn::kInterlockedAdd, args[0], val,
                                           original_value);
             b.LoadWithResult(call->DetachResult(), original_value)->Result(0);
