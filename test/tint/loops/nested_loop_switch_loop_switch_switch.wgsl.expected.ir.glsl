@@ -10,6 +10,7 @@ void main() {
       } else {
         break;
       }
+      bool tint_continue = false;
       switch(i) {
         case 0:
         {
@@ -20,28 +21,30 @@ void main() {
               } else {
                 break;
               }
+              bool tint_continue = false;
               switch(j) {
                 case 0:
                 {
-                  {
-                    j = (j + 2);
-                  }
-                  continue;
+                  tint_continue = true;
+                  break;
                 }
                 case 1:
                 {
+                  bool tint_continue_1 = false;
                   switch(k) {
                     case 0:
                     {
-                      {
-                        j = (j + 2);
-                      }
-                      continue;
+                      tint_continue_1 = true;
+                      break;
                     }
                     default:
                     {
                       break;
                     }
+                  }
+                  if (tint_continue_1) {
+                    tint_continue = true;
+                    break;
                   }
                   break;
                 }
@@ -50,21 +53,31 @@ void main() {
                   break;
                 }
               }
+              if (tint_continue) {
+                {
+                  j = (j + 2);
+                }
+                continue;
+              }
               {
                 j = (j + 2);
               }
               continue;
             }
           }
-          {
-            i = (i + 2);
-          }
-          continue;
+          tint_continue = true;
+          break;
         }
         default:
         {
           break;
         }
+      }
+      if (tint_continue) {
+        {
+          i = (i + 2);
+        }
+        continue;
       }
       {
         i = (i + 2);

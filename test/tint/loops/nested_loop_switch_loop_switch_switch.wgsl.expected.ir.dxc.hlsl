@@ -9,6 +9,7 @@ void main() {
       } else {
         break;
       }
+      bool tint_continue = false;
       switch(i) {
         case int(0):
         {
@@ -19,28 +20,30 @@ void main() {
               } else {
                 break;
               }
+              bool tint_continue = false;
               switch(j) {
                 case int(0):
                 {
-                  {
-                    j = (j + int(2));
-                  }
-                  continue;
+                  tint_continue = true;
+                  break;
                 }
                 case int(1):
                 {
+                  bool tint_continue_1 = false;
                   switch(k) {
                     case int(0):
                     {
-                      {
-                        j = (j + int(2));
-                      }
-                      continue;
+                      tint_continue_1 = true;
+                      break;
                     }
                     default:
                     {
                       break;
                     }
+                  }
+                  if (tint_continue_1) {
+                    tint_continue = true;
+                    break;
                   }
                   break;
                 }
@@ -49,21 +52,31 @@ void main() {
                   break;
                 }
               }
+              if (tint_continue) {
+                {
+                  j = (j + int(2));
+                }
+                continue;
+              }
               {
                 j = (j + int(2));
               }
               continue;
             }
           }
-          {
-            i = (i + int(2));
-          }
-          continue;
+          tint_continue = true;
+          break;
         }
         default:
         {
           break;
         }
+      }
+      if (tint_continue) {
+        {
+          i = (i + int(2));
+        }
+        continue;
       }
       {
         i = (i + int(2));

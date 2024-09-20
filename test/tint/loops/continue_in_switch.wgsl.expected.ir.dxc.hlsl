@@ -8,18 +8,23 @@ void f() {
       } else {
         break;
       }
+      bool tint_continue = false;
       switch(i) {
         case int(0):
         {
-          {
-            i = (i + int(1));
-          }
-          continue;
+          tint_continue = true;
+          break;
         }
         default:
         {
           break;
         }
+      }
+      if (tint_continue) {
+        {
+          i = (i + int(1));
+        }
+        continue;
       }
       {
         i = (i + int(1));

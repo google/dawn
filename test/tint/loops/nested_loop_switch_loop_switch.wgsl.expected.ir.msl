@@ -13,6 +13,7 @@ kernel void tint_symbol() {
       } else {
         break;
       }
+      bool tint_continue = false;
       switch(i) {
         case 0:
         {
@@ -23,18 +24,23 @@ kernel void tint_symbol() {
               } else {
                 break;
               }
+              bool tint_continue = false;
               switch(j) {
                 case 0:
                 {
-                  {
-                    j = as_type<int>((as_type<uint>(j) + as_type<uint>(2)));
-                  }
-                  continue;
+                  tint_continue = true;
+                  break;
                 }
                 default:
                 {
                   break;
                 }
+              }
+              if (tint_continue) {
+                {
+                  j = as_type<int>((as_type<uint>(j) + as_type<uint>(2)));
+                }
+                continue;
               }
               {
                 j = as_type<int>((as_type<uint>(j) + as_type<uint>(2)));
@@ -42,15 +48,19 @@ kernel void tint_symbol() {
               continue;
             }
           }
-          {
-            i = as_type<int>((as_type<uint>(i) + as_type<uint>(2)));
-          }
-          continue;
+          tint_continue = true;
+          break;
         }
         default:
         {
           break;
         }
+      }
+      if (tint_continue) {
+        {
+          i = as_type<int>((as_type<uint>(i) + as_type<uint>(2)));
+        }
+        continue;
       }
       {
         i = as_type<int>((as_type<uint>(i) + as_type<uint>(2)));

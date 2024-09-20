@@ -38,6 +38,7 @@
 #include "src/tint/lang/core/ir/transform/demote_to_helper.h"
 #include "src/tint/lang/core/ir/transform/direct_variable_access.h"
 #include "src/tint/lang/core/ir/transform/multiplanar_external_texture.h"
+#include "src/tint/lang/core/ir/transform/remove_continue_in_switch.h"
 #include "src/tint/lang/core/ir/transform/remove_terminator_args.h"
 #include "src/tint/lang/core/ir/transform/rename_conflicts.h"
 #include "src/tint/lang/core/ir/transform/robustness.h"
@@ -177,7 +178,6 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
     // TODO(dsinclair): PixelLocal transform
     // TODO(dsinclair): TruncateInterstageVariables
     // TODO(dsinclair): CalculateArrayLength
-    // TODO(dsinclair): RemoveContinueInSwitch
 
     // DemoteToHelper must come before any transform that introduces non-core instructions.
     // Run after ShaderIO to ensure the discards are added to the entry point it introduces.
@@ -188,6 +188,7 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
     // builtins
     RUN_TRANSFORM(raise::BuiltinPolyfill, module);
     RUN_TRANSFORM(core::ir::transform::VectorizeScalarMatrixConstructors, module);
+    RUN_TRANSFORM(core::ir::transform::RemoveContinueInSwitch, module);
 
     // These transforms need to be run last as various transforms introduce terminator arguments,
     // naming conflicts, and expressions that need to be explicitly not inlined.

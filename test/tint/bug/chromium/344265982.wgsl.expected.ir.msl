@@ -29,19 +29,24 @@ void foo(device tint_array<int, 4>* const arg) {
       } else {
         break;
       }
+      bool tint_continue = false;
       switch((*arg)[i]) {
         case 1:
         {
-          {
-            i = as_type<int>((as_type<uint>(i) + as_type<uint>(1)));
-          }
-          continue;
+          tint_continue = true;
+          break;
         }
         default:
         {
           (*arg)[i] = 2;
           break;
         }
+      }
+      if (tint_continue) {
+        {
+          i = as_type<int>((as_type<uint>(i) + as_type<uint>(1)));
+        }
+        continue;
       }
       {
         i = as_type<int>((as_type<uint>(i) + as_type<uint>(1)));

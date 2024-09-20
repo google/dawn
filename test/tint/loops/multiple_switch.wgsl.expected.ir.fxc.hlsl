@@ -1,52 +1,55 @@
-SKIP: FAILED
-
 
 [numthreads(1, 1, 1)]
 void main() {
-  int i = 0;
+  int i = int(0);
   {
-    int i = 0;
+    int i = int(0);
     while(true) {
-      if ((i < 2)) {
+      if ((i < int(2))) {
       } else {
         break;
       }
+      bool tint_continue = false;
       switch(i) {
-        case 0:
+        case int(0):
         {
-          {
-            i = (i + 1);
-          }
-          continue;
+          tint_continue = true;
+          break;
         }
         default:
         {
           break;
         }
       }
-      switch(i) {
-        case 0:
+      if (tint_continue) {
         {
-          {
-            i = (i + 1);
-          }
-          continue;
+          i = (i + int(1));
+        }
+        continue;
+      }
+      bool tint_continue_1 = false;
+      switch(i) {
+        case int(0):
+        {
+          tint_continue_1 = true;
+          break;
         }
         default:
         {
           break;
         }
+      }
+      if (tint_continue_1) {
+        {
+          i = (i + int(1));
+        }
+        continue;
       }
       {
-        i = (i + 1);
+        i = (i + int(1));
       }
       continue;
     }
   }
 }
 
-FXC validation failure:
-<scrubbed_path>(18,11-19): error X3708: continue cannot be used in a switch
-
-
-tint executable returned error: exit status 1

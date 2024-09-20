@@ -10,21 +10,25 @@ void main() {
       } else {
         break;
       }
+      bool tint_continue = false;
       switch(i) {
         case 0:
         {
+          bool tint_continue_1 = false;
           switch(j) {
             case 0:
             {
-              {
-                i = (i + 2);
-              }
-              continue;
+              tint_continue_1 = true;
+              break;
             }
             default:
             {
               break;
             }
+          }
+          if (tint_continue_1) {
+            tint_continue = true;
+            break;
           }
           break;
         }
@@ -32,6 +36,12 @@ void main() {
         {
           break;
         }
+      }
+      if (tint_continue) {
+        {
+          i = (i + 2);
+        }
+        continue;
       }
       {
         i = (i + 2);

@@ -8,13 +8,12 @@ void foo() {
       } else {
         break;
       }
+      bool tint_continue = false;
       switch(asint(buffer.Load((0u + (uint(i) * 4u))))) {
         case int(1):
         {
-          {
-            i = (i + int(1));
-          }
-          continue;
+          tint_continue = true;
+          break;
         }
         default:
         {
@@ -22,6 +21,12 @@ void foo() {
           buffer.Store(v, asuint(int(2)));
           break;
         }
+      }
+      if (tint_continue) {
+        {
+          i = (i + int(1));
+        }
+        continue;
       }
       {
         i = (i + int(1));

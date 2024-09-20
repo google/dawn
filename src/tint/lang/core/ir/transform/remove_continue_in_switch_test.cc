@@ -80,7 +80,7 @@ TEST_F(IR_RemoveContinueInSwitchTest, NoModify_ContinueNotInSwitch) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_RemoveContinueInSwitchTest, NoModify_ContinueInSwitchCase_WithoutBreakIf) {
+TEST_F(IR_RemoveContinueInSwitchTest, ContinueInSwitchCase_WithoutBreakIf) {
     auto* func = b.Function("func", ty.void_());
     b.Append(func->Block(), [&] {  //
         auto* loop = b.Loop();
@@ -114,7 +114,31 @@ TEST_F(IR_RemoveContinueInSwitchTest, NoModify_ContinueInSwitchCase_WithoutBreak
 )";
     EXPECT_EQ(src, str());
 
-    auto* expect = src;
+    auto* expect = R"(
+%func = func():void {
+  $B1: {
+    loop [b: $B2] {  # loop_1
+      $B2: {  # body
+        %tint_continue:ptr<function, bool, read_write> = var
+        switch 42i [c: (default, $B3)] {  # switch_1
+          $B3: {  # case
+            store %tint_continue, true
+            exit_switch  # switch_1
+          }
+        }
+        %3:bool = load %tint_continue
+        if %3 [t: $B4] {  # if_1
+          $B4: {  # true
+            continue  # -> $B5
+          }
+        }
+        continue  # -> $B5
+      }
+    }
+    ret
+  }
+}
+)";
 
     Run(RemoveContinueInSwitch);
 

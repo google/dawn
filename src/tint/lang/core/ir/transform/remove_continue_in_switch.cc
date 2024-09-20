@@ -62,12 +62,6 @@ struct State {
                 continue;
             }
 
-            // Skip `continue` instructions in loops whose continuing blocks do not end with
-            // `breakif`, as these continuing blocks can be safely inlined.
-            if (!tint::Is<BreakIf>(cont->Loop()->Continuing()->Terminator())) {
-                continue;
-            }
-
             // Check if this `continue` is inside a `switch` that is inside the `loop`.
             // Do this by walking up the stack of control flow instructions until we see a `loop`.
             // If we hit a `switch` before we see the loop, we need to replace the `continue`.

@@ -16,18 +16,23 @@ void main() {
           } else {
             break;
           }
+          bool tint_continue = false;
           switch(i) {
             case 0:
             {
-              {
-                j = (j + 2);
-              }
-              continue;
+              tint_continue = true;
+              break;
             }
             default:
             {
               break;
             }
+          }
+          if (tint_continue) {
+            {
+              j = (j + 2);
+            }
+            continue;
           }
           {
             j = (j + 2);

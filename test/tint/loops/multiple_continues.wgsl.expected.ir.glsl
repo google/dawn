@@ -9,32 +9,33 @@ void main() {
       } else {
         break;
       }
+      bool tint_continue = false;
       switch(i) {
         case 0:
         {
-          {
-            i = (i + 1);
-          }
-          continue;
+          tint_continue = true;
+          break;
         }
         case 1:
         {
-          {
-            i = (i + 1);
-          }
-          continue;
+          tint_continue = true;
+          break;
         }
         case 2:
         {
-          {
-            i = (i + 1);
-          }
-          continue;
+          tint_continue = true;
+          break;
         }
         default:
         {
           break;
         }
+      }
+      if (tint_continue) {
+        {
+          i = (i + 1);
+        }
+        continue;
       }
       {
         i = (i + 1);

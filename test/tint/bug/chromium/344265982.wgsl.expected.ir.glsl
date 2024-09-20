@@ -14,19 +14,24 @@ void foo() {
       } else {
         break;
       }
+      bool tint_continue = false;
       switch(v.tint_symbol_2[i]) {
         case 1:
         {
-          {
-            i = (i + 1);
-          }
-          continue;
+          tint_continue = true;
+          break;
         }
         default:
         {
           v.tint_symbol_2[i] = 2;
           break;
         }
+      }
+      if (tint_continue) {
+        {
+          i = (i + 1);
+        }
+        continue;
       }
       {
         i = (i + 1);
