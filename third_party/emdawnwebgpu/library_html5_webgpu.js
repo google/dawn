@@ -55,7 +55,9 @@ var LibraryHTML5WebGPU = {
 #endif
     if (WebGPU.preinitializedDeviceId === undefined) {
       var device = Module['preinitializedWebGPUDevice'];
-      WebGPU.preinitializedDeviceId = _emwgpuTableInsertDevice(device);
+      const { instancePtr, devicePtr } = _emwgpuTableInsertDevice(device);
+      WebGPU.preinitializedInstanceId = instancePtr;
+      WebGPU.preinitializedDeviceId = devicePtr;
     }
     _wgpuDeviceAddRef(WebGPU.preinitializedDeviceId);
     return WebGPU.preinitializedDeviceId;
