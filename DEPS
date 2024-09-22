@@ -278,7 +278,7 @@ deps = {
   },
 
   'third_party/vulkan-deps': {
-    'url': '{chromium_git}/vulkan-deps@7089471c2a65234b35cce5491ce0241805c1bdd0',
+    'url': '{chromium_git}/vulkan-deps@54e834b2bf55523b99fe506208b8528528346ccd',
     'condition': 'dawn_standalone',
   },
 
@@ -323,7 +323,7 @@ deps = {
   },
 
   'third_party/vulkan-validation-layers/src': {
-    'url': '{chromium_git}/external/github.com/KhronosGroup/Vulkan-ValidationLayers@e228ff20406fd79d0f0f271c69d6119266311bae',
+    'url': '{chromium_git}/external/github.com/KhronosGroup/Vulkan-ValidationLayers@6386c9e19f148a43bc7d9130882538329d7bff74',
     'condition': 'dawn_standalone',
   },
 
