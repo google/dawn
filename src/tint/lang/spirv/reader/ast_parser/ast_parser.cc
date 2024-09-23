@@ -506,14 +506,19 @@ Attributes ASTParser::ConvertMemberDecoration(uint32_t struct_type_id,
         case spv::Decoration::ColMajor:          // WGSL only supports column major matrices.
         case spv::Decoration::RelaxedPrecision:  // WGSL doesn't support relaxed precision.
             break;
-        case spv::Decoration::RowMajor:
-            if (!member_ty->Is<Matrix>()) {
-                Fail() << "row-major matrix layout not currently supported on type "
-                       << member_ty->String();
+        case spv::Decoration::RowMajor: {
+            auto* ty = member_ty->UnwrapAlias();
+            while (auto* arr = ty->As<Array>()) {
+                ty = arr->type->UnwrapAlias();
+            }
+            auto* mat = ty->As<Matrix>();
+            if (!mat) {
+                Fail() << "MatrixStride cannot be applied to type " << ty->String();
                 break;
             }
             out.Add(create<ast::RowMajorAttribute>(Source{}));
             break;
+        }
         case spv::Decoration::MatrixStride: {
             if (decoration.size() != 2) {
                 Fail() << "malformed MatrixStride decoration: expected 1 literal operand, has "

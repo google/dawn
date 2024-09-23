@@ -38,7 +38,8 @@
 #include "src/tint/lang/wgsl/sem/member_accessor_expression.h"
 #include "src/tint/utils/rtti/switch.h"
 
-using namespace tint::core::fluent_types;  // NOLINT
+using namespace tint::core::fluent_types;     // NOLINT
+using namespace tint::core::number_suffixes;  // NOLINT
 
 TINT_INSTANTIATE_TYPEINFO(tint::spirv::reader::TransposeRowMajor);
 
@@ -59,11 +60,23 @@ struct TransposeRowMajor::State {
     /// The semantic info.
     const sem::Info& sem = src.Sem();
 
+    /// Map from array type to a helper function that transposes from a row-major array of matrices.
+    Hashmap<const core::type::Array*, Symbol, 4> array_from_row_major_helpers;
+
+    /// Map from array type to a helper function that transposes to a row-major array of matrices.
+    Hashmap<const core::type::Array*, Symbol, 4> array_to_row_major_helpers;
+
     /// Map from matrix reference to column load helper function.
     Hashmap<const core::type::Type*, Symbol, 4> column_load_helpers;
 
     /// Map from matrix reference to column store helper function.
     Hashmap<const core::type::Type*, Symbol, 4> column_store_helpers;
+
+    /// MatrixLayout describes whether a matrix is row-major or column-major.
+    enum class MatrixLayout : uint8_t {
+        kRowMajor,
+        kColumnMajor,
+    };
 
     /// Constructor
     /// @param program the source program
@@ -82,19 +95,15 @@ struct TransposeRowMajor::State {
                     continue;
                 }
                 for (auto* member : str_ty->Members()) {
-                    auto* matrix = member->Type()->As<core::type::Matrix>();
-                    if (!matrix) {
-                        continue;
-                    }
                     auto* attr = ast::GetAttribute<ast::RowMajorAttribute>(
                         member->Declaration()->attributes);
                     if (!attr) {
                         continue;
                     }
-                    // We've got a struct member of a matrix type with a row-major memory layout.
+                    // We've got a struct member of a matrix or array of matrix type with a
+                    // row-major memory layout.
                     // Transpose it, remove the @row_major attribute, and record it in the set.
-                    auto transposed_matrix = b.ty.mat(CreateASTTypeFor(ctx, matrix->Type()),
-                                                      matrix->Rows(), matrix->Columns());
+                    auto transposed_matrix = TransposeType(member->Type());
                     ctx.Remove(member->Declaration()->attributes, attr);
                     auto* replacement = b.Member(ctx.Clone(member->Name()), transposed_matrix,
                                                  ctx.Clone(member->Declaration()->attributes));
@@ -182,12 +191,38 @@ struct TransposeRowMajor::State {
         return resolver::Resolve(b);
     }
 
+    /// Transpose a matrix or array of matrix type.
+    /// @param ty the original type
+    /// @returns the transposed type
+    ast::Type TransposeType(const core::type::Type* ty) {
+        if (auto* matrix = ty->As<core::type::Matrix>()) {
+            return b.ty.mat(CreateASTTypeFor(ctx, matrix->Type()), matrix->Rows(),
+                            matrix->Columns());
+        }
+        if (auto* arr = ty->As<core::type::Array>()) {
+            auto* stride = b.Stride(arr->Stride());
+            if (auto count = arr->ConstantCount()) {
+                return b.ty.array(TransposeType(arr->ElemType()), b.Expr(u32(count.value())),
+                                  Vector{stride});
+            }
+            return b.ty.array(TransposeType(arr->ElemType()), Vector{stride});
+        }
+        TINT_UNREACHABLE();
+    }
+
     /// Replace an assignment to a transposed matrix.
     /// @param assign the assignment statement to replace
     void ReplaceAssignment(const ast::AssignmentStatement* assign) {
         auto* lhs = src.Sem().GetVal(assign->lhs);
         Switch(
             src.Sem().GetVal(assign->rhs)->Type(),
+            [&](const core::type::Array* arr) {
+                // We are storing a whole array, so we need to individually transpose each matrix
+                // element. Call a helper function to do this.
+                ctx.Replace(assign->rhs,
+                            b.Call(TransposeArrayHelper(arr, MatrixLayout::kColumnMajor),
+                                   ctx.Clone(assign->rhs)));
+            },
             [&](const core::type::Matrix*) {
                 // We are storing the whole matrix, so just transpose the RHS.
                 ctx.Replace(assign->rhs, b.Call("transpose", ctx.Clone(assign->rhs)));
@@ -252,6 +287,13 @@ struct TransposeRowMajor::State {
     void ReplaceLoad(const sem::Load* load) {
         Switch(
             load->Type(),
+            [&](const core::type::Array* arr) {
+                // We are loading a whole array, so we need to individually transpose each matrix
+                // element. Call a helper function to do this.
+                ctx.Replace(load->Declaration(),
+                            b.Call(TransposeArrayHelper(arr, MatrixLayout::kRowMajor),
+                                   ctx.Clone(load->Declaration())));
+            },
             [&](const core::type::Matrix*) {
                 // We are loading the whole matrix, so just transpose the result.
                 ctx.Replace(load->Declaration(),
@@ -275,8 +317,63 @@ struct TransposeRowMajor::State {
             TINT_ICE_ON_NO_MATCH);
     }
 
+    /// Get (or create) a helper function that will transpose an array of matrices.
+    /// @param arr_type the array type that we are producing
+    /// @param src_layout specifies if the source is row-major or column-major
+    /// @returns the name of the helper function
+    Symbol TransposeArrayHelper(const core::type::Array* arr_type, MatrixLayout src_layout) {
+        auto& helpers = src_layout == MatrixLayout::kRowMajor ? array_from_row_major_helpers
+                                                              : array_to_row_major_helpers;
+        return helpers.GetOrAdd(arr_type, [&] {
+            // The helper function will look like this:
+            //   fn tint_transpose_array(from: array<mat3x2<f32>, 4>) -> array<mat2x3<f32>, 4> {
+            //     var result : array<mat2x3<f32>, 4>;
+            //     for (var i = 0; i < 4; i++) {
+            //       result[i] = transpose(from[i]);
+            //     }
+            //     return result;
+            //   }
+            ast::Type from_param_type;
+            ast::Type return_type;
+            ast::Type result_type;
+            if (src_layout == MatrixLayout::kRowMajor) {
+                from_param_type = TransposeType(arr_type);
+                return_type = CreateASTTypeFor(ctx, arr_type);
+                result_type = CreateASTTypeFor(ctx, arr_type);
+            } else {
+                from_param_type = CreateASTTypeFor(ctx, arr_type);
+                return_type = TransposeType(arr_type);
+                result_type = TransposeType(arr_type);
+            }
+            auto name = b.Symbols().New("tint_transpose_array");
+            auto* from = b.Param("tint_from", from_param_type);
+            auto result = b.Symbols().New("tint_result");
+            auto i = b.Symbols().New("i");
+            auto count = arr_type->ConstantCount();
+
+            const ast::Expression* transpose = nullptr;
+            if (auto* nested_arr = arr_type->ElemType()->As<core::type::Array>()) {
+                transpose =
+                    b.Call(TransposeArrayHelper(nested_arr, src_layout), b.IndexAccessor(from, i));
+            } else {
+                TINT_ASSERT(arr_type->ElemType()->Is<core::type::Matrix>());
+                transpose = b.Call("transpose", b.IndexAccessor(from, i));
+            }
+
+            b.Func(
+                name, Vector{from}, return_type,
+                Vector{
+                    b.Decl(b.Var(result, result_type)),
+                    b.For(b.Decl(b.Var(i, b.Expr(0_u))), b.LessThan(i, u32(*count)), b.Increment(i),
+                          b.Block(b.Assign(b.IndexAccessor(result, i), transpose))),
+                    b.Return(result),
+                });
+            return name;
+        });
+    }
+
     /// Get (or create) a helper function that will load a column from a transposed matrix.
-    /// @param src_type the matrix type we are load from
+    /// @param src_type the matrix type we are loading from
     /// @returns the name of the helper function
     Symbol LoadColumnHelper(const core::type::Type* src_type) {
         auto* ref_type = src_type->As<core::type::Reference>();

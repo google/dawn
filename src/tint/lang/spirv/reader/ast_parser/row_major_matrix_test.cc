@@ -54,18 +54,21 @@ class SpirvReaderRowMajorMatrixTest : public testing::Test {
        %u32_0 = OpConstant %u32 0
        %u32_1 = OpConstant %u32 1
        %u32_2 = OpConstant %u32 2
+       %u32_4 = OpConstant %u32 4
 
          %f32 = OpTypeFloat 32
        %f32_2 = OpConstant %f32 2.0
 
        %vec3f = OpTypeVector %f32 3
      %mat2x3f = OpTypeMatrix %vec3f 2
+ %arr_mat2x3f = OpTypeArray %mat2x3f %u32_4
 
            )" + types + R"(
 
     %_ptr_Storage_f32 = OpTypePointer StorageBuffer %f32
   %_ptr_Storage_vec3f = OpTypePointer StorageBuffer %vec3f
 %_ptr_Storage_mat2x3f = OpTypePointer StorageBuffer %mat2x3f
+%_ptr_Storage_arr_mat2x3f = OpTypePointer StorageBuffer %arr_mat2x3f
 %_ptr_Storage_S = OpTypePointer StorageBuffer %S
       %buffer = OpVariable %_ptr_Storage_S StorageBuffer
 
@@ -114,7 +117,7 @@ struct S {
 @group(0) @binding(0) var<storage, read_write> x_2 : S;
 
 fn foo_1() {
-  let x_20 = transpose(x_2.field0);
+  let x_23 = transpose(x_2.field0);
   return;
 }
 
@@ -159,7 +162,7 @@ fn arr_to_mat3x2_stride_32(arr : array<strided_arr, 3u>) -> mat3x2<f32> {
 }
 
 fn foo_1() {
-  let x_20 = transpose(arr_to_mat3x2_stride_32(x_2.field0));
+  let x_23 = transpose(arr_to_mat3x2_stride_32(x_2.field0));
   return;
 }
 
@@ -199,7 +202,7 @@ struct S {
 @group(0) @binding(0) var<storage, read_write> x_2 : S;
 
 fn foo_1() {
-  let x_20 = tint_load_row_major_column(&(x_2.field0), u32(1u));
+  let x_23 = tint_load_row_major_column(&(x_2.field0), u32(1u));
   return;
 }
 
@@ -235,7 +238,7 @@ struct S {
 @group(0) @binding(0) var<storage, read_write> x_2 : S;
 
 fn foo_1() {
-  let x_20 = x_2.field0[2u][1u];
+  let x_23 = x_2.field0[2u][1u];
   return;
 }
 
@@ -360,6 +363,76 @@ struct S {
 
 fn foo_1() {
   x_2.field0[2u][1u] = (x_2.field0[2u][1u] * 2.0f);
+  return;
+}
+
+@compute @workgroup_size(1i, 1i, 1i)
+fn foo() {
+  foo_1();
+}
+)");
+}
+
+TEST_F(SpirvReaderRowMajorMatrixTest, ArrayOfMatrix) {
+    auto result = Run(R"(
+               OpDecorate %arr_mat2x3f ArrayStride 32
+               OpMemberDecorate %S 0 Offset 0
+               OpMemberDecorate %S 0 RowMajor
+               OpMemberDecorate %S 0 MatrixStride 8
+               OpMemberDecorate %S 1 Offset 128)",
+                      R"(
+          %S = OpTypeStruct %arr_mat2x3f %vec3f)",
+                      R"(
+    %arr_ptr = OpAccessChain %_ptr_Storage_arr_mat2x3f %buffer %u32_0
+        %arr = OpLoad %arr_mat2x3f %arr_ptr
+     %m1_ptr = OpAccessChain %_ptr_Storage_mat2x3f %buffer %u32_0 %u32_1
+          %m = OpLoad %mat2x3f %m1_ptr
+     %m2_ptr = OpAccessChain %_ptr_Storage_mat2x3f %buffer %u32_0 %u32_2
+               OpStore %m2_ptr %m
+    %arr_mod = OpCompositeInsert %arr_mat2x3f %m %arr 0
+               OpStore %arr_ptr %arr_mod
+          )");
+
+    EXPECT_EQ(result, R"(
+struct strided_arr {
+  @size(32)
+  el : mat3x2<f32>,
+}
+
+fn tint_transpose_array(tint_from : array<strided_arr, 4u>) -> array<mat2x3<f32>, 4u> {
+  var tint_result : array<mat2x3<f32>, 4u>;
+  for(var i = 0u; (i < 4u); i++) {
+    tint_result[i] = transpose(tint_from[i].el);
+  }
+  return tint_result;
+}
+
+fn tint_transpose_array_1(tint_from : array<mat2x3<f32>, 4u>) -> array<strided_arr, 4u> {
+  var tint_result_1 : array<strided_arr, 4u>;
+  for(var i_1 = 0u; (i_1 < 4u); i_1++) {
+    tint_result_1[i_1].el = transpose(tint_from[i_1]);
+  }
+  return tint_result_1;
+}
+
+alias Arr = array<mat2x3f, 4u>;
+
+struct S {
+  /* @offset(0) */
+  field0 : array<strided_arr, 4u>,
+  /* @offset(128) */
+  field1 : vec3f,
+}
+
+@group(0) @binding(0) var<storage, read_write> x_2 : S;
+
+fn foo_1() {
+  let x_23 = tint_transpose_array(x_2.field0);
+  let x_25 = transpose(x_2.field0[1u].el);
+  x_2.field0[2u].el = transpose(x_25);
+  var x_27_1 = x_23;
+  x_27_1[0u] = x_25;
+  x_2.field0 = tint_transpose_array_1(x_27_1);
   return;
 }
 

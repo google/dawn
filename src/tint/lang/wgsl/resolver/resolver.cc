@@ -4539,9 +4539,14 @@ sem::Struct* Resolver::Structure(const ast::Struct* str) {
                     return true;
                 },
                 [&](const ast::RowMajorAttribute* attr) {
-                    if (!type->Is<core::type::Matrix>()) {
+                    const auto* element_type = type;
+                    while (auto* arr = element_type->As<core::type::Array>()) {
+                        element_type = arr->ElemType();
+                    }
+                    if (!element_type->Is<core::type::Matrix>()) {
                         AddError(attr->source)
-                            << style::Attribute("@row_major") << " can only be applied to matrices";
+                            << style::Attribute("@row_major")
+                            << " can only be applied to matrices or arrays of matrices";
                         return false;
                     }
                     return true;

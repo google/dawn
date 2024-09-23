@@ -981,5 +981,328 @@ fn f() {
     EXPECT_EQ(expect, str(got));
 }
 
+TEST_F(TransposeRowMajorTest, ArrayOfMatrix_ReadWholeArray) {
+    // struct S {
+    //   @offset(0)
+    //   @row_major
+    //   @stride(8)
+    //   arr : @stride(32) array<mat2x3<f32>, 4>,
+    // };
+    // @group(0) @binding(0) var<storage, read_write> s : S;
+    //
+    // @compute @workgroup_size(1)
+    // fn f() {
+    //   let x : array<mat2x3<f32>, 4> = s.arr;
+    // }
+    ProgramBuilder b;
+    auto* S = b.Structure(
+        "S", Vector{
+                 b.Member("arr", b.ty.array<mat2x3<f32>, 4>(Vector{b.Stride(32u)}),
+                          Vector{
+                              b.MemberOffset(0_u),
+                              b.Stride(8_u),
+                              b.Disable(ast::DisabledValidation::kIgnoreStrideAttribute),
+                              b.RowMajor(),
+                          }),
+             });
+    b.GlobalVar("s", b.ty.Of(S), storage, read_write, b.Group(0_a), b.Binding(0_a));
+    b.Func("f", tint::Empty, b.ty.void_(),
+           Vector{
+               b.Decl(b.Let("x", b.ty.array<mat2x3<f32>, 4>(), b.MemberAccessor("s", "arr"))),
+           },
+           Vector{
+               b.Stage(ast::PipelineStage::kCompute),
+               b.WorkgroupSize(1_i),
+           });
+
+    auto* expect = R"(
+fn tint_transpose_array(tint_from : @stride(32) array<mat3x2<f32>, 4u>) -> array<mat2x3<f32>, 4u> {
+  var tint_result : array<mat2x3<f32>, 4u>;
+  for(var i = 0u; (i < 4u); i++) {
+    tint_result[i] = transpose(tint_from[i]);
+  }
+  return tint_result;
+}
+
+struct S {
+  /* @offset(0u) */
+  @stride(8) @internal(disable_validation__ignore_stride)
+  arr : @stride(32) array<mat3x2<f32>, 4u>,
+}
+
+@group(0) @binding(0) var<storage, read_write> s : S;
+
+@compute @workgroup_size(1i)
+fn f() {
+  let x : array<mat2x3<f32>, 4u> = tint_transpose_array(s.arr);
+}
+)";
+
+    auto got = Run<SimplifyPointers, TransposeRowMajor>(resolver::Resolve(b));
+
+    EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(TransposeRowMajorTest, ArrayOfMatrix_WriteWholeArray) {
+    // struct S {
+    //   @offset(0)
+    //   @row_major
+    //   @stride(8)
+    //   arr : @stride(32) array<mat2x3<f32>, 4>,
+    // };
+    // @group(0) @binding(0) var<storage, read_write> s : S;
+    //
+    // @compute @workgroup_size(1)
+    // fn f() {
+    //   s.arr = array<mat2x3<f32>, 4>();
+    // }
+    ProgramBuilder b;
+    auto* S = b.Structure(
+        "S", Vector{
+                 b.Member("arr", b.ty.array<mat2x3<f32>, 4>(Vector{b.Stride(32u)}),
+                          Vector{
+                              b.MemberOffset(0_u),
+                              b.Stride(8_u),
+                              b.Disable(ast::DisabledValidation::kIgnoreStrideAttribute),
+                              b.RowMajor(),
+                          }),
+             });
+    b.GlobalVar("s", b.ty.Of(S), storage, read_write, b.Group(0_a), b.Binding(0_a));
+    b.Func("f", tint::Empty, b.ty.void_(),
+           Vector{
+               b.Assign(b.MemberAccessor("s", "arr"), b.Call(b.ty.array<mat2x3<f32>, 4>())),
+           },
+           Vector{
+               b.Stage(ast::PipelineStage::kCompute),
+               b.WorkgroupSize(1_i),
+           });
+
+    auto* expect = R"(
+fn tint_transpose_array(tint_from : array<mat2x3<f32>, 4u>) -> @stride(32) array<mat3x2<f32>, 4u> {
+  var tint_result : @stride(32) array<mat3x2<f32>, 4u>;
+  for(var i = 0u; (i < 4u); i++) {
+    tint_result[i] = transpose(tint_from[i]);
+  }
+  return tint_result;
+}
+
+struct S {
+  /* @offset(0u) */
+  @stride(8) @internal(disable_validation__ignore_stride)
+  arr : @stride(32) array<mat3x2<f32>, 4u>,
+}
+
+@group(0) @binding(0) var<storage, read_write> s : S;
+
+@compute @workgroup_size(1i)
+fn f() {
+  s.arr = tint_transpose_array(array<mat2x3<f32>, 4u>());
+}
+)";
+
+    auto got = Run<SimplifyPointers, TransposeRowMajor>(resolver::Resolve(b));
+
+    EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(TransposeRowMajorTest, ArrayOfMatrix_NestedArray) {
+    // struct S {
+    //   @offset(0)
+    //   @row_major
+    //   @stride(8)
+    //   arr : @stride(128) array<@stride(32) array<mat2x3<f32>, 4>, 5>,
+    // };
+    // @group(0) @binding(0) var<storage, read_write> s : S;
+    //
+    // @compute @workgroup_size(1)
+    // fn f() {
+    //   let x = s.arr;
+    //   s.arr = array<array<mat2x3<f32>, 4, 5>>();
+    //   s.arr[0] = x[1];
+    //   s.arr[1][2] = x[2][3];
+    //   s.arr[2][3][1] = x[4][3][1];
+    //   s.arr[4][2][0][1] = x[1][3][0][2];
+    // }
+    ProgramBuilder b;
+    auto* S = b.Structure(
+        "S", Vector{
+                 b.Member("arr",
+                          b.ty.array(b.ty.array<mat2x3<f32>, 4>(Vector{b.Stride(32u)}), 5_a,
+                                     Vector{b.Stride(128u)}),
+                          Vector{
+                              b.MemberOffset(0_u),
+                              b.Stride(8_u),
+                              b.Disable(ast::DisabledValidation::kIgnoreStrideAttribute),
+                              b.RowMajor(),
+                          }),
+             });
+    b.GlobalVar("s", b.ty.Of(S), storage, read_write, b.Group(0_a), b.Binding(0_a));
+    b.Func(
+        "f", tint::Empty, b.ty.void_(),
+        Vector{
+            b.Decl(
+                b.Let("x", b.ty.array<array<mat2x3<f32>, 4>, 5>(), b.MemberAccessor("s", "arr"))),
+            b.Assign(b.MemberAccessor("s", "arr"), b.Call(b.ty.array<array<mat2x3<f32>, 4>, 5>())),
+            b.Assign(b.IndexAccessor(b.MemberAccessor("s", "arr"), 0_a), b.IndexAccessor("x", 1_a)),
+            b.Assign(b.IndexAccessor(b.IndexAccessor(b.MemberAccessor("s", "arr"), 1_a), 2_a),
+                     b.IndexAccessor(b.IndexAccessor("x", 2_a), 3_a)),
+            b.Assign(
+                b.IndexAccessor(
+                    b.IndexAccessor(b.IndexAccessor(b.MemberAccessor("s", "arr"), 2_a), 3_a), 1_a),
+                b.IndexAccessor(b.IndexAccessor(b.IndexAccessor("x", 4_a), 3_a), 1_a)),
+            b.Assign(
+                b.IndexAccessor(
+                    b.IndexAccessor(
+                        b.IndexAccessor(b.IndexAccessor(b.MemberAccessor("s", "arr"), 4_a), 2_a),
+                        0_a),
+                    1_a),
+                b.IndexAccessor(
+                    b.IndexAccessor(b.IndexAccessor(b.IndexAccessor("x", 1_a), 3_a), 0_a), 2_a)),
+        },
+        Vector{
+            b.Stage(ast::PipelineStage::kCompute),
+            b.WorkgroupSize(1_i),
+        });
+
+    auto* expect = R"(
+fn tint_transpose_array_1(tint_from : @stride(32) array<mat3x2<f32>, 4u>) -> array<mat2x3<f32>, 4u> {
+  var tint_result_1 : array<mat2x3<f32>, 4u>;
+  for(var i_1 = 0u; (i_1 < 4u); i_1++) {
+    tint_result_1[i_1] = transpose(tint_from[i_1]);
+  }
+  return tint_result_1;
+}
+
+fn tint_transpose_array(tint_from : @stride(128) array<@stride(32) array<mat3x2<f32>, 4u>, 5u>) -> array<array<mat2x3<f32>, 4u>, 5u> {
+  var tint_result : array<array<mat2x3<f32>, 4u>, 5u>;
+  for(var i = 0u; (i < 5u); i++) {
+    tint_result[i] = tint_transpose_array_1(tint_from[i]);
+  }
+  return tint_result;
+}
+
+fn tint_transpose_array_3(tint_from : array<mat2x3<f32>, 4u>) -> @stride(32) array<mat3x2<f32>, 4u> {
+  var tint_result_3 : @stride(32) array<mat3x2<f32>, 4u>;
+  for(var i_3 = 0u; (i_3 < 4u); i_3++) {
+    tint_result_3[i_3] = transpose(tint_from[i_3]);
+  }
+  return tint_result_3;
+}
+
+fn tint_transpose_array_2(tint_from : array<array<mat2x3<f32>, 4u>, 5u>) -> @stride(128) array<@stride(32) array<mat3x2<f32>, 4u>, 5u> {
+  var tint_result_2 : @stride(128) array<@stride(32) array<mat3x2<f32>, 4u>, 5u>;
+  for(var i_2 = 0u; (i_2 < 5u); i_2++) {
+    tint_result_2[i_2] = tint_transpose_array_3(tint_from[i_2]);
+  }
+  return tint_result_2;
+}
+
+fn tint_store_row_major_column(tint_to : ptr<storage, mat3x2<f32>, read_write>, tint_idx : u32, tint_col : vec3<f32>) {
+  tint_to[0][tint_idx] = tint_col[0];
+  tint_to[1][tint_idx] = tint_col[1];
+  tint_to[2][tint_idx] = tint_col[2];
+}
+
+struct S {
+  /* @offset(0u) */
+  @stride(8) @internal(disable_validation__ignore_stride)
+  arr : @stride(128) array<@stride(32) array<mat3x2<f32>, 4u>, 5u>,
+}
+
+@group(0) @binding(0) var<storage, read_write> s : S;
+
+@compute @workgroup_size(1i)
+fn f() {
+  let x : array<array<mat2x3<f32>, 4u>, 5u> = tint_transpose_array(s.arr);
+  s.arr = tint_transpose_array_2(array<array<mat2x3<f32>, 4u>, 5u>());
+  s.arr[0] = tint_transpose_array_3(x[1]);
+  s.arr[1][2] = transpose(x[2][3]);
+  tint_store_row_major_column(&(s.arr[2][3]), u32(1), x[4][3][1]);
+  s.arr[4][2][1][0] = x[1][3][0][2];
+}
+)";
+
+    auto got = Run<SimplifyPointers, TransposeRowMajor>(resolver::Resolve(b));
+
+    EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(TransposeRowMajorTest, ArrayOfMatrix_RuntimeSizedArray) {
+    // struct S {
+    //   @offset(0)
+    //   @row_major
+    //   @stride(8)
+    //   arr : @stride(128) array<mat4x3<f32>>,
+    // };
+    // @group(0) @binding(0) var<storage, read_write> s : S;
+    //
+    // @compute @workgroup_size(1)
+    // fn f() {
+    //   s.arr[1] = s.arr[0];
+    //   s.arr[2][3] = s.arr[1][2];
+    //   s.arr[3][2][1] = s.arr[4][3][2];
+    // }
+    ProgramBuilder b;
+    auto* S = b.Structure(
+        "S", Vector{
+                 b.Member("arr", b.ty.array<mat4x3<f32>>(Vector{b.Stride(128u)}),
+                          Vector{
+                              b.MemberOffset(0_u),
+                              b.Stride(8_u),
+                              b.Disable(ast::DisabledValidation::kIgnoreStrideAttribute),
+                              b.RowMajor(),
+                          }),
+             });
+    b.GlobalVar("s", b.ty.Of(S), storage, read_write, b.Group(0_a), b.Binding(0_a));
+    b.Func(
+        "f", tint::Empty, b.ty.void_(),
+        Vector{
+            b.Assign(b.IndexAccessor(b.MemberAccessor("s", "arr"), 1_a),
+                     b.IndexAccessor(b.MemberAccessor("s", "arr"), 0_a)),
+            b.Assign(b.IndexAccessor(b.IndexAccessor(b.MemberAccessor("s", "arr"), 2_a), 3_a),
+                     b.IndexAccessor(b.IndexAccessor(b.MemberAccessor("s", "arr"), 1_a), 2_a)),
+            b.Assign(
+                b.IndexAccessor(
+                    b.IndexAccessor(b.IndexAccessor(b.MemberAccessor("s", "arr"), 3_a), 2_a), 1_a),
+                b.IndexAccessor(
+                    b.IndexAccessor(b.IndexAccessor(b.MemberAccessor("s", "arr"), 4_a), 3_a), 2_a)),
+        },
+        Vector{
+            b.Stage(ast::PipelineStage::kCompute),
+            b.WorkgroupSize(1_i),
+        });
+
+    auto* expect = R"(
+fn tint_load_row_major_column(tint_from : ptr<storage, mat3x4<f32>, read_write>, tint_idx : u32) -> vec3<f32> {
+  return vec3<f32>(tint_from[0][tint_idx], tint_from[1][tint_idx], tint_from[2][tint_idx]);
+}
+
+fn tint_store_row_major_column(tint_to : ptr<storage, mat3x4<f32>, read_write>, tint_idx : u32, tint_col : vec3<f32>) {
+  tint_to[0][tint_idx] = tint_col[0];
+  tint_to[1][tint_idx] = tint_col[1];
+  tint_to[2][tint_idx] = tint_col[2];
+}
+
+struct S {
+  /* @offset(0u) */
+  @stride(8) @internal(disable_validation__ignore_stride)
+  arr : @stride(128) array<mat3x4<f32>>,
+}
+
+@group(0) @binding(0) var<storage, read_write> s : S;
+
+@compute @workgroup_size(1i)
+fn f() {
+  s.arr[1] = transpose(transpose(s.arr[0]));
+  tint_store_row_major_column(&(s.arr[2]), u32(3), tint_load_row_major_column(&(s.arr[1]), u32(2)));
+  s.arr[3][1][2] = s.arr[4][2][3];
+}
+)";
+
+    auto got = Run<SimplifyPointers, TransposeRowMajor>(resolver::Resolve(b));
+
+    EXPECT_EQ(expect, str(got));
+}
+
 }  // namespace
 }  // namespace tint::spirv::reader
