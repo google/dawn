@@ -1,8 +1,8 @@
 
 int f() {
-  int v[8] = {1, 2, 3, 4, 5, 6, 7, 8};
+  int v[8] = {int(1), int(2), int(3), int(4), int(5), int(6), int(7), int(8)};
   int a[8] = v;
-  return a[1];
+  return a[int(1)];
 }
 
 [numthreads(1, 1, 1)]

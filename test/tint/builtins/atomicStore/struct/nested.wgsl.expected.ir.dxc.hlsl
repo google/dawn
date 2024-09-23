@@ -27,17 +27,17 @@ struct compute_main_inputs {
 groupshared S2 wg;
 void compute_main_inner(uint tint_local_index) {
   if ((tint_local_index == 0u)) {
-    wg.x = 0;
-    wg.y = 0;
-    wg.z = 0;
-    wg.a.x = 0;
-    wg.a.a.x = 0;
+    wg.x = int(0);
+    wg.y = int(0);
+    wg.z = int(0);
+    wg.a.x = int(0);
+    wg.a.a.x = int(0);
     uint v = 0u;
     InterlockedExchange(wg.a.a.a, 0u, v);
-    wg.a.a.y = 0;
-    wg.a.a.z = 0;
-    wg.a.y = 0;
-    wg.a.z = 0;
+    wg.a.a.y = int(0);
+    wg.a.a.z = int(0);
+    wg.a.y = int(0);
+    wg.a.z = int(0);
   }
   GroupMemoryBarrierWithGroupSync();
   uint v_1 = 0u;

@@ -15,7 +15,7 @@ void f() {
   float4x4 t = transpose(v(128u));
   float l = length(asfloat(u[1u]).ywxz);
   float a = abs(asfloat(u[1u]).ywxz[0u]);
-  float v_4 = (t[0][0u] + float(l));
+  float v_4 = (t[int(0)][0u] + float(l));
   s.Store(0u, asuint((v_4 + float(a))));
 }
 

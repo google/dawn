@@ -45,8 +45,15 @@ using Accesses = EnumSet<Access>;
 /// @returns the accesses that may be performed by the instruction @p inst
 Accesses AccessesFor(ir::Instruction* inst) {
     return tint::Switch<Accesses>(
-        inst,                                                           //
-        [&](const ir::Load*) { return Access::kLoad; },                 //
+        inst,  //
+        [&](const ir::Load* l) {
+            // Always inline things in the `handle` address space
+            if (l->From()->Type()->As<core::type::Pointer>()->AddressSpace() ==
+                core::AddressSpace::kHandle) {
+                return Accesses{};
+            }
+            return Accesses{Access::kLoad};
+        },                                                              //
         [&](const ir::LoadVectorElement*) { return Access::kLoad; },    //
         [&](const ir::Store*) { return Access::kStore; },               //
         [&](const ir::StoreVectorElement*) { return Access::kStore; },  //

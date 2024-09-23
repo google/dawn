@@ -43,6 +43,8 @@ See:
 
 {{- /* Generate the optional flag on HLSL shader model */ -}}
 {{- template "HLSLShaderModel" $overload -}}
+{{- /* Generate the optional flag for GLSL desktop */ -}}
+{{- template "GLSLShaderModel" $overload -}}
 
 {{- /* Generate enable directives */ -}}
 {{- template "EnableDirectives" $overload -}}
@@ -231,6 +233,21 @@ fn vertex_main() -> VertexOutput {
   return out;
 }
 {{ end -}}
+
+{{- end -}}
+
+
+{{- /* ------------------------------------------------------------------ */ -}}
+{{-                        define "GLSLShaderModel"                          -}}
+{{- /* Emits the optional GLSL shader model for a given overload          */ -}}
+{{- /* ------------------------------------------------------------------ */ -}}
+{{-   $permutation  := . -}}
+{{-   $overload := $permutation.Overload -}}
+{{-   $builtin_name := $permutation.Intrinsic.Name -}}
+
+{{-   if OverloadNeedsDesktopGLSL $overload }}
+// flags: --glsl-desktop
+{{    end -}}
 
 {{- end -}}
 

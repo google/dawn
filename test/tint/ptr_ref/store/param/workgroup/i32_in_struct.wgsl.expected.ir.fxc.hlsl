@@ -9,7 +9,7 @@ struct main_inputs {
 
 groupshared str S;
 void func() {
-  S.i = 42;
+  S.i = int(42);
 }
 
 void main_inner(uint tint_local_index) {

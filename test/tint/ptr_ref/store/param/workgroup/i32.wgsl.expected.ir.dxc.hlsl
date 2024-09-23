@@ -5,12 +5,12 @@ struct main_inputs {
 
 groupshared int S;
 void func() {
-  S = 42;
+  S = int(42);
 }
 
 void main_inner(uint tint_local_index) {
   if ((tint_local_index == 0u)) {
-    S = 0;
+    S = int(0);
   }
   GroupMemoryBarrierWithGroupSync();
   func();

@@ -7,7 +7,7 @@ struct Inner {
 ByteAddressBuffer sb : register(t0);
 RWByteAddressBuffer s : register(u1);
 int tint_f32_to_i32(float value) {
-  return (((value <= 2147483520.0f)) ? ((((value >= -2147483648.0f)) ? (int(value)) : (-2147483648))) : (2147483647));
+  return (((value <= 2147483520.0f)) ? ((((value >= -2147483648.0f)) ? (int(value)) : (int(-2147483648)))) : (int(2147483647)));
 }
 
 Inner v(uint offset) {
@@ -149,18 +149,18 @@ void main() {
   int v_47 = (v_46 + int(vec3_u32[1u]));
   int v_48 = ((v_47 + tint_f32_to_i32(vec4_f32[2u])) + vec4_i32[2u]);
   int v_49 = (v_48 + int(vec4_u32[2u]));
-  int v_50 = (v_49 + tint_f32_to_i32(mat2x2_f32[0][0u]));
-  int v_51 = (v_50 + tint_f32_to_i32(mat2x3_f32[0][0u]));
-  int v_52 = (v_51 + tint_f32_to_i32(mat2x4_f32[0][0u]));
-  int v_53 = (v_52 + tint_f32_to_i32(mat3x2_f32[0][0u]));
-  int v_54 = (v_53 + tint_f32_to_i32(mat3x3_f32[0][0u]));
-  int v_55 = (v_54 + tint_f32_to_i32(mat3x4_f32[0][0u]));
-  int v_56 = (v_55 + tint_f32_to_i32(mat4x2_f32[0][0u]));
-  int v_57 = (v_56 + tint_f32_to_i32(mat4x3_f32[0][0u]));
-  int v_58 = (v_57 + tint_f32_to_i32(mat4x4_f32[0][0u]));
+  int v_50 = (v_49 + tint_f32_to_i32(mat2x2_f32[int(0)][0u]));
+  int v_51 = (v_50 + tint_f32_to_i32(mat2x3_f32[int(0)][0u]));
+  int v_52 = (v_51 + tint_f32_to_i32(mat2x4_f32[int(0)][0u]));
+  int v_53 = (v_52 + tint_f32_to_i32(mat3x2_f32[int(0)][0u]));
+  int v_54 = (v_53 + tint_f32_to_i32(mat3x3_f32[int(0)][0u]));
+  int v_55 = (v_54 + tint_f32_to_i32(mat3x4_f32[int(0)][0u]));
+  int v_56 = (v_55 + tint_f32_to_i32(mat4x2_f32[int(0)][0u]));
+  int v_57 = (v_56 + tint_f32_to_i32(mat4x3_f32[int(0)][0u]));
+  int v_58 = (v_57 + tint_f32_to_i32(mat4x4_f32[int(0)][0u]));
   float3 arr2_vec3_f32[2] = v_39;
   Inner struct_inner = v_40;
   Inner array_struct_inner[4] = v_41;
-  s.Store(0u, asuint((((v_58 + tint_f32_to_i32(arr2_vec3_f32[0][0u])) + struct_inner.scalar_i32) + array_struct_inner[0].scalar_i32)));
+  s.Store(0u, asuint((((v_58 + tint_f32_to_i32(arr2_vec3_f32[int(0)][0u])) + struct_inner.scalar_i32) + array_struct_inner[int(0)].scalar_i32)));
 }
 

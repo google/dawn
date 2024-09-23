@@ -26,6 +26,6 @@ void f() {
   float16_t l = length(tint_bitcast_to_f16(u[0u]).xyz.zxy);
   float16_t a = abs(tint_bitcast_to_f16(u[0u]).xyz.zxy[0u]);
   float16_t v_6 = float16_t(a);
-  s.Store<float16_t>(0u, ((v_6 + float16_t(l)) + t[0][0u]));
+  s.Store<float16_t>(0u, ((v_6 + float16_t(l)) + t[int(0)][0u]));
 }
 

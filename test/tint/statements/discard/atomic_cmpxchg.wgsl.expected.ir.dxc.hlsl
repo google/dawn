@@ -12,11 +12,11 @@ RWByteAddressBuffer a : register(u0);
 static bool continue_execution = true;
 int foo_inner() {
   continue_execution = false;
-  int x = 0;
-  int v = 0;
-  a.InterlockedCompareExchange(int(0u), 0, 1, v);
+  int x = int(0);
+  int v = int(0);
+  a.InterlockedCompareExchange(int(0u), int(0), int(1), v);
   int v_1 = v;
-  atomic_compare_exchange_result_i32 v_2 = {v_1, (v_1 == 0)};
+  atomic_compare_exchange_result_i32 v_2 = {v_1, (v_1 == int(0))};
   atomic_compare_exchange_result_i32 result = v_2;
   if (result.exchanged) {
     atomic_compare_exchange_result_i32 v_3 = v_2;

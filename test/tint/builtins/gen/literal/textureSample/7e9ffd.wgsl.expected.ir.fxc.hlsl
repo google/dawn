@@ -3,9 +3,7 @@ RWByteAddressBuffer prevent_dce : register(u0);
 Texture2DArray arg_0 : register(t0, space1);
 SamplerState arg_1 : register(s1, space1);
 float textureSample_7e9ffd() {
-  Texture2DArray v = arg_0;
-  SamplerState v_1 = arg_1;
-  float res = v.Sample(v_1, float3((1.0f).xx, float(1)));
+  float res = arg_0.Sample(arg_1, float3((1.0f).xx, float(int(1))));
   return res;
 }
 

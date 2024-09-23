@@ -1,7 +1,7 @@
 
 RWByteAddressBuffer prevent_dce : register(u0);
 int2 subgroupExclusiveMul_4525a3() {
-  int2 arg_0 = (1).xx;
+  int2 arg_0 = (int(1)).xx;
   int2 res = WavePrefixProduct(arg_0);
   return res;
 }

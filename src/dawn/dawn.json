@@ -42,7 +42,10 @@
     "INTERNAL__HAVE_EMDAWNWEBGPU_HEADER": {
         "category": "structure",
         "tags": ["emscripten"],
-        "members": []
+        "_comment": "TODO(issues.chromium.org/issues/366932309): The struct must have at least one field.",
+        "members": [
+            {"name": "unused", "type": "bool", "default": "false"}
+        ]
     },
 
     "create instance": {
@@ -615,14 +618,14 @@
         "category": "structure",
         "members": [
             {"name": "data", "type": "char", "annotation": "const*", "optional": true},
-            {"name": "length", "type": "size_t", "default": "SIZE_MAX"}
+            {"name": "length", "type": "size_t", "default": "WGPU_STRLEN"}
         ]
     },
     "nullable string view": {
         "category": "structure",
         "members": [
             {"name": "data", "type": "char", "annotation": "const*", "optional": true},
-            {"name": "length", "type": "size_t", "default": "SIZE_MAX"}
+            {"name": "length", "type": "size_t", "default": "WGPU_STRLEN"}
         ]
     },
     "buffer": {
@@ -3987,7 +3990,7 @@
         "chained": "in",
         "chain roots": ["shader module descriptor"],
         "members": [
-            {"name": "code", "type": "char", "annotation": "const*", "length": "strlen"}
+            {"name": "code", "type": "string view"}
         ]
     },
     "dawn shader module SPIRV options descriptor": {
@@ -4771,6 +4774,11 @@
         "category": "constant",
         "type": "uint32_t",
         "value":  "UINT32_MAX"
+    },
+    "strlen" : {
+        "category": "constant",
+        "type": "size_t",
+        "value":  "SIZE_MAX"
     },
     "ObjectType": {
       "_comment": "Only used for the wire",

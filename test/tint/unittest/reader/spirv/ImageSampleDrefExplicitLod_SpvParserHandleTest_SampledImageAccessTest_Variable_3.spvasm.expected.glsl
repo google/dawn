@@ -2,9 +2,10 @@ SKIP: FAILED
 
 #version 310 es
 precision highp float;
+precision highp int;
 
 int tint_ftoi(float v) {
-  return ((v < 2147483520.0f) ? ((v < -2147483648.0f) ? (-2147483647 - 1) : int(v)) : 2147483647);
+  return ((v <= 2147483520.0f) ? ((v < -2147483648.0f) ? (-2147483647 - 1) : int(v)) : 2147483647);
 }
 
 uniform highp sampler2DArrayShadow x_20_x_10;
@@ -39,9 +40,11 @@ void main() {
   return;
 }
 error: Error parsing GLSL shader:
-ERROR: 0:27: 'sampler' : TextureOffset does not support sampler2DArrayShadow :  ES Profile
-ERROR: 0:27: '' : compilation terminated 
+ERROR: 0:28: 'sampler' : TextureOffset does not support sampler2DArrayShadow :  ES Profile
+ERROR: 0:28: '' : compilation terminated 
 ERROR: 2 compilation errors.  No code generated.
 
 
 
+
+tint executable returned error: exit status 1

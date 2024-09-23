@@ -1,7 +1,7 @@
 
 RWByteAddressBuffer prevent_dce : register(u0);
 int2 subgroupShuffle_323416() {
-  int2 res = WaveReadLaneAt((1).xx, 1u);
+  int2 res = WaveReadLaneAt((int(1)).xx, 1u);
   return res;
 }
 

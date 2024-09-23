@@ -21,7 +21,7 @@ void f_inner(uint tint_local_index) {
       if ((v_1 >= 64u)) {
         break;
       }
-      s.data[v_1] = 0;
+      s.data[v_1] = int(0);
       {
         v = (v_1 + 1u);
       }
@@ -29,8 +29,8 @@ void f_inner(uint tint_local_index) {
     }
   }
   GroupMemoryBarrierWithGroupSync();
-  s.data[asint(ubo[0u].x)] = 1;
-  result.Store(0u, asuint(s.data[3]));
+  s.data[asint(ubo[0u].x)] = int(1);
+  result.Store(0u, asuint(s.data[int(3)]));
 }
 
 [numthreads(1, 1, 1)]

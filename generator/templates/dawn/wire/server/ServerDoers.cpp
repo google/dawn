@@ -57,7 +57,7 @@ namespace dawn::wire::server {
                         {% set MemberName = as_varName(member.name) %}
                         {% if member.type.name.get() == "string view" %}
                             // String views must not be nullable.
-                            if ({{MemberName}}.data == nullptr && {{MemberName}}.length == SIZE_MAX) {
+                            if ({{MemberName}}.data == nullptr && {{MemberName}}.length == WGPU_STRLEN) {
                                 return WireResult::FatalError;
                             }
                         {% endif %}

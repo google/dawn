@@ -1,88 +1,17 @@
-SKIP: FAILED
 
-
-@group(0) @binding(0) var t_f : texture_3d<f32>;
-
-@group(0) @binding(1) var t_i : texture_3d<i32>;
-
-@group(0) @binding(2) var t_u : texture_3d<u32>;
-
-@compute @workgroup_size(1)
-fn main() {
-  var fdims = textureDimensions(t_f, 1);
-  var idims = textureDimensions(t_i, 1);
-  var udims = textureDimensions(t_u, 1);
+Texture3D<float4> t_f : register(t0);
+Texture3D<int4> t_i : register(t1);
+Texture3D<uint4> t_u : register(t2);
+[numthreads(1, 1, 1)]
+void main() {
+  uint4 v = (0u).xxxx;
+  t_f.GetDimensions(uint(int(1)), v[0u], v[1u], v[2u], v[3u]);
+  uint3 fdims = v.xyz;
+  uint4 v_1 = (0u).xxxx;
+  t_i.GetDimensions(uint(int(1)), v_1[0u], v_1[1u], v_1[2u], v_1[3u]);
+  uint3 idims = v_1.xyz;
+  uint4 v_2 = (0u).xxxx;
+  t_u.GetDimensions(uint(int(1)), v_2[0u], v_2[1u], v_2[2u], v_2[3u]);
+  uint3 udims = v_2.xyz;
 }
 
-Failed to generate: :19:51 error: var: initializer type 'vec2<u32>' does not match store type 'vec3<u32>'
-    %fdims:ptr<function, vec3<u32>, read_write> = var, %14
-                                                  ^^^
-
-:8:3 note: in block
-  $B2: {
-  ^^^
-
-:30:51 error: var: initializer type 'vec2<u32>' does not match store type 'vec3<u32>'
-    %idims:ptr<function, vec3<u32>, read_write> = var, %25
-                                                  ^^^
-
-:8:3 note: in block
-  $B2: {
-  ^^^
-
-:41:51 error: var: initializer type 'vec2<u32>' does not match store type 'vec3<u32>'
-    %udims:ptr<function, vec3<u32>, read_write> = var, %36
-                                                  ^^^
-
-:8:3 note: in block
-  $B2: {
-  ^^^
-
-note: # Disassembly
-$B1: {  # root
-  %t_f:ptr<handle, texture_3d<f32>, read> = var @binding_point(0, 0)
-  %t_i:ptr<handle, texture_3d<i32>, read> = var @binding_point(0, 1)
-  %t_u:ptr<handle, texture_3d<u32>, read> = var @binding_point(0, 2)
-}
-
-%main = @compute @workgroup_size(1, 1, 1) func():void {
-  $B2: {
-    %5:texture_3d<f32> = load %t_f
-    %6:u32 = convert 1i
-    %7:ptr<function, vec4<u32>, read_write> = var
-    %8:ptr<function, u32, read_write> = access %7, 0u
-    %9:ptr<function, u32, read_write> = access %7, 1u
-    %10:ptr<function, u32, read_write> = access %7, 2u
-    %11:ptr<function, u32, read_write> = access %7, 3u
-    %12:void = %5.GetDimensions %6, %8, %9, %10, %11
-    %13:vec4<u32> = load %7
-    %14:vec2<u32> = swizzle %13, xyz
-    %fdims:ptr<function, vec3<u32>, read_write> = var, %14
-    %16:texture_3d<i32> = load %t_i
-    %17:u32 = convert 1i
-    %18:ptr<function, vec4<u32>, read_write> = var
-    %19:ptr<function, u32, read_write> = access %18, 0u
-    %20:ptr<function, u32, read_write> = access %18, 1u
-    %21:ptr<function, u32, read_write> = access %18, 2u
-    %22:ptr<function, u32, read_write> = access %18, 3u
-    %23:void = %16.GetDimensions %17, %19, %20, %21, %22
-    %24:vec4<u32> = load %18
-    %25:vec2<u32> = swizzle %24, xyz
-    %idims:ptr<function, vec3<u32>, read_write> = var, %25
-    %27:texture_3d<u32> = load %t_u
-    %28:u32 = convert 1i
-    %29:ptr<function, vec4<u32>, read_write> = var
-    %30:ptr<function, u32, read_write> = access %29, 0u
-    %31:ptr<function, u32, read_write> = access %29, 1u
-    %32:ptr<function, u32, read_write> = access %29, 2u
-    %33:ptr<function, u32, read_write> = access %29, 3u
-    %34:void = %27.GetDimensions %28, %30, %31, %32, %33
-    %35:vec4<u32> = load %29
-    %36:vec2<u32> = swizzle %35, xyz
-    %udims:ptr<function, vec3<u32>, read_write> = var, %36
-    ret
-  }
-}
-
-
-tint executable returned error: exit status 1

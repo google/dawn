@@ -1,7 +1,7 @@
 
 RWByteAddressBuffer prevent_dce : register(u0);
 int subgroupAnd_c6fc92() {
-  int arg_0 = 1;
+  int arg_0 = int(1);
   int res = asint(WaveActiveBitAnd(asuint(arg_0)));
   return res;
 }

@@ -2,8 +2,8 @@
 RWByteAddressBuffer prevent_dce : register(u0);
 RWByteAddressBuffer sb_rw : register(u1);
 int atomicLoad_0806ad() {
-  int v = 0;
-  sb_rw.InterlockedOr(int(0u), 0, v);
+  int v = int(0);
+  sb_rw.InterlockedOr(int(0u), int(0), v);
   int res = v;
   return res;
 }

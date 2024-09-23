@@ -2,6 +2,7 @@ SKIP: FAILED
 
 #version 310 es
 
+
 struct frexp_result_f32 {
   float fract;
   int exp;
@@ -17,9 +18,9 @@ void main() {
   int tint_symbol_2 = res.exp;
 }
 error: Error parsing GLSL shader:
-ERROR: 0:12: 'frexp' : no matching overloaded function found 
-ERROR: 0:12: 'assign' :  cannot convert from ' const float' to ' temp structure{ global highp float fract,  global highp int exp}'
-ERROR: 0:12: '' : compilation terminated 
+ERROR: 0:13: 'frexp' : no matching overloaded function found 
+ERROR: 0:13: 'assign' :  cannot convert from ' const float' to ' temp structure{ global highp float fract,  global highp int exp}'
+ERROR: 0:13: '' : compilation terminated 
 ERROR: 3 compilation errors.  No code generated.
 
 

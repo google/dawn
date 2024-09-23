@@ -13,7 +13,7 @@ struct vertex_main_outputs {
 
 
 void frexp_bee870() {
-  frexp_result_f32 res = {0.5f, 1};
+  frexp_result_f32 res = {0.5f, int(1)};
 }
 
 void fragment_main() {

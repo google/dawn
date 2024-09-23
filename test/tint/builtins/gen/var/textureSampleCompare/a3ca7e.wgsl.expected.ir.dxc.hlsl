@@ -4,13 +4,11 @@ TextureCubeArray arg_0 : register(t0, space1);
 SamplerComparisonState arg_1 : register(s1, space1);
 float textureSampleCompare_a3ca7e() {
   float3 arg_2 = (1.0f).xxx;
-  int arg_3 = 1;
+  int arg_3 = int(1);
   float arg_4 = 1.0f;
-  TextureCubeArray v = arg_0;
-  SamplerComparisonState v_1 = arg_1;
-  float3 v_2 = arg_2;
-  float v_3 = arg_4;
-  float res = v.SampleCmp(v_1, float4(v_2, float(arg_3)), v_3);
+  float3 v = arg_2;
+  float v_1 = arg_4;
+  float res = arg_0.SampleCmp(arg_1, float4(v, float(arg_3)), v_1);
   return res;
 }
 

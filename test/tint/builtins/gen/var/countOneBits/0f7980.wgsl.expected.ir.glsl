@@ -8,7 +8,7 @@ buffer tint_symbol_1_1_ssbo {
 } v;
 ivec4 countOneBits_0f7980() {
   ivec4 arg_0 = ivec4(1);
-  ivec4 res = bitCount(arg_0);
+  ivec4 res = ivec4(bitCount(arg_0));
   return res;
 }
 void main() {
@@ -22,7 +22,7 @@ buffer tint_symbol_1_1_ssbo {
 } v;
 ivec4 countOneBits_0f7980() {
   ivec4 arg_0 = ivec4(1);
-  ivec4 res = bitCount(arg_0);
+  ivec4 res = ivec4(bitCount(arg_0));
   return res;
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
@@ -40,7 +40,7 @@ struct VertexOutput {
 layout(location = 0) flat out ivec4 vertex_main_loc0_Output;
 ivec4 countOneBits_0f7980() {
   ivec4 arg_0 = ivec4(1);
-  ivec4 res = bitCount(arg_0);
+  ivec4 res = ivec4(bitCount(arg_0));
   return res;
 }
 VertexOutput vertex_main_inner() {

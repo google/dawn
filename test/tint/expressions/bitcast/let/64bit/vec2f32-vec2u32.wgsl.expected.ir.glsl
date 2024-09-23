@@ -1,11 +1,7 @@
-SKIP: FAILED
+#version 310 es
 
-<dawn>/src/tint/lang/glsl/writer/printer/printer.cc:819 internal compiler error: Switch() matched no cases. Type: tint::core::ir::Bitcast
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
-
-tint executable returned error: signal: trace/BPT trap
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+void main() {
+  vec2 a = vec2(2.003662109375f, -513.03125f);
+  uvec2 b = floatBitsToUint(a);
+}

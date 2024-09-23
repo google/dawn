@@ -6,16 +6,16 @@ struct compute_main_inputs {
 RWByteAddressBuffer prevent_dce : register(u0);
 groupshared int arg_0;
 int atomicOr_d09248() {
-  int v = 0;
-  InterlockedOr(arg_0, 1, v);
+  int v = int(0);
+  InterlockedOr(arg_0, int(1), v);
   int res = v;
   return res;
 }
 
 void compute_main_inner(uint tint_local_index) {
   if ((tint_local_index == 0u)) {
-    int v_1 = 0;
-    InterlockedExchange(arg_0, 0, v_1);
+    int v_1 = int(0);
+    InterlockedExchange(arg_0, int(0), v_1);
   }
   GroupMemoryBarrierWithGroupSync();
   prevent_dce.Store(0u, asuint(atomicOr_d09248()));

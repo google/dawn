@@ -417,7 +417,7 @@ class Builder {
     ir::Constant* MatchWidth(ARG&& value, const core::type::Type* match) {
         auto* element = Constant(std::forward<ARG>(value));
         if (match->Is<core::type::Vector>()) {
-            return Splat(ir.Types().match_width(element->Type(), match), element);
+            return Splat(ir.Types().MatchWidth(element->Type(), match), element);
         }
         return element;
     }
@@ -996,6 +996,15 @@ class Builder {
         auto* type = ir.Types().Get<TYPE>();
         auto* value = Value(std::forward<VAL>(val));
         return Bitcast(type, value);
+    }
+
+    /// Creates a bitcast instruction
+    /// @param result the result
+    /// @param val the value being bitcast
+    /// @returns the instruction
+    template <typename VAL>
+    ir::Bitcast* BitcastWithResult(ir::InstructionResult* result, VAL&& val) {
+        return Append(ir.CreateInstruction<ir::Bitcast>(result, val));
     }
 
     /// Creates a discard instruction

@@ -4,8 +4,8 @@ void main() {
   uint tint_symbol = 0u;
   {
     while(true) {
-      switch(2) {
-        case 1:
+      switch(int(2)) {
+        case int(1):
         {
           {
             if (true) { break; }

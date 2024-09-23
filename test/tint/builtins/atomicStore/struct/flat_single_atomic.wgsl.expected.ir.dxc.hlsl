@@ -12,7 +12,7 @@ struct compute_main_inputs {
 groupshared S wg;
 void compute_main_inner(uint tint_local_index) {
   if ((tint_local_index == 0u)) {
-    wg.x = 0;
+    wg.x = int(0);
     uint v = 0u;
     InterlockedExchange(wg.a, 0u, v);
     wg.y = 0u;

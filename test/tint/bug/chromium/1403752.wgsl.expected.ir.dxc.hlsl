@@ -1,6 +1,6 @@
 
 void d() {
-  int j = 0;
+  int j = int(0);
   {
     while(true) {
       if (false) {

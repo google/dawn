@@ -11,10 +11,9 @@ RWByteAddressBuffer result : register(u3);
 void main_inner(uint3 GlobalInvocationID) {
   uint flatIndex = (((4u * GlobalInvocationID[2u]) + (2u * GlobalInvocationID[1u])) + GlobalInvocationID[0u]);
   flatIndex = (flatIndex * 1u);
-  Texture2DArray<float4> v = myTexture;
-  int2 v_1 = int2(int2(GlobalInvocationID.xy));
-  int v_2 = int(0);
-  float4 texel = float4(v.Load(int4(v_1, v_2, int(0))));
+  int2 v = int2(int2(GlobalInvocationID.xy));
+  int v_1 = int(int(0));
+  float4 texel = float4(myTexture.Load(int4(v, v_1, int(int(0)))));
   {
     uint i = 0u;
     while(true) {
@@ -22,8 +21,8 @@ void main_inner(uint3 GlobalInvocationID) {
       } else {
         break;
       }
-      uint v_3 = (uint((flatIndex + i)) * 4u);
-      result.Store((0u + v_3), asuint(texel.x));
+      uint v_2 = (uint((flatIndex + i)) * 4u);
+      result.Store((0u + v_2), asuint(texel.x));
       {
         i = (i + 1u);
       }

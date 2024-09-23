@@ -1,11 +1,177 @@
 SKIP: FAILED
 
-<dawn>/src/tint/lang/glsl/writer/printer/printer.cc:1116 internal compiler error: TINT_UNREACHABLE unhandled core builtin: select
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
+#version 310 es
+precision highp float;
+precision highp int;
 
-tint executable returned error: signal: trace/BPT trap
+
+struct UniformBuffer_std140 {
+  float unknownInput_S1_c0;
+  vec4 ucolorRed_S1_c0;
+  vec4 ucolorGreen_S1_c0;
+  vec3 umatrix_S1_col0;
+  vec3 umatrix_S1_col1;
+  vec3 umatrix_S1_col2;
+};
+
+struct main_out {
+  vec4 sk_FragColor_1;
+};
+
+layout(binding = 0, std140)
+uniform tint_symbol_2_std140_1_ubo {
+  UniformBuffer_std140 tint_symbol_1;
+} v;
+vec4 sk_FragColor = vec4(0.0f);
+bool sk_Clockwise = false;
+vec4 vcolor_S0 = vec4(0.0f);
+layout(location = 0) in vec4 tint_symbol_loc0_Input;
+layout(location = 0) out vec4 tint_symbol_loc0_Output;
+ivec4 tint_div_v4i32(ivec4 lhs, ivec4 rhs) {
+  int v_1 = ((((rhs == ivec4(0)) | ((lhs == ivec4((-2147483647 - 1))) & (rhs == ivec4(-1)))).x) ? (ivec4(1).x) : (rhs.x));
+  int v_2 = ((((rhs == ivec4(0)) | ((lhs == ivec4((-2147483647 - 1))) & (rhs == ivec4(-1)))).y) ? (ivec4(1).y) : (rhs.y));
+  int v_3 = ((((rhs == ivec4(0)) | ((lhs == ivec4((-2147483647 - 1))) & (rhs == ivec4(-1)))).z) ? (ivec4(1).z) : (rhs.z));
+  return (lhs / ivec4(v_1, v_2, v_3, ((((rhs == ivec4(0)) | ((lhs == ivec4((-2147483647 - 1))) & (rhs == ivec4(-1)))).w) ? (ivec4(1).w) : (rhs.w))));
+}
+int tint_f32_to_i32(float value) {
+  return (((value <= 2147483520.0f)) ? ((((value >= -2147483648.0f)) ? (int(value)) : ((-2147483647 - 1)))) : (2147483647));
+}
+bool test_int_S1_c0_b() {
+  int unknown = 0;
+  bool ok = false;
+  ivec4 val = ivec4(0);
+  bool x_40 = false;
+  bool x_41 = false;
+  bool x_54 = false;
+  bool x_55 = false;
+  bool x_65 = false;
+  bool x_66 = false;
+  int x_27 = tint_f32_to_i32(v.tint_symbol_1.unknownInput_S1_c0);
+  unknown = x_27;
+  ok = true;
+  x_41 = false;
+  if (true) {
+    x_40 = all((tint_div_v4i32(ivec4(0), ivec4(x_27)) == ivec4(0)));
+    x_41 = x_40;
+  }
+  ok = x_41;
+  ivec4 x_44 = ivec4(x_27);
+  val = x_44;
+  ivec4 x_47 = (x_44 + ivec4(1));
+  val = x_47;
+  ivec4 x_48 = (x_47 - ivec4(1));
+  val = x_48;
+  ivec4 x_49 = (x_48 + ivec4(1));
+  val = x_49;
+  ivec4 x_50 = (x_49 - ivec4(1));
+  val = x_50;
+  x_55 = false;
+  if (x_41) {
+    x_54 = all((x_50 == x_44));
+    x_55 = x_54;
+  }
+  ok = x_55;
+  ivec4 x_58 = (x_50 * ivec4(2));
+  val = x_58;
+  ivec4 x_59 = tint_div_v4i32(x_58, ivec4(2));
+  val = x_59;
+  ivec4 x_60 = (x_59 * ivec4(2));
+  val = x_60;
+  ivec4 x_61 = tint_div_v4i32(x_60, ivec4(2));
+  val = x_61;
+  x_66 = false;
+  if (x_55) {
+    x_65 = all((x_61 == x_44));
+    x_66 = x_65;
+  }
+  ok = x_66;
+  return x_66;
+}
+void main_1() {
+  vec4 outputColor_S0 = vec4(0.0f);
+  vec4 output_S1 = vec4(0.0f);
+  float x_8_unknown = 0.0f;
+  bool x_9_ok = false;
+  vec4 x_10_val = vec4(0.0f);
+  vec4 x_116 = vec4(0.0f);
+  bool x_86 = false;
+  bool x_87 = false;
+  bool x_99 = false;
+  bool x_100 = false;
+  bool x_110 = false;
+  bool x_111 = false;
+  bool x_114 = false;
+  bool x_115 = false;
+  outputColor_S0 = vcolor_S0;
+  float x_77 = v.tint_symbol_1.unknownInput_S1_c0;
+  x_8_unknown = x_77;
+  x_9_ok = true;
+  x_87 = false;
+  if (true) {
+    x_86 = all(((vec4(0.0f) / vec4(x_77)) == vec4(0.0f)));
+    x_87 = x_86;
+  }
+  x_9_ok = x_87;
+  vec4 x_89 = vec4(x_77);
+  x_10_val = x_89;
+  vec4 x_92 = (x_89 + vec4(1.0f));
+  x_10_val = x_92;
+  vec4 x_93 = (x_92 - vec4(1.0f));
+  x_10_val = x_93;
+  vec4 x_94 = (x_93 + vec4(1.0f));
+  x_10_val = x_94;
+  vec4 x_95 = (x_94 - vec4(1.0f));
+  x_10_val = x_95;
+  x_100 = false;
+  if (x_87) {
+    x_99 = all((x_95 == x_89));
+    x_100 = x_99;
+  }
+  x_9_ok = x_100;
+  vec4 x_103 = (x_95 * vec4(2.0f));
+  x_10_val = x_103;
+  vec4 x_104 = (x_103 / vec4(2.0f));
+  x_10_val = x_104;
+  vec4 x_105 = (x_104 * vec4(2.0f));
+  x_10_val = x_105;
+  vec4 x_106 = (x_105 / vec4(2.0f));
+  x_10_val = x_106;
+  x_111 = false;
+  if (x_100) {
+    x_110 = all((x_106 == x_89));
+    x_111 = x_110;
+  }
+  x_9_ok = x_111;
+  x_115 = false;
+  if (x_111) {
+    x_114 = test_int_S1_c0_b();
+    x_115 = x_114;
+  }
+  if (x_115) {
+    x_116 = v.tint_symbol_1.ucolorGreen_S1_c0;
+  } else {
+    x_116 = v.tint_symbol_1.ucolorRed_S1_c0;
+  }
+  vec4 x_125 = x_116;
+  output_S1 = x_116;
+  sk_FragColor = x_125;
+}
+main_out tint_symbol_inner(bool sk_Clockwise_param, vec4 vcolor_S0_param) {
+  sk_Clockwise = sk_Clockwise_param;
+  vcolor_S0 = vcolor_S0_param;
+  main_1();
+  return main_out(sk_FragColor);
+}
+void main() {
+  tint_symbol_loc0_Output = tint_symbol_inner(gl_FrontFacing, tint_symbol_loc0_Input).sk_FragColor_1;
+}
+error: Error parsing GLSL shader:
+ERROR: 0:29: '&' :  wrong operand types: no operation '&' exists that takes a left-hand operand of type ' temp bool' and a right operand of type ' temp bool' (or there is no acceptable conversion)
+ERROR: 0:29: '|' :  wrong operand types: no operation '|' exists that takes a left-hand operand of type ' temp bool' and a right operand of type ' temp bool' (or there is no acceptable conversion)
+ERROR: 0:29: '' : compilation terminated 
+ERROR: 3 compilation errors.  No code generated.
+
+
+
+
+tint executable returned error: exit status 1

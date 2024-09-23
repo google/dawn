@@ -1,7 +1,7 @@
 
 int f() {
-  int a[8] = {1, 2, 3, 4, 5, 6, 7, 8};
-  int i = 1;
+  int a[8] = {int(1), int(2), int(3), int(4), int(5), int(6), int(7), int(8)};
+  int i = int(1);
   return a[i];
 }
 

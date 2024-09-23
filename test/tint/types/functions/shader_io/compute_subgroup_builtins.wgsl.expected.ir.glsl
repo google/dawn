@@ -1,17 +1,11 @@
 SKIP: INVALID
 
-#version 310 es
+<dawn>/src/tint/lang/glsl/writer/raise/shader_io.cc:109 internal compiler error: TINT_UNREACHABLE 
+********************************************************************
+*  The tint shader compiler has encountered an unexpected error.   *
+*                                                                  *
+*  Please help us fix this issue by submitting a bug report at     *
+*  crbug.com/tint with the source program that triggered the bug.  *
+********************************************************************
 
-uint tint_symbol[];
-layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
-void main(uint subgroup_invocation_id, uint subgroup_size) {
-  tint_symbol[subgroup_invocation_id] = subgroup_size;
-}
-error: Error parsing GLSL shader:
-ERROR: 0:3: '' : array size required
-ERROR: 1 compilation errors.  No code generated.
-
-
-
-
-tint executable returned error: exit status 1
+tint executable returned error: signal: trace/BPT trap

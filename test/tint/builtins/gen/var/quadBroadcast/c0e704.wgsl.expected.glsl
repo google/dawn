@@ -52,3 +52,5 @@ Failed to generate: <dawn>/test/tint/builtins/gen/var/quadBroadcast/c0e704.wgsl:
 enable subgroups;
        ^^^^^^^^^
 
+
+tint executable returned error: exit status 1

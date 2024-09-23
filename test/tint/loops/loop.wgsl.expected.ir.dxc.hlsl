@@ -1,10 +1,10 @@
 
 int f() {
-  int i = 0;
+  int i = int(0);
   {
     while(true) {
-      i = (i + 1);
-      if ((i > 4)) {
+      i = (i + int(1));
+      if ((i > int(4))) {
         return i;
       }
       {

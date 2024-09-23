@@ -1,7 +1,7 @@
 
 RWTexture2D<int4> arg_0 : register(u0, space1);
 void textureStore_95e452() {
-  arg_0[(1u).xx] = (1).xxxx;
+  arg_0[(1u).xx] = (int(1)).xxxx;
 }
 
 void fragment_main() {

@@ -11,7 +11,7 @@ struct S3 {
 };
 
 
-static const S1 v = {42};
+static const S1 v = {int(42)};
 static const S2 v_1 = {v};
 static const S3 v_2 = {v_1};
 static S3 P = v_2;

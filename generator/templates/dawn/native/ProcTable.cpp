@@ -161,7 +161,7 @@ namespace {{native_namespace}} {
     WGPUProc NativeGetProcAddress2(WGPUDevice, WGPUStringView procName);
 
     WGPUProc NativeGetProcAddress(WGPUDevice device, const char* procName) {
-        return NativeGetProcAddress2(device, WGPUStringView{procName, SIZE_MAX});
+        return NativeGetProcAddress2(device, WGPUStringView{procName, WGPU_STRLEN});
     }
 
     WGPUProc NativeGetProcAddress2(WGPUDevice, WGPUStringView cProcName) {
@@ -169,7 +169,7 @@ namespace {{native_namespace}} {
             return nullptr;
         }
 
-        std::string_view procName(cProcName.data, cProcName.length != SIZE_MAX ? cProcName.length : strlen(cProcName.data));
+        std::string_view procName(cProcName.data, cProcName.length != WGPU_STRLEN ? cProcName.length : strlen(cProcName.data));
 
         const ProcEntry* entry = std::lower_bound(&sProcMap[0], &sProcMap[sProcMapSize], procName,
             [](const ProcEntry &a, const std::string_view& b) -> bool {

@@ -1,11 +1,17 @@
-SKIP: FAILED
+#version 310 es
 
-<dawn>/src/tint/lang/glsl/writer/printer/printer.cc:1116 internal compiler error: TINT_UNREACHABLE unhandled core builtin: textureLoad
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
 
-tint executable returned error: signal: trace/BPT trap
+struct Results {
+  float colorSamples[4];
+};
+
+uniform highp sampler2DMS texture0;
+layout(binding = 2, std430)
+buffer tint_symbol_2_1_ssbo {
+  Results tint_symbol_1;
+} v;
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+void main() {
+  ivec2 v_1 = ivec2(ivec2(0));
+  v.tint_symbol_1.colorSamples[0] = texelFetch(texture0, v_1, int(0))[0u];
+}

@@ -1,5 +1,5 @@
 
-static int3 u = (1).xxx;
+static int3 u = (int(1)).xxx;
 void f() {
   float3 v = float3(u);
 }

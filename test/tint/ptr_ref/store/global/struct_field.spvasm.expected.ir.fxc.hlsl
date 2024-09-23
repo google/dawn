@@ -5,7 +5,7 @@ struct S {
 
 static S V = (S)0;
 void main_1() {
-  V.i = 5;
+  V.i = int(5);
 }
 
 [numthreads(1, 1, 1)]

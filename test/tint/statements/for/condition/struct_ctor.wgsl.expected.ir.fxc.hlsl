@@ -1,9 +1,9 @@
 
 void f() {
-  int i = 0;
+  int i = int(0);
   {
     while(true) {
-      if ((i < 1)) {
+      if ((i < int(1))) {
       } else {
         break;
       }

@@ -1,11 +1,25 @@
 SKIP: FAILED
 
-<dawn>/src/tint/lang/glsl/writer/printer/printer.cc:1116 internal compiler error: TINT_UNREACHABLE unhandled core builtin: select
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
+#version 310 es
 
-tint executable returned error: signal: trace/BPT trap
+uvec3 tint_div_v3u32(uvec3 lhs, uvec3 rhs) {
+  uint v = (((rhs == uvec3(0u)).x) ? (uvec3(1u).x) : (rhs.x));
+  uint v_1 = (((rhs == uvec3(0u)).y) ? (uvec3(1u).y) : (rhs.y));
+  return (lhs / uvec3(v, v_1, (((rhs == uvec3(0u)).z) ? (uvec3(1u).z) : (rhs.z))));
+}
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+void main() {
+  uint a = 4u;
+  uvec3 b = uvec3(0u, 2u, 0u);
+  uvec3 v_2 = b;
+  uvec3 r = tint_div_v3u32(uvec3(a), v_2);
+}
+error: Error parsing GLSL shader:
+ERROR: 0:4: 'scalar swizzle' : not supported with this profile: es
+ERROR: 0:4: '' : compilation terminated 
+ERROR: 2 compilation errors.  No code generated.
+
+
+
+
+tint executable returned error: exit status 1

@@ -21,3 +21,5 @@ Failed to generate: <dawn>/test/tint/types/functions/shader_io/compute_subgroup_
 enable chromium_experimental_subgroups;
        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+
+tint executable returned error: exit status 1

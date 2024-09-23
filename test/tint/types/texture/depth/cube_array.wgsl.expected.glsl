@@ -19,3 +19,5 @@ ERROR: 2 compilation errors.  No code generated.
 
 
 
+
+tint executable returned error: exit status 1

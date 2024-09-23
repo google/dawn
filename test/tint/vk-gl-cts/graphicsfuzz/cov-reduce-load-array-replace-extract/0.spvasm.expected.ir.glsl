@@ -1,6 +1,9 @@
 SKIP: FAILED
 
 #version 310 es
+precision highp float;
+precision highp int;
+
 
 struct buf0 {
   int zero;
@@ -9,12 +12,13 @@ struct buf0 {
 struct main_out {
   vec4 x_GLF_color_1;
 };
-precision highp float;
-precision highp int;
-
 
 vec4 x_GLF_color = vec4(0.0f);
-uniform buf0 x_5;
+layout(binding = 0, std140)
+uniform tint_symbol_2_1_ubo {
+  buf0 tint_symbol_1;
+} v;
+layout(location = 0) out vec4 tint_symbol_loc0_Output;
 void main_1() {
   int x_9[1] = int[1](0);
   int x_10 = 0;
@@ -22,7 +26,7 @@ void main_1() {
   {
     while(true) {
       x_GLF_color = vec4(0.0f);
-      if ((x_9[x_5.zero] == x_6)) {
+      if ((x_9[v.tint_symbol_1.zero] == x_6)) {
         x_10 = 1;
         break;
       }
@@ -36,13 +40,16 @@ void main_1() {
     x_GLF_color = vec4(0.0f);
   }
 }
-main_out main() {
+main_out tint_symbol_inner() {
   main_1();
   return main_out(x_GLF_color);
 }
+void main() {
+  tint_symbol_loc0_Output = tint_symbol_inner().x_GLF_color_1;
+}
 error: Error parsing GLSL shader:
-ERROR: 0:8: 'float' : type requires declaration of default precision qualifier 
-ERROR: 0:8: '' : compilation terminated 
+ERROR: 0:35: '|' :  wrong operand types: no operation '|' exists that takes a left-hand operand of type ' temp bool' and a right operand of type ' temp bool' (or there is no acceptable conversion)
+ERROR: 0:35: '' : compilation terminated 
 ERROR: 2 compilation errors.  No code generated.
 
 

@@ -1,42 +1,11 @@
 SKIP: INVALID
 
-#version 310 es
+<dawn>/src/tint/lang/glsl/writer/printer/printer.cc:851 internal compiler error: TINT_UNREACHABLE PixelLocal not supported
+********************************************************************
+*  The tint shader compiler has encountered an unexpected error.   *
+*                                                                  *
+*  Please help us fix this issue by submitting a bug report at     *
+*  crbug.com/tint with the source program that triggered the bug.  *
+********************************************************************
 
-struct PixelLocal {
-  uint a;
-};
-
-struct Out {
-  vec4 x;
-  vec4 y;
-  vec4 z;
-};
-precision highp float;
-precision highp int;
-
-
-PixelLocal P;
-void f0() {
-  P.a = (P.a + 9u);
-}
-void f1() {
-  f0();
-  P.a = (P.a + 8u);
-}
-void f2() {
-  P.a = (P.a + 7u);
-  f1();
-}
-Out main() {
-  f2();
-  return Out(vec4(10.0f), vec4(20.0f), vec4(30.0f));
-}
-error: Error parsing GLSL shader:
-ERROR: 0:8: 'float' : type requires declaration of default precision qualifier
-ERROR: 0:8: '' : compilation terminated
-ERROR: 2 compilation errors.  No code generated.
-
-
-
-
-tint executable returned error: exit status 1
+tint executable returned error: signal: trace/BPT trap

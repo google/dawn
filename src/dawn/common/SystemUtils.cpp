@@ -31,8 +31,8 @@
 #include "dawn/common/Log.h"
 
 #if DAWN_PLATFORM_IS(WINDOWS)
-#include <Windows.h>
 #include <vector>
+#include "dawn/common/windows_with_undefs.h"
 #elif DAWN_PLATFORM_IS(LINUX)
 #include <dlfcn.h>
 #include <limits.h>

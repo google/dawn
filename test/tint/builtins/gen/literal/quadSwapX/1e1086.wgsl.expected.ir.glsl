@@ -1,6 +1,6 @@
 SKIP: INVALID
 
-<dawn>/src/tint/lang/glsl/writer/printer/printer.cc:1116 internal compiler error: TINT_UNREACHABLE unhandled core builtin: quadSwapX
+<dawn>/src/tint/lang/glsl/writer/printer/printer.cc:1451 internal compiler error: TINT_UNREACHABLE unhandled core builtin: quadSwapX
 ********************************************************************
 *  The tint shader compiler has encountered an unexpected error.   *
 *                                                                  *

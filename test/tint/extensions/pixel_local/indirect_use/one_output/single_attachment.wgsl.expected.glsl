@@ -33,3 +33,5 @@ Failed to generate: <dawn>/test/tint/extensions/pixel_local/indirect_use/one_out
 enable chromium_experimental_pixel_local;
        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+
+tint executable returned error: exit status 1

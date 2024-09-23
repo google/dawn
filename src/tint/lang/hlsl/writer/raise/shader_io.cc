@@ -49,6 +49,9 @@ namespace {
 /// For HLSL, move all inputs to a struct passed as an entry point parameter, and wrap outputs in
 /// a structure returned by the entry point.
 struct StateImpl : core::ir::transform::ShaderIOBackendState {
+    /// The config
+    const ShaderIOConfig& config;
+
     /// The input parameter
     core::ir::FunctionParam* input_param = nullptr;
 
@@ -61,12 +64,14 @@ struct StateImpl : core::ir::transform::ShaderIOBackendState {
     /// The output values to return from the entry point.
     Vector<core::ir::Value*, 4> output_values;
 
-    // Indices of subgroup invocation id and size, if set
+    // Indices of inputs that require special handling
     std::optional<uint32_t> subgroup_invocation_id_index;
     std::optional<uint32_t> subgroup_size_index;
+    std::optional<uint32_t> num_workgroups_index;
 
     /// Constructor
-    StateImpl(core::ir::Module& mod, core::ir::Function* f) : ShaderIOBackendState(mod, f) {}
+    StateImpl(core::ir::Module& mod, core::ir::Function* f, const ShaderIOConfig& c)
+        : ShaderIOBackendState(mod, f), config(c) {}
 
     /// Destructor
     ~StateImpl() override {}
@@ -183,6 +188,9 @@ struct StateImpl : core::ir::transform::ShaderIOBackendState {
                 } else if (*builtin == core::BuiltinValue::kSubgroupSize) {
                     subgroup_size_index = i;
                     continue;
+                } else if (*builtin == core::BuiltinValue::kNumWorkgroups) {
+                    num_workgroups_index = i;
+                    continue;
                 }
             }
 
@@ -257,10 +265,43 @@ struct StateImpl : core::ir::transform::ShaderIOBackendState {
                 output_struct->AddUsage(core::type::PipelineStageUsage::kVertexOutput);
                 break;
             case core::ir::Function::PipelineStage::kCompute:
+                output_struct->AddUsage(core::type::PipelineStageUsage::kComputeOutput);
+                break;
             case core::ir::Function::PipelineStage::kUndefined:
                 TINT_UNREACHABLE();
         }
         return output_struct;
+    }
+
+    /// Handles kNumWorkgroups builtin by emitting a UBO to hold the num_workgroups value,
+    /// along with the load of the value. Returns the loaded value.
+    core::ir::Value* GetInputForNumWorkgroups(core::ir::Builder& builder) {
+        // Create uniform var that will receive the number of workgroups
+        core::ir::Var* num_wg_var = nullptr;
+        builder.Append(ir.root_block, [&] {
+            num_wg_var = builder.Var("tint_num_workgroups", ty.ptr(uniform, ty.vec3<u32>()));
+        });
+        if (config.num_workgroups_binding.has_value()) {
+            // If config.num_workgroups_binding holds a value, use it.
+            auto bp = *config.num_workgroups_binding;
+            num_wg_var->SetBindingPoint(bp.group, bp.binding);
+        } else {
+            // Otherwise, use the binding 0 of the largest used group plus 1, or group 0 if no
+            // resources are bound.
+            uint32_t group = 0;
+            for (auto* inst : *ir.root_block.Get()) {
+                if (auto* var = inst->As<core::ir::Var>()) {
+                    if (const auto& bp = var->BindingPoint()) {
+                        if (bp->group >= group) {
+                            group = bp->group + 1;
+                        }
+                    }
+                }
+            }
+            num_wg_var->SetBindingPoint(group, 0);
+        }
+        auto* load = builder.Load(num_wg_var);
+        return load->Result(0);
     }
 
     /// @copydoc ShaderIO::BackendState::GetInput
@@ -274,6 +315,9 @@ struct StateImpl : core::ir::transform::ShaderIOBackendState {
             return builder
                 .Call<hlsl::ir::BuiltinCall>(ty.u32(), hlsl::BuiltinFn::kWaveGetLaneCount)
                 ->Result(0);
+        }
+        if (num_workgroups_index == idx) {
+            return GetInputForNumWorkgroups(builder);
         }
 
         auto index = input_indices[idx];
@@ -307,14 +351,14 @@ struct StateImpl : core::ir::transform::ShaderIOBackendState {
 };
 }  // namespace
 
-Result<SuccessType> ShaderIO(core::ir::Module& ir) {
+Result<SuccessType> ShaderIO(core::ir::Module& ir, const ShaderIOConfig& config) {
     auto result = ValidateAndDumpIfNeeded(ir, "ShaderIO transform");
     if (result != Success) {
         return result;
     }
 
     core::ir::transform::RunShaderIOBase(ir, [&](core::ir::Module& mod, core::ir::Function* func) {
-        return std::make_unique<StateImpl>(mod, func);
+        return std::make_unique<StateImpl>(mod, func, config);
     });
 
     return Success;

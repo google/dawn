@@ -867,7 +867,7 @@ TEST_F(HlslWriterTest, FunctionWithDiscardAndVoidReturn) {
     EXPECT_EQ(output_.hlsl, R"(
 static bool continue_execution = true;
 void my_func(int a) {
-  if ((a == 0)) {
+  if ((a == int(0))) {
     continue_execution = false;
   }
 }
@@ -904,10 +904,10 @@ TEST_F(HlslWriterTest, FunctionWithDiscardAndNonVoidReturn) {
     EXPECT_EQ(output_.hlsl, R"(
 static bool continue_execution = true;
 int my_func(int a) {
-  if ((a == 0)) {
+  if ((a == int(0))) {
     continue_execution = false;
   }
-  return 42;
+  return int(42);
 }
 
 [numthreads(1, 1, 1)]

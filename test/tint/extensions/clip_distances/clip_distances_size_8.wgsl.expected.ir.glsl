@@ -1,21 +1,11 @@
 SKIP: INVALID
 
-#version 310 es
+<dawn>/src/tint/lang/glsl/writer/raise/shader_io.cc:109 internal compiler error: TINT_UNREACHABLE 
+********************************************************************
+*  The tint shader compiler has encountered an unexpected error.   *
+*                                                                  *
+*  Please help us fix this issue by submitting a bug report at     *
+*  crbug.com/tint with the source program that triggered the bug.  *
+********************************************************************
 
-struct VertexOutputs {
-  vec4 position;
-  float clipDistance[8];
-};
-
-VertexOutputs main() {
-  return VertexOutputs(vec4(1.0f, 2.0f, 3.0f, 4.0f), float[8](0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f));
-}
-error: Error parsing GLSL shader:
-ERROR: 0:8: 'structure' :  entry point cannot return a value
-ERROR: 0:8: '' : compilation terminated 
-ERROR: 2 compilation errors.  No code generated.
-
-
-
-
-tint executable returned error: exit status 1
+tint executable returned error: signal: trace/BPT trap

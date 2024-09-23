@@ -147,11 +147,11 @@ TEST_F(HlslWriterTest, IfWithSinglePhi) {
     EXPECT_EQ(output_.hlsl, R"(
 [numthreads(1, 1, 1)]
 void foo() {
-  int v = 0;
+  int v = int(0);
   if (true) {
-    v = 10;
+    v = int(10);
   } else {
-    v = 20;
+    v = int(20);
   }
 }
 
@@ -177,13 +177,13 @@ TEST_F(HlslWriterTest, IfWithMultiPhi) {
     EXPECT_EQ(output_.hlsl, R"(
 [numthreads(1, 1, 1)]
 void foo() {
-  int v = 0;
+  int v = int(0);
   bool v_1 = false;
   if (true) {
-    v = 10;
+    v = int(10);
     v_1 = true;
   } else {
-    v = 20;
+    v = int(20);
     v_1 = false;
   }
 }
@@ -208,13 +208,13 @@ TEST_F(HlslWriterTest, IfWithMultiPhiReturn1) {
     ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
     EXPECT_EQ(output_.hlsl, R"(
 int foo() {
-  int v = 0;
+  int v = int(0);
   bool v_1 = false;
   if (true) {
-    v = 10;
+    v = int(10);
     v_1 = true;
   } else {
-    v = 20;
+    v = int(20);
     v_1 = false;
   }
   return v;
@@ -244,13 +244,13 @@ TEST_F(HlslWriterTest, IfWithMultiPhiReturn2) {
     ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
     EXPECT_EQ(output_.hlsl, R"(
 bool foo() {
-  int v = 0;
+  int v = int(0);
   bool v_1 = false;
   if (true) {
-    v = 10;
+    v = int(10);
     v_1 = true;
   } else {
-    v = 20;
+    v = int(20);
     v_1 = false;
   }
   return v_1;

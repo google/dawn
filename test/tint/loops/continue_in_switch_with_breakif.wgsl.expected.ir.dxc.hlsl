@@ -1,15 +1,15 @@
 
 [numthreads(1, 1, 1)]
 void f() {
-  int i = 0;
+  int i = int(0);
   {
     while(true) {
       switch(i) {
-        case 0:
+        case int(0):
         {
           {
-            i = (i + 1);
-            if ((i >= 4)) { break; }
+            i = (i + int(1));
+            if ((i >= int(4))) { break; }
           }
           continue;
         }
@@ -19,8 +19,8 @@ void f() {
         }
       }
       {
-        i = (i + 1);
-        if ((i >= 4)) { break; }
+        i = (i + int(1));
+        if ((i >= int(4))) { break; }
       }
       continue;
     }

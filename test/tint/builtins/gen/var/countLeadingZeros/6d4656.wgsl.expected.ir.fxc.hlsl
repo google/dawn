@@ -11,7 +11,7 @@ struct vertex_main_outputs {
 
 RWByteAddressBuffer prevent_dce : register(u0);
 int countLeadingZeros_6d4656() {
-  int arg_0 = 1;
+  int arg_0 = int(1);
   uint v = asuint(arg_0);
   uint v_1 = (((v <= 65535u)) ? (16u) : (0u));
   uint v_2 = ((((v << v_1) <= 16777215u)) ? (8u) : (0u));

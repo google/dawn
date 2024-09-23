@@ -13,7 +13,7 @@ static uint local_invocation_index_1 = 0u;
 groupshared S_atomic wg;
 void compute_main_inner(uint local_invocation_index_2) {
   uint idx = 0u;
-  wg.x = 0;
+  wg.x = int(0);
   wg.y = 0u;
   idx = local_invocation_index_2;
   {
@@ -32,7 +32,7 @@ void compute_main_inner(uint local_invocation_index_2) {
   }
   GroupMemoryBarrierWithGroupSync();
   uint v_1 = 0u;
-  InterlockedExchange(wg.a[4], 1u, v_1);
+  InterlockedExchange(wg.a[int(4)], 1u, v_1);
 }
 
 void compute_main_1() {
@@ -42,7 +42,7 @@ void compute_main_1() {
 
 void compute_main_inner_1(uint local_invocation_index_1_param) {
   if ((local_invocation_index_1_param == 0u)) {
-    wg.x = 0;
+    wg.x = int(0);
     wg.y = 0u;
   }
   {

@@ -56,3 +56,5 @@ Failed to generate: <dawn>/test/tint/builtins/gen/var/subgroupBroadcast/a3b3e5.w
 enable subgroups;
        ^^^^^^^^^
 
+
+tint executable returned error: exit status 1

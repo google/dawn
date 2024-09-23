@@ -12,7 +12,7 @@ struct vertex_main_outputs {
 RWByteAddressBuffer prevent_dce : register(u0);
 float2 ldexp_a22679() {
   float2 arg_0 = (1.0f).xx;
-  float2 res = ldexp(arg_0, (1).xx);
+  float2 res = ldexp(arg_0, (int(1)).xx);
   return res;
 }
 

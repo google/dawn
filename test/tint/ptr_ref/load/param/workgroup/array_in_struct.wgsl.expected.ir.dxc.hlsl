@@ -23,7 +23,7 @@ void main_inner(uint tint_local_index) {
       if ((v_2 >= 4u)) {
         break;
       }
-      S.arr[v_2] = 0;
+      S.arr[v_2] = int(0);
       {
         v_1 = (v_2 + 1u);
       }

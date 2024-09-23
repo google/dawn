@@ -8,7 +8,7 @@ struct main_outputs {
 
 
 int ret_i32() {
-  return 1;
+  return int(1);
 }
 
 uint ret_u32() {
@@ -31,10 +31,10 @@ ary_ret ret_MyArray() {
 }
 
 void var_decls() {
-  int v1 = 1;
+  int v1 = int(1);
   uint v2 = 1u;
   float v3 = 1.0f;
-  int3 v4 = (1).xxx;
+  int3 v4 = (int(1)).xxx;
   uint3 v5 = (1u).xxx;
   float3 v6 = (1.0f).xxx;
   float3x3 v7 = float3x3(v6, v6, v6);

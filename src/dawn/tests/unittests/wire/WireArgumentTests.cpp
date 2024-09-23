@@ -220,7 +220,7 @@ TEST_F(WireArgumentTests, WGPUStringView) {
     vsModule.SetLabel(std::nullopt);
     EXPECT_CALL(api, ShaderModuleSetLabel2(apiVsModule,
                                            AllOf(Field(&WGPUStringView::data, nullptr),
-                                                 Field(&WGPUStringView::length, Eq(SIZE_MAX)))));
+                                                 Field(&WGPUStringView::length, Eq(WGPU_STRLEN)))));
     FlushClient();
 }
 

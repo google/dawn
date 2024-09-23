@@ -6,16 +6,16 @@ struct compute_main_inputs {
 static uint local_invocation_index_1 = 0u;
 groupshared int arg_0;
 void atomicOr_d09248() {
-  int res = 0;
-  int v = 0;
-  InterlockedOr(arg_0, 1, v);
+  int res = int(0);
+  int v = int(0);
+  InterlockedOr(arg_0, int(1), v);
   int x_11 = v;
   res = x_11;
 }
 
 void compute_main_inner(uint local_invocation_index_2) {
-  int v_1 = 0;
-  InterlockedExchange(arg_0, 0, v_1);
+  int v_1 = int(0);
+  InterlockedExchange(arg_0, int(0), v_1);
   GroupMemoryBarrierWithGroupSync();
   atomicOr_d09248();
 }
@@ -27,8 +27,8 @@ void compute_main_1() {
 
 void compute_main_inner_1(uint local_invocation_index_1_param) {
   if ((local_invocation_index_1_param == 0u)) {
-    int v_2 = 0;
-    InterlockedExchange(arg_0, 0, v_2);
+    int v_2 = int(0);
+    InterlockedExchange(arg_0, int(0), v_2);
   }
   GroupMemoryBarrierWithGroupSync();
   local_invocation_index_1 = local_invocation_index_1_param;

@@ -8,7 +8,7 @@ bool ret_bool() {
 }
 
 int ret_i32() {
-  return 0;
+  return int(0);
 }
 
 uint ret_u32() {
@@ -20,7 +20,7 @@ float ret_f32() {
 }
 
 int2 ret_v2i32() {
-  return (0).xx;
+  return (int(0)).xx;
 }
 
 uint3 ret_v3u32() {

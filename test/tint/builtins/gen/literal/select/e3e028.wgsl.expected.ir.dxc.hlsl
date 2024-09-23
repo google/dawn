@@ -12,7 +12,7 @@ struct vertex_main_outputs {
 RWByteAddressBuffer prevent_dce : register(u0);
 int select_e3e028() {
   bool4 res = (true).xxxx;
-  return ((all((res == (false).xxxx))) ? (1) : (0));
+  return ((all((res == (false).xxxx))) ? (int(1)) : (int(0)));
 }
 
 void fragment_main() {

@@ -4,7 +4,7 @@ cbuffer cbuffer_b : register(b0) {
 };
 bool func_3() {
   {
-    int i = 0;
+    int i = int(0);
     while(true) {
       int v = i;
       if ((v < asint(b[0u].x))) {
@@ -12,9 +12,9 @@ bool func_3() {
         break;
       }
       {
-        int j = -1;
+        int j = int(-1);
         while(true) {
-          if ((j == 1)) {
+          if ((j == int(1))) {
           } else {
             break;
           }
@@ -22,7 +22,7 @@ bool func_3() {
         }
       }
       {
-        i = (i + 1);
+        i = (i + int(1));
       }
       continue;
     }

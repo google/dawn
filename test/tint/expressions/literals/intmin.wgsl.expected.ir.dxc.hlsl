@@ -1,8 +1,8 @@
 
 int add_int_min_explicit() {
-  int a = -2147483648;
-  int b = (a + 1);
-  int c = -2147483647;
+  int a = int(-2147483648);
+  int b = (a + int(1));
+  int c = int(-2147483647);
   return c;
 }
 

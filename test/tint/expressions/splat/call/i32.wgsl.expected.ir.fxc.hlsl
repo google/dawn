@@ -1,6 +1,6 @@
 
 int get_i32() {
-  return 1;
+  return int(1);
 }
 
 void f() {

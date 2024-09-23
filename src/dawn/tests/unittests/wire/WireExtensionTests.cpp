@@ -47,7 +47,7 @@ TEST_F(WireExtensionTests, ChainedStruct) {
     wgpu::ShaderModuleDescriptor shaderModuleDesc = {};
     wgpu::ShaderSourceWGSL clientExt = {};
     shaderModuleDesc.nextInChain = &clientExt;
-    clientExt.code = "/* comment */";
+    clientExt.code = {"/* comment */", WGPU_STRLEN};
 
     WGPUShaderModule apiShaderModule = api.GetNewShaderModule();
     wgpu::ShaderModule shaderModule = device.CreateShaderModule(&shaderModuleDesc);
@@ -57,7 +57,7 @@ TEST_F(WireExtensionTests, ChainedStruct) {
                 const auto* ext =
                     reinterpret_cast<const WGPUShaderSourceWGSL*>(serverDesc->nextInChain);
                 EXPECT_EQ(ext->chain.sType, WGPUSType_ShaderSourceWGSL);
-                EXPECT_STREQ(ext->code, clientExt.code);
+                EXPECT_STREQ(ext->code.data, clientExt.code.data);
                 EXPECT_EQ(ext->chain.next, nullptr);
 
                 return apiShaderModule;
@@ -70,10 +70,10 @@ TEST_F(WireExtensionTests, MultipleChainedStructs) {
     wgpu::ShaderModuleDescriptor shaderModuleDesc = {};
 
     wgpu::ShaderSourceWGSL clientExt2 = {};
-    clientExt2.code = "/* comment 2 */";
+    clientExt2.code = {"/* comment 2 */", WGPU_STRLEN};
 
     wgpu::ShaderSourceWGSL clientExt1 = {};
-    clientExt1.code = "/* comment 1 */";
+    clientExt1.code = {"/* comment 1 */", WGPU_STRLEN};
     clientExt1.nextInChain = &clientExt2;
     shaderModuleDesc.nextInChain = &clientExt1;
 
@@ -85,11 +85,11 @@ TEST_F(WireExtensionTests, MultipleChainedStructs) {
                 const auto* ext1 =
                     reinterpret_cast<const WGPUShaderSourceWGSL*>(serverDesc->nextInChain);
                 EXPECT_EQ(ext1->chain.sType, WGPUSType_ShaderSourceWGSL);
-                EXPECT_STREQ(ext1->code, clientExt1.code);
+                EXPECT_STREQ(ext1->code.data, clientExt1.code.data);
 
                 const auto* ext2 = reinterpret_cast<const WGPUShaderSourceWGSL*>(ext1->chain.next);
                 EXPECT_EQ(ext2->chain.sType, WGPUSType_ShaderSourceWGSL);
-                EXPECT_STREQ(ext2->code, clientExt2.code);
+                EXPECT_STREQ(ext2->code.data, clientExt2.code.data);
                 EXPECT_EQ(ext2->chain.next, nullptr);
 
                 return apiShaderModule;
@@ -108,11 +108,11 @@ TEST_F(WireExtensionTests, MultipleChainedStructs) {
                 const auto* ext2 =
                     reinterpret_cast<const WGPUShaderSourceWGSL*>(serverDesc->nextInChain);
                 EXPECT_EQ(ext2->chain.sType, WGPUSType_ShaderSourceWGSL);
-                EXPECT_STREQ(ext2->code, clientExt2.code);
+                EXPECT_STREQ(ext2->code.data, clientExt2.code.data);
 
                 const auto* ext1 = reinterpret_cast<const WGPUShaderSourceWGSL*>(ext2->chain.next);
                 EXPECT_EQ(ext1->chain.sType, WGPUSType_ShaderSourceWGSL);
-                EXPECT_STREQ(ext1->code, clientExt1.code);
+                EXPECT_STREQ(ext1->code.data, clientExt1.code.data);
                 EXPECT_EQ(ext1->chain.next, nullptr);
 
                 return apiShaderModule;
@@ -172,7 +172,7 @@ TEST_F(WireExtensionTests, ValidAndInvalidSTypeInChain) {
     WGPUShaderSourceWGSL clientExt1 = {};
     clientExt1.chain.sType = WGPUSType_ShaderSourceWGSL;
     clientExt1.chain.next = &clientExt2.chain;
-    clientExt1.code = "/* comment 1 */";
+    clientExt1.code = {"/* comment 1 */", WGPU_STRLEN};
     shaderModuleDesc.nextInChain = &clientExt1.chain;
 
     WGPUShaderModule apiShaderModule = api.GetNewShaderModule();
@@ -183,7 +183,7 @@ TEST_F(WireExtensionTests, ValidAndInvalidSTypeInChain) {
                 const auto* ext =
                     reinterpret_cast<const WGPUShaderSourceWGSL*>(serverDesc->nextInChain);
                 EXPECT_EQ(ext->chain.sType, clientExt1.chain.sType);
-                EXPECT_STREQ(ext->code, clientExt1.code);
+                EXPECT_STREQ(ext->code.data, clientExt1.code.data);
 
                 EXPECT_EQ(ext->chain.next->sType, WGPUSType(0));
                 EXPECT_EQ(ext->chain.next->next, nullptr);
@@ -206,7 +206,7 @@ TEST_F(WireExtensionTests, ValidAndInvalidSTypeInChain) {
                 const auto* ext =
                     reinterpret_cast<const WGPUShaderSourceWGSL*>(serverDesc->nextInChain->next);
                 EXPECT_EQ(ext->chain.sType, clientExt1.chain.sType);
-                EXPECT_STREQ(ext->code, clientExt1.code);
+                EXPECT_STREQ(ext->code.data, clientExt1.code.data);
                 EXPECT_EQ(ext->chain.next, nullptr);
 
                 return apiShaderModule;

@@ -29,7 +29,7 @@
     {%- set type = arg.type %}
     {%- set optional = arg.optional %}
     {%- set default_value = arg.default_value %}
-    {%- if arg.length == 'strlen' -%}
+    {%- if arg.length == 'strlen' or arg.type.name.get() == 'string view' -%}
         String{{ '?' if optional or default_value == 'nullptr' }}
         {%- if emit_defaults and (default_value or optional) -%}
             {{ ' ' }}= null

@@ -6,7 +6,7 @@ struct main_inputs {
 groupshared int v;
 void main_inner(uint tint_local_index) {
   if ((tint_local_index == 0u)) {
-    v = 0;
+    v = int(0);
   }
   GroupMemoryBarrierWithGroupSync();
   int i = v;

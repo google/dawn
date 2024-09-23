@@ -10,14 +10,20 @@ struct FBF {
   ivec4 c3;
 };
 
+in vec4 f_Input;
+in ivec4 f_Input_1;
 void g(float a, float b, int c) {
 }
-void main(vec4 pos, FBF fbf) {
+void f_inner(vec4 pos, FBF fbf) {
   g(fbf.c1[0u], pos[1u], fbf.c3[2u]);
 }
+void main() {
+  vec4 v = gl_FragCoord;
+  f_inner(v, FBF(f_Input, f_Input_1));
+}
 error: Error parsing GLSL shader:
-ERROR: 0:13: 'main' : function cannot take any parameter(s) 
-ERROR: 0:13: '' : compilation terminated 
+ERROR: 0:12: 'int' : must be qualified as flat in
+ERROR: 0:12: '' : compilation terminated 
 ERROR: 2 compilation errors.  No code generated.
 
 

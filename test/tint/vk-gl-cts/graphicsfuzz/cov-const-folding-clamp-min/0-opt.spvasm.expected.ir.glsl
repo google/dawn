@@ -1,6 +1,9 @@
 SKIP: FAILED
 
 #version 310 es
+precision highp float;
+precision highp int;
+
 
 struct buf0 {
   float zero;
@@ -9,27 +12,31 @@ struct buf0 {
 struct main_out {
   vec4 x_GLF_color_1;
 };
-precision highp float;
-precision highp int;
 
-
-uniform buf0 x_5;
+layout(binding = 0, std140)
+uniform tint_symbol_2_1_ubo {
+  buf0 tint_symbol_1;
+} v;
 vec4 x_GLF_color = vec4(0.0f);
+layout(location = 0) out vec4 tint_symbol_loc0_Output;
 void main_1() {
-  float v = clamp(2.0f, x_5.zero, 1.0f);
-  if (any((vec4(v, clamp(-1.0f, 0.0f, x_5.zero), 0.0f, 1.0f) != vec4(1.0f, 0.0f, 0.0f, 1.0f)))) {
+  float v_1 = clamp(2.0f, v.tint_symbol_1.zero, 1.0f);
+  if (any((vec4(v_1, clamp(-1.0f, 0.0f, v.tint_symbol_1.zero), 0.0f, 1.0f) != vec4(1.0f, 0.0f, 0.0f, 1.0f)))) {
     x_GLF_color = vec4(0.0f);
   } else {
     x_GLF_color = vec4(1.0f, 0.0f, 0.0f, 1.0f);
   }
 }
-main_out main() {
+main_out tint_symbol_inner() {
   main_1();
   return main_out(x_GLF_color);
 }
+void main() {
+  tint_symbol_loc0_Output = tint_symbol_inner().x_GLF_color_1;
+}
 error: Error parsing GLSL shader:
-ERROR: 0:4: 'float' : type requires declaration of default precision qualifier 
-ERROR: 0:4: '' : compilation terminated 
+ERROR: 0:22: 'any' : no matching overloaded function found 
+ERROR: 0:22: '' : compilation terminated 
 ERROR: 2 compilation errors.  No code generated.
 
 

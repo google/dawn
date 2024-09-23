@@ -1,119 +1,46 @@
-SKIP: FAILED
+struct VertexOutput {
+  float4 pos;
+  uint3 prevent_dce;
+};
+
+struct vertex_main_outputs {
+  nointerpolation uint3 VertexOutput_prevent_dce : TEXCOORD0;
+  float4 VertexOutput_pos : SV_Position;
+};
 
 
-@group(0) @binding(0) var<storage, read_write> prevent_dce : vec3<u32>;
-
-@group(1) @binding(0) var arg_0 : texture_3d<f32>;
-
-fn textureDimensions_0890c6() -> vec3<u32> {
-  var arg_1 = 1u;
-  var res : vec3<u32> = textureDimensions(arg_0, arg_1);
+RWByteAddressBuffer prevent_dce : register(u0);
+Texture3D<float4> arg_0 : register(t0, space1);
+uint3 textureDimensions_0890c6() {
+  uint arg_1 = 1u;
+  uint4 v = (0u).xxxx;
+  arg_0.GetDimensions(uint(arg_1), v[0u], v[1u], v[2u], v[3u]);
+  uint3 res = v.xyz;
   return res;
 }
 
-@fragment
-fn fragment_main() {
-  prevent_dce = textureDimensions_0890c6();
+void fragment_main() {
+  prevent_dce.Store3(0u, textureDimensions_0890c6());
 }
 
-@compute @workgroup_size(1)
-fn compute_main() {
-  prevent_dce = textureDimensions_0890c6();
+[numthreads(1, 1, 1)]
+void compute_main() {
+  prevent_dce.Store3(0u, textureDimensions_0890c6());
 }
 
-struct VertexOutput {
-  @builtin(position)
-  pos : vec4<f32>,
-  @location(0) @interpolate(flat)
-  prevent_dce : vec3<u32>,
-}
-
-@vertex
-fn vertex_main() -> VertexOutput {
-  var tint_symbol : VertexOutput;
-  tint_symbol.pos = vec4<f32>();
+VertexOutput vertex_main_inner() {
+  VertexOutput tint_symbol = (VertexOutput)0;
+  tint_symbol.pos = (0.0f).xxxx;
   tint_symbol.prevent_dce = textureDimensions_0890c6();
-  return tint_symbol;
+  VertexOutput v_1 = tint_symbol;
+  return v_1;
 }
 
-Failed to generate: :30:49 error: var: initializer type 'vec2<u32>' does not match store type 'vec3<u32>'
-    %res:ptr<function, vec3<u32>, read_write> = var, %15
-                                                ^^^
-
-:17:3 note: in block
-  $B2: {
-  ^^^
-
-note: # Disassembly
-VertexOutput = struct @align(16) {
-  pos:vec4<f32> @offset(0)
-  prevent_dce:vec3<u32> @offset(16)
+vertex_main_outputs vertex_main() {
+  VertexOutput v_2 = vertex_main_inner();
+  VertexOutput v_3 = v_2;
+  VertexOutput v_4 = v_2;
+  vertex_main_outputs v_5 = {v_4.prevent_dce, v_3.pos};
+  return v_5;
 }
 
-vertex_main_outputs = struct @align(16) {
-  VertexOutput_prevent_dce:vec3<u32> @offset(0), @location(0), @interpolate(flat)
-  VertexOutput_pos:vec4<f32> @offset(16), @builtin(position)
-}
-
-$B1: {  # root
-  %prevent_dce:hlsl.byte_address_buffer<read_write> = var @binding_point(0, 0)
-  %arg_0:ptr<handle, texture_3d<f32>, read> = var @binding_point(1, 0)
-}
-
-%textureDimensions_0890c6 = func():vec3<u32> {
-  $B2: {
-    %arg_1:ptr<function, u32, read_write> = var, 1u
-    %5:texture_3d<f32> = load %arg_0
-    %6:u32 = load %arg_1
-    %7:u32 = convert %6
-    %8:ptr<function, vec4<u32>, read_write> = var
-    %9:ptr<function, u32, read_write> = access %8, 0u
-    %10:ptr<function, u32, read_write> = access %8, 1u
-    %11:ptr<function, u32, read_write> = access %8, 2u
-    %12:ptr<function, u32, read_write> = access %8, 3u
-    %13:void = %5.GetDimensions %7, %9, %10, %11, %12
-    %14:vec4<u32> = load %8
-    %15:vec2<u32> = swizzle %14, xyz
-    %res:ptr<function, vec3<u32>, read_write> = var, %15
-    %17:vec3<u32> = load %res
-    ret %17
-  }
-}
-%fragment_main = @fragment func():void {
-  $B3: {
-    %19:vec3<u32> = call %textureDimensions_0890c6
-    %20:void = %prevent_dce.Store3 0u, %19
-    ret
-  }
-}
-%compute_main = @compute @workgroup_size(1, 1, 1) func():void {
-  $B4: {
-    %22:vec3<u32> = call %textureDimensions_0890c6
-    %23:void = %prevent_dce.Store3 0u, %22
-    ret
-  }
-}
-%vertex_main_inner = func():VertexOutput {
-  $B5: {
-    %tint_symbol:ptr<function, VertexOutput, read_write> = var
-    %26:ptr<function, vec4<f32>, read_write> = access %tint_symbol, 0u
-    store %26, vec4<f32>(0.0f)
-    %27:ptr<function, vec3<u32>, read_write> = access %tint_symbol, 1u
-    %28:vec3<u32> = call %textureDimensions_0890c6
-    store %27, %28
-    %29:VertexOutput = load %tint_symbol
-    ret %29
-  }
-}
-%vertex_main = @vertex func():vertex_main_outputs {
-  $B6: {
-    %31:VertexOutput = call %vertex_main_inner
-    %32:vec4<f32> = access %31, 0u
-    %33:vec3<u32> = access %31, 1u
-    %34:vertex_main_outputs = construct %33, %32
-    ret %34
-  }
-}
-
-
-tint executable returned error: exit status 1

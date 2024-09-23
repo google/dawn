@@ -1,6 +1,4 @@
-#version 310 es
-precision highp float;
-precision highp int;
+#version 460
 
 struct tint_symbol_1 {
   uint texture_builtin_value_0;
@@ -32,7 +30,7 @@ void main() {
   fragment_main();
   return;
 }
-#version 310 es
+#version 460
 
 struct tint_symbol_1 {
   uint texture_builtin_value_0;
@@ -65,7 +63,7 @@ void main() {
   compute_main();
   return;
 }
-#version 310 es
+#version 460
 
 layout(location = 0) flat out uint prevent_dce_1;
 struct tint_symbol_1 {

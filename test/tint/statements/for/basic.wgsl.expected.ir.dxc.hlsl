@@ -4,15 +4,15 @@ void some_loop_body() {
 
 void f() {
   {
-    int i = 0;
+    int i = int(0);
     while(true) {
-      if ((i < 5)) {
+      if ((i < int(5))) {
       } else {
         break;
       }
       some_loop_body();
       {
-        i = (i + 1);
+        i = (i + int(1));
       }
       continue;
     }

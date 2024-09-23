@@ -3,13 +3,13 @@ void some_loop_body() {
 }
 
 void f() {
-  int j = 0;
+  int j = int(0);
   {
-    int i = 0;
+    int i = int(0);
     while(true) {
       bool v = false;
-      if ((i < 5)) {
-        v = (j < 10);
+      if ((i < int(5))) {
+        v = (j < int(10));
       } else {
         v = false;
       }
@@ -18,9 +18,9 @@ void f() {
         break;
       }
       some_loop_body();
-      j = (i * 30);
+      j = (i * int(30));
       {
-        i = (i + 1);
+        i = (i + int(1));
       }
       continue;
     }

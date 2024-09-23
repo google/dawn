@@ -108,14 +108,14 @@ bool is_reserved(const Token& t) {
            s == "macro_rules" || s == "match" || s == "mediump" || s == "meta" || s == "mod" ||
            s == "module" || s == "move" || s == "mut" || s == "mutable" || s == "namespace" ||
            s == "new" || s == "nil" || s == "noexcept" || s == "noinline" ||
-           s == "nointerpolation" || s == "noperspective" || s == "null" || s == "nullptr" ||
-           s == "of" || s == "operator" || s == "package" || s == "packoffset" ||
-           s == "partition" || s == "pass" || s == "patch" || s == "pixelfragment" ||
-           s == "precise" || s == "precision" || s == "premerge" || s == "priv" ||
-           s == "protected" || s == "pub" || s == "public" || s == "readonly" || s == "ref" ||
-           s == "regardless" || s == "register" || s == "reinterpret_cast" || s == "require" ||
-           s == "resource" || s == "restrict" || s == "self" || s == "set" || s == "shared" ||
-           s == "sizeof" || s == "smooth" || s == "snorm" || s == "static" ||
+           s == "nointerpolation" || s == "non_coherent" || s == "noncoherent" ||
+           s == "noperspective" || s == "null" || s == "nullptr" || s == "of" || s == "operator" ||
+           s == "package" || s == "packoffset" || s == "partition" || s == "pass" || s == "patch" ||
+           s == "pixelfragment" || s == "precise" || s == "precision" || s == "premerge" ||
+           s == "priv" || s == "protected" || s == "pub" || s == "public" || s == "readonly" ||
+           s == "ref" || s == "regardless" || s == "register" || s == "reinterpret_cast" ||
+           s == "require" || s == "resource" || s == "restrict" || s == "self" || s == "set" ||
+           s == "shared" || s == "sizeof" || s == "smooth" || s == "snorm" || s == "static" ||
            s == "static_assert" || s == "static_cast" || s == "std" || s == "subroutine" ||
            s == "super" || s == "target" || s == "template" || s == "this" || s == "thread_local" ||
            s == "throw" || s == "trait" || s == "try" || s == "type" || s == "typedef" ||
@@ -832,7 +832,7 @@ Expect<Parser::TypedIdentifier> Parser::expect_ident_with_type_specifier(std::st
 }
 
 // variable_qualifier
-//   : _template_args_start expression (COMMA expression)? _template_args_end
+//   : _template_args_start expression (COMMA expression)? COMMA? _template_args_end
 Maybe<Parser::VariableQualifier> Parser::variable_qualifier() {
     if (!peek_is(Token::Type::kTemplateArgsLeft) && !peek_is(Token::Type::kLessThan)) {
         // Note: kLessThan will give a sensible error at expect_template_arg_block()
@@ -845,11 +845,14 @@ Maybe<Parser::VariableQualifier> Parser::variable_qualifier() {
         if (address_space.errored) {
             return Failure::kErrored;
         }
+        // The first expression in this condition also matches trailing comma.
         if (match(Token::Type::kComma) && !peek().Is(Token::Type::kTemplateArgsRight)) {
             auto access = expect_expression("'var' access mode");
             if (access.errored) {
                 return Failure::kErrored;
             }
+            // Allow for trailing comma.
+            match(Token::Type::kComma);
             return VariableQualifier{address_space.value, access.value};
         }
         return VariableQualifier{address_space.value};

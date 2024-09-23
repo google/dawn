@@ -38,10 +38,10 @@ using SpirvWriterInstructionTest = testing::Test;
 
 TEST_F(SpirvWriterInstructionTest, Create) {
     Instruction i(spv::Op::OpEntryPoint, {Operand(1.2f), Operand(1u), Operand("my_str")});
-    EXPECT_EQ(i.opcode(), spv::Op::OpEntryPoint);
-    ASSERT_EQ(i.operands().size(), 3u);
+    EXPECT_EQ(i.Opcode(), spv::Op::OpEntryPoint);
+    ASSERT_EQ(i.Operands().size(), 3u);
 
-    const auto& ops = i.operands();
+    const auto& ops = i.Operands();
     ASSERT_TRUE(std::holds_alternative<float>(ops[0]));
     EXPECT_FLOAT_EQ(std::get<float>(ops[0]), 1.2f);
 
@@ -54,7 +54,7 @@ TEST_F(SpirvWriterInstructionTest, Create) {
 
 TEST_F(SpirvWriterInstructionTest, Length) {
     Instruction i(spv::Op::OpEntryPoint, {Operand(1.2f), Operand(1u), Operand("my_str")});
-    EXPECT_EQ(i.word_length(), 5u);
+    EXPECT_EQ(i.WordLength(), 5u);
 }
 
 }  // namespace

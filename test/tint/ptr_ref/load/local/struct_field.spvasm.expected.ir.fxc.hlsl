@@ -4,7 +4,7 @@ struct S {
 
 
 void main_1() {
-  int i = 0;
+  int i = int(0);
   S V = (S)0;
   i = V.i;
 }

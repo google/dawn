@@ -11,11 +11,11 @@ struct vertex_main_outputs {
 
 RWByteAddressBuffer prevent_dce : register(u0);
 uint pack4xI8Clamp_e42b2a() {
-  int4 arg_0 = (1).xxxx;
+  int4 arg_0 = (int(1)).xxxx;
   int4 v = arg_0;
   uint4 v_1 = uint4(0u, 8u, 16u, 24u);
-  int4 v_2 = int4((-128).xxxx);
-  uint4 v_3 = asuint(clamp(v, v_2, int4((127).xxxx)));
+  int4 v_2 = int4((int(-128)).xxxx);
+  uint4 v_3 = asuint(clamp(v, v_2, int4((int(127)).xxxx)));
   uint4 v_4 = ((v_3 & uint4((255u).xxxx)) << v_1);
   uint res = dot(v_4, uint4((1u).xxxx));
   return res;

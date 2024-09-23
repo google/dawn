@@ -3,7 +3,7 @@ groupshared int a;
 groupshared int b;
 void foo() {
   {
-    int i = 0;
+    int i = int(0);
     while(true) {
       int v = i;
       GroupMemoryBarrierWithGroupSync();

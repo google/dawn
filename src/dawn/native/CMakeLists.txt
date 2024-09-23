@@ -684,6 +684,7 @@ if (DAWN_ENABLE_VULKAN)
         "vulkan/SharedTextureMemoryVk.h"
         "vulkan/SwapChainVk.h"
         "vulkan/TextureVk.h"
+        "vulkan/UniqueVkHandle.h"
         "vulkan/UtilsVulkan.h"
         "vulkan/VulkanError.h"
         "vulkan/VulkanExtensions.h"

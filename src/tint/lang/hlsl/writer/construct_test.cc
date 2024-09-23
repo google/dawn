@@ -106,7 +106,7 @@ TEST_F(HlslWriterTest, ConstructI32Var) {
     ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
     EXPECT_EQ(output_.hlsl, R"(
 int a() {
-  int v = 2;
+  int v = int(2);
   return int(v);
 }
 
@@ -268,7 +268,7 @@ TEST_F(HlslWriterTest, ConstructStruct) {
 
 
 S a() {
-  S v = {1, 2.0f, int3(3, 4, 5)};
+  S v = {int(1), 2.0f, int3(int(3), int(4), int(5))};
   return v;
 }
 

@@ -344,6 +344,11 @@ TEST_P(CreatePipelineAsyncTest, CreateRenderPipelineAsyncStress) {
     // TODO(crbug.com/dawn/1766): TSAN reported race conditions in NVIDIA's vk driver.
     DAWN_SUPPRESS_TEST_IF(IsVulkan() && IsNvidia() && IsTsan());
 
+    wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, R"(
+        @fragment fn main() -> @location(0) vec4f {
+            return vec4f(0.0, 1.0, 0.0, 1.0);
+        })");
+
     for (size_t i = 0; i < 100; i++) {
         utils::ComboRenderPipelineDescriptor desc;
         std::string shader = R"(
@@ -352,7 +357,8 @@ TEST_P(CreatePipelineAsyncTest, CreateRenderPipelineAsyncStress) {
         shader += std::to_string(i);
         shader += ".0, 0.0, 0.0, 1.0);\n}";
         desc.vertex.module = utils::CreateShaderModule(device, shader);
-        desc.fragment = nullptr;
+        desc.cFragment.module = fsModule;
+        desc.cTargets[0].format = wgpu::TextureFormat::RGBA8Unorm;
 
         device.CreateRenderPipelineAsync(
             &desc, wgpu::CallbackMode::AllowProcessEvents,
@@ -375,6 +381,11 @@ TEST_P(CreatePipelineAsyncTest, CreateRenderPipelineAsyncStressManyThreads) {
     // TODO(crbug.com/dawn/1766): TSAN reported race conditions in NVIDIA's vk driver.
     DAWN_SUPPRESS_TEST_IF(IsVulkan() && IsNvidia() && IsTsan());
 
+    wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, R"(
+        @fragment fn main() -> @location(0) vec4f {
+            return vec4f(0.0, 1.0, 0.0, 1.0);
+        })");
+
     auto f = [&](size_t t) {
         utils::ComboRenderPipelineDescriptor desc;
         std::string shader = R"(
@@ -383,7 +394,8 @@ TEST_P(CreatePipelineAsyncTest, CreateRenderPipelineAsyncStressManyThreads) {
         shader += std::to_string(t);
         shader += ".0, 0.0, 0.0, 1.0);\n}";
         desc.vertex.module = utils::CreateShaderModule(device, shader);
-        desc.fragment = nullptr;
+        desc.cFragment.module = fsModule;
+        desc.cTargets[0].format = wgpu::TextureFormat::RGBA8Unorm;
 
         device.CreateRenderPipelineAsync(
             &desc, wgpu::CallbackMode::AllowProcessEvents,

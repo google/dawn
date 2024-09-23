@@ -80,6 +80,8 @@
 #include "src/tint/lang/core/type/u32.h"
 #include "src/tint/lang/core/type/vector.h"
 #include "src/tint/lang/core/type/void.h"
+#include "src/tint/lang/glsl/ir/builtin_call.h"
+#include "src/tint/lang/glsl/ir/ternary.h"
 #include "src/tint/lang/glsl/writer/common/printer_support.h"
 #include "src/tint/lang/glsl/writer/common/version.h"
 #include "src/tint/utils/containers/map.h"
@@ -716,17 +718,19 @@ class Printer : public tint::TextGenerator {
                     out << "writeonly ";
                     break;
                 case core::Access::kReadWrite: {
-                    // ESSL 3.1 SPEC (chapter 4.9, Memory Access Qualifiers):
-                    // Except for image variables qualified with the format qualifiers r32f, r32i,
-                    // and r32ui, image variables must specify either memory qualifier readonly or
-                    // the memory qualifier writeonly.
-                    switch (storage->TexelFormat()) {
-                        case core::TexelFormat::kR32Float:
-                        case core::TexelFormat::kR32Sint:
-                        case core::TexelFormat::kR32Uint:
-                            break;
-                        default:
-                            TINT_UNREACHABLE();
+                    if (version_.IsES()) {
+                        // ESSL 3.1 SPEC (chapter 4.9, Memory Access Qualifiers):
+                        // Except for image variables qualified with the format qualifiers r32f,
+                        // r32i, and r32ui, image variables must specify either memory qualifier
+                        // readonly or the memory qualifier writeonly.
+                        switch (storage->TexelFormat()) {
+                            case core::TexelFormat::kR32Float:
+                            case core::TexelFormat::kR32Sint:
+                            case core::TexelFormat::kR32Uint:
+                                break;
+                            default:
+                                TINT_UNREACHABLE();
+                        }
                     }
                     break;
                 }
@@ -1098,11 +1102,55 @@ class Printer : public tint::TextGenerator {
                     [&](const core::ir::UserCall* c) { EmitUserCall(out, c); },
                     [&](const core::ir::Var* var) { out << NameOf(var->Result(0)); },
 
+                    [&](const glsl::ir::BuiltinCall* c) { EmitGlslBuiltinCall(out, c); },  //
+                    [&](const glsl::ir::Ternary* t) { EmitTernary(out, t); },              //
+
                     TINT_ICE_ON_NO_MATCH);
             },
             [&](const core::ir::FunctionParam* p) { out << NameOf(p); },  //
 
             TINT_ICE_ON_NO_MATCH);
+    }
+
+    void EmitGlslBuiltinCall(StringStream& out, const glsl::ir::BuiltinCall* c) {
+        // The atomic subtract is an add in GLSL. If the value is a u32, it just negates the u32 and
+        // GLSL handles it. We don't have u32 negation in the IR, so fake it in the printer.
+        if (c->Func() == glsl::BuiltinFn::kAtomicSub) {
+            out << "atomicAdd";
+            {
+                ScopedParen sp(out);
+
+                EmitValue(out, c->Args()[0]);
+                out << ", -";
+                {
+                    ScopedParen argSP(out);
+                    EmitValue(out, c->Args()[1]);
+                }
+            }
+            return;
+        }
+
+        out << c->Func() << "(";
+        bool needs_comma = false;
+        for (const auto* arg : c->Args()) {
+            if (needs_comma) {
+                out << ", ";
+            }
+            EmitValue(out, arg);
+            needs_comma = true;
+        }
+        out << ")";
+    }
+
+    void EmitTernary(StringStream& out, const glsl::ir::Ternary* t) {
+        out << "((";
+        EmitValue(out, t->Cmp());
+        out << ") ? (";
+        EmitValue(out, t->True());
+        out << ") : (";
+        EmitValue(out, t->False());
+        out << "))";
+        return;
     }
 
     /// Emit a convert instruction
@@ -1263,6 +1311,13 @@ class Printer : public tint::TextGenerator {
             case core::BuiltinFn::kAsinh:
             case core::BuiltinFn::kAtan:
             case core::BuiltinFn::kAtanh:
+            case core::BuiltinFn::kAtomicAdd:
+            case core::BuiltinFn::kAtomicAnd:
+            case core::BuiltinFn::kAtomicExchange:
+            case core::BuiltinFn::kAtomicMax:
+            case core::BuiltinFn::kAtomicMin:
+            case core::BuiltinFn::kAtomicOr:
+            case core::BuiltinFn::kAtomicXor:
             case core::BuiltinFn::kCeil:
             case core::BuiltinFn::kClamp:
             case core::BuiltinFn::kCos:
@@ -1301,8 +1356,10 @@ class Printer : public tint::TextGenerator {
             case core::BuiltinFn::kAtan2:
                 out << "atan";
                 break;
-            case core::BuiltinFn::kCountOneBits:
-                out << "bitCount";
+            case core::BuiltinFn::kAtomicStore:
+                // GLSL does not have an atomicStore, so we emulate it with
+                // atomicExchange.
+                out << "atomicExchange";
                 break;
             case core::BuiltinFn::kDpdx:
                 out << "dFdx";

@@ -196,18 +196,21 @@ interop::Promise<interop::Interface<interop::GPUDevice>> GPUAdapter::requestDevi
     interop::Promise<interop::Interface<interop::GPUDevice>> promise(env, PROMISE_INFO);
 
     wgpu::RequiredLimits limits;
-#define COPY_LIMIT(LIMIT)                                                                    \
-    if (descriptor.requiredLimits.count(#LIMIT)) {                                           \
-        using DawnLimitType = decltype(WGPULimits::LIMIT);                                   \
-        DawnLimitType* dawnLimit = &limits.limits.LIMIT;                                     \
-        uint64_t jsLimit = descriptor.requiredLimits[#LIMIT];                                \
-        if (jsLimit > std::numeric_limits<DawnLimitType>::max() - 1) {                       \
-            promise.Reject(                                                                  \
-                binding::Errors::OperationError(env, "Limit \"" #LIMIT "\" out of range.")); \
-            return promise;                                                                  \
-        }                                                                                    \
-        *dawnLimit = jsLimit;                                                                \
-        descriptor.requiredLimits.erase(#LIMIT);                                             \
+#define COPY_LIMIT(LIMIT)                                                                        \
+    if (descriptor.requiredLimits.count(#LIMIT)) {                                               \
+        auto jsLimitVariant = descriptor.requiredLimits[#LIMIT];                                 \
+        if (!std::holds_alternative<interop::UndefinedType>(jsLimitVariant)) {                   \
+            using DawnLimitType = decltype(WGPULimits::LIMIT);                                   \
+            DawnLimitType* dawnLimit = &limits.limits.LIMIT;                                     \
+            uint64_t jsLimit = std::get<interop::GPUSize64>(jsLimitVariant);                     \
+            if (jsLimit > std::numeric_limits<DawnLimitType>::max() - 1) {                       \
+                promise.Reject(                                                                  \
+                    binding::Errors::OperationError(env, "Limit \"" #LIMIT "\" out of range.")); \
+                return promise;                                                                  \
+            }                                                                                    \
+            *dawnLimit = jsLimit;                                                                \
+        }                                                                                        \
+        descriptor.requiredLimits.erase(#LIMIT);                                                 \
     }
     FOR_EACH_LIMIT(COPY_LIMIT)
 #undef COPY_LIMIT

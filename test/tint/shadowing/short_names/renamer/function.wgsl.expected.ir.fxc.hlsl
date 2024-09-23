@@ -8,7 +8,7 @@ struct main_inputs {
 
 
 int vec4f() {
-  return 0;
+  return int(0);
 }
 
 float vec2f(int i) {

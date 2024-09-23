@@ -1,24 +1,11 @@
 SKIP: INVALID
 
-#version 310 es
-precision highp float;
-precision highp int;
+<dawn>/src/tint/lang/glsl/writer/raise/shader_io.cc:109 internal compiler error: TINT_UNREACHABLE 
+********************************************************************
+*  The tint shader compiler has encountered an unexpected error.   *
+*                                                                  *
+*  Please help us fix this issue by submitting a bug report at     *
+*  crbug.com/tint with the source program that triggered the bug.  *
+********************************************************************
 
-
-struct FragmentInputs {
-  uint subgroup_invocation_id;
-  uint subgroup_size;
-};
-
-uint tint_symbol[];
-void main(FragmentInputs inputs) {
-  tint_symbol[inputs.subgroup_invocation_id] = inputs.subgroup_size;
-}
-error: Error parsing GLSL shader:
-ERROR: 0:11: '' : array size required
-ERROR: 1 compilation errors.  No code generated.
-
-
-
-
-tint executable returned error: exit status 1
+tint executable returned error: signal: trace/BPT trap

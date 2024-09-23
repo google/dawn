@@ -1,11 +1,24 @@
-SKIP: FAILED
+#version 310 es
 
-<dawn>/src/tint/lang/glsl/writer/printer/printer.cc:1116 internal compiler error: TINT_UNREACHABLE unhandled core builtin: select
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
 
-tint executable returned error: signal: trace/BPT trap
+struct S {
+  ivec4 a;
+};
+
+layout(binding = 0, std430)
+buffer tint_symbol_1_1_ssbo {
+  S tint_symbol;
+} v_1;
+ivec4 tint_mod_v4i32(ivec4 lhs, ivec4 rhs) {
+  int v_2 = ((((rhs == ivec4(0)) | ((lhs == ivec4((-2147483647 - 1))) & (rhs == ivec4(-1)))).x) ? (ivec4(1).x) : (rhs.x));
+  int v_3 = ((((rhs == ivec4(0)) | ((lhs == ivec4((-2147483647 - 1))) & (rhs == ivec4(-1)))).y) ? (ivec4(1).y) : (rhs.y));
+  int v_4 = ((((rhs == ivec4(0)) | ((lhs == ivec4((-2147483647 - 1))) & (rhs == ivec4(-1)))).z) ? (ivec4(1).z) : (rhs.z));
+  ivec4 v_5 = ivec4(v_2, v_3, v_4, ((((rhs == ivec4(0)) | ((lhs == ivec4((-2147483647 - 1))) & (rhs == ivec4(-1)))).w) ? (ivec4(1).w) : (rhs.w)));
+  return (lhs - ((lhs / v_5) * v_5));
+}
+void foo() {
+  v_1.tint_symbol.a = tint_mod_v4i32(v_1.tint_symbol.a, ivec4(2));
+}
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+void main() {
+}

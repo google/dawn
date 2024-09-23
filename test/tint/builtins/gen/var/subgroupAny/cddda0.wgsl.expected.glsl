@@ -50,3 +50,5 @@ Failed to generate: <dawn>/test/tint/builtins/gen/var/subgroupAny/cddda0.wgsl:41
 enable subgroups;
        ^^^^^^^^^
 
+
+tint executable returned error: exit status 1

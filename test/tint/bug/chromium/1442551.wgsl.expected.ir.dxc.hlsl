@@ -1,7 +1,7 @@
 
 void f() {
-  int i = 1;
-  int b = int2(1, 2)[i];
+  int i = int(1);
+  int b = int2(int(1), int(2))[i];
 }
 
 [numthreads(1, 1, 1)]

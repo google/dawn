@@ -13,9 +13,7 @@ RWByteAddressBuffer prevent_dce : register(u0);
 TextureCubeArray<float4> arg_0 : register(t0, space1);
 SamplerState arg_1 : register(s1, space1);
 float4 textureSampleGrad_bbb58f() {
-  TextureCubeArray<float4> v = arg_0;
-  SamplerState v_1 = arg_1;
-  float4 res = v.SampleGrad(v_1, float4((1.0f).xxx, float(1u)), (1.0f).xxx, (1.0f).xxx);
+  float4 res = arg_0.SampleGrad(arg_1, float4((1.0f).xxx, float(1u)), (1.0f).xxx, (1.0f).xxx);
   return res;
 }
 
@@ -32,15 +30,15 @@ VertexOutput vertex_main_inner() {
   VertexOutput tint_symbol = (VertexOutput)0;
   tint_symbol.pos = (0.0f).xxxx;
   tint_symbol.prevent_dce = textureSampleGrad_bbb58f();
-  VertexOutput v_2 = tint_symbol;
-  return v_2;
+  VertexOutput v = tint_symbol;
+  return v;
 }
 
 vertex_main_outputs vertex_main() {
-  VertexOutput v_3 = vertex_main_inner();
-  VertexOutput v_4 = v_3;
-  VertexOutput v_5 = v_3;
-  vertex_main_outputs v_6 = {v_5.prevent_dce, v_4.pos};
-  return v_6;
+  VertexOutput v_1 = vertex_main_inner();
+  VertexOutput v_2 = v_1;
+  VertexOutput v_3 = v_1;
+  vertex_main_outputs v_4 = {v_3.prevent_dce, v_2.pos};
+  return v_4;
 }
 

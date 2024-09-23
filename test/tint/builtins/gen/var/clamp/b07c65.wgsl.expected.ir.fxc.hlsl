@@ -11,9 +11,9 @@ struct vertex_main_outputs {
 
 RWByteAddressBuffer prevent_dce : register(u0);
 int clamp_b07c65() {
-  int arg_0 = 1;
-  int arg_1 = 1;
-  int arg_2 = 1;
+  int arg_0 = int(1);
+  int arg_1 = int(1);
+  int arg_2 = int(1);
   int v = arg_2;
   int res = min(max(arg_0, arg_1), v);
   return res;

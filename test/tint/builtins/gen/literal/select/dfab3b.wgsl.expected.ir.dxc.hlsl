@@ -8,7 +8,7 @@ struct vertex_main_outputs {
 
 
 void select_dfab3b() {
-  int3 res = (1).xxx;
+  int3 res = (int(1)).xxx;
 }
 
 void fragment_main() {

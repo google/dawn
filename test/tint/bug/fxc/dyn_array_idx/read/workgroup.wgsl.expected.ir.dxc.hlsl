@@ -21,7 +21,7 @@ void f_inner(uint tint_local_index) {
       if ((v_1 >= 64u)) {
         break;
       }
-      s.data[v_1] = 0;
+      s.data[v_1] = int(0);
       {
         v = (v_1 + 1u);
       }

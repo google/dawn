@@ -21,8 +21,8 @@ matrix<float16_t, 2, 2> v_2(uint start_byte_offset) {
 [numthreads(1, 1, 1)]
 void f() {
   p = v_2(0u);
-  p[1] = tint_bitcast_to_f16(u[0u].x);
-  p[1] = tint_bitcast_to_f16(u[0u].x).yx;
-  p[0][1] = float16_t(f16tof32(u[0u].y));
+  p[int(1)] = tint_bitcast_to_f16(u[0u].x);
+  p[int(1)] = tint_bitcast_to_f16(u[0u].x).yx;
+  p[int(0)][int(1)] = float16_t(f16tof32(u[0u].y));
 }
 

@@ -477,7 +477,7 @@ struct State {
         // Convert the argument to f16 and then back again.
         b.InsertBefore(builtin, [&] {
             b.ConvertWithResult(builtin->DetachResult(),
-                                b.Convert(ty.match_width(ty.f16(), arg->Type()), arg));
+                                b.Convert(ty.MatchWidth(ty.f16(), arg->Type()), arg));
         });
         builtin->Destroy();
     }
@@ -493,7 +493,7 @@ struct State {
             if (type->IsIntegerScalarOrVector()) {
                 core::ir::Value* pos_one = b.MatchWidth(i32(1), type);
                 core::ir::Value* neg_one = b.MatchWidth(i32(-1), type);
-                const core::type::Type* bool_type = ty.match_width(ty.bool_(), type);
+                const core::type::Type* bool_type = ty.MatchWidth(ty.bool_(), type);
                 auto* zero = b.Zero(type);
                 auto* sign = b.Call(type, core::BuiltinFn::kSelect, neg_one, pos_one,
                                     b.GreaterThan(bool_type, arg, zero));
@@ -629,7 +629,7 @@ struct State {
         b.InsertBefore(builtin, [&] {
             // Convert the coordinates to unsigned integers if necessary.
             if (coords->Type()->IsSignedIntegerScalarOrVector()) {
-                coords = b.Convert(ty.match_width(ty.u32(), coords->Type()), coords)->Result(0);
+                coords = b.Convert(ty.MatchWidth(ty.u32(), coords->Type()), coords)->Result(0);
             }
 
             // Call the `read()` member function.
@@ -872,7 +872,7 @@ struct State {
         b.InsertBefore(builtin, [&] {
             // Convert the coordinates to unsigned integers if necessary.
             if (coords->Type()->IsSignedIntegerScalarOrVector()) {
-                coords = b.Convert(ty.match_width(ty.u32(), coords->Type()), coords)->Result(0);
+                coords = b.Convert(ty.MatchWidth(ty.u32(), coords->Type()), coords)->Result(0);
             }
 
             // Call the `write()` member function.

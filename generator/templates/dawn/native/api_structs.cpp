@@ -171,7 +171,7 @@ namespace {{native_namespace}} {
 
     StringView::operator std::string_view() const {
         const bool isNull = this->data == nullptr;
-        const bool useStrlen = this->length == SIZE_MAX;
+        const bool useStrlen = this->length == WGPU_STRLEN;
         DAWN_ASSERT(!(isNull && useStrlen));
         return std::string_view(this->data, isNull      ? 0
                                             : useStrlen ? std::strlen(this->data)
@@ -180,7 +180,7 @@ namespace {{native_namespace}} {
 
     NullableStringView::operator std::optional<std::string_view>() const {
         const bool isNull = this->data == nullptr;
-        const bool useStrlen = this->length == SIZE_MAX;
+        const bool useStrlen = this->length == WGPU_STRLEN;
         if (isNull && useStrlen) {
             return std::nullopt;
         }

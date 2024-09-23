@@ -141,10 +141,8 @@ tint_ExternalTextureParams v_39(uint start_byte_offset) {
 }
 
 void doTextureLoad() {
-  Texture2D<float4> v_62 = arg_0_plane0;
-  Texture2D<float4> v_63 = arg_0_plane1;
-  tint_ExternalTextureParams v_64 = v_39(0u);
-  float4 res = textureLoad2d(v_62, v_63, v_64, (0).xx);
+  tint_ExternalTextureParams v_62 = v_39(0u);
+  float4 res = textureLoad2d(arg_0_plane0, arg_0_plane1, v_62, (int(0)).xx);
 }
 
 float4 vertex_main_inner() {
@@ -162,7 +160,7 @@ void compute_main() {
 }
 
 vertex_main_outputs vertex_main() {
-  vertex_main_outputs v_65 = {vertex_main_inner()};
-  return v_65;
+  vertex_main_outputs v_63 = {vertex_main_inner()};
+  return v_63;
 }
 

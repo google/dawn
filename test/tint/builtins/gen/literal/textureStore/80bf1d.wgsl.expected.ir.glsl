@@ -1,11 +1,21 @@
-SKIP: INVALID
+#version 460
+precision highp float;
+precision highp int;
 
-<dawn>/src/tint/lang/glsl/writer/printer/printer.cc:698 internal compiler error: TINT_UNREACHABLE 
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
+layout(binding = 0, rg32i) uniform highp iimage2D arg_0;
+void textureStore_80bf1d() {
+  imageStore(arg_0, ivec2(1), ivec4(1));
+}
+void main() {
+  textureStore_80bf1d();
+}
+#version 460
 
-tint executable returned error: signal: trace/BPT trap
+layout(binding = 0, rg32i) uniform highp iimage2D arg_0;
+void textureStore_80bf1d() {
+  imageStore(arg_0, ivec2(1), ivec4(1));
+}
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+void main() {
+  textureStore_80bf1d();
+}

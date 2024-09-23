@@ -10,16 +10,16 @@ struct compute_main_inputs {
 
 groupshared int arg_0;
 void atomicCompareExchangeWeak_e88938() {
-  int v = 0;
-  InterlockedCompareExchange(arg_0, 1, 1, v);
+  int v = int(0);
+  InterlockedCompareExchange(arg_0, int(1), int(1), v);
   int v_1 = v;
-  atomic_compare_exchange_result_i32 res = {v_1, (v_1 == 1)};
+  atomic_compare_exchange_result_i32 res = {v_1, (v_1 == int(1))};
 }
 
 void compute_main_inner(uint tint_local_index) {
   if ((tint_local_index == 0u)) {
-    int v_2 = 0;
-    InterlockedExchange(arg_0, 0, v_2);
+    int v_2 = int(0);
+    InterlockedExchange(arg_0, int(0), v_2);
   }
   GroupMemoryBarrierWithGroupSync();
   atomicCompareExchangeWeak_e88938();

@@ -52,7 +52,7 @@ struct DAWN_NATIVE_EXPORT RequestAdapterOptionsLUID : wgpu::ChainedStruct {
 };
 
 // Chrome uses 0 as acquire key.
-static constexpr UINT64 kDXGIKeyedMutexAcquireKey = 0;
+static constexpr uint64_t kDXGIKeyedMutexAcquireKey = 0;
 
 }  // namespace dawn::native::d3d
 

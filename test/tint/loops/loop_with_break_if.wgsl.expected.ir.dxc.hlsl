@@ -1,14 +1,14 @@
 
 int f() {
-  int i = 0;
+  int i = int(0);
   {
     while(true) {
-      if ((i > 4)) {
+      if ((i > int(4))) {
         return i;
       }
       {
-        i = (i + 1);
-        if ((i == 4)) { break; }
+        i = (i + int(1));
+        if ((i == int(4))) { break; }
       }
       continue;
     }

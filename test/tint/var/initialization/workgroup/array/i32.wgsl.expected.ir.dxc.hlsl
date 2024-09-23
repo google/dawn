@@ -13,7 +13,7 @@ void main_inner(uint tint_local_index) {
       if ((v_2 >= 3u)) {
         break;
       }
-      zero[v_2] = 0;
+      zero[v_2] = int(0);
       {
         v_1 = (v_2 + 1u);
       }

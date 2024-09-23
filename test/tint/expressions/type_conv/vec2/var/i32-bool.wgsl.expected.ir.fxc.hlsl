@@ -1,5 +1,5 @@
 
-static int2 u = (1).xx;
+static int2 u = (int(1)).xx;
 void f() {
   bool2 v = bool2(u);
 }

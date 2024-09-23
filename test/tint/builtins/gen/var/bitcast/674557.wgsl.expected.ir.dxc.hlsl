@@ -19,7 +19,7 @@ vector<float16_t, 2> tint_bitcast_to_f16(int src) {
 }
 
 vector<float16_t, 2> bitcast_674557() {
-  int arg_0 = 1;
+  int arg_0 = int(1);
   vector<float16_t, 2> res = tint_bitcast_to_f16(arg_0);
   return res;
 }

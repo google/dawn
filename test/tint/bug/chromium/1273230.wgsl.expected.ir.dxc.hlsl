@@ -77,8 +77,8 @@ void doIgnore() {
   uint b53 = v_14;
   uint rwg = indices.Load(0u);
   float rb5 = asfloat(positions.Load(0u));
-  int v_15 = 0;
-  LUT.InterlockedOr(int(0u), 0, v_15);
+  int v_15 = int(0);
+  LUT.InterlockedOr(int(0u), int(0), v_15);
   int g55 = v_15;
 }
 
@@ -98,8 +98,8 @@ void main_count_inner(uint3 GlobalInvocationID) {
   float3 voxelPos = toVoxelPos(p1);
   uint lIndex = toIndex1D(uniforms[0u].y, p0);
   uint v_16 = (uint(i1) * 4u);
-  int v_17 = 0;
-  LUT.InterlockedAdd(int(0u), 1, v_17);
+  int v_17 = int(0);
+  LUT.InterlockedAdd(int(0u), int(1), v_17);
   int triangleOffset = v_17;
 }
 

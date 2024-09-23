@@ -44,8 +44,12 @@ std::string_view ToString(ParameterUsage usage) {
             return "none";
         case ParameterUsage::kArrayIndex:
             return "array_index";
+        case ParameterUsage::kBase:
+            return "base";
         case ParameterUsage::kBias:
             return "bias";
+        case ParameterUsage::kBits:
+            return "bits";
         case ParameterUsage::kCompareValue:
             return "compare_value";
         case ParameterUsage::kComponent:
@@ -72,6 +76,8 @@ std::string_view ToString(ParameterUsage usage) {
             return "id";
         case ParameterUsage::kInputAttachment:
             return "input_attachment";
+        case ParameterUsage::kInsert:
+            return "insert";
         case ParameterUsage::kLevel:
             return "level";
         case ParameterUsage::kLocation:

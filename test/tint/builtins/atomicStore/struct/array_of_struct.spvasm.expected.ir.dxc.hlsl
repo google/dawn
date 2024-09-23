@@ -20,7 +20,7 @@ void compute_main_inner(uint local_invocation_index_2) {
         break;
       }
       uint x_28 = idx;
-      wg[x_28].x = 0;
+      wg[x_28].x = int(0);
       uint v = 0u;
       InterlockedExchange(wg[x_28].a, 0u, v);
       wg[x_28].y = 0u;
@@ -32,7 +32,7 @@ void compute_main_inner(uint local_invocation_index_2) {
   }
   GroupMemoryBarrierWithGroupSync();
   uint v_1 = 0u;
-  InterlockedExchange(wg[4].a, 1u, v_1);
+  InterlockedExchange(wg[int(4)].a, 1u, v_1);
 }
 
 void compute_main_1() {
@@ -49,7 +49,7 @@ void compute_main_inner_1(uint local_invocation_index_1_param) {
       if ((v_3 >= 10u)) {
         break;
       }
-      wg[v_3].x = 0;
+      wg[v_3].x = int(0);
       uint v_4 = 0u;
       InterlockedExchange(wg[v_3].a, 0u, v_4);
       wg[v_3].y = 0u;

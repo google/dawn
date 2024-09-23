@@ -291,9 +291,17 @@ class Converter {
     [[nodiscard]] bool Convert(wgpu::WGSLFeatureName& out, interop::WGSLFeatureName in);
     [[nodiscard]] bool Convert(interop::WGSLFeatureName& out, wgpu::WGSLFeatureName in);
 
-    // std::string to C string
+    // std::string to C string / wgpu::StringView types
     [[nodiscard]] inline bool Convert(const char*& out, const std::string& in) {
         out = in.c_str();
+        return true;
+    }
+    [[nodiscard]] inline bool Convert(wgpu::StringView& out, const std::string& in) {
+        out = {in.data(), in.size()};
+        return true;
+    }
+    [[nodiscard]] inline bool Convert(wgpu::NullableStringView& out, const std::string& in) {
+        out = {in.data(), in.size()};
         return true;
     }
 

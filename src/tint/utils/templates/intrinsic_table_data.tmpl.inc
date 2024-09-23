@@ -246,7 +246,7 @@ const core::intrinsic::TableData {{$.Name}}{
   /* type_matcher_indices */ {{if .MatcherIndices}}kMatcherIndices{{else}}Empty{{end}},
   /* type_matchers */ {{if .TMatchers}}kTypeMatchers{{else}}Empty{{end}},
   /* number_matchers */ {{if .NMatchers}}kNumberMatchers{{else}}Empty{{end}},
-  /* parameters */ kParameters,
+  /* parameters */ {{if .Parameters}}kParameters{{else}}Empty{{end}},
   /* overloads */ kOverloads,
   /* const_eval_functions */ {{if .ConstEvalFunctions}}kConstEvalFunctions{{else}}Empty{{end}},
   /* ctor_conv */ {{if .ConstructorsAndConverters}}kConstructorsAndConverters{{else}}Empty{{end}},

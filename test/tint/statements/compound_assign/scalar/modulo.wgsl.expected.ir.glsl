@@ -1,11 +1,21 @@
-SKIP: FAILED
+#version 310 es
 
-<dawn>/src/tint/lang/glsl/writer/printer/printer.cc:1116 internal compiler error: TINT_UNREACHABLE unhandled core builtin: select
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
 
-tint executable returned error: signal: trace/BPT trap
+struct S {
+  int a;
+};
+
+layout(binding = 0, std430)
+buffer tint_symbol_1_1_ssbo {
+  S tint_symbol;
+} v_1;
+int tint_mod_i32(int lhs, int rhs) {
+  int v_2 = ((((rhs == 0) | ((lhs == (-2147483647 - 1)) & (rhs == -1)))) ? (1) : (rhs));
+  return (lhs - ((lhs / v_2) * v_2));
+}
+void foo() {
+  v_1.tint_symbol.a = tint_mod_i32(v_1.tint_symbol.a, 2);
+}
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+void main() {
+}

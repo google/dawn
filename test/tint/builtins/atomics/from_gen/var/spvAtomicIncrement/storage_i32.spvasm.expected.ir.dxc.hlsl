@@ -1,11 +1,11 @@
 
 RWByteAddressBuffer sb_rw : register(u0);
 void atomicAdd_d32fe4() {
-  int arg_1 = 0;
-  int res = 0;
-  arg_1 = 1;
-  int v = 0;
-  sb_rw.InterlockedAdd(int(0u), 1, v);
+  int arg_1 = int(0);
+  int res = int(0);
+  arg_1 = int(1);
+  int v = int(0);
+  sb_rw.InterlockedAdd(int(0u), int(1), v);
   int x_13 = v;
   res = x_13;
 }

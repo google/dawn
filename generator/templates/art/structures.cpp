@@ -28,6 +28,8 @@
 {% from 'art/kotlin_record_conversion.cpp' import define_kotlin_record_structure, define_kotlin_to_struct_conversion with context %}
 #include "structures.h"
 
+#include <cassert>
+
 #include <jni.h>
 #include <webgpu/webgpu.h>
 
@@ -79,9 +81,23 @@ void ToNative(JNIContext* c, JNIEnv* env, jobject obj, WGPUUncapturedErrorCallba
 }
 
 jobject ToKotlin(JNIEnv *env, const WGPUDeviceLostCallbackInfo* input) {
+    return nullptr;
 }
 
 jobject ToKotlin(JNIEnv *env, const WGPUUncapturedErrorCallbackInfo* input) {
+    return nullptr;
+}
+
+// Special-case [Nullable]StringView
+void ToNative(JNIContext* c, JNIEnv* env, jstring obj, WGPUStringView* s) {
+    *s = {c->GetStringUTFChars(obj), static_cast<size_t>(env->GetStringUTFLength(obj))};
+}
+jobject ToKotlin(JNIEnv* env, const WGPUStringView* s) {
+    if (s->data == nullptr) {
+        return nullptr;
+    }
+    assert(s->length == WGPU_STRLEN); // Strings returned from Dawn should always be null-terminated.
+    return env->NewStringUTF(s->data);
 }
 
 {% for structure in by_category['structure'] if include_structure(structure) %}

@@ -1,7 +1,7 @@
 
 RWByteAddressBuffer prevent_dce : register(u0);
 int4 subgroupAdd_28db2c() {
-  int4 res = WaveActiveSum((1).xxxx);
+  int4 res = WaveActiveSum((int(1)).xxxx);
   return res;
 }
 

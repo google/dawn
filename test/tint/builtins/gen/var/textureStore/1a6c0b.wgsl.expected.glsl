@@ -1,40 +1,6 @@
-SKIP: FAILED
+#version 460
 
-#version 310 es
-
-layout(rg32i) uniform highp writeonly iimage2DArray arg_0;
-void textureStore_1a6c0b() {
-  uvec2 arg_1 = uvec2(1u);
-  uint arg_2 = 1u;
-  ivec4 arg_3 = ivec4(1);
-  imageStore(arg_0, ivec3(uvec3(arg_1, arg_2)), arg_3);
-}
-
-vec4 vertex_main() {
-  textureStore_1a6c0b();
-  return vec4(0.0f);
-}
-
-void main() {
-  gl_PointSize = 1.0;
-  vec4 inner_result = vertex_main();
-  gl_Position = inner_result;
-  gl_Position.y = -(gl_Position.y);
-  gl_Position.z = ((2.0f * gl_Position.z) - gl_Position.w);
-  return;
-}
-error: Error parsing GLSL shader:
-ERROR: 0:3: 'image load-store format' : not supported with this profile: es
-ERROR: 0:3: '' : compilation terminated 
-ERROR: 2 compilation errors.  No code generated.
-
-
-
-#version 310 es
-precision highp float;
-precision highp int;
-
-layout(rg32i) uniform highp writeonly iimage2DArray arg_0;
+layout(binding = 0, rg32i) uniform highp iimage2DArray arg_0;
 void textureStore_1a6c0b() {
   uvec2 arg_1 = uvec2(1u);
   uint arg_2 = 1u;
@@ -50,16 +16,9 @@ void main() {
   fragment_main();
   return;
 }
-error: Error parsing GLSL shader:
-ERROR: 0:5: 'image load-store format' : not supported with this profile: es
-ERROR: 0:5: '' : compilation terminated 
-ERROR: 2 compilation errors.  No code generated.
+#version 460
 
-
-
-#version 310 es
-
-layout(rg32i) uniform highp writeonly iimage2DArray arg_0;
+layout(binding = 0, rg32i) uniform highp iimage2DArray arg_0;
 void textureStore_1a6c0b() {
   uvec2 arg_1 = uvec2(1u);
   uint arg_2 = 1u;
@@ -76,10 +35,3 @@ void main() {
   compute_main();
   return;
 }
-error: Error parsing GLSL shader:
-ERROR: 0:3: 'image load-store format' : not supported with this profile: es
-ERROR: 0:3: '' : compilation terminated 
-ERROR: 2 compilation errors.  No code generated.
-
-
-

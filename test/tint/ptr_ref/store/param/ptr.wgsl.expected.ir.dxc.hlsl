@@ -5,7 +5,7 @@ void func(int value, inout int pointer) {
 
 [numthreads(1, 1, 1)]
 void main() {
-  int i = 123;
-  func(123, i);
+  int i = int(123);
+  func(int(123), i);
 }
 

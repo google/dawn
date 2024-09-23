@@ -15,7 +15,7 @@ int select_80a9a9() {
   bool3 arg_1 = (true).xxx;
   bool3 arg_2 = (true).xxx;
   bool3 res = ((arg_2) ? (arg_1) : (arg_0));
-  return ((all((res == (false).xxx))) ? (1) : (0));
+  return ((all((res == (false).xxx))) ? (int(1)) : (int(0)));
 }
 
 void fragment_main() {

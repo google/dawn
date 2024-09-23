@@ -1,11 +1,49 @@
-SKIP: FAILED
+#version 310 es
+precision highp float;
+precision highp int;
 
-<dawn>/src/tint/lang/glsl/writer/printer/printer.cc:585 internal compiler error: Switch() matched no cases. Type: tint::core::type::Atomic
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
 
-tint executable returned error: signal: trace/BPT trap
+struct SB_RW {
+  int arg_0;
+};
+
+layout(binding = 0, std430)
+buffer tint_symbol_1_1_ssbo {
+  int tint_symbol;
+} v;
+layout(binding = 1, std430)
+buffer tint_symbol_3_1_ssbo {
+  SB_RW tint_symbol_2;
+} v_1;
+int atomicXor_c1b78c() {
+  int arg_1 = 1;
+  int res = atomicXor(v_1.tint_symbol_2.arg_0, arg_1);
+  return res;
+}
+void main() {
+  v.tint_symbol = atomicXor_c1b78c();
+}
+#version 310 es
+
+
+struct SB_RW {
+  int arg_0;
+};
+
+layout(binding = 0, std430)
+buffer tint_symbol_1_1_ssbo {
+  int tint_symbol;
+} v;
+layout(binding = 1, std430)
+buffer tint_symbol_3_1_ssbo {
+  SB_RW tint_symbol_2;
+} v_1;
+int atomicXor_c1b78c() {
+  int arg_1 = 1;
+  int res = atomicXor(v_1.tint_symbol_2.arg_0, arg_1);
+  return res;
+}
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+void main() {
+  v.tint_symbol = atomicXor_c1b78c();
+}

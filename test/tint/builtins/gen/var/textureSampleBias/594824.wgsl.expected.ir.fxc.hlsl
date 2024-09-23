@@ -5,7 +5,7 @@ SamplerState arg_1 : register(s1, space1);
 float4 textureSampleBias_594824() {
   float3 arg_2 = (1.0f).xxx;
   float arg_3 = 1.0f;
-  float4 res = arg_0.SampleBias(arg_1, arg_2, arg_3, (1).xxx);
+  float4 res = arg_0.SampleBias(arg_1, arg_2, arg_3, (int(1)).xxx);
   return res;
 }
 

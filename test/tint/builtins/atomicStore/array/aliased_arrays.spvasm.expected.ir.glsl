@@ -1,11 +1,62 @@
-SKIP: FAILED
+#version 310 es
 
-<dawn>/src/tint/lang/glsl/writer/printer/printer.cc:585 internal compiler error: Switch() matched no cases. Type: tint::core::type::Atomic
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
-
-tint executable returned error: signal: trace/BPT trap
+uint local_invocation_index_1 = 0u;
+shared uint wg[3][2][1];
+uint tint_mod_u32(uint lhs, uint rhs) {
+  uint v = (((rhs == 0u)) ? (1u) : (rhs));
+  return (lhs - ((lhs / v) * v));
+}
+uint tint_div_u32(uint lhs, uint rhs) {
+  return (lhs / (((rhs == 0u)) ? (1u) : (rhs)));
+}
+void compute_main_inner(uint local_invocation_index_2) {
+  uint idx = 0u;
+  idx = local_invocation_index_2;
+  {
+    while(true) {
+      if (!((idx < 6u))) {
+        break;
+      }
+      uint x_31 = idx;
+      uint x_33 = idx;
+      uint x_35 = idx;
+      uint v_1 = tint_div_u32(x_31, 2u);
+      uint v_2 = tint_mod_u32(x_33, 2u);
+      atomicExchange(wg[v_1][v_2][tint_mod_u32(x_35, 1u)], 0u);
+      {
+        idx = (idx + 1u);
+      }
+      continue;
+    }
+  }
+  barrier();
+  atomicExchange(wg[2][1][0], 1u);
+}
+void compute_main_1() {
+  uint x_57 = local_invocation_index_1;
+  compute_main_inner(x_57);
+}
+void compute_main_inner_1(uint local_invocation_index_1_param) {
+  {
+    uint v_3 = 0u;
+    v_3 = local_invocation_index_1_param;
+    while(true) {
+      uint v_4 = v_3;
+      if ((v_4 >= 6u)) {
+        break;
+      }
+      atomicExchange(wg[(v_4 / 2u)][(v_4 % 2u)][0u], 0u);
+      {
+        v_3 = (v_4 + 1u);
+      }
+      continue;
+    }
+  }
+  barrier();
+  local_invocation_index_1 = local_invocation_index_1_param;
+  compute_main_1();
+}
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+void main() {
+  compute_main_inner_1(gl_LocalInvocationIndex);
+}

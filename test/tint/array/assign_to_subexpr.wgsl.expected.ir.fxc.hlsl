@@ -15,14 +15,14 @@ int foo() {
   int src[4] = v;
   dst_struct.arr = src;
   int v_1[4] = v;
-  dst_array[1] = v_1;
+  dst_array[int(1)] = v_1;
   int v_2[4] = v;
   dst_ptr = v_2;
   int v_3[4] = v;
   dst_struct_ptr.arr = v_3;
   int v_4[4] = v;
-  dst_array_ptr[0] = v_4;
-  return ((dst_ptr[0] + dst_struct_ptr.arr[0]) + dst_array_ptr[0][0]);
+  dst_array_ptr[int(0)] = v_4;
+  return ((dst_ptr[int(0)] + dst_struct_ptr.arr[int(0)]) + dst_array_ptr[int(0)][int(0)]);
 }
 
 [numthreads(1, 1, 1)]

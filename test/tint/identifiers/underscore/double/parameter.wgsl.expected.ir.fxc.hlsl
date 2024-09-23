@@ -7,6 +7,6 @@ void f(int a__) {
 
 [numthreads(1, 1, 1)]
 void main() {
-  f(1);
+  f(int(1));
 }
 

@@ -45,8 +45,8 @@ void comp_main_inner(uint3 gl_GlobalInvocationID) {
   float2 cMass = (0.0f).xx;
   float2 cVel = (0.0f).xx;
   float2 colVel = (0.0f).xx;
-  int cMassCount = 0;
-  int cVelCount = 0;
+  int cMassCount = int(0);
+  int cVelCount = int(0);
   float2 pos = (0.0f).xx;
   float2 vel = (0.0f).xx;
   {
@@ -67,7 +67,7 @@ void comp_main_inner(uint3 gl_GlobalInvocationID) {
       float v_3 = distance(pos, vPos);
       if ((v_3 < asfloat(params[0u].y))) {
         cMass = (cMass + pos);
-        cMassCount = (cMassCount + 1);
+        cMassCount = (cMassCount + int(1));
       }
       float v_4 = distance(pos, vPos);
       if ((v_4 < asfloat(params[0u].z))) {
@@ -76,7 +76,7 @@ void comp_main_inner(uint3 gl_GlobalInvocationID) {
       float v_5 = distance(pos, vPos);
       if ((v_5 < asfloat(params[0u].w))) {
         cVel = (cVel + vel);
-        cVelCount = (cVelCount + 1);
+        cVelCount = (cVelCount + int(1));
       }
       {
         i = (i + 1u);
@@ -84,13 +84,13 @@ void comp_main_inner(uint3 gl_GlobalInvocationID) {
       continue;
     }
   }
-  if ((cMassCount > 0)) {
+  if ((cMassCount > int(0))) {
     float2 v_6 = cMass;
     float v_7 = float(cMassCount);
     float2 v_8 = (v_6 / float2(v_7, float(cMassCount)));
     cMass = (v_8 - vPos);
   }
-  if ((cVelCount > 0)) {
+  if ((cVelCount > int(0))) {
     float2 v_9 = cVel;
     float v_10 = float(cVelCount);
     cVel = (v_9 / float2(v_10, float(cVelCount)));

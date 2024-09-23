@@ -738,7 +738,9 @@ INSTANTIATE_TEST_SUITE_P(RenamerTestGlsl,
                              // "mediump",  // Also reserved in WGSL
                              // "namespace",  // Also reserved in WGSL
                              // "noinline",  // Also reserved in WGSL
+                             // "noncoherent",  // Reserved in WGSL
                              // "noperspective",  // Also reserved in WGSL
+                             // "non_coherent",  // Reserved in WGSL
                              "out",
                              "output",
                              // "partition",  // Also reserved in WGSL

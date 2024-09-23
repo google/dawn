@@ -15,10 +15,8 @@ SamplerState arg_1 : register(s1, space1);
 float4 textureSampleLevel_0b0a1b() {
   float2 arg_2 = (1.0f).xx;
   float arg_3 = 1.0f;
-  Texture2D<float4> v = arg_0;
-  SamplerState v_1 = arg_1;
-  float2 v_2 = arg_2;
-  float4 res = v.SampleLevel(v_1, v_2, float(arg_3), (1).xx);
+  float2 v = arg_2;
+  float4 res = arg_0.SampleLevel(arg_1, v, float(arg_3), (int(1)).xx);
   return res;
 }
 
@@ -35,15 +33,15 @@ VertexOutput vertex_main_inner() {
   VertexOutput tint_symbol = (VertexOutput)0;
   tint_symbol.pos = (0.0f).xxxx;
   tint_symbol.prevent_dce = textureSampleLevel_0b0a1b();
-  VertexOutput v_3 = tint_symbol;
-  return v_3;
+  VertexOutput v_1 = tint_symbol;
+  return v_1;
 }
 
 vertex_main_outputs vertex_main() {
-  VertexOutput v_4 = vertex_main_inner();
-  VertexOutput v_5 = v_4;
-  VertexOutput v_6 = v_4;
-  vertex_main_outputs v_7 = {v_6.prevent_dce, v_5.pos};
-  return v_7;
+  VertexOutput v_2 = vertex_main_inner();
+  VertexOutput v_3 = v_2;
+  VertexOutput v_4 = v_2;
+  vertex_main_outputs v_5 = {v_4.prevent_dce, v_3.pos};
+  return v_5;
 }
 

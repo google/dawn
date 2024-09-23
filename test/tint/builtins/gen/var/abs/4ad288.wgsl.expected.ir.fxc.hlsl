@@ -11,7 +11,7 @@ struct vertex_main_outputs {
 
 RWByteAddressBuffer prevent_dce : register(u0);
 int abs_4ad288() {
-  int arg_0 = 1;
+  int arg_0 = int(1);
   int res = abs(arg_0);
   return res;
 }

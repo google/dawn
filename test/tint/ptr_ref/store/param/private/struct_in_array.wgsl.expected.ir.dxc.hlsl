@@ -11,6 +11,6 @@ void func(inout str pointer) {
 
 [numthreads(1, 1, 1)]
 void main() {
-  func(P[2]);
+  func(P[int(2)]);
 }
 

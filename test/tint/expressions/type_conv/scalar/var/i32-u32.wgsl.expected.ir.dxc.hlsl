@@ -1,5 +1,5 @@
 
-static int u = 1;
+static int u = int(1);
 void f() {
   uint v = uint(u);
 }

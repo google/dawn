@@ -18,7 +18,7 @@ int f(S3 s3) {
 
 [numthreads(1, 1, 1)]
 void main() {
-  S3 v = {{{42}}};
+  S3 v = {{{int(42)}}};
   tint_symbol.Store(0u, asuint(f(v)));
 }
 

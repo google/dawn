@@ -34,6 +34,6 @@ void main() {
   float a1[4] = v_11;
   float a2[3][4] = v_12;
   float a3[2][3][4] = v_13;
-  s.Store(0u, asuint(((a1[0] + a2[0][0]) + a3[0][0][0])));
+  s.Store(0u, asuint(((a1[int(0)] + a2[int(0)][int(0)]) + a3[int(0)][int(0)][int(0)])));
 }
 

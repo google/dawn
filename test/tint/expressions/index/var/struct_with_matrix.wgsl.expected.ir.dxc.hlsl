@@ -6,7 +6,7 @@ struct S {
 
 float f() {
   S a = (S)0;
-  return a.n[2].y;
+  return a.n[int(2)].y;
 }
 
 [numthreads(1, 1, 1)]

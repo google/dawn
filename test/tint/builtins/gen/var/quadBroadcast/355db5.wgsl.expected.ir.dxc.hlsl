@@ -2,7 +2,7 @@
 RWByteAddressBuffer prevent_dce : register(u0);
 float3 quadBroadcast_355db5() {
   float3 arg_0 = (1.0f).xxx;
-  float3 res = QuadReadLaneAt(arg_0, 1);
+  float3 res = QuadReadLaneAt(arg_0, int(1));
   return res;
 }
 

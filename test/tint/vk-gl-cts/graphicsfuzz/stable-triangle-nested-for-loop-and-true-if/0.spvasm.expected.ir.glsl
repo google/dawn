@@ -1,6 +1,9 @@
 SKIP: FAILED
 
 #version 310 es
+precision highp float;
+precision highp int;
+
 
 struct buf0 {
   vec2 resolution;
@@ -9,13 +12,14 @@ struct buf0 {
 struct main_out {
   vec4 x_GLF_color_1;
 };
-precision highp float;
-precision highp int;
-
 
 vec4 tint_symbol = vec4(0.0f);
-uniform buf0 x_17;
+layout(binding = 0, std140)
+uniform tint_symbol_4_1_ubo {
+  buf0 tint_symbol_3;
+} v;
 vec4 x_GLF_color = vec4(0.0f);
+layout(location = 0) out vec4 tint_symbol_1_loc0_Output;
 int pointInTriangle_vf2_vf2_vf2_vf2_(inout vec2 p, inout vec2 a, inout vec2 b, inout vec2 c) {
   float x_66 = 0.0f;
   float x_67 = 0.0f;
@@ -80,7 +84,7 @@ void main_1() {
   vec2 param_7 = vec2(0.0f);
   vec2 param_8 = vec2(0.0f);
   vec2 param_9 = vec2(0.0f);
-  param_6 = (tint_symbol.xy / x_17.resolution);
+  param_6 = (tint_symbol.xy / v.tint_symbol_3.resolution);
   param_7 = vec2(0.69999998807907104492f, 0.30000001192092895508f);
   param_8 = vec2(0.5f, 0.89999997615814208984f);
   param_9 = vec2(0.10000000149011611938f, 0.40000000596046447754f);
@@ -91,14 +95,17 @@ void main_1() {
     x_GLF_color = vec4(0.0f, 0.0f, 0.0f, 1.0f);
   }
 }
-main_out main(vec4 tint_symbol_2) {
+main_out tint_symbol_1_inner(vec4 tint_symbol_2) {
   tint_symbol = tint_symbol_2;
   main_1();
   return main_out(x_GLF_color);
 }
+void main() {
+  tint_symbol_1_loc0_Output = tint_symbol_1_inner(gl_FragCoord).x_GLF_color_1;
+}
 error: Error parsing GLSL shader:
-ERROR: 0:4: 'float' : type requires declaration of default precision qualifier 
-ERROR: 0:4: '' : compilation terminated 
+ERROR: 0:52: '&' :  wrong operand types: no operation '&' exists that takes a left-hand operand of type ' temp bool' and a right operand of type ' temp bool' (or there is no acceptable conversion)
+ERROR: 0:52: '' : compilation terminated 
 ERROR: 2 compilation errors.  No code generated.
 
 

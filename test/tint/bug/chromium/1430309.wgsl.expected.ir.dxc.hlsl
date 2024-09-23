@@ -13,7 +13,7 @@ struct main_outputs {
 
 
 static frexp_result_f32 a = (frexp_result_f32)0;
-static const frexp_result_f32_1 v = {0.5f, 1};
+static const frexp_result_f32_1 v = {0.5f, int(1)};
 static frexp_result_f32_1 b = v;
 float4 main_inner() {
   return float4(a.f, b.fract, 0.0f, 0.0f);

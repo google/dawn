@@ -3,14 +3,14 @@ struct S {
 };
 
 
-static int counter = 0;
+static int counter = int(0);
 int foo() {
-  counter = (counter + 1);
+  counter = (counter + int(1));
   return counter;
 }
 
 int bar() {
-  counter = (counter + 2);
+  counter = (counter + int(2));
   return counter;
 }
 
@@ -19,7 +19,7 @@ void main() {
   S p = x;
   int4 v = p.a[foo()];
   int v_1 = bar();
-  v[v_1] = (v[v_1] + 5);
+  v[v_1] = (v[v_1] + int(5));
 }
 
 [numthreads(1, 1, 1)]

@@ -33,8 +33,8 @@ void main_inner(uint3 GlobalInvocationID) {
     lightsBuffer.Store((4u + v_8), asuint(asfloat(uniforms[1u].y)));
   }
   float4x4 M = v(96u);
-  float viewNear = (-(M[3].z) / (-1.0f + M[2].z));
-  float viewFar = (-(M[3].z) / (1.0f + M[2].z));
+  float viewNear = (-(M[int(3)].z) / (-1.0f + M[int(2)].z));
+  float viewFar = (-(M[int(3)].z) / (1.0f + M[int(2)].z));
   float4 lightPos = asfloat(lightsBuffer.Load4((0u + (uint(index) * 32u))));
   float4x4 v_9 = v(32u);
   lightPos = mul(lightPos, v_9);
@@ -45,20 +45,20 @@ void main_inner(uint3 GlobalInvocationID) {
   float4 v_11 = lightPos;
   float4 boxMax = (v_11 + float4(float3((lightRadius).xxx), 0.0f));
   float4 frustumPlanes[6] = (float4[6])0;
-  frustumPlanes[4] = float4(0.0f, 0.0f, -1.0f, viewNear);
-  frustumPlanes[5] = float4(0.0f, 0.0f, 1.0f, -(viewFar));
-  int TILE_SIZE = 16;
-  int TILE_COUNT_X = 2;
-  int TILE_COUNT_Y = 2;
+  frustumPlanes[int(4)] = float4(0.0f, 0.0f, -1.0f, viewNear);
+  frustumPlanes[int(5)] = float4(0.0f, 0.0f, 1.0f, -(viewFar));
+  int TILE_SIZE = int(16);
+  int TILE_COUNT_X = int(2);
+  int TILE_COUNT_Y = int(2);
   {
-    int y = 0;
+    int y = int(0);
     while(true) {
       if ((y < TILE_COUNT_Y)) {
       } else {
         break;
       }
       {
-        int x = 0;
+        int x = int(0);
         while(true) {
           if ((x < TILE_COUNT_X)) {
           } else {
@@ -70,12 +70,12 @@ void main_inner(uint3 GlobalInvocationID) {
           int2 v_13 = tilePixel0Idx;
           float2 v_14 = (2.0f * float2((v_13 + int2((TILE_SIZE).xx))));
           float2 ceilCoord = ((v_14 / asfloat(uniforms[10u]).xy) - (1.0f).xx);
-          float2 viewFloorCoord = float2((((-(viewNear) * floorCoord.x) - (M[2].x * viewNear)) / M[0].x), (((-(viewNear) * floorCoord.y) - (M[2].y * viewNear)) / M[1].y));
-          float2 viewCeilCoord = float2((((-(viewNear) * ceilCoord.x) - (M[2].x * viewNear)) / M[0].x), (((-(viewNear) * ceilCoord.y) - (M[2].y * viewNear)) / M[1].y));
-          frustumPlanes[0] = float4(1.0f, 0.0f, (-(viewFloorCoord.x) / viewNear), 0.0f);
-          frustumPlanes[1] = float4(-1.0f, 0.0f, (viewCeilCoord.x / viewNear), 0.0f);
-          frustumPlanes[2] = float4(0.0f, 1.0f, (-(viewFloorCoord.y) / viewNear), 0.0f);
-          frustumPlanes[3] = float4(0.0f, -1.0f, (viewCeilCoord.y / viewNear), 0.0f);
+          float2 viewFloorCoord = float2((((-(viewNear) * floorCoord.x) - (M[int(2)].x * viewNear)) / M[int(0)].x), (((-(viewNear) * floorCoord.y) - (M[int(2)].y * viewNear)) / M[int(1)].y));
+          float2 viewCeilCoord = float2((((-(viewNear) * ceilCoord.x) - (M[int(2)].x * viewNear)) / M[int(0)].x), (((-(viewNear) * ceilCoord.y) - (M[int(2)].y * viewNear)) / M[int(1)].y));
+          frustumPlanes[int(0)] = float4(1.0f, 0.0f, (-(viewFloorCoord.x) / viewNear), 0.0f);
+          frustumPlanes[int(1)] = float4(-1.0f, 0.0f, (viewCeilCoord.x / viewNear), 0.0f);
+          frustumPlanes[int(2)] = float4(0.0f, 1.0f, (-(viewFloorCoord.y) / viewNear), 0.0f);
+          frustumPlanes[int(3)] = float4(0.0f, -1.0f, (viewCeilCoord.y / viewNear), 0.0f);
           float dp = 0.0f;
           {
             uint i = 0u;
@@ -119,7 +119,7 @@ void main_inner(uint3 GlobalInvocationID) {
             }
             if (v_16) {
               {
-                x = (x + 1);
+                x = (x + int(1));
               }
               continue;
             }
@@ -129,7 +129,7 @@ void main_inner(uint3 GlobalInvocationID) {
             uint offset = v_18;
             if ((offset >= config[1u].x)) {
               {
-                x = (x + 1);
+                x = (x + int(1));
               }
               continue;
             }
@@ -138,13 +138,13 @@ void main_inner(uint3 GlobalInvocationID) {
             tileLightId.Store(((4u + v_20) + (uint(v_19) * 4u)), GlobalInvocationID[0u]);
           }
           {
-            x = (x + 1);
+            x = (x + int(1));
           }
           continue;
         }
       }
       {
-        y = (y + 1);
+        y = (y + int(1));
       }
       continue;
     }

@@ -5,13 +5,10 @@ SKIP: FAILED
 precision highp float;
 precision highp int;
 
-
-struct VertexOutput {
-  vec4 pos;
-  f16vec2 prevent_dce;
-};
-
-f16vec2 prevent_dce;
+layout(binding = 0, std430)
+buffer tint_symbol_1_1_ssbo {
+  f16vec2 tint_symbol;
+} v;
 f16vec2 fma_bf21b6() {
   f16vec2 arg_0 = f16vec2(1.0hf);
   f16vec2 arg_1 = f16vec2(1.0hf);
@@ -20,39 +17,24 @@ f16vec2 fma_bf21b6() {
   return res;
 }
 void main() {
-  prevent_dce = fma_bf21b6();
-}
-layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
-void main() {
-  prevent_dce = fma_bf21b6();
-}
-VertexOutput main() {
-  VertexOutput tint_symbol = VertexOutput(vec4(0.0f), f16vec2(0.0hf));
-  tint_symbol.pos = vec4(0.0f);
-  tint_symbol.prevent_dce = fma_bf21b6();
-  return tint_symbol;
+  v.tint_symbol = fma_bf21b6();
 }
 error: Error parsing GLSL shader:
-ERROR: 0:17: 'fma' : required extension not requested: Possible extensions include:
+ERROR: 0:14: 'fma' : required extension not requested: Possible extensions include:
 GL_EXT_gpu_shader5
 GL_OES_gpu_shader5
-ERROR: 0:17: '' : compilation terminated 
+ERROR: 0:14: '' : compilation terminated 
 ERROR: 2 compilation errors.  No code generated.
 
 
 
 #version 310 es
 #extension GL_AMD_gpu_shader_half_float: require
-precision highp float;
-precision highp int;
 
-
-struct VertexOutput {
-  vec4 pos;
-  f16vec2 prevent_dce;
-};
-
-f16vec2 prevent_dce;
+layout(binding = 0, std430)
+buffer tint_symbol_1_1_ssbo {
+  f16vec2 tint_symbol;
+} v;
 f16vec2 fma_bf21b6() {
   f16vec2 arg_0 = f16vec2(1.0hf);
   f16vec2 arg_1 = f16vec2(1.0hf);
@@ -60,32 +42,21 @@ f16vec2 fma_bf21b6() {
   f16vec2 res = fma(arg_0, arg_1, arg_2);
   return res;
 }
-void main() {
-  prevent_dce = fma_bf21b6();
-}
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
-  prevent_dce = fma_bf21b6();
-}
-VertexOutput main() {
-  VertexOutput tint_symbol = VertexOutput(vec4(0.0f), f16vec2(0.0hf));
-  tint_symbol.pos = vec4(0.0f);
-  tint_symbol.prevent_dce = fma_bf21b6();
-  return tint_symbol;
+  v.tint_symbol = fma_bf21b6();
 }
 error: Error parsing GLSL shader:
-ERROR: 0:17: 'fma' : required extension not requested: Possible extensions include:
+ERROR: 0:12: 'fma' : required extension not requested: Possible extensions include:
 GL_EXT_gpu_shader5
 GL_OES_gpu_shader5
-ERROR: 0:17: '' : compilation terminated 
+ERROR: 0:12: '' : compilation terminated 
 ERROR: 2 compilation errors.  No code generated.
 
 
 
 #version 310 es
 #extension GL_AMD_gpu_shader_half_float: require
-precision highp float;
-precision highp int;
 
 
 struct VertexOutput {
@@ -93,7 +64,7 @@ struct VertexOutput {
   f16vec2 prevent_dce;
 };
 
-f16vec2 prevent_dce;
+layout(location = 0) flat out f16vec2 vertex_main_loc0_Output;
 f16vec2 fma_bf21b6() {
   f16vec2 arg_0 = f16vec2(1.0hf);
   f16vec2 arg_1 = f16vec2(1.0hf);
@@ -101,24 +72,25 @@ f16vec2 fma_bf21b6() {
   f16vec2 res = fma(arg_0, arg_1, arg_2);
   return res;
 }
-void main() {
-  prevent_dce = fma_bf21b6();
-}
-layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
-void main() {
-  prevent_dce = fma_bf21b6();
-}
-VertexOutput main() {
+VertexOutput vertex_main_inner() {
   VertexOutput tint_symbol = VertexOutput(vec4(0.0f), f16vec2(0.0hf));
   tint_symbol.pos = vec4(0.0f);
   tint_symbol.prevent_dce = fma_bf21b6();
   return tint_symbol;
 }
+void main() {
+  VertexOutput v = vertex_main_inner();
+  gl_Position = v.pos;
+  gl_Position[1u] = -(gl_Position.y);
+  gl_Position[2u] = ((2.0f * gl_Position.z) - gl_Position.w);
+  vertex_main_loc0_Output = v.prevent_dce;
+  gl_PointSize = 1.0f;
+}
 error: Error parsing GLSL shader:
-ERROR: 0:17: 'fma' : required extension not requested: Possible extensions include:
+ERROR: 0:15: 'fma' : required extension not requested: Possible extensions include:
 GL_EXT_gpu_shader5
 GL_OES_gpu_shader5
-ERROR: 0:17: '' : compilation terminated 
+ERROR: 0:15: '' : compilation terminated 
 ERROR: 2 compilation errors.  No code generated.
 
 

@@ -1,7 +1,7 @@
 
 void f() {
   {
-    int i = 0;
+    int i = int(0);
     while(true) {
       if (false) {
       } else {

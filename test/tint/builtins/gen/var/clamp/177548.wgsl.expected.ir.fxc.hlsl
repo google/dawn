@@ -8,7 +8,7 @@ struct vertex_main_outputs {
 
 
 void clamp_177548() {
-  int2 res = (1).xx;
+  int2 res = (int(1)).xx;
 }
 
 void fragment_main() {

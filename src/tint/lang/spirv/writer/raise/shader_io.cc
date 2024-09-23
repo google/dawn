@@ -115,7 +115,7 @@ struct StateImpl : core::ir::transform::ShaderIOBackendState {
             auto* store_type = io.type;
             if (config.polyfill_f16_io) {
                 if (store_type->DeepestElement()->Is<core::type::F16>()) {
-                    store_type = ty.match_width(ty.f32(), io.type);
+                    store_type = ty.MatchWidth(ty.f32(), io.type);
                 }
             }
 

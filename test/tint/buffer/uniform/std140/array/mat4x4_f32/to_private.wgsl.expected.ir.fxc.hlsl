@@ -37,9 +37,9 @@ ary_ret v_4(uint start_byte_offset) {
 void f() {
   float4x4 v_8[4] = v_4(0u);
   p = v_8;
-  p[1] = v(128u);
-  p[1][0] = asfloat(u[1u]).ywxz;
-  p[1][0][0u] = asfloat(u[1u].x);
-  s.Store(0u, asuint(p[1][0].x));
+  p[int(1)] = v(128u);
+  p[int(1)][int(0)] = asfloat(u[1u]).ywxz;
+  p[int(1)][int(0)][0u] = asfloat(u[1u].x);
+  s.Store(0u, asuint(p[int(1)][int(0)].x));
 }
 

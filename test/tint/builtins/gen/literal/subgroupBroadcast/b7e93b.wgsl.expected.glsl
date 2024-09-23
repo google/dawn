@@ -48,3 +48,5 @@ Failed to generate: <dawn>/test/tint/builtins/gen/literal/subgroupBroadcast/b7e9
 enable subgroups;
        ^^^^^^^^^
 
+
+tint executable returned error: exit status 1

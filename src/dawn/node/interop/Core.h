@@ -572,6 +572,8 @@ class Converter<UndefinedType> {
     static Napi::Value ToJS(Napi::Env, UndefinedType);
 };
 
+std::ostream& operator<<(std::ostream& o, const UndefinedType&);
+
 template <typename T>
 class Converter<Interface<T>> {
   public:

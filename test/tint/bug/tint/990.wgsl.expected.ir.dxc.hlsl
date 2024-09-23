@@ -1,6 +1,6 @@
 
 void f() {
-  int i = 0;
+  int i = int(0);
   {
     int p = i;
     while(true) {

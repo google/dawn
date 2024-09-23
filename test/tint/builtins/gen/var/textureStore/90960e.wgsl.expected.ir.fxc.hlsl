@@ -1,7 +1,7 @@
 
 RWTexture1D<float4> arg_0 : register(u0, space1);
 void textureStore_90960e() {
-  int arg_1 = 1;
+  int arg_1 = int(1);
   float4 arg_2 = (1.0f).xxxx;
   arg_0[arg_1] = arg_2;
 }

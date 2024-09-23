@@ -2,6 +2,7 @@ SKIP: FAILED
 
 #version 310 es
 
+
 struct frexp_result_vec2_f32 {
   vec2 fract;
   ivec2 exp;
@@ -15,9 +16,9 @@ void main() {
   ivec2 tint_symbol_3 = res.exp;
 }
 error: Error parsing GLSL shader:
-ERROR: 0:11: 'frexp' : no matching overloaded function found 
-ERROR: 0:11: '=' :  cannot convert from ' const float' to ' temp structure{ global highp 2-component vector of float fract,  global highp 2-component vector of int exp}'
-ERROR: 0:11: '' : compilation terminated 
+ERROR: 0:12: 'frexp' : no matching overloaded function found 
+ERROR: 0:12: '=' :  cannot convert from ' const float' to ' temp structure{ global highp 2-component vector of float fract,  global highp 2-component vector of int exp}'
+ERROR: 0:12: '' : compilation terminated 
 ERROR: 3 compilation errors.  No code generated.
 
 

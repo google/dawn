@@ -882,6 +882,21 @@ TEST_F(ResolverValueConstructorValidationTest, Array_TooManyElements) {
               "found 5");
 }
 
+TEST_F(ResolverValueConstructorValidationTest, Array_ExcessiveNumberOfElements) {
+    // array<i32, 40000u>(0i, 2i, 3i, ..., 39999i);
+    SetSource(Source::Location({12, 34}));
+    Vector<const ast::IntLiteralExpression*, 40000> elements;
+    for (uint32_t i = 0; i < 40000; i++) {
+        elements.Push(Expr(i32(i)));
+    }
+    auto* tc = Call<array<i32, 40000>>(std::move(elements));
+    WrapInFunction(tc);
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(),
+              "12:34 error: array constructor has excessive number of elements (>32767)");
+}
+
 TEST_F(ResolverValueConstructorValidationTest, Array_Runtime) {
     // array<i32>(1i);
     auto* tc = Call<array<i32>>(Source{{12, 34}}, Expr(1_i));

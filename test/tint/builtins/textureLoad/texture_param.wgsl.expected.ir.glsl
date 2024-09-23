@@ -1,11 +1,49 @@
-SKIP: FAILED
+#version 310 es
 
-<dawn>/src/tint/lang/glsl/writer/printer/printer.cc:1116 internal compiler error: TINT_UNREACHABLE unhandled core builtin: textureLoad
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
+uniform highp isampler2D arg_0;
+ivec4 textureLoad2d(highp isampler2D tint_symbol, ivec2 coords, int level) {
+  ivec2 v = ivec2(coords);
+  return texelFetch(tint_symbol, v, int(level));
+}
+void doTextureLoad() {
+  ivec4 res = textureLoad2d(arg_0, ivec2(0), 0);
+}
+vec4 vertex_main_inner() {
+  doTextureLoad();
+  return vec4(0.0f);
+}
+void main() {
+  gl_Position = vertex_main_inner();
+  gl_Position[1u] = -(gl_Position.y);
+  gl_Position[2u] = ((2.0f * gl_Position.z) - gl_Position.w);
+  gl_PointSize = 1.0f;
+}
+#version 310 es
+precision highp float;
+precision highp int;
 
-tint executable returned error: signal: trace/BPT trap
+uniform highp isampler2D arg_0;
+ivec4 textureLoad2d(highp isampler2D tint_symbol, ivec2 coords, int level) {
+  ivec2 v = ivec2(coords);
+  return texelFetch(tint_symbol, v, int(level));
+}
+void doTextureLoad() {
+  ivec4 res = textureLoad2d(arg_0, ivec2(0), 0);
+}
+void main() {
+  doTextureLoad();
+}
+#version 310 es
+
+uniform highp isampler2D arg_0;
+ivec4 textureLoad2d(highp isampler2D tint_symbol, ivec2 coords, int level) {
+  ivec2 v = ivec2(coords);
+  return texelFetch(tint_symbol, v, int(level));
+}
+void doTextureLoad() {
+  ivec4 res = textureLoad2d(arg_0, ivec2(0), 0);
+}
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+void main() {
+  doTextureLoad();
+}

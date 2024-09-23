@@ -4,11 +4,9 @@ TextureCubeArray arg_0 : register(t0, space1);
 SamplerState arg_1 : register(s1, space1);
 float textureSample_c2f4e8() {
   float3 arg_2 = (1.0f).xxx;
-  int arg_3 = 1;
-  TextureCubeArray v = arg_0;
-  SamplerState v_1 = arg_1;
-  float3 v_2 = arg_2;
-  float res = v.Sample(v_1, float4(v_2, float(arg_3)));
+  int arg_3 = int(1);
+  float3 v = arg_2;
+  float res = arg_0.Sample(arg_1, float4(v, float(arg_3)));
   return res;
 }
 

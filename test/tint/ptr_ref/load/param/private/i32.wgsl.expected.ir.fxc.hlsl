@@ -1,5 +1,5 @@
 
-static int P = 0;
+static int P = int(0);
 int func(inout int pointer) {
   return pointer;
 }

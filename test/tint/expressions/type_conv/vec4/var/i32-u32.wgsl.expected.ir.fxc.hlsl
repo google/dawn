@@ -1,5 +1,5 @@
 
-static int4 u = (1).xxxx;
+static int4 u = (int(1)).xxxx;
 void f() {
   uint4 v = uint4(u);
 }

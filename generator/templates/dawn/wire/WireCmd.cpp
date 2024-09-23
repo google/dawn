@@ -736,8 +736,8 @@ WireResult DeserializeChainedStruct(WGPUChainedStructOut** outChainNext,
 
 // Manually define serialization and deserialization for WGPUStringView because
 // it has a special encoding where:
-//  { .data = nullptr, .length = SIZE_MAX }  --> nil
-//  { .data = non-null, .length = SIZE_MAX } --> null-terminated, use strlen
+//  { .data = nullptr, .length = WGPU_STRLEN }  --> nil
+//  { .data = non-null, .length = WGPU_STRLEN } --> null-terminated, use strlen
 //  { .data = ..., .length = 0 }             --> ""
 //  { .data = ..., .length > 0 }             --> string of size `length`
 struct WGPUStringViewTransfer {
@@ -747,7 +747,7 @@ struct WGPUStringViewTransfer {
 
 size_t WGPUStringViewGetExtraRequiredSize(const WGPUStringView& record) {
     size_t size = record.length;
-    if (size == SIZE_MAX) {
+    if (size == WGPU_STRLEN) {
         // This is a null-terminated string, or it's nil.
         size = record.data ? std::strlen(record.data) : 0;
     }
@@ -767,7 +767,7 @@ WireResult WGPUStringViewSerialize(
         transfer->length = length;
         return WireResult::Success;
     }
-    if (length == SIZE_MAX) {
+    if (length == WGPU_STRLEN) {
         length = std::strlen(record.data);
     }
     if (length > 0) {
@@ -788,12 +788,12 @@ WireResult WGPUStringViewDeserialize(
     bool has_data = transfer->has_data;
     uint64_t length = transfer->length;
 
-    if (length > SIZE_MAX) {
+    if (length > WGPU_STRLEN) {
         return WireResult::FatalError;
     }
     if (!has_data) {
         record->data = nullptr;
-        if (length != 0 && length != SIZE_MAX) {
+        if (length != 0 && length != WGPU_STRLEN) {
             // Invalid string.
             return WireResult::FatalError;
         }

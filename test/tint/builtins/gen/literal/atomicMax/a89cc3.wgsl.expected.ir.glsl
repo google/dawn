@@ -1,11 +1,22 @@
-SKIP: FAILED
+#version 310 es
 
-<dawn>/src/tint/lang/glsl/writer/printer/printer.cc:585 internal compiler error: Switch() matched no cases. Type: tint::core::type::Atomic
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
-
-tint executable returned error: signal: trace/BPT trap
+layout(binding = 0, std430)
+buffer tint_symbol_1_1_ssbo {
+  int tint_symbol;
+} v;
+shared int arg_0;
+int atomicMax_a89cc3() {
+  int res = atomicMax(arg_0, 1);
+  return res;
+}
+void compute_main_inner(uint tint_local_index) {
+  if ((tint_local_index == 0u)) {
+    atomicExchange(arg_0, 0);
+  }
+  barrier();
+  v.tint_symbol = atomicMax_a89cc3();
+}
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+void main() {
+  compute_main_inner(gl_LocalInvocationIndex);
+}

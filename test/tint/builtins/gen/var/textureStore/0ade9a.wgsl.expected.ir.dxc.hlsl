@@ -4,10 +4,9 @@ void textureStore_0ade9a() {
   uint2 arg_1 = (1u).xx;
   uint arg_2 = 1u;
   uint4 arg_3 = (1u).xxxx;
-  RWTexture2DArray<uint4> v = arg_0;
-  uint2 v_1 = arg_1;
-  uint4 v_2 = arg_3;
-  v[uint3(v_1, uint(arg_2))] = v_2;
+  uint2 v = arg_1;
+  uint4 v_1 = arg_3;
+  arg_0[uint3(v, uint(arg_2))] = v_1;
 }
 
 void fragment_main() {

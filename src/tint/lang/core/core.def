@@ -230,10 +230,13 @@ enum attribute {
 
 // These are parameter usages which show up in other def files but not in core.def.
 enum usages {
+  base
+  bits
   depth
   compare_value
   elements
   height
+  insert
   level
   location
   num_levels

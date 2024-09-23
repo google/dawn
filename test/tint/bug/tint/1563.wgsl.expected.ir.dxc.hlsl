@@ -1,6 +1,6 @@
 
 float foo() {
-  int oob = 99;
+  int oob = int(99);
   float b = (0.0f).xxxx[min(uint(oob), 3u)];
   float4 v = (0.0f).xxxx;
   v[min(uint(oob), 3u)] = b;

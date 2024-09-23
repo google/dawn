@@ -1,11 +1,11 @@
-SKIP: FAILED
+#version 310 es
+#extension GL_AMD_gpu_shader_half_float: require
 
-<dawn>/src/tint/lang/glsl/writer/printer/printer.cc:819 internal compiler error: Switch() matched no cases. Type: tint::core::ir::Bitcast
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
-
-tint executable returned error: signal: trace/BPT trap
+uint tint_bitcast_from_f16(f16vec2 src) {
+  return uint(packFloat2x16(src));
+}
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+void main() {
+  f16vec2 a = f16vec2(1.0hf, 2.0hf);
+  uint b = tint_bitcast_from_f16(a);
+}

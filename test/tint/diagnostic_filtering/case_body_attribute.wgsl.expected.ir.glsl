@@ -12,7 +12,7 @@ SKIP: FAILED
   switch (i32(x)) {
               ^
 
-<dawn>/src/tint/lang/glsl/writer/printer/printer.cc:585 internal compiler error: Switch() matched no cases. Type: tint::core::type::Sampler
+<dawn>/src/tint/lang/glsl/writer/printer/printer.cc:1451 internal compiler error: TINT_UNREACHABLE unhandled core builtin: textureSample
 ********************************************************************
 *  The tint shader compiler has encountered an unexpected error.   *
 *                                                                  *

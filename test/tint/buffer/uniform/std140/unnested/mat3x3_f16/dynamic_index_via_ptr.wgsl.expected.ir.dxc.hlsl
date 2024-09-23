@@ -2,9 +2,9 @@
 cbuffer cbuffer_m : register(b0) {
   uint4 m[2];
 };
-static int counter = 0;
+static int counter = int(0);
 int i() {
-  counter = (counter + 1);
+  counter = (counter + int(1));
   return counter;
 }
 

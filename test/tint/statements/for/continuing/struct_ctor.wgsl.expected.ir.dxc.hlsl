@@ -1,14 +1,14 @@
 
 void f() {
   {
-    int i = 0;
+    int i = int(0);
     while(true) {
       if (false) {
       } else {
         break;
       }
       {
-        i = (i + 1);
+        i = (i + int(1));
       }
       continue;
     }

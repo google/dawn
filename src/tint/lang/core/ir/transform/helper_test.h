@@ -51,7 +51,7 @@ class TransformTestBase : public BASE {
     template <typename TRANSFORM, typename... ARGS>
     void Run(TRANSFORM&& transform_func, ARGS&&... args) {
         // Run the transform.
-        auto result = transform_func(mod, args...);
+        auto result = transform_func(mod, std::forward<ARGS>(args)...);
         EXPECT_EQ(result, Success);
         if (result != Success) {
             return;

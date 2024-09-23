@@ -142,8 +142,8 @@ TEST_F(HlslWriterTest, AccessStoreVectorElementConstantIndex) {
     ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
     EXPECT_EQ(output_.hlsl, R"(
 void foo() {
-  int4 vec = (0).xxxx;
-  vec[1u] = 42;
+  int4 vec = (int(0)).xxxx;
+  vec[1u] = int(42);
 }
 
 [numthreads(1, 1, 1)]
@@ -166,8 +166,8 @@ TEST_F(HlslWriterTest, AccessStoreVectorElementDynamicIndex) {
     ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
     EXPECT_EQ(output_.hlsl, R"(
 void foo(int idx) {
-  int4 vec = (0).xxxx;
-  vec[min(uint(idx), 3u)] = 42;
+  int4 vec = (int(0)).xxxx;
+  vec[min(uint(idx), 3u)] = int(42);
 }
 
 [numthreads(1, 1, 1)]
@@ -723,11 +723,11 @@ TEST_F(HlslWriterTest, AccessComplexDynamicAccessChain) {
     EXPECT_EQ(output_.hlsl, R"(
 RWByteAddressBuffer sb : register(u0);
 void foo() {
-  int i = 4;
+  int i = int(4);
   int v = i;
   uint j = 1u;
   uint v_1 = j;
-  int k = 2;
+  int k = int(2);
   int v_2 = k;
   uint v_3 = 0u;
   sb.GetDimensions(v_3);

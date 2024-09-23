@@ -142,7 +142,7 @@ struct State {
 
                 // Select either the RHS or a constant one value if the RHS is zero.
                 // If this is a signed operation, we also check for `INT_MIN / -1`.
-                auto* bool_ty = ty.match_width(ty.bool_(), result_ty);
+                auto* bool_ty = ty.MatchWidth(ty.bool_(), result_ty);
                 auto* cond = b.Equal(bool_ty, rhs, zero);
                 if (is_signed) {
                     auto* lowest = b.MatchWidth(i32::Lowest(), result_ty);

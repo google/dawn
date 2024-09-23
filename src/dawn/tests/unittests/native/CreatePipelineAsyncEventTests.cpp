@@ -78,8 +78,14 @@ class CreatePipelineAsyncEventTests : public DawnMockTest {
 // Verify CreateRenderPipelineAsync and the internal CreateRenderPipelineAsyncEvent behavior
 // on creating compute pipeline with validation error.
 TEST_F(CreatePipelineAsyncEventTests, InitializationValidationErrorInCreateRenderPipelineAsync) {
+    wgpu::DepthStencilState ds = {};
+    ds.format = wgpu::TextureFormat::Depth32Float;
+    ds.depthWriteEnabled = wgpu::OptionalBool::True;
+    ds.depthCompare = wgpu::CompareFunction::Always;
+
     wgpu::RenderPipelineDescriptor desc = {};
     desc.vertex.module = utils::CreateShaderModule(device, kVertexShader.data());
+    desc.depthStencil = &ds;
     Ref<RenderPipelineMock> renderPipelineMock =
         RenderPipelineMock::Create(mDeviceMock, FromCppAPI(&desc));
 
@@ -103,8 +109,14 @@ TEST_F(CreatePipelineAsyncEventTests, InitializationValidationErrorInCreateRende
 // Verify CreateComputePipelineAsync and the internal CreateComputePipelineAsyncEvent behavior
 // on creating compute pipeline with internal error.
 TEST_F(CreatePipelineAsyncEventTests, InitializationInternalErrorInCreateRenderPipelineAsync) {
+    wgpu::DepthStencilState ds = {};
+    ds.format = wgpu::TextureFormat::Depth32Float;
+    ds.depthWriteEnabled = wgpu::OptionalBool::True;
+    ds.depthCompare = wgpu::CompareFunction::Always;
+
     wgpu::RenderPipelineDescriptor desc = {};
     desc.vertex.module = utils::CreateShaderModule(device, kVertexShader.data());
+    desc.depthStencil = &ds;
     Ref<RenderPipelineMock> renderPipelineMock =
         RenderPipelineMock::Create(mDeviceMock, FromCppAPI(&desc));
 
@@ -128,8 +140,14 @@ TEST_F(CreatePipelineAsyncEventTests, InitializationInternalErrorInCreateRenderP
 // Test that a long async task's execution won't extend to after the device is dropped.
 // Device dropping should wait for that task to finish.
 TEST_F(CreatePipelineAsyncEventTests, LongAsyncTaskFinishesBeforeDeviceIsDropped) {
+    wgpu::DepthStencilState ds = {};
+    ds.format = wgpu::TextureFormat::Depth32Float;
+    ds.depthWriteEnabled = wgpu::OptionalBool::True;
+    ds.depthCompare = wgpu::CompareFunction::Always;
+
     wgpu::RenderPipelineDescriptor desc = {};
     desc.vertex.module = utils::CreateShaderModule(device, kVertexShader.data());
+    desc.depthStencil = &ds;
     Ref<RenderPipelineMock> renderPipelineMock =
         RenderPipelineMock::Create(mDeviceMock, FromCppAPI(&desc));
 

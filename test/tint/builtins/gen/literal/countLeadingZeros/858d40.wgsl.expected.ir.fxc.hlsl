@@ -11,7 +11,7 @@ struct vertex_main_outputs {
 
 RWByteAddressBuffer prevent_dce : register(u0);
 int2 countLeadingZeros_858d40() {
-  int2 res = (31).xx;
+  int2 res = (int(31)).xx;
   return res;
 }
 

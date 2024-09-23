@@ -830,6 +830,7 @@ source_set("sources") {
       "vulkan/SwapChainVk.h",
       "vulkan/TextureVk.cpp",
       "vulkan/TextureVk.h",
+      "vulkan/UniqueVkHandle.h",
       "vulkan/UtilsVulkan.cpp",
       "vulkan/UtilsVulkan.h",
       "vulkan/VulkanError.cpp",

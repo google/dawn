@@ -42,7 +42,7 @@ Function& Function::operator=(const Function& other) = default;
 
 Function::~Function() = default;
 
-void Function::iterate(std::function<void(const Instruction&)> cb) const {
+void Function::Iterate(std::function<void(const Instruction&)> cb) const {
     cb(declaration_);
 
     for (const auto& param : params_) {

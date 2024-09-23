@@ -744,9 +744,6 @@ TEST_P(MultithreadEncodingTests, RenderPassEncodersInParallel) {
 
 // Test that encoding render passes that resolve to a mip level in parallel should work
 TEST_P(MultithreadEncodingTests, RenderPassEncoders_ResolveToMipLevelOne_InParallel) {
-    // TODO(dawn:462): Issue in the D3D12 validation layers.
-    DAWN_SUPPRESS_TEST_IF(IsD3D12() && IsBackendValidationEnabled());
-
     constexpr uint32_t kRTSize = 16;
     constexpr uint32_t kNumThreads = 10;
 

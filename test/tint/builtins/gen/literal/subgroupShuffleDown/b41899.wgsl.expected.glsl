@@ -48,3 +48,5 @@ Failed to generate: <dawn>/test/tint/builtins/gen/literal/subgroupShuffleDown/b4
 enable subgroups;
        ^^^^^^^^^
 
+
+tint executable returned error: exit status 1

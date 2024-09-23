@@ -30,7 +30,7 @@
 #include "dawn/common/Platform.h"
 
 #if DAWN_PLATFORM_IS(WINDOWS)
-#include <Windows.h>
+#include "dawn/common/windows_with_undefs.h"
 #elif DAWN_PLATFORM_IS(POSIX)
 #include <unistd.h>
 #else

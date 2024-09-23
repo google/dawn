@@ -1,13 +1,13 @@
 
 int c(int z) {
-  int a = (1 + z);
-  a = (a + 2);
+  int a = (int(1) + z);
+  a = (a + int(2));
   return a;
 }
 
 void b() {
-  int b_1 = c(2);
-  int v = c(3);
+  int b_1 = c(int(2));
+  int v = c(int(3));
   b_1 = (b_1 + v);
 }
 

@@ -28,6 +28,9 @@
 #ifndef SRC_TINT_LANG_HLSL_WRITER_RAISE_SHADER_IO_H_
 #define SRC_TINT_LANG_HLSL_WRITER_RAISE_SHADER_IO_H_
 
+#include <optional>
+
+#include "src/tint/api/common/binding_point.h"
 #include "src/tint/utils/result/result.h"
 
 // Forward declarations.
@@ -37,10 +40,17 @@ class Module;
 
 namespace tint::hlsl::writer::raise {
 
+struct ShaderIOConfig {
+    /// The binding point to use for the num_workgroups generated uniform buffer. If it contains
+    /// no value, a free binding point will be used. Specifically, binding 0 of the largest used
+    /// group plus 1 is used if at least one resource is bound, otherwise group 0 binding 0 is used.
+    std::optional<BindingPoint> num_workgroups_binding;
+};
+
 /// ShaderIO is a transform that prepares entry point inputs and outputs for HLSL codegen.
 /// @param module the module to transform
 /// @returns success or failure
-Result<SuccessType> ShaderIO(core::ir::Module& module);
+Result<SuccessType> ShaderIO(core::ir::Module& module, const ShaderIOConfig& config);
 
 }  // namespace tint::hlsl::writer::raise
 

@@ -255,8 +255,8 @@ class Manager final {
     /// @param el_ty the type to extend
     /// @param match the type to match the component count of
     /// @returns a type with the same number of vector components as `match`
-    const core::type::Type* match_width(const core::type::Type* el_ty,
-                                        const core::type::Type* match);
+    const core::type::Type* MatchWidth(const core::type::Type* el_ty,
+                                       const core::type::Type* match);
 
     /// @tparam T the element type
     /// @tparam N the vector width

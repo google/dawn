@@ -2743,23 +2743,26 @@ void ASTPrinter::EmitType(StringStream& out,
                     out << "writeonly ";
                     break;
                 case core::Access::kReadWrite: {
-                    // ESSL 3.1 SPEC (chapter 4.9, Memory Access Qualifiers):
-                    // Except for image variables qualified with the format qualifiers r32f, r32i,
-                    // and r32ui, image variables must specify either memory qualifier readonly or
-                    // the memory qualifier writeonly.
-                    switch (storage->TexelFormat()) {
-                        case core::TexelFormat::kR32Float:
-                        case core::TexelFormat::kR32Sint:
-                        case core::TexelFormat::kR32Uint:
-                            break;
-                        default: {
-                            // TODO(dawn:1972): Fix the tests that contain read-write storage
-                            // textures with illegal formats.
-                            out << "writeonly ";
-                            break;
+                    if (version_.IsES()) {
+                        // ESSL 3.1 SPEC (chapter 4.9, Memory Access Qualifiers):
+                        // Except for image variables qualified with the format qualifiers r32f,
+                        // r32i, and r32ui, image variables must specify either memory qualifier
+                        // readonly or the memory qualifier writeonly.
+                        switch (storage->TexelFormat()) {
+                            case core::TexelFormat::kR32Float:
+                            case core::TexelFormat::kR32Sint:
+                            case core::TexelFormat::kR32Uint:
+                                break;
+                            default: {
+                                // TODO(dawn:1972): Fix the tests that contain read-write storage
+                                // textures with illegal formats.
+                                out << "writeonly ";
+                                break;
+                            }
                         }
                     }
-                } break;
+                    break;
+                }
                 default:
                     TINT_UNREACHABLE() << "unexpected storage texture access " << storage->Access();
             }

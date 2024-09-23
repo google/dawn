@@ -48,3 +48,5 @@ Failed to generate: <dawn>/test/tint/builtins/gen/literal/quadBroadcast/e6d948.w
 enable subgroups;
        ^^^^^^^^^
 
+
+tint executable returned error: exit status 1

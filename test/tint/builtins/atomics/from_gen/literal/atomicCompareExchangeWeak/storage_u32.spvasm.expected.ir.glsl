@@ -1,11 +1,71 @@
-SKIP: FAILED
+#version 310 es
+precision highp float;
+precision highp int;
 
-<dawn>/src/tint/lang/glsl/writer/printer/printer.cc:585 internal compiler error: Switch() matched no cases. Type: tint::core::type::Atomic
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
 
-tint executable returned error: signal: trace/BPT trap
+struct SB_RW_atomic {
+  uint arg_0;
+};
+
+struct tint_symbol {
+  uint old_value;
+  bool exchanged;
+};
+
+struct atomic_compare_exchange_result_u32 {
+  uint old_value;
+  bool exchanged;
+};
+
+layout(binding = 0, std430)
+buffer tint_symbol_2_1_ssbo {
+  SB_RW_atomic tint_symbol_1;
+} v;
+void atomicCompareExchangeWeak_63d8e6() {
+  tint_symbol res = tint_symbol(0u, false);
+  uint v_1 = atomicCompSwap(v.tint_symbol_1.arg_0, 1u, 1u);
+  uint old_value_1 = atomic_compare_exchange_result_u32(v_1, (v_1 == 1u)).old_value;
+  uint x_17 = old_value_1;
+  res = tint_symbol(x_17, (x_17 == 1u));
+}
+void fragment_main_1() {
+  atomicCompareExchangeWeak_63d8e6();
+}
+void main() {
+  fragment_main_1();
+}
+#version 310 es
+
+
+struct SB_RW_atomic {
+  uint arg_0;
+};
+
+struct tint_symbol {
+  uint old_value;
+  bool exchanged;
+};
+
+struct atomic_compare_exchange_result_u32 {
+  uint old_value;
+  bool exchanged;
+};
+
+layout(binding = 0, std430)
+buffer tint_symbol_2_1_ssbo {
+  SB_RW_atomic tint_symbol_1;
+} v;
+void atomicCompareExchangeWeak_63d8e6() {
+  tint_symbol res = tint_symbol(0u, false);
+  uint v_1 = atomicCompSwap(v.tint_symbol_1.arg_0, 1u, 1u);
+  uint old_value_1 = atomic_compare_exchange_result_u32(v_1, (v_1 == 1u)).old_value;
+  uint x_17 = old_value_1;
+  res = tint_symbol(x_17, (x_17 == 1u));
+}
+void compute_main_1() {
+  atomicCompareExchangeWeak_63d8e6();
+}
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+void main() {
+  compute_main_1();
+}
