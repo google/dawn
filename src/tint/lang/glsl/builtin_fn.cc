@@ -82,6 +82,18 @@ const char* str(BuiltinFn i) {
             return "imageLoad";
         case BuiltinFn::kImageStore:
             return "imageStore";
+        case BuiltinFn::kLessThan:
+            return "lessThan";
+        case BuiltinFn::kLessThanEqual:
+            return "lessThanEqual";
+        case BuiltinFn::kGreaterThan:
+            return "greaterThan";
+        case BuiltinFn::kGreaterThanEqual:
+            return "greaterThanEqual";
+        case BuiltinFn::kEqual:
+            return "equal";
+        case BuiltinFn::kNotEqual:
+            return "notEqual";
     }
     return "<unknown>";
 }

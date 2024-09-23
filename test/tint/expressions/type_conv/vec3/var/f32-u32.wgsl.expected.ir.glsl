@@ -3,12 +3,14 @@
 vec3 u = vec3(1.0f);
 uvec3 tint_v3f32_to_v3u32(vec3 value) {
   uvec3 v_1 = uvec3(value);
-  uint v_2 = (((value >= vec3(0.0f)).x) ? (v_1.x) : (uvec3(0u).x));
-  uint v_3 = (((value >= vec3(0.0f)).y) ? (v_1.y) : (uvec3(0u).y));
-  uvec3 v_4 = uvec3(v_2, v_3, (((value >= vec3(0.0f)).z) ? (v_1.z) : (uvec3(0u).z)));
-  uint v_5 = (((value <= vec3(4294967040.0f)).x) ? (v_4.x) : (uvec3(4294967295u).x));
-  uint v_6 = (((value <= vec3(4294967040.0f)).y) ? (v_4.y) : (uvec3(4294967295u).y));
-  return uvec3(v_5, v_6, (((value <= vec3(4294967040.0f)).z) ? (v_4.z) : (uvec3(4294967295u).z)));
+  bvec3 v_2 = greaterThanEqual(value, vec3(0.0f));
+  uint v_3 = ((v_2.x) ? (v_1.x) : (uvec3(0u).x));
+  uint v_4 = ((v_2.y) ? (v_1.y) : (uvec3(0u).y));
+  uvec3 v_5 = uvec3(v_3, v_4, ((v_2.z) ? (v_1.z) : (uvec3(0u).z)));
+  bvec3 v_6 = lessThanEqual(value, vec3(4294967040.0f));
+  uint v_7 = ((v_6.x) ? (v_5.x) : (uvec3(4294967295u).x));
+  uint v_8 = ((v_6.y) ? (v_5.y) : (uvec3(4294967295u).y));
+  return uvec3(v_7, v_8, ((v_6.z) ? (v_5.z) : (uvec3(4294967295u).z)));
 }
 void f() {
   uvec3 v = tint_v3f32_to_v3u32(u);

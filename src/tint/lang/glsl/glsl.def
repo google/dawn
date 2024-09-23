@@ -43,6 +43,7 @@ import "src/tint/lang/core/texel_format.def"
 // Types                                                                      //
 ////////////////////////////////////////////////////////////////////////////////
 
+type bool
 type f16
 type f32
 type i32
@@ -80,6 +81,8 @@ type texture_storage_3d<F: texel_format, A: access>
 
 match iu32: i32 | u32
 match fiu32: f32 | i32 | u32
+match fiu32_f16: f32 | i32 | u32 | f16
+match fiu32_f16_bool: f32 | i32 | u32 | f16 | bool
 
 match read_write: access.read_write
 match readable
@@ -267,3 +270,10 @@ implicit(C: iu32) fn imageStore(texture: texture_storage_2d_array<i32_texel_form
 implicit(C: iu32) fn imageStore(texture: texture_storage_2d_array<u32_texel_format, writable>,
                                 coords: vec3<C>,
                                 value: vec4<u32>)
+
+implicit(T: fiu32_f16 N: num) fn lessThan(vec<N, T>, vec<N, T>) -> vec<N, bool>
+implicit(T: fiu32_f16 N: num) fn lessThanEqual(vec<N, T>, vec<N, T>) -> vec<N, bool>
+implicit(T: fiu32_f16 N: num) fn greaterThan(vec<N, T>, vec<N, T>) -> vec<N, bool>
+implicit(T: fiu32_f16 N: num) fn greaterThanEqual(vec<N, T>, vec<N, T>) -> vec<N, bool>
+implicit(T: fiu32_f16_bool N: num) fn equal(vec<N, T>, vec<N, T>) -> vec<N, bool>
+implicit(T: fiu32_f16_bool N: num) fn notEqual(vec<N, T>, vec<N, T>) -> vec<N, bool>

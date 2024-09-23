@@ -65,6 +65,16 @@ struct State {
                         }
                         break;
                     }
+                    case core::BinaryOp::kEqual:
+                    case core::BinaryOp::kNotEqual:
+                    case core::BinaryOp::kLessThan:
+                    case core::BinaryOp::kGreaterThan:
+                    case core::BinaryOp::kLessThanEqual:
+                    case core::BinaryOp::kGreaterThanEqual:
+                        if (!binary->LHS()->Type()->Is<core::type::Scalar>()) {
+                            binary_worklist.Push(binary);
+                        }
+                        break;
                     default:
                         break;
                 }
@@ -79,10 +89,49 @@ struct State {
                 case core::BinaryOp::kOr:
                     BitwiseBoolean(binary);
                     break;
+                case core::BinaryOp::kEqual:
+                case core::BinaryOp::kNotEqual:
+                case core::BinaryOp::kLessThan:
+                case core::BinaryOp::kGreaterThan:
+                case core::BinaryOp::kLessThanEqual:
+                case core::BinaryOp::kGreaterThanEqual:
+                    ConvertRelational(binary);
+                    break;
                 default:
                     TINT_UNIMPLEMENTED();
             }
         }
+    }
+
+    void ConvertRelational(core::ir::Binary* binary) {
+        glsl::BuiltinFn func = glsl::BuiltinFn::kNone;
+        switch (binary->Op()) {
+            case core::BinaryOp::kEqual:
+                func = glsl::BuiltinFn::kEqual;
+                break;
+            case core::BinaryOp::kNotEqual:
+                func = glsl::BuiltinFn::kNotEqual;
+                break;
+            case core::BinaryOp::kLessThan:
+                func = glsl::BuiltinFn::kLessThan;
+                break;
+            case core::BinaryOp::kGreaterThan:
+                func = glsl::BuiltinFn::kGreaterThan;
+                break;
+            case core::BinaryOp::kLessThanEqual:
+                func = glsl::BuiltinFn::kLessThanEqual;
+                break;
+            case core::BinaryOp::kGreaterThanEqual:
+                func = glsl::BuiltinFn::kGreaterThanEqual;
+                break;
+            default:
+                TINT_UNREACHABLE();
+        }
+        b.InsertBefore(binary, [&] {
+            b.CallWithResult<glsl::ir::BuiltinCall>(binary->DetachResult(), func, binary->LHS(),
+                                                    binary->RHS());
+        });
+        binary->Destroy();
     }
 
     void BitwiseBoolean(core::ir::Binary* binary) {

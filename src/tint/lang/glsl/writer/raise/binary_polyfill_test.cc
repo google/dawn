@@ -184,5 +184,278 @@ TEST_F(GlslWriter_BinaryPolyfillTest, BitwiseBoolOr_Vec) {
     EXPECT_EQ(expect, str());
 }
 
+TEST_F(GlslWriter_BinaryPolyfillTest, RelationalEqualF16) {
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        auto* l = b.Let("left", b.Splat(ty.vec2<f16>(), 1_h));
+        auto* r = b.Let("right", b.Splat(ty.vec2<f16>(), 2_h));
+        auto* bin = b.Equal(ty.vec2<bool>(), l, r);
+        b.Let("val", bin);
+        b.Return(func);
+    });
+
+    auto* src = R"(
+%foo = @fragment func():void {
+  $B1: {
+    %left:vec2<f16> = let vec2<f16>(1.0h)
+    %right:vec2<f16> = let vec2<f16>(2.0h)
+    %4:vec2<bool> = eq %left, %right
+    %val:vec2<bool> = let %4
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = @fragment func():void {
+  $B1: {
+    %left:vec2<f16> = let vec2<f16>(1.0h)
+    %right:vec2<f16> = let vec2<f16>(2.0h)
+    %4:vec2<bool> = glsl.equal %left, %right
+    %val:vec2<bool> = let %4
+    ret
+  }
+}
+)";
+
+    Run(BinaryPolyfill);
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(GlslWriter_BinaryPolyfillTest, RelationalEqualBool) {
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        auto* l = b.Let("left", b.Splat(ty.vec2<bool>(), true));
+        auto* r = b.Let("right", b.Splat(ty.vec2<bool>(), false));
+        auto* bin = b.Equal(ty.vec2<bool>(), l, r);
+        b.Let("val", bin);
+        b.Return(func);
+    });
+
+    auto* src = R"(
+%foo = @fragment func():void {
+  $B1: {
+    %left:vec2<bool> = let vec2<bool>(true)
+    %right:vec2<bool> = let vec2<bool>(false)
+    %4:vec2<bool> = eq %left, %right
+    %val:vec2<bool> = let %4
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = @fragment func():void {
+  $B1: {
+    %left:vec2<bool> = let vec2<bool>(true)
+    %right:vec2<bool> = let vec2<bool>(false)
+    %4:vec2<bool> = glsl.equal %left, %right
+    %val:vec2<bool> = let %4
+    ret
+  }
+}
+)";
+
+    Run(BinaryPolyfill);
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(GlslWriter_BinaryPolyfillTest, RelationalNotEqualI32) {
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        auto* l = b.Let("left", b.Splat(ty.vec2<i32>(), 1_i));
+        auto* r = b.Let("right", b.Splat(ty.vec2<i32>(), 2_i));
+        auto* bin = b.NotEqual(ty.vec2<bool>(), l, r);
+        b.Let("val", bin);
+        b.Return(func);
+    });
+
+    auto* src = R"(
+%foo = @fragment func():void {
+  $B1: {
+    %left:vec2<i32> = let vec2<i32>(1i)
+    %right:vec2<i32> = let vec2<i32>(2i)
+    %4:vec2<bool> = neq %left, %right
+    %val:vec2<bool> = let %4
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = @fragment func():void {
+  $B1: {
+    %left:vec2<i32> = let vec2<i32>(1i)
+    %right:vec2<i32> = let vec2<i32>(2i)
+    %4:vec2<bool> = glsl.notEqual %left, %right
+    %val:vec2<bool> = let %4
+    ret
+  }
+}
+)";
+
+    Run(BinaryPolyfill);
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(GlslWriter_BinaryPolyfillTest, RelationalLessThanF32) {
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        auto* l = b.Let("left", b.Splat(ty.vec2<f32>(), 1_f));
+        auto* r = b.Let("right", b.Splat(ty.vec2<f32>(), 2_f));
+        auto* bin = b.LessThan(ty.vec2<bool>(), l, r);
+        b.Let("val", bin);
+        b.Return(func);
+    });
+
+    auto* src = R"(
+%foo = @fragment func():void {
+  $B1: {
+    %left:vec2<f32> = let vec2<f32>(1.0f)
+    %right:vec2<f32> = let vec2<f32>(2.0f)
+    %4:vec2<bool> = lt %left, %right
+    %val:vec2<bool> = let %4
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = @fragment func():void {
+  $B1: {
+    %left:vec2<f32> = let vec2<f32>(1.0f)
+    %right:vec2<f32> = let vec2<f32>(2.0f)
+    %4:vec2<bool> = glsl.lessThan %left, %right
+    %val:vec2<bool> = let %4
+    ret
+  }
+}
+)";
+
+    Run(BinaryPolyfill);
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(GlslWriter_BinaryPolyfillTest, RelationalLessThanEqualU32) {
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        auto* l = b.Let("left", b.Splat(ty.vec2<u32>(), 1_u));
+        auto* r = b.Let("right", b.Splat(ty.vec2<u32>(), 2_u));
+        auto* bin = b.LessThanEqual(ty.vec2<bool>(), l, r);
+        b.Let("val", bin);
+        b.Return(func);
+    });
+
+    auto* src = R"(
+%foo = @fragment func():void {
+  $B1: {
+    %left:vec2<u32> = let vec2<u32>(1u)
+    %right:vec2<u32> = let vec2<u32>(2u)
+    %4:vec2<bool> = lte %left, %right
+    %val:vec2<bool> = let %4
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = @fragment func():void {
+  $B1: {
+    %left:vec2<u32> = let vec2<u32>(1u)
+    %right:vec2<u32> = let vec2<u32>(2u)
+    %4:vec2<bool> = glsl.lessThanEqual %left, %right
+    %val:vec2<bool> = let %4
+    ret
+  }
+}
+)";
+
+    Run(BinaryPolyfill);
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(GlslWriter_BinaryPolyfillTest, RelationalGreaterThanF32) {
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        auto* l = b.Let("left", b.Splat(ty.vec2<f32>(), 1_f));
+        auto* r = b.Let("right", b.Splat(ty.vec2<f32>(), 2_f));
+        auto* bin = b.GreaterThan(ty.vec2<bool>(), l, r);
+        b.Let("val", bin);
+        b.Return(func);
+    });
+
+    auto* src = R"(
+%foo = @fragment func():void {
+  $B1: {
+    %left:vec2<f32> = let vec2<f32>(1.0f)
+    %right:vec2<f32> = let vec2<f32>(2.0f)
+    %4:vec2<bool> = gt %left, %right
+    %val:vec2<bool> = let %4
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = @fragment func():void {
+  $B1: {
+    %left:vec2<f32> = let vec2<f32>(1.0f)
+    %right:vec2<f32> = let vec2<f32>(2.0f)
+    %4:vec2<bool> = glsl.greaterThan %left, %right
+    %val:vec2<bool> = let %4
+    ret
+  }
+}
+)";
+
+    Run(BinaryPolyfill);
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(GlslWriter_BinaryPolyfillTest, RelationalGreaterThanEqualF32) {
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        auto* l = b.Let("left", b.Splat(ty.vec2<f32>(), 1_f));
+        auto* r = b.Let("right", b.Splat(ty.vec2<f32>(), 2_f));
+        auto* bin = b.GreaterThanEqual(ty.vec2<bool>(), l, r);
+        b.Let("val", bin);
+        b.Return(func);
+    });
+
+    auto* src = R"(
+%foo = @fragment func():void {
+  $B1: {
+    %left:vec2<f32> = let vec2<f32>(1.0f)
+    %right:vec2<f32> = let vec2<f32>(2.0f)
+    %4:vec2<bool> = gte %left, %right
+    %val:vec2<bool> = let %4
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = @fragment func():void {
+  $B1: {
+    %left:vec2<f32> = let vec2<f32>(1.0f)
+    %right:vec2<f32> = let vec2<f32>(2.0f)
+    %4:vec2<bool> = glsl.greaterThanEqual %left, %right
+    %val:vec2<bool> = let %4
+    ret
+  }
+}
+)";
+
+    Run(BinaryPolyfill);
+    EXPECT_EQ(expect, str());
+}
+
 }  // namespace
 }  // namespace tint::glsl::writer::raise

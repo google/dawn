@@ -1,5 +1,3 @@
-SKIP: FAILED
-
 #version 310 es
 
 
@@ -65,12 +63,14 @@ vec3 toVoxelPos(vec3 position) {
 }
 uvec3 tint_v3f32_to_v3u32(vec3 value) {
   uvec3 v_3 = uvec3(value);
-  uint v_4 = (((value >= vec3(0.0f)).x) ? (v_3.x) : (uvec3(0u).x));
-  uint v_5 = (((value >= vec3(0.0f)).y) ? (v_3.y) : (uvec3(0u).y));
-  uvec3 v_6 = uvec3(v_4, v_5, (((value >= vec3(0.0f)).z) ? (v_3.z) : (uvec3(0u).z)));
-  uint v_7 = (((value <= vec3(4294967040.0f)).x) ? (v_6.x) : (uvec3(4294967295u).x));
-  uint v_8 = (((value <= vec3(4294967040.0f)).y) ? (v_6.y) : (uvec3(4294967295u).y));
-  return uvec3(v_7, v_8, (((value <= vec3(4294967040.0f)).z) ? (v_6.z) : (uvec3(4294967295u).z)));
+  bvec3 v_4 = greaterThanEqual(value, vec3(0.0f));
+  uint v_5 = ((v_4.x) ? (v_3.x) : (uvec3(0u).x));
+  uint v_6 = ((v_4.y) ? (v_3.y) : (uvec3(0u).y));
+  uvec3 v_7 = uvec3(v_5, v_6, ((v_4.z) ? (v_3.z) : (uvec3(0u).z)));
+  bvec3 v_8 = lessThanEqual(value, vec3(4294967040.0f));
+  uint v_9 = ((v_8.x) ? (v_7.x) : (uvec3(4294967295u).x));
+  uint v_10 = ((v_8.y) ? (v_7.y) : (uvec3(4294967295u).y));
+  return uvec3(v_9, v_10, ((v_8.z) ? (v_7.z) : (uvec3(4294967295u).z)));
 }
 uint toIndex1D(uint gridSize, vec3 voxelPos) {
   uvec3 icoord = tint_v3f32_to_v3u32(voxelPos);
@@ -109,12 +109,3 @@ layout(local_size_x = 128, local_size_y = 1, local_size_z = 1) in;
 void main() {
   main_count_inner(gl_GlobalInvocationID);
 }
-error: Error parsing GLSL shader:
-ERROR: 0:66: '>=' :  wrong operand types: no operation '>=' exists that takes a left-hand operand of type ' in highp 3-component vector of float' and a right operand of type ' const 3-component vector of float' (or there is no acceptable conversion)
-ERROR: 0:66: '' : compilation terminated 
-ERROR: 2 compilation errors.  No code generated.
-
-
-
-
-tint executable returned error: exit status 1

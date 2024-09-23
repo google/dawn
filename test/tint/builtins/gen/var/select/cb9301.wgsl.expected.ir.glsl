@@ -1,5 +1,3 @@
-SKIP: FAILED
-
 #version 310 es
 precision highp float;
 precision highp int;
@@ -17,18 +15,11 @@ int select_cb9301() {
   bvec2 v_3 = arg_2;
   bool v_4 = ((v_3.x) ? (v_2.x) : (v_1.x));
   bvec2 res = bvec2(v_4, ((v_3.y) ? (v_2.y) : (v_1.y)));
-  return ((all((res == bvec2(false)))) ? (1) : (0));
+  return ((all(equal(res, bvec2(false)))) ? (1) : (0));
 }
 void main() {
   v.tint_symbol = select_cb9301();
 }
-error: Error parsing GLSL shader:
-ERROR: 0:18: 'all' : no matching overloaded function found 
-ERROR: 0:18: '' : compilation terminated 
-ERROR: 2 compilation errors.  No code generated.
-
-
-
 #version 310 es
 
 layout(binding = 0, std430)
@@ -44,19 +35,12 @@ int select_cb9301() {
   bvec2 v_3 = arg_2;
   bool v_4 = ((v_3.x) ? (v_2.x) : (v_1.x));
   bvec2 res = bvec2(v_4, ((v_3.y) ? (v_2.y) : (v_1.y)));
-  return ((all((res == bvec2(false)))) ? (1) : (0));
+  return ((all(equal(res, bvec2(false)))) ? (1) : (0));
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
   v.tint_symbol = select_cb9301();
 }
-error: Error parsing GLSL shader:
-ERROR: 0:16: 'all' : no matching overloaded function found 
-ERROR: 0:16: '' : compilation terminated 
-ERROR: 2 compilation errors.  No code generated.
-
-
-
 #version 310 es
 
 
@@ -75,7 +59,7 @@ int select_cb9301() {
   bvec2 v_2 = arg_2;
   bool v_3 = ((v_2.x) ? (v_1.x) : (v.x));
   bvec2 res = bvec2(v_3, ((v_2.y) ? (v_1.y) : (v.y)));
-  return ((all((res == bvec2(false)))) ? (1) : (0));
+  return ((all(equal(res, bvec2(false)))) ? (1) : (0));
 }
 VertexOutput vertex_main_inner() {
   VertexOutput tint_symbol = VertexOutput(vec4(0.0f), 0);
@@ -91,12 +75,3 @@ void main() {
   vertex_main_loc0_Output = v_4.prevent_dce;
   gl_PointSize = 1.0f;
 }
-error: Error parsing GLSL shader:
-ERROR: 0:19: 'all' : no matching overloaded function found 
-ERROR: 0:19: '' : compilation terminated 
-ERROR: 2 compilation errors.  No code generated.
-
-
-
-
-tint executable returned error: exit status 1

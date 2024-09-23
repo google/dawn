@@ -1,5 +1,3 @@
-SKIP: FAILED
-
 #version 310 es
 precision highp float;
 precision highp int;
@@ -28,10 +26,17 @@ vec4 vcolor_S0 = vec4(0.0f);
 layout(location = 0) in vec4 tint_symbol_loc0_Input;
 layout(location = 0) out vec4 tint_symbol_loc0_Output;
 ivec4 tint_div_v4i32(ivec4 lhs, ivec4 rhs) {
-  int v_1 = ((((rhs == ivec4(0)) | ((lhs == ivec4((-2147483647 - 1))) & (rhs == ivec4(-1)))).x) ? (ivec4(1).x) : (rhs.x));
-  int v_2 = ((((rhs == ivec4(0)) | ((lhs == ivec4((-2147483647 - 1))) & (rhs == ivec4(-1)))).y) ? (ivec4(1).y) : (rhs.y));
-  int v_3 = ((((rhs == ivec4(0)) | ((lhs == ivec4((-2147483647 - 1))) & (rhs == ivec4(-1)))).z) ? (ivec4(1).z) : (rhs.z));
-  return (lhs / ivec4(v_1, v_2, v_3, ((((rhs == ivec4(0)) | ((lhs == ivec4((-2147483647 - 1))) & (rhs == ivec4(-1)))).w) ? (ivec4(1).w) : (rhs.w))));
+  bvec4 v_1 = equal(rhs, ivec4(0));
+  bvec4 v_2 = equal(lhs, ivec4((-2147483647 - 1)));
+  bvec4 v_3 = equal(rhs, ivec4(-1));
+  uvec4 v_4 = uvec4(v_2);
+  bvec4 v_5 = bvec4((v_4 & uvec4(v_3)));
+  uvec4 v_6 = uvec4(v_1);
+  bvec4 v_7 = bvec4((v_6 | uvec4(v_5)));
+  int v_8 = ((v_7.x) ? (ivec4(1).x) : (rhs.x));
+  int v_9 = ((v_7.y) ? (ivec4(1).y) : (rhs.y));
+  int v_10 = ((v_7.z) ? (ivec4(1).z) : (rhs.z));
+  return (lhs / ivec4(v_8, v_9, v_10, ((v_7.w) ? (ivec4(1).w) : (rhs.w))));
 }
 int tint_f32_to_i32(float value) {
   return (((value <= 2147483520.0f)) ? ((((value >= -2147483648.0f)) ? (int(value)) : ((-2147483647 - 1)))) : (2147483647));
@@ -51,7 +56,7 @@ bool test_int_S1_c0_b() {
   ok = true;
   x_41 = false;
   if (true) {
-    x_40 = all((tint_div_v4i32(ivec4(0), ivec4(x_27)) == ivec4(0)));
+    x_40 = all(equal(tint_div_v4i32(ivec4(0), ivec4(x_27)), ivec4(0)));
     x_41 = x_40;
   }
   ok = x_41;
@@ -67,7 +72,7 @@ bool test_int_S1_c0_b() {
   val = x_50;
   x_55 = false;
   if (x_41) {
-    x_54 = all((x_50 == x_44));
+    x_54 = all(equal(x_50, x_44));
     x_55 = x_54;
   }
   ok = x_55;
@@ -81,7 +86,7 @@ bool test_int_S1_c0_b() {
   val = x_61;
   x_66 = false;
   if (x_55) {
-    x_65 = all((x_61 == x_44));
+    x_65 = all(equal(x_61, x_44));
     x_66 = x_65;
   }
   ok = x_66;
@@ -108,7 +113,7 @@ void main_1() {
   x_9_ok = true;
   x_87 = false;
   if (true) {
-    x_86 = all(((vec4(0.0f) / vec4(x_77)) == vec4(0.0f)));
+    x_86 = all(equal((vec4(0.0f) / vec4(x_77)), vec4(0.0f)));
     x_87 = x_86;
   }
   x_9_ok = x_87;
@@ -124,7 +129,7 @@ void main_1() {
   x_10_val = x_95;
   x_100 = false;
   if (x_87) {
-    x_99 = all((x_95 == x_89));
+    x_99 = all(equal(x_95, x_89));
     x_100 = x_99;
   }
   x_9_ok = x_100;
@@ -138,7 +143,7 @@ void main_1() {
   x_10_val = x_106;
   x_111 = false;
   if (x_100) {
-    x_110 = all((x_106 == x_89));
+    x_110 = all(equal(x_106, x_89));
     x_111 = x_110;
   }
   x_9_ok = x_111;
@@ -165,13 +170,3 @@ main_out tint_symbol_inner(bool sk_Clockwise_param, vec4 vcolor_S0_param) {
 void main() {
   tint_symbol_loc0_Output = tint_symbol_inner(gl_FrontFacing, tint_symbol_loc0_Input).sk_FragColor_1;
 }
-error: Error parsing GLSL shader:
-ERROR: 0:29: '&' :  wrong operand types: no operation '&' exists that takes a left-hand operand of type ' temp bool' and a right operand of type ' temp bool' (or there is no acceptable conversion)
-ERROR: 0:29: '|' :  wrong operand types: no operation '|' exists that takes a left-hand operand of type ' temp bool' and a right operand of type ' temp bool' (or there is no acceptable conversion)
-ERROR: 0:29: '' : compilation terminated 
-ERROR: 3 compilation errors.  No code generated.
-
-
-
-
-tint executable returned error: exit status 1
