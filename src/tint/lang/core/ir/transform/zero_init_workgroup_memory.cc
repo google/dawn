@@ -32,7 +32,7 @@
 
 #include "src/tint/lang/core/ir/builder.h"
 #include "src/tint/lang/core/ir/module.h"
-#include "src/tint/lang/core/ir/transform/common/referenced_module_vars.h"
+#include "src/tint/lang/core/ir/referenced_module_vars.h"
 #include "src/tint/lang/core/ir/validator.h"
 #include "src/tint/utils/containers/reverse.h"
 
@@ -63,7 +63,7 @@ struct State {
     core::type::Manager& ty{ir.Types()};
 
     /// The mapping from functions to their transitively referenced workgroup variables.
-    ReferencedModuleVars referenced_module_vars_{
+    ReferencedModuleVars<Module> referenced_module_vars_{
         ir, [](const Var* var) {
             auto* view = var->Result(0)->Type()->As<type::MemoryView>();
             return view && view->AddressSpace() == AddressSpace::kWorkgroup;

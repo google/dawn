@@ -63,6 +63,7 @@
 #include "src/tint/lang/core/ir/member_builtin_call.h"
 #include "src/tint/lang/core/ir/multi_in_block.h"
 #include "src/tint/lang/core/ir/next_iteration.h"
+#include "src/tint/lang/core/ir/referenced_module_vars.h"
 #include "src/tint/lang/core/ir/return.h"
 #include "src/tint/lang/core/ir/store.h"
 #include "src/tint/lang/core/ir/store_vector_element.h"
@@ -75,6 +76,7 @@
 #include "src/tint/lang/core/ir/user_call.h"
 #include "src/tint/lang/core/ir/var.h"
 #include "src/tint/lang/core/type/bool.h"
+#include "src/tint/lang/core/type/f32.h"
 #include "src/tint/lang/core/type/i8.h"
 #include "src/tint/lang/core/type/memory_view.h"
 #include "src/tint/lang/core/type/pointer.h"
@@ -363,8 +365,22 @@ class Validator {
     void CheckRootBlock(const Block* blk);
 
     /// Validates the given function
-    /// @param func the function validate
+    /// @param func the function to validate
     void CheckFunction(const Function* func);
+
+    /// Validates the specific function as a vertex entry point
+    /// @param ep the function to validate
+    void CheckVertexEntryPoint(const Function* ep);
+
+    /// Validates that the type annotated with @builtin(position) is correct
+    /// @param ep the entry point to associate errors with
+    /// @param type the type to validate
+    void CheckBuiltinPosition(const Function* ep, const core::type::Type* type);
+
+    /// Validates that the type annotated with @builtin(clip_distances) is correct
+    /// @param ep the entry point to associate errors with
+    /// @param type the type to validate
+    void CheckBuiltinClipDistances(const Function* ep, const core::type::Type* type);
 
     /// Validates the given instruction
     /// @param inst the instruction to validate
@@ -612,10 +628,11 @@ class Validator {
     Hashmap<const ir::Block*, const ir::Function*, 64> block_to_function_{};
     Hashmap<const ir::Function*, Hashset<const ir::UserCall*, 4>, 4> user_func_calls_;
     Hashset<const ir::Discard*, 4> discards_;
+    core::ir::ReferencedModuleVars<const Module> referenced_module_vars_;
 };
 
 Validator::Validator(const Module& mod, Capabilities capabilities)
-    : mod_(mod), capabilities_(capabilities) {}
+    : mod_(mod), capabilities_(capabilities), referenced_module_vars_(mod) {}
 
 Validator::~Validator() = default;
 
@@ -1176,8 +1193,96 @@ void Validator::CheckFunction(const Function* func) {
         }
     }
 
+    if (func->Stage() == Function::PipelineStage::kVertex) {
+        CheckVertexEntryPoint(func);
+    }
+
     QueueBlock(func->Block());
     ProcessTasks();
+}
+
+void Validator::CheckVertexEntryPoint(const Function* ep) {
+    const auto* ret_struct = ep->ReturnType()->As<core::type::Struct>();
+    bool contains_position = false;
+    if (ret_struct) {
+        for (auto* mem : ret_struct->Members()) {
+            if (!mem->Attributes().builtin.has_value()) {
+                continue;
+            }
+            switch (mem->Attributes().builtin.value()) {
+                case BuiltinValue::kPosition:
+                    contains_position = true;
+                    CheckBuiltinPosition(ep, mem->Type());
+                    break;
+                case BuiltinValue::kClipDistances:
+                    CheckBuiltinClipDistances(ep, mem->Type());
+                    break;
+                default:
+                    break;
+            }
+        }
+    } else {
+        if (ep->ReturnBuiltin() && ep->ReturnBuiltin() == BuiltinValue::kPosition) {
+            contains_position = true;
+            CheckBuiltinPosition(ep, ep->ReturnType());
+        }
+    }
+
+    for (auto var : referenced_module_vars_.TransitiveReferences(ep)) {
+        const auto* res_type = var->Result(0)->Type()->UnwrapPtrOrRef();
+        const auto* res_struct = res_type->As<core::type::Struct>();
+        if (res_struct) {
+            for (auto* mem : res_struct->Members()) {
+                if (!mem->Attributes().builtin.has_value()) {
+                    continue;
+                }
+                switch (mem->Attributes().builtin.value()) {
+                    case BuiltinValue::kPosition:
+                        contains_position = true;
+                        CheckBuiltinPosition(ep, mem->Type()->UnwrapPtrOrRef());
+                        break;
+                    case BuiltinValue::kClipDistances:
+                        CheckBuiltinClipDistances(ep, mem->Type()->UnwrapPtrOrRef());
+                        break;
+                    default:
+                        break;
+                }
+            }
+        } else {
+            if (!var->Attributes().builtin.has_value()) {
+                continue;
+            }
+            switch (var->Attributes().builtin.value()) {
+                case BuiltinValue::kPosition: {
+                    contains_position = true;
+                    CheckBuiltinPosition(ep, res_type);
+                } break;
+                case BuiltinValue::kClipDistances:
+                    CheckBuiltinClipDistances(ep, var->Result(0)->Type()->UnwrapPtrOrRef());
+                    break;
+                default:
+                    break;
+            }
+        }
+    }
+
+    if (DAWN_UNLIKELY(!contains_position)) {
+        AddError(ep) << "position must be declared for vertex entry point output";
+    }
+}
+
+void Validator::CheckBuiltinPosition(const Function* ep, const core::type::Type* type) {
+    auto elems = type->Elements();
+    if (!type->IsFloatVector() || !elems.type->Is<core::type::F32>() || elems.count != 4) {
+        AddError(ep) << "position must be a vec4<f32>";
+    }
+}
+
+void Validator::CheckBuiltinClipDistances(const Function* ep, const core::type::Type* type) {
+    const auto elems = type->Elements();
+    if (!elems.type || !elems.type->Is<core::type::F32>() || elems.count > 8) {
+        AddError(ep) << "clip_distances must be an array<f32, N>, where N <= 8";
+    }
 }
 
 void Validator::ProcessTasks() {
@@ -1789,7 +1894,8 @@ void Validator::CheckLoopContinuing(const Loop* loop) {
     // Ensure that values used in the loop continuing are not from the loop body, after a
     // continue instruction.
     if (auto* first_continue = first_continues_.GetOr(loop, nullptr)) {
-        // Find the instruction in the body block that is or holds the first continue instruction.
+        // Find the instruction in the body block that is or holds the first continue
+        // instruction.
         const Instruction* holds_continue = first_continue;
         while (holds_continue && holds_continue->Block() &&
                holds_continue->Block() != loop->Body()) {
@@ -1803,7 +1909,8 @@ void Validator::CheckLoopContinuing(const Loop* loop) {
                     if (TransitivelyHolds(loop->Continuing(), use.instruction)) {
                         AddError(use.instruction, use.operand_index)
                             << NameOf(result)
-                            << " cannot be used in continuing block as it is declared after the "
+                            << " cannot be used in continuing block as it is declared after "
+                               "the "
                                "first "
                             << style::Instruction("continue") << " in the loop's body";
                         AddDeclarationNote(result);
@@ -1986,8 +2093,8 @@ void Validator::CheckReturn(const Return* ret) {
 
     auto* func = ret->Func();
     if (func == nullptr) {
-        // Func() returning nullptr after CheckResultsAndOperandRange is due to the first operand
-        // being not a function
+        // Func() returning nullptr after CheckResultsAndOperandRange is due to the first
+        // operand being not a function
         AddError(ret) << "expected function for first operand";
         return;
     }

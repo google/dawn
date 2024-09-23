@@ -451,6 +451,133 @@ note: # Disassembly
 )");
 }
 
+TEST_F(IR_ValidatorTest, Function_VertexBasicPosition) {
+    auto* f = b.Function("my_func", ty.vec4<f32>());
+    f->SetStage(Function::PipelineStage::kVertex);
+    f->SetReturnBuiltin(BuiltinValue::kPosition);
+    b.Append(f->Block(), [&] { b.Unreachable(); });
+
+    auto res = ir::Validate(mod);
+    ASSERT_EQ(res, Success);
+}
+
+TEST_F(IR_ValidatorTest, Function_VertexStructPosition) {
+    auto pos_ty = ty.vec4<f32>();
+    auto pos_attr = IOAttributes();
+    pos_attr.builtin = BuiltinValue::kPosition;
+
+    auto* str_ty =
+        ty.Struct(mod.symbols.New("MyStruct"), {
+                                                   {mod.symbols.New("pos"), pos_ty, pos_attr},
+                                               });
+
+    auto* f = b.Function("my_func", str_ty);
+    f->SetStage(Function::PipelineStage::kVertex);
+    b.Append(f->Block(), [&] { b.Unreachable(); });
+
+    auto res = ir::Validate(mod);
+    ASSERT_EQ(res, Success);
+}
+
+TEST_F(IR_ValidatorTest, Function_VertexStructPositionAndClipDistances) {
+    auto pos_ty = ty.vec4<f32>();
+    auto pos_attr = IOAttributes();
+    pos_attr.builtin = BuiltinValue::kPosition;
+
+    auto clip_ty = ty.array<f32, 4>();
+    auto clip_attr = IOAttributes();
+    clip_attr.builtin = BuiltinValue::kClipDistances;
+
+    auto* str_ty =
+        ty.Struct(mod.symbols.New("MyStruct"), {
+                                                   {mod.symbols.New("pos"), pos_ty, pos_attr},
+                                                   {mod.symbols.New("clip"), clip_ty, clip_attr},
+                                               });
+
+    auto* f = b.Function("my_func", str_ty);
+    f->SetStage(Function::PipelineStage::kVertex);
+    b.Append(f->Block(), [&] { b.Unreachable(); });
+
+    auto res = ir::Validate(mod);
+    ASSERT_EQ(res, Success);
+}
+
+TEST_F(IR_ValidatorTest, Function_VertexStructOnlyClipDistances) {
+    auto clip_ty = ty.array<f32, 4>();
+    auto clip_attr = IOAttributes();
+    clip_attr.builtin = BuiltinValue::kClipDistances;
+
+    auto* str_ty =
+        ty.Struct(mod.symbols.New("MyStruct"), {
+                                                   {mod.symbols.New("clip"), clip_ty, clip_attr},
+                                               });
+
+    auto* f = b.Function("my_func", str_ty);
+    f->SetStage(Function::PipelineStage::kVertex);
+    b.Append(f->Block(), [&] { b.Unreachable(); });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_EQ(res.Failure().reason.Str(),
+              R"(:5:1 error: position must be declared for vertex entry point output
+%my_func = @vertex func():MyStruct {
+^^^^^^^^
+
+note: # Disassembly
+MyStruct = struct @align(4) {
+  clip:array<f32, 4> @offset(0), @builtin(clip_distances)
+}
+
+%my_func = @vertex func():MyStruct {
+  $B1: {
+    unreachable
+  }
+}
+)");
+}
+
+TEST_F(IR_ValidatorTest, Function_VertexMissingPosition) {
+    auto* f = b.Function("my_func", ty.vec4<f32>());
+    f->SetStage(Function::PipelineStage::kVertex);
+    b.Append(f->Block(), [&] { b.Unreachable(); });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_EQ(res.Failure().reason.Str(),
+              R"(:1:1 error: position must be declared for vertex entry point output
+%my_func = @vertex func():vec4<f32> {
+^^^^^^^^
+
+note: # Disassembly
+%my_func = @vertex func():vec4<f32> {
+  $B1: {
+    unreachable
+  }
+}
+)");
+}
+
+TEST_F(IR_ValidatorTest, Function_VertexPositionWrongType) {
+    auto* f = b.Function("my_func", ty.void_());
+    f->SetStage(Function::PipelineStage::kVertex);
+    b.Append(f->Block(), [&] { b.Unreachable(); });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_EQ(res.Failure().reason.Str(),
+              R"(:1:1 error: position must be declared for vertex entry point output
+%my_func = @vertex func():void {
+^^^^^^^^
+
+note: # Disassembly
+%my_func = @vertex func():void {
+  $B1: {
+    unreachable
+  }
+}
+)");
+}
+
 TEST_F(IR_ValidatorTest, CallToFunctionOutsideModule) {
     auto* f = b.Function("f", ty.void_());
     auto* g = b.Function("g", ty.void_());
@@ -1547,7 +1674,8 @@ TEST_F(IR_ValidatorTest, Discard_NotInFragment) {
     });
 
     auto* ep = b.Function("ep", ty.void_());
-    ep->SetStage(Function::PipelineStage::kVertex);
+    ep->SetStage(Function::PipelineStage::kCompute);
+    ep->SetWorkgroupSize(0, 0, 0);
     b.Append(ep->Block(), [&] {
         b.Call(func);
         b.Return(ep);
@@ -1567,7 +1695,7 @@ note: # Disassembly
     ret
   }
 }
-%ep = @vertex func():void {
+%ep = @compute @workgroup_size(0, 0, 0) func():void {
   $B2: {
     %3:void = call %foo
     ret

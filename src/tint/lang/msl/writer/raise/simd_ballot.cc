@@ -30,7 +30,7 @@
 #include <utility>
 
 #include "src/tint/lang/core/ir/builder.h"
-#include "src/tint/lang/core/ir/transform/common/referenced_module_vars.h"
+#include "src/tint/lang/core/ir/referenced_module_vars.h"
 #include "src/tint/lang/core/ir/validator.h"
 #include "src/tint/lang/msl/ir/builtin_call.h"
 
@@ -68,9 +68,10 @@ struct State {
         }
 
         // Set the subgroup size mask value from all entry points that use it.
-        core::ir::ReferencedModuleVars refs(ir, [&](const core::ir::Var* var) {  //
-            return var == subgroup_size_mask;
-        });
+        core::ir::ReferencedModuleVars<core::ir::Module> refs(ir,
+                                                              [&](const core::ir::Var* var) {  //
+                                                                  return var == subgroup_size_mask;
+                                                              });
         for (auto func : ir.functions) {
             if (func->Stage() != core::ir::Function::PipelineStage::kUndefined) {
                 if (refs.TransitiveReferences(func).Contains(subgroup_size_mask)) {

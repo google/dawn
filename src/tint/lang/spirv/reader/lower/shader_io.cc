@@ -31,7 +31,7 @@
 
 #include "src/tint/lang/core/ir/builder.h"
 #include "src/tint/lang/core/ir/module.h"
-#include "src/tint/lang/core/ir/transform/common/referenced_module_vars.h"
+#include "src/tint/lang/core/ir/referenced_module_vars.h"
 #include "src/tint/lang/core/ir/validator.h"
 
 namespace tint::spirv::reader::lower {
@@ -62,7 +62,7 @@ struct State {
     Hashset<core::ir::Var*, 4> output_variables{};
 
     /// The mapping from functions to their transitively referenced output variables.
-    core::ir::ReferencedModuleVars referenced_output_vars{
+    core::ir::ReferencedModuleVars<core::ir::Module> referenced_output_vars{
         ir, [](const core::ir::Var* var) {
             auto* view = var->Result(0)->Type()->As<core::type::MemoryView>();
             return view && view->AddressSpace() == core::AddressSpace::kOut;

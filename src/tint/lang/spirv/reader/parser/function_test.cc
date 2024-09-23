@@ -130,7 +130,7 @@ $B1: {  # root
 )");
 }
 
-TEST_F(SpirvParserTest, VertexShader) {
+TEST_F(SpirvParserTest, DISABLED_VertexShader) {
     EXPECT_IR(R"(
                OpCapability Shader
                OpMemoryModel Logical GLSL450

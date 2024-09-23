@@ -143,25 +143,51 @@ TEST_F(SpirvWriterTest, Function_EntryPoint_Fragment) {
 }
 
 TEST_F(SpirvWriterTest, Function_EntryPoint_Vertex) {
-    auto* func = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kVertex);
+    auto* func = b.Function("main", ty.vec4<f32>(), core::ir::Function::PipelineStage::kVertex);
+    func->SetReturnBuiltin(core::BuiltinValue::kPosition);
     b.Append(func->Block(), [&] {  //
-        b.Return(func);
+        b.Return(func, b.Zero<vec4<f32>>());
     });
 
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST(R"(
-               OpEntryPoint Vertex %main "main"
+               OpEntryPoint Vertex %main "main" %main_position_Output %main___point_size_Output
 
                ; Debug Information
-               OpName %main "main"                  ; id %1
+               OpName %main_position_Output "main_position_Output"  ; id %1
+               OpName %main___point_size_Output "main___point_size_Output"  ; id %5
+               OpName %main_inner "main_inner"                              ; id %7
+               OpName %main "main"                                          ; id %11
+
+               ; Annotations
+               OpDecorate %main_position_Output BuiltIn Position
+               OpDecorate %main___point_size_Output BuiltIn PointSize
 
                ; Types, variables and constants
+      %float = OpTypeFloat 32
+    %v4float = OpTypeVector %float 4
+%_ptr_Output_v4float = OpTypePointer Output %v4float
+%main_position_Output = OpVariable %_ptr_Output_v4float Output  ; BuiltIn Position
+%_ptr_Output_float = OpTypePointer Output %float
+%main___point_size_Output = OpVariable %_ptr_Output_float Output    ; BuiltIn PointSize
+          %8 = OpTypeFunction %v4float
+         %10 = OpConstantNull %v4float
        %void = OpTypeVoid
-          %3 = OpTypeFunction %void
+         %13 = OpTypeFunction %void
+    %float_1 = OpConstant %float 1
+
+               ; Function main_inner
+ %main_inner = OpFunction %v4float None %8
+          %9 = OpLabel
+               OpReturnValue %10
+               OpFunctionEnd
 
                ; Function main
-       %main = OpFunction %void None %3
-          %4 = OpLabel
+       %main = OpFunction %void None %13
+         %14 = OpLabel
+         %15 = OpFunctionCall %v4float %main_inner
+               OpStore %main_position_Output %15 None
+               OpStore %main___point_size_Output %float_1 None
                OpReturn
                OpFunctionEnd
 )");

@@ -25,7 +25,7 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "src/tint/lang/core/ir/transform/common/referenced_module_vars.h"
+#include "src/tint/lang/core/ir/referenced_module_vars.h"
 
 #include <string>
 
@@ -62,7 +62,7 @@ TEST_F(IR_ReferencedModuleVarsTest, EmptyRootBlock) {
 )";
     EXPECT_EQ(src, Disassemble());
 
-    ReferencedModuleVars vars(mod);
+    ReferencedModuleVars<Module> vars(mod);
     auto& foo_vars = vars.TransitiveReferences(foo);
     EXPECT_TRUE(foo_vars.IsEmpty());
 }
@@ -98,7 +98,7 @@ $B1: {  # root
 )";
     EXPECT_EQ(src, Disassemble());
 
-    ReferencedModuleVars vars(mod);
+    ReferencedModuleVars<Module> vars(mod);
     EXPECT_THAT(vars.TransitiveReferences(foo), ElementsAre(var_a, var_b));
 }
 
@@ -141,7 +141,7 @@ $B1: {  # root
 )";
     EXPECT_EQ(src, Disassemble());
 
-    ReferencedModuleVars vars(mod);
+    ReferencedModuleVars<Module> vars(mod);
     EXPECT_THAT(vars.TransitiveReferences(foo), ElementsAre(var_a, var_b, var_c, var_d, var_e));
 }
 
@@ -198,7 +198,7 @@ $B1: {  # root
 )";
     EXPECT_EQ(src, Disassemble());
 
-    ReferencedModuleVars vars(mod);
+    ReferencedModuleVars<Module> vars(mod);
     EXPECT_THAT(vars.TransitiveReferences(foo), ElementsAre(var_a, var_b));
     EXPECT_THAT(vars.TransitiveReferences(bar), ElementsAre(var_a, var_c));
     EXPECT_TRUE(vars.TransitiveReferences(zoo).IsEmpty());
@@ -275,7 +275,7 @@ $B1: {  # root
 )";
     EXPECT_EQ(src, Disassemble());
 
-    ReferencedModuleVars vars(mod);
+    ReferencedModuleVars<Module> vars(mod);
     EXPECT_THAT(vars.TransitiveReferences(foo), ElementsAre(var_a, var_b, var_c, var_d));
 }
 
@@ -335,7 +335,7 @@ $B1: {  # root
 )";
     EXPECT_EQ(src, Disassemble());
 
-    ReferencedModuleVars vars(mod);
+    ReferencedModuleVars<Module> vars(mod);
     EXPECT_THAT(vars.TransitiveReferences(bar), ElementsAre(var_b));
     EXPECT_THAT(vars.TransitiveReferences(zoo), ElementsAre(var_b));
     EXPECT_THAT(vars.TransitiveReferences(foo), ElementsAre(var_a, var_b));
@@ -368,7 +368,7 @@ $B1: {  # root
 )";
     EXPECT_EQ(src, Disassemble());
 
-    ReferencedModuleVars vars(mod);
+    ReferencedModuleVars<Module> vars(mod);
     EXPECT_THAT(vars.TransitiveReferences(foo), ElementsAre(var_a));
 }
 
@@ -411,7 +411,7 @@ $B1: {  # root
 )";
     EXPECT_EQ(src, Disassemble());
 
-    ReferencedModuleVars vars(mod, [](const Var* var) {
+    ReferencedModuleVars<Module> vars(mod, [](const Var* var) {
         auto* view = var->Result(0)->Type()->As<type::MemoryView>();
         return view->AddressSpace() == AddressSpace::kPrivate;
     });
