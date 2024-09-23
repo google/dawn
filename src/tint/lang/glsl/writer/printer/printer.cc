@@ -1323,6 +1323,7 @@ class Printer : public tint::TextGenerator {
             case core::BuiltinFn::kCos:
             case core::BuiltinFn::kCosh:
             case core::BuiltinFn::kCross:
+            case core::BuiltinFn::kDegrees:
             case core::BuiltinFn::kDeterminant:
             case core::BuiltinFn::kDistance:
             case core::BuiltinFn::kDot:
@@ -1339,6 +1340,7 @@ class Printer : public tint::TextGenerator {
             case core::BuiltinFn::kModf:
             case core::BuiltinFn::kNormalize:
             case core::BuiltinFn::kPow:
+            case core::BuiltinFn::kRadians:
             case core::BuiltinFn::kReflect:
             case core::BuiltinFn::kRefract:
             case core::BuiltinFn::kRound:
