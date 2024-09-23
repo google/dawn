@@ -38,6 +38,7 @@ namespace dawn::native {
 struct CombinedLimits {
     Limits v1;
     DawnExperimentalSubgroupLimits experimentalSubgroupLimits;
+    DawnExperimentalImmediateDataLimits experimentalImmediateDataLimits;
 };
 
 // Populate |limits| with the default limits.

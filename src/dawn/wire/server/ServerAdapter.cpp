@@ -122,11 +122,20 @@ void Server::OnRequestDeviceCallback(RequestDeviceUserdata* data,
     cmd.featuresCount = features.size();
     cmd.features = features.data();
 
+    // Query and report the adapter limits, including DawnExperimentalSubgroupLimits and
+    // DawnExperimentalImmediateDataLimits. Reporting to client.
     WGPUSupportedLimits limits = {};
-    // Also query the DawnExperimentalSubgroupLimits and report to client.
+
+    // Chained DawnExperimentalSubgroupLimits.
     WGPUDawnExperimentalSubgroupLimits experimentalSubgroupLimits = {};
     experimentalSubgroupLimits.chain.sType = WGPUSType_DawnExperimentalSubgroupLimits;
     limits.nextInChain = &experimentalSubgroupLimits.chain;
+
+    // Chained DawnExperimentalImmediateDataLimits.
+    WGPUDawnExperimentalImmediateDataLimits experimentalImmediateDataLimits = {};
+    experimentalImmediateDataLimits.chain.sType = WGPUSType_DawnExperimentalImmediateDataLimits;
+    experimentalSubgroupLimits.chain.next = &experimentalImmediateDataLimits.chain;
+
     mProcs.deviceGetLimits(device, &limits);
     cmd.limits = &limits;
 

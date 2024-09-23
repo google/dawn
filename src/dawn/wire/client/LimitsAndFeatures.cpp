@@ -53,6 +53,13 @@ WGPUStatus LimitsAndFeatures::GetLimits(WGPUSupportedLimits* limits) const {
                 *experimentalSubgroupLimits = mExperimentalSubgroupLimits;
                 break;
             }
+            case (WGPUSType_DawnExperimentalImmediateDataLimits): {
+                auto* experimentalImmediateDataLimits =
+                    reinterpret_cast<WGPUDawnExperimentalImmediateDataLimits*>(chain);
+                // This assignment break the next field of WGPUChainedStructOut head.
+                *experimentalImmediateDataLimits = mExperimentalImmediateDataLimits;
+                break;
+            }
             default:
                 // Fail if unknown sType found.
                 return WGPUStatus_Error;
@@ -89,6 +96,13 @@ void LimitsAndFeatures::SetLimits(const WGPUSupportedLimits* limits) {
                     reinterpret_cast<WGPUDawnExperimentalSubgroupLimits*>(chain);
                 mExperimentalSubgroupLimits = *experimentalSubgroupLimits;
                 mExperimentalSubgroupLimits.chain.next = nullptr;
+                break;
+            }
+            case (WGPUSType_DawnExperimentalImmediateDataLimits): {
+                auto* experimentalImmediateDataLimits =
+                    reinterpret_cast<WGPUDawnExperimentalImmediateDataLimits*>(chain);
+                mExperimentalImmediateDataLimits = *experimentalImmediateDataLimits;
+                mExperimentalImmediateDataLimits.chain.next = nullptr;
                 break;
             }
             default:

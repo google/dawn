@@ -1984,6 +1984,15 @@
             {"name": "max subgroup size", "type": "uint32_t", "default": "WGPU_LIMIT_U32_UNDEFINED"}
         ]
     },
+    "dawn experimental immediate data limits": {
+        "category": "structure",
+        "chained": "out",
+        "chain roots": ["supported limits"],
+        "tags": ["dawn"],
+        "members": [
+            {"name": "max immediate data range byte size", "type": "uint32_t", "default": "WGPU_LIMIT_U32_UNDEFINED"}
+        ]
+    },
     "required limits": {
         "category": "structure",
         "extensible": "in",
@@ -2659,7 +2668,8 @@
             {"value": 53, "name": "dawn load resolve texture", "tags": ["dawn"]},
             {"value": 54, "name": "dawn partial load resolve texture", "tags": ["dawn"]},
             {"value": 55, "name": "multi draw indirect", "tags": ["dawn"]},
-            {"value": 56, "name": "clip distances", "tags": ["dawn"]}
+            {"value": 56, "name": "clip distances", "tags": ["dawn"]},
+            {"value": 57, "name": "chromium experimental immediate data", "tags": ["dawn"]}
         ]
     },
     "filter mode": {
@@ -4337,7 +4347,8 @@
             {"value": 55, "name": "static sampler binding layout", "tags": ["dawn"]},
             {"value": 56, "name": "y cb cr vk descriptor", "tags": ["dawn"]},
             {"value": 57, "name": "shared texture memory a hardware buffer properties", "tags": ["dawn", "native"]},
-            {"value": 58, "name": "a hardware buffer properties", "tags": ["dawn", "native"]}
+            {"value": 58, "name": "a hardware buffer properties", "tags": ["dawn", "native"]},
+            {"value": 59, "name": "dawn experimental immediate data limits", "tags": ["dawn"]}
 
         ]
     },

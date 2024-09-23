@@ -49,6 +49,7 @@ class LimitsAndFeatures {
   private:
     WGPUSupportedLimits mLimits;
     WGPUDawnExperimentalSubgroupLimits mExperimentalSubgroupLimits;
+    WGPUDawnExperimentalImmediateDataLimits mExperimentalImmediateDataLimits;
     absl::flat_hash_set<WGPUFeatureName> mFeatures;
 };
 
