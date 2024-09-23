@@ -42,6 +42,8 @@ const char* str(BuiltinFn i) {
     switch (i) {
         case BuiltinFn::kNone:
             return "<none>";
+        case BuiltinFn::kLength:
+            return "length";
         case BuiltinFn::kBarrier:
             return "barrier";
         case BuiltinFn::kMemoryBarrierBuffer:

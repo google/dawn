@@ -1422,5 +1422,35 @@ void main() {
 )");
 }
 
+TEST_F(GlslWriterTest, BuiltinArrayLength) {
+    auto* sb = ty.Struct(mod.symbols.New("SB"), {
+                                                    {mod.symbols.New("b"), ty.array<u32>()},
+                                                });
+
+    auto* var = b.Var("v", storage, sb, core::Access::kReadWrite);
+    var->SetBindingPoint(0, 0);
+    b.ir.root_block->Append(var);
+
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        auto* ary = b.Access(ty.ptr<storage, array<u32>, read_write>(), var, 0_u);
+        b.Let("x", b.Call(ty.u32(), core::BuiltinFn::kArrayLength, ary));
+        b.Return(func);
+    });
+
+    ASSERT_TRUE(Generate()) << err_ << output_.glsl;
+    EXPECT_EQ(output_.glsl, GlslHeader() + R"(precision highp float;
+precision highp int;
+
+layout(binding = 0, std430)
+buffer SB_1_ssbo {
+  uint b[];
+} v;
+void main() {
+  uint x = uint(v.b.length());
+}
+)");
+}
+
 }  // namespace
 }  // namespace tint::glsl::writer

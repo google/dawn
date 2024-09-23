@@ -1394,5 +1394,65 @@ TEST_F(GlslWriter_BuiltinPolyfillTest, FMA_f16) {
     EXPECT_EQ(expect, str());
 }
 
+TEST_F(GlslWriter_BuiltinPolyfillTest, ArrayLength) {
+    auto* sb = ty.Struct(mod.symbols.New("SB"), {
+                                                    {mod.symbols.New("b"), ty.array<u32>()},
+                                                });
+
+    auto* var = b.Var("v", storage, sb, core::Access::kReadWrite);
+    var->SetBindingPoint(0, 0);
+    b.ir.root_block->Append(var);
+
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        auto* ary = b.Access(ty.ptr<storage, array<u32>, read_write>(), var, 0_u);
+        b.Let("x", b.Call(ty.u32(), core::BuiltinFn::kArrayLength, ary));
+        b.Return(func);
+    });
+
+    auto* src = R"(
+SB = struct @align(4) {
+  b:array<u32> @offset(0)
+}
+
+$B1: {  # root
+  %v:ptr<storage, SB, read_write> = var @binding_point(0, 0)
+}
+
+%foo = @fragment func():void {
+  $B2: {
+    %3:ptr<storage, array<u32>, read_write> = access %v, 0u
+    %4:u32 = arrayLength %3
+    %x:u32 = let %4
+    ret
+  }
+}
+)";
+    ASSERT_EQ(src, str());
+
+    auto* expect = R"(
+SB = struct @align(4) {
+  b:array<u32> @offset(0)
+}
+
+$B1: {  # root
+  %v:ptr<storage, SB, read_write> = var @binding_point(0, 0)
+}
+
+%foo = @fragment func():void {
+  $B2: {
+    %3:ptr<storage, array<u32>, read_write> = access %v, 0u
+    %4:i32 = %3.length
+    %5:u32 = convert %4
+    %x:u32 = let %5
+    ret
+  }
+}
+)";
+
+    Run(BuiltinPolyfill);
+    EXPECT_EQ(expect, str());
+}
+
 }  // namespace
 }  // namespace tint::glsl::writer::raise

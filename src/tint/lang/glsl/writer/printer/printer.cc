@@ -81,6 +81,7 @@
 #include "src/tint/lang/core/type/vector.h"
 #include "src/tint/lang/core/type/void.h"
 #include "src/tint/lang/glsl/ir/builtin_call.h"
+#include "src/tint/lang/glsl/ir/member_builtin_call.h"
 #include "src/tint/lang/glsl/ir/ternary.h"
 #include "src/tint/lang/glsl/writer/common/printer_support.h"
 #include "src/tint/lang/glsl/writer/common/version.h"
@@ -1103,13 +1104,31 @@ class Printer : public tint::TextGenerator {
                     [&](const core::ir::Var* var) { out << NameOf(var->Result(0)); },
 
                     [&](const glsl::ir::BuiltinCall* c) { EmitGlslBuiltinCall(out, c); },  //
-                    [&](const glsl::ir::Ternary* t) { EmitTernary(out, t); },              //
+                    [&](const glsl::ir::MemberBuiltinCall* mbc) {
+                        EmitGlslMemberBuiltinCall(out, mbc);
+                    },
+                    [&](const glsl::ir::Ternary* t) { EmitTernary(out, t); },  //
 
                     TINT_ICE_ON_NO_MATCH);
             },
             [&](const core::ir::FunctionParam* p) { out << NameOf(p); },  //
 
             TINT_ICE_ON_NO_MATCH);
+    }
+
+    void EmitGlslMemberBuiltinCall(StringStream& out, const glsl::ir::MemberBuiltinCall* c) {
+        EmitValue(out, c->Object());
+        out << "." << c->Func() << "(";
+
+        bool needs_comma = false;
+        for (const auto* arg : c->Args()) {
+            if (needs_comma) {
+                out << ", ";
+            }
+            EmitValue(out, arg);
+            needs_comma = true;
+        }
+        out << ")";
     }
 
     void EmitGlslBuiltinCall(StringStream& out, const glsl::ir::BuiltinCall* c) {

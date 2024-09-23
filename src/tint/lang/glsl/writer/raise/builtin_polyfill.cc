@@ -42,6 +42,7 @@
 #include "src/tint/lang/core/type/storage_texture.h"
 #include "src/tint/lang/glsl/builtin_fn.h"
 #include "src/tint/lang/glsl/ir/builtin_call.h"
+#include "src/tint/lang/glsl/ir/member_builtin_call.h"
 #include "src/tint/lang/glsl/ir/ternary.h"
 
 namespace tint::glsl::writer::raise {
@@ -67,6 +68,7 @@ struct State {
         for (auto* inst : ir.Instructions()) {
             if (auto* call = inst->As<core::ir::CoreBuiltinCall>()) {
                 switch (call->Func()) {
+                    case core::BuiltinFn::kArrayLength:
                     case core::BuiltinFn::kAtomicCompareExchangeWeak:
                     case core::BuiltinFn::kAtomicSub:
                     case core::BuiltinFn::kAtomicLoad:
@@ -94,6 +96,9 @@ struct State {
         // Replace the builtin calls that we found
         for (auto* call : call_worklist) {
             switch (call->Func()) {
+                case core::BuiltinFn::kArrayLength:
+                    ArrayLength(call);
+                    break;
                 case core::BuiltinFn::kAtomicCompareExchangeWeak:
                     AtomicCompareExchangeWeak(call);
                     break;
@@ -139,6 +144,15 @@ struct State {
                     TINT_UNREACHABLE();
             }
         }
+    }
+
+    void ArrayLength(core::ir::Call* call) {
+        b.InsertBefore(call, [&] {
+            auto* len = b.MemberCall<glsl::ir::MemberBuiltinCall>(ty.i32(), BuiltinFn::kLength,
+                                                                  call->Args()[0]);
+            b.ConvertWithResult(call->DetachResult(), len->Result(0));
+        });
+        call->Destroy();
     }
 
     void ExtractBits(core::ir::Call* call) {
