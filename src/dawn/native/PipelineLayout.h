@@ -112,6 +112,8 @@ class PipelineLayoutBase : public ApiObjectBase,
         bool operator()(const PipelineLayoutBase* a, const PipelineLayoutBase* b) const;
     };
 
+    uint32_t GetImmediateDataRangeByteSize() const;
+
   protected:
     PipelineLayoutBase(DeviceBase* device, ObjectBase::ErrorTag tag, const char* label);
     void DestroyImpl() override;
@@ -120,6 +122,7 @@ class PipelineLayoutBase : public ApiObjectBase,
     BindGroupMask mMask;
     bool mHasPLS = false;
     std::vector<wgpu::TextureFormat> mStorageAttachmentSlots;
+    uint32_t mImmediateDataRangeByteSize = 0;
 };
 
 }  // namespace dawn::native

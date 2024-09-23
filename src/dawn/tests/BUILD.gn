@@ -393,6 +393,7 @@ dawn_test("dawn_unittests") {
     "unittests/validation/ErrorScopeValidationTests.cpp",
     "unittests/validation/ExternalTextureTests.cpp",
     "unittests/validation/GetBindGroupLayoutValidationTests.cpp",
+    "unittests/validation/ImmediateDataTests.cpp",
     "unittests/validation/IndexBufferValidationTests.cpp",
     "unittests/validation/InternalUsageValidationTests.cpp",
     "unittests/validation/LabelTests.cpp",

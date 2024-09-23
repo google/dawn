@@ -280,6 +280,9 @@ struct EntryPointMetadata {
     bool usesSampleIndex = false;
     bool usesVertexIndex = false;
     bool usesTextureLoadWithDepthTexture = false;
+
+    // Immediate Data block byte size
+    uint32_t immediateDataRangeByteSize = 0;
 };
 
 class ShaderModuleBase : public RefCountedWithExternalCount<ApiObjectBase>,
