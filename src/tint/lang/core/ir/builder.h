@@ -538,11 +538,25 @@ class Builder {
     /// @returns the operation
     template <typename LHS, typename RHS>
     ir::CoreBinary* Binary(BinaryOp op, const core::type::Type* type, LHS&& lhs, RHS&& rhs) {
+        return BinaryWithResult(InstructionResult(type), op, std::forward<LHS>(lhs),
+                                std::forward<RHS>(rhs));
+    }
+
+    /// Creates an op for `lhs kind rhs`
+    /// @param op the binary operator
+    /// @param result the result of the binary expression
+    /// @param lhs the left-hand-side of the operation
+    /// @param rhs the right-hand-side of the operation
+    /// @returns the operation
+    template <typename LHS, typename RHS>
+    ir::CoreBinary* BinaryWithResult(ir::InstructionResult* result,
+                                     BinaryOp op,
+                                     LHS&& lhs,
+                                     RHS&& rhs) {
         CheckForNonDeterministicEvaluation<LHS, RHS>();
         auto* lhs_val = Value(std::forward<LHS>(lhs));
         auto* rhs_val = Value(std::forward<RHS>(rhs));
-        return Append(
-            ir.CreateInstruction<ir::CoreBinary>(InstructionResult(type), op, lhs_val, rhs_val));
+        return Append(ir.CreateInstruction<ir::CoreBinary>(result, op, lhs_val, rhs_val));
     }
 
     /// Creates an op for `lhs kind rhs`
@@ -812,6 +826,17 @@ class Builder {
     ir::CoreBinary* Add(LHS&& lhs, RHS&& rhs) {
         auto* type = ir.Types().Get<TYPE>();
         return Add(type, std::forward<LHS>(lhs), std::forward<RHS>(rhs));
+    }
+
+    /// Creates an Add operation
+    /// @param result the result
+    /// @param lhs the lhs of the add
+    /// @param rhs the rhs of the add
+    /// @returns the operation
+    template <typename LHS, typename RHS>
+    ir::CoreBinary* AddWithResult(ir::InstructionResult* result, LHS&& lhs, RHS&& rhs) {
+        return BinaryWithResult(result, BinaryOp::kAdd, std::forward<LHS>(lhs),
+                                std::forward<RHS>(rhs));
     }
 
     /// Creates an Subtract operation

@@ -1379,5 +1379,48 @@ void main() {
 )");
 }
 
+TEST_F(GlslWriterTest, BuiltinFMA_f32) {
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        auto* x = b.Splat(ty.vec3<f32>(), 1_f);
+        auto* y = b.Splat(ty.vec3<f32>(), 2_f);
+        auto* z = b.Splat(ty.vec3<f32>(), 3_f);
+
+        b.Let("x", b.Call(ty.vec3<f32>(), core::BuiltinFn::kFma, x, y, z));
+        b.Return(func);
+    });
+
+    ASSERT_TRUE(Generate()) << err_ << output_.glsl;
+    EXPECT_EQ(output_.glsl, GlslHeader() + R"(precision highp float;
+precision highp int;
+
+void main() {
+  vec3 x = ((vec3(1.0f) * vec3(2.0f)) + vec3(3.0f));
+}
+)");
+}
+
+TEST_F(GlslWriterTest, BuiltinFMA_f16) {
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        auto* x = b.Splat(ty.vec3<f16>(), 1_h);
+        auto* y = b.Splat(ty.vec3<f16>(), 2_h);
+        auto* z = b.Splat(ty.vec3<f16>(), 3_h);
+
+        b.Let("x", b.Call(ty.vec3<f16>(), core::BuiltinFn::kFma, x, y, z));
+        b.Return(func);
+    });
+
+    ASSERT_TRUE(Generate()) << err_ << output_.glsl;
+    EXPECT_EQ(output_.glsl, GlslHeader() + R"(precision highp float;
+precision highp int;
+#extension GL_AMD_gpu_shader_half_float: require
+
+void main() {
+  f16vec3 x = ((f16vec3(1.0hf) * f16vec3(2.0hf)) + f16vec3(3.0hf));
+}
+)");
+}
+
 }  // namespace
 }  // namespace tint::glsl::writer

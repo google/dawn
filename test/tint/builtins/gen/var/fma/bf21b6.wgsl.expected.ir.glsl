@@ -1,5 +1,3 @@
-SKIP: FAILED
-
 #version 310 es
 #extension GL_AMD_gpu_shader_half_float: require
 precision highp float;
@@ -13,21 +11,12 @@ f16vec2 fma_bf21b6() {
   f16vec2 arg_0 = f16vec2(1.0hf);
   f16vec2 arg_1 = f16vec2(1.0hf);
   f16vec2 arg_2 = f16vec2(1.0hf);
-  f16vec2 res = fma(arg_0, arg_1, arg_2);
+  f16vec2 res = ((arg_0 * arg_1) + arg_2);
   return res;
 }
 void main() {
   v.tint_symbol = fma_bf21b6();
 }
-error: Error parsing GLSL shader:
-ERROR: 0:14: 'fma' : required extension not requested: Possible extensions include:
-GL_EXT_gpu_shader5
-GL_OES_gpu_shader5
-ERROR: 0:14: '' : compilation terminated 
-ERROR: 2 compilation errors.  No code generated.
-
-
-
 #version 310 es
 #extension GL_AMD_gpu_shader_half_float: require
 
@@ -39,22 +28,13 @@ f16vec2 fma_bf21b6() {
   f16vec2 arg_0 = f16vec2(1.0hf);
   f16vec2 arg_1 = f16vec2(1.0hf);
   f16vec2 arg_2 = f16vec2(1.0hf);
-  f16vec2 res = fma(arg_0, arg_1, arg_2);
+  f16vec2 res = ((arg_0 * arg_1) + arg_2);
   return res;
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
   v.tint_symbol = fma_bf21b6();
 }
-error: Error parsing GLSL shader:
-ERROR: 0:12: 'fma' : required extension not requested: Possible extensions include:
-GL_EXT_gpu_shader5
-GL_OES_gpu_shader5
-ERROR: 0:12: '' : compilation terminated 
-ERROR: 2 compilation errors.  No code generated.
-
-
-
 #version 310 es
 #extension GL_AMD_gpu_shader_half_float: require
 
@@ -69,7 +49,7 @@ f16vec2 fma_bf21b6() {
   f16vec2 arg_0 = f16vec2(1.0hf);
   f16vec2 arg_1 = f16vec2(1.0hf);
   f16vec2 arg_2 = f16vec2(1.0hf);
-  f16vec2 res = fma(arg_0, arg_1, arg_2);
+  f16vec2 res = ((arg_0 * arg_1) + arg_2);
   return res;
 }
 VertexOutput vertex_main_inner() {
@@ -86,14 +66,3 @@ void main() {
   vertex_main_loc0_Output = v.prevent_dce;
   gl_PointSize = 1.0f;
 }
-error: Error parsing GLSL shader:
-ERROR: 0:15: 'fma' : required extension not requested: Possible extensions include:
-GL_EXT_gpu_shader5
-GL_OES_gpu_shader5
-ERROR: 0:15: '' : compilation terminated 
-ERROR: 2 compilation errors.  No code generated.
-
-
-
-
-tint executable returned error: exit status 1

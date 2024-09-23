@@ -1317,7 +1317,80 @@ $B1: {  # root
 )";
 
     Run(BuiltinPolyfill);
+    EXPECT_EQ(expect, str());
+}
 
+TEST_F(GlslWriter_BuiltinPolyfillTest, FMA_f32) {
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        auto* x = b.Splat(ty.vec3<f32>(), 1_f);
+        auto* y = b.Splat(ty.vec3<f32>(), 2_f);
+        auto* z = b.Splat(ty.vec3<f32>(), 3_f);
+
+        b.Let("x", b.Call(ty.vec3<f32>(), core::BuiltinFn::kFma, x, y, z));
+        b.Return(func);
+    });
+
+    auto* src = R"(
+%foo = @fragment func():void {
+  $B1: {
+    %2:vec3<f32> = fma vec3<f32>(1.0f), vec3<f32>(2.0f), vec3<f32>(3.0f)
+    %x:vec3<f32> = let %2
+    ret
+  }
+}
+)";
+    ASSERT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = @fragment func():void {
+  $B1: {
+    %2:vec3<f32> = mul vec3<f32>(1.0f), vec3<f32>(2.0f)
+    %3:vec3<f32> = add %2, vec3<f32>(3.0f)
+    %x:vec3<f32> = let %3
+    ret
+  }
+}
+)";
+
+    Run(BuiltinPolyfill);
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(GlslWriter_BuiltinPolyfillTest, FMA_f16) {
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        auto* x = b.Splat(ty.vec3<f16>(), 1_h);
+        auto* y = b.Splat(ty.vec3<f16>(), 2_h);
+        auto* z = b.Splat(ty.vec3<f16>(), 3_h);
+
+        b.Let("x", b.Call(ty.vec3<f16>(), core::BuiltinFn::kFma, x, y, z));
+        b.Return(func);
+    });
+
+    auto* src = R"(
+%foo = @fragment func():void {
+  $B1: {
+    %2:vec3<f16> = fma vec3<f16>(1.0h), vec3<f16>(2.0h), vec3<f16>(3.0h)
+    %x:vec3<f16> = let %2
+    ret
+  }
+}
+)";
+    ASSERT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = @fragment func():void {
+  $B1: {
+    %2:vec3<f16> = mul vec3<f16>(1.0h), vec3<f16>(2.0h)
+    %3:vec3<f16> = add %2, vec3<f16>(3.0h)
+    %x:vec3<f16> = let %3
+    ret
+  }
+}
+)";
+
+    Run(BuiltinPolyfill);
     EXPECT_EQ(expect, str());
 }
 

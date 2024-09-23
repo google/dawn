@@ -72,6 +72,7 @@ struct State {
                     case core::BuiltinFn::kAtomicLoad:
                     case core::BuiltinFn::kCountOneBits:
                     case core::BuiltinFn::kExtractBits:
+                    case core::BuiltinFn::kFma:
                     case core::BuiltinFn::kInsertBits:
                     case core::BuiltinFn::kSelect:
                     case core::BuiltinFn::kStorageBarrier:
@@ -107,6 +108,9 @@ struct State {
                     break;
                 case core::BuiltinFn::kExtractBits:
                     ExtractBits(call);
+                    break;
+                case core::BuiltinFn::kFma:
+                    FMA(call);
                     break;
                 case core::BuiltinFn::kInsertBits:
                     InsertBits(call);
@@ -158,6 +162,20 @@ struct State {
             b.CallWithResult<glsl::ir::BuiltinCall>(call->DetachResult(),
                                                     glsl::BuiltinFn::kBitfieldInsert, args[0],
                                                     args[1], offset, bits);
+        });
+        call->Destroy();
+    }
+
+    // There is no `fma` method in GLSL ES 3.10 so we emulate it. `fma` does exist in desktop after
+    // 4.00 but we use the emulated version to be consistent. We could use the real one on desktop
+    // if we decide too in the future.
+    void FMA(core::ir::Call* call) {
+        auto args = call->Args();
+
+        b.InsertBefore(call, [&] {
+            auto* res_ty = call->Result(0)->Type();
+            auto* mul = b.Multiply(res_ty, args[0], args[1]);
+            b.AddWithResult(call->DetachResult(), mul, args[2]);
         });
         call->Destroy();
     }
