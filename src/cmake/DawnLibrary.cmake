@@ -179,6 +179,8 @@ function(dawn_install_target name)
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
     ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
   )
+  # When building in debug mode with MSVC, install PDB files together with binaries
+  install(FILES $<TARGET_PDB_FILE:${name}> DESTINATION ${CMAKE_INSTALL_BINDIR} OPTIONAL)
   foreach(header IN LISTS arg_HEADERS)
     # Starting from CMake 3.20 there is the cmake_path command that could simplify this code.
     # Compute the install subdirectory for the header by stripping out the path to
