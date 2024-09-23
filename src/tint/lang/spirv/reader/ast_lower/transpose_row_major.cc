@@ -118,15 +118,13 @@ struct TransposeRowMajor::State {
         }
 
         // Look for expressions that access the matrix.
-        // The `row_major_accesses` map tracks expressions that are accessing a transposed matrix
-        // (or a subset of it), and the originating struct member extraction they came from.
-        Hashmap<const sem::ValueExpression*, const sem::StructMemberAccess*, 8> row_major_accesses;
+        // The `row_major_accesses` set tracks expressions that are accessing a transposed matrix.
+        Hashset<const sem::ValueExpression*, 8> row_major_accesses;
         for (auto* node : src.ASTNodes().Objects()) {
             // Check for assignments to all or part of a transposed matrix and replace them.
             if (auto* assign = node->As<ast::AssignmentStatement>()) {
                 auto* lhs = src.Sem().GetVal(assign->lhs);
-                auto row_major_access = row_major_accesses.Get(lhs);
-                if (row_major_access) {
+                if (row_major_accesses.Contains(lhs)) {
                     ReplaceAssignment(assign);
                     row_major_accesses.Remove(lhs);
                 }
@@ -143,7 +141,7 @@ struct TransposeRowMajor::State {
                     if (transposed_members.Contains(member_access->Member())) {
                         if (member_access->Type()->Is<core::type::MemoryView>()) {
                             // This is a pointer, so track the access until we hit a load or store.
-                            row_major_accesses.Add(member_access, member_access);
+                            row_major_accesses.Add(member_access);
                         } else {
                             // This is not a pointer, so we are extracting a matrix from a value
                             // type. Transpose the matrix now so that all child expressions behave
@@ -156,9 +154,8 @@ struct TransposeRowMajor::State {
                 } else {
                     // For non-struct-member accesses, check if the base object is a transposed
                     // matrix and track the resulting sub-expression if so.
-                    auto row_major_access = row_major_accesses.Get(accessor->Object());
-                    if (row_major_access) {
-                        row_major_accesses.Add(accessor, *row_major_access.value);
+                    if (row_major_accesses.Contains(accessor->Object())) {
+                        row_major_accesses.Add(accessor);
                         row_major_accesses.Remove(accessor->Object());
                     }
                 }
@@ -166,8 +163,7 @@ struct TransposeRowMajor::State {
 
             // Check for loads from all or part of a transposed matrix and replace them.
             if (auto* load = sem_expr->As<sem::Load>()) {
-                auto row_major_access = row_major_accesses.Get(load->Source());
-                if (row_major_access) {
+                if (row_major_accesses.Contains(load->Source())) {
                     ReplaceLoad(load);
                     row_major_accesses.Remove(load->Source());
                 }
