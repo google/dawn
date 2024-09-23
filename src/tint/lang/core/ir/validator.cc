@@ -1166,6 +1166,10 @@ void Validator::CheckFunction(const Function* func) {
         if (DAWN_UNLIKELY(!func->WorkgroupSize().has_value())) {
             AddError(func) << "compute entry point requires workgroup size attribute";
         }
+
+        if (DAWN_UNLIKELY(func->ReturnType() && !func->ReturnType()->Is<core::type::Void>())) {
+            AddError(func) << "compute entry point must not have a return type";
+        }
     }
 
     // References not allowed on function signatures even with Capability::kAllowRefTypes.

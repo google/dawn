@@ -451,6 +451,28 @@ note: # Disassembly
 )");
 }
 
+TEST_F(IR_ValidatorTest, Function_ComputeNonVoidReturn) {
+    auto* f = b.Function("my_func", ty.f32());
+    f->SetStage(Function::PipelineStage::kCompute);
+    f->SetWorkgroupSize(1, 1, 1);
+    b.Append(f->Block(), [&] { b.Unreachable(); });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_EQ(res.Failure().reason.Str(),
+              R"(:1:1 error: compute entry point must not have a return type
+%my_func = @compute @workgroup_size(1, 1, 1) func():f32 {
+^^^^^^^^
+
+note: # Disassembly
+%my_func = @compute @workgroup_size(1, 1, 1) func():f32 {
+  $B1: {
+    unreachable
+  }
+}
+)");
+}
+
 TEST_F(IR_ValidatorTest, Function_VertexBasicPosition) {
     auto* f = b.Function("my_func", ty.vec4<f32>());
     f->SetStage(Function::PipelineStage::kVertex);
