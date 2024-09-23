@@ -10,8 +10,11 @@ buffer tint_symbol_1_1_ssbo {
   S tint_symbol;
 } v_1;
 int tint_mod_i32(int lhs, int rhs) {
-  int v_2 = ((((rhs == 0) | ((lhs == (-2147483647 - 1)) & (rhs == -1)))) ? (1) : (rhs));
-  return (lhs - ((lhs / v_2) * v_2));
+  uint v_2 = uint((lhs == (-2147483647 - 1)));
+  bool v_3 = bool((v_2 & uint((rhs == -1))));
+  uint v_4 = uint((rhs == 0));
+  int v_5 = ((bool((v_4 | uint(v_3)))) ? (1) : (rhs));
+  return (lhs - ((lhs / v_5) * v_5));
 }
 void foo() {
   v_1.tint_symbol.a = tint_mod_i32(v_1.tint_symbol.a, 2);

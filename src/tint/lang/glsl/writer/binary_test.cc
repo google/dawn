@@ -122,6 +122,63 @@ INSTANTIATE_TEST_SUITE_P(
                     BinaryData{"(left <= right)", core::BinaryOp::kLessThanEqual},
                     BinaryData{"(left >= right)", core::BinaryOp::kGreaterThanEqual}));
 
+using GlslWriterBinaryBitwiseBoolTest = GlslWriterTestWithParam<BinaryData>;
+TEST_P(GlslWriterBinaryBitwiseBoolTest, Emit) {
+    auto params = GetParam();
+
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kCompute);
+    func->SetWorkgroupSize(1, 1, 1);
+    b.Append(func->Block(), [&] {
+        auto* l = b.Let("left", b.Constant(true));
+        auto* r = b.Let("right", b.Constant(false));
+        auto* bin = b.Binary(params.op, ty.bool_(), l, r);
+        b.Let("val", bin);
+        b.Return(func);
+    });
+
+    ASSERT_TRUE(Generate()) << err_ << output_.glsl;
+    EXPECT_EQ(output_.glsl, GlslHeader() + R"(
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+void main() {
+  bool left = true;
+  bool right = false;
+  uint v = uint(left);
+  bool val = bool((v )" + params.result +
+                                R"( uint(right)));
+}
+)");
+}
+
+TEST_P(GlslWriterBinaryBitwiseBoolTest, EmitVec) {
+    auto params = GetParam();
+
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kCompute);
+    func->SetWorkgroupSize(1, 1, 1);
+    b.Append(func->Block(), [&] {
+        auto* l = b.Let("left", b.Splat(ty.vec2<bool>(), true));
+        auto* r = b.Let("right", b.Splat(ty.vec2<bool>(), false));
+        auto* bin = b.Binary(params.op, ty.vec2<bool>(), l, r);
+        b.Let("val", bin);
+        b.Return(func);
+    });
+
+    ASSERT_TRUE(Generate()) << err_ << output_.glsl;
+    EXPECT_EQ(output_.glsl, GlslHeader() + R"(
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+void main() {
+  bvec2 left = bvec2(true);
+  bvec2 right = bvec2(false);
+  uvec2 v = uvec2(left);
+  bvec2 val = bvec2((v )" + params.result +
+                                R"( uvec2(right)));
+}
+)");
+}
+INSTANTIATE_TEST_SUITE_P(GlslWriterTest,
+                         GlslWriterBinaryBitwiseBoolTest,
+                         testing::Values(BinaryData{"&", core::BinaryOp::kAnd},
+                                         BinaryData{"|", core::BinaryOp::kOr}));
+
 // TODO(dsinclair): Test int_div_mod polyfil
 TEST_F(GlslWriterTest, DISABLED_Binary_Int_Div_Polyfill) {}
 
@@ -130,9 +187,6 @@ TEST_F(GlslWriterTest, DISABLED_Binary_Int_Mod_Polyfill) {}
 
 // TODO(dsinclair): Polyfill conversion to relational functions
 TEST_F(GlslWriterTest, DISABLED_Binary_Relational_Vector) {}
-
-// TODO(dsinclair): Bitwise bool
-TEST_F(GlslWriterTest, DISABLED_Binary_Bitwise_Bool) {}
 
 // TODO(dsinclair): Float Modulo
 TEST_F(GlslWriterTest, DISABLED_Binary_Float_Modulo) {}

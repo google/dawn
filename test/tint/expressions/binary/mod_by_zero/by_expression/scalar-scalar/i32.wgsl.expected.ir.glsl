@@ -1,10 +1,11 @@
-SKIP: FAILED
-
 #version 310 es
 
 int tint_mod_i32(int lhs, int rhs) {
-  int v = ((((rhs == 0) | ((lhs == (-2147483647 - 1)) & (rhs == -1)))) ? (1) : (rhs));
-  return (lhs - ((lhs / v) * v));
+  uint v = uint((lhs == (-2147483647 - 1)));
+  bool v_1 = bool((v & uint((rhs == -1))));
+  uint v_2 = uint((rhs == 0));
+  int v_3 = ((bool((v_2 | uint(v_1)))) ? (1) : (rhs));
+  return (lhs - ((lhs / v_3) * v_3));
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
@@ -12,13 +13,3 @@ void main() {
   int b = 0;
   int r = tint_mod_i32(a, (b + b));
 }
-error: Error parsing GLSL shader:
-ERROR: 0:4: '&' :  wrong operand types: no operation '&' exists that takes a left-hand operand of type ' temp bool' and a right operand of type ' temp bool' (or there is no acceptable conversion)
-ERROR: 0:4: '|' :  wrong operand types: no operation '|' exists that takes a left-hand operand of type ' temp bool' and a right operand of type ' temp bool' (or there is no acceptable conversion)
-ERROR: 0:4: '' : compilation terminated 
-ERROR: 3 compilation errors.  No code generated.
-
-
-
-
-tint executable returned error: exit status 1

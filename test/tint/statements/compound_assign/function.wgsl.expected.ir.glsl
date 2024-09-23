@@ -1,7 +1,10 @@
 #version 310 es
 
 int tint_div_i32(int lhs, int rhs) {
-  return (lhs / ((((rhs == 0) | ((lhs == (-2147483647 - 1)) & (rhs == -1)))) ? (1) : (rhs)));
+  uint v = uint((lhs == (-2147483647 - 1)));
+  bool v_1 = bool((v & uint((rhs == -1))));
+  uint v_2 = uint((rhs == 0));
+  return (lhs / ((bool((v_2 | uint(v_1)))) ? (1) : (rhs)));
 }
 void foo() {
   int a = 0;

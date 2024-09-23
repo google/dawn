@@ -10,11 +10,15 @@ buffer tint_symbol_1_1_ssbo {
   S tint_symbol;
 } v_1;
 ivec4 tint_mod_v4i32(ivec4 lhs, ivec4 rhs) {
-  int v_2 = ((((rhs == ivec4(0)) | ((lhs == ivec4((-2147483647 - 1))) & (rhs == ivec4(-1)))).x) ? (ivec4(1).x) : (rhs.x));
-  int v_3 = ((((rhs == ivec4(0)) | ((lhs == ivec4((-2147483647 - 1))) & (rhs == ivec4(-1)))).y) ? (ivec4(1).y) : (rhs.y));
-  int v_4 = ((((rhs == ivec4(0)) | ((lhs == ivec4((-2147483647 - 1))) & (rhs == ivec4(-1)))).z) ? (ivec4(1).z) : (rhs.z));
-  ivec4 v_5 = ivec4(v_2, v_3, v_4, ((((rhs == ivec4(0)) | ((lhs == ivec4((-2147483647 - 1))) & (rhs == ivec4(-1)))).w) ? (ivec4(1).w) : (rhs.w)));
-  return (lhs - ((lhs / v_5) * v_5));
+  uvec4 v_2 = uvec4((lhs == ivec4((-2147483647 - 1))));
+  bvec4 v_3 = bvec4((v_2 & uvec4((rhs == ivec4(-1)))));
+  uvec4 v_4 = uvec4((rhs == ivec4(0)));
+  bvec4 v_5 = bvec4((v_4 | uvec4(v_3)));
+  int v_6 = ((v_5.x) ? (ivec4(1).x) : (rhs.x));
+  int v_7 = ((v_5.y) ? (ivec4(1).y) : (rhs.y));
+  int v_8 = ((v_5.z) ? (ivec4(1).z) : (rhs.z));
+  ivec4 v_9 = ivec4(v_6, v_7, v_8, ((v_5.w) ? (ivec4(1).w) : (rhs.w)));
+  return (lhs - ((lhs / v_9) * v_9));
 }
 void foo() {
   v_1.tint_symbol.a = tint_mod_v4i32(v_1.tint_symbol.a, ivec4(2));

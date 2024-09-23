@@ -47,6 +47,7 @@
 #include "src/tint/lang/core/ir/transform/vectorize_scalar_matrix_constructors.h"
 #include "src/tint/lang/core/ir/transform/zero_init_workgroup_memory.h"
 #include "src/tint/lang/glsl/writer/common/option_helpers.h"
+#include "src/tint/lang/glsl/writer/raise/binary_polyfill.h"
 #include "src/tint/lang/glsl/writer/raise/bitcast_polyfill.h"
 #include "src/tint/lang/glsl/writer/raise/builtin_polyfill.h"
 #include "src/tint/lang/glsl/writer/raise/shader_io.h"
@@ -124,6 +125,7 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
         RUN_TRANSFORM(core::ir::transform::ZeroInitWorkgroupMemory, module);
     }
 
+    RUN_TRANSFORM(raise::BinaryPolyfill, module);
     // Must come after zero-init as it will add builtins
     RUN_TRANSFORM(raise::BuiltinPolyfill, module);
     // Must come after BuiltinPolyfill as builtins can add bitcasts
