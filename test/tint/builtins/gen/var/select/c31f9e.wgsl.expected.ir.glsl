@@ -1,5 +1,3 @@
-SKIP: FAILED
-
 #version 310 es
 precision highp float;
 precision highp int;
@@ -13,18 +11,11 @@ int select_c31f9e() {
   bool arg_1 = true;
   bool arg_2 = true;
   bool res = ((arg_2) ? (arg_1) : (arg_0));
-  return ((all((res == false))) ? (1) : (0));
+  return (((res == false)) ? (1) : (0));
 }
 void main() {
   v.tint_symbol = select_c31f9e();
 }
-error: Error parsing GLSL shader:
-ERROR: 0:14: 'all' : no matching overloaded function found 
-ERROR: 0:14: '' : compilation terminated 
-ERROR: 2 compilation errors.  No code generated.
-
-
-
 #version 310 es
 
 layout(binding = 0, std430)
@@ -36,19 +27,12 @@ int select_c31f9e() {
   bool arg_1 = true;
   bool arg_2 = true;
   bool res = ((arg_2) ? (arg_1) : (arg_0));
-  return ((all((res == false))) ? (1) : (0));
+  return (((res == false)) ? (1) : (0));
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
   v.tint_symbol = select_c31f9e();
 }
-error: Error parsing GLSL shader:
-ERROR: 0:12: 'all' : no matching overloaded function found 
-ERROR: 0:12: '' : compilation terminated 
-ERROR: 2 compilation errors.  No code generated.
-
-
-
 #version 310 es
 
 
@@ -63,7 +47,7 @@ int select_c31f9e() {
   bool arg_1 = true;
   bool arg_2 = true;
   bool res = ((arg_2) ? (arg_1) : (arg_0));
-  return ((all((res == false))) ? (1) : (0));
+  return (((res == false)) ? (1) : (0));
 }
 VertexOutput vertex_main_inner() {
   VertexOutput tint_symbol = VertexOutput(vec4(0.0f), 0);
@@ -79,12 +63,3 @@ void main() {
   vertex_main_loc0_Output = v.prevent_dce;
   gl_PointSize = 1.0f;
 }
-error: Error parsing GLSL shader:
-ERROR: 0:15: 'all' : no matching overloaded function found 
-ERROR: 0:15: '' : compilation terminated 
-ERROR: 2 compilation errors.  No code generated.
-
-
-
-
-tint executable returned error: exit status 1

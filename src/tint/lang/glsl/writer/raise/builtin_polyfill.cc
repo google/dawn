@@ -68,6 +68,12 @@ struct State {
         for (auto* inst : ir.Instructions()) {
             if (auto* call = inst->As<core::ir::CoreBuiltinCall>()) {
                 switch (call->Func()) {
+                    case core::BuiltinFn::kAll:
+                    case core::BuiltinFn::kAny:
+                        if (call->Args()[0]->Type()->Is<core::type::Scalar>()) {
+                            call_worklist.Push(call);
+                        }
+                        break;
                     case core::BuiltinFn::kArrayLength:
                     case core::BuiltinFn::kAtomicCompareExchangeWeak:
                     case core::BuiltinFn::kAtomicSub:
@@ -96,6 +102,10 @@ struct State {
         // Replace the builtin calls that we found
         for (auto* call : call_worklist) {
             switch (call->Func()) {
+                case core::BuiltinFn::kAll:
+                case core::BuiltinFn::kAny:
+                    ConvertToNop(call);
+                    break;
                 case core::BuiltinFn::kArrayLength:
                     ArrayLength(call);
                     break;
@@ -144,6 +154,11 @@ struct State {
                     TINT_UNREACHABLE();
             }
         }
+    }
+
+    void ConvertToNop(core::ir::Call* call) {
+        call->Result(0)->ReplaceAllUsesWith(call->Args()[0]);
+        call->Destroy();
     }
 
     void ArrayLength(core::ir::Call* call) {

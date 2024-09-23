@@ -1452,5 +1452,39 @@ void main() {
 )");
 }
 
+TEST_F(GlslWriterTest, AnyScalar) {
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        b.Let("x", b.Call(ty.bool_(), core::BuiltinFn::kAny, true));
+        b.Return(func);
+    });
+
+    ASSERT_TRUE(Generate()) << err_ << output_.glsl;
+    EXPECT_EQ(output_.glsl, GlslHeader() + R"(precision highp float;
+precision highp int;
+
+void main() {
+  bool x = true;
+}
+)");
+}
+
+TEST_F(GlslWriterTest, AllScalar) {
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        b.Let("x", b.Call(ty.bool_(), core::BuiltinFn::kAll, false));
+        b.Return(func);
+    });
+
+    ASSERT_TRUE(Generate()) << err_ << output_.glsl;
+    EXPECT_EQ(output_.glsl, GlslHeader() + R"(precision highp float;
+precision highp int;
+
+void main() {
+  bool x = false;
+}
+)");
+}
+
 }  // namespace
 }  // namespace tint::glsl::writer
