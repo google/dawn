@@ -82,7 +82,7 @@
 # results: [ Failure RetryOnFailure Skip Slow ]
 # END TAG HEADER
 
-# Last rolled: 2024-09-19 06:35:49AM
+# Last rolled: 2024-09-23 10:58:37PM
 
 # Flaky on all platforms
 crbug.com/42251085 webgpu:shader,validation,expression,call,builtin,log:values:stage="override";type="f32" [ RetryOnFailure ]
@@ -150,9 +150,9 @@ crbug.com/341327472 [ intel-0x4680 linux ] webgpu:api,validation,state,device_lo
 ################################################################################
 
 # textureNumLayers tests failing on all OpenGLES backends
-crbug.com/368087174 webgpu:shader,execution,expression,call,builtin,textureNumLayers:storage:* [ Failure ]
 crbug.com/368087174 webgpu:shader,execution,expression,call,builtin,textureNumLayers:arrayed:texture_type="texture_depth_2d_array" [ Failure ]
 crbug.com/368087174 webgpu:shader,execution,expression,call,builtin,textureNumLayers:sampled:texture_type="texture_2d_array" [ Failure ]
+crbug.com/368087174 webgpu:shader,execution,expression,call,builtin,textureNumLayers:storage:* [ Failure ]
 
 # depth_bias validation failures (also failing in Core)
 crbug.com/365922174 webgpu:api,validation,render_pipeline,depth_stencil_state:depth_bias:* [ Failure ]
@@ -501,6 +501,8 @@ crbug.com/368241687 [ android-pixel-6 arm ] webgpu:shader,execution,expression,c
 
 # textureSampleLevel() failures on Pixel 6
 # these are also failing on Vulkan (WebGPU Core) on the same device
+crbug.com/367807042 [ android-pixel-6 arm ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:depth_2d_coords:format="depth16unorm" [ Failure ]
+crbug.com/367807042 [ android-pixel-6 arm ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:depth_2d_coords:format="depth32float" [ Failure ]
 crbug.com/367807042 [ android-pixel-6 arm ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:sampled_2d_coords:format="astc-4x4-unorm" [ Failure ]
 crbug.com/367807042 [ android-pixel-6 arm ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:sampled_2d_coords:format="astc-4x4-unorm-srgb" [ Failure ]
 crbug.com/367807042 [ android-pixel-6 arm ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:sampled_2d_coords:format="astc-5x4-unorm" [ Failure ]
@@ -571,13 +573,11 @@ crbug.com/367807042 [ android-pixel-6 arm ] webgpu:shader,execution,expression,c
 crbug.com/367807042 [ android-pixel-6 arm ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:sampled_array_2d_coords:format="rgba8snorm" [ Failure ]
 crbug.com/367807042 [ android-pixel-6 arm ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:sampled_array_2d_coords:format="rgba8unorm" [ Failure ]
 crbug.com/367807042 [ android-pixel-6 arm ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:sampled_array_2d_coords:format="rgba8unorm-srgb" [ Failure ]
-crbug.com/367807042 [ android-pixel-6 arm ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:depth_2d_coords:format="depth16unorm" [ Failure ]
-crbug.com/367807042 [ android-pixel-6 arm ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:depth_2d_coords:format="depth32float" [ Failure ]
 
 # limits:const_array_elements failures
 # also failing on Vulkan Pixel 6 (Core) and NVidia GL ES Compat
 crbug.com/dawn/0000 [ android-pixel-6 arm ] webgpu:shader,execution,limits:const_array_elements: [ Failure ]
-crbug.com/dawn/0000 [ nvidia-0x2184 linux ] webgpu:shader,execution,limits:const_array_elements: [ Failure ]
+crbug.com/dawn/0000 [ linux nvidia-0x2184 ] webgpu:shader,execution,limits:const_array_elements: [ Failure ]
 
 # importExternalTexture,sampleWithVideoFrameWithVisibleRectParam failures on Pixel 6
 # also failing on Vulkan Pixel 6 (Core)
@@ -1227,6 +1227,7 @@ crbug.com/365974434 [ android arm ] webgpu:shader,execution,robust_access_vertex
 crbug.com/365974434 [ android arm ] webgpu:shader,execution,robust_access_vertex:vertex_buffer_access:indexed=false;indirect=true;drawCallTestParameter="vertexCount";type="float32x4";additionalBuffers=4;partialLastNumber=false;offsetVertexBuffer=true [ Failure ]
 crbug.com/365974434 [ android arm ] webgpu:shader,execution,robust_access_vertex:vertex_buffer_access:indexed=false;indirect=true;drawCallTestParameter="vertexCount";type="float32x4";additionalBuffers=4;partialLastNumber=true;offsetVertexBuffer=false [ Failure ]
 crbug.com/365974434 [ android arm ] webgpu:shader,execution,robust_access_vertex:vertex_buffer_access:indexed=false;indirect=true;drawCallTestParameter="vertexCount";type="float32x4";additionalBuffers=4;partialLastNumber=true;offsetVertexBuffer=true [ Failure ]
+crbug.com/365974434 [ android arm ] webgpu:shader,execution,robust_access_vertex:vertex_buffer_access:indexed=true;indirect=false;drawCallTestParameter="baseVertex";type="float32";additionalBuffers=0;partialLastNumber=false;offsetVertexBuffer=false [ Failure ]
 crbug.com/365974434 [ android arm ] webgpu:shader,execution,robust_access_vertex:vertex_buffer_access:indexed=true;indirect=false;drawCallTestParameter="baseVertex";type="float32x2";additionalBuffers=0;partialLastNumber=false;offsetVertexBuffer=false [ Failure ]
 crbug.com/365974434 [ android arm ] webgpu:shader,execution,robust_access_vertex:vertex_buffer_access:indexed=true;indirect=false;drawCallTestParameter="baseVertex";type="float32x2";additionalBuffers=0;partialLastNumber=false;offsetVertexBuffer=true [ Failure ]
 crbug.com/365974434 [ android arm ] webgpu:shader,execution,robust_access_vertex:vertex_buffer_access:indexed=true;indirect=false;drawCallTestParameter="baseVertex";type="float32x2";additionalBuffers=0;partialLastNumber=true;offsetVertexBuffer=false [ Failure ]
@@ -1235,6 +1236,9 @@ crbug.com/365974434 [ android arm ] webgpu:shader,execution,robust_access_vertex
 crbug.com/365974434 [ android arm ] webgpu:shader,execution,robust_access_vertex:vertex_buffer_access:indexed=true;indirect=false;drawCallTestParameter="baseVertex";type="float32x2";additionalBuffers=4;partialLastNumber=false;offsetVertexBuffer=true [ Failure ]
 crbug.com/365974434 [ android arm ] webgpu:shader,execution,robust_access_vertex:vertex_buffer_access:indexed=true;indirect=false;drawCallTestParameter="baseVertex";type="float32x2";additionalBuffers=4;partialLastNumber=true;offsetVertexBuffer=false [ Failure ]
 crbug.com/365974434 [ android arm ] webgpu:shader,execution,robust_access_vertex:vertex_buffer_access:indexed=true;indirect=false;drawCallTestParameter="baseVertex";type="float32x2";additionalBuffers=4;partialLastNumber=true;offsetVertexBuffer=true [ Failure ]
+crbug.com/365974434 [ android arm ] webgpu:shader,execution,robust_access_vertex:vertex_buffer_access:indexed=true;indirect=false;drawCallTestParameter="baseVertex";type="float32x3";additionalBuffers=4;partialLastNumber=false;offsetVertexBuffer=true [ Failure ]
+crbug.com/365974434 [ android arm ] webgpu:shader,execution,robust_access_vertex:vertex_buffer_access:indexed=true;indirect=false;drawCallTestParameter="baseVertex";type="float32x3";additionalBuffers=4;partialLastNumber=true;offsetVertexBuffer=false [ Failure ]
+crbug.com/365974434 [ android arm ] webgpu:shader,execution,robust_access_vertex:vertex_buffer_access:indexed=true;indirect=false;drawCallTestParameter="baseVertex";type="float32x3";additionalBuffers=4;partialLastNumber=true;offsetVertexBuffer=true [ Failure ]
 crbug.com/365974434 [ android arm ] webgpu:shader,execution,robust_access_vertex:vertex_buffer_access:indexed=true;indirect=false;drawCallTestParameter="baseVertex";type="float32x4";additionalBuffers=4;partialLastNumber=false;offsetVertexBuffer=false [ Failure ]
 crbug.com/365974434 [ android arm ] webgpu:shader,execution,robust_access_vertex:vertex_buffer_access:indexed=true;indirect=false;drawCallTestParameter="baseVertex";type="float32x4";additionalBuffers=4;partialLastNumber=false;offsetVertexBuffer=true [ Failure ]
 crbug.com/365974434 [ android arm ] webgpu:shader,execution,robust_access_vertex:vertex_buffer_access:indexed=true;indirect=false;drawCallTestParameter="baseVertex";type="float32x4";additionalBuffers=4;partialLastNumber=true;offsetVertexBuffer=false [ Failure ]
@@ -1281,10 +1285,6 @@ crbug.com/365974434 [ android arm ] webgpu:shader,execution,robust_access_vertex
 crbug.com/365974434 [ android arm ] webgpu:shader,execution,robust_access_vertex:vertex_buffer_access:indexed=true;indirect=true;drawCallTestParameter="vertexCountInIndexBuffer";type="float32x2";additionalBuffers=0;partialLastNumber=true;offsetVertexBuffer=true [ Failure ]
 crbug.com/365974434 [ android arm ] webgpu:shader,execution,robust_access_vertex:vertex_buffer_access:indexed=true;indirect=true;drawCallTestParameter="vertexCountInIndexBuffer";type="float32x4";additionalBuffers=0;partialLastNumber=false;offsetVertexBuffer=true [ Failure ]
 crbug.com/365974434 [ android arm ] webgpu:shader,execution,robust_access_vertex:vertex_buffer_access:indexed=true;indirect=true;drawCallTestParameter="vertexCountInIndexBuffer";type="float32x4";additionalBuffers=0;partialLastNumber=true;offsetVertexBuffer=true [ Failure ]
-crbug.com/365974434 [ android arm ] webgpu:shader,execution,robust_access_vertex:vertex_buffer_access:indexed=true;indirect=false;drawCallTestParameter="baseVertex";type="float32x3";additionalBuffers=4;partialLastNumber=false;offsetVertexBuffer=true [ Failure ]
-crbug.com/365974434 [ android arm ] webgpu:shader,execution,robust_access_vertex:vertex_buffer_access:indexed=true;indirect=false;drawCallTestParameter="baseVertex";type="float32x3";additionalBuffers=4;partialLastNumber=true;offsetVertexBuffer=true [ Failure ]
-crbug.com/365974434 [ android arm ] webgpu:shader,execution,robust_access_vertex:vertex_buffer_access:indexed=true;indirect=false;drawCallTestParameter="baseVertex";type="float32";additionalBuffers=0;partialLastNumber=false;offsetVertexBuffer=false [ Failure ]
-crbug.com/365974434 [ android arm ] webgpu:shader,execution,robust_access_vertex:vertex_buffer_access:indexed=true;indirect=false;drawCallTestParameter="baseVertex";type="float32x3";additionalBuffers=4;partialLastNumber=true;offsetVertexBuffer=false [ Failure ]
 
 # memory_sync also flaky on Android (too flaky for RetryOnFailure)
 crbug.com/dawn/0000 [ android arm ] webgpu:api,operation,memory_sync,buffer,multiple_buffers:wr:boundary="command-buffer";readOp="input-indirect-dispatch";readContext="compute-pass-encoder";writeOp="b2b-copy";writeContext="command-encoder" [ Failure ]
@@ -1443,15 +1443,15 @@ crbug.com/364917742 [ android arm ] webgpu:api,operation,command_buffer,image_co
 # canvas,configure failures on Pixel 6
 # Error is: "VALIDATION FAILED: Validation succeeded unexpectedly."
 crbug.com/364904749 [ android arm ] webgpu:web_platform,canvas,configure:viewFormats:canvasType="offscreen";format="rgba16float";viewFormatFeature="_undef_" [ Failure ]
-crbug.com/364904749 [ android arm ] webgpu:web_platform,canvas,configure:viewFormats:canvasType="offscreen";format="rgba8unorm";viewFormatFeature="_undef_" [ Failure ]
-crbug.com/364904749 [ android arm ] webgpu:web_platform,canvas,configure:viewFormats:canvasType="onscreen";format="rgba16float";viewFormatFeature="_undef_" [ Failure ]
-crbug.com/364904749 [ android arm ] webgpu:web_platform,canvas,configure:viewFormats:canvasType="onscreen";format="rgba8unorm";viewFormatFeature="_undef_" [ Failure ]
 crbug.com/364904749 [ android arm ] webgpu:web_platform,canvas,configure:viewFormats:canvasType="offscreen";format="rgba16float";viewFormatFeature="texture-compression-astc" [ Failure ]
 crbug.com/364904749 [ android arm ] webgpu:web_platform,canvas,configure:viewFormats:canvasType="offscreen";format="rgba16float";viewFormatFeature="texture-compression-etc2" [ Failure ]
+crbug.com/364904749 [ android arm ] webgpu:web_platform,canvas,configure:viewFormats:canvasType="offscreen";format="rgba8unorm";viewFormatFeature="_undef_" [ Failure ]
 crbug.com/364904749 [ android arm ] webgpu:web_platform,canvas,configure:viewFormats:canvasType="offscreen";format="rgba8unorm";viewFormatFeature="texture-compression-astc" [ Failure ]
 crbug.com/364904749 [ android arm ] webgpu:web_platform,canvas,configure:viewFormats:canvasType="offscreen";format="rgba8unorm";viewFormatFeature="texture-compression-etc2" [ Failure ]
+crbug.com/364904749 [ android arm ] webgpu:web_platform,canvas,configure:viewFormats:canvasType="onscreen";format="rgba16float";viewFormatFeature="_undef_" [ Failure ]
 crbug.com/364904749 [ android arm ] webgpu:web_platform,canvas,configure:viewFormats:canvasType="onscreen";format="rgba16float";viewFormatFeature="texture-compression-astc" [ Failure ]
 crbug.com/364904749 [ android arm ] webgpu:web_platform,canvas,configure:viewFormats:canvasType="onscreen";format="rgba16float";viewFormatFeature="texture-compression-etc2" [ Failure ]
+crbug.com/364904749 [ android arm ] webgpu:web_platform,canvas,configure:viewFormats:canvasType="onscreen";format="rgba8unorm";viewFormatFeature="_undef_" [ Failure ]
 crbug.com/364904749 [ android arm ] webgpu:web_platform,canvas,configure:viewFormats:canvasType="onscreen";format="rgba8unorm";viewFormatFeature="texture-compression-astc" [ Failure ]
 crbug.com/364904749 [ android arm ] webgpu:web_platform,canvas,configure:viewFormats:canvasType="onscreen";format="rgba8unorm";viewFormatFeature="texture-compression-etc2" [ Failure ]
 
@@ -1606,8 +1606,6 @@ crbug.com/dawn/366000875 webgpu:shader,validation,decl,var:var_access_mode_bad_o
 # New flakes. Please triage - will be discarded/regenerated by the next roll:
 # ##ROLLER_DISCARD_AND_REWRITE##
 ################################################################################
-crbug.com/dawn/0000 [ angle-opengl dawn-no-backend-validation desktop display-server-x graphite-disabled intel-0x9bc5 no-asan no-clang-coverage oop-c passthrough release renderer-skia-gl target-cpu-64 ubuntu webgpu-adapter-default webgpu-no-worker ] webgpu:shader,execution,robust_access_vertex:* [ RetryOnFailure ]
-crbug.com/dawn/0000 [ angle-opengl dawn-no-backend-validation desktop display-server-x graphite-disabled no-asan no-clang-coverage nvidia-0x2184 oop-c passthrough release renderer-skia-gl target-cpu-64 ubuntu webgpu-adapter-default webgpu-no-worker ] webgpu:api,operation,adapter,requestAdapter:requestAdapter:powerPreference="high-performance";forceFallbackAdapter=false [ RetryOnFailure ]
 crbug.com/dawn/0000 [ intel-0x9bc5 ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="1d";readMethod="CopyToTexture";format="r8snorm" [ RetryOnFailure ]
 crbug.com/dawn/0000 [ intel-0x9bc5 ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="1d";readMethod="CopyToTexture";format="rgba8snorm" [ RetryOnFailure ]
 crbug.com/dawn/0000 [ intel-0x9bc5 ] webgpu:shader,execution,expression,binary,af_matrix_scalar_multiplication:matrix_scalar:inputSource="const";cols=4;rows=4 [ RetryOnFailure ]
@@ -1631,6 +1629,8 @@ crbug.com/dawn/0000 [ intel-0x9bc5 ] webgpu:shader,execution,expression,call,bui
 crbug.com/dawn/0000 [ intel-0x9bc5 ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:sampled_array_2d_coords:format="astc-10x6-unorm" [ RetryOnFailure ]
 crbug.com/dawn/0000 [ intel-0x9bc5 ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:sampled_array_2d_coords:format="astc-10x6-unorm-srgb" [ RetryOnFailure ]
 crbug.com/dawn/0000 [ intel-0x9bc5 ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:sampled_array_2d_coords:format="astc-4x4-unorm-srgb" [ RetryOnFailure ]
+crbug.com/dawn/0000 [ intel-0x9bc5 ] webgpu:shader,execution,robust_access_vertex:* [ RetryOnFailure ]
+crbug.com/dawn/0000 [ nvidia-0x2184 ] webgpu:api,operation,adapter,requestAdapter:requestAdapter:powerPreference="high-performance";forceFallbackAdapter=false [ RetryOnFailure ]
 crbug.com/dawn/0000 [ nvidia-0x2184 ] webgpu:api,operation,adapter,requestDevice:limit,better_than_supported:limit="maxColorAttachmentBytesPerSample" [ RetryOnFailure ]
 crbug.com/dawn/0000 [ nvidia-0x2184 ] webgpu:shader,execution,expression,binary,af_matrix_addition:matrix:inputSource="const";cols=4;rows=4 [ RetryOnFailure ]
 crbug.com/dawn/0000 [ nvidia-0x2184 ] webgpu:shader,execution,expression,call,builtin,cross:f32:inputSource="storage_rw" [ RetryOnFailure ]
@@ -1641,27 +1641,49 @@ crbug.com/dawn/0000 [ nvidia-0x2184 ] webgpu:shader,execution,expression,call,bu
 ################################################################################
 crbug.com/dawn/0000 webgpu:api,operation,adapter,requestDevice:always_returns_device:compatibilityMode=false [ Failure ]
 crbug.com/dawn/0000 webgpu:api,operation,uncapturederror:iff_uncaptured:errorType="out-of-memory" [ Failure ]
-crbug.com/dawn/0000 webgpu:api,validation,render_pipeline,misc:no_attachment:* [ Failure ]
-crbug.com/dawn/0000 webgpu:api,validation,render_pipeline,misc:vertex_state_only:* [ Failure ]
+crbug.com/dawn/0000 webgpu:shader,execution,expression,call,builtin,abs:f32:inputSource="const";vectorize="_undef_" [ Failure ]
+crbug.com/dawn/0000 webgpu:shader,execution,expression,call,builtin,abs:f32:inputSource="const";vectorize=2 [ Failure ]
+crbug.com/dawn/0000 webgpu:shader,execution,expression,call,builtin,abs:f32:inputSource="const";vectorize=3 [ Failure ]
+crbug.com/dawn/0000 webgpu:shader,execution,expression,call,builtin,abs:f32:inputSource="const";vectorize=4 [ Failure ]
+crbug.com/dawn/0000 webgpu:shader,execution,expression,call,builtin,bitcast:af_to_f32:* [ Failure ]
+crbug.com/dawn/0000 webgpu:shader,execution,expression,call,builtin,bitcast:f32_to_f32:inputSource="const";vectorize="_undef_";alias=false [ Failure ]
+crbug.com/dawn/0000 webgpu:shader,execution,expression,call,builtin,bitcast:f32_to_f32:inputSource="const";vectorize="_undef_";alias=true [ Failure ]
+crbug.com/dawn/0000 webgpu:shader,execution,expression,call,builtin,bitcast:f32_to_f32:inputSource="const";vectorize=2;alias=false [ Failure ]
+crbug.com/dawn/0000 webgpu:shader,execution,expression,call,builtin,bitcast:f32_to_f32:inputSource="const";vectorize=2;alias=true [ Failure ]
+crbug.com/dawn/0000 webgpu:shader,execution,expression,call,builtin,bitcast:f32_to_f32:inputSource="const";vectorize=3;alias=false [ Failure ]
+crbug.com/dawn/0000 webgpu:shader,execution,expression,call,builtin,bitcast:f32_to_f32:inputSource="const";vectorize=3;alias=true [ Failure ]
+crbug.com/dawn/0000 webgpu:shader,execution,expression,call,builtin,bitcast:f32_to_f32:inputSource="const";vectorize=4;alias=false [ Failure ]
+crbug.com/dawn/0000 webgpu:shader,execution,expression,call,builtin,bitcast:f32_to_f32:inputSource="const";vectorize=4;alias=true [ Failure ]
 crbug.com/dawn/0000 webgpu:shader,execution,expression,call,builtin,determinant:f32:inputSource="const";dim=2 [ Failure ]
+crbug.com/dawn/0000 webgpu:shader,execution,expression,call,builtin,modf:f32_fract:inputSource="const" [ Failure ]
+crbug.com/dawn/0000 webgpu:shader,execution,expression,call,builtin,saturate:f32:inputSource="const";vectorize="_undef_" [ Failure ]
+crbug.com/dawn/0000 webgpu:shader,execution,expression,call,builtin,saturate:f32:inputSource="const";vectorize=2 [ Failure ]
+crbug.com/dawn/0000 webgpu:shader,execution,expression,call,builtin,saturate:f32:inputSource="const";vectorize=3 [ Failure ]
+crbug.com/dawn/0000 webgpu:shader,execution,expression,call,builtin,saturate:f32:inputSource="const";vectorize=4 [ Failure ]
+crbug.com/dawn/0000 webgpu:shader,execution,expression,call,builtin,textureSampleLevel:depth_2d_coords:* [ Failure ]
 crbug.com/dawn/0000 webgpu:shader,execution,expression,call,builtin,textureSampleLevel:depth_3d_coords:format="depth16unorm";viewDimension="cube" [ Failure ]
 crbug.com/dawn/0000 webgpu:shader,execution,expression,call,builtin,textureSampleLevel:depth_3d_coords:format="depth32float";viewDimension="cube" [ Failure ]
 crbug.com/dawn/0000 webgpu:shader,execution,expression,call,builtin,textureSampleLevel:depth_array_2d_coords:* [ Failure ]
+crbug.com/dawn/0000 webgpu:shader,execution,expression,unary,f32_arithmetic:negation:inputSource="const";vectorize="_undef_" [ Failure ]
+crbug.com/dawn/0000 webgpu:shader,execution,expression,unary,f32_arithmetic:negation:inputSource="const";vectorize=2 [ Failure ]
+crbug.com/dawn/0000 webgpu:shader,execution,expression,unary,f32_arithmetic:negation:inputSource="const";vectorize=3 [ Failure ]
+crbug.com/dawn/0000 webgpu:shader,execution,expression,unary,f32_arithmetic:negation:inputSource="const";vectorize=4 [ Failure ]
+crbug.com/dawn/0000 webgpu:shader,execution,expression,unary,f32_conversion:f32:inputSource="const";vectorize="_undef_" [ Failure ]
+crbug.com/dawn/0000 webgpu:shader,execution,expression,unary,f32_conversion:f32:inputSource="const";vectorize=2 [ Failure ]
+crbug.com/dawn/0000 webgpu:shader,execution,expression,unary,f32_conversion:f32:inputSource="const";vectorize=3 [ Failure ]
+crbug.com/dawn/0000 webgpu:shader,execution,expression,unary,f32_conversion:f32:inputSource="const";vectorize=4 [ Failure ]
 crbug.com/dawn/0000 webgpu:web_platform,external_texture,video:importExternalTexture,cameraCapture:* [ Failure ]
-crbug.com/dawn/0000 [ angle-opengl dawn-no-backend-validation desktop display-server-x graphite-disabled intel-0x4680 no-asan no-clang-coverage oop-c passthrough release renderer-skia-gl target-cpu-64 ubuntu webgpu-adapter-default webgpu-no-worker ] webgpu:shader,execution,expression,call,builtin,dpdxFine:* [ Failure ]
-crbug.com/dawn/0000 [ angle-opengl dawn-no-backend-validation desktop display-server-x graphite-disabled intel-0x4680 no-asan no-clang-coverage oop-c passthrough release renderer-skia-gl target-cpu-64 ubuntu webgpu-adapter-default webgpu-no-worker ] webgpu:shader,execution,expression,call,builtin,dpdyFine:* [ Failure ]
-crbug.com/dawn/0000 [ angle-opengl dawn-no-backend-validation desktop display-server-x graphite-disabled intel-0x4680 no-asan no-clang-coverage oop-c passthrough release renderer-skia-gl target-cpu-64 ubuntu webgpu-adapter-default webgpu-no-worker ] webgpu:shader,execution,expression,call,builtin,textureGather:depth_3d_coords:* [ Failure ]
-crbug.com/dawn/0000 [ angle-opengl dawn-no-backend-validation desktop display-server-x graphite-disabled intel-0x4680 no-asan no-clang-coverage oop-c passthrough release renderer-skia-gl target-cpu-64 ubuntu webgpu-adapter-default webgpu-no-worker ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:depth_2d_coords:* [ Failure ]
-crbug.com/dawn/0000 [ angle-opengl dawn-no-backend-validation desktop display-server-x graphite-disabled intel-0x4680 no-asan no-clang-coverage oop-c passthrough release renderer-skia-gl target-cpu-64 ubuntu webgpu-adapter-default webgpu-no-worker ] webgpu:shader,execution,robust_access_vertex:* [ Failure ]
-crbug.com/dawn/0000 [ angle-opengl dawn-no-backend-validation desktop display-server-x graphite-disabled intel-0x4680 no-asan no-clang-coverage oop-c passthrough release renderer-skia-gl target-cpu-64 ubuntu webgpu-adapter-default webgpu-no-worker ] webgpu:web_platform,canvas,configure:viewFormats:* [ Failure ]
-crbug.com/dawn/0000 [ angle-opengl dawn-no-backend-validation desktop display-server-x graphite-disabled intel-0x9bc5 no-asan no-clang-coverage oop-c passthrough release renderer-skia-gl target-cpu-64 ubuntu webgpu-adapter-default webgpu-no-worker ] webgpu:shader,execution,expression,call,builtin,fwidthFine:* [ Failure ]
-crbug.com/dawn/0000 [ angle-opengl dawn-no-backend-validation desktop display-server-x graphite-disabled intel-0x9bc5 no-asan no-clang-coverage oop-c passthrough release renderer-skia-gl target-cpu-64 ubuntu webgpu-adapter-default webgpu-no-worker ] webgpu:shader,execution,expression,call,builtin,textureGather:depth_3d_coords:* [ Failure ]
-crbug.com/dawn/0000 [ angle-opengl dawn-no-backend-validation desktop display-server-x graphite-disabled intel-0x9bc5 no-asan no-clang-coverage oop-c passthrough release renderer-skia-gl target-cpu-64 ubuntu webgpu-adapter-default webgpu-no-worker ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:depth_2d_coords:* [ Failure ]
-crbug.com/dawn/0000 [ angle-opengl dawn-no-backend-validation desktop display-server-x graphite-disabled no-asan no-clang-coverage nvidia-0x2184 oop-c passthrough release renderer-skia-gl target-cpu-64 ubuntu webgpu-adapter-default webgpu-no-worker ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:depth_2d_coords:* [ Failure ]
+crbug.com/dawn/0000 [ intel-0x4680 ] webgpu:shader,execution,expression,call,builtin,dpdxFine:* [ Failure ]
+crbug.com/dawn/0000 [ intel-0x4680 ] webgpu:shader,execution,expression,call,builtin,dpdyFine:* [ Failure ]
 crbug.com/dawn/0000 [ intel-0x4680 ] webgpu:shader,execution,expression,call,builtin,textureGather:depth_2d_coords:* [ Failure ]
+crbug.com/dawn/0000 [ intel-0x4680 ] webgpu:shader,execution,expression,call,builtin,textureGather:depth_3d_coords:* [ Failure ]
 crbug.com/dawn/0000 [ intel-0x4680 ] webgpu:shader,execution,expression,call,builtin,textureGather:depth_array_2d_coords:format="depth16unorm";minFilter="nearest" [ Failure ]
 crbug.com/dawn/0000 [ intel-0x4680 ] webgpu:shader,execution,expression,call,builtin,textureGather:depth_array_2d_coords:format="depth32float";minFilter="nearest" [ Failure ]
+crbug.com/dawn/0000 [ intel-0x4680 ] webgpu:shader,execution,robust_access_vertex:* [ Failure ]
+crbug.com/dawn/0000 [ intel-0x4680 ] webgpu:web_platform,canvas,configure:viewFormats:* [ Failure ]
 crbug.com/dawn/0000 [ intel-0x4680 ] webgpu:web_platform,canvas,getCurrentTexture:resize:canvasType="offscreen" [ Failure ]
+crbug.com/dawn/0000 [ intel-0x9bc5 ] webgpu:shader,execution,expression,call,builtin,fwidthFine:* [ Failure ]
 crbug.com/dawn/0000 [ intel-0x9bc5 ] webgpu:shader,execution,expression,call,builtin,textureGather:depth_2d_coords:* [ Failure ]
+crbug.com/dawn/0000 [ intel-0x9bc5 ] webgpu:shader,execution,expression,call,builtin,textureGather:depth_3d_coords:* [ Failure ]
 crbug.com/dawn/0000 [ intel-0x9bc5 ] webgpu:shader,execution,expression,call,builtin,textureGather:depth_array_2d_coords:format="depth16unorm";minFilter="nearest" [ Failure ]
 crbug.com/dawn/0000 [ intel-0x9bc5 ] webgpu:shader,execution,expression,call,builtin,textureGather:depth_array_2d_coords:format="depth32float";minFilter="nearest" [ Failure ]
