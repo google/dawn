@@ -367,6 +367,13 @@ struct less<raw_ptr<T, Traits>> {
     bool operator()(const raw_ptr<T, Traits>& lhs, T* rhs) const { return lhs < rhs; }
 };
 
+template <typename T, RawPtrTraits Traits>
+struct hash<raw_ptr<T, Traits>> {
+    typedef raw_ptr<T, Traits> argument_type;
+    typedef std::size_t result_type;
+    result_type operator()(argument_type const& ptr) const { return hash<T*>()(ptr.get()); }
+};
+
 // Define for cases where raw_ptr<T> holds a pointer to an array of type T. This is consistent with
 // definition of std::iterator_traits<T*>. Algorithms like std::binary_search need that.
 template <typename T, RawPtrTraits Traits>
