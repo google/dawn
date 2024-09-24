@@ -1,5 +1,3 @@
-SKIP: FAILED
-
 #version 310 es
 #extension GL_AMD_gpu_shader_half_float: require
 precision highp float;
@@ -13,19 +11,13 @@ struct modf_result_vec4_f16 {
 
 void modf_995934() {
   f16vec4 arg_0 = f16vec4(-1.5hf);
-  modf_result_vec4_f16 res = modf(arg_0);
+  modf_result_vec4_f16 v = modf_result_vec4_f16(f16vec4(0.0hf), f16vec4(0.0hf));
+  v.fract = modf(arg_0, v.whole);
+  modf_result_vec4_f16 res = v;
 }
 void main() {
   modf_995934();
 }
-error: Error parsing GLSL shader:
-ERROR: 0:14: 'modf' : no matching overloaded function found 
-ERROR: 0:14: '=' :  cannot convert from ' const float' to ' temp structure{ global 4-component vector of float16_t fract,  global 4-component vector of float16_t whole}'
-ERROR: 0:14: '' : compilation terminated 
-ERROR: 3 compilation errors.  No code generated.
-
-
-
 #version 310 es
 #extension GL_AMD_gpu_shader_half_float: require
 
@@ -37,20 +29,14 @@ struct modf_result_vec4_f16 {
 
 void modf_995934() {
   f16vec4 arg_0 = f16vec4(-1.5hf);
-  modf_result_vec4_f16 res = modf(arg_0);
+  modf_result_vec4_f16 v = modf_result_vec4_f16(f16vec4(0.0hf), f16vec4(0.0hf));
+  v.fract = modf(arg_0, v.whole);
+  modf_result_vec4_f16 res = v;
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
   modf_995934();
 }
-error: Error parsing GLSL shader:
-ERROR: 0:12: 'modf' : no matching overloaded function found 
-ERROR: 0:12: '=' :  cannot convert from ' const float' to ' temp structure{ global 4-component vector of float16_t fract,  global 4-component vector of float16_t whole}'
-ERROR: 0:12: '' : compilation terminated 
-ERROR: 3 compilation errors.  No code generated.
-
-
-
 #version 310 es
 #extension GL_AMD_gpu_shader_half_float: require
 
@@ -66,7 +52,9 @@ struct VertexOutput {
 
 void modf_995934() {
   f16vec4 arg_0 = f16vec4(-1.5hf);
-  modf_result_vec4_f16 res = modf(arg_0);
+  modf_result_vec4_f16 v = modf_result_vec4_f16(f16vec4(0.0hf), f16vec4(0.0hf));
+  v.fract = modf(arg_0, v.whole);
+  modf_result_vec4_f16 res = v;
 }
 VertexOutput vertex_main_inner() {
   VertexOutput tint_symbol = VertexOutput(vec4(0.0f));
@@ -80,13 +68,3 @@ void main() {
   gl_Position[2u] = ((2.0f * gl_Position.z) - gl_Position.w);
   gl_PointSize = 1.0f;
 }
-error: Error parsing GLSL shader:
-ERROR: 0:16: 'modf' : no matching overloaded function found 
-ERROR: 0:16: '=' :  cannot convert from ' const float' to ' temp structure{ global 4-component vector of float16_t fract,  global 4-component vector of float16_t whole}'
-ERROR: 0:16: '' : compilation terminated 
-ERROR: 3 compilation errors.  No code generated.
-
-
-
-
-tint executable returned error: exit status 1

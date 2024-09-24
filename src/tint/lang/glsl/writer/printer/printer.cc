@@ -1355,7 +1355,6 @@ class Printer : public tint::TextGenerator {
             case core::BuiltinFn::kLog2:
             case core::BuiltinFn::kMax:
             case core::BuiltinFn::kMin:
-            case core::BuiltinFn::kModf:
             case core::BuiltinFn::kNormalize:
             case core::BuiltinFn::kPow:
             case core::BuiltinFn::kRadians:

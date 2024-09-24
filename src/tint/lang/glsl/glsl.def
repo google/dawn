@@ -97,8 +97,8 @@ match workgroup_or_storage:
   address_space.storage |
   address_space.workgroup
 
-match storage
-  : address_space.storage
+match function: address_space.function
+match storage: address_space.storage
 
 match f32_texel_format
   : texel_format.r8unorm
@@ -167,7 +167,12 @@ implicit(T: iu32, N: num) fn bitfieldInsert(base: vec<N, T>,
 fn packFloat2x16(value: vec2<f16>) -> u32
 fn unpackFloat2x16(value: u32) -> vec2<f16>
 
+
 implicit(T: f32_f16, N: num) fn dot(vec<N, T>, vec<N, T>) -> T
+
+@must_use @const implicit(T: f32_f16) fn modf(value: T, result: ptr<function, T, read_write>) -> T
+@must_use @const implicit(N: num, T: f32_f16) fn modf(value: vec<N, T>,
+                                                      result: ptr<function, vec<N, T>, read_write>) -> vec<N, T>
 
 @must_use implicit(T: fiu32) fn textureSize(texture: texture_1d<T>,
                                             level: i32) -> i32

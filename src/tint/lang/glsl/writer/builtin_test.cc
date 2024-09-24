@@ -1534,5 +1534,69 @@ void main() {
 )");
 }
 
+TEST_F(GlslWriterTest, Modf_Scalar) {
+    auto* value = b.FunctionParam<f32>("value");
+    auto* func = b.Function("foo", ty.f32());
+    func->SetParams({value});
+    b.Append(func->Block(), [&] {
+        auto* result = b.Call(core::type::CreateModfResult(ty, mod.symbols, ty.f32()),
+                              core::BuiltinFn::kModf, value);
+        auto* fract = b.Access<f32>(result, 0_u);
+        auto* whole = b.Access<f32>(result, 1_u);
+        b.Return(func, b.Add<f32>(fract, whole));
+    });
+
+    ASSERT_TRUE(Generate()) << err_ << output_.glsl;
+    EXPECT_EQ(output_.glsl, GlslHeader() + R"(
+
+struct modf_result_f32 {
+  float fract;
+  float whole;
+};
+
+float foo(float value) {
+  modf_result_f32 v = modf_result_f32(0.0f, 0.0f);
+  v.fract = modf(value, v.whole);
+  modf_result_f32 v_1 = v;
+  return (v_1.fract + v_1.whole);
+}
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+void main() {
+}
+)");
+}
+
+TEST_F(GlslWriterTest, Modf_Vector) {
+    auto* value = b.FunctionParam<vec4<f32>>("value");
+    auto* func = b.Function("foo", ty.vec4<f32>());
+    func->SetParams({value});
+    b.Append(func->Block(), [&] {
+        auto* result = b.Call(core::type::CreateModfResult(ty, mod.symbols, ty.vec4<f32>()),
+                              core::BuiltinFn::kModf, value);
+        auto* fract = b.Access<vec4<f32>>(result, 0_u);
+        auto* whole = b.Access<vec4<f32>>(result, 1_u);
+        b.Return(func, b.Add<vec4<f32>>(fract, whole));
+    });
+
+    ASSERT_TRUE(Generate()) << err_ << output_.glsl;
+    EXPECT_EQ(output_.glsl, GlslHeader() + R"(
+
+struct modf_result_vec4_f32 {
+  vec4 fract;
+  vec4 whole;
+};
+
+vec4 foo(vec4 value) {
+  modf_result_vec4_f32 v = modf_result_vec4_f32(vec4(0.0f), vec4(0.0f));
+  v.fract = modf(value, v.whole);
+  modf_result_vec4_f32 v_1 = v;
+  return (v_1.fract + v_1.whole);
+}
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+void main() {
+}
+)");
+}
+
 }  // namespace
 }  // namespace tint::glsl::writer

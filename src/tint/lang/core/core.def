@@ -242,6 +242,7 @@ enum usages {
   num_levels
   original_value
   samples
+  result
   width
 }
 

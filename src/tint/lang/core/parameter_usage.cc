@@ -90,6 +90,8 @@ std::string_view ToString(ParameterUsage usage) {
             return "offset";
         case ParameterUsage::kOriginalValue:
             return "original_value";
+        case ParameterUsage::kResult:
+            return "result";
         case ParameterUsage::kSampleIndex:
             return "sample_index";
         case ParameterUsage::kSampler:

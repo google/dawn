@@ -1699,5 +1699,117 @@ TEST_F(GlslWriter_BuiltinPolyfillTest, DotU32) {
     EXPECT_EQ(expected, str());
 }
 
+TEST_F(GlslWriter_BuiltinPolyfillTest, Modf_Scalar) {
+    auto* value = b.FunctionParam<f32>("value");
+    auto* func = b.Function("foo", ty.f32());
+    func->SetParams({value});
+    b.Append(func->Block(), [&] {
+        auto* result = b.Call(core::type::CreateModfResult(ty, mod.symbols, ty.f32()),
+                              core::BuiltinFn::kModf, value);
+        auto* fract = b.Access<f32>(result, 0_u);
+        auto* whole = b.Access<f32>(result, 1_u);
+        b.Return(func, b.Add<f32>(fract, whole));
+    });
+
+    auto* src = R"(
+__modf_result_f32 = struct @align(4) {
+  fract:f32 @offset(0)
+  whole:f32 @offset(4)
+}
+
+%foo = func(%value:f32):f32 {
+  $B1: {
+    %3:__modf_result_f32 = modf %value
+    %4:f32 = access %3, 0u
+    %5:f32 = access %3, 1u
+    %6:f32 = add %4, %5
+    ret %6
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+__modf_result_f32 = struct @align(4) {
+  fract:f32 @offset(0)
+  whole:f32 @offset(4)
+}
+
+%foo = func(%value:f32):f32 {
+  $B1: {
+    %3:ptr<function, __modf_result_f32, read_write> = var
+    %4:ptr<function, f32, read_write> = access %3, 1u
+    %5:f32 = glsl.modf %value, %4
+    %6:ptr<function, f32, read_write> = access %3, 0u
+    store %6, %5
+    %7:__modf_result_f32 = load %3
+    %8:f32 = access %7, 0u
+    %9:f32 = access %7, 1u
+    %10:f32 = add %8, %9
+    ret %10
+  }
+}
+)";
+
+    Run(BuiltinPolyfill);
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(GlslWriter_BuiltinPolyfillTest, Modf_Vector) {
+    auto* value = b.FunctionParam<vec4<f32>>("value");
+    auto* func = b.Function("foo", ty.vec4<f32>());
+    func->SetParams({value});
+    b.Append(func->Block(), [&] {
+        auto* result = b.Call(core::type::CreateModfResult(ty, mod.symbols, ty.vec4<f32>()),
+                              core::BuiltinFn::kModf, value);
+        auto* fract = b.Access<vec4<f32>>(result, 0_u);
+        auto* whole = b.Access<vec4<f32>>(result, 1_u);
+        b.Return(func, b.Add<vec4<f32>>(fract, whole));
+    });
+
+    auto* src = R"(
+__modf_result_vec4_f32 = struct @align(16) {
+  fract:vec4<f32> @offset(0)
+  whole:vec4<f32> @offset(16)
+}
+
+%foo = func(%value:vec4<f32>):vec4<f32> {
+  $B1: {
+    %3:__modf_result_vec4_f32 = modf %value
+    %4:vec4<f32> = access %3, 0u
+    %5:vec4<f32> = access %3, 1u
+    %6:vec4<f32> = add %4, %5
+    ret %6
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+__modf_result_vec4_f32 = struct @align(16) {
+  fract:vec4<f32> @offset(0)
+  whole:vec4<f32> @offset(16)
+}
+
+%foo = func(%value:vec4<f32>):vec4<f32> {
+  $B1: {
+    %3:ptr<function, __modf_result_vec4_f32, read_write> = var
+    %4:ptr<function, vec4<f32>, read_write> = access %3, 1u
+    %5:vec4<f32> = glsl.modf %value, %4
+    %6:ptr<function, vec4<f32>, read_write> = access %3, 0u
+    store %6, %5
+    %7:__modf_result_vec4_f32 = load %3
+    %8:vec4<f32> = access %7, 0u
+    %9:vec4<f32> = access %7, 1u
+    %10:vec4<f32> = add %8, %9
+    ret %10
+  }
+}
+)";
+
+    Run(BuiltinPolyfill);
+    EXPECT_EQ(expect, str());
+}
+
 }  // namespace
 }  // namespace tint::glsl::writer::raise
