@@ -28,6 +28,7 @@
 #ifndef SRC_DAWN_WIRE_CLIENT_ADAPTER_H_
 #define SRC_DAWN_WIRE_CLIENT_ADAPTER_H_
 
+#include <string>
 #include <vector>
 
 #include "dawn/wire/WireClient.h"
@@ -68,6 +69,10 @@ class Adapter final : public ObjectWithEventsBase {
   private:
     LimitsAndFeatures mLimitsAndFeatures;
     WGPUAdapterInfo mInfo;
+    std::string mVendor;
+    std::string mArchitecture;
+    std::string mDeviceName;
+    std::string mDescription;
     std::vector<WGPUMemoryHeapInfo> mMemoryHeapInfo;
     WGPUAdapterPropertiesD3D mD3DProperties;
     WGPUAdapterPropertiesVk mVkProperties;

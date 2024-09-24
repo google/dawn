@@ -163,6 +163,17 @@ void Adapter::SetFeatures(const WGPUFeatureName* features, uint32_t featuresCoun
 
 void Adapter::SetInfo(const WGPUAdapterInfo* info) {
     mInfo = *info;
+
+    // Deep copy the string pointed out by info.
+    mVendor = info->vendor;
+    mInfo.vendor = mVendor.c_str();
+    mArchitecture = info->architecture;
+    mInfo.architecture = mArchitecture.c_str();
+    mDeviceName = info->device;
+    mInfo.device = mDeviceName.c_str();
+    mDescription = info->description;
+    mInfo.description = mDescription.c_str();
+
     mInfo.nextInChain = nullptr;
 
     // Loop through the chained struct.
