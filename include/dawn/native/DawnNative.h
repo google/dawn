@@ -284,12 +284,17 @@ class DAWN_NATIVE_EXPORT MemoryDump {
     static const char kUnitsBytes[];    // Unit name to represent bytes.
     static const char kUnitsObjects[];  // Unit name to represent #objects.
 
+    MemoryDump() = default;
+
     virtual void AddScalar(const char* name,
                            const char* key,
                            const char* units,
                            uint64_t value) = 0;
 
     virtual void AddString(const char* name, const char* key, const std::string& value) = 0;
+
+    MemoryDump(const MemoryDump&) = delete;
+    MemoryDump& operator=(const MemoryDump&) = delete;
 
   protected:
     virtual ~MemoryDump() = default;

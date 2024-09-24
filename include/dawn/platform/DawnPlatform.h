@@ -73,6 +73,10 @@ class DAWN_PLATFORM_EXPORT WaitableEvent {
   public:
     WaitableEvent() = default;
     virtual ~WaitableEvent() = default;
+
+    WaitableEvent(const WaitableEvent&) = delete;
+    WaitableEvent& operator=(const WaitableEvent&) = delete;
+
     virtual void Wait() = 0;        // Wait for completion
     virtual bool IsComplete() = 0;  // Non-blocking check if the event is complete
 };
@@ -83,6 +87,10 @@ class DAWN_PLATFORM_EXPORT WorkerTaskPool {
   public:
     WorkerTaskPool() = default;
     virtual ~WorkerTaskPool() = default;
+
+    WorkerTaskPool(const WorkerTaskPool&) = delete;
+    WorkerTaskPool& operator=(const WorkerTaskPool&) = delete;
+
     virtual std::unique_ptr<WaitableEvent> PostWorkerTask(PostWorkerTaskCallback,
                                                           void* userdata) = 0;
 };
