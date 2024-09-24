@@ -1,11 +1,9 @@
-SKIP: FAILED
+#version 310 es
+precision highp float;
+precision highp int;
 
-<dawn>/src/tint/lang/glsl/writer/printer/printer.cc:994 internal compiler error: bgra8unorm should have been polyfilled to rgba8unorm
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
-
-tint executable returned error: signal: trace/BPT trap
+layout(binding = 0, rgba8) uniform highp writeonly image2D tex;
+void main() {
+  vec4 value = vec4(1.0f, 2.0f, 3.0f, 4.0f);
+  imageStore(tex, ivec2(9, 8), value.zyxw);
+}

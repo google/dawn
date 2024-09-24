@@ -29,6 +29,7 @@
 
 #include "src/tint/lang/core/ir/transform/add_empty_entry_point.h"
 #include "src/tint/lang/core/ir/transform/array_length_from_uniform.h"
+#include "src/tint/lang/core/ir/transform/bgra8unorm_polyfill.h"
 #include "src/tint/lang/core/ir/transform/binary_polyfill.h"
 #include "src/tint/lang/core/ir/transform/binding_remapper.h"
 #include "src/tint/lang/core/ir/transform/block_decorated_structs.h"
@@ -90,12 +91,10 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
         core_polyfills.pack_unpack_4x8 = true;
         core_polyfills.pack_4xu8_clamp = true;
 
-        // TODO(dsinclair): bgra8unorm
-        // TODO(dsinclair): bitshift_modulo
-        // TODO(dsinclair): int_div_mod
-
         RUN_TRANSFORM(core::ir::transform::BuiltinPolyfill, module, core_polyfills);
     }
+
+    RUN_TRANSFORM(core::ir::transform::Bgra8UnormPolyfill, module);
 
     {
         core::ir::transform::ConversionPolyfillConfig conversion_polyfills;
