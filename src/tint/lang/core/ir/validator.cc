@@ -492,6 +492,10 @@ class Validator {
     /// @param r the return to validate
     void CheckReturn(const Return* r);
 
+    /// Validates the given unreachable
+    /// @param u the unreachable to validate
+    void CheckUnreachable(const Unreachable* u);
+
     /// Validates the @p exit targets a valid @p control instruction where the instruction may jump
     /// over if control instructions.
     /// @param exit the exit to validate
@@ -1987,7 +1991,7 @@ void Validator::CheckTerminator(const Terminator* b) {
         [&](const ir::NextIteration* n) { CheckNextIteration(n); },  //
         [&](const ir::Return* ret) { CheckReturn(ret); },            //
         [&](const ir::TerminateInvocation*) {},                      //
-        [&](const ir::Unreachable*) {},                              //
+        [&](const ir::Unreachable* u) { CheckUnreachable(u); },      //
         [&](Default) { AddError(b) << "missing validation"; });
 
     if (b->next) {
@@ -2115,6 +2119,10 @@ void Validator::CheckReturn(const Return* ret) {
                           << " does not match function return type " << NameOf(func->ReturnType());
         }
     }
+}
+
+void Validator::CheckUnreachable(const Unreachable* u) {
+    CheckResultsAndOperands(u, Unreachable::kNumResults, Unreachable::kNumOperands);
 }
 
 void Validator::CheckControlsAllowingIf(const Exit* exit, const Instruction* control) {
