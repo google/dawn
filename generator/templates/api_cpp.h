@@ -561,7 +561,7 @@ class ObjectBase {
         {% endfor %}
 
         {% if CppType == "Instance" %}
-            inline WaitStatus WaitAny(Future f, uint64_t timeout);
+            inline WaitStatus WaitAny(Future f, uint64_t timeout) const;
         {% endif %}
 
       private:
@@ -927,7 +927,7 @@ void {{CppType}}::SetUncapturedErrorCallback(L callback) {
     {% endfor %}
 
     {% if CppType == "Instance" %}
-        WaitStatus Instance::WaitAny(Future f, uint64_t timeout) {
+        WaitStatus Instance::WaitAny(Future f, uint64_t timeout) const {
             FutureWaitInfo waitInfo { f };
             return WaitAny(1, &waitInfo, timeout);
         }
