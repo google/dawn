@@ -167,7 +167,8 @@ implicit(T: iu32, N: num) fn bitfieldInsert(base: vec<N, T>,
 fn packFloat2x16(value: vec2<f16>) -> u32
 fn unpackFloat2x16(value: u32) -> vec2<f16>
 
-
+implicit(N: num) fn any(vec<N, bool>) -> bool
+implicit(N: num) fn all(vec<N, bool>) -> bool
 implicit(T: f32_f16, N: num) fn dot(vec<N, T>, vec<N, T>) -> T
 
 @must_use @const implicit(T: f32_f16) fn modf(value: T, result: ptr<function, T, read_write>) -> T

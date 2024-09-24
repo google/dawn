@@ -70,15 +70,9 @@ struct State {
         Vector<core::ir::CoreBuiltinCall*, 4> call_worklist;
         for (auto* inst : ir.Instructions()) {
             if (auto* call = inst->As<core::ir::CoreBuiltinCall>()) {
-                auto args = call->Args();
-
                 switch (call->Func()) {
                     case core::BuiltinFn::kAll:
                     case core::BuiltinFn::kAny:
-                        if (args[0]->Type()->Is<core::type::Scalar>()) {
-                            call_worklist.Push(call);
-                        }
-                        break;
                     case core::BuiltinFn::kArrayLength:
                     case core::BuiltinFn::kAtomicCompareExchangeWeak:
                     case core::BuiltinFn::kAtomicSub:
@@ -110,8 +104,10 @@ struct State {
         for (auto* call : call_worklist) {
             switch (call->Func()) {
                 case core::BuiltinFn::kAll:
+                    All(call);
+                    break;
                 case core::BuiltinFn::kAny:
-                    ConvertToNop(call);
+                    Any(call);
                     break;
                 case core::BuiltinFn::kArrayLength:
                     ArrayLength(call);
@@ -169,8 +165,33 @@ struct State {
         }
     }
 
-    void ConvertToNop(core::ir::Call* call) {
-        call->Result(0)->ReplaceAllUsesWith(call->Args()[0]);
+    void Any(core::ir::BuiltinCall* call) {
+        auto args = call->Args();
+
+        if (args[0]->Type()->Is<core::type::Scalar>()) {
+            // GLSL has no scalar `any`, replace it with the arg.
+            call->Result(0)->ReplaceAllUsesWith(args[0]);
+        } else {
+            b.InsertBefore(call, [&] {
+                b.CallWithResult<glsl::ir::BuiltinCall>(call->DetachResult(), glsl::BuiltinFn::kAny,
+                                                        args[0]);
+            });
+        }
+        call->Destroy();
+    }
+
+    void All(core::ir::BuiltinCall* call) {
+        auto args = call->Args();
+
+        if (args[0]->Type()->Is<core::type::Scalar>()) {
+            // GLSL has no scalar `all`, replace it with the arg.
+            call->Result(0)->ReplaceAllUsesWith(args[0]);
+        } else {
+            b.InsertBefore(call, [&] {
+                b.CallWithResult<glsl::ir::BuiltinCall>(call->DetachResult(), glsl::BuiltinFn::kAll,
+                                                        args[0]);
+            });
+        }
         call->Destroy();
     }
 

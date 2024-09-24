@@ -1324,8 +1324,6 @@ class Printer : public tint::TextGenerator {
             case core::BuiltinFn::kAbs:
             case core::BuiltinFn::kAcos:
             case core::BuiltinFn::kAcosh:
-            case core::BuiltinFn::kAll:
-            case core::BuiltinFn::kAny:
             case core::BuiltinFn::kAsin:
             case core::BuiltinFn::kAsinh:
             case core::BuiltinFn::kAtan:
