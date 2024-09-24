@@ -726,6 +726,12 @@ void PhysicalDevice::SetupBackendDeviceToggles(dawn::platform::Platform* platfor
         }
     }
 
+    // B2T copy failed with stencil8 format on Intel ACM/MTL/ARL GPUs. See
+    // https://issues.chromium.org/issues/368085621 for more information.
+    if (gpu_info::IsAlchemist(deviceId) || gpu_info::IsMeteorlakeOrArrowlake(deviceId)) {
+        deviceToggles->Default(Toggle::UseBlitForBufferToStencilTextureCopy, true);
+    }
+
     // Currently these workarounds are needed on Intel Gen9.5 and Gen11 GPUs, as well as
     // AMD GPUS.
     // See http://crbug.com/1237175, http://crbug.com/dawn/1628, and http://crbug.com/dawn/2032

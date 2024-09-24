@@ -40,10 +40,6 @@ namespace {
 // Referenced from the following Mesa source code:
 // https://gitlab.freedesktop.org/mesa/mesa/-/blob/main/include/pci_ids/iris_pci_ids.h
 // gen9
-const std::array<PCIDeviceID, 25> Skylake = {
-    {0x1902, 0x1906, 0x190A, 0x190B, 0x190E, 0x1912, 0x1913, 0x1915, 0x1916,
-     0x1917, 0x191A, 0x191B, 0x191D, 0x191E, 0x1921, 0x1923, 0x1926, 0x1927,
-     0x192A, 0x192B, 0x192D, 0x1932, 0x193A, 0x193B, 0x193D}};
 const std::array<PCIDeviceID, 2> IrisPlus655 = {{0x3EA5, 0x3EA8}};
 
 // According to Intel graphics driver version schema, build number is generated from the
@@ -116,7 +112,15 @@ int CompareIntelMesaDriverVersion(const DriverVersion& version1, const DriverVer
 
 // Intel GPUs
 bool IsSkylake(PCIDeviceID deviceId) {
-    return std::find(Skylake.cbegin(), Skylake.cend(), deviceId) != Skylake.cend();
+    return (deviceId & 0xFF00) == 0x1900;
+}
+
+bool IsAlchemist(PCIDeviceID deviceId) {
+    return (deviceId & 0xFF00) == 0x5600;
+}
+
+bool IsMeteorlakeOrArrowlake(PCIDeviceID deviceId) {
+    return (deviceId & 0xFF00) == 0x7D00;
 }
 
 bool IsIrisPlus655(PCIDeviceID deviceId) {
