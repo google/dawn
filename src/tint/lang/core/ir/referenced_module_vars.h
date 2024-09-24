@@ -88,6 +88,9 @@ class ReferencedModuleVars {
         // Loop over module-scope variables, recording the blocks that they are referenced from.
         BlockT* root_block = ir.root_block;
         for (auto* inst : *root_block) {
+            if (!inst) {
+                continue;
+            }
             if (auto* var = inst->template As<VarT>()) {
                 if (pred(var)) {
                     if (!var->Result(0)) {
@@ -112,7 +115,7 @@ class ReferencedModuleVars {
     VarSet& TransitiveReferences(FunctionT* func) {
         return transitive_references_.GetOrAdd(func, [&] {
             VarSet vars;
-            GetTransitiveReferences(func->Block(), vars);
+            GetTransitiveReferences(func ? func->Block() : nullptr, vars);
             return vars;
         });
     }
@@ -128,6 +131,10 @@ class ReferencedModuleVars {
     /// @param block the block
     /// @param vars the set of transitively reference module-scope variables to populate
     void GetTransitiveReferences(BlockT* block, VarSet& vars) {
+        if (!block) {
+            return;
+        }
+
         // Add directly referenced vars.
         if (auto itr = block_to_direct_vars_.Get(block)) {
             for (auto& var : *itr) {

@@ -418,5 +418,25 @@ $B1: {  # root
     EXPECT_THAT(vars.TransitiveReferences(foo), ElementsAre(var_b, var_d));
 }
 
+TEST_F(IR_ReferencedModuleVarsTest, ReferencesForNullFunction) {
+    auto* foo = b.Function("foo", ty.void_());
+    b.Append(foo->Block(), [&] {  //
+        b.Return(foo);
+    });
+
+    auto* src = R"(
+%foo = func():void {
+  $B1: {
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, Disassemble());
+
+    ReferencedModuleVars<Module> vars(mod);
+    auto& null_vars = vars.TransitiveReferences(nullptr);
+    EXPECT_TRUE(null_vars.IsEmpty());
+}
+
 }  // namespace
 }  // namespace tint::core::ir
