@@ -979,6 +979,9 @@ TEST_P(SubgroupsShaderInclusiveTest, InclusiveExecution) {
         // This was observed for D3D12 NVIDIA GeForce GTX 1660
         DAWN_SUPPRESS_TEST_IF(gpu_info::IsNvidiaTuring(GetParam().adapterProperties.vendorID,
                                                        GetParam().adapterProperties.deviceID));
+        // TODO(361330160): Also fails on MacBookPro16,1 with AMD Radeon Pro 5300M
+        DAWN_SUPPRESS_TEST_IF(gpu_info::IsAMDRDNA1(GetParam().adapterProperties.vendorID,
+                                                   GetParam().adapterProperties.deviceID));
 
         DAWN_ASSERT(IsShaderF16EnabledInWGSL() && IsSubgroupsEnabledInWGSL() &&
                     IsSubgroupsF16EnabledInWGSL());
