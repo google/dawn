@@ -151,6 +151,7 @@ enum class Format : uint8_t {
     kWgsl,
     kMsl,
     kHlsl,
+    kHlslFxc,
     kGlsl,
     kIr,
 };
@@ -275,6 +276,7 @@ bool ParseArgs(tint::VectorRef<std::string_view> arguments,
     WGSL_WRITER_ONLY(format_enum_names.Emplace(Format::kWgsl, "wgsl"));
     MSL_WRITER_ONLY(format_enum_names.Emplace(Format::kMsl, "msl"));
     HLSL_WRITER_ONLY(format_enum_names.Emplace(Format::kHlsl, "hlsl"));
+    HLSL_WRITER_ONLY(format_enum_names.Emplace(Format::kHlslFxc, "hlsl-fxc"));
     GLSL_WRITER_ONLY(format_enum_names.Emplace(Format::kGlsl, "glsl"));
     WGSL_READER_ONLY(format_enum_names.Emplace(Format::kIr, "ir"));
 
@@ -316,13 +318,13 @@ If not provided, will be inferred from output filename extension:
 #if TINT_BUILD_HLSL_WRITER
     auto& fxc_path =
         options.Add<StringOption>("fxc", R"(Path to FXC dll, used to validate HLSL output.
-When specified, automatically enables HLSL validation with FXC)",
+When specified, automatically enables HLSL validation)",
                                   Parameter{"path"});
     TINT_DEFER(opts->fxc_path = fxc_path.value.value_or(""));
 
     auto& dxc_path =
         options.Add<StringOption>("dxc", R"(Path to DXC dll, used to validate HLSL output.
-When specified, automatically enables HLSL validation with DXC)",
+When specified, automatically enables HLSL validation)",
                                   Parameter{"path"});
     TINT_DEFER(opts->dxc_path = dxc_path.value.value_or(""));
 #endif  // TINT_BUILD_HLSL_WRITER
@@ -912,11 +914,7 @@ bool GenerateMsl([[maybe_unused]] const tint::Program& program,
 /// @returns true on success
 bool GenerateHlsl(const tint::Program& program, const Options& options) {
 #if TINT_BUILD_HLSL_WRITER
-    // If --fxc or --dxc was passed, then we must explicitly find and validate with that respective
-    // compiler.
-    const bool must_validate_dxc = !options.dxc_path.empty();
-    const bool must_validate_fxc = !options.fxc_path.empty();
-
+    const bool for_fxc = options.format == Format::kHlslFxc;
     // TODO(jrprice): Provide a way for the user to set non-default options.
     tint::hlsl::writer::Options gen_options;
     gen_options.disable_robustness = !options.enable_robustness;
@@ -927,6 +925,8 @@ bool GenerateHlsl(const tint::Program& program, const Options& options) {
     gen_options.polyfill_dot_4x8_packed = options.hlsl_shader_model < kMinShaderModelForDP4aInHLSL;
     gen_options.polyfill_pack_unpack_4x8 =
         options.hlsl_shader_model < kMinShaderModelForPackUnpack4x8InHLSL;
+    gen_options.compiler = for_fxc ? tint::hlsl::writer::Options::Compiler::kFXC
+                                   : tint::hlsl::writer::Options::Compiler::kDXC;
 
     tint::Result<tint::hlsl::writer::Output> result;
     if (options.use_ir) {
@@ -956,84 +956,74 @@ bool GenerateHlsl(const tint::Program& program, const Options& options) {
         PrintHash(hash);
     }
 
-    if ((options.validate || must_validate_dxc || must_validate_fxc) &&
-        (options.skip_hash.count(hash) == 0)) {
+    const bool validate =
+        (options.validate || !options.fxc_path.empty() || !options.dxc_path.empty()) &&
+        (options.skip_hash.count(hash) == 0);
+
+    if (validate && !for_fxc) {
+        // DXC validation
         tint::hlsl::validate::Result dxc_res;
-        bool dxc_found = false;
-        if (options.validate || must_validate_dxc) {
-            auto dxc =
-                tint::Command::LookPath(options.dxc_path.empty() ? tint::hlsl::validate::kDxcDLLName
-                                                                 : std::string(options.dxc_path));
-            if (dxc.Found()) {
-                dxc_found = true;
-
-                uint32_t hlsl_shader_model = options.hlsl_shader_model;
-                auto enable_list = program.AST().Enables();
-                bool dxc_require_16bit_types = false;
-                for (auto* enable : enable_list) {
-                    if (enable->HasExtension(tint::wgsl::Extension::kF16)) {
-                        dxc_require_16bit_types = true;
-                        break;
-                    }
+        const std::string dxc_path =
+            options.dxc_path.empty() ? tint::hlsl::validate::kDxcDLLName : options.dxc_path;
+        auto dxc = tint::Command::LookPath(dxc_path);
+        if (dxc.Found()) {
+            uint32_t hlsl_shader_model = options.hlsl_shader_model;
+            auto enable_list = program.AST().Enables();
+            bool dxc_require_16bit_types = false;
+            for (auto* enable : enable_list) {
+                if (enable->HasExtension(tint::wgsl::Extension::kF16)) {
+                    dxc_require_16bit_types = true;
+                    break;
                 }
-
-                dxc_res = tint::hlsl::validate::ValidateUsingDXC(
-                    dxc.Path(), result->hlsl, result->entry_points, dxc_require_16bit_types,
-                    hlsl_shader_model);
-            } else if (must_validate_dxc) {
-                // DXC was explicitly requested. Error if it could not be found.
-                dxc_res.failed = true;
-                dxc_res.output = "DXC executable '" + std::string(options.dxc_path) +
-                                 "' not found. Cannot validate";
             }
+            if (options.verbose) {
+                std::cout << "Validating with DXC: " << dxc.Path() << "\n";
+            }
+            dxc_res = tint::hlsl::validate::ValidateUsingDXC(
+                dxc.Path(), result->hlsl, result->entry_points, dxc_require_16bit_types,
+                hlsl_shader_model);
+        } else {
+            dxc_res.failed = true;
+            dxc_res.output = "DXC executable '" + dxc_path + "' not found. Cannot validate.";
         }
 
-        tint::hlsl::validate::Result fxc_res;
-        bool fxc_found = false;
-        if (options.validate || must_validate_fxc) {
-            auto fxc =
-                tint::Command::LookPath(options.fxc_path.empty() ? tint::hlsl::validate::kFxcDLLName
-                                                                 : std::string(options.fxc_path));
+        if (dxc_res.failed) {
+            std::cerr << "DXC validation failure:\n" << dxc_res.output << "\n";
+            return false;
+        }
+        if (options.verbose) {
+            std::cout << "Passed DXC validation. Compiler output:\n" << dxc_res.output << "\n";
+        }
+    }
 
-#ifdef _WIN32
-            if (fxc.Found()) {
-                fxc_found = true;
-                fxc_res = tint::hlsl::validate::ValidateUsingFXC(fxc.Path(), result->hlsl,
-                                                                 result->entry_points);
-            } else if (must_validate_fxc) {
-                // FXC was explicitly requested. Error if it could not be found.
-                fxc_res.failed = true;
-                fxc_res.output = "FXC DLL '" + options.fxc_path + "' not found. Cannot validate";
-            }
+    if (validate && for_fxc) {
+        // FXC validation
+#ifndef _WIN32
+        std::cerr << "FXC can only be used on Windows.\n";
+        return false;
 #else
-            if (must_validate_fxc) {
-                fxc_res.failed = true;
-                fxc_res.output = "FXC can only be used on Windows.";
+        tint::hlsl::validate::Result fxc_res;
+        auto fxc = tint::Command::LookPath(
+            options.fxc_path.empty() ? tint::hlsl::validate::kFxcDLLName : options.fxc_path);
+        if (fxc.Found()) {
+            if (options.verbose) {
+                std::cout << "Validating with FXC: " << fxc.Path() << "\n";
             }
-#endif  // _WIN32
+            fxc_res = tint::hlsl::validate::ValidateUsingFXC(fxc.Path(), result->hlsl,
+                                                             result->entry_points);
+        } else {
+            fxc_res.failed = true;
+            fxc_res.output = "FXC DLL '" + options.fxc_path + "' not found. Cannot validate.";
         }
 
         if (fxc_res.failed) {
             std::cerr << "FXC validation failure:\n" << fxc_res.output << "\n";
-        }
-        if (dxc_res.failed) {
-            std::cerr << "DXC validation failure:\n" << dxc_res.output << "\n";
-        }
-        if (fxc_res.failed || dxc_res.failed) {
-            return false;
-        }
-        if (!fxc_found && !dxc_found) {
-            std::cerr << "Couldn't find FXC or DXC. Cannot validate\n";
             return false;
         }
         if (options.verbose) {
-            if (fxc_found && !fxc_res.failed) {
-                std::cout << "Passed FXC validation\n" << fxc_res.output << "\n";
-            }
-            if (dxc_found && !dxc_res.failed) {
-                std::cout << "Passed DXC validation\n" << dxc_res.output << "\n";
-            }
+            std::cout << "Passed FXC validation. Compiler output:\n" << fxc_res.output << "\n";
         }
+#endif  // _WIN32
     }
 
     return true;
@@ -1382,7 +1372,8 @@ int main(int argc, const char** argv) {
             break;
         }
 #endif  // TINT_BUILD_GLSL_WRITER
-        case Format::kHlsl: {
+        case Format::kHlsl:
+        case Format::kHlslFxc: {
 #if TINT_BUILD_HLSL_WRITER
             transform_inputs.Add<tint::ast::transform::Renamer::Config>(
                 options.rename_all ? tint::ast::transform::Renamer::Target::kAll
@@ -1454,6 +1445,7 @@ int main(int argc, const char** argv) {
             success = GenerateMsl(program, options);
             break;
         case Format::kHlsl:
+        case Format::kHlslFxc:
             success = GenerateHlsl(program, options);
             break;
         case Format::kGlsl:

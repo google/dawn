@@ -711,9 +711,15 @@ func (j job) run(cfg runConfig) {
 
 		expected = strings.ReplaceAll(expected, "\r\n", "\n")
 
+		outputFormat := strings.Split(string(j.format), "-")[0] // 'hlsl-fxc-ir' -> 'hlsl', etc.
+		if j.format == hlslFXC || j.format == hlslFXCIR {
+			// Emit HLSL specifically for FXC
+			outputFormat += "-fxc"
+		}
+
 		args := []string{
 			j.file,
-			"--format", strings.Split(string(j.format), "-")[0], // 'hlsl-fxc' -> 'hlsl', etc.
+			"--format", outputFormat,
 			"--print-hash",
 		}
 

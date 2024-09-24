@@ -26,6 +26,7 @@ void main_inner(float x) {
   }
   switch(int(v)) {
     default:
+    case int(0):
     {
       break;
     }

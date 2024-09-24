@@ -3,6 +3,7 @@ void a() {
   int a_1 = int(0);
   switch(a_1) {
     default:
+    case int(0):
     {
       return;
     }

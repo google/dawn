@@ -22,6 +22,7 @@ int tint_f32_to_i32(float value) {
 void main_inner(float x) {
   switch(tint_f32_to_i32(x)) {
     default:
+    case int(0):
     {
       ddx(1.0f);
       break;

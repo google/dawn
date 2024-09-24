@@ -5,6 +5,7 @@ void f() {
   int result = int(0);
   switch(i) {
     default:
+    case int(0):
     {
       result = int(44);
       break;
