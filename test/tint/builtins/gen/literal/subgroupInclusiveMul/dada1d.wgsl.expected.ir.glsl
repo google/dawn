@@ -1,4 +1,4 @@
-SKIP: FAILED
+SKIP: INVALID
 
 ../../src/tint/lang/glsl/writer/printer/printer.cc:1452 internal compiler error: TINT_UNREACHABLE unhandled core builtin: subgroupInclusiveMul
 ********************************************************************

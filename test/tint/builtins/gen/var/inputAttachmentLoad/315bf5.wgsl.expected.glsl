@@ -1,4 +1,4 @@
-SKIP: FAILED
+SKIP: INVALID
 
 
 enable chromium_internal_input_attachments;
