@@ -358,16 +358,8 @@ MaybeError Queue::SubmitPendingCommands() {
             for (const auto& fence : fences) {
                 // All semaphores are binary semaphores.
                 DAWN_ASSERT(fence.signaledValue == 1u);
-                ExternalSemaphoreHandle semaphoreHandle = [&]() {
-                    if constexpr (std::is_same_v<ExternalSemaphoreHandle, SystemHandle::Handle>) {
-                        return ToBackend(fence.object)->GetHandle().Get();
-                    } else {
-                        // TODO(crbug.com/dawn/1745): Remove this path and make the semaphore
-                        // service use SystemHandle.
-                        DAWN_UNREACHABLE();
-                        return ExternalSemaphoreHandle{};
-                    }
-                }();
+                ExternalSemaphoreHandle semaphoreHandle =
+                    ToBackend(fence.object)->GetHandle().Get();
 
                 VkSemaphore semaphore;
                 DAWN_TRY_ASSIGN(semaphore, device->GetExternalSemaphoreService()->ImportSemaphore(

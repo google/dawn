@@ -32,29 +32,31 @@
 
 namespace dawn::native::vulkan {
 
+// ExternalSemaphoreHandle
+#if DAWN_PLATFORM_IS(WINDOWS)
+using ExternalSemaphoreHandle = HANDLE;
+const ExternalSemaphoreHandle kNullExternalSemaphoreHandle = nullptr;
+#elif DAWN_PLATFORM_IS(FUCHSIA)
+using ExternalSemaphoreHandle = zx_handle_t;
+const ExternalSemaphoreHandle kNullExternalSemaphoreHandle = ZX_HANDLE_INVALID;
+#elif DAWN_PLATFORM_IS(POSIX)
+using ExternalSemaphoreHandle = int;
+const ExternalSemaphoreHandle kNullExternalSemaphoreHandle = -1;
+#else
+#error "Platform not supported."
+#endif
+
+// ExternalMemoryHandle
 #if DAWN_PLATFORM_IS(ANDROID)
-// AHardwareBuffer
 using ExternalMemoryHandle = struct AHardwareBuffer*;
-// File descriptor
-using ExternalSemaphoreHandle = int;
-const ExternalSemaphoreHandle kNullExternalSemaphoreHandle = -1;
 #elif DAWN_PLATFORM_IS(LINUX)
-// File descriptor
 using ExternalMemoryHandle = int;
-// File descriptor
-using ExternalSemaphoreHandle = int;
-const ExternalSemaphoreHandle kNullExternalSemaphoreHandle = -1;
 #elif DAWN_PLATFORM_IS(FUCHSIA)
 // Really a Zircon vmo handle.
 using ExternalMemoryHandle = zx_handle_t;
-// Really a Zircon event handle.
-using ExternalSemaphoreHandle = zx_handle_t;
-const ExternalSemaphoreHandle kNullExternalSemaphoreHandle = ZX_HANDLE_INVALID;
 #else
-// Generic types so that the Null service can compile, not used for real handles
+// Generic types so that the rest of the Vulkan backend compiles.
 using ExternalMemoryHandle = void*;
-using ExternalSemaphoreHandle = void*;
-const ExternalSemaphoreHandle kNullExternalSemaphoreHandle = nullptr;
 #endif
 
 }  // namespace dawn::native::vulkan
