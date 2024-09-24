@@ -1516,5 +1516,188 @@ TEST_F(GlslWriter_BuiltinPolyfillTest, AllScalar) {
     EXPECT_EQ(expect, str());
 }
 
+TEST_F(GlslWriter_BuiltinPolyfillTest, DotF32) {
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        auto* x = b.Let("x", b.Splat(ty.vec3<f32>(), 2_f));
+        auto* y = b.Let("y", b.Splat(ty.vec3<f32>(), 3_f));
+        b.Let("z", b.Call(ty.f32(), core::BuiltinFn::kDot, x, y));
+        b.Return(func);
+    });
+
+    auto* src = R"(
+%foo = @fragment func():void {
+  $B1: {
+    %x:vec3<f32> = let vec3<f32>(2.0f)
+    %y:vec3<f32> = let vec3<f32>(3.0f)
+    %4:f32 = dot %x, %y
+    %z:f32 = let %4
+    ret
+  }
+}
+)";
+    ASSERT_EQ(src, str());
+
+    auto* expected = R"(
+%foo = @fragment func():void {
+  $B1: {
+    %x:vec3<f32> = let vec3<f32>(2.0f)
+    %y:vec3<f32> = let vec3<f32>(3.0f)
+    %4:f32 = glsl.dot %x, %y
+    %z:f32 = let %4
+    ret
+  }
+}
+)";
+    Run(BuiltinPolyfill);
+    EXPECT_EQ(expected, str());
+}
+
+TEST_F(GlslWriter_BuiltinPolyfillTest, DotF16) {
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        auto* x = b.Let("x", b.Splat(ty.vec4<f16>(), 2_h));
+        auto* y = b.Let("y", b.Splat(ty.vec4<f16>(), 3_h));
+        b.Let("z", b.Call(ty.f16(), core::BuiltinFn::kDot, x, y));
+        b.Return(func);
+    });
+
+    auto* src = R"(
+%foo = @fragment func():void {
+  $B1: {
+    %x:vec4<f16> = let vec4<f16>(2.0h)
+    %y:vec4<f16> = let vec4<f16>(3.0h)
+    %4:f16 = dot %x, %y
+    %z:f16 = let %4
+    ret
+  }
+}
+)";
+    ASSERT_EQ(src, str());
+
+    auto* expected = R"(
+%foo = @fragment func():void {
+  $B1: {
+    %x:vec4<f16> = let vec4<f16>(2.0h)
+    %y:vec4<f16> = let vec4<f16>(3.0h)
+    %4:f16 = glsl.dot %x, %y
+    %z:f16 = let %4
+    ret
+  }
+}
+)";
+
+    Run(BuiltinPolyfill);
+    EXPECT_EQ(expected, str());
+}
+
+TEST_F(GlslWriter_BuiltinPolyfillTest, DotI32) {
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        auto* x = b.Let("x", b.Splat(ty.vec4<i32>(), 2_i));
+        auto* y = b.Let("y", b.Splat(ty.vec4<i32>(), 3_i));
+        b.Let("z", b.Call(ty.i32(), core::BuiltinFn::kDot, x, y));
+        b.Return(func);
+    });
+
+    auto* src = R"(
+%foo = @fragment func():void {
+  $B1: {
+    %x:vec4<i32> = let vec4<i32>(2i)
+    %y:vec4<i32> = let vec4<i32>(3i)
+    %4:i32 = dot %x, %y
+    %z:i32 = let %4
+    ret
+  }
+}
+)";
+    ASSERT_EQ(src, str());
+
+    auto* expected = R"(
+%foo = @fragment func():void {
+  $B1: {
+    %x:vec4<i32> = let vec4<i32>(2i)
+    %y:vec4<i32> = let vec4<i32>(3i)
+    %4:i32 = call %tint_int_dot, %x, %y
+    %z:i32 = let %4
+    ret
+  }
+}
+%tint_int_dot = func(%x_1:vec4<i32>, %y_1:vec4<i32>):i32 {  # %x_1: 'x', %y_1: 'y'
+  $B2: {
+    %9:i32 = swizzle %x_1, x
+    %10:i32 = swizzle %y_1, x
+    %11:i32 = mul %9, %10
+    %12:i32 = swizzle %x_1, y
+    %13:i32 = swizzle %y_1, y
+    %14:i32 = mul %12, %13
+    %15:i32 = add %11, %14
+    %16:i32 = swizzle %x_1, z
+    %17:i32 = swizzle %y_1, z
+    %18:i32 = mul %16, %17
+    %19:i32 = add %15, %18
+    %20:i32 = swizzle %x_1, w
+    %21:i32 = swizzle %y_1, w
+    %22:i32 = mul %20, %21
+    %23:i32 = add %19, %22
+    ret %23
+  }
+}
+)";
+
+    Run(BuiltinPolyfill);
+    EXPECT_EQ(expected, str());
+}
+
+TEST_F(GlslWriter_BuiltinPolyfillTest, DotU32) {
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        auto* x = b.Let("x", b.Splat(ty.vec2<u32>(), 2_u));
+        auto* y = b.Let("y", b.Splat(ty.vec2<u32>(), 3_u));
+        b.Let("z", b.Call(ty.u32(), core::BuiltinFn::kDot, x, y));
+        b.Return(func);
+    });
+
+    auto* src = R"(
+%foo = @fragment func():void {
+  $B1: {
+    %x:vec2<u32> = let vec2<u32>(2u)
+    %y:vec2<u32> = let vec2<u32>(3u)
+    %4:u32 = dot %x, %y
+    %z:u32 = let %4
+    ret
+  }
+}
+)";
+    ASSERT_EQ(src, str());
+
+    auto* expected = R"(
+%foo = @fragment func():void {
+  $B1: {
+    %x:vec2<u32> = let vec2<u32>(2u)
+    %y:vec2<u32> = let vec2<u32>(3u)
+    %4:u32 = call %tint_int_dot, %x, %y
+    %z:u32 = let %4
+    ret
+  }
+}
+%tint_int_dot = func(%x_1:vec2<u32>, %y_1:vec2<u32>):u32 {  # %x_1: 'x', %y_1: 'y'
+  $B2: {
+    %9:u32 = swizzle %x_1, x
+    %10:u32 = swizzle %y_1, x
+    %11:u32 = mul %9, %10
+    %12:u32 = swizzle %x_1, y
+    %13:u32 = swizzle %y_1, y
+    %14:u32 = mul %12, %13
+    %15:u32 = add %11, %14
+    ret %15
+  }
+}
+)";
+
+    Run(BuiltinPolyfill);
+    EXPECT_EQ(expected, str());
+}
+
 }  // namespace
 }  // namespace tint::glsl::writer::raise

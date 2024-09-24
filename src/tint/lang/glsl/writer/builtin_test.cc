@@ -1486,5 +1486,53 @@ void main() {
 )");
 }
 
+TEST_F(GlslWriterTest, DotI32) {
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        auto* x = b.Let("x", b.Splat(ty.vec4<i32>(), 2_i));
+        auto* y = b.Let("y", b.Splat(ty.vec4<i32>(), 3_i));
+        b.Let("z", b.Call(ty.i32(), core::BuiltinFn::kDot, x, y));
+        b.Return(func);
+    });
+
+    ASSERT_TRUE(Generate()) << err_ << output_.glsl;
+    EXPECT_EQ(output_.glsl, GlslHeader() + R"(precision highp float;
+precision highp int;
+
+int tint_int_dot(ivec4 x, ivec4 y) {
+  return ((((x.x * y.x) + (x.y * y.y)) + (x.z * y.z)) + (x.w * y.w));
+}
+void main() {
+  ivec4 x = ivec4(2);
+  ivec4 y = ivec4(3);
+  int z = tint_int_dot(x, y);
+}
+)");
+}
+
+TEST_F(GlslWriterTest, DotU32) {
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        auto* x = b.Let("x", b.Splat(ty.vec2<u32>(), 2_u));
+        auto* y = b.Let("y", b.Splat(ty.vec2<u32>(), 3_u));
+        b.Let("z", b.Call(ty.u32(), core::BuiltinFn::kDot, x, y));
+        b.Return(func);
+    });
+
+    ASSERT_TRUE(Generate()) << err_ << output_.glsl;
+    EXPECT_EQ(output_.glsl, GlslHeader() + R"(precision highp float;
+precision highp int;
+
+uint tint_int_dot(uvec2 x, uvec2 y) {
+  return ((x.x * y.x) + (x.y * y.y));
+}
+void main() {
+  uvec2 x = uvec2(2u);
+  uvec2 y = uvec2(3u);
+  uint z = tint_int_dot(x, y);
+}
+)");
+}
+
 }  // namespace
 }  // namespace tint::glsl::writer

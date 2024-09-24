@@ -62,15 +62,20 @@ struct State {
     /// The type manager.
     core::type::Manager& ty{ir.Types()};
 
+    /// Dot polyfills for non `f32`.
+    Hashmap<const core::type::Type*, core::ir::Function*, 4> dot_funcs_{};
+
     /// Process the module.
     void Process() {
         Vector<core::ir::CoreBuiltinCall*, 4> call_worklist;
         for (auto* inst : ir.Instructions()) {
             if (auto* call = inst->As<core::ir::CoreBuiltinCall>()) {
+                auto args = call->Args();
+
                 switch (call->Func()) {
                     case core::BuiltinFn::kAll:
                     case core::BuiltinFn::kAny:
-                        if (call->Args()[0]->Type()->Is<core::type::Scalar>()) {
+                        if (args[0]->Type()->Is<core::type::Scalar>()) {
                             call_worklist.Push(call);
                         }
                         break;
@@ -79,6 +84,7 @@ struct State {
                     case core::BuiltinFn::kAtomicSub:
                     case core::BuiltinFn::kAtomicLoad:
                     case core::BuiltinFn::kCountOneBits:
+                    case core::BuiltinFn::kDot:
                     case core::BuiltinFn::kExtractBits:
                     case core::BuiltinFn::kFma:
                     case core::BuiltinFn::kInsertBits:
@@ -120,6 +126,9 @@ struct State {
                     break;
                 case core::BuiltinFn::kCountOneBits:
                     CountOneBits(call);
+                    break;
+                case core::BuiltinFn::kDot:
+                    Dot(call);
                     break;
                 case core::BuiltinFn::kExtractBits:
                     ExtractBits(call);
@@ -167,6 +176,57 @@ struct State {
                                                                   call->Args()[0]);
             b.ConvertWithResult(call->DetachResult(), len->Result(0));
         });
+        call->Destroy();
+    }
+
+    core::ir::Function* CreateDotPolyfill(const core::type::Vector* type) {
+        auto* ret_ty = type->DeepestElement();
+
+        return dot_funcs_.GetOrAdd(type, [&]() -> core::ir::Function* {
+            auto* f = b.Function("tint_int_dot", ret_ty);
+            auto* x = b.FunctionParam("x", type);
+            auto* y = b.FunctionParam("y", type);
+            f->SetParams({x, y});
+
+            b.Append(f->Block(), [&] {
+                core::ir::Value* ret = nullptr;
+
+                for (uint32_t i = 0; i < type->Width(); ++i) {
+                    auto* lhs = b.Swizzle(ret_ty, x, {i});
+                    auto* rhs = b.Swizzle(ret_ty, y, {i});
+                    auto* v = b.Multiply(ret_ty, lhs, rhs);
+
+                    if (ret != nullptr) {
+                        ret = b.Add(ret_ty, ret, v)->Result(0);
+                    } else {
+                        ret = v->Result(0);
+                    }
+                }
+
+                b.Return(f, ret);
+            });
+            return f;
+        });
+    }
+
+    // GLSL does not have a builtin for `dot` with integer vector types. Generate the helper
+    // function if it hasn't been created already
+    void Dot(core::ir::BuiltinCall* call) {
+        auto args = call->Args();
+
+        auto* vec_ty = call->Args()[0]->Type()->As<core::type::Vector>();
+        TINT_ASSERT(vec_ty);
+
+        b.InsertBefore(call, [&] {
+            if (!vec_ty->DeepestElement()->IsIntegerScalar()) {
+                b.CallWithResult<glsl::ir::BuiltinCall>(call->DetachResult(), glsl::BuiltinFn::kDot,
+                                                        args[0], args[1]);
+            } else {
+                auto* func = CreateDotPolyfill(vec_ty);
+                b.CallWithResult(call->DetachResult(), func, args[0], args[1]);
+            }
+        });
+
         call->Destroy();
     }
 

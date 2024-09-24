@@ -1345,7 +1345,6 @@ class Printer : public tint::TextGenerator {
             case core::BuiltinFn::kDegrees:
             case core::BuiltinFn::kDeterminant:
             case core::BuiltinFn::kDistance:
-            case core::BuiltinFn::kDot:
             case core::BuiltinFn::kExp:
             case core::BuiltinFn::kExp2:
             case core::BuiltinFn::kFloor:

@@ -1,5 +1,3 @@
-SKIP: FAILED
-
 #version 310 es
 precision highp float;
 precision highp int;
@@ -8,6 +6,9 @@ layout(binding = 0, std430)
 buffer tint_symbol_1_1_ssbo {
   int tint_symbol;
 } v;
+int tint_int_dot(ivec4 x, ivec4 y) {
+  return ((((x.x * y.x) + (x.y * y.y)) + (x.z * y.z)) + (x.w * y.w));
+}
 int dot4I8Packed_881e62() {
   uint arg_0 = 1u;
   uint arg_1 = 1u;
@@ -18,26 +19,21 @@ int dot4I8Packed_881e62() {
   ivec4 v_5 = (v_4 >> uvec4(24u));
   uvec4 v_6 = uvec4(24u, 16u, 8u, 0u);
   ivec4 v_7 = ivec4((uvec4(v_2) << v_6));
-  int res = dot(v_5, (v_7 >> uvec4(24u)));
+  int res = tint_int_dot(v_5, (v_7 >> uvec4(24u)));
   return res;
 }
 void main() {
   v.tint_symbol = dot4I8Packed_881e62();
 }
-error: Error parsing GLSL shader:
-ERROR: 0:19: 'dot' : no matching overloaded function found 
-ERROR: 0:19: '=' :  cannot convert from ' const float' to ' temp highp int'
-ERROR: 0:19: '' : compilation terminated 
-ERROR: 3 compilation errors.  No code generated.
-
-
-
 #version 310 es
 
 layout(binding = 0, std430)
 buffer tint_symbol_1_1_ssbo {
   int tint_symbol;
 } v;
+int tint_int_dot(ivec4 x, ivec4 y) {
+  return ((((x.x * y.x) + (x.y * y.y)) + (x.z * y.z)) + (x.w * y.w));
+}
 int dot4I8Packed_881e62() {
   uint arg_0 = 1u;
   uint arg_1 = 1u;
@@ -48,21 +44,13 @@ int dot4I8Packed_881e62() {
   ivec4 v_5 = (v_4 >> uvec4(24u));
   uvec4 v_6 = uvec4(24u, 16u, 8u, 0u);
   ivec4 v_7 = ivec4((uvec4(v_2) << v_6));
-  int res = dot(v_5, (v_7 >> uvec4(24u)));
+  int res = tint_int_dot(v_5, (v_7 >> uvec4(24u)));
   return res;
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
   v.tint_symbol = dot4I8Packed_881e62();
 }
-error: Error parsing GLSL shader:
-ERROR: 0:17: 'dot' : no matching overloaded function found 
-ERROR: 0:17: '=' :  cannot convert from ' const float' to ' temp highp int'
-ERROR: 0:17: '' : compilation terminated 
-ERROR: 3 compilation errors.  No code generated.
-
-
-
 #version 310 es
 
 
@@ -72,6 +60,9 @@ struct VertexOutput {
 };
 
 layout(location = 0) flat out int vertex_main_loc0_Output;
+int tint_int_dot(ivec4 x, ivec4 y) {
+  return ((((x.x * y.x) + (x.y * y.y)) + (x.z * y.z)) + (x.w * y.w));
+}
 int dot4I8Packed_881e62() {
   uint arg_0 = 1u;
   uint arg_1 = 1u;
@@ -82,7 +73,7 @@ int dot4I8Packed_881e62() {
   ivec4 v_4 = (v_3 >> uvec4(24u));
   uvec4 v_5 = uvec4(24u, 16u, 8u, 0u);
   ivec4 v_6 = ivec4((uvec4(v_1) << v_5));
-  int res = dot(v_4, (v_6 >> uvec4(24u)));
+  int res = tint_int_dot(v_4, (v_6 >> uvec4(24u)));
   return res;
 }
 VertexOutput vertex_main_inner() {
@@ -99,13 +90,3 @@ void main() {
   vertex_main_loc0_Output = v_7.prevent_dce;
   gl_PointSize = 1.0f;
 }
-error: Error parsing GLSL shader:
-ERROR: 0:20: 'dot' : no matching overloaded function found 
-ERROR: 0:20: '=' :  cannot convert from ' const float' to ' temp highp int'
-ERROR: 0:20: '' : compilation terminated 
-ERROR: 3 compilation errors.  No code generated.
-
-
-
-
-tint executable returned error: exit status 1

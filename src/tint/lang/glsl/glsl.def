@@ -83,6 +83,7 @@ match iu32: i32 | u32
 match fiu32: f32 | i32 | u32
 match fiu32_f16: f32 | i32 | u32 | f16
 match fiu32_f16_bool: f32 | i32 | u32 | f16 | bool
+match f32_f16: f32 | f16
 
 match read_write: access.read_write
 match readable
@@ -165,6 +166,8 @@ implicit(T: iu32, N: num) fn bitfieldInsert(base: vec<N, T>,
 
 fn packFloat2x16(value: vec2<f16>) -> u32
 fn unpackFloat2x16(value: u32) -> vec2<f16>
+
+implicit(T: f32_f16, N: num) fn dot(vec<N, T>, vec<N, T>) -> T
 
 @must_use implicit(T: fiu32) fn textureSize(texture: texture_1d<T>,
                                             level: i32) -> i32

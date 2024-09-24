@@ -1,5 +1,3 @@
-SKIP: FAILED
-
 #version 310 es
 precision highp float;
 precision highp int;
@@ -8,47 +6,37 @@ layout(binding = 0, std430)
 buffer tint_symbol_1_1_ssbo {
   int tint_symbol;
 } v;
+int tint_int_dot(ivec4 x, ivec4 y) {
+  return ((((x.x * y.x) + (x.y * y.y)) + (x.z * y.z)) + (x.w * y.w));
+}
 int dot_ef6b1d() {
   ivec4 arg_0 = ivec4(1);
   ivec4 arg_1 = ivec4(1);
-  int res = dot(arg_0, arg_1);
+  int res = tint_int_dot(arg_0, arg_1);
   return res;
 }
 void main() {
   v.tint_symbol = dot_ef6b1d();
 }
-error: Error parsing GLSL shader:
-ERROR: 0:12: 'dot' : no matching overloaded function found 
-ERROR: 0:12: '=' :  cannot convert from ' const float' to ' temp highp int'
-ERROR: 0:12: '' : compilation terminated 
-ERROR: 3 compilation errors.  No code generated.
-
-
-
 #version 310 es
 
 layout(binding = 0, std430)
 buffer tint_symbol_1_1_ssbo {
   int tint_symbol;
 } v;
+int tint_int_dot(ivec4 x, ivec4 y) {
+  return ((((x.x * y.x) + (x.y * y.y)) + (x.z * y.z)) + (x.w * y.w));
+}
 int dot_ef6b1d() {
   ivec4 arg_0 = ivec4(1);
   ivec4 arg_1 = ivec4(1);
-  int res = dot(arg_0, arg_1);
+  int res = tint_int_dot(arg_0, arg_1);
   return res;
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
   v.tint_symbol = dot_ef6b1d();
 }
-error: Error parsing GLSL shader:
-ERROR: 0:10: 'dot' : no matching overloaded function found 
-ERROR: 0:10: '=' :  cannot convert from ' const float' to ' temp highp int'
-ERROR: 0:10: '' : compilation terminated 
-ERROR: 3 compilation errors.  No code generated.
-
-
-
 #version 310 es
 
 
@@ -58,10 +46,13 @@ struct VertexOutput {
 };
 
 layout(location = 0) flat out int vertex_main_loc0_Output;
+int tint_int_dot(ivec4 x, ivec4 y) {
+  return ((((x.x * y.x) + (x.y * y.y)) + (x.z * y.z)) + (x.w * y.w));
+}
 int dot_ef6b1d() {
   ivec4 arg_0 = ivec4(1);
   ivec4 arg_1 = ivec4(1);
-  int res = dot(arg_0, arg_1);
+  int res = tint_int_dot(arg_0, arg_1);
   return res;
 }
 VertexOutput vertex_main_inner() {
@@ -78,13 +69,3 @@ void main() {
   vertex_main_loc0_Output = v.prevent_dce;
   gl_PointSize = 1.0f;
 }
-error: Error parsing GLSL shader:
-ERROR: 0:13: 'dot' : no matching overloaded function found 
-ERROR: 0:13: '=' :  cannot convert from ' const float' to ' temp highp int'
-ERROR: 0:13: '' : compilation terminated 
-ERROR: 3 compilation errors.  No code generated.
-
-
-
-
-tint executable returned error: exit status 1
