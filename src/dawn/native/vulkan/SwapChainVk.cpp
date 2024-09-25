@@ -554,7 +554,7 @@ ResultOrError<SwapChainTextureInfo> SwapChain::GetCurrentTextureInternal(bool is
     textureDesc.format = mConfig.wgpuFormat;
     textureDesc.usage = mConfig.wgpuUsage;
 
-    mTexture = Texture::CreateForSwapChain(device, Unpack(&textureDesc), lastImage.image);
+    mTexture = SwapChainTexture::Create(device, Unpack(&textureDesc), lastImage.image);
 
     // In the happy path we can use the swapchain image directly.
     if (!mConfig.needsBlit) {
@@ -565,8 +565,8 @@ ResultOrError<SwapChainTextureInfo> SwapChain::GetCurrentTextureInternal(bool is
     // The blit texture always perfectly matches what the user requested for the swapchain.
     // We need to add the Vulkan TRANSFER_SRC flag for the vkCmdBlitImage call.
     TextureDescriptor desc = GetSwapChainBaseTextureDescriptor(this);
-    DAWN_TRY_ASSIGN(mBlitTexture,
-                    Texture::Create(device, Unpack(&desc), VK_IMAGE_USAGE_TRANSFER_SRC_BIT));
+    DAWN_TRY_ASSIGN(mBlitTexture, InternalTexture::Create(device, Unpack(&desc),
+                                                          VK_IMAGE_USAGE_TRANSFER_SRC_BIT));
     swapChainTextureInfo.texture = mBlitTexture;
     return swapChainTextureInfo;
 }

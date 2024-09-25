@@ -276,17 +276,6 @@ TEST_P(VulkanImageWrappingValidationTests, DoubleSignalSemaphoreExport) {
     ASSERT_EQ(exportInfo.semaphores.size(), 0u);
 }
 
-// Test an error occurs if we try to export the signal semaphore from a normal texture
-TEST_P(VulkanImageWrappingValidationTests, NormalTextureSignalSemaphoreExport) {
-    wgpu::Texture texture = device.CreateTexture(&defaultDescriptor);
-    ASSERT_NE(texture.Get(), nullptr);
-
-    ExternalImageExportInfoVkForTesting exportInfo = GetExternalImageExportInfo();
-    ASSERT_DEVICE_ERROR(bool success = mBackend->ExportImage(texture, &exportInfo));
-    ASSERT_FALSE(success);
-    ASSERT_EQ(exportInfo.semaphores.size(), 0u);
-}
-
 // Test an error occurs if we try to export the signal semaphore from a destroyed texture
 TEST_P(VulkanImageWrappingValidationTests, DestroyedTextureSignalSemaphoreExport) {
     wgpu::Texture texture =

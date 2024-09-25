@@ -995,7 +995,7 @@ void SharedTextureMemory::DestroyImpl() {
 
 ResultOrError<Ref<TextureBase>> SharedTextureMemory::CreateTextureImpl(
     const UnpackedPtr<TextureDescriptor>& descriptor) {
-    return Texture::CreateFromSharedTextureMemory(this, descriptor);
+    return SharedTexture::Create(this, descriptor);
 }
 
 MaybeError SharedTextureMemory::BeginAccessImpl(
@@ -1020,7 +1020,7 @@ MaybeError SharedTextureMemory::BeginAccessImpl(
         DAWN_INVALID_IF(descriptor->signaledValues[i] != 1, "%s signaled value (%u) was not 1.",
                         descriptor->fences[i], descriptor->signaledValues[i]);
     }
-    ToBackend(texture)->SetPendingAcquire(
+    static_cast<SharedTexture*>(texture)->SetPendingAcquire(
         static_cast<VkImageLayout>(vkLayoutBeginState->oldLayout),
         static_cast<VkImageLayout>(vkLayoutBeginState->newLayout));
     return {};
@@ -1059,8 +1059,8 @@ ResultOrError<FenceAndSignalValue> SharedTextureMemory::EndAccessImpl(
         ExternalSemaphoreHandle semaphoreHandle;
         VkImageLayout releasedOldLayout;
         VkImageLayout releasedNewLayout;
-        DAWN_TRY(ToBackend(texture)->EndAccess(&semaphoreHandle, &releasedOldLayout,
-                                               &releasedNewLayout));
+        DAWN_TRY(static_cast<SharedTexture*>(texture)->EndAccess(
+            &semaphoreHandle, &releasedOldLayout, &releasedNewLayout));
         // Handle is acquired from the texture so we need to make sure to close it.
         // TODO(dawn:1745): Consider using one event per submit that is tracked by the
         // CommandRecordingContext so that we don't need to create one handle per texture,

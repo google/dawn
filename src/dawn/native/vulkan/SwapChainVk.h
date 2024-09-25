@@ -38,6 +38,7 @@
 namespace dawn::native::vulkan {
 
 class Device;
+class SwapChainTexture;
 class Texture;
 class PhysicalDevice;
 struct VulkanSurfaceInfo;

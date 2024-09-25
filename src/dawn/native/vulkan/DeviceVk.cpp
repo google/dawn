@@ -225,7 +225,7 @@ ResultOrError<Ref<SwapChainBase>> Device::CreateSwapChainImpl(Surface* surface,
 }
 ResultOrError<Ref<TextureBase>> Device::CreateTextureImpl(
     const UnpackedPtr<TextureDescriptor>& descriptor) {
-    return Texture::Create(this, descriptor);
+    return InternalTexture::Create(this, descriptor);
 }
 ResultOrError<Ref<TextureViewBase>> Device::CreateTextureViewImpl(
     TextureBase* texture,
@@ -737,14 +737,15 @@ bool Device::SignalAndExportExternalTexture(
     VkImageLayout desiredLayout,
     ExternalImageExportInfoVk* info,
     std::vector<ExternalSemaphoreHandle>* semaphoreHandles) {
+    ExternalVkImageTexture* externalTexture = static_cast<ExternalVkImageTexture*>(texture);
     return !ConsumedError([&]() -> MaybeError {
         DAWN_TRY(ValidateObject(texture));
 
         ExternalSemaphoreHandle semaphoreHandle;
         VkImageLayout releasedOldLayout;
         VkImageLayout releasedNewLayout;
-        DAWN_TRY(texture->ExportExternalTexture(desiredLayout, &semaphoreHandle, &releasedOldLayout,
-                                                &releasedNewLayout));
+        DAWN_TRY(externalTexture->ExportExternalTexture(desiredLayout, &semaphoreHandle,
+                                                        &releasedOldLayout, &releasedNewLayout));
 
         semaphoreHandles->push_back(semaphoreHandle);
         info->releasedOldLayout = releasedOldLayout;
@@ -791,10 +792,10 @@ Ref<TextureBase> Device::CreateTextureWrappingVulkanImage(
 
     // Cleanup in case of a failure, the image creation doesn't acquire the external objects
     // if a failure happems.
-    Ref<Texture> result;
+    Ref<ExternalVkImageTexture> result;
     // TODO(crbug.com/1026480): Consolidate this into a single CreateFromExternal call.
-    if (ConsumedError(Texture::CreateFromExternal(this, descriptor, textureDescriptor,
-                                                  mExternalMemoryService.get()),
+    if (ConsumedError(ExternalVkImageTexture::Create(this, descriptor, textureDescriptor,
+                                                     mExternalMemoryService.get()),
                       &result) ||
         ConsumedError(ImportExternalImage(descriptor, memoryHandle, result->GetHandle(),
                                           waitHandles, &allocation, &waitSemaphores)) ||

@@ -333,8 +333,8 @@ MaybeError Queue::SubmitPendingCommands() {
 
     // Create an external semaphore for each external textures used in the pending submit.
     std::vector<UniqueVkHandle<VkSemaphore>> externalTextureSemaphores(
-        mRecordingContext.externalTexturesForEagerTransition.size());
-    for (size_t i = 0; i < mRecordingContext.externalTexturesForEagerTransition.size(); ++i) {
+        mRecordingContext.specialSyncTextures.size());
+    for (size_t i = 0; i < mRecordingContext.specialSyncTextures.size(); ++i) {
         VkSemaphore semaphore;
         DAWN_TRY_ASSIGN(semaphore,
                         device->GetExternalSemaphoreService()->CreateExportableSemaphore());
@@ -342,7 +342,7 @@ MaybeError Queue::SubmitPendingCommands() {
     }
 
     // Transition eagerly all used external textures for export.
-    for (auto* texture : mRecordingContext.externalTexturesForEagerTransition) {
+    for (auto texture : mRecordingContext.specialSyncTextures) {
         texture->TransitionEagerlyForExport(&mRecordingContext);
 
         // TODO(330385376): Remove once ExternalImageDescriptorVk is removed.
@@ -419,7 +419,7 @@ MaybeError Queue::SubmitPendingCommands() {
     }
 
     auto externalTextureSemaphoreIter = externalTextureSemaphores.begin();
-    for (auto* texture : mRecordingContext.externalTexturesForEagerTransition) {
+    for (auto texture : mRecordingContext.specialSyncTextures) {
         // Export the signal semaphore.
         ExternalSemaphoreHandle semaphoreHandle;
         DAWN_TRY_ASSIGN(semaphoreHandle, device->GetExternalSemaphoreService()->ExportSemaphore(
