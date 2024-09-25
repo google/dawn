@@ -345,13 +345,6 @@ class Validator {
                                  size_t num_results,
                                  size_t num_operands);
 
-    /// Checks the given operand is not null
-    /// @param inst the instruction
-    /// @param operand the operand
-    /// @param idx the operand index
-    // TODO(345196551): Remove this override once it is no longer used.
-    void CheckOperandNotNull(const ir::Instruction* inst, const ir::Value* operand, size_t idx);
-
     /// Checks that @p type does not use any types that are prohibited by the target capabilities.
     /// @param type the type
     /// @param diag a function that creates an error diagnostic for the source of the type
@@ -391,8 +384,8 @@ class Validator {
     void CheckVar(const Var* var);
 
     /// Validates the given let
-    /// @param let the let to validate
-    void CheckLet(const Let* let);
+    /// @param l the let to validate
+    void CheckLet(const Let* l);
 
     /// Validates the given call
     /// @param call the call to validate
@@ -905,6 +898,11 @@ bool Validator::CheckResult(const Instruction* inst, size_t idx) {
         return false;
     }
 
+    if (DAWN_UNLIKELY(result->Instruction() == nullptr)) {
+        AddResultError(inst, idx) << "result instruction is undefined";
+        return false;
+    }
+
     return true;
 }
 
@@ -943,6 +941,28 @@ bool Validator::CheckOperand(const Instruction* inst, size_t idx) {
     // behaviour.
     if (DAWN_UNLIKELY(!operand->Is<ir::Function>() && operand->Type() == nullptr)) {
         AddError(inst, idx) << "operand type is undefined";
+        return false;
+    }
+
+    if (DAWN_UNLIKELY(!operand->Alive())) {
+        AddError(inst, idx) << "operand is not alive";
+        return false;
+    }
+
+    if (DAWN_UNLIKELY(!operand->HasUsage(inst, idx))) {
+        AddError(inst, idx) << "operand missing usage";
+        return false;
+    }
+
+    if (auto fn = operand->As<Function>(); fn && !all_functions_.Contains(fn)) {
+        AddError(inst, idx) << NameOf(operand) << " is not part of the module";
+        return false;
+    }
+
+    if (DAWN_UNLIKELY(!operand->Is<ir::Unused>() && !operand->Is<Constant>() &&
+                      !scope_stack_.Contains(operand))) {
+        AddError(inst, idx) << NameOf(operand) << " is not in scope";
+        AddDeclarationNote(operand);
         return false;
     }
 
@@ -1013,13 +1033,6 @@ bool Validator::CheckResultsAndOperands(const ir::Instruction* inst,
     bool results_passed = CheckResults(inst, num_results);
     bool operands_passed = CheckOperands(inst, num_operands);
     return results_passed && operands_passed;
-}
-
-// TODO(353498500): Remove this function once it is no longer used.
-void Validator::CheckOperandNotNull(const Instruction* inst, const ir::Value* operand, size_t idx) {
-    if (operand == nullptr) {
-        AddError(inst, idx) << "operand is undefined";
-    }
 }
 
 void Validator::CheckType(const core::type::Type* root,
@@ -1370,23 +1383,13 @@ void Validator::CheckInstruction(const Instruction* inst) {
         AddError(inst) << "destroyed instruction found in instruction list";
         return;
     }
-    // TODO(353475590): Once all instruction types have been updated to using new checking code,
-    //                  remove the duplicate reporting of results being null, see
-    //                  Validator::CheckResults
+
     auto results = inst->Results();
     for (size_t i = 0; i < results.Length(); ++i) {
         auto* res = results[i];
         if (!res) {
-            AddResultError(inst, i) << "result is undefined";
             continue;
         }
-
-        if (res->Instruction() == nullptr) {
-            AddResultError(inst, i) << "instruction of result is undefined";
-        } else if (res->Instruction() != inst) {
-            AddResultError(inst, i) << "instruction of result is a different instruction";
-        }
-
         CheckType(res->Type(), [&]() -> diag::Diagnostic& { return AddResultError(inst, i); });
     }
 
@@ -1395,19 +1398,6 @@ void Validator::CheckInstruction(const Instruction* inst) {
         auto* op = ops[i];
         if (!op) {
             continue;
-        }
-
-        // Note, a `nullptr` is a valid operand in some cases, like `var` so we can't just check
-        // for `nullptr` here.
-        if (!op->Alive()) {
-            AddError(inst, i) << "operand is not alive";
-        } else if (!op->HasUsage(inst, i)) {
-            AddError(inst, i) << "operand missing usage";
-        } else if (auto fn = op->As<Function>(); fn && !all_functions_.Contains(fn)) {
-            AddError(inst, i) << NameOf(op) << " is not part of the module";
-        } else if (!op->Is<ir::Unused>() && !op->Is<Constant>() && !scope_stack_.Contains(op)) {
-            AddError(inst, i) << NameOf(op) << " is not in scope";
-            AddDeclarationNote(op);
         }
 
         CheckType(op->Type(), [&]() -> diag::Diagnostic& { return AddError(inst, i); });
@@ -1490,14 +1480,16 @@ void Validator::CheckVar(const Var* var) {
     }
 }
 
-void Validator::CheckLet(const Let* let) {
-    CheckOperandNotNull(let, let->Value(), Let::kValueOperandOffset);
+void Validator::CheckLet(const Let* l) {
+    if (!CheckResultsAndOperands(l, Let::kNumResults, Let::kNumOperands)) {
+        return;
+    }
 
-    if (let->Result(0) && let->Value()) {
-        if (let->Result(0)->Type() != let->Value()->Type()) {
-            AddError(let) << "result type " << style::Type(let->Result(0)->Type()->FriendlyName())
-                          << " does not match value type "
-                          << style::Type(let->Value()->Type()->FriendlyName());
+    if (l->Result(0) && l->Value()) {
+        if (l->Result(0)->Type() != l->Value()->Type()) {
+            AddError(l) << "result type " << style::Type(l->Result(0)->Type()->FriendlyName())
+                        << " does not match value type "
+                        << style::Type(l->Value()->Type()->FriendlyName());
         }
     }
 }
@@ -1832,7 +1824,8 @@ void Validator::CheckUnary(const Unary* u) {
 }
 
 void Validator::CheckIf(const If* if_) {
-    CheckOperandNotNull(if_, if_->Condition(), If::kConditionOperandOffset);
+    CheckResults(if_);
+    CheckOperand(if_, If::kConditionOperandOffset);
 
     if (if_->Condition() && !if_->Condition()->Type()->Is<core::type::Bool>()) {
         AddError(if_, If::kConditionOperandOffset)
@@ -1932,7 +1925,7 @@ void Validator::CheckLoopContinuing(const Loop* loop) {
 }
 
 void Validator::CheckSwitch(const Switch* s) {
-    CheckOperandNotNull(s, s->Condition(), If::kConditionOperandOffset);
+    CheckOperand(s, Switch::kConditionOperandOffset);
 
     if (s->Condition() && !s->Condition()->Type()->IsIntegerScalar()) {
         AddError(s, Switch::kConditionOperandOffset) << "condition type must be an integer scalar";

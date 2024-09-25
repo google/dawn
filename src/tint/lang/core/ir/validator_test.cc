@@ -973,15 +973,7 @@ TEST_F(IR_ValidatorTest, CallToBuiltinMissingResult) {
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_EQ(res.Failure().reason.Str(),
-              R"(:3:5 error: abs: result is undefined
-    undef = abs 1.0f
-    ^^^^^
-
-:2:3 note: in block
-  $B1: {
-  ^^^
-
-:3:13 error: abs: call to builtin does not have a return type
+              R"(:3:13 error: abs: call to builtin does not have a return type
     undef = abs 1.0f
             ^^^
 
@@ -1169,14 +1161,6 @@ TEST_F(IR_ValidatorTest, Bitcast_NullResult) {
     ASSERT_NE(res, Success);
     EXPECT_EQ(res.Failure().reason.Str(),
               R"(:3:5 error: bitcast: result is undefined
-    undef = bitcast 1u
-    ^^^^^
-
-:2:3 note: in block
-  $B1: {
-  ^^^
-
-:3:5 error: bitcast: result is undefined
     undef = bitcast 1u
     ^^^^^
 
@@ -1419,14 +1403,6 @@ TEST_F(IR_ValidatorTest, Construct_NullResult) {
   $B1: {
   ^^^
 
-:8:5 error: construct: result is undefined
-    undef = construct 1i, 2u
-    ^^^^^
-
-:7:3 note: in block
-  $B1: {
-  ^^^
-
 note: # Disassembly
 MyStruct = struct @align(4) {
   a:i32 @offset(0)
@@ -1579,14 +1555,6 @@ TEST_F(IR_ValidatorTest, Convert_NullResult) {
     ASSERT_NE(res, Success);
     EXPECT_EQ(res.Failure().reason.Str(),
               R"(:3:5 error: convert: result is undefined
-    undef = convert 1.0f
-    ^^^^^
-
-:2:3 note: in block
-  $B1: {
-  ^^^
-
-:3:5 error: convert: result is undefined
     undef = convert 1.0f
     ^^^^^
 
@@ -2816,14 +2784,6 @@ TEST_F(IR_ValidatorTest, Var_RootBlock_NullResult) {
 $B1: {  # root
 ^^^
 
-:2:3 error: var: result is undefined
-  undef = var, 0i
-  ^^^^^
-
-:1:1 note: in block
-$B1: {  # root
-^^^
-
 note: # Disassembly
 $B1: {  # root
   undef = var, 0i
@@ -2845,14 +2805,6 @@ TEST_F(IR_ValidatorTest, Var_Function_NullResult) {
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_EQ(res.Failure().reason.Str(), R"(:3:5 error: var: result is undefined
-    undef = var, 0i
-    ^^^^^
-
-:2:3 note: in block
-  $B1: {
-  ^^^
-
-:3:5 error: var: result is undefined
     undef = var, 0i
     ^^^^^
 
@@ -3286,6 +3238,36 @@ note: # Disassembly
 )");
 }
 
+TEST_F(IR_ValidatorTest, Let_EmptyResults) {
+    auto* v = mod.CreateInstruction<ir::Let>(b.InstructionResult(ty.i32()), b.Constant(1_i));
+    v->ClearResults();
+
+    auto* f = b.Function("my_func", ty.void_());
+
+    auto sb = b.Append(f->Block());
+    sb.Append(v);
+    sb.Return(f);
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_EQ(res.Failure().reason.Str(), R"(:3:13 error: let: expected exactly 1 results, got 0
+    undef = let 1i
+            ^^^
+
+:2:3 note: in block
+  $B1: {
+  ^^^
+
+note: # Disassembly
+%my_func = func():void {
+  $B1: {
+    undef = let 1i
+    ret
+  }
+}
+)");
+}
+
 TEST_F(IR_ValidatorTest, Let_NullValue) {
     auto* v = mod.CreateInstruction<ir::Let>(b.InstructionResult(ty.f32()), nullptr);
 
@@ -3309,6 +3291,36 @@ note: # Disassembly
 %my_func = func():void {
   $B1: {
     %2:f32 = let undef
+    ret
+  }
+}
+)");
+}
+
+TEST_F(IR_ValidatorTest, Let_EmptyValue) {
+    auto* v = mod.CreateInstruction<ir::Let>(b.InstructionResult(ty.i32()), b.Constant(1_i));
+    v->ClearOperands();
+
+    auto* f = b.Function("my_func", ty.void_());
+
+    auto sb = b.Append(f->Block());
+    sb.Append(v);
+    sb.Return(f);
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_EQ(res.Failure().reason.Str(), R"(:3:14 error: let: expected exactly 1 operands, got 0
+    %2:i32 = let
+             ^^^
+
+:2:3 note: in block
+  $B1: {
+  ^^^
+
+note: # Disassembly
+%my_func = func():void {
+  $B1: {
+    %2:i32 = let
     ret
   }
 }
@@ -3395,7 +3407,7 @@ TEST_F(IR_ValidatorTest, Instruction_NullInstruction) {
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_EQ(res.Failure().reason.Str(),
-              R"(:3:5 error: var: instruction of result is undefined
+              R"(:3:5 error: var: result instruction is undefined
     %2:ptr<function, f32, read_write> = var
     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -3572,14 +3584,6 @@ TEST_F(IR_ValidatorTest, Binary_Result_Nullptr) {
   $B1: {
   ^^^
 
-:3:5 error: binary: result is undefined
-    undef = add 3i, 2i
-    ^^^^^
-
-:2:3 note: in block
-  $B1: {
-  ^^^
-
 note: # Disassembly
 %my_func = func():void {
   $B1: {
@@ -3685,14 +3689,6 @@ TEST_F(IR_ValidatorTest, Unary_Result_Nullptr) {
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_EQ(res.Failure().reason.Str(), R"(:3:5 error: unary: result is undefined
-    undef = negation 2i
-    ^^^^^
-
-:2:3 note: in block
-  $B1: {
-  ^^^
-
-:3:5 error: unary: result is undefined
     undef = negation 2i
     ^^^^^
 
@@ -6673,15 +6669,7 @@ TEST_F(IR_ValidatorTest, Store_NoStoreType) {
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_EQ(res.Failure().reason.Str(),
-              R"(:3:11 error: store: %2 is not in scope
-    store %2, 42u
-          ^^
-
-:2:3 note: in block
-  $B1: {
-  ^^^
-
-:3:11 error: store: operand type is undefined
+              R"(:3:11 error: store: operand type is undefined
     store %2, 42u
           ^^
 
@@ -6756,14 +6744,6 @@ TEST_F(IR_ValidatorTest, LoadVectorElement_NullResult) {
     ASSERT_NE(res, Success);
     EXPECT_EQ(res.Failure().reason.Str(),
               R"(:4:5 error: load_vector_element: result is undefined
-    undef = load_vector_element %2, 1i
-    ^^^^^
-
-:2:3 note: in block
-  $B1: {
-  ^^^
-
-:4:5 error: load_vector_element: result is undefined
     undef = load_vector_element %2, 1i
     ^^^^^
 
@@ -7261,6 +7241,7 @@ TEST_F(IR_ValidatorTest, ReferenceToReference) {
 
     Capabilities caps;
     caps.Add(Capability::kAllowRefTypes);
+
     auto res = ir::Validate(mod, caps);
     ASSERT_NE(res, Success);
     EXPECT_THAT(res.Failure().reason.Str(),
@@ -7678,14 +7659,6 @@ TEST_F(IR_ValidatorTest, Swizzle_NullResult) {
     ASSERT_NE(res, Success);
     EXPECT_EQ(res.Failure().reason.Str(),
               R"(:4:5 error: swizzle: result is undefined
-    undef = swizzle %2, wzyx
-    ^^^^^
-
-:2:3 note: in block
-  $B1: {
-  ^^^
-
-:4:5 error: swizzle: result is undefined
     undef = swizzle %2, wzyx
     ^^^^^
 
