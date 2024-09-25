@@ -23,17 +23,26 @@ jobs:
       # 2. <Windows, Release, latest MSVC compiler toolchain on the default runner image, default generator>
       # 3. <Linux, Debug, latest GCC compiler toolchain in the container, default generator>
       # 4. <Linux, Release, latest GCC compiler toolchain in the container, default generator>
-      # 5. <MacOS, Debug, latest Clang compiler toolchain on the default runner image, default generator>
-      # 6. <MacOS, Release, latest Clang compiler toolchain on the default runner image, default generator>
+      # 5. <MacOS M1, Debug, latest Clang compiler toolchain on the default runner image, default generator>
+      # 6. <MacOS M1, Release, latest Clang compiler toolchain on the default runner image, default generator>
+      # 7. <MacOS x64, Debug, latest Clang compiler toolchain on the default runner image, default generator>
+      # 8. <MacOS x64, Release, latest Clang compiler toolchain on the default runner image, default generator>
       matrix:
-        os: [macos-latest, ubuntu-latest, windows-latest]
+        os: [windows-latest, ubuntu-latest, macos-latest, macos-13]
         build_type: [Debug, Release]
         toolchain: [gcc, clang, msvc]
         include:
           - os: macos-latest
             toolchain: clang
-            c_compiler: $(brew --prefix llvm@15)/bin/clang
-            cpp_compiler: $(brew --prefix llvm@15)/bin/clang++
+            c_compiler: clang
+            cpp_compiler: clang++
+            env:
+              MACOSX_DEPLOYMENT_TARGET: "11.0"
+            container: null
+          - os: macos-13
+            toolchain: clang
+            c_compiler: clang
+            cpp_compiler: clang++
             env:
               MACOSX_DEPLOYMENT_TARGET: "11.0"
             container: null
@@ -53,6 +62,10 @@ jobs:
             - os: macos-latest
               toolchain: msvc
             - os: macos-latest
+              toolchain: gcc
+            - os: macos-13
+              toolchain: msvc
+            - os: macos-13
               toolchain: gcc
             - os: ubuntu-latest
               toolchain: msvc
