@@ -81,6 +81,7 @@ type texture_storage_3d<F: texel_format, A: access>
 
 match iu32: i32 | u32
 match fiu32: f32 | i32 | u32
+match fi32_f16: f32 | i32 | f16
 match fiu32_f16: f32 | i32 | u32 | f16
 match fiu32_f16_bool: f32 | i32 | u32 | f16 | bool
 match f32_f16: f32 | f16
@@ -166,6 +167,9 @@ implicit(T: iu32, N: num) fn bitfieldInsert(base: vec<N, T>,
 
 fn packFloat2x16(value: vec2<f16>) -> u32
 fn unpackFloat2x16(value: u32) -> vec2<f16>
+
+implicit(T: fi32_f16) fn abs(T) -> T
+implicit(T: fi32_f16, N: num) fn abs(vec<N, T>) -> vec<N, T>
 
 implicit(N: num) fn any(vec<N, bool>) -> bool
 implicit(N: num) fn all(vec<N, bool>) -> bool

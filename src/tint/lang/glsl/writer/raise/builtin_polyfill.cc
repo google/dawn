@@ -71,6 +71,7 @@ struct State {
         for (auto* inst : ir.Instructions()) {
             if (auto* call = inst->As<core::ir::CoreBuiltinCall>()) {
                 switch (call->Func()) {
+                    case core::BuiltinFn::kAbs:
                     case core::BuiltinFn::kAll:
                     case core::BuiltinFn::kAny:
                     case core::BuiltinFn::kArrayLength:
@@ -104,6 +105,9 @@ struct State {
         // Replace the builtin calls that we found
         for (auto* call : call_worklist) {
             switch (call->Func()) {
+                case core::BuiltinFn::kAbs:
+                    Abs(call);
+                    break;
                 case core::BuiltinFn::kAll:
                     All(call);
                     break;
@@ -167,6 +171,21 @@ struct State {
                     TINT_UNREACHABLE();
             }
         }
+    }
+
+    void Abs(core::ir::BuiltinCall* call) {
+        auto args = call->Args();
+
+        if (args[0]->Type()->DeepestElement()->IsUnsignedIntegerScalarOrVector()) {
+            // GLSL does not support `abs` on unsigned arguments, replace it with the arg.
+            call->Result(0)->ReplaceAllUsesWith(args[0]);
+        } else {
+            b.InsertBefore(call, [&] {
+                b.CallWithResult<glsl::ir::BuiltinCall>(call->DetachResult(), glsl::BuiltinFn::kAbs,
+                                                        args[0]);
+            });
+        }
+        call->Destroy();
     }
 
     void Any(core::ir::BuiltinCall* call) {

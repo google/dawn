@@ -1,11 +1,36 @@
-SKIP: FAILED
+#version 310 es
+precision highp float;
+precision highp int;
 
-<dawn>/src/tint/lang/core/ir/transform/demote_to_helper.cc:208 internal compiler error: TINT_UNREACHABLE unexpected non-core instruction
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
 
-tint executable returned error: signal: trace/BPT trap
+struct atomic_compare_exchange_result_i32 {
+  int old_value;
+  bool exchanged;
+};
+
+layout(binding = 0, std430)
+buffer tint_symbol_1_1_ssbo {
+  int tint_symbol;
+} v;
+bool continue_execution = true;
+layout(location = 0) out int foo_loc0_Output;
+int foo_inner() {
+  continue_execution = false;
+  int x = 0;
+  atomic_compare_exchange_result_i32 v_1 = atomic_compare_exchange_result_i32(0, false);
+  if (continue_execution) {
+    int v_2 = atomicCompSwap(v.tint_symbol, 0, 1);
+    v_1 = atomic_compare_exchange_result_i32(v_2, (v_2 == 0));
+  }
+  atomic_compare_exchange_result_i32 result = v_1;
+  if (result.exchanged) {
+    x = result.old_value;
+  }
+  if (!(continue_execution)) {
+    discard;
+  }
+  return x;
+}
+void main() {
+  foo_loc0_Output = foo_inner();
+}

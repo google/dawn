@@ -124,6 +124,9 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
         RUN_TRANSFORM(core::ir::transform::ZeroInitWorkgroupMemory, module);
     }
 
+    // DemoteToHelper must come before any transform that introduces non-core instructions.
+    RUN_TRANSFORM(core::ir::transform::DemoteToHelper, module);
+
     RUN_TRANSFORM(raise::BinaryPolyfill, module);
     // Must come after zero-init as it will add builtins
     RUN_TRANSFORM(raise::BuiltinPolyfill, module);
@@ -133,9 +136,6 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
     RUN_TRANSFORM(core::ir::transform::PreservePadding, module);
     RUN_TRANSFORM(core::ir::transform::VectorizeScalarMatrixConstructors, module);
     RUN_TRANSFORM(core::ir::transform::RemoveContinueInSwitch, module);
-
-    // DemoteToHelper must come before any transform that introduces non-core instructions.
-    RUN_TRANSFORM(core::ir::transform::DemoteToHelper, module);
 
     RUN_TRANSFORM(core::ir::transform::AddEmptyEntryPoint, module);
 
