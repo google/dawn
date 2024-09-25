@@ -1696,5 +1696,27 @@ void main() {
 )");
 }
 
+TEST_F(GlslWriterTest, BuiltinQuantizeToF16) {
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        auto* v = b.Var("x", b.Zero(ty.vec2<f32>()));
+        b.Let("a", b.Call(ty.vec2<f32>(), core::BuiltinFn::kQuantizeToF16, b.Load(v)));
+        b.Return(func);
+    });
+
+    ASSERT_TRUE(Generate()) << err_ << output_.glsl;
+    EXPECT_EQ(output_.glsl, GlslHeader() + R"(precision highp float;
+precision highp int;
+
+vec2 tint_quantize_to_f16(vec2 val) {
+  return unpackHalf2x16(packHalf2x16(val));
+}
+void main() {
+  vec2 x = vec2(0.0f);
+  vec2 a = tint_quantize_to_f16(x);
+}
+)");
+}
+
 }  // namespace
 }  // namespace tint::glsl::writer

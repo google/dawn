@@ -64,6 +64,8 @@ struct State {
 
     /// Dot polyfills for non `f32`.
     Hashmap<const core::type::Type*, core::ir::Function*, 4> dot_funcs_{};
+    /// Quantize polyfills
+    Hashmap<const core::type::Type*, core::ir::Function*, 4> quantize_to_f16_funcs_{};
 
     /// Process the module.
     void Process() {
@@ -85,6 +87,7 @@ struct State {
                     case core::BuiltinFn::kFrexp:
                     case core::BuiltinFn::kInsertBits:
                     case core::BuiltinFn::kModf:
+                    case core::BuiltinFn::kQuantizeToF16:
                     case core::BuiltinFn::kSelect:
                     case core::BuiltinFn::kStorageBarrier:
                     case core::BuiltinFn::kTextureBarrier:
@@ -146,6 +149,9 @@ struct State {
                     break;
                 case core::BuiltinFn::kModf:
                     Modf(call);
+                    break;
+                case core::BuiltinFn::kQuantizeToF16:
+                    QuantizeToF16(call);
                     break;
                 case core::BuiltinFn::kSelect:
                     Select(call);
@@ -663,6 +669,73 @@ struct State {
             auto* ternary = b.ir.CreateInstruction<glsl::ir::Ternary>(call->DetachResult(), args);
             ternary->InsertBefore(call);
         }
+        call->Destroy();
+    }
+
+    core::ir::Function* CreateQuantizeToF16Polyfill(const core::type::Type* type) {
+        return quantize_to_f16_funcs_.GetOrAdd(type, [&]() -> core::ir::Function* {
+            auto* f = b.Function("tint_quantize_to_f16", type);
+            auto* val = b.FunctionParam("val", type);
+            f->SetParams({val});
+
+            b.Append(f->Block(), [&] {
+                core::ir::Value* ret = nullptr;
+
+                auto* inner_ty = type->DeepestElement();
+                auto* v2 = ty.vec2(inner_ty);
+
+                auto pack_unpack = [&](core::ir::Value* item) {
+                    auto* r = b.Call(ty.u32(), core::BuiltinFn::kPack2X16Float, item)->Result(0);
+                    return b.Call(v2, core::BuiltinFn::kUnpack2X16Float, r)->Result(0);
+                };
+
+                if (auto* vec = type->As<core::type::Vector>()) {
+                    switch (vec->Width()) {
+                        case 2: {
+                            ret = pack_unpack(val);
+                            break;
+                        }
+                        case 3: {
+                            core::ir::Value* lhs = b.Swizzle(v2, val, {0, 1})->Result(0);
+                            lhs = pack_unpack(lhs);
+
+                            core::ir::Value* rhs = b.Swizzle(v2, val, {2, 2})->Result(0);
+                            rhs = pack_unpack(rhs);
+                            rhs = b.Swizzle(inner_ty, rhs, {0})->Result(0);
+
+                            ret = b.Construct(type, lhs, rhs)->Result(0);
+                            break;
+                        }
+                        default: {
+                            core::ir::Value* lhs = b.Swizzle(v2, val, {0, 1})->Result(0);
+                            lhs = pack_unpack(lhs);
+
+                            core::ir::Value* rhs = b.Swizzle(v2, val, {2, 3})->Result(0);
+                            rhs = pack_unpack(rhs);
+
+                            ret = b.Construct(type, lhs, rhs)->Result(0);
+                            break;
+                        }
+                    }
+                } else {
+                    ret = b.Construct(v2, val)->Result(0);
+                    ret = pack_unpack(ret);
+                    ret = b.Swizzle(type, ret, {0})->Result(0);
+                }
+                b.Return(f, ret);
+            });
+            return f;
+        });
+    }
+
+    // Emulate by casting to f16 and back again.
+    void QuantizeToF16(core::ir::BuiltinCall* call) {
+        auto args = call->Args();
+
+        b.InsertBefore(call, [&] {
+            auto* func = CreateQuantizeToF16Polyfill(args[0]->Type());
+            b.CallWithResult(call->DetachResult(), func, args[0]);
+        });
         call->Destroy();
     }
 };

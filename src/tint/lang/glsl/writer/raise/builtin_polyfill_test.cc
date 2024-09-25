@@ -1989,5 +1989,48 @@ TEST_F(GlslWriter_BuiltinPolyfillTest, AbsVector) {
     EXPECT_EQ(expect, str());
 }
 
+TEST_F(GlslWriter_BuiltinPolyfillTest, QuantizeToF16) {
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        auto* v = b.Var("x", b.Zero(ty.vec2<f32>()));
+        b.Let("a", b.Call(ty.vec2<f32>(), core::BuiltinFn::kQuantizeToF16, b.Load(v)));
+        b.Return(func);
+    });
+
+    auto* src = R"(
+%foo = @fragment func():void {
+  $B1: {
+    %x:ptr<function, vec2<f32>, read_write> = var, vec2<f32>(0.0f)
+    %3:vec2<f32> = load %x
+    %4:vec2<f32> = quantizeToF16 %3
+    %a:vec2<f32> = let %4
+    ret
+  }
+}
+)";
+    ASSERT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = @fragment func():void {
+  $B1: {
+    %x:ptr<function, vec2<f32>, read_write> = var, vec2<f32>(0.0f)
+    %3:vec2<f32> = load %x
+    %4:vec2<f32> = call %tint_quantize_to_f16, %3
+    %a:vec2<f32> = let %4
+    ret
+  }
+}
+%tint_quantize_to_f16 = func(%val:vec2<f32>):vec2<f32> {
+  $B2: {
+    %8:u32 = pack2x16float %val
+    %9:vec2<f32> = unpack2x16float %8
+    ret %9
+  }
+}
+)";
+    Run(BuiltinPolyfill);
+    EXPECT_EQ(expect, str());
+}
+
 }  // namespace
 }  // namespace tint::glsl::writer::raise
