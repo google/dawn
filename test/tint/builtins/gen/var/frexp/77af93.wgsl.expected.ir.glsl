@@ -1,5 +1,3 @@
-SKIP: FAILED
-
 #version 310 es
 precision highp float;
 precision highp int;
@@ -12,19 +10,13 @@ struct frexp_result_vec4_f32 {
 
 void frexp_77af93() {
   vec4 arg_0 = vec4(1.0f);
-  frexp_result_vec4_f32 res = frexp(arg_0);
+  frexp_result_vec4_f32 v = frexp_result_vec4_f32(vec4(0.0f), ivec4(0));
+  v.fract = frexp(arg_0, v.exp);
+  frexp_result_vec4_f32 res = v;
 }
 void main() {
   frexp_77af93();
 }
-error: Error parsing GLSL shader:
-ERROR: 0:13: 'frexp' : no matching overloaded function found 
-ERROR: 0:13: '=' :  cannot convert from ' const float' to ' temp structure{ global highp 4-component vector of float fract,  global highp 4-component vector of int exp}'
-ERROR: 0:13: '' : compilation terminated 
-ERROR: 3 compilation errors.  No code generated.
-
-
-
 #version 310 es
 
 
@@ -35,20 +27,14 @@ struct frexp_result_vec4_f32 {
 
 void frexp_77af93() {
   vec4 arg_0 = vec4(1.0f);
-  frexp_result_vec4_f32 res = frexp(arg_0);
+  frexp_result_vec4_f32 v = frexp_result_vec4_f32(vec4(0.0f), ivec4(0));
+  v.fract = frexp(arg_0, v.exp);
+  frexp_result_vec4_f32 res = v;
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
   frexp_77af93();
 }
-error: Error parsing GLSL shader:
-ERROR: 0:11: 'frexp' : no matching overloaded function found 
-ERROR: 0:11: '=' :  cannot convert from ' const float' to ' temp structure{ global highp 4-component vector of float fract,  global highp 4-component vector of int exp}'
-ERROR: 0:11: '' : compilation terminated 
-ERROR: 3 compilation errors.  No code generated.
-
-
-
 #version 310 es
 
 
@@ -63,7 +49,9 @@ struct VertexOutput {
 
 void frexp_77af93() {
   vec4 arg_0 = vec4(1.0f);
-  frexp_result_vec4_f32 res = frexp(arg_0);
+  frexp_result_vec4_f32 v = frexp_result_vec4_f32(vec4(0.0f), ivec4(0));
+  v.fract = frexp(arg_0, v.exp);
+  frexp_result_vec4_f32 res = v;
 }
 VertexOutput vertex_main_inner() {
   VertexOutput tint_symbol = VertexOutput(vec4(0.0f));
@@ -77,13 +65,3 @@ void main() {
   gl_Position[2u] = ((2.0f * gl_Position.z) - gl_Position.w);
   gl_PointSize = 1.0f;
 }
-error: Error parsing GLSL shader:
-ERROR: 0:15: 'frexp' : no matching overloaded function found 
-ERROR: 0:15: '=' :  cannot convert from ' const float' to ' temp structure{ global highp 4-component vector of float fract,  global highp 4-component vector of int exp}'
-ERROR: 0:15: '' : compilation terminated 
-ERROR: 3 compilation errors.  No code generated.
-
-
-
-
-tint executable returned error: exit status 1

@@ -66,6 +66,7 @@ enum class BuiltinFn : uint8_t {
     kAll,
     kDot,
     kModf,
+    kFrexp,
     kTextureSize,
     kImageSize,
     kTexelFetch,

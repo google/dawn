@@ -81,6 +81,7 @@ struct State {
                     case core::BuiltinFn::kDot:
                     case core::BuiltinFn::kExtractBits:
                     case core::BuiltinFn::kFma:
+                    case core::BuiltinFn::kFrexp:
                     case core::BuiltinFn::kInsertBits:
                     case core::BuiltinFn::kModf:
                     case core::BuiltinFn::kSelect:
@@ -132,6 +133,9 @@ struct State {
                     break;
                 case core::BuiltinFn::kFma:
                     FMA(call);
+                    break;
+                case core::BuiltinFn::kFrexp:
+                    Frexp(call);
                     break;
                 case core::BuiltinFn::kInsertBits:
                     InsertBits(call);
@@ -252,6 +256,26 @@ struct State {
             }
         });
 
+        call->Destroy();
+    }
+
+    void Frexp(core::ir::BuiltinCall* call) {
+        b.InsertBefore(call, [&] {
+            // GLSL's frexp returns `fract` and outputs `whole` as an output parameter.
+            // Polyfill it by declaring the result struct and then setting the values:
+            //   __frexp_result result = {};
+            //   result.fract = frexp(arg, result.exp);
+            auto* result_type = call->Result(0)->Type();
+            auto* float_type = result_type->Element(0);
+            auto* i32_type = result_type->Element(1);
+            auto* result = b.Var(ty.ptr(function, result_type));
+            auto* exp = b.Access(ty.ptr(function, i32_type), result, u32(1));
+            auto args = Vector<core::ir::Value*, 2>{call->Args()[0], exp->Result(0)};
+            auto* res =
+                b.Call<glsl::ir::BuiltinCall>(float_type, glsl::BuiltinFn::kFrexp, std::move(args));
+            b.Store(b.Access(ty.ptr(function, float_type), result, u32(0)), res);
+            b.LoadWithResult(call->DetachResult(), result);
+        });
         call->Destroy();
     }
 

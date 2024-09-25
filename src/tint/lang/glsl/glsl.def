@@ -175,6 +175,10 @@ implicit(T: f32_f16, N: num) fn dot(vec<N, T>, vec<N, T>) -> T
 @must_use @const implicit(N: num, T: f32_f16) fn modf(value: vec<N, T>,
                                                       result: ptr<function, vec<N, T>, read_write>) -> vec<N, T>
 
+@must_use @const implicit(T: f32_f16) fn frexp(value: T, exp: ptr<function, i32, read_write>) -> T
+@must_use @const implicit(N: num, T: f32_f16) fn frexp(value: vec<N, T>,
+                                                       exp : ptr<function, vec<N, i32>, read_write>) -> vec<N, T>
+
 @must_use implicit(T: fiu32) fn textureSize(texture: texture_1d<T>,
                                             level: i32) -> i32
 @must_use implicit(T: fiu32) fn textureSize(texture: texture_2d<T>,

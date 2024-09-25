@@ -70,6 +70,8 @@ std::string_view ToString(ParameterUsage usage) {
             return "e";
         case ParameterUsage::kElements:
             return "elements";
+        case ParameterUsage::kExp:
+            return "exp";
         case ParameterUsage::kHeight:
             return "height";
         case ParameterUsage::kId:

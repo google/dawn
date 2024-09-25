@@ -80,6 +80,8 @@ const char* str(BuiltinFn i) {
             return "dot";
         case BuiltinFn::kModf:
             return "modf";
+        case BuiltinFn::kFrexp:
+            return "frexp";
         case BuiltinFn::kTextureSize:
             return "textureSize";
         case BuiltinFn::kImageSize:

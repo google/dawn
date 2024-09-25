@@ -61,6 +61,7 @@ enum class ParameterUsage : uint8_t {
     kDepthRef,
     kE,
     kElements,
+    kExp,
     kHeight,
     kId,
     kInputAttachment,

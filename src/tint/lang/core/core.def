@@ -235,6 +235,7 @@ enum usages {
   depth
   compare_value
   elements
+  exp
   height
   insert
   level
