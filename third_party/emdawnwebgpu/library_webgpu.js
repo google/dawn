@@ -1121,7 +1121,7 @@ var LibraryWebGPU = {
   wgpuCommandEncoderResolveQuerySet: (encoderPtr, querySetPtr, firstQuery, queryCount, destinationPtr, destinationOffset) => {
     var commandEncoder = WebGPU._tableGet(encoderPtr);
     var querySet = WebGPU._tableGet(querySetPtr);
-    var destination = WebGPU._tableGet(destinationPtr);
+    var destination = WebGPU._tableGet(destinationPtr).object;
 
     commandEncoder.resolveQuerySet(querySet, firstQuery, queryCount, destination, destinationOffset);
   },
@@ -1147,7 +1147,7 @@ var LibraryWebGPU = {
   },
 
   wgpuComputePassEncoderDispatchWorkgroupsIndirect: (passPtr, indirectBufferPtr, indirectOffset) => {
-    var indirectBuffer = WebGPU._tableGet(indirectBufferPtr);
+    var indirectBuffer = WebGPU._tableGet(indirectBufferPtr).object;
     var pass = WebGPU._tableGet(passPtr);
     pass.dispatchWorkgroupsIndirect(indirectBuffer, indirectOffset);
   },
@@ -2030,13 +2030,13 @@ var LibraryWebGPU = {
   },
 
   wgpuRenderBundleEncoderDrawIndexedIndirect: (passPtr, indirectBufferPtr, indirectOffset) => {
-    var indirectBuffer = WebGPU._tableGet(indirectBufferPtr);
+    var indirectBuffer = WebGPU._tableGet(indirectBufferPtr).object;
     var pass = WebGPU._tableGet(passPtr);
     pass.drawIndexedIndirect(indirectBuffer, indirectOffset);
   },
 
   wgpuRenderBundleEncoderDrawIndirect: (passPtr, indirectBufferPtr, indirectOffset) => {
-    var indirectBuffer = WebGPU._tableGet(indirectBufferPtr);
+    var indirectBuffer = WebGPU._tableGet(indirectBufferPtr).object;
     var pass = WebGPU._tableGet(passPtr);
     pass.drawIndirect(indirectBuffer, indirectOffset);
   },
@@ -2130,13 +2130,13 @@ var LibraryWebGPU = {
   },
 
   wgpuRenderPassEncoderDrawIndexedIndirect: (passPtr, indirectBufferPtr, indirectOffset) => {
-    var indirectBuffer = WebGPU._tableGet(indirectBufferPtr);
+    var indirectBuffer = WebGPU._tableGet(indirectBufferPtr).object;
     var pass = WebGPU._tableGet(passPtr);
     pass.drawIndexedIndirect(indirectBuffer, indirectOffset);
   },
 
   wgpuRenderPassEncoderDrawIndirect: (passPtr, indirectBufferPtr, indirectOffset) => {
-    var indirectBuffer = WebGPU._tableGet(indirectBufferPtr);
+    var indirectBuffer = WebGPU._tableGet(indirectBufferPtr).object;
     var pass = WebGPU._tableGet(passPtr);
     pass.drawIndirect(indirectBuffer, indirectOffset);
   },
