@@ -730,7 +730,7 @@ class Printer : public tint::TextGenerator {
                             case core::TexelFormat::kR32Uint:
                                 break;
                             default:
-                                TINT_UNREACHABLE();
+                                TINT_UNREACHABLE() << "invalid texel format for read-write";
                         }
                     }
                     break;
