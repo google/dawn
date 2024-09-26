@@ -38,6 +38,7 @@
 #include "dawn/native/vulkan/DescriptorSetAllocator.h"
 #include "dawn/native/vulkan/DeviceVk.h"
 #include "dawn/native/vulkan/FencedDeleter.h"
+#include "dawn/native/vulkan/PhysicalDeviceVk.h"
 #include "dawn/native/vulkan/SamplerVk.h"
 #include "dawn/native/vulkan/UtilsVulkan.h"
 #include "dawn/native/vulkan/VulkanError.h"
@@ -189,8 +190,30 @@ MaybeError BindGroupLayout::Initialize() {
 
         VkDescriptorType vulkanType = VulkanDescriptorType(GetBindingInfo(bindingIndex));
 
+        size_t numVkDescriptors = 1;
+        if (vulkanType == VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER) {
+            const BindingInfo& bindingInfo = GetBindingInfo(bindingIndex);
+            auto samplerLayout = std::get<StaticSamplerBindingInfo>(bindingInfo.bindingLayout);
+            auto sampler = ToBackend(samplerLayout.sampler);
+            if (sampler->IsYCbCr()) {
+                // A YCbCr sampler can take up multiple Vk descriptor slots.  There is a
+                // recommended Vulkan API to query how many slots a YCbCr sampler should take, but
+                // it is not clear how to actually pass the Android external format to that API.
+                // However, the spec for that API says the following:
+                // "combinedImageSamplerDescriptorCount is a number between 1 and the number of
+                // planes in the format. A descriptor set layout binding with immutable Y′CBCR
+                // conversion samplers will have a maximum combinedImageSamplerDescriptorCount
+                // which is the maximum across all formats supported by its samplers of the
+                // combinedImageSamplerDescriptorCount for each format." Hence, we simply hardcode
+                // the maximum number of planes that an external format can have here. The number
+                // of overall YCbCr descriptors will be relatively small and these pools are not an
+                // overall bottleneck on memory usage.
+                numVkDescriptors = 3;
+            }
+        }
+
         // absl:flat_hash_map::operator[] will return 0 if the key doesn't exist.
-        descriptorCountPerType[vulkanType]++;
+        descriptorCountPerType[vulkanType] += numVkDescriptors;
     }
 
     // TODO(enga): Consider deduping allocators for layouts with the same descriptor type
