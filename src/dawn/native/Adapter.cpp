@@ -332,13 +332,17 @@ AdapterBase::CreateDevice(const DeviceDescriptor* descriptor) {
     DAWN_ASSERT(descriptor != nullptr);
 
     Ref<DeviceBase::DeviceLostEvent> lostEvent = DeviceBase::DeviceLostEvent::Create(descriptor);
-
     auto result = CreateDeviceInternal(descriptor, lostEvent);
+
+    // Catch any errors to directly complete the device lost event with the error message.
     if (result.IsError()) {
+        auto error = result.AcquireError();
         lostEvent->mReason = wgpu::DeviceLostReason::FailedCreation;
-        lostEvent->mMessage = "Failed to create device.";
+        lostEvent->mMessage = "Failed to create device:\n" + error->GetFormattedMessage();
         mInstance->GetEventManager()->SetFutureReady(lostEvent.Get());
+        return {lostEvent, std::move(error)};
     }
+
     return {lostEvent, std::move(result)};
 }
 
