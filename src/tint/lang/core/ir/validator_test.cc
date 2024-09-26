@@ -320,6 +320,129 @@ note: # Disassembly
 )");
 }
 
+TEST_F(IR_ValidatorTest, Function_Param_BothLocationAndBuiltin) {
+    auto* f = b.Function("my_func", ty.void_());
+    auto* p = b.FunctionParam("my_param", ty.f32());
+    IOAttributes attr;
+    attr.builtin = BuiltinValue::kPosition;
+    attr.location = 0;
+    p->SetAttributes(attr);
+    f->SetParams({p});
+
+    b.Append(f->Block(), [&] { b.Return(f); });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_EQ(res.Failure().reason.Str(),
+              R"(:1:17 error: a builtin and location cannot be both declared for a param
+%my_func = func(%my_param:f32 [@location(0), @position]):void {
+                ^^^^^^^^^^^^^
+
+note: # Disassembly
+%my_func = func(%my_param:f32 [@location(0), @position]):void {
+  $B1: {
+    ret
+  }
+}
+)");
+}
+
+TEST_F(IR_ValidatorTest, Function_Param_Struct_BothLocationAndBuiltin) {
+    IOAttributes attr;
+    attr.builtin = BuiltinValue::kPosition;
+    attr.location = 0;
+
+    auto* str_ty =
+        ty.Struct(mod.symbols.New("MyStruct"), {
+                                                   {mod.symbols.New("a"), ty.f32(), attr},
+                                               });
+
+    auto* f = b.Function("my_func", ty.void_());
+    auto* p = b.FunctionParam("my_param", str_ty);
+    f->SetParams({p});
+
+    b.Append(f->Block(), [&] { b.Return(f); });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_EQ(res.Failure().reason.Str(),
+              R"(:5:17 error: a builtin and location cannot be both declared for a struct member
+%my_func = func(%my_param:MyStruct):void {
+                ^^^^^^^^^^^^^^^^^^
+
+note: # Disassembly
+MyStruct = struct @align(4) {
+  a:f32 @offset(0), @location(0), @builtin(position)
+}
+
+%my_func = func(%my_param:MyStruct):void {
+  $B1: {
+    ret
+  }
+}
+)");
+}
+
+TEST_F(IR_ValidatorTest, Function_Return_BothLocationAndBuiltin) {
+    auto* f = b.Function("my_func", ty.f32());
+
+    IOAttributes attr;
+    attr.builtin = BuiltinValue::kPosition;
+    attr.location = 0;
+    f->SetReturnAttributes(attr);
+
+    b.Append(f->Block(), [&] { b.Return(f); });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_EQ(res.Failure().reason.Str(),
+              R"(:1:1 error: a builtin and location cannot be both declared for a function return
+%my_func = func():f32 [@location(0), @position] {
+^^^^^^^^
+
+note: # Disassembly
+%my_func = func():f32 [@location(0), @position] {
+  $B1: {
+    ret
+  }
+}
+)");
+}
+
+TEST_F(IR_ValidatorTest, Function_Return_Struct_BothLocationAndBuiltin) {
+    IOAttributes attr;
+    attr.builtin = BuiltinValue::kPosition;
+    attr.location = 0;
+
+    auto* str_ty =
+        ty.Struct(mod.symbols.New("MyStruct"), {
+                                                   {mod.symbols.New("a"), ty.f32(), attr},
+                                               });
+
+    auto* f = b.Function("my_func", str_ty);
+
+    b.Append(f->Block(), [&] { b.Return(f); });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_EQ(res.Failure().reason.Str(),
+              R"(:5:1 error: a builtin and location cannot be both declared for a struct member
+%my_func = func():MyStruct {
+^^^^^^^^
+
+note: # Disassembly
+MyStruct = struct @align(4) {
+  a:f32 @offset(0), @location(0), @builtin(position)
+}
+
+%my_func = func():MyStruct {
+  $B1: {
+    ret
+  }
+}
+)");
+}
+
 TEST_F(IR_ValidatorTest, Function_MissingWorkgroupSize) {
     auto* f = b.Function("f", ty.void_(), Function::PipelineStage::kCompute);
     b.Append(f->Block(), [&] { b.Return(f); });
@@ -3206,6 +3329,85 @@ $B1: {  # root
   %1:ptr<uniform, i32, read> = var
 }
 
+)");
+}
+
+TEST_F(IR_ValidatorTest, Var_Basic_BothLocationAndBuiltin) {
+    auto* f = b.Function("my_func", ty.void_());
+
+    b.Append(f->Block(), [&] {
+        auto* v = b.Var<function, f32>();
+        IOAttributes attr;
+        attr.builtin = BuiltinValue::kPosition;
+        attr.location = 0;
+        v->SetAttributes(attr);
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_EQ(res.Failure().reason.Str(),
+              R"(:3:41 error: var: a builtin and location cannot be both declared for a var
+    %2:ptr<function, f32, read_write> = var @location(0) @builtin(position)
+                                        ^^^
+
+:2:3 note: in block
+  $B1: {
+  ^^^
+
+note: # Disassembly
+%my_func = func():void {
+  $B1: {
+    %2:ptr<function, f32, read_write> = var @location(0) @builtin(position)
+    ret
+  }
+}
+)");
+}
+
+TEST_F(IR_ValidatorTest, Var_Struct_BothLocationAndBuiltin) {
+    IOAttributes attr;
+    attr.builtin = BuiltinValue::kPosition;
+    attr.location = 0;
+
+    auto* str_ty =
+        ty.Struct(mod.symbols.New("MyStruct"), {
+                                                   {mod.symbols.New("a"), ty.f32(), attr},
+                                               });
+    auto* v = b.Var(ty.ptr(storage, str_ty, read_write));
+    v->SetBindingPoint(0, 0);
+    mod.root_block->Append(v);
+
+    auto* f = b.Function("my_func", ty.void_());
+
+    b.Append(f->Block(), [&] { b.Return(f); });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_EQ(
+        res.Failure().reason.Str(),
+        R"(:6:43 error: var: a builtin and location cannot be both declared for a struct member
+  %1:ptr<storage, MyStruct, read_write> = var @binding_point(0, 0)
+                                          ^^^
+
+:5:1 note: in block
+$B1: {  # root
+^^^
+
+note: # Disassembly
+MyStruct = struct @align(4) {
+  a:f32 @offset(0), @location(0), @builtin(position)
+}
+
+$B1: {  # root
+  %1:ptr<storage, MyStruct, read_write> = var @binding_point(0, 0)
+}
+
+%my_func = func():void {
+  $B2: {
+    ret
+  }
+}
 )");
 }
 

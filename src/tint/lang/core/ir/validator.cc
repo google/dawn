@@ -129,6 +129,11 @@ bool TransitivelyHolds(const Block* block, const Instruction* inst) {
     return false;
 }
 
+/// @returns true is @p attr contains both a location and builtin decoration
+bool HasLocationAndBuiltin(const tint::core::IOAttributes& attr) {
+    return attr.builtin.has_value() && attr.location.has_value();
+}
+
 /// The core IR validator.
 class Validator {
   public:
@@ -1171,12 +1176,42 @@ void Validator::CheckFunction(const Function* func) {
             return;
         }
 
+        if (HasLocationAndBuiltin(param->Attributes())) {
+            AddError(param) << "a builtin and location cannot be both declared for a param";
+            return;
+        }
+
+        if (auto* s = param->Type()->As<core::type::Struct>()) {
+            for (auto* mem : s->Members()) {
+                if (HasLocationAndBuiltin(mem->Attributes())) {
+                    AddError(param)
+                        << "a builtin and location cannot be both declared for a struct member";
+                    return;
+                }
+            }
+        }
+
         // References not allowed on function signatures even with Capability::kAllowRefTypes.
         CheckType(
             param->Type(), [&]() -> diag::Diagnostic& { return AddError(param); },
             Capabilities{Capability::kAllowRefTypes});
 
         scope_stack_.Add(param);
+    }
+
+    if (HasLocationAndBuiltin(func->ReturnAttributes())) {
+        AddError(func) << "a builtin and location cannot be both declared for a function return";
+        return;
+    }
+
+    if (auto* s = func->ReturnType()->As<core::type::Struct>()) {
+        for (auto* mem : s->Members()) {
+            if (HasLocationAndBuiltin(mem->Attributes())) {
+                AddError(func)
+                    << "a builtin and location cannot be both declared for a struct member";
+                return;
+            }
+        }
     }
 
     if (func->Stage() == Function::PipelineStage::kCompute) {
@@ -1477,6 +1512,21 @@ void Validator::CheckVar(const Var* var) {
     if (var->InputAttachmentIndex().has_value() && mv->AddressSpace() != AddressSpace::kHandle) {
         AddError(var) << "'@input_attachment_index' is not valid for non-handle var";
         return;
+    }
+
+    if (HasLocationAndBuiltin(var->Attributes())) {
+        AddError(var) << "a builtin and location cannot be both declared for a var";
+        return;
+    }
+
+    if (auto* s = var->Result(0)->Type()->UnwrapPtrOrRef()->As<core::type::Struct>()) {
+        for (auto* mem : s->Members()) {
+            if (HasLocationAndBuiltin(mem->Attributes())) {
+                AddError(var)
+                    << "a builtin and location cannot be both declared for a struct member";
+                return;
+            }
+        }
     }
 }
 
