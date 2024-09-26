@@ -3958,18 +3958,7 @@
         "category": "structure",
         "extensible": "in",
         "members": [
-            {"name": "label", "type": "string view", "optional": true},
-            {"name": "hint count", "type": "size_t", "default": 0, "tags": ["upstream"]},
-            {"name": "hints", "type": "shader module compilation hint", "annotation": "const*", "length": "hint count", "tags": ["upstream"]}
-        ]
-    },
-    "shader module compilation hint": {
-        "category": "structure",
-        "extensible": "in",
-        "tags": ["upstream"],
-        "members": [
-            {"name": "entry point", "type": "char", "annotation": "const*", "length": "strlen"},
-            {"name": "layout", "type": "pipeline layout"}
+            {"name": "label", "type": "string view", "optional": true}
         ]
     },
     "shader module SPIRV descriptor": {
