@@ -25,7 +25,7 @@
 //* OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 //* OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-{% macro wgpu_string_constructors(CppType, is_nullable) %}
+{% macro wgpu_string_constructors(CppType) %}
     inline constexpr {{CppType}}() noexcept = default;
 
     // NOLINTNEXTLINE(runtime/explicit) allow implicit construction
@@ -42,16 +42,14 @@
         this->data = data;
         this->length = length;
     }
-    {% if is_nullable %}
-        // NOLINTNEXTLINE(runtime/explicit) allow implicit construction
-        inline constexpr {{CppType}}(std::nullptr_t) {
-            this->data = nullptr;
-            this->length = WGPU_STRLEN;
-        }
-        // NOLINTNEXTLINE(runtime/explicit) allow implicit construction
-        inline constexpr {{CppType}}(std::nullopt_t) {
-            this->data = nullptr;
-            this->length = WGPU_STRLEN;
-        }
-    {% endif %}
+    // NOLINTNEXTLINE(runtime/explicit) allow implicit construction
+    inline constexpr {{CppType}}(std::nullptr_t) {
+        this->data = nullptr;
+        this->length = WGPU_STRLEN;
+    }
+    // NOLINTNEXTLINE(runtime/explicit) allow implicit construction
+    inline constexpr {{CppType}}(std::nullopt_t) {
+        this->data = nullptr;
+        this->length = WGPU_STRLEN;
+    }
 {% endmacro %}

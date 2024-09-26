@@ -980,8 +980,8 @@ MaybeError DeviceBase::ValidateIsAlive() const {
     return {};
 }
 
-void DeviceBase::APIForceLoss2(wgpu::DeviceLostReason reason, std::string_view message) {
-    message = utils::NormalizeLabel(message);
+void DeviceBase::APIForceLoss2(wgpu::DeviceLostReason reason, StringView messageIn) {
+    std::string_view message = utils::NormalizeMessageString(messageIn);
     if (mState != State::Alive) {
         return;
     }
@@ -1603,12 +1603,13 @@ ShaderModuleBase* DeviceBase::APICreateShaderModule(const ShaderModuleDescriptor
 }
 
 ShaderModuleBase* DeviceBase::APICreateErrorShaderModule2(const ShaderModuleDescriptor* descriptor,
-                                                          std::string_view errorMessage) {
+                                                          StringView errorMessage) {
     Ref<ShaderModuleBase> result =
         ShaderModuleBase::MakeError(this, descriptor ? descriptor->label : nullptr);
     std::unique_ptr<OwnedCompilationMessages> compilationMessages(
         std::make_unique<OwnedCompilationMessages>());
-    compilationMessages->AddUnanchoredMessage(errorMessage, wgpu::CompilationMessageType::Error);
+    compilationMessages->AddUnanchoredMessage(errorMessage.AsRequiredStringView(),
+                                              wgpu::CompilationMessageType::Error);
     result->InjectCompilationMessages(std::move(compilationMessages));
     EmitCompilationLog(result.Get());
 
@@ -2032,7 +2033,7 @@ size_t DeviceBase::APIEnumerateFeatures(wgpu::FeatureName* features) const {
     return mEnabledFeatures.EnumerateFeatures(features);
 }
 
-void DeviceBase::APIInjectError2(wgpu::ErrorType type, std::string_view message) {
+void DeviceBase::APIInjectError2(wgpu::ErrorType type, StringView message) {
     if (ConsumedError(ValidateErrorType(type))) {
         return;
     }
@@ -2045,9 +2046,10 @@ void DeviceBase::APIInjectError2(wgpu::ErrorType type, std::string_view message)
         return;
     }
 
-    message = utils::NormalizeLabel(message);
-    HandleError(DAWN_MAKE_ERROR(FromWGPUErrorType(type), std::string(message)),
-                InternalErrorType::OutOfMemory);
+    message = utils::NormalizeMessageString(message);
+    HandleError(
+        DAWN_MAKE_ERROR(FromWGPUErrorType(type), std::string(message.AsRequiredStringView())),
+        InternalErrorType::OutOfMemory);
 }
 
 void DeviceBase::APIValidateTextureDescriptor(const TextureDescriptor* descriptorOrig) {
@@ -2525,7 +2527,7 @@ void DeviceBase::APISetLabel(const char* label) {
 }
 
 void DeviceBase::APISetLabel2(std::optional<std::string_view> label) {
-    mLabel = utils::NormalizeLabel(label);
+    mLabel = utils::NormalizeMessageString(label);
     SetLabelImpl();
 }
 

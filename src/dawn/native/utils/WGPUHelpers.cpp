@@ -211,13 +211,9 @@ const char* GetLabelForTrace(const char* label) {
     return (label == nullptr || strlen(label) == 0) ? "None" : label;
 }
 
-std::string_view NormalizeLabel(std::string_view in) {
-    return std::string_view(in.data(), strnlen(in.data(), in.length()));
-}
-
-std::string_view NormalizeLabel(std::optional<std::string_view> in) {
+std::string_view NormalizeMessageString(std::optional<std::string_view> in) {
     if (in) {
-        return NormalizeLabel(*in);
+        return std::string_view(in->data(), strnlen(in->data(), in->length()));
     } else {
         return {};
     }

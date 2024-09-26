@@ -666,7 +666,7 @@ void Surface::APISetLabel(const char* label) {
 }
 
 void Surface::APISetLabel2(std::optional<std::string_view> label) {
-    mLabel = utils::NormalizeLabel(label);
+    mLabel = utils::NormalizeMessageString(label);
 }
 
 }  // namespace dawn::native

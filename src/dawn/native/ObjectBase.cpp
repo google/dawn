@@ -110,7 +110,7 @@ void ApiObjectBase::APISetLabel(const char* label) {
 }
 
 void ApiObjectBase::APISetLabel2(std::optional<std::string_view> label) {
-    SetLabel(std::string(utils::NormalizeLabel(label)));
+    SetLabel(std::string(utils::NormalizeMessageString(label)));
 }
 
 void ApiObjectBase::SetLabel(std::string label) {

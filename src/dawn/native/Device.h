@@ -281,7 +281,7 @@ class DeviceBase : public ErrorSink, public RefCountedWithExternalCount<RefCount
         return APICreateErrorShaderModule2(descriptor, errorMessage);
     }
     ShaderModuleBase* APICreateErrorShaderModule2(const ShaderModuleDescriptor* descriptor,
-                                                  std::string_view errorMessage);
+                                                  StringView errorMessage);
     // TODO(crbug.com/dawn/2320): Remove after deprecation.
     SwapChainBase* APICreateSwapChain(Surface* surface, const SwapChainDescriptor* descriptor);
     TextureBase* APICreateTexture(const TextureDescriptor* descriptor);
@@ -307,7 +307,7 @@ class DeviceBase : public ErrorSink, public RefCountedWithExternalCount<RefCount
         // TODO(crbug.com/42241188): Remove const char* version of the method.
         APIInjectError2(type, message);
     }
-    void APIInjectError2(wgpu::ErrorType type, std::string_view message);
+    void APIInjectError2(wgpu::ErrorType type, StringView message);
     bool APITick();
     void APIValidateTextureDescriptor(const TextureDescriptor* desc);
 
@@ -381,7 +381,7 @@ class DeviceBase : public ErrorSink, public RefCountedWithExternalCount<RefCount
         // TODO(crbug.com/42241188): Remove const char* version of the method.
         return APIForceLoss2(reason, message);
     }
-    void APIForceLoss2(wgpu::DeviceLostReason reason, std::string_view message);
+    void APIForceLoss2(wgpu::DeviceLostReason reason, StringView message);
     QueueBase* GetQueue() const;
 
     friend class IgnoreLazyClearCountScope;

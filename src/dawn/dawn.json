@@ -354,7 +354,7 @@
                 "name": "set label 2",
                 "returns": "void",
                 "args": [
-                    {"name": "label", "type": "nullable string view"}
+                    {"name": "label", "type": "string view", "optional": true}
                 ]
             }
         ]
@@ -395,7 +395,7 @@
                 "name": "set label 2",
                 "returns": "void",
                 "args": [
-                    {"name": "label", "type": "nullable string view"}
+                    {"name": "label", "type": "string view", "optional": true}
                 ]
             }
         ]
@@ -621,13 +621,6 @@
             {"name": "length", "type": "size_t", "default": "WGPU_STRLEN"}
         ]
     },
-    "nullable string view": {
-        "category": "structure",
-        "members": [
-            {"name": "data", "type": "char", "annotation": "const*", "optional": true},
-            {"name": "length", "type": "size_t", "default": "WGPU_STRLEN"}
-        ]
-    },
     "buffer": {
         "category": "object",
         "methods": [
@@ -692,7 +685,7 @@
                 "name": "set label 2",
                 "returns": "void",
                 "args": [
-                    {"name": "label", "type": "nullable string view"}
+                    {"name": "label", "type": "string view", "optional": true}
                 ]
             },
             {
@@ -872,7 +865,7 @@
                 "name": "set label 2",
                 "returns": "void",
                 "args": [
-                    {"name": "label", "type": "nullable string view"}
+                    {"name": "label", "type": "string view", "optional": true}
                 ]
             }
         ]
@@ -1031,7 +1024,7 @@
                 "name": "set label 2",
                 "returns": "void",
                 "args": [
-                    {"name": "label", "type": "nullable string view"}
+                    {"name": "label", "type": "string view", "optional": true}
                 ]
             }
         ]
@@ -1223,7 +1216,7 @@
                 "name": "set label 2",
                 "returns": "void",
                 "args": [
-                    {"name": "label", "type": "nullable string view"}
+                    {"name": "label", "type": "string view", "optional": true}
                 ]
             }
         ]
@@ -1267,7 +1260,7 @@
                 "name": "set label 2",
                 "returns": "void",
                 "args": [
-                    {"name": "label", "type": "nullable string view"}
+                    {"name": "label", "type": "string view", "optional": true}
                 ]
             }
         ]
@@ -1789,7 +1782,7 @@
                 "name": "set label 2",
                 "returns": "void",
                 "args": [
-                    {"name": "label", "type": "nullable string view"}
+                    {"name": "label", "type": "string view", "optional": true}
                 ]
             },
             {
@@ -2077,7 +2070,7 @@
                 "name": "set label 2",
                 "returns": "void",
                 "args": [
-                    {"name": "label", "type": "nullable string view"}
+                    {"name": "label", "type": "string view", "optional": true}
                 ]
             },
             {
@@ -2151,7 +2144,7 @@
                 "name": "set label 2",
                 "returns": "void",
                 "args": [
-                    {"name": "label", "type": "nullable string view"}
+                    {"name": "label", "type": "string view", "optional": true}
                 ]
             },
             {
@@ -2223,7 +2216,7 @@
                 "name": "set label 2",
                 "returns": "void",
                 "args": [
-                    {"name": "label", "type": "nullable string view"}
+                    {"name": "label", "type": "string view", "optional": true}
                 ]
             },
             {
@@ -2976,7 +2969,7 @@
                 "name": "set label 2",
                 "returns": "void",
                 "args": [
-                    {"name": "label", "type": "nullable string view"}
+                    {"name": "label", "type": "string view", "optional": true}
                 ]
             }
         ]
@@ -3064,7 +3057,7 @@
                 "name": "set label 2",
                 "returns": "void",
                 "args": [
-                    {"name": "label", "type": "nullable string view"}
+                    {"name": "label", "type": "string view", "optional": true}
                 ]
             },
             {
@@ -3184,7 +3177,7 @@
                 "name": "set label 2",
                 "returns": "void",
                 "args": [
-                    {"name": "label", "type": "nullable string view"}
+                    {"name": "label", "type": "string view", "optional": true}
                 ]
             }
         ]
@@ -3251,7 +3244,7 @@
                 "name": "set label 2",
                 "returns": "void",
                 "args": [
-                    {"name": "label", "type": "nullable string view"}
+                    {"name": "label", "type": "string view", "optional": true}
                 ]
             }
         ]
@@ -3373,7 +3366,7 @@
                 "name": "set label 2",
                 "returns": "void",
                 "args": [
-                    {"name": "label", "type": "nullable string view"}
+                    {"name": "label", "type": "string view", "optional": true}
                 ]
             }
         ]
@@ -3689,7 +3682,7 @@
                 "name": "set label 2",
                 "returns": "void",
                 "args": [
-                    {"name": "label", "type": "nullable string view"}
+                    {"name": "label", "type": "string view", "optional": true}
                 ]
             }
         ]
@@ -3723,7 +3716,7 @@
                 "name": "set label 2",
                 "returns": "void",
                 "args": [
-                    {"name": "label", "type": "nullable string view"}
+                    {"name": "label", "type": "string view", "optional": true}
                 ]
             }
         ]
@@ -3895,7 +3888,7 @@
                 "name": "set label 2",
                 "returns": "void",
                 "args": [
-                    {"name": "label", "type": "nullable string view"}
+                    {"name": "label", "type": "string view", "optional": true}
                 ]
             }
         ]
@@ -3956,7 +3949,7 @@
                 "name": "set label 2",
                 "returns": "void",
                 "args": [
-                    {"name": "label", "type": "nullable string view"}
+                    {"name": "label", "type": "string view", "optional": true}
                 ]
             }
         ]
@@ -4109,7 +4102,7 @@
                 "name": "set label 2",
                 "returns": "void",
                 "args": [
-                    {"name": "label", "type": "nullable string view"}
+                    {"name": "label", "type": "string view", "optional": true}
                 ]
             }
         ]
@@ -4382,7 +4375,7 @@
                 "name": "set label 2",
                 "returns": "void",
                 "args": [
-                    {"name": "label", "type": "nullable string view"}
+                    {"name": "label", "type": "string view", "optional": true}
                 ]
             },
             {
@@ -4654,7 +4647,7 @@
                 "name": "set label 2",
                 "returns": "void",
                 "args": [
-                    {"name": "label", "type": "nullable string view"}
+                    {"name": "label", "type": "string view", "optional": true}
                 ]
             }
         ]

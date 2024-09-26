@@ -404,6 +404,20 @@ void SkipCommand(CommandIterator* commands, Command type) {
     }
 }
 
+const char* AddNullTerminatedString(CommandAllocator* allocator, StringView s, uint32_t* length) {
+    std::string_view view = s.AsRequiredStringView();
+    *length = view.length();
+
+    // Include extra null-terminator character. The string_view may not be null-terminated. It also
+    // may already have a null-terminator inside of it, in which case adding the null-terminator is
+    // unnecessary. However, this is unlikely, so always include the extra character.
+    char* out = allocator->AllocateData<char>(view.length() + 1);
+    memcpy(out, view.data(), view.length());
+    out[view.length()] = '\0';
+
+    return out;
+}
+
 TimestampWrites::TimestampWrites() = default;
 TimestampWrites::~TimestampWrites() = default;
 

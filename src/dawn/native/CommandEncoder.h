@@ -93,12 +93,12 @@ class CommandEncoder final : public ApiObjectBase {
 
     // TODO(crbug.com/42241188): Remove const char* version of the methods.
     void APIInjectValidationError(const char* message) { APIInjectValidationError2(message); }
-    void APIInjectValidationError2(std::string_view message);
+    void APIInjectValidationError2(StringView message);
     void APIInsertDebugMarker(const char* groupLabel) { APIInsertDebugMarker2(groupLabel); }
-    void APIInsertDebugMarker2(std::string_view groupLabel);
+    void APIInsertDebugMarker2(StringView groupLabel);
     void APIPopDebugGroup();
     void APIPushDebugGroup(const char* groupLabel) { APIPushDebugGroup2(groupLabel); }
-    void APIPushDebugGroup2(std::string_view groupLabel);
+    void APIPushDebugGroup2(StringView groupLabel);
 
     void APIResolveQuerySet(QuerySetBase* querySet,
                             uint32_t firstQuery,

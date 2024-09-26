@@ -169,16 +169,15 @@ namespace {{native_namespace}} {
 
     {% endfor %}
 
-    StringView::operator std::string_view() const {
-        const bool isNull = this->data == nullptr;
-        const bool useStrlen = this->length == WGPU_STRLEN;
-        DAWN_ASSERT(!(isNull && useStrlen));
-        return std::string_view(this->data, isNull      ? 0
-                                            : useStrlen ? std::strlen(this->data)
-                                                        : this->length);
+    std::string_view StringView::AsRequiredStringView() const {
+        std::optional<std::string_view> maybeSv = *this;
+        if (!maybeSv) {
+            return {};
+        }
+        return *maybeSv;
     }
 
-    NullableStringView::operator std::optional<std::string_view>() const {
+    StringView::operator std::optional<std::string_view>() const {
         const bool isNull = this->data == nullptr;
         const bool useStrlen = this->length == WGPU_STRLEN;
         if (isNull && useStrlen) {

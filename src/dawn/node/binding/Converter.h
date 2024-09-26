@@ -300,10 +300,6 @@ class Converter {
         out = {in.data(), in.size()};
         return true;
     }
-    [[nodiscard]] inline bool Convert(wgpu::NullableStringView& out, const std::string& in) {
-        out = {in.data(), in.size()};
-        return true;
-    }
 
     // Floating point number conversion. IDL rules are that double/float that isn't "unrestricted"
     // must be finite.

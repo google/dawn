@@ -101,7 +101,7 @@ typedef uint32_t {{API}}Bool;
 {% endfor %}
 
 // Structure forward declarations
-{% for type in by_category["structure"] if type.name.get() != "nullable string view" %}
+{% for type in by_category["structure"] %}
     struct {{as_cType(type.name)}};
 {% endfor %}
 
@@ -196,7 +196,7 @@ typedef struct {{API}}ChainedStructOut {
 
 {% endfor %}
 
-{% for type in by_category["structure"] if type.name.get() != "nullable string view" %}
+{% for type in by_category["structure"] %}
     {% for root in type.chain_roots %}
         // Can be chained in {{as_cType(root.name)}}
     {% endfor %}

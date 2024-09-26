@@ -1896,8 +1896,8 @@ void CommandEncoder::APIClearBuffer(BufferBase* buffer, uint64_t offset, uint64_
         "encoding %s.ClearBuffer(%s, %u, %u).", this, buffer, offset, size);
 }
 
-void CommandEncoder::APIInjectValidationError2(std::string_view message) {
-    message = utils::NormalizeLabel(message);
+void CommandEncoder::APIInjectValidationError2(StringView messageIn) {
+    std::string_view message = utils::NormalizeMessageString(messageIn);
     mEncodingContext.TryEncode(
         this,
         [&](CommandAllocator*) -> MaybeError {
@@ -1906,19 +1906,17 @@ void CommandEncoder::APIInjectValidationError2(std::string_view message) {
         "injecting validation error: %s.", message);
 }
 
-void CommandEncoder::APIInsertDebugMarker2(std::string_view groupLabel) {
-    groupLabel = utils::NormalizeLabel(groupLabel);
+void CommandEncoder::APIInsertDebugMarker2(StringView markerIn) {
+    std::string_view marker = utils::NormalizeMessageString(markerIn);
     mEncodingContext.TryEncode(
         this,
         [&](CommandAllocator* allocator) -> MaybeError {
             InsertDebugMarkerCmd* cmd =
                 allocator->Allocate<InsertDebugMarkerCmd>(Command::InsertDebugMarker);
-            cmd->length = groupLabel.length();
-            allocator->CopyAsNullTerminatedString(groupLabel);
-
+            AddNullTerminatedString(allocator, marker, &cmd->length);
             return {};
         },
-        "encoding %s.InsertDebugMarker(\"%s\").", this, groupLabel);
+        "encoding %s.InsertDebugMarker(%s).", this, marker);
 }
 
 void CommandEncoder::APIPopDebugGroup() {
@@ -1938,22 +1936,21 @@ void CommandEncoder::APIPopDebugGroup() {
         "encoding %s.PopDebugGroup().", this);
 }
 
-void CommandEncoder::APIPushDebugGroup2(std::string_view groupLabel) {
-    groupLabel = utils::NormalizeLabel(groupLabel);
+void CommandEncoder::APIPushDebugGroup2(StringView groupLabelIn) {
+    std::string_view groupLabel = utils::NormalizeMessageString(groupLabelIn);
     mEncodingContext.TryEncode(
         this,
         [&](CommandAllocator* allocator) -> MaybeError {
             PushDebugGroupCmd* cmd =
                 allocator->Allocate<PushDebugGroupCmd>(Command::PushDebugGroup);
-            cmd->length = groupLabel.length();
-            const char* label = allocator->CopyAsNullTerminatedString(groupLabel);
+            const char* label = AddNullTerminatedString(allocator, groupLabel, &cmd->length);
 
             mDebugGroupStackSize++;
             mEncodingContext.PushDebugGroupLabel(std::string_view(label, cmd->length));
 
             return {};
         },
-        "encoding %s.PushDebugGroup(\"%s\").", this, groupLabel);
+        "encoding %s.PushDebugGroup(%s).", this, groupLabel);
 }
 
 void CommandEncoder::APIResolveQuerySet(QuerySetBase* querySet,

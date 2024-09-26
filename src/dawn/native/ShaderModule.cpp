@@ -1193,11 +1193,12 @@ MaybeError ValidateAndParseShaderModule(
                     "Shader module compilation options used without %s enabled.",
                     wgpu::FeatureName::ShaderModuleCompilationOptions);
 
-    auto tintFile = std::make_unique<tint::Source::File>("", wgslDesc->code);
+    auto tintFile = std::make_unique<tint::Source::File>("", wgslDesc->code.AsRequiredStringView());
 
     if (device->IsToggleEnabled(Toggle::DumpShaders)) {
         std::ostringstream dumpedMsg;
-        dumpedMsg << "// Dumped WGSL:\n" << std::string_view(wgslDesc->code) << "\n";
+        dumpedMsg << "// Dumped WGSL:\n"
+                  << std::string_view(wgslDesc->code.AsRequiredStringView()) << "\n";
         device->EmitLog(WGPULoggingType_Info, dumpedMsg.str().c_str());
     }
 
@@ -1359,7 +1360,7 @@ ShaderModuleBase::ShaderModuleBase(DeviceBase* device,
         mOriginalSpirv.assign(spirvDesc->code, spirvDesc->code + spirvDesc->codeSize);
     } else if (auto* wgslDesc = descriptor.Get<ShaderSourceWGSL>()) {
         mType = Type::Wgsl;
-        mWgsl = std::string(wgslDesc->code);
+        mWgsl = std::string(wgslDesc->code.AsRequiredStringView());
     } else {
         DAWN_ASSERT(false);
     }

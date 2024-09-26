@@ -630,9 +630,7 @@ static_assert(offsetof(ChainedStruct, sType) == offsetof({{c_prefix}}ChainedStru
 
         //* Custom string constructors
         {% if type.name.get() == "string view" %}
-            {{wgpu_string_constructors(as_cppType(type.name), false) | indent(4)}}
-        {% elif type.name.get() == "nullable string view" %}
-            {{wgpu_string_constructors(as_cppType(type.name), true) | indent(4)}}
+            {{wgpu_string_constructors(as_cppType(type.name)) | indent(4)}}
         {% endif %}
 
         {% if type.has_free_members_function %}

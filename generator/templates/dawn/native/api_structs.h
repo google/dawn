@@ -106,15 +106,12 @@ namespace {{native_namespace}} {
 
             //* Custom string constructors / conversion
             {% if type.name.get() == "string view" %}
-                {{wgpu_string_constructors(CppType, false) | indent(8)}}
-
-                // NOLINTNEXTLINE(runtime/explicit) allow implicit conversion
-                operator std::string_view() const;
-            {% elif type.name.get() == "nullable string view" %}
-                {{wgpu_string_constructors(CppType, true) | indent(8)}}
+                {{wgpu_string_constructors(CppType) | indent(8)}}
 
                 // NOLINTNEXTLINE(runtime/explicit) allow implicit conversion
                 operator std::optional<std::string_view>() const;
+
+                std::string_view AsRequiredStringView() const;
             {% endif %}
 
             {% if type.any_member_requires_struct_defaulting %}

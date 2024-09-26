@@ -311,6 +311,9 @@ absl::FormatConvertResult<absl::FormatConversionCharSet::kNumeric> AbslFormatCon
     return {true};
 }
 
+absl::FormatConvertResult<absl::FormatConversionCharSet::kString>
+AbslFormatConvert(StringView value, const absl::FormatConversionSpec& spec, absl::FormatSink* s);
+
 }  // namespace dawn::native
 
 #endif  // SRC_DAWN_NATIVE_WEBGPU_ABSL_FORMAT_H_

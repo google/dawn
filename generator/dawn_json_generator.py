@@ -765,8 +765,7 @@ def compute_kotlin_params(loaded_json, kotlin_json):
         # TODO(352710628) support converting callback info.
         if structure.name.canonical_case().endswith(" callback info"):
             return False
-        if (structure.name.canonical_case() == "string view"
-                or structure.name.canonical_case() == "nullable string view"):
+        if structure.name.canonical_case() == "string view":
             return False
         return True
 
@@ -814,9 +813,6 @@ def as_cType(c_prefix, name):
     # Special case for 'bool' because it has a typedef for compatibility.
     if name.native and name.get() != 'bool':
         return name.concatcase()
-    elif name.get() == 'nullable string view':
-        # nullable string view type doesn't exist in C.
-        return c_prefix + 'StringView'
     else:
         return c_prefix + name.CamelCase()
 
@@ -1431,8 +1427,7 @@ class MultiGeneratorFromDawnJSON(Generator):
 
             by_category = params_kotlin['by_category']
             for structure in by_category['structure']:
-                if (structure.name.get() != "string view"
-                        and structure.name.get() != "nullable string view"):
+                if structure.name.get() != "string view":
                     renders.append(
                         FileRender('art/api_kotlin_structure.kt',
                                    'java/' + jni_name(structure) + '.kt', [
