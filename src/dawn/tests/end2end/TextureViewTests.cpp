@@ -166,7 +166,6 @@ class TextureViewSamplingTest : public TextureViewTestBase {
         mDefaultTextureViewDescriptor.mipLevelCount = mipLevelCount;
         mDefaultTextureViewDescriptor.baseArrayLayer = 0;
         mDefaultTextureViewDescriptor.arrayLayerCount = arrayLayerCount;
-        mDefaultTextureViewDescriptor.usage = kUsage;
 
         // Create a texture with pixel = (0, 0, 0, level * 10 + layer + 1) at level `level` and
         // layer `layer`.

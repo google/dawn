@@ -103,14 +103,13 @@ MTLTextureType MetalTextureViewType(wgpu::TextureViewDimension dimension,
 
 bool RequiresCreatingNewTextureView(
     const TextureBase* texture,
-    wgpu::TextureUsage internalViewUsage,
     const UnpackedPtr<TextureViewDescriptor>& textureViewDescriptor) {
     constexpr wgpu::TextureUsage kShaderUsageNeedsView =
         wgpu::TextureUsage::StorageBinding | wgpu::TextureUsage::TextureBinding;
     constexpr wgpu::TextureUsage kUsageNeedsView = kShaderUsageNeedsView |
                                                    wgpu::TextureUsage::RenderAttachment |
                                                    wgpu::TextureUsage::StorageAttachment;
-    if ((internalViewUsage & kUsageNeedsView) == 0) {
+    if ((texture->GetInternalUsage() & kUsageNeedsView) == 0) {
         return false;
     }
 
@@ -790,7 +789,7 @@ MaybeError TextureView::Initialize(const UnpackedPtr<TextureViewDescriptor>& des
     Aspect aspect = SelectFormatAspects(texture->GetFormat(), descriptor->aspect);
     id<MTLTexture> mtlTexture = texture->GetMTLTexture(aspect);
 
-    bool needsNewView = RequiresCreatingNewTextureView(texture, GetInternalUsage(), descriptor);
+    bool needsNewView = RequiresCreatingNewTextureView(texture, descriptor);
     if (device->IsToggleEnabled(Toggle::MetalUseCombinedDepthStencilFormatForStencil8) &&
         GetTexture()->GetFormat().format == wgpu::TextureFormat::Stencil8) {
         // If MetalUseCombinedDepthStencilFormatForStencil8 is true and the format is Stencil8,
@@ -851,7 +850,7 @@ id<MTLTexture> TextureView::GetMTLTexture() const {
 }
 
 TextureView::AttachmentInfo TextureView::GetAttachmentInfo() const {
-    DAWN_ASSERT(GetInternalUsage() &
+    DAWN_ASSERT(GetTexture()->GetInternalUsage() &
                 (wgpu::TextureUsage::RenderAttachment | wgpu::TextureUsage::StorageAttachment));
     // Use our own view if the formats do not match.
     // If the formats do not match, format reinterpretation will be required.

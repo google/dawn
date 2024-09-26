@@ -42,9 +42,9 @@ namespace dawn::native {
 
 MaybeError ValidateExternalTexturePlane(const TextureViewBase* textureView) {
     DAWN_INVALID_IF(
-        (textureView->GetUsage() & wgpu::TextureUsage::TextureBinding) == 0,
+        (textureView->GetTexture()->GetUsage() & wgpu::TextureUsage::TextureBinding) == 0,
         "The external texture plane (%s) usage (%s) doesn't include the required usage (%s)",
-        textureView, textureView->GetUsage(), wgpu::TextureUsage::TextureBinding);
+        textureView, textureView->GetTexture()->GetUsage(), wgpu::TextureUsage::TextureBinding);
 
     DAWN_INVALID_IF(textureView->GetDimension() != wgpu::TextureViewDimension::e2D,
                     "The external texture plane (%s) dimension (%s) is not 2D.", textureView,

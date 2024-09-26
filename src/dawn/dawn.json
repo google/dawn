@@ -4637,8 +4637,7 @@
             {"name": "mip level count", "type": "uint32_t", "default": "WGPU_MIP_LEVEL_COUNT_UNDEFINED"},
             {"name": "base array layer", "type": "uint32_t", "default": "0"},
             {"name": "array layer count", "type": "uint32_t", "default": "WGPU_ARRAY_LAYER_COUNT_UNDEFINED"},
-            {"name": "aspect", "type": "texture aspect", "default": "all"},
-            {"name": "usage", "type": "texture usage", "default": "none"}
+            {"name": "aspect", "type": "texture aspect", "default": "all"}
         ]
     },
     "texture view": {

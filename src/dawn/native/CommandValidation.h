@@ -110,10 +110,7 @@ MaybeError ValidateTextureToTextureCopyRestrictions(DeviceBase const* device,
                                                     const ImageCopyTexture& dst,
                                                     const Extent3D& copySize);
 
-MaybeError ValidateCanUseAs(const TextureBase* textureView,
-                            wgpu::TextureUsage usage,
-                            UsageValidationMode mode);
-MaybeError ValidateCanUseAs(const TextureViewBase* textureView,
+MaybeError ValidateCanUseAs(const TextureBase* texture,
                             wgpu::TextureUsage usage,
                             UsageValidationMode mode);
 MaybeError ValidateCanUseAs(const BufferBase* buffer, wgpu::BufferUsage usage);

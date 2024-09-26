@@ -460,30 +460,10 @@ TEST_F(BindGroupValidationTest, TextureUsage) {
     utils::MakeBindGroup(device, layout, {{0, mSampledTextureView}});
 
     // Make an render attachment texture and try to set it for a SampledTexture binding
-    {
-        wgpu::Texture outputTexture =
-            CreateTexture(wgpu::TextureUsage::RenderAttachment, wgpu::TextureFormat::RGBA8Unorm, 1);
-        wgpu::TextureView outputTextureView = outputTexture.CreateView();
-        ASSERT_DEVICE_ERROR(utils::MakeBindGroup(device, layout, {{0, outputTextureView}}));
-    }
-
-    // Make a sampled/render attachment texture and a view without sampling and attempt to bind it
-    {
-        wgpu::Texture outputTexture =
-            CreateTexture(wgpu::TextureUsage::RenderAttachment | wgpu::TextureUsage::TextureBinding,
-                          wgpu::TextureFormat::RGBA8Unorm, 1);
-        wgpu::TextureViewDescriptor viewDescriptor;
-        viewDescriptor.format = wgpu::TextureFormat::RGBA8Unorm;
-        viewDescriptor.dimension = wgpu::TextureViewDimension::e2D;
-        viewDescriptor.baseMipLevel = 0;
-        viewDescriptor.mipLevelCount = 1;
-        viewDescriptor.baseArrayLayer = 0;
-        viewDescriptor.arrayLayerCount = 1;
-        viewDescriptor.usage = wgpu::TextureUsage::RenderAttachment;
-
-        wgpu::TextureView outputTextureView = outputTexture.CreateView(&viewDescriptor);
-        ASSERT_DEVICE_ERROR(utils::MakeBindGroup(device, layout, {{0, outputTextureView}}));
-    }
+    wgpu::Texture outputTexture =
+        CreateTexture(wgpu::TextureUsage::RenderAttachment, wgpu::TextureFormat::RGBA8Unorm, 1);
+    wgpu::TextureView outputTextureView = outputTexture.CreateView();
+    ASSERT_DEVICE_ERROR(utils::MakeBindGroup(device, layout, {{0, outputTextureView}}));
 }
 
 // Check that a storage texture binding must have the correct usage

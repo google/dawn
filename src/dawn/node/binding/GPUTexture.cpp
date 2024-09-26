@@ -62,9 +62,7 @@ interop::Interface<interop::GPUTextureView> GPUTexture::createView(
         !conv(desc.arrayLayerCount, descriptor.arrayLayerCount) ||  //
         !conv(desc.format, descriptor.format) ||                    //
         !conv(desc.dimension, descriptor.dimension) ||              //
-        !conv(desc.aspect, descriptor.aspect) ||                    //
-        !conv(desc.label, descriptor.label) ||                      //
-        !conv(desc.usage, descriptor.usage)) {
+        !conv(desc.aspect, descriptor.aspect) || !conv(desc.label, descriptor.label)) {
         return {};
     }
     return interop::GPUTextureView::Create<GPUTextureView>(env, desc, texture_.CreateView(&desc));
