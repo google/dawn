@@ -37,6 +37,8 @@
 #ifndef {{metadata.api.upper()}}_H_
 #define {{metadata.api.upper()}}_H_
 
+#define WGPU_BREAKING_CHANGE_STRING_VIEW_LABELS
+
 {% set API = metadata.c_prefix %}
 #if defined({{API}}_SHARED_LIBRARY)
 #    if defined(_WIN32)

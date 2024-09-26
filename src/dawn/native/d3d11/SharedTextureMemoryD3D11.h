@@ -45,12 +45,12 @@ class SharedTextureMemory final : public d3d::SharedTextureMemory {
   public:
     static ResultOrError<Ref<SharedTextureMemory>> Create(
         Device* device,
-        const char* label,
+        StringView label,
         const SharedTextureMemoryDXGISharedHandleDescriptor* descriptor);
 
     static ResultOrError<Ref<SharedTextureMemory>> Create(
         Device* device,
-        const char* label,
+        StringView label,
         const SharedTextureMemoryD3D11Texture2DDescriptor* descriptor);
 
     ID3D11Resource* GetD3DResource() const;
@@ -59,7 +59,7 @@ class SharedTextureMemory final : public d3d::SharedTextureMemory {
 
   private:
     SharedTextureMemory(Device* device,
-                        const char* label,
+                        StringView label,
                         SharedTextureMemoryProperties properties,
                         ComPtr<ID3D11Resource> resource);
 

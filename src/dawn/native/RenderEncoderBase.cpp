@@ -44,7 +44,7 @@
 namespace dawn::native {
 
 RenderEncoderBase::RenderEncoderBase(DeviceBase* device,
-                                     const char* label,
+                                     StringView label,
                                      EncodingContext* encodingContext,
                                      Ref<AttachmentState> attachmentState,
                                      bool depthReadOnly,
@@ -61,7 +61,7 @@ RenderEncoderBase::RenderEncoderBase(DeviceBase* device,
 RenderEncoderBase::RenderEncoderBase(DeviceBase* device,
                                      EncodingContext* encodingContext,
                                      ErrorTag errorTag,
-                                     const char* label)
+                                     StringView label)
     : ProgrammableEncoder(device, encodingContext, errorTag, label),
       mIndirectDrawMetadata(device->GetLimits()),
       mDisableBaseVertex(device->IsToggleEnabled(Toggle::DisableBaseVertex)),

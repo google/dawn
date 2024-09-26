@@ -184,7 +184,7 @@ struct SubmittedWorkDone : TrackTaskCallback {
 
 class ErrorQueue : public QueueBase {
   public:
-    explicit ErrorQueue(DeviceBase* device, const char* label)
+    explicit ErrorQueue(DeviceBase* device, StringView label)
         : QueueBase(device, ObjectBase::kError, label) {}
 
   private:
@@ -216,7 +216,7 @@ QueueBase::QueueBase(DeviceBase* device, const QueueDescriptor* descriptor)
     GetObjectTrackingList()->Track(this);
 }
 
-QueueBase::QueueBase(DeviceBase* device, ObjectBase::ErrorTag tag, const char* label)
+QueueBase::QueueBase(DeviceBase* device, ObjectBase::ErrorTag tag, StringView label)
     : ApiObjectBase(device, tag, label) {}
 
 QueueBase::~QueueBase() {
@@ -226,7 +226,7 @@ QueueBase::~QueueBase() {
 void QueueBase::DestroyImpl() {}
 
 // static
-Ref<QueueBase> QueueBase::MakeError(DeviceBase* device, const char* label) {
+Ref<QueueBase> QueueBase::MakeError(DeviceBase* device, StringView label) {
     return AcquireRef(new ErrorQueue(device, label));
 }
 

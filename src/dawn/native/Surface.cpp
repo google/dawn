@@ -274,8 +274,9 @@ Surface::Surface(InstanceBase* instance, const UnpackedPtr<SurfaceDescriptor>& d
     : ErrorMonad(),
       mInstance(instance),
       mCapabilityCache(std::make_unique<AdapterSurfaceCapCache>()) {
-    if (descriptor->label != nullptr && strlen(descriptor->label) != 0) {
-        mLabel = descriptor->label;
+    std::optional<std::string_view> label = descriptor->label;
+    if (label.has_value()) {
+        mLabel = label.value();
     }
 
     // Type is validated in validation, otherwise this may crash with an assert failure.

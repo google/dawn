@@ -50,13 +50,11 @@ CommandBufferBase::CommandBufferBase(CommandEncoder* encoder,
     GetObjectTrackingList()->Track(this);
 }
 
-CommandBufferBase::CommandBufferBase(DeviceBase* device,
-                                     ObjectBase::ErrorTag tag,
-                                     const char* label)
+CommandBufferBase::CommandBufferBase(DeviceBase* device, ObjectBase::ErrorTag tag, StringView label)
     : ApiObjectBase(device, tag, label) {}
 
 // static
-Ref<CommandBufferBase> CommandBufferBase::MakeError(DeviceBase* device, const char* label) {
+Ref<CommandBufferBase> CommandBufferBase::MakeError(DeviceBase* device, StringView label) {
     return AcquireRef(new CommandBufferBase(device, ObjectBase::kError, label));
 }
 

@@ -31,7 +31,7 @@
 #include <utility>
 #include <vector>
 
-#include "src/dawn/node/utils/Debug.h"
+#include "src/dawn/node/binding/Converter.h"
 
 namespace wgpu::binding {
 
@@ -41,7 +41,7 @@ namespace wgpu::binding {
 GPUShaderModule::GPUShaderModule(const wgpu::ShaderModuleDescriptor& desc,
                                  wgpu::ShaderModule shader,
                                  std::shared_ptr<AsyncRunner> async)
-    : shader_(std::move(shader)), async_(std::move(async)), label_(desc.label ? desc.label : "") {}
+    : shader_(std::move(shader)), async_(std::move(async)), label_(CopyLabel(desc.label)) {}
 
 interop::Promise<interop::Interface<interop::GPUCompilationInfo>>
 GPUShaderModule::getCompilationInfo(Napi::Env env) {
@@ -116,7 +116,7 @@ std::string GPUShaderModule::getLabel(Napi::Env) {
 }
 
 void GPUShaderModule::setLabel(Napi::Env, std::string value) {
-    shader_.SetLabel(value.c_str());
+    shader_.SetLabel(std::string_view(value));
     label_ = value;
 }
 

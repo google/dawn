@@ -70,7 +70,7 @@ class CreatePipelineAsyncEvent final : public EventManager::TrackedEvent {
     CreatePipelineAsyncEvent(DeviceBase* device,
                              const CreatePipelineAsyncCallbackInfo& callbackInfo,
                              std::unique_ptr<ErrorData> error,
-                             const char* label);
+                             StringView label);
 
     ~CreatePipelineAsyncEvent() override;
 

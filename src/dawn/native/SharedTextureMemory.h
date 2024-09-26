@@ -65,7 +65,7 @@ class SharedTextureMemoryBase : public SharedResourceMemory {
 
   protected:
     SharedTextureMemoryBase(DeviceBase* device,
-                            const char* label,
+                            StringView label,
                             const SharedTextureMemoryProperties& properties);
     SharedTextureMemoryBase(DeviceBase* device,
                             const SharedTextureMemoryDescriptor* descriptor,

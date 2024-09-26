@@ -349,7 +349,7 @@ TEST_F(CommandBufferValidationTest, InjectedValidateErrorStringView) {
     ASSERT_DEVICE_ERROR(encoder.Finish(), HasSubstr(sv));
 }
 
-// Test that calling inject validation error with various wgpu::NullableStringView produces
+// Test that calling inject validation error with various wgpu::StringView produces
 // an error which preserves the string.
 TEST_F(CommandBufferValidationTest, InjectedValidateErrorVariousStringTypes) {
     // Use strlen

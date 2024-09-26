@@ -43,7 +43,7 @@
 namespace dawn::native {
 
 ProgrammableEncoder::ProgrammableEncoder(DeviceBase* device,
-                                         const char* label,
+                                         StringView label,
                                          EncodingContext* encodingContext)
     : ApiObjectBase(device, label),
       mEncodingContext(encodingContext),
@@ -52,7 +52,7 @@ ProgrammableEncoder::ProgrammableEncoder(DeviceBase* device,
 ProgrammableEncoder::ProgrammableEncoder(DeviceBase* device,
                                          EncodingContext* encodingContext,
                                          ErrorTag errorTag,
-                                         const char* label)
+                                         StringView label)
     : ApiObjectBase(device, errorTag, label),
       mEncodingContext(encodingContext),
       mValidationEnabled(device->IsValidationEnabled()) {}

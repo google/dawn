@@ -422,7 +422,7 @@ MaybeError ShaderModule::CreateFunction(SingleShaderStage stage,
                                         const RenderPipeline* renderPipeline,
                                         std::optional<uint32_t> maxSubgroupSizeForFullSubgroups) {
     TRACE_EVENT1(GetDevice()->GetPlatform(), General, "metal::ShaderModule::CreateFunction",
-                 "label", utils::GetLabelForTrace(GetLabel().c_str()));
+                 "label", utils::GetLabelForTrace(GetLabel()));
 
     DAWN_ASSERT(!IsError());
     DAWN_ASSERT(out);

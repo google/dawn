@@ -29,6 +29,7 @@
 #include "structures.h"
 
 #include <cassert>
+#include <string>
 
 #include <jni.h>
 #include <webgpu/webgpu.h>
@@ -90,14 +91,21 @@ jobject ToKotlin(JNIEnv *env, const WGPUUncapturedErrorCallbackInfo* input) {
 
 // Special-case [Nullable]StringView
 void ToNative(JNIContext* c, JNIEnv* env, jstring obj, WGPUStringView* s) {
+    if (obj == nullptr) {
+        *s = {nullptr, WGPU_STRLEN};
+    }
     *s = {c->GetStringUTFChars(obj), static_cast<size_t>(env->GetStringUTFLength(obj))};
 }
+
 jobject ToKotlin(JNIEnv* env, const WGPUStringView* s) {
-    if (s->data == nullptr) {
-        return nullptr;
+    if (s->length == WGPU_STRLEN) {
+        if (s->data == nullptr) {
+            return nullptr;
+        }
+        return env->NewStringUTF(s->data);
     }
-    assert(s->length == WGPU_STRLEN); // Strings returned from Dawn should always be null-terminated.
-    return env->NewStringUTF(s->data);
+    std::string nullTerminated(s->data, s->length);
+    return env->NewStringUTF(nullTerminated.c_str());
 }
 
 {% for structure in by_category['structure'] if include_structure(structure) %}

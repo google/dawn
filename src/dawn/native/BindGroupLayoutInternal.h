@@ -154,7 +154,7 @@ class BindGroupLayoutInternalBase : public ApiObjectBase,
     }
 
   private:
-    BindGroupLayoutInternalBase(DeviceBase* device, ObjectBase::ErrorTag tag, const char* label);
+    BindGroupLayoutInternalBase(DeviceBase* device, ObjectBase::ErrorTag tag, StringView label);
 
     BindingCounts mBindingCounts = {};
     ityp::vector<BindingIndex, BindingInfo> mBindingInfo;

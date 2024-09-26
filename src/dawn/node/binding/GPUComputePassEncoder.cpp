@@ -34,7 +34,6 @@
 #include "src/dawn/node/binding/GPUBuffer.h"
 #include "src/dawn/node/binding/GPUComputePipeline.h"
 #include "src/dawn/node/binding/GPUQuerySet.h"
-#include "src/dawn/node/utils/Debug.h"
 
 namespace wgpu::binding {
 
@@ -43,7 +42,7 @@ namespace wgpu::binding {
 ////////////////////////////////////////////////////////////////////////////////
 GPUComputePassEncoder::GPUComputePassEncoder(const wgpu::ComputePassDescriptor& desc,
                                              wgpu::ComputePassEncoder enc)
-    : enc_(std::move(enc)), label_(desc.label ? desc.label : "") {}
+    : enc_(std::move(enc)), label_(CopyLabel(desc.label)) {}
 
 void GPUComputePassEncoder::setPipeline(Napi::Env,
                                         interop::Interface<interop::GPUComputePipeline> pipeline) {
@@ -134,7 +133,7 @@ std::string GPUComputePassEncoder::getLabel(Napi::Env) {
 }
 
 void GPUComputePassEncoder::setLabel(Napi::Env, std::string value) {
-    enc_.SetLabel(value.c_str());
+    enc_.SetLabel(std::string_view(value));
     label_ = value;
 }
 

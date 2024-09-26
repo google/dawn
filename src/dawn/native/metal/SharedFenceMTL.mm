@@ -35,7 +35,7 @@ namespace dawn::native::metal {
 // static
 ResultOrError<Ref<SharedFence>> SharedFence::Create(
     Device* device,
-    const char* label,
+    StringView label,
     const SharedFenceMTLSharedEventDescriptor* descriptor) {
     DAWN_INVALID_IF(descriptor->sharedEvent == nullptr, "MTLSharedEvent is missing.");
     if (@available(macOS 10.14, iOS 12.0, *)) {
@@ -46,7 +46,7 @@ ResultOrError<Ref<SharedFence>> SharedFence::Create(
     }
 }
 
-SharedFence::SharedFence(Device* device, const char* label, id<MTLSharedEvent> sharedEvent)
+SharedFence::SharedFence(Device* device, StringView label, id<MTLSharedEvent> sharedEvent)
     : SharedFenceBase(device, label), mSharedEvent(sharedEvent) {}
 
 id<MTLSharedEvent> SharedFence::GetMTLSharedEvent() const {

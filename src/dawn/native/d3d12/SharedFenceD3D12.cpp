@@ -37,7 +37,7 @@ namespace dawn::native::d3d12 {
 // static
 ResultOrError<Ref<SharedFence>> SharedFence::Create(
     Device* device,
-    const char* label,
+    StringView label,
     const SharedFenceDXGISharedHandleDescriptor* descriptor) {
     DAWN_INVALID_IF(descriptor->handle == nullptr, "shared HANDLE is missing.");
 
@@ -54,7 +54,7 @@ ResultOrError<Ref<SharedFence>> SharedFence::Create(
 
 // static
 ResultOrError<Ref<SharedFence>> SharedFence::Create(Device* device,
-                                                    const char* label,
+                                                    StringView label,
                                                     ComPtr<ID3D12Fence> d3d12Fence) {
     SystemHandle ownedHandle;
     DAWN_TRY(

@@ -33,7 +33,6 @@
 
 #include "src/dawn/node/binding/Converter.h"
 #include "src/dawn/node/binding/Errors.h"
-#include "src/dawn/node/utils/Debug.h"
 
 namespace wgpu::binding {
 
@@ -49,7 +48,7 @@ GPUBuffer::GPUBuffer(wgpu::Buffer buffer,
       device_(std::move(device)),
       async_(std::move(async)),
       mapped_(desc.mappedAtCreation),
-      label_(desc.label ? desc.label : "") {}
+      label_(CopyLabel(desc.label)) {}
 
 interop::Promise<void> GPUBuffer::mapAsync(Napi::Env env,
                                            interop::GPUMapModeFlags modeIn,
@@ -195,7 +194,7 @@ std::string GPUBuffer::getLabel(Napi::Env) {
 }
 
 void GPUBuffer::setLabel(Napi::Env, std::string value) {
-    buffer_.SetLabel(value.c_str());
+    buffer_.SetLabel(std::string_view(value));
     label_ = value;
 }
 

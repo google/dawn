@@ -35,7 +35,6 @@
 #include "src/dawn/node/binding/GPUQuerySet.h"
 #include "src/dawn/node/binding/GPURenderBundle.h"
 #include "src/dawn/node/binding/GPURenderPipeline.h"
-#include "src/dawn/node/utils/Debug.h"
 
 namespace wgpu::binding {
 
@@ -44,7 +43,7 @@ namespace wgpu::binding {
 ////////////////////////////////////////////////////////////////////////////////
 GPURenderPassEncoder::GPURenderPassEncoder(const wgpu::RenderPassDescriptor& desc,
                                            wgpu::RenderPassEncoder enc)
-    : enc_(std::move(enc)), label_(desc.label ? desc.label : "") {}
+    : enc_(std::move(enc)), label_(CopyLabel(desc.label)) {}
 
 void GPURenderPassEncoder::setViewport(Napi::Env,
                                        float x,
@@ -311,7 +310,7 @@ std::string GPURenderPassEncoder::getLabel(Napi::Env) {
 }
 
 void GPURenderPassEncoder::setLabel(Napi::Env, std::string value) {
-    enc_.SetLabel(value.c_str());
+    enc_.SetLabel(std::string_view(value));
     label_ = value;
 }
 

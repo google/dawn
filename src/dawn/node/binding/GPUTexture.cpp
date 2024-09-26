@@ -32,7 +32,6 @@
 #include "src/dawn/node/binding/Converter.h"
 #include "src/dawn/node/binding/Errors.h"
 #include "src/dawn/node/binding/GPUTextureView.h"
-#include "src/dawn/node/utils/Debug.h"
 
 namespace wgpu::binding {
 
@@ -42,9 +41,7 @@ namespace wgpu::binding {
 GPUTexture::GPUTexture(wgpu::Device device,
                        const wgpu::TextureDescriptor& desc,
                        wgpu::Texture texture)
-    : device_(std::move(device)),
-      texture_(std::move(texture)),
-      label_(desc.label ? desc.label : "") {}
+    : device_(std::move(device)), texture_(std::move(texture)), label_(CopyLabel(desc.label)) {}
 
 interop::Interface<interop::GPUTextureView> GPUTexture::createView(
     Napi::Env env,
@@ -136,7 +133,7 @@ std::string GPUTexture::getLabel(Napi::Env) {
 }
 
 void GPUTexture::setLabel(Napi::Env, std::string value) {
-    texture_.SetLabel(value.c_str());
+    texture_.SetLabel(std::string_view(value));
     label_ = value;
 }
 

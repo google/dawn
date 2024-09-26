@@ -58,7 +58,7 @@ SharedFenceBase::SharedFenceBase(DeviceBase* device,
                                  ObjectBase::ErrorTag tag)
     : ApiObjectBase(device, tag, descriptor->label) {}
 
-SharedFenceBase::SharedFenceBase(DeviceBase* device, const char* label)
+SharedFenceBase::SharedFenceBase(DeviceBase* device, StringView label)
     : ApiObjectBase(device, label) {}
 
 ObjectType SharedFenceBase::GetType() const {

@@ -34,7 +34,6 @@
 #include "src/dawn/node/binding/GPUBuffer.h"
 #include "src/dawn/node/binding/GPURenderBundle.h"
 #include "src/dawn/node/binding/GPURenderPipeline.h"
-#include "src/dawn/node/utils/Debug.h"
 
 namespace wgpu::binding {
 
@@ -43,7 +42,7 @@ namespace wgpu::binding {
 ////////////////////////////////////////////////////////////////////////////////
 GPURenderBundleEncoder::GPURenderBundleEncoder(const RenderBundleEncoderDescriptor& desc,
                                                wgpu::RenderBundleEncoder enc)
-    : enc_(std::move(enc)), label_(desc.label ? desc.label : "") {}
+    : enc_(std::move(enc)), label_(CopyLabel(desc.label)) {}
 
 interop::Interface<interop::GPURenderBundle> GPURenderBundleEncoder::finish(
     Napi::Env env,
@@ -206,7 +205,7 @@ std::string GPURenderBundleEncoder::getLabel(Napi::Env) {
 }
 
 void GPURenderBundleEncoder::setLabel(Napi::Env, std::string value) {
-    enc_.SetLabel(value.c_str());
+    enc_.SetLabel(std::string_view(value));
     label_ = value;
 }
 

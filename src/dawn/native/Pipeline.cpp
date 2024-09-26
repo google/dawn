@@ -207,7 +207,7 @@ WGPUCreatePipelineAsyncStatus CreatePipelineAsyncStatusFromErrorType(InternalErr
 
 PipelineBase::PipelineBase(DeviceBase* device,
                            PipelineLayoutBase* layout,
-                           const char* label,
+                           StringView label,
                            std::vector<StageAndDescriptor> stages)
     : ApiObjectBase(device, label), mLayout(layout) {
     DAWN_ASSERT(!stages.empty());
@@ -248,7 +248,7 @@ PipelineBase::PipelineBase(DeviceBase* device,
     }
 }
 
-PipelineBase::PipelineBase(DeviceBase* device, ObjectBase::ErrorTag tag, const char* label)
+PipelineBase::PipelineBase(DeviceBase* device, ObjectBase::ErrorTag tag, StringView label)
     : ApiObjectBase(device, tag, label) {}
 
 PipelineBase::~PipelineBase() = default;

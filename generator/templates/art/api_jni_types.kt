@@ -44,7 +44,7 @@
 {% endmacro %}
 
 {% macro to_jni_type(type) %}
-    {% if type.name.get() == "string view" %}
+    {% if type.name.get() == 'string view' %}
         jstring
     {% elif type.category in ['function pointer', 'object', 'structure'] %}
         jobject

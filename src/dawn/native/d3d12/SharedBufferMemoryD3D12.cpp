@@ -41,7 +41,7 @@
 namespace dawn::native::d3d12 {
 
 SharedBufferMemory::SharedBufferMemory(Device* device,
-                                       const char* label,
+                                       StringView label,
                                        SharedBufferMemoryProperties properties,
                                        ComPtr<ID3D12Resource> resource)
     : SharedBufferMemoryBase(device, label, properties), mResource(std::move(resource)) {}
@@ -53,7 +53,7 @@ void SharedBufferMemory::DestroyImpl() {
 // static
 ResultOrError<Ref<SharedBufferMemory>> SharedBufferMemory::Create(
     Device* device,
-    const char* label,
+    StringView label,
     const SharedBufferMemoryD3D12ResourceDescriptor* descriptor) {
     DAWN_INVALID_IF(!descriptor->resource, "D3D12 resource is missing.");
 

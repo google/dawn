@@ -30,7 +30,6 @@
 #include <utility>
 
 #include "src/dawn/node/binding/Converter.h"
-#include "src/dawn/node/utils/Debug.h"
 
 namespace wgpu::binding {
 
@@ -38,7 +37,7 @@ namespace wgpu::binding {
 // wgpu::bindings::GPUQuerySet
 ////////////////////////////////////////////////////////////////////////////////
 GPUQuerySet::GPUQuerySet(const wgpu::QuerySetDescriptor& desc, wgpu::QuerySet query_set)
-    : query_set_(std::move(query_set)), label_(desc.label ? desc.label : "") {}
+    : query_set_(std::move(query_set)), label_(CopyLabel(desc.label)) {}
 
 void GPUQuerySet::destroy(Napi::Env) {
     query_set_.Destroy();
@@ -66,7 +65,7 @@ std::string GPUQuerySet::getLabel(Napi::Env) {
 }
 
 void GPUQuerySet::setLabel(Napi::Env, std::string value) {
-    query_set_.SetLabel(value.c_str());
+    query_set_.SetLabel(std::string_view(value));
     label_ = value;
 }
 

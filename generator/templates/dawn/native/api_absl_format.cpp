@@ -34,6 +34,7 @@
 
 #include "{{native_dir}}/ChainUtils.h"
 #include "{{native_dir}}/ObjectType_autogen.h"
+#include "{{native_dir}}/webgpu_absl_format.h"
 
 namespace {{native_namespace}} {
 
@@ -53,7 +54,7 @@ namespace {{native_namespace}} {
                         return {true};
                     }
                     s->Append("[{{as_cppType(type.name)}}");
-                    if (value->label != nullptr) {
+                    if (value->label.data != nullptr) {
                         s->Append(absl::StrFormat(" \"%s\"", value->label));
                     }
                     s->Append("]");

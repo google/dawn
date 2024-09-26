@@ -46,7 +46,7 @@ class DeviceBase;
 // Base class for shared functionality between programmable encoders.
 class ProgrammableEncoder : public ApiObjectBase {
   public:
-    ProgrammableEncoder(DeviceBase* device, const char* label, EncodingContext* encodingContext);
+    ProgrammableEncoder(DeviceBase* device, StringView label, EncodingContext* encodingContext);
 
     // TODO(crbug.com/42241188): Remove const char* version of the methods.
     void APIInsertDebugMarker(const char* groupLabel) { APIInsertDebugMarker2(groupLabel); }
@@ -75,7 +75,7 @@ class ProgrammableEncoder : public ApiObjectBase {
     ProgrammableEncoder(DeviceBase* device,
                         EncodingContext* encodingContext,
                         ErrorTag errorTag,
-                        const char* label);
+                        StringView label);
 
     raw_ptr<EncodingContext> mEncodingContext = nullptr;
 

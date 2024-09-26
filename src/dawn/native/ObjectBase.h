@@ -38,6 +38,7 @@
 #include "dawn/common/Ref.h"
 #include "dawn/common/RefCounted.h"
 #include "dawn/native/Forward.h"
+#include "dawn/native/dawn_platform.h"
 
 namespace dawn::native {
 
@@ -122,8 +123,8 @@ class ApiObjectBase : public ObjectBase, public LinkNode<ApiObjectBase> {
     static constexpr UntrackedByDeviceTag kUntrackedByDevice = {};
 
     ApiObjectBase(DeviceBase* device, LabelNotImplementedTag tag);
-    ApiObjectBase(DeviceBase* device, const char* label);
-    ApiObjectBase(DeviceBase* device, ErrorTag tag, const char* label = nullptr);
+    ApiObjectBase(DeviceBase* device, StringView label);
+    ApiObjectBase(DeviceBase* device, ErrorTag tag, StringView label = {});
     ~ApiObjectBase() override;
 
     virtual ObjectType GetType() const = 0;

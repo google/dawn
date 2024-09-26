@@ -161,7 +161,7 @@ PipelineLayoutBase::PipelineLayoutBase(DeviceBase* device,
 
 PipelineLayoutBase::PipelineLayoutBase(DeviceBase* device,
                                        ObjectBase::ErrorTag tag,
-                                       const char* label)
+                                       StringView label)
     : ApiObjectBase(device, tag, label) {}
 
 PipelineLayoutBase::~PipelineLayoutBase() = default;
@@ -171,7 +171,7 @@ void PipelineLayoutBase::DestroyImpl() {
 }
 
 // static
-Ref<PipelineLayoutBase> PipelineLayoutBase::MakeError(DeviceBase* device, const char* label) {
+Ref<PipelineLayoutBase> PipelineLayoutBase::MakeError(DeviceBase* device, StringView label) {
     return AcquireRef(new PipelineLayoutBase(device, ObjectBase::kError, label));
 }
 

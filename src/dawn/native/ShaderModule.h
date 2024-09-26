@@ -299,7 +299,7 @@ class ShaderModuleBase : public RefCountedWithExternalCount<ApiObjectBase>,
                      std::vector<tint::wgsl::Extension> internalExtensions);
     ~ShaderModuleBase() override;
 
-    static Ref<ShaderModuleBase> MakeError(DeviceBase* device, const char* label);
+    static Ref<ShaderModuleBase> MakeError(DeviceBase* device, StringView label);
 
     ObjectType GetType() const override;
 
@@ -347,7 +347,7 @@ class ShaderModuleBase : public RefCountedWithExternalCount<ApiObjectBase>,
                               OwnedCompilationMessages* compilationMessages);
 
   private:
-    ShaderModuleBase(DeviceBase* device, ObjectBase::ErrorTag tag, const char* label);
+    ShaderModuleBase(DeviceBase* device, ObjectBase::ErrorTag tag, StringView label);
 
     void WillDropLastExternalRef() override;
 

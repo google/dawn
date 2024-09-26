@@ -147,7 +147,7 @@ ComputePassEncoder::ComputePassEncoder(DeviceBase* device,
                                        CommandEncoder* commandEncoder,
                                        EncodingContext* encodingContext,
                                        ErrorTag errorTag,
-                                       const char* label)
+                                       StringView label)
     : ProgrammableEncoder(device, encodingContext, errorTag, label),
       mCommandEncoder(commandEncoder) {}
 
@@ -155,7 +155,7 @@ ComputePassEncoder::ComputePassEncoder(DeviceBase* device,
 Ref<ComputePassEncoder> ComputePassEncoder::MakeError(DeviceBase* device,
                                                       CommandEncoder* commandEncoder,
                                                       EncodingContext* encodingContext,
-                                                      const char* label) {
+                                                      StringView label) {
     return AcquireRef(
         new ComputePassEncoder(device, commandEncoder, encodingContext, ObjectBase::kError, label));
 }

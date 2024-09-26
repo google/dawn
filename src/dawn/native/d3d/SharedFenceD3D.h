@@ -42,7 +42,7 @@ class SharedFence : public SharedFenceBase {
     HANDLE GetFenceHandle() const;
 
   protected:
-    SharedFence(Device* device, const char* label, SystemHandle ownedHandle);
+    SharedFence(Device* device, StringView label, SystemHandle ownedHandle);
 
   private:
     MaybeError ExportInfoImpl(UnpackedPtr<SharedFenceExportInfo>& info) const override;

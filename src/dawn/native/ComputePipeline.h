@@ -48,7 +48,7 @@ class ComputePipelineBase : public PipelineBase,
                         const UnpackedPtr<ComputePipelineDescriptor>& descriptor);
     ~ComputePipelineBase() override;
 
-    static Ref<ComputePipelineBase> MakeError(DeviceBase* device, const char* label);
+    static Ref<ComputePipelineBase> MakeError(DeviceBase* device, StringView label);
 
     ObjectType GetType() const override;
 
@@ -63,7 +63,7 @@ class ComputePipelineBase : public PipelineBase,
     void DestroyImpl() override;
 
   private:
-    ComputePipelineBase(DeviceBase* device, ObjectBase::ErrorTag tag, const char* label);
+    ComputePipelineBase(DeviceBase* device, ObjectBase::ErrorTag tag, StringView label);
 
     bool mRequiresFullSubgroups;
 };

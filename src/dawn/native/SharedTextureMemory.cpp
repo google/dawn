@@ -83,7 +83,7 @@ SharedTextureMemoryBase::SharedTextureMemoryBase(DeviceBase* device,
       } {}
 
 SharedTextureMemoryBase::SharedTextureMemoryBase(DeviceBase* device,
-                                                 const char* label,
+                                                 StringView label,
                                                  const SharedTextureMemoryProperties& properties)
     : SharedResourceMemory(device, label), mProperties(properties) {
     // Reify properties to ensure we don't expose capabilities not supported by the device.

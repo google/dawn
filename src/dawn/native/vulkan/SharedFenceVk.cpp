@@ -37,7 +37,7 @@ namespace dawn::native::vulkan {
 // static
 ResultOrError<Ref<SharedFence>> SharedFence::Create(
     Device* device,
-    const char* label,
+    StringView label,
     const SharedFenceVkSemaphoreZirconHandleDescriptor* descriptor) {
     DAWN_INVALID_IF(descriptor->handle == 0, "Zircon handle (%d) was invalid.", descriptor->handle);
 
@@ -51,7 +51,7 @@ ResultOrError<Ref<SharedFence>> SharedFence::Create(
 // static
 ResultOrError<Ref<SharedFence>> SharedFence::Create(
     Device* device,
-    const char* label,
+    StringView label,
     const SharedFenceVkSemaphoreSyncFDDescriptor* descriptor) {
     DAWN_INVALID_IF(descriptor->handle < 0, "File descriptor (%d) was invalid.",
                     descriptor->handle);
@@ -65,7 +65,7 @@ ResultOrError<Ref<SharedFence>> SharedFence::Create(
 // static
 ResultOrError<Ref<SharedFence>> SharedFence::Create(
     Device* device,
-    const char* label,
+    StringView label,
     const SharedFenceVkSemaphoreOpaqueFDDescriptor* descriptor) {
     DAWN_INVALID_IF(descriptor->handle < 0, "File descriptor (%d) was invalid.",
                     descriptor->handle);
@@ -76,7 +76,7 @@ ResultOrError<Ref<SharedFence>> SharedFence::Create(
     return fence;
 }
 
-SharedFence::SharedFence(Device* device, const char* label, SystemHandle handle)
+SharedFence::SharedFence(Device* device, StringView label, SystemHandle handle)
     : SharedFenceBase(device, label), mHandle(std::move(handle)) {}
 
 void SharedFence::DestroyImpl() {

@@ -143,7 +143,7 @@ GPUDevice::GPUDevice(Napi::Env env,
       device_(device),
       async_(async),
       lost_promise_(lost_promise),
-      label_(desc.label ? desc.label : "") {
+      label_(CopyLabel(desc.label)) {
     device_.SetLoggingCallback(
         [](WGPULoggingType type, char const* message, void* userdata) {
             printf("%s:\n", str(type));
@@ -411,7 +411,7 @@ GPUDevice::createComputePipelineAsync(Napi::Env env,
 
     device_.CreateComputePipelineAsync(
         &desc, wgpu::CallbackMode::AllowProcessEvents,
-        [ctx = std::move(ctx), label = std::string(desc.label ? desc.label : "")](
+        [ctx = std::move(ctx), label = CopyLabel(desc.label)](
             wgpu::CreatePipelineAsyncStatus status, wgpu::ComputePipeline pipeline, char const*) {
             switch (status) {
                 case wgpu::CreatePipelineAsyncStatus::Success:
@@ -443,7 +443,7 @@ GPUDevice::createRenderPipelineAsync(Napi::Env env,
 
     device_.CreateRenderPipelineAsync(
         &desc, wgpu::CallbackMode::AllowProcessEvents,
-        [ctx = std::move(ctx), label = std::string(desc.label ? desc.label : "")](
+        [ctx = std::move(ctx), label = CopyLabel(desc.label)](
             wgpu::CreatePipelineAsyncStatus status, wgpu::RenderPipeline pipeline, char const*) {
             switch (status) {
                 case wgpu::CreatePipelineAsyncStatus::Success:
@@ -582,7 +582,7 @@ std::string GPUDevice::getLabel(Napi::Env) {
 }
 
 void GPUDevice::setLabel(Napi::Env, std::string value) {
-    device_.SetLabel(value.c_str());
+    device_.SetLabel(std::string_view(value));
     label_ = value;
 }
 

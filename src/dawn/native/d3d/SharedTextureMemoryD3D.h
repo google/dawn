@@ -37,9 +37,7 @@ class Device;
 
 class SharedTextureMemory : public SharedTextureMemoryBase {
   protected:
-    SharedTextureMemory(Device* device,
-                        const char* label,
-                        SharedTextureMemoryProperties properties);
+    SharedTextureMemory(Device* device, StringView label, SharedTextureMemoryProperties properties);
 
     MaybeError BeginAccessImpl(TextureBase* texture,
                                const UnpackedPtr<BeginAccessDescriptor>& descriptor) override;

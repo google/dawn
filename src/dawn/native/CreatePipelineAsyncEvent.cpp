@@ -119,7 +119,7 @@ CreatePipelineAsyncEvent<PipelineType, CreatePipelineAsyncCallbackInfo>::CreateP
     DeviceBase* device,
     const CreatePipelineAsyncCallbackInfo& callbackInfo,
     std::unique_ptr<ErrorData> error,
-    const char* label)
+    StringView label)
     : TrackedEvent(static_cast<wgpu::CallbackMode>(callbackInfo.mode), TrackedEvent::Completed{}),
       mCallback(callbackInfo.callback),
       mUserdata1(callbackInfo.userdata1),
@@ -137,7 +137,7 @@ template <typename PipelineType, typename CreatePipelineAsyncCallbackInfo>
 void CreatePipelineAsyncEvent<PipelineType, CreatePipelineAsyncCallbackInfo>::InitializeImpl(
     bool isAsync) {
     DeviceBase* device = mPipeline->GetDevice();
-    const char* eventLabel = utils::GetLabelForTrace(mPipeline->GetLabel().c_str());
+    const char* eventLabel = utils::GetLabelForTrace(mPipeline->GetLabel());
     if (isAsync) {
         TRACE_EVENT_FLOW_END1(device->GetPlatform(), General,
                               "CreatePipelineAsyncEvent::InitializeAsync", this, "label",
@@ -170,7 +170,7 @@ void CreatePipelineAsyncEvent<PipelineType, CreatePipelineAsyncCallbackInfo>::In
 template <typename PipelineType, typename CreatePipelineAsyncCallbackInfo>
 void CreatePipelineAsyncEvent<PipelineType, CreatePipelineAsyncCallbackInfo>::InitializeAsync() {
     DeviceBase* device = mPipeline->GetDevice();
-    const char* eventLabel = utils::GetLabelForTrace(mPipeline->GetLabel().c_str());
+    const char* eventLabel = utils::GetLabelForTrace(mPipeline->GetLabel());
     TRACE_EVENT_FLOW_BEGIN1(device->GetPlatform(), General,
                             "CreatePipelineAsyncEvent::InitializeAsync", this, "label", eventLabel);
 

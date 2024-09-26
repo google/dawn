@@ -42,6 +42,7 @@
 #include "dawn/native/vulkan/TextureVk.h"
 #include "dawn/native/vulkan/UtilsVulkan.h"
 #include "dawn/native/vulkan/VulkanError.h"
+#include "dawn/native/wgpu_structs_autogen.h"
 
 #if DAWN_PLATFORM_IS(ANDROID)
 #include <android/hardware_buffer.h>
@@ -214,7 +215,7 @@ ResultOrError<VkDeviceMemory> AllocateDeviceMemory(Device* device,
 // static
 ResultOrError<Ref<SharedTextureMemory>> SharedTextureMemory::Create(
     Device* device,
-    const char* label,
+    StringView label,
     const SharedTextureMemoryDmaBufDescriptor* descriptor) {
 #if DAWN_PLATFORM_IS(LINUX)
     VkDevice vkDevice = device->GetVkDevice();
@@ -477,7 +478,7 @@ ResultOrError<Ref<SharedTextureMemory>> SharedTextureMemory::Create(
 // static
 ResultOrError<Ref<SharedTextureMemory>> SharedTextureMemory::Create(
     Device* device,
-    const char* label,
+    StringView label,
     const SharedTextureMemoryAHardwareBufferDescriptor* descriptor) {
 #if DAWN_PLATFORM_IS(ANDROID)
     const auto* ahbFunctions =
@@ -743,7 +744,7 @@ ResultOrError<Ref<SharedTextureMemory>> SharedTextureMemory::Create(
 // static
 ResultOrError<Ref<SharedTextureMemory>> SharedTextureMemory::Create(
     Device* device,
-    const char* label,
+    StringView label,
     const SharedTextureMemoryOpaqueFDDescriptor* descriptor) {
 #if DAWN_PLATFORM_IS(POSIX)
     VkDevice vkDevice = device->GetVkDevice();
@@ -961,7 +962,7 @@ ResultOrError<Ref<SharedTextureMemory>> SharedTextureMemory::Create(
 // static
 Ref<SharedTextureMemory> SharedTextureMemory::Create(
     Device* device,
-    const char* label,
+    StringView label,
     const SharedTextureMemoryProperties& properties,
     uint32_t queueFamilyIndex) {
     Ref<SharedTextureMemory> sharedTextureMemory =
@@ -971,7 +972,7 @@ Ref<SharedTextureMemory> SharedTextureMemory::Create(
 }
 
 SharedTextureMemory::SharedTextureMemory(Device* device,
-                                         const char* label,
+                                         StringView label,
                                          const SharedTextureMemoryProperties& properties,
                                          uint32_t queueFamilyIndex)
     : SharedTextureMemoryBase(device, label, properties), mQueueFamilyIndex(queueFamilyIndex) {}

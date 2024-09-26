@@ -29,7 +29,7 @@
 
 #include <utility>
 
-#include "src/dawn/node/utils/Debug.h"
+#include "src/dawn/node/binding/Converter.h"
 
 namespace wgpu::binding {
 
@@ -37,14 +37,14 @@ namespace wgpu::binding {
 // wgpu::bindings::GPUTextureView
 ////////////////////////////////////////////////////////////////////////////////
 GPUTextureView::GPUTextureView(const wgpu::TextureViewDescriptor& desc, wgpu::TextureView view)
-    : view_(std::move(view)), label_(desc.label ? desc.label : "") {}
+    : view_(std::move(view)), label_(CopyLabel(desc.label)) {}
 
 std::string GPUTextureView::getLabel(Napi::Env) {
     return label_;
 }
 
 void GPUTextureView::setLabel(Napi::Env, std::string value) {
-    view_.SetLabel(value.c_str());
+    view_.SetLabel(std::string_view(value));
     label_ = value;
 }
 

@@ -67,11 +67,11 @@ void RenderBundleBase::DestroyImpl() {
 }
 
 // static
-Ref<RenderBundleBase> RenderBundleBase::MakeError(DeviceBase* device, const char* label) {
+Ref<RenderBundleBase> RenderBundleBase::MakeError(DeviceBase* device, StringView label) {
     return AcquireRef(new RenderBundleBase(device, ObjectBase::kError, label));
 }
 
-RenderBundleBase::RenderBundleBase(DeviceBase* device, ErrorTag errorTag, const char* label)
+RenderBundleBase::RenderBundleBase(DeviceBase* device, ErrorTag errorTag, StringView label)
     : ApiObjectBase(device, errorTag, label), mIndirectDrawMetadata(device->GetLimits()) {}
 
 ObjectType RenderBundleBase::GetType() const {

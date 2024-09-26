@@ -540,11 +540,11 @@ void BindGroupBase::DeleteThis() {
     ApiObjectBase::DeleteThis();
 }
 
-BindGroupBase::BindGroupBase(DeviceBase* device, ObjectBase::ErrorTag tag, const char* label)
+BindGroupBase::BindGroupBase(DeviceBase* device, ObjectBase::ErrorTag tag, StringView label)
     : ApiObjectBase(device, tag, label), mBindingData() {}
 
 // static
-Ref<BindGroupBase> BindGroupBase::MakeError(DeviceBase* device, const char* label) {
+Ref<BindGroupBase> BindGroupBase::MakeError(DeviceBase* device, StringView label) {
     return AcquireRef(new BindGroupBase(device, ObjectBase::kError, label));
 }
 

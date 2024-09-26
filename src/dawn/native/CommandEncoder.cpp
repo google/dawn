@@ -1059,7 +1059,7 @@ Ref<CommandEncoder> CommandEncoder::Create(
 }
 
 // static
-Ref<CommandEncoder> CommandEncoder::MakeError(DeviceBase* device, const char* label) {
+Ref<CommandEncoder> CommandEncoder::MakeError(DeviceBase* device, StringView label) {
     return AcquireRef(new CommandEncoder(device, ObjectBase::kError, label));
 }
 
@@ -1076,7 +1076,7 @@ CommandEncoder::CommandEncoder(DeviceBase* device,
     }
 }
 
-CommandEncoder::CommandEncoder(DeviceBase* device, ObjectBase::ErrorTag tag, const char* label)
+CommandEncoder::CommandEncoder(DeviceBase* device, ObjectBase::ErrorTag tag, StringView label)
     : ApiObjectBase(device, tag, label),
       mEncodingContext(device, tag),
       mUsageValidationMode(UsageValidationMode::Default) {}
@@ -1142,7 +1142,11 @@ Ref<ComputePassEncoder> CommandEncoder::BeginComputePass(const ComputePassDescri
             if (descriptor == nullptr) {
                 return {};
             }
-            cmd->label = std::string(descriptor->label ? descriptor->label : "");
+
+            std::optional<std::string_view> label = descriptor->label;
+            if (label.has_value()) {
+                cmd->label = label.value();
+            }
 
             if (descriptor->timestampWrites != nullptr) {
                 QuerySetBase* querySet = descriptor->timestampWrites->querySet;
@@ -1227,7 +1231,11 @@ Ref<RenderPassEncoder> CommandEncoder::BeginRenderPass(const RenderPassDescripto
             mEncodingContext.WillBeginRenderPass();
             BeginRenderPassCmd* cmd =
                 allocator->Allocate<BeginRenderPassCmd>(Command::BeginRenderPass);
-            cmd->label = std::string(descriptor->label ? descriptor->label : "");
+
+            std::optional<std::string_view> label = descriptor->label;
+            if (label.has_value()) {
+                cmd->label = label.value();
+            }
 
             cmd->attachmentState = device->GetOrCreateAttachmentState(descriptor);
             attachmentState = cmd->attachmentState;

@@ -52,7 +52,7 @@ class CommandBufferBase : public ApiObjectBase {
   public:
     CommandBufferBase(CommandEncoder* encoder, const CommandBufferDescriptor* descriptor);
 
-    static Ref<CommandBufferBase> MakeError(DeviceBase* device, const char* label);
+    static Ref<CommandBufferBase> MakeError(DeviceBase* device, StringView label);
 
     ObjectType GetType() const override;
     void FormatLabel(absl::FormatSink* s) const override;
@@ -74,7 +74,7 @@ class CommandBufferBase : public ApiObjectBase {
     CommandIterator mCommands;
 
   private:
-    CommandBufferBase(DeviceBase* device, ObjectBase::ErrorTag tag, const char* label);
+    CommandBufferBase(DeviceBase* device, ObjectBase::ErrorTag tag, StringView label);
 
     CommandBufferResourceUsage mResourceUsages;
     std::vector<IndirectDrawMetadata> mIndirectDrawMetadata;

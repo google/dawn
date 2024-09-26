@@ -96,9 +96,9 @@ class PipelineBase : public ApiObjectBase, public CachedObject {
   protected:
     PipelineBase(DeviceBase* device,
                  PipelineLayoutBase* layout,
-                 const char* label,
+                 StringView label,
                  std::vector<StageAndDescriptor> stages);
-    PipelineBase(DeviceBase* device, ObjectBase::ErrorTag tag, const char* label);
+    PipelineBase(DeviceBase* device, ObjectBase::ErrorTag tag, StringView label);
 
   private:
     MaybeError ValidateGetBindGroupLayout(BindGroupIndex group);

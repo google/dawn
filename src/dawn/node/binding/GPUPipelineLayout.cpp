@@ -29,7 +29,7 @@
 
 #include <utility>
 
-#include "src/dawn/node/utils/Debug.h"
+#include "src/dawn/node/binding/Converter.h"
 
 namespace wgpu::binding {
 
@@ -38,14 +38,14 @@ namespace wgpu::binding {
 ////////////////////////////////////////////////////////////////////////////////
 GPUPipelineLayout::GPUPipelineLayout(const wgpu::PipelineLayoutDescriptor& desc,
                                      wgpu::PipelineLayout layout)
-    : layout_(std::move(layout)), label_(desc.label ? desc.label : "") {}
+    : layout_(std::move(layout)), label_(CopyLabel(desc.label)) {}
 
 std::string GPUPipelineLayout::getLabel(Napi::Env) {
     return label_;
 }
 
 void GPUPipelineLayout::setLabel(Napi::Env, std::string value) {
-    layout_.SetLabel(value.c_str());
+    layout_.SetLabel(std::string_view(value));
     label_ = value;
 }
 

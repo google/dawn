@@ -473,6 +473,8 @@ class Converter {
     std::vector<std::function<void()>> free_;
 };
 
+std::string CopyLabel(StringView label);
+
 }  // namespace wgpu::binding
 
 #endif  // SRC_DAWN_NODE_BINDING_CONVERTER_H_
