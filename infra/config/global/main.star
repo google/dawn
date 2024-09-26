@@ -983,7 +983,7 @@ def _create_dawn_cq_group(name, refs, refs_exclude = None):
         acls = [
             acl.entry(
                 acl.CQ_COMMITTER,
-                groups = "project-dawn-committers",
+                groups = "project-dawn-submit-access",
             ),
             acl.entry(
                 acl.CQ_DRY_RUNNER,
