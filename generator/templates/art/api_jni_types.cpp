@@ -26,33 +26,33 @@
 //* OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 {% macro arg_to_jni_type(arg) %}
-    {% if arg.length == 'strlen' %}
+    {%- if arg.length == 'strlen' -%}
         jstring
-    {% elif arg.length and arg.length != 'constant' %}
-        {% if arg.type.category in ['bitmask', 'enum', 'function pointer', 'object', 'structure'] %}
+    {%- elif arg.length and arg.length != 'constant' -%}
+        {%- if arg.type.category in ['bitmask', 'enum', 'function pointer', 'object', 'structure'] -%}
             jobjectArray
-        {% elif arg.type.name.get() == 'void' %}
+        {%- elif arg.type.name.get() == 'void' -%}
             jobject
-        {% elif arg.type.name.get() == 'uint32_t' %}
+        {%- elif arg.type.name.get() == 'uint32_t' -%}
             jintArray
-        {% else %}
+        {%- else -%}
             {{ unreachable_code() }}
-        {% endif %}
-    {% else %}
+        {%- endif -%}
+    {%- else -%}
         {{ to_jni_type(arg.type) }}
-    {% endif %}
+    {%- endif -%}
 {% endmacro %}
 
 {% macro to_jni_type(type) %}
-    {% if type.name.get() == 'string view' %}
+    {%- if type.name.get() == "string view" -%}
         jstring
-    {% elif type.category in ['function pointer', 'object', 'structure'] %}
+    {%- elif type.category in ['function pointer', 'object', 'structure'] -%}
         jobject
-    {% elif type.category in ['bitmask', 'enum'] %}
+    {%- elif type.category in ['bitmask', 'enum'] -%}
         jint
-    {% else %}
+    {%- else -%}
         {{ jni_primitives[type.name.get()] }}
-    {% endif %}
+    {%- endif -%}
 {% endmacro %}
 
 {% macro jni_signature(member) %}
@@ -83,17 +83,15 @@
 {% endmacro %}
 
 {% macro convert_array_element_to_kotlin(input, output, size, member) %}
-    {% if member.type.category in ['bitmask', 'enum'] %}
+    {%- if member.type.category in ['bitmask', 'enum'] -%}
         //* Kotlin value classes do not get inlined in arrays, so the creation method is different.
-        jobject {{ output }};
-        {
-            jclass clz = env->FindClass("{{ jni_name(member.type) }}");
-            {{ output }} = env->NewObject(clz, env->GetMethodID(clz, "<init>", "(I)V"),
-                    static_cast<jint>({{ input }}));
-        }
-    {% else %}
+        jclass clz = env->FindClass("{{ jni_name(member.type) }}");
+        jmethodID init = env->GetMethodID(clz, "<init>", "(I)V");
+        jobject {{ output }} = env->NewObject(clz, init, static_cast<jint>({{ input }}));
+    {%- else -%}
+        //* Declares an instance of 'output'
         {{ convert_to_kotlin(input, output, size, member) }}
-    {% endif %}
+    {%- endif -%}
 {% endmacro %}
 
 {% macro convert_to_kotlin(input, output, size, member) %}
@@ -102,16 +100,16 @@
             jobject {{ output }} = toByteBuffer(env, {{ input }}, {{ size }});
         {% elif member.type.category in ['bitmask', 'enum', 'object', 'structure'] %}
             //* Native container converted to a Kotlin container.
-            jobjectArray {{ output }} = env->NewObjectArray({{ size }},
+            jobjectArray {{ output }} = env->NewObjectArray(
+                    {{ size }},
                     env->FindClass("{{ jni_name(member.type) }}"), 0);
             for (int idx = 0; idx != {{ size }}; idx++) {
-                {{ convert_array_element_to_kotlin(input + '[idx]', 'element', None, {'type': member.type}) }}
+                {{ convert_array_element_to_kotlin(input + '[idx]', 'element', None, {'type': member.type})  | indent(4) }}
                 env->SetObjectArrayElement({{ output }}, idx, element);
             }
         {% elif member.type.name.get() in ['int', 'int32_t', 'uint32_t'] %}
             jintArray {{ output }} = env->NewIntArray({{ size }});
-            env->SetIntArrayRegion({{ output }}, 0, {{ size }},
-                    reinterpret_cast<const jint *>({{ input }}));
+            {{'    '}}env->SetIntArrayRegion({{ output }}, 0, {{ size }}, reinterpret_cast<const jint *>({{ input }}));
         {% else %}
             {{ unreachable_code() }}
         {% endif %}
@@ -119,20 +117,18 @@
         jobject {{ output }};
         {
             jclass clz = env->FindClass("{{ jni_name(member.type) }}");
-            {{ output }} = env->NewObject(clz, env->GetMethodID(clz, "<init>", "(J)V"),
-                    reinterpret_cast<jlong>({{ input }}));
+            jmethodID init = env->GetMethodID(clz, "<init>", "(J)V");
+            {{ output }} = env->NewObject(clz, init, reinterpret_cast<jlong>({{ input }}));
         }
     {% elif member.type.category == 'structure' %}
-        jobject {{ output }} =
-                ToKotlin(env, {{ '&' if member.annotation not in ['*', 'const*'] }}{{ input }});
+        jobject {{ output }} = ToKotlin(env, {{ '&' if member.annotation not in ['*', 'const*'] }}{{ input }});
     {% elif member.type.name.get() == 'void *' %}
         jlong {{ output }} = reinterpret_cast<jlong>({{ input }});
     {% elif member.type.name.get() == 'char' %}
         jstring {{ output }} = {{ input }} ? env->NewStringUTF({{ input }}) : nullptr;
     {% elif member.type.category in ['bitmask', 'enum', 'native'] %}
         //* We use Kotlin value classes for bitmask and enum, and they get inlined as lone values.
-        {{ to_jni_type(member.type) }} {{ output }} =
-                static_cast<{{ to_jni_type(member.type) }}>({{ input }});
+        {{ to_jni_type(member.type) }} {{ output }} = static_cast<{{ to_jni_type(member.type) }}>({{ input }});
     {% else %}
         {{ unreachable_code() }}
     {% endif %}

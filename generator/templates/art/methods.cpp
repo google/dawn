@@ -25,7 +25,7 @@
 //* OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 //* OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 {% from 'art/kotlin_record_conversion.cpp' import define_kotlin_record_structure, define_kotlin_to_struct_conversion with context %}
-{% from 'art/api_jni_types.kt' import arg_to_jni_type, convert_to_kotlin, jni_signature, to_jni_type with context %}
+{% from 'art/api_jni_types.cpp' import arg_to_jni_type, convert_to_kotlin, jni_signature, to_jni_type with context %}
 #include <jni.h>
 #include <stdlib.h>
 #include <webgpu/webgpu.h>

@@ -1479,7 +1479,7 @@ class MultiGeneratorFromDawnJSON(Generator):
             params_kotlin = compute_kotlin_params(loaded_json, kotlin_json)
 
             imported_templates += [
-                "art/api_jni_types.kt",
+                "art/api_jni_types.cpp",
                 "art/kotlin_record_conversion.cpp",
             ]
 
