@@ -129,8 +129,8 @@ TEST_F(GlslWriterTest, BuiltinStorageBarrier) {
     EXPECT_EQ(output_.glsl, GlslHeader() + R"(
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
-  barrier();
   memoryBarrierBuffer();
+  barrier();
 }
 )");
 }
@@ -147,8 +147,8 @@ TEST_F(GlslWriterTest, BuiltinTextureBarrier) {
     EXPECT_EQ(output_.glsl, GlslHeader() + R"(
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
-  barrier();
   memoryBarrierImage();
+  barrier();
 }
 )");
 }

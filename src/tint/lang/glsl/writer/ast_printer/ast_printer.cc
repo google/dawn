@@ -1322,9 +1322,9 @@ void ASTPrinter::EmitBarrierCall(StringStream& out, const sem::BuiltinFn* builti
     if (builtin->Fn() == wgsl::BuiltinFn::kWorkgroupBarrier) {
         out << "barrier()";
     } else if (builtin->Fn() == wgsl::BuiltinFn::kStorageBarrier) {
-        out << "{ barrier(); memoryBarrierBuffer(); }";
+        out << "{ memoryBarrierBuffer(); barrier(); }";
     } else if (builtin->Fn() == wgsl::BuiltinFn::kTextureBarrier) {
-        out << "{ barrier(); memoryBarrierImage(); }";
+        out << "{ memoryBarrierImage(); barrier(); }";
     } else {
         TINT_UNREACHABLE() << "unexpected barrier builtin type " << builtin->Fn();
     }

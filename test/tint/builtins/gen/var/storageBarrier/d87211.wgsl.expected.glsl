@@ -1,7 +1,7 @@
 #version 310 es
 
 void storageBarrier_d87211() {
-  { barrier(); memoryBarrierBuffer(); };
+  { memoryBarrierBuffer(); barrier(); };
 }
 
 void compute_main() {

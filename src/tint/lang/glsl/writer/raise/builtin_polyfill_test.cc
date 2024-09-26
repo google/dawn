@@ -141,8 +141,8 @@ TEST_F(GlslWriter_BuiltinPolyfillTest, StorageBarrier) {
     auto* expect = R"(
 %foo = @compute @workgroup_size(1, 1, 1) func():void {
   $B1: {
-    %2:void = glsl.barrier
-    %3:void = glsl.memoryBarrierBuffer
+    %2:void = glsl.memoryBarrierBuffer
+    %3:void = glsl.barrier
     ret
   }
 }
@@ -173,8 +173,8 @@ TEST_F(GlslWriter_BuiltinPolyfillTest, TextureBarrier) {
     auto* expect = R"(
 %foo = @compute @workgroup_size(1, 1, 1) func():void {
   $B1: {
-    %2:void = glsl.barrier
-    %3:void = glsl.memoryBarrierImage
+    %2:void = glsl.memoryBarrierImage
+    %3:void = glsl.barrier
     ret
   }
 }

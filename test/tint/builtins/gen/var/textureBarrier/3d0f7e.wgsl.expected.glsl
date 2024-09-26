@@ -1,7 +1,7 @@
 #version 310 es
 
 void textureBarrier_3d0f7e() {
-  { barrier(); memoryBarrierImage(); };
+  { memoryBarrierImage(); barrier(); };
 }
 
 void compute_main() {
