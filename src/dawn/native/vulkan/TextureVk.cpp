@@ -1241,9 +1241,12 @@ MaybeError Texture::EnsureSubresourceContentInitialized(CommandRecordingContext*
     return {};
 }
 
-VkImageLayout Texture::GetCurrentLayoutForSwapChain() const {
+VkImageLayout Texture::GetCurrentLayout(Aspect aspect,
+                                        uint32_t arrayLayer,
+                                        uint32_t mipLevel) const {
     DAWN_ASSERT(GetFormat().aspects == Aspect::Color);
-    return VulkanImageLayout(GetFormat(), mSubresourceLastSyncInfos.Get(Aspect::Color, 0, 0).usage);
+    return VulkanImageLayout(GetFormat(),
+                             mSubresourceLastSyncInfos.Get(aspect, arrayLayer, mipLevel).usage);
 }
 
 bool Texture::UseCombinedAspects() const {
@@ -1607,18 +1610,16 @@ void ImportedTextureBase::TweakTransition(CommandRecordingContext* recordingCont
 MaybeError ImportedTextureBase::EndAccess(ExternalSemaphoreHandle* handle,
                                           VkImageLayout* releasedOldLayout,
                                           VkImageLayout* releasedNewLayout) {
+    DAWN_ASSERT(GetNumMipLevels() == 1 && GetArrayLayers() == 1);
+
     // Release the texture
     mExternalState = ExternalState::Released;
-
-    DAWN_ASSERT(GetNumMipLevels() == 1 && GetArrayLayers() == 1);
-    wgpu::TextureUsage usage =
-        mSubresourceLastSyncInfos.Get(GetDisjointVulkanAspects(), 0, 0).usage;
 
     // Compute the layouts for the queue transition for export. desiredLayout == UNDEFINED is a tag
     // value used to export with whatever the current layout is. However queue transitioning to the
     // UNDEFINED layout is disallowed so we handle the case where currentLayout is UNDEFINED by
     // promoting to GENERAL.
-    VkImageLayout currentLayout = VulkanImageLayout(GetFormat(), usage);
+    VkImageLayout currentLayout = GetCurrentLayout(GetDisjointVulkanAspects());
     VkImageLayout targetLayout;
     if (currentLayout != VK_IMAGE_LAYOUT_UNDEFINED) {
         targetLayout = currentLayout;

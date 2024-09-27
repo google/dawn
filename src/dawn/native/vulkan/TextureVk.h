@@ -75,7 +75,9 @@ class Texture : public TextureBase {
     // Returns the aspects used for tracking of Vulkan state. These can be the combined aspects.
     Aspect GetDisjointVulkanAspects() const;
 
-    VkImageLayout GetCurrentLayoutForSwapChain() const;
+    VkImageLayout GetCurrentLayout(Aspect aspect,
+                                   uint32_t arrayLayer = 0,
+                                   uint32_t mipLevel = 0) const;
 
     // Transitions the texture to be used as `usage`, recording any necessary barrier in
     // `commands`.

@@ -411,9 +411,9 @@ MaybeError SwapChain::PresentImpl() {
                                 static_cast<int32_t>(mTexture->GetHeight(Aspect::Color)), 1};
 
         device->fn.CmdBlitImage(recordingContext->commandBuffer, mBlitTexture->GetHandle(),
-                                mBlitTexture->GetCurrentLayoutForSwapChain(), mTexture->GetHandle(),
-                                mTexture->GetCurrentLayoutForSwapChain(), 1, &region,
-                                VK_FILTER_LINEAR);
+                                mBlitTexture->GetCurrentLayout(Aspect::Color),
+                                mTexture->GetHandle(), mTexture->GetCurrentLayout(Aspect::Color), 1,
+                                &region, VK_FILTER_LINEAR);
 
         // TODO(crbug.com/dawn/269): Find a way to reuse the blit texture between frames
         // instead of creating a new one every time. This will involve "un-destroying" the
