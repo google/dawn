@@ -32,14 +32,10 @@ ivec4 tint_div_v4i32(ivec4 lhs, ivec4 rhs) {
   uvec4 v_4 = uvec4(v_2);
   bvec4 v_5 = bvec4((v_4 & uvec4(v_3)));
   uvec4 v_6 = uvec4(v_1);
-  bvec4 v_7 = bvec4((v_6 | uvec4(v_5)));
-  int v_8 = ((v_7.x) ? (ivec4(1).x) : (rhs.x));
-  int v_9 = ((v_7.y) ? (ivec4(1).y) : (rhs.y));
-  int v_10 = ((v_7.z) ? (ivec4(1).z) : (rhs.z));
-  return (lhs / ivec4(v_8, v_9, v_10, ((v_7.w) ? (ivec4(1).w) : (rhs.w))));
+  return (lhs / mix(rhs, ivec4(1), bvec4((v_6 | uvec4(v_5)))));
 }
 int tint_f32_to_i32(float value) {
-  return (((value <= 2147483520.0f)) ? ((((value >= -2147483648.0f)) ? (int(value)) : ((-2147483647 - 1)))) : (2147483647));
+  return mix(2147483647, mix((-2147483647 - 1), int(value), (value >= -2147483648.0f)), (value <= 2147483520.0f));
 }
 bool test_int_S1_c0_b() {
   int unknown = 0;

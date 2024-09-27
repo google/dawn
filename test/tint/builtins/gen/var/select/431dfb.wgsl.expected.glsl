@@ -2,14 +2,9 @@
 precision highp float;
 precision highp int;
 
-ivec2 tint_select(ivec2 param_0, ivec2 param_1, bvec2 param_2) {
-    return ivec2(param_2[0] ? param_1[0] : param_0[0], param_2[1] ? param_1[1] : param_0[1]);
-}
-
-
 void select_431dfb() {
   bvec2 arg_2 = bvec2(true);
-  ivec2 res = tint_select(ivec2(1), ivec2(1), arg_2);
+  ivec2 res = mix(ivec2(1), ivec2(1), arg_2);
 }
 
 struct VertexOutput {
@@ -26,14 +21,9 @@ void main() {
 }
 #version 310 es
 
-ivec2 tint_select(ivec2 param_0, ivec2 param_1, bvec2 param_2) {
-    return ivec2(param_2[0] ? param_1[0] : param_0[0], param_2[1] ? param_1[1] : param_0[1]);
-}
-
-
 void select_431dfb() {
   bvec2 arg_2 = bvec2(true);
-  ivec2 res = tint_select(ivec2(1), ivec2(1), arg_2);
+  ivec2 res = mix(ivec2(1), ivec2(1), arg_2);
 }
 
 struct VertexOutput {
@@ -51,14 +41,9 @@ void main() {
 }
 #version 310 es
 
-ivec2 tint_select(ivec2 param_0, ivec2 param_1, bvec2 param_2) {
-    return ivec2(param_2[0] ? param_1[0] : param_0[0], param_2[1] ? param_1[1] : param_0[1]);
-}
-
-
 void select_431dfb() {
   bvec2 arg_2 = bvec2(true);
-  ivec2 res = tint_select(ivec2(1), ivec2(1), arg_2);
+  ivec2 res = mix(ivec2(1), ivec2(1), arg_2);
 }
 
 struct VertexOutput {

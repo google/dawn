@@ -3,11 +3,11 @@
 uint local_invocation_index_1 = 0u;
 shared uint wg[3][2][1];
 uint tint_mod_u32(uint lhs, uint rhs) {
-  uint v = (((rhs == 0u)) ? (1u) : (rhs));
+  uint v = mix(rhs, 1u, (rhs == 0u));
   return (lhs - ((lhs / v) * v));
 }
 uint tint_div_u32(uint lhs, uint rhs) {
-  return (lhs / (((rhs == 0u)) ? (1u) : (rhs)));
+  return (lhs / mix(rhs, 1u, (rhs == 0u)));
 }
 void compute_main_inner(uint local_invocation_index_2) {
   uint idx = 0u;

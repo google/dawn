@@ -8,7 +8,7 @@ vec4 tint_symbol(uint VertexIndex) {
   vec4f s = vec4f(1);
   float f = float(s.i);
   bool b = bool(f);
-  return (b ? vec4(1.0f) : vec4(0.0f));
+  return mix(vec4(0.0f), vec4(1.0f), bvec4(b));
 }
 
 void main() {

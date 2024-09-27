@@ -10,7 +10,7 @@ ivec3 select_8fa62c() {
   ivec3 arg_0 = ivec3(1);
   ivec3 arg_1 = ivec3(1);
   bool arg_2 = true;
-  ivec3 res = (arg_2 ? arg_1 : arg_0);
+  ivec3 res = mix(arg_0, arg_1, bvec3(arg_2));
   return res;
 }
 
@@ -37,7 +37,7 @@ ivec3 select_8fa62c() {
   ivec3 arg_0 = ivec3(1);
   ivec3 arg_1 = ivec3(1);
   bool arg_2 = true;
-  ivec3 res = (arg_2 ? arg_1 : arg_0);
+  ivec3 res = mix(arg_0, arg_1, bvec3(arg_2));
   return res;
 }
 
@@ -62,7 +62,7 @@ ivec3 select_8fa62c() {
   ivec3 arg_0 = ivec3(1);
   ivec3 arg_1 = ivec3(1);
   bool arg_2 = true;
-  ivec3 res = (arg_2 ? arg_1 : arg_0);
+  ivec3 res = mix(arg_0, arg_1, bvec3(arg_2));
   return res;
 }
 

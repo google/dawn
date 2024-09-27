@@ -10,7 +10,7 @@ layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
 int transpose_5edd96() {
   f16mat4x2 arg_0 = f16mat4x2(f16vec2(1.0hf), f16vec2(1.0hf), f16vec2(1.0hf), f16vec2(1.0hf));
   f16mat2x4 res = transpose(arg_0);
-  return ((res[0][0] == 0.0hf) ? 1 : 0);
+  return mix(0, 1, (res[0][0] == 0.0hf));
 }
 
 struct VertexOutput {
@@ -36,7 +36,7 @@ layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
 int transpose_5edd96() {
   f16mat4x2 arg_0 = f16mat4x2(f16vec2(1.0hf), f16vec2(1.0hf), f16vec2(1.0hf), f16vec2(1.0hf));
   f16mat2x4 res = transpose(arg_0);
-  return ((res[0][0] == 0.0hf) ? 1 : 0);
+  return mix(0, 1, (res[0][0] == 0.0hf));
 }
 
 struct VertexOutput {
@@ -60,7 +60,7 @@ layout(location = 0) flat out int prevent_dce_1;
 int transpose_5edd96() {
   f16mat4x2 arg_0 = f16mat4x2(f16vec2(1.0hf), f16vec2(1.0hf), f16vec2(1.0hf), f16vec2(1.0hf));
   f16mat2x4 res = transpose(arg_0);
-  return ((res[0][0] == 0.0hf) ? 1 : 0);
+  return mix(0, 1, (res[0][0] == 0.0hf));
 }
 
 struct VertexOutput {

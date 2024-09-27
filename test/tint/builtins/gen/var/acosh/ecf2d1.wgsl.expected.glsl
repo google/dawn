@@ -3,7 +3,7 @@ precision highp float;
 precision highp int;
 
 float tint_acosh(float x) {
-  return ((x < 1.0f) ? 0.0f : acosh(x));
+  return mix(acosh(x), 0.0f, (x < 1.0f));
 }
 
 layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
@@ -32,7 +32,7 @@ void main() {
 #version 310 es
 
 float tint_acosh(float x) {
-  return ((x < 1.0f) ? 0.0f : acosh(x));
+  return mix(acosh(x), 0.0f, (x < 1.0f));
 }
 
 layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
@@ -62,7 +62,7 @@ void main() {
 #version 310 es
 
 float tint_acosh(float x) {
-  return ((x < 1.0f) ? 0.0f : acosh(x));
+  return mix(acosh(x), 0.0f, (x < 1.0f));
 }
 
 layout(location = 0) flat out float prevent_dce_1;

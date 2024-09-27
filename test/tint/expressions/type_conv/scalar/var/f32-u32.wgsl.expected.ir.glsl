@@ -2,7 +2,7 @@
 
 float u = 1.0f;
 uint tint_f32_to_u32(float value) {
-  return (((value <= 4294967040.0f)) ? ((((value >= 0.0f)) ? (uint(value)) : (0u))) : (4294967295u));
+  return mix(4294967295u, mix(0u, uint(value), (value >= 0.0f)), (value <= 4294967040.0f));
 }
 void f() {
   uint v = tint_f32_to_u32(u);

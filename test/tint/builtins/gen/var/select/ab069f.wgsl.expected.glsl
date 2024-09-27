@@ -10,7 +10,7 @@ ivec4 select_ab069f() {
   ivec4 arg_0 = ivec4(1);
   ivec4 arg_1 = ivec4(1);
   bool arg_2 = true;
-  ivec4 res = (arg_2 ? arg_1 : arg_0);
+  ivec4 res = mix(arg_0, arg_1, bvec4(arg_2));
   return res;
 }
 
@@ -37,7 +37,7 @@ ivec4 select_ab069f() {
   ivec4 arg_0 = ivec4(1);
   ivec4 arg_1 = ivec4(1);
   bool arg_2 = true;
-  ivec4 res = (arg_2 ? arg_1 : arg_0);
+  ivec4 res = mix(arg_0, arg_1, bvec4(arg_2));
   return res;
 }
 
@@ -62,7 +62,7 @@ ivec4 select_ab069f() {
   ivec4 arg_0 = ivec4(1);
   ivec4 arg_1 = ivec4(1);
   bool arg_2 = true;
-  ivec4 res = (arg_2 ? arg_1 : arg_0);
+  ivec4 res = mix(arg_0, arg_1, bvec4(arg_2));
   return res;
 }
 

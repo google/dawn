@@ -8,7 +8,7 @@ layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
 
 int any_083428() {
   bool res = true;
-  return ((res == false) ? 1 : 0);
+  return mix(0, 1, (res == false));
 }
 
 struct VertexOutput {
@@ -32,7 +32,7 @@ layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
 
 int any_083428() {
   bool res = true;
-  return ((res == false) ? 1 : 0);
+  return mix(0, 1, (res == false));
 }
 
 struct VertexOutput {
@@ -54,7 +54,7 @@ void main() {
 layout(location = 0) flat out int prevent_dce_1;
 int any_083428() {
   bool res = true;
-  return ((res == false) ? 1 : 0);
+  return mix(0, 1, (res == false));
 }
 
 struct VertexOutput {

@@ -1,7 +1,7 @@
 #version 310 es
 
 uint tint_mod(uint lhs, uint rhs) {
-  return (lhs % ((rhs == 0u) ? 1u : rhs));
+  return (lhs % mix(rhs, 1u, (rhs == 0u)));
 }
 
 void f(uvec3 v) {

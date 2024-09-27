@@ -3,13 +3,8 @@
 precision highp float;
 precision highp int;
 
-f16vec2 tint_select(f16vec2 param_0, f16vec2 param_1, bvec2 param_2) {
-    return f16vec2(param_2[0] ? param_1[0] : param_0[0], param_2[1] ? param_1[1] : param_0[1]);
-}
-
-
 f16vec2 tint_acosh(f16vec2 x) {
-  return tint_select(acosh(x), f16vec2(0.0hf), lessThan(x, f16vec2(1.0hf)));
+  return mix(acosh(x), f16vec2(0.0hf), lessThan(x, f16vec2(1.0hf)));
 }
 
 layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
@@ -38,13 +33,8 @@ void main() {
 #version 310 es
 #extension GL_AMD_gpu_shader_half_float : require
 
-f16vec2 tint_select(f16vec2 param_0, f16vec2 param_1, bvec2 param_2) {
-    return f16vec2(param_2[0] ? param_1[0] : param_0[0], param_2[1] ? param_1[1] : param_0[1]);
-}
-
-
 f16vec2 tint_acosh(f16vec2 x) {
-  return tint_select(acosh(x), f16vec2(0.0hf), lessThan(x, f16vec2(1.0hf)));
+  return mix(acosh(x), f16vec2(0.0hf), lessThan(x, f16vec2(1.0hf)));
 }
 
 layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
@@ -74,13 +64,8 @@ void main() {
 #version 310 es
 #extension GL_AMD_gpu_shader_half_float : require
 
-f16vec2 tint_select(f16vec2 param_0, f16vec2 param_1, bvec2 param_2) {
-    return f16vec2(param_2[0] ? param_1[0] : param_0[0], param_2[1] ? param_1[1] : param_0[1]);
-}
-
-
 f16vec2 tint_acosh(f16vec2 x) {
-  return tint_select(acosh(x), f16vec2(0.0hf), lessThan(x, f16vec2(1.0hf)));
+  return mix(acosh(x), f16vec2(0.0hf), lessThan(x, f16vec2(1.0hf)));
 }
 
 layout(location = 0) flat out f16vec2 prevent_dce_1;

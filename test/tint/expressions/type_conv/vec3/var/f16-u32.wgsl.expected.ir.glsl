@@ -4,14 +4,8 @@
 f16vec3 u = f16vec3(1.0hf);
 uvec3 tint_v3f16_to_v3u32(f16vec3 value) {
   uvec3 v_1 = uvec3(value);
-  bvec3 v_2 = greaterThanEqual(value, f16vec3(0.0hf));
-  uint v_3 = ((v_2.x) ? (v_1.x) : (uvec3(0u).x));
-  uint v_4 = ((v_2.y) ? (v_1.y) : (uvec3(0u).y));
-  uvec3 v_5 = uvec3(v_3, v_4, ((v_2.z) ? (v_1.z) : (uvec3(0u).z)));
-  bvec3 v_6 = lessThanEqual(value, f16vec3(65504.0hf));
-  uint v_7 = ((v_6.x) ? (v_5.x) : (uvec3(4294967295u).x));
-  uint v_8 = ((v_6.y) ? (v_5.y) : (uvec3(4294967295u).y));
-  return uvec3(v_7, v_8, ((v_6.z) ? (v_5.z) : (uvec3(4294967295u).z)));
+  uvec3 v_2 = mix(uvec3(0u), v_1, greaterThanEqual(value, f16vec3(0.0hf)));
+  return mix(uvec3(4294967295u), v_2, lessThanEqual(value, f16vec3(65504.0hf)));
 }
 void f() {
   uvec3 v = tint_v3f16_to_v3u32(u);

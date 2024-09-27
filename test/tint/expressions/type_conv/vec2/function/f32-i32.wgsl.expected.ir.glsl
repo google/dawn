@@ -7,12 +7,8 @@ vec2 m() {
 }
 ivec2 tint_v2f32_to_v2i32(vec2 value) {
   ivec2 v_1 = ivec2(value);
-  bvec2 v_2 = greaterThanEqual(value, vec2(-2147483648.0f));
-  int v_3 = ((v_2.x) ? (v_1.x) : (ivec2((-2147483647 - 1)).x));
-  ivec2 v_4 = ivec2(v_3, ((v_2.y) ? (v_1.y) : (ivec2((-2147483647 - 1)).y)));
-  bvec2 v_5 = lessThanEqual(value, vec2(2147483520.0f));
-  int v_6 = ((v_5.x) ? (v_4.x) : (ivec2(2147483647).x));
-  return ivec2(v_6, ((v_5.y) ? (v_4.y) : (ivec2(2147483647).y)));
+  ivec2 v_2 = mix(ivec2((-2147483647 - 1)), v_1, greaterThanEqual(value, vec2(-2147483648.0f)));
+  return mix(ivec2(2147483647), v_2, lessThanEqual(value, vec2(2147483520.0f)));
 }
 void f() {
   ivec2 v = tint_v2f32_to_v2i32(m());

@@ -10,8 +10,8 @@ int select_c31f9e() {
   bool arg_0 = true;
   bool arg_1 = true;
   bool arg_2 = true;
-  bool res = (arg_2 ? arg_1 : arg_0);
-  return ((res == false) ? 1 : 0);
+  bool res = mix(arg_0, arg_1, arg_2);
+  return mix(0, 1, (res == false));
 }
 
 struct VertexOutput {
@@ -37,8 +37,8 @@ int select_c31f9e() {
   bool arg_0 = true;
   bool arg_1 = true;
   bool arg_2 = true;
-  bool res = (arg_2 ? arg_1 : arg_0);
-  return ((res == false) ? 1 : 0);
+  bool res = mix(arg_0, arg_1, arg_2);
+  return mix(0, 1, (res == false));
 }
 
 struct VertexOutput {
@@ -62,8 +62,8 @@ int select_c31f9e() {
   bool arg_0 = true;
   bool arg_1 = true;
   bool arg_2 = true;
-  bool res = (arg_2 ? arg_1 : arg_0);
-  return ((res == false) ? 1 : 0);
+  bool res = mix(arg_0, arg_1, arg_2);
+  return mix(0, 1, (res == false));
 }
 
 struct VertexOutput {

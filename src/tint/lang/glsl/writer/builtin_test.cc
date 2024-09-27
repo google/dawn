@@ -86,7 +86,7 @@ precision highp int;
 void main() {
   int x = 1;
   int y = 2;
-  int w = ((true) ? (y) : (x));
+  int w = mix(x, y, true);
 }
 )");
 }
@@ -110,9 +110,7 @@ precision highp int;
 void main() {
   ivec2 x = ivec2(1, 2);
   ivec2 y = ivec2(3, 4);
-  bvec2 v = bvec2(true, false);
-  int v_1 = ((v.x) ? (y.x) : (x.x));
-  ivec2 w = ivec2(v_1, ((v.y) ? (y.y) : (x.y)));
+  ivec2 w = mix(x, y, bvec2(true, false));
 }
 )");
 }

@@ -2,13 +2,8 @@
 precision highp float;
 precision highp int;
 
-vec3 tint_select(vec3 param_0, vec3 param_1, bvec3 param_2) {
-    return vec3(param_2[0] ? param_1[0] : param_0[0], param_2[1] ? param_1[1] : param_0[1], param_2[2] ? param_1[2] : param_0[2]);
-}
-
-
 vec3 tint_atanh(vec3 x) {
-  return tint_select(atanh(x), vec3(0.0f), greaterThanEqual(x, vec3(1.0f)));
+  return mix(atanh(x), vec3(0.0f), greaterThanEqual(x, vec3(1.0f)));
 }
 
 layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
@@ -36,13 +31,8 @@ void main() {
 }
 #version 310 es
 
-vec3 tint_select(vec3 param_0, vec3 param_1, bvec3 param_2) {
-    return vec3(param_2[0] ? param_1[0] : param_0[0], param_2[1] ? param_1[1] : param_0[1], param_2[2] ? param_1[2] : param_0[2]);
-}
-
-
 vec3 tint_atanh(vec3 x) {
-  return tint_select(atanh(x), vec3(0.0f), greaterThanEqual(x, vec3(1.0f)));
+  return mix(atanh(x), vec3(0.0f), greaterThanEqual(x, vec3(1.0f)));
 }
 
 layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
@@ -71,13 +61,8 @@ void main() {
 }
 #version 310 es
 
-vec3 tint_select(vec3 param_0, vec3 param_1, bvec3 param_2) {
-    return vec3(param_2[0] ? param_1[0] : param_0[0], param_2[1] ? param_1[1] : param_0[1], param_2[2] ? param_1[2] : param_0[2]);
-}
-
-
 vec3 tint_atanh(vec3 x) {
-  return tint_select(atanh(x), vec3(0.0f), greaterThanEqual(x, vec3(1.0f)));
+  return mix(atanh(x), vec3(0.0f), greaterThanEqual(x, vec3(1.0f)));
 }
 
 layout(location = 0) flat out vec3 prevent_dce_1;

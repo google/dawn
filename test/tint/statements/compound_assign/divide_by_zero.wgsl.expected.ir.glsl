@@ -6,14 +6,14 @@ int tint_mod_i32(int lhs, int rhs) {
   uint v = uint((lhs == (-2147483647 - 1)));
   bool v_1 = bool((v & uint((rhs == -1))));
   uint v_2 = uint((rhs == 0));
-  int v_3 = ((bool((v_2 | uint(v_1)))) ? (1) : (rhs));
+  int v_3 = mix(rhs, 1, bool((v_2 | uint(v_1))));
   return (lhs - ((lhs / v_3) * v_3));
 }
 int tint_div_i32(int lhs, int rhs) {
   uint v_4 = uint((lhs == (-2147483647 - 1)));
   bool v_5 = bool((v_4 & uint((rhs == -1))));
   uint v_6 = uint((rhs == 0));
-  return (lhs / ((bool((v_6 | uint(v_5)))) ? (1) : (rhs)));
+  return (lhs / mix(rhs, 1, bool((v_6 | uint(v_5)))));
 }
 void foo(int maybe_zero) {
   a = tint_div_i32(a, maybe_zero);

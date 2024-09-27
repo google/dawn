@@ -3,7 +3,7 @@
 
 float16_t u = 1.0hf;
 int tint_f16_to_i32(float16_t value) {
-  return (((value <= 65504.0hf)) ? ((((value >= -65504.0hf)) ? (int(value)) : ((-2147483647 - 1)))) : (2147483647));
+  return mix(2147483647, mix((-2147483647 - 1), int(value), (value >= -65504.0hf)), (value <= 65504.0hf));
 }
 void f() {
   int v = tint_f16_to_i32(u);

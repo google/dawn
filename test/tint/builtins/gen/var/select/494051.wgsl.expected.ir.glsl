@@ -4,7 +4,7 @@ precision highp int;
 
 void select_494051() {
   bool arg_2 = true;
-  float res = ((arg_2) ? (1.0f) : (1.0f));
+  float res = mix(1.0f, 1.0f, arg_2);
 }
 void main() {
   select_494051();
@@ -13,7 +13,7 @@ void main() {
 
 void select_494051() {
   bool arg_2 = true;
-  float res = ((arg_2) ? (1.0f) : (1.0f));
+  float res = mix(1.0f, 1.0f, arg_2);
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
@@ -28,7 +28,7 @@ struct VertexOutput {
 
 void select_494051() {
   bool arg_2 = true;
-  float res = ((arg_2) ? (1.0f) : (1.0f));
+  float res = mix(1.0f, 1.0f, arg_2);
 }
 VertexOutput vertex_main_inner() {
   VertexOutput tint_symbol = VertexOutput(vec4(0.0f));

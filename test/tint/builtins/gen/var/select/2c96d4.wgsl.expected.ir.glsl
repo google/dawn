@@ -4,10 +4,7 @@ precision highp int;
 
 void select_2c96d4() {
   bvec3 arg_2 = bvec3(true);
-  bvec3 v = arg_2;
-  float v_1 = ((v.x) ? (vec3(1.0f).x) : (vec3(1.0f).x));
-  float v_2 = ((v.y) ? (vec3(1.0f).y) : (vec3(1.0f).y));
-  vec3 res = vec3(v_1, v_2, ((v.z) ? (vec3(1.0f).z) : (vec3(1.0f).z)));
+  vec3 res = mix(vec3(1.0f), vec3(1.0f), arg_2);
 }
 void main() {
   select_2c96d4();
@@ -16,10 +13,7 @@ void main() {
 
 void select_2c96d4() {
   bvec3 arg_2 = bvec3(true);
-  bvec3 v = arg_2;
-  float v_1 = ((v.x) ? (vec3(1.0f).x) : (vec3(1.0f).x));
-  float v_2 = ((v.y) ? (vec3(1.0f).y) : (vec3(1.0f).y));
-  vec3 res = vec3(v_1, v_2, ((v.z) ? (vec3(1.0f).z) : (vec3(1.0f).z)));
+  vec3 res = mix(vec3(1.0f), vec3(1.0f), arg_2);
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
@@ -34,10 +28,7 @@ struct VertexOutput {
 
 void select_2c96d4() {
   bvec3 arg_2 = bvec3(true);
-  bvec3 v = arg_2;
-  float v_1 = ((v.x) ? (vec3(1.0f).x) : (vec3(1.0f).x));
-  float v_2 = ((v.y) ? (vec3(1.0f).y) : (vec3(1.0f).y));
-  vec3 res = vec3(v_1, v_2, ((v.z) ? (vec3(1.0f).z) : (vec3(1.0f).z)));
+  vec3 res = mix(vec3(1.0f), vec3(1.0f), arg_2);
 }
 VertexOutput vertex_main_inner() {
   VertexOutput tint_symbol = VertexOutput(vec4(0.0f));

@@ -1,7 +1,7 @@
 #version 310 es
 
 uint tint_mod_u32(uint lhs, uint rhs) {
-  uint v_1 = (((rhs == 0u)) ? (1u) : (rhs));
+  uint v_1 = mix(rhs, 1u, (rhs == 0u));
   return (lhs - ((lhs / v_1) * v_1));
 }
 void f_inner(uvec3 v) {

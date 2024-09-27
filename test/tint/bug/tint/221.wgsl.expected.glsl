@@ -10,7 +10,7 @@ layout(binding = 0, std430) buffer b_block_ssbo {
 } b;
 
 uint tint_mod(uint lhs, uint rhs) {
-  return (lhs % ((rhs == 0u) ? 1u : rhs));
+  return (lhs % mix(rhs, 1u, (rhs == 0u)));
 }
 
 void tint_symbol() {

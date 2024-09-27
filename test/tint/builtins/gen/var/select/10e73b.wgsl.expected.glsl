@@ -11,7 +11,7 @@ float16_t select_10e73b() {
   float16_t arg_0 = 1.0hf;
   float16_t arg_1 = 1.0hf;
   bool arg_2 = true;
-  float16_t res = (arg_2 ? arg_1 : arg_0);
+  float16_t res = mix(arg_0, arg_1, arg_2);
   return res;
 }
 
@@ -39,7 +39,7 @@ float16_t select_10e73b() {
   float16_t arg_0 = 1.0hf;
   float16_t arg_1 = 1.0hf;
   bool arg_2 = true;
-  float16_t res = (arg_2 ? arg_1 : arg_0);
+  float16_t res = mix(arg_0, arg_1, arg_2);
   return res;
 }
 
@@ -65,7 +65,7 @@ float16_t select_10e73b() {
   float16_t arg_0 = 1.0hf;
   float16_t arg_1 = 1.0hf;
   bool arg_2 = true;
-  float16_t res = (arg_2 ? arg_1 : arg_0);
+  float16_t res = mix(arg_0, arg_1, arg_2);
   return res;
 }
 

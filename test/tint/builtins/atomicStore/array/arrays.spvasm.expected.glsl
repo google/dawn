@@ -1,11 +1,11 @@
 #version 310 es
 
 uint tint_div(uint lhs, uint rhs) {
-  return (lhs / ((rhs == 0u) ? 1u : rhs));
+  return (lhs / mix(rhs, 1u, (rhs == 0u)));
 }
 
 uint tint_mod(uint lhs, uint rhs) {
-  return (lhs % ((rhs == 0u) ? 1u : rhs));
+  return (lhs % mix(rhs, 1u, (rhs == 0u)));
 }
 
 shared uint wg[3][2][1];

@@ -4,7 +4,7 @@ precision highp float;
 precision highp int;
 
 float16_t tint_atanh(float16_t x) {
-  return ((x >= 1.0hf) ? 0.0hf : atanh(x));
+  return mix(atanh(x), 0.0hf, (x >= 1.0hf));
 }
 
 layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
@@ -34,7 +34,7 @@ void main() {
 #extension GL_AMD_gpu_shader_half_float : require
 
 float16_t tint_atanh(float16_t x) {
-  return ((x >= 1.0hf) ? 0.0hf : atanh(x));
+  return mix(atanh(x), 0.0hf, (x >= 1.0hf));
 }
 
 layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
@@ -65,7 +65,7 @@ void main() {
 #extension GL_AMD_gpu_shader_half_float : require
 
 float16_t tint_atanh(float16_t x) {
-  return ((x >= 1.0hf) ? 0.0hf : atanh(x));
+  return mix(atanh(x), 0.0hf, (x >= 1.0hf));
 }
 
 layout(location = 0) flat out float16_t prevent_dce_1;

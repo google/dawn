@@ -5,7 +5,7 @@ void unused_entry_point() {
   return;
 }
 int tint_ftoi(float v) {
-  return ((v <= 2147483520.0f) ? ((v < -2147483648.0f) ? (-2147483647 - 1) : int(v)) : 2147483647);
+  return mix(2147483647, mix(int(v), (-2147483647 - 1), (v < -2147483648.0f)), (v <= 2147483520.0f));
 }
 
 float t = 0.0f;

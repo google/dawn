@@ -4,7 +4,7 @@ precision highp int;
 
 void select_dfab3b() {
   bool arg_2 = true;
-  ivec3 res = (arg_2 ? ivec3(1) : ivec3(1));
+  ivec3 res = mix(ivec3(1), ivec3(1), bvec3(arg_2));
 }
 
 struct VertexOutput {
@@ -23,7 +23,7 @@ void main() {
 
 void select_dfab3b() {
   bool arg_2 = true;
-  ivec3 res = (arg_2 ? ivec3(1) : ivec3(1));
+  ivec3 res = mix(ivec3(1), ivec3(1), bvec3(arg_2));
 }
 
 struct VertexOutput {
@@ -43,7 +43,7 @@ void main() {
 
 void select_dfab3b() {
   bool arg_2 = true;
-  ivec3 res = (arg_2 ? ivec3(1) : ivec3(1));
+  ivec3 res = mix(ivec3(1), ivec3(1), bvec3(arg_2));
 }
 
 struct VertexOutput {

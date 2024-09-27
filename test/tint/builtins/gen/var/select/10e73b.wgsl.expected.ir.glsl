@@ -11,7 +11,7 @@ float16_t select_10e73b() {
   float16_t arg_0 = 1.0hf;
   float16_t arg_1 = 1.0hf;
   bool arg_2 = true;
-  float16_t res = ((arg_2) ? (arg_1) : (arg_0));
+  float16_t res = mix(arg_0, arg_1, arg_2);
   return res;
 }
 void main() {
@@ -28,7 +28,7 @@ float16_t select_10e73b() {
   float16_t arg_0 = 1.0hf;
   float16_t arg_1 = 1.0hf;
   bool arg_2 = true;
-  float16_t res = ((arg_2) ? (arg_1) : (arg_0));
+  float16_t res = mix(arg_0, arg_1, arg_2);
   return res;
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
@@ -49,7 +49,7 @@ float16_t select_10e73b() {
   float16_t arg_0 = 1.0hf;
   float16_t arg_1 = 1.0hf;
   bool arg_2 = true;
-  float16_t res = ((arg_2) ? (arg_1) : (arg_0));
+  float16_t res = mix(arg_0, arg_1, arg_2);
   return res;
 }
 VertexOutput vertex_main_inner() {

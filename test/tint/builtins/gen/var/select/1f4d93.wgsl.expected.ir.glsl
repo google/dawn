@@ -4,9 +4,7 @@ precision highp int;
 
 void select_1f4d93() {
   bvec2 arg_2 = bvec2(true);
-  bvec2 v = arg_2;
-  float v_1 = ((v.x) ? (vec2(1.0f).x) : (vec2(1.0f).x));
-  vec2 res = vec2(v_1, ((v.y) ? (vec2(1.0f).y) : (vec2(1.0f).y)));
+  vec2 res = mix(vec2(1.0f), vec2(1.0f), arg_2);
 }
 void main() {
   select_1f4d93();
@@ -15,9 +13,7 @@ void main() {
 
 void select_1f4d93() {
   bvec2 arg_2 = bvec2(true);
-  bvec2 v = arg_2;
-  float v_1 = ((v.x) ? (vec2(1.0f).x) : (vec2(1.0f).x));
-  vec2 res = vec2(v_1, ((v.y) ? (vec2(1.0f).y) : (vec2(1.0f).y)));
+  vec2 res = mix(vec2(1.0f), vec2(1.0f), arg_2);
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
@@ -32,9 +28,7 @@ struct VertexOutput {
 
 void select_1f4d93() {
   bvec2 arg_2 = bvec2(true);
-  bvec2 v = arg_2;
-  float v_1 = ((v.x) ? (vec2(1.0f).x) : (vec2(1.0f).x));
-  vec2 res = vec2(v_1, ((v.y) ? (vec2(1.0f).y) : (vec2(1.0f).y)));
+  vec2 res = mix(vec2(1.0f), vec2(1.0f), arg_2);
 }
 VertexOutput vertex_main_inner() {
   VertexOutput tint_symbol = VertexOutput(vec4(0.0f));

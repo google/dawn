@@ -4,7 +4,7 @@ precision highp int;
 
 void select_e381c3() {
   bool arg_2 = true;
-  ivec4 res = (arg_2 ? ivec4(1) : ivec4(1));
+  ivec4 res = mix(ivec4(1), ivec4(1), bvec4(arg_2));
 }
 
 struct VertexOutput {
@@ -23,7 +23,7 @@ void main() {
 
 void select_e381c3() {
   bool arg_2 = true;
-  ivec4 res = (arg_2 ? ivec4(1) : ivec4(1));
+  ivec4 res = mix(ivec4(1), ivec4(1), bvec4(arg_2));
 }
 
 struct VertexOutput {
@@ -43,7 +43,7 @@ void main() {
 
 void select_e381c3() {
   bool arg_2 = true;
-  ivec4 res = (arg_2 ? ivec4(1) : ivec4(1));
+  ivec4 res = mix(ivec4(1), ivec4(1), bvec4(arg_2));
 }
 
 struct VertexOutput {

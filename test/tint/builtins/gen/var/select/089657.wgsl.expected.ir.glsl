@@ -1,46 +1,24 @@
-SKIP: FAILED
-
 #version 310 es
 precision highp float;
 precision highp int;
 
 void select_089657() {
   bool arg_2 = true;
-  bool v = arg_2;
-  float v_1 = ((v.x) ? (vec3(1.0f).x) : (vec3(1.0f).x));
-  float v_2 = ((v.y) ? (vec3(1.0f).y) : (vec3(1.0f).y));
-  vec3 res = vec3(v_1, v_2, ((v.z) ? (vec3(1.0f).z) : (vec3(1.0f).z)));
+  vec3 res = mix(vec3(1.0f), vec3(1.0f), bvec3(arg_2));
 }
 void main() {
   select_089657();
 }
-error: Error parsing GLSL shader:
-ERROR: 0:8: 'scalar swizzle' : not supported with this profile: es
-ERROR: 0:8: '' : compilation terminated 
-ERROR: 2 compilation errors.  No code generated.
-
-
-
 #version 310 es
 
 void select_089657() {
   bool arg_2 = true;
-  bool v = arg_2;
-  float v_1 = ((v.x) ? (vec3(1.0f).x) : (vec3(1.0f).x));
-  float v_2 = ((v.y) ? (vec3(1.0f).y) : (vec3(1.0f).y));
-  vec3 res = vec3(v_1, v_2, ((v.z) ? (vec3(1.0f).z) : (vec3(1.0f).z)));
+  vec3 res = mix(vec3(1.0f), vec3(1.0f), bvec3(arg_2));
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
   select_089657();
 }
-error: Error parsing GLSL shader:
-ERROR: 0:6: 'scalar swizzle' : not supported with this profile: es
-ERROR: 0:6: '' : compilation terminated 
-ERROR: 2 compilation errors.  No code generated.
-
-
-
 #version 310 es
 
 
@@ -50,10 +28,7 @@ struct VertexOutput {
 
 void select_089657() {
   bool arg_2 = true;
-  bool v = arg_2;
-  float v_1 = ((v.x) ? (vec3(1.0f).x) : (vec3(1.0f).x));
-  float v_2 = ((v.y) ? (vec3(1.0f).y) : (vec3(1.0f).y));
-  vec3 res = vec3(v_1, v_2, ((v.z) ? (vec3(1.0f).z) : (vec3(1.0f).z)));
+  vec3 res = mix(vec3(1.0f), vec3(1.0f), bvec3(arg_2));
 }
 VertexOutput vertex_main_inner() {
   VertexOutput tint_symbol = VertexOutput(vec4(0.0f));
@@ -67,12 +42,3 @@ void main() {
   gl_Position[2u] = ((2.0f * gl_Position.z) - gl_Position.w);
   gl_PointSize = 1.0f;
 }
-error: Error parsing GLSL shader:
-ERROR: 0:11: 'scalar swizzle' : not supported with this profile: es
-ERROR: 0:11: '' : compilation terminated 
-ERROR: 2 compilation errors.  No code generated.
-
-
-
-
-tint executable returned error: exit status 1

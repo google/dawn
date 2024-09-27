@@ -9,11 +9,11 @@ buffer tint_symbol_1_1_ssbo {
 uint firstLeadingBit_f0779d() {
   uint arg_0 = 1u;
   uint v_1 = arg_0;
-  uint v_2 = ((((v_1 & 4294901760u) == 0u)) ? (0u) : (16u));
-  uint v_3 = (((((v_1 >> v_2) & 65280u) == 0u)) ? (0u) : (8u));
-  uint v_4 = ((((((v_1 >> v_2) >> v_3) & 240u) == 0u)) ? (0u) : (4u));
-  uint v_5 = (((((((v_1 >> v_2) >> v_3) >> v_4) & 12u) == 0u)) ? (0u) : (2u));
-  uint res = (((((((v_1 >> v_2) >> v_3) >> v_4) >> v_5) == 0u)) ? (4294967295u) : ((v_2 | (v_3 | (v_4 | (v_5 | ((((((((v_1 >> v_2) >> v_3) >> v_4) >> v_5) & 2u) == 0u)) ? (0u) : (1u))))))));
+  uint v_2 = mix(16u, 0u, ((v_1 & 4294901760u) == 0u));
+  uint v_3 = mix(8u, 0u, (((v_1 >> v_2) & 65280u) == 0u));
+  uint v_4 = mix(4u, 0u, ((((v_1 >> v_2) >> v_3) & 240u) == 0u));
+  uint v_5 = mix(2u, 0u, (((((v_1 >> v_2) >> v_3) >> v_4) & 12u) == 0u));
+  uint res = mix((v_2 | (v_3 | (v_4 | (v_5 | mix(1u, 0u, ((((((v_1 >> v_2) >> v_3) >> v_4) >> v_5) & 2u) == 0u)))))), 4294967295u, (((((v_1 >> v_2) >> v_3) >> v_4) >> v_5) == 0u));
   return res;
 }
 void main() {
@@ -28,11 +28,11 @@ buffer tint_symbol_1_1_ssbo {
 uint firstLeadingBit_f0779d() {
   uint arg_0 = 1u;
   uint v_1 = arg_0;
-  uint v_2 = ((((v_1 & 4294901760u) == 0u)) ? (0u) : (16u));
-  uint v_3 = (((((v_1 >> v_2) & 65280u) == 0u)) ? (0u) : (8u));
-  uint v_4 = ((((((v_1 >> v_2) >> v_3) & 240u) == 0u)) ? (0u) : (4u));
-  uint v_5 = (((((((v_1 >> v_2) >> v_3) >> v_4) & 12u) == 0u)) ? (0u) : (2u));
-  uint res = (((((((v_1 >> v_2) >> v_3) >> v_4) >> v_5) == 0u)) ? (4294967295u) : ((v_2 | (v_3 | (v_4 | (v_5 | ((((((((v_1 >> v_2) >> v_3) >> v_4) >> v_5) & 2u) == 0u)) ? (0u) : (1u))))))));
+  uint v_2 = mix(16u, 0u, ((v_1 & 4294901760u) == 0u));
+  uint v_3 = mix(8u, 0u, (((v_1 >> v_2) & 65280u) == 0u));
+  uint v_4 = mix(4u, 0u, ((((v_1 >> v_2) >> v_3) & 240u) == 0u));
+  uint v_5 = mix(2u, 0u, (((((v_1 >> v_2) >> v_3) >> v_4) & 12u) == 0u));
+  uint res = mix((v_2 | (v_3 | (v_4 | (v_5 | mix(1u, 0u, ((((((v_1 >> v_2) >> v_3) >> v_4) >> v_5) & 2u) == 0u)))))), 4294967295u, (((((v_1 >> v_2) >> v_3) >> v_4) >> v_5) == 0u));
   return res;
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
@@ -51,11 +51,11 @@ layout(location = 0) flat out uint vertex_main_loc0_Output;
 uint firstLeadingBit_f0779d() {
   uint arg_0 = 1u;
   uint v = arg_0;
-  uint v_1 = ((((v & 4294901760u) == 0u)) ? (0u) : (16u));
-  uint v_2 = (((((v >> v_1) & 65280u) == 0u)) ? (0u) : (8u));
-  uint v_3 = ((((((v >> v_1) >> v_2) & 240u) == 0u)) ? (0u) : (4u));
-  uint v_4 = (((((((v >> v_1) >> v_2) >> v_3) & 12u) == 0u)) ? (0u) : (2u));
-  uint res = (((((((v >> v_1) >> v_2) >> v_3) >> v_4) == 0u)) ? (4294967295u) : ((v_1 | (v_2 | (v_3 | (v_4 | ((((((((v >> v_1) >> v_2) >> v_3) >> v_4) & 2u) == 0u)) ? (0u) : (1u))))))));
+  uint v_1 = mix(16u, 0u, ((v & 4294901760u) == 0u));
+  uint v_2 = mix(8u, 0u, (((v >> v_1) & 65280u) == 0u));
+  uint v_3 = mix(4u, 0u, ((((v >> v_1) >> v_2) & 240u) == 0u));
+  uint v_4 = mix(2u, 0u, (((((v >> v_1) >> v_2) >> v_3) & 12u) == 0u));
+  uint res = mix((v_1 | (v_2 | (v_3 | (v_4 | mix(1u, 0u, ((((((v >> v_1) >> v_2) >> v_3) >> v_4) & 2u) == 0u)))))), 4294967295u, (((((v >> v_1) >> v_2) >> v_3) >> v_4) == 0u));
   return res;
 }
 VertexOutput vertex_main_inner() {

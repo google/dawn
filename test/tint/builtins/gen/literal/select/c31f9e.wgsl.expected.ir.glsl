@@ -8,7 +8,7 @@ buffer tint_symbol_1_1_ssbo {
 } v;
 int select_c31f9e() {
   bool res = true;
-  return (((res == false)) ? (1) : (0));
+  return mix(0, 1, (res == false));
 }
 void main() {
   v.tint_symbol = select_c31f9e();
@@ -21,7 +21,7 @@ buffer tint_symbol_1_1_ssbo {
 } v;
 int select_c31f9e() {
   bool res = true;
-  return (((res == false)) ? (1) : (0));
+  return mix(0, 1, (res == false));
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
@@ -38,7 +38,7 @@ struct VertexOutput {
 layout(location = 0) flat out int vertex_main_loc0_Output;
 int select_c31f9e() {
   bool res = true;
-  return (((res == false)) ? (1) : (0));
+  return mix(0, 1, (res == false));
 }
 VertexOutput vertex_main_inner() {
   VertexOutput tint_symbol = VertexOutput(vec4(0.0f), 0);

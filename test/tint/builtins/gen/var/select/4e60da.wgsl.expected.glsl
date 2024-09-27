@@ -4,7 +4,7 @@ precision highp int;
 
 void select_4e60da() {
   bool arg_2 = true;
-  vec2 res = (arg_2 ? vec2(1.0f) : vec2(1.0f));
+  vec2 res = mix(vec2(1.0f), vec2(1.0f), bvec2(arg_2));
 }
 
 struct VertexOutput {
@@ -23,7 +23,7 @@ void main() {
 
 void select_4e60da() {
   bool arg_2 = true;
-  vec2 res = (arg_2 ? vec2(1.0f) : vec2(1.0f));
+  vec2 res = mix(vec2(1.0f), vec2(1.0f), bvec2(arg_2));
 }
 
 struct VertexOutput {
@@ -43,7 +43,7 @@ void main() {
 
 void select_4e60da() {
   bool arg_2 = true;
-  vec2 res = (arg_2 ? vec2(1.0f) : vec2(1.0f));
+  vec2 res = mix(vec2(1.0f), vec2(1.0f), bvec2(arg_2));
 }
 
 struct VertexOutput {

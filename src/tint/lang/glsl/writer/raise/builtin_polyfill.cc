@@ -638,36 +638,23 @@ struct State {
     }
 
     void Select(core::ir::CoreBuiltinCall* call) {
-        Vector<core::ir::Value*, 4> args = call->Args();
+        auto args = call->Args();
 
-        // GLSL does not support ternary expressions with a bool vector conditional,
-        // so polyfill by manually creating a vector with each of the
-        // individual scalar ternaries.
-        if (auto* vec = call->Result(0)->Type()->As<core::type::Vector>()) {
-            Vector<core::ir::Value*, 4> construct_args;
+        // Implement as `mix` in GLSL. The one caveat is that `mix` requires the number of
+        // parameters to match, so if we have a `vec2` for the results and a single `bool` value,
+        // we need to splat the `bool`.
+        auto bool_ty = args[2]->Type();
+        auto val_ty = args[0]->Type();
 
-            b.InsertBefore(call, [&] {
-                auto* elm_ty = vec->Type();
-                for (uint32_t i = 0; i < vec->Width(); i++) {
-                    auto* false_ = b.Swizzle(elm_ty, args[0], {i})->Result(0);
-                    auto* true_ = b.Swizzle(elm_ty, args[1], {i})->Result(0);
-                    auto* cond = b.Swizzle(elm_ty, args[2], {i})->Result(0);
+        b.InsertBefore(call, [&] {
+            core::ir::Value* cond = args[2];
+            if (val_ty->Is<core::type::Vector>() && !bool_ty->Is<core::type::Vector>()) {
+                cond = b.Construct(ty.MatchWidth(ty.bool_(), val_ty), cond)->Result(0);
+            }
 
-                    auto* ternary = b.ir.CreateInstruction<glsl::ir::Ternary>(
-                        b.InstructionResult(elm_ty),
-                        Vector<core::ir::Value*, 3>{false_, true_, cond});
-                    ternary->InsertBefore(call);
-
-                    construct_args.Push(ternary->Result(0));
-                }
-
-                b.ConstructWithResult(call->DetachResult(), construct_args);
-            });
-
-        } else {
-            auto* ternary = b.ir.CreateInstruction<glsl::ir::Ternary>(call->DetachResult(), args);
-            ternary->InsertBefore(call);
-        }
+            b.CallWithResult<glsl::ir::BuiltinCall>(call->DetachResult(), glsl::BuiltinFn::kMix,
+                                                    args[0], args[1], cond);
+        });
         call->Destroy();
     }
 

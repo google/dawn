@@ -50,10 +50,10 @@ buffer tint_symbol_2_1_ssbo {
   int tint_symbol_1;
 } v;
 int tint_f32_to_i32(float value) {
-  return (((value <= 2147483520.0f)) ? ((((value >= -2147483648.0f)) ? (int(value)) : ((-2147483647 - 1)))) : (2147483647));
+  return mix(2147483647, mix((-2147483647 - 1), int(value), (value >= -2147483648.0f)), (value <= 2147483520.0f));
 }
 int tint_f16_to_i32(float16_t value) {
-  return (((value <= 65504.0hf)) ? ((((value >= -65504.0hf)) ? (int(value)) : ((-2147483647 - 1)))) : (2147483647));
+  return mix(2147483647, mix((-2147483647 - 1), int(value), (value >= -65504.0hf)), (value <= 65504.0hf));
 }
 void tint_symbol_inner(uint idx) {
   float scalar_f32 = sb.arr[idx].scalar_f32;

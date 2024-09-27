@@ -80,6 +80,8 @@ const char* str(BuiltinFn i) {
             return "all";
         case BuiltinFn::kDot:
             return "dot";
+        case BuiltinFn::kMix:
+            return "mix";
         case BuiltinFn::kModf:
             return "modf";
         case BuiltinFn::kFrexp:

@@ -11,7 +11,7 @@ f16vec4 select_830dd9() {
   f16vec4 arg_0 = f16vec4(1.0hf);
   f16vec4 arg_1 = f16vec4(1.0hf);
   bool arg_2 = true;
-  f16vec4 res = (arg_2 ? arg_1 : arg_0);
+  f16vec4 res = mix(arg_0, arg_1, bvec4(arg_2));
   return res;
 }
 
@@ -39,7 +39,7 @@ f16vec4 select_830dd9() {
   f16vec4 arg_0 = f16vec4(1.0hf);
   f16vec4 arg_1 = f16vec4(1.0hf);
   bool arg_2 = true;
-  f16vec4 res = (arg_2 ? arg_1 : arg_0);
+  f16vec4 res = mix(arg_0, arg_1, bvec4(arg_2));
   return res;
 }
 
@@ -65,7 +65,7 @@ f16vec4 select_830dd9() {
   f16vec4 arg_0 = f16vec4(1.0hf);
   f16vec4 arg_1 = f16vec4(1.0hf);
   bool arg_2 = true;
-  f16vec4 res = (arg_2 ? arg_1 : arg_0);
+  f16vec4 res = mix(arg_0, arg_1, bvec4(arg_2));
   return res;
 }
 

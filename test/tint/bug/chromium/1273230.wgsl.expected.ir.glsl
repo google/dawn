@@ -63,14 +63,8 @@ vec3 toVoxelPos(vec3 position) {
 }
 uvec3 tint_v3f32_to_v3u32(vec3 value) {
   uvec3 v_3 = uvec3(value);
-  bvec3 v_4 = greaterThanEqual(value, vec3(0.0f));
-  uint v_5 = ((v_4.x) ? (v_3.x) : (uvec3(0u).x));
-  uint v_6 = ((v_4.y) ? (v_3.y) : (uvec3(0u).y));
-  uvec3 v_7 = uvec3(v_5, v_6, ((v_4.z) ? (v_3.z) : (uvec3(0u).z)));
-  bvec3 v_8 = lessThanEqual(value, vec3(4294967040.0f));
-  uint v_9 = ((v_8.x) ? (v_7.x) : (uvec3(4294967295u).x));
-  uint v_10 = ((v_8.y) ? (v_7.y) : (uvec3(4294967295u).y));
-  return uvec3(v_9, v_10, ((v_8.z) ? (v_7.z) : (uvec3(4294967295u).z)));
+  uvec3 v_4 = mix(uvec3(0u), v_3, greaterThanEqual(value, vec3(0.0f)));
+  return mix(uvec3(4294967295u), v_4, lessThanEqual(value, vec3(4294967040.0f)));
 }
 uint toIndex1D(uint gridSize, vec3 voxelPos) {
   uvec3 icoord = tint_v3f32_to_v3u32(voxelPos);

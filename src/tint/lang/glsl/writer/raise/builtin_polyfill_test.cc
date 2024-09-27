@@ -66,7 +66,7 @@ TEST_F(GlslWriter_BuiltinPolyfillTest, SelectScalar) {
     auto* expect = R"(
 %foo = func():f32 {
   $B1: {
-    %2:f32 = glsl.ternary 2.0f, 1.0f, false
+    %2:f32 = glsl.mix 2.0f, 1.0f, false
     ret %2
   }
 }
@@ -98,20 +98,8 @@ TEST_F(GlslWriter_BuiltinPolyfillTest, SelectVector) {
     auto* expect = R"(
 %foo = func():vec3<f32> {
   $B1: {
-    %2:f32 = swizzle vec3<f32>(2.0f), x
-    %3:f32 = swizzle vec3<f32>(1.0f), x
-    %4:f32 = swizzle vec3<bool>(false), x
-    %5:f32 = glsl.ternary %2, %3, %4
-    %6:f32 = swizzle vec3<f32>(2.0f), y
-    %7:f32 = swizzle vec3<f32>(1.0f), y
-    %8:f32 = swizzle vec3<bool>(false), y
-    %9:f32 = glsl.ternary %6, %7, %8
-    %10:f32 = swizzle vec3<f32>(2.0f), z
-    %11:f32 = swizzle vec3<f32>(1.0f), z
-    %12:f32 = swizzle vec3<bool>(false), z
-    %13:f32 = glsl.ternary %10, %11, %12
-    %14:vec3<f32> = construct %5, %9, %13
-    ret %14
+    %2:vec3<f32> = glsl.mix vec3<f32>(2.0f), vec3<f32>(1.0f), vec3<bool>(false)
+    ret %2
   }
 }
 )";

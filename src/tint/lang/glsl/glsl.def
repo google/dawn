@@ -79,6 +79,7 @@ type texture_storage_3d<F: texel_format, A: access>
 // Type matchers                                                              //
 ////////////////////////////////////////////////////////////////////////////////
 
+match scalar: f32 | f16 | i32 | u32 | bool
 match iu32: i32 | u32
 match fiu32: f32 | i32 | u32
 match fi32_f16: f32 | i32 | f16
@@ -174,6 +175,9 @@ implicit(T: fi32_f16, N: num) fn abs(vec<N, T>) -> vec<N, T>
 implicit(N: num) fn any(vec<N, bool>) -> bool
 implicit(N: num) fn all(vec<N, bool>) -> bool
 implicit(T: f32_f16, N: num) fn dot(vec<N, T>, vec<N, T>) -> T
+
+@must_use implicit(T: scalar) fn mix(T, T, bool) -> T
+@must_use implicit(N: num, T: scalar) fn mix(vec<N, T>, vec<N, T>, vec<N, bool>) -> vec<N, T>
 
 @must_use @const implicit(T: f32_f16) fn modf(value: T, result: ptr<function, T, read_write>) -> T
 @must_use @const implicit(N: num, T: f32_f16) fn modf(value: vec<N, T>,

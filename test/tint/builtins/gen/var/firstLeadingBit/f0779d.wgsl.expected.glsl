@@ -4,16 +4,16 @@ precision highp int;
 
 uint tint_first_leading_bit(uint v) {
   uint x = v;
-  uint b16 = (bool((x & 4294901760u)) ? 16u : 0u);
+  uint b16 = mix(0u, 16u, bool((x & 4294901760u)));
   x = (x >> b16);
-  uint b8 = (bool((x & 65280u)) ? 8u : 0u);
+  uint b8 = mix(0u, 8u, bool((x & 65280u)));
   x = (x >> b8);
-  uint b4 = (bool((x & 240u)) ? 4u : 0u);
+  uint b4 = mix(0u, 4u, bool((x & 240u)));
   x = (x >> b4);
-  uint b2 = (bool((x & 12u)) ? 2u : 0u);
+  uint b2 = mix(0u, 2u, bool((x & 12u)));
   x = (x >> b2);
-  uint b1 = (bool((x & 2u)) ? 1u : 0u);
-  uint is_zero = ((x == 0u) ? 4294967295u : 0u);
+  uint b1 = mix(0u, 1u, bool((x & 2u)));
+  uint is_zero = mix(0u, 4294967295u, (x == 0u));
   return uint((((((b16 | b8) | b4) | b2) | b1) | is_zero));
 }
 
@@ -44,16 +44,16 @@ void main() {
 
 uint tint_first_leading_bit(uint v) {
   uint x = v;
-  uint b16 = (bool((x & 4294901760u)) ? 16u : 0u);
+  uint b16 = mix(0u, 16u, bool((x & 4294901760u)));
   x = (x >> b16);
-  uint b8 = (bool((x & 65280u)) ? 8u : 0u);
+  uint b8 = mix(0u, 8u, bool((x & 65280u)));
   x = (x >> b8);
-  uint b4 = (bool((x & 240u)) ? 4u : 0u);
+  uint b4 = mix(0u, 4u, bool((x & 240u)));
   x = (x >> b4);
-  uint b2 = (bool((x & 12u)) ? 2u : 0u);
+  uint b2 = mix(0u, 2u, bool((x & 12u)));
   x = (x >> b2);
-  uint b1 = (bool((x & 2u)) ? 1u : 0u);
-  uint is_zero = ((x == 0u) ? 4294967295u : 0u);
+  uint b1 = mix(0u, 1u, bool((x & 2u)));
+  uint is_zero = mix(0u, 4294967295u, (x == 0u));
   return uint((((((b16 | b8) | b4) | b2) | b1) | is_zero));
 }
 
@@ -85,16 +85,16 @@ void main() {
 
 uint tint_first_leading_bit(uint v) {
   uint x = v;
-  uint b16 = (bool((x & 4294901760u)) ? 16u : 0u);
+  uint b16 = mix(0u, 16u, bool((x & 4294901760u)));
   x = (x >> b16);
-  uint b8 = (bool((x & 65280u)) ? 8u : 0u);
+  uint b8 = mix(0u, 8u, bool((x & 65280u)));
   x = (x >> b8);
-  uint b4 = (bool((x & 240u)) ? 4u : 0u);
+  uint b4 = mix(0u, 4u, bool((x & 240u)));
   x = (x >> b4);
-  uint b2 = (bool((x & 12u)) ? 2u : 0u);
+  uint b2 = mix(0u, 2u, bool((x & 12u)));
   x = (x >> b2);
-  uint b1 = (bool((x & 2u)) ? 1u : 0u);
-  uint is_zero = ((x == 0u) ? 4294967295u : 0u);
+  uint b1 = mix(0u, 1u, bool((x & 2u)));
+  uint is_zero = mix(0u, 4294967295u, (x == 0u));
   return uint((((((b16 | b8) | b4) | b2) | b1) | is_zero));
 }
 

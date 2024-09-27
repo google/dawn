@@ -2,23 +2,18 @@
 precision highp float;
 precision highp int;
 
-uvec2 tint_select(uvec2 param_0, uvec2 param_1, bvec2 param_2) {
-    return uvec2(param_2[0] ? param_1[0] : param_0[0], param_2[1] ? param_1[1] : param_0[1]);
-}
-
-
 ivec2 tint_count_leading_zeros(ivec2 v) {
   uvec2 x = uvec2(v);
-  uvec2 b16 = tint_select(uvec2(0u), uvec2(16u), lessThanEqual(x, uvec2(65535u)));
+  uvec2 b16 = mix(uvec2(0u), uvec2(16u), lessThanEqual(x, uvec2(65535u)));
   x = (x << b16);
-  uvec2 b8 = tint_select(uvec2(0u), uvec2(8u), lessThanEqual(x, uvec2(16777215u)));
+  uvec2 b8 = mix(uvec2(0u), uvec2(8u), lessThanEqual(x, uvec2(16777215u)));
   x = (x << b8);
-  uvec2 b4 = tint_select(uvec2(0u), uvec2(4u), lessThanEqual(x, uvec2(268435455u)));
+  uvec2 b4 = mix(uvec2(0u), uvec2(4u), lessThanEqual(x, uvec2(268435455u)));
   x = (x << b4);
-  uvec2 b2 = tint_select(uvec2(0u), uvec2(2u), lessThanEqual(x, uvec2(1073741823u)));
+  uvec2 b2 = mix(uvec2(0u), uvec2(2u), lessThanEqual(x, uvec2(1073741823u)));
   x = (x << b2);
-  uvec2 b1 = tint_select(uvec2(0u), uvec2(1u), lessThanEqual(x, uvec2(2147483647u)));
-  uvec2 is_zero = tint_select(uvec2(0u), uvec2(1u), equal(x, uvec2(0u)));
+  uvec2 b1 = mix(uvec2(0u), uvec2(1u), lessThanEqual(x, uvec2(2147483647u)));
+  uvec2 is_zero = mix(uvec2(0u), uvec2(1u), equal(x, uvec2(0u)));
   return ivec2((((((b16 | b8) | b4) | b2) | b1) + is_zero));
 }
 
@@ -47,23 +42,18 @@ void main() {
 }
 #version 310 es
 
-uvec2 tint_select(uvec2 param_0, uvec2 param_1, bvec2 param_2) {
-    return uvec2(param_2[0] ? param_1[0] : param_0[0], param_2[1] ? param_1[1] : param_0[1]);
-}
-
-
 ivec2 tint_count_leading_zeros(ivec2 v) {
   uvec2 x = uvec2(v);
-  uvec2 b16 = tint_select(uvec2(0u), uvec2(16u), lessThanEqual(x, uvec2(65535u)));
+  uvec2 b16 = mix(uvec2(0u), uvec2(16u), lessThanEqual(x, uvec2(65535u)));
   x = (x << b16);
-  uvec2 b8 = tint_select(uvec2(0u), uvec2(8u), lessThanEqual(x, uvec2(16777215u)));
+  uvec2 b8 = mix(uvec2(0u), uvec2(8u), lessThanEqual(x, uvec2(16777215u)));
   x = (x << b8);
-  uvec2 b4 = tint_select(uvec2(0u), uvec2(4u), lessThanEqual(x, uvec2(268435455u)));
+  uvec2 b4 = mix(uvec2(0u), uvec2(4u), lessThanEqual(x, uvec2(268435455u)));
   x = (x << b4);
-  uvec2 b2 = tint_select(uvec2(0u), uvec2(2u), lessThanEqual(x, uvec2(1073741823u)));
+  uvec2 b2 = mix(uvec2(0u), uvec2(2u), lessThanEqual(x, uvec2(1073741823u)));
   x = (x << b2);
-  uvec2 b1 = tint_select(uvec2(0u), uvec2(1u), lessThanEqual(x, uvec2(2147483647u)));
-  uvec2 is_zero = tint_select(uvec2(0u), uvec2(1u), equal(x, uvec2(0u)));
+  uvec2 b1 = mix(uvec2(0u), uvec2(1u), lessThanEqual(x, uvec2(2147483647u)));
+  uvec2 is_zero = mix(uvec2(0u), uvec2(1u), equal(x, uvec2(0u)));
   return ivec2((((((b16 | b8) | b4) | b2) | b1) + is_zero));
 }
 
@@ -93,23 +83,18 @@ void main() {
 }
 #version 310 es
 
-uvec2 tint_select(uvec2 param_0, uvec2 param_1, bvec2 param_2) {
-    return uvec2(param_2[0] ? param_1[0] : param_0[0], param_2[1] ? param_1[1] : param_0[1]);
-}
-
-
 ivec2 tint_count_leading_zeros(ivec2 v) {
   uvec2 x = uvec2(v);
-  uvec2 b16 = tint_select(uvec2(0u), uvec2(16u), lessThanEqual(x, uvec2(65535u)));
+  uvec2 b16 = mix(uvec2(0u), uvec2(16u), lessThanEqual(x, uvec2(65535u)));
   x = (x << b16);
-  uvec2 b8 = tint_select(uvec2(0u), uvec2(8u), lessThanEqual(x, uvec2(16777215u)));
+  uvec2 b8 = mix(uvec2(0u), uvec2(8u), lessThanEqual(x, uvec2(16777215u)));
   x = (x << b8);
-  uvec2 b4 = tint_select(uvec2(0u), uvec2(4u), lessThanEqual(x, uvec2(268435455u)));
+  uvec2 b4 = mix(uvec2(0u), uvec2(4u), lessThanEqual(x, uvec2(268435455u)));
   x = (x << b4);
-  uvec2 b2 = tint_select(uvec2(0u), uvec2(2u), lessThanEqual(x, uvec2(1073741823u)));
+  uvec2 b2 = mix(uvec2(0u), uvec2(2u), lessThanEqual(x, uvec2(1073741823u)));
   x = (x << b2);
-  uvec2 b1 = tint_select(uvec2(0u), uvec2(1u), lessThanEqual(x, uvec2(2147483647u)));
-  uvec2 is_zero = tint_select(uvec2(0u), uvec2(1u), equal(x, uvec2(0u)));
+  uvec2 b1 = mix(uvec2(0u), uvec2(1u), lessThanEqual(x, uvec2(2147483647u)));
+  uvec2 is_zero = mix(uvec2(0u), uvec2(1u), equal(x, uvec2(0u)));
   return ivec2((((((b16 | b8) | b4) | b2) | b1) + is_zero));
 }
 

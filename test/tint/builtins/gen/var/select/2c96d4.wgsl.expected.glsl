@@ -2,14 +2,9 @@
 precision highp float;
 precision highp int;
 
-vec3 tint_select(vec3 param_0, vec3 param_1, bvec3 param_2) {
-    return vec3(param_2[0] ? param_1[0] : param_0[0], param_2[1] ? param_1[1] : param_0[1], param_2[2] ? param_1[2] : param_0[2]);
-}
-
-
 void select_2c96d4() {
   bvec3 arg_2 = bvec3(true);
-  vec3 res = tint_select(vec3(1.0f), vec3(1.0f), arg_2);
+  vec3 res = mix(vec3(1.0f), vec3(1.0f), arg_2);
 }
 
 struct VertexOutput {
@@ -26,14 +21,9 @@ void main() {
 }
 #version 310 es
 
-vec3 tint_select(vec3 param_0, vec3 param_1, bvec3 param_2) {
-    return vec3(param_2[0] ? param_1[0] : param_0[0], param_2[1] ? param_1[1] : param_0[1], param_2[2] ? param_1[2] : param_0[2]);
-}
-
-
 void select_2c96d4() {
   bvec3 arg_2 = bvec3(true);
-  vec3 res = tint_select(vec3(1.0f), vec3(1.0f), arg_2);
+  vec3 res = mix(vec3(1.0f), vec3(1.0f), arg_2);
 }
 
 struct VertexOutput {
@@ -51,14 +41,9 @@ void main() {
 }
 #version 310 es
 
-vec3 tint_select(vec3 param_0, vec3 param_1, bvec3 param_2) {
-    return vec3(param_2[0] ? param_1[0] : param_0[0], param_2[1] ? param_1[1] : param_0[1], param_2[2] ? param_1[2] : param_0[2]);
-}
-
-
 void select_2c96d4() {
   bvec3 arg_2 = bvec3(true);
-  vec3 res = tint_select(vec3(1.0f), vec3(1.0f), arg_2);
+  vec3 res = mix(vec3(1.0f), vec3(1.0f), arg_2);
 }
 
 struct VertexOutput {

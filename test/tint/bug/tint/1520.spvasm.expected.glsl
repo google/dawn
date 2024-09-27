@@ -2,13 +2,8 @@
 precision highp float;
 precision highp int;
 
-ivec4 tint_select(ivec4 param_0, ivec4 param_1, bvec4 param_2) {
-    return ivec4(param_2[0] ? param_1[0] : param_0[0], param_2[1] ? param_1[1] : param_0[1], param_2[2] ? param_1[2] : param_0[2], param_2[3] ? param_1[3] : param_0[3]);
-}
-
-
 int tint_ftoi(float v) {
-  return ((v <= 2147483520.0f) ? ((v < -2147483648.0f) ? (-2147483647 - 1) : int(v)) : 2147483647);
+  return mix(2147483647, mix(int(v), (-2147483647 - 1), (v < -2147483648.0f)), (v <= 2147483520.0f));
 }
 
 layout(location = 0) in vec4 vcolor_S0_param_1;
@@ -35,7 +30,7 @@ vec4 sk_FragColor = vec4(0.0f, 0.0f, 0.0f, 0.0f);
 bool sk_Clockwise = false;
 vec4 vcolor_S0 = vec4(0.0f, 0.0f, 0.0f, 0.0f);
 ivec4 tint_div(ivec4 lhs, ivec4 rhs) {
-  return (lhs / tint_select(rhs, ivec4(1), bvec4(uvec4(equal(rhs, ivec4(0))) | uvec4(bvec4(uvec4(equal(lhs, ivec4((-2147483647 - 1)))) & uvec4(equal(rhs, ivec4(-1))))))));
+  return (lhs / mix(rhs, ivec4(1), bvec4(uvec4(equal(rhs, ivec4(0))) | uvec4(bvec4(uvec4(equal(lhs, ivec4((-2147483647 - 1)))) & uvec4(equal(rhs, ivec4(-1))))))));
 }
 
 bool test_int_S1_c0_b() {

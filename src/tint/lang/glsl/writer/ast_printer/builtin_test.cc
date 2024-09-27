@@ -380,7 +380,7 @@ TEST_F(GlslASTPrinterTest_Builtin, Select_Scalar) {
     StringStream out;
     gen.EmitExpression(out, call);
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
-    EXPECT_EQ(out.str(), "(true ? b : a)");
+    EXPECT_EQ(out.str(), "mix(a, b, true)");
 }
 
 TEST_F(GlslASTPrinterTest_Builtin, Select_Vector) {
@@ -394,7 +394,7 @@ TEST_F(GlslASTPrinterTest_Builtin, Select_Vector) {
     StringStream out;
     gen.EmitExpression(out, call);
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
-    EXPECT_EQ(out.str(), "tint_select(a, b, bvec2(true, false))");
+    EXPECT_EQ(out.str(), "mix(a, b, bvec2(true, false))");
 }
 
 TEST_F(GlslASTPrinterTest_Builtin, FMA_f32) {

@@ -1127,41 +1127,31 @@ void ASTPrinter::EmitCountOneBitsCall(StringStream& out, const ast::CallExpressi
 void ASTPrinter::EmitSelectCall(StringStream& out,
                                 const ast::CallExpression* expr,
                                 const sem::BuiltinFn* builtin) {
-    // GLSL does not support ternary expressions with a bool vector conditional,
-    // so polyfill with a helper.
-    if (auto* vec = builtin->Parameters()[2]->Type()->As<core::type::Vector>()) {
-        CallBuiltinHelper(out, expr, builtin,
-                          [&](TextBuffer* b, const std::vector<std::string>& params) {
-                              auto l = Line(b);
-                              l << "  return ";
-                              EmitType(l, builtin->ReturnType(), core::AddressSpace::kUndefined,
-                                       core::Access::kUndefined, "");
-                              {
-                                  ScopedParen sp(l);
-                                  for (uint32_t i = 0; i < vec->Width(); i++) {
-                                      if (i > 0) {
-                                          l << ", ";
-                                      }
-                                      l << params[2] << "[" << i << "] ? " << params[1] << "[" << i
-                                        << "] : " << params[0] << "[" << i << "]";
-                                  }
-                              }
-                              l << ";";
-                          });
-        return;
-    }
-
     auto* expr_false = expr->args[0];
     auto* expr_true = expr->args[1];
     auto* expr_cond = expr->args[2];
 
+    out << "mix";
     ScopedParen paren(out);
-    EmitExpression(out, expr_cond);
 
-    out << " ? ";
-    EmitExpression(out, expr_true);
-    out << " : ";
     EmitExpression(out, expr_false);
+    out << ", ";
+    EmitExpression(out, expr_true);
+    out << ", ";
+
+    auto* p0_ty = builtin->Parameters()[0]->Type();
+    auto* p2_ty = builtin->Parameters()[2]->Type();
+
+    // If the value types are vectors, but the condition is a single bool, splat the bool into a
+    // vector of equivalent size.
+    if (p0_ty->Is<core::type::Vector>() && !p2_ty->Is<core::type::Vector>()) {
+        auto* vec = p0_ty->As<core::type::Vector>();
+        out << "bvec" << vec->Width();
+        ScopedParen cast_paren(out);
+        EmitExpression(out, expr_cond);
+    } else {
+        EmitExpression(out, expr_cond);
+    }
 }
 
 void ASTPrinter::EmitDotCall(StringStream& out,

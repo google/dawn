@@ -9,7 +9,7 @@ layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
 int all_f46790() {
   bvec2 arg_0 = bvec2(true);
   bool res = all(arg_0);
-  return ((res == false) ? 1 : 0);
+  return mix(0, 1, (res == false));
 }
 
 struct VertexOutput {
@@ -34,7 +34,7 @@ layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
 int all_f46790() {
   bvec2 arg_0 = bvec2(true);
   bool res = all(arg_0);
-  return ((res == false) ? 1 : 0);
+  return mix(0, 1, (res == false));
 }
 
 struct VertexOutput {
@@ -57,7 +57,7 @@ layout(location = 0) flat out int prevent_dce_1;
 int all_f46790() {
   bvec2 arg_0 = bvec2(true);
   bool res = all(arg_0);
-  return ((res == false) ? 1 : 0);
+  return mix(0, 1, (res == false));
 }
 
 struct VertexOutput {

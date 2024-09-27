@@ -13,7 +13,7 @@ int tint_mod_i32(int lhs, int rhs) {
   uint v_2 = uint((lhs == (-2147483647 - 1)));
   bool v_3 = bool((v_2 & uint((rhs == -1))));
   uint v_4 = uint((rhs == 0));
-  int v_5 = ((bool((v_4 | uint(v_3)))) ? (1) : (rhs));
+  int v_5 = mix(rhs, 1, bool((v_4 | uint(v_3))));
   return (lhs - ((lhs / v_5) * v_5));
 }
 void foo() {

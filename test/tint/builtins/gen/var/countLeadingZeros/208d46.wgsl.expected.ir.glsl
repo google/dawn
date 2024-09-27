@@ -9,12 +9,12 @@ buffer tint_symbol_1_1_ssbo {
 uint countLeadingZeros_208d46() {
   uint arg_0 = 1u;
   uint v_1 = arg_0;
-  uint v_2 = (((v_1 <= 65535u)) ? (16u) : (0u));
-  uint v_3 = ((((v_1 << v_2) <= 16777215u)) ? (8u) : (0u));
-  uint v_4 = (((((v_1 << v_2) << v_3) <= 268435455u)) ? (4u) : (0u));
-  uint v_5 = ((((((v_1 << v_2) << v_3) << v_4) <= 1073741823u)) ? (2u) : (0u));
-  uint v_6 = (((((((v_1 << v_2) << v_3) << v_4) << v_5) <= 2147483647u)) ? (1u) : (0u));
-  uint v_7 = (((((((v_1 << v_2) << v_3) << v_4) << v_5) == 0u)) ? (1u) : (0u));
+  uint v_2 = mix(0u, 16u, (v_1 <= 65535u));
+  uint v_3 = mix(0u, 8u, ((v_1 << v_2) <= 16777215u));
+  uint v_4 = mix(0u, 4u, (((v_1 << v_2) << v_3) <= 268435455u));
+  uint v_5 = mix(0u, 2u, ((((v_1 << v_2) << v_3) << v_4) <= 1073741823u));
+  uint v_6 = mix(0u, 1u, (((((v_1 << v_2) << v_3) << v_4) << v_5) <= 2147483647u));
+  uint v_7 = mix(0u, 1u, (((((v_1 << v_2) << v_3) << v_4) << v_5) == 0u));
   uint res = ((v_2 | (v_3 | (v_4 | (v_5 | (v_6 | v_7))))) + v_7);
   return res;
 }
@@ -30,12 +30,12 @@ buffer tint_symbol_1_1_ssbo {
 uint countLeadingZeros_208d46() {
   uint arg_0 = 1u;
   uint v_1 = arg_0;
-  uint v_2 = (((v_1 <= 65535u)) ? (16u) : (0u));
-  uint v_3 = ((((v_1 << v_2) <= 16777215u)) ? (8u) : (0u));
-  uint v_4 = (((((v_1 << v_2) << v_3) <= 268435455u)) ? (4u) : (0u));
-  uint v_5 = ((((((v_1 << v_2) << v_3) << v_4) <= 1073741823u)) ? (2u) : (0u));
-  uint v_6 = (((((((v_1 << v_2) << v_3) << v_4) << v_5) <= 2147483647u)) ? (1u) : (0u));
-  uint v_7 = (((((((v_1 << v_2) << v_3) << v_4) << v_5) == 0u)) ? (1u) : (0u));
+  uint v_2 = mix(0u, 16u, (v_1 <= 65535u));
+  uint v_3 = mix(0u, 8u, ((v_1 << v_2) <= 16777215u));
+  uint v_4 = mix(0u, 4u, (((v_1 << v_2) << v_3) <= 268435455u));
+  uint v_5 = mix(0u, 2u, ((((v_1 << v_2) << v_3) << v_4) <= 1073741823u));
+  uint v_6 = mix(0u, 1u, (((((v_1 << v_2) << v_3) << v_4) << v_5) <= 2147483647u));
+  uint v_7 = mix(0u, 1u, (((((v_1 << v_2) << v_3) << v_4) << v_5) == 0u));
   uint res = ((v_2 | (v_3 | (v_4 | (v_5 | (v_6 | v_7))))) + v_7);
   return res;
 }
@@ -55,12 +55,12 @@ layout(location = 0) flat out uint vertex_main_loc0_Output;
 uint countLeadingZeros_208d46() {
   uint arg_0 = 1u;
   uint v = arg_0;
-  uint v_1 = (((v <= 65535u)) ? (16u) : (0u));
-  uint v_2 = ((((v << v_1) <= 16777215u)) ? (8u) : (0u));
-  uint v_3 = (((((v << v_1) << v_2) <= 268435455u)) ? (4u) : (0u));
-  uint v_4 = ((((((v << v_1) << v_2) << v_3) <= 1073741823u)) ? (2u) : (0u));
-  uint v_5 = (((((((v << v_1) << v_2) << v_3) << v_4) <= 2147483647u)) ? (1u) : (0u));
-  uint v_6 = (((((((v << v_1) << v_2) << v_3) << v_4) == 0u)) ? (1u) : (0u));
+  uint v_1 = mix(0u, 16u, (v <= 65535u));
+  uint v_2 = mix(0u, 8u, ((v << v_1) <= 16777215u));
+  uint v_3 = mix(0u, 4u, (((v << v_1) << v_2) <= 268435455u));
+  uint v_4 = mix(0u, 2u, ((((v << v_1) << v_2) << v_3) <= 1073741823u));
+  uint v_5 = mix(0u, 1u, (((((v << v_1) << v_2) << v_3) << v_4) <= 2147483647u));
+  uint v_6 = mix(0u, 1u, (((((v << v_1) << v_2) << v_3) << v_4) == 0u));
   uint res = ((v_1 | (v_2 | (v_3 | (v_4 | (v_5 | v_6))))) + v_6);
   return res;
 }

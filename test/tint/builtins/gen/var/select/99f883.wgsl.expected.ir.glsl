@@ -10,7 +10,7 @@ uint select_99f883() {
   uint arg_0 = 1u;
   uint arg_1 = 1u;
   bool arg_2 = true;
-  uint res = ((arg_2) ? (arg_1) : (arg_0));
+  uint res = mix(arg_0, arg_1, arg_2);
   return res;
 }
 void main() {
@@ -26,7 +26,7 @@ uint select_99f883() {
   uint arg_0 = 1u;
   uint arg_1 = 1u;
   bool arg_2 = true;
-  uint res = ((arg_2) ? (arg_1) : (arg_0));
+  uint res = mix(arg_0, arg_1, arg_2);
   return res;
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
@@ -46,7 +46,7 @@ uint select_99f883() {
   uint arg_0 = 1u;
   uint arg_1 = 1u;
   bool arg_2 = true;
-  uint res = ((arg_2) ? (arg_1) : (arg_0));
+  uint res = mix(arg_0, arg_1, arg_2);
   return res;
 }
 VertexOutput vertex_main_inner() {

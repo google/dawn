@@ -10,8 +10,8 @@ int select_c41bd1() {
   bvec4 arg_0 = bvec4(true);
   bvec4 arg_1 = bvec4(true);
   bool arg_2 = true;
-  bvec4 res = (arg_2 ? arg_1 : arg_0);
-  return (all(equal(res, bvec4(false))) ? 1 : 0);
+  bvec4 res = mix(arg_0, arg_1, bvec4(arg_2));
+  return mix(0, 1, all(equal(res, bvec4(false))));
 }
 
 struct VertexOutput {
@@ -37,8 +37,8 @@ int select_c41bd1() {
   bvec4 arg_0 = bvec4(true);
   bvec4 arg_1 = bvec4(true);
   bool arg_2 = true;
-  bvec4 res = (arg_2 ? arg_1 : arg_0);
-  return (all(equal(res, bvec4(false))) ? 1 : 0);
+  bvec4 res = mix(arg_0, arg_1, bvec4(arg_2));
+  return mix(0, 1, all(equal(res, bvec4(false))));
 }
 
 struct VertexOutput {
@@ -62,8 +62,8 @@ int select_c41bd1() {
   bvec4 arg_0 = bvec4(true);
   bvec4 arg_1 = bvec4(true);
   bool arg_2 = true;
-  bvec4 res = (arg_2 ? arg_1 : arg_0);
-  return (all(equal(res, bvec4(false))) ? 1 : 0);
+  bvec4 res = mix(arg_0, arg_1, bvec4(arg_2));
+  return mix(0, 1, all(equal(res, bvec4(false))));
 }
 
 struct VertexOutput {

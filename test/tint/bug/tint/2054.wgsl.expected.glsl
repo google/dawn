@@ -12,7 +12,7 @@ void bar(inout float p) {
     tint_tmp = (b >= 0.0f);
   }
   bool cond = (tint_tmp);
-  p = (cond ? b : a);
+  p = mix(a, b, cond);
 }
 
 void foo() {

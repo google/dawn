@@ -10,7 +10,7 @@ buffer tint_symbol_1_1_ssbo {
 int transpose_b9ad1f() {
   f16mat3x2 arg_0 = f16mat3x2(f16vec2(1.0hf), f16vec2(1.0hf), f16vec2(1.0hf));
   f16mat2x3 res = transpose(arg_0);
-  return (((res[0].x == 0.0hf)) ? (1) : (0));
+  return mix(0, 1, (res[0].x == 0.0hf));
 }
 void main() {
   v.tint_symbol = transpose_b9ad1f();
@@ -25,7 +25,7 @@ buffer tint_symbol_1_1_ssbo {
 int transpose_b9ad1f() {
   f16mat3x2 arg_0 = f16mat3x2(f16vec2(1.0hf), f16vec2(1.0hf), f16vec2(1.0hf));
   f16mat2x3 res = transpose(arg_0);
-  return (((res[0].x == 0.0hf)) ? (1) : (0));
+  return mix(0, 1, (res[0].x == 0.0hf));
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
@@ -44,7 +44,7 @@ layout(location = 0) flat out int vertex_main_loc0_Output;
 int transpose_b9ad1f() {
   f16mat3x2 arg_0 = f16mat3x2(f16vec2(1.0hf), f16vec2(1.0hf), f16vec2(1.0hf));
   f16mat2x3 res = transpose(arg_0);
-  return (((res[0].x == 0.0hf)) ? (1) : (0));
+  return mix(0, 1, (res[0].x == 0.0hf));
 }
 VertexOutput vertex_main_inner() {
   VertexOutput tint_symbol = VertexOutput(vec4(0.0f), 0);

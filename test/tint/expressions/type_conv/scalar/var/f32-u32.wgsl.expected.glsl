@@ -5,7 +5,7 @@ void unused_entry_point() {
   return;
 }
 uint tint_ftou(float v) {
-  return ((v <= 4294967040.0f) ? ((v < 0.0f) ? 0u : uint(v)) : 4294967295u);
+  return mix(4294967295u, mix(uint(v), 0u, (v < 0.0f)), (v <= 4294967040.0f));
 }
 
 float u = 1.0f;

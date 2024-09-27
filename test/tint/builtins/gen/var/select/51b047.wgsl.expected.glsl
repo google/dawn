@@ -10,7 +10,7 @@ uvec2 select_51b047() {
   uvec2 arg_0 = uvec2(1u);
   uvec2 arg_1 = uvec2(1u);
   bool arg_2 = true;
-  uvec2 res = (arg_2 ? arg_1 : arg_0);
+  uvec2 res = mix(arg_0, arg_1, bvec2(arg_2));
   return res;
 }
 
@@ -37,7 +37,7 @@ uvec2 select_51b047() {
   uvec2 arg_0 = uvec2(1u);
   uvec2 arg_1 = uvec2(1u);
   bool arg_2 = true;
-  uvec2 res = (arg_2 ? arg_1 : arg_0);
+  uvec2 res = mix(arg_0, arg_1, bvec2(arg_2));
   return res;
 }
 
@@ -62,7 +62,7 @@ uvec2 select_51b047() {
   uvec2 arg_0 = uvec2(1u);
   uvec2 arg_1 = uvec2(1u);
   bool arg_2 = true;
-  uvec2 res = (arg_2 ? arg_1 : arg_0);
+  uvec2 res = mix(arg_0, arg_1, bvec2(arg_2));
   return res;
 }
 

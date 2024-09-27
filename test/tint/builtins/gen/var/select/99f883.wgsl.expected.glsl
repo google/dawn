@@ -10,7 +10,7 @@ uint select_99f883() {
   uint arg_0 = 1u;
   uint arg_1 = 1u;
   bool arg_2 = true;
-  uint res = (arg_2 ? arg_1 : arg_0);
+  uint res = mix(arg_0, arg_1, arg_2);
   return res;
 }
 
@@ -37,7 +37,7 @@ uint select_99f883() {
   uint arg_0 = 1u;
   uint arg_1 = 1u;
   bool arg_2 = true;
-  uint res = (arg_2 ? arg_1 : arg_0);
+  uint res = mix(arg_0, arg_1, arg_2);
   return res;
 }
 
@@ -62,7 +62,7 @@ uint select_99f883() {
   uint arg_0 = 1u;
   uint arg_1 = 1u;
   bool arg_2 = true;
-  uint res = (arg_2 ? arg_1 : arg_0);
+  uint res = mix(arg_0, arg_1, arg_2);
   return res;
 }
 

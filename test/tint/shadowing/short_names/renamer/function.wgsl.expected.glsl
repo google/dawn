@@ -18,7 +18,7 @@ vec4 tint_symbol(uint VertexIndex) {
   int tint_symbol_3 = vec4f();
   float tint_symbol_4 = vec2f(tint_symbol_3);
   bool tint_symbol_5 = vec2i(tint_symbol_4);
-  return (tint_symbol_5 ? tint_symbol_2 : tint_symbol_1);
+  return mix(tint_symbol_1, tint_symbol_2, bvec4(tint_symbol_5));
 }
 
 void main() {

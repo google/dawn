@@ -10,11 +10,7 @@ uvec2 select_1e960b() {
   uvec2 arg_0 = uvec2(1u);
   uvec2 arg_1 = uvec2(1u);
   bvec2 arg_2 = bvec2(true);
-  uvec2 v_1 = arg_0;
-  uvec2 v_2 = arg_1;
-  bvec2 v_3 = arg_2;
-  uint v_4 = ((v_3.x) ? (v_2.x) : (v_1.x));
-  uvec2 res = uvec2(v_4, ((v_3.y) ? (v_2.y) : (v_1.y)));
+  uvec2 res = mix(arg_0, arg_1, arg_2);
   return res;
 }
 void main() {
@@ -30,11 +26,7 @@ uvec2 select_1e960b() {
   uvec2 arg_0 = uvec2(1u);
   uvec2 arg_1 = uvec2(1u);
   bvec2 arg_2 = bvec2(true);
-  uvec2 v_1 = arg_0;
-  uvec2 v_2 = arg_1;
-  bvec2 v_3 = arg_2;
-  uint v_4 = ((v_3.x) ? (v_2.x) : (v_1.x));
-  uvec2 res = uvec2(v_4, ((v_3.y) ? (v_2.y) : (v_1.y)));
+  uvec2 res = mix(arg_0, arg_1, arg_2);
   return res;
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
@@ -54,11 +46,7 @@ uvec2 select_1e960b() {
   uvec2 arg_0 = uvec2(1u);
   uvec2 arg_1 = uvec2(1u);
   bvec2 arg_2 = bvec2(true);
-  uvec2 v = arg_0;
-  uvec2 v_1 = arg_1;
-  bvec2 v_2 = arg_2;
-  uint v_3 = ((v_2.x) ? (v_1.x) : (v.x));
-  uvec2 res = uvec2(v_3, ((v_2.y) ? (v_1.y) : (v.y)));
+  uvec2 res = mix(arg_0, arg_1, arg_2);
   return res;
 }
 VertexOutput vertex_main_inner() {
@@ -68,10 +56,10 @@ VertexOutput vertex_main_inner() {
   return tint_symbol;
 }
 void main() {
-  VertexOutput v_4 = vertex_main_inner();
-  gl_Position = v_4.pos;
+  VertexOutput v = vertex_main_inner();
+  gl_Position = v.pos;
   gl_Position[1u] = -(gl_Position.y);
   gl_Position[2u] = ((2.0f * gl_Position.z) - gl_Position.w);
-  vertex_main_loc0_Output = v_4.prevent_dce;
+  vertex_main_loc0_Output = v.prevent_dce;
   gl_PointSize = 1.0f;
 }

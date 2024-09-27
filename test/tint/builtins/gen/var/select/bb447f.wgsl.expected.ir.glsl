@@ -1,5 +1,3 @@
-SKIP: FAILED
-
 #version 310 es
 precision highp float;
 precision highp int;
@@ -14,21 +12,12 @@ ivec2 select_bb447f() {
   bool arg_2 = true;
   ivec2 v_1 = arg_0;
   ivec2 v_2 = arg_1;
-  bool v_3 = arg_2;
-  int v_4 = ((v_3.x) ? (v_2.x) : (v_1.x));
-  ivec2 res = ivec2(v_4, ((v_3.y) ? (v_2.y) : (v_1.y)));
+  ivec2 res = mix(v_1, v_2, bvec2(arg_2));
   return res;
 }
 void main() {
   v.tint_symbol = select_bb447f();
 }
-error: Error parsing GLSL shader:
-ERROR: 0:16: 'scalar swizzle' : not supported with this profile: es
-ERROR: 0:16: '' : compilation terminated 
-ERROR: 2 compilation errors.  No code generated.
-
-
-
 #version 310 es
 
 layout(binding = 0, std430)
@@ -41,22 +30,13 @@ ivec2 select_bb447f() {
   bool arg_2 = true;
   ivec2 v_1 = arg_0;
   ivec2 v_2 = arg_1;
-  bool v_3 = arg_2;
-  int v_4 = ((v_3.x) ? (v_2.x) : (v_1.x));
-  ivec2 res = ivec2(v_4, ((v_3.y) ? (v_2.y) : (v_1.y)));
+  ivec2 res = mix(v_1, v_2, bvec2(arg_2));
   return res;
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
   v.tint_symbol = select_bb447f();
 }
-error: Error parsing GLSL shader:
-ERROR: 0:14: 'scalar swizzle' : not supported with this profile: es
-ERROR: 0:14: '' : compilation terminated 
-ERROR: 2 compilation errors.  No code generated.
-
-
-
 #version 310 es
 
 
@@ -72,9 +52,7 @@ ivec2 select_bb447f() {
   bool arg_2 = true;
   ivec2 v = arg_0;
   ivec2 v_1 = arg_1;
-  bool v_2 = arg_2;
-  int v_3 = ((v_2.x) ? (v_1.x) : (v.x));
-  ivec2 res = ivec2(v_3, ((v_2.y) ? (v_1.y) : (v.y)));
+  ivec2 res = mix(v, v_1, bvec2(arg_2));
   return res;
 }
 VertexOutput vertex_main_inner() {
@@ -84,19 +62,10 @@ VertexOutput vertex_main_inner() {
   return tint_symbol;
 }
 void main() {
-  VertexOutput v_4 = vertex_main_inner();
-  gl_Position = v_4.pos;
+  VertexOutput v_2 = vertex_main_inner();
+  gl_Position = v_2.pos;
   gl_Position[1u] = -(gl_Position.y);
   gl_Position[2u] = ((2.0f * gl_Position.z) - gl_Position.w);
-  vertex_main_loc0_Output = v_4.prevent_dce;
+  vertex_main_loc0_Output = v_2.prevent_dce;
   gl_PointSize = 1.0f;
 }
-error: Error parsing GLSL shader:
-ERROR: 0:17: 'scalar swizzle' : not supported with this profile: es
-ERROR: 0:17: '' : compilation terminated 
-ERROR: 2 compilation errors.  No code generated.
-
-
-
-
-tint executable returned error: exit status 1

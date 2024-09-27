@@ -2,17 +2,8 @@
 precision highp float;
 precision highp int;
 
-uvec2 tint_select(uvec2 param_0, uvec2 param_1, bvec2 param_2) {
-    return uvec2(param_2[0] ? param_1[0] : param_0[0], param_2[1] ? param_1[1] : param_0[1]);
-}
-
-vec3 tint_select_1(vec3 param_0, vec3 param_1, bvec3 param_2) {
-    return vec3(param_2[0] ? param_1[0] : param_0[0], param_2[1] ? param_1[1] : param_0[1], param_2[2] ? param_1[2] : param_0[2]);
-}
-
-
 uvec2 tint_ftou(vec2 v) {
-  return tint_select(uvec2(4294967295u), tint_select(uvec2(v), uvec2(0u), lessThan(v, vec2(0.0f))), lessThanEqual(v, vec2(4294967040.0f)));
+  return mix(uvec2(4294967295u), mix(uvec2(v), uvec2(0u), lessThan(v, vec2(0.0f))), lessThanEqual(v, vec2(4294967040.0f)));
 }
 
 struct GammaTransferParams {
@@ -80,7 +71,7 @@ vec3 gammaCorrection(vec3 v, GammaTransferParams params) {
   bvec3 cond = lessThan(abs(v), vec3(params.D));
   vec3 t = (sign(v) * ((params.C * abs(v)) + params.F));
   vec3 f = (sign(v) * (pow(((params.A * abs(v)) + params.B), vec3(params.G)) + params.E));
-  return tint_select_1(f, t, cond);
+  return mix(f, t, cond);
 }
 
 vec4 textureLoadExternal(highp sampler2D plane0_1, highp sampler2D plane1_1, ivec2 coord, ExternalTextureParams params) {
@@ -128,17 +119,8 @@ void main() {
 }
 #version 310 es
 
-uvec2 tint_select(uvec2 param_0, uvec2 param_1, bvec2 param_2) {
-    return uvec2(param_2[0] ? param_1[0] : param_0[0], param_2[1] ? param_1[1] : param_0[1]);
-}
-
-vec3 tint_select_1(vec3 param_0, vec3 param_1, bvec3 param_2) {
-    return vec3(param_2[0] ? param_1[0] : param_0[0], param_2[1] ? param_1[1] : param_0[1], param_2[2] ? param_1[2] : param_0[2]);
-}
-
-
 uvec2 tint_ftou(vec2 v) {
-  return tint_select(uvec2(4294967295u), tint_select(uvec2(v), uvec2(0u), lessThan(v, vec2(0.0f))), lessThanEqual(v, vec2(4294967040.0f)));
+  return mix(uvec2(4294967295u), mix(uvec2(v), uvec2(0u), lessThan(v, vec2(0.0f))), lessThanEqual(v, vec2(4294967040.0f)));
 }
 
 struct GammaTransferParams {
@@ -206,7 +188,7 @@ vec3 gammaCorrection(vec3 v, GammaTransferParams params) {
   bvec3 cond = lessThan(abs(v), vec3(params.D));
   vec3 t = (sign(v) * ((params.C * abs(v)) + params.F));
   vec3 f = (sign(v) * (pow(((params.A * abs(v)) + params.B), vec3(params.G)) + params.E));
-  return tint_select_1(f, t, cond);
+  return mix(f, t, cond);
 }
 
 vec4 textureLoadExternal(highp sampler2D plane0_1, highp sampler2D plane1_1, ivec2 coord, ExternalTextureParams params) {
@@ -255,17 +237,8 @@ void main() {
 }
 #version 310 es
 
-uvec2 tint_select(uvec2 param_0, uvec2 param_1, bvec2 param_2) {
-    return uvec2(param_2[0] ? param_1[0] : param_0[0], param_2[1] ? param_1[1] : param_0[1]);
-}
-
-vec3 tint_select_1(vec3 param_0, vec3 param_1, bvec3 param_2) {
-    return vec3(param_2[0] ? param_1[0] : param_0[0], param_2[1] ? param_1[1] : param_0[1], param_2[2] ? param_1[2] : param_0[2]);
-}
-
-
 uvec2 tint_ftou(vec2 v) {
-  return tint_select(uvec2(4294967295u), tint_select(uvec2(v), uvec2(0u), lessThan(v, vec2(0.0f))), lessThanEqual(v, vec2(4294967040.0f)));
+  return mix(uvec2(4294967295u), mix(uvec2(v), uvec2(0u), lessThan(v, vec2(0.0f))), lessThanEqual(v, vec2(4294967040.0f)));
 }
 
 layout(location = 0) flat out vec4 prevent_dce_1;
@@ -330,7 +303,7 @@ vec3 gammaCorrection(vec3 v, GammaTransferParams params) {
   bvec3 cond = lessThan(abs(v), vec3(params.D));
   vec3 t = (sign(v) * ((params.C * abs(v)) + params.F));
   vec3 f = (sign(v) * (pow(((params.A * abs(v)) + params.B), vec3(params.G)) + params.E));
-  return tint_select_1(f, t, cond);
+  return mix(f, t, cond);
 }
 
 vec4 textureLoadExternal(highp sampler2D plane0_1, highp sampler2D plane1_1, ivec2 coord, ExternalTextureParams params) {

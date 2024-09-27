@@ -3,11 +3,6 @@
 precision highp float;
 precision highp int;
 
-f16vec4 tint_select(f16vec4 param_0, f16vec4 param_1, bvec4 param_2) {
-    return f16vec4(param_2[0] ? param_1[0] : param_0[0], param_2[1] ? param_1[1] : param_0[1], param_2[2] ? param_1[2] : param_0[2], param_2[3] ? param_1[3] : param_0[3]);
-}
-
-
 layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
   f16vec4 inner;
 } prevent_dce;
@@ -16,7 +11,7 @@ f16vec4 select_a081f1() {
   f16vec4 arg_0 = f16vec4(1.0hf);
   f16vec4 arg_1 = f16vec4(1.0hf);
   bvec4 arg_2 = bvec4(true);
-  f16vec4 res = tint_select(arg_0, arg_1, arg_2);
+  f16vec4 res = mix(arg_0, arg_1, arg_2);
   return res;
 }
 
@@ -36,11 +31,6 @@ void main() {
 #version 310 es
 #extension GL_AMD_gpu_shader_half_float : require
 
-f16vec4 tint_select(f16vec4 param_0, f16vec4 param_1, bvec4 param_2) {
-    return f16vec4(param_2[0] ? param_1[0] : param_0[0], param_2[1] ? param_1[1] : param_0[1], param_2[2] ? param_1[2] : param_0[2], param_2[3] ? param_1[3] : param_0[3]);
-}
-
-
 layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
   f16vec4 inner;
 } prevent_dce;
@@ -49,7 +39,7 @@ f16vec4 select_a081f1() {
   f16vec4 arg_0 = f16vec4(1.0hf);
   f16vec4 arg_1 = f16vec4(1.0hf);
   bvec4 arg_2 = bvec4(true);
-  f16vec4 res = tint_select(arg_0, arg_1, arg_2);
+  f16vec4 res = mix(arg_0, arg_1, arg_2);
   return res;
 }
 
@@ -70,17 +60,12 @@ void main() {
 #version 310 es
 #extension GL_AMD_gpu_shader_half_float : require
 
-f16vec4 tint_select(f16vec4 param_0, f16vec4 param_1, bvec4 param_2) {
-    return f16vec4(param_2[0] ? param_1[0] : param_0[0], param_2[1] ? param_1[1] : param_0[1], param_2[2] ? param_1[2] : param_0[2], param_2[3] ? param_1[3] : param_0[3]);
-}
-
-
 layout(location = 0) flat out f16vec4 prevent_dce_1;
 f16vec4 select_a081f1() {
   f16vec4 arg_0 = f16vec4(1.0hf);
   f16vec4 arg_1 = f16vec4(1.0hf);
   bvec4 arg_2 = bvec4(true);
-  f16vec4 res = tint_select(arg_0, arg_1, arg_2);
+  f16vec4 res = mix(arg_0, arg_1, arg_2);
   return res;
 }
 

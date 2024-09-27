@@ -11,7 +11,7 @@ f16vec3 select_1ada2a() {
   f16vec3 arg_0 = f16vec3(1.0hf);
   f16vec3 arg_1 = f16vec3(1.0hf);
   bool arg_2 = true;
-  f16vec3 res = (arg_2 ? arg_1 : arg_0);
+  f16vec3 res = mix(arg_0, arg_1, bvec3(arg_2));
   return res;
 }
 
@@ -39,7 +39,7 @@ f16vec3 select_1ada2a() {
   f16vec3 arg_0 = f16vec3(1.0hf);
   f16vec3 arg_1 = f16vec3(1.0hf);
   bool arg_2 = true;
-  f16vec3 res = (arg_2 ? arg_1 : arg_0);
+  f16vec3 res = mix(arg_0, arg_1, bvec3(arg_2));
   return res;
 }
 
@@ -65,7 +65,7 @@ f16vec3 select_1ada2a() {
   f16vec3 arg_0 = f16vec3(1.0hf);
   f16vec3 arg_1 = f16vec3(1.0hf);
   bool arg_2 = true;
-  f16vec3 res = (arg_2 ? arg_1 : arg_0);
+  f16vec3 res = mix(arg_0, arg_1, bvec3(arg_2));
   return res;
 }
 

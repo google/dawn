@@ -4,7 +4,7 @@ precision highp int;
 
 void select_9b478d() {
   bool arg_2 = true;
-  int res = (arg_2 ? 1 : 1);
+  int res = mix(1, 1, arg_2);
 }
 
 struct VertexOutput {
@@ -23,7 +23,7 @@ void main() {
 
 void select_9b478d() {
   bool arg_2 = true;
-  int res = (arg_2 ? 1 : 1);
+  int res = mix(1, 1, arg_2);
 }
 
 struct VertexOutput {
@@ -43,7 +43,7 @@ void main() {
 
 void select_9b478d() {
   bool arg_2 = true;
-  int res = (arg_2 ? 1 : 1);
+  int res = mix(1, 1, arg_2);
 }
 
 struct VertexOutput {

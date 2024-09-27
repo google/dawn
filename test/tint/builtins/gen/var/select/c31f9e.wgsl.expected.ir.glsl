@@ -10,8 +10,8 @@ int select_c31f9e() {
   bool arg_0 = true;
   bool arg_1 = true;
   bool arg_2 = true;
-  bool res = ((arg_2) ? (arg_1) : (arg_0));
-  return (((res == false)) ? (1) : (0));
+  bool res = mix(arg_0, arg_1, arg_2);
+  return mix(0, 1, (res == false));
 }
 void main() {
   v.tint_symbol = select_c31f9e();
@@ -26,8 +26,8 @@ int select_c31f9e() {
   bool arg_0 = true;
   bool arg_1 = true;
   bool arg_2 = true;
-  bool res = ((arg_2) ? (arg_1) : (arg_0));
-  return (((res == false)) ? (1) : (0));
+  bool res = mix(arg_0, arg_1, arg_2);
+  return mix(0, 1, (res == false));
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
@@ -46,8 +46,8 @@ int select_c31f9e() {
   bool arg_0 = true;
   bool arg_1 = true;
   bool arg_2 = true;
-  bool res = ((arg_2) ? (arg_1) : (arg_0));
-  return (((res == false)) ? (1) : (0));
+  bool res = mix(arg_0, arg_1, arg_2);
+  return mix(0, 1, (res == false));
 }
 VertexOutput vertex_main_inner() {
   VertexOutput tint_symbol = VertexOutput(vec4(0.0f), 0);

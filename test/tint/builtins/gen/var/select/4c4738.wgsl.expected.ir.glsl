@@ -4,11 +4,7 @@ precision highp int;
 
 void select_4c4738() {
   bvec4 arg_2 = bvec4(true);
-  bvec4 v = arg_2;
-  int v_1 = ((v.x) ? (ivec4(1).x) : (ivec4(1).x));
-  int v_2 = ((v.y) ? (ivec4(1).y) : (ivec4(1).y));
-  int v_3 = ((v.z) ? (ivec4(1).z) : (ivec4(1).z));
-  ivec4 res = ivec4(v_1, v_2, v_3, ((v.w) ? (ivec4(1).w) : (ivec4(1).w)));
+  ivec4 res = mix(ivec4(1), ivec4(1), arg_2);
 }
 void main() {
   select_4c4738();
@@ -17,11 +13,7 @@ void main() {
 
 void select_4c4738() {
   bvec4 arg_2 = bvec4(true);
-  bvec4 v = arg_2;
-  int v_1 = ((v.x) ? (ivec4(1).x) : (ivec4(1).x));
-  int v_2 = ((v.y) ? (ivec4(1).y) : (ivec4(1).y));
-  int v_3 = ((v.z) ? (ivec4(1).z) : (ivec4(1).z));
-  ivec4 res = ivec4(v_1, v_2, v_3, ((v.w) ? (ivec4(1).w) : (ivec4(1).w)));
+  ivec4 res = mix(ivec4(1), ivec4(1), arg_2);
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
@@ -36,11 +28,7 @@ struct VertexOutput {
 
 void select_4c4738() {
   bvec4 arg_2 = bvec4(true);
-  bvec4 v = arg_2;
-  int v_1 = ((v.x) ? (ivec4(1).x) : (ivec4(1).x));
-  int v_2 = ((v.y) ? (ivec4(1).y) : (ivec4(1).y));
-  int v_3 = ((v.z) ? (ivec4(1).z) : (ivec4(1).z));
-  ivec4 res = ivec4(v_1, v_2, v_3, ((v.w) ? (ivec4(1).w) : (ivec4(1).w)));
+  ivec4 res = mix(ivec4(1), ivec4(1), arg_2);
 }
 VertexOutput vertex_main_inner() {
   VertexOutput tint_symbol = VertexOutput(vec4(0.0f));
