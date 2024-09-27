@@ -354,7 +354,7 @@
                 "name": "set label 2",
                 "returns": "void",
                 "args": [
-                    {"name": "label", "type": "string view", "optional": true}
+                    {"name": "label", "type": "string view"}
                 ]
             }
         ]
@@ -395,7 +395,7 @@
                 "name": "set label 2",
                 "returns": "void",
                 "args": [
-                    {"name": "label", "type": "string view", "optional": true}
+                    {"name": "label", "type": "string view"}
                 ]
             }
         ]
@@ -685,7 +685,7 @@
                 "name": "set label 2",
                 "returns": "void",
                 "args": [
-                    {"name": "label", "type": "string view", "optional": true}
+                    {"name": "label", "type": "string view"}
                 ]
             },
             {
@@ -865,7 +865,7 @@
                 "name": "set label 2",
                 "returns": "void",
                 "args": [
-                    {"name": "label", "type": "string view", "optional": true}
+                    {"name": "label", "type": "string view"}
                 ]
             }
         ]
@@ -1024,7 +1024,7 @@
                 "name": "set label 2",
                 "returns": "void",
                 "args": [
-                    {"name": "label", "type": "string view", "optional": true}
+                    {"name": "label", "type": "string view"}
                 ]
             }
         ]
@@ -1216,7 +1216,7 @@
                 "name": "set label 2",
                 "returns": "void",
                 "args": [
-                    {"name": "label", "type": "string view", "optional": true}
+                    {"name": "label", "type": "string view"}
                 ]
             }
         ]
@@ -1260,7 +1260,7 @@
                 "name": "set label 2",
                 "returns": "void",
                 "args": [
-                    {"name": "label", "type": "string view", "optional": true}
+                    {"name": "label", "type": "string view"}
                 ]
             }
         ]
@@ -1782,7 +1782,7 @@
                 "name": "set label 2",
                 "returns": "void",
                 "args": [
-                    {"name": "label", "type": "string view", "optional": true}
+                    {"name": "label", "type": "string view"}
                 ]
             },
             {
@@ -2070,7 +2070,7 @@
                 "name": "set label 2",
                 "returns": "void",
                 "args": [
-                    {"name": "label", "type": "string view", "optional": true}
+                    {"name": "label", "type": "string view"}
                 ]
             },
             {
@@ -2144,7 +2144,7 @@
                 "name": "set label 2",
                 "returns": "void",
                 "args": [
-                    {"name": "label", "type": "string view", "optional": true}
+                    {"name": "label", "type": "string view"}
                 ]
             },
             {
@@ -2216,7 +2216,7 @@
                 "name": "set label 2",
                 "returns": "void",
                 "args": [
-                    {"name": "label", "type": "string view", "optional": true}
+                    {"name": "label", "type": "string view"}
                 ]
             },
             {
@@ -2969,7 +2969,7 @@
                 "name": "set label 2",
                 "returns": "void",
                 "args": [
-                    {"name": "label", "type": "string view", "optional": true}
+                    {"name": "label", "type": "string view"}
                 ]
             }
         ]
@@ -3057,7 +3057,7 @@
                 "name": "set label 2",
                 "returns": "void",
                 "args": [
-                    {"name": "label", "type": "string view", "optional": true}
+                    {"name": "label", "type": "string view"}
                 ]
             },
             {
@@ -3177,7 +3177,7 @@
                 "name": "set label 2",
                 "returns": "void",
                 "args": [
-                    {"name": "label", "type": "string view", "optional": true}
+                    {"name": "label", "type": "string view"}
                 ]
             }
         ]
@@ -3244,7 +3244,7 @@
                 "name": "set label 2",
                 "returns": "void",
                 "args": [
-                    {"name": "label", "type": "string view", "optional": true}
+                    {"name": "label", "type": "string view"}
                 ]
             }
         ]
@@ -3366,7 +3366,7 @@
                 "name": "set label 2",
                 "returns": "void",
                 "args": [
-                    {"name": "label", "type": "string view", "optional": true}
+                    {"name": "label", "type": "string view"}
                 ]
             }
         ]
@@ -3682,7 +3682,7 @@
                 "name": "set label 2",
                 "returns": "void",
                 "args": [
-                    {"name": "label", "type": "string view", "optional": true}
+                    {"name": "label", "type": "string view"}
                 ]
             }
         ]
@@ -3716,7 +3716,7 @@
                 "name": "set label 2",
                 "returns": "void",
                 "args": [
-                    {"name": "label", "type": "string view", "optional": true}
+                    {"name": "label", "type": "string view"}
                 ]
             }
         ]
@@ -3888,7 +3888,7 @@
                 "name": "set label 2",
                 "returns": "void",
                 "args": [
-                    {"name": "label", "type": "string view", "optional": true}
+                    {"name": "label", "type": "string view"}
                 ]
             }
         ]
@@ -3949,7 +3949,7 @@
                 "name": "set label 2",
                 "returns": "void",
                 "args": [
-                    {"name": "label", "type": "string view", "optional": true}
+                    {"name": "label", "type": "string view"}
                 ]
             }
         ]
@@ -4091,7 +4091,7 @@
                 "name": "set label 2",
                 "returns": "void",
                 "args": [
-                    {"name": "label", "type": "string view", "optional": true}
+                    {"name": "label", "type": "string view"}
                 ]
             }
         ]
@@ -4364,7 +4364,7 @@
                 "name": "set label 2",
                 "returns": "void",
                 "args": [
-                    {"name": "label", "type": "string view", "optional": true}
+                    {"name": "label", "type": "string view"}
                 ]
             },
             {
@@ -4636,7 +4636,7 @@
                 "name": "set label 2",
                 "returns": "void",
                 "args": [
-                    {"name": "label", "type": "string view", "optional": true}
+                    {"name": "label", "type": "string view"}
                 ]
             }
         ]
