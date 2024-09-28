@@ -128,10 +128,18 @@ struct StateImpl : core::ir::transform::ShaderIOBackendState {
             if (io.attributes.builtin) {
                 name << GLSLBuiltinToString(*io.attributes.builtin, addrspace);
 
-                if (io.attributes.builtin == core::BuiltinValue::kSampleMask) {
-                    ptr = ty.ptr(addrspace, ty.array(ty.i32(), 1), access);
-                } else {
-                    ptr = ty.ptr(addrspace, io.type, access);
+                switch (io.attributes.builtin.value()) {
+                    case core::BuiltinValue::kSampleMask:
+                        ptr = ty.ptr(addrspace, ty.array(ty.i32(), 1), access);
+                        break;
+                    case core::BuiltinValue::kVertexIndex:
+                    case core::BuiltinValue::kInstanceIndex:
+                    case core::BuiltinValue::kSampleIndex:
+                        ptr = ty.ptr(addrspace, ty.i32(), access);
+                        break;
+                    default:
+                        ptr = ty.ptr(addrspace, io.type, access);
+                        break;
                 }
             } else {
                 name << ir.NameOf(func).Name();
