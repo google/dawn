@@ -979,7 +979,7 @@ $B1: {  # root
     EXPECT_EQ(expect, str());
 }
 
-// Test that we change the type of the sample mask builtin to an array for SPIR-V.
+// Test that we change the type of the sample mask builtin to an array for GLSL
 TEST_F(GlslWriter_ShaderIOTest, SampleMask) {
     auto* str_ty = ty.Struct(mod.symbols.New("Outputs"),
                              {
@@ -1042,9 +1042,9 @@ Outputs = struct @align(4) {
 }
 
 $B1: {  # root
-  %gl_SampleMaskIn:ptr<__in, u32, read> = var @builtin(sample_mask)
+  %gl_SampleMaskIn:ptr<__in, array<i32, 1>, read> = var @builtin(sample_mask)
   %foo_loc0_Output:ptr<__out, f32, write> = var @location(0)
-  %gl_SampleMask:ptr<__out, u32, write> = var @builtin(sample_mask)
+  %gl_SampleMask:ptr<__out, array<i32, 1>, write> = var @builtin(sample_mask)
 }
 
 %foo_inner = func(%mask_in:u32):Outputs {
@@ -1055,12 +1055,16 @@ $B1: {  # root
 }
 %foo = @fragment func():void {
   $B3: {
-    %8:u32 = load %gl_SampleMaskIn
-    %9:Outputs = call %foo_inner, %8
-    %10:f32 = access %9, 0u
-    store %foo_loc0_Output, %10
-    %11:u32 = access %9, 1u
-    store %gl_SampleMask, %11
+    %8:array<i32, 1> = load %gl_SampleMaskIn
+    %9:i32 = access %8, 0u
+    %10:u32 = convert %9
+    %11:Outputs = call %foo_inner, %10
+    %12:f32 = access %11, 0u
+    store %foo_loc0_Output, %12
+    %13:u32 = access %11, 1u
+    %14:ptr<__out, i32, write> = access %gl_SampleMask, 0u
+    %15:i32 = convert %13
+    store %14, %15
     ret
   }
 }

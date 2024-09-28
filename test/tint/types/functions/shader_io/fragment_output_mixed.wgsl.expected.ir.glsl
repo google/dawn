@@ -1,5 +1,3 @@
-SKIP: FAILED
-
 #version 310 es
 #extension GL_OES_sample_variables: require
 precision highp float;
@@ -28,15 +26,6 @@ void main() {
   gl_FragDepth = v.frag_depth;
   tint_symbol_loc1_Output = v.loc1;
   tint_symbol_loc2_Output = v.loc2;
-  gl_SampleMask = v.sample_mask;
+  gl_SampleMask[0u] = int(v.sample_mask);
   tint_symbol_loc3_Output = v.loc3;
 }
-error: Error parsing GLSL shader:
-ERROR: 0:29: 'assign' :  cannot convert from ' global highp uint' to ' out unsized 1-element array of highp int SampleMaskIn'
-ERROR: 0:29: '' : compilation terminated 
-ERROR: 2 compilation errors.  No code generated.
-
-
-
-
-tint executable returned error: exit status 1

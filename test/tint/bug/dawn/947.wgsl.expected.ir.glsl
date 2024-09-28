@@ -1,5 +1,3 @@
-SKIP: FAILED
-
 #version 310 es
 
 
@@ -31,21 +29,13 @@ VertexOutputs vs_main_inner(uint VertexIndex) {
   return tint_symbol;
 }
 void main() {
-  VertexOutputs v_1 = vs_main_inner(gl_VertexID);
+  VertexOutputs v_1 = vs_main_inner(uint(gl_VertexID));
   vs_main_loc0_Output = v_1.texcoords;
   gl_Position = v_1.position;
   gl_Position[1u] = -(gl_Position.y);
   gl_Position[2u] = ((2.0f * gl_Position.z) - gl_Position.w);
   gl_PointSize = 1.0f;
 }
-error: Error parsing GLSL shader:
-ERROR: 0:32: 'vs_main_inner' : no matching overloaded function found 
-ERROR: 0:32: '=' :  cannot convert from ' const float' to ' temp structure{ global highp 2-component vector of float texcoords,  global highp 4-component vector of float position}'
-ERROR: 0:32: '' : compilation terminated 
-ERROR: 3 compilation errors.  No code generated.
-
-
-
 #version 310 es
 precision highp float;
 precision highp int;
@@ -55,7 +45,7 @@ layout(location = 0) in vec2 fs_main_loc0_Input;
 layout(location = 0) out vec4 fs_main_loc0_Output;
 vec4 fs_main_inner(vec2 texcoord) {
   vec2 clampedTexcoord = clamp(texcoord, vec2(0.0f), vec2(1.0f));
-  if (!(all((clampedTexcoord == texcoord)))) {
+  if (!(all(equal(clampedTexcoord, texcoord)))) {
     continue_execution = false;
   }
   vec4 srcColor = vec4(0.0f);
@@ -67,12 +57,3 @@ vec4 fs_main_inner(vec2 texcoord) {
 void main() {
   fs_main_loc0_Output = fs_main_inner(fs_main_loc0_Input);
 }
-error: Error parsing GLSL shader:
-ERROR: 0:10: 'all' : no matching overloaded function found 
-ERROR: 0:10: '' : compilation terminated 
-ERROR: 2 compilation errors.  No code generated.
-
-
-
-
-tint executable returned error: exit status 1

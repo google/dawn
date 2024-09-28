@@ -1,5 +1,3 @@
-SKIP: FAILED
-
 #version 310 es
 #extension GL_OES_sample_variables: require
 precision highp float;
@@ -34,16 +32,8 @@ void main() {
   FragmentInputs0 v_1 = FragmentInputs0(gl_FragCoord, tint_symbol_loc0_Input);
   bool v_2 = gl_FrontFacing;
   uint v_3 = tint_symbol_loc1_Input;
-  uint v_4 = gl_SampleID;
-  FragmentInputs1 v_5 = FragmentInputs1(tint_symbol_loc3_Input, gl_SampleMaskIn);
-  tint_symbol_inner(v_1, v_2, v_3, v_4, v_5, tint_symbol_loc2_Input);
+  uint v_4 = uint(gl_SampleID);
+  vec4 v_5 = tint_symbol_loc3_Input;
+  FragmentInputs1 v_6 = FragmentInputs1(v_5, uint(gl_SampleMaskIn[0u]));
+  tint_symbol_inner(v_1, v_2, v_3, v_4, v_6, tint_symbol_loc2_Input);
 }
-error: Error parsing GLSL shader:
-ERROR: 0:35: '=' :  cannot convert from ' flat in lowp int SampleId' to ' temp highp uint'
-ERROR: 0:35: '' : compilation terminated 
-ERROR: 2 compilation errors.  No code generated.
-
-
-
-
-tint executable returned error: exit status 1

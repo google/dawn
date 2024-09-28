@@ -1,5 +1,3 @@
-SKIP: FAILED
-
 #version 310 es
 #extension GL_OES_sample_variables: require
 precision highp float;
@@ -21,18 +19,9 @@ FragIn tint_symbol_inner(FragIn tint_symbol_1, float b) {
   return FragIn(b, 1u);
 }
 void main() {
-  FragIn v = FragIn(tint_symbol_loc0_Input, gl_SampleMaskIn);
-  FragIn v_1 = tint_symbol_inner(v, tint_symbol_loc1_Input);
-  tint_symbol_loc0_Output = v_1.a;
-  gl_SampleMask = v_1.mask;
+  float v = tint_symbol_loc0_Input;
+  FragIn v_1 = FragIn(v, uint(gl_SampleMaskIn[0u]));
+  FragIn v_2 = tint_symbol_inner(v_1, tint_symbol_loc1_Input);
+  tint_symbol_loc0_Output = v_2.a;
+  gl_SampleMask[0u] = int(v_2.mask);
 }
-error: Error parsing GLSL shader:
-ERROR: 0:22: 'constructor' : array argument must be sized 
-ERROR: 0:22: '=' :  cannot convert from ' const float' to ' temp structure{ global highp float a,  global highp uint mask}'
-ERROR: 0:22: '' : compilation terminated 
-ERROR: 3 compilation errors.  No code generated.
-
-
-
-
-tint executable returned error: exit status 1

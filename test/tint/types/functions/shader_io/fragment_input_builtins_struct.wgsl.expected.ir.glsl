@@ -1,5 +1,3 @@
-SKIP: FAILED
-
 #version 310 es
 #extension GL_OES_sample_variables: require
 precision highp float;
@@ -20,14 +18,8 @@ void tint_symbol_inner(FragmentInputs inputs) {
   }
 }
 void main() {
-  tint_symbol_inner(FragmentInputs(gl_FragCoord, gl_FrontFacing, gl_SampleID, gl_SampleMaskIn));
+  vec4 v = gl_FragCoord;
+  bool v_1 = gl_FrontFacing;
+  uint v_2 = uint(gl_SampleID);
+  tint_symbol_inner(FragmentInputs(v, v_1, v_2, uint(gl_SampleMaskIn[0u])));
 }
-error: Error parsing GLSL shader:
-ERROR: 0:21: 'constructor' : array argument must be sized 
-ERROR: 0:21: '' : compilation terminated 
-ERROR: 2 compilation errors.  No code generated.
-
-
-
-
-tint executable returned error: exit status 1

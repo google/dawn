@@ -1,5 +1,3 @@
-SKIP: FAILED
-
 #version 310 es
 
 
@@ -19,20 +17,11 @@ Output tint_symbol_inner(uint VertexIndex, uint InstanceIndex) {
   return tint_symbol_1;
 }
 void main() {
-  Output v = tint_symbol_inner(gl_VertexID, gl_InstanceID);
-  gl_Position = v.Position;
+  uint v = uint(gl_VertexID);
+  Output v_1 = tint_symbol_inner(v, uint(gl_InstanceID));
+  gl_Position = v_1.Position;
   gl_Position[1u] = -(gl_Position.y);
   gl_Position[2u] = ((2.0f * gl_Position.z) - gl_Position.w);
-  tint_symbol_loc0_Output = v.color;
+  tint_symbol_loc0_Output = v_1.color;
   gl_PointSize = 1.0f;
 }
-error: Error parsing GLSL shader:
-ERROR: 0:20: 'tint_symbol_inner' : no matching overloaded function found 
-ERROR: 0:20: '=' :  cannot convert from ' const float' to ' temp structure{ global highp 4-component vector of float Position,  global highp 4-component vector of float color}'
-ERROR: 0:20: '' : compilation terminated 
-ERROR: 3 compilation errors.  No code generated.
-
-
-
-
-tint executable returned error: exit status 1

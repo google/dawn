@@ -1,5 +1,3 @@
-SKIP: FAILED
-
 #version 310 es
 
 
@@ -32,18 +30,8 @@ vec4 tint_symbol_inner(uint tint_symbol_1) {
   return vec4(x_52[0u], x_52[1u], 0.0f, 1.0f);
 }
 void main() {
-  gl_Position = tint_symbol_inner(gl_VertexID);
+  gl_Position = tint_symbol_inner(uint(gl_VertexID));
   gl_Position[1u] = -(gl_Position.y);
   gl_Position[2u] = ((2.0f * gl_Position.z) - gl_Position.w);
   gl_PointSize = 1.0f;
 }
-error: Error parsing GLSL shader:
-ERROR: 0:33: 'tint_symbol_inner' : no matching overloaded function found 
-ERROR: 0:33: 'assign' :  cannot convert from ' const float' to ' gl_Position highp 4-component vector of float Position'
-ERROR: 0:33: '' : compilation terminated 
-ERROR: 3 compilation errors.  No code generated.
-
-
-
-
-tint executable returned error: exit status 1
