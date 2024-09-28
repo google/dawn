@@ -457,5 +457,150 @@ TEST_F(GlslWriter_BinaryPolyfillTest, RelationalGreaterThanEqualF32) {
     EXPECT_EQ(expect, str());
 }
 
+TEST_F(GlslWriter_BinaryPolyfillTest, FloatModF32) {
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        auto* l = b.Let("left", b.Splat(ty.vec2<f32>(), 1_f));
+        auto* r = b.Let("right", b.Splat(ty.vec2<f32>(), 2_f));
+        auto* bin = b.Modulo(ty.vec2<f32>(), l, r);
+        b.Let("val", bin);
+        b.Return(func);
+    });
+
+    auto* src = R"(
+%foo = @fragment func():void {
+  $B1: {
+    %left:vec2<f32> = let vec2<f32>(1.0f)
+    %right:vec2<f32> = let vec2<f32>(2.0f)
+    %4:vec2<f32> = mod %left, %right
+    %val:vec2<f32> = let %4
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = @fragment func():void {
+  $B1: {
+    %left:vec2<f32> = let vec2<f32>(1.0f)
+    %right:vec2<f32> = let vec2<f32>(2.0f)
+    %4:vec2<f32> = call %tint_float_modulo, %left, %right
+    %val:vec2<f32> = let %4
+    ret
+  }
+}
+%tint_float_modulo = func(%x:vec2<f32>, %y:vec2<f32>):vec2<f32> {
+  $B2: {
+    %9:vec2<f32> = div %x, %y
+    %10:vec2<f32> = trunc %9
+    %11:vec2<f32> = mul %y, %10
+    %12:vec2<f32> = sub %x, %11
+    ret %12
+  }
+}
+)";
+
+    Run(BinaryPolyfill);
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(GlslWriter_BinaryPolyfillTest, FloatModMixedF32) {
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        auto* l = b.Let("left", 1_f);
+        auto* r = b.Let("right", b.Splat(ty.vec2<f32>(), 2_f));
+        auto* bin = b.Modulo(ty.vec2<f32>(), l, r);
+        b.Let("val", bin);
+        b.Return(func);
+    });
+
+    auto* src = R"(
+%foo = @fragment func():void {
+  $B1: {
+    %left:f32 = let 1.0f
+    %right:vec2<f32> = let vec2<f32>(2.0f)
+    %4:vec2<f32> = mod %left, %right
+    %val:vec2<f32> = let %4
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = @fragment func():void {
+  $B1: {
+    %left:f32 = let 1.0f
+    %right:vec2<f32> = let vec2<f32>(2.0f)
+    %4:vec2<f32> = construct %left
+    %5:vec2<f32> = call %tint_float_modulo, %4, %right
+    %val:vec2<f32> = let %5
+    ret
+  }
+}
+%tint_float_modulo = func(%x:vec2<f32>, %y:vec2<f32>):vec2<f32> {
+  $B2: {
+    %10:vec2<f32> = div %x, %y
+    %11:vec2<f32> = trunc %10
+    %12:vec2<f32> = mul %y, %11
+    %13:vec2<f32> = sub %x, %12
+    ret %13
+  }
+}
+)";
+
+    Run(BinaryPolyfill);
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(GlslWriter_BinaryPolyfillTest, FloatModF16) {
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        auto* l = b.Let("left", b.Splat(ty.vec2<f16>(), 1_h));
+        auto* r = b.Let("right", b.Splat(ty.vec2<f16>(), 2_h));
+        auto* bin = b.Modulo(ty.vec2<f16>(), l, r);
+        b.Let("val", bin);
+        b.Return(func);
+    });
+
+    auto* src = R"(
+%foo = @fragment func():void {
+  $B1: {
+    %left:vec2<f16> = let vec2<f16>(1.0h)
+    %right:vec2<f16> = let vec2<f16>(2.0h)
+    %4:vec2<f16> = mod %left, %right
+    %val:vec2<f16> = let %4
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = @fragment func():void {
+  $B1: {
+    %left:vec2<f16> = let vec2<f16>(1.0h)
+    %right:vec2<f16> = let vec2<f16>(2.0h)
+    %4:vec2<f16> = call %tint_float_modulo, %left, %right
+    %val:vec2<f16> = let %4
+    ret
+  }
+}
+%tint_float_modulo = func(%x:vec2<f16>, %y:vec2<f16>):vec2<f16> {
+  $B2: {
+    %9:vec2<f16> = div %x, %y
+    %10:vec2<f16> = trunc %9
+    %11:vec2<f16> = mul %y, %10
+    %12:vec2<f16> = sub %x, %11
+    ret %12
+  }
+}
+)";
+
+    Run(BinaryPolyfill);
+    EXPECT_EQ(expect, str());
+}
+
 }  // namespace
 }  // namespace tint::glsl::writer::raise

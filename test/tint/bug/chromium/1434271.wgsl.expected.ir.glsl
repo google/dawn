@@ -1,5 +1,3 @@
-SKIP: FAILED
-
 #version 310 es
 #extension GL_AMD_gpu_shader_half_float: require
 
@@ -131,12 +129,45 @@ layout(local_size_x = 64, local_size_y = 1, local_size_z = 1) in;
 void main() {
   simulate_inner(gl_GlobalInvocationID);
 }
-<dawn>/src/tint/lang/glsl/writer/printer/printer.cc:1451 internal compiler error: TINT_UNREACHABLE unhandled core builtin: textureStore
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
+#version 310 es
 
-tint executable returned error: signal: trace/BPT trap
+
+struct UBO {
+  uint width;
+};
+
+layout(binding = 3, std140)
+uniform tint_symbol_1_1_ubo {
+  UBO tint_symbol;
+} v;
+layout(binding = 4, std430)
+buffer Buffer_1_ssbo {
+  float weights[];
+} buf_in;
+layout(binding = 5, std430)
+buffer Buffer_2_ssbo {
+  float weights[];
+} buf_out;
+layout(binding = 7, rgba8) uniform highp writeonly image2D tex_out;
+float tint_float_modulo(float x, float y) {
+  return (x - (y * trunc((x / y))));
+}
+void export_level_inner(uvec3 coord) {
+  if (all(lessThan(coord.xy, uvec2(uvec2(imageSize(tex_out)))))) {
+    uint dst_offset = (coord[0u] << ((coord[1u] * v.tint_symbol.width) & 31u));
+    uint src_offset = ((coord[0u] - 2u) + ((coord[1u] >> (2u & 31u)) * v.tint_symbol.width));
+    float a = buf_in.weights[(src_offset << (0u & 31u))];
+    float b = buf_in.weights[(src_offset + 1u)];
+    float c = buf_in.weights[((src_offset + 1u) + v.tint_symbol.width)];
+    float d = buf_in.weights[((src_offset + 1u) + v.tint_symbol.width)];
+    float sum = dot(vec4(a, b, c, d), vec4(1.0f));
+    buf_out.weights[dst_offset] = tint_float_modulo(sum, 4.0f);
+    vec4 v_1 = vec4(a, (a * b), ((a / b) + c), sum);
+    vec4 probabilities = (v_1 + max(sum, 0.0f));
+    imageStore(tex_out, ivec2(coord.xy), probabilities);
+  }
+}
+layout(local_size_x = 64, local_size_y = 1, local_size_z = 1) in;
+void main() {
+  export_level_inner(gl_GlobalInvocationID);
+}
