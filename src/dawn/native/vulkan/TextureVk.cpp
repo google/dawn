@@ -1102,6 +1102,7 @@ MaybeError Texture::ClearTexture(CommandRecordingContext* recordingContext,
                 viewDesc.mipLevelCount = 1u;
                 viewDesc.baseArrayLayer = layer;
                 viewDesc.arrayLayerCount = 1u;
+                viewDesc.usage = wgpu::TextureUsage::RenderAttachment;
 
                 ColorAttachmentIndex ca0(uint8_t(0));
                 DAWN_TRY_ASSIGN(beginCmd.colorAttachments[ca0].view,
@@ -1850,8 +1851,7 @@ ResultOrError<Ref<TextureView>> TextureView::Create(
 }
 
 MaybeError TextureView::Initialize(const UnpackedPtr<TextureViewDescriptor>& descriptor) {
-    if ((GetTexture()->GetInternalUsage() &
-         ~(wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::CopyDst)) == 0) {
+    if ((GetInternalUsage() & ~(wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::CopyDst)) == 0) {
         // If the texture view has no other usage than CopySrc and CopyDst, then it can't
         // actually be used as a render pass attachment or sampled/storage texture. The Vulkan
         // validation errors warn if you create such a vkImageView, so return early.
@@ -1866,15 +1866,9 @@ MaybeError TextureView::Initialize(const UnpackedPtr<TextureViewDescriptor>& des
     Device* device = ToBackend(GetTexture()->GetDevice());
     VkImageViewCreateInfo createInfo = GetCreateInfo(descriptor->format, descriptor->dimension);
 
-    // Remove StorageBinding usage if the format doesn't support it.
-    wgpu::TextureUsage usage = GetTexture()->GetInternalUsage();
-    if (!GetFormat().supportsStorageUsage) {
-        usage &= ~wgpu::TextureUsage::StorageBinding;
-    }
-
     VkImageViewUsageCreateInfo usageInfo = {};
     usageInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_USAGE_CREATE_INFO;
-    usageInfo.usage = VulkanImageUsage(device, usage, GetFormat());
+    usageInfo.usage = VulkanImageUsage(device, GetInternalUsage(), GetFormat());
     createInfo.pNext = &usageInfo;
 
     VkSamplerYcbcrConversionInfo samplerYCbCrInfo = {};
