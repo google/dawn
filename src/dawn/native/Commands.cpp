@@ -405,7 +405,7 @@ void SkipCommand(CommandIterator* commands, Command type) {
 }
 
 const char* AddNullTerminatedString(CommandAllocator* allocator, StringView s, uint32_t* length) {
-    std::string_view view = s.AsRequiredStringView();
+    std::string_view view = s;
     *length = view.length();
 
     // Include extra null-terminator character. The string_view may not be null-terminated. It also

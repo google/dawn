@@ -433,7 +433,7 @@ class DeviceBase : public ErrorSink, public RefCountedWithExternalCount<RefCount
     const std::string& GetLabel() const;
     // TODO(crbug.com/42241188): Remove const char* version of the method.
     void APISetLabel(const char* label);
-    void APISetLabel2(std::optional<std::string_view> label);
+    void APISetLabel2(StringView label);
     void APIDestroy();
 
     virtual void AppendDebugLayerMessages(ErrorData* error) {}

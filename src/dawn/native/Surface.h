@@ -130,7 +130,7 @@ class Surface final : public ErrorMonad {
     void APIUnconfigure();
     // TODO(crbug.com/42241188): Remove const char* version of the method.
     void APISetLabel(const char* label);
-    void APISetLabel2(std::optional<std::string_view> label);
+    void APISetLabel2(StringView label);
 
   private:
     Surface(InstanceBase* instance, ErrorMonad::ErrorTag tag);

@@ -24,7 +24,7 @@
 // CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-{% from 'dawn/cpp_macros.tmpl' import wgpu_string_constructors with context %}
+{% from 'dawn/cpp_macros.tmpl' import wgpu_string_members with context %}
 
 {% set API = metadata.api.upper() %}
 {% set api = API.lower() %}
@@ -630,7 +630,7 @@ static_assert(offsetof(ChainedStruct, sType) == offsetof({{c_prefix}}ChainedStru
 
         //* Custom string constructors
         {% if type.name.get() == "string view" %}
-            {{wgpu_string_constructors(as_cppType(type.name)) | indent(4)}}
+            {{wgpu_string_members(as_cppType(type.name)) | indent(4)}}
         {% endif %}
 
         {% if type.has_free_members_function %}
@@ -972,15 +972,7 @@ void {{CppType}}::SetUncapturedErrorCallback(L callback) {
     static inline {{as_cppType(function.return_type.name)}} {{FunctionName}}(
         {%- for arg in function.arguments -%}
             {%- if not loop.first %}, {% endif -%}
-            {%- if arg.type.name.get() == "string" and arg.annotation == "value" -%}
-                {%- if arg.optional -%}
-                    std::optional<std::string_view> {{as_varName(arg.name)}}{{render_cpp_default_value(arg, False)}}
-                {%- else -%}
-                    std::string_view {{as_varName(arg.name)}}{{render_cpp_default_value(arg, False)}}
-                {%- endif -%}
-            {%- else -%}
-                {{as_annotated_cppType(arg)}}{{render_cpp_default_value(arg, False)}}
-            {%- endif -%}
+            {{as_annotated_cppType(arg)}}{{render_cpp_default_value(arg, False)}}
         {%- endfor -%}
     ) {
         {% if function.return_type.name.concatcase() == "void" %}

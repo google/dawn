@@ -228,12 +228,11 @@ TraceLabel GetLabelForTrace(StringView label) {
     return result;
 }
 
-std::string_view NormalizeMessageString(std::optional<std::string_view> in) {
-    if (in) {
-        return std::string_view(in->data(), strnlen(in->data(), in->length()));
-    } else {
+std::string_view NormalizeMessageString(StringView in) {
+    if (in.IsUndefined()) {
         return {};
     }
+    return std::string_view(in.data, strnlen(in.data, in.length));
 }
 
 }  // namespace dawn::native::utils

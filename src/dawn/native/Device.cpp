@@ -434,9 +434,8 @@ DeviceBase::DeviceBase(AdapterBase* adapter,
 
     mFormatTable = BuildFormatTable(this);
 
-    std::optional<std::string_view> label = descriptor->label;
-    if (label.has_value()) {
-        mLabel = label.value();
+    if (!descriptor->label.IsUndefined()) {
+        mLabel = std::string(descriptor->label);
     }
 
     mIsImmediateErrorHandlingEnabled = IsToggleEnabled(Toggle::EnableImmediateErrorHandling);
@@ -1613,8 +1612,7 @@ ShaderModuleBase* DeviceBase::APICreateErrorShaderModule2(const ShaderModuleDesc
         ShaderModuleBase::MakeError(this, descriptor ? descriptor->label : nullptr);
     std::unique_ptr<OwnedCompilationMessages> compilationMessages(
         std::make_unique<OwnedCompilationMessages>());
-    compilationMessages->AddUnanchoredMessage(errorMessage.AsRequiredStringView(),
-                                              wgpu::CompilationMessageType::Error);
+    compilationMessages->AddUnanchoredMessage(errorMessage, wgpu::CompilationMessageType::Error);
     result->InjectCompilationMessages(std::move(compilationMessages));
     EmitCompilationLog(result.Get());
 
@@ -2052,9 +2050,8 @@ void DeviceBase::APIInjectError2(wgpu::ErrorType type, StringView message) {
     }
 
     message = utils::NormalizeMessageString(message);
-    HandleError(
-        DAWN_MAKE_ERROR(FromWGPUErrorType(type), std::string(message.AsRequiredStringView())),
-        InternalErrorType::OutOfMemory);
+    HandleError(DAWN_MAKE_ERROR(FromWGPUErrorType(type), std::string(message)),
+                InternalErrorType::OutOfMemory);
 }
 
 void DeviceBase::APIValidateTextureDescriptor(const TextureDescriptor* descriptorOrig) {
@@ -2531,7 +2528,7 @@ void DeviceBase::APISetLabel(const char* label) {
     SetLabelImpl();
 }
 
-void DeviceBase::APISetLabel2(std::optional<std::string_view> label) {
+void DeviceBase::APISetLabel2(StringView label) {
     mLabel = utils::NormalizeMessageString(label);
     SetLabelImpl();
 }

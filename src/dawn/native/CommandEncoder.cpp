@@ -1143,9 +1143,8 @@ Ref<ComputePassEncoder> CommandEncoder::BeginComputePass(const ComputePassDescri
                 return {};
             }
 
-            std::optional<std::string_view> label = descriptor->label;
-            if (label.has_value()) {
-                cmd->label = label.value();
+            if (!descriptor->label.IsUndefined()) {
+                cmd->label = std::string(descriptor->label);
             }
 
             if (descriptor->timestampWrites != nullptr) {
@@ -1232,9 +1231,8 @@ Ref<RenderPassEncoder> CommandEncoder::BeginRenderPass(const RenderPassDescripto
             BeginRenderPassCmd* cmd =
                 allocator->Allocate<BeginRenderPassCmd>(Command::BeginRenderPass);
 
-            std::optional<std::string_view> label = descriptor->label;
-            if (label.has_value()) {
-                cmd->label = label.value();
+            if (!descriptor->label.IsUndefined()) {
+                cmd->label = std::string(descriptor->label);
             }
 
             cmd->attachmentState = device->GetOrCreateAttachmentState(descriptor);

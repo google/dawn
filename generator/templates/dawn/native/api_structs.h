@@ -24,7 +24,7 @@
 //* CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 //* OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 //* OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-{% from 'dawn/cpp_macros.tmpl' import wgpu_string_constructors with context %}
+{% from 'dawn/cpp_macros.tmpl' import wgpu_string_members with context %}
 
 {% set namespace_name = Name(metadata.native_namespace) %}
 {% set DIR = namespace_name.concatcase().upper() %}
@@ -106,12 +106,7 @@ namespace {{native_namespace}} {
 
             //* Custom string constructors / conversion
             {% if type.name.get() == "string view" %}
-                {{wgpu_string_constructors(CppType) | indent(8)}}
-
-                // NOLINTNEXTLINE(runtime/explicit) allow implicit conversion
-                operator std::optional<std::string_view>() const;
-
-                std::string_view AsRequiredStringView() const;
+                {{wgpu_string_members(CppType) | indent(8)}}
             {% endif %}
 
             {% if type.any_member_requires_struct_defaulting %}

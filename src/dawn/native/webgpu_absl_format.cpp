@@ -695,14 +695,14 @@ absl::FormatConvertResult<absl::FormatConversionCharSet::kString> AbslFormatConv
 
 absl::FormatConvertResult<absl::FormatConversionCharSet::kString>
 AbslFormatConvert(StringView value, const absl::FormatConversionSpec& spec, absl::FormatSink* s) {
-    std::optional<std::string_view> sv = value;
-    if (sv) {
-        s->Append("\"");
-        s->Append(*sv);
-        s->Append("\"");
-    } else {
+    if (value.IsUndefined()) {
         s->Append("[undefined]");
+        return {true};
     }
+
+    s->Append("\"");
+    s->Append(std::string_view(value));
+    s->Append("\"");
     return {true};
 }
 

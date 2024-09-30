@@ -177,7 +177,7 @@ void FreeApiSeq(T** apiData, size_t* apiSize) {
 }
 
 // Normalize the string, truncating it at the first null-terminator, if any.
-std::string_view NormalizeMessageString(std::optional<std::string_view> in);
+std::string_view NormalizeMessageString(StringView in);
 
 }  // namespace dawn::native::utils
 

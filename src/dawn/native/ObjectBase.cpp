@@ -87,18 +87,12 @@ void ApiObjectList::Destroy() {
 }
 
 ApiObjectBase::ApiObjectBase(DeviceBase* device, StringView label) : ObjectBase(device) {
-    std::optional<std::string_view> sv = label;
-    if (sv.has_value()) {
-        mLabel = sv.value();
-    }
+    mLabel = std::string(label);
 }
 
 ApiObjectBase::ApiObjectBase(DeviceBase* device, ErrorTag tag, StringView label)
     : ObjectBase(device, tag) {
-    std::optional<std::string_view> sv = label;
-    if (sv.has_value()) {
-        mLabel = sv.value();
-    }
+    mLabel = std::string(label);
 }
 
 ApiObjectBase::ApiObjectBase(DeviceBase* device, LabelNotImplementedTag tag) : ObjectBase(device) {}
@@ -111,7 +105,7 @@ void ApiObjectBase::APISetLabel(const char* label) {
     SetLabel(std::string(label ? label : ""));
 }
 
-void ApiObjectBase::APISetLabel2(std::optional<std::string_view> label) {
+void ApiObjectBase::APISetLabel2(StringView label) {
     SetLabel(std::string(utils::NormalizeMessageString(label)));
 }
 

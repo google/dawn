@@ -221,5 +221,55 @@ TEST(CppAPITests, StringViewFromNullopt) {
     }
 }
 
+// Test that .IsUndefined() is only for {nullptr, WGPU_STRLEN}.
+TEST(CppAPITests, StringViewIsUndefined) {
+    {
+        wgpu::StringView s(nullptr, wgpu::kStrlen);
+        ASSERT_TRUE(s.IsUndefined());
+    }
+
+    // Nothing else is "undefined".
+    {
+        wgpu::StringView s("woot", wgpu::kStrlen);
+        ASSERT_FALSE(s.IsUndefined());
+    }
+    {
+        wgpu::StringView s(nullptr, 0);
+        ASSERT_FALSE(s.IsUndefined());
+    }
+    {
+        wgpu::StringView s("woot", 0);
+        ASSERT_FALSE(s.IsUndefined());
+    }
+    {
+        wgpu::StringView s("woot", 3);
+        ASSERT_FALSE(s.IsUndefined());
+    }
+}
+
+// Test implicit conversion to std::string_view
+TEST(CppAPITests, StringViewStdStringViewConversion) {
+    {
+        wgpu::StringView s(nullptr, wgpu::kStrlen);
+        ASSERT_EQ("", std::string_view(s));
+    }
+    {
+        wgpu::StringView s("woot", wgpu::kStrlen);
+        ASSERT_EQ("woot", std::string_view(s));
+    }
+    {
+        wgpu::StringView s(nullptr, 0);
+        ASSERT_EQ("", std::string_view(s));
+    }
+    {
+        wgpu::StringView s("woot", 0);
+        ASSERT_EQ("", std::string_view(s));
+    }
+    {
+        wgpu::StringView s("woot", 3);
+        ASSERT_EQ("woo", std::string_view(s));
+    }
+}
+
 }  // anonymous namespace
 }  // namespace dawn::native
