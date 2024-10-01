@@ -112,7 +112,6 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
 
     RUN_TRANSFORM(core::ir::transform::BlockDecoratedStructs, module);
 
-    // TODO(dsinclair): TextureBuiltinsFromUniform
     // TODO(dsinclair): OffsetFirstIndex
     // TODO(dsinclair): CombineSamplers
     // TODO(dsinclair): PadStructs
@@ -130,7 +129,15 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
     RUN_TRANSFORM(raise::BinaryPolyfill, module);
     // Must come after zero-init as it will add builtins
     RUN_TRANSFORM(raise::BuiltinPolyfill, module);
-    RUN_TRANSFORM(raise::TexturePolyfill, module);
+
+    {
+        raise::TexturePolyfillConfig tex_config;
+        tex_config.sampler_texture_to_name = options.bindings.sampler_texture_to_name;
+        tex_config.placeholder_sampler_bind_point = options.bindings.placeholder_sampler_bind_point;
+        tex_config.texture_builtins_from_uniform = options.bindings.texture_builtins_from_uniform;
+        RUN_TRANSFORM(raise::TexturePolyfill, module, tex_config);
+    }
+
     // Must come after BuiltinPolyfill as builtins can add bitcasts
     RUN_TRANSFORM(raise::BitcastPolyfill, module);
 

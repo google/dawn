@@ -52,11 +52,24 @@ struct State {
     /// The IR module.
     core::ir::Module& ir;
 
+    /// The configuration
+    const TexturePolyfillConfig& cfg;
+
     /// The IR builder.
     core::ir::Builder b{ir};
 
     /// The type manager.
     core::type::Manager& ty{ir.Types()};
+
+    /// The global var for texture uniform information
+    core::ir::Var* texture_uniform_data_ = nullptr;
+
+    /// Map from binding point to index into uniform structure
+    Hashmap<BindingPoint, uint32_t, 2> binding_point_to_uniform_idx_{};
+
+    /// Maps from a function parameter to the replacement function parameter for texture uniform
+    /// data
+    Hashmap<core::ir::FunctionParam*, core::ir::FunctionParam*, 2> texture_param_replacement_{};
 
     /// Process the module.
     void Process() {
@@ -73,6 +86,8 @@ struct State {
                     case core::BuiltinFn::kTextureDimensions:
                     case core::BuiltinFn::kTextureLoad:
                     case core::BuiltinFn::kTextureNumLayers:
+                    case core::BuiltinFn::kTextureNumLevels:
+                    case core::BuiltinFn::kTextureNumSamples:
                     case core::BuiltinFn::kTextureStore:
                         call_worklist.Push(call);
                         break;
@@ -94,6 +109,10 @@ struct State {
                     break;
                 case core::BuiltinFn::kTextureNumLayers:
                     TextureNumLayers(call);
+                    break;
+                case core::BuiltinFn::kTextureNumLevels:
+                case core::BuiltinFn::kTextureNumSamples:
+                    TextureFromUniform(call);
                     break;
                 case core::BuiltinFn::kTextureStore:
                     TextureStore(call);
@@ -216,6 +235,112 @@ struct State {
             return;
         }
         ld->Result(0)->SetType(new_type.value());
+    }
+
+    void MakeTextureUniformStructure() {
+        if (texture_uniform_data_ != nullptr) {
+            return;
+        }
+
+        auto count = cfg.texture_builtins_from_uniform.ubo_bindingpoint_ordering.size();
+
+        Vector<core::type::Manager::StructMemberDesc, 2> members;
+        members.Reserve(count);
+        for (uint32_t i = 0; i < count; ++i) {
+            members.Push({ir.symbols.New("tint_builtin_value_" + std::to_string(i)), ty.u32()});
+            binding_point_to_uniform_idx_.Add(
+                cfg.texture_builtins_from_uniform.ubo_bindingpoint_ordering[i], i);
+        }
+
+        auto* strct =
+            ir.Types().Struct(ir.symbols.New("TintTextureUniformData"), std::move(members));
+
+        b.Append(ir.root_block, [&] {
+            texture_uniform_data_ = b.Var(ty.ptr(uniform, strct, read));
+            texture_uniform_data_->SetBindingPoint(
+                cfg.texture_builtins_from_uniform.ubo_binding.group,
+                cfg.texture_builtins_from_uniform.ubo_binding.binding);
+        });
+    }
+
+    // Note, assumes is called inside an insert block
+    core::ir::Access* GetUniformValue(const BindingPoint& binding) {
+        TINT_ASSERT(binding_point_to_uniform_idx_.Contains(binding));
+
+        uint32_t idx = *binding_point_to_uniform_idx_.Get(binding);
+        return b.Access(ty.ptr<uniform, u32, read>(), texture_uniform_data_, u32(idx));
+    }
+
+    core::ir::Value* FindSource(core::ir::Value* tex) {
+        core::ir::Value* res = nullptr;
+        while (res == nullptr) {
+            tint::Switch(
+                tex,
+                [&](core::ir::InstructionResult* r) {
+                    tint::Switch(
+                        r->Instruction(),                               //
+                        [&](core::ir::Var* v) { res = v->Result(0); },  //
+                        [&](core::ir::Load* l) { tex = l->From(); },    //
+                        TINT_ICE_ON_NO_MATCH);
+                },
+                [&](core::ir::FunctionParam* fp) { res = fp; },
+
+                TINT_ICE_ON_NO_MATCH);
+        }
+        return res;
+    }
+
+    core::ir::Value* GetAccessFromUniform(core::ir::Value* arg) {
+        auto* src = FindSource(arg);
+        return tint::Switch(
+            src,
+            [&](core::ir::InstructionResult* r) -> core::ir::Value* {
+                if (auto* v = r->Instruction()->As<core::ir::Var>()) {
+                    auto* access = GetUniformValue(v->BindingPoint().value());
+                    return b.Load(access)->Result(0);
+
+                } else {
+                    TINT_UNREACHABLE() << "invalid instruction type";
+                }
+            },
+            [&](core::ir::FunctionParam* fp) { return AppendFunctionParam(fp); },
+            TINT_ICE_ON_NO_MATCH);
+    }
+
+    core::ir::Value* AppendFunctionParam(core::ir::FunctionParam* fp) {
+        return texture_param_replacement_.GetOrAdd(fp, [&] {
+            auto* new_param = b.FunctionParam("tint_tex_value", ty.u32());
+            fp->Function()->AppendParam(new_param);
+            texture_param_replacement_.Add(fp, new_param);
+
+            AddUniformArgToCallSites(fp->Function(), fp->Index());
+            return new_param;
+        });
+    }
+
+    void AddUniformArgToCallSites(core::ir::Function* func, uint32_t tex_idx) {
+        for (auto usage : func->UsagesUnsorted()) {
+            auto* call = usage->instruction->As<core::ir::UserCall>();
+            if (!call) {
+                continue;
+            }
+
+            b.InsertBefore(call, [&] {
+                auto* val = GetAccessFromUniform(call->Args()[tex_idx]);
+                call->AppendArg(val);
+            });
+        }
+    }
+
+    void TextureFromUniform(core::ir::BuiltinCall* call) {
+        MakeTextureUniformStructure();
+
+        b.InsertBefore(call, [&] {
+            auto* val = GetAccessFromUniform(call->Args()[0]);
+            call->Result(0)->ReplaceAllUsesWith(val);
+        });
+
+        call->Destroy();
     }
 
     // `textureDimensions` returns an unsigned scalar / vector in WGSL. `textureSize` and
@@ -400,13 +525,13 @@ struct State {
 
 }  // namespace
 
-Result<SuccessType> TexturePolyfill(core::ir::Module& ir) {
+Result<SuccessType> TexturePolyfill(core::ir::Module& ir, const TexturePolyfillConfig& cfg) {
     auto result = ValidateAndDumpIfNeeded(ir, "glsl.TexturePolyfill transform");
     if (result != Success) {
         return result.Failure();
     }
 
-    State{ir}.Process();
+    State{ir, cfg}.Process();
 
     return Success;
 }
