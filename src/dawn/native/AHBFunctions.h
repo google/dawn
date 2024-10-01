@@ -42,9 +42,9 @@ class AHBFunctions {
 
     bool IsValid() const;
 
-    decltype(&::AHardwareBuffer_acquire) Acquire = nullptr;
-    decltype(&::AHardwareBuffer_release) Release = nullptr;
-    decltype(&::AHardwareBuffer_describe) Describe = nullptr;
+    void (*Acquire)(::AHardwareBuffer* buffer) = nullptr;
+    void (*Release)(::AHardwareBuffer* buffer) = nullptr;
+    void (*Describe)(::AHardwareBuffer* buffer, ::AHardwareBuffer_Desc* desc) = nullptr;
 
   private:
     DynamicLib mNativeWindowLib;
