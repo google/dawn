@@ -10,10 +10,8 @@ void main_inner(uint tint_local_index) {
     w = 0.0f;
   }
   GroupMemoryBarrierWithGroupSync();
-  float p_ptr = p;
-  float w_ptr = w;
-  float x = (p_ptr + w_ptr);
-  p_ptr = x;
+  float x = (p + w);
+  p = x;
 }
 
 [numthreads(1, 1, 1)]

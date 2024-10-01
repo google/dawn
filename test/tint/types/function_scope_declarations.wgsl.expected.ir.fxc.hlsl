@@ -25,8 +25,5 @@ void main() {
   float arr_let[4] = (float[4])0;
   S struct_var = (S)0;
   S struct_let = (S)0;
-  float ptr_f32 = f32_var;
-  float4 ptr_vec = v4f32_var;
-  float ptr_arr[4] = arr_var;
 }
 

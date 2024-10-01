@@ -1,5 +1,3 @@
-SKIP: FAILED
-
 struct Particle {
   float3 position[8];
   float lifetime;
@@ -46,11 +44,10 @@ Particle v_4(uint offset) {
 [numthreads(1, 1, 1)]
 void main() {
   Particle particle = v_4(0u);
-  particle.position[sim[0u].x] = particle.position[sim[0u].x];
+  uint v_10 = sim[0u].x;
+  float3 tint_array_copy[8] = particle.position;
+  tint_array_copy[v_10] = particle.position[sim[0u].x];
+  float3 v_11[8] = tint_array_copy;
+  particle.position = v_11;
 }
 
-FXC validation failure:
-<scrubbed_path>(47,3-30): error X3500: array reference cannot be used as an l-value; not natively addressable
-
-
-tint executable returned error: exit status 1

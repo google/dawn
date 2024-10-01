@@ -21,8 +21,7 @@ void main_inner(uint tint_local_index) {
     }
   }
   GroupMemoryBarrierWithGroupSync();
-  int p[246] = W;
-  p[int(0)] = int(42);
+  W[int(0)] = int(42);
 }
 
 [numthreads(1, 1, 1)]

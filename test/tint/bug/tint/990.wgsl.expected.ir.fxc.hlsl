@@ -2,7 +2,6 @@
 void f() {
   int i = int(0);
   {
-    int p = i;
     while(true) {
       if (false) {
       } else {

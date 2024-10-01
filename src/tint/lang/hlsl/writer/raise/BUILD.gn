@@ -55,6 +55,8 @@ libtint_source_set("raise") {
     "decompose_uniform_access.h",
     "fxc_polyfill.cc",
     "fxc_polyfill.h",
+    "localize_struct_array_assignment.cc",
+    "localize_struct_array_assignment.h",
     "promote_initializers.cc",
     "promote_initializers.h",
     "raise.cc",
@@ -100,6 +102,7 @@ if (tint_build_unittests) {
       "decompose_storage_access_test.cc",
       "decompose_uniform_access_test.cc",
       "fxc_polyfill_test.cc",
+      "localize_struct_array_assignment_test.cc",
       "promote_initializers_test.cc",
       "shader_io_test.cc",
     ]

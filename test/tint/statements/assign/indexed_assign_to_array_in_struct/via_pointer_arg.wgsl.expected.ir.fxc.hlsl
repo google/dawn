@@ -1,5 +1,3 @@
-SKIP: FAILED
-
 struct InnerS {
   int v;
 };
@@ -14,8 +12,12 @@ cbuffer cbuffer_uniforms : register(b4, space1) {
 };
 void f(inout OuterS p) {
   InnerS v = (InnerS)0;
-  InnerS v_1 = v;
-  p.a1[uniforms[0u].x] = v_1;
+  uint v_1 = uniforms[0u].x;
+  InnerS tint_array_copy[8] = p.a1;
+  InnerS v_2 = v;
+  tint_array_copy[v_1] = v_2;
+  InnerS v_3[8] = tint_array_copy;
+  p.a1 = v_3;
 }
 
 [numthreads(1, 1, 1)]
@@ -24,8 +26,3 @@ void main() {
   f(s1);
 }
 
-FXC validation failure:
-<scrubbed_path>(16,3-22): error X3500: array reference cannot be used as an l-value; not natively addressable
-
-
-tint executable returned error: exit status 1

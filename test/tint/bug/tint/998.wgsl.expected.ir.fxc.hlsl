@@ -1,5 +1,3 @@
-SKIP: FAILED
-
 struct S {
   uint data[3];
 };
@@ -12,11 +10,10 @@ RWByteAddressBuffer result : register(u1, space1);
 static S s = (S)0;
 [numthreads(1, 1, 1)]
 void main() {
-  s.data[constants[0u].x] = 0u;
+  uint v = constants[0u].x;
+  uint tint_array_copy[3] = s.data;
+  tint_array_copy[v] = 0u;
+  uint v_1[3] = tint_array_copy;
+  s.data = v_1;
 }
 
-FXC validation failure:
-<scrubbed_path>(13,3-25): error X3500: array reference cannot be used as an l-value; not natively addressable
-
-
-tint executable returned error: exit status 1

@@ -16,8 +16,7 @@ int bar() {
 
 void main() {
   S x = (S)0;
-  S p = x;
-  int4 v = p.a[foo()];
+  int4 v = x.a[foo()];
   int v_1 = bar();
   v[v_1] = (v[v_1] + int(5));
 }

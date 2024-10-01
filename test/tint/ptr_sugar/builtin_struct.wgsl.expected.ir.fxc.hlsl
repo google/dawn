@@ -11,30 +11,26 @@ struct frexp_result_f32 {
 
 void deref_modf() {
   modf_result_f32 a = {0.5f, 1.0f};
-  modf_result_f32 p = a;
-  float fract = p.fract;
-  float whole = p.whole;
+  float fract = a.fract;
+  float whole = a.whole;
 }
 
 void no_deref_modf() {
   modf_result_f32 a = {0.5f, 1.0f};
-  modf_result_f32 p = a;
-  float fract = p.fract;
-  float whole = p.whole;
+  float fract = a.fract;
+  float whole = a.whole;
 }
 
 void deref_frexp() {
   frexp_result_f32 a = {0.75f, int(1)};
-  frexp_result_f32 p = a;
-  float fract = p.fract;
-  int exp = p.exp;
+  float fract = a.fract;
+  int exp = a.exp;
 }
 
 void no_deref_frexp() {
   frexp_result_f32 a = {0.75f, int(1)};
-  frexp_result_f32 p = a;
-  float fract = p.fract;
-  int exp = p.exp;
+  float fract = a.fract;
+  int exp = a.exp;
 }
 
 [numthreads(1, 1, 1)]

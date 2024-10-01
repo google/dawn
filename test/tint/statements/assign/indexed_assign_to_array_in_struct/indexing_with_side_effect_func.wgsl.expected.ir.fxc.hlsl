@@ -1,5 +1,3 @@
-SKIP: FAILED
-
 struct InnerS {
   int v;
 };
@@ -27,12 +25,11 @@ void main() {
   InnerS v = (InnerS)0;
   OuterS s = (OuterS)0;
   uint v_1 = getNextIndex();
-  InnerS v_2 = v;
-  s.a1[v_1].a2[uniforms[0u].y] = v_2;
+  uint v_2 = uniforms[0u].y;
+  S1 tint_array_copy[8] = s.a1;
+  InnerS v_3 = v;
+  tint_array_copy[v_1].a2[v_2] = v_3;
+  S1 v_4[8] = tint_array_copy;
+  s.a1 = v_4;
 }
 
-FXC validation failure:
-<scrubbed_path>(29,3-30): error X3500: array reference cannot be used as an l-value; not natively addressable
-
-
-tint executable returned error: exit status 1

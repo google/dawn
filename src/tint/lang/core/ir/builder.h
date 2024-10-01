@@ -514,6 +514,13 @@ class Builder {
         return std::forward<VEC>(vec);
     }
 
+    template <typename T>
+    auto Values(tint::Slice<T>&&) {
+        static_assert(sizeof(T) != sizeof(T),  // Condition must be type-dependent
+                      "Cannot construct a Vector from a Slice as the size is not known at "
+                      "compile-time. Use ToVector<N>(Slice&&) instead.");
+    }
+
     /// Overload for Values() with tint::Empty argument
     /// @return tint::Empty
     tint::EmptyType Values(tint::EmptyType) { return tint::Empty; }
