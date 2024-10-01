@@ -56,7 +56,7 @@ ResultOrError<UnpackedPtr<PipelineLayoutDescriptor>> ValidatePipelineLayoutDescr
 struct StageAndDescriptor {
     StageAndDescriptor(SingleShaderStage shaderStage,
                        ShaderModuleBase* module,
-                       const char* entryPoint,
+                       StringView entryPoint,
                        size_t constantCount,
                        ConstantEntry const* constants);
 

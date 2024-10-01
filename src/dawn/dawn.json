@@ -300,7 +300,7 @@
         "chained": "in",
         "chain roots": ["device descriptor"],
         "members": [
-            {"name": "isolation key", "type": "char", "annotation": "const*", "length": "strlen", "default": "\"\""},
+            {"name": "isolation key", "type": "string view"},
             {"name": "load data function", "type": "dawn load cache data function", "default": "nullptr"},
             {"name": "store data function", "type": "dawn store cache data function", "default": "nullptr"},
             {"name": "function userdata", "type": "void *", "default": "nullptr"}
@@ -847,7 +847,7 @@
         "category": "structure",
         "extensible": "in",
         "members": [
-            {"name": "key", "type": "char", "annotation": "const*", "length": "strlen"},
+            {"name": "key", "type": "string view"},
             {"name": "value", "type": "double"}
         ]
     },
@@ -3027,7 +3027,7 @@
         "extensible": "in",
         "members": [
             {"name": "module", "type": "shader module"},
-            {"name": "entry point", "type": "char", "annotation": "const*", "length": "strlen", "optional": true},
+            {"name": "entry point", "type": "string view", "optional": true},
             {"name": "constant count", "type": "size_t", "default": 0},
             {"name": "constants", "type": "constant entry", "annotation": "const*", "length": "constant count"}
         ]
@@ -3774,7 +3774,7 @@
         "extensible": "in",
         "members": [
             {"name": "module", "type": "shader module"},
-            {"name": "entry point", "type": "char", "annotation": "const*", "length": "strlen", "optional": true},
+            {"name": "entry point", "type": "string view", "optional": true},
             {"name": "constant count", "type": "size_t", "default": 0},
             {"name": "constants", "type": "constant entry", "annotation": "const*", "length": "constant count"},
             {"name": "buffer count", "type": "size_t", "default": 0},
@@ -3826,7 +3826,7 @@
         "extensible": "in",
         "members": [
             {"name": "module", "type": "shader module"},
-            {"name": "entry point", "type": "char", "annotation": "const*", "length": "strlen", "optional": true},
+            {"name": "entry point", "type": "string view", "optional": true},
             {"name": "constant count", "type": "size_t", "default": 0},
             {"name": "constants", "type": "constant entry", "annotation": "const*", "length": "constant count"},
             {"name": "target count", "type": "size_t"},
@@ -4128,7 +4128,7 @@
         "chain roots": ["surface descriptor"],
         "tags": ["emscripten"],
         "members": [
-            {"name": "selector", "type": "char", "annotation": "const*", "length": "strlen"}
+            {"name": "selector", "type": "string view"}
         ]
     },
     "surface descriptor from metal layer": {

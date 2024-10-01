@@ -344,7 +344,7 @@ TEST(WireCreatePipelineAsyncTestNullBackend, ServerDeletedBeforeCallback) {
 
     WGPUShaderModule sm = wgpuDeviceCreateShaderModule(device, &smDesc);
 
-    WGPUComputePipelineDescriptor computeDesc = {};
+    WGPUComputePipelineDescriptor computeDesc = WGPU_COMPUTE_PIPELINE_DESCRIPTOR_INIT;
     computeDesc.compute.module = sm;
 
     WGPUComputePipeline pipeline = nullptr;

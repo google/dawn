@@ -48,7 +48,7 @@ namespace dawn::native {
 
 ResultOrError<ShaderModuleEntryPoint> ValidateProgrammableStage(DeviceBase* device,
                                                                 const ShaderModuleBase* module,
-                                                                const char* entryPointName,
+                                                                StringView entryPointName,
                                                                 uint32_t constantCount,
                                                                 const ConstantEntry* constants,
                                                                 const PipelineLayoutBase* layout,

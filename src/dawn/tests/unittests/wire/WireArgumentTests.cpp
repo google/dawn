@@ -166,7 +166,7 @@ TEST_F(WireArgumentTests, CStringArgument) {
     EXPECT_CALL(api,
                 DeviceCreateRenderPipeline(
                     apiDevice, MatchesLambda([](const WGPURenderPipelineDescriptor* desc) -> bool {
-                        return desc->vertex.entryPoint == std::string("main");
+                        return std::string_view(desc->vertex.entryPoint.data) == "main";
                     })))
         .WillOnce(Return(apiPlaceholderPipeline));
 

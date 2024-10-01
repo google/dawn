@@ -50,14 +50,14 @@ bool IsDoubleValueRepresentableAsF16(double value) {
 namespace dawn::native {
 ResultOrError<ShaderModuleEntryPoint> ValidateProgrammableStage(DeviceBase* device,
                                                                 const ShaderModuleBase* module,
-                                                                const char* entryPointName,
+                                                                StringView entryPointName,
                                                                 uint32_t constantCount,
                                                                 const ConstantEntry* constants,
                                                                 const PipelineLayoutBase* layout,
                                                                 SingleShaderStage stage) {
     DAWN_TRY(device->ValidateObject(module));
 
-    if (entryPointName) {
+    if (!entryPointName.IsUndefined()) {
         DAWN_INVALID_IF(!module->HasEntryPoint(entryPointName),
                         "Entry point \"%s\" doesn't exist in the shader module %s.", entryPointName,
                         module);
@@ -103,42 +103,45 @@ ResultOrError<ShaderModuleEntryPoint> ValidateProgrammableStage(DeviceBase* devi
     // pipelineBase is not yet constructed at this moment so iterate constants from descriptor
     size_t numUninitializedConstants = metadata.uninitializedOverrides.size();
     // Keep an initialized constants sets to handle duplicate initialization cases
-    absl::flat_hash_set<std::string> stageInitializedConstantIdentifiers;
+    absl::flat_hash_set<std::string_view> stageInitializedConstantIdentifiers;
     for (uint32_t i = 0; i < constantCount; i++) {
-        DAWN_INVALID_IF(metadata.overrides.count(constants[i].key) == 0,
+        std::string_view key = constants[i].key;
+        double value = constants[i].value;
+
+        DAWN_INVALID_IF(metadata.overrides.count(key) == 0,
                         "Pipeline overridable constant \"%s\" not found in %s.", constants[i].key,
                         module);
-        DAWN_INVALID_IF(!std::isfinite(constants[i].value),
+        DAWN_INVALID_IF(!std::isfinite(value),
                         "Pipeline overridable constant \"%s\" with value (%f) is not finite in %s",
-                        constants[i].key, constants[i].value, module);
+                        key, value, module);
 
         // Validate if constant value can be represented by the given scalar type in shader
-        auto type = metadata.overrides.at(constants[i].key).type;
+        auto type = metadata.overrides.at(key).type;
         switch (type) {
             case EntryPointMetadata::Override::Type::Float32:
-                DAWN_INVALID_IF(!IsDoubleValueRepresentable<float>(constants[i].value),
+                DAWN_INVALID_IF(!IsDoubleValueRepresentable<float>(value),
                                 "Pipeline overridable constant \"%s\" with value (%f) is not "
                                 "representable in type (%s)",
-                                constants[i].key, constants[i].value, "f32");
+                                key, value, "f32");
                 break;
             case EntryPointMetadata::Override::Type::Float16:
-                DAWN_INVALID_IF(!IsDoubleValueRepresentableAsF16(constants[i].value),
+                DAWN_INVALID_IF(!IsDoubleValueRepresentableAsF16(value),
                                 "Pipeline overridable constant \"%s\" with value (%f) is not "
                                 "representable in type (%s)",
-                                constants[i].key, constants[i].value, "f16");
+                                key, value, "f16");
                 break;
             case EntryPointMetadata::Override::Type::Int32:
-                DAWN_INVALID_IF(!IsDoubleValueRepresentable<int32_t>(constants[i].value),
+                DAWN_INVALID_IF(!IsDoubleValueRepresentable<int32_t>(value),
                                 "Pipeline overridable constant \"%s\" with value (%f) is not "
                                 "representable in type (%s)",
-                                constants[i].key, constants[i].value,
+                                key, value,
                                 type == EntryPointMetadata::Override::Type::Int32 ? "i32" : "b");
                 break;
             case EntryPointMetadata::Override::Type::Uint32:
-                DAWN_INVALID_IF(!IsDoubleValueRepresentable<uint32_t>(constants[i].value),
+                DAWN_INVALID_IF(!IsDoubleValueRepresentable<uint32_t>(value),
                                 "Pipeline overridable constant \"%s\" with value (%f) is not "
                                 "representable in type (%s)",
-                                constants[i].key, constants[i].value, "u32");
+                                key, value, "u32");
                 break;
             case EntryPointMetadata::Override::Type::Boolean:
                 // Conversion to boolean can't fail
@@ -148,15 +151,15 @@ ResultOrError<ShaderModuleEntryPoint> ValidateProgrammableStage(DeviceBase* devi
                 DAWN_UNREACHABLE();
         }
 
-        if (!stageInitializedConstantIdentifiers.contains(constants[i].key)) {
-            if (metadata.uninitializedOverrides.contains(constants[i].key)) {
+        if (!stageInitializedConstantIdentifiers.contains(key)) {
+            if (metadata.uninitializedOverrides.contains(key)) {
                 numUninitializedConstants--;
             }
-            stageInitializedConstantIdentifiers.insert(constants[i].key);
+            stageInitializedConstantIdentifiers.insert(key);
         } else {
             // There are duplicate initializations
             return DAWN_VALIDATION_ERROR(
-                "Pipeline overridable constants \"%s\" is set more than once", constants[i].key);
+                "Pipeline overridable constants \"%s\" is set more than once", key);
         }
     }
 

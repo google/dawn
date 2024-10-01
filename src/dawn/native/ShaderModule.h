@@ -304,18 +304,18 @@ class ShaderModuleBase : public RefCountedWithExternalCount<ApiObjectBase>,
     ObjectType GetType() const override;
 
     // Return true iff the program has an entrypoint called `entryPoint`.
-    bool HasEntryPoint(const std::string& entryPoint) const;
+    bool HasEntryPoint(std::string_view entryPoint) const;
 
     // Return the number of entry points for a stage.
     size_t GetEntryPointCount(SingleShaderStage stage) const { return mEntryPointCounts[stage]; }
 
     // Return the entry point for a stage. If no entry point name, returns the default one.
-    ShaderModuleEntryPoint ReifyEntryPointName(const char* entryPointName,
+    ShaderModuleEntryPoint ReifyEntryPointName(StringView entryPointName,
                                                SingleShaderStage stage) const;
 
     // Return the metadata for the given `entryPoint`. HasEntryPoint with the same argument
     // must be true.
-    const EntryPointMetadata& GetEntryPoint(const std::string& entryPoint) const;
+    const EntryPointMetadata& GetEntryPoint(std::string_view entryPoint) const;
 
     // Functions necessary for the unordered_set<ShaderModuleBase*>-based cache.
     size_t ComputeContentHash() override;
