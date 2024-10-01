@@ -1,6 +1,6 @@
 SKIP: FAILED
 
-<dawn>/src/tint/lang/glsl/writer/printer/printer.cc:618 internal compiler error: Switch() matched no cases. Type: tint::core::type::Sampler
+<dawn>/src/tint/lang/glsl/writer/printer/printer.cc:1468 internal compiler error: TINT_UNREACHABLE unhandled core builtin: textureSampleBias
 ********************************************************************
 *  The tint shader compiler has encountered an unexpected error.   *
 *                                                                  *

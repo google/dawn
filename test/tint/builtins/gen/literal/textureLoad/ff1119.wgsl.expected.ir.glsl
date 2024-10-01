@@ -1,6 +1,6 @@
 SKIP: FAILED
 
-<dawn>/src/tint/lang/glsl/writer/printer/printer.cc:1451 internal compiler error: TINT_UNREACHABLE unhandled core builtin: textureLoad
+<dawn>/src/tint/lang/glsl/writer/raise/builtin_polyfill.cc:469 internal compiler error: TINT_ASSERT(!tex->Type()->Is<core::type::DepthTexture>())
 ********************************************************************
 *  The tint shader compiler has encountered an unexpected error.   *
 *                                                                  *

@@ -1,11 +1,45 @@
 SKIP: FAILED
 
-<dawn>/src/tint/lang/glsl/writer/printer/printer.cc:994 internal compiler error: bgra8unorm should have been polyfilled to rgba8unorm
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
+#version 310 es
+precision highp float;
+precision highp int;
 
-tint executable returned error: signal: trace/BPT trap
+layout(binding = 0, rgba8) uniform highp writeonly image1D arg_0;
+void textureStore_e0b666() {
+  int arg_1 = 1;
+  vec4 arg_2 = vec4(1.0f);
+  imageStore(arg_0, arg_1, arg_2.zyxw);
+}
+void main() {
+  textureStore_e0b666();
+}
+error: Error parsing GLSL shader:
+ERROR: 0:5: 'image1D' : Reserved word. 
+WARNING: 0:5: 'layout' : useless application of layout qualifier 
+ERROR: 0:5: '' : compilation terminated 
+ERROR: 2 compilation errors.  No code generated.
+
+
+
+#version 310 es
+
+layout(binding = 0, rgba8) uniform highp writeonly image1D arg_0;
+void textureStore_e0b666() {
+  int arg_1 = 1;
+  vec4 arg_2 = vec4(1.0f);
+  imageStore(arg_0, arg_1, arg_2.zyxw);
+}
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+void main() {
+  textureStore_e0b666();
+}
+error: Error parsing GLSL shader:
+ERROR: 0:3: 'image1D' : Reserved word. 
+WARNING: 0:3: 'layout' : useless application of layout qualifier 
+ERROR: 0:3: '' : compilation terminated 
+ERROR: 2 compilation errors.  No code generated.
+
+
+
+
+tint executable returned error: exit status 1

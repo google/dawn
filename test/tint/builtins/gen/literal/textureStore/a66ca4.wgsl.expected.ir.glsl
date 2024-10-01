@@ -1,6 +1,6 @@
 SKIP: INVALID
 
-<dawn>/src/tint/lang/glsl/writer/printer/printer.cc:994 internal compiler error: bgra8unorm should have been polyfilled to rgba8unorm
+<dawn>/src/tint/lang/glsl/writer/printer/printer.cc:733 internal compiler error: TINT_UNREACHABLE invalid texel format for read-write
 ********************************************************************
 *  The tint shader compiler has encountered an unexpected error.   *
 *                                                                  *

@@ -1,11 +1,49 @@
 SKIP: INVALID
 
-<dawn>/src/tint/lang/glsl/writer/printer/printer.cc:1451 internal compiler error: TINT_UNREACHABLE unhandled core builtin: textureStore
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
+#version 460
+precision highp float;
+precision highp int;
 
-tint executable returned error: signal: trace/BPT trap
+layout(binding = 0, rg32ui) uniform highp uimage2DArray arg_0;
+void textureStore_0ade9a() {
+  uvec2 arg_1 = uvec2(1u);
+  uint arg_2 = 1u;
+  uvec4 arg_3 = uvec4(1u);
+  uvec2 v = arg_1;
+  uvec4 v_1 = arg_3;
+  imageStore(arg_0, uvec3(v, uint(arg_2)), v_1);
+}
+void main() {
+  textureStore_0ade9a();
+}
+error: Error parsing GLSL shader:
+ERROR: 0:12: 'imageStore' : no matching overloaded function found 
+ERROR: 0:12: '' : compilation terminated 
+ERROR: 2 compilation errors.  No code generated.
+
+
+
+#version 460
+
+layout(binding = 0, rg32ui) uniform highp uimage2DArray arg_0;
+void textureStore_0ade9a() {
+  uvec2 arg_1 = uvec2(1u);
+  uint arg_2 = 1u;
+  uvec4 arg_3 = uvec4(1u);
+  uvec2 v = arg_1;
+  uvec4 v_1 = arg_3;
+  imageStore(arg_0, uvec3(v, uint(arg_2)), v_1);
+}
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+void main() {
+  textureStore_0ade9a();
+}
+error: Error parsing GLSL shader:
+ERROR: 0:10: 'imageStore' : no matching overloaded function found 
+ERROR: 0:10: '' : compilation terminated 
+ERROR: 2 compilation errors.  No code generated.
+
+
+
+
+tint executable returned error: exit status 1
