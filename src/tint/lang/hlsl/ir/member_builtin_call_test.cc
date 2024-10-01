@@ -71,12 +71,12 @@ TEST_F(IR_HlslMemberBuiltinCallTest, Clone) {
 }
 
 TEST_F(IR_HlslMemberBuiltinCallTest, DoesNotMatchNonMemberFunction) {
-    auto* buf = ty.Get<hlsl::type::ByteAddressBuffer>(core::Access::kRead);
-
-    auto* t = b.FunctionParam("t", buf);
+    auto* buf_ty = ty.Get<hlsl::type::ByteAddressBuffer>(core::Access::kRead);
+    auto* t = b.Var("t", buf_ty);
+    t->SetBindingPoint(0, 0);
+    mod.root_block->Append(t);
 
     auto* func = b.Function("foo", ty.u32());
-    func->SetParams({t});
     b.Append(func->Block(), [&] {
         auto* builtin =
             b.MemberCall<MemberBuiltinCall>(mod.Types().u32(), BuiltinFn::kAsint, t, 2_u);
@@ -87,18 +87,22 @@ TEST_F(IR_HlslMemberBuiltinCallTest, DoesNotMatchNonMemberFunction) {
     ASSERT_NE(res, Success);
     EXPECT_EQ(
         res.Failure().reason.Str(),
-        R"(:3:17 error: asint: no matching call to 'asint(hlsl.byte_address_buffer<read>, u32)'
+        R"(:7:17 error: asint: no matching call to 'asint(hlsl.byte_address_buffer<read>, u32)'
 
     %3:u32 = %t.asint 2u
                 ^^^^^
 
-:2:3 note: in block
-  $B1: {
+:6:3 note: in block
+  $B2: {
   ^^^
 
 note: # Disassembly
-%foo = func(%t:hlsl.byte_address_buffer<read>):u32 {
-  $B1: {
+$B1: {  # root
+  %t:hlsl.byte_address_buffer<read> = var @binding_point(0, 0)
+}
+
+%foo = func():u32 {
+  $B2: {
     %3:u32 = %t.asint 2u
     ret %3
   }
@@ -107,12 +111,12 @@ note: # Disassembly
 }
 
 TEST_F(IR_HlslMemberBuiltinCallTest, DoesNotMatchIncorrectType) {
-    auto* buf = ty.Get<hlsl::type::ByteAddressBuffer>(core::Access::kRead);
-
-    auto* t = b.FunctionParam("t", buf);
+    auto* buf_ty = ty.Get<hlsl::type::ByteAddressBuffer>(core::Access::kRead);
+    auto* t = b.Var("t", buf_ty);
+    t->SetBindingPoint(0, 0);
+    mod.root_block->Append(t);
 
     auto* func = b.Function("foo", ty.u32());
-    func->SetParams({t});
     b.Append(func->Block(), [&] {
         auto* builtin =
             b.MemberCall<MemberBuiltinCall>(mod.Types().u32(), BuiltinFn::kStore, t, 2_u, 2_u);
@@ -123,7 +127,7 @@ TEST_F(IR_HlslMemberBuiltinCallTest, DoesNotMatchIncorrectType) {
     ASSERT_NE(res, Success);
     EXPECT_EQ(
         res.Failure().reason.Str(),
-        R"(:3:17 error: Store: no matching call to 'Store(hlsl.byte_address_buffer<read>, u32, u32)'
+        R"(:7:17 error: Store: no matching call to 'Store(hlsl.byte_address_buffer<read>, u32, u32)'
 
 1 candidate function:
  • 'Store(byte_address_buffer<write' or 'read_write>  ✗ , offset: u32  ✓ , value: u32  ✓ )'
@@ -131,13 +135,17 @@ TEST_F(IR_HlslMemberBuiltinCallTest, DoesNotMatchIncorrectType) {
     %3:u32 = %t.Store 2u, 2u
                 ^^^^^
 
-:2:3 note: in block
-  $B1: {
+:6:3 note: in block
+  $B2: {
   ^^^
 
 note: # Disassembly
-%foo = func(%t:hlsl.byte_address_buffer<read>):u32 {
-  $B1: {
+$B1: {  # root
+  %t:hlsl.byte_address_buffer<read> = var @binding_point(0, 0)
+}
+
+%foo = func():u32 {
+  $B2: {
     %3:u32 = %t.Store 2u, 2u
     ret %3
   }

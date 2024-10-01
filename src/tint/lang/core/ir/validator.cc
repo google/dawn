@@ -129,9 +129,19 @@ bool TransitivelyHolds(const Block* block, const Instruction* inst) {
     return false;
 }
 
-/// @returns true is @p attr contains both a location and builtin decoration
+/// @returns true if @p attr contains both a location and builtin decoration
 bool HasLocationAndBuiltin(const tint::core::IOAttributes& attr) {
     return attr.builtin.has_value() && attr.location.has_value();
+}
+
+/// @returns true if @p ty meets the basic function parameter rules (i.e. one of constructible,
+///          pointer, sampler or texture).
+///
+/// Note: Does not handle corner cases like if certain capabilities are
+/// enabled.
+bool IsValidFunctionParamType(const core::type::Type* ty) {
+    return ty->IsConstructible() || ty->Is<type::Pointer>() || ty->Is<type::Texture>() ||
+           ty->Is<type::Sampler>();
 }
 
 /// The core IR validator.
@@ -1176,6 +1186,23 @@ void Validator::CheckFunction(const Function* func) {
             return;
         }
 
+        // References not allowed on function signatures even with Capability::kAllowRefTypes.
+        CheckType(
+            param->Type(), [&]() -> diag::Diagnostic& { return AddError(param); },
+            Capabilities{Capability::kAllowRefTypes});
+
+        if (!IsValidFunctionParamType(param->Type())) {
+            auto struct_ty = param->Type()->As<core::type::Struct>();
+            if (!capabilities_.Contains(Capability::kAllowPointersInStructures) || !struct_ty ||
+                struct_ty->Members().Any([](const core::type::StructMember* m) {
+                    return !IsValidFunctionParamType(m->Type());
+                })) {
+                AddError(param) << "function parameter type must be constructible, a pointer, a "
+                                   "texture, or a sampler";
+                return;
+            }
+        }
+
         if (HasLocationAndBuiltin(param->Attributes())) {
             AddError(param) << "a builtin and location cannot be both declared for a param";
             return;
@@ -1190,11 +1217,6 @@ void Validator::CheckFunction(const Function* func) {
                 }
             }
         }
-
-        // References not allowed on function signatures even with Capability::kAllowRefTypes.
-        CheckType(
-            param->Type(), [&]() -> diag::Diagnostic& { return AddError(param); },
-            Capabilities{Capability::kAllowRefTypes});
 
         scope_stack_.Add(param);
     }

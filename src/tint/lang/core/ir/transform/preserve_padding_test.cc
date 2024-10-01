@@ -263,7 +263,7 @@ $B1: {  # root
 }
 
 TEST_F(IR_PreservePaddingTest, NoModify_ArrayWithoutPadding) {
-    auto* arr = ty.array<vec4<f32>>();
+    auto* arr = ty.array<vec4<f32>, 4>();
     auto* buffer = b.Var("buffer", ty.ptr(storage, arr));
     buffer->SetBindingPoint(0, 0);
     mod.root_block->Append(buffer);
@@ -278,10 +278,10 @@ TEST_F(IR_PreservePaddingTest, NoModify_ArrayWithoutPadding) {
 
     auto* src = R"(
 $B1: {  # root
-  %buffer:ptr<storage, array<vec4<f32>>, read_write> = var @binding_point(0, 0)
+  %buffer:ptr<storage, array<vec4<f32>, 4>, read_write> = var @binding_point(0, 0)
 }
 
-%foo = func(%value:array<vec4<f32>>):void {
+%foo = func(%value:array<vec4<f32>, 4>):void {
   $B2: {
     store %buffer, %value
     ret
