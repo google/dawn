@@ -1,5 +1,3 @@
-SKIP: FAILED
-
 #version 310 es
 precision highp float;
 precision highp int;
@@ -8,37 +6,30 @@ layout(binding = 0, std430)
 buffer tint_symbol_1_1_ssbo {
   uvec4 tint_symbol;
 } v;
-uniform highp usampler1D arg_0;
+uniform highp usampler2D arg_0;
 uvec4 textureLoad_6b77d4() {
   int arg_1 = 1;
   uint arg_2 = 1u;
   uint v_1 = arg_2;
-  int v_2 = int(arg_1);
+  ivec2 v_2 = ivec2(ivec2(arg_1, 0));
   uvec4 res = texelFetch(arg_0, v_2, int(v_1));
   return res;
 }
 void main() {
   v.tint_symbol = textureLoad_6b77d4();
 }
-error: Error parsing GLSL shader:
-ERROR: 0:9: 'usampler1D' : Reserved word. 
-ERROR: 0:9: '' : compilation terminated 
-ERROR: 2 compilation errors.  No code generated.
-
-
-
 #version 310 es
 
 layout(binding = 0, std430)
 buffer tint_symbol_1_1_ssbo {
   uvec4 tint_symbol;
 } v;
-uniform highp usampler1D arg_0;
+uniform highp usampler2D arg_0;
 uvec4 textureLoad_6b77d4() {
   int arg_1 = 1;
   uint arg_2 = 1u;
   uint v_1 = arg_2;
-  int v_2 = int(arg_1);
+  ivec2 v_2 = ivec2(ivec2(arg_1, 0));
   uvec4 res = texelFetch(arg_0, v_2, int(v_1));
   return res;
 }
@@ -46,13 +37,6 @@ layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
   v.tint_symbol = textureLoad_6b77d4();
 }
-error: Error parsing GLSL shader:
-ERROR: 0:7: 'usampler1D' : Reserved word. 
-ERROR: 0:7: '' : compilation terminated 
-ERROR: 2 compilation errors.  No code generated.
-
-
-
 #version 310 es
 
 
@@ -61,13 +45,13 @@ struct VertexOutput {
   uvec4 prevent_dce;
 };
 
-uniform highp usampler1D arg_0;
+uniform highp usampler2D arg_0;
 layout(location = 0) flat out uvec4 vertex_main_loc0_Output;
 uvec4 textureLoad_6b77d4() {
   int arg_1 = 1;
   uint arg_2 = 1u;
   uint v = arg_2;
-  int v_1 = int(arg_1);
+  ivec2 v_1 = ivec2(ivec2(arg_1, 0));
   uvec4 res = texelFetch(arg_0, v_1, int(v));
   return res;
 }
@@ -85,12 +69,3 @@ void main() {
   vertex_main_loc0_Output = v_2.prevent_dce;
   gl_PointSize = 1.0f;
 }
-error: Error parsing GLSL shader:
-ERROR: 0:9: 'usampler1D' : Reserved word. 
-ERROR: 0:9: '' : compilation terminated 
-ERROR: 2 compilation errors.  No code generated.
-
-
-
-
-tint executable returned error: exit status 1

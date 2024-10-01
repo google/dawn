@@ -843,8 +843,8 @@ TEST_F(GlslWriterTest, BuiltinTextureDimensions_1d) {
     ASSERT_TRUE(Generate(opts)) << err_ << output_.glsl;
     EXPECT_EQ(output_.glsl, R"(#version 460
 
-uint foo(highp sampler1D t) {
-  return uint(textureSize(t, 0));
+uint foo(highp sampler2D t) {
+  return uvec2(textureSize(t, 0)).x;
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
@@ -1167,9 +1167,9 @@ TEST_F(GlslWriterTest, BuiltinTextureLoad_1DF32) {
 precision highp float;
 precision highp int;
 
-uniform highp sampler1D v;
+uniform highp sampler2D v;
 void main() {
-  int v_1 = int(1u);
+  ivec2 v_1 = ivec2(uvec2(1u, 0u));
   vec4 x = texelFetch(v, v_1, int(3u));
 }
 )");
@@ -1314,9 +1314,9 @@ TEST_F(GlslWriterTest, BuiltinTextureStore1D) {
 precision highp float;
 precision highp int;
 
-layout(binding = 0, r32f) uniform highp writeonly image1D v;
+layout(binding = 0, r32f) uniform highp writeonly image2D v;
 void main() {
-  imageStore(v, 1, vec4(0.5f, 0.0f, 0.0f, 1.0f));
+  imageStore(v, ivec2(1, 0), vec4(0.5f, 0.0f, 0.0f, 1.0f));
 }
 )");
 }

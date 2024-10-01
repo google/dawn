@@ -240,8 +240,6 @@ class Printer : public tint::TextGenerator {
                        << ", local_size_z = " << wg[2] << ") in;";
             }
 
-            // TODO(dsinclair): Handle return type attributes
-
             EmitType(out, func->ReturnType());
             out << " ";
 
@@ -357,7 +355,7 @@ class Printer : public tint::TextGenerator {
                 out << "w";
                 break;
             default:
-                TINT_UNREACHABLE();
+                TINT_UNREACHABLE() << "invalid index for component";
         }
     }
 
@@ -615,7 +613,6 @@ class Printer : public tint::TextGenerator {
             },
             [&](const core::type::Texture* t) { EmitTextureType(out, t); },
 
-            // TODO(dsinclair): Handle remaining types
             TINT_ICE_ON_NO_MATCH);
     }
 
@@ -736,7 +733,7 @@ class Printer : public tint::TextGenerator {
                     break;
                 }
                 default:
-                    TINT_UNREACHABLE();
+                    TINT_UNREACHABLE() << "invalid storage access";
             }
         }
         auto* subtype = sampled   ? sampled->Type()
@@ -756,9 +753,6 @@ class Printer : public tint::TextGenerator {
         out << (storage ? "image" : "sampler");
 
         switch (t->Dim()) {
-            case core::type::TextureDimension::k1d:
-                out << "1D";
-                break;
             case core::type::TextureDimension::k2d:
                 out << "2D";
                 if (ms || depth_ms) {
@@ -782,7 +776,7 @@ class Printer : public tint::TextGenerator {
                 out << "CubeArray";
                 break;
             default:
-                TINT_UNREACHABLE();
+                TINT_UNREACHABLE() << "unknown texture dimension: " << t->Dim();
         }
         if (t->Is<core::type::DepthTexture>()) {
             out << "Shadow";
@@ -1501,7 +1495,6 @@ class Printer : public tint::TextGenerator {
             [&](const core::type::Matrix* m) { EmitConstantMatrix(out, m, c); },
             [&](const core::type::Struct* s) { EmitConstantStruct(out, s, c); },
 
-            // TODO(dsinclair): Emit remaining constant types
             TINT_ICE_ON_NO_MATCH);
     }
 

@@ -44,6 +44,7 @@ cc_library(
     "builtin_polyfill.cc",
     "raise.cc",
     "shader_io.cc",
+    "texture_polyfill.cc",
   ],
   hdrs = [
     "binary_polyfill.h",
@@ -51,6 +52,7 @@ cc_library(
     "builtin_polyfill.h",
     "raise.h",
     "shader_io.h",
+    "texture_polyfill.h",
   ],
   deps = [
     "//src/tint/api/common",
@@ -100,6 +102,7 @@ cc_library(
     "bitcast_polyfill_test.cc",
     "builtin_polyfill_test.cc",
     "shader_io_test.cc",
+    "texture_polyfill_test.cc",
   ],
   deps = [
     "//src/tint/api/common",

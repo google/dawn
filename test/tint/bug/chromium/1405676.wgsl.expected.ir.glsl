@@ -1,8 +1,8 @@
 #version 310 es
 
-uniform highp isampler1D arg_0;
+uniform highp isampler2D arg_0;
 void d() {
-  int v = int(1);
+  ivec2 v = ivec2(ivec2(1, 0));
   texelFetch(arg_0, v, int(0));
   float l = 0.14112000167369842529f;
 }

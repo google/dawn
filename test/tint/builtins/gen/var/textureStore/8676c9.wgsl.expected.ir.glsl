@@ -1,45 +1,27 @@
-SKIP: FAILED
-
 #version 310 es
 precision highp float;
 precision highp int;
 
-layout(binding = 0, r32ui) uniform highp uimage1D arg_0;
+layout(binding = 0, r32ui) uniform highp uimage2D arg_0;
 void textureStore_8676c9() {
   int arg_1 = 1;
   uvec4 arg_2 = uvec4(1u);
-  imageStore(arg_0, arg_1, arg_2);
+  uvec4 v = arg_2;
+  imageStore(arg_0, ivec2(arg_1, 0), v);
 }
 void main() {
   textureStore_8676c9();
 }
-error: Error parsing GLSL shader:
-ERROR: 0:5: 'uimage1D' : Reserved word. 
-WARNING: 0:5: 'layout' : useless application of layout qualifier 
-ERROR: 0:5: '' : compilation terminated 
-ERROR: 2 compilation errors.  No code generated.
-
-
-
 #version 310 es
 
-layout(binding = 0, r32ui) uniform highp uimage1D arg_0;
+layout(binding = 0, r32ui) uniform highp uimage2D arg_0;
 void textureStore_8676c9() {
   int arg_1 = 1;
   uvec4 arg_2 = uvec4(1u);
-  imageStore(arg_0, arg_1, arg_2);
+  uvec4 v = arg_2;
+  imageStore(arg_0, ivec2(arg_1, 0), v);
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
   textureStore_8676c9();
 }
-error: Error parsing GLSL shader:
-ERROR: 0:3: 'uimage1D' : Reserved word. 
-WARNING: 0:3: 'layout' : useless application of layout qualifier 
-ERROR: 0:3: '' : compilation terminated 
-ERROR: 2 compilation errors.  No code generated.
-
-
-
-
-tint executable returned error: exit status 1

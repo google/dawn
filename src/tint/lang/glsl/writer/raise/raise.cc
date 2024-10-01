@@ -52,6 +52,7 @@
 #include "src/tint/lang/glsl/writer/raise/bitcast_polyfill.h"
 #include "src/tint/lang/glsl/writer/raise/builtin_polyfill.h"
 #include "src/tint/lang/glsl/writer/raise/shader_io.h"
+#include "src/tint/lang/glsl/writer/raise/texture_polyfill.h"
 
 namespace tint::glsl::writer {
 
@@ -115,7 +116,6 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
     // TODO(dsinclair): OffsetFirstIndex
     // TODO(dsinclair): CombineSamplers
     // TODO(dsinclair): PadStructs
-    // TODO(dsinclair): Texture1DTo2D
 
     RUN_TRANSFORM(core::ir::transform::DirectVariableAccess, module,
                   core::ir::transform::DirectVariableAccessOptions{});
@@ -130,6 +130,7 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
     RUN_TRANSFORM(raise::BinaryPolyfill, module);
     // Must come after zero-init as it will add builtins
     RUN_TRANSFORM(raise::BuiltinPolyfill, module);
+    RUN_TRANSFORM(raise::TexturePolyfill, module);
     // Must come after BuiltinPolyfill as builtins can add bitcasts
     RUN_TRANSFORM(raise::BitcastPolyfill, module);
 

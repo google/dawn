@@ -6,9 +6,9 @@ layout(binding = 0, std430)
 buffer tint_symbol_1_1_ssbo {
   uvec4 tint_symbol;
 } v;
-layout(binding = 0, rg32ui) uniform highp readonly uimage1D arg_0;
+layout(binding = 0, rg32ui) uniform highp readonly uimage2D arg_0;
 uvec4 textureLoad_44c826() {
-  uvec4 res = imageLoad(arg_0, int(1u));
+  uvec4 res = imageLoad(arg_0, ivec2(uvec2(1u, 0u)));
   return res;
 }
 void main() {
@@ -20,9 +20,9 @@ layout(binding = 0, std430)
 buffer tint_symbol_1_1_ssbo {
   uvec4 tint_symbol;
 } v;
-layout(binding = 0, rg32ui) uniform highp readonly uimage1D arg_0;
+layout(binding = 0, rg32ui) uniform highp readonly uimage2D arg_0;
 uvec4 textureLoad_44c826() {
-  uvec4 res = imageLoad(arg_0, int(1u));
+  uvec4 res = imageLoad(arg_0, ivec2(uvec2(1u, 0u)));
   return res;
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
@@ -37,10 +37,10 @@ struct VertexOutput {
   uvec4 prevent_dce;
 };
 
-layout(binding = 0, rg32ui) uniform highp readonly uimage1D arg_0;
+layout(binding = 0, rg32ui) uniform highp readonly uimage2D arg_0;
 layout(location = 0) flat out uvec4 vertex_main_loc0_Output;
 uvec4 textureLoad_44c826() {
-  uvec4 res = imageLoad(arg_0, int(1u));
+  uvec4 res = imageLoad(arg_0, ivec2(uvec2(1u, 0u)));
   return res;
 }
 VertexOutput vertex_main_inner() {

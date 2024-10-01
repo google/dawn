@@ -712,7 +712,6 @@ INSTANTIATE_TEST_SUITE_P(
     GlslWriterTest,
     GlslWriterSampledTextureNonESTest,
     testing::Values(
-        GlslTextureData{core::type::TextureDimension::k1d, TextureDataType::kF32, "sampler1D"},
         GlslTextureData{core::type::TextureDimension::k2d, TextureDataType::kF32, "sampler2D"},
         GlslTextureData{core::type::TextureDimension::k2dArray, TextureDataType::kF32,
                         "sampler2DArray"},
@@ -721,7 +720,6 @@ INSTANTIATE_TEST_SUITE_P(
         GlslTextureData{core::type::TextureDimension::kCubeArray, TextureDataType::kF32,
                         "samplerCubeArray"},
 
-        GlslTextureData{core::type::TextureDimension::k1d, TextureDataType::kI32, "isampler1D"},
         GlslTextureData{core::type::TextureDimension::k2d, TextureDataType::kI32, "isampler2D"},
         GlslTextureData{core::type::TextureDimension::k2dArray, TextureDataType::kI32,
                         "isampler2DArray"},
@@ -730,7 +728,6 @@ INSTANTIATE_TEST_SUITE_P(
         GlslTextureData{core::type::TextureDimension::kCubeArray, TextureDataType::kI32,
                         "isamplerCubeArray"},
 
-        GlslTextureData{core::type::TextureDimension::k1d, TextureDataType::kU32, "usampler1D"},
         GlslTextureData{core::type::TextureDimension::k2d, TextureDataType::kU32, "usampler2D"},
         GlslTextureData{core::type::TextureDimension::k2dArray, TextureDataType::kU32,
                         "usampler2DArray"},
@@ -983,8 +980,6 @@ INSTANTIATE_TEST_SUITE_P(
     GlslWriterTest,
     GlslWriterStorageTextureNonESTest,
     testing::Values(
-        GlslStorageTextureData{core::type::TextureDimension::k1d, core::Access::kRead,
-                               TextureDataType::kF32, "readonly image1D"},
         GlslStorageTextureData{core::type::TextureDimension::k2d, core::Access::kRead,
                                TextureDataType::kF32, "readonly image2D"},
         GlslStorageTextureData{core::type::TextureDimension::k2dArray, core::Access::kRead,
@@ -996,8 +991,6 @@ INSTANTIATE_TEST_SUITE_P(
         GlslStorageTextureData{core::type::TextureDimension::kCubeArray, core::Access::kRead,
                                TextureDataType::kF32, "readonly imageCubeArray"},
 
-        GlslStorageTextureData{core::type::TextureDimension::k1d, core::Access::kWrite,
-                               TextureDataType::kF32, "writeonly image1D"},
         GlslStorageTextureData{core::type::TextureDimension::k2d, core::Access::kWrite,
                                TextureDataType::kF32, "writeonly image2D"},
         GlslStorageTextureData{core::type::TextureDimension::k2dArray, core::Access::kWrite,
@@ -1009,8 +1002,6 @@ INSTANTIATE_TEST_SUITE_P(
         GlslStorageTextureData{core::type::TextureDimension::kCubeArray, core::Access::kWrite,
                                TextureDataType::kF32, "writeonly imageCubeArray"},
 
-        GlslStorageTextureData{core::type::TextureDimension::k1d, core::Access::kReadWrite,
-                               TextureDataType::kF32, "image1D"},
         GlslStorageTextureData{core::type::TextureDimension::k2d, core::Access::kReadWrite,
                                TextureDataType::kF32, "image2D"},
         GlslStorageTextureData{core::type::TextureDimension::k2dArray, core::Access::kReadWrite,
@@ -1022,8 +1013,6 @@ INSTANTIATE_TEST_SUITE_P(
         GlslStorageTextureData{core::type::TextureDimension::kCubeArray, core::Access::kReadWrite,
                                TextureDataType::kF32, "imageCubeArray"},
 
-        GlslStorageTextureData{core::type::TextureDimension::k1d, core::Access::kRead,
-                               TextureDataType::kI32, "readonly iimage1D"},
         GlslStorageTextureData{core::type::TextureDimension::k2d, core::Access::kRead,
                                TextureDataType::kI32, "readonly iimage2D"},
         GlslStorageTextureData{core::type::TextureDimension::k2dArray, core::Access::kRead,
@@ -1035,8 +1024,6 @@ INSTANTIATE_TEST_SUITE_P(
         GlslStorageTextureData{core::type::TextureDimension::kCubeArray, core::Access::kRead,
                                TextureDataType::kI32, "readonly iimageCubeArray"},
 
-        GlslStorageTextureData{core::type::TextureDimension::k1d, core::Access::kWrite,
-                               TextureDataType::kI32, "writeonly iimage1D"},
         GlslStorageTextureData{core::type::TextureDimension::k2d, core::Access::kWrite,
                                TextureDataType::kI32, "writeonly iimage2D"},
         GlslStorageTextureData{core::type::TextureDimension::k2dArray, core::Access::kWrite,
@@ -1048,8 +1035,6 @@ INSTANTIATE_TEST_SUITE_P(
         GlslStorageTextureData{core::type::TextureDimension::kCubeArray, core::Access::kWrite,
                                TextureDataType::kI32, "writeonly iimageCubeArray"},
 
-        GlslStorageTextureData{core::type::TextureDimension::k1d, core::Access::kReadWrite,
-                               TextureDataType::kI32, "iimage1D"},
         GlslStorageTextureData{core::type::TextureDimension::k2d, core::Access::kReadWrite,
                                TextureDataType::kI32, "iimage2D"},
         GlslStorageTextureData{core::type::TextureDimension::k2dArray, core::Access::kReadWrite,
@@ -1061,8 +1046,6 @@ INSTANTIATE_TEST_SUITE_P(
         GlslStorageTextureData{core::type::TextureDimension::kCubeArray, core::Access::kReadWrite,
                                TextureDataType::kI32, "iimageCubeArray"},
 
-        GlslStorageTextureData{core::type::TextureDimension::k1d, core::Access::kRead,
-                               TextureDataType::kU32, "readonly uimage1D"},
         GlslStorageTextureData{core::type::TextureDimension::k2d, core::Access::kRead,
                                TextureDataType::kU32, "readonly uimage2D"},
         GlslStorageTextureData{core::type::TextureDimension::k2dArray, core::Access::kRead,
@@ -1074,8 +1057,6 @@ INSTANTIATE_TEST_SUITE_P(
         GlslStorageTextureData{core::type::TextureDimension::kCubeArray, core::Access::kRead,
                                TextureDataType::kU32, "readonly uimageCubeArray"},
 
-        GlslStorageTextureData{core::type::TextureDimension::k1d, core::Access::kWrite,
-                               TextureDataType::kU32, "writeonly uimage1D"},
         GlslStorageTextureData{core::type::TextureDimension::k2d, core::Access::kWrite,
                                TextureDataType::kU32, "writeonly uimage2D"},
         GlslStorageTextureData{core::type::TextureDimension::k2dArray, core::Access::kWrite,
@@ -1087,8 +1068,6 @@ INSTANTIATE_TEST_SUITE_P(
         GlslStorageTextureData{core::type::TextureDimension::kCubeArray, core::Access::kWrite,
                                TextureDataType::kU32, "writeonly uimageCubeArray"},
 
-        GlslStorageTextureData{core::type::TextureDimension::k1d, core::Access::kReadWrite,
-                               TextureDataType::kU32, "uimage1D"},
         GlslStorageTextureData{core::type::TextureDimension::k2d, core::Access::kReadWrite,
                                TextureDataType::kU32, "uimage2D"},
         GlslStorageTextureData{core::type::TextureDimension::k2dArray, core::Access::kReadWrite,
