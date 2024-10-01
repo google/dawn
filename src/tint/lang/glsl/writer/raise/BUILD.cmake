@@ -51,6 +51,8 @@ tint_add_target(tint_lang_glsl_writer_raise lib
   lang/glsl/writer/raise/raise.h
   lang/glsl/writer/raise/shader_io.cc
   lang/glsl/writer/raise/shader_io.h
+  lang/glsl/writer/raise/texture_builtins_from_uniform.cc
+  lang/glsl/writer/raise/texture_builtins_from_uniform.h
   lang/glsl/writer/raise/texture_polyfill.cc
   lang/glsl/writer/raise/texture_polyfill.h
 )
@@ -109,6 +111,7 @@ tint_add_target(tint_lang_glsl_writer_raise_test test
   lang/glsl/writer/raise/bitcast_polyfill_test.cc
   lang/glsl/writer/raise/builtin_polyfill_test.cc
   lang/glsl/writer/raise/shader_io_test.cc
+  lang/glsl/writer/raise/texture_builtins_from_uniform_test.cc
   lang/glsl/writer/raise/texture_polyfill_test.cc
 )
 

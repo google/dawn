@@ -44,6 +44,7 @@ cc_library(
     "builtin_polyfill.cc",
     "raise.cc",
     "shader_io.cc",
+    "texture_builtins_from_uniform.cc",
     "texture_polyfill.cc",
   ],
   hdrs = [
@@ -52,6 +53,7 @@ cc_library(
     "builtin_polyfill.h",
     "raise.h",
     "shader_io.h",
+    "texture_builtins_from_uniform.h",
     "texture_polyfill.h",
   ],
   deps = [
@@ -102,6 +104,7 @@ cc_library(
     "bitcast_polyfill_test.cc",
     "builtin_polyfill_test.cc",
     "shader_io_test.cc",
+    "texture_builtins_from_uniform_test.cc",
     "texture_polyfill_test.cc",
   ],
   deps = [

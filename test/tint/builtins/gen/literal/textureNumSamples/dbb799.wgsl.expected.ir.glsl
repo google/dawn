@@ -1,11 +1,85 @@
-SKIP: FAILED
+#version 310 es
+precision highp float;
+precision highp int;
 
-<dawn>/src/tint/lang/glsl/writer/printer/printer.cc:1468 internal compiler error: TINT_UNREACHABLE unhandled core builtin: textureNumSamples
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
 
-tint executable returned error: signal: trace/BPT trap
+struct TintTextureUniformData {
+  uint tint_builtin_value_0;
+};
+
+layout(binding = 0, std430)
+buffer tint_symbol_1_1_ssbo {
+  uint tint_symbol;
+} v;
+uniform highp sampler2DMS arg_0;
+layout(binding = 0, std140)
+uniform tint_symbol_3_1_ubo {
+  TintTextureUniformData tint_symbol_2;
+} v_1;
+uint textureNumSamples_dbb799() {
+  uint res = v_1.tint_symbol_2.tint_builtin_value_0;
+  return res;
+}
+void main() {
+  v.tint_symbol = textureNumSamples_dbb799();
+}
+#version 310 es
+
+
+struct TintTextureUniformData {
+  uint tint_builtin_value_0;
+};
+
+layout(binding = 0, std430)
+buffer tint_symbol_1_1_ssbo {
+  uint tint_symbol;
+} v;
+uniform highp sampler2DMS arg_0;
+layout(binding = 0, std140)
+uniform tint_symbol_3_1_ubo {
+  TintTextureUniformData tint_symbol_2;
+} v_1;
+uint textureNumSamples_dbb799() {
+  uint res = v_1.tint_symbol_2.tint_builtin_value_0;
+  return res;
+}
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+void main() {
+  v.tint_symbol = textureNumSamples_dbb799();
+}
+#version 310 es
+
+
+struct TintTextureUniformData {
+  uint tint_builtin_value_0;
+};
+
+struct VertexOutput {
+  vec4 pos;
+  uint prevent_dce;
+};
+
+uniform highp sampler2DMS arg_0;
+layout(binding = 0, std140)
+uniform tint_symbol_2_1_ubo {
+  TintTextureUniformData tint_symbol_1;
+} v;
+layout(location = 0) flat out uint vertex_main_loc0_Output;
+uint textureNumSamples_dbb799() {
+  uint res = v.tint_symbol_1.tint_builtin_value_0;
+  return res;
+}
+VertexOutput vertex_main_inner() {
+  VertexOutput tint_symbol = VertexOutput(vec4(0.0f), 0u);
+  tint_symbol.pos = vec4(0.0f);
+  tint_symbol.prevent_dce = textureNumSamples_dbb799();
+  return tint_symbol;
+}
+void main() {
+  VertexOutput v_1 = vertex_main_inner();
+  gl_Position = v_1.pos;
+  gl_Position[1u] = -(gl_Position.y);
+  gl_Position[2u] = ((2.0f * gl_Position.z) - gl_Position.w);
+  vertex_main_loc0_Output = v_1.prevent_dce;
+  gl_PointSize = 1.0f;
+}

@@ -52,6 +52,7 @@
 #include "src/tint/lang/glsl/writer/raise/bitcast_polyfill.h"
 #include "src/tint/lang/glsl/writer/raise/builtin_polyfill.h"
 #include "src/tint/lang/glsl/writer/raise/shader_io.h"
+#include "src/tint/lang/glsl/writer/raise/texture_builtins_from_uniform.h"
 #include "src/tint/lang/glsl/writer/raise/texture_polyfill.h"
 
 namespace tint::glsl::writer {
@@ -64,6 +65,11 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
             return result.Failure();     \
         }                                \
     } while (false)
+
+    // Note, this comes before binding remapper as Dawn inserts _pre-remapping_ binding information.
+    // So, in order to move this later we'd need to update Dawn to send the _post-remapping_ data.
+    RUN_TRANSFORM(raise::TextureBuiltinsFromUniform, module,
+                  options.bindings.texture_builtins_from_uniform);
 
     tint::transform::multiplanar::BindingsMap multiplanar_map{};
     RemapperData remapper_data{};
