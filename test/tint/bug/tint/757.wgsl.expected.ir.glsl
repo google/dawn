@@ -18,7 +18,8 @@ void tint_symbol_inner(uvec3 GlobalInvocationID) {
       } else {
         break;
       }
-      result.values[(flatIndex + i)] = texel.x;
+      uint v_2 = (flatIndex + i);
+      result.values[v_2] = texel.x;
       {
         i = (i + 1u);
       }

@@ -158,12 +158,14 @@ void export_level_inner(uvec3 coord) {
     uint src_offset = ((coord[0u] - 2u) + ((coord[1u] >> (2u & 31u)) * v.tint_symbol.width));
     float a = buf_in.weights[(src_offset << (0u & 31u))];
     float b = buf_in.weights[(src_offset + 1u)];
-    float c = buf_in.weights[((src_offset + 1u) + v.tint_symbol.width)];
-    float d = buf_in.weights[((src_offset + 1u) + v.tint_symbol.width)];
+    uint v_1 = ((src_offset + 1u) + v.tint_symbol.width);
+    float c = buf_in.weights[v_1];
+    uint v_2 = ((src_offset + 1u) + v.tint_symbol.width);
+    float d = buf_in.weights[v_2];
     float sum = dot(vec4(a, b, c, d), vec4(1.0f));
     buf_out.weights[dst_offset] = tint_float_modulo(sum, 4.0f);
-    vec4 v_1 = vec4(a, (a * b), ((a / b) + c), sum);
-    vec4 probabilities = (v_1 + max(sum, 0.0f));
+    vec4 v_3 = vec4(a, (a * b), ((a / b) + c), sum);
+    vec4 probabilities = (v_3 + max(sum, 0.0f));
     imageStore(tex_out, ivec2(coord.xy), probabilities);
   }
 }

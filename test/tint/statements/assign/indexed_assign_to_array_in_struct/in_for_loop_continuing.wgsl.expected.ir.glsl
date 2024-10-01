@@ -30,7 +30,8 @@ void main() {
       }
       i = (i + 1);
       {
-        s1.a1[v_1.tint_symbol_1.i] = v;
+        uint v_2 = v_1.tint_symbol_1.i;
+        s1.a1[v_2] = v;
       }
       continue;
     }

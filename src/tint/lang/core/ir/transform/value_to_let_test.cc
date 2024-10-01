@@ -46,7 +46,7 @@ TEST_F(IR_ValueToLetTest, Empty) {
     auto* expect = R"(
 )";
 
-    Run(ValueToLet);
+    Run(ValueToLet, ValueToLetConfig{});
 
     EXPECT_EQ(str(), expect);
 }
@@ -66,7 +66,7 @@ TEST_F(IR_ValueToLetTest, NoModify_Blah) {
 
     auto* expect = src;
 
-    Run(ValueToLet);
+    Run(ValueToLet, ValueToLetConfig{});
 
     EXPECT_EQ(str(), expect);
 }
@@ -95,7 +95,7 @@ TEST_F(IR_ValueToLetTest, NoModify_Unsequenced) {
 
     auto* expect = src;
 
-    Run(ValueToLet);
+    Run(ValueToLet, ValueToLetConfig{});
 
     EXPECT_EQ(str(), expect);
 }
@@ -121,7 +121,7 @@ TEST_F(IR_ValueToLetTest, NoModify_Bitcast) {
 
     auto* expect = src;
 
-    Run(ValueToLet);
+    Run(ValueToLet, ValueToLetConfig{});
 
     EXPECT_EQ(str(), expect);
 }
@@ -173,7 +173,7 @@ $B1: {  # root
 
     auto* expect = src;
 
-    Run(ValueToLet);
+    Run(ValueToLet, ValueToLetConfig{});
 
     EXPECT_EQ(str(), expect);
 }
@@ -226,7 +226,7 @@ $B1: {  # root
 
     auto* expect = src;
 
-    Run(ValueToLet);
+    Run(ValueToLet, ValueToLetConfig{});
 
     EXPECT_EQ(str(), expect);
 }
@@ -279,7 +279,7 @@ $B1: {  # root
 
     auto* expect = src;
 
-    Run(ValueToLet);
+    Run(ValueToLet, ValueToLetConfig{});
 
     EXPECT_EQ(str(), expect);
 }
@@ -321,7 +321,7 @@ TEST_F(IR_ValueToLetTest, NoModify_VarUsedTwice) {
 
     auto* expect = src;
 
-    Run(ValueToLet);
+    Run(ValueToLet, ValueToLetConfig{});
 
     EXPECT_EQ(str(), expect);
 }
@@ -358,7 +358,7 @@ TEST_F(IR_ValueToLetTest, VarLoadUsedTwice) {
 }
 )";
 
-    Run(ValueToLet);
+    Run(ValueToLet, ValueToLetConfig{});
 
     EXPECT_EQ(str(), expect);
 }
@@ -396,7 +396,7 @@ TEST_F(IR_ValueToLetTest, VarLoad_ThenStore_ThenUse) {
 }
 )";
 
-    Run(ValueToLet);
+    Run(ValueToLet, ValueToLetConfig{});
 
     EXPECT_EQ(str(), expect);
 }
@@ -463,7 +463,7 @@ $B1: {  # root
 }
 )";
 
-    Run(ValueToLet);
+    Run(ValueToLet, ValueToLetConfig{});
 
     EXPECT_EQ(str(), expect);
 }
@@ -530,7 +530,7 @@ $B1: {  # root
 }
 )";
 
-    Run(ValueToLet);
+    Run(ValueToLet, ValueToLetConfig{});
 
     EXPECT_EQ(str(), expect);
 }
@@ -594,7 +594,7 @@ $B1: {  # root
 }
 )";
 
-    Run(ValueToLet);
+    Run(ValueToLet, ValueToLetConfig{});
 
     EXPECT_EQ(str(), expect);
 }
@@ -658,7 +658,7 @@ $B1: {  # root
 }
 )";
 
-    Run(ValueToLet);
+    Run(ValueToLet, ValueToLetConfig{});
 
     EXPECT_EQ(str(), expect);
 }
@@ -722,7 +722,7 @@ $B1: {  # root
 }
 )";
 
-    Run(ValueToLet);
+    Run(ValueToLet, ValueToLetConfig{});
 
     EXPECT_EQ(str(), expect);
 }
@@ -798,11 +798,11 @@ $B1: {  # root
 }
 )";
 
-    Run(ValueToLet);
+    Run(ValueToLet, ValueToLetConfig{});
 
     EXPECT_EQ(str(), expect);
 
-    Run(ValueToLet);  // running a second time should be no-op
+    Run(ValueToLet, ValueToLetConfig{});  // running a second time should be no-op
 
     EXPECT_EQ(str(), expect);
 }
@@ -886,11 +886,11 @@ $B1: {  # root
 }
 )";
 
-    Run(ValueToLet);
+    Run(ValueToLet, ValueToLetConfig{});
 
     EXPECT_EQ(str(), expect);
 
-    Run(ValueToLet);  // running a second time should be no-op
+    Run(ValueToLet, ValueToLetConfig{});  // running a second time should be no-op
 
     EXPECT_EQ(str(), expect);
 }
@@ -931,11 +931,11 @@ TEST_F(IR_ValueToLetTest, NameMe1) {
 }
 )";
 
-    Run(ValueToLet);
+    Run(ValueToLet, ValueToLetConfig{});
 
     EXPECT_EQ(str(), expect);
 
-    Run(ValueToLet);  // running a second time should be no-op
+    Run(ValueToLet, ValueToLetConfig{});  // running a second time should be no-op
 
     EXPECT_EQ(str(), expect);
 }
@@ -982,10 +982,10 @@ TEST_F(IR_ValueToLetTest, NameMe2) {
 }
 )";
 
-    Run(ValueToLet);
+    Run(ValueToLet, ValueToLetConfig{});
     EXPECT_EQ(str(), expect);
 
-    Run(ValueToLet);  // running a second time should be no-op
+    Run(ValueToLet, ValueToLetConfig{});  // running a second time should be no-op
     EXPECT_EQ(str(), expect);
 }
 
@@ -1049,10 +1049,175 @@ $B1: {  # root
 }
 )";
 
-    Run(ValueToLet);
+    Run(ValueToLet, ValueToLetConfig{});
     EXPECT_EQ(str(), expect);
 
-    Run(ValueToLet);  // running a second time should be no-op
+    Run(ValueToLet, ValueToLetConfig{});  // running a second time should be no-op
+    EXPECT_EQ(str(), expect);
+}
+
+TEST_F(IR_ValueToLetTest, AccessToLetWithFunctionParams) {
+    auto* f = b.Function("f", ty.i32());
+    b.Append(f->Block(), [&] { b.Return(f, 0_i); });
+
+    auto* g = b.Function("g", ty.i32());
+    b.Append(g->Block(), [&] { b.Return(f, 0_i); });
+
+    auto* foo = b.Function("foo", ty.void_());
+    b.Append(foo->Block(), [&] {
+        auto* arr = b.Var("arr", ty.ptr<function, array<i32, 4>, read_write>());
+        auto* c = b.Call(ty.i32(), f);
+        auto* access = b.Access(ty.ptr<function, i32, read_write>(), arr, c);
+        auto* p = b.Let("p", access);
+        auto* c2 = b.Call(ty.i32(), g);
+        b.Let("y", c2);
+        b.Let("x", b.Load(p));
+        b.Return(foo);
+    });
+
+    auto* src = R"(
+%f = func():i32 {
+  $B1: {
+    ret 0i
+  }
+}
+%g = func():i32 {
+  $B2: {
+    ret 0i
+  }
+}
+%foo = func():void {
+  $B3: {
+    %arr:ptr<function, array<i32, 4>, read_write> = var
+    %5:i32 = call %f
+    %6:ptr<function, i32, read_write> = access %arr, %5
+    %p:ptr<function, i32, read_write> = let %6
+    %8:i32 = call %g
+    %y:i32 = let %8
+    %10:i32 = load %p
+    %x:i32 = let %10
+    ret
+  }
+}
+)";
+    EXPECT_EQ(str(), src);
+
+    auto* expect = R"(
+%f = func():i32 {
+  $B1: {
+    ret 0i
+  }
+}
+%g = func():i32 {
+  $B2: {
+    ret 0i
+  }
+}
+%foo = func():void {
+  $B3: {
+    %arr:ptr<function, array<i32, 4>, read_write> = var
+    %5:i32 = call %f
+    %6:i32 = let %5
+    %7:ptr<function, i32, read_write> = access %arr, %6
+    %8:i32 = call %g
+    %y:i32 = let %8
+    %10:i32 = load %7
+    %x:i32 = let %10
+    ret
+  }
+}
+)";
+
+    ValueToLetConfig cfg{};
+    cfg.replace_pointer_lets = true;
+    Run(ValueToLet, cfg);
+    EXPECT_EQ(str(), expect);
+
+    Run(ValueToLet, cfg);  // running a second time should be no-op
+    EXPECT_EQ(str(), expect);
+}
+
+TEST_F(IR_ValueToLetTest, AccessToLetWithNestedFunctionParams) {
+    auto* f = b.Function("f", ty.i32());
+    b.Append(f->Block(), [&] { b.Return(f, 0_i); });
+
+    auto* g = b.Function("g", ty.i32());
+    b.Append(g->Block(), [&] { b.Return(f, 0_i); });
+
+    auto* foo = b.Function("foo", ty.void_());
+    b.Append(foo->Block(), [&] {
+        auto* arr = b.Var("arr", ty.ptr<function, array<i32, 4>, read_write>());
+        auto* c = b.Call(ty.i32(), f);
+        auto* d = b.Add(ty.i32(), c, 1_i);
+        auto* access = b.Access(ty.ptr<function, i32, read_write>(), arr, d);
+        auto* p = b.Let("p", access);
+        auto* c2 = b.Call(ty.i32(), g);
+        b.Let("y", c2);
+        b.Let("x", b.Load(p));
+        b.Return(foo);
+    });
+
+    auto* src = R"(
+%f = func():i32 {
+  $B1: {
+    ret 0i
+  }
+}
+%g = func():i32 {
+  $B2: {
+    ret 0i
+  }
+}
+%foo = func():void {
+  $B3: {
+    %arr:ptr<function, array<i32, 4>, read_write> = var
+    %5:i32 = call %f
+    %6:i32 = add %5, 1i
+    %7:ptr<function, i32, read_write> = access %arr, %6
+    %p:ptr<function, i32, read_write> = let %7
+    %9:i32 = call %g
+    %y:i32 = let %9
+    %11:i32 = load %p
+    %x:i32 = let %11
+    ret
+  }
+}
+)";
+    EXPECT_EQ(str(), src);
+
+    auto* expect = R"(
+%f = func():i32 {
+  $B1: {
+    ret 0i
+  }
+}
+%g = func():i32 {
+  $B2: {
+    ret 0i
+  }
+}
+%foo = func():void {
+  $B3: {
+    %arr:ptr<function, array<i32, 4>, read_write> = var
+    %5:i32 = call %f
+    %6:i32 = add %5, 1i
+    %7:i32 = let %6
+    %8:ptr<function, i32, read_write> = access %arr, %7
+    %9:i32 = call %g
+    %y:i32 = let %9
+    %11:i32 = load %8
+    %x:i32 = let %11
+    ret
+  }
+}
+)";
+
+    ValueToLetConfig cfg{};
+    cfg.replace_pointer_lets = true;
+    Run(ValueToLet, cfg);
+    EXPECT_EQ(str(), expect);
+
+    Run(ValueToLet, cfg);  // running a second time should be no-op
     EXPECT_EQ(str(), expect);
 }
 

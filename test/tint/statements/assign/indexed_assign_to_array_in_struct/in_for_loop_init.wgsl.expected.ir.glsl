@@ -23,7 +23,8 @@ void main() {
   OuterS s1 = OuterS(InnerS[8](InnerS(0), InnerS(0), InnerS(0), InnerS(0), InnerS(0), InnerS(0), InnerS(0), InnerS(0)));
   int i = 0;
   {
-    s1.a1[v_1.tint_symbol_1.i] = v;
+    uint v_2 = v_1.tint_symbol_1.i;
+    s1.a1[v_2] = v;
     while(true) {
       if ((i < 4)) {
       } else {

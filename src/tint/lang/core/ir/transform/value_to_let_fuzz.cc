@@ -44,12 +44,12 @@ bool CanRun(Module& module) {
     return true;
 }
 
-void ValueToLetFuzzer(Module& module) {
+void ValueToLetFuzzer(Module& module, ValueToLetConfig config) {
     if (!CanRun(module)) {
         return;
     }
 
-    if (auto res = ValueToLet(module); res != Success) {
+    if (auto res = ValueToLet(module, config); res != Success) {
         return;
     }
 

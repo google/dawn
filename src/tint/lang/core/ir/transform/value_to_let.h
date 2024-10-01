@@ -28,6 +28,7 @@
 #ifndef SRC_TINT_LANG_CORE_IR_TRANSFORM_VALUE_TO_LET_H_
 #define SRC_TINT_LANG_CORE_IR_TRANSFORM_VALUE_TO_LET_H_
 
+#include "src/tint/utils/reflection/reflection.h"
 #include "src/tint/utils/result/result.h"
 
 // Forward declarations.
@@ -36,6 +37,15 @@ class Module;
 }
 
 namespace tint::core::ir::transform {
+
+/// Configuration for ValueToLet transform.
+struct ValueToLetConfig {
+    /// Replace pointer lets with their value
+    bool replace_pointer_lets = false;
+
+    /// Reflection for this class
+    TINT_REFLECT(ValueToLetConfig, replace_pointer_lets);
+};
 
 /// ValueToLet is a transform that moves "non-inlinable" instruction values to let instructions.
 /// An expression is considered "non-inlinable" if any of the the following are true:
@@ -46,8 +56,9 @@ namespace tint::core::ir::transform {
 /// * The value is used in a block different to the value's instruction.
 ///
 /// @param module the module to transform
+/// @param cfg the configuration
 /// @returns error diagnostics on failure
-Result<SuccessType> ValueToLet(Module& module);
+Result<SuccessType> ValueToLet(Module& module, const ValueToLetConfig& cfg);
 
 }  // namespace tint::core::ir::transform
 

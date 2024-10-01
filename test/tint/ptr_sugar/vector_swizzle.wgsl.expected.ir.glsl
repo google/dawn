@@ -1,11 +1,17 @@
-SKIP: FAILED
+#version 310 es
 
-<dawn>/src/tint/lang/glsl/writer/printer/printer.cc:521 internal compiler error: TINT_ASSERT(!l->Result(0)->Type()->Is<core::type::Pointer>())
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
-
-tint executable returned error: signal: trace/BPT trap
+layout(binding = 0, std430)
+buffer tint_symbol_3_1_ssbo {
+  ivec4 tint_symbol_2;
+} v;
+void deref() {
+  v.tint_symbol_2 = v.tint_symbol_2.wzyx;
+}
+void no_deref() {
+  v.tint_symbol_2 = v.tint_symbol_2.wzyx;
+}
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+void main() {
+  deref();
+  no_deref();
+}

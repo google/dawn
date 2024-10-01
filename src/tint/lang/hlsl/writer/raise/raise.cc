@@ -194,7 +194,10 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
     // naming conflicts, and expressions that need to be explicitly not inlined.
     RUN_TRANSFORM(core::ir::transform::RemoveTerminatorArgs, module);
     RUN_TRANSFORM(core::ir::transform::RenameConflicts, module);
-    RUN_TRANSFORM(core::ir::transform::ValueToLet, module);
+    {
+        core::ir::transform::ValueToLetConfig cfg;
+        RUN_TRANSFORM(core::ir::transform::ValueToLet, module, cfg);
+    }
 
     // Anything which runs after this needs to handle `Capabilities::kAllowModuleScopedLets`
     RUN_TRANSFORM(raise::PromoteInitializers, module);

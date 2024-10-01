@@ -14,8 +14,9 @@ void foo() {
       } else {
         break;
       }
+      int v_1 = i;
       bool tint_continue = false;
-      switch(v.tint_symbol_2[i]) {
+      switch(v.tint_symbol_2[v_1]) {
         case 1:
         {
           tint_continue = true;
@@ -23,7 +24,8 @@ void foo() {
         }
         default:
         {
-          v.tint_symbol_2[i] = 2;
+          int v_2 = i;
+          v.tint_symbol_2[v_2] = 2;
           break;
         }
       }

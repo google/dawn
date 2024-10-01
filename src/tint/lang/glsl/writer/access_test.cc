@@ -2128,5 +2128,84 @@ void main() {
 )");
 }
 
+TEST_F(GlslWriterTest, AccessToLetWithFunctionParams) {
+    auto* f = b.Function("f", ty.i32());
+    b.Append(f->Block(), [&] { b.Return(f, 0_i); });
+
+    auto* g = b.Function("g", ty.i32());
+    b.Append(g->Block(), [&] { b.Return(f, 0_i); });
+
+    auto* foo = b.Function("foo", ty.void_());
+    b.Append(foo->Block(), [&] {
+        auto* arr = b.Var("arr", ty.ptr<function, array<i32, 4>, read_write>());
+        auto* c = b.Call(ty.i32(), f);
+        auto* access = b.Access(ty.ptr<function, i32, read_write>(), arr, c);
+        auto* p = b.Let("p", access);
+        auto* c2 = b.Call(ty.i32(), g);
+        b.Let("y", c2);
+        b.Let("x", b.Load(p));
+        b.Return(foo);
+    });
+
+    ASSERT_TRUE(Generate()) << err_ << output_.glsl;
+    EXPECT_EQ(output_.glsl, GlslHeader() + R"(
+int f() {
+  return 0;
+}
+int g() {
+  return 0;
+}
+void foo() {
+  int arr[4] = int[4](0, 0, 0, 0);
+  uint v = min(uint(f()), 3u);
+  int y = g();
+  int x = arr[v];
+}
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+void main() {
+}
+)");
+}
+
+TEST_F(GlslWriterTest, AccessToLetWithNestedFunctionParams) {
+    auto* f = b.Function("f", ty.i32());
+    b.Append(f->Block(), [&] { b.Return(f, 0_i); });
+
+    auto* g = b.Function("g", ty.i32());
+    b.Append(g->Block(), [&] { b.Return(f, 0_i); });
+
+    auto* foo = b.Function("foo", ty.void_());
+    b.Append(foo->Block(), [&] {
+        auto* arr = b.Var("arr", ty.ptr<function, array<i32, 4>, read_write>());
+        auto* c = b.Call(ty.i32(), f);
+        auto* d = b.Add(ty.i32(), c, 1_i);
+        auto* access = b.Access(ty.ptr<function, i32, read_write>(), arr, d);
+        auto* p = b.Let("p", access);
+        auto* c2 = b.Call(ty.i32(), g);
+        b.Let("y", c2);
+        b.Let("x", b.Load(p));
+        b.Return(foo);
+    });
+
+    ASSERT_TRUE(Generate()) << err_ << output_.glsl;
+    EXPECT_EQ(output_.glsl, GlslHeader() + R"(
+int f() {
+  return 0;
+}
+int g() {
+  return 0;
+}
+void foo() {
+  int arr[4] = int[4](0, 0, 0, 0);
+  uint v = min(uint((f() + 1)), 3u);
+  int y = g();
+  int x = arr[v];
+}
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+void main() {
+}
+)");
+}
+
 }  // namespace
 }  // namespace tint::glsl::writer

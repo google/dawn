@@ -19,7 +19,8 @@ uniform tint_symbol_2_1_ubo {
 } v_1;
 void f(inout OuterS p) {
   InnerS v = InnerS(0);
-  p.a1[v_1.tint_symbol_1.i] = v;
+  uint v_2 = v_1.tint_symbol_1.i;
+  p.a1[v_2] = v;
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {

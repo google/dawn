@@ -23,5 +23,7 @@ uniform tint_symbol_2_1_ubo {
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
   Particle particle = particles.p[0];
-  particle.position[v.tint_symbol_1.i] = particle.position[v.tint_symbol_1.i];
+  uint v_1 = v.tint_symbol_1.i;
+  uint v_2 = v.tint_symbol_1.i;
+  particle.position[v_1] = particle.position[v_2];
 }

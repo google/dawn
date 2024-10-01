@@ -25,5 +25,6 @@ layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
   InnerS v = InnerS(0);
   OuterS s1 = OuterS(S1(InnerS[8](InnerS(0), InnerS(0), InnerS(0), InnerS(0), InnerS(0), InnerS(0), InnerS(0), InnerS(0))));
-  s1.s2.a[v_1.tint_symbol_1.i] = v;
+  uint v_2 = v_1.tint_symbol_1.i;
+  s1.s2.a[v_2] = v;
 }

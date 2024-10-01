@@ -26,7 +26,8 @@ buffer tint_symbol_6_1_ssbo {
   TestData tint_symbol_5;
 } v_2;
 int runTest() {
-  return atomicOr(v_2.tint_symbol_5.data[(0u + uint(v.tint_symbol_1.zero))], 0);
+  uint v_3 = (0u + uint(v.tint_symbol_1.zero));
+  return atomicOr(v_2.tint_symbol_5.data[v_3], 0);
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {

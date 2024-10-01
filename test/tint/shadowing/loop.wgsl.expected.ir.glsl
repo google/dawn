@@ -9,9 +9,11 @@ void main() {
   int i = 0;
   {
     while(true) {
-      int x = v.tint_symbol_1[i];
+      int v_1 = i;
+      int x = v.tint_symbol_1[v_1];
       {
-        int x = v.tint_symbol_1[x];
+        int v_2 = x;
+        int x = v.tint_symbol_1[v_2];
         i = (i + x);
         if ((i > 10)) { break; }
       }

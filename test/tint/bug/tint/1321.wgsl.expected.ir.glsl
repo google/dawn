@@ -1,11 +1,17 @@
-SKIP: FAILED
+#version 310 es
+precision highp float;
+precision highp int;
 
-<dawn>/src/tint/lang/glsl/writer/printer/printer.cc:521 internal compiler error: TINT_ASSERT(!l->Result(0)->Type()->Is<core::type::Pointer>())
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
-
-tint executable returned error: signal: trace/BPT trap
+int foo() {
+  return 1;
+}
+void main() {
+  float arr[4] = float[4](0.0f, 0.0f, 0.0f, 0.0f);
+  {
+    int v = foo();
+    while(true) {
+      float x = arr[v];
+      break;
+    }
+  }
+}

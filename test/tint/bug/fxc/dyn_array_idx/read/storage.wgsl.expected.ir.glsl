@@ -27,5 +27,6 @@ buffer tint_symbol_6_1_ssbo {
 } v_2;
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
-  v_1.tint_symbol_3.tint_symbol = v_2.tint_symbol_5.data[v.tint_symbol_1.dynamic_idx];
+  int v_3 = v.tint_symbol_1.dynamic_idx;
+  v_1.tint_symbol_3.tint_symbol = v_2.tint_symbol_5.data[v_3];
 }

@@ -42,40 +42,25 @@ enum class Access : uint8_t { kLoad, kStore };
 /// Accesses is a set of of Access
 using Accesses = EnumSet<Access>;
 
-/// @returns the accesses that may be performed by the instruction @p inst
-Accesses AccessesFor(ir::Instruction* inst) {
-    return tint::Switch<Accesses>(
-        inst,  //
-        [&](const ir::Load* l) {
-            // Always inline things in the `handle` address space
-            if (l->From()->Type()->As<core::type::Pointer>()->AddressSpace() ==
-                core::AddressSpace::kHandle) {
-                return Accesses{};
-            }
-            return Accesses{Access::kLoad};
-        },                                                              //
-        [&](const ir::LoadVectorElement*) { return Access::kLoad; },    //
-        [&](const ir::Store*) { return Access::kStore; },               //
-        [&](const ir::StoreVectorElement*) { return Access::kStore; },  //
-        [&](const ir::Call*) {
-            if (inst->IsAnyOf<core::ir::Bitcast>()) {
-                return Accesses{};
-            }
-            return Accesses{Access::kLoad, Access::kStore};
-        },
-        [&](Default) { return Accesses{}; });
-}
-
 /// PIMPL state for the transform.
 struct State {
     /// The IR module.
     Module& ir;
+
+    /// The configuration
+    const ValueToLetConfig& cfg;
 
     /// The IR builder.
     Builder b{ir};
 
     /// The type manager.
     core::type::Manager& ty{ir.Types()};
+
+    // A set of possibly-inlinable values returned by a instructions that has not yet been
+    // marked-for or ruled-out-for inlining.
+    Hashset<ir::InstructionResult*, 32> pending_resolution{};
+    // The accesses of the values in pending_resolution.
+    Access pending_access = Access::kLoad;
 
     /// Process the module.
     void Process() {
@@ -87,54 +72,8 @@ struct State {
 
   private:
     void Process(ir::Block* block) {
-        // A set of possibly-inlinable values returned by a instructions that has not yet been
-        // marked-for or ruled-out-for inlining.
-        Hashset<ir::InstructionResult*, 32> pending_resolution;
-        // The accesses of the values in pending_resolution.
-        Access pending_access = Access::kLoad;
-
-        auto put_pending_in_lets = [&] {
-            for (auto& pending : pending_resolution) {
-                PutInLet(pending);
-            }
-            pending_resolution.Clear();
-        };
-
-        auto maybe_put_in_let = [&](auto* inst, Accesses& accesses) {
-            if (auto* result = inst->Result(0)) {
-                auto& usages = result->UsagesUnsorted();
-                switch (result->NumUsages()) {
-                    case 0:  // No usage
-                        if (accesses.Contains(Access::kStore)) {
-                            // This instruction needs to be emitted but has no uses, so we need to
-                            // make sure that it will be used in a statement. Function call
-                            // instructions with no uses will be emitted as call statements, so we
-                            // just need to put other instructions in `let`s to force them to be
-                            // emitted.
-                            if (!inst->template IsAnyOf<core::ir::Call>() ||
-                                inst->template IsAnyOf<core::ir::Construct, core::ir::Convert>()) {
-                                inst = PutInLet(result);
-                            }
-                        }
-                        break;
-                    case 1: {  // Single usage
-                        auto usage = (*usages.begin())->instruction;
-                        if (usage->Block() == inst->Block()) {
-                            // Usage in same block. Assign to pending_resolution, as we don't
-                            // know whether its safe to inline yet.
-                            pending_resolution.Add(result);
-                        } else {
-                            // Usage from another block. Cannot inline.
-                            inst = PutInLet(result);
-                        }
-                        break;
-                    }
-                    default:  // Value has multiple usages. Cannot inline.
-                        inst = PutInLet(result);
-                        break;
-                }
-            }
-        };
+        // Replace all pointer lets with the value they point too.
+        ReplacePointerLetsWithValues();
 
         for (ir::Instruction* inst = block->Front(); inst; inst = inst->next) {
             // This transform assumes that all multi-result instructions have been replaced
@@ -142,6 +81,36 @@ struct State {
 
             // The memory accesses of this instruction
             auto accesses = AccessesFor(inst);
+
+            // A pointer access chain will be inlined by the backends. For backends which don't
+            // provide pointer lets we need to force any arguments into lets such the occur in the
+            // correct order. Without this it's possible to shift function calls around if they're
+            // only used in the access.
+            //
+            // e.g.
+            // ```
+            // var arr : array<i32, 4>;
+            // let p = val[f() + 1];
+            // g();
+            // let x = p;
+            // ```
+            //
+            // If the access at `p` is inlined to `x` then the function `f()` will be called after
+            // `g()` instead of before as is required. So, we pessimize and for all access operands
+            // to lets to maintain ordering.
+            //
+            // This flush only needs to take place if the access chain contains operands which are
+            // pending resolution. If nothing is pending, we don't need to flush at all.
+            if (cfg.replace_pointer_lets && IsPointerAccess(inst)) {
+                for (auto* operand : inst->Operands()) {
+                    if (auto* result = operand->As<InstructionResult>()) {
+                        if (pending_resolution.Contains(result)) {
+                            PutPendingInLets();
+                            break;
+                        }
+                    }
+                }
+            }
 
             for (auto* operand : inst->Operands()) {
                 // If the operand is in pending_resolution, then we know it has a single use and
@@ -161,25 +130,102 @@ struct State {
             }
 
             if (accesses.Contains(Access::kStore)) {  // Note: Also handles load + store
-                put_pending_in_lets();
+                PutPendingInLets();
                 pending_access = Access::kStore;
-                maybe_put_in_let(inst, accesses);
+                inst = MaybePutInLet(inst, accesses);
             } else if (accesses.Contains(Access::kLoad)) {
                 if (pending_access != Access::kLoad) {
-                    put_pending_in_lets();
+                    PutPendingInLets();
                     pending_access = Access::kLoad;
                 }
-                maybe_put_in_let(inst, accesses);
+                inst = MaybePutInLet(inst, accesses);
             }
         }
+    }
+
+    /// @returns the accesses that may be performed by the instruction @p inst
+    Accesses AccessesFor(ir::Instruction* inst) {
+        return tint::Switch<Accesses>(
+            inst,  //
+            [&](const ir::Load* l) {
+                // Always inline things in the `handle` address space
+                if (l->From()->Type()->As<core::type::Pointer>()->AddressSpace() ==
+                    core::AddressSpace::kHandle) {
+                    return Accesses{};
+                }
+                return Accesses{Access::kLoad};
+            },                                                              //
+            [&](const ir::LoadVectorElement*) { return Access::kLoad; },    //
+            [&](const ir::Store*) { return Access::kStore; },               //
+            [&](const ir::StoreVectorElement*) { return Access::kStore; },  //
+            [&](const ir::Call*) {
+                if (inst->IsAnyOf<core::ir::Bitcast>()) {
+                    return Accesses{};
+                }
+                return Accesses{Access::kLoad, Access::kStore};
+            },
+            [&](Default) { return Accesses{}; });
+    }
+
+    void PutPendingInLets() {
+        for (auto& pending : pending_resolution) {
+            PutInLet(pending);
+        }
+        pending_resolution.Clear();
+    }
+
+    core::ir::Instruction* MaybePutInLet(core::ir::Instruction* inst, Accesses& accesses) {
+        if (auto* result = inst->Result(0)) {
+            auto& usages = result->UsagesUnsorted();
+            switch (result->NumUsages()) {
+                case 0:  // No usage
+                    if (accesses.Contains(Access::kStore)) {
+                        // This instruction needs to be emitted but has no uses, so we need to
+                        // make sure that it will be used in a statement. Function call
+                        // instructions with no uses will be emitted as call statements, so we
+                        // just need to put other instructions in `let`s to force them to be
+                        // emitted.
+                        if (!inst->IsAnyOf<core::ir::Call>() ||
+                            inst->IsAnyOf<core::ir::Construct, core::ir::Convert>()) {
+                            inst = PutInLet(result);
+                        }
+                    }
+                    break;
+                case 1: {  // Single usage
+                    auto usage = (*usages.begin())->instruction;
+                    if (usage->Block() == inst->Block()) {
+                        // Usage in same block. Assign to pending_resolution, as we don't
+                        // know whether its safe to inline yet.
+                        pending_resolution.Add(result);
+                    } else {
+                        // Usage from another block. Cannot inline.
+                        inst = PutInLet(result);
+                    }
+                    break;
+                }
+                default:  // Value has multiple usages. Cannot inline.
+                    inst = PutInLet(result);
+                    break;
+            }
+        }
+        return inst;
+    }
+
+    bool IsPointerAccess(core::ir::Instruction* inst) {
+        return inst->Is<core::ir::Access>() && inst->Result(0)->Type()->Is<core::type::Pointer>();
     }
 
     /// PutInLet places the value into a new 'let' instruction, immediately after the value's
     /// instruction
     /// @param value the value to place into the 'let'
     /// @return the created 'let' instruction.
-    ir::Let* PutInLet(ir::InstructionResult* value) {
+    ir::Instruction* PutInLet(ir::InstructionResult* value) {
         auto* inst = value->Instruction();
+
+        if (cfg.replace_pointer_lets && IsPointerAccess(inst)) {
+            return inst;
+        }
+
         auto* let = b.Let(value->Type());
         value->ReplaceAllUsesWith(let->Result(0));
         let->SetValue(value);
@@ -190,11 +236,27 @@ struct State {
         }
         return let;
     }
+
+    void ReplacePointerLetsWithValues() {
+        if (!cfg.replace_pointer_lets) {
+            return;
+        }
+
+        for (auto* inst : ir.Instructions()) {
+            if (auto* l = inst->As<ir::Let>()) {
+                if (!l->Result(0)->Type()->Is<core::type::Pointer>()) {
+                    continue;
+                }
+                l->Result(0)->ReplaceAllUsesWith(l->Value());
+                l->Destroy();
+            }
+        }
+    }
 };
 
 }  // namespace
 
-Result<SuccessType> ValueToLet(Module& ir) {
+Result<SuccessType> ValueToLet(Module& ir, const ValueToLetConfig& cfg) {
     auto result = ValidateAndDumpIfNeeded(ir, "ValueToLet transform",
                                           core::ir::Capabilities{
                                               core::ir::Capability::kAllow8BitIntegers,
@@ -205,7 +267,7 @@ Result<SuccessType> ValueToLet(Module& ir) {
         return result;
     }
 
-    State{ir}.Process();
+    State{ir, cfg}.Process();
 
     return Success;
 }

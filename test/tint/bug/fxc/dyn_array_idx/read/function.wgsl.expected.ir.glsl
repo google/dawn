@@ -24,5 +24,6 @@ buffer tint_symbol_4_1_ssbo {
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
   S s = S(int[64](0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0));
-  v_1.tint_symbol_3.tint_symbol = s.data[v.tint_symbol_1.dynamic_idx];
+  int v_2 = v.tint_symbol_1.dynamic_idx;
+  v_1.tint_symbol_3.tint_symbol = s.data[v_2];
 }

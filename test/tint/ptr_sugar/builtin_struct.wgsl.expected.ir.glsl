@@ -1,11 +1,40 @@
-SKIP: FAILED
+#version 310 es
 
-<dawn>/src/tint/lang/glsl/writer/printer/printer.cc:521 internal compiler error: TINT_ASSERT(!l->Result(0)->Type()->Is<core::type::Pointer>())
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
 
-tint executable returned error: signal: trace/BPT trap
+struct modf_result_f32 {
+  float fract;
+  float whole;
+};
+
+struct frexp_result_f32 {
+  float fract;
+  int exp;
+};
+
+void deref_modf() {
+  modf_result_f32 a = modf_result_f32(0.5f, 1.0f);
+  float tint_symbol = a.fract;
+  float whole = a.whole;
+}
+void no_deref_modf() {
+  modf_result_f32 a = modf_result_f32(0.5f, 1.0f);
+  float tint_symbol = a.fract;
+  float whole = a.whole;
+}
+void deref_frexp() {
+  frexp_result_f32 a = frexp_result_f32(0.75f, 1);
+  float tint_symbol = a.fract;
+  int tint_symbol_1 = a.exp;
+}
+void no_deref_frexp() {
+  frexp_result_f32 a = frexp_result_f32(0.75f, 1);
+  float tint_symbol = a.fract;
+  int tint_symbol_1 = a.exp;
+}
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+void main() {
+  deref_modf();
+  no_deref_modf();
+  deref_frexp();
+  no_deref_frexp();
+}

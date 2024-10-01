@@ -88,16 +88,20 @@ void main_count_inner(uvec3 GlobalInvocationID) {
     return;
   }
   doIgnore();
-  uint i0 = indices.values[((3u * triangleIndex) + 0u)];
-  uint i1 = indices.values[((3u * i0) + 1u)];
-  uint i2 = indices.values[((3u * i0) + 2u)];
+  uint v_5 = ((3u * triangleIndex) + 0u);
+  uint i0 = indices.values[v_5];
+  uint v_6 = ((3u * i0) + 1u);
+  uint i1 = indices.values[v_6];
+  uint v_7 = ((3u * i0) + 2u);
+  uint i2 = indices.values[v_7];
   vec3 p0 = loadPosition(i0);
   vec3 p1 = loadPosition(i0);
   vec3 p2 = loadPosition(i2);
   vec3 center = (((p0 + p2) + p1) / 3.0f);
   vec3 voxelPos = toVoxelPos(p1);
   uint lIndex = toIndex1D(v.tint_symbol.gridSize, p0);
-  int triangleOffset = atomicAdd(LUT.values[i1], 1);
+  uint v_8 = i1;
+  int triangleOffset = atomicAdd(LUT.values[v_8], 1);
 }
 layout(local_size_x = 128, local_size_y = 1, local_size_z = 1) in;
 void main() {

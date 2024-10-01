@@ -64,9 +64,11 @@ void tint_symbol_1_inner(uvec3 GlobalInvocationID) {
   }
   uint outputIndex = ((GlobalInvocationID[1u] * uint(size.x)) + GlobalInvocationID[0u]);
   if (success) {
-    tint_symbol.result[outputIndex] = 1u;
+    uint v_7 = outputIndex;
+    tint_symbol.result[v_7] = 1u;
   } else {
-    tint_symbol.result[outputIndex] = 0u;
+    uint v_8 = outputIndex;
+    tint_symbol.result[v_8] = 0u;
   }
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;

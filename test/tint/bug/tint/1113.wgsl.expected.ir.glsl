@@ -88,16 +88,20 @@ void main_count_inner(uvec3 GlobalInvocationID) {
     return;
   }
   doIgnore();
-  uint i0 = indices.values[((3u * triangleIndex) + 0u)];
-  uint i1 = indices.values[((3u * triangleIndex) + 1u)];
-  uint i2 = indices.values[((3u * triangleIndex) + 2u)];
+  uint v_5 = ((3u * triangleIndex) + 0u);
+  uint i0 = indices.values[v_5];
+  uint v_6 = ((3u * triangleIndex) + 1u);
+  uint i1 = indices.values[v_6];
+  uint v_7 = ((3u * triangleIndex) + 2u);
+  uint i2 = indices.values[v_7];
   vec3 p0 = loadPosition(i0);
   vec3 p1 = loadPosition(i1);
   vec3 p2 = loadPosition(i2);
   vec3 center = (((p0 + p1) + p2) / 3.0f);
   vec3 voxelPos = toVoxelPos(center);
   uint voxelIndex = toIndex1D(v.tint_symbol.gridSize, voxelPos);
-  uint acefg = atomicAdd(counters.values[voxelIndex], 1u);
+  uint v_8 = voxelIndex;
+  uint acefg = atomicAdd(counters.values[v_8], 1u);
   if ((triangleIndex == 0u)) {
     v_1.tint_symbol_2.value0 = v.tint_symbol.gridSize;
     v_1.tint_symbol_2.value_f32_0 = center.x;
@@ -175,12 +179,14 @@ void main_create_lut_inner(uvec3 GlobalInvocationID) {
   if ((voxelIndex >= maxVoxels)) {
     return;
   }
-  uint numTriangles = atomicOr(counters.values[voxelIndex], 0u);
+  uint v_2 = voxelIndex;
+  uint numTriangles = atomicOr(counters.values[v_2], 0u);
   int offset = -1;
   if ((numTriangles > 0u)) {
     offset = int(atomicAdd(v_1.tint_symbol_2.offsetCounter, numTriangles));
   }
-  atomicExchange(LUT.values[voxelIndex], offset);
+  uint v_3 = voxelIndex;
+  atomicExchange(LUT.values[v_3], offset);
 }
 layout(local_size_x = 128, local_size_y = 1, local_size_z = 1) in;
 void main() {
@@ -276,16 +282,20 @@ void main_sort_triangles_inner(uvec3 GlobalInvocationID) {
   if ((triangleIndex >= v.tint_symbol.numTriangles)) {
     return;
   }
-  uint i0 = indices.values[((3u * triangleIndex) + 0u)];
-  uint i1 = indices.values[((3u * triangleIndex) + 1u)];
-  uint i2 = indices.values[((3u * triangleIndex) + 2u)];
+  uint v_5 = ((3u * triangleIndex) + 0u);
+  uint i0 = indices.values[v_5];
+  uint v_6 = ((3u * triangleIndex) + 1u);
+  uint i1 = indices.values[v_6];
+  uint v_7 = ((3u * triangleIndex) + 2u);
+  uint i2 = indices.values[v_7];
   vec3 p0 = loadPosition(i0);
   vec3 p1 = loadPosition(i1);
   vec3 p2 = loadPosition(i2);
   vec3 center = (((p0 + p1) + p2) / 3.0f);
   vec3 voxelPos = toVoxelPos(center);
   uint voxelIndex = toIndex1D(v.tint_symbol.gridSize, voxelPos);
-  int triangleOffset = atomicAdd(LUT.values[voxelIndex], 1);
+  uint v_8 = voxelIndex;
+  int triangleOffset = atomicAdd(LUT.values[v_8], 1);
 }
 layout(local_size_x = 128, local_size_y = 1, local_size_z = 1) in;
 void main() {

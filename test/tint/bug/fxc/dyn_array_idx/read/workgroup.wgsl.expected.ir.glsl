@@ -39,7 +39,8 @@ void f_inner(uint tint_local_index) {
     }
   }
   barrier();
-  v_1.tint_symbol_3.tint_symbol = s.data[v.tint_symbol_1.dynamic_idx];
+  int v_4 = v.tint_symbol_1.dynamic_idx;
+  v_1.tint_symbol_3.tint_symbol = s.data[v_4];
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
