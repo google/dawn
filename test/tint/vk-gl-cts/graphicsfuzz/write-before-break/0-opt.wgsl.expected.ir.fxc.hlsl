@@ -121,11 +121,10 @@ main_outputs main() {
   return v_3;
 }
 
-DXC validation failure:
-error: validation errors
-hlsl.hlsl:116: error: Loop must have break.
-Validation failed.
-
+FXC validation failure:
+<scrubbed_path>(64,13-23): error X3511: forced to unroll loop, but unrolling failed.
+<scrubbed_path>(46,9-19): error X3511: forced to unroll loop, but unrolling failed.
+<scrubbed_path>(32,5-15): error X3511: forced to unroll loop, but unrolling failed.
 
 
 tint executable returned error: exit status 1

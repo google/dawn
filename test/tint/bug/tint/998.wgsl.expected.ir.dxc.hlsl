@@ -10,6 +10,7 @@ RWByteAddressBuffer result : register(u1, space1);
 static S s = (S)0;
 [numthreads(1, 1, 1)]
 void main() {
-  s.data[constants[0u].x] = 0u;
+  uint v = constants[0u].x;
+  s.data[v] = 0u;
 }
 

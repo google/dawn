@@ -23,8 +23,9 @@ void main() {
       }
       i = (i + int(1));
       {
-        InnerS v_1 = v;
-        s1.a1[uniforms[0u].x] = v_1;
+        uint v_1 = uniforms[0u].x;
+        InnerS v_2 = v;
+        s1.a1[v_1] = v_2;
       }
       continue;
     }

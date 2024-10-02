@@ -60,10 +60,11 @@ void main_inner(uint3 WorkGroupID, uint3 LocalInvocationID, uint tint_local_inde
           if ((flip[0u].x != 0u)) {
             loadIndex = loadIndex.yx;
           }
-          float3 v_4 = tile[r][((4u * LocalInvocationID[0u]) + c)];
-          float2 v_5 = (float2(loadIndex) + (0.25f).xx);
-          float2 v_6 = (v_5 / float2(dims));
-          v_4 = inputTex.SampleLevel(samp, v_6, float(0.0f)).xyz;
+          uint v_4 = r;
+          uint v_5 = ((4u * LocalInvocationID[0u]) + c);
+          float2 v_6 = (float2(loadIndex) + (0.25f).xx);
+          float2 v_7 = (v_6 / float2(dims));
+          tile[v_4][v_5] = inputTex.SampleLevel(samp, v_7, float(0.0f)).xyz;
           {
             c = (c + 1u);
           }
@@ -96,19 +97,19 @@ void main_inner(uint3 WorkGroupID, uint3 LocalInvocationID, uint tint_local_inde
             writeIndex = writeIndex.yx;
           }
           uint center = ((4u * LocalInvocationID[0u]) + c);
-          bool v_7 = false;
-          if ((center >= filterOffset)) {
-            v_7 = (center < (256u - filterOffset));
-          } else {
-            v_7 = false;
-          }
           bool v_8 = false;
-          if (v_7) {
-            v_8 = all((writeIndex < dims));
+          if ((center >= filterOffset)) {
+            v_8 = (center < (256u - filterOffset));
           } else {
             v_8 = false;
           }
+          bool v_9 = false;
           if (v_8) {
+            v_9 = all((writeIndex < dims));
+          } else {
+            v_9 = false;
+          }
+          if (v_9) {
             float3 acc = (0.0f).xxx;
             {
               uint f = 0u;
@@ -118,17 +119,19 @@ void main_inner(uint3 WorkGroupID, uint3 LocalInvocationID, uint tint_local_inde
                   break;
                 }
                 uint i = ((center + f) - filterOffset);
-                float3 v_9 = acc;
-                float v_10 = (1.0f / float(params[0u].x));
-                acc = (v_9 + (v_10 * tile[r][i]));
+                float3 v_10 = acc;
+                float v_11 = (1.0f / float(params[0u].x));
+                uint v_12 = r;
+                uint v_13 = i;
+                acc = (v_10 + (v_11 * tile[v_12][v_13]));
                 {
                   f = (f + 1u);
                 }
                 continue;
               }
             }
-            uint2 v_11 = writeIndex;
-            outputTex[v_11] = float4(acc, 1.0f);
+            uint2 v_14 = writeIndex;
+            outputTex[v_14] = float4(acc, 1.0f);
           }
           {
             c = (c + 1u);

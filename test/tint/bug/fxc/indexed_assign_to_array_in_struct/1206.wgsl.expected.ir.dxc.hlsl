@@ -44,6 +44,8 @@ Particle v_4(uint offset) {
 [numthreads(1, 1, 1)]
 void main() {
   Particle particle = v_4(0u);
-  particle.position[sim[0u].x] = particle.position[sim[0u].x];
+  uint v_10 = sim[0u].x;
+  uint v_11 = sim[0u].x;
+  particle.position[v_10] = particle.position[v_11];
 }
 

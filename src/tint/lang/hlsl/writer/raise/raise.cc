@@ -198,6 +198,7 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
     RUN_TRANSFORM(core::ir::transform::RenameConflicts, module);
     {
         core::ir::transform::ValueToLetConfig cfg;
+        cfg.replace_pointer_lets = true;
         RUN_TRANSFORM(core::ir::transform::ValueToLet, module, cfg);
     }
 

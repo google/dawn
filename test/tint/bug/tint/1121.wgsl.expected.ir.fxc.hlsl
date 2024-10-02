@@ -85,24 +85,29 @@ void main_inner(uint3 GlobalInvocationID) {
                 break;
               }
               float4 p = (0.0f).xxxx;
-              if ((frustumPlanes[i].x > 0.0f)) {
+              uint v_15 = i;
+              if ((frustumPlanes[v_15].x > 0.0f)) {
                 p[0u] = boxMax.x;
               } else {
                 p[0u] = boxMin.x;
               }
-              if ((frustumPlanes[i].y > 0.0f)) {
+              uint v_16 = i;
+              if ((frustumPlanes[v_16].y > 0.0f)) {
                 p[1u] = boxMax.y;
               } else {
                 p[1u] = boxMin.y;
               }
-              if ((frustumPlanes[i].z > 0.0f)) {
+              uint v_17 = i;
+              if ((frustumPlanes[v_17].z > 0.0f)) {
                 p[2u] = boxMax.z;
               } else {
                 p[2u] = boxMin.z;
               }
               p[3u] = 1.0f;
-              float v_15 = dp;
-              dp = (v_15 + min(0.0f, dot(p, frustumPlanes[i])));
+              float v_18 = dp;
+              float4 v_19 = p;
+              uint v_20 = i;
+              dp = (v_18 + min(0.0f, dot(v_19, frustumPlanes[v_20])));
               {
                 i = (i + 1u);
               }
@@ -111,31 +116,31 @@ void main_inner(uint3 GlobalInvocationID) {
           }
           if ((dp >= 0.0f)) {
             uint tileId = uint((x + (y * TILE_COUNT_X)));
-            bool v_16 = false;
+            bool v_21 = false;
             if ((tileId < 0u)) {
-              v_16 = true;
+              v_21 = true;
             } else {
-              v_16 = (tileId >= config[0u].y);
+              v_21 = (tileId >= config[0u].y);
             }
-            if (v_16) {
+            if (v_21) {
               {
                 x = (x + int(1));
               }
               continue;
             }
-            uint v_17 = (uint(tileId) * 260u);
-            uint v_18 = 0u;
-            tileLightId.InterlockedAdd(uint(0u), 1u, v_18);
-            uint offset = v_18;
+            uint v_22 = (uint(tileId) * 260u);
+            uint v_23 = 0u;
+            tileLightId.InterlockedAdd(uint(0u), 1u, v_23);
+            uint offset = v_23;
             if ((offset >= config[1u].x)) {
               {
                 x = (x + int(1));
               }
               continue;
             }
-            uint v_19 = offset;
-            uint v_20 = (uint(tileId) * 260u);
-            tileLightId.Store(((4u + v_20) + (uint(v_19) * 4u)), GlobalInvocationID[0u]);
+            uint v_24 = offset;
+            uint v_25 = (uint(tileId) * 260u);
+            tileLightId.Store(((4u + v_25) + (uint(v_24) * 4u)), GlobalInvocationID[0u]);
           }
           {
             x = (x + int(1));

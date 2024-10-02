@@ -18,7 +18,8 @@ cbuffer cbuffer_uniforms : register(b4, space1) {
 void main() {
   InnerS v = (InnerS)0;
   OuterS s1 = (OuterS)0;
-  InnerS v_1 = v;
-  s1.s2.a[uniforms[0u].x] = v_1;
+  uint v_1 = uniforms[0u].x;
+  InnerS v_2 = v;
+  s1.s2.a[v_1] = v_2;
 }
 

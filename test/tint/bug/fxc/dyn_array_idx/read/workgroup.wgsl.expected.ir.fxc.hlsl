@@ -29,7 +29,8 @@ void f_inner(uint tint_local_index) {
     }
   }
   GroupMemoryBarrierWithGroupSync();
-  result.Store(0u, asuint(s.data[asint(ubo[0u].x)]));
+  int v_2 = asint(ubo[0u].x);
+  result.Store(0u, asuint(s.data[v_2]));
 }
 
 [numthreads(1, 1, 1)]

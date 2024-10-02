@@ -14,7 +14,9 @@ uint f(uint i) {
 void main() {
   OuterS s1 = (OuterS)0;
   float3 v = (0.0f).xxx;
-  v[s1.a1[uniforms[0u].x]] = 1.0f;
-  v[f(s1.a1[uniforms[0u].x])] = 1.0f;
+  uint v_1 = uniforms[0u].x;
+  v[s1.a1[v_1]] = 1.0f;
+  uint v_2 = uniforms[0u].x;
+  v[f(s1.a1[v_2])] = 1.0f;
 }
 

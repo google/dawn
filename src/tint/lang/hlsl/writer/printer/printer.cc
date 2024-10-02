@@ -608,6 +608,8 @@ class Printer : public tint::TextGenerator {
     }
 
     void EmitLet(const core::ir::Let* l, LetType type) {
+        TINT_ASSERT(!l->Result(0)->Type()->Is<core::type::Pointer>());
+
         auto out = Line();
 
         if (type == LetType::kModuleScope) {

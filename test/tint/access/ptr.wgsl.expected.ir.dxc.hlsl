@@ -29,9 +29,8 @@ int accept_ptr_to_struct_and_access(inout S val) {
 }
 
 int accept_ptr_to_struct_access_pass_ptr(inout S val) {
-  int b = val.a;
-  b = int(2);
-  return b;
+  val.a = int(2);
+  return val.a;
 }
 
 int tint_f32_to_i32(float value) {
@@ -57,14 +56,13 @@ void main_inner(uint tint_local_index) {
   GroupMemoryBarrierWithGroupSync();
   int v1 = int(0);
   S v2 = (S)0;
-  S v3 = v2;
   float3 v4 = (0.0f).xxx;
   int v_4 = int(0);
   InterlockedOr(g1, int(0), v_4);
   int t1 = v_4;
   int v_5 = accept_ptr_deref_pass_through(v1);
   int v_6 = (v_5 + accept_ptr_to_struct_and_access(v2));
-  int v_7 = (v_6 + accept_ptr_to_struct_and_access(v3));
+  int v_7 = (v_6 + accept_ptr_to_struct_and_access(v2));
   int v_8 = (v_7 + accept_ptr_vec_access_elements(v4));
   int v_9 = (v_8 + accept_ptr_to_struct_access_pass_ptr(v2));
   s.Store(0u, asuint(((v_9 + call_builtin_with_mod_scope_ptr()) + t1)));

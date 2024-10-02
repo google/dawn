@@ -25,7 +25,8 @@ void main() {
   InnerS v = (InnerS)0;
   OuterS s = (OuterS)0;
   uint v_1 = getNextIndex();
-  InnerS v_2 = v;
-  s.a1[v_1].a2[uniforms[0u].y] = v_2;
+  uint v_2 = uniforms[0u].y;
+  InnerS v_3 = v;
+  s.a1[v_1].a2[v_2] = v_3;
 }
 

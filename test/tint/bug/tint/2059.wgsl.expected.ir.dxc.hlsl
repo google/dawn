@@ -228,10 +228,10 @@ void main() {
       } else {
         break;
       }
-      float3 v_41 = m[c];
+      uint v_41 = c;
       float v_42 = float(((c * 3u) + 1u));
       float v_43 = float(((c * 3u) + 2u));
-      v_41 = float3(v_42, v_43, float(((c * 3u) + 3u)));
+      m[v_41] = float3(v_42, v_43, float(((c * 3u) + 3u)));
       {
         c = (c + 1u);
       }

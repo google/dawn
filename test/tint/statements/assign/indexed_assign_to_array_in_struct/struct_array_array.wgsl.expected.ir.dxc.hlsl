@@ -14,7 +14,9 @@ cbuffer cbuffer_uniforms : register(b4, space1) {
 void main() {
   InnerS v = (InnerS)0;
   OuterS s1 = (OuterS)0;
-  InnerS v_1 = v;
-  s1.a1[uniforms[0u].x][uniforms[0u].y] = v_1;
+  uint v_1 = uniforms[0u].x;
+  uint v_2 = uniforms[0u].y;
+  InnerS v_3 = v;
+  s1.a1[v_1][v_2] = v_3;
 }
 

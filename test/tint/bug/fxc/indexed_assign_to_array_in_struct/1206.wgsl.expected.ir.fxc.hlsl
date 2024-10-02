@@ -45,9 +45,10 @@ Particle v_4(uint offset) {
 void main() {
   Particle particle = v_4(0u);
   uint v_10 = sim[0u].x;
+  uint v_11 = sim[0u].x;
   float3 tint_array_copy[8] = particle.position;
-  tint_array_copy[v_10] = particle.position[sim[0u].x];
-  float3 v_11[8] = tint_array_copy;
-  particle.position = v_11;
+  tint_array_copy[v_10] = particle.position[v_11];
+  float3 v_12[8] = tint_array_copy;
+  particle.position = v_12;
 }
 

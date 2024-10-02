@@ -92,7 +92,8 @@ void main_inner(uint3 local_id, uint3 global_id, uint tint_local_index) {
       } else {
         break;
       }
-      acc[index] = 0.0f;
+      uint v_6 = index;
+      acc[v_6] = 0.0f;
       {
         index = (index + 1u);
       }
@@ -155,8 +156,8 @@ void main_inner(uint3 local_id, uint3 global_id, uint tint_local_index) {
               }
               uint inputRow = (tileRowB + innerRow);
               uint inputCol = (tileCol + innerCol);
-              float v_6 = mm_Bsub[innerCol][inputCol];
-              v_6 = mm_readB(((t * 64u) + inputRow), (globalCol + innerCol));
+              uint v_7 = innerCol;
+              mm_Bsub[v_7][inputCol] = mm_readB(((t * 64u) + inputRow), (globalCol + innerCol));
               {
                 innerCol = (innerCol + 1u);
               }
@@ -184,7 +185,10 @@ void main_inner(uint3 local_id, uint3 global_id, uint tint_local_index) {
               } else {
                 break;
               }
-              BCached[inner] = mm_Bsub[k][(tileCol + inner)];
+              uint v_8 = inner;
+              uint v_9 = k;
+              uint v_10 = (tileCol + inner);
+              BCached[v_8] = mm_Bsub[v_9][v_10];
               {
                 inner = (inner + 1u);
               }
@@ -198,7 +202,9 @@ void main_inner(uint3 local_id, uint3 global_id, uint tint_local_index) {
               } else {
                 break;
               }
-              ACached = mm_Asub[(tileRow + innerRow)][k];
+              uint v_11 = (tileRow + innerRow);
+              uint v_12 = k;
+              ACached = mm_Asub[v_11][v_12];
               {
                 uint innerCol = 0u;
                 while(true) {
@@ -207,7 +213,10 @@ void main_inner(uint3 local_id, uint3 global_id, uint tint_local_index) {
                     break;
                   }
                   uint index = ((innerRow * 4u) + innerCol);
-                  acc[index] = (acc[index] + (ACached * BCached[innerCol]));
+                  float v_13 = acc[index];
+                  float v_14 = ACached;
+                  uint v_15 = innerCol;
+                  acc[index] = (v_13 + (v_14 * BCached[v_15]));
                   {
                     innerCol = (innerCol + 1u);
                   }

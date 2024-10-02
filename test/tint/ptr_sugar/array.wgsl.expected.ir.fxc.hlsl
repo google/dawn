@@ -28,14 +28,16 @@ void no_deref_let() {
 void deref_var() {
   int a[10] = (int[10])0;
   int i = int(0);
-  int b = a[i];
+  int v = i;
+  int b = a[v];
   a[int(0)] = int(42);
 }
 
 void no_deref_var() {
   int a[10] = (int[10])0;
   int i = int(0);
-  int b = a[i];
+  int v_1 = i;
+  int b = a[v_1];
   a[int(0)] = int(42);
 }
 

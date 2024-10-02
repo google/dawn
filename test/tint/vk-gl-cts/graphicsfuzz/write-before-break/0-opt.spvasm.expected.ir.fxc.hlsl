@@ -32,40 +32,32 @@ void main_1() {
   GLF_live6rows = int(2);
   {
     while(true) {
-      int x_18 = ll_1;
-      int x_19 = asint(x_9[0u].x);
-      if ((x_18 >= x_19)) {
+      int v = ll_1;
+      if ((v >= asint(x_9[0u].x))) {
         x_GLF_color = float4(1.0f, 0.0f, 0.0f, 1.0f);
         break;
       }
-      int x_20 = ll_1;
-      ll_1 = (x_20 + int(1));
-      int x_22 = asint(x_9[0u].x);
-      z = x_22;
+      ll_1 = (ll_1 + int(1));
+      z = asint(x_9[0u].x);
       ll_2 = int(0);
       ctr = int(0);
       {
         while(true) {
-          int x_23 = ctr;
-          if ((x_23 < int(1))) {
+          if ((ctr < int(1))) {
           } else {
             break;
           }
-          int x_24 = ll_2;
-          int x_25 = asint(x_9[0u].x);
-          if ((x_24 >= x_25)) {
+          int v_1 = ll_2;
+          if ((v_1 >= asint(x_9[0u].x))) {
             break;
           }
-          int x_26 = ll_2;
-          ll_2 = (x_26 + int(1));
-          float4x3 x_98 = m43;
-          tempm43 = x_98;
+          ll_2 = (ll_2 + int(1));
+          tempm43 = m43;
           ll_3 = int(0);
           c = int(0);
           {
             while(true) {
-              int x_28 = z;
-              if ((int(1) < x_28)) {
+              if ((int(1) < z)) {
               } else {
                 break;
               }
@@ -76,32 +68,25 @@ void main_1() {
               int x_32 = d;
               int x_33 = d;
               int x_34 = d;
-              int v = ((((x_29 >= int(0)) & (x_30 < int(4)))) ? (x_31) : (int(0)));
-              tempm43[v][((((x_32 >= int(0)) & (x_33 < int(3)))) ? (x_34) : (int(0)))] = 1.0f;
+              int v_2 = ((((x_29 >= int(0)) & (x_30 < int(4)))) ? (x_31) : (int(0)));
+              tempm43[v_2][((((x_32 >= int(0)) & (x_33 < int(3)))) ? (x_34) : (int(0)))] = 1.0f;
               {
-                int x_35 = c;
-                c = (x_35 + int(1));
+                c = (c + int(1));
               }
               continue;
             }
           }
-          int x_37 = idx;
-          int x_38 = idx;
-          int x_39 = idx;
-          int x_117 = ((((x_37 >= int(0)) & (x_38 < int(9)))) ? (x_39) : (int(0)));
-          int x_40 = ctr;
-          float x_119 = m43[x_40].y;
-          float x_121 = GLF_live6sums[x_117];
-          GLF_live6sums[x_117] = (x_121 + x_119);
+          int x_117 = ((((idx >= int(0)) & (idx < int(9)))) ? (idx) : (int(0)));
+          float v_3 = GLF_live6sums[x_117];
+          int v_4 = ctr;
+          GLF_live6sums[x_117] = (v_3 + m43[v_4].y);
           {
-            int x_41 = ctr;
-            ctr = (x_41 + int(1));
+            ctr = (ctr + int(1));
           }
           continue;
         }
       }
-      int x_43 = idx;
-      idx = (x_43 + int(1));
+      idx = (idx + int(1));
       {
       }
       continue;
@@ -111,21 +96,20 @@ void main_1() {
 
 main_out main_inner() {
   main_1();
-  main_out v_1 = {x_GLF_color};
-  return v_1;
+  main_out v_5 = {x_GLF_color};
+  return v_5;
 }
 
 main_outputs main() {
-  main_out v_2 = main_inner();
-  main_outputs v_3 = {v_2.x_GLF_color_1};
-  return v_3;
+  main_out v_6 = main_inner();
+  main_outputs v_7 = {v_6.x_GLF_color_1};
+  return v_7;
 }
 
-DXC validation failure:
-error: validation errors
-hlsl.hlsl:116: error: Loop must have break.
-Validation failed.
-
+FXC validation failure:
+<scrubbed_path>(57,13-23): error X3511: forced to unroll loop, but unrolling failed.
+<scrubbed_path>(43,9-19): error X3511: forced to unroll loop, but unrolling failed.
+<scrubbed_path>(32,5-15): error X3511: forced to unroll loop, but unrolling failed.
 
 
 tint executable returned error: exit status 1
