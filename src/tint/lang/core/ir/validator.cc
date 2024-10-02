@@ -134,6 +134,12 @@ bool HasLocationAndBuiltin(const tint::core::IOAttributes& attr) {
     return attr.builtin.has_value() && attr.location.has_value();
 }
 
+/// @return true if @param attr does not have invariant decoration or if it also has position
+/// decoration
+bool InvariantOnlyIfAlsoPosition(const tint::core::IOAttributes& attr) {
+    return !attr.invariant || attr.builtin == BuiltinValue::kPosition;
+}
+
 /// @returns true if @p ty meets the basic function parameter rules (i.e. one of constructible,
 ///          pointer, sampler or texture).
 ///
@@ -1191,6 +1197,11 @@ void Validator::CheckFunction(const Function* func) {
             param->Type(), [&]() -> diag::Diagnostic& { return AddError(param); },
             Capabilities{Capability::kAllowRefTypes});
 
+        if (!InvariantOnlyIfAlsoPosition(param->Attributes())) {
+            AddError(func)
+                << "invariant can only decorate a param iff it is also decorated with position";
+        }
+
         if (!IsValidFunctionParamType(param->Type())) {
             auto struct_ty = param->Type()->As<core::type::Struct>();
             if (!capabilities_.Contains(Capability::kAllowPointersInStructures) || !struct_ty ||
@@ -1210,6 +1221,11 @@ void Validator::CheckFunction(const Function* func) {
 
         if (auto* s = param->Type()->As<core::type::Struct>()) {
             for (auto* mem : s->Members()) {
+                if (!InvariantOnlyIfAlsoPosition(mem->Attributes())) {
+                    AddError(func) << "invariant can only decorate a param member iff it is also "
+                                      "decorated with position";
+                }
+
                 if (HasLocationAndBuiltin(mem->Attributes())) {
                     AddError(param)
                         << "a builtin and location cannot be both declared for a struct member";
@@ -1264,6 +1280,21 @@ void Validator::CheckFunction(const Function* func) {
         AddError(func) << "function return type must be constructible";
     }
 
+    const auto* ret_struct = func->ReturnType()->As<core::type::Struct>();
+    if (ret_struct) {
+        for (auto* mem : ret_struct->Members()) {
+            if (!InvariantOnlyIfAlsoPosition(mem->Attributes())) {
+                AddError(func) << "invariant can only decorate a member iff it is also decorated "
+                                  "with position";
+            }
+        }
+    } else {
+        if (!InvariantOnlyIfAlsoPosition(func->ReturnAttributes())) {
+            AddError(func)
+                << "invariant can only decorate a return iff it is also decorated with position";
+        }
+    }
+
     if (func->Stage() != Function::PipelineStage::kFragment) {
         if (DAWN_UNLIKELY(func->ReturnBuiltin().has_value() &&
                           func->ReturnBuiltin().value() == BuiltinValue::kFragDepth)) {
@@ -1273,6 +1304,7 @@ void Validator::CheckFunction(const Function* func) {
 
     if (func->Stage() == Function::PipelineStage::kVertex) {
         CheckVertexEntryPoint(func);
+    } else {
     }
 
     QueueBlock(func->Block());
@@ -1284,6 +1316,11 @@ void Validator::CheckVertexEntryPoint(const Function* ep) {
     bool contains_position = false;
     if (ret_struct) {
         for (auto* mem : ret_struct->Members()) {
+            if (!InvariantOnlyIfAlsoPosition(mem->Attributes())) {
+                AddError(ep) << "invariant can only decorate output members iff they are also "
+                                "position builtins";
+            }
+
             if (!mem->Attributes().builtin.has_value()) {
                 continue;
             }
@@ -1300,6 +1337,10 @@ void Validator::CheckVertexEntryPoint(const Function* ep) {
             }
         }
     } else {
+        if (!InvariantOnlyIfAlsoPosition(ep->ReturnAttributes())) {
+            AddError(ep)
+                << "invariant can only decorate outputs iff they are also position builtins";
+        }
         if (ep->ReturnBuiltin() && ep->ReturnBuiltin() == BuiltinValue::kPosition) {
             contains_position = true;
             CheckBuiltinPosition(ep, ep->ReturnType());
@@ -1311,6 +1352,11 @@ void Validator::CheckVertexEntryPoint(const Function* ep) {
         const auto* res_struct = res_type->As<core::type::Struct>();
         if (res_struct) {
             for (auto* mem : res_struct->Members()) {
+                if (!InvariantOnlyIfAlsoPosition(mem->Attributes())) {
+                    AddError(ep) << "invariant can only decorate members iff they are also "
+                                    "position builtins";
+                }
+
                 if (!mem->Attributes().builtin.has_value()) {
                     continue;
                 }
@@ -1327,6 +1373,11 @@ void Validator::CheckVertexEntryPoint(const Function* ep) {
                 }
             }
         } else {
+            if (!InvariantOnlyIfAlsoPosition(var->Attributes())) {
+                AddError(ep)
+                    << "invariant can only decorate vars iff they are also position builtins";
+            }
+
             if (!var->Attributes().builtin.has_value()) {
                 continue;
             }

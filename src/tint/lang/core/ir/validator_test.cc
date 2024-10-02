@@ -446,6 +446,104 @@ note: # Disassembly
 )");
 }
 
+TEST_F(IR_ValidatorTest, Function_Param_InvariantWithPosition) {
+    auto* f = b.Function("my_func", ty.void_());
+    auto* p = b.FunctionParam("my_param", ty.vec4<f32>());
+    IOAttributes attr;
+    attr.builtin = BuiltinValue::kPosition;
+    attr.invariant = true;
+    p->SetAttributes(attr);
+    f->SetParams({p});
+
+    b.Append(f->Block(), [&] { b.Return(f); });
+
+    auto res = ir::Validate(mod);
+    ASSERT_EQ(res, Success);
+}
+
+TEST_F(IR_ValidatorTest, Function_Param_InvariantWithoutPosition) {
+    auto* f = b.Function("my_func", ty.void_());
+    auto* p = b.FunctionParam("my_param", ty.vec4<f32>());
+    IOAttributes attr;
+    attr.invariant = true;
+    p->SetAttributes(attr);
+    f->SetParams({p});
+
+    b.Append(f->Block(), [&] { b.Return(f); });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_EQ(
+        res.Failure().reason.Str(),
+        R"(:1:1 error: invariant can only decorate a param iff it is also decorated with position
+%my_func = func(%my_param:vec4<f32> [@invariant]):void {
+^^^^^^^^
+
+note: # Disassembly
+%my_func = func(%my_param:vec4<f32> [@invariant]):void {
+  $B1: {
+    ret
+  }
+}
+)");
+}
+
+TEST_F(IR_ValidatorTest, Function_Param_Struct_InvariantWithPosition) {
+    IOAttributes attr;
+    attr.invariant = true;
+    attr.builtin = BuiltinValue::kPosition;
+
+    auto* str_ty =
+        ty.Struct(mod.symbols.New("MyStruct"), {
+                                                   {mod.symbols.New("pos"), ty.vec4<f32>(), attr},
+                                               });
+
+    auto* f = b.Function("my_func", ty.void_());
+    auto* p = b.FunctionParam("my_param", str_ty);
+    f->SetParams({p});
+
+    b.Append(f->Block(), [&] { b.Return(f); });
+
+    auto res = ir::Validate(mod);
+    ASSERT_EQ(res, Success);
+}
+
+TEST_F(IR_ValidatorTest, Function_Param_Struct_InvariantWithoutPosition) {
+    IOAttributes attr;
+    attr.invariant = true;
+
+    auto* str_ty =
+        ty.Struct(mod.symbols.New("MyStruct"), {
+                                                   {mod.symbols.New("pos"), ty.vec4<f32>(), attr},
+                                               });
+
+    auto* f = b.Function("my_func", ty.void_());
+    auto* p = b.FunctionParam("my_param", str_ty);
+    f->SetParams({p});
+
+    b.Append(f->Block(), [&] { b.Return(f); });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_EQ(
+        res.Failure().reason.Str(),
+        R"(:5:1 error: invariant can only decorate a param member iff it is also decorated with position
+%my_func = func(%my_param:MyStruct):void {
+^^^^^^^^
+
+note: # Disassembly
+MyStruct = struct @align(16) {
+  pos:vec4<f32> @offset(0), @invariant
+}
+
+%my_func = func(%my_param:MyStruct):void {
+  $B1: {
+    ret
+  }
+}
+)");
+}
+
 TEST_F(IR_ValidatorTest, Function_Return_BothLocationAndBuiltin) {
     auto* f = b.Function("my_func", ty.f32());
 
@@ -501,6 +599,98 @@ MyStruct = struct @align(4) {
 %my_func = func():MyStruct {
   $B1: {
     ret
+  }
+}
+)");
+}
+
+TEST_F(IR_ValidatorTest, Function_Return_InvariantWithPosition) {
+    IOAttributes attr;
+    attr.builtin = BuiltinValue::kPosition;
+    attr.invariant = true;
+
+    auto* f = b.Function("my_func", ty.vec4<f32>());
+    f->SetReturnAttributes(attr);
+
+    b.Append(f->Block(), [&] { b.Unreachable(); });
+
+    auto res = ir::Validate(mod);
+    ASSERT_EQ(res, Success);
+}
+
+TEST_F(IR_ValidatorTest, Function_Return_InvariantWithoutPosition) {
+    IOAttributes attr;
+    attr.invariant = true;
+
+    auto* f = b.Function("my_func", ty.vec4<f32>());
+    f->SetReturnAttributes(attr);
+
+    b.Append(f->Block(), [&] { b.Unreachable(); });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_EQ(
+        res.Failure().reason.Str(),
+        R"(:1:1 error: invariant can only decorate a return iff it is also decorated with position
+%my_func = func():vec4<f32> [@invariant] {
+^^^^^^^^
+
+note: # Disassembly
+%my_func = func():vec4<f32> [@invariant] {
+  $B1: {
+    unreachable
+  }
+}
+)");
+}
+
+TEST_F(IR_ValidatorTest, Function_Return_Struct_InvariantWithPosition) {
+    IOAttributes attr;
+    attr.invariant = true;
+    attr.builtin = BuiltinValue::kPosition;
+
+    auto* str_ty =
+        ty.Struct(mod.symbols.New("MyStruct"), {
+                                                   {mod.symbols.New("pos"), ty.vec4<f32>(), attr},
+                                               });
+
+    auto* f = b.Function("my_func", str_ty);
+
+    b.Append(f->Block(), [&] { b.Unreachable(); });
+
+    auto res = ir::Validate(mod);
+    ASSERT_EQ(res, Success);
+}
+
+TEST_F(IR_ValidatorTest, Function_Return_Struct_InvariantWithoutPosition) {
+    IOAttributes attr;
+    attr.invariant = true;
+
+    auto* str_ty =
+        ty.Struct(mod.symbols.New("MyStruct"), {
+                                                   {mod.symbols.New("pos"), ty.vec4<f32>(), attr},
+                                               });
+
+    auto* f = b.Function("my_func", str_ty);
+
+    b.Append(f->Block(), [&] { b.Unreachable(); });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_EQ(
+        res.Failure().reason.Str(),
+        R"(:5:1 error: invariant can only decorate a member iff it is also decorated with position
+%my_func = func():MyStruct {
+^^^^^^^^
+
+note: # Disassembly
+MyStruct = struct @align(16) {
+  pos:vec4<f32> @offset(0), @invariant
+}
+
+%my_func = func():MyStruct {
+  $B1: {
+    unreachable
   }
 }
 )");
