@@ -1394,7 +1394,7 @@ ObjectType ShaderModuleBase::GetType() const {
     return ObjectType::ShaderModule;
 }
 
-bool ShaderModuleBase::HasEntryPoint(std::string_view entryPoint) const {
+bool ShaderModuleBase::HasEntryPoint(absl::string_view entryPoint) const {
     return mEntryPoints.contains(entryPoint);
 }
 
@@ -1415,7 +1415,7 @@ std::optional<bool> ShaderModuleBase::GetStrictMath() const {
     return mStrictMath;
 }
 
-const EntryPointMetadata& ShaderModuleBase::GetEntryPoint(std::string_view entryPoint) const {
+const EntryPointMetadata& ShaderModuleBase::GetEntryPoint(absl::string_view entryPoint) const {
     DAWN_ASSERT(HasEntryPoint(entryPoint));
     return *mEntryPoints.at(entryPoint);
 }

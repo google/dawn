@@ -32,6 +32,7 @@
 #ifndef {{DIR}}_{{namespace.upper()}}_STRUCTS_H_
 #define {{DIR}}_{{namespace.upper()}}_STRUCTS_H_
 
+#include "absl/strings/string_view.h"
 {% set api = metadata.api.lower() %}
 {% set CAPI = metadata.c_prefix %}
 #include "dawn/{{api}}_cpp.h"
@@ -107,6 +108,19 @@ namespace {{native_namespace}} {
             //* Custom string constructors / conversion
             {% if type.name.get() == "string view" %}
                 {{wgpu_string_members(CppType) | indent(8)}}
+
+                #ifndef ABSL_USES_STD_STRING_VIEW
+                // NOLINTNEXTLINE(runtime/explicit) allow implicit conversion
+                operator absl::string_view() const {
+                    if (this->length == wgpu::kStrlen) {
+                        if (IsUndefined()) {
+                            return {};
+                        }
+                        return {this->data};
+                    }
+                    return {this->data, this->length};
+                }
+                #endif
             {% endif %}
 
             {% if type.any_member_requires_struct_defaulting %}
