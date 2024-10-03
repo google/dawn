@@ -40,7 +40,6 @@ import (
 	"dawn.googlesource.com/dawn/tools/src/cov"
 	"dawn.googlesource.com/dawn/tools/src/dawn/node"
 	"dawn.googlesource.com/dawn/tools/src/fileutils"
-	"dawn.googlesource.com/dawn/tools/src/subcmd"
 )
 
 type flags struct {
@@ -171,7 +170,7 @@ func (c *cmd) Run(ctx context.Context, cfg common.Config) error {
 func (c *cmd) processFlags() error {
 	// Check mandatory arguments
 	if c.flags.bin == "" {
-		return subcmd.InvalidCLA()
+		return fmt.Errorf("-bin is not set. It defaults to <dawn>/out/active (%v) which does not exist", filepath.Join(fileutils.DawnRoot(), "out/active"))
 	}
 	if !fileutils.IsDir(c.flags.bin) {
 		return fmt.Errorf("'%v' is not a directory", c.flags.bin)
