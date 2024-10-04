@@ -56,7 +56,6 @@ class DAWN_WIRE_EXPORT WireServer : public CommandHandler {
 
     bool InjectBuffer(WGPUBuffer buffer, const Handle& handle, const Handle& deviceHandle);
     bool InjectTexture(WGPUTexture texture, const Handle& handle, const Handle& deviceHandle);
-    bool InjectSwapChain(WGPUSwapChain swapchain, const Handle& handle, const Handle& deviceHandle);
     bool InjectSurface(WGPUSurface surface, const Handle& handle, const Handle& instanceHandle);
     bool InjectInstance(WGPUInstance instance, const Handle& handle);
 

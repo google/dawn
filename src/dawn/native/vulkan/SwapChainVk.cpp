@@ -120,11 +120,6 @@ ResultOrError<Ref<SwapChain>> SwapChain::Create(Device* device,
 
 SwapChain::~SwapChain() = default;
 
-void SwapChain::DestroyImpl() {
-    SwapChainBase::DestroyImpl();
-    DetachFromSurface();
-}
-
 // Note that when we need to re-create the swapchain because it is out of date,
 // previousSwapChain can be set to `this`.
 MaybeError SwapChain::Initialize(SwapChainBase* previousSwapChain) {

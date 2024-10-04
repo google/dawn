@@ -200,9 +200,6 @@ class Server : public ServerBase {
 
     WireResult InjectBuffer(WGPUBuffer buffer, const Handle& handle, const Handle& deviceHandle);
     WireResult InjectTexture(WGPUTexture texture, const Handle& handle, const Handle& deviceHandle);
-    WireResult InjectSwapChain(WGPUSwapChain swapchain,
-                               const Handle& handle,
-                               const Handle& deviceHandle);
     WireResult InjectSurface(WGPUSurface surface,
                              const Handle& handle,
                              const Handle& instanceHandle);

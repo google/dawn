@@ -1587,15 +1587,6 @@
                 ]
             },
             {
-                "name": "create swap chain",
-                "tags": ["art", "dawn", "emscripten"],
-                "returns": "swap chain",
-                "args": [
-                    {"name": "surface", "type": "surface"},
-                    {"name": "descriptor", "type": "swap chain descriptor", "annotation": "const*"}
-                ]
-            },
-            {
                 "name": "create texture",
                 "returns": "texture",
                 "args": [
@@ -4064,13 +4055,6 @@
                 ]
             },
             {
-                "name": "get preferred format",
-                "returns": "texture format",
-                "args": [
-                    {"name": "adapter", "type": "adapter"}
-                ]
-            },
-            {
                 "name": "present",
                 "returns": "void",
                 "args": []
@@ -4221,28 +4205,6 @@
         "tags": ["dawn"],
         "members": [
             {"name": "swap chain panel", "type": "void", "annotation": "*"}
-        ]
-    },
-    "swap chain": {
-        "category": "object",
-        "tags": ["art", "dawn", "emscripten"],
-        "methods": [
-            {"name": "get current texture view", "returns": "texture view"},
-            {"name": "get current texture", "returns": "texture", "tags": ["dawn"]},
-            {"name": "present"}
-        ]
-    },
-    "swap chain descriptor": {
-        "category": "structure",
-        "tags": ["art", "dawn", "emscripten"],
-        "extensible": "in",
-        "members": [
-            {"name": "label", "type": "string view", "optional": true},
-            {"name": "usage", "type": "texture usage"},
-            {"name": "format", "type": "texture format"},
-            {"name": "width", "type": "uint32_t"},
-            {"name": "height", "type": "uint32_t"},
-            {"name": "present mode", "type": "present mode"}
         ]
     },
     "surface texture": {

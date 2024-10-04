@@ -190,8 +190,6 @@ dawn_json_generator("kotlin_gen") {
     "java/android/dawn/SurfaceGetCurrentTextureStatus.kt",
     "java/android/dawn/SurfaceSourceAndroidNativeWindow.kt",
     "java/android/dawn/SurfaceTexture.kt",
-    "java/android/dawn/SwapChain.kt",
-    "java/android/dawn/SwapChainDescriptor.kt",
     "java/android/dawn/Texture.kt",
     "java/android/dawn/TextureAspect.kt",
     "java/android/dawn/TextureBindingLayout.kt",

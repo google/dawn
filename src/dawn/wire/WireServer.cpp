@@ -53,12 +53,6 @@ bool WireServer::InjectTexture(WGPUTexture texture,
     return mImpl->InjectTexture(texture, handle, deviceHandle) == WireResult::Success;
 }
 
-bool WireServer::InjectSwapChain(WGPUSwapChain swapchain,
-                                 const Handle& handle,
-                                 const Handle& deviceHandle) {
-    return mImpl->InjectSwapChain(swapchain, handle, deviceHandle) == WireResult::Success;
-}
-
 bool WireServer::InjectSurface(WGPUSurface surface,
                                const Handle& handle,
                                const Handle& instanceHandle) {

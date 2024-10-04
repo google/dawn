@@ -51,7 +51,6 @@
 #include "mocks/RenderPipelineMock.h"
 #include "mocks/SamplerMock.h"
 #include "mocks/ShaderModuleMock.h"
-#include "mocks/SwapChainMock.h"
 #include "mocks/TextureMock.h"
 #include "partition_alloc/pointers/raw_ptr.h"
 

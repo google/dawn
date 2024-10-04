@@ -99,17 +99,6 @@ ReservedTexture Client::ReserveTexture(WGPUDevice device, const WGPUTextureDescr
     return result;
 }
 
-ReservedSwapChain Client::ReserveSwapChain(WGPUDevice device,
-                                           const WGPUSwapChainDescriptor* descriptor) {
-    Ref<SwapChain> swapChain = Make<SwapChain>(nullptr, descriptor);
-
-    ReservedSwapChain result;
-    result.handle = swapChain->GetWireHandle();
-    result.deviceHandle = FromAPI(device)->GetWireHandle();
-    result.swapchain = ReturnToAPI(std::move(swapChain));
-    return result;
-}
-
 ReservedSurface Client::ReserveSurface(WGPUInstance instance,
                                        const WGPUSurfaceCapabilities* capabilities) {
     Ref<Surface> surface = Make<Surface>(capabilities);
@@ -143,10 +132,6 @@ void Client::ReclaimBufferReservation(const ReservedBuffer& reservation) {
 
 void Client::ReclaimTextureReservation(const ReservedTexture& reservation) {
     ReclaimReservation(FromAPI(reservation.texture));
-}
-
-void Client::ReclaimSwapChainReservation(const ReservedSwapChain& reservation) {
-    ReclaimReservation(FromAPI(reservation.swapchain));
 }
 
 void Client::ReclaimSurfaceReservation(const ReservedSurface& reservation) {

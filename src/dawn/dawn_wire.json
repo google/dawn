@@ -292,8 +292,7 @@
             "InstanceProcessEvents",
             "InstanceWaitAny",
             "SurfaceConfigure",
-            "SurfaceUnconfigure",
-            "SwapChainGetCurrentTexture"
+            "SurfaceUnconfigure"
         ],
         "client_special_objects": [
             "Adapter",
@@ -305,7 +304,6 @@
             "ShaderModule",
             "Surface",
             "SurfaceCapabilities",
-            "SwapChain",
             "Texture"
         ],
         "server_custom_pre_handler_commands": [

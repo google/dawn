@@ -51,11 +51,6 @@ SwapChain::SwapChain(DeviceBase* dev, Surface* sur, const SurfaceConfiguration* 
 
 SwapChain::~SwapChain() = default;
 
-void SwapChain::DestroyImpl() {
-    SwapChainBase::DestroyImpl();
-    DetachFromSurface();
-}
-
 MaybeError SwapChain::Initialize(SwapChainBase* previousSwapChain) {
     DAWN_ASSERT(GetSurface()->GetType() == Surface::Type::MetalLayer);
 

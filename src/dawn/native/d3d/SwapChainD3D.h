@@ -50,8 +50,6 @@ class SwapChain : public SwapChainBase {
     using SwapChainBase::SwapChainBase;
     ~SwapChain() override;
 
-    void DestroyImpl() override;
-
     MaybeError Initialize(SwapChainBase* previousSwapChain);
 
     virtual IUnknown* GetD3DDeviceForCreatingSwapChain() = 0;

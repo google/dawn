@@ -38,7 +38,6 @@
 #include "dawn/wire/client/Queue.h"
 #include "dawn/wire/client/ShaderModule.h"
 #include "dawn/wire/client/Surface.h"
-#include "dawn/wire/client/SwapChain.h"
 #include "dawn/wire/client/Texture.h"
 
 #include "dawn/wire/client/ApiObjects_autogen.h"

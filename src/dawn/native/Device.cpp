@@ -584,7 +584,6 @@ void DeviceBase::DestroyObjects() {
             ObjectType::RenderPipeline,
             ObjectType::ComputePipeline,
             ObjectType::PipelineLayout,
-            ObjectType::SwapChain,
             ObjectType::BindGroup,
             ObjectType::BindGroupLayout,
             ObjectType::ShaderModule,
@@ -1622,26 +1621,6 @@ ShaderModuleBase* DeviceBase::APICreateErrorShaderModule2(const ShaderModuleDesc
 
     return ReturnToAPI(std::move(result));
 }
-SwapChainBase* DeviceBase::APICreateSwapChain(Surface* surface,
-                                              const SwapChainDescriptor* descriptor) {
-    Ref<SwapChainBase> result;
-    if (ConsumedError(CreateSwapChain(surface, descriptor), &result,
-                      "calling %s.CreateSwapChain(%s).", this, descriptor)) {
-        SurfaceConfiguration config;
-        config.nextInChain = descriptor->nextInChain;
-        config.device = this;
-        config.width = descriptor->width;
-        config.height = descriptor->height;
-        config.format = descriptor->format;
-        config.usage = descriptor->usage;
-        config.presentMode = descriptor->presentMode;
-        config.viewFormatCount = 0;
-        config.viewFormats = nullptr;
-        config.alphaMode = wgpu::CompositeAlphaMode::Opaque;
-        result = SwapChainBase::MakeError(this, &config);
-    }
-    return ReturnToAPI(std::move(result));
-}
 TextureBase* DeviceBase::APICreateTexture(const TextureDescriptor* descriptor) {
     Ref<TextureBase> result;
     if (ConsumedError(CreateTexture(descriptor), &result, InternalErrorType::OutOfMemory,
@@ -2339,47 +2318,6 @@ ResultOrError<Ref<ShaderModuleBase>> DeviceBase::CreateShaderModule(
     }
 
     return GetOrCreateShaderModule(unpacked, internalExtensions, &parseResult, compilationMessages);
-}
-
-ResultOrError<Ref<SwapChainBase>> DeviceBase::CreateSwapChain(
-    Surface* surface,
-    const SwapChainDescriptor* descriptor) {
-    GetInstance()->EmitDeprecationWarning(
-        "The explicit creation of a SwapChain object is deprecated and should be replaced by "
-        "Surface configuration.");
-
-    DAWN_TRY(ValidateIsAlive());
-    if (IsValidationEnabled()) {
-        DAWN_TRY_CONTEXT(ValidateSwapChainDescriptor(this, surface, descriptor), "validating %s",
-                         descriptor);
-    }
-
-    SurfaceConfiguration config;
-    config.nextInChain = descriptor->nextInChain;
-    config.device = this;
-    config.width = descriptor->width;
-    config.height = descriptor->height;
-    config.format = descriptor->format;
-    config.usage = descriptor->usage;
-    config.presentMode = descriptor->presentMode;
-    config.viewFormatCount = 0;
-    config.viewFormats = nullptr;
-    config.alphaMode = wgpu::CompositeAlphaMode::Opaque;
-
-    SwapChainBase* previousSwapChain = surface->GetAttachedSwapChain();
-    ResultOrError<Ref<SwapChainBase>> maybeNewSwapChain =
-        CreateSwapChainImpl(surface, previousSwapChain, &config);
-
-    if (previousSwapChain != nullptr) {
-        previousSwapChain->DetachFromSurface();
-    }
-
-    Ref<SwapChainBase> newSwapChain;
-    DAWN_TRY_ASSIGN(newSwapChain, std::move(maybeNewSwapChain));
-
-    newSwapChain->SetIsAttached();
-    surface->SetAttachedSwapChain(newSwapChain.Get());
-    return newSwapChain;
 }
 
 ResultOrError<Ref<SwapChainBase>> DeviceBase::CreateSwapChain(Surface* surface,

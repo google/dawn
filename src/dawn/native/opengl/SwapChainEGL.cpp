@@ -54,11 +54,6 @@ SwapChainEGL::SwapChainEGL(DeviceBase* dev, Surface* sur, const SurfaceConfigura
 
 SwapChainEGL::~SwapChainEGL() = default;
 
-void SwapChainEGL::DestroyImpl() {
-    SwapChainBase::DestroyImpl();
-    DetachFromSurface();
-}
-
 MaybeError SwapChainEGL::Initialize(SwapChainBase* previousSwapChain) {
     const Device* device = ToBackend(GetDevice());
 

@@ -103,11 +103,6 @@ DXGI_USAGE ToDXGIUsage(DeviceBase* device, wgpu::TextureFormat format, wgpu::Tex
 
 SwapChain::~SwapChain() = default;
 
-void SwapChain::DestroyImpl() {
-    SwapChainBase::DestroyImpl();
-    DetachFromSurface();
-}
-
 // Initializes the swapchain on the surface. Note that `previousSwapChain` may or may not be
 // nullptr. If it is not nullptr it means that it is the swapchain previously in use on the
 // surface and that we have a chance to reuse it's underlying IDXGISwapChain and "buffers".

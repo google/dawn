@@ -109,30 +109,6 @@ WireResult Server::InjectTexture(WGPUTexture texture,
     return WireResult::Success;
 }
 
-WireResult Server::InjectSwapChain(WGPUSwapChain swapchain,
-                                   const Handle& handle,
-                                   const Handle& deviceHandle) {
-    DAWN_ASSERT(swapchain != nullptr);
-    Known<WGPUDevice> device;
-    WIRE_TRY(Objects<WGPUDevice>().Get(deviceHandle.id, &device));
-    if (device->generation != deviceHandle.generation) {
-        return WireResult::FatalError;
-    }
-
-    Reserved<WGPUSwapChain> data;
-    WIRE_TRY(Objects<WGPUSwapChain>().Allocate(&data, handle));
-
-    data->handle = swapchain;
-    data->generation = handle.generation;
-    data->state = AllocationState::Allocated;
-
-    // The swapchain is externally owned so it shouldn't be destroyed when we receive a destroy
-    // message from the client. Add a reference to counterbalance the eventual release.
-    mProcs.swapChainAddRef(swapchain);
-
-    return WireResult::Success;
-}
-
 WireResult Server::InjectSurface(WGPUSurface surface,
                                  const Handle& handle,
                                  const Handle& instanceHandle) {

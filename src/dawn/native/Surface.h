@@ -114,18 +114,12 @@ class Surface final : public ErrorMonad {
     void* GetXDisplay() const;
     uint32_t GetXWindow() const;
 
-    // TODO(dawn:2320): Remove these 2 accessors once the deprecation period is finished and
-    // Device::APICreateSwapChain gets dropped
-    SwapChainBase* GetAttachedSwapChain();
-    void SetAttachedSwapChain(SwapChainBase* swapChain);
-
     const std::string& GetLabel() const;
 
     // Dawn API
     void APIConfigure(const SurfaceConfiguration* config);
     wgpu::Status APIGetCapabilities(AdapterBase* adapter, SurfaceCapabilities* capabilities) const;
     void APIGetCurrentTexture(SurfaceTexture* surfaceTexture) const;
-    wgpu::TextureFormat APIGetPreferredFormat(AdapterBase* adapter) const;
     void APIPresent();
     void APIUnconfigure();
     // TODO(crbug.com/42241188): Remove const char* version of the method.
@@ -141,7 +135,6 @@ class Surface final : public ErrorMonad {
 
     MaybeError GetCapabilities(AdapterBase* adapter, SurfaceCapabilities* capabilities) const;
     MaybeError GetCurrentTexture(SurfaceTexture* surfaceTexture) const;
-    ResultOrError<wgpu::TextureFormat> GetPreferredFormat(AdapterBase* adapter) const;
     MaybeError Present();
 
     Ref<InstanceBase> mInstance;
@@ -156,17 +149,6 @@ class Surface final : public ErrorMonad {
 
     // We keep on storing the previous swap chain after Unconfigure in case we could reuse it
     Ref<SwapChainBase> mRecycledSwapChain;
-
-    // This ensures that the user does not mix the legacy API (ManagesSwapChain::No, i.e., explicit
-    // call to CreateSwapChain) with the new API (ManagesSwapChain::Yes, i.e., surface.configure).
-    // TODO(dawn:2320): Remove and consider it is always Yes once Device::APICreateSwapChain gets
-    // dropped
-    enum class ManagesSwapChain {
-        Yes,
-        No,
-        Unknown,
-    };
-    ManagesSwapChain mIsSwapChainManagedBySurface = ManagesSwapChain::Unknown;
 
     // A cache is mutable because potentially modified in const-qualified getters
     std::unique_ptr<AdapterSurfaceCapCache> mCapabilityCache;

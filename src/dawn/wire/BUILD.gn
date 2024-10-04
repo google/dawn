@@ -133,8 +133,6 @@ dawn_component("wire") {
     "client/ShaderModule.h",
     "client/Surface.cpp",
     "client/Surface.h",
-    "client/SwapChain.cpp",
-    "client/SwapChain.h",
     "client/Texture.cpp",
     "client/Texture.h",
     "server/ObjectStorage.h",

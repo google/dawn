@@ -274,8 +274,6 @@ source_set("native_mocks_sources") {
     "unittests/native/mocks/SamplerMock.h",
     "unittests/native/mocks/ShaderModuleMock.cpp",
     "unittests/native/mocks/ShaderModuleMock.h",
-    "unittests/native/mocks/SwapChainMock.cpp",
-    "unittests/native/mocks/SwapChainMock.h",
     "unittests/native/mocks/TextureMock.cpp",
     "unittests/native/mocks/TextureMock.h",
   ]
@@ -443,7 +441,6 @@ dawn_test("dawn_unittests") {
     "unittests/wire/WireInjectBufferTests.cpp",
     "unittests/wire/WireInjectInstanceTests.cpp",
     "unittests/wire/WireInjectSurfaceTests.cpp",
-    "unittests/wire/WireInjectSwapChainTests.cpp",
     "unittests/wire/WireInjectTextureTests.cpp",
     "unittests/wire/WireInstanceTests.cpp",
     "unittests/wire/WireMemoryTransferServiceTests.cpp",
@@ -722,8 +719,6 @@ source_set("end2end_tests_sources") {
     sources += [
       "end2end/SurfaceConfigurationValidationTests.cpp",
       "end2end/SurfaceTests.cpp",
-      "end2end/SwapChainTests.cpp",
-      "end2end/SwapChainValidationTests.cpp",
       "end2end/WindowSurfaceTests.cpp",
     ]
   }

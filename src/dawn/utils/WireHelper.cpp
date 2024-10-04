@@ -92,24 +92,12 @@ class WireServerTraceLayer : public dawn::wire::CommandHandler {
 
 class WireHelperDirect : public WireHelper {
   public:
-    explicit WireHelperDirect(const DawnProcTable& procs) : mProcs(procs) {
-        dawnProcSetProcs(&procs);
-    }
+    explicit WireHelperDirect(const DawnProcTable& procs) { dawnProcSetProcs(&procs); }
 
     wgpu::Instance RegisterInstance(WGPUInstance backendInstance,
                                     const WGPUInstanceDescriptor* wireDesc) override {
         DAWN_ASSERT(backendInstance != nullptr);
         return wgpu::Instance(backendInstance);
-    }
-
-    wgpu::SwapChain CreateSwapChain(WGPUSurface backendSurface,
-                                    WGPUDevice backendDevice,
-                                    WGPUDevice apiDevice,
-                                    const WGPUSwapChainDescriptor* descriptor) override {
-        DAWN_ASSERT(backendDevice == apiDevice);
-        WGPUSwapChain cSwapChain =
-            mProcs.deviceCreateSwapChain(backendDevice, backendSurface, descriptor);
-        return wgpu::SwapChain::Acquire(cSwapChain);
     }
 
     void BeginWireTrace(const char* name) override {}
@@ -119,15 +107,11 @@ class WireHelperDirect : public WireHelper {
     bool FlushServer() override { return true; }
 
     bool IsIdle() override { return true; }
-
-  private:
-    const DawnProcTable& mProcs;
 };
 
 class WireHelperProxy : public WireHelper {
   public:
-    explicit WireHelperProxy(const char* wireTraceDir, const DawnProcTable& procs)
-        : mBackendProcs(procs) {
+    explicit WireHelperProxy(const char* wireTraceDir, const DawnProcTable& procs) {
         mC2sBuf = std::make_unique<dawn::utils::TerribleCommandBuffer>();
         mS2cBuf = std::make_unique<dawn::utils::TerribleCommandBuffer>();
 
@@ -166,19 +150,6 @@ class WireHelperProxy : public WireHelper {
         return wgpu::Instance::Acquire(reserved.instance);
     }
 
-    wgpu::SwapChain CreateSwapChain(WGPUSurface backendSurface,
-                                    WGPUDevice backendDevice,
-                                    WGPUDevice apiDevice,
-                                    const WGPUSwapChainDescriptor* descriptor) override {
-        WGPUSwapChain cSwapChain =
-            mBackendProcs.deviceCreateSwapChain(backendDevice, backendSurface, descriptor);
-
-        auto reservation = mWireClient->ReserveSwapChain(apiDevice, descriptor);
-        mWireServer->InjectSwapChain(cSwapChain, reservation.handle, reservation.deviceHandle);
-
-        return wgpu::SwapChain::Acquire(reservation.swapchain);
-    }
-
     void BeginWireTrace(const char* name) override {
         if (mWireServerTraceLayer) {
             return mWireServerTraceLayer->BeginWireTrace(name);
@@ -192,7 +163,6 @@ class WireHelperProxy : public WireHelper {
     bool IsIdle() override { return mC2sBuf->Empty() && mS2cBuf->Empty(); }
 
   private:
-    const DawnProcTable& mBackendProcs;
     std::unique_ptr<dawn::utils::TerribleCommandBuffer> mC2sBuf;
     std::unique_ptr<dawn::utils::TerribleCommandBuffer> mS2cBuf;
     std::unique_ptr<dawn::wire::WireServer> mWireServer;
