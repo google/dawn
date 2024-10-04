@@ -134,6 +134,12 @@ bool HasLocationAndBuiltin(const tint::core::IOAttributes& attr) {
     return attr.builtin.has_value() && attr.location.has_value();
 }
 
+/// @returns true if @p attr contains one of either location or builtin decoration
+bool HasEitherLocationOrBuiltin(const tint::core::IOAttributes& attr) {
+    return (attr.builtin.has_value() && !attr.location.has_value()) ||
+           (!attr.builtin.has_value() && attr.location.has_value());
+}
+
 /// @return true if @param attr does not have invariant decoration or if it also has position
 /// decoration
 bool InvariantOnlyIfAlsoPosition(const tint::core::IOAttributes& attr) {
@@ -1210,13 +1216,7 @@ void Validator::CheckFunction(const Function* func) {
                 })) {
                 AddError(param) << "function parameter type must be constructible, a pointer, a "
                                    "texture, or a sampler";
-                return;
             }
-        }
-
-        if (HasLocationAndBuiltin(param->Attributes())) {
-            AddError(param) << "a builtin and location cannot be both declared for a param";
-            return;
         }
 
         if (auto* s = param->Type()->As<core::type::Struct>()) {
@@ -1229,27 +1229,15 @@ void Validator::CheckFunction(const Function* func) {
                 if (HasLocationAndBuiltin(mem->Attributes())) {
                     AddError(param)
                         << "a builtin and location cannot be both declared for a struct member";
-                    return;
                 }
+            }
+        } else {
+            if (HasLocationAndBuiltin(param->Attributes())) {
+                AddError(param) << "a builtin and location cannot be both declared for a param";
             }
         }
 
         scope_stack_.Add(param);
-    }
-
-    if (HasLocationAndBuiltin(func->ReturnAttributes())) {
-        AddError(func) << "a builtin and location cannot be both declared for a function return";
-        return;
-    }
-
-    if (auto* s = func->ReturnType()->As<core::type::Struct>()) {
-        for (auto* mem : s->Members()) {
-            if (HasLocationAndBuiltin(mem->Attributes())) {
-                AddError(func)
-                    << "a builtin and location cannot be both declared for a struct member";
-                return;
-            }
-        }
     }
 
     if (func->Stage() == Function::PipelineStage::kCompute) {
@@ -1259,6 +1247,27 @@ void Validator::CheckFunction(const Function* func) {
 
         if (DAWN_UNLIKELY(func->ReturnType() && !func->ReturnType()->Is<core::type::Void>())) {
             AddError(func) << "compute entry point must not have a return type";
+        }
+    } else if (auto* s = func->ReturnType()->As<core::type::Struct>()) {
+        for (auto* mem : s->Members()) {
+            if (HasLocationAndBuiltin(mem->Attributes())) {
+                AddError(func)
+                    << "a builtin and location cannot be both declared for a struct member";
+            } else if (func->Stage() != Function::PipelineStage::kUndefined &&
+                       !HasEitherLocationOrBuiltin(mem->Attributes())) {
+                AddError(func) << "members of struct used for returns of entry points must "
+                                  "have a builtin or location decoration";
+            }
+        }
+    } else {
+        if (HasLocationAndBuiltin(func->ReturnAttributes())) {
+            AddError(func)
+                << "a builtin and location cannot be both declared for a function return";
+        } else if (!func->ReturnType()->Is<core::type::Void>() &&
+                   func->Stage() != Function::PipelineStage::kUndefined &&
+                   !HasEitherLocationOrBuiltin(func->ReturnAttributes())) {
+            AddError(func) << "a non-void return for an entry point must have a builtin or "
+                              "location decoration";
         }
     }
 
@@ -1304,7 +1313,6 @@ void Validator::CheckFunction(const Function* func) {
 
     if (func->Stage() == Function::PipelineStage::kVertex) {
         CheckVertexEntryPoint(func);
-    } else {
     }
 
     QueueBlock(func->Block());

@@ -1076,42 +1076,39 @@ TEST_F(HlslWriterTransformTest, ShaderIOParameters_Subgroup_NonStruct) {
     auto* subgroup_size = b.FunctionParam("size", ty.u32());
     subgroup_size->SetBuiltin(core::BuiltinValue::kSubgroupSize);
 
-    auto* ep = b.Function("foo", ty.u32(), core::ir::Function::PipelineStage::kFragment);
+    auto* ep = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     ep->SetParams({subgroup_invocation_id, subgroup_size});
 
     b.Append(ep->Block(), [&] {
-        auto* r = b.Multiply(ty.u32(), subgroup_invocation_id, subgroup_size);
-        b.Return(ep, r);
+        b.Let("x", b.Multiply(ty.u32(), subgroup_invocation_id, subgroup_size));
+        b.Return(ep);
     });
 
     auto* src = R"(
-%foo = @fragment func(%id:u32 [@subgroup_invocation_id], %size:u32 [@subgroup_size]):u32 {
+%foo = @fragment func(%id:u32 [@subgroup_invocation_id], %size:u32 [@subgroup_size]):void {
   $B1: {
     %4:u32 = mul %id, %size
-    ret %4
+    %x:u32 = let %4
+    ret
   }
 }
 )";
     EXPECT_EQ(src, str());
 
     auto* expect = R"(
-foo_outputs = struct @align(4) {
-  tint_symbol:u32 @offset(0)
-}
-
-%foo_inner = func(%id:u32, %size:u32):u32 {
+%foo_inner = func(%id:u32, %size:u32):void {
   $B1: {
     %4:u32 = mul %id, %size
-    ret %4
+    %x:u32 = let %4
+    ret
   }
 }
-%foo = @fragment func():foo_outputs {
+%foo = @fragment func():void {
   $B2: {
-    %6:u32 = hlsl.WaveGetLaneIndex
-    %7:u32 = hlsl.WaveGetLaneCount
-    %8:u32 = call %foo_inner, %6, %7
-    %9:foo_outputs = construct %8
-    ret %9
+    %7:u32 = hlsl.WaveGetLaneIndex
+    %8:u32 = hlsl.WaveGetLaneCount
+    %9:void = call %foo_inner, %7, %8
+    ret
   }
 }
 )";
@@ -1152,14 +1149,14 @@ TEST_F(HlslWriterTransformTest, ShaderIOParameters_Subgroup_Struct) {
 
     auto* str_param = b.FunctionParam("inputs", str_ty);
 
-    auto* ep = b.Function("foo", ty.u32(), core::ir::Function::PipelineStage::kFragment);
+    auto* ep = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     ep->SetParams({str_param});
 
     b.Append(ep->Block(), [&] {
         auto* subgroup_invocation_id = b.Access(ty.u32(), str_param, 0_i);
         auto* subgroup_size = b.Access(ty.u32(), str_param, 1_i);
-        auto* r = b.Multiply(ty.u32(), subgroup_invocation_id, subgroup_size);
-        b.Return(ep, r);
+        b.Let("x", b.Multiply(ty.u32(), subgroup_invocation_id, subgroup_size));
+        b.Return(ep);
     });
 
     auto* src = R"(
@@ -1168,12 +1165,13 @@ Inputs = struct @align(4) {
   size:u32 @offset(4), @builtin(subgroup_size)
 }
 
-%foo = @fragment func(%inputs:Inputs):u32 {
+%foo = @fragment func(%inputs:Inputs):void {
   $B1: {
     %3:u32 = access %inputs, 0i
     %4:u32 = access %inputs, 1i
     %5:u32 = mul %3, %4
-    ret %5
+    %x:u32 = let %5
+    ret
   }
 }
 )";
@@ -1185,26 +1183,22 @@ Inputs = struct @align(4) {
   size:u32 @offset(4)
 }
 
-foo_outputs = struct @align(4) {
-  tint_symbol:u32 @offset(0)
-}
-
-%foo_inner = func(%inputs:Inputs):u32 {
+%foo_inner = func(%inputs:Inputs):void {
   $B1: {
     %3:u32 = access %inputs, 0i
     %4:u32 = access %inputs, 1i
     %5:u32 = mul %3, %4
-    ret %5
+    %x:u32 = let %5
+    ret
   }
 }
-%foo = @fragment func():foo_outputs {
+%foo = @fragment func():void {
   $B2: {
-    %7:u32 = hlsl.WaveGetLaneIndex
-    %8:u32 = hlsl.WaveGetLaneCount
-    %9:Inputs = construct %7, %8
-    %10:u32 = call %foo_inner, %9
-    %11:foo_outputs = construct %10
-    ret %11
+    %8:u32 = hlsl.WaveGetLaneIndex
+    %9:u32 = hlsl.WaveGetLaneCount
+    %10:Inputs = construct %8, %9
+    %11:void = call %foo_inner, %10
+    ret
   }
 }
 )";

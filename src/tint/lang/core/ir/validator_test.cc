@@ -552,7 +552,7 @@ TEST_F(IR_ValidatorTest, Function_Return_BothLocationAndBuiltin) {
     attr.location = 0;
     f->SetReturnAttributes(attr);
 
-    b.Append(f->Block(), [&] { b.Return(f); });
+    b.Append(f->Block(), [&] { b.Unreachable(); });
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
@@ -564,7 +564,7 @@ TEST_F(IR_ValidatorTest, Function_Return_BothLocationAndBuiltin) {
 note: # Disassembly
 %my_func = func():f32 [@location(0), @position] {
   $B1: {
-    ret
+    unreachable
   }
 }
 )");
@@ -582,7 +582,7 @@ TEST_F(IR_ValidatorTest, Function_Return_Struct_BothLocationAndBuiltin) {
 
     auto* f = b.Function("my_func", str_ty);
 
-    b.Append(f->Block(), [&] { b.Return(f); });
+    b.Append(f->Block(), [&] { b.Unreachable(); });
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
@@ -598,7 +598,61 @@ MyStruct = struct @align(4) {
 
 %my_func = func():MyStruct {
   $B1: {
-    ret
+    unreachable
+  }
+}
+)");
+}
+
+TEST_F(IR_ValidatorTest, Function_Return_NonVoid_MissingLocationAndBuiltin) {
+    auto* f = b.Function("my_func", ty.f32());
+    f->SetStage(Function::PipelineStage::kFragment);
+
+    b.Append(f->Block(), [&] { b.Unreachable(); });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_EQ(
+        res.Failure().reason.Str(),
+        R"(:1:1 error: a non-void return for an entry point must have a builtin or location decoration
+%my_func = @fragment func():f32 {
+^^^^^^^^
+
+note: # Disassembly
+%my_func = @fragment func():f32 {
+  $B1: {
+    unreachable
+  }
+}
+)");
+}
+
+TEST_F(IR_ValidatorTest, Function_Return_NonVoid_Struct_MissingLocationAndBuiltin) {
+    auto* str_ty = ty.Struct(mod.symbols.New("MyStruct"), {
+                                                              {mod.symbols.New("a"), ty.f32(), {}},
+                                                          });
+
+    auto* f = b.Function("my_func", str_ty);
+    f->SetStage(Function::PipelineStage::kFragment);
+
+    b.Append(f->Block(), [&] { b.Unreachable(); });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_EQ(
+        res.Failure().reason.Str(),
+        R"(:5:1 error: members of struct used for returns of entry points must have a builtin or location decoration
+%my_func = @fragment func():MyStruct {
+^^^^^^^^
+
+note: # Disassembly
+MyStruct = struct @align(4) {
+  a:f32 @offset(0)
+}
+
+%my_func = @fragment func():MyStruct {
+  $B1: {
+    unreachable
   }
 }
 )");
@@ -934,6 +988,8 @@ MyStruct = struct @align(4) {
 )");
 }
 
+// TODO(371219657): Make only the more specific error, 'position must be declared for vertex entry
+//                  point output', be logged here
 TEST_F(IR_ValidatorTest, Function_VertexMissingPosition) {
     auto* f = b.Function("my_func", ty.vec4<f32>());
     f->SetStage(Function::PipelineStage::kVertex);
@@ -941,8 +997,13 @@ TEST_F(IR_ValidatorTest, Function_VertexMissingPosition) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.Str(),
-              R"(:1:1 error: position must be declared for vertex entry point output
+    EXPECT_EQ(
+        res.Failure().reason.Str(),
+        R"(:1:1 error: a non-void return for an entry point must have a builtin or location decoration
+%my_func = @vertex func():vec4<f32> {
+^^^^^^^^
+
+:1:1 error: position must be declared for vertex entry point output
 %my_func = @vertex func():vec4<f32> {
 ^^^^^^^^
 
