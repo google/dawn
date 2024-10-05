@@ -95,6 +95,10 @@ bool IsANGLEDesktopGL(std::string renderer) {
            renderer.find("OpenGL ES") == std::string::npos;
 }
 
+bool IsSwiftShader(std::string renderer) {
+    return renderer.find("SwiftShader") != std::string::npos;
+}
+
 }  // anonymous namespace
 
 // static
@@ -415,6 +419,11 @@ void PhysicalDevice::SetupBackendDeviceToggles(dawn::platform::Platform* platfor
 
     // Use T2B and B2T copies to emulate a T2T copy between sRGB and non-sRGB textures.
     deviceToggles->Default(Toggle::UseT2B2TForSRGBTextureCopy, true);
+
+    // Scale depth bias value by * 0.5 on certain GL drivers.
+    deviceToggles->Default(Toggle::GLDepthBiasModifier, gl.GetVersion().IsDesktop() ||
+                                                            IsANGLEDesktopGL(mName) ||
+                                                            IsSwiftShader(mName));
 }
 
 ResultOrError<Ref<DeviceBase>> PhysicalDevice::CreateDeviceImpl(

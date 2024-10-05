@@ -1307,11 +1307,6 @@ crbug.com/dawn/0000 [ android arm ] webgpu:api,operation,memory_sync,buffer,sing
 crbug.com/dawn/0000 [ android arm ] webgpu:api,operation,memory_sync,buffer,single_buffer:wr:boundary="queue-op";readOp="input-indirect-dispatch";readContext="compute-pass-encoder";writeOp="storage";writeContext="render-bundle-encoder" [ Failure ]
 crbug.com/dawn/0000 [ android arm ] webgpu:api,operation,memory_sync,buffer,single_buffer:ww:boundary="command-buffer";writeOps=["storage","t2b-copy"];contexts=["render-bundle-encoder","command-encoder"] [ Failure ]
 
-# rendering,depth_bias failures on Pixel 6
-crbug.com/366411883 [ android arm ] webgpu:api,operation,rendering,depth_bias:depth_bias:quadAngle=0;bias=8388608;biasSlopeScale=0;biasClamp=0 [ Failure ]
-crbug.com/366411883 [ android arm ] webgpu:api,operation,rendering,depth_bias:depth_bias_24bit_format:format="depth24plus";quadAngle=0;bias=8388608;biasSlopeScale=0;biasClamp=0 [ Failure ]
-crbug.com/366411883 [ android arm ] webgpu:api,operation,rendering,depth_bias:depth_bias_24bit_format:format="depth24plus-stencil8";quadAngle=0;bias=8388608;biasSlopeScale=0;biasClamp=0 [ Failure ]
-
 # Compressed texture image_copy failures on Pixel 6
 crbug.com/364917742 [ android arm ] webgpu:api,operation,command_buffer,image_copy:offsets_and_sizes:initMethod="CopyB2T";checkMethod="FullCopyT2B";format="astc-10x10-unorm";dimension="2d" [ Failure ]
 crbug.com/364917742 [ android arm ] webgpu:api,operation,command_buffer,image_copy:offsets_and_sizes:initMethod="CopyB2T";checkMethod="FullCopyT2B";format="astc-10x5-unorm";dimension="2d" [ Failure ]

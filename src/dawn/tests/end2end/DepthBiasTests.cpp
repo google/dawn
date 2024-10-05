@@ -208,10 +208,6 @@ TEST_P(DepthBiasTests, PositiveBiasOnFloatWithClamp) {
 TEST_P(DepthBiasTests, NegativeBiasOnFloat) {
     // NVIDIA GPUs seems to be using a different scale than everyone else
     DAWN_SUPPRESS_TEST_IF(IsVulkan() && IsNvidia());
-    // TODO(crbug.com/352360580): Investigate failures.
-    DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsAndroid());
-    DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsANGLED3D11());
-
     // Draw quad flat on z = 0.25 with -0.25 bias, depth clear of 0.125
     RunDepthBiasTest(wgpu::TextureFormat::Depth32Float, 0.125, QuadAngle::Flat,
                      -kPointTwoFiveBiasForPointTwoFiveZOnFloat, 0, 0);
@@ -331,14 +327,6 @@ TEST_P(DepthBiasTests, NegativeHalfSlopeBiasOnFloat) {
 
 // Test adding positive bias to output
 TEST_P(DepthBiasTests, PositiveBiasOn24bit) {
-    // ANGLE/D3D11 is failing this test for unknown reasons.
-    DAWN_TEST_UNSUPPORTED_IF(IsANGLED3D11());
-
-    // TODO(crbug.com/dawn/2295): diagnose this failure on Pixel 4 OpenGLES
-    DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsAndroid() && IsQualcomm());
-    // TODO(crbug.com/dawn/2295): diagnose this failure on Pixel 6 OpenGLES
-    DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsAndroid() && IsARM());
-
     // Draw quad flat on z = 0.25 with 0.25 bias
     RunDepthBiasTest(wgpu::TextureFormat::Depth24PlusStencil8, 0.4f, QuadAngle::Flat,
                      0.25f * (1 << 25), 0, 0);

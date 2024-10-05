@@ -558,6 +558,12 @@ static constexpr ToggleEnumAndInfoList kToggleNameAndInfoList = {{
       "COPY_SOURCE too on Nvidia since the shader resource states seem to miss flushing all caches "
       "and layout transitions causing rendering corruption.",
       "https://crbug.com/356905061", ToggleStage::Device}},
+    {Toggle::GLDepthBiasModifier,
+     {"gl_depth_bias_modifier",
+      "Empirically some GL drivers select n+1 when a depth value lies between 2^n and 2^(n+1), "
+      "while the WebGPU CTS is expecting n. Scale the depth bias value by multiple 0.5 on certain "
+      "backends to achieve conformant result.",
+      "https://crbug.com/42241017", ToggleStage::Device}},
     {Toggle::NoWorkaroundSampleMaskBecomesZeroForAllButLastColorTarget,
      {"no_workaround_sample_mask_becomes_zero_for_all_but_last_color_target",
       "MacOS 12.0+ Intel has a bug where the sample mask is only applied for the last color "
