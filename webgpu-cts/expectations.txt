@@ -1458,6 +1458,17 @@ crbug.com/365027668 [ angle-metal dawn-backend-validation desktop graphite-enabl
 crbug.com/365027668 [ angle-metal dawn-no-backend-validation desktop graphite-enabled intel-0x3e9b mac no-asan no-clang-coverage oop-c passthrough release renderer-skia-gl target-cpu-64 webgpu-adapter-default webgpu-no-worker ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_array_2d_coords:format="stencil8";minFilter="linear" [ Skip ]
 crbug.com/365027668 [ angle-metal dawn-no-backend-validation desktop graphite-enabled intel-0x3e9b mac no-asan no-clang-coverage oop-c passthrough release renderer-skia-gl target-cpu-64 webgpu-adapter-default webgpu-no-worker ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_array_2d_coords:format="stencil8";minFilter="nearest" [ Skip ]
 
+# Flaky on MacBookPro16,1 (AMD) machines
+crbug.com/371963563 [ mac amd ] webgpu:shader,execution,expression,call,builtin,atomics,atomicAnd:and_workgroup:workgroupSize=64;dispatchSize=1;mapId="passthrough";scalarType="i32" [ RetryOnFailure ]
+crbug.com/371963563 [ mac amd ] webgpu:shader,execution,expression,call,builtin,atomics,atomicAnd:and_workgroup:workgroupSize=64;dispatchSize=1;mapId="passthrough";scalarType="u32" [ RetryOnFailure ]
+crbug.com/371963563 [ mac amd ] webgpu:shader,execution,expression,call,builtin,atomics,atomicAnd:and_workgroup:workgroupSize=64;dispatchSize=1;mapId="remap";scalarType="i32" [ RetryOnFailure ]
+crbug.com/371963563 [ mac amd ] webgpu:shader,execution,expression,call,builtin,atomics,atomicAnd:and_workgroup:workgroupSize=64;dispatchSize=1;mapId="remap";scalarType="u32" [ RetryOnFailure ]
+crbug.com/371963563 [ mac amd ] webgpu:shader,execution,expression,call,builtin,atomics,atomicAnd:and_workgroup:workgroupSize=64;dispatchSize=4;mapId="passthrough";scalarType="i32" [ RetryOnFailure ]
+crbug.com/371963563 [ mac amd ] webgpu:shader,execution,expression,call,builtin,atomics,atomicAnd:and_workgroup:workgroupSize=64;dispatchSize=8;mapId="passthrough";scalarType="u32" [ RetryOnFailure ]
+crbug.com/371963563 [ mac amd ] webgpu:shader,execution,expression,call,builtin,atomics,atomicAnd:and_workgroup:workgroupSize=64;dispatchSize=16;mapId="passthrough";scalarType="u32" [ RetryOnFailure ]
+crbug.com/371963563 [ mac amd ] webgpu:shader,execution,expression,call,builtin,atomics,atomicOr:or_workgroup:workgroupSize=64;dispatchSize=1;mapId="remap";scalarType="u32" [ RetryOnFailure ]
+crbug.com/371963563 [ mac amd ] webgpu:shader,execution,expression,call,builtin,atomics,atomicOr:or_workgroup:workgroupSize=64;dispatchSize=8;mapId="passthrough";scalarType="u32" [ RetryOnFailure ]
+
 ################################################################################
 # Assorted failures that are missing bug associations (NEEDS TRIAGE)
 ################################################################################
