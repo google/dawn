@@ -39,6 +39,7 @@ void emwgpuDelete(void* id);
 FutureID emwgpuWaitAny(FutureID const* futurePtr,
                        size_t futureCount,
                        uint64_t const* timeoutNSPtr);
+WGPUTextureFormat emwgpuGetPreferredFormat();
 
 // Future/async operation that need to be forwarded to JS.
 void emwgpuAdapterRequestDevice(WGPUAdapter adapter,
@@ -251,7 +252,6 @@ auto ReturnToAPI(Ref<T*>&& object) {
   X(Sampler)             \
   X(ShaderModule)        \
   X(Surface)             \
-  X(SwapChain)           \
   X(Texture)             \
   X(TextureView)
 
@@ -275,7 +275,6 @@ auto ReturnToAPI(Ref<T*>&& object) {
   X(Sampler)             \
   X(ShaderModule)        \
   X(Surface)             \
-  X(SwapChain)           \
   X(Texture)             \
   X(TextureView)
 // clang-format on
@@ -1292,7 +1291,7 @@ WGPUStatus wgpuSurfaceGetCapabilities(WGPUSurface surface,
     WGPUTextureFormat_RGBA8Unorm,
     WGPUTextureFormat_RGBA16Float,
   };
-  WGPUTextureFormat preferredFormat = wgpuSurfaceGetPreferredFormat(surface, adapter);
+  WGPUTextureFormat preferredFormat = emwgpuGetPreferredFormat();
   switch (preferredFormat) {
     case WGPUTextureFormat_RGBA8Unorm:
       capabilities->formatCount = kSurfaceFormatsRGBAFirst.size();
@@ -1324,10 +1323,6 @@ WGPUStatus wgpuSurfaceGetCapabilities(WGPUSurface surface,
 
   return WGPUStatus_Success;
 }
-
-// ----------------------------------------------------------------------------
-// Methods of SwapChain
-// ----------------------------------------------------------------------------
 
 // ----------------------------------------------------------------------------
 // Methods of Texture

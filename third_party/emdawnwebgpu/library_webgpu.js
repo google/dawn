@@ -517,6 +517,11 @@ var LibraryWebGPU = {
   },
 #endif
 
+  emwgpuGetPreferredFormat: () => {
+    var format = navigator["gpu"]["getPreferredCanvasFormat"]();
+    return WebGPU.Int_PreferredFormat[format];
+  },
+
   // --------------------------------------------------------------------------
   // WebGPU function definitions, with methods organized by "class".
   //
@@ -1665,44 +1670,6 @@ var LibraryWebGPU = {
     return ptr;
   },
 
-  wgpuDeviceCreateSwapChain__deps: ['emwgpuCreateSwapChain'],
-  wgpuDeviceCreateSwapChain: (devicePtr, surfacePtr, descriptor) => {
-    {{{ gpu.makeCheckDescriptor('descriptor') }}}
-    var device = WebGPU._tableGet(devicePtr);
-    var context = WebGPU._tableGet(surfacePtr);
-
-#if ASSERTIONS
-    assert({{{ gpu.PresentMode.Fifo }}} ===
-      {{{ gpu.makeGetU32('descriptor', C_STRUCTS.WGPUSwapChainDescriptor.presentMode) }}});
-#endif
-
-    var canvasSize = [
-      {{{ gpu.makeGetU32('descriptor', C_STRUCTS.WGPUSwapChainDescriptor.width) }}},
-      {{{ gpu.makeGetU32('descriptor', C_STRUCTS.WGPUSwapChainDescriptor.height) }}}
-    ];
-
-    if (canvasSize[0] !== 0) {
-      context["canvas"]["width"] = canvasSize[0];
-    }
-
-    if (canvasSize[1] !== 0) {
-      context["canvas"]["height"] = canvasSize[1];
-    }
-
-    var configuration = {
-      "device": device,
-      "format": WebGPU.TextureFormat[
-        {{{ gpu.makeGetU32('descriptor', C_STRUCTS.WGPUSwapChainDescriptor.format) }}}],
-      "usage": {{{ gpu.makeGetU32('descriptor', C_STRUCTS.WGPUSwapChainDescriptor.usage) }}},
-      "alphaMode": "opaque",
-    };
-    context.configure(configuration);
-
-    var ptr = _emwgpuCreateSwapChain();
-    WebGPU._tableInsert(ptr, context);
-    return ptr;
-  },
-
   wgpuDeviceCreateTexture__deps: ['emwgpuCreateTexture'],
   wgpuDeviceCreateTexture: (devicePtr, descriptor) => {
     {{{ gpu.makeCheckDescriptor('descriptor') }}}
@@ -2386,11 +2353,6 @@ var LibraryWebGPU = {
     }
   },
 
-  wgpuSurfaceGetPreferredFormat: (surfacePtr, adapterPtr) => {
-    var format = navigator["gpu"]["getPreferredCanvasFormat"]();
-    return WebGPU.Int_PreferredFormat[format];
-  },
-
   wgpuSurfacePresent: (surfacePtr) => {
     // TODO: This could probably be emulated with ASYNCIFY.
     abort('wgpuSurfacePresent is unsupported (use requestAnimationFrame via html5.h instead)');
@@ -2399,31 +2361,6 @@ var LibraryWebGPU = {
   wgpuSurfaceUnconfigure: (surfacePtr) => {
     var context = WebGPU._tableGet(surfacePtr);
     context.unconfigure();
-  },
-
-  // --------------------------------------------------------------------------
-  // Methods of SwapChain
-  // --------------------------------------------------------------------------
-
-  wgpuSwapChainGetCurrentTexture__deps: ['emwgpuCreateTexture'],
-  wgpuSwapChainGetCurrentTexture: (swapChainPtr) => {
-    var context = WebGPU._tableGet(swapChainPtr);
-    var ptr = _emwgpuCreateTexture();
-    WebGPU._tableInsert(ptr, context.getCurrentTexture());
-    return ptr;
-  },
-
-  wgpuSwapChainGetCurrentTextureView__deps: ['emwgpuCreateTextureView'],
-  wgpuSwapChainGetCurrentTextureView: (swapChainPtr) => {
-    var context = WebGPU._tableGet(swapChainPtr);
-    var ptr = _emwgpuCreateTextureView();
-    WebGPU._tableInsert(ptr, context.getCurrentTexture().createView());
-    return ptr;
-  },
-
-  wgpuSwapChainPresent: (swapChainPtr) => {
-    // TODO: This could probably be emulated with ASYNCIFY.
-    abort('wgpuSwapChainPresent is unsupported (use requestAnimationFrame via html5.h instead)');
   },
 
   // --------------------------------------------------------------------------
