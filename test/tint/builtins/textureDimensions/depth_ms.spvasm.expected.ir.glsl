@@ -5,8 +5,8 @@ struct vertex_main_out {
   vec4 tint_symbol_1_1;
 };
 
-uniform highp sampler2DMS arg_0;
 vec4 tint_symbol_1 = vec4(0.0f);
+uniform highp sampler2DMS arg_0;
 void textureDimensions_f60bdb() {
   ivec2 res = ivec2(0);
   res = ivec2(uvec2(textureSize(arg_0)));

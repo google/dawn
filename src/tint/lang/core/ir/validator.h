@@ -52,6 +52,8 @@ enum class Capability : uint8_t {
     kAllowModuleScopeLets,
     /// Allows pointers inside structures.
     kAllowPointersInStructures,
+    /// Allows handle vars to not have binding points
+    kAllowHandleVarsWithoutBindings,
 };
 
 /// Capabilities is a set of Capability

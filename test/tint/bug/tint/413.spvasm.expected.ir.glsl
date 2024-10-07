@@ -1,7 +1,7 @@
 #version 310 es
 
-uniform highp usampler2D Src;
 layout(binding = 1, r32ui) uniform highp writeonly uimage2D Dst;
+uniform highp usampler2D Src;
 void main_1() {
   uvec4 srcValue = uvec4(0u);
   ivec2 v = ivec2(ivec2(0));

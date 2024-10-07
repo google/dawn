@@ -527,16 +527,14 @@ TEST_P(GlslWriterDepthTextureESTest, Emit) {
     auto params = GetParam();
 
     auto* t = ty.Get<core::type::DepthTexture>(params.dim);
-    auto* func = b.Function("foo", ty.void_());
-    auto* param = b.FunctionParam("a", t);
-    func->SetParams({param});
-    b.Append(func->Block(), [&] { b.Return(func); });
+    auto* var = b.Var("v", handle, t, core::Access::kReadWrite);
+    var->SetBindingPoint(0, 0);
+    b.ir.root_block->Append(var);
 
     ASSERT_TRUE(Generate()) << err_ << output_.glsl;
     EXPECT_EQ(output_.glsl, GlslHeader() + R"(
-void foo(highp )" + params.result +
-                                R"( a) {
-}
+uniform highp )" + params.result +
+                                R"( v;
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
 }
@@ -555,19 +553,17 @@ TEST_P(GlslWriterDepthTextureNonESTest, Emit) {
     auto params = GetParam();
 
     auto* t = ty.Get<core::type::DepthTexture>(params.dim);
-    auto* func = b.Function("foo", ty.void_());
-    auto* param = b.FunctionParam("a", t);
-    func->SetParams({param});
-    b.Append(func->Block(), [&] { b.Return(func); });
+    auto* var = b.Var("v", handle, t, core::Access::kReadWrite);
+    var->SetBindingPoint(0, 0);
+    b.ir.root_block->Append(var);
 
     Options opts{};
     opts.version = Version(Version::Standard::kDesktop, 4, 6);
     ASSERT_TRUE(Generate(opts)) << err_ << output_.glsl;
     EXPECT_EQ(output_.glsl, R"(#version 460
 
-void foo(highp )" + params.result +
-                                R"( a) {
-}
+uniform highp )" + params.result +
+                                R"( v;
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
 }
@@ -584,15 +580,13 @@ INSTANTIATE_TEST_SUITE_P(
 
 TEST_F(GlslWriterTest, EmitType_DepthMultisampledTexture) {
     auto* t = ty.Get<core::type::DepthMultisampledTexture>(core::type::TextureDimension::k2d);
-    auto* func = b.Function("foo", ty.void_());
-    auto* param = b.FunctionParam("a", t);
-    func->SetParams({param});
-    b.Append(func->Block(), [&] { b.Return(func); });
+    auto* var = b.Var("v", handle, t, core::Access::kReadWrite);
+    var->SetBindingPoint(0, 0);
+    b.ir.root_block->Append(var);
 
     ASSERT_TRUE(Generate()) << err_ << output_.glsl;
     EXPECT_EQ(output_.glsl, GlslHeader() + R"(
-void foo(highp sampler2DMS a) {
-}
+uniform highp sampler2DMS v;
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
 }
@@ -634,16 +628,14 @@ TEST_P(GlslWriterSampledTextureESTest, Emit) {
     }
 
     auto* t = ty.Get<core::type::SampledTexture>(params.dim, subtype);
-    auto* func = b.Function("foo", ty.void_());
-    auto* param = b.FunctionParam("a", t);
-    func->SetParams({param});
-    b.Append(func->Block(), [&] { b.Return(func); });
+    auto* var = b.Var("v", handle, t, core::Access::kReadWrite);
+    var->SetBindingPoint(0, 0);
+    b.ir.root_block->Append(var);
 
     ASSERT_TRUE(Generate()) << err_ << output_.glsl;
     EXPECT_EQ(output_.glsl, GlslHeader() + R"(
-void foo(highp )" + params.result +
-                                R"( a) {
-}
+uniform highp )" + params.result +
+                                R"( v;
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
 }
@@ -690,19 +682,17 @@ TEST_P(GlslWriterSampledTextureNonESTest, Emit) {
     }
 
     auto* t = ty.Get<core::type::SampledTexture>(params.dim, subtype);
-    auto* func = b.Function("foo", ty.void_());
-    auto* param = b.FunctionParam("a", t);
-    func->SetParams({param});
-    b.Append(func->Block(), [&] { b.Return(func); });
+    auto* var = b.Var("v", handle, t, core::Access::kReadWrite);
+    var->SetBindingPoint(0, 0);
+    b.ir.root_block->Append(var);
 
     Options opts{};
     opts.version = Version(Version::Standard::kDesktop, 4, 6);
     ASSERT_TRUE(Generate(opts)) << err_ << output_.glsl;
     EXPECT_EQ(output_.glsl, R"(#version 460
 
-void foo(highp )" + params.result +
-                                R"( a) {
-}
+uniform highp )" + params.result +
+                                R"( v;
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
 }
@@ -754,16 +744,14 @@ TEST_P(GlslWriterMultisampledTextureESTest, Emit) {
     }
 
     auto* ms = ty.Get<core::type::MultisampledTexture>(params.dim, subtype);
-    auto* func = b.Function("foo", ty.void_());
-    auto* param = b.FunctionParam("a", ms);
-    func->SetParams({param});
-    b.Append(func->Block(), [&] { b.Return(func); });
+    auto* var = b.Var("v", handle, ms, core::Access::kReadWrite);
+    var->SetBindingPoint(0, 0);
+    b.ir.root_block->Append(var);
 
     ASSERT_TRUE(Generate()) << err_ << output_.glsl;
     EXPECT_EQ(output_.glsl, GlslHeader() + R"(
-void foo(highp )" + params.result +
-                                R"( a) {
-}
+uniform highp )" + params.result +
+                                R"( v;
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
 }
@@ -795,39 +783,32 @@ TEST_P(GlslWriterMultisampledTextureNonESTest, Emit) {
             break;
     }
     auto* ms = ty.Get<core::type::MultisampledTexture>(params.dim, subtype);
-    auto* func = b.Function("foo", ty.void_());
-    auto* param = b.FunctionParam("a", ms);
-    func->SetParams({param});
-    b.Append(func->Block(), [&] { b.Return(func); });
+    auto* var = b.Var("v", handle, ms, core::Access::kReadWrite);
+    var->SetBindingPoint(0, 0);
+    b.ir.root_block->Append(var);
 
     Options opts{};
     opts.version = Version(Version::Standard::kDesktop, 4, 6);
     ASSERT_TRUE(Generate(opts)) << err_ << output_.glsl;
     EXPECT_EQ(output_.glsl, R"(#version 460
 
-void foo(highp )" + params.result +
-                                R"( a) {
-}
+uniform highp )" + params.result +
+                                R"( v;
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
 }
 )");
 }
-INSTANTIATE_TEST_SUITE_P(
-    GlslWriterTest,
-    GlslWriterMultisampledTextureNonESTest,
-    testing::Values(
-        GlslTextureData{core::type::TextureDimension::k2d, TextureDataType::kF32, "sampler2DMS"},
-        GlslTextureData{core::type::TextureDimension::k2dArray, TextureDataType::kF32,
-                        "sampler2DMSArray"},
+INSTANTIATE_TEST_SUITE_P(GlslWriterTest,
+                         GlslWriterMultisampledTextureNonESTest,
+                         testing::Values(GlslTextureData{core::type::TextureDimension::k2d,
+                                                         TextureDataType::kF32, "sampler2DMS"},
 
-        GlslTextureData{core::type::TextureDimension::k2d, TextureDataType::kI32, "isampler2DMS"},
-        GlslTextureData{core::type::TextureDimension::k2dArray, TextureDataType::kI32,
-                        "isampler2DMSArray"},
+                                         GlslTextureData{core::type::TextureDimension::k2d,
+                                                         TextureDataType::kI32, "isampler2DMS"},
 
-        GlslTextureData{core::type::TextureDimension::k2d, TextureDataType::kU32, "usampler2DMS"},
-        GlslTextureData{core::type::TextureDimension::k2dArray, TextureDataType::kU32,
-                        "usampler2DMSArray"}));
+                                         GlslTextureData{core::type::TextureDimension::k2d,
+                                                         TextureDataType::kU32, "usampler2DMS"}));
 
 struct GlslStorageTextureData {
     core::type::TextureDimension dim;
@@ -845,29 +826,34 @@ TEST_P(GlslWriterStorageTextureESTest, Emit) {
     auto params = GetParam();
 
     const core::type::Type* subtype = nullptr;
+    core::TexelFormat texel_fmt = core::TexelFormat::kUndefined;
+    std::string fmt_str = "";
     switch (params.datatype) {
         case TextureDataType::kF32:
             subtype = ty.f32();
+            texel_fmt = core::TexelFormat::kR32Float;
+            fmt_str = "r32f";
             break;
         case TextureDataType::kI32:
             subtype = ty.i32();
+            texel_fmt = core::TexelFormat::kR32Sint;
+            fmt_str = "r32i";
             break;
         case TextureDataType::kU32:
             subtype = ty.u32();
+            texel_fmt = core::TexelFormat::kR32Uint;
+            fmt_str = "r32ui";
             break;
     }
-    auto s = ty.Get<core::type::StorageTexture>(params.dim, core::TexelFormat::kR32Float,
-                                                params.access, subtype);
-    auto* func = b.Function("foo", ty.void_());
-    auto* param = b.FunctionParam("a", s);
-    func->SetParams({param});
-    b.Append(func->Block(), [&] { b.Return(func); });
+    auto s = ty.Get<core::type::StorageTexture>(params.dim, texel_fmt, params.access, subtype);
+    auto* var = b.Var("v", handle, s, core::Access::kReadWrite);
+    var->SetBindingPoint(0, 0);
+    b.ir.root_block->Append(var);
 
     ASSERT_TRUE(Generate()) << err_ << output_.glsl;
     EXPECT_EQ(output_.glsl, GlslHeader() + R"(
-void foo(highp )" + params.result +
-                                R"( a) {
-}
+layout(binding = 0, )" + fmt_str +
+                                ") uniform highp " + params.result + R"( v;
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
 }
@@ -945,32 +931,37 @@ TEST_P(GlslWriterStorageTextureNonESTest, Emit) {
     auto params = GetParam();
 
     const core::type::Type* subtype = nullptr;
+    core::TexelFormat texel_fmt = core::TexelFormat::kUndefined;
+    std::string fmt_str = "";
     switch (params.datatype) {
         case TextureDataType::kF32:
             subtype = ty.f32();
+            texel_fmt = core::TexelFormat::kR32Float;
+            fmt_str = "r32f";
             break;
         case TextureDataType::kI32:
             subtype = ty.i32();
+            texel_fmt = core::TexelFormat::kR32Sint;
+            fmt_str = "r32i";
             break;
         case TextureDataType::kU32:
             subtype = ty.u32();
+            texel_fmt = core::TexelFormat::kR32Uint;
+            fmt_str = "r32ui";
             break;
     }
-    auto s = ty.Get<core::type::StorageTexture>(params.dim, core::TexelFormat::kR32Float,
-                                                params.access, subtype);
-    auto* func = b.Function("foo", ty.void_());
-    auto* param = b.FunctionParam("a", s);
-    func->SetParams({param});
-    b.Append(func->Block(), [&] { b.Return(func); });
+    auto s = ty.Get<core::type::StorageTexture>(params.dim, texel_fmt, params.access, subtype);
+    auto* var = b.Var("v", handle, s, core::Access::kReadWrite);
+    var->SetBindingPoint(0, 0);
+    b.ir.root_block->Append(var);
 
     Options opts{};
     opts.version = Version(Version::Standard::kDesktop, 4, 6);
     ASSERT_TRUE(Generate(opts)) << err_ << output_.glsl;
     EXPECT_EQ(output_.glsl, R"(#version 460
 
-void foo(highp )" + params.result +
-                                R"( a) {
-}
+layout(binding = 0, )" + fmt_str +
+                                ") uniform highp " + params.result + R"( v;
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
 }

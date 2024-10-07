@@ -1,12 +1,12 @@
 #version 310 es
 
 uniform highp isampler2D arg_0;
-ivec4 textureLoad2d(highp isampler2D tint_symbol, ivec2 coords, int level) {
+ivec4 textureLoad2d(ivec2 coords, int level) {
   ivec2 v = ivec2(coords);
-  return texelFetch(tint_symbol, v, int(level));
+  return texelFetch(arg_0, v, int(level));
 }
 void doTextureLoad() {
-  ivec4 res = textureLoad2d(arg_0, ivec2(0), 0);
+  ivec4 res = textureLoad2d(ivec2(0), 0);
 }
 vec4 vertex_main_inner() {
   doTextureLoad();
@@ -23,12 +23,12 @@ precision highp float;
 precision highp int;
 
 uniform highp isampler2D arg_0;
-ivec4 textureLoad2d(highp isampler2D tint_symbol, ivec2 coords, int level) {
+ivec4 textureLoad2d(ivec2 coords, int level) {
   ivec2 v = ivec2(coords);
-  return texelFetch(tint_symbol, v, int(level));
+  return texelFetch(arg_0, v, int(level));
 }
 void doTextureLoad() {
-  ivec4 res = textureLoad2d(arg_0, ivec2(0), 0);
+  ivec4 res = textureLoad2d(ivec2(0), 0);
 }
 void main() {
   doTextureLoad();
@@ -36,12 +36,12 @@ void main() {
 #version 310 es
 
 uniform highp isampler2D arg_0;
-ivec4 textureLoad2d(highp isampler2D tint_symbol, ivec2 coords, int level) {
+ivec4 textureLoad2d(ivec2 coords, int level) {
   ivec2 v = ivec2(coords);
-  return texelFetch(tint_symbol, v, int(level));
+  return texelFetch(arg_0, v, int(level));
 }
 void doTextureLoad() {
-  ivec4 res = textureLoad2d(arg_0, ivec2(0), 0);
+  ivec4 res = textureLoad2d(ivec2(0), 0);
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {

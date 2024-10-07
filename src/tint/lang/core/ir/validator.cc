@@ -1579,6 +1579,12 @@ void Validator::CheckVar(const Var* var) {
     // Check that only resource variables have @group and @binding set
     switch (mv->AddressSpace()) {
         case AddressSpace::kHandle:
+            if (!capabilities_.Contains(Capability::kAllowHandleVarsWithoutBindings)) {
+                if (!var->BindingPoint().has_value()) {
+                    AddError(var) << "resource variable missing binding points";
+                }
+            }
+            break;
         case AddressSpace::kStorage:
         case AddressSpace::kUniform:
             if (!var->BindingPoint().has_value()) {

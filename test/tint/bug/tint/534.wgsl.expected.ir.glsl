@@ -8,8 +8,6 @@ struct Uniforms {
   uint channelCount;
 };
 
-uniform highp sampler2D src;
-uniform highp sampler2D dst;
 layout(binding = 2, std430)
 buffer OutputBuf_1_ssbo {
   uint result[];
@@ -18,6 +16,8 @@ layout(binding = 3, std140)
 uniform tint_symbol_3_1_ubo {
   Uniforms tint_symbol_2;
 } v;
+uniform highp sampler2D src;
+uniform highp sampler2D dst;
 uint ConvertToFp16FloatValue(float fp32) {
   return 1u;
 }

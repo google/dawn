@@ -829,46 +829,50 @@ void main() {
 }
 
 TEST_F(GlslWriterTest, BuiltinTextureDimensions_1d) {
-    auto* t = b.FunctionParam(
-        "t", ty.Get<core::type::SampledTexture>(core::type::TextureDimension::k1d, ty.f32()));
-    auto* func = b.Function("foo", ty.u32());
-    func->SetParams({t});
+    auto* type = ty.Get<core::type::SampledTexture>(core::type::TextureDimension::k1d, ty.f32());
+    auto* var = b.Var("v", handle, type, core::Access::kReadWrite);
+    var->SetBindingPoint(0, 0);
+    b.ir.root_block->Append(var);
+
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
-        auto* result = b.Call<u32>(core::BuiltinFn::kTextureDimensions, t);
-        b.Return(func, result);
+        b.Let("x", b.Call<u32>(core::BuiltinFn::kTextureDimensions, b.Load(var)));
+        b.Return(func);
     });
 
     Options opts{};
     opts.version = Version(Version::Standard::kDesktop, 4, 6);
     ASSERT_TRUE(Generate(opts)) << err_ << output_.glsl;
     EXPECT_EQ(output_.glsl, R"(#version 460
+precision highp float;
+precision highp int;
 
-uint foo(highp sampler2D t) {
-  return uvec2(textureSize(t, 0)).x;
-}
-layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+uniform highp sampler2D v;
 void main() {
+  uint x = uvec2(textureSize(v, 0)).x;
 }
 )");
 }
 
 TEST_F(GlslWriterTest, BuiltinTextureDimensions_2d_WithoutLod) {
-    auto* t = b.FunctionParam(
-        "t", ty.Get<core::type::SampledTexture>(core::type::TextureDimension::k2d, ty.f32()));
-    auto* func = b.Function("foo", ty.vec2<u32>());
-    func->SetParams({t});
+    auto* type = ty.Get<core::type::SampledTexture>(core::type::TextureDimension::k2d, ty.f32());
+    auto* var = b.Var("v", handle, type, core::Access::kReadWrite);
+    var->SetBindingPoint(0, 0);
+    b.ir.root_block->Append(var);
+
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
-        auto* result = b.Call<vec2<u32>>(core::BuiltinFn::kTextureDimensions, t);
-        b.Return(func, result);
+        b.Let("x", b.Call<vec2<u32>>(core::BuiltinFn::kTextureDimensions, b.Load(var)));
+        b.Return(func);
     });
 
     ASSERT_TRUE(Generate()) << err_ << output_.glsl;
-    EXPECT_EQ(output_.glsl, GlslHeader() + R"(
-uvec2 foo(highp sampler2D t) {
-  return uvec2(textureSize(t, 0));
-}
-layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+    EXPECT_EQ(output_.glsl, GlslHeader() + R"(precision highp float;
+precision highp int;
+
+uniform highp sampler2D v;
 void main() {
+  uvec2 x = uvec2(textureSize(v, 0));
 }
 )");
 }
@@ -890,67 +894,73 @@ TEST_F(GlslWriterTest, DISABLED_BuiltinTextureDimensions_2d_WithU32Lod) {
 }
 
 TEST_F(GlslWriterTest, BuiltinTextureDimensions_2dArray) {
-    auto* t = b.FunctionParam(
-        "t", ty.Get<core::type::SampledTexture>(core::type::TextureDimension::k2dArray, ty.f32()));
-    auto* func = b.Function("foo", ty.vec2<u32>());
-    func->SetParams({t});
+    auto* type =
+        ty.Get<core::type::SampledTexture>(core::type::TextureDimension::k2dArray, ty.f32());
+    auto* var = b.Var("v", handle, type, core::Access::kReadWrite);
+    var->SetBindingPoint(0, 0);
+    b.ir.root_block->Append(var);
+
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
-        auto* result = b.Call<vec2<u32>>(core::BuiltinFn::kTextureDimensions, t);
-        b.Return(func, result);
+        b.Let("x", b.Call<vec2<u32>>(core::BuiltinFn::kTextureDimensions, b.Load(var)));
+        b.Return(func);
     });
 
     ASSERT_TRUE(Generate()) << err_ << output_.glsl;
-    EXPECT_EQ(output_.glsl, GlslHeader() + R"(
-uvec2 foo(highp sampler2DArray t) {
-  return uvec2(textureSize(t, 0).xy);
-}
-layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+    EXPECT_EQ(output_.glsl, GlslHeader() + R"(precision highp float;
+precision highp int;
+
+uniform highp sampler2DArray v;
 void main() {
+  uvec2 x = uvec2(textureSize(v, 0).xy);
 }
 )");
 }
 
 TEST_F(GlslWriterTest, BuiltinTextureDimensions_Storage1D) {
-    auto* t = b.FunctionParam(
-        "t",
-        ty.Get<core::type::StorageTexture>(
-            core::type::TextureDimension::k2d, core::TexelFormat::kRg32Float, core::Access::kRead,
-            core::type::StorageTexture::SubtypeFor(core::TexelFormat::kRg32Float, ty)));
-    auto* func = b.Function("foo", ty.vec2<u32>());
-    func->SetParams({t});
+    auto* type = ty.Get<core::type::StorageTexture>(
+        core::type::TextureDimension::k2d, core::TexelFormat::kR32Float, core::Access::kRead,
+        core::type::StorageTexture::SubtypeFor(core::TexelFormat::kR32Float, ty));
+    auto* var = b.Var("v", handle, type, core::Access::kReadWrite);
+    var->SetBindingPoint(0, 0);
+    b.ir.root_block->Append(var);
+
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
-        auto* result = b.Call<vec2<u32>>(core::BuiltinFn::kTextureDimensions, t);
-        b.Return(func, result);
+        b.Let("x", b.Call<vec2<u32>>(core::BuiltinFn::kTextureDimensions, b.Load(var)));
+        b.Return(func);
     });
 
     ASSERT_TRUE(Generate()) << err_ << output_.glsl;
-    EXPECT_EQ(output_.glsl, GlslHeader() + R"(
-uvec2 foo(highp readonly image2D t) {
-  return uvec2(imageSize(t));
-}
-layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+    EXPECT_EQ(output_.glsl, GlslHeader() + R"(precision highp float;
+precision highp int;
+
+layout(binding = 0, r32f) uniform highp readonly image2D v;
 void main() {
+  uvec2 x = uvec2(imageSize(v));
 }
 )");
 }
 
 TEST_F(GlslWriterTest, BuiltinTextureDimensions_DepthMultisampled) {
-    auto* t = b.FunctionParam(
-        "t", ty.Get<core::type::DepthMultisampledTexture>(core::type::TextureDimension::k2d));
-    auto* func = b.Function("foo", ty.vec2<u32>());
-    func->SetParams({t});
+    auto* type = ty.Get<core::type::DepthMultisampledTexture>(core::type::TextureDimension::k2d);
+    auto* var = b.Var("v", handle, type, core::Access::kReadWrite);
+    var->SetBindingPoint(0, 0);
+    b.ir.root_block->Append(var);
+
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
-        auto* result = b.Call<vec2<u32>>(core::BuiltinFn::kTextureDimensions, t);
-        b.Return(func, result);
+        b.Let("x", b.Call<vec2<u32>>(core::BuiltinFn::kTextureDimensions, b.Load(var)));
+        b.Return(func);
     });
 
     ASSERT_TRUE(Generate()) << err_ << output_.glsl;
-    EXPECT_EQ(output_.glsl, GlslHeader() + R"(
-uvec2 foo(highp sampler2DMS t) {
-  return uvec2(textureSize(t));
-}
-layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+    EXPECT_EQ(output_.glsl, GlslHeader() + R"(precision highp float;
+precision highp int;
+
+uniform highp sampler2DMS v;
 void main() {
+  uvec2 x = uvec2(textureSize(v));
 }
 )");
 }

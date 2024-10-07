@@ -1,10 +1,10 @@
 #version 310 es
 
-uniform highp sampler2DArray myTexture;
 layout(binding = 3, std430)
 buffer Result_1_ssbo {
   float values[];
 } result;
+uniform highp sampler2DArray myTexture;
 void tint_symbol_inner(uvec3 GlobalInvocationID) {
   uint flatIndex = (((4u * GlobalInvocationID[2u]) + (2u * GlobalInvocationID[1u])) + GlobalInvocationID[0u]);
   flatIndex = (flatIndex * 1u);

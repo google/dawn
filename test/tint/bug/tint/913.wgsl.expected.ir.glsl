@@ -9,8 +9,6 @@ struct Uniforms {
   uvec2 copySize;
 };
 
-uniform highp sampler2D src;
-uniform highp sampler2D dst;
 layout(binding = 2, std430)
 buffer OutputBuf_1_ssbo {
   uint result[];
@@ -19,6 +17,8 @@ layout(binding = 3, std140)
 uniform tint_symbol_3_1_ubo {
   Uniforms tint_symbol_2;
 } v;
+uniform highp sampler2D src;
+uniform highp sampler2D dst;
 bool aboutEqual(float value, float expect) {
   return (abs((value - expect)) < 0.00100000004749745131f);
 }

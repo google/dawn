@@ -122,8 +122,11 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
     // TODO(dsinclair): CombineSamplers
     // TODO(dsinclair): PadStructs
 
-    RUN_TRANSFORM(core::ir::transform::DirectVariableAccess, module,
-                  core::ir::transform::DirectVariableAccessOptions{});
+    {
+        core::ir::transform::DirectVariableAccessOptions dva_config{};
+        dva_config.transform_handle = true;
+        RUN_TRANSFORM(core::ir::transform::DirectVariableAccess, module, dva_config);
+    }
 
     if (!options.disable_workgroup_init) {
         RUN_TRANSFORM(core::ir::transform::ZeroInitWorkgroupMemory, module);
@@ -137,6 +140,7 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
     RUN_TRANSFORM(raise::BuiltinPolyfill, module);
 
     {
+        // Must come after DirectVariableAccess
         raise::TexturePolyfillConfig tex_config;
         tex_config.sampler_texture_to_name = options.bindings.sampler_texture_to_name;
         tex_config.placeholder_sampler_bind_point = options.bindings.placeholder_sampler_bind_point;

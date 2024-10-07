@@ -97,6 +97,7 @@ Result<SuccessType> VectorizeScalarMatrixConstructors(Module& ir) {
     auto result = ValidateAndDumpIfNeeded(ir, "VectorizeScalarMatrixConstructors transform",
                                           core::ir::Capabilities{
                                               core::ir::Capability::kAllowVectorElementPointer,
+                                              core::ir::Capability::kAllowHandleVarsWithoutBindings,
                                           });
     if (result != Success) {
         return result;

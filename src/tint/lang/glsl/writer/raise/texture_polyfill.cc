@@ -27,7 +27,9 @@
 
 #include "src/tint/lang/glsl/writer/raise/texture_polyfill.h"
 
+#include <string>
 #include <utility>
+#include <vector>
 
 #include "src/tint/lang/core/fluent_types.h"  // IWYU pragma: export
 #include "src/tint/lang/core/ir/builder.h"
@@ -61,6 +63,14 @@ struct State {
     /// The type manager.
     core::type::Manager& ty{ir.Types()};
 
+    // A map of the <texture,sampler> binding pair to the replacement var
+    Hashmap<binding::CombinedTextureSamplerPair, core::ir::Var*, 2>
+        texture_sampler_to_replacement_{};
+
+    // The list of textures and samplers that were replaced. There may have been textures which
+    // existed but were unused. We don't want to delete them, so we only delete replaced values.
+    Hashset<core::ir::Var*, 4> replaced_textures_and_samplers_{};
+
     /// Process the module.
     void Process() {
         /// Converts all 1D texture types and accesses to 2D. This is required for GLSL ES, which
@@ -68,6 +78,8 @@ struct State {
         /// could be relaxed in the future if desired.
         UpgradeTexture1DVars();
         UpgradeTexture1DParams();
+
+        PopulateTextureInformation();
 
         Vector<core::ir::CoreBuiltinCall*, 4> call_worklist;
         for (auto* inst : ir.Instructions()) {
@@ -104,6 +116,154 @@ struct State {
                 default:
                     TINT_UNREACHABLE();
             }
+        }
+
+        // Remove all replaced textures and samplers as they have been replaced by new globals.
+        for (auto* var : replaced_textures_and_samplers_.Vector()) {
+            var->Result(0)->ForEachUseUnsorted([](core::ir::Usage use) {
+                TINT_ASSERT(use.instruction->Is<core::ir::Load>());
+                use.instruction->Destroy();
+            });
+            var->Destroy();
+        }
+    }
+
+    core::ir::Var* GetReplacement(core::ir::Var* tex, core::ir::Var* sampler) {
+        // Don't change storage textures
+        if (tex->Result(0)->Type()->UnwrapPtr()->Is<core::type::StorageTexture>()) {
+            return tex;
+        }
+
+        auto tex_bp = tex->BindingPoint();
+        auto samp_bp = sampler ? sampler->BindingPoint() : cfg.placeholder_sampler_bind_point;
+        TINT_ASSERT(tex_bp.has_value() && samp_bp.has_value());
+
+        replaced_textures_and_samplers_.Add(tex);
+        if (sampler) {
+            replaced_textures_and_samplers_.Add(sampler);
+        }
+
+        binding::CombinedTextureSamplerPair key{tex_bp.value(), samp_bp.value()};
+        auto var = texture_sampler_to_replacement_.Get(key);
+        TINT_ASSERT(var);
+        return *(var.value);
+    }
+
+    // Get the `var` for a texture/sampler value. This means the value must be the result of a load.
+    core::ir::Var* VarForValue(core::ir::Value* val) {
+        if (!val) {
+            return nullptr;
+        }
+
+        auto* load = LoadForValue(val);
+        TINT_ASSERT(load);
+        auto* from = load->From()->As<core::ir::InstructionResult>();
+        TINT_ASSERT(from);
+        auto* var = from->Instruction()->As<core::ir::Var>();
+        TINT_ASSERT(var);
+        return var;
+    }
+
+    core::ir::Load* LoadForValue(core::ir::Value* val) {
+        if (!val) {
+            return nullptr;
+        }
+
+        auto* res = val->As<core::ir::InstructionResult>();
+        TINT_ASSERT(res);
+        auto* load = res->Instruction()->As<core::ir::Load>();
+        TINT_ASSERT(load);
+        return load;
+    }
+
+    struct SamplerTextureVars {
+        core::ir::Var* texture;
+        core::ir::Var* sampler;
+    };
+    SamplerTextureVars GetTextureSamplerFor(core::ir::CoreBuiltinCall* call) {
+        auto args = call->Args();
+        switch (call->Func()) {
+            case core::BuiltinFn::kTextureDimensions:
+            case core::BuiltinFn::kTextureLoad:
+            case core::BuiltinFn::kTextureNumLayers:
+            case core::BuiltinFn::kTextureNumLevels:
+            case core::BuiltinFn::kTextureNumSamples:
+            case core::BuiltinFn::kTextureStore:
+                return {VarForValue(args[0]), nullptr};
+            case core::BuiltinFn::kTextureGather: {
+                if (args[0]->Type()->Is<core::type::Texture>()) {
+                    return {VarForValue(args[0]), VarForValue(args[1])};
+                }
+                return {VarForValue(args[1]), VarForValue(args[2])};
+            }
+            case core::BuiltinFn::kTextureGatherCompare:
+            case core::BuiltinFn::kTextureSample:
+            case core::BuiltinFn::kTextureSampleBaseClampToEdge:
+            case core::BuiltinFn::kTextureSampleBias:
+            case core::BuiltinFn::kTextureSampleCompare:
+            case core::BuiltinFn::kTextureSampleCompareLevel:
+            case core::BuiltinFn::kTextureSampleGrad:
+            case core::BuiltinFn::kTextureSampleLevel:
+                return {VarForValue(args[0]), VarForValue(args[1])};
+            default:
+                TINT_UNREACHABLE() << "unhandled texture function: " << call->Func();
+        }
+    }
+
+    core::ir::Var* MakeVar(binding::CombinedTextureSamplerPair& key,
+                           core::ir::Var* tex,
+                           core::ir::Var* sampler) {
+        std::string name;
+        auto it = (cfg.sampler_texture_to_name.find(key));
+        if (it != cfg.sampler_texture_to_name.end()) {
+            name = it->second;
+        } else {
+            name = ir.NameOf(tex).Name();
+            if (sampler) {
+                name += "_" + ir.NameOf(sampler).Name();
+            }
+            if (name.empty()) {
+                name = "v";
+            }
+        }
+
+        core::ir::Var* var = nullptr;
+        // We may already be inside an insert block, so make a new insert block instead of
+        // appending directly to the root block.
+        b.Append(ir.root_block,
+                 [&] { var = b.Var(name, tex->Result(0)->Type()->As<core::type::Pointer>()); });
+        return var;
+    }
+
+    // This function builds up replacement combined textures. It creates a global mapping, one for
+    // all the texture,sampler pairs and one with individual textures. The individual textures will
+    // attempt to populate with the first texture from a texture,sampler pair but if we didn't see
+    // the texture in any pair we'll create it on the fly when getting the replacemnt later.
+    void PopulateTextureInformation() {
+        for (auto* inst : ir.Instructions()) {
+            auto* call = inst->As<core::ir::CoreBuiltinCall>();
+            if (!call || (!core::IsTexture(call->Func()) && !core::IsImageQuery(call->Func()))) {
+                continue;
+            }
+
+            auto tex_sampler = GetTextureSamplerFor(call);
+            auto* tex = tex_sampler.texture;
+            auto* sampler = tex_sampler.sampler;
+
+            // No change to storage textures.
+            if (tex->Result(0)->Type()->UnwrapPtr()->Is<core::type::StorageTexture>()) {
+                continue;
+            }
+
+            BindingPoint tex_bp = tex->BindingPoint().value();
+
+            // No sampler, use the placeholder binding
+            BindingPoint samp_bp =
+                sampler ? sampler->BindingPoint().value() : cfg.placeholder_sampler_bind_point;
+
+            binding::CombinedTextureSamplerPair key{tex_bp, samp_bp};
+            texture_sampler_to_replacement_.GetOrAdd(key,
+                                                     [&] { return MakeVar(key, tex, sampler); });
         }
     }
 
@@ -221,27 +381,46 @@ struct State {
         ld->Result(0)->SetType(new_type.value());
     }
 
+    // Must be called inside an insertion block
+    core::ir::Value* GetNewTexture(core::ir::Value* tex, core::ir::Value* sampler = nullptr) {
+        auto* t = VarForValue(tex);
+        auto* s = VarForValue(sampler);
+
+        auto* replacement = GetReplacement(t, s);
+        TINT_ASSERT(replacement);
+
+        // In the storage case, we'll return the original texture. Nothing else to do in that case.
+        if (replacement == t) {
+            return tex;
+        }
+
+        return b.Load(replacement)->Result(0);
+    }
+
     // `textureDimensions` returns an unsigned scalar / vector in WGSL. `textureSize` and
-    // `imageSize` return a signed scalar / vector in GLSL.  So, we  need to cast the result to
-    // the needed WGSL type.
+    // `imageSize` return a signed scalar / vector in GLSL.  So, we  need to cast the result
+    // to the needed WGSL type.
     void TextureDimensions(core::ir::BuiltinCall* call) {
         auto args = call->Args();
-        auto* tex = args[0]->Type()->As<core::type::Texture>();
 
         b.InsertBefore(call, [&] {
             auto func = glsl::BuiltinFn::kTextureSize;
-            if (tex->Is<core::type::StorageTexture>()) {
+
+            Vector<core::ir::Value*, 2> new_args;
+            auto* tex = GetNewTexture(args[0]);
+            auto* tex_ty = tex->Type()->As<core::type::Texture>();
+
+            new_args.Push(tex);
+
+            if (tex_ty->Is<core::type::StorageTexture>()) {
                 func = glsl::BuiltinFn::kImageSize;
             }
 
-            Vector<core::ir::Value*, 2> new_args;
-            new_args.Push(args[0]);
-
-            if (!(tex->Is<core::type::StorageTexture>() ||
-                  tex->Is<core::type::MultisampledTexture>() ||
-                  tex->Is<core::type::DepthMultisampledTexture>())) {
-                // Add a LOD to any texture other then storage, and multi-sampled textures which
-                // does not already have an LOD.
+            if (!(tex_ty->Is<core::type::StorageTexture>() ||
+                  tex_ty->Is<core::type::MultisampledTexture>() ||
+                  tex_ty->Is<core::type::DepthMultisampledTexture>())) {
+                // Add a LOD to any texture other then storage, and multi-sampled textures
+                // which does not already have an LOD.
                 if (args.Length() == 1) {
                     new_args.Push(b.Constant(0_i));
                 } else {
@@ -253,8 +432,8 @@ struct State {
             auto ret_type = call->Result(0)->Type();
 
             // In GLSL the array dimensions return a 3rd parameter.
-            if (tex->Dim() == core::type::TextureDimension::k2dArray ||
-                tex->Dim() == core::type::TextureDimension::kCubeArray) {
+            if (tex_ty->Dim() == core::type::TextureDimension::k2dArray ||
+                tex_ty->Dim() == core::type::TextureDimension::kCubeArray) {
                 ret_type = ty.vec(ty.i32(), 3);
             } else {
                 ret_type = ty.MatchWidth(ty.i32(), call->Result(0)->Type());
@@ -263,10 +442,10 @@ struct State {
             core::ir::Value* result =
                 b.Call<glsl::ir::BuiltinCall>(ret_type, func, new_args)->Result(0);
 
-            // `textureSize` on array samplers returns the array size in the final component, WGSL
-            // requires a 2 component response, so drop the array size
-            if (tex->Dim() == core::type::TextureDimension::k2dArray ||
-                tex->Dim() == core::type::TextureDimension::kCubeArray) {
+            // `textureSize` on array samplers returns the array size in the final
+            // component, WGSL requires a 2 component response, so drop the array size
+            if (tex_ty->Dim() == core::type::TextureDimension::k2dArray ||
+                tex_ty->Dim() == core::type::TextureDimension::kCubeArray) {
                 ret_type = ty.MatchWidth(ty.i32(), call->Result(0)->Type());
                 result = b.Swizzle(ret_type, result, {0, 1})->Result(0);
             }
@@ -279,23 +458,24 @@ struct State {
     // `textureNumLayers` returns an unsigned scalar in WGSL. `textureSize` and `imageSize`
     // return a signed scalar / vector in GLSL.
     //
-    // For the `textureSize` and `imageSize` calls the valid WGSL values always produce a `vec3` in
-    // GLSL so we extract the `z` component for the number of layers.
+    // For the `textureSize` and `imageSize` calls the valid WGSL values always produce a
+    // `vec3` in GLSL so we extract the `z` component for the number of layers.
     void TextureNumLayers(core::ir::BuiltinCall* call) {
         b.InsertBefore(call, [&] {
             auto args = call->Args();
-            auto* tex = args[0]->Type()->As<core::type::Texture>();
+            auto* tex = GetNewTexture(args[0]);
+            auto* tex_ty = tex->Type()->As<core::type::Texture>();
 
             auto func = glsl::BuiltinFn::kTextureSize;
-            if (tex->Is<core::type::StorageTexture>()) {
+            if (tex_ty->Is<core::type::StorageTexture>()) {
                 func = glsl::BuiltinFn::kImageSize;
             }
 
             Vector<core::ir::Value*, 2> new_args;
-            new_args.Push(args[0]);
+            new_args.Push(tex);
 
             // Non-storage textures require a LOD
-            if (!tex->Is<core::type::StorageTexture>()) {
+            if (!tex_ty->Is<core::type::StorageTexture>()) {
                 new_args.Push(b.Constant(0_i));
             }
 
@@ -308,24 +488,25 @@ struct State {
     }
 
     void TextureLoad(core::ir::CoreBuiltinCall* call) {
-        auto args = call->Args();
-        auto* tex = args[0];
-
-        // No loading from a depth texture in GLSL, so we should never have gotten here.
-        TINT_ASSERT(!tex->Type()->Is<core::type::DepthTexture>());
-
-        auto* tex_type = tex->Type()->As<core::type::Texture>();
-
-        glsl::BuiltinFn func = glsl::BuiltinFn::kNone;
-        if (tex_type->Is<core::type::StorageTexture>()) {
-            func = glsl::BuiltinFn::kImageLoad;
-        } else {
-            func = glsl::BuiltinFn::kTexelFetch;
-        }
-
-        bool is_ms = tex_type->Is<core::type::MultisampledTexture>();
-        bool is_storage = tex_type->Is<core::type::StorageTexture>();
         b.InsertBefore(call, [&] {
+            auto args = call->Args();
+            auto* tex = GetNewTexture(args[0]);
+
+            // No loading from a depth texture in GLSL, so we should never have gotten here.
+            TINT_ASSERT(!tex->Type()->Is<core::type::DepthTexture>());
+
+            auto* tex_type = tex->Type()->As<core::type::Texture>();
+
+            glsl::BuiltinFn func = glsl::BuiltinFn::kNone;
+            if (tex_type->Is<core::type::StorageTexture>()) {
+                func = glsl::BuiltinFn::kImageLoad;
+            } else {
+                func = glsl::BuiltinFn::kTexelFetch;
+            }
+
+            bool is_ms = tex_type->Is<core::type::MultisampledTexture>();
+            bool is_storage = tex_type->Is<core::type::StorageTexture>();
+
             Vector<core::ir::Value*, 3> call_args{tex};
             switch (tex_type->Dim()) {
                 case core::type::TextureDimension::k2d: {
@@ -368,15 +549,15 @@ struct State {
     }
 
     void TextureStore(core::ir::BuiltinCall* call) {
-        auto args = call->Args();
-        auto* tex = args[0];
-        auto* tex_type = tex->Type()->As<core::type::StorageTexture>();
-        TINT_ASSERT(tex_type);
-
-        Vector<core::ir::Value*, 3> new_args;
-        new_args.Push(tex);
-
         b.InsertBefore(call, [&] {
+            auto args = call->Args();
+            auto* tex = GetNewTexture(args[0]);
+            auto* tex_type = tex->Type()->As<core::type::StorageTexture>();
+            TINT_ASSERT(tex_type);
+
+            Vector<core::ir::Value*, 3> new_args;
+            new_args.Push(tex);
+
             if (tex_type->Dim() == core::type::TextureDimension::k2dArray) {
                 auto* coords = args[1];
                 auto* array_idx = args[2];

@@ -117,6 +117,7 @@ Result<SuccessType> RemoveContinueInSwitch(Module& ir) {
     auto result = ValidateAndDumpIfNeeded(ir, "RemoveContinueInSwitch transform",
                                           core::ir::Capabilities{
                                               core::ir::Capability::kAllowVectorElementPointer,
+                                              core::ir::Capability::kAllowHandleVarsWithoutBindings,
                                           });
     if (result != Success) {
         return result;
