@@ -242,6 +242,7 @@ enum usages {
   location
   num_levels
   original_value
+  refz
   samples
   result
   width

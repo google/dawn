@@ -86,6 +86,10 @@ const char* str(BuiltinFn i) {
             return "modf";
         case BuiltinFn::kFrexp:
             return "frexp";
+        case BuiltinFn::kTextureGather:
+            return "textureGather";
+        case BuiltinFn::kTextureGatherOffset:
+            return "textureGatherOffset";
         case BuiltinFn::kTextureSize:
             return "textureSize";
         case BuiltinFn::kImageSize:

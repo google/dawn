@@ -72,6 +72,7 @@ enum class ParameterUsage : uint8_t {
     kNumLevels,
     kOffset,
     kOriginalValue,
+    kRefz,
     kResult,
     kSampleIndex,
     kSampler,
