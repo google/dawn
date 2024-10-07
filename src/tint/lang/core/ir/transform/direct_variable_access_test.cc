@@ -33,6 +33,8 @@
 #include "src/tint/lang/core/type/array.h"
 #include "src/tint/lang/core/type/matrix.h"
 #include "src/tint/lang/core/type/pointer.h"
+#include "src/tint/lang/core/type/sampled_texture.h"
+#include "src/tint/lang/core/type/sampler.h"
 #include "src/tint/lang/core/type/struct.h"
 
 namespace tint::core::ir::transform {
@@ -43,14 +45,22 @@ using namespace tint::core::number_suffixes;  // NOLINT
 
 namespace {
 
+static constexpr DirectVariableAccessOptions kTransformHandle = {
+    /* transform_private */ false,
+    /* transform_function */ false,
+    /* transform_handle */ true,
+};
+
 static constexpr DirectVariableAccessOptions kTransformPrivate = {
     /* transform_private */ true,
     /* transform_function */ false,
+    /* transform_handle */ false,
 };
 
 static constexpr DirectVariableAccessOptions kTransformFunction = {
     /* transform_private */ false,
     /* transform_function */ true,
+    /* transform_handle */ false,
 };
 
 }  // namespace
@@ -319,6 +329,80 @@ $B1: {  # root
 )";
 
     Run(DirectVariableAccess, kTransformFunction);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(IR_DirectVariableAccessTest_RemoveUncalled, HandleTexture_Disabled) {
+    b.Append(b.ir.root_block, [&] { b.Var<private_>("keep_me", 42_i); });
+
+    auto* f = b.Function("f", ty.i32());
+    auto* p = b.FunctionParam(
+        "p", ty.Get<type::SampledTexture>(core::type::TextureDimension::k1d, ty.f32()));
+    f->SetParams({
+        b.FunctionParam("pre", ty.i32()),
+        p,
+        b.FunctionParam("post", ty.i32()),
+    });
+    b.Append(f->Block(), [&] { b.Return(f, b.Constant(2_i)); });
+
+    auto* src = R"(
+$B1: {  # root
+  %keep_me:ptr<private, i32, read_write> = var, 42i
+}
+
+%f = func(%pre:i32, %p:texture_1d<f32>, %post:i32):i32 {
+  $B2: {
+    ret 2i
+  }
+}
+)";
+
+    EXPECT_EQ(src, str());
+
+    auto* expect = src;
+
+    Run(DirectVariableAccess, DirectVariableAccessOptions{});
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(IR_DirectVariableAccessTest_RemoveUncalled, HandleTexture_Enabled) {
+    b.Append(b.ir.root_block, [&] { b.Var<private_>("keep_me", 42_i); });
+
+    auto* f = b.Function("f", ty.u32());
+    auto* p = b.FunctionParam(
+        "p", ty.Get<type::SampledTexture>(core::type::TextureDimension::k1d, ty.f32()));
+    f->SetParams({
+        b.FunctionParam("pre", ty.i32()),
+        p,
+        b.FunctionParam("post", ty.i32()),
+    });
+    b.Append(f->Block(),
+             [&] { b.Return(f, b.Call(ty.u32(), core::BuiltinFn::kTextureDimensions, p, 0_u)); });
+
+    auto* src = R"(
+$B1: {  # root
+  %keep_me:ptr<private, i32, read_write> = var, 42i
+}
+
+%f = func(%pre:i32, %p:texture_1d<f32>, %post:i32):u32 {
+  $B2: {
+    %6:u32 = textureDimensions %p, 0u
+    ret %6
+  }
+}
+)";
+
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+$B1: {  # root
+  %keep_me:ptr<private, i32, read_write> = var, 42i
+}
+
+)";
+    Run(DirectVariableAccess, kTransformHandle);
 
     EXPECT_EQ(expect, str());
 }
@@ -4977,6 +5061,695 @@ TEST_F(IR_DirectVariableAccessTest_FunctionAS, Disabled_CallChaining2) {
 }
 
 }  // namespace function_as_tests
+
+////////////////////////////////////////////////////////////////////////////////
+// 'handle' address space
+////////////////////////////////////////////////////////////////////////////////
+namespace handle_as_tests {
+
+using IR_DirectVariableAccessTest_HandleAS = TransformTest;
+
+TEST_F(IR_DirectVariableAccessTest_HandleAS, Enabled_LocalTextureSampler) {
+    auto* tex =
+        b.Var("tex", handle,
+              ty.Get<core::type::SampledTexture>(core::type::TextureDimension::k2d, ty.f32()),
+              core::Access::kReadWrite);
+    tex->SetBindingPoint(0, 0);
+    b.ir.root_block->Append(tex);
+
+    auto* samp = b.Var("samp", handle, ty.sampler(), core::Access::kReadWrite);
+    samp->SetBindingPoint(0, 1);
+    b.ir.root_block->Append(samp);
+
+    auto* fn = b.Function("f", ty.void_());
+    b.Append(fn->Block(), [&] {
+        auto* t = b.Load(tex);
+        auto* s = b.Load(samp);
+
+        b.Let("p", b.Call(ty.vec4<f32>(), core::BuiltinFn::kTextureGather, 0_u, t, s,
+                          b.Splat(ty.vec2<f32>(), 0_f)));
+        b.Return(fn);
+    });
+
+    auto* src = R"(
+$B1: {  # root
+  %tex:ptr<handle, texture_2d<f32>, read_write> = var @binding_point(0, 0)
+  %samp:ptr<handle, sampler, read_write> = var @binding_point(0, 1)
+}
+
+%f = func():void {
+  $B2: {
+    %4:texture_2d<f32> = load %tex
+    %5:sampler = load %samp
+    %6:vec4<f32> = textureGather 0u, %4, %5, vec2<f32>(0.0f)
+    %p:vec4<f32> = let %6
+    ret
+  }
+}
+)";
+
+    EXPECT_EQ(src, str());
+
+    auto* expect = src;  // Nothing changes
+
+    Run(DirectVariableAccess, kTransformHandle);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(IR_DirectVariableAccessTest_HandleAS, Enabled_LocalTextureParamSampler) {
+    auto* tex =
+        b.Var("tex", handle,
+              ty.Get<core::type::SampledTexture>(core::type::TextureDimension::k2d, ty.f32()),
+              core::Access::kReadWrite);
+    tex->SetBindingPoint(0, 0);
+    b.ir.root_block->Append(tex);
+
+    auto* samp = b.Var("samp", handle, ty.sampler(), core::Access::kReadWrite);
+    samp->SetBindingPoint(0, 1);
+    b.ir.root_block->Append(samp);
+
+    auto* s = b.FunctionParam("s", ty.sampler());
+
+    auto* fn = b.Function("f", ty.void_());
+    fn->SetParams({s});
+    b.Append(fn->Block(), [&] {
+        auto* t = b.Load(tex);
+
+        b.Let("p", b.Call(ty.vec4<f32>(), core::BuiltinFn::kTextureGather, 0_u, t, s,
+                          b.Splat(ty.vec2<f32>(), 0_f)));
+        b.Return(fn);
+    });
+
+    auto* fn2 = b.Function("g", ty.void_());
+    b.Append(fn2->Block(), [&] {
+        auto* s2 = b.Load(samp);
+        b.Call(ty.void_(), fn, s2);
+        b.Return(fn2);
+    });
+
+    auto* src = R"(
+$B1: {  # root
+  %tex:ptr<handle, texture_2d<f32>, read_write> = var @binding_point(0, 0)
+  %samp:ptr<handle, sampler, read_write> = var @binding_point(0, 1)
+}
+
+%f = func(%s:sampler):void {
+  $B2: {
+    %5:texture_2d<f32> = load %tex
+    %6:vec4<f32> = textureGather 0u, %5, %s, vec2<f32>(0.0f)
+    %p:vec4<f32> = let %6
+    ret
+  }
+}
+%g = func():void {
+  $B3: {
+    %9:sampler = load %samp
+    %10:void = call %f, %9
+    ret
+  }
+}
+)";
+
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+$B1: {  # root
+  %tex:ptr<handle, texture_2d<f32>, read_write> = var @binding_point(0, 0)
+  %samp:ptr<handle, sampler, read_write> = var @binding_point(0, 1)
+}
+
+%f = func():void {
+  $B2: {
+    %4:sampler = load %samp
+    %5:texture_2d<f32> = load %tex
+    %6:vec4<f32> = textureGather 0u, %5, %4, vec2<f32>(0.0f)
+    %p:vec4<f32> = let %6
+    ret
+  }
+}
+%g = func():void {
+  $B3: {
+    %9:void = call %f
+    ret
+  }
+}
+)";
+
+    Run(DirectVariableAccess, kTransformHandle);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(IR_DirectVariableAccessTest_HandleAS, Enabled_ParamTextureLocalSampler) {
+    auto* tex_ty = ty.Get<core::type::SampledTexture>(core::type::TextureDimension::k2d, ty.f32());
+    auto* tex = b.Var("tex", handle, tex_ty, core::Access::kReadWrite);
+    tex->SetBindingPoint(0, 0);
+    b.ir.root_block->Append(tex);
+
+    auto* samp = b.Var("samp", handle, ty.sampler(), core::Access::kReadWrite);
+    samp->SetBindingPoint(0, 1);
+    b.ir.root_block->Append(samp);
+
+    auto* t = b.FunctionParam("t", tex_ty);
+
+    auto* fn = b.Function("f", ty.void_());
+    fn->SetParams({t});
+    b.Append(fn->Block(), [&] {
+        auto* s = b.Load(samp);
+
+        b.Let("p", b.Call(ty.vec4<f32>(), core::BuiltinFn::kTextureGather, 0_u, t, s,
+                          b.Splat(ty.vec2<f32>(), 0_f)));
+        b.Return(fn);
+    });
+
+    auto* fn2 = b.Function("g", ty.void_());
+    b.Append(fn2->Block(), [&] {
+        auto* t2 = b.Load(tex);
+        b.Call(ty.void_(), fn, t2);
+        b.Return(fn2);
+    });
+
+    auto* src = R"(
+$B1: {  # root
+  %tex:ptr<handle, texture_2d<f32>, read_write> = var @binding_point(0, 0)
+  %samp:ptr<handle, sampler, read_write> = var @binding_point(0, 1)
+}
+
+%f = func(%t:texture_2d<f32>):void {
+  $B2: {
+    %5:sampler = load %samp
+    %6:vec4<f32> = textureGather 0u, %t, %5, vec2<f32>(0.0f)
+    %p:vec4<f32> = let %6
+    ret
+  }
+}
+%g = func():void {
+  $B3: {
+    %9:texture_2d<f32> = load %tex
+    %10:void = call %f, %9
+    ret
+  }
+}
+)";
+
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+$B1: {  # root
+  %tex:ptr<handle, texture_2d<f32>, read_write> = var @binding_point(0, 0)
+  %samp:ptr<handle, sampler, read_write> = var @binding_point(0, 1)
+}
+
+%f = func():void {
+  $B2: {
+    %4:texture_2d<f32> = load %tex
+    %5:sampler = load %samp
+    %6:vec4<f32> = textureGather 0u, %4, %5, vec2<f32>(0.0f)
+    %p:vec4<f32> = let %6
+    ret
+  }
+}
+%g = func():void {
+  $B3: {
+    %9:void = call %f
+    ret
+  }
+}
+)";
+
+    Run(DirectVariableAccess, kTransformHandle);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(IR_DirectVariableAccessTest_HandleAS, Enabled_ParamTextureParamSampler) {
+    auto* tex_ty = ty.Get<core::type::SampledTexture>(core::type::TextureDimension::k2d, ty.f32());
+    auto* tex = b.Var("tex", handle, tex_ty, core::Access::kReadWrite);
+    tex->SetBindingPoint(0, 0);
+    b.ir.root_block->Append(tex);
+
+    auto* samp = b.Var("samp", handle, ty.sampler(), core::Access::kReadWrite);
+    samp->SetBindingPoint(0, 1);
+    b.ir.root_block->Append(samp);
+
+    auto* t = b.FunctionParam("t", tex_ty);
+    auto* s = b.FunctionParam("s", ty.sampler());
+
+    auto* fn = b.Function("f", ty.void_());
+    fn->SetParams({t, s});
+    b.Append(fn->Block(), [&] {
+        b.Let("p", b.Call(ty.vec4<f32>(), core::BuiltinFn::kTextureGather, 0_u, t, s,
+                          b.Splat(ty.vec2<f32>(), 0_f)));
+        b.Return(fn);
+    });
+
+    auto* fn2 = b.Function("g", ty.void_());
+    b.Append(fn2->Block(), [&] {
+        auto* s2 = b.Load(samp);
+        auto* t2 = b.Load(tex);
+        b.Call(ty.void_(), fn, t2, s2);
+        b.Return(fn2);
+    });
+
+    auto* src = R"(
+$B1: {  # root
+  %tex:ptr<handle, texture_2d<f32>, read_write> = var @binding_point(0, 0)
+  %samp:ptr<handle, sampler, read_write> = var @binding_point(0, 1)
+}
+
+%f = func(%t:texture_2d<f32>, %s:sampler):void {
+  $B2: {
+    %6:vec4<f32> = textureGather 0u, %t, %s, vec2<f32>(0.0f)
+    %p:vec4<f32> = let %6
+    ret
+  }
+}
+%g = func():void {
+  $B3: {
+    %9:sampler = load %samp
+    %10:texture_2d<f32> = load %tex
+    %11:void = call %f, %10, %9
+    ret
+  }
+}
+)";
+
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+$B1: {  # root
+  %tex:ptr<handle, texture_2d<f32>, read_write> = var @binding_point(0, 0)
+  %samp:ptr<handle, sampler, read_write> = var @binding_point(0, 1)
+}
+
+%f = func():void {
+  $B2: {
+    %4:texture_2d<f32> = load %tex
+    %5:sampler = load %samp
+    %6:vec4<f32> = textureGather 0u, %4, %5, vec2<f32>(0.0f)
+    %p:vec4<f32> = let %6
+    ret
+  }
+}
+%g = func():void {
+  $B3: {
+    %9:void = call %f
+    ret
+  }
+}
+)";
+
+    Run(DirectVariableAccess, kTransformHandle);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(IR_DirectVariableAccessTest_HandleAS, Enabled_MultiFunction) {
+    auto* tex_ty = ty.Get<core::type::SampledTexture>(core::type::TextureDimension::k2d, ty.f32());
+    auto* tex = b.Var("tex", handle, tex_ty, core::Access::kReadWrite);
+    tex->SetBindingPoint(0, 0);
+    b.ir.root_block->Append(tex);
+
+    auto* samp = b.Var("samp", handle, ty.sampler(), core::Access::kReadWrite);
+    samp->SetBindingPoint(0, 1);
+    b.ir.root_block->Append(samp);
+
+    auto* t = b.FunctionParam("t", tex_ty);
+    auto* s = b.FunctionParam("s", ty.sampler());
+
+    auto* fn = b.Function("f", ty.void_());
+    fn->SetParams({t, s});
+    b.Append(fn->Block(), [&] {
+        b.Let("p", b.Call(ty.vec4<f32>(), core::BuiltinFn::kTextureGather, 0_u, t, s,
+                          b.Splat(ty.vec2<f32>(), 0_f)));
+        b.Return(fn);
+    });
+
+    auto* t2 = b.FunctionParam("t", tex_ty);
+    auto* fn2 = b.Function("g", ty.void_());
+    fn2->SetParams({t2});
+    b.Append(fn2->Block(), [&] {
+        auto* s2 = b.Load(samp);
+        b.Call(ty.void_(), fn, t2, s2);
+        b.Return(fn2);
+    });
+
+    auto* fn3 = b.Function("h", ty.void_());
+    b.Append(fn3->Block(), [&] {
+        auto* t3 = b.Load(tex);
+        b.Call(ty.void_(), fn2, t3);
+        b.Return(fn3);
+    });
+
+    auto* src = R"(
+$B1: {  # root
+  %tex:ptr<handle, texture_2d<f32>, read_write> = var @binding_point(0, 0)
+  %samp:ptr<handle, sampler, read_write> = var @binding_point(0, 1)
+}
+
+%f = func(%t:texture_2d<f32>, %s:sampler):void {
+  $B2: {
+    %6:vec4<f32> = textureGather 0u, %t, %s, vec2<f32>(0.0f)
+    %p:vec4<f32> = let %6
+    ret
+  }
+}
+%g = func(%t_1:texture_2d<f32>):void {  # %t_1: 't'
+  $B3: {
+    %10:sampler = load %samp
+    %11:void = call %f, %t_1, %10
+    ret
+  }
+}
+%h = func():void {
+  $B4: {
+    %13:texture_2d<f32> = load %tex
+    %14:void = call %g, %13
+    ret
+  }
+}
+)";
+
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+$B1: {  # root
+  %tex:ptr<handle, texture_2d<f32>, read_write> = var @binding_point(0, 0)
+  %samp:ptr<handle, sampler, read_write> = var @binding_point(0, 1)
+}
+
+%f = func():void {
+  $B2: {
+    %4:texture_2d<f32> = load %tex
+    %5:sampler = load %samp
+    %6:vec4<f32> = textureGather 0u, %4, %5, vec2<f32>(0.0f)
+    %p:vec4<f32> = let %6
+    ret
+  }
+}
+%g = func():void {
+  $B3: {
+    %9:void = call %f
+    ret
+  }
+}
+%h = func():void {
+  $B4: {
+    %11:void = call %g
+    ret
+  }
+}
+)";
+
+    Run(DirectVariableAccess, kTransformHandle);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(IR_DirectVariableAccessTest_HandleAS, Disabled_MultiFunction) {
+    auto* tex_ty = ty.Get<core::type::SampledTexture>(core::type::TextureDimension::k2d, ty.f32());
+    auto* tex = b.Var("tex", handle, tex_ty, core::Access::kReadWrite);
+    tex->SetBindingPoint(0, 0);
+    b.ir.root_block->Append(tex);
+
+    auto* samp = b.Var("samp", handle, ty.sampler(), core::Access::kReadWrite);
+    samp->SetBindingPoint(0, 1);
+    b.ir.root_block->Append(samp);
+
+    auto* t = b.FunctionParam("t", tex_ty);
+    auto* s = b.FunctionParam("s", ty.sampler());
+
+    auto* fn = b.Function("f", ty.void_());
+    fn->SetParams({t, s});
+    b.Append(fn->Block(), [&] {
+        b.Let("p", b.Call(ty.vec4<f32>(), core::BuiltinFn::kTextureGather, 0_u, t, s,
+                          b.Splat(ty.vec2<f32>(), 0_f)));
+        b.Return(fn);
+    });
+
+    auto* t2 = b.FunctionParam("t", tex_ty);
+    auto* fn2 = b.Function("g", ty.void_());
+    fn2->SetParams({t2});
+    b.Append(fn2->Block(), [&] {
+        auto* s2 = b.Load(samp);
+        b.Call(ty.void_(), fn, t2, s2);
+        b.Return(fn2);
+    });
+
+    auto* fn3 = b.Function("h", ty.void_());
+    b.Append(fn3->Block(), [&] {
+        auto* t3 = b.Load(tex);
+        b.Call(ty.void_(), fn2, t3);
+        b.Return(fn3);
+    });
+
+    auto* src = R"(
+$B1: {  # root
+  %tex:ptr<handle, texture_2d<f32>, read_write> = var @binding_point(0, 0)
+  %samp:ptr<handle, sampler, read_write> = var @binding_point(0, 1)
+}
+
+%f = func(%t:texture_2d<f32>, %s:sampler):void {
+  $B2: {
+    %6:vec4<f32> = textureGather 0u, %t, %s, vec2<f32>(0.0f)
+    %p:vec4<f32> = let %6
+    ret
+  }
+}
+%g = func(%t_1:texture_2d<f32>):void {  # %t_1: 't'
+  $B3: {
+    %10:sampler = load %samp
+    %11:void = call %f, %t_1, %10
+    ret
+  }
+}
+%h = func():void {
+  $B4: {
+    %13:texture_2d<f32> = load %tex
+    %14:void = call %g, %13
+    ret
+  }
+}
+)";
+
+    EXPECT_EQ(src, str());
+
+    auto* expect = src;  // No change
+
+    Run(DirectVariableAccess, DirectVariableAccessOptions{});
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(IR_DirectVariableAccessTest_HandleAS, Enabled_DuplicateParam) {
+    auto* tex_ty = ty.Get<core::type::SampledTexture>(core::type::TextureDimension::k2d, ty.f32());
+    auto* tex = b.Var("tex", handle, tex_ty, core::Access::kReadWrite);
+    tex->SetBindingPoint(0, 0);
+    b.ir.root_block->Append(tex);
+
+    auto* samp = b.Var("samp", handle, ty.sampler(), core::Access::kReadWrite);
+    samp->SetBindingPoint(0, 1);
+    b.ir.root_block->Append(samp);
+
+    auto* t1 = b.FunctionParam("t1", tex_ty);
+    auto* t2 = b.FunctionParam("t2", tex_ty);
+
+    auto* fn = b.Function("f", ty.void_());
+    fn->SetParams({t1, t2});
+    b.Append(fn->Block(), [&] {
+        auto* s = b.Load(samp);
+
+        b.Let("p1", b.Call(ty.vec4<f32>(), core::BuiltinFn::kTextureGather, 0_u, t1, s,
+                           b.Splat(ty.vec2<f32>(), 0_f)));
+        b.Let("p2", b.Call(ty.vec4<f32>(), core::BuiltinFn::kTextureGather, 0_u, t2, s,
+                           b.Splat(ty.vec2<f32>(), 0_f)));
+        b.Return(fn);
+    });
+
+    auto* fn2 = b.Function("g", ty.void_());
+    b.Append(fn2->Block(), [&] {
+        auto* t3 = b.Load(tex);
+        auto* t4 = b.Load(tex);
+        b.Call(ty.void_(), fn, t3, t4);
+        b.Return(fn2);
+    });
+
+    auto* src = R"(
+$B1: {  # root
+  %tex:ptr<handle, texture_2d<f32>, read_write> = var @binding_point(0, 0)
+  %samp:ptr<handle, sampler, read_write> = var @binding_point(0, 1)
+}
+
+%f = func(%t1:texture_2d<f32>, %t2:texture_2d<f32>):void {
+  $B2: {
+    %6:sampler = load %samp
+    %7:vec4<f32> = textureGather 0u, %t1, %6, vec2<f32>(0.0f)
+    %p1:vec4<f32> = let %7
+    %9:vec4<f32> = textureGather 0u, %t2, %6, vec2<f32>(0.0f)
+    %p2:vec4<f32> = let %9
+    ret
+  }
+}
+%g = func():void {
+  $B3: {
+    %12:texture_2d<f32> = load %tex
+    %13:texture_2d<f32> = load %tex
+    %14:void = call %f, %12, %13
+    ret
+  }
+}
+)";
+
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+$B1: {  # root
+  %tex:ptr<handle, texture_2d<f32>, read_write> = var @binding_point(0, 0)
+  %samp:ptr<handle, sampler, read_write> = var @binding_point(0, 1)
+}
+
+%f = func():void {
+  $B2: {
+    %4:texture_2d<f32> = load %tex
+    %5:texture_2d<f32> = load %tex
+    %6:sampler = load %samp
+    %7:vec4<f32> = textureGather 0u, %4, %6, vec2<f32>(0.0f)
+    %p1:vec4<f32> = let %7
+    %9:vec4<f32> = textureGather 0u, %5, %6, vec2<f32>(0.0f)
+    %p2:vec4<f32> = let %9
+    ret
+  }
+}
+%g = func():void {
+  $B3: {
+    %12:void = call %f
+    ret
+  }
+}
+)";
+
+    Run(DirectVariableAccess, kTransformHandle);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(IR_DirectVariableAccessTest_HandleAS, Enabled_Fork) {
+    auto* tex_ty = ty.Get<core::type::SampledTexture>(core::type::TextureDimension::k2d, ty.f32());
+    auto* tex1 = b.Var("tex1", handle, tex_ty, core::Access::kReadWrite);
+    tex1->SetBindingPoint(0, 0);
+    b.ir.root_block->Append(tex1);
+    auto* tex2 = b.Var("tex2", handle, tex_ty, core::Access::kReadWrite);
+    tex2->SetBindingPoint(0, 1);
+    b.ir.root_block->Append(tex2);
+
+    auto* samp = b.Var("samp", handle, ty.sampler(), core::Access::kReadWrite);
+    samp->SetBindingPoint(0, 2);
+    b.ir.root_block->Append(samp);
+
+    auto* t = b.FunctionParam("t", tex_ty);
+
+    auto* fn = b.Function("f", ty.void_());
+    fn->SetParams({t});
+    b.Append(fn->Block(), [&] {
+        auto* s = b.Load(samp);
+        b.Let("p", b.Call(ty.vec4<f32>(), core::BuiltinFn::kTextureGather, 0_u, t, s,
+                          b.Splat(ty.vec2<f32>(), 0_f)));
+        b.Return(fn);
+    });
+
+    auto* fn2 = b.Function("g", ty.void_());
+    b.Append(fn2->Block(), [&] {
+        auto* t2 = b.Load(tex1);
+        b.Call(ty.void_(), fn, t2);
+        b.Return(fn2);
+    });
+
+    auto* fn3 = b.Function("h", ty.void_());
+    b.Append(fn3->Block(), [&] {
+        auto* t2 = b.Load(tex2);
+        b.Call(ty.void_(), fn, t2);
+        b.Return(fn3);
+    });
+
+    auto* src = R"(
+$B1: {  # root
+  %tex1:ptr<handle, texture_2d<f32>, read_write> = var @binding_point(0, 0)
+  %tex2:ptr<handle, texture_2d<f32>, read_write> = var @binding_point(0, 1)
+  %samp:ptr<handle, sampler, read_write> = var @binding_point(0, 2)
+}
+
+%f = func(%t:texture_2d<f32>):void {
+  $B2: {
+    %6:sampler = load %samp
+    %7:vec4<f32> = textureGather 0u, %t, %6, vec2<f32>(0.0f)
+    %p:vec4<f32> = let %7
+    ret
+  }
+}
+%g = func():void {
+  $B3: {
+    %10:texture_2d<f32> = load %tex1
+    %11:void = call %f, %10
+    ret
+  }
+}
+%h = func():void {
+  $B4: {
+    %13:texture_2d<f32> = load %tex2
+    %14:void = call %f, %13
+    ret
+  }
+}
+)";
+
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+$B1: {  # root
+  %tex1:ptr<handle, texture_2d<f32>, read_write> = var @binding_point(0, 0)
+  %tex2:ptr<handle, texture_2d<f32>, read_write> = var @binding_point(0, 1)
+  %samp:ptr<handle, sampler, read_write> = var @binding_point(0, 2)
+}
+
+%f = func():void {
+  $B2: {
+    %5:texture_2d<f32> = load %tex1
+    %6:sampler = load %samp
+    %7:vec4<f32> = textureGather 0u, %5, %6, vec2<f32>(0.0f)
+    %p:vec4<f32> = let %7
+    ret
+  }
+}
+%f_1 = func():void {  # %f_1: 'f'
+  $B3: {
+    %10:texture_2d<f32> = load %tex2
+    %11:sampler = load %samp
+    %12:vec4<f32> = textureGather 0u, %10, %11, vec2<f32>(0.0f)
+    %p_1:vec4<f32> = let %12  # %p_1: 'p'
+    ret
+  }
+}
+%g = func():void {
+  $B4: {
+    %15:void = call %f
+    ret
+  }
+}
+%h = func():void {
+  $B5: {
+    %17:void = call %f_1
+    ret
+  }
+}
+)";
+
+    Run(DirectVariableAccess, kTransformHandle);
+
+    EXPECT_EQ(expect, str());
+}
+
+}  // namespace handle_as_tests
 
 ////////////////////////////////////////////////////////////////////////////////
 // builtin function calls

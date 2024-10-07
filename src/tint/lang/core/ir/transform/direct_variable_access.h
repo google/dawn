@@ -44,23 +44,26 @@ struct DirectVariableAccessOptions {
     bool transform_private = false;
     /// If true, then 'function' sub-object pointer arguments will be transformed.
     bool transform_function = false;
+    /// If true, then 'handle' sub-object handle type arguments will be transformed.
+    bool transform_handle = false;
 
     /// Reflection for this class
     TINT_REFLECT(DirectVariableAccessOptions, transform_private, transform_function);
 };
 
-/// DirectVariableAccess is a transform that transforms pointer parameters in the 'storage',
+/// DirectVariableAccess is a transform that transforms parameters in the 'storage',
 /// 'uniform' and 'workgroup' address space so that they're accessed directly by the function,
-/// instead of being passed by pointer.
+/// instead of being passed by pointer. It will potentiall also transform `private`, `handle` or
+/// `function` parameters depending on provided options.
 ///
-/// DirectVariableAccess works by creating specializations of functions that have pointer
-/// parameters, one specialization for each pointer argument's unique access chain 'shape' from a
-/// unique variable. Calls to specialized functions are transformed so that the pointer arguments
-/// are replaced with an array of access-chain indicies, and if the pointer is in the 'function' or
-/// 'private' address space, also with a pointer to the root object. For more information, see the
-/// comments in src/tint/lang/wgsl/ast/transform/direct_variable_access.cc.
+/// DirectVariableAccess works by creating specializations of functions that have matching
+/// parameters, one specialization for each argument's unique access chain 'shape' from a unique
+/// variable. Calls to specialized functions are transformed so that the arguments are replaced with
+/// an array of access-chain indices, and if the parameter is in the 'function' or 'private'
+/// address space, also with a pointer to the root object.
 ///
 /// @param module the module to transform
+/// @param options the options
 /// @returns error diagnostics on failure
 Result<SuccessType> DirectVariableAccess(Module& module,
                                          const DirectVariableAccessOptions& options);
