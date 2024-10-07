@@ -877,19 +877,23 @@ void main() {
 )");
 }
 
-// TODO(dsinclair): Requires textureNumLevels
 TEST_F(GlslWriterTest, DISABLED_BuiltinTextureDimensions_2d_WithU32Lod) {
-    auto* t = b.FunctionParam(
-        "t", ty.Get<core::type::SampledTexture>(core::type::TextureDimension::k2d, ty.f32()));
-    auto* func = b.Function("foo", ty.vec2<u32>());
-    func->SetParams({t});
+    auto* type = ty.Get<core::type::SampledTexture>(core::type::TextureDimension::k2d, ty.f32());
+    auto* var = b.Var("v", handle, type, core::Access::kReadWrite);
+    var->SetBindingPoint(0, 0);
+    b.ir.root_block->Append(var);
+
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
-        auto* result = b.Call<vec2<u32>>(core::BuiltinFn::kTextureDimensions, t, 3_u);
-        b.Return(func, result);
+        b.Let("x", b.Call<vec2<u32>>(core::BuiltinFn::kTextureDimensions, b.Load(var), 3_u));
+        b.Return(func);
     });
 
     ASSERT_TRUE(Generate()) << err_ << output_.glsl;
     EXPECT_EQ(output_.glsl, GlslHeader() + R"(
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+void main() {
+}
 )");
 }
 
@@ -1726,8 +1730,7 @@ void main() {
 )");
 }
 
-// TODO(dsinclair): Add compare
-TEST_F(GlslWriterTest, DISABLED_BuiltinTextureGatherCompare_Depth2d) {
+TEST_F(GlslWriterTest, BuiltinTextureGatherCompare_Depth2d) {
     core::ir::Var* tex = nullptr;
     core::ir::Var* sampler = nullptr;
     b.Append(b.ir.root_block, [&] {
@@ -1755,18 +1758,17 @@ TEST_F(GlslWriterTest, DISABLED_BuiltinTextureGatherCompare_Depth2d) {
     Options opts;
     opts.disable_robustness = true;
     ASSERT_TRUE(Generate(opts)) << err_ << output_.glsl;
-    EXPECT_EQ(output_.glsl, GlslHeader() + R"(
-Texture2D v : register(t0);
-SamplerComparisonState v_1 : register(s1);
-void foo() {
-  float4 x = v.GatherCmp(v_1, float2(1.0f, 2.0f), 3.0f);
-}
+    EXPECT_EQ(output_.glsl, GlslHeader() + R"(precision highp float;
+precision highp int;
 
+uniform highp sampler2DShadow t_s;
+void main() {
+  vec4 x = textureGather(t_s, vec2(1.0f, 2.0f), 3.0f);
+}
 )");
 }
 
-// TODO(dsinclair): Add compare
-TEST_F(GlslWriterTest, DISABLED_BuiltinTextureGatherCompare_Depth2dOffset) {
+TEST_F(GlslWriterTest, BuiltinTextureGatherCompare_Depth2dOffset) {
     core::ir::Var* tex = nullptr;
     core::ir::Var* sampler = nullptr;
     b.Append(b.ir.root_block, [&] {
@@ -1795,19 +1797,18 @@ TEST_F(GlslWriterTest, DISABLED_BuiltinTextureGatherCompare_Depth2dOffset) {
     Options opts;
     opts.disable_robustness = true;
     ASSERT_TRUE(Generate(opts)) << err_ << output_.glsl;
-    EXPECT_EQ(output_.glsl, GlslHeader() + R"(
-Texture2D v : register(t0);
-SamplerComparisonState v_1 : register(s1);
-void foo() {
-  float2 v_2 = float2(1.0f, 2.0f);
-  float4 x = v.GatherCmp(v_1, v_2, 3.0f, int2(int(4), int(5)));
-}
+    EXPECT_EQ(output_.glsl, GlslHeader() + R"(precision highp float;
+precision highp int;
 
+uniform highp sampler2DShadow t_s;
+void main() {
+  vec2 v = vec2(1.0f, 2.0f);
+  vec4 x = textureGatherOffset(t_s, v, 3.0f, ivec2(4, 5));
+}
 )");
 }
 
-// TODO(dsinclair): Add compare
-TEST_F(GlslWriterTest, DISABLED_BuiltinTextureGatherCompare_DepthCubeArray) {
+TEST_F(GlslWriterTest, BuiltinTextureGatherCompare_DepthCubeArray) {
     core::ir::Var* tex = nullptr;
     core::ir::Var* sampler = nullptr;
     b.Append(b.ir.root_block, [&] {
@@ -1834,21 +1835,22 @@ TEST_F(GlslWriterTest, DISABLED_BuiltinTextureGatherCompare_DepthCubeArray) {
     });
 
     Options opts;
+    opts.version = Version(Version::Standard::kDesktop, 4, 6);
     opts.disable_robustness = true;
     ASSERT_TRUE(Generate(opts)) << err_ << output_.glsl;
-    EXPECT_EQ(output_.glsl, GlslHeader() + R"(
-TextureCubeArray v : register(t0);
-SamplerComparisonState v_1 : register(s1);
-void foo() {
-  float3 v_2 = float3(1.0f, 2.0f, 2.5f);
-  float4 x = v.GatherCmp(v_1, float4(v_2, float(6u)), 3.0f);
-}
+    EXPECT_EQ(output_.glsl, R"(#version 460
+precision highp float;
+precision highp int;
 
+uniform highp samplerCubeArrayShadow t_s;
+void main() {
+  vec3 v = vec3(1.0f, 2.0f, 2.5f);
+  vec4 x = textureGather(t_s, vec4(v, float(6u)), 3.0f);
+}
 )");
 }
 
-// TODO(dsinclair): Add compare
-TEST_F(GlslWriterTest, DISABLED_BuiltinTextureGatherCompare_Depth2dArrayOffset) {
+TEST_F(GlslWriterTest, BuiltinTextureGatherCompare_Depth2dArrayOffset) {
     core::ir::Var* tex = nullptr;
     core::ir::Var* sampler = nullptr;
     b.Append(b.ir.root_block, [&] {
@@ -1863,10 +1865,10 @@ TEST_F(GlslWriterTest, DISABLED_BuiltinTextureGatherCompare_Depth2dArrayOffset) 
 
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
-        auto* coords = b.Construct(ty.vec2<f32>(), b.Value(1_f), b.Value(2_f));
+        auto* coords = b.Composite(ty.vec2<f32>(), 1_f, 2_f);
         auto* array_idx = b.Value(6_i);
         auto* depth_ref = b.Value(3_f);
-        auto* offset = b.Construct(ty.vec2<i32>(), b.Value(4_i), b.Value(5_i));
+        auto* offset = b.Composite(ty.vec2<i32>(), 4_i, 5_i);
 
         auto* t = b.Load(tex);
         auto* s = b.Load(sampler);
@@ -1878,15 +1880,13 @@ TEST_F(GlslWriterTest, DISABLED_BuiltinTextureGatherCompare_Depth2dArrayOffset) 
     Options opts;
     opts.disable_robustness = true;
     ASSERT_TRUE(Generate(opts)) << err_ << output_.glsl;
-    EXPECT_EQ(output_.glsl, GlslHeader() + R"(
-Texture2DArray v : register(t0);
-SamplerComparisonState v_1 : register(s1);
-void foo() {
-  float2 v_2 = float2(1.0f, 2.0f);
-  int2 v_3 = int2(int(4), int(5));
-  float4 x = v.GatherCmp(v_1, float3(v_2, float(int(6))), 3.0f, v_3);
-}
+    EXPECT_EQ(output_.glsl, GlslHeader() + R"(precision highp float;
+precision highp int;
 
+uniform highp sampler2DArrayShadow t_s;
+void main() {
+  vec4 x = textureGatherOffset(t_s, vec3(vec2(1.0f, 2.0f), float(6)), 3.0f, ivec2(4, 5));
+}
 )");
 }
 
