@@ -68,12 +68,18 @@ void Run(Module& ir) {
         auto* ptr = var->Result(0)->Type()->As<core::type::Pointer>();
         auto* store_ty = ptr->StoreType();
 
-        if (auto* str = store_ty->As<core::type::Struct>(); str && !str->HasFixedFootprint()) {
-            // We know the original struct will only ever be used as the store type of a buffer, so
-            // just mark it as a block-decorated struct.
-            // TODO(crbug.com/tint/745): Remove the const_cast.
-            const_cast<type::Struct*>(str)->SetStructFlag(type::kBlock);
-            continue;
+        if (auto* str = store_ty->As<core::type::Struct>()) {
+            if (str->StructFlags().Contains(type::kBlock)) {
+                // The struct already has a block attribute, so we don't need to do anything here.
+                continue;
+            }
+            if (!str->HasFixedFootprint()) {
+                // We know the original struct will only ever be used as the store type of a buffer,
+                // so just mark it as a block-decorated struct.
+                // TODO(crbug.com/tint/745): Remove the const_cast.
+                const_cast<type::Struct*>(str)->SetStructFlag(type::kBlock);
+                continue;
+            }
         }
 
         // The original struct might be used in other places, so create a new block-decorated

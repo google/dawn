@@ -394,5 +394,47 @@ $B1: {  # root
     EXPECT_EQ(expect, str());
 }
 
+TEST_F(IR_BlockDecoratedStructsTest, PushConstantAlreadyHasBlockAttribute) {
+    auto* structure = ty.Struct(mod.symbols.New("MyStruct"), {
+                                                                 {mod.symbols.New("i"), ty.i32()},
+                                                             });
+    structure->SetStructFlag(type::kBlock);
+
+    auto* buffer = b.Var(ty.ptr(push_constant, structure));
+    mod.root_block->Append(buffer);
+
+    auto* func = b.Function("foo", ty.i32());
+    b.Append(func->Block(), [&] {
+        auto* val_ptr = b.Access<ptr<push_constant, i32>>(buffer, 0_u);
+        b.Return(func, b.Load(val_ptr));
+    });
+
+    auto* src = R"(
+MyStruct = struct @align(4), @block {
+  i:i32 @offset(0)
+}
+
+$B1: {  # root
+  %1:ptr<push_constant, MyStruct, read> = var
+}
+
+%foo = func():i32 {
+  $B2: {
+    %3:ptr<push_constant, i32, read> = access %1, 0u
+    %4:i32 = load %3
+    ret %4
+  }
+}
+)";
+
+    EXPECT_EQ(src, str());
+
+    auto* expect = src;
+
+    Run(BlockDecoratedStructs);
+
+    EXPECT_EQ(expect, str());
+}
+
 }  // namespace
 }  // namespace tint::core::ir::transform
