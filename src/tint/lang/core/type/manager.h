@@ -250,13 +250,20 @@ class Manager final {
     /// @returns a vec4 type with the element type @p inner
     const core::type::Vector* vec4(const core::type::Type* inner);
 
-    /// Return a type with element type `type` that has the same number of vector components as
-    /// `match`. If `match` is scalar just return `type`.
+    /// Return a type with element type `el_ty` that has the same number of vector components as
+    /// `match`. If `match` is scalar just return `el_ty`.
     /// @param el_ty the type to extend
     /// @param match the type to match the component count of
     /// @returns a type with the same number of vector components as `match`
     const core::type::Type* MatchWidth(const core::type::Type* el_ty,
                                        const core::type::Type* match);
+
+    // Return a type with element type `el_ty` that has the `size` number of vector components.
+    // If `size` is 1, just return `el_ty`.
+    /// @param el_ty the type to extend
+    /// @param size the component size to match
+    /// @returns a type with the `size` number of components
+    const core::type::Type* MatchWidth(const core::type::Type* el_ty, size_t size);
 
     /// @tparam T the element type
     /// @tparam N the vector width

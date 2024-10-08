@@ -586,7 +586,7 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, TextureNumSamples) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(HlslWriter_BuiltinPolyfillTest, TextureDimensions_1d) {
+TEST_F(HlslWriter_BuiltinPolyfillTest, TextureDimensions_1d_WithoutLod) {
     auto* t = b.FunctionParam(
         "t", ty.Get<core::type::SampledTexture>(core::type::TextureDimension::k1d, ty.f32()));
     auto* func = b.Function("foo", ty.u32());
@@ -613,6 +613,88 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, TextureDimensions_1d) {
     %4:void = %t.GetDimensions %3
     %5:u32 = load %3
     ret %5
+  }
+}
+)";
+
+    capabilities = core::ir::Capabilities{core::ir::Capability::kAllowVectorElementPointer};
+    Run(BuiltinPolyfill);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(HlslWriter_BuiltinPolyfillTest, TextureDimensions_1d_WithI32Lod) {
+    auto* t = b.FunctionParam(
+        "t", ty.Get<core::type::SampledTexture>(core::type::TextureDimension::k1d, ty.f32()));
+    auto* func = b.Function("foo", ty.u32());
+    func->SetParams({t});
+    b.Append(func->Block(), [&] {
+        auto* result = b.Call<u32>(core::BuiltinFn::kTextureDimensions, t, 3_i);
+        b.Return(func, result);
+    });
+
+    auto* src = R"(
+%foo = func(%t:texture_1d<f32>):u32 {
+  $B1: {
+    %3:u32 = textureDimensions %t, 3i
+    ret %3
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = func(%t:texture_1d<f32>):u32 {
+  $B1: {
+    %3:u32 = convert 3i
+    %4:ptr<function, vec2<u32>, read_write> = var
+    %5:ptr<function, u32, read_write> = access %4, 0u
+    %6:ptr<function, u32, read_write> = access %4, 1u
+    %7:void = %t.GetDimensions %3, %5, %6
+    %8:vec2<u32> = load %4
+    %9:u32 = swizzle %8, x
+    ret %9
+  }
+}
+)";
+
+    capabilities = core::ir::Capabilities{core::ir::Capability::kAllowVectorElementPointer};
+    Run(BuiltinPolyfill);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(HlslWriter_BuiltinPolyfillTest, TextureDimensions_1d_WithU32Lod) {
+    auto* t = b.FunctionParam(
+        "t", ty.Get<core::type::SampledTexture>(core::type::TextureDimension::k1d, ty.f32()));
+    auto* func = b.Function("foo", ty.u32());
+    func->SetParams({t});
+    b.Append(func->Block(), [&] {
+        auto* result = b.Call<u32>(core::BuiltinFn::kTextureDimensions, t, 3_u);
+        b.Return(func, result);
+    });
+
+    auto* src = R"(
+%foo = func(%t:texture_1d<f32>):u32 {
+  $B1: {
+    %3:u32 = textureDimensions %t, 3u
+    ret %3
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = func(%t:texture_1d<f32>):u32 {
+  $B1: {
+    %3:u32 = convert 3u
+    %4:ptr<function, vec2<u32>, read_write> = var
+    %5:ptr<function, u32, read_write> = access %4, 0u
+    %6:ptr<function, u32, read_write> = access %4, 1u
+    %7:void = %t.GetDimensions %3, %5, %6
+    %8:vec2<u32> = load %4
+    %9:u32 = swizzle %8, x
+    ret %9
   }
 }
 )";

@@ -118,6 +118,13 @@ const core::type::Type* Manager::MatchWidth(const core::type::Type* el_ty,
     return el_ty;
 }
 
+const core::type::Type* Manager::MatchWidth(const core::type::Type* el_ty, size_t size) {
+    if (size > 1) {
+        return vec(el_ty, static_cast<uint32_t>(size));
+    }
+    return el_ty;
+}
+
 const core::type::Vector* Manager::vec(const core::type::Type* inner, uint32_t size) {
     return Get<core::type::Vector>(inner, size);
 }

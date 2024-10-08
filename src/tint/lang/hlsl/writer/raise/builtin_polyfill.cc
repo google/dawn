@@ -902,10 +902,7 @@ struct State {
             query_size += 1;
         }
 
-        const core::type::Type* query_ty = ty.u32();
-        if (query_size > 1) {
-            query_ty = ty.vec(query_ty, query_size);
-        }
+        auto* query_ty = ty.MatchWidth(ty.u32(), query_size);
 
         b.InsertBefore(call, [&] {
             Vector<core::ir::Value*, 5> args;
@@ -928,8 +925,7 @@ struct State {
                                                       tex, args);
             query = b.Load(query);
             if (!swizzle.IsEmpty()) {
-                query = b.Swizzle(ty.vec(ty.u32(), static_cast<uint32_t>(swizzle.Length())), query,
-                                  swizzle);
+                query = b.Swizzle(ty.MatchWidth(ty.u32(), swizzle.Length()), query, swizzle);
             }
             call->Result(0)->ReplaceAllUsesWith(query->Result(0));
         });
