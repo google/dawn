@@ -1,6 +1,4 @@
-SKIP: FAILED
-
-#version 310 es
+#version 460
 precision highp float;
 precision highp int;
 
@@ -16,14 +14,7 @@ float textureSampleCompareLevel_bcb3dd() {
 void main() {
   v.tint_symbol = textureSampleCompareLevel_bcb3dd();
 }
-error: Error parsing GLSL shader:
-ERROR: 0:11: 'sampler' : TextureOffset does not support sampler2DArrayShadow :  ES Profile
-ERROR: 0:11: '' : compilation terminated 
-ERROR: 2 compilation errors.  No code generated.
-
-
-
-#version 310 es
+#version 460
 
 layout(binding = 0, std430)
 buffer tint_symbol_1_1_ssbo {
@@ -38,14 +29,7 @@ layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
   v.tint_symbol = textureSampleCompareLevel_bcb3dd();
 }
-error: Error parsing GLSL shader:
-ERROR: 0:9: 'sampler' : TextureOffset does not support sampler2DArrayShadow :  ES Profile
-ERROR: 0:9: '' : compilation terminated 
-ERROR: 2 compilation errors.  No code generated.
-
-
-
-#version 310 es
+#version 460
 
 
 struct VertexOutput {
@@ -73,12 +57,3 @@ void main() {
   vertex_main_loc0_Output = v.prevent_dce;
   gl_PointSize = 1.0f;
 }
-error: Error parsing GLSL shader:
-ERROR: 0:12: 'sampler' : TextureOffset does not support sampler2DArrayShadow :  ES Profile
-ERROR: 0:12: '' : compilation terminated 
-ERROR: 2 compilation errors.  No code generated.
-
-
-
-
-tint executable returned error: exit status 1

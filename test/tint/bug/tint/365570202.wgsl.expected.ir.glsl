@@ -1,11 +1,7 @@
-SKIP: FAILED
+#version 460
 
-<dawn>/src/tint/lang/glsl/writer/printer/printer.cc:733 internal compiler error: TINT_UNREACHABLE invalid texel format for read-write
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
-
-tint executable returned error: signal: trace/BPT trap
+layout(binding = 0, rgba8) uniform highp image2D tex;
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+void main() {
+  imageStore(tex, ivec2(0), vec4(0.0f));
+}

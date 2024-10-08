@@ -1,8 +1,4 @@
-SKIP: FAILED
-
-#version 310 es
-precision highp float;
-precision highp int;
+#version 460
 
 layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
   float inner;
@@ -28,14 +24,7 @@ void main() {
   fragment_main();
   return;
 }
-error: Error parsing GLSL shader:
-ERROR: 0:12: 'sampler' : TextureOffset does not support sampler2DArrayShadow :  ES Profile
-ERROR: 0:12: '' : compilation terminated 
-ERROR: 2 compilation errors.  No code generated.
-
-
-
-#version 310 es
+#version 460
 
 layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
   float inner;
@@ -62,14 +51,7 @@ void main() {
   compute_main();
   return;
 }
-error: Error parsing GLSL shader:
-ERROR: 0:10: 'sampler' : TextureOffset does not support sampler2DArrayShadow :  ES Profile
-ERROR: 0:10: '' : compilation terminated 
-ERROR: 2 compilation errors.  No code generated.
-
-
-
-#version 310 es
+#version 460
 
 layout(location = 0) flat out float prevent_dce_1;
 uniform highp sampler2DArrayShadow arg_0_arg_1;
@@ -100,12 +82,3 @@ void main() {
   gl_Position.z = ((2.0f * gl_Position.z) - gl_Position.w);
   return;
 }
-error: Error parsing GLSL shader:
-ERROR: 0:7: 'sampler' : TextureOffset does not support sampler2DArrayShadow :  ES Profile
-ERROR: 0:7: '' : compilation terminated 
-ERROR: 2 compilation errors.  No code generated.
-
-
-
-
-tint executable returned error: exit status 1

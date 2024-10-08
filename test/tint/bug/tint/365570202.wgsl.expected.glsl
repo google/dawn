@@ -1,6 +1,6 @@
-#version 310 es
+#version 460
 
-layout(binding = 0, rgba8) uniform highp writeonly image2D tex;
+layout(binding = 0, rgba8) uniform highp image2D tex;
 void tint_symbol() {
   imageStore(tex, ivec2(0), vec4(0.0f));
 }

@@ -1,6 +1,4 @@
-SKIP: FAILED
-
-#version 310 es
+#version 460
 
 layout(binding = 0, rgba8) uniform highp writeonly image2D t_rgba8unorm;
 layout(binding = 1, rgba8_snorm) uniform highp writeonly image2D t_rgba8snorm;
@@ -37,12 +35,3 @@ void main() {
   uint dim15 = uvec2(imageSize(t_rgba32sint)).x;
   uint dim16 = uvec2(imageSize(t_rgba32float)).x;
 }
-error: Error parsing GLSL shader:
-ERROR: 0:13: 'image load-store format' : not supported with this profile: es
-ERROR: 0:13: '' : compilation terminated 
-ERROR: 2 compilation errors.  No code generated.
-
-
-
-
-tint executable returned error: exit status 1

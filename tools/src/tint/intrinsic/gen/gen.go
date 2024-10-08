@@ -623,6 +623,23 @@ func OverloadNeedsDesktopGLSL(overload sem.Overload) bool {
 			}
 		}
 	}
+	if overload.Intrinsic.Name == "textureSampleCompareLevel" {
+		has_tex := false
+		for _, param := range overload.Parameters {
+			if strings.HasPrefix(param.Type.Target.GetName(), "texture_depth_2d_array") {
+				has_tex = true
+				break
+			}
+		}
+		for _, param := range overload.Parameters {
+			if param.Name == "offset" {
+				if has_tex {
+					return true
+				}
+				break
+			}
+		}
+	}
 
 	for _, param := range overload.Parameters {
 		if strings.HasPrefix(param.Type.Target.GetName(), "texture_storage") {
