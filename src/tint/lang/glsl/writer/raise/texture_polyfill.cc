@@ -138,6 +138,9 @@ struct State {
                 case core::BuiltinFn::kTextureSampleBias:
                     TextureSampleBias(call);
                     break;
+                case core::BuiltinFn::kTextureSampleCompare:
+                    TextureSampleCompare(call);
+                    break;
                 case core::BuiltinFn::kTextureSampleGrad:
                     TextureSampleGrad(call);
                     break;
@@ -147,7 +150,6 @@ struct State {
                 case core::BuiltinFn::kTextureStore:
                     TextureStore(call);
                     break;
-                case core::BuiltinFn::kTextureSampleCompare:
                 case core::BuiltinFn::kTextureSampleCompareLevel:
                 default:
                     TINT_UNREACHABLE() << "TODO(dsinclair): " << call->Func();
@@ -811,6 +813,9 @@ struct State {
 
             auto fn = glsl::BuiltinFn::kTexture;
             if (idx < args.Length()) {
+                // In GLSL ES `textureOffset` does not support depth 2d array textures. In order to
+                // support this texture we polyfill with a `textureGradOffset` and explicitly
+                // calculate the `dPdx` and `dPdy` values.
                 if (is_depth && is_array) {
                     fn = glsl::BuiltinFn::kTextureGradOffset;
 
@@ -1013,6 +1018,81 @@ struct State {
             auto fn = glsl::BuiltinFn::kTextureGrad;
             if (idx < args.Length()) {
                 fn = glsl::BuiltinFn::kTextureGradOffset;
+                params.Push(args[idx++]);
+            }
+
+            b.CallWithResult<glsl::ir::BuiltinCall>(call->DetachResult(), fn, params);
+        });
+        call->Destroy();
+    }
+
+    void TextureSampleCompare(core::ir::BuiltinCall* call) {
+        auto args = call->Args();
+        b.InsertBefore(call, [&] {
+            Vector<core::ir::Value*, 4> params;
+
+            uint32_t idx = 0;
+            uint32_t tex_arg = idx++;
+            uint32_t sampler_arg = idx++;
+
+            auto* tex = GetNewTexture(args[tex_arg], args[sampler_arg]);
+            auto* tex_type = tex->Type()->As<core::type::Texture>();
+            TINT_ASSERT(tex_type);
+
+            params.Push(tex);
+
+            bool is_array = false;
+
+            core::ir::Value* coords = args[idx++];
+            switch (tex_type->Dim()) {
+                case core::type::TextureDimension::k2d:
+                    coords = b.Construct(ty.vec3<f32>(), coords, args[idx++])->Result(0);
+                    params.Push(coords);
+
+                    break;
+                case core::type::TextureDimension::k2dArray: {
+                    is_array = true;
+
+                    Vector<core::ir::Value*, 3> new_coords;
+                    new_coords.Push(coords);
+                    new_coords.Push(b.Convert<f32>(args[idx++])->Result(0));
+                    new_coords.Push(b.Value(args[idx++]));
+
+                    params.Push(b.Construct(ty.vec4<f32>(), new_coords)->Result(0));
+                    break;
+                }
+                case core::type::TextureDimension::kCube:
+                    coords = b.Construct(ty.vec4<f32>(), coords, args[idx++])->Result(0);
+                    params.Push(coords);
+                    break;
+                case core::type::TextureDimension::kCubeArray:
+                    is_array = true;
+                    params.Push(b.Construct(ty.vec4<f32>(), coords, b.Convert<f32>(args[idx++]))
+                                    ->Result(0));
+
+                    params.Push(b.Value(args[idx++]));
+                    break;
+                default:
+                    TINT_UNREACHABLE();
+            }
+
+            auto fn = glsl::BuiltinFn::kTexture;
+            if (idx < args.Length()) {
+                // In GLSL ES `textureOffset` does not support depth 2d array textures. In order to
+                // support this texture we polyfill with a `textureGradOffset` and explicitly
+                // calculate the `dPdx` and `dPdy` values.
+                if (is_array) {
+                    fn = glsl::BuiltinFn::kTextureGradOffset;
+
+                    auto* dpdx = b.Call(coords->Type(), core::BuiltinFn::kDpdx, coords);
+                    auto* dpdy = b.Call(coords->Type(), core::BuiltinFn::kDpdy, coords);
+
+                    params.Push(dpdx->Result(0));
+                    params.Push(dpdy->Result(0));
+                } else {
+                    fn = glsl::BuiltinFn::kTextureOffset;
+                }
+
                 params.Push(args[idx++]);
             }
 
