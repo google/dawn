@@ -75,6 +75,7 @@ enum class BuiltinFn : uint8_t {
     kExtTextureLod,
     kTextureLodOffset,
     kExtTextureLodOffset,
+    kTextureGrad,
     kTextureGradOffset,
     kTextureGather,
     kTextureGatherOffset,

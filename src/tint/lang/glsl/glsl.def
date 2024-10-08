@@ -230,6 +230,14 @@ fn textureLodOffset(texture: texture_depth_2d, coords: vec3<f32>, level: f32, of
 
 fn extTextureLodOffset(texture: texture_depth_2d_array, coords: vec4<f32>, level: f32, offset: vec2<i32>) -> f32
 
+fn textureGrad(texture: texture_2d<f32>, coords: vec2<f32>, ddx: vec2<f32>, ddy: vec2<f32>) -> vec4<f32>
+fn textureGrad(texture: texture_2d_array<f32>, coords: vec3<f32>, ddx: vec2<f32>, ddy: vec2<f32>) -> vec4<f32>
+fn textureGrad(texture: texture_3d<f32>, coords: vec3<f32>, ddx: vec3<f32>, ddy: vec3<f32>) -> vec4<f32>
+fn textureGrad(texture: texture_cube<f32>, coords: vec3<f32>, ddx: vec3<f32>, ddy: vec3<f32>) -> vec4<f32>
+fn textureGrad(texture: texture_cube_array<f32>,
+                     coords: vec4<f32>,
+                     ddx: vec3<f32>,
+                     ddy: vec3<f32>) -> vec4<f32>
 
 fn textureGradOffset(texture: texture_2d<f32>,
                      coords: vec2<f32>,

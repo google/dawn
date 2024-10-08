@@ -138,6 +138,9 @@ struct State {
                 case core::BuiltinFn::kTextureSampleBias:
                     TextureSampleBias(call);
                     break;
+                case core::BuiltinFn::kTextureSampleGrad:
+                    TextureSampleGrad(call);
+                    break;
                 case core::BuiltinFn::kTextureSampleLevel:
                     TextureSampleLevel(call);
                     break;
@@ -146,7 +149,6 @@ struct State {
                     break;
                 case core::BuiltinFn::kTextureSampleCompare:
                 case core::BuiltinFn::kTextureSampleCompareLevel:
-                case core::BuiltinFn::kTextureSampleGrad:
                 default:
                     TINT_UNREACHABLE() << "TODO(dsinclair): " << call->Func();
             }
@@ -956,6 +958,61 @@ struct State {
             if (idx < args.Length()) {
                 fn = needs_ext ? glsl::BuiltinFn::kExtTextureLodOffset
                                : glsl::BuiltinFn::kTextureLodOffset;
+                params.Push(args[idx++]);
+            }
+
+            b.CallWithResult<glsl::ir::BuiltinCall>(call->DetachResult(), fn, params);
+        });
+        call->Destroy();
+    }
+
+    void TextureSampleGrad(core::ir::BuiltinCall* call) {
+        auto args = call->Args();
+        b.InsertBefore(call, [&] {
+            Vector<core::ir::Value*, 4> params;
+
+            uint32_t idx = 0;
+            uint32_t tex_arg = idx++;
+            uint32_t sampler_arg = idx++;
+
+            auto* tex = GetNewTexture(args[tex_arg], args[sampler_arg]);
+            auto* tex_type = tex->Type()->As<core::type::Texture>();
+            TINT_ASSERT(tex_type);
+
+            params.Push(tex);
+
+            core::ir::Value* coords = args[idx++];
+            switch (tex_type->Dim()) {
+                case core::type::TextureDimension::k2d:
+                    params.Push(coords);
+
+                    break;
+                case core::type::TextureDimension::k2dArray: {
+                    Vector<core::ir::Value*, 3> new_coords;
+                    new_coords.Push(coords);
+                    new_coords.Push(b.Convert<f32>(args[idx++])->Result(0));
+
+                    params.Push(b.Construct(ty.vec3<f32>(), new_coords)->Result(0));
+                    break;
+                }
+                case core::type::TextureDimension::k3d:
+                case core::type::TextureDimension::kCube:
+                    params.Push(coords);
+                    break;
+                case core::type::TextureDimension::kCubeArray:
+                    params.Push(b.Construct(ty.vec4<f32>(), coords, b.Convert<f32>(args[idx++]))
+                                    ->Result(0));
+                    break;
+                default:
+                    TINT_UNREACHABLE();
+            }
+
+            params.Push(args[idx++]);  // dPdx
+            params.Push(args[idx++]);  // dPdy
+
+            auto fn = glsl::BuiltinFn::kTextureGrad;
+            if (idx < args.Length()) {
+                fn = glsl::BuiltinFn::kTextureGradOffset;
                 params.Push(args[idx++]);
             }
 

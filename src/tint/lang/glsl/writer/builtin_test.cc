@@ -3487,5 +3487,326 @@ void main() {
 )");
 }
 
+TEST_F(GlslWriterTest, BuiltinTextureSampleGrad_2d) {
+    core::ir::Var* tex = nullptr;
+    core::ir::Var* sampler = nullptr;
+    b.Append(b.ir.root_block, [&] {
+        tex = b.Var(ty.ptr(handle, ty.Get<core::type::SampledTexture>(
+                                       core::type::TextureDimension::k2d, ty.f32())));
+        tex->SetBindingPoint(0, 0);
+
+        sampler =
+            b.Var(ty.ptr(handle, ty.Get<core::type::Sampler>(core::type::SamplerKind::kSampler)));
+        sampler->SetBindingPoint(0, 1);
+    });
+
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        auto* coords = b.Construct(ty.vec2<f32>(), b.Value(1_f), b.Value(2_f));
+        auto* ddx = b.Construct(ty.vec2<f32>(), b.Value(3_f), b.Value(4_f));
+        auto* ddy = b.Construct(ty.vec2<f32>(), b.Value(5_f), b.Value(6_f));
+
+        auto* t = b.Load(tex);
+        auto* s = b.Load(sampler);
+        b.Let("x", b.Call<vec4<f32>>(core::BuiltinFn::kTextureSampleGrad, t, s, coords, ddx, ddy));
+        b.Return(func);
+    });
+
+    ASSERT_TRUE(Generate()) << err_ << output_.glsl;
+    EXPECT_EQ(output_.glsl, GlslHeader() + R"(precision highp float;
+precision highp int;
+
+uniform highp sampler2D t_s;
+void main() {
+  vec2 v = vec2(1.0f, 2.0f);
+  vec2 v_1 = vec2(3.0f, 4.0f);
+  vec4 x = textureGrad(t_s, v, v_1, vec2(5.0f, 6.0f));
+}
+)");
+}
+
+TEST_F(GlslWriterTest, BuiltinTextureSampleGrad_2d_Offset) {
+    core::ir::Var* tex = nullptr;
+    core::ir::Var* sampler = nullptr;
+    b.Append(b.ir.root_block, [&] {
+        tex = b.Var(ty.ptr(handle, ty.Get<core::type::SampledTexture>(
+                                       core::type::TextureDimension::k2d, ty.f32())));
+        tex->SetBindingPoint(0, 0);
+
+        sampler =
+            b.Var(ty.ptr(handle, ty.Get<core::type::Sampler>(core::type::SamplerKind::kSampler)));
+        sampler->SetBindingPoint(0, 1);
+    });
+
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        auto* coords = b.Construct(ty.vec2<f32>(), b.Value(1_f), b.Value(2_f));
+        auto* ddx = b.Construct(ty.vec2<f32>(), b.Value(3_f), b.Value(4_f));
+        auto* ddy = b.Construct(ty.vec2<f32>(), b.Value(5_f), b.Value(6_f));
+        auto* offset = b.Composite<vec2<i32>>(4_i, 5_i);
+
+        auto* t = b.Load(tex);
+        auto* s = b.Load(sampler);
+        b.Let("x", b.Call<vec4<f32>>(core::BuiltinFn::kTextureSampleGrad, t, s, coords, ddx, ddy,
+                                     offset));
+        b.Return(func);
+    });
+
+    ASSERT_TRUE(Generate()) << err_ << output_.glsl;
+    EXPECT_EQ(output_.glsl, GlslHeader() + R"(precision highp float;
+precision highp int;
+
+uniform highp sampler2D t_s;
+void main() {
+  vec2 v = vec2(1.0f, 2.0f);
+  vec2 v_1 = vec2(3.0f, 4.0f);
+  vec4 x = textureGradOffset(t_s, v, v_1, vec2(5.0f, 6.0f), ivec2(4, 5));
+}
+)");
+}
+
+TEST_F(GlslWriterTest, BuiltinTextureSampleGrad_2d_Array) {
+    core::ir::Var* tex = nullptr;
+    core::ir::Var* sampler = nullptr;
+    b.Append(b.ir.root_block, [&] {
+        tex = b.Var(ty.ptr(handle, ty.Get<core::type::SampledTexture>(
+                                       core::type::TextureDimension::k2dArray, ty.f32())));
+        tex->SetBindingPoint(0, 0);
+
+        sampler =
+            b.Var(ty.ptr(handle, ty.Get<core::type::Sampler>(core::type::SamplerKind::kSampler)));
+        sampler->SetBindingPoint(0, 1);
+    });
+
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        auto* coords = b.Construct(ty.vec2<f32>(), b.Value(1_f), b.Value(2_f));
+        auto* ddx = b.Construct(ty.vec2<f32>(), b.Value(3_f), b.Value(4_f));
+        auto* ddy = b.Construct(ty.vec2<f32>(), b.Value(5_f), b.Value(6_f));
+        auto* array_idx = b.Value(4_u);
+
+        auto* t = b.Load(tex);
+        auto* s = b.Load(sampler);
+        b.Let("x", b.Call<vec4<f32>>(core::BuiltinFn::kTextureSampleGrad, t, s, coords, array_idx,
+                                     ddx, ddy));
+        b.Return(func);
+    });
+
+    ASSERT_TRUE(Generate()) << err_ << output_.glsl;
+    EXPECT_EQ(output_.glsl, GlslHeader() + R"(precision highp float;
+precision highp int;
+
+uniform highp sampler2DArray t_s;
+void main() {
+  vec2 v = vec2(1.0f, 2.0f);
+  vec2 v_1 = vec2(3.0f, 4.0f);
+  vec2 v_2 = vec2(5.0f, 6.0f);
+  vec4 x = textureGrad(t_s, vec3(v, float(4u)), v_1, v_2);
+}
+)");
+}
+
+TEST_F(GlslWriterTest, BuiltinTextureSampleGrad_2d_Array_Offset) {
+    core::ir::Var* tex = nullptr;
+    core::ir::Var* sampler = nullptr;
+    b.Append(b.ir.root_block, [&] {
+        tex = b.Var(ty.ptr(handle, ty.Get<core::type::SampledTexture>(
+                                       core::type::TextureDimension::k2dArray, ty.f32())));
+        tex->SetBindingPoint(0, 0);
+
+        sampler =
+            b.Var(ty.ptr(handle, ty.Get<core::type::Sampler>(core::type::SamplerKind::kSampler)));
+        sampler->SetBindingPoint(0, 1);
+    });
+
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        auto* coords = b.Construct(ty.vec2<f32>(), b.Value(1_f), b.Value(2_f));
+        auto* array_idx = b.Value(4_u);
+        auto* ddx = b.Construct(ty.vec2<f32>(), b.Value(3_f), b.Value(4_f));
+        auto* ddy = b.Construct(ty.vec2<f32>(), b.Value(5_f), b.Value(6_f));
+        auto* offset = b.Composite<vec2<i32>>(4_i, 5_i);
+
+        auto* t = b.Load(tex);
+        auto* s = b.Load(sampler);
+        b.Let("x", b.Call<vec4<f32>>(core::BuiltinFn::kTextureSampleGrad, t, s, coords, array_idx,
+                                     ddx, ddy, offset));
+        b.Return(func);
+    });
+
+    ASSERT_TRUE(Generate()) << err_ << output_.glsl;
+    EXPECT_EQ(output_.glsl, GlslHeader() + R"(precision highp float;
+precision highp int;
+
+uniform highp sampler2DArray t_s;
+void main() {
+  vec2 v = vec2(1.0f, 2.0f);
+  vec2 v_1 = vec2(3.0f, 4.0f);
+  vec2 v_2 = vec2(5.0f, 6.0f);
+  vec4 x = textureGradOffset(t_s, vec3(v, float(4u)), v_1, v_2, ivec2(4, 5));
+}
+)");
+}
+
+TEST_F(GlslWriterTest, BuiltinTextureSampleGrad_3d) {
+    core::ir::Var* tex = nullptr;
+    core::ir::Var* sampler = nullptr;
+    b.Append(b.ir.root_block, [&] {
+        tex = b.Var(ty.ptr(handle, ty.Get<core::type::SampledTexture>(
+                                       core::type::TextureDimension::k3d, ty.f32())));
+        tex->SetBindingPoint(0, 0);
+
+        sampler =
+            b.Var(ty.ptr(handle, ty.Get<core::type::Sampler>(core::type::SamplerKind::kSampler)));
+        sampler->SetBindingPoint(0, 1);
+    });
+
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        auto* coords = b.Construct(ty.vec3<f32>(), b.Value(1_f), b.Value(2_f), b.Value(3_f));
+        auto* ddx = b.Construct(ty.vec3<f32>(), b.Value(3_f), b.Value(4_f), b.Value(5_f));
+        auto* ddy = b.Construct(ty.vec3<f32>(), b.Value(6_f), b.Value(7_f), b.Value(8_f));
+
+        auto* t = b.Load(tex);
+        auto* s = b.Load(sampler);
+        b.Let("x", b.Call<vec4<f32>>(core::BuiltinFn::kTextureSampleGrad, t, s, coords, ddx, ddy));
+        b.Return(func);
+    });
+
+    ASSERT_TRUE(Generate()) << err_ << output_.glsl;
+    EXPECT_EQ(output_.glsl, GlslHeader() + R"(precision highp float;
+precision highp int;
+
+uniform highp sampler3D t_s;
+void main() {
+  vec3 v = vec3(1.0f, 2.0f, 3.0f);
+  vec3 v_1 = vec3(3.0f, 4.0f, 5.0f);
+  vec4 x = textureGrad(t_s, v, v_1, vec3(6.0f, 7.0f, 8.0f));
+}
+)");
+}
+
+TEST_F(GlslWriterTest, BuiltinTextureSampleGrad_3d_Offset) {
+    core::ir::Var* tex = nullptr;
+    core::ir::Var* sampler = nullptr;
+    b.Append(b.ir.root_block, [&] {
+        tex = b.Var(ty.ptr(handle, ty.Get<core::type::SampledTexture>(
+                                       core::type::TextureDimension::k3d, ty.f32())));
+        tex->SetBindingPoint(0, 0);
+
+        sampler =
+            b.Var(ty.ptr(handle, ty.Get<core::type::Sampler>(core::type::SamplerKind::kSampler)));
+        sampler->SetBindingPoint(0, 1);
+    });
+
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        auto* coords = b.Construct(ty.vec3<f32>(), b.Value(1_f), b.Value(2_f), b.Value(3_f));
+        auto* ddx = b.Construct(ty.vec3<f32>(), b.Value(3_f), b.Value(4_f), b.Value(5_f));
+        auto* ddy = b.Construct(ty.vec3<f32>(), b.Value(6_f), b.Value(7_f), b.Value(8_f));
+        auto* offset = b.Composite<vec3<i32>>(4_i, 5_i, 6_i);
+
+        auto* t = b.Load(tex);
+        auto* s = b.Load(sampler);
+        b.Let("x", b.Call<vec4<f32>>(core::BuiltinFn::kTextureSampleGrad, t, s, coords, ddx, ddy,
+                                     offset));
+        b.Return(func);
+    });
+
+    ASSERT_TRUE(Generate()) << err_ << output_.glsl;
+    EXPECT_EQ(output_.glsl, GlslHeader() + R"(precision highp float;
+precision highp int;
+
+uniform highp sampler3D t_s;
+void main() {
+  vec3 v = vec3(1.0f, 2.0f, 3.0f);
+  vec3 v_1 = vec3(3.0f, 4.0f, 5.0f);
+  vec4 x = textureGradOffset(t_s, v, v_1, vec3(6.0f, 7.0f, 8.0f), ivec3(4, 5, 6));
+}
+)");
+}
+
+TEST_F(GlslWriterTest, BuiltinTextureSampleGrad_Cube) {
+    core::ir::Var* tex = nullptr;
+    core::ir::Var* sampler = nullptr;
+    b.Append(b.ir.root_block, [&] {
+        tex = b.Var(ty.ptr(handle, ty.Get<core::type::SampledTexture>(
+                                       core::type::TextureDimension::kCube, ty.f32())));
+        tex->SetBindingPoint(0, 0);
+
+        sampler =
+            b.Var(ty.ptr(handle, ty.Get<core::type::Sampler>(core::type::SamplerKind::kSampler)));
+        sampler->SetBindingPoint(0, 1);
+    });
+
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        auto* coords = b.Construct(ty.vec3<f32>(), b.Value(1_f), b.Value(2_f), b.Value(3_f));
+        auto* ddx = b.Construct(ty.vec3<f32>(), b.Value(3_f), b.Value(4_f), b.Value(5_f));
+        auto* ddy = b.Construct(ty.vec3<f32>(), b.Value(6_f), b.Value(7_f), b.Value(8_f));
+
+        auto* t = b.Load(tex);
+        auto* s = b.Load(sampler);
+        b.Let("x", b.Call<vec4<f32>>(core::BuiltinFn::kTextureSampleGrad, t, s, coords, ddx, ddy));
+        b.Return(func);
+    });
+
+    ASSERT_TRUE(Generate()) << err_ << output_.glsl;
+    EXPECT_EQ(output_.glsl, GlslHeader() + R"(precision highp float;
+precision highp int;
+
+uniform highp samplerCube t_s;
+void main() {
+  vec3 v = vec3(1.0f, 2.0f, 3.0f);
+  vec3 v_1 = vec3(3.0f, 4.0f, 5.0f);
+  vec4 x = textureGrad(t_s, v, v_1, vec3(6.0f, 7.0f, 8.0f));
+}
+)");
+}
+
+TEST_F(GlslWriterTest, BuiltinTextureSampleGrad_Cube_Array) {
+    core::ir::Var* tex = nullptr;
+    core::ir::Var* sampler = nullptr;
+    b.Append(b.ir.root_block, [&] {
+        tex = b.Var(ty.ptr(handle, ty.Get<core::type::SampledTexture>(
+                                       core::type::TextureDimension::kCubeArray, ty.f32())));
+        tex->SetBindingPoint(0, 0);
+
+        sampler =
+            b.Var(ty.ptr(handle, ty.Get<core::type::Sampler>(core::type::SamplerKind::kSampler)));
+        sampler->SetBindingPoint(0, 1);
+    });
+
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        auto* coords = b.Construct(ty.vec3<f32>(), b.Value(1_f), b.Value(2_f), b.Value(3_f));
+        auto* array_idx = b.Value(4_u);
+        auto* ddx = b.Construct(ty.vec3<f32>(), b.Value(3_f), b.Value(4_f), b.Value(5_f));
+        auto* ddy = b.Construct(ty.vec3<f32>(), b.Value(6_f), b.Value(7_f), b.Value(8_f));
+
+        auto* t = b.Load(tex);
+        auto* s = b.Load(sampler);
+        b.Let("x", b.Call<vec4<f32>>(core::BuiltinFn::kTextureSampleGrad, t, s, coords, array_idx,
+                                     ddx, ddy));
+        b.Return(func);
+    });
+
+    Options opts{};
+    opts.version = Version(Version::Standard::kDesktop, 4, 6);
+    ASSERT_TRUE(Generate(opts)) << err_ << output_.glsl;
+    EXPECT_EQ(output_.glsl, R"(#version 460
+precision highp float;
+precision highp int;
+
+uniform highp samplerCubeArray t_s;
+void main() {
+  vec3 v = vec3(1.0f, 2.0f, 3.0f);
+  vec3 v_1 = vec3(3.0f, 4.0f, 5.0f);
+  vec3 v_2 = vec3(6.0f, 7.0f, 8.0f);
+  vec4 x = textureGrad(t_s, vec4(v, float(4u)), v_1, v_2);
+}
+)");
+}
+
 }  // namespace
 }  // namespace tint::glsl::writer
