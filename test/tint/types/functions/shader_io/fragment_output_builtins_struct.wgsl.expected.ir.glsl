@@ -4,11 +4,17 @@ precision highp float;
 precision highp int;
 
 
+struct tint_push_constant_struct {
+  float tint_frag_depth_min;
+  float tint_frag_depth_max;
+};
+
 struct FragmentOutputs {
   float frag_depth;
   uint sample_mask;
 };
 
+layout(location = 0) uniform tint_push_constant_struct tint_push_constants;
 FragmentOutputs tint_symbol_inner() {
   return FragmentOutputs(1.0f, 1u);
 }

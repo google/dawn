@@ -1,6 +1,10 @@
 #version 310 es
 
 
+struct tint_push_constant_struct {
+  uint tint_first_instance;
+};
+
 struct VertexInputs0 {
   uint vertex_index;
   int loc0;
@@ -11,6 +15,7 @@ struct VertexInputs1 {
   vec4 loc3;
 };
 
+layout(location = 0) uniform tint_push_constant_struct tint_push_constants;
 layout(location = 0) in int tint_symbol_loc0_Input;
 layout(location = 1) in uint tint_symbol_loc1_Input;
 layout(location = 2) in uint tint_symbol_loc2_Input;

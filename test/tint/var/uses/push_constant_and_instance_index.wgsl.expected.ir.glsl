@@ -1,14 +1,15 @@
 #version 310 es
 
 
-struct tint_symbol_2 {
-  float tint_symbol_1;
+struct tint_push_constant_struct {
+  float user_constant;
+  uint tint_first_instance;
 };
 
-layout(location = 0) uniform tint_symbol_2 v;
+layout(location = 0) uniform tint_push_constant_struct tint_push_constants;
 vec4 tint_symbol_inner(uint b) {
-  float v_1 = v.tint_symbol_1;
-  return vec4((v_1 + float(b)));
+  float v = tint_push_constants.user_constant;
+  return vec4((v + float(b)));
 }
 void main() {
   gl_Position = tint_symbol_inner(uint(gl_InstanceID));

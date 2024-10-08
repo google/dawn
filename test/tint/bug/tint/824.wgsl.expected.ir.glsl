@@ -1,11 +1,16 @@
 #version 310 es
 
 
+struct tint_push_constant_struct {
+  uint tint_first_instance;
+};
+
 struct Output {
   vec4 Position;
   vec4 color;
 };
 
+layout(location = 0) uniform tint_push_constant_struct tint_push_constants;
 layout(location = 0) out vec4 tint_symbol_loc0_Output;
 Output tint_symbol_inner(uint VertexIndex, uint InstanceIndex) {
   vec2 zv[4] = vec2[4](vec2(0.20000000298023223877f), vec2(0.30000001192092895508f), vec2(-0.10000000149011611938f), vec2(1.10000002384185791016f));

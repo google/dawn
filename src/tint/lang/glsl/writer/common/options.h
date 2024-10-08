@@ -259,10 +259,10 @@ struct Options {
     Version version;
 
     /// Offset of the firstVertex push constant.
-    std::optional<int32_t> first_vertex_offset;
+    std::optional<uint32_t> first_vertex_offset;
 
     /// Offset of the firstInstance push constant.
-    std::optional<int32_t> first_instance_offset;
+    std::optional<uint32_t> first_instance_offset;
 
     /// Offsets of the minDepth and maxDepth push constants.
     std::optional<RangeOffsets> depth_range_offsets;

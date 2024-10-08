@@ -5,6 +5,11 @@ precision highp float;
 precision highp int;
 
 
+struct tint_push_constant_struct {
+  float tint_frag_depth_min;
+  float tint_frag_depth_max;
+};
+
 struct FragmentOutputs {
   int loc0;
   float frag_depth;
@@ -16,6 +21,7 @@ struct FragmentOutputs {
   f16vec3 loc5;
 };
 
+layout(location = 0) uniform tint_push_constant_struct tint_push_constants;
 layout(location = 0) out int tint_symbol_loc0_Output;
 layout(location = 1) out uint tint_symbol_loc1_Output;
 layout(location = 2) out float tint_symbol_loc2_Output;

@@ -27,6 +27,7 @@
 
 #include "src/tint/lang/glsl/writer/raise/raise.h"
 
+#include "src/tint/lang/core/ir/module.h"
 #include "src/tint/lang/core/ir/transform/add_empty_entry_point.h"
 #include "src/tint/lang/core/ir/transform/array_length_from_uniform.h"
 #include "src/tint/lang/core/ir/transform/bgra8unorm_polyfill.h"
@@ -38,6 +39,7 @@
 #include "src/tint/lang/core/ir/transform/demote_to_helper.h"
 #include "src/tint/lang/core/ir/transform/direct_variable_access.h"
 #include "src/tint/lang/core/ir/transform/multiplanar_external_texture.h"
+#include "src/tint/lang/core/ir/transform/prepare_push_constants.h"
 #include "src/tint/lang/core/ir/transform/preserve_padding.h"
 #include "src/tint/lang/core/ir/transform/remove_continue_in_switch.h"
 #include "src/tint/lang/core/ir/transform/remove_terminator_args.h"
@@ -47,6 +49,8 @@
 #include "src/tint/lang/core/ir/transform/value_to_let.h"
 #include "src/tint/lang/core/ir/transform/vectorize_scalar_matrix_constructors.h"
 #include "src/tint/lang/core/ir/transform/zero_init_workgroup_memory.h"
+#include "src/tint/lang/core/type/f32.h"
+#include "src/tint/lang/core/type/u32.h"
 #include "src/tint/lang/glsl/writer/common/option_helpers.h"
 #include "src/tint/lang/glsl/writer/raise/binary_polyfill.h"
 #include "src/tint/lang/glsl/writer/raise/bitcast_polyfill.h"
@@ -70,6 +74,32 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
     if (!options.disable_robustness) {
         core::ir::transform::RobustnessConfig config{};
         RUN_TRANSFORM(core::ir::transform::Robustness, module, config);
+    }
+
+    // PreparePushConstants must come before any transform that needs internal push constants.
+    core::ir::transform::PreparePushConstantsConfig push_constant_config;
+    if (options.first_instance_offset) {
+        push_constant_config.AddInternalConstant(options.first_instance_offset.value(),
+                                                 module.symbols.New("tint_first_instance"),
+                                                 module.Types().u32());
+    }
+    if (options.first_vertex_offset) {
+        push_constant_config.AddInternalConstant(options.first_vertex_offset.value(),
+                                                 module.symbols.New("tint_first_vertex"),
+                                                 module.Types().u32());
+    }
+    if (options.depth_range_offsets) {
+        push_constant_config.AddInternalConstant(options.depth_range_offsets.value().min,
+                                                 module.symbols.New("tint_frag_depth_min"),
+                                                 module.Types().f32());
+        push_constant_config.AddInternalConstant(options.depth_range_offsets.value().max,
+                                                 module.symbols.New("tint_frag_depth_max"),
+                                                 module.Types().f32());
+    }
+    auto push_constant_layout =
+        core::ir::transform::PreparePushConstants(module, push_constant_config);
+    if (push_constant_layout != Success) {
+        return push_constant_layout.Failure();
     }
 
     // Note, this comes before binding remapper as Dawn inserts _pre-remapping_ binding information.
