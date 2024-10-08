@@ -1,5 +1,3 @@
-SKIP: FAILED
-
 #version 310 es
 
 
@@ -136,7 +134,8 @@ void tint_symbol_inner(uvec3 WorkGroupID, uvec3 LocalInvocationID, uint tint_loc
               }
             }
             uvec2 v_15 = writeIndex;
-            imageStore(outputTex, v_15, vec4(acc, 1.0f));
+            vec4 v_16 = vec4(acc, 1.0f);
+            imageStore(outputTex, ivec2(v_15), v_16);
           }
           {
             c = (c + 1u);
@@ -155,12 +154,3 @@ layout(local_size_x = 64, local_size_y = 1, local_size_z = 1) in;
 void main() {
   tint_symbol_inner(gl_WorkGroupID, gl_LocalInvocationID, gl_LocalInvocationIndex);
 }
-error: Error parsing GLSL shader:
-ERROR: 0:137: 'imageStore' : no matching overloaded function found 
-ERROR: 0:137: '' : compilation terminated 
-ERROR: 2 compilation errors.  No code generated.
-
-
-
-
-tint executable returned error: exit status 1

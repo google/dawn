@@ -620,18 +620,25 @@ struct State {
 
             if (tex_type->Dim() == core::type::TextureDimension::k2dArray) {
                 auto* coords = args[idx++];
-                auto* array_idx = args[idx++];
+                if (!coords->Type()->DeepestElement()->Is<core::type::I32>()) {
+                    coords = b.Convert(ty.vec2<i32>(), coords)->Result(0);
+                }
+
+                auto* array = b.Convert(ty.i32(), args[idx++]);
 
                 auto* coords_ty = coords->Type()->As<core::type::Vector>();
                 TINT_ASSERT(coords_ty);
 
-                auto* new_coords = b.Construct(ty.vec3(coords_ty->Type()), coords,
-                                               b.Convert(coords_ty->Type(), array_idx));
+                auto* new_coords = b.Construct(ty.vec3<i32>(), coords, array);
                 new_args.Push(new_coords->Result(0));
 
                 new_args.Push(args[idx++]);
             } else {
-                new_args.Push(args[idx++]);
+                auto* coords = args[idx++];
+                if (!coords->Type()->DeepestElement()->Is<core::type::I32>()) {
+                    coords = b.Convert(ty.MatchWidth(ty.i32(), coords->Type()), coords)->Result(0);
+                }
+                new_args.Push(coords);
                 new_args.Push(args[idx++]);
             }
 

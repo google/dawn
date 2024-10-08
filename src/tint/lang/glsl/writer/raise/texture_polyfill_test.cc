@@ -955,6 +955,116 @@ $B1: {  # root
     EXPECT_EQ(expect, str());
 }
 
+TEST_F(GlslWriter_TexturePolyfillTest, TextureStore2D) {
+    auto* t = b.Var(ty.ptr(
+        handle, ty.Get<core::type::StorageTexture>(
+                    core::type::TextureDimension::k2d, core::TexelFormat::kRgba32Sint,
+                    core::Access::kReadWrite,
+                    core::type::StorageTexture::SubtypeFor(core::TexelFormat::kRgba32Sint, ty))));
+    t->SetBindingPoint(0, 0);
+    b.ir.root_block->Append(t);
+
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        auto* coords = b.Splat(ty.vec2<u32>(), 0_u);
+        auto* value = b.Composite(ty.vec4<i32>(), 5_i, 0_i, 0_i, 1_i);
+        b.Call(ty.void_(), core::BuiltinFn::kTextureStore, b.Load(t), coords, value);
+        b.Return(func);
+    });
+
+    auto* src = R"(
+$B1: {  # root
+  %1:ptr<handle, texture_storage_2d<rgba32sint, read_write>, read> = var @binding_point(0, 0)
+}
+
+%foo = @fragment func():void {
+  $B2: {
+    %3:texture_storage_2d<rgba32sint, read_write> = load %1
+    %4:void = textureStore %3, vec2<u32>(0u), vec4<i32>(5i, 0i, 0i, 1i)
+    ret
+  }
+}
+)";
+    ASSERT_EQ(src, str());
+
+    auto* expect = R"(
+$B1: {  # root
+  %1:ptr<handle, texture_storage_2d<rgba32sint, read_write>, read> = var @binding_point(0, 0)
+}
+
+%foo = @fragment func():void {
+  $B2: {
+    %3:texture_storage_2d<rgba32sint, read_write> = load %1
+    %4:vec2<i32> = convert vec2<u32>(0u)
+    %5:void = glsl.imageStore %3, %4, vec4<i32>(5i, 0i, 0i, 1i)
+    ret
+  }
+}
+)";
+
+    capabilities = core::ir::Capabilities{core::ir::Capability::kAllowHandleVarsWithoutBindings};
+
+    TexturePolyfillConfig cfg;
+    Run(TexturePolyfill, cfg);
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(GlslWriter_TexturePolyfillTest, TextureStore2DArray) {
+    auto* t = b.Var(ty.ptr(
+        handle, ty.Get<core::type::StorageTexture>(
+                    core::type::TextureDimension::k2dArray, core::TexelFormat::kRgba32Sint,
+                    core::Access::kReadWrite,
+                    core::type::StorageTexture::SubtypeFor(core::TexelFormat::kRgba32Sint, ty))));
+    t->SetBindingPoint(0, 0);
+    b.ir.root_block->Append(t);
+
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        auto* coords = b.Splat(ty.vec2<u32>(), 0_u);
+        auto* value = b.Composite(ty.vec4<i32>(), 5_i, 0_i, 0_i, 1_i);
+        b.Call(ty.void_(), core::BuiltinFn::kTextureStore, b.Load(t), coords, 1_i, value);
+        b.Return(func);
+    });
+
+    auto* src = R"(
+$B1: {  # root
+  %1:ptr<handle, texture_storage_2d_array<rgba32sint, read_write>, read> = var @binding_point(0, 0)
+}
+
+%foo = @fragment func():void {
+  $B2: {
+    %3:texture_storage_2d_array<rgba32sint, read_write> = load %1
+    %4:void = textureStore %3, vec2<u32>(0u), 1i, vec4<i32>(5i, 0i, 0i, 1i)
+    ret
+  }
+}
+)";
+    ASSERT_EQ(src, str());
+
+    auto* expect = R"(
+$B1: {  # root
+  %1:ptr<handle, texture_storage_2d_array<rgba32sint, read_write>, read> = var @binding_point(0, 0)
+}
+
+%foo = @fragment func():void {
+  $B2: {
+    %3:texture_storage_2d_array<rgba32sint, read_write> = load %1
+    %4:vec2<i32> = convert vec2<u32>(0u)
+    %5:i32 = convert 1i
+    %6:vec3<i32> = construct %4, %5
+    %7:void = glsl.imageStore %3, %6, vec4<i32>(5i, 0i, 0i, 1i)
+    ret
+  }
+}
+)";
+
+    capabilities = core::ir::Capabilities{core::ir::Capability::kAllowHandleVarsWithoutBindings};
+
+    TexturePolyfillConfig cfg;
+    Run(TexturePolyfill, cfg);
+    EXPECT_EQ(expect, str());
+}
+
 TEST_F(GlslWriter_TexturePolyfillTest, TextureStore3D) {
     auto* t = b.Var(ty.ptr(
         handle, ty.Get<core::type::StorageTexture>(
