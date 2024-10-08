@@ -168,7 +168,9 @@ struct State {
         }
     }
 
-    core::ir::Var* GetReplacement(core::ir::Var* tex, core::ir::Var* sampler) {
+    core::ir::Var* GetReplacement(core::ir::Var* tex,
+                                  core::ir::Var* sampler,
+                                  const core::type::Pointer* tex_ty) {
         // Don't change storage textures
         if (tex->Result(0)->Type()->UnwrapPtr()->Is<core::type::StorageTexture>()) {
             return tex;
@@ -186,7 +188,7 @@ struct State {
             // hadn't seen yet. Create it and insert into the map for future use.
             binding::CombinedTextureSamplerPair key{tex->BindingPoint().value(),
                                                     cfg.placeholder_sampler_bind_point};
-            auto* replacement = MakeVar(key, tex, nullptr);
+            auto* replacement = MakeVar(key, tex, nullptr, tex_ty);
             texture_to_replacement_.Add(tex, replacement);
             return replacement;
         }
@@ -265,7 +267,8 @@ struct State {
 
     core::ir::Var* MakeVar(binding::CombinedTextureSamplerPair& key,
                            core::ir::Var* tex,
-                           core::ir::Var* sampler) {
+                           core::ir::Var* sampler,
+                           const core::type::Pointer* tex_ty) {
         std::string name;
         auto it = (cfg.sampler_texture_to_name.find(key));
         if (it != cfg.sampler_texture_to_name.end()) {
@@ -291,8 +294,7 @@ struct State {
         core::ir::Var* var = nullptr;
         // We may already be inside an insert block, so make a new insert block instead of
         // appending directly to the root block.
-        b.Append(ir.root_block,
-                 [&] { var = b.Var(name, tex->Result(0)->Type()->As<core::type::Pointer>()); });
+        b.Append(ir.root_block, [&] { var = b.Var(name, tex_ty); });
         return var;
     }
 
@@ -320,9 +322,16 @@ struct State {
             BindingPoint samp_bp = sampler->BindingPoint().value();
 
             binding::CombinedTextureSamplerPair key{tex_bp, samp_bp};
-            auto* replacement = texture_sampler_to_replacement_.GetOrAdd(
-                key, [&] { return MakeVar(key, tex, sampler); });
-            texture_to_replacement_.Add(tex, replacement);
+            auto* replacement = texture_sampler_to_replacement_.GetOrAdd(key, [&] {
+                return MakeVar(key, tex, sampler,
+                               tex->Result(0)->Type()->As<core::type::Pointer>());
+            });
+
+            // Don't add depth textures here because the unsampled depth texture will need to be
+            // created as a sampled texture, instead of a depth texture.
+            if (!tex->Result(0)->Type()->UnwrapPtr()->Is<core::type::DepthTexture>()) {
+                texture_to_replacement_.Add(tex, replacement);
+            }
         }
     }
 
@@ -442,10 +451,26 @@ struct State {
         auto* t = VarForValue(tex);
         auto* s = VarForValue(sampler);
 
-        auto* replacement = GetReplacement(t, s);
+        auto* tex_ty = t->Result(0)->Type()->As<core::type::Pointer>();
+        TINT_ASSERT(tex_ty);
+
+        // A depth texture gets turned into a SampledTexture of type `f32` when there is no
+        // sampler.
+        if (!sampler) {
+            if (tex_ty->StoreType()->Is<core::type::DepthTexture>()) {
+                tex_ty =
+                    ty.ptr(tex_ty->AddressSpace(),
+                           ty.Get<core::type::SampledTexture>(
+                               tex_ty->UnwrapPtr()->As<core::type::Texture>()->Dim(), ty.f32()),
+                           tex_ty->Access());
+            }
+        }
+
+        auto* replacement = GetReplacement(t, s, tex_ty);
         TINT_ASSERT(replacement);
 
-        // In the storage case, we'll return the original texture. Nothing else to do in that case.
+        // In the storage case, we'll return the original texture. Nothing else to do in that
+        // case.
         if (replacement == t) {
             return tex;
         }
@@ -549,7 +574,12 @@ struct State {
         b.InsertBefore(call, [&] {
             uint32_t idx = 0;
             auto args = call->Args();
-            auto* tex = GetNewTexture(args[idx++]);
+
+            auto* source_tex = args[idx++];
+            bool source_was_depth =
+                source_tex->Type()
+                    ->IsAnyOf<core::type::DepthTexture, core::type::DepthMultisampledTexture>();
+            auto* tex = GetNewTexture(source_tex);
 
             // No loading from a depth texture in GLSL, so we should never have gotten here.
             TINT_ASSERT(!tex->Type()->Is<core::type::DepthTexture>());
@@ -601,8 +631,21 @@ struct State {
                     TINT_UNREACHABLE();
             }
 
-            b.CallWithResult<glsl::ir::BuiltinCall>(call->DetachResult(), func,
-                                                    std::move(call_args));
+            // If we had a depth texture source, then that means we've swapped the depth type for a
+            // sampled 2d texture. Sampled 2d returns a `vec4<f32>` from the texel fetch but the
+            // depth texture is expecting an `f32`. So, swap the types to the call and swizzle out
+            // the `x` component if needed.
+            const core::type::Type* fetch_ty = call->Result(0)->Type();
+            if (source_was_depth) {
+                fetch_ty = ty.vec4<f32>();
+            }
+            core::ir::Instruction* new_call =
+                b.Call<glsl::ir::BuiltinCall>(fetch_ty, func, std::move(call_args));
+
+            if (source_was_depth) {
+                new_call = b.Swizzle(ty.f32(), new_call, {0});
+            }
+            call->Result(0)->ReplaceAllUsesWith(new_call->Result(0));
         });
         call->Destroy();
     }

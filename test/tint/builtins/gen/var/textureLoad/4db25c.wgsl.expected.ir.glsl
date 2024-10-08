@@ -1,240 +1,71 @@
-SKIP: FAILED
+#version 310 es
+precision highp float;
+precision highp int;
 
-
-@group(0) @binding(0) var<storage, read_write> prevent_dce : f32;
-
-@group(1) @binding(0) var arg_0 : texture_depth_multisampled_2d;
-
-fn textureLoad_4db25c() -> f32 {
-  var arg_1 = vec2<u32>(1u);
-  var arg_2 = 1u;
-  var res : f32 = textureLoad(arg_0, arg_1, arg_2);
+layout(binding = 0, std430)
+buffer tint_symbol_1_1_ssbo {
+  float tint_symbol;
+} v;
+uniform highp sampler2DMS arg_0;
+float textureLoad_4db25c() {
+  uvec2 arg_1 = uvec2(1u);
+  uint arg_2 = 1u;
+  uint v_1 = arg_2;
+  ivec2 v_2 = ivec2(arg_1);
+  float res = texelFetch(arg_0, v_2, int(v_1)).x;
   return res;
 }
-
-struct VertexOutput {
-  @builtin(position)
-  pos : vec4<f32>,
-  @location(0) @interpolate(flat)
-  prevent_dce : f32,
+void main() {
+  v.tint_symbol = textureLoad_4db25c();
 }
+#version 310 es
 
-@fragment
-fn fragment_main() {
-  prevent_dce = textureLoad_4db25c();
-}
-
-Failed to generate: :19:15 error: glsl.texelFetch: no matching call to 'glsl.texelFetch(texture_depth_multisampled_2d, vec2<i32>, i32)'
-
-4 candidate functions:
- • 'glsl.texelFetch(texture: texture_2d<T>  ✗ , location: vec2<i32>  ✓ , level: i32  ✓ ) -> vec4<T>' where:
-      ✗  'T' is 'f32', 'i32' or 'u32'
- • 'glsl.texelFetch(texture: texture_multisampled_2d<T>  ✗ , location: vec2<i32>  ✓ , sample_index: i32  ✓ ) -> vec4<T>' where:
-      ✗  'T' is 'f32', 'i32' or 'u32'
- • 'glsl.texelFetch(texture: texture_2d_array<T>  ✗ , location: vec3<i32>  ✗ , level: i32  ✓ ) -> vec4<T>' where:
-      ✗  'T' is 'f32', 'i32' or 'u32'
- • 'glsl.texelFetch(texture: texture_3d<T>  ✗ , location: vec3<i32>  ✗ , level: i32  ✓ ) -> vec4<T>' where:
-      ✗  'T' is 'f32', 'i32' or 'u32'
-
-    %11:f32 = glsl.texelFetch %8, %9, %10
-              ^^^^^^^^^^^^^^^
-
-:11:3 note: in block
-  $B2: {
-  ^^^
-
-note: # Disassembly
-tint_symbol_1 = struct @align(4), @block {
-  tint_symbol:f32 @offset(0)
-}
-
-$B1: {  # root
-  %1:ptr<storage, tint_symbol_1, read_write> = var @binding_point(0, 0)
-  %arg_0:ptr<handle, texture_depth_multisampled_2d, read> = var
-}
-
-%textureLoad_4db25c = func():f32 {
-  $B2: {
-    %arg_1:ptr<function, vec2<u32>, read_write> = var, vec2<u32>(1u)
-    %arg_2:ptr<function, u32, read_write> = var, 1u
-    %6:vec2<u32> = load %arg_1
-    %7:u32 = load %arg_2
-    %8:texture_depth_multisampled_2d = load %arg_0
-    %9:vec2<i32> = convert %6
-    %10:i32 = convert %7
-    %11:f32 = glsl.texelFetch %8, %9, %10
-    %res:ptr<function, f32, read_write> = var, %11
-    %13:f32 = load %res
-    ret %13
-  }
-}
-%fragment_main = @fragment func():void {
-  $B3: {
-    %15:f32 = call %textureLoad_4db25c
-    %16:ptr<storage, f32, read_write> = access %1, 0u
-    store %16, %15
-    ret
-  }
-}
-
-
-@group(0) @binding(0) var<storage, read_write> prevent_dce : f32;
-
-@group(1) @binding(0) var arg_0 : texture_depth_multisampled_2d;
-
-fn textureLoad_4db25c() -> f32 {
-  var arg_1 = vec2<u32>(1u);
-  var arg_2 = 1u;
-  var res : f32 = textureLoad(arg_0, arg_1, arg_2);
+layout(binding = 0, std430)
+buffer tint_symbol_1_1_ssbo {
+  float tint_symbol;
+} v;
+uniform highp sampler2DMS arg_0;
+float textureLoad_4db25c() {
+  uvec2 arg_1 = uvec2(1u);
+  uint arg_2 = 1u;
+  uint v_1 = arg_2;
+  ivec2 v_2 = ivec2(arg_1);
+  float res = texelFetch(arg_0, v_2, int(v_1)).x;
   return res;
 }
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+void main() {
+  v.tint_symbol = textureLoad_4db25c();
+}
+#version 310 es
+
 
 struct VertexOutput {
-  @builtin(position)
-  pos : vec4<f32>,
-  @location(0) @interpolate(flat)
-  prevent_dce : f32,
-}
+  vec4 pos;
+  float prevent_dce;
+};
 
-@compute @workgroup_size(1)
-fn compute_main() {
-  prevent_dce = textureLoad_4db25c();
-}
-
-Failed to generate: :19:15 error: glsl.texelFetch: no matching call to 'glsl.texelFetch(texture_depth_multisampled_2d, vec2<i32>, i32)'
-
-4 candidate functions:
- • 'glsl.texelFetch(texture: texture_2d<T>  ✗ , location: vec2<i32>  ✓ , level: i32  ✓ ) -> vec4<T>' where:
-      ✗  'T' is 'f32', 'i32' or 'u32'
- • 'glsl.texelFetch(texture: texture_multisampled_2d<T>  ✗ , location: vec2<i32>  ✓ , sample_index: i32  ✓ ) -> vec4<T>' where:
-      ✗  'T' is 'f32', 'i32' or 'u32'
- • 'glsl.texelFetch(texture: texture_2d_array<T>  ✗ , location: vec3<i32>  ✗ , level: i32  ✓ ) -> vec4<T>' where:
-      ✗  'T' is 'f32', 'i32' or 'u32'
- • 'glsl.texelFetch(texture: texture_3d<T>  ✗ , location: vec3<i32>  ✗ , level: i32  ✓ ) -> vec4<T>' where:
-      ✗  'T' is 'f32', 'i32' or 'u32'
-
-    %11:f32 = glsl.texelFetch %8, %9, %10
-              ^^^^^^^^^^^^^^^
-
-:11:3 note: in block
-  $B2: {
-  ^^^
-
-note: # Disassembly
-tint_symbol_1 = struct @align(4), @block {
-  tint_symbol:f32 @offset(0)
-}
-
-$B1: {  # root
-  %1:ptr<storage, tint_symbol_1, read_write> = var @binding_point(0, 0)
-  %arg_0:ptr<handle, texture_depth_multisampled_2d, read> = var
-}
-
-%textureLoad_4db25c = func():f32 {
-  $B2: {
-    %arg_1:ptr<function, vec2<u32>, read_write> = var, vec2<u32>(1u)
-    %arg_2:ptr<function, u32, read_write> = var, 1u
-    %6:vec2<u32> = load %arg_1
-    %7:u32 = load %arg_2
-    %8:texture_depth_multisampled_2d = load %arg_0
-    %9:vec2<i32> = convert %6
-    %10:i32 = convert %7
-    %11:f32 = glsl.texelFetch %8, %9, %10
-    %res:ptr<function, f32, read_write> = var, %11
-    %13:f32 = load %res
-    ret %13
-  }
-}
-%compute_main = @compute @workgroup_size(1, 1, 1) func():void {
-  $B3: {
-    %15:f32 = call %textureLoad_4db25c
-    %16:ptr<storage, f32, read_write> = access %1, 0u
-    store %16, %15
-    ret
-  }
-}
-
-
-@group(1) @binding(0) var arg_0 : texture_depth_multisampled_2d;
-
-fn textureLoad_4db25c() -> f32 {
-  var arg_1 = vec2<u32>(1u);
-  var arg_2 = 1u;
-  var res : f32 = textureLoad(arg_0, arg_1, arg_2);
+uniform highp sampler2DMS arg_0;
+layout(location = 0) flat out float vertex_main_loc0_Output;
+float textureLoad_4db25c() {
+  uvec2 arg_1 = uvec2(1u);
+  uint arg_2 = 1u;
+  uint v = arg_2;
+  ivec2 v_1 = ivec2(arg_1);
+  float res = texelFetch(arg_0, v_1, int(v)).x;
   return res;
 }
-
-struct VertexOutput {
-  @builtin(position)
-  pos : vec4<f32>,
-  @location(0) @interpolate(flat)
-  prevent_dce : f32,
-}
-
-@vertex
-fn vertex_main() -> VertexOutput {
-  var tint_symbol : VertexOutput;
-  tint_symbol.pos = vec4<f32>();
+VertexOutput vertex_main_inner() {
+  VertexOutput tint_symbol = VertexOutput(vec4(0.0f), 0.0f);
+  tint_symbol.pos = vec4(0.0f);
   tint_symbol.prevent_dce = textureLoad_4db25c();
   return tint_symbol;
 }
-
-Failed to generate: :19:15 error: glsl.texelFetch: no matching call to 'glsl.texelFetch(texture_depth_multisampled_2d, vec2<i32>, i32)'
-
-4 candidate functions:
- • 'glsl.texelFetch(texture: texture_2d<T>  ✗ , location: vec2<i32>  ✓ , level: i32  ✓ ) -> vec4<T>' where:
-      ✗  'T' is 'f32', 'i32' or 'u32'
- • 'glsl.texelFetch(texture: texture_multisampled_2d<T>  ✗ , location: vec2<i32>  ✓ , sample_index: i32  ✓ ) -> vec4<T>' where:
-      ✗  'T' is 'f32', 'i32' or 'u32'
- • 'glsl.texelFetch(texture: texture_2d_array<T>  ✗ , location: vec3<i32>  ✗ , level: i32  ✓ ) -> vec4<T>' where:
-      ✗  'T' is 'f32', 'i32' or 'u32'
- • 'glsl.texelFetch(texture: texture_3d<T>  ✗ , location: vec3<i32>  ✗ , level: i32  ✓ ) -> vec4<T>' where:
-      ✗  'T' is 'f32', 'i32' or 'u32'
-
-    %10:f32 = glsl.texelFetch %7, %8, %9
-              ^^^^^^^^^^^^^^^
-
-:11:3 note: in block
-  $B2: {
-  ^^^
-
-note: # Disassembly
-VertexOutput = struct @align(16) {
-  pos:vec4<f32> @offset(0), @builtin(position)
-  prevent_dce:f32 @offset(16), @location(0), @interpolate(flat)
+void main() {
+  VertexOutput v_2 = vertex_main_inner();
+  gl_Position = v_2.pos;
+  gl_Position[1u] = -(gl_Position.y);
+  gl_Position[2u] = ((2.0f * gl_Position.z) - gl_Position.w);
+  vertex_main_loc0_Output = v_2.prevent_dce;
+  gl_PointSize = 1.0f;
 }
-
-$B1: {  # root
-  %arg_0:ptr<handle, texture_depth_multisampled_2d, read> = var
-}
-
-%textureLoad_4db25c = func():f32 {
-  $B2: {
-    %arg_1:ptr<function, vec2<u32>, read_write> = var, vec2<u32>(1u)
-    %arg_2:ptr<function, u32, read_write> = var, 1u
-    %5:vec2<u32> = load %arg_1
-    %6:u32 = load %arg_2
-    %7:texture_depth_multisampled_2d = load %arg_0
-    %8:vec2<i32> = convert %5
-    %9:i32 = convert %6
-    %10:f32 = glsl.texelFetch %7, %8, %9
-    %res:ptr<function, f32, read_write> = var, %10
-    %12:f32 = load %res
-    ret %12
-  }
-}
-%vertex_main = @vertex func():VertexOutput {
-  $B3: {
-    %tint_symbol:ptr<function, VertexOutput, read_write> = var
-    %15:ptr<function, vec4<f32>, read_write> = access %tint_symbol, 0u
-    store %15, vec4<f32>(0.0f)
-    %16:ptr<function, f32, read_write> = access %tint_symbol, 1u
-    %17:f32 = call %textureLoad_4db25c
-    store %16, %17
-    %18:VertexOutput = load %tint_symbol
-    ret %18
-  }
-}
-
-
-tint executable returned error: exit status 1

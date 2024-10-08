@@ -6,7 +6,7 @@ layout(binding = 0, std430)
 buffer tint_symbol_1_1_ssbo {
   uint tint_symbol;
 } v;
-uniform highp samplerCubeArrayShadow arg_0;
+uniform highp samplerCubeArray arg_0;
 uint textureNumLayers_48ef47() {
   uint res = uint(textureSize(arg_0, 0).z);
   return res;
@@ -20,7 +20,7 @@ layout(binding = 0, std430)
 buffer tint_symbol_1_1_ssbo {
   uint tint_symbol;
 } v;
-uniform highp samplerCubeArrayShadow arg_0;
+uniform highp samplerCubeArray arg_0;
 uint textureNumLayers_48ef47() {
   uint res = uint(textureSize(arg_0, 0).z);
   return res;
@@ -37,7 +37,7 @@ struct VertexOutput {
   uint prevent_dce;
 };
 
-uniform highp samplerCubeArrayShadow arg_0;
+uniform highp samplerCubeArray arg_0;
 layout(location = 0) flat out uint vertex_main_loc0_Output;
 uint textureNumLayers_48ef47() {
   uint res = uint(textureSize(arg_0, 0).z);

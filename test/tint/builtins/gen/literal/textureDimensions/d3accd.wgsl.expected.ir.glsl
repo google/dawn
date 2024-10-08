@@ -6,7 +6,7 @@ layout(binding = 0, std430)
 buffer tint_symbol_1_1_ssbo {
   uvec2 tint_symbol;
 } v;
-uniform highp samplerCubeShadow arg_0;
+uniform highp samplerCube arg_0;
 uvec2 textureDimensions_d3accd() {
   uvec2 res = uvec2(textureSize(arg_0, int(1u)));
   return res;
@@ -20,7 +20,7 @@ layout(binding = 0, std430)
 buffer tint_symbol_1_1_ssbo {
   uvec2 tint_symbol;
 } v;
-uniform highp samplerCubeShadow arg_0;
+uniform highp samplerCube arg_0;
 uvec2 textureDimensions_d3accd() {
   uvec2 res = uvec2(textureSize(arg_0, int(1u)));
   return res;
@@ -37,7 +37,7 @@ struct VertexOutput {
   uvec2 prevent_dce;
 };
 
-uniform highp samplerCubeShadow arg_0;
+uniform highp samplerCube arg_0;
 layout(location = 0) flat out uvec2 vertex_main_loc0_Output;
 uvec2 textureDimensions_d3accd() {
   uvec2 res = uvec2(textureSize(arg_0, int(1u)));

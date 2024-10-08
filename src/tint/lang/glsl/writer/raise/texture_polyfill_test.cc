@@ -444,12 +444,12 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %v:ptr<handle, texture_depth_2d_array, read_write> = var
+  %v:ptr<handle, texture_2d_array<f32>, read_write> = var
 }
 
 %foo = @fragment func():void {
   $B2: {
-    %3:texture_depth_2d_array = load %v
+    %3:texture_2d_array<f32> = load %v
     %4:vec3<i32> = glsl.textureSize %3, 0i
     %5:i32 = swizzle %4, z
     %6:u32 = bitcast %5
@@ -551,12 +551,12 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %v:ptr<handle, texture_depth_cube_array, read_write> = var
+  %v:ptr<handle, texture_cube_array<f32>, read_write> = var
 }
 
 %foo = @fragment func():void {
   $B2: {
-    %3:texture_depth_cube_array = load %v
+    %3:texture_cube_array<f32> = load %v
     %4:vec3<i32> = glsl.textureSize %3, 0i
     %5:i32 = swizzle %4, z
     %6:u32 = bitcast %5

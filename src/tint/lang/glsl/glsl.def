@@ -356,6 +356,8 @@ implicit(T: fiu32) fn texelFetch(texture: texture_multisampled_2d<T>,
                                  location: vec2<i32>,
                                  sample_index: i32) -> vec4<T>
 implicit(T: fiu32) fn texelFetch(texture: texture_3d<T>, location: vec3<i32>, level: i32) -> vec4<T>
+// This ends up emitting as a 2DMS
+fn texelFetch(texture: texture_depth_multisampled_2d, location: vec2<i32>, sample_index: i32) -> vec4<f32>
 
 implicit(F: f32_texel_format, A: readable) fn imageLoad(texture: texture_storage_1d<F, A>,
                                                       coords: i32) -> vec4<f32>

@@ -1082,7 +1082,7 @@ TEST_F(GlslWriterTest, TextureNumLayers_Depth2DArray) {
     EXPECT_EQ(output_.glsl, GlslHeader() + R"(precision highp float;
 precision highp int;
 
-uniform highp sampler2DArrayShadow v;
+uniform highp sampler2DArray v;
 void main() {
   uint x = uint(textureSize(v, 0).z);
 }
@@ -1137,7 +1137,7 @@ TEST_F(GlslWriterTest, TextureNumLayers_DepthCubeArray) {
 precision highp float;
 precision highp int;
 
-uniform highp samplerCubeArrayShadow v;
+uniform highp samplerCubeArray v;
 void main() {
   uint x = uint(textureSize(v, 0).z);
 }

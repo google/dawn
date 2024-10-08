@@ -6,7 +6,7 @@ layout(binding = 0, std430)
 buffer tint_symbol_1_1_ssbo {
   uvec2 tint_symbol;
 } v;
-uniform highp sampler2DArrayShadow arg_0;
+uniform highp sampler2DArray arg_0;
 uvec2 textureDimensions_dfdc32() {
   int arg_1 = 1;
   uvec2 res = uvec2(textureSize(arg_0, arg_1).xy);
@@ -21,7 +21,7 @@ layout(binding = 0, std430)
 buffer tint_symbol_1_1_ssbo {
   uvec2 tint_symbol;
 } v;
-uniform highp sampler2DArrayShadow arg_0;
+uniform highp sampler2DArray arg_0;
 uvec2 textureDimensions_dfdc32() {
   int arg_1 = 1;
   uvec2 res = uvec2(textureSize(arg_0, arg_1).xy);
@@ -39,7 +39,7 @@ struct VertexOutput {
   uvec2 prevent_dce;
 };
 
-uniform highp sampler2DArrayShadow arg_0;
+uniform highp sampler2DArray arg_0;
 layout(location = 0) flat out uvec2 vertex_main_loc0_Output;
 uvec2 textureDimensions_dfdc32() {
   int arg_1 = 1;
