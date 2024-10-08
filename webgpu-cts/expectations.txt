@@ -1464,10 +1464,16 @@ crbug.com/371963563 [ mac amd ] webgpu:shader,execution,expression,call,builtin,
 crbug.com/371963563 [ mac amd ] webgpu:shader,execution,expression,call,builtin,atomics,atomicAnd:and_workgroup:workgroupSize=64;dispatchSize=1;mapId="remap";scalarType="i32" [ RetryOnFailure ]
 crbug.com/371963563 [ mac amd ] webgpu:shader,execution,expression,call,builtin,atomics,atomicAnd:and_workgroup:workgroupSize=64;dispatchSize=1;mapId="remap";scalarType="u32" [ RetryOnFailure ]
 crbug.com/371963563 [ mac amd ] webgpu:shader,execution,expression,call,builtin,atomics,atomicAnd:and_workgroup:workgroupSize=64;dispatchSize=4;mapId="passthrough";scalarType="i32" [ RetryOnFailure ]
+crbug.com/371963563 [ mac amd ] webgpu:shader,execution,expression,call,builtin,atomics,atomicAnd:and_workgroup:workgroupSize=64;dispatchSize=4;mapId="remap";scalarType="u32" [ RetryOnFailure ]
 crbug.com/371963563 [ mac amd ] webgpu:shader,execution,expression,call,builtin,atomics,atomicAnd:and_workgroup:workgroupSize=64;dispatchSize=8;mapId="passthrough";scalarType="u32" [ RetryOnFailure ]
 crbug.com/371963563 [ mac amd ] webgpu:shader,execution,expression,call,builtin,atomics,atomicAnd:and_workgroup:workgroupSize=64;dispatchSize=16;mapId="passthrough";scalarType="u32" [ RetryOnFailure ]
 crbug.com/371963563 [ mac amd ] webgpu:shader,execution,expression,call,builtin,atomics,atomicOr:or_workgroup:workgroupSize=64;dispatchSize=1;mapId="remap";scalarType="u32" [ RetryOnFailure ]
 crbug.com/371963563 [ mac amd ] webgpu:shader,execution,expression,call,builtin,atomics,atomicOr:or_workgroup:workgroupSize=64;dispatchSize=8;mapId="passthrough";scalarType="u32" [ RetryOnFailure ]
+crbug.com/371963563 [ mac amd ] webgpu:shader,execution,expression,call,builtin,atomics,atomicOr:or_workgroup:workgroupSize=64;dispatchSize=8;mapId="passthrough";scalarType="u32" [ RetryOnFailure ]
+crbug.com/372055513 [ mac amd ] webgpu:shader,execution,expression,call,builtin,subgroupBroadcast:workgroup_uniform_load:* [ RetryOnFailure ]
+crbug.com/372055515 [ mac amd ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="DepthTest";format="depth16unorm" [ RetryOnFailure ]
+crbug.com/372055515 [ mac amd ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="DepthTest";format="depth32float" [ RetryOnFailure ]
+crbug.com/372055515 [ mac amd ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="StencilTest";format="depth24plus-stencil8" [ RetryOnFailure ]
 
 ################################################################################
 # Assorted failures that are missing bug associations (NEEDS TRIAGE)
