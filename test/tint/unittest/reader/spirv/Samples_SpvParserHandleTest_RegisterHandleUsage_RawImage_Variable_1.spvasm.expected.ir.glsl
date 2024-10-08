@@ -4,9 +4,9 @@ SKIP: FAILED
 precision highp float;
 precision highp int;
 
-layout(binding = 0, rg32f) uniform highp writeonly image1D x_20;
+layout(binding = 0, rg32f) uniform highp writeonly image2D x_20;
 void main_1() {
-  imageStore(x_20, 1, vec4(0.0f));
+  imageStore(x_20, ivec2(1, 0), vec4(0.0f));
 }
 void main() {
   main_1();

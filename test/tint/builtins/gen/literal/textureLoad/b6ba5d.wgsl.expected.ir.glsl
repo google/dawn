@@ -1,6 +1,6 @@
 SKIP: FAILED
 
-<dawn>/src/tint/lang/glsl/writer/raise/builtin_polyfill.cc:469 internal compiler error: TINT_ASSERT(!tex->Type()->Is<core::type::DepthTexture>())
+<dawn>/src/tint/lang/glsl/writer/raise/texture_polyfill.cc:555 internal compiler error: TINT_ASSERT(!tex->Type()->Is<core::type::DepthTexture>())
 ********************************************************************
 *  The tint shader compiler has encountered an unexpected error.   *
 *                                                                  *

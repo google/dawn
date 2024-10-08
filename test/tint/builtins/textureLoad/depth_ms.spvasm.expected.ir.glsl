@@ -35,12 +35,10 @@ fn vertex_main() -> vertex_main_out {
 
 Failed to generate: :16:14 error: glsl.texelFetch: no matching call to 'glsl.texelFetch(texture_depth_multisampled_2d, vec2<i32>, i32)'
 
-5 candidate functions:
+4 candidate functions:
  • 'glsl.texelFetch(texture: texture_2d<T>  ✗ , location: vec2<i32>  ✓ , level: i32  ✓ ) -> vec4<T>' where:
       ✗  'T' is 'f32', 'i32' or 'u32'
  • 'glsl.texelFetch(texture: texture_multisampled_2d<T>  ✗ , location: vec2<i32>  ✓ , sample_index: i32  ✓ ) -> vec4<T>' where:
-      ✗  'T' is 'f32', 'i32' or 'u32'
- • 'glsl.texelFetch(texture: texture_1d<T>  ✗ , location: i32  ✗ , level: i32  ✓ ) -> vec4<T>' where:
       ✗  'T' is 'f32', 'i32' or 'u32'
  • 'glsl.texelFetch(texture: texture_2d_array<T>  ✗ , location: vec3<i32>  ✗ , level: i32  ✓ ) -> vec4<T>' where:
       ✗  'T' is 'f32', 'i32' or 'u32'
@@ -60,8 +58,8 @@ vertex_main_out = struct @align(16) {
 }
 
 $B1: {  # root
-  %arg_0:ptr<handle, texture_depth_multisampled_2d, read> = var @binding_point(0, 0)
   %tint_symbol_1:ptr<private, vec4<f32>, read_write> = var, vec4<f32>(0.0f)
+  %arg_0:ptr<handle, texture_depth_multisampled_2d, read> = var
 }
 
 %textureLoad_6273b1 = func():void {
@@ -125,12 +123,10 @@ fn fragment_main() {
 
 Failed to generate: :11:14 error: glsl.texelFetch: no matching call to 'glsl.texelFetch(texture_depth_multisampled_2d, vec2<i32>, i32)'
 
-5 candidate functions:
+4 candidate functions:
  • 'glsl.texelFetch(texture: texture_2d<T>  ✗ , location: vec2<i32>  ✓ , level: i32  ✓ ) -> vec4<T>' where:
       ✗  'T' is 'f32', 'i32' or 'u32'
  • 'glsl.texelFetch(texture: texture_multisampled_2d<T>  ✗ , location: vec2<i32>  ✓ , sample_index: i32  ✓ ) -> vec4<T>' where:
-      ✗  'T' is 'f32', 'i32' or 'u32'
- • 'glsl.texelFetch(texture: texture_1d<T>  ✗ , location: i32  ✗ , level: i32  ✓ ) -> vec4<T>' where:
       ✗  'T' is 'f32', 'i32' or 'u32'
  • 'glsl.texelFetch(texture: texture_2d_array<T>  ✗ , location: vec3<i32>  ✗ , level: i32  ✓ ) -> vec4<T>' where:
       ✗  'T' is 'f32', 'i32' or 'u32'
@@ -146,7 +142,7 @@ Failed to generate: :11:14 error: glsl.texelFetch: no matching call to 'glsl.tex
 
 note: # Disassembly
 $B1: {  # root
-  %arg_0:ptr<handle, texture_depth_multisampled_2d, read> = var @binding_point(0, 0)
+  %arg_0:ptr<handle, texture_depth_multisampled_2d, read> = var
 }
 
 %textureLoad_6273b1 = func():void {
@@ -201,12 +197,10 @@ fn compute_main() {
 
 Failed to generate: :11:14 error: glsl.texelFetch: no matching call to 'glsl.texelFetch(texture_depth_multisampled_2d, vec2<i32>, i32)'
 
-5 candidate functions:
+4 candidate functions:
  • 'glsl.texelFetch(texture: texture_2d<T>  ✗ , location: vec2<i32>  ✓ , level: i32  ✓ ) -> vec4<T>' where:
       ✗  'T' is 'f32', 'i32' or 'u32'
  • 'glsl.texelFetch(texture: texture_multisampled_2d<T>  ✗ , location: vec2<i32>  ✓ , sample_index: i32  ✓ ) -> vec4<T>' where:
-      ✗  'T' is 'f32', 'i32' or 'u32'
- • 'glsl.texelFetch(texture: texture_1d<T>  ✗ , location: i32  ✗ , level: i32  ✓ ) -> vec4<T>' where:
       ✗  'T' is 'f32', 'i32' or 'u32'
  • 'glsl.texelFetch(texture: texture_2d_array<T>  ✗ , location: vec3<i32>  ✗ , level: i32  ✓ ) -> vec4<T>' where:
       ✗  'T' is 'f32', 'i32' or 'u32'
@@ -222,7 +216,7 @@ Failed to generate: :11:14 error: glsl.texelFetch: no matching call to 'glsl.tex
 
 note: # Disassembly
 $B1: {  # root
-  %arg_0:ptr<handle, texture_depth_multisampled_2d, read> = var @binding_point(0, 0)
+  %arg_0:ptr<handle, texture_depth_multisampled_2d, read> = var
 }
 
 %textureLoad_6273b1 = func():void {

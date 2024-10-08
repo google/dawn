@@ -1,6 +1,6 @@
 SKIP: INVALID
 
-<dawn>/src/tint/lang/glsl/writer/printer/printer.cc:1468 internal compiler error: TINT_UNREACHABLE unhandled core builtin: inputAttachmentLoad
+<dawn>/src/tint/lang/glsl/writer/raise/texture_polyfill.cc:262 internal compiler error: TINT_UNREACHABLE unhandled texture function: inputAttachmentLoad
 ********************************************************************
 *  The tint shader compiler has encountered an unexpected error.   *
 *                                                                  *

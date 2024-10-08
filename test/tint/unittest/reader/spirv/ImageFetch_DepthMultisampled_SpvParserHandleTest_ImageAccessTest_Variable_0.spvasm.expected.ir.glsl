@@ -26,12 +26,10 @@ fn tint_symbol() {
 
 Failed to generate: :21:15 error: glsl.texelFetch: no matching call to 'glsl.texelFetch(texture_depth_multisampled_2d, vec2<i32>, i32)'
 
-5 candidate functions:
+4 candidate functions:
  • 'glsl.texelFetch(texture: texture_2d<T>  ✗ , location: vec2<i32>  ✓ , level: i32  ✓ ) -> vec4<T>' where:
       ✗  'T' is 'f32', 'i32' or 'u32'
  • 'glsl.texelFetch(texture: texture_multisampled_2d<T>  ✗ , location: vec2<i32>  ✓ , sample_index: i32  ✓ ) -> vec4<T>' where:
-      ✗  'T' is 'f32', 'i32' or 'u32'
- • 'glsl.texelFetch(texture: texture_1d<T>  ✗ , location: i32  ✗ , level: i32  ✓ ) -> vec4<T>' where:
       ✗  'T' is 'f32', 'i32' or 'u32'
  • 'glsl.texelFetch(texture: texture_2d_array<T>  ✗ , location: vec3<i32>  ✗ , level: i32  ✓ ) -> vec4<T>' where:
       ✗  'T' is 'f32', 'i32' or 'u32'
@@ -47,7 +45,7 @@ Failed to generate: :21:15 error: glsl.texelFetch: no matching call to 'glsl.tex
 
 note: # Disassembly
 $B1: {  # root
-  %x_20:ptr<handle, texture_depth_multisampled_2d, read> = var @binding_point(0, 1)
+  %x_20:ptr<handle, texture_depth_multisampled_2d, read> = var
 }
 
 %main_1 = func():void {

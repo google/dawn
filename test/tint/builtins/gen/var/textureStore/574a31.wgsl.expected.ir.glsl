@@ -4,37 +4,39 @@ SKIP: INVALID
 precision highp float;
 precision highp int;
 
-layout(binding = 0, rg32i) uniform highp iimage1D arg_0;
+layout(binding = 0, rg32i) uniform highp iimage2D arg_0;
 void textureStore_574a31() {
   uint arg_1 = 1u;
   ivec4 arg_2 = ivec4(1);
-  imageStore(arg_0, arg_1, arg_2);
+  ivec4 v = arg_2;
+  imageStore(arg_0, uvec2(arg_1, 0u), v);
 }
 void main() {
   textureStore_574a31();
 }
 error: Error parsing GLSL shader:
-ERROR: 0:9: 'imageStore' : no matching overloaded function found 
-ERROR: 0:9: '' : compilation terminated 
+ERROR: 0:10: 'imageStore' : no matching overloaded function found 
+ERROR: 0:10: '' : compilation terminated 
 ERROR: 2 compilation errors.  No code generated.
 
 
 
 #version 460
 
-layout(binding = 0, rg32i) uniform highp iimage1D arg_0;
+layout(binding = 0, rg32i) uniform highp iimage2D arg_0;
 void textureStore_574a31() {
   uint arg_1 = 1u;
   ivec4 arg_2 = ivec4(1);
-  imageStore(arg_0, arg_1, arg_2);
+  ivec4 v = arg_2;
+  imageStore(arg_0, uvec2(arg_1, 0u), v);
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
   textureStore_574a31();
 }
 error: Error parsing GLSL shader:
-ERROR: 0:7: 'imageStore' : no matching overloaded function found 
-ERROR: 0:7: '' : compilation terminated 
+ERROR: 0:8: 'imageStore' : no matching overloaded function found 
+ERROR: 0:8: '' : compilation terminated 
 ERROR: 2 compilation errors.  No code generated.
 
 

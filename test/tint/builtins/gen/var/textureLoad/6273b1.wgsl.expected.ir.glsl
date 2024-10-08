@@ -26,19 +26,17 @@ fn fragment_main() {
 
 Failed to generate: :19:15 error: glsl.texelFetch: no matching call to 'glsl.texelFetch(texture_depth_multisampled_2d, vec2<i32>, i32)'
 
-5 candidate functions:
+4 candidate functions:
  • 'glsl.texelFetch(texture: texture_2d<T>  ✗ , location: vec2<i32>  ✓ , level: i32  ✓ ) -> vec4<T>' where:
       ✗  'T' is 'f32', 'i32' or 'u32'
  • 'glsl.texelFetch(texture: texture_multisampled_2d<T>  ✗ , location: vec2<i32>  ✓ , sample_index: i32  ✓ ) -> vec4<T>' where:
-      ✗  'T' is 'f32', 'i32' or 'u32'
- • 'glsl.texelFetch(texture: texture_1d<T>  ✗ , location: i32  ✗ , level: i32  ✓ ) -> vec4<T>' where:
       ✗  'T' is 'f32', 'i32' or 'u32'
  • 'glsl.texelFetch(texture: texture_2d_array<T>  ✗ , location: vec3<i32>  ✗ , level: i32  ✓ ) -> vec4<T>' where:
       ✗  'T' is 'f32', 'i32' or 'u32'
  • 'glsl.texelFetch(texture: texture_3d<T>  ✗ , location: vec3<i32>  ✗ , level: i32  ✓ ) -> vec4<T>' where:
       ✗  'T' is 'f32', 'i32' or 'u32'
 
-    %11:f32 = glsl.texelFetch %6, %9, %10
+    %11:f32 = glsl.texelFetch %8, %9, %10
               ^^^^^^^^^^^^^^^
 
 :11:3 note: in block
@@ -52,19 +50,19 @@ tint_symbol_1 = struct @align(4), @block {
 
 $B1: {  # root
   %1:ptr<storage, tint_symbol_1, read_write> = var @binding_point(0, 0)
-  %arg_0:ptr<handle, texture_depth_multisampled_2d, read> = var @binding_point(0, 0)
+  %arg_0:ptr<handle, texture_depth_multisampled_2d, read> = var
 }
 
 %textureLoad_6273b1 = func():f32 {
   $B2: {
     %arg_1:ptr<function, vec2<i32>, read_write> = var, vec2<i32>(1i)
     %arg_2:ptr<function, i32, read_write> = var, 1i
-    %6:texture_depth_multisampled_2d = load %arg_0
-    %7:vec2<i32> = load %arg_1
-    %8:i32 = load %arg_2
-    %9:vec2<i32> = convert %7
-    %10:i32 = convert %8
-    %11:f32 = glsl.texelFetch %6, %9, %10
+    %6:vec2<i32> = load %arg_1
+    %7:i32 = load %arg_2
+    %8:texture_depth_multisampled_2d = load %arg_0
+    %9:vec2<i32> = convert %6
+    %10:i32 = convert %7
+    %11:f32 = glsl.texelFetch %8, %9, %10
     %res:ptr<function, f32, read_write> = var, %11
     %13:f32 = load %res
     ret %13
@@ -105,19 +103,17 @@ fn compute_main() {
 
 Failed to generate: :19:15 error: glsl.texelFetch: no matching call to 'glsl.texelFetch(texture_depth_multisampled_2d, vec2<i32>, i32)'
 
-5 candidate functions:
+4 candidate functions:
  • 'glsl.texelFetch(texture: texture_2d<T>  ✗ , location: vec2<i32>  ✓ , level: i32  ✓ ) -> vec4<T>' where:
       ✗  'T' is 'f32', 'i32' or 'u32'
  • 'glsl.texelFetch(texture: texture_multisampled_2d<T>  ✗ , location: vec2<i32>  ✓ , sample_index: i32  ✓ ) -> vec4<T>' where:
-      ✗  'T' is 'f32', 'i32' or 'u32'
- • 'glsl.texelFetch(texture: texture_1d<T>  ✗ , location: i32  ✗ , level: i32  ✓ ) -> vec4<T>' where:
       ✗  'T' is 'f32', 'i32' or 'u32'
  • 'glsl.texelFetch(texture: texture_2d_array<T>  ✗ , location: vec3<i32>  ✗ , level: i32  ✓ ) -> vec4<T>' where:
       ✗  'T' is 'f32', 'i32' or 'u32'
  • 'glsl.texelFetch(texture: texture_3d<T>  ✗ , location: vec3<i32>  ✗ , level: i32  ✓ ) -> vec4<T>' where:
       ✗  'T' is 'f32', 'i32' or 'u32'
 
-    %11:f32 = glsl.texelFetch %6, %9, %10
+    %11:f32 = glsl.texelFetch %8, %9, %10
               ^^^^^^^^^^^^^^^
 
 :11:3 note: in block
@@ -131,19 +127,19 @@ tint_symbol_1 = struct @align(4), @block {
 
 $B1: {  # root
   %1:ptr<storage, tint_symbol_1, read_write> = var @binding_point(0, 0)
-  %arg_0:ptr<handle, texture_depth_multisampled_2d, read> = var @binding_point(0, 0)
+  %arg_0:ptr<handle, texture_depth_multisampled_2d, read> = var
 }
 
 %textureLoad_6273b1 = func():f32 {
   $B2: {
     %arg_1:ptr<function, vec2<i32>, read_write> = var, vec2<i32>(1i)
     %arg_2:ptr<function, i32, read_write> = var, 1i
-    %6:texture_depth_multisampled_2d = load %arg_0
-    %7:vec2<i32> = load %arg_1
-    %8:i32 = load %arg_2
-    %9:vec2<i32> = convert %7
-    %10:i32 = convert %8
-    %11:f32 = glsl.texelFetch %6, %9, %10
+    %6:vec2<i32> = load %arg_1
+    %7:i32 = load %arg_2
+    %8:texture_depth_multisampled_2d = load %arg_0
+    %9:vec2<i32> = convert %6
+    %10:i32 = convert %7
+    %11:f32 = glsl.texelFetch %8, %9, %10
     %res:ptr<function, f32, read_write> = var, %11
     %13:f32 = load %res
     ret %13
@@ -185,19 +181,17 @@ fn vertex_main() -> VertexOutput {
 
 Failed to generate: :19:15 error: glsl.texelFetch: no matching call to 'glsl.texelFetch(texture_depth_multisampled_2d, vec2<i32>, i32)'
 
-5 candidate functions:
+4 candidate functions:
  • 'glsl.texelFetch(texture: texture_2d<T>  ✗ , location: vec2<i32>  ✓ , level: i32  ✓ ) -> vec4<T>' where:
       ✗  'T' is 'f32', 'i32' or 'u32'
  • 'glsl.texelFetch(texture: texture_multisampled_2d<T>  ✗ , location: vec2<i32>  ✓ , sample_index: i32  ✓ ) -> vec4<T>' where:
-      ✗  'T' is 'f32', 'i32' or 'u32'
- • 'glsl.texelFetch(texture: texture_1d<T>  ✗ , location: i32  ✗ , level: i32  ✓ ) -> vec4<T>' where:
       ✗  'T' is 'f32', 'i32' or 'u32'
  • 'glsl.texelFetch(texture: texture_2d_array<T>  ✗ , location: vec3<i32>  ✗ , level: i32  ✓ ) -> vec4<T>' where:
       ✗  'T' is 'f32', 'i32' or 'u32'
  • 'glsl.texelFetch(texture: texture_3d<T>  ✗ , location: vec3<i32>  ✗ , level: i32  ✓ ) -> vec4<T>' where:
       ✗  'T' is 'f32', 'i32' or 'u32'
 
-    %10:f32 = glsl.texelFetch %5, %8, %9
+    %10:f32 = glsl.texelFetch %7, %8, %9
               ^^^^^^^^^^^^^^^
 
 :11:3 note: in block
@@ -211,19 +205,19 @@ VertexOutput = struct @align(16) {
 }
 
 $B1: {  # root
-  %arg_0:ptr<handle, texture_depth_multisampled_2d, read> = var @binding_point(0, 0)
+  %arg_0:ptr<handle, texture_depth_multisampled_2d, read> = var
 }
 
 %textureLoad_6273b1 = func():f32 {
   $B2: {
     %arg_1:ptr<function, vec2<i32>, read_write> = var, vec2<i32>(1i)
     %arg_2:ptr<function, i32, read_write> = var, 1i
-    %5:texture_depth_multisampled_2d = load %arg_0
-    %6:vec2<i32> = load %arg_1
-    %7:i32 = load %arg_2
-    %8:vec2<i32> = convert %6
-    %9:i32 = convert %7
-    %10:f32 = glsl.texelFetch %5, %8, %9
+    %5:vec2<i32> = load %arg_1
+    %6:i32 = load %arg_2
+    %7:texture_depth_multisampled_2d = load %arg_0
+    %8:vec2<i32> = convert %5
+    %9:i32 = convert %6
+    %10:f32 = glsl.texelFetch %7, %8, %9
     %res:ptr<function, f32, read_write> = var, %10
     %12:f32 = load %res
     ret %12
