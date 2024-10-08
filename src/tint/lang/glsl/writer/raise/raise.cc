@@ -154,6 +154,8 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
     // TODO(dsinclair): PadStructs
 
     {
+        // This must come after `MultiplanarExternalTexture` as it will insert functions with
+        // texture parameters
         core::ir::transform::DirectVariableAccessOptions dva_config{};
         dva_config.transform_handle = true;
         RUN_TRANSFORM(core::ir::transform::DirectVariableAccess, module, dva_config);

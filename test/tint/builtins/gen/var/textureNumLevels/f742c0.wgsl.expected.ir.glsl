@@ -11,7 +11,6 @@ layout(binding = 0, std430)
 buffer tint_symbol_1_1_ssbo {
   uint tint_symbol;
 } v;
-uniform highp isampler2D arg_0;
 layout(binding = 0, std140)
 uniform tint_symbol_3_1_ubo {
   TintTextureUniformData tint_symbol_2;
@@ -34,7 +33,6 @@ layout(binding = 0, std430)
 buffer tint_symbol_1_1_ssbo {
   uint tint_symbol;
 } v;
-uniform highp isampler2D arg_0;
 layout(binding = 0, std140)
 uniform tint_symbol_3_1_ubo {
   TintTextureUniformData tint_symbol_2;
@@ -59,7 +57,6 @@ struct VertexOutput {
   uint prevent_dce;
 };
 
-uniform highp isampler2D arg_0;
 layout(binding = 0, std140)
 uniform tint_symbol_2_1_ubo {
   TintTextureUniformData tint_symbol_1;

@@ -1,3 +1,4 @@
+; flags: --glsl-desktop
 ; Test: ImageQuerySizeLod_Arrayed_SignedResult_SignedLevel_SpvParserHandleTest_SampledImageAccessTest_Variable_3.spvasm
 ; SPIR-V
 ; Version: 1.0

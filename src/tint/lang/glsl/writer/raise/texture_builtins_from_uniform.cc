@@ -188,12 +188,28 @@ struct State {
     void TextureFromUniform(core::ir::BuiltinCall* call) {
         MakeTextureUniformStructure();
 
+        auto* src = call->Args()[0];
         b.InsertBefore(call, [&] {
-            auto* val = GetAccessFromUniform(call->Args()[0]);
+            auto* val = GetAccessFromUniform(src);
             call->Result(0)->ReplaceAllUsesWith(val);
         });
 
         call->Destroy();
+
+        // Clean up the load and texture declaration if destroying the call leaves them
+        // orphaned.
+        if (auto* ld = src->As<core::ir::InstructionResult>()) {
+            if (!ld->IsUsed()) {
+                if (auto* load = ld->Instruction()->As<core::ir::Load>()) {
+                    auto* tex = load->From()->As<core::ir::InstructionResult>();
+                    load->Destroy();
+
+                    if (!tex->IsUsed()) {
+                        tex->Instruction()->Destroy();
+                    }
+                }
+            }
+        }
     }
 };
 

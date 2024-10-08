@@ -5,7 +5,6 @@ struct TintTextureUniformData {
   uint tint_builtin_value_0;
 };
 
-uniform highp sampler2D tint_symbol;
 layout(binding = 0, std140)
 uniform tint_symbol_2_1_ubo {
   TintTextureUniformData tint_symbol_1;

@@ -9,7 +9,6 @@ struct vertex_main_out {
   vec4 tint_symbol_1_1;
 };
 
-uniform highp sampler2DMS arg_0;
 vec4 tint_symbol_1 = vec4(0.0f);
 layout(binding = 0, std140)
 uniform tint_symbol_4_1_ubo {
@@ -45,7 +44,6 @@ struct TintTextureUniformData {
   uint tint_builtin_value_0;
 };
 
-uniform highp sampler2DMS arg_0;
 layout(binding = 0, std140)
 uniform tint_symbol_1_1_ubo {
   TintTextureUniformData tint_symbol;
@@ -67,7 +65,6 @@ struct TintTextureUniformData {
   uint tint_builtin_value_0;
 };
 
-uniform highp sampler2DMS arg_0;
 layout(binding = 0, std140)
 uniform tint_symbol_1_1_ubo {
   TintTextureUniformData tint_symbol;
