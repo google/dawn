@@ -1773,14 +1773,6 @@
                 "args": [
                     {"name": "descriptor", "type": "texture descriptor", "annotation": "const*"}
                 ]
-            },
-            {
-                "name": "get supported surface usage",
-                "tags": ["dawn", "native"],
-                "returns": "texture usage",
-                "args": [
-                    {"name": "surface", "type": "surface"}
-                ]
             }
         ]
     },
@@ -2590,7 +2582,7 @@
             {"value": 2, "name": "dawn native", "tags": ["dawn", "native"]},
             {"value": 3, "name": "chromium experimental timestamp query inside passes", "tags": ["dawn"]},
             {"value": 4, "name": "implicit device synchronization", "tags": ["dawn", "native"]},
-            {"value": 5, "name": "surface capabilities", "tags": ["dawn", "native"]},
+            {"value": 5, "name": "chromium experimental immediate data", "tags": ["dawn"]},
             {"value": 6, "name": "transient attachments", "tags": ["dawn"]},
             {"value": 7, "name": "MSAA render to single sampled", "tags": ["dawn"]},
             {"value": 8, "name": "dual source blending", "tags": ["dawn"]},
@@ -2643,8 +2635,7 @@
             {"value": 53, "name": "dawn load resolve texture", "tags": ["dawn"]},
             {"value": 54, "name": "dawn partial load resolve texture", "tags": ["dawn"]},
             {"value": 55, "name": "multi draw indirect", "tags": ["dawn"]},
-            {"value": 56, "name": "clip distances", "tags": ["dawn"]},
-            {"value": 57, "name": "chromium experimental immediate data", "tags": ["dawn"]}
+            {"value": 56, "name": "clip distances", "tags": ["dawn"]}
         ]
     },
     "filter mode": {

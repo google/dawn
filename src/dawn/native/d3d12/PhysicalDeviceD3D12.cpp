@@ -133,7 +133,6 @@ void PhysicalDevice::InitializeSupportedFeaturesImpl() {
     EnableFeature(Feature::IndirectFirstInstance);
     EnableFeature(Feature::RG11B10UfloatRenderable);
     EnableFeature(Feature::DepthClipControl);
-    EnableFeature(Feature::SurfaceCapabilities);
     EnableFeature(Feature::Float32Filterable);
     EnableFeature(Feature::DualSourceBlending);
     EnableFeature(Feature::Unorm16TextureFormats);

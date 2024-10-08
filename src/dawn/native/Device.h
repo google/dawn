@@ -234,8 +234,6 @@ class DeviceBase : public ErrorSink, public RefCountedWithExternalCount<RefCount
         TextureBase* texture,
         const TextureViewDescriptor* descriptor = nullptr);
 
-    ResultOrError<wgpu::TextureUsage> GetSupportedSurfaceUsage(const Surface* surface) const;
-
     // Implementation of API object creation methods. DO NOT use them in a reentrant manner.
     BindGroupBase* APICreateBindGroup(const BindGroupDescriptor* descriptor);
     BindGroupLayoutBase* APICreateBindGroupLayout(const BindGroupLayoutDescriptor* descriptor);
@@ -279,8 +277,6 @@ class DeviceBase : public ErrorSink, public RefCountedWithExternalCount<RefCount
     ShaderModuleBase* APICreateErrorShaderModule2(const ShaderModuleDescriptor* descriptor,
                                                   StringView errorMessage);
     TextureBase* APICreateTexture(const TextureDescriptor* descriptor);
-
-    wgpu::TextureUsage APIGetSupportedSurfaceUsage(Surface* surface);
 
     InternalPipelineStore* GetInternalPipelineStore();
 

@@ -171,12 +171,6 @@ static constexpr FeatureEnumAndInfo kFeatureInfo[] = {
       "https://dawn.googlesource.com/dawn/+/refs/heads/main/docs/dawn/features/"
       "implicit_device_synchronization.md",
       FeatureInfo::FeatureState::Stable}},
-    {Feature::SurfaceCapabilities,
-     {"Support querying Surface's capabilities such as supporte usage flags. This feature also "
-      "enables swap chain to be created with usage other than RenderAttachment.",
-      "https://dawn.googlesource.com/dawn/+/refs/heads/main/docs/dawn/features/"
-      "surface_capabilities.md",
-      FeatureInfo::FeatureState::Stable}},
     {Feature::TransientAttachments,
      {"Support transient attachments that allow render pass operations to stay in tile memory, "
       "avoiding VRAM traffic and potentially avoiding VRAM allocation for the textures.",

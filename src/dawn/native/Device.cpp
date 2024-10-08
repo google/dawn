@@ -1630,15 +1630,6 @@ TextureBase* DeviceBase::APICreateTexture(const TextureDescriptor* descriptor) {
     return ReturnToAPI(std::move(result));
 }
 
-wgpu::TextureUsage DeviceBase::APIGetSupportedSurfaceUsage(Surface* surface) {
-    wgpu::TextureUsage result;
-    if (ConsumedError(GetSupportedSurfaceUsage(surface), &result,
-                      "calling %s.GetSupportedSurfaceUsage().", this)) {
-        return wgpu::TextureUsage::None;
-    }
-    return result;
-}
-
 // For Dawn Wire
 
 BufferBase* DeviceBase::APICreateErrorBuffer(const BufferDescriptor* desc) {
@@ -2369,23 +2360,6 @@ ResultOrError<Ref<TextureViewBase>> DeviceBase::CreateTextureView(
         descriptor = Unpack(&desc);
     }
     return CreateTextureViewImpl(texture, descriptor);
-}
-
-ResultOrError<wgpu::TextureUsage> DeviceBase::GetSupportedSurfaceUsage(
-    const Surface* surface) const {
-    GetInstance()->EmitDeprecationWarning(
-        "GetSupportedSurfaceUsage is deprecated, use surface.GetCapabilities(adapter).usages.");
-
-    DAWN_TRY(ValidateIsAlive());
-
-    if (IsValidationEnabled()) {
-        DAWN_INVALID_IF(!HasFeature(Feature::SurfaceCapabilities), "%s is not enabled.",
-                        wgpu::FeatureName::SurfaceCapabilities);
-    }
-
-    PhysicalDeviceSurfaceCapabilities caps;
-    DAWN_TRY_ASSIGN(caps, GetPhysicalDevice()->GetSurfaceCapabilities(GetInstance(), surface));
-    return caps.usages;
 }
 
 // Other implementation details
