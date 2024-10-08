@@ -1,11 +1,16 @@
-SKIP: FAILED
+#version 310 es
+precision highp float;
+precision highp int;
 
-<dawn>/src/tint/lang/glsl/writer/printer/printer.cc:1468 internal compiler error: TINT_UNREACHABLE unhandled core builtin: textureSampleBias
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
-
-tint executable returned error: signal: trace/BPT trap
+layout(binding = 0, std430)
+buffer tint_symbol_1_1_ssbo {
+  vec4 tint_symbol;
+} v;
+uniform highp sampler2DArray arg_0_arg_1;
+vec4 textureSampleBias_1c707e() {
+  vec4 res = texture(arg_0_arg_1, vec3(vec2(1.0f), float(1u)), 1.0f);
+  return res;
+}
+void main() {
+  v.tint_symbol = textureSampleBias_1c707e();
+}
