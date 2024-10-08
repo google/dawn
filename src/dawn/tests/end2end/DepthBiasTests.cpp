@@ -166,9 +166,6 @@ class DepthBiasTests : public DawnTest {
 TEST_P(DepthBiasTests, PositiveBiasOnFloat) {
     // NVIDIA GPUs under Vulkan seem to be using a different scale than everyone else.
     DAWN_SUPPRESS_TEST_IF(IsVulkan() && IsNvidia());
-    // TODO(crbug.com/352360580): Investigate failures.
-    DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsAndroid());
-    DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsANGLED3D11());
 
     // Draw quad flat on z = 0.25 with 0.25 bias
     RunDepthBiasTest(wgpu::TextureFormat::Depth32Float, 0, QuadAngle::Flat,
