@@ -661,25 +661,12 @@ class Printer : public tint::TextGenerator {
             TINT_ICE_ON_NO_MATCH);
     }
 
-    void EmitStructType(const core::type::Struct* str) {
-        if (!emitted_structs_.Add(str)) {
-            return;
-        }
-
-        // This does not append directly to the preamble because a struct may require other
-        // structs to get emitted before it. So, the struct emits into a temporary text buffer, then
-        // anything it depends on will emit to the preamble first, and then it copies the text
-        // buffer into the preamble.
-        TextBuffer str_buf;
-        Line(&str_buf) << "\n" << "struct " << StructName(str) << " {";
-
+    void EmitStructMembers(TextBuffer& str_buf, const core::type::Struct* str) {
         bool is_host_shareable = host_shareable_structs_.Contains(str);
-
         Vector<std::optional<uint32_t>, 4> new_struct_to_old;
 
         auto add_padding = [&](uint32_t size) {
             auto pad_size = size / 4;
-
             for (size_t i = 0; i < pad_size; ++i) {
                 std::string name;
                 do {
@@ -690,8 +677,6 @@ class Printer : public tint::TextGenerator {
                 new_struct_to_old.Push(std::nullopt);
             }
         };
-
-        str_buf.IncrementIndent();
 
         uint32_t glsl_offset = 0;
         for (auto* mem : str->Members()) {
@@ -733,14 +718,31 @@ class Printer : public tint::TextGenerator {
             add_padding(str->Size() - glsl_offset);
         }
 
-        str_buf.DecrementIndent();
-        Line(&str_buf) << "};";
-
         // If the lengths differ then we've added padding, so we need to handle it when constructing
         // later.
         if (new_struct_to_old.Length() != str->Members().Length()) {
             struct_to_padding_struct_ids_.Add(str, new_struct_to_old);
         }
+    }
+
+    void EmitStructType(const core::type::Struct* str) {
+        if (!emitted_structs_.Add(str)) {
+            return;
+        }
+
+        // This does not append directly to the preamble because a struct may require other
+        // structs to get emitted before it. So, the struct emits into a temporary text buffer, then
+        // anything it depends on will emit to the preamble first, and then it copies the text
+        // buffer into the preamble.
+        TextBuffer str_buf;
+        Line(&str_buf) << "\n" << "struct " << StructName(str) << " {";
+
+        str_buf.IncrementIndent();
+
+        EmitStructMembers(str_buf, str);
+
+        str_buf.DecrementIndent();
+        Line(&str_buf) << "};";
 
         preamble_buffer_.Append(str_buf);
     }
@@ -1042,11 +1044,9 @@ class Printer : public tint::TextGenerator {
         {
             ScopedIndent si(current_buffer_);
 
-            for (auto* mem : str->Members()) {
-                auto out = Line();
-                EmitTypeAndName(out, mem->Type(), mem->Name().Name());
-                out << ";";
-            }
+            TextBuffer str_buf;
+            EmitStructMembers(str_buf, str);
+            current_buffer_->Append(str_buf);
         }
 
         Line() << "} " << name << ";";

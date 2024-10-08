@@ -3,7 +3,9 @@
 layout(binding = 0, std140)
 uniform tint_symbol_2_std140_1_ubo {
   vec3 tint_symbol_1_col0;
+  uint tint_pad;
   vec3 tint_symbol_1_col1;
+  uint tint_pad_1;
   vec3 tint_symbol_1_col2;
 } v;
 layout(binding = 1, std430)

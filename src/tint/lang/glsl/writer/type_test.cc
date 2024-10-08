@@ -1070,5 +1070,36 @@ INSTANTIATE_TEST_SUITE_P(
         GlslStorageTextureData{core::type::TextureDimension::kCubeArray, core::Access::kReadWrite,
                                TextureDataType::kU32, "uimageCubeArray"}));
 
+TEST_F(GlslWriterTest, EmitType_PadInlineStruct) {
+    Vector members{ty.Get<core::type::StructMember>(
+                       b.ir.symbols.New("padding"), ty.u32(), /* index */ 0u,
+                       /* offset */ 0u, /* align */ 4u, /* size */ 20u, core::IOAttributes{}),
+                   ty.Get<core::type::StructMember>(
+                       b.ir.symbols.New("arr"), ty.array<u32>(), /* index */ 1u,
+                       /* offset */ 20u, /* align */ 4u, /* size */ 32u, core::IOAttributes{})};
+
+    auto* S = ty.Struct(mod.symbols.New("S"), std::move(members));
+
+    auto* var = b.Var("v", storage, S, core::Access::kReadWrite);
+    var->SetBindingPoint(0, 0);
+    b.ir.root_block->Append(var);
+
+    ASSERT_TRUE(Generate()) << err_ << output_.glsl;
+    EXPECT_EQ(output_.glsl, GlslHeader() + R"(
+layout(binding = 0, std430)
+buffer S_1_ssbo {
+  uint padding;
+  uint tint_pad;
+  uint tint_pad_1;
+  uint tint_pad_2;
+  uint tint_pad_3;
+  uint arr[];
+} v;
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+void main() {
+}
+)");
+}
+
 }  // namespace
 }  // namespace tint::glsl::writer

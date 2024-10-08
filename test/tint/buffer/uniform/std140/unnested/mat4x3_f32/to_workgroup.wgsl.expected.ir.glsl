@@ -3,8 +3,11 @@
 layout(binding = 0, std140)
 uniform tint_symbol_1_std140_1_ubo {
   vec3 tint_symbol_col0;
+  uint tint_pad;
   vec3 tint_symbol_col1;
+  uint tint_pad_1;
   vec3 tint_symbol_col2;
+  uint tint_pad_2;
   vec3 tint_symbol_col3;
 } v;
 shared mat4x3 w;
