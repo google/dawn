@@ -173,15 +173,14 @@ crbug.com/dawn/2168 webgpu:api,validation,error_scope:simple:errorType="out-of-m
 crbug.com/dawn/2168 webgpu:api,validation,error_scope:simple:errorType="out-of-memory";errorFilter="validation" [ Failure ]
 crbug.com/dawn/2168 [ android arm ] webgpu:api,validation,error_scope:current_scope:errorFilter="validation";stackDepth=100000 [ Failure ]
 
-# textureStore() out_of_bounds_array tests crashing
-crbug.com/dawn/367440985 webgpu:shader,execution,expression,call,builtin,textureStore:out_of_bounds_array:baseLevel=0;arrayLevels=2;type="i32" [ Failure ]
-crbug.com/dawn/367440985 webgpu:shader,execution,expression,call,builtin,textureStore:out_of_bounds_array:baseLevel=0;arrayLevels=2;type="u32" [ Failure ]
-crbug.com/dawn/367440985 webgpu:shader,execution,expression,call,builtin,textureStore:out_of_bounds_array:baseLevel=0;arrayLevels=3;type="i32" [ Failure ]
-crbug.com/dawn/367440985 webgpu:shader,execution,expression,call,builtin,textureStore:out_of_bounds_array:baseLevel=0;arrayLevels=3;type="u32" [ Failure ]
-crbug.com/dawn/367440985 webgpu:shader,execution,expression,call,builtin,textureStore:out_of_bounds_array:baseLevel=1;arrayLevels=2;type="i32" [ Failure ]
-crbug.com/dawn/367440985 webgpu:shader,execution,expression,call,builtin,textureStore:out_of_bounds_array:baseLevel=1;arrayLevels=2;type="u32" [ Failure ]
-crbug.com/dawn/367440985 webgpu:shader,execution,expression,call,builtin,textureStore:out_of_bounds_array:baseLevel=1;arrayLevels=3;type="i32" [ Failure ]
-crbug.com/dawn/367440985 webgpu:shader,execution,expression,call,builtin,textureStore:out_of_bounds_array:baseLevel=1;arrayLevels=3;type="u32" [ Failure ]
+# CTS tests need update to fit compat mode restriction on texture view array layers or binding view dimension.
+crbug.com/dawn/367440985 webgpu:shader,execution,expression,call,builtin,textureStore:out_of_bounds_array:* [ Failure ]
+crbug.com/dawn/367440985 webgpu:api,validation,resource_usages,texture,in_render_common:subresources,color_attachment_and_bind_group:* [ Failure ]
+crbug.com/dawn/367440985 webgpu:api,validation,resource_usages,texture,in_render_common:subresources,depth_stencil_attachment_and_bind_group:* [ Failure ]
+crbug.com/dawn/367440985 webgpu:api,validation,resource_usages,texture,in_render_common:subresources,depth_stencil_texture_in_bind_groups:* [ Failure ]
+crbug.com/dawn/367440985 webgpu:api,validation,resource_usages,texture,in_render_common:subresources,multiple_bind_groups:* [ Failure ]
+crbug.com/dawn/367440985 webgpu:api,validation,resource_usages,texture,in_render_misc:subresources,set_bind_group_on_same_index_color_texture:* [ Failure ]
+crbug.com/dawn/367440985 webgpu:api,validation,resource_usages,texture,in_render_misc:subresources,set_unused_bind_group:* [ Failure ]
 
 # bitcast ai_to_f32 failures; precision issue?
 crbug.com/354152178 [ intel-0x4680 ] webgpu:shader,execution,expression,call,builtin,bitcast:ai_to_f32:* [ Failure ]
