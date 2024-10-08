@@ -1,0 +1,12 @@
+#include <metal_stdlib>
+using namespace metal;
+
+struct tint_module_vars_struct {
+  const constant uint* i;
+};
+
+kernel void tint_symbol(const constant uint* i [[buffer(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.i=i};
+  float3 v1 = 0.0f;
+  v1[(*tint_module_vars.i)] = 1.0f;
+}

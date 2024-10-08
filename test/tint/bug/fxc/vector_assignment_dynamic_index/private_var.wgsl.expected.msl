@@ -1,0 +1,13 @@
+#include <metal_stdlib>
+
+using namespace metal;
+struct tint_private_vars_struct {
+  float3 v1;
+};
+
+kernel void tint_symbol(const constant uint* tint_symbol_1 [[buffer(0)]]) {
+  thread tint_private_vars_struct tint_private_vars = {};
+  tint_private_vars.v1[*(tint_symbol_1)] = 1.0f;
+  return;
+}
+
