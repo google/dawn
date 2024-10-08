@@ -1,6 +1,4 @@
-SKIP: FAILED
-
-#version 310 es
+#version 460
 #extension GL_EXT_texture_shadow_lod: require
 precision highp float;
 precision highp int;
@@ -18,14 +16,7 @@ float textureSampleLevel_3c3442() {
 void main() {
   v.tint_symbol = textureSampleLevel_3c3442();
 }
-error: Error parsing GLSL shader:
-ERROR: 0:13: 'textureLod(..., float lod)' : GL_EXT_texture_shadow_lod not supported for this ES version 
-ERROR: 0:13: '' : compilation terminated 
-ERROR: 2 compilation errors.  No code generated.
-
-
-
-#version 310 es
+#version 460
 #extension GL_EXT_texture_shadow_lod: require
 
 layout(binding = 0, std430)
@@ -42,14 +33,7 @@ layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
   v.tint_symbol = textureSampleLevel_3c3442();
 }
-error: Error parsing GLSL shader:
-ERROR: 0:11: 'textureLod(..., float lod)' : GL_EXT_texture_shadow_lod not supported for this ES version 
-ERROR: 0:11: '' : compilation terminated 
-ERROR: 2 compilation errors.  No code generated.
-
-
-
-#version 310 es
+#version 460
 #extension GL_EXT_texture_shadow_lod: require
 
 
@@ -79,12 +63,3 @@ void main() {
   vertex_main_loc0_Output = v_1.prevent_dce;
   gl_PointSize = 1.0f;
 }
-error: Error parsing GLSL shader:
-ERROR: 0:14: 'textureLod(..., float lod)' : GL_EXT_texture_shadow_lod not supported for this ES version 
-ERROR: 0:14: '' : compilation terminated 
-ERROR: 2 compilation errors.  No code generated.
-
-
-
-
-tint executable returned error: exit status 1

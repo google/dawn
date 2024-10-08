@@ -614,6 +614,16 @@ func OverloadUsesReadWriteStorageTexture(overload sem.Overload) bool {
 
 // OverloadUsesGLESTexture returns true if the overload uses a texture value for GLSL ES 3.10
 func OverloadNeedsDesktopGLSL(overload sem.Overload) bool {
+	if overload.Intrinsic.Name == "textureSampleLevel" {
+		for _, param := range overload.Parameters {
+			if strings.HasPrefix(param.Type.Target.GetName(), "texture_depth_2d_array") ||
+				strings.HasPrefix(param.Type.Target.GetName(), "texture_depth_cube") ||
+				strings.HasPrefix(param.Type.Target.GetName(), "texture_depth_cube_array") {
+				return true
+			}
+		}
+	}
+
 	for _, param := range overload.Parameters {
 		if strings.HasPrefix(param.Type.Target.GetName(), "texture_storage") {
 			fmt := param.Type.TemplateArguments[0].(sem.FullyQualifiedName).Target.GetName()

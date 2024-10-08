@@ -1,8 +1,6 @@
 SKIP: FAILED
 
-#version 310 es
-precision highp float;
-precision highp int;
+#version 460
 
 layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
   float inner;
@@ -32,14 +30,13 @@ void main() {
   return;
 }
 error: Error parsing GLSL shader:
-ERROR: 0:15: 'textureLod(..., float lod)' : required extension not requested: GL_EXT_texture_shadow_lod
-ERROR: 0:15: 'textureLod(..., float lod)' : GL_EXT_texture_shadow_lod not supported for this ES version 
-ERROR: 0:15: '' : compilation terminated 
-ERROR: 3 compilation errors.  No code generated.
+ERROR: 0:13: 'textureLod(..., float lod)' : required extension not requested: GL_EXT_texture_shadow_lod
+ERROR: 0:13: '' : compilation terminated 
+ERROR: 2 compilation errors.  No code generated.
 
 
 
-#version 310 es
+#version 460
 
 layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
   float inner;
@@ -71,13 +68,12 @@ void main() {
 }
 error: Error parsing GLSL shader:
 ERROR: 0:13: 'textureLod(..., float lod)' : required extension not requested: GL_EXT_texture_shadow_lod
-ERROR: 0:13: 'textureLod(..., float lod)' : GL_EXT_texture_shadow_lod not supported for this ES version 
 ERROR: 0:13: '' : compilation terminated 
-ERROR: 3 compilation errors.  No code generated.
+ERROR: 2 compilation errors.  No code generated.
 
 
 
-#version 310 es
+#version 460
 
 layout(location = 0) flat out float prevent_dce_1;
 uniform highp sampler2DArrayShadow arg_0_arg_1;
@@ -113,9 +109,8 @@ void main() {
 }
 error: Error parsing GLSL shader:
 ERROR: 0:10: 'textureLod(..., float lod)' : required extension not requested: GL_EXT_texture_shadow_lod
-ERROR: 0:10: 'textureLod(..., float lod)' : GL_EXT_texture_shadow_lod not supported for this ES version 
 ERROR: 0:10: '' : compilation terminated 
-ERROR: 3 compilation errors.  No code generated.
+ERROR: 2 compilation errors.  No code generated.
 
 
 

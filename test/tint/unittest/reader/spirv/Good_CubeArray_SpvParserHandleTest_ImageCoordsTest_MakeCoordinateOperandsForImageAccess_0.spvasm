@@ -1,3 +1,4 @@
+; flags: --glsl-desktop
 ; Test: Good_CubeArray_SpvParserHandleTest_ImageCoordsTest_MakeCoordinateOperandsForImageAccess_0.spvasm
 ; SPIR-V
 ; Version: 1.0

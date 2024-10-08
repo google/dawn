@@ -1,3 +1,4 @@
+; flags: --glsl-desktop
 ; Test: Samples_SpvParserHandleTest_RegisterHandleUsage_RawImage_Variable_1.spvasm
 ; SPIR-V
 ; Version: 1.0

@@ -1,3 +1,4 @@
+; flags: --glsl-desktop
 ; Test: ImageWrite_ConvertTexelOperand_Arity_SpvParserHandleTest_ImageAccessTest_Variable_5.spvasm
 ; SPIR-V
 ; Version: 1.0

@@ -1,4 +1,4 @@
-#version 310 es
+#version 460
 #extension GL_EXT_texture_shadow_lod: require
 precision highp float;
 precision highp int;
@@ -16,7 +16,7 @@ float textureSampleLevel_cdfe0f() {
 void main() {
   v.tint_symbol = textureSampleLevel_cdfe0f();
 }
-#version 310 es
+#version 460
 #extension GL_EXT_texture_shadow_lod: require
 
 layout(binding = 0, std430)
@@ -33,7 +33,7 @@ layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
   v.tint_symbol = textureSampleLevel_cdfe0f();
 }
-#version 310 es
+#version 460
 #extension GL_EXT_texture_shadow_lod: require
 
 
