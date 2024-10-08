@@ -63,7 +63,15 @@ struct State {
     /// The type manager.
     core::type::Manager& ty{ir.Types()};
 
-    // A map of the <texture,sampler> binding pair to the replacement var
+    // A map of single texture to the replacement var. Note, this doesn't just re-use the
+    // `texture_sampler_to_replacment` with the placeholder sampler because we can share an
+    // individual texture with a texture,sampler pair. So, if we create the texture as `t1,s1` we
+    // want to use that `t1` individually but if we look it up with `t1,sp` then we won't find it.
+    // This secondary map exists to allow us access to textures which may have been created
+    // with a sampler.
+    Hashmap<core::ir::Var*, std::optional<core::ir::Var*>, 2> texture_to_replacement_{};
+
+    // A map of the <texture,sampler> binding pair to the replacement var.
     Hashmap<binding::CombinedTextureSamplerPair, core::ir::Var*, 2>
         texture_sampler_to_replacement_{};
 
@@ -130,13 +138,15 @@ struct State {
                 case core::BuiltinFn::kTextureSampleBias:
                     TextureSampleBias(call);
                     break;
+                case core::BuiltinFn::kTextureSampleLevel:
+                    TextureSampleLevel(call);
+                    break;
                 case core::BuiltinFn::kTextureStore:
                     TextureStore(call);
                     break;
                 case core::BuiltinFn::kTextureSampleCompare:
                 case core::BuiltinFn::kTextureSampleCompareLevel:
                 case core::BuiltinFn::kTextureSampleGrad:
-                case core::BuiltinFn::kTextureSampleLevel:
                 default:
                     TINT_UNREACHABLE() << "TODO(dsinclair): " << call->Func();
             }
@@ -158,14 +168,29 @@ struct State {
             return tex;
         }
 
+        if (!sampler) {
+            auto existing_var = texture_to_replacement_.Get(tex);
+            if (existing_var) {
+                return existing_var->value();
+            }
+
+            replaced_textures_and_samplers_.Add(tex);
+
+            // If the texture wasn't already in the map this means it was an individual texture we
+            // hadn't seen yet. Create it and insert into the map for future use.
+            binding::CombinedTextureSamplerPair key{tex->BindingPoint().value(),
+                                                    cfg.placeholder_sampler_bind_point};
+            auto* replacement = MakeVar(key, tex, nullptr);
+            texture_to_replacement_.Add(tex, replacement);
+            return replacement;
+        }
+
         auto tex_bp = tex->BindingPoint();
-        auto samp_bp = sampler ? sampler->BindingPoint() : cfg.placeholder_sampler_bind_point;
+        auto samp_bp = sampler->BindingPoint();
         TINT_ASSERT(tex_bp.has_value() && samp_bp.has_value());
 
         replaced_textures_and_samplers_.Add(tex);
-        if (sampler) {
-            replaced_textures_and_samplers_.Add(sampler);
-        }
+        replaced_textures_and_samplers_.Add(sampler);
 
         binding::CombinedTextureSamplerPair key{tex_bp.value(), samp_bp.value()};
         auto var = texture_sampler_to_replacement_.Get(key);
@@ -280,20 +305,18 @@ struct State {
             auto* tex = tex_sampler.texture;
             auto* sampler = tex_sampler.sampler;
 
-            // No change to storage textures.
-            if (tex->Result(0)->Type()->UnwrapPtr()->Is<core::type::StorageTexture>()) {
+            // No sampler, then we aren't going to be creating a combined sampler.
+            if (!sampler) {
                 continue;
             }
 
             BindingPoint tex_bp = tex->BindingPoint().value();
-
-            // No sampler, use the placeholder binding
-            BindingPoint samp_bp =
-                sampler ? sampler->BindingPoint().value() : cfg.placeholder_sampler_bind_point;
+            BindingPoint samp_bp = sampler->BindingPoint().value();
 
             binding::CombinedTextureSamplerPair key{tex_bp, samp_bp};
-            texture_sampler_to_replacement_.GetOrAdd(key,
-                                                     [&] { return MakeVar(key, tex, sampler); });
+            auto* replacement = texture_sampler_to_replacement_.GetOrAdd(
+                key, [&] { return MakeVar(key, tex, sampler); });
+            texture_to_replacement_.Add(tex, replacement);
         }
     }
 
@@ -857,6 +880,84 @@ struct State {
             }
 
             params.Push(bias);
+
+            b.CallWithResult<glsl::ir::BuiltinCall>(call->DetachResult(), fn, params);
+        });
+        call->Destroy();
+    }
+
+    void TextureSampleLevel(core::ir::BuiltinCall* call) {
+        auto args = call->Args();
+        b.InsertBefore(call, [&] {
+            Vector<core::ir::Value*, 4> params;
+
+            uint32_t idx = 0;
+            uint32_t tex_arg = idx++;
+            uint32_t sampler_arg = idx++;
+
+            auto* tex = GetNewTexture(args[tex_arg], args[sampler_arg]);
+            auto* tex_type = tex->Type()->As<core::type::Texture>();
+            TINT_ASSERT(tex_type);
+
+            params.Push(tex);
+
+            bool is_depth = tex_type->Is<core::type::DepthTexture>();
+            bool needs_ext = false;
+
+            auto depth_ref = 0_f;
+
+            core::ir::Value* coords = args[idx++];
+            switch (tex_type->Dim()) {
+                case core::type::TextureDimension::k2d:
+                    if (is_depth) {
+                        coords = b.Construct(ty.vec3<f32>(), coords, depth_ref)->Result(0);
+                    }
+                    params.Push(coords);
+
+                    break;
+                case core::type::TextureDimension::k2dArray: {
+                    Vector<core::ir::Value*, 3> new_coords;
+                    new_coords.Push(coords);
+                    new_coords.Push(b.Convert<f32>(args[idx++])->Result(0));
+
+                    uint32_t vec_width = 3;
+                    if (is_depth) {
+                        needs_ext = true;
+                        new_coords.Push(b.Value(depth_ref));
+                        ++vec_width;
+                    }
+                    params.Push(b.Construct(ty.vec(ty.f32(), vec_width), new_coords)->Result(0));
+                    break;
+                }
+                case core::type::TextureDimension::k3d:
+                case core::type::TextureDimension::kCube:
+                    if (is_depth) {
+                        needs_ext = tex_type->Dim() == core::type::TextureDimension::kCube;
+                        coords = b.Construct(ty.vec4<f32>(), coords, depth_ref)->Result(0);
+                    }
+                    params.Push(coords);
+                    break;
+                case core::type::TextureDimension::kCubeArray:
+                    params.Push(b.Construct(ty.vec4<f32>(), coords, b.Convert<f32>(args[idx++]))
+                                    ->Result(0));
+
+                    if (is_depth) {
+                        needs_ext = true;
+                        params.Push(b.Value(depth_ref));
+                    }
+                    break;
+                default:
+                    TINT_UNREACHABLE();
+            }
+
+            params.Push(b.Convert(ty.f32(), args[idx++])->Result(0));
+
+            auto fn = needs_ext ? glsl::BuiltinFn::kExtTextureLod : glsl::BuiltinFn::kTextureLod;
+            if (idx < args.Length()) {
+                fn = needs_ext ? glsl::BuiltinFn::kExtTextureLodOffset
+                               : glsl::BuiltinFn::kTextureLodOffset;
+                params.Push(args[idx++]);
+            }
 
             b.CallWithResult<glsl::ir::BuiltinCall>(call->DetachResult(), fn, params);
         });

@@ -90,6 +90,14 @@ const char* str(BuiltinFn i) {
             return "texture";
         case BuiltinFn::kTextureOffset:
             return "textureOffset";
+        case BuiltinFn::kTextureLod:
+            return "textureLod";
+        case BuiltinFn::kExtTextureLod:
+            return "extTextureLod";
+        case BuiltinFn::kTextureLodOffset:
+            return "textureLodOffset";
+        case BuiltinFn::kExtTextureLodOffset:
+            return "extTextureLodOffset";
         case BuiltinFn::kTextureGradOffset:
             return "textureGradOffset";
         case BuiltinFn::kTextureGather:

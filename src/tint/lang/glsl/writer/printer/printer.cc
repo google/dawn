@@ -99,6 +99,7 @@ namespace {
 constexpr const char* kAMDGpuShaderHalfFloat = "GL_AMD_gpu_shader_half_float";
 constexpr const char* kOESSampleVariables = "GL_OES_sample_variables";
 constexpr const char* kEXTBlendFuncExtended = "GL_EXT_blend_func_extended";
+constexpr const char* kEXTTextureShadowLod = "GL_EXT_texture_shadow_lod";
 
 enum class LayoutFormat : uint8_t {
     kStd140,
@@ -1127,6 +1128,21 @@ class Printer : public tint::TextGenerator {
         out << ")";
     }
 
+    bool RequiresEXTTextureShadowLod(glsl::BuiltinFn fn) {
+        return fn == glsl::BuiltinFn::kExtTextureLod || fn == glsl::BuiltinFn::kExtTextureLodOffset;
+    }
+
+    glsl::BuiltinFn EXTToNonEXT(glsl::BuiltinFn fn) {
+        switch (fn) {
+            case glsl::BuiltinFn::kExtTextureLod:
+                return glsl::BuiltinFn::kTextureLod;
+            case glsl::BuiltinFn::kExtTextureLodOffset:
+                return glsl::BuiltinFn::kTextureLodOffset;
+            default:
+                TINT_UNREACHABLE() << "invalid function for conversion: " << fn;
+        }
+    }
+
     void EmitGlslBuiltinCall(StringStream& out, const glsl::ir::BuiltinCall* c) {
         // The atomic subtract is an add in GLSL. If the value is a u32, it just negates the u32 and
         // GLSL handles it. We don't have u32 negation in the IR, so fake it in the printer.
@@ -1145,7 +1161,14 @@ class Printer : public tint::TextGenerator {
             return;
         }
 
-        out << c->Func() << "(";
+        auto fn = c->Func();
+
+        if (RequiresEXTTextureShadowLod(fn)) {
+            EmitExtension(kEXTTextureShadowLod);
+            fn = EXTToNonEXT(fn);
+        }
+
+        out << fn << "(";
         bool needs_comma = false;
         for (const auto* arg : c->Args()) {
             if (needs_comma) {
