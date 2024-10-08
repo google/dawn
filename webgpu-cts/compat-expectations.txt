@@ -93,20 +93,20 @@ crbug.com/dawn/2083 [ intel-0x9bc5 linux ] webgpu:api,operation,memory_sync,buff
 crbug.com/dawn/2083 [ intel-0x9bc5 linux ] webgpu:api,operation,memory_sync,buffer,multiple_buffers:ww:boundary="command-buffer";writeOps=["storage","t2b-copy"];contexts=["render-pass-encoder","command-encoder"] [ Failure ]
 crbug.com/dawn/2083 [ intel-0x9bc5 linux ] webgpu:api,operation,memory_sync,buffer,single_buffer:ww:boundary="command-buffer";writeOps=["storage","t2b-copy"];contexts=["render-bundle-encoder","command-encoder"] [ Failure ]
 crbug.com/dawn/2083 [ intel-0x9bc5 linux ] webgpu:api,operation,memory_sync,buffer,single_buffer:ww:boundary="command-buffer";writeOps=["storage","t2b-copy"];contexts=["render-pass-encoder","command-encoder"] [ Failure ]
+crbug.com/dawn/2083 [ intel-0x9bc5 linux ] webgpu:api,operation,memory_sync,buffer,multiple_buffers:ww:boundary="command-buffer";writeOps=["storage","b2b-copy"];contexts=["render-bundle-encoder","command-encoder"] [ Failure ]
+crbug.com/dawn/2083 [ intel-0x9bc5 linux ] webgpu:api,operation,memory_sync,buffer,multiple_buffers:ww:boundary="command-buffer";writeOps=["storage","b2b-copy"];contexts=["render-pass-encoder","command-encoder"] [ Failure ]
+crbug.com/dawn/2083 [ intel-0x9bc5 linux ] webgpu:api,operation,memory_sync,buffer,single_buffer:ww:boundary="command-buffer";writeOps=["storage","b2b-copy"];contexts=["render-bundle-encoder","command-encoder"] [ Failure ]
+crbug.com/dawn/2083 [ intel-0x9bc5 linux ] webgpu:api,operation,memory_sync,buffer,single_buffer:ww:boundary="command-buffer";writeOps=["storage","b2b-copy"];contexts=["render-pass-encoder","command-encoder"] [ Failure ]
 crbug.com/dawn/2083 [ intel-0x9bc5 linux ] webgpu:api,operation,memory_sync,texture,same_subresource:ww:boundary="command-buffer";first={"op":"storage","in":"render-bundle-encoder"};second={"op":"b2t-copy","in":"command-encoder"} [ Failure ]
 crbug.com/dawn/2083 [ intel-0x9bc5 linux ] webgpu:api,operation,memory_sync,texture,same_subresource:ww:boundary="command-buffer";first={"op":"storage","in":"render-bundle-encoder"};second={"op":"t2t-copy","in":"command-encoder"} [ Failure ]
 crbug.com/dawn/2083 [ intel-0x9bc5 linux ] webgpu:api,operation,memory_sync,texture,same_subresource:ww:boundary="command-buffer";first={"op":"storage","in":"render-pass-encoder"};second={"op":"b2t-copy","in":"command-encoder"} [ Failure ]
 crbug.com/dawn/2083 [ intel-0x9bc5 linux ] webgpu:api,operation,memory_sync,texture,same_subresource:ww:boundary="command-buffer";first={"op":"storage","in":"render-pass-encoder"};second={"op":"t2t-copy","in":"command-encoder"} [ Failure ]
+crbug.com/dawn/2083 [ intel-0x9bc5 linux ] webgpu:api,operation,memory_sync,texture,same_subresource:wr:boundary="command-buffer";write={"op":"storage","in":"render-bundle-encoder"};read={"op":"t2b-copy","in":"command-encoder"} [ Failure ]
+crbug.com/dawn/2083 [ intel-0x9bc5 linux ] webgpu:api,operation,memory_sync,texture,same_subresource:wr:boundary="command-buffer";write={"op":"storage","in":"render-pass-encoder"};read={"op":"t2b-copy","in":"command-encoder"} [ Failure ]
 
 # Failures due to Linux/Intel UHD 630 OS/driver upgrade
 crbug.com/dawn/2502 [ intel-0x9bc5 linux mesa_ge_23.2 ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,array:srcFormat="rgba8unorm";dstFormat="rgba8unorm-srgb";dimension="3d" [ Failure ]
 crbug.com/dawn/2502 [ intel-0x9bc5 linux mesa_ge_23.2 ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,array:srcFormat="rgba8unorm-srgb";dstFormat="rgba8unorm-srgb";dimension="3d" [ Failure ]
-crbug.com/dawn/2502 [ intel-0x9bc5 linux mesa_ge_23.2 ] webgpu:api,operation,memory_sync,buffer,multiple_buffers:ww:boundary="command-buffer";writeOps=["storage","b2b-copy"];contexts=["render-bundle-encoder","command-encoder"] [ Failure ]
-crbug.com/dawn/2502 [ intel-0x9bc5 linux mesa_ge_23.2 ] webgpu:api,operation,memory_sync,buffer,multiple_buffers:ww:boundary="command-buffer";writeOps=["storage","b2b-copy"];contexts=["render-pass-encoder","command-encoder"] [ Failure ]
-crbug.com/dawn/2502 [ intel-0x9bc5 linux mesa_ge_23.2 ] webgpu:api,operation,memory_sync,buffer,single_buffer:ww:boundary="command-buffer";writeOps=["storage","b2b-copy"];contexts=["render-bundle-encoder","command-encoder"] [ Failure ]
-crbug.com/dawn/2502 [ intel-0x9bc5 linux mesa_ge_23.2 ] webgpu:api,operation,memory_sync,buffer,single_buffer:ww:boundary="command-buffer";writeOps=["storage","b2b-copy"];contexts=["render-pass-encoder","command-encoder"] [ Failure ]
-crbug.com/dawn/2502 [ intel-0x9bc5 linux mesa_ge_23.2 ] webgpu:api,operation,memory_sync,texture,same_subresource:wr:boundary="command-buffer";write={"op":"storage","in":"render-bundle-encoder"};read={"op":"t2b-copy","in":"command-encoder"} [ Failure ]
-crbug.com/dawn/2502 [ intel-0x9bc5 linux mesa_ge_23.2 ] webgpu:api,operation,memory_sync,texture,same_subresource:wr:boundary="command-buffer";write={"op":"storage","in":"render-pass-encoder"};read={"op":"t2b-copy","in":"command-encoder"} [ Failure ]
 crbug.com/dawn/2502 [ intel-0x9bc5 linux mesa_ge_23.2 ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="3d";readMethod="CopyToBuffer";format="r32float" [ Failure ]
 crbug.com/dawn/2502 [ intel-0x9bc5 linux mesa_ge_23.2 ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="3d";readMethod="CopyToBuffer";format="rg32float" [ Failure ]
 crbug.com/dawn/2502 [ intel-0x9bc5 linux mesa_ge_23.2 ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="3d";readMethod="CopyToBuffer";format="rgb10a2unorm" [ Failure ]
@@ -370,10 +370,10 @@ crbug.com/dawn/2319 [ nvidia-0x2184 ] webgpu:shader,execution,expression,call,bu
 crbug.com/dawn/2319 [ nvidia-0x2184 ] webgpu:shader,execution,expression,call,builtin,clamp:u32:inputSource="uniform";vectorize=4 [ Failure ]
 
 # limits:function_variable_combined_byte_size failing on NVidia
-crbug.com/dawn/0000 [ nvidia-0x2184 ] webgpu:shader,execution,limits:function_variable_combined_byte_size:type="bool" [ Failure ]
-crbug.com/dawn/0000 [ nvidia-0x2184 ] webgpu:shader,execution,limits:function_variable_combined_byte_size:type="u32" [ Failure ]
-crbug.com/dawn/0000 [ nvidia-0x2184 ] webgpu:shader,execution,limits:private_array_combined_byte_size:type="bool" [ Failure ]
-crbug.com/dawn/0000 [ nvidia-0x2184 ] webgpu:shader,execution,limits:private_array_combined_byte_size:type="u32" [ Failure ]
+crbug.com/372044248 [ nvidia-0x2184 ] webgpu:shader,execution,limits:function_variable_combined_byte_size:type="bool" [ Failure ]
+crbug.com/372044248 [ nvidia-0x2184 ] webgpu:shader,execution,limits:function_variable_combined_byte_size:type="u32" [ Failure ]
+crbug.com/372044248 [ nvidia-0x2184 ] webgpu:shader,execution,limits:private_array_combined_byte_size:type="bool" [ Failure ]
+crbug.com/372044248 [ nvidia-0x2184 ] webgpu:shader,execution,limits:private_array_combined_byte_size:type="u32" [ Failure ]
 
 # alpha_to_coverage occlusion query tests failing on Intel
 crbug.com/dawn/2248 [ intel-0x9bc5 ] webgpu:api,operation,command_buffer,queries,occlusionQuery:occlusion_query,alpha_to_coverage:writeMask=0;renderMode="direct";bufferOffset="non-zero";querySetOffset="non-zero";alpha=0 [ Failure ]
@@ -410,8 +410,8 @@ crbug.com/dawn/2248 [ intel-0x9bc5 ] webgpu:api,operation,command_buffer,queries
 crbug.com/dawn/2248 [ intel-0x9bc5 ] webgpu:api,operation,command_buffer,queries,occlusionQuery:occlusion_query,alpha_to_coverage:writeMask=0;renderMode="render-bundle";bufferOffset="zero";querySetOffset="zero";alpha=0.75 [ Failure ]
 
 # textureStore:out_of_bounds_array failures on Intel 770
-crbug.com/dawn/0000 [ intel-0x4680 ] webgpu:shader,execution,expression,call,builtin,textureStore:out_of_bounds_array:baseLevel=0;arrayLevels=1;type="i32" [ Failure ]
-crbug.com/dawn/0000 [ intel-0x4680 ] webgpu:shader,execution,expression,call,builtin,textureStore:out_of_bounds_array:baseLevel=0;arrayLevels=1;type="u32" [ Failure ]
+crbug.com/372044249 [ intel-0x4680 ] webgpu:shader,execution,expression,call,builtin,textureStore:out_of_bounds_array:baseLevel=0;arrayLevels=1;type="i32" [ Failure ]
+crbug.com/372044249 [ intel-0x4680 ] webgpu:shader,execution,expression,call,builtin,textureStore:out_of_bounds_array:baseLevel=0;arrayLevels=1;type="u32" [ Failure ]
 
 # getCurrentTexture failures
 crbug.com/dawn/2114 [ intel-0x9bc5 linux ] webgpu:web_platform,canvas,getCurrentTexture:resize:* [ Failure ]
