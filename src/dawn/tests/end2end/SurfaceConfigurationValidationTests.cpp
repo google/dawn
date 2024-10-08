@@ -71,7 +71,7 @@ class SurfaceConfigurationValidationTests : public DawnTest {
             ErrorLog() << "GLFW error " << code << " " << message;
         });
 
-        // GLFW can fail to start in headless environments, in which SwapChainTests are
+        // GLFW can fail to start in headless environments, in which SurfaceTests are
         // inapplicable. Skip this cases without producing a test failure.
         if (glfwInit() == GLFW_FALSE) {
             GTEST_SKIP();
@@ -188,7 +188,7 @@ TEST_P(SurfaceConfigurationValidationTests, AlphaModeAuto) {
 // Using any combination of the reported capability is ok for configuring the surface.
 TEST_P(SurfaceConfigurationValidationTests, AnyCombinationOfCapabilities) {
     // TODO(dawn:2320): Fails with "internal drawable creation failed" on the Windows NVIDIA CQ
-    // builders but not locally. This is a similar limitation to SwapChainTests.SwitchPresentMode.
+    // builders but not locally. This is a similar limitation to SurfaceTests.SwitchPresentMode.
     DAWN_SUPPRESS_TEST_IF(IsWindows() && IsVulkan() && IsNvidia());
 
     wgpu::Surface surface = CreateTestSurface();

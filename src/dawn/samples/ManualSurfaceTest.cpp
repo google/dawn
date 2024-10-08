@@ -28,11 +28,11 @@
 // This is an example to manually test surface code. Controls are the following, scoped to the
 // currently focused window:
 //  - W: creates a new window.
-//  - L: Latches the current swapchain, to check what happens when the window changes but not the
-//    swapchain.
+//  - L: Latches the current surface, to check what happens when the window changes but not the
+//    surface.
 //  - R: switches the rendering mode, between "The Red Triangle" and color-cycling clears that's
 //    (WARNING) likely seizure inducing.
-//  - D: cycles the divisor for the swapchain size.
+//  - D: cycles the divisor for the surface size.
 //  - P: switches present modes.
 //  - A: switches alpha modes.
 //  - F: switches formats.
@@ -58,7 +58,7 @@
 //
 //  - Resizing tests (with the triangle render mode):
 //    - Check that cycling divisors on the triangle produces lower and lower resolution triangles.
-//    - Check latching the swapchain config and resizing the window a bunch (smaller, bigger, and
+//    - Check latching the surface config and resizing the window a bunch (smaller, bigger, and
 //      diagonal aspect ratio).
 //
 //  - Config change tests:

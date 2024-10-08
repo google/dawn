@@ -203,7 +203,7 @@ class SurfaceTests : public DawnTest {
     wgpu::SurfaceConfiguration baseConfig;
 };
 
-// Basic test for creating a swapchain and presenting one frame.
+// Basic test for creating a surface and presenting one frame.
 TEST_P(SurfaceTests, Basic) {
     wgpu::Surface surface = CreateTestSurface();
 
@@ -231,7 +231,7 @@ TEST_P(SurfaceTests, ReconfigureBasic) {
     surface.Configure(&config);
 }
 
-// Test replacing the swapchain after GetCurrentTexture
+// Test reconfiguring the surface after GetCurrentTexture
 TEST_P(SurfaceTests, ReconfigureAfterGetCurrentTexture) {
     wgpu::Surface surface = CreateTestSurface();
     wgpu::SurfaceConfiguration config = GetPreferredConfiguration(surface);

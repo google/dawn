@@ -93,7 +93,7 @@ WGPUTextureFormat Surface::GetPreferredFormat([[maybe_unused]] WGPUAdapter adapt
 
 WGPUStatus Surface::GetCapabilities(WGPUAdapter adapter,
                                     WGPUSurfaceCapabilities* capabilities) const {
-    // Return the capabilities that were provided when injecting the swapchain.
+    // Return the capabilities that were provided when injecting the surface.
     capabilities->nextInChain = nullptr;
     capabilities->usages = mSupportedUsages;
 

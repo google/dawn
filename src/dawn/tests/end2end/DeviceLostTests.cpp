@@ -201,9 +201,8 @@ TEST_P(DeviceLostTest, CreateShaderModuleFails) {
         })"));
 }
 
-// Note that no device lost tests are done for swapchain because it is awkward to create a
-// wgpu::Surface in this file. SwapChainValidationTests.CreateSwapChainFailsAfterDevLost covers
-// this validation.
+// Note that no device lost tests are done for surface because it is awkward to create a
+// wgpu::Surface in this file. SurfaceTests.GetAfterDeviceLoss covers this validation.
 
 // Tests that CreateTexture fails when device is lost
 TEST_P(DeviceLostTest, CreateTextureFails) {

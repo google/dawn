@@ -19,7 +19,7 @@ This repository contains the implementation of Dawn, which is itself composed of
       - [`fuzzers`](../../src/dawn/fuzzers): various fuzzers for Dawn that are running in [Clusterfuzz](https://google.github.io/clusterfuzz/).
       - [`native`](../../src/dawn/native): code for the implementation of WebGPU on top of graphics APIs. Files in this folder are the "frontend" while subdirectories are "backends".
          - `<backend>`: code for the implementation of the backend on a specific graphics API, for example `d3d12`, `metal` or `vulkan`.
-      - [`samples`](../../src/dawn/samples): a small collection of samples using the native WebGPU API. They were mostly used when bringing up Dawn for the first time, and to test the `WGPUSwapChain` object.
+      - [`samples`](../../src/dawn/samples): a small collection of samples using the native WebGPU API. They were mostly used when bringing up Dawn for the first time, and to test the `WGPUSurface` object.
       - [`tests`](../../src/dawn/tests):
         - [`end2end`](../../src/dawn/tests/end2end): tests for the execution of the WebGPU API and require a GPU to run.
         - [`perf_tests`](../../src/dawn/tests/perf_tests): benchmarks for various aspects of Dawn.
