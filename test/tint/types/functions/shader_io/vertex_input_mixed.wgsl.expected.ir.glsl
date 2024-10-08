@@ -33,7 +33,8 @@ void main() {
   VertexInputs0 v_2 = VertexInputs0(v_1, tint_symbol_loc0_Input);
   uint v_3 = tint_symbol_loc1_Input;
   uint v_4 = uint(gl_InstanceID);
-  gl_Position = tint_symbol_inner(v_2, v_3, v_4, VertexInputs1(tint_symbol_loc2_Input, tint_symbol_loc3_Input));
+  uint v_5 = (v_4 + tint_push_constants.tint_first_instance);
+  gl_Position = tint_symbol_inner(v_2, v_3, v_5, VertexInputs1(tint_symbol_loc2_Input, tint_symbol_loc3_Input));
   gl_Position[1u] = -(gl_Position.y);
   gl_Position[2u] = ((2.0f * gl_Position.z) - gl_Position.w);
   gl_PointSize = 1.0f;

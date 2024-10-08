@@ -55,6 +55,7 @@
 #include "src/tint/lang/glsl/writer/raise/binary_polyfill.h"
 #include "src/tint/lang/glsl/writer/raise/bitcast_polyfill.h"
 #include "src/tint/lang/glsl/writer/raise/builtin_polyfill.h"
+#include "src/tint/lang/glsl/writer/raise/offset_first_index.h"
 #include "src/tint/lang/glsl/writer/raise/shader_io.h"
 #include "src/tint/lang/glsl/writer/raise/texture_builtins_from_uniform.h"
 #include "src/tint/lang/glsl/writer/raise/texture_polyfill.h"
@@ -149,7 +150,6 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
 
     RUN_TRANSFORM(core::ir::transform::BlockDecoratedStructs, module);
 
-    // TODO(dsinclair): OffsetFirstIndex
     // TODO(dsinclair): CombineSamplers
     // TODO(dsinclair): PadStructs
 
@@ -190,6 +190,12 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
 
     RUN_TRANSFORM(raise::ShaderIO, module,
                   raise::ShaderIOConfig{push_constant_layout.Get(), options.depth_range_offsets});
+
+    // Must come after ShaderIO as it operates on module-scope `in` variables.
+    RUN_TRANSFORM(
+        raise::OffsetFirstIndex, module,
+        raise::OffsetFirstIndexConfig{push_constant_layout.Get(), options.first_vertex_offset,
+                                      options.first_instance_offset});
 
     RUN_TRANSFORM(core::ir::transform::Std140, module);
 

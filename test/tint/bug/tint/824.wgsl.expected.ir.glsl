@@ -23,10 +23,11 @@ Output tint_symbol_inner(uint VertexIndex, uint InstanceIndex) {
 }
 void main() {
   uint v = uint(gl_VertexID);
-  Output v_1 = tint_symbol_inner(v, uint(gl_InstanceID));
-  gl_Position = v_1.Position;
+  uint v_1 = uint(gl_InstanceID);
+  Output v_2 = tint_symbol_inner(v, (v_1 + tint_push_constants.tint_first_instance));
+  gl_Position = v_2.Position;
   gl_Position[1u] = -(gl_Position.y);
   gl_Position[2u] = ((2.0f * gl_Position.z) - gl_Position.w);
-  tint_symbol_loc0_Output = v_1.color;
+  tint_symbol_loc0_Output = v_2.color;
   gl_PointSize = 1.0f;
 }
