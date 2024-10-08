@@ -30,6 +30,7 @@
 #include <string>
 #include <tuple>
 #include <unordered_map>
+#include <unordered_set>
 #include <utility>
 #include <vector>
 
@@ -272,6 +273,17 @@ TEST(SerializeTests, StdUnorderedMap) {
     EXPECT_CACHE_KEY_EQ(m, expected);
 }
 
+// Test that ByteVectorSink serializes std::unordered_set as expected.
+TEST(SerializeTests, StdUnorderedSet) {
+    const std::unordered_set<int> input = {99, 4, 6, 1};
+
+    // Expect the number of entries, followed by values sorted in order of key.
+    ByteVectorSink expected;
+    StreamIn(&expected, size_t(4), 1, 4, 6, 99);
+
+    EXPECT_CACHE_KEY_EQ(input, expected);
+}
+
 // Test that ByteVectorSink serializes tint::BindingPoint as expected.
 TEST(SerializeTests, TintSemBindingPoint) {
     tint::BindingPoint bp{3, 6};
@@ -399,6 +411,8 @@ static auto kStreamValueVectorParams = std::make_tuple(
         BitsetFromBitString("100110010101011001100110101011001100101010110011001011011"),
         BitsetFromBitString("000110010101011000100110101011001100101010010011001010100"),
         BitsetFromBitString("111111111111111111111111111111111111111111111111111111111"), 0},
+    // Test unordered_sets.
+    std::vector<std::unordered_set<int>>{{}, {4, 6, 99, 0}, {100, 300, 300}},
     // Test vectors.
     std::vector<std::vector<int>>{{}, {1, 5, 2, 7, 4}, {3, 3, 3, 3, 3, 3, 3}});
 
