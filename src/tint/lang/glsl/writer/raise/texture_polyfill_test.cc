@@ -5725,5 +5725,455 @@ $B1: {  # root
     EXPECT_EQ(expect, str());
 }
 
+TEST_F(GlslWriter_TexturePolyfillTest, TextureSampleCompareLevel_2d) {
+    core::ir::Var* tex = nullptr;
+    core::ir::Var* sampler = nullptr;
+    b.Append(b.ir.root_block, [&] {
+        tex = b.Var(
+            ty.ptr(handle, ty.Get<core::type::DepthTexture>(core::type::TextureDimension::k2d)));
+        tex->SetBindingPoint(0, 0);
+
+        sampler = b.Var(ty.ptr(
+            handle, ty.Get<core::type::Sampler>(core::type::SamplerKind::kComparisonSampler)));
+        sampler->SetBindingPoint(0, 1);
+    });
+
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        auto* coords = b.Construct(ty.vec2<f32>(), b.Value(1_f), b.Value(2_f));
+
+        auto* t = b.Load(tex);
+        auto* s = b.Load(sampler);
+        b.Let("x", b.Call<f32>(core::BuiltinFn::kTextureSampleCompareLevel, t, s, coords, 3_f));
+        b.Return(func);
+    });
+
+    auto* src = R"(
+$B1: {  # root
+  %1:ptr<handle, texture_depth_2d, read> = var @binding_point(0, 0)
+  %2:ptr<handle, sampler_comparison, read> = var @binding_point(0, 1)
+}
+
+%foo = @fragment func():void {
+  $B2: {
+    %4:vec2<f32> = construct 1.0f, 2.0f
+    %5:texture_depth_2d = load %1
+    %6:sampler_comparison = load %2
+    %7:f32 = textureSampleCompareLevel %5, %6, %4, 3.0f
+    %x:f32 = let %7
+    ret
+  }
+}
+)";
+    ASSERT_EQ(src, str());
+
+    auto* expect = R"(
+$B1: {  # root
+  %my_tex:ptr<handle, texture_depth_2d, read> = var
+}
+
+%foo = @fragment func():void {
+  $B2: {
+    %3:vec2<f32> = construct 1.0f, 2.0f
+    %4:texture_depth_2d = load %my_tex
+    %5:vec3<f32> = construct %3, 3.0f
+    %6:f32 = glsl.texture %4, %5
+    %x:f32 = let %6
+    ret
+  }
+}
+)";
+
+    capabilities = core::ir::Capabilities{core::ir::Capability::kAllowHandleVarsWithoutBindings};
+
+    TexturePolyfillConfig cfg;
+    cfg.placeholder_sampler_bind_point = {2, 2};
+
+    binding::CombinedTextureSamplerPair pair;
+    pair.texture = {0, 0};
+    pair.sampler = {0, 1};
+    cfg.sampler_texture_to_name[pair] = "my_tex";
+
+    Run(TexturePolyfill, cfg);
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(GlslWriter_TexturePolyfillTest, TextureSampleCompareLevel_2d_Offset) {
+    core::ir::Var* tex = nullptr;
+    core::ir::Var* sampler = nullptr;
+    b.Append(b.ir.root_block, [&] {
+        tex = b.Var(
+            ty.ptr(handle, ty.Get<core::type::DepthTexture>(core::type::TextureDimension::k2d)));
+        tex->SetBindingPoint(0, 0);
+
+        sampler = b.Var(ty.ptr(
+            handle, ty.Get<core::type::Sampler>(core::type::SamplerKind::kComparisonSampler)));
+        sampler->SetBindingPoint(0, 1);
+    });
+
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        auto* coords = b.Construct(ty.vec2<f32>(), b.Value(1_f), b.Value(2_f));
+        auto* offset = b.Composite<vec2<i32>>(4_i, 5_i);
+
+        auto* t = b.Load(tex);
+        auto* s = b.Load(sampler);
+        b.Let("x",
+              b.Call<f32>(core::BuiltinFn::kTextureSampleCompareLevel, t, s, coords, 3_f, offset));
+        b.Return(func);
+    });
+
+    auto* src = R"(
+$B1: {  # root
+  %1:ptr<handle, texture_depth_2d, read> = var @binding_point(0, 0)
+  %2:ptr<handle, sampler_comparison, read> = var @binding_point(0, 1)
+}
+
+%foo = @fragment func():void {
+  $B2: {
+    %4:vec2<f32> = construct 1.0f, 2.0f
+    %5:texture_depth_2d = load %1
+    %6:sampler_comparison = load %2
+    %7:f32 = textureSampleCompareLevel %5, %6, %4, 3.0f, vec2<i32>(4i, 5i)
+    %x:f32 = let %7
+    ret
+  }
+}
+)";
+    ASSERT_EQ(src, str());
+
+    auto* expect = R"(
+$B1: {  # root
+  %my_tex:ptr<handle, texture_depth_2d, read> = var
+}
+
+%foo = @fragment func():void {
+  $B2: {
+    %3:vec2<f32> = construct 1.0f, 2.0f
+    %4:texture_depth_2d = load %my_tex
+    %5:vec3<f32> = construct %3, 3.0f
+    %6:f32 = glsl.textureOffset %4, %5, vec2<i32>(4i, 5i)
+    %x:f32 = let %6
+    ret
+  }
+}
+)";
+
+    capabilities = core::ir::Capabilities{core::ir::Capability::kAllowHandleVarsWithoutBindings};
+
+    TexturePolyfillConfig cfg;
+    cfg.placeholder_sampler_bind_point = {2, 2};
+
+    binding::CombinedTextureSamplerPair pair;
+    pair.texture = {0, 0};
+    pair.sampler = {0, 1};
+    cfg.sampler_texture_to_name[pair] = "my_tex";
+
+    Run(TexturePolyfill, cfg);
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(GlslWriter_TexturePolyfillTest, TextureSampleCompareLevel_2d_Array) {
+    core::ir::Var* tex = nullptr;
+    core::ir::Var* sampler = nullptr;
+    b.Append(b.ir.root_block, [&] {
+        tex = b.Var(ty.ptr(
+            handle, ty.Get<core::type::DepthTexture>(core::type::TextureDimension::k2dArray)));
+        tex->SetBindingPoint(0, 0);
+
+        sampler = b.Var(ty.ptr(
+            handle, ty.Get<core::type::Sampler>(core::type::SamplerKind::kComparisonSampler)));
+        sampler->SetBindingPoint(0, 1);
+    });
+
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        auto* coords = b.Construct(ty.vec2<f32>(), b.Value(1_f), b.Value(2_f));
+        auto* array_idx = b.Value(4_u);
+
+        auto* t = b.Load(tex);
+        auto* s = b.Load(sampler);
+        b.Let("x", b.Call<f32>(core::BuiltinFn::kTextureSampleCompareLevel, t, s, coords, array_idx,
+                               3_f));
+        b.Return(func);
+    });
+
+    auto* src = R"(
+$B1: {  # root
+  %1:ptr<handle, texture_depth_2d_array, read> = var @binding_point(0, 0)
+  %2:ptr<handle, sampler_comparison, read> = var @binding_point(0, 1)
+}
+
+%foo = @fragment func():void {
+  $B2: {
+    %4:vec2<f32> = construct 1.0f, 2.0f
+    %5:texture_depth_2d_array = load %1
+    %6:sampler_comparison = load %2
+    %7:f32 = textureSampleCompareLevel %5, %6, %4, 4u, 3.0f
+    %x:f32 = let %7
+    ret
+  }
+}
+)";
+    ASSERT_EQ(src, str());
+
+    auto* expect = R"(
+$B1: {  # root
+  %my_tex:ptr<handle, texture_depth_2d_array, read> = var
+}
+
+%foo = @fragment func():void {
+  $B2: {
+    %3:vec2<f32> = construct 1.0f, 2.0f
+    %4:texture_depth_2d_array = load %my_tex
+    %5:f32 = convert 4u
+    %6:vec4<f32> = construct %3, %5, 3.0f
+    %7:f32 = glsl.texture %4, %6
+    %x:f32 = let %7
+    ret
+  }
+}
+)";
+
+    capabilities = core::ir::Capabilities{core::ir::Capability::kAllowHandleVarsWithoutBindings};
+
+    TexturePolyfillConfig cfg;
+    cfg.placeholder_sampler_bind_point = {2, 2};
+
+    binding::CombinedTextureSamplerPair pair;
+    pair.texture = {0, 0};
+    pair.sampler = {0, 1};
+    cfg.sampler_texture_to_name[pair] = "my_tex";
+
+    Run(TexturePolyfill, cfg);
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(GlslWriter_TexturePolyfillTest, TextureSampleCompareLevel_2d_Array_Offset) {
+    core::ir::Var* tex = nullptr;
+    core::ir::Var* sampler = nullptr;
+    b.Append(b.ir.root_block, [&] {
+        tex = b.Var(ty.ptr(
+            handle, ty.Get<core::type::DepthTexture>(core::type::TextureDimension::k2dArray)));
+        tex->SetBindingPoint(0, 0);
+
+        sampler = b.Var(ty.ptr(
+            handle, ty.Get<core::type::Sampler>(core::type::SamplerKind::kComparisonSampler)));
+        sampler->SetBindingPoint(0, 1);
+    });
+
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        auto* coords = b.Construct(ty.vec2<f32>(), b.Value(1_f), b.Value(2_f));
+        auto* array_idx = b.Value(4_u);
+        auto* offset = b.Composite<vec2<i32>>(4_i, 5_i);
+
+        auto* t = b.Load(tex);
+        auto* s = b.Load(sampler);
+        b.Let("x", b.Call<f32>(core::BuiltinFn::kTextureSampleCompareLevel, t, s, coords, array_idx,
+                               3_f, offset));
+        b.Return(func);
+    });
+
+    auto* src = R"(
+$B1: {  # root
+  %1:ptr<handle, texture_depth_2d_array, read> = var @binding_point(0, 0)
+  %2:ptr<handle, sampler_comparison, read> = var @binding_point(0, 1)
+}
+
+%foo = @fragment func():void {
+  $B2: {
+    %4:vec2<f32> = construct 1.0f, 2.0f
+    %5:texture_depth_2d_array = load %1
+    %6:sampler_comparison = load %2
+    %7:f32 = textureSampleCompareLevel %5, %6, %4, 4u, 3.0f, vec2<i32>(4i, 5i)
+    %x:f32 = let %7
+    ret
+  }
+}
+)";
+    ASSERT_EQ(src, str());
+
+    auto* expect = R"(
+$B1: {  # root
+  %my_tex:ptr<handle, texture_depth_2d_array, read> = var
+}
+
+%foo = @fragment func():void {
+  $B2: {
+    %3:vec2<f32> = construct 1.0f, 2.0f
+    %4:texture_depth_2d_array = load %my_tex
+    %5:f32 = convert 4u
+    %6:vec4<f32> = construct %3, %5, 3.0f
+    %7:f32 = glsl.textureOffset %4, %6, vec2<i32>(4i, 5i)
+    %x:f32 = let %7
+    ret
+  }
+}
+)";
+
+    capabilities = core::ir::Capabilities{core::ir::Capability::kAllowHandleVarsWithoutBindings};
+
+    TexturePolyfillConfig cfg;
+    cfg.placeholder_sampler_bind_point = {2, 2};
+
+    binding::CombinedTextureSamplerPair pair;
+    pair.texture = {0, 0};
+    pair.sampler = {0, 1};
+    cfg.sampler_texture_to_name[pair] = "my_tex";
+
+    Run(TexturePolyfill, cfg);
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(GlslWriter_TexturePolyfillTest, TextureSampleCompareLevel_Cube) {
+    core::ir::Var* tex = nullptr;
+    core::ir::Var* sampler = nullptr;
+    b.Append(b.ir.root_block, [&] {
+        tex = b.Var(
+            ty.ptr(handle, ty.Get<core::type::DepthTexture>(core::type::TextureDimension::kCube)));
+        tex->SetBindingPoint(0, 0);
+
+        sampler = b.Var(ty.ptr(
+            handle, ty.Get<core::type::Sampler>(core::type::SamplerKind::kComparisonSampler)));
+        sampler->SetBindingPoint(0, 1);
+    });
+
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        auto* coords = b.Construct(ty.vec3<f32>(), b.Value(1_f), b.Value(2_f), b.Value(3_f));
+
+        auto* t = b.Load(tex);
+        auto* s = b.Load(sampler);
+        b.Let("x", b.Call<f32>(core::BuiltinFn::kTextureSampleCompareLevel, t, s, coords, 3_f));
+        b.Return(func);
+    });
+
+    auto* src = R"(
+$B1: {  # root
+  %1:ptr<handle, texture_depth_cube, read> = var @binding_point(0, 0)
+  %2:ptr<handle, sampler_comparison, read> = var @binding_point(0, 1)
+}
+
+%foo = @fragment func():void {
+  $B2: {
+    %4:vec3<f32> = construct 1.0f, 2.0f, 3.0f
+    %5:texture_depth_cube = load %1
+    %6:sampler_comparison = load %2
+    %7:f32 = textureSampleCompareLevel %5, %6, %4, 3.0f
+    %x:f32 = let %7
+    ret
+  }
+}
+)";
+    ASSERT_EQ(src, str());
+
+    auto* expect = R"(
+$B1: {  # root
+  %my_tex:ptr<handle, texture_depth_cube, read> = var
+}
+
+%foo = @fragment func():void {
+  $B2: {
+    %3:vec3<f32> = construct 1.0f, 2.0f, 3.0f
+    %4:texture_depth_cube = load %my_tex
+    %5:vec4<f32> = construct %3, 3.0f
+    %6:f32 = glsl.texture %4, %5
+    %x:f32 = let %6
+    ret
+  }
+}
+)";
+
+    capabilities = core::ir::Capabilities{core::ir::Capability::kAllowHandleVarsWithoutBindings};
+
+    TexturePolyfillConfig cfg;
+    cfg.placeholder_sampler_bind_point = {2, 2};
+
+    binding::CombinedTextureSamplerPair pair;
+    pair.texture = {0, 0};
+    pair.sampler = {0, 1};
+    cfg.sampler_texture_to_name[pair] = "my_tex";
+
+    Run(TexturePolyfill, cfg);
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(GlslWriter_TexturePolyfillTest, TextureSampleCompareLevel_Cube_Array) {
+    core::ir::Var* tex = nullptr;
+    core::ir::Var* sampler = nullptr;
+    b.Append(b.ir.root_block, [&] {
+        tex = b.Var(ty.ptr(
+            handle, ty.Get<core::type::DepthTexture>(core::type::TextureDimension::kCubeArray)));
+        tex->SetBindingPoint(0, 0);
+
+        sampler = b.Var(ty.ptr(
+            handle, ty.Get<core::type::Sampler>(core::type::SamplerKind::kComparisonSampler)));
+        sampler->SetBindingPoint(0, 1);
+    });
+
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        auto* coords = b.Construct(ty.vec3<f32>(), b.Value(1_f), b.Value(2_f), b.Value(3_f));
+        auto* array_idx = b.Value(4_u);
+
+        auto* t = b.Load(tex);
+        auto* s = b.Load(sampler);
+        b.Let("x", b.Call<f32>(core::BuiltinFn::kTextureSampleCompareLevel, t, s, coords, array_idx,
+                               3_f));
+        b.Return(func);
+    });
+
+    auto* src = R"(
+$B1: {  # root
+  %1:ptr<handle, texture_depth_cube_array, read> = var @binding_point(0, 0)
+  %2:ptr<handle, sampler_comparison, read> = var @binding_point(0, 1)
+}
+
+%foo = @fragment func():void {
+  $B2: {
+    %4:vec3<f32> = construct 1.0f, 2.0f, 3.0f
+    %5:texture_depth_cube_array = load %1
+    %6:sampler_comparison = load %2
+    %7:f32 = textureSampleCompareLevel %5, %6, %4, 4u, 3.0f
+    %x:f32 = let %7
+    ret
+  }
+}
+)";
+    ASSERT_EQ(src, str());
+
+    auto* expect = R"(
+$B1: {  # root
+  %my_tex:ptr<handle, texture_depth_cube_array, read> = var
+}
+
+%foo = @fragment func():void {
+  $B2: {
+    %3:vec3<f32> = construct 1.0f, 2.0f, 3.0f
+    %4:texture_depth_cube_array = load %my_tex
+    %5:f32 = convert 4u
+    %6:vec4<f32> = construct %3, %5
+    %7:f32 = glsl.texture %4, %6, 3.0f
+    %x:f32 = let %7
+    ret
+  }
+}
+)";
+
+    capabilities = core::ir::Capabilities{core::ir::Capability::kAllowHandleVarsWithoutBindings};
+
+    TexturePolyfillConfig cfg;
+    cfg.placeholder_sampler_bind_point = {2, 2};
+
+    binding::CombinedTextureSamplerPair pair;
+    pair.texture = {0, 0};
+    pair.sampler = {0, 1};
+    cfg.sampler_texture_to_name[pair] = "my_tex";
+
+    Run(TexturePolyfill, cfg);
+    EXPECT_EQ(expect, str());
+}
+
 }  // namespace
 }  // namespace tint::glsl::writer::raise
