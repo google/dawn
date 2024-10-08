@@ -1,4 +1,4 @@
-SKIP: FAILED
+SKIP: INVALID
 
 static float4 x_GLF_color = float4(0.0f, 0.0f, 0.0f, 0.0f);
 cbuffer cbuffer_x_6 : register(b0) {

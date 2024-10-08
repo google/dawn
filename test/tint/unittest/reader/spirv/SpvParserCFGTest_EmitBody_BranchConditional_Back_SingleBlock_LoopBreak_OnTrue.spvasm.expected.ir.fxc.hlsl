@@ -1,4 +1,4 @@
-SKIP: FAILED
+SKIP: INVALID
 
 
 static uint var_1 = 0u;

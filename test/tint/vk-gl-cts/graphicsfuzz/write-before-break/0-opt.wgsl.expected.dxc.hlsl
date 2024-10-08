@@ -1,4 +1,4 @@
-SKIP: FAILED
+SKIP: INVALID
 
 void set_matrix_scalar(inout float4x3 mat, int col, int row, float val) {
   switch (col) {
