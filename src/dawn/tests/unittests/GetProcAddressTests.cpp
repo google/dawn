@@ -131,57 +131,41 @@ class GetProcAddressTests : public testing::TestWithParam<DawnFlavor> {
 
 // Test GetProcAddress with and without devices on some valid examples
 TEST_P(GetProcAddressTests, ValidExamples) {
-    ASSERT_EQ(mProcs.getProcAddress2(nullptr, {"wgpuDeviceCreateBuffer", WGPU_STRLEN}),
+    ASSERT_EQ(mProcs.getProcAddress({"wgpuDeviceCreateBuffer", WGPU_STRLEN}),
               reinterpret_cast<WGPUProc>(mProcs.deviceCreateBuffer));
-    ASSERT_EQ(mProcs.getProcAddress2(mDevice.Get(), {"wgpuDeviceCreateBuffer", WGPU_STRLEN}),
-              reinterpret_cast<WGPUProc>(mProcs.deviceCreateBuffer));
-    ASSERT_EQ(mProcs.getProcAddress2(nullptr, {"wgpuQueueSubmit", WGPU_STRLEN}),
-              reinterpret_cast<WGPUProc>(mProcs.queueSubmit));
-    ASSERT_EQ(mProcs.getProcAddress2(mDevice.Get(), {"wgpuQueueSubmit", WGPU_STRLEN}),
+    ASSERT_EQ(mProcs.getProcAddress({"wgpuQueueSubmit", WGPU_STRLEN}),
               reinterpret_cast<WGPUProc>(mProcs.queueSubmit));
     // Test a longer string, truncated correctly with the length field.
-    ASSERT_EQ(mProcs.getProcAddress2(mDevice.Get(), {"wgpuQueueSubmitExtraString", 15}),
+    ASSERT_EQ(mProcs.getProcAddress({"wgpuQueueSubmitExtraString", 15}),
               reinterpret_cast<WGPUProc>(mProcs.queueSubmit));
 }
 
 // Test GetProcAddress with and without devices on nullptr procName
 TEST_P(GetProcAddressTests, Nullptr) {
-    ASSERT_EQ(mProcs.getProcAddress2(nullptr, {nullptr, WGPU_STRLEN}), nullptr);
-    ASSERT_EQ(mProcs.getProcAddress2(mDevice.Get(), {nullptr, WGPU_STRLEN}), nullptr);
+    ASSERT_EQ(mProcs.getProcAddress({nullptr, WGPU_STRLEN}), nullptr);
 }
 
 // Test GetProcAddress with and without devices on some invalid
 TEST_P(GetProcAddressTests, InvalidExamples) {
-    ASSERT_EQ(mProcs.getProcAddress2(nullptr, {"wgpuDeviceDoSomething", WGPU_STRLEN}), nullptr);
-    ASSERT_EQ(mProcs.getProcAddress2(mDevice.Get(), {"wgpuDeviceDoSomething", WGPU_STRLEN}),
-              nullptr);
+    ASSERT_EQ(mProcs.getProcAddress({"wgpuDeviceDoSomething", WGPU_STRLEN}), nullptr);
 
     // Test a "valid" string, truncated to not match with the length field.
-    ASSERT_EQ(mProcs.getProcAddress2(mDevice.Get(), {"wgpuQueueSubmit", 14}), nullptr);
+    ASSERT_EQ(mProcs.getProcAddress({"wgpuQueueSubmit", 14}), nullptr);
 
     // Trigger the condition where lower_bound will return the end of the procMap.
-    ASSERT_EQ(mProcs.getProcAddress2(nullptr, {"zzzzzzz", WGPU_STRLEN}), nullptr);
-    ASSERT_EQ(mProcs.getProcAddress2(mDevice.Get(), {"zzzzzzz", WGPU_STRLEN}), nullptr);
-    ASSERT_EQ(mProcs.getProcAddress2(nullptr, {"ZZ", WGPU_STRLEN}), nullptr);
-    ASSERT_EQ(mProcs.getProcAddress2(mDevice.Get(), {"ZZ", WGPU_STRLEN}), nullptr);
+    ASSERT_EQ(mProcs.getProcAddress({"zzzzzzz", WGPU_STRLEN}), nullptr);
+    ASSERT_EQ(mProcs.getProcAddress({"ZZ", WGPU_STRLEN}), nullptr);
 
     // Some more potential corner cases.
-    ASSERT_EQ(mProcs.getProcAddress2(nullptr, {"", WGPU_STRLEN}), nullptr);
-    ASSERT_EQ(mProcs.getProcAddress2(mDevice.Get(), {"", WGPU_STRLEN}), nullptr);
-    ASSERT_EQ(mProcs.getProcAddress2(nullptr, {"0", WGPU_STRLEN}), nullptr);
-    ASSERT_EQ(mProcs.getProcAddress2(mDevice.Get(), {"0", WGPU_STRLEN}), nullptr);
+    ASSERT_EQ(mProcs.getProcAddress({"", WGPU_STRLEN}), nullptr);
+    ASSERT_EQ(mProcs.getProcAddress({"0", WGPU_STRLEN}), nullptr);
 }
 
 // Test that GetProcAddress supports freestanding function that are handled specially
 TEST_P(GetProcAddressTests, FreeStandingFunctions) {
-    ASSERT_EQ(mProcs.getProcAddress2(nullptr, {"wgpuGetProcAddress", WGPU_STRLEN}),
+    ASSERT_EQ(mProcs.getProcAddress({"wgpuGetProcAddress", WGPU_STRLEN}),
               reinterpret_cast<WGPUProc>(mProcs.getProcAddress));
-    ASSERT_EQ(mProcs.getProcAddress2(mDevice.Get(), {"wgpuGetProcAddress", WGPU_STRLEN}),
-              reinterpret_cast<WGPUProc>(mProcs.getProcAddress));
-
-    ASSERT_EQ(mProcs.getProcAddress2(nullptr, {"wgpuCreateInstance", WGPU_STRLEN}),
-              reinterpret_cast<WGPUProc>(mProcs.createInstance));
-    ASSERT_EQ(mProcs.getProcAddress2(mDevice.Get(), {"wgpuCreateInstance", WGPU_STRLEN}),
+    ASSERT_EQ(mProcs.getProcAddress({"wgpuCreateInstance", WGPU_STRLEN}),
               reinterpret_cast<WGPUProc>(mProcs.createInstance));
 }
 

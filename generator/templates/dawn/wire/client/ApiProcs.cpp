@@ -134,14 +134,7 @@ namespace {
     static constexpr size_t sProcMapSize = sizeof(sProcMap) / sizeof(sProcMap[0]);
 }  // anonymous namespace
 
-//* TODO(crbug.com/42241188): Remove "2" suffix when WGPUStringView changes complete.
-WGPUProc {{as_cMethodNamespaced(None, Name('get proc address 2'), Name('dawn wire client'))}}(WGPUDevice, WGPUStringView procName);
-
-DAWN_WIRE_EXPORT WGPUProc {{as_cMethodNamespaced(None, Name('get proc address'), Name('dawn wire client'))}}(WGPUDevice device, const char* procName) {
-    return {{as_cMethodNamespaced(None, Name('get proc address 2'), Name('dawn wire client'))}}(device, {procName, WGPU_STRLEN});
-}
-
-DAWN_WIRE_EXPORT WGPUProc {{as_cMethodNamespaced(None, Name('get proc address 2'), Name('dawn wire client'))}}(WGPUDevice, WGPUStringView cProcName) {
+DAWN_WIRE_EXPORT WGPUProc {{as_cMethodNamespaced(None, Name('get proc address'), Name('dawn wire client'))}}(WGPUStringView cProcName) {
     if (cProcName.data == nullptr) {
         return nullptr;
     }
