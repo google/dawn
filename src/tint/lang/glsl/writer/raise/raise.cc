@@ -66,6 +66,12 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
         }                                \
     } while (false)
 
+    // Must come before TextureBuiltinsFromUniform as it may add `textureNumLevels` calls.
+    if (!options.disable_robustness) {
+        core::ir::transform::RobustnessConfig config{};
+        RUN_TRANSFORM(core::ir::transform::Robustness, module, config);
+    }
+
     // Note, this comes before binding remapper as Dawn inserts _pre-remapping_ binding information.
     // So, in order to move this later we'd need to update Dawn to send the _post-remapping_ data.
     RUN_TRANSFORM(raise::TextureBuiltinsFromUniform, module,
@@ -107,11 +113,6 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
         core::ir::transform::ConversionPolyfillConfig conversion_polyfills;
         conversion_polyfills.ftoi = true;
         RUN_TRANSFORM(core::ir::transform::ConversionPolyfill, module, conversion_polyfills);
-    }
-
-    if (!options.disable_robustness) {
-        core::ir::transform::RobustnessConfig config{};
-        RUN_TRANSFORM(core::ir::transform::Robustness, module, config);
     }
 
     RUN_TRANSFORM(core::ir::transform::MultiplanarExternalTexture, module, multiplanar_map);

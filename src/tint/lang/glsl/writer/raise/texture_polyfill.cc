@@ -206,8 +206,6 @@ struct State {
             case core::BuiltinFn::kTextureDimensions:
             case core::BuiltinFn::kTextureLoad:
             case core::BuiltinFn::kTextureNumLayers:
-            case core::BuiltinFn::kTextureNumLevels:
-            case core::BuiltinFn::kTextureNumSamples:
             case core::BuiltinFn::kTextureStore:
                 return {VarForValue(args[0]), nullptr};
             case core::BuiltinFn::kTextureGather: {
@@ -354,9 +352,6 @@ struct State {
                         });
                         break;
                     }
-                    case core::BuiltinFn::kTextureNumLevels:
-                        // No changes needed.
-                        break;
                     default:
                         TINT_UNREACHABLE() << "unknown usage instruction for texture";
                 }

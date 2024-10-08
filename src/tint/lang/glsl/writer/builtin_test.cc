@@ -877,7 +877,7 @@ void main() {
 )");
 }
 
-TEST_F(GlslWriterTest, DISABLED_BuiltinTextureDimensions_2d_WithU32Lod) {
+TEST_F(GlslWriterTest, BuiltinTextureDimensions_2d_WithU32Lod) {
     auto* type = ty.Get<core::type::SampledTexture>(core::type::TextureDimension::k2d, ty.f32());
     auto* var = b.Var("v", handle, type, core::Access::kReadWrite);
     var->SetBindingPoint(0, 0);
@@ -889,10 +889,24 @@ TEST_F(GlslWriterTest, DISABLED_BuiltinTextureDimensions_2d_WithU32Lod) {
         b.Return(func);
     });
 
-    ASSERT_TRUE(Generate()) << err_ << output_.glsl;
-    EXPECT_EQ(output_.glsl, GlslHeader() + R"(
-layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+    Options opts{};
+    opts.bindings.texture_builtins_from_uniform.ubo_bindingpoint_ordering = {{0, 0}};
+    ASSERT_TRUE(Generate(opts)) << err_ << output_.glsl;
+    EXPECT_EQ(output_.glsl, GlslHeader() + R"(precision highp float;
+precision highp int;
+
+
+struct TintTextureUniformData {
+  uint tint_builtin_value_0;
+};
+
+layout(binding = 0, std140)
+uniform tint_symbol_1_1_ubo {
+  TintTextureUniformData tint_symbol;
+} v_1;
+uniform highp sampler2D v;
 void main() {
+  uvec2 x = uvec2(textureSize(v, int(min(3u, (v_1.tint_symbol.tint_builtin_value_0 - 1u)))));
 }
 )");
 }
