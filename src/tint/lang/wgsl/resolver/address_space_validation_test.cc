@@ -866,7 +866,7 @@ TEST_F(ResolverAddressSpaceValidationTest, PointerAlias_PushConstantBool) {
     EXPECT_EQ(
         r()->error(),
         R"(12:34 error: type 'bool' cannot be used in address space 'push_constant' as it is non-host-shareable
-note: while instantiating ptr<push_constant, bool, read_write>)");
+note: while instantiating ptr<push_constant, bool, read>)");
 }
 
 TEST_F(ResolverAddressSpaceValidationTest, GlobalVariable_PushConstantF16) {
