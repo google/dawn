@@ -29,7 +29,7 @@ FragmentOutputs tint_symbol_inner() {
 void main() {
   FragmentOutputs v = tint_symbol_inner();
   tint_symbol_loc0_Output = v.loc0;
-  gl_FragDepth = v.frag_depth;
+  gl_FragDepth = clamp(v.frag_depth, tint_push_constants.tint_frag_depth_min, tint_push_constants.tint_frag_depth_max);
   tint_symbol_loc1_Output = v.loc1;
   tint_symbol_loc2_Output = v.loc2;
   gl_SampleMask[0u] = int(v.sample_mask);

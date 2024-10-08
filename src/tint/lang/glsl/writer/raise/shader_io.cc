@@ -243,12 +243,16 @@ struct StateImpl : core::ir::transform::ShaderIOBackendState {
     /// @returns the clamped value
     core::ir::Value* ClampFragDepth([[maybe_unused]] core::ir::Builder& builder,
                                     core::ir::Value* frag_depth) {
-        // TODO(dsinclair): Add a clamp frag depth implementation. The `depth_offsets.{min,max}` are
-        // offsets into a push_constant structure, not the actual values as was done here.
-        //
-        // This needs to create a the `push_constant` structure (or append to the existing one if it
-        // was already created) and add these members.
-        return frag_depth;
+        if (!config.depth_range_offsets) {
+            return frag_depth;
+        }
+
+        auto* push_constants = config.push_constant_layout.var;
+        auto min_idx = u32(config.push_constant_layout.IndexOf(config.depth_range_offsets->min));
+        auto max_idx = u32(config.push_constant_layout.IndexOf(config.depth_range_offsets->max));
+        auto* min = builder.Load(builder.Access<ptr<push_constant, f32>>(push_constants, min_idx));
+        auto* max = builder.Load(builder.Access<ptr<push_constant, f32>>(push_constants, max_idx));
+        return builder.Call<f32>(core::BuiltinFn::kClamp, frag_depth, min, max)->Result(0);
     }
 
     /// @copydoc ShaderIO::BackendState::NeedsVertexPointSize

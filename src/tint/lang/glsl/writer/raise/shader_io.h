@@ -30,6 +30,7 @@
 
 #include <string>
 
+#include "src/tint/lang/core/ir/transform/prepare_push_constants.h"
 #include "src/tint/lang/glsl/writer/common/options.h"
 #include "src/tint/utils/diagnostic/diagnostic.h"
 #include "src/tint/utils/result/result.h"
@@ -43,12 +44,15 @@ namespace tint::glsl::writer::raise {
 
 /// ShaderIOConfig describes the set of configuration options for the ShaderIO transform.
 struct ShaderIOConfig {
+    /// push constant layout information
+    const core::ir::transform::PushConstantLayout& push_constant_layout;
+
     /// offsets for clamping frag depth
-    std::optional<Options::RangeOffsets> depth_range_offsets;
+    std::optional<Options::RangeOffsets> depth_range_offsets{};
 };
 
 /// ShaderIO is a transform that moves each entry point function's parameters and return value to
-/// global variables to prepare them for SPIR-V codegen.
+/// global variables to prepare them for GLSL codegen.
 /// @param module the module to transform
 /// @param config the configuration
 /// @returns success or failure

@@ -13,7 +13,8 @@ float main1_inner() {
   return 1.0f;
 }
 void main() {
-  gl_FragDepth = main1_inner();
+  float v = main1_inner();
+  gl_FragDepth = clamp(v, tint_push_constants.tint_frag_depth_min, tint_push_constants.tint_frag_depth_max);
 }
 #version 310 es
 #extension GL_OES_sample_variables: require
