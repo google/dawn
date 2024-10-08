@@ -462,8 +462,10 @@ struct State {
         b.InsertBefore(call, [&] {
             auto func = glsl::BuiltinFn::kTextureSize;
 
+            uint32_t idx = 0;
+
             Vector<core::ir::Value*, 2> new_args;
-            auto* tex = GetNewTexture(args[0]);
+            auto* tex = GetNewTexture(args[idx++]);
             auto* tex_ty = tex->Type()->As<core::type::Texture>();
 
             new_args.Push(tex);
@@ -481,7 +483,7 @@ struct State {
                     new_args.Push(b.Constant(0_i));
                 } else {
                     // Make sure the LOD is a i32
-                    new_args.Push(b.Bitcast(ty.i32(), args[1])->Result(0));
+                    new_args.Push(b.Bitcast(ty.i32(), args[idx++])->Result(0));
                 }
             }
 
@@ -545,8 +547,9 @@ struct State {
 
     void TextureLoad(core::ir::CoreBuiltinCall* call) {
         b.InsertBefore(call, [&] {
+            uint32_t idx = 0;
             auto args = call->Args();
-            auto* tex = GetNewTexture(args[0]);
+            auto* tex = GetNewTexture(args[idx++]);
 
             // No loading from a depth texture in GLSL, so we should never have gotten here.
             TINT_ASSERT(!tex->Type()->Is<core::type::DepthTexture>());
@@ -566,31 +569,31 @@ struct State {
             Vector<core::ir::Value*, 3> call_args{tex};
             switch (tex_type->Dim()) {
                 case core::type::TextureDimension::k2d: {
-                    call_args.Push(b.Convert(ty.vec2<i32>(), args[1])->Result(0));
+                    call_args.Push(b.Convert(ty.vec2<i32>(), args[idx++])->Result(0));
                     if (is_ms) {
-                        call_args.Push(b.Convert(ty.i32(), args[2])->Result(0));
+                        call_args.Push(b.Convert(ty.i32(), args[idx++])->Result(0));
                     } else {
                         if (!is_storage) {
-                            call_args.Push(b.Convert(ty.i32(), args[2])->Result(0));
+                            call_args.Push(b.Convert(ty.i32(), args[idx++])->Result(0));
                         }
                     }
                     break;
                 }
                 case core::type::TextureDimension::k2dArray: {
-                    auto* coord = b.Convert(ty.vec2<i32>(), args[1]);
-                    auto* ary_idx = b.Convert(ty.i32(), args[2]);
+                    auto* coord = b.Convert(ty.vec2<i32>(), args[idx++]);
+                    auto* ary_idx = b.Convert(ty.i32(), args[idx++]);
                     call_args.Push(b.Construct(ty.vec3<i32>(), coord, ary_idx)->Result(0));
 
                     if (!is_storage) {
-                        call_args.Push(b.Convert(ty.i32(), args[3])->Result(0));
+                        call_args.Push(b.Convert(ty.i32(), args[idx++])->Result(0));
                     }
                     break;
                 }
                 case core::type::TextureDimension::k3d: {
-                    call_args.Push(b.Convert(ty.vec3<i32>(), args[1])->Result(0));
+                    call_args.Push(b.Convert(ty.vec3<i32>(), args[idx++])->Result(0));
 
                     if (!is_storage) {
-                        call_args.Push(b.Convert(ty.i32(), args[2])->Result(0));
+                        call_args.Push(b.Convert(ty.i32(), args[idx++])->Result(0));
                     }
                     break;
                 }
@@ -606,8 +609,9 @@ struct State {
 
     void TextureStore(core::ir::BuiltinCall* call) {
         b.InsertBefore(call, [&] {
+            uint32_t idx = 0;
             auto args = call->Args();
-            auto* tex = GetNewTexture(args[0]);
+            auto* tex = GetNewTexture(args[idx++]);
             auto* tex_type = tex->Type()->As<core::type::StorageTexture>();
             TINT_ASSERT(tex_type);
 
@@ -615,8 +619,8 @@ struct State {
             new_args.Push(tex);
 
             if (tex_type->Dim() == core::type::TextureDimension::k2dArray) {
-                auto* coords = args[1];
-                auto* array_idx = args[2];
+                auto* coords = args[idx++];
+                auto* array_idx = args[idx++];
 
                 auto* coords_ty = coords->Type()->As<core::type::Vector>();
                 TINT_ASSERT(coords_ty);
@@ -625,10 +629,10 @@ struct State {
                                                b.Convert(coords_ty->Type(), array_idx));
                 new_args.Push(new_coords->Result(0));
 
-                new_args.Push(args[3]);
+                new_args.Push(args[idx++]);
             } else {
-                new_args.Push(args[1]);
-                new_args.Push(args[2]);
+                new_args.Push(args[idx++]);
+                new_args.Push(args[idx++]);
             }
 
             b.CallWithResult<glsl::ir::BuiltinCall>(
