@@ -58,7 +58,6 @@ type vec4<T>
 
 type array<T>
 
-type texture_1d<T>
 type texture_2d<T>
 type texture_2d_array<T>
 type texture_3d<T>
@@ -187,6 +186,48 @@ implicit(T: f32_f16, N: num) fn dot(vec<N, T>, vec<N, T>) -> T
 @must_use @const implicit(N: num, T: f32_f16) fn frexp(value: vec<N, T>,
                                                        exp : ptr<function, vec<N, i32>, read_write>) -> vec<N, T>
 
+fn texture(texture: texture_2d<f32>, coords: vec2<f32>) -> vec4<f32>
+fn texture(texture: texture_2d_array<f32>, coords: vec3<f32>) -> vec4<f32>
+fn texture(texture: texture_3d<f32>, coords: vec3<f32>) -> vec4<f32>
+fn texture(texture: texture_cube<f32>, coords: vec3<f32>) -> vec4<f32>
+fn texture(texture: texture_cube_array<f32>, coords: vec4<f32>) -> vec4<f32>
+fn texture(texture: texture_depth_2d, coords: vec3<f32>) -> f32
+fn texture(texture: texture_depth_2d_array, coords: vec4<f32>) -> f32
+fn texture(texture: texture_depth_cube, coords: vec4<f32>) -> f32
+fn texture(texture: texture_depth_cube_array, coords: vec4<f32>, compare_value: f32) -> f32
+
+fn textureOffset(texture: texture_2d<f32>, coords: vec2<f32>, offset: vec2<i32>) -> vec4<f32>
+fn textureOffset(texture: texture_2d_array<f32>, coords: vec3<f32>, offset: vec2<i32>) -> vec4<f32>
+fn textureOffset(texture: texture_3d<f32>, coords: vec3<f32>, offset: vec3<i32>) -> vec4<f32>
+fn textureOffset(texture: texture_depth_2d, coords: vec3<f32>, offset: vec2<i32>) -> f32
+fn textureOffset(texture: texture_depth_2d_array, coords: vec4<f32>, offset: vec2<i32>) -> f32
+
+fn textureGradOffset(texture: texture_2d<f32>,
+                     coords: vec2<f32>,
+                     ddx: vec2<f32>,
+                     ddy: vec2<f32>,
+                     offset: vec2<i32>) -> vec4<f32>
+fn textureGradOffset(texture: texture_2d_array<f32>,
+                     coords: vec3<f32>,
+                     ddx: vec2<f32>,
+                     ddy: vec2<f32>,
+                     offset: vec2<i32>) -> vec4<f32>
+fn textureGradOffset(texture: texture_3d<f32>,
+                     coords: vec3<f32>,
+                     ddx: vec3<f32>,
+                     ddy: vec3<f32>,
+                     offset: vec3<i32>) -> vec4<f32>
+fn textureGradOffset(texture: texture_depth_2d,
+                     coords: vec3<f32>,
+                     ddx: vec2<f32>,
+                     ddy: vec2<f32>,
+                     offset: vec2<i32>) -> f32
+fn textureGradOffset(texture: texture_depth_2d_array,
+                     coords: vec4<f32>,
+                     ddx: vec2<f32>,
+                     ddy: vec2<f32>,
+                     offset: vec2<i32>) -> f32
+
 @must_use implicit(T: fiu32) fn textureGather(
         texture: texture_2d<T>,
         coords: vec2<f32>,
@@ -241,8 +282,6 @@ implicit(T: f32_f16, N: num) fn dot(vec<N, T>, vec<N, T>) -> T
         refz: f32,
         offset: vec2<i32>) -> vec4<f32>
 
-@must_use implicit(T: fiu32) fn textureSize(texture: texture_1d<T>,
-                                            level: i32) -> i32
 @must_use implicit(T: fiu32) fn textureSize(texture: texture_2d<T>,
                                             level: i32) -> vec2<i32>
 @must_use implicit(T: fiu32) fn textureSize(texture: texture_2d_array<T>,
@@ -274,7 +313,6 @@ implicit(T: f32_f16, N: num) fn dot(vec<N, T>, vec<N, T>) -> T
 @must_use implicit(F: texel_format, A: access) fn imageSize(
                                             texture: texture_storage_3d<F, A>) -> vec3<i32>
 
-implicit(T: fiu32) fn texelFetch(texture: texture_1d<T>, location: i32, level: i32) -> vec4<T>
 implicit(T: fiu32) fn texelFetch(texture: texture_2d<T>, location: vec2<i32>, level: i32) -> vec4<T>
 implicit(T: fiu32) fn texelFetch(texture: texture_2d_array<T>, location: vec3<i32>, level: i32) -> vec4<T>
 implicit(T: fiu32) fn texelFetch(texture: texture_multisampled_2d<T>,

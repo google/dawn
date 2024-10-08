@@ -1,5 +1,3 @@
-SKIP: FAILED
-
 <dawn>/test/tint/diagnostic_filtering/default_case_body_attribute.wgsl:8:11 warning: 'textureSample' must only be called from uniform control flow
       _ = textureSample(t, s, vec2(0, 0));
           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -12,12 +10,24 @@ SKIP: FAILED
   switch (i32(x)) {
               ^
 
-<dawn>/src/tint/lang/glsl/writer/printer/printer.cc:1468 internal compiler error: TINT_UNREACHABLE unhandled core builtin: textureSample
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
+#version 310 es
+precision highp float;
+precision highp int;
 
-tint executable returned error: signal: trace/BPT trap
+uniform highp sampler2D t_s;
+layout(location = 0) in float tint_symbol_loc0_Input;
+int tint_f32_to_i32(float value) {
+  return mix(2147483647, mix((-2147483647 - 1), int(value), (value >= -2147483648.0f)), (value <= 2147483520.0f));
+}
+void tint_symbol_inner(float x) {
+  switch(tint_f32_to_i32(x)) {
+    default:
+    {
+      texture(t_s, vec2(0.0f));
+      break;
+    }
+  }
+}
+void main() {
+  tint_symbol_inner(tint_symbol_loc0_Input);
+}
