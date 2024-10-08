@@ -133,6 +133,7 @@ class Printer : public tint::TextGenerator {
             }
         }
 
+        FindHostShareableStructs();
         EmitRootBlock();
 
         // Emit functions.
@@ -179,8 +180,17 @@ class Printer : public tint::TextGenerator {
     /// Map of builtin structure to unique generated name
     Hashmap<const core::type::Struct*, std::string, 4> builtin_struct_names_;
 
+    Hashset<const core::type::Struct*, 16> uniform_structs_;
+    Hashset<const core::type::Struct*, 16> host_shareable_structs_;
     // The set of emitted structs
     Hashset<const core::type::Struct*, 4> emitted_structs_;
+
+    // For host shareable structs where we have injected padding, this map stores a pointer from the
+    // struct to a vector. The vector contains an entry for each member and padded item. Each
+    // padding item will have a `nullopt` set. Each real member will have a value of the index into
+    // the struct members list.
+    Hashmap<const core::type::Struct*, Vector<std::optional<uint32_t>, 4>, 4>
+        struct_to_padding_struct_ids_;
 
     /// Block to emit for a continuing
     std::function<void()> emit_continuing_;
@@ -212,6 +222,38 @@ class Printer : public tint::TextGenerator {
                 builtin_struct_names_.GetOrAdd(s, [&] { return UniqueIdentifier(name.substr(2)); });
         }
         return name;
+    }
+
+    /// Find all structures that are used in host-shareable address spaces and mark them as such so
+    /// that we know to pad the properly when we emit them.
+    void FindHostShareableStructs() {
+        for (auto inst : *ir_.root_block) {
+            auto* ptr = inst->Result(0)->Type()->As<core::type::Pointer>();
+            if (!ptr || !core::IsHostShareable(ptr->AddressSpace())) {
+                continue;
+            }
+
+            // Look for structures at any nesting depth of this type.
+            Vector<const core::type::Type*, 8> type_queue;
+            type_queue.Push(ptr->StoreType());
+            while (!type_queue.IsEmpty()) {
+                auto* next = type_queue.Pop();
+                if (auto* str = next->As<core::type::Struct>()) {
+                    // Record this structure as host-shareable.
+                    host_shareable_structs_.Add(str);
+
+                    if (ptr->AddressSpace() == core::AddressSpace::kUniform) {
+                        uniform_structs_.Add(str);
+                    }
+
+                    for (auto* member : str->Members()) {
+                        type_queue.Push(member->Type());
+                    }
+                } else if (auto* arr = next->As<core::type::Array>()) {
+                    type_queue.Push(arr->ElemType());
+                }
+            }
+        }
     }
 
     void EmitRootBlock() {
@@ -631,16 +673,74 @@ class Printer : public tint::TextGenerator {
         TextBuffer str_buf;
         Line(&str_buf) << "\n" << "struct " << StructName(str) << " {";
 
+        bool is_host_shareable = host_shareable_structs_.Contains(str);
+
+        Vector<std::optional<uint32_t>, 4> new_struct_to_old;
+
+        auto add_padding = [&](uint32_t size) {
+            auto pad_size = size / 4;
+
+            for (size_t i = 0; i < pad_size; ++i) {
+                std::string name;
+                do {
+                    name = UniqueIdentifier("tint_pad");
+                } while (str->FindMember(ir_.symbols.Get(name)));
+
+                Line(&str_buf) << "uint " << name << ";";
+                new_struct_to_old.Push(std::nullopt);
+            }
+        };
+
         str_buf.IncrementIndent();
 
+        uint32_t glsl_offset = 0;
         for (auto* mem : str->Members()) {
             auto out = Line(&str_buf);
+            auto ir_offset = mem->Offset();
+
+            if (is_host_shareable) {
+                if (DAWN_UNLIKELY(ir_offset < glsl_offset)) {
+                    // Unimplementable layout
+                    TINT_UNREACHABLE() << "Structure member offset (" << ir_offset
+                                       << ") is behind GLSL offset (" << glsl_offset << ")";
+                }
+
+                // Generate padding if required
+                if (auto padding = ir_offset - glsl_offset) {
+                    add_padding(padding);
+                    glsl_offset += padding;
+                }
+            }
+
             EmitTypeAndName(out, mem->Type(), mem->Name().Name());
             out << ";";
+
+            new_struct_to_old.Push(mem->Index());
+
+            auto size = mem->Type()->Size();
+            if (is_host_shareable) {
+                if (mem->Type()->Is<core::type::Struct>() && uniform_structs_.Contains(str)) {
+                    // std140 structs should be padded out to 16 bytes.
+                    uint32_t rounded_size = tint::RoundUp(16u, size);
+                    glsl_offset += rounded_size;
+                } else {
+                    glsl_offset += size;
+                }
+            }
+        }
+        if (is_host_shareable && !str->StructFlags().Contains(core::type::kBlock) &&
+            str->Size() > glsl_offset) {
+            add_padding(str->Size() - glsl_offset);
         }
 
         str_buf.DecrementIndent();
         Line(&str_buf) << "};";
+
+        // If the lengths differ then we've added padding, so we need to handle it when constructing
+        // later.
+        if (new_struct_to_old.Length() != str->Members().Length()) {
+            struct_to_padding_struct_ids_.Add(str, new_struct_to_old);
+        }
 
         preamble_buffer_.Append(str_buf);
     }
@@ -1226,7 +1326,27 @@ class Printer : public tint::TextGenerator {
             [&](const core::type::Struct* struct_ty) {
                 EmitStructType(struct_ty);
                 out << StructName(struct_ty);
-                emit_args();
+
+                if (struct_to_padding_struct_ids_.Contains(struct_ty)) {
+                    out << "(";
+                    auto vec = struct_to_padding_struct_ids_.Get(struct_ty);
+                    bool needs_comma = false;
+                    for (auto idx : *vec) {
+                        if (needs_comma) {
+                            out << ", ";
+                        }
+                        needs_comma = true;
+
+                        if (!idx.has_value()) {
+                            out << "0u";
+                        } else {
+                            EmitValue(out, c->Args()[idx.value()]);
+                        }
+                    }
+                    out << ")";
+                } else {
+                    emit_args();
+                }
             },
             [&](Default) {
                 EmitType(out, c->Result(0)->Type());
@@ -1530,11 +1650,30 @@ class Printer : public tint::TextGenerator {
         EmitType(out, s);
         ScopedParen sp(out);
 
-        for (size_t i = 0; i < s->Members().Length(); ++i) {
-            if (i > 0) {
-                out << ", ";
+        if (struct_to_padding_struct_ids_.Contains(s)) {
+            auto vec = struct_to_padding_struct_ids_.Get(s);
+            uint32_t i = 0;
+            bool first = true;
+            for (auto idx : *vec) {
+                if (!first) {
+                    out << ", ";
+                }
+                first = false;
+
+                if (!idx.has_value()) {
+                    out << "0u";
+                } else {
+                    EmitConstant(out, c->Index(i));
+                    ++i;
+                }
             }
-            EmitConstant(out, c->Index(i));
+        } else {
+            for (size_t i = 0; i < s->Members().Length(); ++i) {
+                if (i > 0) {
+                    out << ", ";
+                }
+                EmitConstant(out, c->Index(i));
+            }
         }
     }
 

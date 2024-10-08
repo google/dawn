@@ -3,6 +3,7 @@
 
 struct g {
   uvec3 a;
+  uint tint_pad;
 };
 
 struct h {

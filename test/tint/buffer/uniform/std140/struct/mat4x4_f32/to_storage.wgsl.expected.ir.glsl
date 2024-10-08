@@ -3,8 +3,38 @@
 
 struct S {
   int before;
+  uint tint_pad;
+  uint tint_pad_1;
+  uint tint_pad_2;
   mat4 m;
+  uint tint_pad_3;
+  uint tint_pad_4;
+  uint tint_pad_5;
+  uint tint_pad_6;
+  uint tint_pad_7;
+  uint tint_pad_8;
+  uint tint_pad_9;
+  uint tint_pad_10;
+  uint tint_pad_11;
+  uint tint_pad_12;
+  uint tint_pad_13;
+  uint tint_pad_14;
   int after;
+  uint tint_pad_15;
+  uint tint_pad_16;
+  uint tint_pad_17;
+  uint tint_pad_18;
+  uint tint_pad_19;
+  uint tint_pad_20;
+  uint tint_pad_21;
+  uint tint_pad_22;
+  uint tint_pad_23;
+  uint tint_pad_24;
+  uint tint_pad_25;
+  uint tint_pad_26;
+  uint tint_pad_27;
+  uint tint_pad_28;
+  uint tint_pad_29;
 };
 
 layout(binding = 0, std140)

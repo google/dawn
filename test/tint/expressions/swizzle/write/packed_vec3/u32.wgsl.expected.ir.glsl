@@ -3,6 +3,7 @@
 
 struct S {
   uvec3 v;
+  uint tint_pad;
 };
 
 layout(binding = 0, std430)

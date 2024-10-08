@@ -4,8 +4,12 @@
 struct Particle {
   vec3 position[8];
   float lifetime;
+  uint tint_pad;
+  uint tint_pad_1;
+  uint tint_pad_2;
   vec4 color;
   vec3 velocity;
+  uint tint_pad_3;
 };
 
 struct Simulation {

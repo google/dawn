@@ -4,6 +4,9 @@
 struct S {
   vec4 a;
   int b;
+  uint tint_pad;
+  uint tint_pad_1;
+  uint tint_pad_2;
 };
 
 layout(binding = 0, std430)

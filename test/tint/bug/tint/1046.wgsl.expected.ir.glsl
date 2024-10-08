@@ -8,6 +8,8 @@ struct Uniforms {
   mat4 proj;
   uint numPointLights;
   uint color_source;
+  uint tint_pad;
+  uint tint_pad_1;
   vec4 color;
 };
 

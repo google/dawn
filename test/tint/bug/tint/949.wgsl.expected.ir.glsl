@@ -8,6 +8,8 @@ struct LeftOver {
   mat4 u_ViewProjection;
   float u_bumpStrength;
   uint padding;
+  uint tint_pad;
+  uint tint_pad_1;
   vec3 u_cameraPosition;
   float u_parallaxScale;
   float textureInfoName;
@@ -23,6 +25,8 @@ struct Light0 {
   uint padding_2;
   vec4 shadowsInfo;
   vec2 depthValues;
+  uint tint_pad_2;
+  uint tint_pad_3;
 };
 
 struct lightingInfo {

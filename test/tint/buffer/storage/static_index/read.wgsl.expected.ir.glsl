@@ -10,12 +10,18 @@ struct S {
   float scalar_f32;
   int scalar_i32;
   uint scalar_u32;
+  uint tint_pad;
   vec2 vec2_f32;
   ivec2 vec2_i32;
   uvec2 vec2_u32;
+  uint tint_pad_1;
+  uint tint_pad_2;
   vec3 vec3_f32;
+  uint tint_pad_3;
   ivec3 vec3_i32;
+  uint tint_pad_4;
   uvec3 vec3_u32;
+  uint tint_pad_5;
   vec4 vec4_f32;
   ivec4 vec4_i32;
   uvec4 vec4_u32;
@@ -23,6 +29,8 @@ struct S {
   mat2x3 mat2x3_f32;
   mat2x4 mat2x4_f32;
   mat3x2 mat3x2_f32;
+  uint tint_pad_6;
+  uint tint_pad_7;
   mat3 mat3x3_f32;
   mat3x4 mat3x4_f32;
   mat4x2 mat4x2_f32;
@@ -31,6 +39,8 @@ struct S {
   vec3 arr2_vec3_f32[2];
   Inner struct_inner;
   Inner array_struct_inner[4];
+  uint tint_pad_8;
+  uint tint_pad_9;
 };
 
 layout(binding = 0, std430)

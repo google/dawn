@@ -197,6 +197,8 @@ struct SB {
   vec4 padding;
   int a;
   uint b;
+  uint tint_pad;
+  uint tint_pad_1;
 };
 
 struct atomic_compare_exchange_result_i32 {

@@ -4,12 +4,22 @@ precision highp int;
 
 
 struct UniformBuffer_std140 {
+  uint tint_pad;
+  uint tint_pad_1;
+  uint tint_pad_2;
+  uint tint_pad_3;
   float unknownInput_S1_c0;
+  uint tint_pad_4;
+  uint tint_pad_5;
+  uint tint_pad_6;
   vec4 ucolorRed_S1_c0;
   vec4 ucolorGreen_S1_c0;
   vec3 umatrix_S1_col0;
+  uint tint_pad_7;
   vec3 umatrix_S1_col1;
+  uint tint_pad_8;
   vec3 umatrix_S1_col2;
+  uint tint_pad_9;
 };
 
 struct main_out {

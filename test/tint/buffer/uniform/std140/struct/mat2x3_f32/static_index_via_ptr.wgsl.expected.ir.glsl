@@ -3,7 +3,17 @@
 
 struct Inner_std140 {
   vec3 m_col0;
+  uint tint_pad;
   vec3 m_col1;
+  uint tint_pad_1;
+  uint tint_pad_2;
+  uint tint_pad_3;
+  uint tint_pad_4;
+  uint tint_pad_5;
+  uint tint_pad_6;
+  uint tint_pad_7;
+  uint tint_pad_8;
+  uint tint_pad_9;
 };
 
 struct Outer_std140 {

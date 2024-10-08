@@ -3,6 +3,7 @@
 
 struct Input {
   ivec3 position;
+  uint tint_pad;
 };
 
 layout(binding = 0, std430)

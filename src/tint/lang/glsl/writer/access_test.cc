@@ -460,11 +460,17 @@ struct Inner {
 
 struct Outer {
   float x;
+  uint tint_pad_3;
+  uint tint_pad_4;
+  uint tint_pad_5;
   Inner y;
 };
 
 struct SB {
   int a;
+  uint tint_pad;
+  uint tint_pad_1;
+  uint tint_pad_2;
   Outer b;
 };
 
@@ -753,6 +759,9 @@ struct Inner {
 
 struct SB {
   int a;
+  uint tint_pad;
+  uint tint_pad_1;
+  uint tint_pad_2;
   Inner b;
 };
 
@@ -1301,18 +1310,27 @@ precision highp int;
 
 struct Inner_std140 {
   vec3 s_col0;
+  uint tint_pad_6;
   vec3 s_col1;
+  uint tint_pad_7;
   vec3 s_col2;
+  uint tint_pad_8;
   vec3 t[5];
 };
 
 struct Outer_std140 {
   float x;
+  uint tint_pad_3;
+  uint tint_pad_4;
+  uint tint_pad_5;
   Inner_std140 y;
 };
 
 struct SB_std140 {
   int a;
+  uint tint_pad;
+  uint tint_pad_1;
+  uint tint_pad_2;
   Outer_std140 b;
 };
 
@@ -1871,11 +1889,17 @@ struct Inner {
 
 struct Outer {
   float x;
+  uint tint_pad_3;
+  uint tint_pad_4;
+  uint tint_pad_5;
   Inner y;
 };
 
 struct SB {
   int a;
+  uint tint_pad;
+  uint tint_pad_1;
+  uint tint_pad_2;
   Outer b;
 };
 
@@ -1922,16 +1946,26 @@ precision highp int;
 
 struct Inner {
   float s;
+  uint tint_pad_6;
+  uint tint_pad_7;
+  uint tint_pad_8;
   vec3 t;
+  uint tint_pad_9;
 };
 
 struct Outer {
   float x;
+  uint tint_pad_3;
+  uint tint_pad_4;
+  uint tint_pad_5;
   Inner y;
 };
 
 struct SB {
   int a;
+  uint tint_pad;
+  uint tint_pad_1;
+  uint tint_pad_2;
   Outer b;
 };
 
@@ -1952,7 +1986,7 @@ void tint_store_and_preserve_padding(inout SB target, SB value_param) {
   tint_store_and_preserve_padding_1(target.b, value_param.b);
 }
 void main() {
-  SB s = SB(0, Outer(0.0f, Inner(0.0f, vec3(0.0f))));
+  SB s = SB(0, 0u, 0u, 0u, Outer(0.0f, 0u, 0u, 0u, Inner(0.0f, 0u, 0u, 0u, vec3(0.0f), 0u)));
   tint_store_and_preserve_padding(v_1.tint_symbol, s);
 }
 )");
@@ -1997,11 +2031,17 @@ struct Inner {
 
 struct Outer {
   float x;
+  uint tint_pad_3;
+  uint tint_pad_4;
+  uint tint_pad_5;
   Inner y;
 };
 
 struct SB {
   int a;
+  uint tint_pad;
+  uint tint_pad_1;
+  uint tint_pad_2;
   Outer b;
 };
 
@@ -2044,7 +2084,7 @@ void tint_store_and_preserve_padding(inout SB target, SB value_param) {
   tint_store_and_preserve_padding_1(target.b, value_param.b);
 }
 void main() {
-  SB s = SB(0, Outer(0.0f, Inner(mat3(vec3(0.0f), vec3(0.0f), vec3(0.0f)), vec3[5](vec3(0.0f), vec3(0.0f), vec3(0.0f), vec3(0.0f), vec3(0.0f)))));
+  SB s = SB(0, 0u, 0u, 0u, Outer(0.0f, 0u, 0u, 0u, Inner(mat3(vec3(0.0f), vec3(0.0f), vec3(0.0f)), vec3[5](vec3(0.0f), vec3(0.0f), vec3(0.0f), vec3(0.0f), vec3(0.0f)))));
   tint_store_and_preserve_padding(v_1.tint_symbol, s);
 }
 )");
@@ -2075,7 +2115,11 @@ precision highp int;
 
 struct SB {
   int a;
+  uint tint_pad;
+  uint tint_pad_1;
+  uint tint_pad_2;
   vec3 b;
+  uint tint_pad_3;
 };
 
 layout(binding = 0, std430)
@@ -2114,7 +2158,11 @@ precision highp int;
 
 struct SB {
   float c;
+  uint tint_pad;
+  uint tint_pad_1;
+  uint tint_pad_2;
   vec3 d;
+  uint tint_pad_3;
 };
 
 layout(binding = 0, std140)

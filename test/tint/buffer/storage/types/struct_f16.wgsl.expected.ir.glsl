@@ -4,6 +4,7 @@
 
 struct Inner {
   float16_t scalar_f16;
+  uint tint_pad;
   f16vec3 vec3_f16;
   f16mat2x4 mat2x4_f16;
 };

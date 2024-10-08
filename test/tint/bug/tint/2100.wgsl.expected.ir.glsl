@@ -4,8 +4,11 @@
 struct S_std140 {
   mat4 matrix_view;
   vec3 matrix_normal_col0;
+  uint tint_pad;
   vec3 matrix_normal_col1;
+  uint tint_pad_1;
   vec3 matrix_normal_col2;
+  uint tint_pad_2;
 };
 
 layout(binding = 0, std140)

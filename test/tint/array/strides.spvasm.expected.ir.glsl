@@ -3,10 +3,31 @@
 
 struct strided_arr {
   float el;
+  uint tint_pad;
 };
 
 struct strided_arr_1 {
   strided_arr el[3][2];
+  uint tint_pad_1;
+  uint tint_pad_2;
+  uint tint_pad_3;
+  uint tint_pad_4;
+  uint tint_pad_5;
+  uint tint_pad_6;
+  uint tint_pad_7;
+  uint tint_pad_8;
+  uint tint_pad_9;
+  uint tint_pad_10;
+  uint tint_pad_11;
+  uint tint_pad_12;
+  uint tint_pad_13;
+  uint tint_pad_14;
+  uint tint_pad_15;
+  uint tint_pad_16;
+  uint tint_pad_17;
+  uint tint_pad_18;
+  uint tint_pad_19;
+  uint tint_pad_20;
 };
 
 struct S {
@@ -79,7 +100,7 @@ void f_1() {
   strided_arr x_24[3][2] = v.tint_symbol.a[3].el;
   strided_arr x_28[2] = v.tint_symbol.a[3].el[2];
   float x_32 = v.tint_symbol.a[3].el[2][1].el;
-  tint_store_and_preserve_padding(v.tint_symbol.a, strided_arr_1[4](strided_arr_1(strided_arr[3][2](strided_arr[2](strided_arr(0.0f), strided_arr(0.0f)), strided_arr[2](strided_arr(0.0f), strided_arr(0.0f)), strided_arr[2](strided_arr(0.0f), strided_arr(0.0f)))), strided_arr_1(strided_arr[3][2](strided_arr[2](strided_arr(0.0f), strided_arr(0.0f)), strided_arr[2](strided_arr(0.0f), strided_arr(0.0f)), strided_arr[2](strided_arr(0.0f), strided_arr(0.0f)))), strided_arr_1(strided_arr[3][2](strided_arr[2](strided_arr(0.0f), strided_arr(0.0f)), strided_arr[2](strided_arr(0.0f), strided_arr(0.0f)), strided_arr[2](strided_arr(0.0f), strided_arr(0.0f)))), strided_arr_1(strided_arr[3][2](strided_arr[2](strided_arr(0.0f), strided_arr(0.0f)), strided_arr[2](strided_arr(0.0f), strided_arr(0.0f)), strided_arr[2](strided_arr(0.0f), strided_arr(0.0f))))));
+  tint_store_and_preserve_padding(v.tint_symbol.a, strided_arr_1[4](strided_arr_1(strided_arr[3][2](strided_arr[2](strided_arr(0.0f, 0u), strided_arr(0.0f, 0u)), strided_arr[2](strided_arr(0.0f, 0u), strided_arr(0.0f, 0u)), strided_arr[2](strided_arr(0.0f, 0u), strided_arr(0.0f, 0u))), 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u), strided_arr_1(strided_arr[3][2](strided_arr[2](strided_arr(0.0f, 0u), strided_arr(0.0f, 0u)), strided_arr[2](strided_arr(0.0f, 0u), strided_arr(0.0f, 0u)), strided_arr[2](strided_arr(0.0f, 0u), strided_arr(0.0f, 0u))), 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u), strided_arr_1(strided_arr[3][2](strided_arr[2](strided_arr(0.0f, 0u), strided_arr(0.0f, 0u)), strided_arr[2](strided_arr(0.0f, 0u), strided_arr(0.0f, 0u)), strided_arr[2](strided_arr(0.0f, 0u), strided_arr(0.0f, 0u))), 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u), strided_arr_1(strided_arr[3][2](strided_arr[2](strided_arr(0.0f, 0u), strided_arr(0.0f, 0u)), strided_arr[2](strided_arr(0.0f, 0u), strided_arr(0.0f, 0u)), strided_arr[2](strided_arr(0.0f, 0u), strided_arr(0.0f, 0u))), 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u)));
   v.tint_symbol.a[3].el[2][1].el = 5.0f;
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;

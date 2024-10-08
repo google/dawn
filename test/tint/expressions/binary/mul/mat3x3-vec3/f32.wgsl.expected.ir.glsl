@@ -5,9 +5,13 @@ precision highp int;
 
 struct S_std140 {
   vec3 matrix_col0;
+  uint tint_pad;
   vec3 matrix_col1;
+  uint tint_pad_1;
   vec3 matrix_col2;
+  uint tint_pad_2;
   vec3 vector;
+  uint tint_pad_3;
 };
 
 layout(binding = 0, std140)

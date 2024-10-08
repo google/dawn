@@ -6,6 +6,8 @@ precision highp int;
 struct LeftOver {
   float time;
   uint padding;
+  uint tint_pad;
+  uint tint_pad_1;
   mat4 worldViewProjection;
   vec2 outputSize;
   vec2 stageSize;
@@ -13,6 +15,7 @@ struct LeftOver {
   float stageScale;
   float spriteCount;
   vec3 colorMul;
+  uint tint_pad_2;
 };
 
 struct main_out {

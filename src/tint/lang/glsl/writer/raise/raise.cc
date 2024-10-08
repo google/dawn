@@ -151,7 +151,6 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
     RUN_TRANSFORM(core::ir::transform::BlockDecoratedStructs, module);
 
     // TODO(dsinclair): CombineSamplers
-    // TODO(dsinclair): PadStructs
 
     {
         // This must come after `MultiplanarExternalTexture` as it will insert functions with

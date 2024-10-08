@@ -3,6 +3,9 @@
 
 struct S {
   int a;
+  uint tint_pad;
+  uint tint_pad_1;
+  uint tint_pad_2;
   vec4 b;
   mat2 c;
 };

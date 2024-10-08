@@ -6,6 +6,14 @@ struct Inner_std140 {
   vec2 m_col1;
   vec2 m_col2;
   vec2 m_col3;
+  uint tint_pad;
+  uint tint_pad_1;
+  uint tint_pad_2;
+  uint tint_pad_3;
+  uint tint_pad_4;
+  uint tint_pad_5;
+  uint tint_pad_6;
+  uint tint_pad_7;
 };
 
 struct Outer_std140 {

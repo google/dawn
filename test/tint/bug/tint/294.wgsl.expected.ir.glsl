@@ -3,7 +3,9 @@
 
 struct Light {
   vec3 position;
+  uint tint_pad;
   vec3 colour;
+  uint tint_pad_1;
 };
 
 layout(binding = 1, std430)

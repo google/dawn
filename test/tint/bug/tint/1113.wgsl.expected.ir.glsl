@@ -7,7 +7,9 @@ struct Uniforms {
   uint pad1;
   uint pad2;
   vec3 bbMin;
+  uint tint_pad;
   vec3 bbMax;
+  uint tint_pad_1;
 };
 
 struct Dbg {
@@ -122,7 +124,9 @@ struct Uniforms {
   uint pad1;
   uint pad2;
   vec3 bbMin;
+  uint tint_pad;
   vec3 bbMax;
+  uint tint_pad_1;
 };
 
 struct Dbg {
@@ -201,7 +205,9 @@ struct Uniforms {
   uint pad1;
   uint pad2;
   vec3 bbMin;
+  uint tint_pad;
   vec3 bbMax;
+  uint tint_pad_1;
 };
 
 struct Dbg {

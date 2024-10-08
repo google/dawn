@@ -7,7 +7,10 @@ struct S_std140 {
   vec2 matrix_col0;
   vec2 matrix_col1;
   vec2 matrix_col2;
+  uint tint_pad;
+  uint tint_pad_1;
   vec3 vector;
+  uint tint_pad_2;
 };
 
 layout(binding = 0, std140)

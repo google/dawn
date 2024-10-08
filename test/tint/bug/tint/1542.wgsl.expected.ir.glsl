@@ -3,6 +3,7 @@
 
 struct UniformBuffer {
   ivec3 d;
+  uint tint_pad;
 };
 
 layout(binding = 0, std140)

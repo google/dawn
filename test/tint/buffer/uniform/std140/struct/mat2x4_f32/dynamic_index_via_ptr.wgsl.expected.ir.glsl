@@ -3,6 +3,14 @@
 
 struct Inner {
   mat2x4 m;
+  uint tint_pad;
+  uint tint_pad_1;
+  uint tint_pad_2;
+  uint tint_pad_3;
+  uint tint_pad_4;
+  uint tint_pad_5;
+  uint tint_pad_6;
+  uint tint_pad_7;
 };
 
 struct Outer {

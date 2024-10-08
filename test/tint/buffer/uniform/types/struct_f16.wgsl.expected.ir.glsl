@@ -4,6 +4,7 @@
 
 struct Inner_std140 {
   float16_t scalar_f16;
+  uint tint_pad;
   f16vec3 vec3_f16;
   f16vec4 mat2x4_f16_col0;
   f16vec4 mat2x4_f16_col1;
@@ -15,6 +16,7 @@ struct S_std140 {
 
 struct Inner {
   float16_t scalar_f16;
+  uint tint_pad_1;
   f16vec3 vec3_f16;
   f16mat2x4 mat2x4_f16;
 };
@@ -40,7 +42,7 @@ void tint_store_and_preserve_padding(inout S target, S value_param) {
   tint_store_and_preserve_padding_1(target.inner, value_param.inner);
 }
 Inner tint_convert_Inner(Inner_std140 tint_input) {
-  return Inner(tint_input.scalar_f16, tint_input.vec3_f16, f16mat2x4(tint_input.mat2x4_f16_col0, tint_input.mat2x4_f16_col1));
+  return Inner(tint_input.scalar_f16, 0u, tint_input.vec3_f16, f16mat2x4(tint_input.mat2x4_f16_col0, tint_input.mat2x4_f16_col1));
 }
 S tint_convert_S(S_std140 tint_input) {
   return S(tint_convert_Inner(tint_input.inner));

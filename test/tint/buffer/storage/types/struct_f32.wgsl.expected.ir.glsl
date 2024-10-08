@@ -3,7 +3,11 @@
 
 struct Inner {
   float scalar_f32;
+  uint tint_pad;
+  uint tint_pad_1;
+  uint tint_pad_2;
   vec3 vec3_f32;
+  uint tint_pad_3;
   mat2x4 mat2x4_f32;
 };
 

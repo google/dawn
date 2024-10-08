@@ -3,9 +3,35 @@
 
 struct S_std140 {
   int before;
+  uint tint_pad;
   vec2 m_col0;
   vec2 m_col1;
+  uint tint_pad_1;
+  uint tint_pad_2;
+  uint tint_pad_3;
+  uint tint_pad_4;
+  uint tint_pad_5;
+  uint tint_pad_6;
+  uint tint_pad_7;
+  uint tint_pad_8;
+  uint tint_pad_9;
+  uint tint_pad_10;
   int after;
+  uint tint_pad_11;
+  uint tint_pad_12;
+  uint tint_pad_13;
+  uint tint_pad_14;
+  uint tint_pad_15;
+  uint tint_pad_16;
+  uint tint_pad_17;
+  uint tint_pad_18;
+  uint tint_pad_19;
+  uint tint_pad_20;
+  uint tint_pad_21;
+  uint tint_pad_22;
+  uint tint_pad_23;
+  uint tint_pad_24;
+  uint tint_pad_25;
 };
 
 struct S {
