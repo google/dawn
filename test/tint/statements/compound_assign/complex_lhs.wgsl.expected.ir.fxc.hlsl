@@ -18,7 +18,9 @@ void main() {
   S x = (S)0;
   int v = foo();
   int v_1 = bar();
-  x.a[v][v_1] = (x.a[v][v_1] + int(5));
+  int4 v_2 = x.a[v];
+  int4 v_3 = (x.a[v][v_1] + int(5)).xxxx;
+  x.a[v] = (((v_1.xxxx == int4(int(0), int(1), int(2), int(3)))) ? (v_3) : (v_2));
 }
 
 [numthreads(1, 1, 1)]

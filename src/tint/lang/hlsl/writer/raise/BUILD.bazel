@@ -47,6 +47,7 @@ cc_library(
     "localize_struct_array_assignment.cc",
     "promote_initializers.cc",
     "raise.cc",
+    "replace_non_indexable_mat_vec_stores.cc",
     "shader_io.cc",
   ],
   hdrs = [
@@ -58,6 +59,7 @@ cc_library(
     "localize_struct_array_assignment.h",
     "promote_initializers.h",
     "raise.h",
+    "replace_non_indexable_mat_vec_stores.h",
     "shader_io.h",
   ],
   deps = [
@@ -103,6 +105,7 @@ cc_library(
     "fxc_polyfill_test.cc",
     "localize_struct_array_assignment_test.cc",
     "promote_initializers_test.cc",
+    "replace_non_indexable_mat_vec_stores_test.cc",
     "shader_io_test.cc",
   ],
   deps = [

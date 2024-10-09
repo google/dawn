@@ -1,5 +1,3 @@
-SKIP: FAILED
-
 struct main_inputs {
   uint3 GlobalInvocationID : SV_DispatchThreadID;
 };
@@ -28,12 +26,10 @@ void main_inner(uint3 GlobalInvocationID) {
   if ((uniforms[0u].x == 1u)) {
     srcTexCoord[1u] = ((size.y - dstTexCoord.y) - 1u);
   }
-  Texture2D<float4> v_1 = src;
-  int2 v_2 = int2(srcTexCoord);
-  float4 srcColor = float4(v_1.Load(int3(v_2, int(0))));
-  Texture2D<float4> v_3 = tint_symbol;
-  int2 v_4 = int2(dstTexCoord);
-  float4 dstColor = float4(v_3.Load(int3(v_4, int(0))));
+  int2 v_1 = int2(srcTexCoord);
+  float4 srcColor = float4(src.Load(int3(v_1, int(int(0)))));
+  int2 v_2 = int2(dstTexCoord);
+  float4 dstColor = float4(tint_symbol.Load(int3(v_2, int(int(0)))));
   bool success = true;
   uint4 srcColorBits = (0u).xxxx;
   uint4 dstColorBits = tint_v4f32_to_v4u32(dstColor);
@@ -44,8 +40,10 @@ void main_inner(uint3 GlobalInvocationID) {
       } else {
         break;
       }
-      uint v_5 = i;
-      srcColorBits[v_5] = ConvertToFp16FloatValue(srcColor[i]);
+      uint v_3 = i;
+      uint v_4 = ConvertToFp16FloatValue(srcColor[i]);
+      uint4 v_5 = srcColorBits;
+      srcColorBits = (((v_3.xxxx == uint4(int(0), int(1), int(2), int(3)))) ? (v_4.xxxx) : (v_5));
       bool v_6 = false;
       if (success) {
         v_6 = (srcColorBits[i] == dstColorBits[i]);
@@ -72,8 +70,3 @@ void main(main_inputs inputs) {
   main_inner(inputs.GlobalInvocationID);
 }
 
-FXC validation failure:
-<scrubbed_path>(40,5-15): error X3511: forced to unroll loop, but unrolling failed.
-
-
-tint executable returned error: exit status 1

@@ -61,6 +61,8 @@ libtint_source_set("raise") {
     "promote_initializers.h",
     "raise.cc",
     "raise.h",
+    "replace_non_indexable_mat_vec_stores.cc",
+    "replace_non_indexable_mat_vec_stores.h",
     "shader_io.cc",
     "shader_io.h",
   ]
@@ -104,6 +106,7 @@ if (tint_build_unittests) {
       "fxc_polyfill_test.cc",
       "localize_struct_array_assignment_test.cc",
       "promote_initializers_test.cc",
+      "replace_non_indexable_mat_vec_stores_test.cc",
       "shader_io_test.cc",
     ]
     deps = [

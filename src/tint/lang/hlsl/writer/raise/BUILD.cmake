@@ -55,6 +55,8 @@ tint_add_target(tint_lang_hlsl_writer_raise lib
   lang/hlsl/writer/raise/promote_initializers.h
   lang/hlsl/writer/raise/raise.cc
   lang/hlsl/writer/raise/raise.h
+  lang/hlsl/writer/raise/replace_non_indexable_mat_vec_stores.cc
+  lang/hlsl/writer/raise/replace_non_indexable_mat_vec_stores.h
   lang/hlsl/writer/raise/shader_io.cc
   lang/hlsl/writer/raise/shader_io.h
 )
@@ -104,6 +106,7 @@ tint_add_target(tint_lang_hlsl_writer_raise_test test
   lang/hlsl/writer/raise/fxc_polyfill_test.cc
   lang/hlsl/writer/raise/localize_struct_array_assignment_test.cc
   lang/hlsl/writer/raise/promote_initializers_test.cc
+  lang/hlsl/writer/raise/replace_non_indexable_mat_vec_stores_test.cc
   lang/hlsl/writer/raise/shader_io_test.cc
 )
 

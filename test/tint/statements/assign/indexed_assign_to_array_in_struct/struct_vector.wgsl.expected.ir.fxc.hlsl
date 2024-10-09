@@ -1,5 +1,3 @@
-SKIP: FAILED
-
 struct OuterS {
   float3 v1;
 };
@@ -11,11 +9,8 @@ cbuffer cbuffer_uniforms : register(b4, space1) {
 [numthreads(1, 1, 1)]
 void main() {
   OuterS s1 = (OuterS)0;
-  s1.v1[uniforms[0u].x] = 1.0f;
+  float3 v = s1.v1;
+  float3 v_1 = uniforms[0u].x.xxx;
+  s1.v1 = (((v_1 == float3(int(0), int(1), int(2)))) ? (1.0f.xxx) : (v));
 }
 
-FXC validation failure:
-<scrubbed_path>(12,3-23): error X3500: array reference cannot be used as an l-value; not natively addressable
-
-
-tint executable returned error: exit status 1
