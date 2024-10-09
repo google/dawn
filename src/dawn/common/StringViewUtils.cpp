@@ -1,4 +1,4 @@
-// Copyright 2023 The Dawn & Tint Authors
+// Copyright 2024 The Dawn & Tint Authors
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
@@ -25,37 +25,40 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "src/dawn/node/binding/GPUAdapterInfo.h"
+#include "dawn/common/StringViewUtils.h"
 
-#include <iomanip>
-#include <sstream>
-
-namespace wgpu::binding {
-
-////////////////////////////////////////////////////////////////////////////////
-// wgpu::bindings::GPUAdapterInfo
-////////////////////////////////////////////////////////////////////////////////
-
-GPUAdapterInfo::GPUAdapterInfo(const wgpu::AdapterInfo& info)
-    : vendor_(info.vendor),
-      architecture_(info.architecture),
-      device_(info.device),
-      description_(info.description) {}
-
-std::string GPUAdapterInfo::getVendor(Napi::Env) {
-    return vendor_;
+bool operator==(WGPUStringView a, WGPUStringView b) {
+    return wgpu::StringView(a) == wgpu::StringView(b);
 }
 
-std::string GPUAdapterInfo::getArchitecture(Napi::Env) {
-    return architecture_;
+namespace wgpu {
+bool operator==(StringView a, StringView b) {
+    return std::string_view(a) == std::string_view(b);
+}
+}  // namespace wgpu
+
+namespace dawn {
+
+WGPUStringView ToOutputStringView(const std::string& s) {
+    return {s.data(), s.size()};
 }
 
-std::string GPUAdapterInfo::getDevice(Napi::Env) {
-    return device_;
+WGPUStringView ToOutputStringView(const std::string_view& s) {
+    return {s.data(), s.size()};
 }
 
-std::string GPUAdapterInfo::getDescription(Napi::Env) {
-    return description_;
+WGPUStringView ToOutputStringView(const char* s) {
+    return {s, std::strlen(s)};
 }
 
-}  // namespace wgpu::binding
+std::string ToString(WGPUStringView s) {
+    if (s.length == WGPU_STRLEN) {
+        if (s.data == nullptr) {
+            return {};
+        }
+        return {s.data};
+    }
+    return {s.data, s.length};
+}
+
+}  // namespace dawn

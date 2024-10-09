@@ -100,6 +100,12 @@ namespace {{metadata.namespace}} {
       }
   {% endfor %}
 
+  template <typename CharT, typename Traits>
+  std::basic_ostream<CharT, Traits>& operator<<(std::basic_ostream<CharT, Traits>& o, StringView value) {
+      o << std::string_view(value);
+      return o;
+  }
+
 }  // namespace {{metadata.namespace}}
 
 #endif // {{API}}_CPP_PRINT_H_

@@ -35,6 +35,7 @@
 
 #include "dawn/dawn_proc.h"  // nogncheck
 #include "dawn/native/DawnNative.h"
+#include "dawn/webgpu_cpp_print.h"
 
 namespace {
 

@@ -46,26 +46,40 @@ GPUShaderModule::GPUShaderModule(const wgpu::ShaderModuleDescriptor& desc,
 interop::Promise<interop::Interface<interop::GPUCompilationInfo>>
 GPUShaderModule::getCompilationInfo(Napi::Env env) {
     struct GPUCompilationMessage : public interop::GPUCompilationMessage {
-        WGPUCompilationMessage message;
+        interop::GPUCompilationMessageType type;
+        uint64_t lineNum;
+        uint64_t linePos;
+        uint64_t offset;
+        uint64_t length;
+        std::string message;
 
-        explicit GPUCompilationMessage(const WGPUCompilationMessage& m) : message(m) {}
-        std::string getMessage(Napi::Env) override { return message.message; }
-        interop::GPUCompilationMessageType getType(Napi::Env) override {
-            switch (message.type) {
-                case WGPUCompilationMessageType_Error:
-                    return interop::GPUCompilationMessageType::kError;
-                case WGPUCompilationMessageType_Warning:
-                    return interop::GPUCompilationMessageType::kWarning;
-                case WGPUCompilationMessageType_Info:
-                    return interop::GPUCompilationMessageType::kInfo;
+        explicit GPUCompilationMessage(const wgpu::CompilationMessage& m)
+            : lineNum(m.lineNum),
+              linePos(m.utf16LinePos),
+              offset(m.utf16Offset),
+              length(m.utf16Length),
+              message(m.message) {
+            switch (m.type) {
+                case wgpu::CompilationMessageType::Error:
+                    type = interop::GPUCompilationMessageType::kError;
+                    break;
+                case wgpu::CompilationMessageType::Warning:
+                    type = interop::GPUCompilationMessageType::kWarning;
+                    break;
+                case wgpu::CompilationMessageType::Info:
+                    type = interop::GPUCompilationMessageType::kInfo;
+                    break;
                 default:
-                    UNREACHABLE("unrecognized handled compilation message type", message.type);
+                    UNREACHABLE("unrecognized handled compilation message type", m.type);
             }
         }
-        uint64_t getLineNum(Napi::Env) override { return message.lineNum; }
-        uint64_t getLinePos(Napi::Env) override { return message.utf16LinePos; }
-        uint64_t getOffset(Napi::Env) override { return message.utf16Offset; }
-        uint64_t getLength(Napi::Env) override { return message.utf16Length; }
+
+        std::string getMessage(Napi::Env) override { return message; }
+        interop::GPUCompilationMessageType getType(Napi::Env) override { return type; }
+        uint64_t getLineNum(Napi::Env) override { return lineNum; }
+        uint64_t getLinePos(Napi::Env) override { return linePos; }
+        uint64_t getOffset(Napi::Env) override { return offset; }
+        uint64_t getLength(Napi::Env) override { return length; }
     };
 
     using Messages = std::vector<interop::Interface<interop::GPUCompilationMessage>>;
