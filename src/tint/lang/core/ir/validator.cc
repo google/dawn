@@ -134,10 +134,9 @@ bool HasLocationAndBuiltin(const tint::core::IOAttributes& attr) {
     return attr.builtin.has_value() && attr.location.has_value();
 }
 
-/// @returns true if @p attr contains one of either location or builtin decoration
-bool HasEitherLocationOrBuiltin(const tint::core::IOAttributes& attr) {
-    return (attr.builtin.has_value() && !attr.location.has_value()) ||
-           (!attr.builtin.has_value() && attr.location.has_value());
+/// @returns true if @p attr contains one of location or builtin decoration
+bool HasLocationOrBuiltin(const tint::core::IOAttributes& attr) {
+    return attr.builtin.has_value() || attr.location.has_value();
 }
 
 /// @return true if @param attr does not have invariant decoration or if it also has position
@@ -154,6 +153,96 @@ bool InvariantOnlyIfAlsoPosition(const tint::core::IOAttributes& attr) {
 bool IsValidFunctionParamType(const core::type::Type* ty) {
     return ty->IsConstructible() || ty->Is<type::Pointer>() || ty->Is<type::Texture>() ||
            ty->Is<type::Sampler>();
+}
+
+/// Utility for running checks on attributes.
+/// If the type that the attributes are attached to is a struct, the check is run over the members,
+/// otherwise it run on the attributes directly.
+///
+/// @param msg_anchor what to associate errors with, i.e. the 'foo' of AddError(foo)
+/// @param ty_attr the directly attached attributes
+/// @param ty the type of the thing that the attributes are attached to
+/// @param is_not_struct_impl has the signature 'void(const MSG_ANCHOR*, const IOAttributes&)' and
+///        is called when @p ty is not a struct
+/// @param is_struct_impl has the signature 'void(const MSG_ANCHOR*, const IOAttributes&)' and is
+///        called when @p ty is a struct
+template <typename MSG_ANCHOR, typename IS_NOT_STRUCT, typename IS_STRUCT>
+void CheckIOAttributes(const MSG_ANCHOR* msg_anchor,
+                       const IOAttributes& ty_attr,
+                       const core::type::Type* ty,
+                       IS_NOT_STRUCT&& is_not_struct_impl,
+                       IS_STRUCT&& is_struct_impl) {
+    if (auto* ty_struct = ty->As<core::type::Struct>()) {
+        for (const auto* mem : ty_struct->Members()) {
+            is_struct_impl(msg_anchor, mem->Attributes());
+        }
+    } else {
+        is_not_struct_impl(msg_anchor, ty_attr);
+    }
+}
+
+/// Helper for calling CheckIOAttributes on a function return
+/// @param func function whose return is to be tested
+/// See @ref CheckIOAttributes for more details
+template <typename IS_NOT_STRUCT, typename IS_STRUCT>
+void CheckFunctionReturnAttributes(const Function* func,
+                                   IS_NOT_STRUCT&& is_not_struct_impl,
+                                   IS_STRUCT&& is_struct_impl) {
+    CheckIOAttributes(func, func->ReturnAttributes(), func->ReturnType(),
+                      std::forward<IS_NOT_STRUCT>(is_not_struct_impl),
+                      std::forward<IS_STRUCT>(is_struct_impl));
+}
+
+/// Helper for calling CheckIOAttributes on a function param
+/// @param param function param to be tested
+/// See @ref CheckIOAttributes for more details
+template <typename IS_NOT_STRUCT, typename IS_STRUCT>
+void CheckFunctionParamAttributes(const FunctionParam* param,
+                                  IS_NOT_STRUCT&& is_not_struct_impl,
+                                  IS_STRUCT&& is_struct_impl) {
+    CheckIOAttributes(param, param->Attributes(), param->Type(),
+                      std::forward<IS_NOT_STRUCT>(is_not_struct_impl),
+                      std::forward<IS_STRUCT>(is_struct_impl));
+}
+
+/// Utility for running checks on attributes and type.
+/// If the type that the attributes are attached to is a struct, the check is run over the members,
+/// otherwise it run on the attributes directly.
+///
+/// @param msg_anchor what to associate errors with, i.e. the 'foo' of AddError(foo)
+/// @param ty_attr the directly attached attributes
+/// @param ty the type of the thing that the attributes are attached to
+/// @param is_not_struct_impl has the signature 'void(const MSG_ANCHOR*, const IOAttributes&, const
+/// core::type::Type* ty)'
+///        and is called when @p ty is not a struct
+/// @param is_struct_impl has the signature 'void(const MSG_ANCHOR*, const IOAttributes&, const
+/// core::type::Type* ty)'
+///        and is called when @p ty is a struct
+template <typename MSG_ANCHOR, typename IS_NOT_STRUCT, typename IS_STRUCT>
+void CheckIOAttributesAndType(const MSG_ANCHOR* msg_anchor,
+                              const IOAttributes& ty_attr,
+                              const core::type::Type* ty,
+                              IS_NOT_STRUCT&& is_not_struct_impl,
+                              IS_STRUCT&& is_struct_impl) {
+    if (auto* ty_struct = ty->As<core::type::Struct>()) {
+        for (const auto* mem : ty_struct->Members()) {
+            is_struct_impl(msg_anchor, mem->Attributes(), mem->Type());
+        }
+    } else {
+        is_not_struct_impl(msg_anchor, ty_attr, ty);
+    }
+}
+
+/// Helper for calling CheckIOAttributesAndType on a function return
+/// @param func function whose return is to be tested
+/// See @ref CheckIOAttributesAndType for more details
+template <typename IS_NOT_STRUCT, typename IS_STRUCT>
+void CheckFunctionReturnAttributesAndType(const Function* func,
+                                          IS_NOT_STRUCT&& is_not_struct_impl,
+                                          IS_STRUCT&& is_struct_impl) {
+    CheckIOAttributesAndType(func, func->ReturnAttributes(), func->ReturnType(),
+                             std::forward<IS_NOT_STRUCT>(is_not_struct_impl),
+                             std::forward<IS_STRUCT>(is_struct_impl));
 }
 
 /// The core IR validator.
@@ -391,6 +480,40 @@ class Validator {
     /// Validates the specific function as a vertex entry point
     /// @param ep the function to validate
     void CheckVertexEntryPoint(const Function* ep);
+
+    /// @returns a function that validates rules for invariant decorations
+    /// @param err error message to log when check fails
+    template <typename MSG_ANCHOR>
+    auto CheckInvariantFunc(const std::string& err) {
+        return [this, err](const MSG_ANCHOR* msg_anchor, const IOAttributes& attr) {
+            if (!InvariantOnlyIfAlsoPosition(attr)) {
+                AddError(msg_anchor) << err;
+            }
+        };
+    }
+
+    /// @returns a function that validates that location and builtin attributes are not present at
+    ///          the same time
+    /// @param err error message to log when check fails
+    template <typename MSG_ANCHOR>
+    auto CheckDoesNotHaveBothLocationAndBuiltinFunc(const std::string& err) {
+        return [this, err](const MSG_ANCHOR* msg_anchor, const IOAttributes& attr) {
+            if (HasLocationAndBuiltin(attr)) {
+                AddError(msg_anchor) << err;
+            }
+        };
+    }
+
+    /// @returns a function that validates that either a location or builtin attribute are present
+    /// @param err error message to log when check fails
+    template <typename MSG_ANCHOR>
+    auto CheckHasLocationOrBuiltinFunc(const std::string& err) {
+        return [this, err](const MSG_ANCHOR* msg_anchor, const IOAttributes& attr) {
+            if (!HasLocationOrBuiltin(attr)) {
+                AddError(msg_anchor) << err;
+            }
+        };
+    }
 
     /// Validates that the type annotated with @builtin(position) is correct
     /// @param ep the entry point to associate errors with
@@ -1203,11 +1326,6 @@ void Validator::CheckFunction(const Function* func) {
             param->Type(), [&]() -> diag::Diagnostic& { return AddError(param); },
             Capabilities{Capability::kAllowRefTypes});
 
-        if (!InvariantOnlyIfAlsoPosition(param->Attributes())) {
-            AddError(func)
-                << "invariant can only decorate a param iff it is also decorated with position";
-        }
-
         if (!IsValidFunctionParamType(param->Type())) {
             auto struct_ty = param->Type()->As<core::type::Struct>();
             if (!capabilities_.Contains(Capability::kAllowPointersInStructures) || !struct_ty ||
@@ -1219,25 +1337,46 @@ void Validator::CheckFunction(const Function* func) {
             }
         }
 
-        if (auto* s = param->Type()->As<core::type::Struct>()) {
-            for (auto* mem : s->Members()) {
-                if (!InvariantOnlyIfAlsoPosition(mem->Attributes())) {
-                    AddError(func) << "invariant can only decorate a param member iff it is also "
-                                      "decorated with position";
-                }
-
-                if (HasLocationAndBuiltin(mem->Attributes())) {
-                    AddError(param)
-                        << "a builtin and location cannot be both declared for a struct member";
-                }
-            }
-        } else {
-            if (HasLocationAndBuiltin(param->Attributes())) {
-                AddError(param) << "a builtin and location cannot be both declared for a param";
-            }
-        }
+        CheckFunctionParamAttributes(
+            param,
+            CheckInvariantFunc<FunctionParam>(
+                "invariant can only decorate a param iff it is also decorated with position"),
+            CheckInvariantFunc<FunctionParam>(
+                "invariant can only decorate a param member iff it is also "
+                "decorated with position"));
+        CheckFunctionParamAttributes(
+            param,
+            CheckDoesNotHaveBothLocationAndBuiltinFunc<FunctionParam>(
+                "a builtin and location cannot be both declared for a param"),
+            CheckDoesNotHaveBothLocationAndBuiltinFunc<FunctionParam>(
+                "a builtin and location cannot be both declared for a struct member"));
 
         scope_stack_.Add(param);
+    }
+
+    // References not allowed on function signatures even with Capability::kAllowRefTypes.
+    CheckType(
+        func->ReturnType(), [&]() -> diag::Diagnostic& { return AddError(func); },
+        Capabilities{Capability::kAllowRefTypes});
+
+    CheckFunctionReturnAttributes(
+        func,
+        CheckInvariantFunc<Function>(
+            "invariant can only decorate outputs iff they are also position builtins"),
+        CheckInvariantFunc<Function>(
+            "invariant can only decorate output members iff they are also position builtins"));
+
+    // void needs to be filtered out, since it isn't constructible, but used in the IR when no
+    // return is specified.
+    if (DAWN_UNLIKELY(!func->ReturnType()->Is<core::type::Void>() &&
+                      !func->ReturnType()->IsConstructible())) {
+        AddError(func) << "function return type must be constructible";
+    }
+
+    if (func->Stage() != Function::PipelineStage::kUndefined) {
+        if (DAWN_UNLIKELY(mod_.NameOf(func).Name().empty())) {
+            AddError(func) << "entry points must have names";
+        }
     }
 
     if (func->Stage() == Function::PipelineStage::kCompute) {
@@ -1248,66 +1387,32 @@ void Validator::CheckFunction(const Function* func) {
         if (DAWN_UNLIKELY(func->ReturnType() && !func->ReturnType()->Is<core::type::Void>())) {
             AddError(func) << "compute entry point must not have a return type";
         }
-    } else if (auto* s = func->ReturnType()->As<core::type::Struct>()) {
-        for (auto* mem : s->Members()) {
-            if (HasLocationAndBuiltin(mem->Attributes())) {
-                AddError(func)
-                    << "a builtin and location cannot be both declared for a struct member";
-            } else if (func->Stage() != Function::PipelineStage::kUndefined &&
-                       !HasEitherLocationOrBuiltin(mem->Attributes())) {
-                AddError(func) << "members of struct used for returns of entry points must "
-                                  "have a builtin or location decoration";
-            }
-        }
     } else {
-        if (HasLocationAndBuiltin(func->ReturnAttributes())) {
-            AddError(func)
-                << "a builtin and location cannot be both declared for a function return";
-        } else if (!func->ReturnType()->Is<core::type::Void>() &&
-                   func->Stage() != Function::PipelineStage::kUndefined &&
-                   !HasEitherLocationOrBuiltin(func->ReturnAttributes())) {
-            AddError(func) << "a non-void return for an entry point must have a builtin or "
-                              "location decoration";
-        }
-    }
-
-    // References not allowed on function signatures even with Capability::kAllowRefTypes.
-    CheckType(
-        func->ReturnType(), [&]() -> diag::Diagnostic& { return AddError(func); },
-        Capabilities{Capability::kAllowRefTypes});
-
-    if (func->Stage() != Function::PipelineStage::kUndefined) {
-        if (DAWN_UNLIKELY(mod_.NameOf(func).Name().empty())) {
-            AddError(func) << "entry points must have names";
-        }
-    }
-
-    // void needs to be filtered out, since it isn't constructible, but used in the IR when no
-    // return is specified.
-    if (DAWN_UNLIKELY(!func->ReturnType()->Is<core::type::Void>() &&
-                      !func->ReturnType()->IsConstructible())) {
-        AddError(func) << "function return type must be constructible";
-    }
-
-    const auto* ret_struct = func->ReturnType()->As<core::type::Struct>();
-    if (ret_struct) {
-        for (auto* mem : ret_struct->Members()) {
-            if (!InvariantOnlyIfAlsoPosition(mem->Attributes())) {
-                AddError(func) << "invariant can only decorate a member iff it is also decorated "
-                                  "with position";
-            }
-        }
-    } else {
-        if (!InvariantOnlyIfAlsoPosition(func->ReturnAttributes())) {
-            AddError(func)
-                << "invariant can only decorate a return iff it is also decorated with position";
-        }
+        CheckFunctionReturnAttributes(
+            func,
+            CheckDoesNotHaveBothLocationAndBuiltinFunc<Function>(
+                "a builtin and location cannot be both declared for a function return"),
+            CheckDoesNotHaveBothLocationAndBuiltinFunc<Function>(
+                "a builtin and location cannot be both declared for a struct member"));
     }
 
     if (func->Stage() != Function::PipelineStage::kFragment) {
         if (DAWN_UNLIKELY(func->ReturnBuiltin().has_value() &&
                           func->ReturnBuiltin().value() == BuiltinValue::kFragDepth)) {
             AddError(func) << "frag_depth can only be declared for fragment entry points";
+        }
+    }
+
+    if (func->Stage() == Function::PipelineStage::kFragment) {
+        if (!func->ReturnType()->Is<core::type::Void>()) {
+            CheckFunctionReturnAttributes(
+                func,
+                CheckHasLocationOrBuiltinFunc<Function>(
+                    "a non-void return for an entry point must have a "
+                    "builtin or location decoration"),
+                CheckHasLocationOrBuiltinFunc<Function>(
+                    "members of struct used for returns of entry points must have a builtin or "
+                    "location decoration"));
         }
     }
 
@@ -1320,87 +1425,38 @@ void Validator::CheckFunction(const Function* func) {
 }
 
 void Validator::CheckVertexEntryPoint(const Function* ep) {
-    const auto* ret_struct = ep->ReturnType()->As<core::type::Struct>();
     bool contains_position = false;
-    if (ret_struct) {
-        for (auto* mem : ret_struct->Members()) {
-            if (!InvariantOnlyIfAlsoPosition(mem->Attributes())) {
-                AddError(ep) << "invariant can only decorate output members iff they are also "
-                                "position builtins";
-            }
-
-            if (!mem->Attributes().builtin.has_value()) {
-                continue;
-            }
-            switch (mem->Attributes().builtin.value()) {
-                case BuiltinValue::kPosition:
-                    contains_position = true;
-                    CheckBuiltinPosition(ep, mem->Type());
-                    break;
-                case BuiltinValue::kClipDistances:
-                    CheckBuiltinClipDistances(ep, mem->Type());
-                    break;
-                default:
-                    break;
-            }
-        }
-    } else {
-        if (!InvariantOnlyIfAlsoPosition(ep->ReturnAttributes())) {
-            AddError(ep)
-                << "invariant can only decorate outputs iff they are also position builtins";
-        }
-        if (ep->ReturnBuiltin() && ep->ReturnBuiltin() == BuiltinValue::kPosition) {
+    auto check_position = [&](const Function* func, const IOAttributes& attr,
+                              const core::type::Type* ty) {
+        if (attr.builtin == BuiltinValue::kPosition) {
             contains_position = true;
-            CheckBuiltinPosition(ep, ep->ReturnType());
+            CheckBuiltinPosition(func, ty);
         }
-    }
+    };
+
+    auto check_clip_distances = [&](const Function* func, const IOAttributes& attr,
+                                    const core::type::Type* ty) {
+        if (attr.builtin == BuiltinValue::kClipDistances) {
+            CheckBuiltinClipDistances(func, ty);
+        }
+    };
+    auto check_clip_distances_noop = [](const Function*, const IOAttributes&,
+                                        const core::type::Type*) {};
+
+    CheckFunctionReturnAttributesAndType(ep, check_position, check_position);
+    CheckFunctionReturnAttributesAndType(ep, check_clip_distances_noop, check_clip_distances);
 
     for (auto var : referenced_module_vars_.TransitiveReferences(ep)) {
-        const auto* res_type = var->Result(0)->Type()->UnwrapPtrOrRef();
-        const auto* res_struct = res_type->As<core::type::Struct>();
-        if (res_struct) {
-            for (auto* mem : res_struct->Members()) {
-                if (!InvariantOnlyIfAlsoPosition(mem->Attributes())) {
-                    AddError(ep) << "invariant can only decorate members iff they are also "
-                                    "position builtins";
-                }
-
-                if (!mem->Attributes().builtin.has_value()) {
-                    continue;
-                }
-                switch (mem->Attributes().builtin.value()) {
-                    case BuiltinValue::kPosition:
-                        contains_position = true;
-                        CheckBuiltinPosition(ep, mem->Type()->UnwrapPtrOrRef());
-                        break;
-                    case BuiltinValue::kClipDistances:
-                        CheckBuiltinClipDistances(ep, mem->Type()->UnwrapPtrOrRef());
-                        break;
-                    default:
-                        break;
-                }
-            }
-        } else {
-            if (!InvariantOnlyIfAlsoPosition(var->Attributes())) {
-                AddError(ep)
-                    << "invariant can only decorate vars iff they are also position builtins";
-            }
-
-            if (!var->Attributes().builtin.has_value()) {
-                continue;
-            }
-            switch (var->Attributes().builtin.value()) {
-                case BuiltinValue::kPosition: {
-                    contains_position = true;
-                    CheckBuiltinPosition(ep, res_type);
-                } break;
-                case BuiltinValue::kClipDistances:
-                    CheckBuiltinClipDistances(ep, var->Result(0)->Type()->UnwrapPtrOrRef());
-                    break;
-                default:
-                    break;
-            }
-        }
+        const auto* ty = var->Result(0)->Type()->UnwrapPtrOrRef();
+        const auto attr = var->Attributes();
+        CheckIOAttributes(
+            ep, attr, ty,
+            CheckInvariantFunc<Function>(
+                "invariant can only decorate vars iff they are also position builtins"),
+            CheckInvariantFunc<Function>(
+                "invariant can only decorate members iff they are also position builtins"));
+        CheckIOAttributesAndType(ep, attr, ty, check_position, check_position);
+        CheckIOAttributesAndType(ep, attr, ty, check_clip_distances_noop, check_clip_distances);
     }
 
     if (DAWN_UNLIKELY(!contains_position)) {

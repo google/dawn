@@ -475,9 +475,9 @@ TEST_F(IR_ValidatorTest, Function_Param_InvariantWithoutPosition) {
     ASSERT_NE(res, Success);
     EXPECT_EQ(
         res.Failure().reason.Str(),
-        R"(:1:1 error: invariant can only decorate a param iff it is also decorated with position
+        R"(:1:17 error: invariant can only decorate a param iff it is also decorated with position
 %my_func = func(%my_param:vec4<f32> [@invariant]):void {
-^^^^^^^^
+                ^^^^^^^^^^^^^^^^^^^
 
 note: # Disassembly
 %my_func = func(%my_param:vec4<f32> [@invariant]):void {
@@ -527,9 +527,9 @@ TEST_F(IR_ValidatorTest, Function_Param_Struct_InvariantWithoutPosition) {
     ASSERT_NE(res, Success);
     EXPECT_EQ(
         res.Failure().reason.Str(),
-        R"(:5:1 error: invariant can only decorate a param member iff it is also decorated with position
+        R"(:5:17 error: invariant can only decorate a param member iff it is also decorated with position
 %my_func = func(%my_param:MyStruct):void {
-^^^^^^^^
+                ^^^^^^^^^^^^^^^^^^
 
 note: # Disassembly
 MyStruct = struct @align(16) {
@@ -683,9 +683,8 @@ TEST_F(IR_ValidatorTest, Function_Return_InvariantWithoutPosition) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(
-        res.Failure().reason.Str(),
-        R"(:1:1 error: invariant can only decorate a return iff it is also decorated with position
+    EXPECT_EQ(res.Failure().reason.Str(),
+              R"(:1:1 error: invariant can only decorate outputs iff they are also position builtins
 %my_func = func():vec4<f32> [@invariant] {
 ^^^^^^^^
 
@@ -733,7 +732,7 @@ TEST_F(IR_ValidatorTest, Function_Return_Struct_InvariantWithoutPosition) {
     ASSERT_NE(res, Success);
     EXPECT_EQ(
         res.Failure().reason.Str(),
-        R"(:5:1 error: invariant can only decorate a member iff it is also decorated with position
+        R"(:5:1 error: invariant can only decorate output members iff they are also position builtins
 %my_func = func():MyStruct {
 ^^^^^^^^
 
@@ -988,8 +987,6 @@ MyStruct = struct @align(4) {
 )");
 }
 
-// TODO(371219657): Make only the more specific error, 'position must be declared for vertex entry
-//                  point output', be logged here
 TEST_F(IR_ValidatorTest, Function_VertexMissingPosition) {
     auto* f = b.Function("my_func", ty.vec4<f32>());
     f->SetStage(Function::PipelineStage::kVertex);
@@ -997,13 +994,8 @@ TEST_F(IR_ValidatorTest, Function_VertexMissingPosition) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(
-        res.Failure().reason.Str(),
-        R"(:1:1 error: a non-void return for an entry point must have a builtin or location decoration
-%my_func = @vertex func():vec4<f32> {
-^^^^^^^^
-
-:1:1 error: position must be declared for vertex entry point output
+    EXPECT_EQ(res.Failure().reason.Str(),
+              R"(:1:1 error: position must be declared for vertex entry point output
 %my_func = @vertex func():vec4<f32> {
 ^^^^^^^^
 
