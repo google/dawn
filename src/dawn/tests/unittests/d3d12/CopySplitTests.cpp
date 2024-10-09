@@ -32,6 +32,7 @@
 #include "dawn/common/Math.h"
 #include "dawn/native/Format.h"
 #include "dawn/native/d3d12/TextureCopySplitter.h"
+#include "dawn/native/d3d12/UtilsD3D12.h"
 #include "dawn/native/d3d12/d3d12_platform.h"
 #include "dawn/utils/TestUtils.h"
 #include "dawn/webgpu_cpp_print.h"
@@ -61,14 +62,16 @@ struct BufferSpec {
 // Check that each copy region fits inside the buffer footprint
 void ValidateFootprints(const TextureSpec& textureSpec,
                         const BufferSpec& bufferSpec,
+                        BufferTextureCopyDirection direction,
                         const TextureCopySubresource& copySplit,
                         wgpu::TextureDimension dimension) {
     for (uint32_t i = 0; i < copySplit.count; ++i) {
         const auto& copy = copySplit.copies[i];
-        ASSERT_LE(copy.bufferOffset.x + copy.copySize.width, copy.bufferSize.width);
-        ASSERT_LE(copy.bufferOffset.y + copy.copySize.height, copy.bufferSize.height);
-        ASSERT_LE(copy.bufferOffset.z + copy.copySize.depthOrArrayLayers,
-                  copy.bufferSize.depthOrArrayLayers);
+        Extent3D copySize = copy.GetCopySize();
+        Origin3D bufferOffset = copy.GetBufferOffset(direction);
+        ASSERT_LE(bufferOffset.x + copySize.width, copy.bufferSize.width);
+        ASSERT_LE(bufferOffset.y + copySize.height, copy.bufferSize.height);
+        ASSERT_LE(bufferOffset.z + copySize.depthOrArrayLayers, copy.bufferSize.depthOrArrayLayers);
 
         // If there are multiple layers, 2D texture splitter actually splits each layer
         // independently. See the details in Compute2DTextureCopySplits(). As a result,
@@ -89,15 +92,15 @@ void ValidateFootprints(const TextureSpec& textureSpec,
             // The last pixel (buffer footprint) of each copy region depends on its
             // bufferOffset and copySize. It is not the last pixel where the bufferSize
             // ends.
-            ASSERT_EQ(copy.bufferOffset.x % textureSpec.blockWidth, 0u);
-            ASSERT_EQ(copy.copySize.width % textureSpec.blockWidth, 0u);
-            uint32_t footprintWidth = copy.bufferOffset.x + copy.copySize.width;
+            ASSERT_EQ(bufferOffset.x % textureSpec.blockWidth, 0u);
+            ASSERT_EQ(copySize.width % textureSpec.blockWidth, 0u);
+            uint32_t footprintWidth = bufferOffset.x + copySize.width;
             ASSERT_EQ(footprintWidth % textureSpec.blockWidth, 0u);
             uint32_t footprintWidthInBlocks = footprintWidth / textureSpec.blockWidth;
 
-            ASSERT_EQ(copy.bufferOffset.y % textureSpec.blockHeight, 0u);
-            ASSERT_EQ(copy.copySize.height % textureSpec.blockHeight, 0u);
-            uint32_t footprintHeight = copy.bufferOffset.y + copy.copySize.height;
+            ASSERT_EQ(bufferOffset.y % textureSpec.blockHeight, 0u);
+            ASSERT_EQ(copySize.height % textureSpec.blockHeight, 0u);
+            uint32_t footprintHeight = bufferOffset.y + copySize.height;
             ASSERT_EQ(footprintHeight % textureSpec.blockHeight, 0u);
             uint32_t footprintHeightInBlocks = footprintHeight / textureSpec.blockHeight;
 
@@ -129,24 +132,29 @@ bool InclusiveRangesOverlap(uint32_t minA, uint32_t maxA, uint32_t minB, uint32_
 }
 
 // Check that no pair of copy regions intersect each other
-void ValidateDisjoint(const TextureCopySubresource& copySplit) {
+void ValidateDisjoint(const TextureCopySubresource& copySplit,
+                      BufferTextureCopyDirection direction) {
     for (uint32_t i = 0; i < copySplit.count; ++i) {
         const auto& a = copySplit.copies[i];
+        Extent3D copySizeA = a.GetCopySize();
+        Origin3D textureOffsetA = a.GetTextureOffset(direction);
         for (uint32_t j = i + 1; j < copySplit.count; ++j) {
             const auto& b = copySplit.copies[j];
             // If textureOffset.x is 0, and copySize.width is 2, we are copying pixel 0 and
             // 1. We never touch pixel 2 on x-axis. So the copied range on x-axis should be
             // [textureOffset.x, textureOffset.x + copySize.width - 1] and both ends are
             // included.
+            Extent3D copySizeB = b.GetCopySize();
+            Origin3D textureOffsetB = b.GetTextureOffset(direction);
             bool overlapX =
-                InclusiveRangesOverlap(a.textureOffset.x, a.textureOffset.x + a.copySize.width - 1,
-                                       b.textureOffset.x, b.textureOffset.x + b.copySize.width - 1);
-            bool overlapY = InclusiveRangesOverlap(
-                a.textureOffset.y, a.textureOffset.y + a.copySize.height - 1, b.textureOffset.y,
-                b.textureOffset.y + b.copySize.height - 1);
+                InclusiveRangesOverlap(textureOffsetA.x, textureOffsetA.x + copySizeA.width - 1,
+                                       textureOffsetB.x, textureOffsetB.x + copySizeB.width - 1);
+            bool overlapY =
+                InclusiveRangesOverlap(textureOffsetA.y, textureOffsetA.y + copySizeA.height - 1,
+                                       textureOffsetB.y, textureOffsetB.y + copySizeB.height - 1);
             bool overlapZ = InclusiveRangesOverlap(
-                a.textureOffset.z, a.textureOffset.z + a.copySize.depthOrArrayLayers - 1,
-                b.textureOffset.z, b.textureOffset.z + b.copySize.depthOrArrayLayers - 1);
+                textureOffsetA.z, textureOffsetA.z + copySizeA.depthOrArrayLayers - 1,
+                textureOffsetB.z, textureOffsetB.z + copySizeB.depthOrArrayLayers - 1);
             ASSERT_TRUE(!overlapX || !overlapY || !overlapZ);
         }
     }
@@ -154,25 +162,29 @@ void ValidateDisjoint(const TextureCopySubresource& copySplit) {
 
 // Check that the union of the copy regions exactly covers the texture region
 void ValidateTextureBounds(const TextureSpec& textureSpec,
+                           BufferTextureCopyDirection direction,
                            const TextureCopySubresource& copySplit) {
     ASSERT_GT(copySplit.count, 0u);
 
-    uint32_t minX = copySplit.copies[0].textureOffset.x;
-    uint32_t minY = copySplit.copies[0].textureOffset.y;
-    uint32_t minZ = copySplit.copies[0].textureOffset.z;
-    uint32_t maxX = copySplit.copies[0].textureOffset.x + copySplit.copies[0].copySize.width;
-    uint32_t maxY = copySplit.copies[0].textureOffset.y + copySplit.copies[0].copySize.height;
-    uint32_t maxZ =
-        copySplit.copies[0].textureOffset.z + copySplit.copies[0].copySize.depthOrArrayLayers;
+    Extent3D copySize0 = copySplit.copies[0].GetCopySize();
+    Origin3D textureOffset0 = copySplit.copies[0].GetTextureOffset(direction);
+    uint32_t minX = textureOffset0.x;
+    uint32_t minY = textureOffset0.y;
+    uint32_t minZ = textureOffset0.z;
+    uint32_t maxX = textureOffset0.x + copySize0.width;
+    uint32_t maxY = textureOffset0.y + copySize0.height;
+    uint32_t maxZ = textureOffset0.z + copySize0.depthOrArrayLayers;
 
     for (uint32_t i = 1; i < copySplit.count; ++i) {
         const auto& copy = copySplit.copies[i];
-        minX = std::min(minX, copy.textureOffset.x);
-        minY = std::min(minY, copy.textureOffset.y);
-        minZ = std::min(minZ, copy.textureOffset.z);
-        maxX = std::max(maxX, copy.textureOffset.x + copy.copySize.width);
-        maxY = std::max(maxY, copy.textureOffset.y + copy.copySize.height);
-        maxZ = std::max(maxZ, copy.textureOffset.z + copy.copySize.depthOrArrayLayers);
+        Origin3D textureOffset = copy.GetTextureOffset(direction);
+        minX = std::min(minX, textureOffset.x);
+        minY = std::min(minY, textureOffset.y);
+        minZ = std::min(minZ, textureOffset.z);
+        Extent3D copySize = copy.GetCopySize();
+        maxX = std::max(maxX, textureOffset.x + copySize.width);
+        maxY = std::max(maxY, textureOffset.y + copySize.height);
+        maxZ = std::max(maxZ, textureOffset.z + copySize.depthOrArrayLayers);
     }
 
     ASSERT_EQ(minX, textureSpec.x);
@@ -189,8 +201,8 @@ void ValidatePixelCount(const TextureSpec& textureSpec, const TextureCopySubreso
     uint32_t count = 0;
     for (uint32_t i = 0; i < copySplit.count; ++i) {
         const auto& copy = copySplit.copies[i];
-        uint32_t copiedPixels =
-            copy.copySize.width * copy.copySize.height * copy.copySize.depthOrArrayLayers;
+        Extent3D copySize = copy.GetCopySize();
+        uint32_t copiedPixels = copySize.width * copySize.height * copySize.depthOrArrayLayers;
         ASSERT_GT(copiedPixels, 0u);
         count += copiedPixels;
     }
@@ -200,6 +212,7 @@ void ValidatePixelCount(const TextureSpec& textureSpec, const TextureCopySubreso
 // Check that every buffer offset is at the correct pixel location
 void ValidateBufferOffset(const TextureSpec& textureSpec,
                           const BufferSpec& bufferSpec,
+                          BufferTextureCopyDirection direction,
                           const TextureCopySubresource& copySplit,
                           wgpu::TextureDimension dimension) {
     ASSERT_GT(copySplit.count, 0u);
@@ -207,6 +220,8 @@ void ValidateBufferOffset(const TextureSpec& textureSpec,
     uint32_t texelsPerBlock = textureSpec.blockWidth * textureSpec.blockHeight;
     for (uint32_t i = 0; i < copySplit.count; ++i) {
         const auto& copy = copySplit.copies[i];
+        Origin3D bufferOffset = copy.GetBufferOffset(direction);
+        Origin3D textureOffset = copy.GetTextureOffset(direction);
 
         uint32_t bytesPerRowInTexels =
             bufferSpec.bytesPerRow / textureSpec.texelBlockSizeInBytes * texelsPerBlock;
@@ -214,16 +229,16 @@ void ValidateBufferOffset(const TextureSpec& textureSpec,
             bytesPerRowInTexels * (bufferSpec.rowsPerImage / textureSpec.blockHeight);
         uint32_t absoluteTexelOffset =
             copy.alignedOffset / textureSpec.texelBlockSizeInBytes * texelsPerBlock +
-            copy.bufferOffset.x / textureSpec.blockWidth * texelsPerBlock +
-            copy.bufferOffset.y / textureSpec.blockHeight * bytesPerRowInTexels;
+            bufferOffset.x / textureSpec.blockWidth * texelsPerBlock +
+            bufferOffset.y / textureSpec.blockHeight * bytesPerRowInTexels;
 
         // There is one empty row at most in a 2D copy region. However, it is not true for
         // a 3D texture copy region when we are copying the last row of each slice. We may
         // need to offset a lot rows and copy.bufferOffset.y may be big.
         if (dimension == wgpu::TextureDimension::e2D) {
-            ASSERT_LE(copy.bufferOffset.y, textureSpec.blockHeight);
+            ASSERT_LE(bufferOffset.y, textureSpec.blockHeight);
         }
-        ASSERT_EQ(copy.bufferOffset.z, 0u);
+        ASSERT_EQ(bufferOffset.z, 0u);
 
         ASSERT_GE(absoluteTexelOffset,
                   bufferSpec.offset / textureSpec.texelBlockSizeInBytes * texelsPerBlock);
@@ -235,22 +250,23 @@ void ValidateBufferOffset(const TextureSpec& textureSpec,
         uint32_t y = (relativeTexelOffset % slicePitchInTexels) / bytesPerRowInTexels;
         uint32_t x = relativeTexelOffset % bytesPerRowInTexels;
 
-        ASSERT_EQ(copy.textureOffset.x - textureSpec.x, x);
-        ASSERT_EQ(copy.textureOffset.y - textureSpec.y, y);
-        ASSERT_EQ(copy.textureOffset.z - textureSpec.z, z);
+        ASSERT_EQ(textureOffset.x - textureSpec.x, x);
+        ASSERT_EQ(textureOffset.y - textureSpec.y, y);
+        ASSERT_EQ(textureOffset.z - textureSpec.z, z);
     }
 }
 
 void ValidateCopySplit(const TextureSpec& textureSpec,
                        const BufferSpec& bufferSpec,
+                       BufferTextureCopyDirection direction,
                        const TextureCopySubresource& copySplit,
                        wgpu::TextureDimension dimension) {
-    ValidateFootprints(textureSpec, bufferSpec, copySplit, dimension);
+    ValidateFootprints(textureSpec, bufferSpec, direction, copySplit, dimension);
     ValidateOffset(copySplit);
-    ValidateDisjoint(copySplit);
-    ValidateTextureBounds(textureSpec, copySplit);
+    ValidateDisjoint(copySplit, direction);
+    ValidateTextureBounds(textureSpec, direction, copySplit);
     ValidatePixelCount(textureSpec, copySplit);
-    ValidateBufferOffset(textureSpec, bufferSpec, copySplit, dimension);
+    ValidateBufferOffset(textureSpec, bufferSpec, direction, copySplit, dimension);
 }
 
 std::ostream& operator<<(std::ostream& os, const TextureSpec& textureSpec) {
@@ -270,12 +286,15 @@ std::ostream& operator<<(std::ostream& os, const TextureCopySubresource& copySpl
     os << "CopySplit\n";
     for (uint32_t i = 0; i < copySplit.count; ++i) {
         const auto& copy = copySplit.copies[i];
-        os << "  " << i << ": Texture at (" << copy.textureOffset.x << ", " << copy.textureOffset.y
-           << ", " << copy.textureOffset.z << "), size (" << copy.copySize.width << ", "
-           << copy.copySize.height << ", " << copy.copySize.depthOrArrayLayers << ")\n";
-        os << "  " << i << ": Buffer at (" << copy.bufferOffset.x << ", " << copy.bufferOffset.y
-           << ", " << copy.bufferOffset.z << "), footprint (" << copy.bufferSize.width << ", "
-           << copy.bufferSize.height << ", " << copy.bufferSize.depthOrArrayLayers << ")\n";
+        os << "  " << i << ": destinationOffset at (" << copy.destinationOffset.x << ", "
+           << copy.destinationOffset.y << ", " << copy.destinationOffset.z << "), sourceRegion ("
+           << copy.sourceRegion.left << ", " << copy.sourceRegion.top << ", "
+           << copy.sourceRegion.front << ", " << copy.sourceRegion.right << ", "
+           << copy.sourceRegion.bottom << ", " << copy.sourceRegion.back << ")\n";
+        os << "  " << i << ": sourceOffset at (" << copy.sourceRegion.left << ", "
+           << copy.sourceRegion.top << ", " << copy.sourceRegion.front << "), footprint ("
+           << copy.bufferSize.width << ", " << copy.bufferSize.height << ", "
+           << copy.bufferSize.depthOrArrayLayers << ")\n";
     }
     return os;
 }
@@ -380,18 +399,25 @@ constexpr uint32_t kCheckValues[] = {1,  2,  3,  4,   5,   6,   7,    8,     // 
                                      15, 31, 63, 127, 257, 511, 1023, 2047,  // misalignments
                                      17, 33, 65, 129, 257, 513, 1025, 2049};
 
-class CopySplitTest : public testing::TestWithParam<wgpu::TextureDimension> {
+struct CopySplitTestParam {
+    wgpu::TextureDimension dimension;
+    BufferTextureCopyDirection direction;
+};
+
+class CopySplitTest : public testing::TestWithParam<CopySplitTestParam> {
   protected:
     void DoTest(const TextureSpec& textureSpec, const BufferSpec& bufferSpec) {
         DAWN_ASSERT(textureSpec.width % textureSpec.blockWidth == 0 &&
                     textureSpec.height % textureSpec.blockHeight == 0);
 
-        wgpu::TextureDimension dimension = GetParam();
+        wgpu::TextureDimension dimension = GetParam().dimension;
+        BufferTextureCopyDirection direction = GetParam().direction;
         TextureCopySubresource copySplit;
         switch (dimension) {
+            case wgpu::TextureDimension::e1D:
             case wgpu::TextureDimension::e2D: {
                 copySplit = Compute2DTextureCopySubresource(
-                    {textureSpec.x, textureSpec.y, textureSpec.z},
+                    direction, {textureSpec.x, textureSpec.y, textureSpec.z},
                     {textureSpec.width, textureSpec.height, textureSpec.depthOrArrayLayers},
                     {textureSpec.texelBlockSizeInBytes, textureSpec.blockWidth,
                      textureSpec.blockHeight},
@@ -400,7 +426,7 @@ class CopySplitTest : public testing::TestWithParam<wgpu::TextureDimension> {
             }
             case wgpu::TextureDimension::e3D: {
                 copySplit = Compute3DTextureCopySplits(
-                    {textureSpec.x, textureSpec.y, textureSpec.z},
+                    direction, {textureSpec.x, textureSpec.y, textureSpec.z},
                     {textureSpec.width, textureSpec.height, textureSpec.depthOrArrayLayers},
                     {textureSpec.texelBlockSizeInBytes, textureSpec.blockWidth,
                      textureSpec.blockHeight},
@@ -412,7 +438,7 @@ class CopySplitTest : public testing::TestWithParam<wgpu::TextureDimension> {
                 break;
         }
 
-        ValidateCopySplit(textureSpec, bufferSpec, copySplit, dimension);
+        ValidateCopySplit(textureSpec, bufferSpec, direction, copySplit, dimension);
 
         if (HasFatalFailure()) {
             std::ostringstream message;
@@ -530,9 +556,16 @@ TEST_P(CopySplitTest, ImageHeight) {
     }
 }
 
-INSTANTIATE_TEST_SUITE_P(,
-                         CopySplitTest,
-                         testing::Values(wgpu::TextureDimension::e2D, wgpu::TextureDimension::e3D));
+INSTANTIATE_TEST_SUITE_P(
+    ,
+    CopySplitTest,
+    testing::Values(
+        CopySplitTestParam(wgpu::TextureDimension::e1D, BufferTextureCopyDirection::B2T),
+        CopySplitTestParam(wgpu::TextureDimension::e1D, BufferTextureCopyDirection::T2B),
+        CopySplitTestParam(wgpu::TextureDimension::e2D, BufferTextureCopyDirection::B2T),
+        CopySplitTestParam(wgpu::TextureDimension::e2D, BufferTextureCopyDirection::T2B),
+        CopySplitTestParam(wgpu::TextureDimension::e3D, BufferTextureCopyDirection::B2T),
+        CopySplitTestParam(wgpu::TextureDimension::e3D, BufferTextureCopyDirection::T2B)));
 
 }  // anonymous namespace
 }  // namespace dawn::native::d3d12

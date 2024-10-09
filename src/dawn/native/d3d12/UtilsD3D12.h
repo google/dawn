@@ -33,7 +33,6 @@
 #include "dawn/native/Commands.h"
 #include "dawn/native/d3d/UtilsD3D.h"
 #include "dawn/native/d3d12/BufferD3D12.h"
-#include "dawn/native/d3d12/TextureCopySplitter.h"
 #include "dawn/native/d3d12/TextureD3D12.h"
 #include "dawn/native/d3d12/d3d12_platform.h"
 #include "dawn/native/dawn_platform.h"
