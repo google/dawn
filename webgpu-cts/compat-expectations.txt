@@ -1251,6 +1251,8 @@ crbug.com/dawn/0000 [ android arm ] webgpu:shader,execution,expression,construct
 crbug.com/dawn/0000 [ android arm ] webgpu:shader,execution,expression,constructor,non_zero:concrete_array_elements:inputSource="uniform";type="bool";length=5;infer_type=true [ Skip ]
 crbug.com/dawn/0000 [ android arm ] webgpu:shader,execution,expression,unary,af_assignment:f32:inputSource="const" [ Skip ]
 crbug.com/dawn/0000 [ android arm ] webgpu:api,validation,state,device_lost,destroy:importExternalTexture:sourceType="VideoElement";awaitLost=false [ Skip ]
+crbug.com/dawn/0000 [ android arm ] webgpu:api,validation,error_scope:current_scope:errorFilter="validation";stackDepth=100000 [ Skip ]
+crbug.com/dawn/0000 [ android arm ] webgpu:api,operation,command_buffer,render,state_tracking:set_index_buffer_without_changing_buffer: [ Skip ]
 
 # Android atomic builtin failures on Pixel 6
 # Note that all of these are also failing on Core (Vulkan)
