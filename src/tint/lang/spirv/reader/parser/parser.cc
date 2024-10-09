@@ -646,6 +646,9 @@ class Parser {
                 case spv::Decoration::Sample:
                     interpolation().sampling = core::InterpolationSampling::kSample;
                     break;
+                case spv::Decoration::Index:
+                    io_attributes.blend_src = deco->GetSingleWordOperand(2);
+                    break;
                 default:
                     TINT_UNIMPLEMENTED() << "unhandled decoration " << d;
             }

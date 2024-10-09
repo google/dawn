@@ -350,5 +350,114 @@ $B1: {  # root
 )");
 }
 
+TEST_F(SpirvReaderTest, BlendSrc) {
+    auto got = Run(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint Fragment %frag_main "frag_main" %frag_main_loc0_idx0_Output %frag_main_loc0_idx1_Output
+               OpExecutionMode %frag_main OriginUpperLeft
+               OpName %frag_main_loc0_idx0_Output "frag_main_loc0_idx0_Output"
+               OpName %frag_main_loc0_idx1_Output "frag_main_loc0_idx1_Output"
+               OpName %frag_main_inner "frag_main_inner"
+               OpMemberName %FragOutput 0 "color"
+               OpMemberName %FragOutput 1 "blend"
+               OpName %FragOutput "FragOutput"
+               OpName %output "output"
+               OpName %frag_main "frag_main"
+               OpDecorate %frag_main_loc0_idx0_Output Location 0
+               OpDecorate %frag_main_loc0_idx0_Output Index 0
+               OpDecorate %frag_main_loc0_idx1_Output Location 0
+               OpDecorate %frag_main_loc0_idx1_Output Index 1
+               OpMemberDecorate %FragOutput 0 Offset 0
+               OpMemberDecorate %FragOutput 1 Offset 16
+      %float = OpTypeFloat 32
+    %v4float = OpTypeVector %float 4
+%_ptr_Output_v4float = OpTypePointer Output %v4float
+%frag_main_loc0_idx0_Output = OpVariable %_ptr_Output_v4float Output
+%frag_main_loc0_idx1_Output = OpVariable %_ptr_Output_v4float Output
+ %FragOutput = OpTypeStruct %v4float %v4float
+          %8 = OpTypeFunction %FragOutput
+%_ptr_Function_FragOutput = OpTypePointer Function %FragOutput
+         %12 = OpConstantNull %FragOutput
+%_ptr_Function_v4float = OpTypePointer Function %v4float
+       %uint = OpTypeInt 32 0
+     %uint_0 = OpConstant %uint 0
+  %float_0_5 = OpConstant %float 0.5
+    %float_1 = OpConstant %float 1
+         %17 = OpConstantComposite %v4float %float_0_5 %float_0_5 %float_0_5 %float_1
+     %uint_1 = OpConstant %uint 1
+       %void = OpTypeVoid
+         %25 = OpTypeFunction %void
+%frag_main_inner = OpFunction %FragOutput None %8
+          %9 = OpLabel
+     %output = OpVariable %_ptr_Function_FragOutput Function %12
+         %13 = OpAccessChain %_ptr_Function_v4float %output %uint_0
+               OpStore %13 %17 None
+         %20 = OpAccessChain %_ptr_Function_v4float %output %uint_1
+               OpStore %20 %17 None
+         %22 = OpLoad %FragOutput %output None
+               OpReturnValue %22
+               OpFunctionEnd
+  %frag_main = OpFunction %void None %25
+         %26 = OpLabel
+         %27 = OpFunctionCall %FragOutput %frag_main_inner
+         %28 = OpCompositeExtract %v4float %27 0
+               OpStore %frag_main_loc0_idx0_Output %28 None
+         %29 = OpCompositeExtract %v4float %27 1
+               OpStore %frag_main_loc0_idx1_Output %29 None
+               OpReturn
+               OpFunctionEnd
+)");
+
+    ASSERT_EQ(got, Success);
+    EXPECT_EQ(got, R"(
+tint_symbol_2 = struct @align(16) {
+  tint_symbol:vec4<f32> @offset(0)
+  tint_symbol_1:vec4<f32> @offset(16)
+}
+
+tint_symbol_5 = struct @align(16) {
+  tint_symbol_3:vec4<f32> @offset(0), @location(0), @blend_src(0)
+  tint_symbol_4:vec4<f32> @offset(16), @location(0), @blend_src(1)
+}
+
+$B1: {  # root
+  %1:ptr<private, vec4<f32>, read_write> = var
+  %2:ptr<private, vec4<f32>, read_write> = var
+}
+
+%3 = func():tint_symbol_2 {
+  $B2: {
+    %4:ptr<function, tint_symbol_2, read_write> = var, tint_symbol_2(vec4<f32>(0.0f))
+    %5:ptr<function, vec4<f32>, read_write> = access %4, 0u
+    store %5, vec4<f32>(0.5f, 0.5f, 0.5f, 1.0f)
+    %6:ptr<function, vec4<f32>, read_write> = access %4, 1u
+    store %6, vec4<f32>(0.5f, 0.5f, 0.5f, 1.0f)
+    %7:tint_symbol_2 = load %4
+    ret %7
+  }
+}
+%frag_main_inner = func():void {
+  $B3: {
+    %9:tint_symbol_2 = call %3
+    %10:vec4<f32> = access %9, 0u
+    store %1, %10
+    %11:vec4<f32> = access %9, 1u
+    store %2, %11
+    ret
+  }
+}
+%frag_main = @fragment func():tint_symbol_5 {
+  $B4: {
+    %13:void = call %frag_main_inner
+    %14:vec4<f32> = load %1
+    %15:vec4<f32> = load %2
+    %16:tint_symbol_5 = construct %14, %15
+    ret %16
+  }
+}
+)");
+}
+
 }  // namespace
 }  // namespace tint::spirv::reader

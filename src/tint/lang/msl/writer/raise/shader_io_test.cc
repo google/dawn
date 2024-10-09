@@ -654,8 +654,8 @@ TEST_F(MslWriter_ShaderIOTest, ReturnValue_DualSourceBlending) {
 
     auto* src = R"(
 Output = struct @align(4) {
-  color1:f32 @offset(0), @location(0)
-  color2:f32 @offset(4), @location(0)
+  color1:f32 @offset(0), @location(0), @blend_src(0)
+  color2:f32 @offset(4), @location(0), @blend_src(1)
 }
 
 %foo = @fragment func():Output {
@@ -674,8 +674,8 @@ Output = struct @align(4) {
 }
 
 foo_outputs = struct @align(4) {
-  Output_color1:f32 @offset(0), @location(0)
-  Output_color2:f32 @offset(4), @location(0)
+  Output_color1:f32 @offset(0), @location(0), @blend_src(0)
+  Output_color2:f32 @offset(4), @location(0), @blend_src(1)
 }
 
 %foo_inner = func():Output {

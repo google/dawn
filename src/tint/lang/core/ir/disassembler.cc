@@ -914,6 +914,10 @@ void Disassembler::EmitStructDecl(const core::type::Struct* str) {
             out_ << ", " << StyleAttribute("@location") << "("
                  << StyleLiteral(member->Attributes().location.value()) << ")";
         }
+        if (member->Attributes().blend_src.has_value()) {
+            out_ << ", " << StyleAttribute("@blend_src") << "("
+                 << StyleLiteral(member->Attributes().blend_src.value()) << ")";
+        }
         if (member->Attributes().color.has_value()) {
             out_ << ", " << StyleAttribute("@color") << "("
                  << StyleLiteral(member->Attributes().color.value()) << ")";

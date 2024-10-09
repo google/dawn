@@ -682,8 +682,8 @@ TEST_F(GlslWriter_ShaderIOTest, ReturnValue_DualSourceBlending) {
 
     auto* src = R"(
 Output = struct @align(4) {
-  color1:f32 @offset(0), @location(0)
-  color2:f32 @offset(4), @location(0)
+  color1:f32 @offset(0), @location(0), @blend_src(0)
+  color2:f32 @offset(4), @location(0), @blend_src(1)
 }
 
 %foo = @fragment func():Output {
