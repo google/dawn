@@ -1465,6 +1465,7 @@ crbug.com/371963563 [ mac amd ] webgpu:shader,execution,expression,call,builtin,
 crbug.com/371963563 [ mac amd ] webgpu:shader,execution,expression,call,builtin,atomics,atomicAnd:and_workgroup:workgroupSize=64;dispatchSize=1;mapId="remap";scalarType="u32" [ RetryOnFailure ]
 crbug.com/371963563 [ mac amd ] webgpu:shader,execution,expression,call,builtin,atomics,atomicAnd:and_workgroup:workgroupSize=64;dispatchSize=4;mapId="passthrough";scalarType="i32" [ RetryOnFailure ]
 crbug.com/371963563 [ mac amd ] webgpu:shader,execution,expression,call,builtin,atomics,atomicAnd:and_workgroup:workgroupSize=64;dispatchSize=4;mapId="remap";scalarType="u32" [ RetryOnFailure ]
+crbug.com/371963563 [ mac amd ] webgpu:shader,execution,expression,call,builtin,atomics,atomicAnd:and_workgroup:workgroupSize=64;dispatchSize=8;mapId="passthrough";scalarType="i32" [ RetryOnFailure ]
 crbug.com/371963563 [ mac amd ] webgpu:shader,execution,expression,call,builtin,atomics,atomicAnd:and_workgroup:workgroupSize=64;dispatchSize=8;mapId="passthrough";scalarType="u32" [ RetryOnFailure ]
 crbug.com/371963563 [ mac amd ] webgpu:shader,execution,expression,call,builtin,atomics,atomicAnd:and_workgroup:workgroupSize=64;dispatchSize=16;mapId="passthrough";scalarType="u32" [ RetryOnFailure ]
 crbug.com/371963563 [ mac amd ] webgpu:shader,execution,expression,call,builtin,atomics,atomicOr:or_workgroup:workgroupSize=64;dispatchSize=1;mapId="remap";scalarType="u32" [ RetryOnFailure ]
