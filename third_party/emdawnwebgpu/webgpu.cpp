@@ -41,6 +41,19 @@ FutureID emwgpuWaitAny(FutureID const* futurePtr,
                        uint64_t const* timeoutNSPtr);
 WGPUTextureFormat emwgpuGetPreferredFormat();
 
+// Creation functions to create JS backing objects given a pre-allocated handle.
+void emwgpuDeviceCreateBuffer(WGPUDevice device,
+                              const WGPUBufferDescriptor* descriptor,
+                              WGPUBuffer buffer);
+
+// Buffer mapping operations that has work that needs to be done on the JS side.
+void emwgpuBufferDestroy(WGPUBuffer buffer);
+const void* emwgpuBufferGetConstMappedRange(WGPUBuffer buffer,
+                                            size_t offset,
+                                            size_t size);
+void* emwgpuBufferGetMappedRange(WGPUBuffer buffer, size_t offset, size_t size);
+void emwgpuBufferUnmap(WGPUBuffer buffer);
+
 // Future/async operation that need to be forwarded to JS.
 void emwgpuAdapterRequestDevice(WGPUAdapter adapter,
                                 FutureID futureId,
@@ -48,6 +61,11 @@ void emwgpuAdapterRequestDevice(WGPUAdapter adapter,
                                 WGPUDevice device,
                                 WGPUQueue queue,
                                 const WGPUDeviceDescriptor* descriptor);
+void emwgpuBufferMapAsync(WGPUBuffer buffer,
+                          FutureID futureID,
+                          WGPUMapMode mode,
+                          size_t offset,
+                          size_t size);
 void emwgpuDeviceCreateComputePipelineAsync(
     WGPUDevice device,
     FutureID futureId,
@@ -260,7 +278,6 @@ auto ReturnToAPI(Ref<T*>&& object) {
 #define WGPU_PASSTHROUGH_OBJECTS(X) \
   X(BindGroup)           \
   X(BindGroupLayout)     \
-  X(Buffer)              \
   X(CommandBuffer)       \
   X(CommandEncoder)      \
   X(ComputePassEncoder)  \
@@ -291,6 +308,7 @@ enum class EventType {
   CreateComputePipeline,
   CreateRenderPipeline,
   DeviceLost,
+  MapAsync,
   RequestAdapter,
   RequestDevice,
 };
@@ -583,6 +601,41 @@ struct WGPUAdapterImpl final : public RefCounted, public EventSource {
   WGPUAdapterImpl(const EventSource* source);
 };
 
+struct WGPUBufferImpl final : public RefCountedWithExternalCount,
+                              public EventSource {
+ public:
+  WGPUBufferImpl(const EventSource* source, bool mappedAtCreation);
+
+  void Destroy();
+  const void* GetConstMappedRange(size_t offset, size_t size);
+  WGPUBufferMapState GetMapState() const;
+  void* GetMappedRange(size_t offset, size_t size);
+  WGPUFuture MapAsync(WGPUMapMode mode,
+                      size_t offset,
+                      size_t size,
+                      WGPUBufferMapCallbackInfo2 callbackInfo);
+  void Unmap();
+
+ private:
+  friend class MapAsyncEvent;
+
+  void WillDropLastExternalRef() override;
+
+  bool IsPendingMapRequest(FutureID futureID) const;
+  void AbortPendingMap(const char* message);
+
+  // Encapsulates information about a map request. Note that when
+  // futureID == kNullFutureId, there are no pending map requests, however, it
+  // is still possible that we are still "mapped" because of mappedAtCreation
+  // which is not associated with a particular async map / future.
+  struct MapRequest {
+    FutureID futureID = kNullFutureId;
+    WGPUMapMode mode = WGPUMapMode_None;
+  };
+  MapRequest mPendingMapRequest;
+  WGPUBufferMapState mMapState;
+};
+
 // Device is specially implemented in order to handle refcounting the Queue.
 struct WGPUDeviceImpl final : public RefCountedWithExternalCount,
                               public EventSource {
@@ -732,6 +785,65 @@ class DeviceLostEvent final : public TrackedEvent {
   std::optional<std::string> mMessage;
 };
 
+class MapAsyncEvent final : public TrackedEvent {
+ public:
+  static constexpr EventType kType = EventType::MapAsync;
+
+  MapAsyncEvent(InstanceID instance,
+                WGPUBuffer buffer,
+                const WGPUBufferMapCallbackInfo2& callbackInfo)
+      : TrackedEvent(instance, callbackInfo.mode), mBuffer(buffer) {}
+
+  EventType GetType() override { return kType; }
+
+  void ReadyHook(WGPUMapAsyncStatus status, const char* message) {
+    // For mapping, this hook may be called more than once if we are not in
+    // Spontaneous mode. The precedence of which status should follow
+    // Success < Error < Aborted. Luckily, the enum is defined such that the
+    // precedence holds true already, so we can exploit that here.
+    static_assert(WGPUMapAsyncStatus_Success < WGPUMapAsyncStatus_Error);
+    static_assert(WGPUMapAsyncStatus_Error < WGPUMapAsyncStatus_Aborted);
+    if (status > mStatus) {
+      mStatus = status;
+      if (message) {
+        mMessage = message;
+      }
+    }
+  }
+
+  void Complete(FutureID futureID, EventCompletionType type) override {
+    if (type == EventCompletionType::Shutdown) {
+      mStatus = WGPUMapAsyncStatus_InstanceDropped;
+      mMessage = "A valid external Instance reference no longer exists.";
+    }
+
+    if (mBuffer->IsPendingMapRequest(futureID)) {
+      if (mStatus == WGPUMapAsyncStatus_Success) {
+        mBuffer->mMapState = WGPUBufferMapState_Mapped;
+      } else {
+        mBuffer->mMapState = WGPUBufferMapState_Unmapped;
+        mBuffer->mPendingMapRequest = {};
+      }
+    } else {
+      assert(mStatus != WGPUMapAsyncStatus_Success);
+    }
+
+    if (mCallback) {
+      mCallback(mStatus, mMessage ? mMessage->c_str() : nullptr, mUserdata1,
+                mUserdata2);
+    }
+  }
+
+ private:
+  WGPUBufferMapCallback2 mCallback = nullptr;
+  void* mUserdata1 = nullptr;
+  void* mUserdata2 = nullptr;
+
+  Ref<WGPUBuffer> mBuffer;
+  WGPUMapAsyncStatus mStatus = WGPUMapAsyncStatus_Success;
+  std::optional<std::string> mMessage = std::nullopt;
+};
+
 class RequestAdapterEvent final : public TrackedEvent {
  public:
   static constexpr EventType kType = EventType::RequestAdapter;
@@ -834,8 +946,106 @@ class RequestDeviceEvent final : public TrackedEvent {
 // WGPUAdapterImpl implementations.
 // ----------------------------------------------------------------------------
 
-WGPUAdapterImpl::WGPUAdapterImpl(const EventSource* source)
-    : EventSource(source->GetInstanceId()) {}
+WGPUAdapterImpl::WGPUAdapterImpl(const EventSource* instance)
+    : EventSource(instance->GetInstanceId()) {}
+
+// ----------------------------------------------------------------------------
+// WGPUBuffer implementations.
+// ----------------------------------------------------------------------------
+
+WGPUBufferImpl::WGPUBufferImpl(const EventSource* source, bool mappedAtCreation)
+    : EventSource(source->GetInstanceId()),
+      mMapState(mappedAtCreation ? WGPUBufferMapState_Mapped
+                                 : WGPUBufferMapState_Unmapped) {
+  if (mappedAtCreation) {
+    mPendingMapRequest = {kNullFutureId, WGPUMapMode_Write};
+  }
+}
+
+void WGPUBufferImpl::Destroy() {
+  emwgpuBufferDestroy(this);
+  AbortPendingMap("Buffer was destroyed before mapping was resolved.");
+}
+
+const void* WGPUBufferImpl::GetConstMappedRange(size_t offset, size_t size) {
+  if (mMapState != WGPUBufferMapState_Mapped) {
+    return nullptr;
+  }
+  return emwgpuBufferGetConstMappedRange(this, offset, size);
+}
+
+WGPUBufferMapState WGPUBufferImpl::GetMapState() const {
+  return mMapState;
+}
+
+void* WGPUBufferImpl::GetMappedRange(size_t offset, size_t size) {
+  if (mMapState != WGPUBufferMapState_Mapped) {
+    return nullptr;
+  }
+  if (mPendingMapRequest.mode != WGPUMapMode_Write) {
+    assert(false);
+    return nullptr;
+  }
+
+  return emwgpuBufferGetMappedRange(this, offset, size);
+}
+
+WGPUFuture WGPUBufferImpl::MapAsync(WGPUMapMode mode,
+                                    size_t offset,
+                                    size_t size,
+                                    WGPUBufferMapCallbackInfo2 callbackInfo) {
+  auto [futureId, tracked] = GetEventManager().TrackEvent(
+      std::make_unique<MapAsyncEvent>(GetInstanceId(), this, callbackInfo));
+  if (!tracked) {
+    return WGPUFuture{kNullFutureId};
+  }
+
+  if (mMapState == WGPUBufferMapState_Pending) {
+    GetEventManager().SetFutureReady<MapAsyncEvent>(
+        futureId, WGPUMapAsyncStatus_Error,
+        "Buffer already has an outstanding map pending.");
+    return WGPUFuture{futureId};
+  }
+
+  assert(mPendingMapRequest.mode == WGPUMapMode_None);
+  mMapState = WGPUBufferMapState_Pending;
+  mPendingMapRequest = {futureId, mode};
+
+  emwgpuBufferMapAsync(this, futureId, mode, offset, size);
+  return WGPUFuture{futureId};
+}
+
+void WGPUBufferImpl::Unmap() {
+  emwgpuBufferUnmap(this);
+  AbortPendingMap("Buffer was unmapped before mapping was resolved.");
+}
+
+bool WGPUBufferImpl::IsPendingMapRequest(FutureID futureID) const {
+  assert(futureID != kNullFutureId);
+  return mPendingMapRequest.futureID == futureID;
+}
+
+void WGPUBufferImpl::AbortPendingMap(const char* message) {
+  if (mMapState == WGPUBufferMapState_Unmapped) {
+    return;
+  }
+
+  mMapState = WGPUBufferMapState_Unmapped;
+
+  FutureID futureId = mPendingMapRequest.futureID;
+  if (futureId == kNullFutureId) {
+    // If we were mappedAtCreation, then there is no pending map request so we
+    // don't need to resolve any futures.
+    return;
+  }
+  mPendingMapRequest = {};
+  GetEventManager().SetFutureReady<MapAsyncEvent>(
+      futureId, WGPUMapAsyncStatus_Aborted, message);
+}
+
+void WGPUBufferImpl::WillDropLastExternalRef() {
+  AbortPendingMap("Buffer was destroyed before mapping was resolved.");
+}
 
 // ----------------------------------------------------------------------------
 // WGPUDeviceImpl implementations.
@@ -934,7 +1144,7 @@ WGPUDevice emwgpuCreateDevice(WGPUInstance instance, WGPUQueue queue) {
 }
 
 // Future event callbacks.
-void emwgpuOnDeviceCreateComputePipelineCompleted(
+void emwgpuOnCreateComputePipelineCompleted(
     FutureID futureId,
     WGPUCreatePipelineAsyncStatus status,
     WGPUComputePipeline pipeline,
@@ -942,11 +1152,10 @@ void emwgpuOnDeviceCreateComputePipelineCompleted(
   GetEventManager().SetFutureReady<CreateComputePipelineEvent>(
       futureId, status, pipeline, message);
 }
-void emwgpuOnDeviceCreateRenderPipelineCompleted(
-    FutureID futureId,
-    WGPUCreatePipelineAsyncStatus status,
-    WGPURenderPipeline pipeline,
-    const char* message) {
+void emwgpuOnCreateRenderPipelineCompleted(FutureID futureId,
+                                           WGPUCreatePipelineAsyncStatus status,
+                                           WGPURenderPipeline pipeline,
+                                           const char* message) {
   GetEventManager().SetFutureReady<CreateRenderPipelineEvent>(
       futureId, status, pipeline, message);
 }
@@ -954,6 +1163,11 @@ void emwgpuOnDeviceLostCompleted(FutureID futureId,
                                  WGPUDeviceLostReason reason,
                                  const char* message) {
   GetEventManager().SetFutureReady<DeviceLostEvent>(futureId, reason, message);
+}
+void emwgpuOnMapAsyncCompleted(FutureID futureId,
+                               WGPUMapAsyncStatus status,
+                               const char* message) {
+  GetEventManager().SetFutureReady<MapAsyncEvent>(futureId, status, message);
 }
 void emwgpuOnRequestAdapterCompleted(FutureID futureId,
                                      WGPURequestAdapterStatus status,
@@ -1098,6 +1312,36 @@ WGPUFuture wgpuAdapterRequestDevice2(
 // Methods of Buffer
 // ----------------------------------------------------------------------------
 
+void wgpuBufferDestroy(WGPUBuffer buffer) {
+  buffer->Destroy();
+}
+
+const void* wgpuBufferGetConstMappedRange(WGPUBuffer buffer,
+                                          size_t offset,
+                                          size_t size) {
+  return buffer->GetConstMappedRange(offset, size);
+}
+
+WGPUBufferMapState wgpuBufferGetMapState(WGPUBuffer buffer) {
+  return buffer->GetMapState();
+}
+
+void* wgpuBufferGetMappedRange(WGPUBuffer buffer, size_t offset, size_t size) {
+  return buffer->GetMappedRange(offset, size);
+}
+
+WGPUFuture wgpuBufferMapAsync2(WGPUBuffer buffer,
+                               WGPUMapMode mode,
+                               size_t offset,
+                               size_t size,
+                               WGPUBufferMapCallbackInfo2 callbackInfo) {
+  return buffer->MapAsync(mode, offset, size, callbackInfo);
+}
+
+void wgpuBufferUnmap(WGPUBuffer buffer) {
+  buffer->Unmap();
+}
+
 // ----------------------------------------------------------------------------
 // Methods of CommandBuffer
 // ----------------------------------------------------------------------------
@@ -1117,6 +1361,13 @@ WGPUFuture wgpuAdapterRequestDevice2(
 // ----------------------------------------------------------------------------
 // Methods of Device
 // ----------------------------------------------------------------------------
+
+WGPUBuffer wgpuDeviceCreateBuffer(WGPUDevice device,
+                                  const WGPUBufferDescriptor* descriptor) {
+  WGPUBuffer buffer = new WGPUBufferImpl(device, descriptor->mappedAtCreation);
+  emwgpuDeviceCreateBuffer(device, descriptor, buffer);
+  return buffer;
+}
 
 void wgpuDeviceCreateComputePipelineAsync(
     WGPUDevice device,
