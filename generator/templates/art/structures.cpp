@@ -94,6 +94,7 @@ jobject ToKotlin(JNIEnv *env, const WGPUUncapturedErrorCallbackInfo* input) {
 void ToNative(JNIContext* c, JNIEnv* env, jstring obj, WGPUStringView* s) {
     if (obj == nullptr) {
         *s = {nullptr, WGPU_STRLEN};
+        return;
     }
     *s = {c->GetStringUTFChars(obj), static_cast<size_t>(env->GetStringUTFLength(obj))};
 }
