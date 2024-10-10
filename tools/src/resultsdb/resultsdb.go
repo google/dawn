@@ -38,8 +38,12 @@ import (
 	"google.golang.org/api/iterator"
 )
 
+type RowHandler = func(*QueryResult) error
+type QueryFunc = func(context.Context, []buildbucket.BuildID, string, RowHandler) error
+
 type Querier interface {
-	QueryTestResults(ctx context.Context, builds []buildbucket.BuildID, testPrefix string, f func(*QueryResult) error) error
+	QueryTestResults(ctx context.Context, builds []buildbucket.BuildID, testPrefix string, f RowHandler) error
+	QueryUnsuppressedFailingTestResults(ctx context.Context, builds []buildbucket.BuildID, testPrefix string, f RowHandler) error
 }
 
 // BigQueryClient is a wrapper around bigquery.Client so that we can define new
@@ -91,26 +95,79 @@ func NewBigQueryClient(ctx context.Context, project string) (*BigQueryClient, er
 // f is called once per result and is expected to handle any processing or
 // storage of results.
 func (bq BigQueryClient) QueryTestResults(
-	ctx context.Context, builds []buildbucket.BuildID, testPrefix string, f func(*QueryResult) error) error {
+	ctx context.Context, builds []buildbucket.BuildID, testPrefix string, f RowHandler) error {
 	// test_id gets renamed since the column names need to match the struct names
 	// unless we want to get results in a generic bigquery.Value slice and
 	// manually copy data over.
-	base_query := `
+	baseQuery := `
 		SELECT
-		  test_id AS testid,
-		  status,
-		  tags,
-		  duration
+			test_id AS testid,
+			status,
+			tags,
+			duration
 		FROM ` + "`chrome-luci-data.chromium.gpu_try_test_results`" + ` tr
 		WHERE
-		  exported.id IN UNNEST([%s])
-		  AND STARTS_WITH(tr.test_id, "%v")`
+			exported.id IN UNNEST([%s])
+			AND STARTS_WITH(tr.test_id, "%v")`
 
+	return bq.runQueryForBuilds(ctx, baseQuery, builds, testPrefix, f)
+}
+
+// QueryUnsuppressedFailingTestResults fetches the test results for the given
+// builds using BigQuery that both:
+//  1. Failed in some way
+//  2. Did not have an existing failure suppression in place
+//
+// f is called once per result and is expected to handle any processing or
+// sorage of results.
+func (bq BigQueryClient) QueryUnsuppressedFailingTestResults(
+	ctx context.Context, builds []buildbucket.BuildID, testPrefix string, f RowHandler) error {
+	// We use a subquery since we need to calculate the typ expectations for
+	// filtering, but don't actually need them in the end results.
+	// test_id gets renamed since the column names need to match the struct names
+	// unless we want to get results as a generic bigquery.Value slice and
+	// manually copy data over.
+	baseQuery := `
+		WITH
+			failing_results AS (
+				SELECT
+					test_id AS testid,
+					status,
+					tags,
+					duration,
+					ARRAY(
+						SELECT value
+						FROM tr.tags
+						WHERE key = "raw_typ_expectation") as typ_expectations
+				FROM ` + "`chrome-luci-data.chromium.gpu_try_test_results`" + ` tr
+				WHERE
+					exported.id IN UNNEST([%s])
+					AND STARTS_WITH(tr.test_id, "%v")
+					AND status != "SKIP"
+					AND status != "PASS"
+			)
+		SELECT
+			*
+		EXCEPT
+			(typ_expectations)
+		FROM
+			failing_results
+		WHERE
+			ARRAY_LENGTH(typ_expectations) = 1
+			AND typ_expectations[0] = "Pass"`
+
+	return bq.runQueryForBuilds(ctx, baseQuery, builds, testPrefix, f)
+}
+
+// runQueryForBuilds is a helper function for running queries limited to a set
+// of builds and prefix. See callers of this function for additional information.
+func (bq BigQueryClient) runQueryForBuilds(
+	ctx context.Context, baseQuery string, builds []buildbucket.BuildID, testPrefix string, f RowHandler) error {
 	var buildIds []string
 	for _, id := range builds {
 		buildIds = append(buildIds, fmt.Sprintf(`"build-%v"`, id))
 	}
-	query := fmt.Sprintf(base_query, strings.Join(buildIds, ","), testPrefix)
+	query := fmt.Sprintf(baseQuery, strings.Join(buildIds, ","), testPrefix)
 
 	q := bq.client.Query(query)
 	iter, err := q.Read(ctx)

@@ -41,10 +41,13 @@ import (
 
 // TODO(crbug.com/342554800): Add test coverage for:
 //   ResultSource.GetResults (requires breaking out into helper functions)
-//   CacheResults
+//   ResultSource.GetUnsuppressedFailingResults (ditto)
+//   CacheResults (requires os abstraction crbug.com/344014313)
+//   CacheUnsuppressedFailingResults (ditto)
 //   LatestCTSRoll
 //   LatestPatchset
-//   MostRecentResultsForChange
+//   MostRecentResultsForChange (requires os abstraction crbug.com/344014313)
+//   MostRecentUnsuppressedFailingResultsForChange (ditto)
 
 /*******************************************************************************
  * Fake implementations
@@ -52,12 +55,24 @@ import (
 
 // A fake version of dawn/tools/src/resultsdb's BigQueryClient.
 type mockedBigQueryClient struct {
-	returnValues []resultsdb.QueryResult
+	returnValues                    []resultsdb.QueryResult
+	unsuppressedFailureReturnValues []resultsdb.QueryResult
 }
 
 func (bq mockedBigQueryClient) QueryTestResults(
 	ctx context.Context, builds []buildbucket.BuildID, testPrefix string, f func(*resultsdb.QueryResult) error) error {
 	for _, result := range bq.returnValues {
+		if err := f(&result); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (bq mockedBigQueryClient) QueryUnsuppressedFailingTestResults(
+	ctx context.Context, builds []buildbucket.BuildID, testPrefix string, f func(*resultsdb.QueryResult) error) error {
+
+	for _, result := range bq.unsuppressedFailureReturnValues {
 		if err := f(&result); err != nil {
 			return err
 		}
@@ -165,6 +180,110 @@ func TestGetResultsGetRawResultsErrorSurfaced(t *testing.T) {
 	client.returnValues[0].TestId = "bad_test"
 
 	results, err := GetResults(ctx, cfg, client, builds)
+	assert.Nil(t, results)
+	assert.ErrorContains(t, err, "Test ID bad_test did not start with prefix even though query should have filtered.")
+}
+
+/*******************************************************************************
+ * GetUnsuppressedFailingResults tests
+ ******************************************************************************/
+
+func generateGoodGetUnsuppressedFailingResultsInputs() (context.Context, Config, *mockedBigQueryClient, BuildsByName) {
+	ctx := context.Background()
+
+	cfg := Config{
+		Tests: []TestConfig{
+			TestConfig{
+				ExecutionMode: result.ExecutionMode("execution_mode"),
+				Prefixes:      []string{"prefix"},
+			},
+		},
+	}
+
+	client := &mockedBigQueryClient{
+		unsuppressedFailureReturnValues: []resultsdb.QueryResult{
+			resultsdb.QueryResult{
+				TestId:   "prefix_test",
+				Status:   "FAIL",
+				Tags:     []resultsdb.TagPair{},
+				Duration: 1.0,
+			},
+		},
+	}
+
+	builds := make(BuildsByName)
+
+	return ctx, cfg, client, builds
+}
+
+// Tests that valid results are properly cleaned, sorted, and returned.
+func TestGetUnsuppressedFailingResultsHappyPath(t *testing.T) {
+	ctx, cfg, client, builds := generateGoodGetUnsuppressedFailingResultsInputs()
+
+	cfg.Tag.Remove = []string{
+		"remove_me",
+	}
+
+	client.unsuppressedFailureReturnValues = []resultsdb.QueryResult{
+		resultsdb.QueryResult{
+			TestId: "prefix_test_2",
+			Status: "FAIL",
+			Tags: []resultsdb.TagPair{
+				resultsdb.TagPair{
+					Key:   "typ_tag",
+					Value: "remove_me",
+				},
+				resultsdb.TagPair{
+					Key:   "typ_tag",
+					Value: "win",
+				},
+			},
+			Duration: 2.0,
+		},
+		resultsdb.QueryResult{
+			TestId: "prefix_test_1",
+			Status: "FAIL",
+			Tags: []resultsdb.TagPair{
+				resultsdb.TagPair{
+					Key:   "typ_tag",
+					Value: "linux",
+				},
+			},
+			Duration: 1.0,
+		},
+	}
+
+	expectedResultsList := result.List{
+		result.Result{
+			Query:        query.Parse("_test_1"),
+			Status:       result.Failure,
+			Tags:         result.NewTags("linux"),
+			Duration:     time.Second,
+			MayExonerate: false,
+		},
+		result.Result{
+			Query:        query.Parse("_test_2"),
+			Status:       result.Failure,
+			Tags:         result.NewTags("win"),
+			Duration:     2 * time.Second,
+			MayExonerate: false,
+		},
+	}
+
+	expectedResults := make(result.ResultsByExecutionMode)
+	expectedResults["execution_mode"] = expectedResultsList
+
+	results, err := GetUnsuppressedFailingResults(ctx, cfg, client, builds)
+	assert.Nil(t, err)
+	assert.Equal(t, results, expectedResults)
+}
+
+// Tests that errors from GetRawResults are properly surfaced.
+func TestGetUnsuppressedFailingResultsGetRawResultsErrorSurfaced(t *testing.T) {
+	ctx, cfg, client, builds := generateGoodGetUnsuppressedFailingResultsInputs()
+	client.unsuppressedFailureReturnValues[0].TestId = "bad_test"
+
+	results, err := GetUnsuppressedFailingResults(ctx, cfg, client, builds)
 	assert.Nil(t, results)
 	assert.ErrorContains(t, err, "Test ID bad_test did not start with prefix even though query should have filtered.")
 }
@@ -297,6 +416,138 @@ func TestGetRawResultsBadMayExonerate(t *testing.T) {
 	}
 
 	results, err := GetRawResults(ctx, cfg, client, builds)
+	assert.Nil(t, results)
+	assert.ErrorContains(t, err, `strconv.ParseBool: parsing "yesnt": invalid syntax`)
+}
+
+/*******************************************************************************
+ * GetRawUnsuppressedFailingResults tests
+ ******************************************************************************/
+
+// Tests that valid results are properly parsed and returned.
+func TestGetRawUnsuppressedFailingResultsHappyPath(t *testing.T) {
+	ctx, cfg, client, builds := generateGoodGetUnsuppressedFailingResultsInputs()
+	client.unsuppressedFailureReturnValues = []resultsdb.QueryResult{
+		resultsdb.QueryResult{
+			TestId:   "prefix_test_1",
+			Status:   "FAIL",
+			Tags:     []resultsdb.TagPair{},
+			Duration: 1.0,
+		},
+		resultsdb.QueryResult{
+			TestId: "prefix_test_2",
+			Status: "FAIL",
+			Tags: []resultsdb.TagPair{
+				resultsdb.TagPair{
+					Key:   "javascript_duration",
+					Value: "0.5s",
+				},
+			},
+			Duration: 2.0,
+		},
+		resultsdb.QueryResult{
+			TestId: "prefix_test_3",
+			Status: "FAIL",
+			Tags: []resultsdb.TagPair{
+				resultsdb.TagPair{
+					Key:   "may_exonerate",
+					Value: "true",
+				},
+			},
+			Duration: 3.0,
+		},
+		resultsdb.QueryResult{
+			TestId: "prefix_test_4",
+			Status: "SomeStatus",
+			Tags: []resultsdb.TagPair{
+				resultsdb.TagPair{
+					Key:   "typ_tag",
+					Value: "linux",
+				},
+				resultsdb.TagPair{
+					Key:   "typ_tag",
+					Value: "intel",
+				},
+			},
+			Duration: 4.0,
+		},
+	}
+
+	expectedResultsList := result.List{
+		result.Result{
+			Query:        query.Parse("_test_1"),
+			Status:       result.Failure,
+			Tags:         result.NewTags(),
+			Duration:     time.Second,
+			MayExonerate: false,
+		},
+		result.Result{
+			Query:        query.Parse("_test_2"),
+			Status:       result.Failure,
+			Tags:         result.NewTags(),
+			Duration:     500 * time.Millisecond,
+			MayExonerate: false,
+		},
+		result.Result{
+			Query:        query.Parse("_test_3"),
+			Status:       result.Failure,
+			Tags:         result.NewTags(),
+			Duration:     3 * time.Second,
+			MayExonerate: true,
+		},
+		result.Result{
+			Query:        query.Parse("_test_4"),
+			Status:       result.Unknown,
+			Tags:         result.NewTags("linux", "intel"),
+			Duration:     4 * time.Second,
+			MayExonerate: false,
+		},
+	}
+
+	expectedResults := make(result.ResultsByExecutionMode)
+	expectedResults["execution_mode"] = expectedResultsList
+
+	results, err := GetRawUnsuppressedFailingResults(ctx, cfg, client, builds)
+	assert.Nil(t, err)
+	assert.Equal(t, results, expectedResults)
+}
+
+// Tests that a mismatched prefix results in an error.
+func TestGetRawUnsuppressedFailingResultsPrefixMismatch(t *testing.T) {
+	ctx, cfg, client, builds := generateGoodGetUnsuppressedFailingResultsInputs()
+	client.unsuppressedFailureReturnValues[0].TestId = "bad_test"
+
+	results, err := GetRawUnsuppressedFailingResults(ctx, cfg, client, builds)
+	assert.Nil(t, results)
+	assert.ErrorContains(t, err, "Test ID bad_test did not start with prefix even though query should have filtered.")
+}
+
+// Tests that a JavaScript duration that cannot be parsed results in an error.
+func TestGetRawUnsuppressedFailingResultsBadJavaScriptDuration(t *testing.T) {
+	ctx, cfg, client, builds := generateGoodGetUnsuppressedFailingResultsInputs()
+	client.unsuppressedFailureReturnValues[0].Tags = []resultsdb.TagPair{
+		resultsdb.TagPair{
+			Key:   "javascript_duration",
+			Value: "1000foo",
+		},
+	}
+
+	results, err := GetRawUnsuppressedFailingResults(ctx, cfg, client, builds)
+	assert.Nil(t, results)
+	assert.ErrorContains(t, err, `time: unknown unit "foo" in duration "1000foo"`)
+}
+
+// Tests that a non-boolean may_exonerate value results in an error.
+func TestGetRawUnsuppressedFailingResultsBadMayExonerate(t *testing.T) {
+	ctx, cfg, client, builds := generateGoodGetUnsuppressedFailingResultsInputs()
+	client.unsuppressedFailureReturnValues[0].Tags = []resultsdb.TagPair{
+		resultsdb.TagPair{
+			Key:   "may_exonerate",
+			Value: "yesnt",
+		},
+	}
+
+	results, err := GetRawUnsuppressedFailingResults(ctx, cfg, client, builds)
 	assert.Nil(t, results)
 	assert.ErrorContains(t, err, `strconv.ParseBool: parsing "yesnt": invalid syntax`)
 }
@@ -450,7 +701,7 @@ func TestCleanResultsReplaceResultSlow(t *testing.T) {
 }
 
 // Tests that statuses without explicit priority default to Failure.
-func TestCleanResultsReplacEresultDefault(t *testing.T) {
+func TestCleanResultsReplaceResultDefault(t *testing.T) {
 	cfg := Config{}
 	statuses := []result.Status{result.Pass, result.RetryOnFailure, result.Skip, result.Unknown}
 	for i, leftStatus := range statuses {
