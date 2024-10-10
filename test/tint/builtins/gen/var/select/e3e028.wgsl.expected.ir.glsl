@@ -3,8 +3,8 @@ precision highp float;
 precision highp int;
 
 layout(binding = 0, std430)
-buffer tint_symbol_1_1_ssbo {
-  int tint_symbol;
+buffer prevent_dce_block_1_ssbo {
+  int inner;
 } v;
 int select_e3e028() {
   bvec4 arg_0 = bvec4(true);
@@ -14,13 +14,13 @@ int select_e3e028() {
   return mix(0, 1, all(equal(res, bvec4(false))));
 }
 void main() {
-  v.tint_symbol = select_e3e028();
+  v.inner = select_e3e028();
 }
 #version 310 es
 
 layout(binding = 0, std430)
-buffer tint_symbol_1_1_ssbo {
-  int tint_symbol;
+buffer prevent_dce_block_1_ssbo {
+  int inner;
 } v;
 int select_e3e028() {
   bvec4 arg_0 = bvec4(true);
@@ -31,7 +31,7 @@ int select_e3e028() {
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
-  v.tint_symbol = select_e3e028();
+  v.inner = select_e3e028();
 }
 #version 310 es
 

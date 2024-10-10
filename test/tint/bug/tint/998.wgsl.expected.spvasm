@@ -9,25 +9,25 @@
                OpExecutionMode %main LocalSize 1 1 1
                OpMemberName %Constants 0 "zero"
                OpName %Constants "Constants"
-               OpMemberName %tint_symbol_1 0 "tint_symbol"
-               OpName %tint_symbol_1 "tint_symbol_1"
+               OpMemberName %constants_block 0 "inner"
+               OpName %constants_block "constants_block"
                OpMemberName %Result 0 "value"
                OpName %Result "Result"
-               OpMemberName %tint_symbol_3 0 "tint_symbol_2"
-               OpName %tint_symbol_3 "tint_symbol_3"
+               OpMemberName %result_block 0 "inner"
+               OpName %result_block "result_block"
                OpMemberName %S 0 "data"
                OpName %S "S"
                OpName %s "s"
                OpName %main "main"
                OpMemberDecorate %Constants 0 Offset 0
-               OpMemberDecorate %tint_symbol_1 0 Offset 0
-               OpDecorate %tint_symbol_1 Block
+               OpMemberDecorate %constants_block 0 Offset 0
+               OpDecorate %constants_block Block
                OpDecorate %1 DescriptorSet 1
                OpDecorate %1 Binding 0
                OpDecorate %1 NonWritable
                OpMemberDecorate %Result 0 Offset 0
-               OpMemberDecorate %tint_symbol_3 0 Offset 0
-               OpDecorate %tint_symbol_3 Block
+               OpMemberDecorate %result_block 0 Offset 0
+               OpDecorate %result_block Block
                OpDecorate %6 DescriptorSet 1
                OpDecorate %6 Binding 1
                OpDecorate %6 Coherent
@@ -35,13 +35,13 @@
                OpMemberDecorate %S 0 Offset 0
        %uint = OpTypeInt 32 0
   %Constants = OpTypeStruct %uint
-%tint_symbol_1 = OpTypeStruct %Constants
-%_ptr_Uniform_tint_symbol_1 = OpTypePointer Uniform %tint_symbol_1
-          %1 = OpVariable %_ptr_Uniform_tint_symbol_1 Uniform
+%constants_block = OpTypeStruct %Constants
+%_ptr_Uniform_constants_block = OpTypePointer Uniform %constants_block
+          %1 = OpVariable %_ptr_Uniform_constants_block Uniform
      %Result = OpTypeStruct %uint
-%tint_symbol_3 = OpTypeStruct %Result
-%_ptr_StorageBuffer_tint_symbol_3 = OpTypePointer StorageBuffer %tint_symbol_3
-          %6 = OpVariable %_ptr_StorageBuffer_tint_symbol_3 StorageBuffer
+%result_block = OpTypeStruct %Result
+%_ptr_StorageBuffer_result_block = OpTypePointer StorageBuffer %result_block
+          %6 = OpVariable %_ptr_StorageBuffer_result_block StorageBuffer
      %uint_3 = OpConstant %uint 3
 %_arr_uint_uint_3 = OpTypeArray %uint %uint_3
           %S = OpTypeStruct %_arr_uint_uint_3

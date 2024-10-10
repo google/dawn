@@ -44,10 +44,10 @@
                OpName %Inner_std140 "Inner_std140"
                OpMemberName %S_std140 0 "arr"
                OpName %S_std140 "S_std140"
-               OpMemberName %tint_symbol_1_std140 0 "tint_symbol"
-               OpName %tint_symbol_1_std140 "tint_symbol_1_std140"
-               OpMemberName %tint_symbol_3 0 "tint_symbol_2"
-               OpName %tint_symbol_3 "tint_symbol_3"
+               OpMemberName %ub_block_std140 0 "inner"
+               OpName %ub_block_std140 "ub_block_std140"
+               OpMemberName %s_block 0 "inner"
+               OpName %s_block "s_block"
                OpName %main_local_invocation_index_Input "main_local_invocation_index_Input"
                OpName %main_inner "main_inner"
                OpName %idx "idx"
@@ -119,13 +119,13 @@
                OpMemberDecorate %Inner_std140 33 Offset 512
                OpDecorate %_arr_Inner_std140_uint_8 ArrayStride 544
                OpMemberDecorate %S_std140 0 Offset 0
-               OpMemberDecorate %tint_symbol_1_std140 0 Offset 0
-               OpDecorate %tint_symbol_1_std140 Block
+               OpMemberDecorate %ub_block_std140 0 Offset 0
+               OpDecorate %ub_block_std140 Block
                OpDecorate %1 DescriptorSet 0
                OpDecorate %1 Binding 0
                OpDecorate %1 NonWritable
-               OpMemberDecorate %tint_symbol_3 0 Offset 0
-               OpDecorate %tint_symbol_3 Block
+               OpMemberDecorate %s_block 0 Offset 0
+               OpDecorate %s_block Block
                OpDecorate %25 DescriptorSet 0
                OpDecorate %25 Binding 1
                OpDecorate %25 Coherent
@@ -151,12 +151,12 @@
      %uint_8 = OpConstant %uint 8
 %_arr_Inner_std140_uint_8 = OpTypeArray %Inner_std140 %uint_8
    %S_std140 = OpTypeStruct %_arr_Inner_std140_uint_8
-%tint_symbol_1_std140 = OpTypeStruct %S_std140
-%_ptr_Uniform_tint_symbol_1_std140 = OpTypePointer Uniform %tint_symbol_1_std140
-          %1 = OpVariable %_ptr_Uniform_tint_symbol_1_std140 Uniform
-%tint_symbol_3 = OpTypeStruct %int
-%_ptr_StorageBuffer_tint_symbol_3 = OpTypePointer StorageBuffer %tint_symbol_3
-         %25 = OpVariable %_ptr_StorageBuffer_tint_symbol_3 StorageBuffer
+%ub_block_std140 = OpTypeStruct %S_std140
+%_ptr_Uniform_ub_block_std140 = OpTypePointer Uniform %ub_block_std140
+          %1 = OpVariable %_ptr_Uniform_ub_block_std140 Uniform
+    %s_block = OpTypeStruct %int
+%_ptr_StorageBuffer_s_block = OpTypePointer StorageBuffer %s_block
+         %25 = OpVariable %_ptr_StorageBuffer_s_block StorageBuffer
 %_ptr_Input_uint = OpTypePointer Input %uint
 %main_local_invocation_index_Input = OpVariable %_ptr_Input_uint Input
        %void = OpTypeVoid

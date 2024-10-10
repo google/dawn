@@ -7,37 +7,37 @@
                OpMemoryModel Logical GLSL450
                OpEntryPoint GLCompute %main "main"
                OpExecutionMode %main LocalSize 1 1 1
-               OpMemberName %tint_symbol_1_std140 0 "tint_symbol_col0"
-               OpMemberName %tint_symbol_1_std140 1 "tint_symbol_col1"
-               OpName %tint_symbol_1_std140 "tint_symbol_1_std140"
-               OpMemberName %tint_symbol_3 0 "tint_symbol_2"
-               OpName %tint_symbol_3 "tint_symbol_3"
+               OpMemberName %u_block_std140 0 "inner_col0"
+               OpMemberName %u_block_std140 1 "inner_col1"
+               OpName %u_block_std140 "u_block_std140"
+               OpMemberName %s_block 0 "inner"
+               OpName %s_block "s_block"
                OpName %main "main"
                OpName %x "x"
                OpName %tint_store_and_preserve_padding "tint_store_and_preserve_padding"
                OpName %value_param "value_param"
-               OpMemberDecorate %tint_symbol_1_std140 0 Offset 0
-               OpMemberDecorate %tint_symbol_1_std140 1 Offset 16
-               OpDecorate %tint_symbol_1_std140 Block
+               OpMemberDecorate %u_block_std140 0 Offset 0
+               OpMemberDecorate %u_block_std140 1 Offset 16
+               OpDecorate %u_block_std140 Block
                OpDecorate %1 DescriptorSet 0
                OpDecorate %1 Binding 0
                OpDecorate %1 NonWritable
-               OpMemberDecorate %tint_symbol_3 0 Offset 0
-               OpMemberDecorate %tint_symbol_3 0 ColMajor
-               OpMemberDecorate %tint_symbol_3 0 MatrixStride 16
-               OpDecorate %tint_symbol_3 Block
+               OpMemberDecorate %s_block 0 Offset 0
+               OpMemberDecorate %s_block 0 ColMajor
+               OpMemberDecorate %s_block 0 MatrixStride 16
+               OpDecorate %s_block Block
                OpDecorate %6 DescriptorSet 0
                OpDecorate %6 Binding 1
                OpDecorate %6 Coherent
       %float = OpTypeFloat 32
     %v3float = OpTypeVector %float 3
-%tint_symbol_1_std140 = OpTypeStruct %v3float %v3float
-%_ptr_Uniform_tint_symbol_1_std140 = OpTypePointer Uniform %tint_symbol_1_std140
-          %1 = OpVariable %_ptr_Uniform_tint_symbol_1_std140 Uniform
+%u_block_std140 = OpTypeStruct %v3float %v3float
+%_ptr_Uniform_u_block_std140 = OpTypePointer Uniform %u_block_std140
+          %1 = OpVariable %_ptr_Uniform_u_block_std140 Uniform
 %mat2v3float = OpTypeMatrix %v3float 2
-%tint_symbol_3 = OpTypeStruct %mat2v3float
-%_ptr_StorageBuffer_tint_symbol_3 = OpTypePointer StorageBuffer %tint_symbol_3
-          %6 = OpVariable %_ptr_StorageBuffer_tint_symbol_3 StorageBuffer
+    %s_block = OpTypeStruct %mat2v3float
+%_ptr_StorageBuffer_s_block = OpTypePointer StorageBuffer %s_block
+          %6 = OpVariable %_ptr_StorageBuffer_s_block StorageBuffer
        %void = OpTypeVoid
          %12 = OpTypeFunction %void
 %_ptr_Uniform_v3float = OpTypePointer Uniform %v3float

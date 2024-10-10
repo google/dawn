@@ -17,8 +17,8 @@
                OpName %particles "particles"
                OpMemberName %Simulation 0 "i"
                OpName %Simulation "Simulation"
-               OpMemberName %tint_symbol_1 0 "tint_symbol"
-               OpName %tint_symbol_1 "tint_symbol_1"
+               OpMemberName %sim_block 0 "inner"
+               OpName %sim_block "sim_block"
                OpName %main "main"
                OpName %particle "particle"
                OpDecorate %_arr_v3float_uint_8 ArrayStride 16
@@ -33,8 +33,8 @@
                OpDecorate %particles Binding 3
                OpDecorate %particles NonWritable
                OpMemberDecorate %Simulation 0 Offset 0
-               OpMemberDecorate %tint_symbol_1 0 Offset 0
-               OpDecorate %tint_symbol_1 Block
+               OpMemberDecorate %sim_block 0 Offset 0
+               OpDecorate %sim_block Block
                OpDecorate %12 DescriptorSet 1
                OpDecorate %12 Binding 4
                OpDecorate %12 NonWritable
@@ -50,9 +50,9 @@
 %_ptr_StorageBuffer_Particles = OpTypePointer StorageBuffer %Particles
   %particles = OpVariable %_ptr_StorageBuffer_Particles StorageBuffer
  %Simulation = OpTypeStruct %uint
-%tint_symbol_1 = OpTypeStruct %Simulation
-%_ptr_Uniform_tint_symbol_1 = OpTypePointer Uniform %tint_symbol_1
-         %12 = OpVariable %_ptr_Uniform_tint_symbol_1 Uniform
+  %sim_block = OpTypeStruct %Simulation
+%_ptr_Uniform_sim_block = OpTypePointer Uniform %sim_block
+         %12 = OpVariable %_ptr_Uniform_sim_block Uniform
        %void = OpTypeVoid
          %18 = OpTypeFunction %void
 %_ptr_StorageBuffer_Particle = OpTypePointer StorageBuffer %Particle

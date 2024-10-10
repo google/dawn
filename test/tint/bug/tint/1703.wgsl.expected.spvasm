@@ -8,8 +8,8 @@
                OpEntryPoint GLCompute %unused_entry_point "unused_entry_point"
                OpExecutionMode %unused_entry_point LocalSize 1 1 1
                OpName %my_global "my_global"
-               OpMemberName %tint_symbol_1 0 "tint_symbol"
-               OpName %tint_symbol_1 "tint_symbol_1"
+               OpMemberName %my_uniform_block 0 "inner"
+               OpName %my_uniform_block "my_uniform_block"
                OpName %my_texture "my_texture"
                OpName %my_sampler "my_sampler"
                OpName %foo_member_initialize "foo_member_initialize"
@@ -19,8 +19,8 @@
                OpName %vb2_0 "vb2"
                OpName %r_0 "r"
                OpName %unused_entry_point "unused_entry_point"
-               OpMemberDecorate %tint_symbol_1 0 Offset 0
-               OpDecorate %tint_symbol_1 Block
+               OpMemberDecorate %my_uniform_block 0 Offset 0
+               OpDecorate %my_uniform_block Block
                OpDecorate %6 DescriptorSet 0
                OpDecorate %6 Binding 0
                OpDecorate %6 NonWritable
@@ -33,9 +33,9 @@
 %_ptr_Private_v4float = OpTypePointer Private %v4float
           %5 = OpConstantNull %v4float
   %my_global = OpVariable %_ptr_Private_v4float Private %5
-%tint_symbol_1 = OpTypeStruct %float
-%_ptr_Uniform_tint_symbol_1 = OpTypePointer Uniform %tint_symbol_1
-          %6 = OpVariable %_ptr_Uniform_tint_symbol_1 Uniform
+%my_uniform_block = OpTypeStruct %float
+%_ptr_Uniform_my_uniform_block = OpTypePointer Uniform %my_uniform_block
+          %6 = OpVariable %_ptr_Uniform_my_uniform_block Uniform
          %11 = OpTypeImage %float 2D 0 0 0 1 Unknown
 %_ptr_UniformConstant_11 = OpTypePointer UniformConstant %11
  %my_texture = OpVariable %_ptr_UniformConstant_11 UniformConstant

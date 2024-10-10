@@ -16,10 +16,10 @@
                OpName %Inner "Inner"
                OpMemberName %S 0 "inner"
                OpName %S "S"
-               OpMemberName %tint_symbol_1 0 "tint_symbol"
-               OpName %tint_symbol_1 "tint_symbol_1"
-               OpMemberName %tint_symbol_3 0 "tint_symbol_2"
-               OpName %tint_symbol_3 "tint_symbol_3"
+               OpMemberName %in_block 0 "inner"
+               OpName %in_block "in_block"
+               OpMemberName %out_block 0 "inner"
+               OpName %out_block "out_block"
                OpName %main "main"
                OpName %t "t"
                OpName %tint_store_and_preserve_padding "tint_store_and_preserve_padding"
@@ -32,13 +32,13 @@
                OpMemberDecorate %Inner 2 ColMajor
                OpMemberDecorate %Inner 2 MatrixStride 8
                OpMemberDecorate %S 0 Offset 0
-               OpMemberDecorate %tint_symbol_1 0 Offset 0
-               OpDecorate %tint_symbol_1 Block
+               OpMemberDecorate %in_block 0 Offset 0
+               OpDecorate %in_block Block
                OpDecorate %1 DescriptorSet 0
                OpDecorate %1 Binding 0
                OpDecorate %1 NonWritable
-               OpMemberDecorate %tint_symbol_3 0 Offset 0
-               OpDecorate %tint_symbol_3 Block
+               OpMemberDecorate %out_block 0 Offset 0
+               OpDecorate %out_block Block
                OpDecorate %10 DescriptorSet 0
                OpDecorate %10 Binding 1
                OpDecorate %10 Coherent
@@ -48,12 +48,12 @@
  %mat2v4half = OpTypeMatrix %v4half 2
       %Inner = OpTypeStruct %half %v3half %mat2v4half
           %S = OpTypeStruct %Inner
-%tint_symbol_1 = OpTypeStruct %S
-%_ptr_StorageBuffer_tint_symbol_1 = OpTypePointer StorageBuffer %tint_symbol_1
-          %1 = OpVariable %_ptr_StorageBuffer_tint_symbol_1 StorageBuffer
-%tint_symbol_3 = OpTypeStruct %S
-%_ptr_StorageBuffer_tint_symbol_3 = OpTypePointer StorageBuffer %tint_symbol_3
-         %10 = OpVariable %_ptr_StorageBuffer_tint_symbol_3 StorageBuffer
+   %in_block = OpTypeStruct %S
+%_ptr_StorageBuffer_in_block = OpTypePointer StorageBuffer %in_block
+          %1 = OpVariable %_ptr_StorageBuffer_in_block StorageBuffer
+  %out_block = OpTypeStruct %S
+%_ptr_StorageBuffer_out_block = OpTypePointer StorageBuffer %out_block
+         %10 = OpVariable %_ptr_StorageBuffer_out_block StorageBuffer
        %void = OpTypeVoid
          %15 = OpTypeFunction %void
 %_ptr_StorageBuffer_S = OpTypePointer StorageBuffer %S

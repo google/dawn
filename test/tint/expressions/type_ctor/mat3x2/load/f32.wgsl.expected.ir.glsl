@@ -1,11 +1,11 @@
 #version 310 es
 
 layout(binding = 0, std430)
-buffer tint_symbol_2_1_ssbo {
-  mat3x2 tint_symbol_1;
+buffer tint_symbol_block_1_ssbo {
+  mat3x2 inner;
 } v;
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
   mat3x2 m = mat3x2(vec2(0.0f), vec2(0.0f), vec2(0.0f));
-  v.tint_symbol_1 = mat3x2(m);
+  v.inner = mat3x2(m);
 }

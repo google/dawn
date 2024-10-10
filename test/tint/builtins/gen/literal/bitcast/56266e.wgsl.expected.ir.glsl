@@ -3,21 +3,21 @@ precision highp float;
 precision highp int;
 
 layout(binding = 0, std430)
-buffer tint_symbol_1_1_ssbo {
-  uvec3 tint_symbol;
+buffer prevent_dce_block_1_ssbo {
+  uvec3 inner;
 } v;
 uvec3 bitcast_56266e() {
   uvec3 res = uvec3(1065353216u);
   return res;
 }
 void main() {
-  v.tint_symbol = bitcast_56266e();
+  v.inner = bitcast_56266e();
 }
 #version 310 es
 
 layout(binding = 0, std430)
-buffer tint_symbol_1_1_ssbo {
-  uvec3 tint_symbol;
+buffer prevent_dce_block_1_ssbo {
+  uvec3 inner;
 } v;
 uvec3 bitcast_56266e() {
   uvec3 res = uvec3(1065353216u);
@@ -25,7 +25,7 @@ uvec3 bitcast_56266e() {
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
-  v.tint_symbol = bitcast_56266e();
+  v.inner = bitcast_56266e();
 }
 #version 310 es
 

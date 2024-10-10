@@ -11,12 +11,12 @@ struct S_std140 {
 };
 
 layout(binding = 0, std430)
-buffer tint_symbol_1_1_ssbo {
-  S tint_symbol;
+buffer SSBO_block_1_ssbo {
+  S inner;
 } v;
 layout(binding = 0, std140)
-uniform tint_symbol_3_std140_1_ubo {
-  S_std140 tint_symbol_2;
+uniform UBO_block_std140_1_ubo {
+  S_std140 inner;
 } v_1;
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {

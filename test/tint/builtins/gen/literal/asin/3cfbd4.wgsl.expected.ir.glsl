@@ -4,22 +4,22 @@ precision highp float;
 precision highp int;
 
 layout(binding = 0, std430)
-buffer tint_symbol_1_1_ssbo {
-  f16vec4 tint_symbol;
+buffer prevent_dce_block_1_ssbo {
+  f16vec4 inner;
 } v;
 f16vec4 asin_3cfbd4() {
   f16vec4 res = f16vec4(0.499755859375hf);
   return res;
 }
 void main() {
-  v.tint_symbol = asin_3cfbd4();
+  v.inner = asin_3cfbd4();
 }
 #version 310 es
 #extension GL_AMD_gpu_shader_half_float: require
 
 layout(binding = 0, std430)
-buffer tint_symbol_1_1_ssbo {
-  f16vec4 tint_symbol;
+buffer prevent_dce_block_1_ssbo {
+  f16vec4 inner;
 } v;
 f16vec4 asin_3cfbd4() {
   f16vec4 res = f16vec4(0.499755859375hf);
@@ -27,7 +27,7 @@ f16vec4 asin_3cfbd4() {
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
-  v.tint_symbol = asin_3cfbd4();
+  v.inner = asin_3cfbd4();
 }
 #version 310 es
 #extension GL_AMD_gpu_shader_half_float: require

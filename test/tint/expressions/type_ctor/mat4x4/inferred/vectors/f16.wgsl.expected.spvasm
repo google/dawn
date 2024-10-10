@@ -11,13 +11,13 @@
                OpEntryPoint GLCompute %f "f"
                OpExecutionMode %f LocalSize 1 1 1
                OpName %m "m"
-               OpMemberName %tint_symbol_1 0 "tint_symbol"
-               OpName %tint_symbol_1 "tint_symbol_1"
+               OpMemberName %out_block 0 "inner"
+               OpName %out_block "out_block"
                OpName %f "f"
-               OpMemberDecorate %tint_symbol_1 0 Offset 0
-               OpMemberDecorate %tint_symbol_1 0 ColMajor
-               OpMemberDecorate %tint_symbol_1 0 MatrixStride 8
-               OpDecorate %tint_symbol_1 Block
+               OpMemberDecorate %out_block 0 Offset 0
+               OpMemberDecorate %out_block 0 ColMajor
+               OpMemberDecorate %out_block 0 MatrixStride 8
+               OpDecorate %out_block Block
                OpDecorate %27 DescriptorSet 0
                OpDecorate %27 Binding 0
                OpDecorate %27 Coherent
@@ -47,9 +47,9 @@
          %22 = OpConstantComposite %v4half %half_0x1_8p_3 %half_0x1_ap_3 %half_0x1_cp_3 %half_0x1_ep_3
           %6 = OpConstantComposite %mat4v4half %7 %12 %17 %22
           %m = OpVariable %_ptr_Private_mat4v4half Private %6
-%tint_symbol_1 = OpTypeStruct %mat4v4half
-%_ptr_StorageBuffer_tint_symbol_1 = OpTypePointer StorageBuffer %tint_symbol_1
-         %27 = OpVariable %_ptr_StorageBuffer_tint_symbol_1 StorageBuffer
+  %out_block = OpTypeStruct %mat4v4half
+%_ptr_StorageBuffer_out_block = OpTypePointer StorageBuffer %out_block
+         %27 = OpVariable %_ptr_StorageBuffer_out_block StorageBuffer
        %void = OpTypeVoid
          %32 = OpTypeFunction %void
 %_ptr_StorageBuffer_mat4v4half = OpTypePointer StorageBuffer %mat4v4half

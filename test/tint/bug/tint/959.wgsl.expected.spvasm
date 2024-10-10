@@ -9,38 +9,38 @@
                OpExecutionMode %main OriginUpperLeft
                OpMemberName %S 0 "a"
                OpName %S "S"
-               OpMemberName %tint_symbol_1 0 "tint_symbol"
-               OpName %tint_symbol_1 "tint_symbol_1"
-               OpMemberName %tint_symbol_3 0 "tint_symbol_2"
-               OpName %tint_symbol_3 "tint_symbol_3"
-               OpMemberName %tint_symbol_5 0 "tint_symbol_4"
-               OpName %tint_symbol_5 "tint_symbol_5"
-               OpMemberName %tint_symbol_7 0 "tint_symbol_6"
-               OpName %tint_symbol_7 "tint_symbol_7"
-               OpMemberName %tint_symbol_9 0 "tint_symbol_8"
-               OpName %tint_symbol_9 "tint_symbol_9"
-               OpMemberName %tint_symbol_11 0 "tint_symbol_10"
-               OpName %tint_symbol_11 "tint_symbol_11"
-               OpMemberName %tint_symbol_13 0 "tint_symbol_12"
-               OpName %tint_symbol_13 "tint_symbol_13"
-               OpMemberName %tint_symbol_15 0 "tint_symbol_14"
-               OpName %tint_symbol_15 "tint_symbol_15"
-               OpMemberName %tint_symbol_17 0 "tint_symbol_16"
-               OpName %tint_symbol_17 "tint_symbol_17"
-               OpMemberName %tint_symbol_19 0 "tint_symbol_18"
-               OpName %tint_symbol_19 "tint_symbol_19"
-               OpMemberName %tint_symbol_21 0 "tint_symbol_20"
-               OpName %tint_symbol_21 "tint_symbol_21"
-               OpMemberName %tint_symbol_23 0 "tint_symbol_22"
-               OpName %tint_symbol_23 "tint_symbol_23"
-               OpMemberName %tint_symbol_25 0 "tint_symbol_24"
-               OpName %tint_symbol_25 "tint_symbol_25"
-               OpMemberName %tint_symbol_27 0 "tint_symbol_26"
-               OpName %tint_symbol_27 "tint_symbol_27"
-               OpMemberName %tint_symbol_29 0 "tint_symbol_28"
-               OpName %tint_symbol_29 "tint_symbol_29"
-               OpMemberName %tint_symbol_31 0 "tint_symbol_30"
-               OpName %tint_symbol_31 "tint_symbol_31"
+               OpMemberName %b0_block 0 "inner"
+               OpName %b0_block "b0_block"
+               OpMemberName %b1_block 0 "inner"
+               OpName %b1_block "b1_block"
+               OpMemberName %b2_block 0 "inner"
+               OpName %b2_block "b2_block"
+               OpMemberName %b3_block 0 "inner"
+               OpName %b3_block "b3_block"
+               OpMemberName %b4_block 0 "inner"
+               OpName %b4_block "b4_block"
+               OpMemberName %b5_block 0 "inner"
+               OpName %b5_block "b5_block"
+               OpMemberName %b6_block 0 "inner"
+               OpName %b6_block "b6_block"
+               OpMemberName %b7_block 0 "inner"
+               OpName %b7_block "b7_block"
+               OpMemberName %b8_block 0 "inner"
+               OpName %b8_block "b8_block"
+               OpMemberName %b9_block 0 "inner"
+               OpName %b9_block "b9_block"
+               OpMemberName %b10_block 0 "inner"
+               OpName %b10_block "b10_block"
+               OpMemberName %b11_block 0 "inner"
+               OpName %b11_block "b11_block"
+               OpMemberName %b12_block 0 "inner"
+               OpName %b12_block "b12_block"
+               OpMemberName %b13_block 0 "inner"
+               OpName %b13_block "b13_block"
+               OpMemberName %b14_block 0 "inner"
+               OpName %b14_block "b14_block"
+               OpMemberName %b15_block 0 "inner"
+               OpName %b15_block "b15_block"
                OpName %t0 "t0"
                OpName %t1 "t1"
                OpName %t2 "t2"
@@ -75,83 +75,83 @@
                OpName %s15 "s15"
                OpName %main "main"
                OpMemberDecorate %S 0 Offset 0
-               OpMemberDecorate %tint_symbol_1 0 Offset 0
-               OpDecorate %tint_symbol_1 Block
+               OpMemberDecorate %b0_block 0 Offset 0
+               OpDecorate %b0_block Block
                OpDecorate %1 DescriptorSet 0
                OpDecorate %1 Binding 0
                OpDecorate %1 NonWritable
-               OpMemberDecorate %tint_symbol_3 0 Offset 0
-               OpDecorate %tint_symbol_3 Block
+               OpMemberDecorate %b1_block 0 Offset 0
+               OpDecorate %b1_block Block
                OpDecorate %6 DescriptorSet 1
                OpDecorate %6 Binding 0
                OpDecorate %6 NonWritable
-               OpMemberDecorate %tint_symbol_5 0 Offset 0
-               OpDecorate %tint_symbol_5 Block
+               OpMemberDecorate %b2_block 0 Offset 0
+               OpDecorate %b2_block Block
                OpDecorate %9 DescriptorSet 2
                OpDecorate %9 Binding 0
                OpDecorate %9 NonWritable
-               OpMemberDecorate %tint_symbol_7 0 Offset 0
-               OpDecorate %tint_symbol_7 Block
+               OpMemberDecorate %b3_block 0 Offset 0
+               OpDecorate %b3_block Block
                OpDecorate %12 DescriptorSet 3
                OpDecorate %12 Binding 0
                OpDecorate %12 NonWritable
-               OpMemberDecorate %tint_symbol_9 0 Offset 0
-               OpDecorate %tint_symbol_9 Block
+               OpMemberDecorate %b4_block 0 Offset 0
+               OpDecorate %b4_block Block
                OpDecorate %15 DescriptorSet 4
                OpDecorate %15 Binding 0
                OpDecorate %15 NonWritable
-               OpMemberDecorate %tint_symbol_11 0 Offset 0
-               OpDecorate %tint_symbol_11 Block
+               OpMemberDecorate %b5_block 0 Offset 0
+               OpDecorate %b5_block Block
                OpDecorate %18 DescriptorSet 5
                OpDecorate %18 Binding 0
                OpDecorate %18 NonWritable
-               OpMemberDecorate %tint_symbol_13 0 Offset 0
-               OpDecorate %tint_symbol_13 Block
+               OpMemberDecorate %b6_block 0 Offset 0
+               OpDecorate %b6_block Block
                OpDecorate %21 DescriptorSet 6
                OpDecorate %21 Binding 0
                OpDecorate %21 NonWritable
-               OpMemberDecorate %tint_symbol_15 0 Offset 0
-               OpDecorate %tint_symbol_15 Block
+               OpMemberDecorate %b7_block 0 Offset 0
+               OpDecorate %b7_block Block
                OpDecorate %24 DescriptorSet 7
                OpDecorate %24 Binding 0
                OpDecorate %24 NonWritable
-               OpMemberDecorate %tint_symbol_17 0 Offset 0
-               OpDecorate %tint_symbol_17 Block
+               OpMemberDecorate %b8_block 0 Offset 0
+               OpDecorate %b8_block Block
                OpDecorate %27 DescriptorSet 9
                OpDecorate %27 Binding 1
                OpDecorate %27 NonWritable
-               OpMemberDecorate %tint_symbol_19 0 Offset 0
-               OpDecorate %tint_symbol_19 Block
+               OpMemberDecorate %b9_block 0 Offset 0
+               OpDecorate %b9_block Block
                OpDecorate %30 DescriptorSet 8
                OpDecorate %30 Binding 1
                OpDecorate %30 NonWritable
-               OpMemberDecorate %tint_symbol_21 0 Offset 0
-               OpDecorate %tint_symbol_21 Block
+               OpMemberDecorate %b10_block 0 Offset 0
+               OpDecorate %b10_block Block
                OpDecorate %33 DescriptorSet 10
                OpDecorate %33 Binding 1
                OpDecorate %33 NonWritable
-               OpMemberDecorate %tint_symbol_23 0 Offset 0
-               OpDecorate %tint_symbol_23 Block
+               OpMemberDecorate %b11_block 0 Offset 0
+               OpDecorate %b11_block Block
                OpDecorate %36 DescriptorSet 11
                OpDecorate %36 Binding 1
                OpDecorate %36 NonWritable
-               OpMemberDecorate %tint_symbol_25 0 Offset 0
-               OpDecorate %tint_symbol_25 Block
+               OpMemberDecorate %b12_block 0 Offset 0
+               OpDecorate %b12_block Block
                OpDecorate %39 DescriptorSet 12
                OpDecorate %39 Binding 1
                OpDecorate %39 NonWritable
-               OpMemberDecorate %tint_symbol_27 0 Offset 0
-               OpDecorate %tint_symbol_27 Block
+               OpMemberDecorate %b13_block 0 Offset 0
+               OpDecorate %b13_block Block
                OpDecorate %42 DescriptorSet 13
                OpDecorate %42 Binding 1
                OpDecorate %42 NonWritable
-               OpMemberDecorate %tint_symbol_29 0 Offset 0
-               OpDecorate %tint_symbol_29 Block
+               OpMemberDecorate %b14_block 0 Offset 0
+               OpDecorate %b14_block Block
                OpDecorate %45 DescriptorSet 14
                OpDecorate %45 Binding 1
                OpDecorate %45 NonWritable
-               OpMemberDecorate %tint_symbol_31 0 Offset 0
-               OpDecorate %tint_symbol_31 Block
+               OpMemberDecorate %b15_block 0 Offset 0
+               OpDecorate %b15_block Block
                OpDecorate %48 DescriptorSet 15
                OpDecorate %48 Binding 1
                OpDecorate %48 NonWritable
@@ -221,54 +221,54 @@
                OpDecorate %s15 Binding 300
       %float = OpTypeFloat 32
           %S = OpTypeStruct %float
-%tint_symbol_1 = OpTypeStruct %S
-%_ptr_StorageBuffer_tint_symbol_1 = OpTypePointer StorageBuffer %tint_symbol_1
-          %1 = OpVariable %_ptr_StorageBuffer_tint_symbol_1 StorageBuffer
-%tint_symbol_3 = OpTypeStruct %S
-%_ptr_StorageBuffer_tint_symbol_3 = OpTypePointer StorageBuffer %tint_symbol_3
-          %6 = OpVariable %_ptr_StorageBuffer_tint_symbol_3 StorageBuffer
-%tint_symbol_5 = OpTypeStruct %S
-%_ptr_StorageBuffer_tint_symbol_5 = OpTypePointer StorageBuffer %tint_symbol_5
-          %9 = OpVariable %_ptr_StorageBuffer_tint_symbol_5 StorageBuffer
-%tint_symbol_7 = OpTypeStruct %S
-%_ptr_StorageBuffer_tint_symbol_7 = OpTypePointer StorageBuffer %tint_symbol_7
-         %12 = OpVariable %_ptr_StorageBuffer_tint_symbol_7 StorageBuffer
-%tint_symbol_9 = OpTypeStruct %S
-%_ptr_StorageBuffer_tint_symbol_9 = OpTypePointer StorageBuffer %tint_symbol_9
-         %15 = OpVariable %_ptr_StorageBuffer_tint_symbol_9 StorageBuffer
-%tint_symbol_11 = OpTypeStruct %S
-%_ptr_StorageBuffer_tint_symbol_11 = OpTypePointer StorageBuffer %tint_symbol_11
-         %18 = OpVariable %_ptr_StorageBuffer_tint_symbol_11 StorageBuffer
-%tint_symbol_13 = OpTypeStruct %S
-%_ptr_StorageBuffer_tint_symbol_13 = OpTypePointer StorageBuffer %tint_symbol_13
-         %21 = OpVariable %_ptr_StorageBuffer_tint_symbol_13 StorageBuffer
-%tint_symbol_15 = OpTypeStruct %S
-%_ptr_StorageBuffer_tint_symbol_15 = OpTypePointer StorageBuffer %tint_symbol_15
-         %24 = OpVariable %_ptr_StorageBuffer_tint_symbol_15 StorageBuffer
-%tint_symbol_17 = OpTypeStruct %S
-%_ptr_Uniform_tint_symbol_17 = OpTypePointer Uniform %tint_symbol_17
-         %27 = OpVariable %_ptr_Uniform_tint_symbol_17 Uniform
-%tint_symbol_19 = OpTypeStruct %S
-%_ptr_Uniform_tint_symbol_19 = OpTypePointer Uniform %tint_symbol_19
-         %30 = OpVariable %_ptr_Uniform_tint_symbol_19 Uniform
-%tint_symbol_21 = OpTypeStruct %S
-%_ptr_Uniform_tint_symbol_21 = OpTypePointer Uniform %tint_symbol_21
-         %33 = OpVariable %_ptr_Uniform_tint_symbol_21 Uniform
-%tint_symbol_23 = OpTypeStruct %S
-%_ptr_Uniform_tint_symbol_23 = OpTypePointer Uniform %tint_symbol_23
-         %36 = OpVariable %_ptr_Uniform_tint_symbol_23 Uniform
-%tint_symbol_25 = OpTypeStruct %S
-%_ptr_Uniform_tint_symbol_25 = OpTypePointer Uniform %tint_symbol_25
-         %39 = OpVariable %_ptr_Uniform_tint_symbol_25 Uniform
-%tint_symbol_27 = OpTypeStruct %S
-%_ptr_Uniform_tint_symbol_27 = OpTypePointer Uniform %tint_symbol_27
-         %42 = OpVariable %_ptr_Uniform_tint_symbol_27 Uniform
-%tint_symbol_29 = OpTypeStruct %S
-%_ptr_Uniform_tint_symbol_29 = OpTypePointer Uniform %tint_symbol_29
-         %45 = OpVariable %_ptr_Uniform_tint_symbol_29 Uniform
-%tint_symbol_31 = OpTypeStruct %S
-%_ptr_Uniform_tint_symbol_31 = OpTypePointer Uniform %tint_symbol_31
-         %48 = OpVariable %_ptr_Uniform_tint_symbol_31 Uniform
+   %b0_block = OpTypeStruct %S
+%_ptr_StorageBuffer_b0_block = OpTypePointer StorageBuffer %b0_block
+          %1 = OpVariable %_ptr_StorageBuffer_b0_block StorageBuffer
+   %b1_block = OpTypeStruct %S
+%_ptr_StorageBuffer_b1_block = OpTypePointer StorageBuffer %b1_block
+          %6 = OpVariable %_ptr_StorageBuffer_b1_block StorageBuffer
+   %b2_block = OpTypeStruct %S
+%_ptr_StorageBuffer_b2_block = OpTypePointer StorageBuffer %b2_block
+          %9 = OpVariable %_ptr_StorageBuffer_b2_block StorageBuffer
+   %b3_block = OpTypeStruct %S
+%_ptr_StorageBuffer_b3_block = OpTypePointer StorageBuffer %b3_block
+         %12 = OpVariable %_ptr_StorageBuffer_b3_block StorageBuffer
+   %b4_block = OpTypeStruct %S
+%_ptr_StorageBuffer_b4_block = OpTypePointer StorageBuffer %b4_block
+         %15 = OpVariable %_ptr_StorageBuffer_b4_block StorageBuffer
+   %b5_block = OpTypeStruct %S
+%_ptr_StorageBuffer_b5_block = OpTypePointer StorageBuffer %b5_block
+         %18 = OpVariable %_ptr_StorageBuffer_b5_block StorageBuffer
+   %b6_block = OpTypeStruct %S
+%_ptr_StorageBuffer_b6_block = OpTypePointer StorageBuffer %b6_block
+         %21 = OpVariable %_ptr_StorageBuffer_b6_block StorageBuffer
+   %b7_block = OpTypeStruct %S
+%_ptr_StorageBuffer_b7_block = OpTypePointer StorageBuffer %b7_block
+         %24 = OpVariable %_ptr_StorageBuffer_b7_block StorageBuffer
+   %b8_block = OpTypeStruct %S
+%_ptr_Uniform_b8_block = OpTypePointer Uniform %b8_block
+         %27 = OpVariable %_ptr_Uniform_b8_block Uniform
+   %b9_block = OpTypeStruct %S
+%_ptr_Uniform_b9_block = OpTypePointer Uniform %b9_block
+         %30 = OpVariable %_ptr_Uniform_b9_block Uniform
+  %b10_block = OpTypeStruct %S
+%_ptr_Uniform_b10_block = OpTypePointer Uniform %b10_block
+         %33 = OpVariable %_ptr_Uniform_b10_block Uniform
+  %b11_block = OpTypeStruct %S
+%_ptr_Uniform_b11_block = OpTypePointer Uniform %b11_block
+         %36 = OpVariable %_ptr_Uniform_b11_block Uniform
+  %b12_block = OpTypeStruct %S
+%_ptr_Uniform_b12_block = OpTypePointer Uniform %b12_block
+         %39 = OpVariable %_ptr_Uniform_b12_block Uniform
+  %b13_block = OpTypeStruct %S
+%_ptr_Uniform_b13_block = OpTypePointer Uniform %b13_block
+         %42 = OpVariable %_ptr_Uniform_b13_block Uniform
+  %b14_block = OpTypeStruct %S
+%_ptr_Uniform_b14_block = OpTypePointer Uniform %b14_block
+         %45 = OpVariable %_ptr_Uniform_b14_block Uniform
+  %b15_block = OpTypeStruct %S
+%_ptr_Uniform_b15_block = OpTypePointer Uniform %b15_block
+         %48 = OpVariable %_ptr_Uniform_b15_block Uniform
          %53 = OpTypeImage %float 2D 0 0 0 1 Unknown
 %_ptr_UniformConstant_53 = OpTypePointer UniformConstant %53
          %t0 = OpVariable %_ptr_UniformConstant_53 UniformConstant

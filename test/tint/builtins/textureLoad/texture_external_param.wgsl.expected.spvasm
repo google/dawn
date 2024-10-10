@@ -43,8 +43,8 @@
                OpMemberName %tint_ExternalTextureParams_std140 18 "visibleSize"
                OpMemberName %tint_ExternalTextureParams_std140 19 "plane1CoordFactor"
                OpName %tint_ExternalTextureParams_std140 "tint_ExternalTextureParams_std140"
-               OpMemberName %tint_symbol_1_std140 0 "tint_symbol"
-               OpName %tint_symbol_1_std140 "tint_symbol_1_std140"
+               OpMemberName %arg_0_params_block_std140 0 "inner"
+               OpName %arg_0_params_block_std140 "arg_0_params_block_std140"
                OpName %vertex_main_position_Output "vertex_main_position_Output"
                OpName %vertex_main___point_size_Output "vertex_main___point_size_Output"
                OpName %textureLoad2d "textureLoad2d"
@@ -117,8 +117,8 @@
                OpMemberDecorate %tint_ExternalTextureParams_std140 17 Offset 248
                OpMemberDecorate %tint_ExternalTextureParams_std140 18 Offset 256
                OpMemberDecorate %tint_ExternalTextureParams_std140 19 Offset 264
-               OpMemberDecorate %tint_symbol_1_std140 0 Offset 0
-               OpDecorate %tint_symbol_1_std140 Block
+               OpMemberDecorate %arg_0_params_block_std140 0 Offset 0
+               OpDecorate %arg_0_params_block_std140 Block
                OpDecorate %6 DescriptorSet 1
                OpDecorate %6 Binding 2
                OpDecorate %6 NonWritable
@@ -159,9 +159,9 @@
     %v2float = OpTypeVector %float 2
      %v2uint = OpTypeVector %uint 2
 %tint_ExternalTextureParams_std140 = OpTypeStruct %uint %uint %mat3v4float %tint_GammaTransferParams %tint_GammaTransferParams %v3float %v3float %v3float %v2float %v2float %v2float %v2float %v2float %v2float %v2float %v2float %v2float %v2float %v2uint %v2float
-%tint_symbol_1_std140 = OpTypeStruct %tint_ExternalTextureParams_std140
-%_ptr_Uniform_tint_symbol_1_std140 = OpTypePointer Uniform %tint_symbol_1_std140
-          %6 = OpVariable %_ptr_Uniform_tint_symbol_1_std140 Uniform
+%arg_0_params_block_std140 = OpTypeStruct %tint_ExternalTextureParams_std140
+%_ptr_Uniform_arg_0_params_block_std140 = OpTypePointer Uniform %arg_0_params_block_std140
+          %6 = OpVariable %_ptr_Uniform_arg_0_params_block_std140 Uniform
 %_ptr_Output_v4float = OpTypePointer Output %v4float
 %vertex_main_position_Output = OpVariable %_ptr_Output_v4float Output
 %_ptr_Output_float = OpTypePointer Output %float

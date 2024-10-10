@@ -50,8 +50,8 @@
                OpMemberName %S 0 "arr"
                OpName %S "S"
                OpName %sb "sb"
-               OpMemberName %tint_symbol_1 0 "tint_symbol"
-               OpName %tint_symbol_1 "tint_symbol_1"
+               OpMemberName %s_block 0 "inner"
+               OpName %s_block "s_block"
                OpName %main_local_invocation_index_Input "main_local_invocation_index_Input"
                OpName %main_inner "main_inner"
                OpName %idx "idx"
@@ -178,8 +178,8 @@
                OpDecorate %sb DescriptorSet 0
                OpDecorate %sb Binding 0
                OpDecorate %sb NonWritable
-               OpMemberDecorate %tint_symbol_1 0 Offset 0
-               OpDecorate %tint_symbol_1 Block
+               OpMemberDecorate %s_block 0 Offset 0
+               OpDecorate %s_block Block
                OpDecorate %43 DescriptorSet 0
                OpDecorate %43 Binding 1
                OpDecorate %43 Coherent
@@ -226,9 +226,9 @@
           %S = OpTypeStruct %_runtimearr_Inner
 %_ptr_StorageBuffer_S = OpTypePointer StorageBuffer %S
          %sb = OpVariable %_ptr_StorageBuffer_S StorageBuffer
-%tint_symbol_1 = OpTypeStruct %int
-%_ptr_StorageBuffer_tint_symbol_1 = OpTypePointer StorageBuffer %tint_symbol_1
-         %43 = OpVariable %_ptr_StorageBuffer_tint_symbol_1 StorageBuffer
+    %s_block = OpTypeStruct %int
+%_ptr_StorageBuffer_s_block = OpTypePointer StorageBuffer %s_block
+         %43 = OpVariable %_ptr_StorageBuffer_s_block StorageBuffer
 %_ptr_Input_uint = OpTypePointer Input %uint
 %main_local_invocation_index_Input = OpVariable %_ptr_Input_uint Input
        %void = OpTypeVoid

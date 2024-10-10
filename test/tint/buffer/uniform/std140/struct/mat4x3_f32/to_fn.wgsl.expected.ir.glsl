@@ -51,8 +51,8 @@ struct S {
 };
 
 layout(binding = 0, std140)
-uniform tint_symbol_1_std140_1_ubo {
-  S_std140 tint_symbol[4];
+uniform u_block_std140_1_ubo {
+  S_std140 inner[4];
 } v_1;
 void a(S a_1[4]) {
 }
@@ -69,7 +69,7 @@ S tint_convert_S(S_std140 tint_input) {
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
-  S_std140 v_2[4] = v_1.tint_symbol;
+  S_std140 v_2[4] = v_1.inner;
   S v_3[4] = S[4](S(0, mat4x3(vec3(0.0f), vec3(0.0f), vec3(0.0f), vec3(0.0f)), 0), S(0, mat4x3(vec3(0.0f), vec3(0.0f), vec3(0.0f), vec3(0.0f)), 0), S(0, mat4x3(vec3(0.0f), vec3(0.0f), vec3(0.0f), vec3(0.0f)), 0), S(0, mat4x3(vec3(0.0f), vec3(0.0f), vec3(0.0f), vec3(0.0f)), 0));
   {
     uint v_4 = 0u;
@@ -87,8 +87,8 @@ void main() {
     }
   }
   a(v_3);
-  b(tint_convert_S(v_1.tint_symbol[2]));
-  c(mat4x3(v_1.tint_symbol[2].m_col0, v_1.tint_symbol[2].m_col1, v_1.tint_symbol[2].m_col2, v_1.tint_symbol[2].m_col3));
-  d(v_1.tint_symbol[0].m_col1.zxy);
-  e(v_1.tint_symbol[0].m_col1.zxy[0u]);
+  b(tint_convert_S(v_1.inner[2]));
+  c(mat4x3(v_1.inner[2].m_col0, v_1.inner[2].m_col1, v_1.inner[2].m_col2, v_1.inner[2].m_col3));
+  d(v_1.inner[0].m_col1.zxy);
+  e(v_1.inner[0].m_col1.zxy[0u]);
 }

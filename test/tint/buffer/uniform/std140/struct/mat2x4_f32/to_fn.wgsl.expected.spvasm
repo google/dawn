@@ -11,8 +11,8 @@
                OpMemberName %S 1 "m"
                OpMemberName %S 2 "after"
                OpName %S "S"
-               OpMemberName %tint_symbol_1 0 "tint_symbol"
-               OpName %tint_symbol_1 "tint_symbol_1"
+               OpMemberName %u_block 0 "inner"
+               OpName %u_block "u_block"
                OpName %a "a"
                OpName %a_0 "a"
                OpName %b "b"
@@ -30,8 +30,8 @@
                OpMemberDecorate %S 1 MatrixStride 16
                OpMemberDecorate %S 2 Offset 64
                OpDecorate %_arr_S_uint_4 ArrayStride 128
-               OpMemberDecorate %tint_symbol_1 0 Offset 0
-               OpDecorate %tint_symbol_1 Block
+               OpMemberDecorate %u_block 0 Offset 0
+               OpDecorate %u_block Block
                OpDecorate %1 DescriptorSet 0
                OpDecorate %1 Binding 0
                OpDecorate %1 NonWritable
@@ -43,9 +43,9 @@
        %uint = OpTypeInt 32 0
      %uint_4 = OpConstant %uint 4
 %_arr_S_uint_4 = OpTypeArray %S %uint_4
-%tint_symbol_1 = OpTypeStruct %_arr_S_uint_4
-%_ptr_Uniform_tint_symbol_1 = OpTypePointer Uniform %tint_symbol_1
-          %1 = OpVariable %_ptr_Uniform_tint_symbol_1 Uniform
+    %u_block = OpTypeStruct %_arr_S_uint_4
+%_ptr_Uniform_u_block = OpTypePointer Uniform %u_block
+          %1 = OpVariable %_ptr_Uniform_u_block Uniform
        %void = OpTypeVoid
          %15 = OpTypeFunction %void %_arr_S_uint_4
          %19 = OpTypeFunction %void %S

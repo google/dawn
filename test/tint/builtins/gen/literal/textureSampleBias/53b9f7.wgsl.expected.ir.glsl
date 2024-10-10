@@ -3,8 +3,8 @@ precision highp float;
 precision highp int;
 
 layout(binding = 0, std430)
-buffer tint_symbol_1_1_ssbo {
-  vec4 tint_symbol;
+buffer prevent_dce_block_1_ssbo {
+  vec4 inner;
 } v;
 uniform highp samplerCube arg_0_arg_1;
 vec4 textureSampleBias_53b9f7() {
@@ -12,5 +12,5 @@ vec4 textureSampleBias_53b9f7() {
   return res;
 }
 void main() {
-  v.tint_symbol = textureSampleBias_53b9f7();
+  v.inner = textureSampleBias_53b9f7();
 }

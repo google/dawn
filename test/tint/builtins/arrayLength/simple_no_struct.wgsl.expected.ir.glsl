@@ -1,10 +1,10 @@
 #version 310 es
 
 layout(binding = 0, std430)
-buffer tint_symbol_2_1_ssbo {
-  int tint_symbol_1[];
+buffer G_block_1_ssbo {
+  int inner[];
 } v;
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
-  uint l1 = uint(v.tint_symbol_1.length());
+  uint l1 = uint(v.inner.length());
 }

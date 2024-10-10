@@ -18,8 +18,8 @@ struct atomic_compare_exchange_result_u32 {
 };
 
 layout(binding = 0, std430)
-buffer tint_symbol_2_1_ssbo {
-  SB_RW_atomic tint_symbol_1;
+buffer sb_rw_block_1_ssbo {
+  SB_RW_atomic inner;
 } v;
 void atomicCompareExchangeWeak_63d8e6() {
   uint arg_1 = 0u;
@@ -29,7 +29,7 @@ void atomicCompareExchangeWeak_63d8e6() {
   arg_2 = 1u;
   uint x_21 = arg_2;
   uint x_22 = arg_1;
-  uint v_1 = atomicCompSwap(v.tint_symbol_1.arg_0, x_22, x_21);
+  uint v_1 = atomicCompSwap(v.inner.arg_0, x_22, x_21);
   uint old_value_1 = atomic_compare_exchange_result_u32(v_1, (v_1 == x_22)).old_value;
   uint x_23 = old_value_1;
   res = tint_symbol(x_23, (x_23 == x_21));
@@ -58,8 +58,8 @@ struct atomic_compare_exchange_result_u32 {
 };
 
 layout(binding = 0, std430)
-buffer tint_symbol_2_1_ssbo {
-  SB_RW_atomic tint_symbol_1;
+buffer sb_rw_block_1_ssbo {
+  SB_RW_atomic inner;
 } v;
 void atomicCompareExchangeWeak_63d8e6() {
   uint arg_1 = 0u;
@@ -69,7 +69,7 @@ void atomicCompareExchangeWeak_63d8e6() {
   arg_2 = 1u;
   uint x_21 = arg_2;
   uint x_22 = arg_1;
-  uint v_1 = atomicCompSwap(v.tint_symbol_1.arg_0, x_22, x_21);
+  uint v_1 = atomicCompSwap(v.inner.arg_0, x_22, x_21);
   uint old_value_1 = atomic_compare_exchange_result_u32(v_1, (v_1 == x_22)).old_value;
   uint x_23 = old_value_1;
   res = tint_symbol(x_23, (x_23 == x_21));

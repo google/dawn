@@ -3,8 +3,8 @@ precision highp float;
 precision highp int;
 
 layout(binding = 0, std430)
-buffer tint_symbol_1_1_ssbo {
-  vec3 tint_symbol;
+buffer prevent_dce_block_1_ssbo {
+  vec3 inner;
 } v;
 vec3 dpdxFine_f92fb6() {
   vec3 arg_0 = vec3(1.0f);
@@ -12,5 +12,5 @@ vec3 dpdxFine_f92fb6() {
   return res;
 }
 void main() {
-  v.tint_symbol = dpdxFine_f92fb6();
+  v.inner = dpdxFine_f92fb6();
 }

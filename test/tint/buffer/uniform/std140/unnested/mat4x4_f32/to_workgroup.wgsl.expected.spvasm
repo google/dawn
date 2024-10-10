@@ -7,17 +7,17 @@
                OpMemoryModel Logical GLSL450
                OpEntryPoint GLCompute %f "f" %f_local_invocation_index_Input
                OpExecutionMode %f LocalSize 1 1 1
-               OpMemberName %tint_symbol_1 0 "tint_symbol"
-               OpName %tint_symbol_1 "tint_symbol_1"
+               OpMemberName %u_block 0 "inner"
+               OpName %u_block "u_block"
                OpName %w "w"
                OpName %f_local_invocation_index_Input "f_local_invocation_index_Input"
                OpName %f_inner "f_inner"
                OpName %tint_local_index "tint_local_index"
                OpName %f "f"
-               OpMemberDecorate %tint_symbol_1 0 Offset 0
-               OpMemberDecorate %tint_symbol_1 0 ColMajor
-               OpMemberDecorate %tint_symbol_1 0 MatrixStride 16
-               OpDecorate %tint_symbol_1 Block
+               OpMemberDecorate %u_block 0 Offset 0
+               OpMemberDecorate %u_block 0 ColMajor
+               OpMemberDecorate %u_block 0 MatrixStride 16
+               OpDecorate %u_block Block
                OpDecorate %1 DescriptorSet 0
                OpDecorate %1 Binding 0
                OpDecorate %1 NonWritable
@@ -25,9 +25,9 @@
       %float = OpTypeFloat 32
     %v4float = OpTypeVector %float 4
 %mat4v4float = OpTypeMatrix %v4float 4
-%tint_symbol_1 = OpTypeStruct %mat4v4float
-%_ptr_Uniform_tint_symbol_1 = OpTypePointer Uniform %tint_symbol_1
-          %1 = OpVariable %_ptr_Uniform_tint_symbol_1 Uniform
+    %u_block = OpTypeStruct %mat4v4float
+%_ptr_Uniform_u_block = OpTypePointer Uniform %u_block
+          %1 = OpVariable %_ptr_Uniform_u_block Uniform
 %_ptr_Workgroup_mat4v4float = OpTypePointer Workgroup %mat4v4float
           %w = OpVariable %_ptr_Workgroup_mat4v4float Workgroup
        %uint = OpTypeInt 32 0

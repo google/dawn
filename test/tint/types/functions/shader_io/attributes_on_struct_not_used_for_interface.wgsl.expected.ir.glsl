@@ -68,8 +68,8 @@ struct S {
 };
 
 layout(binding = 0, std430)
-buffer tint_symbol_2_1_ssbo {
-  S tint_symbol_1;
+buffer tint_symbol_block_1_ssbo {
+  S inner;
 } v_1;
 void tint_store_and_preserve_padding(inout S target, S value_param) {
   target.f = value_param.f;
@@ -77,5 +77,5 @@ void tint_store_and_preserve_padding(inout S target, S value_param) {
   target.v = value_param.v;
 }
 void main() {
-  tint_store_and_preserve_padding(v_1.tint_symbol_1, S(1.0f, 2u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, vec4(3.0f), 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u));
+  tint_store_and_preserve_padding(v_1.inner, S(1.0f, 2u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, vec4(3.0f), 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u));
 }

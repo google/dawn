@@ -38,8 +38,8 @@ struct S {
 };
 
 layout(binding = 0, std140)
-uniform tint_symbol_1_1_ubo {
-  S tint_symbol[4];
+uniform u_block_1_ubo {
+  S inner[4];
 } v;
 shared S w[4];
 void f_inner(uint tint_local_index) {
@@ -59,10 +59,10 @@ void f_inner(uint tint_local_index) {
     }
   }
   barrier();
-  w = v.tint_symbol;
-  w[1] = v.tint_symbol[2];
-  w[3].m = v.tint_symbol[2].m;
-  w[1].m[0] = v.tint_symbol[0].m[1].ywxz;
+  w = v.inner;
+  w[1] = v.inner[2];
+  w[3].m = v.inner[2].m;
+  w[1].m[0] = v.inner[0].m[1].ywxz;
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {

@@ -10,8 +10,8 @@
                OpExecutionMode %main OriginUpperLeft
                OpMemberName %buf0 0 "r"
                OpName %buf0 "buf0"
-               OpMemberName %tint_symbol_1 0 "tint_symbol"
-               OpName %tint_symbol_1 "tint_symbol_1"
+               OpMemberName %x_7_block 0 "inner"
+               OpName %x_7_block "x_7_block"
                OpName %x_GLF_color "x_GLF_color"
                OpName %main_loc0_Output "main_loc0_Output"
                OpName %main_1 "main_1"
@@ -22,8 +22,8 @@
                OpName %main_out "main_out"
                OpName %main "main"
                OpMemberDecorate %buf0 0 Offset 0
-               OpMemberDecorate %tint_symbol_1 0 Offset 0
-               OpDecorate %tint_symbol_1 Block
+               OpMemberDecorate %x_7_block 0 Offset 0
+               OpDecorate %x_7_block Block
                OpDecorate %1 DescriptorSet 0
                OpDecorate %1 Binding 0
                OpDecorate %1 NonWritable
@@ -32,9 +32,9 @@
       %float = OpTypeFloat 32
     %v4float = OpTypeVector %float 4
        %buf0 = OpTypeStruct %v4float
-%tint_symbol_1 = OpTypeStruct %buf0
-%_ptr_Uniform_tint_symbol_1 = OpTypePointer Uniform %tint_symbol_1
-          %1 = OpVariable %_ptr_Uniform_tint_symbol_1 Uniform
+  %x_7_block = OpTypeStruct %buf0
+%_ptr_Uniform_x_7_block = OpTypePointer Uniform %x_7_block
+          %1 = OpVariable %_ptr_Uniform_x_7_block Uniform
 %_ptr_Private_v4float = OpTypePointer Private %v4float
           %9 = OpConstantNull %v4float
 %x_GLF_color = OpVariable %_ptr_Private_v4float Private %9

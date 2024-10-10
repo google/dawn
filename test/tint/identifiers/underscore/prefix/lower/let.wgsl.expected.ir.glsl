@@ -1,8 +1,8 @@
 #version 310 es
 
 layout(binding = 0, std430)
-buffer tint_symbol_1_1_ssbo {
-  int tint_symbol;
+buffer s_block_1_ssbo {
+  int inner;
 } v;
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
@@ -10,5 +10,5 @@ void main() {
   int _a = a;
   int b = a;
   int _b = _a;
-  v.tint_symbol = (((a + _a) + b) + _b);
+  v.inner = (((a + _a) + b) + _b);
 }

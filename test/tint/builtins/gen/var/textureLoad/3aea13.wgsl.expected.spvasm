@@ -9,8 +9,8 @@
                OpEntryPoint GLCompute %compute_main "compute_main"
                OpExecutionMode %fragment_main OriginUpperLeft
                OpExecutionMode %compute_main LocalSize 1 1 1
-               OpMemberName %tint_symbol_1 0 "tint_symbol"
-               OpName %tint_symbol_1 "tint_symbol_1"
+               OpMemberName %prevent_dce_block 0 "inner"
+               OpName %prevent_dce_block "prevent_dce_block"
                OpName %arg_0 "arg_0"
                OpName %textureLoad_3aea13 "textureLoad_3aea13"
                OpName %arg_1 "arg_1"
@@ -18,8 +18,8 @@
                OpName %res "res"
                OpName %fragment_main "fragment_main"
                OpName %compute_main "compute_main"
-               OpMemberDecorate %tint_symbol_1 0 Offset 0
-               OpDecorate %tint_symbol_1 Block
+               OpMemberDecorate %prevent_dce_block 0 Offset 0
+               OpDecorate %prevent_dce_block Block
                OpDecorate %1 DescriptorSet 0
                OpDecorate %1 Binding 0
                OpDecorate %1 Coherent
@@ -28,9 +28,9 @@
                OpDecorate %arg_0 Coherent
         %int = OpTypeInt 32 1
       %v4int = OpTypeVector %int 4
-%tint_symbol_1 = OpTypeStruct %v4int
-%_ptr_StorageBuffer_tint_symbol_1 = OpTypePointer StorageBuffer %tint_symbol_1
-          %1 = OpVariable %_ptr_StorageBuffer_tint_symbol_1 StorageBuffer
+%prevent_dce_block = OpTypeStruct %v4int
+%_ptr_StorageBuffer_prevent_dce_block = OpTypePointer StorageBuffer %prevent_dce_block
+          %1 = OpVariable %_ptr_StorageBuffer_prevent_dce_block StorageBuffer
           %8 = OpTypeImage %int 2D 0 1 0 2 R32i
 %_ptr_UniformConstant_8 = OpTypePointer UniformConstant %8
       %arg_0 = OpVariable %_ptr_UniformConstant_8 UniformConstant

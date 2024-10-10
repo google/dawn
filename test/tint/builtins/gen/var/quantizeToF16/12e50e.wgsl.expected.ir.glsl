@@ -3,8 +3,8 @@ precision highp float;
 precision highp int;
 
 layout(binding = 0, std430)
-buffer tint_symbol_1_1_ssbo {
-  float tint_symbol;
+buffer prevent_dce_block_1_ssbo {
+  float inner;
 } v;
 float tint_quantize_to_f16(float val) {
   return unpackHalf2x16(packHalf2x16(vec2(val))).x;
@@ -15,13 +15,13 @@ float quantizeToF16_12e50e() {
   return res;
 }
 void main() {
-  v.tint_symbol = quantizeToF16_12e50e();
+  v.inner = quantizeToF16_12e50e();
 }
 #version 310 es
 
 layout(binding = 0, std430)
-buffer tint_symbol_1_1_ssbo {
-  float tint_symbol;
+buffer prevent_dce_block_1_ssbo {
+  float inner;
 } v;
 float tint_quantize_to_f16(float val) {
   return unpackHalf2x16(packHalf2x16(vec2(val))).x;
@@ -33,7 +33,7 @@ float quantizeToF16_12e50e() {
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
-  v.tint_symbol = quantizeToF16_12e50e();
+  v.inner = quantizeToF16_12e50e();
 }
 #version 310 es
 

@@ -15,8 +15,8 @@
                OpMemberName %Uniforms 4 "bbMin"
                OpMemberName %Uniforms 5 "bbMax"
                OpName %Uniforms "Uniforms"
-               OpMemberName %tint_symbol_1 0 "tint_symbol"
-               OpName %tint_symbol_1 "tint_symbol_1"
+               OpMemberName %uniforms_block 0 "inner"
+               OpName %uniforms_block "uniforms_block"
                OpMemberName %U32s 0 "values"
                OpName %U32s "U32s"
                OpName %indices "indices"
@@ -42,8 +42,8 @@
                OpMemberName %Dbg 10 "value_f32_2"
                OpMemberName %Dbg 11 "value_f32_3"
                OpName %Dbg "Dbg"
-               OpMemberName %tint_symbol_3 0 "tint_symbol_2"
-               OpName %tint_symbol_3 "tint_symbol_3"
+               OpMemberName %dbg_block 0 "inner"
+               OpName %dbg_block "dbg_block"
                OpName %main_count_global_invocation_id_Input "main_count_global_invocation_id_Input"
                OpName %marg8uintin "marg8uintin"
                OpName %toVoxelPos "toVoxelPos"
@@ -104,8 +104,8 @@
                OpMemberDecorate %Uniforms 3 Offset 12
                OpMemberDecorate %Uniforms 4 Offset 16
                OpMemberDecorate %Uniforms 5 Offset 32
-               OpMemberDecorate %tint_symbol_1 0 Offset 0
-               OpDecorate %tint_symbol_1 Block
+               OpMemberDecorate %uniforms_block 0 Offset 0
+               OpDecorate %uniforms_block Block
                OpDecorate %1 DescriptorSet 0
                OpDecorate %1 Binding 0
                OpDecorate %1 NonWritable
@@ -145,8 +145,8 @@
                OpMemberDecorate %Dbg 9 Offset 36
                OpMemberDecorate %Dbg 10 Offset 40
                OpMemberDecorate %Dbg 11 Offset 44
-               OpMemberDecorate %tint_symbol_3 0 Offset 0
-               OpDecorate %tint_symbol_3 Block
+               OpMemberDecorate %dbg_block 0 Offset 0
+               OpDecorate %dbg_block Block
                OpDecorate %25 DescriptorSet 0
                OpDecorate %25 Binding 50
                OpDecorate %25 Coherent
@@ -155,9 +155,9 @@
       %float = OpTypeFloat 32
     %v3float = OpTypeVector %float 3
    %Uniforms = OpTypeStruct %uint %uint %uint %uint %v3float %v3float
-%tint_symbol_1 = OpTypeStruct %Uniforms
-%_ptr_Uniform_tint_symbol_1 = OpTypePointer Uniform %tint_symbol_1
-          %1 = OpVariable %_ptr_Uniform_tint_symbol_1 Uniform
+%uniforms_block = OpTypeStruct %Uniforms
+%_ptr_Uniform_uniforms_block = OpTypePointer Uniform %uniforms_block
+          %1 = OpVariable %_ptr_Uniform_uniforms_block Uniform
 %_runtimearr_uint = OpTypeRuntimeArray %uint
        %U32s = OpTypeStruct %_runtimearr_uint
 %_ptr_StorageBuffer_U32s = OpTypePointer StorageBuffer %U32s
@@ -176,9 +176,9 @@
 %_ptr_StorageBuffer_AI32s = OpTypePointer StorageBuffer %AI32s
         %LUT = OpVariable %_ptr_StorageBuffer_AI32s StorageBuffer
         %Dbg = OpTypeStruct %uint %uint %uint %uint %uint %uint %uint %uint %float %float %float %float
-%tint_symbol_3 = OpTypeStruct %Dbg
-%_ptr_StorageBuffer_tint_symbol_3 = OpTypePointer StorageBuffer %tint_symbol_3
-         %25 = OpVariable %_ptr_StorageBuffer_tint_symbol_3 StorageBuffer
+  %dbg_block = OpTypeStruct %Dbg
+%_ptr_StorageBuffer_dbg_block = OpTypePointer StorageBuffer %dbg_block
+         %25 = OpVariable %_ptr_StorageBuffer_dbg_block StorageBuffer
      %v3uint = OpTypeVector %uint 3
 %_ptr_Input_v3uint = OpTypePointer Input %v3uint
 %main_count_global_invocation_id_Input = OpVariable %_ptr_Input_v3uint Input

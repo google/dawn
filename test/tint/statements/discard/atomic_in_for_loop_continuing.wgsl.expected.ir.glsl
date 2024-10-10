@@ -3,8 +3,8 @@ precision highp float;
 precision highp int;
 
 layout(binding = 2, std430)
-buffer tint_symbol_2_1_ssbo {
-  int tint_symbol_1;
+buffer a_block_1_ssbo {
+  int inner;
 } v;
 bool continue_execution = true;
 uniform highp sampler2D t_s;
@@ -30,7 +30,7 @@ int foo_inner(float tint_symbol, vec2 coord) {
       {
         int v_1 = 0;
         if (continue_execution) {
-          v_1 = atomicAdd(v.tint_symbol_1, 1);
+          v_1 = atomicAdd(v.inner, 1);
         }
         i = v_1;
       }

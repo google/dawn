@@ -12,11 +12,11 @@ struct S_std140 {
 };
 
 layout(binding = 0, std140)
-uniform tint_symbol_3_std140_1_ubo {
-  S_std140 tint_symbol_2;
+uniform tint_symbol_block_std140_1_ubo {
+  S_std140 inner;
 } v;
 vec4 tint_symbol_1_inner() {
-  float x = v.tint_symbol_2.matrix_view[0].z;
+  float x = v.inner.matrix_view[0].z;
   return vec4(x, 0.0f, 0.0f, 1.0f);
 }
 void main() {

@@ -3,8 +3,8 @@ precision highp float;
 precision highp int;
 
 layout(binding = 0, std430)
-buffer tint_symbol_1_1_ssbo {
-  vec2 tint_symbol;
+buffer prevent_dce_block_1_ssbo {
+  vec2 inner;
 } v;
 vec2 radians_61687a() {
   vec2 arg_0 = vec2(1.0f);
@@ -12,13 +12,13 @@ vec2 radians_61687a() {
   return res;
 }
 void main() {
-  v.tint_symbol = radians_61687a();
+  v.inner = radians_61687a();
 }
 #version 310 es
 
 layout(binding = 0, std430)
-buffer tint_symbol_1_1_ssbo {
-  vec2 tint_symbol;
+buffer prevent_dce_block_1_ssbo {
+  vec2 inner;
 } v;
 vec2 radians_61687a() {
   vec2 arg_0 = vec2(1.0f);
@@ -27,7 +27,7 @@ vec2 radians_61687a() {
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
-  v.tint_symbol = radians_61687a();
+  v.inner = radians_61687a();
 }
 #version 310 es
 

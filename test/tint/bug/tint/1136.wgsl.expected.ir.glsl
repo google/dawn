@@ -6,11 +6,11 @@ struct Buffer {
 };
 
 layout(binding = 0, std430)
-buffer tint_symbol_3_1_ssbo {
-  Buffer tint_symbol_2;
+buffer tint_symbol_block_1_ssbo {
+  Buffer inner;
 } v;
 void tint_symbol_1() {
-  v.tint_symbol_2.data = (v.tint_symbol_2.data + 1u);
+  v.inner.data = (v.inner.data + 1u);
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {

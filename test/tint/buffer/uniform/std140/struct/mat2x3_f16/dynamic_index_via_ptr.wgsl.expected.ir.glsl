@@ -32,8 +32,8 @@ struct Outer {
 };
 
 layout(binding = 0, std140)
-uniform tint_symbol_1_std140_1_ubo {
-  Outer_std140 tint_symbol[4];
+uniform a_block_std140_1_ubo {
+  Outer_std140 inner[4];
 } v;
 int counter = 0;
 int i() {
@@ -66,9 +66,9 @@ layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
   int v_4 = i();
   int v_5 = i();
-  f16mat2x3 v_6 = f16mat2x3(v.tint_symbol[v_4].a[v_5].m_col0, v.tint_symbol[v_4].a[v_5].m_col1);
+  f16mat2x3 v_6 = f16mat2x3(v.inner[v_4].a[v_5].m_col0, v.inner[v_4].a[v_5].m_col1);
   f16vec3 v_7 = v_6[i()];
-  Outer_std140 v_8[4] = v.tint_symbol;
+  Outer_std140 v_8[4] = v.inner;
   Outer v_9[4] = Outer[4](Outer(Inner[4](Inner(f16mat2x3(f16vec3(0.0hf), f16vec3(0.0hf))), Inner(f16mat2x3(f16vec3(0.0hf), f16vec3(0.0hf))), Inner(f16mat2x3(f16vec3(0.0hf), f16vec3(0.0hf))), Inner(f16mat2x3(f16vec3(0.0hf), f16vec3(0.0hf))))), Outer(Inner[4](Inner(f16mat2x3(f16vec3(0.0hf), f16vec3(0.0hf))), Inner(f16mat2x3(f16vec3(0.0hf), f16vec3(0.0hf))), Inner(f16mat2x3(f16vec3(0.0hf), f16vec3(0.0hf))), Inner(f16mat2x3(f16vec3(0.0hf), f16vec3(0.0hf))))), Outer(Inner[4](Inner(f16mat2x3(f16vec3(0.0hf), f16vec3(0.0hf))), Inner(f16mat2x3(f16vec3(0.0hf), f16vec3(0.0hf))), Inner(f16mat2x3(f16vec3(0.0hf), f16vec3(0.0hf))), Inner(f16mat2x3(f16vec3(0.0hf), f16vec3(0.0hf))))), Outer(Inner[4](Inner(f16mat2x3(f16vec3(0.0hf), f16vec3(0.0hf))), Inner(f16mat2x3(f16vec3(0.0hf), f16vec3(0.0hf))), Inner(f16mat2x3(f16vec3(0.0hf), f16vec3(0.0hf))), Inner(f16mat2x3(f16vec3(0.0hf), f16vec3(0.0hf))))));
   {
     uint v_10 = 0u;
@@ -86,8 +86,8 @@ void main() {
     }
   }
   Outer l_a[4] = v_9;
-  Outer l_a_i = tint_convert_Outer(v.tint_symbol[v_4]);
-  Inner_std140 v_12[4] = v.tint_symbol[v_4].a;
+  Outer l_a_i = tint_convert_Outer(v.inner[v_4]);
+  Inner_std140 v_12[4] = v.inner[v_4].a;
   Inner v_13[4] = Inner[4](Inner(f16mat2x3(f16vec3(0.0hf), f16vec3(0.0hf))), Inner(f16mat2x3(f16vec3(0.0hf), f16vec3(0.0hf))), Inner(f16mat2x3(f16vec3(0.0hf), f16vec3(0.0hf))), Inner(f16mat2x3(f16vec3(0.0hf), f16vec3(0.0hf))));
   {
     uint v_14 = 0u;
@@ -105,7 +105,7 @@ void main() {
     }
   }
   Inner l_a_i_a[4] = v_13;
-  Inner l_a_i_a_i = tint_convert_Inner(v.tint_symbol[v_4].a[v_5]);
+  Inner l_a_i_a_i = tint_convert_Inner(v.inner[v_4].a[v_5]);
   f16mat2x3 l_a_i_a_i_m = v_6;
   f16vec3 l_a_i_a_i_m_i = v_7;
   float16_t l_a_i_a_i_m_i_i = v_7[i()];

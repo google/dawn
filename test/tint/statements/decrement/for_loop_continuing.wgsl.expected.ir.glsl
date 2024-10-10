@@ -1,18 +1,18 @@
 #version 310 es
 
 layout(binding = 0, std430)
-buffer tint_symbol_2_1_ssbo {
-  uint tint_symbol_1;
+buffer i_block_1_ssbo {
+  uint inner;
 } v;
 void tint_symbol() {
   {
     while(true) {
-      if ((v.tint_symbol_1 < 10u)) {
+      if ((v.inner < 10u)) {
       } else {
         break;
       }
       {
-        v.tint_symbol_1 = (v.tint_symbol_1 - 1u);
+        v.inner = (v.inner - 1u);
       }
       continue;
     }

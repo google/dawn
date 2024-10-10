@@ -3,8 +3,8 @@ precision highp float;
 precision highp int;
 
 layout(binding = 0, std430)
-buffer tint_symbol_1_1_ssbo {
-  vec2 tint_symbol;
+buffer prevent_dce_block_1_ssbo {
+  vec2 inner;
 } v;
 vec2 tanh_5724b3() {
   vec2 arg_0 = vec2(1.0f);
@@ -12,13 +12,13 @@ vec2 tanh_5724b3() {
   return res;
 }
 void main() {
-  v.tint_symbol = tanh_5724b3();
+  v.inner = tanh_5724b3();
 }
 #version 310 es
 
 layout(binding = 0, std430)
-buffer tint_symbol_1_1_ssbo {
-  vec2 tint_symbol;
+buffer prevent_dce_block_1_ssbo {
+  vec2 inner;
 } v;
 vec2 tanh_5724b3() {
   vec2 arg_0 = vec2(1.0f);
@@ -27,7 +27,7 @@ vec2 tanh_5724b3() {
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
-  v.tint_symbol = tanh_5724b3();
+  v.inner = tanh_5724b3();
 }
 #version 310 es
 

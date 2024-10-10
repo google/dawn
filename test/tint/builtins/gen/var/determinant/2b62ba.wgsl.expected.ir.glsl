@@ -3,8 +3,8 @@ precision highp float;
 precision highp int;
 
 layout(binding = 0, std430)
-buffer tint_symbol_1_1_ssbo {
-  float tint_symbol;
+buffer prevent_dce_block_1_ssbo {
+  float inner;
 } v;
 float determinant_2b62ba() {
   mat3 arg_0 = mat3(vec3(1.0f), vec3(1.0f), vec3(1.0f));
@@ -12,13 +12,13 @@ float determinant_2b62ba() {
   return res;
 }
 void main() {
-  v.tint_symbol = determinant_2b62ba();
+  v.inner = determinant_2b62ba();
 }
 #version 310 es
 
 layout(binding = 0, std430)
-buffer tint_symbol_1_1_ssbo {
-  float tint_symbol;
+buffer prevent_dce_block_1_ssbo {
+  float inner;
 } v;
 float determinant_2b62ba() {
   mat3 arg_0 = mat3(vec3(1.0f), vec3(1.0f), vec3(1.0f));
@@ -27,7 +27,7 @@ float determinant_2b62ba() {
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
-  v.tint_symbol = determinant_2b62ba();
+  v.inner = determinant_2b62ba();
 }
 #version 310 es
 

@@ -1,8 +1,8 @@
 #version 310 es
 
 layout(binding = 0, std430)
-buffer tint_symbol_2_1_ssbo {
-  float tint_symbol_1;
+buffer tint_symbol_block_1_ssbo {
+  float inner;
 } v;
 void bar(inout float p) {
   float a = 1.0f;
@@ -20,5 +20,5 @@ layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
   float param = 0.0f;
   bar(param);
-  v.tint_symbol_1 = param;
+  v.inner = param;
 }

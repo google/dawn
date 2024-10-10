@@ -3,9 +3,9 @@ precision highp float;
 precision highp int;
 
 layout(binding = 0, std140)
-uniform tint_symbol_2_1_ubo {
-  vec2 tint_symbol_1;
+uniform weights_block_1_ubo {
+  vec2 inner;
 } v;
 void main() {
-  float a = v.tint_symbol_1.x;
+  float a = v.inner.x;
 }

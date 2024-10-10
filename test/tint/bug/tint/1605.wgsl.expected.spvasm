@@ -7,23 +7,23 @@
                OpMemoryModel Logical GLSL450
                OpEntryPoint GLCompute %main "main"
                OpExecutionMode %main LocalSize 1 1 1
-               OpMemberName %tint_symbol_1 0 "tint_symbol"
-               OpName %tint_symbol_1 "tint_symbol_1"
+               OpMemberName %b_block 0 "inner"
+               OpName %b_block "b_block"
                OpName %func_3 "func_3"
                OpName %return_value "return_value"
                OpName %continue_execution "continue_execution"
                OpName %i "i"
                OpName %j "j"
                OpName %main "main"
-               OpMemberDecorate %tint_symbol_1 0 Offset 0
-               OpDecorate %tint_symbol_1 Block
+               OpMemberDecorate %b_block 0 Offset 0
+               OpDecorate %b_block Block
                OpDecorate %1 DescriptorSet 0
                OpDecorate %1 Binding 0
                OpDecorate %1 NonWritable
         %int = OpTypeInt 32 1
-%tint_symbol_1 = OpTypeStruct %int
-%_ptr_Uniform_tint_symbol_1 = OpTypePointer Uniform %tint_symbol_1
-          %1 = OpVariable %_ptr_Uniform_tint_symbol_1 Uniform
+    %b_block = OpTypeStruct %int
+%_ptr_Uniform_b_block = OpTypePointer Uniform %b_block
+          %1 = OpVariable %_ptr_Uniform_b_block Uniform
        %bool = OpTypeBool
           %7 = OpTypeFunction %bool
 %_ptr_Function_bool = OpTypePointer Function %bool

@@ -44,8 +44,8 @@ struct S {
 };
 
 layout(binding = 0, std140)
-uniform tint_symbol_1_std140_1_ubo {
-  S_std140 tint_symbol[4];
+uniform u_block_std140_1_ubo {
+  S_std140 inner[4];
 } v;
 S p[4] = S[4](S(0, f16mat3x2(f16vec2(0.0hf), f16vec2(0.0hf), f16vec2(0.0hf)), 0), S(0, f16mat3x2(f16vec2(0.0hf), f16vec2(0.0hf), f16vec2(0.0hf)), 0), S(0, f16mat3x2(f16vec2(0.0hf), f16vec2(0.0hf), f16vec2(0.0hf)), 0), S(0, f16mat3x2(f16vec2(0.0hf), f16vec2(0.0hf), f16vec2(0.0hf)), 0));
 S tint_convert_S(S_std140 tint_input) {
@@ -53,7 +53,7 @@ S tint_convert_S(S_std140 tint_input) {
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
-  S_std140 v_1[4] = v.tint_symbol;
+  S_std140 v_1[4] = v.inner;
   S v_2[4] = S[4](S(0, f16mat3x2(f16vec2(0.0hf), f16vec2(0.0hf), f16vec2(0.0hf)), 0), S(0, f16mat3x2(f16vec2(0.0hf), f16vec2(0.0hf), f16vec2(0.0hf)), 0), S(0, f16mat3x2(f16vec2(0.0hf), f16vec2(0.0hf), f16vec2(0.0hf)), 0), S(0, f16mat3x2(f16vec2(0.0hf), f16vec2(0.0hf), f16vec2(0.0hf)), 0));
   {
     uint v_3 = 0u;
@@ -71,7 +71,7 @@ void main() {
     }
   }
   p = v_2;
-  p[1] = tint_convert_S(v.tint_symbol[2]);
-  p[3].m = f16mat3x2(v.tint_symbol[2].m_col0, v.tint_symbol[2].m_col1, v.tint_symbol[2].m_col2);
-  p[1].m[0] = v.tint_symbol[0].m_col1.yx;
+  p[1] = tint_convert_S(v.inner[2]);
+  p[3].m = f16mat3x2(v.inner[2].m_col0, v.inner[2].m_col1, v.inner[2].m_col2);
+  p[1].m[0] = v.inner[0].m_col1.yx;
 }

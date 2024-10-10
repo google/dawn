@@ -7,8 +7,8 @@ struct S {
 };
 
 layout(binding = 0, std430)
-buffer tint_symbol_2_1_ssbo {
-  int tint_symbol_1;
+buffer s_block_1_ssbo {
+  int inner;
 } v;
 shared int g1;
 int accept_value(int val) {
@@ -53,7 +53,7 @@ void tint_symbol_inner(uint tint_local_index) {
   int v_5 = (v_4 + accept_ptr_to_struct_and_access(v2));
   int v_6 = (v_5 + accept_ptr_vec_access_elements(v4));
   int v_7 = (v_6 + accept_ptr_to_struct_access_pass_ptr(v2));
-  v.tint_symbol_1 = ((v_7 + call_builtin_with_mod_scope_ptr()) + t1);
+  v.inner = ((v_7 + call_builtin_with_mod_scope_ptr()) + t1);
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {

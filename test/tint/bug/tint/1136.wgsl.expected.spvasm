@@ -9,21 +9,21 @@
                OpExecutionMode %unused_entry_point LocalSize 1 1 1
                OpMemberName %Buffer 0 "data"
                OpName %Buffer "Buffer"
-               OpMemberName %tint_symbol_1 0 "tint_symbol"
-               OpName %tint_symbol_1 "tint_symbol_1"
+               OpMemberName %buffer_block 0 "inner"
+               OpName %buffer_block "buffer_block"
                OpName %main "main"
                OpName %unused_entry_point "unused_entry_point"
                OpMemberDecorate %Buffer 0 Offset 0
-               OpMemberDecorate %tint_symbol_1 0 Offset 0
-               OpDecorate %tint_symbol_1 Block
+               OpMemberDecorate %buffer_block 0 Offset 0
+               OpDecorate %buffer_block Block
                OpDecorate %1 DescriptorSet 0
                OpDecorate %1 Binding 0
                OpDecorate %1 Coherent
        %uint = OpTypeInt 32 0
      %Buffer = OpTypeStruct %uint
-%tint_symbol_1 = OpTypeStruct %Buffer
-%_ptr_StorageBuffer_tint_symbol_1 = OpTypePointer StorageBuffer %tint_symbol_1
-          %1 = OpVariable %_ptr_StorageBuffer_tint_symbol_1 StorageBuffer
+%buffer_block = OpTypeStruct %Buffer
+%_ptr_StorageBuffer_buffer_block = OpTypePointer StorageBuffer %buffer_block
+          %1 = OpVariable %_ptr_StorageBuffer_buffer_block StorageBuffer
        %void = OpTypeVoid
           %8 = OpTypeFunction %void
 %_ptr_StorageBuffer_uint = OpTypePointer StorageBuffer %uint

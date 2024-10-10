@@ -9,8 +9,8 @@
                OpExecutionMode %unused_entry_point LocalSize 1 1 1
                OpMemberName %S 0 "a"
                OpName %S "S"
-               OpMemberName %tint_symbol_1 0 "tint_symbol"
-               OpName %tint_symbol_1 "tint_symbol_1"
+               OpMemberName %buffer_block 0 "inner"
+               OpName %buffer_block "buffer_block"
                OpName %v "v"
                OpName %idx1 "idx1"
                OpName %idx2 "idx2"
@@ -23,8 +23,8 @@
                OpDecorate %_arr_v4int_uint_4 ArrayStride 16
                OpMemberDecorate %S 0 Offset 0
                OpDecorate %_runtimearr_S ArrayStride 64
-               OpMemberDecorate %tint_symbol_1 0 Offset 0
-               OpDecorate %tint_symbol_1 Block
+               OpMemberDecorate %buffer_block 0 Offset 0
+               OpDecorate %buffer_block Block
                OpDecorate %1 DescriptorSet 0
                OpDecorate %1 Binding 0
                OpDecorate %1 Coherent
@@ -35,9 +35,9 @@
 %_arr_v4int_uint_4 = OpTypeArray %v4int %uint_4
           %S = OpTypeStruct %_arr_v4int_uint_4
 %_runtimearr_S = OpTypeRuntimeArray %S
-%tint_symbol_1 = OpTypeStruct %_runtimearr_S
-%_ptr_StorageBuffer_tint_symbol_1 = OpTypePointer StorageBuffer %tint_symbol_1
-          %1 = OpVariable %_ptr_StorageBuffer_tint_symbol_1 StorageBuffer
+%buffer_block = OpTypeStruct %_runtimearr_S
+%_ptr_StorageBuffer_buffer_block = OpTypePointer StorageBuffer %buffer_block
+          %1 = OpVariable %_ptr_StorageBuffer_buffer_block StorageBuffer
 %_ptr_Private_uint = OpTypePointer Private %uint
          %13 = OpConstantNull %uint
           %v = OpVariable %_ptr_Private_uint Private %13

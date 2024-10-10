@@ -4,8 +4,8 @@ precision highp float;
 precision highp int;
 
 layout(binding = 0, std430)
-buffer tint_symbol_1_1_ssbo {
-  uvec2 tint_symbol;
+buffer prevent_dce_block_1_ssbo {
+  uvec2 inner;
 } v;
 uvec2 tint_bitcast_from_f16(f16vec4 src) {
   uint v_1 = packFloat2x16(src.xy);
@@ -17,14 +17,14 @@ uvec2 bitcast_81c5f5() {
   return res;
 }
 void main() {
-  v.tint_symbol = bitcast_81c5f5();
+  v.inner = bitcast_81c5f5();
 }
 #version 310 es
 #extension GL_AMD_gpu_shader_half_float: require
 
 layout(binding = 0, std430)
-buffer tint_symbol_1_1_ssbo {
-  uvec2 tint_symbol;
+buffer prevent_dce_block_1_ssbo {
+  uvec2 inner;
 } v;
 uvec2 tint_bitcast_from_f16(f16vec4 src) {
   uint v_1 = packFloat2x16(src.xy);
@@ -37,7 +37,7 @@ uvec2 bitcast_81c5f5() {
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
-  v.tint_symbol = bitcast_81c5f5();
+  v.inner = bitcast_81c5f5();
 }
 #version 310 es
 #extension GL_AMD_gpu_shader_half_float: require

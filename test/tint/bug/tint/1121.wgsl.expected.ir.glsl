@@ -38,20 +38,20 @@ buffer LightsBuffer_1_ssbo {
   LightData lights[];
 } lightsBuffer;
 layout(binding = 0, std430)
-buffer tint_symbol_4_1_ssbo {
-  Tiles tint_symbol_3;
+buffer tileLightId_block_1_ssbo {
+  Tiles inner;
 } v;
 layout(binding = 0, std140)
-uniform tint_symbol_6_1_ubo {
-  Config tint_symbol_5;
+uniform config_block_1_ubo {
+  Config inner;
 } v_1;
 layout(binding = 0, std140)
-uniform tint_symbol_8_1_ubo {
-  Uniforms tint_symbol_7;
+uniform uniforms_block_1_ubo {
+  Uniforms inner;
 } v_2;
 void tint_symbol_2_inner(uvec3 GlobalInvocationID) {
   uint index = GlobalInvocationID[0u];
-  if ((index >= v_1.tint_symbol_5.numLights)) {
+  if ((index >= v_1.inner.numLights)) {
     return;
   }
   uint v_3 = index;
@@ -60,16 +60,16 @@ void tint_symbol_2_inner(uvec3 GlobalInvocationID) {
   float v_6 = float(index);
   lightsBuffer.lights[v_3].position[1u] = (v_5 + (0.00100000004749745131f * (v_6 - (64.0f * floor((float(index) / 64.0f))))));
   uint v_7 = index;
-  if ((lightsBuffer.lights[v_7].position.y < v_2.tint_symbol_7.tint_symbol.y)) {
+  if ((lightsBuffer.lights[v_7].position.y < v_2.inner.tint_symbol.y)) {
     uint v_8 = index;
-    lightsBuffer.lights[v_8].position[1u] = v_2.tint_symbol_7.tint_symbol_1.y;
+    lightsBuffer.lights[v_8].position[1u] = v_2.inner.tint_symbol_1.y;
   }
-  mat4 M = v_2.tint_symbol_7.projectionMatrix;
+  mat4 M = v_2.inner.projectionMatrix;
   float viewNear = (-(M[3].z) / (-1.0f + M[2].z));
   float viewFar = (-(M[3].z) / (1.0f + M[2].z));
   uint v_9 = index;
   vec4 lightPos = lightsBuffer.lights[v_9].position;
-  lightPos = (v_2.tint_symbol_7.viewMatrix * lightPos);
+  lightPos = (v_2.inner.viewMatrix * lightPos);
   lightPos = (lightPos / lightPos.w);
   uint v_10 = index;
   float lightRadius = lightsBuffer.lights[v_10].radius;
@@ -99,10 +99,10 @@ void tint_symbol_2_inner(uvec3 GlobalInvocationID) {
           }
           ivec2 tilePixel0Idx = ivec2((x * TILE_SIZE), (y * TILE_SIZE));
           vec2 v_13 = (2.0f * vec2(tilePixel0Idx));
-          vec2 floorCoord = ((v_13 / v_2.tint_symbol_7.fullScreenSize.xy) - vec2(1.0f));
+          vec2 floorCoord = ((v_13 / v_2.inner.fullScreenSize.xy) - vec2(1.0f));
           ivec2 v_14 = tilePixel0Idx;
           vec2 v_15 = (2.0f * vec2((v_14 + ivec2(TILE_SIZE))));
-          vec2 ceilCoord = ((v_15 / v_2.tint_symbol_7.fullScreenSize.xy) - vec2(1.0f));
+          vec2 ceilCoord = ((v_15 / v_2.inner.fullScreenSize.xy) - vec2(1.0f));
           vec2 viewFloorCoord = vec2((((-(viewNear) * floorCoord.x) - (M[2].x * viewNear)) / M[0].x), (((-(viewNear) * floorCoord.y) - (M[2].y * viewNear)) / M[1].y));
           vec2 viewCeilCoord = vec2((((-(viewNear) * ceilCoord.x) - (M[2].x * viewNear)) / M[0].x), (((-(viewNear) * ceilCoord.y) - (M[2].y * viewNear)) / M[1].y));
           frustumPlanes[0] = vec4(1.0f, 0.0f, (-(viewFloorCoord.x) / viewNear), 0.0f);
@@ -153,7 +153,7 @@ void tint_symbol_2_inner(uvec3 GlobalInvocationID) {
             if ((tileId < 0u)) {
               v_22 = true;
             } else {
-              v_22 = (tileId >= v_1.tint_symbol_5.numTiles);
+              v_22 = (tileId >= v_1.inner.numTiles);
             }
             if (v_22) {
               {
@@ -162,8 +162,8 @@ void tint_symbol_2_inner(uvec3 GlobalInvocationID) {
               continue;
             }
             uint v_23 = tileId;
-            uint offset = atomicAdd(v.tint_symbol_3.data[v_23].count, 1u);
-            if ((offset >= v_1.tint_symbol_5.numTileLightSlot)) {
+            uint offset = atomicAdd(v.inner.data[v_23].count, 1u);
+            if ((offset >= v_1.inner.numTileLightSlot)) {
               {
                 x = (x + 1);
               }
@@ -171,7 +171,7 @@ void tint_symbol_2_inner(uvec3 GlobalInvocationID) {
             }
             uint v_24 = tileId;
             uint v_25 = offset;
-            v.tint_symbol_3.data[v_24].lightId[v_25] = GlobalInvocationID[0u];
+            v.inner.data[v_24].lightId[v_25] = GlobalInvocationID[0u];
           }
           {
             x = (x + 1);

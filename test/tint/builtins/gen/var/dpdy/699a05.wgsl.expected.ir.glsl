@@ -3,8 +3,8 @@ precision highp float;
 precision highp int;
 
 layout(binding = 0, std430)
-buffer tint_symbol_1_1_ssbo {
-  vec4 tint_symbol;
+buffer prevent_dce_block_1_ssbo {
+  vec4 inner;
 } v;
 vec4 dpdy_699a05() {
   vec4 arg_0 = vec4(1.0f);
@@ -12,5 +12,5 @@ vec4 dpdy_699a05() {
   return res;
 }
 void main() {
-  v.tint_symbol = dpdy_699a05();
+  v.inner = dpdy_699a05();
 }

@@ -16,8 +16,8 @@
                OpMemberName %Uniforms 1 "bShape"
                OpMemberName %Uniforms 2 "outShape"
                OpName %Uniforms "Uniforms"
-               OpMemberName %tint_symbol_1 0 "tint_symbol"
-               OpName %tint_symbol_1 "tint_symbol_1"
+               OpMemberName %uniforms_block 0 "inner"
+               OpName %uniforms_block "uniforms_block"
                OpName %main_global_invocation_id_Input "main_global_invocation_id_Input"
                OpName %main_inner "main_inner"
                OpName %global_id "global_id"
@@ -45,8 +45,8 @@
                OpMemberDecorate %Uniforms 0 Offset 0
                OpMemberDecorate %Uniforms 1 Offset 8
                OpMemberDecorate %Uniforms 2 Offset 16
-               OpMemberDecorate %tint_symbol_1 0 Offset 0
-               OpDecorate %tint_symbol_1 Block
+               OpMemberDecorate %uniforms_block 0 Offset 0
+               OpDecorate %uniforms_block Block
                OpDecorate %9 DescriptorSet 0
                OpDecorate %9 Binding 3
                OpDecorate %9 NonWritable
@@ -61,9 +61,9 @@
 %resultMatrix = OpVariable %_ptr_StorageBuffer_Matrix_0 StorageBuffer
      %v2uint = OpTypeVector %uint 2
    %Uniforms = OpTypeStruct %v2uint %v2uint %v2uint
-%tint_symbol_1 = OpTypeStruct %Uniforms
-%_ptr_Uniform_tint_symbol_1 = OpTypePointer Uniform %tint_symbol_1
-          %9 = OpVariable %_ptr_Uniform_tint_symbol_1 Uniform
+%uniforms_block = OpTypeStruct %Uniforms
+%_ptr_Uniform_uniforms_block = OpTypePointer Uniform %uniforms_block
+          %9 = OpVariable %_ptr_Uniform_uniforms_block Uniform
      %v3uint = OpTypeVector %uint 3
 %_ptr_Input_v3uint = OpTypePointer Input %v3uint
 %main_global_invocation_id_Input = OpVariable %_ptr_Input_v3uint Input

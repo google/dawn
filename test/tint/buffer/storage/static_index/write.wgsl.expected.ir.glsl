@@ -44,8 +44,8 @@ struct S {
 };
 
 layout(binding = 0, std430)
-buffer tint_symbol_2_1_ssbo {
-  S tint_symbol_1;
+buffer sb_block_1_ssbo {
+  S inner;
 } v;
 void tint_store_and_preserve_padding_3(inout vec3 target[2], vec3 value_param[2]) {
   {
@@ -81,28 +81,28 @@ void tint_store_and_preserve_padding(inout mat2x3 target, mat2x3 value_param) {
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
-  v.tint_symbol_1.scalar_f32 = 0.0f;
-  v.tint_symbol_1.scalar_i32 = 0;
-  v.tint_symbol_1.scalar_u32 = 0u;
-  v.tint_symbol_1.vec2_f32 = vec2(0.0f);
-  v.tint_symbol_1.vec2_i32 = ivec2(0);
-  v.tint_symbol_1.vec2_u32 = uvec2(0u);
-  v.tint_symbol_1.vec3_f32 = vec3(0.0f);
-  v.tint_symbol_1.vec3_i32 = ivec3(0);
-  v.tint_symbol_1.vec3_u32 = uvec3(0u);
-  v.tint_symbol_1.vec4_f32 = vec4(0.0f);
-  v.tint_symbol_1.vec4_i32 = ivec4(0);
-  v.tint_symbol_1.vec4_u32 = uvec4(0u);
-  v.tint_symbol_1.mat2x2_f32 = mat2(vec2(0.0f), vec2(0.0f));
-  tint_store_and_preserve_padding(v.tint_symbol_1.mat2x3_f32, mat2x3(vec3(0.0f), vec3(0.0f)));
-  v.tint_symbol_1.mat2x4_f32 = mat2x4(vec4(0.0f), vec4(0.0f));
-  v.tint_symbol_1.mat3x2_f32 = mat3x2(vec2(0.0f), vec2(0.0f), vec2(0.0f));
-  tint_store_and_preserve_padding_1(v.tint_symbol_1.mat3x3_f32, mat3(vec3(0.0f), vec3(0.0f), vec3(0.0f)));
-  v.tint_symbol_1.mat3x4_f32 = mat3x4(vec4(0.0f), vec4(0.0f), vec4(0.0f));
-  v.tint_symbol_1.mat4x2_f32 = mat4x2(vec2(0.0f), vec2(0.0f), vec2(0.0f), vec2(0.0f));
-  tint_store_and_preserve_padding_2(v.tint_symbol_1.mat4x3_f32, mat4x3(vec3(0.0f), vec3(0.0f), vec3(0.0f), vec3(0.0f)));
-  v.tint_symbol_1.mat4x4_f32 = mat4(vec4(0.0f), vec4(0.0f), vec4(0.0f), vec4(0.0f));
-  tint_store_and_preserve_padding_3(v.tint_symbol_1.arr2_vec3_f32, vec3[2](vec3(0.0f), vec3(0.0f)));
-  v.tint_symbol_1.struct_inner = Inner(0, 0.0f);
-  v.tint_symbol_1.array_struct_inner = Inner[4](Inner(0, 0.0f), Inner(0, 0.0f), Inner(0, 0.0f), Inner(0, 0.0f));
+  v.inner.scalar_f32 = 0.0f;
+  v.inner.scalar_i32 = 0;
+  v.inner.scalar_u32 = 0u;
+  v.inner.vec2_f32 = vec2(0.0f);
+  v.inner.vec2_i32 = ivec2(0);
+  v.inner.vec2_u32 = uvec2(0u);
+  v.inner.vec3_f32 = vec3(0.0f);
+  v.inner.vec3_i32 = ivec3(0);
+  v.inner.vec3_u32 = uvec3(0u);
+  v.inner.vec4_f32 = vec4(0.0f);
+  v.inner.vec4_i32 = ivec4(0);
+  v.inner.vec4_u32 = uvec4(0u);
+  v.inner.mat2x2_f32 = mat2(vec2(0.0f), vec2(0.0f));
+  tint_store_and_preserve_padding(v.inner.mat2x3_f32, mat2x3(vec3(0.0f), vec3(0.0f)));
+  v.inner.mat2x4_f32 = mat2x4(vec4(0.0f), vec4(0.0f));
+  v.inner.mat3x2_f32 = mat3x2(vec2(0.0f), vec2(0.0f), vec2(0.0f));
+  tint_store_and_preserve_padding_1(v.inner.mat3x3_f32, mat3(vec3(0.0f), vec3(0.0f), vec3(0.0f)));
+  v.inner.mat3x4_f32 = mat3x4(vec4(0.0f), vec4(0.0f), vec4(0.0f));
+  v.inner.mat4x2_f32 = mat4x2(vec2(0.0f), vec2(0.0f), vec2(0.0f), vec2(0.0f));
+  tint_store_and_preserve_padding_2(v.inner.mat4x3_f32, mat4x3(vec3(0.0f), vec3(0.0f), vec3(0.0f), vec3(0.0f)));
+  v.inner.mat4x4_f32 = mat4(vec4(0.0f), vec4(0.0f), vec4(0.0f), vec4(0.0f));
+  tint_store_and_preserve_padding_3(v.inner.arr2_vec3_f32, vec3[2](vec3(0.0f), vec3(0.0f)));
+  v.inner.struct_inner = Inner(0, 0.0f);
+  v.inner.array_struct_inner = Inner[4](Inner(0, 0.0f), Inner(0, 0.0f), Inner(0, 0.0f), Inner(0, 0.0f));
 }

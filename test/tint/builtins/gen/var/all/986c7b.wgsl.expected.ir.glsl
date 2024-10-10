@@ -3,8 +3,8 @@ precision highp float;
 precision highp int;
 
 layout(binding = 0, std430)
-buffer tint_symbol_1_1_ssbo {
-  int tint_symbol;
+buffer prevent_dce_block_1_ssbo {
+  int inner;
 } v;
 int all_986c7b() {
   bvec4 arg_0 = bvec4(true);
@@ -12,13 +12,13 @@ int all_986c7b() {
   return mix(0, 1, (res == false));
 }
 void main() {
-  v.tint_symbol = all_986c7b();
+  v.inner = all_986c7b();
 }
 #version 310 es
 
 layout(binding = 0, std430)
-buffer tint_symbol_1_1_ssbo {
-  int tint_symbol;
+buffer prevent_dce_block_1_ssbo {
+  int inner;
 } v;
 int all_986c7b() {
   bvec4 arg_0 = bvec4(true);
@@ -27,7 +27,7 @@ int all_986c7b() {
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
-  v.tint_symbol = all_986c7b();
+  v.inner = all_986c7b();
 }
 #version 310 es
 

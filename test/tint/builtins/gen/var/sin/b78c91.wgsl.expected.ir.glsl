@@ -3,8 +3,8 @@ precision highp float;
 precision highp int;
 
 layout(binding = 0, std430)
-buffer tint_symbol_1_1_ssbo {
-  float tint_symbol;
+buffer prevent_dce_block_1_ssbo {
+  float inner;
 } v;
 float sin_b78c91() {
   float arg_0 = 1.57079637050628662109f;
@@ -12,13 +12,13 @@ float sin_b78c91() {
   return res;
 }
 void main() {
-  v.tint_symbol = sin_b78c91();
+  v.inner = sin_b78c91();
 }
 #version 310 es
 
 layout(binding = 0, std430)
-buffer tint_symbol_1_1_ssbo {
-  float tint_symbol;
+buffer prevent_dce_block_1_ssbo {
+  float inner;
 } v;
 float sin_b78c91() {
   float arg_0 = 1.57079637050628662109f;
@@ -27,7 +27,7 @@ float sin_b78c91() {
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
-  v.tint_symbol = sin_b78c91();
+  v.inner = sin_b78c91();
 }
 #version 310 es
 

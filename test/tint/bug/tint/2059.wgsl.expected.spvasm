@@ -7,30 +7,30 @@
                OpMemoryModel Logical GLSL450
                OpEntryPoint GLCompute %main "main"
                OpExecutionMode %main LocalSize 1 1 1
-               OpMemberName %tint_symbol_1 0 "tint_symbol"
-               OpName %tint_symbol_1 "tint_symbol_1"
+               OpMemberName %buffer0_block 0 "inner"
+               OpName %buffer0_block "buffer0_block"
                OpMemberName %S 0 "m"
                OpName %S "S"
-               OpMemberName %tint_symbol_3 0 "tint_symbol_2"
-               OpName %tint_symbol_3 "tint_symbol_3"
+               OpMemberName %buffer1_block 0 "inner"
+               OpName %buffer1_block "buffer1_block"
                OpMemberName %S2 0 "m"
                OpName %S2 "S2"
-               OpMemberName %tint_symbol_5 0 "tint_symbol_4"
-               OpName %tint_symbol_5 "tint_symbol_5"
+               OpMemberName %buffer2_block 0 "inner"
+               OpName %buffer2_block "buffer2_block"
                OpMemberName %S3 0 "s"
                OpName %S3 "S3"
-               OpMemberName %tint_symbol_7 0 "tint_symbol_6"
-               OpName %tint_symbol_7 "tint_symbol_7"
+               OpMemberName %buffer3_block 0 "inner"
+               OpName %buffer3_block "buffer3_block"
                OpMemberName %S4 0 "s"
                OpName %S4 "S4"
-               OpMemberName %tint_symbol_9 0 "tint_symbol_8"
-               OpName %tint_symbol_9 "tint_symbol_9"
-               OpMemberName %tint_symbol_11 0 "tint_symbol_10"
-               OpName %tint_symbol_11 "tint_symbol_11"
-               OpMemberName %tint_symbol_13 0 "tint_symbol_12"
-               OpName %tint_symbol_13 "tint_symbol_13"
-               OpMemberName %tint_symbol_15 0 "tint_symbol_14"
-               OpName %tint_symbol_15 "tint_symbol_15"
+               OpMemberName %buffer4_block 0 "inner"
+               OpName %buffer4_block "buffer4_block"
+               OpMemberName %buffer5_block 0 "inner"
+               OpName %buffer5_block "buffer5_block"
+               OpMemberName %buffer6_block 0 "inner"
+               OpName %buffer6_block "buffer6_block"
+               OpMemberName %buffer7_block 0 "inner"
+               OpName %buffer7_block "buffer7_block"
                OpName %main "main"
                OpName %m "m"
                OpName %c "c"
@@ -95,18 +95,18 @@
                OpName %value_param_19 "value_param"
                OpName %tint_store_and_preserve_padding_20 "tint_store_and_preserve_padding"
                OpName %value_param_20 "value_param"
-               OpMemberDecorate %tint_symbol_1 0 Offset 0
-               OpMemberDecorate %tint_symbol_1 0 ColMajor
-               OpMemberDecorate %tint_symbol_1 0 MatrixStride 16
-               OpDecorate %tint_symbol_1 Block
+               OpMemberDecorate %buffer0_block 0 Offset 0
+               OpMemberDecorate %buffer0_block 0 ColMajor
+               OpMemberDecorate %buffer0_block 0 MatrixStride 16
+               OpDecorate %buffer0_block Block
                OpDecorate %1 DescriptorSet 0
                OpDecorate %1 Binding 0
                OpDecorate %1 Coherent
                OpMemberDecorate %S 0 Offset 0
                OpMemberDecorate %S 0 ColMajor
                OpMemberDecorate %S 0 MatrixStride 16
-               OpMemberDecorate %tint_symbol_3 0 Offset 0
-               OpDecorate %tint_symbol_3 Block
+               OpMemberDecorate %buffer1_block 0 Offset 0
+               OpDecorate %buffer1_block Block
                OpDecorate %7 DescriptorSet 0
                OpDecorate %7 Binding 1
                OpDecorate %7 Coherent
@@ -114,39 +114,39 @@
                OpMemberDecorate %S2 0 Offset 0
                OpMemberDecorate %S2 0 ColMajor
                OpMemberDecorate %S2 0 MatrixStride 16
-               OpMemberDecorate %tint_symbol_5 0 Offset 0
-               OpDecorate %tint_symbol_5 Block
+               OpMemberDecorate %buffer2_block 0 Offset 0
+               OpDecorate %buffer2_block Block
                OpDecorate %11 DescriptorSet 0
                OpDecorate %11 Binding 2
                OpDecorate %11 Coherent
                OpMemberDecorate %S3 0 Offset 0
-               OpMemberDecorate %tint_symbol_7 0 Offset 0
-               OpDecorate %tint_symbol_7 Block
+               OpMemberDecorate %buffer3_block 0 Offset 0
+               OpDecorate %buffer3_block Block
                OpDecorate %18 DescriptorSet 0
                OpDecorate %18 Binding 3
                OpDecorate %18 Coherent
                OpDecorate %_arr_S_uint_1 ArrayStride 48
                OpMemberDecorate %S4 0 Offset 0
-               OpMemberDecorate %tint_symbol_9 0 Offset 0
-               OpDecorate %tint_symbol_9 Block
+               OpMemberDecorate %buffer4_block 0 Offset 0
+               OpDecorate %buffer4_block Block
                OpDecorate %22 DescriptorSet 0
                OpDecorate %22 Binding 4
                OpDecorate %22 Coherent
-               OpMemberDecorate %tint_symbol_11 0 Offset 0
-               OpMemberDecorate %tint_symbol_11 0 ColMajor
-               OpMemberDecorate %tint_symbol_11 0 MatrixStride 16
-               OpDecorate %tint_symbol_11 Block
+               OpMemberDecorate %buffer5_block 0 Offset 0
+               OpMemberDecorate %buffer5_block 0 ColMajor
+               OpMemberDecorate %buffer5_block 0 MatrixStride 16
+               OpDecorate %buffer5_block Block
                OpDecorate %27 DescriptorSet 0
                OpDecorate %27 Binding 5
                OpDecorate %27 Coherent
-               OpMemberDecorate %tint_symbol_13 0 Offset 0
-               OpDecorate %tint_symbol_13 Block
+               OpMemberDecorate %buffer6_block 0 Offset 0
+               OpDecorate %buffer6_block Block
                OpDecorate %30 DescriptorSet 0
                OpDecorate %30 Binding 6
                OpDecorate %30 Coherent
                OpDecorate %_arr_S2_uint_1 ArrayStride 48
-               OpMemberDecorate %tint_symbol_15 0 Offset 0
-               OpDecorate %tint_symbol_15 Block
+               OpMemberDecorate %buffer7_block 0 Offset 0
+               OpDecorate %buffer7_block Block
                OpDecorate %33 DescriptorSet 0
                OpDecorate %33 Binding 7
                OpDecorate %33 Coherent
@@ -155,39 +155,39 @@
       %float = OpTypeFloat 32
     %v3float = OpTypeVector %float 3
 %mat3v3float = OpTypeMatrix %v3float 3
-%tint_symbol_1 = OpTypeStruct %mat3v3float
-%_ptr_StorageBuffer_tint_symbol_1 = OpTypePointer StorageBuffer %tint_symbol_1
-          %1 = OpVariable %_ptr_StorageBuffer_tint_symbol_1 StorageBuffer
+%buffer0_block = OpTypeStruct %mat3v3float
+%_ptr_StorageBuffer_buffer0_block = OpTypePointer StorageBuffer %buffer0_block
+          %1 = OpVariable %_ptr_StorageBuffer_buffer0_block StorageBuffer
           %S = OpTypeStruct %mat3v3float
-%tint_symbol_3 = OpTypeStruct %S
-%_ptr_StorageBuffer_tint_symbol_3 = OpTypePointer StorageBuffer %tint_symbol_3
-          %7 = OpVariable %_ptr_StorageBuffer_tint_symbol_3 StorageBuffer
+%buffer1_block = OpTypeStruct %S
+%_ptr_StorageBuffer_buffer1_block = OpTypePointer StorageBuffer %buffer1_block
+          %7 = OpVariable %_ptr_StorageBuffer_buffer1_block StorageBuffer
        %uint = OpTypeInt 32 0
      %uint_1 = OpConstant %uint 1
 %_arr_mat3v3float_uint_1 = OpTypeArray %mat3v3float %uint_1
          %S2 = OpTypeStruct %_arr_mat3v3float_uint_1
-%tint_symbol_5 = OpTypeStruct %S2
-%_ptr_StorageBuffer_tint_symbol_5 = OpTypePointer StorageBuffer %tint_symbol_5
-         %11 = OpVariable %_ptr_StorageBuffer_tint_symbol_5 StorageBuffer
+%buffer2_block = OpTypeStruct %S2
+%_ptr_StorageBuffer_buffer2_block = OpTypePointer StorageBuffer %buffer2_block
+         %11 = OpVariable %_ptr_StorageBuffer_buffer2_block StorageBuffer
          %S3 = OpTypeStruct %S
-%tint_symbol_7 = OpTypeStruct %S3
-%_ptr_StorageBuffer_tint_symbol_7 = OpTypePointer StorageBuffer %tint_symbol_7
-         %18 = OpVariable %_ptr_StorageBuffer_tint_symbol_7 StorageBuffer
+%buffer3_block = OpTypeStruct %S3
+%_ptr_StorageBuffer_buffer3_block = OpTypePointer StorageBuffer %buffer3_block
+         %18 = OpVariable %_ptr_StorageBuffer_buffer3_block StorageBuffer
 %_arr_S_uint_1 = OpTypeArray %S %uint_1
          %S4 = OpTypeStruct %_arr_S_uint_1
-%tint_symbol_9 = OpTypeStruct %S4
-%_ptr_StorageBuffer_tint_symbol_9 = OpTypePointer StorageBuffer %tint_symbol_9
-         %22 = OpVariable %_ptr_StorageBuffer_tint_symbol_9 StorageBuffer
-%tint_symbol_11 = OpTypeStruct %_arr_mat3v3float_uint_1
-%_ptr_StorageBuffer_tint_symbol_11 = OpTypePointer StorageBuffer %tint_symbol_11
-         %27 = OpVariable %_ptr_StorageBuffer_tint_symbol_11 StorageBuffer
-%tint_symbol_13 = OpTypeStruct %_arr_S_uint_1
-%_ptr_StorageBuffer_tint_symbol_13 = OpTypePointer StorageBuffer %tint_symbol_13
-         %30 = OpVariable %_ptr_StorageBuffer_tint_symbol_13 StorageBuffer
+%buffer4_block = OpTypeStruct %S4
+%_ptr_StorageBuffer_buffer4_block = OpTypePointer StorageBuffer %buffer4_block
+         %22 = OpVariable %_ptr_StorageBuffer_buffer4_block StorageBuffer
+%buffer5_block = OpTypeStruct %_arr_mat3v3float_uint_1
+%_ptr_StorageBuffer_buffer5_block = OpTypePointer StorageBuffer %buffer5_block
+         %27 = OpVariable %_ptr_StorageBuffer_buffer5_block StorageBuffer
+%buffer6_block = OpTypeStruct %_arr_S_uint_1
+%_ptr_StorageBuffer_buffer6_block = OpTypePointer StorageBuffer %buffer6_block
+         %30 = OpVariable %_ptr_StorageBuffer_buffer6_block StorageBuffer
 %_arr_S2_uint_1 = OpTypeArray %S2 %uint_1
-%tint_symbol_15 = OpTypeStruct %_arr_S2_uint_1
-%_ptr_StorageBuffer_tint_symbol_15 = OpTypePointer StorageBuffer %tint_symbol_15
-         %33 = OpVariable %_ptr_StorageBuffer_tint_symbol_15 StorageBuffer
+%buffer7_block = OpTypeStruct %_arr_S2_uint_1
+%_ptr_StorageBuffer_buffer7_block = OpTypePointer StorageBuffer %buffer7_block
+         %33 = OpVariable %_ptr_StorageBuffer_buffer7_block StorageBuffer
        %void = OpTypeVoid
          %39 = OpTypeFunction %void
 %_ptr_Function_mat3v3float = OpTypePointer Function %mat3v3float

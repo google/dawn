@@ -20,20 +20,20 @@ buffer Matrix_3_ssbo {
   float numbers[];
 } resultMatrix;
 layout(binding = 3, std140)
-uniform tint_symbol_2_1_ubo {
-  Uniforms tint_symbol_1;
+uniform uniforms_block_1_ubo {
+  Uniforms inner;
 } v;
 shared float mm_Asub[64][64];
 shared float mm_Bsub[64][64];
 float mm_readA(uint row, uint col) {
   bool v_1 = false;
-  if ((row < v.tint_symbol_1.dimAOuter)) {
-    v_1 = (col < v.tint_symbol_1.dimInner);
+  if ((row < v.inner.dimAOuter)) {
+    v_1 = (col < v.inner.dimInner);
   } else {
     v_1 = false;
   }
   if (v_1) {
-    uint v_2 = ((row * v.tint_symbol_1.dimInner) + col);
+    uint v_2 = ((row * v.inner.dimInner) + col);
     float result = firstMatrix.numbers[v_2];
     return result;
   }
@@ -41,13 +41,13 @@ float mm_readA(uint row, uint col) {
 }
 float mm_readB(uint row, uint col) {
   bool v_3 = false;
-  if ((row < v.tint_symbol_1.dimInner)) {
-    v_3 = (col < v.tint_symbol_1.dimBOuter);
+  if ((row < v.inner.dimInner)) {
+    v_3 = (col < v.inner.dimBOuter);
   } else {
     v_3 = false;
   }
   if (v_3) {
-    uint v_4 = ((row * v.tint_symbol_1.dimBOuter) + col);
+    uint v_4 = ((row * v.inner.dimBOuter) + col);
     float result = secondMatrix.numbers[v_4];
     return result;
   }
@@ -55,13 +55,13 @@ float mm_readB(uint row, uint col) {
 }
 void mm_write(uint row, uint col, float value) {
   bool v_5 = false;
-  if ((row < v.tint_symbol_1.dimAOuter)) {
-    v_5 = (col < v.tint_symbol_1.dimBOuter);
+  if ((row < v.inner.dimAOuter)) {
+    v_5 = (col < v.inner.dimBOuter);
   } else {
     v_5 = false;
   }
   if (v_5) {
-    uint index = (col + (row * v.tint_symbol_1.dimBOuter));
+    uint index = (col + (row * v.inner.dimBOuter));
     resultMatrix.numbers[index] = value;
   }
 }
@@ -90,7 +90,7 @@ void tint_symbol_inner(uvec3 local_id, uvec3 global_id, uint tint_local_index) {
   uint tileCol = (local_id[0u] * 4u);
   uint globalRow = (global_id[1u] * 4u);
   uint globalCol = (global_id[0u] * 4u);
-  uint numTiles = (tint_div_u32((v.tint_symbol_1.dimInner - 1u), 64u) + 1u);
+  uint numTiles = (tint_div_u32((v.inner.dimInner - 1u), 64u) + 1u);
   float acc[16] = float[16](0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
   float ACached = 0.0f;
   float BCached[4] = float[4](0.0f, 0.0f, 0.0f, 0.0f);

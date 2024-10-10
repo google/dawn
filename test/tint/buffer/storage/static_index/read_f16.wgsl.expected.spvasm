@@ -53,10 +53,10 @@
                OpMemberName %S 36 "struct_inner"
                OpMemberName %S 37 "array_struct_inner"
                OpName %S "S"
-               OpMemberName %tint_symbol_1 0 "tint_symbol"
-               OpName %tint_symbol_1 "tint_symbol_1"
-               OpMemberName %tint_symbol_3 0 "tint_symbol_2"
-               OpName %tint_symbol_3 "tint_symbol_3"
+               OpMemberName %sb_block 0 "inner"
+               OpName %sb_block "sb_block"
+               OpMemberName %s_block 0 "inner"
+               OpName %s_block "s_block"
                OpName %main "main"
                OpName %scalar_f32 "scalar_f32"
                OpName %scalar_i32 "scalar_i32"
@@ -182,13 +182,13 @@
                OpMemberDecorate %S 36 Offset 800
                OpDecorate %_arr_Inner_uint_4 ArrayStride 12
                OpMemberDecorate %S 37 Offset 812
-               OpMemberDecorate %tint_symbol_1 0 Offset 0
-               OpDecorate %tint_symbol_1 Block
+               OpMemberDecorate %sb_block 0 Offset 0
+               OpDecorate %sb_block Block
                OpDecorate %1 DescriptorSet 0
                OpDecorate %1 Binding 0
                OpDecorate %1 NonWritable
-               OpMemberDecorate %tint_symbol_3 0 Offset 0
-               OpDecorate %tint_symbol_3 Block
+               OpMemberDecorate %s_block 0 Offset 0
+               OpDecorate %s_block Block
                OpDecorate %45 DescriptorSet 0
                OpDecorate %45 Binding 1
                OpDecorate %45 Coherent
@@ -233,12 +233,12 @@
      %uint_4 = OpConstant %uint 4
 %_arr_Inner_uint_4 = OpTypeArray %Inner %uint_4
           %S = OpTypeStruct %float %int %uint %half %v2float %v2int %v2uint %v2half %v3float %v3int %v3uint %v3half %v4float %v4int %v4uint %v4half %mat2v2float %mat2v3float %mat2v4float %mat3v2float %mat3v3float %mat3v4float %mat4v2float %mat4v3float %mat4v4float %mat2v2half %mat2v3half %mat2v4half %mat3v2half %mat3v3half %mat3v4half %mat4v2half %mat4v3half %mat4v4half %_arr_v3float_uint_2 %_arr_mat4v2half_uint_2 %Inner %_arr_Inner_uint_4
-%tint_symbol_1 = OpTypeStruct %S
-%_ptr_StorageBuffer_tint_symbol_1 = OpTypePointer StorageBuffer %tint_symbol_1
-          %1 = OpVariable %_ptr_StorageBuffer_tint_symbol_1 StorageBuffer
-%tint_symbol_3 = OpTypeStruct %int
-%_ptr_StorageBuffer_tint_symbol_3 = OpTypePointer StorageBuffer %tint_symbol_3
-         %45 = OpVariable %_ptr_StorageBuffer_tint_symbol_3 StorageBuffer
+   %sb_block = OpTypeStruct %S
+%_ptr_StorageBuffer_sb_block = OpTypePointer StorageBuffer %sb_block
+          %1 = OpVariable %_ptr_StorageBuffer_sb_block StorageBuffer
+    %s_block = OpTypeStruct %int
+%_ptr_StorageBuffer_s_block = OpTypePointer StorageBuffer %s_block
+         %45 = OpVariable %_ptr_StorageBuffer_s_block StorageBuffer
        %void = OpTypeVoid
          %50 = OpTypeFunction %void
 %_ptr_StorageBuffer_float = OpTypePointer StorageBuffer %float

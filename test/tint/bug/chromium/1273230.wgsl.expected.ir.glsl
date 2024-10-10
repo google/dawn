@@ -28,8 +28,8 @@ struct Dbg {
 };
 
 layout(binding = 0, std140)
-uniform tint_symbol_1_1_ubo {
-  Uniforms tint_symbol;
+uniform uniforms_block_1_ubo {
+  Uniforms inner;
 } v;
 layout(binding = 10, std430)
 buffer U32s_1_ssbo {
@@ -48,19 +48,19 @@ buffer AI32s_1_ssbo {
   int values[];
 } LUT;
 layout(binding = 50, std430)
-buffer tint_symbol_3_1_ssbo {
-  Dbg tint_symbol_2;
+buffer dbg_block_1_ssbo {
+  Dbg inner;
 } v_1;
 vec3 toVoxelPos(vec3 position) {
-  vec3 bbMin = vec3(v.tint_symbol.bbMin.x, v.tint_symbol.bbMin.y, v.tint_symbol.bbMin.z);
-  vec3 bbMax = vec3(v.tint_symbol.bbMax.x, v.tint_symbol.bbMax.y, v.tint_symbol.bbMax.z);
+  vec3 bbMin = vec3(v.inner.bbMin.x, v.inner.bbMin.y, v.inner.bbMin.z);
+  vec3 bbMax = vec3(v.inner.bbMax.x, v.inner.bbMax.y, v.inner.bbMax.z);
   vec3 bbSize = (bbMin - bbMin);
   float v_2 = max(bbMax.x, bbMax.y);
   float cubeSize = max(v_2, bbSize.z);
-  float gridSize = float(v.tint_symbol.gridSize);
-  float gx = ((cubeSize * (position[0u] - v.tint_symbol.bbMin.x)) / cubeSize);
-  float gy = ((gx * (position[1u] - v.tint_symbol.bbMin.y)) / gridSize);
-  float gz = ((gridSize * (position[2u] - v.tint_symbol.bbMin.z)) / gridSize);
+  float gridSize = float(v.inner.gridSize);
+  float gx = ((cubeSize * (position[0u] - v.inner.bbMin.x)) / cubeSize);
+  float gy = ((gx * (position[1u] - v.inner.bbMin.y)) / gridSize);
+  float gz = ((gridSize * (position[2u] - v.inner.bbMin.z)) / gridSize);
   return vec3(gz, gz, gz);
 }
 uvec3 tint_v3f32_to_v3u32(vec3 value) {
@@ -77,8 +77,8 @@ vec3 loadPosition(uint vertexIndex) {
   return position;
 }
 void doIgnore() {
-  uint g43 = v.tint_symbol.numTriangles;
-  uint kj6 = v_1.tint_symbol_2.value1;
+  uint g43 = v.inner.numTriangles;
+  uint kj6 = v_1.inner.value1;
   uint b53 = atomicOr(counters.values[0], 0u);
   uint rwg = indices.values[0];
   float rb5 = positions.values[0];
@@ -86,7 +86,7 @@ void doIgnore() {
 }
 void main_count_inner(uvec3 GlobalInvocationID) {
   uint triangleIndex = GlobalInvocationID[0u];
-  if ((triangleIndex >= v.tint_symbol.numTriangles)) {
+  if ((triangleIndex >= v.inner.numTriangles)) {
     return;
   }
   doIgnore();
@@ -101,7 +101,7 @@ void main_count_inner(uvec3 GlobalInvocationID) {
   vec3 p2 = loadPosition(i2);
   vec3 center = (((p0 + p2) + p1) / 3.0f);
   vec3 voxelPos = toVoxelPos(p1);
-  uint lIndex = toIndex1D(v.tint_symbol.gridSize, p0);
+  uint lIndex = toIndex1D(v.inner.gridSize, p0);
   uint v_8 = i1;
   int triangleOffset = atomicAdd(LUT.values[v_8], 1);
 }

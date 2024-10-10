@@ -60,12 +60,12 @@ struct tint_ExternalTextureParams {
 };
 
 layout(binding = 0, std430)
-buffer tint_symbol_1_1_ssbo {
-  vec4 tint_symbol;
+buffer prevent_dce_block_1_ssbo {
+  vec4 inner;
 } v_1;
 layout(binding = 2, std140)
-uniform tint_symbol_3_std140_1_ubo {
-  tint_ExternalTextureParams_std140 tint_symbol_2;
+uniform arg_0_params_block_std140_1_ubo {
+  tint_ExternalTextureParams_std140 inner;
 } v_2;
 uniform highp sampler2D arg_0_plane0;
 uniform highp sampler2D arg_0_plane1;
@@ -110,12 +110,12 @@ tint_ExternalTextureParams tint_convert_tint_ExternalTextureParams(tint_External
 }
 vec4 textureLoad_8acf41() {
   ivec2 arg_1 = ivec2(1);
-  tint_ExternalTextureParams v_21 = tint_convert_tint_ExternalTextureParams(v_2.tint_symbol_2);
+  tint_ExternalTextureParams v_21 = tint_convert_tint_ExternalTextureParams(v_2.inner);
   vec4 res = tint_TextureLoadExternal(v_21, uvec2(arg_1));
   return res;
 }
 void main() {
-  v_1.tint_symbol = textureLoad_8acf41();
+  v_1.inner = textureLoad_8acf41();
 }
 #version 310 es
 
@@ -177,12 +177,12 @@ struct tint_ExternalTextureParams {
 };
 
 layout(binding = 0, std430)
-buffer tint_symbol_1_1_ssbo {
-  vec4 tint_symbol;
+buffer prevent_dce_block_1_ssbo {
+  vec4 inner;
 } v_1;
 layout(binding = 2, std140)
-uniform tint_symbol_3_std140_1_ubo {
-  tint_ExternalTextureParams_std140 tint_symbol_2;
+uniform arg_0_params_block_std140_1_ubo {
+  tint_ExternalTextureParams_std140 inner;
 } v_2;
 uniform highp sampler2D arg_0_plane0;
 uniform highp sampler2D arg_0_plane1;
@@ -227,13 +227,13 @@ tint_ExternalTextureParams tint_convert_tint_ExternalTextureParams(tint_External
 }
 vec4 textureLoad_8acf41() {
   ivec2 arg_1 = ivec2(1);
-  tint_ExternalTextureParams v_21 = tint_convert_tint_ExternalTextureParams(v_2.tint_symbol_2);
+  tint_ExternalTextureParams v_21 = tint_convert_tint_ExternalTextureParams(v_2.inner);
   vec4 res = tint_TextureLoadExternal(v_21, uvec2(arg_1));
   return res;
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
-  v_1.tint_symbol = textureLoad_8acf41();
+  v_1.inner = textureLoad_8acf41();
 }
 #version 310 es
 
@@ -300,8 +300,8 @@ struct VertexOutput {
 };
 
 layout(binding = 2, std140)
-uniform tint_symbol_2_std140_1_ubo {
-  tint_ExternalTextureParams_std140 tint_symbol_1;
+uniform arg_0_params_block_std140_1_ubo {
+  tint_ExternalTextureParams_std140 inner;
 } v_1;
 uniform highp sampler2D arg_0_plane0;
 uniform highp sampler2D arg_0_plane1;
@@ -347,7 +347,7 @@ tint_ExternalTextureParams tint_convert_tint_ExternalTextureParams(tint_External
 }
 vec4 textureLoad_8acf41() {
   ivec2 arg_1 = ivec2(1);
-  tint_ExternalTextureParams v_20 = tint_convert_tint_ExternalTextureParams(v_1.tint_symbol_1);
+  tint_ExternalTextureParams v_20 = tint_convert_tint_ExternalTextureParams(v_1.inner);
   vec4 res = tint_TextureLoadExternal(v_20, uvec2(arg_1));
   return res;
 }

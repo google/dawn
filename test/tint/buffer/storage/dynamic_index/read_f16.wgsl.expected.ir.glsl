@@ -59,8 +59,8 @@ buffer S_1_ssbo {
   Inner arr[];
 } sb;
 layout(binding = 1, std430)
-buffer tint_symbol_2_1_ssbo {
-  int tint_symbol_1;
+buffer s_block_1_ssbo {
+  int inner;
 } v;
 int tint_f32_to_i32(float value) {
   return mix(2147483647, mix((-2147483647 - 1), int(value), (value >= -2147483648.0f)), (value <= 2147483520.0f));
@@ -136,7 +136,7 @@ void tint_symbol_inner(uint idx) {
   int v_29 = (v_28 + tint_f16_to_i32(mat4x3_f16[0][0u]));
   int v_30 = (v_29 + tint_f16_to_i32(mat4x4_f16[0][0u]));
   int v_31 = (v_30 + tint_f16_to_i32(arr2_mat4x2_f16[0][0][0u]));
-  v.tint_symbol_1 = (v_31 + tint_f32_to_i32(arr2_vec3_f32[0][0u]));
+  v.inner = (v_31 + tint_f32_to_i32(arr2_vec3_f32[0][0u]));
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {

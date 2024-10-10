@@ -10,8 +10,8 @@
                OpMemberName %Buf 0 "count"
                OpMemberName %Buf 1 "data"
                OpName %Buf "Buf"
-               OpMemberName %tint_symbol_1 0 "tint_symbol"
-               OpName %tint_symbol_1 "tint_symbol_1"
+               OpMemberName %b_block 0 "inner"
+               OpName %b_block "b_block"
                OpName %main "main"
                OpName %i "i"
                OpName %p "p"
@@ -21,8 +21,8 @@
                OpMemberDecorate %Buf 0 Offset 0
                OpDecorate %_arr_uint_uint_50 ArrayStride 4
                OpMemberDecorate %Buf 1 Offset 4
-               OpMemberDecorate %tint_symbol_1 0 Offset 0
-               OpDecorate %tint_symbol_1 Block
+               OpMemberDecorate %b_block 0 Offset 0
+               OpDecorate %b_block Block
                OpDecorate %1 DescriptorSet 0
                OpDecorate %1 Binding 0
                OpDecorate %1 Coherent
@@ -30,9 +30,9 @@
     %uint_50 = OpConstant %uint 50
 %_arr_uint_uint_50 = OpTypeArray %uint %uint_50
         %Buf = OpTypeStruct %uint %_arr_uint_uint_50
-%tint_symbol_1 = OpTypeStruct %Buf
-%_ptr_StorageBuffer_tint_symbol_1 = OpTypePointer StorageBuffer %tint_symbol_1
-          %1 = OpVariable %_ptr_StorageBuffer_tint_symbol_1 StorageBuffer
+    %b_block = OpTypeStruct %Buf
+%_ptr_StorageBuffer_b_block = OpTypePointer StorageBuffer %b_block
+          %1 = OpVariable %_ptr_StorageBuffer_b_block StorageBuffer
        %void = OpTypeVoid
          %10 = OpTypeFunction %void
 %_ptr_Function_uint = OpTypePointer Function %uint

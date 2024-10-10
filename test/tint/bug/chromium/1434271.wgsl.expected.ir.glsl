@@ -62,8 +62,8 @@ struct VertexInput {
 };
 
 layout(binding = 5, std140)
-uniform tint_symbol_3_1_ubo {
-  RenderParams tint_symbol_2;
+uniform render_params_block_1_ubo {
+  RenderParams inner;
 } v;
 layout(location = 0) in vec3 vs_main_loc0_Input;
 layout(location = 1) in vec4 vs_main_loc1_Input;
@@ -71,10 +71,10 @@ layout(location = 2) in vec2 vs_main_loc2_Input;
 layout(location = 0) out vec4 vs_main_loc0_Output;
 layout(location = 1) out vec2 vs_main_loc1_Output;
 VertexOutput vs_main_inner(VertexInput tint_symbol) {
-  vec3 quad_pos = (mat2x3(v.tint_symbol_2.right, v.tint_symbol_2.up) * tint_symbol.quad_pos);
+  vec3 quad_pos = (mat2x3(v.inner.right, v.inner.up) * tint_symbol.quad_pos);
   vec3 position = (tint_symbol.position - (quad_pos + 0.00999999977648258209f));
   VertexOutput tint_symbol_1 = VertexOutput(vec4(0.0f), vec4(0.0f), vec2(0.0f));
-  mat4 v_1 = v.tint_symbol_2.modelViewProjectionMatrix;
+  mat4 v_1 = v.inner.modelViewProjectionMatrix;
   tint_symbol_1.position = (v_1 * vec4(position, 1.0f));
   tint_symbol_1.color = tint_symbol.color;
   tint_symbol_1.quad_pos = tint_symbol.quad_pos;
@@ -111,8 +111,8 @@ struct Particle {
 
 vec2 rand_seed = vec2(0.0f);
 layout(binding = 0, std140)
-uniform tint_symbol_1_1_ubo {
-  SimulationParams tint_symbol;
+uniform sim_params_block_1_ubo {
+  SimulationParams inner;
 } v;
 layout(binding = 1, std430)
 buffer Particles_1_ssbo {
@@ -125,9 +125,9 @@ void tint_store_and_preserve_padding(inout Particle target, Particle value_param
   target.velocity = value_param.velocity;
 }
 void simulate_inner(uvec3 GlobalInvocationID) {
-  vec2 v_1 = v.tint_symbol.seed.xy;
+  vec2 v_1 = v.inner.seed.xy;
   vec2 v_2 = (v_1 * vec2(GlobalInvocationID.xy));
-  rand_seed = (v_2 * v.tint_symbol.seed.zw);
+  rand_seed = (v_2 * v.inner.seed.zw);
   uint idx = GlobalInvocationID[0u];
   Particle particle = data.particles[idx];
   tint_store_and_preserve_padding(data.particles[idx], particle);
@@ -144,8 +144,8 @@ struct UBO {
 };
 
 layout(binding = 3, std140)
-uniform tint_symbol_1_1_ubo {
-  UBO tint_symbol;
+uniform ubo_block_1_ubo {
+  UBO inner;
 } v;
 layout(binding = 4, std430)
 buffer Buffer_1_ssbo {
@@ -161,13 +161,13 @@ float tint_float_modulo(float x, float y) {
 }
 void export_level_inner(uvec3 coord) {
   if (all(lessThan(coord.xy, uvec2(uvec2(imageSize(tex_out)))))) {
-    uint dst_offset = (coord[0u] << ((coord[1u] * v.tint_symbol.width) & 31u));
-    uint src_offset = ((coord[0u] - 2u) + ((coord[1u] >> (2u & 31u)) * v.tint_symbol.width));
+    uint dst_offset = (coord[0u] << ((coord[1u] * v.inner.width) & 31u));
+    uint src_offset = ((coord[0u] - 2u) + ((coord[1u] >> (2u & 31u)) * v.inner.width));
     float a = buf_in.weights[(src_offset << (0u & 31u))];
     float b = buf_in.weights[(src_offset + 1u)];
-    uint v_1 = ((src_offset + 1u) + v.tint_symbol.width);
+    uint v_1 = ((src_offset + 1u) + v.inner.width);
     float c = buf_in.weights[v_1];
-    uint v_2 = ((src_offset + 1u) + v.tint_symbol.width);
+    uint v_2 = ((src_offset + 1u) + v.inner.width);
     float d = buf_in.weights[v_2];
     float sum = dot(vec4(a, b, c, d), vec4(1.0f));
     buf_out.weights[dst_offset] = tint_float_modulo(sum, 4.0f);

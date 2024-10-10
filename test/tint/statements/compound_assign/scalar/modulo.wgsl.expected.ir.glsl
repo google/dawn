@@ -6,8 +6,8 @@ struct S {
 };
 
 layout(binding = 0, std430)
-buffer tint_symbol_1_1_ssbo {
-  S tint_symbol;
+buffer v_block_1_ssbo {
+  S inner;
 } v_1;
 int tint_mod_i32(int lhs, int rhs) {
   uint v_2 = uint((lhs == (-2147483647 - 1)));
@@ -17,7 +17,7 @@ int tint_mod_i32(int lhs, int rhs) {
   return (lhs - ((lhs / v_5) * v_5));
 }
 void foo() {
-  v_1.tint_symbol.a = tint_mod_i32(v_1.tint_symbol.a, 2);
+  v_1.inner.a = tint_mod_i32(v_1.inner.a, 2);
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {

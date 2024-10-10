@@ -23,8 +23,8 @@
                OpMemberName %LeftOver 7 "padding_1"
                OpMemberName %LeftOver 8 "tangentSpaceParameter0"
                OpName %LeftOver "LeftOver"
-               OpMemberName %tint_symbol_1 0 "tint_symbol"
-               OpName %tint_symbol_1 "tint_symbol_1"
+               OpMemberName %x_269_block 0 "inner"
+               OpName %x_269_block "x_269_block"
                OpName %v_output1 "v_output1"
                OpName %gl_FrontFacing "gl_FrontFacing"
                OpName %v_uv "v_uv"
@@ -39,8 +39,8 @@
                OpMemberName %Light0 5 "shadowsInfo"
                OpMemberName %Light0 6 "depthValues"
                OpName %Light0 "Light0"
-               OpMemberName %tint_symbol_3 0 "tint_symbol_2"
-               OpName %tint_symbol_3 "tint_symbol_3"
+               OpMemberName %light0_block 0 "inner"
+               OpName %light0_block "light0_block"
                OpName %glFragColor "glFragColor"
                OpName %bumpSamplerSampler "bumpSamplerSampler"
                OpName %bumpSamplerTexture "bumpSamplerTexture"
@@ -344,8 +344,8 @@
                OpMemberDecorate %LeftOver 6 Offset 160
                OpMemberDecorate %LeftOver 7 Offset 164
                OpMemberDecorate %LeftOver 8 Offset 168
-               OpMemberDecorate %tint_symbol_1 0 Offset 0
-               OpDecorate %tint_symbol_1 Block
+               OpMemberDecorate %x_269_block 0 Offset 0
+               OpDecorate %x_269_block Block
                OpDecorate %19 DescriptorSet 2
                OpDecorate %19 Binding 6
                OpDecorate %19 NonWritable
@@ -360,8 +360,8 @@
                OpMemberDecorate %Light0 4 Offset 60
                OpMemberDecorate %Light0 5 Offset 64
                OpMemberDecorate %Light0 6 Offset 80
-               OpMemberDecorate %tint_symbol_3 0 Offset 0
-               OpDecorate %tint_symbol_3 Block
+               OpMemberDecorate %light0_block 0 Offset 0
+               OpDecorate %light0_block Block
                OpDecorate %37 DescriptorSet 0
                OpDecorate %37 Binding 5
                OpDecorate %37 NonWritable
@@ -400,9 +400,9 @@
 %mat4v4float = OpTypeMatrix %v4float 4
        %uint = OpTypeInt 32 0
    %LeftOver = OpTypeStruct %mat4v4float %mat4v4float %float %uint %v3float %float %float %uint %v2float
-%tint_symbol_1 = OpTypeStruct %LeftOver
-%_ptr_Uniform_tint_symbol_1 = OpTypePointer Uniform %tint_symbol_1
-         %19 = OpVariable %_ptr_Uniform_tint_symbol_1 Uniform
+%x_269_block = OpTypeStruct %LeftOver
+%_ptr_Uniform_x_269_block = OpTypePointer Uniform %x_269_block
+         %19 = OpVariable %_ptr_Uniform_x_269_block Uniform
 %_ptr_Private_v4float = OpTypePointer Private %v4float
       %x_397 = OpConstantNull %v4float
   %v_output1 = OpVariable %_ptr_Private_v4float Private %x_397
@@ -415,9 +415,9 @@
 %TextureSampler1Texture = OpVariable %_ptr_UniformConstant_11 UniformConstant
 %TextureSampler1Sampler = OpVariable %_ptr_UniformConstant_14 UniformConstant
      %Light0 = OpTypeStruct %v4float %v4float %v4float %v3float %uint %v4float %v2float
-%tint_symbol_3 = OpTypeStruct %Light0
-%_ptr_Uniform_tint_symbol_3 = OpTypePointer Uniform %tint_symbol_3
-         %37 = OpVariable %_ptr_Uniform_tint_symbol_3 Uniform
+%light0_block = OpTypeStruct %Light0
+%_ptr_Uniform_light0_block = OpTypePointer Uniform %light0_block
+         %37 = OpVariable %_ptr_Uniform_light0_block Uniform
 %glFragColor = OpVariable %_ptr_Private_v4float Private %x_397
 %bumpSamplerSampler = OpVariable %_ptr_UniformConstant_14 UniformConstant
 %bumpSamplerTexture = OpVariable %_ptr_UniformConstant_11 UniformConstant

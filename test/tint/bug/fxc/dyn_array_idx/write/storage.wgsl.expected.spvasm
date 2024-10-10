@@ -9,52 +9,52 @@
                OpExecutionMode %f LocalSize 1 1 1
                OpMemberName %UBO 0 "dynamic_idx"
                OpName %UBO "UBO"
-               OpMemberName %tint_symbol_1 0 "tint_symbol"
-               OpName %tint_symbol_1 "tint_symbol_1"
+               OpMemberName %ubo_block 0 "inner"
+               OpName %ubo_block "ubo_block"
                OpMemberName %Result 0 "out"
                OpName %Result "Result"
-               OpMemberName %tint_symbol_3 0 "tint_symbol_2"
-               OpName %tint_symbol_3 "tint_symbol_3"
+               OpMemberName %result_block 0 "inner"
+               OpName %result_block "result_block"
                OpMemberName %SSBO 0 "data"
                OpName %SSBO "SSBO"
-               OpMemberName %tint_symbol_5 0 "tint_symbol_4"
-               OpName %tint_symbol_5 "tint_symbol_5"
+               OpMemberName %ssbo_block 0 "inner"
+               OpName %ssbo_block "ssbo_block"
                OpName %f "f"
                OpMemberDecorate %UBO 0 Offset 0
-               OpMemberDecorate %tint_symbol_1 0 Offset 0
-               OpDecorate %tint_symbol_1 Block
+               OpMemberDecorate %ubo_block 0 Offset 0
+               OpDecorate %ubo_block Block
                OpDecorate %1 DescriptorSet 0
                OpDecorate %1 Binding 0
                OpDecorate %1 NonWritable
                OpMemberDecorate %Result 0 Offset 0
-               OpMemberDecorate %tint_symbol_3 0 Offset 0
-               OpDecorate %tint_symbol_3 Block
+               OpMemberDecorate %result_block 0 Offset 0
+               OpDecorate %result_block Block
                OpDecorate %6 DescriptorSet 0
                OpDecorate %6 Binding 2
                OpDecorate %6 Coherent
                OpDecorate %_arr_int_uint_4 ArrayStride 4
                OpMemberDecorate %SSBO 0 Offset 0
-               OpMemberDecorate %tint_symbol_5 0 Offset 0
-               OpDecorate %tint_symbol_5 Block
+               OpMemberDecorate %ssbo_block 0 Offset 0
+               OpDecorate %ssbo_block Block
                OpDecorate %10 DescriptorSet 0
                OpDecorate %10 Binding 1
                OpDecorate %10 Coherent
         %int = OpTypeInt 32 1
         %UBO = OpTypeStruct %int
-%tint_symbol_1 = OpTypeStruct %UBO
-%_ptr_Uniform_tint_symbol_1 = OpTypePointer Uniform %tint_symbol_1
-          %1 = OpVariable %_ptr_Uniform_tint_symbol_1 Uniform
+  %ubo_block = OpTypeStruct %UBO
+%_ptr_Uniform_ubo_block = OpTypePointer Uniform %ubo_block
+          %1 = OpVariable %_ptr_Uniform_ubo_block Uniform
      %Result = OpTypeStruct %int
-%tint_symbol_3 = OpTypeStruct %Result
-%_ptr_StorageBuffer_tint_symbol_3 = OpTypePointer StorageBuffer %tint_symbol_3
-          %6 = OpVariable %_ptr_StorageBuffer_tint_symbol_3 StorageBuffer
+%result_block = OpTypeStruct %Result
+%_ptr_StorageBuffer_result_block = OpTypePointer StorageBuffer %result_block
+          %6 = OpVariable %_ptr_StorageBuffer_result_block StorageBuffer
        %uint = OpTypeInt 32 0
      %uint_4 = OpConstant %uint 4
 %_arr_int_uint_4 = OpTypeArray %int %uint_4
        %SSBO = OpTypeStruct %_arr_int_uint_4
-%tint_symbol_5 = OpTypeStruct %SSBO
-%_ptr_StorageBuffer_tint_symbol_5 = OpTypePointer StorageBuffer %tint_symbol_5
-         %10 = OpVariable %_ptr_StorageBuffer_tint_symbol_5 StorageBuffer
+ %ssbo_block = OpTypeStruct %SSBO
+%_ptr_StorageBuffer_ssbo_block = OpTypePointer StorageBuffer %ssbo_block
+         %10 = OpVariable %_ptr_StorageBuffer_ssbo_block StorageBuffer
        %void = OpTypeVoid
          %19 = OpTypeFunction %void
 %_ptr_Uniform_int = OpTypePointer Uniform %int

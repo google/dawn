@@ -7,20 +7,20 @@
                OpMemoryModel Logical GLSL450
                OpEntryPoint Fragment %main "main"
                OpExecutionMode %main OriginUpperLeft
-               OpMemberName %tint_symbol_1 0 "tint_symbol"
-               OpName %tint_symbol_1 "tint_symbol_1"
+               OpMemberName %weights_block 0 "inner"
+               OpName %weights_block "weights_block"
                OpName %main "main"
                OpName %a "a"
-               OpMemberDecorate %tint_symbol_1 0 Offset 0
-               OpDecorate %tint_symbol_1 Block
+               OpMemberDecorate %weights_block 0 Offset 0
+               OpDecorate %weights_block Block
                OpDecorate %1 DescriptorSet 0
                OpDecorate %1 Binding 0
                OpDecorate %1 NonWritable
       %float = OpTypeFloat 32
     %v2float = OpTypeVector %float 2
-%tint_symbol_1 = OpTypeStruct %v2float
-%_ptr_Uniform_tint_symbol_1 = OpTypePointer Uniform %tint_symbol_1
-          %1 = OpVariable %_ptr_Uniform_tint_symbol_1 Uniform
+%weights_block = OpTypeStruct %v2float
+%_ptr_Uniform_weights_block = OpTypePointer Uniform %weights_block
+          %1 = OpVariable %_ptr_Uniform_weights_block Uniform
        %void = OpTypeVoid
           %8 = OpTypeFunction %void
 %_ptr_Uniform_v2float = OpTypePointer Uniform %v2float

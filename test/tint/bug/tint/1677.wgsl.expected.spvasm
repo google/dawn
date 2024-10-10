@@ -9,16 +9,16 @@
                OpExecutionMode %main LocalSize 1 1 1
                OpMemberName %Input 0 "position"
                OpName %Input "Input"
-               OpMemberName %tint_symbol_1 0 "tint_symbol"
-               OpName %tint_symbol_1 "tint_symbol_1"
+               OpMemberName %input_block 0 "inner"
+               OpName %input_block "input_block"
                OpName %main_global_invocation_id_Input "main_global_invocation_id_Input"
                OpName %main_inner "main_inner"
                OpName %id "id"
                OpName %pos "pos"
                OpName %main "main"
                OpMemberDecorate %Input 0 Offset 0
-               OpMemberDecorate %tint_symbol_1 0 Offset 0
-               OpDecorate %tint_symbol_1 Block
+               OpMemberDecorate %input_block 0 Offset 0
+               OpDecorate %input_block Block
                OpDecorate %1 DescriptorSet 0
                OpDecorate %1 Binding 0
                OpDecorate %1 NonWritable
@@ -26,9 +26,9 @@
         %int = OpTypeInt 32 1
       %v3int = OpTypeVector %int 3
       %Input = OpTypeStruct %v3int
-%tint_symbol_1 = OpTypeStruct %Input
-%_ptr_StorageBuffer_tint_symbol_1 = OpTypePointer StorageBuffer %tint_symbol_1
-          %1 = OpVariable %_ptr_StorageBuffer_tint_symbol_1 StorageBuffer
+%input_block = OpTypeStruct %Input
+%_ptr_StorageBuffer_input_block = OpTypePointer StorageBuffer %input_block
+          %1 = OpVariable %_ptr_StorageBuffer_input_block StorageBuffer
        %uint = OpTypeInt 32 0
      %v3uint = OpTypeVector %uint 3
 %_ptr_Input_v3uint = OpTypePointer Input %v3uint

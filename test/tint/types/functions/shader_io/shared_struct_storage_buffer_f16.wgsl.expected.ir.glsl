@@ -68,8 +68,8 @@ struct S {
 };
 
 layout(binding = 0, std430)
-buffer tint_symbol_3_1_ssbo {
-  S tint_symbol_2;
+buffer tint_symbol_block_1_ssbo {
+  S inner;
 } v_1;
 layout(location = 0) in float frag_main_loc0_Input;
 layout(location = 1) flat in uint frag_main_loc1_Input;
@@ -88,7 +88,7 @@ void frag_main_inner(S tint_symbol_1) {
   vec4 v = tint_symbol_1.v;
   float16_t x = tint_symbol_1.x;
   f16vec3 y = tint_symbol_1.y;
-  tint_store_and_preserve_padding(v_1.tint_symbol_2, tint_symbol_1);
+  tint_store_and_preserve_padding(v_1.inner, tint_symbol_1);
 }
 void main() {
   frag_main_inner(S(frag_main_loc0_Input, frag_main_loc1_Input, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, gl_FragCoord, 0u, 0u, 0u, 0u, frag_main_loc2_Input, 0u, 0u, 0u, 0u, 0u, 0u, 0u, frag_main_loc3_Input, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u));

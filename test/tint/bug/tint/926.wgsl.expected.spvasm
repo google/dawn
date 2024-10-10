@@ -9,8 +9,8 @@
                OpExecutionMode %computeMain LocalSize 1 1 1
                OpMemberName %DrawIndirectArgs 0 "vertexCount"
                OpName %DrawIndirectArgs "DrawIndirectArgs"
-               OpMemberName %tint_symbol_1 0 "tint_symbol"
-               OpName %tint_symbol_1 "tint_symbol_1"
+               OpMemberName %drawOut_block 0 "inner"
+               OpName %drawOut_block "drawOut_block"
                OpName %cubeVerts "cubeVerts"
                OpName %computeMain_global_invocation_id_Input "computeMain_global_invocation_id_Input"
                OpName %computeMain_inner "computeMain_inner"
@@ -18,17 +18,17 @@
                OpName %firstVertex "firstVertex"
                OpName %computeMain "computeMain"
                OpMemberDecorate %DrawIndirectArgs 0 Offset 0
-               OpMemberDecorate %tint_symbol_1 0 Offset 0
-               OpDecorate %tint_symbol_1 Block
+               OpMemberDecorate %drawOut_block 0 Offset 0
+               OpDecorate %drawOut_block Block
                OpDecorate %1 DescriptorSet 0
                OpDecorate %1 Binding 5
                OpDecorate %1 Coherent
                OpDecorate %computeMain_global_invocation_id_Input BuiltIn GlobalInvocationId
        %uint = OpTypeInt 32 0
 %DrawIndirectArgs = OpTypeStruct %uint
-%tint_symbol_1 = OpTypeStruct %DrawIndirectArgs
-%_ptr_StorageBuffer_tint_symbol_1 = OpTypePointer StorageBuffer %tint_symbol_1
-          %1 = OpVariable %_ptr_StorageBuffer_tint_symbol_1 StorageBuffer
+%drawOut_block = OpTypeStruct %DrawIndirectArgs
+%_ptr_StorageBuffer_drawOut_block = OpTypePointer StorageBuffer %drawOut_block
+          %1 = OpVariable %_ptr_StorageBuffer_drawOut_block StorageBuffer
 %_ptr_Private_uint = OpTypePointer Private %uint
      %uint_0 = OpConstant %uint 0
   %cubeVerts = OpVariable %_ptr_Private_uint Private %uint_0

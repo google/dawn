@@ -8,20 +8,20 @@ struct SB_RW {
 };
 
 layout(binding = 0, std430)
-buffer tint_symbol_1_1_ssbo {
-  int tint_symbol;
+buffer prevent_dce_block_1_ssbo {
+  int inner;
 } v;
 layout(binding = 1, std430)
-buffer tint_symbol_3_1_ssbo {
-  SB_RW tint_symbol_2;
+buffer sb_rw_block_1_ssbo {
+  SB_RW inner;
 } v_1;
 int atomicOr_8d96a0() {
   int arg_1 = 1;
-  int res = atomicOr(v_1.tint_symbol_2.arg_0, arg_1);
+  int res = atomicOr(v_1.inner.arg_0, arg_1);
   return res;
 }
 void main() {
-  v.tint_symbol = atomicOr_8d96a0();
+  v.inner = atomicOr_8d96a0();
 }
 #version 310 es
 
@@ -31,19 +31,19 @@ struct SB_RW {
 };
 
 layout(binding = 0, std430)
-buffer tint_symbol_1_1_ssbo {
-  int tint_symbol;
+buffer prevent_dce_block_1_ssbo {
+  int inner;
 } v;
 layout(binding = 1, std430)
-buffer tint_symbol_3_1_ssbo {
-  SB_RW tint_symbol_2;
+buffer sb_rw_block_1_ssbo {
+  SB_RW inner;
 } v_1;
 int atomicOr_8d96a0() {
   int arg_1 = 1;
-  int res = atomicOr(v_1.tint_symbol_2.arg_0, arg_1);
+  int res = atomicOr(v_1.inner.arg_0, arg_1);
   return res;
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
-  v.tint_symbol = atomicOr_8d96a0();
+  v.inner = atomicOr_8d96a0();
 }

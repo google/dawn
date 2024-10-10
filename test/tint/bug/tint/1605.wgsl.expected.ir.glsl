@@ -1,14 +1,14 @@
 #version 310 es
 
 layout(binding = 0, std140)
-uniform tint_symbol_2_1_ubo {
-  int tint_symbol_1;
+uniform b_block_1_ubo {
+  int inner;
 } v;
 bool func_3() {
   {
     int i = 0;
     while(true) {
-      if ((i < v.tint_symbol_1)) {
+      if ((i < v.inner)) {
       } else {
         break;
       }

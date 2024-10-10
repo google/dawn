@@ -9,8 +9,8 @@
                OpExecutionMode %main LocalSize 1 1 1
                OpMemberName %Uniforms 0 "i"
                OpName %Uniforms "Uniforms"
-               OpMemberName %tint_symbol_1 0 "tint_symbol"
-               OpName %tint_symbol_1 "tint_symbol_1"
+               OpMemberName %uniforms_block 0 "inner"
+               OpName %uniforms_block "uniforms_block"
                OpName %main "main"
                OpMemberName %InnerS 0 "v"
                OpName %InnerS "InnerS"
@@ -19,8 +19,8 @@
                OpName %OuterS "OuterS"
                OpName %s1 "s1"
                OpMemberDecorate %Uniforms 0 Offset 0
-               OpMemberDecorate %tint_symbol_1 0 Offset 0
-               OpDecorate %tint_symbol_1 Block
+               OpMemberDecorate %uniforms_block 0 Offset 0
+               OpDecorate %uniforms_block Block
                OpDecorate %1 DescriptorSet 1
                OpDecorate %1 Binding 4
                OpDecorate %1 NonWritable
@@ -29,9 +29,9 @@
                OpMemberDecorate %OuterS 0 Offset 0
        %uint = OpTypeInt 32 0
    %Uniforms = OpTypeStruct %uint
-%tint_symbol_1 = OpTypeStruct %Uniforms
-%_ptr_Uniform_tint_symbol_1 = OpTypePointer Uniform %tint_symbol_1
-          %1 = OpVariable %_ptr_Uniform_tint_symbol_1 Uniform
+%uniforms_block = OpTypeStruct %Uniforms
+%_ptr_Uniform_uniforms_block = OpTypePointer Uniform %uniforms_block
+          %1 = OpVariable %_ptr_Uniform_uniforms_block Uniform
        %void = OpTypeVoid
           %8 = OpTypeFunction %void
         %int = OpTypeInt 32 1

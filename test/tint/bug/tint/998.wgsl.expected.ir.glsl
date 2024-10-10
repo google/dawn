@@ -10,12 +10,12 @@ struct S {
 };
 
 layout(binding = 0, std140)
-uniform tint_symbol_2_1_ubo {
-  Constants tint_symbol_1;
+uniform constants_block_1_ubo {
+  Constants inner;
 } v;
 S s = S(uint[3](0u, 0u, 0u));
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
-  uint v_1 = v.tint_symbol_1.zero;
+  uint v_1 = v.inner.zero;
   s.data[v_1] = 0u;
 }

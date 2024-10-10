@@ -14,12 +14,12 @@ struct S {
 };
 
 layout(binding = 0, std430)
-buffer tint_symbol_4_1_ssbo {
-  S tint_symbol_3;
+buffer tint_symbol_block_1_ssbo {
+  S inner;
 } v;
 layout(binding = 1, std430)
-buffer tint_symbol_6_1_ssbo {
-  S tint_symbol_5;
+buffer tint_symbol_1_block_1_ssbo {
+  S inner;
 } v_1;
 void tint_store_and_preserve_padding_1(inout Inner target, Inner value_param) {
   target.scalar_f16 = value_param.scalar_f16;
@@ -31,6 +31,6 @@ void tint_store_and_preserve_padding(inout S target, S value_param) {
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
-  S t = v.tint_symbol_3;
-  tint_store_and_preserve_padding(v_1.tint_symbol_5, t);
+  S t = v.inner;
+  tint_store_and_preserve_padding(v_1.inner, t);
 }

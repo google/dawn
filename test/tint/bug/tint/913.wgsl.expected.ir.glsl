@@ -14,8 +14,8 @@ buffer OutputBuf_1_ssbo {
   uint result[];
 } tint_symbol;
 layout(binding = 3, std140)
-uniform tint_symbol_3_1_ubo {
-  Uniforms tint_symbol_2;
+uniform uniforms_block_1_ubo {
+  Uniforms inner;
 } v;
 uniform highp sampler2D src;
 uniform highp sampler2D dst;
@@ -29,22 +29,22 @@ void tint_symbol_1_inner(uvec3 GlobalInvocationID) {
   vec4 nonCoveredColor = vec4(0.0f, 1.0f, 0.0f, 1.0f);
   bool success = true;
   bool v_1 = false;
-  if ((dstTexCoord[0u] < v.tint_symbol_2.dstCopyOrigin.x)) {
+  if ((dstTexCoord[0u] < v.inner.dstCopyOrigin.x)) {
     v_1 = true;
   } else {
-    v_1 = (dstTexCoord[1u] < v.tint_symbol_2.dstCopyOrigin.y);
+    v_1 = (dstTexCoord[1u] < v.inner.dstCopyOrigin.y);
   }
   bool v_2 = false;
   if (v_1) {
     v_2 = true;
   } else {
-    v_2 = (dstTexCoord[0u] >= (v.tint_symbol_2.dstCopyOrigin.x + v.tint_symbol_2.copySize.x));
+    v_2 = (dstTexCoord[0u] >= (v.inner.dstCopyOrigin.x + v.inner.copySize.x));
   }
   bool v_3 = false;
   if (v_2) {
     v_3 = true;
   } else {
-    v_3 = (dstTexCoord[1u] >= (v.tint_symbol_2.dstCopyOrigin.y + v.tint_symbol_2.copySize.y));
+    v_3 = (dstTexCoord[1u] >= (v.inner.dstCopyOrigin.y + v.inner.copySize.y));
   }
   if (v_3) {
     bool v_4 = false;
@@ -56,15 +56,15 @@ void tint_symbol_1_inner(uvec3 GlobalInvocationID) {
     }
     success = v_4;
   } else {
-    uvec2 srcTexCoord = ((dstTexCoord - v.tint_symbol_2.dstCopyOrigin) + v.tint_symbol_2.srcCopyOrigin);
-    if ((v.tint_symbol_2.dstTextureFlipY == 1u)) {
+    uvec2 srcTexCoord = ((dstTexCoord - v.inner.dstCopyOrigin) + v.inner.srcCopyOrigin);
+    if ((v.inner.dstTextureFlipY == 1u)) {
       srcTexCoord[1u] = ((srcSize[1u] - srcTexCoord.y) - 1u);
     }
     ivec2 v_6 = ivec2(ivec2(srcTexCoord));
     vec4 srcColor = texelFetch(src, v_6, int(0));
     ivec2 v_7 = ivec2(ivec2(dstTexCoord));
     vec4 dstColor = texelFetch(dst, v_7, int(0));
-    if ((v.tint_symbol_2.channelCount == 2u)) {
+    if ((v.inner.channelCount == 2u)) {
       bool v_8 = false;
       if (success) {
         v_8 = aboutEqual(dstColor[0u], srcColor[0u]);

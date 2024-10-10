@@ -6,11 +6,11 @@ struct DeclaredAfterUsage {
 };
 
 layout(binding = 0, std140)
-uniform tint_symbol_2_1_ubo {
-  DeclaredAfterUsage tint_symbol_1;
+uniform declared_after_usage_block_1_ubo {
+  DeclaredAfterUsage inner;
 } v;
 vec4 tint_symbol_inner() {
-  return vec4(v.tint_symbol_1.f);
+  return vec4(v.inner.f);
 }
 void main() {
   gl_Position = tint_symbol_inner();

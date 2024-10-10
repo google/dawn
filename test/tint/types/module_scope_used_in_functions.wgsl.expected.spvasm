@@ -9,10 +9,10 @@
                OpExecutionMode %main LocalSize 1 1 1
                OpName %p "p"
                OpName %w "w"
-               OpMemberName %tint_symbol_1 0 "tint_symbol"
-               OpName %tint_symbol_1 "tint_symbol_1"
-               OpMemberName %tint_symbol_3 0 "tint_symbol_2"
-               OpName %tint_symbol_3 "tint_symbol_3"
+               OpMemberName %uniforms_block 0 "inner"
+               OpName %uniforms_block "uniforms_block"
+               OpMemberName %storages_block 0 "inner"
+               OpName %storages_block "storages_block"
                OpName %main_local_invocation_index_Input "main_local_invocation_index_Input"
                OpName %no_uses "no_uses"
                OpName %zoo "zoo"
@@ -25,14 +25,14 @@
                OpName %main_inner "main_inner"
                OpName %tint_local_index "tint_local_index"
                OpName %main "main"
-               OpMemberDecorate %tint_symbol_1 0 Offset 0
-               OpDecorate %tint_symbol_1 Block
+               OpMemberDecorate %uniforms_block 0 Offset 0
+               OpDecorate %uniforms_block Block
                OpDecorate %7 DescriptorSet 0
                OpDecorate %7 Binding 1
                OpDecorate %7 NonWritable
                OpDecorate %_runtimearr_float ArrayStride 4
-               OpMemberDecorate %tint_symbol_3 0 Offset 0
-               OpDecorate %tint_symbol_3 Block
+               OpMemberDecorate %storages_block 0 Offset 0
+               OpDecorate %storages_block Block
                OpDecorate %11 DescriptorSet 0
                OpDecorate %11 Binding 0
                OpDecorate %11 Coherent
@@ -44,13 +44,13 @@
 %_ptr_Workgroup_float = OpTypePointer Workgroup %float
           %w = OpVariable %_ptr_Workgroup_float Workgroup
     %v2float = OpTypeVector %float 2
-%tint_symbol_1 = OpTypeStruct %v2float
-%_ptr_StorageBuffer_tint_symbol_1 = OpTypePointer StorageBuffer %tint_symbol_1
-          %7 = OpVariable %_ptr_StorageBuffer_tint_symbol_1 StorageBuffer
+%uniforms_block = OpTypeStruct %v2float
+%_ptr_StorageBuffer_uniforms_block = OpTypePointer StorageBuffer %uniforms_block
+          %7 = OpVariable %_ptr_StorageBuffer_uniforms_block StorageBuffer
 %_runtimearr_float = OpTypeRuntimeArray %float
-%tint_symbol_3 = OpTypeStruct %_runtimearr_float
-%_ptr_StorageBuffer_tint_symbol_3 = OpTypePointer StorageBuffer %tint_symbol_3
-         %11 = OpVariable %_ptr_StorageBuffer_tint_symbol_3 StorageBuffer
+%storages_block = OpTypeStruct %_runtimearr_float
+%_ptr_StorageBuffer_storages_block = OpTypePointer StorageBuffer %storages_block
+         %11 = OpVariable %_ptr_StorageBuffer_storages_block StorageBuffer
        %uint = OpTypeInt 32 0
 %_ptr_Input_uint = OpTypePointer Input %uint
 %main_local_invocation_index_Input = OpVariable %_ptr_Input_uint Input

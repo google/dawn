@@ -11,10 +11,10 @@
                OpName %src_workgroup "src_workgroup"
                OpMemberName %S 0 "arr"
                OpName %S "S"
-               OpMemberName %tint_symbol_1 0 "tint_symbol"
-               OpName %tint_symbol_1 "tint_symbol_1"
-               OpMemberName %tint_symbol_3 0 "tint_symbol_2"
-               OpName %tint_symbol_3 "tint_symbol_3"
+               OpMemberName %src_uniform_block 0 "inner"
+               OpName %src_uniform_block "src_uniform_block"
+               OpMemberName %src_storage_block 0 "inner"
+               OpName %src_storage_block "src_storage_block"
                OpName %dst "dst"
                OpName %dst_nested "dst_nested"
                OpName %main_local_invocation_index_Input "main_local_invocation_index_Input"
@@ -31,13 +31,13 @@
                OpName %main "main"
                OpDecorate %_arr_v4int_uint_4 ArrayStride 16
                OpMemberDecorate %S 0 Offset 0
-               OpMemberDecorate %tint_symbol_1 0 Offset 0
-               OpDecorate %tint_symbol_1 Block
+               OpMemberDecorate %src_uniform_block 0 Offset 0
+               OpDecorate %src_uniform_block Block
                OpDecorate %11 DescriptorSet 0
                OpDecorate %11 Binding 0
                OpDecorate %11 NonWritable
-               OpMemberDecorate %tint_symbol_3 0 Offset 0
-               OpDecorate %tint_symbol_3 Block
+               OpMemberDecorate %src_storage_block 0 Offset 0
+               OpDecorate %src_storage_block Block
                OpDecorate %15 DescriptorSet 0
                OpDecorate %15 Binding 1
                OpDecorate %15 Coherent
@@ -56,12 +56,12 @@
 %_ptr_Workgroup__arr_v4int_uint_4 = OpTypePointer Workgroup %_arr_v4int_uint_4
 %src_workgroup = OpVariable %_ptr_Workgroup__arr_v4int_uint_4 Workgroup
           %S = OpTypeStruct %_arr_v4int_uint_4
-%tint_symbol_1 = OpTypeStruct %S
-%_ptr_Uniform_tint_symbol_1 = OpTypePointer Uniform %tint_symbol_1
-         %11 = OpVariable %_ptr_Uniform_tint_symbol_1 Uniform
-%tint_symbol_3 = OpTypeStruct %S
-%_ptr_StorageBuffer_tint_symbol_3 = OpTypePointer StorageBuffer %tint_symbol_3
-         %15 = OpVariable %_ptr_StorageBuffer_tint_symbol_3 StorageBuffer
+%src_uniform_block = OpTypeStruct %S
+%_ptr_Uniform_src_uniform_block = OpTypePointer Uniform %src_uniform_block
+         %11 = OpVariable %_ptr_Uniform_src_uniform_block Uniform
+%src_storage_block = OpTypeStruct %S
+%_ptr_StorageBuffer_src_storage_block = OpTypePointer StorageBuffer %src_storage_block
+         %15 = OpVariable %_ptr_StorageBuffer_src_storage_block StorageBuffer
         %dst = OpVariable %_ptr_Private__arr_v4int_uint_4 Private %src_let
      %uint_2 = OpConstant %uint 2
 %_arr_int_uint_2 = OpTypeArray %int %uint_2

@@ -13,12 +13,12 @@
                OpExecutionMode %main2 LocalSize 1 1 1
                OpExecutionMode %main3 LocalSize 1 1 1
                OpExecutionMode %main4 LocalSize 1 1 1
-               OpMemberName %tint_symbol_1 0 "tint_symbol"
-               OpName %tint_symbol_1 "tint_symbol_1"
-               OpMemberName %tint_symbol_3 0 "tint_symbol_2"
-               OpName %tint_symbol_3 "tint_symbol_3"
-               OpMemberName %tint_symbol_5 0 "tint_symbol_4"
-               OpName %tint_symbol_5 "tint_symbol_5"
+               OpMemberName %a_block 0 "inner"
+               OpName %a_block "a_block"
+               OpMemberName %b_block 0 "inner"
+               OpName %b_block "b_block"
+               OpMemberName %c_block 0 "inner"
+               OpName %c_block "c_block"
                OpName %uses_a "uses_a"
                OpName %foo "foo"
                OpName %uses_uses_a "uses_uses_a"
@@ -28,22 +28,22 @@
                OpName %main2 "main2"
                OpName %main3 "main3"
                OpName %main4 "main4"
-               OpMemberDecorate %tint_symbol_1 0 Offset 0
-               OpDecorate %tint_symbol_1 Block
-               OpMemberDecorate %tint_symbol_3 0 Offset 0
-               OpDecorate %tint_symbol_3 Block
-               OpMemberDecorate %tint_symbol_5 0 Offset 0
-               OpDecorate %tint_symbol_5 Block
+               OpMemberDecorate %a_block 0 Offset 0
+               OpDecorate %a_block Block
+               OpMemberDecorate %b_block 0 Offset 0
+               OpDecorate %b_block Block
+               OpMemberDecorate %c_block 0 Offset 0
+               OpDecorate %c_block Block
         %int = OpTypeInt 32 1
-%tint_symbol_1 = OpTypeStruct %int
-%_ptr_PushConstant_tint_symbol_1 = OpTypePointer PushConstant %tint_symbol_1
-          %1 = OpVariable %_ptr_PushConstant_tint_symbol_1 PushConstant
-%tint_symbol_3 = OpTypeStruct %int
-%_ptr_PushConstant_tint_symbol_3 = OpTypePointer PushConstant %tint_symbol_3
-          %5 = OpVariable %_ptr_PushConstant_tint_symbol_3 PushConstant
-%tint_symbol_5 = OpTypeStruct %int
-%_ptr_PushConstant_tint_symbol_5 = OpTypePointer PushConstant %tint_symbol_5
-          %8 = OpVariable %_ptr_PushConstant_tint_symbol_5 PushConstant
+    %a_block = OpTypeStruct %int
+%_ptr_PushConstant_a_block = OpTypePointer PushConstant %a_block
+          %1 = OpVariable %_ptr_PushConstant_a_block PushConstant
+    %b_block = OpTypeStruct %int
+%_ptr_PushConstant_b_block = OpTypePointer PushConstant %b_block
+          %5 = OpVariable %_ptr_PushConstant_b_block PushConstant
+    %c_block = OpTypeStruct %int
+%_ptr_PushConstant_c_block = OpTypePointer PushConstant %c_block
+          %8 = OpVariable %_ptr_PushConstant_c_block PushConstant
        %void = OpTypeVoid
          %13 = OpTypeFunction %void
 %_ptr_PushConstant_int = OpTypePointer PushConstant %int

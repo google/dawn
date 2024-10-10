@@ -8,8 +8,8 @@
                OpMemoryModel Logical GLSL450
                OpEntryPoint GLCompute %main "main" %main_subgroup_invocation_id_Input %main_subgroup_size_Input
                OpExecutionMode %main LocalSize 1 1 1
-               OpMemberName %tint_symbol_1 0 "tint_symbol"
-               OpName %tint_symbol_1 "tint_symbol_1"
+               OpMemberName %output_block 0 "inner"
+               OpName %output_block "output_block"
                OpName %main_subgroup_invocation_id_Input "main_subgroup_invocation_id_Input"
                OpName %main_subgroup_size_Input "main_subgroup_size_Input"
                OpName %main_inner "main_inner"
@@ -17,8 +17,8 @@
                OpName %subgroup_size "subgroup_size"
                OpName %main "main"
                OpDecorate %_runtimearr_uint ArrayStride 4
-               OpMemberDecorate %tint_symbol_1 0 Offset 0
-               OpDecorate %tint_symbol_1 Block
+               OpMemberDecorate %output_block 0 Offset 0
+               OpDecorate %output_block Block
                OpDecorate %1 DescriptorSet 0
                OpDecorate %1 Binding 0
                OpDecorate %1 Coherent
@@ -26,9 +26,9 @@
                OpDecorate %main_subgroup_size_Input BuiltIn SubgroupSize
        %uint = OpTypeInt 32 0
 %_runtimearr_uint = OpTypeRuntimeArray %uint
-%tint_symbol_1 = OpTypeStruct %_runtimearr_uint
-%_ptr_StorageBuffer_tint_symbol_1 = OpTypePointer StorageBuffer %tint_symbol_1
-          %1 = OpVariable %_ptr_StorageBuffer_tint_symbol_1 StorageBuffer
+%output_block = OpTypeStruct %_runtimearr_uint
+%_ptr_StorageBuffer_output_block = OpTypePointer StorageBuffer %output_block
+          %1 = OpVariable %_ptr_StorageBuffer_output_block StorageBuffer
 %_ptr_Input_uint = OpTypePointer Input %uint
 %main_subgroup_invocation_id_Input = OpVariable %_ptr_Input_uint Input
 %main_subgroup_size_Input = OpVariable %_ptr_Input_uint Input

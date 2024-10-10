@@ -8,12 +8,12 @@ struct S {
 ivec4 src_private[4] = ivec4[4](ivec4(0), ivec4(0), ivec4(0), ivec4(0));
 shared ivec4 src_workgroup[4];
 layout(binding = 0, std140)
-uniform tint_symbol_2_1_ubo {
-  S tint_symbol_1;
+uniform src_uniform_block_1_ubo {
+  S inner;
 } v;
 layout(binding = 1, std430)
-buffer tint_symbol_4_1_ssbo {
-  S tint_symbol_3;
+buffer src_storage_block_1_ssbo {
+  S inner;
 } v_1;
 ivec4 dst[4] = ivec4[4](ivec4(0), ivec4(0), ivec4(0), ivec4(0));
 int dst_nested[4][3][2] = int[4][3][2](int[3][2](int[2](0, 0), int[2](0, 0), int[2](0, 0)), int[3][2](int[2](0, 0), int[2](0, 0), int[2](0, 0)), int[3][2](int[2](0, 0), int[2](0, 0), int[2](0, 0)), int[3][2](int[2](0, 0), int[2](0, 0), int[2](0, 0)));
@@ -34,8 +34,8 @@ void foo(ivec4 src_param[4]) {
   dst = src_private;
   dst = src_workgroup;
   dst = ret_struct_arr().arr;
-  dst = v.tint_symbol_1.arr;
-  dst = v_1.tint_symbol_3.arr;
+  dst = v.inner.arr;
+  dst = v_1.inner.arr;
   int src_nested[4][3][2] = int[4][3][2](int[3][2](int[2](0, 0), int[2](0, 0), int[2](0, 0)), int[3][2](int[2](0, 0), int[2](0, 0), int[2](0, 0)), int[3][2](int[2](0, 0), int[2](0, 0), int[2](0, 0)), int[3][2](int[2](0, 0), int[2](0, 0), int[2](0, 0)));
   dst_nested = src_nested;
 }

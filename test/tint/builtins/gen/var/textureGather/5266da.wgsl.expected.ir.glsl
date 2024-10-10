@@ -3,8 +3,8 @@ precision highp float;
 precision highp int;
 
 layout(binding = 0, std430)
-buffer tint_symbol_1_1_ssbo {
-  vec4 tint_symbol;
+buffer prevent_dce_block_1_ssbo {
+  vec4 inner;
 } v;
 uniform highp sampler2D arg_1_arg_2;
 vec4 textureGather_5266da() {
@@ -14,13 +14,13 @@ vec4 textureGather_5266da() {
   return res;
 }
 void main() {
-  v.tint_symbol = textureGather_5266da();
+  v.inner = textureGather_5266da();
 }
 #version 310 es
 
 layout(binding = 0, std430)
-buffer tint_symbol_1_1_ssbo {
-  vec4 tint_symbol;
+buffer prevent_dce_block_1_ssbo {
+  vec4 inner;
 } v;
 uniform highp sampler2D arg_1_arg_2;
 vec4 textureGather_5266da() {
@@ -31,7 +31,7 @@ vec4 textureGather_5266da() {
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
-  v.tint_symbol = textureGather_5266da();
+  v.inner = textureGather_5266da();
 }
 #version 310 es
 

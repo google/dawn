@@ -58,8 +58,8 @@ struct tint_ExternalTextureParams {
 };
 
 layout(binding = 3, std140)
-uniform tint_symbol_2_std140_1_ubo {
-  tint_ExternalTextureParams_std140 tint_symbol_1;
+uniform t_params_block_std140_1_ubo {
+  tint_ExternalTextureParams_std140 inner;
 } v_1;
 layout(binding = 1, rgba8) uniform highp writeonly image2D outImage;
 uniform highp sampler2D t_plane0;
@@ -105,10 +105,10 @@ tint_ExternalTextureParams tint_convert_tint_ExternalTextureParams(tint_External
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
-  tint_ExternalTextureParams v_20 = tint_convert_tint_ExternalTextureParams(v_1.tint_symbol_1);
+  tint_ExternalTextureParams v_20 = tint_convert_tint_ExternalTextureParams(v_1.inner);
   vec4 red = tint_TextureLoadExternal(v_20, min(uvec2(ivec2(10)), ((v_20.visibleSize + uvec2(1u)) - uvec2(1u))));
   imageStore(outImage, ivec2(0), red);
-  tint_ExternalTextureParams v_21 = tint_convert_tint_ExternalTextureParams(v_1.tint_symbol_1);
+  tint_ExternalTextureParams v_21 = tint_convert_tint_ExternalTextureParams(v_1.inner);
   vec4 green = tint_TextureLoadExternal(v_21, min(uvec2(ivec2(70, 118)), ((v_21.visibleSize + uvec2(1u)) - uvec2(1u))));
   imageStore(outImage, ivec2(1, 0), green);
 }

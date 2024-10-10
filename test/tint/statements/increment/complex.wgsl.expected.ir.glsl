@@ -6,8 +6,8 @@ struct S {
 };
 
 layout(binding = 0, std430)
-buffer tint_symbol_3_1_ssbo {
-  S tint_symbol_2[];
+buffer tint_symbol_block_1_ssbo {
+  S inner[];
 } v_1;
 uint v = 0u;
 int idx1() {
@@ -39,7 +39,7 @@ void tint_symbol_1() {
     int v_2 = idx1();
     int v_3 = idx2();
     int v_4 = idx3();
-    v_1.tint_symbol_2[v_2].a[v_3][v_4] = (v_1.tint_symbol_2[v_2].a[v_3][v_4] + 1);
+    v_1.inner[v_2].a[v_3][v_4] = (v_1.inner[v_2].a[v_3][v_4] + 1);
     while(true) {
       if ((v < 10u)) {
       } else {
@@ -49,7 +49,7 @@ void tint_symbol_1() {
         int v_5 = idx4();
         int v_6 = idx5();
         int v_7 = idx6();
-        v_1.tint_symbol_2[v_5].a[v_6][v_7] = (v_1.tint_symbol_2[v_5].a[v_6][v_7] + 1);
+        v_1.inner[v_5].a[v_6][v_7] = (v_1.inner[v_5].a[v_6][v_7] + 1);
       }
       continue;
     }

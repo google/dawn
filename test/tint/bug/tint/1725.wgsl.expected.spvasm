@@ -8,8 +8,8 @@
                OpMemoryModel Logical GLSL450
                OpEntryPoint GLCompute %tint_symbol_1 "tint_symbol_1" %tint_symbol_1_local_invocation_index_Input
                OpExecutionMode %tint_symbol_1 LocalSize 1 1 1
-               OpMemberName %tint_symbol_8 0 "tint_symbol_7"
-               OpName %tint_symbol_8 "tint_symbol_8"
+               OpMemberName %tint_symbol_block 0 "inner"
+               OpName %tint_symbol_block "tint_symbol_block"
                OpName %tint_symbol_1_local_invocation_index_Input "tint_symbol_1_local_invocation_index_Input"
                OpName %tint_symbol_1_inner "tint_symbol_1_inner"
                OpName %tint_symbol_2 "tint_symbol_2"
@@ -19,17 +19,17 @@
                OpName %tint_symbol_6 "tint_symbol_6"
                OpName %tint_symbol_1 "tint_symbol_1"
                OpDecorate %_runtimearr_uint ArrayStride 4
-               OpMemberDecorate %tint_symbol_8 0 Offset 0
-               OpDecorate %tint_symbol_8 Block
+               OpMemberDecorate %tint_symbol_block 0 Offset 0
+               OpDecorate %tint_symbol_block Block
                OpDecorate %1 DescriptorSet 0
                OpDecorate %1 Binding 0
                OpDecorate %1 NonWritable
                OpDecorate %tint_symbol_1_local_invocation_index_Input BuiltIn LocalInvocationIndex
        %uint = OpTypeInt 32 0
 %_runtimearr_uint = OpTypeRuntimeArray %uint
-%tint_symbol_8 = OpTypeStruct %_runtimearr_uint
-%_ptr_StorageBuffer_tint_symbol_8 = OpTypePointer StorageBuffer %tint_symbol_8
-          %1 = OpVariable %_ptr_StorageBuffer_tint_symbol_8 StorageBuffer
+%tint_symbol_block = OpTypeStruct %_runtimearr_uint
+%_ptr_StorageBuffer_tint_symbol_block = OpTypePointer StorageBuffer %tint_symbol_block
+          %1 = OpVariable %_ptr_StorageBuffer_tint_symbol_block StorageBuffer
 %_ptr_Input_uint = OpTypePointer Input %uint
 %tint_symbol_1_local_invocation_index_Input = OpVariable %_ptr_Input_uint Input
        %void = OpTypeVoid

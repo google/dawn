@@ -15,8 +15,8 @@
                OpName %strided_arr "strided_arr"
                OpMemberName %LeftOver 3 "test"
                OpName %LeftOver "LeftOver"
-               OpMemberName %tint_symbol_1 0 "tint_symbol"
-               OpName %tint_symbol_1 "tint_symbol_1"
+               OpMemberName %x_14_block 0 "inner"
+               OpName %x_14_block "x_14_block"
                OpName %vUV "vUV"
                OpName %uv "uv"
                OpName %normal "normal"
@@ -49,8 +49,8 @@
                OpMemberDecorate %strided_arr 0 Offset 0
                OpDecorate %_arr_strided_arr_uint_4 ArrayStride 16
                OpMemberDecorate %LeftOver 3 Offset 208
-               OpMemberDecorate %tint_symbol_1 0 Offset 0
-               OpDecorate %tint_symbol_1 Block
+               OpMemberDecorate %x_14_block 0 Offset 0
+               OpDecorate %x_14_block Block
                OpDecorate %6 DescriptorSet 2
                OpDecorate %6 Binding 2
                OpDecorate %6 NonWritable
@@ -76,9 +76,9 @@
      %uint_4 = OpConstant %uint 4
 %_arr_strided_arr_uint_4 = OpTypeArray %strided_arr %uint_4
    %LeftOver = OpTypeStruct %mat4v4float %float %_arr_mat4v4float_uint_2 %_arr_strided_arr_uint_4
-%tint_symbol_1 = OpTypeStruct %LeftOver
-%_ptr_Uniform_tint_symbol_1 = OpTypePointer Uniform %tint_symbol_1
-          %6 = OpVariable %_ptr_Uniform_tint_symbol_1 Uniform
+ %x_14_block = OpTypeStruct %LeftOver
+%_ptr_Uniform_x_14_block = OpTypePointer Uniform %x_14_block
+          %6 = OpVariable %_ptr_Uniform_x_14_block Uniform
     %v2float = OpTypeVector %float 2
 %_ptr_Private_v2float = OpTypePointer Private %v2float
          %21 = OpConstantNull %v2float

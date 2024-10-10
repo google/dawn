@@ -7,8 +7,8 @@
                OpMemoryModel Logical GLSL450
                OpEntryPoint Fragment %main "main" %main_loc0_Output
                OpExecutionMode %main OriginUpperLeft
-               OpMemberName %tint_symbol_1 0 "tint_symbol"
-               OpName %tint_symbol_1 "tint_symbol_1"
+               OpMemberName %S_block 0 "inner"
+               OpName %S_block "S_block"
                OpName %continue_execution "continue_execution"
                OpName %main_loc0_Output "main_loc0_Output"
                OpName %main_inner "main_inner"
@@ -17,8 +17,8 @@
                OpName %__atomic_compare_exchange_result_i32 "__atomic_compare_exchange_result_i32"
                OpName %old_value "old_value"
                OpName %main "main"
-               OpMemberDecorate %tint_symbol_1 0 Offset 0
-               OpDecorate %tint_symbol_1 Block
+               OpMemberDecorate %S_block 0 Offset 0
+               OpDecorate %S_block Block
                OpDecorate %1 DescriptorSet 0
                OpDecorate %1 Binding 0
                OpDecorate %1 Coherent
@@ -26,9 +26,9 @@
                OpMemberDecorate %__atomic_compare_exchange_result_i32 0 Offset 0
                OpMemberDecorate %__atomic_compare_exchange_result_i32 1 Offset 4
         %int = OpTypeInt 32 1
-%tint_symbol_1 = OpTypeStruct %int
-%_ptr_StorageBuffer_tint_symbol_1 = OpTypePointer StorageBuffer %tint_symbol_1
-          %1 = OpVariable %_ptr_StorageBuffer_tint_symbol_1 StorageBuffer
+    %S_block = OpTypeStruct %int
+%_ptr_StorageBuffer_S_block = OpTypePointer StorageBuffer %S_block
+          %1 = OpVariable %_ptr_StorageBuffer_S_block StorageBuffer
        %bool = OpTypeBool
 %_ptr_Private_bool = OpTypePointer Private %bool
        %true = OpConstantTrue %bool

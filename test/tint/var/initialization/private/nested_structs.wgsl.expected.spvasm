@@ -14,14 +14,14 @@
                OpMemberName %S3 0 "s2"
                OpName %S3 "S3"
                OpName %P "P"
-               OpMemberName %tint_symbol_1 0 "tint_symbol"
-               OpName %tint_symbol_1 "tint_symbol_1"
+               OpMemberName %out_block 0 "inner"
+               OpName %out_block "out_block"
                OpName %main "main"
                OpMemberDecorate %S1 0 Offset 0
                OpMemberDecorate %S2 0 Offset 0
                OpMemberDecorate %S3 0 Offset 0
-               OpMemberDecorate %tint_symbol_1 0 Offset 0
-               OpDecorate %tint_symbol_1 Block
+               OpMemberDecorate %out_block 0 Offset 0
+               OpDecorate %out_block Block
                OpDecorate %11 DescriptorSet 0
                OpDecorate %11 Binding 0
                OpDecorate %11 Coherent
@@ -35,9 +35,9 @@
           %8 = OpConstantComposite %S2 %9
           %7 = OpConstantComposite %S3 %8
           %P = OpVariable %_ptr_Private_S3 Private %7
-%tint_symbol_1 = OpTypeStruct %int
-%_ptr_StorageBuffer_tint_symbol_1 = OpTypePointer StorageBuffer %tint_symbol_1
-         %11 = OpVariable %_ptr_StorageBuffer_tint_symbol_1 StorageBuffer
+  %out_block = OpTypeStruct %int
+%_ptr_StorageBuffer_out_block = OpTypePointer StorageBuffer %out_block
+         %11 = OpVariable %_ptr_StorageBuffer_out_block StorageBuffer
        %void = OpTypeVoid
          %16 = OpTypeFunction %void
 %_ptr_Private_int = OpTypePointer Private %int

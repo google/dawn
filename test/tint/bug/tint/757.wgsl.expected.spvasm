@@ -9,8 +9,8 @@
                OpExecutionMode %main LocalSize 1 1 1
                OpMemberName %Constants 0 "level"
                OpName %Constants "Constants"
-               OpMemberName %tint_symbol_1 0 "tint_symbol"
-               OpName %tint_symbol_1 "tint_symbol_1"
+               OpMemberName %constants_block 0 "inner"
+               OpName %constants_block "constants_block"
                OpName %myTexture "myTexture"
                OpMemberName %Result 0 "values"
                OpName %Result "Result"
@@ -23,8 +23,8 @@
                OpName %i "i"
                OpName %main "main"
                OpMemberDecorate %Constants 0 Offset 0
-               OpMemberDecorate %tint_symbol_1 0 Offset 0
-               OpDecorate %tint_symbol_1 Block
+               OpMemberDecorate %constants_block 0 Offset 0
+               OpDecorate %constants_block Block
                OpDecorate %1 DescriptorSet 0
                OpDecorate %1 Binding 0
                OpDecorate %1 NonWritable
@@ -39,9 +39,9 @@
                OpDecorate %main_global_invocation_id_Input BuiltIn GlobalInvocationId
         %int = OpTypeInt 32 1
   %Constants = OpTypeStruct %int
-%tint_symbol_1 = OpTypeStruct %Constants
-%_ptr_Uniform_tint_symbol_1 = OpTypePointer Uniform %tint_symbol_1
-          %1 = OpVariable %_ptr_Uniform_tint_symbol_1 Uniform
+%constants_block = OpTypeStruct %Constants
+%_ptr_Uniform_constants_block = OpTypePointer Uniform %constants_block
+          %1 = OpVariable %_ptr_Uniform_constants_block Uniform
       %float = OpTypeFloat 32
           %8 = OpTypeImage %float 2D 0 1 0 1 Unknown
 %_ptr_UniformConstant_8 = OpTypePointer UniformConstant %8

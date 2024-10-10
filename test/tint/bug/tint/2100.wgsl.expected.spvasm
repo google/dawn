@@ -11,8 +11,8 @@
                OpMemberName %S_std140 2 "matrix_normal_col1"
                OpMemberName %S_std140 3 "matrix_normal_col2"
                OpName %S_std140 "S_std140"
-               OpMemberName %tint_symbol_1_std140 0 "tint_symbol"
-               OpName %tint_symbol_1_std140 "tint_symbol_1_std140"
+               OpMemberName %buffer_block_std140 0 "inner"
+               OpName %buffer_block_std140 "buffer_block_std140"
                OpName %main_position_Output "main_position_Output"
                OpName %main___point_size_Output "main___point_size_Output"
                OpName %main_inner "main_inner"
@@ -24,8 +24,8 @@
                OpMemberDecorate %S_std140 1 Offset 64
                OpMemberDecorate %S_std140 2 Offset 80
                OpMemberDecorate %S_std140 3 Offset 96
-               OpMemberDecorate %tint_symbol_1_std140 0 Offset 0
-               OpDecorate %tint_symbol_1_std140 Block
+               OpMemberDecorate %buffer_block_std140 0 Offset 0
+               OpDecorate %buffer_block_std140 Block
                OpDecorate %1 DescriptorSet 0
                OpDecorate %1 Binding 0
                OpDecorate %1 NonWritable
@@ -36,9 +36,9 @@
 %mat4v4float = OpTypeMatrix %v4float 4
     %v3float = OpTypeVector %float 3
    %S_std140 = OpTypeStruct %mat4v4float %v3float %v3float %v3float
-%tint_symbol_1_std140 = OpTypeStruct %S_std140
-%_ptr_Uniform_tint_symbol_1_std140 = OpTypePointer Uniform %tint_symbol_1_std140
-          %1 = OpVariable %_ptr_Uniform_tint_symbol_1_std140 Uniform
+%buffer_block_std140 = OpTypeStruct %S_std140
+%_ptr_Uniform_buffer_block_std140 = OpTypePointer Uniform %buffer_block_std140
+          %1 = OpVariable %_ptr_Uniform_buffer_block_std140 Uniform
 %_ptr_Output_v4float = OpTypePointer Output %v4float
 %main_position_Output = OpVariable %_ptr_Output_v4float Output
 %_ptr_Output_float = OpTypePointer Output %float

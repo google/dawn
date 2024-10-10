@@ -26,16 +26,16 @@ struct main_out {
 float fClipDistance3 = 0.0f;
 float fClipDistance4 = 0.0f;
 layout(binding = 0, std140)
-uniform tint_symbol_2_1_ubo {
-  Scene tint_symbol_1;
+uniform x_29_block_1_ubo {
+  Scene inner;
 } v;
 layout(binding = 1, std140)
-uniform tint_symbol_4_1_ubo {
-  Material tint_symbol_3;
+uniform x_49_block_1_ubo {
+  Material inner;
 } v_1;
 layout(binding = 2, std140)
-uniform tint_symbol_6_1_ubo {
-  Mesh tint_symbol_5;
+uniform x_137_block_1_ubo {
+  Mesh inner;
 } v_2;
 vec4 glFragColor = vec4(0.0f);
 bool continue_execution = true;
@@ -67,13 +67,13 @@ void main_1() {
   if ((x_17 > 0.0f)) {
     continue_execution = false;
   }
-  vec4 x_34 = v.tint_symbol_1.vEyePosition;
+  vec4 x_34 = v.inner.vEyePosition;
   vec3 x_38 = vec3(0.0f);
   viewDirectionW = normalize((vec3(x_34[0u], x_34[1u], x_34[2u]) - x_38));
   baseColor = vec4(1.0f);
-  vec4 x_52 = v_1.tint_symbol_3.vDiffuseColor;
+  vec4 x_52 = v_1.inner.vDiffuseColor;
   diffuseColor = vec3(x_52[0u], x_52[1u], x_52[2u]);
-  float x_60 = v_1.tint_symbol_3.vDiffuseColor.w;
+  float x_60 = v_1.inner.vDiffuseColor.w;
   alpha = x_60;
   vec3 x_62 = vec3(0.0f);
   vec3 x_64 = vec3(0.0f);
@@ -90,12 +90,12 @@ void main_1() {
   shadow = 1.0f;
   refractionColor = vec4(0.0f, 0.0f, 0.0f, 1.0f);
   reflectionColor = vec4(0.0f, 0.0f, 0.0f, 1.0f);
-  vec3 x_94 = v_1.tint_symbol_3.vEmissiveColor;
+  vec3 x_94 = v_1.inner.vEmissiveColor;
   emissiveColor = x_94;
   vec3 x_96 = diffuseBase;
   vec3 x_97 = diffuseColor;
   vec3 x_99 = emissiveColor;
-  vec3 x_103 = v_1.tint_symbol_3.vAmbientColor;
+  vec3 x_103 = v_1.inner.vAmbientColor;
   vec4 x_108 = baseColor;
   vec3 v_4 = clamp((((x_96 * x_97) + x_99) + x_103), vec3(0.0f), vec3(1.0f));
   finalDiffuse = (v_4 * vec3(x_108[0u], x_108[1u], x_108[2u]));
@@ -113,7 +113,7 @@ void main_1() {
   vec3 x_132 = max(vec3(x_129[0u], x_129[1u], x_129[2u]), vec3(0.0f));
   vec4 x_133 = color;
   color = vec4(x_132[0u], x_132[1u], x_132[2u], x_133[3u]);
-  float x_140 = v_2.tint_symbol_5.visibility;
+  float x_140 = v_2.inner.visibility;
   float x_142 = color.w;
   color[3u] = (x_142 * x_140);
   vec4 x_147 = color;

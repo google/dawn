@@ -11,8 +11,8 @@
                OpMemberName %S 1 "b"
                OpMemberName %S 2 "c"
                OpName %S "S"
-               OpMemberName %tint_symbol_1 0 "tint_symbol"
-               OpName %tint_symbol_1 "tint_symbol_1"
+               OpMemberName %v_block 0 "inner"
+               OpName %v_block "v_block"
                OpName %i "i"
                OpName %idx1 "idx1"
                OpName %idx2 "idx2"
@@ -25,8 +25,8 @@
                OpMemberDecorate %S 2 Offset 32
                OpMemberDecorate %S 2 ColMajor
                OpMemberDecorate %S 2 MatrixStride 8
-               OpMemberDecorate %tint_symbol_1 0 Offset 0
-               OpDecorate %tint_symbol_1 Block
+               OpMemberDecorate %v_block 0 Offset 0
+               OpDecorate %v_block Block
                OpDecorate %1 DescriptorSet 0
                OpDecorate %1 Binding 0
                OpDecorate %1 Coherent
@@ -37,9 +37,9 @@
     %v2float = OpTypeVector %float 2
 %mat2v2float = OpTypeMatrix %v2float 2
           %S = OpTypeStruct %int %v4float %mat2v2float
-%tint_symbol_1 = OpTypeStruct %S
-%_ptr_StorageBuffer_tint_symbol_1 = OpTypePointer StorageBuffer %tint_symbol_1
-          %1 = OpVariable %_ptr_StorageBuffer_tint_symbol_1 StorageBuffer
+    %v_block = OpTypeStruct %S
+%_ptr_StorageBuffer_v_block = OpTypePointer StorageBuffer %v_block
+          %1 = OpVariable %_ptr_StorageBuffer_v_block StorageBuffer
        %uint = OpTypeInt 32 0
 %_ptr_Private_uint = OpTypePointer Private %uint
          %13 = OpConstantNull %uint

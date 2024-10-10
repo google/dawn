@@ -3,12 +3,12 @@
 float p = 0.0f;
 shared float w;
 layout(binding = 1, std430)
-buffer tint_symbol_2_1_ssbo {
-  vec2 tint_symbol_1;
+buffer uniforms_block_1_ssbo {
+  vec2 inner;
 } v;
 layout(binding = 0, std430)
-buffer tint_symbol_4_1_ssbo {
-  float tint_symbol_3[];
+buffer storages_block_1_ssbo {
+  float inner[];
 } v_1;
 void no_uses() {
 }
@@ -18,7 +18,7 @@ void zoo() {
 void bar(float a, float b) {
   p = a;
   w = b;
-  v_1.tint_symbol_3[0] = v.tint_symbol_1.x;
+  v_1.inner[0] = v.inner.x;
   zoo();
 }
 void foo(float a) {

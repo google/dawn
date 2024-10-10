@@ -7,14 +7,14 @@
                OpMemoryModel Logical GLSL450
                OpEntryPoint Fragment %main "main"
                OpExecutionMode %main OriginUpperLeft
-               OpMemberName %tint_symbol_1 0 "tint_symbol"
-               OpName %tint_symbol_1 "tint_symbol_1"
+               OpMemberName %buffer_block 0 "inner"
+               OpName %buffer_block "buffer_block"
                OpName %foo "foo"
                OpName %i "i"
                OpName %main "main"
                OpDecorate %_arr_int_uint_4 ArrayStride 4
-               OpMemberDecorate %tint_symbol_1 0 Offset 0
-               OpDecorate %tint_symbol_1 Block
+               OpMemberDecorate %buffer_block 0 Offset 0
+               OpDecorate %buffer_block Block
                OpDecorate %1 DescriptorSet 0
                OpDecorate %1 Binding 0
                OpDecorate %1 Coherent
@@ -22,9 +22,9 @@
        %uint = OpTypeInt 32 0
      %uint_4 = OpConstant %uint 4
 %_arr_int_uint_4 = OpTypeArray %int %uint_4
-%tint_symbol_1 = OpTypeStruct %_arr_int_uint_4
-%_ptr_StorageBuffer_tint_symbol_1 = OpTypePointer StorageBuffer %tint_symbol_1
-          %1 = OpVariable %_ptr_StorageBuffer_tint_symbol_1 StorageBuffer
+%buffer_block = OpTypeStruct %_arr_int_uint_4
+%_ptr_StorageBuffer_buffer_block = OpTypePointer StorageBuffer %buffer_block
+          %1 = OpVariable %_ptr_StorageBuffer_buffer_block StorageBuffer
        %void = OpTypeVoid
          %10 = OpTypeFunction %void
 %_ptr_Function_int = OpTypePointer Function %int

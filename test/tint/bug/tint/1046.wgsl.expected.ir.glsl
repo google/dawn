@@ -30,8 +30,8 @@ struct FragmentInput {
 };
 
 layout(binding = 0, std140)
-uniform tint_symbol_3_1_ubo {
-  Uniforms tint_symbol_2;
+uniform uniforms_block_1_ubo {
+  Uniforms inner;
 } v;
 layout(binding = 1, std430)
 buffer PointLights_1_ssbo {

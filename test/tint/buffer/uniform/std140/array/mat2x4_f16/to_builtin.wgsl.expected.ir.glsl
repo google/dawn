@@ -8,18 +8,18 @@ struct mat2x4_f16_std140 {
 };
 
 layout(binding = 0, std140)
-uniform tint_symbol_1_std140_1_ubo {
-  mat2x4_f16_std140 tint_symbol[4];
+uniform u_block_std140_1_ubo {
+  mat2x4_f16_std140 inner[4];
 } v;
 layout(binding = 1, std430)
-buffer tint_symbol_3_1_ssbo {
-  float16_t tint_symbol_2;
+buffer s_block_1_ssbo {
+  float16_t inner;
 } v_1;
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
-  f16mat4x2 t = transpose(f16mat2x4(v.tint_symbol[2].col0, v.tint_symbol[2].col1));
-  float16_t l = length(v.tint_symbol[0].col1.ywxz);
-  float16_t a = abs(v.tint_symbol[0].col1.ywxz[0u]);
+  f16mat4x2 t = transpose(f16mat2x4(v.inner[2].col0, v.inner[2].col1));
+  float16_t l = length(v.inner[0].col1.ywxz);
+  float16_t a = abs(v.inner[0].col1.ywxz[0u]);
   float16_t v_2 = (t[0][0u] + float16_t(l));
-  v_1.tint_symbol_2 = (v_2 + float16_t(a));
+  v_1.inner = (v_2 + float16_t(a));
 }

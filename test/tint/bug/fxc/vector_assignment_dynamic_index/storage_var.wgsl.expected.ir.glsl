@@ -1,14 +1,14 @@
 #version 310 es
 
 layout(binding = 0, std140)
-uniform tint_symbol_2_1_ubo {
-  uint tint_symbol_1;
+uniform i_block_1_ubo {
+  uint inner;
 } v;
 layout(binding = 1, std430)
-buffer tint_symbol_4_1_ssbo {
-  vec3 tint_symbol_3;
+buffer v1_block_1_ssbo {
+  vec3 inner;
 } v_1;
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
-  v_1.tint_symbol_3[v.tint_symbol_1] = 1.0f;
+  v_1.inner[v.inner] = 1.0f;
 }

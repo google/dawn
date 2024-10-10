@@ -18,8 +18,8 @@
                OpMemberName %LeftOver 7 "spriteCount"
                OpMemberName %LeftOver 8 "colorMul"
                OpName %LeftOver "LeftOver"
-               OpMemberName %tint_symbol_1 0 "tint_symbol"
-               OpName %tint_symbol_1 "tint_symbol_1"
+               OpMemberName %x_20_block 0 "inner"
+               OpName %x_20_block "x_20_block"
                OpName %frameMapTexture "frameMapTexture"
                OpName %frameMapSampler "frameMapSampler"
                OpName %tUV "tUV"
@@ -156,8 +156,8 @@
                OpMemberDecorate %LeftOver 6 Offset 104
                OpMemberDecorate %LeftOver 7 Offset 108
                OpMemberDecorate %LeftOver 8 Offset 112
-               OpMemberDecorate %tint_symbol_1 0 Offset 0
-               OpDecorate %tint_symbol_1 Block
+               OpMemberDecorate %x_20_block 0 Offset 0
+               OpDecorate %x_20_block Block
                OpDecorate %1 DescriptorSet 2
                OpDecorate %1 Binding 9
                OpDecorate %1 NonWritable
@@ -194,9 +194,9 @@
     %v2float = OpTypeVector %float 2
     %v3float = OpTypeVector %float 3
    %LeftOver = OpTypeStruct %float %uint %mat4v4float %v2float %v2float %v2float %float %float %v3float
-%tint_symbol_1 = OpTypeStruct %LeftOver
-%_ptr_Uniform_tint_symbol_1 = OpTypePointer Uniform %tint_symbol_1
-          %1 = OpVariable %_ptr_Uniform_tint_symbol_1 Uniform
+ %x_20_block = OpTypeStruct %LeftOver
+%_ptr_Uniform_x_20_block = OpTypePointer Uniform %x_20_block
+          %1 = OpVariable %_ptr_Uniform_x_20_block Uniform
          %13 = OpTypeImage %float 2D 0 0 0 1 Unknown
 %_ptr_UniformConstant_13 = OpTypePointer UniformConstant %13
 %frameMapTexture = OpVariable %_ptr_UniformConstant_13 UniformConstant

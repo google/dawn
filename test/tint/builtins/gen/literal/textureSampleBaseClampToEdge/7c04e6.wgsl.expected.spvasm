@@ -11,8 +11,8 @@
                OpEntryPoint Vertex %vertex_main "vertex_main" %vertex_main_position_Output %vertex_main_loc0_Output %vertex_main___point_size_Output
                OpExecutionMode %fragment_main OriginUpperLeft
                OpExecutionMode %compute_main LocalSize 1 1 1
-               OpMemberName %tint_symbol_1 0 "tint_symbol"
-               OpName %tint_symbol_1 "tint_symbol_1"
+               OpMemberName %prevent_dce_block 0 "inner"
+               OpName %prevent_dce_block "prevent_dce_block"
                OpName %arg_0_plane0 "arg_0_plane0"
                OpName %arg_0_plane1 "arg_0_plane1"
                OpMemberName %tint_ExternalTextureParams_std140 0 "numPlanes"
@@ -45,8 +45,8 @@
                OpMemberName %tint_ExternalTextureParams_std140 18 "visibleSize"
                OpMemberName %tint_ExternalTextureParams_std140 19 "plane1CoordFactor"
                OpName %tint_ExternalTextureParams_std140 "tint_ExternalTextureParams_std140"
-               OpMemberName %tint_symbol_3_std140 0 "tint_symbol_2"
-               OpName %tint_symbol_3_std140 "tint_symbol_3_std140"
+               OpMemberName %arg_0_params_block_std140 0 "inner"
+               OpName %arg_0_params_block_std140 "arg_0_params_block_std140"
                OpName %arg_1 "arg_1"
                OpName %vertex_main_position_Output "vertex_main_position_Output"
                OpName %vertex_main_loc0_Output "vertex_main_loc0_Output"
@@ -87,8 +87,8 @@
                OpName %vertex_main "vertex_main"
                OpName %tint_convert_tint_ExternalTextureParams "tint_convert_tint_ExternalTextureParams"
                OpName %tint_input "tint_input"
-               OpMemberDecorate %tint_symbol_1 0 Offset 0
-               OpDecorate %tint_symbol_1 Block
+               OpMemberDecorate %prevent_dce_block 0 Offset 0
+               OpDecorate %prevent_dce_block Block
                OpDecorate %1 DescriptorSet 0
                OpDecorate %1 Binding 0
                OpDecorate %1 Coherent
@@ -126,8 +126,8 @@
                OpMemberDecorate %tint_ExternalTextureParams_std140 17 Offset 248
                OpMemberDecorate %tint_ExternalTextureParams_std140 18 Offset 256
                OpMemberDecorate %tint_ExternalTextureParams_std140 19 Offset 264
-               OpMemberDecorate %tint_symbol_3_std140 0 Offset 0
-               OpDecorate %tint_symbol_3_std140 Block
+               OpMemberDecorate %arg_0_params_block_std140 0 Offset 0
+               OpDecorate %arg_0_params_block_std140 Block
                OpDecorate %10 DescriptorSet 1
                OpDecorate %10 Binding 3
                OpDecorate %10 NonWritable
@@ -163,9 +163,9 @@
                OpMemberDecorate %VertexOutput 1 Offset 16
       %float = OpTypeFloat 32
     %v4float = OpTypeVector %float 4
-%tint_symbol_1 = OpTypeStruct %v4float
-%_ptr_StorageBuffer_tint_symbol_1 = OpTypePointer StorageBuffer %tint_symbol_1
-          %1 = OpVariable %_ptr_StorageBuffer_tint_symbol_1 StorageBuffer
+%prevent_dce_block = OpTypeStruct %v4float
+%_ptr_StorageBuffer_prevent_dce_block = OpTypePointer StorageBuffer %prevent_dce_block
+          %1 = OpVariable %_ptr_StorageBuffer_prevent_dce_block StorageBuffer
           %8 = OpTypeImage %float 2D 0 0 0 1 Unknown
 %_ptr_UniformConstant_8 = OpTypePointer UniformConstant %8
 %arg_0_plane0 = OpVariable %_ptr_UniformConstant_8 UniformConstant
@@ -177,9 +177,9 @@
     %v2float = OpTypeVector %float 2
      %v2uint = OpTypeVector %uint 2
 %tint_ExternalTextureParams_std140 = OpTypeStruct %uint %uint %mat3v4float %tint_GammaTransferParams %tint_GammaTransferParams %v3float %v3float %v3float %v2float %v2float %v2float %v2float %v2float %v2float %v2float %v2float %v2float %v2float %v2uint %v2float
-%tint_symbol_3_std140 = OpTypeStruct %tint_ExternalTextureParams_std140
-%_ptr_Uniform_tint_symbol_3_std140 = OpTypePointer Uniform %tint_symbol_3_std140
-         %10 = OpVariable %_ptr_Uniform_tint_symbol_3_std140 Uniform
+%arg_0_params_block_std140 = OpTypeStruct %tint_ExternalTextureParams_std140
+%_ptr_Uniform_arg_0_params_block_std140 = OpTypePointer Uniform %arg_0_params_block_std140
+         %10 = OpVariable %_ptr_Uniform_arg_0_params_block_std140 Uniform
          %22 = OpTypeSampler
 %_ptr_UniformConstant_22 = OpTypePointer UniformConstant %22
       %arg_1 = OpVariable %_ptr_UniformConstant_22 UniformConstant

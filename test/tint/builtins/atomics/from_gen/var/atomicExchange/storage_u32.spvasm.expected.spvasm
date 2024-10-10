@@ -11,8 +11,8 @@
                OpExecutionMode %compute_main LocalSize 1 1 1
                OpMemberName %SB_RW_atomic 0 "arg_0"
                OpName %SB_RW_atomic "SB_RW_atomic"
-               OpMemberName %tint_symbol_1 0 "tint_symbol"
-               OpName %tint_symbol_1 "tint_symbol_1"
+               OpMemberName %sb_rw_block 0 "inner"
+               OpName %sb_rw_block "sb_rw_block"
                OpName %atomicExchange_d59712 "atomicExchange_d59712"
                OpName %arg_1 "arg_1"
                OpName %res "res"
@@ -23,16 +23,16 @@
                OpName %compute_main_1 "compute_main_1"
                OpName %compute_main "compute_main"
                OpMemberDecorate %SB_RW_atomic 0 Offset 0
-               OpMemberDecorate %tint_symbol_1 0 Offset 0
-               OpDecorate %tint_symbol_1 Block
+               OpMemberDecorate %sb_rw_block 0 Offset 0
+               OpDecorate %sb_rw_block Block
                OpDecorate %1 DescriptorSet 0
                OpDecorate %1 Binding 0
                OpDecorate %1 Coherent
        %uint = OpTypeInt 32 0
 %SB_RW_atomic = OpTypeStruct %uint
-%tint_symbol_1 = OpTypeStruct %SB_RW_atomic
-%_ptr_StorageBuffer_tint_symbol_1 = OpTypePointer StorageBuffer %tint_symbol_1
-          %1 = OpVariable %_ptr_StorageBuffer_tint_symbol_1 StorageBuffer
+%sb_rw_block = OpTypeStruct %SB_RW_atomic
+%_ptr_StorageBuffer_sb_rw_block = OpTypePointer StorageBuffer %sb_rw_block
+          %1 = OpVariable %_ptr_StorageBuffer_sb_rw_block StorageBuffer
        %void = OpTypeVoid
           %8 = OpTypeFunction %void
 %_ptr_Function_uint = OpTypePointer Function %uint

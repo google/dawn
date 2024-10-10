@@ -207,11 +207,11 @@ struct atomic_compare_exchange_result_i32 {
 };
 
 layout(binding = 0, std430)
-buffer tint_symbol_1_1_ssbo {
-  SB tint_symbol;
+buffer v_block_1_ssbo {
+  SB inner;
 } v_1;
 void main() {
-  int v_2 = atomicCompSwap(v_1.tint_symbol.a, 123, 345);
+  int v_2 = atomicCompSwap(v_1.inner.a, 123, 345);
   atomic_compare_exchange_result_i32 x = atomic_compare_exchange_result_i32(v_2, (v_2 == 123));
 }
 )");
@@ -240,11 +240,11 @@ struct atomic_compare_exchange_result_i32 {
 };
 
 layout(binding = 0, std430)
-buffer tint_symbol_1_1_ssbo {
-  int tint_symbol;
+buffer v_block_1_ssbo {
+  int inner;
 } v_1;
 void main() {
-  int v_2 = atomicCompSwap(v_1.tint_symbol, 123, 345);
+  int v_2 = atomicCompSwap(v_1.inner, 123, 345);
   atomic_compare_exchange_result_i32 x = atomic_compare_exchange_result_i32(v_2, (v_2 == 123));
 }
 )");
@@ -903,12 +903,12 @@ struct TintTextureUniformData {
 };
 
 layout(binding = 0, std140)
-uniform tint_symbol_1_1_ubo {
-  TintTextureUniformData tint_symbol;
+uniform tint_symbol_1_ubo {
+  TintTextureUniformData inner;
 } v_1;
 uniform highp sampler2D v;
 void main() {
-  uvec2 x = uvec2(textureSize(v, int(min(3u, (v_1.tint_symbol.tint_builtin_value_0 - 1u)))));
+  uvec2 x = uvec2(textureSize(v, int(min(3u, (v_1.inner.tint_builtin_value_0 - 1u)))));
 }
 )");
 }

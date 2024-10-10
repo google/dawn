@@ -7,8 +7,8 @@
                OpMemoryModel Logical GLSL450
                OpEntryPoint GLCompute %f "f"
                OpExecutionMode %f LocalSize 1 1 1
-               OpMemberName %tint_symbol_1 0 "tint_symbol"
-               OpName %tint_symbol_1 "tint_symbol_1"
+               OpMemberName %m_block 0 "inner"
+               OpName %m_block "m_block"
                OpName %counter "counter"
                OpName %i "i"
                OpName %f "f"
@@ -16,19 +16,19 @@
                OpName %p_m_i "p_m_i"
                OpName %l_m "l_m"
                OpName %l_m_i "l_m_i"
-               OpMemberDecorate %tint_symbol_1 0 Offset 0
-               OpMemberDecorate %tint_symbol_1 0 ColMajor
-               OpMemberDecorate %tint_symbol_1 0 MatrixStride 16
-               OpDecorate %tint_symbol_1 Block
+               OpMemberDecorate %m_block 0 Offset 0
+               OpMemberDecorate %m_block 0 ColMajor
+               OpMemberDecorate %m_block 0 MatrixStride 16
+               OpDecorate %m_block Block
                OpDecorate %1 DescriptorSet 0
                OpDecorate %1 Binding 0
                OpDecorate %1 NonWritable
       %float = OpTypeFloat 32
     %v4float = OpTypeVector %float 4
 %mat3v4float = OpTypeMatrix %v4float 3
-%tint_symbol_1 = OpTypeStruct %mat3v4float
-%_ptr_Uniform_tint_symbol_1 = OpTypePointer Uniform %tint_symbol_1
-          %1 = OpVariable %_ptr_Uniform_tint_symbol_1 Uniform
+    %m_block = OpTypeStruct %mat3v4float
+%_ptr_Uniform_m_block = OpTypePointer Uniform %m_block
+          %1 = OpVariable %_ptr_Uniform_m_block Uniform
         %int = OpTypeInt 32 1
 %_ptr_Private_int = OpTypePointer Private %int
       %int_0 = OpConstant %int 0

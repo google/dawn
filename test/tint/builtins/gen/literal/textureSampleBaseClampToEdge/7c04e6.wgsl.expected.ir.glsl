@@ -60,12 +60,12 @@ struct tint_ExternalTextureParams {
 };
 
 layout(binding = 0, std430)
-buffer tint_symbol_1_1_ssbo {
-  vec4 tint_symbol;
+buffer prevent_dce_block_1_ssbo {
+  vec4 inner;
 } v_1;
 layout(binding = 3, std140)
-uniform tint_symbol_3_std140_1_ubo {
-  tint_ExternalTextureParams_std140 tint_symbol_2;
+uniform arg_0_params_block_std140_1_ubo {
+  tint_ExternalTextureParams_std140 inner;
 } v_2;
 uniform highp sampler2D arg_0_plane0_arg_1;
 uniform highp sampler2D arg_0_plane1_arg_1;
@@ -107,11 +107,11 @@ tint_ExternalTextureParams tint_convert_tint_ExternalTextureParams(tint_External
   return tint_ExternalTextureParams(tint_input.numPlanes, tint_input.doYuvToRgbConversionOnly, tint_input.yuvToRgbConversionMatrix, tint_input.gammaDecodeParams, tint_input.gammaEncodeParams, v_17, v_18, mat3x2(tint_input.loadTransform_col0, tint_input.loadTransform_col1, tint_input.loadTransform_col2), tint_input.samplePlane0RectMin, tint_input.samplePlane0RectMax, tint_input.samplePlane1RectMin, tint_input.samplePlane1RectMax, tint_input.visibleSize, tint_input.plane1CoordFactor);
 }
 vec4 textureSampleBaseClampToEdge_7c04e6() {
-  vec4 res = tint_TextureSampleExternal(tint_convert_tint_ExternalTextureParams(v_2.tint_symbol_2), vec2(1.0f));
+  vec4 res = tint_TextureSampleExternal(tint_convert_tint_ExternalTextureParams(v_2.inner), vec2(1.0f));
   return res;
 }
 void main() {
-  v_1.tint_symbol = textureSampleBaseClampToEdge_7c04e6();
+  v_1.inner = textureSampleBaseClampToEdge_7c04e6();
 }
 #version 310 es
 
@@ -173,12 +173,12 @@ struct tint_ExternalTextureParams {
 };
 
 layout(binding = 0, std430)
-buffer tint_symbol_1_1_ssbo {
-  vec4 tint_symbol;
+buffer prevent_dce_block_1_ssbo {
+  vec4 inner;
 } v_1;
 layout(binding = 3, std140)
-uniform tint_symbol_3_std140_1_ubo {
-  tint_ExternalTextureParams_std140 tint_symbol_2;
+uniform arg_0_params_block_std140_1_ubo {
+  tint_ExternalTextureParams_std140 inner;
 } v_2;
 uniform highp sampler2D arg_0_plane0_arg_1;
 uniform highp sampler2D arg_0_plane1_arg_1;
@@ -220,12 +220,12 @@ tint_ExternalTextureParams tint_convert_tint_ExternalTextureParams(tint_External
   return tint_ExternalTextureParams(tint_input.numPlanes, tint_input.doYuvToRgbConversionOnly, tint_input.yuvToRgbConversionMatrix, tint_input.gammaDecodeParams, tint_input.gammaEncodeParams, v_17, v_18, mat3x2(tint_input.loadTransform_col0, tint_input.loadTransform_col1, tint_input.loadTransform_col2), tint_input.samplePlane0RectMin, tint_input.samplePlane0RectMax, tint_input.samplePlane1RectMin, tint_input.samplePlane1RectMax, tint_input.visibleSize, tint_input.plane1CoordFactor);
 }
 vec4 textureSampleBaseClampToEdge_7c04e6() {
-  vec4 res = tint_TextureSampleExternal(tint_convert_tint_ExternalTextureParams(v_2.tint_symbol_2), vec2(1.0f));
+  vec4 res = tint_TextureSampleExternal(tint_convert_tint_ExternalTextureParams(v_2.inner), vec2(1.0f));
   return res;
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
-  v_1.tint_symbol = textureSampleBaseClampToEdge_7c04e6();
+  v_1.inner = textureSampleBaseClampToEdge_7c04e6();
 }
 #version 310 es
 
@@ -292,8 +292,8 @@ struct VertexOutput {
 };
 
 layout(binding = 3, std140)
-uniform tint_symbol_2_std140_1_ubo {
-  tint_ExternalTextureParams_std140 tint_symbol_1;
+uniform arg_0_params_block_std140_1_ubo {
+  tint_ExternalTextureParams_std140 inner;
 } v_1;
 uniform highp sampler2D arg_0_plane0_arg_1;
 uniform highp sampler2D arg_0_plane1_arg_1;
@@ -336,7 +336,7 @@ tint_ExternalTextureParams tint_convert_tint_ExternalTextureParams(tint_External
   return tint_ExternalTextureParams(tint_input.numPlanes, tint_input.doYuvToRgbConversionOnly, tint_input.yuvToRgbConversionMatrix, tint_input.gammaDecodeParams, tint_input.gammaEncodeParams, v_16, v_17, mat3x2(tint_input.loadTransform_col0, tint_input.loadTransform_col1, tint_input.loadTransform_col2), tint_input.samplePlane0RectMin, tint_input.samplePlane0RectMax, tint_input.samplePlane1RectMin, tint_input.samplePlane1RectMax, tint_input.visibleSize, tint_input.plane1CoordFactor);
 }
 vec4 textureSampleBaseClampToEdge_7c04e6() {
-  vec4 res = tint_TextureSampleExternal(tint_convert_tint_ExternalTextureParams(v_1.tint_symbol_1), vec2(1.0f));
+  vec4 res = tint_TextureSampleExternal(tint_convert_tint_ExternalTextureParams(v_1.inner), vec2(1.0f));
   return res;
 }
 VertexOutput vertex_main_inner() {

@@ -9,8 +9,8 @@
                OpExecutionMode %foo OriginUpperLeft
                OpName %t "t"
                OpName %s "s"
-               OpMemberName %tint_symbol_1 0 "tint_symbol"
-               OpName %tint_symbol_1 "tint_symbol_1"
+               OpMemberName %a_block 0 "inner"
+               OpName %a_block "a_block"
                OpName %continue_execution "continue_execution"
                OpName %foo_loc0_Input "foo_loc0_Input"
                OpName %foo_loc1_Input "foo_loc1_Input"
@@ -27,8 +27,8 @@
                OpDecorate %t Binding 0
                OpDecorate %s DescriptorSet 0
                OpDecorate %s Binding 1
-               OpMemberDecorate %tint_symbol_1 0 Offset 0
-               OpDecorate %tint_symbol_1 Block
+               OpMemberDecorate %a_block 0 Offset 0
+               OpDecorate %a_block Block
                OpDecorate %8 DescriptorSet 0
                OpDecorate %8 Binding 2
                OpDecorate %8 Coherent
@@ -43,9 +43,9 @@
 %_ptr_UniformConstant_7 = OpTypePointer UniformConstant %7
           %s = OpVariable %_ptr_UniformConstant_7 UniformConstant
         %int = OpTypeInt 32 1
-%tint_symbol_1 = OpTypeStruct %int
-%_ptr_StorageBuffer_tint_symbol_1 = OpTypePointer StorageBuffer %tint_symbol_1
-          %8 = OpVariable %_ptr_StorageBuffer_tint_symbol_1 StorageBuffer
+    %a_block = OpTypeStruct %int
+%_ptr_StorageBuffer_a_block = OpTypePointer StorageBuffer %a_block
+          %8 = OpVariable %_ptr_StorageBuffer_a_block StorageBuffer
        %bool = OpTypeBool
 %_ptr_Private_bool = OpTypePointer Private %bool
        %true = OpConstantTrue %bool

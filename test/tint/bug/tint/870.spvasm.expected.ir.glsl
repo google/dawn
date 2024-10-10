@@ -16,12 +16,12 @@ struct x_B4_BuildInformation {
 };
 
 layout(binding = 2, std430)
-buffer tint_symbol_2_1_ssbo {
-  x_B4_BuildInformation tint_symbol_1;
+buffer sspp962805860buildInformation_block_1_ssbo {
+  x_B4_BuildInformation inner;
 } v;
 void main_1() {
   int orientation[6] = int[6](0, 0, 0, 0, 0, 0);
-  int x_23[6] = v.tint_symbol_1.passthru.orientation;
+  int x_23[6] = v.inner.passthru.orientation;
   orientation[0] = x_23[0u];
   orientation[1] = x_23[1u];
   orientation[2] = x_23[2u];

@@ -8,15 +8,15 @@
                OpEntryPoint Vertex %main "main" %main_position_Output %main___point_size_Output
                OpMemberName %DeclaredAfterUsage 0 "f"
                OpName %DeclaredAfterUsage "DeclaredAfterUsage"
-               OpMemberName %tint_symbol_1 0 "tint_symbol"
-               OpName %tint_symbol_1 "tint_symbol_1"
+               OpMemberName %declared_after_usage_block 0 "inner"
+               OpName %declared_after_usage_block "declared_after_usage_block"
                OpName %main_position_Output "main_position_Output"
                OpName %main___point_size_Output "main___point_size_Output"
                OpName %main_inner "main_inner"
                OpName %main "main"
                OpMemberDecorate %DeclaredAfterUsage 0 Offset 0
-               OpMemberDecorate %tint_symbol_1 0 Offset 0
-               OpDecorate %tint_symbol_1 Block
+               OpMemberDecorate %declared_after_usage_block 0 Offset 0
+               OpDecorate %declared_after_usage_block Block
                OpDecorate %1 DescriptorSet 0
                OpDecorate %1 Binding 0
                OpDecorate %1 NonWritable
@@ -24,9 +24,9 @@
                OpDecorate %main___point_size_Output BuiltIn PointSize
       %float = OpTypeFloat 32
 %DeclaredAfterUsage = OpTypeStruct %float
-%tint_symbol_1 = OpTypeStruct %DeclaredAfterUsage
-%_ptr_Uniform_tint_symbol_1 = OpTypePointer Uniform %tint_symbol_1
-          %1 = OpVariable %_ptr_Uniform_tint_symbol_1 Uniform
+%declared_after_usage_block = OpTypeStruct %DeclaredAfterUsage
+%_ptr_Uniform_declared_after_usage_block = OpTypePointer Uniform %declared_after_usage_block
+          %1 = OpVariable %_ptr_Uniform_declared_after_usage_block Uniform
     %v4float = OpTypeVector %float 4
 %_ptr_Output_v4float = OpTypePointer Output %v4float
 %main_position_Output = OpVariable %_ptr_Output_v4float Output

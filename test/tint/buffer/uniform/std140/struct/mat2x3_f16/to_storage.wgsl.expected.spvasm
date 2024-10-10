@@ -15,14 +15,14 @@
                OpMemberName %S_std140 2 "m_col1"
                OpMemberName %S_std140 3 "after"
                OpName %S_std140 "S_std140"
-               OpMemberName %tint_symbol_1_std140 0 "tint_symbol"
-               OpName %tint_symbol_1_std140 "tint_symbol_1_std140"
+               OpMemberName %u_block_std140 0 "inner"
+               OpName %u_block_std140 "u_block_std140"
                OpMemberName %S 0 "before"
                OpMemberName %S 1 "m"
                OpMemberName %S 2 "after"
                OpName %S "S"
-               OpMemberName %tint_symbol_3 0 "tint_symbol_2"
-               OpName %tint_symbol_3 "tint_symbol_3"
+               OpMemberName %s_block 0 "inner"
+               OpName %s_block "s_block"
                OpName %f "f"
                OpName %tint_store_and_preserve_padding "tint_store_and_preserve_padding"
                OpName %value_param "value_param"
@@ -39,8 +39,8 @@
                OpMemberDecorate %S_std140 2 Offset 16
                OpMemberDecorate %S_std140 3 Offset 64
                OpDecorate %_arr_S_std140_uint_4 ArrayStride 128
-               OpMemberDecorate %tint_symbol_1_std140 0 Offset 0
-               OpDecorate %tint_symbol_1_std140 Block
+               OpMemberDecorate %u_block_std140 0 Offset 0
+               OpDecorate %u_block_std140 Block
                OpDecorate %1 DescriptorSet 0
                OpDecorate %1 Binding 0
                OpDecorate %1 NonWritable
@@ -50,8 +50,8 @@
                OpMemberDecorate %S 1 MatrixStride 8
                OpMemberDecorate %S 2 Offset 64
                OpDecorate %_arr_S_uint_4 ArrayStride 128
-               OpMemberDecorate %tint_symbol_3 0 Offset 0
-               OpDecorate %tint_symbol_3 Block
+               OpMemberDecorate %s_block 0 Offset 0
+               OpDecorate %s_block Block
                OpDecorate %11 DescriptorSet 0
                OpDecorate %11 Binding 1
                OpDecorate %11 Coherent
@@ -63,15 +63,15 @@
        %uint = OpTypeInt 32 0
      %uint_4 = OpConstant %uint 4
 %_arr_S_std140_uint_4 = OpTypeArray %S_std140 %uint_4
-%tint_symbol_1_std140 = OpTypeStruct %_arr_S_std140_uint_4
-%_ptr_Uniform_tint_symbol_1_std140 = OpTypePointer Uniform %tint_symbol_1_std140
-          %1 = OpVariable %_ptr_Uniform_tint_symbol_1_std140 Uniform
+%u_block_std140 = OpTypeStruct %_arr_S_std140_uint_4
+%_ptr_Uniform_u_block_std140 = OpTypePointer Uniform %u_block_std140
+          %1 = OpVariable %_ptr_Uniform_u_block_std140 Uniform
  %mat2v3half = OpTypeMatrix %v3half 2
           %S = OpTypeStruct %int %mat2v3half %int
 %_arr_S_uint_4 = OpTypeArray %S %uint_4
-%tint_symbol_3 = OpTypeStruct %_arr_S_uint_4
-%_ptr_StorageBuffer_tint_symbol_3 = OpTypePointer StorageBuffer %tint_symbol_3
-         %11 = OpVariable %_ptr_StorageBuffer_tint_symbol_3 StorageBuffer
+    %s_block = OpTypeStruct %_arr_S_uint_4
+%_ptr_StorageBuffer_s_block = OpTypePointer StorageBuffer %s_block
+         %11 = OpVariable %_ptr_StorageBuffer_s_block StorageBuffer
        %void = OpTypeVoid
          %19 = OpTypeFunction %void
 %_ptr_Uniform__arr_S_std140_uint_4 = OpTypePointer Uniform %_arr_S_std140_uint_4

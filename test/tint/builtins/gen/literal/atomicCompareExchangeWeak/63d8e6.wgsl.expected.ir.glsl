@@ -13,11 +13,11 @@ struct atomic_compare_exchange_result_u32 {
 };
 
 layout(binding = 0, std430)
-buffer tint_symbol_1_1_ssbo {
-  SB_RW tint_symbol;
+buffer sb_rw_block_1_ssbo {
+  SB_RW inner;
 } v;
 void atomicCompareExchangeWeak_63d8e6() {
-  uint v_1 = atomicCompSwap(v.tint_symbol.arg_0, 1u, 1u);
+  uint v_1 = atomicCompSwap(v.inner.arg_0, 1u, 1u);
   atomic_compare_exchange_result_u32 res = atomic_compare_exchange_result_u32(v_1, (v_1 == 1u));
 }
 void main() {
@@ -36,11 +36,11 @@ struct atomic_compare_exchange_result_u32 {
 };
 
 layout(binding = 0, std430)
-buffer tint_symbol_1_1_ssbo {
-  SB_RW tint_symbol;
+buffer sb_rw_block_1_ssbo {
+  SB_RW inner;
 } v;
 void atomicCompareExchangeWeak_63d8e6() {
-  uint v_1 = atomicCompSwap(v.tint_symbol.arg_0, 1u, 1u);
+  uint v_1 = atomicCompSwap(v.inner.arg_0, 1u, 1u);
   atomic_compare_exchange_result_u32 res = atomic_compare_exchange_result_u32(v_1, (v_1 == 1u));
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;

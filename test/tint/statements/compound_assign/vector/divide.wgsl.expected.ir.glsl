@@ -6,8 +6,8 @@ struct S {
 };
 
 layout(binding = 0, std430)
-buffer tint_symbol_1_1_ssbo {
-  S tint_symbol;
+buffer v_block_1_ssbo {
+  S inner;
 } v_1;
 ivec4 tint_div_v4i32(ivec4 lhs, ivec4 rhs) {
   bvec4 v_2 = equal(rhs, ivec4(0));
@@ -19,7 +19,7 @@ ivec4 tint_div_v4i32(ivec4 lhs, ivec4 rhs) {
   return (lhs / mix(rhs, ivec4(1), bvec4((v_7 | uvec4(v_6)))));
 }
 void foo() {
-  v_1.tint_symbol.a = tint_div_v4i32(v_1.tint_symbol.a, ivec4(2));
+  v_1.inner.a = tint_div_v4i32(v_1.inner.a, ivec4(2));
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {

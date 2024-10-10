@@ -20,13 +20,13 @@ buffer Matrix_3_ssbo {
   uint numbers[];
 } resultMatrix;
 layout(binding = 3, std140)
-uniform tint_symbol_2_1_ubo {
-  Uniforms tint_symbol_1;
+uniform uniforms_block_1_ubo {
+  Uniforms inner;
 } v;
 void tint_symbol_inner(uvec3 global_id) {
   uvec2 resultCell = uvec2(global_id[1u], global_id[0u]);
-  uint dimInner = v.tint_symbol_1.aShape.y;
-  uint dimOutter = v.tint_symbol_1.outShape.y;
+  uint dimInner = v.inner.aShape.y;
+  uint dimOutter = v.inner.outShape.y;
   uint result = 0u;
   {
     uint i = 0u;

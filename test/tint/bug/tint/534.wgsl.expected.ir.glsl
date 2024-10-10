@@ -13,8 +13,8 @@ buffer OutputBuf_1_ssbo {
   uint result[];
 } tint_symbol;
 layout(binding = 3, std140)
-uniform tint_symbol_3_1_ubo {
-  Uniforms tint_symbol_2;
+uniform uniforms_block_1_ubo {
+  Uniforms inner;
 } v;
 uniform highp sampler2D src;
 uniform highp sampler2D dst;
@@ -30,7 +30,7 @@ void tint_symbol_1_inner(uvec3 GlobalInvocationID) {
   uvec2 size = uvec2(textureSize(src, 0));
   uvec2 dstTexCoord = GlobalInvocationID.xy;
   uvec2 srcTexCoord = dstTexCoord;
-  if ((v.tint_symbol_2.dstTextureFlipY == 1u)) {
+  if ((v.inner.dstTextureFlipY == 1u)) {
     srcTexCoord[1u] = ((size.y - dstTexCoord.y) - 1u);
   }
   ivec2 v_3 = ivec2(srcTexCoord);
@@ -43,7 +43,7 @@ void tint_symbol_1_inner(uvec3 GlobalInvocationID) {
   {
     uint i = 0u;
     while(true) {
-      if ((i < v.tint_symbol_2.channelCount)) {
+      if ((i < v.inner.channelCount)) {
       } else {
         break;
       }

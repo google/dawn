@@ -11,8 +11,8 @@
                OpMemberName %Uniforms 0 "i"
                OpMemberName %Uniforms 1 "j"
                OpName %Uniforms "Uniforms"
-               OpMemberName %tint_symbol_1 0 "tint_symbol"
-               OpName %tint_symbol_1 "tint_symbol_1"
+               OpMemberName %uniforms_block 0 "inner"
+               OpName %uniforms_block "uniforms_block"
                OpName %getNextIndex "getNextIndex"
                OpName %main "main"
                OpMemberName %InnerS 0 "v"
@@ -25,8 +25,8 @@
                OpName %s "s"
                OpMemberDecorate %Uniforms 0 Offset 0
                OpMemberDecorate %Uniforms 1 Offset 4
-               OpMemberDecorate %tint_symbol_1 0 Offset 0
-               OpDecorate %tint_symbol_1 Block
+               OpMemberDecorate %uniforms_block 0 Offset 0
+               OpDecorate %uniforms_block Block
                OpDecorate %5 DescriptorSet 1
                OpDecorate %5 Binding 4
                OpDecorate %5 NonWritable
@@ -40,9 +40,9 @@
           %4 = OpConstantNull %uint
   %nextIndex = OpVariable %_ptr_Private_uint Private %4
    %Uniforms = OpTypeStruct %uint %uint
-%tint_symbol_1 = OpTypeStruct %Uniforms
-%_ptr_Uniform_tint_symbol_1 = OpTypePointer Uniform %tint_symbol_1
-          %5 = OpVariable %_ptr_Uniform_tint_symbol_1 Uniform
+%uniforms_block = OpTypeStruct %Uniforms
+%_ptr_Uniform_uniforms_block = OpTypePointer Uniform %uniforms_block
+          %5 = OpVariable %_ptr_Uniform_uniforms_block Uniform
          %10 = OpTypeFunction %uint
      %uint_1 = OpConstant %uint 1
        %void = OpTypeVoid

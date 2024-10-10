@@ -51,16 +51,16 @@ struct Particles {
 };
 
 layout(binding = 0, std140)
-uniform tint_symbol_2_1_ubo {
-  SimParams tint_symbol_1;
+uniform params_block_1_ubo {
+  SimParams inner;
 } v;
 layout(binding = 1, std430)
-buffer tint_symbol_4_1_ssbo {
-  Particles tint_symbol_3;
+buffer particlesA_block_1_ssbo {
+  Particles inner;
 } v_1;
 layout(binding = 2, std430)
-buffer tint_symbol_6_1_ssbo {
-  Particles tint_symbol_5;
+buffer particlesB_block_1_ssbo {
+  Particles inner;
 } v_2;
 void comp_main_inner(uvec3 tint_symbol) {
   uint index = tint_symbol[0u];
@@ -68,9 +68,9 @@ void comp_main_inner(uvec3 tint_symbol) {
     return;
   }
   uint v_3 = index;
-  vec2 vPos = v_1.tint_symbol_3.particles[v_3].pos;
+  vec2 vPos = v_1.inner.particles[v_3].pos;
   uint v_4 = index;
-  vec2 vVel = v_1.tint_symbol_3.particles[v_4].vel;
+  vec2 vVel = v_1.inner.particles[v_4].vel;
   vec2 cMass = vec2(0.0f);
   vec2 cVel = vec2(0.0f);
   vec2 colVel = vec2(0.0f);
@@ -92,20 +92,20 @@ void comp_main_inner(uvec3 tint_symbol) {
         continue;
       }
       uint v_5 = i;
-      pos = v_1.tint_symbol_3.particles[v_5].pos.xy;
+      pos = v_1.inner.particles[v_5].pos.xy;
       uint v_6 = i;
-      vel = v_1.tint_symbol_3.particles[v_6].vel.xy;
+      vel = v_1.inner.particles[v_6].vel.xy;
       float v_7 = distance(pos, vPos);
-      if ((v_7 < v.tint_symbol_1.rule1Distance)) {
+      if ((v_7 < v.inner.rule1Distance)) {
         cMass = (cMass + pos);
         cMassCount = (cMassCount + 1);
       }
       float v_8 = distance(pos, vPos);
-      if ((v_8 < v.tint_symbol_1.rule2Distance)) {
+      if ((v_8 < v.inner.rule2Distance)) {
         colVel = (colVel - (pos - vPos));
       }
       float v_9 = distance(pos, vPos);
-      if ((v_9 < v.tint_symbol_1.rule3Distance)) {
+      if ((v_9 < v.inner.rule3Distance)) {
         cVel = (cVel + vel);
         cVelCount = (cVelCount + 1);
       }
@@ -126,10 +126,10 @@ void comp_main_inner(uvec3 tint_symbol) {
     float v_14 = float(cVelCount);
     cVel = (v_13 / vec2(v_14, float(cVelCount)));
   }
-  vVel = (((vVel + (cMass * v.tint_symbol_1.rule1Scale)) + (colVel * v.tint_symbol_1.rule2Scale)) + (cVel * v.tint_symbol_1.rule3Scale));
+  vVel = (((vVel + (cMass * v.inner.rule1Scale)) + (colVel * v.inner.rule2Scale)) + (cVel * v.inner.rule3Scale));
   vec2 v_15 = normalize(vVel);
   vVel = (v_15 * clamp(length(vVel), 0.0f, 0.10000000149011611938f));
-  vPos = (vPos + (vVel * v.tint_symbol_1.deltaT));
+  vPos = (vPos + (vVel * v.inner.deltaT));
   if ((vPos.x < -1.0f)) {
     vPos[0u] = 1.0f;
   }
@@ -143,9 +143,9 @@ void comp_main_inner(uvec3 tint_symbol) {
     vPos[1u] = -1.0f;
   }
   uint v_16 = index;
-  v_2.tint_symbol_5.particles[v_16].pos = vPos;
+  v_2.inner.particles[v_16].pos = vPos;
   uint v_17 = index;
-  v_2.tint_symbol_5.particles[v_17].vel = vVel;
+  v_2.inner.particles[v_17].vel = vVel;
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {

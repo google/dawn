@@ -21,8 +21,8 @@
                OpName %S_1 "S_1"
                OpMemberName %S_2 0 "field0"
                OpName %S_2 "S_2"
-               OpMemberName %tint_symbol_1 0 "tint_symbol"
-               OpName %tint_symbol_1 "tint_symbol_1"
+               OpMemberName %x_6_block 0 "inner"
+               OpName %x_6_block "x_6_block"
                OpMemberName %S_3 0 "field0"
                OpName %S_3 "S_3"
                OpName %x_9 "x_9"
@@ -71,8 +71,8 @@
                OpDecorate %_arr_S_uint_4096 ArrayStride 16
                OpMemberDecorate %S_1 0 Offset 0
                OpMemberDecorate %S_2 0 Offset 0
-               OpMemberDecorate %tint_symbol_1 0 Offset 0
-               OpDecorate %tint_symbol_1 Block
+               OpMemberDecorate %x_6_block 0 Offset 0
+               OpDecorate %x_6_block Block
                OpDecorate %18 DescriptorSet 0
                OpDecorate %18 Binding 1
                OpDecorate %18 NonWritable
@@ -108,9 +108,9 @@
         %x_3 = OpVariable %_ptr_Private_v3uint Private %17
         %S_1 = OpTypeStruct %uint
         %S_2 = OpTypeStruct %S_1
-%tint_symbol_1 = OpTypeStruct %S_2
-%_ptr_Uniform_tint_symbol_1 = OpTypePointer Uniform %tint_symbol_1
-         %18 = OpVariable %_ptr_Uniform_tint_symbol_1 Uniform
+  %x_6_block = OpTypeStruct %S_2
+%_ptr_Uniform_x_6_block = OpTypePointer Uniform %x_6_block
+         %18 = OpVariable %_ptr_Uniform_x_6_block Uniform
     %v4float = OpTypeVector %float 4
 %_runtimearr_v4float = OpTypeRuntimeArray %v4float
         %S_3 = OpTypeStruct %_runtimearr_v4float

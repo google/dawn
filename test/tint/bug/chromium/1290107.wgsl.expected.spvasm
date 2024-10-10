@@ -9,23 +9,23 @@
                OpExecutionMode %main LocalSize 1 1 1
                OpMemberName %S 0 "f"
                OpName %S "S"
-               OpMemberName %tint_symbol_1 0 "tint_symbol"
-               OpName %tint_symbol_1 "tint_symbol_1"
+               OpMemberName %arr_block 0 "inner"
+               OpName %arr_block "arr_block"
                OpName %main "main"
                OpName %len "len"
                OpMemberDecorate %S 0 Offset 0
                OpDecorate %_runtimearr_S ArrayStride 4
-               OpMemberDecorate %tint_symbol_1 0 Offset 0
-               OpDecorate %tint_symbol_1 Block
+               OpMemberDecorate %arr_block 0 Offset 0
+               OpDecorate %arr_block Block
                OpDecorate %1 DescriptorSet 0
                OpDecorate %1 Binding 0
                OpDecorate %1 NonWritable
       %float = OpTypeFloat 32
           %S = OpTypeStruct %float
 %_runtimearr_S = OpTypeRuntimeArray %S
-%tint_symbol_1 = OpTypeStruct %_runtimearr_S
-%_ptr_StorageBuffer_tint_symbol_1 = OpTypePointer StorageBuffer %tint_symbol_1
-          %1 = OpVariable %_ptr_StorageBuffer_tint_symbol_1 StorageBuffer
+  %arr_block = OpTypeStruct %_runtimearr_S
+%_ptr_StorageBuffer_arr_block = OpTypePointer StorageBuffer %arr_block
+          %1 = OpVariable %_ptr_StorageBuffer_arr_block StorageBuffer
        %void = OpTypeVoid
           %9 = OpTypeFunction %void
 %_ptr_StorageBuffer__runtimearr_S = OpTypePointer StorageBuffer %_runtimearr_S

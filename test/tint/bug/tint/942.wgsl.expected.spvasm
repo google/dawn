@@ -12,14 +12,14 @@
                OpMemberName %Params 0 "filterDim"
                OpMemberName %Params 1 "blockDim"
                OpName %Params "Params"
-               OpMemberName %tint_symbol_1 0 "tint_symbol"
-               OpName %tint_symbol_1 "tint_symbol_1"
+               OpMemberName %params_block 0 "inner"
+               OpName %params_block "params_block"
                OpName %inputTex "inputTex"
                OpName %outputTex "outputTex"
                OpMemberName %Flip 0 "value"
                OpName %Flip "Flip"
-               OpMemberName %tint_symbol_3 0 "tint_symbol_2"
-               OpName %tint_symbol_3 "tint_symbol_3"
+               OpMemberName %flip_block 0 "inner"
+               OpName %flip_block "flip_block"
                OpName %tile "tile"
                OpName %main_workgroup_id_Input "main_workgroup_id_Input"
                OpName %main_local_invocation_id_Input "main_local_invocation_id_Input"
@@ -49,8 +49,8 @@
                OpDecorate %samp Binding 0
                OpMemberDecorate %Params 0 Offset 0
                OpMemberDecorate %Params 1 Offset 4
-               OpMemberDecorate %tint_symbol_1 0 Offset 0
-               OpDecorate %tint_symbol_1 Block
+               OpMemberDecorate %params_block 0 Offset 0
+               OpDecorate %params_block Block
                OpDecorate %4 DescriptorSet 0
                OpDecorate %4 Binding 1
                OpDecorate %4 NonWritable
@@ -60,8 +60,8 @@
                OpDecorate %outputTex Binding 2
                OpDecorate %outputTex NonReadable
                OpMemberDecorate %Flip 0 Offset 0
-               OpMemberDecorate %tint_symbol_3 0 Offset 0
-               OpDecorate %tint_symbol_3 Block
+               OpMemberDecorate %flip_block 0 Offset 0
+               OpDecorate %flip_block Block
                OpDecorate %16 DescriptorSet 1
                OpDecorate %16 Binding 3
                OpDecorate %16 NonWritable
@@ -75,9 +75,9 @@
        %samp = OpVariable %_ptr_UniformConstant_3 UniformConstant
        %uint = OpTypeInt 32 0
      %Params = OpTypeStruct %uint %uint
-%tint_symbol_1 = OpTypeStruct %Params
-%_ptr_Uniform_tint_symbol_1 = OpTypePointer Uniform %tint_symbol_1
-          %4 = OpVariable %_ptr_Uniform_tint_symbol_1 Uniform
+%params_block = OpTypeStruct %Params
+%_ptr_Uniform_params_block = OpTypePointer Uniform %params_block
+          %4 = OpVariable %_ptr_Uniform_params_block Uniform
       %float = OpTypeFloat 32
          %11 = OpTypeImage %float 2D 0 0 0 1 Unknown
 %_ptr_UniformConstant_11 = OpTypePointer UniformConstant %11
@@ -86,9 +86,9 @@
 %_ptr_UniformConstant_15 = OpTypePointer UniformConstant %15
   %outputTex = OpVariable %_ptr_UniformConstant_15 UniformConstant
        %Flip = OpTypeStruct %uint
-%tint_symbol_3 = OpTypeStruct %Flip
-%_ptr_Uniform_tint_symbol_3 = OpTypePointer Uniform %tint_symbol_3
-         %16 = OpVariable %_ptr_Uniform_tint_symbol_3 Uniform
+ %flip_block = OpTypeStruct %Flip
+%_ptr_Uniform_flip_block = OpTypePointer Uniform %flip_block
+         %16 = OpVariable %_ptr_Uniform_flip_block Uniform
     %v3float = OpTypeVector %float 3
    %uint_256 = OpConstant %uint 256
 %_arr_v3float_uint_256 = OpTypeArray %v3float %uint_256

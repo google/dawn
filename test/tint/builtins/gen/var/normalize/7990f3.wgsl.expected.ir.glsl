@@ -4,8 +4,8 @@ precision highp float;
 precision highp int;
 
 layout(binding = 0, std430)
-buffer tint_symbol_1_1_ssbo {
-  f16vec2 tint_symbol;
+buffer prevent_dce_block_1_ssbo {
+  f16vec2 inner;
 } v;
 f16vec2 normalize_7990f3() {
   f16vec2 arg_0 = f16vec2(1.0hf);
@@ -13,14 +13,14 @@ f16vec2 normalize_7990f3() {
   return res;
 }
 void main() {
-  v.tint_symbol = normalize_7990f3();
+  v.inner = normalize_7990f3();
 }
 #version 310 es
 #extension GL_AMD_gpu_shader_half_float: require
 
 layout(binding = 0, std430)
-buffer tint_symbol_1_1_ssbo {
-  f16vec2 tint_symbol;
+buffer prevent_dce_block_1_ssbo {
+  f16vec2 inner;
 } v;
 f16vec2 normalize_7990f3() {
   f16vec2 arg_0 = f16vec2(1.0hf);
@@ -29,7 +29,7 @@ f16vec2 normalize_7990f3() {
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
-  v.tint_symbol = normalize_7990f3();
+  v.inner = normalize_7990f3();
 }
 #version 310 es
 #extension GL_AMD_gpu_shader_half_float: require

@@ -20,8 +20,8 @@
                OpName %TileLightIdData "TileLightIdData"
                OpMemberName %Tiles 0 "data"
                OpName %Tiles "Tiles"
-               OpMemberName %tint_symbol_1 0 "tint_symbol"
-               OpName %tint_symbol_1 "tint_symbol_1"
+               OpMemberName %tileLightId_block 0 "inner"
+               OpName %tileLightId_block "tileLightId_block"
                OpMemberName %Config 0 "numLights"
                OpMemberName %Config 1 "numTiles"
                OpMemberName %Config 2 "tileCountX"
@@ -29,16 +29,16 @@
                OpMemberName %Config 4 "numTileLightSlot"
                OpMemberName %Config 5 "tileSize"
                OpName %Config "Config"
-               OpMemberName %tint_symbol_3 0 "tint_symbol_2"
-               OpName %tint_symbol_3 "tint_symbol_3"
+               OpMemberName %config_block 0 "inner"
+               OpName %config_block "config_block"
                OpMemberName %Uniforms 0 "min"
                OpMemberName %Uniforms 1 "max"
                OpMemberName %Uniforms 2 "viewMatrix"
                OpMemberName %Uniforms 3 "projectionMatrix"
                OpMemberName %Uniforms 4 "fullScreenSize"
                OpName %Uniforms "Uniforms"
-               OpMemberName %tint_symbol_5 0 "tint_symbol_4"
-               OpName %tint_symbol_5 "tint_symbol_5"
+               OpMemberName %uniforms_block 0 "inner"
+               OpName %uniforms_block "uniforms_block"
                OpName %main_global_invocation_id_Input "main_global_invocation_id_Input"
                OpName %main_inner "main_inner"
                OpName %GlobalInvocationID "GlobalInvocationID"
@@ -81,8 +81,8 @@
                OpMemberDecorate %TileLightIdData 1 Offset 4
                OpDecorate %_arr_TileLightIdData_uint_4 ArrayStride 260
                OpMemberDecorate %Tiles 0 Offset 0
-               OpMemberDecorate %tint_symbol_1 0 Offset 0
-               OpDecorate %tint_symbol_1 Block
+               OpMemberDecorate %tileLightId_block 0 Offset 0
+               OpDecorate %tileLightId_block Block
                OpDecorate %9 DescriptorSet 1
                OpDecorate %9 Binding 0
                OpDecorate %9 Coherent
@@ -92,8 +92,8 @@
                OpMemberDecorate %Config 3 Offset 12
                OpMemberDecorate %Config 4 Offset 16
                OpMemberDecorate %Config 5 Offset 20
-               OpMemberDecorate %tint_symbol_3 0 Offset 0
-               OpDecorate %tint_symbol_3 Block
+               OpMemberDecorate %config_block 0 Offset 0
+               OpDecorate %config_block Block
                OpDecorate %19 DescriptorSet 2
                OpDecorate %19 Binding 0
                OpDecorate %19 NonWritable
@@ -106,8 +106,8 @@
                OpMemberDecorate %Uniforms 3 ColMajor
                OpMemberDecorate %Uniforms 3 MatrixStride 16
                OpMemberDecorate %Uniforms 4 Offset 160
-               OpMemberDecorate %tint_symbol_5 0 Offset 0
-               OpDecorate %tint_symbol_5 Block
+               OpMemberDecorate %uniforms_block 0 Offset 0
+               OpDecorate %uniforms_block Block
                OpDecorate %23 DescriptorSet 3
                OpDecorate %23 Binding 0
                OpDecorate %23 NonWritable
@@ -128,18 +128,18 @@
      %uint_4 = OpConstant %uint 4
 %_arr_TileLightIdData_uint_4 = OpTypeArray %TileLightIdData %uint_4
       %Tiles = OpTypeStruct %_arr_TileLightIdData_uint_4
-%tint_symbol_1 = OpTypeStruct %Tiles
-%_ptr_StorageBuffer_tint_symbol_1 = OpTypePointer StorageBuffer %tint_symbol_1
-          %9 = OpVariable %_ptr_StorageBuffer_tint_symbol_1 StorageBuffer
+%tileLightId_block = OpTypeStruct %Tiles
+%_ptr_StorageBuffer_tileLightId_block = OpTypePointer StorageBuffer %tileLightId_block
+          %9 = OpVariable %_ptr_StorageBuffer_tileLightId_block StorageBuffer
      %Config = OpTypeStruct %uint %uint %uint %uint %uint %uint
-%tint_symbol_3 = OpTypeStruct %Config
-%_ptr_Uniform_tint_symbol_3 = OpTypePointer Uniform %tint_symbol_3
-         %19 = OpVariable %_ptr_Uniform_tint_symbol_3 Uniform
+%config_block = OpTypeStruct %Config
+%_ptr_Uniform_config_block = OpTypePointer Uniform %config_block
+         %19 = OpVariable %_ptr_Uniform_config_block Uniform
 %mat4v4float = OpTypeMatrix %v4float 4
    %Uniforms = OpTypeStruct %v4float %v4float %mat4v4float %mat4v4float %v4float
-%tint_symbol_5 = OpTypeStruct %Uniforms
-%_ptr_Uniform_tint_symbol_5 = OpTypePointer Uniform %tint_symbol_5
-         %23 = OpVariable %_ptr_Uniform_tint_symbol_5 Uniform
+%uniforms_block = OpTypeStruct %Uniforms
+%_ptr_Uniform_uniforms_block = OpTypePointer Uniform %uniforms_block
+         %23 = OpVariable %_ptr_Uniform_uniforms_block Uniform
      %v3uint = OpTypeVector %uint 3
 %_ptr_Input_v3uint = OpTypePointer Input %v3uint
 %main_global_invocation_id_Input = OpVariable %_ptr_Input_v3uint Input

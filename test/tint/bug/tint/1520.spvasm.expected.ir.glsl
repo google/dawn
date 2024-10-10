@@ -27,8 +27,8 @@ struct main_out {
 };
 
 layout(binding = 0, std140)
-uniform tint_symbol_2_std140_1_ubo {
-  UniformBuffer_std140 tint_symbol_1;
+uniform x_4_block_std140_1_ubo {
+  UniformBuffer_std140 inner;
 } v;
 vec4 sk_FragColor = vec4(0.0f);
 bool sk_Clockwise = false;
@@ -57,7 +57,7 @@ bool test_int_S1_c0_b() {
   bool x_55 = false;
   bool x_65 = false;
   bool x_66 = false;
-  int x_27 = tint_f32_to_i32(v.tint_symbol_1.unknownInput_S1_c0);
+  int x_27 = tint_f32_to_i32(v.inner.unknownInput_S1_c0);
   unknown = x_27;
   ok = true;
   x_41 = false;
@@ -114,7 +114,7 @@ void main_1() {
   bool x_114 = false;
   bool x_115 = false;
   outputColor_S0 = vcolor_S0;
-  float x_77 = v.tint_symbol_1.unknownInput_S1_c0;
+  float x_77 = v.inner.unknownInput_S1_c0;
   x_8_unknown = x_77;
   x_9_ok = true;
   x_87 = false;
@@ -159,9 +159,9 @@ void main_1() {
     x_115 = x_114;
   }
   if (x_115) {
-    x_116 = v.tint_symbol_1.ucolorGreen_S1_c0;
+    x_116 = v.inner.ucolorGreen_S1_c0;
   } else {
-    x_116 = v.tint_symbol_1.ucolorRed_S1_c0;
+    x_116 = v.inner.ucolorRed_S1_c0;
   }
   vec4 x_125 = x_116;
   output_S1 = x_116;

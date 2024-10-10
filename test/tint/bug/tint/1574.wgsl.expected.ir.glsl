@@ -12,12 +12,12 @@ struct atomic_compare_exchange_result_i32 {
 };
 
 layout(binding = 0, std430)
-buffer tint_symbol_2_1_ssbo {
-  uint tint_symbol_1;
+buffer a_u32_block_1_ssbo {
+  uint inner;
 } v;
 layout(binding = 1, std430)
-buffer tint_symbol_4_1_ssbo {
-  int tint_symbol_3;
+buffer a_i32_block_1_ssbo {
+  int inner;
 } v_1;
 shared uint b_u32;
 shared int b_i32;
@@ -28,18 +28,18 @@ void tint_symbol_inner(uint tint_local_index) {
   }
   barrier();
   uint value = 42u;
-  uint v_2 = atomicCompSwap(v.tint_symbol_1, 0u, value);
+  uint v_2 = atomicCompSwap(v.inner, 0u, value);
   atomic_compare_exchange_result_u32 r1 = atomic_compare_exchange_result_u32(v_2, (v_2 == 0u));
-  uint v_3 = atomicCompSwap(v.tint_symbol_1, 0u, value);
+  uint v_3 = atomicCompSwap(v.inner, 0u, value);
   atomic_compare_exchange_result_u32 r2 = atomic_compare_exchange_result_u32(v_3, (v_3 == 0u));
-  uint v_4 = atomicCompSwap(v.tint_symbol_1, 0u, value);
+  uint v_4 = atomicCompSwap(v.inner, 0u, value);
   atomic_compare_exchange_result_u32 r3 = atomic_compare_exchange_result_u32(v_4, (v_4 == 0u));
   int value_1 = 42;
-  int v_5 = atomicCompSwap(v_1.tint_symbol_3, 0, value_1);
+  int v_5 = atomicCompSwap(v_1.inner, 0, value_1);
   atomic_compare_exchange_result_i32 r1_1 = atomic_compare_exchange_result_i32(v_5, (v_5 == 0));
-  int v_6 = atomicCompSwap(v_1.tint_symbol_3, 0, value_1);
+  int v_6 = atomicCompSwap(v_1.inner, 0, value_1);
   atomic_compare_exchange_result_i32 r2_1 = atomic_compare_exchange_result_i32(v_6, (v_6 == 0));
-  int v_7 = atomicCompSwap(v_1.tint_symbol_3, 0, value_1);
+  int v_7 = atomicCompSwap(v_1.inner, 0, value_1);
   atomic_compare_exchange_result_i32 r3_1 = atomic_compare_exchange_result_i32(v_7, (v_7 == 0));
   uint value_2 = 42u;
   uint v_8 = atomicCompSwap(b_u32, 0u, value_2);

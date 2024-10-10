@@ -3,8 +3,8 @@ precision highp float;
 precision highp int;
 
 layout(binding = 0, std430)
-buffer tint_symbol_1_1_ssbo {
-  vec2 tint_symbol;
+buffer prevent_dce_block_1_ssbo {
+  vec2 inner;
 } v;
 vec2 smoothstep_392c19() {
   vec2 arg_0 = vec2(2.0f);
@@ -14,13 +14,13 @@ vec2 smoothstep_392c19() {
   return res;
 }
 void main() {
-  v.tint_symbol = smoothstep_392c19();
+  v.inner = smoothstep_392c19();
 }
 #version 310 es
 
 layout(binding = 0, std430)
-buffer tint_symbol_1_1_ssbo {
-  vec2 tint_symbol;
+buffer prevent_dce_block_1_ssbo {
+  vec2 inner;
 } v;
 vec2 smoothstep_392c19() {
   vec2 arg_0 = vec2(2.0f);
@@ -31,7 +31,7 @@ vec2 smoothstep_392c19() {
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
-  v.tint_symbol = smoothstep_392c19();
+  v.inner = smoothstep_392c19();
 }
 #version 310 es
 

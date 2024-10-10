@@ -20,8 +20,8 @@ struct OuterS {
 
 uint nextIndex = 0u;
 layout(binding = 4, std140)
-uniform tint_symbol_2_1_ubo {
-  Uniforms tint_symbol_1;
+uniform uniforms_block_1_ubo {
+  Uniforms inner;
 } v_1;
 uint getNextIndex() {
   nextIndex = (nextIndex + 1u);
@@ -32,6 +32,6 @@ void main() {
   InnerS v = InnerS(0);
   OuterS s = OuterS(S1[8](S1(InnerS[8](InnerS(0), InnerS(0), InnerS(0), InnerS(0), InnerS(0), InnerS(0), InnerS(0), InnerS(0))), S1(InnerS[8](InnerS(0), InnerS(0), InnerS(0), InnerS(0), InnerS(0), InnerS(0), InnerS(0), InnerS(0))), S1(InnerS[8](InnerS(0), InnerS(0), InnerS(0), InnerS(0), InnerS(0), InnerS(0), InnerS(0), InnerS(0))), S1(InnerS[8](InnerS(0), InnerS(0), InnerS(0), InnerS(0), InnerS(0), InnerS(0), InnerS(0), InnerS(0))), S1(InnerS[8](InnerS(0), InnerS(0), InnerS(0), InnerS(0), InnerS(0), InnerS(0), InnerS(0), InnerS(0))), S1(InnerS[8](InnerS(0), InnerS(0), InnerS(0), InnerS(0), InnerS(0), InnerS(0), InnerS(0), InnerS(0))), S1(InnerS[8](InnerS(0), InnerS(0), InnerS(0), InnerS(0), InnerS(0), InnerS(0), InnerS(0), InnerS(0))), S1(InnerS[8](InnerS(0), InnerS(0), InnerS(0), InnerS(0), InnerS(0), InnerS(0), InnerS(0), InnerS(0)))));
   uint v_2 = getNextIndex();
-  uint v_3 = v_1.tint_symbol_1.j;
+  uint v_3 = v_1.inner.j;
   s.a1[v_2].a2[v_3] = v;
 }

@@ -8,19 +8,19 @@ struct TintTextureUniformData {
 };
 
 layout(binding = 0, std430)
-buffer tint_symbol_1_1_ssbo {
-  uint tint_symbol;
+buffer prevent_dce_block_1_ssbo {
+  uint inner;
 } v;
 layout(binding = 0, std140)
-uniform tint_symbol_3_1_ubo {
-  TintTextureUniformData tint_symbol_2;
+uniform tint_symbol_1_ubo {
+  TintTextureUniformData inner;
 } v_1;
 uint textureNumLevels_181090() {
-  uint res = v_1.tint_symbol_2.tint_builtin_value_0;
+  uint res = v_1.inner.tint_builtin_value_0;
   return res;
 }
 void main() {
-  v.tint_symbol = textureNumLevels_181090();
+  v.inner = textureNumLevels_181090();
 }
 #version 310 es
 
@@ -30,20 +30,20 @@ struct TintTextureUniformData {
 };
 
 layout(binding = 0, std430)
-buffer tint_symbol_1_1_ssbo {
-  uint tint_symbol;
+buffer prevent_dce_block_1_ssbo {
+  uint inner;
 } v;
 layout(binding = 0, std140)
-uniform tint_symbol_3_1_ubo {
-  TintTextureUniformData tint_symbol_2;
+uniform tint_symbol_1_ubo {
+  TintTextureUniformData inner;
 } v_1;
 uint textureNumLevels_181090() {
-  uint res = v_1.tint_symbol_2.tint_builtin_value_0;
+  uint res = v_1.inner.tint_builtin_value_0;
   return res;
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
-  v.tint_symbol = textureNumLevels_181090();
+  v.inner = textureNumLevels_181090();
 }
 #version 310 es
 
@@ -58,12 +58,12 @@ struct VertexOutput {
 };
 
 layout(binding = 0, std140)
-uniform tint_symbol_2_1_ubo {
-  TintTextureUniformData tint_symbol_1;
+uniform tint_symbol_1_1_ubo {
+  TintTextureUniformData inner;
 } v;
 layout(location = 0) flat out uint vertex_main_loc0_Output;
 uint textureNumLevels_181090() {
-  uint res = v.tint_symbol_1.tint_builtin_value_0;
+  uint res = v.inner.tint_builtin_value_0;
   return res;
 }
 VertexOutput vertex_main_inner() {

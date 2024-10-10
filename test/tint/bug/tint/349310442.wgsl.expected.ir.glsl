@@ -58,8 +58,8 @@ struct tint_ExternalTextureParams {
 };
 
 layout(binding = 2, std140)
-uniform tint_symbol_1_std140_1_ubo {
-  tint_ExternalTextureParams_std140 tint_symbol;
+uniform t_params_block_std140_1_ubo {
+  tint_ExternalTextureParams_std140 inner;
 } v_1;
 uniform highp sampler2D t_plane0;
 uniform highp sampler2D t_plane1;
@@ -104,6 +104,6 @@ tint_ExternalTextureParams tint_convert_tint_ExternalTextureParams(tint_External
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
-  tint_ExternalTextureParams v_20 = tint_convert_tint_ExternalTextureParams(v_1.tint_symbol);
+  tint_ExternalTextureParams v_20 = tint_convert_tint_ExternalTextureParams(v_1.inner);
   vec4 r = tint_TextureLoadExternal(v_20, uvec2(ivec2(0)));
 }

@@ -9,53 +9,53 @@
                OpExecutionMode %main LocalSize 1 1 1
                OpMemberName %Constants 0 "zero"
                OpName %Constants "Constants"
-               OpMemberName %tint_symbol_1 0 "tint_symbol"
-               OpName %tint_symbol_1 "tint_symbol_1"
+               OpMemberName %constants_block 0 "inner"
+               OpName %constants_block "constants_block"
                OpMemberName %Result 0 "value"
                OpName %Result "Result"
-               OpMemberName %tint_symbol_3 0 "tint_symbol_2"
-               OpName %tint_symbol_3 "tint_symbol_3"
+               OpMemberName %result_block 0 "inner"
+               OpName %result_block "result_block"
                OpMemberName %TestData 0 "data"
                OpName %TestData "TestData"
-               OpMemberName %tint_symbol_5 0 "tint_symbol_4"
-               OpName %tint_symbol_5 "tint_symbol_5"
+               OpMemberName %s_block 0 "inner"
+               OpName %s_block "s_block"
                OpName %runTest "runTest"
                OpName %main "main"
                OpMemberDecorate %Constants 0 Offset 0
-               OpMemberDecorate %tint_symbol_1 0 Offset 0
-               OpDecorate %tint_symbol_1 Block
+               OpMemberDecorate %constants_block 0 Offset 0
+               OpDecorate %constants_block Block
                OpDecorate %1 DescriptorSet 1
                OpDecorate %1 Binding 0
                OpDecorate %1 NonWritable
                OpMemberDecorate %Result 0 Offset 0
-               OpMemberDecorate %tint_symbol_3 0 Offset 0
-               OpDecorate %tint_symbol_3 Block
+               OpMemberDecorate %result_block 0 Offset 0
+               OpDecorate %result_block Block
                OpDecorate %6 DescriptorSet 1
                OpDecorate %6 Binding 1
                OpDecorate %6 Coherent
                OpDecorate %_arr_int_uint_3 ArrayStride 4
                OpMemberDecorate %TestData 0 Offset 0
-               OpMemberDecorate %tint_symbol_5 0 Offset 0
-               OpDecorate %tint_symbol_5 Block
+               OpMemberDecorate %s_block 0 Offset 0
+               OpDecorate %s_block Block
                OpDecorate %10 DescriptorSet 0
                OpDecorate %10 Binding 0
                OpDecorate %10 Coherent
        %uint = OpTypeInt 32 0
   %Constants = OpTypeStruct %uint
-%tint_symbol_1 = OpTypeStruct %Constants
-%_ptr_Uniform_tint_symbol_1 = OpTypePointer Uniform %tint_symbol_1
-          %1 = OpVariable %_ptr_Uniform_tint_symbol_1 Uniform
+%constants_block = OpTypeStruct %Constants
+%_ptr_Uniform_constants_block = OpTypePointer Uniform %constants_block
+          %1 = OpVariable %_ptr_Uniform_constants_block Uniform
      %Result = OpTypeStruct %uint
-%tint_symbol_3 = OpTypeStruct %Result
-%_ptr_StorageBuffer_tint_symbol_3 = OpTypePointer StorageBuffer %tint_symbol_3
-          %6 = OpVariable %_ptr_StorageBuffer_tint_symbol_3 StorageBuffer
+%result_block = OpTypeStruct %Result
+%_ptr_StorageBuffer_result_block = OpTypePointer StorageBuffer %result_block
+          %6 = OpVariable %_ptr_StorageBuffer_result_block StorageBuffer
         %int = OpTypeInt 32 1
      %uint_3 = OpConstant %uint 3
 %_arr_int_uint_3 = OpTypeArray %int %uint_3
    %TestData = OpTypeStruct %_arr_int_uint_3
-%tint_symbol_5 = OpTypeStruct %TestData
-%_ptr_StorageBuffer_tint_symbol_5 = OpTypePointer StorageBuffer %tint_symbol_5
-         %10 = OpVariable %_ptr_StorageBuffer_tint_symbol_5 StorageBuffer
+    %s_block = OpTypeStruct %TestData
+%_ptr_StorageBuffer_s_block = OpTypePointer StorageBuffer %s_block
+         %10 = OpVariable %_ptr_StorageBuffer_s_block StorageBuffer
          %18 = OpTypeFunction %int
 %_ptr_Uniform_uint = OpTypePointer Uniform %uint
      %uint_0 = OpConstant %uint 0

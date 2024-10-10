@@ -9,15 +9,15 @@
                OpExecutionMode %f LocalSize 1 1 1
                OpMemberName %SSBO 0 "m"
                OpName %SSBO "SSBO"
-               OpMemberName %tint_symbol_1 0 "tint_symbol"
-               OpName %tint_symbol_1 "tint_symbol_1"
+               OpMemberName %ssbo_block 0 "inner"
+               OpName %ssbo_block "ssbo_block"
                OpName %f "f"
                OpName %v "v"
                OpMemberDecorate %SSBO 0 Offset 0
                OpMemberDecorate %SSBO 0 ColMajor
                OpMemberDecorate %SSBO 0 MatrixStride 8
-               OpMemberDecorate %tint_symbol_1 0 Offset 0
-               OpDecorate %tint_symbol_1 Block
+               OpMemberDecorate %ssbo_block 0 Offset 0
+               OpDecorate %ssbo_block Block
                OpDecorate %1 DescriptorSet 0
                OpDecorate %1 Binding 0
                OpDecorate %1 Coherent
@@ -25,9 +25,9 @@
     %v2float = OpTypeVector %float 2
 %mat2v2float = OpTypeMatrix %v2float 2
        %SSBO = OpTypeStruct %mat2v2float
-%tint_symbol_1 = OpTypeStruct %SSBO
-%_ptr_StorageBuffer_tint_symbol_1 = OpTypePointer StorageBuffer %tint_symbol_1
-          %1 = OpVariable %_ptr_StorageBuffer_tint_symbol_1 StorageBuffer
+ %ssbo_block = OpTypeStruct %SSBO
+%_ptr_StorageBuffer_ssbo_block = OpTypePointer StorageBuffer %ssbo_block
+          %1 = OpVariable %_ptr_StorageBuffer_ssbo_block StorageBuffer
        %void = OpTypeVoid
          %10 = OpTypeFunction %void
 %_ptr_StorageBuffer_mat2v2float = OpTypePointer StorageBuffer %mat2v2float

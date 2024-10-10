@@ -1,8 +1,8 @@
 #version 310 es
 
 layout(binding = 0, std430)
-buffer tint_symbol_2_1_ssbo {
-  float tint_symbol_1;
+buffer s_block_1_ssbo {
+  float inner;
 } v;
 float f1(float a[4]) {
   return a[3];
@@ -21,5 +21,5 @@ void main() {
   float v1 = f1(a1);
   float v2 = f2(a2);
   float v3 = f3(a3);
-  v.tint_symbol_1 = ((v1 + v2) + v3);
+  v.inner = ((v1 + v2) + v3);
 }

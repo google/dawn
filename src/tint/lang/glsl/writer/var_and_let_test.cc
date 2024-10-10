@@ -278,8 +278,8 @@ TEST_F(GlslWriterTest, VarStorageUint32) {
     ASSERT_TRUE(Generate()) << err_ << output_.glsl;
     EXPECT_EQ(output_.glsl, GlslHeader() + R"(
 layout(binding = 1, std430)
-buffer tint_symbol_1_1_ssbo {
-  uint tint_symbol;
+buffer v_block_1_ssbo {
+  uint inner;
 } v_1;
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
@@ -307,8 +307,8 @@ struct SB {
 };
 
 layout(binding = 1, std430)
-buffer tint_symbol_1_1_ssbo {
-  SB tint_symbol;
+buffer v_block_1_ssbo {
+  SB inner;
 } v_1;
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
@@ -325,8 +325,8 @@ TEST_F(GlslWriterTest, VarUniform) {
     ASSERT_TRUE(Generate()) << err_ << output_.glsl;
     EXPECT_EQ(output_.glsl, GlslHeader() + R"(
 layout(binding = 1, std140)
-uniform tint_symbol_1_1_ubo {
-  uint tint_symbol;
+uniform v_block_1_ubo {
+  uint inner;
 } v_1;
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {

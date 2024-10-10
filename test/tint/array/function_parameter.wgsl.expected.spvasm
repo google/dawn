@@ -7,8 +7,8 @@
                OpMemoryModel Logical GLSL450
                OpEntryPoint GLCompute %main "main"
                OpExecutionMode %main LocalSize 1 1 1
-               OpMemberName %tint_symbol_1 0 "tint_symbol"
-               OpName %tint_symbol_1 "tint_symbol_1"
+               OpMemberName %s_block 0 "inner"
+               OpName %s_block "s_block"
                OpName %f1 "f1"
                OpName %a "a"
                OpName %f2 "f2"
@@ -22,8 +22,8 @@
                OpName %v1 "v1"
                OpName %v2 "v2"
                OpName %v3 "v3"
-               OpMemberDecorate %tint_symbol_1 0 Offset 0
-               OpDecorate %tint_symbol_1 Block
+               OpMemberDecorate %s_block 0 Offset 0
+               OpDecorate %s_block Block
                OpDecorate %1 DescriptorSet 0
                OpDecorate %1 Binding 0
                OpDecorate %1 Coherent
@@ -31,9 +31,9 @@
                OpDecorate %_arr__arr_float_uint_4_uint_3 ArrayStride 16
                OpDecorate %_arr__arr__arr_float_uint_4_uint_3_uint_2 ArrayStride 48
       %float = OpTypeFloat 32
-%tint_symbol_1 = OpTypeStruct %float
-%_ptr_StorageBuffer_tint_symbol_1 = OpTypePointer StorageBuffer %tint_symbol_1
-          %1 = OpVariable %_ptr_StorageBuffer_tint_symbol_1 StorageBuffer
+    %s_block = OpTypeStruct %float
+%_ptr_StorageBuffer_s_block = OpTypePointer StorageBuffer %s_block
+          %1 = OpVariable %_ptr_StorageBuffer_s_block StorageBuffer
        %uint = OpTypeInt 32 0
      %uint_4 = OpConstant %uint 4
 %_arr_float_uint_4 = OpTypeArray %float %uint_4

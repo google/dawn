@@ -8,68 +8,68 @@ struct S {
 };
 
 layout(binding = 0, std430)
-buffer tint_symbol_2_1_ssbo {
-  S tint_symbol_1;
+buffer b0_block_1_ssbo {
+  S inner;
 } v;
 layout(binding = 0, std430)
-buffer tint_symbol_4_1_ssbo {
-  S tint_symbol_3;
+buffer b1_block_1_ssbo {
+  S inner;
 } v_1;
 layout(binding = 0, std430)
-buffer tint_symbol_6_1_ssbo {
-  S tint_symbol_5;
+buffer b2_block_1_ssbo {
+  S inner;
 } v_2;
 layout(binding = 0, std430)
-buffer tint_symbol_8_1_ssbo {
-  S tint_symbol_7;
+buffer b3_block_1_ssbo {
+  S inner;
 } v_3;
 layout(binding = 0, std430)
-buffer tint_symbol_10_1_ssbo {
-  S tint_symbol_9;
+buffer b4_block_1_ssbo {
+  S inner;
 } v_4;
 layout(binding = 0, std430)
-buffer tint_symbol_12_1_ssbo {
-  S tint_symbol_11;
+buffer b5_block_1_ssbo {
+  S inner;
 } v_5;
 layout(binding = 0, std430)
-buffer tint_symbol_14_1_ssbo {
-  S tint_symbol_13;
+buffer b6_block_1_ssbo {
+  S inner;
 } v_6;
 layout(binding = 0, std430)
-buffer tint_symbol_16_1_ssbo {
-  S tint_symbol_15;
+buffer b7_block_1_ssbo {
+  S inner;
 } v_7;
 layout(binding = 1, std140)
-uniform tint_symbol_18_1_ubo {
-  S tint_symbol_17;
+uniform b8_block_1_ubo {
+  S inner;
 } v_8;
 layout(binding = 1, std140)
-uniform tint_symbol_20_1_ubo {
-  S tint_symbol_19;
+uniform b9_block_1_ubo {
+  S inner;
 } v_9;
 layout(binding = 1, std140)
-uniform tint_symbol_22_1_ubo {
-  S tint_symbol_21;
+uniform b10_block_1_ubo {
+  S inner;
 } v_10;
 layout(binding = 1, std140)
-uniform tint_symbol_24_1_ubo {
-  S tint_symbol_23;
+uniform b11_block_1_ubo {
+  S inner;
 } v_11;
 layout(binding = 1, std140)
-uniform tint_symbol_26_1_ubo {
-  S tint_symbol_25;
+uniform b12_block_1_ubo {
+  S inner;
 } v_12;
 layout(binding = 1, std140)
-uniform tint_symbol_28_1_ubo {
-  S tint_symbol_27;
+uniform b13_block_1_ubo {
+  S inner;
 } v_13;
 layout(binding = 1, std140)
-uniform tint_symbol_30_1_ubo {
-  S tint_symbol_29;
+uniform b14_block_1_ubo {
+  S inner;
 } v_14;
 layout(binding = 1, std140)
-uniform tint_symbol_32_1_ubo {
-  S tint_symbol_31;
+uniform b15_block_1_ubo {
+  S inner;
 } v_15;
 uniform highp sampler2D t0;
 uniform highp sampler2D t1;

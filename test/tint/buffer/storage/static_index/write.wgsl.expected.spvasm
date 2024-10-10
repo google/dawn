@@ -35,8 +35,8 @@
                OpMemberName %S 22 "struct_inner"
                OpMemberName %S 23 "array_struct_inner"
                OpName %S "S"
-               OpMemberName %tint_symbol_1 0 "tint_symbol"
-               OpName %tint_symbol_1 "tint_symbol_1"
+               OpMemberName %sb_block 0 "inner"
+               OpName %sb_block "sb_block"
                OpName %main "main"
                OpName %tint_store_and_preserve_padding "tint_store_and_preserve_padding"
                OpName %value_param "value_param"
@@ -92,8 +92,8 @@
                OpMemberDecorate %S 22 Offset 544
                OpDecorate %_arr_Inner_uint_4 ArrayStride 8
                OpMemberDecorate %S 23 Offset 552
-               OpMemberDecorate %tint_symbol_1 0 Offset 0
-               OpDecorate %tint_symbol_1 Block
+               OpMemberDecorate %sb_block 0 Offset 0
+               OpDecorate %sb_block Block
                OpDecorate %1 DescriptorSet 0
                OpDecorate %1 Binding 0
                OpDecorate %1 Coherent
@@ -124,9 +124,9 @@
      %uint_4 = OpConstant %uint 4
 %_arr_Inner_uint_4 = OpTypeArray %Inner %uint_4
           %S = OpTypeStruct %float %int %uint %v2float %v2int %v2uint %v3float %v3int %v3uint %v4float %v4int %v4uint %mat2v2float %mat2v3float %mat2v4float %mat3v2float %mat3v3float %mat3v4float %mat4v2float %mat4v3float %mat4v4float %_arr_v3float_uint_2 %Inner %_arr_Inner_uint_4
-%tint_symbol_1 = OpTypeStruct %S
-%_ptr_StorageBuffer_tint_symbol_1 = OpTypePointer StorageBuffer %tint_symbol_1
-          %1 = OpVariable %_ptr_StorageBuffer_tint_symbol_1 StorageBuffer
+   %sb_block = OpTypeStruct %S
+%_ptr_StorageBuffer_sb_block = OpTypePointer StorageBuffer %sb_block
+          %1 = OpVariable %_ptr_StorageBuffer_sb_block StorageBuffer
        %void = OpTypeVoid
          %33 = OpTypeFunction %void
 %_ptr_StorageBuffer_float = OpTypePointer StorageBuffer %float

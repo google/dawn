@@ -11,8 +11,8 @@ struct S {
 };
 
 layout(binding = 0, std430)
-buffer tint_symbol_1_1_ssbo {
-  S tint_symbol;
+buffer v_block_1_ssbo {
+  S inner;
 } v_1;
 uint i = 0u;
 int idx1() {

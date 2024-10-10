@@ -3,8 +3,8 @@ precision highp float;
 precision highp int;
 
 layout(binding = 0, std430)
-buffer tint_symbol_1_1_ssbo {
-  uvec4 tint_symbol;
+buffer prevent_dce_block_1_ssbo {
+  uvec4 inner;
 } v;
 layout(binding = 0, r32ui) uniform highp readonly uimage3D arg_0;
 uvec4 textureLoad_5cee3b() {
@@ -13,13 +13,13 @@ uvec4 textureLoad_5cee3b() {
   return res;
 }
 void main() {
-  v.tint_symbol = textureLoad_5cee3b();
+  v.inner = textureLoad_5cee3b();
 }
 #version 310 es
 
 layout(binding = 0, std430)
-buffer tint_symbol_1_1_ssbo {
-  uvec4 tint_symbol;
+buffer prevent_dce_block_1_ssbo {
+  uvec4 inner;
 } v;
 layout(binding = 0, r32ui) uniform highp readonly uimage3D arg_0;
 uvec4 textureLoad_5cee3b() {
@@ -29,7 +29,7 @@ uvec4 textureLoad_5cee3b() {
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
-  v.tint_symbol = textureLoad_5cee3b();
+  v.inner = textureLoad_5cee3b();
 }
 #version 310 es
 

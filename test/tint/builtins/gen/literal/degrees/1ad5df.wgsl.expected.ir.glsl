@@ -3,21 +3,21 @@ precision highp float;
 precision highp int;
 
 layout(binding = 0, std430)
-buffer tint_symbol_1_1_ssbo {
-  vec2 tint_symbol;
+buffer prevent_dce_block_1_ssbo {
+  vec2 inner;
 } v;
 vec2 degrees_1ad5df() {
   vec2 res = vec2(57.2957763671875f);
   return res;
 }
 void main() {
-  v.tint_symbol = degrees_1ad5df();
+  v.inner = degrees_1ad5df();
 }
 #version 310 es
 
 layout(binding = 0, std430)
-buffer tint_symbol_1_1_ssbo {
-  vec2 tint_symbol;
+buffer prevent_dce_block_1_ssbo {
+  vec2 inner;
 } v;
 vec2 degrees_1ad5df() {
   vec2 res = vec2(57.2957763671875f);
@@ -25,7 +25,7 @@ vec2 degrees_1ad5df() {
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
-  v.tint_symbol = degrees_1ad5df();
+  v.inner = degrees_1ad5df();
 }
 #version 310 es
 

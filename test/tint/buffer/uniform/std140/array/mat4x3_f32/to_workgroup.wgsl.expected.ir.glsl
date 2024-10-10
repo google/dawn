@@ -13,8 +13,8 @@ struct mat4x3_f32_std140 {
 };
 
 layout(binding = 0, std140)
-uniform tint_symbol_1_std140_1_ubo {
-  mat4x3_f32_std140 tint_symbol[4];
+uniform u_block_std140_1_ubo {
+  mat4x3_f32_std140 inner[4];
 } v;
 shared mat4x3 w[4];
 void f_inner(uint tint_local_index) {
@@ -34,7 +34,7 @@ void f_inner(uint tint_local_index) {
     }
   }
   barrier();
-  mat4x3_f32_std140 v_3[4] = v.tint_symbol;
+  mat4x3_f32_std140 v_3[4] = v.inner;
   mat4x3 v_4[4] = mat4x3[4](mat4x3(vec3(0.0f), vec3(0.0f), vec3(0.0f), vec3(0.0f)), mat4x3(vec3(0.0f), vec3(0.0f), vec3(0.0f), vec3(0.0f)), mat4x3(vec3(0.0f), vec3(0.0f), vec3(0.0f), vec3(0.0f)), mat4x3(vec3(0.0f), vec3(0.0f), vec3(0.0f), vec3(0.0f)));
   {
     uint v_5 = 0u;
@@ -52,9 +52,9 @@ void f_inner(uint tint_local_index) {
     }
   }
   w = v_4;
-  w[1] = mat4x3(v.tint_symbol[2].col0, v.tint_symbol[2].col1, v.tint_symbol[2].col2, v.tint_symbol[2].col3);
-  w[1][0] = v.tint_symbol[0].col1.zxy;
-  w[1][0][0u] = v.tint_symbol[0].col1.x;
+  w[1] = mat4x3(v.inner[2].col0, v.inner[2].col1, v.inner[2].col2, v.inner[2].col3);
+  w[1][0] = v.inner[0].col1.zxy;
+  w[1][0][0u] = v.inner[0].col1.x;
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {

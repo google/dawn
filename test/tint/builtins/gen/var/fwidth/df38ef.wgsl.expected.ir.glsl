@@ -3,8 +3,8 @@ precision highp float;
 precision highp int;
 
 layout(binding = 0, std430)
-buffer tint_symbol_1_1_ssbo {
-  float tint_symbol;
+buffer prevent_dce_block_1_ssbo {
+  float inner;
 } v;
 float fwidth_df38ef() {
   float arg_0 = 1.0f;
@@ -12,5 +12,5 @@ float fwidth_df38ef() {
   return res;
 }
 void main() {
-  v.tint_symbol = fwidth_df38ef();
+  v.inner = fwidth_df38ef();
 }

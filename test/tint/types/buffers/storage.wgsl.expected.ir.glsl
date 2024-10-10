@@ -3,9 +3,9 @@ precision highp float;
 precision highp int;
 
 layout(binding = 0, std430)
-buffer tint_symbol_2_1_ssbo {
-  float tint_symbol_1[];
+buffer weights_block_1_ssbo {
+  float inner[];
 } v;
 void main() {
-  float a = v.tint_symbol_1[0];
+  float a = v.inner[0];
 }

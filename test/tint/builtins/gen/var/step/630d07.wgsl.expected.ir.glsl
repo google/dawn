@@ -4,8 +4,8 @@ precision highp float;
 precision highp int;
 
 layout(binding = 0, std430)
-buffer tint_symbol_1_1_ssbo {
-  float16_t tint_symbol;
+buffer prevent_dce_block_1_ssbo {
+  float16_t inner;
 } v;
 float16_t step_630d07() {
   float16_t arg_0 = 1.0hf;
@@ -14,14 +14,14 @@ float16_t step_630d07() {
   return res;
 }
 void main() {
-  v.tint_symbol = step_630d07();
+  v.inner = step_630d07();
 }
 #version 310 es
 #extension GL_AMD_gpu_shader_half_float: require
 
 layout(binding = 0, std430)
-buffer tint_symbol_1_1_ssbo {
-  float16_t tint_symbol;
+buffer prevent_dce_block_1_ssbo {
+  float16_t inner;
 } v;
 float16_t step_630d07() {
   float16_t arg_0 = 1.0hf;
@@ -31,7 +31,7 @@ float16_t step_630d07() {
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
-  v.tint_symbol = step_630d07();
+  v.inner = step_630d07();
 }
 #version 310 es
 #extension GL_AMD_gpu_shader_half_float: require

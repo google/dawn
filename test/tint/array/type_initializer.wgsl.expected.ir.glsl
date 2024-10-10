@@ -1,8 +1,8 @@
 #version 310 es
 
 layout(binding = 0, std430)
-buffer tint_symbol_2_1_ssbo {
-  int tint_symbol_1;
+buffer s_block_1_ssbo {
+  int inner;
 } v;
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
@@ -20,5 +20,5 @@ void main() {
   int subexpr_nested_empty[4] = int[4](0, 0, 0, 0);
   int subexpr_nested_nonempty[4] = int[4](5, 6, 7, 8);
   int subexpr_nested_nonempty_with_expr[4] = int[2][4](int[4](1, x, (x + 1), nonempty[3]), nested_nonempty[1][2])[1];
-  v.tint_symbol_1 = (((((((((((empty[0] + nonempty[0]) + nonempty_with_expr[0]) + nested_empty[0][0][0]) + nested_nonempty[0][0][0]) + nested_nonempty_with_expr[0][0][0]) + subexpr_empty) + subexpr_nonempty) + subexpr_nonempty_with_expr) + subexpr_nested_empty[0]) + subexpr_nested_nonempty[0]) + subexpr_nested_nonempty_with_expr[0]);
+  v.inner = (((((((((((empty[0] + nonempty[0]) + nonempty_with_expr[0]) + nested_empty[0][0][0]) + nested_nonempty[0][0][0]) + nested_nonempty_with_expr[0][0][0]) + subexpr_empty) + subexpr_nonempty) + subexpr_nonempty_with_expr) + subexpr_nested_empty[0]) + subexpr_nested_nonempty[0]) + subexpr_nested_nonempty_with_expr[0]);
 }

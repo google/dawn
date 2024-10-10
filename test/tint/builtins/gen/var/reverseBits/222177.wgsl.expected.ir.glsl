@@ -3,8 +3,8 @@ precision highp float;
 precision highp int;
 
 layout(binding = 0, std430)
-buffer tint_symbol_1_1_ssbo {
-  ivec2 tint_symbol;
+buffer prevent_dce_block_1_ssbo {
+  ivec2 inner;
 } v;
 ivec2 reverseBits_222177() {
   ivec2 arg_0 = ivec2(1);
@@ -12,13 +12,13 @@ ivec2 reverseBits_222177() {
   return res;
 }
 void main() {
-  v.tint_symbol = reverseBits_222177();
+  v.inner = reverseBits_222177();
 }
 #version 310 es
 
 layout(binding = 0, std430)
-buffer tint_symbol_1_1_ssbo {
-  ivec2 tint_symbol;
+buffer prevent_dce_block_1_ssbo {
+  ivec2 inner;
 } v;
 ivec2 reverseBits_222177() {
   ivec2 arg_0 = ivec2(1);
@@ -27,7 +27,7 @@ ivec2 reverseBits_222177() {
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
-  v.tint_symbol = reverseBits_222177();
+  v.inner = reverseBits_222177();
 }
 #version 310 es
 

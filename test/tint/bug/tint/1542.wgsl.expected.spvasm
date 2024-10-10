@@ -9,22 +9,22 @@
                OpExecutionMode %main LocalSize 1 1 1
                OpMemberName %UniformBuffer 0 "d"
                OpName %UniformBuffer "UniformBuffer"
-               OpMemberName %tint_symbol_1 0 "tint_symbol"
-               OpName %tint_symbol_1 "tint_symbol_1"
+               OpMemberName %u_input_block 0 "inner"
+               OpName %u_input_block "u_input_block"
                OpName %main "main"
                OpName %temp "temp"
                OpMemberDecorate %UniformBuffer 0 Offset 0
-               OpMemberDecorate %tint_symbol_1 0 Offset 0
-               OpDecorate %tint_symbol_1 Block
+               OpMemberDecorate %u_input_block 0 Offset 0
+               OpDecorate %u_input_block Block
                OpDecorate %1 DescriptorSet 0
                OpDecorate %1 Binding 0
                OpDecorate %1 NonWritable
         %int = OpTypeInt 32 1
       %v3int = OpTypeVector %int 3
 %UniformBuffer = OpTypeStruct %v3int
-%tint_symbol_1 = OpTypeStruct %UniformBuffer
-%_ptr_Uniform_tint_symbol_1 = OpTypePointer Uniform %tint_symbol_1
-          %1 = OpVariable %_ptr_Uniform_tint_symbol_1 Uniform
+%u_input_block = OpTypeStruct %UniformBuffer
+%_ptr_Uniform_u_input_block = OpTypePointer Uniform %u_input_block
+          %1 = OpVariable %_ptr_Uniform_u_input_block Uniform
        %void = OpTypeVoid
           %9 = OpTypeFunction %void
 %_ptr_Uniform_v3int = OpTypePointer Uniform %v3int

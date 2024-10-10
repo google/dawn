@@ -3,8 +3,8 @@ precision highp float;
 precision highp int;
 
 layout(binding = 0, std430)
-buffer tint_symbol_1_1_ssbo {
-  float tint_symbol;
+buffer prevent_dce_block_1_ssbo {
+  float inner;
 } v;
 float distance_aa4055() {
   vec2 arg_0 = vec2(1.0f);
@@ -13,13 +13,13 @@ float distance_aa4055() {
   return res;
 }
 void main() {
-  v.tint_symbol = distance_aa4055();
+  v.inner = distance_aa4055();
 }
 #version 310 es
 
 layout(binding = 0, std430)
-buffer tint_symbol_1_1_ssbo {
-  float tint_symbol;
+buffer prevent_dce_block_1_ssbo {
+  float inner;
 } v;
 float distance_aa4055() {
   vec2 arg_0 = vec2(1.0f);
@@ -29,7 +29,7 @@ float distance_aa4055() {
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
-  v.tint_symbol = distance_aa4055();
+  v.inner = distance_aa4055();
 }
 #version 310 es
 

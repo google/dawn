@@ -11,8 +11,8 @@
                OpName %Inner "Inner"
                OpMemberName %Outer 0 "a"
                OpName %Outer "Outer"
-               OpMemberName %tint_symbol_1 0 "tint_symbol"
-               OpName %tint_symbol_1 "tint_symbol_1"
+               OpMemberName %a_block 0 "inner"
+               OpName %a_block "a_block"
                OpName %f "f"
                OpName %p_a "p_a"
                OpName %p_a_3 "p_a_3"
@@ -33,8 +33,8 @@
                OpDecorate %_arr_Inner_uint_4 ArrayStride 64
                OpMemberDecorate %Outer 0 Offset 0
                OpDecorate %_arr_Outer_uint_4 ArrayStride 256
-               OpMemberDecorate %tint_symbol_1 0 Offset 0
-               OpDecorate %tint_symbol_1 Block
+               OpMemberDecorate %a_block 0 Offset 0
+               OpDecorate %a_block Block
                OpDecorate %1 DescriptorSet 0
                OpDecorate %1 Binding 0
                OpDecorate %1 NonWritable
@@ -47,9 +47,9 @@
 %_arr_Inner_uint_4 = OpTypeArray %Inner %uint_4
       %Outer = OpTypeStruct %_arr_Inner_uint_4
 %_arr_Outer_uint_4 = OpTypeArray %Outer %uint_4
-%tint_symbol_1 = OpTypeStruct %_arr_Outer_uint_4
-%_ptr_Uniform_tint_symbol_1 = OpTypePointer Uniform %tint_symbol_1
-          %1 = OpVariable %_ptr_Uniform_tint_symbol_1 Uniform
+    %a_block = OpTypeStruct %_arr_Outer_uint_4
+%_ptr_Uniform_a_block = OpTypePointer Uniform %a_block
+          %1 = OpVariable %_ptr_Uniform_a_block Uniform
        %void = OpTypeVoid
          %15 = OpTypeFunction %void
 %_ptr_Uniform__arr_Outer_uint_4 = OpTypePointer Uniform %_arr_Outer_uint_4

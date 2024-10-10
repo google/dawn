@@ -10,14 +10,14 @@ struct OuterS {
 };
 
 layout(binding = 4, std140)
-uniform tint_symbol_2_1_ubo {
-  Uniforms tint_symbol_1;
+uniform uniforms_block_1_ubo {
+  Uniforms inner;
 } v;
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
   OuterS s1 = OuterS(mat2x4(vec4(0.0f), vec4(0.0f)));
-  uint v_1 = v.tint_symbol_1.i;
+  uint v_1 = v.inner.i;
   s1.m1[v_1] = vec4(1.0f);
-  uint v_2 = v.tint_symbol_1.i;
-  s1.m1[v_2][v.tint_symbol_1.i] = 1.0f;
+  uint v_2 = v.inner.i;
+  s1.m1[v_2][v.inner.i] = 1.0f;
 }

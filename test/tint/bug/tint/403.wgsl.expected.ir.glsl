@@ -12,17 +12,17 @@ struct vertexUniformBuffer2_std140 {
 };
 
 layout(binding = 0, std140)
-uniform tint_symbol_3_std140_1_ubo {
-  vertexUniformBuffer1_std140 tint_symbol_2;
+uniform x_20_block_std140_1_ubo {
+  vertexUniformBuffer1_std140 inner;
 } v;
 layout(binding = 0, std140)
-uniform tint_symbol_5_std140_1_ubo {
-  vertexUniformBuffer2_std140 tint_symbol_4;
+uniform x_26_block_std140_1_ubo {
+  vertexUniformBuffer2_std140 inner;
 } v_1;
 vec4 tint_symbol_inner(uint tint_symbol_1) {
   vec2 indexable[3] = vec2[3](vec2(0.0f), vec2(0.0f), vec2(0.0f));
-  mat2 x_23 = mat2(v.tint_symbol_2.transform1_col0, v.tint_symbol_2.transform1_col1);
-  mat2 x_28 = mat2(v_1.tint_symbol_4.transform2_col0, v_1.tint_symbol_4.transform2_col1);
+  mat2 x_23 = mat2(v.inner.transform1_col0, v.inner.transform1_col1);
+  mat2 x_28 = mat2(v_1.inner.transform2_col0, v_1.inner.transform2_col1);
   uint x_46 = tint_symbol_1;
   indexable = vec2[3](vec2(-1.0f, 1.0f), vec2(1.0f), vec2(-1.0f));
   vec2 x_51 = indexable[x_46];

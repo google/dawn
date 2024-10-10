@@ -39,16 +39,16 @@ struct VertexOutput {
 };
 
 layout(binding = 0, std140)
-uniform tint_symbol_3_1_ubo {
-  ub_SceneParams tint_symbol_2;
+uniform global_block_1_ubo {
+  ub_SceneParams inner;
 } v_1;
 layout(binding = 1, std140)
-uniform tint_symbol_5_1_ubo {
-  ub_MaterialParams tint_symbol_4;
+uniform global1_block_1_ubo {
+  ub_MaterialParams inner;
 } v_2;
 layout(binding = 2, std140)
-uniform tint_symbol_7_1_ubo {
-  ub_PacketParams tint_symbol_6;
+uniform global2_block_1_ubo {
+  ub_PacketParams inner;
 } v_3;
 vec3 a_Position1 = vec3(0.0f);
 vec2 a_UV1 = vec2(0.0f);
@@ -133,7 +133,7 @@ void main1() {
   vec2 t_TexSpaceCoord = vec2(0.0f);
   float x_e15 = a_PosMtxIdx1;
   int v_8 = tint_f32_to_i32(x_e15);
-  Mat4x3_ x_e18 = v_3.tint_symbol_6.u_PosMtx[v_8];
+  Mat4x3_ x_e18 = v_3.inner.u_PosMtx[v_8];
   t_PosMtx = x_e18;
   Mat4x3_ x_e23 = t_PosMtx;
   Mat4x4_ x_e24 = x_Mat4x4_1(x_e23);
@@ -142,7 +142,7 @@ void main1() {
   Mat4x4_ x_e30 = x_Mat4x4_1(x_e29);
   vec3 x_e31 = a_Position1;
   vec4 x_e34 = Mul(x_e30, vec4(x_e31, 1.0f));
-  Mat4x4_ x_e35 = v_1.tint_symbol_2.u_Projection;
+  Mat4x4_ x_e35 = v_1.inner.u_Projection;
   Mat4x3_ x_e37 = t_PosMtx;
   Mat4x4_ x_e38 = x_Mat4x4_1(x_e37);
   vec3 x_e39 = a_Position1;
@@ -154,17 +154,17 @@ void main1() {
   tint_symbol = x_e49;
   vec4 x_e50 = a_Color1;
   v_Color = x_e50;
-  vec4 x_e52 = v_2.tint_symbol_4.u_Misc0_;
+  vec4 x_e52 = v_2.inner.u_Misc0_;
   if ((x_e52[0u] == 2.0f)) {
     vec3 x_e59 = a_Normal1;
-    Mat4x2_ x_e64 = v_2.tint_symbol_4.u_TexMtx[0];
+    Mat4x2_ x_e64 = v_2.inner.u_TexMtx[0];
     vec3 x_e65 = a_Normal1;
     vec2 x_e68 = Mul2(x_e64, vec4(x_e65, 1.0f));
     v_TexCoord = x_e68.xy;
     return;
   } else {
     vec2 x_e73 = a_UV1;
-    Mat4x2_ x_e79 = v_2.tint_symbol_4.u_TexMtx[0];
+    Mat4x2_ x_e79 = v_2.inner.u_TexMtx[0];
     vec2 x_e80 = a_UV1;
     vec2 x_e84 = Mul2(x_e79, vec4(x_e80, 1.0f, 1.0f));
     v_TexCoord = x_e84.xy;

@@ -60,14 +60,14 @@ struct tint_ExternalTextureParams {
 };
 
 layout(binding = 0, std430)
-buffer tint_symbol_1_1_ssbo {
-  uvec2 tint_symbol;
+buffer prevent_dce_block_1_ssbo {
+  uvec2 inner;
 } v;
 uniform highp sampler2D arg_0_plane0;
 uniform highp sampler2D arg_0_plane1;
 layout(binding = 2, std140)
-uniform tint_symbol_3_std140_1_ubo {
-  tint_ExternalTextureParams_std140 tint_symbol_2;
+uniform arg_0_params_block_std140_1_ubo {
+  tint_ExternalTextureParams_std140 inner;
 } v_1;
 tint_ExternalTextureParams tint_convert_tint_ExternalTextureParams(tint_ExternalTextureParams_std140 tint_input) {
   mat3 v_2 = mat3(tint_input.gamutConversionMatrix_col0, tint_input.gamutConversionMatrix_col1, tint_input.gamutConversionMatrix_col2);
@@ -75,11 +75,11 @@ tint_ExternalTextureParams tint_convert_tint_ExternalTextureParams(tint_External
   return tint_ExternalTextureParams(tint_input.numPlanes, tint_input.doYuvToRgbConversionOnly, tint_input.yuvToRgbConversionMatrix, tint_input.gammaDecodeParams, tint_input.gammaEncodeParams, v_2, v_3, mat3x2(tint_input.loadTransform_col0, tint_input.loadTransform_col1, tint_input.loadTransform_col2), tint_input.samplePlane0RectMin, tint_input.samplePlane0RectMax, tint_input.samplePlane1RectMin, tint_input.samplePlane1RectMax, tint_input.visibleSize, tint_input.plane1CoordFactor);
 }
 uvec2 textureDimensions_cdc6c9() {
-  uvec2 res = (tint_convert_tint_ExternalTextureParams(v_1.tint_symbol_2).visibleSize + uvec2(1u));
+  uvec2 res = (tint_convert_tint_ExternalTextureParams(v_1.inner).visibleSize + uvec2(1u));
   return res;
 }
 void main() {
-  v.tint_symbol = textureDimensions_cdc6c9();
+  v.inner = textureDimensions_cdc6c9();
 }
 #version 310 es
 
@@ -141,14 +141,14 @@ struct tint_ExternalTextureParams {
 };
 
 layout(binding = 0, std430)
-buffer tint_symbol_1_1_ssbo {
-  uvec2 tint_symbol;
+buffer prevent_dce_block_1_ssbo {
+  uvec2 inner;
 } v;
 uniform highp sampler2D arg_0_plane0;
 uniform highp sampler2D arg_0_plane1;
 layout(binding = 2, std140)
-uniform tint_symbol_3_std140_1_ubo {
-  tint_ExternalTextureParams_std140 tint_symbol_2;
+uniform arg_0_params_block_std140_1_ubo {
+  tint_ExternalTextureParams_std140 inner;
 } v_1;
 tint_ExternalTextureParams tint_convert_tint_ExternalTextureParams(tint_ExternalTextureParams_std140 tint_input) {
   mat3 v_2 = mat3(tint_input.gamutConversionMatrix_col0, tint_input.gamutConversionMatrix_col1, tint_input.gamutConversionMatrix_col2);
@@ -156,12 +156,12 @@ tint_ExternalTextureParams tint_convert_tint_ExternalTextureParams(tint_External
   return tint_ExternalTextureParams(tint_input.numPlanes, tint_input.doYuvToRgbConversionOnly, tint_input.yuvToRgbConversionMatrix, tint_input.gammaDecodeParams, tint_input.gammaEncodeParams, v_2, v_3, mat3x2(tint_input.loadTransform_col0, tint_input.loadTransform_col1, tint_input.loadTransform_col2), tint_input.samplePlane0RectMin, tint_input.samplePlane0RectMax, tint_input.samplePlane1RectMin, tint_input.samplePlane1RectMax, tint_input.visibleSize, tint_input.plane1CoordFactor);
 }
 uvec2 textureDimensions_cdc6c9() {
-  uvec2 res = (tint_convert_tint_ExternalTextureParams(v_1.tint_symbol_2).visibleSize + uvec2(1u));
+  uvec2 res = (tint_convert_tint_ExternalTextureParams(v_1.inner).visibleSize + uvec2(1u));
   return res;
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
-  v.tint_symbol = textureDimensions_cdc6c9();
+  v.inner = textureDimensions_cdc6c9();
 }
 #version 310 es
 
@@ -230,8 +230,8 @@ struct VertexOutput {
 uniform highp sampler2D arg_0_plane0;
 uniform highp sampler2D arg_0_plane1;
 layout(binding = 2, std140)
-uniform tint_symbol_2_std140_1_ubo {
-  tint_ExternalTextureParams_std140 tint_symbol_1;
+uniform arg_0_params_block_std140_1_ubo {
+  tint_ExternalTextureParams_std140 inner;
 } v;
 layout(location = 0) flat out uvec2 vertex_main_loc0_Output;
 tint_ExternalTextureParams tint_convert_tint_ExternalTextureParams(tint_ExternalTextureParams_std140 tint_input) {
@@ -240,7 +240,7 @@ tint_ExternalTextureParams tint_convert_tint_ExternalTextureParams(tint_External
   return tint_ExternalTextureParams(tint_input.numPlanes, tint_input.doYuvToRgbConversionOnly, tint_input.yuvToRgbConversionMatrix, tint_input.gammaDecodeParams, tint_input.gammaEncodeParams, v_1, v_2, mat3x2(tint_input.loadTransform_col0, tint_input.loadTransform_col1, tint_input.loadTransform_col2), tint_input.samplePlane0RectMin, tint_input.samplePlane0RectMax, tint_input.samplePlane1RectMin, tint_input.samplePlane1RectMax, tint_input.visibleSize, tint_input.plane1CoordFactor);
 }
 uvec2 textureDimensions_cdc6c9() {
-  uvec2 res = (tint_convert_tint_ExternalTextureParams(v.tint_symbol_1).visibleSize + uvec2(1u));
+  uvec2 res = (tint_convert_tint_ExternalTextureParams(v.inner).visibleSize + uvec2(1u));
   return res;
 }
 VertexOutput vertex_main_inner() {

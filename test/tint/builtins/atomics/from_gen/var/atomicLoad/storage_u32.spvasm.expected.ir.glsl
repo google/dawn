@@ -8,12 +8,12 @@ struct SB_RW_atomic {
 };
 
 layout(binding = 0, std430)
-buffer tint_symbol_1_1_ssbo {
-  SB_RW_atomic tint_symbol;
+buffer sb_rw_block_1_ssbo {
+  SB_RW_atomic inner;
 } v;
 void atomicLoad_fe6cc3() {
   uint res = 0u;
-  uint x_9 = atomicOr(v.tint_symbol.arg_0, 0u);
+  uint x_9 = atomicOr(v.inner.arg_0, 0u);
   res = x_9;
 }
 void fragment_main_1() {
@@ -30,12 +30,12 @@ struct SB_RW_atomic {
 };
 
 layout(binding = 0, std430)
-buffer tint_symbol_1_1_ssbo {
-  SB_RW_atomic tint_symbol;
+buffer sb_rw_block_1_ssbo {
+  SB_RW_atomic inner;
 } v;
 void atomicLoad_fe6cc3() {
   uint res = 0u;
-  uint x_9 = atomicOr(v.tint_symbol.arg_0, 0u);
+  uint x_9 = atomicOr(v.inner.arg_0, 0u);
   res = x_9;
 }
 void compute_main_1() {

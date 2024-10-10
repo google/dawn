@@ -11,16 +11,16 @@
                OpMemberName %S 1 "u"
                OpMemberName %S 2 "v"
                OpName %S "S"
-               OpMemberName %tint_symbol_1 0 "tint_symbol"
-               OpName %tint_symbol_1 "tint_symbol_1"
+               OpMemberName %output_block 0 "inner"
+               OpName %output_block "output_block"
                OpName %frag_main "frag_main"
                OpName %tint_store_and_preserve_padding "tint_store_and_preserve_padding"
                OpName %value_param "value_param"
                OpMemberDecorate %S 0 Offset 0
                OpMemberDecorate %S 1 Offset 4
                OpMemberDecorate %S 2 Offset 128
-               OpMemberDecorate %tint_symbol_1 0 Offset 0
-               OpDecorate %tint_symbol_1 Block
+               OpMemberDecorate %output_block 0 Offset 0
+               OpDecorate %output_block Block
                OpDecorate %1 DescriptorSet 0
                OpDecorate %1 Binding 0
                OpDecorate %1 Coherent
@@ -28,9 +28,9 @@
        %uint = OpTypeInt 32 0
     %v4float = OpTypeVector %float 4
           %S = OpTypeStruct %float %uint %v4float
-%tint_symbol_1 = OpTypeStruct %S
-%_ptr_StorageBuffer_tint_symbol_1 = OpTypePointer StorageBuffer %tint_symbol_1
-          %1 = OpVariable %_ptr_StorageBuffer_tint_symbol_1 StorageBuffer
+%output_block = OpTypeStruct %S
+%_ptr_StorageBuffer_output_block = OpTypePointer StorageBuffer %output_block
+          %1 = OpVariable %_ptr_StorageBuffer_output_block StorageBuffer
        %void = OpTypeVoid
          %10 = OpTypeFunction %void
     %float_1 = OpConstant %float 1

@@ -4,8 +4,8 @@ precision highp float;
 precision highp int;
 
 layout(binding = 0, std430)
-buffer tint_symbol_1_1_ssbo {
-  int tint_symbol;
+buffer prevent_dce_block_1_ssbo {
+  int inner;
 } v;
 int tint_bitcast_from_f16(f16vec2 src) {
   return int(packFloat2x16(src));
@@ -16,14 +16,14 @@ int bitcast_6ac6f9() {
   return res;
 }
 void main() {
-  v.tint_symbol = bitcast_6ac6f9();
+  v.inner = bitcast_6ac6f9();
 }
 #version 310 es
 #extension GL_AMD_gpu_shader_half_float: require
 
 layout(binding = 0, std430)
-buffer tint_symbol_1_1_ssbo {
-  int tint_symbol;
+buffer prevent_dce_block_1_ssbo {
+  int inner;
 } v;
 int tint_bitcast_from_f16(f16vec2 src) {
   return int(packFloat2x16(src));
@@ -35,7 +35,7 @@ int bitcast_6ac6f9() {
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
-  v.tint_symbol = bitcast_6ac6f9();
+  v.inner = bitcast_6ac6f9();
 }
 #version 310 es
 #extension GL_AMD_gpu_shader_half_float: require

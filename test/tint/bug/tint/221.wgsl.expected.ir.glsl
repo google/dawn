@@ -7,8 +7,8 @@ struct Buf {
 };
 
 layout(binding = 0, std430)
-buffer tint_symbol_2_1_ssbo {
-  Buf tint_symbol_1;
+buffer b_block_1_ssbo {
+  Buf inner;
 } v;
 uint tint_mod_u32(uint lhs, uint rhs) {
   uint v_1 = mix(rhs, 1u, (rhs == 0u));
@@ -19,20 +19,20 @@ void main() {
   uint i = 0u;
   {
     while(true) {
-      if ((i >= v.tint_symbol_1.count)) {
+      if ((i >= v.inner.count)) {
         break;
       }
       uint v_2 = i;
       if ((tint_mod_u32(i, 2u) == 0u)) {
         {
-          v.tint_symbol_1.data[v_2] = (v.tint_symbol_1.data[v_2] * 2u);
+          v.inner.data[v_2] = (v.inner.data[v_2] * 2u);
           i = (i + 1u);
         }
         continue;
       }
-      v.tint_symbol_1.data[v_2] = 0u;
+      v.inner.data[v_2] = 0u;
       {
-        v.tint_symbol_1.data[v_2] = (v.tint_symbol_1.data[v_2] * 2u);
+        v.inner.data[v_2] = (v.inner.data[v_2] * 2u);
         i = (i + 1u);
       }
       continue;

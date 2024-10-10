@@ -16,15 +16,15 @@ struct VertexInput {
 };
 
 layout(binding = 0, std140)
-uniform tint_symbol_3_1_ubo {
-  Uniforms tint_symbol_2;
+uniform uniforms_block_1_ubo {
+  Uniforms inner;
 } v;
 layout(location = 0) in vec4 vtx_main_loc0_Input;
 layout(location = 1) in vec4 vtx_main_loc1_Input;
 layout(location = 0) out vec4 vtx_main_loc0_Output;
 VertexOutput vtx_main_inner(VertexInput tint_symbol) {
   VertexOutput tint_symbol_1 = VertexOutput(vec4(0.0f), vec4(0.0f));
-  tint_symbol_1.Position = (v.tint_symbol_2.modelViewProjectionMatrix * tint_symbol.cur_position);
+  tint_symbol_1.Position = (v.inner.modelViewProjectionMatrix * tint_symbol.cur_position);
   tint_symbol_1.vtxFragColor = tint_symbol.color;
   return tint_symbol_1;
 }

@@ -12,8 +12,8 @@
                OpExecutionMode %unused_entry_point LocalSize 1 1 1
                OpMemberName %S 0 "v"
                OpName %S "S"
-               OpMemberName %tint_symbol_1 0 "tint_symbol"
-               OpName %tint_symbol_1 "tint_symbol_1"
+               OpMemberName %U_block 0 "inner"
+               OpName %U_block "U_block"
                OpName %f "f"
                OpName %v "v"
                OpName %x "x"
@@ -138,17 +138,17 @@
                OpName %zzzz "zzzz"
                OpName %unused_entry_point "unused_entry_point"
                OpMemberDecorate %S 0 Offset 0
-               OpMemberDecorate %tint_symbol_1 0 Offset 0
-               OpDecorate %tint_symbol_1 Block
+               OpMemberDecorate %U_block 0 Offset 0
+               OpDecorate %U_block Block
                OpDecorate %1 DescriptorSet 0
                OpDecorate %1 Binding 0
                OpDecorate %1 NonWritable
        %half = OpTypeFloat 16
      %v3half = OpTypeVector %half 3
           %S = OpTypeStruct %v3half
-%tint_symbol_1 = OpTypeStruct %S
-%_ptr_Uniform_tint_symbol_1 = OpTypePointer Uniform %tint_symbol_1
-          %1 = OpVariable %_ptr_Uniform_tint_symbol_1 Uniform
+    %U_block = OpTypeStruct %S
+%_ptr_Uniform_U_block = OpTypePointer Uniform %U_block
+          %1 = OpVariable %_ptr_Uniform_U_block Uniform
        %void = OpTypeVoid
           %9 = OpTypeFunction %void
 %_ptr_Uniform_v3half = OpTypePointer Uniform %v3half

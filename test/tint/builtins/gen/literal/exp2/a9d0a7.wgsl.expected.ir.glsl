@@ -3,21 +3,21 @@ precision highp float;
 precision highp int;
 
 layout(binding = 0, std430)
-buffer tint_symbol_1_1_ssbo {
-  vec4 tint_symbol;
+buffer prevent_dce_block_1_ssbo {
+  vec4 inner;
 } v;
 vec4 exp2_a9d0a7() {
   vec4 res = vec4(2.0f);
   return res;
 }
 void main() {
-  v.tint_symbol = exp2_a9d0a7();
+  v.inner = exp2_a9d0a7();
 }
 #version 310 es
 
 layout(binding = 0, std430)
-buffer tint_symbol_1_1_ssbo {
-  vec4 tint_symbol;
+buffer prevent_dce_block_1_ssbo {
+  vec4 inner;
 } v;
 vec4 exp2_a9d0a7() {
   vec4 res = vec4(2.0f);
@@ -25,7 +25,7 @@ vec4 exp2_a9d0a7() {
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
-  v.tint_symbol = exp2_a9d0a7();
+  v.inner = exp2_a9d0a7();
 }
 #version 310 es
 

@@ -10,8 +10,8 @@
                OpExecutionMode %frag_main OriginUpperLeft
                OpMemberName %Uniforms 0 "modelViewProjectionMatrix"
                OpName %Uniforms "Uniforms"
-               OpMemberName %tint_symbol_1 0 "tint_symbol"
-               OpName %tint_symbol_1 "tint_symbol_1"
+               OpMemberName %uniforms_block 0 "inner"
+               OpName %uniforms_block "uniforms_block"
                OpName %vtx_main_loc0_Input "vtx_main_loc0_Input"
                OpName %vtx_main_loc1_Input "vtx_main_loc1_Input"
                OpName %vtx_main_loc0_Output "vtx_main_loc0_Output"
@@ -35,8 +35,8 @@
                OpMemberDecorate %Uniforms 0 Offset 0
                OpMemberDecorate %Uniforms 0 ColMajor
                OpMemberDecorate %Uniforms 0 MatrixStride 16
-               OpMemberDecorate %tint_symbol_1 0 Offset 0
-               OpDecorate %tint_symbol_1 Block
+               OpMemberDecorate %uniforms_block 0 Offset 0
+               OpDecorate %uniforms_block Block
                OpDecorate %1 DescriptorSet 0
                OpDecorate %1 Binding 0
                OpDecorate %1 NonWritable
@@ -55,9 +55,9 @@
     %v4float = OpTypeVector %float 4
 %mat4v4float = OpTypeMatrix %v4float 4
    %Uniforms = OpTypeStruct %mat4v4float
-%tint_symbol_1 = OpTypeStruct %Uniforms
-%_ptr_Uniform_tint_symbol_1 = OpTypePointer Uniform %tint_symbol_1
-          %1 = OpVariable %_ptr_Uniform_tint_symbol_1 Uniform
+%uniforms_block = OpTypeStruct %Uniforms
+%_ptr_Uniform_uniforms_block = OpTypePointer Uniform %uniforms_block
+          %1 = OpVariable %_ptr_Uniform_uniforms_block Uniform
 %_ptr_Input_v4float = OpTypePointer Input %v4float
 %vtx_main_loc0_Input = OpVariable %_ptr_Input_v4float Input
 %vtx_main_loc1_Input = OpVariable %_ptr_Input_v4float Input

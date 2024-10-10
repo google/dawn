@@ -11,8 +11,8 @@
                OpName %strided_arr "strided_arr"
                OpMemberName %SSBO 0 "m"
                OpName %SSBO "SSBO"
-               OpMemberName %tint_symbol_1 0 "tint_symbol"
-               OpName %tint_symbol_1 "tint_symbol_1"
+               OpMemberName %ssbo_block 0 "inner"
+               OpName %ssbo_block "ssbo_block"
                OpName %mat2x2_stride_16_to_arr "mat2x2_stride_16_to_arr"
                OpName %m "m"
                OpName %arr_to_mat2x2_stride_16 "arr_to_mat2x2_stride_16"
@@ -27,8 +27,8 @@
                OpMemberDecorate %strided_arr 0 Offset 0
                OpDecorate %_arr_strided_arr_uint_2 ArrayStride 16
                OpMemberDecorate %SSBO 0 Offset 0
-               OpMemberDecorate %tint_symbol_1 0 Offset 0
-               OpDecorate %tint_symbol_1 Block
+               OpMemberDecorate %ssbo_block 0 Offset 0
+               OpDecorate %ssbo_block Block
                OpDecorate %1 DescriptorSet 0
                OpDecorate %1 Binding 0
                OpDecorate %1 Coherent
@@ -40,9 +40,9 @@
      %uint_2 = OpConstant %uint 2
 %_arr_strided_arr_uint_2 = OpTypeArray %strided_arr %uint_2
        %SSBO = OpTypeStruct %_arr_strided_arr_uint_2
-%tint_symbol_1 = OpTypeStruct %SSBO
-%_ptr_StorageBuffer_tint_symbol_1 = OpTypePointer StorageBuffer %tint_symbol_1
-          %1 = OpVariable %_ptr_StorageBuffer_tint_symbol_1 StorageBuffer
+ %ssbo_block = OpTypeStruct %SSBO
+%_ptr_StorageBuffer_ssbo_block = OpTypePointer StorageBuffer %ssbo_block
+          %1 = OpVariable %_ptr_StorageBuffer_ssbo_block StorageBuffer
 %mat2v2float = OpTypeMatrix %v2float 2
          %14 = OpTypeFunction %_arr_strided_arr_uint_2 %mat2v2float
          %23 = OpTypeFunction %mat2v2float %_arr_strided_arr_uint_2

@@ -8,8 +8,8 @@ struct S {
 
 shared S wgvar;
 layout(binding = 0, std430)
-buffer tint_symbol_3_1_ssbo {
-  S tint_symbol_2;
+buffer tint_symbol_block_1_ssbo {
+  S inner;
 } v_1;
 void tint_symbol_1_inner(uint tint_local_index) {
   if ((tint_local_index == 0u)) {
@@ -18,7 +18,7 @@ void tint_symbol_1_inner(uint tint_local_index) {
   }
   barrier();
   uint x = atomicOr(wgvar.u, 0u);
-  atomicExchange(v_1.tint_symbol_2.u, x);
+  atomicExchange(v_1.inner.u, x);
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {

@@ -7,8 +7,8 @@ struct mat2x2_f32_std140 {
 };
 
 layout(binding = 0, std140)
-uniform tint_symbol_1_std140_1_ubo {
-  mat2x2_f32_std140 tint_symbol[4];
+uniform u_block_std140_1_ubo {
+  mat2x2_f32_std140 inner[4];
 } v;
 shared mat2 w[4];
 void f_inner(uint tint_local_index) {
@@ -28,7 +28,7 @@ void f_inner(uint tint_local_index) {
     }
   }
   barrier();
-  mat2x2_f32_std140 v_3[4] = v.tint_symbol;
+  mat2x2_f32_std140 v_3[4] = v.inner;
   mat2 v_4[4] = mat2[4](mat2(vec2(0.0f), vec2(0.0f)), mat2(vec2(0.0f), vec2(0.0f)), mat2(vec2(0.0f), vec2(0.0f)), mat2(vec2(0.0f), vec2(0.0f)));
   {
     uint v_5 = 0u;
@@ -46,9 +46,9 @@ void f_inner(uint tint_local_index) {
     }
   }
   w = v_4;
-  w[1] = mat2(v.tint_symbol[2].col0, v.tint_symbol[2].col1);
-  w[1][0] = v.tint_symbol[0].col1.yx;
-  w[1][0][0u] = v.tint_symbol[0].col1.x;
+  w[1] = mat2(v.inner[2].col0, v.inner[2].col1);
+  w[1][0] = v.inner[0].col1.yx;
+  w[1][0][0u] = v.inner[0].col1.x;
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {

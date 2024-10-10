@@ -8,17 +8,17 @@ struct mat2x3_f16_std140 {
 };
 
 layout(binding = 0, std140)
-uniform tint_symbol_1_std140_1_ubo {
-  mat2x3_f16_std140 tint_symbol[4];
+uniform a_block_std140_1_ubo {
+  mat2x3_f16_std140 inner[4];
 } v;
 layout(binding = 1, std430)
-buffer tint_symbol_3_1_ssbo {
-  float16_t tint_symbol_2;
+buffer s_block_1_ssbo {
+  float16_t inner;
 } v_1;
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
-  f16mat2x3 v_2 = f16mat2x3(v.tint_symbol[2].col0, v.tint_symbol[2].col1);
-  mat2x3_f16_std140 v_3[4] = v.tint_symbol;
+  f16mat2x3 v_2 = f16mat2x3(v.inner[2].col0, v.inner[2].col1);
+  mat2x3_f16_std140 v_3[4] = v.inner;
   f16mat2x3 v_4[4] = f16mat2x3[4](f16mat2x3(f16vec3(0.0hf), f16vec3(0.0hf)), f16mat2x3(f16vec3(0.0hf), f16vec3(0.0hf)), f16mat2x3(f16vec3(0.0hf), f16vec3(0.0hf)), f16mat2x3(f16vec3(0.0hf), f16vec3(0.0hf)));
   {
     uint v_5 = 0u;
@@ -38,5 +38,5 @@ void main() {
   f16mat2x3 l_a[4] = v_4;
   f16mat2x3 l_a_i = v_2;
   f16vec3 l_a_i_i = v_2[1];
-  v_1.tint_symbol_2 = (((v_2[1][0u] + l_a[0][0][0u]) + l_a_i[0][0u]) + l_a_i_i[0u]);
+  v_1.inner = (((v_2[1][0u] + l_a[0][0][0u]) + l_a_i[0][0u]) + l_a_i_i[0u]);
 }

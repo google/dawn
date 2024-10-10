@@ -3,8 +3,8 @@ precision highp float;
 precision highp int;
 
 layout(binding = 0, std430)
-buffer tint_symbol_1_1_ssbo {
-  uint tint_symbol;
+buffer prevent_dce_block_1_ssbo {
+  uint inner;
 } v;
 uint countOneBits_ae44f9() {
   uint arg_0 = 1u;
@@ -12,13 +12,13 @@ uint countOneBits_ae44f9() {
   return res;
 }
 void main() {
-  v.tint_symbol = countOneBits_ae44f9();
+  v.inner = countOneBits_ae44f9();
 }
 #version 310 es
 
 layout(binding = 0, std430)
-buffer tint_symbol_1_1_ssbo {
-  uint tint_symbol;
+buffer prevent_dce_block_1_ssbo {
+  uint inner;
 } v;
 uint countOneBits_ae44f9() {
   uint arg_0 = 1u;
@@ -27,7 +27,7 @@ uint countOneBits_ae44f9() {
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
-  v.tint_symbol = countOneBits_ae44f9();
+  v.inner = countOneBits_ae44f9();
 }
 #version 310 es
 

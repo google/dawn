@@ -3,8 +3,8 @@ precision highp float;
 precision highp int;
 
 layout(binding = 0, std430)
-buffer tint_symbol_1_1_ssbo {
-  uint tint_symbol;
+buffer prevent_dce_block_1_ssbo {
+  uint inner;
 } v;
 uint tint_int_dot(uvec4 x, uvec4 y) {
   return ((((x.x * y.x) + (x.y * y.y)) + (x.z * y.z)) + (x.w * y.w));
@@ -23,13 +23,13 @@ uint dot4U8Packed_fbed7b() {
   return res;
 }
 void main() {
-  v.tint_symbol = dot4U8Packed_fbed7b();
+  v.inner = dot4U8Packed_fbed7b();
 }
 #version 310 es
 
 layout(binding = 0, std430)
-buffer tint_symbol_1_1_ssbo {
-  uint tint_symbol;
+buffer prevent_dce_block_1_ssbo {
+  uint inner;
 } v;
 uint tint_int_dot(uvec4 x, uvec4 y) {
   return ((((x.x * y.x) + (x.y * y.y)) + (x.z * y.z)) + (x.w * y.w));
@@ -49,7 +49,7 @@ uint dot4U8Packed_fbed7b() {
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
-  v.tint_symbol = dot4U8Packed_fbed7b();
+  v.inner = dot4U8Packed_fbed7b();
 }
 #version 310 es
 

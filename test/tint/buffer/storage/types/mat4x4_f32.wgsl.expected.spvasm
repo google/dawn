@@ -7,34 +7,34 @@
                OpMemoryModel Logical GLSL450
                OpEntryPoint GLCompute %main "main"
                OpExecutionMode %main LocalSize 1 1 1
-               OpMemberName %tint_symbol_1 0 "tint_symbol"
-               OpName %tint_symbol_1 "tint_symbol_1"
-               OpMemberName %tint_symbol_3 0 "tint_symbol_2"
-               OpName %tint_symbol_3 "tint_symbol_3"
+               OpMemberName %in_block 0 "inner"
+               OpName %in_block "in_block"
+               OpMemberName %out_block 0 "inner"
+               OpName %out_block "out_block"
                OpName %main "main"
-               OpMemberDecorate %tint_symbol_1 0 Offset 0
-               OpMemberDecorate %tint_symbol_1 0 ColMajor
-               OpMemberDecorate %tint_symbol_1 0 MatrixStride 16
-               OpDecorate %tint_symbol_1 Block
+               OpMemberDecorate %in_block 0 Offset 0
+               OpMemberDecorate %in_block 0 ColMajor
+               OpMemberDecorate %in_block 0 MatrixStride 16
+               OpDecorate %in_block Block
                OpDecorate %1 DescriptorSet 0
                OpDecorate %1 Binding 0
                OpDecorate %1 NonWritable
-               OpMemberDecorate %tint_symbol_3 0 Offset 0
-               OpMemberDecorate %tint_symbol_3 0 ColMajor
-               OpMemberDecorate %tint_symbol_3 0 MatrixStride 16
-               OpDecorate %tint_symbol_3 Block
+               OpMemberDecorate %out_block 0 Offset 0
+               OpMemberDecorate %out_block 0 ColMajor
+               OpMemberDecorate %out_block 0 MatrixStride 16
+               OpDecorate %out_block Block
                OpDecorate %7 DescriptorSet 0
                OpDecorate %7 Binding 1
                OpDecorate %7 Coherent
       %float = OpTypeFloat 32
     %v4float = OpTypeVector %float 4
 %mat4v4float = OpTypeMatrix %v4float 4
-%tint_symbol_1 = OpTypeStruct %mat4v4float
-%_ptr_StorageBuffer_tint_symbol_1 = OpTypePointer StorageBuffer %tint_symbol_1
-          %1 = OpVariable %_ptr_StorageBuffer_tint_symbol_1 StorageBuffer
-%tint_symbol_3 = OpTypeStruct %mat4v4float
-%_ptr_StorageBuffer_tint_symbol_3 = OpTypePointer StorageBuffer %tint_symbol_3
-          %7 = OpVariable %_ptr_StorageBuffer_tint_symbol_3 StorageBuffer
+   %in_block = OpTypeStruct %mat4v4float
+%_ptr_StorageBuffer_in_block = OpTypePointer StorageBuffer %in_block
+          %1 = OpVariable %_ptr_StorageBuffer_in_block StorageBuffer
+  %out_block = OpTypeStruct %mat4v4float
+%_ptr_StorageBuffer_out_block = OpTypePointer StorageBuffer %out_block
+          %7 = OpVariable %_ptr_StorageBuffer_out_block StorageBuffer
        %void = OpTypeVoid
          %12 = OpTypeFunction %void
 %_ptr_StorageBuffer_mat4v4float = OpTypePointer StorageBuffer %mat4v4float

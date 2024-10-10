@@ -18,36 +18,36 @@ struct S4 {
 };
 
 layout(binding = 0, std430)
-buffer tint_symbol_2_1_ssbo {
-  mat3 tint_symbol_1;
+buffer buffer0_block_1_ssbo {
+  mat3 inner;
 } v;
 layout(binding = 1, std430)
-buffer tint_symbol_4_1_ssbo {
-  S tint_symbol_3;
+buffer buffer1_block_1_ssbo {
+  S inner;
 } v_1;
 layout(binding = 2, std430)
-buffer tint_symbol_6_1_ssbo {
-  S2 tint_symbol_5;
+buffer buffer2_block_1_ssbo {
+  S2 inner;
 } v_2;
 layout(binding = 3, std430)
-buffer tint_symbol_8_1_ssbo {
-  S3 tint_symbol_7;
+buffer buffer3_block_1_ssbo {
+  S3 inner;
 } v_3;
 layout(binding = 4, std430)
-buffer tint_symbol_10_1_ssbo {
-  S4 tint_symbol_9;
+buffer buffer4_block_1_ssbo {
+  S4 inner;
 } v_4;
 layout(binding = 5, std430)
-buffer tint_symbol_12_1_ssbo {
-  mat3 tint_symbol_11[1];
+buffer buffer5_block_1_ssbo {
+  mat3 inner[1];
 } v_5;
 layout(binding = 6, std430)
-buffer tint_symbol_14_1_ssbo {
-  S tint_symbol_13[1];
+buffer buffer6_block_1_ssbo {
+  S inner[1];
 } v_6;
 layout(binding = 7, std430)
-buffer tint_symbol_16_1_ssbo {
-  S2 tint_symbol_15[1];
+buffer buffer7_block_1_ssbo {
+  S2 inner[1];
 } v_7;
 void tint_store_and_preserve_padding(inout mat3 target, mat3 value_param) {
   target[0u] = value_param[0u];
@@ -138,19 +138,19 @@ void main() {
     }
   }
   mat3 a = m;
-  tint_store_and_preserve_padding(v.tint_symbol_1, a);
+  tint_store_and_preserve_padding(v.inner, a);
   S a_1 = S(m);
-  tint_store_and_preserve_padding_1(v_1.tint_symbol_3, a_1);
+  tint_store_and_preserve_padding_1(v_1.inner, a_1);
   S2 a_2 = S2(mat3[1](m));
-  tint_store_and_preserve_padding_2(v_2.tint_symbol_5, a_2);
+  tint_store_and_preserve_padding_2(v_2.inner, a_2);
   S3 a_3 = S3(S(m));
-  tint_store_and_preserve_padding_4(v_3.tint_symbol_7, a_3);
+  tint_store_and_preserve_padding_4(v_3.inner, a_3);
   S4 a_4 = S4(S[1](S(m)));
-  tint_store_and_preserve_padding_5(v_4.tint_symbol_9, a_4);
+  tint_store_and_preserve_padding_5(v_4.inner, a_4);
   mat3 a_5[1] = mat3[1](m);
-  tint_store_and_preserve_padding_3(v_5.tint_symbol_11, a_5);
+  tint_store_and_preserve_padding_3(v_5.inner, a_5);
   S a_6[1] = S[1](S(m));
-  tint_store_and_preserve_padding_6(v_6.tint_symbol_13, a_6);
+  tint_store_and_preserve_padding_6(v_6.inner, a_6);
   S2 a_7[1] = S2[1](S2(mat3[1](m)));
-  tint_store_and_preserve_padding_7(v_7.tint_symbol_15, a_7);
+  tint_store_and_preserve_padding_7(v_7.inner, a_7);
 }

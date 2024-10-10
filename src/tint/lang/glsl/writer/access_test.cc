@@ -277,15 +277,15 @@ TEST_F(GlslWriterTest, AccessStorageVector) {
 precision highp int;
 
 layout(binding = 0, std430)
-buffer tint_symbol_1_1_ssbo {
-  vec4 tint_symbol;
+buffer v_block_1_ssbo {
+  vec4 inner;
 } v_1;
 void main() {
-  vec4 a = v_1.tint_symbol;
-  float b = v_1.tint_symbol.x;
-  float c = v_1.tint_symbol.y;
-  float d = v_1.tint_symbol.z;
-  float e = v_1.tint_symbol.w;
+  vec4 a = v_1.inner;
+  float b = v_1.inner.x;
+  float c = v_1.inner.y;
+  float d = v_1.inner.z;
+  float e = v_1.inner.w;
 }
 )");
 }
@@ -311,15 +311,15 @@ precision highp float;
 precision highp int;
 
 layout(binding = 0, std430)
-buffer tint_symbol_1_1_ssbo {
-  f16vec4 tint_symbol;
+buffer v_block_1_ssbo {
+  f16vec4 inner;
 } v_1;
 void main() {
-  f16vec4 a = v_1.tint_symbol;
-  float16_t b = v_1.tint_symbol.x;
-  float16_t c = v_1.tint_symbol.y;
-  float16_t d = v_1.tint_symbol.z;
-  float16_t e = v_1.tint_symbol.w;
+  f16vec4 a = v_1.inner;
+  float16_t b = v_1.inner.x;
+  float16_t c = v_1.inner.y;
+  float16_t d = v_1.inner.z;
+  float16_t e = v_1.inner.w;
 }
 )");
 }
@@ -343,13 +343,13 @@ TEST_F(GlslWriterTest, AccessStorageMatrix) {
 precision highp int;
 
 layout(binding = 0, std430)
-buffer tint_symbol_1_1_ssbo {
-  mat4 tint_symbol;
+buffer v_block_1_ssbo {
+  mat4 inner;
 } v_1;
 void main() {
-  mat4 a = v_1.tint_symbol;
-  vec4 b = v_1.tint_symbol[3u];
-  float c = v_1.tint_symbol[1u].z;
+  mat4 a = v_1.inner;
+  vec4 b = v_1.inner[3u];
+  float c = v_1.inner[1u].z;
 }
 )");
 }
@@ -371,12 +371,12 @@ TEST_F(GlslWriterTest, AccessStorageArray) {
 precision highp int;
 
 layout(binding = 0, std430)
-buffer tint_symbol_1_1_ssbo {
-  vec3 tint_symbol[5];
+buffer v_block_1_ssbo {
+  vec3 inner[5];
 } v_1;
 void main() {
-  vec3 a[5] = v_1.tint_symbol;
-  vec3 b = v_1.tint_symbol[3u];
+  vec3 a[5] = v_1.inner;
+  vec3 b = v_1.inner[3u];
 }
 )");
 }
@@ -409,12 +409,12 @@ struct SB {
 };
 
 layout(binding = 0, std430)
-buffer tint_symbol_1_1_ssbo {
-  SB tint_symbol;
+buffer v_block_1_ssbo {
+  SB inner;
 } v_1;
 void main() {
-  SB a = v_1.tint_symbol;
-  float b = v_1.tint_symbol.b;
+  SB a = v_1.inner;
+  float b = v_1.inner.b;
 }
 )");
 }
@@ -475,12 +475,12 @@ struct SB {
 };
 
 layout(binding = 0, std430)
-buffer tint_symbol_1_1_ssbo {
-  SB tint_symbol;
+buffer v_block_1_ssbo {
+  SB inner;
 } v_1;
 void main() {
-  SB a = v_1.tint_symbol;
-  float b = v_1.tint_symbol.b.y.t[3u].z;
+  SB a = v_1.inner;
+  float b = v_1.inner.b.y.t[3u].z;
 }
 )");
 }
@@ -504,14 +504,14 @@ TEST_F(GlslWriterTest, AccessStorageStoreVector) {
 precision highp int;
 
 layout(binding = 0, std430)
-buffer tint_symbol_1_1_ssbo {
-  vec4 tint_symbol;
+buffer v_block_1_ssbo {
+  vec4 inner;
 } v_1;
 void main() {
-  v_1.tint_symbol[0u] = 2.0f;
-  v_1.tint_symbol[1u] = 4.0f;
-  v_1.tint_symbol[2u] = 8.0f;
-  v_1.tint_symbol[3u] = 16.0f;
+  v_1.inner[0u] = 2.0f;
+  v_1.inner[1u] = 4.0f;
+  v_1.inner[2u] = 8.0f;
+  v_1.inner[3u] = 16.0f;
 }
 )");
 }
@@ -545,18 +545,18 @@ TEST_F(GlslWriterTest, AccessDirectVariable) {
 precision highp int;
 
 layout(binding = 0, std430)
-buffer tint_symbol_1_1_ssbo {
-  vec4 tint_symbol;
+buffer v1_block_1_ssbo {
+  vec4 inner;
 } v;
 layout(binding = 1, std430)
-buffer tint_symbol_3_1_ssbo {
-  vec4 tint_symbol_2;
+buffer v2_block_1_ssbo {
+  vec4 inner;
 } v_1;
 void bar() {
-  float a = v.tint_symbol.y;
+  float a = v.inner.y;
 }
 void bar_1() {
-  float a = v_1.tint_symbol_2.y;
+  float a = v_1.inner.y;
 }
 void main() {
   bar();
@@ -604,11 +604,11 @@ struct SB {
 };
 
 layout(binding = 0, std430)
-buffer tint_symbol_1_1_ssbo {
-  SB tint_symbol;
+buffer v_block_1_ssbo {
+  SB inner;
 } v_1;
 void main() {
-  uint b = v_1.tint_symbol.b.d;
+  uint b = v_1.inner.b.d;
 }
 )");
 }
@@ -766,11 +766,11 @@ struct SB {
 };
 
 layout(binding = 0, std140)
-uniform tint_symbol_1_1_ubo {
-  SB tint_symbol;
+uniform v_block_1_ubo {
+  SB inner;
 } v_1;
 void main() {
-  uint b = v_1.tint_symbol.b.d;
+  uint b = v_1.inner.b.d;
 }
 )");
 }
@@ -824,11 +824,11 @@ TEST_F(GlslWriterTest, AccessUniformScalar) {
 precision highp int;
 
 layout(binding = 0, std140)
-uniform tint_symbol_1_1_ubo {
-  float tint_symbol;
+uniform v_block_1_ubo {
+  float inner;
 } v_1;
 void main() {
-  float a = v_1.tint_symbol;
+  float a = v_1.inner;
 }
 )");
 }
@@ -850,11 +850,11 @@ precision highp float;
 precision highp int;
 
 layout(binding = 0, std140)
-uniform tint_symbol_1_1_ubo {
-  float16_t tint_symbol;
+uniform v_block_1_ubo {
+  float16_t inner;
 } v_1;
 void main() {
-  float16_t a = v_1.tint_symbol;
+  float16_t a = v_1.inner;
 }
 )");
 }
@@ -879,15 +879,15 @@ TEST_F(GlslWriterTest, AccessUniformVector) {
 precision highp int;
 
 layout(binding = 0, std140)
-uniform tint_symbol_1_1_ubo {
-  vec4 tint_symbol;
+uniform v_block_1_ubo {
+  vec4 inner;
 } v_1;
 void main() {
-  vec4 a = v_1.tint_symbol;
-  float b = v_1.tint_symbol.x;
-  float c = v_1.tint_symbol.y;
-  float d = v_1.tint_symbol.z;
-  float e = v_1.tint_symbol.w;
+  vec4 a = v_1.inner;
+  float b = v_1.inner.x;
+  float c = v_1.inner.y;
+  float d = v_1.inner.z;
+  float e = v_1.inner.w;
 }
 )");
 }
@@ -914,16 +914,16 @@ precision highp float;
 precision highp int;
 
 layout(binding = 0, std140)
-uniform tint_symbol_1_1_ubo {
-  f16vec4 tint_symbol;
+uniform v_block_1_ubo {
+  f16vec4 inner;
 } v_1;
 void main() {
   uint x = 1u;
-  f16vec4 a = v_1.tint_symbol;
-  float16_t b = v_1.tint_symbol.x;
-  float16_t c = v_1.tint_symbol[min(x, 3u)];
-  float16_t d = v_1.tint_symbol.z;
-  float16_t e = v_1.tint_symbol.w;
+  f16vec4 a = v_1.inner;
+  float16_t b = v_1.inner.x;
+  float16_t c = v_1.inner[min(x, 3u)];
+  float16_t d = v_1.inner.z;
+  float16_t e = v_1.inner.w;
 }
 )");
 }
@@ -947,13 +947,13 @@ TEST_F(GlslWriterTest, AccessUniformMatrix) {
 precision highp int;
 
 layout(binding = 0, std140)
-uniform tint_symbol_1_1_ubo {
-  mat4 tint_symbol;
+uniform v_block_1_ubo {
+  mat4 inner;
 } v_1;
 void main() {
-  mat4 a = v_1.tint_symbol;
-  vec4 b = v_1.tint_symbol[3u];
-  float c = v_1.tint_symbol[1u].z;
+  mat4 a = v_1.inner;
+  vec4 b = v_1.inner[3u];
+  float c = v_1.inner[1u].z;
 }
 )");
 }
@@ -977,15 +977,15 @@ TEST_F(GlslWriterTest, AccessUniformMatrix2x3) {
 precision highp int;
 
 layout(binding = 0, std140)
-uniform tint_symbol_1_std140_1_ubo {
-  vec3 tint_symbol_col0;
+uniform v_block_std140_1_ubo {
+  vec3 inner_col0;
   uint tint_pad;
-  vec3 tint_symbol_col1;
+  vec3 inner_col1;
 } v_1;
 void main() {
-  mat2x3 a = mat2x3(v_1.tint_symbol_col0, v_1.tint_symbol_col1);
-  vec3 b = mat2x3(v_1.tint_symbol_col0, v_1.tint_symbol_col1)[1u];
-  float c = mat2x3(v_1.tint_symbol_col0, v_1.tint_symbol_col1)[1u][2u];
+  mat2x3 a = mat2x3(v_1.inner_col0, v_1.inner_col1);
+  vec3 b = mat2x3(v_1.inner_col0, v_1.inner_col1)[1u];
+  float c = mat2x3(v_1.inner_col0, v_1.inner_col1)[1u][2u];
 }
 )");
 }
@@ -1009,14 +1009,14 @@ precision highp float;
 precision highp int;
 
 layout(binding = 0, std140)
-uniform tint_symbol_1_std140_1_ubo {
-  f16vec3 tint_symbol_col0;
-  f16vec3 tint_symbol_col1;
+uniform v_block_std140_1_ubo {
+  f16vec3 inner_col0;
+  f16vec3 inner_col1;
 } v_1;
 void main() {
-  f16mat2x3 a = f16mat2x3(v_1.tint_symbol_col0, v_1.tint_symbol_col1);
-  f16vec3 b = f16mat2x3(v_1.tint_symbol_col0, v_1.tint_symbol_col1)[1u];
-  float16_t c = f16mat2x3(v_1.tint_symbol_col0, v_1.tint_symbol_col1)[1u][2u];
+  f16mat2x3 a = f16mat2x3(v_1.inner_col0, v_1.inner_col1);
+  f16vec3 b = f16mat2x3(v_1.inner_col0, v_1.inner_col1)[1u];
+  float16_t c = f16mat2x3(v_1.inner_col0, v_1.inner_col1)[1u][2u];
 }
 )");
 }
@@ -1040,15 +1040,15 @@ TEST_F(GlslWriterTest, AccessUniformMatrix3x2) {
 precision highp int;
 
 layout(binding = 0, std140)
-uniform tint_symbol_1_std140_1_ubo {
-  vec2 tint_symbol_col0;
-  vec2 tint_symbol_col1;
-  vec2 tint_symbol_col2;
+uniform v_block_std140_1_ubo {
+  vec2 inner_col0;
+  vec2 inner_col1;
+  vec2 inner_col2;
 } v_1;
 void main() {
-  mat3x2 a = mat3x2(v_1.tint_symbol_col0, v_1.tint_symbol_col1, v_1.tint_symbol_col2);
-  vec2 b = mat3x2(v_1.tint_symbol_col0, v_1.tint_symbol_col1, v_1.tint_symbol_col2)[1u];
-  float c = mat3x2(v_1.tint_symbol_col0, v_1.tint_symbol_col1, v_1.tint_symbol_col2)[1u][1u];
+  mat3x2 a = mat3x2(v_1.inner_col0, v_1.inner_col1, v_1.inner_col2);
+  vec2 b = mat3x2(v_1.inner_col0, v_1.inner_col1, v_1.inner_col2)[1u];
+  float c = mat3x2(v_1.inner_col0, v_1.inner_col1, v_1.inner_col2)[1u][1u];
 }
 )");
 }
@@ -1072,14 +1072,14 @@ TEST_F(GlslWriterTest, AccessUniformMatrix2x2) {
 precision highp int;
 
 layout(binding = 0, std140)
-uniform tint_symbol_1_std140_1_ubo {
-  vec2 tint_symbol_col0;
-  vec2 tint_symbol_col1;
+uniform v_block_std140_1_ubo {
+  vec2 inner_col0;
+  vec2 inner_col1;
 } v_1;
 void main() {
-  mat2 a = mat2(v_1.tint_symbol_col0, v_1.tint_symbol_col1);
-  vec2 b = mat2(v_1.tint_symbol_col0, v_1.tint_symbol_col1)[1u];
-  float c = mat2(v_1.tint_symbol_col0, v_1.tint_symbol_col1)[1u][1u];
+  mat2 a = mat2(v_1.inner_col0, v_1.inner_col1);
+  vec2 b = mat2(v_1.inner_col0, v_1.inner_col1)[1u];
+  float c = mat2(v_1.inner_col0, v_1.inner_col1)[1u][1u];
 }
 )");
 }
@@ -1104,14 +1104,14 @@ precision highp float;
 precision highp int;
 
 layout(binding = 0, std140)
-uniform tint_symbol_1_std140_1_ubo {
-  f16vec2 tint_symbol_col0;
-  f16vec2 tint_symbol_col1;
+uniform v_block_std140_1_ubo {
+  f16vec2 inner_col0;
+  f16vec2 inner_col1;
 } v_1;
 void main() {
-  f16mat2 a = f16mat2(v_1.tint_symbol_col0, v_1.tint_symbol_col1);
-  f16vec2 b = f16mat2(v_1.tint_symbol_col0, v_1.tint_symbol_col1)[1u];
-  float16_t c = f16mat2(v_1.tint_symbol_col0, v_1.tint_symbol_col1)[1u][1u];
+  f16mat2 a = f16mat2(v_1.inner_col0, v_1.inner_col1);
+  f16vec2 b = f16mat2(v_1.inner_col0, v_1.inner_col1)[1u];
+  float16_t c = f16mat2(v_1.inner_col0, v_1.inner_col1)[1u][1u];
 }
 )");
 }
@@ -1133,12 +1133,12 @@ TEST_F(GlslWriterTest, AccessUniformArray) {
 precision highp int;
 
 layout(binding = 0, std140)
-uniform tint_symbol_1_1_ubo {
-  vec3 tint_symbol[5];
+uniform v_block_1_ubo {
+  vec3 inner[5];
 } v_1;
 void main() {
-  vec3 a[5] = v_1.tint_symbol;
-  vec3 b = v_1.tint_symbol[3u];
+  vec3 a[5] = v_1.inner;
+  vec3 b = v_1.inner[3u];
 }
 )");
 }
@@ -1161,12 +1161,12 @@ precision highp float;
 precision highp int;
 
 layout(binding = 0, std140)
-uniform tint_symbol_1_1_ubo {
-  f16vec3 tint_symbol[5];
+uniform v_block_1_ubo {
+  f16vec3 inner[5];
 } v_1;
 void main() {
-  f16vec3 a[5] = v_1.tint_symbol;
-  f16vec3 b = v_1.tint_symbol[3u];
+  f16vec3 a[5] = v_1.inner;
+  f16vec3 b = v_1.inner[3u];
 }
 )");
 }
@@ -1188,12 +1188,12 @@ TEST_F(GlslWriterTest, AccessUniformArrayWhichCanHaveSizesOtherThenFive) {
 precision highp int;
 
 layout(binding = 0, std140)
-uniform tint_symbol_1_1_ubo {
-  vec3 tint_symbol[42];
+uniform v_block_1_ubo {
+  vec3 inner[42];
 } v_1;
 void main() {
-  vec3 a[42] = v_1.tint_symbol;
-  vec3 b = v_1.tint_symbol[3u];
+  vec3 a[42] = v_1.inner;
+  vec3 b = v_1.inner[3u];
 }
 )");
 }
@@ -1226,12 +1226,12 @@ struct SB {
 };
 
 layout(binding = 0, std140)
-uniform tint_symbol_1_1_ubo {
-  SB tint_symbol;
+uniform v_block_1_ubo {
+  SB inner;
 } v_1;
 void main() {
-  SB a = v_1.tint_symbol;
-  float b = v_1.tint_symbol.b;
+  SB a = v_1.inner;
+  float b = v_1.inner.b;
 }
 )");
 }
@@ -1265,12 +1265,12 @@ struct SB {
 };
 
 layout(binding = 0, std140)
-uniform tint_symbol_1_1_ubo {
-  SB tint_symbol;
+uniform v_block_1_ubo {
+  SB inner;
 } v_1;
 void main() {
-  SB a = v_1.tint_symbol;
-  float16_t b = v_1.tint_symbol.b;
+  SB a = v_1.inner;
+  float16_t b = v_1.inner.b;
 }
 )");
 }
@@ -1351,8 +1351,8 @@ struct SB {
 };
 
 layout(binding = 0, std140)
-uniform tint_symbol_1_std140_1_ubo {
-  SB_std140 tint_symbol;
+uniform v_block_std140_1_ubo {
+  SB_std140 inner;
 } v_1;
 Inner tint_convert_Inner(Inner_std140 tint_input) {
   return Inner(mat3(tint_input.s_col0, tint_input.s_col1, tint_input.s_col2), tint_input.t);
@@ -1364,8 +1364,8 @@ SB tint_convert_SB(SB_std140 tint_input) {
   return SB(tint_input.a, tint_convert_Outer(tint_input.b));
 }
 void main() {
-  SB a = tint_convert_SB(v_1.tint_symbol);
-  float b = v_1.tint_symbol.b.y.t[3u].z;
+  SB a = tint_convert_SB(v_1.inner);
+  float b = v_1.inner.b.y.t[3u].z;
 }
 )");
 }
@@ -1386,11 +1386,11 @@ TEST_F(GlslWriterTest, AccessStoreScalar) {
 precision highp int;
 
 layout(binding = 0, std430)
-buffer tint_symbol_1_1_ssbo {
-  float tint_symbol;
+buffer v_block_1_ssbo {
+  float inner;
 } v_1;
 void main() {
-  v_1.tint_symbol = 2.0f;
+  v_1.inner = 2.0f;
 }
 )");
 }
@@ -1412,11 +1412,11 @@ precision highp float;
 precision highp int;
 
 layout(binding = 0, std430)
-buffer tint_symbol_1_1_ssbo {
-  float16_t tint_symbol;
+buffer v_block_1_ssbo {
+  float16_t inner;
 } v_1;
 void main() {
-  v_1.tint_symbol = 2.0hf;
+  v_1.inner = 2.0hf;
 }
 )");
 }
@@ -1438,11 +1438,11 @@ TEST_F(GlslWriterTest, AccessStoreVectorElement) {
 precision highp int;
 
 layout(binding = 0, std430)
-buffer tint_symbol_1_1_ssbo {
-  vec3 tint_symbol;
+buffer v_block_1_ssbo {
+  vec3 inner;
 } v_1;
 void main() {
-  v_1.tint_symbol[1u] = 2.0f;
+  v_1.inner[1u] = 2.0f;
 }
 )");
 }
@@ -1465,11 +1465,11 @@ precision highp float;
 precision highp int;
 
 layout(binding = 0, std430)
-buffer tint_symbol_1_1_ssbo {
-  f16vec3 tint_symbol;
+buffer v_block_1_ssbo {
+  f16vec3 inner;
 } v_1;
 void main() {
-  v_1.tint_symbol[1u] = 2.0hf;
+  v_1.inner[1u] = 2.0hf;
 }
 )");
 }
@@ -1491,11 +1491,11 @@ TEST_F(GlslWriterTest, AccessStoreVector) {
 precision highp int;
 
 layout(binding = 0, std430)
-buffer tint_symbol_1_1_ssbo {
-  vec3 tint_symbol;
+buffer v_block_1_ssbo {
+  vec3 inner;
 } v_1;
 void main() {
-  v_1.tint_symbol = vec3(2.0f, 3.0f, 4.0f);
+  v_1.inner = vec3(2.0f, 3.0f, 4.0f);
 }
 )");
 }
@@ -1518,11 +1518,11 @@ precision highp float;
 precision highp int;
 
 layout(binding = 0, std430)
-buffer tint_symbol_1_1_ssbo {
-  f16vec3 tint_symbol;
+buffer v_block_1_ssbo {
+  f16vec3 inner;
 } v_1;
 void main() {
-  v_1.tint_symbol = f16vec3(2.0hf, 3.0hf, 4.0hf);
+  v_1.inner = f16vec3(2.0hf, 3.0hf, 4.0hf);
 }
 )");
 }
@@ -1544,11 +1544,11 @@ TEST_F(GlslWriterTest, AccessStoreMatrixElement) {
 precision highp int;
 
 layout(binding = 0, std430)
-buffer tint_symbol_1_1_ssbo {
-  mat4 tint_symbol;
+buffer v_block_1_ssbo {
+  mat4 inner;
 } v_1;
 void main() {
-  v_1.tint_symbol[1u][2u] = 5.0f;
+  v_1.inner[1u][2u] = 5.0f;
 }
 )");
 }
@@ -1571,11 +1571,11 @@ precision highp float;
 precision highp int;
 
 layout(binding = 0, std430)
-buffer tint_symbol_1_1_ssbo {
-  f16mat3x2 tint_symbol;
+buffer v_block_1_ssbo {
+  f16mat3x2 inner;
 } v_1;
 void main() {
-  v_1.tint_symbol[2u][1u] = 5.0hf;
+  v_1.inner[2u][1u] = 5.0hf;
 }
 )");
 }
@@ -1597,11 +1597,11 @@ TEST_F(GlslWriterTest, AccessStoreMatrixColumn) {
 precision highp int;
 
 layout(binding = 0, std430)
-buffer tint_symbol_1_1_ssbo {
-  mat4 tint_symbol;
+buffer v_block_1_ssbo {
+  mat4 inner;
 } v_1;
 void main() {
-  v_1.tint_symbol[1u] = vec4(5.0f);
+  v_1.inner[1u] = vec4(5.0f);
 }
 )");
 }
@@ -1624,11 +1624,11 @@ precision highp float;
 precision highp int;
 
 layout(binding = 0, std430)
-buffer tint_symbol_1_1_ssbo {
-  f16mat2x3 tint_symbol;
+buffer v_block_1_ssbo {
+  f16mat2x3 inner;
 } v_1;
 void main() {
-  v_1.tint_symbol[1u] = f16vec3(5.0hf);
+  v_1.inner[1u] = f16vec3(5.0hf);
 }
 )");
 }
@@ -1649,11 +1649,11 @@ TEST_F(GlslWriterTest, AccessStoreMatrix) {
 precision highp int;
 
 layout(binding = 0, std430)
-buffer tint_symbol_1_1_ssbo {
-  mat4 tint_symbol;
+buffer v_block_1_ssbo {
+  mat4 inner;
 } v_1;
 void main() {
-  v_1.tint_symbol = mat4(vec4(0.0f), vec4(0.0f), vec4(0.0f), vec4(0.0f));
+  v_1.inner = mat4(vec4(0.0f), vec4(0.0f), vec4(0.0f), vec4(0.0f));
 }
 )");
 }
@@ -1675,11 +1675,11 @@ precision highp float;
 precision highp int;
 
 layout(binding = 0, std430)
-buffer tint_symbol_1_1_ssbo {
-  f16mat4 tint_symbol;
+buffer v_block_1_ssbo {
+  f16mat4 inner;
 } v_1;
 void main() {
-  v_1.tint_symbol = f16mat4(f16vec4(0.0hf), f16vec4(0.0hf), f16vec4(0.0hf), f16vec4(0.0hf));
+  v_1.inner = f16mat4(f16vec4(0.0hf), f16vec4(0.0hf), f16vec4(0.0hf), f16vec4(0.0hf));
 }
 )");
 }
@@ -1700,11 +1700,11 @@ TEST_F(GlslWriterTest, AccessStoreArrayElement) {
 precision highp int;
 
 layout(binding = 0, std430)
-buffer tint_symbol_1_1_ssbo {
-  float tint_symbol[5];
+buffer v_block_1_ssbo {
+  float inner[5];
 } v_1;
 void main() {
-  v_1.tint_symbol[3u] = 1.0f;
+  v_1.inner[3u] = 1.0f;
 }
 )");
 }
@@ -1726,11 +1726,11 @@ precision highp float;
 precision highp int;
 
 layout(binding = 0, std430)
-buffer tint_symbol_1_1_ssbo {
-  float16_t tint_symbol[5];
+buffer v_block_1_ssbo {
+  float16_t inner[5];
 } v_1;
 void main() {
-  v_1.tint_symbol[3u] = 1.0hf;
+  v_1.inner[3u] = 1.0hf;
 }
 )");
 }
@@ -1752,8 +1752,8 @@ TEST_F(GlslWriterTest, AccessStoreArray) {
 precision highp int;
 
 layout(binding = 0, std430)
-buffer tint_symbol_1_1_ssbo {
-  vec3 tint_symbol[5];
+buffer v_block_1_ssbo {
+  vec3 inner[5];
 } v_1;
 void tint_store_and_preserve_padding(inout vec3 target[5], vec3 value_param[5]) {
   {
@@ -1774,7 +1774,7 @@ void tint_store_and_preserve_padding(inout vec3 target[5], vec3 value_param[5]) 
 }
 void main() {
   vec3 ary[5] = vec3[5](vec3(0.0f), vec3(0.0f), vec3(0.0f), vec3(0.0f), vec3(0.0f));
-  tint_store_and_preserve_padding(v_1.tint_symbol, ary);
+  tint_store_and_preserve_padding(v_1.inner, ary);
 }
 )");
 }
@@ -1806,11 +1806,11 @@ struct SB {
 };
 
 layout(binding = 0, std430)
-buffer tint_symbol_1_1_ssbo {
-  SB tint_symbol;
+buffer v_block_1_ssbo {
+  SB inner;
 } v_1;
 void main() {
-  v_1.tint_symbol.b = 3.0f;
+  v_1.inner.b = 3.0f;
 }
 )");
 }
@@ -1843,11 +1843,11 @@ struct SB {
 };
 
 layout(binding = 0, std430)
-buffer tint_symbol_1_1_ssbo {
-  SB tint_symbol;
+buffer v_block_1_ssbo {
+  SB inner;
 } v_1;
 void main() {
-  v_1.tint_symbol.b = 3.0hf;
+  v_1.inner.b = 3.0hf;
 }
 )");
 }
@@ -1905,11 +1905,11 @@ struct SB {
 };
 
 layout(binding = 0, std430)
-buffer tint_symbol_1_1_ssbo {
-  SB tint_symbol;
+buffer v_block_1_ssbo {
+  SB inner;
 } v_1;
 void main() {
-  v_1.tint_symbol.b.x = 2.0f;
+  v_1.inner.b.x = 2.0f;
 }
 )");
 }
@@ -1971,8 +1971,8 @@ struct SB {
 };
 
 layout(binding = 0, std430)
-buffer tint_symbol_1_1_ssbo {
-  SB tint_symbol;
+buffer v_block_1_ssbo {
+  SB inner;
 } v_1;
 void tint_store_and_preserve_padding_2(inout Inner target, Inner value_param) {
   target.s = value_param.s;
@@ -1988,7 +1988,7 @@ void tint_store_and_preserve_padding(inout SB target, SB value_param) {
 }
 void main() {
   SB s = SB(0, 0u, 0u, 0u, Outer(0.0f, 0u, 0u, 0u, Inner(0.0f, 0u, 0u, 0u, vec3(0.0f), 0u)));
-  tint_store_and_preserve_padding(v_1.tint_symbol, s);
+  tint_store_and_preserve_padding(v_1.inner, s);
 }
 )");
 }
@@ -2047,8 +2047,8 @@ struct SB {
 };
 
 layout(binding = 0, std430)
-buffer tint_symbol_1_1_ssbo {
-  SB tint_symbol;
+buffer v_block_1_ssbo {
+  SB inner;
 } v_1;
 void tint_store_and_preserve_padding_4(inout vec3 target[5], vec3 value_param[5]) {
   {
@@ -2086,7 +2086,7 @@ void tint_store_and_preserve_padding(inout SB target, SB value_param) {
 }
 void main() {
   SB s = SB(0, 0u, 0u, 0u, Outer(0.0f, 0u, 0u, 0u, Inner(mat3(vec3(0.0f), vec3(0.0f), vec3(0.0f)), vec3[5](vec3(0.0f), vec3(0.0f), vec3(0.0f), vec3(0.0f), vec3(0.0f)))));
-  tint_store_and_preserve_padding(v_1.tint_symbol, s);
+  tint_store_and_preserve_padding(v_1.inner, s);
 }
 )");
 }
@@ -2124,12 +2124,12 @@ struct SB {
 };
 
 layout(binding = 0, std430)
-buffer tint_symbol_1_1_ssbo {
-  SB tint_symbol;
+buffer v_block_1_ssbo {
+  SB inner;
 } v_1;
 void main() {
-  float b = v_1.tint_symbol.b.y;
-  float c = v_1.tint_symbol.b.z;
+  float b = v_1.inner.b.y;
+  float c = v_1.inner.b.z;
 }
 )");
 }
@@ -2167,12 +2167,12 @@ struct SB {
 };
 
 layout(binding = 0, std140)
-uniform tint_symbol_1_1_ubo {
-  SB tint_symbol;
+uniform v_block_1_ubo {
+  SB inner;
 } v_1;
 void main() {
-  float b = v_1.tint_symbol.d.y;
-  float c = v_1.tint_symbol.d.z;
+  float b = v_1.inner.d.y;
+  float c = v_1.inner.d.z;
 }
 )");
 }

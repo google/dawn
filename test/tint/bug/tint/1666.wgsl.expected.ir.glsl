@@ -1,8 +1,8 @@
 #version 310 es
 
 layout(binding = 0, std430)
-buffer tint_symbol_1_1_ssbo {
-  float tint_symbol[];
+buffer rarr_block_1_ssbo {
+  float inner[];
 } v;
 void vector() {
   int idx = 3;
@@ -19,7 +19,7 @@ void fixed_size_array() {
 }
 void runtime_size_array() {
   int idx = -1;
-  float x = v.tint_symbol[idx];
+  float x = v.inner[idx];
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {

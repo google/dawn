@@ -8,15 +8,15 @@ struct SB_RW_atomic {
 };
 
 layout(binding = 0, std430)
-buffer tint_symbol_1_1_ssbo {
-  SB_RW_atomic tint_symbol;
+buffer sb_rw_block_1_ssbo {
+  SB_RW_atomic inner;
 } v;
 void atomicMax_92aa72() {
   int arg_1 = 0;
   int res = 0;
   arg_1 = 1;
   int x_20 = arg_1;
-  int x_13 = atomicMax(v.tint_symbol.arg_0, x_20);
+  int x_13 = atomicMax(v.inner.arg_0, x_20);
   res = x_13;
 }
 void fragment_main_1() {
@@ -33,15 +33,15 @@ struct SB_RW_atomic {
 };
 
 layout(binding = 0, std430)
-buffer tint_symbol_1_1_ssbo {
-  SB_RW_atomic tint_symbol;
+buffer sb_rw_block_1_ssbo {
+  SB_RW_atomic inner;
 } v;
 void atomicMax_92aa72() {
   int arg_1 = 0;
   int res = 0;
   arg_1 = 1;
   int x_20 = arg_1;
-  int x_13 = atomicMax(v.tint_symbol.arg_0, x_20);
+  int x_13 = atomicMax(v.inner.arg_0, x_20);
   res = x_13;
 }
 void compute_main_1() {

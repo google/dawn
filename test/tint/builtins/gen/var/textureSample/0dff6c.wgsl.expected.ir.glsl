@@ -3,8 +3,8 @@ precision highp float;
 precision highp int;
 
 layout(binding = 0, std430)
-buffer tint_symbol_1_1_ssbo {
-  float tint_symbol;
+buffer prevent_dce_block_1_ssbo {
+  float inner;
 } v;
 uniform highp sampler2DShadow arg_0_arg_1;
 float textureSample_0dff6c() {
@@ -13,5 +13,5 @@ float textureSample_0dff6c() {
   return res;
 }
 void main() {
-  v.tint_symbol = textureSample_0dff6c();
+  v.inner = textureSample_0dff6c();
 }

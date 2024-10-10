@@ -35,8 +35,8 @@ struct S {
 };
 
 layout(binding = 0, std430)
-buffer tint_symbol_1_1_ssbo {
-  S tint_symbol;
+buffer s_block_1_ssbo {
+  S inner;
 } v;
 void tint_store_and_preserve_padding_4(inout strided_arr target, strided_arr value_param) {
   target.el = value_param.el;
@@ -96,12 +96,12 @@ void tint_store_and_preserve_padding(inout strided_arr_1 target[4], strided_arr_
   }
 }
 void f_1() {
-  strided_arr_1 x_19[4] = v.tint_symbol.a;
-  strided_arr x_24[3][2] = v.tint_symbol.a[3].el;
-  strided_arr x_28[2] = v.tint_symbol.a[3].el[2];
-  float x_32 = v.tint_symbol.a[3].el[2][1].el;
-  tint_store_and_preserve_padding(v.tint_symbol.a, strided_arr_1[4](strided_arr_1(strided_arr[3][2](strided_arr[2](strided_arr(0.0f, 0u), strided_arr(0.0f, 0u)), strided_arr[2](strided_arr(0.0f, 0u), strided_arr(0.0f, 0u)), strided_arr[2](strided_arr(0.0f, 0u), strided_arr(0.0f, 0u))), 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u), strided_arr_1(strided_arr[3][2](strided_arr[2](strided_arr(0.0f, 0u), strided_arr(0.0f, 0u)), strided_arr[2](strided_arr(0.0f, 0u), strided_arr(0.0f, 0u)), strided_arr[2](strided_arr(0.0f, 0u), strided_arr(0.0f, 0u))), 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u), strided_arr_1(strided_arr[3][2](strided_arr[2](strided_arr(0.0f, 0u), strided_arr(0.0f, 0u)), strided_arr[2](strided_arr(0.0f, 0u), strided_arr(0.0f, 0u)), strided_arr[2](strided_arr(0.0f, 0u), strided_arr(0.0f, 0u))), 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u), strided_arr_1(strided_arr[3][2](strided_arr[2](strided_arr(0.0f, 0u), strided_arr(0.0f, 0u)), strided_arr[2](strided_arr(0.0f, 0u), strided_arr(0.0f, 0u)), strided_arr[2](strided_arr(0.0f, 0u), strided_arr(0.0f, 0u))), 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u)));
-  v.tint_symbol.a[3].el[2][1].el = 5.0f;
+  strided_arr_1 x_19[4] = v.inner.a;
+  strided_arr x_24[3][2] = v.inner.a[3].el;
+  strided_arr x_28[2] = v.inner.a[3].el[2];
+  float x_32 = v.inner.a[3].el[2][1].el;
+  tint_store_and_preserve_padding(v.inner.a, strided_arr_1[4](strided_arr_1(strided_arr[3][2](strided_arr[2](strided_arr(0.0f, 0u), strided_arr(0.0f, 0u)), strided_arr[2](strided_arr(0.0f, 0u), strided_arr(0.0f, 0u)), strided_arr[2](strided_arr(0.0f, 0u), strided_arr(0.0f, 0u))), 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u), strided_arr_1(strided_arr[3][2](strided_arr[2](strided_arr(0.0f, 0u), strided_arr(0.0f, 0u)), strided_arr[2](strided_arr(0.0f, 0u), strided_arr(0.0f, 0u)), strided_arr[2](strided_arr(0.0f, 0u), strided_arr(0.0f, 0u))), 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u), strided_arr_1(strided_arr[3][2](strided_arr[2](strided_arr(0.0f, 0u), strided_arr(0.0f, 0u)), strided_arr[2](strided_arr(0.0f, 0u), strided_arr(0.0f, 0u)), strided_arr[2](strided_arr(0.0f, 0u), strided_arr(0.0f, 0u))), 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u), strided_arr_1(strided_arr[3][2](strided_arr[2](strided_arr(0.0f, 0u), strided_arr(0.0f, 0u)), strided_arr[2](strided_arr(0.0f, 0u), strided_arr(0.0f, 0u)), strided_arr[2](strided_arr(0.0f, 0u), strided_arr(0.0f, 0u))), 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u)));
+  v.inner.a[3].el[2][1].el = 5.0f;
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {

@@ -3,8 +3,8 @@ precision highp float;
 precision highp int;
 
 layout(binding = 0, std430)
-buffer tint_symbol_1_1_ssbo {
-  uint tint_symbol;
+buffer prevent_dce_block_1_ssbo {
+  uint inner;
 } v;
 layout(binding = 0, rgba8) uniform highp readonly image2DArray arg_0;
 uint textureNumLayers_3eff89() {
@@ -12,13 +12,13 @@ uint textureNumLayers_3eff89() {
   return res;
 }
 void main() {
-  v.tint_symbol = textureNumLayers_3eff89();
+  v.inner = textureNumLayers_3eff89();
 }
 #version 310 es
 
 layout(binding = 0, std430)
-buffer tint_symbol_1_1_ssbo {
-  uint tint_symbol;
+buffer prevent_dce_block_1_ssbo {
+  uint inner;
 } v;
 layout(binding = 0, rgba8) uniform highp readonly image2DArray arg_0;
 uint textureNumLayers_3eff89() {
@@ -27,7 +27,7 @@ uint textureNumLayers_3eff89() {
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
-  v.tint_symbol = textureNumLayers_3eff89();
+  v.inner = textureNumLayers_3eff89();
 }
 #version 310 es
 

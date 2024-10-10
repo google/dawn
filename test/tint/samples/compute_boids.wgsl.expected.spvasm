@@ -19,17 +19,17 @@
                OpMemberName %SimParams 5 "rule2Scale"
                OpMemberName %SimParams 6 "rule3Scale"
                OpName %SimParams "SimParams"
-               OpMemberName %tint_symbol_1 0 "tint_symbol"
-               OpName %tint_symbol_1 "tint_symbol_1"
+               OpMemberName %params_block 0 "inner"
+               OpName %params_block "params_block"
                OpMemberName %Particle 0 "pos"
                OpMemberName %Particle 1 "vel"
                OpName %Particle "Particle"
                OpMemberName %Particles 0 "particles"
                OpName %Particles "Particles"
-               OpMemberName %tint_symbol_3 0 "tint_symbol_2"
-               OpName %tint_symbol_3 "tint_symbol_3"
-               OpMemberName %tint_symbol_5 0 "tint_symbol_4"
-               OpName %tint_symbol_5 "tint_symbol_5"
+               OpMemberName %particlesA_block 0 "inner"
+               OpName %particlesA_block "particlesA_block"
+               OpMemberName %particlesB_block 0 "inner"
+               OpName %particlesB_block "particlesB_block"
                OpName %vert_main_loc0_Input "vert_main_loc0_Input"
                OpName %vert_main_loc1_Input "vert_main_loc1_Input"
                OpName %vert_main_loc2_Input "vert_main_loc2_Input"
@@ -67,8 +67,8 @@
                OpMemberDecorate %SimParams 4 Offset 16
                OpMemberDecorate %SimParams 5 Offset 20
                OpMemberDecorate %SimParams 6 Offset 24
-               OpMemberDecorate %tint_symbol_1 0 Offset 0
-               OpDecorate %tint_symbol_1 Block
+               OpMemberDecorate %params_block 0 Offset 0
+               OpDecorate %params_block Block
                OpDecorate %1 DescriptorSet 0
                OpDecorate %1 Binding 0
                OpDecorate %1 NonWritable
@@ -76,13 +76,13 @@
                OpMemberDecorate %Particle 1 Offset 8
                OpDecorate %_arr_Particle_uint_5 ArrayStride 16
                OpMemberDecorate %Particles 0 Offset 0
-               OpMemberDecorate %tint_symbol_3 0 Offset 0
-               OpDecorate %tint_symbol_3 Block
+               OpMemberDecorate %particlesA_block 0 Offset 0
+               OpDecorate %particlesA_block Block
                OpDecorate %6 DescriptorSet 0
                OpDecorate %6 Binding 1
                OpDecorate %6 Coherent
-               OpMemberDecorate %tint_symbol_5 0 Offset 0
-               OpDecorate %tint_symbol_5 Block
+               OpMemberDecorate %particlesB_block 0 Offset 0
+               OpDecorate %particlesB_block Block
                OpDecorate %15 DescriptorSet 0
                OpDecorate %15 Binding 2
                OpDecorate %15 Coherent
@@ -95,21 +95,21 @@
                OpDecorate %comp_main_global_invocation_id_Input BuiltIn GlobalInvocationId
       %float = OpTypeFloat 32
   %SimParams = OpTypeStruct %float %float %float %float %float %float %float
-%tint_symbol_1 = OpTypeStruct %SimParams
-%_ptr_Uniform_tint_symbol_1 = OpTypePointer Uniform %tint_symbol_1
-          %1 = OpVariable %_ptr_Uniform_tint_symbol_1 Uniform
+%params_block = OpTypeStruct %SimParams
+%_ptr_Uniform_params_block = OpTypePointer Uniform %params_block
+          %1 = OpVariable %_ptr_Uniform_params_block Uniform
     %v2float = OpTypeVector %float 2
    %Particle = OpTypeStruct %v2float %v2float
        %uint = OpTypeInt 32 0
      %uint_5 = OpConstant %uint 5
 %_arr_Particle_uint_5 = OpTypeArray %Particle %uint_5
   %Particles = OpTypeStruct %_arr_Particle_uint_5
-%tint_symbol_3 = OpTypeStruct %Particles
-%_ptr_StorageBuffer_tint_symbol_3 = OpTypePointer StorageBuffer %tint_symbol_3
-          %6 = OpVariable %_ptr_StorageBuffer_tint_symbol_3 StorageBuffer
-%tint_symbol_5 = OpTypeStruct %Particles
-%_ptr_StorageBuffer_tint_symbol_5 = OpTypePointer StorageBuffer %tint_symbol_5
-         %15 = OpVariable %_ptr_StorageBuffer_tint_symbol_5 StorageBuffer
+%particlesA_block = OpTypeStruct %Particles
+%_ptr_StorageBuffer_particlesA_block = OpTypePointer StorageBuffer %particlesA_block
+          %6 = OpVariable %_ptr_StorageBuffer_particlesA_block StorageBuffer
+%particlesB_block = OpTypeStruct %Particles
+%_ptr_StorageBuffer_particlesB_block = OpTypePointer StorageBuffer %particlesB_block
+         %15 = OpVariable %_ptr_StorageBuffer_particlesB_block StorageBuffer
 %_ptr_Input_v2float = OpTypePointer Input %v2float
 %vert_main_loc0_Input = OpVariable %_ptr_Input_v2float Input
 %vert_main_loc1_Input = OpVariable %_ptr_Input_v2float Input

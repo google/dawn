@@ -13,8 +13,8 @@
                OpMemberName %Uniforms 3 "color_source"
                OpMemberName %Uniforms 4 "color"
                OpName %Uniforms "Uniforms"
-               OpMemberName %tint_symbol_1 0 "tint_symbol"
-               OpName %tint_symbol_1 "tint_symbol_1"
+               OpMemberName %uniforms_block 0 "inner"
+               OpName %uniforms_block "uniforms_block"
                OpMemberName %PointLight 0 "position"
                OpName %PointLight "PointLight"
                OpMemberName %PointLights 0 "values"
@@ -52,8 +52,8 @@
                OpMemberDecorate %Uniforms 2 Offset 128
                OpMemberDecorate %Uniforms 3 Offset 132
                OpMemberDecorate %Uniforms 4 Offset 144
-               OpMemberDecorate %tint_symbol_1 0 Offset 0
-               OpDecorate %tint_symbol_1 Block
+               OpMemberDecorate %uniforms_block 0 Offset 0
+               OpDecorate %uniforms_block Block
                OpDecorate %1 DescriptorSet 0
                OpDecorate %1 Binding 0
                OpDecorate %1 NonWritable
@@ -85,9 +85,9 @@
 %mat4v4float = OpTypeMatrix %v4float 4
        %uint = OpTypeInt 32 0
    %Uniforms = OpTypeStruct %mat4v4float %mat4v4float %uint %uint %v4float
-%tint_symbol_1 = OpTypeStruct %Uniforms
-%_ptr_Uniform_tint_symbol_1 = OpTypePointer Uniform %tint_symbol_1
-          %1 = OpVariable %_ptr_Uniform_tint_symbol_1 Uniform
+%uniforms_block = OpTypeStruct %Uniforms
+%_ptr_Uniform_uniforms_block = OpTypePointer Uniform %uniforms_block
+          %1 = OpVariable %_ptr_Uniform_uniforms_block Uniform
  %PointLight = OpTypeStruct %v4float
 %_runtimearr_PointLight = OpTypeRuntimeArray %PointLight
 %PointLights = OpTypeStruct %_runtimearr_PointLight

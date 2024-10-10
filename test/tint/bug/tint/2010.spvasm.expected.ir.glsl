@@ -21,8 +21,8 @@ shared uint x_36;
 shared uint x_37;
 uvec3 x_3 = uvec3(0u);
 layout(binding = 1, std140)
-uniform tint_symbol_2_1_ubo {
-  S_2 tint_symbol_1;
+uniform x_6_block_1_ubo {
+  S_2 inner;
 } v;
 layout(binding = 2, std430)
 buffer S_3_1_ssbo {
@@ -42,7 +42,7 @@ void main_1() {
   {
     while(true) {
       uint x_55 = 0u;
-      x_58 = v.tint_symbol_1.field0.field0;
+      x_58 = v.inner.field0.field0;
       if ((x_54 < x_58)) {
       } else {
         break;

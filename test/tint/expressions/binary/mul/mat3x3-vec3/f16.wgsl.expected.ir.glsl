@@ -12,10 +12,10 @@ struct S_std140 {
 };
 
 layout(binding = 0, std140)
-uniform tint_symbol_2_std140_1_ubo {
-  S_std140 tint_symbol_1;
+uniform data_block_std140_1_ubo {
+  S_std140 inner;
 } v;
 void main() {
-  f16mat3 v_1 = f16mat3(v.tint_symbol_1.matrix_col0, v.tint_symbol_1.matrix_col1, v.tint_symbol_1.matrix_col2);
-  f16vec3 x = (v_1 * v.tint_symbol_1.vector);
+  f16mat3 v_1 = f16mat3(v.inner.matrix_col0, v.inner.matrix_col1, v.inner.matrix_col2);
+  f16vec3 x = (v_1 * v.inner.vector);
 }

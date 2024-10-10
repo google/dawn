@@ -13,24 +13,24 @@
                OpName %Mat4x4_ "Mat4x4_"
                OpMemberName %ub_SceneParams 0 "u_Projection"
                OpName %ub_SceneParams "ub_SceneParams"
-               OpMemberName %tint_symbol_1 0 "tint_symbol"
-               OpName %tint_symbol_1 "tint_symbol_1"
+               OpMemberName %global_block 0 "inner"
+               OpName %global_block "global_block"
                OpMemberName %Mat4x2_ 0 "mx"
                OpMemberName %Mat4x2_ 1 "my"
                OpName %Mat4x2_ "Mat4x2_"
                OpMemberName %ub_MaterialParams 0 "u_TexMtx"
                OpMemberName %ub_MaterialParams 1 "u_Misc0_"
                OpName %ub_MaterialParams "ub_MaterialParams"
-               OpMemberName %tint_symbol_3 0 "tint_symbol_2"
-               OpName %tint_symbol_3 "tint_symbol_3"
+               OpMemberName %global1_block 0 "inner"
+               OpName %global1_block "global1_block"
                OpMemberName %Mat4x3_ 0 "mx"
                OpMemberName %Mat4x3_ 1 "my"
                OpMemberName %Mat4x3_ 2 "mz"
                OpName %Mat4x3_ "Mat4x3_"
                OpMemberName %ub_PacketParams 0 "u_PosMtx"
                OpName %ub_PacketParams "ub_PacketParams"
-               OpMemberName %tint_symbol_5 0 "tint_symbol_4"
-               OpName %tint_symbol_5 "tint_symbol_5"
+               OpMemberName %global2_block 0 "inner"
+               OpName %global2_block "global2_block"
                OpName %a_Position1 "a_Position1"
                OpName %a_UV1 "a_UV1"
                OpName %a_Color1 "a_Color1"
@@ -216,8 +216,8 @@
                OpMemberDecorate %Mat4x4_ 2 Offset 32
                OpMemberDecorate %Mat4x4_ 3 Offset 48
                OpMemberDecorate %ub_SceneParams 0 Offset 0
-               OpMemberDecorate %tint_symbol_1 0 Offset 0
-               OpDecorate %tint_symbol_1 Block
+               OpMemberDecorate %global_block 0 Offset 0
+               OpDecorate %global_block Block
                OpDecorate %1 DescriptorSet 0
                OpDecorate %1 Binding 0
                OpDecorate %1 NonWritable
@@ -226,8 +226,8 @@
                OpDecorate %_arr_Mat4x2__uint_1 ArrayStride 32
                OpMemberDecorate %ub_MaterialParams 0 Offset 0
                OpMemberDecorate %ub_MaterialParams 1 Offset 32
-               OpMemberDecorate %tint_symbol_3 0 Offset 0
-               OpDecorate %tint_symbol_3 Block
+               OpMemberDecorate %global1_block 0 Offset 0
+               OpDecorate %global1_block Block
                OpDecorate %8 DescriptorSet 0
                OpDecorate %8 Binding 1
                OpDecorate %8 NonWritable
@@ -236,8 +236,8 @@
                OpMemberDecorate %Mat4x3_ 2 Offset 32
                OpDecorate %_arr_Mat4x3__uint_32 ArrayStride 48
                OpMemberDecorate %ub_PacketParams 0 Offset 0
-               OpMemberDecorate %tint_symbol_5 0 Offset 0
-               OpDecorate %tint_symbol_5 Block
+               OpMemberDecorate %global2_block 0 Offset 0
+               OpDecorate %global2_block Block
                OpDecorate %16 DescriptorSet 0
                OpDecorate %16 Binding 2
                OpDecorate %16 NonWritable
@@ -257,24 +257,24 @@
     %v4float = OpTypeVector %float 4
     %Mat4x4_ = OpTypeStruct %v4float %v4float %v4float %v4float
 %ub_SceneParams = OpTypeStruct %Mat4x4_
-%tint_symbol_1 = OpTypeStruct %ub_SceneParams
-%_ptr_Uniform_tint_symbol_1 = OpTypePointer Uniform %tint_symbol_1
-          %1 = OpVariable %_ptr_Uniform_tint_symbol_1 Uniform
+%global_block = OpTypeStruct %ub_SceneParams
+%_ptr_Uniform_global_block = OpTypePointer Uniform %global_block
+          %1 = OpVariable %_ptr_Uniform_global_block Uniform
     %Mat4x2_ = OpTypeStruct %v4float %v4float
        %uint = OpTypeInt 32 0
      %uint_1 = OpConstant %uint 1
 %_arr_Mat4x2__uint_1 = OpTypeArray %Mat4x2_ %uint_1
 %ub_MaterialParams = OpTypeStruct %_arr_Mat4x2__uint_1 %v4float
-%tint_symbol_3 = OpTypeStruct %ub_MaterialParams
-%_ptr_Uniform_tint_symbol_3 = OpTypePointer Uniform %tint_symbol_3
-          %8 = OpVariable %_ptr_Uniform_tint_symbol_3 Uniform
+%global1_block = OpTypeStruct %ub_MaterialParams
+%_ptr_Uniform_global1_block = OpTypePointer Uniform %global1_block
+          %8 = OpVariable %_ptr_Uniform_global1_block Uniform
     %Mat4x3_ = OpTypeStruct %v4float %v4float %v4float
     %uint_32 = OpConstant %uint 32
 %_arr_Mat4x3__uint_32 = OpTypeArray %Mat4x3_ %uint_32
 %ub_PacketParams = OpTypeStruct %_arr_Mat4x3__uint_32
-%tint_symbol_5 = OpTypeStruct %ub_PacketParams
-%_ptr_Uniform_tint_symbol_5 = OpTypePointer Uniform %tint_symbol_5
-         %16 = OpVariable %_ptr_Uniform_tint_symbol_5 Uniform
+%global2_block = OpTypeStruct %ub_PacketParams
+%_ptr_Uniform_global2_block = OpTypePointer Uniform %global2_block
+         %16 = OpVariable %_ptr_Uniform_global2_block Uniform
     %v3float = OpTypeVector %float 3
 %_ptr_Private_v3float = OpTypePointer Private %v3float
          %26 = OpConstantNull %v3float

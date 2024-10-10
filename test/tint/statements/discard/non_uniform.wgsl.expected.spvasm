@@ -7,30 +7,30 @@
                OpMemoryModel Logical GLSL450
                OpEntryPoint Fragment %main "main"
                OpExecutionMode %main OriginUpperLeft
-               OpMemberName %tint_symbol_1 0 "tint_symbol"
-               OpName %tint_symbol_1 "tint_symbol_1"
-               OpMemberName %tint_symbol_3 0 "tint_symbol_2"
-               OpName %tint_symbol_3 "tint_symbol_3"
+               OpMemberName %non_uniform_global_block 0 "inner"
+               OpName %non_uniform_global_block "non_uniform_global_block"
+               OpMemberName %output_block 0 "inner"
+               OpName %output_block "output_block"
                OpName %continue_execution "continue_execution"
                OpName %main "main"
-               OpMemberDecorate %tint_symbol_1 0 Offset 0
-               OpDecorate %tint_symbol_1 Block
+               OpMemberDecorate %non_uniform_global_block 0 Offset 0
+               OpDecorate %non_uniform_global_block Block
                OpDecorate %1 DescriptorSet 0
                OpDecorate %1 Binding 0
                OpDecorate %1 Coherent
-               OpMemberDecorate %tint_symbol_3 0 Offset 0
-               OpDecorate %tint_symbol_3 Block
+               OpMemberDecorate %output_block 0 Offset 0
+               OpDecorate %output_block Block
                OpDecorate %5 DescriptorSet 0
                OpDecorate %5 Binding 1
                OpDecorate %5 Coherent
         %int = OpTypeInt 32 1
-%tint_symbol_1 = OpTypeStruct %int
-%_ptr_StorageBuffer_tint_symbol_1 = OpTypePointer StorageBuffer %tint_symbol_1
-          %1 = OpVariable %_ptr_StorageBuffer_tint_symbol_1 StorageBuffer
+%non_uniform_global_block = OpTypeStruct %int
+%_ptr_StorageBuffer_non_uniform_global_block = OpTypePointer StorageBuffer %non_uniform_global_block
+          %1 = OpVariable %_ptr_StorageBuffer_non_uniform_global_block StorageBuffer
       %float = OpTypeFloat 32
-%tint_symbol_3 = OpTypeStruct %float
-%_ptr_StorageBuffer_tint_symbol_3 = OpTypePointer StorageBuffer %tint_symbol_3
-          %5 = OpVariable %_ptr_StorageBuffer_tint_symbol_3 StorageBuffer
+%output_block = OpTypeStruct %float
+%_ptr_StorageBuffer_output_block = OpTypePointer StorageBuffer %output_block
+          %5 = OpVariable %_ptr_StorageBuffer_output_block StorageBuffer
        %bool = OpTypeBool
 %_ptr_Private_bool = OpTypePointer Private %bool
        %true = OpConstantTrue %bool

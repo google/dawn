@@ -8,11 +8,11 @@ struct SB_RW_atomic {
 };
 
 layout(binding = 0, std430)
-buffer tint_symbol_1_1_ssbo {
-  SB_RW_atomic tint_symbol;
+buffer sb_rw_block_1_ssbo {
+  SB_RW_atomic inner;
 } v;
 void atomicStore_cdc29e() {
-  atomicExchange(v.tint_symbol.arg_0, 1u);
+  atomicExchange(v.inner.arg_0, 1u);
 }
 void fragment_main_1() {
   atomicStore_cdc29e();
@@ -28,11 +28,11 @@ struct SB_RW_atomic {
 };
 
 layout(binding = 0, std430)
-buffer tint_symbol_1_1_ssbo {
-  SB_RW_atomic tint_symbol;
+buffer sb_rw_block_1_ssbo {
+  SB_RW_atomic inner;
 } v;
 void atomicStore_cdc29e() {
-  atomicExchange(v.tint_symbol.arg_0, 1u);
+  atomicExchange(v.inner.arg_0, 1u);
 }
 void compute_main_1() {
   atomicStore_cdc29e();

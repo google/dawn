@@ -88,10 +88,10 @@
                OpMemberName %S_std140 66 "struct_inner"
                OpMemberName %S_std140 67 "array_struct_inner"
                OpName %S_std140 "S_std140"
-               OpMemberName %tint_symbol_1_std140 0 "tint_symbol"
-               OpName %tint_symbol_1_std140 "tint_symbol_1_std140"
-               OpMemberName %tint_symbol_3 0 "tint_symbol_2"
-               OpName %tint_symbol_3 "tint_symbol_3"
+               OpMemberName %ub_block_std140 0 "inner"
+               OpName %ub_block_std140 "ub_block_std140"
+               OpMemberName %s_block 0 "inner"
+               OpName %s_block "s_block"
                OpName %main "main"
                OpName %scalar_f32 "scalar_f32"
                OpName %scalar_i32 "scalar_i32"
@@ -219,13 +219,13 @@
                OpMemberDecorate %S_std140 66 Offset 800
                OpDecorate %_arr_Inner_uint_4 ArrayStride 16
                OpMemberDecorate %S_std140 67 Offset 816
-               OpMemberDecorate %tint_symbol_1_std140 0 Offset 0
-               OpDecorate %tint_symbol_1_std140 Block
+               OpMemberDecorate %ub_block_std140 0 Offset 0
+               OpDecorate %ub_block_std140 Block
                OpDecorate %1 DescriptorSet 0
                OpDecorate %1 Binding 0
                OpDecorate %1 NonWritable
-               OpMemberDecorate %tint_symbol_3 0 Offset 0
-               OpDecorate %tint_symbol_3 Block
+               OpMemberDecorate %s_block 0 Offset 0
+               OpDecorate %s_block Block
                OpDecorate %31 DescriptorSet 0
                OpDecorate %31 Binding 1
                OpDecorate %31 Coherent
@@ -257,12 +257,12 @@
      %uint_4 = OpConstant %uint 4
 %_arr_Inner_uint_4 = OpTypeArray %Inner %uint_4
    %S_std140 = OpTypeStruct %float %int %uint %half %v2float %v2int %v2uint %v2half %v3float %v3int %v3uint %v3half %v4float %v4int %v4uint %v4half %v2float %v2float %v3float %v3float %mat2v4float %v2float %v2float %v2float %v3float %v3float %v3float %mat3v4float %v2float %v2float %v2float %v2float %v3float %v3float %v3float %v3float %mat4v4float %v2half %v2half %v3half %v3half %v4half %v4half %v2half %v2half %v2half %v3half %v3half %v3half %v4half %v4half %v4half %v2half %v2half %v2half %v2half %v3half %v3half %v3half %v3half %v4half %v4half %v4half %v4half %_arr_v3float_uint_2 %_arr_mat4x2_f16_std140_uint_2 %Inner %_arr_Inner_uint_4
-%tint_symbol_1_std140 = OpTypeStruct %S_std140
-%_ptr_Uniform_tint_symbol_1_std140 = OpTypePointer Uniform %tint_symbol_1_std140
-          %1 = OpVariable %_ptr_Uniform_tint_symbol_1_std140 Uniform
-%tint_symbol_3 = OpTypeStruct %int
-%_ptr_StorageBuffer_tint_symbol_3 = OpTypePointer StorageBuffer %tint_symbol_3
-         %31 = OpVariable %_ptr_StorageBuffer_tint_symbol_3 StorageBuffer
+%ub_block_std140 = OpTypeStruct %S_std140
+%_ptr_Uniform_ub_block_std140 = OpTypePointer Uniform %ub_block_std140
+          %1 = OpVariable %_ptr_Uniform_ub_block_std140 Uniform
+    %s_block = OpTypeStruct %int
+%_ptr_StorageBuffer_s_block = OpTypePointer StorageBuffer %s_block
+         %31 = OpVariable %_ptr_StorageBuffer_s_block StorageBuffer
        %void = OpTypeVoid
          %36 = OpTypeFunction %void
 %_ptr_Uniform_float = OpTypePointer Uniform %float

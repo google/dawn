@@ -25,8 +25,8 @@ struct main_out {
 
 vec3 position_1 = vec3(0.0f);
 layout(binding = 2, std140)
-uniform tint_symbol_3_1_ubo {
-  LeftOver tint_symbol_2;
+uniform x_14_block_1_ubo {
+  LeftOver inner;
 } v;
 vec2 vUV = vec2(0.0f);
 vec2 uv = vec2(0.0f);
@@ -42,10 +42,10 @@ void main_1() {
   q = vec4(position_1.x, position_1.y, position_1.z, 1.0f);
   p = q.xyz;
   float v_1 = p.x;
-  p[0u] = (v_1 + sin(((v.tint_symbol_2.test[0].el * position_1.y) + v.tint_symbol_2.time)));
+  p[0u] = (v_1 + sin(((v.inner.test[0].el * position_1.y) + v.inner.time)));
   float v_2 = p.y;
-  p[1u] = (v_2 + sin((v.tint_symbol_2.time + 4.0f)));
-  mat4 v_3 = v.tint_symbol_2.worldViewProjection;
+  p[1u] = (v_2 + sin((v.inner.time + 4.0f)));
+  mat4 v_3 = v.inner.worldViewProjection;
   tint_symbol = (v_3 * vec4(p.x, p.y, p.z, 1.0f));
   vUV = uv;
   tint_symbol[1u] = (tint_symbol.y * -1.0f);

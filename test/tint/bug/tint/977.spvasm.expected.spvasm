@@ -22,8 +22,8 @@
                OpMemberName %Uniforms 1 "sizeA"
                OpMemberName %Uniforms 2 "sizeB"
                OpName %Uniforms "Uniforms"
-               OpMemberName %tint_symbol_1 0 "tint_symbol"
-               OpName %tint_symbol_1 "tint_symbol_1"
+               OpMemberName %x_46_block 0 "inner"
+               OpName %x_46_block "x_46_block"
                OpName %main_global_invocation_id_Input "main_global_invocation_id_Input"
                OpName %binaryOperation_f1_f1_ "binaryOperation_f1_f1_"
                OpName %a_root "a_root"
@@ -62,8 +62,8 @@
                OpMemberDecorate %Uniforms 0 Offset 0
                OpMemberDecorate %Uniforms 1 Offset 4
                OpMemberDecorate %Uniforms 2 Offset 8
-               OpMemberDecorate %tint_symbol_1 0 Offset 0
-               OpDecorate %tint_symbol_1 Block
+               OpMemberDecorate %x_46_block 0 Offset 0
+               OpDecorate %x_46_block Block
                OpDecorate %17 DescriptorSet 0
                OpDecorate %17 Binding 3
                OpDecorate %17 NonWritable
@@ -86,9 +86,9 @@
 %secondMatrix = OpVariable %_ptr_StorageBuffer_SecondMatrix StorageBuffer
         %int = OpTypeInt 32 1
    %Uniforms = OpTypeStruct %float %int %int
-%tint_symbol_1 = OpTypeStruct %Uniforms
-%_ptr_Uniform_tint_symbol_1 = OpTypePointer Uniform %tint_symbol_1
-         %17 = OpVariable %_ptr_Uniform_tint_symbol_1 Uniform
+ %x_46_block = OpTypeStruct %Uniforms
+%_ptr_Uniform_x_46_block = OpTypePointer Uniform %x_46_block
+         %17 = OpVariable %_ptr_Uniform_x_46_block Uniform
 %_ptr_Input_v3uint = OpTypePointer Input %v3uint
 %main_global_invocation_id_Input = OpVariable %_ptr_Input_v3uint Input
 %_ptr_Function_float = OpTypePointer Function %float

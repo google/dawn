@@ -84,8 +84,16 @@ void Run(Module& ir) {
 
         // The original struct might be used in other places, so create a new block-decorated
         // struct that wraps the original struct.
-        auto inner_name = ir.symbols.New();
-        auto wrapper_name = ir.symbols.New();
+        // Use a consistent name for the inner struct member to satisfy GLSL's interface matching
+        // rules. Derive the struct name from the variable name to preserve any prefixes provided by
+        // Dawn, which are needed to avoid clashing between vertex and fragment shaders in GLSL.
+        auto inner_name = ir.symbols.Register("inner");
+        Symbol wrapper_name;
+        if (auto var_name = ir.NameOf(var)) {
+            wrapper_name = ir.symbols.New(var_name.Name() + "_block");
+        } else {
+            wrapper_name = ir.symbols.New();
+        }
         auto* block_struct = ty.Struct(wrapper_name, {{inner_name, store_ty}});
         block_struct->SetStructFlag(core::type::StructFlag::kBlock);
 

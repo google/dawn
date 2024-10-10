@@ -12,8 +12,8 @@ struct SSBO {
 };
 
 layout(binding = 0, std430)
-buffer tint_symbol_1_1_ssbo {
-  SSBO tint_symbol;
+buffer ssbo_block_1_ssbo {
+  SSBO inner;
 } v;
 strided_arr[2] mat2x2_stride_16_to_arr(mat2 m) {
   strided_arr v_1 = strided_arr(m[0u], 0u, 0u);
@@ -43,7 +43,7 @@ void tint_store_and_preserve_padding(inout strided_arr target[2], strided_arr va
   }
 }
 void f_1() {
-  tint_store_and_preserve_padding(v.tint_symbol.m, mat2x2_stride_16_to_arr(arr_to_mat2x2_stride_16(v.tint_symbol.m)));
+  tint_store_and_preserve_padding(v.inner.m, mat2x2_stride_16_to_arr(arr_to_mat2x2_stride_16(v.inner.m)));
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {

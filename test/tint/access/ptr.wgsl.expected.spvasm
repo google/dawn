@@ -8,8 +8,8 @@
                OpMemoryModel Logical GLSL450
                OpEntryPoint GLCompute %main "main" %main_local_invocation_index_Input
                OpExecutionMode %main LocalSize 1 1 1
-               OpMemberName %tint_symbol_1 0 "tint_symbol"
-               OpName %tint_symbol_1 "tint_symbol_1"
+               OpMemberName %s_block 0 "inner"
+               OpName %s_block "s_block"
                OpName %g1 "g1"
                OpName %main_local_invocation_index_Input "main_local_invocation_index_Input"
                OpName %accept_value "accept_value"
@@ -38,8 +38,8 @@
                OpName %tint_f32_to_i32 "tint_f32_to_i32"
                OpName %value "value"
                OpName %main "main"
-               OpMemberDecorate %tint_symbol_1 0 Offset 0
-               OpDecorate %tint_symbol_1 Block
+               OpMemberDecorate %s_block 0 Offset 0
+               OpDecorate %s_block Block
                OpDecorate %1 DescriptorSet 0
                OpDecorate %1 Binding 0
                OpDecorate %1 Coherent
@@ -47,9 +47,9 @@
                OpMemberDecorate %S 0 Offset 0
                OpMemberDecorate %S 1 Offset 4
         %int = OpTypeInt 32 1
-%tint_symbol_1 = OpTypeStruct %int
-%_ptr_StorageBuffer_tint_symbol_1 = OpTypePointer StorageBuffer %tint_symbol_1
-          %1 = OpVariable %_ptr_StorageBuffer_tint_symbol_1 StorageBuffer
+    %s_block = OpTypeStruct %int
+%_ptr_StorageBuffer_s_block = OpTypePointer StorageBuffer %s_block
+          %1 = OpVariable %_ptr_StorageBuffer_s_block StorageBuffer
 %_ptr_Workgroup_int = OpTypePointer Workgroup %int
          %g1 = OpVariable %_ptr_Workgroup_int Workgroup
        %uint = OpTypeInt 32 0

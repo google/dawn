@@ -60,12 +60,12 @@ struct tint_ExternalTextureParams {
 };
 
 layout(binding = 0, std430)
-buffer tint_symbol_1_1_ssbo {
-  vec4 tint_symbol;
+buffer prevent_dce_block_1_ssbo {
+  vec4 inner;
 } v_1;
 layout(binding = 2, std140)
-uniform tint_symbol_3_std140_1_ubo {
-  tint_ExternalTextureParams_std140 tint_symbol_2;
+uniform arg_0_params_block_std140_1_ubo {
+  tint_ExternalTextureParams_std140 inner;
 } v_2;
 uniform highp sampler2D arg_0_plane0;
 uniform highp sampler2D arg_0_plane1;
@@ -109,11 +109,11 @@ tint_ExternalTextureParams tint_convert_tint_ExternalTextureParams(tint_External
   return tint_ExternalTextureParams(tint_input.numPlanes, tint_input.doYuvToRgbConversionOnly, tint_input.yuvToRgbConversionMatrix, tint_input.gammaDecodeParams, tint_input.gammaEncodeParams, v_19, v_20, mat3x2(tint_input.loadTransform_col0, tint_input.loadTransform_col1, tint_input.loadTransform_col2), tint_input.samplePlane0RectMin, tint_input.samplePlane0RectMax, tint_input.samplePlane1RectMin, tint_input.samplePlane1RectMax, tint_input.visibleSize, tint_input.plane1CoordFactor);
 }
 vec4 textureLoad_1bfdfb() {
-  vec4 res = tint_TextureLoadExternal(tint_convert_tint_ExternalTextureParams(v_2.tint_symbol_2), uvec2(1u));
+  vec4 res = tint_TextureLoadExternal(tint_convert_tint_ExternalTextureParams(v_2.inner), uvec2(1u));
   return res;
 }
 void main() {
-  v_1.tint_symbol = textureLoad_1bfdfb();
+  v_1.inner = textureLoad_1bfdfb();
 }
 #version 310 es
 
@@ -175,12 +175,12 @@ struct tint_ExternalTextureParams {
 };
 
 layout(binding = 0, std430)
-buffer tint_symbol_1_1_ssbo {
-  vec4 tint_symbol;
+buffer prevent_dce_block_1_ssbo {
+  vec4 inner;
 } v_1;
 layout(binding = 2, std140)
-uniform tint_symbol_3_std140_1_ubo {
-  tint_ExternalTextureParams_std140 tint_symbol_2;
+uniform arg_0_params_block_std140_1_ubo {
+  tint_ExternalTextureParams_std140 inner;
 } v_2;
 uniform highp sampler2D arg_0_plane0;
 uniform highp sampler2D arg_0_plane1;
@@ -224,12 +224,12 @@ tint_ExternalTextureParams tint_convert_tint_ExternalTextureParams(tint_External
   return tint_ExternalTextureParams(tint_input.numPlanes, tint_input.doYuvToRgbConversionOnly, tint_input.yuvToRgbConversionMatrix, tint_input.gammaDecodeParams, tint_input.gammaEncodeParams, v_19, v_20, mat3x2(tint_input.loadTransform_col0, tint_input.loadTransform_col1, tint_input.loadTransform_col2), tint_input.samplePlane0RectMin, tint_input.samplePlane0RectMax, tint_input.samplePlane1RectMin, tint_input.samplePlane1RectMax, tint_input.visibleSize, tint_input.plane1CoordFactor);
 }
 vec4 textureLoad_1bfdfb() {
-  vec4 res = tint_TextureLoadExternal(tint_convert_tint_ExternalTextureParams(v_2.tint_symbol_2), uvec2(1u));
+  vec4 res = tint_TextureLoadExternal(tint_convert_tint_ExternalTextureParams(v_2.inner), uvec2(1u));
   return res;
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
-  v_1.tint_symbol = textureLoad_1bfdfb();
+  v_1.inner = textureLoad_1bfdfb();
 }
 #version 310 es
 
@@ -296,8 +296,8 @@ struct VertexOutput {
 };
 
 layout(binding = 2, std140)
-uniform tint_symbol_2_std140_1_ubo {
-  tint_ExternalTextureParams_std140 tint_symbol_1;
+uniform arg_0_params_block_std140_1_ubo {
+  tint_ExternalTextureParams_std140 inner;
 } v_1;
 uniform highp sampler2D arg_0_plane0;
 uniform highp sampler2D arg_0_plane1;
@@ -342,7 +342,7 @@ tint_ExternalTextureParams tint_convert_tint_ExternalTextureParams(tint_External
   return tint_ExternalTextureParams(tint_input.numPlanes, tint_input.doYuvToRgbConversionOnly, tint_input.yuvToRgbConversionMatrix, tint_input.gammaDecodeParams, tint_input.gammaEncodeParams, v_18, v_19, mat3x2(tint_input.loadTransform_col0, tint_input.loadTransform_col1, tint_input.loadTransform_col2), tint_input.samplePlane0RectMin, tint_input.samplePlane0RectMax, tint_input.samplePlane1RectMin, tint_input.samplePlane1RectMax, tint_input.visibleSize, tint_input.plane1CoordFactor);
 }
 vec4 textureLoad_1bfdfb() {
-  vec4 res = tint_TextureLoadExternal(tint_convert_tint_ExternalTextureParams(v_1.tint_symbol_1), uvec2(1u));
+  vec4 res = tint_TextureLoadExternal(tint_convert_tint_ExternalTextureParams(v_1.inner), uvec2(1u));
   return res;
 }
 VertexOutput vertex_main_inner() {

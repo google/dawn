@@ -3,8 +3,8 @@ precision highp float;
 precision highp int;
 
 layout(binding = 0, std430)
-buffer tint_symbol_1_1_ssbo {
-  float tint_symbol;
+buffer prevent_dce_block_1_ssbo {
+  float inner;
 } v;
 uniform highp samplerCubeShadow arg_0_arg_1;
 float textureSampleCompare_63fb83() {
@@ -12,5 +12,5 @@ float textureSampleCompare_63fb83() {
   return res;
 }
 void main() {
-  v.tint_symbol = textureSampleCompare_63fb83();
+  v.inner = textureSampleCompare_63fb83();
 }

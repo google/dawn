@@ -14,8 +14,8 @@
                OpName %sspp962805860buildInformationS "sspp962805860buildInformationS"
                OpMemberName %x_B4_BuildInformation 0 "passthru"
                OpName %x_B4_BuildInformation "x_B4_BuildInformation"
-               OpMemberName %tint_symbol_1 0 "tint_symbol"
-               OpName %tint_symbol_1 "tint_symbol_1"
+               OpMemberName %sspp962805860buildInformation_block 0 "inner"
+               OpName %sspp962805860buildInformation_block "sspp962805860buildInformation_block"
                OpName %main_1 "main_1"
                OpName %orientation "orientation"
                OpName %x_23 "x_23"
@@ -26,8 +26,8 @@
                OpDecorate %_arr_int_uint_6 ArrayStride 4
                OpMemberDecorate %sspp962805860buildInformationS 3 Offset 36
                OpMemberDecorate %x_B4_BuildInformation 0 Offset 0
-               OpMemberDecorate %tint_symbol_1 0 Offset 0
-               OpDecorate %tint_symbol_1 Block
+               OpMemberDecorate %sspp962805860buildInformation_block 0 Offset 0
+               OpDecorate %sspp962805860buildInformation_block Block
                OpDecorate %1 DescriptorSet 0
                OpDecorate %1 Binding 2
                OpDecorate %1 NonWritable
@@ -39,9 +39,9 @@
 %_arr_int_uint_6 = OpTypeArray %int %uint_6
 %sspp962805860buildInformationS = OpTypeStruct %v4float %v4float %int %_arr_int_uint_6
 %x_B4_BuildInformation = OpTypeStruct %sspp962805860buildInformationS
-%tint_symbol_1 = OpTypeStruct %x_B4_BuildInformation
-%_ptr_StorageBuffer_tint_symbol_1 = OpTypePointer StorageBuffer %tint_symbol_1
-          %1 = OpVariable %_ptr_StorageBuffer_tint_symbol_1 StorageBuffer
+%sspp962805860buildInformation_block = OpTypeStruct %x_B4_BuildInformation
+%_ptr_StorageBuffer_sspp962805860buildInformation_block = OpTypePointer StorageBuffer %sspp962805860buildInformation_block
+          %1 = OpVariable %_ptr_StorageBuffer_sspp962805860buildInformation_block StorageBuffer
        %void = OpTypeVoid
          %14 = OpTypeFunction %void
 %_ptr_Function__arr_int_uint_6 = OpTypePointer Function %_arr_int_uint_6

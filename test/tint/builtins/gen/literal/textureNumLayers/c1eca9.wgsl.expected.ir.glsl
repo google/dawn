@@ -3,8 +3,8 @@ precision highp float;
 precision highp int;
 
 layout(binding = 0, std430)
-buffer tint_symbol_1_1_ssbo {
-  uint tint_symbol;
+buffer prevent_dce_block_1_ssbo {
+  uint inner;
 } v;
 uniform highp usamplerCubeArray arg_0;
 uint textureNumLayers_c1eca9() {
@@ -12,13 +12,13 @@ uint textureNumLayers_c1eca9() {
   return res;
 }
 void main() {
-  v.tint_symbol = textureNumLayers_c1eca9();
+  v.inner = textureNumLayers_c1eca9();
 }
 #version 460
 
 layout(binding = 0, std430)
-buffer tint_symbol_1_1_ssbo {
-  uint tint_symbol;
+buffer prevent_dce_block_1_ssbo {
+  uint inner;
 } v;
 uniform highp usamplerCubeArray arg_0;
 uint textureNumLayers_c1eca9() {
@@ -27,7 +27,7 @@ uint textureNumLayers_c1eca9() {
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
-  v.tint_symbol = textureNumLayers_c1eca9();
+  v.inner = textureNumLayers_c1eca9();
 }
 #version 460
 
