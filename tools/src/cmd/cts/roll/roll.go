@@ -42,7 +42,6 @@ import (
 	"strconv"
 	"strings"
 	"sync"
-	"text/tabwriter"
 	"time"
 
 	commonAuth "dawn.googlesource.com/dawn/tools/src/auth"
@@ -431,14 +430,8 @@ func (r *roller) roll(ctx context.Context) error {
 			exInfo.results = result.Merge(exInfo.results, psResultsByExecutionMode[exInfo.executionMode])
 
 			exInfo.newExpectations = exInfo.expectations.Clone()
-			diags, err := exInfo.newExpectations.Update(exInfo.results, testlist, r.flags.verbose)
+			_, err := exInfo.newExpectations.Update(exInfo.results, testlist, r.flags.verbose)
 			if err != nil {
-				return err
-			}
-
-			// Post statistics and expectation diagnostics
-			log.Printf("posting stats & diagnostics for %s...\n", exInfo.executionMode)
-			if err := r.postComments(ps, exInfo.path, diags, exInfo.results); err != nil {
 				return err
 			}
 		}
@@ -613,76 +606,6 @@ func (r *roller) rollCommitMessage(
 	}
 
 	return msg.String()
-}
-
-func (r *roller) postComments(ps gerrit.Patchset, path string, diags []expectations.Diagnostic, results result.List) error {
-	fc := make([]gerrit.FileComment, len(diags))
-	for i, d := range diags {
-		var prefix string
-		switch d.Severity {
-		case expectations.Error:
-			prefix = "🟥"
-		case expectations.Warning:
-			prefix = "🟨"
-		case expectations.Note:
-			prefix = "🟦"
-		}
-		fc[i] = gerrit.FileComment{
-			Path:    path,
-			Side:    gerrit.Left,
-			Line:    d.Line,
-			Message: fmt.Sprintf("%v %v: %v", prefix, d.Severity, d.Message),
-		}
-	}
-
-	sb := &strings.Builder{}
-
-	{
-		sb.WriteString("Tests by status:\n")
-		counts := map[result.Status]int{}
-		for _, r := range results {
-			counts[r.Status] = counts[r.Status] + 1
-		}
-		type StatusCount struct {
-			status result.Status
-			count  int
-		}
-		statusCounts := []StatusCount{}
-		for s, n := range counts {
-			if n > 0 {
-				statusCounts = append(statusCounts, StatusCount{s, n})
-			}
-		}
-		sort.Slice(statusCounts, func(i, j int) bool { return statusCounts[i].status < statusCounts[j].status })
-		sb.WriteString("```\n")
-		tw := tabwriter.NewWriter(sb, 0, 1, 0, ' ', 0)
-		for _, sc := range statusCounts {
-			fmt.Fprintf(tw, "%v:\t %v\n", sc.status, sc.count)
-		}
-		tw.Flush()
-		sb.WriteString("```\n")
-	}
-	{
-		sb.WriteString("Top 25 slowest tests:\n")
-		sort.Slice(results, func(i, j int) bool {
-			return results[i].Duration > results[j].Duration
-		})
-		const N = 25
-		topN := results
-		if len(topN) > N {
-			topN = topN[:N]
-		}
-		sb.WriteString("```\n")
-		for i, r := range topN {
-			fmt.Fprintf(sb, "%3.1d: %v\n", i+1, r)
-		}
-		sb.WriteString("```\n")
-	}
-
-	if err := r.gerrit.Comment(ps, sb.String(), fc); err != nil {
-		return fmt.Errorf("failed to post stats on change: %v", err)
-	}
-	return nil
 }
 
 // findExistingRolls looks for all existing open CTS rolls by this user

@@ -57,6 +57,8 @@ import (
 // Note: Validate() should be called before attempting to update the
 // expectations. If Validate() returns errors, then Update() behaviour is
 // undefined.
+// TODO(crbug.com/371501714): Remove the Diagnostics return value since it is
+// no longer used with the removal of commenting on CLs.
 func (c *Content) Update(results result.List, testlist []query.Query, verbose bool) (Diagnostics, error) {
 	// Make a copy of the results. This code mutates the list.
 	results = append(result.List{}, results...)
