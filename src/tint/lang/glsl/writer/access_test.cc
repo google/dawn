@@ -1755,7 +1755,7 @@ layout(binding = 0, std430)
 buffer v_block_1_ssbo {
   vec3 inner[5];
 } v_1;
-void tint_store_and_preserve_padding(inout vec3 target[5], vec3 value_param[5]) {
+void tint_store_and_preserve_padding(vec3 value_param[5]) {
   {
     uint v_2 = 0u;
     v_2 = 0u;
@@ -1764,7 +1764,7 @@ void tint_store_and_preserve_padding(inout vec3 target[5], vec3 value_param[5]) 
       if ((v_3 >= 5u)) {
         break;
       }
-      target[v_3] = value_param[v_3];
+      v_1.inner[v_3] = value_param[v_3];
       {
         v_2 = (v_3 + 1u);
       }
@@ -1774,7 +1774,7 @@ void tint_store_and_preserve_padding(inout vec3 target[5], vec3 value_param[5]) 
 }
 void main() {
   vec3 ary[5] = vec3[5](vec3(0.0f), vec3(0.0f), vec3(0.0f), vec3(0.0f), vec3(0.0f));
-  tint_store_and_preserve_padding(v_1.inner, ary);
+  tint_store_and_preserve_padding(ary);
 }
 )");
 }
@@ -1974,21 +1974,21 @@ layout(binding = 0, std430)
 buffer v_block_1_ssbo {
   SB inner;
 } v_1;
-void tint_store_and_preserve_padding_2(inout Inner target, Inner value_param) {
-  target.s = value_param.s;
-  target.t = value_param.t;
+void tint_store_and_preserve_padding_2(Inner value_param) {
+  v_1.inner.b.y.s = value_param.s;
+  v_1.inner.b.y.t = value_param.t;
 }
-void tint_store_and_preserve_padding_1(inout Outer target, Outer value_param) {
-  target.x = value_param.x;
-  tint_store_and_preserve_padding_2(target.y, value_param.y);
+void tint_store_and_preserve_padding_1(Outer value_param) {
+  v_1.inner.b.x = value_param.x;
+  tint_store_and_preserve_padding_2(value_param.y);
 }
-void tint_store_and_preserve_padding(inout SB target, SB value_param) {
-  target.a = value_param.a;
-  tint_store_and_preserve_padding_1(target.b, value_param.b);
+void tint_store_and_preserve_padding(SB value_param) {
+  v_1.inner.a = value_param.a;
+  tint_store_and_preserve_padding_1(value_param.b);
 }
 void main() {
   SB s = SB(0, 0u, 0u, 0u, Outer(0.0f, 0u, 0u, 0u, Inner(0.0f, 0u, 0u, 0u, vec3(0.0f), 0u)));
-  tint_store_and_preserve_padding(v_1.inner, s);
+  tint_store_and_preserve_padding(s);
 }
 )");
 }
@@ -2050,7 +2050,7 @@ layout(binding = 0, std430)
 buffer v_block_1_ssbo {
   SB inner;
 } v_1;
-void tint_store_and_preserve_padding_4(inout vec3 target[5], vec3 value_param[5]) {
+void tint_store_and_preserve_padding_4(vec3 value_param[5]) {
   {
     uint v_2 = 0u;
     v_2 = 0u;
@@ -2059,7 +2059,7 @@ void tint_store_and_preserve_padding_4(inout vec3 target[5], vec3 value_param[5]
       if ((v_3 >= 5u)) {
         break;
       }
-      target[v_3] = value_param[v_3];
+      v_1.inner.b.y.t[v_3] = value_param[v_3];
       {
         v_2 = (v_3 + 1u);
       }
@@ -2067,26 +2067,26 @@ void tint_store_and_preserve_padding_4(inout vec3 target[5], vec3 value_param[5]
     }
   }
 }
-void tint_store_and_preserve_padding_3(inout mat3 target, mat3 value_param) {
-  target[0u] = value_param[0u];
-  target[1u] = value_param[1u];
-  target[2u] = value_param[2u];
+void tint_store_and_preserve_padding_3(mat3 value_param) {
+  v_1.inner.b.y.s[0u] = value_param[0u];
+  v_1.inner.b.y.s[1u] = value_param[1u];
+  v_1.inner.b.y.s[2u] = value_param[2u];
 }
-void tint_store_and_preserve_padding_2(inout Inner target, Inner value_param) {
-  tint_store_and_preserve_padding_3(target.s, value_param.s);
-  tint_store_and_preserve_padding_4(target.t, value_param.t);
+void tint_store_and_preserve_padding_2(Inner value_param) {
+  tint_store_and_preserve_padding_3(value_param.s);
+  tint_store_and_preserve_padding_4(value_param.t);
 }
-void tint_store_and_preserve_padding_1(inout Outer target, Outer value_param) {
-  target.x = value_param.x;
-  tint_store_and_preserve_padding_2(target.y, value_param.y);
+void tint_store_and_preserve_padding_1(Outer value_param) {
+  v_1.inner.b.x = value_param.x;
+  tint_store_and_preserve_padding_2(value_param.y);
 }
-void tint_store_and_preserve_padding(inout SB target, SB value_param) {
-  target.a = value_param.a;
-  tint_store_and_preserve_padding_1(target.b, value_param.b);
+void tint_store_and_preserve_padding(SB value_param) {
+  v_1.inner.a = value_param.a;
+  tint_store_and_preserve_padding_1(value_param.b);
 }
 void main() {
   SB s = SB(0, 0u, 0u, 0u, Outer(0.0f, 0u, 0u, 0u, Inner(mat3(vec3(0.0f), vec3(0.0f), vec3(0.0f)), vec3[5](vec3(0.0f), vec3(0.0f), vec3(0.0f), vec3(0.0f), vec3(0.0f)))));
-  tint_store_and_preserve_padding(v_1.inner, s);
+  tint_store_and_preserve_padding(s);
 }
 )");
 }

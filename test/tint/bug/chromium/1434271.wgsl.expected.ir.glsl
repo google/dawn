@@ -118,11 +118,11 @@ layout(binding = 1, std430)
 buffer Particles_1_ssbo {
   Particle particles[];
 } data;
-void tint_store_and_preserve_padding(inout Particle target, Particle value_param) {
-  target.position = value_param.position;
-  target.lifetime = value_param.lifetime;
-  target.color = value_param.color;
-  target.velocity = value_param.velocity;
+void tint_store_and_preserve_padding(uint target_indices[1], Particle value_param) {
+  data.particles[target_indices[0u]].position = value_param.position;
+  data.particles[target_indices[0u]].lifetime = value_param.lifetime;
+  data.particles[target_indices[0u]].color = value_param.color;
+  data.particles[target_indices[0u]].velocity = value_param.velocity;
 }
 void simulate_inner(uvec3 GlobalInvocationID) {
   vec2 v_1 = v.inner.seed.xy;
@@ -130,7 +130,8 @@ void simulate_inner(uvec3 GlobalInvocationID) {
   rand_seed = (v_2 * v.inner.seed.zw);
   uint idx = GlobalInvocationID[0u];
   Particle particle = data.particles[idx];
-  tint_store_and_preserve_padding(data.particles[idx], particle);
+  Particle v_3 = particle;
+  tint_store_and_preserve_padding(uint[1](idx), v_3);
 }
 layout(local_size_x = 64, local_size_y = 1, local_size_z = 1) in;
 void main() {

@@ -150,11 +150,13 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
 
     RUN_TRANSFORM(core::ir::transform::BlockDecoratedStructs, module);
 
-    // TODO(dsinclair): CombineSamplers
+    // `PreservePadding` must run before `DirectVariableAccess`.
+    RUN_TRANSFORM(core::ir::transform::PreservePadding, module);
 
     {
         // This must come after `MultiplanarExternalTexture` as it will insert functions with
-        // texture parameters
+        // texture parameters, and also after `PreservePadding` which inserts functions with storage
+        // buffer parameters.
         core::ir::transform::DirectVariableAccessOptions dva_config{};
         dva_config.transform_handle = true;
         RUN_TRANSFORM(core::ir::transform::DirectVariableAccess, module, dva_config);
@@ -183,7 +185,6 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
     // Must come after BuiltinPolyfill as builtins can add bitcasts
     RUN_TRANSFORM(raise::BitcastPolyfill, module);
 
-    RUN_TRANSFORM(core::ir::transform::PreservePadding, module);
     RUN_TRANSFORM(core::ir::transform::VectorizeScalarMatrixConstructors, module);
     RUN_TRANSFORM(core::ir::transform::RemoveContinueInSwitch, module);
 

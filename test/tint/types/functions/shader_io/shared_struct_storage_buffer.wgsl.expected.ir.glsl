@@ -73,16 +73,16 @@ buffer tint_symbol_block_1_ssbo {
 } v_1;
 layout(location = 0) in float frag_main_loc0_Input;
 layout(location = 1) flat in uint frag_main_loc1_Input;
-void tint_store_and_preserve_padding(inout S target, S value_param) {
-  target.f = value_param.f;
-  target.u = value_param.u;
-  target.v = value_param.v;
+void tint_store_and_preserve_padding(S value_param) {
+  v_1.inner.f = value_param.f;
+  v_1.inner.u = value_param.u;
+  v_1.inner.v = value_param.v;
 }
 void frag_main_inner(S tint_symbol_1) {
   float f = tint_symbol_1.f;
   uint u = tint_symbol_1.u;
   vec4 v = tint_symbol_1.v;
-  tint_store_and_preserve_padding(v_1.inner, tint_symbol_1);
+  tint_store_and_preserve_padding(tint_symbol_1);
 }
 void main() {
   frag_main_inner(S(frag_main_loc0_Input, frag_main_loc1_Input, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, gl_FragCoord, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u));

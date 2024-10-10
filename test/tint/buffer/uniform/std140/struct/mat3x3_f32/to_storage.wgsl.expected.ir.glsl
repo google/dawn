@@ -65,17 +65,17 @@ buffer s_block_1_ssbo {
 S tint_convert_S(S_std140 tint_input) {
   return S(tint_input.before, 0u, 0u, 0u, mat3(tint_input.m_col0, tint_input.m_col1, tint_input.m_col2), tint_input.after, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u);
 }
-void tint_store_and_preserve_padding_2(inout mat3 target, mat3 value_param) {
-  target[0u] = value_param[0u];
-  target[1u] = value_param[1u];
-  target[2u] = value_param[2u];
+void tint_store_and_preserve_padding_2(uint target_indices[1], mat3 value_param) {
+  v_1.inner[target_indices[0u]].m[0u] = value_param[0u];
+  v_1.inner[target_indices[0u]].m[1u] = value_param[1u];
+  v_1.inner[target_indices[0u]].m[2u] = value_param[2u];
 }
-void tint_store_and_preserve_padding_1(inout S target, S value_param) {
-  target.before = value_param.before;
-  tint_store_and_preserve_padding_2(target.m, value_param.m);
-  target.after = value_param.after;
+void tint_store_and_preserve_padding_1(uint target_indices[1], S value_param) {
+  v_1.inner[target_indices[0u]].before = value_param.before;
+  tint_store_and_preserve_padding_2(uint[1](target_indices[0u]), value_param.m);
+  v_1.inner[target_indices[0u]].after = value_param.after;
 }
-void tint_store_and_preserve_padding(inout S target[4], S value_param[4]) {
+void tint_store_and_preserve_padding(S value_param[4]) {
   {
     uint v_2 = 0u;
     v_2 = 0u;
@@ -84,7 +84,7 @@ void tint_store_and_preserve_padding(inout S target[4], S value_param[4]) {
       if ((v_3 >= 4u)) {
         break;
       }
-      tint_store_and_preserve_padding_1(target[v_3], value_param[v_3]);
+      tint_store_and_preserve_padding_1(uint[1](v_3), value_param[v_3]);
       {
         v_2 = (v_3 + 1u);
       }
@@ -111,8 +111,10 @@ void main() {
       continue;
     }
   }
-  tint_store_and_preserve_padding(v_1.inner, v_5);
-  tint_store_and_preserve_padding_1(v_1.inner[1], tint_convert_S(v.inner[2]));
-  tint_store_and_preserve_padding_2(v_1.inner[3].m, mat3(v.inner[2].m_col0, v.inner[2].m_col1, v.inner[2].m_col2));
+  tint_store_and_preserve_padding(v_5);
+  S v_8 = tint_convert_S(v.inner[2]);
+  tint_store_and_preserve_padding_1(uint[1](uint(1)), v_8);
+  mat3 v_9 = mat3(v.inner[2].m_col0, v.inner[2].m_col1, v.inner[2].m_col2);
+  tint_store_and_preserve_padding_2(uint[1](uint(3)), v_9);
   v_1.inner[1].m[0] = v.inner[0].m_col1.zxy;
 }

@@ -21,16 +21,16 @@ layout(binding = 1, std430)
 buffer tint_symbol_1_block_1_ssbo {
   S inner;
 } v_1;
-void tint_store_and_preserve_padding_1(inout Inner target, Inner value_param) {
-  target.scalar_f16 = value_param.scalar_f16;
-  target.vec3_f16 = value_param.vec3_f16;
-  target.mat2x4_f16 = value_param.mat2x4_f16;
+void tint_store_and_preserve_padding_1(Inner value_param) {
+  v_1.inner.inner.scalar_f16 = value_param.scalar_f16;
+  v_1.inner.inner.vec3_f16 = value_param.vec3_f16;
+  v_1.inner.inner.mat2x4_f16 = value_param.mat2x4_f16;
 }
-void tint_store_and_preserve_padding(inout S target, S value_param) {
-  tint_store_and_preserve_padding_1(target.inner, value_param.inner);
+void tint_store_and_preserve_padding(S value_param) {
+  tint_store_and_preserve_padding_1(value_param.inner);
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
   S t = v.inner;
-  tint_store_and_preserve_padding(v_1.inner, t);
+  tint_store_and_preserve_padding(t);
 }

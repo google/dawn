@@ -6,13 +6,13 @@ layout(binding = 0, std430)
 buffer tint_symbol_block_1_ssbo {
   f16mat4x3 inner;
 } v;
-void tint_store_and_preserve_padding(inout f16mat4x3 target, f16mat4x3 value_param) {
-  target[0u] = value_param[0u];
-  target[1u] = value_param[1u];
-  target[2u] = value_param[2u];
-  target[3u] = value_param[3u];
+void tint_store_and_preserve_padding(f16mat4x3 value_param) {
+  v.inner[0u] = value_param[0u];
+  v.inner[1u] = value_param[1u];
+  v.inner[2u] = value_param[2u];
+  v.inner[3u] = value_param[3u];
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
-  tint_store_and_preserve_padding(v.inner, m);
+  tint_store_and_preserve_padding(m);
 }

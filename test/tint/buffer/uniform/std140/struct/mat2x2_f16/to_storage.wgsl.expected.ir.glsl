@@ -82,12 +82,12 @@ buffer s_block_1_ssbo {
 S tint_convert_S(S_std140 tint_input) {
   return S(tint_input.before, f16mat2(tint_input.m_col0, tint_input.m_col1), 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, tint_input.after, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u);
 }
-void tint_store_and_preserve_padding_1(inout S target, S value_param) {
-  target.before = value_param.before;
-  target.m = value_param.m;
-  target.after = value_param.after;
+void tint_store_and_preserve_padding_1(uint target_indices[1], S value_param) {
+  v_1.inner[target_indices[0u]].before = value_param.before;
+  v_1.inner[target_indices[0u]].m = value_param.m;
+  v_1.inner[target_indices[0u]].after = value_param.after;
 }
-void tint_store_and_preserve_padding(inout S target[4], S value_param[4]) {
+void tint_store_and_preserve_padding(S value_param[4]) {
   {
     uint v_2 = 0u;
     v_2 = 0u;
@@ -96,7 +96,7 @@ void tint_store_and_preserve_padding(inout S target[4], S value_param[4]) {
       if ((v_3 >= 4u)) {
         break;
       }
-      tint_store_and_preserve_padding_1(target[v_3], value_param[v_3]);
+      tint_store_and_preserve_padding_1(uint[1](v_3), value_param[v_3]);
       {
         v_2 = (v_3 + 1u);
       }
@@ -123,8 +123,9 @@ void main() {
       continue;
     }
   }
-  tint_store_and_preserve_padding(v_1.inner, v_5);
-  tint_store_and_preserve_padding_1(v_1.inner[1], tint_convert_S(v.inner[2]));
+  tint_store_and_preserve_padding(v_5);
+  S v_8 = tint_convert_S(v.inner[2]);
+  tint_store_and_preserve_padding_1(uint[1](uint(1)), v_8);
   v_1.inner[3].m = f16mat2(v.inner[2].m_col0, v.inner[2].m_col1);
   v_1.inner[1].m[0] = v.inner[0].m_col1.yx;
 }

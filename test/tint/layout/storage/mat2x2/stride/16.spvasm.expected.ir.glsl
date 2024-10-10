@@ -22,10 +22,10 @@ strided_arr[2] mat2x2_stride_16_to_arr(mat2 m) {
 mat2 arr_to_mat2x2_stride_16(strided_arr arr[2]) {
   return mat2(arr[0u].el, arr[1u].el);
 }
-void tint_store_and_preserve_padding_1(inout strided_arr target, strided_arr value_param) {
-  target.el = value_param.el;
+void tint_store_and_preserve_padding_1(uint target_indices[1], strided_arr value_param) {
+  v.inner.m[target_indices[0u]].el = value_param.el;
 }
-void tint_store_and_preserve_padding(inout strided_arr target[2], strided_arr value_param[2]) {
+void tint_store_and_preserve_padding(strided_arr value_param[2]) {
   {
     uint v_2 = 0u;
     v_2 = 0u;
@@ -34,7 +34,7 @@ void tint_store_and_preserve_padding(inout strided_arr target[2], strided_arr va
       if ((v_3 >= 2u)) {
         break;
       }
-      tint_store_and_preserve_padding_1(target[v_3], value_param[v_3]);
+      tint_store_and_preserve_padding_1(uint[1](v_3), value_param[v_3]);
       {
         v_2 = (v_3 + 1u);
       }
@@ -43,7 +43,7 @@ void tint_store_and_preserve_padding(inout strided_arr target[2], strided_arr va
   }
 }
 void f_1() {
-  tint_store_and_preserve_padding(v.inner.m, mat2x2_stride_16_to_arr(arr_to_mat2x2_stride_16(v.inner.m)));
+  tint_store_and_preserve_padding(mat2x2_stride_16_to_arr(arr_to_mat2x2_stride_16(v.inner.m)));
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
