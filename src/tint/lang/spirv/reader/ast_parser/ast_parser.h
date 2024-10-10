@@ -296,6 +296,14 @@ class ASTParser {
     /// @param replacement the location decoration to place into the list
     void SetLocation(Attributes& attributes, const ast::Attribute* replacement);
 
+    /// Updates the attribute list, placing a non-null BlendSrc decoration into
+    /// the list, replacing an existing one if it exists. Does nothing if the
+    /// replacement is nullptr.
+    /// Assumes the list contains at most one BlendSrc decoration.
+    /// @param attributes the attribute list to modify
+    /// @param replacement the BlendSrc decoration to place into the list
+    void SetBlendSrc(Attributes& attributes, const ast::Attribute* replacement);
+
     /// Converts a SPIR-V struct member decoration into a number of AST
     /// decorations. If the decoration is recognized but deliberately dropped,
     /// then returns an empty list without a diagnostic. On failure, emits a

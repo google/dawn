@@ -99,6 +99,9 @@ Program Parse(const std::vector<uint32_t>& input, const Options& options) {
     allowed_features.extensions.insert(wgsl::Extension::kChromiumDisableUniformityAnalysis);
     builder.Enable(wgsl::Extension::kChromiumDisableUniformityAnalysis);
 
+    // Allow below WGSL extensions unconditionally but not enable them by default.
+    allowed_features.extensions.insert(wgsl::Extension::kDualSourceBlending);
+
     // The SPIR-V parser can construct disjoint AST nodes, which is invalid for
     // the Resolver. Clone the Program to clean these up.
     Program program_with_disjoint_ast(std::move(builder));

@@ -270,6 +270,7 @@ bool IsPipelineDecoration(const Decoration& deco) {
     }
     switch (static_cast<spv::Decoration>(deco[0])) {
         case spv::Decoration::Location:
+        case spv::Decoration::Index:
         case spv::Decoration::Flat:
         case spv::Decoration::NoPerspective:
         case spv::Decoration::Centroid:
@@ -589,6 +590,7 @@ void ASTParser::ResetInternalModule() {
     deco_mgr_ = nullptr;
 
     glsl_std_450_imports_.clear();
+    enabled_extensions_.Clear();
 }
 
 bool ASTParser::ParseInternalModule() {
@@ -1805,7 +1807,23 @@ void ASTParser::SetLocation(Attributes& attributes, const ast::Attribute* replac
     }
     // The list didn't have a location. Add it.
     attributes.Add(replacement);
-    return;
+}
+
+void ASTParser::SetBlendSrc(Attributes& attributes, const ast::Attribute* replacement) {
+    if (!replacement) {
+        return;
+    }
+    for (auto*& attribute : attributes.list) {
+        if (attribute->Is<ast::BlendSrcAttribute>()) {
+            // Replace this BlendSrc attribute with the replacement.
+            // The old one doesn't leak because it's kept in the builder's AST node
+            // list.
+            attribute = replacement;
+            return;  // Assume there is only one such decoration.
+        }
+    }
+    // The list didn't have a BlendSrc. Add it.
+    attributes.Add(replacement);
 }
 
 bool ASTParser::ConvertPipelineDecorations(const Type* store_type,
@@ -1852,6 +1870,14 @@ bool ASTParser::ConvertPipelineDecorations(const Type* store_type,
                     return Fail() << "Sample interpolation sampling is invalid on integral IO";
                 }
                 sampling = core::InterpolationSampling::kSample;
+                break;
+            case spv::Decoration::Index:
+                if (deco.size() != 2) {
+                    return Fail()
+                           << "malformed Index decoration on ID requires one literal operand";
+                }
+                Enable(wgsl::Extension::kDualSourceBlending);
+                SetBlendSrc(attributes, builder_.BlendSrc(AInt(deco[1])));
                 break;
             default:
                 break;
