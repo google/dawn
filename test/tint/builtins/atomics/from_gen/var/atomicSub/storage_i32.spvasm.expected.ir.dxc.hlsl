@@ -6,7 +6,7 @@ void atomicSub_051100() {
   arg_1 = int(1);
   int x_20 = arg_1;
   int v = int(0);
-  sb_rw.InterlockedAdd(int(0u), -(x_20), v);
+  sb_rw.InterlockedAdd(int(0u), (int(0) - x_20), v);
   int x_13 = v;
   res = x_13;
 }

@@ -5,7 +5,7 @@ void atomicAdd_d32fe4() {
   int res = int(0);
   arg_1 = int(1);
   int v = int(0);
-  sb_rw.InterlockedAdd(int(0u), -(int(1)), v);
+  sb_rw.InterlockedAdd(int(0u), (int(0) - int(1)), v);
   int x_13 = v;
   res = x_13;
 }

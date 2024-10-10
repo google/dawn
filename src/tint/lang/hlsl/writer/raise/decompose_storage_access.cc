@@ -288,7 +288,7 @@ struct State {
             auto* original_value = b.Var(ty.ptr(function, type));
             original_value->SetInitializer(b.Zero(type));
 
-            auto* val = b.Negation(type, args[1]);
+            auto* val = b.Subtract(type, b.Zero(type), args[1]);
             b.MemberCall<hlsl::ir::MemberBuiltinCall>(ty.void_(), BuiltinFn::kInterlockedAdd, var,
                                                       b.Convert(type, u32(offset)), val,
                                                       original_value);

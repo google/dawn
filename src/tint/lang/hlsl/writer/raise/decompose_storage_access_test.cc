@@ -1585,7 +1585,7 @@ $B1: {  # root
 %foo = @fragment func():void {
   $B2: {
     %3:ptr<function, i32, read_write> = var, 0i
-    %4:i32 = negation 123i
+    %4:i32 = sub 0i, 123i
     %5:i32 = convert 16u
     %6:void = %v.InterlockedAdd %5, %4, %3
     %7:i32 = load %3
@@ -1633,7 +1633,7 @@ $B1: {  # root
 %foo = @fragment func():void {
   $B2: {
     %3:ptr<function, i32, read_write> = var, 0i
-    %4:i32 = negation 123i
+    %4:i32 = sub 0i, 123i
     %5:i32 = convert 0u
     %6:void = %v.InterlockedAdd %5, %4, %3
     %7:i32 = load %3
