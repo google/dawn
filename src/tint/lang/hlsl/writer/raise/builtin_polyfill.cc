@@ -104,6 +104,8 @@ struct State {
                     case core::BuiltinFn::kCountOneBits:
                     case core::BuiltinFn::kDot4I8Packed:
                     case core::BuiltinFn::kDot4U8Packed:
+                    case core::BuiltinFn::kFrexp:
+                    case core::BuiltinFn::kModf:
                     case core::BuiltinFn::kPack2X16Float:
                     case core::BuiltinFn::kPack2X16Snorm:
                     case core::BuiltinFn::kPack2X16Unorm:
@@ -225,6 +227,12 @@ struct State {
                     break;
                 case core::BuiltinFn::kDot4U8Packed:
                     Dot4U8Packed(call);
+                    break;
+                case core::BuiltinFn::kFrexp:
+                    Frexp(call);
+                    break;
+                case core::BuiltinFn::kModf:
+                    Modf(call);
                     break;
                 case core::BuiltinFn::kPack2X16Float:
                     Pack2x16Float(call);
@@ -754,17 +762,16 @@ struct State {
     // The HLSL `sign` method always returns an `int` result (scalar or vector). In WGSL the result
     // is expected to be the same type as the argument. This injects a cast to the expected WGSL
     // result type after the call to `hlsl.sign`.
+    core::ir::Instruction* BuildSign(core::ir::Value* value) {
+        const auto* result_ty = ty.MatchWidth(ty.i32(), value->Type());
+        auto* sign = b.Call<hlsl::ir::BuiltinCall>(result_ty, hlsl::BuiltinFn::kSign, value);
+        return b.Convert(value->Type(), sign);
+    }
+
     void Sign(core::ir::BuiltinCall* call) {
         b.InsertBefore(call, [&] {
-            const core::type::Type* result_ty = ty.i32();
-            if (auto* vec = call->Result(0)->Type()->As<core::type::Vector>()) {
-                result_ty = ty.vec(result_ty, vec->Width());
-            }
-
-            auto* sign =
-                b.Call<hlsl::ir::BuiltinCall>(result_ty, hlsl::BuiltinFn::kSign, call->Args()[0]);
-
-            b.ConvertWithResult(call->DetachResult(), sign);
+            auto* sign = BuildSign(call->Args()[0]);
+            sign->SetResults(Vector{call->DetachResult()});
         });
         call->Destroy();
     }
@@ -1743,6 +1750,44 @@ struct State {
             auto* acc = b.Var("accumulator", b.Zero(ty.u32()));
             b.CallWithResult<hlsl::ir::BuiltinCall>(
                 call->DetachResult(), hlsl::BuiltinFn::kDot4AddU8Packed, args[0], args[1], acc);
+        });
+        call->Destroy();
+    }
+
+    void Frexp(core::ir::CoreBuiltinCall* call) {
+        auto arg = call->Args()[0];
+        b.InsertBefore(call, [&] {
+            auto* arg_ty = arg->Type();
+            auto* arg_i32_ty = ty.MatchWidth(ty.i32(), arg_ty);
+            // Note: WGSL's frexp expects an i32 for exp, but HLSL expects f32 (same type as first
+            // arg), so we use a temp f32 var that we convert to i32 later.
+            auto* exp_out = b.Var(ty.ptr<function>(arg_ty));
+            // HLSL frexp writes exponent part to second out param, and returns the fraction
+            // (mantissa) part.
+            auto* call_result = b.Call<hlsl::ir::BuiltinCall>(arg_ty, hlsl::BuiltinFn::kFrexp, arg,
+                                                              b.Load(exp_out));
+            // The returned exponent is always positive, but for WGSL, we want it to keep the sign
+            // of the input value.
+            auto* arg_sign = BuildSign(arg);
+            b.Store(exp_out, b.Multiply(arg_ty, arg_sign, b.Load(exp_out)));
+            // Replace the call with new result struct
+            b.ConstructWithResult(call->DetachResult(), call_result,
+                                  b.Convert(arg_i32_ty, b.Load(exp_out)));
+        });
+        call->Destroy();
+    }
+
+    void Modf(core::ir::CoreBuiltinCall* call) {
+        auto arg = call->Args()[0];
+        b.InsertBefore(call, [&] {
+            auto* arg_ty = arg->Type();
+            auto* whole = b.Var(ty.ptr<function>(arg_ty));
+            // HLSL modf writes whole (integer) part to second out param, and returns the fractional
+            // part.
+            auto* call_result =
+                b.Call<hlsl::ir::BuiltinCall>(arg_ty, hlsl::BuiltinFn::kModf, arg, b.Load(whole));
+            // Replace the call with new result struct
+            b.ConstructWithResult(call->DetachResult(), call_result, b.Load(whole));
         });
         call->Destroy();
     }

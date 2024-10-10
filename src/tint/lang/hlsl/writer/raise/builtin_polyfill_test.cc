@@ -7222,5 +7222,225 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, SubgroupShuffleDown) {
     EXPECT_EQ(expect, str());
 }
 
+TEST_F(HlslWriter_BuiltinPolyfillTest, Modf_f32) {
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        auto* arg_ty = ty.f32();
+        auto* v = b.Var(ty.ptr<function>(arg_ty));
+        b.Let("a", b.Call(core::type::CreateModfResult(ty, mod.symbols, arg_ty),
+                          core::BuiltinFn::kModf, b.Load(v)));
+        b.Return(func);
+    });
+
+    auto* src = R"(
+__modf_result_f32 = struct @align(4) {
+  fract:f32 @offset(0)
+  whole:f32 @offset(4)
+}
+
+%foo = @fragment func():void {
+  $B1: {
+    %2:ptr<function, f32, read_write> = var
+    %3:f32 = load %2
+    %4:__modf_result_f32 = modf %3
+    %a:__modf_result_f32 = let %4
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+__modf_result_f32 = struct @align(4) {
+  fract:f32 @offset(0)
+  whole:f32 @offset(4)
+}
+
+%foo = @fragment func():void {
+  $B1: {
+    %2:ptr<function, f32, read_write> = var
+    %3:f32 = load %2
+    %4:ptr<function, f32, read_write> = var
+    %5:f32 = load %4
+    %6:f32 = hlsl.modf %3, %5
+    %7:f32 = load %4
+    %8:__modf_result_f32 = construct %6, %7
+    %a:__modf_result_f32 = let %8
+    ret
+  }
+}
+)";
+    Run(BuiltinPolyfill);
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(HlslWriter_BuiltinPolyfillTest, Modf_vec_f32) {
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        auto* arg_ty = ty.vec3<f32>();
+        auto* v = b.Var(ty.ptr<function>(arg_ty));
+        b.Let("a", b.Call(core::type::CreateModfResult(ty, mod.symbols, arg_ty),
+                          core::BuiltinFn::kModf, b.Load(v)));
+        b.Return(func);
+    });
+
+    auto* src = R"(
+__modf_result_vec3_f32 = struct @align(16) {
+  fract:vec3<f32> @offset(0)
+  whole:vec3<f32> @offset(16)
+}
+
+%foo = @fragment func():void {
+  $B1: {
+    %2:ptr<function, vec3<f32>, read_write> = var
+    %3:vec3<f32> = load %2
+    %4:__modf_result_vec3_f32 = modf %3
+    %a:__modf_result_vec3_f32 = let %4
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+__modf_result_vec3_f32 = struct @align(16) {
+  fract:vec3<f32> @offset(0)
+  whole:vec3<f32> @offset(16)
+}
+
+%foo = @fragment func():void {
+  $B1: {
+    %2:ptr<function, vec3<f32>, read_write> = var
+    %3:vec3<f32> = load %2
+    %4:ptr<function, vec3<f32>, read_write> = var
+    %5:vec3<f32> = load %4
+    %6:vec3<f32> = hlsl.modf %3, %5
+    %7:vec3<f32> = load %4
+    %8:__modf_result_vec3_f32 = construct %6, %7
+    %a:__modf_result_vec3_f32 = let %8
+    ret
+  }
+}
+)";
+    Run(BuiltinPolyfill);
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(HlslWriter_BuiltinPolyfillTest, Frexp_f32) {
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        auto* arg_ty = ty.f32();
+        auto* v = b.Var(ty.ptr<function>(arg_ty));
+        b.Let("a", b.Call(core::type::CreateFrexpResult(ty, mod.symbols, arg_ty),
+                          core::BuiltinFn::kFrexp, b.Load(v)));
+        b.Return(func);
+    });
+
+    auto* src = R"(
+__frexp_result_f32 = struct @align(4) {
+  fract:f32 @offset(0)
+  exp:i32 @offset(4)
+}
+
+%foo = @fragment func():void {
+  $B1: {
+    %2:ptr<function, f32, read_write> = var
+    %3:f32 = load %2
+    %4:__frexp_result_f32 = frexp %3
+    %a:__frexp_result_f32 = let %4
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+__frexp_result_f32 = struct @align(4) {
+  fract:f32 @offset(0)
+  exp:i32 @offset(4)
+}
+
+%foo = @fragment func():void {
+  $B1: {
+    %2:ptr<function, f32, read_write> = var
+    %3:f32 = load %2
+    %4:ptr<function, f32, read_write> = var
+    %5:f32 = load %4
+    %6:f32 = hlsl.frexp %3, %5
+    %7:i32 = hlsl.sign %3
+    %8:f32 = convert %7
+    %9:f32 = load %4
+    %10:f32 = mul %8, %9
+    store %4, %10
+    %11:f32 = load %4
+    %12:i32 = convert %11
+    %13:__frexp_result_f32 = construct %6, %12
+    %a:__frexp_result_f32 = let %13
+    ret
+  }
+}
+)";
+    Run(BuiltinPolyfill);
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(HlslWriter_BuiltinPolyfillTest, Frexp_vec_f32) {
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        auto* arg_ty = ty.vec3<f32>();
+        auto* v = b.Var(ty.ptr<function>(arg_ty));
+        b.Let("a", b.Call(core::type::CreateFrexpResult(ty, mod.symbols, arg_ty),
+                          core::BuiltinFn::kFrexp, b.Load(v)));
+        b.Return(func);
+    });
+
+    auto* src = R"(
+__frexp_result_vec3_f32 = struct @align(16) {
+  fract:vec3<f32> @offset(0)
+  exp:vec3<i32> @offset(16)
+}
+
+%foo = @fragment func():void {
+  $B1: {
+    %2:ptr<function, vec3<f32>, read_write> = var
+    %3:vec3<f32> = load %2
+    %4:__frexp_result_vec3_f32 = frexp %3
+    %a:__frexp_result_vec3_f32 = let %4
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+__frexp_result_vec3_f32 = struct @align(16) {
+  fract:vec3<f32> @offset(0)
+  exp:vec3<i32> @offset(16)
+}
+
+%foo = @fragment func():void {
+  $B1: {
+    %2:ptr<function, vec3<f32>, read_write> = var
+    %3:vec3<f32> = load %2
+    %4:ptr<function, vec3<f32>, read_write> = var
+    %5:vec3<f32> = load %4
+    %6:vec3<f32> = hlsl.frexp %3, %5
+    %7:vec3<i32> = hlsl.sign %3
+    %8:vec3<f32> = convert %7
+    %9:vec3<f32> = load %4
+    %10:vec3<f32> = mul %8, %9
+    store %4, %10
+    %11:vec3<f32> = load %4
+    %12:vec3<i32> = convert %11
+    %13:__frexp_result_vec3_f32 = construct %6, %12
+    %a:__frexp_result_vec3_f32 = let %13
+    ret
+  }
+}
+)";
+    Run(BuiltinPolyfill);
+    EXPECT_EQ(expect, str());
+}
+
 }  // namespace
 }  // namespace tint::hlsl::writer::raise

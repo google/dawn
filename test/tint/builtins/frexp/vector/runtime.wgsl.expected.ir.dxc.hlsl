@@ -1,5 +1,3 @@
-SKIP: FAILED
-
 struct frexp_result_vec2_f32 {
   float2 fract;
   int2 exp;
@@ -9,17 +7,14 @@ struct frexp_result_vec2_f32 {
 [numthreads(1, 1, 1)]
 void main() {
   float2 tint_symbol = float2(1.25f, 3.75f);
-  frexp_result_vec2_f32 v = frexp(tint_symbol);
-  frexp_result_vec2_f32 res = v;
+  float2 v = (0.0f).xx;
+  float2 v_1 = frexp(tint_symbol, v);
+  float2 v_2 = float2(sign(tint_symbol));
+  v = (v_2 * v);
+  frexp_result_vec2_f32 v_3 = {v_1, int2(v)};
+  frexp_result_vec2_f32 res = v_3;
   float2 fract = res.fract;
-  frexp_result_vec2_f32 v_1 = v;
-  int2 exp = v_1.exp;
+  frexp_result_vec2_f32 v_4 = v_3;
+  int2 exp = v_4.exp;
 }
 
-DXC validation failure:
-hlsl.hlsl:10:29: error: use of undeclared identifier 'frexp'
-  frexp_result_vec2_f32 v = frexp(tint_symbol);
-                            ^
-
-
-tint executable returned error: exit status 1

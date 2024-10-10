@@ -94,6 +94,10 @@ const char* str(BuiltinFn i) {
             return "WaveGetLaneCount";
         case BuiltinFn::kWaveReadLaneAt:
             return "WaveReadLaneAt";
+        case BuiltinFn::kModf:
+            return "modf";
+        case BuiltinFn::kFrexp:
+            return "frexp";
         case BuiltinFn::kLoad:
             return "Load";
         case BuiltinFn::kLoad2:

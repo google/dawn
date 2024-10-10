@@ -240,6 +240,12 @@ fn WaveGetLaneCount() -> u32
 implicit(T: fiu32_f16) fn WaveReadLaneAt(T, u32) -> T
 implicit(N: num, T: fiu32_f16) fn WaveReadLaneAt(vec<N, T>, u32) -> vec<N, T>
 
+implicit(T: f32_f16) fn modf(T, T) -> T
+implicit(N: num, T: f32_f16) fn modf(vec<N, T>, vec<N, T>) -> vec<N, T>
+
+implicit(T: f32_f16) fn frexp(T, T) -> T
+implicit(N: num, T: f32_f16) fn frexp(vec<N, T>, vec<N, T>) -> vec<N, T>
+
 ////////////////////////////////////////////////////////////////////////////////
 // Member Functions                                                           //
 ////////////////////////////////////////////////////////////////////////////////

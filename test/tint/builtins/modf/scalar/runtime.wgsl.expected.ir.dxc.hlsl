@@ -1,5 +1,3 @@
-SKIP: FAILED
-
 struct modf_result_f32 {
   float fract;
   float whole;
@@ -9,17 +7,12 @@ struct modf_result_f32 {
 [numthreads(1, 1, 1)]
 void main() {
   float tint_symbol = 1.25f;
-  modf_result_f32 v = modf(tint_symbol);
-  modf_result_f32 res = v;
+  float v = 0.0f;
+  float v_1 = modf(tint_symbol, v);
+  modf_result_f32 v_2 = {v_1, v};
+  modf_result_f32 res = v_2;
   float fract = res.fract;
-  modf_result_f32 v_1 = v;
-  float whole = v_1.whole;
+  modf_result_f32 v_3 = v_2;
+  float whole = v_3.whole;
 }
 
-DXC validation failure:
-hlsl.hlsl:10:23: error: use of undeclared identifier 'modf'
-  modf_result_f32 v = modf(tint_symbol);
-                      ^
-
-
-tint executable returned error: exit status 1
