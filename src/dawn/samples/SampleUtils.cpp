@@ -43,7 +43,6 @@
 #include "dawn/utils/CommandLineParser.h"
 #include "dawn/utils/SystemUtils.h"
 #include "dawn/utils/WGPUHelpers.h"
-#include "dawn/webgpu_cpp_print.h"
 
 #ifndef __EMSCRIPTEN__
 #include "GLFW/glfw3.h"

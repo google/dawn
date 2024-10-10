@@ -157,14 +157,12 @@ namespace {{native_namespace}} {
         }
 
         void {{as_cppType(type.name)}}::FreeMembers() {
-            bool needsFreeing = false;
-            {%- for member in type.members if member.annotation != 'value' %}
-                if (this->{{member.name.camelCase()}} != nullptr) { needsFreeing = true; }
-            {%- endfor -%}
-            {%- for member in type.members if member.type.name.canonical_case() == 'string view' %}
-                if (this->{{member.name.camelCase()}}.data != nullptr) { needsFreeing = true; }
-            {%- endfor -%}
-            if (needsFreeing) {
+            if (
+                {%- for member in type.members if member.annotation != 'value' %}
+                    {% if not loop.first %} || {% endif -%}
+                    this->{{member.name.camelCase()}} != nullptr
+                {%- endfor -%}
+            ) {
                 API{{as_MethodSuffix(type.name, Name("free members"))}}(*reinterpret_cast<{{as_cType(type.name)}}*>(this));
             }
         }

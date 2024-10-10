@@ -27,7 +27,6 @@
 
 #include "dawn/tests/unittests/wire/WireTest.h"
 
-#include "dawn/common/StringViewUtils.h"
 #include "dawn/dawn_proc.h"
 #include "dawn/tests/MockCallback.h"
 #include "dawn/utils/TerribleCommandBuffer.h"
@@ -101,10 +100,10 @@ void WireTest::SetUp() {
         EXPECT_CALL(api, AdapterGetInfo(apiAdapter, NotNull()))
             .WillOnce(WithArg<1>(Invoke([&](WGPUAdapterInfo* info) {
                 *info = {};
-                info->vendor = dawn::kEmptyOutputStringView;
-                info->architecture = dawn::kEmptyOutputStringView;
-                info->device = dawn::kEmptyOutputStringView;
-                info->description = dawn::kEmptyOutputStringView;
+                info->vendor = "";
+                info->architecture = "";
+                info->device = "";
+                info->description = "";
                 return WGPUStatus_Success;
             })));
 

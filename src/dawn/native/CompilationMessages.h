@@ -28,7 +28,6 @@
 #ifndef SRC_DAWN_NATIVE_COMPILATIONMESSAGES_H_
 #define SRC_DAWN_NATIVE_COMPILATIONMESSAGES_H_
 
-#include <memory>
 #include <string>
 #include <vector>
 
@@ -67,18 +66,18 @@ class OwnedCompilationMessages : public NonCopyable {
     MaybeError AddMessages(const tint::diag::List& diagnostics);
     void ClearMessages();
 
-    const CompilationInfo* GetCompilationInfo();
+    const WGPUCompilationInfo* GetCompilationInfo();
     const std::vector<std::string>& GetFormattedTintMessages() const;
     bool HasWarningsOrErrors() const;
 
   private:
     MaybeError AddMessage(const tint::diag::Diagnostic& diagnostic);
-    void AddMessage(const CompilationMessage& message);
+    void AddMessage(std::string_view messageString, const WGPUCompilationMessage& message);
     void AddFormattedTintMessages(const tint::diag::List& diagnostics);
 
-    CompilationInfo mCompilationInfo;
-    std::vector<std::unique_ptr<std::string>> mMessageStrings;
-    std::vector<CompilationMessage> mMessages;
+    WGPUCompilationInfo mCompilationInfo;
+    std::vector<std::string> mMessageStrings;
+    std::vector<WGPUCompilationMessage> mMessages;
     std::vector<std::string> mFormattedTintMessages;
 };
 

@@ -755,14 +755,12 @@ struct {{CppType}} : protected detail::{{CppType}} {
 
         {% if type.has_free_members_function %}
             void {{CppType}}::FreeMembers() {
-                bool needsFreeing = false;
-                {%- for member in type.members if member.annotation != 'value' %}
-                    if (this->{{member.name.camelCase()}} != nullptr) { needsFreeing = true; }
-                {%- endfor -%}
-                {%- for member in type.members if member.type.name.canonical_case() == 'string view' %}
-                    if (this->{{member.name.camelCase()}}.data != nullptr) { needsFreeing = true; }
-                {%- endfor -%}
-                if (needsFreeing) {
+                if (
+                    {%- for member in type.members if member.annotation != 'value' %}
+                        {% if not loop.first %} || {% endif -%}
+                        this->{{member.name.camelCase()}} != nullptr
+                    {%- endfor -%}
+                ) {
                     {{as_cMethodNamespaced(type.name, Name("free members"), c_namespace)}}(
                         *reinterpret_cast<{{CType}}*>(this));
                 }

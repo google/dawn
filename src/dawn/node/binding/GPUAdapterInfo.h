@@ -41,7 +41,7 @@ namespace wgpu::binding {
 // GPUAdapterInfo is an implementation of interop::GPUAdapterInfo.
 class GPUAdapterInfo final : public interop::GPUAdapterInfo {
   public:
-    explicit GPUAdapterInfo(const wgpu::AdapterInfo& info);
+    explicit GPUAdapterInfo(WGPUAdapterInfo);
 
     // interop::GPUAdapterInfo interface compliance
     std::string getVendor(Napi::Env) override;

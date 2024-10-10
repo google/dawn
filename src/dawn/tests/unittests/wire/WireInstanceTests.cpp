@@ -28,7 +28,6 @@
 #include <unordered_set>
 #include <vector>
 
-#include "dawn/common/StringViewUtils.h"
 #include "dawn/tests/MockCallback.h"
 #include "dawn/tests/unittests/wire/WireFutureTest.h"
 #include "dawn/tests/unittests/wire/WireTest.h"
@@ -120,10 +119,10 @@ TEST_P(WireInstanceTests, RequestAdapterSuccess) {
     InstanceRequestAdapter(instance, &options, nullptr);
 
     WGPUAdapterInfo fakeInfo = {};
-    fakeInfo.vendor = ToOutputStringView("fake-vendor");
-    fakeInfo.architecture = ToOutputStringView("fake-architecture");
-    fakeInfo.device = ToOutputStringView("fake-device");
-    fakeInfo.description = ToOutputStringView("fake-description");
+    fakeInfo.vendor = "fake-vendor";
+    fakeInfo.architecture = "fake-architecture";
+    fakeInfo.device = "fake adapter";
+    fakeInfo.description = "hello world";
     fakeInfo.backendType = WGPUBackendType_D3D12;
     fakeInfo.adapterType = WGPUAdapterType_IntegratedGPU;
     fakeInfo.vendorID = 0x134;
@@ -180,14 +179,10 @@ TEST_P(WireInstanceTests, RequestAdapterSuccess) {
             .WillOnce(WithArg<1>(Invoke([&](WGPUAdapter adapter) {
                 WGPUAdapterInfo info = {};
                 wgpuAdapterGetInfo(adapter, &info);
-                EXPECT_NE(info.vendor.length, WGPU_STRLEN);
-                EXPECT_EQ(info.vendor, fakeInfo.vendor);
-                EXPECT_NE(info.architecture.length, WGPU_STRLEN);
-                EXPECT_EQ(info.architecture, fakeInfo.architecture);
-                EXPECT_NE(info.device.length, WGPU_STRLEN);
-                EXPECT_EQ(info.device, fakeInfo.device);
-                EXPECT_NE(info.description.length, WGPU_STRLEN);
-                EXPECT_EQ(info.description, fakeInfo.description);
+                EXPECT_STREQ(info.vendor, fakeInfo.vendor);
+                EXPECT_STREQ(info.architecture, fakeInfo.architecture);
+                EXPECT_STREQ(info.device, fakeInfo.device);
+                EXPECT_STREQ(info.description, fakeInfo.description);
                 EXPECT_EQ(info.backendType, fakeInfo.backendType);
                 EXPECT_EQ(info.adapterType, fakeInfo.adapterType);
                 EXPECT_EQ(info.vendorID, fakeInfo.vendorID);
@@ -254,10 +249,10 @@ TEST_P(WireInstanceTests, RequestAdapterPassesChainedProperties) {
 
             EXPECT_CALL(api, AdapterGetInfo(apiAdapter, NotNull()))
                 .WillOnce(WithArg<1>(Invoke([&](WGPUAdapterInfo* info) {
-                    info->vendor = ToOutputStringView("fake-vendor");
-                    info->architecture = ToOutputStringView("fake-architecture");
-                    info->device = ToOutputStringView("fake-device");
-                    info->description = ToOutputStringView("fake-description");
+                    info->vendor = "fake-vendor";
+                    info->architecture = "fake-architecture";
+                    info->device = "fake adapter";
+                    info->description = "hello world";
 
                     WGPUChainedStructOut* chain = info->nextInChain;
                     while (chain != nullptr) {
@@ -377,10 +372,10 @@ TEST_P(WireInstanceTests, RequestAdapterWireLacksFeatureSupport) {
 
             EXPECT_CALL(api, AdapterGetInfo(apiAdapter, NotNull()))
                 .WillOnce(WithArg<1>(Invoke([&](WGPUAdapterInfo* info) {
-                    info->vendor = ToOutputStringView("fake-vendor");
-                    info->architecture = ToOutputStringView("fake-architecture");
-                    info->device = ToOutputStringView("fake-device");
-                    info->description = ToOutputStringView("fake-description");
+                    info->vendor = "fake-vendor";
+                    info->architecture = "fake-architecture";
+                    info->device = "fake adapter";
+                    info->description = "hello world";
                     return WGPUStatus_Success;
                 })));
 

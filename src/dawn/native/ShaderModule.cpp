@@ -1560,13 +1560,13 @@ Future ShaderModuleBase::APIGetCompilationInfo2(
         void Complete(EventCompletionType completionType) override {
             WGPUCompilationInfoRequestStatus status =
                 WGPUCompilationInfoRequestStatus_InstanceDropped;
-            const CompilationInfo* compilationInfo = nullptr;
+            const WGPUCompilationInfo* compilationInfo = nullptr;
             if (completionType == EventCompletionType::Ready) {
                 status = WGPUCompilationInfoRequestStatus_Success;
                 compilationInfo = mShaderModule->mCompilationMessages->GetCompilationInfo();
             }
 
-            mCallback(status, ToAPI(compilationInfo), mUserdata1.ExtractAsDangling(),
+            mCallback(status, compilationInfo, mUserdata1.ExtractAsDangling(),
                       mUserdata2.ExtractAsDangling());
         }
     };
