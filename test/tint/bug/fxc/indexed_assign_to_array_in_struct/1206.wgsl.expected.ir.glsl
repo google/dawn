@@ -4,7 +4,7 @@
 struct Particle {
   vec3 position[8];
   float lifetime;
-  uint tint_pad;
+  uint tint_pad_0;
   uint tint_pad_1;
   uint tint_pad_2;
   vec4 color;

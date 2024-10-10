@@ -7,7 +7,7 @@ struct S_std140 {
   f16vec2 m_col0;
   f16vec2 m_col1;
   f16vec2 m_col2;
-  uint tint_pad;
+  uint tint_pad_0;
   uint tint_pad_1;
   uint tint_pad_2;
   uint tint_pad_3;

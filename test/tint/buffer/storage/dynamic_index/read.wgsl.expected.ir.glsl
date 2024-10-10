@@ -5,7 +5,7 @@ struct Inner {
   float scalar_f32;
   int scalar_i32;
   uint scalar_u32;
-  uint tint_pad;
+  uint tint_pad_0;
   vec2 vec2_f32;
   ivec2 vec2_i32;
   uvec2 vec2_u32;

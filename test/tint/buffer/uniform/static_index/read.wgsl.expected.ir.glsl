@@ -3,20 +3,20 @@
 
 struct Inner {
   int scalar_i32;
-  uint tint_pad_17;
-  uint tint_pad_18;
-  uint tint_pad_19;
+  uint tint_pad_0;
+  uint tint_pad_1;
+  uint tint_pad_2;
   float scalar_f32;
-  uint tint_pad_20;
-  uint tint_pad_21;
-  uint tint_pad_22;
+  uint tint_pad_3;
+  uint tint_pad_4;
+  uint tint_pad_5;
 };
 
 struct S_std140 {
   float scalar_f32;
   int scalar_i32;
   uint scalar_u32;
-  uint tint_pad;
+  uint tint_pad_0;
   vec2 vec2_f32;
   ivec2 vec2_i32;
   uvec2 vec2_u32;

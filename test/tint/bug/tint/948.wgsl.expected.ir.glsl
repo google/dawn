@@ -6,7 +6,7 @@ precision highp int;
 struct LeftOver {
   float time;
   uint padding;
-  uint tint_pad;
+  uint tint_pad_0;
   uint tint_pad_1;
   mat4 worldViewProjection;
   vec2 outputSize;

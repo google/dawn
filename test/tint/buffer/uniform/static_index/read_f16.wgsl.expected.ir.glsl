@@ -13,7 +13,7 @@ struct Inner {
   int scalar_i32;
   float scalar_f32;
   float16_t scalar_f16;
-  uint tint_pad_22;
+  uint tint_pad_0;
 };
 
 struct S_std140 {
@@ -25,7 +25,7 @@ struct S_std140 {
   ivec2 vec2_i32;
   uvec2 vec2_u32;
   f16vec2 vec2_f16;
-  uint tint_pad;
+  uint tint_pad_0;
   vec3 vec3_f32;
   uint tint_pad_1;
   ivec3 vec3_i32;

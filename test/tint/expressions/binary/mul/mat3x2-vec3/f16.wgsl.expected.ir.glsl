@@ -8,7 +8,7 @@ struct S_std140 {
   f16vec2 matrix_col0;
   f16vec2 matrix_col1;
   f16vec2 matrix_col2;
-  uint tint_pad;
+  uint tint_pad_0;
   f16vec3 vector;
 };
 

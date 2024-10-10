@@ -4,7 +4,7 @@
 
 struct S_std140 {
   int before;
-  uint tint_pad;
+  uint tint_pad_0;
   f16vec3 m_col0;
   f16vec3 m_col1;
   uint tint_pad_1;

@@ -3,7 +3,7 @@
 
 struct S_std140 {
   int before;
-  uint tint_pad;
+  uint tint_pad_0;
   uint tint_pad_1;
   uint tint_pad_2;
   vec3 m_col0;

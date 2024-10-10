@@ -17,7 +17,7 @@ struct S {
   ivec2 vec2_i32;
   uvec2 vec2_u32;
   f16vec2 vec2_f16;
-  uint tint_pad;
+  uint tint_pad_0;
   vec3 vec3_f32;
   uint tint_pad_1;
   ivec3 vec3_i32;

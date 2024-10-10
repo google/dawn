@@ -3,7 +3,7 @@
 layout(binding = 0, std140)
 uniform m_block_std140_1_ubo {
   vec3 inner_col0;
-  uint tint_pad;
+  uint tint_pad_0;
   vec3 inner_col1;
 } v;
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;

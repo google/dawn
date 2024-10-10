@@ -7,7 +7,7 @@ precision highp int;
 struct S {
   float f;
   uint u;
-  uint tint_pad;
+  uint tint_pad_0;
   uint tint_pad_1;
   uint tint_pad_2;
   uint tint_pad_3;

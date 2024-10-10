@@ -460,15 +460,15 @@ struct Inner {
 
 struct Outer {
   float x;
-  uint tint_pad_3;
-  uint tint_pad_4;
-  uint tint_pad_5;
+  uint tint_pad_0;
+  uint tint_pad_1;
+  uint tint_pad_2;
   Inner y;
 };
 
 struct SB {
   int a;
-  uint tint_pad;
+  uint tint_pad_0;
   uint tint_pad_1;
   uint tint_pad_2;
   Outer b;
@@ -759,7 +759,7 @@ struct Inner {
 
 struct SB {
   int a;
-  uint tint_pad;
+  uint tint_pad_0;
   uint tint_pad_1;
   uint tint_pad_2;
   Inner b;
@@ -979,7 +979,7 @@ precision highp int;
 layout(binding = 0, std140)
 uniform v_block_std140_1_ubo {
   vec3 inner_col0;
-  uint tint_pad;
+  uint tint_pad_0;
   vec3 inner_col1;
 } v_1;
 void main() {
@@ -1311,25 +1311,25 @@ precision highp int;
 
 struct Inner_std140 {
   vec3 s_col0;
-  uint tint_pad_6;
+  uint tint_pad_0;
   vec3 s_col1;
-  uint tint_pad_7;
+  uint tint_pad_1;
   vec3 s_col2;
-  uint tint_pad_8;
+  uint tint_pad_2;
   vec3 t[5];
 };
 
 struct Outer_std140 {
   float x;
-  uint tint_pad_3;
-  uint tint_pad_4;
-  uint tint_pad_5;
+  uint tint_pad_0;
+  uint tint_pad_1;
+  uint tint_pad_2;
   Inner_std140 y;
 };
 
 struct SB_std140 {
   int a;
-  uint tint_pad;
+  uint tint_pad_0;
   uint tint_pad_1;
   uint tint_pad_2;
   Outer_std140 b;
@@ -1890,15 +1890,15 @@ struct Inner {
 
 struct Outer {
   float x;
-  uint tint_pad_3;
-  uint tint_pad_4;
-  uint tint_pad_5;
+  uint tint_pad_0;
+  uint tint_pad_1;
+  uint tint_pad_2;
   Inner y;
 };
 
 struct SB {
   int a;
-  uint tint_pad;
+  uint tint_pad_0;
   uint tint_pad_1;
   uint tint_pad_2;
   Outer b;
@@ -1947,24 +1947,24 @@ precision highp int;
 
 struct Inner {
   float s;
-  uint tint_pad_6;
-  uint tint_pad_7;
-  uint tint_pad_8;
+  uint tint_pad_0;
+  uint tint_pad_1;
+  uint tint_pad_2;
   vec3 t;
-  uint tint_pad_9;
+  uint tint_pad_3;
 };
 
 struct Outer {
   float x;
-  uint tint_pad_3;
-  uint tint_pad_4;
-  uint tint_pad_5;
+  uint tint_pad_0;
+  uint tint_pad_1;
+  uint tint_pad_2;
   Inner y;
 };
 
 struct SB {
   int a;
-  uint tint_pad;
+  uint tint_pad_0;
   uint tint_pad_1;
   uint tint_pad_2;
   Outer b;
@@ -2032,15 +2032,15 @@ struct Inner {
 
 struct Outer {
   float x;
-  uint tint_pad_3;
-  uint tint_pad_4;
-  uint tint_pad_5;
+  uint tint_pad_0;
+  uint tint_pad_1;
+  uint tint_pad_2;
   Inner y;
 };
 
 struct SB {
   int a;
-  uint tint_pad;
+  uint tint_pad_0;
   uint tint_pad_1;
   uint tint_pad_2;
   Outer b;
@@ -2116,7 +2116,7 @@ precision highp int;
 
 struct SB {
   int a;
-  uint tint_pad;
+  uint tint_pad_0;
   uint tint_pad_1;
   uint tint_pad_2;
   vec3 b;
@@ -2159,7 +2159,7 @@ precision highp int;
 
 struct SB {
   float c;
-  uint tint_pad;
+  uint tint_pad_0;
   uint tint_pad_1;
   uint tint_pad_2;
   vec3 d;

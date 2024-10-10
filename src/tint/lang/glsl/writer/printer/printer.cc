@@ -665,12 +665,15 @@ class Printer : public tint::TextGenerator {
         bool is_host_shareable = host_shareable_structs_.Contains(str);
         Vector<std::optional<uint32_t>, 4> new_struct_to_old;
 
+        // Padding members need to be named consistently between different shader stages to satisfy
+        // GLSL's interface matching rules.
+        uint32_t pad_id = 0;
         auto add_padding = [&](uint32_t size) {
             auto pad_size = size / 4;
             for (size_t i = 0; i < pad_size; ++i) {
                 std::string name;
                 do {
-                    name = UniqueIdentifier("tint_pad");
+                    name = "tint_pad_" + std::to_string(pad_id++);
                 } while (str->FindMember(ir_.symbols.Get(name)));
 
                 Line(&str_buf) << "uint " << name << ";";

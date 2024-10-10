@@ -7,7 +7,7 @@ struct Uniforms {
   uint puuuuuuuuuuuuuuuuad1;
   uint pad2;
   vec3 bbMin;
-  uint tint_pad;
+  uint tint_pad_0;
   vec3 bbMax;
   uint tint_pad_1;
 };

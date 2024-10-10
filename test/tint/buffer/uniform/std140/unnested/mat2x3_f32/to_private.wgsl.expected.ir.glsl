@@ -3,7 +3,7 @@
 layout(binding = 0, std140)
 uniform u_block_std140_1_ubo {
   vec3 inner_col0;
-  uint tint_pad;
+  uint tint_pad_0;
   vec3 inner_col1;
 } v;
 mat2x3 p = mat2x3(vec3(0.0f), vec3(0.0f));

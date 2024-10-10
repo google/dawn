@@ -3,11 +3,12 @@
 
 struct strided_arr {
   float el;
-  uint tint_pad;
+  uint tint_pad_0;
 };
 
 struct strided_arr_1 {
   strided_arr el[3][2];
+  uint tint_pad_0;
   uint tint_pad_1;
   uint tint_pad_2;
   uint tint_pad_3;
@@ -27,7 +28,6 @@ struct strided_arr_1 {
   uint tint_pad_17;
   uint tint_pad_18;
   uint tint_pad_19;
-  uint tint_pad_20;
 };
 
 struct S {

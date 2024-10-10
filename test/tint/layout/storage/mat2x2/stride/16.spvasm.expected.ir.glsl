@@ -3,7 +3,7 @@
 
 struct strided_arr {
   vec2 el;
-  uint tint_pad;
+  uint tint_pad_0;
   uint tint_pad_1;
 };
 

@@ -4,7 +4,7 @@
 struct S_std140 {
   mat4 matrix_view;
   vec3 matrix_normal_col0;
-  uint tint_pad;
+  uint tint_pad_0;
   vec3 matrix_normal_col1;
   uint tint_pad_1;
   vec3 matrix_normal_col2;

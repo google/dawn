@@ -17,7 +17,7 @@ struct tint_GammaTransferParams {
 struct tint_ExternalTextureParams_std140 {
   uint numPlanes;
   uint doYuvToRgbConversionOnly;
-  uint tint_pad;
+  uint tint_pad_0;
   uint tint_pad_1;
   mat3x4 yuvToRgbConversionMatrix;
   tint_GammaTransferParams gammaDecodeParams;
@@ -98,7 +98,7 @@ struct tint_GammaTransferParams {
 struct tint_ExternalTextureParams_std140 {
   uint numPlanes;
   uint doYuvToRgbConversionOnly;
-  uint tint_pad;
+  uint tint_pad_0;
   uint tint_pad_1;
   mat3x4 yuvToRgbConversionMatrix;
   tint_GammaTransferParams gammaDecodeParams;
@@ -180,7 +180,7 @@ struct tint_GammaTransferParams {
 struct tint_ExternalTextureParams_std140 {
   uint numPlanes;
   uint doYuvToRgbConversionOnly;
-  uint tint_pad;
+  uint tint_pad_0;
   uint tint_pad_1;
   mat3x4 yuvToRgbConversionMatrix;
   tint_GammaTransferParams gammaDecodeParams;

@@ -4,7 +4,7 @@
 struct S {
   vec4 a;
   int b;
-  uint tint_pad;
+  uint tint_pad_0;
   uint tint_pad_1;
   uint tint_pad_2;
 };

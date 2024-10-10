@@ -3,7 +3,7 @@
 
 struct Inner {
   mat3x4 m;
-  uint tint_pad;
+  uint tint_pad_0;
   uint tint_pad_1;
   uint tint_pad_2;
   uint tint_pad_3;

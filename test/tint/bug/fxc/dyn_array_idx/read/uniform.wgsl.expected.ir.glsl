@@ -4,7 +4,7 @@
 struct UBO {
   ivec4 data[4];
   int dynamic_idx;
-  uint tint_pad;
+  uint tint_pad_0;
   uint tint_pad_1;
   uint tint_pad_2;
 };

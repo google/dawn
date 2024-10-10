@@ -3,7 +3,7 @@
 
 struct S {
   ivec3 v;
-  uint tint_pad;
+  uint tint_pad_0;
 };
 
 layout(binding = 0, std430)

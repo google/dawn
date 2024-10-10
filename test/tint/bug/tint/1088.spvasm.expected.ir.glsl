@@ -3,15 +3,15 @@
 
 struct strided_arr {
   float el;
-  uint tint_pad_3;
-  uint tint_pad_4;
-  uint tint_pad_5;
+  uint tint_pad_0;
+  uint tint_pad_1;
+  uint tint_pad_2;
 };
 
 struct LeftOver {
   mat4 worldViewProjection;
   float time;
-  uint tint_pad;
+  uint tint_pad_0;
   uint tint_pad_1;
   uint tint_pad_2;
   mat4 test2[2];

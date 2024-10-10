@@ -5,7 +5,7 @@ struct Inner_std140 {
   vec2 m_col0;
   vec2 m_col1;
   vec2 m_col2;
-  uint tint_pad;
+  uint tint_pad_0;
   uint tint_pad_1;
   uint tint_pad_2;
   uint tint_pad_3;

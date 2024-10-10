@@ -8,7 +8,7 @@ struct sspp962805860buildInformationS {
   vec4 offset;
   int essence;
   int orientation[6];
-  uint tint_pad;
+  uint tint_pad_0;
 };
 
 struct x_B4_BuildInformation {

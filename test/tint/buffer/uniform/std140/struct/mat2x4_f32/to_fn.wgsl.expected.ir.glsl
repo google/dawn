@@ -3,7 +3,7 @@
 
 struct S {
   int before;
-  uint tint_pad;
+  uint tint_pad_0;
   uint tint_pad_1;
   uint tint_pad_2;
   mat2x4 m;

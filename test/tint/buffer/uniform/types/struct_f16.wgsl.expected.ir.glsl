@@ -4,7 +4,7 @@
 
 struct Inner_std140 {
   float16_t scalar_f16;
-  uint tint_pad;
+  uint tint_pad_0;
   f16vec3 vec3_f16;
   f16vec4 mat2x4_f16_col0;
   f16vec4 mat2x4_f16_col1;
@@ -16,7 +16,7 @@ struct S_std140 {
 
 struct Inner {
   float16_t scalar_f16;
-  uint tint_pad_1;
+  uint tint_pad_0;
   f16vec3 vec3_f16;
   f16mat2x4 mat2x4_f16;
 };

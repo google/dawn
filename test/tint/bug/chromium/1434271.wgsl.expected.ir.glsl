@@ -44,7 +44,7 @@ void main() {
 struct RenderParams {
   mat4 modelViewProjectionMatrix;
   vec3 right;
-  uint tint_pad;
+  uint tint_pad_0;
   vec3 up;
   uint tint_pad_1;
 };
@@ -94,7 +94,7 @@ void main() {
 
 struct SimulationParams {
   float deltaTime;
-  uint tint_pad;
+  uint tint_pad_0;
   uint tint_pad_1;
   uint tint_pad_2;
   vec4 seed;
@@ -105,8 +105,8 @@ struct Particle {
   float lifetime;
   vec4 color;
   vec2 velocity;
-  uint tint_pad_3;
-  uint tint_pad_4;
+  uint tint_pad_0;
+  uint tint_pad_1;
 };
 
 vec2 rand_seed = vec2(0.0f);

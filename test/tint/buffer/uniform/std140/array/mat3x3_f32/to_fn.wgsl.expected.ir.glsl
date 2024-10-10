@@ -3,7 +3,7 @@
 
 struct mat3x3_f32_std140 {
   vec3 col0;
-  uint tint_pad;
+  uint tint_pad_0;
   vec3 col1;
   uint tint_pad_1;
   vec3 col2;
