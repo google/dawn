@@ -370,8 +370,9 @@ std::vector<Ref<AdapterBase>> InstanceBase::EnumerateAdapters(
     UnpackedPtr<RequestAdapterOptions> unpacked = Unpack(options);
     auto* togglesDesc = unpacked.Get<DawnTogglesDescriptor>();
 
-    FeatureLevel featureLevel =
-        options->compatibilityMode ? FeatureLevel::Compatibility : FeatureLevel::Core;
+    FeatureLevel featureLevel = (options->compatibilityMode && !options->forceFallbackAdapter)
+                                    ? FeatureLevel::Compatibility
+                                    : FeatureLevel::Core;
     std::vector<Ref<AdapterBase>> adapters;
     for (const auto& physicalDevice : EnumeratePhysicalDevices(unpacked)) {
         DAWN_ASSERT(physicalDevice->SupportsFeatureLevel(featureLevel));
