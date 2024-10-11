@@ -746,7 +746,7 @@ DawnTestBase::DawnTestBase(const AdapterTestParam& param) : mParam(param) {
                         info.deviceID == param.adapterProperties.deviceID &&
                         info.vendorID == param.adapterProperties.vendorID &&
                         info.adapterType == param.adapterProperties.adapterType &&
-                        strcmp(info.device, param.adapterProperties.name.c_str()) == 0);
+                        std::string_view(info.device) == param.adapterProperties.name);
             });
         DAWN_ASSERT(it != adapters.end());
         gCurrentTest->mBackendAdapter = *it;

@@ -1,4 +1,4 @@
-// Copyright 2023 The Dawn & Tint Authors
+// Copyright 2024 The Dawn & Tint Authors
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
@@ -25,37 +25,35 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "src/dawn/node/binding/GPUAdapterInfo.h"
+#ifndef SRC_DAWN_COMMON_STRINGVIEWUTILS_H_
+#define SRC_DAWN_COMMON_STRINGVIEWUTILS_H_
 
-#include <iomanip>
-#include <sstream>
+#include <webgpu/webgpu_cpp.h>
 
-namespace wgpu::binding {
+#include <string>
+#include <string_view>
 
-////////////////////////////////////////////////////////////////////////////////
-// wgpu::bindings::GPUAdapterInfo
-////////////////////////////////////////////////////////////////////////////////
+// A comparison operators for use in tests that assumes that the nil string is the same as "".
+bool operator==(WGPUStringView a, WGPUStringView b);
+namespace wgpu {
+bool operator==(StringView a, StringView b);
+}  // namespace wgpu
 
-GPUAdapterInfo::GPUAdapterInfo(const wgpu::AdapterInfo& info)
-    : vendor_(info.vendor),
-      architecture_(info.architecture),
-      device_(info.device),
-      description_(info.description) {}
+namespace dawn {
 
-std::string GPUAdapterInfo::getVendor(Napi::Env) {
-    return vendor_;
+// Helper functions to work with the C WGPUStringView in tests, since it doesn't have all the
+// niceties of wgpu::StringView.
+WGPUStringView ToOutputStringView(const std::string& s);
+WGPUStringView ToOutputStringView(const std::string_view& s);
+template <size_t N>
+constexpr WGPUStringView ToOutputStringView(const char (&s)[N]) {
+    return {s, N - 1};
 }
 
-std::string GPUAdapterInfo::getArchitecture(Napi::Env) {
-    return architecture_;
-}
+constexpr WGPUStringView kEmptyOutputStringView = {nullptr, 0};
 
-std::string GPUAdapterInfo::getDevice(Napi::Env) {
-    return device_;
-}
+std::string ToString(WGPUStringView s);
 
-std::string GPUAdapterInfo::getDescription(Napi::Env) {
-    return description_;
-}
+}  // namespace dawn
 
-}  // namespace wgpu::binding
+#endif  // SRC_DAWN_COMMON_STRINGVIEWUTILS_H_

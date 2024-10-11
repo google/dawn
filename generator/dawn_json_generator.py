@@ -339,7 +339,8 @@ class StructureType(Record, Type):
         if not self.output:
             return False
         for m in self.members:
-            if m.annotation != 'value':
+            if m.annotation != 'value' \
+                or m.type.name.canonical_case() == 'string view':
                 return True
         return False
 

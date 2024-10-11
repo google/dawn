@@ -40,6 +40,12 @@
         this->length = WGPU_STRLEN;  // use strlen
     }
 
+    // NOLINTNEXTLINE(runtime/explicit) allow implicit construction
+    inline constexpr {{CppType}}(WGPUStringView s) {
+        this->data = s.data;
+        this->length = s.length;
+    }
+
     inline constexpr {{CppType}}(const char* data, size_t length) {
         this->data = data;
         this->length = length;

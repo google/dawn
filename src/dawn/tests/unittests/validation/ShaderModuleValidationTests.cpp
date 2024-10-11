@@ -290,25 +290,25 @@ TEST_F(ShaderModuleValidationTest, GetCompilationMessages) {
             ASSERT_EQ(4u, info->messageCount);
 
             const wgpu::CompilationMessage* message = &info->messages[0];
-            ASSERT_STREQ("Info Message", message->message);
+            ASSERT_EQ("Info Message", std::string_view(message->message));
             ASSERT_EQ(wgpu::CompilationMessageType::Info, message->type);
             ASSERT_EQ(0u, message->lineNum);
             ASSERT_EQ(0u, message->linePos);
 
             message = &info->messages[1];
-            ASSERT_STREQ("Warning Message", message->message);
+            ASSERT_EQ("Warning Message", std::string_view(message->message));
             ASSERT_EQ(wgpu::CompilationMessageType::Warning, message->type);
             ASSERT_EQ(0u, message->lineNum);
             ASSERT_EQ(0u, message->linePos);
 
             message = &info->messages[2];
-            ASSERT_STREQ("Error Message", message->message);
+            ASSERT_EQ("Error Message", std::string_view(message->message));
             ASSERT_EQ(wgpu::CompilationMessageType::Error, message->type);
             ASSERT_EQ(3u, message->lineNum);
             ASSERT_EQ(4u, message->linePos);
 
             message = &info->messages[3];
-            ASSERT_STREQ("Complete Message", message->message);
+            ASSERT_EQ("Complete Message", std::string_view(message->message));
             ASSERT_EQ(wgpu::CompilationMessageType::Info, message->type);
             ASSERT_EQ(3u, message->lineNum);
             ASSERT_EQ(4u, message->linePos);
@@ -732,7 +732,7 @@ TEST_F(ShaderModuleValidationTest, CreateErrorShaderModule) {
             ASSERT_EQ(1u, info->messageCount);
 
             const wgpu::CompilationMessage* message = &info->messages[0];
-            ASSERT_STREQ("Shader compilation error", message->message);
+            ASSERT_EQ("Shader compilation error", std::string_view(message->message));
             ASSERT_EQ(wgpu::CompilationMessageType::Error, message->type);
             ASSERT_EQ(0u, message->lineNum);
             ASSERT_EQ(0u, message->linePos);

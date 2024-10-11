@@ -27,6 +27,7 @@
 
 #include <memory>
 
+#include "dawn/common/StringViewUtils.h"
 #include "dawn/tests/unittests/wire/WireFutureTest.h"
 #include "dawn/tests/unittests/wire/WireTest.h"
 #include "dawn/wire/WireClient.h"
@@ -66,8 +67,16 @@ class WireShaderModuleTests : public WireShaderModuleTestBase {
     WGPUShaderModule apiShaderModule;
 
     // Default responses.
-    WGPUCompilationMessage mMessage = {
-        nullptr, "Test Message", WGPUCompilationMessageType_Info, 2, 4, 6, 8, 4, 6, 8};
+    WGPUCompilationMessage mMessage = {nullptr,
+                                       ToOutputStringView("Test Message"),
+                                       WGPUCompilationMessageType_Info,
+                                       2,
+                                       4,
+                                       6,
+                                       8,
+                                       4,
+                                       6,
+                                       8};
     WGPUCompilationInfo mCompilationInfo = {nullptr, 1, &mMessage};
 };
 
@@ -92,7 +101,8 @@ TEST_P(WireShaderModuleTests, GetCompilationInfo) {
                                          return false;
                                      }
                                      const WGPUCompilationMessage* infoMessage = &info->messages[0];
-                                     return strcmp(infoMessage->message, mMessage.message) == 0 &&
+                                     EXPECT_NE(infoMessage->message.length, WGPU_STRLEN);
+                                     return infoMessage->message == mMessage.message &&
                                             infoMessage->nextInChain == mMessage.nextInChain &&
                                             infoMessage->type == mMessage.type &&
                                             infoMessage->lineNum == mMessage.lineNum &&

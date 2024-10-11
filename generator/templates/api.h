@@ -38,6 +38,7 @@
 #define {{metadata.api.upper()}}_H_
 
 #define WGPU_BREAKING_CHANGE_STRING_VIEW_LABELS
+#define WGPU_BREAKING_CHANGE_STRING_VIEW_OUTPUT_STRUCTS
 
 {% set API = metadata.c_prefix %}
 #if defined({{API}}_SHARED_LIBRARY)

@@ -90,6 +90,7 @@ set(private_headers
     "SerialStorage.h"
     "SlabAllocator.h"
     "StackAllocated.h"
+    "StringViewUtils.h"
     "SystemUtils.h"
     "TypedInteger.h"
     "TypeTraits.h"
@@ -114,6 +115,7 @@ set(sources
     "RefCounted.cpp"
     "Result.cpp"
     "SlabAllocator.cpp"
+    "StringViewUtils.cpp"
     "SystemUtils.cpp"
     "WeakRefSupport.cpp"
 )

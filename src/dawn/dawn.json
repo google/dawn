@@ -212,10 +212,10 @@
         "category": "structure",
         "extensible": "out",
         "members": [
-            {"name": "vendor", "type": "char", "annotation": "const*", "length": "strlen", "default": "nullptr"},
-            {"name": "architecture", "type": "char", "annotation": "const*", "length": "strlen", "default": "nullptr"},
-            {"name": "device", "type": "char", "annotation": "const*", "length": "strlen", "default": "nullptr"},
-            {"name": "description", "type": "char", "annotation": "const*", "length": "strlen", "default": "nullptr"},
+            {"name": "vendor", "type": "string view"},
+            {"name": "architecture", "type": "string view"},
+            {"name": "device", "type": "string view"},
+            {"name": "description", "type": "string view"},
             {"name": "backend type", "type": "backend type"},
             {"name": "adapter type", "type": "adapter type"},
             {"name": "vendor ID", "type": "uint32_t"},
@@ -1094,7 +1094,7 @@
         "category": "structure",
         "extensible": "in",
         "members": [
-            {"name": "message", "type": "char", "annotation": "const*", "length": "strlen", "optional": true},
+            {"name": "message", "type": "string view"},
             {"name": "type", "type": "compilation message type"},
             {"name": "line num", "type": "uint64_t"},
             {"name": "line pos", "type": "uint64_t"},

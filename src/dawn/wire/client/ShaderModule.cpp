@@ -30,6 +30,7 @@
 #include <memory>
 #include <utility>
 
+#include "dawn/common/StringViewUtils.h"
 #include "dawn/wire/client/Client.h"
 #include "partition_alloc/pointers/raw_ptr.h"
 
@@ -62,12 +63,15 @@ class ShaderModule::CompilationInfoEvent final : public TrackedEvent {
         }
 
         mStatus = status;
+
+        // Deep copy the WGPUCompilationInfo
         mShader->mMessageStrings.reserve(info->messageCount);
         mShader->mMessages.reserve(info->messageCount);
         for (size_t i = 0; i < info->messageCount; i++) {
-            mShader->mMessageStrings.push_back(info->messages[i].message);
+            DAWN_ASSERT(info->messages[i].length != WGPU_STRLEN);
+            mShader->mMessageStrings.push_back(ToString(info->messages[i].message));
             mShader->mMessages.push_back(info->messages[i]);
-            mShader->mMessages[i].message = mShader->mMessageStrings[i].c_str();
+            mShader->mMessages[i].message = ToOutputStringView(mShader->mMessageStrings[i]);
         }
         mShader->mCompilationInfo = {nullptr, mShader->mMessages.size(), mShader->mMessages.data()};
 
