@@ -181,11 +181,14 @@ tint_target_add_dependencies(tint_lang_glsl_writer_bench bench
   tint_api_common
   tint_lang_core
   tint_lang_core_constant
+  tint_lang_core_ir
   tint_lang_core_type
   tint_lang_wgsl
   tint_lang_wgsl_ast
   tint_lang_wgsl_ast_transform
+  tint_lang_wgsl_common
   tint_lang_wgsl_features
+  tint_lang_wgsl_inspector
   tint_lang_wgsl_program
   tint_lang_wgsl_sem
   tint_utils_containers
@@ -212,12 +215,14 @@ if(TINT_BUILD_GLSL_WRITER)
   tint_target_add_dependencies(tint_lang_glsl_writer_bench bench
     tint_lang_glsl_writer
     tint_lang_glsl_writer_common
+    tint_lang_glsl_writer_helpers
   )
 endif(TINT_BUILD_GLSL_WRITER)
 
 if(TINT_BUILD_WGSL_READER)
   tint_target_add_dependencies(tint_lang_glsl_writer_bench bench
     tint_cmd_bench_bench
+    tint_lang_wgsl_reader
   )
 endif(TINT_BUILD_WGSL_READER)
 

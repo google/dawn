@@ -28,12 +28,77 @@
 #include <string>
 
 #include "src/tint/cmd/bench/bench.h"
+#include "src/tint/lang/glsl/writer/helpers/generate_bindings.h"
 #include "src/tint/lang/glsl/writer/writer.h"
 #include "src/tint/lang/wgsl/ast/identifier.h"
 #include "src/tint/lang/wgsl/ast/module.h"
+#include "src/tint/lang/wgsl/ast/transform/manager.h"
+#include "src/tint/lang/wgsl/ast/transform/single_entry_point.h"
+#include "src/tint/lang/wgsl/inspector/inspector.h"
+#include "src/tint/lang/wgsl/reader/reader.h"
 
 namespace tint::glsl::writer {
 namespace {
+
+void GenerateGLSL(benchmark::State& state, std::string input_name) {
+    auto res = bench::GetWgslProgram(input_name);
+    if (res != Success) {
+        state.SkipWithError(res.Failure().reason.Str());
+        return;
+    }
+
+    // Generate the input program and generator options for each entry point.
+    std::vector<Program> programs;
+    std::vector<Options> options;
+    std::vector<std::string> names;
+    tint::inspector::Inspector inspector(res->program);
+    for (auto ep : inspector.GetEntryPoints()) {
+        tint::glsl::writer::Options gen_options = {};
+        gen_options.bindings = tint::glsl::writer::GenerateBindings(res->program);
+        gen_options.bindings.texture_builtins_from_uniform.ubo_binding = {4u, 0u};
+
+        auto textureBuiltinsFromUniformData = inspector.GetTextureQueries(ep.name);
+        if (!textureBuiltinsFromUniformData.empty()) {
+            for (size_t i = 0; i < textureBuiltinsFromUniformData.size(); ++i) {
+                const auto& info = textureBuiltinsFromUniformData[i];
+
+                // This is the unmodified binding point from the WGSL shader.
+                tint::BindingPoint srcBindingPoint{info.group, info.binding};
+                gen_options.bindings.texture_builtins_from_uniform.ubo_bindingpoint_ordering
+                    .emplace_back(srcBindingPoint);
+            }
+        }
+
+        // Run single entry point to strip the program down to a single entry point.
+        tint::ast::transform::Manager manager;
+        tint::ast::transform::DataMap inputs;
+        tint::ast::transform::DataMap outputs;
+        inputs.Add<tint::ast::transform::SingleEntryPoint::Config>(ep.name);
+        manager.Add<tint::ast::transform::SingleEntryPoint>();
+        auto program = manager.Run(res->program, inputs, outputs);
+
+        programs.push_back(std::move(program));
+        options.push_back(gen_options);
+        names.push_back(ep.name);
+    }
+
+    for (auto _ : state) {
+        for (uint32_t i = 0; i < programs.size(); i++) {
+            // Convert the AST program to an IR module.
+            auto ir = tint::wgsl::reader::ProgramToLoweredIR(programs[i]);
+            if (ir != Success) {
+                state.SkipWithError(ir.Failure().reason.Str());
+                return;
+            }
+
+            // Generate GLSL.
+            auto gen_res = Generate(ir.Get(), options[i], names[i]);
+            if (gen_res != Success) {
+                state.SkipWithError(gen_res.Failure().reason.Str());
+            }
+        }
+    }
+}
 
 void GenerateGLSL_AST(benchmark::State& state, std::string input_name) {
     auto res = bench::GetWgslProgram(input_name);
@@ -59,6 +124,7 @@ void GenerateGLSL_AST(benchmark::State& state, std::string input_name) {
     }
 }
 
+TINT_BENCHMARK_PROGRAMS(GenerateGLSL);
 TINT_BENCHMARK_PROGRAMS(GenerateGLSL_AST);
 
 }  // namespace
