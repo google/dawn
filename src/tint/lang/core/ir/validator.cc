@@ -1772,7 +1772,10 @@ void Validator::CheckMemberBuiltinCall(const MemberBuiltinCall* call) {
     }
 
     if (result->return_type != call->Result(0)->Type()) {
-        AddError(call) << "member call result type does not match builtin return type";
+        AddError(call) << "member call result type ("
+                       << style::Type(call->Result(0)->Type()->FriendlyName())
+                       << ") does not match builtin return type ("
+                       << style::Type(result->return_type->FriendlyName()) << ")";
     }
 }
 
