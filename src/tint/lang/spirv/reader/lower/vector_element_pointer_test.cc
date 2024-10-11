@@ -228,6 +228,56 @@ TEST_F(SpirvReader_VectorElementPointerTest, Store) {
     EXPECT_EQ(expect, str());
 }
 
+TEST_F(SpirvReader_VectorElementPointerTest, Store_DynamicIndex) {
+    auto* dyn_index = b.Var("dyn_index", ty.ptr<uniform, u32>());
+    dyn_index->SetBindingPoint(0, 0);
+    mod.root_block->Append(dyn_index);
+
+    auto* foo = b.Function("foo", ty.void_());
+    b.Append(foo->Block(), [&] {
+        auto* vec = b.Var<function, vec4<u32>>("vec");
+        auto* access = b.Access<ptr<function, u32>>(vec, b.Load(dyn_index));
+        b.Store(access, 42_u);
+        b.Return(foo);
+    });
+
+    auto* src = R"(
+$B1: {  # root
+  %dyn_index:ptr<uniform, u32, read> = var @binding_point(0, 0)
+}
+
+%foo = func():void {
+  $B2: {
+    %vec:ptr<function, vec4<u32>, read_write> = var
+    %4:u32 = load %dyn_index
+    %5:ptr<function, u32, read_write> = access %vec, %4
+    store %5, 42u
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+$B1: {  # root
+  %dyn_index:ptr<uniform, u32, read> = var @binding_point(0, 0)
+}
+
+%foo = func():void {
+  $B2: {
+    %vec:ptr<function, vec4<u32>, read_write> = var
+    %4:u32 = load %dyn_index
+    store_vector_element %vec, %4, 42u
+    ret
+  }
+}
+)";
+
+    Run(VectorElementPointer);
+
+    EXPECT_EQ(expect, str());
+}
+
 TEST_F(SpirvReader_VectorElementPointerTest, AccessBeforeUse) {
     auto* foo = b.Function("foo", ty.void_());
     b.Append(foo->Block(), [&] {
@@ -372,6 +422,57 @@ TEST_F(SpirvReader_VectorElementPointerTest, ViaArray) {
     %arr:ptr<function, array<vec4<f32>, 4>, read_write> = var
     %3:ptr<function, vec4<f32>, read_write> = access %arr, 1u
     store_vector_element %3, 2u, 42.0f
+    ret
+  }
+}
+)";
+
+    Run(VectorElementPointer);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(SpirvReader_VectorElementPointerTest, ViaArray_DynamicIndex) {
+    auto* dyn_index = b.Var("dyn_index", ty.ptr<uniform, u32>());
+    dyn_index->SetBindingPoint(0, 0);
+    mod.root_block->Append(dyn_index);
+
+    auto* foo = b.Function("foo", ty.void_());
+    b.Append(foo->Block(), [&] {
+        auto* arr = b.Var<function, array<vec4<f32>, 4>>("arr");
+        auto* access = b.Access<ptr<function, f32>>(arr, b.Load(dyn_index), 2_u);
+        b.Store(access, 42_f);
+        b.Return(foo);
+    });
+
+    auto* src = R"(
+$B1: {  # root
+  %dyn_index:ptr<uniform, u32, read> = var @binding_point(0, 0)
+}
+
+%foo = func():void {
+  $B2: {
+    %arr:ptr<function, array<vec4<f32>, 4>, read_write> = var
+    %4:u32 = load %dyn_index
+    %5:ptr<function, f32, read_write> = access %arr, %4, 2u
+    store %5, 42.0f
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+$B1: {  # root
+  %dyn_index:ptr<uniform, u32, read> = var @binding_point(0, 0)
+}
+
+%foo = func():void {
+  $B2: {
+    %arr:ptr<function, array<vec4<f32>, 4>, read_write> = var
+    %4:u32 = load %dyn_index
+    %5:ptr<function, vec4<f32>, read_write> = access %arr, %4
+    store_vector_element %5, 2u, 42.0f
     ret
   }
 }
