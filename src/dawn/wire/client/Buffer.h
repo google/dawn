@@ -35,7 +35,7 @@
 
 #include "dawn/common/FutureUtils.h"
 #include "dawn/common/Ref.h"
-#include "dawn/common/RefCounted.h"
+#include "dawn/common/RefCountedWithExternalCount.h"
 #include "dawn/wire/WireClient.h"
 #include "dawn/wire/client/ObjectBase.h"
 #include "partition_alloc/pointers/raw_ptr.h"
@@ -44,7 +44,7 @@ namespace dawn::wire::client {
 
 class Device;
 
-class Buffer final : public ObjectWithEventsBase {
+class Buffer final : public RefCountedWithExternalCount<ObjectWithEventsBase> {
   public:
     static WGPUBuffer Create(Device* device, const WGPUBufferDescriptor* descriptor);
     static WGPUBuffer CreateError(Device* device, const WGPUBufferDescriptor* descriptor);
@@ -86,6 +86,8 @@ class Buffer final : public ObjectWithEventsBase {
     friend class Client;
     class MapAsyncEvent;
     class MapAsyncEvent2;
+
+    void WillDropLastExternalRef() override;
 
     // Prepares the callbacks to be called and potentially calls them
     void SetFutureStatus(WGPUBufferMapAsyncStatus status);

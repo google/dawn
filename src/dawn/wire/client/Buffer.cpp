@@ -201,7 +201,7 @@ class Buffer::MapAsyncEvent : public TrackedEvent {
 
     std::optional<WGPUBufferMapAsyncStatus> mStatus;
 
-    // Strong reference to the buffer so that when we call the callback we can pass the buffer.
+    // Reference to the buffer to handle the internal states.
     Ref<Buffer> mBuffer;
 };
 
@@ -443,7 +443,7 @@ Buffer::Buffer(const ObjectBaseParams& params,
                const ObjectHandle& eventManagerHandle,
                Device* device,
                const WGPUBufferDescriptor* descriptor)
-    : ObjectWithEventsBase(params, eventManagerHandle),
+    : RefCountedWithExternalCount<ObjectWithEventsBase>(params, eventManagerHandle),
       mSize(descriptor->size),
       mUsage(static_cast<WGPUBufferUsage>(descriptor->usage)),
       // This flag is for the write handle created by mappedAtCreation
@@ -455,6 +455,10 @@ Buffer::Buffer(const ObjectBaseParams& params,
 void Buffer::DeleteThis() {
     FreeMappedData();
     ObjectWithEventsBase::DeleteThis();
+}
+
+void Buffer::WillDropLastExternalRef() {
+    SetFutureStatus(WGPUBufferMapAsyncStatus_DestroyedBeforeCallback);
 }
 
 ObjectType Buffer::GetObjectType() const {

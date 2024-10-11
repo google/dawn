@@ -461,6 +461,18 @@ TEST_P(BufferMappingValidationTest, MapAsync_DestroyBeforeResult) {
     WaitForAllOperations();
 }
 
+// Test map async but dropping the last reference before the result is ready.
+TEST_P(BufferMappingValidationTest, MapAsync_DroppedBeforeResult) {
+    wgpu::Buffer buffer = CreateBuffer(4);
+
+    MockMapAsyncCallback mockCb;
+    EXPECT_CALL(mockCb, Call(wgpu::MapAsyncStatus::Aborted, HasSubstr("destroyed"))).Times(1);
+
+    buffer.MapAsync(GetParam(), 0, 4, wgpu::CallbackMode::AllowProcessEvents, mockCb.Callback());
+    buffer = nullptr;
+    WaitForAllOperations();
+}
+
 // Test that the MapCallback isn't fired twice when unmap() is called inside the callback
 TEST_P(BufferMappingValidationTest, MapAsync_UnmapCalledInCallback) {
     wgpu::Buffer buffer = CreateBuffer(4);
