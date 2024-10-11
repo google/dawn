@@ -32,6 +32,7 @@ import("${dawn_root}/generator/dawn_generator.gni")
 dawn_json_generator("emdawnwebgpu_headers_gen") {
   target = "emdawnwebgpu_headers"
   outputs = [
+    "src/emdawnwebgpu/include/dawn/webgpu_cpp_print.h",
     "src/emdawnwebgpu/include/webgpu/webgpu.h",
     "src/emdawnwebgpu/include/webgpu/webgpu_cpp.h",
     "src/emdawnwebgpu/include/webgpu/webgpu_cpp_chained_struct.h",

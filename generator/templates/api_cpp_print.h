@@ -30,7 +30,7 @@
 #ifndef {{API}}_CPP_PRINT_H_
 #define {{API}}_CPP_PRINT_H_
 
-#include "dawn/{{api}}_cpp.h"
+#include "{{api}}/{{api}}_cpp.h"
 
 #include <iomanip>
 #include <ios>

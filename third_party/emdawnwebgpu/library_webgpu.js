@@ -107,6 +107,11 @@ var LibraryWebGPU = {
       stackRestore(sp);
     },
 
+    setStringView: (ptr, data, length) => {
+      {{{ makeSetValue('ptr', C_STRUCTS.WGPUStringView.data, 'data', '*') }}};
+      {{{ makeSetValue('ptr', C_STRUCTS.WGPUStringView.length, 'length', '*') }}};
+    },
+
     makeColor: (ptr) => {
       return {
         "r": {{{ makeGetValue('ptr', 0, 'double') }}},
@@ -561,19 +566,31 @@ var LibraryWebGPU = {
     return adapter.features.size;
   },
 
-  wgpuAdapterGetInfo__deps: ['$stringToNewUTF8'],
+  wgpuAdapterGetInfo__deps: ['$stringToNewUTF8', '$lengthBytesUTF8'],
   wgpuAdapterGetInfo: (adapterPtr, info) => {
     var adapter = WebGPU._tableGet(adapterPtr);
     {{{ gpu.makeCheckDescriptor('info') }}}
 
-    var vendorPtr = stringToNewUTF8(adapter.info.vendor);
-    {{{ makeSetValue('info', C_STRUCTS.WGPUAdapterInfo.vendor, 'vendorPtr', '*') }}};
-    var architecturePtr = stringToNewUTF8(adapter.info.architecture);
-    {{{ makeSetValue('info', C_STRUCTS.WGPUAdapterInfo.architecture, 'architecturePtr', '*') }}};
-    var devicePtr = stringToNewUTF8(adapter.info.device);
-    {{{ makeSetValue('info', C_STRUCTS.WGPUAdapterInfo.device, 'devicePtr', '*') }}};
-    var descriptionPtr = stringToNewUTF8(adapter.info.description);
-    {{{ makeSetValue('info', C_STRUCTS.WGPUAdapterInfo.description, 'descriptionPtr', '*') }}};
+    // Append all the strings together to condense into a single malloc.
+    var strs = adapter.info.vendor + adapter.info.architecture + adapter.info.device + adapter.info.description;
+    var strPtr = stringToNewUTF8(strs);
+
+    var vendorLen = lengthBytesUTF8(adapter.info.vendor);
+    WebGPU.setStringView(info + {{{ C_STRUCTS.WGPUAdapterInfo.vendor }}}, strPtr, vendorLen);
+    strPtr += vendorLen;
+
+    var architectureLen = lengthBytesUTF8(adapter.info.architecture);
+    WebGPU.setStringView(info + {{{ C_STRUCTS.WGPUAdapterInfo.architecture }}}, strPtr, architectureLen);
+    strPtr += architectureLen;
+
+    var deviceLen = lengthBytesUTF8(adapter.info.device);
+    WebGPU.setStringView(info + {{{ C_STRUCTS.WGPUAdapterInfo.device }}}, strPtr, deviceLen);
+    strPtr += deviceLen;
+
+    var descriptionLen = lengthBytesUTF8(adapter.info.description);
+    WebGPU.setStringView(info + {{{ C_STRUCTS.WGPUAdapterInfo.description }}}, strPtr, descriptionLen);
+    strPtr += descriptionLen;
+
     {{{ makeSetValue('info', C_STRUCTS.WGPUAdapterInfo.backendType, gpu.BackendType.WebGPU, 'i32') }}};
     var adapterType = adapter.isFallbackAdapter ? {{{ gpu.AdapterType.CPU }}} : {{{ gpu.AdapterType.Unknown }}};
     {{{ makeSetValue('info', C_STRUCTS.WGPUAdapterInfo.adapterType, 'adapterType', 'i32') }}};

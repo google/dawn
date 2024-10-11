@@ -1233,10 +1233,9 @@ WGPU_REFCOUNTED_OBJECTS(DEFINE_WGPU_DEFAULT_ADDREF_RELEASE)
 // ----------------------------------------------------------------------------
 
 void wgpuAdapterInfoFreeMembers(WGPUAdapterInfo value) {
-  free(const_cast<char*>(value.vendor));
-  free(const_cast<char*>(value.architecture));
-  free(const_cast<char*>(value.device));
-  free(const_cast<char*>(value.description));
+  // The strings are allocated via a single malloc, so freeing the first pointer
+  // frees all of the strings in the struct.
+  free(const_cast<char*>(value.vendor.data));
 }
 
 WGPUInstance wgpuCreateInstance([[maybe_unused]] const WGPUInstanceDescriptor* descriptor) {
