@@ -216,9 +216,6 @@ crbug.com/354152178 [ nvidia-0x2184 ] webgpu:shader,execution,expression,call,bu
 ### This section represents tests which may require CTS changes.
 
 # ANGLETextureSharing is not supported
-crbug.com/dawn/2086 webgpu:api,operation,adapter,requestAdapter:requestAdapter:powerPreference="_undef_";forceFallbackAdapter=true [ Failure ]
-crbug.com/dawn/2086 webgpu:api,operation,adapter,requestAdapter:requestAdapter:powerPreference="high-performance";forceFallbackAdapter=true [ Failure ]
-crbug.com/dawn/2086 webgpu:api,operation,adapter,requestAdapter:requestAdapter:powerPreference="low-power";forceFallbackAdapter=true [ Failure ]
 crbug.com/dawn/2086 webgpu:web_platform,canvas,configure:usage:* [ Failure ]
 crbug.com/dawn/2086 [ intel-0x9bc5 ] webgpu:web_platform,canvas,configure:viewFormats:* [ Failure ]
 crbug.com/dawn/2086 [ nvidia-0x2184 ] webgpu:web_platform,canvas,configure:viewFormats:* [ Failure ]
