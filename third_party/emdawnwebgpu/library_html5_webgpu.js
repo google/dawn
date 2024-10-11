@@ -15,7 +15,6 @@ LibraryHTML5WebGPU.emscripten_webgpu_export_${snake_case} = (ptr) =>
   null;
 }}}
 
-
 var LibraryHTML5WebGPU = {
   $JsValStore: {
     values: {},
@@ -48,16 +47,13 @@ var LibraryHTML5WebGPU = {
   emscripten_webgpu_release_js_handle__deps: ['$JsValStore'],
   emscripten_webgpu_release_js_handle: (id) => JsValStore.remove(id),
 
-  emscripten_webgpu_get_device__deps: ['$WebGPU', 'emwgpuTableInsertDevice', 'wgpuDeviceAddRef'],
+  emscripten_webgpu_get_device__deps: ['$WebGPU','wgpuDeviceAddRef'],
   emscripten_webgpu_get_device: () => {
 #if ASSERTIONS
     assert(Module['preinitializedWebGPUDevice']);
 #endif
     if (WebGPU.preinitializedDeviceId === undefined) {
-      var device = Module['preinitializedWebGPUDevice'];
-      const { instancePtr, devicePtr } = _emwgpuTableInsertDevice(device);
-      WebGPU.preinitializedInstanceId = instancePtr;
-      WebGPU.preinitializedDeviceId = devicePtr;
+      WebGPU.preinitializedDeviceId = WebGPU.importJsDevice(Module['preinitializedWebGPUDevice']);
     }
     _wgpuDeviceAddRef(WebGPU.preinitializedDeviceId);
     return WebGPU.preinitializedDeviceId;

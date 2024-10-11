@@ -27,6 +27,7 @@
 using FutureID = uint64_t;
 static constexpr FutureID kNullFutureId = 0;
 using InstanceID = uint64_t;
+static constexpr InstanceID kNullInstanceId = 0;
 
 // ----------------------------------------------------------------------------
 // Declarations for JS emwgpu functions (defined in library_webgpu.js)
@@ -116,12 +117,13 @@ class RefCounted : NonMovable {
     assert(oldRefCount >= 1);
   }
 
-  void Release() {
+  bool Release() {
     if (mRefCount.fetch_sub(1u, std::memory_order_release) == 1u) {
       std::atomic_thread_fence(std::memory_order_acquire);
       emwgpuDelete(this);
-      delete this;
+      return true;
     }
+    return false;
   }
 
  private:
@@ -139,12 +141,12 @@ class RefCountedWithExternalCount : public RefCounted {
     RefCounted::AddRef();
   }
 
-  void Release() {
+  bool Release() {
     if (mExternalRefCount.fetch_sub(1u, std::memory_order_release) == 1u) {
       std::atomic_thread_fence(std::memory_order_acquire);
       WillDropLastExternalRef();
     }
-    RefCounted::Release();
+    return RefCounted::Release();
   }
 
   void AddExternalRef() {
@@ -215,12 +217,12 @@ class Ref {
  private:
   static void AddRef(T value) {
     if (value != nullptr) {
-      value->RefCounted::AddRef();
+      value->AddRef();
     }
   }
   static void Release(T value) {
-    if (value != nullptr) {
-      value->RefCounted::Release();
+    if (value != nullptr && value->Release()) {
+      delete value;
     }
   }
 
@@ -338,18 +340,19 @@ class TrackedEvent : NonMovable {
 // Compositable class for objects that provide entry point(s) that produce
 // Events, i.e. returns a Future.
 //
-// Note that while it would be nice to make it so that C++ entry points
-// implemented in here, and called from JS could use this abstraction in
-// signatures, pointers passed between JS and C++ in WASM do not cast properly
-// and results in undefined behavior. As an example, given:
+// Note that if passing pointers between JS and C++, to ensure that EventSource
+// inheritance is handled properly, EventSource must be the first class
+// inherited by subclasses. Otherwise the pointer is not cast properly and
+// results in corrupted data. As an example, given:
 //   (1) WGPUAdapter emwgpuCreateAdapter(const EventSource* source);
 //   (2) WGPUAdapter emwgpuCreateAdapter(WGPUInstance instance);
-// I tried to use (1), but when calling from JS, the pointer is not correctly
-// adjusted so the value we end up getting when calling GetInstanceId() is some
-// garbage.
+// WGPUInstance **must** list EventSource as it's first inherited class for (1)
+// to work.
 class EventSource {
  public:
   explicit EventSource(InstanceID instanceId) : mInstanceId(instanceId) {}
+  explicit EventSource(const EventSource* source)
+      : mInstanceId(source ? source->GetInstanceId() : kNullInstanceId) {}
   InstanceID GetInstanceId() const { return mInstanceId; }
 
  private:
@@ -592,17 +595,19 @@ static EventManager& GetEventManager() {
 // ----------------------------------------------------------------------------
 
 // Default struct declarations.
-#define DEFINE_WGPU_DEFAULT_STRUCT(Name) \
-  struct WGPU##Name##Impl final : public RefCounted {};
+#define DEFINE_WGPU_DEFAULT_STRUCT(Name)                     \
+  struct WGPU##Name##Impl final : public RefCounted {        \
+    WGPU##Name##Impl(const EventSource* source = nullptr) {} \
+  };
 WGPU_PASSTHROUGH_OBJECTS(DEFINE_WGPU_DEFAULT_STRUCT)
 
-struct WGPUAdapterImpl final : public RefCounted, public EventSource {
+struct WGPUAdapterImpl final : public EventSource, public RefCounted {
  public:
   WGPUAdapterImpl(const EventSource* source);
 };
 
-struct WGPUBufferImpl final : public RefCountedWithExternalCount,
-                              public EventSource {
+struct WGPUBufferImpl final : public EventSource,
+                              public RefCountedWithExternalCount {
  public:
   WGPUBufferImpl(const EventSource* source, bool mappedAtCreation);
 
@@ -637,8 +642,8 @@ struct WGPUBufferImpl final : public RefCountedWithExternalCount,
 };
 
 // Device is specially implemented in order to handle refcounting the Queue.
-struct WGPUDeviceImpl final : public RefCountedWithExternalCount,
-                              public EventSource {
+struct WGPUDeviceImpl final : public EventSource,
+                              public RefCountedWithExternalCount {
  public:
   // Reservation constructor used when calling RequestDevice.
   WGPUDeviceImpl(const EventSource* source,
@@ -662,7 +667,7 @@ struct WGPUDeviceImpl final : public RefCountedWithExternalCount,
 };
 
 // Instance is specially implemented in order to handle Futures implementation.
-struct WGPUInstanceImpl final : public RefCounted, public EventSource {
+struct WGPUInstanceImpl final : public EventSource, public RefCounted {
  public:
   WGPUInstanceImpl();
   ~WGPUInstanceImpl();
@@ -946,15 +951,15 @@ class RequestDeviceEvent final : public TrackedEvent {
 // WGPUAdapterImpl implementations.
 // ----------------------------------------------------------------------------
 
-WGPUAdapterImpl::WGPUAdapterImpl(const EventSource* instance)
-    : EventSource(instance->GetInstanceId()) {}
+WGPUAdapterImpl::WGPUAdapterImpl(const EventSource* source)
+    : EventSource(source) {}
 
 // ----------------------------------------------------------------------------
 // WGPUBuffer implementations.
 // ----------------------------------------------------------------------------
 
 WGPUBufferImpl::WGPUBufferImpl(const EventSource* source, bool mappedAtCreation)
-    : EventSource(source->GetInstanceId()),
+    : EventSource(source),
       mMapState(mappedAtCreation ? WGPUBufferMapState_Mapped
                                  : WGPUBufferMapState_Unmapped) {
   if (mappedAtCreation) {
@@ -1054,7 +1059,7 @@ void WGPUBufferImpl::WillDropLastExternalRef() {
 WGPUDeviceImpl::WGPUDeviceImpl(const EventSource* source,
                                const WGPUDeviceDescriptor* descriptor,
                                WGPUQueue queue)
-    : EventSource(source->GetInstanceId()),
+    : EventSource(source),
       mUncapturedErrorCallbackInfo(descriptor->uncapturedErrorCallbackInfo2) {
   // Create the DeviceLostEvent now.
   std::tie(mDeviceLostFutureId, std::ignore) =
@@ -1064,7 +1069,7 @@ WGPUDeviceImpl::WGPUDeviceImpl(const EventSource* source,
 }
 
 WGPUDeviceImpl::WGPUDeviceImpl(const EventSource* source, WGPUQueue queue)
-    : EventSource(source->GetInstanceId()) {
+    : EventSource(source) {
   mQueue.Acquire(queue);
 }
 
@@ -1129,18 +1134,23 @@ extern "C" {
 
 // Object creation helpers that all return a pointer which is used as a key
 // in the JS object table in library_webgpu.js.
-#define DEFINE_EMWGPU_DEFAULT_CREATE(Name) \
-  WGPU##Name emwgpuCreate##Name() {        \
-    return new WGPU##Name##Impl();         \
+#define DEFINE_EMWGPU_DEFAULT_CREATE(Name)                             \
+  WGPU##Name emwgpuCreate##Name(const EventSource* source = nullptr) { \
+    return new WGPU##Name##Impl(source);                               \
   }
 WGPU_PASSTHROUGH_OBJECTS(DEFINE_EMWGPU_DEFAULT_CREATE)
 
-WGPUAdapter emwgpuCreateAdapter(WGPUInstance instance) {
-  return new WGPUAdapterImpl(instance);
+WGPUAdapter emwgpuCreateAdapter(const EventSource* source) {
+  return new WGPUAdapterImpl(source);
 }
 
-WGPUDevice emwgpuCreateDevice(WGPUInstance instance, WGPUQueue queue) {
-  return new WGPUDeviceImpl(instance, queue);
+WGPUBuffer emwgpuCreateBuffer(const EventSource* source,
+                              bool mappedAtCreation = false) {
+  return new WGPUBufferImpl(source, mappedAtCreation);
+}
+
+WGPUDevice emwgpuCreateDevice(const EventSource* source, WGPUQueue queue) {
+  return new WGPUDeviceImpl(source, queue);
 }
 
 // Future event callbacks.
@@ -1224,7 +1234,9 @@ void emwgpuOnUncapturedError(WGPUDevice device,
     o->AddRef();                                 \
   }                                              \
   void wgpu##Name##Release(WGPU##Name o) {       \
-    o->Release();                                \
+    if (o->Release()) {                          \
+      delete o;                                  \
+    }                                            \
   }
 WGPU_REFCOUNTED_OBJECTS(DEFINE_WGPU_DEFAULT_ADDREF_RELEASE)
 
