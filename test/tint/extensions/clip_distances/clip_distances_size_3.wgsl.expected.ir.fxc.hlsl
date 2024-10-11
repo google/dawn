@@ -1,6 +1,6 @@
 SKIP: FAILED
 
-..\..\src\tint\lang\hlsl\writer\raise\shader_io.cc:101 internal compiler error: TINT_UNREACHABLE 
+..\..\src\tint\lang\hlsl\writer\raise\shader_io.cc:112 internal compiler error: TINT_UNREACHABLE Unhandled builtin value: clip_distances
 ********************************************************************
 *  The tint shader compiler has encountered an unexpected error.   *
 *                                                                  *

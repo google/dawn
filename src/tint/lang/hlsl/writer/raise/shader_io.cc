@@ -109,7 +109,7 @@ struct StateImpl : core::ir::transform::ShaderIOBackendState {
             default:
                 break;
         }
-        TINT_UNREACHABLE();
+        TINT_UNREACHABLE() << "Unhandled builtin value: " << ToString(builtin);
     }
 
     struct MemberInfo {
