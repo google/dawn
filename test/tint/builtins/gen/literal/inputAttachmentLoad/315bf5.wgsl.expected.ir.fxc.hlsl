@@ -1,6 +1,6 @@
-SKIP: FAILED
+SKIP: INVALID
 
-..\..\src\tint\lang\hlsl\writer\printer\printer.cc:1063 internal compiler error: TINT_UNREACHABLE unhandled: inputAttachmentLoad
+..\..\src\tint\lang\hlsl\writer\printer\printer.cc:1063 internal compiler error: HLSL does not support inputAttachmentLoad
 ********************************************************************
 *  The tint shader compiler has encountered an unexpected error.   *
 *                                                                  *

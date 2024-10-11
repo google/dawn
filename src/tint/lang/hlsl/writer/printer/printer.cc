@@ -1059,6 +1059,9 @@ class Printer : public tint::TextGenerator {
             case core::BuiltinFn::kQuadSwapDiagonal:
                 out << "QuadReadAcrossDiagonal";
                 break;
+            case core::BuiltinFn::kInputAttachmentLoad:
+                // WGSL extension: chromium_internal_input_attachments
+                TINT_ICE() << "HLSL does not support inputAttachmentLoad";
             default:
                 TINT_UNREACHABLE() << "unhandled: " << func;
         }
@@ -1519,6 +1522,7 @@ class Printer : public tint::TextGenerator {
                     pre += "precise ";
                 }
                 if (attributes.color) {
+                    // WGSL extension: chromium_experimental_framebuffer_fetch
                     TINT_ICE() << "HLSL does not support @color attribute";
                 }
 
