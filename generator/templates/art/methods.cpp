@@ -146,7 +146,7 @@ jobject toByteBuffer(JNIEnv *env, const void* address, jlong size) {
             {{ as_cType(_kotlin_return.type.name) }} out = {};
             args.{{ as_varName(_kotlin_return.name) }} = &out;
         {% endif %}
-        {{ 'auto result =' if _kotlin_return.type.name.get() != 'void' }}
+        {{ 'auto result =' if method.return_type.name.get() != 'void' }}
         {% if object %}
             wgpu{{ object.name.CamelCase() }}{{ method.name.CamelCase() }}(handle
         {% else %}
@@ -157,7 +157,7 @@ jobject toByteBuffer(JNIEnv *env, const void* address, jlong size) {
             {% endfor %}
         );
         if (env->ExceptionCheck()) {  //* Early out if client (Kotlin) callback threw an exception.
-            return {{ '0' if method.return_type.name.get() != 'void' }};
+            return {{ '0' if  _kotlin_return.type.name.get() != 'void' }};
         }
         {% if method.return_type.name.canonical_case() == 'status' %}
             if (result != WGPUStatus_Success) {
