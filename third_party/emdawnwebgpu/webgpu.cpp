@@ -75,6 +75,7 @@ void emwgpuDeviceCreateRenderPipelineAsync(
     WGPUDevice device,
     FutureID futureId,
     const WGPURenderPipelineDescriptor* descriptor);
+void emwgpuDevicePopErrorScope(WGPUDevice device, FutureID futureId);
 void emwgpuInstanceRequestAdapter(WGPUInstance instance,
                                   FutureID futureId,
                                   const WGPURequestAdapterOptions* options);
@@ -311,6 +312,7 @@ enum class EventType {
   CreateRenderPipeline,
   DeviceLost,
   MapAsync,
+  PopErrorScope,
   RequestAdapter,
   RequestDevice,
   WorkDone,
@@ -796,6 +798,51 @@ class DeviceLostEvent final : public TrackedEvent {
   std::optional<std::string> mMessage;
 };
 
+class PopErrorScopeEvent final : public TrackedEvent {
+ public:
+  static constexpr EventType kType = EventType::PopErrorScope;
+
+  PopErrorScopeEvent(InstanceID instance,
+                     const WGPUPopErrorScopeCallbackInfo2& callbackInfo)
+      : TrackedEvent(instance, callbackInfo.mode),
+        mCallback(callbackInfo.callback),
+        mUserdata1(callbackInfo.userdata1),
+        mUserdata2(callbackInfo.userdata2) {}
+
+  EventType GetType() override { return kType; }
+
+  void ReadyHook(WGPUPopErrorScopeStatus status,
+                 WGPUErrorType errorType,
+                 const char* message) {
+    mStatus = status;
+    mErrorType = errorType;
+    if (message) {
+      mMessage = message;
+    }
+  }
+
+  void Complete(FutureID, EventCompletionType type) override {
+    if (type == EventCompletionType::Shutdown) {
+      mStatus = WGPUPopErrorScopeStatus_InstanceDropped;
+      mErrorType = WGPUErrorType_NoError;
+      mMessage = "A valid external Instance reference no longer exists.";
+    }
+    if (mCallback) {
+      mCallback(mStatus, mErrorType, mMessage ? mMessage->c_str() : nullptr,
+                mUserdata1, mUserdata2);
+    }
+  }
+
+ private:
+  WGPUPopErrorScopeCallback2 mCallback = nullptr;
+  void* mUserdata1 = nullptr;
+  void* mUserdata2 = nullptr;
+
+  WGPUPopErrorScopeStatus mStatus = WGPUPopErrorScopeStatus_Success;
+  WGPUErrorType mErrorType = WGPUErrorType_Unknown;
+  std::optional<std::string> mMessage;
+};
+
 class MapAsyncEvent final : public TrackedEvent {
  public:
   static constexpr EventType kType = EventType::MapAsync;
@@ -1227,6 +1274,13 @@ void emwgpuOnMapAsyncCompleted(FutureID futureId,
                                const char* message) {
   GetEventManager().SetFutureReady<MapAsyncEvent>(futureId, status, message);
 }
+void emwgpuOnPopErrorScopeCompleted(FutureID futureId,
+                                    WGPUPopErrorScopeStatus status,
+                                    WGPUErrorType errorType,
+                                    const char* message) {
+  GetEventManager().SetFutureReady<PopErrorScopeEvent>(futureId, status,
+                                                       errorType, message);
+}
 void emwgpuOnRequestAdapterCompleted(FutureID futureId,
                                      WGPURequestAdapterStatus status,
                                      WGPUAdapter adapter,
@@ -1501,6 +1555,20 @@ WGPUFuture wgpuDeviceCreateRenderPipelineAsync2(
 
 WGPUQueue wgpuDeviceGetQueue(WGPUDevice device) {
   return device->GetQueue();
+}
+
+WGPUFuture wgpuDevicePopErrorScope2(
+    WGPUDevice device,
+    WGPUPopErrorScopeCallbackInfo2 callbackInfo) {
+  auto [futureId, tracked] =
+      GetEventManager().TrackEvent(std::make_unique<PopErrorScopeEvent>(
+          device->GetInstanceId(), callbackInfo));
+  if (!tracked) {
+    return WGPUFuture{kNullFutureId};
+  }
+
+  emwgpuDevicePopErrorScope(device, futureId);
+  return WGPUFuture{futureId};
 }
 
 // ----------------------------------------------------------------------------

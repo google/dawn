@@ -768,7 +768,7 @@ var LibraryWebGPU = {
       assert(typeof GPUInternalError != 'undefined');
 #endif
       device.onuncapturederror = (ev) => {
-          var type = {{{ gpu.ErrorType.Unknown }}};;
+          var type = {{{ gpu.ErrorType.Unknown }}};
           if (ev.error instanceof GPUValidationError) type = {{{ gpu.ErrorType.Validation }}};
           else if (ev.error instanceof GPUOutOfMemoryError) type = {{{ gpu.ErrorType.OutOfMemory }}};
           else if (ev.error instanceof GPUInternalError) type = {{{ gpu.ErrorType.Internal }}};
@@ -1767,36 +1767,32 @@ var LibraryWebGPU = {
     return device.features.has(WebGPU.FeatureName[featureEnumValue]);
   },
 
-  wgpuDevicePopErrorScope__deps: ['$callUserCallback'],
-  wgpuDevicePopErrorScope: (devicePtr, callback, userdata) => {
+  emwgpuDevicePopErrorScope__i53abi: false,
+  emwgpuDevicePopErrorScope__deps: ['emwgpuOnPopErrorScopeCompleted'],
+  emwgpuDevicePopErrorScope: (devicePtr, futureIdL, futureIdH) => {
     var device = WebGPU.getJsObject(devicePtr);
     {{{ runtimeKeepalivePush() }}}
-    device.popErrorScope().then((gpuError) => {
+    WebGPU.Internals.futureInsert(futureIdL, futureIdH, device.popErrorScope().then((gpuError) => {
       {{{ runtimeKeepalivePop() }}}
-      callUserCallback(() => {
-        if (!gpuError) {
-          {{{ makeDynCall('vipp', 'callback') }}}(
-            {{{ gpu.ErrorType.NoError }}}, 0, userdata);
-        } else if (gpuError instanceof GPUOutOfMemoryError) {
-          {{{ makeDynCall('vipp', 'callback') }}}(
-            {{{ gpu.ErrorType.OutOfMemory }}}, 0, userdata);
-        } else {
+      var type = {{{ gpu.ErrorType.Unknown }}};
+      if (!gpuError) type = {{{ gpu.ErrorType.NoError }}};
+      else if (gpuError instanceof GPUValidationError) type = {{{ gpu.ErrorType.Validation }}};
+      else if (gpuError instanceof GPUOutOfMemoryError) type = {{{ gpu.ErrorType.OutOfMemory }}};
+      else if (gpuError instanceof GPUInternalError) type = {{{ gpu.ErrorType.Internal }}};
 #if ASSERTIONS
-          // TODO: Implement GPUInternalError
-          assert(gpuError instanceof GPUValidationError);
+      else assert(false);
 #endif
-          WebGPU.errorCallback(callback, {{{ gpu.ErrorType.Validation }}}, gpuError.message, userdata);
-        }
-      });
+      var sp = stackSave();
+      var messagePtr = gpuError ? stringToUTF8OnStack(gpuError.message) : 0;
+      _emwgpuOnPopErrorScopeCompleted(futureIdL, futureIdH, {{{ gpu.PopErrorScopeStatus.Success }}}, type, messagePtr);
+      stackRestore(sp);
     }, (ex) => {
       {{{ runtimeKeepalivePop() }}}
-      callUserCallback(() => {
-        // TODO: This can mean either the device was lost or the error scope stack was empty. Figure
-        // out how to synthesize the DeviceLost error type. (Could be by simply tracking the error
-        // scope depth, but that isn't ideal.)
-        WebGPU.errorCallback(callback, {{{ gpu.ErrorType.Unknown }}}, ex.message, userdata);
-      });
-    });
+      var sp = stackSave();
+      var messagePtr = stringToUTF8OnStack(ex.message);
+      _emwgpuOnPopErrorScopeCompleted(futureIdL, futureIdH, {{{ gpu.PopErrorScopeStatus.Success }}}, {{{ gpu.ErrorType.Unknown }}}, messagePtr);
+      stackRestore(sp);
+    }));
   },
 
   wgpuDevicePushErrorScope: (devicePtr, filter) => {
