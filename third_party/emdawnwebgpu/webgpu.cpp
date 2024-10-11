@@ -78,6 +78,7 @@ void emwgpuDeviceCreateRenderPipelineAsync(
 void emwgpuInstanceRequestAdapter(WGPUInstance instance,
                                   FutureID futureId,
                                   const WGPURequestAdapterOptions* options);
+void emwgpuQueueOnSubmittedWorkDone(WGPUQueue queue, FutureID futureId);
 }  // extern "C"
 
 // ----------------------------------------------------------------------------
@@ -286,7 +287,6 @@ auto ReturnToAPI(Ref<T*>&& object) {
   X(ComputePipeline)     \
   X(PipelineLayout)      \
   X(QuerySet)            \
-  X(Queue)               \
   X(RenderBundle)        \
   X(RenderBundleEncoder) \
   X(RenderPassEncoder)   \
@@ -313,6 +313,7 @@ enum class EventType {
   MapAsync,
   RequestAdapter,
   RequestDevice,
+  WorkDone,
 };
 
 class EventManager;
@@ -641,6 +642,11 @@ struct WGPUBufferImpl final : public EventSource,
   WGPUBufferMapState mMapState;
 };
 
+struct WGPUQueueImpl final : public EventSource, public RefCounted {
+ public:
+  WGPUQueueImpl(const EventSource* source);
+};
+
 // Device is specially implemented in order to handle refcounting the Queue.
 struct WGPUDeviceImpl final : public EventSource,
                               public RefCountedWithExternalCount {
@@ -943,6 +949,38 @@ class RequestDeviceEvent final : public TrackedEvent {
   std::optional<std::string> mMessage = std::nullopt;
 };
 
+class WorkDoneEvent final : public TrackedEvent {
+ public:
+  static constexpr EventType kType = EventType::WorkDone;
+
+  WorkDoneEvent(InstanceID instance,
+                const WGPUQueueWorkDoneCallbackInfo2& callbackInfo)
+      : TrackedEvent(instance, callbackInfo.mode),
+        mCallback(callbackInfo.callback),
+        mUserdata1(callbackInfo.userdata1),
+        mUserdata2(callbackInfo.userdata2) {}
+
+  EventType GetType() override { return kType; }
+
+  void ReadyHook(WGPUQueueWorkDoneStatus status) { mStatus = status; }
+
+  void Complete(FutureID, EventCompletionType type) override {
+    if (type == EventCompletionType::Shutdown) {
+      mStatus = WGPUQueueWorkDoneStatus_InstanceDropped;
+    }
+    if (mCallback) {
+      mCallback(mStatus, mUserdata1, mUserdata2);
+    }
+  }
+
+ private:
+  WGPUQueueWorkDoneCallback2 mCallback = nullptr;
+  void* mUserdata1 = nullptr;
+  void* mUserdata2 = nullptr;
+
+  WGPUQueueWorkDoneStatus mStatus;
+};
+
 // ----------------------------------------------------------------------------
 // WGPU struct implementations.
 // ----------------------------------------------------------------------------
@@ -1128,6 +1166,12 @@ InstanceID WGPUInstanceImpl::GetNextInstanceId() {
 }
 
 // ----------------------------------------------------------------------------
+// WGPUQueueImpl implementations.
+// ----------------------------------------------------------------------------
+
+WGPUQueueImpl::WGPUQueueImpl(const EventSource* source) : EventSource(source) {}
+
+// ----------------------------------------------------------------------------
 // Definitions for C++ emwgpu functions (callable from library_webgpu.js)
 // ----------------------------------------------------------------------------
 extern "C" {
@@ -1151,6 +1195,10 @@ WGPUBuffer emwgpuCreateBuffer(const EventSource* source,
 
 WGPUDevice emwgpuCreateDevice(const EventSource* source, WGPUQueue queue) {
   return new WGPUDeviceImpl(source, queue);
+}
+
+WGPUQueue emwgpuCreateQueue(const EventSource* source) {
+  return new WGPUQueueImpl(source);
 }
 
 // Future event callbacks.
@@ -1203,6 +1251,10 @@ void emwgpuOnRequestDeviceCompleted(FutureID futureId,
     GetEventManager().SetFutureReady<RequestDeviceEvent>(futureId, status,
                                                          nullptr, message);
   }
+}
+void emwgpuOnWorkDoneCompleted(FutureID futureId,
+                               WGPUQueueWorkDoneStatus status) {
+  GetEventManager().SetFutureReady<WorkDoneEvent>(futureId, status);
 }
 
 // Uncaptured error handler is similar to the Future event callbacks, but it
@@ -1299,7 +1351,7 @@ WGPUFuture wgpuAdapterRequestDevice2(
 
   // For RequestDevice, we always create a Device and Queue up front. The
   // Device is also immediately associated with the DeviceLostEvent.
-  WGPUQueue queue = new WGPUQueueImpl();
+  WGPUQueue queue = new WGPUQueueImpl(adapter);
   WGPUDevice device = new WGPUDeviceImpl(adapter, descriptor, queue);
 
   auto [deviceLostFutureId, _] = GetEventManager().TrackEvent(
@@ -1509,6 +1561,19 @@ WGPUWaitStatus wgpuInstanceWaitAny(WGPUInstance instance,
 // ----------------------------------------------------------------------------
 // Methods of Queue
 // ----------------------------------------------------------------------------
+
+WGPUFuture wgpuQueueOnSubmittedWorkDone2(
+    WGPUQueue queue,
+    WGPUQueueWorkDoneCallbackInfo2 callbackInfo) {
+  auto [futureId, tracked] = GetEventManager().TrackEvent(
+      std::make_unique<WorkDoneEvent>(queue->GetInstanceId(), callbackInfo));
+  if (!tracked) {
+    return WGPUFuture{kNullFutureId};
+  }
+
+  emwgpuQueueOnSubmittedWorkDone(queue, futureId);
+  return WGPUFuture{futureId};
+}
 
 // ----------------------------------------------------------------------------
 // Methods of RenderBundle

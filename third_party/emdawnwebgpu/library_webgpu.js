@@ -137,8 +137,8 @@ var LibraryWebGPU = {
     importJsDevice__deps: ['emwgpuCreateDevice', 'emwgpuCreateQueue'],
     importJsDevice: (device, parentPtr = 0) => {
       var queuePtr = _emwgpuCreateQueue(parentPtr);
-      WebGPU.Internals.jsObjectInsert(queuePtr, device.queue);
       var devicePtr = _emwgpuCreateDevice(parentPtr, queuePtr);
+      WebGPU.Internals.jsObjectInsert(queuePtr, device.queue);
       WebGPU.Internals.jsObjectInsert(devicePtr, device);
       return devicePtr;
     },
@@ -1491,7 +1491,7 @@ var LibraryWebGPU = {
     return ptr;
   },
 
-  emwgpuDeviceCreateComputePipelineAsync__i53abi:false,
+  emwgpuDeviceCreateComputePipelineAsync__i53abi: false,
   emwgpuDeviceCreateComputePipelineAsync__deps: ['emwgpuCreateComputePipeline', 'emwgpuOnCreateComputePipelineCompleted'],
   emwgpuDeviceCreateComputePipelineAsync: (devicePtr, futureIdL, futureIdH, descriptor) => {
     var desc = WebGPU.makeComputePipelineDesc(descriptor);
@@ -1601,7 +1601,7 @@ var LibraryWebGPU = {
     return ptr;
   },
 
-  emwgpuDeviceCreateRenderPipelineAsync__i53abi:false,
+  emwgpuDeviceCreateRenderPipelineAsync__i53abi: false,
   emwgpuDeviceCreateRenderPipelineAsync__deps: ['emwgpuCreateRenderPipeline', 'emwgpuOnCreateRenderPipelineCompleted'],
   emwgpuDeviceCreateRenderPipelineAsync: (devicePtr, futureIdL, futureIdH, descriptor) => {
     var desc = WebGPU.makeRenderPipelineDesc(descriptor);
@@ -1956,22 +1956,19 @@ var LibraryWebGPU = {
   // Methods of Queue
   // --------------------------------------------------------------------------
 
-  wgpuQueueOnSubmittedWorkDone__deps: ['$callUserCallback'],
-  wgpuQueueOnSubmittedWorkDone: (queuePtr, callback, userdata) => {
+  emwgpuQueueOnSubmittedWorkDone__i53abi: false,
+  emwgpuQueueOnSubmittedWorkDone__deps: ['emwgpuOnWorkDoneCompleted'],
+  emwgpuQueueOnSubmittedWorkDone: (queuePtr, futureIdL, futureIdH) => {
     var queue = WebGPU.getJsObject(queuePtr);
 
     {{{ runtimeKeepalivePush() }}}
-    queue.onSubmittedWorkDone().then(() => {
+    WebGPU.Internals.futureInsert(futureIdL, futureIdH, queue.onSubmittedWorkDone().then(() => {
       {{{ runtimeKeepalivePop() }}}
-      callUserCallback(() => {
-        {{{ makeDynCall('vip', 'callback') }}}({{{ gpu.QueueWorkDoneStatus.Success }}}, userdata);
-      });
+      _emwgpuOnWorkDoneCompleted(futureIdL, futureIdH, {{{ gpu.QueueWorkDoneStatus.Success }}});
     }, () => {
       {{{ runtimeKeepalivePop() }}}
-      callUserCallback(() => {
-        {{{ makeDynCall('vip', 'callback') }}}({{{ gpu.QueueWorkDoneStatus.Error }}}, userdata);
-      });
-    });
+      _emwgpuOnWorkDoneCompleted(futureIdL, futureIdH, {{{ gpu.QueueWorkDoneStatus.Error }}});
+    }));
   },
 
   wgpuQueueSetLabel: (queuePtr, labelPtr) => {
