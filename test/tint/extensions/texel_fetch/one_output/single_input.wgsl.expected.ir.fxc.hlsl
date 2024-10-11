@@ -1,25 +1,11 @@
-SKIP: FAILED
+SKIP: INVALID
 
-struct f_outputs {
-  float4 tint_symbol : SV_Target0;
-};
+..\..\src\tint\lang\hlsl\writer\printer\printer.cc:1522 internal compiler error: HLSL does not support @color attribute
+********************************************************************
+*  The tint shader compiler has encountered an unexpected error.   *
+*                                                                  *
+*  Please help us fix this issue by submitting a bug report at     *
+*  crbug.com/tint with the source program that triggered the bug.  *
+********************************************************************
 
-struct f_inputs {
-  float4 fbf;
-};
-
-
-float4 f_inner(float4 fbf) {
-  return fbf;
-}
-
-f_outputs f(f_inputs inputs) {
-  f_outputs v = {f_inner(inputs.fbf)};
-  return v;
-}
-
-FXC validation failure:
-<scrubbed_path>(14,22-27): error X3502: 'f': input parameter 'inputs' missing semantics
-
-
-tint executable returned error: exit status 1
+tint executable returned error: exit status 0xc000001d

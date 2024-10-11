@@ -1518,6 +1518,9 @@ class Printer : public tint::TextGenerator {
                     // See discussion here: https://github.com/gpuweb/gpuweb/issues/893
                     pre += "precise ";
                 }
+                if (attributes.color) {
+                    TINT_ICE() << "HLSL does not support @color attribute";
+                }
 
                 out << pre;
                 EmitTypeAndName(out, ty, mem_name);
