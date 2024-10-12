@@ -1262,8 +1262,14 @@ struct State {
                     TINT_UNREACHABLE();
             }
 
-            b.MemberCallWithResult<hlsl::ir::MemberBuiltinCall>(
-                call->DetachResult(), hlsl::BuiltinFn::kSample, tex, params);
+            core::ir::Instruction* result = b.MemberCall<hlsl::ir::MemberBuiltinCall>(
+                ty.vec4<f32>(), hlsl::BuiltinFn::kSample, tex, params);
+            if (tex_type->Is<core::type::DepthTexture>()) {
+                // Swizzle x from vec4 result for depth textures
+                TINT_ASSERT(call->Result(0)->Type()->Is<core::type::F32>());
+                result = b.Swizzle(ty.f32(), result, {0});
+            }
+            result->SetResults(Vector{call->DetachResult()});
         });
         call->Destroy();
     }
@@ -1488,8 +1494,14 @@ struct State {
                     TINT_UNREACHABLE();
             }
 
-            b.MemberCallWithResult<hlsl::ir::MemberBuiltinCall>(
-                call->DetachResult(), hlsl::BuiltinFn::kSampleLevel, tex, params);
+            core::ir::Instruction* result = b.MemberCall<hlsl::ir::MemberBuiltinCall>(
+                ty.vec4<f32>(), hlsl::BuiltinFn::kSampleLevel, tex, params);
+            if (tex_type->Is<core::type::DepthTexture>()) {
+                // Swizzle x from vec4 result for depth textures
+                TINT_ASSERT(call->Result(0)->Type()->Is<core::type::F32>());
+                result = b.Swizzle(ty.f32(), result, {0});
+            }
+            result->SetResults(Vector{call->DetachResult()});
         });
         call->Destroy();
     }

@@ -6,7 +6,7 @@ float textureSample_7e9ffd() {
   float2 arg_2 = (1.0f).xx;
   int arg_3 = int(1);
   float2 v = arg_2;
-  float res = arg_0.Sample(arg_1, float3(v, float(arg_3)));
+  float res = arg_0.Sample(arg_1, float3(v, float(arg_3))).x;
   return res;
 }
 

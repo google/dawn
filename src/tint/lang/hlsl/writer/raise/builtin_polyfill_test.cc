@@ -2706,8 +2706,9 @@ $B1: {  # root
     %4:vec2<f32> = construct 1.0f, 2.0f
     %5:texture_depth_2d = load %1
     %6:sampler = load %2
-    %7:f32 = %5.Sample %6, %4
-    %x:f32 = let %7
+    %7:vec4<f32> = %5.Sample %6, %4
+    %8:f32 = swizzle %7, x
+    %x:f32 = let %8
     ret
   }
 }
@@ -2770,8 +2771,9 @@ $B1: {  # root
     %4:vec2<f32> = construct 1.0f, 2.0f
     %5:texture_depth_2d = load %1
     %6:sampler = load %2
-    %7:f32 = %5.Sample %6, %4, vec2<i32>(4i, 5i)
-    %x:f32 = let %7
+    %7:vec4<f32> = %5.Sample %6, %4, vec2<i32>(4i, 5i)
+    %8:f32 = swizzle %7, x
+    %x:f32 = let %8
     ret
   }
 }
@@ -2836,8 +2838,9 @@ $B1: {  # root
     %6:sampler = load %2
     %7:f32 = convert 4u
     %8:vec3<f32> = construct %4, %7
-    %9:f32 = %5.Sample %6, %8
-    %x:f32 = let %9
+    %9:vec4<f32> = %5.Sample %6, %8
+    %10:f32 = swizzle %9, x
+    %x:f32 = let %10
     ret
   }
 }
@@ -2903,8 +2906,9 @@ $B1: {  # root
     %6:sampler = load %2
     %7:f32 = convert 4u
     %8:vec3<f32> = construct %4, %7
-    %9:f32 = %5.Sample %6, %8, vec2<i32>(4i, 5i)
-    %x:f32 = let %9
+    %9:vec4<f32> = %5.Sample %6, %8, vec2<i32>(4i, 5i)
+    %10:f32 = swizzle %9, x
+    %x:f32 = let %10
     ret
   }
 }
@@ -2969,8 +2973,9 @@ $B1: {  # root
     %6:sampler = load %2
     %7:f32 = convert 4u
     %8:vec4<f32> = construct %4, %7
-    %9:f32 = %5.Sample %6, %8
-    %x:f32 = let %9
+    %9:vec4<f32> = %5.Sample %6, %8
+    %10:f32 = swizzle %9, x
+    %x:f32 = let %10
     ret
   }
 }
@@ -5437,8 +5442,9 @@ $B1: {  # root
     %5:texture_depth_2d = load %1
     %6:sampler = load %2
     %7:f32 = convert 3i
-    %8:f32 = %5.SampleLevel %6, %4, %7
-    %x:f32 = let %8
+    %8:vec4<f32> = %5.SampleLevel %6, %4, %7
+    %9:f32 = swizzle %8, x
+    %x:f32 = let %9
     ret
   }
 }
@@ -5502,8 +5508,9 @@ $B1: {  # root
     %5:texture_depth_2d = load %1
     %6:sampler = load %2
     %7:f32 = convert 3u
-    %8:f32 = %5.SampleLevel %6, %4, %7, vec2<i32>(4i, 5i)
-    %x:f32 = let %8
+    %8:vec4<f32> = %5.SampleLevel %6, %4, %7, vec2<i32>(4i, 5i)
+    %9:f32 = swizzle %8, x
+    %x:f32 = let %9
     ret
   }
 }
@@ -5569,8 +5576,9 @@ $B1: {  # root
     %7:f32 = convert 4u
     %8:vec3<f32> = construct %4, %7
     %9:f32 = convert 3i
-    %10:f32 = %5.SampleLevel %6, %8, %9
-    %x:f32 = let %10
+    %10:vec4<f32> = %5.SampleLevel %6, %8, %9
+    %11:f32 = swizzle %10, x
+    %x:f32 = let %11
     ret
   }
 }
@@ -5638,8 +5646,9 @@ $B1: {  # root
     %7:f32 = convert 4u
     %8:vec3<f32> = construct %4, %7
     %9:f32 = convert 3u
-    %10:f32 = %5.SampleLevel %6, %8, %9, vec2<i32>(4i, 5i)
-    %x:f32 = let %10
+    %10:vec4<f32> = %5.SampleLevel %6, %8, %9, vec2<i32>(4i, 5i)
+    %11:f32 = swizzle %10, x
+    %x:f32 = let %11
     ret
   }
 }
@@ -5705,8 +5714,9 @@ $B1: {  # root
     %7:f32 = convert 4u
     %8:vec4<f32> = construct %4, %7
     %9:f32 = convert 3i
-    %10:f32 = %5.SampleLevel %6, %8, %9
-    %x:f32 = let %10
+    %10:vec4<f32> = %5.SampleLevel %6, %8, %9
+    %11:f32 = swizzle %10, x
+    %x:f32 = let %11
     ret
   }
 }

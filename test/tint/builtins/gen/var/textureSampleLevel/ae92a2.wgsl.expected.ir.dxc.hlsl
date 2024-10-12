@@ -16,7 +16,7 @@ float textureSampleLevel_ae92a2() {
   float3 arg_2 = (1.0f).xxx;
   uint arg_3 = 1u;
   float3 v = arg_2;
-  float res = arg_0.SampleLevel(arg_1, v, float(arg_3));
+  float res = arg_0.SampleLevel(arg_1, v, float(arg_3)).x;
   return res;
 }
 

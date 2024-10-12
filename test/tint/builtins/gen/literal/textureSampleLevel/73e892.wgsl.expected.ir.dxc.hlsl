@@ -13,7 +13,7 @@ RWByteAddressBuffer prevent_dce : register(u0);
 Texture2D arg_0 : register(t0, space1);
 SamplerState arg_1 : register(s1, space1);
 float textureSampleLevel_73e892() {
-  float res = arg_0.SampleLevel(arg_1, (1.0f).xx, float(1u));
+  float res = arg_0.SampleLevel(arg_1, (1.0f).xx, float(1u)).x;
   return res;
 }
 
