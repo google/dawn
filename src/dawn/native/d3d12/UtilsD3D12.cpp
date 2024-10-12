@@ -146,26 +146,6 @@ D3D12_TEXTURE_COPY_LOCATION ComputeTextureCopyLocationForTexture(const Texture* 
     return copyLocation;
 }
 
-D3D12_TEXTURE_COPY_LOCATION ComputeBufferLocationForCopyTextureRegion(
-    const Texture* texture,
-    ID3D12Resource* bufferResource,
-    const Extent3D& bufferSize,
-    const uint64_t offset,
-    const uint32_t rowPitch,
-    Aspect aspect) {
-    D3D12_TEXTURE_COPY_LOCATION bufferLocation;
-    bufferLocation.pResource = bufferResource;
-    bufferLocation.Type = D3D12_TEXTURE_COPY_TYPE_PLACED_FOOTPRINT;
-    bufferLocation.PlacedFootprint.Offset = offset;
-    bufferLocation.PlacedFootprint.Footprint.Format =
-        texture->GetD3D12CopyableSubresourceFormat(aspect);
-    bufferLocation.PlacedFootprint.Footprint.Width = bufferSize.width;
-    bufferLocation.PlacedFootprint.Footprint.Height = bufferSize.height;
-    bufferLocation.PlacedFootprint.Footprint.Depth = bufferSize.depthOrArrayLayers;
-    bufferLocation.PlacedFootprint.Footprint.RowPitch = rowPitch;
-    return bufferLocation;
-}
-
 D3D12_BOX ComputeD3D12BoxFromOffsetAndSize(const Origin3D& offset, const Extent3D& copySize) {
     D3D12_BOX sourceRegion;
     sourceRegion.left = offset.x;
@@ -191,15 +171,14 @@ void RecordBufferTextureCopyFromSplits(BufferTextureCopyDirection direction,
     const D3D12_TEXTURE_COPY_LOCATION textureLocation =
         ComputeTextureCopyLocationForTexture(texture, textureMiplevel, textureLayer, aspect);
 
+    DXGI_FORMAT dxgiFormat = texture->GetD3D12CopyableSubresourceFormat(aspect);
     for (uint32_t i = 0; i < baseCopySplit.count; ++i) {
         const TextureCopySubresource::CopyInfo& info = baseCopySplit.copies[i];
 
-        // TODO(jiawei.shao@intel.com): pre-compute bufferLocation as a member in
-        // TextureCopySubresource::CopyInfo.
-        const uint64_t offsetBytes = info.alignedOffset + baseOffset;
-        const D3D12_TEXTURE_COPY_LOCATION bufferLocation =
-            ComputeBufferLocationForCopyTextureRegion(texture, bufferResource, info.bufferSize,
-                                                      offsetBytes, bufferBytesPerRow, aspect);
+        D3D12_TEXTURE_COPY_LOCATION bufferLocation = info.bufferLocation;
+        bufferLocation.pResource = bufferResource;
+        bufferLocation.PlacedFootprint.Offset += baseOffset;
+        bufferLocation.PlacedFootprint.Footprint.Format = dxgiFormat;
         if (direction == BufferTextureCopyDirection::B2T) {
             commandList->CopyTextureRegion(&textureLocation, info.destinationOffset.x,
                                            info.destinationOffset.y, info.destinationOffset.z,

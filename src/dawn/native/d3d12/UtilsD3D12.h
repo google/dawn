@@ -48,13 +48,6 @@ D3D12_TEXTURE_COPY_LOCATION ComputeTextureCopyLocationForTexture(const Texture* 
                                                                  uint32_t layer,
                                                                  Aspect aspect);
 
-D3D12_TEXTURE_COPY_LOCATION ComputeBufferLocationForCopyTextureRegion(
-    const Texture* texture,
-    ID3D12Resource* bufferResource,
-    const Extent3D& bufferSize,
-    const uint64_t offset,
-    const uint32_t rowPitch,
-    Aspect aspect);
 D3D12_BOX ComputeD3D12BoxFromOffsetAndSize(const Origin3D& offset, const Extent3D& copySize);
 
 enum class BufferTextureCopyDirection {

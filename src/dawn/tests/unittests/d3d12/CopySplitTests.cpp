@@ -59,6 +59,12 @@ struct BufferSpec {
     uint32_t rowsPerImage;
 };
 
+Extent3D GetBufferSize(D3D12_TEXTURE_COPY_LOCATION bufferLocation) {
+    return {bufferLocation.PlacedFootprint.Footprint.Width,
+            bufferLocation.PlacedFootprint.Footprint.Height,
+            bufferLocation.PlacedFootprint.Footprint.Depth};
+}
+
 // Check that each copy region fits inside the buffer footprint
 void ValidateFootprints(const TextureSpec& textureSpec,
                         const BufferSpec& bufferSpec,
@@ -69,9 +75,10 @@ void ValidateFootprints(const TextureSpec& textureSpec,
         const auto& copy = copySplit.copies[i];
         Extent3D copySize = copy.GetCopySize();
         Origin3D bufferOffset = copy.GetBufferOffset(direction);
-        ASSERT_LE(bufferOffset.x + copySize.width, copy.bufferSize.width);
-        ASSERT_LE(bufferOffset.y + copySize.height, copy.bufferSize.height);
-        ASSERT_LE(bufferOffset.z + copySize.depthOrArrayLayers, copy.bufferSize.depthOrArrayLayers);
+        Extent3D bufferSize = GetBufferSize(copy.bufferLocation);
+        ASSERT_LE(bufferOffset.x + copySize.width, bufferSize.width);
+        ASSERT_LE(bufferOffset.y + copySize.height, bufferSize.height);
+        ASSERT_LE(bufferOffset.z + copySize.depthOrArrayLayers, bufferSize.depthOrArrayLayers);
 
         // If there are multiple layers, 2D texture splitter actually splits each layer
         // independently. See the details in Compute2DTextureCopySplits(). As a result,
@@ -105,10 +112,10 @@ void ValidateFootprints(const TextureSpec& textureSpec,
             uint32_t footprintHeightInBlocks = footprintHeight / textureSpec.blockHeight;
 
             uint64_t bufferSizeForFootprint =
-                copy.alignedOffset +
-                utils::RequiredBytesInCopy(bufferSpec.bytesPerRow, copy.bufferSize.height,
+                copy.GetAlignedOffset() +
+                utils::RequiredBytesInCopy(bufferSpec.bytesPerRow, bufferSize.height,
                                            footprintWidthInBlocks, footprintHeightInBlocks,
-                                           copy.bufferSize.depthOrArrayLayers,
+                                           bufferSize.depthOrArrayLayers,
                                            textureSpec.texelBlockSizeInBytes);
 
             // The buffer footprint of each copy region should not exceed the minimum
@@ -122,8 +129,8 @@ void ValidateFootprints(const TextureSpec& textureSpec,
 void ValidateOffset(const TextureCopySubresource& copySplit) {
     for (uint32_t i = 0; i < copySplit.count; ++i) {
         ASSERT_TRUE(
-            Align(copySplit.copies[i].alignedOffset, D3D12_TEXTURE_DATA_PLACEMENT_ALIGNMENT) ==
-            copySplit.copies[i].alignedOffset);
+            Align(copySplit.copies[i].GetAlignedOffset(), D3D12_TEXTURE_DATA_PLACEMENT_ALIGNMENT) ==
+            copySplit.copies[i].GetAlignedOffset());
     }
 }
 
@@ -228,7 +235,7 @@ void ValidateBufferOffset(const TextureSpec& textureSpec,
         uint32_t slicePitchInTexels =
             bytesPerRowInTexels * (bufferSpec.rowsPerImage / textureSpec.blockHeight);
         uint32_t absoluteTexelOffset =
-            copy.alignedOffset / textureSpec.texelBlockSizeInBytes * texelsPerBlock +
+            copy.GetAlignedOffset() / textureSpec.texelBlockSizeInBytes * texelsPerBlock +
             bufferOffset.x / textureSpec.blockWidth * texelsPerBlock +
             bufferOffset.y / textureSpec.blockHeight * bytesPerRowInTexels;
 
@@ -286,6 +293,7 @@ std::ostream& operator<<(std::ostream& os, const TextureCopySubresource& copySpl
     os << "CopySplit\n";
     for (uint32_t i = 0; i < copySplit.count; ++i) {
         const auto& copy = copySplit.copies[i];
+        Extent3D bufferSize = GetBufferSize(copy.bufferLocation);
         os << "  " << i << ": destinationOffset at (" << copy.destinationOffset.x << ", "
            << copy.destinationOffset.y << ", " << copy.destinationOffset.z << "), sourceRegion ("
            << copy.sourceRegion.left << ", " << copy.sourceRegion.top << ", "
@@ -293,8 +301,8 @@ std::ostream& operator<<(std::ostream& os, const TextureCopySubresource& copySpl
            << copy.sourceRegion.bottom << ", " << copy.sourceRegion.back << ")\n";
         os << "  " << i << ": sourceOffset at (" << copy.sourceRegion.left << ", "
            << copy.sourceRegion.top << ", " << copy.sourceRegion.front << "), footprint ("
-           << copy.bufferSize.width << ", " << copy.bufferSize.height << ", "
-           << copy.bufferSize.depthOrArrayLayers << ")\n";
+           << bufferSize.width << ", " << bufferSize.height << ", " << bufferSize.depthOrArrayLayers
+           << ")\n";
     }
     return os;
 }

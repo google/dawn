@@ -45,15 +45,20 @@ struct TextureCopySubresource {
     static constexpr unsigned int kMaxTextureCopyRegions = 4;
 
     struct CopyInfo {
-        uint64_t alignedOffset = 0;
         Origin3D destinationOffset;
-        Extent3D bufferSize;
 
         D3D12_BOX sourceRegion;
+        D3D12_TEXTURE_COPY_LOCATION bufferLocation;
 
         Origin3D GetBufferOffset(BufferTextureCopyDirection direction) const;
         Origin3D GetTextureOffset(BufferTextureCopyDirection direction) const;
         Extent3D GetCopySize() const;
+        uint64_t GetAlignedOffset() const;
+        Extent3D GetBufferSize() const;
+
+        void SetAlignedOffset(uint64_t alignedOffset);
+        void SetHeightInBufferLocation(uint32_t bufferHeight);
+        void SetDepthInBufferLocation(uint32_t bufferDepth);
     };
 
     CopyInfo* AddCopy();
