@@ -3,7 +3,7 @@ SKIP: INVALID
 
 RWByteAddressBuffer prevent_dce : register(u0);
 int subgroupAdd_ba53f9() {
-  int arg_0 = 1;
+  int arg_0 = int(1);
   int res = WaveActiveSum(arg_0);
   return res;
 }

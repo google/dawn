@@ -3,7 +3,7 @@ SKIP: INVALID
 
 RWByteAddressBuffer prevent_dce : register(u0);
 int3 subgroupShuffleDown_1b530f() {
-  int3 arg_0 = (1).xxx;
+  int3 arg_0 = (int(1)).xxx;
   uint arg_1 = 1u;
   int3 v = arg_0;
   uint v_1 = arg_1;

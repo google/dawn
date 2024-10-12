@@ -16,3 +16,8 @@ void compute_main() {
   prevent_dce.Store3(0u, subgroupInclusiveMul_359176());
 }
 
+FXC validation failure:
+<scrubbed_path>(4,16-42): error X3004: undeclared identifier 'WavePrefixProduct'
+
+
+tint executable returned error: exit status 1

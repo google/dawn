@@ -3,7 +3,7 @@ SKIP: INVALID
 
 RWByteAddressBuffer prevent_dce : register(u0);
 int subgroupXor_694b17() {
-  int res = asint(WaveActiveBitXor(asuint(1)));
+  int res = asint(WaveActiveBitXor(asuint(int(1))));
   return res;
 }
 
@@ -17,7 +17,7 @@ void compute_main() {
 }
 
 FXC validation failure:
-<scrubbed_path>(4,19-45): error X3004: undeclared identifier 'WaveActiveBitXor'
+<scrubbed_path>(4,19-50): error X3004: undeclared identifier 'WaveActiveBitXor'
 
 
 tint executable returned error: exit status 1

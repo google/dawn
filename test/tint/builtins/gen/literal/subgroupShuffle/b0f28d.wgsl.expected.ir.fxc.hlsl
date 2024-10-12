@@ -3,7 +3,7 @@ SKIP: INVALID
 
 RWByteAddressBuffer prevent_dce : register(u0);
 float16_t subgroupShuffle_b0f28d() {
-  float16_t res = WaveReadLaneAt(float16_t(1.0h), 1);
+  float16_t res = WaveReadLaneAt(float16_t(1.0h), int(1));
   return res;
 }
 

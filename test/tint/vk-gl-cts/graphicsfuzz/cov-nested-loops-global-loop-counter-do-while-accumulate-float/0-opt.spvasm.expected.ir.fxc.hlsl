@@ -9,7 +9,7 @@ struct main_outputs {
 };
 
 
-static int x_GLF_global_loop_count = 0;
+static int x_GLF_global_loop_count = int(0);
 cbuffer cbuffer_x_7 : register(b0) {
   uint4 x_7[3];
 };
@@ -19,24 +19,24 @@ cbuffer cbuffer_x_10 : register(b1) {
 static float4 x_GLF_color = (0.0f).xxxx;
 void main_1() {
   float f = 0.0f;
-  int i = 0;
-  int i_1 = 0;
-  int i_2 = 0;
-  int i_3 = 0;
-  int i_4 = 0;
-  int i_5 = 0;
-  int i_6 = 0;
-  int i_7 = 0;
-  int i_8 = 0;
-  int i_9 = 0;
-  int i_10 = 0;
-  int i_11 = 0;
-  int i_12 = 0;
-  int i_13 = 0;
-  int i_14 = 0;
+  int i = int(0);
+  int i_1 = int(0);
+  int i_2 = int(0);
+  int i_3 = int(0);
+  int i_4 = int(0);
+  int i_5 = int(0);
+  int i_6 = int(0);
+  int i_7 = int(0);
+  int i_8 = int(0);
+  int i_9 = int(0);
+  int i_10 = int(0);
+  int i_11 = int(0);
+  int i_12 = int(0);
+  int i_13 = int(0);
+  int i_14 = int(0);
   float sum = 0.0f;
-  int r = 0;
-  x_GLF_global_loop_count = 0;
+  int r = int(0);
+  x_GLF_global_loop_count = int(0);
   f = asfloat(x_7[1u].x);
   i = asint(x_10[1u].x);
   {
@@ -160,11 +160,11 @@ void main_1() {
                                                               }
                                                               {
                                                                 while(true) {
-                                                                  x_GLF_global_loop_count = (x_GLF_global_loop_count + 1);
+                                                                  x_GLF_global_loop_count = (x_GLF_global_loop_count + int(1));
                                                                   {
                                                                     int x_225 = x_GLF_global_loop_count;
                                                                     int x_227 = asint(x_10[3u].x);
-                                                                    if (!((x_225 < (100 - x_227)))) { break; }
+                                                                    if (!((x_225 < (int(100) - x_227)))) { break; }
                                                                   }
                                                                   continue;
                                                                 }
@@ -172,91 +172,91 @@ void main_1() {
                                                               float v_15 = f;
                                                               f = (v_15 + asfloat(x_7[0u].x));
                                                               {
-                                                                i_14 = (i_14 + 1);
+                                                                i_14 = (i_14 + int(1));
                                                               }
                                                               continue;
                                                             }
                                                           }
                                                           {
-                                                            i_13 = (i_13 + 1);
+                                                            i_13 = (i_13 + int(1));
                                                           }
                                                           continue;
                                                         }
                                                       }
                                                       {
-                                                        i_12 = (i_12 + 1);
+                                                        i_12 = (i_12 + int(1));
                                                       }
                                                       continue;
                                                     }
                                                   }
                                                   {
-                                                    i_11 = (i_11 + 1);
+                                                    i_11 = (i_11 + int(1));
                                                   }
                                                   continue;
                                                 }
                                               }
                                               {
-                                                i_10 = (i_10 + 1);
+                                                i_10 = (i_10 + int(1));
                                               }
                                               continue;
                                             }
                                           }
                                           {
-                                            i_9 = (i_9 + 1);
+                                            i_9 = (i_9 + int(1));
                                           }
                                           continue;
                                         }
                                       }
                                       {
-                                        i_8 = (i_8 + 1);
+                                        i_8 = (i_8 + int(1));
                                       }
                                       continue;
                                     }
                                   }
                                   {
-                                    i_7 = (i_7 + 1);
+                                    i_7 = (i_7 + int(1));
                                   }
                                   continue;
                                 }
                               }
                               {
-                                i_6 = (i_6 + 1);
+                                i_6 = (i_6 + int(1));
                               }
                               continue;
                             }
                           }
                           {
-                            i_5 = (i_5 + 1);
+                            i_5 = (i_5 + int(1));
                           }
                           continue;
                         }
                       }
                       {
-                        i_4 = (i_4 + 1);
+                        i_4 = (i_4 + int(1));
                       }
                       continue;
                     }
                   }
                   {
-                    i_3 = (i_3 + 1);
+                    i_3 = (i_3 + int(1));
                   }
                   continue;
                 }
               }
               {
-                i_2 = (i_2 + 1);
+                i_2 = (i_2 + int(1));
               }
               continue;
             }
           }
           {
-            i_1 = (i_1 + 1);
+            i_1 = (i_1 + int(1));
           }
           continue;
         }
       }
       {
-        i = (i + 1);
+        i = (i + int(1));
       }
       continue;
     }
@@ -265,14 +265,14 @@ void main_1() {
   r = asint(x_10[1u].x);
   {
     while(true) {
-      if ((x_GLF_global_loop_count < 100)) {
+      if ((x_GLF_global_loop_count < int(100))) {
       } else {
         break;
       }
-      x_GLF_global_loop_count = (x_GLF_global_loop_count + 1);
+      x_GLF_global_loop_count = (x_GLF_global_loop_count + int(1));
       sum = (sum + f);
       {
-        r = (r + 1);
+        r = (r + int(1));
       }
       continue;
     }

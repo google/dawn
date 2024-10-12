@@ -12,9 +12,9 @@ struct Outer {
 cbuffer cbuffer_a : register(b0) {
   uint4 a[64];
 };
-static int counter = 0;
+static int counter = int(0);
 int i() {
-  counter = (counter + 1);
+  counter = (counter + int(1));
   return counter;
 }
 

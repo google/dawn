@@ -3,7 +3,7 @@ SKIP: INVALID
 
 RWByteAddressBuffer prevent_dce : register(u0);
 int3 subgroupInclusiveAdd_c816b2() {
-  int3 res = (WavePrefixSum((1).xxx) + (1).xxx);
+  int3 res = (WavePrefixSum((int(1)).xxx) + (int(1)).xxx);
   return res;
 }
 
@@ -16,3 +16,8 @@ void compute_main() {
   prevent_dce.Store3(0u, asuint(subgroupInclusiveAdd_c816b2()));
 }
 
+FXC validation failure:
+<scrubbed_path>(4,15-41): error X3004: undeclared identifier 'WavePrefixSum'
+
+
+tint executable returned error: exit status 1

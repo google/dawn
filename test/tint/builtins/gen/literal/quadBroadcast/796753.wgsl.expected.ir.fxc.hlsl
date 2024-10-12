@@ -3,7 +3,7 @@ SKIP: INVALID
 
 RWByteAddressBuffer prevent_dce : register(u0);
 vector<float16_t, 3> quadBroadcast_796753() {
-  vector<float16_t, 3> res = QuadReadLaneAt((float16_t(1.0h)).xxx, 1);
+  vector<float16_t, 3> res = QuadReadLaneAt((float16_t(1.0h)).xxx, int(1));
   return res;
 }
 

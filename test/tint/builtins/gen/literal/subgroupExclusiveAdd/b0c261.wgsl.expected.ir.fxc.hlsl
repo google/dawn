@@ -3,7 +3,7 @@ SKIP: INVALID
 
 RWByteAddressBuffer prevent_dce : register(u0);
 int subgroupExclusiveAdd_b0c261() {
-  int res = WavePrefixSum(1);
+  int res = WavePrefixSum(int(1));
   return res;
 }
 
@@ -17,7 +17,7 @@ void compute_main() {
 }
 
 FXC validation failure:
-<scrubbed_path>(4,13-28): error X3004: undeclared identifier 'WavePrefixSum'
+<scrubbed_path>(4,13-33): error X3004: undeclared identifier 'WavePrefixSum'
 
 
 tint executable returned error: exit status 1

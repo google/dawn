@@ -3,7 +3,7 @@ SKIP: INVALID
 
 RWByteAddressBuffer prevent_dce : register(u0);
 int2 quadBroadcast_c0e704() {
-  int2 res = QuadReadLaneAt((1).xx, 1);
+  int2 res = QuadReadLaneAt((int(1)).xx, int(1));
   return res;
 }
 
@@ -17,7 +17,7 @@ void compute_main() {
 }
 
 FXC validation failure:
-<scrubbed_path>(4,14-38): error X3004: undeclared identifier 'QuadReadLaneAt'
+<scrubbed_path>(4,14-48): error X3004: undeclared identifier 'QuadReadLaneAt'
 
 
 tint executable returned error: exit status 1

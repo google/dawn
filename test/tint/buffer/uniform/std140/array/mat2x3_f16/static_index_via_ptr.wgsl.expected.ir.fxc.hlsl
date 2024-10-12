@@ -50,7 +50,7 @@ void f() {
   matrix<float16_t, 2, 3> l_a_i = v_4(32u);
   vector<float16_t, 3> l_a_i_i = tint_bitcast_to_f16(a[2u]).xyz;
   matrix<float16_t, 2, 3> l_a[4] = v_10;
-  s.Store<float16_t>(0u, (((float16_t(f16tof32(a[2u].z)) + l_a[0][0][0u]) + l_a_i[0][0u]) + l_a_i_i[0u]));
+  s.Store<float16_t>(0u, (((float16_t(f16tof32(a[2u].z)) + l_a[int(0)][int(0)][0u]) + l_a_i[int(0)][0u]) + l_a_i_i[0u]));
 }
 
 FXC validation failure:

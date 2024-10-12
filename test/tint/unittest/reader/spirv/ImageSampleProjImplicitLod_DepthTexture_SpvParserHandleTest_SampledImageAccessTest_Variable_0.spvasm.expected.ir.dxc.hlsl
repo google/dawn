@@ -10,10 +10,10 @@ void main_1() {
   float2 vf21 = float2(2.0f, 1.0f);
   float3 vf123 = float3(1.0f, 2.0f, 3.0f);
   float4 vf1234 = float4(1.0f, 2.0f, 3.0f, 4.0f);
-  int i1 = 1;
-  int2 vi12 = int2(1, 2);
-  int3 vi123 = int3(1, 2, 3);
-  int4 vi1234 = int4(1, 2, 3, 4);
+  int i1 = int(1);
+  int2 vi12 = int2(int(1), int(2));
+  int3 vi123 = int3(int(1), int(2), int(3));
+  int4 vi1234 = int4(int(1), int(2), int(3), int(4));
   uint u1 = 1u;
   uint2 vu12 = uint2(1u, 2u);
   uint3 vu123 = uint3(1u, 2u, 3u);

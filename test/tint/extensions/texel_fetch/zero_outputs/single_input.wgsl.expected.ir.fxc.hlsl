@@ -1,6 +1,6 @@
 SKIP: INVALID
 
-..\..\src\tint\lang\hlsl\writer\printer\printer.cc:1522 internal compiler error: HLSL does not support @color attribute
+..\..\src\tint\lang\hlsl\writer\printer\printer.cc:1526 internal compiler error: HLSL does not support @color attribute
 ********************************************************************
 *  The tint shader compiler has encountered an unexpected error.   *
 *                                                                  *

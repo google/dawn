@@ -3,7 +3,7 @@ SKIP: INVALID
 
 RWByteAddressBuffer prevent_dce : register(u0);
 int3 subgroupShuffle_b4bbb7() {
-  int3 res = WaveReadLaneAt((1).xxx, 1u);
+  int3 res = WaveReadLaneAt((int(1)).xxx, 1u);
   return res;
 }
 
@@ -17,7 +17,7 @@ void compute_main() {
 }
 
 FXC validation failure:
-<scrubbed_path>(4,14-40): error X3004: undeclared identifier 'WaveReadLaneAt'
+<scrubbed_path>(4,14-45): error X3004: undeclared identifier 'WaveReadLaneAt'
 
 
 tint executable returned error: exit status 1

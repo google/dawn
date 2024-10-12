@@ -3,7 +3,7 @@ SKIP: INVALID
 
 RWByteAddressBuffer prevent_dce : register(u0);
 int subgroupMax_6c913e() {
-  int res = WaveActiveMax(1);
+  int res = WaveActiveMax(int(1));
   return res;
 }
 
@@ -17,7 +17,7 @@ void compute_main() {
 }
 
 FXC validation failure:
-<scrubbed_path>(4,13-28): error X3004: undeclared identifier 'WaveActiveMax'
+<scrubbed_path>(4,13-33): error X3004: undeclared identifier 'WaveActiveMax'
 
 
 tint executable returned error: exit status 1

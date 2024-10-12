@@ -16,7 +16,9 @@ struct vertex_main_outputs {
 
 void modf_a545b9() {
   vector<float16_t, 2> arg_0 = (float16_t(-1.5h)).xx;
-  modf_result_vec2_f16 res = modf(arg_0);
+  vector<float16_t, 2> v = (float16_t(0.0h)).xx;
+  vector<float16_t, 2> v_1 = modf(arg_0, v);
+  modf_result_vec2_f16 res = {v_1, v};
 }
 
 void fragment_main() {
@@ -32,14 +34,14 @@ VertexOutput vertex_main_inner() {
   VertexOutput tint_symbol = (VertexOutput)0;
   tint_symbol.pos = (0.0f).xxxx;
   modf_a545b9();
-  VertexOutput v = tint_symbol;
-  return v;
+  VertexOutput v_2 = tint_symbol;
+  return v_2;
 }
 
 vertex_main_outputs vertex_main() {
-  VertexOutput v_1 = vertex_main_inner();
-  vertex_main_outputs v_2 = {v_1.pos};
-  return v_2;
+  VertexOutput v_3 = vertex_main_inner();
+  vertex_main_outputs v_4 = {v_3.pos};
+  return v_4;
 }
 
 FXC validation failure:

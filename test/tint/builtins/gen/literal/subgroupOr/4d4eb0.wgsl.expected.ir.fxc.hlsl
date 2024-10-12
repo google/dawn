@@ -3,7 +3,7 @@ SKIP: INVALID
 
 RWByteAddressBuffer prevent_dce : register(u0);
 int4 subgroupOr_4d4eb0() {
-  int4 arg = (1).xxxx;
+  int4 arg = (int(1)).xxxx;
   int4 res = asint(WaveActiveBitOr(asuint(arg)));
   return res;
 }

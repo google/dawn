@@ -1,7 +1,7 @@
 SKIP: INVALID
 
 
-static int4 u = (1).xxxx;
+static int4 u = (int(1)).xxxx;
 void f() {
   vector<float16_t, 4> v = vector<float16_t, 4>(u);
 }

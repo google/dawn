@@ -3,7 +3,7 @@ SKIP: INVALID
 
 RWByteAddressBuffer prevent_dce : register(u0);
 int subgroupExclusiveAdd_b0c261() {
-  int arg_0 = 1;
+  int arg_0 = int(1);
   int res = WavePrefixSum(arg_0);
   return res;
 }

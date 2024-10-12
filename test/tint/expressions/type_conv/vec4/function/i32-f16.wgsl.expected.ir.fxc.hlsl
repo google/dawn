@@ -1,9 +1,9 @@
 SKIP: INVALID
 
 
-static int t = 0;
+static int t = int(0);
 int4 m() {
-  t = 1;
+  t = int(1);
   return int4((t).xxxx);
 }
 

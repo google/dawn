@@ -3,7 +3,7 @@ SKIP: INVALID
 
 RWByteAddressBuffer prevent_dce : register(u0);
 int subgroupBroadcast_1d79c7() {
-  int arg_0 = 1;
+  int arg_0 = int(1);
   int res = WaveReadLaneAt(arg_0, 1u);
   return res;
 }

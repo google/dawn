@@ -3,7 +3,7 @@ SKIP: INVALID
 
 RWByteAddressBuffer prevent_dce : register(u0);
 int subgroupMin_a96a2e() {
-  int res = WaveActiveMin(1);
+  int res = WaveActiveMin(int(1));
   return res;
 }
 
@@ -17,7 +17,7 @@ void compute_main() {
 }
 
 FXC validation failure:
-<scrubbed_path>(4,13-28): error X3004: undeclared identifier 'WaveActiveMin'
+<scrubbed_path>(4,13-33): error X3004: undeclared identifier 'WaveActiveMin'
 
 
 tint executable returned error: exit status 1

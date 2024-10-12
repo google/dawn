@@ -20,7 +20,7 @@ cbuffer cbuffer_x_10 : register(b0) {
   uint4 x_10[2];
 };
 void main_1() {
-  int i = 0;
+  int i = int(0);
   float x_38 = asfloat(x_5[0u].x);
   x_GLF_color = float4(x_38, x_38, x_38, x_38);
   float x_41 = asfloat(x_7[0u].x);
@@ -62,7 +62,7 @@ void main_1() {
                 x_GLF_color = float4(x_73, x_75, x_77, x_79);
                 {
                   int x_16 = i;
-                  i = (x_16 + 1);
+                  i = (x_16 + int(1));
                 }
                 continue;
               }

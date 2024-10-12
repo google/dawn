@@ -1,7 +1,7 @@
 SKIP: INVALID
 
 
-static int u = 1;
+static int u = int(1);
 void f() {
   float16_t v = float16_t(u);
 }

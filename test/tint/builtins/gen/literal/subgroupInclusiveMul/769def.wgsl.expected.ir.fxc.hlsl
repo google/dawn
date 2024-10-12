@@ -3,7 +3,7 @@ SKIP: INVALID
 
 RWByteAddressBuffer prevent_dce : register(u0);
 int3 subgroupInclusiveMul_769def() {
-  int3 res = (WavePrefixProduct((1).xxx) * (1).xxx);
+  int3 res = (WavePrefixProduct((int(1)).xxx) * (int(1)).xxx);
   return res;
 }
 
@@ -16,3 +16,8 @@ void compute_main() {
   prevent_dce.Store3(0u, asuint(subgroupInclusiveMul_769def()));
 }
 
+FXC validation failure:
+<scrubbed_path>(4,15-45): error X3004: undeclared identifier 'WavePrefixProduct'
+
+
+tint executable returned error: exit status 1

@@ -14,7 +14,7 @@ cbuffer cbuffer_x_5 : register(b0) {
   uint4 x_5[1];
 };
 void main_1() {
-  int m = 0;
+  int m = int(0);
   x_GLF_color = float4(1.0f, 0.0f, 0.0f, 1.0f);
   float v = asfloat(x_5[0u].x);
   if ((v > asfloat(x_5[0u].y))) {
@@ -26,7 +26,7 @@ void main_1() {
         continue;
       }
     }
-    m = 1;
+    m = int(1);
     {
       while(true) {
         if (true) {

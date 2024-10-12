@@ -15,7 +15,7 @@ RWByteAddressBuffer prevent_dce : register(u0);
 int transpose_7be8b2() {
   matrix<float16_t, 2, 2> arg_0 = matrix<float16_t, 2, 2>((float16_t(1.0h)).xx, (float16_t(1.0h)).xx);
   matrix<float16_t, 2, 2> res = transpose(arg_0);
-  return (((res[0].x == float16_t(0.0h))) ? (1) : (0));
+  return (((res[int(0)].x == float16_t(0.0h))) ? (int(1)) : (int(0)));
 }
 
 void fragment_main() {

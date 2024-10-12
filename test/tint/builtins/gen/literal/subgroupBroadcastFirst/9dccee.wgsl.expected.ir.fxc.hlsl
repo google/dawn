@@ -3,7 +3,7 @@ SKIP: INVALID
 
 RWByteAddressBuffer prevent_dce : register(u0);
 int4 subgroupBroadcastFirst_9dccee() {
-  int4 res = WaveReadLaneFirst((1).xxxx);
+  int4 res = WaveReadLaneFirst((int(1)).xxxx);
   return res;
 }
 
@@ -17,7 +17,7 @@ void compute_main() {
 }
 
 FXC validation failure:
-<scrubbed_path>(4,14-40): error X3004: undeclared identifier 'WaveReadLaneFirst'
+<scrubbed_path>(4,14-45): error X3004: undeclared identifier 'WaveReadLaneFirst'
 
 
 tint executable returned error: exit status 1

@@ -4,7 +4,7 @@ SKIP: INVALID
 RWByteAddressBuffer prevent_dce : register(u0);
 float16_t subgroupBroadcast_719ad6() {
   float16_t arg_0 = float16_t(1.0h);
-  float16_t res = WaveReadLaneAt(arg_0, 1);
+  float16_t res = WaveReadLaneAt(arg_0, int(1));
   return res;
 }
 

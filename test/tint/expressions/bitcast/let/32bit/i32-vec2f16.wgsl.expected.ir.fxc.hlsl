@@ -11,7 +11,7 @@ vector<float16_t, 2> tint_bitcast_to_f16(int src) {
 
 [numthreads(1, 1, 1)]
 void f() {
-  int a = 1073757184;
+  int a = int(1073757184);
   vector<float16_t, 2> b = tint_bitcast_to_f16(a);
 }
 

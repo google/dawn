@@ -180,19 +180,19 @@ void v_28(uint offset, float2x2 obj) {
 [numthreads(1, 1, 1)]
 void main() {
   sb.Store(0u, asuint(0.0f));
-  sb.Store(4u, asuint(0));
+  sb.Store(4u, asuint(int(0)));
   sb.Store(8u, 0u);
   sb.Store<float16_t>(12u, float16_t(0.0h));
   sb.Store2(16u, asuint((0.0f).xx));
-  sb.Store2(24u, asuint((0).xx));
+  sb.Store2(24u, asuint(int2((int(0)).xx)));
   sb.Store2(32u, (0u).xx);
   sb.Store<vector<float16_t, 2> >(40u, (float16_t(0.0h)).xx);
   sb.Store3(48u, asuint((0.0f).xxx));
-  sb.Store3(64u, asuint((0).xxx));
+  sb.Store3(64u, asuint(int3((int(0)).xxx)));
   sb.Store3(80u, (0u).xxx);
   sb.Store<vector<float16_t, 3> >(96u, (float16_t(0.0h)).xxx);
   sb.Store4(112u, asuint((0.0f).xxxx));
-  sb.Store4(128u, asuint((0).xxxx));
+  sb.Store4(128u, asuint(int4((int(0)).xxxx)));
   sb.Store4(144u, (0u).xxxx);
   sb.Store<vector<float16_t, 4> >(160u, (float16_t(0.0h)).xxxx);
   v_28(168u, float2x2((0.0f).xx, (0.0f).xx));

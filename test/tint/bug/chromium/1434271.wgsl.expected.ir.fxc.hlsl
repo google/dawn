@@ -129,7 +129,7 @@ void simulate_inner(uint3 GlobalInvocationID) {
 void export_level_inner(uint3 coord) {
   uint2 v_18 = (0u).xx;
   tex_out.GetDimensions(v_18[0u], v_18[1u]);
-  if (all((coord.xy < uint2((v_18).xx)))) {
+  if (all((coord.xy < uint2(v_18)))) {
     uint dst_offset = (coord[0u] << ((coord[1u] * ubo[0u].x) & 31u));
     uint src_offset = ((coord[0u] - 2u) + ((coord[1u] >> (2u & 31u)) * ubo[0u].x));
     float a = asfloat(buf_in.Load((0u + (uint((src_offset << (0u & 31u))) * 4u))));
@@ -143,24 +143,23 @@ void export_level_inner(uint3 coord) {
     buf_out.Store((0u + v_19), asuint(((sum - (((v_20 < 0.0f)) ? (ceil(v_20)) : (v_21))) * 4.0f)));
     float4 v_22 = float4(a, (a * b), ((a / b) + c), sum);
     float4 probabilities = (v_22 + max(sum, 0.0f));
-    RWTexture2D<float4> v_23 = tex_out;
-    v_23[int2(coord.xy)] = probabilities;
+    tex_out[int2(coord.xy)] = probabilities;
   }
 }
 
 vertex_main_outputs vertex_main() {
-  vertex_main_outputs v_24 = {vertex_main_inner()};
-  return v_24;
+  vertex_main_outputs v_23 = {vertex_main_inner()};
+  return v_23;
 }
 
 vs_main_outputs vs_main(vs_main_inputs inputs) {
-  VertexInput v_25 = {inputs.VertexInput_position, inputs.VertexInput_color, inputs.VertexInput_quad_pos};
-  VertexOutput v_26 = vs_main_inner(v_25);
-  VertexOutput v_27 = v_26;
-  VertexOutput v_28 = v_26;
-  VertexOutput v_29 = v_26;
-  vs_main_outputs v_30 = {v_28.color, v_29.quad_pos, v_27.position};
-  return v_30;
+  VertexInput v_24 = {inputs.VertexInput_position, inputs.VertexInput_color, inputs.VertexInput_quad_pos};
+  VertexOutput v_25 = vs_main_inner(v_24);
+  VertexOutput v_26 = v_25;
+  VertexOutput v_27 = v_25;
+  VertexOutput v_28 = v_25;
+  vs_main_outputs v_29 = {v_27.color, v_28.quad_pos, v_26.position};
+  return v_29;
 }
 
 [numthreads(64, 1, 1)]

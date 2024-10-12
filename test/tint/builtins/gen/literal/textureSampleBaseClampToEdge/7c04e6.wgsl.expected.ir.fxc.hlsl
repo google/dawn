@@ -141,11 +141,8 @@ tint_ExternalTextureParams v_37(uint start_byte_offset) {
 }
 
 float4 textureSampleBaseClampToEdge_7c04e6() {
-  Texture2D<float4> v_60 = arg_0_plane0;
-  Texture2D<float4> v_61 = arg_0_plane1;
-  tint_ExternalTextureParams v_62 = v_37(0u);
-  tint_ExternalTextureParams v_63 = v_62;
-  float4 res = tint_TextureSampleExternal(v_60, v_61, v_63, arg_1, (1.0f).xx);
+  tint_ExternalTextureParams v_60 = v_37(0u);
+  float4 res = tint_TextureSampleExternal(arg_0_plane0, arg_0_plane1, v_60, arg_1, (1.0f).xx);
   return res;
 }
 
@@ -162,16 +159,16 @@ VertexOutput vertex_main_inner() {
   VertexOutput tint_symbol = (VertexOutput)0;
   tint_symbol.pos = (0.0f).xxxx;
   tint_symbol.prevent_dce = textureSampleBaseClampToEdge_7c04e6();
-  VertexOutput v_64 = tint_symbol;
-  return v_64;
+  VertexOutput v_61 = tint_symbol;
+  return v_61;
 }
 
 vertex_main_outputs vertex_main() {
-  VertexOutput v_65 = vertex_main_inner();
-  VertexOutput v_66 = v_65;
-  VertexOutput v_67 = v_65;
-  vertex_main_outputs v_68 = {v_67.prevent_dce, v_66.pos};
-  return v_68;
+  VertexOutput v_62 = vertex_main_inner();
+  VertexOutput v_63 = v_62;
+  VertexOutput v_64 = v_62;
+  vertex_main_outputs v_65 = {v_64.prevent_dce, v_63.pos};
+  return v_65;
 }
 
 FXC validation failure:

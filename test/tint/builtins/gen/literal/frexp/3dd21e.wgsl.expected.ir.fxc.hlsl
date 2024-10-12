@@ -15,7 +15,7 @@ struct vertex_main_outputs {
 
 
 void frexp_3dd21e() {
-  frexp_result_vec4_f16 res = {(float16_t(0.5h)).xxxx, (1).xxxx};
+  frexp_result_vec4_f16 res = {(float16_t(0.5h)).xxxx, (int(1)).xxxx};
 }
 
 void fragment_main() {

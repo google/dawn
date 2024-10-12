@@ -22,14 +22,14 @@ cbuffer cbuffer_x_10 : register(b1) {
 static float4 gl_FragCoord = (0.0f).xxxx;
 static float4 x_GLF_color = (0.0f).xxxx;
 int tint_f32_to_i32(float value) {
-  return (((value <= 2147483520.0f)) ? ((((value >= -2147483648.0f)) ? (int(value)) : (-2147483648))) : (2147483647));
+  return (((value <= 2147483520.0f)) ? ((((value >= -2147483648.0f)) ? (int(value)) : (int(-2147483648)))) : (int(2147483647)));
 }
 
 void main_1() {
   float4 data[2] = (float4[2])0;
-  int b = 0;
-  int y = 0;
-  int i = 0;
+  int b = int(0);
+  int y = int(0);
+  int i = int(0);
   float x_42 = asfloat(x_7[0u].x);
   float x_45 = asfloat(x_7[0u].x);
   float4 v = float4(x_42, x_42, x_42, x_42);
@@ -70,10 +70,10 @@ void main_1() {
         break;
       }
       int x_86 = b;
-      b = (x_86 + 1);
+      b = (x_86 + int(1));
       {
         int x_88 = i;
-        i = (x_88 + 1);
+        i = (x_88 + int(1));
       }
       continue;
     }
@@ -88,11 +88,11 @@ void main_1() {
     int x_107 = asint(x_10[2u].x);
     int x_110 = asint(x_10[2u].x);
     int x_113 = asint(x_10[1u].x);
-    float4 v_3 = data[min(max(x_97, x_99), x_101)];
+    int v_3 = min(max(x_97, x_99), x_101);
     float v_4 = float(x_104);
     float v_5 = float(x_107);
     float v_6 = float(x_110);
-    v_3 = float4(v_4, v_5, v_6, float(x_113));
+    data[v_3] = float4(v_4, v_5, v_6, float(x_113));
   }
   int x_118 = asint(x_10[1u].x);
   float4 x_120 = data[x_118];

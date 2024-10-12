@@ -18,3 +18,8 @@ void compute_main() {
   prevent_dce.Store(0u, asuint(subgroupInclusiveAdd_df692b()));
 }
 
+FXC validation failure:
+<scrubbed_path>(6,16-31): error X3004: undeclared identifier 'WavePrefixSum'
+
+
+tint executable returned error: exit status 1

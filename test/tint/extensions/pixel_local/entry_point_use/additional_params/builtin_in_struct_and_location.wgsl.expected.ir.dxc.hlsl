@@ -1,6 +1,6 @@
 SKIP: FAILED
 
-..\..\src\tint\lang\hlsl\writer\printer\printer.cc:524 internal compiler error: unhandled address space pixel_local
+..\..\src\tint\lang\hlsl\writer\printer\printer.cc:522 internal compiler error: unhandled address space pixel_local
 ********************************************************************
 *  The tint shader compiler has encountered an unexpected error.   *
 *                                                                  *

@@ -8,3 +8,8 @@ void main() {
   float submul = (WavePrefixProduct(val) * val);
 }
 
+FXC validation failure:
+<scrubbed_path>(5,19-36): error X3004: undeclared identifier 'WavePrefixSum'
+
+
+tint executable returned error: exit status 1

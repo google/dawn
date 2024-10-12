@@ -64,9 +64,9 @@ void f() {
   S v_16[4] = v_11(0u);
   p = v_16;
   S v_17 = v_7(256u);
-  p[1] = v_17;
-  p[3].m = v_4(264u);
-  p[1].m[0] = tint_bitcast_to_f16(u[1u]).ywxz;
+  p[int(1)] = v_17;
+  p[int(3)].m = v_4(264u);
+  p[int(1)].m[int(0)] = tint_bitcast_to_f16(u[1u]).ywxz;
 }
 
 FXC validation failure:

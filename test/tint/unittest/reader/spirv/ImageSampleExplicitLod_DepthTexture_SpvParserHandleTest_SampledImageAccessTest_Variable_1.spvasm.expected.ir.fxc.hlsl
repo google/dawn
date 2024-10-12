@@ -9,10 +9,10 @@ void main_1() {
   float2 vf21 = float2(2.0f, 1.0f);
   float3 vf123 = float3(1.0f, 2.0f, 3.0f);
   float4 vf1234 = float4(1.0f, 2.0f, 3.0f, 4.0f);
-  int i1 = 1;
-  int2 vi12 = int2(1, 2);
-  int3 vi123 = int3(1, 2, 3);
-  int4 vi1234 = int4(1, 2, 3, 4);
+  int i1 = int(1);
+  int2 vi12 = int2(int(1), int(2));
+  int3 vi123 = int3(int(1), int(2), int(3));
+  int4 vi1234 = int4(int(1), int(2), int(3), int(4));
   uint u1 = 1u;
   uint2 vu12 = uint2(1u, 2u);
   uint3 vu123 = uint3(1u, 2u, 3u);
@@ -21,9 +21,7 @@ void main_1() {
   float2 coords12 = vf12;
   float3 coords123 = vf123;
   float4 coords1234 = vf1234;
-  Texture2D v = x_20;
-  SamplerState v_1 = x_10;
-  float4 x_79 = float4(v.SampleLevel(v_1, vf12, float(1)), 0.0f, 0.0f, 0.0f);
+  float4 x_79 = float4(x_20.SampleLevel(x_10, vf12, float(int(1))), 0.0f, 0.0f, 0.0f);
 }
 
 void main() {
@@ -31,7 +29,7 @@ void main() {
 }
 
 FXC validation failure:
-<scrubbed_path>(24,17-76): error X3014: incorrect number of arguments to numeric-type constructor
+<scrubbed_path>(22,17-85): error X3014: incorrect number of arguments to numeric-type constructor
 
 
 tint executable returned error: exit status 1

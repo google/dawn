@@ -3,7 +3,7 @@ SKIP: INVALID
 
 RWByteAddressBuffer prevent_dce : register(u0);
 int quadSwapDiagonal_9ccb38() {
-  int res = QuadReadAcrossDiagonal(1);
+  int res = QuadReadAcrossDiagonal(int(1));
   return res;
 }
 
@@ -17,7 +17,7 @@ void compute_main() {
 }
 
 FXC validation failure:
-<scrubbed_path>(4,13-37): error X3004: undeclared identifier 'QuadReadAcrossDiagonal'
+<scrubbed_path>(4,13-42): error X3004: undeclared identifier 'QuadReadAcrossDiagonal'
 
 
 tint executable returned error: exit status 1

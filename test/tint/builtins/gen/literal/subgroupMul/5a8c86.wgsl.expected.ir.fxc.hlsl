@@ -3,7 +3,7 @@ SKIP: INVALID
 
 RWByteAddressBuffer prevent_dce : register(u0);
 int3 subgroupMul_5a8c86() {
-  int3 res = WaveActiveProduct((1).xxx);
+  int3 res = WaveActiveProduct((int(1)).xxx);
   return res;
 }
 
@@ -17,7 +17,7 @@ void compute_main() {
 }
 
 FXC validation failure:
-<scrubbed_path>(4,14-39): error X3004: undeclared identifier 'WaveActiveProduct'
+<scrubbed_path>(4,14-44): error X3004: undeclared identifier 'WaveActiveProduct'
 
 
 tint executable returned error: exit status 1

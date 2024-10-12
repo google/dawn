@@ -52,7 +52,7 @@ void main_1() {
   }
   GroupMemoryBarrierWithGroupSync();
   int x_74 = asint(x_58);
-  float2 x_76 = x_28[0].field0;
+  float2 x_76 = x_28[int(0)].field0;
   if ((x_52 == 0u)) {
     uint2 x_80 = asuint(x_76);
     uint x_81 = x_80[0u];

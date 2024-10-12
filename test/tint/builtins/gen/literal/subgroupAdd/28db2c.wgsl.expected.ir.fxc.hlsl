@@ -3,7 +3,7 @@ SKIP: INVALID
 
 RWByteAddressBuffer prevent_dce : register(u0);
 int4 subgroupAdd_28db2c() {
-  int4 res = WaveActiveSum((1).xxxx);
+  int4 res = WaveActiveSum((int(1)).xxxx);
   return res;
 }
 
@@ -17,7 +17,7 @@ void compute_main() {
 }
 
 FXC validation failure:
-<scrubbed_path>(4,14-36): error X3004: undeclared identifier 'WaveActiveSum'
+<scrubbed_path>(4,14-41): error X3004: undeclared identifier 'WaveActiveSum'
 
 
 tint executable returned error: exit status 1
