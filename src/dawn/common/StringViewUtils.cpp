@@ -27,6 +27,8 @@
 
 #include "dawn/common/StringViewUtils.h"
 
+#include <cstring>
+
 bool operator==(WGPUStringView a, WGPUStringView b) {
     return wgpu::StringView(a) == wgpu::StringView(b);
 }
