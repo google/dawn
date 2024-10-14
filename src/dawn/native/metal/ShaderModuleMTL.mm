@@ -484,6 +484,20 @@ MaybeError ShaderModule::CreateFunction(SingleShaderStage stage,
     {
         TRACE_EVENT0(GetDevice()->GetPlatform(), General, "MTLLibrary::newFunctionWithName");
         out->function = AcquireNSPRef([*library newFunctionWithName:name.Get()]);
+        // TODO(372181030): Remove this unnecessary check when we understand why the MTLFunction
+        // might be nil here.
+        if (out->function == nil) {
+            std::string availableFunctions;
+            for (NSString* fn : [*library functionNames]) {
+                availableFunctions += "\n - \"";
+                availableFunctions += [fn UTF8String];
+            }
+
+            return DAWN_FORMAT_INTERNAL_ERROR(
+                "ShaderModuleMTL: failed to get the MTLFunction \'%s\' from produced MSL "
+                "shader below:\n\n%s\n\nAvailable functions are:%s",
+                mslCompilation->remappedEntryPointName, mslCompilation->msl, availableFunctions);
+        }
     }
 
     std::ostringstream labelStream;
