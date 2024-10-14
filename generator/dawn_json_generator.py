@@ -742,7 +742,7 @@ def compute_kotlin_params(loaded_json, kotlin_json):
                     container_type = deepcopy(argument)
                     container_type.length = 'size_t'
                     return container_type
-                if (method.return_type.name.get() == 'status'
+                if (method.return_type.name.get() in ['status', 'void']
                         and argument.type.category == 'structure'):
                     return argument
 
