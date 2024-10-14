@@ -63,6 +63,7 @@ Now, create a `hello_webgpu.cpp` C++ file within the `TestDawn` directory.
 
 ```cpp
 #include <webgpu/webgpu_cpp.h>
+#include <webgpu/webgpu_cpp_print.h>
 
 #include <cstdlib>
 #include <iostream>
