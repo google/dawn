@@ -1,4 +1,4 @@
-// Copyright 2024 The Dawn & Tint Authors
+// Copyright 2020 The Dawn & Tint Authors
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
@@ -25,36 +25,36 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "dawn/common/StringViewUtils.h"
+#ifndef SRC_DAWN_TESTS_STRINGVIEWMATCHERS_H_
+#define SRC_DAWN_TESTS_STRINGVIEWMATCHERS_H_
 
-bool operator==(WGPUStringView a, WGPUStringView b) {
-    return wgpu::StringView(a) == wgpu::StringView(b);
+#include <string_view>
+
+#include "dawn/webgpu_cpp.h"
+#include "gmock/gmock.h"
+
+namespace testing {
+
+MATCHER(EmptySizedString, "") {
+    return arg.length == 0;
 }
 
-namespace wgpu {
-bool operator==(StringView a, StringView b) {
-    return std::string_view(a) == std::string_view(b);
-}
-}  // namespace wgpu
-
-namespace dawn {
-
-WGPUStringView ToOutputStringView(const std::string& s) {
-    return {s.data(), s.size()};
+MATCHER(NonEmptySizedString, "") {
+    return arg.length != 0 && arg.length != WGPU_STRLEN;
 }
 
-WGPUStringView ToOutputStringView(const std::string_view& s) {
-    return {s.data(), s.size()};
+MATCHER_P(SizedString, expected, "") {
+    return arg.length != WGPU_STRLEN && std::string_view(arg.data, arg.length) == expected;
 }
 
-std::string ToString(WGPUStringView s) {
-    if (s.length == WGPU_STRLEN) {
-        if (s.data == nullptr) {
-            return {};
-        }
-        return {s.data};
+MATCHER_P(SizedStringMatches, matcher, "") {
+    if (arg.length == WGPU_STRLEN) {
+        return false;
     }
-    return {s.data, s.length};
+    std::string_view v = {arg.data, arg.length};
+    return Matches(matcher)(v);
 }
 
-}  // namespace dawn
+}  // namespace testing
+
+#endif  // SRC_DAWN_TESTS_STRINGVIEWMATCHERS_H_

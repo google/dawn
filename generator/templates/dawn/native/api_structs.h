@@ -68,7 +68,34 @@ namespace {{native_namespace}} {
     using {{namespace}}::ChainedStruct;
     using {{namespace}}::ChainedStructOut;
 
-    {% for type in by_category["structure"] %}
+    //* Special structures that are manually written.
+    {% set SpecialStructures = ["string view"] %}
+
+    struct StringView {
+        char const * data = nullptr;
+        size_t length = WGPU_STRLEN;
+
+        {{wgpu_string_members("StringView")}}
+
+        // Equality operators, mostly for testing. Note that this tests
+        // strict pointer-pointer equality if the struct contains member pointers.
+        bool operator==(const StringView& rhs) const;
+
+        #ifndef ABSL_USES_STD_STRING_VIEW
+        // NOLINTNEXTLINE(runtime/explicit) allow implicit conversion
+        operator absl::string_view() const {
+            if (this->length == wgpu::kStrlen) {
+                if (IsUndefined()) {
+                    return {};
+                }
+                return {this->data};
+            }
+            return {this->data, this->length};
+        }
+        #endif
+    };
+
+    {% for type in by_category["structure"] if type.name.get() not in SpecialStructures %}
         {% set CppType = as_cppType(type.name) %}
         {% if type.chained %}
             {% set chainedStructType = "ChainedStructOut" if type.chained == "out" else "ChainedStruct" %}
@@ -104,24 +131,6 @@ namespace {{native_namespace}} {
                     {{member_declaration}};
                 {% endif %}
             {% endfor %}
-
-            //* Custom string constructors / conversion
-            {% if type.name.get() == "string view" %}
-                {{wgpu_string_members(CppType) | indent(8)}}
-
-                #ifndef ABSL_USES_STD_STRING_VIEW
-                // NOLINTNEXTLINE(runtime/explicit) allow implicit conversion
-                operator absl::string_view() const {
-                    if (this->length == wgpu::kStrlen) {
-                        if (IsUndefined()) {
-                            return {};
-                        }
-                        return {this->data};
-                    }
-                    return {this->data, this->length};
-                }
-                #endif
-            {% endif %}
 
             {% if type.any_member_requires_struct_defaulting %}
                 // This method makes a copy of the struct, then, for any enum members with trivial

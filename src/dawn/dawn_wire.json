@@ -134,7 +134,7 @@
             { "name": "future", "type": "future" },
             { "name": "status", "type": "buffer map async status" },
             { "name": "status2", "type": "map async status" },
-            { "name": "message", "type": "char", "annotation": "const*", "length": "strlen", "optional": true },
+            { "name": "message", "type": "string view" },
             { "name": "userdata count", "type": "uint8_t", "_comment": "TODO(crbug.com/dawn/2509): Remove this once Chromium overrides the correct functions in the proc table."},
             { "name": "read data update info length", "type": "uint64_t" },
             { "name": "read data update info", "type": "uint8_t", "annotation": "const*", "length": "read data update info length", "skip_serialize": true }
@@ -143,35 +143,35 @@
             { "name": "event manager", "type": "ObjectHandle" },
             { "name": "future", "type": "future" },
             { "name": "status", "type": "create pipeline async status" },
-            { "name": "message", "type": "char", "annotation": "const*", "length": "strlen" }
+            { "name": "message", "type": "string view"}
         ],
         "device create render pipeline async callback": [
             { "name": "event manager", "type": "ObjectHandle" },
             { "name": "future", "type": "future" },
             { "name": "status", "type": "create pipeline async status" },
-            { "name": "message", "type": "char", "annotation": "const*", "length": "strlen" }
+            { "name": "message", "type": "string view"}
         ],
         "device uncaptured error callback": [
             { "name": "device", "type": "ObjectHandle", "handle_type": "device" },
             { "name": "type", "type": "error type"},
-            { "name": "message", "type": "char", "annotation": "const*", "length": "strlen" }
+            { "name": "message", "type": "string view"}
         ],
         "device logging callback": [
             { "name": "device", "type": "ObjectHandle", "handle_type": "device" },
             { "name": "type", "type": "logging type"},
-            { "name": "message", "type": "char", "annotation": "const*", "length": "strlen" }
+            { "name": "message", "type": "string view" }
         ],
         "device lost callback" : [
             { "name": "event manager", "type": "ObjectHandle" },
             { "name": "future", "type": "future" },
             { "name": "reason", "type": "device lost reason" },
-            { "name": "message", "type": "char", "annotation": "const*", "length": "strlen" }
+            { "name": "message", "type": "string view"}
         ],
         "device pop error scope callback": [
             { "name": "event manager", "type": "ObjectHandle" },
             { "name": "future", "type": "future" },
             { "name": "type", "type": "error type" },
-            { "name": "message", "type": "char", "annotation": "const*", "length": "strlen" }
+            { "name": "message", "type": "string view"}
         ],
         "queue work done callback": [
             { "name": "event manager", "type": "ObjectHandle" },
@@ -188,7 +188,7 @@
             { "name": "event manager", "type": "ObjectHandle" },
             { "name": "future", "type": "future" },
             { "name": "status", "type": "request adapter status" },
-            { "name": "message", "type": "char", "annotation": "const*", "length": "strlen", "optional": true },
+            { "name": "message", "type": "string view" },
             { "name": "info", "type": "adapter info", "annotation": "const*", "optional": "true" },
             { "name": "limits", "type": "supported limits", "annotation": "const*", "optional": "true" },
             { "name": "features count", "type": "uint32_t"},
@@ -198,7 +198,7 @@
             { "name": "event manager", "type": "ObjectHandle" },
             { "name": "future", "type": "future" },
             { "name": "status", "type": "request device status" },
-            { "name": "message", "type": "char", "annotation": "const*", "length": "strlen", "optional": true },
+            { "name": "message", "type": "string view" },
             { "name": "limits", "type": "supported limits", "annotation": "const*", "optional": "true" },
             { "name": "features count", "type": "uint32_t"},
             { "name": "features", "type": "feature name", "annotation": "const*", "length": "features count"}

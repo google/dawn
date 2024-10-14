@@ -33,6 +33,7 @@
 #include "dawn/common/FutureUtils.h"
 #include "dawn/common/GPUInfo.h"
 #include "dawn/common/Log.h"
+#include "dawn/common/StringViewUtils.h"
 #include "dawn/common/SystemUtils.h"
 #include "dawn/common/WGSLFeatureMapping.h"
 #include "dawn/native/CallbackTaskManager.h"
@@ -226,19 +227,20 @@ MaybeError InstanceBase::Initialize(const UnpackedPtr<InstanceDescriptor>& descr
     }
 
     if (!mLoggingCallback) {
-        mLoggingCallback = [](WGPULoggingType type, char const* message, void*) {
+        mLoggingCallback = [](WGPULoggingType type, WGPUStringView message, void*) {
+            std::string_view view = {message.data, message.length};
             switch (static_cast<wgpu::LoggingType>(type)) {
                 case wgpu::LoggingType::Verbose:
-                    dawn::DebugLog() << message;
+                    dawn::DebugLog() << view;
                     break;
                 case wgpu::LoggingType::Info:
-                    dawn::InfoLog() << message;
+                    dawn::InfoLog() << view;
                     break;
                 case wgpu::LoggingType::Warning:
-                    dawn::WarningLog() << message;
+                    dawn::WarningLog() << view;
                     break;
                 case wgpu::LoggingType::Error:
-                    dawn::ErrorLog() << message;
+                    dawn::ErrorLog() << view;
                     break;
             }
         };
@@ -274,7 +276,7 @@ Future InstanceBase::APIRequestAdapterF(const RequestAdapterOptions* options,
                                         const RequestAdapterCallbackInfo& callbackInfo) {
     return APIRequestAdapter2(
         options, {ToAPI(callbackInfo.nextInChain), ToAPI(callbackInfo.mode),
-                  [](WGPURequestAdapterStatus status, WGPUAdapter adapter, char const* message,
+                  [](WGPURequestAdapterStatus status, WGPUAdapter adapter, WGPUStringView message,
                      void* callback, void* userdata) {
                       auto cb = reinterpret_cast<WGPURequestAdapterCallback>(callback);
                       cb(status, adapter, message, userdata);
@@ -303,17 +305,18 @@ Future InstanceBase::APIRequestAdapter2(const RequestAdapterOptions* options,
 
         void Complete(EventCompletionType completionType) override {
             if (completionType == EventCompletionType::Shutdown) {
-                mCallback(WGPURequestAdapterStatus_InstanceDropped, nullptr, nullptr,
+                mCallback(WGPURequestAdapterStatus_InstanceDropped, nullptr, kEmptyOutputStringView,
                           mUserdata1.ExtractAsDangling(), mUserdata2.ExtractAsDangling());
                 return;
             }
 
             WGPUAdapter adapter = ToAPI(ReturnToAPI(std::move(mAdapter)));
             if (adapter == nullptr) {
-                mCallback(WGPURequestAdapterStatus_Unavailable, nullptr, "No supported adapters",
+                mCallback(WGPURequestAdapterStatus_Unavailable, nullptr,
+                          ToOutputStringView("No supported adapters"),
                           mUserdata1.ExtractAsDangling(), mUserdata2.ExtractAsDangling());
             } else {
-                mCallback(WGPURequestAdapterStatus_Success, adapter, nullptr,
+                mCallback(WGPURequestAdapterStatus_Success, adapter, kEmptyOutputStringView,
                           mUserdata1.ExtractAsDangling(), mUserdata2.ExtractAsDangling());
             }
         }
@@ -489,7 +492,8 @@ bool InstanceBase::ConsumedErrorAndWarnOnce(MaybeError maybeErr) {
     }
     std::string message = maybeErr.AcquireError()->GetFormattedMessage();
     if (mWarningMessages.insert(message).second && mLoggingCallback) {
-        mLoggingCallback(WGPULoggingType_Warning, message.c_str(), mLoggingCallbackUserdata);
+        mLoggingCallback(WGPULoggingType_Warning, ToOutputStringView(message),
+                         mLoggingCallbackUserdata);
     }
     return true;
 }
@@ -596,7 +600,8 @@ void InstanceBase::ConsumeError(std::unique_ptr<ErrorData> error,
     DAWN_ASSERT(error != nullptr);
     if (mLoggingCallback) {
         std::string messageStr = error->GetFormattedMessage();
-        mLoggingCallback(WGPULoggingType_Error, messageStr.c_str(), mLoggingCallbackUserdata);
+        mLoggingCallback(WGPULoggingType_Error, ToOutputStringView(messageStr),
+                         mLoggingCallbackUserdata);
     }
 }
 

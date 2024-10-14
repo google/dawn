@@ -344,10 +344,10 @@ class DawnTestBase {
     // device loss that aren't expected should result in test failures and not just some warnings
     // printed to stdout.
     testing::StrictMock<
-        testing::MockCppCallback<void (*)(const wgpu::Device&, wgpu::ErrorType, const char*)>>
+        testing::MockCppCallback<void (*)(const wgpu::Device&, wgpu::ErrorType, wgpu::StringView)>>
         mDeviceErrorCallback;
     testing::StrictMock<testing::MockCppCallback<
-        void (*)(const wgpu::Device&, wgpu::DeviceLostReason, const char*)>>
+        void (*)(const wgpu::Device&, wgpu::DeviceLostReason, wgpu::StringView)>>
         mDeviceLostCallback;
 
     // Helper methods to implement the EXPECT_ macros

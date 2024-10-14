@@ -43,6 +43,7 @@
 #include "dawn/common/Log.h"
 #include "dawn/common/Math.h"
 #include "dawn/common/Platform.h"
+#include "dawn/common/StringViewUtils.h"
 #include "dawn/common/SystemUtils.h"
 #include "dawn/dawn_proc.h"
 #include "dawn/native/Device.h"
@@ -754,7 +755,7 @@ DawnTestBase::DawnTestBase(const AdapterTestParam& param) : mParam(param) {
         WGPUAdapter cAdapter = it->Get();
         DAWN_ASSERT(cAdapter);
         native::GetProcs().adapterAddRef(cAdapter);
-        callbackInfo.callback(WGPURequestAdapterStatus_Success, cAdapter, nullptr,
+        callbackInfo.callback(WGPURequestAdapterStatus_Success, cAdapter, kEmptyOutputStringView,
                               callbackInfo.userdata1, callbackInfo.userdata2);
 
         // Returning a placeholder future that we should never be waiting on.
@@ -778,7 +779,7 @@ DawnTestBase::DawnTestBase(const AdapterTestParam& param) : mParam(param) {
         DAWN_ASSERT(cDevice != nullptr);
 
         gCurrentTest->mLastCreatedBackendDevice = cDevice;
-        callbackInfo.callback(WGPURequestDeviceStatus_Success, cDevice, nullptr,
+        callbackInfo.callback(WGPURequestDeviceStatus_Success, cDevice, kEmptyOutputStringView,
                               callbackInfo.userdata1, callbackInfo.userdata2);
 
         // Returning a placeholder future that we should never be waiting on.
@@ -1190,19 +1191,20 @@ wgpu::Device DawnTestBase::CreateDevice(std::string isolationKey) {
         .Times(AtMost(1));
 
     apiDevice.SetLoggingCallback(
-        [](WGPULoggingType type, char const* message, void*) {
+        [](WGPULoggingType type, WGPUStringView message, void*) {
+            std::string_view view = {message.data, message.length};
             switch (type) {
                 case WGPULoggingType_Verbose:
-                    DebugLog() << message;
+                    DebugLog() << view;
                     break;
                 case WGPULoggingType_Warning:
-                    WarningLog() << message;
+                    WarningLog() << view;
                     break;
                 case WGPULoggingType_Error:
-                    ErrorLog() << message;
+                    ErrorLog() << view;
                     break;
                 default:
-                    InfoLog() << message;
+                    InfoLog() << view;
                     break;
             }
         },

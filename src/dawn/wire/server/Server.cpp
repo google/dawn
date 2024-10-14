@@ -174,7 +174,7 @@ void Server::SetForwardingDeviceCallbacks(Known<WGPUDevice> device) {
     // Set callback to post warning and other information to client.
     mProcs.deviceSetLoggingCallback(
         device->handle,
-        [](WGPULoggingType type, const char* message, void* userdata) {
+        [](WGPULoggingType type, WGPUStringView message, void* userdata) {
             DeviceInfo* info = static_cast<DeviceInfo*>(userdata);
             info->server->OnLogging(info->self, type, message);
         },

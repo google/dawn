@@ -32,6 +32,7 @@
 #include <string>
 #include <utility>
 
+#include "dawn/common/StringViewUtils.h"
 #include "dawn/wire/BufferConsumer_impl.h"
 #include "dawn/wire/WireCmd_autogen.h"
 #include "dawn/wire/client/Client.h"
@@ -226,12 +227,12 @@ class Buffer::MapAsyncEvent2 : public TrackedEvent {
 
     WireResult ReadyHook(FutureID futureID,
                          WGPUMapAsyncStatus status,
-                         const char* message,
+                         WGPUStringView message,
                          uint64_t readDataUpdateInfoLength = 0,
                          const uint8_t* readDataUpdateInfo = nullptr) {
         if (status != WGPUMapAsyncStatus_Success) {
             mStatus = status;
-            mMessage = message;
+            mMessage = ToString(message);
             return WireResult::Success;
         }
 
@@ -248,7 +249,6 @@ class Buffer::MapAsyncEvent2 : public TrackedEvent {
         };
 
         mStatus = status;
-        DAWN_ASSERT(message == nullptr);
         const auto& pending = mBuffer->mPendingMapRequest.value();
         if (!pending.type) {
             return FailRequest("Invalid map call without a specified mapping type.");
@@ -290,8 +290,8 @@ class Buffer::MapAsyncEvent2 : public TrackedEvent {
 
         auto Callback = [this]() {
             if (mCallback) {
-                mCallback(mStatus, mMessage ? mMessage->c_str() : nullptr,
-                          mUserdata1.ExtractAsDangling(), mUserdata2.ExtractAsDangling());
+                mCallback(mStatus, ToOutputStringView(mMessage), mUserdata1.ExtractAsDangling(),
+                          mUserdata2.ExtractAsDangling());
             }
         };
 
@@ -327,7 +327,7 @@ class Buffer::MapAsyncEvent2 : public TrackedEvent {
     raw_ptr<void> mUserdata2;
 
     WGPUMapAsyncStatus mStatus;
-    std::optional<std::string> mMessage;
+    std::string mMessage;
 
     // Strong reference to the buffer so that when we call the callback we can pass the buffer.
     Ref<Buffer> mBuffer;
@@ -476,7 +476,7 @@ void Buffer::SetFutureStatus(WGPUBufferMapAsyncStatus status) {
 
     if (isNewEntryPoint) {
         auto [newStatus, message] =
-            [](WGPUBufferMapAsyncStatus status) -> std::pair<WGPUMapAsyncStatus, const char*> {
+            [](WGPUBufferMapAsyncStatus status) -> std::pair<WGPUMapAsyncStatus, std::string_view> {
             switch (status) {
                 case WGPUBufferMapAsyncStatus_DestroyedBeforeCallback:
                     return {WGPUMapAsyncStatus_Aborted,
@@ -489,8 +489,8 @@ void Buffer::SetFutureStatus(WGPUBufferMapAsyncStatus status) {
             }
         }(status);
 
-        DAWN_CHECK(GetEventManager().SetFutureReady<MapAsyncEvent2>(futureID, newStatus, message) ==
-                   WireResult::Success);
+        DAWN_CHECK(GetEventManager().SetFutureReady<MapAsyncEvent2>(
+                       futureID, newStatus, ToOutputStringView(message)) == WireResult::Success);
     } else {
         DAWN_CHECK(GetEventManager().SetFutureReady<MapAsyncEvent>(futureID, status) ==
                    WireResult::Success);
@@ -569,7 +569,7 @@ WGPUFuture Buffer::MapAsync2(WGPUMapMode mode,
     if (mPendingMapRequest) {
         [[maybe_unused]] auto id = GetEventManager().SetFutureReady<MapAsyncEvent2>(
             futureIDInternal, WGPUMapAsyncStatus_Error,
-            "Buffer already has an outstanding map pending.");
+            ToOutputStringView("Buffer already has an outstanding map pending."));
         return {futureIDInternal};
     }
 
@@ -606,7 +606,7 @@ WireResult Client::DoBufferMapAsyncCallback(ObjectHandle eventManager,
                                             WGPUFuture future,
                                             WGPUBufferMapAsyncStatus status,
                                             WGPUMapAsyncStatus status2,
-                                            const char* message,
+                                            WGPUStringView message,
                                             uint8_t userdataCount,
                                             uint64_t readDataUpdateInfoLength,
                                             const uint8_t* readDataUpdateInfo) {

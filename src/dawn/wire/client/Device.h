@@ -60,9 +60,9 @@ class Device final : public RefCountedWithExternalCount<ObjectWithEventsBase> {
     bool IsAlive() const;
     WGPUFuture GetDeviceLostFuture();
 
-    void HandleError(WGPUErrorType errorType, const char* message);
-    void HandleLogging(WGPULoggingType loggingType, const char* message);
-    void HandleDeviceLost(WGPUDeviceLostReason reason, const char* message);
+    void HandleError(WGPUErrorType errorType, WGPUStringView message);
+    void HandleLogging(WGPULoggingType loggingType, WGPUStringView message);
+    void HandleDeviceLost(WGPUDeviceLostReason reason, WGPUStringView message);
     class DeviceLostEvent;
 
     // WebGPU API

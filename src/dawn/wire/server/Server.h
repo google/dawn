@@ -242,42 +242,42 @@ class Server : public ServerBase {
     void ClearDeviceCallbacks(WGPUDevice device);
 
     // Error callbacks
-    void OnUncapturedError(ObjectHandle device, WGPUErrorType type, const char* message);
-    void OnLogging(ObjectHandle device, WGPULoggingType type, const char* message);
+    void OnUncapturedError(ObjectHandle device, WGPUErrorType type, WGPUStringView message);
+    void OnLogging(ObjectHandle device, WGPULoggingType type, WGPUStringView message);
 
     // Async event callbacks
     void OnDeviceLost(DeviceLostUserdata* userdata,
                       WGPUDevice const* device,
                       WGPUDeviceLostReason reason,
-                      const char* message);
+                      WGPUStringView message);
     void OnDevicePopErrorScope(ErrorScopeUserdata* userdata,
                                WGPUPopErrorScopeStatus status,
                                WGPUErrorType type,
-                               const char* message);
+                               WGPUStringView message);
     void OnBufferMapAsyncCallback(MapUserdata* userdata, WGPUBufferMapAsyncStatus status);
     void OnBufferMapAsyncCallback2(MapUserdata* userdata,
                                    WGPUMapAsyncStatus status,
-                                   const char* message);
+                                   WGPUStringView message);
     void OnQueueWorkDone(QueueWorkDoneUserdata* userdata, WGPUQueueWorkDoneStatus status);
     void OnCreateComputePipelineAsyncCallback(CreatePipelineAsyncUserData* userdata,
                                               WGPUCreatePipelineAsyncStatus status,
                                               WGPUComputePipeline pipeline,
-                                              const char* message);
+                                              WGPUStringView message);
     void OnCreateRenderPipelineAsyncCallback(CreatePipelineAsyncUserData* userdata,
                                              WGPUCreatePipelineAsyncStatus status,
                                              WGPURenderPipeline pipeline,
-                                             const char* message);
+                                             WGPUStringView message);
     void OnShaderModuleGetCompilationInfo(ShaderModuleGetCompilationInfoUserdata* userdata,
                                           WGPUCompilationInfoRequestStatus status,
                                           const WGPUCompilationInfo* info);
     void OnRequestAdapterCallback(RequestAdapterUserdata* userdata,
                                   WGPURequestAdapterStatus status,
                                   WGPUAdapter adapter,
-                                  const char* message);
+                                  WGPUStringView message);
     void OnRequestDeviceCallback(RequestDeviceUserdata* userdata,
                                  WGPURequestDeviceStatus status,
                                  WGPUDevice device,
-                                 const char* message);
+                                 WGPUStringView message);
 
 #include "dawn/wire/server/ServerPrototypes_autogen.inc"
 

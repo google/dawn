@@ -27,6 +27,7 @@
 
 #include <array>
 
+#include "dawn/common/StringViewUtils.h"
 #include "dawn/tests/MockCallback.h"
 #include "dawn/tests/unittests/wire/WireTest.h"
 #include "dawn/wire/WireClient.h"
@@ -62,7 +63,7 @@ TEST_F(WireInjectInstanceTests, CallAfterReserveInject) {
 
     EXPECT_CALL(api, OnInstanceRequestAdapter2(apiInstance, _, _)).WillOnce([&]() {
         api.CallInstanceRequestAdapter2Callback(apiInstance, WGPURequestAdapterStatus_Error,
-                                                nullptr, "Some error message.");
+                                                nullptr, ToOutputStringView("Some error message."));
     });
     FlushClient();
 

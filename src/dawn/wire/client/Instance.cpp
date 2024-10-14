@@ -32,6 +32,7 @@
 #include <utility>
 
 #include "dawn/common/Log.h"
+#include "dawn/common/StringViewUtils.h"
 #include "dawn/common/WGSLFeatureMapping.h"
 #include "dawn/wire/client/ApiObjects_autogen.h"
 #include "dawn/wire/client/Client.h"
@@ -65,16 +66,14 @@ class RequestAdapterEvent : public TrackedEvent {
 
     WireResult ReadyHook(FutureID futureID,
                          WGPURequestAdapterStatus status,
-                         const char* message,
+                         WGPUStringView message,
                          const WGPUAdapterInfo* info,
                          const WGPUSupportedLimits* limits,
                          uint32_t featuresCount,
                          const WGPUFeatureName* features) {
         DAWN_ASSERT(mAdapter != nullptr);
         mStatus = status;
-        if (message != nullptr) {
-            mMessage = message;
-        }
+        mMessage = ToString(message);
         if (status == WGPURequestAdapterStatus_Success) {
             mAdapter->SetInfo(info);
             mAdapter->SetLimits(limits);
@@ -101,13 +100,13 @@ class RequestAdapterEvent : public TrackedEvent {
             mCallback(mStatus,
                       mStatus == WGPURequestAdapterStatus_Success ? ReturnToAPI(std::move(mAdapter))
                                                                   : nullptr,
-                      mMessage ? mMessage->c_str() : nullptr, mUserdata1.ExtractAsDangling());
+                      ToOutputStringView(mMessage), mUserdata1.ExtractAsDangling());
         } else {
             mCallback2(mStatus,
                        mStatus == WGPURequestAdapterStatus_Success
                            ? ReturnToAPI(std::move(mAdapter))
                            : nullptr,
-                       mMessage ? mMessage->c_str() : nullptr, mUserdata1.ExtractAsDangling(),
+                       ToOutputStringView(mMessage), mUserdata1.ExtractAsDangling(),
                        mUserdata2.ExtractAsDangling());
         }
     }
@@ -120,7 +119,7 @@ class RequestAdapterEvent : public TrackedEvent {
     // Note that the message is optional because we want to return nullptr when it wasn't set
     // instead of a pointer to an empty string.
     WGPURequestAdapterStatus mStatus;
-    std::optional<std::string> mMessage;
+    std::string mMessage;
 
     // The adapter is created when we call RequestAdapter(F). It is guaranteed to be alive
     // throughout the duration of a RequestAdapterEvent because the Event essentially takes
@@ -254,7 +253,7 @@ WGPUFuture Instance::RequestAdapter2(const WGPURequestAdapterOptions* options,
 WireResult Client::DoInstanceRequestAdapterCallback(ObjectHandle eventManager,
                                                     WGPUFuture future,
                                                     WGPURequestAdapterStatus status,
-                                                    const char* message,
+                                                    WGPUStringView message,
                                                     const WGPUAdapterInfo* info,
                                                     const WGPUSupportedLimits* limits,
                                                     uint32_t featuresCount,

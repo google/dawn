@@ -39,6 +39,7 @@ namespace {
 using testing::IsNull;
 using testing::MockCppCallback;
 using testing::NotNull;
+using testing::StrEq;
 using testing::WithArgs;
 
 class RequestDeviceValidationTest : public ValidationTest {
@@ -57,7 +58,7 @@ TEST_F(RequestDeviceValidationTest, NoRequiredLimits) {
     wgpu::DeviceDescriptor descriptor;
 
     EXPECT_CALL(mRequestDeviceCallback,
-                Call(wgpu::RequestDeviceStatus::Success, NotNull(), IsNull()))
+                Call(wgpu::RequestDeviceStatus::Success, NotNull(), StrEq("")))
         .WillOnce(WithArgs<1>([](wgpu::Device device) {
             // Check one of the default limits.
             wgpu::SupportedLimits limits;
@@ -75,7 +76,7 @@ TEST_F(RequestDeviceValidationTest, DefaultLimits) {
     descriptor.requiredLimits = &limits;
 
     EXPECT_CALL(mRequestDeviceCallback,
-                Call(wgpu::RequestDeviceStatus::Success, NotNull(), IsNull()))
+                Call(wgpu::RequestDeviceStatus::Success, NotNull(), StrEq("")))
         .WillOnce(WithArgs<1>([](wgpu::Device device) {
             // Check one of the default limits.
             wgpu::SupportedLimits limits;
@@ -99,7 +100,7 @@ TEST_F(RequestDeviceValidationTest, HigherIsBetter) {
     if (supportedLimits.limits.maxBindGroups > 4u) {
         limits.limits.maxBindGroups = supportedLimits.limits.maxBindGroups - 1;
         EXPECT_CALL(mRequestDeviceCallback,
-                    Call(wgpu::RequestDeviceStatus::Success, NotNull(), IsNull()))
+                    Call(wgpu::RequestDeviceStatus::Success, NotNull(), StrEq("")))
             .WillOnce(WithArgs<1>([&](wgpu::Device device) {
                 wgpu::SupportedLimits limits;
                 device.GetLimits(&limits);
@@ -116,7 +117,7 @@ TEST_F(RequestDeviceValidationTest, HigherIsBetter) {
     // Test the max.
     limits.limits.maxBindGroups = supportedLimits.limits.maxBindGroups;
     EXPECT_CALL(mRequestDeviceCallback,
-                Call(wgpu::RequestDeviceStatus::Success, NotNull(), IsNull()))
+                Call(wgpu::RequestDeviceStatus::Success, NotNull(), StrEq("")))
         .WillOnce(WithArgs<1>([&](wgpu::Device device) {
             wgpu::SupportedLimits limits;
             device.GetLimits(&limits);
@@ -139,7 +140,7 @@ TEST_F(RequestDeviceValidationTest, HigherIsBetter) {
     // Test worse than the default
     limits.limits.maxBindGroups = 3u;
     EXPECT_CALL(mRequestDeviceCallback,
-                Call(wgpu::RequestDeviceStatus::Success, NotNull(), IsNull()))
+                Call(wgpu::RequestDeviceStatus::Success, NotNull(), StrEq("")))
         .WillOnce(WithArgs<1>([&](wgpu::Device device) {
             wgpu::SupportedLimits limits;
             device.GetLimits(&limits);
@@ -172,7 +173,7 @@ TEST_F(RequestDeviceValidationTest, LowerIsBetter) {
     limits.limits.minUniformBufferOffsetAlignment =
         supportedLimits.limits.minUniformBufferOffsetAlignment;
     EXPECT_CALL(mRequestDeviceCallback,
-                Call(wgpu::RequestDeviceStatus::Success, NotNull(), IsNull()))
+                Call(wgpu::RequestDeviceStatus::Success, NotNull(), StrEq("")))
         .WillOnce(WithArgs<1>([&](wgpu::Device device) {
             wgpu::SupportedLimits limits;
             device.GetLimits(&limits);
@@ -191,7 +192,7 @@ TEST_F(RequestDeviceValidationTest, LowerIsBetter) {
         limits.limits.minUniformBufferOffsetAlignment =
             supportedLimits.limits.minUniformBufferOffsetAlignment * 2;
         EXPECT_CALL(mRequestDeviceCallback,
-                    Call(wgpu::RequestDeviceStatus::Success, NotNull(), IsNull()))
+                    Call(wgpu::RequestDeviceStatus::Success, NotNull(), StrEq("")))
             .WillOnce(WithArgs<1>([&](wgpu::Device device) {
                 wgpu::SupportedLimits limits;
                 device.GetLimits(&limits);
@@ -209,7 +210,7 @@ TEST_F(RequestDeviceValidationTest, LowerIsBetter) {
     // Test worse than the default
     limits.limits.minUniformBufferOffsetAlignment = 2u * 256u;
     EXPECT_CALL(mRequestDeviceCallback,
-                Call(wgpu::RequestDeviceStatus::Success, NotNull(), IsNull()))
+                Call(wgpu::RequestDeviceStatus::Success, NotNull(), StrEq("")))
         .WillOnce(WithArgs<1>([&](wgpu::Device device) {
             wgpu::SupportedLimits limits;
             device.GetLimits(&limits);
@@ -266,7 +267,7 @@ TEST_F(RequestDeviceValidationTest, SubgroupsF16FeatureDependency) {
 
                 if (isSuccess) {
                     EXPECT_CALL(mRequestDeviceCallback,
-                                Call(wgpu::RequestDeviceStatus::Success, NotNull(), IsNull()))
+                                Call(wgpu::RequestDeviceStatus::Success, NotNull(), StrEq("")))
                         .Times(1);
                 } else {
                     EXPECT_CALL(mRequestDeviceCallback,

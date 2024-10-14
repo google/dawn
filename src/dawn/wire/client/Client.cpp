@@ -28,6 +28,7 @@
 #include "dawn/wire/client/Client.h"
 
 #include "dawn/common/Compiler.h"
+#include "dawn/common/StringViewUtils.h"
 #include "dawn/wire/client/Device.h"
 
 namespace dawn::wire::client {
@@ -161,8 +162,8 @@ void Client::Disconnect() {
         auto& deviceList = mObjects[ObjectType::Device];
         for (auto object : deviceList.GetAllObjects()) {
             if (object != nullptr) {
-                static_cast<Device*>(object)->HandleDeviceLost(WGPUDeviceLostReason_Unknown,
-                                                               "GPU connection lost");
+                static_cast<Device*>(object)->HandleDeviceLost(
+                    WGPUDeviceLostReason_Unknown, ToOutputStringView("GPU connection lost"));
             }
         }
     }

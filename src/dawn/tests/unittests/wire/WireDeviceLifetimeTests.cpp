@@ -54,7 +54,8 @@ class WireDeviceLifetimeTests : public testing::Test {
 
         instance.RequestAdapter(
             &options,
-            [](WGPURequestAdapterStatus status, WGPUAdapter cAdapter, const char*, void* userdata) {
+            [](WGPURequestAdapterStatus status, WGPUAdapter cAdapter, WGPUStringView,
+               void* userdata) {
                 ASSERT_EQ(status, WGPURequestAdapterStatus_Success);
                 *static_cast<wgpu::Adapter*>(userdata) = wgpu::Adapter::Acquire(cAdapter);
             },
@@ -81,7 +82,7 @@ class WireDeviceLifetimeTests : public testing::Test {
             using WrappedUserdata = std::pair<WGPURequestDeviceCallback, void*>;
             native::GetProcs().adapterRequestDevice(
                 self, desc,
-                [](WGPURequestDeviceStatus status, WGPUDevice device, char const* message,
+                [](WGPURequestDeviceStatus status, WGPUDevice device, WGPUStringView message,
                    void* userdata) {
                     lastBackendDevice = device;
                     auto* wrappedUserdata = static_cast<WrappedUserdata*>(userdata);
@@ -102,7 +103,7 @@ TEST_F(WireDeviceLifetimeTests, DeviceDroppedFromWireThenUncapturedErrorCallback
     wgpu::DeviceDescriptor deviceDesc = {};
     adapter.RequestDevice(
         &deviceDesc,
-        [](WGPURequestDeviceStatus, WGPUDevice cDevice, const char*, void* userdata) {
+        [](WGPURequestDeviceStatus, WGPUDevice cDevice, WGPUStringView, void* userdata) {
             *static_cast<wgpu::Device*>(userdata) = wgpu::Device::Acquire(cDevice);
         },
         &device);
@@ -125,7 +126,7 @@ TEST_F(WireDeviceLifetimeTests, DeviceDroppedFromWireThenUncapturedErrorCallback
     // Request a new device. This overrides the wire's device-related data.
     adapter.RequestDevice(
         &deviceDesc,
-        [](WGPURequestDeviceStatus, WGPUDevice cDevice, const char*, void* userdata) {
+        [](WGPURequestDeviceStatus, WGPUDevice cDevice, WGPUStringView, void* userdata) {
             *static_cast<wgpu::Device*>(userdata) = wgpu::Device::Acquire(cDevice);
         },
         &device);
@@ -145,7 +146,7 @@ TEST_F(WireDeviceLifetimeTests, DeviceDroppedFromWireThenLoggingCallback) {
     wgpu::DeviceDescriptor deviceDesc = {};
     adapter.RequestDevice(
         &deviceDesc,
-        [](WGPURequestDeviceStatus, WGPUDevice cDevice, const char*, void* userdata) {
+        [](WGPURequestDeviceStatus, WGPUDevice cDevice, WGPUStringView, void* userdata) {
             *static_cast<wgpu::Device*>(userdata) = wgpu::Device::Acquire(cDevice);
         },
         &device);
@@ -173,7 +174,7 @@ TEST_F(WireDeviceLifetimeTests, DeviceDroppedFromWireThenLoggingCallback) {
     // Request a new device. This overrides the wire's device-related data.
     adapter.RequestDevice(
         &deviceDesc,
-        [](WGPURequestDeviceStatus, WGPUDevice cDevice, const char*, void* userdata) {
+        [](WGPURequestDeviceStatus, WGPUDevice cDevice, WGPUStringView, void* userdata) {
             *static_cast<wgpu::Device*>(userdata) = wgpu::Device::Acquire(cDevice);
         },
         &device);
@@ -193,7 +194,7 @@ TEST_F(WireDeviceLifetimeTests, DeviceDroppedFromWireThenLostCallback) {
     wgpu::DeviceDescriptor deviceDesc = {};
     adapter.RequestDevice(
         &deviceDesc,
-        [](WGPURequestDeviceStatus, WGPUDevice cDevice, const char*, void* userdata) {
+        [](WGPURequestDeviceStatus, WGPUDevice cDevice, WGPUStringView, void* userdata) {
             *static_cast<wgpu::Device*>(userdata) = wgpu::Device::Acquire(cDevice);
         },
         &device);
@@ -213,7 +214,7 @@ TEST_F(WireDeviceLifetimeTests, DeviceDroppedFromWireThenLostCallback) {
     // Request a new device. This overrides the wire's device-related data.
     adapter.RequestDevice(
         &deviceDesc,
-        [](WGPURequestDeviceStatus, WGPUDevice cDevice, const char*, void* userdata) {
+        [](WGPURequestDeviceStatus, WGPUDevice cDevice, WGPUStringView, void* userdata) {
             *static_cast<wgpu::Device*>(userdata) = wgpu::Device::Acquire(cDevice);
         },
         &device);

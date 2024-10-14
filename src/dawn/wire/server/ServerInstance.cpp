@@ -28,6 +28,7 @@
 #include <algorithm>
 #include <vector>
 
+#include "dawn/common/StringViewUtils.h"
 #include "dawn/wire/SupportedFeatures.h"
 #include "dawn/wire/server/ObjectStorage.h"
 #include "dawn/wire/server/Server.h"
@@ -64,7 +65,7 @@ WireResult Server::DoInstanceRequestAdapter(Known<WGPUInstance> instance,
 void Server::OnRequestAdapterCallback(RequestAdapterUserdata* data,
                                       WGPURequestAdapterStatus status,
                                       WGPUAdapter adapter,
-                                      const char* message) {
+                                      WGPUStringView message) {
     ReturnInstanceRequestAdapterCallbackCmd cmd = {};
     cmd.eventManager = data->eventManager;
     cmd.future = data->future;
@@ -80,7 +81,7 @@ void Server::OnRequestAdapterCallback(RequestAdapterUserdata* data,
     // Assign the handle and allocated status if the adapter is created successfully.
     if (FillReservation(data->adapterObjectId, adapter) == WireResult::FatalError) {
         cmd.status = WGPURequestAdapterStatus_Unknown;
-        cmd.message = "Destroyed before request was fulfilled.";
+        cmd.message = ToOutputStringView("Destroyed before request was fulfilled.");
         SerializeCommand(cmd);
         return;
     }

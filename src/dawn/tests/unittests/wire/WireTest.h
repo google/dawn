@@ -37,6 +37,8 @@
 
 #include "webgpu/webgpu_cpp.h"
 
+namespace dawn {
+
 // Definition of a "Lambda predicate matcher" for GMock to allow checking deep structures
 // are passed correctly by the wire.
 
@@ -119,7 +121,7 @@ inline testing::Matcher<const char*> ValidStringMessage() {
         }                                                       \
     } while (0)
 
-namespace dawn::wire {
+namespace wire {
 class WireClient;
 class WireServer;
 namespace client {
@@ -128,11 +130,11 @@ class MemoryTransferService;
 namespace server {
 class MemoryTransferService;
 }  // namespace server
-}  // namespace dawn::wire
+}  // namespace wire
 
-namespace dawn::utils {
+namespace utils {
 class TerribleCommandBuffer;
-}
+}  // namespace utils
 
 class WireTest : public testing::Test {
   protected:
@@ -182,5 +184,7 @@ class WireTest : public testing::Test {
     std::unique_ptr<dawn::utils::TerribleCommandBuffer> mS2cBuf;
     std::unique_ptr<dawn::utils::TerribleCommandBuffer> mC2sBuf;
 };
+
+}  // namespace dawn
 
 #endif  // SRC_DAWN_TESTS_UNITTESTS_WIRE_WIRETEST_H_

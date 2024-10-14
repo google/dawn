@@ -152,7 +152,7 @@ class ProcTableAsClass {
                                                    void* userdata) = 0;
         void CallDeviceSetDeviceLostCallbackCallback(WGPUDevice device,
                                                      WGPUDeviceLostReason reason,
-                                                     char const* message);
+                                                     WGPUStringView message);
         void DeviceSetUncapturedErrorCallback(WGPUDevice device,
                                               WGPUErrorCallback callback,
                                               void* userdata);
@@ -161,7 +161,7 @@ class ProcTableAsClass {
                                                         void* userdata) = 0;
         void CallDeviceSetUncapturedErrorCallbackCallback(WGPUDevice device,
                                                           WGPUErrorType type,
-                                                          char const* message);
+                                                          WGPUStringView message);
 
         struct Object {
             ProcTableAsClass* procs = nullptr;

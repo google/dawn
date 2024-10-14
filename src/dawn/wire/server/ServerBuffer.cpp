@@ -29,6 +29,7 @@
 #include <memory>
 
 #include "dawn/common/Assert.h"
+#include "dawn/common/StringViewUtils.h"
 #include "dawn/wire/BufferConsumer_impl.h"
 #include "dawn/wire/WireCmd_autogen.h"
 #include "dawn/wire/WireResult.h"
@@ -239,7 +240,7 @@ void Server::OnBufferMapAsyncCallback(MapUserdata* data, WGPUBufferMapAsyncStatu
     cmd.eventManager = data->eventManager;
     cmd.future = data->future;
     cmd.status = status;
-    cmd.message = nullptr;
+    cmd.message = kEmptyOutputStringView;
     cmd.readDataUpdateInfoLength = 0;
     cmd.readDataUpdateInfo = nullptr;
     cmd.userdataCount = 1;
@@ -282,7 +283,7 @@ void Server::OnBufferMapAsyncCallback(MapUserdata* data, WGPUBufferMapAsyncStatu
 
 void Server::OnBufferMapAsyncCallback2(MapUserdata* data,
                                        WGPUMapAsyncStatus status,
-                                       const char* message) {
+                                       WGPUStringView message) {
     // Skip sending the callback if the buffer has already been destroyed.
     Known<WGPUBuffer> buffer;
     if (Objects<WGPUBuffer>().Get(data->buffer.id, &buffer) != WireResult::Success ||

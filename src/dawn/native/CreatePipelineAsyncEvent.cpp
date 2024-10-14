@@ -33,6 +33,7 @@
 
 #include "dawn/common/FutureUtils.h"
 #include "dawn/common/Ref.h"
+#include "dawn/common/StringViewUtils.h"
 #include "dawn/native/AsyncTask.h"
 #include "dawn/native/ComputePipeline.h"
 #include "dawn/native/Device.h"
@@ -186,8 +187,8 @@ void CreatePipelineAsyncEvent<PipelineType, CreatePipelineAsyncCallbackInfo>::Co
 
     if (completionType == EventCompletionType::Shutdown) {
         if (mCallback) {
-            mCallback(WGPUCreatePipelineAsyncStatus_InstanceDropped, nullptr, "Instance dropped",
-                      userdata1, userdata2);
+            mCallback(WGPUCreatePipelineAsyncStatus_InstanceDropped, nullptr,
+                      ToOutputStringView("Instance dropped"), userdata1, userdata2);
         }
         return;
     }
@@ -202,7 +203,8 @@ void CreatePipelineAsyncEvent<PipelineType, CreatePipelineAsyncCallbackInfo>::Co
         }
         if (mCallback) {
             mCallback(WGPUCreatePipelineAsyncStatus_Success,
-                      ToAPI(ReturnToAPI(std::move(mPipeline))), "", userdata1, userdata2);
+                      ToAPI(ReturnToAPI(std::move(mPipeline))), kEmptyOutputStringView, userdata1,
+                      userdata2);
         }
         return;
     }
@@ -218,7 +220,8 @@ void CreatePipelineAsyncEvent<PipelineType, CreatePipelineAsyncCallbackInfo>::Co
                 break;
         }
         if (mCallback) {
-            mCallback(status, nullptr, mError->GetFormattedMessage().c_str(), userdata1, userdata2);
+            mCallback(status, nullptr, ToOutputStringView(mError->GetFormattedMessage()), userdata1,
+                      userdata2);
         }
         return;
     }
@@ -226,7 +229,7 @@ void CreatePipelineAsyncEvent<PipelineType, CreatePipelineAsyncCallbackInfo>::Co
     AddOrGetCachedPipeline();
     if (mCallback) {
         mCallback(WGPUCreatePipelineAsyncStatus_Success, ToAPI(ReturnToAPI(std::move(mPipeline))),
-                  "", userdata1, userdata2);
+                  kEmptyOutputStringView, userdata1, userdata2);
     }
 }
 

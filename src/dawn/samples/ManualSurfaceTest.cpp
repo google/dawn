@@ -440,9 +440,16 @@ int main(int argc, const char* argv[]) {
     std::cout << "Using adapter \"" << adapterInfo.device << "\" on " << adapterInfo.backendType
               << ".\n";
 
+    wgpu::DeviceDescriptor deviceDesc;
+    deviceDesc.SetUncapturedErrorCallback(
+        [](const wgpu::Device&, wgpu::ErrorType errorType, const char* message) {
+            dawn::ErrorLog() << errorType << " error: " << message;
+            DAWN_ASSERT(false);
+        });
+
     // Setup the device on that adapter.
     wgpu::Future deviceFuture = adapter.RequestDevice(
-        nullptr, wgpu::CallbackMode::WaitAnyOnly,
+        &deviceDesc, wgpu::CallbackMode::WaitAnyOnly,
         [&](wgpu::RequestDeviceStatus status, wgpu::Device deviceIn, const char* message) {
             if (status != wgpu::RequestDeviceStatus::Success) {
                 dawn::ErrorLog() << "Failed to get a device:" << message;
@@ -456,30 +463,6 @@ int main(int argc, const char* argv[]) {
         return 1;
     }
 
-    device.SetUncapturedErrorCallback(
-        [](WGPUErrorType errorType, const char* message, void*) {
-            const char* errorTypeName = "";
-            switch (errorType) {
-                case WGPUErrorType_Validation:
-                    errorTypeName = "Validation";
-                    break;
-                case WGPUErrorType_OutOfMemory:
-                    errorTypeName = "Out of memory";
-                    break;
-                case WGPUErrorType_Unknown:
-                    errorTypeName = "Unknown";
-                    break;
-                case WGPUErrorType_DeviceLost:
-                    errorTypeName = "Device lost";
-                    break;
-                default:
-                    DAWN_UNREACHABLE();
-                    return;
-            }
-            dawn::ErrorLog() << errorTypeName << " error: " << message;
-            DAWN_ASSERT(false);
-        },
-        nullptr);
     queue = device.GetQueue();
 
     // Create the first window, since the example exits when there are no windows.

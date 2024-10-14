@@ -33,6 +33,7 @@
 
 #include "dawn/native/ChainUtils.h"
 #include "dawn/tests/MockCallback.h"
+#include "dawn/tests/StringViewMatchers.h"
 #include "mocks/BufferMock.h"
 #include "mocks/ComputePipelineMock.h"
 #include "mocks/DawnMockTest.h"
@@ -53,13 +54,14 @@ using ::testing::MockCallback;
 using ::testing::MockCppCallback;
 using ::testing::NiceMock;
 using ::testing::Return;
+using ::testing::SizedStringMatches;
 using ::testing::StrictMock;
 using ::testing::Test;
 
-using MockComputePipelineAsyncCallback =
-    MockCppCallback<void (*)(wgpu::CreatePipelineAsyncStatus, wgpu::ComputePipeline, const char*)>;
-using MockRenderPipelineAsyncCallback =
-    MockCppCallback<void (*)(wgpu::CreatePipelineAsyncStatus, wgpu::RenderPipeline, const char*)>;
+using MockComputePipelineAsyncCallback = MockCppCallback<
+    void (*)(wgpu::CreatePipelineAsyncStatus, wgpu::ComputePipeline, wgpu::StringView)>;
+using MockRenderPipelineAsyncCallback = MockCppCallback<
+    void (*)(wgpu::CreatePipelineAsyncStatus, wgpu::RenderPipeline, wgpu::StringView)>;
 
 static constexpr char kOomErrorMessage[] = "Out of memory error";
 static constexpr char kInternalErrorMessage[] = "Internal error";
@@ -100,8 +102,8 @@ TEST_F(AllowedErrorTests, QueueSubmit) {
         .WillOnce(Return(ByMove(DAWN_OUT_OF_MEMORY_ERROR(kOomErrorMessage))));
 
     // Expect the device lost because of the error.
-    EXPECT_CALL(mDeviceLostCb,
-                Call(WGPUDeviceLostReason_Unknown, HasSubstr(kOomErrorMessage), this))
+    EXPECT_CALL(mDeviceLostCb, Call(WGPUDeviceLostReason_Unknown,
+                                    SizedStringMatches(HasSubstr(kOomErrorMessage)), this))
         .Times(1);
 
     device.GetQueue().Submit(0, nullptr);
@@ -118,8 +120,8 @@ TEST_F(AllowedErrorTests, QueueWriteBuffer) {
         .WillOnce(Return(ByMove(DAWN_OUT_OF_MEMORY_ERROR(kOomErrorMessage))));
 
     // Expect the device lost because of the error.
-    EXPECT_CALL(mDeviceLostCb,
-                Call(WGPUDeviceLostReason_Unknown, HasSubstr(kOomErrorMessage), this))
+    EXPECT_CALL(mDeviceLostCb, Call(WGPUDeviceLostReason_Unknown,
+                                    SizedStringMatches(HasSubstr(kOomErrorMessage)), this))
         .Times(1);
 
     constexpr uint8_t data = 8;
@@ -139,8 +141,8 @@ TEST_F(AllowedErrorTests, QueueWriteTexture) {
         .WillOnce(Return(ByMove(DAWN_OUT_OF_MEMORY_ERROR(kOomErrorMessage))));
 
     // Expect the device lost because of the error.
-    EXPECT_CALL(mDeviceLostCb,
-                Call(WGPUDeviceLostReason_Unknown, HasSubstr(kOomErrorMessage), this))
+    EXPECT_CALL(mDeviceLostCb, Call(WGPUDeviceLostReason_Unknown,
+                                    SizedStringMatches(HasSubstr(kOomErrorMessage)), this))
         .Times(1);
 
     constexpr uint8_t data[] = {1, 2, 4, 8};
@@ -172,8 +174,8 @@ TEST_F(AllowedErrorTests, QueueCopyTextureForBrowserOomBuffer) {
         .WillOnce(Return(ByMove(DAWN_OUT_OF_MEMORY_ERROR(kOomErrorMessage))));
 
     // Expect the device lost because of the error.
-    EXPECT_CALL(mDeviceLostCb,
-                Call(WGPUDeviceLostReason_Unknown, HasSubstr(kOomErrorMessage), this))
+    EXPECT_CALL(mDeviceLostCb, Call(WGPUDeviceLostReason_Unknown,
+                                    SizedStringMatches(HasSubstr(kOomErrorMessage)), this))
         .Times(1);
     device.GetQueue().CopyTextureForBrowser(&src, &dst, &size, &options);
 }
@@ -213,8 +215,8 @@ TEST_F(AllowedErrorTests, QueueCopyExternalTextureForBrowserOomBuffer) {
         .WillOnce(Return(ByMove(DAWN_OUT_OF_MEMORY_ERROR(kOomErrorMessage))));
 
     // Expect the device lost because of the error.
-    EXPECT_CALL(mDeviceLostCb,
-                Call(WGPUDeviceLostReason_Unknown, HasSubstr(kOomErrorMessage), this))
+    EXPECT_CALL(mDeviceLostCb, Call(WGPUDeviceLostReason_Unknown,
+                                    SizedStringMatches(HasSubstr(kOomErrorMessage)), this))
         .Times(1);
     device.GetQueue().CopyExternalTextureForBrowser(&src, &dst, &size, &options);
 }
@@ -233,8 +235,8 @@ TEST_F(AllowedErrorTests, CreateComputePipeline) {
         .WillOnce(Return(ByMove(std::move(computePipelineMock))));
 
     // Expect the device lost because of the error.
-    EXPECT_CALL(mDeviceLostCb,
-                Call(WGPUDeviceLostReason_Unknown, HasSubstr(kOomErrorMessage), this))
+    EXPECT_CALL(mDeviceLostCb, Call(WGPUDeviceLostReason_Unknown,
+                                    SizedStringMatches(HasSubstr(kOomErrorMessage)), this))
         .Times(1);
     device.CreateComputePipeline(ToCppAPI(&desc));
 }
@@ -259,8 +261,8 @@ TEST_F(AllowedErrorTests, CreateRenderPipeline) {
         .WillOnce(Return(ByMove(std::move(renderPipelineMock))));
 
     // Expect the device lost because of the error.
-    EXPECT_CALL(mDeviceLostCb,
-                Call(WGPUDeviceLostReason_Unknown, HasSubstr(kOomErrorMessage), this))
+    EXPECT_CALL(mDeviceLostCb, Call(WGPUDeviceLostReason_Unknown,
+                                    SizedStringMatches(HasSubstr(kOomErrorMessage)), this))
         .Times(1);
     device.CreateRenderPipeline(ToCppAPI(&desc));
 }
@@ -280,8 +282,8 @@ TEST_F(AllowedErrorTests, CreateComputePipelineInternalError) {
         .WillOnce(Return(ByMove(std::move(computePipelineMock))));
 
     // Expect the internal error.
-    EXPECT_CALL(mDeviceErrorCb,
-                Call(WGPUErrorType_Internal, HasSubstr(kInternalErrorMessage), this))
+    EXPECT_CALL(mDeviceErrorCb, Call(WGPUErrorType_Internal,
+                                     SizedStringMatches(HasSubstr(kInternalErrorMessage)), this))
         .Times(1);
     device.CreateComputePipeline(ToCppAPI(&desc));
 
@@ -310,8 +312,8 @@ TEST_F(AllowedErrorTests, CreateRenderPipelineInternalError) {
         .WillOnce(Return(ByMove(std::move(renderPipelineMock))));
 
     // Expect the internal error.
-    EXPECT_CALL(mDeviceErrorCb,
-                Call(WGPUErrorType_Internal, HasSubstr(kInternalErrorMessage), this))
+    EXPECT_CALL(mDeviceErrorCb, Call(WGPUErrorType_Internal,
+                                     SizedStringMatches(HasSubstr(kInternalErrorMessage)), this))
         .Times(1);
     device.CreateRenderPipeline(ToCppAPI(&desc));
 
@@ -337,8 +339,8 @@ TEST_F(AllowedErrorTests, CreateComputePipelineAsync) {
         .WillOnce(Return(ByMove(std::move(computePipelineMock))));
 
     MockComputePipelineAsyncCallback cb;
-    EXPECT_CALL(
-        cb, Call(wgpu::CreatePipelineAsyncStatus::InternalError, _, HasSubstr(kOomErrorMessage)))
+    EXPECT_CALL(cb, Call(wgpu::CreatePipelineAsyncStatus::InternalError, _,
+                         SizedStringMatches(HasSubstr(kOomErrorMessage))))
         .Times(1);
 
     device.CreateComputePipelineAsync(ToCppAPI(&desc), wgpu::CallbackMode::AllowProcessEvents,
@@ -369,8 +371,8 @@ TEST_F(AllowedErrorTests, CreateRenderPipelineAsync) {
         .WillOnce(Return(ByMove(std::move(renderPipelineMock))));
 
     MockRenderPipelineAsyncCallback cb;
-    EXPECT_CALL(
-        cb, Call(wgpu::CreatePipelineAsyncStatus::InternalError, _, HasSubstr(kOomErrorMessage)))
+    EXPECT_CALL(cb, Call(wgpu::CreatePipelineAsyncStatus::InternalError, _,
+                         SizedStringMatches(HasSubstr(kOomErrorMessage))))
         .Times(1);
 
     device.CreateRenderPipelineAsync(ToCppAPI(&desc), wgpu::CallbackMode::AllowProcessEvents,
@@ -451,7 +453,8 @@ TEST_F(AllowedErrorTests, CreateBuffer) {
         .WillOnce(Return(ByMove(DAWN_OUT_OF_MEMORY_ERROR(kOomErrorMessage))));
 
     // Expect the OOM error.
-    EXPECT_CALL(mDeviceErrorCb, Call(WGPUErrorType_OutOfMemory, HasSubstr(kOomErrorMessage), this))
+    EXPECT_CALL(mDeviceErrorCb, Call(WGPUErrorType_OutOfMemory,
+                                     SizedStringMatches(HasSubstr(kOomErrorMessage)), this))
         .Times(1);
 
     wgpu::BufferDescriptor desc = {};
@@ -469,7 +472,8 @@ TEST_F(AllowedErrorTests, CreateTexture) {
         .WillOnce(Return(ByMove(DAWN_OUT_OF_MEMORY_ERROR(kOomErrorMessage))));
 
     // Expect the OOM error.
-    EXPECT_CALL(mDeviceErrorCb, Call(WGPUErrorType_OutOfMemory, HasSubstr(kOomErrorMessage), this))
+    EXPECT_CALL(mDeviceErrorCb, Call(WGPUErrorType_OutOfMemory,
+                                     SizedStringMatches(HasSubstr(kOomErrorMessage)), this))
         .Times(1);
 
     wgpu::TextureDescriptor desc = {};
@@ -488,7 +492,8 @@ TEST_F(AllowedErrorTests, CreateQuerySet) {
         .WillOnce(Return(ByMove(DAWN_OUT_OF_MEMORY_ERROR(kOomErrorMessage))));
 
     // Expect the OOM error.
-    EXPECT_CALL(mDeviceErrorCb, Call(WGPUErrorType_OutOfMemory, HasSubstr(kOomErrorMessage), this))
+    EXPECT_CALL(mDeviceErrorCb, Call(WGPUErrorType_OutOfMemory,
+                                     SizedStringMatches(HasSubstr(kOomErrorMessage)), this))
         .Times(1);
 
     wgpu::QuerySetDescriptor desc = {};
@@ -502,7 +507,8 @@ TEST_F(AllowedErrorTests, CreateQuerySet) {
 
 TEST_F(AllowedErrorTests, InjectError) {
     // Expect the OOM error.
-    EXPECT_CALL(mDeviceErrorCb, Call(WGPUErrorType_OutOfMemory, HasSubstr(kOomErrorMessage), this))
+    EXPECT_CALL(mDeviceErrorCb, Call(WGPUErrorType_OutOfMemory,
+                                     SizedStringMatches(HasSubstr(kOomErrorMessage)), this))
         .Times(1);
 
     device.InjectError(wgpu::ErrorType::OutOfMemory, kOomErrorMessage);

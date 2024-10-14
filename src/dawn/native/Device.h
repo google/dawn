@@ -364,8 +364,8 @@ class DeviceBase : public ErrorSink, public RefCountedWithExternalCount<RefCount
     size_t GetLazyClearCountForTesting();
     void IncrementLazyClearCountForTesting();
     void EmitWarningOnce(const std::string& message);
-    void EmitLog(const char* message);
-    void EmitLog(WGPULoggingType loggingType, const char* message);
+    void EmitLog(std::string_view message);
+    void EmitLog(WGPULoggingType loggingType, std::string_view message);
     void EmitCompilationLog(const ShaderModuleBase* module);
     void APIForceLoss(wgpu::DeviceLostReason reason, const char* message) {
         // TODO(crbug.com/42241188): Remove const char* version of the method.

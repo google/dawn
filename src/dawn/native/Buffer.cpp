@@ -37,6 +37,7 @@
 #include "absl/strings/str_format.h"
 #include "dawn/common/Alloc.h"
 #include "dawn/common/Assert.h"
+#include "dawn/common/StringViewUtils.h"
 #include "dawn/native/Adapter.h"
 #include "dawn/native/CallbackTaskManager.h"
 #include "dawn/native/ChainUtils.h"
@@ -340,8 +341,8 @@ struct BufferBase::MapAsyncEvent2 final : public BufferBase::MapAsyncEvent {
 
         if (completionType == EventCompletionType::Shutdown) {
             mCallback(WGPUMapAsyncStatus_InstanceDropped,
-                      "A valid external Instance reference no longer exists.", userdata1,
-                      userdata2);
+                      ToOutputStringView("A valid external Instance reference no longer exists."),
+                      userdata1, userdata2);
             return;
         }
 
@@ -368,10 +369,10 @@ struct BufferBase::MapAsyncEvent2 final : public BufferBase::MapAsyncEvent {
         });
         if (error) {
             DAWN_ASSERT(!pendingErrorData.message.empty());
-            mCallback(pendingErrorData.status, pendingErrorData.message.c_str(), userdata1,
-                      userdata2);
+            mCallback(pendingErrorData.status, ToOutputStringView(pendingErrorData.message),
+                      userdata1, userdata2);
         } else {
-            mCallback(WGPUMapAsyncStatus_Success, nullptr, userdata1, userdata2);
+            mCallback(WGPUMapAsyncStatus_Success, kEmptyOutputStringView, userdata1, userdata2);
         }
     }
 

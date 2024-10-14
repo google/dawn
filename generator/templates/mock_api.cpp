@@ -228,7 +228,7 @@ void ProcTableAsClass::DeviceSetDeviceLostCallback(WGPUDevice device,
                                                    void* userdata) {
     ProcTableAsClass::Object* object = reinterpret_cast<ProcTableAsClass::Object*>(device);
     object->mDeviceLostCallback = [](WGPUDevice const*, WGPUDeviceLostReason reason,
-                                     char const* message, void* callback, void* userdata) {
+                                     WGPUStringView message, void* callback, void* userdata) {
         if (callback == nullptr) {
             return;
         }
@@ -242,7 +242,7 @@ void ProcTableAsClass::DeviceSetDeviceLostCallback(WGPUDevice device,
 }
 void ProcTableAsClass::CallDeviceSetDeviceLostCallbackCallback(WGPUDevice device,
                                                                WGPUDeviceLostReason reason,
-                                                               char const* message) {
+                                                               WGPUStringView message) {
     ProcTableAsClass::Object* object = reinterpret_cast<ProcTableAsClass::Object*>(device);
     object->mDeviceLostCallback(&device, reason, message, object->mDeviceLostUserdata1,
                                 object->mDeviceLostUserdata2);
@@ -252,7 +252,7 @@ void ProcTableAsClass::DeviceSetUncapturedErrorCallback(WGPUDevice device,
                                                         void* userdata) {
     ProcTableAsClass::Object* object = reinterpret_cast<ProcTableAsClass::Object*>(device);
     object->mUncapturedErrorCallback = [](WGPUDevice const*, WGPUErrorType type,
-                                          char const* message, void* callback, void* userdata) {
+                                          WGPUStringView message, void* callback, void* userdata) {
         if (callback == nullptr) {
             return;
         }
@@ -266,7 +266,7 @@ void ProcTableAsClass::DeviceSetUncapturedErrorCallback(WGPUDevice device,
 }
 void ProcTableAsClass::CallDeviceSetUncapturedErrorCallbackCallback(WGPUDevice device,
                                                                     WGPUErrorType type,
-                                                                    char const* message) {
+                                                                    WGPUStringView message) {
     ProcTableAsClass::Object* object = reinterpret_cast<ProcTableAsClass::Object*>(device);
     object->mUncapturedErrorCallback(&device, type, message, object->mUncapturedErrorUserdata1,
                                      object->mUncapturedErrorUserdata2);

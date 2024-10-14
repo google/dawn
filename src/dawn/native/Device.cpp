@@ -38,6 +38,7 @@
 #include "absl/strings/str_format.h"
 #include "dawn/common/Log.h"
 #include "dawn/common/Ref.h"
+#include "dawn/common/StringViewUtils.h"
 #include "dawn/common/Version_autogen.h"
 #include "dawn/native/AsyncTask.h"
 #include "dawn/native/AttachmentState.h"
@@ -148,14 +149,16 @@ struct LoggingCallbackTask : CallbackTask {
     }
 
   private:
-    void FinishImpl() override { mCallback(mLoggingType, mMessage.c_str(), mUserdata); }
+    void FinishImpl() override { mCallback(mLoggingType, ToOutputStringView(mMessage), mUserdata); }
 
     void HandleShutDownImpl() override {
         // Do the logging anyway
-        mCallback(mLoggingType, mMessage.c_str(), mUserdata);
+        mCallback(mLoggingType, ToOutputStringView(mMessage), mUserdata);
     }
 
-    void HandleDeviceLossImpl() override { mCallback(mLoggingType, mMessage.c_str(), mUserdata); }
+    void HandleDeviceLossImpl() override {
+        mCallback(mLoggingType, ToOutputStringView(mMessage), mUserdata);
+    }
 
     // As all deferred callback tasks will be triggered before modifying the registered
     // callback or shutting down, we are ensured that callback function and userdata pointer
@@ -168,7 +171,7 @@ struct LoggingCallbackTask : CallbackTask {
 
 void LegacyDeviceLostCallback(WGPUDevice const* device,
                               WGPUDeviceLostReason reason,
-                              char const* message,
+                              WGPUStringView message,
                               void* callback,
                               void* userdata) {
     if (callback == nullptr) {
@@ -180,7 +183,7 @@ void LegacyDeviceLostCallback(WGPUDevice const* device,
 
 void LegacyDeviceLostCallback2(WGPUDevice const* device,
                                WGPUDeviceLostReason reason,
-                               char const* message,
+                               WGPUStringView message,
                                void* callback,
                                void* userdata) {
     if (callback == nullptr) {
@@ -192,7 +195,7 @@ void LegacyDeviceLostCallback2(WGPUDevice const* device,
 
 void LegacyUncapturedErrorCallback(WGPUDevice const* device,
                                    WGPUErrorType type,
-                                   const char* message,
+                                   WGPUStringView message,
                                    void* callback,
                                    void* userdata) {
     if (callback == nullptr) {
@@ -227,7 +230,7 @@ Ref<DeviceBase::DeviceLostEvent> DeviceBase::DeviceLostEvent::Create(
     // TODO(crbug.com/dawn/2465) Make default AllowSpontaneous once SetDeviceLostCallback is gone.
     static constexpr WGPUDeviceLostCallbackInfo2 kDefaultDeviceLostCallbackInfo = {
         nullptr, WGPUCallbackMode_AllowProcessEvents,
-        [](WGPUDevice const*, WGPUDeviceLostReason, char const*, void*, void*) {
+        [](WGPUDevice const*, WGPUDeviceLostReason, WGPUStringView, void*, void*) {
             static bool calledOnce = false;
             if (!calledOnce) {
                 calledOnce = true;
@@ -278,7 +281,7 @@ void DeviceBase::DeviceLostEvent::Complete(EventCompletionType completionType) {
         device = nullptr;
     }
     if (mCallback) {
-        mCallback(&device, ToAPI(mReason), mMessage.c_str(), userdata1, userdata2);
+        mCallback(&device, ToAPI(mReason), ToOutputStringView(mMessage), userdata1, userdata2);
     }
 
     // After the device lost callback fires, the uncaptured error callback is no longer valid so we
@@ -352,7 +355,7 @@ DeviceBase::DeviceBase(AdapterBase* adapter,
 #if defined(DAWN_ENABLE_ASSERTS)
     static constexpr WGPUUncapturedErrorCallbackInfo2 kDefaultUncapturedErrorCallbackInfo = {
         nullptr,
-        [](WGPUDevice const*, WGPUErrorType, char const*, void*, void*) {
+        [](WGPUDevice const*, WGPUErrorType, WGPUStringView, void*, void*) {
             static bool calledOnce = false;
             if (!calledOnce) {
                 calledOnce = true;
@@ -791,7 +794,7 @@ void DeviceBase::HandleError(std::unique_ptr<ErrorData> error,
             if (mUncapturedErrorCallbackInfo.callback != nullptr && mState == State::Alive) {
                 auto device = ToAPI(this);
                 mUncapturedErrorCallbackInfo.callback(
-                    &device, ToAPI(ToWGPUErrorType(type)), messageStr.c_str(),
+                    &device, ToAPI(ToWGPUErrorType(type)), ToOutputStringView(messageStr),
                     mUncapturedErrorCallbackInfo.userdata1, mUncapturedErrorCallbackInfo.userdata2);
             }
         }
@@ -870,10 +873,10 @@ void DeviceBase::APIPushErrorScope(wgpu::ErrorFilter filter) {
 }
 
 void DeviceBase::APIPopErrorScope(wgpu::ErrorCallback callback, void* userdata) {
-    static wgpu::ErrorCallback kDefaultCallback = [](WGPUErrorType, char const*, void*) {};
+    static wgpu::ErrorCallback kDefaultCallback = [](WGPUErrorType, WGPUStringView, void*) {};
 
     APIPopErrorScope2({nullptr, WGPUCallbackMode_AllowProcessEvents,
-                       [](WGPUPopErrorScopeStatus, WGPUErrorType type, char const* message,
+                       [](WGPUPopErrorScopeStatus, WGPUErrorType type, WGPUStringView message,
                           void* callback, void* userdata) {
                            auto cb = reinterpret_cast<wgpu::ErrorCallback>(callback);
                            cb(type, message, userdata);
@@ -885,7 +888,7 @@ void DeviceBase::APIPopErrorScope(wgpu::ErrorCallback callback, void* userdata) 
 Future DeviceBase::APIPopErrorScopeF(const PopErrorScopeCallbackInfo& callbackInfo) {
     return APIPopErrorScope2({ToAPI(callbackInfo.nextInChain), ToAPI(callbackInfo.mode),
                               [](WGPUPopErrorScopeStatus status, WGPUErrorType type,
-                                 char const* message, void* callback, void* userdata) {
+                                 WGPUStringView message, void* callback, void* userdata) {
                                   auto cb = reinterpret_cast<WGPUPopErrorScopeCallback>(callback);
                                   cb(status, type, message, userdata);
                               },
@@ -916,13 +919,13 @@ Future DeviceBase::APIPopErrorScope2(const WGPUPopErrorScopeCallbackInfo2& callb
                                                  ? WGPUPopErrorScopeStatus_Success
                                                  : WGPUPopErrorScopeStatus_InstanceDropped;
             WGPUErrorType type;
-            const char* message;
+            WGPUStringView message;
             if (mScope) {
                 type = static_cast<WGPUErrorType>(mScope->GetErrorType());
-                message = mScope->GetErrorMessage().c_str();
+                message = ToOutputStringView(mScope->GetErrorMessage());
             } else {
                 type = WGPUErrorType_Unknown;
-                message = "No error scopes to pop";
+                message = ToOutputStringView("No error scopes to pop");
             }
 
             mCallback(status, type, message, mUserdata1.ExtractAsDangling(),
@@ -1377,7 +1380,7 @@ void DeviceBase::APICreateComputePipelineAsync(const ComputePipelineDescriptor* 
     APICreateComputePipelineAsync2(
         descriptor, {nullptr, WGPUCallbackMode_AllowProcessEvents,
                      [](WGPUCreatePipelineAsyncStatus status, WGPUComputePipeline pipeline,
-                        char const* message, void* callback, void* userdata) {
+                        WGPUStringView message, void* callback, void* userdata) {
                          auto cb =
                              reinterpret_cast<WGPUCreateComputePipelineAsyncCallback>(callback);
                          cb(status, pipeline, message, userdata);
@@ -1393,7 +1396,7 @@ Future DeviceBase::APICreateComputePipelineAsyncF(
     return APICreateComputePipelineAsync2(
         descriptor, {ToAPI(callbackInfo.nextInChain), ToAPI(callbackInfo.mode),
                      [](WGPUCreatePipelineAsyncStatus status, WGPUComputePipeline pipeline,
-                        char const* message, void* callback, void* userdata) {
+                        WGPUStringView message, void* callback, void* userdata) {
                          auto cb =
                              reinterpret_cast<WGPUCreateComputePipelineAsyncCallback>(callback);
                          cb(status, pipeline, message, userdata);
@@ -1479,7 +1482,7 @@ void DeviceBase::APICreateRenderPipelineAsync(const RenderPipelineDescriptor* de
     APICreateRenderPipelineAsync2(
         descriptor, {nullptr, WGPUCallbackMode_AllowProcessEvents,
                      [](WGPUCreatePipelineAsyncStatus status, WGPURenderPipeline pipeline,
-                        char const* message, void* callback, void* userdata) {
+                        WGPUStringView message, void* callback, void* userdata) {
                          auto cb =
                              reinterpret_cast<WGPUCreateRenderPipelineAsyncCallback>(callback);
                          cb(status, pipeline, message, userdata);
@@ -1495,7 +1498,7 @@ Future DeviceBase::APICreateRenderPipelineAsyncF(
     return APICreateRenderPipelineAsync2(
         descriptor, {ToAPI(callbackInfo.nextInChain), ToAPI(callbackInfo.mode),
                      [](WGPUCreatePipelineAsyncStatus status, WGPURenderPipeline pipeline,
-                        char const* message, void* callback, void* userdata) {
+                        WGPUStringView message, void* callback, void* userdata) {
                          auto cb =
                              reinterpret_cast<WGPUCreateRenderPipelineAsyncCallback>(callback);
                          cb(status, pipeline, message, userdata);
@@ -1920,18 +1923,18 @@ void DeviceBase::EmitCompilationLog(const ShaderModuleBase* module) {
     EmitLog(WGPULoggingType_Warning, t.str().c_str());
 }
 
-void DeviceBase::EmitLog(const char* message) {
+void DeviceBase::EmitLog(std::string_view message) {
     this->EmitLog(WGPULoggingType_Info, message);
 }
 
-void DeviceBase::EmitLog(WGPULoggingType loggingType, const char* message) {
+void DeviceBase::EmitLog(WGPULoggingType loggingType, std::string_view message) {
     // Acquire a shared lock. This allows multiple threads to emit logs,
     // or even logs to be emitted re-entrantly. It will block if there is a call
     // to SetLoggingCallback. Applications should not call SetLoggingCallback inside
     // the logging callback or they will deadlock.
     std::shared_lock<std::shared_mutex> lock(mLoggingMutex);
     if (mLoggingCallback) {
-        mLoggingCallback(loggingType, message, mLoggingUserdata);
+        mLoggingCallback(loggingType, ToOutputStringView(message), mLoggingUserdata);
     }
 }
 

@@ -28,7 +28,9 @@
 #include "dawn/tests/unittests/wire/WireTest.h"
 
 #include "dawn/common/Assert.h"
+#include "dawn/common/StringViewUtils.h"
 #include "dawn/tests/MockCallback.h"
+#include "dawn/tests/StringViewMatchers.h"
 #include "dawn/wire/WireClient.h"
 
 namespace dawn::wire {
@@ -40,7 +42,7 @@ using testing::InvokeWithoutArgs;
 using testing::MockCallback;
 using testing::Return;
 using testing::Sequence;
-using testing::StrEq;
+using testing::SizedString;
 
 class WireDisconnectTests : public WireTest {};
 
@@ -92,11 +94,11 @@ TEST_F(WireDisconnectTests, CallsDeviceLostCallback) {
 // again.
 TEST_F(WireDisconnectTests, ServerLostThenDisconnect) {
     api.CallDeviceSetDeviceLostCallbackCallback(apiDevice, WGPUDeviceLostReason_Unknown,
-                                                "some reason");
+                                                ToOutputStringView("some reason"));
 
     // Flush the device lost return command.
     EXPECT_CALL(deviceLostCallback,
-                Call(_, WGPUDeviceLostReason_Unknown, StrEq("some reason"), this))
+                Call(_, WGPUDeviceLostReason_Unknown, SizedString("some reason"), this))
         .Times(Exactly(1));
     FlushServer();
 
@@ -113,12 +115,12 @@ TEST_F(WireDisconnectTests, ServerLostThenDisconnectInCallback) {
                                  mockDeviceLostCallback.MakeUserdata(this));
 
     api.CallDeviceSetDeviceLostCallbackCallback(apiDevice, WGPUDeviceLostReason_Unknown,
-                                                "lost reason");
+                                                ToOutputStringView("lost reason"));
 
     // Disconnect the client inside the lost callback. We should see the callback
     // only once.
     EXPECT_CALL(mockDeviceLostCallback,
-                Call(WGPUDeviceLostReason_Unknown, StrEq("lost reason"), this))
+                Call(WGPUDeviceLostReason_Unknown, SizedString("lost reason"), this))
         .WillOnce(InvokeWithoutArgs([&] {
             EXPECT_CALL(mockDeviceLostCallback, Call(_, _, _)).Times(Exactly(0));
             GetWireClient()->Disconnect();
@@ -140,7 +142,7 @@ TEST_F(WireDisconnectTests, DisconnectThenServerLost) {
     // Lose the device on the server. The client callback shouldn't be
     // called again.
     api.CallDeviceSetDeviceLostCallbackCallback(apiDevice, WGPUDeviceLostReason_Unknown,
-                                                "lost reason");
+                                                ToOutputStringView("lost reason"));
     EXPECT_CALL(mockDeviceLostCallback, Call(_, _, _)).Times(Exactly(0));
     FlushServer();
 }

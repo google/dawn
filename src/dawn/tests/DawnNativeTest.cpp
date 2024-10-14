@@ -36,6 +36,7 @@
 #include "dawn/native/Instance.h"
 #include "dawn/native/dawn_platform.h"
 #include "dawn/platform/DawnPlatform.h"
+#include "dawn/webgpu_cpp_print.h"
 
 namespace dawn::native {
 
@@ -90,7 +91,7 @@ std::unique_ptr<dawn::platform::Platform> DawnNativeTest::CreateTestPlatform() {
 WGPUDevice DawnNativeTest::CreateTestDevice() {
     wgpu::DeviceDescriptor desc = {};
     desc.SetUncapturedErrorCallback(
-        [](const wgpu::Device&, wgpu::ErrorType type, const char* message) {
+        [](const wgpu::Device&, wgpu::ErrorType type, wgpu::StringView message) {
             DAWN_ASSERT(type != wgpu::ErrorType::NoError);
             FAIL() << "Unexpected error: " << message;
         });

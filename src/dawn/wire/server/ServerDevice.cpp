@@ -27,12 +27,13 @@
 
 #include "dawn/wire/server/Server.h"
 
+#include "dawn/common/StringViewUtils.h"
 #include "dawn/wire/Wire.h"
 #include "dawn/wire/WireResult.h"
 
 namespace dawn::wire::server {
 
-void Server::OnUncapturedError(ObjectHandle device, WGPUErrorType type, const char* message) {
+void Server::OnUncapturedError(ObjectHandle device, WGPUErrorType type, WGPUStringView message) {
     ReturnDeviceUncapturedErrorCallbackCmd cmd;
     cmd.device = device;
     cmd.type = type;
@@ -44,7 +45,7 @@ void Server::OnUncapturedError(ObjectHandle device, WGPUErrorType type, const ch
 void Server::OnDeviceLost(DeviceLostUserdata* userdata,
                           WGPUDevice const* device,
                           WGPUDeviceLostReason reason,
-                          const char* message) {
+                          WGPUStringView message) {
     ReturnDeviceLostCallbackCmd cmd;
     cmd.eventManager = userdata->eventManager;
     cmd.future = userdata->future;
@@ -54,7 +55,7 @@ void Server::OnDeviceLost(DeviceLostUserdata* userdata,
     SerializeCommand(cmd);
 }
 
-void Server::OnLogging(ObjectHandle device, WGPULoggingType type, const char* message) {
+void Server::OnLogging(ObjectHandle device, WGPULoggingType type, WGPUStringView message) {
     ReturnDeviceLoggingCallbackCmd cmd;
     cmd.device = device;
     cmd.type = type;
@@ -80,7 +81,7 @@ WireResult Server::DoDevicePopErrorScope(Known<WGPUDevice> device,
 void Server::OnDevicePopErrorScope(ErrorScopeUserdata* userdata,
                                    WGPUPopErrorScopeStatus status,
                                    WGPUErrorType type,
-                                   const char* message) {
+                                   WGPUStringView message) {
     ReturnDevicePopErrorScopeCallbackCmd cmd;
     cmd.eventManager = userdata->eventManager;
     cmd.future = userdata->future;
@@ -117,7 +118,7 @@ WireResult Server::DoDeviceCreateComputePipelineAsync(
 void Server::OnCreateComputePipelineAsyncCallback(CreatePipelineAsyncUserData* data,
                                                   WGPUCreatePipelineAsyncStatus status,
                                                   WGPUComputePipeline pipeline,
-                                                  const char* message) {
+                                                  WGPUStringView message) {
     ReturnDeviceCreateComputePipelineAsyncCallbackCmd cmd;
     cmd.eventManager = data->eventManager;
     cmd.future = data->future;
@@ -127,7 +128,7 @@ void Server::OnCreateComputePipelineAsyncCallback(CreatePipelineAsyncUserData* d
     if (status == WGPUCreatePipelineAsyncStatus_Success &&
         FillReservation(data->pipelineObjectID, pipeline) == WireResult::FatalError) {
         cmd.status = WGPUCreatePipelineAsyncStatus_Unknown;
-        cmd.message = "Destroyed before request was fulfilled.";
+        cmd.message = ToOutputStringView("Destroyed before request was fulfilled.");
     }
     SerializeCommand(cmd);
 }
@@ -159,7 +160,7 @@ WireResult Server::DoDeviceCreateRenderPipelineAsync(
 void Server::OnCreateRenderPipelineAsyncCallback(CreatePipelineAsyncUserData* data,
                                                  WGPUCreatePipelineAsyncStatus status,
                                                  WGPURenderPipeline pipeline,
-                                                 const char* message) {
+                                                 WGPUStringView message) {
     ReturnDeviceCreateRenderPipelineAsyncCallbackCmd cmd;
     cmd.eventManager = data->eventManager;
     cmd.future = data->future;
@@ -169,7 +170,7 @@ void Server::OnCreateRenderPipelineAsyncCallback(CreatePipelineAsyncUserData* da
     if (status == WGPUCreatePipelineAsyncStatus_Success &&
         FillReservation(data->pipelineObjectID, pipeline) == WireResult::FatalError) {
         cmd.status = WGPUCreatePipelineAsyncStatus_Unknown;
-        cmd.message = "Destroyed before request was fulfilled.";
+        cmd.message = ToOutputStringView("Destroyed before request was fulfilled.");
     }
     SerializeCommand(cmd);
 }
