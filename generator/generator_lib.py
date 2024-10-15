@@ -262,7 +262,7 @@ def _compute_python_dependencies(root_dir=None):
 
         paths.add(path)
 
-    return paths
+    return sorted(paths)
 
 
 # Computes the string representing a cmake list of paths.
