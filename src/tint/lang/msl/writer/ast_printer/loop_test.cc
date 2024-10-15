@@ -52,11 +52,11 @@ TEST_F(MslASTPrinterTest, Emit_Loop) {
 using namespace metal;
 
 #define TINT_ISOLATE_UB(VOLATILE_NAME) \
-  volatile bool VOLATILE_NAME = true; \
-  if (VOLATILE_NAME)
+  {volatile bool VOLATILE_NAME = false; if (VOLATILE_NAME) break;}
 
 fragment void F() {
-  TINT_ISOLATE_UB(tint_volatile_true) while(true) {
+  while(true) {
+    TINT_ISOLATE_UB(tint_volatile_false);
     break;
   }
   return;
@@ -82,14 +82,14 @@ TEST_F(MslASTPrinterTest, Emit_LoopWithContinuing) {
 using namespace metal;
 
 #define TINT_ISOLATE_UB(VOLATILE_NAME) \
-  volatile bool VOLATILE_NAME = true; \
-  if (VOLATILE_NAME)
+  {volatile bool VOLATILE_NAME = false; if (VOLATILE_NAME) break;}
 
 void a_statement() {
 }
 
 fragment void F() {
-  TINT_ISOLATE_UB(tint_volatile_true) while(true) {
+  while(true) {
+    TINT_ISOLATE_UB(tint_volatile_false);
     break;
     {
       a_statement();
@@ -118,14 +118,14 @@ TEST_F(MslASTPrinterTest, Emit_LoopWithContinuing_BreakIf) {
 using namespace metal;
 
 #define TINT_ISOLATE_UB(VOLATILE_NAME) \
-  volatile bool VOLATILE_NAME = true; \
-  if (VOLATILE_NAME)
+  {volatile bool VOLATILE_NAME = false; if (VOLATILE_NAME) break;}
 
 void a_statement() {
 }
 
 fragment void F() {
-  TINT_ISOLATE_UB(tint_volatile_true) while(true) {
+  while(true) {
+    TINT_ISOLATE_UB(tint_volatile_false);
     break;
     {
       a_statement();
@@ -159,8 +159,10 @@ TEST_F(MslASTPrinterTest, Emit_LoopNestedWithContinuing) {
     ASTPrinter& gen = Build();
 
     ASSERT_TRUE(gen.EmitStatement(outer)) << gen.Diagnostics();
-    EXPECT_EQ(gen.Result(), R"(TINT_ISOLATE_UB(tint_volatile_true) while(true) {
-  TINT_ISOLATE_UB(tint_volatile_true_1) while(true) {
+    EXPECT_EQ(gen.Result(), R"(while(true) {
+  TINT_ISOLATE_UB(tint_volatile_false);
+  while(true) {
+    TINT_ISOLATE_UB(tint_volatile_false_1);
     break;
     {
       a_statement();
@@ -197,7 +199,8 @@ TEST_F(MslASTPrinterTest, Emit_LoopWithVarUsedInContinuing) {
     ASTPrinter& gen = Build();
 
     ASSERT_TRUE(gen.EmitStatement(outer)) << gen.Diagnostics();
-    EXPECT_EQ(gen.Result(), R"(TINT_ISOLATE_UB(tint_volatile_true) while(true) {
+    EXPECT_EQ(gen.Result(), R"(while(true) {
+  TINT_ISOLATE_UB(tint_volatile_false);
   float lhs = 2.5f;
   float other = 0.0f;
   break;
@@ -220,7 +223,8 @@ TEST_F(MslASTPrinterTest, Emit_ForLoop) {
     ASTPrinter& gen = Build();
 
     ASSERT_TRUE(gen.EmitStatement(f)) << gen.Diagnostics();
-    EXPECT_EQ(gen.Result(), R"(TINT_ISOLATE_UB(tint_volatile_true) for(; ; ) {
+    EXPECT_EQ(gen.Result(), R"(for(; ; ) {
+  TINT_ISOLATE_UB(tint_volatile_false);
   return;
 }
 )");
@@ -238,7 +242,8 @@ TEST_F(MslASTPrinterTest, Emit_ForLoopWithSimpleInit) {
     ASTPrinter& gen = Build();
 
     ASSERT_TRUE(gen.EmitStatement(f)) << gen.Diagnostics();
-    EXPECT_EQ(gen.Result(), R"(TINT_ISOLATE_UB(tint_volatile_true) for(int i = 0; ; ) {
+    EXPECT_EQ(gen.Result(), R"(for(int i = 0; ; ) {
+  TINT_ISOLATE_UB(tint_volatile_false);
   return;
 }
 )");
@@ -269,7 +274,8 @@ TEST_F(MslASTPrinterTest, Emit_ForLoopWithMultiStmtInit) {
     f(1);
     f(2);
   }
-  TINT_ISOLATE_UB(tint_volatile_true) for(; ; ) {
+  for(; ; ) {
+    TINT_ISOLATE_UB(tint_volatile_false);
     return;
   }
 }
@@ -288,7 +294,8 @@ TEST_F(MslASTPrinterTest, Emit_ForLoopWithSimpleCond) {
     ASTPrinter& gen = Build();
 
     ASSERT_TRUE(gen.EmitStatement(f)) << gen.Diagnostics();
-    EXPECT_EQ(gen.Result(), R"(TINT_ISOLATE_UB(tint_volatile_true) for(; true; ) {
+    EXPECT_EQ(gen.Result(), R"(for(; true; ) {
+  TINT_ISOLATE_UB(tint_volatile_false);
   return;
 }
 )");
@@ -307,9 +314,9 @@ TEST_F(MslASTPrinterTest, Emit_ForLoopWithSimpleCont) {
     ASTPrinter& gen = Build();
 
     ASSERT_TRUE(gen.EmitStatement(f)) << gen.Diagnostics();
-    EXPECT_EQ(
-        gen.Result(),
-        R"(TINT_ISOLATE_UB(tint_volatile_true) for(; ; i = as_type<int>((as_type<uint>(i) + as_type<uint>(1)))) {
+    EXPECT_EQ(gen.Result(),
+              R"(for(; ; i = as_type<int>((as_type<uint>(i) + as_type<uint>(1)))) {
+  TINT_ISOLATE_UB(tint_volatile_false);
   return;
 }
 )");
@@ -335,7 +342,8 @@ TEST_F(MslASTPrinterTest, Emit_ForLoopWithMultiStmtCont) {
     ASTPrinter& gen = Build();
 
     ASSERT_TRUE(gen.EmitStatement(loop)) << gen.Diagnostics();
-    EXPECT_EQ(gen.Result(), R"(TINT_ISOLATE_UB(tint_volatile_true) while(true) {
+    EXPECT_EQ(gen.Result(), R"(while(true) {
+  TINT_ISOLATE_UB(tint_volatile_false);
   return;
   {
     f(1);
@@ -359,9 +367,9 @@ TEST_F(MslASTPrinterTest, Emit_ForLoopWithSimpleInitCondCont) {
     ASTPrinter& gen = Build();
 
     ASSERT_TRUE(gen.EmitStatement(f)) << gen.Diagnostics();
-    EXPECT_EQ(
-        gen.Result(),
-        R"(TINT_ISOLATE_UB(tint_volatile_true) for(int i = 0; true; i = as_type<int>((as_type<uint>(i) + as_type<uint>(1)))) {
+    EXPECT_EQ(gen.Result(),
+              R"(for(int i = 0; true; i = as_type<int>((as_type<uint>(i) + as_type<uint>(1)))) {
+  TINT_ISOLATE_UB(tint_volatile_false);
   a_statement();
 }
 )");
@@ -393,7 +401,8 @@ TEST_F(MslASTPrinterTest, Emit_ForLoopWithMultiStmtInitCondCont) {
     f(1);
     f(2);
   }
-  TINT_ISOLATE_UB(tint_volatile_true) while(true) {
+  while(true) {
+    TINT_ISOLATE_UB(tint_volatile_false);
     if (!(true)) { break; }
     return;
     {
@@ -416,7 +425,8 @@ TEST_F(MslASTPrinterTest, Emit_While) {
     ASTPrinter& gen = Build();
 
     ASSERT_TRUE(gen.EmitStatement(f)) << gen.Diagnostics();
-    EXPECT_EQ(gen.Result(), R"(TINT_ISOLATE_UB(tint_volatile_true) while(true) {
+    EXPECT_EQ(gen.Result(), R"(while(true) {
+  TINT_ISOLATE_UB(tint_volatile_false);
   return;
 }
 )");
@@ -433,7 +443,8 @@ TEST_F(MslASTPrinterTest, Emit_While_WithContinue) {
     ASTPrinter& gen = Build();
 
     ASSERT_TRUE(gen.EmitStatement(f)) << gen.Diagnostics();
-    EXPECT_EQ(gen.Result(), R"(TINT_ISOLATE_UB(tint_volatile_true) while(true) {
+    EXPECT_EQ(gen.Result(), R"(while(true) {
+  TINT_ISOLATE_UB(tint_volatile_false);
   continue;
 }
 )");
@@ -453,7 +464,8 @@ TEST_F(MslASTPrinterTest, Emit_WhileWithMultiCond) {
     ASTPrinter& gen = Build();
 
     ASSERT_TRUE(gen.EmitStatement(f)) << gen.Diagnostics();
-    EXPECT_EQ(gen.Result(), R"(TINT_ISOLATE_UB(tint_volatile_true) while((t && false)) {
+    EXPECT_EQ(gen.Result(), R"(while((t && false)) {
+  TINT_ISOLATE_UB(tint_volatile_false);
   return;
 }
 )");

@@ -3,8 +3,7 @@
 using namespace metal;
 
 #define TINT_ISOLATE_UB(VOLATILE_NAME) \
-  volatile bool VOLATILE_NAME = true; \
-  if (VOLATILE_NAME)
+  {volatile bool VOLATILE_NAME = false; if (VOLATILE_NAME) break;}
 
 struct tint_private_vars_struct {
   float2 v2f;
@@ -14,7 +13,8 @@ struct tint_private_vars_struct {
 };
 
 void foo(thread tint_private_vars_struct* const tint_private_vars) {
-  TINT_ISOLATE_UB(tint_volatile_true) for(int i = 0; (i < 2); i = as_type<int>((as_type<uint>(i) + as_type<uint>(1)))) {
+  for(int i = 0; (i < 2); i = as_type<int>((as_type<uint>(i) + as_type<uint>(1)))) {
+    TINT_ISOLATE_UB(tint_volatile_false);
     (*(tint_private_vars)).v2f[i] = 1.0f;
     (*(tint_private_vars)).v3i[i] = 1;
     (*(tint_private_vars)).v4u[i] = 1u;
@@ -24,7 +24,8 @@ void foo(thread tint_private_vars_struct* const tint_private_vars) {
 
 kernel void tint_symbol() {
   thread tint_private_vars_struct tint_private_vars = {};
-  TINT_ISOLATE_UB(tint_volatile_true_1) for(int i = 0; (i < 2); i = as_type<int>((as_type<uint>(i) + as_type<uint>(1)))) {
+  for(int i = 0; (i < 2); i = as_type<int>((as_type<uint>(i) + as_type<uint>(1)))) {
+    TINT_ISOLATE_UB(tint_volatile_false_1);
     foo(&(tint_private_vars));
   }
   return;

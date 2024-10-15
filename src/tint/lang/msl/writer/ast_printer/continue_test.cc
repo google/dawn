@@ -45,11 +45,11 @@ TEST_F(MslASTPrinterTest, Emit_Continue) {
 using namespace metal;
 
 #define TINT_ISOLATE_UB(VOLATILE_NAME) \
-  volatile bool VOLATILE_NAME = true; \
-  if (VOLATILE_NAME)
+  {volatile bool VOLATILE_NAME = false; if (VOLATILE_NAME) break;}
 
 kernel void test_function() {
-  TINT_ISOLATE_UB(tint_volatile_true) while(true) {
+  while(true) {
+    TINT_ISOLATE_UB(tint_volatile_false);
     if (false) {
       break;
     }

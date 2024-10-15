@@ -373,8 +373,13 @@ class ASTPrinter : public tint::TextGenerator {
                               const ast::CallExpression* expr,
                               const sem::BuiltinFn* builtin);
 
-    /// Lazilly generates the TINT_ISOLATE_UB macro, used to prevent UB statements from affecting
-    /// later logic.
+    /// Lazily generates the TINT_ISOLATE_UB macro, and returns a call to
+    /// the macro, passing in a unique identifier. The call tricks the MSL
+    /// compiler into thinking it might execute a `break`, but otherwise
+    /// has no effect in the generated code.
+    ///
+    /// Invoke this inside the body of a loop to prevent the MSL compiler
+    /// from inferring the loop never terminates.
     /// @return the MSL to call the TINT_ISOLATE_UB macro.
     std::string IsolateUB();
 

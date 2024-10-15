@@ -3,12 +3,12 @@
 using namespace metal;
 
 #define TINT_ISOLATE_UB(VOLATILE_NAME) \
-  volatile bool VOLATILE_NAME = true; \
-  if (VOLATILE_NAME)
+  {volatile bool VOLATILE_NAME = false; if (VOLATILE_NAME) break;}
 
 void f() {
   int i = 0;
-  TINT_ISOLATE_UB(tint_volatile_true) for(; false; i = as_type<int>((as_type<uint>(i) + as_type<uint>(1)))) {
+  for(; false; i = as_type<int>((as_type<uint>(i) + as_type<uint>(1)))) {
+    TINT_ISOLATE_UB(tint_volatile_false);
   }
 }
 

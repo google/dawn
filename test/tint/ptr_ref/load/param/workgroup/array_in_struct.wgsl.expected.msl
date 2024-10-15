@@ -15,15 +15,15 @@ struct tint_array {
 };
 
 #define TINT_ISOLATE_UB(VOLATILE_NAME) \
-  volatile bool VOLATILE_NAME = true; \
-  if (VOLATILE_NAME)
+  {volatile bool VOLATILE_NAME = false; if (VOLATILE_NAME) break;}
 
 struct str {
   tint_array<int, 4> arr;
 };
 
 void tint_zero_workgroup_memory(uint local_idx, threadgroup str* const tint_symbol_1) {
-  TINT_ISOLATE_UB(tint_volatile_true) for(uint idx = local_idx; (idx < 4u); idx = (idx + 1u)) {
+  for(uint idx = local_idx; (idx < 4u); idx = (idx + 1u)) {
+    TINT_ISOLATE_UB(tint_volatile_false);
     uint const i = idx;
     (*(tint_symbol_1)).arr[i] = 0;
   }

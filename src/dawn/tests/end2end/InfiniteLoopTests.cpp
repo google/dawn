@@ -269,7 +269,10 @@ class ExpectOneNonZero : public detail::Expectation {
 };
 
 TEST_P(InfiniteLoopTests, LoopDeletedThenBoundedWrite) {
-    DAWN_SKIP_TEST_IF_BASE(!IsMetal(), "platform-specific", "only test on Metal");
+    DAWN_SKIP_TEST_IF_BASE(!IsMetal(), "infinite-loops", "only test on Metal");
+    DAWN_SKIP_TEST_IF_BASE(
+        IsMetal(), "infinite-loops",
+        "Metal loops run forever: TODO(crbug.com/371840056) rewrite as death tests with watchdog?");
 
     const uint32_t sentinelValue = 777;
     std::string shader = Shader(sentinelValue);

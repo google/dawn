@@ -2324,9 +2324,10 @@ bool ASTPrinter::EmitLoop(const ast::LoopStatement* stmt) {
     };
 
     TINT_SCOPED_ASSIGNMENT(emit_continuing_, emit_continuing);
-    Line() << IsolateUB() << " while(true) {";
+    Line() << "while(true) {";
     {
         ScopedIndent si(this);
+        Line() << IsolateUB();
         if (!EmitStatements(stmt->body->statements)) {
             return false;
         }
@@ -2394,12 +2395,13 @@ bool ASTPrinter::EmitForLoop(const ast::ForLoopStatement* stmt) {
         };
 
         TINT_SCOPED_ASSIGNMENT(emit_continuing_, emit_continuing);
-        Line() << IsolateUB() << " while(true) {";
+        Line() << "while(true) {";
         IncrementIndent();
         TINT_DEFER({
             DecrementIndent();
             Line() << "}";
         });
+        Line() << IsolateUB();
 
         if (stmt->condition) {
             current_buffer_->Append(cond_pre);
@@ -2417,7 +2419,7 @@ bool ASTPrinter::EmitForLoop(const ast::ForLoopStatement* stmt) {
         // For-loop can be generated.
         {
             auto out = Line();
-            out << IsolateUB() << " for";
+            out << "for";
             {
                 ScopedParen sp(out);
 
@@ -2436,6 +2438,9 @@ bool ASTPrinter::EmitForLoop(const ast::ForLoopStatement* stmt) {
             out << " {";
         }
         {
+            IncrementIndent();
+            Line() << IsolateUB();
+            DecrementIndent();
             auto emit_continuing = [] { return true; };
             TINT_SCOPED_ASSIGNMENT(emit_continuing_, emit_continuing);
             if (!EmitStatementsWithIndent(stmt->body->statements)) {
@@ -2467,8 +2472,9 @@ bool ASTPrinter::EmitWhile(const ast::WhileStatement* stmt) {
     // as a regular while in MSL. Instead we need to generate a `while(true)` loop.
     bool emit_as_loop = cond_pre.lines.size() > 0;
     if (emit_as_loop) {
-        Line() << IsolateUB() << " while(true) {";
+        Line() << "while(true) {";
         IncrementIndent();
+        Line() << IsolateUB();
         TINT_DEFER({
             DecrementIndent();
             Line() << "}";
@@ -2481,7 +2487,10 @@ bool ASTPrinter::EmitWhile(const ast::WhileStatement* stmt) {
         }
     } else {
         // While can be generated.
-        Line() << IsolateUB() << " while(" << cond_buf.str() << ") {";
+        Line() << "while(" << cond_buf.str() << ") {";
+        IncrementIndent();
+        Line() << IsolateUB();
+        DecrementIndent();
         if (!EmitStatementsWithIndent(stmt->body->statements)) {
             return false;
         }
@@ -3240,12 +3249,11 @@ std::string ASTPrinter::IsolateUB() {
     if (isolate_ub_macro_name_.empty()) {
         isolate_ub_macro_name_ = UniqueIdentifier("TINT_ISOLATE_UB");
         Line(&helpers_) << "#define " << isolate_ub_macro_name_ << "(VOLATILE_NAME) \\";
-        Line(&helpers_) << "  volatile bool VOLATILE_NAME = true; \\";
-        Line(&helpers_) << "  if (VOLATILE_NAME)";
+        Line(&helpers_) << "  {volatile bool VOLATILE_NAME = false; if (VOLATILE_NAME) break;}";
         Line(&helpers_);
     }
     StringStream ss;
-    ss << isolate_ub_macro_name_ << "(" << UniqueIdentifier("tint_volatile_true") << ")";
+    ss << isolate_ub_macro_name_ << "(" << UniqueIdentifier("tint_volatile_false") << ");";
     return ss.str();
 }
 
