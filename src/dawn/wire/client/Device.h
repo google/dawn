@@ -69,7 +69,7 @@ class Device final : public RefCountedWithExternalCount<ObjectWithEventsBase> {
     void SetUncapturedErrorCallback(WGPUErrorCallback errorCallback, void* errorUserdata);
     void SetLoggingCallback(WGPULoggingCallback errorCallback, void* errorUserdata);
     void SetDeviceLostCallback(WGPUDeviceLostCallback errorCallback, void* errorUserdata);
-    void InjectError(WGPUErrorType type, const char* message);
+    void InjectError(WGPUErrorType type, WGPUStringView message);
     void PopErrorScope(WGPUErrorCallback callback, void* userdata);
     WGPUFuture PopErrorScopeF(const WGPUPopErrorScopeCallbackInfo& callbackInfo);
     WGPUFuture PopErrorScope2(const WGPUPopErrorScopeCallbackInfo2& callbackInfo);

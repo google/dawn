@@ -101,11 +101,7 @@ ApiObjectBase::~ApiObjectBase() {
     DAWN_ASSERT(!IsAlive());
 }
 
-void ApiObjectBase::APISetLabel(const char* label) {
-    SetLabel(std::string(label ? label : ""));
-}
-
-void ApiObjectBase::APISetLabel2(StringView label) {
+void ApiObjectBase::APISetLabel(StringView label) {
     SetLabel(std::string(utils::NormalizeMessageString(label)));
 }
 

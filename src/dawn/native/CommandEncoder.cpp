@@ -1902,7 +1902,7 @@ void CommandEncoder::APIClearBuffer(BufferBase* buffer, uint64_t offset, uint64_
         "encoding %s.ClearBuffer(%s, %u, %u).", this, buffer, offset, size);
 }
 
-void CommandEncoder::APIInjectValidationError2(StringView messageIn) {
+void CommandEncoder::APIInjectValidationError(StringView messageIn) {
     std::string_view message = utils::NormalizeMessageString(messageIn);
     mEncodingContext.TryEncode(
         this,
@@ -1912,7 +1912,7 @@ void CommandEncoder::APIInjectValidationError2(StringView messageIn) {
         "injecting validation error: %s.", message);
 }
 
-void CommandEncoder::APIInsertDebugMarker2(StringView markerIn) {
+void CommandEncoder::APIInsertDebugMarker(StringView markerIn) {
     std::string_view marker = utils::NormalizeMessageString(markerIn);
     mEncodingContext.TryEncode(
         this,
@@ -1942,7 +1942,7 @@ void CommandEncoder::APIPopDebugGroup() {
         "encoding %s.PopDebugGroup().", this);
 }
 
-void CommandEncoder::APIPushDebugGroup2(StringView groupLabelIn) {
+void CommandEncoder::APIPushDebugGroup(StringView groupLabelIn) {
     std::string_view groupLabel = utils::NormalizeMessageString(groupLabelIn);
     mEncodingContext.TryEncode(
         this,

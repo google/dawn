@@ -48,12 +48,9 @@ class ProgrammableEncoder : public ApiObjectBase {
   public:
     ProgrammableEncoder(DeviceBase* device, StringView label, EncodingContext* encodingContext);
 
-    // TODO(crbug.com/42241188): Remove const char* version of the methods.
-    void APIInsertDebugMarker(const char* groupLabel) { APIInsertDebugMarker2(groupLabel); }
-    void APIInsertDebugMarker2(StringView groupLabel);
+    void APIInsertDebugMarker(StringView groupLabel);
     void APIPopDebugGroup();
-    void APIPushDebugGroup(const char* groupLabel) { APIPushDebugGroup2(groupLabel); }
-    void APIPushDebugGroup2(StringView groupLabel);
+    void APIPushDebugGroup(StringView groupLabel);
 
   protected:
     bool IsValidationEnabled() const;

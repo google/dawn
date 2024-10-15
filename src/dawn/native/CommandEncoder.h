@@ -91,14 +91,10 @@ class CommandEncoder final : public ApiObjectBase {
                                  const Extent3D* copySize);
     void APIClearBuffer(BufferBase* destination, uint64_t destinationOffset, uint64_t size);
 
-    // TODO(crbug.com/42241188): Remove const char* version of the methods.
-    void APIInjectValidationError(const char* message) { APIInjectValidationError2(message); }
-    void APIInjectValidationError2(StringView message);
-    void APIInsertDebugMarker(const char* groupLabel) { APIInsertDebugMarker2(groupLabel); }
-    void APIInsertDebugMarker2(StringView groupLabel);
+    void APIInjectValidationError(StringView message);
+    void APIInsertDebugMarker(StringView groupLabel);
     void APIPopDebugGroup();
-    void APIPushDebugGroup(const char* groupLabel) { APIPushDebugGroup2(groupLabel); }
-    void APIPushDebugGroup2(StringView groupLabel);
+    void APIPushDebugGroup(StringView groupLabel);
 
     void APIResolveQuerySet(QuerySetBase* querySet,
                             uint32_t firstQuery,

@@ -461,7 +461,7 @@ WireResult Client::DoDevicePopErrorScopeCallback(ObjectHandle eventManager,
         .SetFutureReady<PopErrorScopeEvent>(future.id, errorType, message);
 }
 
-void Device::InjectError(WGPUErrorType type, const char* message) {
+void Device::InjectError(WGPUErrorType type, WGPUStringView message) {
     DeviceInjectErrorCmd cmd;
     cmd.self = ToAPI(this);
     cmd.type = type;

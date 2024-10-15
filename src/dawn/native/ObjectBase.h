@@ -141,9 +141,7 @@ class ApiObjectBase : public ObjectBase, public LinkNode<ApiObjectBase> {
     void Destroy();
 
     // Dawn API
-    // TODO(crbug.com/42241188): Remove const char* version of the method.
-    void APISetLabel(const char* label);
-    void APISetLabel2(StringView label);
+    void APISetLabel(StringView label);
 
   protected:
     // Overriding of the RefCounted's DeleteThis function ensures that instances of objects

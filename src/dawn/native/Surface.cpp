@@ -600,11 +600,7 @@ void Surface::APIUnconfigure() {
     }
 }
 
-void Surface::APISetLabel(const char* label) {
-    mLabel = label ? label : "";
-}
-
-void Surface::APISetLabel2(StringView label) {
+void Surface::APISetLabel(StringView label) {
     mLabel = utils::NormalizeMessageString(label);
 }
 

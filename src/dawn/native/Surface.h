@@ -122,9 +122,7 @@ class Surface final : public ErrorMonad {
     void APIGetCurrentTexture(SurfaceTexture* surfaceTexture) const;
     void APIPresent();
     void APIUnconfigure();
-    // TODO(crbug.com/42241188): Remove const char* version of the method.
-    void APISetLabel(const char* label);
-    void APISetLabel2(StringView label);
+    void APISetLabel(StringView label);
 
   private:
     Surface(InstanceBase* instance, ErrorMonad::ErrorTag tag);
