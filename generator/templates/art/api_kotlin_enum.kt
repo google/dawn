@@ -27,10 +27,10 @@
 package {{ kotlin_package }}
 
 @JvmInline
-public value class {{ enum.name.CamelCase() }}(@get:JvmName("getValue") public val v: Int) {
+public value class {{ enum.name.CamelCase() }}(public val value: Int) {
     {% if enum.category == 'bitmask' %}
         public infix fun or(b: {{ enum.name.CamelCase() }}): {{ enum.name.CamelCase() }} ={{ ' ' }}
-            {{- enum.name.CamelCase() }}(this.v or b.v)
+            {{- enum.name.CamelCase() }}(this.value or b.value)
     {% endif %}
     public companion object {
         {% for value in enum.values %}
@@ -43,5 +43,5 @@ public value class {{ enum.name.CamelCase() }}(@get:JvmName("getValue") public v
             {% endfor %}
         )
     }
-    override fun toString(): String = names[v]?:v.toString()
+    override fun toString(): String = names[value]?:value.toString()
 }
