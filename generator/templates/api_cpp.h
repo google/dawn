@@ -499,7 +499,9 @@ struct StringViewAdapter {
         assert(sv.length != WGPU_STRLEN);
         assert(nullTerminated == nullptr);
         nullTerminated = new char[sv.length + 1];
-        memcpy(nullTerminated, sv.data, sv.length);
+        for (size_t i = 0; i < sv.length; i++) {
+            nullTerminated[i] = sv.data[i];
+        }
         nullTerminated[sv.length] = 0;
         return nullTerminated;
     }
