@@ -2079,8 +2079,7 @@ TEST_F(HlslWriterDecomposeStorageAccessTest, StoreVectorElement) {
     b.ir.root_block->Append(var);
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
-        b.StoreVectorElement(b.Access(ty.ptr<storage, vec3<f32>, core::Access::kReadWrite>(), var),
-                             1_u, 2_f);
+        b.StoreVectorElement(var, 1_u, 2_f);
         b.Return(func);
     });
 
@@ -2091,8 +2090,7 @@ $B1: {  # root
 
 %foo = @fragment func():void {
   $B2: {
-    %3:ptr<storage, vec3<f32>, read_write> = access %v
-    store_vector_element %3, 1u, 2.0f
+    store_vector_element %v, 1u, 2.0f
     ret
   }
 }
@@ -2123,8 +2121,7 @@ TEST_F(HlslWriterDecomposeStorageAccessTest, StoreVectorElementF16) {
     b.ir.root_block->Append(var);
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
-        b.StoreVectorElement(b.Access(ty.ptr<storage, vec3<f16>, core::Access::kReadWrite>(), var),
-                             1_u, 2_h);
+        b.StoreVectorElement(var, 1_u, 2_h);
         b.Return(func);
     });
 
@@ -2135,8 +2132,7 @@ $B1: {  # root
 
 %foo = @fragment func():void {
   $B2: {
-    %3:ptr<storage, vec3<f16>, read_write> = access %v
-    store_vector_element %3, 1u, 2.0h
+    store_vector_element %v, 1u, 2.0h
     ret
   }
 }

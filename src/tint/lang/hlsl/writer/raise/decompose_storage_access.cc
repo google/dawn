@@ -890,12 +890,8 @@ struct State {
         b.InsertBefore(sve, [&] {
             OffsetData offset{};
             UpdateOffsetData(sve->Index(), var_ty->StoreType()->DeepestElement()->Size(), &offset);
-
-            auto* cast = b.Bitcast(ty.u32(), sve->Value());
-            b.MemberCall<hlsl::ir::MemberBuiltinCall>(ty.void_(), BuiltinFn::kStore, var,
-                                                      OffsetToValue(offset), cast);
+            Store(sve, var, sve->Value(), offset);
         });
-        sve->Destroy();
     }
 };
 
