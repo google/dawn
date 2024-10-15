@@ -94,6 +94,10 @@ static constexpr FeatureEnumAndInfo kFeatureInfo[] = {
     {Feature::Float32Filterable,
      {"Allows textures with formats \"r32float\" \"rg32float\" and \"rgba32float\" to be filtered.",
       "https://gpuweb.github.io/gpuweb/#float32-filterable", FeatureInfo::FeatureState::Stable}},
+    {Feature::Float32Blendable,
+     {"Allows textures with formats \"r32float\" \"rg32float\" and \"rgba32float\" to be "
+      "blendable.",
+      "https://gpuweb.github.io/gpuweb/#float32-blendable", FeatureInfo::FeatureState::Stable}},
     {Feature::ChromiumExperimentalSubgroups,
      {"DEPRECATED, use subgroups and subgroups-f16 features instead. "
       "Experimental, allows using subgroup and supports the \"enable "

@@ -278,6 +278,11 @@ void PhysicalDevice::InitializeSupportedFeaturesImpl() {
         EnableFeature(Feature::Snorm16TextureFormats);
         EnableFeature(Feature::Norm16TextureFormats);
     }
+
+    // Float32Blendable
+    if (mFunctions.IsGLExtensionSupported("GL_EXT_float_blend")) {
+        EnableFeature(Feature::Float32Blendable);
+    }
 }
 
 namespace {

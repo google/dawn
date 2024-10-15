@@ -89,6 +89,7 @@ bool IsFeatureSupported(WGPUFeatureName feature) {
         case WGPUFeatureName_BGRA8UnormStorage:
         case WGPUFeatureName_TransientAttachments:
         case WGPUFeatureName_Float32Filterable:
+        case WGPUFeatureName_Float32Blendable:
         case WGPUFeatureName_MSAARenderToSingleSampled:
         case WGPUFeatureName_DualSourceBlending:
         case WGPUFeatureName_ANGLETextureSharing:

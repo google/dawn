@@ -2574,8 +2574,9 @@
             {"value": 9, "name": "RG11B10 ufloat renderable"},
             {"value": 10, "name": "BGRA8 unorm storage"},
             {"value": 11, "name": "float32 filterable", "jsrepr": "'float32-filterable'"},
-            {"value": 12, "name": "subgroups"},
-            {"value": 13, "name": "subgroups f16"},
+            {"value": 12, "name": "float32 blendable", "jsrepr": "'float32-blendable'"},
+            {"value": 13, "name": "subgroups"},
+            {"value": 14, "name": "subgroups f16"},
 
             {"value": 0, "name": "dawn internal usages", "tags": ["dawn"]},
             {"value": 1, "name": "dawn multi planar formats", "tags": ["dawn"]},
