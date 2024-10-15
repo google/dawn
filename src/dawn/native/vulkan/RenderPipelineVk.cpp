@@ -331,7 +331,7 @@ Ref<RenderPipeline> RenderPipeline::CreateUninitialized(
 
 MaybeError RenderPipeline::InitializeImpl() {
     Device* device = ToBackend(GetDevice());
-    const PipelineLayout* layout = ToBackend(GetLayout());
+    PipelineLayout* layout = ToBackend(GetLayout());
 
     // Vulkan devices need cache UUID field to be serialized into pipeline cache keys.
     StreamIn(&mCacheKey, device->GetDeviceInfo().properties.pipelineCacheUUID);
@@ -539,6 +539,9 @@ MaybeError RenderPipeline::InitializeImpl() {
         DAWN_TRY_ASSIGN(renderPassInfo, device->GetRenderPassCache()->GetRenderPass(query));
     }
 
+    // TODO(crbug.com/366291600): Add internal immediate data size when needed.
+    DAWN_TRY(InitializeBase(layout, kClampFragDepthArgsSize));
+
     // The create info chains in a bunch of things created on the stack here or inside state
     // objects.
     VkGraphicsPipelineCreateInfo createInfo;
@@ -557,7 +560,7 @@ MaybeError RenderPipeline::InitializeImpl() {
     createInfo.pColorBlendState =
         (GetStageMask() & wgpu::ShaderStage::Fragment) ? &colorBlend : nullptr;
     createInfo.pDynamicState = &dynamic;
-    createInfo.layout = ToBackend(GetLayout())->GetHandle();
+    createInfo.layout = GetVkLayout();
     createInfo.renderPass = renderPassInfo.renderPass;
     createInfo.basePipelineHandle = VkPipeline{};
     createInfo.basePipelineIndex = -1;
@@ -695,6 +698,7 @@ RenderPipeline::~RenderPipeline() = default;
 
 void RenderPipeline::DestroyImpl() {
     RenderPipelineBase::DestroyImpl();
+    PipelineVk::DestroyImpl();
     if (mHandle != VK_NULL_HANDLE) {
         ToBackend(GetDevice())->GetFencedDeleter()->DeleteWhenUnused(mHandle);
         mHandle = VK_NULL_HANDLE;

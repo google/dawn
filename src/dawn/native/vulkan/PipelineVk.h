@@ -1,4 +1,4 @@
-// Copyright 2018 The Dawn & Tint Authors
+// Copyright 2024 The Dawn & Tint Authors
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
@@ -25,42 +25,41 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef SRC_DAWN_NATIVE_VULKAN_COMPUTEPIPELINEVK_H_
-#define SRC_DAWN_NATIVE_VULKAN_COMPUTEPIPELINEVK_H_
+#ifndef SRC_DAWN_NATIVE_VULKAN_PIPELINEVK_H_
+#define SRC_DAWN_NATIVE_VULKAN_PIPELINEVK_H_
 
-#include "dawn/native/ComputePipeline.h"
+#include <memory>
 
 #include "dawn/common/vulkan_platform.h"
-#include "dawn/native/CreatePipelineAsyncEvent.h"
 #include "dawn/native/Error.h"
-#include "dawn/native/vulkan/PipelineVk.h"
+#include "dawn/native/PipelineLayout.h"
+#include "dawn/native/vulkan/RefCountedVkHandle.h"
 
 namespace dawn::native::vulkan {
 
 class Device;
-struct VkPipelineLayoutObject;
+class PipelineLayout;
 
-class ComputePipeline final : public ComputePipelineBase, public PipelineVk {
+class PipelineVk {
   public:
-    static Ref<ComputePipeline> CreateUninitialized(
-        Device* device,
-        const UnpackedPtr<ComputePipelineDescriptor>& descriptor);
+    PipelineVk() = default;
+    ~PipelineVk() = default;
 
-    VkPipeline GetHandle() const;
+    VkPipelineLayout GetVkLayout() const;
+    uint32_t GetInternalImmediateDataSize() const;
 
-    MaybeError InitializeImpl() override;
-
-    // Dawn API
-    void SetLabelImpl() override;
+  protected:
+    MaybeError InitializeBase(PipelineLayout* layout, uint32_t internalImmediateDataSize);
+    void DestroyImpl();
 
   private:
-    ~ComputePipeline() override;
-    void DestroyImpl() override;
-    using ComputePipelineBase::ComputePipelineBase;
+    // Internal immediate data is decided by shader modules and might be different from
+    // pipelines created with same pipeline layout object.
+    int32_t mInternalImmediateDataSize = 0;
 
-    VkPipeline mHandle = VK_NULL_HANDLE;
+    Ref<RefCountedVkHandle<VkPipelineLayout>> mVkPipelineLayout;
 };
 
 }  // namespace dawn::native::vulkan
 
-#endif  // SRC_DAWN_NATIVE_VULKAN_COMPUTEPIPELINEVK_H_
+#endif  // SRC_DAWN_NATIVE_VULKAN_PIPELINEVK_H_

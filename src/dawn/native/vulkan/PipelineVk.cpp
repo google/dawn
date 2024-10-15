@@ -1,4 +1,4 @@
-// Copyright 2018 The Dawn & Tint Authors
+// Copyright 2024 The Dawn & Tint Authors
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
@@ -25,42 +25,30 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef SRC_DAWN_NATIVE_VULKAN_COMPUTEPIPELINEVK_H_
-#define SRC_DAWN_NATIVE_VULKAN_COMPUTEPIPELINEVK_H_
-
-#include "dawn/native/ComputePipeline.h"
-
-#include "dawn/common/vulkan_platform.h"
-#include "dawn/native/CreatePipelineAsyncEvent.h"
-#include "dawn/native/Error.h"
 #include "dawn/native/vulkan/PipelineVk.h"
+#include "dawn/native/vulkan/PipelineLayoutVk.h"
 
 namespace dawn::native::vulkan {
 
-class Device;
-struct VkPipelineLayoutObject;
+VkPipelineLayout PipelineVk::GetVkLayout() const {
+    return mVkPipelineLayout->Get();
+}
 
-class ComputePipeline final : public ComputePipelineBase, public PipelineVk {
-  public:
-    static Ref<ComputePipeline> CreateUninitialized(
-        Device* device,
-        const UnpackedPtr<ComputePipelineDescriptor>& descriptor);
+uint32_t PipelineVk::GetInternalImmediateDataSize() const {
+    return mInternalImmediateDataSize;
+}
 
-    VkPipeline GetHandle() const;
+MaybeError PipelineVk::InitializeBase(PipelineLayout* layout, uint32_t internalImmediateDataSize) {
+    mInternalImmediateDataSize = internalImmediateDataSize;
 
-    MaybeError InitializeImpl() override;
+    DAWN_TRY_ASSIGN(mVkPipelineLayout,
+                    layout->GetOrCreateVkLayoutObject(internalImmediateDataSize));
 
-    // Dawn API
-    void SetLabelImpl() override;
+    return {};
+}
 
-  private:
-    ~ComputePipeline() override;
-    void DestroyImpl() override;
-    using ComputePipelineBase::ComputePipelineBase;
-
-    VkPipeline mHandle = VK_NULL_HANDLE;
-};
+void PipelineVk::DestroyImpl() {
+    mVkPipelineLayout = nullptr;
+}
 
 }  // namespace dawn::native::vulkan
-
-#endif  // SRC_DAWN_NATIVE_VULKAN_COMPUTEPIPELINEVK_H_

@@ -802,6 +802,8 @@ source_set("sources") {
       "vulkan/PipelineCacheVk.h",
       "vulkan/PipelineLayoutVk.cpp",
       "vulkan/PipelineLayoutVk.h",
+      "vulkan/PipelineVk.cpp",
+      "vulkan/PipelineVk.h",
       "vulkan/QuerySetVk.cpp",
       "vulkan/QuerySetVk.h",
       "vulkan/QueueVk.cpp",

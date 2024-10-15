@@ -52,16 +52,20 @@ Ref<ComputePipeline> ComputePipeline::CreateUninitialized(
 
 MaybeError ComputePipeline::InitializeImpl() {
     Device* device = ToBackend(GetDevice());
-    const PipelineLayout* layout = ToBackend(GetLayout());
+    PipelineLayout* layout = ToBackend(GetLayout());
 
     // Vulkan devices need cache UUID field to be serialized into pipeline cache keys.
     StreamIn(&mCacheKey, device->GetDeviceInfo().properties.pipelineCacheUUID);
+
+    // Compute pipeline doesn't have clamp depth feature.
+    // TODO(crbug.com/366291600): Setting immediate data size if needed.
+    DAWN_TRY(InitializeBase(layout, 0));
 
     VkComputePipelineCreateInfo createInfo;
     createInfo.sType = VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO;
     createInfo.pNext = nullptr;
     createInfo.flags = 0;
-    createInfo.layout = layout->GetHandle();
+    createInfo.layout = GetVkLayout();
     createInfo.basePipelineHandle = VkPipeline{};
     createInfo.basePipelineIndex = -1;
 
@@ -150,7 +154,7 @@ ComputePipeline::~ComputePipeline() = default;
 
 void ComputePipeline::DestroyImpl() {
     ComputePipelineBase::DestroyImpl();
-
+    PipelineVk::DestroyImpl();
     if (mHandle != VK_NULL_HANDLE) {
         ToBackend(GetDevice())->GetFencedDeleter()->DeleteWhenUnused(mHandle);
         mHandle = VK_NULL_HANDLE;
