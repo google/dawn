@@ -2,13 +2,13 @@
 using namespace metal;
 
 #define TINT_ISOLATE_UB(VOLATILE_NAME) \
-  volatile bool VOLATILE_NAME = true; \
-  if (VOLATILE_NAME)
+  {volatile bool VOLATILE_NAME = false; if (VOLATILE_NAME) break;}
 
 void f() {
   {
     int i0520 = 0;
-    TINT_ISOLATE_UB(tint_volatile_true) while(true) {
+    while(true) {
+      TINT_ISOLATE_UB(tint_volatile_false)
       if (false) {
       } else {
         break;
@@ -20,7 +20,8 @@ void f() {
   }
   {
     int i62 = 0;
-    TINT_ISOLATE_UB(tint_volatile_true_1) while(true) {
+    while(true) {
+      TINT_ISOLATE_UB(tint_volatile_false_1)
       if (false) {
       } else {
         break;
@@ -32,7 +33,8 @@ void f() {
   }
   {
     int i0520 = 0;
-    TINT_ISOLATE_UB(tint_volatile_true_2) while(true) {
+    while(true) {
+      TINT_ISOLATE_UB(tint_volatile_false_2)
       if (false) {
       } else {
         break;
@@ -44,7 +46,8 @@ void f() {
   }
   {
     int i62 = 0;
-    TINT_ISOLATE_UB(tint_volatile_true_3) while(true) {
+    while(true) {
+      TINT_ISOLATE_UB(tint_volatile_false_3)
       if (false) {
       } else {
         break;
@@ -56,7 +59,8 @@ void f() {
   }
   {
     int i62 = 0;
-    TINT_ISOLATE_UB(tint_volatile_true_4) while(true) {
+    while(true) {
+      TINT_ISOLATE_UB(tint_volatile_false_4)
       if (false) {
       } else {
         break;
@@ -68,7 +72,8 @@ void f() {
   }
   {
     int i60 = 0;
-    TINT_ISOLATE_UB(tint_volatile_true_5) while(true) {
+    while(true) {
+      TINT_ISOLATE_UB(tint_volatile_false_5)
       if (false) {
       } else {
         break;
@@ -80,7 +85,8 @@ void f() {
   }
   {
     int i62 = 0;
-    TINT_ISOLATE_UB(tint_volatile_true_6) while(true) {
+    while(true) {
+      TINT_ISOLATE_UB(tint_volatile_false_6)
       if (false) {
       } else {
         break;
@@ -92,7 +98,8 @@ void f() {
   }
   {
     int i60 = 0;
-    TINT_ISOLATE_UB(tint_volatile_true_7) while(true) {
+    while(true) {
+      TINT_ISOLATE_UB(tint_volatile_false_7)
       if (false) {
       } else {
         break;

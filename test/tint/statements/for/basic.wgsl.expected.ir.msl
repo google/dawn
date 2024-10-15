@@ -2,8 +2,7 @@
 using namespace metal;
 
 #define TINT_ISOLATE_UB(VOLATILE_NAME) \
-  volatile bool VOLATILE_NAME = true; \
-  if (VOLATILE_NAME)
+  {volatile bool VOLATILE_NAME = false; if (VOLATILE_NAME) break;}
 
 void some_loop_body() {
 }
@@ -11,7 +10,8 @@ void some_loop_body() {
 void f() {
   {
     int i = 0;
-    TINT_ISOLATE_UB(tint_volatile_true) while(true) {
+    while(true) {
+      TINT_ISOLATE_UB(tint_volatile_false)
       if ((i < 5)) {
       } else {
         break;

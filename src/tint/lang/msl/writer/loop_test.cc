@@ -47,12 +47,12 @@ TEST_F(MslWriterTest, Loop) {
 using namespace metal;
 
 #define TINT_ISOLATE_UB(VOLATILE_NAME) \
-  volatile bool VOLATILE_NAME = true; \
-  if (VOLATILE_NAME)
+  {volatile bool VOLATILE_NAME = false; if (VOLATILE_NAME) break;}
 
 void a() {
   {
-    TINT_ISOLATE_UB(tint_volatile_true) while(true) {
+    while(true) {
+      TINT_ISOLATE_UB(tint_volatile_false)
       break;
     }
   }
@@ -74,12 +74,12 @@ TEST_F(MslWriterTest, LoopContinueAndBreakIf) {
 using namespace metal;
 
 #define TINT_ISOLATE_UB(VOLATILE_NAME) \
-  volatile bool VOLATILE_NAME = true; \
-  if (VOLATILE_NAME)
+  {volatile bool VOLATILE_NAME = false; if (VOLATILE_NAME) break;}
 
 void a() {
   {
-    TINT_ISOLATE_UB(tint_volatile_true) while(true) {
+    while(true) {
+      TINT_ISOLATE_UB(tint_volatile_false)
       {
         if (true) { break; }
       }
@@ -108,12 +108,12 @@ TEST_F(MslWriterTest, LoopBodyVarInContinue) {
 using namespace metal;
 
 #define TINT_ISOLATE_UB(VOLATILE_NAME) \
-  volatile bool VOLATILE_NAME = true; \
-  if (VOLATILE_NAME)
+  {volatile bool VOLATILE_NAME = false; if (VOLATILE_NAME) break;}
 
 void a() {
   {
-    TINT_ISOLATE_UB(tint_volatile_true) while(true) {
+    while(true) {
+      TINT_ISOLATE_UB(tint_volatile_false)
       bool v = true;
       {
         if (v) { break; }
@@ -144,13 +144,13 @@ TEST_F(MslWriterTest, LoopInitializer) {
 using namespace metal;
 
 #define TINT_ISOLATE_UB(VOLATILE_NAME) \
-  volatile bool VOLATILE_NAME = true; \
-  if (VOLATILE_NAME)
+  {volatile bool VOLATILE_NAME = false; if (VOLATILE_NAME) break;}
 
 void a() {
   {
     bool v = true;
-    TINT_ISOLATE_UB(tint_volatile_true) while(true) {
+    while(true) {
+      TINT_ISOLATE_UB(tint_volatile_false)
       {
         if (v) { break; }
       }

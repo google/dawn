@@ -219,6 +219,12 @@ class Printer : public tint::TextGenerator {
         return array_template_name_;
     }
 
+    /// Lazily generates the TINT_ISOLATE_UB macro, and returns a call to
+    /// the macro, passing in a unique identifier. The call tricks the MSL
+    /// compiler into thinking it might execute a `break`, but otherwise
+    /// has no effect in the generated code.
+    /// Invoke this inside the body of a loop to prevent the MSL compiler
+    /// from inferring the loop never terminates.
     /// @returns a call to the TINT_ISOLATE_UB macro, creating that macro on first call
     std::string IsolateUB() {
         if (isolate_ub_macro_name_.empty()) {
@@ -226,11 +232,10 @@ class Printer : public tint::TextGenerator {
             isolate_ub_macro_name_ = UniqueIdentifier("TINT_ISOLATE_UB");
             Line();
             Line() << "#define " << isolate_ub_macro_name_ << "(VOLATILE_NAME) \\";
-            Line() << "  volatile bool VOLATILE_NAME = true; \\";
-            Line() << "  if (VOLATILE_NAME)";
+            Line() << "  {volatile bool VOLATILE_NAME = false; if (VOLATILE_NAME) break;}";
         }
         StringStream ss;
-        ss << isolate_ub_macro_name_ << "(" << UniqueIdentifier("tint_volatile_true") << ")";
+        ss << isolate_ub_macro_name_ << "(" << UniqueIdentifier("tint_volatile_false") << ")";
         return ss.str();
     }
 
@@ -668,9 +673,10 @@ class Printer : public tint::TextGenerator {
             ScopedIndent init(current_buffer_);
             EmitBlock(l->Initializer());
 
-            Line() << IsolateUB() << " while(true) {";
+            Line() << "while(true) {";
             {
                 ScopedIndent si(current_buffer_);
+                Line() << IsolateUB();
                 EmitBlock(l->Body());
             }
             Line() << "}";

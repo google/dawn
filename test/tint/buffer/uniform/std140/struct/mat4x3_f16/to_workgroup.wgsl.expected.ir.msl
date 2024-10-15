@@ -39,8 +39,7 @@ struct tint_module_vars_struct {
 };
 
 #define TINT_ISOLATE_UB(VOLATILE_NAME) \
-  volatile bool VOLATILE_NAME = true; \
-  if (VOLATILE_NAME)
+  {volatile bool VOLATILE_NAME = false; if (VOLATILE_NAME) break;}
 
 struct tint_symbol_1 {
   tint_array<S_packed_vec3, 4> tint_symbol;
@@ -83,7 +82,8 @@ void f_inner(uint tint_local_index, tint_module_vars_struct tint_module_vars) {
   {
     uint v_9 = 0u;
     v_9 = tint_local_index;
-    TINT_ISOLATE_UB(tint_volatile_true) while(true) {
+    while(true) {
+      TINT_ISOLATE_UB(tint_volatile_false)
       uint const v_10 = v_9;
       if ((v_10 >= 4u)) {
         break;

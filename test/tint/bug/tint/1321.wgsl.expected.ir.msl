@@ -14,8 +14,7 @@ struct tint_array {
 };
 
 #define TINT_ISOLATE_UB(VOLATILE_NAME) \
-  volatile bool VOLATILE_NAME = true; \
-  if (VOLATILE_NAME)
+  {volatile bool VOLATILE_NAME = false; if (VOLATILE_NAME) break;}
 
 int foo() {
   return 1;
@@ -25,7 +24,8 @@ fragment void tint_symbol() {
   tint_array<float, 4> arr = tint_array<float, 4>{};
   {
     thread float* const a = (&arr[foo()]);
-    TINT_ISOLATE_UB(tint_volatile_true) while(true) {
+    while(true) {
+      TINT_ISOLATE_UB(tint_volatile_false)
       float const x = (*a);
       break;
     }

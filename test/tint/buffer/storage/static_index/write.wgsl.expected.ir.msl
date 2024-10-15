@@ -19,8 +19,7 @@ struct tint_packed_vec3_f32_array_element {
 };
 
 #define TINT_ISOLATE_UB(VOLATILE_NAME) \
-  volatile bool VOLATILE_NAME = true; \
-  if (VOLATILE_NAME)
+  {volatile bool VOLATILE_NAME = false; if (VOLATILE_NAME) break;}
 
 struct Inner {
   /* 0x0000 */ int scalar_i32;
@@ -69,7 +68,8 @@ void tint_store_and_preserve_padding_3(device tint_array<tint_packed_vec3_f32_ar
   {
     uint v = 0u;
     v = 0u;
-    TINT_ISOLATE_UB(tint_volatile_true) while(true) {
+    while(true) {
+      TINT_ISOLATE_UB(tint_volatile_false)
       uint const v_1 = v;
       if ((v_1 >= 2u)) {
         break;

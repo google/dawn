@@ -30,8 +30,7 @@ struct S {
 };
 
 #define TINT_ISOLATE_UB(VOLATILE_NAME) \
-  volatile bool VOLATILE_NAME = true; \
-  if (VOLATILE_NAME)
+  {volatile bool VOLATILE_NAME = false; if (VOLATILE_NAME) break;}
 
 struct tint_module_vars_struct {
   const constant S_packed_vec3* ubuffer;
@@ -56,7 +55,8 @@ void tint_store_and_preserve_padding_1(device tint_array<tint_packed_vec3_u32_ar
   {
     uint v = 0u;
     v = 0u;
-    TINT_ISOLATE_UB(tint_volatile_true) while(true) {
+    while(true) {
+      TINT_ISOLATE_UB(tint_volatile_false)
       uint const v_1 = v;
       if ((v_1 >= 4u)) {
         break;

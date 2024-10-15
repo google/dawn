@@ -32,8 +32,7 @@ struct tint_module_vars_struct {
 };
 
 #define TINT_ISOLATE_UB(VOLATILE_NAME) \
-  volatile bool VOLATILE_NAME = true; \
-  if (VOLATILE_NAME)
+  {volatile bool VOLATILE_NAME = false; if (VOLATILE_NAME) break;}
 
 uint ConvertToFp16FloatValue(float fp32) {
   return 1u;
@@ -58,7 +57,8 @@ void tint_symbol_inner(uint3 GlobalInvocationID, tint_module_vars_struct tint_mo
   uint4 dstColorBits = tint_v4f32_to_v4u32(dstColor);
   {
     uint i = 0u;
-    TINT_ISOLATE_UB(tint_volatile_true) while(true) {
+    while(true) {
+      TINT_ISOLATE_UB(tint_volatile_false)
       if ((i < (*tint_module_vars.uniforms).channelCount)) {
       } else {
         break;

@@ -33,8 +33,7 @@ struct tint_module_vars_struct {
 };
 
 #define TINT_ISOLATE_UB(VOLATILE_NAME) \
-  volatile bool VOLATILE_NAME = true; \
-  if (VOLATILE_NAME)
+  {volatile bool VOLATILE_NAME = false; if (VOLATILE_NAME) break;}
 
 struct tint_symbol_3 {
   tint_array<tint_array<float, 64>, 64> tint_symbol_1;
@@ -90,7 +89,8 @@ void tint_symbol_inner(uint3 local_id, uint3 global_id, uint tint_local_index, t
   {
     uint v_3 = 0u;
     v_3 = tint_local_index;
-    TINT_ISOLATE_UB(tint_volatile_true) while(true) {
+    while(true) {
+      TINT_ISOLATE_UB(tint_volatile_false)
       uint const v_4 = v_3;
       if ((v_4 >= 4096u)) {
         break;
@@ -114,7 +114,8 @@ void tint_symbol_inner(uint3 local_id, uint3 global_id, uint tint_local_index, t
   tint_array<float, 4> BCached = {};
   {
     uint index = 0u;
-    TINT_ISOLATE_UB(tint_volatile_true_1) while(true) {
+    while(true) {
+      TINT_ISOLATE_UB(tint_volatile_false_1)
       if ((index < 16u)) {
       } else {
         break;
@@ -132,21 +133,24 @@ void tint_symbol_inner(uint3 local_id, uint3 global_id, uint tint_local_index, t
   uint const tileRowB = (local_id[1u] * RowPerThreadB);
   {
     uint t = 0u;
-    TINT_ISOLATE_UB(tint_volatile_true_2) while(true) {
+    while(true) {
+      TINT_ISOLATE_UB(tint_volatile_false_2)
       if ((t < numTiles)) {
       } else {
         break;
       }
       {
         uint innerRow = 0u;
-        TINT_ISOLATE_UB(tint_volatile_true_3) while(true) {
+        while(true) {
+          TINT_ISOLATE_UB(tint_volatile_false_3)
           if ((innerRow < 4u)) {
           } else {
             break;
           }
           {
             uint innerCol = 0u;
-            TINT_ISOLATE_UB(tint_volatile_true_4) while(true) {
+            while(true) {
+              TINT_ISOLATE_UB(tint_volatile_false_4)
               if ((innerCol < ColPerThreadA)) {
               } else {
                 break;
@@ -168,14 +172,16 @@ void tint_symbol_inner(uint3 local_id, uint3 global_id, uint tint_local_index, t
       }
       {
         uint innerRow = 0u;
-        TINT_ISOLATE_UB(tint_volatile_true_5) while(true) {
+        while(true) {
+          TINT_ISOLATE_UB(tint_volatile_false_5)
           if ((innerRow < RowPerThreadB)) {
           } else {
             break;
           }
           {
             uint innerCol = 0u;
-            TINT_ISOLATE_UB(tint_volatile_true_6) while(true) {
+            while(true) {
+              TINT_ISOLATE_UB(tint_volatile_false_6)
               if ((innerCol < 4u)) {
               } else {
                 break;
@@ -199,14 +205,16 @@ void tint_symbol_inner(uint3 local_id, uint3 global_id, uint tint_local_index, t
       threadgroup_barrier(mem_flags::mem_threadgroup);
       {
         uint k = 0u;
-        TINT_ISOLATE_UB(tint_volatile_true_7) while(true) {
+        while(true) {
+          TINT_ISOLATE_UB(tint_volatile_false_7)
           if ((k < 64u)) {
           } else {
             break;
           }
           {
             uint inner = 0u;
-            TINT_ISOLATE_UB(tint_volatile_true_8) while(true) {
+            while(true) {
+              TINT_ISOLATE_UB(tint_volatile_false_8)
               if ((inner < 4u)) {
               } else {
                 break;
@@ -220,7 +228,8 @@ void tint_symbol_inner(uint3 local_id, uint3 global_id, uint tint_local_index, t
           }
           {
             uint innerRow = 0u;
-            TINT_ISOLATE_UB(tint_volatile_true_9) while(true) {
+            while(true) {
+              TINT_ISOLATE_UB(tint_volatile_false_9)
               if ((innerRow < 4u)) {
               } else {
                 break;
@@ -228,7 +237,8 @@ void tint_symbol_inner(uint3 local_id, uint3 global_id, uint tint_local_index, t
               ACached = (*tint_module_vars.mm_Asub)[(tileRow + innerRow)][k];
               {
                 uint innerCol = 0u;
-                TINT_ISOLATE_UB(tint_volatile_true_10) while(true) {
+                while(true) {
+                  TINT_ISOLATE_UB(tint_volatile_false_10)
                   if ((innerCol < 4u)) {
                   } else {
                     break;
@@ -262,14 +272,16 @@ void tint_symbol_inner(uint3 local_id, uint3 global_id, uint tint_local_index, t
   }
   {
     uint innerRow = 0u;
-    TINT_ISOLATE_UB(tint_volatile_true_11) while(true) {
+    while(true) {
+      TINT_ISOLATE_UB(tint_volatile_false_11)
       if ((innerRow < 4u)) {
       } else {
         break;
       }
       {
         uint innerCol = 0u;
-        TINT_ISOLATE_UB(tint_volatile_true_12) while(true) {
+        while(true) {
+          TINT_ISOLATE_UB(tint_volatile_false_12)
           if ((innerCol < 4u)) {
           } else {
             break;

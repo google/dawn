@@ -25,8 +25,7 @@ struct tint_array {
 };
 
 #define TINT_ISOLATE_UB(VOLATILE_NAME) \
-  volatile bool VOLATILE_NAME = true; \
-  if (VOLATILE_NAME)
+  {volatile bool VOLATILE_NAME = false; if (VOLATILE_NAME) break;}
 
 int idx1(tint_module_vars_struct tint_module_vars) {
   (*tint_module_vars.i) = ((*tint_module_vars.i) + 1u);
@@ -48,7 +47,8 @@ void foo(tint_module_vars_struct tint_module_vars) {
   {
     thread float* const v_1 = (&a[idx1(tint_module_vars)]);
     (*v_1) = ((*v_1) * 2.0f);
-    TINT_ISOLATE_UB(tint_volatile_true) while(true) {
+    while(true) {
+      TINT_ISOLATE_UB(tint_volatile_false)
       if ((a[idx2(tint_module_vars)] < 10.0f)) {
       } else {
         break;
