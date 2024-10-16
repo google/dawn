@@ -280,16 +280,10 @@ struct State {
                     to_destroy.Push(lve);
                 },
                 [&](core::ir::Access* a) {
-                    if (!a->Indices().IsEmpty()) {
-                        // Remove the pointer from the source and destination type.
-                        a->SetOperand(core::ir::Access::kObjectOperandOffset, object);
-                        a->Result(0)->SetType(a->Result(0)->Type()->UnwrapPtr());
-                        ReplaceInputPointerUses(var, a->Result(0));
-                    } else {
-                        // Fold the access away and replace its uses.
-                        ReplaceInputPointerUses(var, a->Result(0));
-                        to_destroy.Push(a);
-                    }
+                    // Remove the pointer from the source and destination type.
+                    a->SetOperand(core::ir::Access::kObjectOperandOffset, object);
+                    a->Result(0)->SetType(a->Result(0)->Type()->UnwrapPtr());
+                    ReplaceInputPointerUses(var, a->Result(0));
                 },
                 TINT_ICE_ON_NO_MATCH);
         });

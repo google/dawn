@@ -645,59 +645,6 @@ $B1: {  # root
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(SpirvReader_ShaderIOTest, Input_AccessChains) {
-    auto* lid = b.Var("lid", ty.ptr(core::AddressSpace::kIn, ty.vec3<u32>()));
-    {
-        core::IOAttributes attributes;
-        attributes.builtin = core::BuiltinValue::kLocalInvocationId;
-        lid->SetAttributes(std::move(attributes));
-    }
-    mod.root_block->Append(lid);
-
-    auto* ep = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kCompute);
-    ep->SetWorkgroupSize(1, 1, 1);
-    b.Append(ep->Block(), [&] {
-        auto* access_1 = b.Access(ty.ptr(core::AddressSpace::kIn, ty.vec3<u32>()), lid);
-        auto* access_2 = b.Access(ty.ptr(core::AddressSpace::kIn, ty.vec3<u32>()), access_1);
-        auto* vec = b.Load(access_2);
-        auto* z = b.LoadVectorElement(access_2, 2_u);
-        b.Multiply<vec3<u32>>(vec, z);
-        b.Return(ep);
-    });
-
-    auto* src = R"(
-$B1: {  # root
-  %lid:ptr<__in, vec3<u32>, read> = var @builtin(local_invocation_id)
-}
-
-%foo = @compute @workgroup_size(1, 1, 1) func():void {
-  $B2: {
-    %3:ptr<__in, vec3<u32>, read> = access %lid
-    %4:ptr<__in, vec3<u32>, read> = access %3
-    %5:vec3<u32> = load %4
-    %6:u32 = load_vector_element %4, 2u
-    %7:vec3<u32> = mul %5, %6
-    ret
-  }
-}
-)";
-    EXPECT_EQ(src, str());
-
-    auto* expect = R"(
-%foo = @compute @workgroup_size(1, 1, 1) func(%lid:vec3<u32> [@local_invocation_id]):void {
-  $B1: {
-    %3:u32 = access %lid, 2u
-    %4:vec3<u32> = mul %lid, %3
-    ret
-  }
-}
-)";
-
-    Run(ShaderIO);
-
-    EXPECT_EQ(expect, str());
-}
-
 TEST_F(SpirvReader_ShaderIOTest, Inputs_Struct_LocationOnEachMember) {
     auto* colors_str = ty.Struct(
         mod.symbols.New("Colors"),
@@ -2026,72 +1973,6 @@ $B1: {  # root
     %6:void = call %foo_inner
     %7:vec4<f32> = load %color
     ret %7
-  }
-}
-)";
-
-    Run(ShaderIO);
-
-    EXPECT_EQ(expect, str());
-}
-
-TEST_F(SpirvReader_ShaderIOTest, Output_AccessChain) {
-    auto* color = b.Var("color", ty.ptr(core::AddressSpace::kOut, ty.vec4<f32>()));
-    {
-        core::IOAttributes attributes;
-        attributes.location = 1u;
-        color->SetAttributes(std::move(attributes));
-    }
-    mod.root_block->Append(color);
-
-    auto* ep = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
-    b.Append(ep->Block(), [&] {  //
-        auto* access_1 = b.Access(ty.ptr(core::AddressSpace::kOut, ty.vec4<f32>()), color);
-        auto* access_2 = b.Access(ty.ptr(core::AddressSpace::kOut, ty.vec4<f32>()), access_1);
-        auto* load = b.LoadVectorElement(access_2, 2_u);
-        auto* mul = b.Multiply<vec4<f32>>(b.Splat<vec4<f32>>(1_f), load);
-        b.Store(access_2, mul);
-        b.Return(ep);
-    });
-
-    auto* src = R"(
-$B1: {  # root
-  %color:ptr<__out, vec4<f32>, read_write> = var @location(1)
-}
-
-%foo = @fragment func():void {
-  $B2: {
-    %3:ptr<__out, vec4<f32>, read_write> = access %color
-    %4:ptr<__out, vec4<f32>, read_write> = access %3
-    %5:f32 = load_vector_element %4, 2u
-    %6:vec4<f32> = mul vec4<f32>(1.0f), %5
-    store %4, %6
-    ret
-  }
-}
-)";
-    EXPECT_EQ(src, str());
-
-    auto* expect = R"(
-$B1: {  # root
-  %color:ptr<private, vec4<f32>, read_write> = var
-}
-
-%foo_inner = func():void {
-  $B2: {
-    %3:ptr<private, vec4<f32>, read_write> = access %color
-    %4:ptr<private, vec4<f32>, read_write> = access %3
-    %5:f32 = load_vector_element %4, 2u
-    %6:vec4<f32> = mul vec4<f32>(1.0f), %5
-    store %4, %6
-    ret
-  }
-}
-%foo = @fragment func():vec4<f32> [@location(1)] {
-  $B3: {
-    %8:void = call %foo_inner
-    %9:vec4<f32> = load %color
-    ret %9
   }
 }
 )";

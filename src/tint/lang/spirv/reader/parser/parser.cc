@@ -549,6 +549,12 @@ class Parser {
         }
         auto* base = Value(inst.GetSingleWordOperand(2));
 
+        if (indices.IsEmpty()) {
+            // There are no indices, so just forward the base object.
+            AddValue(inst.result_id(), base);
+            return;
+        }
+
         // Propagate the access mode of the base object.
         auto access_mode = core::Access::kUndefined;
         if (auto* ptr = base->Type()->As<core::type::Pointer>()) {

@@ -140,11 +140,6 @@ struct State {
                     sve->InsertBefore(store);
                     to_destroy.Push(store);
                 },
-                [&](core::ir::Access* noop_access) {
-                    TINT_ASSERT(noop_access->Indices().IsEmpty());
-                    ReplaceAccessUses(noop_access, object, index);
-                    to_destroy.Push(noop_access);
-                },
                 TINT_ICE_ON_NO_MATCH);
         });
 

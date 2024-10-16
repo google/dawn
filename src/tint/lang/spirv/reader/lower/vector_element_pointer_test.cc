@@ -65,64 +65,6 @@ TEST_F(SpirvReader_VectorElementPointerTest, NonPointerAccess) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(SpirvReader_VectorElementPointerTest, Access_NoIndices) {
-    auto* foo = b.Function("foo", ty.vec4<u32>());
-    b.Append(foo->Block(), [&] {
-        auto* vec = b.Var<function, vec4<u32>>("vec");
-        auto* access = b.Access<ptr<function, vec4<u32>>>(vec);
-        b.Return(foo, b.Load(access));
-    });
-
-    auto* src = R"(
-%foo = func():vec4<u32> {
-  $B1: {
-    %vec:ptr<function, vec4<u32>, read_write> = var
-    %3:ptr<function, vec4<u32>, read_write> = access %vec
-    %4:vec4<u32> = load %3
-    ret %4
-  }
-}
-)";
-    EXPECT_EQ(src, str());
-
-    auto* expect = src;
-
-    Run(VectorElementPointer);
-
-    EXPECT_EQ(expect, str());
-}
-
-TEST_F(SpirvReader_VectorElementPointerTest, Access_NoIndices_Chain) {
-    auto* foo = b.Function("foo", ty.vec4<u32>());
-    b.Append(foo->Block(), [&] {
-        auto* vec = b.Var<function, vec4<u32>>("vec");
-        auto* access_1 = b.Access<ptr<function, vec4<u32>>>(vec);
-        auto* access_2 = b.Access<ptr<function, vec4<u32>>>(access_1);
-        auto* access_3 = b.Access<ptr<function, vec4<u32>>>(access_2);
-        b.Return(foo, b.Load(access_3));
-    });
-
-    auto* src = R"(
-%foo = func():vec4<u32> {
-  $B1: {
-    %vec:ptr<function, vec4<u32>, read_write> = var
-    %3:ptr<function, vec4<u32>, read_write> = access %vec
-    %4:ptr<function, vec4<u32>, read_write> = access %3
-    %5:ptr<function, vec4<u32>, read_write> = access %4
-    %6:vec4<u32> = load %5
-    ret %6
-  }
-}
-)";
-    EXPECT_EQ(src, str());
-
-    auto* expect = src;
-
-    Run(VectorElementPointer);
-
-    EXPECT_EQ(expect, str());
-}
-
 TEST_F(SpirvReader_VectorElementPointerTest, Access_Component_NoUse) {
     auto* foo = b.Function("foo", ty.void_());
     b.Append(foo->Block(), [&] {
@@ -268,44 +210,6 @@ $B1: {  # root
     %vec:ptr<function, vec4<u32>, read_write> = var
     %4:u32 = load %dyn_index
     store_vector_element %vec, %4, 42u
-    ret
-  }
-}
-)";
-
-    Run(VectorElementPointer);
-
-    EXPECT_EQ(expect, str());
-}
-
-TEST_F(SpirvReader_VectorElementPointerTest, AccessBeforeUse) {
-    auto* foo = b.Function("foo", ty.void_());
-    b.Append(foo->Block(), [&] {
-        auto* vec = b.Var<function, vec4<u32>>("vec");
-        auto* access_1 = b.Access<ptr<function, u32>>(vec, 2_u);
-        auto* access_2 = b.Access<ptr<function, u32>>(access_1);
-        b.Store(access_2, 42_u);
-        b.Return(foo);
-    });
-
-    auto* src = R"(
-%foo = func():void {
-  $B1: {
-    %vec:ptr<function, vec4<u32>, read_write> = var
-    %3:ptr<function, u32, read_write> = access %vec, 2u
-    %4:ptr<function, u32, read_write> = access %3
-    store %4, 42u
-    ret
-  }
-}
-)";
-    EXPECT_EQ(src, str());
-
-    auto* expect = R"(
-%foo = func():void {
-  $B1: {
-    %vec:ptr<function, vec4<u32>, read_write> = var
-    store_vector_element %vec, 2u, 42u
     ret
   }
 }

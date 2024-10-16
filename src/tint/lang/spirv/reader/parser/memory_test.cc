@@ -726,9 +726,7 @@ TEST_F(SpirvParserTest, Access_NoIndices) {
 %main = @compute @workgroup_size(1, 1, 1) func():void {
   $B1: {
     %2:ptr<function, u32, read_write> = var
-    %3:ptr<function, u32, read_write> = access %2
-    %4:ptr<function, u32, read_write> = access %3
-    %5:u32 = load %4
+    %3:u32 = load %2
     ret
   }
 )");
