@@ -77,4 +77,16 @@
         }
         return {this->data, this->length};
     }
+
+    template <typename View,
+              typename = std::enable_if_t<std::is_constructible_v<View, const char*, size_t>>>
+    explicit operator View() const {
+        if (this->length == wgpu::kStrlen) {
+            if (IsUndefined()) {
+                return {};
+            }
+            return {this->data};
+        }
+        return {this->data, this->length};
+    }
 {% endmacro %}
