@@ -33,6 +33,8 @@ class JNIContext;
 
 // Converts Kotlin objects representing Dawn structures into native structures that can be passed
 // into the native Dawn API.
+jobject ToKotlin(JNIEnv* env, const WGPUStringView* s);
+
 {% for structure in by_category['structure'] if include_structure(structure) %}
     jobject ToKotlin(JNIEnv *env, const {{ as_cType(structure.name) }}* input);
     void ToNative(JNIContext* c, JNIEnv* env, jobject obj, {{ as_cType(structure.name) }}* converted);
