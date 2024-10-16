@@ -596,10 +596,15 @@ struct State {
                         auto* access = b.Access(ty.u32(), indices_param, u32(index_index++));
                         return access->Result(0);
                     });
-                    auto* access = b.Access(old_param->Type(), root_ptr, std::move(chain));
+
+                    auto* new_ptr = root_ptr;
+                    if (!chain.IsEmpty()) {
+                        new_ptr =
+                            b.Access(old_param->Type(), root_ptr, std::move(chain))->Result(0);
+                    }
 
                     // Replace the now removed parameter value with the access instruction
-                    old_param->ReplaceAllUsesWith(access->Result(0));
+                    old_param->ReplaceAllUsesWith(new_ptr);
                 } else if (HandleNeedsTransforming(old_param)) {
                     auto* load = b.Load(root_ptr);
 

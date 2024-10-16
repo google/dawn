@@ -837,14 +837,13 @@ $B1: {  # root
 
 %a = func(%pre:i32, %post:i32):i32 {
   $B2: {
-    %5:ptr<uniform, i32, read> = access %U
-    %6:i32 = load %5
-    ret %6
+    %5:i32 = load %U
+    ret %5
   }
 }
 %b = func():void {
   $B3: {
-    %8:i32 = call %a, 10i, 20i
+    %7:i32 = call %a, 10i, 20i
     ret
   }
 }
@@ -2703,14 +2702,13 @@ $B1: {  # root
 
 %a = func(%pre:i32, %post:i32):i32 {
   $B2: {
-    %5:ptr<private, i32, read_write> = access %P
-    %6:i32 = load %5
-    ret %6
+    %5:i32 = load %P
+    ret %5
   }
 }
 %b = func():void {
   $B3: {
-    %8:i32 = call %a, 10i, 20i
+    %7:i32 = call %a, 10i, 20i
     ret
   }
 }
@@ -2774,14 +2772,13 @@ $B1: {  # root
 
 %a = func(%pre:i32, %post:i32):void {
   $B2: {
-    %5:ptr<private, i32, read_write> = access %P
-    store %5, 42i
+    store %P, 42i
     ret
   }
 }
 %b = func():void {
   $B3: {
-    %7:void = call %a, 10i, 20i
+    %6:void = call %a, 10i, 20i
     ret
   }
 }
@@ -3168,33 +3165,32 @@ $B1: {  # root
 
 %a = func(%pre:i32, %post:i32):i32 {
   $B2: {
-    %7:ptr<private, i32, read_write> = access %Pi
-    %8:i32 = load %7
-    ret %8
+    %7:i32 = load %Pi
+    ret %7
   }
 }
 %a_1 = func(%pre_1:i32, %post_1:i32):i32 {  # %a_1: 'a', %pre_1: 'pre', %post_1: 'post'
   $B3: {
-    %12:ptr<private, i32, read_write> = access %Ps, 0u
-    %13:i32 = load %12
-    ret %13
+    %11:ptr<private, i32, read_write> = access %Ps, 0u
+    %12:i32 = load %11
+    ret %12
   }
 }
 %a_2 = func(%pre_2:i32, %p_indices:array<u32, 1>, %post_2:i32):i32 {  # %a_2: 'a', %pre_2: 'pre', %post_2: 'post'
   $B4: {
-    %18:u32 = access %p_indices, 0u
-    %19:ptr<private, i32, read_write> = access %Pa, %18
-    %20:i32 = load %19
-    ret %20
+    %17:u32 = access %p_indices, 0u
+    %18:ptr<private, i32, read_write> = access %Pa, %17
+    %19:i32 = load %18
+    ret %19
   }
 }
 %b = func():void {
   $B5: {
-    %22:i32 = call %a, 10i, 20i
-    %23:i32 = call %a_1, 30i, 40i
-    %24:u32 = convert 2i
-    %25:array<u32, 1> = construct %24
-    %26:i32 = call %a_2, 50i, %25, 60i
+    %21:i32 = call %a, 10i, 20i
+    %22:i32 = call %a_1, 30i, 40i
+    %23:u32 = convert 2i
+    %24:array<u32, 1> = construct %23
+    %25:i32 = call %a_2, 50i, %24, 60i
     ret
   }
 }
@@ -4058,15 +4054,14 @@ TEST_F(IR_DirectVariableAccessTest_FunctionAS, Enabled_Param_ptr_i32_read) {
     auto* expect = R"(
 %a = func(%pre:i32, %p_root:ptr<function, i32, read_write>, %post:i32):i32 {
   $B1: {
-    %5:ptr<function, i32, read_write> = access %p_root
-    %6:i32 = load %5
-    ret %6
+    %5:i32 = load %p_root
+    ret %5
   }
 }
 %b = func():void {
   $B2: {
     %F:ptr<function, i32, read_write> = var
-    %9:i32 = call %a, 10i, %F, 20i
+    %8:i32 = call %a, 10i, %F, 20i
     ret
   }
 }
@@ -4118,15 +4113,14 @@ TEST_F(IR_DirectVariableAccessTest_FunctionAS, Enabled_Param_ptr_i32_write) {
     auto* expect = R"(
 %a = func(%pre:i32, %p_root:ptr<function, i32, read_write>, %post:i32):void {
   $B1: {
-    %5:ptr<function, i32, read_write> = access %p_root
-    store %5, 42i
+    store %p_root, 42i
     ret
   }
 }
 %b = func():void {
   $B2: {
     %F:ptr<function, i32, read_write> = var
-    %8:void = call %a, 10i, %F, 20i
+    %7:void = call %a, 10i, %F, 20i
     ret
   }
 }
@@ -4351,24 +4345,23 @@ str = struct @align(4) {
 
 %a = func(%pre:i32, %p_root:ptr<function, i32, read_write>, %post:i32):i32 {
   $B1: {
-    %5:ptr<function, i32, read_write> = access %p_root
-    %6:i32 = load %5
-    ret %6
+    %5:i32 = load %p_root
+    ret %5
   }
 }
 %a_1 = func(%pre_1:i32, %p_root_1:ptr<function, str, read_write>, %post_1:i32):i32 {  # %a_1: 'a', %pre_1: 'pre', %p_root_1: 'p_root', %post_1: 'post'
   $B2: {
-    %11:ptr<function, i32, read_write> = access %p_root_1, 0u
-    %12:i32 = load %11
-    ret %12
+    %10:ptr<function, i32, read_write> = access %p_root_1, 0u
+    %11:i32 = load %10
+    ret %11
   }
 }
 %a_2 = func(%pre_2:i32, %p_root_2:ptr<function, array<i32, 4>, read_write>, %p_indices:array<u32, 1>, %post_2:i32):i32 {  # %a_2: 'a', %pre_2: 'pre', %p_root_2: 'p_root', %post_2: 'post'
   $B3: {
-    %18:u32 = access %p_indices, 0u
-    %19:ptr<function, i32, read_write> = access %p_root_2, %18
-    %20:i32 = load %19
-    ret %20
+    %17:u32 = access %p_indices, 0u
+    %18:ptr<function, i32, read_write> = access %p_root_2, %17
+    %19:i32 = load %18
+    ret %19
   }
 }
 %b = func():void {
@@ -4376,11 +4369,11 @@ str = struct @align(4) {
     %Fi:ptr<function, i32, read_write> = var
     %Fs:ptr<function, str, read_write> = var
     %Fa:ptr<function, array<i32, 4>, read_write> = var
-    %25:i32 = call %a, 10i, %Fi, 20i
-    %26:i32 = call %a_1, 30i, %Fs, 40i
-    %27:u32 = convert 2i
-    %28:array<u32, 1> = construct %27
-    %29:i32 = call %a_2, 50i, %Fa, %28, 60i
+    %24:i32 = call %a, 10i, %Fi, 20i
+    %25:i32 = call %a_1, 30i, %Fs, 40i
+    %26:u32 = convert 2i
+    %27:array<u32, 1> = construct %26
+    %28:i32 = call %a_2, 50i, %Fa, %27, 60i
     ret
   }
 }
@@ -5808,14 +5801,13 @@ $B1: {  # root
 
 %len = func():u32 {
   $B2: {
-    %3:ptr<storage, array<f32>, read_write> = access %S
-    %4:u32 = arrayLength %3
-    ret %4
+    %3:u32 = arrayLength %S
+    ret %3
   }
 }
 %b = func():void {
   $B3: {
-    %6:u32 = call %len
+    %5:u32 = call %len
     ret
   }
 }
@@ -5875,14 +5867,13 @@ $B1: {  # root
 
 %load = func():i32 {
   $B2: {
-    %3:ptr<workgroup, atomic<i32>, read_write> = access %W
-    %4:i32 = atomicLoad %3
-    ret %4
+    %3:i32 = atomicLoad %W
+    ret %3
   }
 }
 %b = func():void {
   $B3: {
-    %6:i32 = call %load
+    %5:i32 = call %load
     ret
   }
 }
@@ -6155,95 +6146,92 @@ $B1: {  # root
 
 %fn_u = func():vec4<i32> {
   $B2: {
-    %14:ptr<uniform, vec4<i32>, read> = access %U
-    %15:vec4<i32> = load %14
-    ret %15
+    %14:vec4<i32> = load %U
+    ret %14
   }
 }
 %fn_u_1 = func():vec4<i32> {  # %fn_u_1: 'fn_u'
   $B3: {
-    %17:ptr<uniform, vec4<i32>, read> = access %U_str, 0u
-    %18:vec4<i32> = load %17
-    ret %18
+    %16:ptr<uniform, vec4<i32>, read> = access %U_str, 0u
+    %17:vec4<i32> = load %16
+    ret %17
   }
 }
 %fn_u_2 = func(%p_indices:array<u32, 1>):vec4<i32> {  # %fn_u_2: 'fn_u'
   $B4: {
-    %21:u32 = access %p_indices, 0u
-    %22:ptr<uniform, vec4<i32>, read> = access %U_arr, %21
-    %23:vec4<i32> = load %22
-    ret %23
+    %20:u32 = access %p_indices, 0u
+    %21:ptr<uniform, vec4<i32>, read> = access %U_arr, %20
+    %22:vec4<i32> = load %21
+    ret %22
   }
 }
 %fn_u_3 = func(%p_indices_1:array<u32, 2>):vec4<i32> {  # %fn_u_3: 'fn_u', %p_indices_1: 'p_indices'
   $B5: {
-    %26:u32 = access %p_indices_1, 0u
-    %27:u32 = access %p_indices_1, 1u
-    %28:ptr<uniform, vec4<i32>, read> = access %U_arr_arr, %26, %27
-    %29:vec4<i32> = load %28
-    ret %29
+    %25:u32 = access %p_indices_1, 0u
+    %26:u32 = access %p_indices_1, 1u
+    %27:ptr<uniform, vec4<i32>, read> = access %U_arr_arr, %25, %26
+    %28:vec4<i32> = load %27
+    ret %28
   }
 }
 %fn_s = func():vec4<i32> {
   $B6: {
-    %31:ptr<storage, vec4<i32>, read> = access %S
-    %32:vec4<i32> = load %31
-    ret %32
+    %30:vec4<i32> = load %S
+    ret %30
   }
 }
 %fn_s_1 = func():vec4<i32> {  # %fn_s_1: 'fn_s'
   $B7: {
-    %34:ptr<storage, vec4<i32>, read> = access %S_str, 0u
-    %35:vec4<i32> = load %34
-    ret %35
+    %32:ptr<storage, vec4<i32>, read> = access %S_str, 0u
+    %33:vec4<i32> = load %32
+    ret %33
   }
 }
 %fn_s_2 = func(%p_indices_2:array<u32, 1>):vec4<i32> {  # %fn_s_2: 'fn_s', %p_indices_2: 'p_indices'
   $B8: {
-    %38:u32 = access %p_indices_2, 0u
-    %39:ptr<storage, vec4<i32>, read> = access %S_arr, %38
-    %40:vec4<i32> = load %39
-    ret %40
+    %36:u32 = access %p_indices_2, 0u
+    %37:ptr<storage, vec4<i32>, read> = access %S_arr, %36
+    %38:vec4<i32> = load %37
+    ret %38
   }
 }
 %fn_s_3 = func(%p_indices_3:array<u32, 2>):vec4<i32> {  # %fn_s_3: 'fn_s', %p_indices_3: 'p_indices'
   $B9: {
-    %43:u32 = access %p_indices_3, 0u
-    %44:u32 = access %p_indices_3, 1u
-    %45:ptr<storage, vec4<i32>, read> = access %S_arr_arr, %43, %44
-    %46:vec4<i32> = load %45
-    ret %46
+    %41:u32 = access %p_indices_3, 0u
+    %42:u32 = access %p_indices_3, 1u
+    %43:ptr<storage, vec4<i32>, read> = access %S_arr_arr, %41, %42
+    %44:vec4<i32> = load %43
+    ret %44
   }
 }
 %fn_w = func():vec4<i32> {
   $B10: {
-    %48:ptr<workgroup, vec4<i32>, read_write> = access %W
-    %49:vec4<i32> = load %48
-    ret %49
+    %46:vec4<i32> = load %W
+    ret %46
   }
 }
 %fn_w_1 = func():vec4<i32> {  # %fn_w_1: 'fn_w'
   $B11: {
-    %51:ptr<workgroup, vec4<i32>, read_write> = access %W_str, 0u
-    %52:vec4<i32> = load %51
-    ret %52
+    %48:ptr<workgroup, vec4<i32>, read_write> = access %W_str, 0u
+    %49:vec4<i32> = load %48
+    ret %49
   }
 }
 %fn_w_2 = func(%p_indices_4:array<u32, 1>):vec4<i32> {  # %fn_w_2: 'fn_w', %p_indices_4: 'p_indices'
   $B12: {
-    %55:u32 = access %p_indices_4, 0u
-    %56:ptr<workgroup, vec4<i32>, read_write> = access %W_arr, %55
-    %57:vec4<i32> = load %56
-    ret %57
+    %52:u32 = access %p_indices_4, 0u
+    %53:ptr<workgroup, vec4<i32>, read_write> = access %W_arr, %52
+    %54:vec4<i32> = load %53
+    ret %54
   }
 }
 %fn_w_3 = func(%p_indices_5:array<u32, 2>):vec4<i32> {  # %fn_w_3: 'fn_w', %p_indices_5: 'p_indices'
   $B13: {
-    %60:u32 = access %p_indices_5, 0u
-    %61:u32 = access %p_indices_5, 1u
-    %62:ptr<workgroup, vec4<i32>, read_write> = access %W_arr_arr, %60, %61
-    %63:vec4<i32> = load %62
-    ret %63
+    %57:u32 = access %p_indices_5, 0u
+    %58:u32 = access %p_indices_5, 1u
+    %59:ptr<workgroup, vec4<i32>, read_write> = access %W_arr_arr, %57, %58
+    %60:vec4<i32> = load %59
+    ret %60
   }
 }
 %b = func():void {
@@ -6252,85 +6240,85 @@ $B1: {  # root
     %J:i32 = let 4i
     %u:vec4<i32> = call %fn_u
     %u_str:vec4<i32> = call %fn_u_1
-    %69:u32 = convert 0i
+    %66:u32 = convert 0i
+    %67:array<u32, 1> = construct %66
+    %u_arr0:vec4<i32> = call %fn_u_2, %67
+    %69:u32 = convert 1i
     %70:array<u32, 1> = construct %69
-    %u_arr0:vec4<i32> = call %fn_u_2, %70
-    %72:u32 = convert 1i
+    %u_arr1:vec4<i32> = call %fn_u_2, %70
+    %72:u32 = convert %I
     %73:array<u32, 1> = construct %72
-    %u_arr1:vec4<i32> = call %fn_u_2, %73
-    %75:u32 = convert %I
-    %76:array<u32, 1> = construct %75
-    %u_arrI:vec4<i32> = call %fn_u_2, %76
-    %78:u32 = convert 1i
-    %79:u32 = convert 0i
-    %80:array<u32, 2> = construct %78, %79
-    %u_arr1_arr0:vec4<i32> = call %fn_u_3, %80
-    %82:u32 = convert 2i
+    %u_arrI:vec4<i32> = call %fn_u_2, %73
+    %75:u32 = convert 1i
+    %76:u32 = convert 0i
+    %77:array<u32, 2> = construct %75, %76
+    %u_arr1_arr0:vec4<i32> = call %fn_u_3, %77
+    %79:u32 = convert 2i
+    %80:u32 = convert %I
+    %81:array<u32, 2> = construct %79, %80
+    %u_arr2_arrI:vec4<i32> = call %fn_u_3, %81
     %83:u32 = convert %I
-    %84:array<u32, 2> = construct %82, %83
-    %u_arr2_arrI:vec4<i32> = call %fn_u_3, %84
-    %86:u32 = convert %I
-    %87:u32 = convert 2i
-    %88:array<u32, 2> = construct %86, %87
-    %u_arrI_arr2:vec4<i32> = call %fn_u_3, %88
-    %90:u32 = convert %I
-    %91:u32 = convert %J
-    %92:array<u32, 2> = construct %90, %91
-    %u_arrI_arrJ:vec4<i32> = call %fn_u_3, %92
+    %84:u32 = convert 2i
+    %85:array<u32, 2> = construct %83, %84
+    %u_arrI_arr2:vec4<i32> = call %fn_u_3, %85
+    %87:u32 = convert %I
+    %88:u32 = convert %J
+    %89:array<u32, 2> = construct %87, %88
+    %u_arrI_arrJ:vec4<i32> = call %fn_u_3, %89
     %s:vec4<i32> = call %fn_s
     %s_str:vec4<i32> = call %fn_s_1
-    %96:u32 = convert 0i
+    %93:u32 = convert 0i
+    %94:array<u32, 1> = construct %93
+    %s_arr0:vec4<i32> = call %fn_s_2, %94
+    %96:u32 = convert 1i
     %97:array<u32, 1> = construct %96
-    %s_arr0:vec4<i32> = call %fn_s_2, %97
-    %99:u32 = convert 1i
+    %s_arr1:vec4<i32> = call %fn_s_2, %97
+    %99:u32 = convert %I
     %100:array<u32, 1> = construct %99
-    %s_arr1:vec4<i32> = call %fn_s_2, %100
-    %102:u32 = convert %I
-    %103:array<u32, 1> = construct %102
-    %s_arrI:vec4<i32> = call %fn_s_2, %103
-    %105:u32 = convert 1i
-    %106:u32 = convert 0i
-    %107:array<u32, 2> = construct %105, %106
-    %s_arr1_arr0:vec4<i32> = call %fn_s_3, %107
-    %109:u32 = convert 2i
+    %s_arrI:vec4<i32> = call %fn_s_2, %100
+    %102:u32 = convert 1i
+    %103:u32 = convert 0i
+    %104:array<u32, 2> = construct %102, %103
+    %s_arr1_arr0:vec4<i32> = call %fn_s_3, %104
+    %106:u32 = convert 2i
+    %107:u32 = convert %I
+    %108:array<u32, 2> = construct %106, %107
+    %s_arr2_arrI:vec4<i32> = call %fn_s_3, %108
     %110:u32 = convert %I
-    %111:array<u32, 2> = construct %109, %110
-    %s_arr2_arrI:vec4<i32> = call %fn_s_3, %111
-    %113:u32 = convert %I
-    %114:u32 = convert 2i
-    %115:array<u32, 2> = construct %113, %114
-    %s_arrI_arr2:vec4<i32> = call %fn_s_3, %115
-    %117:u32 = convert %I
-    %118:u32 = convert %J
-    %119:array<u32, 2> = construct %117, %118
-    %s_arrI_arrJ:vec4<i32> = call %fn_s_3, %119
+    %111:u32 = convert 2i
+    %112:array<u32, 2> = construct %110, %111
+    %s_arrI_arr2:vec4<i32> = call %fn_s_3, %112
+    %114:u32 = convert %I
+    %115:u32 = convert %J
+    %116:array<u32, 2> = construct %114, %115
+    %s_arrI_arrJ:vec4<i32> = call %fn_s_3, %116
     %w:vec4<i32> = call %fn_w
     %w_str:vec4<i32> = call %fn_w_1
-    %123:u32 = convert 0i
+    %120:u32 = convert 0i
+    %121:array<u32, 1> = construct %120
+    %w_arr0:vec4<i32> = call %fn_w_2, %121
+    %123:u32 = convert 1i
     %124:array<u32, 1> = construct %123
-    %w_arr0:vec4<i32> = call %fn_w_2, %124
-    %126:u32 = convert 1i
+    %w_arr1:vec4<i32> = call %fn_w_2, %124
+    %126:u32 = convert %I
     %127:array<u32, 1> = construct %126
-    %w_arr1:vec4<i32> = call %fn_w_2, %127
-    %129:u32 = convert %I
-    %130:array<u32, 1> = construct %129
-    %w_arrI:vec4<i32> = call %fn_w_2, %130
-    %132:u32 = convert 1i
-    %133:u32 = convert 0i
-    %134:array<u32, 2> = construct %132, %133
-    %w_arr1_arr0:vec4<i32> = call %fn_w_3, %134
-    %136:u32 = convert 2i
+    %w_arrI:vec4<i32> = call %fn_w_2, %127
+    %129:u32 = convert 1i
+    %130:u32 = convert 0i
+    %131:array<u32, 2> = construct %129, %130
+    %w_arr1_arr0:vec4<i32> = call %fn_w_3, %131
+    %133:u32 = convert 2i
+    %134:u32 = convert %I
+    %135:array<u32, 2> = construct %133, %134
+    %w_arr2_arrI:vec4<i32> = call %fn_w_3, %135
     %137:u32 = convert %I
-    %138:array<u32, 2> = construct %136, %137
-    %w_arr2_arrI:vec4<i32> = call %fn_w_3, %138
-    %140:u32 = convert %I
-    %141:u32 = convert 2i
-    %142:array<u32, 2> = construct %140, %141
-    %w_arrI_arr2:vec4<i32> = call %fn_w_3, %142
-    %144:u32 = convert %I
-    %145:u32 = convert %J
-    %146:array<u32, 2> = construct %144, %145
-    %w_arrI_arrJ:vec4<i32> = call %fn_w_3, %146
+    %138:u32 = convert 2i
+    %139:array<u32, 2> = construct %137, %138
+    %w_arrI_arr2:vec4<i32> = call %fn_w_3, %139
+    %141:u32 = convert %I
+    %142:u32 = convert %J
+    %143:array<u32, 2> = construct %141, %142
+    %w_arrI_arrJ:vec4<i32> = call %fn_w_3, %143
     ret
   }
 }
