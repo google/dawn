@@ -17,7 +17,6 @@
 #include <map>
 #include <memory>
 #include <mutex>
-#include <optional>
 #include <set>
 #include <tuple>
 #include <unordered_map>
@@ -257,6 +256,11 @@ auto ReturnToAPI(Ref<T*>&& object) {
     object->AddExternalRef();
   }
   return object.Detach();
+}
+
+// StringView utilities.
+WGPUStringView ToOutputStringView(const std::string& s) {
+  return {s.data(), s.size()};
 }
 
 // clang-format off
@@ -814,7 +818,7 @@ class CreatePipelineEventBase final : public TrackedEvent {
                 mStatus == WGPUCreatePipelineAsyncStatus_Success
                     ? ReturnToAPI(std::move(mPipeline))
                     : nullptr,
-                mMessage ? mMessage->c_str() : nullptr, mUserdata1, mUserdata2);
+                ToOutputStringView(mMessage), mUserdata1, mUserdata2);
     }
   }
 
@@ -826,7 +830,7 @@ class CreatePipelineEventBase final : public TrackedEvent {
 
   WGPUCreatePipelineAsyncStatus mStatus = WGPUCreatePipelineAsyncStatus_Success;
   Ref<Pipeline> mPipeline;
-  std::optional<std::string> mMessage = std::nullopt;
+  std::string mMessage;
 };
 using CreateComputePipelineEvent =
     CreatePipelineEventBase<WGPUComputePipeline,
@@ -870,8 +874,8 @@ class DeviceLostEvent final : public TrackedEvent {
       WGPUDevice device = mReason != WGPUDeviceLostReason_FailedCreation
                               ? mDevice.Get()
                               : nullptr;
-      mCallback(&device, mReason, mMessage ? mMessage->c_str() : nullptr,
-                mUserdata1, mUserdata2);
+      mCallback(&device, mReason, ToOutputStringView(mMessage), mUserdata1,
+                mUserdata2);
     }
   }
 
@@ -883,7 +887,7 @@ class DeviceLostEvent final : public TrackedEvent {
   Ref<WGPUDevice> mDevice;
 
   WGPUDeviceLostReason mReason;
-  std::optional<std::string> mMessage;
+  std::string mMessage;
 };
 
 class PopErrorScopeEvent final : public TrackedEvent {
@@ -916,8 +920,8 @@ class PopErrorScopeEvent final : public TrackedEvent {
       mMessage = "A valid external Instance reference no longer exists.";
     }
     if (mCallback) {
-      mCallback(mStatus, mErrorType, mMessage ? mMessage->c_str() : nullptr,
-                mUserdata1, mUserdata2);
+      mCallback(mStatus, mErrorType, ToOutputStringView(mMessage), mUserdata1,
+                mUserdata2);
     }
   }
 
@@ -928,7 +932,7 @@ class PopErrorScopeEvent final : public TrackedEvent {
 
   WGPUPopErrorScopeStatus mStatus = WGPUPopErrorScopeStatus_Success;
   WGPUErrorType mErrorType = WGPUErrorType_Unknown;
-  std::optional<std::string> mMessage;
+  std::string mMessage;
 };
 
 class MapAsyncEvent final : public TrackedEvent {
@@ -975,8 +979,7 @@ class MapAsyncEvent final : public TrackedEvent {
     }
 
     if (mCallback) {
-      mCallback(mStatus, mMessage ? mMessage->c_str() : nullptr, mUserdata1,
-                mUserdata2);
+      mCallback(mStatus, ToOutputStringView(mMessage), mUserdata1, mUserdata2);
     }
   }
 
@@ -987,7 +990,7 @@ class MapAsyncEvent final : public TrackedEvent {
 
   Ref<WGPUBuffer> mBuffer;
   WGPUMapAsyncStatus mStatus = WGPUMapAsyncStatus_Success;
-  std::optional<std::string> mMessage = std::nullopt;
+  std::string mMessage;
 };
 
 class RequestAdapterEvent final : public TrackedEvent {
@@ -1023,7 +1026,7 @@ class RequestAdapterEvent final : public TrackedEvent {
                 mStatus == WGPURequestAdapterStatus_Success
                     ? ReturnToAPI(std::move(mAdapter))
                     : nullptr,
-                mMessage ? mMessage->c_str() : nullptr, mUserdata1, mUserdata2);
+                ToOutputStringView(mMessage), mUserdata1, mUserdata2);
     }
   }
 
@@ -1034,7 +1037,7 @@ class RequestAdapterEvent final : public TrackedEvent {
 
   WGPURequestAdapterStatus mStatus;
   Ref<WGPUAdapter> mAdapter;
-  std::optional<std::string> mMessage = std::nullopt;
+  std::string mMessage;
 };
 
 class RequestDeviceEvent final : public TrackedEvent {
@@ -1070,7 +1073,7 @@ class RequestDeviceEvent final : public TrackedEvent {
                 mStatus == WGPURequestDeviceStatus_Success
                     ? ReturnToAPI(std::move(mDevice))
                     : nullptr,
-                mMessage ? mMessage->c_str() : nullptr, mUserdata1, mUserdata2);
+                ToOutputStringView(mMessage), mUserdata1, mUserdata2);
     }
   }
 
@@ -1081,7 +1084,7 @@ class RequestDeviceEvent final : public TrackedEvent {
 
   WGPURequestDeviceStatus mStatus;
   Ref<WGPUDevice> mDevice;
-  std::optional<std::string> mMessage = std::nullopt;
+  std::string mMessage;
 };
 
 class WorkDoneEvent final : public TrackedEvent {
@@ -1379,7 +1382,9 @@ void WGPUDeviceImpl::OnUncapturedError(WGPUErrorType type,
   if (mUncapturedErrorCallbackInfo.callback) {
     WGPUDeviceImpl* device = this;
     mUncapturedErrorCallbackInfo.callback(
-        &device, type, message, mUncapturedErrorCallbackInfo.userdata1,
+        &device, type,
+        WGPUStringView{.data = message, .length = std::strlen(message)},
+        mUncapturedErrorCallbackInfo.userdata1,
         mUncapturedErrorCallbackInfo.userdata2);
   }
 }
@@ -1513,7 +1518,7 @@ void wgpuAdapterRequestDevice(WGPUAdapter adapter,
   WGPURequestDeviceCallbackInfo2 callbackInfo = {};
   callbackInfo.mode = WGPUCallbackMode_AllowSpontaneous;
   callbackInfo.callback = [](WGPURequestDeviceStatus status, WGPUDevice device,
-                             char const* message, void* callback,
+                             WGPUStringView message, void* callback,
                              void* userdata) {
     auto cb = reinterpret_cast<WGPURequestDeviceCallback>(callback);
     cb(status, device, message, userdata);
@@ -1631,8 +1636,9 @@ void wgpuDeviceCreateComputePipelineAsync(
   WGPUCreateComputePipelineAsyncCallbackInfo2 callbackInfo = {};
   callbackInfo.mode = WGPUCallbackMode_AllowSpontaneous;
   callbackInfo.callback = [](WGPUCreatePipelineAsyncStatus status,
-                             WGPUComputePipeline pipeline, char const* message,
-                             void* callback, void* userdata) {
+                             WGPUComputePipeline pipeline,
+                             WGPUStringView message, void* callback,
+                             void* userdata) {
     auto cb =
         reinterpret_cast<WGPUCreateComputePipelineAsyncCallback>(callback);
     cb(status, pipeline, message, userdata);
@@ -1665,8 +1671,9 @@ void wgpuDeviceCreateRenderPipelineAsync(
   WGPUCreateRenderPipelineAsyncCallbackInfo2 callbackInfo = {};
   callbackInfo.mode = WGPUCallbackMode_AllowSpontaneous;
   callbackInfo.callback = [](WGPUCreatePipelineAsyncStatus status,
-                             WGPURenderPipeline pipeline, char const* message,
-                             void* callback, void* userdata) {
+                             WGPURenderPipeline pipeline,
+                             WGPUStringView message, void* callback,
+                             void* userdata) {
     auto cb = reinterpret_cast<WGPUCreateRenderPipelineAsyncCallback>(callback);
     cb(status, pipeline, message, userdata);
   };
@@ -1731,7 +1738,7 @@ void wgpuInstanceRequestAdapter(WGPUInstance instance,
   WGPURequestAdapterCallbackInfo2 callbackInfo = {};
   callbackInfo.mode = WGPUCallbackMode_AllowSpontaneous;
   callbackInfo.callback = [](WGPURequestAdapterStatus status,
-                             WGPUAdapter adapter, char const* message,
+                             WGPUAdapter adapter, WGPUStringView message,
                              void* callback, void* userdata) {
     auto cb = reinterpret_cast<WGPURequestAdapterCallback>(callback);
     cb(status, adapter, message, userdata);
