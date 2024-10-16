@@ -29,10 +29,9 @@
     {%- set type = arg.type %}
     {%- set optional = arg.optional %}
     {%- set default_value = arg.default_value %}
-    {%- if arg.length == 'strlen' or arg.type.name.get() == 'string view' -%}
-        {%- set optional_string = optional or default_value == 'nullptr' -%}
-        String{{ '?' if optional_string }}
-        {%- if emit_defaults and optional_string -%}
+    {%- if arg.type.name.get() == 'string view' -%}
+        String{{ '?' if optional }}
+        {%- if emit_defaults and optional-%}
             {{ ' ' }}= null
         {%- endif %}
     {% elif type.name.get() == 'void' %}

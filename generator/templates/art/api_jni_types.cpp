@@ -26,9 +26,7 @@
 //* OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 {% macro arg_to_jni_type(arg) %}
-    {%- if arg.length == 'strlen' -%}
-        jstring
-    {%- elif arg.length and arg.length != 'constant' -%}
+    {%- if arg.length and arg.length != 'constant' -%}
         {%- if arg.type.category in ['bitmask', 'enum', 'function pointer', 'object', 'structure'] -%}
             jobjectArray
         {%- elif arg.type.name.get() == 'void' -%}
@@ -56,7 +54,7 @@
 {% endmacro %}
 
 {% macro jni_signature(member) %}
-    {%- if member.length == 'strlen' or member.type.name.get() == 'string view' -%}
+    {%- if member.type.name.get() == 'string view' -%}
         Ljava/lang/String;
     {%- elif member.length and member.length != 'constant' -%}
         {%- if member.type.category in ['bitmask', 'enum'] -%}
@@ -124,8 +122,6 @@
         jobject {{ output }} = ToKotlin(env, {{ '&' if member.annotation not in ['*', 'const*'] }}{{ input }});
     {% elif member.type.name.get() == 'void *' %}
         jlong {{ output }} = reinterpret_cast<jlong>({{ input }});
-    {% elif member.type.name.get() == 'char' %}
-        jstring {{ output }} = {{ input }} ? env->NewStringUTF({{ input }}) : nullptr;
     {% elif member.type.category in ['bitmask', 'enum', 'native'] %}
         //* We use Kotlin value classes for bitmask and enum, and they get inlined as lone values.
         {{ to_jni_type(member.type) }} {{ output }} = static_cast<{{ to_jni_type(member.type) }}>({{ input }});

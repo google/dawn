@@ -53,8 +53,6 @@ namespace {{native_namespace}} {
     {%- set name = member.name.camelCase() -%}
     {% if member.length == None %}
         StreamIn(sink, t.{{name}});
-    {% elif member.length == "strlen" %}
-        StreamIn(sink, Iterable(t.{{name}}, strlen(t.{{name}})));
     {% else %}
         StreamIn(sink, Iterable(t.{{name}}, t.{{member.length.name.camelCase()}}));
     {% endif %}

@@ -50,13 +50,7 @@
             {
                 auto& in = inStruct.{{member.name.camelCase()}};
                 auto& out = outStruct->{{member.name.camelCase()}};
-                {% if member.length == 'strlen' %}
-                    if (in != nullptr) {
-                        out = c->GetStringUTFChars(in);
-                    } else {
-                        out = nullptr;
-                    }
-                {% elif member.constant_length == 1 %}
+                {% if member.constant_length == 1 %}
                     {% if member.type.category == 'structure' %}
                         if (in != nullptr) {
                             auto converted = c->Alloc<{{as_cType(member.type.name)}}>();
