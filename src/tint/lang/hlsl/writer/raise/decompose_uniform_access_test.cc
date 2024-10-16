@@ -74,13 +74,13 @@ TEST_F(HlslWriterDecomposeUniformAccessTest, UniformAccessChainFromUnnamedAccess
                                                   Inner->Size(), core::IOAttributes{}));
     auto* sb = ty.Struct(mod.symbols.New("SB"), members);
 
-    auto* var = b.Var("v", uniform, sb, core::Access::kRead);
+    auto* var = b.Var("v", uniform, ty.array(sb, 4), core::Access::kRead);
     var->SetBindingPoint(0, 0);
     b.ir.root_block->Append(var);
 
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
-        auto* x = b.Access(ty.ptr(uniform, sb, core::Access::kRead), var);
+        auto* x = b.Access(ty.ptr(uniform, sb, core::Access::kRead), var, 2_u);
         auto* y = b.Access(ty.ptr(uniform, Inner, core::Access::kRead), x->Result(0), 1_u);
         b.Let("b",
               b.Load(b.Access(ty.ptr(uniform, ty.u32(), core::Access::kRead), y->Result(0), 1_u)));
@@ -99,12 +99,12 @@ SB = struct @align(16) {
 }
 
 $B1: {  # root
-  %v:ptr<uniform, SB, read> = var @binding_point(0, 0)
+  %v:ptr<uniform, array<SB, 4>, read> = var @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
   $B2: {
-    %3:ptr<uniform, SB, read> = access %v
+    %3:ptr<uniform, SB, read> = access %v, 2u
     %4:ptr<uniform, Inner, read> = access %3, 1u
     %5:ptr<uniform, u32, read> = access %4, 1u
     %6:u32 = load %5
@@ -127,12 +127,12 @@ SB = struct @align(16) {
 }
 
 $B1: {  # root
-  %v:ptr<uniform, array<vec4<u32>, 2>, read> = var @binding_point(0, 0)
+  %v:ptr<uniform, array<vec4<u32>, 8>, read> = var @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
   $B2: {
-    %3:ptr<uniform, vec4<u32>, read> = access %v, 1u
+    %3:ptr<uniform, vec4<u32>, read> = access %v, 5u
     %4:u32 = load_vector_element %3, 1u
     %5:u32 = bitcast %4
     %b:u32 = let %5

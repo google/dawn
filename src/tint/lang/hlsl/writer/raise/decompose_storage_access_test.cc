@@ -74,13 +74,13 @@ TEST_F(HlslWriterDecomposeStorageAccessTest, AccessChainFromUnnamedAccessChain) 
                                                     {mod.symbols.New("b"), Inner},
                                                 });
 
-    auto* var = b.Var("v", storage, sb, core::Access::kReadWrite);
+    auto* var = b.Var("v", storage, ty.array(sb, 4), core::Access::kReadWrite);
     var->SetBindingPoint(0, 0);
     b.ir.root_block->Append(var);
 
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
-        auto* x = b.Access(ty.ptr(storage, sb, core::Access::kReadWrite), var);
+        auto* x = b.Access(ty.ptr(storage, sb, core::Access::kReadWrite), var, 2_u);
         auto* y = b.Access(ty.ptr(storage, Inner, core::Access::kReadWrite), x->Result(0), 1_u);
         b.Let("b", b.Load(b.Access(ty.ptr(storage, ty.u32(), core::Access::kReadWrite),
                                    y->Result(0), 1_u)));
@@ -99,12 +99,12 @@ SB = struct @align(4) {
 }
 
 $B1: {  # root
-  %v:ptr<storage, SB, read_write> = var @binding_point(0, 0)
+  %v:ptr<storage, array<SB, 4>, read_write> = var @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
   $B2: {
-    %3:ptr<storage, SB, read_write> = access %v
+    %3:ptr<storage, SB, read_write> = access %v, 2u
     %4:ptr<storage, Inner, read_write> = access %3, 1u
     %5:ptr<storage, u32, read_write> = access %4, 1u
     %6:u32 = load %5
@@ -132,7 +132,7 @@ $B1: {  # root
 
 %foo = @fragment func():void {
   $B2: {
-    %3:u32 = %v.Load 8u
+    %3:u32 = %v.Load 32u
     %4:u32 = bitcast %3
     %b:u32 = let %4
     ret
@@ -1994,7 +1994,7 @@ TEST_F(HlslWriterDecomposeStorageAccessTest, StoreScalar) {
     b.ir.root_block->Append(var);
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
-        b.Store(b.Access(ty.ptr<storage, f32, core::Access::kReadWrite>(), var), 2_f);
+        b.Store(var, 2_f);
         b.Return(func);
     });
 
@@ -2005,8 +2005,7 @@ $B1: {  # root
 
 %foo = @fragment func():void {
   $B2: {
-    %3:ptr<storage, f32, read_write> = access %v
-    store %3, 2.0f
+    store %v, 2.0f
     ret
   }
 }
@@ -2037,7 +2036,7 @@ TEST_F(HlslWriterDecomposeStorageAccessTest, StoreScalarF16) {
     b.ir.root_block->Append(var);
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
-        b.Store(b.Access(ty.ptr<storage, f16, core::Access::kReadWrite>(), var), 2_h);
+        b.Store(var, 2_h);
         b.Return(func);
     });
 
@@ -2048,8 +2047,7 @@ $B1: {  # root
 
 %foo = @fragment func():void {
   $B2: {
-    %3:ptr<storage, f16, read_write> = access %v
-    store %3, 2.0h
+    store %v, 2.0h
     ret
   }
 }
@@ -2162,8 +2160,7 @@ TEST_F(HlslWriterDecomposeStorageAccessTest, StoreVector) {
     b.ir.root_block->Append(var);
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
-        b.Store(b.Access(ty.ptr<storage, vec3<f32>, core::Access::kReadWrite>(), var),
-                b.Composite(ty.vec3<f32>(), 2_f, 3_f, 4_f));
+        b.Store(var, b.Composite(ty.vec3<f32>(), 2_f, 3_f, 4_f));
         b.Return(func);
     });
 
@@ -2174,8 +2171,7 @@ $B1: {  # root
 
 %foo = @fragment func():void {
   $B2: {
-    %3:ptr<storage, vec3<f32>, read_write> = access %v
-    store %3, vec3<f32>(2.0f, 3.0f, 4.0f)
+    store %v, vec3<f32>(2.0f, 3.0f, 4.0f)
     ret
   }
 }
@@ -2206,8 +2202,7 @@ TEST_F(HlslWriterDecomposeStorageAccessTest, StoreVectorF16) {
     b.ir.root_block->Append(var);
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
-        b.Store(b.Access(ty.ptr<storage, vec3<f16>, core::Access::kReadWrite>(), var),
-                b.Composite(ty.vec3<f16>(), 2_h, 3_h, 4_h));
+        b.Store(var, b.Composite(ty.vec3<f16>(), 2_h, 3_h, 4_h));
 
         b.Return(func);
     });
@@ -2219,8 +2214,7 @@ $B1: {  # root
 
 %foo = @fragment func():void {
   $B2: {
-    %3:ptr<storage, vec3<f16>, read_write> = access %v
-    store %3, vec3<f16>(2.0h, 3.0h, 4.0h)
+    store %v, vec3<f16>(2.0h, 3.0h, 4.0h)
     ret
   }
 }

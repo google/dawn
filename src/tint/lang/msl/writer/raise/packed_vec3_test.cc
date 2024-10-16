@@ -3187,69 +3187,6 @@ $B1: {  # root
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(MslWriter_PackedVec3Test, StorageVar_ViaAccessWithNoIndices) {
-    auto* var = b.Var<storage, mat4x3<f32>>("v");
-    var->SetBindingPoint(0, 0);
-    mod.root_block->Append(var);
-
-    auto* func = b.Function("foo", ty.void_());
-    b.Append(func->Block(), [&] {  //
-        auto* mat_ptr = b.Access(ty.ptr<storage, mat4x3<f32>>(), var);
-        auto* col_ptr = b.Access(ty.ptr<storage, vec3<f32>>(),
-                                 b.Access(ty.ptr<storage, vec3<f32>>(), mat_ptr, 1_u));
-        auto* col = b.Load(col_ptr);
-        b.Store(b.Access(ty.ptr<storage, vec3<f32>>(), mat_ptr, 2_u), col);
-        b.Return(func);
-    });
-
-    auto* src = R"(
-$B1: {  # root
-  %v:ptr<storage, mat4x3<f32>, read_write> = var @binding_point(0, 0)
-}
-
-%foo = func():void {
-  $B2: {
-    %3:ptr<storage, mat4x3<f32>, read_write> = access %v
-    %4:ptr<storage, vec3<f32>, read_write> = access %3, 1u
-    %5:ptr<storage, vec3<f32>, read_write> = access %4
-    %6:vec3<f32> = load %5
-    %7:ptr<storage, vec3<f32>, read_write> = access %3, 2u
-    store %7, %6
-    ret
-  }
-}
-)";
-    EXPECT_EQ(src, str());
-
-    auto* expect = R"(
-tint_packed_vec3_f32_array_element = struct @align(16) {
-  packed:__packed_vec3<f32> @offset(0)
-}
-
-$B1: {  # root
-  %v:ptr<storage, array<tint_packed_vec3_f32_array_element, 4>, read_write> = var @binding_point(0, 0)
-}
-
-%foo = func():void {
-  $B2: {
-    %3:ptr<storage, array<tint_packed_vec3_f32_array_element, 4>, read_write> = access %v
-    %4:ptr<storage, __packed_vec3<f32>, read_write> = access %3, 1u, 0u
-    %5:ptr<storage, __packed_vec3<f32>, read_write> = access %4
-    %6:__packed_vec3<f32> = load %5
-    %7:vec3<f32> = convert %6
-    %8:ptr<storage, __packed_vec3<f32>, read_write> = access %3, 2u, 0u
-    %9:__packed_vec3<f32> = convert %7
-    store %8, %9
-    ret
-  }
-}
-)";
-
-    Run(PackedVec3);
-
-    EXPECT_EQ(expect, str());
-}
-
 TEST_F(MslWriter_PackedVec3Test, StorageVar_ArrayLengthBuiltinCall) {
     auto* var = b.Var<storage, array<vec3<f32>>>("v");
     var->SetBindingPoint(0, 0);

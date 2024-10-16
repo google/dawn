@@ -48,7 +48,7 @@ class Access final : public Castable<Access, OperandInstruction<3, 1>> {
     static constexpr size_t kNumResults = 1;
 
     /// The minimum number of operands used by this instruction
-    static constexpr size_t kMinNumOperands = 1;
+    static constexpr size_t kMinNumOperands = 2;
 
     /// Constructor (no results, no operands)
     /// @param id the instruction id

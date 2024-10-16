@@ -238,59 +238,6 @@ $B1: {  # root
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_ArrayLengthFromUniformTest, ViaAccess) {
-    auto* arr = ty.array<i32>();
-    auto* arr_ptr = ty.ptr<storage>(arr);
-
-    auto* buffer = b.Var("buffer", arr_ptr);
-    buffer->SetBindingPoint(0, 0);
-    mod.root_block->Append(buffer);
-
-    auto* func = b.Function("foo", ty.u32());
-    b.Append(func->Block(), [&] {
-        auto* len = b.Call<u32>(BuiltinFn::kArrayLength, b.Access(arr_ptr, buffer));
-        b.Return(func, len);
-    });
-
-    auto* src = R"(
-$B1: {  # root
-  %buffer:ptr<storage, array<i32>, read_write> = var @binding_point(0, 0)
-}
-
-%foo = func():u32 {
-  $B2: {
-    %3:ptr<storage, array<i32>, read_write> = access %buffer
-    %4:u32 = arrayLength %3
-    ret %4
-  }
-}
-)";
-    EXPECT_EQ(src, str());
-
-    auto* expect = R"(
-$B1: {  # root
-  %buffer:ptr<storage, array<i32>, read_write> = var @binding_point(0, 0)
-  %tint_storage_buffer_sizes:ptr<uniform, array<vec4<u32>, 1>, read> = var @binding_point(1, 2)
-}
-
-%foo = func():u32 {
-  $B2: {
-    %4:ptr<storage, array<i32>, read_write> = access %buffer
-    %5:ptr<uniform, vec4<u32>, read> = access %tint_storage_buffer_sizes, 0u
-    %6:u32 = load_vector_element %5, 0u
-    %7:u32 = div %6, 4u
-    ret %7
-  }
-}
-)";
-
-    std::unordered_map<BindingPoint, uint32_t> bindpoint_to_index;
-    bindpoint_to_index[{0, 0}] = 0;
-    Run(ArrayLengthFromUniform, BindingPoint{1, 2}, bindpoint_to_index);
-
-    EXPECT_EQ(expect, str());
-}
-
 TEST_F(IR_ArrayLengthFromUniformTest, ViaAccess_StructMember) {
     auto* arr = ty.array<i32>();
     auto* structure = ty.Struct(mod.symbols.New("MyStruct"), {
@@ -907,9 +854,9 @@ TEST_F(IR_ArrayLengthFromUniformTest, ViaComplexChain) {
     auto* param = b.FunctionParam("param", arr_ptr);
     bar->SetParams({param});
     b.Append(bar->Block(), [&] {
-        auto* access = b.Access(arr_ptr, param);
-        auto* let = b.Let("let", access);
-        auto* len = b.Call<u32>(BuiltinFn::kArrayLength, let);
+        auto* let1 = b.Let("let1", param);
+        auto* let2 = b.Let("let2", let1);
+        auto* len = b.Call<u32>(BuiltinFn::kArrayLength, let2);
         b.Return(bar, len);
     });
 
@@ -933,17 +880,17 @@ $B1: {  # root
 
 %bar = func(%param:ptr<storage, array<i32>, read_write>):u32 {
   $B2: {
-    %4:ptr<storage, array<i32>, read_write> = access %param
-    %let:ptr<storage, array<i32>, read_write> = let %4
-    %6:u32 = arrayLength %let
+    %let1:ptr<storage, array<i32>, read_write> = let %param
+    %let2:ptr<storage, array<i32>, read_write> = let %let1
+    %6:u32 = arrayLength %let2
     ret %6
   }
 }
 %foo = func():u32 {
   $B3: {
     %8:ptr<storage, array<i32>, read_write> = access %buffer, 1u
-    %let_1:ptr<storage, array<i32>, read_write> = let %8  # %let_1: 'let'
-    %10:u32 = call %bar, %let_1
+    %let:ptr<storage, array<i32>, read_write> = let %8
+    %10:u32 = call %bar, %let
     ret %10
   }
 }
@@ -963,20 +910,20 @@ $B1: {  # root
 
 %bar = func(%param:ptr<storage, array<i32>, read_write>, %tint_array_length:u32):u32 {
   $B2: {
-    %6:ptr<storage, array<i32>, read_write> = access %param
-    %let:ptr<storage, array<i32>, read_write> = let %6
+    %let1:ptr<storage, array<i32>, read_write> = let %param
+    %let2:ptr<storage, array<i32>, read_write> = let %let1
     ret %tint_array_length
   }
 }
 %foo = func():u32 {
   $B3: {
     %9:ptr<storage, array<i32>, read_write> = access %buffer, 1u
-    %let_1:ptr<storage, array<i32>, read_write> = let %9  # %let_1: 'let'
+    %let:ptr<storage, array<i32>, read_write> = let %9
     %11:ptr<uniform, vec4<u32>, read> = access %tint_storage_buffer_sizes, 0u
     %12:u32 = load_vector_element %11, 0u
     %13:u32 = sub %12, 4u
     %14:u32 = div %13, 4u
-    %15:u32 = call %bar, %let_1, %14
+    %15:u32 = call %bar, %let, %14
     ret %15
   }
 }

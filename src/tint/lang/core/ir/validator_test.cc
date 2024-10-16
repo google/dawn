@@ -2318,7 +2318,7 @@ TEST_F(IR_ValidatorTest, Access_NoOperands) {
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_EQ(res.Failure().reason.Str(),
-              R"(:3:14 error: access: expected at least 1 operands, got 0
+              R"(:3:14 error: access: expected at least 2 operands, got 0
     %3:f32 = access
              ^^^^^^
 
@@ -2330,6 +2330,37 @@ note: # Disassembly
 %my_func = func(%2:vec3<f32>):void {
   $B1: {
     %3:f32 = access
+    ret
+  }
+}
+)");
+}
+
+TEST_F(IR_ValidatorTest, Access_NoIndices) {
+    auto* f = b.Function("my_func", ty.void_());
+    auto* obj = b.FunctionParam(ty.vec3<f32>());
+    f->SetParams({obj});
+
+    b.Append(f->Block(), [&] {
+        b.Access(ty.f32(), obj);
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_EQ(res.Failure().reason.Str(),
+              R"(:3:14 error: access: expected at least 2 operands, got 1
+    %3:f32 = access %2
+             ^^^^^^
+
+:2:3 note: in block
+  $B1: {
+  ^^^
+
+note: # Disassembly
+%my_func = func(%2:vec3<f32>):void {
+  $B1: {
+    %3:f32 = access %2
     ret
   }
 }
@@ -2371,7 +2402,7 @@ note: # Disassembly
 TEST_F(IR_ValidatorTest, Access_NullObject) {
     auto* f = b.Function("my_func", ty.void_());
     b.Append(f->Block(), [&] {
-        b.Access(ty.f32(), nullptr);
+        b.Access(ty.f32(), nullptr, 0_u);
         b.Return(f);
     });
 
@@ -2379,7 +2410,7 @@ TEST_F(IR_ValidatorTest, Access_NullObject) {
     ASSERT_NE(res, Success);
     EXPECT_EQ(res.Failure().reason.Str(),
               R"(:3:21 error: access: operand is undefined
-    %2:f32 = access undef
+    %2:f32 = access undef, 0u
                     ^^^^^
 
 :2:3 note: in block
@@ -2389,7 +2420,7 @@ TEST_F(IR_ValidatorTest, Access_NullObject) {
 note: # Disassembly
 %my_func = func():void {
   $B1: {
-    %2:f32 = access undef
+    %2:f32 = access undef, 0u
     ret
   }
 }
