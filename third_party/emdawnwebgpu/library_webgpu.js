@@ -169,6 +169,31 @@ var LibraryWebGPU = {
       {{{ makeSetValue('ptr', C_STRUCTS.WGPUStringView.length, 'length', '*') }}};
     },
 
+    makeStringFromStringView__deps: ['$UTF8ToString'],
+    makeStringFromStringView: (stringViewPtr) => {
+      var ptr = {{{ makeGetValue('stringViewPtr', C_STRUCTS.WGPUStringView.data, '*') }}};
+      var length = {{{ makeGetValue('stringViewPtr', C_STRUCTS.WGPUStringView.length, '*') }}};
+      // UTF8ToString stops at the first null terminator character in the
+      // string regardless of the length.
+      return UTF8ToString(ptr, length);
+    },
+    makeStringFromOptionalStringView__deps: ['$UTF8ToString'],
+    makeStringFromOptionalStringView: (stringViewPtr) => {
+      var ptr = {{{ makeGetValue('stringViewPtr', C_STRUCTS.WGPUStringView.data, '*') }}};
+      var length = {{{ makeGetValue('stringViewPtr', C_STRUCTS.WGPUStringView.length, '*') }}};
+      // If we don't have a valid string pointer, just return undefined when
+      // optional.
+      if (!ptr) {
+        if (length === 0) {
+          return "";
+        }
+        return undefined;
+      }
+      // UTF8ToString stops at the first null terminator character in the
+      // string regardless of the length.
+      return UTF8ToString(ptr, length);
+    },
+
     makeColor: (ptr) => {
       return {
         "r": {{{ makeGetValue('ptr', 0, 'double') }}},
@@ -230,7 +255,7 @@ var LibraryWebGPU = {
       var constants = {};
       for (var i = 0; i < constantCount; ++i) {
         var entryPtr = constantsPtr + {{{ C_STRUCTS.WGPUConstantEntry.__size__ }}} * i;
-        var key = UTF8ToString({{{ makeGetValue('entryPtr', C_STRUCTS.WGPUConstantEntry.key, '*') }}});
+        var key = WebGPU.makeStringFromStringView(entryPtr + {{{ C_STRUCTS.WGPUConstantEntry.key }}});
         constants[key] = {{{ makeGetValue('entryPtr', C_STRUCTS.WGPUConstantEntry.value, 'double') }}};
       }
       return constants;
@@ -250,9 +275,9 @@ var LibraryWebGPU = {
         "constants": WebGPU.makePipelineConstants(
           {{{ gpu.makeGetU32('ptr', C_STRUCTS.WGPUProgrammableStageDescriptor.constantCount) }}},
           {{{ makeGetValue('ptr', C_STRUCTS.WGPUProgrammableStageDescriptor.constants, '*') }}}),
+        "entryPoint": WebGPU.makeStringFromOptionalStringView(
+          ptr + {{{ C_STRUCTS.WGPUProgrammableStageDescriptor.entryPoint }}}),
       };
-      var entryPointPtr = {{{ makeGetValue('ptr', C_STRUCTS.WGPUProgrammableStageDescriptor.entryPoint, '*') }}};
-      if (entryPointPtr) desc["entryPoint"] = UTF8ToString(entryPointPtr);
       return desc;
     },
 
@@ -260,14 +285,13 @@ var LibraryWebGPU = {
       {{{ gpu.makeCheckDescriptor('descriptor') }}}
 
       var desc = {
-        "label": undefined,
+        "label": WebGPU.makeStringFromOptionalStringView(
+          descriptor + {{{ C_STRUCTS.WGPUComputePipelineDescriptor.label }}}),
         "layout": WebGPU.makePipelineLayout(
           {{{ makeGetValue('descriptor', C_STRUCTS.WGPUComputePipelineDescriptor.layout, '*') }}}),
         "compute": WebGPU.makeProgrammableStageDescriptor(
           descriptor + {{{ C_STRUCTS.WGPUComputePipelineDescriptor.compute }}}),
       };
-      var labelPtr = {{{ makeGetValue('descriptor', C_STRUCTS.WGPUComputePipelineDescriptor.label, '*') }}};
-      if (labelPtr) desc["label"] = UTF8ToString(labelPtr);
       return desc;
     },
 
@@ -415,9 +439,9 @@ var LibraryWebGPU = {
           "buffers": makeVertexBuffers(
             {{{ gpu.makeGetU32('viPtr', C_STRUCTS.WGPUVertexState.bufferCount) }}},
             {{{ makeGetValue('viPtr', C_STRUCTS.WGPUVertexState.buffers, '*') }}}),
+          "entryPoint": WebGPU.makeStringFromOptionalStringView(
+            viPtr + {{{ C_STRUCTS.WGPUVertexState.entryPoint }}}),
           };
-        var entryPointPtr = {{{ makeGetValue('viPtr', C_STRUCTS.WGPUVertexState.entryPoint, '*') }}};
-        if (entryPointPtr) desc["entryPoint"] = UTF8ToString(entryPointPtr);
         return desc;
       }
 
@@ -443,14 +467,15 @@ var LibraryWebGPU = {
           "targets": makeColorStates(
             {{{ gpu.makeGetU32('fsPtr', C_STRUCTS.WGPUFragmentState.targetCount) }}},
             {{{ makeGetValue('fsPtr', C_STRUCTS.WGPUFragmentState.targets, '*') }}}),
+          "entryPoint": WebGPU.makeStringFromOptionalStringView(
+            fsPtr + {{{ C_STRUCTS.WGPUFragmentState.entryPoint }}}),
           };
-        var entryPointPtr = {{{ makeGetValue('fsPtr', C_STRUCTS.WGPUFragmentState.entryPoint, '*') }}};
-        if (entryPointPtr) desc["entryPoint"] = UTF8ToString(entryPointPtr);
         return desc;
       }
 
       var desc = {
-        "label": undefined,
+        "label": WebGPU.makeStringFromOptionalStringView(
+          descriptor + {{{ C_STRUCTS.WGPURenderPipelineDescriptor.label }}}),
         "layout": WebGPU.makePipelineLayout(
           {{{ makeGetValue('descriptor', C_STRUCTS.WGPURenderPipelineDescriptor.layout, '*') }}}),
         "vertex": makeVertexState(
@@ -464,8 +489,6 @@ var LibraryWebGPU = {
         "fragment": makeFragmentState(
           {{{ makeGetValue('descriptor', C_STRUCTS.WGPURenderPipelineDescriptor.fragment, '*') }}}),
       };
-      var labelPtr = {{{ makeGetValue('descriptor', C_STRUCTS.WGPURenderPipelineDescriptor.label, '*') }}};
-      if (labelPtr) desc["label"] = UTF8ToString(labelPtr);
       return desc;
     },
 
@@ -531,6 +554,12 @@ var LibraryWebGPU = {
 
   emwgpuDelete: (ptr) => {
     delete WebGPU.Internals.jsObjects[ptr];
+  },
+
+  emwgpuSetLabel__deps: ['$UTF8ToString'],
+  emwgpuSetLabel: (ptr, data, length) => {
+    var obj = WebGPU.getJsObject(ptr);
+    obj.label = UTF8ToString(data, length);
   },
 
 #if ASYNCIFY
@@ -730,14 +759,15 @@ var LibraryWebGPU = {
 
       var defaultQueuePtr = {{{ makeGetValue('descriptor', C_STRUCTS.WGPUDeviceDescriptor.defaultQueue, '*') }}};
       if (defaultQueuePtr) {
-        var defaultQueueDesc = {};
-        var labelPtr = {{{ makeGetValue('defaultQueuePtr', C_STRUCTS.WGPUQueueDescriptor.label, '*') }}};
-        if (labelPtr) defaultQueueDesc["label"] = UTF8ToString(labelPtr);
+        var defaultQueueDesc = {
+          "label": WebGPU.makeStringFromOptionalStringView(
+            defaultQueuePtr + {{{ C_STRUCTS.WGPUQueueDescriptor.label }}}),
+        };
         desc["defaultQueue"] = defaultQueueDesc;
       }
-
-      var labelPtr = {{{ makeGetValue('descriptor', C_STRUCTS.WGPUDeviceDescriptor.label, '*') }}};
-      if (labelPtr) desc["label"] = UTF8ToString(labelPtr);
+      desc["label"] = WebGPU.makeStringFromOptionalStringView(
+        descriptor + {{{ C_STRUCTS.WGPUDeviceDescriptor.label }}}
+      );
     }
 
     {{{ runtimeKeepalivePush() }}}
@@ -795,19 +825,9 @@ var LibraryWebGPU = {
   // Methods of BindGroup
   // --------------------------------------------------------------------------
 
-  wgpuBindGroupSetLabel: (bindGroupPtr, labelPtr) => {
-    var bindGroup = WebGPU.getJsObject(bindGroupPtr);
-    bindGroup.label = UTF8ToString(labelPtr);
-  },
-
   // --------------------------------------------------------------------------
   // Methods of BindGroupLayout
   // --------------------------------------------------------------------------
-
-  wgpuBindGroupLayoutSetLabel: (bindGroupLayoutPtr, labelPtr) => {
-    var bindGroupLayout = WebGPU.getJsObject(bindGroupLayoutPtr);
-    bindGroupLayout.label = UTF8ToString(labelPtr);
-  },
 
   // --------------------------------------------------------------------------
   // Methods of Buffer
@@ -920,11 +940,6 @@ var LibraryWebGPU = {
     }));
   },
 
-  wgpuBufferSetLabel: (bufferPtr, labelPtr) => {
-    var buffer = WebGPU.getJsObject(bufferPtr);
-    buffer.label = UTF8ToString(labelPtr);
-  },
-
   emwgpuBufferUnmap: (bufferPtr) => {
     var buffer = WebGPU.getJsObject(bufferPtr);
 
@@ -945,11 +960,6 @@ var LibraryWebGPU = {
   // --------------------------------------------------------------------------
   // Methods of CommandBuffer
   // --------------------------------------------------------------------------
-
-  wgpuCommandBufferSetLabel: (commandBufferPtr, labelPtr) => {
-    var commandBuffer = WebGPU.getJsObject(commandBufferPtr);
-    commandBuffer.label = UTF8ToString(labelPtr);
-  },
 
   // --------------------------------------------------------------------------
   // Methods of CommandEncoder
@@ -973,13 +983,11 @@ var LibraryWebGPU = {
     if (descriptor) {
       {{{ gpu.makeCheckDescriptor('descriptor') }}}
       desc = {
-        "label": undefined,
+        "label": WebGPU.makeStringFromOptionalStringView(
+          descriptor + {{{ C_STRUCTS.WGPUComputePassDescriptor.label }}}),
         "timestampWrites": makeComputePassTimestampWrites(
           {{{ makeGetValue('descriptor', C_STRUCTS.WGPUComputePassDescriptor.timestampWrites, '*') }}}),
       };
-      var labelPtr = {{{ makeGetValue('descriptor', C_STRUCTS.WGPUComputePassDescriptor.label, '*') }}};
-      if (labelPtr) desc["label"] = UTF8ToString(labelPtr);
-
     }
     var commandEncoder = WebGPU.getJsObject(encoderPtr);
     var ptr = _emwgpuCreateComputePassEncoder();
@@ -1081,7 +1089,8 @@ var LibraryWebGPU = {
       }
 
       var desc = {
-        "label": undefined,
+        "label": WebGPU.makeStringFromOptionalStringView(
+          descriptor + {{{ C_STRUCTS.WGPURenderPassDescriptor.label }}}),
         "colorAttachments": makeColorAttachments(
           {{{ gpu.makeGetU32('descriptor', C_STRUCTS.WGPURenderPassDescriptor.colorAttachmentCount) }}},
           {{{ makeGetValue('descriptor', C_STRUCTS.WGPURenderPassDescriptor.colorAttachments, '*') }}}),
@@ -1093,9 +1102,6 @@ var LibraryWebGPU = {
           {{{ makeGetValue('descriptor', C_STRUCTS.WGPURenderPassDescriptor.timestampWrites, '*') }}}),
           "maxDrawCount": maxDrawCount,
       };
-      var labelPtr = {{{ makeGetValue('descriptor', C_STRUCTS.WGPURenderPassDescriptor.label, '*') }}};
-      if (labelPtr) desc["label"] = UTF8ToString(labelPtr);
-
       return desc;
     }
 
@@ -1152,9 +1158,9 @@ var LibraryWebGPU = {
     return ptr;
   },
 
-  wgpuCommandEncoderInsertDebugMarker: (encoderPtr, markerLabelPtr) => {
+  wgpuCommandEncoderInsertDebugMarker2: (encoderPtr, markerLabelPtr) => {
     var encoder = WebGPU.getJsObject(encoderPtr);
-    encoder.insertDebugMarker(UTF8ToString(markerLabelPtr));
+    encoder.insertDebugMarker(WebGPU.makeStringFromStringView(markerLabelPtr));
   },
 
   wgpuCommandEncoderPopDebugGroup: (encoderPtr) => {
@@ -1162,9 +1168,9 @@ var LibraryWebGPU = {
     encoder.popDebugGroup();
   },
 
-  wgpuCommandEncoderPushDebugGroup: (encoderPtr, groupLabelPtr) => {
+  wgpuCommandEncoderPushDebugGroup2: (encoderPtr, groupLabelPtr) => {
     var encoder = WebGPU.getJsObject(encoderPtr);
-    encoder.pushDebugGroup(UTF8ToString(groupLabelPtr));
+    encoder.pushDebugGroup(WebGPU.makeStringFromStringView(groupLabelPtr));
   },
 
   wgpuCommandEncoderResolveQuerySet: (encoderPtr, querySetPtr, firstQuery, queryCount, destinationPtr, destinationOffset) => {
@@ -1173,11 +1179,6 @@ var LibraryWebGPU = {
     var destination = WebGPU.getJsObject(destinationPtr);
 
     commandEncoder.resolveQuerySet(querySet, firstQuery, queryCount, destination, destinationOffset);
-  },
-
-  wgpuCommandEncoderSetLabel: (encoderPtr, labelPtr) => {
-    var commandEncoder = WebGPU.getJsObject(encoderPtr);
-    commandEncoder.label = UTF8ToString(labelPtr);
   },
 
   wgpuCommandEncoderWriteTimestamp: (encoderPtr, querySetPtr, queryIndex) => {
@@ -1206,9 +1207,9 @@ var LibraryWebGPU = {
     pass.end();
   },
 
-  wgpuComputePassEncoderInsertDebugMarker: (encoderPtr, markerLabelPtr) => {
+  wgpuComputePassEncoderInsertDebugMarker2: (encoderPtr, markerLabelPtr) => {
     var encoder = WebGPU.getJsObject(encoderPtr);
-    encoder.insertDebugMarker(UTF8ToString(markerLabelPtr));
+    encoder.insertDebugMarker(WebGPU.makeStringFromStringView(markerLabelPtr));
   },
 
   wgpuComputePassEncoderPopDebugGroup: (encoderPtr) => {
@@ -1216,9 +1217,9 @@ var LibraryWebGPU = {
     encoder.popDebugGroup();
   },
 
-  wgpuComputePassEncoderPushDebugGroup: (encoderPtr, groupLabelPtr) => {
+  wgpuComputePassEncoderPushDebugGroup2: (encoderPtr, groupLabelPtr) => {
     var encoder = WebGPU.getJsObject(encoderPtr);
-    encoder.pushDebugGroup(UTF8ToString(groupLabelPtr));
+    encoder.pushDebugGroup(WebGPU.makeStringFromStringView(groupLabelPtr));
   },
 
   wgpuComputePassEncoderSetBindGroup: (passPtr, groupIndex, groupPtr, dynamicOffsetCount, dynamicOffsetsPtr) => {
@@ -1233,11 +1234,6 @@ var LibraryWebGPU = {
       }
       pass.setBindGroup(groupIndex, group, offsets);
     }
-  },
-
-  wgpuComputePassEncoderSetLabel: (passPtr, labelPtr) => {
-    var pass = WebGPU.getJsObject(passPtr);
-    pass.label = UTF8ToString(labelPtr);
   },
 
   wgpuComputePassEncoderSetPipeline: (passPtr, pipelinePtr) => {
@@ -1262,11 +1258,6 @@ var LibraryWebGPU = {
     var ptr = _emwgpuCreateBindGroupLayout();
     WebGPU.Internals.jsObjectInsert(ptr, pipeline.getBindGroupLayout(groupIndex));
     return ptr;
-  },
-
-  wgpuComputePipelineSetLabel: (pipelinePtr, labelPtr) => {
-    var pipeline = WebGPU.getJsObject(pipelinePtr);
-    pipeline.label = UTF8ToString(labelPtr);
   },
 
   // --------------------------------------------------------------------------
@@ -1324,7 +1315,8 @@ var LibraryWebGPU = {
     }
 
     var desc = {
-      "label": undefined,
+      "label": WebGPU.makeStringFromOptionalStringView(
+        descriptor + {{{ C_STRUCTS.WGPUBindGroupDescriptor.label }}}),
       "layout": WebGPU.getJsObject(
         {{{ makeGetValue('descriptor', C_STRUCTS.WGPUBindGroupDescriptor.layout, '*') }}}),
       "entries": makeEntries(
@@ -1332,8 +1324,6 @@ var LibraryWebGPU = {
         {{{ makeGetValue('descriptor', C_STRUCTS.WGPUBindGroupDescriptor.entries, '*') }}}
       ),
     };
-    var labelPtr = {{{ makeGetValue('descriptor', C_STRUCTS.WGPUBindGroupDescriptor.label, '*') }}};
-    if (labelPtr) desc["label"] = UTF8ToString(labelPtr);
 
     var device = WebGPU.getJsObject(devicePtr);
     var ptr = _emwgpuCreateBindGroup();
@@ -1430,13 +1420,13 @@ var LibraryWebGPU = {
     }
 
     var desc = {
+      "label": WebGPU.makeStringFromOptionalStringView(
+        descriptor + {{{ C_STRUCTS.WGPUBindGroupLayoutDescriptor.label }}}),
       "entries": makeEntries(
         {{{ gpu.makeGetU32('descriptor', C_STRUCTS.WGPUBindGroupLayoutDescriptor.entryCount) }}},
         {{{ makeGetValue('descriptor', C_STRUCTS.WGPUBindGroupLayoutDescriptor.entries, '*') }}}
       ),
     };
-    var labelPtr = {{{ makeGetValue('descriptor', C_STRUCTS.WGPUBindGroupLayoutDescriptor.label, '*') }}};
-    if (labelPtr) desc["label"] = UTF8ToString(labelPtr);
 
     var device = WebGPU.getJsObject(devicePtr);
     var ptr = _emwgpuCreateBindGroupLayout();
@@ -1450,13 +1440,12 @@ var LibraryWebGPU = {
     var mappedAtCreation = {{{ gpu.makeGetBool('descriptor', C_STRUCTS.WGPUBufferDescriptor.mappedAtCreation) }}};
 
     var desc = {
-      "label": undefined,
+      "label": WebGPU.makeStringFromOptionalStringView(
+        descriptor + {{{ C_STRUCTS.WGPUBufferDescriptor.label }}}),
       "usage": {{{ gpu.makeGetU32('descriptor', C_STRUCTS.WGPUBufferDescriptor.usage) }}},
       "size": {{{ gpu.makeGetU64('descriptor', C_STRUCTS.WGPUBufferDescriptor.size) }}},
       "mappedAtCreation": mappedAtCreation,
     };
-    var labelPtr = {{{ makeGetValue('descriptor', C_STRUCTS.WGPUBufferDescriptor.label, '*') }}};
-    if (labelPtr) desc["label"] = UTF8ToString(labelPtr);
 
     var device = WebGPU.getJsObject(devicePtr);
     WebGPU.Internals.jsObjectInsert(bufferPtr, device.createBuffer(desc));
@@ -1471,10 +1460,9 @@ var LibraryWebGPU = {
     if (descriptor) {
       {{{ gpu.makeCheckDescriptor('descriptor') }}}
       desc = {
-        "label": undefined,
+        "label": WebGPU.makeStringFromOptionalStringView(
+          descriptor + {{{ C_STRUCTS.WGPUCommandEncoderDescriptor.label }}}),
       };
-      var labelPtr = {{{ makeGetValue('descriptor', C_STRUCTS.WGPUCommandEncoderDescriptor.label, '*') }}};
-      if (labelPtr) desc["label"] = UTF8ToString(labelPtr);
     }
     var device = WebGPU.getJsObject(devicePtr);
     var ptr = _emwgpuCreateCommandEncoder();
@@ -1526,11 +1514,10 @@ var LibraryWebGPU = {
         {{{ makeGetValue('bglPtr', `${POINTER_SIZE} * i`, '*') }}}));
     }
     var desc = {
-      "label": undefined,
+      "label": WebGPU.makeStringFromOptionalStringView(
+        descriptor + {{{ C_STRUCTS.WGPUPipelineLayoutDescriptor.label }}}),
       "bindGroupLayouts": bgls,
     };
-    var labelPtr = {{{ makeGetValue('descriptor', C_STRUCTS.WGPUPipelineLayoutDescriptor.label, '*') }}};
-    if (labelPtr) desc["label"] = UTF8ToString(labelPtr);
 
     var device = WebGPU.getJsObject(devicePtr);
     var ptr = _emwgpuCreatePipelineLayout();
@@ -1571,7 +1558,8 @@ var LibraryWebGPU = {
       }
 
       var desc = {
-        "label": undefined,
+        "label": WebGPU.makeStringFromOptionalStringView(
+          descriptor + {{{ C_STRUCTS.WGPURenderBundleEncoderDescriptor.label }}}),
         "colorFormats": makeColorFormats(
           {{{ gpu.makeGetU32('descriptor', C_STRUCTS.WGPURenderBundleEncoderDescriptor.colorFormatCount) }}},
           {{{ makeGetValue('descriptor', C_STRUCTS.WGPURenderBundleEncoderDescriptor.colorFormats, '*') }}}),
@@ -1580,8 +1568,6 @@ var LibraryWebGPU = {
         "depthReadOnly": {{{ gpu.makeGetBool('descriptor', C_STRUCTS.WGPURenderBundleEncoderDescriptor.depthReadOnly) }}},
         "stencilReadOnly": {{{ gpu.makeGetBool('descriptor', C_STRUCTS.WGPURenderBundleEncoderDescriptor.stencilReadOnly) }}},
       };
-      var labelPtr = {{{ makeGetValue('descriptor', C_STRUCTS.WGPURenderBundleEncoderDescriptor.label, '*') }}};
-      if (labelPtr) desc["label"] = UTF8ToString(labelPtr);
       return desc;
     }
 
@@ -1632,7 +1618,8 @@ var LibraryWebGPU = {
       {{{ gpu.makeCheckDescriptor('descriptor') }}}
 
       desc = {
-        "label": undefined,
+        "label": WebGPU.makeStringFromOptionalStringView(
+          descriptor + {{{ C_STRUCTS.WGPUSamplerDescriptor.label }}}),
         "addressModeU": WebGPU.AddressMode[
             {{{ gpu.makeGetU32('descriptor', C_STRUCTS.WGPUSamplerDescriptor.addressModeU) }}}],
         "addressModeV": WebGPU.AddressMode[
@@ -1650,8 +1637,6 @@ var LibraryWebGPU = {
         "compare": WebGPU.CompareFunction[
             {{{ gpu.makeGetU32('descriptor', C_STRUCTS.WGPUSamplerDescriptor.compare) }}}],
       };
-      var labelPtr = {{{ makeGetValue('descriptor', C_STRUCTS.WGPUSamplerDescriptor.label, '*') }}};
-      if (labelPtr) desc["label"] = UTF8ToString(labelPtr);
     }
 
     var device = WebGPU.getJsObject(devicePtr);
@@ -1669,30 +1654,16 @@ var LibraryWebGPU = {
     var sType = {{{ gpu.makeGetU32('nextInChainPtr', C_STRUCTS.WGPUChainedStruct.sType) }}};
 
     var desc = {
-      "label": undefined,
+      "label": WebGPU.makeStringFromOptionalStringView(
+        descriptor + {{{ C_STRUCTS.WGPUShaderModuleDescriptor.label }}}),
       "code": "",
     };
-    var labelPtr = {{{ makeGetValue('descriptor', C_STRUCTS.WGPUShaderModuleDescriptor.label, '*') }}};
-    if (labelPtr) desc["label"] = UTF8ToString(labelPtr);
 
     switch (sType) {
-      case {{{ gpu.SType.ShaderSourceSPIRV }}}: {
-        var count = {{{ gpu.makeGetU32('nextInChainPtr', C_STRUCTS.WGPUShaderSourceSPIRV.codeSize) }}};
-        var start = {{{ makeGetValue('nextInChainPtr', C_STRUCTS.WGPUShaderSourceSPIRV.code, '*') }}};
-        var offset = {{{ getHeapOffset('start', 'u32') }}};
-#if PTHREADS
-        // Chrome can't currently handle a SharedArrayBuffer view here, so make a copy.
-        desc["code"] = HEAPU32.slice(offset, offset + count);
-#else
-        desc["code"] = HEAPU32.subarray(offset, offset + count);
-#endif
-        break;
-      }
       case {{{ gpu.SType.ShaderSourceWGSL }}}: {
-        var sourcePtr = {{{ makeGetValue('nextInChainPtr', C_STRUCTS.WGPUShaderSourceWGSL.code, '*') }}};
-        if (sourcePtr) {
-          desc["code"] = UTF8ToString(sourcePtr);
-        }
+        desc["code"] = WebGPU.makeStringFromStringView(
+          nextInChainPtr + {{{ C_STRUCTS.WGPUShaderSourceWGSL.code }}}
+        );
         break;
       }
 #if ASSERTIONS
@@ -1709,7 +1680,8 @@ var LibraryWebGPU = {
     {{{ gpu.makeCheckDescriptor('descriptor') }}}
 
     var desc = {
-      "label": undefined,
+      "label": WebGPU.makeStringFromOptionalStringView(
+        descriptor + {{{ C_STRUCTS.WGPUTextureDescriptor.label }}}),
       "size": WebGPU.makeExtent3D(descriptor + {{{ C_STRUCTS.WGPUTextureDescriptor.size }}}),
       "mipLevelCount": {{{ gpu.makeGetU32('descriptor', C_STRUCTS.WGPUTextureDescriptor.mipLevelCount) }}},
       "sampleCount": {{{ gpu.makeGetU32('descriptor', C_STRUCTS.WGPUTextureDescriptor.sampleCount) }}},
@@ -1719,8 +1691,6 @@ var LibraryWebGPU = {
         {{{ gpu.makeGetU32('descriptor', C_STRUCTS.WGPUTextureDescriptor.format) }}}],
       "usage": {{{ gpu.makeGetU32('descriptor', C_STRUCTS.WGPUTextureDescriptor.usage) }}},
     };
-    var labelPtr = {{{ makeGetValue('descriptor', C_STRUCTS.WGPUTextureDescriptor.label, '*') }}};
-    if (labelPtr) desc["label"] = UTF8ToString(labelPtr);
 
     var viewFormatCount = {{{ gpu.makeGetU32('descriptor', C_STRUCTS.WGPUTextureDescriptor.viewFormatCount) }}};
     if (viewFormatCount) {
@@ -1797,11 +1767,6 @@ var LibraryWebGPU = {
     device.pushErrorScope(WebGPU.ErrorFilter[filter]);
   },
 
-  wgpuDeviceSetLabel: (devicePtr, labelPtr) => {
-    var device = WebGPU.getJsObject(devicePtr);
-    device.label = UTF8ToString(labelPtr);
-  },
-
   // TODO(42241415) Remove this after verifying that it's not used and/or updating users.
   wgpuDeviceSetUncapturedErrorCallback__deps: ['$callUserCallback'],
   wgpuDeviceSetUncapturedErrorCallback: (devicePtr, callback, userdata) => {
@@ -1854,8 +1819,9 @@ var LibraryWebGPU = {
 #endif
     if (!context) return 0;
 
-    var labelPtr = {{{ makeGetValue('descriptor', C_STRUCTS.WGPUSurfaceDescriptor.label, '*') }}};
-    if (labelPtr) context.surfaceLabelWebGPU = UTF8ToString(labelPtr);
+    context.surfaceLabelWebGPU = WebGPU.makeStringFromOptionalStringView(
+      descriptor + {{{ C_STRUCTS.WGPUSurfaceDescriptor.label }}}
+    );
 
     var ptr = _emwgpuCreateSurface();
     WebGPU.Internals.jsObjectInsert(ptr, context);
@@ -1917,11 +1883,6 @@ var LibraryWebGPU = {
   // Methods of PipelineLayout
   // --------------------------------------------------------------------------
 
-  wgpuPipelineLayoutSetLabel: (pipelineLayoutPtr, labelPtr) => {
-    var pipelineLayout = WebGPU.getJsObject(pipelineLayoutPtr);
-    pipelineLayout.label = UTF8ToString(labelPtr);
-  },
-
   // --------------------------------------------------------------------------
   // Methods of QuerySet
   // --------------------------------------------------------------------------
@@ -1938,11 +1899,6 @@ var LibraryWebGPU = {
   wgpuQuerySetGetType: (querySetPtr, labelPtr) => {
     var querySet = WebGPU.getJsObject(querySetPtr);
     return querySet.type;
-  },
-
-  wgpuQuerySetSetLabel: (querySetPtr, labelPtr) => {
-    var querySet = WebGPU.getJsObject(querySetPtr);
-    querySet.label = UTF8ToString(labelPtr);
   },
 
   // --------------------------------------------------------------------------
@@ -1962,11 +1918,6 @@ var LibraryWebGPU = {
       {{{ runtimeKeepalivePop() }}}
       _emwgpuOnWorkDoneCompleted(futureIdL, futureIdH, {{{ gpu.QueueWorkDoneStatus.Error }}});
     }));
-  },
-
-  wgpuQueueSetLabel: (queuePtr, labelPtr) => {
-    var queue = WebGPU.getJsObject(queuePtr);
-    queue.label = UTF8ToString(labelPtr);
   },
 
   wgpuQueueSubmit: (queuePtr, commandCount, commands) => {
@@ -2004,11 +1955,6 @@ var LibraryWebGPU = {
   // Methods of RenderBundle
   // --------------------------------------------------------------------------
 
-  wgpuRenderBundleSetLabel: (bundlePtr, labelPtr) => {
-    var bundle = WebGPU.getJsObject(bundlePtr);
-    bundle.label = UTF8ToString(labelPtr);
-  },
-
   // --------------------------------------------------------------------------
   // Methods of RenderBundleEncoder
   // --------------------------------------------------------------------------
@@ -2040,9 +1986,10 @@ var LibraryWebGPU = {
     var desc;
     if (descriptor) {
       {{{ gpu.makeCheckDescriptor('descriptor') }}}
-      desc = {};
-      var labelPtr = {{{ makeGetValue('descriptor', C_STRUCTS.WGPURenderBundleDescriptor.label, '*') }}};
-      if (labelPtr) desc["label"] = UTF8ToString(labelPtr);
+      desc = {
+        "label": WebGPU.makeStringFromOptionalStringView(
+          descriptor + {{{ C_STRUCTS.WGPURenderBundleDescriptor.label }}}),
+      };
     }
     var encoder = WebGPU.getJsObject(encoderPtr);
     var ptr = _emwgpuCreateRenderBundle();
@@ -2050,9 +1997,9 @@ var LibraryWebGPU = {
     return ptr;
   },
 
-  wgpuRenderBundleEncoderInsertDebugMarker: (encoderPtr, markerLabelPtr) => {
+  wgpuRenderBundleEncoderInsertDebugMarker2: (encoderPtr, markerLabelPtr) => {
     var encoder = WebGPU.getJsObject(encoderPtr);
-    encoder.insertDebugMarker(UTF8ToString(markerLabelPtr));
+    encoder.insertDebugMarker(WebGPU.makeStringFromStringView(markerLabelPtr));
   },
 
   wgpuRenderBundleEncoderPopDebugGroup: (encoderPtr) => {
@@ -2060,9 +2007,9 @@ var LibraryWebGPU = {
     encoder.popDebugGroup();
   },
 
-  wgpuRenderBundleEncoderPushDebugGroup: (encoderPtr, groupLabelPtr) => {
+  wgpuRenderBundleEncoderPushDebugGroup2: (encoderPtr, groupLabelPtr) => {
     var encoder = WebGPU.getJsObject(encoderPtr);
-    encoder.pushDebugGroup(UTF8ToString(groupLabelPtr));
+    encoder.pushDebugGroup(WebGPU.makeStringFromStringView(groupLabelPtr));
   },
 
   wgpuRenderBundleEncoderSetBindGroup: (passPtr, groupIndex, groupPtr, dynamicOffsetCount, dynamicOffsetsPtr) => {
@@ -2084,11 +2031,6 @@ var LibraryWebGPU = {
     var buffer = WebGPU.getJsObject(bufferPtr);
     {{{ gpu.convertSentinelToUndefined('size') }}}
     pass.setIndexBuffer(buffer, WebGPU.IndexFormat[format], offset, size);
-  },
-
-  wgpuRenderBundleEncoderSetLabel: (passPtr, labelPtr) => {
-    var pass = WebGPU.getJsObject(passPtr);
-    pass.label = UTF8ToString(labelPtr);
   },
 
   wgpuRenderBundleEncoderSetPipeline: (passPtr, pipelinePtr) => {
@@ -2157,9 +2099,9 @@ var LibraryWebGPU = {
     pass.executeBundles(bundles);
   },
 
-  wgpuRenderPassEncoderInsertDebugMarker: (encoderPtr, markerLabelPtr) => {
+  wgpuRenderPassEncoderInsertDebugMarker2: (encoderPtr, markerLabelPtr) => {
     var encoder = WebGPU.getJsObject(encoderPtr);
-    encoder.insertDebugMarker(UTF8ToString(markerLabelPtr));
+    encoder.insertDebugMarker(WebGPU.makeStringFromStringView(markerLabelPtr));
   },
 
   wgpuRenderPassEncoderPopDebugGroup: (encoderPtr) => {
@@ -2167,9 +2109,9 @@ var LibraryWebGPU = {
     encoder.popDebugGroup();
   },
 
-  wgpuRenderPassEncoderPushDebugGroup: (encoderPtr, groupLabelPtr) => {
+  wgpuRenderPassEncoderPushDebugGroup2: (encoderPtr, groupLabelPtr) => {
     var encoder = WebGPU.getJsObject(encoderPtr);
-    encoder.pushDebugGroup(UTF8ToString(groupLabelPtr));
+    encoder.pushDebugGroup(WebGPU.makeStringFromStringView(groupLabelPtr));
   },
 
   wgpuRenderPassEncoderSetBindGroup: (passPtr, groupIndex, groupPtr, dynamicOffsetCount, dynamicOffsetsPtr) => {
@@ -2197,11 +2139,6 @@ var LibraryWebGPU = {
     var buffer = WebGPU.getJsObject(bufferPtr);
     {{{ gpu.convertSentinelToUndefined('size') }}}
     pass.setIndexBuffer(buffer, WebGPU.IndexFormat[format], offset, size);
-  },
-
-  wgpuRenderPassEncoderSetLabel: (passPtr, labelPtr) => {
-    var pass = WebGPU.getJsObject(passPtr);
-    pass.label = UTF8ToString(labelPtr);
   },
 
   wgpuRenderPassEncoderSetPipeline: (passPtr, pipelinePtr) => {
@@ -2250,19 +2187,9 @@ var LibraryWebGPU = {
     return ptr;
   },
 
-  wgpuRenderPipelineSetLabel: (pipelinePtr, labelPtr) => {
-    var pipeline = WebGPU.getJsObject(pipelinePtr);
-    pipeline.label = UTF8ToString(labelPtr);
-  },
-
   // --------------------------------------------------------------------------
   // Methods of Sampler
   // --------------------------------------------------------------------------
-
-  wgpuSamplerSetLabel: (samplerPtr, labelPtr) => {
-    var sampler = WebGPU.getJsObject(samplerPtr);
-    sampler.label = UTF8ToString(labelPtr);
-  },
 
   // --------------------------------------------------------------------------
   // Methods of ShaderModule
@@ -2310,7 +2237,7 @@ var LibraryWebGPU = {
         // Write the string out to the allocated buffer. Note we have to add 1
         // to the length of the string to ensure enough space for the null
         // terminator. However, we only increment the pointer by the exact
-        // length so that we overwrite the last null terminator excpet for the last one.
+        // length so we overwrite the null terminators except for the last one.
         stringToUTF8(compilationMessage.message, messagesPtr, messageLengths[i] + 1);
         messagesPtr += messageLengths[i];
       }
@@ -2323,11 +2250,6 @@ var LibraryWebGPU = {
     }, () => {
       _emwgpuOnCompilationInfoCompleted(futureIdL, futureIdH, {{{ gpu.CompilationInfoRequestStatus.Error }}}, compilationInfoPtr);
     }));
-  },
-
-  wgpuShaderModuleSetLabel: (shaderModulePtr, labelPtr) => {
-    var shaderModule = WebGPU.getJsObject(shaderModulePtr);
-    shaderModule.label = UTF8ToString(labelPtr);
   },
 
   // --------------------------------------------------------------------------
@@ -2417,6 +2339,8 @@ var LibraryWebGPU = {
       var mipLevelCount = {{{ gpu.makeGetU32('descriptor', C_STRUCTS.WGPUTextureViewDescriptor.mipLevelCount) }}};
       var arrayLayerCount = {{{ gpu.makeGetU32('descriptor', C_STRUCTS.WGPUTextureViewDescriptor.arrayLayerCount) }}};
       desc = {
+        "label": WebGPU.makeStringFromOptionalStringView(
+          descriptor + {{{ C_STRUCTS.WGPUTextureViewDescriptor.label }}}),
         "format": WebGPU.TextureFormat[
           {{{ gpu.makeGetU32('descriptor', C_STRUCTS.WGPUTextureViewDescriptor.format) }}}],
         "dimension": WebGPU.TextureViewDimension[
@@ -2428,8 +2352,6 @@ var LibraryWebGPU = {
         "aspect": WebGPU.TextureAspect[
           {{{ gpu.makeGetU32('descriptor', C_STRUCTS.WGPUTextureViewDescriptor.aspect) }}}],
       };
-      var labelPtr = {{{ makeGetValue('descriptor', C_STRUCTS.WGPUTextureViewDescriptor.label, '*') }}};
-      if (labelPtr) desc["label"] = UTF8ToString(labelPtr);
     }
 
     var texture = WebGPU.getJsObject(texturePtr);
@@ -2483,19 +2405,9 @@ var LibraryWebGPU = {
     return texture.width;
   },
 
-  wgpuTextureSetLabel: (texturePtr, labelPtr) => {
-    var texture = WebGPU.getJsObject(texturePtr);
-    texture.label = UTF8ToString(labelPtr);
-  },
-
   // --------------------------------------------------------------------------
   // Methods of TextureView
   // --------------------------------------------------------------------------
-
-  wgpuTextureViewSetLabel: (textureViewPtr, labelPtr) => {
-    var textureView = WebGPU.getJsObject(textureViewPtr);
-    textureView.label = UTF8ToString(labelPtr);
-  },
 };
 
 // Inverted index used by EnumerateFeatures/HasFeature

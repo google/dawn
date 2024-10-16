@@ -33,7 +33,8 @@ static constexpr InstanceID kNullInstanceId = 0;
 // Declarations for JS emwgpu functions (defined in library_webgpu.js)
 // ----------------------------------------------------------------------------
 extern "C" {
-void emwgpuDelete(void* id);
+void emwgpuDelete(void* ptr);
+void emwgpuSetLabel(void* ptr, const char* data, size_t length);
 
 // Note that for the JS entry points, we pass uint64_t as pointer and decode it
 // on the other side.
@@ -260,7 +261,7 @@ auto ReturnToAPI(Ref<T*>&& object) {
 
 // clang-format off
 // X Macro to help generate boilerplate code for all refcounted object types.
-#define WGPU_REFCOUNTED_OBJECTS(X) \
+#define WGPU_OBJECTS(X) \
   X(Adapter)             \
   X(BindGroup)           \
   X(BindGroupLayout)     \
@@ -1459,7 +1460,10 @@ WGPUFuture WGPUShaderModuleImpl::GetCompilationInfo(
 // ----------------------------------------------------------------------------
 
 // ----------------------------------------------------------------------------
-// Common AddRef/Release APIs are batch generated via X macros for all objects.
+// Common APIs are batch generated via X macros for all objects, including:
+//   - AddRef
+//   - Release
+//   - SetLabel
 // ----------------------------------------------------------------------------
 
 #define DEFINE_WGPU_DEFAULT_ADDREF_RELEASE(Name) \
@@ -1471,7 +1475,13 @@ WGPUFuture WGPUShaderModuleImpl::GetCompilationInfo(
       delete o;                                  \
     }                                            \
   }
-WGPU_REFCOUNTED_OBJECTS(DEFINE_WGPU_DEFAULT_ADDREF_RELEASE)
+WGPU_OBJECTS(DEFINE_WGPU_DEFAULT_ADDREF_RELEASE)
+
+#define DEFINE_WGPU_DEFAULT_SETLABEL(Name)                        \
+  void wgpu##Name##SetLabel(WGPU##Name o, WGPUStringView label) { \
+    emwgpuSetLabel(o, label.data, label.length);                  \
+  }
+WGPU_OBJECTS(DEFINE_WGPU_DEFAULT_SETLABEL)
 
 // ----------------------------------------------------------------------------
 // Standalone (non-method) functions
