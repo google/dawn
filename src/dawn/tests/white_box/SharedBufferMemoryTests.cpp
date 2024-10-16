@@ -216,7 +216,7 @@ TEST_P(SharedBufferMemoryTests, CallEndAccessOnMappedBuffer) {
     bool done = false;
     buffer.MapAsync(wgpu::MapMode::Write, 0, sizeof(uint32_t),
                     wgpu::CallbackMode::AllowProcessEvents,
-                    [&done](wgpu::MapAsyncStatus status, const char*) {
+                    [&done](wgpu::MapAsyncStatus status, wgpu::StringView) {
                         ASSERT_EQ(status, wgpu::MapAsyncStatus::Success);
                         done = true;
                     });
@@ -263,7 +263,7 @@ TEST_P(SharedBufferMemoryTests, EnsureNoMapUsageBeforeBeginAccess) {
     // Mapping a buffer without calling BeginAccess should cause an error.
     ASSERT_DEVICE_ERROR(sharedBuffer.MapAsync(wgpu::MapMode::Write, 0, 4,
                                               wgpu::CallbackMode::AllowProcessEvents,
-                                              [](wgpu::MapAsyncStatus status, const char*) {
+                                              [](wgpu::MapAsyncStatus status, wgpu::StringView) {
                                                   ASSERT_EQ(status, wgpu::MapAsyncStatus::Error);
                                               }));
 }

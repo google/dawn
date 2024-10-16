@@ -38,7 +38,7 @@ using testing::_;
 using testing::InSequence;
 using testing::MockCppCallback;
 
-using MockMapAsyncCallback = MockCppCallback<void (*)(wgpu::MapAsyncStatus, const char*)>;
+using MockMapAsyncCallback = MockCppCallback<void (*)(wgpu::MapAsyncStatus, wgpu::StringView)>;
 using MockQueueWorkDoneCallback = MockCppCallback<void (*)(wgpu::QueueWorkDoneStatus)>;
 
 class QueueTimelineTests : public DawnTest {

@@ -44,7 +44,7 @@ using testing::Exactly;
 using testing::HasSubstr;
 using testing::MockCppCallback;
 
-using MockMapAsyncCallback = MockCppCallback<void (*)(wgpu::MapAsyncStatus, const char*)>;
+using MockMapAsyncCallback = MockCppCallback<void (*)(wgpu::MapAsyncStatus, wgpu::StringView)>;
 using MockQueueWorkDoneCallback = MockCppCallback<void (*)(wgpu::QueueWorkDoneStatus)>;
 
 static const int fakeUserData = 0;
@@ -446,12 +446,13 @@ TEST_P(DeviceLostTest, DeviceLostBeforeCreatePipelineAsyncCallback) {
     wgpu::ComputePipelineDescriptor descriptor;
     descriptor.compute.module = csModule;
 
-    device.CreateComputePipelineAsync(
-        &descriptor, wgpu::CallbackMode::AllowProcessEvents,
-        [](wgpu::CreatePipelineAsyncStatus status, wgpu::ComputePipeline pipeline, const char*) {
-            EXPECT_EQ(wgpu::CreatePipelineAsyncStatus::Success, status);
-            EXPECT_NE(pipeline, nullptr);
-        });
+    device.CreateComputePipelineAsync(&descriptor, wgpu::CallbackMode::AllowProcessEvents,
+                                      [](wgpu::CreatePipelineAsyncStatus status,
+                                         wgpu::ComputePipeline pipeline, wgpu::StringView) {
+                                          EXPECT_EQ(wgpu::CreatePipelineAsyncStatus::Success,
+                                                    status);
+                                          EXPECT_NE(pipeline, nullptr);
+                                      });
 
     LoseDeviceForTesting();
 }

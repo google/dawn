@@ -118,7 +118,7 @@ class MockCppCallback;
 
 // Helper wrapper class for C++ entry point callbacks.
 // Example Usage:
-//   MockCppCallback<void (*)(wgpu::PopErrorScopeStatus, wgpu::ErrorType, const char*)> mock;
+//   MockCppCallback<void (*)(wgpu::PopErrorScopeStatus, wgpu::ErrorType, wgpu::StringView)> mock;
 //
 //   device.PopErrorScope(wgpu::CallbackMode::AllowProcessEvents, mock.Callback());
 //   EXPECT_CALL(mock, Call(wgpu::PopErrorScopeStatus::Success, _, _));

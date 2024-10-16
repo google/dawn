@@ -335,7 +335,7 @@ wgpu::Device ValidationTest::RequestDeviceSync(const wgpu::DeviceDescriptor& dev
     EXPECT_DEPRECATION_WARNINGS(
         adapter.RequestDevice(&deviceDesc, wgpu::CallbackMode::AllowSpontaneous,
                               [&apiDevice](wgpu::RequestDeviceStatus status, wgpu::Device result,
-                                           const char* message) {
+                                           wgpu::StringView message) {
                                   if (status != wgpu::RequestDeviceStatus::Success) {
                                       ADD_FAILURE() << "Unable to create device: " << message;
                                       DAWN_ASSERT(false);
@@ -368,7 +368,7 @@ void ValidationTest::SetUp(const wgpu::InstanceDescriptor* nativeDesc,
     options.compatibilityMode = gCurrentTest->UseCompatibilityMode();
     instance.RequestAdapter(&options, wgpu::CallbackMode::AllowSpontaneous,
                             [this](wgpu::RequestAdapterStatus, wgpu::Adapter result,
-                                   char const*) -> void { adapter = std::move(result); });
+                                   wgpu::StringView) -> void { adapter = std::move(result); });
     FlushWire();
     DAWN_ASSERT(adapter);
 

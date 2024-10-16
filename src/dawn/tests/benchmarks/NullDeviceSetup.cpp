@@ -77,7 +77,7 @@ void NullDeviceBenchmarkFixture::SetUp(const benchmark::State& state) {
 
             adapter.RequestDevice(
                 &desc, wgpu::CallbackMode::AllowSpontaneous,
-                [this](wgpu::RequestDeviceStatus status, wgpu::Device result, const char*) {
+                [this](wgpu::RequestDeviceStatus status, wgpu::Device result, wgpu::StringView) {
                     DAWN_ASSERT(status == wgpu::RequestDeviceStatus::Success);
                     device = std::move(result);
                 });

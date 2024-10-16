@@ -422,7 +422,7 @@ int main(int argc, const char* argv[]) {
 
     wgpu::Future adapterFuture = instance.RequestAdapter(
         &options, wgpu::CallbackMode::WaitAnyOnly,
-        [&](wgpu::RequestAdapterStatus status, wgpu::Adapter adapterIn, const char* message) {
+        [&](wgpu::RequestAdapterStatus status, wgpu::Adapter adapterIn, wgpu::StringView message) {
             if (status != wgpu::RequestAdapterStatus::Success) {
                 dawn::ErrorLog() << "Failed to get an adapter: " << message;
                 return;
@@ -442,7 +442,7 @@ int main(int argc, const char* argv[]) {
 
     wgpu::DeviceDescriptor deviceDesc;
     deviceDesc.SetUncapturedErrorCallback(
-        [](const wgpu::Device&, wgpu::ErrorType errorType, const char* message) {
+        [](const wgpu::Device&, wgpu::ErrorType errorType, wgpu::StringView message) {
             dawn::ErrorLog() << errorType << " error: " << message;
             DAWN_ASSERT(false);
         });
@@ -450,7 +450,7 @@ int main(int argc, const char* argv[]) {
     // Setup the device on that adapter.
     wgpu::Future deviceFuture = adapter.RequestDevice(
         &deviceDesc, wgpu::CallbackMode::WaitAnyOnly,
-        [&](wgpu::RequestDeviceStatus status, wgpu::Device deviceIn, const char* message) {
+        [&](wgpu::RequestDeviceStatus status, wgpu::Device deviceIn, wgpu::StringView message) {
             if (status != wgpu::RequestDeviceStatus::Success) {
                 dawn::ErrorLog() << "Failed to get a device:" << message;
                 return;

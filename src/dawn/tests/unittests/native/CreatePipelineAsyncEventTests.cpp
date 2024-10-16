@@ -52,10 +52,10 @@ using ::testing::MockCppCallback;
 using ::testing::NotNull;
 using ::testing::Test;
 
-using MockComputePipelineAsyncCallback =
-    MockCppCallback<void (*)(wgpu::CreatePipelineAsyncStatus, wgpu::ComputePipeline, const char*)>;
-using MockRenderPipelineAsyncCallback =
-    MockCppCallback<void (*)(wgpu::CreatePipelineAsyncStatus, wgpu::RenderPipeline, const char*)>;
+using MockComputePipelineAsyncCallback = MockCppCallback<
+    void (*)(wgpu::CreatePipelineAsyncStatus, wgpu::ComputePipeline, wgpu::StringView)>;
+using MockRenderPipelineAsyncCallback = MockCppCallback<
+    void (*)(wgpu::CreatePipelineAsyncStatus, wgpu::RenderPipeline, wgpu::StringView)>;
 
 static constexpr std::string_view kComputeShader = R"(
         @compute @workgroup_size(1) fn main() {}

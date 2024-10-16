@@ -1181,7 +1181,7 @@ wgpu::Device DawnTestBase::CreateDevice(std::string isolationKey) {
 
     adapter.RequestDevice(&deviceDesc, wgpu::CallbackMode::AllowSpontaneous,
                           [&apiDevice](wgpu::RequestDeviceStatus, wgpu::Device result,
-                                       const char*) { apiDevice = std::move(result); });
+                                       wgpu::StringView) { apiDevice = std::move(result); });
     FlushWire();
     DAWN_ASSERT(apiDevice);
 
@@ -1239,7 +1239,7 @@ void DawnTestBase::SetUp() {
     // RequestAdapter is overriden to ignore RequestAdapterOptions, and select based on test params.
     instance.RequestAdapter(
         nullptr, wgpu::CallbackMode::AllowSpontaneous,
-        [](wgpu::RequestAdapterStatus status, wgpu::Adapter result, char const* message,
+        [](wgpu::RequestAdapterStatus status, wgpu::Adapter result, wgpu::StringView message,
            wgpu::Adapter* userdata) -> void { *userdata = std::move(result); },
         &adapter);
     FlushWire();
@@ -1675,7 +1675,7 @@ void DawnTestBase::MapAsyncAndWait(const wgpu::Buffer& buffer,
     if (!UsesWire()) {
         // We use a new mock callback here so that the validation on the call happens as soon as the
         // scope of this call ends.
-        MockCppCallback<void (*)(wgpu::MapAsyncStatus, const char*)> mockCb;
+        MockCppCallback<void (*)(wgpu::MapAsyncStatus, wgpu::StringView)> mockCb;
         EXPECT_CALL(mockCb, Call(wgpu::MapAsyncStatus::Success, _)).Times(1);
 
         ASSERT_EQ(
@@ -1686,7 +1686,7 @@ void DawnTestBase::MapAsyncAndWait(const wgpu::Buffer& buffer,
     } else {
         bool done = false;
         buffer.MapAsync(mapMode, offset, size, wgpu::CallbackMode::AllowProcessEvents,
-                        [&done](wgpu::MapAsyncStatus status, const char*) {
+                        [&done](wgpu::MapAsyncStatus status, wgpu::StringView) {
                             ASSERT_EQ(status, wgpu::MapAsyncStatus::Success);
                             done = true;
                         });
@@ -1765,7 +1765,7 @@ void DawnTestBase::MapSlotsSynchronously() {
 
         slot.buffer.MapAsync(wgpu::MapMode::Read, 0, wgpu::kWholeMapSize,
                              wgpu::CallbackMode::AllowProcessEvents,
-                             [this, &slot](wgpu::MapAsyncStatus status, const char*) {
+                             [this, &slot](wgpu::MapAsyncStatus status, wgpu::StringView) {
                                  DAWN_ASSERT(status == wgpu::MapAsyncStatus::Success);
                                  Mutex::AutoLock lg(&mMutex);
 

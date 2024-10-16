@@ -75,7 +75,7 @@ interop::Promise<void> GPUBuffer::mapAsync(Napi::Env env,
 
     buffer_.MapAsync(
         mode, offset, rangeSize, wgpu::CallbackMode::AllowProcessEvents,
-        [ctx = std::move(ctx), this](wgpu::MapAsyncStatus status, char const*) {
+        [ctx = std::move(ctx), this](wgpu::MapAsyncStatus status, wgpu::StringView) {
             // The promise may already have been resolved with an AbortError if there was an early
             // destroy() or early unmap().
             if (ctx->promise.GetState() != interop::PromiseState::Pending) {

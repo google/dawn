@@ -131,7 +131,7 @@ class CreatePipelineAsyncTest : public DawnTest {
         device.CreateRenderPipelineAsync(
             &renderPipelineDescriptor, wgpu::CallbackMode::AllowProcessEvents,
             [this](wgpu::CreatePipelineAsyncStatus status, wgpu::RenderPipeline pipeline,
-                   const char* message) {
+                   wgpu::StringView message) {
                 EXPECT_EQ(wgpu::CreatePipelineAsyncStatus::Success, status);
                 task.renderPipeline = std::move(pipeline);
                 task.isCompleted = true;
@@ -155,15 +155,15 @@ TEST_P(CreatePipelineAsyncTest, BasicUseOfCreateComputePipelineAsync) {
             ssbo.value = 1u;
         })");
 
-    device.CreateComputePipelineAsync(&csDesc, wgpu::CallbackMode::AllowProcessEvents,
-                                      [this](wgpu::CreatePipelineAsyncStatus status,
-                                             wgpu::ComputePipeline pipeline, const char* message) {
-                                          EXPECT_EQ(wgpu::CreatePipelineAsyncStatus::Success,
-                                                    status);
-                                          task.computePipeline = std::move(pipeline);
-                                          task.isCompleted = true;
-                                          task.message = message;
-                                      });
+    device.CreateComputePipelineAsync(
+        &csDesc, wgpu::CallbackMode::AllowProcessEvents,
+        [this](wgpu::CreatePipelineAsyncStatus status, wgpu::ComputePipeline pipeline,
+               wgpu::StringView message) {
+            EXPECT_EQ(wgpu::CreatePipelineAsyncStatus::Success, status);
+            task.computePipeline = std::move(pipeline);
+            task.isCompleted = true;
+            task.message = message;
+        });
 
     ValidateCreateComputePipelineAsync();
 }
@@ -191,7 +191,7 @@ TEST_P(CreatePipelineAsyncTest, CreateComputePipelineAsyncStress) {
 
         device.CreateComputePipelineAsync(
             &csDesc, wgpu::CallbackMode::AllowProcessEvents,
-            [](wgpu::CreatePipelineAsyncStatus status, wgpu::ComputePipeline, const char*) {
+            [](wgpu::CreatePipelineAsyncStatus status, wgpu::ComputePipeline, wgpu::StringView) {
                 EXPECT_EQ(wgpu::CreatePipelineAsyncStatus::Success, status);
             });
     }
@@ -226,7 +226,7 @@ TEST_P(CreatePipelineAsyncTest, CreateComputePipelineAsyncStressManyThreads) {
 
         device.CreateComputePipelineAsync(
             &csDesc, wgpu::CallbackMode::AllowProcessEvents,
-            [](wgpu::CreatePipelineAsyncStatus status, wgpu::ComputePipeline, const char*) {
+            [](wgpu::CreatePipelineAsyncStatus status, wgpu::ComputePipeline, wgpu::StringView) {
                 EXPECT_EQ(wgpu::CreatePipelineAsyncStatus::Success, status);
             });
     };
@@ -263,15 +263,15 @@ TEST_P(CreatePipelineAsyncTest, ReleaseEntryPointAfterCreatComputePipelineAsync)
 
     csDesc.compute.entryPoint = entryPoint.c_str();
 
-    device.CreateComputePipelineAsync(&csDesc, wgpu::CallbackMode::AllowProcessEvents,
-                                      [this](wgpu::CreatePipelineAsyncStatus status,
-                                             wgpu::ComputePipeline pipeline, const char* message) {
-                                          EXPECT_EQ(wgpu::CreatePipelineAsyncStatus::Success,
-                                                    status);
-                                          task.computePipeline = std::move(pipeline);
-                                          task.isCompleted = true;
-                                          task.message = message;
-                                      });
+    device.CreateComputePipelineAsync(
+        &csDesc, wgpu::CallbackMode::AllowProcessEvents,
+        [this](wgpu::CreatePipelineAsyncStatus status, wgpu::ComputePipeline pipeline,
+               wgpu::StringView message) {
+            EXPECT_EQ(wgpu::CreatePipelineAsyncStatus::Success, status);
+            task.computePipeline = std::move(pipeline);
+            task.isCompleted = true;
+            task.message = message;
+        });
 
     entryPoint = "";
     ValidateCreateComputePipelineAsync();
@@ -299,7 +299,7 @@ TEST_P(CreatePipelineAsyncTest, CreateComputePipelineFailed) {
     device.CreateComputePipelineAsync(
         &csDesc, wgpu::CallbackMode::AllowProcessEvents,
         [this](wgpu::CreatePipelineAsyncStatus status, wgpu::ComputePipeline pipeline,
-               const char* message) {
+               wgpu::StringView message) {
             EXPECT_EQ(wgpu::CreatePipelineAsyncStatus::ValidationError, status);
             task.computePipeline = std::move(pipeline);
             task.isCompleted = true;
@@ -362,7 +362,7 @@ TEST_P(CreatePipelineAsyncTest, CreateRenderPipelineAsyncStress) {
 
         device.CreateRenderPipelineAsync(
             &desc, wgpu::CallbackMode::AllowProcessEvents,
-            [](wgpu::CreatePipelineAsyncStatus status, wgpu::RenderPipeline, const char*) {
+            [](wgpu::CreatePipelineAsyncStatus status, wgpu::RenderPipeline, wgpu::StringView) {
                 EXPECT_EQ(wgpu::CreatePipelineAsyncStatus::Success, status);
             });
     }
@@ -399,7 +399,7 @@ TEST_P(CreatePipelineAsyncTest, CreateRenderPipelineAsyncStressManyThreads) {
 
         device.CreateRenderPipelineAsync(
             &desc, wgpu::CallbackMode::AllowProcessEvents,
-            [](wgpu::CreatePipelineAsyncStatus status, wgpu::RenderPipeline, const char*) {
+            [](wgpu::CreatePipelineAsyncStatus status, wgpu::RenderPipeline, wgpu::StringView) {
                 EXPECT_EQ(wgpu::CreatePipelineAsyncStatus::Success, status);
             });
     };
@@ -506,7 +506,7 @@ TEST_P(CreatePipelineAsyncTest, CreateRenderPipelineFailed) {
     device.CreateRenderPipelineAsync(
         &renderPipelineDescriptor, wgpu::CallbackMode::AllowProcessEvents,
         [this](wgpu::CreatePipelineAsyncStatus status, wgpu::RenderPipeline pipeline,
-               const char* message) {
+               wgpu::StringView message) {
             EXPECT_EQ(wgpu::CreatePipelineAsyncStatus::ValidationError, status);
             task.renderPipeline = std::move(pipeline);
             task.isCompleted = true;
@@ -529,16 +529,16 @@ TEST_P(CreatePipelineAsyncTest, ReleaseDeviceBeforeCallbackOfCreateComputePipeli
         @compute @workgroup_size(1) fn main() {
         })");
 
-    device.CreateComputePipelineAsync(&csDesc, wgpu::CallbackMode::AllowProcessEvents,
-                                      [this](wgpu::CreatePipelineAsyncStatus status,
-                                             wgpu::ComputePipeline pipeline, const char* message) {
-                                          EXPECT_EQ(wgpu::CreatePipelineAsyncStatus::Success,
-                                                    status);
-                                          EXPECT_NE(pipeline, nullptr);
-                                          task.computePipeline = std::move(pipeline);
-                                          task.isCompleted = true;
-                                          task.message = message;
-                                      });
+    device.CreateComputePipelineAsync(
+        &csDesc, wgpu::CallbackMode::AllowProcessEvents,
+        [this](wgpu::CreatePipelineAsyncStatus status, wgpu::ComputePipeline pipeline,
+               wgpu::StringView message) {
+            EXPECT_EQ(wgpu::CreatePipelineAsyncStatus::Success, status);
+            EXPECT_NE(pipeline, nullptr);
+            task.computePipeline = std::move(pipeline);
+            task.isCompleted = true;
+            task.message = message;
+        });
     device = nullptr;
 
     while (!task.isCompleted) {
@@ -566,7 +566,7 @@ TEST_P(CreatePipelineAsyncTest, ReleaseDeviceBeforeCallbackOfCreateRenderPipelin
     device.CreateRenderPipelineAsync(
         &renderPipelineDescriptor, wgpu::CallbackMode::AllowProcessEvents,
         [this](wgpu::CreatePipelineAsyncStatus status, wgpu::RenderPipeline pipeline,
-               const char* message) {
+               wgpu::StringView message) {
             EXPECT_EQ(wgpu::CreatePipelineAsyncStatus::Success, status);
             EXPECT_NE(pipeline, nullptr);
             task.renderPipeline = std::move(pipeline);
@@ -588,16 +588,16 @@ TEST_P(CreatePipelineAsyncTest, DestroyDeviceBeforeCallbackOfCreateComputePipeli
         @compute @workgroup_size(1) fn main() {
         })");
 
-    device.CreateComputePipelineAsync(&csDesc, wgpu::CallbackMode::AllowProcessEvents,
-                                      [this](wgpu::CreatePipelineAsyncStatus status,
-                                             wgpu::ComputePipeline pipeline, const char* message) {
-                                          EXPECT_EQ(wgpu::CreatePipelineAsyncStatus::Success,
-                                                    status);
-                                          EXPECT_NE(pipeline, nullptr);
-                                          task.computePipeline = std::move(pipeline);
-                                          task.isCompleted = true;
-                                          task.message = message;
-                                      });
+    device.CreateComputePipelineAsync(
+        &csDesc, wgpu::CallbackMode::AllowProcessEvents,
+        [this](wgpu::CreatePipelineAsyncStatus status, wgpu::ComputePipeline pipeline,
+               wgpu::StringView message) {
+            EXPECT_EQ(wgpu::CreatePipelineAsyncStatus::Success, status);
+            EXPECT_NE(pipeline, nullptr);
+            task.computePipeline = std::move(pipeline);
+            task.isCompleted = true;
+            task.message = message;
+        });
 
     DestroyDevice();
     while (!task.isCompleted) {
@@ -625,7 +625,7 @@ TEST_P(CreatePipelineAsyncTest, DestroyDeviceBeforeCallbackOfCreateRenderPipelin
     device.CreateRenderPipelineAsync(
         &renderPipelineDescriptor, wgpu::CallbackMode::AllowProcessEvents,
         [this](wgpu::CreatePipelineAsyncStatus status, wgpu::RenderPipeline pipeline,
-               const char* message) {
+               wgpu::StringView message) {
             EXPECT_EQ(wgpu::CreatePipelineAsyncStatus::Success, status);
             EXPECT_NE(pipeline, nullptr);
             task.renderPipeline = std::move(pipeline);
@@ -658,7 +658,7 @@ TEST_P(CreatePipelineAsyncTest, CreateSameComputePipelineTwice) {
     device.CreateComputePipelineAsync(
         &csDesc, wgpu::CallbackMode::AllowProcessEvents,
         [&anotherTask](wgpu::CreatePipelineAsyncStatus status, wgpu::ComputePipeline pipeline,
-                       const char* message) {
+                       wgpu::StringView message) {
             EXPECT_EQ(wgpu::CreatePipelineAsyncStatus::Success, status);
             anotherTask.computePipeline = std::move(pipeline);
             anotherTask.isCompleted = true;
@@ -673,15 +673,15 @@ TEST_P(CreatePipelineAsyncTest, CreateSameComputePipelineTwice) {
     // Create another pipeline object task.comnputepipeline with the same compute pipeline
     // descriptor used in the creation of anotherTask.computePipeline. This time the pipeline
     // object should be directly got from the pipeline object cache.
-    device.CreateComputePipelineAsync(&csDesc, wgpu::CallbackMode::AllowProcessEvents,
-                                      [this](wgpu::CreatePipelineAsyncStatus status,
-                                             wgpu::ComputePipeline pipeline, const char* message) {
-                                          EXPECT_EQ(wgpu::CreatePipelineAsyncStatus::Success,
-                                                    status);
-                                          task.computePipeline = std::move(pipeline);
-                                          task.isCompleted = true;
-                                          task.message = message;
-                                      });
+    device.CreateComputePipelineAsync(
+        &csDesc, wgpu::CallbackMode::AllowProcessEvents,
+        [this](wgpu::CreatePipelineAsyncStatus status, wgpu::ComputePipeline pipeline,
+               wgpu::StringView message) {
+            EXPECT_EQ(wgpu::CreatePipelineAsyncStatus::Success, status);
+            task.computePipeline = std::move(pipeline);
+            task.isCompleted = true;
+            task.message = message;
+        });
     ValidateCreateComputePipelineAsync();
 }
 
@@ -719,19 +719,19 @@ TEST_P(CreatePipelineAsyncTest, CreateSameComputePipelineTwiceAtSameTime) {
 
     // Create two pipeline objects with same descriptor.
     CreatePipelineAsyncTask anotherTask;
-    device.CreateComputePipelineAsync(&csDesc, wgpu::CallbackMode::AllowProcessEvents,
-                                      [this](wgpu::CreatePipelineAsyncStatus status,
-                                             wgpu::ComputePipeline pipeline, const char* message) {
-                                          EXPECT_EQ(wgpu::CreatePipelineAsyncStatus::Success,
-                                                    status);
-                                          task.computePipeline = std::move(pipeline);
-                                          task.isCompleted = true;
-                                          task.message = message;
-                                      });
+    device.CreateComputePipelineAsync(
+        &csDesc, wgpu::CallbackMode::AllowProcessEvents,
+        [this](wgpu::CreatePipelineAsyncStatus status, wgpu::ComputePipeline pipeline,
+               wgpu::StringView message) {
+            EXPECT_EQ(wgpu::CreatePipelineAsyncStatus::Success, status);
+            task.computePipeline = std::move(pipeline);
+            task.isCompleted = true;
+            task.message = message;
+        });
     device.CreateComputePipelineAsync(
         &csDesc, wgpu::CallbackMode::AllowProcessEvents,
         [&anotherTask](wgpu::CreatePipelineAsyncStatus status, wgpu::ComputePipeline pipeline,
-                       const char* message) {
+                       wgpu::StringView message) {
             EXPECT_EQ(wgpu::CreatePipelineAsyncStatus::Success, status);
             anotherTask.computePipeline = std::move(pipeline);
             anotherTask.isCompleted = true;
@@ -773,7 +773,7 @@ TEST_P(CreatePipelineAsyncTest, CreateSameRenderPipelineTwiceAtSameTime) {
     device.CreateRenderPipelineAsync(
         &renderPipelineDescriptor, wgpu::CallbackMode::AllowProcessEvents,
         [this](wgpu::CreatePipelineAsyncStatus status, wgpu::RenderPipeline pipeline,
-               const char* message) {
+               wgpu::StringView message) {
             EXPECT_EQ(wgpu::CreatePipelineAsyncStatus::Success, status);
             task.renderPipeline = std::move(pipeline);
             task.isCompleted = true;
@@ -782,7 +782,7 @@ TEST_P(CreatePipelineAsyncTest, CreateSameRenderPipelineTwiceAtSameTime) {
     device.CreateRenderPipelineAsync(
         &renderPipelineDescriptor, wgpu::CallbackMode::AllowProcessEvents,
         [&anotherTask](wgpu::CreatePipelineAsyncStatus status, wgpu::RenderPipeline pipeline,
-                       const char* message) {
+                       wgpu::StringView message) {
             EXPECT_EQ(wgpu::CreatePipelineAsyncStatus::Success, status);
             anotherTask.renderPipeline = std::move(pipeline);
             anotherTask.isCompleted = true;

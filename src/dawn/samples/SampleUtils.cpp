@@ -186,7 +186,7 @@ int SampleBase::Run(unsigned int delay) {
     sample->instance.WaitAny(
         sample->instance.RequestAdapter(
             &adapterOptions, wgpu::CallbackMode::WaitAnyOnly,
-            [](wgpu::RequestAdapterStatus status, wgpu::Adapter adapter, const char* message) {
+            [](wgpu::RequestAdapterStatus status, wgpu::Adapter adapter, wgpu::StringView message) {
                 if (status != wgpu::RequestAdapterStatus::Success) {
                     dawn::ErrorLog() << "Failed to get an adapter:" << message;
                     return;

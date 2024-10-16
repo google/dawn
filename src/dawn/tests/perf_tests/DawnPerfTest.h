@@ -187,7 +187,7 @@ class DawnPerfTestWithParams : public DawnTestWithParams<Params>, public DawnPer
         bool done = false;
         mReadbackBuffer.MapAsync(wgpu::MapMode::Read, 0, sizeof(uint64_t) * kTimestampQueryCount,
                                  wgpu::CallbackMode::AllowProcessEvents,
-                                 [&done](wgpu::MapAsyncStatus, const char*) { done = true; });
+                                 [&done](wgpu::MapAsyncStatus, wgpu::StringView) { done = true; });
         while (!done) {
             DawnTestWithParams<Params>::WaitABit();
         }

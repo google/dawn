@@ -33,9 +33,12 @@
 #include <vector>
 
 #include "dawn/tests/MockCallback.h"
+#include "dawn/tests/StringViewMatchers.h"
 #include "dawn/utils/ComboRenderPipelineDescriptor.h"
 #include "dawn/utils/TextureUtils.h"
 #include "dawn/utils/WGPUHelpers.h"
+
+using testing::SizedStringMatches;
 
 namespace dawn {
 
@@ -790,11 +793,11 @@ TEST_P(SharedTextureMemoryNoFeatureTests, CreationWithoutFeature) {
     const auto& memories =
         GetParam().mBackend->CreateSharedTextureMemories(device, GetParam().mLayerCount);
 
-    MockCppCallback<void (*)(wgpu::PopErrorScopeStatus, wgpu::ErrorType, const char*)>
+    MockCppCallback<void (*)(wgpu::PopErrorScopeStatus, wgpu::ErrorType, wgpu::StringView)>
         popErrorScopeCallback;
     EXPECT_CALL(popErrorScopeCallback,
                 Call(wgpu::PopErrorScopeStatus::Success, wgpu::ErrorType::Validation,
-                     HasSubstr("is not enabled")));
+                     SizedStringMatches(HasSubstr("is not enabled"))));
 
     device.PopErrorScope(wgpu::CallbackMode::AllowProcessEvents, popErrorScopeCallback.Callback());
 

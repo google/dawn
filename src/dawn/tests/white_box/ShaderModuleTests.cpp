@@ -116,7 +116,7 @@ class ShaderModuleTests : public DawnTest {
         device.CreateRenderPipelineAsync(
             &renderPipelineDescriptor, wgpu::CallbackMode::AllowProcessEvents,
             [this](wgpu::CreatePipelineAsyncStatus status, wgpu::RenderPipeline pipeline,
-                   const char* message) {
+                   wgpu::StringView message) {
                 EXPECT_EQ(wgpu::CreatePipelineAsyncStatus::Success, status);
 
                 task.renderPipeline = std::move(pipeline);
@@ -144,7 +144,7 @@ class ShaderModuleTests : public DawnTest {
         device.CreateComputePipelineAsync(
             &csDesc, wgpu::CallbackMode::AllowProcessEvents,
             [this](wgpu::CreatePipelineAsyncStatus status, wgpu::ComputePipeline pipeline,
-                   const char* message) {
+                   wgpu::StringView message) {
                 EXPECT_EQ(wgpu::CreatePipelineAsyncStatus::Success, status);
                 task.computePipeline = std::move(pipeline);
                 task.isCompleted = true;

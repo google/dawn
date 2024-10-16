@@ -94,7 +94,8 @@ void WireTest::SetUp() {
 
     // Create the adapter for testing.
     apiAdapter = api.GetNewAdapter();
-    MockCallback<void (*)(wgpu::RequestAdapterStatus, wgpu::Adapter, const char*, void*)> adapterCb;
+    MockCallback<void (*)(wgpu::RequestAdapterStatus, wgpu::Adapter, wgpu::StringView, void*)>
+        adapterCb;
     instance.RequestAdapter(nullptr, wgpu::CallbackMode::AllowSpontaneous, adapterCb.Callback(),
                             adapterCb.MakeUserdata(this));
 
@@ -140,7 +141,8 @@ void WireTest::SetUp() {
                                               uncapturedErrorCallback.MakeUserdata(this)};
     EXPECT_CALL(deviceLostCallback, Call).Times(AtMost(1));
 
-    MockCallback<void (*)(wgpu::RequestDeviceStatus, wgpu::Device, const char*, void*)> deviceCb;
+    MockCallback<void (*)(wgpu::RequestDeviceStatus, wgpu::Device, wgpu::StringView, void*)>
+        deviceCb;
     adapter.RequestDevice(&deviceDesc, wgpu::CallbackMode::AllowSpontaneous, deviceCb.Callback(),
                           deviceCb.MakeUserdata(this));
     EXPECT_CALL(api, OnAdapterRequestDevice2(apiAdapter, NotNull(), _))

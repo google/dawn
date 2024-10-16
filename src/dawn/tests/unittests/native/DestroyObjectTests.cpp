@@ -68,7 +68,7 @@ using ::testing::StrictMock;
 using ::testing::Test;
 
 using MockMapAsyncCallback =
-    StrictMock<MockCppCallback<void (*)(wgpu::MapAsyncStatus, const char*)>>;
+    StrictMock<MockCppCallback<void (*)(wgpu::MapAsyncStatus, wgpu::StringView)>>;
 
 static constexpr std::string_view kComputeShader = R"(
         @compute @workgroup_size(1) fn main() {}

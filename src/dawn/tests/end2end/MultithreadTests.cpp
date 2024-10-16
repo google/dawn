@@ -175,7 +175,8 @@ TEST_P(MultithreadTests, Device_DroppedInCallback_OnAnotherThread) {
         additionalDevice.PushErrorScope(wgpu::ErrorFilter::Validation);
         additionalDevice.PopErrorScope(
             wgpu::CallbackMode::AllowProcessEvents,
-            [&device2ndRef, &isCompleted](wgpu::PopErrorScopeStatus, wgpu::ErrorType, const char*) {
+            [&device2ndRef, &isCompleted](wgpu::PopErrorScopeStatus, wgpu::ErrorType,
+                                          wgpu::StringView) {
                 device2ndRef = nullptr;
                 isCompleted = true;
             });
@@ -207,14 +208,14 @@ TEST_P(MultithreadTests, Buffers_MapInParallel) {
             CreateBuffer(kSize, wgpu::BufferUsage::MapWrite | wgpu::BufferUsage::CopySrc);
 
         // Wait for the mapping to complete
-        ASSERT_EQ(instance.WaitAny(buffer.MapAsync(wgpu::MapMode::Write, 0, kSize,
-                                                   wgpu::CallbackMode::AllowProcessEvents,
-                                                   [](wgpu::MapAsyncStatus status, const char*) {
-                                                       ASSERT_EQ(status,
-                                                                 wgpu::MapAsyncStatus::Success);
-                                                   }),
-                                   UINT64_MAX),
-                  wgpu::WaitStatus::Success);
+        ASSERT_EQ(
+            instance.WaitAny(buffer.MapAsync(wgpu::MapMode::Write, 0, kSize,
+                                             wgpu::CallbackMode::AllowProcessEvents,
+                                             [](wgpu::MapAsyncStatus status, wgpu::StringView) {
+                                                 ASSERT_EQ(status, wgpu::MapAsyncStatus::Success);
+                                             }),
+                             UINT64_MAX),
+            wgpu::WaitStatus::Success);
 
         // Buffer is mapped, write into it and unmap .
         memcpy(buffer.GetMappedRange(0, kSize), myData.data(), kSize);
@@ -303,15 +304,15 @@ TEST_P(MultithreadTests, CreateComputePipelineAsyncInParallel) {
             wgpu::ComputePipeline computePipeline;
             std::atomic<bool> isCompleted{false};
         } task;
-        device.CreateComputePipelineAsync(&csDesc, wgpu::CallbackMode::AllowProcessEvents,
-                                          [&task](wgpu::CreatePipelineAsyncStatus status,
-                                                  wgpu::ComputePipeline pipeline, const char*) {
-                                              EXPECT_EQ(wgpu::CreatePipelineAsyncStatus::Success,
-                                                        status);
+        device.CreateComputePipelineAsync(
+            &csDesc, wgpu::CallbackMode::AllowProcessEvents,
+            [&task](wgpu::CreatePipelineAsyncStatus status, wgpu::ComputePipeline pipeline,
+                    wgpu::StringView) {
+                EXPECT_EQ(wgpu::CreatePipelineAsyncStatus::Success, status);
 
-                                              task.computePipeline = std::move(pipeline);
-                                              task.isCompleted = true;
-                                          });
+                task.computePipeline = std::move(pipeline);
+                task.isCompleted = true;
+            });
 
         while (!task.isCompleted.load()) {
             WaitABit();
@@ -472,7 +473,7 @@ TEST_P(MultithreadTests, CreateRenderPipelineAsyncInParallel) {
         device.CreateRenderPipelineAsync(
             &renderPipelineDescriptor, wgpu::CallbackMode::AllowProcessEvents,
             [&task](wgpu::CreatePipelineAsyncStatus status, wgpu::RenderPipeline pipeline,
-                    const char*) {
+                    wgpu::StringView) {
                 EXPECT_EQ(wgpu::CreatePipelineAsyncStatus::Success, status);
 
                 task.renderPipeline = std::move(pipeline);
@@ -1301,13 +1302,13 @@ TEST_P(MultithreadTextureCopyTests, CopyTextureForBrowserErrorNoDeadLock) {
         CopyTextureToTextureHelper(invalidSrcTexture, dest, dstSize, nullptr, &options);
 
         std::atomic<bool> errorThrown(false);
-        device.PopErrorScope(
-            wgpu::CallbackMode::AllowProcessEvents,
-            [&errorThrown](wgpu::PopErrorScopeStatus status, wgpu::ErrorType type, char const*) {
-                EXPECT_EQ(status, wgpu::PopErrorScopeStatus::Success);
-                EXPECT_EQ(type, wgpu::ErrorType::Validation);
-                errorThrown = true;
-            });
+        device.PopErrorScope(wgpu::CallbackMode::AllowProcessEvents,
+                             [&errorThrown](wgpu::PopErrorScopeStatus status, wgpu::ErrorType type,
+                                            wgpu::StringView) {
+                                 EXPECT_EQ(status, wgpu::PopErrorScopeStatus::Success);
+                                 EXPECT_EQ(type, wgpu::ErrorType::Validation);
+                                 errorThrown = true;
+                             });
         instance.ProcessEvents();
         EXPECT_TRUE(errorThrown.load());
 

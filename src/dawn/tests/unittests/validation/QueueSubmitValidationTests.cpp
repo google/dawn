@@ -69,7 +69,7 @@ TEST_F(QueueSubmitValidationTest, SubmitWithMappedBuffer) {
 
     // Map the buffer, submitting when the buffer is mapped should fail
     buffer.MapAsync(wgpu::MapMode::Write, 0, kBufferSize, wgpu::CallbackMode::AllowProcessEvents,
-                    [](wgpu::MapAsyncStatus, const char*) {});
+                    [](wgpu::MapAsyncStatus, wgpu::StringView) {});
 
     // Try submitting before the callback is fired.
     ASSERT_DEVICE_ERROR(queue.Submit(1, &commands));
@@ -134,7 +134,7 @@ TEST_F(QueueSubmitValidationTest, CommandBufferSubmittedFailed) {
 
     // Map the source buffer to force a failure
     buffer.MapAsync(wgpu::MapMode::Write, 0, kBufferSize, wgpu::CallbackMode::AllowProcessEvents,
-                    [](wgpu::MapAsyncStatus, const char*) {});
+                    [](wgpu::MapAsyncStatus, wgpu::StringView) {});
 
     // Submitting a command buffer with a mapped buffer should fail
     ASSERT_DEVICE_ERROR(queue.Submit(1, &commands));
@@ -156,7 +156,7 @@ TEST_F(QueueSubmitValidationTest, SubmitInBufferMapCallback) {
 
     buffer.MapAsync(wgpu::MapMode::Write, 0, descriptor.size,
                     wgpu::CallbackMode::AllowProcessEvents,
-                    [buffer, queue = device.GetQueue()](wgpu::MapAsyncStatus, const char*) {
+                    [buffer, queue = device.GetQueue()](wgpu::MapAsyncStatus, wgpu::StringView) {
                         buffer.Unmap();
                         queue.Submit(0, nullptr);
                     });
@@ -183,7 +183,7 @@ TEST_F(QueueSubmitValidationTest, SubmitInCreateRenderPipelineAsyncCallback) {
     device.CreateRenderPipelineAsync(
         &descriptor, wgpu::CallbackMode::AllowProcessEvents,
         [device = this->device](wgpu::CreatePipelineAsyncStatus, wgpu::RenderPipeline pipeline,
-                                char const*) {
+                                wgpu::StringView) {
             pipeline = nullptr;
             device.GetQueue().Submit(0, nullptr);
         });
@@ -201,7 +201,7 @@ TEST_F(QueueSubmitValidationTest, SubmitInCreateComputePipelineAsyncCallback) {
     device.CreateComputePipelineAsync(
         &descriptor, wgpu::CallbackMode::AllowProcessEvents,
         [device = this->device](wgpu::CreatePipelineAsyncStatus, wgpu::ComputePipeline pipeline,
-                                char const*) {
+                                wgpu::StringView) {
             pipeline = nullptr;
             device.GetQueue().Submit(0, nullptr);
         });

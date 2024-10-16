@@ -231,7 +231,7 @@ TEST_P(D3D12ResourceResidencyTests, AsyncMappedBufferRead) {
     bool done = false;
     buffer.MapAsync(wgpu::MapMode::Read, 0, sizeof(uint32_t),
                     wgpu::CallbackMode::AllowProcessEvents,
-                    [&done](wgpu::MapAsyncStatus status, const char*) {
+                    [&done](wgpu::MapAsyncStatus status, wgpu::StringView) {
                         ASSERT_EQ(status, wgpu::MapAsyncStatus::Success);
                         done = true;
                     });
@@ -276,7 +276,7 @@ TEST_P(D3D12ResourceResidencyTests, AsyncMappedBufferWrite) {
     bool done = false;
     buffer.MapAsync(wgpu::MapMode::Write, 0, sizeof(uint32_t),
                     wgpu::CallbackMode::AllowProcessEvents,
-                    [&done](wgpu::MapAsyncStatus status, const char*) {
+                    [&done](wgpu::MapAsyncStatus status, wgpu::StringView) {
                         ASSERT_EQ(status, wgpu::MapAsyncStatus::Success);
                         done = true;
                     });

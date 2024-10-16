@@ -61,7 +61,7 @@ TEST_F(MultipleDeviceTest, ValidatesSameDeviceCreatePipelineAsync) {
     shaderModuleDesc.nextInChain = &wgslDesc;
 
     using MockComputePipelineAsyncCallback = MockCppCallback<void (*)(
-        wgpu::CreatePipelineAsyncStatus, wgpu::ComputePipeline, const char*)>;
+        wgpu::CreatePipelineAsyncStatus, wgpu::ComputePipeline, wgpu::StringView)>;
 
     // Base case: CreateComputePipelineAsync succeeds.
     {

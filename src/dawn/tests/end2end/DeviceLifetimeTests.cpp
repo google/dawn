@@ -40,7 +40,7 @@ using testing::Invoke;
 using testing::MockCppCallback;
 using testing::Return;
 
-using MockMapAsyncCallback = MockCppCallback<void (*)(wgpu::MapAsyncStatus, const char*)>;
+using MockMapAsyncCallback = MockCppCallback<void (*)(wgpu::MapAsyncStatus, wgpu::StringView)>;
 
 class DeviceLifetimeTests : public DawnTest {};
 
@@ -91,7 +91,7 @@ TEST_P(DeviceLifetimeTests, DroppedWhilePopErrorScope) {
 
     device.PopErrorScope(
         wgpu::CallbackMode::AllowProcessEvents,
-        [](wgpu::PopErrorScopeStatus status, wgpu::ErrorType type, const char*, bool* done) {
+        [](wgpu::PopErrorScopeStatus status, wgpu::ErrorType type, wgpu::StringView, bool* done) {
             *done = true;
             EXPECT_EQ(status, wgpu::PopErrorScopeStatus::Success);
             EXPECT_EQ(type, wgpu::ErrorType::NoError);
@@ -116,7 +116,7 @@ TEST_P(DeviceLifetimeTests, DroppedInsidePopErrorScope) {
     Userdata data = Userdata{std::move(device), false};
     data.device.PopErrorScope(
         wgpu::CallbackMode::AllowProcessEvents,
-        [](wgpu::PopErrorScopeStatus status, wgpu::ErrorType type, const char*,
+        [](wgpu::PopErrorScopeStatus status, wgpu::ErrorType type, wgpu::StringView,
            Userdata* userdata) {
             EXPECT_EQ(status, wgpu::PopErrorScopeStatus::Success);
             EXPECT_EQ(type, wgpu::ErrorType::NoError);
@@ -211,14 +211,14 @@ TEST_P(DeviceLifetimeTests, Dropped_ThenMapBuffer_ThenMapBufferInCallback) {
     // First mapping.
     buffer.MapAsync(wgpu::MapMode::Read, 0, wgpu::kWholeMapSize,
                     wgpu::CallbackMode::AllowProcessEvents,
-                    [&buffer](wgpu::MapAsyncStatus status, const char* message) {
+                    [&buffer](wgpu::MapAsyncStatus status, wgpu::StringView message) {
                         EXPECT_EQ(status, wgpu::MapAsyncStatus::Error);
                         EXPECT_THAT(message, HasSubstr("lost"));
 
                         // Second mapping
                         buffer.MapAsync(wgpu::MapMode::Read, 0, wgpu::kWholeMapSize,
                                         wgpu::CallbackMode::AllowProcessEvents,
-                                        [](wgpu::MapAsyncStatus status, const char* message) {
+                                        [](wgpu::MapAsyncStatus status, wgpu::StringView message) {
                                             EXPECT_EQ(status, wgpu::MapAsyncStatus::Error);
                                             EXPECT_THAT(message, HasSubstr("lost"));
                                         });
@@ -236,7 +236,7 @@ TEST_P(DeviceLifetimeTests, DroppedInsideBufferMapCallback) {
 
     buffer.MapAsync(wgpu::MapMode::Read, 0, wgpu::kWholeMapSize,
                     wgpu::CallbackMode::AllowProcessEvents,
-                    [this, buffer](wgpu::MapAsyncStatus status, const char*) {
+                    [this, buffer](wgpu::MapAsyncStatus status, wgpu::StringView) {
                         EXPECT_EQ(status, wgpu::MapAsyncStatus::Success);
                         device = nullptr;
 
@@ -296,7 +296,8 @@ TEST_P(DeviceLifetimeTests, DroppedWhileCreatePipelineAsync) {
     device.CreateComputePipelineAsync(
         &desc,
         UsesWire() ? wgpu::CallbackMode::AllowSpontaneous : wgpu::CallbackMode::AllowProcessEvents,
-        [](wgpu::CreatePipelineAsyncStatus status, wgpu::ComputePipeline pipeline, const char*) {
+        [](wgpu::CreatePipelineAsyncStatus status, wgpu::ComputePipeline pipeline,
+           wgpu::StringView) {
             EXPECT_EQ(wgpu::CreatePipelineAsyncStatus::Success, status);
             EXPECT_NE(pipeline, nullptr);
         });
@@ -312,13 +313,14 @@ TEST_P(DeviceLifetimeTests, DroppedInsideCreatePipelineAsync) {
     })");
 
     bool done = false;
-    device.CreateComputePipelineAsync(
-        &desc, wgpu::CallbackMode::AllowProcessEvents,
-        [this, &done](wgpu::CreatePipelineAsyncStatus status, wgpu::ComputePipeline, const char*) {
-            EXPECT_EQ(wgpu::CreatePipelineAsyncStatus::Success, status);
-            device = nullptr;
-            done = true;
-        });
+    device.CreateComputePipelineAsync(&desc, wgpu::CallbackMode::AllowProcessEvents,
+                                      [this, &done](wgpu::CreatePipelineAsyncStatus status,
+                                                    wgpu::ComputePipeline, wgpu::StringView) {
+                                          EXPECT_EQ(wgpu::CreatePipelineAsyncStatus::Success,
+                                                    status);
+                                          device = nullptr;
+                                          done = true;
+                                      });
 
     while (!done) {
         WaitABit();
@@ -339,7 +341,7 @@ TEST_P(DeviceLifetimeTests, DroppedWhileCreatePipelineAsyncAlreadyCached) {
     bool done = false;
     device.CreateComputePipelineAsync(&desc, wgpu::CallbackMode::AllowProcessEvents,
                                       [&done](wgpu::CreatePipelineAsyncStatus status,
-                                              wgpu::ComputePipeline pipeline, const char*) {
+                                              wgpu::ComputePipeline pipeline, wgpu::StringView) {
                                           EXPECT_EQ(wgpu::CreatePipelineAsyncStatus::Success,
                                                     status);
                                           EXPECT_NE(pipeline, nullptr);
@@ -364,15 +366,15 @@ TEST_P(DeviceLifetimeTests, DroppedInsideCreatePipelineAsyncAlreadyCached) {
     wgpu::ComputePipeline p = device.CreateComputePipeline(&desc);
 
     bool done = false;
-    device.CreateComputePipelineAsync(&desc, wgpu::CallbackMode::AllowProcessEvents,
-                                      [this, &done](wgpu::CreatePipelineAsyncStatus status,
-                                                    wgpu::ComputePipeline pipeline, const char*) {
-                                          EXPECT_EQ(wgpu::CreatePipelineAsyncStatus::Success,
-                                                    status);
-                                          EXPECT_NE(pipeline, nullptr);
-                                          device = nullptr;
-                                          done = true;
-                                      });
+    device.CreateComputePipelineAsync(
+        &desc, wgpu::CallbackMode::AllowProcessEvents,
+        [this, &done](wgpu::CreatePipelineAsyncStatus status, wgpu::ComputePipeline pipeline,
+                      wgpu::StringView) {
+            EXPECT_EQ(wgpu::CreatePipelineAsyncStatus::Success, status);
+            EXPECT_NE(pipeline, nullptr);
+            device = nullptr;
+            done = true;
+        });
 
     while (!done) {
         WaitABit();
@@ -390,7 +392,8 @@ TEST_P(DeviceLifetimeTests, DroppedWhileCreatePipelineAsyncRaceCache) {
     device.CreateComputePipelineAsync(
         &desc,
         UsesWire() ? wgpu::CallbackMode::AllowSpontaneous : wgpu::CallbackMode::AllowProcessEvents,
-        [](wgpu::CreatePipelineAsyncStatus status, wgpu::ComputePipeline pipeline, const char*) {
+        [](wgpu::CreatePipelineAsyncStatus status, wgpu::ComputePipeline pipeline,
+           wgpu::StringView) {
             EXPECT_EQ(wgpu::CreatePipelineAsyncStatus::Success, status);
             EXPECT_NE(pipeline, nullptr);
         });
@@ -410,15 +413,15 @@ TEST_P(DeviceLifetimeTests, DroppedInsideCreatePipelineAsyncRaceCache) {
     })");
 
     bool done = false;
-    device.CreateComputePipelineAsync(&desc, wgpu::CallbackMode::AllowProcessEvents,
-                                      [this, &done](wgpu::CreatePipelineAsyncStatus status,
-                                                    wgpu::ComputePipeline pipeline, const char*) {
-                                          EXPECT_EQ(wgpu::CreatePipelineAsyncStatus::Success,
-                                                    status);
-                                          EXPECT_NE(pipeline, nullptr);
-                                          device = nullptr;
-                                          done = true;
-                                      });
+    device.CreateComputePipelineAsync(
+        &desc, wgpu::CallbackMode::AllowProcessEvents,
+        [this, &done](wgpu::CreatePipelineAsyncStatus status, wgpu::ComputePipeline pipeline,
+                      wgpu::StringView) {
+            EXPECT_EQ(wgpu::CreatePipelineAsyncStatus::Success, status);
+            EXPECT_NE(pipeline, nullptr);
+            device = nullptr;
+            done = true;
+        });
 
     // Create the same pipeline synchronously which will get added to the cache.
     wgpu::ComputePipeline p = device.CreateComputePipeline(&desc);
@@ -446,7 +449,7 @@ TEST_P(DeviceLifetimeTests, DropDevice2InProcessEvents) {
     // instance.ProcessEvents() is called.
     device.PopErrorScope(
         wgpu::CallbackMode::AllowProcessEvents,
-        [](wgpu::PopErrorScopeStatus status, wgpu::ErrorType type, const char*,
+        [](wgpu::PopErrorScopeStatus status, wgpu::ErrorType type, wgpu::StringView,
            UserData* userdata) {
             userdata->device2 = nullptr;
             userdata->done = true;

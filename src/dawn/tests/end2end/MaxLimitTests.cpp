@@ -223,7 +223,7 @@ TEST_P(MaxLimitTests, MaxBufferBindingSize) {
         wgpu::ErrorType oomResult;
         device.PopErrorScope(wgpu::CallbackMode::AllowProcessEvents,
                              [&oomResult](wgpu::PopErrorScopeStatus, wgpu::ErrorType type,
-                                          const char*) { oomResult = type; });
+                                          wgpu::StringView) { oomResult = type; });
         FlushWire();
         instance.ProcessEvents();
         // Max buffer size is smaller than the max buffer binding size.

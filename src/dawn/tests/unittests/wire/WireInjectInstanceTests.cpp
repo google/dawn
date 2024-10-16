@@ -57,7 +57,8 @@ TEST_F(WireInjectInstanceTests, CallAfterReserveInject) {
     EXPECT_CALL(api, InstanceAddRef(serverInstance));
     ASSERT_TRUE(GetWireServer()->InjectInstance(serverInstance, reserved.handle));
 
-    MockCallback<void (*)(wgpu::RequestAdapterStatus, wgpu::Adapter, const char*, void*)> adapterCb;
+    MockCallback<void (*)(wgpu::RequestAdapterStatus, wgpu::Adapter, wgpu::StringView, void*)>
+        adapterCb;
     instance.RequestAdapter(nullptr, wgpu::CallbackMode::AllowSpontaneous, adapterCb.Callback(),
                             adapterCb.MakeUserdata(this));
 

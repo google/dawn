@@ -42,7 +42,7 @@ using testing::TestParamInfo;
 using testing::Values;
 using testing::WithParamInterface;
 
-using MockMapAsyncCallback = MockCppCallback<void (*)(wgpu::MapAsyncStatus, const char*)>;
+using MockMapAsyncCallback = MockCppCallback<void (*)(wgpu::MapAsyncStatus, wgpu::StringView)>;
 
 class BufferValidationTest : public ValidationTest {
   protected:

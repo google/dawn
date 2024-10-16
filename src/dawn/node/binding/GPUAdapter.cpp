@@ -29,6 +29,7 @@
 
 #include <limits>
 #include <memory>
+#include <string>
 #include <unordered_set>
 #include <utility>
 #include <vector>
@@ -173,15 +174,19 @@ const char* str(wgpu::ErrorType ty) {
 // There's something broken with Node when attempting to write more than 65536 bytes to cout.
 // Split the string up into writes of 4k chunks.
 // Likely related: https://github.com/nodejs/node/issues/12921
-void chunkedWrite(const char* msg) {
-    while (true) {
-        auto n = printf("%.4096s", msg);
-        if (n <= 0) {
-            break;
+void chunkedWrite(wgpu::StringView msg) {
+    while (msg.length != 0) {
+        int n;
+        if (msg.length > 4096) {
+            n = printf("%.4096s", msg.data);
+        } else {
+            n = printf("%.*s", static_cast<int>(msg.length), msg.data);
         }
-        msg += n;
+        msg.data += n;
+        msg.length -= n;
     }
 }
+
 }  // namespace
 
 interop::Promise<interop::Interface<interop::GPUDevice>> GPUAdapter::requestDevice(
@@ -243,7 +248,7 @@ interop::Promise<interop::Interface<interop::GPUDevice>> GPUAdapter::requestDevi
     auto device_lost_promise = device_lost_ctx->promise;
     desc.SetDeviceLostCallback(
         wgpu::CallbackMode::AllowSpontaneous,
-        [](const wgpu::Device&, wgpu::DeviceLostReason reason, const char* message,
+        [](const wgpu::Device&, wgpu::DeviceLostReason reason, wgpu::StringView message,
            DeviceLostContext* device_lost_ctx) {
             std::unique_ptr<DeviceLostContext> ctx(device_lost_ctx);
             auto r = interop::GPUDeviceLostReason::kDestroyed;
@@ -258,15 +263,16 @@ interop::Promise<interop::Interface<interop::GPUDevice>> GPUAdapter::requestDevi
                     break;
             }
             if (ctx->promise.GetState() == interop::PromiseState::Pending) {
-                ctx->promise.Resolve(
-                    interop::GPUDeviceLostInfo::Create<GPUDeviceLostInfo>(ctx->env, r, message));
+                ctx->promise.Resolve(interop::GPUDeviceLostInfo::Create<GPUDeviceLostInfo>(
+                    ctx->env, r, std::string(message)));
             }
         },
         device_lost_ctx);
-    desc.SetUncapturedErrorCallback([](const wgpu::Device&, ErrorType type, const char* message) {
-        printf("%s:\n", str(type));
-        chunkedWrite(message);
-    });
+    desc.SetUncapturedErrorCallback(
+        [](const wgpu::Device&, ErrorType type, wgpu::StringView message) {
+            printf("%s:\n", str(type));
+            chunkedWrite(message);
+        });
 
     // Propagate enabled/disabled dawn features
     TogglesLoader togglesLoader(flags_);

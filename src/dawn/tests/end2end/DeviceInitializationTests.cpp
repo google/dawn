@@ -59,7 +59,7 @@ class DeviceInitializationTest : public testing::Test {
         device.CreateComputePipelineAsync(
             &desc, wgpu::CallbackMode::AllowSpontaneous,
             [&callbacks](wgpu::CreatePipelineAsyncStatus status, wgpu::ComputePipeline pipeline,
-                         const char*) {
+                         wgpu::StringView) {
                 EXPECT_EQ(status, wgpu::CreatePipelineAsyncStatus::Success);
                 EXPECT_NE(pipeline, nullptr);
                 callbacks++;
@@ -67,7 +67,7 @@ class DeviceInitializationTest : public testing::Test {
 
         device.PopErrorScope(
             wgpu::CallbackMode::AllowSpontaneous,
-            [&callbacks](wgpu::PopErrorScopeStatus status, wgpu::ErrorType type, const char*) {
+            [&callbacks](wgpu::PopErrorScopeStatus status, wgpu::ErrorType type, wgpu::StringView) {
                 EXPECT_EQ(status, wgpu::PopErrorScopeStatus::Success);
                 EXPECT_EQ(type, wgpu::ErrorType::NoError);
                 callbacks++;

@@ -134,7 +134,7 @@ TEST_F(QueueWriteBufferValidationTest, MappedBuffer) {
         wgpu::Buffer buf = device.CreateBuffer(&descriptor);
 
         buf.MapAsync(wgpu::MapMode::Read, 0, 4, wgpu::CallbackMode::AllowProcessEvents,
-                     [](wgpu::MapAsyncStatus, const char*) {});
+                     [](wgpu::MapAsyncStatus, wgpu::StringView) {});
         uint32_t value = 0;
         ASSERT_DEVICE_ERROR(queue.WriteBuffer(buf, 0, &value, sizeof(value)));
     }

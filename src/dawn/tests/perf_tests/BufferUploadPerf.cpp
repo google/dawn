@@ -298,7 +298,7 @@ void BufferMapExtendedUsagesPerf::MapAsyncAndWait(const wgpu::Buffer& buffer,
                                                   size_t offset,
                                                   size_t size) {
     wgpu::Future future = buffer.MapAsync(mode, offset, size, wgpu::CallbackMode::WaitAnyOnly,
-                                          [](wgpu::MapAsyncStatus status, const char*) {
+                                          [](wgpu::MapAsyncStatus status, wgpu::StringView) {
                                               ASSERT_EQ(wgpu::MapAsyncStatus::Success, status);
                                           });
     wgpu::FutureWaitInfo waitInfo = {future};
