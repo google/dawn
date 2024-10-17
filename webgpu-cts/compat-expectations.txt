@@ -222,11 +222,6 @@ crbug.com/354152178 [ android arm ] webgpu:shader,execution,expression,call,buil
 crbug.com/354152178 [ android arm ] webgpu:shader,execution,expression,call,builtin,bitcast:ai_to_f32:inputSource="const";vectorize=4;alias=true [ Failure ]
 
 ### This section represents tests which may require CTS changes.
-
-# ANGLETextureSharing is not supported
-crbug.com/dawn/2086 [ intel-0x9bc5 ] webgpu:web_platform,canvas,configure:viewFormats:* [ Failure ]
-crbug.com/dawn/2086 [ nvidia-0x2184 ] webgpu:web_platform,canvas,configure:viewFormats:* [ Failure ]
-
 ### This section represents things that will require Compat validation
 ### These tests will never pass, but should be skipped in CTS once Compat
 ### validation has been added
