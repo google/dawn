@@ -41,6 +41,7 @@ BUILD_TYPE=""
 BUILD_ARCH=""
 FORCE=""
 VERBOSE=""
+REMOTEEXEC=""
 
 function show_usage() {
   echo "setup-build [-f] $POSSIBLE_BUILD_SYSTEMS $POSSIBLE_BUILD_TYPES $POSSIBLE_BUILD_ARCHS [fuzz|fuzzer]"
@@ -60,6 +61,7 @@ function show_usage() {
   echo "  fuzz, fuzzer  Build fuzzers. Forces Clang to be used"
   echo "  native        Target the machine you're running on"
   echo "  x86           Target a 32-bit x86 (adds -m32 to compiler flags)"
+  echo "  remoteexec    Use remoteexec to improve compile time"
   if [[ ! -z "$1" ]]; then
     echo
     echo "$1"
@@ -119,6 +121,9 @@ for arg in "$@"; do
     ;;
     "--verbose" | "-v")
       VERBOSE=1
+    ;;
+    "remoteexec")
+      REMOTEEXEC=1
     ;;
     "--help" | "-help" | "-h")
       show_usage
@@ -184,6 +189,9 @@ case $BUILD_SYSTEM in
         GN_ARGS+=" use_libfuzzer=true"
         GN_ARGS+=" tint_build_ir_binary=true"
         GN_ARGS+=" tint_build_ir_fuzzer=true"
+    fi
+    if [[ -n "$REMOTEEXEC" ]]; then
+        GN_ARGS+=" use_remoteexec=true"
     fi
     if [[ -z "$FORCE" && -f "$ROOT_DIR/out/$BUILD_DIR/args.gn" ]]; then
       generate "gn" "gen" "out/active" # keep existing args
