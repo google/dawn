@@ -224,7 +224,6 @@ crbug.com/354152178 [ android arm ] webgpu:shader,execution,expression,call,buil
 ### This section represents tests which may require CTS changes.
 
 # ANGLETextureSharing is not supported
-crbug.com/dawn/2086 webgpu:web_platform,canvas,configure:usage:* [ Failure ]
 crbug.com/dawn/2086 [ intel-0x9bc5 ] webgpu:web_platform,canvas,configure:viewFormats:* [ Failure ]
 crbug.com/dawn/2086 [ nvidia-0x2184 ] webgpu:web_platform,canvas,configure:viewFormats:* [ Failure ]
 

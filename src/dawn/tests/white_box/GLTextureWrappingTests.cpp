@@ -198,16 +198,6 @@ TEST_P(GLTextureValidationTests, InvalidTextureDimension) {
     ASSERT_EQ(texture.Get(), nullptr);
 }
 
-// Test an error occurs if the texture usage contains StorageBinding.
-TEST_P(GLTextureValidationTests, InvalidTextureUsage) {
-    descriptor.usage = wgpu::TextureUsage::StorageBinding;
-
-    ScopedGLTexture glTexture = CreateDefaultGLTexture();
-    ASSERT_DEVICE_ERROR(wgpu::Texture texture = WrapGLTexture(&descriptor, glTexture.Get()));
-
-    ASSERT_EQ(texture.Get(), nullptr);
-}
-
 // Test an error occurs if the descriptor mip level count isn't 1
 TEST_P(GLTextureValidationTests, InvalidMipLevelCount) {
     descriptor.mipLevelCount = 2;

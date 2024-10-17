@@ -295,10 +295,6 @@ MaybeError Device::ValidateTextureCanBeWrapped(const UnpackedPtr<TextureDescript
     DAWN_INVALID_IF(descriptor->sampleCount != 1, "Sample count (%u) is not 1.",
                     descriptor->sampleCount);
 
-    DAWN_INVALID_IF(descriptor->usage & wgpu::TextureUsage::StorageBinding,
-                    "Texture usage (%s) cannot have %s.", descriptor->usage,
-                    wgpu::TextureUsage::StorageBinding);
-
     return {};
 }
 

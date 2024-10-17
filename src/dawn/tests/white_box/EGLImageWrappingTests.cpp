@@ -245,16 +245,6 @@ TEST_P(EGLImageValidationTests, InvalidTextureDimension) {
     ASSERT_EQ(texture.Get(), nullptr);
 }
 
-// Test an error occurs if the texture usage is not RenderAttachment
-TEST_P(EGLImageValidationTests, InvalidTextureUsage) {
-    DAWN_TEST_UNSUPPORTED_IF(UsesWire());
-    descriptor.usage = wgpu::TextureUsage::StorageBinding;
-
-    ScopedEGLImage image = CreateDefaultEGLImage();
-    ASSERT_DEVICE_ERROR(wgpu::Texture texture = WrapEGLImage(&descriptor, image.getImage()));
-    ASSERT_EQ(texture.Get(), nullptr);
-}
-
 // Test an error occurs if the descriptor mip level count isn't 1
 TEST_P(EGLImageValidationTests, InvalidMipLevelCount) {
     DAWN_TEST_UNSUPPORTED_IF(UsesWire());
