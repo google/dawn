@@ -94,7 +94,6 @@ using InterstageLocationAndName = std::pair<uint32_t, std::string>;
     X(std::optional<tint::ast::transform::SubstituteOverride::Config>, substituteOverrideConfig) \
     X(LimitsForCompilationRequest, limits)                                                       \
     X(bool, disableSymbolRenaming)                                                               \
-    X(bool, useTintIR)                                                                           \
     X(std::vector<InterstageLocationAndName>, interstageVariables)                               \
     X(std::vector<std::string>, bufferBindingVariables)                                          \
     X(tint::glsl::writer::Options, tintOptions)                                                  \
@@ -480,7 +479,6 @@ ResultOrError<GLuint> ShaderModule::CompileShader(
     }
 
     req.disableSymbolRenaming = GetDevice()->IsToggleEnabled(Toggle::DisableSymbolRenaming);
-    req.useTintIR = GetDevice()->IsToggleEnabled(Toggle::UseTintIR);
 
     req.interstageVariables = {};
     for (size_t i = 0; i < entryPointMetaData.interStageVariables.size(); i++) {
@@ -575,18 +573,14 @@ ResultOrError<GLuint> ShaderModule::CompileShader(
             // TODO(crbug.com/356424898): In the long run, we want to move SingleEntryPoint to Tint,
             // but that has interactions with SubstituteOverrides which need to be handled first.
             remappedEntryPoint = "";
-            tint::Result<tint::glsl::writer::Output> result;
-            if (r.useTintIR) {
-                // Convert the AST program to an IR module.
-                auto ir = tint::wgsl::reader::ProgramToLoweredIR(program);
-                DAWN_INVALID_IF(ir != tint::Success,
-                                "An error occurred while generating Tint IR\n%s",
-                                ir.Failure().reason.Str());
 
-                result = tint::glsl::writer::Generate(ir.Get(), r.tintOptions, remappedEntryPoint);
-            } else {
-                result = tint::glsl::writer::Generate(program, r.tintOptions, remappedEntryPoint);
-            }
+            // Convert the AST program to an IR module.
+            auto ir = tint::wgsl::reader::ProgramToLoweredIR(program);
+            DAWN_INVALID_IF(ir != tint::Success, "An error occurred while generating Tint IR\n%s",
+                            ir.Failure().reason.Str());
+
+            // Generate GLSL from Tint IR.
+            auto result = tint::glsl::writer::Generate(ir.Get(), r.tintOptions, remappedEntryPoint);
             DAWN_INVALID_IF(result != tint::Success, "An error occurred while generating GLSL:\n%s",
                             result.Failure().reason.Str());
 
