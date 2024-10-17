@@ -101,6 +101,7 @@ Program Parse(const std::vector<uint32_t>& input, const Options& options) {
 
     // Allow below WGSL extensions unconditionally but not enable them by default.
     allowed_features.extensions.insert(wgsl::Extension::kDualSourceBlending);
+    allowed_features.extensions.insert(wgsl::Extension::kClipDistances);
 
     // The SPIR-V parser can construct disjoint AST nodes, which is invalid for
     // the Resolver. Clone the Program to clean these up.

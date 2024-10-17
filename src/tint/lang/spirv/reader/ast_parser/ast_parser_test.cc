@@ -264,7 +264,7 @@ TEST_F(SpirvASTParserTest, Impl_FailOnNonFiniteLiteral) {
 
 TEST_F(SpirvASTParserTest, BlendSrc) {
     auto spv = test::Assemble(R"(
-OpCapability Shader
+               OpCapability Shader
                OpMemoryModel Logical GLSL450
                OpEntryPoint Fragment %frag_main "frag_main" %frag_main_loc0_idx0_Output %frag_main_loc0_idx1_Output
                OpExecutionMode %frag_main OriginUpperLeft
@@ -368,6 +368,206 @@ struct frag_main_out {
 fn frag_main() -> frag_main_out {
   frag_main_1();
   return frag_main_out(frag_main_loc0_idx0_Output, frag_main_loc0_idx1_Output);
+}
+)");
+}
+
+TEST_F(SpirvASTParserTest, ClipDistances_ArraySize_1) {
+    auto spv = test::Assemble(R"(
+               OpCapability Shader
+               OpCapability ClipDistance
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint Vertex %main "main" %main_position_Output %main_clip_distances_Output %main___point_size_Output
+               OpName %main_position_Output "main_position_Output"
+               OpName %main_clip_distances_Output "main_clip_distances_Output"
+               OpName %main___point_size_Output "main___point_size_Output"
+               OpName %main_inner "main_inner"
+               OpMemberName %VertexOutputs 0 "position"
+               OpMemberName %VertexOutputs 1 "clipDistance"
+               OpName %VertexOutputs "VertexOutputs"
+               OpName %main "main"
+               OpDecorate %main_position_Output BuiltIn Position
+               OpDecorate %_arr_float_uint_1 ArrayStride 4
+               OpDecorate %main_clip_distances_Output BuiltIn ClipDistance
+               OpDecorate %main___point_size_Output BuiltIn PointSize
+               OpMemberDecorate %VertexOutputs 0 Offset 0
+               OpMemberDecorate %VertexOutputs 1 Offset 16
+      %float = OpTypeFloat 32
+    %v4float = OpTypeVector %float 4
+%_ptr_Output_v4float = OpTypePointer Output %v4float
+%main_position_Output = OpVariable %_ptr_Output_v4float Output
+       %uint = OpTypeInt 32 0
+     %uint_1 = OpConstant %uint 1
+%_arr_float_uint_1 = OpTypeArray %float %uint_1
+%_ptr_Output__arr_float_uint_1 = OpTypePointer Output %_arr_float_uint_1
+%main_clip_distances_Output = OpVariable %_ptr_Output__arr_float_uint_1 Output
+%_ptr_Output_float = OpTypePointer Output %float
+%main___point_size_Output = OpVariable %_ptr_Output_float Output
+%VertexOutputs = OpTypeStruct %v4float %_arr_float_uint_1
+         %14 = OpTypeFunction %VertexOutputs
+         %16 = OpConstantNull %VertexOutputs
+       %void = OpTypeVoid
+         %19 = OpTypeFunction %void
+    %float_1 = OpConstant %float 1
+ %main_inner = OpFunction %VertexOutputs None %14
+         %15 = OpLabel
+               OpReturnValue %16
+               OpFunctionEnd
+       %main = OpFunction %void None %19
+         %20 = OpLabel
+         %21 = OpFunctionCall %VertexOutputs %main_inner
+         %22 = OpCompositeExtract %v4float %21 0
+               OpStore %main_position_Output %22 None
+         %23 = OpCompositeExtract %_arr_float_uint_1 %21 1
+               OpStore %main_clip_distances_Output %23 None
+               OpStore %main___point_size_Output %float_1 None
+               OpReturn
+               OpFunctionEnd
+)");
+    auto program = Parse(spv, {});
+    auto errs = program.Diagnostics().Str();
+    EXPECT_TRUE(program.IsValid()) << errs;
+    EXPECT_EQ(program.Diagnostics().Count(), 0u) << errs;
+    auto result = wgsl::writer::Generate(program, {});
+    EXPECT_EQ(result, Success);
+    EXPECT_EQ("\n" + result->wgsl, R"(
+enable clip_distances;
+
+alias Arr = array<f32, 1u>;
+
+struct VertexOutputs {
+  /* @offset(0) */
+  position : vec4f,
+  /* @offset(16) */
+  clipDistance : Arr,
+}
+
+var<private> main_position_Output : vec4f;
+
+var<private> main_clip_distances_Output : Arr;
+
+fn main_inner() -> VertexOutputs {
+  return VertexOutputs(vec4f(), array<f32, 1u>());
+}
+
+fn main_1() {
+  let x_21 = main_inner();
+  main_position_Output = x_21.position;
+  main_clip_distances_Output = x_21.clipDistance;
+  return;
+}
+
+struct main_out {
+  @builtin(position)
+  main_position_Output_1 : vec4f,
+  @builtin(clip_distances)
+  main_clip_distances_Output_1 : Arr,
+}
+
+@vertex
+fn main() -> main_out {
+  main_1();
+  return main_out(main_position_Output, main_clip_distances_Output);
+}
+)");
+}
+
+TEST_F(SpirvASTParserTest, ClipDistances_ArraySize_4) {
+    auto spv = test::Assemble(R"(
+               OpCapability Shader
+               OpCapability ClipDistance
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint Vertex %main "main" %main_position_Output %main_clip_distances_Output %main___point_size_Output
+               OpName %main_position_Output "main_position_Output"
+               OpName %main_clip_distances_Output "main_clip_distances_Output"
+               OpName %main___point_size_Output "main___point_size_Output"
+               OpName %main_inner "main_inner"
+               OpMemberName %VertexOutputs 0 "position"
+               OpMemberName %VertexOutputs 1 "clipDistance"
+               OpName %VertexOutputs "VertexOutputs"
+               OpName %main "main"
+               OpDecorate %main_position_Output BuiltIn Position
+               OpDecorate %_arr_float_uint_1 ArrayStride 4
+               OpDecorate %main_clip_distances_Output BuiltIn ClipDistance
+               OpDecorate %main___point_size_Output BuiltIn PointSize
+               OpMemberDecorate %VertexOutputs 0 Offset 0
+               OpMemberDecorate %VertexOutputs 1 Offset 16
+      %float = OpTypeFloat 32
+    %v4float = OpTypeVector %float 4
+%_ptr_Output_v4float = OpTypePointer Output %v4float
+%main_position_Output = OpVariable %_ptr_Output_v4float Output
+       %uint = OpTypeInt 32 0
+     %uint_1 = OpConstant %uint 4
+%_arr_float_uint_1 = OpTypeArray %float %uint_1
+%_ptr_Output__arr_float_uint_1 = OpTypePointer Output %_arr_float_uint_1
+%main_clip_distances_Output = OpVariable %_ptr_Output__arr_float_uint_1 Output
+%_ptr_Output_float = OpTypePointer Output %float
+%main___point_size_Output = OpVariable %_ptr_Output_float Output
+%VertexOutputs = OpTypeStruct %v4float %_arr_float_uint_1
+         %14 = OpTypeFunction %VertexOutputs
+         %16 = OpConstantNull %VertexOutputs
+       %void = OpTypeVoid
+         %19 = OpTypeFunction %void
+    %float_1 = OpConstant %float 1
+ %main_inner = OpFunction %VertexOutputs None %14
+         %15 = OpLabel
+               OpReturnValue %16
+               OpFunctionEnd
+       %main = OpFunction %void None %19
+         %20 = OpLabel
+         %21 = OpFunctionCall %VertexOutputs %main_inner
+         %22 = OpCompositeExtract %v4float %21 0
+               OpStore %main_position_Output %22 None
+         %23 = OpCompositeExtract %_arr_float_uint_1 %21 1
+               OpStore %main_clip_distances_Output %23 None
+               OpStore %main___point_size_Output %float_1 None
+               OpReturn
+               OpFunctionEnd
+)");
+    auto program = Parse(spv, {});
+    auto errs = program.Diagnostics().Str();
+    EXPECT_TRUE(program.IsValid()) << errs;
+    EXPECT_EQ(program.Diagnostics().Count(), 0u) << errs;
+    auto result = wgsl::writer::Generate(program, {});
+    EXPECT_EQ(result, Success);
+    EXPECT_EQ("\n" + result->wgsl, R"(
+enable clip_distances;
+
+alias Arr = array<f32, 4u>;
+
+struct VertexOutputs {
+  /* @offset(0) */
+  position : vec4f,
+  /* @offset(16) */
+  clipDistance : Arr,
+}
+
+var<private> main_position_Output : vec4f;
+
+var<private> main_clip_distances_Output : Arr;
+
+fn main_inner() -> VertexOutputs {
+  return VertexOutputs(vec4f(), array<f32, 4u>());
+}
+
+fn main_1() {
+  let x_21 = main_inner();
+  main_position_Output = x_21.position;
+  main_clip_distances_Output = x_21.clipDistance;
+  return;
+}
+
+struct main_out {
+  @builtin(position)
+  main_position_Output_1 : vec4f,
+  @builtin(clip_distances)
+  main_clip_distances_Output_1 : Arr,
+}
+
+@vertex
+fn main() -> main_out {
+  main_1();
+  return main_out(main_position_Output, main_clip_distances_Output);
 }
 )");
 }

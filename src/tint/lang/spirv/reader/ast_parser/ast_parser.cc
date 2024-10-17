@@ -1156,7 +1156,7 @@ const Type* ASTParser::ConvertStructType(uint32_t type_id) {
                         builtin_position_.pointsize_member_index = member_index;
                         create_ast_member = false;  // Not part of the WGSL structure.
                         break;
-                    case spv::BuiltIn::ClipDistance:  // not supported in WGSL
+                    case spv::BuiltIn::ClipDistance:
                     case spv::BuiltIn::CullDistance:  // not supported in WGSL
                         create_ast_member = false;    // Not part of the WGSL structure.
                         break;
@@ -1555,6 +1555,7 @@ bool ASTParser::EmitModuleScopeVariables() {
     }
 
     // Emit gl_Position instead of gl_PerVertex
+    // TODO(chromium:358408571): handle gl_ClipDistance[] in gl_PerVertex
     if (builtin_position_.per_vertex_var_id) {
         // Make sure the variable has a name.
         namer_.SuggestSanitizedName(builtin_position_.per_vertex_var_id, "gl_Position");
@@ -1737,6 +1738,9 @@ bool ASTParser::ConvertDecorationsForVariable(uint32_t id,
                     }
                     break;
                 }
+                case spv::BuiltIn::ClipDistance:
+                    Enable(wgsl::Extension::kClipDistances);
+                    break;
                 default:
                     break;
             }

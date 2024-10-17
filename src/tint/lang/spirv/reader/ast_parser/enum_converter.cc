@@ -105,6 +105,8 @@ core::BuiltinValue EnumConverter::ToBuiltin(spv::BuiltIn b) {
             return core::BuiltinValue::kSampleIndex;
         case spv::BuiltIn::SampleMask:
             return core::BuiltinValue::kSampleMask;
+        case spv::BuiltIn::ClipDistance:
+            return core::BuiltinValue::kClipDistances;
         default:
             break;
     }
