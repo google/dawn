@@ -31,6 +31,7 @@
 #include "src/tint/lang/core/ir/module.h"
 #include "src/tint/lang/core/ir/validator.h"
 #include "src/tint/lang/core/type/sampled_texture.h"
+#include "src/tint/lang/core/type/texture.h"
 
 using namespace tint::core::fluent_types;     // NOLINT
 using namespace tint::core::number_suffixes;  // NOLINT
@@ -125,6 +126,9 @@ struct State {
                             worklist.Push(builtin);
                         }
                         break;
+                    case core::BuiltinFn::kTextureSampleBias:
+                        worklist.Push(builtin);
+                        break;
                     case core::BuiltinFn::kTextureSampleBaseClampToEdge:
                         if (config.texture_sample_base_clamp_to_edge_2d_f32) {
                             auto* tex =
@@ -202,6 +206,9 @@ struct State {
                     break;
                 case core::BuiltinFn::kTextureSampleBaseClampToEdge:
                     TextureSampleBaseClampToEdge_2d_f32(builtin);
+                    break;
+                case core::BuiltinFn::kTextureSampleBias:
+                    TextureSampleBiasClamp(builtin);
                     break;
                 case core::BuiltinFn::kDot4I8Packed:
                     Dot4I8Packed(builtin);
@@ -705,6 +712,23 @@ struct State {
                              sampler, clamped, 0_f);
         });
         call->Destroy();
+    }
+
+    /// Polyfill clamping for the (f32) bias parameter of TextureSampleBias
+    /// @param call the builtin call instruction
+    void TextureSampleBiasClamp(ir::CoreBuiltinCall* call) {
+        b.InsertBefore(call, [&] {
+            auto* texture_type = call->Args()[0]->Type()->As<core::type::Texture>();
+            bool is_array_texture = type::IsTextureArray(texture_type->Dim());
+            const uint32_t kBiasParameterIndex = is_array_texture ? 4 : 3;
+            auto* bias_parameter = call->Args()[kBiasParameterIndex];
+            // TODO(crbug.com/371033198): Consider applying clamp here if 'bias_parameter' is a
+            // constant. This might not be the most prudent idea for two reasons: 1. the platform
+            // compilers will perform this optimization 2. it will bifurcate the testing paths.
+            call->SetArg(kBiasParameterIndex, b.Call(ty.f32(), core::BuiltinFn::kClamp,
+                                                     bias_parameter, -16.00_f, 15.99_f)
+                                                  ->Result(0));
+        });
     }
 
     /// Polyfill a `dot4I8Packed()` builtin call

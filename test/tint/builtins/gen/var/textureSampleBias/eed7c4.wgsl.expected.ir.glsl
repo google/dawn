@@ -12,8 +12,9 @@ vec4 textureSampleBias_eed7c4() {
   int arg_3 = 1;
   float arg_4 = 1.0f;
   vec3 v_1 = arg_2;
-  float v_2 = arg_4;
-  vec4 res = texture(arg_0_arg_1, vec4(v_1, float(arg_3)), v_2);
+  int v_2 = arg_3;
+  float v_3 = clamp(arg_4, -16.0f, 15.9899997711181640625f);
+  vec4 res = texture(arg_0_arg_1, vec4(v_1, float(v_2)), v_3);
   return res;
 }
 void main() {

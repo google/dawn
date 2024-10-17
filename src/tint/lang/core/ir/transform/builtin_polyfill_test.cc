@@ -2101,6 +2101,70 @@ TEST_F(IR_BuiltinPolyfillTest, TextureSampleBaseClampToEdge_2d_f32) {
     EXPECT_EQ(expect, str());
 }
 
+TEST_F(IR_BuiltinPolyfillTest, TextureSampleBiasClampNonArray) {
+    auto* texture_ty =
+        ty.Get<core::type::SampledTexture>(core::type::TextureDimension::k2d, ty.f32());
+    Build(core::BuiltinFn::kTextureSampleBias, ty.vec4<f32>(),
+          Vector{texture_ty, ty.sampler(), ty.vec2<f32>(), ty.f32()});
+
+    auto* src = R"(
+%foo = func(%arg:texture_2d<f32>, %arg_1:sampler, %arg_2:vec2<f32>, %arg_3:f32):vec4<f32> {  # %arg_1: 'arg', %arg_2: 'arg', %arg_3: 'arg'
+  $B1: {
+    %result:vec4<f32> = textureSampleBias %arg, %arg_1, %arg_2, %arg_3
+    ret %result
+  }
+}
+)";
+    auto* expect = R"(
+%foo = func(%arg:texture_2d<f32>, %arg_1:sampler, %arg_2:vec2<f32>, %arg_3:f32):vec4<f32> {  # %arg_1: 'arg', %arg_2: 'arg', %arg_3: 'arg'
+  $B1: {
+    %6:f32 = clamp %arg_3, -16.0f, 15.9899997711181640625f
+    %result:vec4<f32> = textureSampleBias %arg, %arg_1, %arg_2, %6
+    ret %result
+  }
+}
+)";
+
+    EXPECT_EQ(src, str());
+
+    BuiltinPolyfillConfig config;
+    config.texture_sample_base_clamp_to_edge_2d_f32 = true;
+    Run(BuiltinPolyfill, config);
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(IR_BuiltinPolyfillTest, TextureSampleBiasClampWithArray) {
+    auto* texture_ty =
+        ty.Get<core::type::SampledTexture>(core::type::TextureDimension::k2dArray, ty.f32());
+    Build(core::BuiltinFn::kTextureSampleBias, ty.vec4<f32>(),
+          Vector{texture_ty, ty.sampler(), ty.vec2<f32>(), ty.i32(), ty.f32()});
+
+    auto* src = R"(
+%foo = func(%arg:texture_2d_array<f32>, %arg_1:sampler, %arg_2:vec2<f32>, %arg_3:i32, %arg_4:f32):vec4<f32> {  # %arg_1: 'arg', %arg_2: 'arg', %arg_3: 'arg', %arg_4: 'arg'
+  $B1: {
+    %result:vec4<f32> = textureSampleBias %arg, %arg_1, %arg_2, %arg_3, %arg_4
+    ret %result
+  }
+}
+)";
+    auto* expect = R"(
+%foo = func(%arg:texture_2d_array<f32>, %arg_1:sampler, %arg_2:vec2<f32>, %arg_3:i32, %arg_4:f32):vec4<f32> {  # %arg_1: 'arg', %arg_2: 'arg', %arg_3: 'arg', %arg_4: 'arg'
+  $B1: {
+    %7:f32 = clamp %arg_4, -16.0f, 15.9899997711181640625f
+    %result:vec4<f32> = textureSampleBias %arg, %arg_1, %arg_2, %arg_3, %7
+    ret %result
+  }
+}
+)";
+
+    EXPECT_EQ(src, str());
+
+    BuiltinPolyfillConfig config;
+    config.texture_sample_base_clamp_to_edge_2d_f32 = true;
+    Run(BuiltinPolyfill, config);
+    EXPECT_EQ(expect, str());
+}
+
 TEST_F(IR_BuiltinPolyfillTest, Pack4xI8) {
     Build(core::BuiltinFn::kPack4XI8, ty.u32(), Vector{ty.vec4<i32>()});
 

@@ -8,7 +8,7 @@ struct tint_module_vars_struct {
 };
 
 float4 textureSampleBias_6a9113(tint_module_vars_struct tint_module_vars) {
-  float4 res = tint_module_vars.arg_0.sample(tint_module_vars.arg_1, float2(1.0f), bias(1.0f));
+  float4 res = tint_module_vars.arg_0.sample(tint_module_vars.arg_1, float2(1.0f), bias(clamp(1.0f, -16.0f, 15.9899997711181640625f)));
   return res;
 }
 

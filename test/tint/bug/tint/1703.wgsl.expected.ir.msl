@@ -14,7 +14,7 @@ void foo_member_initialize(tint_module_vars_struct tint_module_vars) {
   vb2[0u] = ((*tint_module_vars.my_uniform) == -1.0f);
   vb2 = bool2(((*tint_module_vars.my_uniform) == -1.0f), false);
   if (vb2[0u]) {
-    float4 const r = tint_module_vars.my_texture.sample(tint_module_vars.my_sampler, float2(0.0f), bias(0.0f));
+    float4 const r = tint_module_vars.my_texture.sample(tint_module_vars.my_sampler, float2(0.0f), bias(clamp(0.0f, -16.0f, 15.9899997711181640625f)));
   }
 }
 
@@ -24,6 +24,6 @@ void foo_default_initialize(tint_module_vars_struct tint_module_vars) {
   vb2[0u] = ((*tint_module_vars.my_uniform) == -1.0f);
   vb2 = bool2(false);
   if (vb2[0u]) {
-    float4 const r = tint_module_vars.my_texture.sample(tint_module_vars.my_sampler, float2(0.0f), bias(0.0f));
+    float4 const r = tint_module_vars.my_texture.sample(tint_module_vars.my_sampler, float2(0.0f), bias(clamp(0.0f, -16.0f, 15.9899997711181640625f)));
   }
 }

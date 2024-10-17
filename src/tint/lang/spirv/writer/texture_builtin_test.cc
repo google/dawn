@@ -426,8 +426,9 @@ INSTANTIATE_TEST_SUITE_P(
             {{"coords", 2, kF32}, {"bias", 1, kF32}},
             {"result", 4, kF32},
             {
-                "%10 = OpSampledImage %11 %t %s",
-                "OpImageSampleImplicitLod %v4float %10 %coords Bias %bias",
+                "OpExtInst %float %11 NClamp %bias %float_n16 %float_15_9899998",
+                "OpSampledImage %16 %t %s",
+                "OpImageSampleImplicitLod %v4float %15 %coords Bias %10",
             },
         },
         TextureBuiltinTestCase{
@@ -437,8 +438,9 @@ INSTANTIATE_TEST_SUITE_P(
             {{"coords", 2, kF32}, {"bias", 1, kF32}, {"offset", 2, kI32}},
             {"result", 4, kF32},
             {
-                "%10 = OpSampledImage %11 %t %s",
-                "OpImageSampleImplicitLod %v4float %10 %coords Bias|ConstOffset %bias %offset",
+                "OpExtInst %float %11 NClamp %bias %float_n16 %float_15_9899998",
+                "OpSampledImage %16 %t %s",
+                "OpImageSampleImplicitLod %v4float %15 %coords Bias|ConstOffset %10 %offset",
             },
         },
         TextureBuiltinTestCase{
@@ -448,10 +450,11 @@ INSTANTIATE_TEST_SUITE_P(
             {{"coords", 2, kF32}, {"array_idx", 1, kI32}, {"bias", 1, kF32}},
             {"result", 4, kF32},
             {
-                "%10 = OpSampledImage %11 %t %s",
-                "%12 = OpConvertSToF %float %array_idx",
-                "%16 = OpCompositeConstruct %v3float %coords %12",
-                "OpImageSampleImplicitLod %v4float %10 %16 Bias %bias",
+                "OpExtInst %float %11 NClamp %bias %float_n16 %float_15_9899998",
+                "OpSampledImage %16 %t %s",
+                "OpConvertSToF %float %array_idx",
+                "OpCompositeConstruct %v3float %coords %17",
+                "OpImageSampleImplicitLod %v4float %15 %21 Bias %10",
             },
         },
         TextureBuiltinTestCase{
@@ -461,10 +464,11 @@ INSTANTIATE_TEST_SUITE_P(
             {{"coords", 2, kF32}, {"array_idx", 1, kI32}, {"bias", 1, kF32}, {"offset", 2, kI32}},
             {"result", 4, kF32},
             {
-                "%10 = OpSampledImage %11 %t %s",
-                "%12 = OpConvertSToF %float %array_idx",
-                "%16 = OpCompositeConstruct %v3float %coords %12",
-                "OpImageSampleImplicitLod %v4float %10 %16 Bias|ConstOffset %bias %offset",
+                "OpExtInst %float %11 NClamp %bias %float_n16 %float_15_9899998",
+                "OpSampledImage %16 %t %s",
+                "OpConvertSToF %float %array_idx",
+                "OpCompositeConstruct %v3float %coords %17",
+                "OpImageSampleImplicitLod %v4float %15 %21 Bias|ConstOffset %10 %offset",
             },
         },
         TextureBuiltinTestCase{
@@ -474,8 +478,9 @@ INSTANTIATE_TEST_SUITE_P(
             {{"coords", 3, kF32}, {"bias", 1, kF32}},
             {"result", 4, kF32},
             {
-                "%10 = OpSampledImage %11 %t %s",
-                "OpImageSampleImplicitLod %v4float %10 %coords Bias %bias",
+                "OpExtInst %float %11 NClamp %bias %float_n16 %float_15_9899998",
+                "OpSampledImage %16 %t %s",
+                "OpImageSampleImplicitLod %v4float %15 %coords Bias %10",
             },
         },
         TextureBuiltinTestCase{
@@ -485,8 +490,9 @@ INSTANTIATE_TEST_SUITE_P(
             {{"coords", 3, kF32}, {"bias", 1, kF32}, {"offset", 3, kI32}},
             {"result", 4, kF32},
             {
-                "%10 = OpSampledImage %11 %t %s",
-                "OpImageSampleImplicitLod %v4float %10 %coords Bias|ConstOffset %bias %offset",
+                "OpExtInst %float %11 NClamp %bias %float_n16 %float_15_9899998",
+                "OpSampledImage %16 %t %s",
+                "OpImageSampleImplicitLod %v4float %15 %coords Bias|ConstOffset %10 %offset",
             },
         },
         TextureBuiltinTestCase{
@@ -496,8 +502,9 @@ INSTANTIATE_TEST_SUITE_P(
             {{"coords", 3, kF32}, {"bias", 1, kF32}},
             {"result", 4, kF32},
             {
-                "%10 = OpSampledImage %11 %t %s",
-                "OpImageSampleImplicitLod %v4float %10 %coords Bias %bias",
+                "OpExtInst %float %11 NClamp %bias %float_n16 %float_15_9899998",
+                "OpSampledImage %16 %t %s",
+                "OpImageSampleImplicitLod %v4float %15 %coords Bias %10",
             },
         },
         TextureBuiltinTestCase{
@@ -507,10 +514,11 @@ INSTANTIATE_TEST_SUITE_P(
             {{"coords", 3, kF32}, {"array_idx", 1, kI32}, {"bias", 1, kF32}},
             {"result", 4, kF32},
             {
-                "%10 = OpSampledImage %11 %t %s",
-                "%12 = OpConvertSToF %float %array_idx",
-                "%15 = OpCompositeConstruct %v4float %coords %12",
-                "OpImageSampleImplicitLod %v4float %10 %15 Bias %bias",
+                "OpExtInst %float %11 NClamp %bias %float_n16 %float_15_9899998",
+                "OpSampledImage %16 %t %s",
+                "OpConvertSToF %float %array_idx",
+                "OpCompositeConstruct %v4float %coords %17",
+                "OpImageSampleImplicitLod %v4float %15 %20 Bias %10",
             },
         }),
     PrintCase);

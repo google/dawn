@@ -133,7 +133,7 @@ Symbol Module::NameOf(const Value* value) const {
 
 void Module::SetName(Instruction* inst, std::string_view name) {
     TINT_ASSERT(inst->Results().Length() == 1);
-    return SetName(inst->Result(0), name);
+    SetName(inst->Result(0), name);
 }
 
 void Module::SetName(Value* value, std::string_view name) {

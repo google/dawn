@@ -11,7 +11,7 @@ float4 textureSampleBias_53b9f7(tint_module_vars_struct tint_module_vars) {
   float3 arg_2 = float3(1.0f);
   float arg_3 = 1.0f;
   float3 const v = arg_2;
-  float4 res = tint_module_vars.arg_0.sample(tint_module_vars.arg_1, v, bias(arg_3));
+  float4 res = tint_module_vars.arg_0.sample(tint_module_vars.arg_1, v, bias(clamp(arg_3, -16.0f, 15.9899997711181640625f)));
   return res;
 }
 

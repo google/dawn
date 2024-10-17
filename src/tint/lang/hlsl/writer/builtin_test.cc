@@ -2781,7 +2781,8 @@ TEST_F(HlslWriterTest, BuiltinTextureSampleBias_2d) {
 Texture2D<float4> v : register(t0);
 SamplerState v_1 : register(s1);
 void foo() {
-  float4 x = v.SampleBias(v_1, float2(1.0f, 2.0f), 3.0f);
+  float2 v_2 = float2(1.0f, 2.0f);
+  float4 x = v.SampleBias(v_1, v_2, clamp(3.0f, -16.0f, 15.9899997711181640625f));
 }
 
 )");
@@ -2817,7 +2818,8 @@ TEST_F(HlslWriterTest, BuiltinTextureSampleBias_2d_Offset) {
 Texture2D<float4> v : register(t0);
 SamplerState v_1 : register(s1);
 void foo() {
-  float4 x = v.SampleBias(v_1, float2(1.0f, 2.0f), 3.0f, int2(int(4), int(5)));
+  float2 v_2 = float2(1.0f, 2.0f);
+  float4 x = v.SampleBias(v_1, v_2, clamp(3.0f, -16.0f, 15.9899997711181640625f), int2(int(4), int(5)));
 }
 
 )");
@@ -2854,7 +2856,8 @@ Texture2DArray<float4> v : register(t0);
 SamplerState v_1 : register(s1);
 void foo() {
   float2 v_2 = float2(1.0f, 2.0f);
-  float4 x = v.SampleBias(v_1, float3(v_2, float(4u)), 3.0f);
+  float v_3 = clamp(3.0f, -16.0f, 15.9899997711181640625f);
+  float4 x = v.SampleBias(v_1, float3(v_2, float(4u)), v_3);
 }
 
 )");
@@ -2892,7 +2895,8 @@ Texture2DArray<float4> v : register(t0);
 SamplerState v_1 : register(s1);
 void foo() {
   float2 v_2 = float2(1.0f, 2.0f);
-  float4 x = v.SampleBias(v_1, float3(v_2, float(4u)), 3.0f, int2(int(4), int(5)));
+  float v_3 = clamp(3.0f, -16.0f, 15.9899997711181640625f);
+  float4 x = v.SampleBias(v_1, float3(v_2, float(4u)), v_3, int2(int(4), int(5)));
 }
 
 )");
@@ -2926,7 +2930,8 @@ TEST_F(HlslWriterTest, BuiltinTextureSampleBias_3d) {
 Texture3D<float4> v : register(t0);
 SamplerState v_1 : register(s1);
 void foo() {
-  float4 x = v.SampleBias(v_1, float3(1.0f, 2.0f, 3.0f), 3.0f);
+  float3 v_2 = float3(1.0f, 2.0f, 3.0f);
+  float4 x = v.SampleBias(v_1, v_2, clamp(3.0f, -16.0f, 15.9899997711181640625f));
 }
 
 )");
@@ -2962,7 +2967,8 @@ TEST_F(HlslWriterTest, BuiltinTextureSampleBias_3d_Offset) {
 Texture3D<float4> v : register(t0);
 SamplerState v_1 : register(s1);
 void foo() {
-  float4 x = v.SampleBias(v_1, float3(1.0f, 2.0f, 3.0f), 3.0f, int3(int(4), int(5), int(6)));
+  float3 v_2 = float3(1.0f, 2.0f, 3.0f);
+  float4 x = v.SampleBias(v_1, v_2, clamp(3.0f, -16.0f, 15.9899997711181640625f), int3(int(4), int(5), int(6)));
 }
 
 )");
@@ -2996,7 +3002,8 @@ TEST_F(HlslWriterTest, BuiltinTextureSampleBias_Cube) {
 TextureCube<float4> v : register(t0);
 SamplerState v_1 : register(s1);
 void foo() {
-  float4 x = v.SampleBias(v_1, float3(1.0f, 2.0f, 3.0f), 3.0f);
+  float3 v_2 = float3(1.0f, 2.0f, 3.0f);
+  float4 x = v.SampleBias(v_1, v_2, clamp(3.0f, -16.0f, 15.9899997711181640625f));
 }
 
 )");
@@ -3033,7 +3040,8 @@ TextureCubeArray<float4> v : register(t0);
 SamplerState v_1 : register(s1);
 void foo() {
   float3 v_2 = float3(1.0f, 2.0f, 3.0f);
-  float4 x = v.SampleBias(v_1, float4(v_2, float(4u)), 3.0f);
+  float v_3 = clamp(3.0f, -16.0f, 15.9899997711181640625f);
+  float4 x = v.SampleBias(v_1, float4(v_2, float(4u)), v_3);
 }
 
 )");

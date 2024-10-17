@@ -10,7 +10,8 @@ uniform highp sampler2D arg_0_arg_1;
 vec4 textureSampleBias_a161cf() {
   vec2 arg_2 = vec2(1.0f);
   float arg_3 = 1.0f;
-  vec4 res = textureOffset(arg_0_arg_1, arg_2, ivec2(1), arg_3);
+  vec2 v_1 = arg_2;
+  vec4 res = textureOffset(arg_0_arg_1, v_1, ivec2(1), clamp(arg_3, -16.0f, 15.9899997711181640625f));
   return res;
 }
 void main() {
