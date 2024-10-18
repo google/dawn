@@ -1,0 +1,64 @@
+#include <metal_stdlib>
+
+using namespace metal;
+struct PixelLocal {
+  uint a;
+  int b;
+  float c;
+};
+
+struct tint_private_vars_struct {
+  PixelLocal P;
+};
+
+struct f_res {
+  uint output_0;
+  int output_1;
+  float output_2;
+};
+
+struct tint_symbol_1 {
+  uint a [[color(1)]];
+  float c [[color(3)]];
+  int b [[color(6)]];
+};
+
+struct tint_symbol_2 {
+  uint output_0 [[color(1)]];
+  float output_2 [[color(3)]];
+  int output_1 [[color(6)]];
+};
+
+struct In {
+  float4 pos;
+  bool ff;
+  uint si;
+};
+
+uint tint_ftou(float v) {
+  return select(4294967295u, select(uint(v), 0u, (v < 0.0f)), (v <= 4294967040.0f));
+}
+
+void f_inner(In in, thread tint_private_vars_struct* const tint_private_vars) {
+  (*(tint_private_vars)).P.a = ((*(tint_private_vars)).P.a + tint_ftou(in.pos[0]));
+}
+
+f_res f_inner_1(In in, PixelLocal pixel_local_1, thread tint_private_vars_struct* const tint_private_vars) {
+  (*(tint_private_vars)).P = pixel_local_1;
+  f_inner(in, tint_private_vars);
+  f_res const tint_symbol_5 = {.output_0=(*(tint_private_vars)).P.a, .output_1=(*(tint_private_vars)).P.b, .output_2=(*(tint_private_vars)).P.c};
+  return tint_symbol_5;
+}
+
+fragment tint_symbol_2 f(float4 pos [[position]], bool ff [[front_facing]], uint si [[sample_id]], tint_symbol_1 tint_symbol [[stage_in]]) {
+  thread tint_private_vars_struct tint_private_vars = {};
+  In const tint_symbol_3 = {.pos=pos, .ff=ff, .si=si};
+  PixelLocal const tint_symbol_4 = {.a=tint_symbol.a, .b=tint_symbol.b, .c=tint_symbol.c};
+  f_res const inner_result = f_inner_1(tint_symbol_3, tint_symbol_4, &(tint_private_vars));
+  tint_symbol_2 wrapper_result = {};
+  wrapper_result.output_0 = inner_result.output_0;
+  wrapper_result.output_1 = inner_result.output_1;
+  wrapper_result.output_2 = inner_result.output_2;
+  return wrapper_result;
+}
+

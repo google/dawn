@@ -43,6 +43,8 @@ tint_add_target(tint_lang_hlsl_type lib
   lang/hlsl/type/byte_address_buffer.h
   lang/hlsl/type/int8_t4_packed.cc
   lang/hlsl/type/int8_t4_packed.h
+  lang/hlsl/type/rasterizer_ordered_texture_2d.cc
+  lang/hlsl/type/rasterizer_ordered_texture_2d.h
   lang/hlsl/type/uint8_t4_packed.cc
   lang/hlsl/type/uint8_t4_packed.h
 )

@@ -80,11 +80,6 @@ struct State {
                 continue;
             }
 
-            // Skip entry points with no inputs or outputs.
-            if (func->Params().IsEmpty() && func->ReturnType()->Is<core::type::Void>()) {
-                continue;
-            }
-
             ProcessEntryPoint(func, make_backend_state(ir, func));
         }
 
@@ -126,6 +121,11 @@ struct State {
 
         auto new_params = backend->FinalizeInputs();
         auto* new_ret_ty = backend->FinalizeOutputs();
+
+        // Skip entry points with no new inputs or outputs.
+        if (!backend->HasInputs() && !backend->HasOutputs()) {
+            return;
+        }
 
         // Rename the old function and remove its pipeline stage and workgroup size, as we will be
         // wrapping it with a new entry point.

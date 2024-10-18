@@ -51,6 +51,8 @@ tint_add_target(tint_lang_hlsl_writer_raise lib
   lang/hlsl/writer/raise/fxc_polyfill.h
   lang/hlsl/writer/raise/localize_struct_array_assignment.cc
   lang/hlsl/writer/raise/localize_struct_array_assignment.h
+  lang/hlsl/writer/raise/pixel_local.cc
+  lang/hlsl/writer/raise/pixel_local.h
   lang/hlsl/writer/raise/promote_initializers.cc
   lang/hlsl/writer/raise/promote_initializers.h
   lang/hlsl/writer/raise/raise.cc
@@ -105,6 +107,7 @@ tint_add_target(tint_lang_hlsl_writer_raise_test test
   lang/hlsl/writer/raise/decompose_uniform_access_test.cc
   lang/hlsl/writer/raise/fxc_polyfill_test.cc
   lang/hlsl/writer/raise/localize_struct_array_assignment_test.cc
+  lang/hlsl/writer/raise/pixel_local_test.cc
   lang/hlsl/writer/raise/promote_initializers_test.cc
   lang/hlsl/writer/raise/replace_non_indexable_mat_vec_stores_test.cc
   lang/hlsl/writer/raise/shader_io_test.cc
@@ -118,6 +121,7 @@ tint_target_add_dependencies(tint_lang_hlsl_writer_raise_test test
   tint_lang_core_ir
   tint_lang_core_ir_transform_test
   tint_lang_core_type
+  tint_lang_hlsl_writer_common
   tint_lang_hlsl_writer_raise
   tint_utils_containers
   tint_utils_diagnostic

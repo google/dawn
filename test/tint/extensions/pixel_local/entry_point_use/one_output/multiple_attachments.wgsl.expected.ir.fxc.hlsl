@@ -1,11 +1,37 @@
-SKIP: FAILED
+struct PixelLocal {
+  uint a;
+  int b;
+  float c;
+};
 
-..\..\src\tint\lang\hlsl\writer\printer\printer.cc:522 internal compiler error: unhandled address space pixel_local
-********************************************************************
-*  The tint shader compiler has encountered an unexpected error.   *
-*                                                                  *
-*  Please help us fix this issue by submitting a bug report at     *
-*  crbug.com/tint with the source program that triggered the bug.  *
-********************************************************************
+struct f_outputs {
+  float4 tint_symbol : SV_Target0;
+};
 
-tint executable returned error: exit status 0xc000001d
+struct f_inputs {
+  float4 pos : SV_Position;
+};
+
+
+static PixelLocal P = (PixelLocal)0;
+RasterizerOrderedTexture2D<uint4> pixel_local_a : register(u1);
+RasterizerOrderedTexture2D<int4> pixel_local_b : register(u6);
+RasterizerOrderedTexture2D<float4> pixel_local_c : register(u3);
+float4 f_inner() {
+  P.a = (P.a + 42u);
+  return (2.0f).xxxx;
+}
+
+f_outputs f(f_inputs inputs) {
+  uint2 v = uint2(inputs.pos.xy);
+  P.a = pixel_local_a.Load(v).x;
+  P.b = pixel_local_b.Load(v).x;
+  P.c = pixel_local_c.Load(v).x;
+  f_outputs v_1 = {f_inner()};
+  pixel_local_a[v] = P.a.xxxx;
+  pixel_local_b[v] = P.b.xxxx;
+  pixel_local_c[v] = P.c.xxxx;
+  f_outputs v_2 = v_1;
+  return v_2;
+}
+

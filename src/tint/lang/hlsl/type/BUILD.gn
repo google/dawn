@@ -49,6 +49,8 @@ libtint_source_set("type") {
     "byte_address_buffer.h",
     "int8_t4_packed.cc",
     "int8_t4_packed.h",
+    "rasterizer_ordered_texture_2d.cc",
+    "rasterizer_ordered_texture_2d.h",
     "uint8_t4_packed.cc",
     "uint8_t4_packed.h",
   ]

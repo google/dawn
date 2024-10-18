@@ -53,6 +53,7 @@
 #include "src/tint/lang/hlsl/writer/raise/decompose_uniform_access.h"
 #include "src/tint/lang/hlsl/writer/raise/fxc_polyfill.h"
 #include "src/tint/lang/hlsl/writer/raise/localize_struct_array_assignment.h"
+#include "src/tint/lang/hlsl/writer/raise/pixel_local.h"
 #include "src/tint/lang/hlsl/writer/raise/promote_initializers.h"
 #include "src/tint/lang/hlsl/writer/raise/replace_non_indexable_mat_vec_stores.h"
 #include "src/tint/lang/hlsl/writer/raise/shader_io.h"
@@ -163,11 +164,14 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
         RUN_TRANSFORM(core::ir::transform::ZeroInitWorkgroupMemory, module);
     }
 
+    const bool pixel_local_enabled = !options.pixel_local.attachment_formats.empty();
+
     // ShaderIO must be run before DecomposeUniformAccess because it might
     // introduce a uniform buffer for kNumWorkgroups.
     {
         raise::ShaderIOConfig config;
         config.num_workgroups_binding = options.root_constant_binding_point;
+        config.add_input_position_member = pixel_local_enabled;
         RUN_TRANSFORM(raise::ShaderIO, module, config);
     }
 
@@ -178,8 +182,13 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
     // Comes after DecomposeStorageAccess.
     RUN_TRANSFORM(raise::DecomposeUniformAccess, module);
 
-    // TODO(dsinclair): LocalizeStructArrayAssignment
-    // TODO(dsinclair): PixelLocal transform
+    // PixelLocal must run after DirectVariableAccess to avoid chasing pointer parameters.
+    if (pixel_local_enabled) {
+        raise::PixelLocalConfig config;
+        config.options = options.pixel_local;
+        RUN_TRANSFORM(raise::PixelLocal, module, config);
+    }
+
     // TODO(dsinclair): TruncateInterstageVariables
     // TODO(dsinclair): CalculateArrayLength
 

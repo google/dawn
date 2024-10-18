@@ -51,9 +51,7 @@ struct ShaderIOBackendState {
     /// @param type the type of the input
     /// @param attributes the IO attributes
     /// @returns the index of the input
-    virtual uint32_t AddInput(Symbol name,
-                              const core::type::Type* type,
-                              core::IOAttributes attributes) {
+    uint32_t AddInput(Symbol name, const core::type::Type* type, core::IOAttributes attributes) {
         inputs.Push({name, type, std::move(attributes)});
         return uint32_t(inputs.Length() - 1);
     }
@@ -63,12 +61,16 @@ struct ShaderIOBackendState {
     /// @param type the type of the output
     /// @param attributes the IO attributes
     /// @returns the index of the output
-    virtual uint32_t AddOutput(Symbol name,
-                               const core::type::Type* type,
-                               core::IOAttributes attributes) {
+    uint32_t AddOutput(Symbol name, const core::type::Type* type, core::IOAttributes attributes) {
         outputs.Push({name, type, std::move(attributes)});
         return uint32_t(outputs.Length() - 1);
     }
+
+    /// @returns true if inputs were added
+    bool HasInputs() const { return !inputs.IsEmpty(); }
+
+    // @returns true if outputs were added
+    bool HasOutputs() const { return !outputs.IsEmpty(); }
 
     /// Finalize the shader inputs and create any state needed for the new entry point function.
     /// @returns the list of function parameters for the new entry point

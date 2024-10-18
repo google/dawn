@@ -41,11 +41,13 @@ cc_library(
   srcs = [
     "byte_address_buffer.cc",
     "int8_t4_packed.cc",
+    "rasterizer_ordered_texture_2d.cc",
     "uint8_t4_packed.cc",
   ],
   hdrs = [
     "byte_address_buffer.h",
     "int8_t4_packed.h",
+    "rasterizer_ordered_texture_2d.h",
     "uint8_t4_packed.h",
   ],
   deps = [

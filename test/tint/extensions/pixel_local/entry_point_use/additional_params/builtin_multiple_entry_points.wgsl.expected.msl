@@ -1,0 +1,141 @@
+#include <metal_stdlib>
+
+using namespace metal;
+struct PixelLocal {
+  uint a;
+  int b;
+  float c;
+};
+
+struct tint_private_vars_struct {
+  PixelLocal P;
+};
+
+struct f_res {
+  uint output_0;
+  int output_1;
+  float output_2;
+};
+
+struct tint_symbol_1 {
+  uint a [[color(1)]];
+  float c [[color(3)]];
+  int b [[color(6)]];
+};
+
+struct tint_symbol_2 {
+  uint output_0 [[color(1)]];
+  float output_2 [[color(3)]];
+  int output_1 [[color(6)]];
+};
+
+uint tint_ftou(float v) {
+  return select(4294967295u, select(uint(v), 0u, (v < 0.0f)), (v <= 4294967040.0f));
+}
+
+void f_inner(float4 pos, thread tint_private_vars_struct* const tint_private_vars) {
+  (*(tint_private_vars)).P.a = ((*(tint_private_vars)).P.a + tint_ftou(pos[0]));
+}
+
+f_res f_inner_1(float4 pos, PixelLocal pixel_local_1, thread tint_private_vars_struct* const tint_private_vars) {
+  (*(tint_private_vars)).P = pixel_local_1;
+  f_inner(pos, tint_private_vars);
+  f_res const tint_symbol_10 = {.output_0=(*(tint_private_vars)).P.a, .output_1=(*(tint_private_vars)).P.b, .output_2=(*(tint_private_vars)).P.c};
+  return tint_symbol_10;
+}
+
+fragment tint_symbol_2 f(float4 pos [[position]], tint_symbol_1 tint_symbol [[stage_in]]) {
+  thread tint_private_vars_struct tint_private_vars = {};
+  PixelLocal const tint_symbol_9 = {.a=tint_symbol.a, .b=tint_symbol.b, .c=tint_symbol.c};
+  f_res const inner_result = f_inner_1(pos, tint_symbol_9, &(tint_private_vars));
+  tint_symbol_2 wrapper_result = {};
+  wrapper_result.output_0 = inner_result.output_0;
+  wrapper_result.output_1 = inner_result.output_1;
+  wrapper_result.output_2 = inner_result.output_2;
+  return wrapper_result;
+}
+
+struct f2_res {
+  uint output_0;
+  int output_1;
+  float output_2;
+};
+
+struct tint_symbol_4 {
+  uint a [[color(1)]];
+  float c [[color(3)]];
+  int b [[color(6)]];
+};
+
+struct tint_symbol_5 {
+  uint output_0 [[color(1)]];
+  float output_2 [[color(3)]];
+  int output_1 [[color(6)]];
+};
+
+int tint_ftoi(float v) {
+  return select(2147483647, select(int(v), (-2147483647 - 1), (v < -2147483648.0f)), (v <= 2147483520.0f));
+}
+
+void f2_inner(float4 pos, thread tint_private_vars_struct* const tint_private_vars) {
+  (*(tint_private_vars)).P.b = as_type<int>((as_type<uint>((*(tint_private_vars)).P.b) + as_type<uint>(tint_ftoi(pos[0]))));
+}
+
+f2_res f2_inner_1(float4 pos, PixelLocal pixel_local_2, thread tint_private_vars_struct* const tint_private_vars) {
+  (*(tint_private_vars)).P = pixel_local_2;
+  f2_inner(pos, tint_private_vars);
+  f2_res const tint_symbol_12 = {.output_0=(*(tint_private_vars)).P.a, .output_1=(*(tint_private_vars)).P.b, .output_2=(*(tint_private_vars)).P.c};
+  return tint_symbol_12;
+}
+
+fragment tint_symbol_5 f2(float4 pos [[position]], tint_symbol_4 tint_symbol_3 [[stage_in]]) {
+  thread tint_private_vars_struct tint_private_vars = {};
+  PixelLocal const tint_symbol_11 = {.a=tint_symbol_3.a, .b=tint_symbol_3.b, .c=tint_symbol_3.c};
+  f2_res const inner_result_1 = f2_inner_1(pos, tint_symbol_11, &(tint_private_vars));
+  tint_symbol_5 wrapper_result_1 = {};
+  wrapper_result_1.output_0 = inner_result_1.output_0;
+  wrapper_result_1.output_1 = inner_result_1.output_1;
+  wrapper_result_1.output_2 = inner_result_1.output_2;
+  return wrapper_result_1;
+}
+
+struct f3_res {
+  uint output_0;
+  int output_1;
+  float output_2;
+};
+
+struct tint_symbol_7 {
+  uint a [[color(1)]];
+  float c [[color(3)]];
+  int b [[color(6)]];
+};
+
+struct tint_symbol_8 {
+  uint output_0 [[color(1)]];
+  float output_2 [[color(3)]];
+  int output_1 [[color(6)]];
+};
+
+void f3_inner(float4 pos, thread tint_private_vars_struct* const tint_private_vars) {
+  (*(tint_private_vars)).P.c = ((*(tint_private_vars)).P.c + pos[0]);
+}
+
+f3_res f3_inner_1(float4 pos, PixelLocal pixel_local_3, thread tint_private_vars_struct* const tint_private_vars) {
+  (*(tint_private_vars)).P = pixel_local_3;
+  f3_inner(pos, tint_private_vars);
+  f3_res const tint_symbol_14 = {.output_0=(*(tint_private_vars)).P.a, .output_1=(*(tint_private_vars)).P.b, .output_2=(*(tint_private_vars)).P.c};
+  return tint_symbol_14;
+}
+
+fragment tint_symbol_8 f3(float4 pos [[position]], tint_symbol_7 tint_symbol_6 [[stage_in]]) {
+  thread tint_private_vars_struct tint_private_vars = {};
+  PixelLocal const tint_symbol_13 = {.a=tint_symbol_6.a, .b=tint_symbol_6.b, .c=tint_symbol_6.c};
+  f3_res const inner_result_2 = f3_inner_1(pos, tint_symbol_13, &(tint_private_vars));
+  tint_symbol_8 wrapper_result_2 = {};
+  wrapper_result_2.output_0 = inner_result_2.output_0;
+  wrapper_result_2.output_1 = inner_result_2.output_1;
+  wrapper_result_2.output_2 = inner_result_2.output_2;
+  return wrapper_result_2;
+}
+

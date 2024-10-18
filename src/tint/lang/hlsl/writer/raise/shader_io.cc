@@ -176,7 +176,16 @@ struct StateImpl : core::ir::transform::ShaderIOBackendState {
 
     /// @copydoc ShaderIO::BackendState::FinalizeInputs
     Vector<core::ir::FunctionParam*, 4> FinalizeInputs() override {
-        Vector<core::type::Manager::StructMemberDesc, 4> input_struct_members;
+        if (config.add_input_position_member) {
+            const bool has_position_member = inputs.Any([](auto& struct_mem_desc) {
+                return struct_mem_desc.attributes.builtin == core::BuiltinValue::kPosition;
+            });
+            if (!has_position_member) {
+                core::IOAttributes attrs;
+                attrs.builtin = core::BuiltinValue::kPosition;
+                AddInput(ir.symbols.New("pos"), ty.vec4<f32>(), attrs);
+            }
+        }
 
         Vector<MemberInfo, 4> input_data;
         for (uint32_t i = 0; i < inputs.Length(); ++i) {
@@ -203,6 +212,7 @@ struct StateImpl : core::ir::transform::ShaderIOBackendState {
         std::sort(input_data.begin(), input_data.end(),
                   [&](auto& x, auto& y) { return StructMemberComparator(x, y); });
 
+        Vector<core::type::Manager::StructMemberDesc, 4> input_struct_members;
         for (auto& input : input_data) {
             input_indices[input.idx] = static_cast<uint32_t>(input_struct_members.Length());
             input_struct_members.Push(input.member);

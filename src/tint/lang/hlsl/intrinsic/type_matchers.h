@@ -32,6 +32,7 @@
 #include "src/tint/lang/core/type/manager.h"
 #include "src/tint/lang/hlsl/type/byte_address_buffer.h"
 #include "src/tint/lang/hlsl/type/int8_t4_packed.h"
+#include "src/tint/lang/hlsl/type/rasterizer_ordered_texture_2d.h"
 #include "src/tint/lang/hlsl/type/uint8_t4_packed.h"
 
 namespace tint::hlsl::intrinsic {
@@ -50,6 +51,25 @@ inline const type::ByteAddressBuffer* BuildByteAddressBuffer(core::intrinsic::Ma
                                                              const core::type::Type*,
                                                              core::intrinsic::Number& A) {
     return state.types.Get<type::ByteAddressBuffer>(static_cast<core::Access>(A.Value()));
+}
+
+inline bool MatchRasterizerOrderedTexture2D(core::intrinsic::MatchState&,
+                                            const core::type::Type* ty,
+                                            core::intrinsic::Number& F) {
+    if (auto* buf = ty->As<type::RasterizerOrderedTexture2D>()) {
+        F = core::intrinsic::Number(static_cast<uint32_t>(buf->TexelFormat()));
+        return true;
+    }
+    return false;
+}
+
+inline const type::RasterizerOrderedTexture2D* BuildRasterizerOrderedTexture2D(
+    core::intrinsic::MatchState& state,
+    const core::type::Type*,
+    core::intrinsic::Number& F) {
+    auto format = static_cast<core::TexelFormat>(F.Value());
+    auto* subtype = type::RasterizerOrderedTexture2D::SubtypeFor(format, state.types);
+    return state.types.Get<type::RasterizerOrderedTexture2D>(format, subtype);
 }
 
 inline bool MatchInt8T4Packed(core::intrinsic::MatchState&, const core::type::Type* ty) {

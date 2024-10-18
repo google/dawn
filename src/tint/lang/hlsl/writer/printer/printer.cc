@@ -106,6 +106,7 @@
 #include "src/tint/lang/hlsl/ir/ternary.h"
 #include "src/tint/lang/hlsl/type/byte_address_buffer.h"
 #include "src/tint/lang/hlsl/type/int8_t4_packed.h"
+#include "src/tint/lang/hlsl/type/rasterizer_ordered_texture_2d.h"
 #include "src/tint/lang/hlsl/type/uint8_t4_packed.h"
 #include "src/tint/utils/containers/hashmap.h"
 #include "src/tint/utils/containers/map.h"
@@ -566,6 +567,8 @@ class Printer : public tint::TextGenerator {
             auto* st = ptr->StoreType()->As<core::type::StorageTexture>();
             if (st && st->Access() != core::Access::kRead) {
                 register_space = 'u';
+            } else if (ptr->StoreType()->Is<hlsl::type::RasterizerOrderedTexture2D>()) {
+                register_space = 'u';
             }
         } else if (ptr->StoreType()->Is<core::type::Sampler>()) {
             register_space = 's';
@@ -575,7 +578,6 @@ class Printer : public tint::TextGenerator {
         auto bp = var->BindingPoint();
         TINT_ASSERT(bp.has_value());
 
-        // TODO(dsinclair): Handle PixelLocal::RasterizerOrderedView attribute
         auto out = Line();
         EmitTypeAndName(out, var->Result(0)->Type(), NameOf(var->Result(0)));
         out << RegisterAndSpace(register_space, bp.value()) << ";";
@@ -1287,6 +1289,10 @@ class Printer : public tint::TextGenerator {
                     out << "RW";
                 }
                 out << "ByteAddressBuffer";
+            },
+            [&](const hlsl::type::RasterizerOrderedTexture2D* rov) {
+                auto* component = ImageFormatToRWtextureType(rov->TexelFormat());
+                out << "RasterizerOrderedTexture2D<" << component << ">";
             },
             [&](const hlsl::type::Int8T4Packed*) { out << "int8_t4_packed"; },
             [&](const hlsl::type::Uint8T4Packed*) { out << "uint8_t4_packed"; },
