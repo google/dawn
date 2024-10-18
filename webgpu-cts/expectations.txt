@@ -1586,9 +1586,9 @@ crbug.com/355482869 [ amd-0x7340 mac ] webgpu:shader,execution,value_init:mat:ad
 crbug.com/dawn/0000 [ android-chromium android-r angle-opengles dawn-backend-validation graphite-disabled mobile no-asan no-clang-coverage oop-c passthrough qualcomm renderer-skia-gl target-cpu-32 webgpu-adapter-default webgpu-no-worker ] webgpu:api,operation,render_pipeline,overrides:multi_entry_points:isAsync=true [ RetryOnFailure ]
 crbug.com/dawn/0000 [ android-chromium android-r angle-opengles dawn-backend-validation graphite-disabled mobile no-asan no-clang-coverage oop-c passthrough qualcomm renderer-skia-gl target-cpu-32 webgpu-adapter-default webgpu-no-worker ] webgpu:api,operation,render_pipeline,overrides:shared_shader_module:isAsync=true [ RetryOnFailure ]
 crbug.com/dawn/0000 [ android-chromium android-r angle-opengles dawn-no-backend-validation graphite-disabled mobile no-asan no-clang-coverage oop-c passthrough qualcomm renderer-skia-gl target-cpu-32 webgpu-adapter-default webgpu-no-worker ] webgpu:api,operation,render_pipeline,overrides:multi_entry_points:isAsync=true [ RetryOnFailure ]
-crbug.com/dawn/0000 [ android-chromium android-r angle-opengles dawn-no-backend-validation graphite-disabled mobile no-asan no-clang-coverage oop-c passthrough qualcomm renderer-skia-gl target-cpu-32 webgpu-adapter-default webgpu-no-worker ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:sampled_array_3d_coords:stage="compute";format="rgb9e5ufloat" [ RetryOnFailure ]
-crbug.com/dawn/0000 [ android-chromium android-r angle-opengles dawn-no-backend-validation graphite-disabled mobile no-asan no-clang-coverage oop-c passthrough qualcomm renderer-skia-gl target-cpu-32 webgpu-adapter-default webgpu-no-worker ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:sampled_array_3d_coords:stage="fragment";format="rgb9e5ufloat" [ RetryOnFailure ]
-crbug.com/dawn/0000 [ android-chromium android-r angle-opengles dawn-no-backend-validation graphite-disabled mobile no-asan no-clang-coverage oop-c passthrough qualcomm renderer-skia-gl target-cpu-32 webgpu-adapter-default webgpu-no-worker ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:sampled_array_3d_coords:stage="vertex";format="rgb9e5ufloat" [ RetryOnFailure ]
+crbug.com/dawn/0000 [ android-chromium android-r angle-opengles dawn-no-backend-validation graphite-disabled mobile no-asan no-clang-coverage oop-c passthrough qualcomm renderer-skia-gl target-cpu-32 webgpu-adapter-default webgpu-no-worker ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:sampled_array_3d_coords:stage="compute";format="rgb9e5ufloat" [ Failure ]
+crbug.com/dawn/0000 [ android-chromium android-r angle-opengles dawn-no-backend-validation graphite-disabled mobile no-asan no-clang-coverage oop-c passthrough qualcomm renderer-skia-gl target-cpu-32 webgpu-adapter-default webgpu-no-worker ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:sampled_array_3d_coords:stage="fragment";format="rgb9e5ufloat" [ Failure ]
+crbug.com/dawn/0000 [ android-chromium android-r angle-opengles dawn-no-backend-validation graphite-disabled mobile no-asan no-clang-coverage oop-c passthrough qualcomm renderer-skia-gl target-cpu-32 webgpu-adapter-default webgpu-no-worker ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:sampled_array_3d_coords:stage="vertex";format="rgb9e5ufloat" [ Failure ]
 crbug.com/dawn/0000 [ android-t dawn-backend-validation ] webgpu:shader,execution,memory_model,coherence:corr:memType="atomic_storage";testType="intra_workgroup" [ RetryOnFailure ]
 crbug.com/dawn/0000 [ angle-d3d11 dawn-backend-validation desktop graphite-enabled intel-0x4680 no-asan no-clang-coverage oop-c passthrough release-x64 renderer-skia-gl target-cpu-64 webgpu-adapter-default webgpu-dxc-disabled webgpu-no-worker win10 ] webgpu:web_platform,copyToTexture,ImageBitmap:from_ImageData:alpha="premultiply";orientation="none";colorSpaceConversion="default";srcFlipYInCopy=false;dstFormat="rg32float";dstPremultiplied=false [ RetryOnFailure ]
 crbug.com/dawn/0000 [ angle-d3d11 dawn-backend-validation desktop graphite-enabled intel-0x4680 no-asan no-clang-coverage oop-c passthrough release-x64 renderer-skia-gl target-cpu-64 webgpu-adapter-default webgpu-dxc-enabled webgpu-no-worker win10 ] webgpu:web_platform,copyToTexture,ImageBitmap:from_ImageData:alpha="premultiply";orientation="none";colorSpaceConversion="default";srcFlipYInCopy=false;dstFormat="rg32float";dstPremultiplied=false [ RetryOnFailure ]
@@ -1743,8 +1743,8 @@ crbug.com/373664083 [ dawn-backend-validation nvidia-0x2184 win10 ] webgpu:api,o
 crbug.com/373664084 [ dawn-backend-validation intel-0x4680 win10 ] webgpu:web_platform,copyToTexture,ImageBitmap:from_ImageData:* [ RetryOnFailure ]
 
 crbug.com/373670513 [ android-pixel-6 ] webgpu:shader,execution,zero_init:compute,zero_init:addressSpace="workgroup";* [ RetryOnFailure ]
-# https://ci.chromium.org/ui/p/chromium/builders/ci/Dawn%20Win10%20x86%20DEPS%20Release%20(Intel)/15773/overview
-[ win10 target-cpu-32 ] webgpu:shader,execution,zero_init:compute,zero_init:addressSpace="workgroup";* [ RetryOnFailure ]
+crbug.com/373485785 [ win10 intel ] webgpu:shader,execution,zero_init:compute,zero_init:addressSpace="workgroup";* [ RetryOnFailure ]
+crbug.com/373485785 [ target-cpu-32 ] webgpu:shader,execution,zero_init:compute,zero_init:addressSpace="workgroup";* [ RetryOnFailure ]
 
 ################################################################################
 # New flakes. Please triage - will be discarded/regenerated by the next roll:
@@ -1765,6 +1765,9 @@ crbug.com/dawn/0000 [ dawn-backend-validation intel-0x9bc5 win10 ] webgpu:shader
 crbug.com/dawn/0000 [ dawn-no-backend-validation intel-0x4680 webgpu-dxc-enabled win10 ] webgpu:shader,execution,value_init:mat:addressSpace="private";type="f16" [ RetryOnFailure ]
 
 crbug.com/363903526 webgpu:api,validation,createView:texture_view_usage:* [ Failure ]
+
+crbug.com/dawn/0000 [ android-pixel-6 ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:* [ RetryOnFailure ]
+crbug.com/dawn/0000 [ android-pixel-6 ] webgpu:shader,execution,expression,call,builtin,textureSampleCompare:* [ RetryOnFailure ]
 
 ################################################################################
 # New failures. Please triage - will be discarded/regenerated by the next roll:
