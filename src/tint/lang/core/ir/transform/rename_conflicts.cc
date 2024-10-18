@@ -147,10 +147,6 @@ struct State {
         // Check resolving of operands
         for (auto* operand : inst->Operands()) {
             if (operand) {
-                // Ensure that named operands can be resolved.
-                if (auto symbol = ir.NameOf(operand)) {
-                    EnsureResolvesTo(symbol.NameView(), operand);
-                }
                 // If the operand is a constant, then ensure that type name can be resolved.
                 if (auto* c = operand->As<core::ir::Constant>()) {
                     EnsureResolvable(c->Type());
@@ -200,7 +196,7 @@ struct State {
             [&](core::ir::CoreBuiltinCall* call) {
                 // Ensure builtin of a builtin call is resolvable
                 auto name = tint::ToString(call->Func());
-                EnsureResolvesTo(name, nullptr);
+                EnsureResolvesToBuiltin(name);
             });
 
         // Register new operands and check their types can resolve
@@ -217,44 +213,37 @@ struct State {
             type = tint::Switch(
                 type,  //
                 [&](const core::type::Scalar* s) {
-                    EnsureResolvesTo(s->FriendlyName(), nullptr);
+                    EnsureResolvesToBuiltin(s->FriendlyName());
                     return nullptr;
                 },
                 [&](const core::type::Vector* v) {
-                    EnsureResolvesTo("vec" + tint::ToString(v->Width()), nullptr);
+                    EnsureResolvesToBuiltin("vec" + tint::ToString(v->Width()));
                     return v->Type();
                 },
                 [&](const core::type::Matrix* m) {
-                    EnsureResolvesTo(
-                        "mat" + tint::ToString(m->Columns()) + "x" + tint::ToString(m->Rows()),
-                        nullptr);
+                    EnsureResolvesToBuiltin("mat" + tint::ToString(m->Columns()) + "x" +
+                                            tint::ToString(m->Rows()));
                     return m->Type();
                 },
                 [&](const core::type::Pointer* p) {
-                    EnsureResolvesTo(tint::ToString(p->Access()), nullptr);
-                    EnsureResolvesTo(tint::ToString(p->AddressSpace()), nullptr);
+                    EnsureResolvesToBuiltin(tint::ToString(p->Access()));
+                    EnsureResolvesToBuiltin(tint::ToString(p->AddressSpace()));
                     return p->StoreType();
                 },
                 [&](const core::type::Struct* s) {
                     auto name = s->Name().NameView();
                     if (IsBuiltinStruct(s)) {
-                        EnsureResolvesTo(name, nullptr);
-                    } else {
-                        EnsureResolvesTo(name, s);
+                        EnsureResolvesToBuiltin(name);
                     }
                     return nullptr;
                 });
         }
     }
 
-    /// Ensures that the identifier @p identifier resolves to the declaration @p thing
-    void EnsureResolvesTo(std::string_view identifier, const CastableBase* thing) {
+    /// Ensures that the identifier @p identifier resolves to a builtin symbol.
+    void EnsureResolvesToBuiltin(std::string_view identifier) {
         for (auto& scope : tint::Reverse(scopes)) {
             if (auto decl = scope.Get(identifier)) {
-                if (*decl == thing) {
-                    return;  // Resolved to the right thing.
-                }
-
                 // Operand is shadowed
                 scope.Remove(identifier);
                 Rename(*decl, identifier);
