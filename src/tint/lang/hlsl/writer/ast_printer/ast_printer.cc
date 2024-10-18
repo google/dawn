@@ -2993,8 +2993,14 @@ bool ASTPrinter::EmitTextureCall(StringStream& out,
         }
         if (auto* e = arg(usage)) {
             out << ", ";
+            if (usage == Usage::kBias) {
+                out << "clamp(";
+            }
             if (!EmitTextureOrStorageBufferCallArgExpression(out, e)) {
                 return false;
+            }
+            if (usage == Usage::kBias) {
+                out << ", -16.0f, 15.99f)";
             }
         }
     }

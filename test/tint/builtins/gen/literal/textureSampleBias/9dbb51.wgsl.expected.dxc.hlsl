@@ -3,7 +3,7 @@ Texture2DArray<float4> arg_0 : register(t0, space1);
 SamplerState arg_1 : register(s1, space1);
 
 float4 textureSampleBias_9dbb51() {
-  float4 res = arg_0.SampleBias(arg_1, float3((1.0f).xx, float(1)), 1.0f, int2((1).xx));
+  float4 res = arg_0.SampleBias(arg_1, float3((1.0f).xx, float(1)), clamp(1.0f, -16.0f, 15.99f), int2((1).xx));
   return res;
 }
 
