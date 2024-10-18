@@ -209,19 +209,6 @@ crbug.com/dawn/367440985 webgpu:api,validation,resource_usages,texture,in_render
 crbug.com/dawn/367440985 webgpu:api,validation,resource_usages,texture,in_render_misc:subresources,set_unused_bind_group:* [ Failure ]
 crbug.com/dawn/367440985 webgpu:shader,execution,expression,call,builtin,textureStore:out_of_bounds_array:* [ Failure ]
 
-# bitcast ai_to_f32 failures; precision issue?
-crbug.com/354152178 [ intel-0x4680 ] webgpu:shader,execution,expression,call,builtin,bitcast:ai_to_f32:* [ Failure ]
-crbug.com/354152178 [ intel-0x9bc5 ] webgpu:shader,execution,expression,call,builtin,bitcast:ai_to_f32:* [ Failure ]
-crbug.com/354152178 [ nvidia-0x2184 ] webgpu:shader,execution,expression,call,builtin,bitcast:ai_to_f32:* [ Failure ]
-crbug.com/354152178 [ android arm ] webgpu:shader,execution,expression,call,builtin,bitcast:ai_to_f32:inputSource="const";vectorize="_undef_";alias=false [ Failure ]
-crbug.com/354152178 [ android arm ] webgpu:shader,execution,expression,call,builtin,bitcast:ai_to_f32:inputSource="const";vectorize="_undef_";alias=true [ Failure ]
-crbug.com/354152178 [ android arm ] webgpu:shader,execution,expression,call,builtin,bitcast:ai_to_f32:inputSource="const";vectorize=2;alias=false [ Failure ]
-crbug.com/354152178 [ android arm ] webgpu:shader,execution,expression,call,builtin,bitcast:ai_to_f32:inputSource="const";vectorize=2;alias=true [ Failure ]
-crbug.com/354152178 [ android arm ] webgpu:shader,execution,expression,call,builtin,bitcast:ai_to_f32:inputSource="const";vectorize=3;alias=false [ Failure ]
-crbug.com/354152178 [ android arm ] webgpu:shader,execution,expression,call,builtin,bitcast:ai_to_f32:inputSource="const";vectorize=3;alias=true [ Failure ]
-crbug.com/354152178 [ android arm ] webgpu:shader,execution,expression,call,builtin,bitcast:ai_to_f32:inputSource="const";vectorize=4;alias=false [ Failure ]
-crbug.com/354152178 [ android arm ] webgpu:shader,execution,expression,call,builtin,bitcast:ai_to_f32:inputSource="const";vectorize=4;alias=true [ Failure ]
-
 ### This section represents tests which may require CTS changes.
 ### This section represents things that will require Compat validation
 ### These tests will never pass, but should be skipped in CTS once Compat
@@ -294,31 +281,6 @@ crbug.com/353552533 [ angle-vulkan ] webgpu:shader,execution,shader_io,fragment_
 crbug.com/353552533 [ angle-vulkan ] webgpu:shader,execution,shader_io,fragment_builtins:inputs,front_facing:nearFar=[0.25,0.75];sampleCount=4;frontFace="cw";interpolation={"type":"flat","sampling":"either"} [ Failure ]
 crbug.com/353552533 [ angle-vulkan ] webgpu:shader,execution,shader_io,fragment_builtins:inputs,position:nearFar=[0,1];sampleCount=4;interpolation={"type":"flat","sampling":"either"} [ Failure ]
 crbug.com/353552533 [ angle-vulkan ] webgpu:shader,execution,shader_io,fragment_builtins:inputs,position:nearFar=[0.25,0.75];sampleCount=4;interpolation={"type":"flat","sampling":"either"} [ Failure ]
-
-# failures with 1-bit LSB errors on shader expression tests
-# passes on ANGLE/SwiftShader and ANGLE/Vulkan, so likely a bug in ANGLE/GL
-crbug.com/dawn/2077 webgpu:shader,execution,expression,binary,f32_matrix_matrix_multiplication:matrix_matrix:inputSource="const";common_dim=4;x_rows=4;y_cols=2 [ Failure ]
-crbug.com/dawn/2077 webgpu:shader,execution,expression,binary,f32_matrix_matrix_multiplication:matrix_matrix:inputSource="const";common_dim=4;x_rows=4;y_cols=3 [ Failure ]
-crbug.com/dawn/2077 webgpu:shader,execution,expression,binary,f32_matrix_matrix_multiplication:matrix_matrix:inputSource="const";common_dim=4;x_rows=4;y_cols=4 [ Failure ]
-crbug.com/dawn/2077 webgpu:shader,execution,expression,binary,f32_matrix_vector_multiplication:matrix_vector:inputSource="const";cols=4;rows=4 [ Failure ]
-crbug.com/dawn/2077 webgpu:shader,execution,expression,call,builtin,fract:f32:inputSource="const";vectorize="_undef_" [ Failure ]
-crbug.com/dawn/2077 webgpu:shader,execution,expression,call,builtin,fract:f32:inputSource="const";vectorize=2 [ Failure ]
-crbug.com/dawn/2077 webgpu:shader,execution,expression,call,builtin,fract:f32:inputSource="const";vectorize=3 [ Failure ]
-crbug.com/dawn/2077 webgpu:shader,execution,expression,call,builtin,fract:f32:inputSource="const";vectorize=4 [ Failure ]
-crbug.com/dawn/2077 webgpu:shader,execution,expression,call,builtin,refract:f32_vec2:inputSource="const" [ Failure ]
-crbug.com/dawn/2077 webgpu:shader,execution,expression,call,builtin,unpack2x16float:unpack:inputSource="const" [ Failure ]
-crbug.com/dawn/2077 webgpu:shader,execution,expression,unary,af_assignment:f32:inputSource="const" [ Failure ]
-
-# bitcast i32_to_f32 inputSource="const" shader execution failures
-# passes on ANGLE/SwiftShader and ANGLE/Vulkan, so likely a bug in ANGLE/GL
-crbug.com/dawn/2371 webgpu:shader,execution,expression,call,builtin,bitcast:i32_to_f32:inputSource="const";vectorize="_undef_";alias=false [ Failure ]
-crbug.com/dawn/2371 webgpu:shader,execution,expression,call,builtin,bitcast:i32_to_f32:inputSource="const";vectorize="_undef_";alias=true [ Failure ]
-crbug.com/dawn/2371 webgpu:shader,execution,expression,call,builtin,bitcast:i32_to_f32:inputSource="const";vectorize=2;alias=false [ Failure ]
-crbug.com/dawn/2371 webgpu:shader,execution,expression,call,builtin,bitcast:i32_to_f32:inputSource="const";vectorize=2;alias=true [ Failure ]
-crbug.com/dawn/2371 webgpu:shader,execution,expression,call,builtin,bitcast:i32_to_f32:inputSource="const";vectorize=3;alias=false [ Failure ]
-crbug.com/dawn/2371 webgpu:shader,execution,expression,call,builtin,bitcast:i32_to_f32:inputSource="const";vectorize=3;alias=true [ Failure ]
-crbug.com/dawn/2371 webgpu:shader,execution,expression,call,builtin,bitcast:i32_to_f32:inputSource="const";vectorize=4;alias=false [ Failure ]
-crbug.com/dawn/2371 webgpu:shader,execution,expression,call,builtin,bitcast:i32_to_f32:inputSource="const";vectorize=4;alias=true [ Failure ]
 
 # read-only storage texture failures
 # passes on ANGLE/Vulkan, so likely a bug in ANGLE/SwiftShader and ANGLE/GL
@@ -2099,25 +2061,7 @@ crbug.com/dawn/374167797 [ android arm ] webgpu:shader,execution,expression,call
 # ##ROLLER_DISCARD_AND_REWRITE##
 ################################################################################
 crbug.com/dawn/0000 webgpu:api,validation,resource_usages,texture,in_render_misc:subresources,texture_view_usages:* [ Failure ]
-crbug.com/dawn/0000 webgpu:shader,execution,expression,call,builtin,abs:f32:inputSource="const";vectorize="_undef_" [ Failure ]
-crbug.com/dawn/0000 webgpu:shader,execution,expression,call,builtin,abs:f32:inputSource="const";vectorize=2 [ Failure ]
-crbug.com/dawn/0000 webgpu:shader,execution,expression,call,builtin,abs:f32:inputSource="const";vectorize=3 [ Failure ]
-crbug.com/dawn/0000 webgpu:shader,execution,expression,call,builtin,abs:f32:inputSource="const";vectorize=4 [ Failure ]
 crbug.com/dawn/0000 webgpu:shader,execution,expression,call,builtin,bitcast:af_to_f32:* [ Failure ]
-crbug.com/dawn/0000 webgpu:shader,execution,expression,call,builtin,bitcast:f32_to_f32:inputSource="const";vectorize="_undef_";alias=false [ Failure ]
-crbug.com/dawn/0000 webgpu:shader,execution,expression,call,builtin,bitcast:f32_to_f32:inputSource="const";vectorize="_undef_";alias=true [ Failure ]
-crbug.com/dawn/0000 webgpu:shader,execution,expression,call,builtin,bitcast:f32_to_f32:inputSource="const";vectorize=2;alias=false [ Failure ]
-crbug.com/dawn/0000 webgpu:shader,execution,expression,call,builtin,bitcast:f32_to_f32:inputSource="const";vectorize=2;alias=true [ Failure ]
-crbug.com/dawn/0000 webgpu:shader,execution,expression,call,builtin,bitcast:f32_to_f32:inputSource="const";vectorize=3;alias=false [ Failure ]
-crbug.com/dawn/0000 webgpu:shader,execution,expression,call,builtin,bitcast:f32_to_f32:inputSource="const";vectorize=3;alias=true [ Failure ]
-crbug.com/dawn/0000 webgpu:shader,execution,expression,call,builtin,bitcast:f32_to_f32:inputSource="const";vectorize=4;alias=false [ Failure ]
-crbug.com/dawn/0000 webgpu:shader,execution,expression,call,builtin,bitcast:f32_to_f32:inputSource="const";vectorize=4;alias=true [ Failure ]
-crbug.com/dawn/0000 webgpu:shader,execution,expression,call,builtin,determinant:f32:inputSource="const";dim=2 [ Failure ]
-crbug.com/dawn/0000 webgpu:shader,execution,expression,call,builtin,modf:f32_fract:inputSource="const" [ Failure ]
-crbug.com/dawn/0000 webgpu:shader,execution,expression,call,builtin,saturate:f32:inputSource="const";vectorize="_undef_" [ Failure ]
-crbug.com/dawn/0000 webgpu:shader,execution,expression,call,builtin,saturate:f32:inputSource="const";vectorize=2 [ Failure ]
-crbug.com/dawn/0000 webgpu:shader,execution,expression,call,builtin,saturate:f32:inputSource="const";vectorize=3 [ Failure ]
-crbug.com/dawn/0000 webgpu:shader,execution,expression,call,builtin,saturate:f32:inputSource="const";vectorize=4 [ Failure ]
 crbug.com/dawn/0000 webgpu:shader,execution,expression,call,builtin,textureLoad:external:stage="vertex" [ Failure ]
 crbug.com/dawn/0000 webgpu:shader,execution,expression,call,builtin,textureLoad:sampled_1d:* [ Failure ]
 crbug.com/dawn/0000 webgpu:shader,execution,expression,call,builtin,textureLoad:sampled_3d:* [ Failure ]
@@ -2151,14 +2095,6 @@ crbug.com/dawn/0000 webgpu:shader,execution,expression,call,builtin,textureSampl
 crbug.com/dawn/0000 webgpu:shader,execution,expression,call,builtin,textureSampleLevel:depth_3d_coords:stage="vertex";format="depth16unorm";viewDimension="cube" [ Failure ]
 crbug.com/dawn/0000 webgpu:shader,execution,expression,call,builtin,textureSampleLevel:depth_3d_coords:stage="vertex";format="depth32float";viewDimension="cube" [ Failure ]
 crbug.com/dawn/0000 webgpu:shader,execution,expression,call,builtin,textureSampleLevel:depth_array_2d_coords:* [ Failure ]
-crbug.com/dawn/0000 webgpu:shader,execution,expression,unary,f32_arithmetic:negation:inputSource="const";vectorize="_undef_" [ Failure ]
-crbug.com/dawn/0000 webgpu:shader,execution,expression,unary,f32_arithmetic:negation:inputSource="const";vectorize=2 [ Failure ]
-crbug.com/dawn/0000 webgpu:shader,execution,expression,unary,f32_arithmetic:negation:inputSource="const";vectorize=3 [ Failure ]
-crbug.com/dawn/0000 webgpu:shader,execution,expression,unary,f32_arithmetic:negation:inputSource="const";vectorize=4 [ Failure ]
-crbug.com/dawn/0000 webgpu:shader,execution,expression,unary,f32_conversion:f32:inputSource="const";vectorize="_undef_" [ Failure ]
-crbug.com/dawn/0000 webgpu:shader,execution,expression,unary,f32_conversion:f32:inputSource="const";vectorize=2 [ Failure ]
-crbug.com/dawn/0000 webgpu:shader,execution,expression,unary,f32_conversion:f32:inputSource="const";vectorize=3 [ Failure ]
-crbug.com/dawn/0000 webgpu:shader,execution,expression,unary,f32_conversion:f32:inputSource="const";vectorize=4 [ Failure ]
 crbug.com/dawn/0000 webgpu:web_platform,external_texture,video:importExternalTexture,cameraCapture:* [ Failure ]
 crbug.com/dawn/0000 webgpu:api,validation,capability_checks,features,texture_formats:canvas_configuration:* [ Failure ]
 crbug.com/dawn/0000 [ android arm ] webgpu:shader,execution,expression,call,builtin,textureSampleCompare:2d_coords:format="depth16unorm";minFilter="nearest";offset=true [ Failure ]
