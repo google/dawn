@@ -7,15 +7,15 @@ using namespace metal;
 kernel void tint_symbol() {
   int i = 0;
   {
-    int i = 0;
+    int i_1 = 0;
     while(true) {
       TINT_ISOLATE_UB(tint_volatile_false)
-      if ((i < 2)) {
+      if ((i_1 < 2)) {
       } else {
         break;
       }
       bool tint_continue = false;
-      switch(i) {
+      switch(i_1) {
         case 0:
         {
           tint_continue = true;
@@ -28,12 +28,12 @@ kernel void tint_symbol() {
       }
       if (tint_continue) {
         {
-          i = as_type<int>((as_type<uint>(i) + as_type<uint>(1)));
+          i_1 = as_type<int>((as_type<uint>(i_1) + as_type<uint>(1)));
         }
         continue;
       }
       bool tint_continue_1 = false;
-      switch(i) {
+      switch(i_1) {
         case 0:
         {
           tint_continue_1 = true;
@@ -46,12 +46,12 @@ kernel void tint_symbol() {
       }
       if (tint_continue_1) {
         {
-          i = as_type<int>((as_type<uint>(i) + as_type<uint>(1)));
+          i_1 = as_type<int>((as_type<uint>(i_1) + as_type<uint>(1)));
         }
         continue;
       }
       {
-        i = as_type<int>((as_type<uint>(i) + as_type<uint>(1)));
+        i_1 = as_type<int>((as_type<uint>(i_1) + as_type<uint>(1)));
       }
       continue;
     }

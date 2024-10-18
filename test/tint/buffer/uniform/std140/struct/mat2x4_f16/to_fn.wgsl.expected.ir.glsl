@@ -53,7 +53,7 @@ void c(f16mat2x4 m) {
 }
 void d(f16vec4 v) {
 }
-void e(float16_t f) {
+void e(float16_t f_1) {
 }
 S tint_convert_S(S_std140 tint_input) {
   return S(tint_input.before, f16mat2x4(tint_input.m_col0, tint_input.m_col1), tint_input.after);

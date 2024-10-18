@@ -8,7 +8,7 @@ void a(matrix<float16_t, 2, 3> m) {
 void b(vector<float16_t, 3> v) {
 }
 
-void c(float16_t f) {
+void c(float16_t f_1) {
 }
 
 vector<float16_t, 4> tint_bitcast_to_f16(uint4 src) {

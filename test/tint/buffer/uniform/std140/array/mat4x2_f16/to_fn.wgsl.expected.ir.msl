@@ -30,8 +30,8 @@ half c(half2 v) {
   return v[0u];
 }
 
-half d(half f) {
-  return f;
+half d(half f_1) {
+  return f_1;
 }
 
 kernel void f(const constant tint_array<half4x2, 4>* u [[buffer(0)]], device half* s [[buffer(1)]]) {

@@ -606,16 +606,16 @@ fn a(pre : i32, p_indices : array<u32, 2u>, post : i32) -> vec4<i32> {
 fn b() {
   let v = first();
   let v_1 = second();
-  for(var i : i32 = 0i; (i < 3i); a(10i, array<u32, 2u>(u32(v), u32(v_1)), 20i)) {
-    i = (i + 1i);
+  for(var i_1 : i32 = 0i; (i_1 < 3i); a(10i, array<u32, 2u>(u32(v), u32(v_1)), 20i)) {
+    i_1 = (i_1 + 1i);
   }
 }
 
 fn c() {
   let v_2 = first();
   let v_3 = second();
-  for(var i : i32 = 0i; (i < 3i); a(10i, array<u32, 2u>(u32(v_2), u32(v_3)), 20i)) {
-    i = (i + 1i);
+  for(var i_2 : i32 = 0i; (i_2 < 3i); a(10i, array<u32, 2u>(u32(v_2), u32(v_3)), 20i)) {
+    i_2 = (i_2 + 1i);
   }
 }
 

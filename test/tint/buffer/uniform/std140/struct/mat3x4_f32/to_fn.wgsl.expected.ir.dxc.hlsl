@@ -20,7 +20,7 @@ void c(float3x4 m) {
 void d(float4 v) {
 }
 
-void e(float f) {
+void e(float f_1) {
 }
 
 float3x4 v_1(uint start_byte_offset) {
@@ -38,7 +38,7 @@ S v_4(uint start_byte_offset) {
 
 typedef S ary_ret[4];
 ary_ret v_8(uint start_byte_offset) {
-  S a[4] = (S[4])0;
+  S a_2[4] = (S[4])0;
   {
     uint v_9 = 0u;
     v_9 = 0u;
@@ -48,14 +48,14 @@ ary_ret v_8(uint start_byte_offset) {
         break;
       }
       S v_11 = v_4((start_byte_offset + (v_10 * 128u)));
-      a[v_10] = v_11;
+      a_2[v_10] = v_11;
       {
         v_9 = (v_10 + 1u);
       }
       continue;
     }
   }
-  S v_12[4] = a;
+  S v_12[4] = a_2;
   return v_12;
 }
 

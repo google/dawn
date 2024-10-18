@@ -8,7 +8,7 @@ void a(float2x2 m) {
 void b(float2 v) {
 }
 
-void c(float f) {
+void c(float f_1) {
 }
 
 float2x2 v_1(uint start_byte_offset) {

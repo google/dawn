@@ -48,7 +48,7 @@ void c(float3x3 m) {
 void d(float3 v) {
 }
 
-void e(float f) {
+void e(float f_1) {
 }
 
 S tint_load_struct_packed_vec3(const constant S_packed_vec3* const from) {

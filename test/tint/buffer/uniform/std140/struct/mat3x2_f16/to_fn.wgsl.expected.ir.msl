@@ -37,7 +37,7 @@ void c(half3x2 m) {
 void d(half2 v) {
 }
 
-void e(half f) {
+void e(half f_1) {
 }
 
 kernel void f(const constant tint_array<S, 4>* u [[buffer(0)]]) {

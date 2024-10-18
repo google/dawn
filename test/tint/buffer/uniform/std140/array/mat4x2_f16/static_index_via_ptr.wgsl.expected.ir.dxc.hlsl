@@ -24,7 +24,7 @@ matrix<float16_t, 4, 2> v_2(uint start_byte_offset) {
 
 typedef matrix<float16_t, 4, 2> ary_ret[4];
 ary_ret v_10(uint start_byte_offset) {
-  matrix<float16_t, 4, 2> a[4] = (matrix<float16_t, 4, 2>[4])0;
+  matrix<float16_t, 4, 2> a_1[4] = (matrix<float16_t, 4, 2>[4])0;
   {
     uint v_11 = 0u;
     v_11 = 0u;
@@ -33,14 +33,14 @@ ary_ret v_10(uint start_byte_offset) {
       if ((v_12 >= 4u)) {
         break;
       }
-      a[v_12] = v_2((start_byte_offset + (v_12 * 16u)));
+      a_1[v_12] = v_2((start_byte_offset + (v_12 * 16u)));
       {
         v_11 = (v_12 + 1u);
       }
       continue;
     }
   }
-  matrix<float16_t, 4, 2> v_13[4] = a;
+  matrix<float16_t, 4, 2> v_13[4] = a_1;
   return v_13;
 }
 

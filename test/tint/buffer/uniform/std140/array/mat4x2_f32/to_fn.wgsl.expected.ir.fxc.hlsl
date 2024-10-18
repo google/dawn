@@ -15,8 +15,8 @@ float c(float2 v) {
   return v[0u];
 }
 
-float d(float f) {
-  return f;
+float d(float f_1) {
+  return f_1;
 }
 
 float4x2 v_1(uint start_byte_offset) {
@@ -32,7 +32,7 @@ float4x2 v_1(uint start_byte_offset) {
 
 typedef float4x2 ary_ret[4];
 ary_ret v_9(uint start_byte_offset) {
-  float4x2 a[4] = (float4x2[4])0;
+  float4x2 a_2[4] = (float4x2[4])0;
   {
     uint v_10 = 0u;
     v_10 = 0u;
@@ -41,14 +41,14 @@ ary_ret v_9(uint start_byte_offset) {
       if ((v_11 >= 4u)) {
         break;
       }
-      a[v_11] = v_1((start_byte_offset + (v_11 * 32u)));
+      a_2[v_11] = v_1((start_byte_offset + (v_11 * 32u)));
       {
         v_10 = (v_11 + 1u);
       }
       continue;
     }
   }
-  float4x2 v_12[4] = a;
+  float4x2 v_12[4] = a_2;
   return v_12;
 }
 

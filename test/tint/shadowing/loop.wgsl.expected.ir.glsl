@@ -13,8 +13,8 @@ void main() {
       int x = v.inner[v_1];
       {
         int v_2 = x;
-        int x = v.inner[v_2];
-        i = (i + x);
+        int x_1 = v.inner[v_2];
+        i = (i + x_1);
         if ((i > 10)) { break; }
       }
       continue;

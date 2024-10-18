@@ -28,8 +28,8 @@ kernel void foo(device tint_array<int, 10>* output [[buffer(0)]]) {
       TINT_ISOLATE_UB(tint_volatile_false)
       int x = (*tint_module_vars.output)[i];
       {
-        int x = (*tint_module_vars.output)[x];
-        i = as_type<int>((as_type<uint>(i) + as_type<uint>(x)));
+        int x_1 = (*tint_module_vars.output)[x];
+        i = as_type<int>((as_type<uint>(i) + as_type<uint>(x_1)));
         if ((i > 10)) { break; }
       }
       continue;

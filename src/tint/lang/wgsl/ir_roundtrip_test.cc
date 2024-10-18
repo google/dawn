@@ -3064,8 +3064,8 @@ struct S {
 }
 
 fn f() -> i32 {
-  var S : S = S();
-  return S.i;
+  var S_1 : S = S();
+  return S_1.i;
 }
 )");
 }
@@ -3076,8 +3076,8 @@ struct S {
   i : i32,
 }
 
-fn f(S : S) -> i32 {
-  return S.i;
+fn f(S_1 : S) -> i32 {
+  return S_1.i;
 }
 )");
 }
@@ -3088,8 +3088,8 @@ var<private> i : i32 = 1i;
 
 fn f() -> i32 {
   i = (i + 1i);
-  var i : i32 = (i + 1i);
-  return i;
+  var i_1 : i32 = (i + 1i);
+  return i_1;
 }
 )");
 }
@@ -3100,8 +3100,8 @@ var<private> i : i32 = 1i;
 
 fn f() -> i32 {
   i = (i + 1i);
-  let i = (i + 1i);
-  return i;
+  let i_1 = (i + 1i);
+  return i_1;
 }
 )");
 }
@@ -3112,8 +3112,8 @@ fn f() -> i32 {
   var i : i32;
   if (true) {
     i = (i + 1i);
-    var i : i32 = (i + 1i);
-    i = (i + 1i);
+    var i_1 : i32 = (i + 1i);
+    i_1 = (i_1 + 1i);
   }
   return i;
 }
@@ -3126,8 +3126,8 @@ fn f() -> i32 {
   var i : i32;
   if (true) {
     i = (i + 1i);
-    let i = (i + 1i);
-    return i;
+    let i_1 = (i + 1i);
+    return i_1;
   }
   return i;
 }
@@ -3139,8 +3139,8 @@ TEST_F(IRToProgramRoundtripTest, Shadow_FnVar_With_WhileVar) {
 fn f() -> i32 {
   var i : i32;
   while((i < 4i)) {
-    var i : i32 = (i + 1i);
-    return i;
+    var i_1 : i32 = (i + 1i);
+    return i_1;
   }
   return i;
 }
@@ -3152,8 +3152,8 @@ TEST_F(IRToProgramRoundtripTest, Shadow_FnVar_With_WhileLet) {
 fn f() -> i32 {
   var i : i32;
   while((i < 4i)) {
-    let i = (i + 1i);
-    return i;
+    let i_1 = (i + 1i);
+    return i_1;
   }
   return i;
 }
@@ -3164,8 +3164,8 @@ TEST_F(IRToProgramRoundtripTest, Shadow_FnVar_With_ForInitVar) {
     RUN_TEST(R"(
 fn f() -> i32 {
   var i : i32;
-  for(var i : f32 = 0.0f; (i < 4.0f); ) {
-    let j = i;
+  for(var i_1 : f32 = 0.0f; (i_1 < 4.0f); ) {
+    let j = i_1;
   }
   return i;
 }
@@ -3176,8 +3176,8 @@ TEST_F(IRToProgramRoundtripTest, Shadow_FnVar_With_ForInitLet) {
     RUN_TEST(R"(
 fn f() -> i32 {
   var i : i32;
-  for(let i = 0.0f; (i < 4.0f); ) {
-    let j = i;
+  for(let i_1 = 0.0f; (i_1 < 4.0f); ) {
+    let j = i_1;
   }
   return i;
 }
@@ -3189,8 +3189,8 @@ TEST_F(IRToProgramRoundtripTest, Shadow_FnVar_With_ForBodyVar) {
 fn f() -> i32 {
   var i : i32;
   for(var x : i32 = 0i; (i < 4i); ) {
-    var i : i32 = (i + 1i);
-    return i;
+    var i_1 : i32 = (i + 1i);
+    return i_1;
   }
   return i;
 }
@@ -3202,8 +3202,8 @@ TEST_F(IRToProgramRoundtripTest, Shadow_FnVar_With_ForBodyLet) {
 fn f() -> i32 {
   var i : i32;
   for(var x : i32 = 0i; (i < 4i); ) {
-    let i = (i + 1i);
-    return i;
+    let i_1 = (i + 1i);
+    return i_1;
   }
   return i;
 }
@@ -3218,8 +3218,8 @@ fn f() -> i32 {
     if ((i == 2i)) {
       break;
     }
-    var i : i32 = (i + 1i);
-    if ((i == 3i)) {
+    var i_1 : i32 = (i + 1i);
+    if ((i_1 == 3i)) {
       break;
     }
   }
@@ -3236,8 +3236,8 @@ fn f() -> i32 {
     if ((i == 2i)) {
       break;
     }
-    let i = (i + 1i);
-    if ((i == 3i)) {
+    let i_1 = (i + 1i);
+    if ((i_1 == 3i)) {
       break;
     }
   }
@@ -3256,8 +3256,8 @@ fn f() -> i32 {
     }
 
     continuing {
-      var i : i32 = (i + 1i);
-      break if (i > 2i);
+      var i_1 : i32 = (i + 1i);
+      break if (i_1 > 2i);
     }
   }
   return i;
@@ -3275,8 +3275,8 @@ fn f() -> i32 {
     }
 
     continuing {
-      let i = (i + 1i);
-      break if (i > 2i);
+      let i_1 = (i + 1i);
+      break if (i_1 > 2i);
     }
   }
   return i;
@@ -3293,8 +3293,8 @@ fn f() -> i32 {
       return i;
     }
     case 1i: {
-      var i : i32 = (i + 1i);
-      return i;
+      var i_1 : i32 = (i + 1i);
+      return i_1;
     }
     default: {
       return i;
@@ -3313,8 +3313,8 @@ fn f() -> i32 {
       return i;
     }
     case 1i: {
-      let i = (i + 1i);
-      return i;
+      let i_1 = (i + 1i);
+      return i_1;
     }
     default: {
       return i;

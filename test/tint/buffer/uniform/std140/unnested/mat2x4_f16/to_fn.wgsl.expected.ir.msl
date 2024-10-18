@@ -11,7 +11,7 @@ void a(half2x4 m) {
 void b(half4 v) {
 }
 
-void c(half f) {
+void c(half f_1) {
 }
 
 kernel void f(const constant half2x4* u [[buffer(0)]]) {

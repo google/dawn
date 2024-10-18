@@ -39,7 +39,7 @@ namespace tint::core::ir::transform {
 
 /// RenameConflicts is a transform that renames declarations which prevent identifiers from
 /// resolving to the correct declaration, and those with identical identifiers declared in the same
-/// scope.
+/// scope or a parent scope.
 /// @param module the module to transform
 /// @returns success or failure
 Result<SuccessType> RenameConflicts(core::ir::Module& module);

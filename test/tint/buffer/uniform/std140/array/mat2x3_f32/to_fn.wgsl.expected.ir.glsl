@@ -25,8 +25,8 @@ float b(mat2x3 m) {
 float c(vec3 v) {
   return v[0u];
 }
-float d(float f) {
-  return f;
+float d(float f_1) {
+  return f_1;
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {

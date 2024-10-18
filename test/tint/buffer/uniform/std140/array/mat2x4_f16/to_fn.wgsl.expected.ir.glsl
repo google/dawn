@@ -24,8 +24,8 @@ float16_t b(f16mat2x4 m) {
 float16_t c(f16vec4 v) {
   return v[0u];
 }
-float16_t d(float16_t f) {
-  return f;
+float16_t d(float16_t f_1) {
+  return f_1;
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {

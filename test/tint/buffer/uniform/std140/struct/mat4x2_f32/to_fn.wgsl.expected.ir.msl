@@ -38,7 +38,7 @@ void c(float4x2 m) {
 void d(float2 v) {
 }
 
-void e(float f) {
+void e(float f_1) {
 }
 
 kernel void f(const constant tint_array<S, 4>* u [[buffer(0)]]) {

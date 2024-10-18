@@ -51,7 +51,7 @@ void c(mat3x2 m) {
 }
 void d(vec2 v) {
 }
-void e(float f) {
+void e(float f_1) {
 }
 S tint_convert_S(S_std140 tint_input) {
   return S(tint_input.before, mat3x2(tint_input.m_col0, tint_input.m_col1, tint_input.m_col2), tint_input.after);

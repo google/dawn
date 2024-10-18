@@ -21,20 +21,20 @@ void main() {
               } else {
                 break;
               }
-              bool tint_continue = false;
+              bool tint_continue_1 = false;
               switch(j) {
                 case 0:
                 {
-                  tint_continue = true;
+                  tint_continue_1 = true;
                   break;
                 }
                 case 1:
                 {
-                  bool tint_continue_1 = false;
+                  bool tint_continue_2 = false;
                   switch(k) {
                     case 0:
                     {
-                      tint_continue_1 = true;
+                      tint_continue_2 = true;
                       break;
                     }
                     default:
@@ -42,8 +42,8 @@ void main() {
                       break;
                     }
                   }
-                  if (tint_continue_1) {
-                    tint_continue = true;
+                  if (tint_continue_2) {
+                    tint_continue_1 = true;
                     break;
                   }
                   break;
@@ -53,7 +53,7 @@ void main() {
                   break;
                 }
               }
-              if (tint_continue) {
+              if (tint_continue_1) {
                 {
                   j = (j + 2);
                 }

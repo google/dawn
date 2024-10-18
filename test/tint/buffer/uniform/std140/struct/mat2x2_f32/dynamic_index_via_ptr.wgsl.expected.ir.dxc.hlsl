@@ -30,7 +30,7 @@ Inner v_4(uint start_byte_offset) {
 
 typedef Inner ary_ret[4];
 ary_ret v_6(uint start_byte_offset) {
-  Inner a[4] = (Inner[4])0;
+  Inner a_2[4] = (Inner[4])0;
   {
     uint v_7 = 0u;
     v_7 = 0u;
@@ -40,14 +40,14 @@ ary_ret v_6(uint start_byte_offset) {
         break;
       }
       Inner v_9 = v_4((start_byte_offset + (v_8 * 64u)));
-      a[v_8] = v_9;
+      a_2[v_8] = v_9;
       {
         v_7 = (v_8 + 1u);
       }
       continue;
     }
   }
-  Inner v_10[4] = a;
+  Inner v_10[4] = a_2;
   return v_10;
 }
 
@@ -59,7 +59,7 @@ Outer v_11(uint start_byte_offset) {
 
 typedef Outer ary_ret_1[4];
 ary_ret_1 v_14(uint start_byte_offset) {
-  Outer a[4] = (Outer[4])0;
+  Outer a_1[4] = (Outer[4])0;
   {
     uint v_15 = 0u;
     v_15 = 0u;
@@ -69,14 +69,14 @@ ary_ret_1 v_14(uint start_byte_offset) {
         break;
       }
       Outer v_17 = v_11((start_byte_offset + (v_16 * 256u)));
-      a[v_16] = v_17;
+      a_1[v_16] = v_17;
       {
         v_15 = (v_16 + 1u);
       }
       continue;
     }
   }
-  Outer v_18[4] = a;
+  Outer v_18[4] = a_1;
   return v_18;
 }
 

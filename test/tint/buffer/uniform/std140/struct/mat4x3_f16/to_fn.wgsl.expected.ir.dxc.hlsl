@@ -20,7 +20,7 @@ void c(matrix<float16_t, 4, 3> m) {
 void d(vector<float16_t, 3> v) {
 }
 
-void e(float16_t f) {
+void e(float16_t f_1) {
 }
 
 vector<float16_t, 4> tint_bitcast_to_f16(uint4 src) {
@@ -51,7 +51,7 @@ S v_8(uint start_byte_offset) {
 
 typedef S ary_ret[4];
 ary_ret v_12(uint start_byte_offset) {
-  S a[4] = (S[4])0;
+  S a_2[4] = (S[4])0;
   {
     uint v_13 = 0u;
     v_13 = 0u;
@@ -61,14 +61,14 @@ ary_ret v_12(uint start_byte_offset) {
         break;
       }
       S v_15 = v_8((start_byte_offset + (v_14 * 128u)));
-      a[v_14] = v_15;
+      a_2[v_14] = v_15;
       {
         v_13 = (v_14 + 1u);
       }
       continue;
     }
   }
-  S v_16[4] = a;
+  S v_16[4] = a_2;
   return v_16;
 }
 

@@ -28,7 +28,7 @@ void a(half4x3 m) {
 void b(half3 v) {
 }
 
-void c(half f) {
+void c(half f_1) {
 }
 
 kernel void f(const constant tint_array<tint_packed_vec3_f16_array_element, 4>* u [[buffer(0)]]) {

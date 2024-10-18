@@ -30,8 +30,8 @@ float c(float4 v) {
   return v[0u];
 }
 
-float d(float f) {
-  return f;
+float d(float f_1) {
+  return f_1;
 }
 
 kernel void f(const constant tint_array<float4x4, 4>* u [[buffer(0)]], device float* s [[buffer(1)]]) {

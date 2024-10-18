@@ -35,8 +35,8 @@ float c(float3 v) {
   return v[0u];
 }
 
-float d(float f) {
-  return f;
+float d(float f_1) {
+  return f_1;
 }
 
 tint_array<float2x3, 4> tint_load_array_packed_vec3(const constant tint_array<tint_array<tint_packed_vec3_f32_array_element, 2>, 4>* const from) {
