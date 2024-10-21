@@ -1475,7 +1475,7 @@ TEST_F(IR_ZeroInitWorkgroupMemoryTest, ExistingLocalInvocationIndex) {
     auto* var = MakeVar("wgvar", ty.bool_());
 
     auto* func = MakeEntryPoint("main", 1, 1, 1);
-    auto* global_id = b.FunctionParam("global_id", ty.vec4<u32>());
+    auto* global_id = b.FunctionParam("global_id", ty.vec3<u32>());
     global_id->SetBuiltin(BuiltinValue::kGlobalInvocationId);
     auto* index = b.FunctionParam("index", ty.u32());
     index->SetBuiltin(BuiltinValue::kLocalInvocationIndex);
@@ -1490,7 +1490,7 @@ $B1: {  # root
   %wgvar:ptr<workgroup, bool, read_write> = var
 }
 
-%main = @compute @workgroup_size(1, 1, 1) func(%global_id:vec4<u32> [@global_invocation_id], %index:u32 [@local_invocation_index]):void {
+%main = @compute @workgroup_size(1, 1, 1) func(%global_id:vec3<u32> [@global_invocation_id], %index:u32 [@local_invocation_index]):void {
   $B2: {
     %5:bool = load %wgvar
     ret
@@ -1504,7 +1504,7 @@ $B1: {  # root
   %wgvar:ptr<workgroup, bool, read_write> = var
 }
 
-%main = @compute @workgroup_size(1, 1, 1) func(%global_id:vec4<u32> [@global_invocation_id], %index:u32 [@local_invocation_index]):void {
+%main = @compute @workgroup_size(1, 1, 1) func(%global_id:vec3<u32> [@global_invocation_id], %index:u32 [@local_invocation_index]):void {
   $B2: {
     %5:bool = eq %index, 0u
     if %5 [t: $B3] {  # if_1

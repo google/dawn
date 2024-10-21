@@ -64,7 +64,7 @@ struct HlslWriterPixelLocalTest : core::ir::transform::TransformTest {
         if (multiple_builtins) {
             attrs.builtin = core::BuiltinValue::kFrontFacing;
             members.Emplace(mod.symbols.New("front_facing"), ty.bool_(), attrs);
-            attrs.builtin = core::BuiltinValue::kFragDepth;
+            attrs.builtin = core::BuiltinValue::kSampleIndex;
             members.Emplace(mod.symbols.New("sample_index"), ty.u32(), attrs);
         }
         auto* param_struct_ty = ty.Struct(mod.symbols.New("params"), members);
@@ -445,7 +445,7 @@ PixelLocal = struct @align(4) {
 params = struct @align(16) {
   pos:vec4<f32> @offset(0), @builtin(position)
   front_facing:bool @offset(16), @builtin(front_facing)
-  sample_index:u32 @offset(20), @builtin(frag_depth)
+  sample_index:u32 @offset(20), @builtin(sample_index)
 }
 
 $B1: {  # root
@@ -474,7 +474,7 @@ PixelLocal = struct @align(4) {
 params = struct @align(16) {
   pos:vec4<f32> @offset(0), @builtin(position)
   front_facing:bool @offset(16), @builtin(front_facing)
-  sample_index:u32 @offset(20), @builtin(frag_depth)
+  sample_index:u32 @offset(20), @builtin(sample_index)
 }
 
 $B1: {  # root

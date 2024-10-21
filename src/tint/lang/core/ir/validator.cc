@@ -83,6 +83,7 @@
 #include "src/tint/lang/core/type/pointer.h"
 #include "src/tint/lang/core/type/reference.h"
 #include "src/tint/lang/core/type/type.h"
+#include "src/tint/lang/core/type/u32.h"
 #include "src/tint/lang/core/type/u8.h"
 #include "src/tint/lang/core/type/vector.h"
 #include "src/tint/lang/core/type/void.h"
@@ -159,6 +160,23 @@ bool InvariantOnlyIfAlsoPosition(const tint::core::IOAttributes& attr) {
 bool IsValidFunctionParamType(const core::type::Type* ty) {
     return ty->IsConstructible() || ty->Is<type::Pointer>() || ty->Is<type::Texture>() ||
            ty->Is<type::Sampler>();
+}
+
+/// @returns true if @p ty is a non-struct and decorated with @builtin(position), or if it is a
+/// struct and one of its members is decorated, otherwise false.
+/// @param attr attributes attached to data
+/// @param ty type of the data being tested
+bool IsPositionPresent(const IOAttributes& attr, const core::type::Type* ty) {
+    if (auto* ty_struct = ty->As<core::type::Struct>()) {
+        for (const auto* mem : ty_struct->Members()) {
+            if (mem->Attributes().builtin == BuiltinValue::kPosition) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    return attr.builtin == BuiltinValue::kPosition;
 }
 
 /// Utility for running checks on attributes.
@@ -239,9 +257,21 @@ void CheckIOAttributesAndType(const MSG_ANCHOR* msg_anchor,
     }
 }
 
-/// Helper for calling CheckIOAttributesAndType on a function return
-/// @param func function whose return is to be tested
-/// See @ref CheckIOAttributesAndType for more details
+/// Helper for calling IOAttributesAndType on a function param
+/// @param param function param to be tested
+/// See @ref IOAttributesAndType for more details
+template <typename IS_NOT_STRUCT, typename IS_STRUCT>
+void CheckFunctionParamAttributesAndType(const FunctionParam* param,
+                                         IS_NOT_STRUCT&& is_not_struct_impl,
+                                         IS_STRUCT&& is_struct_impl) {
+    CheckIOAttributesAndType(param, param->Attributes(), param->Type(),
+                             std::forward<IS_NOT_STRUCT>(is_not_struct_impl),
+                             std::forward<IS_STRUCT>(is_struct_impl));
+}
+
+/// Helper for calling IOAttributesAndType on a function return
+/// @param func function's return to be tested
+/// See @ref IOAttributesAndType for more details
 template <typename IS_NOT_STRUCT, typename IS_STRUCT>
 void CheckFunctionReturnAttributesAndType(const Function* func,
                                           IS_NOT_STRUCT&& is_not_struct_impl,
@@ -249,6 +279,321 @@ void CheckFunctionReturnAttributesAndType(const Function* func,
     CheckIOAttributesAndType(func, func->ReturnAttributes(), func->ReturnType(),
                              std::forward<IS_NOT_STRUCT>(is_not_struct_impl),
                              std::forward<IS_STRUCT>(is_struct_impl));
+}
+
+/// A BuiltinChecker is the interface used to check that a usage of a builtin attribute meets the
+/// basic spec rules, i.e. correct shader stage, data type, and IO direction.
+/// It does not test more sophisticated rules like location and builtins being mutually exclusive or
+/// the correct capabilities are enabled.
+struct BuiltinChecker {
+    /// User friendly name to print in logging messages
+    const char* name;
+
+    /// What type of entry point is this builtin legal for
+    EnumSet<Function::PipelineStage> stages;
+
+    enum IODirection : uint8_t { kInput, kOutput };
+    /// Is this expected to be a param going into the entry point or a result coming out
+    IODirection direction;
+
+    /// Implements logic for checking if the given type is valid or not
+    using TypeCheckFn = bool(const core::type::Type* type);
+
+    /// @see #TypeCheckFn
+    TypeCheckFn* const type_check;
+
+    /// Message that should logged if the type check fails
+    const char* type_error;
+};
+
+std::string_view ToString(BuiltinChecker::IODirection value) {
+    switch (value) {
+        case BuiltinChecker::IODirection::kInput:
+            return "input";
+        case BuiltinChecker::IODirection::kOutput:
+            return "output";
+    }
+    TINT_ICE() << "Unknown enum passed to ToString(BuiltinChecker::IODirection)";
+}
+
+constexpr BuiltinChecker kPointSizeChecker{
+    /* name */ "__point_size",
+    /* stages */ EnumSet<Function::PipelineStage>(Function::PipelineStage::kVertex),
+    /* direction */ BuiltinChecker::IODirection::kOutput,
+    /* type_check */ [](const core::type::Type* ty) -> bool { return ty->Is<core::type::F32>(); },
+    /* type_error */ "__point_size must be a f32",
+};
+
+constexpr BuiltinChecker kClipDistancesChecker{
+    /* name */ "clip_distances",
+    /* stages */ EnumSet<Function::PipelineStage>(Function::PipelineStage::kVertex),
+    /* direction */ BuiltinChecker::IODirection::kOutput,
+    /* type_check */
+    [](const core::type::Type* ty) -> bool {
+        auto elems = ty->Elements();
+        return elems.type && elems.type->Is<core::type::F32>() && elems.count <= 8;
+    },
+    /* type_error */ "clip_distances must be an array<f32, N>, where N <= 8",
+};
+
+constexpr BuiltinChecker kFragDepthChecker{
+    /* name */ "frag_depth",
+    /* stages */ EnumSet<Function::PipelineStage>(Function::PipelineStage::kFragment),
+    /* direction */ BuiltinChecker::IODirection::kOutput,
+    /* type_check */ [](const core::type::Type* ty) -> bool { return ty->Is<core::type::F32>(); },
+    /* type_error */ "frag_depth must be a f32",
+};
+
+constexpr BuiltinChecker kFrontFacingChecker{
+    /* name */ "front_facing",
+    /* stages */ EnumSet<Function::PipelineStage>(Function::PipelineStage::kFragment),
+    /* direction */ BuiltinChecker::IODirection::kInput,
+    /* type_check */ [](const core::type::Type* ty) -> bool { return ty->Is<core::type::Bool>(); },
+    /* type_error */ "front_facing must be a bool",
+};
+
+constexpr BuiltinChecker kGlobalInvocationIdChecker{
+    /* name */ "global_invocation_id",
+    /* stages */ EnumSet<Function::PipelineStage>(Function::PipelineStage::kCompute),
+    /* direction */ BuiltinChecker::IODirection::kInput,
+    /* type_check */
+    [](const core::type::Type* ty) -> bool {
+        return ty->IsUnsignedIntegerVector() && ty->Elements().count == 3;
+    },
+    /* type_error */ "global_invocation_id must be an vec3<u32>",
+};
+
+constexpr BuiltinChecker kInstanceIndexChecker{
+    /* name */ "instance_index",
+    /* stages */ EnumSet<Function::PipelineStage>(Function::PipelineStage::kVertex),
+    /* direction */ BuiltinChecker::IODirection::kInput,
+    /* type_check */ [](const core::type::Type* ty) -> bool { return ty->Is<core::type::U32>(); },
+    /* type_error */ "instance_index must be an u32",
+};
+
+constexpr BuiltinChecker kLocalInvocationIdChecker{
+    /* name */ "local_invocation_id",
+    /* stages */ EnumSet<Function::PipelineStage>(Function::PipelineStage::kCompute),
+    /* direction */ BuiltinChecker::IODirection::kInput,
+    /* type_check */
+    [](const core::type::Type* ty) -> bool {
+        return ty->IsUnsignedIntegerVector() && ty->Elements().count == 3;
+    },
+    /* type_error */ "local_invocation_id must be an vec3<u32>",
+};
+
+constexpr BuiltinChecker kLocalInvocationIndexChecker{
+    /* name */ "local_invocation_index",
+    /* stages */ EnumSet<Function::PipelineStage>(Function::PipelineStage::kCompute),
+    /* direction */ BuiltinChecker::IODirection::kInput,
+    /* type_check */ [](const core::type::Type* ty) -> bool { return ty->Is<core::type::U32>(); },
+    /* type_error */ "local_invocation_index must be an u32",
+};
+
+constexpr BuiltinChecker kNumWorkgroupsChecker{
+    /* name */ "num_workgroups",
+    /* stages */ EnumSet<Function::PipelineStage>(Function::PipelineStage::kCompute),
+    /* direction */ BuiltinChecker::IODirection::kInput,
+    /* type_check */
+    [](const core::type::Type* ty) -> bool {
+        return ty->IsUnsignedIntegerVector() && ty->Elements().count == 3;
+    },
+    /* type_error */ "num_workgroups must be an vec3<u32>",
+};
+
+constexpr BuiltinChecker kSampleIndexChecker{
+    /* name */ "sample_index",
+    /* stages */ EnumSet<Function::PipelineStage>(Function::PipelineStage::kFragment),
+    /* direction */ BuiltinChecker::IODirection::kInput,
+    /* type_check */ [](const core::type::Type* ty) -> bool { return ty->Is<core::type::U32>(); },
+    /* type_error */ "sample_index must be an u32",
+};
+
+constexpr BuiltinChecker kSubgroupInvocationIdChecker{
+    /* name */ "subgroup_invocation_id",
+    /* stages */
+    EnumSet<Function::PipelineStage>(Function::PipelineStage::kFragment,
+                                     Function::PipelineStage::kCompute),
+    /* direction */ BuiltinChecker::IODirection::kInput,
+    /* type_check */ [](const core::type::Type* ty) -> bool { return ty->Is<core::type::U32>(); },
+    /* type_error */ "subgroup_invocation_id must be an u32",
+};
+
+constexpr BuiltinChecker kSubgroupSizeChecker{
+    /* name */ "subgroup_size",
+    /* stages */
+    EnumSet<Function::PipelineStage>(Function::PipelineStage::kFragment,
+                                     Function::PipelineStage::kCompute),
+    /* direction */ BuiltinChecker::IODirection::kInput,
+    /* type_check */ [](const core::type::Type* ty) -> bool { return ty->Is<core::type::U32>(); },
+    /* type_error */ "subgroup_size must be an u32",
+};
+
+constexpr BuiltinChecker kVertexIndexChecker{
+    /* name */ "vertex_index",
+    /* stages */ EnumSet<Function::PipelineStage>(Function::PipelineStage::kVertex),
+    /* direction */ BuiltinChecker::IODirection::kInput,
+    /* type_check */ [](const core::type::Type* ty) -> bool { return ty->Is<core::type::U32>(); },
+    /* type_error */ "vertex_index must be an u32",
+};
+
+constexpr BuiltinChecker kWorkgroupIdChecker{
+    /* name */ "workgroup_id",
+    /* stages */ EnumSet<Function::PipelineStage>(Function::PipelineStage::kCompute),
+    /* direction */ BuiltinChecker::IODirection::kInput,
+    /* type_check */
+    [](const core::type::Type* ty) -> bool {
+        return ty->IsUnsignedIntegerVector() && ty->Elements().count == 3;
+    },
+    /* type_error */ "workgroup_id must be an vec3<u32>",
+};
+
+/// @returns an appropriate BuiltInCheck for @p builtin, ICEs when one isn't defined
+const BuiltinChecker& BuiltinCheckerFor(BuiltinValue builtin) {
+    switch (builtin) {
+        case BuiltinValue::kPointSize:
+            return kPointSizeChecker;
+        case BuiltinValue::kClipDistances:
+            return kClipDistancesChecker;
+        case BuiltinValue::kFragDepth:
+            return kFragDepthChecker;
+        case BuiltinValue::kFrontFacing:
+            return kFrontFacingChecker;
+        case BuiltinValue::kGlobalInvocationId:
+            return kGlobalInvocationIdChecker;
+        case BuiltinValue::kInstanceIndex:
+            return kInstanceIndexChecker;
+        case BuiltinValue::kLocalInvocationId:
+            return kLocalInvocationIdChecker;
+        case BuiltinValue::kLocalInvocationIndex:
+            return kLocalInvocationIndexChecker;
+        case BuiltinValue::kNumWorkgroups:
+            return kNumWorkgroupsChecker;
+        case BuiltinValue::kSampleIndex:
+            return kSampleIndexChecker;
+        case BuiltinValue::kSubgroupInvocationId:
+            return kSubgroupInvocationIdChecker;
+        case BuiltinValue::kSubgroupSize:
+            return kSubgroupSizeChecker;
+        case BuiltinValue::kVertexIndex:
+            return kVertexIndexChecker;
+        case BuiltinValue::kWorkgroupId:
+            return kWorkgroupIdChecker;
+        case BuiltinValue::kPosition:
+            TINT_ICE() << "BuiltinValue::kPosition requires special handling, so does not have a "
+                          "checker defined";
+        case BuiltinValue::kSampleMask:
+            TINT_ICE() << "BuiltinValue::kSampleMask requires special handling, so does not have a "
+                          "checker defined";
+        default:
+            TINT_ICE() << builtin << " is does not have a checker defined for it";
+    }
+}
+
+/// Validates the basic spec rules for @builtin(position) usage
+/// @param stage the shader stage the builtin is being used
+/// @param is_input the IO direction of usage, true if input, false if output
+/// @param ty the data type being decorated by the builtin
+/// @returns Success if a valid usage, or reason for invalidity in Failure
+Result<SuccessType, std::string> ValidatePositionBuiltIn(Function::PipelineStage stage,
+                                                         bool is_input,
+                                                         const core::type::Type* ty) {
+    if (stage != Function::PipelineStage::kVertex && stage != Function::PipelineStage::kFragment) {
+        return std::string("position must be used in a fragment or vertex shader entry point");
+    }
+
+    if (stage == Function::PipelineStage::kVertex && is_input) {
+        return std::string("position must be an output for a vertex entry point");
+    }
+
+    if (stage == Function::PipelineStage::kFragment && !is_input) {
+        return std::string("position must be an input for a fragment entry point");
+    }
+
+    if (!ty->IsFloatVector() || ty->Elements().count != 4 ||
+        !ty->Element(0)->Is<core::type::F32>()) {
+        return std::string("position must be an vec4<f32>");
+    }
+
+    return Success;
+}
+
+/// Validates the basic spec rules for @builtin(sample_mask) usage
+/// @param stage the shader stage the builtin is being used
+/// @param ty the data type being decorated by the builtin
+/// @returns Success if a valid usage, or reason for invalidity in Failure
+Result<SuccessType, std::string> ValidateSampleMaskBuiltIn(Function::PipelineStage stage,
+                                                           const core::type::Type* ty) {
+    if (stage != Function::PipelineStage::kFragment) {
+        return std::string("sample_mask must be used in a fragment entry point");
+    }
+
+    if (!ty->Is<core::type::U32>()) {
+        return std::string("sample_mask must be an u32");
+    }
+
+    return Success;
+}
+
+/// Validates the basic spec rules for builtin usage
+/// @param builtin the builtin to test
+/// @param stage the shader stage the builtin is being used
+/// @param is_input the IO direction of usage, true if input, false if output
+/// @param ty the data type being decorated by the builtin
+/// @returns Success if a valid usage, or reason for invalidity in Failure
+Result<SuccessType, std::string> ValidateBuiltIn(BuiltinValue builtin,
+                                                 Function::PipelineStage stage,
+                                                 bool is_input,
+                                                 const core::type::Type* ty) {
+    // This is not an entry point function, either it is dead code and thus never called, or any
+    // issues will be detected when validating the calling entry point.
+    if (stage == Function::PipelineStage::kUndefined) {
+        return Success;
+    }
+
+    // Some builtins have multiple contexts that they are valid in, so have special handling
+    // instead of making the checker/lookup table more complex.
+    switch (builtin) {
+        case BuiltinValue::kPosition:
+            return ValidatePositionBuiltIn(stage, is_input, ty);
+        case BuiltinValue::kSampleMask:
+            return ValidateSampleMaskBuiltIn(stage, ty);
+        default: {
+        }
+    }
+
+    const auto& checker = BuiltinCheckerFor(builtin);
+    std::stringstream msg;
+    if (!checker.stages.Contains(stage)) {
+        auto stages_size = checker.stages.Size();
+        switch (stages_size) {
+            case 1:
+                msg << checker.name << " must be used in a " << ToString(*checker.stages.begin())
+                    << " shader entry point";
+                break;
+            case 2:
+                msg << checker.name << " must be used in a " << ToString(*checker.stages.begin())
+                    << " or " << ToString(*(++checker.stages.begin())) << " shader entry point";
+                break;
+            default:
+                TINT_ICE() << "Unexpected number of stages set, " << stages_size;
+        }
+        return msg.str();
+    }
+
+    auto io_direction =
+        is_input ? BuiltinChecker::IODirection::kInput : BuiltinChecker::IODirection::kOutput;
+    if (io_direction != checker.direction) {
+        msg << checker.name << " must be an " << ToString(checker.direction)
+            << " of a shader entry point";
+        return msg.str();
+    }
+
+    if (!checker.type_check(ty)) {
+        return std::string(checker.type_error);
+    }
+
+    return Success;
 }
 
 /// The core IR validator.
@@ -498,6 +843,34 @@ class Validator {
         };
     }
 
+    /// @returns a function that validates builtins on function params
+    auto CheckBuiltinFunctionParam(const std::string& err) {
+        return [this, err](const FunctionParam* param, const IOAttributes& attr,
+                           const type::Type* ty) {
+            if (!attr.builtin.has_value()) {
+                return;
+            }
+            auto result =
+                ValidateBuiltIn(attr.builtin.value(), param->Function()->Stage(), true, ty);
+            if (result != Success) {
+                AddError(param) << err << result.Failure();
+            }
+        };
+    }
+
+    /// @returns a function that validates builtins on function returns
+    auto CheckBuiltinFunctionReturn(const std::string& err) {
+        return [this, err](const Function* func, const IOAttributes& attr, const type::Type* ty) {
+            if (!attr.builtin.has_value()) {
+                return;
+            }
+            auto result = ValidateBuiltIn(attr.builtin.value(), func->Stage(), false, ty);
+            if (result != Success) {
+                AddError(func) << err << result.Failure();
+            }
+        };
+    }
+
     /// @returns a function that validates that location and builtin attributes are not present at
     ///          the same time
     /// @param err error message to log when check fails
@@ -520,16 +893,6 @@ class Validator {
             }
         };
     }
-
-    /// Validates that the type annotated with @builtin(position) is correct
-    /// @param ep the entry point to associate errors with
-    /// @param type the type to validate
-    void CheckBuiltinPosition(const Function* ep, const core::type::Type* type);
-
-    /// Validates that the type annotated with @builtin(clip_distances) is correct
-    /// @param ep the entry point to associate errors with
-    /// @param type the type to validate
-    void CheckBuiltinClipDistances(const Function* ep, const core::type::Type* type);
 
     /// Validates the given instruction
     /// @param inst the instruction to validate
@@ -1353,6 +1716,9 @@ void Validator::CheckFunction(const Function* func) {
             }
         }
 
+        CheckFunctionParamAttributesAndType(param, CheckBuiltinFunctionParam(""),
+                                            CheckBuiltinFunctionParam(""));
+
         CheckFunctionParamAttributes(
             param,
             CheckInvariantFunc<FunctionParam>(
@@ -1375,12 +1741,22 @@ void Validator::CheckFunction(const Function* func) {
         func->ReturnType(), [&]() -> diag::Diagnostic& { return AddError(func); },
         Capabilities{Capability::kAllowRefTypes});
 
+    CheckFunctionReturnAttributesAndType(func, CheckBuiltinFunctionReturn(""),
+                                         CheckBuiltinFunctionReturn(""));
+
     CheckFunctionReturnAttributes(
         func,
         CheckInvariantFunc<Function>(
             "invariant can only decorate outputs iff they are also position builtins"),
         CheckInvariantFunc<Function>(
             "invariant can only decorate output members iff they are also position builtins"));
+
+    CheckFunctionReturnAttributes(
+        func,
+        CheckDoesNotHaveBothLocationAndBuiltinFunc<Function>(
+            "a builtin and location cannot be both declared for a function return"),
+        CheckDoesNotHaveBothLocationAndBuiltinFunc<Function>(
+            "a builtin and location cannot be both declared for a struct member"));
 
     // void needs to be filtered out, since it isn't constructible, but used in the IR when no
     // return is specified.
@@ -1402,20 +1778,6 @@ void Validator::CheckFunction(const Function* func) {
 
         if (DAWN_UNLIKELY(func->ReturnType() && !func->ReturnType()->Is<core::type::Void>())) {
             AddError(func) << "compute entry point must not have a return type";
-        }
-    } else {
-        CheckFunctionReturnAttributes(
-            func,
-            CheckDoesNotHaveBothLocationAndBuiltinFunc<Function>(
-                "a builtin and location cannot be both declared for a function return"),
-            CheckDoesNotHaveBothLocationAndBuiltinFunc<Function>(
-                "a builtin and location cannot be both declared for a struct member"));
-    }
-
-    if (func->Stage() != Function::PipelineStage::kFragment) {
-        if (DAWN_UNLIKELY(func->ReturnBuiltin().has_value() &&
-                          func->ReturnBuiltin().value() == BuiltinValue::kFragDepth)) {
-            AddError(func) << "frag_depth can only be declared for fragment entry points";
         }
     }
 
@@ -1441,56 +1803,32 @@ void Validator::CheckFunction(const Function* func) {
 }
 
 void Validator::CheckVertexEntryPoint(const Function* ep) {
-    bool contains_position = false;
-    auto check_position = [&](const Function* func, const IOAttributes& attr,
-                              const core::type::Type* ty) {
-        if (attr.builtin == BuiltinValue::kPosition) {
-            contains_position = true;
-            CheckBuiltinPosition(func, ty);
-        }
-    };
-
-    auto check_clip_distances = [&](const Function* func, const IOAttributes& attr,
-                                    const core::type::Type* ty) {
-        if (attr.builtin == BuiltinValue::kClipDistances) {
-            CheckBuiltinClipDistances(func, ty);
-        }
-    };
-    auto check_clip_distances_noop = [](const Function*, const IOAttributes&,
-                                        const core::type::Type*) {};
-
-    CheckFunctionReturnAttributesAndType(ep, check_position, check_position);
-    CheckFunctionReturnAttributesAndType(ep, check_clip_distances_noop, check_clip_distances);
+    bool contains_position = IsPositionPresent(ep->ReturnAttributes(), ep->ReturnType());
 
     for (auto var : referenced_module_vars_.TransitiveReferences(ep)) {
         const auto* ty = var->Result(0)->Type()->UnwrapPtrOrRef();
         const auto attr = var->Attributes();
+        if (!ty) {
+            continue;
+        }
+
+        if (!contains_position) {
+            contains_position = IsPositionPresent(attr, ty);
+        }
+
         CheckIOAttributes(
             ep, attr, ty,
             CheckInvariantFunc<Function>(
                 "invariant can only decorate vars iff they are also position builtins"),
             CheckInvariantFunc<Function>(
                 "invariant can only decorate members iff they are also position builtins"));
-        CheckIOAttributesAndType(ep, attr, ty, check_position, check_position);
-        CheckIOAttributesAndType(ep, attr, ty, check_clip_distances_noop, check_clip_distances);
+
+        // Builtin rules are not checked on module-scope variables, because they are often generated
+        // as part of the backend transforms, and have different rules for correctness.
     }
 
     if (DAWN_UNLIKELY(!contains_position)) {
         AddError(ep) << "position must be declared for vertex entry point output";
-    }
-}
-
-void Validator::CheckBuiltinPosition(const Function* ep, const core::type::Type* type) {
-    auto elems = type->Elements();
-    if (!type->IsFloatVector() || !elems.type->Is<core::type::F32>() || elems.count != 4) {
-        AddError(ep) << "position must be a vec4<f32>";
-    }
-}
-
-void Validator::CheckBuiltinClipDistances(const Function* ep, const core::type::Type* type) {
-    const auto elems = type->Elements();
-    if (!elems.type || !elems.type->Is<core::type::F32>() || elems.count > 8) {
-        AddError(ep) << "clip_distances must be an array<f32, N>, where N <= 8";
     }
 }
 
