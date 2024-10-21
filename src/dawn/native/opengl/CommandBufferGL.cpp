@@ -492,6 +492,9 @@ void ResolveMultisampledRenderTargets(const OpenGLFunctions& gl,
                                       const BeginRenderPassCmd* renderPass) {
     DAWN_ASSERT(renderPass != nullptr);
 
+    // Reset state that may affect glBlitFramebuffer().
+    gl.Disable(GL_SCISSOR_TEST);
+
     GLuint readFbo = 0;
     GLuint writeFbo = 0;
 
@@ -517,6 +520,7 @@ void ResolveMultisampledRenderTargets(const OpenGLFunctions& gl,
         }
     }
 
+    gl.Enable(GL_SCISSOR_TEST);
     gl.DeleteFramebuffers(1, &readFbo);
     gl.DeleteFramebuffers(1, &writeFbo);
 }
