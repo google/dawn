@@ -150,8 +150,7 @@ void main() {
 )");
 }
 
-// TODO(dsinclair): Needs ir::Convert
-TEST_F(GlslWriterTest, DISABLED_AccessStoreVectorElementDynamicIndex) {
+TEST_F(GlslWriterTest, AccessStoreVectorElementDynamicIndex) {
     auto* idx = b.FunctionParam("idx", ty.i32());
     auto* func = b.Function("foo", ty.void_());
     func->SetParams({idx});
@@ -163,7 +162,13 @@ TEST_F(GlslWriterTest, DISABLED_AccessStoreVectorElementDynamicIndex) {
 
     ASSERT_TRUE(Generate()) << err_ << output_.glsl;
     EXPECT_EQ(output_.glsl, GlslHeader() + R"(
-
+void foo(int idx) {
+  ivec4 vec = ivec4(0);
+  vec[min(uint(idx), 3u)] = 42;
+}
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+void main() {
+}
 )");
 }
 
@@ -613,8 +618,7 @@ void main() {
 )");
 }
 
-// TODO(dsinclair): Requires let pointer translation
-TEST_F(GlslWriterTest, DISABLED_AccessChainFromLetAccessChain) {
+TEST_F(GlslWriterTest, AccessChainFromLetAccessChain) {
     auto* Inner = ty.Struct(mod.symbols.New("Inner"), {
                                                           {mod.symbols.New("c"), ty.f32()},
                                                       });
@@ -639,13 +643,30 @@ TEST_F(GlslWriterTest, DISABLED_AccessChainFromLetAccessChain) {
     });
 
     ASSERT_TRUE(Generate()) << err_ << output_.glsl;
-    EXPECT_EQ(output_.glsl, GlslHeader() + R"(
+    EXPECT_EQ(output_.glsl, GlslHeader() + R"(precision highp float;
+precision highp int;
 
+
+struct Inner {
+  float c;
+};
+
+struct SB {
+  int a;
+  Inner b;
+};
+
+layout(binding = 0, std430)
+buffer v_block_1_ssbo {
+  SB inner;
+} v_1;
+void main() {
+  float a = v_1.inner.b.c;
+}
 )");
 }
 
-// TODO(dsinclair): Support arrayLength
-TEST_F(GlslWriterTest, DISABLED_AccessComplexDynamicAccessChain) {
+TEST_F(GlslWriterTest, AccessComplexDynamicAccessChain) {
     auto* S1 = ty.Struct(mod.symbols.New("S1"), {
                                                     {mod.symbols.New("a"), ty.i32()},
                                                     {mod.symbols.New("b"), ty.vec3<f32>()},
@@ -679,13 +700,55 @@ TEST_F(GlslWriterTest, DISABLED_AccessComplexDynamicAccessChain) {
     });
 
     ASSERT_TRUE(Generate()) << err_ << output_.glsl;
-    EXPECT_EQ(output_.glsl, GlslHeader() + R"(
+    EXPECT_EQ(output_.glsl, GlslHeader() + R"(precision highp float;
+precision highp int;
 
+
+struct S1 {
+  int a;
+  uint tint_pad_0;
+  uint tint_pad_1;
+  uint tint_pad_2;
+  vec3 b;
+  int c;
+};
+
+struct S2 {
+  int a_1;
+  uint tint_pad_0;
+  uint tint_pad_1;
+  uint tint_pad_2;
+  S1 b_1[3];
+  int c_1;
+  uint tint_pad_3;
+  uint tint_pad_4;
+  uint tint_pad_5;
+};
+
+layout(binding = 0, std430)
+buffer SB_1_ssbo {
+  int a_2;
+  uint tint_pad_0;
+  uint tint_pad_1;
+  uint tint_pad_2;
+  S2 b_2[];
+} sb;
+void main() {
+  int i = 4;
+  int v = i;
+  uint j = 1u;
+  uint v_1 = j;
+  int k = 2;
+  int v_2 = k;
+  uint v_3 = (uint(sb.b_2.length()) - 1u);
+  uint v_4 = min(uint(v), v_3);
+  uint v_5 = min(v_1, 2u);
+  float x = sb.b_2[v_4].b_1[v_5].b[min(uint(v_2), 2u)];
+}
 )");
 }
 
-// TODO(dsinclair): Support arrayLength
-TEST_F(GlslWriterTest, DISABLED_AccessComplexDynamicAccessChainSplit) {
+TEST_F(GlslWriterTest, AccessComplexDynamicAccessChainSplit) {
     auto* S1 = ty.Struct(mod.symbols.New("S1"), {
                                                     {mod.symbols.New("a"), ty.i32()},
                                                     {mod.symbols.New("b"), ty.vec3<f32>()},
@@ -716,8 +779,46 @@ TEST_F(GlslWriterTest, DISABLED_AccessComplexDynamicAccessChainSplit) {
     });
 
     ASSERT_TRUE(Generate()) << err_ << output_.glsl;
-    EXPECT_EQ(output_.glsl, GlslHeader() + R"(
+    EXPECT_EQ(output_.glsl, GlslHeader() + R"(precision highp float;
+precision highp int;
 
+
+struct S1 {
+  int a;
+  uint tint_pad_0;
+  uint tint_pad_1;
+  uint tint_pad_2;
+  vec3 b;
+  int c;
+};
+
+struct S2 {
+  int a_1;
+  uint tint_pad_0;
+  uint tint_pad_1;
+  uint tint_pad_2;
+  S1 b_1[3];
+  int c_1;
+  uint tint_pad_3;
+  uint tint_pad_4;
+  uint tint_pad_5;
+};
+
+layout(binding = 0, std430)
+buffer SB_1_ssbo {
+  int a_2;
+  uint tint_pad_0;
+  uint tint_pad_1;
+  uint tint_pad_2;
+  S2 b_2[];
+} sb;
+void main() {
+  uint j = 1u;
+  uint v = j;
+  uint v_1 = min(4u, (uint(sb.b_2.length()) - 1u));
+  uint v_2 = min(v, 2u);
+  float x = sb.b_2[v_1].b_1[v_2].b.z;
+}
 )");
 }
 
@@ -775,8 +876,7 @@ void main() {
 )");
 }
 
-// TODO(dsinclair): Handle let pointers
-TEST_F(GlslWriterTest, DISABLED_AccessUniformChainFromLetAccessChain) {
+TEST_F(GlslWriterTest, AccessUniformChainFromLetAccessChain) {
     auto* Inner = ty.Struct(mod.symbols.New("Inner"), {
                                                           {mod.symbols.New("c"), ty.f32()},
                                                       });
@@ -803,8 +903,29 @@ TEST_F(GlslWriterTest, DISABLED_AccessUniformChainFromLetAccessChain) {
     });
 
     ASSERT_TRUE(Generate()) << err_ << output_.glsl;
-    EXPECT_EQ(output_.glsl, GlslHeader() + R"(
+    EXPECT_EQ(output_.glsl, GlslHeader() + R"(precision highp float;
+precision highp int;
 
+
+struct Inner {
+  float c;
+};
+
+struct SB {
+  int a;
+  uint tint_pad_0;
+  uint tint_pad_1;
+  uint tint_pad_2;
+  Inner b;
+};
+
+layout(binding = 0, std140)
+uniform v_block_1_ubo {
+  SB inner;
+} v_1;
+void main() {
+  float a = v_1.inner.b.c;
+}
 )");
 }
 

@@ -35,12 +35,6 @@ using namespace tint::core::fluent_types;     // NOLINT
 namespace tint::glsl::writer {
 namespace {
 
-// TODO(dsinclair): Test address of is gone
-TEST_F(GlslWriterTest, DISABLED_AddressOf) {}
-
-// TODO(dsinclair): Test indirection is gone
-TEST_F(GlslWriterTest, Indirection) {}
-
 TEST_F(GlslWriterTest, Complement) {
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kCompute);
     func->SetWorkgroupSize(1, 1, 1);

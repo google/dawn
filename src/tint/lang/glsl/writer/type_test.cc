@@ -480,38 +480,6 @@ void main() {
 )");
 }
 
-// TODO(dsinclair): Add sampler support
-TEST_F(GlslWriterTest, DISABLED_EmitType_Sampler) {
-    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kCompute);
-    auto* param = b.FunctionParam("a", ty.sampler());
-    func->SetParams({param});
-    func->SetWorkgroupSize(1, 1, 1);
-    b.Append(func->Block(), [&] { b.Return(func); });
-
-    ASSERT_TRUE(Generate()) << err_ << output_.glsl;
-    EXPECT_EQ(output_.glsl, R"(
-layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
-void main() {
-}
-)");
-}
-
-// TODO(dsinclair): Add sampler comparison support
-TEST_F(GlslWriterTest, DISABLED_EmitType_SamplerComparison) {
-    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kCompute);
-    auto* param = b.FunctionParam("a", ty.comparison_sampler());
-    func->SetParams({param});
-    func->SetWorkgroupSize(1, 1, 1);
-    b.Append(func->Block(), [&] { b.Return(func); });
-
-    ASSERT_TRUE(Generate()) << err_ << output_.glsl;
-    EXPECT_EQ(output_.glsl, R"(
-layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
-void main() {
-}
-)");
-}
-
 struct GlslDepthTextureData {
     core::type::TextureDimension dim;
     std::string result;
