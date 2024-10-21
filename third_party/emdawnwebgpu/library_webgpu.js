@@ -1706,7 +1706,7 @@ var LibraryWebGPU = {
     return ptr;
   },
 
-  wgpuDeviceDestroy: (devicePtr) => {
+  emwgpuDeviceDestroy: (devicePtr) => {
     WebGPU.getJsObject(devicePtr).destroy()
   },
 

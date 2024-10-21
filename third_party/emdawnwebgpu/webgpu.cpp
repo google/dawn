@@ -42,7 +42,8 @@ FutureID emwgpuWaitAny(FutureID const* futurePtr,
                        uint64_t const* timeoutNSPtr);
 WGPUTextureFormat emwgpuGetPreferredFormat();
 
-// Creation functions to create JS backing objects given a pre-allocated handle.
+// Device functions, i.e. creation functions to create JS backing objects given
+// a pre-allocated handle, and destruction implementations.
 void emwgpuDeviceCreateBuffer(WGPUDevice device,
                               const WGPUBufferDescriptor* descriptor,
                               WGPUBuffer buffer);
@@ -50,6 +51,7 @@ void emwgpuDeviceCreateShaderModule(
     WGPUDevice device,
     const WGPUShaderModuleDescriptor* descriptor,
     WGPUShaderModule shader);
+void emwgpuDeviceDestroy(WGPUDevice device);
 
 // Buffer mapping operations that has work that needs to be done on the JS side.
 void emwgpuBufferDestroy(WGPUBuffer buffer);
@@ -226,11 +228,11 @@ class Ref {
  private:
   static void AddRef(T value) {
     if (value != nullptr) {
-      value->AddRef();
+      value->RefCounted::AddRef();
     }
   }
   static void Release(T value) {
-    if (value != nullptr && value->Release()) {
+    if (value != nullptr && value->RefCounted::Release()) {
       delete value;
     }
   }
@@ -672,6 +674,7 @@ struct WGPUDeviceImpl final : public EventSource,
   // Injection constructor used when we already have a backing Device.
   WGPUDeviceImpl(const EventSource* source, WGPUQueue queue);
 
+  void Destroy();
   WGPUQueue GetQueue() const;
 
   void OnDeviceLost(WGPUDeviceLostReason reason, const char* message);
@@ -1363,6 +1366,12 @@ WGPUDeviceImpl::WGPUDeviceImpl(const EventSource* source, WGPUQueue queue)
   mQueue.Acquire(queue);
 }
 
+void WGPUDeviceImpl::Destroy() {
+  emwgpuDeviceDestroy(this);
+  // TODO(374803367): Remove this when we can get the device lost future.
+  OnDeviceLost(WGPUDeviceLostReason_Destroyed, "Device was destroyed.");
+}
+
 WGPUQueue WGPUDeviceImpl::GetQueue() const {
   auto queue = mQueue;
   return ReturnToAPI(std::move(queue));
@@ -1390,7 +1399,7 @@ void WGPUDeviceImpl::OnUncapturedError(WGPUErrorType type,
 }
 
 void WGPUDeviceImpl::WillDropLastExternalRef() {
-  OnDeviceLost(WGPUDeviceLostReason_Destroyed, "Device was destroyed.");
+  Destroy();
 }
 
 // ----------------------------------------------------------------------------
@@ -1703,6 +1712,10 @@ WGPUShaderModule wgpuDeviceCreateShaderModule(
   WGPUShaderModule shader = new WGPUShaderModuleImpl(device);
   emwgpuDeviceCreateShaderModule(device, descriptor, shader);
   return shader;
+}
+
+void wgpuDeviceDestroy(WGPUDevice device) {
+  device->Destroy();
 }
 
 WGPUQueue wgpuDeviceGetQueue(WGPUDevice device) {
