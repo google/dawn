@@ -29,6 +29,7 @@
 
 #include <algorithm>
 #include <cstdint>
+#include <functional>
 #include <memory>
 #include <string>
 #include <string_view>
@@ -108,6 +109,11 @@
 using namespace tint::core::fluent_types;  // NOLINT
 
 namespace tint::core::ir {
+
+struct ValidatedType {
+    const type::Type* ty;
+    Capabilities caps;
+};
 
 namespace {
 
@@ -776,6 +782,8 @@ class Validator {
     Hashmap<const ir::Function*, Hashset<const ir::UserCall*, 4>, 4> user_func_calls_;
     Hashset<const ir::Discard*, 4> discards_;
     core::ir::ReferencedModuleVars<const Module> referenced_module_vars_;
+
+    Hashset<ValidatedType, 16> validated_types_{};
 };
 
 Validator::Validator(const Module& mod, Capabilities capabilities)
@@ -1188,6 +1196,14 @@ bool Validator::CheckResultsAndOperands(const ir::Instruction* inst,
 void Validator::CheckType(const core::type::Type* root,
                           std::function<diag::Diagnostic&()> diag,
                           Capabilities ignore_caps) {
+    if (root == nullptr) {
+        return;
+    }
+
+    if (!validated_types_.Add(ValidatedType{root, ignore_caps})) {
+        return;
+    }
+
     auto visit = [&](const type::Type* type) {
         return tint::Switch(
             type,
@@ -2525,3 +2541,20 @@ Result<SuccessType> ValidateAndDumpIfNeeded([[maybe_unused]] const Module& ir,
 }
 
 }  // namespace tint::core::ir
+
+namespace std {
+
+template <>
+struct hash<tint::core::ir::ValidatedType> {
+    size_t operator()(const tint::core::ir::ValidatedType& v) const { return Hash(v.ty, v.caps); }
+};
+
+template <>
+struct equal_to<tint::core::ir::ValidatedType> {
+    bool operator()(const tint::core::ir::ValidatedType& a,
+                    const tint::core::ir::ValidatedType& b) const {
+        return a.ty->Equals(*(b.ty)) && a.caps == b.caps;
+    }
+};
+
+}  // namespace std
