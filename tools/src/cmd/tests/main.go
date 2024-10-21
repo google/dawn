@@ -1052,8 +1052,6 @@ func parseOutputFormat(s string) ([]outputFormat, error) {
 		return []outputFormat{hlslFXCIR}, nil
 	case "glsl":
 		return []outputFormat{glsl}, nil
-	case "glsl-ir":
-		return []outputFormat{glsl}, nil
 	default:
 		return nil, fmt.Errorf("unknown format '%s'", s)
 	}
