@@ -61,7 +61,6 @@ type outputFormat string
 const (
 	testTimeout = 2 * time.Minute
 
-	glsl      = outputFormat("glsl")
 	glslIR    = outputFormat("glsl-ir")
 	hlslFXC   = outputFormat("hlsl-fxc")
 	hlslFXCIR = outputFormat("hlsl-fxc-ir")
@@ -74,7 +73,7 @@ const (
 )
 
 // allOutputFormats holds all the supported outputFormats
-var allOutputFormats = []outputFormat{wgsl, spvasm, msl, mslIR, hlslDXC, hlslDXCIR, hlslFXC, hlslFXCIR, glsl, glslIR}
+var allOutputFormats = []outputFormat{wgsl, spvasm, msl, mslIR, hlslDXC, hlslDXCIR, hlslFXC, hlslFXCIR, glslIR}
 
 // The root directory of the dawn project
 var dawnRoot = fileutils.DawnRoot()
@@ -140,7 +139,7 @@ func run() error {
 	var maxTableWidth int
 	numCPU := runtime.NumCPU()
 	verbose, generateExpected, generateSkip := false, false, false
-	flag.StringVar(&formatList, "format", "all", "comma separated list of formats to emit. Possible values are: all, wgsl, spvasm, msl, msl-ir, hlsl, hlsl-ir, hlsl-dxc, hlsl-dxc-ir, hlsl-fxc, hlsl-fxc-ir, glsl, glsl-ir")
+	flag.StringVar(&formatList, "format", "all", "comma separated list of formats to emit. Possible values are: all, wgsl, spvasm, msl, msl-ir, hlsl, hlsl-ir, hlsl-dxc, hlsl-dxc-ir, hlsl-fxc, hlsl-fxc-ir, glsl-ir")
 	flag.StringVar(&ignore, "ignore", "**.expected.*", "files to ignore in globs")
 	flag.StringVar(&dxcPath, "dxcompiler", "", "path to DXC DLL for validating HLSL output")
 	flag.StringVar(&fxcPath, "fxc", "", "path to FXC DLL for validating HLSL output")
@@ -674,7 +673,7 @@ func (j job) run(cfg runConfig) {
 		// expectedFilePath is the path to the expected output file for the given test
 		expectedFilePath := j.file + ".expected."
 
-		useIr := j.format == hlslDXCIR || j.format == hlslFXCIR || j.format == mslIR || j.format == glslIR
+		useIr := j.format == hlslDXCIR || j.format == hlslFXCIR || j.format == mslIR
 
 		switch j.format {
 		case hlslDXC:
@@ -740,7 +739,7 @@ func (j job) run(cfg runConfig) {
 		case wgsl:
 			args = append(args, "--validate") // wgsl validation uses Tint, so is always available
 			validate = true
-		case spvasm, glsl, glslIR:
+		case spvasm, glslIR:
 			args = append(args, "--validate") // spirv-val and glslang are statically linked, always available
 			validate = true
 		case hlslDXC, hlslDXCIR:
@@ -1054,7 +1053,7 @@ func parseOutputFormat(s string) ([]outputFormat, error) {
 	case "hlsl-fxc-ir":
 		return []outputFormat{hlslFXCIR}, nil
 	case "glsl":
-		return []outputFormat{glsl}, nil
+		return []outputFormat{glslIR}, nil
 	case "glsl-ir":
 		return []outputFormat{glslIR}, nil
 	default:

@@ -1053,7 +1053,7 @@ bool GenerateGlsl([[maybe_unused]] const tint::Program& program,
         tint::ast::transform::Manager transform_manager;
         tint::ast::transform::DataMap transform_inputs;
 
-        if (options.use_ir && !entry_point_name.empty()) {
+        if (!entry_point_name.empty()) {
             transform_manager.append(std::make_unique<tint::ast::transform::SingleEntryPoint>());
             transform_inputs.Add<tint::ast::transform::SingleEntryPoint::Config>(entry_point_name);
         }
@@ -1107,18 +1107,14 @@ bool GenerateGlsl([[maybe_unused]] const tint::Program& program,
             offset += 8;
         }
 
-        tint::Result<tint::glsl::writer::Output> result;
-        if (options.use_ir) {
-            // Convert the AST program to an IR module.
-            auto ir = tint::wgsl::reader::ProgramToLoweredIR(single_prog);
-            if (ir != tint::Success) {
-                std::cerr << "Failed to generate IR: " << ir << "\n";
-                return false;
-            }
-            result = tint::glsl::writer::Generate(ir.Get(), gen_options, "");
-        } else {
-            result = tint::glsl::writer::Generate(single_prog, gen_options, entry_point_name);
+        // Convert the AST program to an IR module.
+        auto ir = tint::wgsl::reader::ProgramToLoweredIR(single_prog);
+        if (ir != tint::Success) {
+            std::cerr << "Failed to generate IR: " << ir << "\n";
+            return false;
         }
+        auto result = tint::glsl::writer::Generate(ir.Get(), gen_options, "");
+
         if (result != tint::Success) {
             tint::cmd::PrintWGSL(std::cerr, single_prog);
             std::cerr << "Failed to generate: " << result.Failure() << "\n";
