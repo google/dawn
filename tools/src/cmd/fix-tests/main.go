@@ -291,11 +291,17 @@ func processFailure(test, wd, failure string) error {
 			}
 
 			// trim away the number of unmatched characters from the end of expected to the end of the replacement.
-			replace_str = replace_str[mr_largest.start : len(replace_str)-(len(expected_str)-mr_largest.end)]
-			expected_str = expected_str[mr_largest.start:mr_largest.end]
+			replace_str_end := len(replace_str) - (len(expected_str) - mr_largest.end)
+			if replace_str_end >= mr_largest.start && replace_str_end <= len(replace_str) {
+				replace_str = replace_str[mr_largest.start:replace_str_end]
+				expected_str = expected_str[mr_largest.start:mr_largest.end]
+			} else {
+				// It is not safe to attempt a replace if the replacement string would have negative (nonsense) size.
+				expected_str = ""
+			}
 
-			// Do not try to replace empty strings.
-			if len(replace_str) <= 0 || len(expected_str) <= 0 {
+			// Do not try to replace on empty strings.
+			if len(expected_str) <= 0 {
 				return "", fmt.Errorf("could not fix 'EXPECT_EQ' pattern in '%v'\n\nA: '%v'\n\nB: '%v'", file, a, b)
 			}
 
