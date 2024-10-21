@@ -1378,7 +1378,7 @@ TextureViewBase::TextureViewBase(TextureBase* texture,
             "usages on texture views when the view format is not compatible with all inherited "
             "texture usages.",
             this, mFormat->format, inheritedUsage);
-        GetDevice()->EmitLog(WGPULoggingType_Warning, warning.c_str());
+        GetDevice()->EmitWarningOnce(warning.c_str());
     }
 }
 

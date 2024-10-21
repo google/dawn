@@ -1885,9 +1885,9 @@ void DeviceBase::IncrementLazyClearCountForTesting() {
     ++mLazyClearCountForTesting;
 }
 
-void DeviceBase::EmitWarningOnce(const std::string& message) {
-    if (mWarnings.insert(message).second) {
-        this->EmitLog(WGPULoggingType_Warning, message.c_str());
+void DeviceBase::EmitWarningOnce(std::string_view message) {
+    if (mWarnings.insert(std::string{message}).second) {
+        this->EmitLog(WGPULoggingType_Warning, message);
     }
 }
 

@@ -355,7 +355,7 @@ class DeviceBase : public ErrorSink, public RefCountedWithExternalCount<RefCount
 
     size_t GetLazyClearCountForTesting();
     void IncrementLazyClearCountForTesting();
-    void EmitWarningOnce(const std::string& message);
+    void EmitWarningOnce(std::string_view message);
     void EmitLog(std::string_view message);
     void EmitLog(WGPULoggingType loggingType, std::string_view message);
     void EmitCompilationLog(const ShaderModuleBase* module);

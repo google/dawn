@@ -556,8 +556,10 @@ class Float32FilterableValidationTest : public RenderPipelineValidationTest {
     }
 };
 
-// Tests that blending a float32 color formats without the float32-blendable feature emits a
-// deprecation warning with the float32-filterable feature.
+// TODO(crbug.com/364987733): Remove this test once float filterable texture types
+// are not considered blendable.
+// Tests that blending a float32 color formats without the float32-blendable feature
+// is still valid with the float32-filterable feature.
 TEST_F(Float32FilterableValidationTest, Float32BlendableFormatsWithoutFeature) {
     for (const auto f32Format : {wgpu::TextureFormat::R32Float, wgpu::TextureFormat::RG32Float,
                                  wgpu::TextureFormat::RGBA32Float}) {
@@ -567,7 +569,7 @@ TEST_F(Float32FilterableValidationTest, Float32BlendableFormatsWithoutFeature) {
         descriptor.cTargets[0].blend = &descriptor.cBlends[0];
         descriptor.cTargets[0].format = f32Format;
 
-        EXPECT_DEPRECATION_WARNING(device.CreateRenderPipeline(&descriptor));
+        device.CreateRenderPipeline(&descriptor);
     }
 }
 
