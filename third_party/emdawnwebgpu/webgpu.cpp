@@ -676,6 +676,7 @@ struct WGPUDeviceImpl final : public EventSource,
 
   void Destroy();
   WGPUQueue GetQueue() const;
+  WGPUFuture GetDeviceLostFuture() const;
 
   void OnDeviceLost(WGPUDeviceLostReason reason, const char* message);
   void OnUncapturedError(WGPUErrorType type, char const* message);
@@ -1377,6 +1378,10 @@ WGPUQueue WGPUDeviceImpl::GetQueue() const {
   return ReturnToAPI(std::move(queue));
 }
 
+WGPUFuture WGPUDeviceImpl::GetDeviceLostFuture() const {
+  return WGPUFuture{mDeviceLostFutureId};
+}
+
 void WGPUDeviceImpl::OnDeviceLost(WGPUDeviceLostReason reason,
                                   const char* message) {
   if (mDeviceLostFutureId != kNullFutureId) {
@@ -1558,10 +1563,7 @@ WGPUFuture wgpuAdapterRequestDevice2(
   // Device is also immediately associated with the DeviceLostEvent.
   WGPUQueue queue = new WGPUQueueImpl(adapter);
   WGPUDevice device = new WGPUDeviceImpl(adapter, descriptor, queue);
-
-  auto [deviceLostFutureId, _] = GetEventManager().TrackEvent(
-      std::make_unique<DeviceLostEvent>(adapter->GetInstanceId(), device,
-                                        descriptor->deviceLostCallbackInfo2));
+  auto deviceLostFutureId = device->GetDeviceLostFuture().id;
 
   emwgpuAdapterRequestDevice(adapter, futureId, deviceLostFutureId, device,
                              queue, descriptor);
