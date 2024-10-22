@@ -35,6 +35,9 @@ can use Dawn's fork of the bindings.
   Note this must be a source checkout of Emscripten,
   not emsdk's `upstream/emscripten` release, which excludes necessary tools.
 
+
+- Make sure you run the `./bootstrap` in the `emscripten` folder to make sure node is setup.
+
 ## Building Dawn Emscripten bindings with GN
 
 - Set up a Dawn GN build, with `dawn_emscripten_dir` in the GN args set to point to

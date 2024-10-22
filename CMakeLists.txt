@@ -245,14 +245,19 @@ option(TINT_BUILD_BENCHMARKS "Build Tint benchmarks" OFF)
 option(TINT_BUILD_TESTS "Build tests" ON)
 option(TINT_BUILD_AS_OTHER_OS "Override OS detection to force building of *_other.cc files" OFF)
 
+if (DAWN_ENABLE_EMSCRIPTEN)
+  # Skip tint tests in emscripten build
+  set(TINT_BUILD_TESTS OFF)
+  # Skip GLSL validation in Emscripten
+  set(TINT_BUILD_GLSL_VALIDATOR OFF)
+endif()
+
 option(TINT_BUILD_TINTD "Build the WGSL language server" OFF)
 
 option(TINT_ENABLE_BREAK_IN_DEBUGGER "Enable tint::debugger::Break()" OFF)
 option(TINT_CHECK_CHROMIUM_STYLE "Check for [chromium-style] issues during build" OFF)
 option(TINT_RANDOMIZE_HASHES "Randomize the hash seed value to detect non-deterministic output" OFF)
 
-# We don't build Tint when building with Emscripten so silence these messages.
-if (NOT ${DAWN_ENABLE_EMSCRIPTEN})
 message(STATUS "Tint build SPIR-V reader: ${TINT_BUILD_SPV_READER}")
 message(STATUS "Tint build WGSL reader: ${TINT_BUILD_WGSL_READER}")
 message(STATUS "Tint build GLSL writer: ${TINT_BUILD_GLSL_WRITER}")
@@ -276,7 +281,6 @@ message(STATUS "Tint enable break in debugger: ${TINT_ENABLE_BREAK_IN_DEBUGGER}"
 message(STATUS "Tint build checking [chromium-style]: ${TINT_CHECK_CHROMIUM_STYLE}")
 message(STATUS "Tint randomize hashes: ${TINT_RANDOMIZE_HASHES}")
 message(STATUS "")
-endif()
 
 set_if_not_defined(DAWN_THIRD_PARTY_DIR "${Dawn_SOURCE_DIR}/third_party" "Directory in which to find third-party dependencies.")
 
@@ -466,11 +470,8 @@ set(BUILD_SHARED_LIBS_SAVED ${BUILD_SHARED_LIBS})
 set(BUILD_SHARED_LIBS 0)
 
 add_subdirectory(src/utils)
+add_subdirectory(src/tint)
 
-# Only build Tint when we are not building under Emscripten.
-if (NOT ${DAWN_ENABLE_EMSCRIPTEN})
-  add_subdirectory(src/tint)
-endif()
 set(BUILD_SHARED_LIBS ${BUILD_SHARED_LIBS_SAVED})
 
 if (DAWN_ENABLE_D3D11 OR DAWN_ENABLE_D3D12 OR DAWN_ENABLE_METAL OR DAWN_ENABLE_NULL OR DAWN_ENABLE_DESKTOP_GL OR DAWN_ENABLE_OPENGLES OR DAWN_ENABLE_VULKAN OR DAWN_ENABLE_EMSCRIPTEN)
