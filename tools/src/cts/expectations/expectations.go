@@ -224,7 +224,37 @@ func (e Expectation) Compare(b Expectation) int {
 	return 0
 }
 
+// ComparePrioritizeQuery is the same as Compare, but compares in the following
+// order: query, tags, bug.
+func (e Expectation) ComparePrioritizeQuery(other Expectation) int {
+	switch strings.Compare(e.Query, other.Query) {
+	case -1:
+		return -1
+	case 1:
+		return 1
+	}
+	switch strings.Compare(result.TagsToString(e.Tags), result.TagsToString(other.Tags)) {
+	case -1:
+		return -1
+	case 1:
+		return 1
+	}
+	switch strings.Compare(e.Bug, other.Bug) {
+	case -1:
+		return -1
+	case 1:
+		return 1
+	}
+	return 0
+}
+
 // Sort sorts the expectations in-place
 func (e Expectations) Sort() {
 	sort.Slice(e, func(i, j int) bool { return e[i].Compare(e[j]) < 0 })
+}
+
+// SortPrioritizeQuery sorts the expectations in-place, prioritizing the query for
+// sorting order.
+func (e Expectations) SortPrioritizeQuery() {
+	sort.Slice(e, func(i, j int) bool { return e[i].ComparePrioritizeQuery(e[j]) < 0 })
 }

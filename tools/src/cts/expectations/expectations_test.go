@@ -173,3 +173,171 @@ func TestExpectationAsExpectationFileString(t *testing.T) {
 	}
 	assert.Equal(t, e.AsExpectationFileString(), "query [ Failure Slow ]")
 }
+
+func TestSort(t *testing.T) {
+	firstAndroidOne := Expectation{
+		Bug:    "crbug.com/1",
+		Tags:   result.NewTags("android"),
+		Query:  "first_query",
+		Status: []string{"Failure"},
+	}
+
+	firstAndroidTwo := Expectation{
+		Bug:    "crbug.com/2",
+		Tags:   result.NewTags("android"),
+		Query:  "first_query",
+		Status: []string{"Failure"},
+	}
+
+	firstLinuxOne := Expectation{
+		Bug:    "crbug.com/1",
+		Tags:   result.NewTags("linux"),
+		Query:  "first_query",
+		Status: []string{"Failure"},
+	}
+
+	firstLinuxTwo := Expectation{
+		Bug:    "crbug.com/2",
+		Tags:   result.NewTags("linux"),
+		Query:  "first_query",
+		Status: []string{"Failure"},
+	}
+
+	secondAndroidOne := Expectation{
+		Bug:    "crbug.com/1",
+		Tags:   result.NewTags("android"),
+		Query:  "second_query",
+		Status: []string{"Failure"},
+	}
+
+	secondAndroidTwo := Expectation{
+		Bug:    "crbug.com/2",
+		Tags:   result.NewTags("android"),
+		Query:  "second_query",
+		Status: []string{"Failure"},
+	}
+
+	secondLinuxOne := Expectation{
+		Bug:    "crbug.com/1",
+		Tags:   result.NewTags("linux"),
+		Query:  "second_query",
+		Status: []string{"Failure"},
+	}
+
+	secondLinuxTwo := Expectation{
+		Bug:    "crbug.com/2",
+		Tags:   result.NewTags("linux"),
+		Query:  "second_query",
+		Status: []string{"Failure"},
+	}
+
+	expectationsList := Expectations{
+		firstAndroidOne,
+		firstAndroidTwo,
+		firstLinuxOne,
+		firstLinuxTwo,
+		secondAndroidOne,
+		secondAndroidTwo,
+		secondLinuxOne,
+		secondLinuxTwo,
+	}
+
+	expectationsList.Sort()
+
+	expectedList := Expectations{
+		firstAndroidOne,
+		secondAndroidOne,
+		firstLinuxOne,
+		secondLinuxOne,
+		firstAndroidTwo,
+		secondAndroidTwo,
+		firstLinuxTwo,
+		secondLinuxTwo,
+	}
+
+	assert.Equal(t, expectationsList, expectedList)
+}
+
+func TestSortPrioritizeQuery(t *testing.T) {
+	firstAndroidOne := Expectation{
+		Bug:    "crbug.com/1",
+		Tags:   result.NewTags("android"),
+		Query:  "first_query",
+		Status: []string{"Failure"},
+	}
+
+	firstAndroidTwo := Expectation{
+		Bug:    "crbug.com/2",
+		Tags:   result.NewTags("android"),
+		Query:  "first_query",
+		Status: []string{"Failure"},
+	}
+
+	firstLinuxOne := Expectation{
+		Bug:    "crbug.com/1",
+		Tags:   result.NewTags("linux"),
+		Query:  "first_query",
+		Status: []string{"Failure"},
+	}
+
+	firstLinuxTwo := Expectation{
+		Bug:    "crbug.com/2",
+		Tags:   result.NewTags("linux"),
+		Query:  "first_query",
+		Status: []string{"Failure"},
+	}
+
+	secondAndroidOne := Expectation{
+		Bug:    "crbug.com/1",
+		Tags:   result.NewTags("android"),
+		Query:  "second_query",
+		Status: []string{"Failure"},
+	}
+
+	secondAndroidTwo := Expectation{
+		Bug:    "crbug.com/2",
+		Tags:   result.NewTags("android"),
+		Query:  "second_query",
+		Status: []string{"Failure"},
+	}
+
+	secondLinuxOne := Expectation{
+		Bug:    "crbug.com/1",
+		Tags:   result.NewTags("linux"),
+		Query:  "second_query",
+		Status: []string{"Failure"},
+	}
+
+	secondLinuxTwo := Expectation{
+		Bug:    "crbug.com/2",
+		Tags:   result.NewTags("linux"),
+		Query:  "second_query",
+		Status: []string{"Failure"},
+	}
+
+	expectationsList := Expectations{
+		firstAndroidOne,
+		secondAndroidOne,
+		firstLinuxOne,
+		secondLinuxOne,
+		firstAndroidTwo,
+		secondAndroidTwo,
+		firstLinuxTwo,
+		secondLinuxTwo,
+	}
+
+	expectationsList.SortPrioritizeQuery()
+
+	expectedList := Expectations{
+		firstAndroidOne,
+		firstAndroidTwo,
+		firstLinuxOne,
+		firstLinuxTwo,
+		secondAndroidOne,
+		secondAndroidTwo,
+		secondLinuxOne,
+		secondLinuxTwo,
+	}
+
+	assert.Equal(t, expectationsList, expectedList)
+}
