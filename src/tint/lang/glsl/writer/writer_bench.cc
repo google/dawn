@@ -100,32 +100,7 @@ void GenerateGLSL(benchmark::State& state, std::string input_name) {
     }
 }
 
-void GenerateGLSL_AST(benchmark::State& state, std::string input_name) {
-    auto res = bench::GetWgslProgram(input_name);
-    if (res != Success) {
-        state.SkipWithError(res.Failure().reason.Str());
-        return;
-    }
-    auto& program = res->program;
-    std::vector<std::string> entry_points;
-    for (auto& fn : program.AST().Functions()) {
-        if (fn->IsEntryPoint()) {
-            entry_points.emplace_back(fn->name->symbol.Name());
-        }
-    }
-
-    for (auto _ : state) {
-        for (auto& ep : entry_points) {
-            auto gen_res = Generate(program, {}, ep);
-            if (gen_res != Success) {
-                state.SkipWithError(gen_res.Failure().reason.Str());
-            }
-        }
-    }
-}
-
 TINT_BENCHMARK_PROGRAMS(GenerateGLSL);
-TINT_BENCHMARK_PROGRAMS(GenerateGLSL_AST);
 
 }  // namespace
 }  // namespace tint::glsl::writer

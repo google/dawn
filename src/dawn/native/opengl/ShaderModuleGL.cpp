@@ -513,8 +513,7 @@ ResultOrError<GLuint> ShaderModule::CompileShader(
                 }
 
                 // Prepend v_ or f_ to buffer binding variable names in order to avoid collisions in
-                // renamed interface blocks. The AddBlockAttribute transform in the Tint GLSL
-                // printer will always generate wrapper structs from such bindings.
+                // renamed interface blocks.
                 for (const auto& variableName : r.bufferBindingVariables) {
                     assignedRenamings.emplace(
                         variableName,

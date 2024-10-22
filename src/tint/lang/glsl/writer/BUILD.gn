@@ -59,12 +59,10 @@ if (tint_build_glsl_writer) {
       "${tint_src_dir}/lang/wgsl",
       "${tint_src_dir}/lang/wgsl/ast",
       "${tint_src_dir}/lang/wgsl/ast/transform",
-      "${tint_src_dir}/lang/wgsl/features",
       "${tint_src_dir}/lang/wgsl/program",
       "${tint_src_dir}/lang/wgsl/sem",
       "${tint_src_dir}/utils/containers",
       "${tint_src_dir}/utils/diagnostic",
-      "${tint_src_dir}/utils/generator",
       "${tint_src_dir}/utils/ice",
       "${tint_src_dir}/utils/id",
       "${tint_src_dir}/utils/macros",
@@ -80,7 +78,6 @@ if (tint_build_glsl_writer) {
 
     if (tint_build_glsl_writer) {
       deps += [
-        "${tint_src_dir}/lang/glsl/writer/ast_printer",
         "${tint_src_dir}/lang/glsl/writer/common",
         "${tint_src_dir}/lang/glsl/writer/printer",
         "${tint_src_dir}/lang/glsl/writer/raise",
@@ -216,8 +213,6 @@ if (tint_build_glsl_writer) {
       "${tint_src_dir}/lang/wgsl",
       "${tint_src_dir}/lang/wgsl/ast",
       "${tint_src_dir}/lang/wgsl/ast/transform",
-      "${tint_src_dir}/lang/wgsl/features",
-      "${tint_src_dir}/lang/wgsl/inspector",
       "${tint_src_dir}/lang/wgsl/program",
       "${tint_src_dir}/lang/wgsl/sem",
       "${tint_src_dir}/utils/bytes",
@@ -242,11 +237,6 @@ if (tint_build_glsl_writer) {
         "${tint_src_dir}/lang/glsl/writer/common",
         "${tint_src_dir}/lang/glsl/writer/helpers",
       ]
-    }
-
-    if (tint_build_wgsl_reader) {
-      sources += [ "writer_ast_fuzz.cc" ]
-      deps += [ "${tint_src_dir}/cmd/fuzz/wgsl:fuzz" ]
     }
   }
 }

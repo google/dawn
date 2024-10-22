@@ -313,10 +313,17 @@ bool GenerateHlsl(const tint::Program& program) {
 /// @returns true on success
 bool GenerateGlsl(const tint::Program& program) {
 #if TINT_BUILD_GLSL_WRITER
+    // Convert the AST program to an IR module.
+    auto ir = tint::wgsl::reader::ProgramToLoweredIR(program);
+    if (ir != tint::Success) {
+        std::cerr << "Failed to generate IR: " << ir << "\n";
+        return false;
+    }
+
     tint::glsl::writer::Options gen_options;
     gen_options.bindings = tint::glsl::writer::GenerateBindings(program);
 
-    auto result = tint::glsl::writer::Generate(program, gen_options, "");
+    auto result = tint::glsl::writer::Generate(ir.Get(), gen_options, "");
     if (result == tint::Success) {
         tint::cmd::PrintWGSL(std::cerr, program);
         std::cerr << "Failed to generate: " << result.Failure() << "\n";

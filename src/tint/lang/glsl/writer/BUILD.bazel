@@ -54,12 +54,10 @@ cc_library(
     "//src/tint/lang/wgsl",
     "//src/tint/lang/wgsl/ast",
     "//src/tint/lang/wgsl/ast/transform",
-    "//src/tint/lang/wgsl/features",
     "//src/tint/lang/wgsl/program",
     "//src/tint/lang/wgsl/sem",
     "//src/tint/utils/containers",
     "//src/tint/utils/diagnostic",
-    "//src/tint/utils/generator",
     "//src/tint/utils/ice",
     "//src/tint/utils/id",
     "//src/tint/utils/macros",
@@ -74,7 +72,6 @@ cc_library(
     "//src/utils",
   ] + select({
     ":tint_build_glsl_writer": [
-      "//src/tint/lang/glsl/writer/ast_printer",
       "//src/tint/lang/glsl/writer/common",
       "//src/tint/lang/glsl/writer/printer",
       "//src/tint/lang/glsl/writer/raise",

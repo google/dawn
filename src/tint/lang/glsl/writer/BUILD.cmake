@@ -34,8 +34,6 @@
 #                       Do not modify this file directly
 ################################################################################
 
-include(lang/glsl/writer/ast_printer/BUILD.cmake)
-include(lang/glsl/writer/ast_raise/BUILD.cmake)
 include(lang/glsl/writer/common/BUILD.cmake)
 include(lang/glsl/writer/helpers/BUILD.cmake)
 include(lang/glsl/writer/printer/BUILD.cmake)
@@ -62,12 +60,10 @@ tint_target_add_dependencies(tint_lang_glsl_writer lib
   tint_lang_wgsl
   tint_lang_wgsl_ast
   tint_lang_wgsl_ast_transform
-  tint_lang_wgsl_features
   tint_lang_wgsl_program
   tint_lang_wgsl_sem
   tint_utils_containers
   tint_utils_diagnostic
-  tint_utils_generator
   tint_utils_ice
   tint_utils_id
   tint_utils_macros
@@ -87,7 +83,6 @@ tint_target_add_external_dependencies(tint_lang_glsl_writer lib
 
 if(TINT_BUILD_GLSL_WRITER)
   tint_target_add_dependencies(tint_lang_glsl_writer lib
-    tint_lang_glsl_writer_ast_printer
     tint_lang_glsl_writer_common
     tint_lang_glsl_writer_printer
     tint_lang_glsl_writer_raise
@@ -247,8 +242,6 @@ tint_target_add_dependencies(tint_lang_glsl_writer_fuzz fuzz
   tint_lang_wgsl
   tint_lang_wgsl_ast
   tint_lang_wgsl_ast_transform
-  tint_lang_wgsl_features
-  tint_lang_wgsl_inspector
   tint_lang_wgsl_program
   tint_lang_wgsl_sem
   tint_utils_bytes
@@ -278,14 +271,5 @@ if(TINT_BUILD_GLSL_WRITER)
     tint_lang_glsl_writer_helpers
   )
 endif(TINT_BUILD_GLSL_WRITER)
-
-if(TINT_BUILD_WGSL_READER)
-  tint_target_add_sources(tint_lang_glsl_writer_fuzz fuzz
-    "lang/glsl/writer/writer_ast_fuzz.cc"
-  )
-  tint_target_add_dependencies(tint_lang_glsl_writer_fuzz fuzz
-    tint_cmd_fuzz_wgsl_fuzz
-  )
-endif(TINT_BUILD_WGSL_READER)
 
 endif(TINT_BUILD_GLSL_WRITER)
