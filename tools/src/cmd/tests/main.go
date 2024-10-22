@@ -697,13 +697,18 @@ func (j job) run(cfg runConfig) {
 			expectedFileExists = true
 		}
 
-		skipped := false
+		isSkipTest := false
 		if strings.HasPrefix(expected, "SKIP") { // Special SKIP token
-			skipped = true
+			isSkipTest = true
 		}
-		invalid_test := false
+		isSkipInvalidTest := false
 		if strings.HasPrefix(expected, "SKIP: INVALID") { // Special invalid test case token
-			invalid_test = true
+			isSkipInvalidTest = true
+		}
+
+		isSkipTimeoutTest := false
+		if strings.HasPrefix(expected, "SKIP: TIMEOUT") { // Special timeout test case token
+			isSkipTimeoutTest = true
 		}
 
 		expected = strings.ReplaceAll(expected, "\r\n", "\n")
@@ -764,8 +769,9 @@ func (j job) run(cfg runConfig) {
 		var out string
 		args = append(args, j.flags...)
 
+		timedOut := false
 		start := time.Now()
-		ok, out = invoke(cfg.tintPath, args...)
+		ok, out, timedOut = invoke(cfg.tintPath, args...)
 		timeTaken := time.Since(start)
 
 		out = strings.ReplaceAll(out, "\r\n", "\n")
@@ -785,7 +791,8 @@ func (j job) run(cfg runConfig) {
 			return os.WriteFile(path, []byte(content), 0666)
 		}
 
-		if ok && cfg.generateExpected && (validate || !skipped) {
+		// Do not update expected if test is marked as SKIP: TIMEOUT
+		if ok && cfg.generateExpected && !isSkipTimeoutTest && (validate || !isSkipTest) {
 			// User requested to update PASS expectations, and test passed.
 			if canEmitPassExpectationFile {
 				saveExpectedFile(expectedFilePath, out)
@@ -799,11 +806,15 @@ func (j job) run(cfg runConfig) {
 		}
 
 		var skip_str string = "FAILED"
-		if invalid_test {
+		if isSkipInvalidTest {
 			skip_str = "INVALID"
 		}
 
-		passed := ok && matched
+		if timedOut {
+			skip_str = "TIMEOUT"
+		}
+
+		passed := ok && (matched || isSkipTimeoutTest)
 		if !passed {
 			if j.format == hlslFXC || j.format == hlslFXCIR {
 				out = reFXCErrorStringHash.ReplaceAllString(out, `<scrubbed_path>${1}`)
@@ -811,16 +822,17 @@ func (j job) run(cfg runConfig) {
 		}
 
 		switch {
-		case ok && matched:
+		case passed:
 			// Test passed
 			return status{code: pass, timeTaken: timeTaken, passHashes: hashes}
 
 			//       --- Below this point the test has failed ---
-		case skipped:
-			if cfg.generateSkip {
+		case isSkipTest:
+			// Do not update expected if timeout test actually timed out.
+			if cfg.generateSkip && !(isSkipTimeoutTest && timedOut) {
 				saveExpectedFile(expectedFilePath, "SKIP: "+skip_str+"\n\n"+out)
 			}
-			if invalid_test {
+			if isSkipInvalidTest {
 				return status{code: invalid, timeTaken: timeTaken}
 			} else {
 				return status{code: skip, timeTaken: timeTaken}
@@ -954,7 +966,7 @@ func percentage(n, total int) string {
 }
 
 // invoke runs the executable 'exe' with the provided arguments.
-func invoke(exe string, args ...string) (ok bool, output string) {
+func invoke(exe string, args ...string) (ok bool, output string, timedOut bool) {
 	ctx, cancel := context.WithTimeout(context.Background(), testTimeout)
 	defer cancel()
 
@@ -963,15 +975,15 @@ func invoke(exe string, args ...string) (ok bool, output string) {
 	str := string(out)
 	if err != nil {
 		if ctx.Err() == context.DeadlineExceeded {
-			return false, fmt.Sprintf("test timed out after %v", testTimeout)
+			return false, fmt.Sprintf("test timed out after %v", testTimeout), true
 		}
 		if str != "" {
 			str += fmt.Sprintf("\ntint executable returned error: %v\n", err.Error())
-			return false, str
+			return false, str, false
 		}
-		return false, err.Error()
+		return false, err.Error(), false
 	}
-	return true, str
+	return true, str, false
 }
 
 var reFlags = regexp.MustCompile(`^\s*(?:\/\/|;)\s*(\[[\w-]+\])?\s*flags:(.*)`)

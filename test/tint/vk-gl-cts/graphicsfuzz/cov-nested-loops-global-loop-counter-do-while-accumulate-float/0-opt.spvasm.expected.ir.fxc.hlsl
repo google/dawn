@@ -1,4 +1,4 @@
-SKIP: FAILED
+SKIP: TIMEOUT
 
 struct main_out {
   float4 x_GLF_color_1;

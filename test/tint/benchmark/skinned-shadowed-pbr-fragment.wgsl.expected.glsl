@@ -1,3 +1,3 @@
-SKIP: FAILED
+SKIP: TIMEOUT
 
 Times out on bots
