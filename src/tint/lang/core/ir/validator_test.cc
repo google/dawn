@@ -938,6 +938,28 @@ note: # Disassembly
 )");
 }
 
+TEST_F(IR_ValidatorTest, Function_WorkspaceSizeOnlyOnCompute) {
+    auto* f = FragmentEntryPoint();
+    f->SetWorkgroupSize(0, 0, 0);
+
+    b.Append(f->Block(), [&] { b.Unreachable(); });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_EQ(res.Failure().reason.Str(),
+              R"(:1:1 error: workgroup size attribute only valid on compute entry point
+%f = @fragment @workgroup_size(0, 0, 0) func():void {
+^^
+
+note: # Disassembly
+%f = @fragment @workgroup_size(0, 0, 0) func():void {
+  $B1: {
+    unreachable
+  }
+}
+)");
+}
+
 TEST_F(IR_ValidatorTest, Function_Vertex_BasicPosition) {
     auto* f = b.Function("my_func", ty.vec4<f32>(), Function::PipelineStage::kVertex);
     f->SetReturnBuiltin(BuiltinValue::kPosition);

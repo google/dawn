@@ -1781,6 +1781,11 @@ void Validator::CheckFunction(const Function* func) {
         }
     }
 
+    if (DAWN_UNLIKELY(func->Stage() != Function::PipelineStage::kCompute &&
+                      func->WorkgroupSize().has_value())) {
+        AddError(func) << "workgroup size attribute only valid on compute entry point";
+    }
+
     if (func->Stage() == Function::PipelineStage::kFragment) {
         if (!func->ReturnType()->Is<core::type::Void>()) {
             CheckFunctionReturnAttributes(
