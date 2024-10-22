@@ -1253,7 +1253,10 @@ crbug.com/373664069 [ android arm ] webgpu:api,operation,resource_init,texture_z
 crbug.com/373664069 [ android arm ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="3d";readMethod="CopyToTexture";format="rgba8snorm" [ Failure ]
 
 # CopyExternalImageToTexture failures on Pixel 6:
+crbug.com/373648910 [ android arm ] webgpu:api,validation,queue,copyToTexture,CopyExternalImageToTexture:source_image,crossOrigin:sourceImage="canvas";isOriginClean=true [ Failure ]
+crbug.com/373648910 [ android arm ] webgpu:api,validation,queue,copyToTexture,CopyExternalImageToTexture:source_image,crossOrigin:sourceImage="imageBitmap";isOriginClean=true [ Failure ]
 crbug.com/373648910 [ android arm ] webgpu:api,validation,queue,copyToTexture,CopyExternalImageToTexture:source_image,crossOrigin:sourceImage="offscreenCanvas";isOriginClean=true [ Failure ]
+crbug.com/373648910 [ android arm ] webgpu:api,validation,queue,copyToTexture,CopyExternalImageToTexture:source_offscreenCanvas,state:state="valid" [ Failure ]
 
 # fwidth failures on Pixel 6:
 crbug.com/373670501 [ android arm ] webgpu:shader,execution,expression,call,builtin,fwidth:f32:vectorize="_undef_";non_uniform_discard=false [ Failure ]
