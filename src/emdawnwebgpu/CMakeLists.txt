@@ -201,7 +201,6 @@ if (${DAWN_ENABLE_EMSCRIPTEN})
         "--js-library=${EM_BUILD_GEN_DIR}/library_webgpu_generated_struct_info.js"
         "--js-library=${EM_BUILD_GEN_DIR}/library_webgpu_generated_sig_info.js"
         "--js-library=${DAWN_EMDAWNWEBGPU_DIR}/library_webgpu.js"
-        "--js-library=${DAWN_EMDAWNWEBGPU_DIR}/library_html5_webgpu.js"
         "--closure-args=--externs=${DAWN_EMSCRIPTEN_TOOLCHAIN}/src/closure-externs/webgpu-externs.js"
     )
 

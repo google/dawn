@@ -248,6 +248,12 @@ extern "C" {
 
 #if !defined({{API}}_SKIP_PROCS)
 
+// TODO(374150686): Remove these Emscripten specific declarations from the
+// header once they are fully deprecated.
+#ifdef __EMSCRIPTEN__
+{{API}}_EXPORT WGPUDevice emscripten_webgpu_get_device(void);
+#endif
+
 {% for function in by_category["function"] %}
     typedef {{as_cType(function.return_type.name)}} (*{{as_cProc(None, function.name)}})(
             {%- for arg in function.arguments -%}

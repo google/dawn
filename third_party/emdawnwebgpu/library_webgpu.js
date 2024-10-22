@@ -547,6 +547,19 @@ var LibraryWebGPU = {
     {{{ WEBGPU_INT_TO_STRING_TABLES }}}
   },
 
+  // TODO(374150686): Remove this once it has been fully deprecated in users.
+  emscripten_webgpu_get_device__deps: ['wgpuDeviceAddRef'],
+  emscripten_webgpu_get_device: () => {
+#if ASSERTIONS
+    assert(Module['preinitializedWebGPUDevice']);
+#endif
+    if (WebGPU.preinitializedDeviceId === undefined) {
+      WebGPU.preinitializedDeviceId = WebGPU.importJsDevice(Module['preinitializedWebGPUDevice']);
+    }
+    _wgpuDeviceAddRef(WebGPU.preinitializedDeviceId);
+    return WebGPU.preinitializedDeviceId;
+  },
+
   // ----------------------------------------------------------------------------
   // Definitions for standalone JS emwgpu functions (callable from webgpu.cpp and
   //   library_html5_html.js)

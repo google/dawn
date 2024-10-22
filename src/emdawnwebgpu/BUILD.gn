@@ -150,8 +150,6 @@ if (dawn_emscripten_dir != "") {
           rebase_path("${target_gen_dir}/library_webgpu_generated_sig_info.js"),
       "--js-library=" +
           rebase_path("../../third_party/emdawnwebgpu/library_webgpu.js"),
-      "--js-library=" +
-          rebase_path("../../third_party/emdawnwebgpu/library_html5_webgpu.js"),
 
       # Emscripten only enables webgpu-externs.js with -sUSE_WEBGPU=1, so add them explicitly.
       "--closure-args=--externs=${dawn_emscripten_dir}/src/closure-externs/webgpu-externs.js",
@@ -182,7 +180,6 @@ if (dawn_emscripten_dir != "") {
     inputs = [
       # FIXME: Changing these files still doesn't cause a relink. Why?
       "../../third_party/emdawnwebgpu/library_webgpu.js",
-      "../../third_party/emdawnwebgpu/library_html5_webgpu.js",
     ]
   }
 }
