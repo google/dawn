@@ -158,6 +158,7 @@ class Printer : public tint::TextGenerator {
         core::ir::Capabilities capabilities{
             core::ir::Capability::kAllowModuleScopeLets,
             core::ir::Capability::kAllowVectorElementPointer,
+            core::ir::Capability::kAllowClipDistancesOnF32,
         };
         auto valid = core::ir::ValidateAndDumpIfNeeded(ir_, "HLSL writer", capabilities);
         if (valid != Success) {
@@ -1471,6 +1472,7 @@ class Printer : public tint::TextGenerator {
         TextBuffer str_buf;
         Line(&str_buf) << "struct " << StructName(str) << " {";
         {
+            int which_clip_distance = 0;
             const ScopedIndent si(&str_buf);
             for (auto* mem : str->Members()) {
                 auto mem_name = mem->Name().Name();
@@ -1509,7 +1511,13 @@ class Printer : public tint::TextGenerator {
                     }
                 }
                 if (auto builtin = attributes.builtin) {
-                    auto name = builtin_to_attribute(builtin.value());
+                    std::string name;
+                    if (builtin.value() == core::BuiltinValue::kClipDistances) {
+                        name = "SV_ClipDistance" + std::to_string(which_clip_distance);
+                        ++which_clip_distance;
+                    } else {
+                        name = builtin_to_attribute(builtin.value());
+                    }
                     TINT_ASSERT(!name.empty());
 
                     post += " : " + name;
@@ -1571,7 +1579,7 @@ class Printer : public tint::TextGenerator {
             default:
                 break;
         }
-        return "";
+        TINT_ICE() << "Unhandled BuiltinValue: " << ToString(builtin);
     }
 
     std::string interpolation_to_modifiers(core::InterpolationType type,

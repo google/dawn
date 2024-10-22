@@ -217,6 +217,7 @@ Result<SuccessType> DemoteToHelper(Module& ir) {
     auto result = ValidateAndDumpIfNeeded(ir, "DemoteToHelper transform",
                                           core::ir::Capabilities{
                                               core::ir::Capability::kAllowVectorElementPointer,
+                                              core::ir::Capability::kAllowClipDistancesOnF32,
                                           });
     if (result != Success) {
         return result;

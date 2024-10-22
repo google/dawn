@@ -136,7 +136,10 @@ struct State {
 }  // namespace
 
 Result<SuccessType> BinaryPolyfill(core::ir::Module& ir) {
-    auto result = ValidateAndDumpIfNeeded(ir, "BinaryPolyfill transform");
+    auto result = ValidateAndDumpIfNeeded(ir, "BinaryPolyfill transform",
+                                          core::ir::Capabilities{
+                                              core::ir::Capability::kAllowClipDistancesOnF32,
+                                          });
     if (result != Success) {
         return result.Failure();
     }

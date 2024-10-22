@@ -299,6 +299,7 @@ Result<SuccessType> RenameConflicts(core::ir::Module& ir) {
                                               core::ir::Capability::kAllowPointersInStructures,
                                               core::ir::Capability::kAllowVectorElementPointer,
                                               core::ir::Capability::kAllowHandleVarsWithoutBindings,
+                                              core::ir::Capability::kAllowClipDistancesOnF32,
                                           });
     if (result != Success) {
         return result;

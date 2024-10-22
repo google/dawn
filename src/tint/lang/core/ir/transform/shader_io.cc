@@ -201,7 +201,8 @@ struct State {
                     // Strip interpolation on non-vertex outputs
                     attributes.interpolation = {};
                 }
-                backend->AddOutput(ir.symbols.Register(name), member->Type(), attributes);
+                backend->AddOutput(ir.symbols.Register(name), member->Type(),
+                                   std::move(attributes));
             }
         } else {
             // Pull out the IO attributes and remove them from the original function.

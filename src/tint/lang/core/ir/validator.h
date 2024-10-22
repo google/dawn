@@ -54,6 +54,8 @@ enum class Capability : uint8_t {
     kAllowPointersInStructures,
     /// Allows handle vars to not have binding points
     kAllowHandleVarsWithoutBindings,
+    /// Allows ClipDistances on f32 parameters
+    kAllowClipDistancesOnF32,
 };
 
 /// Capabilities is a set of Capability

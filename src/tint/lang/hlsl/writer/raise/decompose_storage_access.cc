@@ -898,7 +898,10 @@ struct State {
 }  // namespace
 
 Result<SuccessType> DecomposeStorageAccess(core::ir::Module& ir) {
-    auto result = ValidateAndDumpIfNeeded(ir, "DecomposeStorageAccess transform");
+    auto result = ValidateAndDumpIfNeeded(ir, "DecomposeStorageAccess transform",
+                                          core::ir::Capabilities{
+                                              core::ir::Capability::kAllowClipDistancesOnF32,
+                                          });
     if (result != Success) {
         return result.Failure();
     }

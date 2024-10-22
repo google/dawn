@@ -1459,5 +1459,701 @@ $B1: {  # root
     EXPECT_EQ(expect, str());
 }
 
+TEST_F(HlslWriterTransformTest, ShaderIOParameters_ClipDistances_1) {
+    core::IOAttributes pos_attr;
+    pos_attr.builtin = core::BuiltinValue::kPosition;
+    core::IOAttributes clip_distances_attr;
+    clip_distances_attr.builtin = core::BuiltinValue::kClipDistances;
+    auto* str_ty =
+        ty.Struct(mod.symbols.New("Outputs"),
+                  {
+                      {mod.symbols.New("position"), ty.vec4<f32>(), pos_attr},
+                      {mod.symbols.New("clip_distances"), ty.array<f32, 1>(), clip_distances_attr},
+                  });
+    auto* ep = b.Function("foo", str_ty, core::ir::Function::PipelineStage::kVertex);
+    b.Append(ep->Block(), [&] {
+        auto* pos = b.Construct(ty.vec4<f32>(), 0.5_f);
+        auto* cd = b.Construct(ty.array<f32, 1>(), 0.0_f);
+        b.Return(ep, b.Construct(str_ty, pos, cd));
+    });
+
+    auto* src = R"(
+Outputs = struct @align(16) {
+  position:vec4<f32> @offset(0), @builtin(position)
+  clip_distances:array<f32, 1> @offset(16), @builtin(clip_distances)
+}
+
+%foo = @vertex func():Outputs {
+  $B1: {
+    %2:vec4<f32> = construct 0.5f
+    %3:array<f32, 1> = construct 0.0f
+    %4:Outputs = construct %2, %3
+    ret %4
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+Outputs = struct @align(16) {
+  position:vec4<f32> @offset(0)
+  clip_distances:array<f32, 1> @offset(16)
+}
+
+foo_outputs = struct @align(16) {
+  Outputs_position:vec4<f32> @offset(0), @builtin(position)
+  Outputs_clip_distances0:f32 @offset(16), @builtin(clip_distances)
+}
+
+%foo_inner = func():Outputs {
+  $B1: {
+    %2:vec4<f32> = construct 0.5f
+    %3:array<f32, 1> = construct 0.0f
+    %4:Outputs = construct %2, %3
+    ret %4
+  }
+}
+%foo = @vertex func():foo_outputs {
+  $B2: {
+    %6:Outputs = call %foo_inner
+    %7:vec4<f32> = access %6, 0u
+    %8:array<f32, 1> = access %6, 1u
+    %9:f32 = access %8, 0u
+    %10:foo_outputs = construct %7, %9
+    ret %10
+  }
+}
+)";
+
+    capabilities = core::ir::Capability::kAllowClipDistancesOnF32;
+    Run(ShaderIO, ShaderIOConfig{});
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(HlslWriterTransformTest, ShaderIOParameters_ClipDistances_2) {
+    core::IOAttributes pos_attr;
+    pos_attr.builtin = core::BuiltinValue::kPosition;
+    core::IOAttributes clip_distances_attr;
+    clip_distances_attr.builtin = core::BuiltinValue::kClipDistances;
+    auto* str_ty =
+        ty.Struct(mod.symbols.New("Outputs"),
+                  {
+                      {mod.symbols.New("position"), ty.vec4<f32>(), pos_attr},
+                      {mod.symbols.New("clip_distances"), ty.array<f32, 2>(), clip_distances_attr},
+                  });
+    auto* ep = b.Function("foo", str_ty, core::ir::Function::PipelineStage::kVertex);
+    b.Append(ep->Block(), [&] {
+        auto* pos = b.Construct(ty.vec4<f32>(), 0.5_f);
+        auto* cd = b.Construct(ty.array<f32, 2>(), 0.0_f);
+        b.Return(ep, b.Construct(str_ty, pos, cd));
+    });
+
+    auto* src = R"(
+Outputs = struct @align(16) {
+  position:vec4<f32> @offset(0), @builtin(position)
+  clip_distances:array<f32, 2> @offset(16), @builtin(clip_distances)
+}
+
+%foo = @vertex func():Outputs {
+  $B1: {
+    %2:vec4<f32> = construct 0.5f
+    %3:array<f32, 2> = construct 0.0f
+    %4:Outputs = construct %2, %3
+    ret %4
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+Outputs = struct @align(16) {
+  position:vec4<f32> @offset(0)
+  clip_distances:array<f32, 2> @offset(16)
+}
+
+foo_outputs = struct @align(16) {
+  Outputs_position:vec4<f32> @offset(0), @builtin(position)
+  Outputs_clip_distances0:vec2<f32> @offset(16), @builtin(clip_distances)
+}
+
+%foo_inner = func():Outputs {
+  $B1: {
+    %2:vec4<f32> = construct 0.5f
+    %3:array<f32, 2> = construct 0.0f
+    %4:Outputs = construct %2, %3
+    ret %4
+  }
+}
+%foo = @vertex func():foo_outputs {
+  $B2: {
+    %6:Outputs = call %foo_inner
+    %7:vec4<f32> = access %6, 0u
+    %8:array<f32, 2> = access %6, 1u
+    %9:f32 = access %8, 0u
+    %10:f32 = access %8, 1u
+    %11:vec2<f32> = construct %9, %10
+    %12:foo_outputs = construct %7, %11
+    ret %12
+  }
+}
+)";
+
+    capabilities = core::ir::Capability::kAllowClipDistancesOnF32;
+    Run(ShaderIO, ShaderIOConfig{});
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(HlslWriterTransformTest, ShaderIOParameters_ClipDistances_3) {
+    core::IOAttributes pos_attr;
+    pos_attr.builtin = core::BuiltinValue::kPosition;
+    core::IOAttributes clip_distances_attr;
+    clip_distances_attr.builtin = core::BuiltinValue::kClipDistances;
+    auto* str_ty =
+        ty.Struct(mod.symbols.New("Outputs"),
+                  {
+                      {mod.symbols.New("position"), ty.vec4<f32>(), pos_attr},
+                      {mod.symbols.New("clip_distances"), ty.array<f32, 3>(), clip_distances_attr},
+                  });
+    auto* ep = b.Function("foo", str_ty, core::ir::Function::PipelineStage::kVertex);
+    b.Append(ep->Block(), [&] {
+        auto* pos = b.Construct(ty.vec4<f32>(), 0.5_f);
+        auto* cd = b.Construct(ty.array<f32, 3>(), 0.0_f);
+        b.Return(ep, b.Construct(str_ty, pos, cd));
+    });
+
+    auto* src = R"(
+Outputs = struct @align(16) {
+  position:vec4<f32> @offset(0), @builtin(position)
+  clip_distances:array<f32, 3> @offset(16), @builtin(clip_distances)
+}
+
+%foo = @vertex func():Outputs {
+  $B1: {
+    %2:vec4<f32> = construct 0.5f
+    %3:array<f32, 3> = construct 0.0f
+    %4:Outputs = construct %2, %3
+    ret %4
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+Outputs = struct @align(16) {
+  position:vec4<f32> @offset(0)
+  clip_distances:array<f32, 3> @offset(16)
+}
+
+foo_outputs = struct @align(16) {
+  Outputs_position:vec4<f32> @offset(0), @builtin(position)
+  Outputs_clip_distances0:vec3<f32> @offset(16), @builtin(clip_distances)
+}
+
+%foo_inner = func():Outputs {
+  $B1: {
+    %2:vec4<f32> = construct 0.5f
+    %3:array<f32, 3> = construct 0.0f
+    %4:Outputs = construct %2, %3
+    ret %4
+  }
+}
+%foo = @vertex func():foo_outputs {
+  $B2: {
+    %6:Outputs = call %foo_inner
+    %7:vec4<f32> = access %6, 0u
+    %8:array<f32, 3> = access %6, 1u
+    %9:f32 = access %8, 0u
+    %10:f32 = access %8, 1u
+    %11:f32 = access %8, 2u
+    %12:vec3<f32> = construct %9, %10, %11
+    %13:foo_outputs = construct %7, %12
+    ret %13
+  }
+}
+)";
+
+    capabilities = core::ir::Capability::kAllowClipDistancesOnF32;
+    Run(ShaderIO, ShaderIOConfig{});
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(HlslWriterTransformTest, ShaderIOParameters_ClipDistances_4) {
+    core::IOAttributes pos_attr;
+    pos_attr.builtin = core::BuiltinValue::kPosition;
+    core::IOAttributes clip_distances_attr;
+    clip_distances_attr.builtin = core::BuiltinValue::kClipDistances;
+    auto* str_ty =
+        ty.Struct(mod.symbols.New("Outputs"),
+                  {
+                      {mod.symbols.New("position"), ty.vec4<f32>(), pos_attr},
+                      {mod.symbols.New("clip_distances"), ty.array<f32, 4>(), clip_distances_attr},
+                  });
+    auto* ep = b.Function("foo", str_ty, core::ir::Function::PipelineStage::kVertex);
+    b.Append(ep->Block(), [&] {
+        auto* pos = b.Construct(ty.vec4<f32>(), 0.5_f);
+        auto* cd = b.Construct(ty.array<f32, 4>(), 0.0_f);
+        b.Return(ep, b.Construct(str_ty, pos, cd));
+    });
+
+    auto* src = R"(
+Outputs = struct @align(16) {
+  position:vec4<f32> @offset(0), @builtin(position)
+  clip_distances:array<f32, 4> @offset(16), @builtin(clip_distances)
+}
+
+%foo = @vertex func():Outputs {
+  $B1: {
+    %2:vec4<f32> = construct 0.5f
+    %3:array<f32, 4> = construct 0.0f
+    %4:Outputs = construct %2, %3
+    ret %4
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+Outputs = struct @align(16) {
+  position:vec4<f32> @offset(0)
+  clip_distances:array<f32, 4> @offset(16)
+}
+
+foo_outputs = struct @align(16) {
+  Outputs_position:vec4<f32> @offset(0), @builtin(position)
+  Outputs_clip_distances0:vec4<f32> @offset(16), @builtin(clip_distances)
+}
+
+%foo_inner = func():Outputs {
+  $B1: {
+    %2:vec4<f32> = construct 0.5f
+    %3:array<f32, 4> = construct 0.0f
+    %4:Outputs = construct %2, %3
+    ret %4
+  }
+}
+%foo = @vertex func():foo_outputs {
+  $B2: {
+    %6:Outputs = call %foo_inner
+    %7:vec4<f32> = access %6, 0u
+    %8:array<f32, 4> = access %6, 1u
+    %9:f32 = access %8, 0u
+    %10:f32 = access %8, 1u
+    %11:f32 = access %8, 2u
+    %12:f32 = access %8, 3u
+    %13:vec4<f32> = construct %9, %10, %11, %12
+    %14:foo_outputs = construct %7, %13
+    ret %14
+  }
+}
+)";
+
+    capabilities = core::ir::Capability::kAllowClipDistancesOnF32;
+    Run(ShaderIO, ShaderIOConfig{});
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(HlslWriterTransformTest, ShaderIOParameters_ClipDistances_5) {
+    core::IOAttributes pos_attr;
+    pos_attr.builtin = core::BuiltinValue::kPosition;
+    core::IOAttributes clip_distances_attr;
+    clip_distances_attr.builtin = core::BuiltinValue::kClipDistances;
+    auto* str_ty =
+        ty.Struct(mod.symbols.New("Outputs"),
+                  {
+                      {mod.symbols.New("position"), ty.vec4<f32>(), pos_attr},
+                      {mod.symbols.New("clip_distances"), ty.array<f32, 5>(), clip_distances_attr},
+                  });
+    auto* ep = b.Function("foo", str_ty, core::ir::Function::PipelineStage::kVertex);
+    b.Append(ep->Block(), [&] {
+        auto* pos = b.Construct(ty.vec4<f32>(), 0.5_f);
+        auto* cd = b.Construct(ty.array<f32, 5>(), 0.0_f);
+        b.Return(ep, b.Construct(str_ty, pos, cd));
+    });
+
+    auto* src = R"(
+Outputs = struct @align(16) {
+  position:vec4<f32> @offset(0), @builtin(position)
+  clip_distances:array<f32, 5> @offset(16), @builtin(clip_distances)
+}
+
+%foo = @vertex func():Outputs {
+  $B1: {
+    %2:vec4<f32> = construct 0.5f
+    %3:array<f32, 5> = construct 0.0f
+    %4:Outputs = construct %2, %3
+    ret %4
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+Outputs = struct @align(16) {
+  position:vec4<f32> @offset(0)
+  clip_distances:array<f32, 5> @offset(16)
+}
+
+foo_outputs = struct @align(16) {
+  Outputs_position:vec4<f32> @offset(0), @builtin(position)
+  Outputs_clip_distances0:vec4<f32> @offset(16), @builtin(clip_distances)
+  Outputs_clip_distances1:f32 @offset(32), @builtin(clip_distances)
+}
+
+%foo_inner = func():Outputs {
+  $B1: {
+    %2:vec4<f32> = construct 0.5f
+    %3:array<f32, 5> = construct 0.0f
+    %4:Outputs = construct %2, %3
+    ret %4
+  }
+}
+%foo = @vertex func():foo_outputs {
+  $B2: {
+    %6:Outputs = call %foo_inner
+    %7:vec4<f32> = access %6, 0u
+    %8:array<f32, 5> = access %6, 1u
+    %9:f32 = access %8, 0u
+    %10:f32 = access %8, 1u
+    %11:f32 = access %8, 2u
+    %12:f32 = access %8, 3u
+    %13:vec4<f32> = construct %9, %10, %11, %12
+    %14:f32 = access %8, 4u
+    %15:foo_outputs = construct %7, %13, %14
+    ret %15
+  }
+}
+)";
+
+    capabilities = core::ir::Capability::kAllowClipDistancesOnF32;
+    Run(ShaderIO, ShaderIOConfig{});
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(HlslWriterTransformTest, ShaderIOParameters_ClipDistances_6) {
+    core::IOAttributes pos_attr;
+    pos_attr.builtin = core::BuiltinValue::kPosition;
+    core::IOAttributes clip_distances_attr;
+    clip_distances_attr.builtin = core::BuiltinValue::kClipDistances;
+    auto* str_ty =
+        ty.Struct(mod.symbols.New("Outputs"),
+                  {
+                      {mod.symbols.New("position"), ty.vec4<f32>(), pos_attr},
+                      {mod.symbols.New("clip_distances"), ty.array<f32, 6>(), clip_distances_attr},
+                  });
+    auto* ep = b.Function("foo", str_ty, core::ir::Function::PipelineStage::kVertex);
+    b.Append(ep->Block(), [&] {
+        auto* pos = b.Construct(ty.vec4<f32>(), 0.5_f);
+        auto* cd = b.Construct(ty.array<f32, 6>(), 0.0_f);
+        b.Return(ep, b.Construct(str_ty, pos, cd));
+    });
+
+    auto* src = R"(
+Outputs = struct @align(16) {
+  position:vec4<f32> @offset(0), @builtin(position)
+  clip_distances:array<f32, 6> @offset(16), @builtin(clip_distances)
+}
+
+%foo = @vertex func():Outputs {
+  $B1: {
+    %2:vec4<f32> = construct 0.5f
+    %3:array<f32, 6> = construct 0.0f
+    %4:Outputs = construct %2, %3
+    ret %4
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+Outputs = struct @align(16) {
+  position:vec4<f32> @offset(0)
+  clip_distances:array<f32, 6> @offset(16)
+}
+
+foo_outputs = struct @align(16) {
+  Outputs_position:vec4<f32> @offset(0), @builtin(position)
+  Outputs_clip_distances0:vec4<f32> @offset(16), @builtin(clip_distances)
+  Outputs_clip_distances1:vec2<f32> @offset(32), @builtin(clip_distances)
+}
+
+%foo_inner = func():Outputs {
+  $B1: {
+    %2:vec4<f32> = construct 0.5f
+    %3:array<f32, 6> = construct 0.0f
+    %4:Outputs = construct %2, %3
+    ret %4
+  }
+}
+%foo = @vertex func():foo_outputs {
+  $B2: {
+    %6:Outputs = call %foo_inner
+    %7:vec4<f32> = access %6, 0u
+    %8:array<f32, 6> = access %6, 1u
+    %9:f32 = access %8, 0u
+    %10:f32 = access %8, 1u
+    %11:f32 = access %8, 2u
+    %12:f32 = access %8, 3u
+    %13:vec4<f32> = construct %9, %10, %11, %12
+    %14:f32 = access %8, 4u
+    %15:f32 = access %8, 5u
+    %16:vec2<f32> = construct %14, %15
+    %17:foo_outputs = construct %7, %13, %16
+    ret %17
+  }
+}
+)";
+
+    capabilities = core::ir::Capability::kAllowClipDistancesOnF32;
+    Run(ShaderIO, ShaderIOConfig{});
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(HlslWriterTransformTest, ShaderIOParameters_ClipDistances_7) {
+    core::IOAttributes pos_attr;
+    pos_attr.builtin = core::BuiltinValue::kPosition;
+    core::IOAttributes clip_distances_attr;
+    clip_distances_attr.builtin = core::BuiltinValue::kClipDistances;
+    auto* str_ty =
+        ty.Struct(mod.symbols.New("Outputs"),
+                  {
+                      {mod.symbols.New("position"), ty.vec4<f32>(), pos_attr},
+                      {mod.symbols.New("clip_distances"), ty.array<f32, 7>(), clip_distances_attr},
+                  });
+    auto* ep = b.Function("foo", str_ty, core::ir::Function::PipelineStage::kVertex);
+    b.Append(ep->Block(), [&] {
+        auto* pos = b.Construct(ty.vec4<f32>(), 0.5_f);
+        auto* cd = b.Construct(ty.array<f32, 7>(), 0.0_f);
+        b.Return(ep, b.Construct(str_ty, pos, cd));
+    });
+
+    auto* src = R"(
+Outputs = struct @align(16) {
+  position:vec4<f32> @offset(0), @builtin(position)
+  clip_distances:array<f32, 7> @offset(16), @builtin(clip_distances)
+}
+
+%foo = @vertex func():Outputs {
+  $B1: {
+    %2:vec4<f32> = construct 0.5f
+    %3:array<f32, 7> = construct 0.0f
+    %4:Outputs = construct %2, %3
+    ret %4
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+Outputs = struct @align(16) {
+  position:vec4<f32> @offset(0)
+  clip_distances:array<f32, 7> @offset(16)
+}
+
+foo_outputs = struct @align(16) {
+  Outputs_position:vec4<f32> @offset(0), @builtin(position)
+  Outputs_clip_distances0:vec4<f32> @offset(16), @builtin(clip_distances)
+  Outputs_clip_distances1:vec3<f32> @offset(32), @builtin(clip_distances)
+}
+
+%foo_inner = func():Outputs {
+  $B1: {
+    %2:vec4<f32> = construct 0.5f
+    %3:array<f32, 7> = construct 0.0f
+    %4:Outputs = construct %2, %3
+    ret %4
+  }
+}
+%foo = @vertex func():foo_outputs {
+  $B2: {
+    %6:Outputs = call %foo_inner
+    %7:vec4<f32> = access %6, 0u
+    %8:array<f32, 7> = access %6, 1u
+    %9:f32 = access %8, 0u
+    %10:f32 = access %8, 1u
+    %11:f32 = access %8, 2u
+    %12:f32 = access %8, 3u
+    %13:vec4<f32> = construct %9, %10, %11, %12
+    %14:f32 = access %8, 4u
+    %15:f32 = access %8, 5u
+    %16:f32 = access %8, 6u
+    %17:vec3<f32> = construct %14, %15, %16
+    %18:foo_outputs = construct %7, %13, %17
+    ret %18
+  }
+}
+)";
+
+    capabilities = core::ir::Capability::kAllowClipDistancesOnF32;
+    Run(ShaderIO, ShaderIOConfig{});
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(HlslWriterTransformTest, ShaderIOParameters_ClipDistances_8) {
+    core::IOAttributes pos_attr;
+    pos_attr.builtin = core::BuiltinValue::kPosition;
+    core::IOAttributes clip_distances_attr;
+    clip_distances_attr.builtin = core::BuiltinValue::kClipDistances;
+    auto* str_ty =
+        ty.Struct(mod.symbols.New("Outputs"),
+                  {
+                      {mod.symbols.New("position"), ty.vec4<f32>(), pos_attr},
+                      {mod.symbols.New("clip_distances"), ty.array<f32, 8>(), clip_distances_attr},
+                  });
+    auto* ep = b.Function("foo", str_ty, core::ir::Function::PipelineStage::kVertex);
+    b.Append(ep->Block(), [&] {
+        auto* pos = b.Construct(ty.vec4<f32>(), 0.5_f);
+        auto* cd = b.Construct(ty.array<f32, 8>(), 0.0_f);
+        b.Return(ep, b.Construct(str_ty, pos, cd));
+    });
+
+    auto* src = R"(
+Outputs = struct @align(16) {
+  position:vec4<f32> @offset(0), @builtin(position)
+  clip_distances:array<f32, 8> @offset(16), @builtin(clip_distances)
+}
+
+%foo = @vertex func():Outputs {
+  $B1: {
+    %2:vec4<f32> = construct 0.5f
+    %3:array<f32, 8> = construct 0.0f
+    %4:Outputs = construct %2, %3
+    ret %4
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+Outputs = struct @align(16) {
+  position:vec4<f32> @offset(0)
+  clip_distances:array<f32, 8> @offset(16)
+}
+
+foo_outputs = struct @align(16) {
+  Outputs_position:vec4<f32> @offset(0), @builtin(position)
+  Outputs_clip_distances0:vec4<f32> @offset(16), @builtin(clip_distances)
+  Outputs_clip_distances1:vec4<f32> @offset(32), @builtin(clip_distances)
+}
+
+%foo_inner = func():Outputs {
+  $B1: {
+    %2:vec4<f32> = construct 0.5f
+    %3:array<f32, 8> = construct 0.0f
+    %4:Outputs = construct %2, %3
+    ret %4
+  }
+}
+%foo = @vertex func():foo_outputs {
+  $B2: {
+    %6:Outputs = call %foo_inner
+    %7:vec4<f32> = access %6, 0u
+    %8:array<f32, 8> = access %6, 1u
+    %9:f32 = access %8, 0u
+    %10:f32 = access %8, 1u
+    %11:f32 = access %8, 2u
+    %12:f32 = access %8, 3u
+    %13:vec4<f32> = construct %9, %10, %11, %12
+    %14:f32 = access %8, 4u
+    %15:f32 = access %8, 5u
+    %16:f32 = access %8, 6u
+    %17:f32 = access %8, 7u
+    %18:vec4<f32> = construct %14, %15, %16, %17
+    %19:foo_outputs = construct %7, %13, %18
+    ret %19
+  }
+}
+)";
+
+    capabilities = core::ir::Capability::kAllowClipDistancesOnF32;
+    Run(ShaderIO, ShaderIOConfig{});
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(HlslWriterTransformTest, ShaderIOParameters_ClipDistances_FirstMember) {
+    core::IOAttributes pos_attr;
+    pos_attr.builtin = core::BuiltinValue::kPosition;
+    core::IOAttributes clip_distances_attr;
+    clip_distances_attr.builtin = core::BuiltinValue::kClipDistances;
+    auto* str_ty =
+        ty.Struct(mod.symbols.New("Outputs"),
+                  {
+                      {mod.symbols.New("clip_distances"), ty.array<f32, 5>(), clip_distances_attr},
+                      {mod.symbols.New("position"), ty.vec4<f32>(), pos_attr},
+                  });
+    auto* ep = b.Function("foo", str_ty, core::ir::Function::PipelineStage::kVertex);
+    b.Append(ep->Block(), [&] {
+        auto* cd = b.Construct(ty.array<f32, 5>(), 0.0_f);
+        auto* pos = b.Construct(ty.vec4<f32>(), 0.5_f);
+        b.Return(ep, b.Construct(str_ty, cd, pos));
+    });
+
+    auto* src = R"(
+Outputs = struct @align(16) {
+  clip_distances:array<f32, 5> @offset(0), @builtin(clip_distances)
+  position:vec4<f32> @offset(32), @builtin(position)
+}
+
+%foo = @vertex func():Outputs {
+  $B1: {
+    %2:array<f32, 5> = construct 0.0f
+    %3:vec4<f32> = construct 0.5f
+    %4:Outputs = construct %2, %3
+    ret %4
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+Outputs = struct @align(16) {
+  clip_distances:array<f32, 5> @offset(0)
+  position:vec4<f32> @offset(32)
+}
+
+foo_outputs = struct @align(16) {
+  Outputs_position:vec4<f32> @offset(0), @builtin(position)
+  Outputs_clip_distances0:vec4<f32> @offset(16), @builtin(clip_distances)
+  Outputs_clip_distances1:f32 @offset(32), @builtin(clip_distances)
+}
+
+%foo_inner = func():Outputs {
+  $B1: {
+    %2:array<f32, 5> = construct 0.0f
+    %3:vec4<f32> = construct 0.5f
+    %4:Outputs = construct %2, %3
+    ret %4
+  }
+}
+%foo = @vertex func():foo_outputs {
+  $B2: {
+    %6:Outputs = call %foo_inner
+    %7:array<f32, 5> = access %6, 0u
+    %8:f32 = access %7, 0u
+    %9:f32 = access %7, 1u
+    %10:f32 = access %7, 2u
+    %11:f32 = access %7, 3u
+    %12:vec4<f32> = construct %8, %9, %10, %11
+    %13:f32 = access %7, 4u
+    %14:vec4<f32> = access %6, 1u
+    %15:foo_outputs = construct %14, %12, %13
+    ret %15
+  }
+}
+)";
+
+    capabilities = core::ir::Capability::kAllowClipDistancesOnF32;
+    Run(ShaderIO, ShaderIOConfig{});
+
+    EXPECT_EQ(expect, str());
+}
+
 }  // namespace
 }  // namespace tint::hlsl::writer::raise

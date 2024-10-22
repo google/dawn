@@ -324,18 +324,6 @@ constexpr BuiltinChecker kPointSizeChecker{
     /* type_error */ "__point_size must be a f32",
 };
 
-constexpr BuiltinChecker kClipDistancesChecker{
-    /* name */ "clip_distances",
-    /* stages */ EnumSet<Function::PipelineStage>(Function::PipelineStage::kVertex),
-    /* direction */ BuiltinChecker::IODirection::kOutput,
-    /* type_check */
-    [](const core::type::Type* ty) -> bool {
-        auto elems = ty->Elements();
-        return elems.type && elems.type->Is<core::type::F32>() && elems.count <= 8;
-    },
-    /* type_error */ "clip_distances must be an array<f32, N>, where N <= 8",
-};
-
 constexpr BuiltinChecker kFragDepthChecker{
     /* name */ "frag_depth",
     /* stages */ EnumSet<Function::PipelineStage>(Function::PipelineStage::kFragment),
@@ -453,8 +441,6 @@ const BuiltinChecker& BuiltinCheckerFor(BuiltinValue builtin) {
     switch (builtin) {
         case BuiltinValue::kPointSize:
             return kPointSizeChecker;
-        case BuiltinValue::kClipDistances:
-            return kClipDistancesChecker;
         case BuiltinValue::kFragDepth:
             return kFragDepthChecker;
         case BuiltinValue::kFrontFacing:
@@ -535,6 +521,40 @@ Result<SuccessType, std::string> ValidateSampleMaskBuiltIn(Function::PipelineSta
     return Success;
 }
 
+/// Validates the basic spec rules for @builtin(clip_distance) usage
+/// @param stage the shader stage the builtin is being used
+/// @param is_input the IO direction of usage, true if input, false if output
+/// @param capabilities the optional capabilities that are allowed
+/// @param ty the data type being decorated by the builtin
+/// @returns Success if a valid usage, or reason for invalidity in Failure
+Result<SuccessType, std::string> ValidateBuiltinClipDistances(Function::PipelineStage stage,
+                                                              bool is_input,
+                                                              const Capabilities& capabilities,
+                                                              const core::type::Type* ty) {
+    if (stage != Function::PipelineStage::kVertex) {
+        return std::string("clip_distances must be used in a vertex shader entry point");
+    }
+
+    if (is_input) {
+        return std::string("clip_distances must be an output of a shader entry point");
+    }
+
+    auto is_valid_array = [&] {
+        const auto elems = ty->Elements();
+        return elems.type && elems.type->Is<core::type::F32>() && elems.count <= 8;
+    };
+
+    if (capabilities.Contains(Capability::kAllowClipDistancesOnF32)) {
+        if (!ty->Is<core::type::F32>() && !is_valid_array()) {
+            return std::string("clip_distances must be an f32 or an array<f32, N>, where N <= 8");
+        }
+    } else if (!is_valid_array()) {
+        return std::string("clip_distances must be an array<f32, N>, where N <= 8");
+    }
+
+    return Success;
+}
+
 /// Validates the basic spec rules for builtin usage
 /// @param builtin the builtin to test
 /// @param stage the shader stage the builtin is being used
@@ -544,6 +564,7 @@ Result<SuccessType, std::string> ValidateSampleMaskBuiltIn(Function::PipelineSta
 Result<SuccessType, std::string> ValidateBuiltIn(BuiltinValue builtin,
                                                  Function::PipelineStage stage,
                                                  bool is_input,
+                                                 const Capabilities& capabilities,
                                                  const core::type::Type* ty) {
     // This is not an entry point function, either it is dead code and thus never called, or any
     // issues will be detected when validating the calling entry point.
@@ -558,8 +579,10 @@ Result<SuccessType, std::string> ValidateBuiltIn(BuiltinValue builtin,
             return ValidatePositionBuiltIn(stage, is_input, ty);
         case BuiltinValue::kSampleMask:
             return ValidateSampleMaskBuiltIn(stage, ty);
-        default: {
-        }
+        case BuiltinValue::kClipDistances:
+            return ValidateBuiltinClipDistances(stage, is_input, capabilities, ty);
+        default:
+            break;
     }
 
     const auto& checker = BuiltinCheckerFor(builtin);
@@ -850,8 +873,8 @@ class Validator {
             if (!attr.builtin.has_value()) {
                 return;
             }
-            auto result =
-                ValidateBuiltIn(attr.builtin.value(), param->Function()->Stage(), true, ty);
+            auto result = ValidateBuiltIn(attr.builtin.value(), param->Function()->Stage(), true,
+                                          capabilities_, ty);
             if (result != Success) {
                 AddError(param) << err << result.Failure();
             }
@@ -864,7 +887,8 @@ class Validator {
             if (!attr.builtin.has_value()) {
                 return;
             }
-            auto result = ValidateBuiltIn(attr.builtin.value(), func->Stage(), false, ty);
+            auto result =
+                ValidateBuiltIn(attr.builtin.value(), func->Stage(), false, capabilities_, ty);
             if (result != Success) {
                 AddError(func) << err << result.Failure();
             }

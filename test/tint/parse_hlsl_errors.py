@@ -40,7 +40,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument('--list-files', dest='list_files', action='store_true')
 parser.add_argument('--no-list-files', dest='list_files', action='store_false')
 parser.set_defaults(list_files=True)
-parser.add_argument('--ir-only', dest='ir_only', action='store_false')
+parser.add_argument('--ir-only', dest='ir_only', action='store_true')
 parser.set_defaults(ir_only=False)
 args = parser.parse_args()
 

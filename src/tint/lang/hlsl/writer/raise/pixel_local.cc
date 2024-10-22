@@ -245,7 +245,10 @@ struct State {
 }  // namespace
 
 Result<SuccessType> PixelLocal(core::ir::Module& ir, const PixelLocalConfig& config) {
-    auto result = ValidateAndDumpIfNeeded(ir, "PixelLocal transform");
+    auto result = ValidateAndDumpIfNeeded(ir, "PixelLocal transform",
+                                          core::ir::Capabilities{
+                                              core::ir::Capability::kAllowClipDistancesOnF32,
+                                          });
     if (result != Success) {
         return result.Failure();
     }
