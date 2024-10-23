@@ -68,6 +68,9 @@ class PipelineLayout final : public PipelineLayoutBase {
 
     uint32_t GetUnusedUAVBindingCount() const { return mUnusedUAVBindingCount; }
     uint32_t GetTotalUAVBindingCount() const { return mTotalUAVBindingCount; }
+    uint32_t GetPLSSlotCount() const {
+        return static_cast<uint32_t>(GetStorageAttachmentSlots().size());
+    }
 
     // Get the bind groups that use one or more UAV slots.
     const BindGroupMask& GetUAVBindGroupLayoutsMask() const;

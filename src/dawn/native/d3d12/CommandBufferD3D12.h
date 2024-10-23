@@ -38,9 +38,12 @@ struct BeginRenderPassCmd;
 
 namespace dawn::native::d3d12 {
 
+template <typename PipelineType>
 class BindGroupStateTracker;
 class CommandRecordingContext;
+class ComputePipeline;
 class RenderPassBuilder;
+class RenderPipeline;
 
 class CommandBuffer final : public CommandBufferBase {
   public:
@@ -53,11 +56,11 @@ class CommandBuffer final : public CommandBufferBase {
     CommandBuffer(CommandEncoder* encoder, const CommandBufferDescriptor* descriptor);
 
     MaybeError RecordComputePass(CommandRecordingContext* commandContext,
-                                 BindGroupStateTracker* bindingTracker,
+                                 BindGroupStateTracker<ComputePipeline>* bindingTracker,
                                  BeginComputePassCmd* computePass,
                                  const ComputePassResourceUsage& resourceUsages);
     MaybeError RecordRenderPass(CommandRecordingContext* commandContext,
-                                BindGroupStateTracker* bindingTracker,
+                                BindGroupStateTracker<RenderPipeline>* bindingTracker,
                                 BeginRenderPassCmd* renderPass,
                                 bool passHasUAV);
     MaybeError SetupRenderPass(CommandRecordingContext* commandContext,

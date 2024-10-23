@@ -475,7 +475,7 @@ MaybeError CommandBuffer::Execute(const ScopedSwapStateCommandRecordingContext* 
 MaybeError CommandBuffer::ExecuteComputePass(
     const ScopedSwapStateCommandRecordingContext* commandContext) {
     ComputePipeline* lastPipeline = nullptr;
-    BindGroupTracker bindGroupTracker(commandContext, /*isRenderPass=*/false);
+    ComputePassBindGroupTracker bindGroupTracker(commandContext);
 
     Command type;
     while (mCommands.NextCommandId(&type)) {
@@ -650,8 +650,7 @@ MaybeError CommandBuffer::ExecuteRenderPass(
     d3d11DeviceContext->RSSetScissorRects(1, &scissor);
 
     RenderPipeline* lastPipeline = nullptr;
-    BindGroupTracker bindGroupTracker(commandContext, /*isRenderPass=*/true,
-                                      std::move(pixelLocalStorageUAVs));
+    RenderPassBindGroupTracker bindGroupTracker(commandContext, std::move(pixelLocalStorageUAVs));
     VertexBufferTracker vertexBufferTracker(commandContext);
     std::array<float, 4> blendColor = {0.0f, 0.0f, 0.0f, 0.0f};
     uint32_t stencilReference = 0;
