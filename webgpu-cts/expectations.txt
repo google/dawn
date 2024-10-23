@@ -1338,6 +1338,7 @@ crbug.com/dawn/374691235 [ amd-0x7340 dawn-no-backend-validation mac ] webgpu:sh
 
 # Flaky on MacBookPro16,1 (AMD) machines
 crbug.com/371963563 [ amd mac ] webgpu:shader,execution,expression,call,builtin,atomics,atomicAnd:and_workgroup:workgroupSize=64;dispatchSize=16;mapId="passthrough";scalarType="u32" [ RetryOnFailure ]
+crbug.com/371963563 [ amd mac ] webgpu:shader,execution,expression,call,builtin,atomics,atomicAnd:and_workgroup:workgroupSize=64;dispatchSize=16;mapId="remap";scalarType="u32" [ RetryOnFailure ]
 crbug.com/371963563 [ amd mac ] webgpu:shader,execution,expression,call,builtin,atomics,atomicAnd:and_workgroup:workgroupSize=64;dispatchSize=1;mapId="passthrough";scalarType="i32" [ RetryOnFailure ]
 crbug.com/371963563 [ amd mac ] webgpu:shader,execution,expression,call,builtin,atomics,atomicAnd:and_workgroup:workgroupSize=64;dispatchSize=1;mapId="passthrough";scalarType="u32" [ RetryOnFailure ]
 crbug.com/371963563 [ amd mac ] webgpu:shader,execution,expression,call,builtin,atomics,atomicAnd:and_workgroup:workgroupSize=64;dispatchSize=1;mapId="remap";scalarType="i32" [ RetryOnFailure ]
@@ -1349,9 +1350,8 @@ crbug.com/371963563 [ amd mac ] webgpu:shader,execution,expression,call,builtin,
 crbug.com/371963563 [ amd mac ] webgpu:shader,execution,expression,call,builtin,atomics,atomicOr:or_workgroup:workgroupSize=64;dispatchSize=1;mapId="remap";scalarType="u32" [ RetryOnFailure ]
 crbug.com/371963563 [ amd mac ] webgpu:shader,execution,expression,call,builtin,atomics,atomicOr:or_workgroup:workgroupSize=64;dispatchSize=8;mapId="passthrough";scalarType="u32" [ RetryOnFailure ]
 crbug.com/372055513 [ amd mac ] webgpu:shader,execution,expression,call,builtin,subgroupBroadcast:workgroup_uniform_load:* [ RetryOnFailure ]
-crbug.com/372055515 [ amd mac ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="DepthTest";format="depth16unorm" [ RetryOnFailure ]
-crbug.com/372055515 [ amd mac ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="DepthTest";format="depth32float" [ RetryOnFailure ]
-crbug.com/372055515 [ amd mac ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="StencilTest";format="depth24plus-stencil8" [ RetryOnFailure ]
+crbug.com/372055515 [ amd mac ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="DepthTest";format=* [ RetryOnFailure ]
+crbug.com/372055515 [ amd mac ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="StencilTest";format=* [ RetryOnFailure ]
 
 ################################################################################
 # Assorted failures that are missing bug associations (NEEDS TRIAGE)
@@ -1544,7 +1544,8 @@ crbug.com/dawn/0000 [ webgpu-dxc-disabled win10 ] webgpu:shader,execution,memory
 
 crbug.com/dawn/0000 [ intel-0x3e9b mac-x86_64 ] webgpu:web_platform,external_texture,video:importExternalTexture,* [ Failure ]
 crbug.com/dawn/0000 [ intel-0x3e9b mac-x86_64 webgpu-adapter-swiftshader ] webgpu:web_platform,copyToTexture,canvas:copy_contents_from_bitmaprenderer_context_canvas:* [ Failure ]
-crbug.com/dawn/2327 [ intel-0x3e9b mac ] webgpu:shader,execution,zero_init:compute,zero_init:addressSpace="workgroup";* [ Failure ]
+crbug.com/42241269 [ intel-0x3e9b mac ] webgpu:shader,execution,zero_init:compute,zero_init:addressSpace="workgroup";* [ Failure ]
+crbug.com/42241269 [ mac amd ] webgpu:shader,execution,zero_init:compute,zero_init:addressSpace="workgroup";* [ Failure ]
 
 crbug.com/dawn/0000 [ amd mac-x86_64 webgpu-adapter-swiftshader ] webgpu:web_platform,copyToTexture,canvas:copy_contents_from_bitmaprenderer_context_canvas:* [ Failure ]
 crbug.com/dawn/0000 [ mac-arm64 webgpu-adapter-swiftshader webgpu-no-worker ] webgpu:web_platform,copyToTexture,canvas:copy_contents_from_bitmaprenderer_context_canvas:* [ Failure ]
