@@ -76,6 +76,7 @@ libtint_source_set("resolver") {
     "${tint_src_dir}/lang/wgsl/intrinsic",
     "${tint_src_dir}/lang/wgsl/program",
     "${tint_src_dir}/lang/wgsl/sem",
+    "${tint_src_dir}/utils/constants",
     "${tint_src_dir}/utils/containers",
     "${tint_src_dir}/utils/diagnostic",
     "${tint_src_dir}/utils/ice",

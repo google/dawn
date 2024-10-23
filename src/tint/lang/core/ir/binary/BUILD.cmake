@@ -54,6 +54,7 @@ tint_target_add_dependencies(tint_lang_core_ir_binary lib
   tint_lang_core_intrinsic
   tint_lang_core_ir
   tint_lang_core_type
+  tint_utils_constants
   tint_utils_containers
   tint_utils_diagnostic
   tint_utils_ice

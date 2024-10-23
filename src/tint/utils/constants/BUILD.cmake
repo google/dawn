@@ -1,4 +1,4 @@
-# Copyright 2023 The Dawn & Tint Authors
+# Copyright 2024 The Dawn & Tint Authors
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
@@ -34,27 +34,11 @@
 #                       Do not modify this file directly
 ################################################################################
 
-include(utils/bytes/BUILD.cmake)
-include(utils/cli/BUILD.cmake)
-include(utils/command/BUILD.cmake)
-include(utils/constants/BUILD.cmake)
-include(utils/containers/BUILD.cmake)
-include(utils/debug/BUILD.cmake)
-include(utils/diagnostic/BUILD.cmake)
-include(utils/file/BUILD.cmake)
-include(utils/generator/BUILD.cmake)
-include(utils/ice/BUILD.cmake)
-include(utils/id/BUILD.cmake)
-include(utils/macros/BUILD.cmake)
-include(utils/math/BUILD.cmake)
-include(utils/memory/BUILD.cmake)
-include(utils/protos/BUILD.cmake)
-include(utils/reflection/BUILD.cmake)
-include(utils/result/BUILD.cmake)
-include(utils/rtti/BUILD.cmake)
-include(utils/socket/BUILD.cmake)
-include(utils/strconv/BUILD.cmake)
-include(utils/symbol/BUILD.cmake)
-include(utils/system/BUILD.cmake)
-include(utils/text/BUILD.cmake)
-include(utils/traits/BUILD.cmake)
+################################################################################
+# Target:    tint_utils_constants
+# Kind:      lib
+################################################################################
+tint_add_target(tint_utils_constants lib
+  utils/constants/internal_limits.cc
+  utils/constants/internal_limits.h
+)
