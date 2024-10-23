@@ -42,7 +42,7 @@ def go_path(input_api):
 def gofmt_path(input_api):
     gofmt = input_api.os_path.join(go_bin_path(input_api), 'gofmt')
     if input_api.is_windows:
-        go += '.exe'
+        gofmt += '.exe'
     return gofmt
 
 
