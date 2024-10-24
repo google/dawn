@@ -572,15 +572,21 @@ void PhysicalDevice::SetupBackendAdapterToggles(dawn::platform::Platform* platfo
     }
 
     // Workaround for textureDimensions() produces incorrect results with shader model 6.6 on Intel
-    // D3D driver > 27.20.100.8935 and < 27.20.100.9684 on Intel Gen9, Gen9.5 and Gen11 GPUs.
+    // D3D driver > 27.20.100.8935 and < 27.20.100.9684 on Intel Gen9 and Gen9.5 GPUs.
     // See https://crbug.com/dawn/2448 for more information.
-    if (gpu_info::IsIntelGen9(vendorId, deviceId) || gpu_info::IsIntelGen11(vendorId, deviceId)) {
+    if (gpu_info::IsIntelGen9(vendorId, deviceId)) {
         if (gpu_info::CompareWindowsDriverVersion(vendorId, GetDriverVersion(),
                                                   {27, 20, 100, 8935}) == 1 &&
             gpu_info::CompareWindowsDriverVersion(vendorId, GetDriverVersion(),
                                                   {27, 20, 100, 9684}) == -1) {
             adapterToggles->ForceSet(Toggle::D3D12DontUseShaderModel66OrHigher, true);
         }
+    }
+
+    // On Intel Gen11 D3D12 GPUs using shader model 6.6 causes many unexpected issues.
+    // See https://crbug.com/374606634 for more information.
+    if (gpu_info::IsIntelGen11(vendorId, deviceId)) {
+        adapterToggles->ForceSet(Toggle::D3D12DontUseShaderModel66OrHigher, true);
     }
 }
 
