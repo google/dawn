@@ -747,7 +747,11 @@ class CompilationInfoEvent final : public TrackedEvent {
   CompilationInfoEvent(InstanceID instance,
                        WGPUShaderModule shader,
                        const WGPUCompilationInfoCallbackInfo2& callbackInfo)
-      : TrackedEvent(instance, callbackInfo.mode), mShader(shader) {}
+      : TrackedEvent(instance, callbackInfo.mode),
+        mCallback(callbackInfo.callback),
+        mUserdata1(callbackInfo.userdata1),
+        mUserdata2(callbackInfo.userdata2),
+        mShader(shader) {}
 
   EventType GetType() override { return kType; }
 
@@ -946,7 +950,11 @@ class MapAsyncEvent final : public TrackedEvent {
   MapAsyncEvent(InstanceID instance,
                 WGPUBuffer buffer,
                 const WGPUBufferMapCallbackInfo2& callbackInfo)
-      : TrackedEvent(instance, callbackInfo.mode), mBuffer(buffer) {}
+      : TrackedEvent(instance, callbackInfo.mode),
+        mCallback(callbackInfo.callback),
+        mUserdata1(callbackInfo.userdata1),
+        mUserdata2(callbackInfo.userdata2),
+        mBuffer(buffer) {}
 
   EventType GetType() override { return kType; }
 
