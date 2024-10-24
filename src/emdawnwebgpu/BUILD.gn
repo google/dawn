@@ -76,8 +76,7 @@ if (dawn_emscripten_dir != "") {
         ":emdawnwebgpu_js_gen",  # for struct_info_webgpu.json
       ]
 
-      script = rebase_path(dawn_emscripten_dir, root_build_dir) +
-               "/tools/maint/gen_struct_info.py"
+      script = dawn_emscripten_dir + "/tools/maint/gen_struct_info.py"
       args = [
         "-q",  # quiet
         rebase_path(sources[0], root_build_dir),  # input file
