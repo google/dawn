@@ -1,4 +1,4 @@
-SKIP: FAILED
+SKIP: INVALID
 
 ..\..\src\tint\lang\hlsl\writer\printer\printer.cc:522 internal compiler error: unhandled address space push_constant
 ********************************************************************
