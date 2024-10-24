@@ -199,7 +199,11 @@ tint::Result<tint::cmd::fuzz::ir::pb::Root> GenerateFuzzCaseProto(const tint::Pr
     tint::cmd::fuzz::ir::pb::Root fuzz_pb;
     {
         auto ir_pb = tint::core::ir::binary::EncodeToProto(module.Get());
-        fuzz_pb.set_allocated_module(ir_pb.release());
+        if (ir_pb != tint::Success) {
+            std::cerr << " Failed to encode IR to proto: " << ir_pb.Failure() << "\n";
+            return tint::Failure();
+        }
+        fuzz_pb.set_allocated_module(ir_pb.Get().release());
     }
 
     return std::move(fuzz_pb);

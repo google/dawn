@@ -29,6 +29,7 @@
 #include "src/tint/lang/core/ir/binary/decode.h"
 #include "src/tint/lang/core/ir/binary/encode.h"
 #include "src/tint/lang/core/ir/disassembler.h"
+#include "src/tint/lang/core/ir/validator.h"
 
 namespace tint::core::ir::binary {
 namespace {
@@ -36,7 +37,11 @@ namespace {
 void IRBinaryRoundtripFuzzer(core::ir::Module& module) {
     auto encoded = EncodeToBinary(module);
     if (encoded != Success) {
-        TINT_ICE() << "Encode() failed\n" << encoded.Failure();
+        // Failing to encode, not ICE'ing, indicates that an internal limit to the IR binary
+        // encoding/decoding logic was hit. Due to differences between the AST and IR
+        // implementations, there exist corner cases where these internal limits are hit for IR,
+        // but not AST.
+        return;
     }
 
     auto decoded = Decode(encoded->Slice());

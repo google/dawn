@@ -46,7 +46,7 @@ class Module;
 namespace tint::core::ir::binary {
 
 // Encode the module into a proto representation.
-std::unique_ptr<pb::Module> EncodeToProto(const Module& module);
+Result<std::unique_ptr<pb::Module>> EncodeToProto(const Module& module);
 
 // Encode the module into a binary representation.
 Result<Vector<std::byte, 0>> EncodeToBinary(const Module& module);
