@@ -587,7 +587,7 @@ var LibraryWebGPU = {
     if (timeoutNSPtr) {
       var timeoutMS = {{{ gpu.makeGetU64('timeoutNSPtr', 0) }}} / 1000000;
       promises.length = futureCount + 1;
-      promise[futureCount] = new Promise((resolve) => setTimeout(resolve, timeoutMS, 0));
+      promises[futureCount] = new Promise((resolve) => setTimeout(resolve, timeoutMS, 0));
     } else {
       promises.length = futureCount;
     }
