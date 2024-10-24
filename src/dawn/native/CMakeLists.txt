@@ -864,6 +864,11 @@ if (DAWN_ENABLE_SWIFTSHADER)
     target_compile_definitions(dawn_native_objects PRIVATE "DAWN_ENABLE_SWIFTSHADER")
 endif()
 
+if (IOS)
+    target_compile_options(dawn_native_objects PRIVATE -fno-objc-arc)
+    target_compile_options(dawn_native PRIVATE -fno-objc-arc)
+endif()
+
 if (DAWN_BUILD_MONOLITHIC_LIBRARY)
     ###############################################################################
     # Do the 'complete_lib' build.
