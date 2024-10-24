@@ -9,7 +9,7 @@ float4 func(uint pointer_indices[1]) {
 
 [numthreads(1, 1, 1)]
 void main() {
-  uint v_1[1] = (uint[1])0;
+  uint v_1[1] = {uint(int(1))};
   float4 r = func(v_1);
 }
 

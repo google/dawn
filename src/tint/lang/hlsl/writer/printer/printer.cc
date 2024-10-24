@@ -777,18 +777,9 @@ class Printer : public tint::TextGenerator {
         Switch(
             c->Result(0)->Type(),
             [&](const core::type::Array*) {
-                // The PromoteInitializers transform will inject splat arrays as composites of one
-                // element. These need to convert to `(type)0` in HLSL otherwise DXC will complain
-                // about missing values.
-                if (c->Args().Length() == 1) {
-                    out << "(";
-                    EmitType(out, c->Result(0)->Type());
-                    out << ")0";
-                } else {
-                    out << "{";
-                    emit_args();
-                    out << "}";
-                }
+                out << "{";
+                emit_args();
+                out << "}";
             },
             [&](const core::type::Struct*) {
                 out << "{";
