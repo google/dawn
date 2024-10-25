@@ -90,19 +90,19 @@ float3 tint_GammaCorrection(float3 v, tint_GammaTransferParams params) {
   return select((v_4 * (powr(((params.A * v_3) + params.B), v_1) + params.E)), (v_4 * ((params.C * v_3) + params.F)), (v_3 < v_2));
 }
 
-float4 tint_TextureSampleExternal(texture2d<float, access::sample> plane_0, texture2d<float, access::sample> plane_1, tint_ExternalTextureParams params, sampler sampler, float2 coords) {
+float4 tint_TextureSampleExternal(texture2d<float, access::sample> plane_0, texture2d<float, access::sample> plane_1, tint_ExternalTextureParams params, sampler tint_sampler, float2 coords) {
   float2 const v_5 = (params.sampleTransform * float3(coords, 1.0f));
   float2 const v_6 = clamp(v_5, params.samplePlane0RectMin, params.samplePlane0RectMax);
   float3 v_7 = 0.0f;
   float v_8 = 0.0f;
   if ((params.numPlanes == 1u)) {
-    float4 const v_9 = plane_0.sample(sampler, v_6, level(0.0f));
+    float4 const v_9 = plane_0.sample(tint_sampler, v_6, level(0.0f));
     v_7 = v_9.xyz;
     v_8 = v_9[3u];
   } else {
-    float const v_10 = plane_0.sample(sampler, v_6, level(0.0f))[0u];
+    float const v_10 = plane_0.sample(tint_sampler, v_6, level(0.0f))[0u];
     float2 const v_11 = clamp(v_5, params.samplePlane1RectMin, params.samplePlane1RectMax);
-    v_7 = (float4(v_10, plane_1.sample(sampler, v_11, level(0.0f)).xy, 1.0f) * params.yuvToRgbConversionMatrix);
+    v_7 = (float4(v_10, plane_1.sample(tint_sampler, v_11, level(0.0f)).xy, 1.0f) * params.yuvToRgbConversionMatrix);
     v_8 = 1.0f;
   }
   float3 const v_12 = v_7;

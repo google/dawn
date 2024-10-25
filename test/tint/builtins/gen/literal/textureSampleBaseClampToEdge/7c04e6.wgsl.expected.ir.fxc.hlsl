@@ -1,5 +1,3 @@
-SKIP: FAILED
-
 struct tint_GammaTransferParams {
   float G;
   float A;
@@ -54,19 +52,19 @@ float3 tint_GammaCorrection(float3 v, tint_GammaTransferParams params) {
   return (((v_3 < v_2)) ? ((v_4 * ((params.C * v_3) + params.F))) : ((v_4 * (pow(((params.A * v_3) + params.B), v_1) + params.E))));
 }
 
-float4 tint_TextureSampleExternal(Texture2D<float4> plane_0, Texture2D<float4> plane_1, tint_ExternalTextureParams params, SamplerState sampler, float2 coords) {
+float4 tint_TextureSampleExternal(Texture2D<float4> plane_0, Texture2D<float4> plane_1, tint_ExternalTextureParams params, SamplerState tint_sampler, float2 coords) {
   float2 v_5 = mul(float3(coords, 1.0f), params.sampleTransform);
   float2 v_6 = clamp(v_5, params.samplePlane0RectMin, params.samplePlane0RectMax);
   float3 v_7 = (0.0f).xxx;
   float v_8 = 0.0f;
   if ((params.numPlanes == 1u)) {
-    float4 v_9 = plane_0.SampleLevel(sampler, v_6, float(0.0f));
+    float4 v_9 = plane_0.SampleLevel(tint_sampler, v_6, float(0.0f));
     v_7 = v_9.xyz;
     v_8 = v_9[3u];
   } else {
-    float v_10 = plane_0.SampleLevel(sampler, v_6, float(0.0f))[0u];
+    float v_10 = plane_0.SampleLevel(tint_sampler, v_6, float(0.0f))[0u];
     float2 v_11 = clamp(v_5, params.samplePlane1RectMin, params.samplePlane1RectMax);
-    v_7 = mul(params.yuvToRgbConversionMatrix, float4(v_10, plane_1.SampleLevel(sampler, v_11, float(0.0f)).xy, 1.0f));
+    v_7 = mul(params.yuvToRgbConversionMatrix, float4(v_10, plane_1.SampleLevel(tint_sampler, v_11, float(0.0f)).xy, 1.0f));
     v_8 = 1.0f;
   }
   float3 v_12 = v_7;
@@ -134,15 +132,13 @@ tint_ExternalTextureParams v_37(uint start_byte_offset) {
   uint4 v_54 = arg_0_params[((256u + start_byte_offset) / 16u)];
   uint2 v_55 = ((((((256u + start_byte_offset) % 16u) / 4u) == 2u)) ? (v_54.zw) : (v_54.xy));
   uint4 v_56 = arg_0_params[((264u + start_byte_offset) / 16u)];
-  tint_GammaTransferParams v_57 = v_41;
-  tint_GammaTransferParams v_58 = v_42;
-  tint_ExternalTextureParams v_59 = {v_38, v_39, v_40, v_57, v_58, v_43, v_44, v_45, v_47, v_49, v_51, v_53, v_55, asfloat(((((((264u + start_byte_offset) % 16u) / 4u) == 2u)) ? (v_56.zw) : (v_56.xy)))};
-  return v_59;
+  tint_ExternalTextureParams v_57 = {v_38, v_39, v_40, v_41, v_42, v_43, v_44, v_45, v_47, v_49, v_51, v_53, v_55, asfloat(((((((264u + start_byte_offset) % 16u) / 4u) == 2u)) ? (v_56.zw) : (v_56.xy)))};
+  return v_57;
 }
 
 float4 textureSampleBaseClampToEdge_7c04e6() {
-  tint_ExternalTextureParams v_60 = v_37(0u);
-  float4 res = tint_TextureSampleExternal(arg_0_plane0, arg_0_plane1, v_60, arg_1, (1.0f).xx);
+  tint_ExternalTextureParams v_58 = v_37(0u);
+  float4 res = tint_TextureSampleExternal(arg_0_plane0, arg_0_plane1, v_58, arg_1, (1.0f).xx);
   return res;
 }
 
@@ -159,21 +155,13 @@ VertexOutput vertex_main_inner() {
   VertexOutput tint_symbol = (VertexOutput)0;
   tint_symbol.pos = (0.0f).xxxx;
   tint_symbol.prevent_dce = textureSampleBaseClampToEdge_7c04e6();
-  VertexOutput v_61 = tint_symbol;
-  return v_61;
+  VertexOutput v_59 = tint_symbol;
+  return v_59;
 }
 
 vertex_main_outputs vertex_main() {
-  VertexOutput v_62 = vertex_main_inner();
-  VertexOutput v_63 = v_62;
-  VertexOutput v_64 = v_62;
-  vertex_main_outputs v_65 = {v_64.prevent_dce, v_63.pos};
-  return v_65;
+  VertexOutput v_60 = vertex_main_inner();
+  vertex_main_outputs v_61 = {v_60.prevent_dce, v_60.pos};
+  return v_61;
 }
 
-FXC validation failure:
-<scrubbed_path>(55,137-143): error X3000: syntax error: unexpected token 'sampler'
-<scrubbed_path>(56,27-32): error X3004: undeclared identifier 'coords'
-
-
-tint executable returned error: exit status 1

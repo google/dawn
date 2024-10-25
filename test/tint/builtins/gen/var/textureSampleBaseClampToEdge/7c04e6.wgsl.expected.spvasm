@@ -80,7 +80,7 @@
                OpName %plane_0 "plane_0"
                OpName %plane_1 "plane_1"
                OpName %params "params"
-               OpName %sampler "sampler"
+               OpName %tint_sampler "tint_sampler"
                OpName %coords "coords"
                OpName %tint_GammaCorrection "tint_GammaCorrection"
                OpName %v "v"
@@ -261,7 +261,7 @@
     %plane_0 = OpFunctionParameter %8
     %plane_1 = OpFunctionParameter %8
      %params = OpFunctionParameter %tint_ExternalTextureParams
-    %sampler = OpFunctionParameter %22
+%tint_sampler = OpFunctionParameter %22
      %coords = OpFunctionParameter %v2float
          %83 = OpLabel
          %84 = OpCompositeExtract %uint %params 1
@@ -279,17 +279,17 @@
                OpSelectionMerge %98 None
                OpBranchConditional %96 %99 %100
          %99 = OpLabel
-        %101 = OpSampledImage %102 %plane_0 %sampler
+        %101 = OpSampledImage %102 %plane_0 %tint_sampler
         %103 = OpImageSampleExplicitLod %v4float %101 %93 Lod %float_0
         %105 = OpVectorShuffle %v3float %103 %103 0 1 2
         %106 = OpCompositeExtract %float %103 3
                OpBranch %98
         %100 = OpLabel
-        %107 = OpSampledImage %102 %plane_0 %sampler
+        %107 = OpSampledImage %102 %plane_0 %tint_sampler
         %108 = OpImageSampleExplicitLod %v4float %107 %93 Lod %float_0
         %109 = OpCompositeExtract %float %108 0
         %110 = OpExtInst %v2float %94 NClamp %92 %89 %90
-        %111 = OpSampledImage %102 %plane_1 %sampler
+        %111 = OpSampledImage %102 %plane_1 %tint_sampler
         %112 = OpImageSampleExplicitLod %v4float %111 %110 Lod %float_0
         %113 = OpVectorShuffle %v2float %112 %112 0 1
         %114 = OpCompositeConstruct %v4float %109 %113 %float_1

@@ -527,7 +527,7 @@ struct State {
         auto* plane_0 = b.FunctionParam("plane_0", SampledTexture());
         auto* plane_1 = b.FunctionParam("plane_1", SampledTexture());
         auto* params = b.FunctionParam("params", ExternalTextureParams());
-        auto* sampler = b.FunctionParam("sampler", ty.sampler());
+        auto* sampler = b.FunctionParam("tint_sampler", ty.sampler());
         auto* coords = b.FunctionParam("coords", ty.vec2<f32>());
         texture_sample_external->SetParams({plane_0, plane_1, params, sampler, coords});
         b.Append(texture_sample_external->Block(), [&] {

@@ -52,19 +52,19 @@ float3 tint_GammaCorrection(float3 v, tint_GammaTransferParams params) {
   return (((v_3 < v_2)) ? ((v_4 * ((params.C * v_3) + params.F))) : ((v_4 * (pow(((params.A * v_3) + params.B), v_1) + params.E))));
 }
 
-float4 tint_TextureSampleExternal(Texture2D<float4> plane_0, Texture2D<float4> plane_1, tint_ExternalTextureParams params, SamplerState sampler, float2 coords) {
+float4 tint_TextureSampleExternal(Texture2D<float4> plane_0, Texture2D<float4> plane_1, tint_ExternalTextureParams params, SamplerState tint_sampler, float2 coords) {
   float2 v_5 = mul(float3(coords, 1.0f), params.sampleTransform);
   float2 v_6 = clamp(v_5, params.samplePlane0RectMin, params.samplePlane0RectMax);
   float3 v_7 = (0.0f).xxx;
   float v_8 = 0.0f;
   if ((params.numPlanes == 1u)) {
-    float4 v_9 = plane_0.SampleLevel(sampler, v_6, float(0.0f));
+    float4 v_9 = plane_0.SampleLevel(tint_sampler, v_6, float(0.0f));
     v_7 = v_9.xyz;
     v_8 = v_9[3u];
   } else {
-    float v_10 = plane_0.SampleLevel(sampler, v_6, float(0.0f))[0u];
+    float v_10 = plane_0.SampleLevel(tint_sampler, v_6, float(0.0f))[0u];
     float2 v_11 = clamp(v_5, params.samplePlane1RectMin, params.samplePlane1RectMax);
-    v_7 = mul(params.yuvToRgbConversionMatrix, float4(v_10, plane_1.SampleLevel(sampler, v_11, float(0.0f)).xy, 1.0f));
+    v_7 = mul(params.yuvToRgbConversionMatrix, float4(v_10, plane_1.SampleLevel(tint_sampler, v_11, float(0.0f)).xy, 1.0f));
     v_8 = 1.0f;
   }
   float3 v_12 = v_7;

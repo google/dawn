@@ -682,7 +682,7 @@ $B1: {  # root
     ret %result
   }
 }
-%tint_TextureSampleExternal = func(%plane_0:texture_2d<f32>, %plane_1:texture_2d<f32>, %params:tint_ExternalTextureParams, %sampler_1:sampler, %coords_1:vec2<f32>):vec4<f32> {  # %sampler_1: 'sampler', %coords_1: 'coords'
+%tint_TextureSampleExternal = func(%plane_0:texture_2d<f32>, %plane_1:texture_2d<f32>, %params:tint_ExternalTextureParams, %tint_sampler:sampler, %coords_1:vec2<f32>):vec4<f32> {  # %coords_1: 'coords'
   $B3: {
     %17:u32 = access %params, 1u
     %18:mat3x4<f32> = access %params, 2u
@@ -698,16 +698,16 @@ $B1: {  # root
     %28:bool = eq %27, 1u
     %29:vec3<f32>, %30:f32 = if %28 [t: $B4, f: $B5] {  # if_1
       $B4: {  # true
-        %31:vec4<f32> = textureSampleLevel %plane_0, %sampler_1, %26, 0.0f
+        %31:vec4<f32> = textureSampleLevel %plane_0, %tint_sampler, %26, 0.0f
         %32:vec3<f32> = swizzle %31, xyz
         %33:f32 = access %31, 3u
         exit_if %32, %33  # if_1
       }
       $B5: {  # false
-        %34:vec4<f32> = textureSampleLevel %plane_0, %sampler_1, %26, 0.0f
+        %34:vec4<f32> = textureSampleLevel %plane_0, %tint_sampler, %26, 0.0f
         %35:f32 = access %34, 0u
         %36:vec2<f32> = clamp %25, %22, %23
-        %37:vec4<f32> = textureSampleLevel %plane_1, %sampler_1, %36, 0.0f
+        %37:vec4<f32> = textureSampleLevel %plane_1, %tint_sampler, %36, 0.0f
         %38:vec2<f32> = swizzle %37, xy
         %39:vec4<f32> = construct %35, %38, 1.0f
         %40:vec3<f32> = mul %39, %18
@@ -870,7 +870,7 @@ $B1: {  # root
     ret %result_1
   }
 }
-%tint_TextureSampleExternal = func(%plane_0:texture_2d<f32>, %plane_1:texture_2d<f32>, %params:tint_ExternalTextureParams, %sampler_2:sampler, %coords_2:vec2<f32>):vec4<f32> {  # %sampler_2: 'sampler', %coords_2: 'coords'
+%tint_TextureSampleExternal = func(%plane_0:texture_2d<f32>, %plane_1:texture_2d<f32>, %params:tint_ExternalTextureParams, %tint_sampler:sampler, %coords_2:vec2<f32>):vec4<f32> {  # %coords_2: 'coords'
   $B4: {
     %24:u32 = access %params, 1u
     %25:mat3x4<f32> = access %params, 2u
@@ -886,16 +886,16 @@ $B1: {  # root
     %35:bool = eq %34, 1u
     %36:vec3<f32>, %37:f32 = if %35 [t: $B5, f: $B6] {  # if_1
       $B5: {  # true
-        %38:vec4<f32> = textureSampleLevel %plane_0, %sampler_2, %33, 0.0f
+        %38:vec4<f32> = textureSampleLevel %plane_0, %tint_sampler, %33, 0.0f
         %39:vec3<f32> = swizzle %38, xyz
         %40:f32 = access %38, 3u
         exit_if %39, %40  # if_1
       }
       $B6: {  # false
-        %41:vec4<f32> = textureSampleLevel %plane_0, %sampler_2, %33, 0.0f
+        %41:vec4<f32> = textureSampleLevel %plane_0, %tint_sampler, %33, 0.0f
         %42:f32 = access %41, 0u
         %43:vec2<f32> = clamp %32, %29, %30
-        %44:vec4<f32> = textureSampleLevel %plane_1, %sampler_2, %43, 0.0f
+        %44:vec4<f32> = textureSampleLevel %plane_1, %tint_sampler, %43, 0.0f
         %45:vec2<f32> = swizzle %44, xy
         %46:vec4<f32> = construct %42, %45, 1.0f
         %47:vec3<f32> = mul %46, %25
@@ -1091,7 +1091,7 @@ $B1: {  # root
     ret %33
   }
 }
-%tint_TextureSampleExternal = func(%plane_0:texture_2d<f32>, %plane_1:texture_2d<f32>, %params:tint_ExternalTextureParams, %sampler_2:sampler, %coords_2:vec2<f32>):vec4<f32> {  # %sampler_2: 'sampler', %coords_2: 'coords'
+%tint_TextureSampleExternal = func(%plane_0:texture_2d<f32>, %plane_1:texture_2d<f32>, %params:tint_ExternalTextureParams, %tint_sampler:sampler, %coords_2:vec2<f32>):vec4<f32> {  # %coords_2: 'coords'
   $B4: {
     %39:u32 = access %params, 1u
     %40:mat3x4<f32> = access %params, 2u
@@ -1107,16 +1107,16 @@ $B1: {  # root
     %50:bool = eq %49, 1u
     %51:vec3<f32>, %52:f32 = if %50 [t: $B5, f: $B6] {  # if_1
       $B5: {  # true
-        %53:vec4<f32> = textureSampleLevel %plane_0, %sampler_2, %48, 0.0f
+        %53:vec4<f32> = textureSampleLevel %plane_0, %tint_sampler, %48, 0.0f
         %54:vec3<f32> = swizzle %53, xyz
         %55:f32 = access %53, 3u
         exit_if %54, %55  # if_1
       }
       $B6: {  # false
-        %56:vec4<f32> = textureSampleLevel %plane_0, %sampler_2, %48, 0.0f
+        %56:vec4<f32> = textureSampleLevel %plane_0, %tint_sampler, %48, 0.0f
         %57:f32 = access %56, 0u
         %58:vec2<f32> = clamp %47, %44, %45
-        %59:vec4<f32> = textureSampleLevel %plane_1, %sampler_2, %58, 0.0f
+        %59:vec4<f32> = textureSampleLevel %plane_1, %tint_sampler, %58, 0.0f
         %60:vec2<f32> = swizzle %59, xy
         %61:vec4<f32> = construct %57, %60, 1.0f
         %62:vec3<f32> = mul %61, %40
