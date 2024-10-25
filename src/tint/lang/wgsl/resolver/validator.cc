@@ -641,6 +641,22 @@ bool Validator::AddressSpaceLayout(const core::type::Type* store_ty,
                     return false;
                 }
             }
+
+            // If an alignment was explicitly specified, we need to validate that it satisfies the
+            // alignment requirement of the address space.
+            auto* align_attr =
+                ast::GetAttribute<ast::StructMemberAlignAttribute>(m->Declaration()->attributes);
+            if (align_attr && !enabled_extensions_.Contains(
+                                  wgsl::Extension::kChromiumInternalRelaxedUniformLayout)) {
+                auto align = sem_.GetVal(align_attr->expr)->ConstantValue()->ValueAs<uint32_t>();
+                if (align % required_align != 0) {
+                    AddError(align_attr->expr->source)
+                        << "alignment must be a multiple of " << style::Literal(required_align)
+                        << " bytes for the " << style::Enum(address_space) << " address space";
+                    note_usage();
+                    return false;
+                }
+            }
         }
     }
 
