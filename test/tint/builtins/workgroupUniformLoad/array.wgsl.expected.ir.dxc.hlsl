@@ -5,8 +5,7 @@ ary_ret foo() {
   GroupMemoryBarrierWithGroupSync();
   int v_1[4] = v;
   GroupMemoryBarrierWithGroupSync();
-  int v_2[4] = v_1;
-  return v_2;
+  return v_1;
 }
 
 [numthreads(1, 1, 1)]

@@ -47,8 +47,7 @@ S v_10(uint offset) {
 
 [numthreads(1, 1, 1)]
 void main() {
-  S v_13 = v_10(0u);
-  S t = v_13;
+  S t = v_10(0u);
   v_2(0u, t);
 }
 

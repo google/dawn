@@ -27,7 +27,6 @@ main_outputs main() {
   if (!(continue_execution)) {
     discard;
   }
-  main_outputs v_4 = v_3;
-  return v_4;
+  return v_3;
 }
 

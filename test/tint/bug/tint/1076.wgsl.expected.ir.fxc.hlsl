@@ -26,9 +26,7 @@ FragIn main_inner(FragIn tint_symbol, float b) {
 main_outputs main(main_inputs inputs) {
   FragIn v_1 = {inputs.FragIn_a, inputs.FragIn_mask};
   FragIn v_2 = main_inner(v_1, inputs.b);
-  FragIn v_3 = v_2;
-  FragIn v_4 = v_2;
-  main_outputs v_5 = {v_3.a, v_4.mask};
-  return v_5;
+  main_outputs v_3 = {v_2.a, v_2.mask};
+  return v_3;
 }
 

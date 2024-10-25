@@ -16,9 +16,7 @@ FragmentOutputs main_inner() {
 
 main_outputs main() {
   FragmentOutputs v_1 = main_inner();
-  FragmentOutputs v_2 = v_1;
-  FragmentOutputs v_3 = v_1;
-  main_outputs v_4 = {v_2.frag_depth, v_3.sample_mask};
-  return v_4;
+  main_outputs v_2 = {v_1.frag_depth, v_1.sample_mask};
+  return v_2;
 }
 

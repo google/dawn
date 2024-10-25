@@ -6,10 +6,8 @@ struct _a {
 RWByteAddressBuffer s : register(u0);
 [numthreads(1, 1, 1)]
 void f() {
-  _a v = (_a)0;
-  _a c = v;
+  _a c = (_a)0;
   int d = c._b;
-  _a v_1 = v;
-  s.Store(0u, asuint((v_1._b + d)));
+  s.Store(0u, asuint((c._b + d)));
 }
 

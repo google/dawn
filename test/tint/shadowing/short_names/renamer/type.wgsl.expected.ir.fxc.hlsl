@@ -12,15 +12,14 @@ struct main_inputs {
 
 
 float4 main_inner(uint VertexIndex) {
-  vec4f v = {int(1)};
-  vec4f s = v;
+  vec4f s = {int(1)};
   float f = float(s.i);
   bool b = bool(f);
   return ((b) ? ((1.0f).xxxx) : ((0.0f).xxxx));
 }
 
 main_outputs main(main_inputs inputs) {
-  main_outputs v_1 = {main_inner(inputs.VertexIndex)};
-  return v_1;
+  main_outputs v = {main_inner(inputs.VertexIndex)};
+  return v;
 }
 

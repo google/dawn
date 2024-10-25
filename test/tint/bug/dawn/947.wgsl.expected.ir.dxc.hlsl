@@ -56,18 +56,15 @@ float4 fs_main_inner(float2 texcoord) {
 
 vs_main_outputs vs_main(vs_main_inputs inputs) {
   VertexOutputs v_5 = vs_main_inner(inputs.VertexIndex);
-  VertexOutputs v_6 = v_5;
-  VertexOutputs v_7 = v_5;
-  vs_main_outputs v_8 = {v_6.texcoords, v_7.position};
-  return v_8;
+  vs_main_outputs v_6 = {v_5.texcoords, v_5.position};
+  return v_6;
 }
 
 fs_main_outputs fs_main(fs_main_inputs inputs) {
-  fs_main_outputs v_9 = {fs_main_inner(inputs.texcoord)};
+  fs_main_outputs v_7 = {fs_main_inner(inputs.texcoord)};
   if (!(continue_execution)) {
     discard;
   }
-  fs_main_outputs v_10 = v_9;
-  return v_10;
+  return v_7;
 }
 

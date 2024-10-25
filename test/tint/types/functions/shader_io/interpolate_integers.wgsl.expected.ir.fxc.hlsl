@@ -38,18 +38,13 @@ int frag_main_inner(Interface inputs) {
 
 vert_main_outputs vert_main() {
   Interface v_1 = vert_main_inner();
-  Interface v_2 = v_1;
-  Interface v_3 = v_1;
-  Interface v_4 = v_1;
-  Interface v_5 = v_1;
-  Interface v_6 = v_1;
-  vert_main_outputs v_7 = {v_2.i, v_3.u, v_4.vi, v_5.vu, v_6.pos};
-  return v_7;
+  vert_main_outputs v_2 = {v_1.i, v_1.u, v_1.vi, v_1.vu, v_1.pos};
+  return v_2;
 }
 
 frag_main_outputs frag_main(frag_main_inputs inputs) {
-  Interface v_8 = {inputs.Interface_i, inputs.Interface_u, inputs.Interface_vi, inputs.Interface_vu, float4(inputs.Interface_pos.xyz, (1.0f / inputs.Interface_pos[3u]))};
-  frag_main_outputs v_9 = {frag_main_inner(v_8)};
-  return v_9;
+  Interface v_3 = {inputs.Interface_i, inputs.Interface_u, inputs.Interface_vi, inputs.Interface_vu, float4(inputs.Interface_pos.xyz, (1.0f / inputs.Interface_pos[3u]))};
+  frag_main_outputs v_4 = {frag_main_inner(v_3)};
+  return v_4;
 }
 

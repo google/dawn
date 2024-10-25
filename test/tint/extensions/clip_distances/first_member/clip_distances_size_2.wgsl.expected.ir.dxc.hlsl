@@ -16,11 +16,9 @@ VertexOutputs main_inner() {
 
 main_outputs main() {
   VertexOutputs v_1 = main_inner();
-  VertexOutputs v_2 = v_1;
-  float v_3[2] = v_2.clipDistance;
-  float v_4[2] = v_2.clipDistance;
-  VertexOutputs v_5 = v_1;
-  main_outputs v_6 = {v_5.position, float2(v_3[0u], v_4[1u])};
-  return v_6;
+  float v_2[2] = v_1.clipDistance;
+  float v_3[2] = v_1.clipDistance;
+  main_outputs v_4 = {v_1.position, float2(v_2[0u], v_3[1u])};
+  return v_4;
 }
 

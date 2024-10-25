@@ -1903,8 +1903,7 @@ void v_1(uint offset, float3 obj[5]) {
 }
 
 void foo() {
-  float3 v_4[5] = (float3[5])0;
-  float3 ary[5] = v_4;
+  float3 ary[5] = (float3[5])0;
   v_1(0u, ary);
 }
 
@@ -2061,8 +2060,7 @@ void v_4(uint offset, SB obj) {
 }
 
 void foo() {
-  SB v_6 = (SB)0;
-  SB s = v_6;
+  SB s = (SB)0;
   v_4(0u, s);
 }
 
@@ -2157,8 +2155,7 @@ void v_9(uint offset, SB obj) {
 }
 
 void foo() {
-  SB v_11 = (SB)0;
-  SB s = v_11;
+  SB s = (SB)0;
   v_9(0u, s);
 }
 

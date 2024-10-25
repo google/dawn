@@ -76,47 +76,45 @@ void foo(int4 src_param[4]) {
   tint_symbol = src_param;
   int4 v_11[4] = ret_arr();
   tint_symbol = v_11;
-  int4 v_12[4] = (int4[4])0;
-  int4 src_let[4] = v_12;
+  int4 src_let[4] = (int4[4])0;
   tint_symbol = src_let;
-  int4 v_13[4] = src_function;
+  int4 v_12[4] = src_function;
+  tint_symbol = v_12;
+  int4 v_13[4] = src_private;
   tint_symbol = v_13;
-  int4 v_14[4] = src_private;
+  int4 v_14[4] = src_workgroup;
   tint_symbol = v_14;
-  int4 v_15[4] = src_workgroup;
-  tint_symbol = v_15;
-  S v_16 = ret_struct_arr();
-  int4 v_17[4] = v_16.arr;
+  S v_15 = ret_struct_arr();
+  int4 v_16[4] = v_15.arr;
+  tint_symbol = v_16;
+  int4 v_17[4] = v_6(0u);
   tint_symbol = v_17;
-  int4 v_18[4] = v_6(0u);
+  int4 v_18[4] = v_2(0u);
   tint_symbol = v_18;
-  int4 v_19[4] = v_2(0u);
-  tint_symbol = v_19;
   int dst_nested[4][3][2] = (int[4][3][2])0;
   int src_nested[4][3][2] = (int[4][3][2])0;
-  int v_20[4][3][2] = src_nested;
-  dst_nested = v_20;
+  int v_19[4][3][2] = src_nested;
+  dst_nested = v_19;
 }
 
 void main_inner(uint tint_local_index) {
   {
-    uint v_21 = 0u;
-    v_21 = tint_local_index;
+    uint v_20 = 0u;
+    v_20 = tint_local_index;
     while(true) {
-      uint v_22 = v_21;
-      if ((v_22 >= 4u)) {
+      uint v_21 = v_20;
+      if ((v_21 >= 4u)) {
         break;
       }
-      src_workgroup[v_22] = (int(0)).xxxx;
+      src_workgroup[v_21] = (int(0)).xxxx;
       {
-        v_21 = (v_22 + 1u);
+        v_20 = (v_21 + 1u);
       }
       continue;
     }
   }
   GroupMemoryBarrierWithGroupSync();
-  int4 v_23[4] = (int4[4])0;
-  int4 val[4] = v_23;
+  int4 val[4] = (int4[4])0;
   foo(val);
 }
 

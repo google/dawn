@@ -6,10 +6,8 @@ struct frexp_result_f32 {
 
 [numthreads(1, 1, 1)]
 void main() {
-  frexp_result_f32 v = {0.625f, int(1)};
-  frexp_result_f32 res = v;
+  frexp_result_f32 res = {0.625f, int(1)};
   float fract = res.fract;
-  frexp_result_f32 v_1 = v;
-  int exp = v_1.exp;
+  int exp = res.exp;
 }
 

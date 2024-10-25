@@ -37,7 +37,6 @@ f_outputs f(f_inputs inputs) {
   P.a = pixel_local_a.Load(v).x;
   f_outputs v_1 = {f_inner()};
   pixel_local_a[v] = P.a.xxxx;
-  f_outputs v_2 = v_1;
-  return v_2;
+  return v_1;
 }
 

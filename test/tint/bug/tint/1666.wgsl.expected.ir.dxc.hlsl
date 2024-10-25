@@ -11,9 +11,8 @@ void tint_symbol_1() {
 }
 
 void fixed_size_array() {
-  int v[2] = {int(1), int(2)};
+  int arr[2] = {int(1), int(2)};
   int idx = int(3);
-  int arr[2] = v;
   int x = arr[idx];
 }
 

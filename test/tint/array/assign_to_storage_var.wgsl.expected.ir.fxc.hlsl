@@ -151,46 +151,44 @@ void foo(int4 src_param[4]) {
   v_13(0u, src_param);
   int4 v_25[4] = ret_arr();
   v_13(0u, v_25);
-  int4 v_26[4] = (int4[4])0;
-  int4 src_let[4] = v_26;
+  int4 src_let[4] = (int4[4])0;
   v_13(0u, src_let);
-  int4 v_27[4] = src_function;
+  int4 v_26[4] = src_function;
+  v_13(0u, v_26);
+  int4 v_27[4] = src_private;
   v_13(0u, v_27);
-  int4 v_28[4] = src_private;
+  int4 v_28[4] = src_workgroup;
   v_13(0u, v_28);
-  int4 v_29[4] = src_workgroup;
-  v_13(0u, v_29);
-  S v_30 = ret_struct_arr();
-  int4 v_31[4] = v_30.arr;
+  S v_29 = ret_struct_arr();
+  int4 v_30[4] = v_29.arr;
+  v_13(0u, v_30);
+  int4 v_31[4] = v_20(0u);
   v_13(0u, v_31);
-  int4 v_32[4] = v_20(0u);
+  int4 v_32[4] = v_16(0u);
   v_13(0u, v_32);
-  int4 v_33[4] = v_16(0u);
-  v_13(0u, v_33);
   int src_nested[4][3][2] = (int[4][3][2])0;
-  int v_34[4][3][2] = src_nested;
-  v_9(0u, v_34);
+  int v_33[4][3][2] = src_nested;
+  v_9(0u, v_33);
 }
 
 void main_inner(uint tint_local_index) {
   {
-    uint v_35 = 0u;
-    v_35 = tint_local_index;
+    uint v_34 = 0u;
+    v_34 = tint_local_index;
     while(true) {
-      uint v_36 = v_35;
-      if ((v_36 >= 4u)) {
+      uint v_35 = v_34;
+      if ((v_35 >= 4u)) {
         break;
       }
-      src_workgroup[v_36] = (int(0)).xxxx;
+      src_workgroup[v_35] = (int(0)).xxxx;
       {
-        v_35 = (v_36 + 1u);
+        v_34 = (v_35 + 1u);
       }
       continue;
     }
   }
   GroupMemoryBarrierWithGroupSync();
-  int4 v_37[4] = (int4[4])0;
-  int4 ary[4] = v_37;
+  int4 ary[4] = (int4[4])0;
   foo(ary);
 }
 

@@ -117,7 +117,6 @@ main_outputs main(main_inputs inputs) {
   if (!(continue_execution)) {
     discard;
   }
-  main_outputs v_6 = v_5;
-  return v_6;
+  return v_5;
 }
 

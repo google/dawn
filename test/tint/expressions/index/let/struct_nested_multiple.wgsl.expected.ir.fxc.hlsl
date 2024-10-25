@@ -9,8 +9,7 @@ struct S {
 
 
 uint f() {
-  S v = (S)0;
-  S a = v;
+  S a = (S)0;
   return a.n[int(2)].k[int(1)];
 }
 

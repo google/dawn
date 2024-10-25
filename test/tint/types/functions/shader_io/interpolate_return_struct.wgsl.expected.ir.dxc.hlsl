@@ -30,16 +30,7 @@ Out main_inner() {
 
 main_outputs main() {
   Out v_1 = main_inner();
-  Out v_2 = v_1;
-  Out v_3 = v_1;
-  Out v_4 = v_1;
-  Out v_5 = v_1;
-  Out v_6 = v_1;
-  Out v_7 = v_1;
-  Out v_8 = v_1;
-  Out v_9 = v_1;
-  Out v_10 = v_1;
-  main_outputs v_11 = {v_3.none, v_4.flat, v_5.perspective_center, v_6.perspective_centroid, v_7.perspective_sample, v_8.linear_center, v_9.linear_centroid, v_10.linear_sample, v_2.pos};
-  return v_11;
+  main_outputs v_2 = {v_1.none, v_1.flat, v_1.perspective_center, v_1.perspective_centroid, v_1.perspective_sample, v_1.linear_center, v_1.linear_centroid, v_1.linear_sample, v_1.pos};
+  return v_2;
 }
 

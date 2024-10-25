@@ -45,7 +45,6 @@ foo_outputs foo(foo_inputs inputs) {
   if (!(continue_execution)) {
     discard;
   }
-  foo_outputs v_2 = v_1;
-  return v_2;
+  return v_1;
 }
 

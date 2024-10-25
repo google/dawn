@@ -36,19 +36,18 @@ Particle v_4(uint offset) {
   float3 v_5[8] = v((offset + 0u));
   float v_6 = asfloat(particles.Load((offset + 128u)));
   float4 v_7 = asfloat(particles.Load4((offset + 144u)));
-  float3 v_8[8] = v_5;
-  Particle v_9 = {v_8, v_6, v_7, asfloat(particles.Load3((offset + 160u)))};
-  return v_9;
+  Particle v_8 = {v_5, v_6, v_7, asfloat(particles.Load3((offset + 160u)))};
+  return v_8;
 }
 
 [numthreads(1, 1, 1)]
 void main() {
   Particle particle = v_4(0u);
+  uint v_9 = sim[0u].x;
   uint v_10 = sim[0u].x;
-  uint v_11 = sim[0u].x;
   float3 tint_array_copy[8] = particle.position;
-  tint_array_copy[v_10] = particle.position[v_11];
-  float3 v_12[8] = tint_array_copy;
-  particle.position = v_12;
+  tint_array_copy[v_9] = particle.position[v_10];
+  float3 v_11[8] = tint_array_copy;
+  particle.position = v_11;
 }
 

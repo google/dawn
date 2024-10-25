@@ -153,11 +153,8 @@ vertex_main_outputs vertex_main() {
 vs_main_outputs vs_main(vs_main_inputs inputs) {
   VertexInput v_24 = {inputs.VertexInput_position, inputs.VertexInput_color, inputs.VertexInput_quad_pos};
   VertexOutput v_25 = vs_main_inner(v_24);
-  VertexOutput v_26 = v_25;
-  VertexOutput v_27 = v_25;
-  VertexOutput v_28 = v_25;
-  vs_main_outputs v_29 = {v_27.color, v_28.quad_pos, v_26.position};
-  return v_29;
+  vs_main_outputs v_26 = {v_25.color, v_25.quad_pos, v_25.position};
+  return v_26;
 }
 
 [numthreads(64, 1, 1)]

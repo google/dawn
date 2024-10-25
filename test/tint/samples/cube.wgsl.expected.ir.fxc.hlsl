@@ -52,14 +52,12 @@ float4 frag_main_inner(float4 fragColor) {
 vtx_main_outputs vtx_main(vtx_main_inputs inputs) {
   VertexInput v_5 = {inputs.VertexInput_cur_position, inputs.VertexInput_color};
   VertexOutput v_6 = vtx_main_inner(v_5);
-  VertexOutput v_7 = v_6;
-  VertexOutput v_8 = v_6;
-  vtx_main_outputs v_9 = {v_7.vtxFragColor, v_8.Position};
-  return v_9;
+  vtx_main_outputs v_7 = {v_6.vtxFragColor, v_6.Position};
+  return v_7;
 }
 
 frag_main_outputs frag_main(frag_main_inputs inputs) {
-  frag_main_outputs v_10 = {frag_main_inner(inputs.fragColor)};
-  return v_10;
+  frag_main_outputs v_8 = {frag_main_inner(inputs.fragColor)};
+  return v_8;
 }
 

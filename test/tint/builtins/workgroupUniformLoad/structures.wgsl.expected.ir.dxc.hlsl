@@ -14,8 +14,7 @@ Outer foo() {
   GroupMemoryBarrierWithGroupSync();
   Outer v_1 = v;
   GroupMemoryBarrierWithGroupSync();
-  Outer v_2 = v_1;
-  return v_2;
+  return v_1;
 }
 
 [numthreads(1, 1, 1)]

@@ -31,7 +31,6 @@ f_outputs f(f_inputs inputs) {
   pixel_local_a[v] = P.a.xxxx;
   pixel_local_b[v] = P.b.xxxx;
   pixel_local_c[v] = P.c.xxxx;
-  f_outputs v_2 = v_1;
-  return v_2;
+  return v_1;
 }
 

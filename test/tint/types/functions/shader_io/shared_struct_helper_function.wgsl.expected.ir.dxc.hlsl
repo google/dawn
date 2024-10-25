@@ -31,17 +31,13 @@ VertexOutput vert_main2_inner() {
 
 vert_main1_outputs vert_main1() {
   VertexOutput v_3 = vert_main1_inner();
-  VertexOutput v_4 = v_3;
-  VertexOutput v_5 = v_3;
-  vert_main1_outputs v_6 = {v_5.loc0, v_4.pos};
-  return v_6;
+  vert_main1_outputs v_4 = {v_3.loc0, v_3.pos};
+  return v_4;
 }
 
 vert_main2_outputs vert_main2() {
-  VertexOutput v_7 = vert_main2_inner();
-  VertexOutput v_8 = v_7;
-  VertexOutput v_9 = v_7;
-  vert_main2_outputs v_10 = {v_9.loc0, v_8.pos};
-  return v_10;
+  VertexOutput v_5 = vert_main2_inner();
+  vert_main2_outputs v_6 = {v_5.loc0, v_5.pos};
+  return v_6;
 }
 

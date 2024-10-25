@@ -5,8 +5,7 @@ struct S {
 
 
 uint f() {
-  S v[2] = (S[2])0;
-  S a[2] = v;
+  S a[2] = (S[2])0;
   return a[int(1)].n[int(1)];
 }
 

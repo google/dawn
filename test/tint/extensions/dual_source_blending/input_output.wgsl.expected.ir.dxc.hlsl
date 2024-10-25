@@ -30,9 +30,7 @@ FragOutput frag_main_inner(FragInput tint_symbol) {
 frag_main_outputs frag_main(frag_main_inputs inputs) {
   FragInput v_1 = {inputs.FragInput_a, inputs.FragInput_b};
   FragOutput v_2 = frag_main_inner(v_1);
-  FragOutput v_3 = v_2;
-  FragOutput v_4 = v_2;
-  frag_main_outputs v_5 = {v_3.color, v_4.blend};
-  return v_5;
+  frag_main_outputs v_3 = {v_2.color, v_2.blend};
+  return v_3;
 }
 

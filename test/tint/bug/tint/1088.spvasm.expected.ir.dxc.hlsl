@@ -58,9 +58,7 @@ main_out main_inner(float3 position_1_param, float2 uv_param, float3 normal_para
 
 main_outputs main(main_inputs inputs) {
   main_out v_10 = main_inner(inputs.position_1_param, inputs.uv_param, inputs.normal_param);
-  main_out v_11 = v_10;
-  main_out v_12 = v_10;
-  main_outputs v_13 = {v_12.vUV_1, v_11.gl_Position};
-  return v_13;
+  main_outputs v_11 = {v_10.vUV_1, v_10.gl_Position};
+  return v_11;
 }
 

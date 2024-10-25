@@ -753,5 +753,115 @@ TEST_F(HlslWriterPromoteInitializersTest, DuplicateConstant) {
     EXPECT_EQ(expect, str());
 }
 
+// TODO(dsinclair): Fixup duplicate let creation
+TEST_F(HlslWriterPromoteInitializersTest, DISABLED_DuplicateAccess) {
+    capabilities = core::ir::Capabilities{core::ir::Capability::kAllowModuleScopeLets};
+
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        auto* ary = b.Construct(ty.array(ty.f32(), 8));
+        b.Access(ty.f32(), ary, 0_u);
+        b.Access(ty.f32(), ary, 1_u);
+        b.Access(ty.f32(), ary, 2_u);
+        b.Return(func);
+    });
+
+    auto* src = R"(
+%foo = @fragment func():void {
+  $B1: {
+    %2:array<f32, 8> = construct
+    %3:f32 = access %2, 0u
+    %4:f32 = access %2, 1u
+    %5:f32 = access %2, 2u
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = @fragment func():void {
+  $B1: {
+    %2:array<f32, 8> = construct
+    %3:array<f32, 8> = let %2
+    %4:f32 = access %3, 0u
+    %5:f32 = access %3, 1u
+    %6:f32 = access %3, 2u
+    ret
+  }
+}
+)";
+
+    Run(PromoteInitializers);
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(HlslWriterPromoteInitializersTest, LetOfLet) {
+    capabilities = core::ir::Capabilities{core::ir::Capability::kAllowModuleScopeLets};
+
+    auto* str_ty = ty.Struct(mod.symbols.New("S"), {
+                                                       {mod.symbols.New("a"), ty.vec4<i32>()},
+                                                   });
+
+    auto* inner = b.Function("inner", str_ty);
+    b.Append(inner->Block(),
+             [&] { b.Return(inner, b.Construct(str_ty, b.Splat(ty.vec4<i32>(), 1_i))); });
+
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        auto* in = b.Call(inner);
+        auto* l = b.Let("a", in);
+        b.Access(ty.vec4<i32>(), l, 0_u);
+        b.Return(func);
+    });
+
+    auto* src = R"(
+S = struct @align(16) {
+  a:vec4<i32> @offset(0)
+}
+
+%inner = func():S {
+  $B1: {
+    %2:S = construct vec4<i32>(1i)
+    ret %2
+  }
+}
+%foo = @fragment func():void {
+  $B2: {
+    %4:S = call %inner
+    %a:S = let %4
+    %6:vec4<i32> = access %a, 0u
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+S = struct @align(16) {
+  a:vec4<i32> @offset(0)
+}
+
+%inner = func():S {
+  $B1: {
+    %2:S = construct vec4<i32>(1i)
+    %3:S = let %2
+    ret %3
+  }
+}
+%foo = @fragment func():void {
+  $B2: {
+    %5:S = call %inner
+    %a:S = let %5
+    %7:vec4<i32> = access %a, 0u
+    ret
+  }
+}
+)";
+
+    Run(PromoteInitializers);
+    EXPECT_EQ(expect, str());
+}
+
 }  // namespace
 }  // namespace tint::hlsl::writer::raise

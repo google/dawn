@@ -21,8 +21,7 @@ void main_inner(ComputeInputs0 inputs0, uint local_invocation_index, uint3 globa
 [numthreads(1, 1, 1)]
 void main(main_inputs inputs) {
   ComputeInputs0 v = {inputs.ComputeInputs0_local_invocation_id};
-  ComputeInputs0 v_1 = v;
-  ComputeInputs1 v_2 = {inputs.ComputeInputs1_workgroup_id};
-  main_inner(v_1, inputs.local_invocation_index, inputs.global_invocation_id, v_2);
+  ComputeInputs1 v_1 = {inputs.ComputeInputs1_workgroup_id};
+  main_inner(v, inputs.local_invocation_index, inputs.global_invocation_id, v_1);
 }
 

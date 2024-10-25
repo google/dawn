@@ -132,17 +132,14 @@ tint_ExternalTextureParams v_37(uint start_byte_offset) {
   uint4 v_54 = arg_0_params[((256u + start_byte_offset) / 16u)];
   uint2 v_55 = ((((((256u + start_byte_offset) % 16u) / 4u) == 2u)) ? (v_54.zw) : (v_54.xy));
   uint4 v_56 = arg_0_params[((264u + start_byte_offset) / 16u)];
-  tint_GammaTransferParams v_57 = v_41;
-  tint_GammaTransferParams v_58 = v_42;
-  tint_ExternalTextureParams v_59 = {v_38, v_39, v_40, v_57, v_58, v_43, v_44, v_45, v_47, v_49, v_51, v_53, v_55, asfloat(((((((264u + start_byte_offset) % 16u) / 4u) == 2u)) ? (v_56.zw) : (v_56.xy)))};
-  return v_59;
+  tint_ExternalTextureParams v_57 = {v_38, v_39, v_40, v_41, v_42, v_43, v_44, v_45, v_47, v_49, v_51, v_53, v_55, asfloat(((((((264u + start_byte_offset) % 16u) / 4u) == 2u)) ? (v_56.zw) : (v_56.xy)))};
+  return v_57;
 }
 
 float4 textureSampleBaseClampToEdge_7c04e6() {
   float2 arg_2 = (1.0f).xx;
-  tint_ExternalTextureParams v_60 = v_37(0u);
-  tint_ExternalTextureParams v_61 = v_60;
-  float4 res = tint_TextureSampleExternal(arg_0_plane0, arg_0_plane1, v_61, arg_1, arg_2);
+  tint_ExternalTextureParams v_58 = v_37(0u);
+  float4 res = tint_TextureSampleExternal(arg_0_plane0, arg_0_plane1, v_58, arg_1, arg_2);
   return res;
 }
 
@@ -159,15 +156,13 @@ VertexOutput vertex_main_inner() {
   VertexOutput tint_symbol = (VertexOutput)0;
   tint_symbol.pos = (0.0f).xxxx;
   tint_symbol.prevent_dce = textureSampleBaseClampToEdge_7c04e6();
-  VertexOutput v_62 = tint_symbol;
-  return v_62;
+  VertexOutput v_59 = tint_symbol;
+  return v_59;
 }
 
 vertex_main_outputs vertex_main() {
-  VertexOutput v_63 = vertex_main_inner();
-  VertexOutput v_64 = v_63;
-  VertexOutput v_65 = v_63;
-  vertex_main_outputs v_66 = {v_65.prevent_dce, v_64.pos};
-  return v_66;
+  VertexOutput v_60 = vertex_main_inner();
+  vertex_main_outputs v_61 = {v_60.prevent_dce, v_60.pos};
+  return v_61;
 }
 

@@ -49,8 +49,7 @@ S v_10(uint start_byte_offset) {
 
 [numthreads(1, 1, 1)]
 void main() {
-  S v_13 = v_10(0u);
-  S x = v_13;
+  S x = v_10(0u);
   v_2(0u, x);
 }
 

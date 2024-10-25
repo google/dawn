@@ -62,8 +62,7 @@ S v_15(uint start_byte_offset) {
 
 [numthreads(1, 1, 1)]
 void main() {
-  S v_18 = v_15(0u);
-  S x = v_18;
+  S x = v_15(0u);
   v_3(0u, x);
 }
 

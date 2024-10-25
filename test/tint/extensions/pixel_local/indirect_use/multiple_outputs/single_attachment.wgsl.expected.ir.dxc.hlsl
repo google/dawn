@@ -45,12 +45,8 @@ f_outputs f(f_inputs inputs) {
   uint2 v_1 = uint2(inputs.pos.xy);
   P.a = pixel_local_a.Load(v_1).x;
   Out v_2 = f_inner();
-  Out v_3 = v_2;
-  Out v_4 = v_2;
-  Out v_5 = v_2;
-  f_outputs v_6 = {v_3.x, v_4.y, v_5.z};
+  f_outputs v_3 = {v_2.x, v_2.y, v_2.z};
   pixel_local_a[v_1] = P.a.xxxx;
-  f_outputs v_7 = v_6;
-  return v_7;
+  return v_3;
 }
 

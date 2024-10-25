@@ -42,9 +42,7 @@ VertexOutput vertex_main_inner() {
 
 vertex_main_outputs vertex_main() {
   VertexOutput v_8 = vertex_main_inner();
-  VertexOutput v_9 = v_8;
-  VertexOutput v_10 = v_8;
-  vertex_main_outputs v_11 = {v_10.prevent_dce, v_9.pos};
-  return v_11;
+  vertex_main_outputs v_9 = {v_8.prevent_dce, v_8.pos};
+  return v_9;
 }
 

@@ -29,9 +29,8 @@ float4 main_inner(VertexInputs0 inputs0, uint loc1, uint instance_index, VertexI
 
 main_outputs main(main_inputs inputs) {
   VertexInputs0 v = {inputs.VertexInputs0_vertex_index, inputs.VertexInputs0_loc0};
-  VertexInputs0 v_1 = v;
-  VertexInputs1 v_2 = {inputs.VertexInputs1_loc1, inputs.VertexInputs1_loc3};
-  main_outputs v_3 = {main_inner(v_1, inputs.loc1, inputs.instance_index, v_2)};
-  return v_3;
+  VertexInputs1 v_1 = {inputs.VertexInputs1_loc1, inputs.VertexInputs1_loc3};
+  main_outputs v_2 = {main_inner(v, inputs.loc1, inputs.instance_index, v_1)};
+  return v_2;
 }
 

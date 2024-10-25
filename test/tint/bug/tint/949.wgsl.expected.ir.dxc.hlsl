@@ -172,8 +172,7 @@ lightingInfo computeHemisphericLighting_vf3_vf3_vf4_vf3_vf3_vf3_f1_(inout float3
   float x_241 = specComp;
   float3 x_242 = specularColor;
   result.specular = (x_242 * x_241);
-  lightingInfo v_5 = result;
-  lightingInfo x_245 = v_5;
+  lightingInfo x_245 = result;
   return x_245;
 }
 
@@ -276,8 +275,8 @@ void main_1() {
   float3 x_334 = mul(-(x_332), x_331);
   float3x3 x_337 = invTBN;
   float3 x_338 = output5;
-  float v_6 = length(float2(x_334[0u], x_334[1u]));
-  parallaxLimit = (v_6 / mul(-(x_338), x_337)[2u]);
+  float v_5 = length(float2(x_334[0u], x_334[1u]));
+  parallaxLimit = (v_5 / mul(-(x_338), x_337)[2u]);
   float x_345 = asfloat(x_269[9u].w);
   float x_346 = parallaxLimit;
   parallaxLimit = (x_346 * x_345);
@@ -292,8 +291,8 @@ void main_1() {
   float3 x_362 = output5;
   float3x3 x_365 = invTBN;
   float4 x_366 = v_output2;
-  float3 v_7 = mul(-(x_362), x_361);
-  numSamples = (15.0f + (dot(v_7, mul(float3(x_366[0u], x_366[1u], x_366[2u]), x_365)) * -11.0f));
+  float3 v_6 = mul(-(x_362), x_361);
+  numSamples = (15.0f + (dot(v_6, mul(float3(x_366[0u], x_366[1u], x_366[2u]), x_365)) * -11.0f));
   float x_374 = numSamples;
   stepSize = (1.0f / x_374);
   currRayHeight = 1.0f;
@@ -400,8 +399,7 @@ void main_1() {
   param_16 = x_518;
   float x_520 = glossiness_1;
   param_17 = x_520;
-  lightingInfo v_8 = computeHemisphericLighting_vf3_vf3_vf4_vf3_vf3_vf3_f1_(param_11, param_12, param_13, param_14, param_15, param_16, param_17);
-  lightingInfo x_521 = v_8;
+  lightingInfo x_521 = computeHemisphericLighting_vf3_vf3_vf4_vf3_vf3_vf3_f1_(param_11, param_12, param_13, param_14, param_15, param_16, param_17);
   info = x_521;
   shadow = 1.0f;
   float3 x_523 = info.diffuse;
@@ -432,13 +430,13 @@ main_out main_inner(float2 vMainuv_param, float4 v_output1_param, bool gl_FrontF
   v_uv = v_uv_param;
   v_output2 = v_output2_param;
   main_1();
-  main_out v_9 = {glFragColor};
-  return v_9;
+  main_out v_7 = {glFragColor};
+  return v_7;
 }
 
 main_outputs main(main_inputs inputs) {
-  main_out v_10 = main_inner(inputs.vMainuv_param, inputs.v_output1_param, inputs.gl_FrontFacing_param, inputs.v_uv_param, inputs.v_output2_param);
-  main_outputs v_11 = {v_10.glFragColor_1};
-  return v_11;
+  main_out v_8 = main_inner(inputs.vMainuv_param, inputs.v_output1_param, inputs.gl_FrontFacing_param, inputs.v_uv_param, inputs.v_output2_param);
+  main_outputs v_9 = {v_8.glFragColor_1};
+  return v_9;
 }
 

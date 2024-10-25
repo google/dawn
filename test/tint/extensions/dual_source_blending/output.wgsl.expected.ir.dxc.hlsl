@@ -19,9 +19,7 @@ FragOutput frag_main_inner() {
 
 frag_main_outputs frag_main() {
   FragOutput v_1 = frag_main_inner();
-  FragOutput v_2 = v_1;
-  FragOutput v_3 = v_1;
-  frag_main_outputs v_4 = {v_2.color, v_3.blend};
-  return v_4;
+  frag_main_outputs v_2 = {v_1.color, v_1.blend};
+  return v_2;
 }
 

@@ -96,7 +96,10 @@ struct State {
         Vector<core::ir::Construct*, 4> const_worklist;
         for (auto& item : worklist) {
             if (auto* res = As<core::ir::InstructionResult>(item.val)) {
-                PutInLet(item.inst, item.index, res);
+                // If the value isn't already a `let`, put it into a `let`.
+                if (!res->Instruction()->Is<core::ir::Let>()) {
+                    PutInLet(item.inst, item.index, res);
+                }
             } else if (auto* val = As<core::ir::Constant>(item.val)) {
                 auto* let = PutInLet(item.inst, item.index, val);
                 auto ret = HoistModuleScopeLetToConstruct(is_root_block, item.inst, let, val);

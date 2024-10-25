@@ -17,18 +17,16 @@ VertexOutputs main_inner() {
 
 main_outputs main() {
   VertexOutputs v_1 = main_inner();
-  VertexOutputs v_2 = v_1;
-  float v_3[8] = v_2.clipDistance;
-  float v_4[8] = v_2.clipDistance;
-  float v_5[8] = v_2.clipDistance;
-  float v_6[8] = v_2.clipDistance;
-  float4 v_7 = float4(v_3[0u], v_4[1u], v_5[2u], v_6[3u]);
-  float v_8[8] = v_2.clipDistance;
-  float v_9[8] = v_2.clipDistance;
-  float v_10[8] = v_2.clipDistance;
-  float v_11[8] = v_2.clipDistance;
-  VertexOutputs v_12 = v_1;
-  main_outputs v_13 = {v_12.position, v_7, float4(v_8[4u], v_9[5u], v_10[6u], v_11[7u])};
-  return v_13;
+  float v_2[8] = v_1.clipDistance;
+  float v_3[8] = v_1.clipDistance;
+  float v_4[8] = v_1.clipDistance;
+  float v_5[8] = v_1.clipDistance;
+  float4 v_6 = float4(v_2[0u], v_3[1u], v_4[2u], v_5[3u]);
+  float v_7[8] = v_1.clipDistance;
+  float v_8[8] = v_1.clipDistance;
+  float v_9[8] = v_1.clipDistance;
+  float v_10[8] = v_1.clipDistance;
+  main_outputs v_11 = {v_1.position, v_6, float4(v_7[4u], v_8[5u], v_9[6u], v_10[7u])};
+  return v_11;
 }
 

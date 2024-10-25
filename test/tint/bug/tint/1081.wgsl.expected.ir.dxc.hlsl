@@ -36,7 +36,6 @@ main_outputs main(main_inputs inputs) {
   if (!(continue_execution)) {
     discard;
   }
-  main_outputs v_1 = v;
-  return v_1;
+  return v;
 }
 

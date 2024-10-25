@@ -46,11 +46,10 @@ ary_ret v_8(uint start_byte_offset) {
 void f() {
   uint v_12 = (32u * uint(i()));
   uint v_13 = (8u * uint(i()));
-  float4x2 v_14[4] = v_8(0u);
+  float4x2 l_a[4] = v_8(0u);
   float4x2 l_a_i = v(v_12);
-  uint4 v_15 = a[((v_12 + v_13) / 16u)];
-  float2 l_a_i_i = asfloat(((((((v_12 + v_13) % 16u) / 4u) == 2u)) ? (v_15.zw) : (v_15.xy)));
-  float4x2 l_a[4] = v_14;
+  uint4 v_14 = a[((v_12 + v_13) / 16u)];
+  float2 l_a_i_i = asfloat(((((((v_12 + v_13) % 16u) / 4u) == 2u)) ? (v_14.zw) : (v_14.xy)));
   s.Store(0u, asuint((((asfloat(a[((v_12 + v_13) / 16u)][(((v_12 + v_13) % 16u) / 4u)]) + l_a[int(0)][int(0)][0u]) + l_a_i[int(0)][0u]) + l_a_i_i[0u])));
 }
 
