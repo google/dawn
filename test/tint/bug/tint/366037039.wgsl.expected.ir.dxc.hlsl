@@ -101,8 +101,7 @@ void foo() {
   S w = v_9(0u);
   S v_23 = (S)0;
   v_3(0u, v_23);
-  S v_24 = (S)0;
-  wbuffer = v_24;
+  wbuffer = v_23;
 }
 
 [numthreads(1, 1, 1)]

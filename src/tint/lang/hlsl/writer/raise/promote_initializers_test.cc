@@ -682,8 +682,7 @@ A = struct @align(4) {
   $B2: {
     %4:A = let A(1i)
     %5:void = call %bar, %4
-    %6:A = let A(1i)
-    %7:void = call %bar, %6
+    %6:void = call %bar, %4
     ret
   }
 }
@@ -753,8 +752,7 @@ TEST_F(HlslWriterPromoteInitializersTest, DuplicateConstant) {
     EXPECT_EQ(expect, str());
 }
 
-// TODO(dsinclair): Fixup duplicate let creation
-TEST_F(HlslWriterPromoteInitializersTest, DISABLED_DuplicateAccess) {
+TEST_F(HlslWriterPromoteInitializersTest, DuplicateAccess) {
     capabilities = core::ir::Capabilities{core::ir::Capability::kAllowModuleScopeLets};
 
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
@@ -787,6 +785,119 @@ TEST_F(HlslWriterPromoteInitializersTest, DISABLED_DuplicateAccess) {
     %4:f32 = access %3, 0u
     %5:f32 = access %3, 1u
     %6:f32 = access %3, 2u
+    ret
+  }
+}
+)";
+
+    Run(PromoteInitializers);
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(HlslWriterPromoteInitializersTest, DuplicateAccessDifferentFunction) {
+    capabilities = core::ir::Capabilities{core::ir::Capability::kAllowModuleScopeLets};
+
+    auto* a = b.Function("a", ty.void_());
+    b.Append(a->Block(), [&] {
+        auto* ary = b.Splat(ty.array(ty.f32(), 8), 8_f);
+        b.Access(ty.f32(), ary, 0_u);
+        b.Return(a);
+    });
+
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        auto* ary = b.Splat(ty.array(ty.f32(), 8), 8_f);
+        b.Access(ty.f32(), ary, 0_u);
+        b.Return(func);
+    });
+
+    auto* src = R"(
+%a = func():void {
+  $B1: {
+    %2:f32 = access array<f32, 8>(8.0f), 0u
+    ret
+  }
+}
+%foo = @fragment func():void {
+  $B2: {
+    %4:f32 = access array<f32, 8>(8.0f), 0u
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%a = func():void {
+  $B1: {
+    %2:array<f32, 8> = let array<f32, 8>(8.0f)
+    %3:f32 = access %2, 0u
+    ret
+  }
+}
+%foo = @fragment func():void {
+  $B2: {
+    %5:array<f32, 8> = let array<f32, 8>(8.0f)
+    %6:f32 = access %5, 0u
+    ret
+  }
+}
+)";
+
+    Run(PromoteInitializers);
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(HlslWriterPromoteInitializersTest, DuplicateAccessDifferentScope) {
+    capabilities = core::ir::Capabilities{core::ir::Capability::kAllowModuleScopeLets};
+
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        auto* ary = b.Construct(ty.array(ty.f32(), 8));
+
+        auto* if_ = b.If(true);
+        b.Append(if_->True(), [&] {
+            b.Access(ty.f32(), ary, 0_u);
+            b.ExitIf(if_);
+        });
+
+        b.Access(ty.f32(), ary, 1_u);
+        b.Access(ty.f32(), ary, 2_u);
+        b.Return(func);
+    });
+
+    auto* src = R"(
+%foo = @fragment func():void {
+  $B1: {
+    %2:array<f32, 8> = construct
+    if true [t: $B2] {  # if_1
+      $B2: {  # true
+        %3:f32 = access %2, 0u
+        exit_if  # if_1
+      }
+    }
+    %4:f32 = access %2, 1u
+    %5:f32 = access %2, 2u
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = @fragment func():void {
+  $B1: {
+    %2:array<f32, 8> = construct
+    if true [t: $B2] {  # if_1
+      $B2: {  # true
+        %3:array<f32, 8> = let %2
+        %4:f32 = access %3, 0u
+        exit_if  # if_1
+      }
+    }
+    %5:array<f32, 8> = let %2
+    %6:f32 = access %5, 1u
+    %7:f32 = access %5, 2u
     ret
   }
 }
