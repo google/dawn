@@ -591,6 +591,11 @@ class EventManager : NonMovable {
       spontaneousEvent->Complete(futureId, EventCompletionType::Ready);
     }
   }
+  template <typename Event, typename... ReadyArgs>
+  void SetFutureReady(double futureId, ReadyArgs&&... readyArgs) {
+    SetFutureReady<Event>(static_cast<uint64_t>(futureId),
+                          std::forward<ReadyArgs>(readyArgs)...);
+  }
 
  private:
   std::mutex mMutex;
@@ -1166,52 +1171,52 @@ WGPUShaderModule emwgpuCreateShaderModule(const EventSource* source) {
 }
 
 // Future event callbacks.
-void emwgpuOnCompilationInfoCompleted(FutureID futureId,
+void emwgpuOnCompilationInfoCompleted(double futureId,
                                       WGPUCompilationInfoRequestStatus status,
                                       WGPUCompilationInfo* compilationInfo) {
   GetEventManager().SetFutureReady<CompilationInfoEvent>(futureId, status,
                                                          compilationInfo);
 }
 void emwgpuOnCreateComputePipelineCompleted(
-    FutureID futureId,
+    double futureId,
     WGPUCreatePipelineAsyncStatus status,
     WGPUComputePipeline pipeline,
     const char* message) {
   GetEventManager().SetFutureReady<CreateComputePipelineEvent>(
       futureId, status, pipeline, message);
 }
-void emwgpuOnCreateRenderPipelineCompleted(FutureID futureId,
+void emwgpuOnCreateRenderPipelineCompleted(double futureId,
                                            WGPUCreatePipelineAsyncStatus status,
                                            WGPURenderPipeline pipeline,
                                            const char* message) {
   GetEventManager().SetFutureReady<CreateRenderPipelineEvent>(
       futureId, status, pipeline, message);
 }
-void emwgpuOnDeviceLostCompleted(FutureID futureId,
+void emwgpuOnDeviceLostCompleted(double futureId,
                                  WGPUDeviceLostReason reason,
                                  const char* message) {
   GetEventManager().SetFutureReady<DeviceLostEvent>(futureId, reason, message);
 }
-void emwgpuOnMapAsyncCompleted(FutureID futureId,
+void emwgpuOnMapAsyncCompleted(double futureId,
                                WGPUMapAsyncStatus status,
                                const char* message) {
   GetEventManager().SetFutureReady<MapAsyncEvent>(futureId, status, message);
 }
-void emwgpuOnPopErrorScopeCompleted(FutureID futureId,
+void emwgpuOnPopErrorScopeCompleted(double futureId,
                                     WGPUPopErrorScopeStatus status,
                                     WGPUErrorType errorType,
                                     const char* message) {
   GetEventManager().SetFutureReady<PopErrorScopeEvent>(futureId, status,
                                                        errorType, message);
 }
-void emwgpuOnRequestAdapterCompleted(FutureID futureId,
+void emwgpuOnRequestAdapterCompleted(double futureId,
                                      WGPURequestAdapterStatus status,
                                      WGPUAdapter adapter,
                                      const char* message) {
   GetEventManager().SetFutureReady<RequestAdapterEvent>(futureId, status,
                                                         adapter, message);
 }
-void emwgpuOnRequestDeviceCompleted(FutureID futureId,
+void emwgpuOnRequestDeviceCompleted(double futureId,
                                     WGPURequestDeviceStatus status,
                                     WGPUDevice device,
                                     const char* message) {
@@ -1229,7 +1234,7 @@ void emwgpuOnRequestDeviceCompleted(FutureID futureId,
                                                          nullptr, message);
   }
 }
-void emwgpuOnWorkDoneCompleted(FutureID futureId,
+void emwgpuOnWorkDoneCompleted(double futureId,
                                WGPUQueueWorkDoneStatus status) {
   GetEventManager().SetFutureReady<WorkDoneEvent>(futureId, status);
 }
