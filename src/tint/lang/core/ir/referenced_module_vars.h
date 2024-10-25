@@ -43,7 +43,7 @@ class Block;
 class Function;
 }  // namespace tint::core::ir
 
-/// Utility that helps guarantee makes sure the same const-ness is applied to both type
+/// Utility that helps guarantee the same const-ness is applied to both types.
 template <class Src, class Dst>
 using TranscribeConst = std::conditional_t<std::is_const<Src>{}, std::add_const_t<Dst>, Dst>;
 

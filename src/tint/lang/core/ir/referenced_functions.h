@@ -35,7 +35,7 @@
 #include "src/tint/utils/containers/hashmap.h"
 #include "src/tint/utils/rtti/switch.h"
 
-/// Utility that helps guarantee makes sure the same const-ness is applied to both type
+/// Utility that helps guarantee the same const-ness is applied to both types.
 template <class Src, class Dst>
 using TranscribeConst = std::conditional_t<std::is_const<Src>{}, std::add_const_t<Dst>, Dst>;
 
