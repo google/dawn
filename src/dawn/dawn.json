@@ -1547,6 +1547,11 @@
                 ]
             },
             {
+                "name": "get lost future",
+                "returns": "future",
+                "tags": ["emscripten"]
+            },
+            {
                 "name": "has feature",
                 "returns": "bool",
                 "args": [
