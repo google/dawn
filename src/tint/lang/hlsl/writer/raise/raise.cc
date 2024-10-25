@@ -76,17 +76,6 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
     PopulateBindingRelatedOptions(options, remapper_data, multiplanar_map,
                                   array_length_from_uniform_options);
 
-    {
-        auto result = core::ir::transform::ArrayLengthFromUniform(
-            module,
-            BindingPoint{array_length_from_uniform_options.ubo_binding.group,
-                         array_length_from_uniform_options.ubo_binding.binding},
-            array_length_from_uniform_options.bindpoint_to_size_index);
-        if (result != Success) {
-            return result.Failure();
-        }
-    }
-
     RUN_TRANSFORM(core::ir::transform::BindingRemapper, module, remapper_data);
     RUN_TRANSFORM(core::ir::transform::MultiplanarExternalTexture, module, multiplanar_map);
 
@@ -159,6 +148,18 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
         RUN_TRANSFORM(core::ir::transform::Robustness, module, config);
     }
 
+    // ArrayLengthFromUniform must run after Robustness, which introduces arrayLength calls.
+    {
+        auto result = core::ir::transform::ArrayLengthFromUniform(
+            module,
+            BindingPoint{array_length_from_uniform_options.ubo_binding.group,
+                         array_length_from_uniform_options.ubo_binding.binding},
+            array_length_from_uniform_options.bindpoint_to_size_index);
+        if (result != Success) {
+            return result.Failure();
+        }
+    }
+
     if (!options.disable_workgroup_init) {
         // Must run before ShaderIO as it may introduce a builtin parameter (local_invocation_index)
         RUN_TRANSFORM(core::ir::transform::ZeroInitWorkgroupMemory, module);
@@ -190,7 +191,6 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
     }
 
     // TODO(dsinclair): TruncateInterstageVariables
-    // TODO(dsinclair): CalculateArrayLength
 
     // DemoteToHelper must come before any transform that introduces non-core instructions.
     // Run after ShaderIO to ensure the discards are added to the entry point it introduces.
