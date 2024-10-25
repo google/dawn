@@ -77,12 +77,14 @@ set(USE_WAYLAND OFF)
 set(USE_X11 OFF)
 set(USE_WINDOWS_UI OFF)
 set(BUILD_SAMPLES OFF)
+set(BUILD_TESTS OFF)
 set(TARGET_MACOS OFF)
 if (CMAKE_SYSTEM_NAME MATCHES "Emscripten")
   # Only the samples are supported for Emscripten at the moment.
   # TODO(crbug.com/42240181): Make dawn_end2end_tests work too.
   set(ENABLE_EMSCRIPTEN ON)
   set(BUILD_SAMPLES ON)
+  set(BUILD_TESTS ON)
   set(ENABLE_NULL OFF)
 elseif (WIN32)
   set(ENABLE_D3D11 ON)
@@ -174,6 +176,7 @@ option(DAWN_DXC_ENABLE_ASSERTS_IN_NDEBUG "Enable DXC asserts in non-debug builds
 option(DAWN_TARGET_MACOS "Manually link Apple core frameworks" ${TARGET_MACOS})
 
 option(DAWN_BUILD_SAMPLES "Enables building Dawn's samples" ${BUILD_SAMPLES})
+option(DAWN_BUILD_TESTS "Enables building Dawn's tests" ${BUILD_TESTS})
 option(DAWN_BUILD_NODE_BINDINGS "Enables building Dawn's NodeJS bindings" OFF)
 option(DAWN_ENABLE_SWIFTSHADER "Enables building Swiftshader as part of the build and Vulkan adapter discovery" OFF)
 option(DAWN_BUILD_BENCHMARKS "Build Dawn benchmarks" OFF)
@@ -293,6 +296,7 @@ set_if_not_defined(DAWN_SWIFTSHADER_DIR "${DAWN_THIRD_PARTY_DIR}/swiftshader" "D
 set_if_not_defined(DAWN_PROTOBUF_DIR "${DAWN_THIRD_PARTY_DIR}/protobuf" "Directory in which to find protobuf")
 set_if_not_defined(DAWN_LPM_DIR "${DAWN_THIRD_PARTY_DIR}/libprotobuf-mutator/src" "Directory in which to find libprotobuf")
 set_if_not_defined(DAWN_EMDAWNWEBGPU_DIR "${DAWN_THIRD_PARTY_DIR}/emdawnwebgpu" "Directory in which to find Dawn specific Emscripten bindings")
+set_if_not_defined(DAWN_GOOGLETEST_DIR "${DAWN_THIRD_PARTY_DIR}/googletest" "Directory in which to find googletest")
 
 set_if_not_defined(DAWN_SPIRV_TOOLS_DIR "${DAWN_THIRD_PARTY_DIR}/spirv-tools/src" "Directory in which to find SPIRV-Tools")
 set_if_not_defined(DAWN_SPIRV_HEADERS_DIR "${DAWN_THIRD_PARTY_DIR}/spirv-headers/src" "Directory in which to find SPIRV-Headers")

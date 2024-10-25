@@ -576,12 +576,14 @@ var LibraryWebGPU = {
     obj.label = UTF8ToString(data, length);
   },
 
-#if ASYNCIFY
   // Returns a FutureID that was resolved, or kNullFutureId if timed out.
+#if ASYNCIFY
   emwgpuWaitAny__async: true,
+#endif
   emwgpuWaitAny__i53abi: false,
   emwgpuWaitAny__sig: 'jppp',
   emwgpuWaitAny: (futurePtr, futureCount, timeoutNSPtr) => {
+#if ASYNCIFY
     var promises = WebGPU.Internals.waitAnyPromisesList;
     if (timeoutNSPtr) {
       var timeoutMS = {{{ gpu.makeGetU64('timeoutNSPtr', 0) }}} / 1000000;
@@ -608,8 +610,10 @@ var LibraryWebGPU = {
     delete WebGPU.Internals.futures[result];
     WebGPU.Internals.waitAnyPromisesList.length = 0;
     return result;
-  },
+#else
+    assert(false);
 #endif
+  },
 
   emwgpuGetPreferredFormat__sig: 'i',
   emwgpuGetPreferredFormat: () => {

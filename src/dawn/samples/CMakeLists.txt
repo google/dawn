@@ -78,6 +78,10 @@ function(Sample)
     if (${DAWN_ENABLE_EMSCRIPTEN})
         set_target_properties(${arg_NAME} PROPERTIES
             SUFFIX ".html")
+        target_link_options(${arg_NAME} PUBLIC
+            # We need JSPI for Future implementation.
+            "-sJSPI"
+        )
     endif()
     target_link_libraries(${arg_NAME} PUBLIC dawn::dawn_sample_utils)
     common_compile_options(${arg_NAME})

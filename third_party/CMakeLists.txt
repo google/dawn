@@ -33,7 +33,7 @@ set(BUILD_TESTING OFF)
 # a parent project that does not want to use depot_tools.
 if (DAWN_FETCH_DEPENDENCIES)
     set(EXTRA_FETCH_ARGS)
-    if (NOT TARGET gmock AND ${TINT_BUILD_TESTS})
+    if (NOT TARGET gmock AND (DAWN_BUILD_TESTS OR TINT_BUILD_TESTS))
         list(APPEND EXTRA_FETCH_ARGS --use-test-deps)
     endif()
 
@@ -68,6 +68,15 @@ if (NOT TARGET absl::strings)
     endif()
 
     add_subdirectory(${DAWN_ABSEIL_DIR} "${CMAKE_CURRENT_BINARY_DIR}/abseil")
+endif()
+
+if ((DAWN_BUILD_TESTS OR TINT_BUILD_TESTS) AND NOT TARGET gmock)
+    set(gtest_force_shared_crt ON CACHE BOOL "Controls whether a shared run-time library should be used even when Google Test is built as static library" FORCE)
+    if (${DAWN_ENABLE_EMSCRIPTEN})
+        # For Emscripten builds, we need to disable pthreads.
+        set(gtest_disable_pthreads ON)
+    endif()
+    add_subdirectory(${DAWN_GOOGLETEST_DIR} "${CMAKE_CURRENT_BINARY_DIR}/googletest" EXCLUDE_FROM_ALL)
 endif()
 
 ################################################################################
@@ -159,11 +168,6 @@ endif()
 if (TINT_BUILD_BENCHMARKS OR DAWN_BUILD_BENCHMARKS)
     set(BENCHMARK_ENABLE_TESTING FALSE CACHE BOOL FALSE FORCE)
     add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/google_benchmark/src EXCLUDE_FROM_ALL)
-endif()
-
-if (TINT_BUILD_TESTS AND NOT TARGET gmock)
-    set(gtest_force_shared_crt ON CACHE BOOL "Controls whether a shared run-time library should be used even when Google Test is built as static library" FORCE)
-    add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/googletest EXCLUDE_FROM_ALL)
 endif()
 
 # Populates 'targets' with list of all targets under 'dir'
