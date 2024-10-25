@@ -649,15 +649,20 @@ var LibraryWebGPU = {
 
   wgpuAdapterEnumerateFeatures: (adapterPtr, featuresOutPtr) => {
     var adapter = WebGPU.getJsObject(adapterPtr);
-    if (featuresOutPtr !== 0) {
-      var offset = 0;
-      adapter.features.forEach(feature => {
-        var featureEnumValue = WebGPU.FeatureNameString2Enum[feature];
-        {{{ makeSetValue('featuresOutPtr', 'offset', 'featureEnumValue', 'i32') }}};
-        offset += 4;
-      });
-    }
-    return adapter.features.size;
+
+    var offset = 0;
+    var numFeatures = 0;
+    adapter.features.forEach(feature => {
+      var featureEnumValue = WebGPU.FeatureNameString2Enum[feature];
+      if (featureEnumValue !== undefined) {
+        if (featuresOutPtr !== 0) {
+          {{{ makeSetValue('featuresOutPtr', 'offset', 'featureEnumValue', 'i32') }}};
+          offset += 4;
+        }
+        numFeatures++;
+      }
+    });
+    return numFeatures;
   },
 
   wgpuAdapterGetInfo__deps: ['$stringToNewUTF8', '$lengthBytesUTF8'],
@@ -1733,15 +1738,20 @@ var LibraryWebGPU = {
 
   wgpuDeviceEnumerateFeatures: (devicePtr, featuresOutPtr) => {
     var device = WebGPU.getJsObject(devicePtr);
-    if (featuresOutPtr !== 0) {
-      var offset = 0;
-      device.features.forEach(feature => {
-        var featureEnumValue = WebGPU.FeatureNameString2Enum[feature];
-        {{{ makeSetValue('featuresOutPtr', 'offset', 'featureEnumValue', 'i32') }}};
-        offset += 4;
-      });
-    }
-    return device.features.size;
+
+    var offset = 0;
+    var numFeatures = 0;
+    device.features.forEach(feature => {
+      var featureEnumValue = WebGPU.FeatureNameString2Enum[feature];
+      if (featureEnumValue !== undefined) {
+        if (featuresOutPtr !== 0) {
+          {{{ makeSetValue('featuresOutPtr', 'offset', 'featureEnumValue', 'i32') }}};
+          offset += 4;
+        }
+        numFeatures++;
+      }
+    });
+    return numFeatures;
   },
 
   wgpuDeviceGetLimits: (devicePtr, limitsOutPtr) => {
