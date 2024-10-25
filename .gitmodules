@@ -18,6 +18,10 @@
 	path = third_party/libc++abi/src
 	url = https://chromium.googlesource.com/external/github.com/llvm/llvm-project/libcxxabi
 	gclient-condition = dawn_standalone
+[submodule "third_party/libdrm/src"]
+	path = third_party/libdrm/src
+	url = https://chromium.googlesource.com/chromiumos/third_party/libdrm
+	gclient-condition = dawn_standalone and host_os == "linux"
 [submodule "build"]
 	path = build
 	url = https://chromium.googlesource.com/chromium/src/build

@@ -2,8 +2,6 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-import("//build_overrides/build.gni")
-
 config("benchmark_config") {
   include_dirs = [ "src/include" ]
 
@@ -64,10 +62,8 @@ component("google_benchmark") {
 
   all_dependent_configs = [ ":benchmark_config" ]
 
-  if (build_with_chromium) {
-    configs -= [ "//build/config/compiler:chromium_code" ]
-    configs += [ "//build/config/compiler:no_chromium_code" ]
-  }
+  configs -= [ "//build/config/compiler:chromium_code" ]
+  configs += [ "//build/config/compiler:no_chromium_code" ]
 
   if (is_win) {
     configs -= [ "//build/config/win:nominmax" ]
@@ -77,9 +73,10 @@ component("google_benchmark") {
     "benchmark_EXPORTS=1",
 
     # Tell gtest to always use standard regular expressions.
-    "HAVE_GNU_POSIX_REGEX=0",
-    "HAVE_POSIX_REGEX=0",
     "HAVE_STD_REGEX=1",
+
+    # google_benchmark expects a BENCHMARK_VERSION definition
+    "BENCHMARK_VERSION=\"1.9.0\"",
   ]
 }
 

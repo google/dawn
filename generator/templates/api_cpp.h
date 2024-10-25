@@ -189,11 +189,11 @@ class {{OptionalBoolCppType}} {
     }
 
     // Comparison functions.
-    bool operator==({{OptionalBoolCType}} rhs) const {
-        return mValue == rhs;
+    friend bool operator==(const {{OptionalBoolCppType}}& lhs, const {{OptionalBoolCppType}}& rhs) {
+        return lhs.mValue == rhs.mValue;
     }
-    bool operator!=({{OptionalBoolCType}} rhs) const {
-        return mValue != rhs;
+    friend bool operator!=(const {{OptionalBoolCppType}}& lhs, const {{OptionalBoolCppType}}& rhs) {
+        return lhs.mValue != rhs.mValue;
     }
 
   private:

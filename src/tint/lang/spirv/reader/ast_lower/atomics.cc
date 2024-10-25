@@ -262,7 +262,7 @@ struct Atomics::State {
         for (auto* node : ctx.src->ASTNodes().Objects()) {
             if (auto* load = ctx.src->Sem().Get<sem::Load>(node)) {
                 if (is_ref_to_atomic_var(load->Source())) {
-                    ctx.Replace(load->Source()->Declaration(), [=] {
+                    ctx.Replace(load->Source()->Declaration(), [load, this] {
                         auto* expr = ctx.CloneWithoutTransform(load->Source()->Declaration());
                         return b.Call(wgsl::BuiltinFn::kAtomicLoad, b.AddressOf(expr));
                     });
@@ -270,7 +270,7 @@ struct Atomics::State {
             } else if (auto* assign = node->As<ast::AssignmentStatement>()) {
                 auto* sem_lhs = ctx.src->Sem().GetVal(assign->lhs);
                 if (is_ref_to_atomic_var(sem_lhs)) {
-                    ctx.Replace(assign, [=] {
+                    ctx.Replace(assign, [assign, this] {
                         auto* lhs = ctx.CloneWithoutTransform(assign->lhs);
                         auto* rhs = ctx.CloneWithoutTransform(assign->rhs);
                         auto* call = b.Call(wgsl::BuiltinFn::kAtomicStore, b.AddressOf(lhs), rhs);
