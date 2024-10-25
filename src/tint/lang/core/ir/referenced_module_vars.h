@@ -30,6 +30,7 @@
 
 #include <functional>
 
+#include "src/tint/lang/core/ir/control_instruction.h"
 #include "src/tint/lang/core/ir/module.h"
 #include "src/tint/lang/core/ir/user_call.h"
 #include "src/tint/lang/core/ir/var.h"
