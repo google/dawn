@@ -213,8 +213,10 @@ struct StateImpl : core::ir::transform::ShaderIOBackendState {
         input_indices.Resize(input_data.Length());
 
         // Sort the struct members to satisfy HLSL interfacing matching rules.
-        std::sort(input_data.begin(), input_data.end(),
-                  [&](auto& x, auto& y) { return StructMemberComparator(x, y); });
+        // We use stable_sort so that two members with the same attributes maintain their relative
+        // ordering (e.g. kClipDistance).
+        std::stable_sort(input_data.begin(), input_data.end(),
+                         [&](auto& x, auto& y) { return StructMemberComparator(x, y); });
 
         Vector<core::type::Manager::StructMemberDesc, 4> input_struct_members;
         for (auto& input : input_data) {
