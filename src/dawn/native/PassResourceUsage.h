@@ -83,12 +83,6 @@ struct SyncScopeResourceUsage {
 // textures used, because some unused BindGroups may not be used at all in synchronization
 // scope but their resources still need to be validated on Queue::Submit.
 struct ComputePassResourceUsage {
-    // Somehow without this defaulted constructor, MSVC or its STDlib have an issue where they
-    // use the copy constructor (that's deleted) when doing operations on a
-    // vector<ComputePassResourceUsage>
-    ComputePassResourceUsage(ComputePassResourceUsage&&);
-    ComputePassResourceUsage();
-
     std::vector<SyncScopeResourceUsage> dispatchUsages;
 
     // All the resources referenced by this compute pass for validation in Queue::Submit.

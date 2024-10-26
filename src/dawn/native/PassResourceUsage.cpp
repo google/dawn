@@ -29,10 +29,6 @@
 
 namespace dawn::native {
 
-ComputePassResourceUsage::ComputePassResourceUsage() = default;
-
-ComputePassResourceUsage::ComputePassResourceUsage(ComputePassResourceUsage&&) = default;
-
 bool operator==(const TextureSyncInfo& a, const TextureSyncInfo& b) {
     return (a.usage == b.usage) && (a.shaderStages == b.shaderStages);
 }
