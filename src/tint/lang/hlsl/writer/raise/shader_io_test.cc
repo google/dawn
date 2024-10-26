@@ -2155,5 +2155,975 @@ foo_outputs = struct @align(16) {
     EXPECT_EQ(expect, str());
 }
 
+TEST_F(HlslWriterTransformTest, ShaderIOParameters_TruncateInterstage_Disabled) {
+    core::IOAttributes pos_attr;
+    pos_attr.builtin = core::BuiltinValue::kPosition;
+
+    core::IOAttributes loc0_attr;
+    loc0_attr.location = 0;
+    core::IOAttributes loc1_attr;
+    loc1_attr.location = 1;
+    core::IOAttributes loc2_attr;
+    loc2_attr.location = 2;
+
+    auto* str_ty = ty.Struct(mod.symbols.New("Outputs"),
+                             {
+                                 {mod.symbols.New("position"), ty.vec4<f32>(), pos_attr},
+                                 {mod.symbols.New("loc0"), ty.f32(), loc0_attr},
+                                 {mod.symbols.New("loc1"), ty.i32(), loc1_attr},
+                                 {mod.symbols.New("loc2"), ty.vec3<i32>(), loc2_attr},
+                             });
+    auto* ep = b.Function("foo", str_ty, core::ir::Function::PipelineStage::kVertex);
+    b.Append(ep->Block(), [&] {
+        auto* pos = b.Construct(ty.vec4<f32>(), 0.5_f);
+        auto* loc2 = b.Construct(ty.vec3<i32>(), 3_i);
+        b.Return(ep, b.Construct(str_ty, pos, 1_f, 2_i, loc2));
+    });
+
+    auto* src = R"(
+Outputs = struct @align(16) {
+  position:vec4<f32> @offset(0), @builtin(position)
+  loc0:f32 @offset(16), @location(0)
+  loc1:i32 @offset(20), @location(1)
+  loc2:vec3<i32> @offset(32), @location(2)
+}
+
+%foo = @vertex func():Outputs {
+  $B1: {
+    %2:vec4<f32> = construct 0.5f
+    %3:vec3<i32> = construct 3i
+    %4:Outputs = construct %2, 1.0f, 2i, %3
+    ret %4
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+Outputs = struct @align(16) {
+  position:vec4<f32> @offset(0)
+  loc0:f32 @offset(16)
+  loc1:i32 @offset(20)
+  loc2:vec3<i32> @offset(32)
+}
+
+foo_outputs = struct @align(16) {
+  Outputs_loc0:f32 @offset(0), @location(0)
+  Outputs_loc1:i32 @offset(4), @location(1)
+  Outputs_loc2:vec3<i32> @offset(16), @location(2)
+  Outputs_position:vec4<f32> @offset(32), @builtin(position)
+}
+
+%foo_inner = func():Outputs {
+  $B1: {
+    %2:vec4<f32> = construct 0.5f
+    %3:vec3<i32> = construct 3i
+    %4:Outputs = construct %2, 1.0f, 2i, %3
+    ret %4
+  }
+}
+%foo = @vertex func():foo_outputs {
+  $B2: {
+    %6:Outputs = call %foo_inner
+    %7:vec4<f32> = access %6, 0u
+    %8:f32 = access %6, 1u
+    %9:i32 = access %6, 2u
+    %10:vec3<i32> = access %6, 3u
+    %11:foo_outputs = construct %8, %9, %10, %7
+    ret %11
+  }
+}
+)";
+
+    ShaderIOConfig config;
+    config.truncate_interstage_variables = false;  // Disabled
+    Run(ShaderIO, config);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(HlslWriterTransformTest, ShaderIOParameters_TruncateInterstage_None) {
+    core::IOAttributes pos_attr;
+    pos_attr.builtin = core::BuiltinValue::kPosition;
+
+    core::IOAttributes loc0_attr;
+    loc0_attr.location = 0;
+    core::IOAttributes loc1_attr;
+    loc1_attr.location = 1;
+    core::IOAttributes loc2_attr;
+    loc2_attr.location = 2;
+
+    auto* str_ty = ty.Struct(mod.symbols.New("Outputs"),
+                             {
+                                 {mod.symbols.New("position"), ty.vec4<f32>(), pos_attr},
+                                 {mod.symbols.New("loc0"), ty.f32(), loc0_attr},
+                                 {mod.symbols.New("loc1"), ty.i32(), loc1_attr},
+                                 {mod.symbols.New("loc2"), ty.vec3<i32>(), loc2_attr},
+                             });
+    auto* ep = b.Function("foo", str_ty, core::ir::Function::PipelineStage::kVertex);
+    b.Append(ep->Block(), [&] {
+        auto* pos = b.Construct(ty.vec4<f32>(), 0.5_f);
+        auto* loc2 = b.Construct(ty.vec3<i32>(), 3_i);
+        b.Return(ep, b.Construct(str_ty, pos, 1_f, 2_i, loc2));
+    });
+
+    auto* src = R"(
+Outputs = struct @align(16) {
+  position:vec4<f32> @offset(0), @builtin(position)
+  loc0:f32 @offset(16), @location(0)
+  loc1:i32 @offset(20), @location(1)
+  loc2:vec3<i32> @offset(32), @location(2)
+}
+
+%foo = @vertex func():Outputs {
+  $B1: {
+    %2:vec4<f32> = construct 0.5f
+    %3:vec3<i32> = construct 3i
+    %4:Outputs = construct %2, 1.0f, 2i, %3
+    ret %4
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+Outputs = struct @align(16) {
+  position:vec4<f32> @offset(0)
+  loc0:f32 @offset(16)
+  loc1:i32 @offset(20)
+  loc2:vec3<i32> @offset(32)
+}
+
+foo_outputs = struct @align(16) {
+  Outputs_loc0:f32 @offset(0), @location(0)
+  Outputs_loc1:i32 @offset(4), @location(1)
+  Outputs_loc2:vec3<i32> @offset(16), @location(2)
+  Outputs_position:vec4<f32> @offset(32), @builtin(position)
+}
+
+%foo_inner = func():Outputs {
+  $B1: {
+    %2:vec4<f32> = construct 0.5f
+    %3:vec3<i32> = construct 3i
+    %4:Outputs = construct %2, 1.0f, 2i, %3
+    ret %4
+  }
+}
+%foo = @vertex func():foo_outputs {
+  $B2: {
+    %6:Outputs = call %foo_inner
+    %7:vec4<f32> = access %6, 0u
+    %8:f32 = access %6, 1u
+    %9:i32 = access %6, 2u
+    %10:vec3<i32> = access %6, 3u
+    %11:foo_outputs = construct %8, %9, %10, %7
+    ret %11
+  }
+}
+)";
+
+    ShaderIOConfig config;
+    config.truncate_interstage_variables = true;
+    config.interstage_locations[0] = true;
+    config.interstage_locations[1] = true;
+    config.interstage_locations[2] = true;
+    Run(ShaderIO, config);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(HlslWriterTransformTest, ShaderIOParameters_TruncateInterstage_First) {
+    core::IOAttributes pos_attr;
+    pos_attr.builtin = core::BuiltinValue::kPosition;
+
+    core::IOAttributes loc0_attr;
+    loc0_attr.location = 0;
+    core::IOAttributes loc1_attr;
+    loc1_attr.location = 1;
+    core::IOAttributes loc2_attr;
+    loc2_attr.location = 2;
+
+    auto* str_ty = ty.Struct(mod.symbols.New("Outputs"),
+                             {
+                                 {mod.symbols.New("position"), ty.vec4<f32>(), pos_attr},
+                                 {mod.symbols.New("loc0"), ty.f32(), loc0_attr},
+                                 {mod.symbols.New("loc1"), ty.i32(), loc1_attr},
+                                 {mod.symbols.New("loc2"), ty.vec3<i32>(), loc2_attr},
+                             });
+    auto* ep = b.Function("foo", str_ty, core::ir::Function::PipelineStage::kVertex);
+    b.Append(ep->Block(), [&] {
+        auto* pos = b.Construct(ty.vec4<f32>(), 0.5_f);
+        auto* loc2 = b.Construct(ty.vec3<i32>(), 3_i);
+        b.Return(ep, b.Construct(str_ty, pos, 1_f, 2_i, loc2));
+    });
+
+    auto* src = R"(
+Outputs = struct @align(16) {
+  position:vec4<f32> @offset(0), @builtin(position)
+  loc0:f32 @offset(16), @location(0)
+  loc1:i32 @offset(20), @location(1)
+  loc2:vec3<i32> @offset(32), @location(2)
+}
+
+%foo = @vertex func():Outputs {
+  $B1: {
+    %2:vec4<f32> = construct 0.5f
+    %3:vec3<i32> = construct 3i
+    %4:Outputs = construct %2, 1.0f, 2i, %3
+    ret %4
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+Outputs = struct @align(16) {
+  position:vec4<f32> @offset(0)
+  loc0:f32 @offset(16)
+  loc1:i32 @offset(20)
+  loc2:vec3<i32> @offset(32)
+}
+
+foo_outputs = struct @align(16) {
+  Outputs_loc1:i32 @offset(0), @location(1)
+  Outputs_loc2:vec3<i32> @offset(16), @location(2)
+  Outputs_position:vec4<f32> @offset(32), @builtin(position)
+}
+
+%foo_inner = func():Outputs {
+  $B1: {
+    %2:vec4<f32> = construct 0.5f
+    %3:vec3<i32> = construct 3i
+    %4:Outputs = construct %2, 1.0f, 2i, %3
+    ret %4
+  }
+}
+%foo = @vertex func():foo_outputs {
+  $B2: {
+    %6:Outputs = call %foo_inner
+    %7:vec4<f32> = access %6, 0u
+    %8:f32 = access %6, 1u
+    %9:i32 = access %6, 2u
+    %10:vec3<i32> = access %6, 3u
+    %11:foo_outputs = construct %9, %10, %7
+    ret %11
+  }
+}
+)";
+
+    ShaderIOConfig config;
+    config.truncate_interstage_variables = true;
+    config.interstage_locations[1] = true;
+    config.interstage_locations[2] = true;
+    Run(ShaderIO, config);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(HlslWriterTransformTest, ShaderIOParameters_TruncateInterstage_Middle) {
+    core::IOAttributes pos_attr;
+    pos_attr.builtin = core::BuiltinValue::kPosition;
+
+    core::IOAttributes loc0_attr;
+    loc0_attr.location = 0;
+    core::IOAttributes loc1_attr;
+    loc1_attr.location = 1;
+    core::IOAttributes loc2_attr;
+    loc2_attr.location = 2;
+
+    auto* str_ty = ty.Struct(mod.symbols.New("Outputs"),
+                             {
+                                 {mod.symbols.New("position"), ty.vec4<f32>(), pos_attr},
+                                 {mod.symbols.New("loc0"), ty.f32(), loc0_attr},
+                                 {mod.symbols.New("loc1"), ty.i32(), loc1_attr},
+                                 {mod.symbols.New("loc2"), ty.vec3<i32>(), loc2_attr},
+                             });
+    auto* ep = b.Function("foo", str_ty, core::ir::Function::PipelineStage::kVertex);
+    b.Append(ep->Block(), [&] {
+        auto* pos = b.Construct(ty.vec4<f32>(), 0.5_f);
+        auto* loc2 = b.Construct(ty.vec3<i32>(), 3_i);
+        b.Return(ep, b.Construct(str_ty, pos, 1_f, 2_i, loc2));
+    });
+
+    auto* src = R"(
+Outputs = struct @align(16) {
+  position:vec4<f32> @offset(0), @builtin(position)
+  loc0:f32 @offset(16), @location(0)
+  loc1:i32 @offset(20), @location(1)
+  loc2:vec3<i32> @offset(32), @location(2)
+}
+
+%foo = @vertex func():Outputs {
+  $B1: {
+    %2:vec4<f32> = construct 0.5f
+    %3:vec3<i32> = construct 3i
+    %4:Outputs = construct %2, 1.0f, 2i, %3
+    ret %4
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+Outputs = struct @align(16) {
+  position:vec4<f32> @offset(0)
+  loc0:f32 @offset(16)
+  loc1:i32 @offset(20)
+  loc2:vec3<i32> @offset(32)
+}
+
+foo_outputs = struct @align(16) {
+  Outputs_loc0:f32 @offset(0), @location(0)
+  Outputs_loc2:vec3<i32> @offset(16), @location(2)
+  Outputs_position:vec4<f32> @offset(32), @builtin(position)
+}
+
+%foo_inner = func():Outputs {
+  $B1: {
+    %2:vec4<f32> = construct 0.5f
+    %3:vec3<i32> = construct 3i
+    %4:Outputs = construct %2, 1.0f, 2i, %3
+    ret %4
+  }
+}
+%foo = @vertex func():foo_outputs {
+  $B2: {
+    %6:Outputs = call %foo_inner
+    %7:vec4<f32> = access %6, 0u
+    %8:f32 = access %6, 1u
+    %9:i32 = access %6, 2u
+    %10:vec3<i32> = access %6, 3u
+    %11:foo_outputs = construct %8, %10, %7
+    ret %11
+  }
+}
+)";
+
+    ShaderIOConfig config;
+    config.truncate_interstage_variables = true;
+    config.interstage_locations[0] = true;
+    config.interstage_locations[2] = true;
+    Run(ShaderIO, config);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(HlslWriterTransformTest, ShaderIOParameters_TruncateInterstage_Last) {
+    core::IOAttributes pos_attr;
+    pos_attr.builtin = core::BuiltinValue::kPosition;
+
+    core::IOAttributes loc0_attr;
+    loc0_attr.location = 0;
+    core::IOAttributes loc1_attr;
+    loc1_attr.location = 1;
+    core::IOAttributes loc2_attr;
+    loc2_attr.location = 2;
+
+    auto* str_ty = ty.Struct(mod.symbols.New("Outputs"),
+                             {
+                                 {mod.symbols.New("position"), ty.vec4<f32>(), pos_attr},
+                                 {mod.symbols.New("loc0"), ty.f32(), loc0_attr},
+                                 {mod.symbols.New("loc1"), ty.i32(), loc1_attr},
+                                 {mod.symbols.New("loc2"), ty.vec3<i32>(), loc2_attr},
+                             });
+    auto* ep = b.Function("foo", str_ty, core::ir::Function::PipelineStage::kVertex);
+    b.Append(ep->Block(), [&] {
+        auto* pos = b.Construct(ty.vec4<f32>(), 0.5_f);
+        auto* loc2 = b.Construct(ty.vec3<i32>(), 3_i);
+        b.Return(ep, b.Construct(str_ty, pos, 1_f, 2_i, loc2));
+    });
+
+    auto* src = R"(
+Outputs = struct @align(16) {
+  position:vec4<f32> @offset(0), @builtin(position)
+  loc0:f32 @offset(16), @location(0)
+  loc1:i32 @offset(20), @location(1)
+  loc2:vec3<i32> @offset(32), @location(2)
+}
+
+%foo = @vertex func():Outputs {
+  $B1: {
+    %2:vec4<f32> = construct 0.5f
+    %3:vec3<i32> = construct 3i
+    %4:Outputs = construct %2, 1.0f, 2i, %3
+    ret %4
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+Outputs = struct @align(16) {
+  position:vec4<f32> @offset(0)
+  loc0:f32 @offset(16)
+  loc1:i32 @offset(20)
+  loc2:vec3<i32> @offset(32)
+}
+
+foo_outputs = struct @align(16) {
+  Outputs_loc0:f32 @offset(0), @location(0)
+  Outputs_loc1:i32 @offset(4), @location(1)
+  Outputs_position:vec4<f32> @offset(16), @builtin(position)
+}
+
+%foo_inner = func():Outputs {
+  $B1: {
+    %2:vec4<f32> = construct 0.5f
+    %3:vec3<i32> = construct 3i
+    %4:Outputs = construct %2, 1.0f, 2i, %3
+    ret %4
+  }
+}
+%foo = @vertex func():foo_outputs {
+  $B2: {
+    %6:Outputs = call %foo_inner
+    %7:vec4<f32> = access %6, 0u
+    %8:f32 = access %6, 1u
+    %9:i32 = access %6, 2u
+    %10:vec3<i32> = access %6, 3u
+    %11:foo_outputs = construct %8, %9, %7
+    ret %11
+  }
+}
+)";
+
+    ShaderIOConfig config;
+    config.truncate_interstage_variables = true;
+    config.interstage_locations[0] = true;
+    config.interstage_locations[1] = true;
+    Run(ShaderIO, config);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(HlslWriterTransformTest, ShaderIOParameters_TruncateInterstage_FirstAndLast) {
+    core::IOAttributes pos_attr;
+    pos_attr.builtin = core::BuiltinValue::kPosition;
+
+    core::IOAttributes loc0_attr;
+    loc0_attr.location = 0;
+    core::IOAttributes loc1_attr;
+    loc1_attr.location = 1;
+    core::IOAttributes loc2_attr;
+    loc2_attr.location = 2;
+
+    auto* str_ty = ty.Struct(mod.symbols.New("Outputs"),
+                             {
+                                 {mod.symbols.New("position"), ty.vec4<f32>(), pos_attr},
+                                 {mod.symbols.New("loc0"), ty.f32(), loc0_attr},
+                                 {mod.symbols.New("loc1"), ty.i32(), loc1_attr},
+                                 {mod.symbols.New("loc2"), ty.vec3<i32>(), loc2_attr},
+                             });
+    auto* ep = b.Function("foo", str_ty, core::ir::Function::PipelineStage::kVertex);
+    b.Append(ep->Block(), [&] {
+        auto* pos = b.Construct(ty.vec4<f32>(), 0.5_f);
+        auto* loc2 = b.Construct(ty.vec3<i32>(), 3_i);
+        b.Return(ep, b.Construct(str_ty, pos, 1_f, 2_i, loc2));
+    });
+
+    auto* src = R"(
+Outputs = struct @align(16) {
+  position:vec4<f32> @offset(0), @builtin(position)
+  loc0:f32 @offset(16), @location(0)
+  loc1:i32 @offset(20), @location(1)
+  loc2:vec3<i32> @offset(32), @location(2)
+}
+
+%foo = @vertex func():Outputs {
+  $B1: {
+    %2:vec4<f32> = construct 0.5f
+    %3:vec3<i32> = construct 3i
+    %4:Outputs = construct %2, 1.0f, 2i, %3
+    ret %4
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+Outputs = struct @align(16) {
+  position:vec4<f32> @offset(0)
+  loc0:f32 @offset(16)
+  loc1:i32 @offset(20)
+  loc2:vec3<i32> @offset(32)
+}
+
+foo_outputs = struct @align(16) {
+  Outputs_loc1:i32 @offset(0), @location(1)
+  Outputs_position:vec4<f32> @offset(16), @builtin(position)
+}
+
+%foo_inner = func():Outputs {
+  $B1: {
+    %2:vec4<f32> = construct 0.5f
+    %3:vec3<i32> = construct 3i
+    %4:Outputs = construct %2, 1.0f, 2i, %3
+    ret %4
+  }
+}
+%foo = @vertex func():foo_outputs {
+  $B2: {
+    %6:Outputs = call %foo_inner
+    %7:vec4<f32> = access %6, 0u
+    %8:f32 = access %6, 1u
+    %9:i32 = access %6, 2u
+    %10:vec3<i32> = access %6, 3u
+    %11:foo_outputs = construct %9, %7
+    ret %11
+  }
+}
+)";
+
+    ShaderIOConfig config;
+    config.truncate_interstage_variables = true;
+    config.interstage_locations[1] = true;
+    Run(ShaderIO, config);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(HlslWriterTransformTest, ShaderIOParameters_TruncateInterstage_All) {
+    core::IOAttributes pos_attr;
+    pos_attr.builtin = core::BuiltinValue::kPosition;
+
+    core::IOAttributes loc0_attr;
+    loc0_attr.location = 0;
+    core::IOAttributes loc1_attr;
+    loc1_attr.location = 1;
+    core::IOAttributes loc2_attr;
+    loc2_attr.location = 2;
+
+    auto* str_ty = ty.Struct(mod.symbols.New("Outputs"),
+                             {
+                                 {mod.symbols.New("position"), ty.vec4<f32>(), pos_attr},
+                                 {mod.symbols.New("loc0"), ty.f32(), loc0_attr},
+                                 {mod.symbols.New("loc1"), ty.i32(), loc1_attr},
+                                 {mod.symbols.New("loc2"), ty.vec3<i32>(), loc2_attr},
+                             });
+    auto* ep = b.Function("foo", str_ty, core::ir::Function::PipelineStage::kVertex);
+    b.Append(ep->Block(), [&] {
+        auto* pos = b.Construct(ty.vec4<f32>(), 0.5_f);
+        auto* loc2 = b.Construct(ty.vec3<i32>(), 3_i);
+        b.Return(ep, b.Construct(str_ty, pos, 1_f, 2_i, loc2));
+    });
+
+    auto* src = R"(
+Outputs = struct @align(16) {
+  position:vec4<f32> @offset(0), @builtin(position)
+  loc0:f32 @offset(16), @location(0)
+  loc1:i32 @offset(20), @location(1)
+  loc2:vec3<i32> @offset(32), @location(2)
+}
+
+%foo = @vertex func():Outputs {
+  $B1: {
+    %2:vec4<f32> = construct 0.5f
+    %3:vec3<i32> = construct 3i
+    %4:Outputs = construct %2, 1.0f, 2i, %3
+    ret %4
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+Outputs = struct @align(16) {
+  position:vec4<f32> @offset(0)
+  loc0:f32 @offset(16)
+  loc1:i32 @offset(20)
+  loc2:vec3<i32> @offset(32)
+}
+
+foo_outputs = struct @align(16) {
+  Outputs_position:vec4<f32> @offset(0), @builtin(position)
+}
+
+%foo_inner = func():Outputs {
+  $B1: {
+    %2:vec4<f32> = construct 0.5f
+    %3:vec3<i32> = construct 3i
+    %4:Outputs = construct %2, 1.0f, 2i, %3
+    ret %4
+  }
+}
+%foo = @vertex func():foo_outputs {
+  $B2: {
+    %6:Outputs = call %foo_inner
+    %7:vec4<f32> = access %6, 0u
+    %8:f32 = access %6, 1u
+    %9:i32 = access %6, 2u
+    %10:vec3<i32> = access %6, 3u
+    %11:foo_outputs = construct %7
+    ret %11
+  }
+}
+)";
+
+    ShaderIOConfig config;
+    config.truncate_interstage_variables = true;
+    Run(ShaderIO, config);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(HlslWriterTransformTest, ShaderIOParameters_TruncateInterstage_NonLocationInBetween) {
+    core::IOAttributes pos_attr;
+    pos_attr.builtin = core::BuiltinValue::kPosition;
+
+    core::IOAttributes loc0_attr;
+    loc0_attr.location = 0;
+    core::IOAttributes loc1_attr;
+    loc1_attr.location = 1;
+    core::IOAttributes loc2_attr;
+    loc2_attr.location = 2;
+
+    auto* str_ty = ty.Struct(mod.symbols.New("Outputs"),
+                             {
+                                 {mod.symbols.New("loc0"), ty.f32(), loc0_attr},
+                                 {mod.symbols.New("position"), ty.vec4<f32>(), pos_attr},
+                                 {mod.symbols.New("loc1"), ty.i32(), loc1_attr},
+                                 {mod.symbols.New("loc2"), ty.vec3<i32>(), loc2_attr},
+                             });
+    auto* ep = b.Function("foo", str_ty, core::ir::Function::PipelineStage::kVertex);
+    b.Append(ep->Block(), [&] {
+        auto* pos = b.Construct(ty.vec4<f32>(), 0.5_f);
+        auto* loc2 = b.Construct(ty.vec3<i32>(), 3_i);
+        b.Return(ep, b.Construct(str_ty, 1_f, pos, 2_i, loc2));
+    });
+
+    auto* src = R"(
+Outputs = struct @align(16) {
+  loc0:f32 @offset(0), @location(0)
+  position:vec4<f32> @offset(16), @builtin(position)
+  loc1:i32 @offset(32), @location(1)
+  loc2:vec3<i32> @offset(48), @location(2)
+}
+
+%foo = @vertex func():Outputs {
+  $B1: {
+    %2:vec4<f32> = construct 0.5f
+    %3:vec3<i32> = construct 3i
+    %4:Outputs = construct 1.0f, %2, 2i, %3
+    ret %4
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+Outputs = struct @align(16) {
+  loc0:f32 @offset(0)
+  position:vec4<f32> @offset(16)
+  loc1:i32 @offset(32)
+  loc2:vec3<i32> @offset(48)
+}
+
+foo_outputs = struct @align(16) {
+  Outputs_loc0:f32 @offset(0), @location(0)
+  Outputs_loc2:vec3<i32> @offset(16), @location(2)
+  Outputs_position:vec4<f32> @offset(32), @builtin(position)
+}
+
+%foo_inner = func():Outputs {
+  $B1: {
+    %2:vec4<f32> = construct 0.5f
+    %3:vec3<i32> = construct 3i
+    %4:Outputs = construct 1.0f, %2, 2i, %3
+    ret %4
+  }
+}
+%foo = @vertex func():foo_outputs {
+  $B2: {
+    %6:Outputs = call %foo_inner
+    %7:f32 = access %6, 0u
+    %8:vec4<f32> = access %6, 1u
+    %9:i32 = access %6, 2u
+    %10:vec3<i32> = access %6, 3u
+    %11:foo_outputs = construct %7, %10, %8
+    ret %11
+  }
+}
+)";
+
+    ShaderIOConfig config;
+    config.truncate_interstage_variables = true;
+    config.interstage_locations[0] = true;
+    config.interstage_locations[2] = true;
+    Run(ShaderIO, config);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(HlslWriterTransformTest,
+       ShaderIOParameters_TruncateInterstage_MultipleEntryPointsSharedStruct) {
+    core::IOAttributes pos_attr;
+    pos_attr.builtin = core::BuiltinValue::kPosition;
+
+    core::IOAttributes loc0_attr;
+    loc0_attr.location = 0;
+    core::IOAttributes loc1_attr;
+    loc1_attr.location = 1;
+    core::IOAttributes loc2_attr;
+    loc2_attr.location = 2;
+
+    auto* str_ty = ty.Struct(mod.symbols.New("Outputs"),
+                             {
+                                 {mod.symbols.New("position"), ty.vec4<f32>(), pos_attr},
+                                 {mod.symbols.New("loc0"), ty.f32(), loc0_attr},
+                                 {mod.symbols.New("loc1"), ty.i32(), loc1_attr},
+                                 {mod.symbols.New("loc2"), ty.vec3<i32>(), loc2_attr},
+                             });
+    auto* ep1 = b.Function("foo1", str_ty, core::ir::Function::PipelineStage::kVertex);
+    b.Append(ep1->Block(), [&] {
+        auto* pos = b.Construct(ty.vec4<f32>(), 0.5_f);
+        auto* loc2 = b.Construct(ty.vec3<i32>(), 3_i);
+        b.Return(ep1, b.Construct(str_ty, pos, 1_f, 2_i, loc2));
+    });
+    auto* ep2 = b.Function("foo2", str_ty, core::ir::Function::PipelineStage::kVertex);
+    b.Append(ep2->Block(), [&] {
+        auto* pos = b.Construct(ty.vec4<f32>(), 0.5_f);
+        auto* loc2 = b.Construct(ty.vec3<i32>(), 3_i);
+        b.Return(ep2, b.Construct(str_ty, pos, 1_f, 2_i, loc2));
+    });
+
+    auto* src = R"(
+Outputs = struct @align(16) {
+  position:vec4<f32> @offset(0), @builtin(position)
+  loc0:f32 @offset(16), @location(0)
+  loc1:i32 @offset(20), @location(1)
+  loc2:vec3<i32> @offset(32), @location(2)
+}
+
+%foo1 = @vertex func():Outputs {
+  $B1: {
+    %2:vec4<f32> = construct 0.5f
+    %3:vec3<i32> = construct 3i
+    %4:Outputs = construct %2, 1.0f, 2i, %3
+    ret %4
+  }
+}
+%foo2 = @vertex func():Outputs {
+  $B2: {
+    %6:vec4<f32> = construct 0.5f
+    %7:vec3<i32> = construct 3i
+    %8:Outputs = construct %6, 1.0f, 2i, %7
+    ret %8
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+Outputs = struct @align(16) {
+  position:vec4<f32> @offset(0)
+  loc0:f32 @offset(16)
+  loc1:i32 @offset(20)
+  loc2:vec3<i32> @offset(32)
+}
+
+foo1_outputs = struct @align(16) {
+  Outputs_loc0:f32 @offset(0), @location(0)
+  Outputs_loc2:vec3<i32> @offset(16), @location(2)
+  Outputs_position:vec4<f32> @offset(32), @builtin(position)
+}
+
+foo2_outputs = struct @align(16) {
+  Outputs_loc0:f32 @offset(0), @location(0)
+  Outputs_loc2:vec3<i32> @offset(16), @location(2)
+  Outputs_position:vec4<f32> @offset(32), @builtin(position)
+}
+
+%foo1_inner = func():Outputs {
+  $B1: {
+    %2:vec4<f32> = construct 0.5f
+    %3:vec3<i32> = construct 3i
+    %4:Outputs = construct %2, 1.0f, 2i, %3
+    ret %4
+  }
+}
+%foo2_inner = func():Outputs {
+  $B2: {
+    %6:vec4<f32> = construct 0.5f
+    %7:vec3<i32> = construct 3i
+    %8:Outputs = construct %6, 1.0f, 2i, %7
+    ret %8
+  }
+}
+%foo1 = @vertex func():foo1_outputs {
+  $B3: {
+    %10:Outputs = call %foo1_inner
+    %11:vec4<f32> = access %10, 0u
+    %12:f32 = access %10, 1u
+    %13:i32 = access %10, 2u
+    %14:vec3<i32> = access %10, 3u
+    %15:foo1_outputs = construct %12, %14, %11
+    ret %15
+  }
+}
+%foo2 = @vertex func():foo2_outputs {
+  $B4: {
+    %17:Outputs = call %foo2_inner
+    %18:vec4<f32> = access %17, 0u
+    %19:f32 = access %17, 1u
+    %20:i32 = access %17, 2u
+    %21:vec3<i32> = access %17, 3u
+    %22:foo2_outputs = construct %19, %21, %18
+    ret %22
+  }
+}
+)";
+
+    ShaderIOConfig config;
+    config.truncate_interstage_variables = true;
+    config.interstage_locations[0] = true;
+    config.interstage_locations[2] = true;
+    Run(ShaderIO, config);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(HlslWriterTransformTest,
+       ShaderIOParameters_TruncateInterstage_MultipleEntryPointsSeparateStruct) {
+    core::IOAttributes pos_attr;
+    pos_attr.builtin = core::BuiltinValue::kPosition;
+
+    core::IOAttributes loc1_attr;
+    loc1_attr.location = 1;
+    core::IOAttributes loc2_attr;
+    loc2_attr.location = 2;
+    core::IOAttributes loc3_attr;
+    loc3_attr.location = 3;
+    core::IOAttributes loc5_attr;
+    loc5_attr.location = 5;
+
+    auto* str_ty1 = ty.Struct(mod.symbols.New("Outputs1"),
+                              {
+                                  {mod.symbols.New("position"), ty.vec4<f32>(), pos_attr},
+                                  {mod.symbols.New("loc1"), ty.f32(), loc1_attr},
+                                  {mod.symbols.New("loc3"), ty.i32(), loc3_attr},
+                                  {mod.symbols.New("loc5"), ty.vec3<i32>(), loc5_attr},
+                              });
+    auto* ep1 = b.Function("foo1", str_ty1, core::ir::Function::PipelineStage::kVertex);
+    b.Append(ep1->Block(), [&] {
+        auto* pos = b.Construct(ty.vec4<f32>(), 0.5_f);
+        auto* loc5 = b.Construct(ty.vec3<i32>(), 3_i);
+        b.Return(ep1, b.Construct(str_ty1, pos, 1_f, 2_i, loc5));
+    });
+
+    auto* str_ty2 = ty.Struct(mod.symbols.New("Outputs2"),
+                              {
+                                  {mod.symbols.New("position"), ty.vec4<f32>(), pos_attr},
+                                  {mod.symbols.New("loc2"), ty.vec3<i32>(), loc2_attr},
+                              });
+
+    auto* ep2 = b.Function("foo2", str_ty2, core::ir::Function::PipelineStage::kVertex);
+    b.Append(ep2->Block(), [&] {
+        auto* pos = b.Construct(ty.vec4<f32>(), 0.5_f);
+        auto* loc2 = b.Construct(ty.vec3<i32>(), 3_i);
+        b.Return(ep2, b.Construct(str_ty2, pos, loc2));
+    });
+
+    auto* src = R"(
+Outputs1 = struct @align(16) {
+  position:vec4<f32> @offset(0), @builtin(position)
+  loc1:f32 @offset(16), @location(1)
+  loc3:i32 @offset(20), @location(3)
+  loc5:vec3<i32> @offset(32), @location(5)
+}
+
+Outputs2 = struct @align(16) {
+  position_1:vec4<f32> @offset(0), @builtin(position)
+  loc2:vec3<i32> @offset(16), @location(2)
+}
+
+%foo1 = @vertex func():Outputs1 {
+  $B1: {
+    %2:vec4<f32> = construct 0.5f
+    %3:vec3<i32> = construct 3i
+    %4:Outputs1 = construct %2, 1.0f, 2i, %3
+    ret %4
+  }
+}
+%foo2 = @vertex func():Outputs2 {
+  $B2: {
+    %6:vec4<f32> = construct 0.5f
+    %7:vec3<i32> = construct 3i
+    %8:Outputs2 = construct %6, %7
+    ret %8
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+Outputs1 = struct @align(16) {
+  position:vec4<f32> @offset(0)
+  loc1:f32 @offset(16)
+  loc3:i32 @offset(20)
+  loc5:vec3<i32> @offset(32)
+}
+
+Outputs2 = struct @align(16) {
+  position_1:vec4<f32> @offset(0)
+  loc2:vec3<i32> @offset(16)
+}
+
+foo1_outputs = struct @align(16) {
+  Outputs1_loc3:i32 @offset(0), @location(3)
+  Outputs1_position:vec4<f32> @offset(16), @builtin(position)
+}
+
+foo2_outputs = struct @align(16) {
+  Outputs2_loc2:vec3<i32> @offset(0), @location(2)
+  Outputs2_position_1:vec4<f32> @offset(16), @builtin(position)
+}
+
+%foo1_inner = func():Outputs1 {
+  $B1: {
+    %2:vec4<f32> = construct 0.5f
+    %3:vec3<i32> = construct 3i
+    %4:Outputs1 = construct %2, 1.0f, 2i, %3
+    ret %4
+  }
+}
+%foo2_inner = func():Outputs2 {
+  $B2: {
+    %6:vec4<f32> = construct 0.5f
+    %7:vec3<i32> = construct 3i
+    %8:Outputs2 = construct %6, %7
+    ret %8
+  }
+}
+%foo1 = @vertex func():foo1_outputs {
+  $B3: {
+    %10:Outputs1 = call %foo1_inner
+    %11:vec4<f32> = access %10, 0u
+    %12:f32 = access %10, 1u
+    %13:i32 = access %10, 2u
+    %14:vec3<i32> = access %10, 3u
+    %15:foo1_outputs = construct %13, %11
+    ret %15
+  }
+}
+%foo2 = @vertex func():foo2_outputs {
+  $B4: {
+    %17:Outputs2 = call %foo2_inner
+    %18:vec4<f32> = access %17, 0u
+    %19:vec3<i32> = access %17, 1u
+    %20:foo2_outputs = construct %19, %18
+    ret %20
+  }
+}
+)";
+
+    ShaderIOConfig config;
+    config.truncate_interstage_variables = true;
+    config.interstage_locations[2] = true;
+    config.interstage_locations[3] = true;
+    Run(ShaderIO, config);
+
+    EXPECT_EQ(expect, str());
+}
+
 }  // namespace
 }  // namespace tint::hlsl::writer::raise

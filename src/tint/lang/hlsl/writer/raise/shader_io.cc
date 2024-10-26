@@ -70,6 +70,7 @@ struct StateImpl : core::ir::transform::ShaderIOBackendState {
     std::optional<uint32_t> num_workgroups_index;
     std::optional<uint32_t> first_clip_distance_index;
     std::optional<uint32_t> second_clip_distance_index;
+    Hashset<uint32_t, 4> truncated_indices;
 
     /// Constructor
     StateImpl(core::ir::Module& mod, core::ir::Function* f, const ShaderIOConfig& c)
@@ -298,12 +299,27 @@ struct StateImpl : core::ir::transform::ShaderIOBackendState {
                   [&](auto& x, auto& y) { return StructMemberComparator(x, y); });
 
         output_indices.Resize(outputs.Length());
-        output_values.Resize(outputs.Length());
+        output_values.Resize(outputs.Length(), nullptr);
 
         Vector<core::type::Manager::StructMemberDesc, 4> output_struct_members;
         for (size_t i = 0; i < output_data.Length(); ++i) {
             output_indices[output_data[i].idx] = static_cast<uint32_t>(i);
+
+            // If we need to truncate this member, don't add it to the output struct
+            if (config.truncate_interstage_variables) {
+                if (auto loc = output_data[i].member.attributes.location) {
+                    if (!config.interstage_locations.test(*loc)) {
+                        truncated_indices.Add(output_data[i].idx);
+                        continue;
+                    }
+                }
+            }
+
             output_struct_members.Push(output_data[i].member);
+        }
+        if (output_struct_members.IsEmpty()) {
+            // All members were truncated
+            return ty.void_();
         }
 
         output_struct =
@@ -412,6 +428,12 @@ struct StateImpl : core::ir::transform::ShaderIOBackendState {
 
     /// @copydoc ShaderIO::BackendState::SetOutput
     void SetOutput(core::ir::Builder& builder, uint32_t idx, core::ir::Value* value) override {
+        if (truncated_indices.Contains(idx)) {
+            // Leave this output value as nullptr
+            TINT_ASSERT(!output_values[output_indices[idx]]);
+            return;
+        }
+
         // If setting a ClipDistance output, build the initial value for one or both output values.
         if (idx == first_clip_distance_index) {
             auto index = output_indices[idx];
@@ -434,6 +456,13 @@ struct StateImpl : core::ir::transform::ShaderIOBackendState {
         if (!output_struct) {
             return nullptr;
         }
+
+        if (truncated_indices.Count()) {
+            // Remove all truncated values, which are nullptr in output_values
+            output_values.EraseIf([](auto* v) { return v == nullptr; });
+        }
+
+        TINT_ASSERT(output_values.Length() == output_struct->Members().Length());
         return builder.Construct(output_struct, std::move(output_values))->Result(0);
     }
 };

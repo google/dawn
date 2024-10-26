@@ -28,6 +28,7 @@
 #ifndef SRC_TINT_LANG_HLSL_WRITER_RAISE_SHADER_IO_H_
 #define SRC_TINT_LANG_HLSL_WRITER_RAISE_SHADER_IO_H_
 
+#include <bitset>
 #include <optional>
 
 #include "src/tint/api/common/binding_point.h"
@@ -49,6 +50,13 @@ struct ShaderIOConfig {
     /// If one doesn't exist, adds a @position member to the input struct as the last member.
     /// This is used for PixelLocal, for which Dawn requires such a member in the final HLSL shader.
     bool add_input_position_member = false;
+
+    /// Set to `true` to truncate location variables not found in `interstage_locations`
+    bool truncate_interstage_variables = false;
+
+    /// Indicate which interstage io locations are actually used by the later stage.
+    /// There can be at most 30 user defined interstage variables with locations.
+    std::bitset<30> interstage_locations;
 };
 
 /// ShaderIO is a transform that prepares entry point inputs and outputs for HLSL codegen.

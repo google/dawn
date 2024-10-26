@@ -28,6 +28,7 @@
 #include "src/tint/lang/hlsl/writer/raise/raise.h"
 
 #include <unordered_set>
+#include <utility>
 
 #include "src/tint/lang/core/ir/transform/add_empty_entry_point.h"
 #include "src/tint/lang/core/ir/transform/array_length_from_uniform.h"
@@ -173,6 +174,8 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
         raise::ShaderIOConfig config;
         config.num_workgroups_binding = options.root_constant_binding_point;
         config.add_input_position_member = pixel_local_enabled;
+        config.truncate_interstage_variables = options.truncate_interstage_variables;
+        config.interstage_locations = std::move(options.interstage_locations);
         RUN_TRANSFORM(raise::ShaderIO, module, config);
     }
 
