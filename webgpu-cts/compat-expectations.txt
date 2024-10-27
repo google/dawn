@@ -82,7 +82,7 @@
 # results: [ Failure RetryOnFailure Skip Slow ]
 # END TAG HEADER
 
-# Last rolled: 2024-10-21 10:43:15PM
+# Last rolled: 2024-10-27 05:05:04AM
 
 # conflicts_allowed: true
 
@@ -1527,9 +1527,9 @@ crbug.com/374218148 [ intel-0x4680 ] webgpu:shader,execution,expression,call,bui
 crbug.com/374218148 [ intel-0x4680 ] webgpu:shader,execution,expression,call,builtin,textureSample:depth_3d_coords:* [ Failure ]
 crbug.com/374218148 [ intel-0x4680 ] webgpu:shader,execution,expression,call,builtin,textureSample:depth_array_2d_coords:* [ Failure ]
 crbug.com/374218148 [ intel-0x4680 ] webgpu:shader,execution,expression,call,builtin,textureSampleBias:* [ Failure ]
-crbug.com/374218148 [ arm android-Pixel-6 ] webgpu:shader,execution,expression,call,builtin,textureSample:depth_2d_coords:* [ Failure ]
-crbug.com/374218148 [ arm android-Pixel-6 ] webgpu:shader,execution,expression,call,builtin,textureSample:depth_3d_coords:* [ Failure ]
-crbug.com/374218148 [ arm android-Pixel-6 ] webgpu:shader,execution,expression,call,builtin,textureSample:depth_array_2d_coords:* [ Skip ]
+crbug.com/374218148 [ android-Pixel-6 arm ] webgpu:shader,execution,expression,call,builtin,textureSample:depth_2d_coords:* [ Failure ]
+crbug.com/374218148 [ android-Pixel-6 arm ] webgpu:shader,execution,expression,call,builtin,textureSample:depth_3d_coords:* [ Failure ]
+crbug.com/374218148 [ android-Pixel-6 arm ] webgpu:shader,execution,expression,call,builtin,textureSample:depth_array_2d_coords:* [ Skip ]
 
 # Returning unexpected values
 crbug.com/0000 [ linux nvidia-0x2184 ] webgpu:shader,execution,expression,call,builtin,textureSample:depth_2d_coords:* [ Failure ]
@@ -6622,7 +6622,7 @@ crbug.com/dawn/0000 [ nvidia_lt_535.183.01 ] webgpu:shader,execution,expression,
 crbug.com/dawn/0000 [ nvidia_lt_535.183.01 ] webgpu:shader,execution,expression,call,builtin,textureLoad:sampled_2d:* [ Failure ]
 crbug.com/dawn/0000 [ android arm ] webgpu:shader,execution,expression,call,builtin,textureSample:sampled_2d_coords:* [ Skip ]
 crbug.com/dawn/0000 [ android arm ] webgpu:shader,execution,expression,call,builtin,textureSample:sampled_array_2d_coords:* [ Failure ]
-crbug.com/dawn/0000 [ win nvidia-0x2184 ] webgpu:shader,execution,expression,call,builtin,textureSampleGrad:sampled_array_2d_coords:stage="c";format="rgba16float";filt="linear";modeU="r";modeV="m";offset=false [ Failure ]
+crbug.com/dawn/0000 [ nvidia-0x2184 win ] webgpu:shader,execution,expression,call,builtin,textureSampleGrad:sampled_array_2d_coords:stage="c";format="rgba16float";filt="linear";modeU="r";modeV="m";offset=false [ Failure ]
 crbug.com/dawn/0000 [ intel-0x9bc5 linux ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,array:srcFormat="r32float";dstFormat="r32float";dimension="3d" [ Failure ]
 crbug.com/dawn/0000 [ intel-0x9bc5 linux ] webgpu:api,validation,resource_usages,texture,in_render_misc:subresources,texture_usages_in_copy_and_render_pass:usage0="readwrite-storage-texture";usage1="copy-dst" [ Failure ]
 crbug.com/dawn/0000 [ intel-0x9bc5 linux ] webgpu:shader,execution,expression,call,builtin,textureGather:depth_2d_coords:* [ Failure ]
@@ -6644,4 +6644,3 @@ crbug.com/dawn/0000 [ android-pixel-6 ] webgpu:api,validation,render_pass,attach
 crbug.com/dawn/0000 [ android-pixel-6 ] webgpu:shader,execution,expression,access,structure,index:buffer_align: [ Failure ]
 crbug.com/dawn/0000 [ android-pixel-6 ] webgpu:shader,execution,expression,call,builtin,atomics,atomicStore:store_workgroup_basic:* [ Failure ]
 crbug.com/dawn/0000 [ android-pixel-6 ] webgpu:shader,execution,expression,call,builtin,subgroupAdd:compute,split:* [ Failure ]
-
