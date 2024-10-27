@@ -152,10 +152,12 @@ crbug.com/341327472 [ intel-0x4680 linux ] webgpu:api,validation,state,device_lo
 ################################################################################
 
 # Many texture sampling functions failing in Vertex stage
-crbug.com/374890770 webgpu:shader,execution,expression,call,builtin,textureLoad:external:stage="v" [ Failure ]
+crbug.com/374890770 webgpu:shader,execution,expression,call,builtin,textureLoad:sampled_1d:stage="v";* [ Failure ]
 crbug.com/374890770 webgpu:shader,execution,expression,call,builtin,textureLoad:sampled_2d:stage="v";* [ Failure ]
+crbug.com/374890770 webgpu:shader,execution,expression,call,builtin,textureLoad:sampled_3d:stage="v";* [ Failure ]
 crbug.com/374890770 webgpu:shader,execution,expression,call,builtin,textureLoad:arrayed:stage="v";* [ Failure ]
 crbug.com/374890770 webgpu:shader,execution,expression,call,builtin,textureLoad:multisampled:stage="v";* [ Failure ]
+crbug.com/374890770 webgpu:shader,execution,expression,call,builtin,textureLoad:external:stage="v" [ Failure ]
 
 # error_scope validation tests with errorType="out-of-memory" are failing on all platforms
 # On NVidia, crashes in PartitionAlloc due to the NV GL driver malloc()ing 2GB+ blocks
@@ -1530,11 +1532,20 @@ crbug.com/374218148 [ intel-0x4680 ] webgpu:shader,execution,expression,call,bui
 crbug.com/374218148 [ android-Pixel-6 arm ] webgpu:shader,execution,expression,call,builtin,textureSample:depth_2d_coords:* [ Failure ]
 crbug.com/374218148 [ android-Pixel-6 arm ] webgpu:shader,execution,expression,call,builtin,textureSample:depth_3d_coords:* [ Failure ]
 crbug.com/374218148 [ android-Pixel-6 arm ] webgpu:shader,execution,expression,call,builtin,textureSample:depth_array_2d_coords:* [ Skip ]
+crbug.com/374218148 [ linux nvidia-0x2184 ] webgpu:shader,execution,expression,call,builtin,textureSampleBias:arrayed_2d_coords:format="bc3-rgba-unorm";filt="linear";modeU="c";modeV="m";offset=true [ Failure ]
+crbug.com/374218148 [ linux nvidia-0x2184 ] webgpu:shader,execution,expression,call,builtin,textureSampleBias:arrayed_2d_coords:format="bc1-rgba-unorm";filt="linear";modeU="r";modeV="c";offset=true [ Failure ]
+crbug.com/374218148 [ linux nvidia-0x2184 ] webgpu:shader,execution,expression,call,builtin,textureSampleBias:arrayed_2d_coords:format="bc3-rgba-unorm-srgb";filt="linear";modeU="r";modeV="m";offset=true [ Failure ]
+crbug.com/374218148 [ linux nvidia-0x2184 ] webgpu:shader,execution,expression,call,builtin,textureSampleBias:arrayed_2d_coords:format="bc7-rgba-unorm";filt="linear";modeU="c";modeV="m";offset=false [ Failure ]
+crbug.com/374218148 [ linux nvidia-0x2184 ] webgpu:shader,execution,expression,call,builtin,textureSampleBias:sampled_2d_coords:format="bc7-rgba-unorm-srgb";filt="linear";modeU="r";modeV="c";offset=true [ Failure ]
+crbug.com/374218148 [ linux nvidia-0x2184 ] webgpu:shader,execution,expression,call,builtin,textureSampleBias:sampled_2d_coords:format="bc2-rgba-unorm";filt="linear";modeU="m";modeV="r";offset=false [ Failure ]
 
-# Returning unexpected values
-crbug.com/0000 [ linux nvidia-0x2184 ] webgpu:shader,execution,expression,call,builtin,textureSample:depth_2d_coords:* [ Failure ]
-crbug.com/0000 [ linux nvidia-0x2184 ] webgpu:shader,execution,expression,call,builtin,textureSample:depth_3d_coords:* [ Failure ]
-crbug.com/0000 [ linux nvidia-0x2184 ] webgpu:shader,execution,expression,call,builtin,textureSample:depth_array_2d_coords:* [ Failure ]
+# Returning unexpected values with filt="linear"
+crbug.com/0 [ linux nvidia-0x2184 ] webgpu:shader,execution,expression,call,builtin,textureSample:depth_2d_coords:format="depth16unorm";filt="linear";* [ Failure ]
+crbug.com/0 [ linux nvidia-0x2184 ] webgpu:shader,execution,expression,call,builtin,textureSample:depth_2d_coords:format="depth32float";filt="linear";* [ Failure ]
+crbug.com/0 [ linux nvidia-0x2184 ] webgpu:shader,execution,expression,call,builtin,textureSample:depth_3d_coords:format="depth16unorm";viewDimension="cube";filt="linear";* [ Failure ]
+crbug.com/0 [ linux nvidia-0x2184 ] webgpu:shader,execution,expression,call,builtin,textureSample:depth_3d_coords:format="depth32float";viewDimension="cube";filt="linear";* [ Failure ]
+crbug.com/0 [ linux nvidia-0x2184 ] webgpu:shader,execution,expression,call,builtin,textureSample:depth_array_2d_coords:format="depth16unorm";filt="linear";* [ Failure ]
+crbug.com/0 [ linux nvidia-0x2184 ] webgpu:shader,execution,expression,call,builtin,textureSample:depth_array_2d_coords:format="depth32float";filt="linear";* [ Failure ]
 
 # Mip Level doesn't match software renderer. Probably needs a CTS fix.
 crbug.com/374167797 [ android arm ] webgpu:shader,execution,expression,call,builtin,textureSampleBias:arrayed_2d_coords:* [ Failure ]
@@ -6458,10 +6469,6 @@ crbug.com/dawn/0000 [ nvidia-0x2184 ] webgpu:api,operation,adapter,requestAdapte
 crbug.com/dawn/0000 [ nvidia-0x2184 ] webgpu:api,operation,adapter,requestDevice:limit,better_than_supported:limit="maxColorAttachmentBytesPerSample" [ RetryOnFailure ]
 crbug.com/dawn/0000 [ nvidia-0x2184 ] webgpu:shader,execution,expression,binary,af_matrix_addition:matrix:inputSource="const";cols=4;rows=4 [ RetryOnFailure ]
 crbug.com/dawn/0000 [ nvidia-0x2184 ] webgpu:shader,execution,expression,call,builtin,cross:f32:inputSource="storage_rw" [ RetryOnFailure ]
-crbug.com/dawn/0000 webgpu:api,validation,resource_usages,texture,in_render_misc:subresources,texture_view_usages:* [ Failure ]
-crbug.com/dawn/0000 webgpu:shader,execution,expression,call,builtin,bitcast:af_to_f32:* [ Failure ]
-crbug.com/dawn/0000 webgpu:shader,execution,expression,call,builtin,textureLoad:sampled_1d:* [ Failure ]
-crbug.com/dawn/0000 webgpu:shader,execution,expression,call,builtin,textureLoad:sampled_3d:* [ Failure ]
 crbug.com/dawn/0000 webgpu:shader,execution,expression,call,builtin,textureSampleCompare:2d_coords:format="depth16unorm";filt="linear";modeU="c";modeV="c";offset=false [ Failure ]
 crbug.com/dawn/0000 webgpu:shader,execution,expression,call,builtin,textureSampleCompare:2d_coords:format="depth16unorm";filt="linear";modeU="c";modeV="r";offset=false [ Failure ]
 crbug.com/dawn/0000 webgpu:shader,execution,expression,call,builtin,textureSampleCompare:2d_coords:format="depth16unorm";filt="linear";modeU="c";modeV="m";offset=false [ Failure ]
@@ -6611,15 +6618,9 @@ crbug.com/dawn/0000 [ intel-0x9bc5 ] webgpu:api,operation,resource_init,texture_
 crbug.com/dawn/0000 [ intel-0x9bc5 ] webgpu:shader,execution,expression,call,builtin,fwidthFine:* [ Failure ]
 crbug.com/dawn/0000 [ intel-0x9bc5 ] webgpu:shader,execution,limits:switch_case_selectors: [ Failure ]
 crbug.com/dawn/0000 [ intel-0x9bc5 ] webgpu:web_platform,canvas,configure:format:* [ Failure ]
-crbug.com/dawn/0000 [ mesa_ge_23.2 ] webgpu:shader,execution,expression,call,builtin,textureLoad:multisampled:* [ Failure ]
-crbug.com/dawn/0000 [ mesa_ge_23.2 ] webgpu:shader,execution,expression,call,builtin,textureLoad:sampled_2d:* [ Failure ]
-crbug.com/dawn/0000 [ nvidia-0x2184 ] webgpu:shader,execution,expression,call,builtin,textureLoad:arrayed:* [ Failure ]
 crbug.com/dawn/0000 [ nvidia-0x2184 ] webgpu:shader,execution,expression,call,builtin,textureSampleBias:* [ Failure ]
+
 crbug.com/dawn/0000 [ nvidia-0x2184 ] webgpu:web_platform,canvas,configure:format:* [ Failure ]
-crbug.com/dawn/0000 [ nvidia_ge_535.183.01 ] webgpu:shader,execution,expression,call,builtin,textureLoad:multisampled:* [ Failure ]
-crbug.com/dawn/0000 [ nvidia_ge_535.183.01 ] webgpu:shader,execution,expression,call,builtin,textureLoad:sampled_2d:* [ Failure ]
-crbug.com/dawn/0000 [ nvidia_lt_535.183.01 ] webgpu:shader,execution,expression,call,builtin,textureLoad:multisampled:* [ Failure ]
-crbug.com/dawn/0000 [ nvidia_lt_535.183.01 ] webgpu:shader,execution,expression,call,builtin,textureLoad:sampled_2d:* [ Failure ]
 crbug.com/dawn/0000 [ android arm ] webgpu:shader,execution,expression,call,builtin,textureSample:sampled_2d_coords:* [ Skip ]
 crbug.com/dawn/0000 [ android arm ] webgpu:shader,execution,expression,call,builtin,textureSample:sampled_array_2d_coords:* [ Failure ]
 crbug.com/dawn/0000 [ nvidia-0x2184 win ] webgpu:shader,execution,expression,call,builtin,textureSampleGrad:sampled_array_2d_coords:stage="c";format="rgba16float";filt="linear";modeU="r";modeV="m";offset=false [ Failure ]
