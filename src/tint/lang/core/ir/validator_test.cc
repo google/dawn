@@ -389,7 +389,7 @@ note: # Disassembly
 }
 
 TEST_F(IR_ValidatorTest, Function_Param_BothLocationAndBuiltin) {
-    auto* f = b.Function("my_func", ty.void_(), Function::PipelineStage::kFragment);
+    auto* f = FragmentEntryPoint("my_func");
 
     auto* p = b.FunctionParam("my_param", ty.vec4<f32>());
     IOAttributes attr;
@@ -417,7 +417,7 @@ note: # Disassembly
 }
 
 TEST_F(IR_ValidatorTest, Function_Param_Struct_BothLocationAndBuiltin) {
-    auto* f = b.Function("my_func", ty.void_(), Function::PipelineStage::kFragment);
+    auto* f = FragmentEntryPoint("my_func");
 
     IOAttributes attr;
     attr.builtin = BuiltinValue::kPosition;
@@ -613,7 +613,7 @@ MyStruct = struct @align(16) {
 }
 
 TEST_F(IR_ValidatorTest, Function_Return_BothLocationAndBuiltin) {
-    auto* f = b.Function("my_func", ty.vec4<f32>(), Function::PipelineStage::kVertex);
+    auto* f = VertexEntryPoint("my_func");
     IOAttributes attr;
     attr.builtin = BuiltinValue::kPosition;
     attr.location = 0;
@@ -2222,8 +2222,7 @@ note: # Disassembly
 
 TEST_F(IR_ValidatorTest, CallToEntryPointFunction) {
     auto* f = b.Function("f", ty.void_());
-    auto* g = b.Function("g", ty.void_(), Function::PipelineStage::kCompute,
-                         std::array<uint32_t, 3>({0, 0, 0}));
+    auto* g = ComputeEntryPoint("g");
 
     b.Append(f->Block(), [&] {
         b.Call(g);
@@ -3168,7 +3167,7 @@ TEST_F(IR_ValidatorTest, Discard_TooManyOperands) {
         b.Return(func);
     });
 
-    auto* ep = b.Function("ep", ty.void_(), Function::PipelineStage::kFragment);
+    auto* ep = FragmentEntryPoint("ep");
     b.Append(ep->Block(), [&] {
         b.Call(func);
         b.Return(ep);
@@ -3209,7 +3208,7 @@ TEST_F(IR_ValidatorTest, Discard_TooManyResults) {
         b.Return(func);
     });
 
-    auto* ep = b.Function("ep", ty.void_(), Function::PipelineStage::kFragment);
+    auto* ep = FragmentEntryPoint("ep");
     b.Append(ep->Block(), [&] {
         b.Call(func);
         b.Return(ep);
@@ -3249,8 +3248,7 @@ TEST_F(IR_ValidatorTest, Discard_NotInFragment) {
         b.Return(func);
     });
 
-    auto* ep = b.Function("ep", ty.void_(), Function::PipelineStage::kCompute,
-                          std::array<uint32_t, 3>({0, 0, 0}));
+    auto* ep = ComputeEntryPoint("ep");
 
     b.Append(ep->Block(), [&] {
         b.Call(func);
