@@ -451,7 +451,7 @@ struct State {
 
 Result<SuccessType> Std140(Module& ir) {
     auto result = ValidateAndDumpIfNeeded(
-        ir, "Std140 transform",
+        ir, "core.Std140",
         core::ir::Capabilities{core::ir::Capability::kAllowHandleVarsWithoutBindings});
     if (result != Success) {
         return result;

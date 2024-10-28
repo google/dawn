@@ -204,7 +204,7 @@ core::BuiltinFn Convert(wgsl::BuiltinFn fn) {
 }  // namespace
 
 Result<SuccessType> Lower(core::ir::Module& mod) {
-    if (auto res = core::ir::ValidateAndDumpIfNeeded(mod, "lowering from WGSL"); res != Success) {
+    if (auto res = core::ir::ValidateAndDumpIfNeeded(mod, "wgsl.Lower"); res != Success) {
         return res.Failure();
     }
 

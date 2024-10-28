@@ -45,8 +45,7 @@ Result<SuccessType> Lower(core::ir::Module& mod) {
     RUN_TRANSFORM(lower::VectorElementPointer, mod);
     RUN_TRANSFORM(lower::ShaderIO, mod);
 
-    if (auto res = core::ir::ValidateAndDumpIfNeeded(mod, "end of lowering from SPIR-V");
-        res != Success) {
+    if (auto res = core::ir::ValidateAndDumpIfNeeded(mod, "spirv.Lower"); res != Success) {
         return res.Failure();
     }
 

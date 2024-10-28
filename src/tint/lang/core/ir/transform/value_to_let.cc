@@ -257,7 +257,7 @@ struct State {
 }  // namespace
 
 Result<SuccessType> ValueToLet(Module& ir, const ValueToLetConfig& cfg) {
-    auto result = ValidateAndDumpIfNeeded(ir, "ValueToLet transform",
+    auto result = ValidateAndDumpIfNeeded(ir, "core.ValueToLet",
                                           core::ir::Capabilities{
                                               core::ir::Capability::kAllow8BitIntegers,
                                               core::ir::Capability::kAllowPointersInStructures,

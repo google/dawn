@@ -153,7 +153,7 @@ struct State {
 }  // namespace
 
 Result<SuccessType> VectorElementPointer(core::ir::Module& ir) {
-    auto result = ValidateAndDumpIfNeeded(ir, "VectorElementPointer transform",
+    auto result = ValidateAndDumpIfNeeded(ir, "spirv.VectorElementPointer",
                                           core::ir::Capabilities{
                                               core::ir::Capability::kAllowVectorElementPointer,
                                           });

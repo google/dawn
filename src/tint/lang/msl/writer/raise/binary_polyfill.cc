@@ -157,7 +157,7 @@ struct State {
 }  // namespace
 
 Result<SuccessType> BinaryPolyfill(core::ir::Module& ir) {
-    auto result = ValidateAndDumpIfNeeded(ir, "BinaryPolyfill transform",
+    auto result = ValidateAndDumpIfNeeded(ir, "msl.BinaryPolyfill",
                                           core::ir::Capabilities{
                                               core::ir::Capability::kAllowPointersInStructures,
                                           });

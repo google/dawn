@@ -217,7 +217,7 @@ struct State {
 
 Result<SuccessType> TextureBuiltinsFromUniform(core::ir::Module& ir,
                                                const TextureBuiltinsFromUniformOptions& cfg) {
-    auto result = ValidateAndDumpIfNeeded(ir, "glsl.TextureBuiltinsFromUniform transform");
+    auto result = ValidateAndDumpIfNeeded(ir, "glsl.TextureBuiltinsFromUniform");
     if (result != Success) {
         return result.Failure();
     }

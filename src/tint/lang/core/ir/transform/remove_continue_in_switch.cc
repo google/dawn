@@ -114,7 +114,7 @@ struct State {
 }  // namespace
 
 Result<SuccessType> RemoveContinueInSwitch(Module& ir) {
-    auto result = ValidateAndDumpIfNeeded(ir, "RemoveContinueInSwitch transform",
+    auto result = ValidateAndDumpIfNeeded(ir, "core.RemoveContinueInSwitch",
                                           core::ir::Capabilities{
                                               core::ir::Capability::kAllowVectorElementPointer,
                                               core::ir::Capability::kAllowHandleVarsWithoutBindings,

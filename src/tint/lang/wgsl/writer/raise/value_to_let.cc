@@ -186,7 +186,7 @@ struct State {
 }  // namespace
 
 Result<SuccessType> ValueToLet(core::ir::Module& ir) {
-    auto result = core::ir::ValidateAndDumpIfNeeded(ir, "ValueToLet transform");
+    auto result = core::ir::ValidateAndDumpIfNeeded(ir, "wgsl.ValueToLet");
     if (result != Success) {
         return result;
     }

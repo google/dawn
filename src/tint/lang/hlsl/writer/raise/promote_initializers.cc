@@ -238,7 +238,7 @@ struct State {
 }  // namespace
 
 Result<SuccessType> PromoteInitializers(core::ir::Module& ir) {
-    auto result = ValidateAndDumpIfNeeded(ir, "PromoteInitializers transform",
+    auto result = ValidateAndDumpIfNeeded(ir, "hlsl.PromoteInitializers",
                                           core::ir::Capabilities{
                                               core::ir::Capability::kAllowVectorElementPointer,
                                               core::ir::Capability::kAllowClipDistancesOnF32,

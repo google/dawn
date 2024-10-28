@@ -633,7 +633,7 @@ struct State {
 }  // namespace
 
 Result<SuccessType> PackedVec3(core::ir::Module& ir) {
-    auto result = ValidateAndDumpIfNeeded(ir, "PackedVec3 transform");
+    auto result = ValidateAndDumpIfNeeded(ir, "msl.PackedVec3");
     if (result != Success) {
         return result.Failure();
     }

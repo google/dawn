@@ -293,7 +293,7 @@ struct State {
 }  // namespace
 
 Result<SuccessType> RenameConflicts(core::ir::Module& ir) {
-    auto result = ValidateAndDumpIfNeeded(ir, "RenameConflicts transform",
+    auto result = ValidateAndDumpIfNeeded(ir, "core.RenameConflicts",
                                           core::ir::Capabilities{
                                               core::ir::Capability::kAllow8BitIntegers,
                                               core::ir::Capability::kAllowPointersInStructures,

@@ -160,7 +160,7 @@ struct State {
 }  // namespace
 
 Result<SuccessType> SimdBallot(core::ir::Module& ir) {
-    auto result = ValidateAndDumpIfNeeded(ir, "SimdBallot transform");
+    auto result = ValidateAndDumpIfNeeded(ir, "msl.SimdBallot");
     if (result != Success) {
         return result.Failure();
     }

@@ -322,7 +322,7 @@ struct State {
 }  // namespace
 
 Result<SuccessType> MergeReturn(core::ir::Module& ir) {
-    auto result = ValidateAndDumpIfNeeded(ir, "MergeReturn transform");
+    auto result = ValidateAndDumpIfNeeded(ir, "spirv.MergeReturn");
     if (result != Success) {
         return result;
     }

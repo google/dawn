@@ -933,7 +933,7 @@ struct State {
 }  // namespace
 
 Result<SuccessType> BuiltinPolyfill(core::ir::Module& ir) {
-    auto result = ValidateAndDumpIfNeeded(ir, "BuiltinPolyfill transform",
+    auto result = ValidateAndDumpIfNeeded(ir, "msl.BuiltinPolyfill",
                                           core::ir::Capabilities{
                                               core::ir::Capability::kAllowPointersInStructures,
                                           });

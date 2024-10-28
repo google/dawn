@@ -287,7 +287,7 @@ struct State {
 }  // namespace
 
 Result<SuccessType> ReplaceNonIndexableMatVecStores(core::ir::Module& ir) {
-    auto result = ValidateAndDumpIfNeeded(ir, "ReplaceNonIndexableMatVecStores transform");
+    auto result = ValidateAndDumpIfNeeded(ir, "hlsl.ReplaceNonIndexableMatVecStores");
     if (result != Success) {
         return result.Failure();
     }

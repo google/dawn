@@ -278,7 +278,7 @@ class Printer {
 
     /// Builds the SPIR-V from the IR
     Result<SuccessType> Generate() {
-        auto valid = core::ir::ValidateAndDumpIfNeeded(ir_, "SPIR-V writer");
+        auto valid = core::ir::ValidateAndDumpIfNeeded(ir_, "spirv.Printer");
         if (valid != Success) {
             return valid.Failure();
         }

@@ -75,7 +75,7 @@ struct State {
 }  // namespace
 
 Result<SuccessType> FxcPolyfill(core::ir::Module& ir) {
-    auto result = ValidateAndDumpIfNeeded(ir, "FxcPolyfill transform");
+    auto result = ValidateAndDumpIfNeeded(ir, "hlsl.FxcPolyfill");
     if (result != Success) {
         return result.Failure();
     }

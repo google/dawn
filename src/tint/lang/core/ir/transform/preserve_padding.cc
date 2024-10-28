@@ -174,7 +174,7 @@ struct State {
 
 Result<SuccessType> PreservePadding(Module& ir) {
     auto result = ValidateAndDumpIfNeeded(
-        ir, "PreservePadding transform",
+        ir, "core.PreservePadding",
         core::ir::Capabilities{core::ir::Capability::kAllowHandleVarsWithoutBindings});
     if (result != Success) {
         return result;

@@ -88,7 +88,7 @@ struct State {
 }  // namespace
 
 Result<SuccessType> UnaryPolyfill(core::ir::Module& ir) {
-    auto result = ValidateAndDumpIfNeeded(ir, "UnaryPolyfill transform",
+    auto result = ValidateAndDumpIfNeeded(ir, "msl.UnaryPolyfill",
                                           core::ir::Capabilities{
                                               core::ir::Capability::kAllowPointersInStructures,
                                           });

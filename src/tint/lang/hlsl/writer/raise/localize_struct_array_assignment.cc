@@ -158,7 +158,7 @@ struct State {
 }  // namespace
 
 Result<SuccessType> LocalizeStructArrayAssignment(core::ir::Module& ir) {
-    auto result = ValidateAndDumpIfNeeded(ir, "LocalizeStructArrayAssignment transform");
+    auto result = ValidateAndDumpIfNeeded(ir, "hlsl.LocalizeStructArrayAssignment");
     if (result != Success) {
         return result.Failure();
     }

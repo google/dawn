@@ -54,7 +54,7 @@ void Run(ir::Module& ir) {
 
 Result<SuccessType> AddEmptyEntryPoint(Module& ir) {
     auto result = ValidateAndDumpIfNeeded(
-        ir, "AddEmptyEntryPoint transform",
+        ir, "core.AddEmptyEntryPoint",
         core::ir::Capabilities{core::ir::Capability::kAllowHandleVarsWithoutBindings});
     if (result != Success) {
         return result.Failure();

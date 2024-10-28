@@ -527,7 +527,7 @@ struct State {
 }  // namespace
 
 Result<SuccessType> BuiltinPolyfill(core::ir::Module& ir) {
-    auto result = ValidateAndDumpIfNeeded(ir, "BuiltinPolyfill transform");
+    auto result = ValidateAndDumpIfNeeded(ir, "glsl.BuiltinPolyfill");
     if (result != Success) {
         return result.Failure();
     }

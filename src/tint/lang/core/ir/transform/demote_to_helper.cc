@@ -214,7 +214,7 @@ struct State {
 }  // namespace
 
 Result<SuccessType> DemoteToHelper(Module& ir) {
-    auto result = ValidateAndDumpIfNeeded(ir, "DemoteToHelper transform",
+    auto result = ValidateAndDumpIfNeeded(ir, "core.DemoteToHelper",
                                           core::ir::Capabilities{
                                               core::ir::Capability::kAllowVectorElementPointer,
                                               core::ir::Capability::kAllowClipDistancesOnF32,

@@ -118,7 +118,7 @@ class Printer : public tint::TextGenerator {
     /// @returns the generated MSL shader
     tint::Result<PrintResult> Generate() {
         auto valid =
-            core::ir::ValidateAndDumpIfNeeded(ir_, "MSL writer",
+            core::ir::ValidateAndDumpIfNeeded(ir_, "msl.Printer",
                                               core::ir::Capabilities{
                                                   core::ir::Capability::kAllow8BitIntegers,
                                                   core::ir::Capability::kAllowPointersInStructures,

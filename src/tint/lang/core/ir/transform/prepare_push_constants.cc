@@ -129,7 +129,7 @@ struct State {
 
 Result<PushConstantLayout> PreparePushConstants(Module& ir,
                                                 const PreparePushConstantsConfig& config) {
-    auto result = ValidateAndDumpIfNeeded(ir, "PreparePushConstants transform");
+    auto result = ValidateAndDumpIfNeeded(ir, "core.PreparePushConstants");
     if (result != Success) {
         return result.Failure();
     }
