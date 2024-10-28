@@ -7379,13 +7379,11 @@ __frexp_result_f32 = struct @align(4) {
     %6:f32 = hlsl.frexp %3, %5
     %7:i32 = hlsl.sign %3
     %8:f32 = convert %7
-    %9:f32 = load %4
-    %10:f32 = mul %8, %9
-    store %4, %10
-    %11:f32 = load %4
-    %12:i32 = convert %11
-    %13:__frexp_result_f32 = construct %6, %12
-    %a:__frexp_result_f32 = let %13
+    %9:f32 = mul %8, %6
+    %10:f32 = load %4
+    %11:i32 = convert %10
+    %12:__frexp_result_f32 = construct %9, %11
+    %a:__frexp_result_f32 = let %12
     ret
   }
 }
@@ -7437,13 +7435,11 @@ __frexp_result_vec3_f32 = struct @align(16) {
     %6:vec3<f32> = hlsl.frexp %3, %5
     %7:vec3<i32> = hlsl.sign %3
     %8:vec3<f32> = convert %7
-    %9:vec3<f32> = load %4
-    %10:vec3<f32> = mul %8, %9
-    store %4, %10
-    %11:vec3<f32> = load %4
-    %12:vec3<i32> = convert %11
-    %13:__frexp_result_vec3_f32 = construct %6, %12
-    %a:__frexp_result_vec3_f32 = let %13
+    %9:vec3<f32> = mul %8, %6
+    %10:vec3<f32> = load %4
+    %11:vec3<i32> = convert %10
+    %12:__frexp_result_vec3_f32 = construct %9, %11
+    %a:__frexp_result_vec3_f32 = let %12
     ret
   }
 }

@@ -17,9 +17,8 @@ void frexp_5f47bf() {
   vector<float16_t, 2> v = arg_0;
   vector<float16_t, 2> v_1 = (float16_t(0.0h)).xx;
   vector<float16_t, 2> v_2 = frexp(v, v_1);
-  vector<float16_t, 2> v_3 = vector<float16_t, 2>(sign(v));
-  v_1 = (v_3 * v_1);
-  frexp_result_vec2_f16 res = {v_2, int2(v_1)};
+  vector<float16_t, 2> v_3 = (vector<float16_t, 2>(sign(v)) * v_2);
+  frexp_result_vec2_f16 res = {v_3, int2(v_1)};
 }
 
 void fragment_main() {

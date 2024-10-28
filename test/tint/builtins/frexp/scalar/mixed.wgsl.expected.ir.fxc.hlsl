@@ -10,9 +10,8 @@ void main() {
   frexp_result_f32 res = {0.625f, int(1)};
   float v = 0.0f;
   float v_1 = frexp(runtime_in, v);
-  float v_2 = float(sign(runtime_in));
-  v = (v_2 * v);
-  frexp_result_f32 v_3 = {v_1, int(v)};
+  float v_2 = (float(sign(runtime_in)) * v_1);
+  frexp_result_f32 v_3 = {v_2, int(v)};
   res = v_3;
   frexp_result_f32 v_4 = {0.625f, int(1)};
   res = v_4;

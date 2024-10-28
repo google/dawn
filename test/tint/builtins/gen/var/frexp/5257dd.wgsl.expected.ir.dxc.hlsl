@@ -17,9 +17,8 @@ void frexp_5257dd() {
   float16_t v = arg_0;
   float16_t v_1 = float16_t(0.0h);
   float16_t v_2 = frexp(v, v_1);
-  float16_t v_3 = float16_t(sign(v));
-  v_1 = (v_3 * v_1);
-  frexp_result_f16 res = {v_2, int(v_1)};
+  float16_t v_3 = (float16_t(sign(v)) * v_2);
+  frexp_result_f16 res = {v_3, int(v_1)};
 }
 
 void fragment_main() {

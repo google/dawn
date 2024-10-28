@@ -1776,14 +1776,14 @@ struct State {
             auto* exp_out = b.Var(ty.ptr<function>(arg_ty));
             // HLSL frexp writes exponent part to second out param, and returns the fraction
             // (mantissa) part.
-            auto* call_result = b.Call<hlsl::ir::BuiltinCall>(arg_ty, hlsl::BuiltinFn::kFrexp, arg,
-                                                              b.Load(exp_out));
-            // The returned exponent is always positive, but for WGSL, we want it to keep the sign
+            core::ir::Instruction* fract = b.Call<hlsl::ir::BuiltinCall>(
+                arg_ty, hlsl::BuiltinFn::kFrexp, arg, b.Load(exp_out));
+            // The returned fraction is always positive, but for WGSL, we want it to keep the sign
             // of the input value.
             auto* arg_sign = BuildSign(arg);
-            b.Store(exp_out, b.Multiply(arg_ty, arg_sign, b.Load(exp_out)));
+            fract = b.Multiply(arg_ty, arg_sign, fract);
             // Replace the call with new result struct
-            b.ConstructWithResult(call->DetachResult(), call_result,
+            b.ConstructWithResult(call->DetachResult(), fract,
                                   b.Convert(arg_i32_ty, b.Load(exp_out)));
         });
         call->Destroy();

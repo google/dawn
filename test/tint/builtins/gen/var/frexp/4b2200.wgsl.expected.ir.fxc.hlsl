@@ -17,9 +17,8 @@ void frexp_4b2200() {
   float v = arg_0;
   float v_1 = 0.0f;
   float v_2 = frexp(v, v_1);
-  float v_3 = float(sign(v));
-  v_1 = (v_3 * v_1);
-  frexp_result_f32 res = {v_2, int(v_1)};
+  float v_3 = (float(sign(v)) * v_2);
+  frexp_result_f32 res = {v_3, int(v_1)};
 }
 
 void fragment_main() {

@@ -10,9 +10,8 @@ void main() {
   frexp_result_vec2_f32 res = {float2(0.625f, 0.9375f), int2(int(1), int(2))};
   float2 v = (0.0f).xx;
   float2 v_1 = frexp(runtime_in, v);
-  float2 v_2 = float2(sign(runtime_in));
-  v = (v_2 * v);
-  frexp_result_vec2_f32 v_3 = {v_1, int2(v)};
+  float2 v_2 = (float2(sign(runtime_in)) * v_1);
+  frexp_result_vec2_f32 v_3 = {v_2, int2(v)};
   res = v_3;
   frexp_result_vec2_f32 v_4 = {float2(0.625f, 0.9375f), int2(int(1), int(2))};
   res = v_4;

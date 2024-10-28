@@ -17,9 +17,8 @@ void frexp_3dd21e() {
   vector<float16_t, 4> v = arg_0;
   vector<float16_t, 4> v_1 = (float16_t(0.0h)).xxxx;
   vector<float16_t, 4> v_2 = frexp(v, v_1);
-  vector<float16_t, 4> v_3 = vector<float16_t, 4>(sign(v));
-  v_1 = (v_3 * v_1);
-  frexp_result_vec4_f16 res = {v_2, int4(v_1)};
+  vector<float16_t, 4> v_3 = (vector<float16_t, 4>(sign(v)) * v_2);
+  frexp_result_vec4_f16 res = {v_3, int4(v_1)};
 }
 
 void fragment_main() {
