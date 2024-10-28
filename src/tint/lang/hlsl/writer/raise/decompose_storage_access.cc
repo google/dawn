@@ -132,14 +132,8 @@ struct State {
                     inst,
                     [&](core::ir::LoadVectorElement* l) { LoadVectorElement(l, var, var_ty); },
                     [&](core::ir::StoreVectorElement* s) { StoreVectorElement(s, var, var_ty); },
-                    [&](core::ir::Store* s) {
-                        OffsetData offset{};
-                        Store(s, var, s->From(), offset);
-                    },
-                    [&](core::ir::Load* l) {
-                        OffsetData offset{};
-                        Load(l, var, offset);
-                    },
+                    [&](core::ir::Store* s) { Store(s, var, s->From(), {}); },
+                    [&](core::ir::Load* l) { Load(l, var, {}); },
                     [&](core::ir::Access* a) {
                         OffsetData offset{};
                         Access(a, var, a->Object()->Type(), offset);
@@ -160,37 +154,37 @@ struct State {
                                 ArrayLength(var, call, var_ty->StoreType(), 0);
                                 break;
                             case core::BuiltinFn::kAtomicAnd:
-                                AtomicAnd(var, call, 0);
+                                AtomicAnd(var, call, {});
                                 break;
                             case core::BuiltinFn::kAtomicOr:
-                                AtomicOr(var, call, 0);
+                                AtomicOr(var, call, {});
                                 break;
                             case core::BuiltinFn::kAtomicXor:
-                                AtomicXor(var, call, 0);
+                                AtomicXor(var, call, {});
                                 break;
                             case core::BuiltinFn::kAtomicMin:
-                                AtomicMin(var, call, 0);
+                                AtomicMin(var, call, {});
                                 break;
                             case core::BuiltinFn::kAtomicMax:
-                                AtomicMax(var, call, 0);
+                                AtomicMax(var, call, {});
                                 break;
                             case core::BuiltinFn::kAtomicAdd:
-                                AtomicAdd(var, call, 0);
+                                AtomicAdd(var, call, {});
                                 break;
                             case core::BuiltinFn::kAtomicSub:
-                                AtomicSub(var, call, 0);
+                                AtomicSub(var, call, {});
                                 break;
                             case core::BuiltinFn::kAtomicExchange:
-                                AtomicExchange(var, call, 0);
+                                AtomicExchange(var, call, {});
                                 break;
                             case core::BuiltinFn::kAtomicCompareExchangeWeak:
-                                AtomicCompareExchangeWeak(var, call, 0);
+                                AtomicCompareExchangeWeak(var, call, {});
                                 break;
                             case core::BuiltinFn::kAtomicStore:
-                                AtomicStore(var, call, 0);
+                                AtomicStore(var, call, {});
                                 break;
                             case core::BuiltinFn::kAtomicLoad:
-                                AtomicLoad(var, call, 0);
+                                AtomicLoad(var, call, {});
                                 break;
                             default:
                                 TINT_UNREACHABLE();
@@ -233,9 +227,14 @@ struct State {
         call->Destroy();
     }
 
+    struct OffsetData {
+        uint32_t byte_offset = 0;
+        Vector<core::ir::Value*, 4> expr{};
+    };
+
     void Interlocked(core::ir::Var* var,
                      core::ir::CoreBuiltinCall* call,
-                     uint32_t offset,
+                     const OffsetData& offset,
                      BuiltinFn fn) {
         auto args = call->Args();
         auto* type = args[1]->Type();
@@ -244,43 +243,46 @@ struct State {
             auto* original_value = b.Var(ty.ptr(function, type));
             original_value->SetInitializer(b.Zero(type));
 
-            b.MemberCall<hlsl::ir::MemberBuiltinCall>(
-                ty.void_(), fn, var, b.Convert(type, u32(offset)), args[1], original_value);
+            b.MemberCall<hlsl::ir::MemberBuiltinCall>(ty.void_(), fn, var,
+                                                      b.Convert(type, OffsetToValue(offset)),
+                                                      args[1], original_value);
             b.LoadWithResult(call->DetachResult(), original_value);
         });
         call->Destroy();
     }
 
-    void AtomicAnd(core::ir::Var* var, core::ir::CoreBuiltinCall* call, uint32_t offset) {
+    void AtomicAnd(core::ir::Var* var, core::ir::CoreBuiltinCall* call, const OffsetData& offset) {
         Interlocked(var, call, offset, BuiltinFn::kInterlockedAnd);
     }
 
-    void AtomicOr(core::ir::Var* var, core::ir::CoreBuiltinCall* call, uint32_t offset) {
+    void AtomicOr(core::ir::Var* var, core::ir::CoreBuiltinCall* call, const OffsetData& offset) {
         Interlocked(var, call, offset, BuiltinFn::kInterlockedOr);
     }
 
-    void AtomicXor(core::ir::Var* var, core::ir::CoreBuiltinCall* call, uint32_t offset) {
+    void AtomicXor(core::ir::Var* var, core::ir::CoreBuiltinCall* call, const OffsetData& offset) {
         Interlocked(var, call, offset, BuiltinFn::kInterlockedXor);
     }
 
-    void AtomicMin(core::ir::Var* var, core::ir::CoreBuiltinCall* call, uint32_t offset) {
+    void AtomicMin(core::ir::Var* var, core::ir::CoreBuiltinCall* call, const OffsetData& offset) {
         Interlocked(var, call, offset, BuiltinFn::kInterlockedMin);
     }
 
-    void AtomicMax(core::ir::Var* var, core::ir::CoreBuiltinCall* call, uint32_t offset) {
+    void AtomicMax(core::ir::Var* var, core::ir::CoreBuiltinCall* call, const OffsetData& offset) {
         Interlocked(var, call, offset, BuiltinFn::kInterlockedMax);
     }
 
-    void AtomicAdd(core::ir::Var* var, core::ir::CoreBuiltinCall* call, uint32_t offset) {
+    void AtomicAdd(core::ir::Var* var, core::ir::CoreBuiltinCall* call, const OffsetData& offset) {
         Interlocked(var, call, offset, BuiltinFn::kInterlockedAdd);
     }
 
-    void AtomicExchange(core::ir::Var* var, core::ir::CoreBuiltinCall* call, uint32_t offset) {
+    void AtomicExchange(core::ir::Var* var,
+                        core::ir::CoreBuiltinCall* call,
+                        const OffsetData& offset) {
         Interlocked(var, call, offset, BuiltinFn::kInterlockedExchange);
     }
 
     // An atomic sub is a negated atomic add
-    void AtomicSub(core::ir::Var* var, core::ir::CoreBuiltinCall* call, uint32_t offset) {
+    void AtomicSub(core::ir::Var* var, core::ir::CoreBuiltinCall* call, const OffsetData& offset) {
         auto args = call->Args();
         auto* type = args[1]->Type();
 
@@ -290,7 +292,7 @@ struct State {
 
             auto* val = b.Subtract(type, b.Zero(type), args[1]);
             b.MemberCall<hlsl::ir::MemberBuiltinCall>(ty.void_(), BuiltinFn::kInterlockedAdd, var,
-                                                      b.Convert(type, u32(offset)), val,
+                                                      b.Convert(type, OffsetToValue(offset)), val,
                                                       original_value);
             b.LoadWithResult(call->DetachResult(), original_value);
         });
@@ -299,7 +301,7 @@ struct State {
 
     void AtomicCompareExchangeWeak(core::ir::Var* var,
                                    core::ir::CoreBuiltinCall* call,
-                                   uint32_t offset) {
+                                   const OffsetData& offset) {
         auto args = call->Args();
         auto* type = args[1]->Type();
         b.InsertBefore(call, [&] {
@@ -309,7 +311,7 @@ struct State {
             auto* cmp = args[1];
             b.MemberCall<hlsl::ir::MemberBuiltinCall>(
                 ty.void_(), BuiltinFn::kInterlockedCompareExchange, var,
-                b.Convert(type, u32(offset)), cmp, args[2], original_value);
+                b.Convert(type, OffsetToValue(offset)), cmp, args[2], original_value);
 
             auto* o = b.Load(original_value);
             b.ConstructWithResult(call->DetachResult(), o, b.Equal(ty.bool_(), o, cmp));
@@ -318,21 +320,23 @@ struct State {
     }
 
     // An atomic load is an Or with 0
-    void AtomicLoad(core::ir::Var* var, core::ir::CoreBuiltinCall* call, uint32_t offset) {
+    void AtomicLoad(core::ir::Var* var, core::ir::CoreBuiltinCall* call, const OffsetData& offset) {
         auto* type = call->Result(0)->Type();
         b.InsertBefore(call, [&] {
             auto* original_value = b.Var(ty.ptr(function, type));
             original_value->SetInitializer(b.Zero(type));
 
             b.MemberCall<hlsl::ir::MemberBuiltinCall>(ty.void_(), BuiltinFn::kInterlockedOr, var,
-                                                      b.Convert(type, u32(offset)), b.Zero(type),
-                                                      original_value);
+                                                      b.Convert(type, OffsetToValue(offset)),
+                                                      b.Zero(type), original_value);
             b.LoadWithResult(call->DetachResult(), original_value);
         });
         call->Destroy();
     }
 
-    void AtomicStore(core::ir::Var* var, core::ir::CoreBuiltinCall* call, uint32_t offset) {
+    void AtomicStore(core::ir::Var* var,
+                     core::ir::CoreBuiltinCall* call,
+                     const OffsetData& offset) {
         auto args = call->Args();
         auto* type = args[1]->Type();
 
@@ -341,16 +345,11 @@ struct State {
             original_value->SetInitializer(b.Zero(type));
 
             b.MemberCall<hlsl::ir::MemberBuiltinCall>(ty.void_(), BuiltinFn::kInterlockedExchange,
-                                                      var, b.Convert(type, u32(offset)), args[1],
-                                                      original_value);
+                                                      var, b.Convert(type, OffsetToValue(offset)),
+                                                      args[1], original_value);
         });
         call->Destroy();
     }
-
-    struct OffsetData {
-        uint32_t byte_offset = 0;
-        Vector<core::ir::Value*, 4> expr{};
-    };
 
     // Note, must be called inside a builder insert block (Append, InsertBefore, etc)
     void UpdateOffsetData(core::ir::Value* v, uint32_t elm_size, OffsetData* offset) {
@@ -367,7 +366,7 @@ struct State {
     }
 
     // Note, must be called inside a builder insert block (Append, InsertBefore, etc)
-    core::ir::Value* OffsetToValue(OffsetData offset) {
+    core::ir::Value* OffsetToValue(const OffsetData& offset) {
         core::ir::Value* val = b.Value(u32(offset.byte_offset));
         for (core::ir::Value* expr : offset.expr) {
             val = b.Add(ty.u32(), val, expr)->Result(0);
@@ -798,37 +797,37 @@ struct State {
                             ArrayLength(var, call, obj, offset.byte_offset);
                             break;
                         case core::BuiltinFn::kAtomicAnd:
-                            AtomicAnd(var, call, offset.byte_offset);
+                            AtomicAnd(var, call, offset);
                             break;
                         case core::BuiltinFn::kAtomicOr:
-                            AtomicOr(var, call, offset.byte_offset);
+                            AtomicOr(var, call, offset);
                             break;
                         case core::BuiltinFn::kAtomicXor:
-                            AtomicXor(var, call, offset.byte_offset);
+                            AtomicXor(var, call, offset);
                             break;
                         case core::BuiltinFn::kAtomicMin:
-                            AtomicMin(var, call, offset.byte_offset);
+                            AtomicMin(var, call, offset);
                             break;
                         case core::BuiltinFn::kAtomicMax:
-                            AtomicMax(var, call, offset.byte_offset);
+                            AtomicMax(var, call, offset);
                             break;
                         case core::BuiltinFn::kAtomicAdd:
-                            AtomicAdd(var, call, offset.byte_offset);
+                            AtomicAdd(var, call, offset);
                             break;
                         case core::BuiltinFn::kAtomicSub:
-                            AtomicSub(var, call, offset.byte_offset);
+                            AtomicSub(var, call, offset);
                             break;
                         case core::BuiltinFn::kAtomicExchange:
-                            AtomicExchange(var, call, offset.byte_offset);
+                            AtomicExchange(var, call, offset);
                             break;
                         case core::BuiltinFn::kAtomicCompareExchangeWeak:
-                            AtomicCompareExchangeWeak(var, call, offset.byte_offset);
+                            AtomicCompareExchangeWeak(var, call, offset);
                             break;
                         case core::BuiltinFn::kAtomicStore:
-                            AtomicStore(var, call, offset.byte_offset);
+                            AtomicStore(var, call, offset);
                             break;
                         case core::BuiltinFn::kAtomicLoad:
-                            AtomicLoad(var, call, offset.byte_offset);
+                            AtomicLoad(var, call, offset);
                             break;
                         default:
                             TINT_UNREACHABLE() << call->Func();
@@ -843,7 +842,7 @@ struct State {
     void Store(core::ir::Instruction* inst,
                core::ir::Var* var,
                core::ir::Value* from,
-               OffsetData& offset) {
+               const OffsetData& offset) {
         b.InsertBefore(inst, [&] {
             auto* off = OffsetToValue(offset);
             MakeStore(inst, var, from, off);
@@ -851,7 +850,7 @@ struct State {
         inst->Destroy();
     }
 
-    void Load(core::ir::Instruction* inst, core::ir::Var* var, OffsetData& offset) {
+    void Load(core::ir::Instruction* inst, core::ir::Var* var, const OffsetData& offset) {
         b.InsertBefore(inst, [&] {
             auto* off = OffsetToValue(offset);
             auto* call = MakeLoad(inst, var, inst->Result(0)->Type(), off);

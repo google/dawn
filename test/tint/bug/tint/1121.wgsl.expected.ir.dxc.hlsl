@@ -128,19 +128,18 @@ void main_inner(uint3 GlobalInvocationID) {
               }
               continue;
             }
-            uint v_22 = (uint(tileId) * 260u);
-            uint v_23 = 0u;
-            tileLightId.InterlockedAdd(uint(0u), 1u, v_23);
-            uint offset = v_23;
+            uint v_22 = 0u;
+            tileLightId.InterlockedAdd(uint((0u + (uint(tileId) * 260u))), 1u, v_22);
+            uint offset = v_22;
             if ((offset >= config[1u].x)) {
               {
                 x = (x + int(1));
               }
               continue;
             }
-            uint v_24 = offset;
-            uint v_25 = (uint(tileId) * 260u);
-            tileLightId.Store(((4u + v_25) + (uint(v_24) * 4u)), GlobalInvocationID[0u]);
+            uint v_23 = offset;
+            uint v_24 = (uint(tileId) * 260u);
+            tileLightId.Store(((4u + v_24) + (uint(v_23) * 4u)), GlobalInvocationID[0u]);
           }
           {
             x = (x + int(1));
