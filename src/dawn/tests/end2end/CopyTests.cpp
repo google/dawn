@@ -2822,6 +2822,18 @@ TEST_P(CopyTests_T2T, Texture2DArraySameTextureDifferentMipLevels) {
     }
 }
 
+// Test that copying whole 1D texture in one texture-to-texture-copy works.
+TEST_P(CopyTests_T2T, Texture1DFull) {
+    constexpr uint32_t kWidth = 256;
+    constexpr uint32_t kHeight = 1;
+    constexpr uint32_t kDepth = 1;
+
+    TextureSpec textureSpec;
+    textureSpec.textureSize = {kWidth, kHeight, kDepth};
+
+    DoTest(textureSpec, textureSpec, {kWidth, kHeight, kDepth}, false, wgpu::TextureDimension::e1D);
+}
+
 // Test that copying whole 3D texture in one texture-to-texture-copy works.
 TEST_P(CopyTests_T2T, Texture3DFull) {
     // TODO(crbug.com/dawn/2294): diagnose T2B failures on Pixel 4 OpenGLES
