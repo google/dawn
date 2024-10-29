@@ -92,11 +92,14 @@ ResultOrError<D3D12DeviceInfo> GatherDeviceInfo(const PhysicalDevice& physicalDe
         info.supportsNative16BitShaderOps = featureOptions4.Native16BitShaderOpsSupported;
     }
 
-    D3D12_FEATURE_DATA_D3D12_OPTIONS18 featureOptions18 = {};
-    if (SUCCEEDED(physicalDevice.GetDevice()->CheckFeatureSupport(
-            D3D12_FEATURE_D3D12_OPTIONS18, &featureOptions18, sizeof(featureOptions18)))) {
-        info.supportsRenderPass = featureOptions18.RenderPassesValid;
-    }
+    // Per https://microsoft.github.io/DirectX-Specs/d3d/RenderPasses.html#checking-for-support,
+    // render passes on Windows originally shipped in an incomplete form that drivers could not take
+    // advantage of. The feature has been repaired now but to detect whether you're getting the
+    // fixed version, you need to query for the D3D12_FEATURE_DATA_D3D12_OPTIONS18 structure and
+    // check the RenderPassesValid field inside. Until we upgrade Dawn to use a version of the
+    // header file with the structure, we force render passes to be disabled. See
+    // https://issues.chromium.org/issues/348202695 for additional information.
+    info.supportsRenderPass = false;
 
     // D3D12_HEAP_FLAG_CREATE_NOT_ZEROED is available anytime that ID3D12Device8 is exposed, or a
     // check for D3D12_FEATURE_D3D12_OPTIONS7 succeeds.
