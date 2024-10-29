@@ -213,8 +213,7 @@ TEST_F(SpirvWriter_MergeReturnTest, IfElse_OneSideReturns) {
 
 TEST_F(SpirvWriter_MergeReturnTest, NoModify_EntryPoint_IfElse_OneSideReturns) {
     auto* cond = b.FunctionParam(ty.bool_());
-    auto* func = b.Function("entrypointfunction", ty.void_(),
-                            core::ir::Function::PipelineStage::kCompute, {{2, 3, 4}});
+    auto* func = b.ComputeFunction("entrypointfunction", 2_u, 3_u, 4_u);
     func->SetParams({cond});
     b.Append(func->Block(), [&] {
         auto* ifelse = b.If(cond);
@@ -225,7 +224,7 @@ TEST_F(SpirvWriter_MergeReturnTest, NoModify_EntryPoint_IfElse_OneSideReturns) {
     });
 
     auto* src = R"(
-%entrypointfunction = @compute @workgroup_size(2, 3, 4) func(%2:bool):void {
+%entrypointfunction = @compute @workgroup_size(2u, 3u, 4u) func(%2:bool):void {
   $B1: {
     if %2 [t: $B2, f: $B3] {  # if_1
       $B2: {  # true

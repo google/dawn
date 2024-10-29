@@ -34,8 +34,7 @@ namespace tint::hlsl::writer {
 namespace {
 
 TEST_F(HlslWriterTest, Loop) {
-    auto* func = b.Function("a", ty.void_(), core::ir::Function::PipelineStage::kCompute);
-    func->SetWorkgroupSize(1, 1, 1);
+    auto* func = b.ComputeFunction("a");
 
     b.Append(func->Block(), [&] {
         auto* l = b.Loop();
@@ -59,8 +58,7 @@ void a() {
 }
 
 TEST_F(HlslWriterTest, LoopContinueAndBreakIf) {
-    auto* func = b.Function("a", ty.void_(), core::ir::Function::PipelineStage::kCompute);
-    func->SetWorkgroupSize(1, 1, 1);
+    auto* func = b.ComputeFunction("a");
 
     b.Append(func->Block(), [&] {
         auto* l = b.Loop();
@@ -87,8 +85,7 @@ void a() {
 }
 
 TEST_F(HlslWriterTest, LoopBodyVarInContinue) {
-    auto* func = b.Function("a", ty.void_(), core::ir::Function::PipelineStage::kCompute);
-    func->SetWorkgroupSize(1, 1, 1);
+    auto* func = b.ComputeFunction("a");
 
     b.Append(func->Block(), [&] {
         auto* l = b.Loop();
@@ -120,8 +117,7 @@ void a() {
 }
 
 TEST_F(HlslWriterTest, LoopInitializer) {
-    auto* func = b.Function("a", ty.void_(), core::ir::Function::PipelineStage::kCompute);
-    func->SetWorkgroupSize(1, 1, 1);
+    auto* func = b.ComputeFunction("a");
 
     b.Append(func->Block(), [&] {
         auto* l = b.Loop();

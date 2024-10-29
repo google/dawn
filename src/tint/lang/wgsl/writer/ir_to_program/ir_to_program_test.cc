@@ -122,8 +122,7 @@ fn f(i : i32, u : u32) -> i32 {
 }
 
 TEST_F(IRToProgramTest, EntryPoint_Compute) {
-    auto* fn = b.Function("f", ty.void_(), core::ir::Function::PipelineStage::kCompute,
-                          std::array{3u, 4u, 5u});
+    auto* fn = b.ComputeFunction("f", 3_u, 4_u, 5_u);
 
     fn->Block()->Append(b.Return(fn));
 
@@ -278,8 +277,7 @@ core::ir::FunctionParam* MakeBuiltinParam(core::ir::Builder& b,
 }  // namespace
 
 TEST_F(IRToProgramTest, EntryPoint_ParameterAttribute_Compute) {
-    auto* fn = b.Function("f", ty.void_(), core::ir::Function::PipelineStage::kCompute,
-                          std::array{3u, 4u, 5u});
+    auto* fn = b.ComputeFunction("f", 3_u, 4_u, 5_u);
     fn->SetParams({
         MakeBuiltinParam(b, ty.vec3<u32>(), core::BuiltinValue::kLocalInvocationId),
         MakeBuiltinParam(b, ty.u32(), core::BuiltinValue::kLocalInvocationIndex),

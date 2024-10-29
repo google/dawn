@@ -34,8 +34,7 @@ namespace tint::glsl::writer {
 namespace {
 
 TEST_F(GlslWriterTest, Loop) {
-    auto* func = b.Function("a", ty.void_(), core::ir::Function::PipelineStage::kCompute);
-    func->SetWorkgroupSize(1, 1, 1);
+    auto* func = b.ComputeFunction("a");
 
     b.Append(func->Block(), [&] {
         auto* l = b.Loop();
@@ -58,8 +57,7 @@ void main() {
 }
 
 TEST_F(GlslWriterTest, LoopContinueAndBreakIf) {
-    auto* func = b.Function("a", ty.void_(), core::ir::Function::PipelineStage::kCompute);
-    func->SetWorkgroupSize(1, 1, 1);
+    auto* func = b.ComputeFunction("a");
 
     b.Append(func->Block(), [&] {
         auto* l = b.Loop();
@@ -85,8 +83,7 @@ void main() {
 }
 
 TEST_F(GlslWriterTest, LoopBodyVarInContinue) {
-    auto* func = b.Function("a", ty.void_(), core::ir::Function::PipelineStage::kCompute);
-    func->SetWorkgroupSize(1, 1, 1);
+    auto* func = b.ComputeFunction("a");
 
     b.Append(func->Block(), [&] {
         auto* l = b.Loop();
@@ -117,8 +114,7 @@ void main() {
 }
 
 TEST_F(GlslWriterTest, LoopInitializer) {
-    auto* func = b.Function("a", ty.void_(), core::ir::Function::PipelineStage::kCompute);
-    func->SetWorkgroupSize(1, 1, 1);
+    auto* func = b.ComputeFunction("a");
 
     b.Append(func->Block(), [&] {
         auto* l = b.Loop();

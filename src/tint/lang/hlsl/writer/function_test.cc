@@ -76,8 +76,7 @@ void unused_entry_point() {
 }
 
 TEST_F(HlslWriterTest, FunctionEntryPoint) {
-    auto* func = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kCompute);
-    func->SetWorkgroupSize(1, 1, 1);
+    auto* func = b.ComputeFunction("main");
     func->Block()->Append(b.Return(func));
 
     ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
@@ -768,8 +767,7 @@ void frag_main() {
 TEST_F(HlslWriterTest, FunctionEntryPointCompute) {
     // @compute @workgroup_size(1) fn main() {}
 
-    auto* func = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kCompute);
-    func->SetWorkgroupSize(1, 1, 1);
+    auto* func = b.ComputeFunction("main");
     func->Block()->Append(b.Return(func));
 
     ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
@@ -784,8 +782,7 @@ void main() {
 TEST_F(HlslWriterTest, FunctionEntryPointComputeWithWorkgroupLiteral) {
     // @compute @workgroup_size(2, 4, 6) fn main() {}
 
-    auto* func = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kCompute);
-    func->SetWorkgroupSize(2, 4, 6);
+    auto* func = b.ComputeFunction("main", 2_u, 4_u, 6_u);
     func->Block()->Append(b.Return(func));
 
     ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
@@ -942,8 +939,7 @@ TEST_F(HlslWriterTest, FunctionMultipleEntryPointWithSameModuleVar) {
     b.ir.root_block->Append(data);
 
     {
-        auto* func = b.Function("a", ty.void_(), core::ir::Function::PipelineStage::kCompute);
-        func->SetWorkgroupSize(1, 1, 1);
+        auto* func = b.ComputeFunction("a");
         b.Append(func->Block(), [&] {  //
             auto* a = b.Access(ty.ptr<storage, f32>(), data, 0_u);
             b.Var("v", b.Load(a));
@@ -952,8 +948,7 @@ TEST_F(HlslWriterTest, FunctionMultipleEntryPointWithSameModuleVar) {
     }
 
     {
-        auto* func = b.Function("b", ty.void_(), core::ir::Function::PipelineStage::kCompute);
-        func->SetWorkgroupSize(1, 1, 1);
+        auto* func = b.ComputeFunction("b");
         b.Append(func->Block(), [&] {  //
             auto* a = b.Access(ty.ptr<storage, f32>(), data, 0_u);
             b.Var("v", b.Load(a));

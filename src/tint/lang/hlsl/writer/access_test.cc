@@ -34,8 +34,7 @@ namespace tint::hlsl::writer {
 namespace {
 
 TEST_F(HlslWriterTest, AccessArray) {
-    auto* func = b.Function("a", ty.void_(), core::ir::Function::PipelineStage::kCompute);
-    func->SetWorkgroupSize(1, 1, 1);
+    auto* func = b.ComputeFunction("a");
 
     b.Append(func->Block(), [&] {
         auto* v = b.Var("v", b.Zero<array<f32, 3>>());
@@ -63,8 +62,7 @@ TEST_F(HlslWriterTest, AccessStruct) {
     };
     auto* strct = ty.Struct(b.ir.symbols.New("S"), std::move(members));
 
-    auto* f = b.Function("a", ty.void_(), core::ir::Function::PipelineStage::kCompute);
-    f->SetWorkgroupSize(1, 1, 1);
+    auto* f = b.ComputeFunction("a");
 
     b.Append(f->Block(), [&] {
         auto* v = b.Var("v", b.Zero(strct));
@@ -89,8 +87,7 @@ void a() {
 }
 
 TEST_F(HlslWriterTest, AccessVector) {
-    auto* func = b.Function("a", ty.void_(), core::ir::Function::PipelineStage::kCompute);
-    func->SetWorkgroupSize(1, 1, 1);
+    auto* func = b.ComputeFunction("a");
 
     b.Append(func->Block(), [&] {
         auto* v = b.Var("v", b.Zero<vec3<f32>>());
@@ -110,8 +107,7 @@ void a() {
 }
 
 TEST_F(HlslWriterTest, AccessMatrix) {
-    auto* func = b.Function("a", ty.void_(), core::ir::Function::PipelineStage::kCompute);
-    func->SetWorkgroupSize(1, 1, 1);
+    auto* func = b.ComputeFunction("a");
 
     b.Append(func->Block(), [&] {
         auto* v = b.Var("v", b.Zero<mat4x4<f32>>());
@@ -196,8 +192,7 @@ TEST_F(HlslWriterTest, AccessNested) {
     };
     auto* s_strct = ty.Struct(b.ir.symbols.New("S"), std::move(members_s));
 
-    auto* f = b.Function("a", ty.void_(), core::ir::Function::PipelineStage::kCompute);
-    f->SetWorkgroupSize(1, 1, 1);
+    auto* f = b.ComputeFunction("a");
 
     b.Append(f->Block(), [&] {
         auto* v = b.Var("v", b.Zero(s_strct));
@@ -228,8 +223,7 @@ void a() {
 }
 
 TEST_F(HlslWriterTest, AccessSwizzle) {
-    auto* f = b.Function("a", ty.void_(), core::ir::Function::PipelineStage::kCompute);
-    f->SetWorkgroupSize(1, 1, 1);
+    auto* f = b.ComputeFunction("a");
 
     b.Append(f->Block(), [&] {
         auto* v = b.Var("v", b.Zero<vec3<f32>>());
@@ -249,8 +243,7 @@ void a() {
 }
 
 TEST_F(HlslWriterTest, AccessSwizzleMulti) {
-    auto* f = b.Function("a", ty.void_(), core::ir::Function::PipelineStage::kCompute);
-    f->SetWorkgroupSize(1, 1, 1);
+    auto* f = b.ComputeFunction("a");
 
     b.Append(f->Block(), [&] {
         auto* v = b.Var("v", b.Zero<vec4<f32>>());

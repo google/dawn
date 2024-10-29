@@ -34,8 +34,7 @@ namespace tint::hlsl::writer {
 namespace {
 
 TEST_F(HlslWriterTest, Switch) {
-    auto* f = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kCompute);
-    f->SetWorkgroupSize(1, 1, 1);
+    auto* f = b.ComputeFunction("foo");
 
     b.Append(f->Block(), [&] {
         auto* a = b.Var("a", b.Zero<i32>());
@@ -66,8 +65,7 @@ void foo() {
 }
 
 TEST_F(HlslWriterTest, SwitchMixedDefault) {
-    auto* f = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kCompute);
-    f->SetWorkgroupSize(1, 1, 1);
+    auto* f = b.ComputeFunction("foo");
 
     b.Append(f->Block(), [&] {
         auto* a = b.Var("a", b.Zero<i32>());
@@ -105,8 +103,7 @@ TEST_F(HlslWriterTest, SwitchOnlyDefaultCaseNoSideEffectsConditionDXC) {
     //   }
     // }
 
-    auto* f = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kCompute);
-    f->SetWorkgroupSize(1, 1, 1);
+    auto* f = b.ComputeFunction("foo");
 
     b.Append(f->Block(), [&] {
         auto* cond = b.Var("cond", b.Zero<i32>());
@@ -164,8 +161,7 @@ TEST_F(HlslWriterTest, SwitchOnlyDefaultCaseSideEffectsConditionDXC) {
         b.Return(bar, b.Load(global));
     });
 
-    auto* f = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kCompute);
-    f->SetWorkgroupSize(1, 1, 1);
+    auto* f = b.ComputeFunction("foo");
 
     b.Append(f->Block(), [&] {
         auto* cond = b.Call(bar);
@@ -211,8 +207,7 @@ TEST_F(HlslWriterTest, SwitchOnlyDefaultCaseNoSideEffectsConditionFXC) {
     //   }
     // }
 
-    auto* f = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kCompute);
-    f->SetWorkgroupSize(1, 1, 1);
+    auto* f = b.ComputeFunction("foo");
 
     b.Append(f->Block(), [&] {
         auto* cond = b.Var("cond", b.Zero<i32>());
@@ -274,8 +269,7 @@ TEST_F(HlslWriterTest, SwitchOnlyDefaultCaseSideEffectsConditionFXC) {
         b.Return(bar, b.Load(global));
     });
 
-    auto* f = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kCompute);
-    f->SetWorkgroupSize(1, 1, 1);
+    auto* f = b.ComputeFunction("foo");
 
     b.Append(f->Block(), [&] {
         auto* cond = b.Call(bar);

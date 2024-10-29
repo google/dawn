@@ -152,7 +152,7 @@ TEST_F(IR_FromProgramTest, IfStatement) {
     ASSERT_EQ(1u, m.functions.Length());
 
     EXPECT_EQ(core::ir::Disassembler(m).Plain(),
-              R"(%test_function = @compute @workgroup_size(1, 1, 1) func():void {
+              R"(%test_function = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
     if true [t: $B2, f: $B3] {  # if_1
       $B2: {  # true
@@ -180,7 +180,7 @@ TEST_F(IR_FromProgramTest, IfStatement_TrueReturns) {
     ASSERT_EQ(1u, m.functions.Length());
 
     EXPECT_EQ(core::ir::Disassembler(m).Plain(),
-              R"(%test_function = @compute @workgroup_size(1, 1, 1) func():void {
+              R"(%test_function = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
     if true [t: $B2] {  # if_1
       $B2: {  # true
@@ -205,7 +205,7 @@ TEST_F(IR_FromProgramTest, IfStatement_FalseReturns) {
     ASSERT_EQ(1u, m.functions.Length());
 
     EXPECT_EQ(core::ir::Disassembler(m).Plain(),
-              R"(%test_function = @compute @workgroup_size(1, 1, 1) func():void {
+              R"(%test_function = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
     if true [t: $B2, f: $B3] {  # if_1
       $B2: {  # true
@@ -233,7 +233,7 @@ TEST_F(IR_FromProgramTest, IfStatement_BothReturn) {
     ASSERT_EQ(1u, m.functions.Length());
 
     EXPECT_EQ(core::ir::Disassembler(m).Plain(),
-              R"(%test_function = @compute @workgroup_size(1, 1, 1) func():void {
+              R"(%test_function = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
     if true [t: $B2, f: $B3] {  # if_1
       $B2: {  # true
@@ -260,7 +260,7 @@ TEST_F(IR_FromProgramTest, IfStatement_JumpChainToMerge) {
     auto m = res.Move();
 
     EXPECT_EQ(core::ir::Disassembler(m).Plain(),
-              R"(%test_function = @compute @workgroup_size(1, 1, 1) func():void {
+              R"(%test_function = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
     if true [t: $B2] {  # if_1
       $B2: {  # true
@@ -294,7 +294,7 @@ TEST_F(IR_FromProgramTest, Loop_WithBreak) {
     EXPECT_EQ(0u, loop->Continuing()->InboundSiblingBranches().Length());
 
     EXPECT_EQ(core::ir::Disassembler(m).Plain(),
-              R"(%test_function = @compute @workgroup_size(1, 1, 1) func():void {
+              R"(%test_function = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
     loop [b: $B2] {  # loop_1
       $B2: {  # body
@@ -324,7 +324,7 @@ TEST_F(IR_FromProgramTest, Loop_WithContinue) {
     EXPECT_EQ(1u, loop->Continuing()->InboundSiblingBranches().Length());
 
     EXPECT_EQ(core::ir::Disassembler(m).Plain(),
-              R"(%test_function = @compute @workgroup_size(1, 1, 1) func():void {
+              R"(%test_function = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
     loop [b: $B2, c: $B3] {  # loop_1
       $B2: {  # body
@@ -362,7 +362,7 @@ TEST_F(IR_FromProgramTest, Loop_WithContinuing_BreakIf) {
     EXPECT_EQ(1u, loop->Continuing()->InboundSiblingBranches().Length());
 
     EXPECT_EQ(core::ir::Disassembler(m).Plain(),
-              R"(%test_function = @compute @workgroup_size(1, 1, 1) func():void {
+              R"(%test_function = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
     loop [b: $B2, c: $B3] {  # loop_1
       $B2: {  # body
@@ -389,7 +389,7 @@ TEST_F(IR_FromProgramTest, Loop_Continuing_Body_Scope) {
 
     auto m = res.Move();
     EXPECT_EQ(core::ir::Disassembler(m).Plain(),
-              R"(%test_function = @compute @workgroup_size(1, 1, 1) func():void {
+              R"(%test_function = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
     loop [b: $B2, c: $B3] {  # loop_1
       $B2: {  # body
@@ -423,7 +423,7 @@ TEST_F(IR_FromProgramTest, Loop_WithReturn) {
     EXPECT_EQ(1u, loop->Continuing()->InboundSiblingBranches().Length());
 
     EXPECT_EQ(core::ir::Disassembler(m).Plain(),
-              R"(%test_function = @compute @workgroup_size(1, 1, 1) func():void {
+              R"(%test_function = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
     loop [b: $B2, c: $B3] {  # loop_1
       $B2: {  # body
@@ -460,7 +460,7 @@ TEST_F(IR_FromProgramTest, Loop_WithOnlyReturn) {
     EXPECT_EQ(0u, loop->Continuing()->InboundSiblingBranches().Length());
 
     EXPECT_EQ(core::ir::Disassembler(m).Plain(),
-              R"(%test_function = @compute @workgroup_size(1, 1, 1) func():void {
+              R"(%test_function = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
     loop [b: $B2] {  # loop_1
       $B2: {  # body
@@ -498,7 +498,7 @@ TEST_F(IR_FromProgramTest, Loop_WithOnlyReturn_ContinuingBreakIf) {
     EXPECT_EQ(0u, loop->Continuing()->InboundSiblingBranches().Length());
 
     EXPECT_EQ(core::ir::Disassembler(m).Plain(),
-              R"(%test_function = @compute @workgroup_size(1, 1, 1) func():void {
+              R"(%test_function = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
     loop [b: $B2] {  # loop_1
       $B2: {  # body
@@ -533,7 +533,7 @@ TEST_F(IR_FromProgramTest, Loop_WithIf_BothBranchesBreak) {
     EXPECT_EQ(0u, loop->Continuing()->InboundSiblingBranches().Length());
 
     EXPECT_EQ(core::ir::Disassembler(m).Plain(),
-              R"(%test_function = @compute @workgroup_size(1, 1, 1) func():void {
+              R"(%test_function = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
     loop [b: $B2] {  # loop_1
       $B2: {  # body
@@ -572,7 +572,7 @@ TEST_F(IR_FromProgramTest, Loop_Nested) {
     ASSERT_EQ(m, Success);
 
     EXPECT_EQ(core::ir::Disassembler(m.Get()).Plain(),
-              R"(%test_function = @compute @workgroup_size(1, 1, 1) func():void {
+              R"(%test_function = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
     loop [b: $B2, c: $B3] {  # loop_1
       $B2: {  # body
@@ -640,7 +640,7 @@ TEST_F(IR_FromProgramTest, While) {
     EXPECT_EQ(1u, loop->Continuing()->InboundSiblingBranches().Length());
 
     EXPECT_EQ(core::ir::Disassembler(m).Plain(),
-              R"(%test_function = @compute @workgroup_size(1, 1, 1) func():void {
+              R"(%test_function = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
     loop [b: $B2, c: $B3] {  # loop_1
       $B2: {  # body
@@ -680,7 +680,7 @@ TEST_F(IR_FromProgramTest, While_Return) {
     EXPECT_EQ(0u, loop->Continuing()->InboundSiblingBranches().Length());
 
     EXPECT_EQ(core::ir::Disassembler(m).Plain(),
-              R"(%test_function = @compute @workgroup_size(1, 1, 1) func():void {
+              R"(%test_function = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
     loop [b: $B2, c: $B3] {  # loop_1
       $B2: {  # body
@@ -720,7 +720,7 @@ TEST_F(IR_FromProgramTest, For) {
     EXPECT_EQ(1u, loop->Continuing()->InboundSiblingBranches().Length());
 
     EXPECT_EQ(core::ir::Disassembler(m).Plain(),
-              R"(%test_function = @compute @workgroup_size(1, 1, 1) func():void {
+              R"(%test_function = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
     loop [i: $B2, b: $B3, c: $B4] {  # loop_1
       $B2: {  # initializer
@@ -769,7 +769,7 @@ TEST_F(IR_FromProgramTest, For_Init_NoCondOrContinuing) {
     EXPECT_EQ(0u, loop->Continuing()->InboundSiblingBranches().Length());
 
     EXPECT_EQ(core::ir::Disassembler(m).Plain(),
-              R"(%test_function = @compute @workgroup_size(1, 1, 1) func():void {
+              R"(%test_function = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
     loop [i: $B2, b: $B3] {  # loop_1
       $B2: {  # initializer
@@ -802,7 +802,7 @@ TEST_F(IR_FromProgramTest, For_NoInitCondOrContinuing) {
     EXPECT_EQ(0u, loop->Continuing()->InboundSiblingBranches().Length());
 
     EXPECT_EQ(core::ir::Disassembler(m).Plain(),
-              R"(%test_function = @compute @workgroup_size(1, 1, 1) func():void {
+              R"(%test_function = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
     loop [b: $B2] {  # loop_1
       $B2: {  # body
@@ -847,7 +847,7 @@ TEST_F(IR_FromProgramTest, Switch) {
     EXPECT_TRUE(cases[2].selectors[0].IsDefault());
 
     EXPECT_EQ(core::ir::Disassembler(m).Plain(),
-              R"(%test_function = @compute @workgroup_size(1, 1, 1) func():void {
+              R"(%test_function = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
     switch 1i [c: (0i, $B2), c: (1i, $B3), c: (default, $B4)] {  # switch_1
       $B2: {  # case
@@ -895,7 +895,7 @@ TEST_F(IR_FromProgramTest, Switch_MultiSelector) {
     EXPECT_TRUE(cases[0].selectors[2].IsDefault());
 
     EXPECT_EQ(core::ir::Disassembler(m).Plain(),
-              R"(%test_function = @compute @workgroup_size(1, 1, 1) func():void {
+              R"(%test_function = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
     switch 1i [c: (0i 1i default, $B2)] {  # switch_1
       $B2: {  # case
@@ -926,7 +926,7 @@ TEST_F(IR_FromProgramTest, Switch_OnlyDefault) {
     EXPECT_TRUE(cases[0].selectors[0].IsDefault());
 
     EXPECT_EQ(core::ir::Disassembler(m).Plain(),
-              R"(%test_function = @compute @workgroup_size(1, 1, 1) func():void {
+              R"(%test_function = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
     switch 1i [c: (default, $B2)] {  # switch_1
       $B2: {  # case
@@ -966,7 +966,7 @@ TEST_F(IR_FromProgramTest, Switch_WithBreak) {
     // This is 1 because the if is dead-code eliminated and the return doesn't happen.
 
     EXPECT_EQ(core::ir::Disassembler(m).Plain(),
-              R"(%test_function = @compute @workgroup_size(1, 1, 1) func():void {
+              R"(%test_function = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
     switch 1i [c: (0i, $B2), c: (default, $B3)] {  # switch_1
       $B2: {  # case
@@ -1008,7 +1008,7 @@ TEST_F(IR_FromProgramTest, Switch_AllReturn) {
     EXPECT_TRUE(cases[1].selectors[0].IsDefault());
 
     EXPECT_EQ(core::ir::Disassembler(m).Plain(),
-              R"(%test_function = @compute @workgroup_size(1, 1, 1) func():void {
+              R"(%test_function = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
     switch 1i [c: (0i, $B2), c: (default, $B3)] {  # switch_1
       $B2: {  # case
@@ -1037,7 +1037,7 @@ TEST_F(IR_FromProgramTest, Emit_Phony) {
     ret 1i
   }
 }
-%test_function = @compute @workgroup_size(1, 1, 1) func():void {
+%test_function = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
     %3:i32 = call %b
     ret

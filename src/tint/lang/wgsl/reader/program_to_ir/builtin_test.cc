@@ -47,7 +47,7 @@ TEST_F(ProgramToIRBuiltinTest, EmitExpression_Builtin) {
   %i:ptr<private, f32, read_write> = var, 1.0f
 }
 
-%test_function = @compute @workgroup_size(1, 1, 1) func():void {
+%test_function = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
     %3:f32 = load %i
     %4:f32 = asin %3

@@ -519,8 +519,7 @@ void unused_entry_point() {
 }
 
 TEST_F(HlslWriterTest, ConstantTypeArray) {
-    auto* f = b.Function("a", ty.void_(), core::ir::Function::PipelineStage::kCompute);
-    f->SetWorkgroupSize(1, 1, 1);
+    auto* f = b.ComputeFunction("a");
 
     b.Append(f->Block(), [&] {
         b.Var("v", b.Composite(ty.array<vec3<f32>, 3>(), b.Composite(ty.vec3<f32>(), 1_f, 2_f, 3_f),
@@ -554,8 +553,7 @@ void unused_entry_point() {
 }
 
 TEST_F(HlslWriterTest, ConstantTypeArrayEmpty) {
-    auto* f = b.Function("a", ty.void_(), core::ir::Function::PipelineStage::kCompute);
-    f->SetWorkgroupSize(1, 1, 1);
+    auto* f = b.ComputeFunction("a");
 
     b.Append(f->Block(), [&] {
         b.Var("v", b.Zero<array<vec3<f32>, 3>>());

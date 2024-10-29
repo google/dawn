@@ -226,7 +226,7 @@ class Printer : public tint::TextGenerator {
 
         {
             if (func->Stage() == core::ir::Function::PipelineStage::kCompute) {
-                auto wg_opt = func->WorkgroupSize();
+                auto wg_opt = func->WorkgroupSizeAsConst();
                 TINT_ASSERT(wg_opt.has_value());
 
                 auto& wg = wg_opt.value();

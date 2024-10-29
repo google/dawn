@@ -37,8 +37,7 @@ TEST_F(GlslWriterTest, CallWithoutParams) {
     auto* f = b.Function("a", ty.bool_());
     f->Block()->Append(b.Return(f, false));
 
-    auto* ep = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kCompute);
-    ep->SetWorkgroupSize(1, 1, 1);
+    auto* ep = b.ComputeFunction("main");
     b.Append(ep->Block(), [&] {
         b.Let("x", b.Call(f));
         b.Return(ep);
@@ -64,8 +63,7 @@ TEST_F(GlslWriterTest, CallWithParams) {
     f->SetParams({p1, p2});
     f->Block()->Append(b.Return(f, p2));
 
-    auto* ep = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kCompute);
-    ep->SetWorkgroupSize(1, 1, 1);
+    auto* ep = b.ComputeFunction("main");
     b.Append(ep->Block(), [&] {
         b.Let("x", b.Call(f, 1.5_f, false));
         b.Return(ep);
@@ -92,8 +90,7 @@ TEST_F(GlslWriterTest, CallWithPointerParams) {
     f->SetParams({p1, p2, p3});
     f->Block()->Append(b.Return(f, p2));
 
-    auto* ep = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kCompute);
-    ep->SetWorkgroupSize(1, 1, 1);
+    auto* ep = b.ComputeFunction("main");
     b.Append(ep->Block(), [&] {
         auto* y = b.Var("y", 1_i);
         b.Let("x", b.Call(f, 1.5_f, false, y));
@@ -117,8 +114,7 @@ TEST_F(GlslWriterTest, CallStatement) {
     auto* f = b.Function("a", ty.bool_());
     f->Block()->Append(b.Return(f, false));
 
-    auto* ep = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kCompute);
-    ep->SetWorkgroupSize(1, 1, 1);
+    auto* ep = b.ComputeFunction("main");
     b.Append(ep->Block(), [&] {
         b.Call(f);
         b.Return(ep);

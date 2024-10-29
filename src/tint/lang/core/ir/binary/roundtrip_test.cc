@@ -116,8 +116,7 @@ INSTANTIATE_TEST_SUITE_P(,
                                          Function::PipelineStage::kVertex));
 
 TEST_F(IRBinaryRoundtripTest, Fn_WorkgroupSize) {
-    b.Function("Function", ty.i32(), Function::PipelineStage::kCompute,
-               std::array<uint32_t, 3>{1, 2, 3});
+    b.ComputeFunction("Function", 1_u, 2_u, 3_u);
     RUN_TEST();
 }
 

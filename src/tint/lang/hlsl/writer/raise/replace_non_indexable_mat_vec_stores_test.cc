@@ -47,8 +47,7 @@ TEST_F(HlslWriterReplaceNonIndexableMatVecStoresTest, Vector) {
     dyn_index->SetBindingPoint(0, 0);
     mod.root_block->Append(dyn_index);
 
-    auto* func = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kCompute);
-    func->SetWorkgroupSize(1, 1, 1);
+    auto* func = b.ComputeFunction("main");
     b.Append(func->Block(), [&] {
         auto* static_index = b.Let("static_index", 0_u);
         auto* v = b.Var("v", ty.ptr<function>(ty.vec3<f32>()));
@@ -62,7 +61,7 @@ $B1: {  # root
   %dyn_index:ptr<uniform, u32, read> = var @binding_point(0, 0)
 }
 
-%main = @compute @workgroup_size(1, 1, 1) func():void {
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
     %static_index:u32 = let 0u
     %v:ptr<function, vec3<f32>, read_write> = var
@@ -81,7 +80,7 @@ $B1: {  # root
   %dyn_index:ptr<uniform, u32, read> = var @binding_point(0, 0)
 }
 
-%main = @compute @workgroup_size(1, 1, 1) func():void {
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
     %static_index:u32 = let 0u
     %v:ptr<function, vec3<f32>, read_write> = var
@@ -111,8 +110,7 @@ TEST_F(HlslWriterReplaceNonIndexableMatVecStoresTest, VectorInStruct) {
     dyn_index->SetBindingPoint(0, 0);
     mod.root_block->Append(dyn_index);
 
-    auto* func = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kCompute);
-    func->SetWorkgroupSize(1, 1, 1);
+    auto* func = b.ComputeFunction("main");
     b.Append(func->Block(), [&] {
         auto* static_index = b.Let("static_index", 0_u);
         auto* v = b.Var("v", ty.ptr<function>(struct_ty));
@@ -131,7 +129,7 @@ $B1: {  # root
   %dyn_index:ptr<uniform, u32, read> = var @binding_point(0, 0)
 }
 
-%main = @compute @workgroup_size(1, 1, 1) func():void {
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
     %static_index:u32 = let 0u
     %v:ptr<function, S, read_write> = var
@@ -155,7 +153,7 @@ $B1: {  # root
   %dyn_index:ptr<uniform, u32, read> = var @binding_point(0, 0)
 }
 
-%main = @compute @workgroup_size(1, 1, 1) func():void {
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
     %static_index:u32 = let 0u
     %v:ptr<function, S, read_write> = var
@@ -184,8 +182,7 @@ TEST_F(HlslWriterReplaceNonIndexableMatVecStoresTest, VectorInArray) {
     dyn_index->SetBindingPoint(0, 0);
     mod.root_block->Append(dyn_index);
 
-    auto* func = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kCompute);
-    func->SetWorkgroupSize(1, 1, 1);
+    auto* func = b.ComputeFunction("main");
     b.Append(func->Block(), [&] {
         auto* static_index = b.Let("static_index", 0_u);
         auto* vec_ty = ty.vec3<f32>();
@@ -201,7 +198,7 @@ $B1: {  # root
   %dyn_index:ptr<uniform, u32, read> = var @binding_point(0, 0)
 }
 
-%main = @compute @workgroup_size(1, 1, 1) func():void {
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
     %static_index:u32 = let 0u
     %v:ptr<function, array<vec3<f32>, 8>, read_write> = var
@@ -221,7 +218,7 @@ $B1: {  # root
   %dyn_index:ptr<uniform, u32, read> = var @binding_point(0, 0)
 }
 
-%main = @compute @workgroup_size(1, 1, 1) func():void {
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
     %static_index:u32 = let 0u
     %v:ptr<function, array<vec3<f32>, 8>, read_write> = var
@@ -253,8 +250,7 @@ TEST_F(HlslWriterReplaceNonIndexableMatVecStoresTest, VectorInArrayInStruct) {
     dyn_index->SetBindingPoint(0, 0);
     mod.root_block->Append(dyn_index);
 
-    auto* func = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kCompute);
-    func->SetWorkgroupSize(1, 1, 1);
+    auto* func = b.ComputeFunction("main");
     b.Append(func->Block(), [&] {
         auto* static_index = b.Let("static_index", 0_u);
         auto* v = b.Var("v", ty.ptr<function>(struct_ty));
@@ -273,7 +269,7 @@ $B1: {  # root
   %dyn_index:ptr<uniform, u32, read> = var @binding_point(0, 0)
 }
 
-%main = @compute @workgroup_size(1, 1, 1) func():void {
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
     %static_index:u32 = let 0u
     %v:ptr<function, S, read_write> = var
@@ -297,7 +293,7 @@ $B1: {  # root
   %dyn_index:ptr<uniform, u32, read> = var @binding_point(0, 0)
 }
 
-%main = @compute @workgroup_size(1, 1, 1) func():void {
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
     %static_index:u32 = let 0u
     %v:ptr<function, S, read_write> = var
@@ -330,8 +326,7 @@ TEST_F(HlslWriterReplaceNonIndexableMatVecStoresTest, VectorByFunc) {
     auto* get_static = b.Function("get_static", ty.u32());
     b.Append(get_static->Block(), [&] { b.Return(get_static, 0_u); });
 
-    auto* func = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kCompute);
-    func->SetWorkgroupSize(1, 1, 1);
+    auto* func = b.ComputeFunction("main");
     b.Append(func->Block(), [&] {
         auto* v = b.Var("v", ty.ptr<function>(ty.vec3<f32>()));
         b.StoreVectorElement(v, b.Call(get_dynamic), 1_f);
@@ -356,7 +351,7 @@ $B1: {  # root
     ret 0u
   }
 }
-%main = @compute @workgroup_size(1, 1, 1) func():void {
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B4: {
     %v:ptr<function, vec3<f32>, read_write> = var
     %7:u32 = call %get_dynamic
@@ -386,7 +381,7 @@ $B1: {  # root
     ret 0u
   }
 }
-%main = @compute @workgroup_size(1, 1, 1) func():void {
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B4: {
     %v:ptr<function, vec3<f32>, read_write> = var
     %7:u32 = call %get_dynamic
@@ -420,8 +415,7 @@ TEST_F(HlslWriterReplaceNonIndexableMatVecStoresTest, Vector_ViaPointer) {
     dyn_index->SetBindingPoint(0, 0);
     mod.root_block->Append(dyn_index);
 
-    auto* func = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kCompute);
-    func->SetWorkgroupSize(1, 1, 1);
+    auto* func = b.ComputeFunction("main");
     b.Append(func->Block(), [&] {
         auto* static_index = b.Let("static_index", 0_u);
         auto* v = b.Var("v", ty.ptr<function>(ty.vec3<f32>()));
@@ -436,7 +430,7 @@ $B1: {  # root
   %dyn_index:ptr<uniform, u32, read> = var @binding_point(0, 0)
 }
 
-%main = @compute @workgroup_size(1, 1, 1) func():void {
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
     %static_index:u32 = let 0u
     %v:ptr<function, vec3<f32>, read_write> = var
@@ -456,7 +450,7 @@ $B1: {  # root
   %dyn_index:ptr<uniform, u32, read> = var @binding_point(0, 0)
 }
 
-%main = @compute @workgroup_size(1, 1, 1) func():void {
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
     %static_index:u32 = let 0u
     %v:ptr<function, vec3<f32>, read_write> = var
@@ -486,8 +480,7 @@ TEST_F(HlslWriterReplaceNonIndexableMatVecStoresTest, Vector_PrivateVar) {
     auto* v = b.Var("v", ty.ptr<private_>(ty.vec3<f32>()));
     mod.root_block->Append(v);
 
-    auto* func = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kCompute);
-    func->SetWorkgroupSize(1, 1, 1);
+    auto* func = b.ComputeFunction("main");
     b.Append(func->Block(), [&] {
         auto* static_index = b.Let("static_index", 0_u);
         b.StoreVectorElement(v, b.Load(dyn_index), 1_f);
@@ -501,7 +494,7 @@ $B1: {  # root
   %v:ptr<private, vec3<f32>, read_write> = var
 }
 
-%main = @compute @workgroup_size(1, 1, 1) func():void {
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
     %static_index:u32 = let 0u
     %5:u32 = load %dyn_index
@@ -520,7 +513,7 @@ $B1: {  # root
   %v:ptr<private, vec3<f32>, read_write> = var
 }
 
-%main = @compute @workgroup_size(1, 1, 1) func():void {
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
     %static_index:u32 = let 0u
     %5:u32 = load %dyn_index
@@ -550,8 +543,7 @@ TEST_F(HlslWriterReplaceNonIndexableMatVecStoresTest, Vector_StorageVar) {
     v->SetBindingPoint(0, 1);
     mod.root_block->Append(v);
 
-    auto* func = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kCompute);
-    func->SetWorkgroupSize(1, 1, 1);
+    auto* func = b.ComputeFunction("main");
     b.Append(func->Block(), [&] {
         auto* static_index = b.Let("static_index", 0_u);
         b.StoreVectorElement(v, b.Load(dyn_index), 1_f);
@@ -565,7 +557,7 @@ $B1: {  # root
   %v:ptr<storage, vec3<f32>, read_write> = var @binding_point(0, 1)
 }
 
-%main = @compute @workgroup_size(1, 1, 1) func():void {
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
     %static_index:u32 = let 0u
     %5:u32 = load %dyn_index
@@ -592,8 +584,7 @@ TEST_F(HlslWriterReplaceNonIndexableMatVecStoresTest, Vector_WorkgroupVar) {
     auto* v = b.Var("v", ty.ptr<workgroup>(ty.vec3<f32>()));
     mod.root_block->Append(v);
 
-    auto* func = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kCompute);
-    func->SetWorkgroupSize(1, 1, 1);
+    auto* func = b.ComputeFunction("main");
     b.Append(func->Block(), [&] {
         auto* static_index = b.Let("static_index", 0_u);
         b.StoreVectorElement(v, b.Load(dyn_index), 1_f);
@@ -607,7 +598,7 @@ $B1: {  # root
   %v:ptr<workgroup, vec3<f32>, read_write> = var
 }
 
-%main = @compute @workgroup_size(1, 1, 1) func():void {
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
     %static_index:u32 = let 0u
     %5:u32 = load %dyn_index
@@ -632,8 +623,7 @@ TEST_F(HlslWriterReplaceNonIndexableMatVecStoresTest, MatrixElement) {
     dyn_index->SetBindingPoint(0, 0);
     mod.root_block->Append(dyn_index);
 
-    auto* func = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kCompute);
-    func->SetWorkgroupSize(1, 1, 1);
+    auto* func = b.ComputeFunction("main");
     b.Append(func->Block(), [&] {
         auto* static_index = b.Let("static_index", 0_u);
         auto* v = b.Var("v", ty.ptr<function>(ty.mat2x4<f32>()));
@@ -648,7 +638,7 @@ $B1: {  # root
   %dyn_index:ptr<uniform, u32, read> = var @binding_point(0, 0)
 }
 
-%main = @compute @workgroup_size(1, 1, 1) func():void {
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
     %static_index:u32 = let 0u
     %v:ptr<function, mat2x4<f32>, read_write> = var
@@ -668,7 +658,7 @@ $B1: {  # root
   %dyn_index:ptr<uniform, u32, read> = var @binding_point(0, 0)
 }
 
-%main = @compute @workgroup_size(1, 1, 1) func():void {
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
     %static_index:u32 = let 0u
     %v:ptr<function, mat2x4<f32>, read_write> = var
@@ -699,8 +689,7 @@ TEST_F(HlslWriterReplaceNonIndexableMatVecStoresTest, MatrixElementInStruct) {
     dyn_index->SetBindingPoint(0, 0);
     mod.root_block->Append(dyn_index);
 
-    auto* func = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kCompute);
-    func->SetWorkgroupSize(1, 1, 1);
+    auto* func = b.ComputeFunction("main");
     b.Append(func->Block(), [&] {
         auto* static_index = b.Let("static_index", 0_u);
         auto* v = b.Var("v", ty.ptr<function>(struct_ty));
@@ -719,7 +708,7 @@ $B1: {  # root
   %dyn_index:ptr<uniform, u32, read> = var @binding_point(0, 0)
 }
 
-%main = @compute @workgroup_size(1, 1, 1) func():void {
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
     %static_index:u32 = let 0u
     %v:ptr<function, S, read_write> = var
@@ -743,7 +732,7 @@ $B1: {  # root
   %dyn_index:ptr<uniform, u32, read> = var @binding_point(0, 0)
 }
 
-%main = @compute @workgroup_size(1, 1, 1) func():void {
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
     %static_index:u32 = let 0u
     %v:ptr<function, S, read_write> = var
@@ -772,8 +761,7 @@ TEST_F(HlslWriterReplaceNonIndexableMatVecStoresTest, MatrixElementInArray) {
     dyn_index->SetBindingPoint(0, 0);
     mod.root_block->Append(dyn_index);
 
-    auto* func = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kCompute);
-    func->SetWorkgroupSize(1, 1, 1);
+    auto* func = b.ComputeFunction("main");
     b.Append(func->Block(), [&] {
         auto* static_index = b.Let("static_index", 0_u);
         auto* v = b.Var("v", ty.ptr<function>(ty.array(ty.mat2x4<f32>(), 8)));
@@ -788,7 +776,7 @@ $B1: {  # root
   %dyn_index:ptr<uniform, u32, read> = var @binding_point(0, 0)
 }
 
-%main = @compute @workgroup_size(1, 1, 1) func():void {
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
     %static_index:u32 = let 0u
     %v:ptr<function, array<mat2x4<f32>, 8>, read_write> = var
@@ -808,7 +796,7 @@ $B1: {  # root
   %dyn_index:ptr<uniform, u32, read> = var @binding_point(0, 0)
 }
 
-%main = @compute @workgroup_size(1, 1, 1) func():void {
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
     %static_index:u32 = let 0u
     %v:ptr<function, array<mat2x4<f32>, 8>, read_write> = var
@@ -840,8 +828,7 @@ TEST_F(HlslWriterReplaceNonIndexableMatVecStoresTest, MatrixElementInArrayInStru
     dyn_index->SetBindingPoint(0, 0);
     mod.root_block->Append(dyn_index);
 
-    auto* func = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kCompute);
-    func->SetWorkgroupSize(1, 1, 1);
+    auto* func = b.ComputeFunction("main");
     b.Append(func->Block(), [&] {
         auto* static_index = b.Let("static_index", 0_u);
         auto* v = b.Var("v", ty.ptr<function>(struct_ty));
@@ -860,7 +847,7 @@ $B1: {  # root
   %dyn_index:ptr<uniform, u32, read> = var @binding_point(0, 0)
 }
 
-%main = @compute @workgroup_size(1, 1, 1) func():void {
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
     %static_index:u32 = let 0u
     %v:ptr<function, S, read_write> = var
@@ -884,7 +871,7 @@ $B1: {  # root
   %dyn_index:ptr<uniform, u32, read> = var @binding_point(0, 0)
 }
 
-%main = @compute @workgroup_size(1, 1, 1) func():void {
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
     %static_index:u32 = let 0u
     %v:ptr<function, S, read_write> = var
@@ -918,8 +905,7 @@ TEST_F(HlslWriterReplaceNonIndexableMatVecStoresTest, MatrixElementByFunc) {
     auto* get_static = b.Function("get_static", ty.u32());
     b.Append(get_static->Block(), [&] { b.Return(get_static, 0_u); });
 
-    auto* func = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kCompute);
-    func->SetWorkgroupSize(1, 1, 1);
+    auto* func = b.ComputeFunction("main");
     b.Append(func->Block(), [&] {
         auto* v = b.Var("v", ty.ptr<function>(ty.mat2x4<f32>()));
         auto* access = b.Access(ty.ptr<function, vec4<f32>>(), v, 1_u);
@@ -945,7 +931,7 @@ $B1: {  # root
     ret 0u
   }
 }
-%main = @compute @workgroup_size(1, 1, 1) func():void {
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B4: {
     %v:ptr<function, mat2x4<f32>, read_write> = var
     %7:ptr<function, vec4<f32>, read_write> = access %v, 1u
@@ -976,7 +962,7 @@ $B1: {  # root
     ret 0u
   }
 }
-%main = @compute @workgroup_size(1, 1, 1) func():void {
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B4: {
     %v:ptr<function, mat2x4<f32>, read_write> = var
     %7:ptr<function, vec4<f32>, read_write> = access %v, 1u
@@ -1011,8 +997,7 @@ TEST_F(HlslWriterReplaceNonIndexableMatVecStoresTest, MatrixElement_ViaPointer) 
     dyn_index->SetBindingPoint(0, 0);
     mod.root_block->Append(dyn_index);
 
-    auto* func = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kCompute);
-    func->SetWorkgroupSize(1, 1, 1);
+    auto* func = b.ComputeFunction("main");
     b.Append(func->Block(), [&] {
         auto* static_index = b.Let("static_index", 0_u);
         auto* v = b.Var("v", ty.ptr<function>(ty.mat2x4<f32>()));
@@ -1028,7 +1013,7 @@ $B1: {  # root
   %dyn_index:ptr<uniform, u32, read> = var @binding_point(0, 0)
 }
 
-%main = @compute @workgroup_size(1, 1, 1) func():void {
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
     %static_index:u32 = let 0u
     %v:ptr<function, mat2x4<f32>, read_write> = var
@@ -1049,7 +1034,7 @@ $B1: {  # root
   %dyn_index:ptr<uniform, u32, read> = var @binding_point(0, 0)
 }
 
-%main = @compute @workgroup_size(1, 1, 1) func():void {
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
     %static_index:u32 = let 0u
     %v:ptr<function, mat2x4<f32>, read_write> = var
@@ -1080,8 +1065,7 @@ TEST_F(HlslWriterReplaceNonIndexableMatVecStoresTest, MatrixElement_PrivateVar) 
     auto* v = b.Var("v", ty.ptr<private_>(ty.mat2x4<f32>()));
     mod.root_block->Append(v);
 
-    auto* func = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kCompute);
-    func->SetWorkgroupSize(1, 1, 1);
+    auto* func = b.ComputeFunction("main");
     b.Append(func->Block(), [&] {
         auto* static_index = b.Let("static_index", 0_u);
         auto* access = b.Access(ty.ptr<private_, vec4<f32>>(), v, 1_u);
@@ -1096,7 +1080,7 @@ $B1: {  # root
   %v:ptr<private, mat2x4<f32>, read_write> = var
 }
 
-%main = @compute @workgroup_size(1, 1, 1) func():void {
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
     %static_index:u32 = let 0u
     %5:ptr<private, vec4<f32>, read_write> = access %v, 1u
@@ -1116,7 +1100,7 @@ $B1: {  # root
   %v:ptr<private, mat2x4<f32>, read_write> = var
 }
 
-%main = @compute @workgroup_size(1, 1, 1) func():void {
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
     %static_index:u32 = let 0u
     %5:ptr<private, vec4<f32>, read_write> = access %v, 1u
@@ -1147,8 +1131,7 @@ TEST_F(HlslWriterReplaceNonIndexableMatVecStoresTest, MatrixElement_StorageVar) 
     v->SetBindingPoint(0, 1);
     mod.root_block->Append(v);
 
-    auto* func = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kCompute);
-    func->SetWorkgroupSize(1, 1, 1);
+    auto* func = b.ComputeFunction("main");
     b.Append(func->Block(), [&] {
         auto* static_index = b.Let("static_index", 0_u);
         auto* access = b.Access(ty.ptr<storage, vec4<f32>>(), v, 1_u);
@@ -1163,7 +1146,7 @@ $B1: {  # root
   %v:ptr<storage, mat2x4<f32>, read_write> = var @binding_point(0, 1)
 }
 
-%main = @compute @workgroup_size(1, 1, 1) func():void {
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
     %static_index:u32 = let 0u
     %5:ptr<storage, vec4<f32>, read_write> = access %v, 1u
@@ -1191,8 +1174,7 @@ TEST_F(HlslWriterReplaceNonIndexableMatVecStoresTest, MatrixElement_WorkgroupVar
     auto* v = b.Var("v", ty.ptr<workgroup>(ty.mat2x4<f32>()));
     mod.root_block->Append(v);
 
-    auto* func = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kCompute);
-    func->SetWorkgroupSize(1, 1, 1);
+    auto* func = b.ComputeFunction("main");
     b.Append(func->Block(), [&] {
         auto* static_index = b.Let("static_index", 0_u);
         auto* access = b.Access(ty.ptr<workgroup, vec4<f32>>(), v, 1_u);
@@ -1207,7 +1189,7 @@ $B1: {  # root
   %v:ptr<workgroup, mat2x4<f32>, read_write> = var
 }
 
-%main = @compute @workgroup_size(1, 1, 1) func():void {
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
     %static_index:u32 = let 0u
     %5:ptr<workgroup, vec4<f32>, read_write> = access %v, 1u
@@ -1233,8 +1215,7 @@ TEST_F(HlslWriterReplaceNonIndexableMatVecStoresTest, MatrixColumn) {
     dyn_index->SetBindingPoint(0, 0);
     mod.root_block->Append(dyn_index);
 
-    auto* func = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kCompute);
-    func->SetWorkgroupSize(1, 1, 1);
+    auto* func = b.ComputeFunction("main");
     b.Append(func->Block(), [&] {
         auto* static_index = b.Let("static_index", 0_u);
         auto* v = b.Var("v", ty.ptr<function>(ty.mat2x4<f32>()));
@@ -1251,7 +1232,7 @@ $B1: {  # root
   %dyn_index:ptr<uniform, u32, read> = var @binding_point(0, 0)
 }
 
-%main = @compute @workgroup_size(1, 1, 1) func():void {
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
     %static_index:u32 = let 0u
     %v:ptr<function, mat2x4<f32>, read_write> = var
@@ -1273,7 +1254,7 @@ $B1: {  # root
   %dyn_index:ptr<uniform, u32, read> = var @binding_point(0, 0)
 }
 
-%main = @compute @workgroup_size(1, 1, 1) func():void {
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
     %static_index:u32 = let 0u
     %v:ptr<function, mat2x4<f32>, read_write> = var
@@ -1314,8 +1295,7 @@ TEST_F(HlslWriterReplaceNonIndexableMatVecStoresTest, MatrixColumnInStruct) {
     dyn_index->SetBindingPoint(0, 0);
     mod.root_block->Append(dyn_index);
 
-    auto* func = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kCompute);
-    func->SetWorkgroupSize(1, 1, 1);
+    auto* func = b.ComputeFunction("main");
     b.Append(func->Block(), [&] {
         auto* static_index = b.Let("static_index", 0_u);
         auto* v = b.Var("v", ty.ptr<function>(struct_ty));
@@ -1336,7 +1316,7 @@ $B1: {  # root
   %dyn_index:ptr<uniform, u32, read> = var @binding_point(0, 0)
 }
 
-%main = @compute @workgroup_size(1, 1, 1) func():void {
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
     %static_index:u32 = let 0u
     %v:ptr<function, S, read_write> = var
@@ -1362,7 +1342,7 @@ $B1: {  # root
   %dyn_index:ptr<uniform, u32, read> = var @binding_point(0, 0)
 }
 
-%main = @compute @workgroup_size(1, 1, 1) func():void {
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
     %static_index:u32 = let 0u
     %v:ptr<function, S, read_write> = var
@@ -1402,8 +1382,7 @@ TEST_F(HlslWriterReplaceNonIndexableMatVecStoresTest, MatrixColumnInArray) {
     dyn_index->SetBindingPoint(0, 0);
     mod.root_block->Append(dyn_index);
 
-    auto* func = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kCompute);
-    func->SetWorkgroupSize(1, 1, 1);
+    auto* func = b.ComputeFunction("main");
     b.Append(func->Block(), [&] {
         auto* static_index = b.Let("static_index", 0_u);
         auto* v = b.Var("v", ty.ptr<function>(ty.array(ty.mat2x4<f32>(), 8)));
@@ -1420,7 +1399,7 @@ $B1: {  # root
   %dyn_index:ptr<uniform, u32, read> = var @binding_point(0, 0)
 }
 
-%main = @compute @workgroup_size(1, 1, 1) func():void {
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
     %static_index:u32 = let 0u
     %v:ptr<function, array<mat2x4<f32>, 8>, read_write> = var
@@ -1442,7 +1421,7 @@ $B1: {  # root
   %dyn_index:ptr<uniform, u32, read> = var @binding_point(0, 0)
 }
 
-%main = @compute @workgroup_size(1, 1, 1) func():void {
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
     %static_index:u32 = let 0u
     %v:ptr<function, array<mat2x4<f32>, 8>, read_write> = var
@@ -1485,8 +1464,7 @@ TEST_F(HlslWriterReplaceNonIndexableMatVecStoresTest, MatrixColumnInArrayInStruc
     dyn_index->SetBindingPoint(0, 0);
     mod.root_block->Append(dyn_index);
 
-    auto* func = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kCompute);
-    func->SetWorkgroupSize(1, 1, 1);
+    auto* func = b.ComputeFunction("main");
     b.Append(func->Block(), [&] {
         auto* static_index = b.Let("static_index", 0_u);
         auto* v = b.Var("v", ty.ptr<function>(struct_ty));
@@ -1507,7 +1485,7 @@ $B1: {  # root
   %dyn_index:ptr<uniform, u32, read> = var @binding_point(0, 0)
 }
 
-%main = @compute @workgroup_size(1, 1, 1) func():void {
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
     %static_index:u32 = let 0u
     %v:ptr<function, S, read_write> = var
@@ -1533,7 +1511,7 @@ $B1: {  # root
   %dyn_index:ptr<uniform, u32, read> = var @binding_point(0, 0)
 }
 
-%main = @compute @workgroup_size(1, 1, 1) func():void {
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
     %static_index:u32 = let 0u
     %v:ptr<function, S, read_write> = var
@@ -1577,8 +1555,7 @@ TEST_F(HlslWriterReplaceNonIndexableMatVecStoresTest, MatrixColumnByFunc) {
     auto* get_static = b.Function("get_static", ty.u32());
     b.Append(get_static->Block(), [&] { b.Return(get_static, 0_u); });
 
-    auto* func = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kCompute);
-    func->SetWorkgroupSize(1, 1, 1);
+    auto* func = b.ComputeFunction("main");
     b.Append(func->Block(), [&] {
         auto* v = b.Var("v", ty.ptr<function>(ty.mat2x4<f32>()));
         auto* vec = b.Construct(ty.vec4<f32>(), 0_f);
@@ -1606,7 +1583,7 @@ $B1: {  # root
     ret 0u
   }
 }
-%main = @compute @workgroup_size(1, 1, 1) func():void {
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B4: {
     %v:ptr<function, mat2x4<f32>, read_write> = var
     %7:vec4<f32> = construct 0.0f
@@ -1639,7 +1616,7 @@ $B1: {  # root
     ret 0u
   }
 }
-%main = @compute @workgroup_size(1, 1, 1) func():void {
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B4: {
     %v:ptr<function, mat2x4<f32>, read_write> = var
     %7:vec4<f32> = construct 0.0f
@@ -1692,8 +1669,7 @@ TEST_F(HlslWriterReplaceNonIndexableMatVecStoresTest, MatrixColumn_ViaPointer) {
     dyn_index->SetBindingPoint(0, 0);
     mod.root_block->Append(dyn_index);
 
-    auto* func = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kCompute);
-    func->SetWorkgroupSize(1, 1, 1);
+    auto* func = b.ComputeFunction("main");
     b.Append(func->Block(), [&] {
         auto* static_index = b.Let("static_index", 0_u);
         auto* v = b.Var("v", ty.ptr<function>(ty.mat2x4<f32>()));
@@ -1712,7 +1688,7 @@ $B1: {  # root
   %dyn_index:ptr<uniform, u32, read> = var @binding_point(0, 0)
 }
 
-%main = @compute @workgroup_size(1, 1, 1) func():void {
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
     %static_index:u32 = let 0u
     %v:ptr<function, mat2x4<f32>, read_write> = var
@@ -1736,7 +1712,7 @@ $B1: {  # root
   %dyn_index:ptr<uniform, u32, read> = var @binding_point(0, 0)
 }
 
-%main = @compute @workgroup_size(1, 1, 1) func():void {
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
     %static_index:u32 = let 0u
     %v:ptr<function, mat2x4<f32>, read_write> = var
@@ -1777,8 +1753,7 @@ TEST_F(HlslWriterReplaceNonIndexableMatVecStoresTest, MatrixColumn_PrivateVar) {
     auto* v = b.Var("v", ty.ptr<private_>(ty.mat2x4<f32>()));
     mod.root_block->Append(v);
 
-    auto* func = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kCompute);
-    func->SetWorkgroupSize(1, 1, 1);
+    auto* func = b.ComputeFunction("main");
     b.Append(func->Block(), [&] {
         auto* static_index = b.Let("static_index", 0_u);
         auto* vec = b.Construct(ty.vec4<f32>(), 0_f);
@@ -1795,7 +1770,7 @@ $B1: {  # root
   %v:ptr<private, mat2x4<f32>, read_write> = var
 }
 
-%main = @compute @workgroup_size(1, 1, 1) func():void {
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
     %static_index:u32 = let 0u
     %5:vec4<f32> = construct 0.0f
@@ -1817,7 +1792,7 @@ $B1: {  # root
   %v:ptr<private, mat2x4<f32>, read_write> = var
 }
 
-%main = @compute @workgroup_size(1, 1, 1) func():void {
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
     %static_index:u32 = let 0u
     %5:vec4<f32> = construct 0.0f
@@ -1858,8 +1833,7 @@ TEST_F(HlslWriterReplaceNonIndexableMatVecStoresTest, MatrixColumn_StorageVar) {
     v->SetBindingPoint(0, 1);
     mod.root_block->Append(v);
 
-    auto* func = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kCompute);
-    func->SetWorkgroupSize(1, 1, 1);
+    auto* func = b.ComputeFunction("main");
     b.Append(func->Block(), [&] {
         auto* static_index = b.Let("static_index", 0_u);
         auto* vec = b.Construct(ty.vec4<f32>(), 0_f);
@@ -1876,7 +1850,7 @@ $B1: {  # root
   %v:ptr<storage, mat2x4<f32>, read_write> = var @binding_point(0, 1)
 }
 
-%main = @compute @workgroup_size(1, 1, 1) func():void {
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
     %static_index:u32 = let 0u
     %5:vec4<f32> = construct 0.0f
@@ -1906,8 +1880,7 @@ TEST_F(HlslWriterReplaceNonIndexableMatVecStoresTest, MatrixColumn_WorkgroupVar)
     auto* v = b.Var("v", ty.ptr<workgroup>(ty.mat2x4<f32>()));
     mod.root_block->Append(v);
 
-    auto* func = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kCompute);
-    func->SetWorkgroupSize(1, 1, 1);
+    auto* func = b.ComputeFunction("main");
     b.Append(func->Block(), [&] {
         auto* static_index = b.Let("static_index", 0_u);
         auto* vec = b.Construct(ty.vec4<f32>(), 0_f);
@@ -1924,7 +1897,7 @@ $B1: {  # root
   %v:ptr<workgroup, mat2x4<f32>, read_write> = var
 }
 
-%main = @compute @workgroup_size(1, 1, 1) func():void {
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
     %static_index:u32 = let 0u
     %5:vec4<f32> = construct 0.0f
@@ -1952,8 +1925,7 @@ TEST_F(HlslWriterReplaceNonIndexableMatVecStoresTest, MatrixColumnAndElement) {
     dyn_index->SetBindingPoint(0, 0);
     mod.root_block->Append(dyn_index);
 
-    auto* func = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kCompute);
-    func->SetWorkgroupSize(1, 1, 1);
+    auto* func = b.ComputeFunction("main");
     b.Append(func->Block(), [&] {
         auto* static_index = b.Let("static_index", 0_u);
         auto* v = b.Var("v", ty.ptr<function>(ty.mat2x4<f32>()));
@@ -1969,7 +1941,7 @@ $B1: {  # root
   %dyn_index:ptr<uniform, u32, read> = var @binding_point(0, 0)
 }
 
-%main = @compute @workgroup_size(1, 1, 1) func():void {
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
     %static_index:u32 = let 0u
     %v:ptr<function, mat2x4<f32>, read_write> = var
@@ -1991,7 +1963,7 @@ $B1: {  # root
   %dyn_index:ptr<uniform, u32, read> = var @binding_point(0, 0)
 }
 
-%main = @compute @workgroup_size(1, 1, 1) func():void {
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
     %static_index:u32 = let 0u
     %v:ptr<function, mat2x4<f32>, read_write> = var

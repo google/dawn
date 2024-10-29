@@ -55,8 +55,7 @@ TEST_F(GlslWriter_TextureBuiltinsFromUniformTest, TextureNumLevels) {
     t->SetBindingPoint(0, 0);
     b.ir.root_block->Append(t);
 
-    auto* func = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kCompute);
-    func->SetWorkgroupSize(1, 1, 1);
+    auto* func = b.ComputeFunction("main");
     b.Append(func->Block(), [&] {
         auto* tex = b.Load(t);
         b.Let("len", b.Call(ty.u32(), core::BuiltinFn::kTextureNumLevels, tex));
@@ -68,7 +67,7 @@ $B1: {  # root
   %1:ptr<handle, texture_2d<f32>, read_write> = var @binding_point(0, 0)
 }
 
-%main = @compute @workgroup_size(1, 1, 1) func():void {
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
     %3:texture_2d<f32> = load %1
     %4:u32 = textureNumLevels %3
@@ -89,7 +88,7 @@ $B1: {  # root
   %1:ptr<uniform, TintTextureUniformData, read> = var @binding_point(0, 30)
 }
 
-%main = @compute @workgroup_size(1, 1, 1) func():void {
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
     %3:ptr<uniform, u32, read> = access %1, 0u
     %4:u32 = load %3
@@ -111,8 +110,7 @@ TEST_F(GlslWriter_TextureBuiltinsFromUniformTest, TextureNumSamples) {
     t->SetBindingPoint(0, 0);
     b.ir.root_block->Append(t);
 
-    auto* func = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kCompute);
-    func->SetWorkgroupSize(1, 1, 1);
+    auto* func = b.ComputeFunction("main");
     b.Append(func->Block(), [&] {
         auto* tex = b.Load(t);
         b.Let("len", b.Call(ty.u32(), core::BuiltinFn::kTextureNumSamples, tex));
@@ -124,7 +122,7 @@ $B1: {  # root
   %1:ptr<handle, texture_depth_multisampled_2d, read_write> = var @binding_point(0, 0)
 }
 
-%main = @compute @workgroup_size(1, 1, 1) func():void {
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
     %3:texture_depth_multisampled_2d = load %1
     %4:u32 = textureNumSamples %3
@@ -145,7 +143,7 @@ $B1: {  # root
   %1:ptr<uniform, TintTextureUniformData, read> = var @binding_point(0, 30)
 }
 
-%main = @compute @workgroup_size(1, 1, 1) func():void {
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
     %3:ptr<uniform, u32, read> = access %1, 0u
     %4:u32 = load %3
@@ -167,8 +165,7 @@ TEST_F(GlslWriter_TextureBuiltinsFromUniformTest, SameBuiltinCalledMultipleTimes
     t->SetBindingPoint(0, 0);
     b.ir.root_block->Append(t);
 
-    auto* func = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kCompute);
-    func->SetWorkgroupSize(1, 1, 1);
+    auto* func = b.ComputeFunction("main");
     b.Append(func->Block(), [&] {
         auto* tex = b.Load(t);
         b.Let("len", b.Call(ty.u32(), core::BuiltinFn::kTextureNumLevels, tex));
@@ -181,7 +178,7 @@ $B1: {  # root
   %1:ptr<handle, texture_2d<f32>, read_write> = var @binding_point(0, 0)
 }
 
-%main = @compute @workgroup_size(1, 1, 1) func():void {
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
     %3:texture_2d<f32> = load %1
     %4:u32 = textureNumLevels %3
@@ -204,7 +201,7 @@ $B1: {  # root
   %1:ptr<uniform, TintTextureUniformData, read> = var @binding_point(0, 30)
 }
 
-%main = @compute @workgroup_size(1, 1, 1) func():void {
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
     %3:ptr<uniform, u32, read> = access %1, 0u
     %4:u32 = load %3
@@ -229,8 +226,7 @@ TEST_F(GlslWriter_TextureBuiltinsFromUniformTest, SameBuiltinCalledMultipleTimes
     t->SetBindingPoint(0, 0);
     b.ir.root_block->Append(t);
 
-    auto* func = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kCompute);
-    func->SetWorkgroupSize(1, 1, 1);
+    auto* func = b.ComputeFunction("main");
     b.Append(func->Block(), [&] {
         auto* tex = b.Load(t);
         b.Let("len", b.Call(ty.u32(), core::BuiltinFn::kTextureNumSamples, tex));
@@ -243,7 +239,7 @@ $B1: {  # root
   %1:ptr<handle, texture_depth_multisampled_2d, read_write> = var @binding_point(0, 0)
 }
 
-%main = @compute @workgroup_size(1, 1, 1) func():void {
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
     %3:texture_depth_multisampled_2d = load %1
     %4:u32 = textureNumSamples %3
@@ -266,7 +262,7 @@ $B1: {  # root
   %1:ptr<uniform, TintTextureUniformData, read> = var @binding_point(0, 30)
 }
 
-%main = @compute @workgroup_size(1, 1, 1) func():void {
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
     %3:ptr<uniform, u32, read> = access %1, 0u
     %4:u32 = load %3

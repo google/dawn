@@ -516,8 +516,7 @@ TEST_F(MslWriterTest, EmitType_Struct_Layout_NumericTypes) {
     auto* var = b.Var("a", ty.ptr(core::AddressSpace::kStorage, s));
     var->SetBindingPoint(0, 0);
     mod.root_block->Append(var);
-    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kCompute,
-                            std::array<uint32_t, 3>{1u, 1u, 1u});
+    auto* func = b.ComputeFunction("foo");
     b.Append(func->Block(), [&] {
         b.Load(var);
         b.Return(func);
@@ -607,8 +606,7 @@ struct inner_y {
     auto* var = b.Var("a", ty.ptr(core::AddressSpace::kStorage, s));
     var->SetBindingPoint(0, 0);
     mod.root_block->Append(var);
-    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kCompute,
-                            std::array<uint32_t, 3>{1u, 1u, 1u});
+    auto* func = b.ComputeFunction("foo");
     b.Append(func->Block(), [&] {
         b.Load(var);
         b.Return(func);
@@ -712,8 +710,7 @@ struct inner {
     auto* var = b.Var("a", ty.ptr(core::AddressSpace::kStorage, s));
     var->SetBindingPoint(0, 0);
     mod.root_block->Append(var);
-    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kCompute,
-                            std::array<uint32_t, 3>{1u, 1u, 1u});
+    auto* func = b.ComputeFunction("foo");
     b.Append(func->Block(), [&] {
         b.Load(var);
         b.Return(func);
@@ -859,8 +856,7 @@ kernel void foo(device S_packed_vec3* a [[buffer(0)]]) {
     auto* var = b.Var("a", ty.ptr(core::AddressSpace::kStorage, s));
     var->SetBindingPoint(0, 0);
     mod.root_block->Append(var);
-    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kCompute,
-                            std::array<uint32_t, 3>{1u, 1u, 1u});
+    auto* func = b.ComputeFunction("foo");
     b.Append(func->Block(), [&] {
         b.Load(var);
         b.Return(func);
@@ -948,8 +944,7 @@ struct S_packed_vec3 {
     auto* var = b.Var("a", ty.ptr(core::AddressSpace::kStorage, s));
     var->SetBindingPoint(0, 0);
     mod.root_block->Append(var);
-    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kCompute,
-                            std::array<uint32_t, 3>{1u, 1u, 1u});
+    auto* func = b.ComputeFunction("foo");
     b.Append(func->Block(), [&] {
         b.Load(var);
         b.Return(func);

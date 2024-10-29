@@ -50,8 +50,7 @@ TEST_F(HlslWriterLocalizeStructArrayAssignmentTest, StructArray) {
     dyn_index->SetBindingPoint(0, 0);
     mod.root_block->Append(dyn_index);
 
-    auto* func = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kCompute);
-    func->SetWorkgroupSize(1, 1, 1);
+    auto* func = b.ComputeFunction("main");
     b.Append(func->Block(), [&] {
         // var v : InnerS;
         // var s1 : OuterS;
@@ -76,7 +75,7 @@ $B1: {  # root
   %dyn_index:ptr<uniform, u32, read> = var @binding_point(0, 0)
 }
 
-%main = @compute @workgroup_size(1, 1, 1) func():void {
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
     %v:ptr<function, InnerS, read_write> = var
     %s1:ptr<function, OuterS, read_write> = var
@@ -104,7 +103,7 @@ $B1: {  # root
   %dyn_index:ptr<uniform, u32, read> = var @binding_point(0, 0)
 }
 
-%main = @compute @workgroup_size(1, 1, 1) func():void {
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
     %v:ptr<function, InnerS, read_write> = var
     %s1:ptr<function, OuterS, read_write> = var
@@ -136,8 +135,7 @@ TEST_F(HlslWriterLocalizeStructArrayAssignmentTest, StructArray_SplitAccess) {
     dyn_index->SetBindingPoint(0, 0);
     mod.root_block->Append(dyn_index);
 
-    auto* func = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kCompute);
-    func->SetWorkgroupSize(1, 1, 1);
+    auto* func = b.ComputeFunction("main");
     b.Append(func->Block(), [&] {
         // var v : InnerS;
         // var s1 : OuterS;
@@ -163,7 +161,7 @@ $B1: {  # root
   %dyn_index:ptr<uniform, u32, read> = var @binding_point(0, 0)
 }
 
-%main = @compute @workgroup_size(1, 1, 1) func():void {
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
     %v:ptr<function, InnerS, read_write> = var
     %s1:ptr<function, OuterS, read_write> = var
@@ -192,7 +190,7 @@ $B1: {  # root
   %dyn_index:ptr<uniform, u32, read> = var @binding_point(0, 0)
 }
 
-%main = @compute @workgroup_size(1, 1, 1) func():void {
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
     %v:ptr<function, InnerS, read_write> = var
     %s1:ptr<function, OuterS, read_write> = var
@@ -226,8 +224,7 @@ TEST_F(HlslWriterLocalizeStructArrayAssignmentTest, StructStructArray) {
     dyn_index->SetBindingPoint(0, 0);
     mod.root_block->Append(dyn_index);
 
-    auto* func = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kCompute);
-    func->SetWorkgroupSize(1, 1, 1);
+    auto* func = b.ComputeFunction("main");
     b.Append(func->Block(), [&] {
         // var v : InnerS;
         // var s1 : OuterS;
@@ -256,7 +253,7 @@ $B1: {  # root
   %dyn_index:ptr<uniform, u32, read> = var @binding_point(0, 0)
 }
 
-%main = @compute @workgroup_size(1, 1, 1) func():void {
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
     %v:ptr<function, InnerS, read_write> = var
     %s1:ptr<function, OuterS, read_write> = var
@@ -288,7 +285,7 @@ $B1: {  # root
   %dyn_index:ptr<uniform, u32, read> = var @binding_point(0, 0)
 }
 
-%main = @compute @workgroup_size(1, 1, 1) func():void {
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
     %v:ptr<function, InnerS, read_write> = var
     %s1:ptr<function, OuterS, read_write> = var
@@ -321,8 +318,7 @@ TEST_F(HlslWriterLocalizeStructArrayAssignmentTest, StructStructArray_SplitAcces
     dyn_index->SetBindingPoint(0, 0);
     mod.root_block->Append(dyn_index);
 
-    auto* func = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kCompute);
-    func->SetWorkgroupSize(1, 1, 1);
+    auto* func = b.ComputeFunction("main");
     b.Append(func->Block(), [&] {
         // var v : InnerS;
         // var s1 : OuterS;
@@ -355,7 +351,7 @@ $B1: {  # root
   %dyn_index:ptr<uniform, u32, read> = var @binding_point(0, 0)
 }
 
-%main = @compute @workgroup_size(1, 1, 1) func():void {
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
     %v:ptr<function, InnerS, read_write> = var
     %s1:ptr<function, OuterS, read_write> = var
@@ -389,7 +385,7 @@ $B1: {  # root
   %dyn_index:ptr<uniform, u32, read> = var @binding_point(0, 0)
 }
 
-%main = @compute @workgroup_size(1, 1, 1) func():void {
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
     %v:ptr<function, InnerS, read_write> = var
     %s1:ptr<function, OuterS, read_write> = var
@@ -425,8 +421,7 @@ TEST_F(HlslWriterLocalizeStructArrayAssignmentTest, StructArrayStructArray) {
     dyn_index->SetBindingPoint(0, 0);
     mod.root_block->Append(dyn_index);
 
-    auto* func = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kCompute);
-    func->SetWorkgroupSize(1, 1, 1);
+    auto* func = b.ComputeFunction("main");
     b.Append(func->Block(), [&] {
         // var v : InnerS;
         // var s : OuterS;
@@ -456,7 +451,7 @@ $B1: {  # root
   %dyn_index:ptr<uniform, u32, read> = var @binding_point(0, 0)
 }
 
-%main = @compute @workgroup_size(1, 1, 1) func():void {
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
     %v:ptr<function, InnerS, read_write> = var
     %s:ptr<function, OuterS, read_write> = var
@@ -488,7 +483,7 @@ $B1: {  # root
   %dyn_index:ptr<uniform, u32, read> = var @binding_point(0, 0)
 }
 
-%main = @compute @workgroup_size(1, 1, 1) func():void {
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
     %v:ptr<function, InnerS, read_write> = var
     %s:ptr<function, OuterS, read_write> = var
@@ -522,8 +517,7 @@ TEST_F(HlslWriterLocalizeStructArrayAssignmentTest, StructArrayStructArray_Split
     dyn_index->SetBindingPoint(0, 0);
     mod.root_block->Append(dyn_index);
 
-    auto* func = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kCompute);
-    func->SetWorkgroupSize(1, 1, 1);
+    auto* func = b.ComputeFunction("main");
     b.Append(func->Block(), [&] {
         // var v : InnerS;
         // var s : OuterS;
@@ -555,7 +549,7 @@ $B1: {  # root
   %dyn_index:ptr<uniform, u32, read> = var @binding_point(0, 0)
 }
 
-%main = @compute @workgroup_size(1, 1, 1) func():void {
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
     %v:ptr<function, InnerS, read_write> = var
     %s:ptr<function, OuterS, read_write> = var
@@ -591,7 +585,7 @@ $B1: {  # root
   %dyn_index:ptr<uniform, u32, read> = var @binding_point(0, 0)
 }
 
-%main = @compute @workgroup_size(1, 1, 1) func():void {
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
     %v:ptr<function, InnerS, read_write> = var
     %s:ptr<function, OuterS, read_write> = var
@@ -629,8 +623,7 @@ TEST_F(HlslWriterLocalizeStructArrayAssignmentTest, StructArrayStructArray_DynIn
     dyn_index->SetBindingPoint(0, 0);
     mod.root_block->Append(dyn_index);
 
-    auto* func = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kCompute);
-    func->SetWorkgroupSize(1, 1, 1);
+    auto* func = b.ComputeFunction("main");
     b.Append(func->Block(), [&] {
         // var v : InnerS;
         // var s : OuterS;
@@ -660,7 +653,7 @@ $B1: {  # root
   %dyn_index:ptr<uniform, u32, read> = var @binding_point(0, 0)
 }
 
-%main = @compute @workgroup_size(1, 1, 1) func():void {
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
     %v:ptr<function, InnerS, read_write> = var
     %s:ptr<function, OuterS, read_write> = var
@@ -692,7 +685,7 @@ $B1: {  # root
   %dyn_index:ptr<uniform, u32, read> = var @binding_point(0, 0)
 }
 
-%main = @compute @workgroup_size(1, 1, 1) func():void {
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
     %v:ptr<function, InnerS, read_write> = var
     %s:ptr<function, OuterS, read_write> = var
@@ -724,8 +717,7 @@ TEST_F(HlslWriterLocalizeStructArrayAssignmentTest, StructArrayArray_DynIndexSec
     dyn_index->SetBindingPoint(0, 0);
     mod.root_block->Append(dyn_index);
 
-    auto* func = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kCompute);
-    func->SetWorkgroupSize(1, 1, 1);
+    auto* func = b.ComputeFunction("main");
     b.Append(func->Block(), [&] {
         // var v : InnerS;
         // var s : OuterS;
@@ -751,7 +743,7 @@ $B1: {  # root
   %dyn_index:ptr<uniform, u32, read> = var @binding_point(0, 0)
 }
 
-%main = @compute @workgroup_size(1, 1, 1) func():void {
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
     %v:ptr<function, InnerS, read_write> = var
     %s:ptr<function, OuterS, read_write> = var
@@ -779,7 +771,7 @@ $B1: {  # root
   %dyn_index:ptr<uniform, u32, read> = var @binding_point(0, 0)
 }
 
-%main = @compute @workgroup_size(1, 1, 1) func():void {
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
     %v:ptr<function, InnerS, read_write> = var
     %s:ptr<function, OuterS, read_write> = var
@@ -811,8 +803,7 @@ TEST_F(HlslWriterLocalizeStructArrayAssignmentTest, Multiple) {
     dyn_index->SetBindingPoint(0, 0);
     mod.root_block->Append(dyn_index);
 
-    auto* func = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kCompute);
-    func->SetWorkgroupSize(1, 1, 1);
+    auto* func = b.ComputeFunction("main");
     b.Append(func->Block(), [&] {
         auto* v = b.Var("v", ty.ptr<function>(inner_s_ty));
         auto* s1 = b.Var("s1", ty.ptr<function>(outer_s_ty));
@@ -841,7 +832,7 @@ $B1: {  # root
   %dyn_index:ptr<uniform, u32, read> = var @binding_point(0, 0)
 }
 
-%main = @compute @workgroup_size(1, 1, 1) func():void {
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
     %v:ptr<function, InnerS, read_write> = var
     %s1:ptr<function, OuterS, read_write> = var
@@ -881,7 +872,7 @@ $B1: {  # root
   %dyn_index:ptr<uniform, u32, read> = var @binding_point(0, 0)
 }
 
-%main = @compute @workgroup_size(1, 1, 1) func():void {
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
     %v:ptr<function, InnerS, read_write> = var
     %s1:ptr<function, OuterS, read_write> = var
@@ -947,8 +938,7 @@ TEST_F(HlslWriterLocalizeStructArrayAssignmentTest, PrivateVar) {
     auto* s1 = b.Var("s1", ty.ptr<private_>(outer_s_ty));
     mod.root_block->Append(s1);
 
-    auto* func = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kCompute);
-    func->SetWorkgroupSize(1, 1, 1);
+    auto* func = b.ComputeFunction("main");
     b.Append(func->Block(), [&] {
         // var v : InnerS;
         // s1.a1[dyn_index] = v;
@@ -972,7 +962,7 @@ $B1: {  # root
   %s1:ptr<private, OuterS, read_write> = var
 }
 
-%main = @compute @workgroup_size(1, 1, 1) func():void {
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
     %v:ptr<function, InnerS, read_write> = var
     %5:u32 = load %dyn_index
@@ -1000,7 +990,7 @@ $B1: {  # root
   %s1:ptr<private, OuterS, read_write> = var
 }
 
-%main = @compute @workgroup_size(1, 1, 1) func():void {
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
     %v:ptr<function, InnerS, read_write> = var
     %5:u32 = load %dyn_index
@@ -1035,8 +1025,7 @@ TEST_F(HlslWriterLocalizeStructArrayAssignmentTest, ViaPointer) {
     auto* s1 = b.Var("s1", ty.ptr<private_>(outer_s_ty));
     mod.root_block->Append(s1);
 
-    auto* func = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kCompute);
-    func->SetWorkgroupSize(1, 1, 1);
+    auto* func = b.ComputeFunction("main");
     b.Append(func->Block(), [&] {
         // var v : InnerS;
         // let p = &(s1.a1[dyn_index]);
@@ -1062,7 +1051,7 @@ $B1: {  # root
   %s1:ptr<private, OuterS, read_write> = var
 }
 
-%main = @compute @workgroup_size(1, 1, 1) func():void {
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
     %v:ptr<function, InnerS, read_write> = var
     %5:u32 = load %dyn_index
@@ -1091,7 +1080,7 @@ $B1: {  # root
   %s1:ptr<private, OuterS, read_write> = var
 }
 
-%main = @compute @workgroup_size(1, 1, 1) func():void {
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
     %v:ptr<function, InnerS, read_write> = var
     %5:u32 = load %dyn_index
@@ -1127,8 +1116,7 @@ TEST_F(HlslWriterLocalizeStructArrayAssignmentTest, StorageVar) {
     s1->SetBindingPoint(0, 1);
     mod.root_block->Append(s1);
 
-    auto* func = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kCompute);
-    func->SetWorkgroupSize(1, 1, 1);
+    auto* func = b.ComputeFunction("main");
     b.Append(func->Block(), [&] {
         // var v : InnerS;
         // s1.a1[dyn_index] = v;
@@ -1152,7 +1140,7 @@ $B1: {  # root
   %s1:ptr<storage, OuterS, read_write> = var @binding_point(0, 1)
 }
 
-%main = @compute @workgroup_size(1, 1, 1) func():void {
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
     %v:ptr<function, InnerS, read_write> = var
     %5:u32 = load %dyn_index
@@ -1185,8 +1173,7 @@ TEST_F(HlslWriterLocalizeStructArrayAssignmentTest, WorkgroupVar) {
     auto* s1 = b.Var("s1", ty.ptr<workgroup>(outer_s_ty));
     mod.root_block->Append(s1);
 
-    auto* func = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kCompute);
-    func->SetWorkgroupSize(1, 1, 1);
+    auto* func = b.ComputeFunction("main");
     b.Append(func->Block(), [&] {
         // var v : InnerS;
         // s1.a1[dyn_index] = v;
@@ -1210,7 +1197,7 @@ $B1: {  # root
   %s1:ptr<workgroup, OuterS, read_write> = var
 }
 
-%main = @compute @workgroup_size(1, 1, 1) func():void {
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
     %v:ptr<function, InnerS, read_write> = var
     %5:u32 = load %dyn_index
@@ -1240,8 +1227,7 @@ TEST_F(HlslWriterLocalizeStructArrayAssignmentTest, ArrayStructArray) {
     dyn_index->SetBindingPoint(0, 0);
     mod.root_block->Append(dyn_index);
 
-    auto* func = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kCompute);
-    func->SetWorkgroupSize(1, 1, 1);
+    auto* func = b.ComputeFunction("main");
     b.Append(func->Block(), [&] {
         // var v : InnerS;
         // var as : array<OuterS, 2>;
@@ -1267,7 +1253,7 @@ $B1: {  # root
   %dyn_index:ptr<uniform, u32, read> = var @binding_point(0, 0)
 }
 
-%main = @compute @workgroup_size(1, 1, 1) func():void {
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
     %v:ptr<function, InnerS, read_write> = var
     %s:ptr<function, array<OuterS, 2>, read_write> = var

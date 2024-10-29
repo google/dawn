@@ -281,9 +281,13 @@ class Impl {
                 case ast::PipelineStage::kCompute: {
                     ir_func->SetStage(core::ir::Function::PipelineStage::kCompute);
 
+                    // TODO(dsinclair): When overrides are supported, this will have to change. The
+                    // `sem` does not hold information on override workgroup sizes so we'll have to
+                    // pull this from elsewhere.
                     auto wg_size = sem->WorkgroupSize();
-                    ir_func->SetWorkgroupSize(wg_size[0].value(), wg_size[1].value_or(1),
-                                              wg_size[2].value_or(1));
+                    ir_func->SetWorkgroupSize(builder_.Constant(u32(wg_size[0].value())),
+                                              builder_.Constant(u32(wg_size[1].value_or(1))),
+                                              builder_.Constant(u32(wg_size[2].value_or(1))));
                     break;
                 }
                 default: {

@@ -38,7 +38,7 @@ using IR_AddEmptyEntryPointTest = TransformTest;
 
 TEST_F(IR_AddEmptyEntryPointTest, EmptyModule) {
     auto* expect = R"(
-%unused_entry_point = @compute @workgroup_size(1, 1, 1) func():void {
+%unused_entry_point = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
     ret
   }

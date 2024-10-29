@@ -48,7 +48,7 @@ TEST_F(ProgramToIRUnaryTest, EmitExpression_Unary_Not) {
     ret false
   }
 }
-%test_function = @compute @workgroup_size(1, 1, 1) func():void {
+%test_function = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
     %3:bool = call %my_func
     %4:bool = not %3
@@ -72,7 +72,7 @@ TEST_F(ProgramToIRUnaryTest, EmitExpression_Unary_Not_Vector) {
     ret vec4<bool>(false)
   }
 }
-%test_function = @compute @workgroup_size(1, 1, 1) func():void {
+%test_function = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
     %3:vec4<bool> = call %my_func
     %4:vec4<bool> = not %3
@@ -96,7 +96,7 @@ TEST_F(ProgramToIRUnaryTest, EmitExpression_Unary_Complement) {
     ret 1u
   }
 }
-%test_function = @compute @workgroup_size(1, 1, 1) func():void {
+%test_function = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
     %3:u32 = call %my_func
     %4:u32 = complement %3
@@ -120,7 +120,7 @@ TEST_F(ProgramToIRUnaryTest, EmitExpression_Unary_Negation) {
     ret 1i
   }
 }
-%test_function = @compute @workgroup_size(1, 1, 1) func():void {
+%test_function = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
     %3:i32 = call %my_func
     %4:i32 = negation %3
@@ -144,7 +144,7 @@ TEST_F(ProgramToIRUnaryTest, EmitExpression_Unary_AddressOf) {
   %v1:ptr<private, i32, read_write> = var
 }
 
-%test_function = @compute @workgroup_size(1, 1, 1) func():void {
+%test_function = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
     %v2:ptr<private, i32, read_write> = let %v1
     ret
@@ -168,7 +168,7 @@ TEST_F(ProgramToIRUnaryTest, EmitExpression_Unary_Indirection) {
   %v1:ptr<private, i32, read_write> = var
 }
 
-%test_function = @compute @workgroup_size(1, 1, 1) func():void {
+%test_function = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
     %v3:ptr<private, i32, read_write> = let %v1
     store %v3, 42i

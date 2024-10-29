@@ -40,7 +40,7 @@ Function::Function() = default;
 
 Function::Function(const core::type::Type* rt,
                    PipelineStage stage,
-                   std::optional<std::array<uint32_t, 3>> wg_size)
+                   std::optional<std::array<Value*, 3>> wg_size)
     : pipeline_stage_(stage), workgroup_size_(wg_size) {
     TINT_ASSERT(rt != nullptr);
 

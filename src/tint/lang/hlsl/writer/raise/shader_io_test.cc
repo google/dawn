@@ -40,12 +40,11 @@ using namespace tint::core::number_suffixes;  // NOLINT
 using HlslWriterTransformTest = core::ir::transform::TransformTest;
 
 TEST_F(HlslWriterTransformTest, ShaderIONoInputsOrOutputs) {
-    auto* ep = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kCompute);
-    ep->SetWorkgroupSize(1, 1, 1);
+    auto* ep = b.ComputeFunction("foo");
     b.Append(ep->Block(), [&] { b.Return(ep); });
 
     auto* src = R"(
-%foo = @compute @workgroup_size(1, 1, 1) func():void {
+%foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
     ret
   }
@@ -1025,9 +1024,8 @@ TEST_F(HlslWriterTransformTest, ShaderIOCompute) {
     auto* invoc = b.FunctionParam("invoc_id", ty.vec3<u32>());
     invoc->SetBuiltin(core::BuiltinValue::kLocalInvocationId);
 
-    auto* ep = b.Function("cmp", ty.void_(), core::ir::Function::PipelineStage::kCompute);
+    auto* ep = b.ComputeFunction("cmp");
     ep->SetParams({invoc});
-    ep->SetWorkgroupSize(1, 1, 1);
 
     b.Append(ep->Block(), [&] {
         b.Let("a", invoc);
@@ -1035,7 +1033,7 @@ TEST_F(HlslWriterTransformTest, ShaderIOCompute) {
     });
 
     auto* src = R"(
-%cmp = @compute @workgroup_size(1, 1, 1) func(%invoc_id:vec3<u32> [@local_invocation_id]):void {
+%cmp = @compute @workgroup_size(1u, 1u, 1u) func(%invoc_id:vec3<u32> [@local_invocation_id]):void {
   $B1: {
     %a:vec3<u32> = let %invoc_id
     ret
@@ -1055,7 +1053,7 @@ cmp_inputs = struct @align(16) {
     ret
   }
 }
-%cmp = @compute @workgroup_size(1, 1, 1) func(%inputs:cmp_inputs):void {
+%cmp = @compute @workgroup_size(1u, 1u, 1u) func(%inputs:cmp_inputs):void {
   $B2: {
     %6:vec3<u32> = access %inputs, 0u
     %7:void = call %cmp_inner, %6
@@ -1212,9 +1210,8 @@ TEST_F(HlslWriterTransformTest, ShaderIOParameters_NumWorkgroups_NonStruct) {
     auto* num_workgroups = b.FunctionParam("num_wgs", ty.vec3<u32>());
     num_workgroups->SetBuiltin(core::BuiltinValue::kNumWorkgroups);
 
-    auto* ep = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kCompute);
+    auto* ep = b.ComputeFunction("foo");
     ep->SetParams({num_workgroups});
-    ep->SetWorkgroupSize(1, 1, 1);
 
     b.Append(ep->Block(), [&] {
         b.Multiply(ty.vec3<u32>(), num_workgroups, num_workgroups);
@@ -1222,7 +1219,7 @@ TEST_F(HlslWriterTransformTest, ShaderIOParameters_NumWorkgroups_NonStruct) {
     });
 
     auto* src = R"(
-%foo = @compute @workgroup_size(1, 1, 1) func(%num_wgs:vec3<u32> [@num_workgroups]):void {
+%foo = @compute @workgroup_size(1u, 1u, 1u) func(%num_wgs:vec3<u32> [@num_workgroups]):void {
   $B1: {
     %3:vec3<u32> = mul %num_wgs, %num_wgs
     ret
@@ -1242,7 +1239,7 @@ $B1: {  # root
     ret
   }
 }
-%foo = @compute @workgroup_size(1, 1, 1) func():void {
+%foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B3: {
     %6:vec3<u32> = load %tint_num_workgroups
     %7:void = call %foo_inner, %6
@@ -1275,9 +1272,8 @@ TEST_F(HlslWriterTransformTest, ShaderIOParameters_NumWorkgroups_Struct) {
 
     auto* str_param = b.FunctionParam("inputs", str_ty);
 
-    auto* ep = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kCompute);
+    auto* ep = b.ComputeFunction("foo");
     ep->SetParams({str_param});
-    ep->SetWorkgroupSize(1, 1, 1);
 
     b.Append(ep->Block(), [&] {
         auto* num_workgroups = b.Access(ty.vec3<u32>(), str_param, 0_i);
@@ -1290,7 +1286,7 @@ Inputs = struct @align(16) {
   num_wgs:vec3<u32> @offset(0), @builtin(num_workgroups)
 }
 
-%foo = @compute @workgroup_size(1, 1, 1) func(%inputs:Inputs):void {
+%foo = @compute @workgroup_size(1u, 1u, 1u) func(%inputs:Inputs):void {
   $B1: {
     %3:vec3<u32> = access %inputs, 0i
     %4:vec3<u32> = mul %3, %3
@@ -1316,7 +1312,7 @@ $B1: {  # root
     ret
   }
 }
-%foo = @compute @workgroup_size(1, 1, 1) func():void {
+%foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B3: {
     %7:vec3<u32> = load %tint_num_workgroups
     %8:Inputs = construct %7
@@ -1335,9 +1331,8 @@ TEST_F(HlslWriterTransformTest, ShaderIOParameters_NumWorkgroups_ExplicitBinding
     auto* num_workgroups = b.FunctionParam("num_wgs", ty.vec3<u32>());
     num_workgroups->SetBuiltin(core::BuiltinValue::kNumWorkgroups);
 
-    auto* ep = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kCompute);
+    auto* ep = b.ComputeFunction("foo");
     ep->SetParams({num_workgroups});
-    ep->SetWorkgroupSize(1, 1, 1);
 
     b.Append(ep->Block(), [&] {
         b.Multiply(ty.vec3<u32>(), num_workgroups, num_workgroups);
@@ -1345,7 +1340,7 @@ TEST_F(HlslWriterTransformTest, ShaderIOParameters_NumWorkgroups_ExplicitBinding
     });
 
     auto* src = R"(
-%foo = @compute @workgroup_size(1, 1, 1) func(%num_wgs:vec3<u32> [@num_workgroups]):void {
+%foo = @compute @workgroup_size(1u, 1u, 1u) func(%num_wgs:vec3<u32> [@num_workgroups]):void {
   $B1: {
     %3:vec3<u32> = mul %num_wgs, %num_wgs
     ret
@@ -1365,7 +1360,7 @@ $B1: {  # root
     ret
   }
 }
-%foo = @compute @workgroup_size(1, 1, 1) func():void {
+%foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B3: {
     %6:vec3<u32> = load %tint_num_workgroups
     %7:void = call %foo_inner, %6
@@ -1385,9 +1380,8 @@ TEST_F(HlslWriterTransformTest, ShaderIOParameters_NumWorkgroups_AutoBinding) {
     auto* num_workgroups = b.FunctionParam("num_wgs", ty.vec3<u32>());
     num_workgroups->SetBuiltin(core::BuiltinValue::kNumWorkgroups);
 
-    auto* ep = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kCompute);
+    auto* ep = b.ComputeFunction("foo");
     ep->SetParams({num_workgroups});
-    ep->SetWorkgroupSize(1, 1, 1);
 
     b.Append(ep->Block(), [&] {
         b.Multiply(ty.vec3<u32>(), num_workgroups, num_workgroups);
@@ -1415,7 +1409,7 @@ $B1: {  # root
   %10:ptr<storage, i32, read_write> = var @binding_point(9, 10)
 }
 
-%foo = @compute @workgroup_size(1, 1, 1) func(%num_wgs:vec3<u32> [@num_workgroups]):void {
+%foo = @compute @workgroup_size(1u, 1u, 1u) func(%num_wgs:vec3<u32> [@num_workgroups]):void {
   $B2: {
     %13:vec3<u32> = mul %num_wgs, %num_wgs
     ret
@@ -1445,7 +1439,7 @@ $B1: {  # root
     ret
   }
 }
-%foo = @compute @workgroup_size(1, 1, 1) func():void {
+%foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B3: {
     %16:vec3<u32> = load %tint_num_workgroups
     %17:void = call %foo_inner, %16

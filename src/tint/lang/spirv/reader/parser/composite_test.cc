@@ -226,7 +226,7 @@ tint_symbol_3 = struct @align(16) {
   tint_symbol_2:array<vec4<u32>, 2> @offset(32)
 }
 
-%main = @compute @workgroup_size(1, 1, 1) func():void {
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
     ret
   }
@@ -445,7 +445,7 @@ tint_symbol_2 = struct @align(4) {
   tint_symbol_1:u32 @offset(4)
 }
 
-%main = @compute @workgroup_size(1, 1, 1) func():void {
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
     ret
   }

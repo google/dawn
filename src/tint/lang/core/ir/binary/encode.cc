@@ -146,9 +146,9 @@ struct Encoder {
         }
         if (auto wg_size_in = fn_in->WorkgroupSize()) {
             auto& wg_size_out = *fn_out->mutable_workgroup_size();
-            wg_size_out.set_x((*wg_size_in)[0]);
-            wg_size_out.set_y((*wg_size_in)[1]);
-            wg_size_out.set_z((*wg_size_in)[2]);
+            wg_size_out.set_x(Value((*wg_size_in)[0]));
+            wg_size_out.set_y(Value((*wg_size_in)[1]));
+            wg_size_out.set_z(Value((*wg_size_in)[2]));
         }
         for (auto* param_in : fn_in->Params()) {
             fn_out->add_parameters(Value(param_in));

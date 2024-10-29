@@ -771,10 +771,14 @@ class Printer {
         switch (func->Stage()) {
             case core::ir::Function::PipelineStage::kCompute: {
                 stage = SpvExecutionModelGLCompute;
+
+                auto const_wg_size = func->WorkgroupSizeAsConst();
+                TINT_ASSERT(const_wg_size);
+
                 module_.PushExecutionMode(
                     spv::Op::OpExecutionMode,
-                    {id, U32Operand(SpvExecutionModeLocalSize), func->WorkgroupSize()->at(0),
-                     func->WorkgroupSize()->at(1), func->WorkgroupSize()->at(2)});
+                    {id, U32Operand(SpvExecutionModeLocalSize), const_wg_size->at(0),
+                     const_wg_size->at(1), const_wg_size->at(2)});
                 break;
             }
             case core::ir::Function::PipelineStage::kFragment: {

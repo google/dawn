@@ -255,7 +255,10 @@ struct Decoder {
         }
         if (fn_in.has_workgroup_size()) {
             auto& wg_size_in = fn_in.workgroup_size();
-            fn_out->SetWorkgroupSize(wg_size_in.x(), wg_size_in.y(), wg_size_in.z());
+            // TODO(dsinclair): When overrides are supported we should add support for generating
+            // override expressions here.
+            fn_out->SetWorkgroupSize(Value(wg_size_in.x()), Value(wg_size_in.y()),
+                                     Value(wg_size_in.z()));
         }
 
         Vector<FunctionParam*, 8> params_out;

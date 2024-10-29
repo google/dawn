@@ -44,7 +44,7 @@ TEST_F(SpirvParserTest, ComputeShader) {
                OpFunctionEnd
 )",
               R"(
-%main = @compute @workgroup_size(1, 1, 1) func():void {
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
     ret
   }
@@ -66,7 +66,7 @@ TEST_F(SpirvParserTest, LocalSize) {
                OpFunctionEnd
 )",
               R"(
-%main = @compute @workgroup_size(3, 4, 5) func():void {
+%main = @compute @workgroup_size(3u, 4u, 5u) func():void {
   $B1: {
     ret
   }
@@ -173,12 +173,12 @@ TEST_F(SpirvParserTest, MultipleEntryPoints) {
                OpFunctionEnd
 )",
               R"(
-%foo = @compute @workgroup_size(3, 4, 5) func():void {
+%foo = @compute @workgroup_size(3u, 4u, 5u) func():void {
   $B1: {
     ret
   }
 }
-%bar = @compute @workgroup_size(6, 7, 8) func():void {
+%bar = @compute @workgroup_size(6u, 7u, 8u) func():void {
   $B2: {
     ret
   }
@@ -212,7 +212,7 @@ TEST_F(SpirvParserTest, FunctionCall) {
     ret
   }
 }
-%main = @compute @workgroup_size(1, 1, 1) func():void {
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
     %3:void = call %1
     ret
@@ -242,7 +242,7 @@ TEST_F(SpirvParserTest, FunctionCall_ForwardReference) {
                OpFunctionEnd
 )",
               R"(
-%main = @compute @workgroup_size(1, 1, 1) func():void {
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
     %2:void = call %3
     ret
@@ -288,7 +288,7 @@ TEST_F(SpirvParserTest, FunctionCall_WithParam) {
     ret
   }
 }
-%main = @compute @workgroup_size(1, 1, 1) func():void {
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
     %4:void = call %1, true
     %5:void = call %1, false
@@ -343,7 +343,7 @@ TEST_F(SpirvParserTest, FunctionCall_Chained_WithParam) {
     ret
   }
 }
-%main = @compute @workgroup_size(1, 1, 1) func():void {
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B3: {
     %7:void = call %3, true
     %8:void = call %3, false
@@ -385,7 +385,7 @@ TEST_F(SpirvParserTest, FunctionCall_WithMultipleParams) {
     ret
   }
 }
-%main = @compute @workgroup_size(1, 1, 1) func():void {
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
     %5:void = call %1, true, false
     ret
@@ -423,7 +423,7 @@ TEST_F(SpirvParserTest, FunctionCall_ReturnValue) {
     ret true
   }
 }
-%main = @compute @workgroup_size(1, 1, 1) func():void {
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
     %3:bool = call %1
     ret
@@ -473,7 +473,7 @@ TEST_F(SpirvParserTest, FunctionCall_ReturnValueChain) {
     ret %3
   }
 }
-%main = @compute @workgroup_size(1, 1, 1) func():void {
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B3: {
     %5:bool = call %1
     ret
@@ -512,7 +512,7 @@ TEST_F(SpirvParserTest, FunctionCall_ParamAndReturnValue) {
     ret %2
   }
 }
-%main = @compute @workgroup_size(1, 1, 1) func():void {
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
     %4:bool = call %1, true
     ret

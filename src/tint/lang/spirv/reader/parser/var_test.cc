@@ -47,7 +47,7 @@ TEST_F(SpirvParserTest, FunctionVar) {
                OpFunctionEnd
 )",
               R"(
-%main = @compute @workgroup_size(1, 1, 1) func():void {
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
     %2:ptr<function, u32, read_write> = var
     ret
@@ -74,7 +74,7 @@ TEST_F(SpirvParserTest, FunctionVar_Initializer) {
                OpFunctionEnd
 )",
               R"(
-%main = @compute @workgroup_size(1, 1, 1) func():void {
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
     %2:ptr<function, u32, read_write> = var, 42u
     ret
@@ -104,7 +104,7 @@ $B1: {  # root
   %1:ptr<private, u32, read_write> = var
 }
 
-%main = @compute @workgroup_size(1, 1, 1) func():void {
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
     ret
   }
@@ -134,7 +134,7 @@ $B1: {  # root
   %1:ptr<private, u32, read_write> = var, 42u
 }
 
-%main = @compute @workgroup_size(1, 1, 1) func():void {
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
     ret
   }
@@ -174,7 +174,7 @@ $B1: {  # root
   %1:ptr<storage, tint_symbol_1, read> = var @binding_point(1, 2)
 }
 
-%main = @compute @workgroup_size(1, 1, 1) func():void {
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
     ret
   }
@@ -213,7 +213,7 @@ $B1: {  # root
   %1:ptr<storage, tint_symbol_1, read_write> = var @binding_point(1, 2)
 }
 
-%main = @compute @workgroup_size(1, 1, 1) func():void {
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
     ret
   }
@@ -257,7 +257,7 @@ $B1: {  # root
   %2:ptr<storage, tint_symbol_1, read_write> = var @binding_point(1, 3)
 }
 
-%main = @compute @workgroup_size(1, 1, 1) func():void {
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
     ret
   }
@@ -296,7 +296,7 @@ $B1: {  # root
   %1:ptr<uniform, tint_symbol_1, read> = var @binding_point(1, 2)
 }
 
-%main = @compute @workgroup_size(1, 1, 1) func():void {
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
     ret
   }

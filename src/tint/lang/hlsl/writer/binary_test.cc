@@ -50,8 +50,7 @@ using HlslWriterBinaryU32Test = HlslWriterTestWithParam<BinaryData>;
 TEST_P(HlslWriterBinaryU32Test, Emit) {
     auto params = GetParam();
 
-    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kCompute);
-    func->SetWorkgroupSize(1, 1, 1);
+    auto* func = b.ComputeFunction("foo");
     b.Append(func->Block(), [&] {
         auto* l = b.Let("left", b.Constant(1_u));
         auto* r = b.Let("right", b.Constant(2_u));
@@ -82,8 +81,7 @@ INSTANTIATE_TEST_SUITE_P(HlslWriterTest,
                                          BinaryData{"(left ^ right)", core::BinaryOp::kXor}));
 
 TEST_F(HlslWriterTest, BinaryU32Div) {
-    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kCompute);
-    func->SetWorkgroupSize(1, 1, 1);
+    auto* func = b.ComputeFunction("foo");
     b.Append(func->Block(), [&] {
         auto* l = b.Let("left", b.Constant(1_u));
         auto* r = b.Let("right", b.Constant(2_u));
@@ -109,8 +107,7 @@ void foo() {
 }
 
 TEST_F(HlslWriterTest, BinaryU32Mod) {
-    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kCompute);
-    func->SetWorkgroupSize(1, 1, 1);
+    auto* func = b.ComputeFunction("foo");
     b.Append(func->Block(), [&] {
         auto* l = b.Let("left", b.Constant(1_u));
         auto* r = b.Let("right", b.Constant(2_u));
@@ -137,8 +134,7 @@ void foo() {
 }
 
 TEST_F(HlslWriterTest, BinaryU32ShiftLeft) {
-    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kCompute);
-    func->SetWorkgroupSize(1, 1, 1);
+    auto* func = b.ComputeFunction("foo");
     b.Append(func->Block(), [&] {
         auto* l = b.Let("left", b.Constant(1_u));
         auto* r = b.Let("right", b.Constant(2_u));
@@ -160,8 +156,7 @@ void foo() {
 }
 
 TEST_F(HlslWriterTest, BinaryU32ShiftRight) {
-    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kCompute);
-    func->SetWorkgroupSize(1, 1, 1);
+    auto* func = b.ComputeFunction("foo");
     b.Append(func->Block(), [&] {
         auto* l = b.Let("left", b.Constant(1_u));
         auto* r = b.Let("right", b.Constant(2_u));
@@ -186,8 +181,7 @@ using HlslWriterBinaryBoolTest = HlslWriterTestWithParam<BinaryData>;
 TEST_P(HlslWriterBinaryBoolTest, Emit) {
     auto params = GetParam();
 
-    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kCompute);
-    func->SetWorkgroupSize(1, 1, 1);
+    auto* func = b.ComputeFunction("foo");
     b.Append(func->Block(), [&] {
         auto* l = b.Let("left", b.Constant(1_u));
         auto* r = b.Let("right", b.Constant(2_u));
@@ -219,8 +213,7 @@ INSTANTIATE_TEST_SUITE_P(
                     BinaryData{"(left >= right)", core::BinaryOp::kGreaterThanEqual}));
 
 TEST_F(HlslWriterTest, BinaryF32Mod) {
-    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kCompute);
-    func->SetWorkgroupSize(1, 1, 1);
+    auto* func = b.ComputeFunction("foo");
     b.Append(func->Block(), [&] {
         auto* left = b.Var("left", ty.ptr<core::AddressSpace::kFunction, f32>());
         auto* right = b.Var("right", ty.ptr<core::AddressSpace::kFunction, f32>());
@@ -250,8 +243,7 @@ void foo() {
 }
 
 TEST_F(HlslWriterTest, BinaryF16Mod) {
-    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kCompute);
-    func->SetWorkgroupSize(1, 1, 1);
+    auto* func = b.ComputeFunction("foo");
     b.Append(func->Block(), [&] {
         auto* left = b.Var("left", ty.ptr<core::AddressSpace::kFunction, f16>());
         auto* right = b.Var("right", ty.ptr<core::AddressSpace::kFunction, f16>());
@@ -281,8 +273,7 @@ void foo() {
 }
 
 TEST_F(HlslWriterTest, BinaryF32ModVec3) {
-    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kCompute);
-    func->SetWorkgroupSize(1, 1, 1);
+    auto* func = b.ComputeFunction("foo");
     b.Append(func->Block(), [&] {
         auto* left = b.Var("left", ty.ptr(core::AddressSpace::kFunction, ty.vec3<f32>()));
         auto* right = b.Var("right", ty.ptr(core::AddressSpace::kFunction, ty.vec3<f32>()));
@@ -312,8 +303,7 @@ void foo() {
 }
 
 TEST_F(HlslWriterTest, BinaryF16ModVec3) {
-    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kCompute);
-    func->SetWorkgroupSize(1, 1, 1);
+    auto* func = b.ComputeFunction("foo");
     b.Append(func->Block(), [&] {
         auto* left = b.Var("left", ty.ptr(core::AddressSpace::kFunction, ty.vec3<f16>()));
         auto* right = b.Var("right", ty.ptr(core::AddressSpace::kFunction, ty.vec3<f16>()));
@@ -343,8 +333,7 @@ void foo() {
 }
 
 TEST_F(HlslWriterTest, BinaryBoolAnd) {
-    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kCompute);
-    func->SetWorkgroupSize(1, 1, 1);
+    auto* func = b.ComputeFunction("foo");
     b.Append(func->Block(), [&] {
         auto* left = b.Var("left", ty.ptr(core::AddressSpace::kFunction, ty.bool_()));
         auto* right = b.Var("right", ty.ptr(core::AddressSpace::kFunction, ty.bool_()));
@@ -370,8 +359,7 @@ void foo() {
 }
 
 TEST_F(HlslWriterTest, BinaryBoolOr) {
-    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kCompute);
-    func->SetWorkgroupSize(1, 1, 1);
+    auto* func = b.ComputeFunction("foo");
     b.Append(func->Block(), [&] {
         auto* left = b.Var("left", ty.ptr(core::AddressSpace::kFunction, ty.bool_()));
         auto* right = b.Var("right", ty.ptr(core::AddressSpace::kFunction, ty.bool_()));
@@ -397,8 +385,7 @@ void foo() {
 }
 
 TEST_F(HlslWriterTest, BinaryMulMatVec) {
-    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kCompute);
-    func->SetWorkgroupSize(1, 1, 1);
+    auto* func = b.ComputeFunction("foo");
     b.Append(func->Block(), [&] {
         auto* x = b.Var("x", b.Zero<mat4x4<f32>>());
         auto* y = b.Var("y", b.Zero<vec4<f32>>());
@@ -421,8 +408,7 @@ void foo() {
 }
 
 TEST_F(HlslWriterTest, BinaryMulVecMat) {
-    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kCompute);
-    func->SetWorkgroupSize(1, 1, 1);
+    auto* func = b.ComputeFunction("foo");
     b.Append(func->Block(), [&] {
         auto* x = b.Var("x", b.Zero<mat4x4<f32>>());
         auto* y = b.Var("y", b.Zero<vec4<f32>>());
@@ -445,8 +431,7 @@ void foo() {
 }
 
 TEST_F(HlslWriterTest, BinaryMulVec4Mat3x4) {
-    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kCompute);
-    func->SetWorkgroupSize(1, 1, 1);
+    auto* func = b.ComputeFunction("foo");
     b.Append(func->Block(), [&] {
         auto* x = b.Var("x", b.Zero<vec4<f32>>());
         auto* y = b.Var("y", b.Zero<mat3x4<f32>>());
@@ -469,8 +454,7 @@ void foo() {
 }
 
 TEST_F(HlslWriterTest, BinaryMulMat3x2Vec3) {
-    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kCompute);
-    func->SetWorkgroupSize(1, 1, 1);
+    auto* func = b.ComputeFunction("foo");
     b.Append(func->Block(), [&] {
         auto* x = b.Var("x", b.Zero<mat3x2<f32>>());
         auto* y = b.Var("y", b.Zero<vec3<f32>>());
@@ -493,8 +477,7 @@ void foo() {
 }
 
 TEST_F(HlslWriterTest, BinaryMulMatMat) {
-    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kCompute);
-    func->SetWorkgroupSize(1, 1, 1);
+    auto* func = b.ComputeFunction("foo");
     b.Append(func->Block(), [&] {
         auto* x = b.Var("x", b.Zero<mat4x4<f32>>());
         auto* y = b.Var("y", b.Zero<mat4x4<f32>>());

@@ -33,8 +33,7 @@ namespace tint::hlsl::writer {
 namespace {
 
 TEST_F(HlslWriterTest, If) {
-    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kCompute);
-    func->SetWorkgroupSize(1, 1, 1);
+    auto* func = b.ComputeFunction("foo");
     b.Append(func->Block(), [&] {
         auto* if_ = b.If(true);
         b.Append(if_->True(), [&] { b.ExitIf(if_); });
@@ -53,8 +52,7 @@ void foo() {
 }
 
 TEST_F(HlslWriterTest, IfWithElseIf) {
-    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kCompute);
-    func->SetWorkgroupSize(1, 1, 1);
+    auto* func = b.ComputeFunction("foo");
     b.Append(func->Block(), [&] {
         auto* if_ = b.If(true);
         b.Append(if_->True(), [&] { b.ExitIf(if_); });
@@ -81,8 +79,7 @@ void foo() {
 }
 
 TEST_F(HlslWriterTest, IfWithElse) {
-    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kCompute);
-    func->SetWorkgroupSize(1, 1, 1);
+    auto* func = b.ComputeFunction("foo");
     b.Append(func->Block(), [&] {
         auto* if_ = b.If(true);
         b.Append(if_->True(), [&] { b.ExitIf(if_); });
@@ -104,8 +101,7 @@ void foo() {
 }
 
 TEST_F(HlslWriterTest, IfBothBranchesReturn) {
-    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kCompute);
-    func->SetWorkgroupSize(1, 1, 1);
+    auto* func = b.ComputeFunction("foo");
     b.Append(func->Block(), [&] {
         auto* if_ = b.If(true);
         b.Append(if_->True(), [&] { b.Return(func); });
@@ -129,8 +125,7 @@ void foo() {
 }
 
 TEST_F(HlslWriterTest, IfWithSinglePhi) {
-    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kCompute);
-    func->SetWorkgroupSize(1, 1, 1);
+    auto* func = b.ComputeFunction("foo");
     b.Append(func->Block(), [&] {
         auto* i = b.If(true);
         i->SetResults(b.InstructionResult(ty.i32()));
@@ -159,8 +154,7 @@ void foo() {
 }
 
 TEST_F(HlslWriterTest, IfWithMultiPhi) {
-    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kCompute);
-    func->SetWorkgroupSize(1, 1, 1);
+    auto* func = b.ComputeFunction("foo");
     b.Append(func->Block(), [&] {
         auto* i = b.If(true);
         i->SetResults(b.InstructionResult(ty.i32()), b.InstructionResult(ty.bool_()));

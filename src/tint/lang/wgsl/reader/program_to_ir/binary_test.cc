@@ -48,7 +48,7 @@ TEST_F(ProgramToIRBinaryTest, EmitExpression_Binary_Add) {
     ret 0u
   }
 }
-%test_function = @compute @workgroup_size(1, 1, 1) func():void {
+%test_function = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
     %3:u32 = call %my_func
     %4:u32 = add %3, 4u
@@ -71,7 +71,7 @@ TEST_F(ProgramToIRBinaryTest, EmitExpression_Binary_Increment) {
   %v1:ptr<private, u32, read_write> = var
 }
 
-%test_function = @compute @workgroup_size(1, 1, 1) func():void {
+%test_function = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
     %3:u32 = load %v1
     %4:u32 = add %3, 1u
@@ -94,7 +94,7 @@ TEST_F(ProgramToIRBinaryTest, EmitExpression_Binary_CompoundAdd) {
   %v1:ptr<private, u32, read_write> = var
 }
 
-%test_function = @compute @workgroup_size(1, 1, 1) func():void {
+%test_function = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
     %3:u32 = load %v1
     %4:u32 = add %3, 1u
@@ -118,7 +118,7 @@ TEST_F(ProgramToIRBinaryTest, EmitExpression_Binary_Subtract) {
     ret 0u
   }
 }
-%test_function = @compute @workgroup_size(1, 1, 1) func():void {
+%test_function = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
     %3:u32 = call %my_func
     %4:u32 = sub %3, 4u
@@ -141,7 +141,7 @@ TEST_F(ProgramToIRBinaryTest, EmitExpression_Binary_Decrement) {
   %v1:ptr<private, i32, read_write> = var
 }
 
-%test_function = @compute @workgroup_size(1, 1, 1) func():void {
+%test_function = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
     %3:i32 = load %v1
     %4:i32 = sub %3, 1i
@@ -164,7 +164,7 @@ TEST_F(ProgramToIRBinaryTest, EmitExpression_Binary_CompoundSubtract) {
   %v1:ptr<private, u32, read_write> = var
 }
 
-%test_function = @compute @workgroup_size(1, 1, 1) func():void {
+%test_function = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
     %3:u32 = load %v1
     %4:u32 = sub %3, 1u
@@ -188,7 +188,7 @@ TEST_F(ProgramToIRBinaryTest, EmitExpression_Binary_Multiply) {
     ret 0u
   }
 }
-%test_function = @compute @workgroup_size(1, 1, 1) func():void {
+%test_function = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
     %3:u32 = call %my_func
     %4:u32 = mul %3, 4u
@@ -211,7 +211,7 @@ TEST_F(ProgramToIRBinaryTest, EmitExpression_Binary_CompoundMultiply) {
   %v1:ptr<private, u32, read_write> = var
 }
 
-%test_function = @compute @workgroup_size(1, 1, 1) func():void {
+%test_function = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
     %3:u32 = load %v1
     %4:u32 = mul %3, 1u
@@ -235,7 +235,7 @@ TEST_F(ProgramToIRBinaryTest, EmitExpression_Binary_Div) {
     ret 0u
   }
 }
-%test_function = @compute @workgroup_size(1, 1, 1) func():void {
+%test_function = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
     %3:u32 = call %my_func
     %4:u32 = div %3, 4u
@@ -258,7 +258,7 @@ TEST_F(ProgramToIRBinaryTest, EmitExpression_Binary_CompoundDiv) {
   %v1:ptr<private, u32, read_write> = var
 }
 
-%test_function = @compute @workgroup_size(1, 1, 1) func():void {
+%test_function = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
     %3:u32 = load %v1
     %4:u32 = div %3, 1u
@@ -282,7 +282,7 @@ TEST_F(ProgramToIRBinaryTest, EmitExpression_Binary_Modulo) {
     ret 0u
   }
 }
-%test_function = @compute @workgroup_size(1, 1, 1) func():void {
+%test_function = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
     %3:u32 = call %my_func
     %4:u32 = mod %3, 4u
@@ -305,7 +305,7 @@ TEST_F(ProgramToIRBinaryTest, EmitExpression_Binary_CompoundModulo) {
   %v1:ptr<private, u32, read_write> = var
 }
 
-%test_function = @compute @workgroup_size(1, 1, 1) func():void {
+%test_function = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
     %3:u32 = load %v1
     %4:u32 = mod %3, 1u
@@ -329,7 +329,7 @@ TEST_F(ProgramToIRBinaryTest, EmitExpression_Binary_And) {
     ret 0u
   }
 }
-%test_function = @compute @workgroup_size(1, 1, 1) func():void {
+%test_function = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
     %3:u32 = call %my_func
     %4:u32 = and %3, 4u
@@ -352,7 +352,7 @@ TEST_F(ProgramToIRBinaryTest, EmitExpression_Binary_CompoundAnd) {
   %v1:ptr<private, bool, read_write> = var
 }
 
-%test_function = @compute @workgroup_size(1, 1, 1) func():void {
+%test_function = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
     %3:bool = load %v1
     %4:bool = and %3, false
@@ -376,7 +376,7 @@ TEST_F(ProgramToIRBinaryTest, EmitExpression_Binary_Or) {
     ret 0u
   }
 }
-%test_function = @compute @workgroup_size(1, 1, 1) func():void {
+%test_function = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
     %3:u32 = call %my_func
     %4:u32 = or %3, 4u
@@ -399,7 +399,7 @@ TEST_F(ProgramToIRBinaryTest, EmitExpression_Binary_CompoundOr) {
   %v1:ptr<private, bool, read_write> = var
 }
 
-%test_function = @compute @workgroup_size(1, 1, 1) func():void {
+%test_function = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
     %3:bool = load %v1
     %4:bool = or %3, false
@@ -423,7 +423,7 @@ TEST_F(ProgramToIRBinaryTest, EmitExpression_Binary_Xor) {
     ret 0u
   }
 }
-%test_function = @compute @workgroup_size(1, 1, 1) func():void {
+%test_function = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
     %3:u32 = call %my_func
     %4:u32 = xor %3, 4u
@@ -446,7 +446,7 @@ TEST_F(ProgramToIRBinaryTest, EmitExpression_Binary_CompoundXor) {
   %v1:ptr<private, u32, read_write> = var
 }
 
-%test_function = @compute @workgroup_size(1, 1, 1) func():void {
+%test_function = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
     %3:u32 = load %v1
     %4:u32 = xor %3, 1u
@@ -471,7 +471,7 @@ TEST_F(ProgramToIRBinaryTest, EmitExpression_Binary_LogicalAnd) {
     ret true
   }
 }
-%test_function = @compute @workgroup_size(1, 1, 1) func():void {
+%test_function = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
     %3:bool = call %my_func
     %4:bool = if %3 [t: $B3, f: $B4] {  # if_1
@@ -508,7 +508,7 @@ TEST_F(ProgramToIRBinaryTest, EmitExpression_Binary_LogicalOr) {
     ret true
   }
 }
-%test_function = @compute @workgroup_size(1, 1, 1) func():void {
+%test_function = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
     %3:bool = call %my_func
     %4:bool = if %3 [t: $B3, f: $B4] {  # if_1
@@ -544,7 +544,7 @@ TEST_F(ProgramToIRBinaryTest, EmitExpression_Binary_Equal) {
     ret 0u
   }
 }
-%test_function = @compute @workgroup_size(1, 1, 1) func():void {
+%test_function = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
     %3:u32 = call %my_func
     %4:bool = eq %3, 4u
@@ -568,7 +568,7 @@ TEST_F(ProgramToIRBinaryTest, EmitExpression_Binary_NotEqual) {
     ret 0u
   }
 }
-%test_function = @compute @workgroup_size(1, 1, 1) func():void {
+%test_function = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
     %3:u32 = call %my_func
     %4:bool = neq %3, 4u
@@ -592,7 +592,7 @@ TEST_F(ProgramToIRBinaryTest, EmitExpression_Binary_LessThan) {
     ret 0u
   }
 }
-%test_function = @compute @workgroup_size(1, 1, 1) func():void {
+%test_function = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
     %3:u32 = call %my_func
     %4:bool = lt %3, 4u
@@ -616,7 +616,7 @@ TEST_F(ProgramToIRBinaryTest, EmitExpression_Binary_GreaterThan) {
     ret 0u
   }
 }
-%test_function = @compute @workgroup_size(1, 1, 1) func():void {
+%test_function = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
     %3:u32 = call %my_func
     %4:bool = gt %3, 4u
@@ -640,7 +640,7 @@ TEST_F(ProgramToIRBinaryTest, EmitExpression_Binary_LessThanEqual) {
     ret 0u
   }
 }
-%test_function = @compute @workgroup_size(1, 1, 1) func():void {
+%test_function = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
     %3:u32 = call %my_func
     %4:bool = lte %3, 4u
@@ -664,7 +664,7 @@ TEST_F(ProgramToIRBinaryTest, EmitExpression_Binary_GreaterThanEqual) {
     ret 0u
   }
 }
-%test_function = @compute @workgroup_size(1, 1, 1) func():void {
+%test_function = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
     %3:u32 = call %my_func
     %4:bool = gte %3, 4u
@@ -688,7 +688,7 @@ TEST_F(ProgramToIRBinaryTest, EmitExpression_Binary_ShiftLeft) {
     ret 0u
   }
 }
-%test_function = @compute @workgroup_size(1, 1, 1) func():void {
+%test_function = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
     %3:u32 = call %my_func
     %4:u32 = shl %3, 4u
@@ -711,7 +711,7 @@ TEST_F(ProgramToIRBinaryTest, EmitExpression_Binary_CompoundShiftLeft) {
   %v1:ptr<private, u32, read_write> = var
 }
 
-%test_function = @compute @workgroup_size(1, 1, 1) func():void {
+%test_function = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
     %3:u32 = load %v1
     %4:u32 = shl %3, 1u
@@ -735,7 +735,7 @@ TEST_F(ProgramToIRBinaryTest, EmitExpression_Binary_ShiftRight) {
     ret 0u
   }
 }
-%test_function = @compute @workgroup_size(1, 1, 1) func():void {
+%test_function = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
     %3:u32 = call %my_func
     %4:u32 = shr %3, 4u
@@ -758,7 +758,7 @@ TEST_F(ProgramToIRBinaryTest, EmitExpression_Binary_CompoundShiftRight) {
   %v1:ptr<private, u32, read_write> = var
 }
 
-%test_function = @compute @workgroup_size(1, 1, 1) func():void {
+%test_function = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
     %3:u32 = load %v1
     %4:u32 = shr %3, 1u
@@ -784,7 +784,7 @@ TEST_F(ProgramToIRBinaryTest, EmitExpression_Binary_Compound) {
     ret 0.0f
   }
 }
-%test_function = @compute @workgroup_size(1, 1, 1) func():void {
+%test_function = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
     %3:f32 = call %my_func
     %4:bool = lt %3, 2.0f
@@ -822,7 +822,7 @@ TEST_F(ProgramToIRBinaryTest, EmitExpression_Binary_Compound_WithConstEval) {
     ret true
   }
 }
-%test_function = @compute @workgroup_size(1, 1, 1) func():void {
+%test_function = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
     %4:bool = call %my_func, false
     %tint_symbol:bool = let %4

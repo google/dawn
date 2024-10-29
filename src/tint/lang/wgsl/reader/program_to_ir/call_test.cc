@@ -50,7 +50,7 @@ TEST_F(ProgramToIRCallTest, EmitExpression_Bitcast) {
     ret 0.0f
   }
 }
-%test_function = @compute @workgroup_size(1, 1, 1) func():void {
+%test_function = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
     %3:f32 = call %my_func
     %4:f32 = bitcast %3
@@ -93,7 +93,7 @@ TEST_F(ProgramToIRCallTest, EmitStatement_UserFunction) {
     ret
   }
 }
-%test_function = @compute @workgroup_size(1, 1, 1) func():void {
+%test_function = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
     %4:void = call %my_func, 6.0f
     ret
@@ -114,7 +114,7 @@ TEST_F(ProgramToIRCallTest, EmitExpression_Convert) {
   %i:ptr<private, i32, read_write> = var, 1i
 }
 
-%test_function = @compute @workgroup_size(1, 1, 1) func():void {
+%test_function = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
     %3:i32 = load %i
     %4:f32 = convert %3
@@ -151,7 +151,7 @@ TEST_F(ProgramToIRCallTest, EmitExpression_Construct) {
   %i:ptr<private, f32, read_write> = var, 1.0f
 }
 
-%test_function = @compute @workgroup_size(1, 1, 1) func():void {
+%test_function = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
     %3:f32 = load %i
     %4:vec3<f32> = construct 2.0f, 3.0f, %3

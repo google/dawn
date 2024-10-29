@@ -36,8 +36,7 @@ namespace tint::glsl::writer {
 namespace {
 
 TEST_F(GlslWriterTest, Switch) {
-    auto* f = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kCompute);
-    f->SetWorkgroupSize(1, 1, 1);
+    auto* f = b.ComputeFunction("foo");
 
     b.Append(f->Block(), [&] {
         auto* a = b.Var("a", b.Zero<i32>());
@@ -67,8 +66,7 @@ void main() {
 }
 
 TEST_F(GlslWriterTest, Switch_MixedDefault) {
-    auto* f = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kCompute);
-    f->SetWorkgroupSize(1, 1, 1);
+    auto* f = b.ComputeFunction("foo");
 
     b.Append(f->Block(), [&] {
         auto* a = b.Var("a", b.Zero<i32>());

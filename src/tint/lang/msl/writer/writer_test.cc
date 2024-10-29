@@ -41,8 +41,7 @@ TEST_F(MslWriterTest, WorkgroupAllocations) {
     mod.root_block->Append(var_a);
     mod.root_block->Append(var_b);
 
-    auto* foo = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kCompute,
-                           std::array<uint32_t, 3>{1u, 1u, 1u});
+    auto* foo = b.ComputeFunction("foo");
     b.Append(foo->Block(), [&] {
         auto* load_a = b.Load(var_a);
         auto* load_b = b.Load(var_b);
@@ -51,8 +50,7 @@ TEST_F(MslWriterTest, WorkgroupAllocations) {
     });
 
     // No allocations, but still needs an entry in the map.
-    auto* bar = b.Function("bar", ty.void_(), core::ir::Function::PipelineStage::kCompute,
-                           std::array<uint32_t, 3>{1u, 1u, 1u});
+    auto* bar = b.ComputeFunction("bar");
     b.Append(bar->Block(), [&] { b.Return(bar); });
 
     ASSERT_TRUE(Generate()) << err_ << output_.msl;
@@ -98,8 +96,7 @@ TEST_F(MslWriterTest, NeedsStorageBufferSizes_False) {
     var->SetBindingPoint(0, 0);
     mod.root_block->Append(var);
 
-    auto* foo = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kCompute,
-                           std::array<uint32_t, 3>{1u, 1u, 1u});
+    auto* foo = b.ComputeFunction("foo");
     b.Append(foo->Block(), [&] {
         b.Store(b.Access<ptr<storage, u32>>(var, 0_u), 42_u);
         b.Return(foo);
@@ -142,8 +139,7 @@ TEST_F(MslWriterTest, NeedsStorageBufferSizes_True) {
     var->SetBindingPoint(0, 0);
     mod.root_block->Append(var);
 
-    auto* foo = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kCompute,
-                           std::array<uint32_t, 3>{1u, 1u, 1u});
+    auto* foo = b.ComputeFunction("foo");
     b.Append(foo->Block(), [&] {
         auto* length = b.Call<u32>(core::BuiltinFn::kArrayLength, var);
         b.Store(b.Access<ptr<storage, u32>>(var, 0_u), length);

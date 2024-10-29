@@ -374,8 +374,7 @@ TEST_F(MslWriter_ModuleScopeVarsTest, Workgroup) {
     mod.root_block->Append(var_a);
     mod.root_block->Append(var_b);
 
-    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kCompute,
-                            std::array<uint32_t, 3>{1u, 1u, 1u});
+    auto* func = b.ComputeFunction("foo");
     b.Append(func->Block(), [&] {
         auto* load_a = b.Load(var_a);
         auto* load_b = b.Load(var_b);
@@ -389,7 +388,7 @@ $B1: {  # root
   %b:ptr<workgroup, i32, read_write> = var
 }
 
-%foo = @compute @workgroup_size(1, 1, 1) func():void {
+%foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
     %4:i32 = load %a
     %5:i32 = load %b
@@ -412,7 +411,7 @@ tint_symbol_2 = struct @align(4) {
   tint_symbol_1:i32 @offset(4)
 }
 
-%foo = @compute @workgroup_size(1, 1, 1) func(%2:ptr<workgroup, tint_symbol_2, read_write>):void {
+%foo = @compute @workgroup_size(1u, 1u, 1u) func(%2:ptr<workgroup, tint_symbol_2, read_write>):void {
   $B1: {
     %a:ptr<workgroup, i32, read_write> = access %2, 0u
     %b:ptr<workgroup, i32, read_write> = access %2, 1u

@@ -50,8 +50,7 @@ using GlslWriterBinaryTest = GlslWriterTestWithParam<BinaryData>;
 TEST_P(GlslWriterBinaryTest, Emit) {
     auto params = GetParam();
 
-    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kCompute);
-    func->SetWorkgroupSize(1, 1, 1);
+    auto* func = b.ComputeFunction("foo");
     b.Append(func->Block(), [&] {
         auto* l = b.Let("left", b.Constant(1_u));
         auto* r = b.Let("right", b.Constant(2_u));
@@ -91,8 +90,7 @@ using GlslWriterBinaryBoolTest = GlslWriterTestWithParam<BinaryData>;
 TEST_P(GlslWriterBinaryBoolTest, Emit) {
     auto params = GetParam();
 
-    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kCompute);
-    func->SetWorkgroupSize(1, 1, 1);
+    auto* func = b.ComputeFunction("foo");
     b.Append(func->Block(), [&] {
         auto* l = b.Let("left", b.Constant(1_u));
         auto* r = b.Let("right", b.Constant(2_u));
@@ -126,8 +124,7 @@ using GlslWriterBinaryBitwiseBoolTest = GlslWriterTestWithParam<BinaryData>;
 TEST_P(GlslWriterBinaryBitwiseBoolTest, Emit) {
     auto params = GetParam();
 
-    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kCompute);
-    func->SetWorkgroupSize(1, 1, 1);
+    auto* func = b.ComputeFunction("foo");
     b.Append(func->Block(), [&] {
         auto* l = b.Let("left", b.Constant(true));
         auto* r = b.Let("right", b.Constant(false));
@@ -152,8 +149,7 @@ void main() {
 TEST_P(GlslWriterBinaryBitwiseBoolTest, EmitVec) {
     auto params = GetParam();
 
-    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kCompute);
-    func->SetWorkgroupSize(1, 1, 1);
+    auto* func = b.ComputeFunction("foo");
     b.Append(func->Block(), [&] {
         auto* l = b.Let("left", b.Splat(ty.vec2<bool>(), true));
         auto* r = b.Let("right", b.Splat(ty.vec2<bool>(), false));
@@ -183,8 +179,7 @@ using GlslWriterBinaryRelationalVecTest = GlslWriterTestWithParam<BinaryData>;
 TEST_P(GlslWriterBinaryRelationalVecTest, Emit) {
     auto params = GetParam();
 
-    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kCompute);
-    func->SetWorkgroupSize(1, 1, 1);
+    auto* func = b.ComputeFunction("foo");
     b.Append(func->Block(), [&] {
         auto* l = b.Let("left", b.Splat(ty.vec2<f32>(), 1_f));
         auto* r = b.Let("right", b.Splat(ty.vec2<f32>(), 2_f));
@@ -215,8 +210,7 @@ INSTANTIATE_TEST_SUITE_P(
                     BinaryData{"greaterThanEqual", core::BinaryOp::kGreaterThanEqual}));
 
 TEST_F(GlslWriterTest, Binary_Float_Modulo) {
-    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kCompute);
-    func->SetWorkgroupSize(1, 1, 1);
+    auto* func = b.ComputeFunction("foo");
     b.Append(func->Block(), [&] {
         auto* l = b.Let("left", b.Splat(ty.vec2<f32>(), 1_f));
         auto* r = b.Let("right", b.Splat(ty.vec2<f32>(), 2_f));

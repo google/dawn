@@ -319,10 +319,7 @@ class Parser {
     /// @param id a SPIR-V result ID for a function declaration instruction
     /// @returns a Tint function object
     core::ir::Function* Function(uint32_t id) {
-        return functions_.GetOrAdd(id, [&] {
-            return b_.Function(ty_.void_(), core::ir::Function::PipelineStage::kUndefined,
-                               std::nullopt);
-        });
+        return functions_.GetOrAdd(id, [&] { return b_.Function(ty_.void_()); });
     }
 
     /// @param id a SPIR-V result ID
@@ -475,9 +472,10 @@ class Parser {
 
             switch (spv::ExecutionMode(mode)) {
                 case spv::ExecutionMode::LocalSize:
-                    func->SetWorkgroupSize(execution_mode.GetSingleWordInOperand(2),
-                                           execution_mode.GetSingleWordInOperand(3),
-                                           execution_mode.GetSingleWordInOperand(4));
+                    func->SetWorkgroupSize(
+                        b_.Constant(u32(execution_mode.GetSingleWordInOperand(2))),
+                        b_.Constant(u32(execution_mode.GetSingleWordInOperand(3))),
+                        b_.Constant(u32(execution_mode.GetSingleWordInOperand(4))));
                     break;
                 case spv::ExecutionMode::DepthReplacing:
                 case spv::ExecutionMode::OriginUpperLeft:

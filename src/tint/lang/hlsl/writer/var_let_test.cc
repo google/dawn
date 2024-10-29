@@ -44,8 +44,7 @@ namespace tint::hlsl::writer {
 namespace {
 
 TEST_F(HlslWriterTest, Var) {
-    auto* func = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kCompute);
-    func->SetWorkgroupSize(1, 1, 1);
+    auto* func = b.ComputeFunction("main");
     b.Append(func->Block(), [&] {
         b.Var("a", 1_u);
         b.Return(func);
@@ -62,8 +61,7 @@ void main() {
 }
 
 TEST_F(HlslWriterTest, VarZeroInit) {
-    auto* func = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kCompute);
-    func->SetWorkgroupSize(1, 1, 1);
+    auto* func = b.ComputeFunction("main");
     b.Append(func->Block(), [&] {
         b.Var("a", function, ty.f32());
         b.Return(func);
@@ -80,8 +78,7 @@ void main() {
 }
 
 TEST_F(HlslWriterTest, Let) {
-    auto* func = b.Function("main", ty.void_(), core::ir::Function::PipelineStage::kCompute);
-    func->SetWorkgroupSize(1, 1, 1);
+    auto* func = b.ComputeFunction("main");
     b.Append(func->Block(), [&] {
         b.Let("a", 2_f);
         b.Return(func);

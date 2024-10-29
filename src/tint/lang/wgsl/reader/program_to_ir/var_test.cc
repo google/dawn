@@ -84,7 +84,7 @@ TEST_F(ProgramToIRVarTest, Emit_Var_NoInit) {
     ASSERT_EQ(m, Success);
 
     EXPECT_EQ(core::ir::Disassembler(m.Get()).Plain(),
-              R"(%test_function = @compute @workgroup_size(1, 1, 1) func():void {
+              R"(%test_function = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
     %a:ptr<function, u32, read_write> = var
     ret
@@ -102,7 +102,7 @@ TEST_F(ProgramToIRVarTest, Emit_Var_Init_Constant) {
     ASSERT_EQ(m, Success);
 
     EXPECT_EQ(core::ir::Disassembler(m.Get()).Plain(),
-              R"(%test_function = @compute @workgroup_size(1, 1, 1) func():void {
+              R"(%test_function = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
     %a:ptr<function, u32, read_write> = var, 2u
     ret
@@ -120,7 +120,7 @@ TEST_F(ProgramToIRVarTest, Emit_Var_Init_NonConstant) {
     ASSERT_EQ(m, Success);
 
     EXPECT_EQ(core::ir::Disassembler(m.Get()).Plain(),
-              R"(%test_function = @compute @workgroup_size(1, 1, 1) func():void {
+              R"(%test_function = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
     %a:ptr<function, u32, read_write> = var
     %3:u32 = load %a
@@ -140,7 +140,7 @@ TEST_F(ProgramToIRVarTest, Emit_Var_Assign_42i) {
     ASSERT_EQ(m, Success);
 
     EXPECT_EQ(core::ir::Disassembler(m.Get()).Plain(),
-              R"(%test_function = @compute @workgroup_size(1, 1, 1) func():void {
+              R"(%test_function = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
     %a:ptr<function, i32, read_write> = var
     store %a, 42i
@@ -182,7 +182,7 @@ TEST_F(ProgramToIRVarTest, Emit_Var_Assign_ArrayOfArray_EvalOrder) {
     ret %p
   }
 }
-%test_function = @compute @workgroup_size(1, 1, 1) func():void {
+%test_function = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
     %a:ptr<function, array<array<array<i32, 5>, 5>, 5>, read_write> = var
     %5:i32 = call %f, 1i
@@ -228,7 +228,7 @@ TEST_F(ProgramToIRVarTest, Emit_Var_Assign_ArrayOfVec_EvalOrder) {
     ret %p
   }
 }
-%test_function = @compute @workgroup_size(1, 1, 1) func():void {
+%test_function = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
     %a:ptr<function, array<vec4<f32>, 5>, read_write> = var
     %5:i32 = call %f, 1i
@@ -276,7 +276,7 @@ TEST_F(ProgramToIRVarTest, Emit_Var_Assign_ArrayOfMatrix_EvalOrder) {
     ret %p
   }
 }
-%test_function = @compute @workgroup_size(1, 1, 1) func():void {
+%test_function = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
     %a:ptr<function, array<mat3x4<f32>, 5>, read_write> = var
     %5:i32 = call %f, 1i
@@ -303,7 +303,7 @@ TEST_F(ProgramToIRVarTest, Emit_Var_CompoundAssign_42i) {
     ASSERT_EQ(m, Success);
 
     EXPECT_EQ(core::ir::Disassembler(m.Get()).Plain(),
-              R"(%test_function = @compute @workgroup_size(1, 1, 1) func():void {
+              R"(%test_function = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
     %a:ptr<function, i32, read_write> = var
     %3:i32 = load %a
@@ -347,7 +347,7 @@ TEST_F(ProgramToIRVarTest, Emit_Var_CompoundAssign_ArrayOfArray_EvalOrder) {
     ret %p
   }
 }
-%test_function = @compute @workgroup_size(1, 1, 1) func():void {
+%test_function = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
     %a:ptr<function, array<array<array<i32, 5>, 5>, 5>, read_write> = var
     %5:i32 = call %f, 1i
@@ -399,7 +399,7 @@ TEST_F(ProgramToIRVarTest, Emit_Var_CompoundAssign_ArrayOfMatrix_EvalOrder) {
     ret %p
   }
 }
-%test_function = @compute @workgroup_size(1, 1, 1) func():void {
+%test_function = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B2: {
     %a:ptr<function, array<mat3x4<f32>, 5>, read_write> = var
     %5:i32 = call %f, 1i

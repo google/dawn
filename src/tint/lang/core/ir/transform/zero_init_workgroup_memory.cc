@@ -133,8 +133,6 @@ struct State {
 
         // Get the local invocation index and the linearized workgroup size.
         auto* local_index = GetLocalInvocationIndex(func);
-        auto wgsizes = func->WorkgroupSize().value();
-        auto wgsize = wgsizes[0] * wgsizes[1] * wgsizes[2];
 
         // Insert instructions to zero-initialize every variable.
         b.InsertBefore(function_start, [&] {
@@ -150,6 +148,11 @@ struct State {
                         b.ExitIf(ifelse);
                     });
                 } else {
+                    auto wgsizes = func->WorkgroupSizeAsConst();
+                    TINT_ASSERT(wgsizes);
+
+                    auto wgsize = wgsizes.value()[0] * wgsizes.value()[1] * wgsizes.value()[2];
+
                     // Use a loop for arrayed stores.
                     b.LoopRange(ty, local_index, u32(count), u32(wgsize), [&](Value* index) {
                         for (auto& store : *element_stores) {
