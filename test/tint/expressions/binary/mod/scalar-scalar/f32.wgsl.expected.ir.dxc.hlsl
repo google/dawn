@@ -5,6 +5,6 @@ void f() {
   float b = 2.0f;
   float v = (a / b);
   float v_1 = floor(v);
-  float r = ((a - (((v < 0.0f)) ? (ceil(v)) : (v_1))) * b);
+  float r = (a - ((((v < 0.0f)) ? (ceil(v)) : (v_1)) * b));
 }
 

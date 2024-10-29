@@ -129,7 +129,7 @@ void main_1() {
         float x_184 = animationData.z;
         float v_6 = ((x_181 * x_184) / 1.0f);
         float v_7 = floor(v_6);
-        mt = (((x_181 * x_184) - (((v_6 < 0.0f)) ? (ceil(v_6)) : (v_7))) * 1.0f);
+        mt = ((x_181 * x_184) - ((((v_6 < 0.0f)) ? (ceil(v_6)) : (v_7)) * 1.0f));
         f = 0.0f;
         {
           while(true) {

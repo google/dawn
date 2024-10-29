@@ -138,7 +138,7 @@ void export_level_inner(uint3 coord) {
     uint v_19 = (uint(dst_offset) * 4u);
     float v_20 = (sum / 4.0f);
     float v_21 = floor(v_20);
-    buf_out.Store((0u + v_19), asuint(((sum - (((v_20 < 0.0f)) ? (ceil(v_20)) : (v_21))) * 4.0f)));
+    buf_out.Store((0u + v_19), asuint((sum - ((((v_20 < 0.0f)) ? (ceil(v_20)) : (v_21)) * 4.0f))));
     float4 v_22 = float4(a, (a * b), ((a / b) + c), sum);
     float4 probabilities = (v_22 + max(sum, 0.0f));
     tex_out[int2(coord.xy)] = probabilities;
