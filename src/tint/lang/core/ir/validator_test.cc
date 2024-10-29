@@ -84,21 +84,19 @@ class IR_ValidatorTest : public IRTestHelper {
         func->AppendParam(p);
     }
 
-    /// Adds to a function an return value of type @p type, and decorated with @p builtin.
+    /// Adds to a function an return value of type @p type with attributes @p attr.
     /// If there is an already existing non-structured return, both values are moved into a
     /// structured return using @p name as the name.
     /// If there is an already existing structured return, then this ICEs, since that is beyond the
     /// scope of this implementation.
-    void AddBuiltinReturn(Function* func,
-                          const std::string& name,
-                          BuiltinValue builtin,
-                          const core::type::Type* type) {
+    void AddReturn(Function* func,
+                   const std::string& name,
+                   const core::type::Type* type,
+                   const IOAttributes& attr = {}) {
         if (func->ReturnType()->Is<core::type::Struct>()) {
-            TINT_ICE() << "AddBuiltinReturn does not support adding to structured returns";
+            TINT_ICE() << "AddReturn does not support adding to structured returns";
         }
 
-        IOAttributes attr;
-        attr.builtin = builtin;
         if (func->ReturnType() == ty.void_()) {
             func->SetReturnAttributes(attr);
             func->SetReturnType(type);
@@ -116,6 +114,17 @@ class IR_ValidatorTest : public IRTestHelper {
 
         func->SetReturnAttributes({});
         func->SetReturnType(str_ty);
+    }
+
+    /// Adds to a function an return value of type @p type, and decorated with @p builtin.
+    /// See @ref AddReturn for more details
+    void AddBuiltinReturn(Function* func,
+                          const std::string& name,
+                          BuiltinValue builtin,
+                          const core::type::Type* type) {
+        IOAttributes attr;
+        attr.builtin = builtin;
+        AddReturn(func, name, type, attr);
     }
 };
 
@@ -1058,6 +1067,168 @@ note: # Disassembly
 )");
 }
 
+TEST_F(IR_ValidatorTest, Function_NonFragment_BoolInput) {
+    auto* f = VertexEntryPoint();
+    f->AppendParam(b.FunctionParam("invalid", ty.bool_()));
+    b.Append(f->Block(), [&] { b.Unreachable(); });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_EQ(res.Failure().reason.Str(),
+              R"(:1:19 error: entry point params can only be a bool for fragment shaders
+%f = @vertex func(%invalid:bool):vec4<f32> [@position] {
+                  ^^^^^^^^^^^^^
+
+note: # Disassembly
+%f = @vertex func(%invalid:bool):vec4<f32> [@position] {
+  $B1: {
+    unreachable
+  }
+}
+)");
+}
+
+TEST_F(IR_ValidatorTest, Function_NonFragment_BoolOutput) {
+    auto* f = VertexEntryPoint();
+    AddReturn(f, "invalid", ty.bool_());
+    b.Append(f->Block(), [&] { b.Unreachable(); });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_EQ(res.Failure().reason.Str(),
+              R"(:6:1 error: entry point return members can not be bool
+%f = @vertex func():OutputStruct {
+^^
+
+note: # Disassembly
+OutputStruct = struct @align(16) {
+  pos:vec4<f32> @offset(0), @builtin(position)
+  invalid:bool @offset(16)
+}
+
+%f = @vertex func():OutputStruct {
+  $B1: {
+    unreachable
+  }
+}
+)");
+}
+
+TEST_F(IR_ValidatorTest, Function_Fragment_BoolInputWithoutFrontFacing) {
+    auto* f = FragmentEntryPoint();
+    f->AppendParam(b.FunctionParam("invalid", ty.bool_()));
+    b.Append(f->Block(), [&] { b.Unreachable(); });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_EQ(
+        res.Failure().reason.Str(),
+        R"(:1:21 error: fragment entry point params can only be a bool if decorated with @builtin(front_facing)
+%f = @fragment func(%invalid:bool):void {
+                    ^^^^^^^^^^^^^
+
+note: # Disassembly
+%f = @fragment func(%invalid:bool):void {
+  $B1: {
+    unreachable
+  }
+}
+)");
+}
+
+TEST_F(IR_ValidatorTest, Function_Fragment_BoolOutput) {
+    auto* f = FragmentEntryPoint();
+    IOAttributes attr;
+    attr.location = 0;
+    AddReturn(f, "invalid", ty.bool_(), attr);
+    b.Append(f->Block(), [&] { b.Unreachable(); });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_EQ(res.Failure().reason.Str(),
+              R"(:1:1 error: entry point returns can not be bool
+%f = @fragment func():bool [@location(0)] {
+^^
+
+note: # Disassembly
+%f = @fragment func():bool [@location(0)] {
+  $B1: {
+    unreachable
+  }
+}
+)");
+}
+
+TEST_F(IR_ValidatorTest, Function_BoolOutput_via_MSV) {
+    auto* f = ComputeEntryPoint();
+
+    auto* v = b.Var(ty.ptr(AddressSpace::kOut, ty.bool_(), core::Access::kReadWrite));
+    mod.root_block->Append(v);
+
+    b.Append(f->Block(), [&] {
+        b.Append(
+            mod.CreateInstruction<ir::Store>(v->Result(0), b.Constant(b.ConstantValue(false))));
+        b.Unreachable();
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_EQ(
+        res.Failure().reason.Str(),
+        R"(:5:1 error: IO address space values referenced by shader entry points can only be bool if in the input space, used only by fragment shaders and decorated with @builtin(front_facing)
+%f = @compute @workgroup_size(1u, 1u, 1u) func():void {
+^^
+
+note: # Disassembly
+$B1: {  # root
+  %1:ptr<__out, bool, read_write> = var
+}
+
+%f = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B2: {
+    store %1, false
+    unreachable
+  }
+}
+)");
+}
+
+TEST_F(IR_ValidatorTest, Function_BoolInputWithoutFrontFacing_via_MSV) {
+    auto* f = FragmentEntryPoint();
+
+    auto* invalid = b.Var("invalid", AddressSpace::kIn, ty.bool_());
+    mod.root_block->Append(invalid);
+
+    b.Append(f->Block(), [&] {
+        auto* l = b.Load(invalid);
+        auto* v = b.Var("v", AddressSpace::kPrivate, ty.bool_());
+        v->SetInitializer(l->Result(0));
+        b.Unreachable();
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_EQ(
+        res.Failure().reason.Str(),
+        R"(:5:1 error: input address space values referenced by fragment shaders can only be a bool if decorated with @builtin(front_facing)
+%f = @fragment func():void {
+^^
+
+note: # Disassembly
+$B1: {  # root
+  %invalid:ptr<__in, bool, read> = var
+}
+
+%f = @fragment func():void {
+  $B2: {
+    %3:bool = load %invalid
+    %v:ptr<private, bool, read_write> = var, %3
+    unreachable
+  }
+}
+)");
+}
+
 TEST_F(IR_ValidatorTest, Builtin_PointSize_WrongStage) {
     auto* f = FragmentEntryPoint();
     AddBuiltinReturn(f, "size", BuiltinValue::kPointSize, ty.f32());
@@ -1281,6 +1452,10 @@ TEST_F(IR_ValidatorTest, Builtin_FrontFacing_WrongStage) {
     ASSERT_NE(res, Success);
     EXPECT_EQ(res.Failure().reason.Str(),
               R"(:1:19 error: front_facing must be used in a fragment shader entry point
+%f = @vertex func(%facing:bool [@front_facing]):vec4<f32> [@position] {
+                  ^^^^^^^^^^^^
+
+:1:19 error: entry point params can only be a bool for fragment shaders
 %f = @vertex func(%facing:bool [@front_facing]):vec4<f32> [@position] {
                   ^^^^^^^^^^^^
 

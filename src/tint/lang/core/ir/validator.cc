@@ -257,6 +257,16 @@ void CheckIOAttributesAndType(const MSG_ANCHOR* msg_anchor,
     }
 }
 
+// Wrapper for CheckIOAttributesAndType, when the struct and non-struct impl are the same
+/// See @ref IOAttributesAndType for more details
+template <typename MSG_ANCHOR, typename IMPL>
+void CheckIOAttributesAndType(const MSG_ANCHOR* msg_anchor,
+                              const IOAttributes& ty_attr,
+                              const core::type::Type* ty,
+                              IMPL&& impl) {
+    CheckIOAttributesAndType(msg_anchor, ty_attr, ty, impl, impl);
+}
+
 /// Helper for calling IOAttributesAndType on a function param
 /// @param param function param to be tested
 /// See @ref IOAttributesAndType for more details
@@ -269,6 +279,14 @@ void CheckFunctionParamAttributesAndType(const FunctionParam* param,
                              std::forward<IS_STRUCT>(is_struct_impl));
 }
 
+/// Helper for calling IOAttributesAndType on a function param
+/// @param param function param to be tested
+/// See @ref IOAttributesAndType for more details
+template <typename IMPL>
+void CheckFunctionParamAttributesAndType(const FunctionParam* param, IMPL&& impl) {
+    CheckIOAttributesAndType(param, param->Attributes(), param->Type(), std::forward<IMPL>(impl));
+}
+
 /// Helper for calling IOAttributesAndType on a function return
 /// @param func function's return to be tested
 /// See @ref IOAttributesAndType for more details
@@ -279,6 +297,15 @@ void CheckFunctionReturnAttributesAndType(const Function* func,
     CheckIOAttributesAndType(func, func->ReturnAttributes(), func->ReturnType(),
                              std::forward<IS_NOT_STRUCT>(is_not_struct_impl),
                              std::forward<IS_STRUCT>(is_struct_impl));
+}
+
+/// Helper for calling IOAttributesAndType on a function return
+/// @param func function's return to be tested
+/// See @ref IOAttributesAndType for more details
+template <typename IMPL>
+void CheckFunctionReturnAttributesAndType(const Function* func, IMPL&& impl) {
+    CheckIOAttributesAndType(func, func->ReturnAttributes(), func->ReturnType(),
+                             std::forward<IMPL>(impl));
 }
 
 /// A BuiltinChecker is the interface used to check that a usage of a builtin attribute meets the
@@ -913,6 +940,31 @@ class Validator {
     auto CheckHasLocationOrBuiltinFunc(const std::string& err) {
         return [this, err](const MSG_ANCHOR* msg_anchor, const IOAttributes& attr) {
             if (!HasLocationOrBuiltin(attr)) {
+                AddError(msg_anchor) << err;
+            }
+        };
+    }
+
+    /// @returns a function that validates that type is bool iff decorated with
+    /// @builtin(front_facing)
+    /// @param err error message to log when check fails
+    template <typename MSG_ANCHOR>
+    auto CheckFrontFacingIfBoolFunc(const std::string& err) {
+        return [this, err](const MSG_ANCHOR* msg_anchor, const IOAttributes& attr,
+                           const type::Type* ty) {
+            if (ty->Is<core::type::Bool>() && attr.builtin != BuiltinValue::kFrontFacing) {
+                AddError(msg_anchor) << err;
+            }
+        };
+    }
+
+    /// @returns a function that validates that type is not bool
+    /// @param err error message to log when check fails
+    template <typename MSG_ANCHOR>
+    auto CheckNotBool(const std::string& err) {
+        return [this, err](const MSG_ANCHOR* msg_anchor, [[maybe_unused]] const IOAttributes& attr,
+                           const type::Type* ty) {
+            if (ty->Is<core::type::Bool>()) {
                 AddError(msg_anchor) << err;
             }
         };
@@ -1740,8 +1792,7 @@ void Validator::CheckFunction(const Function* func) {
             }
         }
 
-        CheckFunctionParamAttributesAndType(param, CheckBuiltinFunctionParam(""),
-                                            CheckBuiltinFunctionParam(""));
+        CheckFunctionParamAttributesAndType(param, CheckBuiltinFunctionParam(""));
 
         CheckFunctionParamAttributes(
             param,
@@ -1757,6 +1808,21 @@ void Validator::CheckFunction(const Function* func) {
             CheckDoesNotHaveBothLocationAndBuiltinFunc<FunctionParam>(
                 "a builtin and location cannot be both declared for a struct member"));
 
+        if (func->Stage() == Function::PipelineStage::kFragment) {
+            CheckFunctionParamAttributesAndType(
+                param,
+                CheckFrontFacingIfBoolFunc<FunctionParam>(
+                    "fragment entry point params can only be a bool if decorated with "
+                    "@builtin(front_facing)"),
+                CheckFrontFacingIfBoolFunc<FunctionParam>(
+                    "fragment entry point param memebers can only be a bool if "
+                    "decorated with @builtin(front_facing)"));
+        } else if (func->Stage() != Function::PipelineStage::kUndefined) {
+            CheckFunctionParamAttributesAndType(
+                param, CheckNotBool<FunctionParam>(
+                           "entry point params can only be a bool for fragment shaders"));
+        }
+
         scope_stack_.Add(param);
     }
 
@@ -1765,8 +1831,7 @@ void Validator::CheckFunction(const Function* func) {
         func->ReturnType(), [&]() -> diag::Diagnostic& { return AddError(func); },
         Capabilities{Capability::kAllowRefTypes});
 
-    CheckFunctionReturnAttributesAndType(func, CheckBuiltinFunctionReturn(""),
-                                         CheckBuiltinFunctionReturn(""));
+    CheckFunctionReturnAttributesAndType(func, CheckBuiltinFunctionReturn(""));
 
     CheckFunctionReturnAttributes(
         func,
@@ -1820,6 +1885,44 @@ void Validator::CheckFunction(const Function* func) {
                 CheckHasLocationOrBuiltinFunc<Function>(
                     "members of struct used for returns of entry points must have a builtin or "
                     "location decoration"));
+        }
+    }
+
+    if (func->Stage() != Function::PipelineStage::kUndefined) {
+        CheckFunctionReturnAttributesAndType(
+            func, CheckFrontFacingIfBoolFunc<Function>("entry point returns can not be bool"),
+            CheckFrontFacingIfBoolFunc<Function>("entry point return members can not be bool"));
+
+        for (auto var : referenced_module_vars_.TransitiveReferences(func)) {
+            const auto* mv = var->Result(0)->Type()->As<type::MemoryView>();
+            const auto* ty = var->Result(0)->Type()->UnwrapPtrOrRef();
+            const auto attr = var->Attributes();
+            if (!mv || !ty) {
+                continue;
+            }
+
+            if (mv->AddressSpace() != AddressSpace::kIn &&
+                mv->AddressSpace() != AddressSpace::kOut) {
+                continue;
+            }
+
+            if (func->Stage() == Function::PipelineStage::kFragment &&
+                mv->AddressSpace() == AddressSpace::kIn) {
+                CheckIOAttributesAndType(
+                    func, attr, ty,
+                    CheckFrontFacingIfBoolFunc<Function>("input address space values referenced by "
+                                                         "fragment shaders can only be a bool if "
+                                                         "decorated with @builtin(front_facing)"));
+
+            } else {
+                CheckIOAttributesAndType(
+                    func, attr, ty,
+                    CheckNotBool<Function>(
+                        "IO address space values referenced by shader entry points can only be "
+                        "bool if "
+                        "in the input space, used only by fragment shaders and decorated with "
+                        "@builtin(front_facing)"));
+            }
         }
     }
 
