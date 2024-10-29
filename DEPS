@@ -21,7 +21,7 @@ vars = {
   'dawn_gn_version': 'git_revision:182a6eb05d15cc76d2302f7928fdb4f645d52c53',
   # ninja CIPD package version.
   # https://chrome-infra-packages.appspot.com/p/infra/3pp/tools/ninja
-  'dawn_ninja_version': 'version:2@1.11.1.chromium.6',
+  'dawn_ninja_version': 'version:3@1.12.1.chromium.4',
   'dawn_go_version': 'version:2@1.21.3',
 
   'node_darwin_arm64_sha': '864780996d3be6c9aca03f371a4bd672728f0a75',
