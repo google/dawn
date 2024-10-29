@@ -2383,8 +2383,9 @@ void Validator::CheckAccess(const Access* a) {
         };
 
         auto* index = a->Indices()[i];
-        if (DAWN_UNLIKELY(!index->Type()->IsIntegerScalar())) {
-            err() << "index must be integer, got " << index->Type()->FriendlyName();
+        if (DAWN_UNLIKELY(!index->Type() || !index->Type()->IsIntegerScalar())) {
+            err() << "index must be integer, got "
+                  << (index->Type() ? index->Type()->FriendlyName() : "undefined");
             return;
         }
 
@@ -2397,7 +2398,7 @@ void Validator::CheckAccess(const Access* a) {
 
         if (auto* const_index = index->As<ir::Constant>()) {
             auto* value = const_index->Value();
-            if (value->Type()->IsSignedIntegerScalar()) {
+            if (!value->Type() || value->Type()->IsSignedIntegerScalar()) {
                 // index is a signed integer scalar. Check that the index isn't negative.
                 // If the index is unsigned, we can skip this.
                 auto idx = value->ValueAs<AInt>();
