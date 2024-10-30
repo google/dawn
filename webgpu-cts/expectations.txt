@@ -1838,12 +1838,6 @@ crbug.com/dawn/371033198 [ amd mac ] webgpu:shader,execution,expression,call,bui
 crbug.com/dawn/371033198 [ amd mac ] webgpu:shader,execution,expression,call,builtin,textureSampleBias:sampled_2d_coords:format="bc1-rgba-unorm";filt="linear";modeU="m";modeV="r";offset=true [ Failure ]
 crbug.com/dawn/371033198 [ amd mac ] webgpu:shader,execution,expression,call,builtin,textureSampleBias:sampled_2d_coords:format="bc1-rgba-unorm";filt="linear";modeU="m";modeV="m";offset=true [ Failure ]
 
-################################################################################
-# AMD Macbook 16" Qualification (NEEDS TRIAGE)
-################################################################################
-crbug.com/355482869 [ amd-0x7340 mac ] webgpu:shader,execution,value_init:array:addressSpace="function";type="f16" [ Failure ]
-crbug.com/355482869 [ amd-0x7340 mac ] webgpu:shader,execution,value_init:mat:addressSpace="function";type="f16" [ Failure ]
-
 crbug.com/dawn/0000 [ android-chromium android-r angle-opengles dawn-backend-validation graphite-disabled mobile no-asan no-clang-coverage oop-c passthrough qualcomm renderer-skia-gl target-cpu-32 webgpu-adapter-default webgpu-no-worker ] webgpu:api,operation,render_pipeline,overrides:multi_entry_points:isAsync=true [ RetryOnFailure ]
 crbug.com/dawn/0000 [ android-chromium android-r angle-opengles dawn-backend-validation graphite-disabled mobile no-asan no-clang-coverage oop-c passthrough qualcomm renderer-skia-gl target-cpu-32 webgpu-adapter-default webgpu-no-worker ] webgpu:api,operation,render_pipeline,overrides:shared_shader_module:isAsync=true [ RetryOnFailure ]
 crbug.com/dawn/0000 [ android-chromium android-r angle-opengles dawn-no-backend-validation graphite-disabled mobile no-asan no-clang-coverage oop-c passthrough qualcomm renderer-skia-gl target-cpu-32 webgpu-adapter-default webgpu-no-worker ] webgpu:api,operation,render_pipeline,overrides:multi_entry_points:isAsync=true [ RetryOnFailure ]
