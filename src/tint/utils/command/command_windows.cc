@@ -35,6 +35,7 @@
 #include <string>
 
 #include "src/tint/utils/macros/defer.h"
+#include "src/tint/utils/system/executable_path.h"
 #include "src/tint/utils/text/string_stream.h"
 
 namespace tint {
@@ -159,12 +160,22 @@ std::string FindExecutable(const std::string& name) {
     if (ExecutableExists(in_cwd + ".exe")) {
         return in_cwd + ".exe";
     }
+
+    auto in_exe_path = tint::ExecutableDirectory() + "/" + name;
+    if (ExecutableExists(in_exe_path)) {
+        return in_exe_path;
+    }
+    if (ExecutableExists(in_exe_path + ".exe")) {
+        return in_exe_path + ".exe";
+    }
+
     if (ExecutableExists(name)) {
         return name;
     }
     if (ExecutableExists(name + ".exe")) {
         return name + ".exe";
     }
+
     if (name.find("/") == std::string::npos && name.find("\\") == std::string::npos) {
         char* path_env = nullptr;
         size_t path_env_len = 0;

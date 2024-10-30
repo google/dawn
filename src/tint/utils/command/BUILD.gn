@@ -47,6 +47,7 @@ libtint_source_set("command") {
   sources = [ "command.h" ]
   deps = [
     "${tint_src_dir}/utils/macros",
+    "${tint_src_dir}/utils/system",
     "${tint_src_dir}/utils/text",
   ]
 

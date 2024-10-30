@@ -44,6 +44,7 @@ tint_add_target(tint_utils_command lib
 
 tint_target_add_dependencies(tint_utils_command lib
   tint_utils_macros
+  tint_utils_system
   tint_utils_text
 )
 

@@ -37,6 +37,8 @@
 #include <sstream>
 #include <vector>
 
+#include "src/tint/utils/system/executable_path.h"
+
 namespace tint {
 
 namespace {
@@ -131,6 +133,10 @@ std::string FindExecutable(const std::string& name) {
         auto in_cwd = GetCWD() + "/" + name;
         if (ExecutableExists(in_cwd)) {
             return in_cwd;
+        }
+        auto in_exe_path = tint::ExecutableDirectory() + "/" + name;
+        if (ExecutableExists(in_exe_path)) {
+            return in_exe_path;
         }
     }
     if (ExecutableExists(name)) {

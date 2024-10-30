@@ -40,6 +40,7 @@
 ################################################################################
 tint_add_target(tint_utils_system lib
   utils/system/env.h
+  utils/system/executable_path.h
   utils/system/terminal.h
 )
 
@@ -69,15 +70,28 @@ if((NOT TINT_BUILD_IS_WIN))
   )
 endif((NOT TINT_BUILD_IS_WIN))
 
+if(TINT_BUILD_IS_LINUX)
+  tint_target_add_sources(tint_utils_system lib
+    "utils/system/executable_path_linux.cc"
+  )
+endif(TINT_BUILD_IS_LINUX)
+
 if(TINT_BUILD_IS_LINUX OR TINT_BUILD_IS_MAC)
   tint_target_add_sources(tint_utils_system lib
     "utils/system/terminal_posix.cc"
   )
 endif(TINT_BUILD_IS_LINUX OR TINT_BUILD_IS_MAC)
 
+if(TINT_BUILD_IS_MAC)
+  tint_target_add_sources(tint_utils_system lib
+    "utils/system/executable_file_mac.cc"
+  )
+endif(TINT_BUILD_IS_MAC)
+
 if(TINT_BUILD_IS_WIN)
   tint_target_add_sources(tint_utils_system lib
     "utils/system/env_windows.cc"
+    "utils/system/executable_path_windows.cc"
     "utils/system/terminal_windows.cc"
   )
 endif(TINT_BUILD_IS_WIN)

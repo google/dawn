@@ -60,6 +60,7 @@ cc_library(
   ],
   deps = [
     "//src/tint/utils/macros",
+    "//src/tint/utils/system",
     "//src/tint/utils/text",
   ],
   copts = COPTS,
