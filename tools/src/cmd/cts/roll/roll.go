@@ -77,20 +77,21 @@ const (
 )
 
 type rollerFlags struct {
-	gitPath             string
-	npmPath             string
-	nodePath            string
-	auth                authcli.Flags
-	cacheDir            string
-	ctsGitURL           string
-	ctsRevision         string
-	force               bool // Create a new roll, even if CTS is up to date
-	rebuild             bool // Rebuild the expectations file from scratch
-	preserve            bool // If false, abandon past roll changes
-	sendToGardener      bool // If true, automatically send to the gardener for review
-	verbose             bool
-	parentSwarmingRunID string
-	maxAttempts         int
+	gitPath               string
+	npmPath               string
+	nodePath              string
+	auth                  authcli.Flags
+	cacheDir              string
+	ctsGitURL             string
+	ctsRevision           string
+	force                 bool // Create a new roll, even if CTS is up to date
+	rebuild               bool // Rebuild the expectations file from scratch
+	preserve              bool // If false, abandon past roll changes
+	sendToGardener        bool // If true, automatically send to the gardener for review
+	verbose               bool
+	useSimplifiedCodepath bool
+	parentSwarmingRunID   string
+	maxAttempts           int
 }
 
 type cmd struct {
@@ -120,6 +121,7 @@ func (c *cmd) RegisterFlags(ctx context.Context, cfg common.Config) ([]string, e
 	flag.BoolVar(&c.flags.preserve, "preserve", false, "do not abandon existing rolls")
 	flag.BoolVar(&c.flags.sendToGardener, "send-to-gardener", false, "send the CL to the WebGPU gardener for review")
 	flag.BoolVar(&c.flags.verbose, "verbose", false, "emit additional logging")
+	flag.BoolVar(&c.flags.useSimplifiedCodepath, "use-simplified-codepath", false, "use the simplified codepath that only looks at unexpected failures")
 	flag.StringVar(&c.flags.parentSwarmingRunID, "parent-swarming-run-id", "", "parent swarming run id. All triggered tasks will be children of this task and will be canceled if the parent is canceled.")
 	flag.IntVar(&c.flags.maxAttempts, "max-attempts", 3, "number of update attempts before giving up")
 	return nil, nil
@@ -412,7 +414,11 @@ func (r *roller) roll(ctx context.Context) error {
 
 		// Gather the build results
 		log.Println("gathering results...")
-		psResultsByExecutionMode, err = common.CacheResults(ctx, r.cfg, ps, r.flags.cacheDir, r.client, builds)
+		if r.flags.useSimplifiedCodepath {
+			psResultsByExecutionMode, err = common.CacheUnsuppressedFailingResults(ctx, r.cfg, ps, r.flags.cacheDir, r.client, builds)
+		} else {
+			psResultsByExecutionMode, err = common.CacheResults(ctx, r.cfg, ps, r.flags.cacheDir, r.client, builds)
+		}
 		if err != nil {
 			return err
 		}
@@ -425,14 +431,25 @@ func (r *roller) roll(ctx context.Context) error {
 		// Rebuild the expectations with the accumulated results
 		log.Println("building new expectations...")
 		for _, exInfo := range exInfos {
-			// Merge the new results into the accumulated results
-			log.Printf("merging results for %s ...\n", exInfo.executionMode)
-			exInfo.results = result.Merge(exInfo.results, psResultsByExecutionMode[exInfo.executionMode])
+			if r.flags.useSimplifiedCodepath {
+				// TODO(crbug.com/372730248): Modify exInfo.expectations in place once
+				// the old code path is removed.
+				exInfo.newExpectations = exInfo.expectations.Clone()
+				err := exInfo.newExpectations.AddExpectationsForFailingResults(psResultsByExecutionMode[exInfo.executionMode], testlist, r.flags.verbose)
+				if err != nil {
+					return err
+				}
+				exInfo.expectations = exInfo.newExpectations
+			} else {
+				// Merge the new results into the accumulated results
+				log.Printf("merging results for %s ...\n", exInfo.executionMode)
+				exInfo.results = result.Merge(exInfo.results, psResultsByExecutionMode[exInfo.executionMode])
 
-			exInfo.newExpectations = exInfo.expectations.Clone()
-			_, err := exInfo.newExpectations.Update(exInfo.results, testlist, r.flags.verbose)
-			if err != nil {
-				return err
+				exInfo.newExpectations = exInfo.expectations.Clone()
+				_, err := exInfo.newExpectations.Update(exInfo.results, testlist, r.flags.verbose)
+				if err != nil {
+					return err
+				}
 			}
 		}
 

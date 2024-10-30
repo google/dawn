@@ -33,6 +33,7 @@ import (
 	"log"
 	"os"
 	"strings"
+	"time"
 
 	"dawn.googlesource.com/dawn/tools/src/container"
 	"dawn.googlesource.com/dawn/tools/src/cts/query"
@@ -52,24 +53,53 @@ import (
 //   - Add new expectations to the one mutable chunk that is expected to
 //     be present in the file.
 //   - Sort the mutable chunk's expectations by test name, then tags.
+//
+// TODO(crbug.com/372730248): Return diagnostics.
 func (c *Content) AddExpectationsForFailingResults(results result.List,
 	testlist []query.Query, verbose bool) error {
 	// Make a copy of the results. This code mutates the list.
 	results = append(result.List{}, results...)
 
+	startTime := time.Now()
+	// TODO(crbug.com/372730248): Do this once (instead of every patchset) and/or
+	// find a way to optimize this. This currently takes ~99% of the result
+	// processing time.
 	if err := c.removeExpectationsForUnknownTests(&testlist); err != nil {
 		return err
 	}
+	if verbose {
+		fmt.Printf("Removing unknown expectations took %s\n", time.Now().Sub(startTime).String())
+	}
 
+	startTime = time.Now()
+	if err := c.removeUnknownTags(&results); err != nil {
+		return err
+	}
+	if verbose {
+		fmt.Printf("Removing unknown tags took %s\n", time.Now().Sub(startTime).String())
+	}
+
+	startTime = time.Now()
 	if err := c.reduceTagsToMostExplicitOnly(&results); err != nil {
 		return err
 	}
+	if verbose {
+		fmt.Printf("Reducing tags took %s\n", time.Now().Sub(startTime).String())
+	}
 
 	// Merge identical results.
+	startTime = time.Now()
 	results = result.Merge(results)
+	if verbose {
+		fmt.Printf("Merging identical results took %s\n", time.Now().Sub(startTime).String())
+	}
 
+	startTime = time.Now()
 	if err := c.addExpectationsToMutableChunk(&results); err != nil {
 		return err
+	}
+	if verbose {
+		fmt.Printf("Adding expectations took %s\n", time.Now().Sub(startTime).String())
 	}
 	return nil
 }
@@ -82,7 +112,7 @@ func (c *Content) removeExpectationsForUnknownTests(testlist *[]query.Query) err
 		prunedChunk := chunk.Clone()
 		// If we don't have any expectations already, just add the chunk back
 		// immediately to avoid removing comments, especially the header.
-		if len(prunedChunk.Expectations) == 0 {
+		if prunedChunk.IsCommentOnly() {
 			prunedChunkSlice = append(prunedChunkSlice, prunedChunk)
 			continue
 		}
@@ -104,6 +134,21 @@ func (c *Content) removeExpectationsForUnknownTests(testlist *[]query.Query) err
 	}
 
 	c.Chunks = prunedChunkSlice
+	return nil
+}
+
+// removeUnknownTags modifies |results| in place so that the Results contained
+// within it only use tags that the Content is aware of.
+func (c *Content) removeUnknownTags(results *result.List) error {
+	*results = results.TransformTags(func(t result.Tags) result.Tags {
+		filtered := result.NewTags()
+		for tag := range t {
+			if _, ok := c.Tags.ByName[tag]; ok {
+				filtered.Add(tag)
+			}
+		}
+		return filtered
+	})
 	return nil
 }
 
@@ -174,7 +219,7 @@ func (c *Content) addExpectationsToMutableChunk(results *result.List) error {
 		expectation := Expectation{
 			Bug:   "crbug.com/0000",
 			Tags:  res.Tags,
-			Query: res.Query.String(),
+			Query: res.Query.ExpectationFileString(),
 			Status: []string{
 				"Failure",
 			},

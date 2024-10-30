@@ -60,10 +60,11 @@ func (i *arrayFlags) Set(value string) error {
 
 type cmd struct {
 	flags struct {
-		results      common.ResultSource
-		expectations arrayFlags
-		auth         authcli.Flags
-		verbose      bool
+		results               common.ResultSource
+		expectations          arrayFlags
+		auth                  authcli.Flags
+		verbose               bool
+		useSimplifiedCodepath bool
 	}
 }
 
@@ -79,6 +80,7 @@ func (c *cmd) RegisterFlags(ctx context.Context, cfg common.Config) ([]string, e
 	c.flags.results.RegisterFlags(cfg)
 	c.flags.auth.Register(flag.CommandLine, auth.DefaultAuthOptions())
 	flag.BoolVar(&c.flags.verbose, "verbose", false, "emit additional logging")
+	flag.BoolVar(&c.flags.useSimplifiedCodepath, "use-simplified-codepath", false, "use the simplified codepath that only looks at unexpected failures")
 	flag.Var(&c.flags.expectations, "expectations", "path to CTS expectations file(s) to update")
 	return nil, nil
 }
@@ -109,7 +111,12 @@ func (c *cmd) Run(ctx context.Context, cfg common.Config) error {
 
 	// Fetch the results
 	log.Println("fetching results...")
-	resultsByExecutionMode, err := c.flags.results.GetResults(ctx, cfg, auth)
+	var resultsByExecutionMode result.ResultsByExecutionMode
+	if c.flags.useSimplifiedCodepath {
+		resultsByExecutionMode, err = c.flags.results.GetUnsuppressedFailingResults(ctx, cfg, auth)
+	} else {
+		resultsByExecutionMode, err = c.flags.results.GetResults(ctx, cfg, auth)
+	}
 	if err != nil {
 		return err
 	}
@@ -146,7 +153,15 @@ func (c *cmd) Run(ctx context.Context, cfg common.Config) error {
 		if strings.Contains(expectationsFilename, "compat") {
 			name = "compat"
 		}
-		diag, err := ex.Update(resultsByExecutionMode[name], testlist, c.flags.verbose)
+
+		var diag expectations.Diagnostics
+		if c.flags.useSimplifiedCodepath {
+			err = ex.AddExpectationsForFailingResults(resultsByExecutionMode[name], testlist, c.flags.verbose)
+			// TODO(crbug.com/372730248): Report actual diagnostics.
+			diag = expectations.Diagnostics{}
+		} else {
+			diag, err = ex.Update(resultsByExecutionMode[name], testlist, c.flags.verbose)
+		}
 		if err != nil {
 			return err
 		}
