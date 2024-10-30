@@ -151,14 +151,6 @@ crbug.com/341327472 [ intel-0x4680 linux ] webgpu:api,validation,state,device_lo
 # This section represents things that are probably fixable in Dawn.
 ################################################################################
 
-# Many texture sampling functions failing in Vertex stage
-crbug.com/374890770 webgpu:shader,execution,expression,call,builtin,textureLoad:sampled_1d:stage="v";* [ Failure ]
-crbug.com/374890770 webgpu:shader,execution,expression,call,builtin,textureLoad:sampled_2d:stage="v";* [ Failure ]
-crbug.com/374890770 webgpu:shader,execution,expression,call,builtin,textureLoad:sampled_3d:stage="v";* [ Failure ]
-crbug.com/374890770 webgpu:shader,execution,expression,call,builtin,textureLoad:arrayed:stage="v";* [ Failure ]
-crbug.com/374890770 webgpu:shader,execution,expression,call,builtin,textureLoad:multisampled:stage="v";* [ Failure ]
-crbug.com/374890770 webgpu:shader,execution,expression,call,builtin,textureLoad:external:stage="v" [ Failure ]
-
 # texture sampling of depth textures with linear filtering is failing
 crbug.com/375343411 webgpu:shader,execution,expression,call,builtin,textureSampleLevel:depth_2d_coords:stage="c";format="depth16unorm";filt="linear";mode="c";offset=false [ Failure ]
 crbug.com/375343411 webgpu:shader,execution,expression,call,builtin,textureSampleLevel:depth_2d_coords:stage="c";format="depth16unorm";filt="linear";mode="c";offset=true [ Failure ]

@@ -438,7 +438,6 @@ ResultOrError<GLuint> ShaderModule::CompileShader(
         bindings.texture_builtins_from_uniform.ubo_binding,
         tint::glsl::writer::binding::Uniform{layout->GetInternalUniformBinding()});
 
-    *needsPlaceholderSampler = false;
     CombinedSamplerInfo combinedSamplerInfo =
         generateCombinedSamplerInfo(inspector, programmableStage.entryPoint, bindings,
                                     externalTextureExpansionMap, needsPlaceholderSampler);
