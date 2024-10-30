@@ -107,6 +107,13 @@ func (c *Content) AddExpectationsForFailingResults(results result.List,
 // removeExpectationsForUnknownTests modifies the Content in place so that all
 // contained Expectations apply to tests in the given testlist.
 func (c *Content) removeExpectationsForUnknownTests(testlist *[]query.Query) error {
+	// Converting into a set allows us to much more efficiently check if a
+	// non-wildcard expectation is for a valid test.
+	knownTestNames := container.NewSet[string]()
+	for _, testQuery := range *testlist {
+		knownTestNames.Add(testQuery.ExpectationFileString())
+	}
+
 	prunedChunkSlice := make([]Chunk, 0)
 	for _, chunk := range c.Chunks {
 		prunedChunk := chunk.Clone()
@@ -119,11 +126,19 @@ func (c *Content) removeExpectationsForUnknownTests(testlist *[]query.Query) err
 
 		prunedChunk.Expectations = make(Expectations, 0)
 		for _, expectation := range chunk.Expectations {
-			for _, testQuery := range *testlist {
-				expectationQuery := query.Parse(expectation.Query)
-				if expectationQuery.Contains(testQuery) {
+			// We don't actually parse the query string into a Query since wildcards
+			// are treated differently between expectations and CTS queries.
+			if strings.HasSuffix(expectation.Query, "*") {
+				testPrefix := expectation.Query[:len(expectation.Query)-1]
+				for testName := range knownTestNames {
+					if strings.HasPrefix(testName, testPrefix) {
+						prunedChunk.Expectations = append(prunedChunk.Expectations, expectation)
+						break
+					}
+				}
+			} else {
+				if knownTestNames.Contains(expectation.Query) {
 					prunedChunk.Expectations = append(prunedChunk.Expectations, expectation)
-					break
 				}
 			}
 		}
