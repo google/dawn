@@ -26,6 +26,7 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <memory>
+#include <utility>
 
 #include "dawn/common/StringViewUtils.h"
 #include "dawn/dawn_proc.h"
@@ -319,52 +320,43 @@ TEST(WireCreatePipelineAsyncTestNullBackend, ServerDeletedBeforeCallback) {
     dawnProcSetProcs(&dawn::wire::client::GetProcs());
 
     auto reserved = wireClient->ReserveInstance();
-    WGPUInstance instance = reserved.instance;
+    wgpu::Instance instance = wgpu::Instance::Acquire(reserved.instance);
     wireServer->InjectInstance(dawn::native::GetProcs().createInstance(nullptr), reserved.handle);
 
-    WGPURequestAdapterOptions adapterOptions = {};
-    adapterOptions.backendType = WGPUBackendType_Null;
+    wgpu::RequestAdapterOptions adapterOptions = {};
+    adapterOptions.backendType = wgpu::BackendType::Null;
 
-    WGPUAdapter adapter;
-    wgpuInstanceRequestAdapter(
-        instance, &adapterOptions,
-        [](WGPURequestAdapterStatus status, WGPUAdapter adapter, WGPUStringView, void* userdata) {
-            *static_cast<WGPUAdapter*>(userdata) = adapter;
-        },
-        &adapter);
+    wgpu::Adapter adapter;
+    instance.RequestAdapter(&adapterOptions, wgpu::CallbackMode::AllowSpontaneous,
+                            [&adapter](wgpu::RequestAdapterStatus, wgpu::Adapter result,
+                                       wgpu::StringView) { adapter = std::move(result); });
     ASSERT_TRUE(c2sBuf->Flush());
     ASSERT_TRUE(s2cBuf->Flush());
 
-    WGPUDeviceDescriptor deviceDesc = {};
-    WGPUDevice device;
-    wgpuAdapterRequestDevice(
-        adapter, &deviceDesc,
-        [](WGPURequestDeviceStatus status, WGPUDevice device, WGPUStringView, void* userdata) {
-            *static_cast<WGPUDevice*>(userdata) = device;
-        },
-        &device);
+    wgpu::DeviceDescriptor deviceDesc = {};
+    wgpu::Device device;
+    adapter.RequestDevice(&deviceDesc, wgpu::CallbackMode::AllowSpontaneous,
+                          [&device](wgpu::RequestDeviceStatus, wgpu::Device result,
+                                    wgpu::StringView) { device = std::move(result); });
     ASSERT_TRUE(c2sBuf->Flush());
     ASSERT_TRUE(s2cBuf->Flush());
 
-    WGPUShaderSourceWGSL wgslDesc = WGPU_SHADER_SOURCE_WGSL_INIT;
+    wgpu::ShaderSourceWGSL wgslDesc = {};
     wgslDesc.code.data = "@compute @workgroup_size(64) fn main() {}";
 
-    WGPUShaderModuleDescriptor smDesc = {};
-    smDesc.nextInChain = &wgslDesc.chain;
+    wgpu::ShaderModuleDescriptor smDesc = {};
+    smDesc.nextInChain = &wgslDesc;
 
-    WGPUShaderModule sm = wgpuDeviceCreateShaderModule(device, &smDesc);
+    wgpu::ShaderModule sm = device.CreateShaderModule(&smDesc);
 
-    WGPUComputePipelineDescriptor computeDesc = WGPU_COMPUTE_PIPELINE_DESCRIPTOR_INIT;
+    wgpu::ComputePipelineDescriptor computeDesc = {};
     computeDesc.compute.module = sm;
 
-    WGPUComputePipeline pipeline = nullptr;
-    wgpuDeviceCreateComputePipelineAsync(
-        device, &computeDesc,
-        [](WGPUCreatePipelineAsyncStatus status, WGPUComputePipeline pipeline,
-           WGPUStringView message,
-           void* userdata) { *static_cast<WGPUComputePipeline*>(userdata) = pipeline; },
-        &pipeline);
-
+    wgpu::ComputePipeline pipeline;
+    device.CreateComputePipelineAsync(
+        &computeDesc, wgpu::CallbackMode::AllowSpontaneous,
+        [&pipeline](wgpu::CreatePipelineAsyncStatus, wgpu::ComputePipeline result,
+                    wgpu::StringView) { pipeline = std::move(result); });
     ASSERT_TRUE(c2sBuf->Flush());
 
     // Delete the server. It should force async work to complete.
@@ -374,11 +366,11 @@ TEST(WireCreatePipelineAsyncTestNullBackend, ServerDeletedBeforeCallback) {
     ASSERT_TRUE(s2cBuf->Flush());
     ASSERT_NE(pipeline, nullptr);
 
-    wgpuComputePipelineRelease(pipeline);
-    wgpuShaderModuleRelease(sm);
-    wgpuDeviceRelease(device);
-    wgpuAdapterRelease(adapter);
-    wgpuInstanceRelease(instance);
+    pipeline = nullptr;
+    sm = nullptr;
+    device = nullptr;
+    adapter = nullptr;
+    instance = nullptr;
 
     s2cBuf->SetHandler(nullptr);
 }
