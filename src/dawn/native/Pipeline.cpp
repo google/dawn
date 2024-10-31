@@ -377,7 +377,8 @@ MaybeError PipelineBase::Initialize(std::optional<ScopedUseShaderPrograms> scope
     if (!scopedUsePrograms) {
         scopedUsePrograms = UseShaderPrograms();
     }
-    return InitializeImpl();
+    DAWN_TRY_CONTEXT(InitializeImpl(), "initializing %s", this);
+    return {};
 }
 
 }  // namespace dawn::native
