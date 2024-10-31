@@ -297,6 +297,21 @@ MaybeError Device::CreateZeroBuffer() {
     zeroBufferDescriptor.label = "ZeroBuffer_Internal";
     DAWN_TRY_ASSIGN(mZeroBuffer, Buffer::Create(this, Unpack(&zeroBufferDescriptor)));
 
+    CommandRecordingContext* commandContext =
+        ToBackend(GetQueue())->GetPendingCommandContext(QueueBase::SubmitMode::Passive);
+
+    DynamicUploader* uploader = GetDynamicUploader();
+    UploadHandle uploadHandle;
+    DAWN_TRY_ASSIGN(uploadHandle,
+                    uploader->Allocate(kZeroBufferSize, GetQueue()->GetPendingCommandSerial(),
+                                       kCopyBufferToBufferOffsetAlignment));
+
+    memset(uploadHandle.mappedBuffer, 0u, kZeroBufferSize);
+
+    CopyFromStagingToBufferHelper(commandContext, uploadHandle.stagingBuffer,
+                                  uploadHandle.startOffset, mZeroBuffer.Get(), 0, kZeroBufferSize);
+
+    mZeroBuffer->SetInitialized(true);
     return {};
 }
 
@@ -304,26 +319,6 @@ MaybeError Device::ClearBufferToZero(CommandRecordingContext* commandContext,
                                      BufferBase* destination,
                                      uint64_t offset,
                                      uint64_t size) {
-    // TODO(crbug.com/dawn/852): It would be ideal to clear the buffer in CreateZeroBuffer, but
-    // the allocation of the staging buffer causes various end2end tests that monitor heap usage
-    // to fail if it's done during device creation. Perhaps ClearUnorderedAccessView*() can be
-    // used to avoid that.
-    if (!mZeroBuffer->IsInitialized()) {
-        DynamicUploader* uploader = GetDynamicUploader();
-        UploadHandle uploadHandle;
-        DAWN_TRY_ASSIGN(uploadHandle,
-                        uploader->Allocate(kZeroBufferSize, GetQueue()->GetPendingCommandSerial(),
-                                           kCopyBufferToBufferOffsetAlignment));
-
-        memset(uploadHandle.mappedBuffer, 0u, kZeroBufferSize);
-
-        CopyFromStagingToBufferHelper(commandContext, uploadHandle.stagingBuffer,
-                                      uploadHandle.startOffset, mZeroBuffer.Get(), 0,
-                                      kZeroBufferSize);
-
-        mZeroBuffer->SetInitialized(true);
-    }
-
     Buffer* dstBuffer = ToBackend(destination);
 
     // Necessary to ensure residency of the zero buffer.
