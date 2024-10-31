@@ -2323,7 +2323,7 @@ source_set("windows_version_resource") {
   sources = [ "$dawn_dxc_dir/resources/windows_version_resource.rc" ]
 }
 
-loadable_module("dxcompiler") {
+shared_library("dxcompiler") {
   if (dawn_has_build) {
     configs -= [ "//build/config/compiler:chromium_code" ]
     configs += [ "//build/config/compiler:no_chromium_code" ]
