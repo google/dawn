@@ -159,10 +159,10 @@ BackendConnection* Connect(InstanceBase* instance) {
 
 struct CopyFromStagingToBufferOperation : PendingOperation {
     void Execute() override {
-        destination->CopyFromStaging(staging, sourceOffset, destinationOffset, size);
+        destination->CopyFromStaging(staging.Get(), sourceOffset, destinationOffset, size);
     }
 
-    raw_ptr<BufferBase> staging;
+    Ref<BufferBase> staging;
     Ref<Buffer> destination;
     uint64_t sourceOffset;
     uint64_t destinationOffset;

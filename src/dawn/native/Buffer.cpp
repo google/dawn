@@ -886,8 +886,7 @@ MaybeError BufferBase::CopyFromStagingBuffer() {
     DAWN_TRY(
         GetDevice()->CopyFromStagingToBuffer(mStagingBuffer.Get(), 0, this, 0, GetAllocatedSize()));
 
-    DynamicUploader* uploader = GetDevice()->GetDynamicUploader();
-    uploader->ReleaseStagingBuffer(std::move(mStagingBuffer));
+    mStagingBuffer = nullptr;
 
     return {};
 }
