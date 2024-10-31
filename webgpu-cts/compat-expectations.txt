@@ -637,6 +637,11 @@ crbug.com/368241687 [ android-pixel-6 arm ] webgpu:shader,execution,expression,c
 # these are also failing on Vulkan (WebGPU Core) on the same device
 crbug.com/367807042 [ android-pixel-6 arm ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:* [ Skip ]
 
+# textureSampleLevel() with depth textures failing on Intel 770
+crbug.com/dawn/0000 [ linux intel-0x4680 ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:depth_2d_coords:* [ Failure ]
+crbug.com/dawn/0000 [ linux intel-0x4680 ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:depth_3d_coords:* [ Failure ]
+crbug.com/dawn/0000 [ linux intel-0x4680 ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:depth_array_2d_coords:* [ Failure ]
+
 # limits:const_array_elements failures
 # also failing on Vulkan Pixel 6 (Core) and NVidia GL ES Compat
 crbug.com/dawn/0000 [ android-pixel-6 arm ] webgpu:shader,execution,limits:const_array_elements: [ Failure ]
