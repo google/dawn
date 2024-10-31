@@ -394,6 +394,28 @@ note: # Disassembly
 )");
 }
 
+TEST_F(IR_ValidatorTest, Function_ParameterDuplicated) {
+    auto* f = b.Function("my_func", ty.void_());
+    auto* p = b.FunctionParam("my_param", ty.u32());
+    f->SetParams({p, p});
+    f->Block()->Append(b.Return(f));
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_EQ(res.Failure().reason.Str(),
+              R"(:1:17 error: function parameter is not unique
+%my_func = func(%my_param:u32%my_param:u32):void {
+                ^^^^^^^^^^^^^
+
+note: # Disassembly
+%my_func = func(%my_param:u32%my_param:u32):void {
+  $B1: {
+    ret
+  }
+}
+)");
+}
+
 TEST_F(IR_ValidatorTest, Function_Param_BothLocationAndBuiltin) {
     auto* f = FragmentEntryPoint("my_func");
 

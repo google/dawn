@@ -1757,6 +1757,7 @@ void Validator::CheckFunction(const Function* func) {
     scope_stack_.Push();
     TINT_DEFER(scope_stack_.Pop());
 
+    Hashset<const FunctionParam*, 4> param_set{};
     for (auto* param : func->Params()) {
         if (!param->Alive()) {
             AddError(param) << "destroyed parameter found in function parameter list";
@@ -1774,6 +1775,11 @@ void Validator::CheckFunction(const Function* func) {
         if (!param->Type()) {
             AddError(param) << "function parameter has nullptr type";
             return;
+        }
+
+        if (!param_set.Add(param)) {
+            AddError(param) << "function parameter is not unique";
+            continue;
         }
 
         // References not allowed on function signatures even with Capability::kAllowRefTypes.
