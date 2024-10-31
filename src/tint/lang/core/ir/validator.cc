@@ -2172,9 +2172,12 @@ void Validator::CheckLet(const Let* l) {
 
     if (l->Result(0) && l->Value()) {
         if (l->Result(0)->Type() != l->Value()->Type()) {
-            AddError(l) << "result type " << style::Type(l->Result(0)->Type()->FriendlyName())
-                        << " does not match value type "
-                        << style::Type(l->Value()->Type()->FriendlyName());
+            auto result_type_name =
+                l->Result(0)->Type() ? l->Result(0)->Type()->FriendlyName() : "undef";
+            auto value_type_name =
+                l->Value()->Type() ? l->Value()->Type()->FriendlyName() : "undef";
+            AddError(l) << "result type " << style::Type(result_type_name)
+                        << " does not match value type " << style::Type(value_type_name);
         }
     }
 }
@@ -2390,8 +2393,8 @@ void Validator::CheckAccess(const Access* a) {
 
         auto* index = a->Indices()[i];
         if (DAWN_UNLIKELY(!index->Type() || !index->Type()->IsIntegerScalar())) {
-            err() << "index must be integer, got "
-                  << (index->Type() ? index->Type()->FriendlyName() : "undefined");
+            auto name = index->Type() ? index->Type()->FriendlyName() : "undef";
+            err() << "index must be integer, got " << name;
             return;
         }
 
