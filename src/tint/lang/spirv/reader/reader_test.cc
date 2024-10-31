@@ -391,6 +391,91 @@ $B1: {  # root
 )");
 }
 
+TEST_F(SpirvReaderTest, ClipDistances_gl_PerVertex) {
+    auto got = Run(R"(
+               OpCapability Shader
+               OpCapability ClipDistance
+          %1 = OpExtInstImport "GLSL.std.450"
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint Vertex %main "main" %_
+               OpSource GLSL 450
+               OpName %main "main"
+               OpName %gl_PerVertex "gl_PerVertex"
+               OpMemberName %gl_PerVertex 0 "gl_Position"
+               OpMemberName %gl_PerVertex 1 "gl_ClipDistance"
+               OpName %_ ""
+               OpDecorate %gl_PerVertex Block
+               OpMemberDecorate %gl_PerVertex 0 BuiltIn Position
+               OpMemberDecorate %gl_PerVertex 1 BuiltIn ClipDistance
+       %void = OpTypeVoid
+          %3 = OpTypeFunction %void
+      %float = OpTypeFloat 32
+    %v4float = OpTypeVector %float 4
+       %uint = OpTypeInt 32 0
+     %uint_2 = OpConstant %uint 2
+%_arr_float_uint_2 = OpTypeArray %float %uint_2
+%gl_PerVertex = OpTypeStruct %v4float %_arr_float_uint_2
+%_ptr_Output_gl_PerVertex = OpTypePointer Output %gl_PerVertex
+          %_ = OpVariable %_ptr_Output_gl_PerVertex Output
+        %int = OpTypeInt 32 1
+      %int_1 = OpConstant %int 1
+      %int_0 = OpConstant %int 0
+    %float_0 = OpConstant %float 0
+%_ptr_Output_float = OpTypePointer Output %float
+         %21 = OpConstantComposite %v4float %float_0 %float_0 %float_0 %float_0
+%_ptr_Output_v4float = OpTypePointer Output %v4float
+       %main = OpFunction %void None %3
+          %5 = OpLabel
+         %19 = OpAccessChain %_ptr_Output_float %_ %int_1 %int_0
+               OpStore %19 %float_0
+         %20 = OpAccessChain %_ptr_Output_float %_ %int_1 %int_1
+               OpStore %20 %float_0
+         %23 = OpAccessChain %_ptr_Output_v4float %_ %int_0
+               OpStore %23 %21
+               OpReturn
+               OpFunctionEnd
+)");
+    ASSERT_EQ(got, Success);
+    EXPECT_EQ(got, R"(
+tint_symbol_2 = struct @align(16) {
+  tint_symbol:vec4<f32> @offset(0)
+  tint_symbol_1:array<f32, 2> @offset(16)
+}
+
+tint_symbol_3 = struct @align(16) {
+  tint_symbol:vec4<f32> @offset(0), @builtin(position)
+  tint_symbol_1:array<f32, 2> @offset(16), @builtin(clip_distances)
+}
+
+$B1: {  # root
+  %1:ptr<private, tint_symbol_2, read_write> = var
+}
+
+%main_inner = func():void {
+  $B2: {
+    %3:ptr<private, f32, read_write> = access %1, 1i, 0i
+    store %3, 0.0f
+    %4:ptr<private, f32, read_write> = access %1, 1i, 1i
+    store %4, 0.0f
+    %5:ptr<private, vec4<f32>, read_write> = access %1, 0i
+    store %5, vec4<f32>(0.0f)
+    ret
+  }
+}
+%main = @vertex func():tint_symbol_3 {
+  $B3: {
+    %7:void = call %main_inner
+    %8:ptr<private, vec4<f32>, read_write> = access %1, 0u
+    %9:vec4<f32> = load %8
+    %10:ptr<private, array<f32, 2>, read_write> = access %1, 1u
+    %11:array<f32, 2> = load %10
+    %12:tint_symbol_3 = construct %9, %11
+    ret %12
+  }
+}
+)");
+}
+
 TEST_F(SpirvReaderTest, SampleMask) {
     auto got = Run(R"(
                OpCapability Shader
