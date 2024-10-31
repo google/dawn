@@ -94,6 +94,8 @@ DescriptorSetAllocator::~DescriptorSetAllocator() {
 }
 
 ResultOrError<DescriptorSetAllocation> DescriptorSetAllocator::Allocate(BindGroupLayout* layout) {
+    Mutex::AutoLock lock(&mMutex);
+
     if (mAvailableDescriptorPoolIndices.empty()) {
         DAWN_TRY(AllocateDescriptorPool(layout));
     }
@@ -116,6 +118,8 @@ ResultOrError<DescriptorSetAllocation> DescriptorSetAllocator::Allocate(BindGrou
 }
 
 void DescriptorSetAllocator::Deallocate(DescriptorSetAllocation* allocationInfo) {
+    Mutex::AutoLock lock(&mMutex);
+
     DAWN_ASSERT(allocationInfo != nullptr);
     DAWN_ASSERT(allocationInfo->set != VK_NULL_HANDLE);
 
@@ -136,6 +140,8 @@ void DescriptorSetAllocator::Deallocate(DescriptorSetAllocation* allocationInfo)
 }
 
 void DescriptorSetAllocator::FinishDeallocation(ExecutionSerial completedSerial) {
+    Mutex::AutoLock lock(&mMutex);
+
     for (const Deallocation& dealloc : mPendingDeallocations.IterateUpTo(completedSerial)) {
         DAWN_ASSERT(dealloc.poolIndex < mDescriptorPools.size());
 

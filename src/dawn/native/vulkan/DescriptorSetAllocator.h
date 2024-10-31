@@ -31,6 +31,7 @@
 #include <vector>
 
 #include "absl/container/flat_hash_map.h"
+#include "dawn/common/Mutex.h"
 #include "dawn/common/SerialQueue.h"
 #include "dawn/common/vulkan_platform.h"
 #include "dawn/native/Error.h"
@@ -81,6 +82,9 @@ class DescriptorSetAllocator : public ObjectBase {
     };
     SerialQueue<ExecutionSerial, Deallocation> mPendingDeallocations;
     ExecutionSerial mLastDeallocationSerial = ExecutionSerial(0);
+
+    // Used to guard all public member functions.
+    Mutex mMutex;
 };
 
 }  // namespace dawn::native::vulkan
