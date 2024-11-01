@@ -588,8 +588,14 @@ MaybeError BufferBase::MapAtCreation() {
     DeviceBase* device = GetDevice();
     if (device->IsToggleEnabled(Toggle::LazyClearResourceOnFirstUse) &&
         !device->IsToggleEnabled(Toggle::DisableLazyClearForMappedAtCreationBuffer)) {
-        memset(ptr, uint8_t(0u), size);
-        device->IncrementLazyClearCountForTesting();
+        // The staging buffer is created with `MappedAtCreation == true` so we don't need to clear
+        // it again.
+        if (mStagingBuffer != nullptr) {
+            DAWN_ASSERT(!mStagingBuffer->NeedsInitialization());
+        } else {
+            memset(ptr, uint8_t(0u), size);
+            device->IncrementLazyClearCountForTesting();
+        }
     } else if (device->IsToggleEnabled(Toggle::NonzeroClearResourcesOnCreationForTesting)) {
         memset(ptr, uint8_t(1u), size);
     }
@@ -624,8 +630,6 @@ MaybeError BufferBase::MapAtCreationInternal() {
             stagingBufferDesc.size = Align(GetAllocatedSize(), 4);
             stagingBufferDesc.mappedAtCreation = true;
             stagingBufferDesc.label = "Dawn_MappedAtCreationStaging";
-
-            IgnoreLazyClearCountScope scope(GetDevice());
             DAWN_TRY_ASSIGN(mStagingBuffer, GetDevice()->CreateBuffer(&stagingBufferDesc));
         }
     }
