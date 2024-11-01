@@ -24,10 +24,9 @@ void main_inner(float x) {
   } else {
     v = false;
   }
-  switch(int(v)) {
-    default:
-    case int(0):
-    {
+  int v_1 = int(v);
+  {
+    while(true) {
       break;
     }
   }

@@ -22,10 +22,9 @@ int tint_f32_to_i32(float value) {
 }
 
 void main_inner(float x) {
-  switch(tint_f32_to_i32(x)) {
-    default:
-    case int(0):
-    {
+  tint_f32_to_i32(x);
+  {
+    while(true) {
       t.Sample(s, (0.0f).xx);
       break;
     }

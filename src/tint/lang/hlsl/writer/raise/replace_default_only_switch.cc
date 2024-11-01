@@ -25,7 +25,7 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "src/tint/lang/hlsl/writer/raise/fxc_polyfill.h"
+#include "src/tint/lang/hlsl/writer/raise/replace_default_only_switch.h"
 
 #include "src/tint/lang/core/ir/block.h"
 #include "src/tint/lang/core/ir/builder.h"
@@ -56,26 +56,51 @@ struct State {
 
     /// Process the module.
     void Process() {
+        Vector<core::ir::Switch*, 4> worklist;
         for (auto* inst : ir.Instructions()) {
             if (auto* swtch = inst->As<core::ir::Switch>()) {
-                // BUG(crbug.com/tint/1188): work around default-only switches
-                //
-                // FXC fails to compile a switch with just a default case, ignoring the
-                // default case body. We work around this here by emitting the zero case as a
-                // fallthrough to the default case
                 if (swtch->Cases().Length() == 1 && swtch->Cases()[0].selectors.Length() == 1 &&
                     swtch->Cases()[0].selectors[0].IsDefault()) {
-                    swtch->Cases()[0].selectors.Push({b.Zero(swtch->Condition()->Type())});
+                    ProcessSwitch(swtch);
                 }
             }
         }
+    }
+
+    void ProcessSwitch(core::ir::Switch* swtch) {
+        // Replace the switch with a one-iteration loop. We use a loop so that 'break's
+        // in switch used for control flow will continue to work.
+        // Note that we can't just add a 'case 0' fallthrough on the 'default' as FXC treates it
+        // the same as just a 'default', resulting in the same miscompilation.
+
+        auto* loop = b.Loop();
+        loop->InsertBefore(swtch);
+
+        // Replace all switch exits with loop exits. This includes nested exits.
+        auto exits = swtch->Exits().Vector();  // Copy to avoid iterator invalidation
+        for (auto& exit : exits) {
+            exit->ReplaceWith(b.ExitLoop(loop));
+            exit->Destroy();
+        }
+
+        // Move all instructions from the default case to the loop body
+        auto swtch_default_block = swtch->Cases()[0].block;
+        for (auto* inst = *swtch_default_block->begin(); inst;) {
+            // Remember next instruction as we're about to remove the current one from its block
+            auto* next = inst->next.Get();
+            TINT_DEFER(inst = next);
+            inst->Remove();
+            loop->Body()->Append(inst);
+        }
+
+        swtch->Destroy();
     }
 };
 
 }  // namespace
 
-Result<SuccessType> FxcPolyfill(core::ir::Module& ir) {
-    auto result = ValidateAndDumpIfNeeded(ir, "hlsl.FxcPolyfill");
+Result<SuccessType> ReplaceDefaultOnlySwitch(core::ir::Module& ir) {
+    auto result = ValidateAndDumpIfNeeded(ir, "hlsl.ReplaceDefaultOnlySwitch");
     if (result != Success) {
         return result.Failure();
     }

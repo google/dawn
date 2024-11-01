@@ -229,10 +229,8 @@ TEST_F(HlslWriterTest, SwitchOnlyDefaultCaseNoSideEffectsConditionFXC) {
 void foo() {
   int cond = int(0);
   int a = int(0);
-  switch(cond) {
-    default:
-    case int(0):
-    {
+  {
+    while(true) {
       a = int(42);
       break;
     }
@@ -295,10 +293,9 @@ int bar() {
 
 [numthreads(1, 1, 1)]
 void foo() {
-  switch(bar()) {
-    default:
-    case int(0):
-    {
+  bar();
+  {
+    while(true) {
       a = int(42);
       break;
     }

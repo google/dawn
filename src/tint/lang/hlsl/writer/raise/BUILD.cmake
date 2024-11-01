@@ -47,8 +47,6 @@ tint_add_target(tint_lang_hlsl_writer_raise lib
   lang/hlsl/writer/raise/decompose_storage_access.h
   lang/hlsl/writer/raise/decompose_uniform_access.cc
   lang/hlsl/writer/raise/decompose_uniform_access.h
-  lang/hlsl/writer/raise/fxc_polyfill.cc
-  lang/hlsl/writer/raise/fxc_polyfill.h
   lang/hlsl/writer/raise/localize_struct_array_assignment.cc
   lang/hlsl/writer/raise/localize_struct_array_assignment.h
   lang/hlsl/writer/raise/pixel_local.cc
@@ -57,6 +55,8 @@ tint_add_target(tint_lang_hlsl_writer_raise lib
   lang/hlsl/writer/raise/promote_initializers.h
   lang/hlsl/writer/raise/raise.cc
   lang/hlsl/writer/raise/raise.h
+  lang/hlsl/writer/raise/replace_default_only_switch.cc
+  lang/hlsl/writer/raise/replace_default_only_switch.h
   lang/hlsl/writer/raise/replace_non_indexable_mat_vec_stores.cc
   lang/hlsl/writer/raise/replace_non_indexable_mat_vec_stores.h
   lang/hlsl/writer/raise/shader_io.cc
@@ -105,10 +105,10 @@ tint_add_target(tint_lang_hlsl_writer_raise_test test
   lang/hlsl/writer/raise/builtin_polyfill_test.cc
   lang/hlsl/writer/raise/decompose_storage_access_test.cc
   lang/hlsl/writer/raise/decompose_uniform_access_test.cc
-  lang/hlsl/writer/raise/fxc_polyfill_test.cc
   lang/hlsl/writer/raise/localize_struct_array_assignment_test.cc
   lang/hlsl/writer/raise/pixel_local_test.cc
   lang/hlsl/writer/raise/promote_initializers_test.cc
+  lang/hlsl/writer/raise/replace_default_only_switch_test.cc
   lang/hlsl/writer/raise/replace_non_indexable_mat_vec_stores_test.cc
   lang/hlsl/writer/raise/shader_io_test.cc
 )

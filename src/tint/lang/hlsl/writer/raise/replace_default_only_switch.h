@@ -25,10 +25,8 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef SRC_TINT_LANG_HLSL_WRITER_RAISE_FXC_POLYFILL_H_
-#define SRC_TINT_LANG_HLSL_WRITER_RAISE_FXC_POLYFILL_H_
-
-#include <string>
+#ifndef SRC_TINT_LANG_HLSL_WRITER_RAISE_REPLACE_DEFAULT_ONLY_SWITCH_H_
+#define SRC_TINT_LANG_HLSL_WRITER_RAISE_REPLACE_DEFAULT_ONLY_SWITCH_H_
 
 #include "src/tint/utils/result/result.h"
 
@@ -39,12 +37,13 @@ class Module;
 
 namespace tint::hlsl::writer::raise {
 
-/// FxcPollyfill is a transform that replaces code constructs which cause FXC mis-compiles with
-/// safer constructs.
+/// ReplaceDefaultOnlySwitch is a transform that replaces switch statements with a single
+/// default case with a single-iteration loop. This is to work around an FXC bug that causes
+/// it to miscompile default-only-switch statements. See crbug.com/tint/1188.
 /// @param module the module to transform
 /// @returns success or failure
-Result<SuccessType> FxcPolyfill(core::ir::Module& module);
+Result<SuccessType> ReplaceDefaultOnlySwitch(core::ir::Module& module);
 
 }  // namespace tint::hlsl::writer::raise
 
-#endif  // SRC_TINT_LANG_HLSL_WRITER_RAISE_FXC_POLYFILL_H_
+#endif  // SRC_TINT_LANG_HLSL_WRITER_RAISE_REPLACE_DEFAULT_ONLY_SWITCH_H_

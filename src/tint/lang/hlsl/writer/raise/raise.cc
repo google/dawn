@@ -52,10 +52,10 @@
 #include "src/tint/lang/hlsl/writer/raise/builtin_polyfill.h"
 #include "src/tint/lang/hlsl/writer/raise/decompose_storage_access.h"
 #include "src/tint/lang/hlsl/writer/raise/decompose_uniform_access.h"
-#include "src/tint/lang/hlsl/writer/raise/fxc_polyfill.h"
 #include "src/tint/lang/hlsl/writer/raise/localize_struct_array_assignment.h"
 #include "src/tint/lang/hlsl/writer/raise/pixel_local.h"
 #include "src/tint/lang/hlsl/writer/raise/promote_initializers.h"
+#include "src/tint/lang/hlsl/writer/raise/replace_default_only_switch.h"
 #include "src/tint/lang/hlsl/writer/raise/replace_non_indexable_mat_vec_stores.h"
 #include "src/tint/lang/hlsl/writer/raise/shader_io.h"
 #include "src/tint/utils/result/result.h"
@@ -128,7 +128,7 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
     RUN_TRANSFORM(core::ir::transform::AddEmptyEntryPoint, module);
 
     if (options.compiler == Options::Compiler::kFXC) {
-        RUN_TRANSFORM(raise::FxcPolyfill, module);
+        RUN_TRANSFORM(raise::ReplaceDefaultOnlySwitch, module);
         RUN_TRANSFORM(raise::LocalizeStructArrayAssignment, module);
         RUN_TRANSFORM(raise::ReplaceNonIndexableMatVecStores, module);
     }

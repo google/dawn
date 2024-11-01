@@ -5,10 +5,9 @@ int tint_f32_to_i32(float value) {
 }
 
 void foo(float x) {
-  switch(tint_f32_to_i32(x)) {
-    default:
-    case int(0):
-    {
+  tint_f32_to_i32(x);
+  {
+    while(true) {
       break;
     }
   }
@@ -20,10 +19,9 @@ int baz(int x) {
 }
 
 void bar(float x) {
-  switch(baz(tint_f32_to_i32(x))) {
-    default:
-    case int(0):
-    {
+  baz(tint_f32_to_i32(x));
+  {
+    while(true) {
       break;
     }
   }
