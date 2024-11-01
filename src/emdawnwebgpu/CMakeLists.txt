@@ -191,6 +191,7 @@ if (${DAWN_ENABLE_EMSCRIPTEN})
     target_include_directories(emdawnwebgpu_config BEFORE INTERFACE
         "${EM_BUILD_GEN_DIR}/include"
     )
+    add_dependencies(emdawnwebgpu_config webgpu_generated_struct_info_js emdawnwebgpu_js_gen)
     target_link_options(emdawnwebgpu_config INTERFACE
         # We are using Dawn-generated bindings, not built-in ones
         "-sUSE_WEBGPU=0"
@@ -244,7 +245,7 @@ if (${DAWN_ENABLE_EMSCRIPTEN})
             # We need ASYNCIFY for Future implementation. Note that for
             # some reason, at the moment, these tests do not work with
             # JSPI.
-            "-sASYNCIFY=1"
+            "-sJSPI=1"
         )
     endif()
 

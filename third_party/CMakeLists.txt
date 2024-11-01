@@ -76,6 +76,13 @@ if ((DAWN_BUILD_TESTS OR TINT_BUILD_TESTS) AND NOT TARGET gmock)
         # For Emscripten builds, we need to disable pthreads.
         set(gtest_disable_pthreads ON)
     endif()
+
+    # We don't use exceptions, so we don't need gtest to handle them. Emscripten
+    # builds in particular, with JSPI enabled, crash without this enabled.
+    # There doesn't seem to be an option to tell the gtest build files to do
+    # this, so we set it globally. (This seems to be the intended usage.)
+    add_definitions(-DGTEST_HAS_EXCEPTIONS=0)
+
     add_subdirectory(${DAWN_GOOGLETEST_DIR} "${CMAKE_CURRENT_BINARY_DIR}/googletest" EXCLUDE_FROM_ALL)
 endif()
 
