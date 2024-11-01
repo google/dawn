@@ -138,8 +138,7 @@ MaybeError ComputePipeline::InitializeImpl() {
             "CreateComputePipelines"));
         cacheTimer.RecordMicroseconds("Vulkan.CreateComputePipelines.CacheMiss");
     }
-    // TODO(dawn:549): Flush is currently in the same thread, but perhaps deferrable.
-    DAWN_TRY(cache->FlushIfNeeded());
+    DAWN_TRY(cache->DidCompilePipeline());
 
     SetLabelImpl();
 

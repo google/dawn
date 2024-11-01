@@ -29,8 +29,8 @@
 
 namespace dawn::native {
 
-PipelineCacheBase::PipelineCacheBase(BlobCache* cache, const CacheKey& key)
-    : mCache(cache), mKey(key) {}
+PipelineCacheBase::PipelineCacheBase(BlobCache* cache, const CacheKey& key, bool storeOnIdle)
+    : mCache(cache), mKey(key), mStoreOnIdle(storeOnIdle) {}
 
 Blob PipelineCacheBase::Initialize() {
     DAWN_ASSERT(!mInitialized);
@@ -57,10 +57,27 @@ MaybeError PipelineCacheBase::Flush() {
     return {};
 }
 
-MaybeError PipelineCacheBase::FlushIfNeeded() {
+MaybeError PipelineCacheBase::DidCompilePipeline() {
     DAWN_ASSERT(mInitialized);
-    if (!CacheHit()) {
-        return Flush();
+    if (mStoreOnIdle) {
+        // Assume pipeline cache was modified by compiling a pipeline. It will be stored in
+        // BlobCache at some later point in StoreOnIdle() if necessary.
+        mNeedsStore = true;
+    } else {
+        // TODO(dawn:549): Flush is currently synchronously happening on the same thread as pipeline
+        // compilation, but it's perhaps deferrable.
+        if (!CacheHit()) {
+            return Flush();
+        }
+    }
+    return {};
+}
+
+MaybeError PipelineCacheBase::StoreOnIdle() {
+    DAWN_ASSERT(mStoreOnIdle);
+    if (mNeedsStore) {
+        mNeedsStore = false;
+        DAWN_TRY(Flush());
     }
     return {};
 }

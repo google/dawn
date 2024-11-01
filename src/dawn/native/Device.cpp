@@ -2445,6 +2445,8 @@ void DeviceBase::APISetLabel(StringView label) {
 
 void DeviceBase::SetLabelImpl() {}
 
+void DeviceBase::PerformIdleTasksImpl() {}
+
 bool DeviceBase::ShouldDuplicateNumWorkgroupsForDispatchIndirect(
     ComputePipelineBase* computePipeline) const {
     return false;
@@ -2562,6 +2564,11 @@ void DeviceBase::ReduceMemoryUsage() {
     GetDynamicUploader()->Deallocate(GetQueue()->GetCompletedCommandSerial(), /*freeAll=*/true);
     mInternalPipelineStore->ResetScratchBuffers();
     mTemporaryUniformBuffer = nullptr;
+}
+
+void DeviceBase::PerformIdleTasks() {
+    DAWN_ASSERT(IsLockedByCurrentThreadIfNeeded());
+    PerformIdleTasksImpl();
 }
 
 ResultOrError<Ref<BufferBase>> DeviceBase::GetOrCreateTemporaryUniformBuffer(size_t size) {

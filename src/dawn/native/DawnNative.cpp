@@ -312,4 +312,10 @@ void ReduceMemoryUsage(WGPUDevice device) {
     FromAPI(device)->ReduceMemoryUsage();
 }
 
+void PerformIdleTasks(const wgpu::Device& device) {
+    auto* deviceBase = FromAPI(device.Get());
+    auto deviceLock(deviceBase->GetScopedLock());
+    deviceBase->PerformIdleTasks();
+}
+
 }  // namespace dawn::native

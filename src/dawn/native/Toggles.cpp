@@ -564,6 +564,11 @@ static constexpr ToggleEnumAndInfoList kToggleNameAndInfoList = {{
       "while the WebGPU CTS is expecting n. Scale the depth bias value by multiple 0.5 on certain "
       "backends to achieve conformant result.",
       "https://crbug.com/42241017", ToggleStage::Device}},
+    {Toggle::VulkanMonolithicPipelineCache,
+     {"vulkan_monolithic_pipeline_cache",
+      "Use a monolithic VkPipelineCache per device. The embedder is responsible for calling "
+      "PerformIdleTasks() on the device to serialize VkPipelineCache to BlobCache if needed.",
+      "crbug.com/370343334", ToggleStage::Device}},
     {Toggle::NoWorkaroundSampleMaskBecomesZeroForAllButLastColorTarget,
      {"no_workaround_sample_mask_becomes_zero_for_all_but_last_color_target",
       "MacOS 12.0+ Intel has a bug where the sample mask is only applied for the last color "
