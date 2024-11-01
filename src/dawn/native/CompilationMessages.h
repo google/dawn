@@ -32,10 +32,10 @@
 #include <string>
 #include <vector>
 
+#include "dawn/common/MutexProtected.h"
+#include "dawn/common/NonCopyable.h"
 #include "dawn/native/Error.h"
 #include "dawn/native/dawn_platform.h"
-
-#include "dawn/common/NonCopyable.h"
 
 namespace tint::diag {
 class Diagnostic;
@@ -76,7 +76,7 @@ class OwnedCompilationMessages : public NonCopyable {
     void AddMessage(const CompilationMessage& message);
     void AddFormattedTintMessages(const tint::diag::List& diagnostics);
 
-    CompilationInfo mCompilationInfo;
+    MutexProtected<std::optional<CompilationInfo>> mCompilationInfo = std::nullopt;
     std::vector<std::unique_ptr<std::string>> mMessageStrings;
     std::vector<CompilationMessage> mMessages;
     std::vector<std::string> mFormattedTintMessages;
