@@ -517,9 +517,15 @@ void Device::CopyFromStagingToBufferHelper(CommandRecordingContext* commandConte
     Buffer* srcBuffer = ToBackend(source);
     dstBuffer->TrackUsageAndTransitionNow(commandContext, wgpu::BufferUsage::CopyDst);
 
-    commandContext->GetCommandList()->CopyBufferRegion(
-        dstBuffer->GetD3D12Resource(), destinationOffset, srcBuffer->GetD3D12Resource(),
-        sourceOffset, size);
+    if (CanCopyBufferToBufferWithCopyResource(srcBuffer, sourceOffset, dstBuffer, destinationOffset,
+                                              size)) {
+        commandContext->GetCommandList()->CopyResource(dstBuffer->GetD3D12Resource(),
+                                                       srcBuffer->GetD3D12Resource());
+    } else {
+        commandContext->GetCommandList()->CopyBufferRegion(
+            dstBuffer->GetD3D12Resource(), destinationOffset, srcBuffer->GetD3D12Resource(),
+            sourceOffset, size);
+    }
 }
 
 MaybeError Device::CopyFromStagingToTextureImpl(const BufferBase* source,
