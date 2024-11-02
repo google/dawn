@@ -57,13 +57,13 @@ class GPUQueue final : public interop::GPUQueue {
                      interop::GPUSize64 dataOffset,
                      std::optional<interop::GPUSize64> size) override;
     void writeTexture(Napi::Env,
-                      interop::GPUImageCopyTexture destination,
+                      interop::GPUTexelCopyTextureInfo destination,
                       interop::AllowSharedBufferSource data,
-                      interop::GPUImageDataLayout dataLayout,
+                      interop::GPUTexelCopyBufferLayout dataLayout,
                       interop::GPUExtent3D size) override;
     void copyExternalImageToTexture(Napi::Env,
-                                    interop::GPUImageCopyExternalImage source,
-                                    interop::GPUImageCopyTextureTagged destination,
+                                    interop::GPUCopyExternalImageSourceInfo source,
+                                    interop::GPUCopyExternalImageDestInfo destination,
                                     interop::GPUExtent3D copySize) override;
     std::string getLabel(Napi::Env) override;
     void setLabel(Napi::Env, std::string value) override;

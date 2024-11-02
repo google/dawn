@@ -119,8 +119,8 @@ void GPUCommandEncoder::copyBufferToBuffer(Napi::Env env,
 }
 
 void GPUCommandEncoder::copyBufferToTexture(Napi::Env env,
-                                            interop::GPUImageCopyBuffer source,
-                                            interop::GPUImageCopyTexture destination,
+                                            interop::GPUTexelCopyBufferInfo source,
+                                            interop::GPUTexelCopyTextureInfo destination,
                                             interop::GPUExtent3D copySize) {
     Converter conv(env);
 
@@ -137,8 +137,8 @@ void GPUCommandEncoder::copyBufferToTexture(Napi::Env env,
 }
 
 void GPUCommandEncoder::copyTextureToBuffer(Napi::Env env,
-                                            interop::GPUImageCopyTexture source,
-                                            interop::GPUImageCopyBuffer destination,
+                                            interop::GPUTexelCopyTextureInfo source,
+                                            interop::GPUTexelCopyBufferInfo destination,
                                             interop::GPUExtent3D copySize) {
     Converter conv(env);
 
@@ -155,8 +155,8 @@ void GPUCommandEncoder::copyTextureToBuffer(Napi::Env env,
 }
 
 void GPUCommandEncoder::copyTextureToTexture(Napi::Env env,
-                                             interop::GPUImageCopyTexture source,
-                                             interop::GPUImageCopyTexture destination,
+                                             interop::GPUTexelCopyTextureInfo source,
+                                             interop::GPUTexelCopyTextureInfo destination,
                                              interop::GPUExtent3D copySize) {
     Converter conv(env);
 

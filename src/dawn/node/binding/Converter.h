@@ -129,13 +129,16 @@ class Converter {
 
     [[nodiscard]] bool Convert(wgpu::TextureAspect& out, const interop::GPUTextureAspect& in);
 
-    [[nodiscard]] bool Convert(wgpu::ImageCopyTexture& out, const interop::GPUImageCopyTexture& in);
+    [[nodiscard]] bool Convert(wgpu::ImageCopyTexture& out,
+                               const interop::GPUTexelCopyTextureInfo& in);
 
-    [[nodiscard]] bool Convert(wgpu::ImageCopyBuffer& out, const interop::GPUImageCopyBuffer& in);
+    [[nodiscard]] bool Convert(wgpu::ImageCopyBuffer& out,
+                               const interop::GPUTexelCopyBufferInfo& in);
 
     [[nodiscard]] bool Convert(BufferSource& out, interop::BufferSource in);
 
-    [[nodiscard]] bool Convert(wgpu::TextureDataLayout& out, const interop::GPUImageDataLayout& in);
+    [[nodiscard]] bool Convert(wgpu::TextureDataLayout& out,
+                               const interop::GPUTexelCopyBufferLayout& in);
 
     [[nodiscard]] bool Convert(wgpu::TextureFormat& out, const interop::GPUTextureFormat& in);
 
