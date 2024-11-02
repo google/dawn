@@ -58,6 +58,9 @@ class Module {
     /// Map of value to name
     Hashmap<const Value*, Symbol, 32> value_to_name_;
 
+    // The source information for a value
+    Hashmap<const Value*, Source, 32> value_to_source_;
+
     /// A predicate function that returns true if the instruction or value is alive.
     struct IsAlive {
         bool operator()(const Instruction* instruction) const { return instruction->Alive(); }
@@ -122,6 +125,25 @@ class Module {
     /// Removes the name from @p value
     /// @param value the value to remove the name from
     void ClearName(Value* value);
+
+    /// @param inst the instruction to set the source of
+    /// @param src the source
+    /// @note requires the instruction be a single result instruction.
+    void SetSource(Instruction* inst, Source src);
+
+    /// @param value the value to set the source
+    /// @param src the source
+    void SetSource(Value* value, Source src);
+
+    /// @param inst the instruction
+    /// @return the source of the given instruction, or an empty source if the instruction does not
+    /// have a source or does not have a single return value.
+    Source SourceOf(const Instruction* inst) const;
+
+    /// @param value the value
+    /// @return the source of the given value, or an empty source if the value does not have a
+    /// source.
+    Source SourceOf(const Value* value) const;
 
     /// @return the type manager for the module
     core::type::Manager& Types() { return constant_values.types; }

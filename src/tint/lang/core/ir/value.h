@@ -158,6 +158,7 @@ class Value : public Castable<Value> {
     /// Bitset of value flags
     tint::EnumSet<Flag> flags_;
 };
+
 }  // namespace tint::core::ir
 
 #endif  // SRC_TINT_LANG_CORE_IR_VALUE_H_

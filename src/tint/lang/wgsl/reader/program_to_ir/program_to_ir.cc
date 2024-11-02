@@ -267,7 +267,6 @@ class Impl {
         auto* ir_func = builder_.Function(ast_func->name->symbol.NameView(),
                                           sem->ReturnType()->Clone(clone_ctx_.type_ctx));
         current_function_ = ir_func;
-
         scopes_.Set(ast_func->name->symbol, ir_func);
 
         if (ast_func->IsEntryPoint()) {
@@ -718,10 +717,7 @@ class Impl {
     // the code has to continue as before it just predicates writes. If WGSL grows some kind of
     // terminating discard that would probably make sense as a Block but would then require
     // figuring out the multi-level exit that is triggered.
-    void EmitDiscard(const ast::DiscardStatement*) {
-        auto* inst = builder_.Discard();
-        current_block_->Append(inst);
-    }
+    void EmitDiscard(const ast::DiscardStatement*) { current_block_->Append(builder_.Discard()); }
 
     void EmitBreakIf(const ast::BreakIfStatement* stmt) {
         auto* current_control = FindEnclosingControl(ControlFlags::kExcludeSwitch);
@@ -1162,6 +1158,7 @@ class Impl {
     core::ir::Value* EmitValueExpression(const ast::Expression* root) {
         auto res = EmitExpression(root);
         if (auto** val = std::get_if<core::ir::Value*>(&res)) {
+            builder_.ir.SetSource(*val, root->source);
             return *val;
         }
         TINT_ICE() << "expression did not resolve to a value";
@@ -1204,8 +1201,9 @@ class Impl {
                 // Store the declaration so we can get the instruction to store too
                 scopes_.Set(v->name->symbol, val->Result(0));
 
-                // Record the original name of the var
+                // Record the original name and source of the var
                 builder_.ir.SetName(val, v->name->symbol.Name());
+                builder_.ir.SetSource(val, v->source);
             },
             [&](const ast::Let* l) {
                 auto init = EmitValueExpression(l->initializer);
@@ -1217,6 +1215,7 @@ class Impl {
 
                 // Store the results of the initialization
                 scopes_.Set(l->name->symbol, let->Result(0));
+                builder_.ir.SetSource(let, l->source);
             },
             [&](const ast::Override* o) {
                 auto* o_sem = program_.Sem().Get(o);
@@ -1238,8 +1237,9 @@ class Impl {
                 // Store the declaration so we can get the instruction to store too
                 scopes_.Set(o->name->symbol, override->Result(0));
 
-                // Record the original name of the var
+                // Record the original name and source of the var
                 builder_.ir.SetName(override, o->name->symbol.Name());
+                builder_.ir.SetSource(override, o->source);
             },
             [&](const ast::Const*) {
                 // Skip. This should be handled by const-eval already, so the const will be a

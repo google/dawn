@@ -150,6 +150,26 @@ void Module::ClearName(Value* value) {
     value_to_name_.Remove(value);
 }
 
+void Module::SetSource(Instruction* inst, Source src) {
+    TINT_ASSERT(inst->Results().Length() == 1);
+    SetSource(inst->Result(0), src);
+}
+
+void Module::SetSource(Value* value, Source src) {
+    value_to_source_.Replace(value, src);
+}
+
+Source Module::SourceOf(const Instruction* inst) const {
+    if (inst->Results().Length() != 1) {
+        return Source{};
+    }
+    return SourceOf(inst->Result(0));
+}
+
+Source Module::SourceOf(const Value* value) const {
+    return value_to_source_.GetOr(value, Source{});
+}
+
 Vector<Function*, 16> Module::DependencyOrderedFunctions() {
     return FunctionSorter<Function>::SortFunctions(*this);
 }

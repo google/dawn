@@ -78,7 +78,6 @@ TEST_F(IR_FromProgramTest, Func) {
 
     core::ir::Function* f = m->functions[0];
     ASSERT_NE(f->Block(), nullptr);
-
     EXPECT_EQ(m->functions[0]->Stage(), core::ir::Function::PipelineStage::kUndefined);
 
     EXPECT_EQ(core::ir::Disassembler(m.Get()).Plain(), R"(%f = func():void {
@@ -1181,16 +1180,19 @@ TEST_F(IR_FromProgramTest, BugChromium324466107) {
 }
 
 TEST_F(IR_FromProgramTest, OverrideNoInitializer) {
-    Override("a", ty.i32());
+    Override(Source{{1, 2}}, "a", ty.i32());
 
     auto res = Build();
     ASSERT_EQ(res, Success);
 
     auto m = res.Move();
-    auto* overide = FindSingleInstruction<core::ir::Override>(m);
+    auto* override = FindSingleInstruction<core::ir::Override>(m);
 
-    ASSERT_NE(overide, nullptr);
-    ASSERT_EQ(overide->Initializer(), nullptr);
+    ASSERT_NE(override, nullptr);
+    ASSERT_EQ(override->Initializer(), nullptr);
+
+    Source::Location loc{1u, 2u};
+    EXPECT_EQ(m.SourceOf(override).range.begin, loc);
 
     EXPECT_EQ(core::ir::Disassembler(m).Plain(), R"($B1: {  # root
   %a:i32 = override @id(0)
