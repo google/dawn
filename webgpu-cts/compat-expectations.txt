@@ -6620,7 +6620,6 @@ crbug.com/dawn/0000 webgpu:shader,execution,expression,call,builtin,textureSampl
 crbug.com/dawn/0000 webgpu:shader,execution,expression,call,builtin,textureSampleCompareLevel:arrayed_2d_coords:stage="v";format="depth32float";filt="nearest";modeU="r";modeV="m";offset=true [ Failure ]
 crbug.com/dawn/0000 webgpu:shader,execution,expression,call,builtin,textureSampleCompareLevel:arrayed_2d_coords:stage="v";format="depth32float";filt="nearest";modeU="r";modeV="r";offset=true [ Failure ]
 crbug.com/dawn/0000 webgpu:web_platform,external_texture,video:importExternalTexture,cameraCapture:* [ Failure ]
-crbug.com/dawn/0000 [ android arm ] webgpu:shader,execution,expression,call,builtin,textureSampleBias:* [ Failure ]
 crbug.com/dawn/0000 [ intel-0x4680 ] webgpu:shader,execution,expression,call,builtin,dpdxFine:* [ Failure ]
 crbug.com/dawn/0000 [ intel-0x4680 ] webgpu:shader,execution,expression,call,builtin,dpdyFine:* [ Failure ]
 crbug.com/dawn/0000 [ intel-0x4680 ] webgpu:shader,execution,robust_access_vertex:* [ Failure ]
