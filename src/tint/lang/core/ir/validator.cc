@@ -64,6 +64,7 @@
 #include "src/tint/lang/core/ir/member_builtin_call.h"
 #include "src/tint/lang/core/ir/multi_in_block.h"
 #include "src/tint/lang/core/ir/next_iteration.h"
+#include "src/tint/lang/core/ir/override.h"
 #include "src/tint/lang/core/ir/referenced_module_vars.h"
 #include "src/tint/lang/core/ir/return.h"
 #include "src/tint/lang/core/ir/store.h"
@@ -874,6 +875,10 @@ class Validator {
     /// @param blk the block
     void CheckRootBlock(const Block* blk);
 
+    /// Validates the given instruction is only used in the root block.
+    /// @param inst the instruction
+    void CheckOnlyUsedInRootBlock(const Instruction* inst);
+
     /// Validates the given function
     /// @param func the function to validate
     void CheckFunction(const Function* func);
@@ -973,6 +978,10 @@ class Validator {
     /// Validates the given instruction
     /// @param inst the instruction to validate
     void CheckInstruction(const Instruction* inst);
+
+    /// Validates the given override
+    /// @param o the override to validate
+    void CheckOverride(const Override* o);
 
     /// Validates the given var
     /// @param var the var to validate
@@ -1221,6 +1230,7 @@ class Validator {
     Hashmap<const ir::Function*, Hashset<const ir::UserCall*, 4>, 4> user_func_calls_;
     Hashset<const ir::Discard*, 4> discards_;
     core::ir::ReferencedModuleVars<const Module> referenced_module_vars_;
+    Hashset<OverrideId, 8> seen_override_ids_;
 
     Hashset<ValidatedType, 16> validated_types_{};
 };
@@ -1731,6 +1741,13 @@ void Validator::CheckRootBlock(const Block* blk) {
 
         tint::Switch(
             inst,  //
+            [&](const core::ir::Override* o) {
+                if (capabilities_.Contains(Capability::kAllowOverrides)) {
+                    CheckInstruction(o);
+                } else {
+                    AddError(inst) << "root block: invalid instruction: " << inst->TypeInfo().name;
+                }
+            },
             [&](const core::ir::Var* var) { CheckInstruction(var); },
             [&](const core::ir::Let* let) {
                 if (capabilities_.Contains(Capability::kAllowModuleScopeLets)) {
@@ -1747,9 +1764,29 @@ void Validator::CheckRootBlock(const Block* blk) {
                 }
             },
             [&](Default) {
-                AddError(inst) << "root block: invalid instruction: " << inst->TypeInfo().name;
+                // Note, this validation is looser then it could be. There are only certain
+                // expressions and builtins which can be used in an override. We can tighten this up
+                // later to a constrained set of instructions and builtins if necessary.
+                if (capabilities_.Contains(Capability::kAllowOverrides)) {
+                    // If overrides are allowed we can have regular instructions in the root block,
+                    // with the caveat that those instructions can _only_ be used in the root block.
+                    CheckOnlyUsedInRootBlock(inst);
+                } else {
+                    AddError(inst) << "root block: invalid instruction: " << inst->TypeInfo().name;
+                }
             });
     }
+}
+
+void Validator::CheckOnlyUsedInRootBlock(const Instruction* inst) {
+    for (auto& usage : inst->Result(0)->UsagesSorted()) {
+        if (usage.instruction->Block() != mod_.root_block) {
+            AddError(inst) << "root block: instruction used outside of root block "
+                           << inst->TypeInfo().name;
+        }
+    }
+
+    CheckInstruction(inst);
 }
 
 void Validator::CheckFunction(const Function* func) {
@@ -2083,11 +2120,42 @@ void Validator::CheckInstruction(const Instruction* inst) {
         [&](const Swizzle* s) { CheckSwizzle(s); },                        //
         [&](const Terminator* b) { CheckTerminator(b); },                  //
         [&](const Unary* u) { CheckUnary(u); },                            //
+        [&](const Override* o) { CheckOverride(o); },                      //
         [&](const Var* var) { CheckVar(var); },                            //
         [&](const Default) { AddError(inst) << "missing validation"; });
 
     for (auto* result : results) {
         scope_stack_.Add(result);
+    }
+}
+
+void Validator::CheckOverride(const Override* o) {
+    // Intentionally not checking operands, since Override may have a null operand
+    if (!CheckResults(o, Override::kNumResults)) {
+        return;
+    }
+
+    if (!seen_override_ids_.Add(o->OverrideId())) {
+        AddError(o) << "duplicate override id encountered: " << o->OverrideId().value;
+        return;
+    }
+
+    if (!o->Result(0)->Type()->IsScalar()) {
+        AddError(o) << "override type " << style::Type(o->Result(0)->Type()->FriendlyName())
+                    << " is not a scalar";
+        return;
+    }
+
+    if (o->Initializer()) {
+        if (!CheckOperand(o, ir::Var::kInitializerOperandOffset)) {
+            return;
+        }
+        if (o->Initializer()->Type() != o->Result(0)->Type()) {
+            AddError(o) << "override type " << style::Type(o->Result(0)->Type()->FriendlyName())
+                        << " does not match initializer type "
+                        << style::Type(o->Initializer()->Type()->FriendlyName());
+            return;
+        }
     }
 }
 

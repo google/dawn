@@ -66,7 +66,9 @@ class IRProgramTestBase : public BASE, public ProgramBuilder {
             return lower.Failure();
         }
 
-        if (auto validate = core::ir::Validate(result.Get()); validate != Success) {
+        auto validate = core::ir::Validate(
+            result.Get(), core::ir::Capabilities{core::ir::Capability::kAllowOverrides});
+        if (validate != Success) {
             return validate.Failure();
         }
         return result;

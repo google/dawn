@@ -51,29 +51,20 @@ Program Parse(const Source::File* file, const Options& options) {
 
 Result<core::ir::Module> WgslToIR(const Source::File* file, const Options& options) {
     Program program = Parse(file, options);
-    auto module = ProgramToIR(program);
-    if (module != Success) {
-        return module.Failure();
-    }
-    // WGSL-dialect -> core-dialect
-    if (auto res = Lower(module.Get()); res != Success) {
-        return res.Failure();
-    }
-    return module;
+    return ProgramToLoweredIR(program);
 }
 
 tint::Result<core::ir::Module> ProgramToLoweredIR(const Program& program) {
-    auto ir = tint::wgsl::reader::ProgramToIR(program);
+    auto ir = ProgramToIR(program);
     if (ir != Success) {
         return ir.Failure();
     }
 
     // Lower from WGSL-dialect to core-dialect
-    auto res = tint::wgsl::reader::Lower(ir.Get());
+    auto res = Lower(ir.Get());
     if (res != Success) {
         return res.Failure();
     }
-
     return ir;
 }
 

@@ -32,6 +32,7 @@
 #include "src/tint/lang/core/ir/if.h"
 #include "src/tint/lang/core/ir/loop.h"
 #include "src/tint/lang/core/ir/multi_in_block.h"
+#include "src/tint/lang/core/ir/override.h"
 #include "src/tint/lang/core/ir/switch.h"
 #include "src/tint/lang/wgsl/reader/program_to_ir/ir_program_test.h"
 
@@ -1160,9 +1161,6 @@ TEST_F(IR_FromProgramTest, Requires) {
 )");
 }
 
-////////////////////////////////////////////////////////////////////////////////
-// Bugs
-////////////////////////////////////////////////////////////////////////////////
 TEST_F(IR_FromProgramTest, BugChromium324466107) {
     Func("f", Empty, ty.void_(),
          Vector{
@@ -1179,6 +1177,88 @@ TEST_F(IR_FromProgramTest, BugChromium324466107) {
     ret
   }
 }
+)");
+}
+
+TEST_F(IR_FromProgramTest, OverrideNoInitializer) {
+    Override("a", ty.i32());
+
+    auto res = Build();
+    ASSERT_EQ(res, Success);
+
+    auto m = res.Move();
+    auto* overide = FindSingleInstruction<core::ir::Override>(m);
+
+    ASSERT_NE(overide, nullptr);
+    ASSERT_EQ(overide->Initializer(), nullptr);
+
+    EXPECT_EQ(core::ir::Disassembler(m).Plain(), R"($B1: {  # root
+  %a:i32 = override @id(0)
+}
+
+)");
+}
+
+TEST_F(IR_FromProgramTest, OverrideWithConstantInitializer) {
+    Override("a", Expr(1_f));
+
+    auto res = Build();
+    ASSERT_EQ(res, Success);
+
+    auto m = res.Move();
+    auto* override = FindSingleInstruction<core::ir::Override>(m);
+
+    ASSERT_NE(override, nullptr);
+    ASSERT_NE(override->Initializer(), nullptr);
+
+    auto* init = override->Initializer()->As<core::ir::Constant>();
+    ASSERT_NE(init, nullptr);
+    EXPECT_FLOAT_EQ(1.0f, init->Value()->ValueAs<float>());
+
+    EXPECT_EQ(core::ir::Disassembler(m).Plain(), R"($B1: {  # root
+  %a:f32 = override, 1.0f @id(0)
+}
+
+)");
+}
+
+TEST_F(IR_FromProgramTest, OverrideWithAddInitializer) {
+    Override("a", Add(1_u, 2_u));
+
+    auto res = Build();
+    ASSERT_EQ(res, Success);
+
+    auto m = res.Move();
+    auto* override = FindSingleInstruction<core::ir::Override>(m);
+
+    ASSERT_NE(override, nullptr);
+    ASSERT_NE(override->Initializer(), nullptr);
+
+    auto* init = override->Initializer()->As<core::ir::Constant>();
+    ASSERT_NE(init, nullptr);
+    EXPECT_EQ(3u, init->Value()->ValueAs<uint32_t>());
+
+    EXPECT_EQ(core::ir::Disassembler(m).Plain(), R"($B1: {  # root
+  %a:u32 = override, 3u @id(0)
+}
+
+)");
+}
+
+TEST_F(IR_FromProgramTest, OverrideWithOverrideAddInitializer) {
+    auto* z = Override("z", ty.u32());
+    Override("a", Add(z, 2_u));
+
+    auto res = Build();
+    ASSERT_EQ(res, Success);
+
+    auto m = res.Move();
+    EXPECT_EQ(core::ir::Disassembler(m).Plain(), R"($B1: {  # root
+  %z:u32 = override @id(0)
+  %2:u32 = add %z, 2u
+  %a:u32 = override, %2 @id(1)
+}
+
 )");
 }
 

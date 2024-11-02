@@ -1218,19 +1218,34 @@ class Impl {
                 // Store the results of the initialization
                 scopes_.Set(l->name->symbol, let->Result(0));
             },
-            [&](const ast::Override*) {
-                AddError(var->source) << "found an `Override` variable. The SubstituteOverrides "
-                                         "transform must be run before converting to IR";
+            [&](const ast::Override* o) {
+                auto* o_sem = program_.Sem().Get(o);
+                auto* ty = sem->Type()->Clone(clone_ctx_.type_ctx);
+
+                auto* override = builder_.Override(ty);
+                if (o->initializer) {
+                    auto init = EmitValueExpression(o->initializer);
+                    if (!init) {
+                        return;
+                    }
+                    override->SetInitializer(init);
+                }
+                current_block_->Append(override);
+
+                TINT_ASSERT(o_sem->Attributes().override_id.has_value());
+                override->SetOverrideId(o_sem->Attributes().override_id.value());
+
+                // Store the declaration so we can get the instruction to store too
+                scopes_.Set(o->name->symbol, override->Result(0));
+
+                // Record the original name of the var
+                builder_.ir.SetName(override, o->name->symbol.Name());
             },
             [&](const ast::Const*) {
                 // Skip. This should be handled by const-eval already, so the const will be a
                 // `core::constant::` value at the usage sites. Can just ignore the `const` variable
                 // as it should never be used.
-                //
-                // TODO(dsinclair): Probably want to store the const variable somewhere and then
-                // in identifier expression log an error if we ever see a const identifier. Add
-                // this when identifiers and variables are supported.
-            },  //
+            },
             TINT_ICE_ON_NO_MATCH);
     }
 

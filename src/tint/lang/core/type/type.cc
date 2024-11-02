@@ -88,6 +88,10 @@ uint32_t Type::Align() const {
     return 0;
 }
 
+bool Type::IsScalar() const {
+    return IsFloatScalar() || IsIntegerScalar() || IsAnyOf<AbstractInt, Bool>();
+}
+
 bool Type::IsFloatScalar() const {
     return IsAnyOf<F16, F32, AbstractFloat>();
 }

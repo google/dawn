@@ -1,4 +1,4 @@
-// Copyright 2023 The Dawn & Tint Authors
+// Copyright 2024 The Dawn & Tint Authors
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
@@ -25,19 +25,50 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef SRC_TINT_LANG_WGSL_READER_LOWER_LOWER_H_
-#define SRC_TINT_LANG_WGSL_READER_LOWER_LOWER_H_
+#include "src/tint/lang/core/ir/override.h"
 
+#include "src/tint/lang/core/ir/clone_context.h"
 #include "src/tint/lang/core/ir/module.h"
-#include "src/tint/utils/result/result.h"
+#include "src/tint/lang/core/ir/store.h"
+#include "src/tint/lang/core/type/pointer.h"
+#include "src/tint/utils/ice/ice.h"
 
-namespace tint::wgsl::reader {
+TINT_INSTANTIATE_TYPEINFO(tint::core::ir::Override);
 
-/// Lower converts a WGSL-dialect IR module to a core-dialect IR module
-/// @param  mod the IR module
-/// @return the result of the operation
-Result<SuccessType> Lower(core::ir::Module& mod);
+namespace tint::core::ir {
 
-}  // namespace tint::wgsl::reader
+Override::Override(Id id) : Base(id) {}
 
-#endif  // SRC_TINT_LANG_WGSL_READER_LOWER_LOWER_H_
+Override::Override(Id id, InstructionResult* result) : Base(id) {
+    // Default to no initializer.
+    AddOperand(Override::kInitializerOperandOffset, nullptr);
+    AddResult(result);
+}
+
+Override::~Override() = default;
+
+void Override::SetInitializer(Value* initializer) {
+    SetOperand(Override::kInitializerOperandOffset, initializer);
+}
+
+Override* Override::Clone(CloneContext& ctx) {
+    auto* new_result = ctx.Clone(Result(0));
+    TINT_ASSERT(new_result);
+
+    auto* new_override = ctx.ir.CreateInstruction<Override>(new_result);
+
+    new_override->id_ = id_;
+
+    if (auto* init = Initializer()) {
+        new_override->SetInitializer(ctx.Clone(init));
+    }
+    new_override->SetOverrideId(override_id_);
+
+    auto name = ctx.ir.NameOf(this);
+    if (name.IsValid()) {
+        ctx.ir.SetName(new_override, name.Name());
+    }
+    return new_override;
+}
+
+}  // namespace tint::core::ir

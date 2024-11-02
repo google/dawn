@@ -129,6 +129,8 @@ class Type : public Castable<Type, UniqueNode> {
     /// @see https://www.w3.org/TR/WGSL/#fixed-footprint-types
     inline bool HasFixedFootprint() const { return flags_.Contains(Flag::kFixedFootprint); }
 
+    /// @returns true if the type is a scalar
+    bool IsScalar() const;
     /// @returns true if this type is a float scalar
     bool IsFloatScalar() const;
     /// @returns true if this type is a float matrix
