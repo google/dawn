@@ -28,6 +28,7 @@
 #include "src/tint/lang/hlsl/writer/raise/shader_io.h"
 
 #include <algorithm>
+#include <limits>
 #include <memory>
 #include <utility>
 
@@ -111,6 +112,11 @@ struct StateImpl : core::ir::transform::ShaderIOBackendState {
                 return 13;
             case core::BuiltinValue::kClipDistances:
                 return 14;
+            case core::BuiltinValue::kSubgroupInvocationId:
+            case core::BuiltinValue::kSubgroupSize:
+                // These are sorted, but don't actually end up as members. Value doesn't really
+                // matter, so just make it larger than the rest.
+                return std::numeric_limits<uint32_t>::max();
             default:
                 break;
         }
@@ -194,17 +200,16 @@ struct StateImpl : core::ir::transform::ShaderIOBackendState {
 
         Vector<MemberInfo, 4> input_data;
         for (uint32_t i = 0; i < inputs.Length(); ++i) {
-            // If subgroup invocation id or size, save the index for GetInput
+            // Save the index of certain builtins for GetIndex. Although struct members will not be
+            // added for these inputs, we still add entries to input_data so that other inputs with
+            // struct members can index input_indices properly in GetIndex.
             if (auto builtin = inputs[i].attributes.builtin) {
                 if (*builtin == core::BuiltinValue::kSubgroupInvocationId) {
                     subgroup_invocation_id_index = i;
-                    continue;
                 } else if (*builtin == core::BuiltinValue::kSubgroupSize) {
                     subgroup_size_index = i;
-                    continue;
                 } else if (*builtin == core::BuiltinValue::kNumWorkgroups) {
                     num_workgroups_index = i;
-                    continue;
                 }
             }
 
@@ -221,6 +226,14 @@ struct StateImpl : core::ir::transform::ShaderIOBackendState {
 
         Vector<core::type::Manager::StructMemberDesc, 4> input_struct_members;
         for (auto& input : input_data) {
+            // Don't add members for certain builtins
+            if (input.idx == subgroup_invocation_id_index ||  //
+                input.idx == subgroup_size_index ||           //
+                input.idx == num_workgroups_index) {
+                // Invalid value, should not be indexed
+                input_indices[input.idx] = std::numeric_limits<uint32_t>::max();
+                continue;
+            }
             input_indices[input.idx] = static_cast<uint32_t>(input_struct_members.Length());
             input_struct_members.Push(input.member);
         }

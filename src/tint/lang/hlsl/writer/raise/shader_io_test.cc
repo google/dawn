@@ -1206,6 +1206,198 @@ Inputs = struct @align(4) {
     EXPECT_EQ(expect, str());
 }
 
+TEST_F(HlslWriterTransformTest, ShaderIOParameters_Subgroup_WithNonSubgroupParamsFirst) {
+    auto* invocation_id = b.FunctionParam("invoc_id", ty.vec3<u32>());
+    invocation_id->SetBuiltin(core::BuiltinValue::kLocalInvocationId);
+
+    auto* subgroup_invocation_id = b.FunctionParam("id", ty.u32());
+    subgroup_invocation_id->SetBuiltin(core::BuiltinValue::kSubgroupInvocationId);
+
+    auto* subgroup_size = b.FunctionParam("size", ty.u32());
+    subgroup_size->SetBuiltin(core::BuiltinValue::kSubgroupSize);
+
+    auto* ep = b.ComputeFunction("foo");
+    ep->SetParams({invocation_id, subgroup_invocation_id, subgroup_size});
+
+    b.Append(ep->Block(), [&] {
+        auto* x = b.Let("x", b.Multiply(ty.u32(), subgroup_invocation_id, subgroup_size));
+        b.Let("y", b.Add(ty.u32(), x, b.Access(ty.u32(), invocation_id, 0_u)));
+        b.Return(ep);
+    });
+
+    auto* src = R"(
+%foo = @compute @workgroup_size(1u, 1u, 1u) func(%invoc_id:vec3<u32> [@local_invocation_id], %id:u32 [@subgroup_invocation_id], %size:u32 [@subgroup_size]):void {
+  $B1: {
+    %5:u32 = mul %id, %size
+    %x:u32 = let %5
+    %7:u32 = access %invoc_id, 0u
+    %8:u32 = add %x, %7
+    %y:u32 = let %8
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+foo_inputs = struct @align(16) {
+  invoc_id:vec3<u32> @offset(0), @builtin(local_invocation_id)
+}
+
+%foo_inner = func(%invoc_id:vec3<u32>, %id:u32, %size:u32):void {
+  $B1: {
+    %5:u32 = mul %id, %size
+    %x:u32 = let %5
+    %7:u32 = access %invoc_id, 0u
+    %8:u32 = add %x, %7
+    %y:u32 = let %8
+    ret
+  }
+}
+%foo = @compute @workgroup_size(1u, 1u, 1u) func(%inputs:foo_inputs):void {
+  $B2: {
+    %12:vec3<u32> = access %inputs, 0u
+    %13:u32 = hlsl.WaveGetLaneIndex
+    %14:u32 = hlsl.WaveGetLaneCount
+    %15:void = call %foo_inner, %12, %13, %14
+    ret
+  }
+}
+)";
+
+    Run(ShaderIO, ShaderIOConfig{});
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(HlslWriterTransformTest, ShaderIOParameters_Subgroup_WithNonSubgroupParamsLast) {
+    auto* subgroup_invocation_id = b.FunctionParam("id", ty.u32());
+    subgroup_invocation_id->SetBuiltin(core::BuiltinValue::kSubgroupInvocationId);
+
+    auto* subgroup_size = b.FunctionParam("size", ty.u32());
+    subgroup_size->SetBuiltin(core::BuiltinValue::kSubgroupSize);
+
+    auto* invocation_id = b.FunctionParam("invoc_id", ty.vec3<u32>());
+    invocation_id->SetBuiltin(core::BuiltinValue::kLocalInvocationId);
+
+    auto* ep = b.ComputeFunction("foo");
+    ep->SetParams({subgroup_invocation_id, subgroup_size, invocation_id});
+
+    b.Append(ep->Block(), [&] {
+        auto* x = b.Let("x", b.Multiply(ty.u32(), subgroup_invocation_id, subgroup_size));
+        b.Let("y", b.Add(ty.u32(), x, b.Access(ty.u32(), invocation_id, 0_u)));
+        b.Return(ep);
+    });
+
+    auto* src = R"(
+%foo = @compute @workgroup_size(1u, 1u, 1u) func(%id:u32 [@subgroup_invocation_id], %size:u32 [@subgroup_size], %invoc_id:vec3<u32> [@local_invocation_id]):void {
+  $B1: {
+    %5:u32 = mul %id, %size
+    %x:u32 = let %5
+    %7:u32 = access %invoc_id, 0u
+    %8:u32 = add %x, %7
+    %y:u32 = let %8
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+foo_inputs = struct @align(16) {
+  invoc_id:vec3<u32> @offset(0), @builtin(local_invocation_id)
+}
+
+%foo_inner = func(%id:u32, %size:u32, %invoc_id:vec3<u32>):void {
+  $B1: {
+    %5:u32 = mul %id, %size
+    %x:u32 = let %5
+    %7:u32 = access %invoc_id, 0u
+    %8:u32 = add %x, %7
+    %y:u32 = let %8
+    ret
+  }
+}
+%foo = @compute @workgroup_size(1u, 1u, 1u) func(%inputs:foo_inputs):void {
+  $B2: {
+    %12:u32 = hlsl.WaveGetLaneIndex
+    %13:u32 = hlsl.WaveGetLaneCount
+    %14:vec3<u32> = access %inputs, 0u
+    %15:void = call %foo_inner, %12, %13, %14
+    ret
+  }
+}
+)";
+
+    Run(ShaderIO, ShaderIOConfig{});
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(HlslWriterTransformTest, ShaderIOParameters_Subgroup_WithNonSubgroupParamsMiddle) {
+    auto* subgroup_invocation_id = b.FunctionParam("id", ty.u32());
+    subgroup_invocation_id->SetBuiltin(core::BuiltinValue::kSubgroupInvocationId);
+
+    auto* invocation_id = b.FunctionParam("invoc_id", ty.vec3<u32>());
+    invocation_id->SetBuiltin(core::BuiltinValue::kLocalInvocationId);
+
+    auto* subgroup_size = b.FunctionParam("size", ty.u32());
+    subgroup_size->SetBuiltin(core::BuiltinValue::kSubgroupSize);
+
+    auto* ep = b.ComputeFunction("foo");
+    ep->SetParams({subgroup_invocation_id, invocation_id, subgroup_size});
+
+    b.Append(ep->Block(), [&] {
+        auto* x = b.Let("x", b.Multiply(ty.u32(), subgroup_invocation_id, subgroup_size));
+        b.Let("y", b.Add(ty.u32(), x, b.Access(ty.u32(), invocation_id, 0_u)));
+        b.Return(ep);
+    });
+
+    auto* src = R"(
+%foo = @compute @workgroup_size(1u, 1u, 1u) func(%id:u32 [@subgroup_invocation_id], %invoc_id:vec3<u32> [@local_invocation_id], %size:u32 [@subgroup_size]):void {
+  $B1: {
+    %5:u32 = mul %id, %size
+    %x:u32 = let %5
+    %7:u32 = access %invoc_id, 0u
+    %8:u32 = add %x, %7
+    %y:u32 = let %8
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+foo_inputs = struct @align(16) {
+  invoc_id:vec3<u32> @offset(0), @builtin(local_invocation_id)
+}
+
+%foo_inner = func(%id:u32, %invoc_id:vec3<u32>, %size:u32):void {
+  $B1: {
+    %5:u32 = mul %id, %size
+    %x:u32 = let %5
+    %7:u32 = access %invoc_id, 0u
+    %8:u32 = add %x, %7
+    %y:u32 = let %8
+    ret
+  }
+}
+%foo = @compute @workgroup_size(1u, 1u, 1u) func(%inputs:foo_inputs):void {
+  $B2: {
+    %12:u32 = hlsl.WaveGetLaneIndex
+    %13:vec3<u32> = access %inputs, 0u
+    %14:u32 = hlsl.WaveGetLaneCount
+    %15:void = call %foo_inner, %12, %13, %14
+    ret
+  }
+}
+)";
+
+    Run(ShaderIO, ShaderIOConfig{});
+
+    EXPECT_EQ(expect, str());
+}
+
 TEST_F(HlslWriterTransformTest, ShaderIOParameters_NumWorkgroups_NonStruct) {
     auto* num_workgroups = b.FunctionParam("num_wgs", ty.vec3<u32>());
     num_workgroups->SetBuiltin(core::BuiltinValue::kNumWorkgroups);
@@ -1443,6 +1635,217 @@ $B1: {  # root
   $B3: {
     %16:vec3<u32> = load %tint_num_workgroups
     %17:void = call %foo_inner, %16
+    ret
+  }
+}
+)";
+
+    Run(ShaderIO, ShaderIOConfig{});
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(HlslWriterTransformTest, ShaderIOParameters_NumWorkgroups_WithNonWorkgroupParamFirst) {
+    auto* invocation_id = b.FunctionParam("invoc_id", ty.vec3<u32>());
+    invocation_id->SetBuiltin(core::BuiltinValue::kLocalInvocationId);
+
+    auto* num_workgroups = b.FunctionParam("num_wgs", ty.vec3<u32>());
+    num_workgroups->SetBuiltin(core::BuiltinValue::kNumWorkgroups);
+
+    auto* ep = b.ComputeFunction("foo");
+    ep->SetParams({invocation_id, num_workgroups});
+
+    b.Append(ep->Block(), [&] {
+        b.Multiply(ty.vec3<u32>(), b.Access(ty.u32(), invocation_id, 0_u), num_workgroups);
+        b.Return(ep);
+    });
+
+    auto* src = R"(
+%foo = @compute @workgroup_size(1u, 1u, 1u) func(%invoc_id:vec3<u32> [@local_invocation_id], %num_wgs:vec3<u32> [@num_workgroups]):void {
+  $B1: {
+    %4:u32 = access %invoc_id, 0u
+    %5:vec3<u32> = mul %4, %num_wgs
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+foo_inputs = struct @align(16) {
+  invoc_id:vec3<u32> @offset(0), @builtin(local_invocation_id)
+}
+
+$B1: {  # root
+  %tint_num_workgroups:ptr<uniform, vec3<u32>, read> = var @binding_point(0, 0)
+}
+
+%foo_inner = func(%invoc_id:vec3<u32>, %num_wgs:vec3<u32>):void {
+  $B2: {
+    %5:u32 = access %invoc_id, 0u
+    %6:vec3<u32> = mul %5, %num_wgs
+    ret
+  }
+}
+%foo = @compute @workgroup_size(1u, 1u, 1u) func(%inputs:foo_inputs):void {
+  $B3: {
+    %9:vec3<u32> = access %inputs, 0u
+    %10:vec3<u32> = load %tint_num_workgroups
+    %11:void = call %foo_inner, %9, %10
+    ret
+  }
+}
+)";
+
+    Run(ShaderIO, ShaderIOConfig{});
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(HlslWriterTransformTest, ShaderIOParameters_NumWorkgroups_WithNonWorkgroupParamLast) {
+    auto* num_workgroups = b.FunctionParam("num_wgs", ty.vec3<u32>());
+    num_workgroups->SetBuiltin(core::BuiltinValue::kNumWorkgroups);
+
+    auto* invocation_id = b.FunctionParam("invoc_id", ty.vec3<u32>());
+    invocation_id->SetBuiltin(core::BuiltinValue::kLocalInvocationId);
+
+    auto* ep = b.ComputeFunction("foo");
+    ep->SetParams({num_workgroups, invocation_id});
+
+    b.Append(ep->Block(), [&] {
+        b.Multiply(ty.vec3<u32>(), b.Access(ty.u32(), invocation_id, 0_u), num_workgroups);
+        b.Return(ep);
+    });
+
+    auto* src = R"(
+%foo = @compute @workgroup_size(1u, 1u, 1u) func(%num_wgs:vec3<u32> [@num_workgroups], %invoc_id:vec3<u32> [@local_invocation_id]):void {
+  $B1: {
+    %4:u32 = access %invoc_id, 0u
+    %5:vec3<u32> = mul %4, %num_wgs
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+foo_inputs = struct @align(16) {
+  invoc_id:vec3<u32> @offset(0), @builtin(local_invocation_id)
+}
+
+$B1: {  # root
+  %tint_num_workgroups:ptr<uniform, vec3<u32>, read> = var @binding_point(0, 0)
+}
+
+%foo_inner = func(%num_wgs:vec3<u32>, %invoc_id:vec3<u32>):void {
+  $B2: {
+    %5:u32 = access %invoc_id, 0u
+    %6:vec3<u32> = mul %5, %num_wgs
+    ret
+  }
+}
+%foo = @compute @workgroup_size(1u, 1u, 1u) func(%inputs:foo_inputs):void {
+  $B3: {
+    %9:vec3<u32> = load %tint_num_workgroups
+    %10:vec3<u32> = access %inputs, 0u
+    %11:void = call %foo_inner, %9, %10
+    ret
+  }
+}
+)";
+
+    Run(ShaderIO, ShaderIOConfig{});
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(HlslWriterTransformTest, ShaderIOParameters_NumWorkgroupsAndSubgroups_Mixed) {
+    auto* invocation_id = b.FunctionParam("invoc_id", ty.vec3<u32>());
+    invocation_id->SetBuiltin(core::BuiltinValue::kLocalInvocationId);
+
+    auto* num_workgroups = b.FunctionParam("num_wgs", ty.vec3<u32>());
+    num_workgroups->SetBuiltin(core::BuiltinValue::kNumWorkgroups);
+
+    auto* invocation_index = b.FunctionParam("invoc_index", ty.u32());
+    invocation_index->SetBuiltin(core::BuiltinValue::kLocalInvocationIndex);
+
+    auto* subgroup_invocation_id = b.FunctionParam("sg_id", ty.u32());
+    subgroup_invocation_id->SetBuiltin(core::BuiltinValue::kSubgroupInvocationId);
+
+    auto* global_invocation_id = b.FunctionParam("glob_id", ty.vec3<u32>());
+    global_invocation_id->SetBuiltin(core::BuiltinValue::kGlobalInvocationId);
+
+    auto* subgroup_size = b.FunctionParam("sg_size", ty.u32());
+    subgroup_size->SetBuiltin(core::BuiltinValue::kSubgroupSize);
+
+    auto* workgroup_id = b.FunctionParam("wg_id", ty.vec3<u32>());
+    workgroup_id->SetBuiltin(core::BuiltinValue::kWorkgroupId);
+
+    auto* ep = b.ComputeFunction("foo");
+    ep->SetParams({invocation_id, num_workgroups, invocation_index, subgroup_invocation_id,
+                   global_invocation_id, subgroup_size, workgroup_id});
+
+    b.Append(ep->Block(), [&] {
+        b.Let("l_invoc_id", invocation_id);
+        b.Let("l_num_wgs", num_workgroups);
+        b.Let("l_invoc_index", invocation_index);
+        b.Let("l_sg_id", subgroup_invocation_id);
+        b.Let("l_glob_id", global_invocation_id);
+        b.Let("l_sg_size", subgroup_size);
+        b.Let("l_wg_id", workgroup_id);
+        b.Return(ep);
+    });
+
+    auto* src = R"(
+%foo = @compute @workgroup_size(1u, 1u, 1u) func(%invoc_id:vec3<u32> [@local_invocation_id], %num_wgs:vec3<u32> [@num_workgroups], %invoc_index:u32 [@local_invocation_index], %sg_id:u32 [@subgroup_invocation_id], %glob_id:vec3<u32> [@global_invocation_id], %sg_size:u32 [@subgroup_size], %wg_id:vec3<u32> [@workgroup_id]):void {
+  $B1: {
+    %l_invoc_id:vec3<u32> = let %invoc_id
+    %l_num_wgs:vec3<u32> = let %num_wgs
+    %l_invoc_index:u32 = let %invoc_index
+    %l_sg_id:u32 = let %sg_id
+    %l_glob_id:vec3<u32> = let %glob_id
+    %l_sg_size:u32 = let %sg_size
+    %l_wg_id:vec3<u32> = let %wg_id
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+foo_inputs = struct @align(16) {
+  invoc_id:vec3<u32> @offset(0), @builtin(local_invocation_id)
+  invoc_index:u32 @offset(12), @builtin(local_invocation_index)
+  glob_id:vec3<u32> @offset(16), @builtin(global_invocation_id)
+  wg_id:vec3<u32> @offset(32), @builtin(workgroup_id)
+}
+
+$B1: {  # root
+  %tint_num_workgroups:ptr<uniform, vec3<u32>, read> = var @binding_point(0, 0)
+}
+
+%foo_inner = func(%invoc_id:vec3<u32>, %num_wgs:vec3<u32>, %invoc_index:u32, %sg_id:u32, %glob_id:vec3<u32>, %sg_size:u32, %wg_id:vec3<u32>):void {
+  $B2: {
+    %l_invoc_id:vec3<u32> = let %invoc_id
+    %l_num_wgs:vec3<u32> = let %num_wgs
+    %l_invoc_index:u32 = let %invoc_index
+    %l_sg_id:u32 = let %sg_id
+    %l_glob_id:vec3<u32> = let %glob_id
+    %l_sg_size:u32 = let %sg_size
+    %l_wg_id:vec3<u32> = let %wg_id
+    ret
+  }
+}
+%foo = @compute @workgroup_size(1u, 1u, 1u) func(%inputs:foo_inputs):void {
+  $B3: {
+    %19:vec3<u32> = access %inputs, 0u
+    %20:vec3<u32> = load %tint_num_workgroups
+    %21:u32 = access %inputs, 1u
+    %22:u32 = hlsl.WaveGetLaneIndex
+    %23:vec3<u32> = access %inputs, 2u
+    %24:u32 = hlsl.WaveGetLaneCount
+    %25:vec3<u32> = access %inputs, 3u
+    %26:void = call %foo_inner, %19, %20, %21, %22, %23, %24, %25
     ret
   }
 }
