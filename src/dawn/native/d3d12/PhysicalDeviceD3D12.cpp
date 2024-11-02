@@ -354,19 +354,9 @@ MaybeError PhysicalDevice::InitializeSupportedLimitsImpl(CombinedLimits* limits)
     // Max number of "constants" where each constant is a 16-byte float4
     limits->v1.maxUniformBufferBindingSize = D3D12_REQ_CONSTANT_BUFFER_ELEMENT_COUNT * 16;
 
-    if (gpu_info::IsQualcomm_ACPI(GetVendorId())) {
-        // limit of number of texels in a buffer == (1 << 27)
-        // D3D12_REQ_BUFFER_RESOURCE_TEXEL_COUNT_2_TO_EXP
-        // This limit doesn't apply to a raw buffer, but only applies to
-        // typed, or structured buffer. so this could be a QC driver bug.
-        limits->v1.maxStorageBufferBindingSize = uint64_t(1)
-                                                 << D3D12_REQ_BUFFER_RESOURCE_TEXEL_COUNT_2_TO_EXP;
-    } else {
-        limits->v1.maxStorageBufferBindingSize = kAssumedMaxBufferSize;
-    }
-
     // D3D12 has no documented limit on the buffer size.
     limits->v1.maxBufferSize = kAssumedMaxBufferSize;
+    limits->v1.maxStorageBufferBindingSize = kAssumedMaxBufferSize;
 
     // 1 for SV_Position and 1 for (SV_IsFrontFace OR SV_SampleIndex).
     // See the discussions in https://github.com/gpuweb/gpuweb/issues/1962 for more details.
@@ -384,6 +374,14 @@ MaybeError PhysicalDevice::InitializeSupportedLimitsImpl(CombinedLimits* limits)
     // unclear. Use 128 instead, which is the largest possible size. Reference:
     // https://github.com/Microsoft/DirectXShaderCompiler/wiki/Wave-Intrinsics#:~:text=UINT%20WaveLaneCountMax
     limits->experimentalSubgroupLimits.maxSubgroupSize = 128u;
+
+    if (gpu_info::IsQualcomm_ACPI(GetVendorId())) {
+        // Due to a driver and hardware limitation, Raw Buffers can only address 2^27 WORDS instead
+        // of the guaranteeed 2^31 bytes. Probably because it uses some form of texel buffer of
+        // 32bit values to implement [RW]ByteAddressBuffer.
+        limits->v1.maxStorageBufferBindingSize = sizeof(uint32_t)
+                                                 << D3D12_REQ_BUFFER_RESOURCE_TEXEL_COUNT_2_TO_EXP;
+    }
 
     return {};
 }
