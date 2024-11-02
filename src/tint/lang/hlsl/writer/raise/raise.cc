@@ -179,6 +179,10 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
         RUN_TRANSFORM(raise::ShaderIO, module, config);
     }
 
+    // DemoteToHelper must come before any transform that introduces non-core instructions.
+    // Run after ShaderIO to ensure the discards are added to the entry point it introduces.
+    RUN_TRANSFORM(core::ir::transform::DemoteToHelper, module);
+
     RUN_TRANSFORM(core::ir::transform::DirectVariableAccess, module,
                   core::ir::transform::DirectVariableAccessOptions{});
     // DecomposeStorageAccess must come after Robustness and DirectVariableAccess
@@ -192,12 +196,6 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
         config.options = options.pixel_local;
         RUN_TRANSFORM(raise::PixelLocal, module, config);
     }
-
-    // TODO(dsinclair): TruncateInterstageVariables
-
-    // DemoteToHelper must come before any transform that introduces non-core instructions.
-    // Run after ShaderIO to ensure the discards are added to the entry point it introduces.
-    RUN_TRANSFORM(core::ir::transform::DemoteToHelper, module);
 
     RUN_TRANSFORM(raise::BinaryPolyfill, module);
     // BuiltinPolyfill must come after BinaryPolyfill and DecomposeStorageAccess as they add

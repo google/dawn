@@ -31,7 +31,11 @@ int foo_inner(float tint_symbol, float2 coord) {
       result = (result + i);
       {
         int v = int(0);
-        a.InterlockedAdd(int(0u), int(1), v);
+        if (continue_execution) {
+          int v_1 = int(0);
+          a.InterlockedAdd(int(0u), int(1), v_1);
+          v = v_1;
+        }
         i = v;
       }
       continue;
@@ -41,10 +45,10 @@ int foo_inner(float tint_symbol, float2 coord) {
 }
 
 foo_outputs foo(foo_inputs inputs) {
-  foo_outputs v_1 = {foo_inner(inputs.tint_symbol, inputs.coord)};
+  foo_outputs v_2 = {foo_inner(inputs.tint_symbol, inputs.coord)};
   if (!(continue_execution)) {
     discard;
   }
-  return v_1;
+  return v_2;
 }
 
