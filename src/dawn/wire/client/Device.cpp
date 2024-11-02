@@ -341,6 +341,10 @@ size_t Device::EnumerateFeatures(WGPUFeatureName* features) const {
     return mLimitsAndFeatures.EnumerateFeatures(features);
 }
 
+void Device::GetFeatures(WGPUSupportedFeatures* features) const {
+    mLimitsAndFeatures.ToSupportedFeatures(features);
+}
+
 void Device::SetLimits(const WGPUSupportedLimits* limits) {
     return mLimitsAndFeatures.SetLimits(limits);
 }

@@ -182,6 +182,7 @@ dawn_json_generator("kotlin_gen") {
     "java/android/dawn/StorageTextureAccess.kt",
     "java/android/dawn/StorageTextureBindingLayout.kt",
     "java/android/dawn/StoreOp.kt",
+    "java/android/dawn/SupportedFeatures.kt",
     "java/android/dawn/SupportedLimits.kt",
     "java/android/dawn/Surface.kt",
     "java/android/dawn/SurfaceCapabilities.kt",

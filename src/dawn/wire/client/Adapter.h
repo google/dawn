@@ -52,6 +52,7 @@ class Adapter final : public ObjectWithEventsBase {
     void SetFeatures(const WGPUFeatureName* features, uint32_t featuresCount);
     void SetInfo(const WGPUAdapterInfo* info);
     WGPUStatus GetInfo(WGPUAdapterInfo* info) const;
+    void GetFeatures(WGPUSupportedFeatures* features) const;
     void RequestDevice(const WGPUDeviceDescriptor* descriptor,
                        WGPURequestDeviceCallback callback,
                        void* userdata);

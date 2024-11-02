@@ -60,6 +60,7 @@ struct FeaturesSet {
     // non-null.
     size_t EnumerateFeatures(wgpu::FeatureName* features) const;
     std::vector<const char*> GetEnabledFeatureNames() const;
+    void ToSupportedFeatures(SupportedFeatures* supportedFeatures) const;
 };
 
 }  // namespace dawn::native

@@ -235,13 +235,12 @@ void DumpAdapterInfo(const wgpu::Adapter& adapter) {
 }
 
 void DumpAdapterFeatures(const wgpu::Adapter& adapter) {
-    auto feature_count = adapter.EnumerateFeatures(nullptr);
-    std::vector<wgpu::FeatureName> features(feature_count);
-    adapter.EnumerateFeatures(features.data());
-
+    wgpu::SupportedFeatures supportedFeatures;
+    adapter.GetFeatures(&supportedFeatures);
     std::cout << "  Features\n";
     std::cout << "  ========\n";
-    for (const auto& f : features) {
+    for (uint32_t i = 0; i < supportedFeatures.featureCount; ++i) {
+        wgpu::FeatureName f = supportedFeatures.features[i];
         auto info = dawn::native::GetFeatureInfo(f);
         std::cout << "   * " << info->name << "\n";
         std::cout << WrapString(info->description, "      ") << "\n";

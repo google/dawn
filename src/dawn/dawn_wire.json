@@ -218,6 +218,7 @@
         ],
         "client_side_commands": [
             "AdapterCreateDevice",
+            "AdapterGetFeatures",
             "AdapterGetFormatCapabilities",
             "AdapterGetInfo",
             "AdapterGetInstance",
@@ -243,6 +244,7 @@
             "DeviceCreateRenderPipelineAsyncF",
             "DeviceCreateRenderPipelineAsync2",
             "DeviceGetAdapter",
+            "DeviceGetFeatures",
             "DeviceGetLimits",
             "DeviceHasFeature",
             "DeviceEnumerateFeatures",

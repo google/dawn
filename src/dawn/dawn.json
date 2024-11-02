@@ -156,9 +156,17 @@
             },
             {
                 "name": "enumerate features",
+                "tags": ["deprecated"],
                 "returns": "size_t",
                 "args": [
                     {"name": "features", "type": "feature name", "annotation": "*"}
+                ]
+            },
+            {
+                "name": "get features",
+                "returns": "void",
+                "args": [
+                    {"name": "features", "type": "supported features", "annotation": "*"}
                 ]
             },
             {
@@ -1560,9 +1568,17 @@
             },
             {
                 "name": "enumerate features",
+                "tags": ["deprecated"],
                 "returns": "size_t",
                 "args": [
                     {"name": "features", "type": "feature name", "annotation": "*"}
+                ]
+            },
+            {
+                "name": "get features",
+                "returns": "void",
+                "args": [
+                    {"name": "features", "type": "supported features", "annotation": "*"}
                 ]
             },
             {
@@ -1865,6 +1881,14 @@
         "extensible": "out",
         "members": [
             {"name": "limits", "type": "limits"}
+        ]
+    },
+    "supported features": {
+        "category": "structure",
+        "out": true,
+        "members": [
+            {"name": "feature count", "type": "size_t"},
+            {"name": "features", "type": "feature name", "annotation": "const*", "length": "feature count"}
         ]
     },
     "logging callback": {

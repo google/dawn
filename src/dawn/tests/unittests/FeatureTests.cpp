@@ -165,11 +165,12 @@ TEST_F(FeatureTests, RequireAndGetEnabledFeatures) {
         // Helper to check the returned device has all required features
         auto ExpectDeviceHasRequiredFeatures =
             [&requiredFeaturesSet](native::DeviceBase* deviceBase) {
-                ASSERT_EQ(requiredFeaturesSet.size(), deviceBase->APIEnumerateFeatures(nullptr));
-                std::vector<wgpu::FeatureName> enabledFeatures(requiredFeaturesSet.size());
-                deviceBase->APIEnumerateFeatures(enabledFeatures.data());
-                for (auto enabledFeature : enabledFeatures) {
-                    EXPECT_TRUE(requiredFeaturesSet.count(enabledFeature) > 0);
+                native::SupportedFeatures enabledFeatures;
+                deviceBase->APIGetFeatures(&enabledFeatures);
+                ASSERT_EQ(requiredFeaturesSet.size(), enabledFeatures.featureCount);
+                for (uint32_t i = 0; i < enabledFeatures.featureCount; ++i) {
+                    wgpu::FeatureName enabledFeature = enabledFeatures.features[i];
+                    EXPECT_TRUE(requiredFeaturesSet.contains(enabledFeature));
                 }
             };
 

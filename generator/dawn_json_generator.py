@@ -301,6 +301,7 @@ class StructureType(Record, Type):
                 m for m in json_data['members'] if is_enabled(m)
             ]
         Type.__init__(self, name, dict(json_data, **json_data_override))
+        self.out = json_data.get('out', False)
         self.chained = json_data.get('chained', None)
         self.extensible = json_data.get('extensible', None)
         if self.chained:
@@ -332,7 +333,10 @@ class StructureType(Record, Type):
 
     @property
     def output(self):
-        return self.chained == "out" or self.extensible == "out"
+        # self.out is a temporary way to express that this is an output structure
+        # without also making it extensible. See
+        # https://dawn-review.googlesource.com/c/dawn/+/212174/comment/2271690b_1fd82ea9/
+        return self.chained == "out" or self.extensible == "out" or self.out
 
     @property
     def has_free_members_function(self):
