@@ -16,7 +16,7 @@ class FeaturesTest {
         val requiredFeatures =
             arrayOf(FeatureName.BGRA8UnormStorage, FeatureName.TextureCompressionASTC)
         dawnTestLauncher(requiredFeatures) { device ->
-            val deviceFeatures = device.enumerateFeatures()
+            val deviceFeatures = device.getFeatures().features
             requiredFeatures.forEach {
                 assert(deviceFeatures.contains(it)) { "Requested feature $it available on device" }
             }
