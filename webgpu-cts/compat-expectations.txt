@@ -288,10 +288,6 @@ crbug.com/dawn/0000 [ android arm ] webgpu:api,validation,error_scope:simple:err
 
 ### This section represents tests which may require CTS changes.
 
-# CTS tests need update to fit compat mode restriction on texture view array layers or binding view dimension.
-crbug.com/367440985 webgpu:api,validation,resource_usages,texture,in_render_misc:subresources,set_bind_group_on_same_index_color_texture:* [ Skip ]
-crbug.com/367440985 webgpu:api,validation,resource_usages,texture,in_render_misc:subresources,set_unused_bind_group:* [ Failure ]
-
 # Not valid for GLES, need to be skipped in CTS when targeting compat.
 crbug.com/dawn/372654300 webgpu:api,validation,compute_pipeline:resource_compatibility:apiResource="texture_depth_cube-array_false" [ Failure ]
 crbug.com/dawn/372654300 webgpu:api,validation,compute_pipeline:resource_compatibility:apiResource="texture_float_cube-array_false" [ Failure ]
