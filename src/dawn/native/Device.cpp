@@ -1948,7 +1948,11 @@ wgpu::Status DeviceBase::APIGetAHardwareBufferProperties(void* handle,
         return wgpu::Status::Error;
     }
 
-    if (ConsumedError(GetAHardwareBufferPropertiesImpl(handle, properties))) {
+    // This method makes a Vulkan API call that will return an error if `handle` is invalid. This
+    // is not cause to lose the Dawn device, as it is a client-side error and not a true internal
+    // Dawn error.
+    if (ConsumedError(GetAHardwareBufferPropertiesImpl(handle, properties),
+                      InternalErrorType::Internal)) {
         return wgpu::Status::Error;
     }
 
