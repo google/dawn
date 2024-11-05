@@ -38,6 +38,70 @@
 namespace tint::glsl::writer {
 namespace {
 
+Options GenerateOptions(core::ir::Module& module) {
+    Options options;
+    options.version = Version(Version::Standard::kES, 3, 1);
+    options.disable_robustness = false;
+    options.disable_workgroup_init = false;
+    options.disable_polyfill_integer_div_mod = false;
+    options.bindings = GenerateBindings(module);
+
+    // Leave some room for user-declared push constants.
+    uint32_t next_push_constant_offset = 0x800;
+    auto builtin_push_constant = [&next_push_constant_offset] {
+        auto offset = next_push_constant_offset;
+        next_push_constant_offset += 4;
+        return offset;
+    };
+
+    // Set offsets for push constants used for certain builtins.
+    for (auto& func : module.functions) {
+        if (func->Stage() == core::ir::Function::PipelineStage::kUndefined) {
+            continue;
+        }
+
+        // vertex_index and instance_index use push constants for offsets if used.
+        for (auto* param : func->Params()) {
+            if (auto* str = param->Type()->As<core::type::Struct>()) {
+                for (auto* member : str->Members()) {
+                    if (member->Attributes().builtin == core::BuiltinValue::kVertexIndex) {
+                        options.first_vertex_offset = builtin_push_constant();
+                    } else if (member->Attributes().builtin == core::BuiltinValue::kInstanceIndex) {
+                        options.first_vertex_offset = builtin_push_constant();
+                    }
+                }
+            } else {
+                if (param->Builtin() == core::BuiltinValue::kVertexIndex) {
+                    options.first_vertex_offset = builtin_push_constant();
+                } else if (param->Builtin() == core::BuiltinValue::kInstanceIndex) {
+                    options.first_vertex_offset = builtin_push_constant();
+                }
+            }
+        }
+
+        // frag_depth uses push constants for min and max clamp values if used.
+        if (auto* str = func->ReturnType()->As<core::type::Struct>()) {
+            for (auto* member : str->Members()) {
+                if (member->Attributes().builtin == core::BuiltinValue::kFragDepth) {
+                    options.depth_range_offsets = {
+                        builtin_push_constant(),
+                        builtin_push_constant(),
+                    };
+                }
+            }
+        } else {
+            if (func->ReturnBuiltin() == core::BuiltinValue::kFragDepth) {
+                options.depth_range_offsets = {
+                    builtin_push_constant(),
+                    builtin_push_constant(),
+                };
+            }
+        }
+    }
+
+    return options;
+}
+
 bool CanRun(const core::ir::Module& module, Options& options) {
     // Make sure that every texture variable is in the texture_builtins_from_uniform binding list,
     // otherwise TextureBuiltinsFromUniform will fail.
@@ -189,12 +253,12 @@ bool CanRun(const core::ir::Module& module, Options& options) {
     return true;
 }
 
-void IRFuzzer(core::ir::Module& module, Options options) {
+void IRFuzzer(core::ir::Module& module) {
+    // TODO(377391551): Enable fuzzing of options.
+    auto options = GenerateOptions(module);
     if (!CanRun(module, options)) {
         return;
     }
-
-    options.bindings = GenerateBindings(module);
 
     [[maybe_unused]] auto output = Generate(module, options, "");
 }
