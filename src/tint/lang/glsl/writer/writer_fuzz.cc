@@ -104,6 +104,20 @@ bool CanRun(const core::ir::Module& module, Options& options) {
         }
     }
 
+    // Check for clip_distance builtins.
+    for (auto& func : module.functions) {
+        if (func->Stage() != core::ir::Function::PipelineStage::kVertex) {
+            continue;
+        }
+        if (auto* str = func->ReturnType()->As<core::type::Struct>()) {
+            for (auto* member : str->Members()) {
+                if (member->Attributes().builtin == core::BuiltinValue::kClipDistances) {
+                    return false;
+                }
+            }
+        }
+    }
+
     static constexpr uint32_t kMaxOffset = 0x1000;
     Hashset<uint32_t, 4> push_constant_word_offsets;
     auto check_push_constant_offset = [&](uint32_t offset) {
