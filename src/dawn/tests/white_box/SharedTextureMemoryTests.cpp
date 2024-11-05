@@ -153,12 +153,12 @@ wgpu::SharedFence SharedTextureMemoryTestBackend::ImportFenceTo(const wgpu::Devi
             fenceDesc.nextInChain = &vkDesc;
             return importingDevice.ImportSharedFence(&fenceDesc);
         }
-        case wgpu::SharedFenceType::VkSemaphoreSyncFD: {
-            wgpu::SharedFenceVkSemaphoreSyncFDExportInfo vkExportInfo;
+        case wgpu::SharedFenceType::SyncFD: {
+            wgpu::SharedFenceSyncFDExportInfo vkExportInfo;
             exportInfo.nextInChain = &vkExportInfo;
             fence.ExportInfo(&exportInfo);
 
-            wgpu::SharedFenceVkSemaphoreSyncFDDescriptor vkDesc;
+            wgpu::SharedFenceSyncFDDescriptor vkDesc;
             vkDesc.handle = vkExportInfo.handle;
 
             wgpu::SharedFenceDescriptor fenceDesc;
@@ -2829,7 +2829,7 @@ TEST_P(SharedTextureMemoryVulkanTests, SingleFenceFeature) {
     wgpu::Adapter adapter(GetAdapter().Get());
     for (wgpu::FeatureName f : {
              wgpu::FeatureName::SharedFenceVkSemaphoreOpaqueFD,
-             wgpu::FeatureName::SharedFenceVkSemaphoreSyncFD,
+             wgpu::FeatureName::SharedFenceSyncFD,
              wgpu::FeatureName::SharedFenceVkSemaphoreZirconHandle,
          }) {
         if (adapter.HasFeature(f)) {

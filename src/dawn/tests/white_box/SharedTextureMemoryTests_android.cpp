@@ -181,8 +181,7 @@ class SharedTextureMemoryTestAndroidVulkanBackend
 
     std::vector<wgpu::FeatureName> RequiredFeatures(const wgpu::Adapter&) const override {
         return {wgpu::FeatureName::SharedTextureMemoryAHardwareBuffer,
-                wgpu::FeatureName::SharedFenceVkSemaphoreSyncFD,
-                wgpu::FeatureName::YCbCrVulkanSamplers};
+                wgpu::FeatureName::SharedFenceSyncFD, wgpu::FeatureName::YCbCrVulkanSamplers};
     }
 };
 
@@ -201,7 +200,7 @@ class SharedTextureMemoryTestAndroidOpenGLESBackend
 
 // Test clearing the texture memory on the device, then reading it on the CPU.
 TEST_P(SharedTextureMemoryTests, GPUWriteThenCPURead) {
-    DAWN_TEST_UNSUPPORTED_IF(!SupportsFeatures({wgpu::FeatureName::SharedFenceVkSemaphoreSyncFD}));
+    DAWN_TEST_UNSUPPORTED_IF(!SupportsFeatures({wgpu::FeatureName::SharedFenceSyncFD}));
 
     AHardwareBuffer_Desc aHardwareBufferDesc = {
         .width = 4,
@@ -249,7 +248,7 @@ TEST_P(SharedTextureMemoryTests, GPUWriteThenCPURead) {
     memory.EndAccess(texture, &endState);
 
     wgpu::SharedFenceExportInfo exportInfo;
-    wgpu::SharedFenceVkSemaphoreSyncFDExportInfo syncFdExportInfo;
+    wgpu::SharedFenceSyncFDExportInfo syncFdExportInfo;
     exportInfo.nextInChain = &syncFdExportInfo;
 
     endState.fences[0].ExportInfo(&exportInfo);

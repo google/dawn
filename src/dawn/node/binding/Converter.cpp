@@ -1581,6 +1581,7 @@ bool Converter::Convert(interop::GPUFeatureName& out, wgpu::FeatureName in) {
         case wgpu::FeatureName::SharedFenceDXGISharedHandle:
         case wgpu::FeatureName::SharedFenceMTLSharedEvent:
         case wgpu::FeatureName::SharedFenceVkSemaphoreOpaqueFD:
+        case wgpu::FeatureName::SharedFenceSyncFD:
         case wgpu::FeatureName::SharedFenceVkSemaphoreSyncFD:
         case wgpu::FeatureName::SharedFenceVkSemaphoreZirconHandle:
         case wgpu::FeatureName::SharedTextureMemoryAHardwareBuffer:

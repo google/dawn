@@ -476,6 +476,7 @@ void PhysicalDevice::InitializeSupportedFeaturesImpl() {
     if (CheckSemaphoreSupport(DeviceExt::ExternalSemaphoreFD,
                               VK_EXTERNAL_SEMAPHORE_HANDLE_TYPE_SYNC_FD_BIT_KHR)) {
         EnableFeature(Feature::SharedFenceVkSemaphoreSyncFD);
+        EnableFeature(Feature::SharedFenceSyncFD);
     }
     if (CheckSemaphoreSupport(DeviceExt::ExternalSemaphoreFD,
                               VK_EXTERNAL_SEMAPHORE_HANDLE_TYPE_OPAQUE_FD_BIT_KHR)) {

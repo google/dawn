@@ -133,17 +133,19 @@ MaybeError Device::Initialize(const UnpackedPtr<DeviceDescriptor>& descriptor) {
 
     if (uint32_t(HasFeature(Feature::SharedFenceVkSemaphoreOpaqueFD)) +
             uint32_t(HasFeature(Feature::SharedFenceVkSemaphoreSyncFD)) +
+            uint32_t(HasFeature(Feature::SharedFenceSyncFD)) +
             uint32_t(HasFeature(Feature::SharedFenceVkSemaphoreZirconHandle)) >
         1) {
         return DAWN_VALIDATION_ERROR("At most one of %s, %s, and %s may be enabled.",
                                      wgpu::FeatureName::SharedFenceVkSemaphoreOpaqueFD,
-                                     wgpu::FeatureName::SharedFenceVkSemaphoreSyncFD,
+                                     wgpu::FeatureName::SharedFenceSyncFD,
                                      wgpu::FeatureName::SharedFenceVkSemaphoreZirconHandle);
     }
     if (HasFeature(Feature::SharedFenceVkSemaphoreOpaqueFD)) {
         mExternalSemaphoreService = std::make_unique<external_semaphore::Service>(
             this, VK_EXTERNAL_SEMAPHORE_HANDLE_TYPE_OPAQUE_FD_BIT_KHR);
-    } else if (HasFeature(Feature::SharedFenceVkSemaphoreSyncFD)) {
+    } else if (HasFeature(Feature::SharedFenceSyncFD) ||
+               HasFeature(Feature::SharedFenceVkSemaphoreSyncFD)) {
         mExternalSemaphoreService = std::make_unique<external_semaphore::Service>(
             this, VK_EXTERNAL_SEMAPHORE_HANDLE_TYPE_SYNC_FD_BIT);
     } else if (HasFeature(Feature::SharedFenceVkSemaphoreZirconHandle)) {
@@ -298,7 +300,7 @@ ResultOrError<Ref<SharedFenceBase>> Device::ImportSharedFenceImpl(
     wgpu::SType type;
     DAWN_TRY_ASSIGN(
         type, (unpacked.ValidateBranches<Branch<SharedFenceVkSemaphoreZirconHandleDescriptor>,
-                                         Branch<SharedFenceVkSemaphoreSyncFDDescriptor>,
+                                         Branch<SharedFenceSyncFDDescriptor>,
                                          Branch<SharedFenceVkSemaphoreOpaqueFDDescriptor>>()));
 
     switch (type) {
@@ -309,11 +311,13 @@ ResultOrError<Ref<SharedFenceBase>> Device::ImportSharedFenceImpl(
             return SharedFence::Create(
                 this, descriptor->label,
                 unpacked.Get<SharedFenceVkSemaphoreZirconHandleDescriptor>());
-        case wgpu::SType::SharedFenceVkSemaphoreSyncFDDescriptor:
-            DAWN_INVALID_IF(!HasFeature(Feature::SharedFenceVkSemaphoreSyncFD),
-                            "%s is not enabled.", wgpu::FeatureName::SharedFenceVkSemaphoreSyncFD);
+        case wgpu::SType::SharedFenceSyncFDDescriptor:
+            DAWN_INVALID_IF(!HasFeature(Feature::SharedFenceSyncFD) &&
+                                !HasFeature(Feature::SharedFenceVkSemaphoreSyncFD),
+                            "%s or %s are not enabled.", wgpu::FeatureName::SharedFenceSyncFD,
+                            wgpu::FeatureName::SharedFenceVkSemaphoreSyncFD);
             return SharedFence::Create(this, descriptor->label,
-                                       unpacked.Get<SharedFenceVkSemaphoreSyncFDDescriptor>());
+                                       unpacked.Get<SharedFenceSyncFDDescriptor>());
         case wgpu::SType::SharedFenceVkSemaphoreOpaqueFDDescriptor:
             DAWN_INVALID_IF(!HasFeature(Feature::SharedFenceVkSemaphoreOpaqueFD),
                             "%s is not enabled.",

@@ -53,7 +53,7 @@ class Backend : public SharedTextureMemoryTestVulkanBackend {
         switch (FenceFeature) {
             case wgpu::FeatureName::SharedFenceVkSemaphoreOpaqueFD:
                 return "dma buf, opaque fd";
-            case wgpu::FeatureName::SharedFenceVkSemaphoreSyncFD:
+            case wgpu::FeatureName::SharedFenceSyncFD:
                 return "dma buf, sync fd";
             default:
                 DAWN_UNREACHABLE();
@@ -222,7 +222,7 @@ DAWN_INSTANTIATE_PREFIXED_TEST_P(
     SharedTextureMemoryNoFeatureTests,
     {VulkanBackend()},
     {Backend<wgpu::FeatureName::SharedFenceVkSemaphoreOpaqueFD>::GetInstance(),
-     Backend<wgpu::FeatureName::SharedFenceVkSemaphoreSyncFD>::GetInstance()},
+     Backend<wgpu::FeatureName::SharedFenceSyncFD>::GetInstance()},
     {1});
 
 DAWN_INSTANTIATE_PREFIXED_TEST_P(
@@ -230,7 +230,7 @@ DAWN_INSTANTIATE_PREFIXED_TEST_P(
     SharedTextureMemoryTests,
     {VulkanBackend()},
     {Backend<wgpu::FeatureName::SharedFenceVkSemaphoreOpaqueFD>::GetInstance(),
-     Backend<wgpu::FeatureName::SharedFenceVkSemaphoreSyncFD>::GetInstance()},
+     Backend<wgpu::FeatureName::SharedFenceSyncFD>::GetInstance()},
     {1});
 
 }  // anonymous namespace
