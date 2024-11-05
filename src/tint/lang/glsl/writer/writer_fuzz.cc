@@ -104,11 +104,30 @@ bool CanRun(const core::ir::Module& module, Options& options) {
         }
     }
 
-    // Check for clip_distance builtins.
+    // Check for unsupported shader IO builtins.
     for (auto& func : module.functions) {
-        if (func->Stage() != core::ir::Function::PipelineStage::kVertex) {
+        if (func->Stage() == core::ir::Function::PipelineStage::kUndefined) {
             continue;
         }
+
+        // subgroup builtins are not supported.
+        for (auto* param : func->Params()) {
+            if (auto* str = param->Type()->As<core::type::Struct>()) {
+                for (auto* member : str->Members()) {
+                    if (member->Attributes().builtin == core::BuiltinValue::kSubgroupInvocationId ||
+                        member->Attributes().builtin == core::BuiltinValue::kSubgroupSize) {
+                        return false;
+                    }
+                }
+            } else {
+                if (param->Builtin() == core::BuiltinValue::kSubgroupInvocationId ||
+                    param->Builtin() == core::BuiltinValue::kSubgroupSize) {
+                    return false;
+                }
+            }
+        }
+
+        // clip_distance is not supported.
         if (auto* str = func->ReturnType()->As<core::type::Struct>()) {
             for (auto* member : str->Members()) {
                 if (member->Attributes().builtin == core::BuiltinValue::kClipDistances) {
