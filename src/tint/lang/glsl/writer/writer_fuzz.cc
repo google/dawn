@@ -99,6 +99,9 @@ bool CanRun(const core::ir::Module& module, Options& options) {
         if (core::IsSubgroup(call->Func())) {
             return false;
         }
+        if (call->Func() == core::BuiltinFn::kInputAttachmentLoad) {
+            return false;
+        }
     }
 
     static constexpr uint32_t kMaxOffset = 0x1000;
