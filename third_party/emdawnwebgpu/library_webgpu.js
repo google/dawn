@@ -554,6 +554,9 @@ var LibraryWebGPU = {
 #endif
     if (WebGPU.preinitializedDeviceId === undefined) {
       WebGPU.preinitializedDeviceId = WebGPU.importJsDevice(Module['preinitializedWebGPUDevice']);
+      // Some users depend on this keeping the device alive, so we add an
+      // additional reference when we first initialize it.
+      _wgpuDeviceAddRef(WebGPU.preinitializedDeviceId);
     }
     _wgpuDeviceAddRef(WebGPU.preinitializedDeviceId);
     return WebGPU.preinitializedDeviceId;
