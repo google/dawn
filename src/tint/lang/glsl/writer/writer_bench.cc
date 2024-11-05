@@ -51,9 +51,17 @@ void GenerateGLSL(benchmark::State& state, std::string input_name) {
     std::vector<Options> options;
     std::vector<std::string> names;
     tint::inspector::Inspector inspector(res->program);
+
     for (auto ep : inspector.GetEntryPoints()) {
+        // Convert the AST program to an IR module, so that we can generating bindings data.
+        auto ir = tint::wgsl::reader::ProgramToLoweredIR(res->program);
+        if (ir != Success) {
+            state.SkipWithError(ir.Failure().reason.Str());
+            return;
+        }
+
         tint::glsl::writer::Options gen_options = {};
-        gen_options.bindings = tint::glsl::writer::GenerateBindings(res->program);
+        gen_options.bindings = tint::glsl::writer::GenerateBindings(ir.Get());
         gen_options.bindings.texture_builtins_from_uniform.ubo_binding = {4u, 0u};
 
         auto textureBuiltinsFromUniformData = inspector.GetTextureQueries(ep.name);

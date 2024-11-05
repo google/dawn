@@ -31,9 +31,6 @@
 #include "src/tint/lang/glsl/writer/common/options.h"
 
 // Forward declarations
-namespace tint {
-class Program;
-}
 namespace tint::core::ir {
 class Module;
 }  // namespace tint::core::ir
@@ -44,11 +41,6 @@ namespace tint::glsl::writer {
 /// @param module the module to generate from
 /// @returns the bindings
 Bindings GenerateBindings(const core::ir::Module& module);
-
-/// Generate the resource bindings
-/// @param program the program to generate from
-/// @returns the bindings
-Bindings GenerateBindings(const Program& program);
 
 }  // namespace tint::glsl::writer
 

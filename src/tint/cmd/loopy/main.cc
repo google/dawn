@@ -321,7 +321,7 @@ bool GenerateGlsl(const tint::Program& program) {
     }
 
     tint::glsl::writer::Options gen_options;
-    gen_options.bindings = tint::glsl::writer::GenerateBindings(program);
+    gen_options.bindings = tint::glsl::writer::GenerateBindings(ir.Get());
 
     auto result = tint::glsl::writer::Generate(ir.Get(), gen_options, "");
     if (result == tint::Success) {
