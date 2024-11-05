@@ -1095,21 +1095,6 @@ bool GenerateGlsl([[maybe_unused]] const tint::Program& program,
         // Generate binding options.
         gen_options.bindings = tint::glsl::writer::GenerateBindings(ir.Get());
 
-        constexpr uint32_t kMaxBindGroups = 4u;
-        gen_options.bindings.texture_builtins_from_uniform.ubo_binding = {kMaxBindGroups, 0u};
-
-        auto textureBuiltinsFromUniformData = inspector.GetTextureQueries(entry_point_name);
-        if (!textureBuiltinsFromUniformData.empty()) {
-            for (size_t i = 0; i < textureBuiltinsFromUniformData.size(); ++i) {
-                const auto& info = textureBuiltinsFromUniformData[i];
-
-                // This is the unmodified binding point from the WGSL shader.
-                tint::BindingPoint srcBindingPoint{info.group, info.binding};
-                gen_options.bindings.texture_builtins_from_uniform.ubo_bindingpoint_ordering
-                    .emplace_back(srcBindingPoint);
-            }
-        }
-
         // Generate GLSL.
         auto result = tint::glsl::writer::Generate(ir.Get(), gen_options, "");
         if (result != tint::Success) {

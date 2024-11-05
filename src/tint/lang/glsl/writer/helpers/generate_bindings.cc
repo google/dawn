@@ -46,6 +46,10 @@ Bindings GenerateBindings(const core::ir::Module& module) {
 
     std::unordered_set<tint::BindingPoint> seen_binding_points;
 
+    // Set a binding point for the texture-builtins-from-uniform buffer.
+    constexpr uint32_t kMaxBindGroups = 4u;
+    bindings.texture_builtins_from_uniform.ubo_binding = {kMaxBindGroups, 0u};
+
     // Collect next valid binding number per group
     Hashmap<uint32_t, uint32_t, 4> group_to_next_binding_number;
     Vector<tint::BindingPoint, 4> ext_tex_bps;
@@ -59,6 +63,11 @@ Bindings GenerateBindings(const core::ir::Module& module) {
             }
 
             auto* ptr_type = var->Result(0)->Type()->As<core::type::Pointer>();
+
+            // Add all texture variables to the texture-builtin-from-uniform map.
+            if (ptr_type->StoreType()->Is<core::type::Texture>()) {
+                bindings.texture_builtins_from_uniform.ubo_bindingpoint_ordering.emplace_back(*bp);
+            }
 
             // Store up the external textures, we'll add them in the next step
             if (ptr_type->StoreType()->Is<core::type::ExternalTexture>()) {

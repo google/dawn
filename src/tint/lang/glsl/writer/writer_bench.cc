@@ -47,37 +47,23 @@ void GenerateGLSL(benchmark::State& state, std::string input_name) {
         return;
     }
 
-    // Populate the generator options for each entry point.
-    std::vector<Options> options;
     std::vector<std::string> names;
-    tint::inspector::Inspector inspector(res->program);
-
-    for (auto ep : inspector.GetEntryPoints()) {
+    tint::glsl::writer::Options gen_options = {};
+    {
         // Convert the AST program to an IR module, so that we can generating bindings data.
         auto ir = tint::wgsl::reader::ProgramToLoweredIR(res->program);
         if (ir != Success) {
             state.SkipWithError(ir.Failure().reason.Str());
             return;
         }
-
-        tint::glsl::writer::Options gen_options = {};
         gen_options.bindings = tint::glsl::writer::GenerateBindings(ir.Get());
-        gen_options.bindings.texture_builtins_from_uniform.ubo_binding = {4u, 0u};
 
-        auto textureBuiltinsFromUniformData = inspector.GetTextureQueries(ep.name);
-        if (!textureBuiltinsFromUniformData.empty()) {
-            for (size_t i = 0; i < textureBuiltinsFromUniformData.size(); ++i) {
-                const auto& info = textureBuiltinsFromUniformData[i];
-
-                // This is the unmodified binding point from the WGSL shader.
-                tint::BindingPoint srcBindingPoint{info.group, info.binding};
-                gen_options.bindings.texture_builtins_from_uniform.ubo_bindingpoint_ordering
-                    .emplace_back(srcBindingPoint);
+        // Get the list of entry point names.
+        for (auto func : ir->functions) {
+            if (func->Stage() != core::ir::Function::PipelineStage::kUndefined) {
+                names.push_back(ir->NameOf(func).Name());
             }
         }
-
-        options.push_back(gen_options);
-        names.push_back(ep.name);
     }
 
     for (auto _ : state) {
@@ -97,7 +83,7 @@ void GenerateGLSL(benchmark::State& state, std::string input_name) {
             }
 
             // Generate GLSL.
-            auto gen_res = Generate(ir.Get(), options[i], names[i]);
+            auto gen_res = Generate(ir.Get(), gen_options, names[i]);
             if (gen_res != Success) {
                 state.SkipWithError(gen_res.Failure().reason.Str());
             }
