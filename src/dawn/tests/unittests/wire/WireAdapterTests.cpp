@@ -183,17 +183,15 @@ TEST_P(WireAdapterTests, RequestDeviceSuccess) {
                     return WGPUStatus_Success;
                 })));
 
-            EXPECT_CALL(api, DeviceGetFeatures(apiDevice, NotNull()))
-                .WillOnce(WithArg<1>(Invoke([&](WGPUSupportedFeatures* supportedFeatures) {
-                    const size_t count = fakeFeatures.size();
-                    WGPUFeatureName* features = new WGPUFeatureName[count];
-                    uint32_t index = 0;
+            EXPECT_CALL(api, DeviceEnumerateFeatures(apiDevice, nullptr))
+                .WillOnce(Return(fakeFeatures.size()));
+
+            EXPECT_CALL(api, DeviceEnumerateFeatures(apiDevice, NotNull()))
+                .WillOnce(WithArg<1>(Invoke([&](WGPUFeatureName* features) {
                     for (wgpu::FeatureName feature : fakeFeatures) {
-                        features[index++] = static_cast<WGPUFeatureName>(feature);
+                        *(features++) = static_cast<WGPUFeatureName>(feature);
                     }
-                    supportedFeatures->featureCount = count;
-                    supportedFeatures->features = features;
-                    return WGPUStatus_Success;
+                    return fakeFeatures.size();
                 })));
 
             // The backend device should still not be known by the wire server since the
@@ -222,13 +220,13 @@ TEST_P(WireAdapterTests, RequestDeviceSuccess) {
                           fakeLimits.limits.maxTextureDimension1D);
                 EXPECT_EQ(limits.limits.maxVertexAttributes, fakeLimits.limits.maxVertexAttributes);
 
-                wgpu::SupportedFeatures supportedFeatures;
-                device.GetFeatures(&supportedFeatures);
-                ASSERT_EQ(supportedFeatures.featureCount, fakeFeatures.size());
+                std::vector<wgpu::FeatureName> features;
+                features.resize(device.EnumerateFeatures(nullptr));
+                ASSERT_EQ(features.size(), fakeFeatures.size());
+                EXPECT_EQ(device.EnumerateFeatures(&features[0]), features.size());
 
                 std::unordered_set<wgpu::FeatureName> featureSet(fakeFeatures);
-                for (uint32_t i = 0; i < supportedFeatures.featureCount; ++i) {
-                    wgpu::FeatureName feature = supportedFeatures.features[i];
+                for (wgpu::FeatureName feature : features) {
                     EXPECT_EQ(featureSet.erase(feature), 1u);
                 }
             })));
@@ -267,16 +265,15 @@ TEST_P(WireAdapterTests, RequestFeatureUnsupportedByWire) {
     WGPUDevice apiDevice = api.GetNewDevice();
     EXPECT_CALL(api, OnAdapterRequestDevice(apiAdapter, NotNull(), _))
         .WillOnce(InvokeWithoutArgs([&] {
-            EXPECT_CALL(api, DeviceGetFeatures(apiDevice, NotNull()))
-                .WillOnce(WithArg<1>(Invoke([&](WGPUSupportedFeatures* supportedFeatures) {
-                    const size_t count = fakeFeatures.size();
-                    WGPUFeatureName* features = new WGPUFeatureName[count];
-                    uint32_t index = 0;
+            EXPECT_CALL(api, DeviceEnumerateFeatures(apiDevice, nullptr))
+                .WillOnce(Return(fakeFeatures.size()));
+
+            EXPECT_CALL(api, DeviceEnumerateFeatures(apiDevice, NotNull()))
+                .WillOnce(WithArg<1>(Invoke([&](WGPUFeatureName* features) {
                     for (wgpu::FeatureName feature : fakeFeatures) {
-                        features[index++] = static_cast<WGPUFeatureName>(feature);
+                        *(features++) = static_cast<WGPUFeatureName>(feature);
                     }
-                    supportedFeatures->featureCount = count;
-                    supportedFeatures->features = features;
+                    return fakeFeatures.size();
                 })));
 
             // The device was actually created, but the wire didn't support its features.
@@ -352,16 +349,15 @@ TEST_P(WireAdapterTests, RequestDeviceAdapterDestroyedBeforeCallback) {
                     return WGPUStatus_Success;
                 })));
 
-            EXPECT_CALL(api, DeviceGetFeatures(apiDevice, NotNull()))
-                .WillOnce(WithArg<1>(Invoke([&](WGPUSupportedFeatures* supportedFeatures) {
-                    const size_t count = fakeFeatures.size();
-                    WGPUFeatureName* features = new WGPUFeatureName[count];
-                    uint32_t index = 0;
+            EXPECT_CALL(api, DeviceEnumerateFeatures(apiDevice, nullptr))
+                .WillOnce(Return(fakeFeatures.size()));
+
+            EXPECT_CALL(api, DeviceEnumerateFeatures(apiDevice, NotNull()))
+                .WillOnce(WithArg<1>(Invoke([&](WGPUFeatureName* features) {
                     for (wgpu::FeatureName feature : fakeFeatures) {
-                        features[index++] = static_cast<WGPUFeatureName>(feature);
+                        *(features++) = static_cast<WGPUFeatureName>(feature);
                     }
-                    supportedFeatures->featureCount = count;
-                    supportedFeatures->features = features;
+                    return fakeFeatures.size();
                 })));
 
             api.CallAdapterRequestDeviceCallback(apiAdapter, WGPURequestDeviceStatus_Success,
