@@ -73,10 +73,12 @@ Result<SuccessType> Run(ir::Module& ir, std::string_view entry_point_name) {
     // Remove unused module-scope variables.
     ReferencedModuleVars<Module> referenced_var_cache(ir);
     auto& referenced_vars = referenced_var_cache.TransitiveReferences(entry_point);
-    for (auto* decl : *ir.root_block) {
-        // Assume that we only have var instructions for now, until override support is added.
-        auto* var = decl->As<Var>();
+    auto* inst = ir.root_block->Front();
+    while (inst) {
+        // TODO(374971092): Handle removal of override instructions.
+        auto* var = inst->As<Var>();
         TINT_ASSERT(var);
+        inst = var->next;
         if (!referenced_vars.Contains(var)) {
             // There shouldn't be any remaining references to the variable.
             // This will not always be the case once we have override support.

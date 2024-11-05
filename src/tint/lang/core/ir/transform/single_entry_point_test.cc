@@ -469,5 +469,71 @@ TEST_F(IR_SingleEntryPointTest, RemoveMultipleFunctions) {
     EXPECT_EQ(expect, str());
 }
 
+TEST_F(IR_SingleEntryPointTest, RemoveMultipleVariables) {
+    auto* v1 = Var("v1");
+    auto* v2 = Var("v2");
+    auto* v3 = Var("v3");
+    auto* v4 = Var("v4");
+    auto* v5 = Var("v5");
+    auto* v6 = Var("v6");
+    auto* v7 = Var("v7");
+
+    EntryPoint("foo", {v1, v5});
+    EntryPoint("bar", {v1, v2, v3, v4, v5, v6, v7});
+
+    auto* src = R"(
+$B1: {  # root
+  %v1:ptr<private, i32, read_write> = var
+  %v2:ptr<private, i32, read_write> = var
+  %v3:ptr<private, i32, read_write> = var
+  %v4:ptr<private, i32, read_write> = var
+  %v5:ptr<private, i32, read_write> = var
+  %v6:ptr<private, i32, read_write> = var
+  %v7:ptr<private, i32, read_write> = var
+}
+
+%foo = @fragment func():void {
+  $B2: {
+    %9:ptr<private, i32, read_write> = let %v1
+    %10:ptr<private, i32, read_write> = let %v5
+    ret
+  }
+}
+%bar = @fragment func():void {
+  $B3: {
+    %12:ptr<private, i32, read_write> = let %v1
+    %13:ptr<private, i32, read_write> = let %v2
+    %14:ptr<private, i32, read_write> = let %v3
+    %15:ptr<private, i32, read_write> = let %v4
+    %16:ptr<private, i32, read_write> = let %v5
+    %17:ptr<private, i32, read_write> = let %v6
+    %18:ptr<private, i32, read_write> = let %v7
+    ret
+  }
+}
+)";
+
+    auto* expect = R"(
+$B1: {  # root
+  %v1:ptr<private, i32, read_write> = var
+  %v5:ptr<private, i32, read_write> = var
+}
+
+%foo = @fragment func():void {
+  $B2: {
+    %4:ptr<private, i32, read_write> = let %v1
+    %5:ptr<private, i32, read_write> = let %v5
+    ret
+  }
+}
+)";
+
+    EXPECT_EQ(src, str());
+
+    Run(SingleEntryPoint, "foo");
+
+    EXPECT_EQ(expect, str());
+}
+
 }  // namespace
 }  // namespace tint::core::ir::transform
