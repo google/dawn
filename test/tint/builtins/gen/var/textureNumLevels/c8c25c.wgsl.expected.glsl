@@ -12,7 +12,7 @@ buffer prevent_dce_block_1_ssbo {
   uint inner;
 } v;
 layout(binding = 0, std140)
-uniform tint_symbol_1_ubo {
+uniform tint_symbol_1_1_ubo {
   TintTextureUniformData inner;
 } v_1;
 uint textureNumLevels_c8c25c() {
@@ -34,7 +34,7 @@ buffer prevent_dce_block_1_ssbo {
   uint inner;
 } v;
 layout(binding = 0, std140)
-uniform tint_symbol_1_ubo {
+uniform tint_symbol_1_1_ubo {
   TintTextureUniformData inner;
 } v_1;
 uint textureNumLevels_c8c25c() {

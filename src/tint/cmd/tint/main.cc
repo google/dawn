@@ -43,6 +43,7 @@
 #include "src/tint/api/tint.h"
 #include "src/tint/cmd/common/helper.h"
 #include "src/tint/lang/core/ir/disassembler.h"
+#include "src/tint/lang/core/ir/transform/single_entry_point.h"
 #include "src/tint/lang/wgsl/ast/module.h"
 #include "src/tint/lang/wgsl/ast/transform/first_index_offset.h"
 #include "src/tint/lang/wgsl/ast/transform/manager.h"
@@ -1049,23 +1050,6 @@ bool GenerateGlsl([[maybe_unused]] const tint::Program& program,
 
     auto generate = [&](const tint::Program& prg, const std::string entry_point_name,
                         [[maybe_unused]] tint::ast::PipelineStage stage) -> bool {
-        // The GLSL backend assumes single entry point
-        tint::ast::transform::Manager transform_manager;
-        tint::ast::transform::DataMap transform_inputs;
-
-        if (!entry_point_name.empty()) {
-            transform_manager.append(std::make_unique<tint::ast::transform::SingleEntryPoint>());
-            transform_inputs.Add<tint::ast::transform::SingleEntryPoint::Config>(entry_point_name);
-        }
-
-        tint::ast::transform::DataMap outputs;
-        auto single_prog = transform_manager.Run(prg, std::move(transform_inputs), outputs);
-        if (!single_prog.IsValid()) {
-            tint::cmd::PrintWGSL(std::cerr, single_prog);
-            std::cerr << single_prog.Diagnostics() << "\n";
-            return 1;
-        }
-
         tint::glsl::writer::Options gen_options;
 
         if (options.glsl_desktop) {
@@ -1108,15 +1092,25 @@ bool GenerateGlsl([[maybe_unused]] const tint::Program& program,
         }
 
         // Convert the AST program to an IR module.
-        auto ir = tint::wgsl::reader::ProgramToLoweredIR(single_prog);
+        auto ir = tint::wgsl::reader::ProgramToLoweredIR(prg);
         if (ir != tint::Success) {
             std::cerr << "Failed to generate IR: " << ir << "\n";
             return false;
         }
-        auto result = tint::glsl::writer::Generate(ir.Get(), gen_options, "");
 
+        // The GLSL backend assumes single entry point.
+        if (!entry_point_name.empty()) {
+            auto single_result =
+                tint::core::ir::transform::SingleEntryPoint(ir.Get(), entry_point_name);
+            if (single_result != tint::Success) {
+                std::cerr << single_result.Failure().reason.Str() << "\n";
+                return false;
+            }
+        }
+
+        // Generate GLSL.
+        auto result = tint::glsl::writer::Generate(ir.Get(), gen_options, "");
         if (result != tint::Success) {
-            tint::cmd::PrintWGSL(std::cerr, single_prog);
             std::cerr << "Failed to generate: " << result.Failure() << "\n";
             return false;
         }
