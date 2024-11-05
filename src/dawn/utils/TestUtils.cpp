@@ -165,10 +165,20 @@ void UnalignDynamicUploader(wgpu::Device device) {
 
 uint32_t VertexFormatSize(wgpu::VertexFormat format) {
     switch (format) {
+        case wgpu::VertexFormat::Uint8:
+        case wgpu::VertexFormat::Sint8:
+        case wgpu::VertexFormat::Unorm8:
+        case wgpu::VertexFormat::Snorm8:
+            return 1;
         case wgpu::VertexFormat::Uint8x2:
         case wgpu::VertexFormat::Sint8x2:
         case wgpu::VertexFormat::Unorm8x2:
         case wgpu::VertexFormat::Snorm8x2:
+        case wgpu::VertexFormat::Uint16:
+        case wgpu::VertexFormat::Sint16:
+        case wgpu::VertexFormat::Unorm16:
+        case wgpu::VertexFormat::Snorm16:
+        case wgpu::VertexFormat::Float16:
             return 2;
         case wgpu::VertexFormat::Uint8x4:
         case wgpu::VertexFormat::Sint8x4:
@@ -183,6 +193,7 @@ uint32_t VertexFormatSize(wgpu::VertexFormat format) {
         case wgpu::VertexFormat::Uint32:
         case wgpu::VertexFormat::Sint32:
         case wgpu::VertexFormat::Unorm10_10_10_2:
+        case wgpu::VertexFormat::Unorm8x4BGRA:
             return 4;
         case wgpu::VertexFormat::Uint16x4:
         case wgpu::VertexFormat::Sint16x4:

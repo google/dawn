@@ -1136,11 +1136,17 @@ bool Converter::Convert(wgpu::VertexAttribute& out, const interop::GPUVertexAttr
 
 bool Converter::Convert(wgpu::VertexFormat& out, const interop::GPUVertexFormat& in) {
     switch (in) {
+        case interop::GPUVertexFormat::kUint8:
+            out = wgpu::VertexFormat::Uint8;
+            return true;
         case interop::GPUVertexFormat::kUint8X2:
             out = wgpu::VertexFormat::Uint8x2;
             return true;
         case interop::GPUVertexFormat::kUint8X4:
             out = wgpu::VertexFormat::Uint8x4;
+            return true;
+        case interop::GPUVertexFormat::kSint8:
+            out = wgpu::VertexFormat::Sint8;
             return true;
         case interop::GPUVertexFormat::kSint8X2:
             out = wgpu::VertexFormat::Sint8x2;
@@ -1148,11 +1154,17 @@ bool Converter::Convert(wgpu::VertexFormat& out, const interop::GPUVertexFormat&
         case interop::GPUVertexFormat::kSint8X4:
             out = wgpu::VertexFormat::Sint8x4;
             return true;
+        case interop::GPUVertexFormat::kUnorm8:
+            out = wgpu::VertexFormat::Unorm8;
+            return true;
         case interop::GPUVertexFormat::kUnorm8X2:
             out = wgpu::VertexFormat::Unorm8x2;
             return true;
         case interop::GPUVertexFormat::kUnorm8X4:
             out = wgpu::VertexFormat::Unorm8x4;
+            return true;
+        case interop::GPUVertexFormat::kSnorm8:
+            out = wgpu::VertexFormat::Snorm8;
             return true;
         case interop::GPUVertexFormat::kSnorm8X2:
             out = wgpu::VertexFormat::Snorm8x2;
@@ -1160,11 +1172,17 @@ bool Converter::Convert(wgpu::VertexFormat& out, const interop::GPUVertexFormat&
         case interop::GPUVertexFormat::kSnorm8X4:
             out = wgpu::VertexFormat::Snorm8x4;
             return true;
+        case interop::GPUVertexFormat::kUint16:
+            out = wgpu::VertexFormat::Uint16;
+            return true;
         case interop::GPUVertexFormat::kUint16X2:
             out = wgpu::VertexFormat::Uint16x2;
             return true;
         case interop::GPUVertexFormat::kUint16X4:
             out = wgpu::VertexFormat::Uint16x4;
+            return true;
+        case interop::GPUVertexFormat::kSint16:
+            out = wgpu::VertexFormat::Sint16;
             return true;
         case interop::GPUVertexFormat::kSint16X2:
             out = wgpu::VertexFormat::Sint16x2;
@@ -1172,17 +1190,26 @@ bool Converter::Convert(wgpu::VertexFormat& out, const interop::GPUVertexFormat&
         case interop::GPUVertexFormat::kSint16X4:
             out = wgpu::VertexFormat::Sint16x4;
             return true;
+        case interop::GPUVertexFormat::kUnorm16:
+            out = wgpu::VertexFormat::Unorm16;
+            return true;
         case interop::GPUVertexFormat::kUnorm16X2:
             out = wgpu::VertexFormat::Unorm16x2;
             return true;
         case interop::GPUVertexFormat::kUnorm16X4:
             out = wgpu::VertexFormat::Unorm16x4;
             return true;
+        case interop::GPUVertexFormat::kSnorm16:
+            out = wgpu::VertexFormat::Snorm16;
+            return true;
         case interop::GPUVertexFormat::kSnorm16X2:
             out = wgpu::VertexFormat::Snorm16x2;
             return true;
         case interop::GPUVertexFormat::kSnorm16X4:
             out = wgpu::VertexFormat::Snorm16x4;
+            return true;
+        case interop::GPUVertexFormat::kFloat16:
+            out = wgpu::VertexFormat::Float16;
             return true;
         case interop::GPUVertexFormat::kFloat16X2:
             out = wgpu::VertexFormat::Float16x2;
@@ -1228,6 +1255,9 @@ bool Converter::Convert(wgpu::VertexFormat& out, const interop::GPUVertexFormat&
             return true;
         case interop::GPUVertexFormat::kUnorm1010102:
             out = wgpu::VertexFormat::Unorm10_10_10_2;
+            return true;
+        case interop::GPUVertexFormat::kUnorm8X4Bgra:
+            out = wgpu::VertexFormat::Unorm8x4BGRA;
             return true;
         default:
             break;

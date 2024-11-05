@@ -78,38 +78,56 @@ enum class VertexDataType {
 /// @returns out so calls can be chained
 diag::Diagnostic& operator<<(diag::Diagnostic& out, VertexFormat format) {
     switch (format) {
+        case VertexFormat::kUint8:
+            return out << "uint8";
         case VertexFormat::kUint8x2:
             return out << "uint8x2";
         case VertexFormat::kUint8x4:
             return out << "uint8x4";
+        case VertexFormat::kSint8:
+            return out << "sint8";
         case VertexFormat::kSint8x2:
             return out << "sint8x2";
         case VertexFormat::kSint8x4:
             return out << "sint8x4";
+        case VertexFormat::kUnorm8:
+            return out << "unorm8";
         case VertexFormat::kUnorm8x2:
             return out << "unorm8x2";
         case VertexFormat::kUnorm8x4:
             return out << "unorm8x4";
+        case VertexFormat::kSnorm8:
+            return out << "snorm8";
         case VertexFormat::kSnorm8x2:
             return out << "snorm8x2";
         case VertexFormat::kSnorm8x4:
             return out << "snorm8x4";
+        case VertexFormat::kUint16:
+            return out << "uint16";
         case VertexFormat::kUint16x2:
             return out << "uint16x2";
         case VertexFormat::kUint16x4:
             return out << "uint16x4";
+        case VertexFormat::kSint16:
+            return out << "sint16";
         case VertexFormat::kSint16x2:
             return out << "sint16x2";
         case VertexFormat::kSint16x4:
             return out << "sint16x4";
+        case VertexFormat::kUnorm16:
+            return out << "unorm16";
         case VertexFormat::kUnorm16x2:
             return out << "unorm16x2";
         case VertexFormat::kUnorm16x4:
             return out << "unorm16x4";
+        case VertexFormat::kSnorm16:
+            return out << "snorm16";
         case VertexFormat::kSnorm16x2:
             return out << "snorm16x2";
         case VertexFormat::kSnorm16x4:
             return out << "snorm16x4";
+        case VertexFormat::kFloat16:
+            return out << "float16";
         case VertexFormat::kFloat16x2:
             return out << "float16x2";
         case VertexFormat::kFloat16x4:
@@ -140,6 +158,8 @@ diag::Diagnostic& operator<<(diag::Diagnostic& out, VertexFormat format) {
             return out << "sint32x4";
         case VertexFormat::kUnorm10_10_10_2:
             return out << "unorm10-10-10-2";
+        case VertexFormat::kUnorm8x4BGRA:
+            return out << "unorm8x4-bgra";
     }
     return out << "<unknown>";
 }
@@ -196,6 +216,8 @@ AttributeWGSLType WGSLTypeOf(const core::type::Type* ty) {
 
 VertexFormatType VertexFormatTypeOf(VertexFormat format) {
     switch (format) {
+        case VertexFormat::kUint8:
+        case VertexFormat::kUint16:
         case VertexFormat::kUint32:
             return {VertexDataType::kUInt, 1};
         case VertexFormat::kUint8x2:
@@ -208,6 +230,8 @@ VertexFormatType VertexFormatTypeOf(VertexFormat format) {
         case VertexFormat::kUint16x4:
         case VertexFormat::kUint32x4:
             return {VertexDataType::kUInt, 4};
+        case VertexFormat::kSint8:
+        case VertexFormat::kSint16:
         case VertexFormat::kSint32:
             return {VertexDataType::kSInt, 1};
         case VertexFormat::kSint8x2:
@@ -220,6 +244,11 @@ VertexFormatType VertexFormatTypeOf(VertexFormat format) {
         case VertexFormat::kSint16x4:
         case VertexFormat::kSint32x4:
             return {VertexDataType::kSInt, 4};
+        case VertexFormat::kUnorm8:
+        case VertexFormat::kSnorm8:
+        case VertexFormat::kUnorm16:
+        case VertexFormat::kSnorm16:
+        case VertexFormat::kFloat16:
         case VertexFormat::kFloat32:
             return {VertexDataType::kFloat, 1};
         case VertexFormat::kUnorm8x2:
@@ -238,6 +267,7 @@ VertexFormatType VertexFormatTypeOf(VertexFormat format) {
         case VertexFormat::kFloat16x4:
         case VertexFormat::kFloat32x4:
         case VertexFormat::kUnorm10_10_10_2:
+        case VertexFormat::kUnorm8x4BGRA:
             return {VertexDataType::kFloat, 4};
     }
     return {VertexDataType::kInvalid, 0};
@@ -552,6 +582,31 @@ struct VertexPulling::State {
         // The low 16 bits are 0.
         auto load_i16_h = [&] { return b.Bitcast<i32>(load_u16_h()); };
 
+        // Returns a u8 loaded from offset, in the low 8 bits of a u32. Other bits are 0.
+        auto load_u8_l = [&] {
+            auto u32_offset = offset & ~3u;
+            auto remainder_offset = offset - u32_offset;
+
+            auto* u8s = LoadPrimitive(array_base, u32_offset, buffer, VertexFormat::kUint32);
+            auto* shifts = b.Call<vec4<u32>>(0_u, 8_u, 16_u, 24_u);
+            auto* shift = b.IndexAccessor(shifts, u32(remainder_offset));
+
+            return b.And(b.Shr(u8s, shift), 0xFF_u);
+        };
+
+        // Returns an i8 loaded from offset, in the low 8 bits of a u32. Other bits are 0.
+        auto load_i8_l = [&] {
+            auto u32_offset = offset & ~3u;
+            auto remainder_offset = offset - u32_offset;
+
+            auto* i8s = LoadPrimitive(array_base, u32_offset, buffer, VertexFormat::kSint32);
+            auto* shifts = b.Call<vec4<u32>>(24_u, 16_u, 8_u, 0_u);
+            auto* shift = b.IndexAccessor(shifts, u32(remainder_offset));
+
+            auto* i8_high = b.Shl(i8s, shift);
+            return b.Shr(i8_high, 24_u);
+        };
+
         // Assumptions are made that alignment must be at least as large as the size
         // of a single component.
         switch (format) {
@@ -584,6 +639,9 @@ struct VertexPulling::State {
                 return LoadVec(array_base, offset, buffer, 4, b.ty.f32(), VertexFormat::kFloat32,
                                4);
 
+            case VertexFormat::kUint8: {
+                return load_u8_l();
+            }
             case VertexFormat::kUint8x2: {
                 // yyxx0000, yyxx0000
                 auto* u16s = b.Call<vec2<u32>>(load_u16_h());
@@ -599,6 +657,9 @@ struct VertexPulling::State {
                 auto* shl = b.Shl(u32s, b.Call<vec4<u32>>(24_u, 16_u, 8_u, 0_u));
                 // 000000xx, 000000yy, 000000zz, 000000ww
                 return b.Shr(shl, b.Call<vec4<u32>>(24_u));
+            }
+            case VertexFormat::kUint16: {
+                return load_u16_l();
             }
             case VertexFormat::kUint16x2: {
                 // yyyyxxxx, yyyyxxxx
@@ -618,6 +679,9 @@ struct VertexPulling::State {
                 // 0000xxxx, 0000yyyy, 0000zzzz, 0000wwww
                 return b.Shr(shl, b.Call<vec4<u32>>(16_u));
             }
+            case VertexFormat::kSint8: {
+                return load_i8_l();
+            }
             case VertexFormat::kSint8x2: {
                 // yyxx0000, yyxx0000
                 auto* i16s = b.Call<vec2<i32>>(load_i16_h());
@@ -633,6 +697,9 @@ struct VertexPulling::State {
                 auto* shl = b.Shl(i32s, b.Call<vec4<u32>>(24_u, 16_u, 8_u, 0_u));
                 // ssssssxx, ssssssyy, sssssszz, ssssssww
                 return b.Shr(shl, b.Call<vec4<u32>>(24_u));
+            }
+            case VertexFormat::kSint16: {
+                return b.Shr(load_i16_h(), 16_u);
             }
             case VertexFormat::kSint16x2: {
                 // yyyyxxxx, yyyyxxxx
@@ -652,6 +719,10 @@ struct VertexPulling::State {
                 // ssssxxxx, ssssyyyy, sssszzzz, sssswwww
                 return b.Shr(shl, b.Call<vec4<u32>>(16_u));
             }
+            case VertexFormat::kUnorm8:
+                return b.MemberAccessor(b.Call("unpack4x8unorm", load_u8_l()), "x");
+            case VertexFormat::kSnorm8:
+                return b.MemberAccessor(b.Call("unpack4x8snorm", load_u8_l()), "x");
             case VertexFormat::kUnorm8x2:
                 return b.MemberAccessor(b.Call("unpack4x8unorm", load_u16_l()), "xy");
             case VertexFormat::kSnorm8x2:
@@ -660,6 +731,12 @@ struct VertexPulling::State {
                 return b.Call("unpack4x8unorm", load_u32());
             case VertexFormat::kSnorm8x4:
                 return b.Call("unpack4x8snorm", load_u32());
+            case VertexFormat::kUnorm16:
+                return b.MemberAccessor(b.Call("unpack2x16unorm", load_u16_l()), "x");
+            case VertexFormat::kSnorm16:
+                return b.MemberAccessor(b.Call("unpack2x16snorm", load_u16_l()), "x");
+            case VertexFormat::kFloat16:
+                return b.MemberAccessor(b.Call("unpack2x16float", load_u16_l()), "x");
             case VertexFormat::kUnorm16x2:
                 return b.Call("unpack2x16unorm", load_u32());
             case VertexFormat::kSnorm16x2:
@@ -675,7 +752,7 @@ struct VertexPulling::State {
             case VertexFormat::kFloat16x4:
                 return b.Call<vec4<f32>>(b.Call("unpack2x16float", load_u32()),
                                          b.Call("unpack2x16float", load_next_u32()));
-            case VertexFormat::kUnorm10_10_10_2:
+            case VertexFormat::kUnorm10_10_10_2: {
                 auto* u32s = b.Call<vec4<u32>>(load_u32());
                 // shr = u32s >> vec4u(0, 10, 20, 30);
                 auto* shr = b.Shr(u32s, b.Call<vec4<u32>>(0_u, 10_u, 20_u, 30_u));
@@ -684,6 +761,10 @@ struct VertexPulling::State {
                 // return vec4f(mask) / vec4f(1023, 1023, 1023, 3);
                 return b.Div(b.Call<vec4<f32>>(mask),
                              b.Call<vec4<f32>>(1023_f, 1023_f, 1023_f, 3_f));
+            }
+            case VertexFormat::kUnorm8x4BGRA: {
+                return b.MemberAccessor(b.Call("unpack4x8unorm", load_u32()), "zyxw");
+            }
         }
 
         TINT_UNREACHABLE() << "format " << static_cast<int>(format);

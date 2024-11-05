@@ -43,38 +43,56 @@ namespace dawn::native::metal {
 namespace {
 MTLVertexFormat VertexFormatType(wgpu::VertexFormat format) {
     switch (format) {
+        case wgpu::VertexFormat::Uint8:
+            return MTLVertexFormatUChar;
         case wgpu::VertexFormat::Uint8x2:
             return MTLVertexFormatUChar2;
         case wgpu::VertexFormat::Uint8x4:
             return MTLVertexFormatUChar4;
+        case wgpu::VertexFormat::Sint8:
+            return MTLVertexFormatChar;
         case wgpu::VertexFormat::Sint8x2:
             return MTLVertexFormatChar2;
         case wgpu::VertexFormat::Sint8x4:
             return MTLVertexFormatChar4;
+        case wgpu::VertexFormat::Unorm8:
+            return MTLVertexFormatUCharNormalized;
         case wgpu::VertexFormat::Unorm8x2:
             return MTLVertexFormatUChar2Normalized;
         case wgpu::VertexFormat::Unorm8x4:
             return MTLVertexFormatUChar4Normalized;
+        case wgpu::VertexFormat::Snorm8:
+            return MTLVertexFormatCharNormalized;
         case wgpu::VertexFormat::Snorm8x2:
             return MTLVertexFormatChar2Normalized;
         case wgpu::VertexFormat::Snorm8x4:
             return MTLVertexFormatChar4Normalized;
+        case wgpu::VertexFormat::Uint16:
+            return MTLVertexFormatUShort;
         case wgpu::VertexFormat::Uint16x2:
             return MTLVertexFormatUShort2;
         case wgpu::VertexFormat::Uint16x4:
             return MTLVertexFormatUShort4;
+        case wgpu::VertexFormat::Sint16:
+            return MTLVertexFormatShort;
         case wgpu::VertexFormat::Sint16x2:
             return MTLVertexFormatShort2;
         case wgpu::VertexFormat::Sint16x4:
             return MTLVertexFormatShort4;
+        case wgpu::VertexFormat::Unorm16:
+            return MTLVertexFormatUShortNormalized;
         case wgpu::VertexFormat::Unorm16x2:
             return MTLVertexFormatUShort2Normalized;
         case wgpu::VertexFormat::Unorm16x4:
             return MTLVertexFormatUShort4Normalized;
+        case wgpu::VertexFormat::Snorm16:
+            return MTLVertexFormatShortNormalized;
         case wgpu::VertexFormat::Snorm16x2:
             return MTLVertexFormatShort2Normalized;
         case wgpu::VertexFormat::Snorm16x4:
             return MTLVertexFormatShort4Normalized;
+        case wgpu::VertexFormat::Float16:
+            return MTLVertexFormatHalf;
         case wgpu::VertexFormat::Float16x2:
             return MTLVertexFormatHalf2;
         case wgpu::VertexFormat::Float16x4:
@@ -105,6 +123,8 @@ MTLVertexFormat VertexFormatType(wgpu::VertexFormat format) {
             return MTLVertexFormatInt4;
         case wgpu::VertexFormat::Unorm10_10_10_2:
             return MTLVertexFormatUInt1010102Normalized;
+        case wgpu::VertexFormat::Unorm8x4BGRA:
+            return MTLVertexFormatUChar4Normalized_BGRA;
         default:
             DAWN_UNREACHABLE();
     }

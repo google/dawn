@@ -48,28 +48,37 @@
 
 namespace dawn::native {
 
-static constexpr ityp::array<wgpu::VertexFormat, VertexFormatInfo, 32> sVertexFormatTable =
+static constexpr ityp::array<wgpu::VertexFormat, VertexFormatInfo, 42> sVertexFormatTable =
     []() constexpr {
-        ityp::array<wgpu::VertexFormat, VertexFormatInfo, 32> table{};
+        ityp::array<wgpu::VertexFormat, VertexFormatInfo, 42> table{};
 
         // clang-format off
+        table[wgpu::VertexFormat::Uint8          ] = { 1, 1, VertexFormatBaseType::Uint };
         table[wgpu::VertexFormat::Uint8x2        ] = { 2, 2, VertexFormatBaseType::Uint };
         table[wgpu::VertexFormat::Uint8x4        ] = { 4, 4, VertexFormatBaseType::Uint };
+        table[wgpu::VertexFormat::Sint8          ] = { 1, 1, VertexFormatBaseType::Sint };
         table[wgpu::VertexFormat::Sint8x2        ] = { 2, 2, VertexFormatBaseType::Sint };
         table[wgpu::VertexFormat::Sint8x4        ] = { 4, 4, VertexFormatBaseType::Sint };
+        table[wgpu::VertexFormat::Unorm8         ] = { 1, 1, VertexFormatBaseType::Float};
         table[wgpu::VertexFormat::Unorm8x2       ] = { 2, 2, VertexFormatBaseType::Float};
         table[wgpu::VertexFormat::Unorm8x4       ] = { 4, 4, VertexFormatBaseType::Float};
+        table[wgpu::VertexFormat::Snorm8         ] = { 1, 1, VertexFormatBaseType::Float};
         table[wgpu::VertexFormat::Snorm8x2       ] = { 2, 2, VertexFormatBaseType::Float};
         table[wgpu::VertexFormat::Snorm8x4       ] = { 4, 4, VertexFormatBaseType::Float};
 
+        table[wgpu::VertexFormat::Uint16         ] = { 2, 1, VertexFormatBaseType::Uint };
         table[wgpu::VertexFormat::Uint16x2       ] = { 4, 2, VertexFormatBaseType::Uint };
         table[wgpu::VertexFormat::Uint16x4       ] = { 8, 4, VertexFormatBaseType::Uint };
+        table[wgpu::VertexFormat::Sint16         ] = { 2, 1, VertexFormatBaseType::Sint };
         table[wgpu::VertexFormat::Sint16x2       ] = { 4, 2, VertexFormatBaseType::Sint };
         table[wgpu::VertexFormat::Sint16x4       ] = { 8, 4, VertexFormatBaseType::Sint };
+        table[wgpu::VertexFormat::Unorm16        ] = { 2, 1, VertexFormatBaseType::Float};
         table[wgpu::VertexFormat::Unorm16x2      ] = { 4, 2, VertexFormatBaseType::Float};
         table[wgpu::VertexFormat::Unorm16x4      ] = { 8, 4, VertexFormatBaseType::Float};
+        table[wgpu::VertexFormat::Snorm16        ] = { 2, 1, VertexFormatBaseType::Float};
         table[wgpu::VertexFormat::Snorm16x2      ] = { 4, 2, VertexFormatBaseType::Float};
         table[wgpu::VertexFormat::Snorm16x4      ] = { 8, 4, VertexFormatBaseType::Float};
+        table[wgpu::VertexFormat::Float16        ] = { 2, 1, VertexFormatBaseType::Float};
         table[wgpu::VertexFormat::Float16x2      ] = { 4, 2, VertexFormatBaseType::Float};
         table[wgpu::VertexFormat::Float16x4      ] = { 8, 4, VertexFormatBaseType::Float};
 
@@ -86,6 +95,7 @@ static constexpr ityp::array<wgpu::VertexFormat, VertexFormatInfo, 32> sVertexFo
         table[wgpu::VertexFormat::Sint32x3       ] = {12, 3, VertexFormatBaseType::Sint };
         table[wgpu::VertexFormat::Sint32x4       ] = {16, 4, VertexFormatBaseType::Sint };
         table[wgpu::VertexFormat::Unorm10_10_10_2] = { 4, 4, VertexFormatBaseType::Float};
+        table[wgpu::VertexFormat::Unorm8x4BGRA   ] = { 4, 4, VertexFormatBaseType::Float};
         // clang-format on
 
         return table;
