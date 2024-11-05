@@ -30,6 +30,7 @@
 #include "src/tint/lang/core/ir/var.h"
 #include "src/tint/lang/core/type/input_attachment.h"
 #include "src/tint/lang/core/type/pointer.h"
+#include "src/tint/lang/core/type/storage_texture.h"
 #include "src/tint/lang/glsl/writer/helpers/generate_bindings.h"
 #include "src/tint/lang/glsl/writer/writer.h"
 
@@ -61,6 +62,20 @@ bool CanRun(const core::ir::Module& module, Options& options) {
             }
             if (!found) {
                 return false;
+            }
+
+            // Check texel formats for read-write storage textures.
+            if (auto* st = ptr->StoreType()->As<core::type::StorageTexture>()) {
+                if (st->Access() == core::Access::kReadWrite) {
+                    switch (st->TexelFormat()) {
+                        case core::TexelFormat::kR32Float:
+                        case core::TexelFormat::kR32Sint:
+                        case core::TexelFormat::kR32Uint:
+                            break;
+                        default:
+                            return false;
+                    }
+                }
             }
         }
 
