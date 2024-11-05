@@ -26,6 +26,7 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "src/tint/cmd/fuzz/ir/fuzz.h"
+#include "src/tint/lang/core/ir/core_builtin_call.h"
 #include "src/tint/lang/core/ir/module.h"
 #include "src/tint/lang/core/ir/var.h"
 #include "src/tint/lang/core/type/input_attachment.h"
@@ -85,6 +86,18 @@ bool CanRun(const core::ir::Module& module, Options& options) {
                 return false;
             }
             user_push_constant_size = tint::RoundUp(4u, ptr->StoreType()->Size());
+        }
+    }
+
+    // Check for calls to unsupported builtin functions.
+    for (auto* inst : module.Instructions()) {
+        auto* call = inst->As<core::ir::CoreBuiltinCall>();
+        if (!call) {
+            continue;
+        }
+
+        if (core::IsSubgroup(call->Func())) {
+            return false;
         }
     }
 
