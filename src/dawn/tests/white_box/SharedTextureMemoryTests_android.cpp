@@ -42,20 +42,10 @@
 namespace dawn {
 namespace {
 
-class Backend : public SharedTextureMemoryTestVulkanBackend {
+template <typename BackendBase>
+class SharedTextureMemoryTestAndroidBackend : public BackendBase {
   public:
-    static SharedTextureMemoryTestBackend* GetInstance() {
-        static Backend b;
-        return &b;
-    }
-
     std::string Name() const override { return "AHardwareBuffer"; }
-
-    std::vector<wgpu::FeatureName> RequiredFeatures(const wgpu::Adapter&) const override {
-        return {wgpu::FeatureName::SharedTextureMemoryAHardwareBuffer,
-                wgpu::FeatureName::SharedFenceVkSemaphoreSyncFD,
-                wgpu::FeatureName::YCbCrVulkanSamplers};
-    }
 
     static std::string MakeLabel(const AHardwareBuffer_Desc& desc) {
         std::string label = std::to_string(desc.width) + "x" + std::to_string(desc.height);
@@ -138,9 +128,11 @@ class Backend : public SharedTextureMemoryTestVulkanBackend {
         int layerCount) override {
         std::vector<std::vector<wgpu::SharedTextureMemory>> memories;
 
+        // AHARDWAREBUFFER_FORMAT_R8G8B8X8_UNORM behaves inconsistantly between GLES (alpha is
+        // always 1.0) and Vulkan (alpha is writeable) so it is omitted. There is no TextureFormat
+        // to represent the difference so it's undetectable when testing.
         for (auto format : {
                  AHARDWAREBUFFER_FORMAT_R8G8B8A8_UNORM,
-                 AHARDWAREBUFFER_FORMAT_R8G8B8X8_UNORM,
                  AHARDWAREBUFFER_FORMAT_R16G16B16A16_FLOAT,
                  AHARDWAREBUFFER_FORMAT_R10G10B10A2_UNORM,
                  AHARDWAREBUFFER_FORMAT_R8_UNORM,
@@ -179,8 +171,38 @@ class Backend : public SharedTextureMemoryTestVulkanBackend {
     }
 };
 
+class SharedTextureMemoryTestAndroidVulkanBackend
+    : public SharedTextureMemoryTestAndroidBackend<SharedTextureMemoryTestVulkanBackend> {
+  public:
+    static SharedTextureMemoryTestBackend* GetInstance() {
+        static SharedTextureMemoryTestAndroidVulkanBackend b;
+        return &b;
+    }
+
+    std::vector<wgpu::FeatureName> RequiredFeatures(const wgpu::Adapter&) const override {
+        return {wgpu::FeatureName::SharedTextureMemoryAHardwareBuffer,
+                wgpu::FeatureName::SharedFenceVkSemaphoreSyncFD,
+                wgpu::FeatureName::YCbCrVulkanSamplers};
+    }
+};
+
+class SharedTextureMemoryTestAndroidOpenGLESBackend
+    : public SharedTextureMemoryTestAndroidBackend<SharedTextureMemoryTestBackend> {
+  public:
+    static SharedTextureMemoryTestBackend* GetInstance() {
+        static SharedTextureMemoryTestAndroidOpenGLESBackend b;
+        return &b;
+    }
+
+    std::vector<wgpu::FeatureName> RequiredFeatures(const wgpu::Adapter&) const override {
+        return {wgpu::FeatureName::SharedTextureMemoryAHardwareBuffer};
+    }
+};
+
 // Test clearing the texture memory on the device, then reading it on the CPU.
 TEST_P(SharedTextureMemoryTests, GPUWriteThenCPURead) {
+    DAWN_TEST_UNSUPPORTED_IF(!SupportsFeatures({wgpu::FeatureName::SharedFenceVkSemaphoreSyncFD}));
+
     AHardwareBuffer_Desc aHardwareBufferDesc = {
         .width = 4,
         .height = 4,
@@ -322,6 +344,8 @@ TEST_P(SharedTextureMemoryTests, CPUWriteThenGPURead) {
 // Test validation of an incorrectly-configured SharedTextureMemoryAHardwareBufferProperties
 // instance.
 TEST_P(SharedTextureMemoryTests, InvalidSharedTextureMemoryAHardwareBufferProperties) {
+    DAWN_TEST_UNSUPPORTED_IF(!SupportsFeatures({wgpu::FeatureName::YCbCrVulkanSamplers}));
+
     AHardwareBuffer_Desc aHardwareBufferDesc = {
         .width = 4,
         .height = 4,
@@ -353,6 +377,8 @@ TEST_P(SharedTextureMemoryTests, InvalidSharedTextureMemoryAHardwareBufferProper
 
 // Test querying YCbCr info from the Device.
 TEST_P(SharedTextureMemoryTests, QueryYCbCrInfoFromDevice) {
+    DAWN_TEST_UNSUPPORTED_IF(!SupportsFeatures({wgpu::FeatureName::YCbCrVulkanSamplers}));
+
     AHardwareBuffer_Desc aHardwareBufferDesc = {
         .width = 4,
         .height = 4,
@@ -414,6 +440,8 @@ TEST_P(SharedTextureMemoryTests, QueryYCbCrInfoFromDevice) {
 
 // Test querying YCbCr info from the SharedTextureMemory without external format.
 TEST_P(SharedTextureMemoryTests, QueryYCbCrInfoWithoutExternalFormat) {
+    DAWN_TEST_UNSUPPORTED_IF(!SupportsFeatures({wgpu::FeatureName::YCbCrVulkanSamplers}));
+
     AHardwareBuffer_Desc aHardwareBufferDesc = {
         .width = 4,
         .height = 4,
@@ -488,6 +516,8 @@ TEST_P(SharedTextureMemoryTests, QueryYCbCrInfoWithoutExternalFormat) {
 
 // Test querying YCbCr info from the SharedTextureMemory with external format.
 TEST_P(SharedTextureMemoryTests, QueryYCbCrInfoWithExternalFormat) {
+    DAWN_TEST_UNSUPPORTED_IF(!SupportsFeatures({wgpu::FeatureName::YCbCrVulkanSamplers}));
+
     AHardwareBuffer_Desc aHardwareBufferDesc = {
         .width = 4,
         .height = 4,
@@ -563,6 +593,8 @@ TEST_P(SharedTextureMemoryTests, QueryYCbCrInfoWithExternalFormat) {
 
 // Test BeginAccess on an uninitialized texture with external format fails.
 TEST_P(SharedTextureMemoryTests, GPUReadForUninitializedTextureWithExternalFormatFails) {
+    DAWN_TEST_UNSUPPORTED_IF(!SupportsFeatures({wgpu::FeatureName::YCbCrVulkanSamplers}));
+
     const AHardwareBuffer_Desc aHardwareBufferDesc = {
         .width = 4,
         .height = 4,
@@ -605,13 +637,25 @@ TEST_P(SharedTextureMemoryTests, GPUReadForUninitializedTextureWithExternalForma
 DAWN_INSTANTIATE_PREFIXED_TEST_P(Vulkan,
                                  SharedTextureMemoryNoFeatureTests,
                                  {VulkanBackend()},
-                                 {Backend::GetInstance()},
+                                 {SharedTextureMemoryTestAndroidVulkanBackend::GetInstance()},
                                  {1});
 
 DAWN_INSTANTIATE_PREFIXED_TEST_P(Vulkan,
                                  SharedTextureMemoryTests,
                                  {VulkanBackend()},
-                                 {Backend::GetInstance()},
+                                 {SharedTextureMemoryTestAndroidVulkanBackend::GetInstance()},
+                                 {1});
+
+DAWN_INSTANTIATE_PREFIXED_TEST_P(OpenGLES,
+                                 SharedTextureMemoryNoFeatureTests,
+                                 {OpenGLESBackend()},
+                                 {SharedTextureMemoryTestAndroidOpenGLESBackend::GetInstance()},
+                                 {1});
+
+DAWN_INSTANTIATE_PREFIXED_TEST_P(OpenGLES,
+                                 SharedTextureMemoryTests,
+                                 {OpenGLESBackend()},
+                                 {SharedTextureMemoryTestAndroidOpenGLESBackend::GetInstance()},
                                  {1});
 
 }  // anonymous namespace

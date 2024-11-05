@@ -61,6 +61,10 @@ enum class EGLExt {
     PixelFormatFloat,
     GLColorspace,
 
+    // EGL image creation extensions
+    ImageNativeBuffer,      // EGL_ANDROID_image_native_buffer
+    GetNativeClientBuffer,  // EGL_ANDROID_get_native_client_buffer
+
     EnumCount,
 };
 
@@ -134,6 +138,9 @@ class EGLFunctions {
 
     // EGL_KHR_reusable_sync
     PFNEGLSIGNALSYNCKHRPROC SignalSync;
+
+    // EGL_ANDROID_get_native_client_buffer
+    PFNEGLGETNATIVECLIENTBUFFERANDROIDPROC GetNativeClientBuffer;
 
   private:
     MaybeError LoadClientExtensions();

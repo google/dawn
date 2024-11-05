@@ -1,4 +1,4 @@
-// Copyright 2023 The Dawn & Tint Authors
+// Copyright 2024 The Dawn & Tint Authors
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
@@ -25,36 +25,37 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef SRC_DAWN_NATIVE_AHBFUNCTIONS_H_
-#define SRC_DAWN_NATIVE_AHBFUNCTIONS_H_
+#ifndef SRC_DAWN_NATIVE_OPENGL_SHARED_TEXTURE_MEMORY_EGL_H_
+#define SRC_DAWN_NATIVE_OPENGL_SHARED_TEXTURE_MEMORY_EGL_H_
 
-#include <android/hardware_buffer.h>
+#include "dawn/native/opengl/SharedTextureMemoryGL.h"
+#include "dawn/native/opengl/opengl_platform.h"
 
-#include "dawn/common/DynamicLib.h"
-#include "dawn/native/dawn_platform.h"
+namespace dawn::native::opengl {
 
-namespace dawn::native {
+class Device;
 
-// A helper class that dynamically loads the native window library on Android.
-class AHBFunctions {
+class SharedTextureMemoryEGL final : public SharedTextureMemory {
   public:
-    AHBFunctions();
-    ~AHBFunctions();
+    static ResultOrError<Ref<SharedTextureMemory>> Create(
+        Device* device,
+        StringView label,
+        const SharedTextureMemoryAHardwareBufferDescriptor* descriptor);
 
-    bool IsValid() const;
-
-    void (*Acquire)(::AHardwareBuffer* buffer) = nullptr;
-    void (*Release)(::AHardwareBuffer* buffer) = nullptr;
-    void (*Describe)(::AHardwareBuffer* buffer, ::AHardwareBuffer_Desc* desc) = nullptr;
+    GLuint GenerateGLTexture() override;
 
   private:
-    DynamicLib mNativeWindowLib;
+    SharedTextureMemoryEGL(Device* device,
+                           StringView label,
+                           const SharedTextureMemoryProperties& properties,
+                           ::EGLImage image);
+
+    void DestroyImpl() override;
+
+  private:
+    ::EGLImage mEGLImage = nullptr;
 };
 
-SharedTextureMemoryProperties GetAHBSharedTextureMemoryProperties(
-    const AHBFunctions* ahbFunctions,
-    ::AHardwareBuffer* aHardwareBuffer);
+}  // namespace dawn::native::opengl
 
-}  // namespace dawn::native
-
-#endif  // SRC_DAWN_NATIVE_AHBFUNCTIONS_H_
+#endif  // SRC_DAWN_NATIVE_OPENGL_SHARED_TEXTURE_MEMORY_EGL_H_

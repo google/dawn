@@ -48,10 +48,15 @@
 #include "dawn/native/opengl/RenderPipelineGL.h"
 #include "dawn/native/opengl/SamplerGL.h"
 #include "dawn/native/opengl/ShaderModuleGL.h"
+#include "dawn/native/opengl/SharedTextureMemoryEGL.h"
 #include "dawn/native/opengl/SwapChainEGL.h"
 #include "dawn/native/opengl/TextureGL.h"
 #include "dawn/native/opengl/UtilsGL.h"
 #include "dawn/native/opengl/opengl_platform.h"
+
+#if DAWN_PLATFORM_IS(ANDROID)
+#include "dawn/native/AHBFunctions.h"
+#endif  // DAWN_PLATFORM_IS(ANDROID)
 
 namespace {
 
@@ -281,6 +286,28 @@ ResultOrError<Ref<TextureViewBase>> Device::CreateTextureViewImpl(
     return AcquireRef(new TextureView(texture, descriptor));
 }
 
+ResultOrError<Ref<SharedTextureMemoryBase>> Device::ImportSharedTextureMemoryImpl(
+    const SharedTextureMemoryDescriptor* descriptor) {
+    UnpackedPtr<SharedTextureMemoryDescriptor> unpacked;
+    DAWN_TRY_ASSIGN(unpacked, ValidateAndUnpack(descriptor));
+
+    wgpu::SType type;
+    DAWN_TRY_ASSIGN(
+        type, (unpacked.ValidateBranches<Branch<SharedTextureMemoryAHardwareBufferDescriptor>>()));
+
+    switch (type) {
+        case wgpu::SType::SharedTextureMemoryAHardwareBufferDescriptor:
+            DAWN_INVALID_IF(!HasFeature(Feature::SharedTextureMemoryAHardwareBuffer),
+                            "%s is not enabled.",
+                            wgpu::FeatureName::SharedTextureMemoryAHardwareBuffer);
+            return SharedTextureMemoryEGL::Create(
+                this, descriptor->label,
+                unpacked.Get<SharedTextureMemoryAHardwareBufferDescriptor>());
+        default:
+            DAWN_UNREACHABLE();
+    }
+}
+
 MaybeError Device::ValidateTextureCanBeWrapped(const UnpackedPtr<TextureDescriptor>& descriptor) {
     DAWN_INVALID_IF(descriptor->dimension != wgpu::TextureDimension::e2D,
                     "Texture dimension (%s) is not %s.", descriptor->dimension,
@@ -340,7 +367,7 @@ Ref<TextureBase> Device::CreateTextureWrappingEGLImage(const ExternalImageDescri
 
     // TODO(dawn:803): Validate the OpenGL texture format from the EGLImage against the format
     // in the passed-in TextureDescriptor.
-    auto result = AcquireRef(new Texture(this, textureDescriptor, tex));
+    auto result = AcquireRef(new Texture(this, textureDescriptor, tex, OwnsHandle::No));
     result->SetIsSubresourceContentInitialized(descriptor->isInitialized,
                                                result->GetAllSubresources());
     return result;
@@ -381,7 +408,7 @@ Ref<TextureBase> Device::CreateTextureWrappingGLTexture(const ExternalImageDescr
         return nullptr;
     }
 
-    auto result = AcquireRef(new Texture(this, textureDescriptor, texture));
+    auto result = AcquireRef(new Texture(this, textureDescriptor, texture, OwnsHandle::No));
     result->SetIsSubresourceContentInitialized(descriptor->isInitialized,
                                                result->GetAllSubresources());
     return result;
@@ -429,6 +456,17 @@ bool Device::MayRequireDuplicationOfIndirectParameters() const {
 
 bool Device::ShouldApplyIndexBufferOffsetToFirstIndex() const {
     return true;
+}
+
+const AHBFunctions* Device::GetOrLoadAHBFunctions() {
+#if DAWN_PLATFORM_IS(ANDROID)
+    if (mAHBFunctions == nullptr) {
+        mAHBFunctions = std::make_unique<AHBFunctions>();
+    }
+    return mAHBFunctions.get();
+#else
+    DAWN_UNREACHABLE();
+#endif  // DAWN_PLATFORM_IS(ANDROID)
 }
 
 const OpenGLFunctions& Device::GetGL() const {

@@ -41,6 +41,10 @@
 #include "dawn/native/opengl/GLFormat.h"
 #include "dawn/native/opengl/OpenGLFunctions.h"
 
+namespace dawn::native {
+class AHBFunctions;
+}  // namespace dawn::native
+
 namespace dawn::native::opengl {
 
 class ContextEGL;
@@ -101,6 +105,8 @@ class Device final : public DeviceBase {
     bool MayRequireDuplicationOfIndirectParameters() const override;
     bool ShouldApplyIndexBufferOffsetToFirstIndex() const override;
 
+    const AHBFunctions* GetOrLoadAHBFunctions();
+
   private:
     Device(AdapterBase* adapter,
            const UnpackedPtr<DeviceDescriptor>& descriptor,
@@ -138,6 +144,8 @@ class Device final : public DeviceBase {
         const UnpackedPtr<ComputePipelineDescriptor>& descriptor) override;
     Ref<RenderPipelineBase> CreateUninitializedRenderPipelineImpl(
         const UnpackedPtr<RenderPipelineDescriptor>& descriptor) override;
+    ResultOrError<Ref<SharedTextureMemoryBase>> ImportSharedTextureMemoryImpl(
+        const SharedTextureMemoryDescriptor* descriptor) override;
 
     GLenum GetBGRAInternalFormat(const OpenGLFunctions& gl) const;
     void DestroyImpl() override;
@@ -147,6 +155,10 @@ class Device final : public DeviceBase {
     GLFormatTable mFormatTable;
     std::unique_ptr<ContextEGL> mContext;
     int mMaxTextureMaxAnisotropy = 0;
+
+#if DAWN_PLATFORM_IS(ANDROID)
+    std::unique_ptr<AHBFunctions> mAHBFunctions;
+#endif  // DAWN_PLATFORM_IS(ANDROID)
 };
 
 }  // namespace dawn::native::opengl

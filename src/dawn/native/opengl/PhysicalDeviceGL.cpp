@@ -252,6 +252,11 @@ void PhysicalDevice::InitializeSupportedFeaturesImpl() {
         EnableFeature(dawn::native::Feature::ANGLETextureSharing);
     }
 
+    if (mDisplay->egl.HasExt(EGLExt::ImageNativeBuffer) &&
+        mDisplay->egl.HasExt(EGLExt::GetNativeClientBuffer)) {
+        EnableFeature(dawn::native::Feature::SharedTextureMemoryAHardwareBuffer);
+    }
+
     // Non-zero baseInstance requires at least desktop OpenGL 4.2, and it is not supported in
     // OpenGL ES OpenGL:
     // https://www.khronos.org/registry/OpenGL-Refpages/gl4/html/glDrawElementsIndirect.xhtml

@@ -86,6 +86,9 @@ static constexpr std::array<ExtensionInfo, kExtensionCount> kExtensionInfos{{
     {EGLExt::NoConfigContext, "EGL_KHR_no_config_context", NeverPromoted, ExtType::Display},
     {EGLExt::PixelFormatFloat, "EGL_EXT_pixel_format_float", NeverPromoted, ExtType::Display},
     {EGLExt::GLColorspace, "EGL_KHR_gl_colorspace", NeverPromoted, ExtType::Display},
+    {EGLExt::ImageNativeBuffer, "EGL_ANDROID_image_native_buffer", NeverPromoted, ExtType::Display},
+    {EGLExt::GetNativeClientBuffer, "EGL_ANDROID_get_native_client_buffer", NeverPromoted,
+     ExtType::Display},
     //
 }};
 
@@ -233,6 +236,10 @@ MaybeError EGLFunctions::LoadDisplayProcs(EGLDisplay display) {
 
     if (HasExt(EGLExt::ReusableSync)) {
         GET_PROC_WITH_NAME(SignalSync, "eglSignalSyncKHR");
+    }
+
+    if (HasExt(EGLExt::GetNativeClientBuffer)) {
+        GET_PROC_WITH_NAME(GetNativeClientBuffer, "eglGetNativeClientBufferANDROID");
     }
 
     return {};

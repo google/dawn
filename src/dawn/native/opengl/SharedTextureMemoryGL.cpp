@@ -1,4 +1,4 @@
-// Copyright 2023 The Dawn & Tint Authors
+// Copyright 2024 The Dawn & Tint Authors
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
@@ -25,36 +25,36 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef SRC_DAWN_NATIVE_AHBFUNCTIONS_H_
-#define SRC_DAWN_NATIVE_AHBFUNCTIONS_H_
+#include "dawn/native/opengl/SharedTextureMemoryGL.h"
 
-#include <android/hardware_buffer.h>
+#include <utility>
 
-#include "dawn/common/DynamicLib.h"
-#include "dawn/native/dawn_platform.h"
+#include "dawn/native/opengl/DeviceGL.h"
+#include "dawn/native/opengl/TextureGL.h"
 
-namespace dawn::native {
+namespace dawn::native::opengl {
 
-// A helper class that dynamically loads the native window library on Android.
-class AHBFunctions {
-  public:
-    AHBFunctions();
-    ~AHBFunctions();
+SharedTextureMemory::SharedTextureMemory(Device* device,
+                                         StringView label,
+                                         const SharedTextureMemoryProperties& properties)
+    : SharedTextureMemoryBase(device, label, properties) {}
 
-    bool IsValid() const;
+ResultOrError<Ref<TextureBase>> SharedTextureMemory::CreateTextureImpl(
+    const UnpackedPtr<TextureDescriptor>& descriptor) {
+    return Texture::CreateFromSharedTextureMemory(this, descriptor);
+}
 
-    void (*Acquire)(::AHardwareBuffer* buffer) = nullptr;
-    void (*Release)(::AHardwareBuffer* buffer) = nullptr;
-    void (*Describe)(::AHardwareBuffer* buffer, ::AHardwareBuffer_Desc* desc) = nullptr;
+MaybeError SharedTextureMemory::BeginAccessImpl(
+    TextureBase* texture,
+    const UnpackedPtr<BeginAccessDescriptor>& descriptor) {
+    return {};
+}
 
-  private:
-    DynamicLib mNativeWindowLib;
-};
+ResultOrError<FenceAndSignalValue> SharedTextureMemory::EndAccessImpl(
+    TextureBase* texture,
+    ExecutionSerial lastUsageSerial,
+    UnpackedPtr<EndAccessState>& state) {
+    return DAWN_VALIDATION_ERROR("No shared fence features supported.");
+}
 
-SharedTextureMemoryProperties GetAHBSharedTextureMemoryProperties(
-    const AHBFunctions* ahbFunctions,
-    ::AHardwareBuffer* aHardwareBuffer);
-
-}  // namespace dawn::native
-
-#endif  // SRC_DAWN_NATIVE_AHBFUNCTIONS_H_
+}  // namespace dawn::native::opengl

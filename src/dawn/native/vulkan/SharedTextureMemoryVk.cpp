@@ -493,27 +493,12 @@ ResultOrError<Ref<SharedTextureMemory>> SharedTextureMemory::Create(
         VK_EXTERNAL_MEMORY_HANDLE_TYPE_ANDROID_HARDWARE_BUFFER_BIT_ANDROID;
 
     // Reflect the properties of the AHardwareBuffer.
-    AHardwareBuffer_Desc aHardwareBufferDesc{};
-    ahbFunctions->Describe(aHardwareBuffer, &aHardwareBufferDesc);
+    SharedTextureMemoryProperties properties =
+        GetAHBSharedTextureMemoryProperties(ahbFunctions, aHardwareBuffer);
 
-    SharedTextureMemoryProperties properties;
-    properties.size = {aHardwareBufferDesc.width, aHardwareBufferDesc.height,
-                       aHardwareBufferDesc.layers};
     if (useExternalFormat) {
-        if (aHardwareBufferDesc.usage & AHARDWAREBUFFER_USAGE_GPU_SAMPLED_IMAGE) {
-            properties.usage = wgpu::TextureUsage::TextureBinding;
-        }
-    } else {
-        properties.usage = wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::CopyDst;
-        if (aHardwareBufferDesc.usage & AHARDWAREBUFFER_USAGE_GPU_FRAMEBUFFER) {
-            properties.usage |= wgpu::TextureUsage::RenderAttachment;
-        }
-        if (aHardwareBufferDesc.usage & AHARDWAREBUFFER_USAGE_GPU_SAMPLED_IMAGE) {
-            properties.usage |= wgpu::TextureUsage::TextureBinding;
-        }
-        if (aHardwareBufferDesc.usage & AHARDWAREBUFFER_USAGE_GPU_DATA_BUFFER) {
-            properties.usage |= wgpu::TextureUsage::StorageBinding;
-        }
+        // When using the external YUV texture format, only TextureBinding usage is valid.
+        properties.usage &= wgpu::TextureUsage::TextureBinding;
     }
 
     VkFormat vkFormat;
