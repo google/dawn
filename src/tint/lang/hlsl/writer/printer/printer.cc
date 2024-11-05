@@ -1079,9 +1079,6 @@ class Printer : public tint::TextGenerator {
     /// Emit a binary instruction
     /// @param b the binary instruction
     void EmitBinary(StringStream& out, const core::ir::CoreBinary* b) {
-        // TODO(dsinclair): Short circuring transform
-        // TODO(dsinclair): Transform matrix multiplication into a `mul` instruction
-
         auto kind = [&] {
             switch (b->Op()) {
                 case core::BinaryOp::kAdd:

@@ -88,10 +88,7 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
     }
 
     {
-        // TODO(dsinclair): Add missing polyfills
-
         core::ir::transform::BuiltinPolyfillConfig core_polyfills{};
-        // core_polyfills.bitshift_modulo = true;
         core_polyfills.clamp_int = true;
         core_polyfills.dot_4x8_packed = options.polyfill_dot_4x8_packed;
 
@@ -105,7 +102,6 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
         core_polyfills.first_trailing_bit = true;
         core_polyfills.fwidth_fine = true;
         core_polyfills.insert_bits = core::ir::transform::BuiltinPolyfillLevel::kFull;
-        // core_polyfills.int_div_mod = !options.disable_polyfill_integer_div_mod;
 
         // Currently Pack4xU8Clamp() must be polyfilled because on latest DXC pack_clamp_u8()
         // receives an int32_t4 as its input.
@@ -113,9 +109,9 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
         core_polyfills.pack_4xu8_clamp = true;
         core_polyfills.pack_unpack_4x8 = options.polyfill_pack_unpack_4x8;
         core_polyfills.radians = true;
+        // TODO(crbug.com/377357960): Implement reflect_vec2_f32
         // core_polyfills.reflect_vec2_f32 = options.polyfill_reflect_vec2_f32;
         core_polyfills.texture_sample_base_clamp_to_edge_2d_f32 = true;
-        // core_polyfills.workgroup_uniform_load = true;
         RUN_TRANSFORM(core::ir::transform::BuiltinPolyfill, module, core_polyfills);
     }
 
@@ -143,7 +139,7 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
         // according to the description of the assembly store_uav_typed, out of bounds addressing
         // means nothing gets written to memory.
         //
-        // TODO(dsinclair): Need to translate this into new robustness.
+        // TODO(crbug.com/377360326): Implement ignore for texture actions for performance
         // config.texture_action = ast::transform::Robustness::Action::kIgnore;
 
         RUN_TRANSFORM(core::ir::transform::Robustness, module, config);
