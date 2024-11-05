@@ -532,7 +532,7 @@ crbug.com/372044248 [ nvidia-0x2184 ] webgpu:shader,execution,limits:function_va
 crbug.com/372044248 [ nvidia-0x2184 ] webgpu:shader,execution,limits:private_array_combined_byte_size:type="bool" [ Failure ]
 crbug.com/372044248 [ nvidia-0x2184 ] webgpu:shader,execution,limits:private_array_combined_byte_size:type="u32" [ Failure ]
 
-# alpha_to_coverage occlusion query tests failing on Intel
+# alpha_to_coverage occlusion query tests failing on Intel 630
 crbug.com/dawn/2248 [ intel-0x9bc5 ] webgpu:api,operation,command_buffer,queries,occlusionQuery:occlusion_query,alpha_to_coverage:writeMask=0;renderMode="direct";bufferOffset="non-zero";querySetOffset="non-zero";alpha=0 [ Failure ]
 crbug.com/dawn/2248 [ intel-0x9bc5 ] webgpu:api,operation,command_buffer,queries,occlusionQuery:occlusion_query,alpha_to_coverage:writeMask=0;renderMode="direct";bufferOffset="non-zero";querySetOffset="non-zero";alpha=0.25 [ Failure ]
 crbug.com/dawn/2248 [ intel-0x9bc5 ] webgpu:api,operation,command_buffer,queries,occlusionQuery:occlusion_query,alpha_to_coverage:writeMask=0;renderMode="direct";bufferOffset="non-zero";querySetOffset="non-zero";alpha=0.5 [ Failure ]
@@ -570,8 +570,12 @@ crbug.com/dawn/2248 [ intel-0x9bc5 ] webgpu:api,operation,command_buffer,queries
 crbug.com/372044249 [ intel-0x4680 ] webgpu:shader,execution,expression,call,builtin,textureStore:out_of_bounds_array:baseLevel=0;arrayLevels=1;type="i32" [ Failure ]
 crbug.com/372044249 [ intel-0x4680 ] webgpu:shader,execution,expression,call,builtin,textureStore:out_of_bounds_array:baseLevel=0;arrayLevels=1;type="u32" [ Failure ]
 
-# getCurrentTexture failures
+# getCurrentTexture failures on Intel 630
 crbug.com/dawn/2114 [ intel-0x9bc5 linux ] webgpu:web_platform,canvas,getCurrentTexture:resize:* [ Failure ]
+
+# textureSample:sampled_3d_coords cube depth failures on Intel 630
+crbug.com/377321457 [ intel-0x9bc5 linux ] webgpu:shader,execution,expression,call,builtin,textureSample:sampled_3d_coords:format="depth24plus";dim="cube";* [ Failure ]
+crbug.com/377321457 [ intel-0x9bc5 linux ] webgpu:shader,execution,expression,call,builtin,textureSample:sampled_3d_coords:format="depth24plus-stencil8";dim="cube";* [ Failure ]
 
 # copyToTexture,canvas color_space_conversion failure on NVidia
 crbug.com/dawn/2377 [ nvidia-0x2184 ] webgpu:web_platform,copyToTexture,canvas:color_space_conversion:srcColorSpace="display-p3";dstColorSpace="srgb";dstColorFormat="rg16float";dstPremultiplied=false;srcDoFlipYDuringCopy=false [ RetryOnFailure ]
@@ -609,7 +613,7 @@ crbug.com/dawn/2123 [ linux nvidia-0x2184 ] webgpu:api,validation,capability_che
 crbug.com/dawn/2125 [ nvidia-0x2184 ] webgpu:shader,execution,zero_init:compute,zero_init:addressSpace="function";workgroupSize=[1,1,1];batch__=9 [ Failure ]
 crbug.com/dawn/2125 [ nvidia-0x2184 ] webgpu:shader,execution,zero_init:compute,zero_init:addressSpace="private";workgroupSize=[1,1,1];batch__=9 [ Failure ]
 
-# copyTextureToTexture failures on Intel
+# copyTextureToTexture failures on Intel 630
 crbug.com/dawn/2208 [ intel-0x9bc5 linux ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,array:srcFormat="r8snorm";dstFormat="r8snorm";dimension="2d" [ Failure ]
 crbug.com/dawn/2208 [ intel-0x9bc5 linux ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,array:srcFormat="r8snorm";dstFormat="r8snorm";dimension="3d" [ Failure ]
 crbug.com/dawn/2208 [ intel-0x9bc5 linux ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,array:srcFormat="rg8snorm";dstFormat="rg8snorm";dimension="2d" [ Failure ]
@@ -6672,7 +6676,6 @@ crbug.com/dawn/0000 [ intel-0x9bc5 ] webgpu:shader,execution,expression,call,bui
 crbug.com/dawn/0000 [ intel-0x9bc5 ] webgpu:shader,execution,expression,call,builtin,textureSample:sampled_2d_coords:format="rgba8snorm";filt="linear";modeU="m";modeV="c";offset=true [ RetryOnFailure ]
 crbug.com/dawn/0000 [ intel-0x9bc5 ] webgpu:shader,execution,expression,call,builtin,textureSample:sampled_2d_coords:format="rgba8snorm";filt="linear";modeU="m";modeV="r";offset=true [ RetryOnFailure ]
 crbug.com/dawn/0000 [ intel-0x9bc5 ] webgpu:shader,execution,expression,call,builtin,textureSample:sampled_2d_coords:format="rgba8snorm";filt="linear";modeU="m";modeV="m";offset=true [ RetryOnFailure ]
-crbug.com/dawn/0000 [ intel-0x9bc5 ] webgpu:shader,execution,expression,call,builtin,textureSample:sampled_3d_coords:* [ RetryOnFailure ]
 crbug.com/dawn/0000 [ intel-0x9bc5 ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:sampled_2d_coords:stage="c";format="astc-5x5-unorm";filt="nearest";modeU="c";modeV="c";offset=false [ RetryOnFailure ]
 crbug.com/dawn/0000 [ intel-0x9bc5 ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:sampled_2d_coords:stage="c";format="astc-5x5-unorm";filt="nearest";modeU="c";modeV="r";offset=false [ RetryOnFailure ]
 crbug.com/dawn/0000 [ intel-0x9bc5 ] webgpu:shader,execution,expression,call,builtin,textureSampleLevel:sampled_2d_coords:stage="c";format="astc-5x5-unorm";filt="nearest";modeU="c";modeV="m";offset=false [ RetryOnFailure ]
