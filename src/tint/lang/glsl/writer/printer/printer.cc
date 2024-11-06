@@ -82,7 +82,6 @@
 #include "src/tint/lang/core/type/void.h"
 #include "src/tint/lang/glsl/ir/builtin_call.h"
 #include "src/tint/lang/glsl/ir/member_builtin_call.h"
-#include "src/tint/lang/glsl/ir/ternary.h"
 #include "src/tint/lang/glsl/writer/common/printer_support.h"
 #include "src/tint/lang/glsl/writer/common/version.h"
 #include "src/tint/utils/containers/map.h"
@@ -1208,7 +1207,6 @@ class Printer : public tint::TextGenerator {
                     [&](const glsl::ir::MemberBuiltinCall* mbc) {
                         EmitGlslMemberBuiltinCall(out, mbc);
                     },
-                    [&](const glsl::ir::Ternary* t) { EmitTernary(out, t); },  //
 
                     TINT_ICE_ON_NO_MATCH);
             },
@@ -1282,17 +1280,6 @@ class Printer : public tint::TextGenerator {
             needs_comma = true;
         }
         out << ")";
-    }
-
-    void EmitTernary(StringStream& out, const glsl::ir::Ternary* t) {
-        out << "((";
-        EmitValue(out, t->Cmp());
-        out << ") ? (";
-        EmitValue(out, t->True());
-        out << ") : (";
-        EmitValue(out, t->False());
-        out << "))";
-        return;
     }
 
     /// Emit a convert instruction

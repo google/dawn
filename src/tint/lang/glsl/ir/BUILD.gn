@@ -49,8 +49,6 @@ libtint_source_set("ir") {
     "builtin_call.h",
     "member_builtin_call.cc",
     "member_builtin_call.h",
-    "ternary.cc",
-    "ternary.h",
   ]
   deps = [
     "${dawn_root}/src/utils:utils",
@@ -82,7 +80,6 @@ if (tint_build_unittests) {
     sources = [
       "builtin_call_test.cc",
       "member_builtin_call_test.cc",
-      "ternary_test.cc",
     ]
     deps = [
       "${dawn_root}/src/utils:utils",

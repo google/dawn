@@ -41,12 +41,10 @@ cc_library(
   srcs = [
     "builtin_call.cc",
     "member_builtin_call.cc",
-    "ternary.cc",
   ],
   hdrs = [
     "builtin_call.h",
     "member_builtin_call.h",
-    "ternary.h",
   ],
   deps = [
     "//src/tint/api/common",
@@ -81,7 +79,6 @@ cc_library(
   srcs = [
     "builtin_call_test.cc",
     "member_builtin_call_test.cc",
-    "ternary_test.cc",
   ],
   deps = [
     "//src/tint/api/common",

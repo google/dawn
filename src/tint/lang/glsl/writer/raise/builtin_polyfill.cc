@@ -43,7 +43,6 @@
 #include "src/tint/lang/glsl/builtin_fn.h"
 #include "src/tint/lang/glsl/ir/builtin_call.h"
 #include "src/tint/lang/glsl/ir/member_builtin_call.h"
-#include "src/tint/lang/glsl/ir/ternary.h"
 
 namespace tint::glsl::writer::raise {
 namespace {
