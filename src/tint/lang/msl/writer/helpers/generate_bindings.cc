@@ -57,6 +57,10 @@ Bindings GenerateBindings(const core::ir::Module& module) {
     Vector<tint::BindingPoint, 4> ext_tex_bps;
     for (auto* inst : *module.root_block) {
         auto* var = inst->As<core::ir::Var>();
+        if (!var) {
+            continue;
+        }
+
         if (auto bp = var->BindingPoint()) {
             if (auto val = group_to_next_binding_number.Get(bp->group)) {
                 *val = std::max(*val, bp->binding + 1);
