@@ -116,6 +116,11 @@ bool CanRun(const core::ir::Module& module, Options& options) {
         }
         auto* ptr = var->Result(0)->Type()->As<core::type::Pointer>();
 
+        // The pixel_local extension is not supported by the GLSL backend.
+        if (ptr->AddressSpace() == core::AddressSpace::kPixelLocal) {
+            return false;
+        }
+
         if (ptr->StoreType()->Is<core::type::Texture>()) {
             bool found = false;
             auto binding_point = var->BindingPoint();

@@ -72,8 +72,6 @@ bool IsUnsupportedByIR(const ast::Enable* enable) {
     for (auto ext : enable->extensions) {
         switch (ext->name) {
             case tint::wgsl::Extension::kChromiumExperimentalFramebufferFetch:
-            case tint::wgsl::Extension::kChromiumExperimentalPixelLocal:
-            case tint::wgsl::Extension::kChromiumExperimentalPushConstant:
             case tint::wgsl::Extension::kChromiumInternalRelaxedUniformLayout:
                 return true;
             default:

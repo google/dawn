@@ -37,11 +37,14 @@ namespace tint::msl::writer {
 namespace {
 
 bool CanRun(const core::ir::Module& module) {
-    // Check for push constants and input attachments, which the MSL writer does not support.
+    // Check for unsupported module-scope variable address spaces and types.
     for (auto* inst : *module.root_block) {
         auto* var = inst->As<core::ir::Var>();
         auto* ptr = var->Result(0)->Type()->As<core::type::Pointer>();
         if (ptr->AddressSpace() == core::AddressSpace::kPushConstant) {
+            return false;
+        }
+        if (ptr->AddressSpace() == core::AddressSpace::kPixelLocal) {
             return false;
         }
         if (ptr->StoreType()->Is<core::type::InputAttachment>()) {

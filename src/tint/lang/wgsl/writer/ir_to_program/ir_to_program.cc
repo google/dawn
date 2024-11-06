@@ -595,6 +595,14 @@ class State {
             case core::AddressSpace::kHandle:
                 b.GlobalVar(name, ty, init, std::move(attrs));
                 return;
+            case core::AddressSpace::kPixelLocal:
+                Enable(wgsl::Extension::kChromiumExperimentalPixelLocal);
+                b.GlobalVar(name, ty, init, ref->AddressSpace(), std::move(attrs));
+                return;
+            case core::AddressSpace::kPushConstant:
+                Enable(wgsl::Extension::kChromiumExperimentalPushConstant);
+                b.GlobalVar(name, ty, init, ref->AddressSpace(), std::move(attrs));
+                return;
             default:
                 b.GlobalVar(name, ty, init, ref->AddressSpace(), std::move(attrs));
                 return;
