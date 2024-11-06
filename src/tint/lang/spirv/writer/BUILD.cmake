@@ -229,7 +229,7 @@ if(TINT_BUILD_SPV_WRITER)
 # Condition: TINT_BUILD_SPV_WRITER
 ################################################################################
 tint_add_target(tint_lang_spirv_writer_fuzz fuzz
-  lang/spirv/writer/writer_ir_fuzz.cc
+  lang/spirv/writer/writer_fuzz.cc
 )
 
 tint_target_add_dependencies(tint_lang_spirv_writer_fuzz fuzz

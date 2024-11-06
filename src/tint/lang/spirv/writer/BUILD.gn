@@ -204,7 +204,7 @@ if (tint_build_benchmarks) {
 }
 if (tint_build_spv_writer) {
   tint_fuzz_source_set("fuzz") {
-    sources = [ "writer_ir_fuzz.cc" ]
+    sources = [ "writer_fuzz.cc" ]
     deps = [
       "${dawn_root}/src/utils:utils",
       "${tint_src_dir}/api/common",
