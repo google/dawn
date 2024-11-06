@@ -614,10 +614,14 @@ TEST_P(SubgroupsBroadcastTests, SubgroupBroadcast) {
         DAWN_TEST_UNSUPPORTED_IF(!IsSubgroupsEnabledInWGSL());
     }
 
-    // TODO(351745820): Suppress the test for Qualcomm Adreno 6xx until we figure out why creating
-    // compute pipeline with subgroupBroadcast shader fails on trybots using these devices.
-    DAWN_SUPPRESS_TEST_IF(gpu_info::IsQualcomm_PCIAdreno6xx(GetParam().adapterProperties.vendorID,
-                                                            GetParam().adapterProperties.deviceID));
+    if (IsChromiumExperimentalSubgroupsRequired()) {
+        // Adreno 640 does not support subgroups in the fragment stage and therefore will not
+        // actually be supported for the subgroup feature in WGSL. In addition to missing the
+        // fragment stage subgroups also appear to have implementation issues in compute for this
+        // device. See crbug/351745820
+        DAWN_SUPPRESS_TEST_IF(gpu_info::IsQualcomm_PCIAdreno6xx(
+            GetParam().adapterProperties.vendorID, GetParam().adapterProperties.deviceID));
+    }
 
     for (uint32_t workgroupSize : {1, 2, 3, 4, 7, 8, 15, 16, 31, 32, 63, 64, 127, 128, 255, 256}) {
         TestBroadcastSubgroupSize(workgroupSize);
@@ -988,12 +992,15 @@ TEST_P(SubgroupsShaderInclusiveTest, InclusiveExecution) {
     } else {
         DAWN_TEST_UNSUPPORTED_IF(!IsSubgroupsEnabledInWGSL());
     }
-    DAWN_TEST_UNSUPPORTED_IF(!IsChromiumExperimentalSubgroupsRequired());
 
-    // TODO(351745820): Suppress the test for Qualcomm Adreno 6xx until we figure out why creating
-    // compute pipeline with subgroupBroadcast shader fails on trybots using these devices.
-    DAWN_SUPPRESS_TEST_IF(gpu_info::IsQualcomm_PCIAdreno6xx(GetParam().adapterProperties.vendorID,
-                                                            GetParam().adapterProperties.deviceID));
+    if (IsChromiumExperimentalSubgroupsRequired()) {
+        // Adreno 640 does not support subgroups in the fragment stage and therefore will not
+        // actually be supported for the subgroup feature in WGSL. In addition to missing the
+        // fragment stage subgroups also appear to have implementation issues in compute for this
+        // device. See crbug/351745820
+        DAWN_SUPPRESS_TEST_IF(gpu_info::IsQualcomm_PCIAdreno6xx(
+            GetParam().adapterProperties.vendorID, GetParam().adapterProperties.deviceID));
+    }
 
     for (uint32_t workgroupSize : {1, 2, 3, 4, 7, 8, 15, 16, 31, 32, 63, 64, 127, 128, 255, 256}) {
         TestReadSubgroupSize(workgroupSize);
