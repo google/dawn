@@ -51,10 +51,11 @@ Bindings GenerateBindings(const core::ir::Module& module) {
     Hashmap<uint32_t, uint32_t, 4> group_to_next_binding_number;
     Vector<tint::BindingPoint, 4> ext_tex_bps;
     for (auto* inst : *module.root_block) {
-        if (!inst->Alive()) {
+        auto* var = inst->As<core::ir::Var>();
+        if (!var) {
             continue;
         }
-        auto* var = inst->As<core::ir::Var>();
+
         if (auto bp = var->BindingPoint()) {
             if (auto val = group_to_next_binding_number.Get(bp->group)) {
                 *val = std::max(*val, bp->binding + 1);
