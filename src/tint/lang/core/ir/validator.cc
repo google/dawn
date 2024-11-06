@@ -2015,7 +2015,33 @@ void Validator::CheckWorkgroupSize(const Function* func) {
             return;
         }
 
-        // TODO(376624999): Implement enforcing rules around override and constant expressions
+        if (auto* c = size->As<ir::Constant>()) {
+            if (c->Value()->ValueAs<int64_t>() <= 0) {
+                AddError(func) << "@workgroup_size params must be greater than 0";
+                return;
+            }
+            continue;
+        }
+
+        if (!capabilities_.Contains(Capability::kAllowOverrides)) {
+            AddError(func) << "@workgroup_size param is not a constant value, and IR capability "
+                              "'kAllowOverrides' is not set";
+            return;
+        }
+
+        if (auto* r = size->As<ir::InstructionResult>()) {
+            if (r->Instruction() && r->Instruction()->Is<core::ir::Override>()) {
+                continue;
+            }
+
+            // TODO(376624999): Finish implementing checking that this is a override/constant
+            //  expression, i.e. calculated from only appropriate values/operations, once override
+            //  implementation is complete
+            // for each value/operation used to calculate param:
+            //        if  not constant expression && not override expression:
+            //            fail
+            //    pass
+        }
     }
 }
 

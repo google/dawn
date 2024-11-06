@@ -1054,6 +1054,52 @@ note: # Disassembly
 )");
 }
 
+TEST_F(IR_ValidatorTest, Function_WorkgroupSize_ParamsTooSmall) {
+    auto* f = ComputeEntryPoint();
+    f->SetWorkgroupSize({b.Constant(-1_i), b.Constant(2_i), b.Constant(3_i)});
+
+    b.Append(f->Block(), [&] { b.Unreachable(); });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_EQ(res.Failure().reason.Str(),
+              R"(:1:1 error: @workgroup_size params must be greater than 0
+%f = @compute @workgroup_size(-1i, 2i, 3i) func():void {
+^^
+
+note: # Disassembly
+%f = @compute @workgroup_size(-1i, 2i, 3i) func():void {
+  $B1: {
+    unreachable
+  }
+}
+)");
+}
+
+TEST_F(IR_ValidatorTest, Function_WorkgroupSize_OverrideWithoutAllowOverrides) {
+    auto* o = b.Override(ty.u32());
+    auto* f = ComputeEntryPoint();
+    f->SetWorkgroupSize({o->Result(0), o->Result(0), o->Result(0)});
+
+    b.Append(f->Block(), [&] { b.Unreachable(); });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_EQ(
+        res.Failure().reason.Str(),
+        R"(:1:1 error: @workgroup_size param is not a constant value, and IR capability 'kAllowOverrides' is not set
+%f = @compute @workgroup_size(%2, %2, %2) func():void {
+^^
+
+note: # Disassembly
+%f = @compute @workgroup_size(%2, %2, %2) func():void {
+  $B1: {
+    unreachable
+  }
+}
+)");
+}
+
 TEST_F(IR_ValidatorTest, Function_Vertex_BasicPosition) {
     auto* f = b.Function("my_func", ty.vec4<f32>(), Function::PipelineStage::kVertex);
     f->SetReturnBuiltin(BuiltinValue::kPosition);
