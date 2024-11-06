@@ -55,9 +55,8 @@ void Run(ir::Module& ir) {
 }  // namespace
 
 Result<SuccessType> AddEmptyEntryPoint(Module& ir) {
-    auto result = ValidateAndDumpIfNeeded(
-        ir, "core.AddEmptyEntryPoint",
-        core::ir::Capabilities{core::ir::Capability::kAllowHandleVarsWithoutBindings});
+    auto result =
+        ValidateAndDumpIfNeeded(ir, "core.AddEmptyEntryPoint", kAddEmptyEntryPointCapabilities);
     if (result != Success) {
         return result.Failure();
     }

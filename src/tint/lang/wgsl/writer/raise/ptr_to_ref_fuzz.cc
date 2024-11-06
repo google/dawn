@@ -47,4 +47,4 @@ void PtrToRefFuzzer(core::ir::Module& module) {
 }  // namespace
 }  // namespace tint::wgsl::writer::raise
 
-TINT_IR_MODULE_FUZZER(tint::wgsl::writer::raise::PtrToRefFuzzer);
+TINT_IR_MODULE_FUZZER(tint::wgsl::writer::raise::PtrToRefFuzzer, tint::core::ir::Capabilities{});

@@ -47,4 +47,4 @@ void RaiseFuzzer(core::ir::Module& module) {
 }  // namespace
 }  // namespace tint::wgsl::writer::raise
 
-TINT_IR_MODULE_FUZZER(tint::wgsl::writer::raise::RaiseFuzzer);
+TINT_IR_MODULE_FUZZER(tint::wgsl::writer::raise::RaiseFuzzer, tint::core::ir::Capabilities{});

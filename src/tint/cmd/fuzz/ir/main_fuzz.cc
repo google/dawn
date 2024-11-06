@@ -50,19 +50,14 @@ tint::fuzz::ir::Options options;
 }
 
 DEFINE_BINARY_PROTO_FUZZER(const tint::cmd::fuzz::ir::pb::Root& pb) {
-    /// As the fuzzers are free to mutate the module, we need to deserialize a few module for each
+    /// As the fuzzers are free to mutate the module, we need to deserialize a new module for each
     /// sub-fuzzer. Because the protobuf may error when deserializing and the module may be invalid,
-    /// we early deserialize and validate the first module. If this fails, then we do not call
-    /// Run().
+    /// we early deserialize. If this fails, then we do not call Run().
     std::optional<tint::core::ir::Module> module;
     {
         auto decoded = tint::core::ir::binary::Decode(pb.module());
         if (decoded != tint::Success) {
             return;  // Failed to decode
-        }
-        tint::core::ir::Capabilities caps;
-        if (tint::core::ir::Validate(decoded.Get(), caps) != tint::Success) {
-            return;  // Failed to validate
         }
         module = std::move(decoded.Move());
     }

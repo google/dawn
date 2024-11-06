@@ -33,6 +33,7 @@
 #include <tuple>
 #include <utility>
 
+#include "src/tint/lang/core/ir/validator.h"
 #include "src/tint/utils/bytes/buffer_reader.h"
 #include "src/tint/utils/bytes/decoder.h"
 #include "src/tint/utils/containers/slice.h"
@@ -58,10 +59,13 @@ struct Options {
 struct IRFuzzer {
     /// @param name the name of the fuzzer
     /// @param fn the fuzzer function
+    /// @param capabilities the capabilities that the fuzzer can accept
     /// @returns an IRFuzzer that invokes the function @p fn with the IR module, along with any
     /// additional arguments which are deserialized from the fuzzer input.
     template <typename... ARGS>
-    static IRFuzzer Create(std::string_view name, void (*fn)(core::ir::Module&, ARGS...)) {
+    static IRFuzzer Create(std::string_view name,
+                           void (*fn)(core::ir::Module&, ARGS...),
+                           core::ir::Capabilities capabilities) {
         if constexpr (sizeof...(ARGS) > 0) {
             auto fn_with_decode = [fn](core::ir::Module& module, Slice<const std::byte> data) {
                 if (!data.data) {
@@ -75,11 +79,12 @@ struct IRFuzzer {
                     std::apply(*fn, all_args);
                 }
             };
-            return IRFuzzer{name, std::move(fn_with_decode)};
+            return IRFuzzer{name, std::move(fn_with_decode), capabilities};
         } else {
             return IRFuzzer{
                 name,
                 [fn](core::ir::Module& module, Slice<const std::byte>) { fn(module); },
+                capabilities,
             };
         }
     }
@@ -88,6 +93,8 @@ struct IRFuzzer {
     std::string_view name;
     /// The fuzzer function
     std::function<void(core::ir::Module&, Slice<const std::byte> data)> fn;
+    /// The IR capabilities that the fuzzer can accept.
+    core::ir::Capabilities capabilities;
 };
 
 /// Registers the fuzzer function with the IR fuzzer executable.
@@ -105,9 +112,9 @@ void Run(const std::function<tint::core::ir::Module()>& acquire_module,
 #endif  // TINT_BUILD_IR_BINARY
 
 /// TINT_IR_MODULE_FUZZER registers the fuzzer function.
-#define TINT_IR_MODULE_FUZZER(FUNCTION) \
-    TINT_STATIC_INIT(                   \
-        ::tint::fuzz::ir::Register(::tint::fuzz::ir::IRFuzzer::Create(#FUNCTION, FUNCTION)))
+#define TINT_IR_MODULE_FUZZER(FUNCTION, CAPABILITIES) \
+    TINT_STATIC_INIT(::tint::fuzz::ir::Register(      \
+        ::tint::fuzz::ir::IRFuzzer::Create(#FUNCTION, FUNCTION, (CAPABILITIES))))
 
 }  // namespace tint::fuzz::ir
 

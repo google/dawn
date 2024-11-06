@@ -47,4 +47,4 @@ void ValueToLetFuzzer(core::ir::Module& module) {
 }  // namespace
 }  // namespace tint::wgsl::writer::raise
 
-TINT_IR_MODULE_FUZZER(tint::wgsl::writer::raise::ValueToLetFuzzer);
+TINT_IR_MODULE_FUZZER(tint::wgsl::writer::raise::ValueToLetFuzzer, tint::core::ir::Capabilities{});

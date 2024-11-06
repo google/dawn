@@ -68,4 +68,5 @@ void IRBinaryRoundtripFuzzer(core::ir::Module& module) {
 }  // namespace
 }  // namespace tint::core::ir::binary
 
-TINT_IR_MODULE_FUZZER(tint::core::ir::binary::IRBinaryRoundtripFuzzer);
+TINT_IR_MODULE_FUZZER(tint::core::ir::binary::IRBinaryRoundtripFuzzer,
+                      tint::core::ir::Capabilities{});

@@ -129,6 +129,12 @@ void Run(const std::function<tint::core::ir::Module()>& acquire_module,
                     std::cout << " • [" << i << "] Running: " << currently_running << '\n';
                 }
                 auto mod = acquire_module();
+                if (tint::core::ir::Validate(mod, fuzzer.capabilities) != tint::Success) {
+                    if (options.verbose) {
+                        std::cout << "   Failed to validate against fuzzer capabilities\n";
+                    }
+                    return;
+                }
                 fuzzer.fn(mod, data);
             }));
         }
@@ -148,6 +154,12 @@ void Run(const std::function<tint::core::ir::Module()>& acquire_module,
                 std::cout << " • Running: " << currently_running << '\n';
             }
             auto mod = acquire_module();
+            if (tint::core::ir::Validate(mod, fuzzer.capabilities) != tint::Success) {
+                if (options.verbose) {
+                    std::cout << "   Failed to validate against fuzzer capabilities\n";
+                }
+                continue;
+            }
             fuzzer.fn(mod, data);
         }
     }

@@ -47,4 +47,5 @@ void DirectVariableAccessFuzzer(Module& module, DirectVariableAccessOptions opti
 }  // namespace
 }  // namespace tint::core::ir::transform
 
-TINT_IR_MODULE_FUZZER(tint::core::ir::transform::DirectVariableAccessFuzzer);
+TINT_IR_MODULE_FUZZER(tint::core::ir::transform::DirectVariableAccessFuzzer,
+                      tint::core::ir::transform::kDirectVariableAccessCapabilities);

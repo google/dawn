@@ -54,4 +54,4 @@ void IRFuzzer(core::ir::Module& module, Options options) {
 }  // namespace
 }  // namespace tint::spirv::writer
 
-TINT_IR_MODULE_FUZZER(tint::spirv::writer::IRFuzzer);
+TINT_IR_MODULE_FUZZER(tint::spirv::writer::IRFuzzer, tint::core::ir::Capabilities{});

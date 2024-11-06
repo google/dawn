@@ -62,4 +62,5 @@ void ValueToLetFuzzer(Module& module, ValueToLetConfig config) {
 }  // namespace
 }  // namespace tint::core::ir::transform
 
-TINT_IR_MODULE_FUZZER(tint::core::ir::transform::ValueToLetFuzzer);
+TINT_IR_MODULE_FUZZER(tint::core::ir::transform::ValueToLetFuzzer,
+                      tint::core::ir::transform::kValueToLetCapabilities);

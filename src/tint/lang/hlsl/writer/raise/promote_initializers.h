@@ -28,6 +28,7 @@
 #ifndef SRC_TINT_LANG_HLSL_WRITER_RAISE_PROMOTE_INITIALIZERS_H_
 #define SRC_TINT_LANG_HLSL_WRITER_RAISE_PROMOTE_INITIALIZERS_H_
 
+#include "src/tint/lang/core/ir/validator.h"
 #include "src/tint/utils/result/result.h"
 
 // Forward declarations.
@@ -36,6 +37,12 @@ class Module;
 }
 
 namespace tint::hlsl::writer::raise {
+
+/// The capabilities that the transform can support.
+const core::ir::Capabilities kPromoteInitializersCapabilities{
+    core::ir::Capability::kAllowVectorElementPointer,
+    core::ir::Capability::kAllowClipDistancesOnF32,
+};
 
 /// PromoteInitializers is a transform that moves inline struct and array initializers to a `let`
 /// unless the initializer is already in a `let ` or `var`. For any `var` at the module scope it

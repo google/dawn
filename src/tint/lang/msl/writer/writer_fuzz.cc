@@ -79,4 +79,4 @@ void IRFuzzer(core::ir::Module& module, Options options) {
 }  // namespace
 }  // namespace tint::msl::writer
 
-TINT_IR_MODULE_FUZZER(tint::msl::writer::IRFuzzer);
+TINT_IR_MODULE_FUZZER(tint::msl::writer::IRFuzzer, tint::core::ir::Capabilities{});

@@ -47,4 +47,5 @@ void ConversionPolyfillFuzzer(Module& module, ConversionPolyfillConfig config) {
 }  // namespace
 }  // namespace tint::core::ir::transform
 
-TINT_IR_MODULE_FUZZER(tint::core::ir::transform::ConversionPolyfillFuzzer);
+TINT_IR_MODULE_FUZZER(tint::core::ir::transform::ConversionPolyfillFuzzer,
+                      tint::core::ir::Capabilities{});

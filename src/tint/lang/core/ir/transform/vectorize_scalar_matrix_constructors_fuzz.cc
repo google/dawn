@@ -48,4 +48,5 @@ void VectorizeScalarMatrixConstructorsFuzzer(Module& module) {
 }  // namespace
 }  // namespace tint::core::ir::transform
 
-TINT_IR_MODULE_FUZZER(tint::core::ir::transform::VectorizeScalarMatrixConstructorsFuzzer);
+TINT_IR_MODULE_FUZZER(tint::core::ir::transform::VectorizeScalarMatrixConstructorsFuzzer,
+                      tint::core::ir::transform::kVectorizeScalarMatrixConstructorsCapabilities);

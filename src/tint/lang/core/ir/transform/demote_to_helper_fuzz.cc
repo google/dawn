@@ -47,4 +47,5 @@ void DemoteToHelperFuzzer(Module& module) {
 }  // namespace
 }  // namespace tint::core::ir::transform
 
-TINT_IR_MODULE_FUZZER(tint::core::ir::transform::DemoteToHelperFuzzer);
+TINT_IR_MODULE_FUZZER(tint::core::ir::transform::DemoteToHelperFuzzer,
+                      tint::core::ir::transform::kDemoteToHelperCapabilities);

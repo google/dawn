@@ -48,4 +48,5 @@ void PromoteInitializersFuzzer(core::ir::Module& module) {
 }  // namespace
 }  // namespace tint::hlsl::writer::raise
 
-TINT_IR_MODULE_FUZZER(tint::hlsl::writer::raise::PromoteInitializersFuzzer);
+TINT_IR_MODULE_FUZZER(tint::hlsl::writer::raise::PromoteInitializersFuzzer,
+                      tint::hlsl::writer::raise::kPromoteInitializersCapabilities);

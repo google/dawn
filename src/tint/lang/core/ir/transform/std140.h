@@ -30,6 +30,7 @@
 
 #include <string>
 
+#include "src/tint/lang/core/ir/validator.h"
 #include "src/tint/utils/result/result.h"
 
 // Forward declarations.
@@ -38,6 +39,11 @@ class Module;
 }
 
 namespace tint::core::ir::transform {
+
+/// The capabilities that the transform can support.
+const core::ir::Capabilities kStd140Capabilities{
+    core::ir::Capability::kAllowHandleVarsWithoutBindings,
+};
 
 /// Std140 is a transform that rewrites matrix types in the uniform address space to conform to
 /// GLSL's std140 layout rules.

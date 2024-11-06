@@ -257,14 +257,7 @@ struct State {
 }  // namespace
 
 Result<SuccessType> ValueToLet(Module& ir, const ValueToLetConfig& cfg) {
-    auto result = ValidateAndDumpIfNeeded(ir, "core.ValueToLet",
-                                          core::ir::Capabilities{
-                                              core::ir::Capability::kAllow8BitIntegers,
-                                              core::ir::Capability::kAllowPointersInStructures,
-                                              core::ir::Capability::kAllowVectorElementPointer,
-                                              core::ir::Capability::kAllowHandleVarsWithoutBindings,
-                                              core::ir::Capability::kAllowClipDistancesOnF32,
-                                          });
+    auto result = ValidateAndDumpIfNeeded(ir, "core.ValueToLet", kValueToLetCapabilities);
     if (result != Success) {
         return result;
     }

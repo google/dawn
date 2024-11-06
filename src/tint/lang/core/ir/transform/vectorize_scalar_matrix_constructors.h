@@ -28,6 +28,7 @@
 #ifndef SRC_TINT_LANG_CORE_IR_TRANSFORM_VECTORIZE_SCALAR_MATRIX_CONSTRUCTORS_H_
 #define SRC_TINT_LANG_CORE_IR_TRANSFORM_VECTORIZE_SCALAR_MATRIX_CONSTRUCTORS_H_
 
+#include "src/tint/lang/core/ir/validator.h"
 #include "src/tint/utils/result/result.h"
 
 // Forward declarations.
@@ -36,6 +37,13 @@ class Module;
 }
 
 namespace tint::core::ir::transform {
+
+/// The capabilities that the transform can support.
+const core::ir::Capabilities kVectorizeScalarMatrixConstructorsCapabilities{
+    core::ir::Capability::kAllowVectorElementPointer,
+    core::ir::Capability::kAllowHandleVarsWithoutBindings,
+    core::ir::Capability::kAllowClipDistancesOnF32,
+};
 
 /// VectorizeScalarMatrixConstructors is a transform that replaces construct instructions that
 /// produce matrices from scalar operands to construct individual columns first.

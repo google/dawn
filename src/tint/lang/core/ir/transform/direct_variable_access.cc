@@ -704,10 +704,8 @@ struct State {
 }  // namespace
 
 Result<SuccessType> DirectVariableAccess(Module& ir, const DirectVariableAccessOptions& options) {
-    auto result = ValidateAndDumpIfNeeded(ir, "core.DirectVariableAccess",
-                                          core::ir::Capabilities{
-                                              core::ir::Capability::kAllowClipDistancesOnF32,
-                                          });
+    auto result =
+        ValidateAndDumpIfNeeded(ir, "core.DirectVariableAccess", kDirectVariableAccessCapabilities);
     if (result != Success) {
         return result;
     }

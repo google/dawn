@@ -28,6 +28,7 @@
 #ifndef SRC_TINT_LANG_CORE_IR_TRANSFORM_DIRECT_VARIABLE_ACCESS_H_
 #define SRC_TINT_LANG_CORE_IR_TRANSFORM_DIRECT_VARIABLE_ACCESS_H_
 
+#include "src/tint/lang/core/ir/validator.h"
 #include "src/tint/utils/reflection/reflection.h"
 #include "src/tint/utils/result/result.h"
 
@@ -37,6 +38,11 @@ class Module;
 }
 
 namespace tint::core::ir::transform {
+
+/// The capabilities that the transform can support.
+const core::ir::Capabilities kDirectVariableAccessCapabilities{
+    core::ir::Capability::kAllowClipDistancesOnF32,
+};
 
 /// DirectVariableAccessOptions adjusts the behaviour of the transform.
 struct DirectVariableAccessOptions {
