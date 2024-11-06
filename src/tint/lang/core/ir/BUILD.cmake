@@ -82,6 +82,8 @@ tint_add_target(tint_lang_core_ir lib
   lang/core/ir/disassembler.h
   lang/core/ir/discard.cc
   lang/core/ir/discard.h
+  lang/core/ir/evaluator.cc
+  lang/core/ir/evaluator.h
   lang/core/ir/exit.cc
   lang/core/ir/exit.h
   lang/core/ir/exit_if.cc
@@ -198,6 +200,7 @@ tint_add_target(tint_lang_core_ir_test test
   lang/core/ir/core_builtin_call_test.cc
   lang/core/ir/core_unary_test.cc
   lang/core/ir/discard_test.cc
+  lang/core/ir/evaluator_test.cc
   lang/core/ir/exit_if_test.cc
   lang/core/ir/exit_loop_test.cc
   lang/core/ir/exit_switch_test.cc
