@@ -25,7 +25,11 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+#include <algorithm>
+#include <vector>
+
 #include "dawn/common/StringViewUtils.h"
+#include "dawn/wire/SupportedFeatures.h"
 #include "dawn/wire/server/ObjectStorage.h"
 #include "dawn/wire/server/Server.h"
 
@@ -83,10 +87,17 @@ void Server::OnRequestAdapterCallback(RequestAdapterUserdata* data,
     }
 
     // Query and report the adapter supported features.
-    WGPUSupportedFeatures supportedFeatures;
-    mProcs.adapterGetFeatures(adapter, &supportedFeatures);
-    cmd.featuresCount = supportedFeatures.featureCount;
-    cmd.features = supportedFeatures.features;
+    std::vector<WGPUFeatureName> features;
+
+    size_t featuresCount = mProcs.adapterEnumerateFeatures(adapter, nullptr);
+    features.resize(featuresCount);
+    mProcs.adapterEnumerateFeatures(adapter, features.data());
+
+    // Hide features the wire cannot support.
+    auto it = std::partition(features.begin(), features.end(), IsFeatureSupported);
+
+    cmd.featuresCount = std::distance(features.begin(), it);
+    cmd.features = features.data();
 
     // Query and report the adapter info.
     WGPUAdapterInfo info = {};
@@ -138,7 +149,6 @@ void Server::OnRequestAdapterCallback(RequestAdapterUserdata* data,
     SerializeCommand(cmd);
     mProcs.adapterInfoFreeMembers(info);
     mProcs.adapterPropertiesMemoryHeapsFreeMembers(memoryHeapProperties);
-    mProcs.supportedFeaturesFreeMembers(supportedFeatures);
 }
 
 }  // namespace dawn::wire::server

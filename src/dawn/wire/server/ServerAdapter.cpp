@@ -97,15 +97,17 @@ void Server::OnRequestDeviceCallback(RequestDeviceUserdata* data,
         return;
     }
 
-    WGPUSupportedFeatures supportedFeatures;
-    mProcs.deviceGetFeatures(device, &supportedFeatures);
+    std::vector<WGPUFeatureName> features;
+
+    size_t featuresCount = mProcs.deviceEnumerateFeatures(device, nullptr);
+    features.resize(featuresCount);
+    mProcs.deviceEnumerateFeatures(device, features.data());
 
     // The client should only be able to request supported features, so all enumerated
     // features that were enabled must also be supported by the wire.
     // Note: We fail the callback here, instead of immediately upon receiving
     // the request to preserve callback ordering.
-    for (uint32_t i = 0; i < supportedFeatures.featureCount; ++i) {
-        WGPUFeatureName f = supportedFeatures.features[i];
+    for (WGPUFeatureName f : features) {
         if (!IsFeatureSupported(f)) {
             // Release the device.
             mProcs.deviceRelease(device);
@@ -114,13 +116,12 @@ void Server::OnRequestDeviceCallback(RequestDeviceUserdata* data,
             cmd.status = WGPURequestDeviceStatus_Error;
             cmd.message = ToOutputStringView("Requested feature not supported.");
             SerializeCommand(cmd);
-            mProcs.supportedFeaturesFreeMembers(supportedFeatures);
             return;
         }
     }
 
-    cmd.featuresCount = supportedFeatures.featureCount;
-    cmd.features = supportedFeatures.features;
+    cmd.featuresCount = features.size();
+    cmd.features = features.data();
 
     // Query and report the adapter limits, including DawnExperimentalSubgroupLimits and
     // DawnExperimentalImmediateDataLimits. Reporting to client.
@@ -145,7 +146,6 @@ void Server::OnRequestDeviceCallback(RequestDeviceUserdata* data,
         cmd.status = WGPURequestDeviceStatus_Unknown;
         cmd.message = ToOutputStringView("Destroyed before request was fulfilled.");
         SerializeCommand(cmd);
-        mProcs.supportedFeaturesFreeMembers(supportedFeatures);
         return;
     }
     DAWN_ASSERT(reservation.data != nullptr);
@@ -153,7 +153,6 @@ void Server::OnRequestDeviceCallback(RequestDeviceUserdata* data,
     reservation->info->self = reservation.AsHandle();
     SetForwardingDeviceCallbacks(reservation);
     SerializeCommand(cmd);
-    mProcs.supportedFeaturesFreeMembers(supportedFeatures);
 }
 
 }  // namespace dawn::wire::server
