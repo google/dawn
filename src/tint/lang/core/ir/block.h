@@ -44,6 +44,8 @@ namespace tint::core::ir {
 
 /// A block of statements. The instructions in the block are a linear list of instructions to
 /// execute. The block will terminate with a Terminator instruction at the end.
+/// The instructions are held in a doubly-linked list with explicit first and last pointer,
+/// and with an explicit count.
 class Block : public Castable<Block> {
   public:
     /// Constructor
@@ -178,6 +180,7 @@ class Block : public Castable<Block> {
     void Destroy();
 
   private:
+    // The first and last pointers are null if and only if the list is empty.
     struct {
         ConstPropagatingPtr<Instruction> first;
         ConstPropagatingPtr<Instruction> last;

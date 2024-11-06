@@ -43,6 +43,11 @@ using namespace tint::core::fluent_types;     // NOLINT
 using namespace tint::core::number_suffixes;  // NOLINT
 
 /// PIMPL state for the transform.
+///
+/// Each uniform buffer variable is rewritten so its store type is an array of vec4u
+/// elements.  Accesses to original store type contents are rewritten to pick out the
+/// right set of vec4u elements and then use bitcasts as needed to construct the originally
+/// loaded value.
 struct State {
     /// The IR module.
     core::ir::Module& ir;
@@ -124,6 +129,9 @@ struct State {
         }
     }
 
+    // OffsetData represents an unsigned integer expression.
+    // The value is the sum of a const part, held in `byte_offset`, and
+    // non-const parts in `byte_offset_expr`.
     struct OffsetData {
         uint32_t byte_offset = 0;
         Vector<core::ir::Value*, 4> byte_offset_expr{};
@@ -153,7 +161,10 @@ struct State {
         return val;
     }
 
-    // Note, must be called inside a builder insert block (Append, InsertBefore, etc)
+    // Converts a byte offset to an index into a vec4u array.
+    // After the transform runs the store type of the uniform buffer variable is an
+    // array of vec4u.
+    // Note, this must be called inside a builder insert block (Append, InsertBefore, etc)
     core::ir::Value* OffsetValueToArrayIndex(core::ir::Value* val) {
         if (auto* cnst = val->As<core::ir::Constant>()) {
             auto v = cnst->Value()->ValueAs<uint32_t>();
@@ -162,7 +173,9 @@ struct State {
         return b.Divide(ty.u32(), val, 16_u)->Result(0);
     }
 
-    // From the byte_offset calculate the index of the vector inside the array we need to access.
+    // Calculates the index of the vec4u element containing the byte at (byte_idx % 16).
+    // Assumes the upper bits of byte_idx have already been used to access the correct
+    // vec4u array element in the underlying variable.
     core::ir::Value* CalculateVectorOffset(core::ir::Value* byte_idx) {
         if (auto* byte_cnst = byte_idx->As<core::ir::Constant>()) {
             return b.Value(u32((byte_cnst->Value()->ValueAs<uint32_t>() % 16u) / 4u));
@@ -384,6 +397,7 @@ struct State {
             return MakeVectorLoadF16(access, result_ty, byte_idx);
         }
 
+        TINT_ASSERT(result_ty->DeepestElement()->Size() == 4);
         core::ir::Instruction* load = nullptr;
         if (result_ty->Width() == 4) {
             load = b.Load(access);
@@ -418,6 +432,9 @@ struct State {
         return b.Bitcast(result_ty, load);
     }
 
+    // Returns the instruction for getting a vector-of-f16 value of type `result_ty`
+    // out of the pointer-to-vec4u value `access`.  Get the components starting
+    // at byte offset (byte_idx % 16).
     core::ir::Instruction* MakeVectorLoadF16(core::ir::Access* access,
                                              const core::type::Vector* result_ty,
                                              core::ir::Value* byte_idx) {
