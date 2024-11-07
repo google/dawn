@@ -1799,6 +1799,16 @@ void Validator::CheckFunction(const Function* func) {
     scope_stack_.Push();
     TINT_DEFER(scope_stack_.Pop());
 
+    if (!func->Block()) {
+        AddError(func) << "root block for function is undefined";
+        return;
+    }
+
+    if (func->Block()->Is<ir::MultiInBlock>()) {
+        AddError(func) << "root block for function cannot be a multi-in block";
+        return;
+    }
+
     Hashset<const FunctionParam*, 4> param_set{};
     for (auto* param : func->Params()) {
         if (!param->Alive()) {

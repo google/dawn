@@ -290,6 +290,27 @@ note: # Disassembly
 )");
 }
 
+TEST_F(IR_ValidatorTest, Function_MultinBlock) {
+    auto* f = b.Function("my_func", ty.void_());
+    f->SetBlock(b.MultiInBlock());
+    f->Block()->Append(b.Return(f));
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_EQ(res.Failure().reason.Str(),
+              R"(:1:1 error: root block for function cannot be a multi-in block
+%my_func = func():void {
+^^^^^^^^
+
+note: # Disassembly
+%my_func = func():void {
+  $B1: {
+    ret
+  }
+}
+)");
+}
+
 TEST_F(IR_ValidatorTest, Function_DeadParameter) {
     auto* f = b.Function("my_func", ty.void_());
     auto* p = b.FunctionParam("my_param", ty.f32());
