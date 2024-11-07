@@ -39,6 +39,7 @@
 #include "dawn/native/d3d11/DeviceD3D11.h"
 #include "dawn/native/d3d11/PlatformFunctionsD3D11.h"
 #include "dawn/native/d3d11/UtilsD3D11.h"
+#include "dawn/platform/DawnPlatform.h"
 
 namespace dawn::native::d3d11 {
 
@@ -299,6 +300,10 @@ void PhysicalDevice::SetupBackendDeviceToggles(dawn::platform::Platform* platfor
     if (gpu_info::IsIntelGen11OrOlder(vendorId, deviceId)) {
         deviceToggles->Default(Toggle::ClearColorWithDraw, true);
     }
+
+    // Use the Tint IR backend by default if the corresponding platform feature is enabled.
+    deviceToggles->Default(Toggle::UseTintIR,
+                           platform->IsFeatureEnabled(platform::Features::kWebGPUUseTintIR));
 }
 
 ResultOrError<Ref<DeviceBase>> PhysicalDevice::CreateDeviceImpl(
