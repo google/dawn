@@ -868,20 +868,6 @@ crbug.com/374218148 webgpu:shader,execution,expression,call,builtin,textureSampl
 
 ### This section represents unimplemented features in Tint, Chrome or core WebGPU
 
-# canvas,configure failures Android
-crbug.com/364904749 [ android arm ] webgpu:web_platform,canvas,configure:viewFormats:canvasType="offscreen";format="rgba16float";viewFormatFeature="texture-compression-astc" [ Failure ]
-crbug.com/364904749 [ android arm ] webgpu:web_platform,canvas,configure:viewFormats:canvasType="offscreen";format="rgba16float";viewFormatFeature="texture-compression-etc2" [ Failure ]
-crbug.com/364904749 [ android arm ] webgpu:web_platform,canvas,configure:viewFormats:canvasType="offscreen";format="rgba8unorm";viewFormatFeature="texture-compression-astc" [ Failure ]
-crbug.com/364904749 [ android arm ] webgpu:web_platform,canvas,configure:viewFormats:canvasType="offscreen";format="rgba8unorm";viewFormatFeature="texture-compression-etc2" [ Failure ]
-crbug.com/364904749 [ android arm ] webgpu:web_platform,canvas,configure:viewFormats:canvasType="onscreen";format="rgba16float";viewFormatFeature="texture-compression-astc" [ Failure ]
-crbug.com/364904749 [ android arm ] webgpu:web_platform,canvas,configure:viewFormats:canvasType="onscreen";format="rgba16float";viewFormatFeature="texture-compression-etc2" [ Failure ]
-crbug.com/364904749 [ android arm ] webgpu:web_platform,canvas,configure:viewFormats:canvasType="onscreen";format="rgba8unorm";viewFormatFeature="texture-compression-astc" [ Failure ]
-crbug.com/364904749 [ android arm ] webgpu:web_platform,canvas,configure:viewFormats:canvasType="onscreen";format="rgba8unorm";viewFormatFeature="texture-compression-etc2" [ Failure ]
-crbug.com/364904749 [ android arm ] webgpu:web_platform,canvas,configure:viewFormats:canvasType="offscreen";format="rgba16float";viewFormatFeature="_undef_" [ Failure ]
-crbug.com/364904749 [ android arm ] webgpu:web_platform,canvas,configure:viewFormats:canvasType="offscreen";format="rgba8unorm";viewFormatFeature="_undef_" [ Failure ]
-crbug.com/364904749 [ android arm ] webgpu:web_platform,canvas,configure:viewFormats:canvasType="onscreen";format="rgba16float";viewFormatFeature="_undef_" [ Failure ]
-crbug.com/364904749 [ android arm ] webgpu:web_platform,canvas,configure:viewFormats:canvasType="onscreen";format="rgba8unorm";viewFormatFeature="_undef_" [ Failure ]
-
 # depth_bias validation failures: test is using depthBiasClamp = 1.0
 # must be zero in compatibility mode
 crbug.com/365922174 webgpu:api,validation,render_pipeline,depth_stencil_state:depth_bias:isAsync=true;topology="triangle-list" [ Failure ]
