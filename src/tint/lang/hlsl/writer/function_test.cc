@@ -408,7 +408,7 @@ vert2_main1_outputs vert2_main1() {
 )");
 }
 
-TEST_F(HlslWriterTest, DISABLED_FunctionEntryPointWithUniform) {
+TEST_F(HlslWriterTest, FunctionEntryPointWithUniform) {
     // struct Uniforms {
     //   coord: vec4f,
     // }
@@ -454,9 +454,8 @@ TEST_F(HlslWriterTest, DISABLED_FunctionEntryPointWithUniform) {
 cbuffer cbuffer_ubo : register(b0, space1) {
   uint4 ubo[1];
 };
-
 float sub_func(float param) {
-  return asfloat(ubo[0].x);
+  return asfloat(ubo[0u].x);
 }
 
 void frag_main() {
@@ -466,7 +465,7 @@ void frag_main() {
 )");
 }
 
-TEST_F(HlslWriterTest, DISABLED_FunctionEntryPointWithUniformStruct) {
+TEST_F(HlslWriterTest, FunctionEntryPointWithUniformStruct) {
     // struct Uniforms {
     //   coord: vec4f,
     // }
@@ -502,8 +501,7 @@ cbuffer cbuffer_ubo : register(b0, space1) {
   uint4 ubo[1];
 };
 void frag_main() {
-  float v = asfloat(ubo[0].x);
-  return;
+  float v = asfloat(ubo[0u].x);
 }
 
 )");
@@ -588,7 +586,7 @@ void frag_main() {
 )");
 }
 
-TEST_F(HlslWriterTest, DISABLED_FunctionEntryPointWithWOStorageBufferStore) {
+TEST_F(HlslWriterTest, FunctionEntryPointWithWOStorageBufferStore) {
     // struct Data {
     //   a: i32,
     //   b: f32,
@@ -621,13 +619,12 @@ TEST_F(HlslWriterTest, DISABLED_FunctionEntryPointWithWOStorageBufferStore) {
 RWByteAddressBuffer coord : register(u0, space1);
 void frag_main() {
   coord.Store(4u, asuint(2.0f));
-  return;
 }
 
 )");
 }
 
-TEST_F(HlslWriterTest, DISABLED_FunctionEntryPointWithStorageBufferStore) {
+TEST_F(HlslWriterTest, FunctionEntryPointWithStorageBufferStore) {
     // struct Data {
     //   a: i32,
     //   b: f32,
@@ -660,13 +657,12 @@ TEST_F(HlslWriterTest, DISABLED_FunctionEntryPointWithStorageBufferStore) {
 RWByteAddressBuffer coord : register(u0, space1);
 void frag_main() {
   coord.Store(4u, asuint(2.0f));
-  return;
 }
 
 )");
 }
 
-TEST_F(HlslWriterTest, DISABLED_FunctionCalledByEntryPointWithUniform) {
+TEST_F(HlslWriterTest, FunctionCalledByEntryPointWithUniform) {
     // Struct S {
     //   x: f32,
     // }
@@ -687,7 +683,10 @@ TEST_F(HlslWriterTest, DISABLED_FunctionCalledByEntryPointWithUniform) {
     coord->SetBindingPoint(1, 0);
     b.ir.root_block->Append(coord);
 
+    auto* param = b.FunctionParam("param", ty.f32());
     auto* sub_func = b.Function("sub_func", ty.f32());
+    sub_func->SetParams({param});
+
     b.Append(sub_func->Block(), [&] {
         auto* a = b.Access(ty.ptr<uniform, f32, core::Access::kRead>(), coord, 0_u);
         b.Return(sub_func, b.Load(a));
@@ -700,17 +699,16 @@ TEST_F(HlslWriterTest, DISABLED_FunctionCalledByEntryPointWithUniform) {
     });
 
     ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
-    EXPECT_EQ(output_.hlsl, R"(cbuffer cbuffer_coord : register(b0, space1) {
+    EXPECT_EQ(output_.hlsl, R"(
+cbuffer cbuffer_coord : register(b0, space1) {
   uint4 coord[1];
 };
-
 float sub_func(float param) {
-  return coord.x;
+  return asfloat(coord[0u].x);
 }
 
 void frag_main() {
   float v = sub_func(1.0f);
-  return;
 }
 
 )");
