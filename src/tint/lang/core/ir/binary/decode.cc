@@ -765,6 +765,13 @@ struct Decoder {
             Error() << "struct must have a name";
             return mod_out_.Types().invalid();
         }
+
+        if (DAWN_UNLIKELY(struct_name.find('\0') != std::string::npos)) {
+            Error() << "structure name '" << struct_name
+                    << "' contains '\\0' before end of the string";
+            return mod_out_.Types().invalid();
+        }
+
         if (!struct_names_.Add(struct_name)) {
             Error() << "duplicate struct name: " << style::Type(struct_name);
             return mod_out_.Types().invalid();
@@ -778,6 +785,13 @@ struct Decoder {
                 Error() << "struct member must have a name";
                 return mod_out_.Types().invalid();
             }
+
+            if (DAWN_UNLIKELY(member_name.find('\0') != std::string::npos)) {
+                Error() << "member name '" << member_name
+                        << "' contains '\\0' before end of the string";
+                return mod_out_.Types().invalid();
+            }
+
             auto symbol = mod_out_.symbols.Register(member_name);
             auto* type = Type(member_in.type());
             auto index = static_cast<uint32_t>(members_out.Length());
