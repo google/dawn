@@ -650,22 +650,24 @@ var LibraryWebGPU = {
   // Methods of Adapter
   // --------------------------------------------------------------------------
 
-  wgpuAdapterEnumerateFeatures: (adapterPtr, featuresOutPtr) => {
+  wgpuAdapterGetFeatures__deps: ['malloc'],
+  wgpuAdapterGetFeatures: (adapterPtr, supportedFeatures) => {
     var adapter = WebGPU.getJsObject(adapterPtr);
 
+    // Always allocate enough space for all the features, though some may be unused.
+    var featuresPtr = _malloc(adapter.features.size * 4);
     var offset = 0;
     var numFeatures = 0;
     adapter.features.forEach(feature => {
       var featureEnumValue = WebGPU.FeatureNameString2Enum[feature];
       if (featureEnumValue !== undefined) {
-        if (featuresOutPtr !== 0) {
-          {{{ makeSetValue('featuresOutPtr', 'offset', 'featureEnumValue', 'i32') }}};
-          offset += 4;
-        }
+        {{{ makeSetValue('featuresPtr', 'offset', 'featureEnumValue', 'i32') }}};
+        offset += 4;
         numFeatures++;
       }
     });
-    return numFeatures;
+    {{{ makeSetValue('supportedFeatures', C_STRUCTS.WGPUSupportedFeatures.features, 'featuresPtr', '*') }}};
+    {{{ makeSetValue('supportedFeatures', C_STRUCTS.WGPUSupportedFeatures.featureCount, 'numFeatures', '*') }}};
   },
 
   wgpuAdapterGetInfo__deps: ['$stringToNewUTF8', '$lengthBytesUTF8'],
@@ -1740,22 +1742,24 @@ var LibraryWebGPU = {
     WebGPU.getJsObject(devicePtr).destroy()
   },
 
-  wgpuDeviceEnumerateFeatures: (devicePtr, featuresOutPtr) => {
+  wgpuDeviceGetFeatures__deps: ['malloc'],
+  wgpuDeviceGetFeatures: (devicePtr, supportedFeatures) => {
     var device = WebGPU.getJsObject(devicePtr);
 
+    // Always allocate enough space for all the features, though some may be unused.
+    var featuresPtr = _malloc(device.features.size * 4);
     var offset = 0;
     var numFeatures = 0;
     device.features.forEach(feature => {
       var featureEnumValue = WebGPU.FeatureNameString2Enum[feature];
       if (featureEnumValue !== undefined) {
-        if (featuresOutPtr !== 0) {
-          {{{ makeSetValue('featuresOutPtr', 'offset', 'featureEnumValue', 'i32') }}};
-          offset += 4;
-        }
+        {{{ makeSetValue('featuresPtr', 'offset', 'featureEnumValue', 'i32') }}};
+        offset += 4;
         numFeatures++;
       }
     });
-    return numFeatures;
+    {{{ makeSetValue('supportedFeatures', C_STRUCTS.WGPUSupportedFeatures.features, 'featuresPtr', '*') }}};
+    {{{ makeSetValue('supportedFeatures', C_STRUCTS.WGPUSupportedFeatures.featureCount, 'numFeatures', '*') }}};
   },
 
   wgpuDeviceGetLimits: (devicePtr, limitsOutPtr) => {

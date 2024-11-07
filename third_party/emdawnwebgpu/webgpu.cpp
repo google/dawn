@@ -1506,7 +1506,7 @@ WGPU_OBJECTS(DEFINE_WGPU_DEFAULT_ADDREF_RELEASE)
 WGPU_OBJECTS(DEFINE_WGPU_DEFAULT_SETLABEL)
 
 // ----------------------------------------------------------------------------
-// Standalone (non-method) functions
+// FreeMember functions
 // ----------------------------------------------------------------------------
 
 void wgpuAdapterInfoFreeMembers(WGPUAdapterInfo value) {
@@ -1515,13 +1515,22 @@ void wgpuAdapterInfoFreeMembers(WGPUAdapterInfo value) {
   free(const_cast<char*>(value.vendor.data));
 }
 
-WGPUInstance wgpuCreateInstance([[maybe_unused]] const WGPUInstanceDescriptor* descriptor) {
-  assert(descriptor == nullptr);  // descriptor not implemented yet
-  return new WGPUInstanceImpl();
+void wgpuSupportedFeaturesFreeMembers(WGPUSupportedFeatures value) {
+  free(const_cast<WGPUFeatureName*>(value.features));
 }
 
 void wgpuSurfaceCapabilitiesFreeMembers(WGPUSurfaceCapabilities) {
   // wgpuSurfaceCapabilities doesn't currently allocate anything.
+}
+
+// ----------------------------------------------------------------------------
+// Standalone (non-method) functions
+// ----------------------------------------------------------------------------
+
+WGPUInstance wgpuCreateInstance(
+    [[maybe_unused]] const WGPUInstanceDescriptor* descriptor) {
+  assert(descriptor == nullptr);  // descriptor not implemented yet
+  return new WGPUInstanceImpl();
 }
 
 // ----------------------------------------------------------------------------
