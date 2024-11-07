@@ -400,11 +400,13 @@ ResultOrError<Ref<PipelineLayoutBase>> PipelineLayoutBase::CreateDefault(
     DAWN_TRY_ASSIGN(result, device->CreatePipelineLayout(&desc, pipelineCompatibilityToken));
     DAWN_ASSERT(!result->IsError());
 
-    // Check in debug that the pipeline layout is compatible with the current pipeline.
+    // That the auto pipeline layout is compatible with the current pipeline.
+    // Note: the currently specified rules can generate invalid default layouts.
+    // Hopefully the spec will be updated to prevent this.
+    // See: https://github.com/gpuweb/gpuweb/issues/4952
     for (const StageAndDescriptor& stage : stages) {
         const EntryPointMetadata& metadata = stage.module->GetEntryPoint(stage.entryPoint);
-        DAWN_ASSERT(
-            ValidateCompatibilityWithPipelineLayout(device, metadata, result.Get()).IsSuccess());
+        DAWN_TRY(ValidateCompatibilityWithPipelineLayout(device, metadata, result.Get()));
     }
 
     return std::move(result);

@@ -1283,11 +1283,25 @@ MaybeError ValidateCompatibilityWithPipelineLayout(DeviceBase* device,
             std::get<TextureBindingInfo>(textureInfo.bindingLayout);
 
         DAWN_INVALID_IF(
-            sampledTextureBindingInfo.sampleType == wgpu::TextureSampleType::UnfilterableFloat,
+            sampledTextureBindingInfo.sampleType != wgpu::TextureSampleType::Float &&
+                // TODO(crbug.com/376497143): remove Depth as it's invalid WebGPU. See deprecation
+                // warning below.
+                sampledTextureBindingInfo.sampleType != wgpu::TextureSampleType::Depth &&
+                sampledTextureBindingInfo.sampleType != kInternalResolveAttachmentSampleType,
             "Texture binding (group:%u, binding:%u) is %s but used statically with a sampler "
             "(group:%u, binding:%u) that's %s",
-            pair.texture.group, pair.texture.binding, wgpu::TextureSampleType::UnfilterableFloat,
+            pair.texture.group, pair.texture.binding, sampledTextureBindingInfo.sampleType,
             pair.sampler.group, pair.sampler.binding, wgpu::SamplerBindingType::Filtering);
+
+        // TODO(crbug.com/376497143): remove this deprecation warning.
+        if (sampledTextureBindingInfo.sampleType == wgpu::TextureSampleType::Depth) {
+            const char* msg =
+                "Using a TextureType::Depth with SamplerType::Filtering is deprecated."
+                "TextureType::Depth can only be used with SamplerType::NonFiltering or "
+                "SamplerType::Comparison.";
+            device->EmitWarningOnce(msg);
+            device->GetInstance()->EmitDeprecationWarning(msg);
+        }
     }
 
     // Validate compatibility of the pixel local storage.

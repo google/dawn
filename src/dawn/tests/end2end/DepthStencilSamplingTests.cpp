@@ -682,6 +682,16 @@ TEST_P(DepthStencilSamplingTest, CheckDepthTextureRange) {
         }
     )");
 
+    wgpu::BindGroupLayout bgl = utils::MakeBindGroupLayout(
+        device, {
+                    {0, wgpu::ShaderStage::Fragment, wgpu::TextureSampleType::Depth},
+                    {1, wgpu::ShaderStage::Fragment, wgpu::SamplerBindingType::NonFiltering},
+                });
+
+    wgpu::PipelineLayoutDescriptor plDescriptor;
+    plDescriptor.bindGroupLayoutCount = 1;
+    plDescriptor.bindGroupLayouts = &bgl;
+
     // The first pipeline will write to the depth texture.
     utils::ComboRenderPipelineDescriptor pDesc1;
     pDesc1.vertex.module = module;
@@ -695,6 +705,7 @@ TEST_P(DepthStencilSamplingTest, CheckDepthTextureRange) {
 
     // The second pipeline checks the depth texture and outputs 1 to a texel on success.
     utils::ComboRenderPipelineDescriptor pDesc2;
+    pDesc2.layout = device.CreatePipelineLayout(&plDescriptor);
     pDesc2.vertex.module = module;
     pDesc2.cFragment.module = module;
     pDesc2.cFragment.entryPoint = "fs2";
