@@ -2454,5 +2454,157 @@ TEST_F(IR_BuiltinPolyfillTest, Dot4U8Packed) {
     EXPECT_EQ(expect, str());
 }
 
+TEST_F(IR_BuiltinPolyfillTest, Reflect_NoPolyfill) {
+    Build(core::BuiltinFn::kReflect, ty.vec2<f32>(), Vector{ty.vec2<f32>(), ty.vec2<f32>()});
+    auto* src = R"(
+%foo = func(%arg:vec2<f32>, %arg_1:vec2<f32>):vec2<f32> {  # %arg_1: 'arg'
+  $B1: {
+    %result:vec2<f32> = reflect %arg, %arg_1
+    ret %result
+  }
+}
+)";
+    auto* expect = src;
+
+    EXPECT_EQ(src, str());
+
+    BuiltinPolyfillConfig config;
+    config.reflect_vec2_f32 = false;
+    Run(BuiltinPolyfill, config);
+    EXPECT_EQ(expect, str());
+}
+
+// Reflect polyfill (reflect_vec2_f32) should only affect vec2<f32>
+TEST_F(IR_BuiltinPolyfillTest, Reflect_Vec2F32) {
+    Build(core::BuiltinFn::kReflect, ty.vec2<f32>(), Vector{ty.vec2<f32>(), ty.vec2<f32>()});
+    auto* src = R"(
+%foo = func(%arg:vec2<f32>, %arg_1:vec2<f32>):vec2<f32> {  # %arg_1: 'arg'
+  $B1: {
+    %result:vec2<f32> = reflect %arg, %arg_1
+    ret %result
+  }
+}
+)";
+    auto* expect = R"(
+%foo = func(%arg:vec2<f32>, %arg_1:vec2<f32>):vec2<f32> {  # %arg_1: 'arg'
+  $B1: {
+    %4:f32 = dot %arg, %arg_1
+    %5:f32 = mul -2.0f, %4
+    %6:vec2<f32> = construct %5
+    %7:vec2<f32> = mul %6, %arg_1
+    %result:vec2<f32> = add %arg, %7
+    ret %result
+  }
+}
+)";
+
+    EXPECT_EQ(src, str());
+
+    BuiltinPolyfillConfig config;
+    config.reflect_vec2_f32 = true;
+    Run(BuiltinPolyfill, config);
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(IR_BuiltinPolyfillTest, Reflect_Vec3F32) {
+    Build(core::BuiltinFn::kReflect, ty.vec3<f32>(), Vector{ty.vec3<f32>(), ty.vec3<f32>()});
+    auto* src = R"(
+%foo = func(%arg:vec3<f32>, %arg_1:vec3<f32>):vec3<f32> {  # %arg_1: 'arg'
+  $B1: {
+    %result:vec3<f32> = reflect %arg, %arg_1
+    ret %result
+  }
+}
+)";
+    auto* expect = src;
+
+    EXPECT_EQ(src, str());
+
+    BuiltinPolyfillConfig config;
+    config.reflect_vec2_f32 = true;
+    Run(BuiltinPolyfill, config);
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(IR_BuiltinPolyfillTest, Reflect_Vec4F32) {
+    Build(core::BuiltinFn::kReflect, ty.vec4<f32>(), Vector{ty.vec4<f32>(), ty.vec4<f32>()});
+    auto* src = R"(
+%foo = func(%arg:vec4<f32>, %arg_1:vec4<f32>):vec4<f32> {  # %arg_1: 'arg'
+  $B1: {
+    %result:vec4<f32> = reflect %arg, %arg_1
+    ret %result
+  }
+}
+)";
+    auto* expect = src;
+
+    EXPECT_EQ(src, str());
+
+    BuiltinPolyfillConfig config;
+    config.reflect_vec2_f32 = true;
+    Run(BuiltinPolyfill, config);
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(IR_BuiltinPolyfillTest, Reflect_Vec2F16) {
+    Build(core::BuiltinFn::kReflect, ty.vec2<f16>(), Vector{ty.vec2<f16>(), ty.vec2<f16>()});
+    auto* src = R"(
+%foo = func(%arg:vec2<f16>, %arg_1:vec2<f16>):vec2<f16> {  # %arg_1: 'arg'
+  $B1: {
+    %result:vec2<f16> = reflect %arg, %arg_1
+    ret %result
+  }
+}
+)";
+    auto* expect = src;
+
+    EXPECT_EQ(src, str());
+
+    BuiltinPolyfillConfig config;
+    config.reflect_vec2_f32 = true;
+    Run(BuiltinPolyfill, config);
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(IR_BuiltinPolyfillTest, Reflect_Vec3F16) {
+    Build(core::BuiltinFn::kReflect, ty.vec3<f16>(), Vector{ty.vec3<f16>(), ty.vec3<f16>()});
+    auto* src = R"(
+%foo = func(%arg:vec3<f16>, %arg_1:vec3<f16>):vec3<f16> {  # %arg_1: 'arg'
+  $B1: {
+    %result:vec3<f16> = reflect %arg, %arg_1
+    ret %result
+  }
+}
+)";
+    auto* expect = src;
+
+    EXPECT_EQ(src, str());
+
+    BuiltinPolyfillConfig config;
+    config.reflect_vec2_f32 = true;
+    Run(BuiltinPolyfill, config);
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(IR_BuiltinPolyfillTest, Reflect_Vec4F16) {
+    Build(core::BuiltinFn::kReflect, ty.vec4<f16>(), Vector{ty.vec4<f16>(), ty.vec4<f16>()});
+    auto* src = R"(
+%foo = func(%arg:vec4<f16>, %arg_1:vec4<f16>):vec4<f16> {  # %arg_1: 'arg'
+  $B1: {
+    %result:vec4<f16> = reflect %arg, %arg_1
+    ret %result
+  }
+}
+)";
+    auto* expect = src;
+
+    EXPECT_EQ(src, str());
+
+    BuiltinPolyfillConfig config;
+    config.reflect_vec2_f32 = true;
+    Run(BuiltinPolyfill, config);
+    EXPECT_EQ(expect, str());
+}
+
 }  // namespace
 }  // namespace tint::core::ir::transform

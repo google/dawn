@@ -4443,5 +4443,60 @@ void foo() {
 )");
 }
 
+TEST_F(HlslWriterTest, BuiltinReflect_Vec2f32_NoPolyfill) {
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        auto* vec_ty = ty.vec2<f32>();
+        auto* x = b.Let("x", b.MatchWidth(1_f, vec_ty));
+        auto* y = b.Let("y", b.MatchWidth(2_f, vec_ty));
+
+        auto* c = b.Call(vec_ty, core::BuiltinFn::kReflect, x, y);
+        b.Let("w", c);
+        b.Return(func);
+    });
+
+    tint::hlsl::writer::Options options;
+    options.polyfill_reflect_vec2_f32 = false;
+    ASSERT_TRUE(Generate(options)) << err_ << output_.hlsl;
+    EXPECT_EQ(output_.hlsl, R"(
+void foo() {
+  float2 x = (1.0f).xx;
+  float2 y = (2.0f).xx;
+  float2 w = reflect(x, y);
+}
+
+)");
+}
+
+// The generated HLSL must effectively be emitted as:
+//      x + (-2.0 * dot(x,y) * y)
+// Rather than:
+//      x - 2.0 * dot(x,y) * y
+// See crbug.com/tint/1798
+TEST_F(HlslWriterTest, BuiltinReflect_Vec2f32_Polyfill) {
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(func->Block(), [&] {
+        auto* vec_ty = ty.vec2<f32>();
+        auto* x = b.Let("x", b.MatchWidth(1_f, vec_ty));
+        auto* y = b.Let("y", b.MatchWidth(2_f, vec_ty));
+
+        auto* c = b.Call(vec_ty, core::BuiltinFn::kReflect, x, y);
+        b.Let("w", c);
+        b.Return(func);
+    });
+
+    tint::hlsl::writer::Options options;
+    options.polyfill_reflect_vec2_f32 = true;
+    ASSERT_TRUE(Generate(options)) << err_ << output_.hlsl;
+    EXPECT_EQ(output_.hlsl, R"(
+void foo() {
+  float2 x = (1.0f).xx;
+  float2 y = (2.0f).xx;
+  float2 w = (x + (float2(((-2.0f * dot(x, y))).xx) * y));
+}
+
+)");
+}
+
 }  // namespace
 }  // namespace tint::hlsl::writer

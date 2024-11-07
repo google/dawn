@@ -121,6 +121,15 @@ struct State {
                             worklist.Push(builtin);
                         }
                         break;
+                    case core::BuiltinFn::kReflect:
+                        if (config.reflect_vec2_f32) {
+                            // Polyfill for vec2<f32>. See crbug.com/tint/1798
+                            auto* vec_ty = builtin->Result(0)->Type()->As<core::type::Vector>();
+                            if (vec_ty->Width() == 2 && vec_ty->Type()->Is<core::type::F32>()) {
+                                worklist.Push(builtin);
+                            }
+                        }
+                        break;
                     case core::BuiltinFn::kSaturate:
                         if (config.saturate) {
                             worklist.Push(builtin);
@@ -200,6 +209,9 @@ struct State {
                     break;
                 case core::BuiltinFn::kRadians:
                     Radians(builtin);
+                    break;
+                case core::BuiltinFn::kReflect:
+                    Reflect(builtin);
                     break;
                 case core::BuiltinFn::kSaturate:
                     Saturate(builtin);
@@ -666,6 +678,35 @@ struct State {
         b.InsertBefore(call, [&] {
             auto* mul = b.Multiply(arg->Type(), arg, value);
             mul->SetResults(Vector{call->DetachResult()});
+        });
+        call->Destroy();
+    }
+
+    /// Polyfill a `reflect()` builtin call.
+    /// @param call the builtin call instruction
+    void Reflect(ir::CoreBuiltinCall* call) {
+        auto* e1 = call->Args()[0];
+        auto* e2 = call->Args()[1];
+        auto* vec_ty = e1->Type()->As<core::type::Vector>();
+        // Only polyfills vec2<f32> (crbug.com/tint/1798)
+        TINT_ASSERT(vec_ty && vec_ty->Width() == 2 && vec_ty->Type()->Is<core::type::F32>());
+
+        b.InsertBefore(call, [&] {
+            // The generated HLSL must effectively be emitted as:
+            //      e1 + (-2 * dot(e1,e2) * e2)
+            // Rather than the mathemetically equivalent:
+            //      e1 - 2 * dot(e2,e2) * e2
+            //
+            // When FXC compiles HLSL reflect, or the second case above,
+            // it emits a `dp4` instruction for `2 * dot(e1,e2)`, which is
+            // miscompiled by certain Intel drivers. The workaround (first
+            // case above) results in FXC emitting a `dp2` for the dot,
+            // followed by a `mul 2`, which works around the bug.
+            auto* dot = b.Call(ty.f32(), core::BuiltinFn::kDot, e1, e2);
+            auto* factor = b.Multiply(ty.f32(), -2.0_f, dot);
+            auto* vfactor = b.Construct(vec_ty, factor);
+            auto* mul = b.Multiply(vec_ty, vfactor, e2);
+            b.AddWithResult(call->DetachResult(), e1, mul);
         });
         call->Destroy();
     }

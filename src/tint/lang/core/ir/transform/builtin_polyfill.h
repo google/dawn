@@ -72,6 +72,8 @@ struct BuiltinPolyfillConfig {
     BuiltinPolyfillLevel insert_bits = BuiltinPolyfillLevel::kNone;
     /// Should `radians()` be polyfilled?
     bool radians = false;
+    /// Should `reflect()` be polyfilled for vec2<f32>?
+    bool reflect_vec2_f32 = false;
     /// Should `saturate()` be polyfilled?
     bool saturate = false;
     /// Should `textureSampleBaseClampToEdge()` be polyfilled for texture_2d<f32> textures?
