@@ -399,38 +399,39 @@ $B1: {  # root
     %x:u32 = let 1u
     %4:ptr<uniform, vec4<u32>, read> = access %v, 0u
     %5:vec4<u32> = load %4
-    %6:vec4<f16> = bitcast %5
-    %a:vec4<f16> = let %6
-    %8:ptr<uniform, vec4<u32>, read> = access %v, 0u
-    %9:u32 = load_vector_element %8, 0u
-    %10:f32 = hlsl.f16tof32 %9
-    %11:f16 = convert %10
-    %b:f16 = let %11
-    %13:u32 = convert %x
-    %14:u32 = mul %13, 2u
-    %15:u32 = div %14, 16u
-    %16:ptr<uniform, vec4<u32>, read> = access %v, %15
-    %17:u32 = mod %14, 16u
-    %18:u32 = div %17, 4u
-    %19:u32 = load_vector_element %16, %18
-    %20:u32 = mod %14, 4u
-    %21:bool = eq %20, 0u
-    %22:u32 = hlsl.ternary 16u, 0u, %21
-    %23:u32 = shr %19, %22
-    %24:f32 = hlsl.f16tof32 %23
-    %25:f16 = convert %24
-    %c:f16 = let %25
-    %27:ptr<uniform, vec4<u32>, read> = access %v, 0u
-    %28:u32 = load_vector_element %27, 1u
-    %29:f32 = hlsl.f16tof32 %28
-    %30:f16 = convert %29
-    %d:f16 = let %30
-    %32:ptr<uniform, vec4<u32>, read> = access %v, 0u
-    %33:u32 = load_vector_element %32, 1u
-    %34:u32 = shr %33, 16u
-    %35:f32 = hlsl.f16tof32 %34
-    %36:f16 = convert %35
-    %e:f16 = let %36
+    %6:vec2<u32> = swizzle %5, xy
+    %7:vec4<f16> = bitcast %6
+    %a:vec4<f16> = let %7
+    %9:ptr<uniform, vec4<u32>, read> = access %v, 0u
+    %10:u32 = load_vector_element %9, 0u
+    %11:f32 = hlsl.f16tof32 %10
+    %12:f16 = convert %11
+    %b:f16 = let %12
+    %14:u32 = convert %x
+    %15:u32 = mul %14, 2u
+    %16:u32 = div %15, 16u
+    %17:ptr<uniform, vec4<u32>, read> = access %v, %16
+    %18:u32 = mod %15, 16u
+    %19:u32 = div %18, 4u
+    %20:u32 = load_vector_element %17, %19
+    %21:u32 = mod %15, 4u
+    %22:bool = eq %21, 0u
+    %23:u32 = hlsl.ternary 16u, 0u, %22
+    %24:u32 = shr %20, %23
+    %25:f32 = hlsl.f16tof32 %24
+    %26:f16 = convert %25
+    %c:f16 = let %26
+    %28:ptr<uniform, vec4<u32>, read> = access %v, 0u
+    %29:u32 = load_vector_element %28, 1u
+    %30:f32 = hlsl.f16tof32 %29
+    %31:f16 = convert %30
+    %d:f16 = let %31
+    %33:ptr<uniform, vec4<u32>, read> = access %v, 0u
+    %34:u32 = load_vector_element %33, 1u
+    %35:u32 = shr %34, 16u
+    %36:f32 = hlsl.f16tof32 %35
+    %37:f16 = convert %36
+    %e:f16 = let %37
     ret
   }
 }
@@ -484,32 +485,45 @@ $B1: {  # root
     %a:mat2x3<f16> = let %3
     %6:ptr<uniform, vec4<u32>, read> = access %v, 0u
     %7:vec4<u32> = load %6
-    %8:vec4<f16> = bitcast %7
-    %9:vec3<f16> = swizzle %8, xyz
-    %b:vec3<f16> = let %9
-    %11:ptr<uniform, vec4<u32>, read> = access %v, 0u
-    %12:u32 = load_vector_element %11, 3u
-    %13:f32 = hlsl.f16tof32 %12
-    %14:f16 = convert %13
-    %c:f16 = let %14
+    %8:vec2<u32> = swizzle %7, zw
+    %9:vec4<f16> = bitcast %8
+    %10:vec3<f16> = swizzle %9, xyz
+    %b:vec3<f16> = let %10
+    %12:ptr<uniform, vec4<u32>, read> = access %v, 0u
+    %13:u32 = load_vector_element %12, 3u
+    %14:f32 = hlsl.f16tof32 %13
+    %15:f16 = convert %14
+    %c:f16 = let %15
     ret
   }
 }
 %4 = func(%start_byte_offset:u32):mat2x3<f16> {
   $B3: {
-    %17:u32 = div %start_byte_offset, 16u
-    %18:ptr<uniform, vec4<u32>, read> = access %v, %17
-    %19:vec4<u32> = load %18
-    %20:vec4<f16> = bitcast %19
-    %21:vec3<f16> = swizzle %20, xyz
-    %22:u32 = add 8u, %start_byte_offset
-    %23:u32 = div %22, 16u
-    %24:ptr<uniform, vec4<u32>, read> = access %v, %23
-    %25:vec4<u32> = load %24
-    %26:vec4<f16> = bitcast %25
-    %27:vec3<f16> = swizzle %26, xyz
-    %28:mat2x3<f16> = construct %21, %27
-    ret %28
+    %18:u32 = div %start_byte_offset, 16u
+    %19:ptr<uniform, vec4<u32>, read> = access %v, %18
+    %20:u32 = mod %start_byte_offset, 16u
+    %21:u32 = div %20, 4u
+    %22:vec4<u32> = load %19
+    %23:vec2<u32> = swizzle %22, zw
+    %24:vec2<u32> = swizzle %22, xy
+    %25:bool = eq %21, 2u
+    %26:vec2<u32> = hlsl.ternary %24, %23, %25
+    %27:vec4<f16> = bitcast %26
+    %28:vec3<f16> = swizzle %27, xyz
+    %29:u32 = add 8u, %start_byte_offset
+    %30:u32 = div %29, 16u
+    %31:ptr<uniform, vec4<u32>, read> = access %v, %30
+    %32:u32 = mod %29, 16u
+    %33:u32 = div %32, 4u
+    %34:vec4<u32> = load %31
+    %35:vec2<u32> = swizzle %34, zw
+    %36:vec2<u32> = swizzle %34, xy
+    %37:bool = eq %33, 2u
+    %38:vec2<u32> = hlsl.ternary %36, %35, %37
+    %39:vec4<f16> = bitcast %38
+    %40:vec3<f16> = swizzle %39, xyz
+    %41:mat2x3<f16> = construct %28, %40
+    ret %41
   }
 }
 )";

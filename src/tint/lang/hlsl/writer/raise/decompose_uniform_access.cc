@@ -433,47 +433,60 @@ struct State {
     }
 
     // Returns the instruction for getting a vector-of-f16 value of type `result_ty`
-    // out of the pointer-to-vec4u value `access`.  Get the components starting
+    // out of the pointer-to-vec4u value `access`. Get the components starting
     // at byte offset (byte_idx % 16).
+    // A `vec4` or `vec3` of `f16` has 8-byte alignment, while a `vec2` of `f16` has 4-byte
+    // alignment. So, this means we'll have memory like:
+    //
+    // Byte:     |  0 |  1 |  2 |  3 |  4 |  5 |  6 |  7 |  8 |  9 | 10 | 11 | 12 | 13 | 14 | 15 |
+    // Scalar Index:       0         |         1         |         2         |         3         |
+    // vec4<u32>:|         x         |         y         |         z         |         w         |
+    // vec4<f16>:|   x     |    y    |    z    |    w    |   x     |    y    |    z    |    w    |
+    // vec3<f16>:|   x     |    y    |    z    |         |   x     |    y    |    z    |         |
+    // vec2<f16>:|   x     |    y    |    x    |    y    |   x     |    y    |    x    |    y    |
     core::ir::Instruction* MakeVectorLoadF16(core::ir::Access* access,
                                              const core::type::Vector* result_ty,
                                              core::ir::Value* byte_idx) {
-        core::ir::Instruction* load = nullptr;
-        // Vec4 ends up being the same as a bitcast of vec2<u32> to a vec4<f16>
-        if (result_ty->Width() == 4) {
-            return b.Bitcast(result_ty, b.Load(access));
-        }
-
-        // A vec3 will be stored as a vec4, so we can bitcast as if we're a vec4 and swizzle out the
-        // last element
-        if (result_ty->Width() == 3) {
-            auto* bc = b.Bitcast(ty.vec4(result_ty->Type()), b.Load(access));
-            return b.Swizzle(result_ty, bc, {0, 1, 2});
-        }
-
-        // Vec2 ends up being the same as a bitcast u32 to vec2<f16>
-        if (result_ty->Width() == 2) {
-            auto* vec_idx = CalculateVectorOffset(byte_idx);
+        // Vec4 ends up being the same as a bitcast of vec2<u32> to a vec4<f16>.
+        // A vec3 will be stored as a vec4, so we can bitcast as if we're a vec4
+        // and swizzle out the last element.
+        if (result_ty->Width() == 3 || result_ty->Width() == 4) {
+            core::ir::Instruction* load = nullptr;
+            auto* vec_idx = CalculateVectorOffset(byte_idx);  // 0 or 2
             if (auto* cnst = vec_idx->As<core::ir::Constant>()) {
                 if (cnst->Value()->ValueAs<uint32_t>() == 2u) {
-                    load = b.Swizzle(ty.u32(), b.Load(access), {2});
+                    load = b.Swizzle(ty.vec2<u32>(), b.Load(access), {2, 3});
                 } else {
-                    load = b.Swizzle(ty.u32(), b.Load(access), {0});
+                    load = b.Swizzle(ty.vec2<u32>(), b.Load(access), {0, 1});
                 }
             } else {
                 auto* ubo = b.Load(access);
                 // if vec_idx == 2 -> zw
-                auto* sw_lhs = b.Swizzle(ty.u32(), ubo, {2});
+                auto* sw_lhs = b.Swizzle(ty.vec2<u32>(), ubo, {2, 3});
                 // else -> xy
-                auto* sw_rhs = b.Swizzle(ty.u32(), ubo, {0});
+                auto* sw_rhs = b.Swizzle(ty.vec2<u32>(), ubo, {0, 1});
                 auto* cond = b.Equal(ty.bool_(), vec_idx, 2_u);
-
-                Vector<core::ir::Value*, 3> args{sw_rhs->Result(0), sw_lhs->Result(0),
-                                                 cond->Result(0)};
-
-                load =
-                    b.ir.CreateInstruction<hlsl::ir::Ternary>(b.InstructionResult(ty.u32()), args);
+                auto args = Vector{sw_rhs->Result(0), sw_lhs->Result(0), cond->Result(0)};
+                load = b.ir.CreateInstruction<hlsl::ir::Ternary>(
+                    b.InstructionResult(ty.vec2<u32>()), std::move(args));
                 b.Append(load);
+            }
+            if (result_ty->Width() == 3) {
+                auto* bc = b.Bitcast(ty.vec4(result_ty->Type()), load);
+                return b.Swizzle(result_ty, bc, {0, 1, 2});
+            }
+            return b.Bitcast(result_ty, load);
+        }
+
+        // Vec2 ends up being the same as a bitcast u32 to vec2<f16>
+        if (result_ty->Width() == 2) {
+            core::ir::Instruction* load = nullptr;
+            auto* vec_idx = CalculateVectorOffset(byte_idx);  // 0, 1, 2, or 3
+            if (auto* cnst = vec_idx->As<core::ir::Constant>()) {
+                const auto vec_idx_val = cnst->Value()->ValueAs<uint32_t>();
+                load = b.Swizzle(ty.u32(), b.Load(access), {vec_idx_val});
+            } else {
+                load = b.Access(ty.u32(), b.Load(access), vec_idx);
             }
             return b.Bitcast(result_ty, load);
         }
