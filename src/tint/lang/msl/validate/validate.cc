@@ -47,12 +47,6 @@ Result Validate(const std::string& xcrun_path, const std::string& source, MslVer
 
     const char* version_str = nullptr;
     switch (version) {
-        case MslVersion::kMsl_1_2:
-            version_str = "-std=macos-metal1.2";
-            break;
-        case MslVersion::kMsl_2_1:
-            version_str = "-std=macos-metal2.1";
-            break;
         case MslVersion::kMsl_2_2:
             version_str = "-std=macos-metal2.2";
             break;

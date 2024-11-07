@@ -1,5 +1,3 @@
-SKIP: FAILED
-
 #include <metal_stdlib>
 using namespace metal;
 
@@ -9,8 +7,8 @@ struct VertexOutputs {
 };
 
 struct Uniforms {
-  float2 u_scale;
-  float2 u_offset;
+  /* 0x0000 */ float2 u_scale;
+  /* 0x0008 */ float2 u_offset;
 };
 
 struct tint_module_vars_struct {
@@ -73,30 +71,16 @@ float4 fs_main_inner(float2 texcoord, tint_module_vars_struct tint_module_vars) 
 vertex vs_main_outputs vs_main(uint VertexIndex [[vertex_id]], const constant Uniforms* uniforms [[buffer(0)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.uniforms=uniforms};
   VertexOutputs const v = vs_main_inner(VertexIndex, tint_module_vars);
-  return vs_main_outputs{.VertexOutputs_texcoords=v.texcoords, .VertexOutputs_position=v.position};
+  vs_main_outputs tint_wrapper_result = {};
+  tint_wrapper_result.VertexOutputs_texcoords = v.texcoords;
+  tint_wrapper_result.VertexOutputs_position = v.position;
+  return tint_wrapper_result;
 }
 
 fragment fs_main_outputs fs_main(fs_main_inputs inputs [[stage_in]]) {
   thread bool continue_execution = true;
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.continue_execution=(&continue_execution)};
-  return fs_main_outputs{.tint_symbol=fs_main_inner(inputs.texcoord, tint_module_vars)};
+  fs_main_outputs tint_wrapper_result = {};
+  tint_wrapper_result.tint_symbol = fs_main_inner(inputs.texcoord, tint_module_vars);
+  return tint_wrapper_result;
 }
-program_source:72:94: error: call to deleted constructor of 'texture2d<float, access::sample>'
-  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.uniforms=uniforms};
-                                                                                             ^
-/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/32023/Libraries/lib/clang/32023.194/include/metal/metal_texture:6083:3: note: 'texture2d' has been explicitly marked deleted here
-  texture2d() thread = delete;
-  ^
-program_source:17:36: note: in implicit initialization of field 'myTexture' with omitted initializer
-  texture2d<float, access::sample> myTexture;
-                                   ^
-program_source:79:117: error: call to deleted constructor of 'texture2d<float, access::sample>'
-  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.continue_execution=(&continue_execution)};
-                                                                                                                    ^
-/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/32023/Libraries/lib/clang/32023.194/include/metal/metal_texture:6083:3: note: 'texture2d' has been explicitly marked deleted here
-  texture2d() thread = delete;
-  ^
-program_source:17:36: note: in implicit initialization of field 'myTexture' with omitted initializer
-  texture2d<float, access::sample> myTexture;
-                                   ^
-

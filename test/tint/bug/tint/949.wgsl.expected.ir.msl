@@ -1,5 +1,3 @@
-SKIP: FAILED
-
 #include <metal_stdlib>
 using namespace metal;
 
@@ -8,26 +6,40 @@ struct lightingInfo {
   float3 specular;
 };
 
-struct LeftOver {
-  float4x4 u_World;
-  float4x4 u_ViewProjection;
-  float u_bumpStrength;
-  uint padding;
-  float3 u_cameraPosition;
-  float u_parallaxScale;
-  float textureInfoName;
-  uint padding_1;
-  float2 tangentSpaceParameter0;
+template<typename T, size_t N>
+struct tint_array {
+  const constant T& operator[](size_t i) const constant { return elements[i]; }
+  device T& operator[](size_t i) device { return elements[i]; }
+  const device T& operator[](size_t i) const device { return elements[i]; }
+  thread T& operator[](size_t i) thread { return elements[i]; }
+  const thread T& operator[](size_t i) const thread { return elements[i]; }
+  threadgroup T& operator[](size_t i) threadgroup { return elements[i]; }
+  const threadgroup T& operator[](size_t i) const threadgroup { return elements[i]; }
+  T elements[N];
 };
 
-struct Light0 {
-  float4 vLightData;
-  float4 vLightDiffuse;
-  float4 vLightSpecular;
-  float3 vLightGround;
-  uint padding_2;
-  float4 shadowsInfo;
-  float2 depthValues;
+struct LeftOver_packed_vec3 {
+  /* 0x0000 */ float4x4 u_World;
+  /* 0x0040 */ float4x4 u_ViewProjection;
+  /* 0x0080 */ float u_bumpStrength;
+  /* 0x0084 */ uint padding;
+  /* 0x0088 */ tint_array<int8_t, 8> tint_pad;
+  /* 0x0090 */ packed_float3 u_cameraPosition;
+  /* 0x009c */ float u_parallaxScale;
+  /* 0x00a0 */ float textureInfoName;
+  /* 0x00a4 */ uint padding_1;
+  /* 0x00a8 */ float2 tangentSpaceParameter0;
+};
+
+struct Light0_packed_vec3 {
+  /* 0x0000 */ float4 vLightData;
+  /* 0x0010 */ float4 vLightDiffuse;
+  /* 0x0020 */ float4 vLightSpecular;
+  /* 0x0030 */ packed_float3 vLightGround;
+  /* 0x003c */ uint padding_2;
+  /* 0x0040 */ float4 shadowsInfo;
+  /* 0x0050 */ float2 depthValues;
+  /* 0x0058 */ tint_array<int8_t, 8> tint_pad_1;
 };
 
 struct tint_module_vars_struct {
@@ -36,18 +48,21 @@ struct tint_module_vars_struct {
   texture2d<float, access::sample> TextureSamplerTexture;
   sampler TextureSamplerSampler;
   thread float2* vMainuv;
-  const constant LeftOver* x_269;
+  const constant LeftOver_packed_vec3* x_269;
   thread float4* v_output1;
   thread bool* gl_FrontFacing;
   thread float2* v_uv;
   thread float4* v_output2;
   texture2d<float, access::sample> TextureSampler1Texture;
   sampler TextureSampler1Sampler;
-  const constant Light0* light0;
+  const constant Light0_packed_vec3* light0;
   thread float4* glFragColor;
   sampler bumpSamplerSampler;
   texture2d<float, access::sample> bumpSamplerTexture;
 };
+
+#define TINT_ISOLATE_UB(VOLATILE_NAME) \
+  {volatile bool VOLATILE_NAME = false; if (VOLATILE_NAME) break;}
 
 struct main_out {
   float4 glFragColor_1;
@@ -262,7 +277,7 @@ void main_1(tint_module_vars_struct tint_module_vars) {
   float4 const x_264 = tempTextureRead;
   float const x_273 = (*tint_module_vars.x_269).textureInfoName;
   rgb = (float3(x_264[0u], x_264[1u], x_264[2u]) * x_273);
-  float3 const x_279 = (*tint_module_vars.x_269).u_cameraPosition;
+  float3 const x_279 = float3((*tint_module_vars.x_269).u_cameraPosition);
   float4 const x_282 = (*tint_module_vars.v_output1);
   output5 = normalize((x_279 - float3(x_282[0u], x_282[1u], x_282[2u])));
   output4 = float4(0.0f);
@@ -325,6 +340,7 @@ void main_1(tint_module_vars_struct tint_module_vars) {
   i = 0;
   {
     while(true) {
+      TINT_ISOLATE_UB(tint_volatile_false)
       int const x_388 = i;
       if ((x_388 < 15)) {
       } else {
@@ -369,7 +385,7 @@ void main_1(tint_module_vars_struct tint_module_vars) {
       }
       {
         int const x_441 = i;
-        i = (x_441 + 1);
+        i = as_type<int>((as_type<uint>(x_441) + as_type<uint>(1)));
       }
       continue;
     }
@@ -397,7 +413,7 @@ void main_1(tint_module_vars_struct tint_module_vars) {
   tempTextureRead1 = x_475;
   float4 const x_477 = tempTextureRead1;
   rgb1 = float3(x_477[0u], x_477[1u], x_477[2u]);
-  float3 const x_481 = (*tint_module_vars.x_269).u_cameraPosition;
+  float3 const x_481 = float3((*tint_module_vars.x_269).u_cameraPosition);
   float4 const x_482 = (*tint_module_vars.v_output1);
   viewDirectionW_1 = normalize((x_481 - float3(x_482[0u], x_482[1u], x_482[2u])));
   shadow = 1.0f;
@@ -417,7 +433,7 @@ void main_1(tint_module_vars_struct tint_module_vars) {
   param_14 = float3(x_510[0u], x_510[1u], x_510[2u]);
   float4 const x_514 = (*tint_module_vars.light0).vLightSpecular;
   param_15 = float3(x_514[0u], x_514[1u], x_514[2u]);
-  float3 const x_518 = (*tint_module_vars.light0).vLightGround;
+  float3 const x_518 = float3((*tint_module_vars.light0).vLightGround);
   param_16 = x_518;
   float const x_520 = glossiness_1;
   param_17 = x_520;
@@ -455,7 +471,7 @@ main_out tint_symbol_inner(float2 vMainuv_param, float4 v_output1_param, bool gl
   return main_out{.glFragColor_1=(*tint_module_vars.glFragColor)};
 }
 
-fragment tint_symbol_outputs tint_symbol(tint_symbol_inputs inputs [[stage_in]], bool gl_FrontFacing_param [[front_facing]], texture2d<float, access::sample> TextureSamplerTexture [[texture(0)]], sampler TextureSamplerSampler [[sampler(0)]], const constant LeftOver* x_269 [[buffer(0)]], texture2d<float, access::sample> TextureSampler1Texture [[texture(1)]], sampler TextureSampler1Sampler [[sampler(1)]], const constant Light0* light0 [[buffer(1)]]) {
+fragment tint_symbol_outputs tint_symbol(tint_symbol_inputs inputs [[stage_in]], bool gl_FrontFacing_param [[front_facing]], texture2d<float, access::sample> TextureSamplerTexture [[texture(0)]], sampler TextureSamplerSampler [[sampler(0)]], const constant LeftOver_packed_vec3* x_269 [[buffer(0)]], texture2d<float, access::sample> TextureSampler1Texture [[texture(1)]], sampler TextureSampler1Sampler [[sampler(1)]], const constant Light0_packed_vec3* light0 [[buffer(1)]]) {
   thread float u_Float = 0.0f;
   thread float3 u_Color = 0.0f;
   thread float2 vMainuv = 0.0f;
@@ -465,21 +481,7 @@ fragment tint_symbol_outputs tint_symbol(tint_symbol_inputs inputs [[stage_in]],
   thread float4 v_output2 = 0.0f;
   thread float4 glFragColor = 0.0f;
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.u_Float=(&u_Float), .u_Color=(&u_Color), .TextureSamplerTexture=TextureSamplerTexture, .TextureSamplerSampler=TextureSamplerSampler, .vMainuv=(&vMainuv), .x_269=x_269, .v_output1=(&v_output1), .gl_FrontFacing=(&gl_FrontFacing), .v_uv=(&v_uv), .v_output2=(&v_output2), .TextureSampler1Texture=TextureSampler1Texture, .TextureSampler1Sampler=TextureSampler1Sampler, .light0=light0, .glFragColor=(&glFragColor)};
-  return tint_symbol_outputs{.main_out_glFragColor_1=tint_symbol_inner(inputs.vMainuv_param, inputs.v_output1_param, gl_FrontFacing_param, inputs.v_uv_param, inputs.v_output2_param, tint_module_vars).glFragColor_1};
+  tint_symbol_outputs tint_wrapper_result = {};
+  tint_wrapper_result.main_out_glFragColor_1 = tint_symbol_inner(inputs.vMainuv_param, inputs.v_output1_param, gl_FrontFacing_param, inputs.v_uv_param, inputs.v_output2_param, tint_module_vars).glFragColor_1;
+  return tint_wrapper_result;
 }
-program_source:331:20: warning: unused variable 'x_394' [-Wunused-variable]
-      float2 const x_394 = (*tint_module_vars.v_uv);
-                   ^
-program_source:332:20: warning: unused variable 'x_395' [-Wunused-variable]
-      float2 const x_395 = vCurrOffset;
-                   ^
-program_source:465:484: error: call to deleted constructor of 'texture2d<float, access::sample>'
-  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.u_Float=(&u_Float), .u_Color=(&u_Color), .TextureSamplerTexture=TextureSamplerTexture, .TextureSamplerSampler=TextureSamplerSampler, .vMainuv=(&vMainuv), .x_269=x_269, .v_output1=(&v_output1), .gl_FrontFacing=(&gl_FrontFacing), .v_uv=(&v_uv), .v_output2=(&v_output2), .TextureSampler1Texture=TextureSampler1Texture, .TextureSampler1Sampler=TextureSampler1Sampler, .light0=light0, .glFragColor=(&glFragColor)};
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   ^
-/System/Library/PrivateFrameworks/GPUCompiler.framework/Versions/32023/Libraries/lib/clang/32023.194/include/metal/metal_texture:6083:3: note: 'texture2d' has been explicitly marked deleted here
-  texture2d() thread = delete;
-  ^
-program_source:47:36: note: in implicit initialization of field 'bumpSamplerTexture' with omitted initializer
-  texture2d<float, access::sample> bumpSamplerTexture;
-                                   ^
-

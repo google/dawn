@@ -866,14 +866,10 @@ bool GenerateMsl([[maybe_unused]] const tint::Program& program,
         PrintHash(hash);
     }
 
-    // Default to validating against MSL 1.2.
-    // If subgroups are used, bump the version to 2.2.
-    auto msl_version = tint::msl::validate::MslVersion::kMsl_1_2;
+    // Default to validating against MSL 2.2, which corresponds to macOS 10.15.
+    // Check for extensions that bump the requirements.
+    auto msl_version = tint::msl::validate::MslVersion::kMsl_2_2;
     for (auto* enable : program.AST().Enables()) {
-        if (enable->HasExtension(tint::wgsl::Extension::kChromiumExperimentalSubgroups) ||
-            enable->HasExtension(tint::wgsl::Extension::kSubgroups)) {
-            msl_version = std::max(msl_version, tint::msl::validate::MslVersion::kMsl_2_2);
-        }
         if (enable->HasExtension(tint::wgsl::Extension::kChromiumExperimentalPixelLocal) ||
             enable->HasExtension(tint::wgsl::Extension::kChromiumExperimentalFramebufferFetch)) {
             msl_version = std::max(msl_version, tint::msl::validate::MslVersion::kMsl_2_3);
