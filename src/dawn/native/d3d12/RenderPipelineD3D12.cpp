@@ -33,7 +33,6 @@
 #include <utility>
 
 #include "dawn/common/Assert.h"
-#include "dawn/common/Log.h"
 #include "dawn/native/CreatePipelineAsyncEvent.h"
 #include "dawn/native/Instance.h"
 #include "dawn/native/d3d/BlobD3D.h"

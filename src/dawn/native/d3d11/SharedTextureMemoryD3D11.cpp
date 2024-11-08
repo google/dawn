@@ -29,8 +29,6 @@
 
 #include <utility>
 
-#include "dawn/common/Log.h"
-
 #include "dawn/native/D3D11Backend.h"
 #include "dawn/native/d3d/D3DError.h"
 #include "dawn/native/d3d/KeyedMutex.h"
