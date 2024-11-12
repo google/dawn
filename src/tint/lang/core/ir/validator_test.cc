@@ -5151,40 +5151,36 @@ $B1: {  # root
 )");
 }
 
-TEST_F(IR_ValidatorTest, Var_Basic_BothLocationAndBuiltin) {
-    auto* f = b.Function("my_func", ty.void_());
-
-    b.Append(f->Block(), [&] {
-        auto* v = b.Var<function, f32>();
-        IOAttributes attr;
-        attr.builtin = BuiltinValue::kPosition;
-        attr.location = 0;
-        v->SetAttributes(attr);
-        b.Return(f);
-    });
+TEST_F(IR_ValidatorTest, Var_IOBothLocationAndBuiltin) {
+    auto* v = b.Var<AddressSpace::kIn, vec4<f32>>();
+    IOAttributes attr;
+    attr.builtin = BuiltinValue::kPosition;
+    attr.location = 0;
+    v->SetAttributes(attr);
+    v->SetBindingPoint(0, 0);
+    mod.root_block->Append(v);
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.Str(),
-              R"(:3:41 error: var: a builtin and location cannot be both declared for a var
-    %2:ptr<function, f32, read_write> = var @location(0) @builtin(position)
-                                        ^^^
+    EXPECT_EQ(
+        res.Failure().reason.Str(),
+        R"(:2:35 error: var: a builtin and location cannot be both declared for a module scope var
+  %1:ptr<__in, vec4<f32>, read> = var @binding_point(0, 0) @location(0) @builtin(position)
+                                  ^^^
 
-:2:3 note: in block
-  $B1: {
-  ^^^
+:1:1 note: in block
+$B1: {  # root
+^^^
 
 note: # Disassembly
-%my_func = func():void {
-  $B1: {
-    %2:ptr<function, f32, read_write> = var @location(0) @builtin(position)
-    ret
-  }
+$B1: {  # root
+  %1:ptr<__in, vec4<f32>, read> = var @binding_point(0, 0) @location(0) @builtin(position)
 }
+
 )");
 }
 
-TEST_F(IR_ValidatorTest, Var_Struct_BothLocationAndBuiltin) {
+TEST_F(IR_ValidatorTest, Var_Struct_IOBothLocationAndBuiltin) {
     IOAttributes attr;
     attr.builtin = BuiltinValue::kPosition;
     attr.location = 0;
@@ -5193,21 +5189,17 @@ TEST_F(IR_ValidatorTest, Var_Struct_BothLocationAndBuiltin) {
         ty.Struct(mod.symbols.New("MyStruct"), {
                                                    {mod.symbols.New("a"), ty.f32(), attr},
                                                });
-    auto* v = b.Var(ty.ptr(storage, str_ty, read_write));
+    auto* v = b.Var(ty.ptr(AddressSpace::kOut, str_ty, read_write));
     v->SetBindingPoint(0, 0);
     mod.root_block->Append(v);
-
-    auto* f = b.Function("my_func", ty.void_());
-
-    b.Append(f->Block(), [&] { b.Return(f); });
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_EQ(
         res.Failure().reason.Str(),
-        R"(:6:43 error: var: a builtin and location cannot be both declared for a struct member
-  %1:ptr<storage, MyStruct, read_write> = var @binding_point(0, 0)
-                                          ^^^
+        R"(:6:41 error: var: a builtin and location cannot be both declared for a module scope var struct member
+  %1:ptr<__out, MyStruct, read_write> = var @binding_point(0, 0)
+                                        ^^^
 
 :5:1 note: in block
 $B1: {  # root
@@ -5219,14 +5211,9 @@ MyStruct = struct @align(4) {
 }
 
 $B1: {  # root
-  %1:ptr<storage, MyStruct, read_write> = var @binding_point(0, 0)
+  %1:ptr<__out, MyStruct, read_write> = var @binding_point(0, 0)
 }
 
-%my_func = func():void {
-  $B2: {
-    ret
-  }
-}
 )");
 }
 

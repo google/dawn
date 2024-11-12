@@ -1859,12 +1859,15 @@ void Validator::CheckFunction(const Function* func) {
             CheckInvariantFunc<FunctionParam>(
                 "invariant can only decorate a param member iff it is also "
                 "decorated with position"));
-        CheckFunctionParamAttributes(
-            param,
-            CheckDoesNotHaveBothLocationAndBuiltinFunc<FunctionParam>(
-                "a builtin and location cannot be both declared for a param"),
-            CheckDoesNotHaveBothLocationAndBuiltinFunc<FunctionParam>(
-                "a builtin and location cannot be both declared for a struct member"));
+
+        if (func->Stage() != Function::PipelineStage::kUndefined) {
+            CheckFunctionParamAttributes(
+                param,
+                CheckDoesNotHaveBothLocationAndBuiltinFunc<FunctionParam>(
+                    "a builtin and location cannot be both declared for a param"),
+                CheckDoesNotHaveBothLocationAndBuiltinFunc<FunctionParam>(
+                    "a builtin and location cannot be both declared for a struct member"));
+        }
 
         if (func->Stage() == Function::PipelineStage::kFragment) {
             CheckFunctionParamAttributesAndType(
@@ -1898,12 +1901,14 @@ void Validator::CheckFunction(const Function* func) {
         CheckInvariantFunc<Function>(
             "invariant can only decorate output members iff they are also position builtins"));
 
-    CheckFunctionReturnAttributes(
-        func,
-        CheckDoesNotHaveBothLocationAndBuiltinFunc<Function>(
-            "a builtin and location cannot be both declared for a function return"),
-        CheckDoesNotHaveBothLocationAndBuiltinFunc<Function>(
-            "a builtin and location cannot be both declared for a struct member"));
+    if (func->Stage() != Function::PipelineStage::kUndefined) {
+        CheckFunctionReturnAttributes(
+            func,
+            CheckDoesNotHaveBothLocationAndBuiltinFunc<Function>(
+                "a builtin and location cannot be both declared for a function return"),
+            CheckDoesNotHaveBothLocationAndBuiltinFunc<Function>(
+                "a builtin and location cannot be both declared for a struct member"));
+    }
 
     // void needs to be filtered out, since it isn't constructible, but used in the IR when no
     // return is specified.
@@ -2295,17 +2300,22 @@ void Validator::CheckVar(const Var* var) {
         return;
     }
 
-    if (HasLocationAndBuiltin(var->Attributes())) {
-        AddError(var) << "a builtin and location cannot be both declared for a var";
-        return;
-    }
-
-    if (auto* s = var->Result(0)->Type()->UnwrapPtrOrRef()->As<core::type::Struct>()) {
-        for (auto* mem : s->Members()) {
-            if (HasLocationAndBuiltin(mem->Attributes())) {
+    if (var->Block() == mod_.root_block) {
+        if (mv->AddressSpace() == AddressSpace::kIn || mv->AddressSpace() == AddressSpace::kOut) {
+            if (HasLocationAndBuiltin(var->Attributes())) {
                 AddError(var)
-                    << "a builtin and location cannot be both declared for a struct member";
+                    << "a builtin and location cannot be both declared for a module scope var";
                 return;
+            }
+
+            if (auto* s = var->Result(0)->Type()->UnwrapPtrOrRef()->As<core::type::Struct>()) {
+                for (auto* mem : s->Members()) {
+                    if (HasLocationAndBuiltin(mem->Attributes())) {
+                        AddError(var) << "a builtin and location cannot be both declared for a "
+                                         "module scope var struct member";
+                        return;
+                    }
+                }
             }
         }
     }
