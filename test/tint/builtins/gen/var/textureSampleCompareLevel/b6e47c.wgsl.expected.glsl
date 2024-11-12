@@ -13,7 +13,7 @@ float textureSampleCompareLevel_b6e47c() {
   float arg_4 = 1.0f;
   vec2 v_1 = arg_2;
   float v_2 = arg_4;
-  float res = textureOffset(arg_0_arg_1, vec4(v_1, float(arg_3), v_2), ivec2(1));
+  float res = textureGradOffset(arg_0_arg_1, vec4(v_1, float(arg_3), v_2), vec2(0.0f), vec2(0.0f), ivec2(1));
   return res;
 }
 void main() {
@@ -32,7 +32,7 @@ float textureSampleCompareLevel_b6e47c() {
   float arg_4 = 1.0f;
   vec2 v_1 = arg_2;
   float v_2 = arg_4;
-  float res = textureOffset(arg_0_arg_1, vec4(v_1, float(arg_3), v_2), ivec2(1));
+  float res = textureGradOffset(arg_0_arg_1, vec4(v_1, float(arg_3), v_2), vec2(0.0f), vec2(0.0f), ivec2(1));
   return res;
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
@@ -55,7 +55,7 @@ float textureSampleCompareLevel_b6e47c() {
   float arg_4 = 1.0f;
   vec2 v = arg_2;
   float v_1 = arg_4;
-  float res = textureOffset(arg_0_arg_1, vec4(v, float(arg_3), v_1), ivec2(1));
+  float res = textureGradOffset(arg_0_arg_1, vec4(v, float(arg_3), v_1), vec2(0.0f), vec2(0.0f), ivec2(1));
   return res;
 }
 VertexOutput vertex_main_inner() {

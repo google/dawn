@@ -8,7 +8,7 @@ buffer prevent_dce_block_1_ssbo {
 } v;
 uniform highp sampler2DArrayShadow arg_0_arg_1;
 float textureSampleCompareLevel_bcb3dd() {
-  float res = textureOffset(arg_0_arg_1, vec4(vec2(1.0f), float(1u), 1.0f), ivec2(1));
+  float res = textureGradOffset(arg_0_arg_1, vec4(vec2(1.0f), float(1u), 1.0f), vec2(0.0f), vec2(0.0f), ivec2(1));
   return res;
 }
 void main() {
@@ -22,7 +22,7 @@ buffer prevent_dce_block_1_ssbo {
 } v;
 uniform highp sampler2DArrayShadow arg_0_arg_1;
 float textureSampleCompareLevel_bcb3dd() {
-  float res = textureOffset(arg_0_arg_1, vec4(vec2(1.0f), float(1u), 1.0f), ivec2(1));
+  float res = textureGradOffset(arg_0_arg_1, vec4(vec2(1.0f), float(1u), 1.0f), vec2(0.0f), vec2(0.0f), ivec2(1));
   return res;
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
@@ -40,7 +40,7 @@ struct VertexOutput {
 uniform highp sampler2DArrayShadow arg_0_arg_1;
 layout(location = 0) flat out float vertex_main_loc0_Output;
 float textureSampleCompareLevel_bcb3dd() {
-  float res = textureOffset(arg_0_arg_1, vec4(vec2(1.0f), float(1u), 1.0f), ivec2(1));
+  float res = textureGradOffset(arg_0_arg_1, vec4(vec2(1.0f), float(1u), 1.0f), vec2(0.0f), vec2(0.0f), ivec2(1));
   return res;
 }
 VertexOutput vertex_main_inner() {

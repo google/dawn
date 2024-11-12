@@ -6115,7 +6115,7 @@ $B1: {  # root
     %4:texture_depth_2d_array = load %my_tex
     %5:f32 = convert 4u
     %6:vec4<f32> = construct %3, %5, 3.0f
-    %7:f32 = glsl.textureOffset %4, %6, vec2<i32>(4i, 5i)
+    %7:f32 = glsl.textureGradOffset %4, %6, vec2<f32>(0.0f), vec2<f32>(0.0f), vec2<i32>(4i, 5i)
     %x:f32 = let %7
     ret
   }

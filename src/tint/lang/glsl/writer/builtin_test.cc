@@ -4174,7 +4174,7 @@ precision highp int;
 uniform highp sampler2DArrayShadow t_s;
 void main() {
   vec2 v = vec2(1.0f, 2.0f);
-  float x = textureOffset(t_s, vec4(v, float(4u), 3.0f), ivec2(4, 5));
+  float x = textureGradOffset(t_s, vec4(v, float(4u), 3.0f), vec2(0.0f), vec2(0.0f), ivec2(4, 5));
 }
 )");
 }

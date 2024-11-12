@@ -1173,6 +1173,8 @@ struct State {
             params.Push(tex);
 
             core::ir::Value* coords = args[idx++];
+            bool is_array = false;
+            bool is_depth = tex_type->Is<core::type::DepthTexture>();
             switch (tex_type->Dim()) {
                 case core::type::TextureDimension::k2d:
                     coords = b.Construct(ty.vec3<f32>(), coords, args[idx++])->Result(0);
@@ -1180,6 +1182,8 @@ struct State {
 
                     break;
                 case core::type::TextureDimension::k2dArray: {
+                    is_array = true;
+
                     Vector<core::ir::Value*, 3> new_coords;
                     new_coords.Push(coords);
                     new_coords.Push(b.Convert<f32>(args[idx++])->Result(0));
@@ -1193,6 +1197,8 @@ struct State {
                     params.Push(coords);
                     break;
                 case core::type::TextureDimension::kCubeArray:
+                    is_array = true;
+
                     params.Push(b.Construct(ty.vec4<f32>(), coords, b.Convert<f32>(args[idx++]))
                                     ->Result(0));
 
@@ -1204,7 +1210,17 @@ struct State {
 
             auto fn = glsl::BuiltinFn::kTexture;
             if (idx < args.Length()) {
-                fn = glsl::BuiltinFn::kTextureOffset;
+                // In GLSL ES `textureOffset` does not support depth 2d array textures. In order to
+                // support this texture we polyfill with a `textureGradOffset` and pass zero for
+                // the `dPdx` and `dPdy` values.
+                if (is_depth && is_array) {
+                    fn = glsl::BuiltinFn::kTextureGradOffset;
+
+                    params.Push(b.Zero(ty.vec2<f32>()));
+                    params.Push(b.Zero(ty.vec2<f32>()));
+                } else {
+                    fn = glsl::BuiltinFn::kTextureOffset;
+                }
                 params.Push(args[idx++]);
             }
 
