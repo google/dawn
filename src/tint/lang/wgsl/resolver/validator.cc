@@ -557,10 +557,6 @@ bool Validator::AddressSpaceLayout(const core::type::Type* store_ty,
         return true;
     }
 
-    if (!core::IsHostShareable(address_space)) {
-        return true;
-    }
-
     auto note_usage = [&] {
         AddNote(source) << style::Type(store_ty->FriendlyName()) << " used in address space "
                         << style::Enum(address_space) << " here";

@@ -730,7 +730,7 @@ TEST_F(ResolverAddressSpaceLayoutValidationTest, RelaxedUniformLayout_ArrayStrid
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
 
-TEST_F(ResolverAddressSpaceLayoutValidationTest, AlignAttributeTooSmall) {
+TEST_F(ResolverAddressSpaceLayoutValidationTest, AlignAttributeTooSmall_Storage) {
     // struct S {
     //   @align(4) vector : vec4u;
     //   scalar : u32;
@@ -752,6 +752,74 @@ TEST_F(ResolverAddressSpaceLayoutValidationTest, AlignAttributeTooSmall) {
         r()->error(),
         R"(12:34 error: alignment must be a multiple of '16' bytes for the 'storage' address space
 56:78 note: 'S' used in address space 'storage' here)");
+}
+
+TEST_F(ResolverAddressSpaceLayoutValidationTest, AlignAttributeTooSmall_Workgroup) {
+    // struct S {
+    //   @align(4) vector : vec4u;
+    //   scalar : u32;
+    // };
+    //
+    // var<workgroup> a : array<S, 4>;
+    Structure(
+        "S", Vector{
+                 Member("vector", ty.vec4<u32>(), Vector{MemberAlign(Expr(Source{{12, 34}}, 4_a))}),
+                 Member("scalar", ty.u32()),
+             });
+
+    GlobalVar(Source{{56, 78}}, "a", ty("S"), core::AddressSpace::kWorkgroup, Group(0_a));
+
+    ASSERT_FALSE(r()->Resolve());
+    EXPECT_EQ(
+        r()->error(),
+        R"(12:34 error: alignment must be a multiple of '16' bytes for the 'workgroup' address space
+56:78 note: 'S' used in address space 'workgroup' here)");
+}
+
+TEST_F(ResolverAddressSpaceLayoutValidationTest, AlignAttributeTooSmall_Private) {
+    // struct S {
+    //   @align(4) vector : vec4u;
+    //   scalar : u32;
+    // };
+    //
+    // var<private> a : array<S, 4>;
+    Structure(
+        "S", Vector{
+                 Member("vector", ty.vec4<u32>(), Vector{MemberAlign(Expr(Source{{12, 34}}, 4_a))}),
+                 Member("scalar", ty.u32()),
+             });
+
+    GlobalVar(Source{{56, 78}}, "a", ty("S"), core::AddressSpace::kPrivate, Group(0_a));
+
+    ASSERT_FALSE(r()->Resolve());
+    EXPECT_EQ(
+        r()->error(),
+        R"(12:34 error: alignment must be a multiple of '16' bytes for the 'private' address space
+56:78 note: 'S' used in address space 'private' here)");
+}
+
+TEST_F(ResolverAddressSpaceLayoutValidationTest, AlignAttributeTooSmall_Function) {
+    // struct S {
+    //   @align(4) vector : vec4u;
+    //   scalar : u32;
+    // };
+    //
+    // fn foo() {
+    //   var a : array<S, 4>;
+    // }
+    Structure(
+        "S", Vector{
+                 Member("vector", ty.vec4<u32>(), Vector{MemberAlign(Expr(Source{{12, 34}}, 4_a))}),
+                 Member("scalar", ty.u32()),
+             });
+
+    GlobalVar(Source{{56, 78}}, "a", ty("S"), core::AddressSpace::kFunction, Group(0_a));
+
+    ASSERT_FALSE(r()->Resolve());
+    EXPECT_EQ(
+        r()->error(),
+        R"(12:34 error: alignment must be a multiple of '16' bytes for the 'function' address space
+56:78 note: 'S' used in address space 'function' here)");
 }
 
 }  // namespace
