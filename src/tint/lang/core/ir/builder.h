@@ -1749,7 +1749,10 @@ class Builder {
     /// @param name the override name
     /// @param value the override value
     /// @returns the instruction
-    template <typename VALUE>
+    template <
+        typename VALUE,
+        typename = std::enable_if_t<
+            !traits::IsTypeOrDerived<std::remove_pointer_t<std::decay_t<VALUE>>, core::type::Type>>>
     ir::Override* Override(std::string_view name, VALUE&& value) {
         auto* val = Value(std::forward<VALUE>(value));
         if (DAWN_UNLIKELY(!val)) {
@@ -1759,6 +1762,48 @@ class Builder {
         auto* override = Append(ir.CreateInstruction<ir::Override>(InstructionResult(val->Type())));
         override->SetInitializer(val);
         ir.SetName(override->Result(0), name);
+        return override;
+    }
+
+    /// Creates a new `override` declaration
+    /// @param src the source
+    /// @param name the override name
+    /// @param value the override value
+    /// @returns the instruction
+    template <
+        typename VALUE,
+        typename = std::enable_if_t<
+            !traits::IsTypeOrDerived<std::remove_pointer_t<std::decay_t<VALUE>>, core::type::Type>>>
+    ir::Override* Override(Source src, std::string_view name, VALUE&& value) {
+        auto* val = Value(std::forward<VALUE>(value));
+        if (DAWN_UNLIKELY(!val)) {
+            TINT_ASSERT(val);
+            return nullptr;
+        }
+        auto* override = Append(ir.CreateInstruction<ir::Override>(InstructionResult(val->Type())));
+        override->SetInitializer(val);
+        ir.SetName(override->Result(0), name);
+        ir.SetSource(override, src);
+        return override;
+    }
+
+    /// Creates a new `override` declaration, with an unassigned value
+    /// @param name the override name
+    /// @param type the override type
+    /// @returns the instruction
+    ir::Override* Override(std::string_view name, const type::Type* type) {
+        return Override(Source{}, name, type);
+    }
+
+    /// Creates a new `override` declaration, with an unassigned value
+    /// @param name the override name
+    /// @param type the override type
+    /// @returns the instruction
+    ir::Override* Override(Source src, std::string_view name, const type::Type* type) {
+        auto* override = ir.CreateInstruction<ir::Override>(InstructionResult(type));
+        ir.SetName(override->Result(0), name);
+        ir.SetSource(override, src);
+        Append(override);
         return override;
     }
 

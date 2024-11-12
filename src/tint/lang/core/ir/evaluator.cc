@@ -86,7 +86,10 @@ Evaluator::EvalResult Evaluator::EvalValue(core::ir::Value* val) {
                 [&](core::ir::CoreBuiltinCall* c) { return EvalCoreBuiltinCall(c); },
                 [&](core::ir::CoreUnary* u) { return EvalUnary(u); },
                 [&](core::ir::Swizzle* s) { return EvalSwizzle(s); },  //
-                TINT_ICE_ON_NO_MATCH);
+                [&](Default) {
+                    // Treat any unknown instruction as a termination point for trying to eval.
+                    return nullptr;
+                });
         },
         TINT_ICE_ON_NO_MATCH);
 }

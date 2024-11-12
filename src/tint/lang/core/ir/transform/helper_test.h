@@ -61,6 +61,14 @@ class TransformTestBase : public BASE {
         EXPECT_EQ(ir::Validate(mod, capabilities), Success);
     }
 
+    /// Calls the `transform` but return the result instead of validating.
+    /// @param transform_func the transform to run
+    /// @param args the arguments to the transform function
+    template <typename TRANSFORM, typename... ARGS>
+    Result<SuccessType> RunWithFailure(TRANSFORM&& transform_func, ARGS&&... args) {
+        return transform_func(mod, std::forward<ARGS>(args)...);
+    }
+
     /// @returns the transformed module as a disassembled string
     std::string str() { return "\n" + ir::Disassembler(mod).Plain(); }
 
