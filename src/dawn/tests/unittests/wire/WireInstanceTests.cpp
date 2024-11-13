@@ -161,15 +161,16 @@ TEST_P(WireInstanceTests, RequestAdapterSuccess) {
                     return WGPUStatus_Success;
                 })));
 
-            EXPECT_CALL(api, AdapterEnumerateFeatures(apiAdapter, nullptr))
-                .WillOnce(Return(fakeFeatures.size()));
-
-            EXPECT_CALL(api, AdapterEnumerateFeatures(apiAdapter, NotNull()))
-                .WillOnce(WithArg<1>(Invoke([&](WGPUFeatureName* features) {
+            EXPECT_CALL(api, AdapterGetFeatures(apiAdapter, NotNull()))
+                .WillOnce(WithArg<1>(Invoke([&](WGPUSupportedFeatures* supportedFeatures) {
+                    const size_t count = fakeFeatures.size();
+                    WGPUFeatureName* features = new WGPUFeatureName[count];
+                    uint32_t index = 0;
                     for (WGPUFeatureName feature : fakeFeatures) {
-                        *(features++) = feature;
+                        features[index++] = feature;
                     }
-                    return fakeFeatures.size();
+                    supportedFeatures->featureCount = count;
+                    supportedFeatures->features = features;
                 })));
             api.CallInstanceRequestAdapterCallback(apiInstance, WGPURequestAdapterStatus_Success,
                                                    apiAdapter, kEmptyOutputStringView);
@@ -204,13 +205,13 @@ TEST_P(WireInstanceTests, RequestAdapterSuccess) {
                           fakeLimits.limits.maxTextureDimension1D);
                 EXPECT_EQ(limits.limits.maxVertexAttributes, fakeLimits.limits.maxVertexAttributes);
 
-                std::vector<WGPUFeatureName> features;
-                features.resize(wgpuAdapterEnumerateFeatures(adapter, nullptr));
-                ASSERT_EQ(features.size(), fakeFeatures.size());
-                EXPECT_EQ(wgpuAdapterEnumerateFeatures(adapter, &features[0]), features.size());
+                WGPUSupportedFeatures supportedFeatures;
+                wgpuAdapterGetFeatures(adapter, &supportedFeatures);
+                ASSERT_EQ(supportedFeatures.featureCount, fakeFeatures.size());
 
                 std::unordered_set<WGPUFeatureName> featureSet(fakeFeatures);
-                for (WGPUFeatureName feature : features) {
+                for (uint32_t i = 0; i < supportedFeatures.featureCount; ++i) {
+                    WGPUFeatureName feature = supportedFeatures.features[i];
                     EXPECT_EQ(featureSet.erase(feature), 1u);
                 }
             })));
@@ -299,15 +300,16 @@ TEST_P(WireInstanceTests, RequestAdapterPassesChainedProperties) {
                     return WGPUStatus_Success;
                 })));
 
-            EXPECT_CALL(api, AdapterEnumerateFeatures(apiAdapter, nullptr))
-                .WillOnce(Return(fakeFeatures.size()));
-
-            EXPECT_CALL(api, AdapterEnumerateFeatures(apiAdapter, NotNull()))
-                .WillOnce(WithArg<1>(Invoke([&](WGPUFeatureName* features) {
+            EXPECT_CALL(api, AdapterGetFeatures(apiAdapter, NotNull()))
+                .WillOnce(WithArg<1>(Invoke([&](WGPUSupportedFeatures* supportedFeatures) {
+                    const size_t count = fakeFeatures.size();
+                    WGPUFeatureName* features = new WGPUFeatureName[count];
+                    uint32_t index = 0;
                     for (WGPUFeatureName feature : fakeFeatures) {
-                        *(features++) = feature;
+                        features[index++] = feature;
                     }
-                    return fakeFeatures.size();
+                    supportedFeatures->featureCount = count;
+                    supportedFeatures->features = features;
                 })));
             api.CallInstanceRequestAdapterCallback(apiInstance, WGPURequestAdapterStatus_Success,
                                                    apiAdapter, kEmptyOutputStringView);
@@ -396,15 +398,16 @@ TEST_P(WireInstanceTests, RequestAdapterWireLacksFeatureSupport) {
                     return WGPUStatus_Success;
                 })));
 
-            EXPECT_CALL(api, AdapterEnumerateFeatures(apiAdapter, nullptr))
-                .WillOnce(Return(fakeFeatures.size()));
-
-            EXPECT_CALL(api, AdapterEnumerateFeatures(apiAdapter, NotNull()))
-                .WillOnce(WithArg<1>(Invoke([&](WGPUFeatureName* features) {
+            EXPECT_CALL(api, AdapterGetFeatures(apiAdapter, NotNull()))
+                .WillOnce(WithArg<1>(Invoke([&](WGPUSupportedFeatures* supportedFeatures) {
+                    const size_t count = fakeFeatures.size();
+                    WGPUFeatureName* features = new WGPUFeatureName[count];
+                    uint32_t index = 0;
                     for (WGPUFeatureName feature : fakeFeatures) {
-                        *(features++) = feature;
+                        features[index++] = feature;
                     }
-                    return fakeFeatures.size();
+                    supportedFeatures->featureCount = count;
+                    supportedFeatures->features = features;
                 })));
             api.CallInstanceRequestAdapterCallback(apiInstance, WGPURequestAdapterStatus_Success,
                                                    apiAdapter, kEmptyOutputStringView);
@@ -418,10 +421,10 @@ TEST_P(WireInstanceTests, RequestAdapterWireLacksFeatureSupport) {
         EXPECT_CALL(mockCb,
                     Call(WGPURequestAdapterStatus_Success, NotNull(), EmptySizedString(), nullptr))
             .WillOnce(WithArg<1>(Invoke([&](WGPUAdapter adapter) {
-                WGPUFeatureName feature;
-                ASSERT_EQ(wgpuAdapterEnumerateFeatures(adapter, nullptr), 1u);
-                wgpuAdapterEnumerateFeatures(adapter, &feature);
-                EXPECT_EQ(feature, WGPUFeatureName_Depth32FloatStencil8);
+                WGPUSupportedFeatures supportedFeatures;
+                wgpuAdapterGetFeatures(adapter, &supportedFeatures);
+                EXPECT_EQ(supportedFeatures.featureCount, 1u);
+                EXPECT_EQ(supportedFeatures.features[0], WGPUFeatureName_Depth32FloatStencil8);
             })));
 
         FlushCallbacks();
