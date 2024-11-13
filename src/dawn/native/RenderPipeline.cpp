@@ -153,9 +153,9 @@ MaybeError ValidateVertexAttribute(DeviceBase* device,
 
     DAWN_INVALID_IF(metadata.usedVertexInputs[location] &&
                         formatInfo.baseType != metadata.vertexInputBaseTypes[location],
-                    "Attribute base type (%s) does not match the "
-                    "shader's base type (%s) in location (%u).",
-                    formatInfo.baseType, metadata.vertexInputBaseTypes[location],
+                    "Attribute base type (%s for %s) does not match the shader's base type (%s) in "
+                    "location (%u).",
+                    formatInfo.baseType, attribute->format, metadata.vertexInputBaseTypes[location],
                     attribute->shaderLocation);
 
     DAWN_INVALID_IF((*attributesSetMask)[location],
