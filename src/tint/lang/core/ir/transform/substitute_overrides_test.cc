@@ -32,6 +32,7 @@
 
 #include "gtest/gtest.h"
 #include "src/tint/lang/core/ir/transform/helper_test.h"
+#include "src/tint/lang/core/ir/type/array_count.h"
 
 namespace tint::core::ir::transform {
 namespace {
@@ -770,9 +771,156 @@ $B1: {  # root
     EXPECT_EQ(expect, str());
 }
 
-// TODO(dsinclair): Support array type overrides
-TEST_F(IR_SubstituteOverridesTest, DISABLED_OverrideArraySize) {
-    FAIL();
+TEST_F(IR_SubstituteOverridesTest, OverrideArraySize) {
+    b.Append(mod.root_block, [&] {
+        auto* x = b.Override("x", ty.u32());
+        x->SetOverrideId({2});
+
+        auto* cnt = ty.Get<core::ir::type::ValueArrayCount>(x->Result(0));
+        auto* ary = ty.Get<core::type::Array>(ty.i32(), cnt, 4_u, 4_u, 4_u, 4_u);
+        b.Var("v", ty.ptr(core::AddressSpace::kWorkgroup, ary, core::Access::kReadWrite));
+    });
+
+    auto* func = b.ComputeFunction("foo");
+    b.Append(func->Block(), [&] { b.Return(func); });
+
+    auto* src = R"(
+$B1: {  # root
+  %x:u32 = override @id(2)
+  %v:ptr<workgroup, array<i32, %x>, read_write> = var
+}
+
+%foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B2: {
+    ret
+  }
+}
+)";
+
+    auto* expect = R"(
+$B1: {  # root
+  %v:ptr<workgroup, array<i32, 5>, read_write> = var
+}
+
+%foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B2: {
+    ret
+  }
+}
+)";
+
+    EXPECT_EQ(src, str());
+
+    SubstituteOverridesConfig cfg{};
+    cfg.map[OverrideId{2}] = 5;
+    Run(SubstituteOverrides, cfg);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(IR_SubstituteOverridesTest, OverrideArraySizeExpression) {
+    b.Append(mod.root_block, [&] {
+        auto* x = b.Override("x", ty.u32());
+        x->SetOverrideId({2});
+
+        auto* inst = b.Multiply(ty.u32(), x, 2_u);
+        auto* cnt = ty.Get<core::ir::type::ValueArrayCount>(inst->Result(0));
+        auto* ary = ty.Get<core::type::Array>(ty.i32(), cnt, 4_u, 4_u, 4_u, 4_u);
+        b.Var("v", ty.ptr(core::AddressSpace::kWorkgroup, ary, core::Access::kReadWrite));
+    });
+
+    auto* func = b.ComputeFunction("foo");
+    b.Append(func->Block(), [&] { b.Return(func); });
+
+    auto* src = R"(
+$B1: {  # root
+  %x:u32 = override @id(2)
+  %2:u32 = mul %x, 2u
+  %v:ptr<workgroup, array<i32, %2>, read_write> = var
+}
+
+%foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B2: {
+    ret
+  }
+}
+)";
+
+    auto* expect = R"(
+$B1: {  # root
+  %v:ptr<workgroup, array<i32, 10>, read_write> = var
+}
+
+%foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B2: {
+    ret
+  }
+}
+)";
+
+    EXPECT_EQ(src, str());
+
+    SubstituteOverridesConfig cfg{};
+    cfg.map[OverrideId{2}] = 5;
+    Run(SubstituteOverrides, cfg);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(IR_SubstituteOverridesTest, OverrideArraySizeIntoLet) {
+    core::ir::Var* v = nullptr;
+    b.Append(mod.root_block, [&] {
+        auto* x = b.Override("x", ty.u32());
+        x->SetOverrideId({2});
+
+        auto* cnt = ty.Get<core::ir::type::ValueArrayCount>(x->Result(0));
+        auto* ary = ty.Get<core::type::Array>(ty.i32(), cnt, 4_u, 4_u, 4_u, 4_u);
+        v = b.Var("v", ty.ptr(core::AddressSpace::kWorkgroup, ary, core::Access::kReadWrite));
+    });
+
+    auto* func = b.ComputeFunction("foo");
+    b.Append(func->Block(), [&] {
+        auto* y = b.Let("y", v);
+        b.Let("z", y);
+        b.Return(func);
+    });
+
+    auto* src = R"(
+$B1: {  # root
+  %x:u32 = override @id(2)
+  %v:ptr<workgroup, array<i32, %x>, read_write> = var
+}
+
+%foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B2: {
+    %y:ptr<workgroup, array<i32, %x>, read_write> = let %v
+    %z:ptr<workgroup, array<i32, %x>, read_write> = let %y
+    ret
+  }
+}
+)";
+
+    auto* expect = R"(
+$B1: {  # root
+  %v:ptr<workgroup, array<i32, 5>, read_write> = var
+}
+
+%foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B2: {
+    %y:ptr<workgroup, array<i32, 5>, read_write> = let %v
+    %z:ptr<workgroup, array<i32, 5>, read_write> = let %y
+    ret
+  }
+}
+)";
+
+    EXPECT_EQ(src, str());
+
+    SubstituteOverridesConfig cfg{};
+    cfg.map[OverrideId{2}] = 5;
+    Run(SubstituteOverrides, cfg);
+
+    EXPECT_EQ(expect, str());
 }
 
 }  // namespace

@@ -40,6 +40,7 @@
 #include "src/tint/lang/core/ir/loop.h"
 #include "src/tint/lang/core/ir/module.h"
 #include "src/tint/lang/core/ir/switch.h"
+#include "src/tint/lang/core/ir/type/array_count.h"
 #include "src/tint/lang/core/ir/value.h"
 #include "src/tint/lang/core/type/pointer.h"
 #include "src/tint/lang/core/type/reference.h"
@@ -87,6 +88,7 @@
 #include "src/tint/lang/wgsl/ast/while_statement.h"
 #include "src/tint/lang/wgsl/ir/builtin_call.h"
 #include "src/tint/lang/wgsl/program/program.h"
+#include "src/tint/lang/wgsl/sem/array_count.h"
 #include "src/tint/lang/wgsl/sem/builtin_enum_expression.h"
 #include "src/tint/lang/wgsl/sem/builtin_fn.h"
 #include "src/tint/lang/wgsl/sem/call.h"
@@ -914,9 +916,8 @@ class Impl {
                 if (!val) {
                     return;
                 }
-                auto* sem = impl.program_.Sem().Get(expr);
-                auto* ty = sem->Type()->Clone(impl.clone_ctx_.type_ctx);
                 core::ir::Instruction* inst = nullptr;
+                auto* sem = impl.program_.Sem().Get(expr);
                 switch (expr->op) {
                     case core::UnaryOp::kAddressOf:
                     case core::UnaryOp::kIndirection:
@@ -924,15 +925,21 @@ class Impl {
                         // pointer.
                         Bind(expr, val);
                         return;
-                    case core::UnaryOp::kComplement:
+                    case core::UnaryOp::kComplement: {
+                        auto* ty = sem->Type()->Clone(impl.clone_ctx_.type_ctx);
                         inst = impl.builder_.Complement(ty, val);
                         break;
-                    case core::UnaryOp::kNegation:
+                    }
+                    case core::UnaryOp::kNegation: {
+                        auto* ty = sem->Type()->Clone(impl.clone_ctx_.type_ctx);
                         inst = impl.builder_.Negation(ty, val);
                         break;
-                    case core::UnaryOp::kNot:
+                    }
+                    case core::UnaryOp::kNot: {
+                        auto* ty = sem->Type()->Clone(impl.clone_ctx_.type_ctx);
                         inst = impl.builder_.Not(ty, val);
                         break;
+                    }
                 }
                 impl.current_block_->Append(inst);
                 Bind(expr, inst->Result(0));
@@ -1173,9 +1180,38 @@ class Impl {
             var,
             [&](const ast::Var* v) {
                 auto* ref = sem->Type()->As<core::type::Reference>();
-                auto* ty = builder_.ir.Types().Get<core::type::Pointer>(
-                    ref->AddressSpace(), ref->StoreType()->Clone(clone_ctx_.type_ctx),
-                    ref->Access());
+                const core::type::Type* store_ty = nullptr;
+
+                const auto* ary = ref->StoreType()->As<core::type::Array>();
+                // If the array has an override count
+                if (ary && !ary->Count()
+                                ->IsAnyOf<core::type::RuntimeArrayCount,
+                                          core::type::ConstantArrayCount>()) {
+                    core::ir::Value* count = tint::Switch(
+                        ary->Count(),  //
+                        [&](const sem::UnnamedOverrideArrayCount* u) {
+                            return EmitValueExpression(u->expr->Declaration());
+                        },
+                        [&](const sem::NamedOverrideArrayCount* n) {
+                            return scopes_.Get(n->variable->Declaration()->name->symbol);
+                        },
+                        TINT_ICE_ON_NO_MATCH);
+
+                    if (!count) {
+                        return;
+                    }
+
+                    auto* ary_count =
+                        builder_.ir.Types().Get<core::ir::type::ValueArrayCount>(count);
+                    store_ty = builder_.ir.Types().Get<core::type::Array>(
+                        ary->ElemType()->Clone(clone_ctx_.type_ctx), ary_count, ary->Align(),
+                        ary->Size(), ary->Stride(), ary->ImplicitStride());
+                } else {
+                    store_ty = ref->StoreType()->Clone(clone_ctx_.type_ctx);
+                }
+
+                auto* ty = builder_.ir.Types().Get<core::type::Pointer>(ref->AddressSpace(),
+                                                                        store_ty, ref->Access());
 
                 auto* val = builder_.Var(ty);
                 if (v->initializer) {

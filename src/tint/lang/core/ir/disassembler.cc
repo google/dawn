@@ -32,7 +32,6 @@
 #include <optional>
 #include <string_view>
 
-#include "src//tint/lang/core/ir/unary.h"
 #include "src/tint/lang/core/binary_op.h"
 #include "src/tint/lang/core/constant/composite.h"
 #include "src/tint/lang/core/constant/scalar.h"
@@ -60,10 +59,14 @@
 #include "src/tint/lang/core/ir/switch.h"
 #include "src/tint/lang/core/ir/swizzle.h"
 #include "src/tint/lang/core/ir/terminate_invocation.h"
+#include "src/tint/lang/core/ir/type/array_count.h"
+#include "src/tint/lang/core/ir/unary.h"
 #include "src/tint/lang/core/ir/unreachable.h"
 #include "src/tint/lang/core/ir/unused.h"
 #include "src/tint/lang/core/ir/user_call.h"
 #include "src/tint/lang/core/ir/var.h"
+#include "src/tint/lang/core/type/array.h"
+#include "src/tint/lang/core/type/pointer.h"
 #include "src/tint/lang/core/type/struct.h"
 #include "src/tint/lang/core/type/type.h"
 #include "src/tint/utils/ice/ice.h"
@@ -961,9 +964,35 @@ void Disassembler::EmitStructDecl(const core::type::Struct* str) {
     EmitLine();
 }
 
-StyledText Disassembler::NameOf(const type::Type* ty) {
+StyledText Disassembler::NameOf(const core::type::Type* ty) {
     if (!ty) {
         return StyledText{} << StyleError("undef");
+    }
+
+    auto ary_emit = [&](StyledText& out, const core::type::Array* ary,
+                        const core::ir::type::ValueArrayCount* cnt) -> void {
+        out << "array<" << ary->ElemType()->FriendlyName() << ", " << NameOf(cnt->value) << ">";
+    };
+
+    if (auto* ptr = ty->As<core::type::Pointer>()) {
+        if (auto* ary = ty->UnwrapPtr()->As<core::type::Array>()) {
+            if (auto* cnt = ary->Count()->As<core::ir::type::ValueArrayCount>()) {
+                auto out = StyledText{} << "ptr<";
+                if (ptr->AddressSpace() != core::AddressSpace::kUndefined) {
+                    out << ptr->AddressSpace() << ", ";
+                }
+                ary_emit(out, ary, cnt);
+                out << ", " << ptr->Access() << ">";
+
+                return out;
+            }
+        }
+    } else if (auto* ary = ty->UnwrapPtr()->As<core::type::Array>()) {
+        if (auto* cnt = ary->Count()->As<core::ir::type::ValueArrayCount>()) {
+            auto out = StyledText{};
+            ary_emit(out, ary, cnt);
+            return out;
+        }
     }
 
     return StyledText{} << StyleType(ty->FriendlyName());
