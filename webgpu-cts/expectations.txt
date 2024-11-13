@@ -110,9 +110,6 @@ crbug.com/dawn/2486 [ android webgpu-shared-worker ] * [ Skip ]
 # depth_bias validation failures
 crbug.com/365922174 webgpu:api,validation,render_pipeline,depth_stencil_state:depth_bias:* [ Failure ]
 
-# Skipped due to device creation failures
-crbug.com/1421045 [ nvidia-0x2184 ubuntu ] webgpu:api,validation,capability_checks,limits,* [ Skip ]
-
 # Causing bot instability on Mac AMD
 crbug.com/1448651 [ amd-0x67ef ] webgpu:api,operation,rendering,color_target_state:blending,GPUBlendComponent:* [ Skip ]
 
