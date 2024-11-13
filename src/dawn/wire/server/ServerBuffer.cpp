@@ -236,7 +236,7 @@ void Server::OnBufferMapAsyncCallback(MapUserdata* data, WGPUBufferMapAsyncStatu
     bool isRead = data->mode & WGPUMapMode_Read;
     bool isSuccess = status == WGPUBufferMapAsyncStatus_Success;
 
-    ReturnBufferMapAsyncCallbackCmd cmd;
+    ReturnBufferMapAsyncCallbackCmd cmd = {};
     cmd.eventManager = data->eventManager;
     cmd.future = data->future;
     cmd.status = status;
@@ -294,7 +294,7 @@ void Server::OnBufferMapAsyncCallback2(MapUserdata* data,
     bool isRead = data->mode & WGPUMapMode_Read;
     bool isSuccess = status == WGPUMapAsyncStatus_Success;
 
-    ReturnBufferMapAsyncCallbackCmd cmd;
+    ReturnBufferMapAsyncCallbackCmd cmd = {};
     cmd.eventManager = data->eventManager;
     cmd.future = data->future;
     cmd.status2 = status;
