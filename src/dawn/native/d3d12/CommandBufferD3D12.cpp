@@ -104,6 +104,12 @@ bool CanUseCopyResource(const TextureCopy& src, const TextureCopy& dst, const Ex
            copySize.depthOrArrayLayers == srcSize.depthOrArrayLayers;
 }
 
+bool CanUseCopyResource(CopyBufferToBufferCmd* copy) {
+    return copy->sourceOffset == 0 && copy->destinationOffset == 0 &&
+           copy->size == copy->source->GetSize() && copy->size == copy->destination->GetSize() &&
+           copy->source->GetAllocatedSize() == copy->destination->GetAllocatedSize();
+}
+
 void RecordWriteTimestampCmd(ID3D12GraphicsCommandList* commandList,
                              QuerySetBase* querySet,
                              uint32_t queryIndex) {
@@ -856,8 +862,7 @@ MaybeError CommandBuffer::RecordCommands(CommandRecordingContext* commandContext
                 srcBuffer->TrackUsageAndTransitionNow(commandContext, wgpu::BufferUsage::CopySrc);
                 dstBuffer->TrackUsageAndTransitionNow(commandContext, wgpu::BufferUsage::CopyDst);
 
-                if (CanCopyBufferToBufferWithCopyResource(srcBuffer, copy->sourceOffset, dstBuffer,
-                                                          copy->destinationOffset, copy->size)) {
+                if (CanUseCopyResource(copy)) {
                     commandList->CopyResource(dstBuffer->GetD3D12Resource(),
                                               srcBuffer->GetD3D12Resource());
                 } else {

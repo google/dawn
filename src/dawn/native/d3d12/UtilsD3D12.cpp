@@ -344,14 +344,4 @@ void SetDebugName(Device* device, ID3D12Object* object, const char* prefix, std:
     object->SetPrivateData(WKPDID_D3DDebugObjectName, objectName.length(), objectName.c_str());
 }
 
-bool CanCopyBufferToBufferWithCopyResource(Buffer* sourceBuffer,
-                                           uint64_t sourceOffset,
-                                           Buffer* destinationBuffer,
-                                           uint64_t destinationOffset,
-                                           uint64_t copySize) {
-    return sourceOffset == 0 && destinationOffset == 0 && sourceBuffer->GetSize() == copySize &&
-           destinationBuffer->GetSize() == copySize &&
-           sourceBuffer->GetAllocatedSize() == destinationBuffer->GetAllocatedSize();
-}
-
 }  // namespace dawn::native::d3d12
