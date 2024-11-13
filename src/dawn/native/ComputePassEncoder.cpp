@@ -173,14 +173,13 @@ ObjectType ComputePassEncoder::GetType() const {
 }
 
 void ComputePassEncoder::APIEnd() {
-    mCommandBufferState.End();
-
     if (mEnded && IsValidationEnabled()) {
         GetDevice()->HandleError(DAWN_VALIDATION_ERROR("%s was already ended.", this));
         return;
     }
 
     mEnded = true;
+    mCommandBufferState.End();
 
     if (mEncodingContext->TryEncode(
             this,

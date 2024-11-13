@@ -166,14 +166,13 @@ void RenderPassEncoder::APIEnd() {
 void RenderPassEncoder::End() {
     DAWN_ASSERT(GetDevice()->IsLockedByCurrentThreadIfNeeded());
 
-    mCommandBufferState.End();
-
     if (mEnded && IsValidationEnabled()) {
         GetDevice()->HandleError(DAWN_VALIDATION_ERROR("%s was already ended.", this));
         return;
     }
 
     mEnded = true;
+    mCommandBufferState.End();
 
     mEncodingContext->TryEncode(
         this,
@@ -192,7 +191,6 @@ void RenderPassEncoder::End() {
             }
 
             allocator->Allocate<EndRenderPassCmd>(Command::EndRenderPass);
-
             DAWN_TRY(mEncodingContext->ExitRenderPass(this, std::move(mUsageTracker),
                                                       mCommandEncoder.Get(),
                                                       std::move(mIndirectDrawMetadata)));

@@ -2054,6 +2054,51 @@ TEST_F(RenderPipelineValidationTest, PointLineDepthBias) {
     }
 }
 
+// Regression test for 377530684 where we try to access the current pipeline in
+// CommandBufferStateTracker even after the pass is ended because a validation failure in End() made
+// the RenderPass only partially closed, and further commands could keep pass the TryEncode
+// validation.
+TEST_F(RenderPipelineValidationTest, DrawAfterEndShouldNotAccessPipeline) {
+    // A pipeline and texture used for rendering.
+    utils::ComboRenderPipelineDescriptor pDesc;
+    pDesc.vertex.module = vsModule;
+    pDesc.cFragment.module = fsModule;
+    pDesc.cFragment.targetCount = 1;
+    pDesc.cTargets[0].format = wgpu::TextureFormat::RGBA8Unorm;
+    wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&pDesc);
+
+    wgpu::TextureDescriptor tDesc;
+    tDesc.format = wgpu::TextureFormat::RGBA8Unorm;
+    tDesc.size = {1, 1};
+    tDesc.usage = wgpu::TextureUsage::RenderAttachment;
+    wgpu::Texture texture = device.CreateTexture(&tDesc);
+
+    // The issue was found with DrawIndirect that gets the currently bound pipeline to know if
+    // vertex duplication is necessary.
+    wgpu::BufferDescriptor bDesc;
+    bDesc.size = 64;
+    bDesc.usage = wgpu::BufferUsage::Indirect;
+    wgpu::Buffer buffer = device.CreateBuffer(&bDesc);
+
+    // Cause an End() validation failure with maxDrawCount
+    utils::ComboRenderPassDescriptor rpDesc{{texture.CreateView()}};
+    wgpu::RenderPassMaxDrawCount maxDrawCount;
+    maxDrawCount.maxDrawCount = 1;
+    rpDesc.nextInChain = &maxDrawCount;
+
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+    wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&rpDesc);
+    pass.SetPipeline(pipeline);
+    pass.DrawIndirect(buffer, 0);
+    pass.DrawIndirect(buffer, 0);
+    pass.End();
+
+    // This call shouldn't access any CommandBufferStateTracker state but prior to the fix, it would
+    // and cause an ASSERT() to trigger.
+    pass.DrawIndirect(buffer, 0);
+    ASSERT_DEVICE_ERROR(encoder.Finish());
+}
+
 class DepthClipControlValidationTest : public RenderPipelineValidationTest {
   protected:
     std::vector<wgpu::FeatureName> GetRequiredFeatures() override {

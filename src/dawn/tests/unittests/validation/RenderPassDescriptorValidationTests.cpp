@@ -134,7 +134,7 @@ TEST_F(RenderPassDescriptorValidationTest, ErrorEncoderLingeringAttachmentState)
 
     wgpu::CommandEncoder commandEncoder;
     ASSERT_DEVICE_ERROR(commandEncoder = device.CreateCommandEncoder(&commandEncoderDesc));
-    ASSERT_DEVICE_ERROR(commandEncoder.BeginRenderPass(&descriptor));
+    commandEncoder.BeginRenderPass(&descriptor);
 
     ExpectDeviceDestruction();
     device = nullptr;

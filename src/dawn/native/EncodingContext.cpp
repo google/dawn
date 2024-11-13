@@ -49,7 +49,7 @@ EncodingContext::EncodingContext(DeviceBase* device, ErrorMonad::ErrorTag tag)
     : mDevice(device),
       mTopLevelEncoder(nullptr),
       mCurrentEncoder(nullptr),
-      mStatus(Status::Error) {}
+      mStatus(Status::ErrorAtCreation) {}
 
 EncodingContext::~EncodingContext() {
     Destroy();
@@ -66,9 +66,7 @@ void EncodingContext::Destroy() {
         FreeCommands(&commands);
     }
 
-    mStatus = Status::Destroyed;
-    mTopLevelEncoder = nullptr;
-    mCurrentEncoder = nullptr;
+    CloseWithStatus(Status::Destroyed);
 }
 
 CommandIterator EncodingContext::AcquireCommands() {
@@ -89,7 +87,12 @@ void EncodingContext::HandleError(std::unique_ptr<ErrorData> error) {
         error->AppendDebugGroup(*iter);
     }
 
-    if (mStatus == Status::Open && !mDevice->IsImmediateErrorHandlingEnabled()) {
+    if (mDevice->IsImmediateErrorHandlingEnabled() || mStatus == Status::Finished) {
+        // EncodingContext is unprotected from multiple threads by default, but this code will
+        // modify Device's internal states so we need to lock the device now.
+        auto deviceLock(mDevice->GetScopedLock());
+        mDevice->HandleError(std::move(error));
+    } else {
         // TODO(crbug.com/42240579): ASSERT that encoding only generates validation errors.
 
         // If the encoding context is not finished, errors are deferred until
@@ -97,12 +100,9 @@ void EncodingContext::HandleError(std::unique_ptr<ErrorData> error) {
         if (mError == nullptr) {
             mError = std::move(error);
         }
-    } else {
-        // EncodingContext is unprotected from multiple threads by default, but this code will
-        // modify Device's internal states so we need to lock the device now.
-        auto deviceLock(mDevice->GetScopedLock());
-        mDevice->HandleError(std::move(error));
     }
+
+    CloseWithStatus(Status::ErrorInRecording);
 }
 
 void EncodingContext::WillBeginRenderPass() {
@@ -223,32 +223,30 @@ void EncodingContext::PopDebugGroupLabel() {
 }
 
 MaybeError EncodingContext::Finish() {
+    CommitCommands(std::move(mPendingCommands));
+
     switch (mStatus) {
-        case Status::Error:
+        case Status::ErrorAtCreation:
         case Status::Destroyed:
             return {};
 
         case Status::Finished:
             return DAWN_VALIDATION_ERROR("Command encoding already finished.");
 
+        case Status::ErrorInRecording:
         case Status::Open:
             break;
     }
     const ApiObjectBase* currentEncoder = mCurrentEncoder;
     const ApiObjectBase* topLevelEncoder = mTopLevelEncoder;
 
-    // Even if finish validation fails, it is now invalid to call any encoding commands,
-    // so we clear the encoders. Note: mTopLevelEncoder == nullptr is used as a flag for
-    // if Finish() has been called.
-    mStatus = Status::Finished;
-    mCurrentEncoder = nullptr;
-    mTopLevelEncoder = nullptr;
-
-    CommitCommands(std::move(mPendingCommands));
+    // Even if finish validation fails, it is now invalid to call any encoding commands.
+    CloseWithStatus(Status::Finished);
 
     if (mError != nullptr) {
         return std::move(mError);
     }
+
     DAWN_INVALID_IF(currentEncoder != topLevelEncoder,
                     "Command buffer recording ended before %s was ended.", currentEncoder);
     return {};
@@ -258,6 +256,35 @@ void EncodingContext::CommitCommands(CommandAllocator allocator) {
     if (!allocator.IsEmpty()) {
         mAllocators.push_back(std::move(allocator));
     }
+}
+
+void EncodingContext::CloseWithStatus(Status status) {
+    switch (status) {
+        case Status::Open:
+        case Status::ErrorAtCreation:
+            // We cannot close with Open, and ErrorInRecording is set at construction, never after.
+            DAWN_UNREACHABLE();
+
+        // Status::ErrorInRecording causes encoding errors to be silently ignored (as we already
+        // have one for this encoder), but both Status::Finished and Status::Destroyed make all
+        // further errors surfaced on the device. For that reason we promote a
+        // Status::ErrorInRecording to Finished/Destroyed.
+        case Status::Destroyed:
+        case Status::Finished:
+            if (mStatus == Status::ErrorInRecording || mStatus == Status::Open) {
+                mStatus = status;
+            }
+            break;
+
+        case Status::ErrorInRecording:
+            if (mStatus == Status::Open) {
+                mStatus = status;
+            }
+            break;
+    }
+
+    mTopLevelEncoder = nullptr;
+    mCurrentEncoder = nullptr;
 }
 
 }  // namespace dawn::native

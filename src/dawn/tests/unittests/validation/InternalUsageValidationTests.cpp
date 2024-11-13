@@ -75,9 +75,9 @@ TEST_F(InternalUsageValidationDisabledTest, CommandEncoderDescriptorRequiresFeat
     ASSERT_DEVICE_ERROR(wgpu::CommandEncoder encoder = device.CreateCommandEncoder(&encoderDesc));
 
     // Check that the encoder records that it is invalid, and not any other errors.
-    ASSERT_DEVICE_ERROR(
-        encoder.InjectValidationError("injected error"),
-        testing::HasSubstr("Recording in an error [Invalid CommandEncoder (unlabeled)]"));
+    encoder.InjectValidationError("injected error");
+    ASSERT_DEVICE_ERROR(encoder.Finish(),
+                        testing::HasSubstr("[Invalid CommandEncoder (unlabeled)]"));
 }
 
 class TextureInternalUsageValidationTest : public ValidationTest {
