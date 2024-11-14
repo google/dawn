@@ -119,7 +119,7 @@ namespace {
 // Any texture-only references will have "usePlaceholderSampler" set to true, and only the texture
 // binding point will be used in naming them. In addition, Dawn will bind a non-filtering sampler
 // for them (see PipelineGL).
-CombinedSamplerInfo generateCombinedSamplerInfo(tint::inspector::Inspector& inspector,
+CombinedSamplerInfo GenerateCombinedSamplerInfo(tint::inspector::Inspector& inspector,
                                                 const std::string& entryPoint,
                                                 tint::glsl::writer::Bindings& bindings,
                                                 BindingMap externalTextureExpansionMap,
@@ -199,7 +199,7 @@ CombinedSamplerInfo generateCombinedSamplerInfo(tint::inspector::Inspector& insp
     return combinedSamplerInfo;
 }
 
-bool generateTextureBuiltinFromUniformData(tint::inspector::Inspector& inspector,
+bool GenerateTextureBuiltinFromUniformData(tint::inspector::Inspector& inspector,
                                            const std::string& entryPoint,
                                            const PipelineLayout* layout,
                                            BindingPointToFunctionAndOffset* bindingPointToData,
@@ -301,7 +301,7 @@ MaybeError ShaderModule::Initialize(ShaderModuleParseResult* parseResult,
     return {};
 }
 
-std::pair<tint::glsl::writer::Bindings, BindingMap> generateBindingInfo(
+std::pair<tint::glsl::writer::Bindings, BindingMap> GenerateBindingInfo(
     SingleShaderStage stage,
     const PipelineLayout* layout,
     const BindingInfoArray& moduleBindingInfo,
@@ -399,6 +399,7 @@ ResultOrError<GLuint> ShaderModule::CompileShader(
     bool usesVertexIndex,
     bool usesInstanceIndex,
     bool usesFragDepth,
+    VertexAttributeMask bgraSwizzleAttributes,
     CombinedSamplerInfo* combinedSamplers,
     const PipelineLayout* layout,
     bool* needsPlaceholderSampler,
@@ -423,7 +424,7 @@ ResultOrError<GLuint> ShaderModule::CompileShader(
     const BindingInfoArray& moduleBindingInfo = entryPointMetaData.bindings;
 
     auto [bindings, externalTextureExpansionMap] =
-        generateBindingInfo(stage, layout, moduleBindingInfo, req);
+        GenerateBindingInfo(stage, layout, moduleBindingInfo, req);
 
     // When textures are accessed without a sampler (e.g., textureLoad()),
     // GetSamplerTextureUses() will return this sentinel value.
@@ -439,10 +440,10 @@ ResultOrError<GLuint> ShaderModule::CompileShader(
         tint::glsl::writer::binding::Uniform{layout->GetInternalUniformBinding()});
 
     CombinedSamplerInfo combinedSamplerInfo =
-        generateCombinedSamplerInfo(inspector, programmableStage.entryPoint, bindings,
+        GenerateCombinedSamplerInfo(inspector, programmableStage.entryPoint, bindings,
                                     externalTextureExpansionMap, needsPlaceholderSampler);
 
-    bool needsInternalUBO = generateTextureBuiltinFromUniformData(
+    bool needsInternalUBO = GenerateTextureBuiltinFromUniformData(
         inspector, programmableStage.entryPoint, layout, bindingPointToData, bindings);
 
     std::optional<tint::ast::transform::SubstituteOverride::Config> substituteOverrideConfig;
@@ -475,6 +476,12 @@ ResultOrError<GLuint> ShaderModule::CompileShader(
     if (usesFragDepth) {
         req.tintOptions.depth_range_offsets = {4 * PipelineLayout::PushConstantLocation::MinDepth,
                                                4 * PipelineLayout::PushConstantLocation::MaxDepth};
+    }
+
+    if (stage == SingleShaderStage::Vertex) {
+        for (VertexAttributeLocation i : IterateBitSet(bgraSwizzleAttributes)) {
+            req.tintOptions.bgra_swizzle_locations.insert(static_cast<uint8_t>(i));
+        }
     }
 
     req.disableSymbolRenaming = GetDevice()->IsToggleEnabled(Toggle::DisableSymbolRenaming);

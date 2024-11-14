@@ -1516,5 +1516,166 @@ $B1: {  # root
     EXPECT_EQ(expect, str());
 }
 
+TEST_F(GlslWriter_ShaderIOTest, BGRASwizzleSingleValue) {
+    auto* ep = b.Function("vert", ty.vec4<f32>());
+    ep->SetReturnBuiltin(core::BuiltinValue::kPosition);
+    ep->SetReturnInvariant(true);
+    ep->SetStage(core::ir::Function::PipelineStage::kVertex);
+
+    auto* val = b.FunctionParam("val", ty.vec4<f32>());
+    val->SetLocation(0);
+    ep->SetParams({val});
+
+    b.Append(ep->Block(), [&] {  //
+        b.Return(ep, b.Construct(ty.vec4<f32>(), 0.5_f));
+    });
+
+    auto* src = R"(
+%vert = @vertex func(%val:vec4<f32> [@location(0)]):vec4<f32> [@invariant, @position] {
+  $B1: {
+    %3:vec4<f32> = construct 0.5f
+    ret %3
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+$B1: {  # root
+  %vert_loc0_Input:ptr<__in, vec4<f32>, read> = var @location(0)
+  %gl_Position:ptr<__out, vec4<f32>, write> = var @invariant @builtin(position)
+  %gl_PointSize:ptr<__out, f32, write> = var @builtin(__point_size)
+}
+
+%vert_inner = func(%val:vec4<f32>):vec4<f32> {
+  $B2: {
+    %6:vec4<f32> = construct 0.5f
+    ret %6
+  }
+}
+%vert = @vertex func():void {
+  $B3: {
+    %8:vec4<f32> = load %vert_loc0_Input
+    %9:vec4<f32> = swizzle %8, zyxw
+    %10:vec4<f32> = call %vert_inner, %9
+    store %gl_Position, %10
+    %11:f32 = swizzle %gl_Position, y
+    %12:f32 = negation %11
+    store_vector_element %gl_Position, 1u, %12
+    %13:f32 = swizzle %gl_Position, z
+    %14:f32 = swizzle %gl_Position, w
+    %15:f32 = mul 2.0f, %13
+    %16:f32 = sub %15, %14
+    store_vector_element %gl_Position, 2u, %16
+    store %gl_PointSize, 1.0f
+    ret
+  }
+}
+)";
+
+    core::ir::transform::PushConstantLayout push_constants;
+    ShaderIOConfig config{push_constants};
+    config.bgra_swizzle_locations.insert(0u);
+    Run(ShaderIO, config);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(GlslWriter_ShaderIOTest, BGRASwizzleMultipleValueMixedTypes) {
+    auto* ep = b.Function("vert", ty.vec4<f32>());
+    ep->SetReturnBuiltin(core::BuiltinValue::kPosition);
+    ep->SetReturnInvariant(true);
+    ep->SetStage(core::ir::Function::PipelineStage::kVertex);
+
+    std::unordered_set<uint32_t> swizzled_locations;
+
+    // Checks swizzling happens before conversion to the original type.
+    auto* val1 = b.FunctionParam("val1", ty.f32());
+    val1->SetLocation(5);
+    swizzled_locations.insert(5);
+
+    auto* val2 = b.FunctionParam("val2", ty.vec2<f32>());
+    val2->SetLocation(0);
+    swizzled_locations.insert(0);
+
+    auto* val3 = b.FunctionParam("val3", ty.vec3<f32>());
+    val3->SetLocation(3);
+    swizzled_locations.insert(3);
+
+    auto* val4 = b.FunctionParam("val4", ty.vec4<f32>());
+    val4->SetLocation(7);
+    swizzled_locations.insert(7);
+
+    // Checks that the sentinel doesn't get swizzled.
+    auto* sentinel = b.FunctionParam("sentinel", ty.vec4<f32>());
+    sentinel->SetLocation(4);
+
+    ep->SetParams({val1, val2, sentinel, val3, val4});
+    b.Append(ep->Block(), [&] {  //
+        b.Return(ep, b.Construct(ty.vec4<f32>(), 0.5_f));
+    });
+
+    auto* src = R"(
+%vert = @vertex func(%val1:f32 [@location(5)], %val2:vec2<f32> [@location(0)], %sentinel:vec4<f32> [@location(4)], %val3:vec3<f32> [@location(3)], %val4:vec4<f32> [@location(7)]):vec4<f32> [@invariant, @position] {
+  $B1: {
+    %7:vec4<f32> = construct 0.5f
+    ret %7
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+$B1: {  # root
+  %vert_loc5_Input:ptr<__in, vec4<f32>, read> = var @location(5)
+  %vert_loc0_Input:ptr<__in, vec4<f32>, read> = var @location(0)
+  %vert_loc4_Input:ptr<__in, vec4<f32>, read> = var @location(4)
+  %vert_loc3_Input:ptr<__in, vec4<f32>, read> = var @location(3)
+  %vert_loc7_Input:ptr<__in, vec4<f32>, read> = var @location(7)
+  %gl_Position:ptr<__out, vec4<f32>, write> = var @invariant @builtin(position)
+  %gl_PointSize:ptr<__out, f32, write> = var @builtin(__point_size)
+}
+
+%vert_inner = func(%val1:f32, %val2:vec2<f32>, %sentinel:vec4<f32>, %val3:vec3<f32>, %val4:vec4<f32>):vec4<f32> {
+  $B2: {
+    %14:vec4<f32> = construct 0.5f
+    ret %14
+  }
+}
+%vert = @vertex func():void {
+  $B3: {
+    %16:vec4<f32> = load %vert_loc5_Input
+    %17:f32 = swizzle %16, z
+    %18:vec4<f32> = load %vert_loc0_Input
+    %19:vec2<f32> = swizzle %18, zy
+    %20:vec4<f32> = load %vert_loc4_Input
+    %21:vec4<f32> = load %vert_loc3_Input
+    %22:vec3<f32> = swizzle %21, zyx
+    %23:vec4<f32> = load %vert_loc7_Input
+    %24:vec4<f32> = swizzle %23, zyxw
+    %25:vec4<f32> = call %vert_inner, %17, %19, %20, %22, %24
+    store %gl_Position, %25
+    %26:f32 = swizzle %gl_Position, y
+    %27:f32 = negation %26
+    store_vector_element %gl_Position, 1u, %27
+    %28:f32 = swizzle %gl_Position, z
+    %29:f32 = swizzle %gl_Position, w
+    %30:f32 = mul 2.0f, %28
+    %31:f32 = sub %30, %29
+    store_vector_element %gl_Position, 2u, %31
+    store %gl_PointSize, 1.0f
+    ret
+  }
+}
+)";
+
+    core::ir::transform::PushConstantLayout push_constants;
+    ShaderIOConfig config{push_constants};
+    config.bgra_swizzle_locations = swizzled_locations;
+    Run(ShaderIO, config);
+
+    EXPECT_EQ(expect, str());
+}
+
 }  // namespace
 }  // namespace tint::glsl::writer::raise

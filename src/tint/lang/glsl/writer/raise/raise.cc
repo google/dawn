@@ -191,7 +191,8 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
     RUN_TRANSFORM(core::ir::transform::AddEmptyEntryPoint, module);
 
     RUN_TRANSFORM(raise::ShaderIO, module,
-                  raise::ShaderIOConfig{push_constant_layout.Get(), options.depth_range_offsets});
+                  raise::ShaderIOConfig{push_constant_layout.Get(), options.depth_range_offsets,
+                                        options.bgra_swizzle_locations});
 
     // Must come after ShaderIO as it operates on module-scope `in` variables.
     RUN_TRANSFORM(

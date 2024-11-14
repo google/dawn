@@ -31,6 +31,7 @@
 #include <string>
 #include <vector>
 
+#include "dawn/native/IntegerTypes.h"
 #include "dawn/native/Serializable.h"
 #include "dawn/native/ShaderModule.h"
 #include "dawn/native/opengl/BindingPoint.h"
@@ -93,6 +94,7 @@ class ShaderModule final : public ShaderModuleBase {
                                         bool usesVertexIndex,
                                         bool usesInstanceIndex,
                                         bool usesFragDepth,
+                                        VertexAttributeMask bgraSwizzleAttributes,
                                         CombinedSamplerInfo* combinedSamplers,
                                         const PipelineLayout* layout,
                                         bool* needsPlaceholderSampler,

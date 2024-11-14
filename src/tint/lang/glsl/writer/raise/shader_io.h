@@ -29,6 +29,7 @@
 #define SRC_TINT_LANG_GLSL_WRITER_RAISE_SHADER_IO_H_
 
 #include <string>
+#include <unordered_set>
 
 #include "src/tint/lang/core/ir/transform/prepare_push_constants.h"
 #include "src/tint/lang/glsl/writer/common/options.h"
@@ -49,6 +50,9 @@ struct ShaderIOConfig {
 
     /// offsets for clamping frag depth
     std::optional<Options::RangeOffsets> depth_range_offsets{};
+
+    /// locations of vertex input variables to apply BGRA swizzle to.
+    std::unordered_set<uint32_t> bgra_swizzle_locations{};
 };
 
 /// ShaderIO is a transform that moves each entry point function's parameters and return value to
