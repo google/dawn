@@ -28,6 +28,8 @@
 #ifndef SRC_DAWN_NATIVE_PIPELINECACHE_H_
 #define SRC_DAWN_NATIVE_PIPELINECACHE_H_
 
+#include <atomic>
+
 #include "dawn/common/RefCounted.h"
 #include "dawn/native/BlobCache.h"
 #include "dawn/native/CacheKey.h"
@@ -73,12 +75,17 @@ class PipelineCacheBase : public RefCounted {
     // The blob cache is owned by the Adapter and pipeline caches are owned/created by devices
     // or adapters. Since the device owns a reference to the Instance which owns the Adapter,
     // the blob cache is guaranteed to be valid throughout the lifetime of the object.
-    raw_ptr<BlobCache> mCache;
-    CacheKey mKey;
+    const raw_ptr<BlobCache> mCache;
+    const CacheKey mKey;
     const bool mStoreOnIdle;
     bool mInitialized = false;
     bool mCacheHit = false;
-    bool mNeedsStore = false;
+
+    // Multiple threads can be using the pipeline cache concurrently and
+    // modifying this variable. Loads and stores are done with relaxed ordering
+    // since we don't care so much about strict ordering just avoiding UB from
+    // concurrent read/writes.
+    std::atomic<bool> mNeedsStore = false;
 };
 
 }  // namespace dawn::native

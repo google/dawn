@@ -27,6 +27,8 @@
 
 #include "dawn/native/PipelineCache.h"
 
+#include <atomic>
+
 namespace dawn::native {
 
 PipelineCacheBase::PipelineCacheBase(BlobCache* cache, const CacheKey& key, bool storeOnIdle)
@@ -62,7 +64,7 @@ MaybeError PipelineCacheBase::DidCompilePipeline() {
     if (mStoreOnIdle) {
         // Assume pipeline cache was modified by compiling a pipeline. It will be stored in
         // BlobCache at some later point in StoreOnIdle() if necessary.
-        mNeedsStore = true;
+        mNeedsStore.store(true, std::memory_order_relaxed);
     } else {
         // TODO(dawn:549): Flush is currently synchronously happening on the same thread as pipeline
         // compilation, but it's perhaps deferrable.
@@ -75,8 +77,7 @@ MaybeError PipelineCacheBase::DidCompilePipeline() {
 
 MaybeError PipelineCacheBase::StoreOnIdle() {
     DAWN_ASSERT(mStoreOnIdle);
-    if (mNeedsStore) {
-        mNeedsStore = false;
+    if (mNeedsStore.exchange(false, std::memory_order_relaxed)) {
         DAWN_TRY(Flush());
     }
     return {};
