@@ -333,11 +333,7 @@ class ObjectBase {
     template <typename F, typename T,
               typename Cb
                 {%- if not dfn -%}
-                    {{" "}}= void (
-                        {%- for arg in CallbackType.arguments -%}
-                            {{as_annotated_cppType(arg)}}{{", "}}
-                        {%- endfor -%}
-                    T userdata)
+                    {{" "}}= {{as_cppType(CallbackType.name)}}<T>
                 {%- endif -%},
               //* The Callback fnptr with const char* instead of StringView.
               //* TODO(42241188): Remove once all clients use StringView versions of the callbacks
@@ -379,12 +375,7 @@ class ObjectBase {
     template <typename L,
               typename Cb
                 {%- if not dfn -%}
-                    {{" "}}= std::function<void(
-                        {%- for arg in CallbackType.arguments -%}
-                            {%- if not loop.first %}, {% endif -%}
-                            {{as_annotated_cppType(arg)}}
-                        {%- endfor -%}
-                    )>
+                    {{" "}}= {{as_cppType(CallbackType.name)}}<>
                 {%- endif -%},
               //* The Callback fnptr with const char* instead of StringView.
               //* TODO(42241188): Remove once all clients use StringView versions of the callbacks
@@ -510,6 +501,43 @@ struct StringViewAdapter {
 
 inline StringView::StringView(const detail::StringViewAdapter& s): data(s.sv.data), length(s.sv.length) {}
 
+namespace detail {
+// For callbacks, we support two modes:
+//   1) No userdata where we allow a std::function type that can include argument captures.
+//   2) Explicit typed userdata where we only allow non-capturing lambdas or function pointers.
+template <typename... Args>
+struct CallbackTypeBase;
+template <typename... Args>
+struct CallbackTypeBase<std::tuple<Args...>> {
+    using Callback = std::function<void(Args...)>;
+};
+template <typename... Args>
+struct CallbackTypeBase<std::tuple<Args...>, void> {
+    using Callback = void (Args...);
+};
+template <typename... Args, typename T>
+struct CallbackTypeBase<std::tuple<Args...>, T> {
+    using Callback = void (Args..., T);
+};
+}  // namespace detail
+
+//* Special callbacks that require some custom code generation.
+{% set SpecialCallbacks = ["device lost callback 2", "uncaptured error callback"] %}
+
+{% for type in by_category["callback function"] if type.name.get() not in SpecialCallbacks %}
+    template <typename... T>
+    using {{as_cppType(type.name)}} = typename detail::CallbackTypeBase<std::tuple<
+        {%- for arg in type.arguments -%}
+            {%- if not loop.first %}, {% endif -%}
+            {{decorate("", as_cppType(arg.type.name), arg)}}
+        {%- endfor -%}
+    >, T...>::Callback;
+{% endfor %}
+template <typename... T>
+using DeviceLostCallback2 = typename detail::CallbackTypeBase<std::tuple<const Device&, DeviceLostReason, StringView>, T...>::Callback;
+template <typename... T>
+using UncapturedErrorCallback = typename detail::CallbackTypeBase<std::tuple<const Device&, ErrorType, StringView>, T...>::Callback;
+
 {% macro render_cpp_callback_info_template_method_impl(type, method) %}
     {{render_cpp_callback_info_template_method_declaration(type, method, dfn=True)}} {
         {% set CallbackInfoType = (method.arguments|last).type %}
@@ -565,12 +593,7 @@ inline StringView::StringView(const detail::StringViewAdapter& s): data(s.sv.dat
     {{render_cpp_callback_info_lambda_method_declaration(type, method, dfn=True)}} {
         {% set CallbackInfoType = (method.arguments|last).type %}
         {% set CallbackType = find_by_name(CallbackInfoType.members, "callback").type %}
-        using F = void (
-            {%- for arg in CallbackType.arguments -%}
-                {%- if not loop.first %}, {% endif -%}
-                {{as_annotated_cppType(arg)}}
-            {%- endfor -%}
-        );
+        using F = {{as_cppType(CallbackType.name)}}<void>;
 
         {{as_cType(CallbackInfoType.name)}} callbackInfo = {};
         callbackInfo.mode = static_cast<{{as_cType(types["callback mode"].name)}}>(callbackMode);
@@ -769,26 +792,26 @@ struct {{CppType}} : protected detail::{{CppType}} {
     inline {{CppType}}(Init&& init);
 
     template <typename F, typename T,
-              typename Cb = void (const Device& device, DeviceLostReason reason, StringView message, T userdata),
+              typename Cb = DeviceLostCallback2<T>,
               //* TODO(42241188): Remove once all clients use StringView versions of the callbacks
               typename CbChar = void (const Device& device, DeviceLostReason reason, const char* message, T userdata),
               typename = std::enable_if_t<std::is_convertible_v<F, Cb*> || std::is_convertible_v<F, CbChar*>>>
     void SetDeviceLostCallback(CallbackMode callbackMode, F callback, T userdata);
     template <typename L,
-              typename Cb = std::function<void(const Device& device, DeviceLostReason reason, StringView message)>,
+              typename Cb = DeviceLostCallback2<>,
               //* TODO(42241188): Remove once all clients use StringView versions of the callbacks
               typename CbChar = std::function<void(const Device& device, DeviceLostReason reason, const char* message)>,
               typename = std::enable_if_t<std::is_convertible_v<L, Cb> || std::is_convertible_v<L, CbChar>>>
     void SetDeviceLostCallback(CallbackMode callbackMode, L callback);
 
     template <typename F, typename T,
-              typename Cb = void (const Device& device, ErrorType type, StringView message, T userdata),
+              typename Cb = UncapturedErrorCallback<T>,
               //* TODO(42241188): Remove once all clients use StringView versions of the callbacks
               typename CbChar = void (const Device& device, ErrorType type, const char* message, T userdata),
               typename = std::enable_if_t<std::is_convertible_v<F, Cb*> || std::is_convertible_v<F, CbChar*>>>
     void SetUncapturedErrorCallback(F callback, T userdata);
     template <typename L,
-              typename Cb = std::function<void(const Device& device, ErrorType type, StringView message)>,
+              typename Cb = UncapturedErrorCallback<>,
               //* TODO(42241188): Remove once all clients use StringView versions of the callbacks
               typename CbChar = std::function<void(const Device& device, ErrorType type, const char* message)>,
               typename = std::enable_if_t<std::is_convertible_v<L, Cb> || std::is_convertible_v<L, CbChar>>>
@@ -962,7 +985,7 @@ void {{CppType}}::SetDeviceLostCallback(CallbackMode callbackMode, F callback, T
 template <typename L, typename Cb, typename CbChar, typename>
 void {{CppType}}::SetDeviceLostCallback(CallbackMode callbackMode, L callback) {
     assert(deviceLostCallbackInfo2.callback == nullptr);
-    using F = void (const Device& device, DeviceLostReason reason, StringView message);
+    using F = DeviceLostCallback2<void>;
 
     deviceLostCallbackInfo2.mode = static_cast<WGPUCallbackMode>(callbackMode);
     if constexpr (std::is_convertible_v<L, F*>) {
@@ -1015,7 +1038,7 @@ void {{CppType}}::SetUncapturedErrorCallback(F callback, T userdata) {
 
 template <typename L, typename Cb, typename CbChar, typename>
 void {{CppType}}::SetUncapturedErrorCallback(L callback) {
-    using F = void (const Device& device, ErrorType type, StringView message);
+    using F = UncapturedErrorCallback<void>;
     using FChar = void (const Device& device, ErrorType type, const char* message);
     static_assert(std::is_convertible_v<L, F*> || std::is_convertible_v<L, FChar*>, "Uncaptured error callback cannot be a binding lambda");
 
