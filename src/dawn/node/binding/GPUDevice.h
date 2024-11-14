@@ -66,6 +66,7 @@ class GPUDevice final : public interop::GPUDevice {
     // interop::GPUDevice interface compliance
     interop::Interface<interop::GPUSupportedFeatures> getFeatures(Napi::Env) override;
     interop::Interface<interop::GPUSupportedLimits> getLimits(Napi::Env) override;
+    interop::Interface<interop::GPUAdapterInfo> getAdapterInfo(Napi::Env) override;
     interop::Interface<interop::GPUQueue> getQueue(Napi::Env env) override;
     void destroy(Napi::Env) override;
     interop::Interface<interop::GPUBuffer> createBuffer(

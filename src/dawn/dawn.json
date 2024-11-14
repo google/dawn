@@ -1582,6 +1582,13 @@
                 ]
             },
             {
+                "name": "get adapter info",
+                "returns": "status",
+                "args": [
+                    {"name": "adapter info", "type": "adapter info", "annotation": "*"}
+                ]
+            },
+            {
                 "name": "get adapter",
                 "returns": "adapter",
                 "tags": ["dawn"]

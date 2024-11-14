@@ -345,6 +345,10 @@ void Device::GetFeatures(WGPUSupportedFeatures* features) const {
     mLimitsAndFeatures.ToSupportedFeatures(features);
 }
 
+WGPUStatus Device::GetAdapterInfo(WGPUAdapterInfo* adapterInfo) const {
+    return mAdapter->GetInfo(adapterInfo);
+}
+
 void Device::SetLimits(const WGPUSupportedLimits* limits) {
     return mLimitsAndFeatures.SetLimits(limits);
 }

@@ -2021,6 +2021,10 @@ void DeviceBase::APIGetFeatures(SupportedFeatures* features) const {
     mEnabledFeatures.ToSupportedFeatures(features);
 }
 
+wgpu::Status DeviceBase::APIGetAdapterInfo(AdapterInfo* adapterInfo) const {
+    return mAdapter->APIGetInfo(adapterInfo);
+}
+
 void DeviceBase::APIInjectError(wgpu::ErrorType type, StringView message) {
     if (ConsumedError(ValidateErrorType(type))) {
         return;

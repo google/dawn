@@ -38,15 +38,26 @@ class AdapterPropertiesD3DTest : public DawnTest {};
 // Test that it is possible to query the d3d properties, and it is populated with a valid data.
 TEST_P(AdapterPropertiesD3DTest, GetD3DProperties) {
     DAWN_TEST_UNSUPPORTED_IF(!adapter.HasFeature(wgpu::FeatureName::AdapterPropertiesD3D));
+    {
+        wgpu::AdapterInfo info;
+        wgpu::AdapterPropertiesD3D d3dProperties;
+        info.nextInChain = &d3dProperties;
 
-    wgpu::AdapterInfo info;
-    wgpu::AdapterPropertiesD3D d3dProperties;
-    info.nextInChain = &d3dProperties;
+        adapter.GetInfo(&info);
 
-    adapter.GetInfo(&info);
+        // This is the minimum D3D shader model Dawn supports.
+        EXPECT_GE(d3dProperties.shaderModel, 50u);
+    }
+    {
+        wgpu::AdapterInfo adapterInfo;
+        wgpu::AdapterPropertiesD3D d3dProperties;
+        adapterInfo.nextInChain = &d3dProperties;
 
-    // This is the minimum D3D shader model Dawn supports.
-    EXPECT_GE(d3dProperties.shaderModel, 50u);
+        device.GetAdapterInfo(&adapterInfo);
+
+        // This is the minimum D3D shader model Dawn supports.
+        EXPECT_GE(d3dProperties.shaderModel, 50u);
+    }
 }
 
 DAWN_INSTANTIATE_TEST(AdapterPropertiesD3DTest,

@@ -216,6 +216,13 @@ TEST_P(WireAdapterTests, RequestDeviceSuccess) {
             .WillOnce(WithArg<1>(Invoke([&](WGPUDevice cDevice) {
                 device = wgpu::Device::Acquire(cDevice);
 
+                wgpu::AdapterInfo adapterInfo;
+                EXPECT_EQ(device.GetAdapterInfo(&adapterInfo), wgpu::Status::Success);
+                EXPECT_EQ(adapterInfo.vendor, kEmptyOutputStringView);
+                EXPECT_EQ(adapterInfo.architecture, kEmptyOutputStringView);
+                EXPECT_EQ(adapterInfo.device, kEmptyOutputStringView);
+                EXPECT_EQ(adapterInfo.description, kEmptyOutputStringView);
+
                 wgpu::SupportedLimits limits;
                 EXPECT_EQ(device.GetLimits(&limits), wgpu::Status::Success);
                 EXPECT_EQ(limits.limits.maxTextureDimension1D,
