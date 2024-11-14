@@ -202,7 +202,6 @@ TEST_F(GlslWriter_BuiltinPolyfillTest, WorkgroupBarrier) {
 
 TEST_F(GlslWriter_BuiltinPolyfillTest, AtomicCompareExchangeWeak) {
     auto* var = b.Var("v", workgroup, ty.atomic<i32>(), core::Access::kReadWrite);
-    var->SetBindingPoint(0, 0);
     b.ir.root_block->Append(var);
 
     auto* func = b.ComputeFunction("foo");
@@ -219,7 +218,7 @@ __atomic_compare_exchange_result_i32 = struct @align(4) {
 }
 
 $B1: {  # root
-  %v:ptr<workgroup, atomic<i32>, read_write> = var @binding_point(0, 0)
+  %v:ptr<workgroup, atomic<i32>, read_write> = var
 }
 
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -239,7 +238,7 @@ __atomic_compare_exchange_result_i32 = struct @align(4) {
 }
 
 $B1: {  # root
-  %v:ptr<workgroup, atomic<i32>, read_write> = var @binding_point(0, 0)
+  %v:ptr<workgroup, atomic<i32>, read_write> = var
 }
 
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -261,7 +260,6 @@ $B1: {  # root
 
 TEST_F(GlslWriter_BuiltinPolyfillTest, AtomicSub) {
     auto* var = b.Var("v", workgroup, ty.atomic<i32>(), core::Access::kReadWrite);
-    var->SetBindingPoint(0, 0);
     b.ir.root_block->Append(var);
 
     auto* func = b.ComputeFunction("foo");
@@ -272,7 +270,7 @@ TEST_F(GlslWriter_BuiltinPolyfillTest, AtomicSub) {
 
     auto* src = R"(
 $B1: {  # root
-  %v:ptr<workgroup, atomic<i32>, read_write> = var @binding_point(0, 0)
+  %v:ptr<workgroup, atomic<i32>, read_write> = var
 }
 
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -287,7 +285,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %v:ptr<workgroup, atomic<i32>, read_write> = var @binding_point(0, 0)
+  %v:ptr<workgroup, atomic<i32>, read_write> = var
 }
 
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -306,7 +304,6 @@ $B1: {  # root
 
 TEST_F(GlslWriter_BuiltinPolyfillTest, AtomicSub_u32) {
     auto* var = b.Var("v", workgroup, ty.atomic<u32>(), core::Access::kReadWrite);
-    var->SetBindingPoint(0, 0);
     b.ir.root_block->Append(var);
 
     auto* func = b.ComputeFunction("foo");
@@ -317,7 +314,7 @@ TEST_F(GlslWriter_BuiltinPolyfillTest, AtomicSub_u32) {
 
     auto* src = R"(
 $B1: {  # root
-  %v:ptr<workgroup, atomic<u32>, read_write> = var @binding_point(0, 0)
+  %v:ptr<workgroup, atomic<u32>, read_write> = var
 }
 
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -332,7 +329,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %v:ptr<workgroup, atomic<u32>, read_write> = var @binding_point(0, 0)
+  %v:ptr<workgroup, atomic<u32>, read_write> = var
 }
 
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -350,7 +347,6 @@ $B1: {  # root
 
 TEST_F(GlslWriter_BuiltinPolyfillTest, AtomicLoad) {
     auto* var = b.Var("v", workgroup, ty.atomic<i32>(), core::Access::kReadWrite);
-    var->SetBindingPoint(0, 0);
     b.ir.root_block->Append(var);
 
     auto* func = b.ComputeFunction("foo");
@@ -361,7 +357,7 @@ TEST_F(GlslWriter_BuiltinPolyfillTest, AtomicLoad) {
 
     auto* src = R"(
 $B1: {  # root
-  %v:ptr<workgroup, atomic<i32>, read_write> = var @binding_point(0, 0)
+  %v:ptr<workgroup, atomic<i32>, read_write> = var
 }
 
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -376,7 +372,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %v:ptr<workgroup, atomic<i32>, read_write> = var @binding_point(0, 0)
+  %v:ptr<workgroup, atomic<i32>, read_write> = var
 }
 
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {

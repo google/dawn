@@ -5775,7 +5775,6 @@ using HlslBuiltinPolyfillWorkgroupAtomic = core::ir::transform::TransformTestWit
 TEST_P(HlslBuiltinPolyfillWorkgroupAtomic, Access) {
     auto param = GetParam();
     auto* var = b.Var("v", workgroup, ty.atomic<i32>(), core::Access::kReadWrite);
-    var->SetBindingPoint(0, 0);
     b.ir.root_block->Append(var);
 
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
@@ -5786,7 +5785,7 @@ TEST_P(HlslBuiltinPolyfillWorkgroupAtomic, Access) {
 
     std::string src = R"(
 $B1: {  # root
-  %v:ptr<workgroup, atomic<i32>, read_write> = var @binding_point(0, 0)
+  %v:ptr<workgroup, atomic<i32>, read_write> = var
 }
 
 %foo = @fragment func():void {
@@ -5802,7 +5801,7 @@ $B1: {  # root
 
     std::string expect = R"(
 $B1: {  # root
-  %v:ptr<workgroup, atomic<i32>, read_write> = var @binding_point(0, 0)
+  %v:ptr<workgroup, atomic<i32>, read_write> = var
 }
 
 %foo = @fragment func():void {
@@ -5840,7 +5839,6 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, BuiltinWorkgroupAtomicStore) {
                                                 });
 
     auto* var = b.Var("v", workgroup, sb, core::Access::kReadWrite);
-    var->SetBindingPoint(0, 0);
     b.ir.root_block->Append(var);
 
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
@@ -5858,7 +5856,7 @@ SB = struct @align(16) {
 }
 
 $B1: {  # root
-  %v:ptr<workgroup, SB, read_write> = var @binding_point(0, 0)
+  %v:ptr<workgroup, SB, read_write> = var
 }
 
 %foo = @fragment func():void {
@@ -5879,7 +5877,7 @@ SB = struct @align(16) {
 }
 
 $B1: {  # root
-  %v:ptr<workgroup, SB, read_write> = var @binding_point(0, 0)
+  %v:ptr<workgroup, SB, read_write> = var
 }
 
 %foo = @fragment func():void {
@@ -5903,7 +5901,6 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, BuiltinWorkgroupAtomicLoad) {
                                                 });
 
     auto* var = b.Var("v", workgroup, sb, core::Access::kReadWrite);
-    var->SetBindingPoint(0, 0);
     b.ir.root_block->Append(var);
 
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
@@ -5921,7 +5918,7 @@ SB = struct @align(16) {
 }
 
 $B1: {  # root
-  %v:ptr<workgroup, SB, read_write> = var @binding_point(0, 0)
+  %v:ptr<workgroup, SB, read_write> = var
 }
 
 %foo = @fragment func():void {
@@ -5943,7 +5940,7 @@ SB = struct @align(16) {
 }
 
 $B1: {  # root
-  %v:ptr<workgroup, SB, read_write> = var @binding_point(0, 0)
+  %v:ptr<workgroup, SB, read_write> = var
 }
 
 %foo = @fragment func():void {
@@ -5969,7 +5966,6 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, BuiltinWorkgroupAtomicSub) {
                                                 });
 
     auto* var = b.Var("v", workgroup, sb, core::Access::kReadWrite);
-    var->SetBindingPoint(0, 0);
     b.ir.root_block->Append(var);
 
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
@@ -5989,7 +5985,7 @@ SB = struct @align(16) {
 }
 
 $B1: {  # root
-  %v:ptr<workgroup, SB, read_write> = var @binding_point(0, 0)
+  %v:ptr<workgroup, SB, read_write> = var
 }
 
 %foo = @fragment func():void {
@@ -6014,7 +6010,7 @@ SB = struct @align(16) {
 }
 
 $B1: {  # root
-  %v:ptr<workgroup, SB, read_write> = var @binding_point(0, 0)
+  %v:ptr<workgroup, SB, read_write> = var
 }
 
 %foo = @fragment func():void {
@@ -6047,7 +6043,6 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, BuiltinWorkgroupAtomicCompareExchangeWeak
                                                 });
 
     auto* var = b.Var("v", workgroup, sb, core::Access::kReadWrite);
-    var->SetBindingPoint(0, 0);
     b.ir.root_block->Append(var);
 
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
@@ -6072,7 +6067,7 @@ __atomic_compare_exchange_result_i32 = struct @align(4) {
 }
 
 $B1: {  # root
-  %v:ptr<workgroup, SB, read_write> = var @binding_point(0, 0)
+  %v:ptr<workgroup, SB, read_write> = var
 }
 
 %foo = @fragment func():void {
@@ -6099,7 +6094,7 @@ __atomic_compare_exchange_result_i32 = struct @align(4) {
 }
 
 $B1: {  # root
-  %v:ptr<workgroup, SB, read_write> = var @binding_point(0, 0)
+  %v:ptr<workgroup, SB, read_write> = var
 }
 
 %foo = @fragment func():void {

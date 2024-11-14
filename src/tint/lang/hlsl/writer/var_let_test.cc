@@ -504,7 +504,6 @@ void unused_entry_point() {
 
 TEST_F(HlslWriterTest, VarPrivate) {
     auto* s = b.Var("u", ty.ptr<private_>(ty.vec4<f32>()));
-    s->SetBindingPoint(2, 1);
 
     b.ir.root_block->Append(s);
 
@@ -520,7 +519,6 @@ void unused_entry_point() {
 
 TEST_F(HlslWriterTest, VarWorkgroup) {
     auto* s = b.Var("u", ty.ptr<workgroup>(ty.vec4<f32>()));
-    s->SetBindingPoint(2, 1);
 
     b.ir.root_block->Append(s);
 

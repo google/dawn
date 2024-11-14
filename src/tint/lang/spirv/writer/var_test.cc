@@ -304,7 +304,6 @@ TEST_F(SpirvWriterTest, StorageVar_WithVulkan) {
 
 TEST_F(SpirvWriterTest, StorageVar_Workgroup_WithVulkan) {
     auto* v = b.Var("v", ty.ptr<workgroup, i32, read_write>());
-    v->SetBindingPoint(0, 0);
     mod.root_block->Append(v);
 
     auto* func = b.ComputeFunction("foo");

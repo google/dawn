@@ -123,7 +123,6 @@ TEST_F(GlslWriterTest, VarInBuiltin) {
         core::IOAttributes attrs = {};
         attrs.builtin = core::BuiltinValue::kLocalInvocationIndex;
         v->SetAttributes(attrs);
-        v->SetBindingPoint(1, 2);
     });
 
     ASSERT_TRUE(Generate()) << err_ << output_.glsl;

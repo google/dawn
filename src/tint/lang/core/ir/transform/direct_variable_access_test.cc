@@ -2531,7 +2531,6 @@ TEST_F(IR_DirectVariableAccessTest_WorkgroupAS, CallChaining2) {
     b.Append(b.ir.root_block,
              [&] {  //
                  input = b.Var("U", ty.ptr<workgroup>(T));
-                 input->SetBindingPoint(0, 0);
              });
 
     auto* f2 = b.Function("f2", T3);
@@ -2566,7 +2565,7 @@ TEST_F(IR_DirectVariableAccessTest_WorkgroupAS, CallChaining2) {
 
     auto* src = R"(
 $B1: {  # root
-  %U:ptr<workgroup, array<array<array<vec4<i32>, 5>, 5>, 5>, read_write> = var @binding_point(0, 0)
+  %U:ptr<workgroup, array<array<array<vec4<i32>, 5>, 5>, 5>, read_write> = var
 }
 
 %f2 = func(%p:ptr<workgroup, array<vec4<i32>, 5>, read_write>):vec4<i32> {
@@ -2602,7 +2601,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %U:ptr<workgroup, array<array<array<vec4<i32>, 5>, 5>, 5>, read_write> = var @binding_point(0, 0)
+  %U:ptr<workgroup, array<array<array<vec4<i32>, 5>, 5>, 5>, read_write> = var
 }
 
 %f2 = func(%p_indices:array<u32, 2>):vec4<i32> {
