@@ -130,7 +130,7 @@ VertexOutput vs_main_inner(VertexInput in, const constant RenderParams_tint_pack
 }
 
 vertex tint_symbol_4 vs_main(const constant RenderParams_tint_packed_vec3* tint_symbol_7 [[buffer(0)]], tint_symbol_3 tint_symbol_2 [[stage_in]]) {
-  VertexInput const tint_symbol_5 = {.position=tint_symbol_2.position, .color=tint_symbol_2.color, .quad_pos=tint_symbol_2.quad_pos};
+  VertexInput const tint_symbol_5 = VertexInput{.position=tint_symbol_2.position, .color=tint_symbol_2.color, .quad_pos=tint_symbol_2.quad_pos};
   VertexOutput const inner_result_1 = vs_main_inner(tint_symbol_5, tint_symbol_7);
   tint_symbol_4 wrapper_result_1 = {};
   wrapper_result_1.position = inner_result_1.position;

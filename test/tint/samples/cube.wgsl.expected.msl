@@ -33,7 +33,7 @@ VertexOutput vtx_main_inner(VertexInput input, const constant Uniforms* const ti
 }
 
 vertex tint_symbol_2 vtx_main(const constant Uniforms* tint_symbol_8 [[buffer(0)]], tint_symbol_1 tint_symbol [[stage_in]]) {
-  VertexInput const tint_symbol_6 = {.cur_position=tint_symbol.cur_position, .color=tint_symbol.color};
+  VertexInput const tint_symbol_6 = VertexInput{.cur_position=tint_symbol.cur_position, .color=tint_symbol.color};
   VertexOutput const inner_result = vtx_main_inner(tint_symbol_6, tint_symbol_8);
   tint_symbol_2 wrapper_result = {};
   wrapper_result.vtxFragColor = inner_result.vtxFragColor;

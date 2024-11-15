@@ -36,7 +36,7 @@ void atomicCompareExchangeWeak_1bd40a(device SB_RW_atomic* const tint_symbol_2) 
   atomic_compare_exchange_result_i32 const tint_symbol = atomicCompareExchangeWeak_1(&((*(tint_symbol_2)).arg_0), x_24, x_23);
   int const old_value_1 = tint_symbol.old_value;
   int const x_25 = old_value_1;
-  x__atomic_compare_exchange_resulti32 const tint_symbol_1 = {.old_value=x_25, .exchanged=(x_25 == x_23)};
+  x__atomic_compare_exchange_resulti32 const tint_symbol_1 = x__atomic_compare_exchange_resulti32{.old_value=x_25, .exchanged=(x_25 == x_23)};
   res = tint_symbol_1;
   return;
 }

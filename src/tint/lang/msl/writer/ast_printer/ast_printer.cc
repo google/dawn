@@ -1075,6 +1075,9 @@ bool ASTPrinter::EmitTypeInitializer(StringStream& out,
             return true;
         },
         [&](const core::type::Struct*) {
+            if (!EmitType(out, type)) {
+                return false;
+            }
             out << "{";
             terminator = "}";
             return true;

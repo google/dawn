@@ -245,7 +245,7 @@ main_out tint_symbol_inner(float2 tUV_param, float2 tileID_1_param, float2 level
   (*(tint_private_vars)).vPosition = vPosition_param;
   (*(tint_private_vars)).vUV = vUV_param;
   main_1(tint_private_vars, tint_symbol_18, tint_symbol_19, tint_symbol_20, tint_symbol_21, tint_symbol_22, tint_symbol_23, tint_symbol_24, tint_symbol_25, tint_symbol_26, tint_symbol_27);
-  main_out const tint_symbol_4 = {.glFragColor_1=(*(tint_private_vars)).glFragColor};
+  main_out const tint_symbol_4 = main_out{.glFragColor_1=(*(tint_private_vars)).glFragColor};
   return tint_symbol_4;
 }
 

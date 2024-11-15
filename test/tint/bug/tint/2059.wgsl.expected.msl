@@ -108,23 +108,23 @@ kernel void tint_symbol(device tint_array<tint_packed_vec3_f32_array_element, 3>
     assign_and_preserve_padding(tint_symbol_8, a);
   }
   {
-    S const a = {.m=m};
+    S const a = S{.m=m};
     assign_and_preserve_padding_1(tint_symbol_9, a);
   }
   {
     tint_array<float3x3, 1> const tint_symbol_1 = tint_array<float3x3, 1>{m};
-    S2 const a = {.m=tint_symbol_1};
+    S2 const a = S2{.m=tint_symbol_1};
     assign_and_preserve_padding_2(tint_symbol_10, a);
   }
   {
-    S const tint_symbol_2 = {.m=m};
-    S3 const a = {.s=tint_symbol_2};
+    S const tint_symbol_2 = S{.m=m};
+    S3 const a = S3{.s=tint_symbol_2};
     assign_and_preserve_padding_4(tint_symbol_11, a);
   }
   {
-    S const tint_symbol_3 = {.m=m};
+    S const tint_symbol_3 = S{.m=m};
     tint_array<S, 1> const tint_symbol_4 = tint_array<S, 1>{tint_symbol_3};
-    S4 const a = {.s=tint_symbol_4};
+    S4 const a = S4{.s=tint_symbol_4};
     assign_and_preserve_padding_5(tint_symbol_12, a);
   }
   {
@@ -132,13 +132,13 @@ kernel void tint_symbol(device tint_array<tint_packed_vec3_f32_array_element, 3>
     assign_and_preserve_padding_3(tint_symbol_13, a);
   }
   {
-    S const tint_symbol_5 = {.m=m};
+    S const tint_symbol_5 = S{.m=m};
     tint_array<S, 1> const a = tint_array<S, 1>{tint_symbol_5};
     assign_and_preserve_padding_6(tint_symbol_14, a);
   }
   {
     tint_array<float3x3, 1> const tint_symbol_6 = tint_array<float3x3, 1>{m};
-    S2 const tint_symbol_7 = {.m=tint_symbol_6};
+    S2 const tint_symbol_7 = S2{.m=tint_symbol_6};
     tint_array<S2, 1> const a = tint_array<S2, 1>{tint_symbol_7};
     assign_and_preserve_padding_7(tint_symbol_15, a);
   }

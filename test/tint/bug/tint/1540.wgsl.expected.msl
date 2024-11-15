@@ -7,7 +7,7 @@ struct S {
 
 kernel void tint_symbol() {
   bool b = false;
-  S v = {.e=bool(true & b)};
+  S v = S{.e=bool(true & b)};
   return;
 }
 

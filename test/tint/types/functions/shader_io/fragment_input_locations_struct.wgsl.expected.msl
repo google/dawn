@@ -23,7 +23,7 @@ void tint_symbol_inner(FragmentInputs inputs) {
 }
 
 fragment void tint_symbol(tint_symbol_2 tint_symbol_1 [[stage_in]]) {
-  FragmentInputs const tint_symbol_3 = {.loc0=tint_symbol_1.loc0, .loc1=tint_symbol_1.loc1, .loc2=tint_symbol_1.loc2, .loc3=tint_symbol_1.loc3};
+  FragmentInputs const tint_symbol_3 = FragmentInputs{.loc0=tint_symbol_1.loc0, .loc1=tint_symbol_1.loc1, .loc2=tint_symbol_1.loc2, .loc3=tint_symbol_1.loc3};
   tint_symbol_inner(tint_symbol_3);
   return;
 }

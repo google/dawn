@@ -39,7 +39,7 @@ void atomicCompareExchangeWeak_e88938(threadgroup atomic_int* const tint_symbol_
   atomic_compare_exchange_result_i32 const tint_symbol = atomicCompareExchangeWeak_1(tint_symbol_3, x_23, x_22);
   int const old_value_1 = tint_symbol.old_value;
   int const x_24 = old_value_1;
-  x__atomic_compare_exchange_resulti32 const tint_symbol_1 = {.old_value=x_24, .exchanged=(x_24 == x_22)};
+  x__atomic_compare_exchange_resulti32 const tint_symbol_1 = x__atomic_compare_exchange_resulti32{.old_value=x_24, .exchanged=(x_24 == x_22)};
   res = tint_symbol_1;
   return;
 }

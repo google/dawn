@@ -20,7 +20,7 @@ struct tint_symbol_1 {
 
 main_out tint_symbol_inner(thread tint_private_vars_struct* const tint_private_vars) {
   main_1(tint_private_vars);
-  main_out const tint_symbol_2 = {.gl_Position=(*(tint_private_vars)).gl_Position};
+  main_out const tint_symbol_2 = main_out{.gl_Position=(*(tint_private_vars)).gl_Position};
   return tint_symbol_2;
 }
 

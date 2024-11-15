@@ -125,7 +125,7 @@ main_out tint_symbol_inner(float fClipDistance3_param, float fClipDistance4_para
   (*(tint_private_vars)).fClipDistance3 = fClipDistance3_param;
   (*(tint_private_vars)).fClipDistance4 = fClipDistance4_param;
   main_1(tint_private_vars, tint_symbol_8, tint_symbol_9, tint_symbol_10);
-  main_out const tint_symbol_4 = {.glFragColor_1=(*(tint_private_vars)).glFragColor};
+  main_out const tint_symbol_4 = main_out{.glFragColor_1=(*(tint_private_vars)).glFragColor};
   return tint_symbol_4;
 }
 

@@ -18,7 +18,7 @@ void f_inner(float4 pos, float4 fbf, In in) {
 }
 
 fragment void f(float4 pos [[position]], tint_symbol_1 tint_symbol [[stage_in]]) {
-  In const tint_symbol_2 = {.uv=tint_symbol.uv};
+  In const tint_symbol_2 = In{.uv=tint_symbol.uv};
   f_inner(pos, tint_symbol.fbf, tint_symbol_2);
   return;
 }

@@ -31,7 +31,7 @@ void tint_symbol_inner(In in) {
 }
 
 fragment void tint_symbol(tint_symbol_2 tint_symbol_1 [[stage_in]]) {
-  In const tint_symbol_3 = {.none=tint_symbol_1.none, .flat=tint_symbol_1.flat, .perspective_center=tint_symbol_1.perspective_center, .perspective_centroid=tint_symbol_1.perspective_centroid, .perspective_sample=tint_symbol_1.perspective_sample, .linear_center=tint_symbol_1.linear_center, .linear_centroid=tint_symbol_1.linear_centroid, .linear_sample=tint_symbol_1.linear_sample, .perspective_default=tint_symbol_1.perspective_default, .linear_default=tint_symbol_1.linear_default};
+  In const tint_symbol_3 = In{.none=tint_symbol_1.none, .flat=tint_symbol_1.flat, .perspective_center=tint_symbol_1.perspective_center, .perspective_centroid=tint_symbol_1.perspective_centroid, .perspective_sample=tint_symbol_1.perspective_sample, .linear_center=tint_symbol_1.linear_center, .linear_centroid=tint_symbol_1.linear_centroid, .linear_sample=tint_symbol_1.linear_sample, .perspective_default=tint_symbol_1.perspective_default, .linear_default=tint_symbol_1.linear_default};
   tint_symbol_inner(tint_symbol_3);
   return;
 }

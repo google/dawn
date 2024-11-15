@@ -59,7 +59,7 @@ void frag_main_inner(S input, device S_tint_packed_vec3* const tint_symbol_3) {
 }
 
 fragment void frag_main(device S_tint_packed_vec3* tint_symbol_4 [[buffer(0)]], float4 v [[position]], tint_symbol_1 tint_symbol [[stage_in]]) {
-  S const tint_symbol_2 = {.f=tint_symbol.f, .u=tint_symbol.u, .v=v, .x=tint_symbol.x, .y=tint_symbol.y};
+  S const tint_symbol_2 = S{.f=tint_symbol.f, .u=tint_symbol.u, .v=v, .x=tint_symbol.x, .y=tint_symbol.y};
   frag_main_inner(tint_symbol_2, tint_symbol_4);
   return;
 }

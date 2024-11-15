@@ -69,7 +69,7 @@ main_out tint_symbol_inner(float3 position_1_param, float2 uv_param, float3 norm
   (*(tint_private_vars)).uv = uv_param;
   (*(tint_private_vars)).normal = normal_param;
   main_1(tint_private_vars, tint_symbol_6);
-  main_out const tint_symbol_4 = {.gl_Position=(*(tint_private_vars)).gl_Position, .vUV_1=(*(tint_private_vars)).vUV};
+  main_out const tint_symbol_4 = main_out{.gl_Position=(*(tint_private_vars)).gl_Position, .vUV_1=(*(tint_private_vars)).vUV};
   return tint_symbol_4;
 }
 

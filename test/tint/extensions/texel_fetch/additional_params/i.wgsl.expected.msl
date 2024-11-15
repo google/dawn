@@ -21,7 +21,7 @@ void f_inner(In in) {
 }
 
 fragment void f(tint_symbol_1 tint_symbol [[stage_in]]) {
-  In const tint_symbol_2 = {.a=tint_symbol.a, .b=tint_symbol.b, .fbf=tint_symbol.fbf};
+  In const tint_symbol_2 = In{.a=tint_symbol.a, .b=tint_symbol.b, .fbf=tint_symbol.fbf};
   f_inner(tint_symbol_2);
   return;
 }

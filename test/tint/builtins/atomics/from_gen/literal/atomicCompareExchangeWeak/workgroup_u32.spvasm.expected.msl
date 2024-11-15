@@ -33,7 +33,7 @@ void atomicCompareExchangeWeak_83580d(threadgroup atomic_uint* const tint_symbol
   atomic_compare_exchange_result_u32 const tint_symbol = atomicCompareExchangeWeak_1(tint_symbol_3, 1u, 1u);
   uint const old_value_1 = tint_symbol.old_value;
   uint const x_17 = old_value_1;
-  x__atomic_compare_exchange_resultu32 const tint_symbol_1 = {.old_value=x_17, .exchanged=(x_17 == 1u)};
+  x__atomic_compare_exchange_resultu32 const tint_symbol_1 = x__atomic_compare_exchange_resultu32{.old_value=x_17, .exchanged=(x_17 == 1u)};
   res = tint_symbol_1;
   return;
 }

@@ -16,7 +16,7 @@ void tint_symbol_inner(FragmentInputs inputs) {
 }
 
 fragment void tint_symbol(float4 position [[position]], bool front_facing [[front_facing]], uint sample_index [[sample_id]], uint sample_mask [[sample_mask]]) {
-  FragmentInputs const tint_symbol_1 = {.position=position, .front_facing=front_facing, .sample_index=sample_index, .sample_mask=sample_mask};
+  FragmentInputs const tint_symbol_1 = FragmentInputs{.position=position, .front_facing=front_facing, .sample_index=sample_index, .sample_mask=sample_mask};
   tint_symbol_inner(tint_symbol_1);
   return;
 }

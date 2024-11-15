@@ -19,7 +19,7 @@ struct tint_symbol_2 {
 };
 
 Out f_inner(float4 fbf_1, float4 fbf_3) {
-  Out const tint_symbol_3 = {.x=fbf_1, .y=float4(20.0f), .z=fbf_3};
+  Out const tint_symbol_3 = Out{.x=fbf_1, .y=float4(20.0f), .z=fbf_3};
   return tint_symbol_3;
 }
 

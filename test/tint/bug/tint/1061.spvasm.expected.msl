@@ -32,7 +32,7 @@ struct tint_symbol_1 {
 
 main_out tint_symbol_inner(thread tint_private_vars_struct* const tint_private_vars, const constant buf0* const tint_symbol_4) {
   main_1(tint_private_vars, tint_symbol_4);
-  main_out const tint_symbol_2 = {.x_GLF_color_1=(*(tint_private_vars)).x_GLF_color};
+  main_out const tint_symbol_2 = main_out{.x_GLF_color_1=(*(tint_private_vars)).x_GLF_color};
   return tint_symbol_2;
 }
 

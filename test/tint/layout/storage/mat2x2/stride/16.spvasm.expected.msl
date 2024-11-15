@@ -27,8 +27,8 @@ struct SSBO {
 };
 
 tint_array<strided_arr, 2> mat2x2_stride_16_to_arr(float2x2 m) {
-  strided_arr const tint_symbol_2 = {.el=m[0u]};
-  strided_arr const tint_symbol_3 = {.el=m[1u]};
+  strided_arr const tint_symbol_2 = strided_arr{.el=m[0u]};
+  strided_arr const tint_symbol_3 = strided_arr{.el=m[1u]};
   tint_array<strided_arr, 2> const tint_symbol_4 = tint_array<strided_arr, 2>{tint_symbol_2, tint_symbol_3};
   return tint_symbol_4;
 }

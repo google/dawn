@@ -188,7 +188,7 @@ main_out tint_symbol_inner(bool sk_Clockwise_param, float4 vcolor_S0_param, thre
   (*(tint_private_vars)).sk_Clockwise = sk_Clockwise_param;
   (*(tint_private_vars)).vcolor_S0 = vcolor_S0_param;
   main_1(tint_private_vars, tint_symbol_7);
-  main_out const tint_symbol_4 = {.sk_FragColor_1=(*(tint_private_vars)).sk_FragColor};
+  main_out const tint_symbol_4 = main_out{.sk_FragColor_1=(*(tint_private_vars)).sk_FragColor};
   return tint_symbol_4;
 }
 

@@ -260,7 +260,7 @@ void frag_main_inner(Interface colors) {
 }
 
 fragment void frag_main(float4 pos [[position]], tint_symbol_2 tint_symbol_1 [[stage_in]]) {
-  Interface const tint_symbol_4 = {.col1=tint_symbol_1.col1, .col2=tint_symbol_1.col2, .pos=pos};
+  Interface const tint_symbol_4 = Interface{.col1=tint_symbol_1.col1, .col2=tint_symbol_1.col2, .pos=pos};
   frag_main_inner(tint_symbol_4);
   return;
 }
@@ -310,7 +310,7 @@ struct VertexOutput {
 };
 
 VertexOutput foo(float x) {
-  VertexOutput const tint_symbol_2 = {.pos=float4(x, x, x, 1.0f)};
+  VertexOutput const tint_symbol_2 = VertexOutput{.pos=float4(x, x, x, 1.0f)};
   return tint_symbol_2;
 }
 

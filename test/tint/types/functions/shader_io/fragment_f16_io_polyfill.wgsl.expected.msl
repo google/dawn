@@ -17,7 +17,7 @@ struct tint_symbol_2 {
 };
 
 Outputs frag_main_inner(half loc1, half4 loc2) {
-  Outputs const tint_symbol_3 = {.a=(loc1 * 2.0h), .b=(loc2 * 3.0h)};
+  Outputs const tint_symbol_3 = Outputs{.a=(loc1 * 2.0h), .b=(loc2 * 3.0h)};
   return tint_symbol_3;
 }
 

@@ -29,7 +29,7 @@ FragOutput frag_main_inner(FragInput in) {
 }
 
 fragment tint_symbol_2 frag_main(tint_symbol_1 tint_symbol [[stage_in]]) {
-  FragInput const tint_symbol_3 = {.a=tint_symbol.a, .b=tint_symbol.b};
+  FragInput const tint_symbol_3 = FragInput{.a=tint_symbol.a, .b=tint_symbol.b};
   FragOutput const inner_result = frag_main_inner(tint_symbol_3);
   tint_symbol_2 wrapper_result = {};
   wrapper_result.color = inner_result.color;

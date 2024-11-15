@@ -41,7 +41,7 @@ void frag_main_inner(S input, device S* const tint_symbol_3) {
 }
 
 fragment void frag_main(device S* tint_symbol_4 [[buffer(0)]], float4 v [[position]], tint_symbol_1 tint_symbol [[stage_in]]) {
-  S const tint_symbol_2 = {.f=tint_symbol.f, .u=tint_symbol.u, .v=v};
+  S const tint_symbol_2 = S{.f=tint_symbol.f, .u=tint_symbol.u, .v=v};
   frag_main_inner(tint_symbol_2, tint_symbol_4);
   return;
 }

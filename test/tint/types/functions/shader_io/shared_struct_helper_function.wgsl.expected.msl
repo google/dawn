@@ -7,7 +7,7 @@ struct VertexOutput {
 };
 
 VertexOutput foo(float x) {
-  VertexOutput const tint_symbol_2 = {.pos=float4(x, x, x, 1.0f), .loc0=42};
+  VertexOutput const tint_symbol_2 = VertexOutput{.pos=float4(x, x, x, 1.0f), .loc0=42};
   return tint_symbol_2;
 }
 

@@ -28,7 +28,7 @@ void tint_symbol_inner(FragmentInputs inputs, device tint_array<uint, 1>* const 
 }
 
 fragment void tint_symbol(device tint_symbol_4* tint_symbol_3 [[buffer(0)]], uint subgroup_invocation_id [[thread_index_in_simdgroup]], uint subgroup_size [[threads_per_simdgroup]]) {
-  FragmentInputs const tint_symbol_1 = {.subgroup_invocation_id=subgroup_invocation_id, .subgroup_size=subgroup_size};
+  FragmentInputs const tint_symbol_1 = FragmentInputs{.subgroup_invocation_id=subgroup_invocation_id, .subgroup_size=subgroup_size};
   tint_symbol_inner(tint_symbol_1, &((*(tint_symbol_3)).arr));
   return;
 }

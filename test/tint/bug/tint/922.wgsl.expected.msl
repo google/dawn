@@ -309,7 +309,7 @@ VertexOutput tint_symbol_inner(float3 a_Position, float2 a_UV, float4 a_Color, f
   float4 const x_e11 = (*(tint_private_vars)).v_Color;
   float2 const x_e13 = (*(tint_private_vars)).v_TexCoord;
   float4 const x_e15 = (*(tint_private_vars)).gl_Position;
-  VertexOutput const tint_symbol_4 = {.v_Color=x_e11, .v_TexCoord=x_e13, .member=x_e15};
+  VertexOutput const tint_symbol_4 = VertexOutput{.v_Color=x_e11, .v_TexCoord=x_e13, .member=x_e15};
   return tint_symbol_4;
 }
 

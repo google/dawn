@@ -82,7 +82,7 @@ FragmentOutput tint_symbol_1_inner(FragmentInput tint_symbol) {
 }
 
 fragment tint_symbol_4 tint_symbol_1(float4 position [[position]], tint_symbol_3 tint_symbol_2 [[stage_in]]) {
-  FragmentInput const tint_symbol_5 = {.position=position, .view_position=tint_symbol_2.view_position, .normal=tint_symbol_2.normal, .uv=tint_symbol_2.uv, .color=tint_symbol_2.color};
+  FragmentInput const tint_symbol_5 = FragmentInput{.position=position, .view_position=tint_symbol_2.view_position, .normal=tint_symbol_2.normal, .uv=tint_symbol_2.uv, .color=tint_symbol_2.color};
   FragmentOutput const inner_result = tint_symbol_1_inner(tint_symbol_5);
   tint_symbol_4 wrapper_result = {};
   wrapper_result.color = inner_result.color;
