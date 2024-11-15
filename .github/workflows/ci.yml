@@ -118,6 +118,12 @@ jobs:
         -DCMAKE_C_COMPILER=${{ matrix.c_compiler }}
         -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
 
+    - name: Upload build files (DEBUG)
+      uses: actions/upload-artifact@v4
+      with:
+        name: Dawn-build-${{ github.sha }}-${{ matrix.os }}-${{ matrix.build_type }}
+        path: out/${{ matrix.build_type }}
+
     - name: Build
       run: cmake --build out/${{ matrix.build_type }} --config ${{ matrix.build_type }}
 
