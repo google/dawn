@@ -9092,6 +9092,75 @@ test:12:17 note: builtin 'idx' of 'main' may be non-uniform
 )");
 }
 
+TEST_F(UniformityAnalysisTest, SubgroupShuffleDown_Delta) {
+    std::string src = R"(
+enable subgroups;
+
+var<private> delta: u32;
+
+fn foo() {
+  _ = subgroupShuffleDown(1.0, delta);
+}
+)";
+
+    RunTest(src, false);
+    EXPECT_EQ(error_,
+              R"(test:7:32 error: 'subgroupShuffleDown' requires argument 1 to be uniform
+  _ = subgroupShuffleDown(1.0, delta);
+                               ^^^^^
+
+test:7:32 note: reading from module-scope private variable 'delta' may result in a non-uniform value
+  _ = subgroupShuffleDown(1.0, delta);
+                               ^^^^^
+)");
+}
+
+TEST_F(UniformityAnalysisTest, SubgroupShuffleUp_Delta) {
+    std::string src = R"(
+enable subgroups;
+
+var<private> delta: u32;
+
+fn foo() {
+  _ = subgroupShuffleUp(1.0, delta);
+}
+)";
+
+    RunTest(src, false);
+    EXPECT_EQ(error_,
+              R"(test:7:30 error: 'subgroupShuffleUp' requires argument 1 to be uniform
+  _ = subgroupShuffleUp(1.0, delta);
+                             ^^^^^
+
+test:7:30 note: reading from module-scope private variable 'delta' may result in a non-uniform value
+  _ = subgroupShuffleUp(1.0, delta);
+                             ^^^^^
+)");
+}
+
+TEST_F(UniformityAnalysisTest, SubgroupShuffleXor_Delta) {
+    std::string src = R"(
+enable subgroups;
+
+var<private> delta: u32;
+
+fn foo() {
+  _ = subgroupShuffleXor(1.0, delta);
+}
+)";
+
+    RunTest(src, false);
+    EXPECT_EQ(error_,
+              R"(test:7:31 error: 'subgroupShuffleXor' requires argument 1 to be uniform
+  _ = subgroupShuffleXor(1.0, delta);
+                              ^^^^^
+
+test:7:31 note: reading from module-scope private variable 'delta' may result in a non-uniform value
+  _ = subgroupShuffleXor(1.0, delta);
+                              ^^^^^
+)");
+}
+
 TEST_F(UniformityAnalysisTest, WorkgroupAtomics) {
     std::string src = R"(
 var<workgroup> a : atomic<i32>;
@@ -9288,7 +9357,7 @@ fn foo() {
     }
 }
 
-TEST_P(UniformityAnalysisDiagnosticFilterTest, Directive_SubgroupUniformity) {
+TEST_P(UniformityAnalysisDiagnosticFilterTest, Directive_SubgroupUniformity_Callsite) {
     auto& param = GetParam();
     StringStream ss;
     ss << "enable subgroups;\n"
@@ -9309,6 +9378,29 @@ fn foo() {
     } else {
         StringStream err;
         err << ToStr(param) << ": 'subgroupElect' must only be called";
+        EXPECT_THAT(error_, ::testing::HasSubstr(err.str()));
+    }
+}
+
+TEST_P(UniformityAnalysisDiagnosticFilterTest, Directive_SubgroupUniformity_ShuffleDelta) {
+    auto& param = GetParam();
+    StringStream ss;
+    ss << "enable subgroups;\n"
+       << "diagnostic(" << param << ", subgroup_uniformity);" << R"(
+@group(0) @binding(0) var<storage, read_write> non_uniform : u32;
+
+fn foo() {
+  _ = subgroupShuffleUp(1.0, non_uniform);
+}
+)";
+
+    RunTest(ss.str(), param != wgsl::DiagnosticSeverity::kError);
+
+    if (param == wgsl::DiagnosticSeverity::kOff) {
+        EXPECT_TRUE(error_.empty());
+    } else {
+        StringStream err;
+        err << ToStr(param) << ": 'subgroupShuffleUp' requires argument 1 to be uniform";
         EXPECT_THAT(error_, ::testing::HasSubstr(err.str()));
     }
 }
@@ -9339,7 +9431,7 @@ TEST_P(UniformityAnalysisDiagnosticFilterTest, AttributeOnFunction_DerivativeUni
     }
 }
 
-TEST_P(UniformityAnalysisDiagnosticFilterTest, AttributeOnFunction_SubgroupUniformity) {
+TEST_P(UniformityAnalysisDiagnosticFilterTest, AttributeOnFunction_SubgroupUniformity_Callsite) {
     auto& param = GetParam();
     StringStream ss;
     ss << R"(
@@ -9360,6 +9452,31 @@ enable subgroups;
     } else {
         StringStream err;
         err << ToStr(param) << ": 'subgroupElect' must only be called";
+        EXPECT_THAT(error_, ::testing::HasSubstr(err.str()));
+    }
+}
+
+TEST_P(UniformityAnalysisDiagnosticFilterTest,
+       AttributeOnFunction_SubgroupUniformity_ShuffleDelta) {
+    auto& param = GetParam();
+    StringStream ss;
+    ss << "enable subgroups;\n"
+       << "diagnostic(" << param << ", subgroup_uniformity);" << R"(
+@group(0) @binding(0) var<storage, read_write> non_uniform : u32;
+)" << "@diagnostic("
+       << param << ", subgroup_uniformity)" <<
+        R"(fn foo() {
+  _ = subgroupShuffleUp(1.0, non_uniform);
+}
+)";
+
+    RunTest(ss.str(), param != wgsl::DiagnosticSeverity::kError);
+
+    if (param == wgsl::DiagnosticSeverity::kOff) {
+        EXPECT_TRUE(error_.empty());
+    } else {
+        StringStream err;
+        err << ToStr(param) << ": 'subgroupShuffleUp' requires argument 1 to be uniform";
         EXPECT_THAT(error_, ::testing::HasSubstr(err.str()));
     }
 }

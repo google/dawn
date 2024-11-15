@@ -1750,6 +1750,19 @@ class UniformityGraph {
                 if (builtin && builtin->Fn() == wgsl::BuiltinFn::kWorkgroupUniformLoad) {
                     // The workgroupUniformLoad builtin requires its parameter to be uniform.
                     current_function_->RequiredToBeUniform(default_severity)->AddEdge(args[i]);
+                } else if (builtin &&
+                           (builtin->Fn() == wgsl::BuiltinFn::kSubgroupShuffleDown ||
+                            builtin->Fn() == wgsl::BuiltinFn::kSubgroupShuffleUp ||
+                            builtin->Fn() == wgsl::BuiltinFn::kSubgroupShuffleXor) &&
+                           i == 1) {
+                    // The subgroupShuffle{Down,Up,Xor} builtins require their `delta` parameters to
+                    // be uniform.
+                    // Get the severity of subgroup uniformity violations in this context.
+                    auto severity = sem_.DiagnosticSeverity(
+                        call->args[i], wgsl::CoreDiagnosticRule::kSubgroupUniformity);
+                    if (severity != wgsl::DiagnosticSeverity::kOff) {
+                        current_function_->RequiredToBeUniform(severity)->AddEdge(args[i]);
+                    }
                 } else {
                     // All other builtin function parameters are RequiredToBeUniformForReturnValue,
                     // as are parameters for value constructors and value conversions.
