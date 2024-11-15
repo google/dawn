@@ -65,7 +65,7 @@ void f_inner(uint tint_local_index) {
   w = v_12;
   w[int(1)] = v_2(32u);
   w[int(1)][int(0)] = tint_bitcast_to_f16(u[0u].y).yx;
-  w[int(1)][int(0)][0u] = float16_t(f16tof32(u[0u].y));
+  w[int(1)][int(0)].x = float16_t(f16tof32(u[0u].y));
 }
 
 [numthreads(1, 1, 1)]

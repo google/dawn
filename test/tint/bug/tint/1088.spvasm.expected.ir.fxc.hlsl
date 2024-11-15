@@ -38,13 +38,13 @@ void main_1() {
   float v_4 = p.x;
   float v_5 = asfloat(x_14[13u].x);
   float v_6 = (v_5 * position_1.y);
-  p[0u] = (v_4 + sin((v_6 + asfloat(x_14[4u].x))));
+  p.x = (v_4 + sin((v_6 + asfloat(x_14[4u].x))));
   float v_7 = p.y;
-  p[1u] = (v_7 + sin((asfloat(x_14[4u].x) + 4.0f)));
+  p.y = (v_7 + sin((asfloat(x_14[4u].x) + 4.0f)));
   float4x4 v_8 = v(0u);
   gl_Position = mul(float4(p.x, p.y, p.z, 1.0f), v_8);
   vUV = uv;
-  gl_Position[1u] = (gl_Position.y * -1.0f);
+  gl_Position.y = (gl_Position.y * -1.0f);
 }
 
 main_out main_inner(float3 position_1_param, float2 uv_param, float3 normal_param) {

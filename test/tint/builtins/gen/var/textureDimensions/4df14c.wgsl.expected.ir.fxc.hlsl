@@ -3,7 +3,7 @@ RWByteAddressBuffer prevent_dce : register(u0);
 RWTexture3D<uint4> arg_0 : register(u0, space1);
 uint3 textureDimensions_4df14c() {
   uint3 v = (0u).xxx;
-  arg_0.GetDimensions(v[0u], v[1u], v[2u]);
+  arg_0.GetDimensions(v.x, v.y, v.z);
   uint3 res = v;
   return res;
 }

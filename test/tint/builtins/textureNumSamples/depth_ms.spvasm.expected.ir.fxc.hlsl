@@ -12,7 +12,7 @@ static float4 tint_symbol_1 = (0.0f).xxxx;
 void textureNumSamples_a3c8a0() {
   int res = int(0);
   uint3 v = (0u).xxx;
-  arg_0.GetDimensions(v[0u], v[1u], v[2u]);
+  arg_0.GetDimensions(v.x, v.y, v.z);
   res = int(v.z);
 }
 

@@ -38,7 +38,7 @@ int tint_f32_to_i32(float value) {
 }
 
 int accept_ptr_vec_access_elements(inout float3 v1) {
-  v1[0u] = cross(v1, v1)[0u];
+  v1.x = cross(v1, v1).x;
   return tint_f32_to_i32(v1.x);
 }
 

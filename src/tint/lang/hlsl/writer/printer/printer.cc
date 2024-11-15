@@ -331,21 +331,8 @@ class Printer : public tint::TextGenerator {
 
     void EmitDiscard() { Line() << "discard;"; }
 
-    void EmitStoreVectorElement(const core::ir::StoreVectorElement* l) {
-        auto out = Line();
-
-        EmitValue(out, l->To());
-        out << "[";
-        EmitValue(out, l->Index());
-        out << "] = ";
-        EmitValue(out, l->Value());
-        out << ";";
-    }
-
-    void EmitLoadVectorElement(StringStream& out, const core::ir::LoadVectorElement* l) {
-        EmitValue(out, l->From());
-
-        if (auto* cnst = l->Index()->As<core::ir::Constant>()) {
+    void EmitVectorAccess(StringStream& out, const core::ir::Value* index) {
+        if (auto* cnst = index->As<core::ir::Constant>()) {
             out << ".";
             switch (cnst->Value()->ValueAs<uint32_t>()) {
                 case 0:
@@ -366,9 +353,24 @@ class Printer : public tint::TextGenerator {
 
         } else {
             out << "[";
-            EmitValue(out, l->Index());
+            EmitValue(out, index);
             out << "]";
         }
+    }
+
+    void EmitStoreVectorElement(const core::ir::StoreVectorElement* l) {
+        auto out = Line();
+
+        EmitValue(out, l->To());
+        EmitVectorAccess(out, l->Index());
+        out << " = ";
+        EmitValue(out, l->Value());
+        out << ";";
+    }
+
+    void EmitLoadVectorElement(StringStream& out, const core::ir::LoadVectorElement* l) {
+        EmitValue(out, l->From());
+        EmitVectorAccess(out, l->Index());
     }
 
     void EmitExitSwitch() { Line() << "break;"; }
@@ -861,6 +863,7 @@ class Printer : public tint::TextGenerator {
         EmitValue(out, a->Object());
 
         auto* current_type = a->Object()->Type();
+
         for (auto* index : a->Indices()) {
             TINT_ASSERT(current_type);
 
@@ -872,6 +875,10 @@ class Printer : public tint::TextGenerator {
                     auto* member = s->Members()[c->Value()->ValueAs<uint32_t>()];
                     out << "." << member->Name().Name();
                     current_type = member->Type();
+                },
+                [&](const core::type::Vector*) {
+                    TINT_ASSERT(index == a->Indices().Back());
+                    EmitVectorAccess(out, index);
                 },
                 [&](Default) {
                     out << "[";

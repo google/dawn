@@ -39,7 +39,7 @@ void f() {
   p = v_8;
   p[int(1)] = v(128u);
   p[int(1)][int(0)] = asfloat(u[1u].xyz).zxy;
-  p[int(1)][int(0)][0u] = asfloat(u[1u].x);
+  p[int(1)][int(0)].x = asfloat(u[1u].x);
   s.Store(0u, asuint(p[int(1)][int(0)].x));
 }
 

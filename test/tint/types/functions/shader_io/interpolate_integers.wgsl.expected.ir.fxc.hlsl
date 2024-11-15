@@ -43,7 +43,7 @@ vert_main_outputs vert_main() {
 }
 
 frag_main_outputs frag_main(frag_main_inputs inputs) {
-  Interface v_3 = {inputs.Interface_i, inputs.Interface_u, inputs.Interface_vi, inputs.Interface_vu, float4(inputs.Interface_pos.xyz, (1.0f / inputs.Interface_pos[3u]))};
+  Interface v_3 = {inputs.Interface_i, inputs.Interface_u, inputs.Interface_vi, inputs.Interface_vu, float4(inputs.Interface_pos.xyz, (1.0f / inputs.Interface_pos.w))};
   frag_main_outputs v_4 = {frag_main_inner(v_3)};
   return v_4;
 }

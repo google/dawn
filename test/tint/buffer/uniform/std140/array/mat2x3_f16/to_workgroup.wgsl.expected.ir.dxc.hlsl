@@ -70,7 +70,7 @@ void f_inner(uint tint_local_index) {
   w = v_14;
   w[int(1)] = v_4(32u);
   w[int(1)][int(0)] = tint_bitcast_to_f16(u[0u].zw).xyz.zxy;
-  w[int(1)][int(0)][0u] = float16_t(f16tof32(u[0u].z));
+  w[int(1)][int(0)].x = float16_t(f16tof32(u[0u].z));
   s.Store<float16_t>(0u, w[int(1)][int(0)].x);
 }
 

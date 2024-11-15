@@ -21,7 +21,7 @@ void f_inner(uint tint_local_index) {
   w = v(0u);
   w[int(1)] = asfloat(u[0u]);
   w[int(1)] = asfloat(u[0u]).ywxz;
-  w[int(0)][int(1)] = asfloat(u[1u].x);
+  w[int(0)].y = asfloat(u[1u].x);
 }
 
 [numthreads(1, 1, 1)]

@@ -19,7 +19,7 @@ float4x4 v(uint start_byte_offset) {
 }
 
 void main_inner(uint3 GlobalInvocationID) {
-  uint index = GlobalInvocationID[0u];
+  uint index = GlobalInvocationID.x;
   if ((index >= config[0u].x)) {
     return;
   }
@@ -87,23 +87,23 @@ void main_inner(uint3 GlobalInvocationID) {
               float4 p = (0.0f).xxxx;
               uint v_15 = i;
               if ((frustumPlanes[v_15].x > 0.0f)) {
-                p[0u] = boxMax.x;
+                p.x = boxMax.x;
               } else {
-                p[0u] = boxMin.x;
+                p.x = boxMin.x;
               }
               uint v_16 = i;
               if ((frustumPlanes[v_16].y > 0.0f)) {
-                p[1u] = boxMax.y;
+                p.y = boxMax.y;
               } else {
-                p[1u] = boxMin.y;
+                p.y = boxMin.y;
               }
               uint v_17 = i;
               if ((frustumPlanes[v_17].z > 0.0f)) {
-                p[2u] = boxMax.z;
+                p.z = boxMax.z;
               } else {
-                p[2u] = boxMin.z;
+                p.z = boxMin.z;
               }
-              p[3u] = 1.0f;
+              p.w = 1.0f;
               float v_18 = dp;
               float4 v_19 = p;
               uint v_20 = i;
@@ -139,7 +139,7 @@ void main_inner(uint3 GlobalInvocationID) {
             }
             uint v_23 = offset;
             uint v_24 = (uint(tileId) * 260u);
-            tileLightId.Store(((4u + v_24) + (uint(v_23) * 4u)), GlobalInvocationID[0u]);
+            tileLightId.Store(((4u + v_24) + (uint(v_23) * 4u)), GlobalInvocationID.x);
           }
           {
             x = (x + int(1));

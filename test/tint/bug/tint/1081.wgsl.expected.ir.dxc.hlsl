@@ -16,7 +16,7 @@ int f(int x) {
 }
 
 int main_inner(int3 x) {
-  int y = x[0u];
+  int y = x.x;
   {
     while(true) {
       int r = f(y);

@@ -13,7 +13,7 @@ RWByteAddressBuffer prevent_dce : register(u0);
 Texture2DArray<float4> arg_0 : register(t0, space1);
 uint2 textureDimensions_3fc3dc() {
   uint4 v = (0u).xxxx;
-  arg_0.GetDimensions(uint(1u), v[0u], v[1u], v[2u], v[3u]);
+  arg_0.GetDimensions(uint(1u), v.x, v.y, v.z, v.w);
   uint2 res = v.xy;
   return res;
 }

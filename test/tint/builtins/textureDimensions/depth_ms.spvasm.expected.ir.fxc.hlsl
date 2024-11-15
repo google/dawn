@@ -12,7 +12,7 @@ static float4 tint_symbol_1 = (0.0f).xxxx;
 void textureDimensions_f60bdb() {
   int2 res = (int(0)).xx;
   uint3 v = (0u).xxx;
-  arg_0.GetDimensions(v[0u], v[1u], v[2u]);
+  arg_0.GetDimensions(v.x, v.y, v.z);
   res = int2(v.xy);
 }
 

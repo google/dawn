@@ -154,21 +154,21 @@ void main() {
   Inner array_struct_inner[4] = v_3(576u);
   int v_48 = (tint_f32_to_i32(scalar_f32) + scalar_i32);
   int v_49 = (v_48 + int(scalar_u32));
-  int v_50 = ((v_49 + tint_f32_to_i32(vec2_f32[0u])) + vec2_i32[0u]);
-  int v_51 = (v_50 + int(vec2_u32[0u]));
-  int v_52 = ((v_51 + tint_f32_to_i32(vec3_f32[1u])) + vec3_i32[1u]);
-  int v_53 = (v_52 + int(vec3_u32[1u]));
-  int v_54 = ((v_53 + tint_f32_to_i32(vec4_f32[2u])) + vec4_i32[2u]);
-  int v_55 = (v_54 + int(vec4_u32[2u]));
-  int v_56 = (v_55 + tint_f32_to_i32(mat2x2_f32[int(0)][0u]));
-  int v_57 = (v_56 + tint_f32_to_i32(mat2x3_f32[int(0)][0u]));
-  int v_58 = (v_57 + tint_f32_to_i32(mat2x4_f32[int(0)][0u]));
-  int v_59 = (v_58 + tint_f32_to_i32(mat3x2_f32[int(0)][0u]));
-  int v_60 = (v_59 + tint_f32_to_i32(mat3x3_f32[int(0)][0u]));
-  int v_61 = (v_60 + tint_f32_to_i32(mat3x4_f32[int(0)][0u]));
-  int v_62 = (v_61 + tint_f32_to_i32(mat4x2_f32[int(0)][0u]));
-  int v_63 = (v_62 + tint_f32_to_i32(mat4x3_f32[int(0)][0u]));
-  int v_64 = (v_63 + tint_f32_to_i32(mat4x4_f32[int(0)][0u]));
-  s.Store(0u, asuint((((v_64 + tint_f32_to_i32(arr2_vec3_f32[int(0)][0u])) + struct_inner.scalar_i32) + array_struct_inner[int(0)].scalar_i32)));
+  int v_50 = ((v_49 + tint_f32_to_i32(vec2_f32.x)) + vec2_i32.x);
+  int v_51 = (v_50 + int(vec2_u32.x));
+  int v_52 = ((v_51 + tint_f32_to_i32(vec3_f32.y)) + vec3_i32.y);
+  int v_53 = (v_52 + int(vec3_u32.y));
+  int v_54 = ((v_53 + tint_f32_to_i32(vec4_f32.z)) + vec4_i32.z);
+  int v_55 = (v_54 + int(vec4_u32.z));
+  int v_56 = (v_55 + tint_f32_to_i32(mat2x2_f32[int(0)].x));
+  int v_57 = (v_56 + tint_f32_to_i32(mat2x3_f32[int(0)].x));
+  int v_58 = (v_57 + tint_f32_to_i32(mat2x4_f32[int(0)].x));
+  int v_59 = (v_58 + tint_f32_to_i32(mat3x2_f32[int(0)].x));
+  int v_60 = (v_59 + tint_f32_to_i32(mat3x3_f32[int(0)].x));
+  int v_61 = (v_60 + tint_f32_to_i32(mat3x4_f32[int(0)].x));
+  int v_62 = (v_61 + tint_f32_to_i32(mat4x2_f32[int(0)].x));
+  int v_63 = (v_62 + tint_f32_to_i32(mat4x3_f32[int(0)].x));
+  int v_64 = (v_63 + tint_f32_to_i32(mat4x4_f32[int(0)].x));
+  s.Store(0u, asuint((((v_64 + tint_f32_to_i32(arr2_vec3_f32[int(0)].x)) + struct_inner.scalar_i32) + array_struct_inner[int(0)].scalar_i32)));
 }
 

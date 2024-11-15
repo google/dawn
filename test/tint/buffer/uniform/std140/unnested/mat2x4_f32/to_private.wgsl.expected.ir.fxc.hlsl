@@ -13,6 +13,6 @@ void f() {
   p = v(0u);
   p[int(1)] = asfloat(u[0u]);
   p[int(1)] = asfloat(u[0u]).ywxz;
-  p[int(0)][int(1)] = asfloat(u[1u].x);
+  p[int(0)].y = asfloat(u[1u].x);
 }
 

@@ -14,7 +14,7 @@ Texture1D<float4> arg_0 : register(t0, space1);
 uint textureDimensions_aac604() {
   uint arg_1 = 1u;
   uint2 v = (0u).xx;
-  arg_0.GetDimensions(uint(arg_1), v[0u], v[1u]);
+  arg_0.GetDimensions(uint(arg_1), v.x, v.y);
   uint res = v.x;
   return res;
 }

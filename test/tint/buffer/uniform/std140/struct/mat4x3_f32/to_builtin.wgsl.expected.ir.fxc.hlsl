@@ -13,6 +13,6 @@ float4x3 v(uint start_byte_offset) {
 void f() {
   float3x4 t = transpose(v(400u));
   float l = length(asfloat(u[2u].xyz).zxy);
-  float a = abs(asfloat(u[2u].xyz).zxy[0u]);
+  float a = abs(asfloat(u[2u].xyz).zxy.x);
 }
 

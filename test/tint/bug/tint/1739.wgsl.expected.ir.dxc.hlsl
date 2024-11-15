@@ -52,28 +52,28 @@ float4 tint_TextureLoadExternal(Texture2D<float4> plane_0, Texture2D<float4> pla
   float v_8 = 0.0f;
   if ((params.numPlanes == 1u)) {
     uint3 v_9 = (0u).xxx;
-    plane_0.GetDimensions(0u, v_9[0u], v_9[1u], v_9[2u]);
+    plane_0.GetDimensions(0u, v_9.x, v_9.y, v_9.z);
     uint v_10 = min(0u, (v_9.z - 1u));
     uint3 v_11 = (0u).xxx;
-    plane_0.GetDimensions(uint(v_10), v_11[0u], v_11[1u], v_11[2u]);
+    plane_0.GetDimensions(uint(v_10), v_11.x, v_11.y, v_11.z);
     int2 v_12 = int2(min(v_6, (v_11.xy - (1u).xx)));
     float4 v_13 = float4(plane_0.Load(int3(v_12, int(v_10))));
     v_7 = v_13.xyz;
-    v_8 = v_13[3u];
+    v_8 = v_13.w;
   } else {
     uint3 v_14 = (0u).xxx;
-    plane_0.GetDimensions(0u, v_14[0u], v_14[1u], v_14[2u]);
+    plane_0.GetDimensions(0u, v_14.x, v_14.y, v_14.z);
     uint v_15 = min(0u, (v_14.z - 1u));
     uint3 v_16 = (0u).xxx;
-    plane_0.GetDimensions(uint(v_15), v_16[0u], v_16[1u], v_16[2u]);
+    plane_0.GetDimensions(uint(v_15), v_16.x, v_16.y, v_16.z);
     int2 v_17 = int2(min(v_6, (v_16.xy - (1u).xx)));
-    float v_18 = float4(plane_0.Load(int3(v_17, int(v_15))))[0u];
+    float v_18 = float4(plane_0.Load(int3(v_17, int(v_15)))).x;
     uint2 v_19 = tint_v2f32_to_v2u32((v_5 * params.plane1CoordFactor));
     uint3 v_20 = (0u).xxx;
-    plane_1.GetDimensions(0u, v_20[0u], v_20[1u], v_20[2u]);
+    plane_1.GetDimensions(0u, v_20.x, v_20.y, v_20.z);
     uint v_21 = min(0u, (v_20.z - 1u));
     uint3 v_22 = (0u).xxx;
-    plane_1.GetDimensions(uint(v_21), v_22[0u], v_22[1u], v_22[2u]);
+    plane_1.GetDimensions(uint(v_21), v_22.x, v_22.y, v_22.z);
     int2 v_23 = int2(min(v_19, (v_22.xy - (1u).xx)));
     v_7 = mul(params.yuvToRgbConversionMatrix, float4(v_18, float4(plane_1.Load(int3(v_23, int(v_21)))).xy, 1.0f));
     v_8 = 1.0f;

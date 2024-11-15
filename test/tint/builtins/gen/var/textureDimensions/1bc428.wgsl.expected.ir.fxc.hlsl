@@ -14,7 +14,7 @@ Texture3D<float4> arg_0 : register(t0, space1);
 uint3 textureDimensions_1bc428() {
   int arg_1 = int(1);
   uint4 v = (0u).xxxx;
-  arg_0.GetDimensions(uint(arg_1), v[0u], v[1u], v[2u], v[3u]);
+  arg_0.GetDimensions(uint(arg_1), v.x, v.y, v.z, v.w);
   uint3 res = v.xyz;
   return res;
 }

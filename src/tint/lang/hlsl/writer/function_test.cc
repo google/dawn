@@ -118,7 +118,7 @@ void main_inner(Interface p) {
 }
 
 void main(main_inputs inputs) {
-  Interface v = {float4(inputs.Interface_pos.xyz, (1.0f / inputs.Interface_pos[3u]))};
+  Interface v = {float4(inputs.Interface_pos.xyz, (1.0f / inputs.Interface_pos.w))};
   main_inner(v);
 }
 
@@ -214,7 +214,7 @@ float frag_main_inner(float4 coord) {
 }
 
 frag_main_outputs frag_main(frag_main_inputs inputs) {
-  frag_main_outputs v = {frag_main_inner(float4(inputs.coord.xyz, (1.0f / inputs.coord[3u])))};
+  frag_main_outputs v = {frag_main_inner(float4(inputs.coord.xyz, (1.0f / inputs.coord.w)))};
   return v;
 }
 
@@ -313,7 +313,7 @@ vert_main_outputs vert_main() {
 }
 
 void frag_main(frag_main_inputs inputs) {
-  Interface v_3 = {float4(inputs.Interface_pos.xyz, (1.0f / inputs.Interface_pos[3u])), inputs.Interface_col1, inputs.Interface_col2};
+  Interface v_3 = {float4(inputs.Interface_pos.xyz, (1.0f / inputs.Interface_pos.w)), inputs.Interface_col1, inputs.Interface_col2};
   frag_main_inner(v_3);
 }
 

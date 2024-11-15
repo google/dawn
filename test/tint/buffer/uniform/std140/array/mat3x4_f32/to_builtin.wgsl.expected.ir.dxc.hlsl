@@ -13,8 +13,8 @@ float3x4 v(uint start_byte_offset) {
 void f() {
   float4x3 t = transpose(v(96u));
   float l = length(asfloat(u[1u]).ywxz);
-  float a = abs(asfloat(u[1u]).ywxz[0u]);
-  float v_3 = (t[int(0)][0u] + float(l));
+  float a = abs(asfloat(u[1u]).ywxz.x);
+  float v_3 = (t[int(0)].x + float(l));
   s.Store(0u, asuint((v_3 + float(a))));
 }
 

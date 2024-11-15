@@ -18,7 +18,7 @@ cbuffer cbuffer_tint_num_workgroups : register(b0) {
   uint4 tint_num_workgroups[1];
 };
 void main_inner(ComputeInputs inputs) {
-  uint foo = ((((inputs.local_invocation_id[0u] + inputs.local_invocation_index) + inputs.global_invocation_id[0u]) + inputs.workgroup_id[0u]) + inputs.num_workgroups[0u]);
+  uint foo = ((((inputs.local_invocation_id.x + inputs.local_invocation_index) + inputs.global_invocation_id.x) + inputs.workgroup_id.x) + inputs.num_workgroups.x);
 }
 
 [numthreads(1, 1, 1)]

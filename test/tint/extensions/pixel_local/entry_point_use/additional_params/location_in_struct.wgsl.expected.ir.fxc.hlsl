@@ -25,8 +25,8 @@ uint tint_f32_to_u32(float value) {
 }
 
 void f_inner(In tint_symbol) {
-  uint v = tint_f32_to_u32(tint_symbol.a[0u]);
-  uint v_1 = (v + tint_f32_to_u32(tint_symbol.b[1u]));
+  uint v = tint_f32_to_u32(tint_symbol.a.x);
+  uint v_1 = (v + tint_f32_to_u32(tint_symbol.b.y));
   P.a = (P.a + v_1);
 }
 

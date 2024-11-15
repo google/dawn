@@ -50,9 +50,9 @@ float4x4 getFrameData_f1_(inout float frameID) {
   float x_51 = fX;
   float2 v_2 = float2(x_51, 0.5f);
   float4 x_54 = frameMapTexture.SampleBias(frameMapSampler, v_2, clamp(0.0f, -16.0f, 15.9899997711181640625f));
-  float4 v_3 = float4(x_40[0u], x_40[1u], x_40[2u], x_40[3u]);
-  float4 v_4 = float4(x_47[0u], x_47[1u], x_47[2u], x_47[3u]);
-  return float4x4(v_3, v_4, float4(x_54[0u], x_54[1u], x_54[2u], x_54[3u]), (0.0f).xxxx);
+  float4 v_3 = float4(x_40.x, x_40.y, x_40.z, x_40.w);
+  float4 v_4 = float4(x_47.x, x_47.y, x_47.z, x_47.w);
+  return float4x4(v_3, v_4, float4(x_54.x, x_54.y, x_54.z, x_54.w), (0.0f).xxxx);
 }
 
 void main_1() {
@@ -78,7 +78,7 @@ void main_1() {
   float2 x_86 = tUV;
   tileUV = frac(x_86);
   float x_91 = tileUV.y;
-  tileUV[1u] = (1.0f - x_91);
+  tileUV.y = (1.0f - x_91);
   float2 x_95 = tUV;
   tileID = floor(x_95);
   float2 x_101 = asfloat(x_20[6u].xy);
@@ -102,7 +102,7 @@ void main_1() {
           float2 x_150 = tileID;
           float2 x_154 = asfloat(x_20[5u].zw);
           float4 x_156 = tileMapsTexture1.SampleBias(tileMapsSampler, ((x_150 + (0.5f).xx) / x_154), clamp(0.0f, -16.0f, 15.9899997711181640625f));
-          frameID_1 = x_156[0u];
+          frameID_1 = x_156.x;
           break;
         }
         case int(0):
@@ -110,7 +110,7 @@ void main_1() {
           float2 x_136 = tileID;
           float2 x_140 = asfloat(x_20[5u].zw);
           float4 x_142 = tileMapsTexture0.SampleBias(tileMapsSampler, ((x_136 + (0.5f).xx) / x_140), clamp(0.0f, -16.0f, 15.9899997711181640625f));
-          frameID_1 = x_142[0u];
+          frameID_1 = x_142.x;
           break;
         }
         default:
@@ -164,18 +164,18 @@ void main_1() {
       frameData = x_225;
       float4 x_228 = frameData[int(0)];
       float2 x_231 = asfloat(x_20[6u].xy);
-      frameSize = (float2(x_228[3u], x_228[2u]) / x_231);
+      frameSize = (float2(x_228.w, x_228.z) / x_231);
       float4 x_235 = frameData[int(0)];
       float2 x_237 = sheetUnits;
-      offset_1 = (float2(x_235[0u], x_235[1u]) * x_237);
+      offset_1 = (float2(x_235.x, x_235.y) * x_237);
       float4 x_241 = frameData[int(2)];
       float4 x_244 = frameData[int(0)];
-      float2 v_8 = float2(x_241[0u], x_241[1u]);
-      ratio = (v_8 / float2(x_244[3u], x_244[2u]));
+      float2 v_8 = float2(x_241.x, x_241.y);
+      ratio = (v_8 / float2(x_244.w, x_244.z));
       float x_248 = frameData[int(2)].z;
       if ((x_248 == 1.0f)) {
         float2 x_252 = tileUV;
-        tileUV = float2(x_252[1u], x_252[0u]);
+        tileUV = float2(x_252.y, x_252.x);
       }
       int x_254 = i;
       if ((x_254 == int(0))) {
@@ -196,12 +196,12 @@ void main_1() {
         float4 x_290 = color;
         float4 x_292 = nc;
         float x_295 = nc.w;
-        float3 v_9 = float3(x_290[0u], x_290[1u], x_290[2u]);
-        float3 v_10 = float3(x_292[0u], x_292[1u], x_292[2u]);
+        float3 v_9 = float3(x_290.x, x_290.y, x_290.z);
+        float3 v_10 = float3(x_292.x, x_292.y, x_292.z);
         mixed = lerp(v_9, v_10, float3(x_295, x_295, x_295));
         float3 x_298 = mixed;
         float x_299 = alpha;
-        color = float4(x_298[0u], x_298[1u], x_298[2u], x_299);
+        color = float4(x_298.x, x_298.y, x_298.z, x_299);
       }
       {
         int x_304 = i;
@@ -212,9 +212,9 @@ void main_1() {
   }
   float3 x_310 = asfloat(x_20[7u].xyz);
   float4 x_311 = color;
-  float3 x_313 = (float3(x_311[0u], x_311[1u], x_311[2u]) * x_310);
+  float3 x_313 = (float3(x_311.x, x_311.y, x_311.z) * x_310);
   float4 x_314 = color;
-  color = float4(x_313[0u], x_313[1u], x_313[2u], x_314[3u]);
+  color = float4(x_313.x, x_313.y, x_313.z, x_314.w);
   float4 x_318 = color;
   glFragColor = x_318;
 }

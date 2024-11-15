@@ -14,7 +14,7 @@ TextureCubeArray arg_0 : register(t0, space1);
 uint2 textureDimensions_bd94c8() {
   uint arg_1 = 1u;
   uint4 v = (0u).xxxx;
-  arg_0.GetDimensions(uint(arg_1), v[0u], v[1u], v[2u], v[3u]);
+  arg_0.GetDimensions(uint(arg_1), v.x, v.y, v.z, v.w);
   uint2 res = v.xy;
   return res;
 }

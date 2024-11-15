@@ -21,7 +21,7 @@ void main_inner(FragmentInputs inputs) {
 }
 
 void main(main_inputs inputs) {
-  FragmentInputs v = {float4(inputs.FragmentInputs_position.xyz, (1.0f / inputs.FragmentInputs_position[3u])), inputs.FragmentInputs_front_facing, inputs.FragmentInputs_sample_index, inputs.FragmentInputs_sample_mask};
+  FragmentInputs v = {float4(inputs.FragmentInputs_position.xyz, (1.0f / inputs.FragmentInputs_position.w)), inputs.FragmentInputs_front_facing, inputs.FragmentInputs_sample_index, inputs.FragmentInputs_sample_mask};
   main_inner(v);
 }
 

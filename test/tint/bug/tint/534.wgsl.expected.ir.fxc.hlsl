@@ -19,12 +19,12 @@ uint4 tint_v4f32_to_v4u32(float4 value) {
 
 void main_inner(uint3 GlobalInvocationID) {
   uint2 v = (0u).xx;
-  src.GetDimensions(v[0u], v[1u]);
+  src.GetDimensions(v.x, v.y);
   uint2 size = v;
   uint2 dstTexCoord = GlobalInvocationID.xy;
   uint2 srcTexCoord = dstTexCoord;
   if ((uniforms[0u].x == 1u)) {
-    srcTexCoord[1u] = ((size.y - dstTexCoord.y) - 1u);
+    srcTexCoord.y = ((size.y - dstTexCoord.y) - 1u);
   }
   int2 v_1 = int2(srcTexCoord);
   float4 srcColor = float4(src.Load(int3(v_1, int(int(0)))));
@@ -57,7 +57,7 @@ void main_inner(uint3 GlobalInvocationID) {
       continue;
     }
   }
-  uint outputIndex = ((GlobalInvocationID[1u] * uint(size.x)) + GlobalInvocationID[0u]);
+  uint outputIndex = ((GlobalInvocationID.y * uint(size.x)) + GlobalInvocationID.x);
   if (success) {
     output.Store((0u + (uint(outputIndex) * 4u)), 1u);
   } else {

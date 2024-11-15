@@ -34,7 +34,7 @@ vert_main_outputs vert_main() {
 }
 
 void frag_main(frag_main_inputs inputs) {
-  Interface v_3 = {inputs.Interface_col1, inputs.Interface_col2, float4(inputs.Interface_pos.xyz, (1.0f / inputs.Interface_pos[3u]))};
+  Interface v_3 = {inputs.Interface_col1, inputs.Interface_col2, float4(inputs.Interface_pos.xyz, (1.0f / inputs.Interface_pos.w))};
   frag_main_inner(v_3);
 }
 

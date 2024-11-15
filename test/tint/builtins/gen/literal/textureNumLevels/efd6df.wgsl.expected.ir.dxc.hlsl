@@ -13,7 +13,7 @@ RWByteAddressBuffer prevent_dce : register(u0);
 Texture2D<uint4> arg_0 : register(t0, space1);
 uint textureNumLevels_efd6df() {
   uint3 v = (0u).xxx;
-  arg_0.GetDimensions(0u, v[0u], v[1u], v[2u]);
+  arg_0.GetDimensions(0u, v.x, v.y, v.z);
   uint res = v.z;
   return res;
 }

@@ -20,7 +20,7 @@ int foo_inner(float tint_symbol, float2 coord) {
   if ((tint_symbol == 0.0f)) {
     continue_execution = false;
   }
-  int result = tint_f32_to_i32(t.Sample(s, coord)[0u]);
+  int result = tint_f32_to_i32(t.Sample(s, coord).x);
   {
     int i = int(0);
     while(true) {

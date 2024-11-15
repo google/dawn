@@ -15,6 +15,6 @@ float3x2 v(uint start_byte_offset) {
 void f() {
   float2x3 t = transpose(v(0u));
   float l = length(asfloat(u[0u].zw));
-  float a = abs(asfloat(u[0u].xy).yx[0u]);
+  float a = abs(asfloat(u[0u].xy).yx.x);
 }
 

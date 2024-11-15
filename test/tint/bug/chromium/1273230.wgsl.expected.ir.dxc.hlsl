@@ -26,13 +26,13 @@ float3 toVoxelPos(float3 position) {
   float cubeSize = max(v_4, bbSize.z);
   float gridSize = float(uniforms[0u].y);
   float v_5 = cubeSize;
-  float v_6 = (v_5 * (position[0u] - asfloat(uniforms[1u].x)));
+  float v_6 = (v_5 * (position.x - asfloat(uniforms[1u].x)));
   float gx = (v_6 / cubeSize);
   float v_7 = gx;
-  float v_8 = (v_7 * (position[1u] - asfloat(uniforms[1u].y)));
+  float v_8 = (v_7 * (position.y - asfloat(uniforms[1u].y)));
   float gy = (v_8 / gridSize);
   float v_9 = gridSize;
-  float v_10 = (v_9 * (position[2u] - asfloat(uniforms[1u].z)));
+  float v_10 = (v_9 * (position.z - asfloat(uniforms[1u].z)));
   float gz = (v_10 / gridSize);
   return float3(gz, gz, gz);
 }
@@ -83,7 +83,7 @@ void doIgnore() {
 }
 
 void main_count_inner(uint3 GlobalInvocationID) {
-  uint triangleIndex = GlobalInvocationID[0u];
+  uint triangleIndex = GlobalInvocationID.x;
   if ((triangleIndex >= uniforms[0u].x)) {
     return;
   }

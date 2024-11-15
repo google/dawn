@@ -117,7 +117,7 @@ void simulate_inner(uint3 GlobalInvocationID) {
   float2 v_14 = asfloat(sim_params[1u]).xy;
   float2 v_15 = (v_14 * float2(GlobalInvocationID.xy));
   rand_seed = (v_15 * asfloat(sim_params[1u]).zw);
-  uint idx = GlobalInvocationID[0u];
+  uint idx = GlobalInvocationID.x;
   Particle particle = v_9((0u + (uint(idx) * 48u)));
   uint v_16 = (uint(idx) * 48u);
   Particle v_17 = particle;
@@ -126,10 +126,10 @@ void simulate_inner(uint3 GlobalInvocationID) {
 
 void export_level_inner(uint3 coord) {
   uint2 v_18 = (0u).xx;
-  tex_out.GetDimensions(v_18[0u], v_18[1u]);
+  tex_out.GetDimensions(v_18.x, v_18.y);
   if (all((coord.xy < uint2(v_18)))) {
-    uint dst_offset = (coord[0u] << ((coord[1u] * ubo[0u].x) & 31u));
-    uint src_offset = ((coord[0u] - 2u) + ((coord[1u] >> (2u & 31u)) * ubo[0u].x));
+    uint dst_offset = (coord.x << ((coord.y * ubo[0u].x) & 31u));
+    uint src_offset = ((coord.x - 2u) + ((coord.y >> (2u & 31u)) * ubo[0u].x));
     float a = asfloat(buf_in.Load((0u + (uint((src_offset << (0u & 31u))) * 4u))));
     float b = asfloat(buf_in.Load((0u + (uint((src_offset + 1u)) * 4u))));
     float c = asfloat(buf_in.Load((0u + (uint(((src_offset + 1u) + ubo[0u].x)) * 4u))));

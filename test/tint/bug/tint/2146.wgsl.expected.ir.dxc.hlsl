@@ -12,6 +12,6 @@ uint globalId2Index() {
 void main() {
   vector<float16_t, 4> a = (float16_t(0.0h)).xxxx;
   float16_t b = float16_t(1.0h);
-  a[int(0)] = (a.x + b);
+  a.x = (a.x + b);
 }
 

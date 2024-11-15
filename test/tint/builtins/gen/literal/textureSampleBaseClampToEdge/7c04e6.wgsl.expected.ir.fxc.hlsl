@@ -60,9 +60,9 @@ float4 tint_TextureSampleExternal(Texture2D<float4> plane_0, Texture2D<float4> p
   if ((params.numPlanes == 1u)) {
     float4 v_9 = plane_0.SampleLevel(tint_sampler, v_6, float(0.0f));
     v_7 = v_9.xyz;
-    v_8 = v_9[3u];
+    v_8 = v_9.w;
   } else {
-    float v_10 = plane_0.SampleLevel(tint_sampler, v_6, float(0.0f))[0u];
+    float v_10 = plane_0.SampleLevel(tint_sampler, v_6, float(0.0f)).x;
     float2 v_11 = clamp(v_5, params.samplePlane1RectMin, params.samplePlane1RectMax);
     v_7 = mul(params.yuvToRgbConversionMatrix, float4(v_10, plane_1.SampleLevel(tint_sampler, v_11, float(0.0f)).xy, 1.0f));
     v_8 = 1.0f;

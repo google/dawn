@@ -14,7 +14,7 @@ TextureCube<float4> arg_0 : register(t0, space1);
 uint2 textureDimensions_49a067() {
   int arg_1 = int(1);
   uint3 v = (0u).xxx;
-  arg_0.GetDimensions(uint(arg_1), v[0u], v[1u], v[2u]);
+  arg_0.GetDimensions(uint(arg_1), v.x, v.y, v.z);
   uint2 res = v.xy;
   return res;
 }

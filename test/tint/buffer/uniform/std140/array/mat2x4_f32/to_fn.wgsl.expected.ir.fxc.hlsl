@@ -4,15 +4,15 @@ cbuffer cbuffer_u : register(b0) {
 };
 RWByteAddressBuffer s : register(u1);
 float a(float2x4 a_1[4]) {
-  return a_1[int(0)][int(0)][0u];
+  return a_1[int(0)][int(0)].x;
 }
 
 float b(float2x4 m) {
-  return m[int(0)][0u];
+  return m[int(0)].x;
 }
 
 float c(float4 v) {
-  return v[0u];
+  return v.x;
 }
 
 float d(float f_1) {
@@ -52,6 +52,6 @@ void f() {
   float v_8 = a(v_7);
   float v_9 = (v_8 + b(v_1(32u)));
   float v_10 = (v_9 + c(asfloat(u[2u]).ywxz));
-  s.Store(0u, asuint((v_10 + d(asfloat(u[2u]).ywxz[0u]))));
+  s.Store(0u, asuint((v_10 + d(asfloat(u[2u]).ywxz.x))));
 }
 

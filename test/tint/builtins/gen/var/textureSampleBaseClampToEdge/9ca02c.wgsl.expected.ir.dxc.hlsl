@@ -16,7 +16,7 @@ float4 textureSampleBaseClampToEdge_9ca02c() {
   float2 arg_2 = (1.0f).xx;
   float2 v = arg_2;
   uint2 v_1 = (0u).xx;
-  arg_0.GetDimensions(v_1[0u], v_1[1u]);
+  arg_0.GetDimensions(v_1.x, v_1.y);
   float2 v_2 = ((0.5f).xx / float2(v_1));
   float2 v_3 = clamp(v, v_2, ((1.0f).xx - v_2));
   float4 res = arg_0.SampleLevel(arg_1, v_3, float(0.0f));

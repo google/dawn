@@ -29,6 +29,6 @@ void f() {
   p = v_4(0u);
   p[int(1)] = tint_bitcast_to_f16(u[0u].xy);
   p[int(1)] = tint_bitcast_to_f16(u[0u].xy).ywxz;
-  p[int(0)][int(1)] = float16_t(f16tof32(u[0u].z));
+  p[int(0)].y = float16_t(f16tof32(u[0u].z));
 }
 

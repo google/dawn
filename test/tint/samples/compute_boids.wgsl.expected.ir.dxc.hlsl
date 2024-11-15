@@ -23,11 +23,11 @@ cbuffer cbuffer_params : register(b0) {
 RWByteAddressBuffer particlesA : register(u1);
 RWByteAddressBuffer particlesB : register(u2);
 float4 vert_main_inner(float2 a_particlePos, float2 a_particleVel, float2 a_pos) {
-  float angle = -(atan2(a_particleVel[0u], a_particleVel[1u]));
-  float v = (a_pos[0u] * cos(angle));
-  float v_1 = (v - (a_pos[1u] * sin(angle)));
-  float v_2 = (a_pos[0u] * sin(angle));
-  float2 pos = float2(v_1, (v_2 + (a_pos[1u] * cos(angle))));
+  float angle = -(atan2(a_particleVel.x, a_particleVel.y));
+  float v = (a_pos.x * cos(angle));
+  float v_1 = (v - (a_pos.y * sin(angle)));
+  float v_2 = (a_pos.x * sin(angle));
+  float2 pos = float2(v_1, (v_2 + (a_pos.y * cos(angle))));
   return float4((pos + a_particlePos), 0.0f, 1.0f);
 }
 
@@ -36,7 +36,7 @@ float4 frag_main_inner() {
 }
 
 void comp_main_inner(uint3 gl_GlobalInvocationID) {
-  uint index = gl_GlobalInvocationID[0u];
+  uint index = gl_GlobalInvocationID.x;
   if ((index >= 5u)) {
     return;
   }
@@ -108,16 +108,16 @@ void comp_main_inner(uint3 gl_GlobalInvocationID) {
   float2 v_19 = vVel;
   vPos = (v_18 + (v_19 * asfloat(params[0u].x)));
   if ((vPos.x < -1.0f)) {
-    vPos[0u] = 1.0f;
+    vPos.x = 1.0f;
   }
   if ((vPos.x > 1.0f)) {
-    vPos[0u] = -1.0f;
+    vPos.x = -1.0f;
   }
   if ((vPos.y < -1.0f)) {
-    vPos[1u] = 1.0f;
+    vPos.y = 1.0f;
   }
   if ((vPos.y > 1.0f)) {
-    vPos[1u] = -1.0f;
+    vPos.y = -1.0f;
   }
   uint v_20 = (uint(index) * 16u);
   particlesB.Store2((0u + v_20), asuint(vPos));

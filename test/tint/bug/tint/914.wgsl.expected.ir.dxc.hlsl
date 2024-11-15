@@ -77,10 +77,10 @@ void main_inner(uint3 local_id, uint3 global_id, uint tint_local_index) {
     }
   }
   GroupMemoryBarrierWithGroupSync();
-  uint tileRow = (local_id[1u] * 4u);
-  uint tileCol = (local_id[0u] * 4u);
-  uint globalRow = (global_id[1u] * 4u);
-  uint globalCol = (global_id[0u] * 4u);
+  uint tileRow = (local_id.y * 4u);
+  uint tileCol = (local_id.x * 4u);
+  uint globalRow = (global_id.y * 4u);
+  uint globalCol = (global_id.x * 4u);
   uint numTiles = (tint_div_u32((uniforms[0u].y - 1u), 64u) + 1u);
   float acc[16] = (float[16])0;
   float ACached = 0.0f;
@@ -101,9 +101,9 @@ void main_inner(uint3 local_id, uint3 global_id, uint tint_local_index) {
     }
   }
   uint ColPerThreadA = 4u;
-  uint tileColA = (local_id[0u] * ColPerThreadA);
+  uint tileColA = (local_id.x * ColPerThreadA);
   uint RowPerThreadB = 4u;
-  uint tileRowB = (local_id[1u] * RowPerThreadB);
+  uint tileRowB = (local_id.y * RowPerThreadB);
   {
     uint t = 0u;
     while(true) {

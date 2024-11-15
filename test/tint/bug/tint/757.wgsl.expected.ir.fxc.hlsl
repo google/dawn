@@ -9,7 +9,7 @@ cbuffer cbuffer_constants : register(b0) {
 Texture2DArray<float4> myTexture : register(t1);
 RWByteAddressBuffer result : register(u3);
 void main_inner(uint3 GlobalInvocationID) {
-  uint flatIndex = (((4u * GlobalInvocationID[2u]) + (2u * GlobalInvocationID[1u])) + GlobalInvocationID[0u]);
+  uint flatIndex = (((4u * GlobalInvocationID.z) + (2u * GlobalInvocationID.y)) + GlobalInvocationID.x);
   flatIndex = (flatIndex * 1u);
   int2 v = int2(int2(GlobalInvocationID.xy));
   int v_1 = int(int(0));

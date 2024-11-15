@@ -60,7 +60,7 @@ float3 Mat4x3GetCol0_(Mat4x3_ m) {
   Mat4x3_ x_e2 = m1;
   Mat4x3_ x_e5 = m1;
   Mat4x3_ x_e8 = m1;
-  return float3(x_e2.mx[0u], x_e5.my[0u], x_e8.mz[0u]);
+  return float3(x_e2.mx.x, x_e5.my.x, x_e8.mz.x);
 }
 
 float3 Mat4x3GetCol1_(Mat4x3_ m2) {
@@ -69,7 +69,7 @@ float3 Mat4x3GetCol1_(Mat4x3_ m2) {
   Mat4x3_ x_e2 = m3;
   Mat4x3_ x_e5 = m3;
   Mat4x3_ x_e8 = m3;
-  return float3(x_e2.mx[1u], x_e5.my[1u], x_e8.mz[1u]);
+  return float3(x_e2.mx.y, x_e5.my.y, x_e8.mz.y);
 }
 
 float3 Mat4x3GetCol2_(Mat4x3_ m4) {
@@ -78,7 +78,7 @@ float3 Mat4x3GetCol2_(Mat4x3_ m4) {
   Mat4x3_ x_e2 = m5;
   Mat4x3_ x_e5 = m5;
   Mat4x3_ x_e8 = m5;
-  return float3(x_e2.mx[2u], x_e5.my[2u], x_e8.mz[2u]);
+  return float3(x_e2.mx.z, x_e5.my.z, x_e8.mz.z);
 }
 
 float3 Mat4x3GetCol3_(Mat4x3_ m6) {
@@ -87,7 +87,7 @@ float3 Mat4x3GetCol3_(Mat4x3_ m6) {
   Mat4x3_ x_e2 = m7;
   Mat4x3_ x_e5 = m7;
   Mat4x3_ x_e8 = m7;
-  return float3(x_e2.mx[3u], x_e5.my[3u], x_e8.mz[3u]);
+  return float3(x_e2.mx.w, x_e5.my.w, x_e8.mz.w);
 }
 
 float4 Mul(Mat4x4_ m8, float4 v) {
@@ -286,7 +286,7 @@ void main1() {
   float4 x_e50 = a_Color1;
   v_Color = x_e50;
   float4 x_e52 = asfloat(global1[2u]);
-  if ((x_e52[0u] == 2.0f)) {
+  if ((x_e52.x == 2.0f)) {
     float3 x_e59 = a_Normal1;
     Mat4x2_ x_e64 = v_10(0u);
     float3 x_e65 = a_Normal1;

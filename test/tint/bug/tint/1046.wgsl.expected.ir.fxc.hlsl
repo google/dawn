@@ -44,7 +44,7 @@ float4 getColor(FragmentInput fragment) {
   } else {
     if ((uniforms[8u].y == 1u)) {
       color = fragment.normal;
-      color[3u] = 1.0f;
+      color.w = 1.0f;
     } else {
       if ((uniforms[8u].y == 2u)) {
         color = asfloat(uniforms[9u]);
@@ -83,7 +83,7 @@ FragmentOutput main_inner(FragmentInput fragment) {
 }
 
 main_outputs main(main_inputs inputs) {
-  FragmentInput v_11 = {float4(inputs.FragmentInput_position.xyz, (1.0f / inputs.FragmentInput_position[3u])), inputs.FragmentInput_view_position, inputs.FragmentInput_normal, inputs.FragmentInput_uv, inputs.FragmentInput_color};
+  FragmentInput v_11 = {float4(inputs.FragmentInput_position.xyz, (1.0f / inputs.FragmentInput_position.w)), inputs.FragmentInput_view_position, inputs.FragmentInput_normal, inputs.FragmentInput_uv, inputs.FragmentInput_color};
   FragmentOutput v_12 = main_inner(v_11);
   main_outputs v_13 = {v_12.color};
   return v_13;

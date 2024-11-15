@@ -12,7 +12,7 @@ static float4 tint_symbol_1 = (0.0f).xxxx;
 void textureLoad_6273b1() {
   float res = 0.0f;
   int2 v = int2((int(0)).xx);
-  res = float4(arg_0.Load(v, int(int(1))).x, 0.0f, 0.0f, 0.0f)[0u];
+  res = float4(arg_0.Load(v, int(int(1))).x, 0.0f, 0.0f, 0.0f).x;
 }
 
 void tint_symbol_2(float4 tint_symbol) {

@@ -838,7 +838,7 @@ TEST_F(HlslWriterTest, BuiltinTextureNumLevels1D) {
     EXPECT_EQ(output_.hlsl, R"(
 void foo(Texture1D<float4> t) {
   uint2 v = (0u).xx;
-  t.GetDimensions(0u, v[0u], v[1u]);
+  t.GetDimensions(0u, v.x, v.y);
   uint d = v.y;
 }
 
@@ -865,7 +865,7 @@ TEST_F(HlslWriterTest, BuiltinTextureNumLevels2D) {
     EXPECT_EQ(output_.hlsl, R"(
 void foo(Texture2D<float4> t) {
   uint3 v = (0u).xxx;
-  t.GetDimensions(0u, v[0u], v[1u], v[2u]);
+  t.GetDimensions(0u, v.x, v.y, v.z);
   uint d = v.z;
 }
 
@@ -892,7 +892,7 @@ TEST_F(HlslWriterTest, BuiltinTextureNumLevels3D) {
     EXPECT_EQ(output_.hlsl, R"(
 void foo(Texture3D<float4> t) {
   uint4 v = (0u).xxxx;
-  t.GetDimensions(0u, v[0u], v[1u], v[2u], v[3u]);
+  t.GetDimensions(0u, v.x, v.y, v.z, v.w);
   uint d = v.w;
 }
 
@@ -946,7 +946,7 @@ TEST_F(HlslWriterTest, BuiltinTextureDimension2D) {
     EXPECT_EQ(output_.hlsl, R"(
 void foo(Texture2D<float4> t) {
   uint2 v = (0u).xx;
-  t.GetDimensions(v[0u], v[1u]);
+  t.GetDimensions(v.x, v.y);
   uint2 d = v;
 }
 
@@ -973,9 +973,9 @@ TEST_F(HlslWriterTest, BuiltinTextureDimension2dLOD) {
     EXPECT_EQ(output_.hlsl, R"(
 void foo(Texture2D<float4> t) {
   uint3 v = (0u).xxx;
-  t.GetDimensions(0u, v[0u], v[1u], v[2u]);
+  t.GetDimensions(0u, v.x, v.y, v.z);
   uint3 v_1 = (0u).xxx;
-  t.GetDimensions(uint(min(uint(int(1)), (v.z - 1u))), v_1[0u], v_1[1u], v_1[2u]);
+  t.GetDimensions(uint(min(uint(int(1)), (v.z - 1u))), v_1.x, v_1.y, v_1.z);
   uint2 d = v_1.xy;
 }
 
@@ -1002,7 +1002,7 @@ TEST_F(HlslWriterTest, BuiltinTextureDimension3D) {
     EXPECT_EQ(output_.hlsl, R"(
 void foo(Texture3D<float4> t) {
   uint3 v = (0u).xxx;
-  t.GetDimensions(v[0u], v[1u], v[2u]);
+  t.GetDimensions(v.x, v.y, v.z);
   uint3 d = v;
 }
 
@@ -1029,7 +1029,7 @@ TEST_F(HlslWriterTest, BuiltinTextureLayers2dArray) {
     EXPECT_EQ(output_.hlsl, R"(
 void foo(Texture2DArray<float4> t) {
   uint3 v = (0u).xxx;
-  t.GetDimensions(v[0u], v[1u], v[2u]);
+  t.GetDimensions(v.x, v.y, v.z);
   uint d = v.z;
 }
 
@@ -1056,7 +1056,7 @@ TEST_F(HlslWriterTest, BuiltinTextureNumLayersCubeArray) {
     EXPECT_EQ(output_.hlsl, R"(
 void foo(TextureCubeArray<float4> t) {
   uint3 v = (0u).xxx;
-  t.GetDimensions(v[0u], v[1u], v[2u]);
+  t.GetDimensions(v.x, v.y, v.z);
   uint d = v.z;
 }
 
@@ -1083,7 +1083,7 @@ TEST_F(HlslWriterTest, BuiltinTextureNumSamples) {
     EXPECT_EQ(output_.hlsl, R"(
 void foo(Texture2DMS<float4> t) {
   uint3 v = (0u).xxx;
-  t.GetDimensions(v[0u], v[1u], v[2u]);
+  t.GetDimensions(v.x, v.y, v.z);
   uint d = v.z;
 }
 

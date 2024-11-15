@@ -139,7 +139,7 @@ TEST_F(HlslWriterTest, AccessStoreVectorElementConstantIndex) {
     EXPECT_EQ(output_.hlsl, R"(
 void foo() {
   int4 vec = (int(0)).xxxx;
-  vec[1u] = int(42);
+  vec.y = int(42);
 }
 
 [numthreads(1, 1, 1)]

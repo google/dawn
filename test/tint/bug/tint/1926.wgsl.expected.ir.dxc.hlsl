@@ -16,7 +16,7 @@ void main_inner(uint3 global_id, uint3 local_id, uint tint_local_index) {
   uint v = sh_atomic_failed;
   GroupMemoryBarrierWithGroupSync();
   uint failed = v;
-  if ((local_id[0u] == 0u)) {
+  if ((local_id.x == 0u)) {
     output.Store(0u, failed);
   }
 }
