@@ -2011,14 +2011,22 @@ class UniformityGraph {
                 auto& param_info = next_function->parameters[cause->arg_index];
                 MakeError(*next_function,
                           is_value ? param_info.value : param_info.ptr_input_contents, severity);
-            }
 
-            // Show the place where the non-uniform argument was passed.
-            // If this is a builtin, this will be the trigger location for the failure.
-            StringStream ss;
-            ss << "possibly non-uniform value passed" << (is_value ? "" : " via pointer")
-               << " here";
-            report(call->args[cause->arg_index]->source, ss.str(), /* note */ user_func != nullptr);
+                // Show the place where the non-uniform argument was passed.
+                // If this is a builtin, this will be the trigger location for the failure.
+                StringStream ss;
+                ss << "possibly non-uniform value passed" << (is_value ? "" : " via pointer")
+                   << " here";
+                report(call->args[cause->arg_index]->source, ss.str(), /* note */ true);
+            } else {
+                // The uniformity requirement must come from a builtin function.
+                auto* builtin = target->As<sem::BuiltinFn>();
+                TINT_ASSERT(builtin);
+                StringStream ss;
+                ss << "'" << builtin->Fn() << "' requires argument " << cause->arg_index << " to "
+                   << (is_value ? "be uniform" : "have uniform contents");
+                report(call->args[cause->arg_index]->source, ss.str(), /* note */ false);
+            }
 
             // Show the origin of non-uniformity for the value or data that is being passed.
             ShowSourceOfNonUniformity(source_node->visited_from);

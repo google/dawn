@@ -9044,7 +9044,7 @@ fn main(@builtin(local_invocation_index) idx : u32) {
 
     RunTest(src, false);
     EXPECT_EQ(error_,
-              R"(test:8:28 error: possibly non-uniform value passed here
+              R"(test:8:28 error: 'workgroupUniformLoad' requires argument 0 to be uniform
   if (workgroupUniformLoad(&data[idx]) > 0) {
                            ^^^^^^^^^^
 
@@ -9074,7 +9074,7 @@ fn main(@builtin(local_invocation_index) idx : u32) {
 
     RunTest(src, false);
     EXPECT_EQ(error_,
-              R"(test:6:31 error: possibly non-uniform value passed here
+              R"(test:6:31 error: 'workgroupUniformLoad' requires argument 0 to be uniform
   return workgroupUniformLoad(p);
                               ^
 
