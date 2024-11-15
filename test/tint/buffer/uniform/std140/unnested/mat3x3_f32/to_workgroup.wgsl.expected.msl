@@ -14,38 +14,34 @@ struct tint_array {
     T elements[N];
 };
 
-struct tint_symbol_6 {
-  float3x3 w;
-};
-
 struct tint_packed_vec3_f32_array_element {
   /* 0x0000 */ packed_float3 elements;
   /* 0x000c */ tint_array<int8_t, 4> tint_pad;
 };
 
-float3x3 tint_unpack_vec3_in_composite(tint_array<tint_packed_vec3_f32_array_element, 3> in) {
-  float3x3 result = float3x3(float3(in[0].elements), float3(in[1].elements), float3(in[2].elements));
+tint_array<tint_packed_vec3_f32_array_element, 3> tint_pack_vec3_in_composite(float3x3 in) {
+  tint_array<tint_packed_vec3_f32_array_element, 3> result = tint_array<tint_packed_vec3_f32_array_element, 3>{tint_packed_vec3_f32_array_element{.elements=packed_float3(in[0])}, tint_packed_vec3_f32_array_element{.elements=packed_float3(in[1])}, tint_packed_vec3_f32_array_element{.elements=packed_float3(in[2])}};
   return result;
 }
 
-void tint_zero_workgroup_memory(uint local_idx, threadgroup float3x3* const tint_symbol) {
+void tint_zero_workgroup_memory(uint local_idx, threadgroup tint_array<tint_packed_vec3_f32_array_element, 3>* const tint_symbol) {
   if ((local_idx < 1u)) {
-    *(tint_symbol) = float3x3(float3(0.0f), float3(0.0f), float3(0.0f));
+    *(tint_symbol) = tint_pack_vec3_in_composite(float3x3(float3(0.0f), float3(0.0f), float3(0.0f)));
   }
   threadgroup_barrier(mem_flags::mem_threadgroup);
 }
 
-void f_inner(uint local_invocation_index, threadgroup float3x3* const tint_symbol_1, const constant tint_array<tint_packed_vec3_f32_array_element, 3>* const tint_symbol_2) {
+void f_inner(uint local_invocation_index, threadgroup tint_array<tint_packed_vec3_f32_array_element, 3>* const tint_symbol_1, const constant tint_array<tint_packed_vec3_f32_array_element, 3>* const tint_symbol_2) {
   tint_zero_workgroup_memory(local_invocation_index, tint_symbol_1);
-  *(tint_symbol_1) = tint_unpack_vec3_in_composite(*(tint_symbol_2));
-  (*(tint_symbol_1))[1] = float3((*(tint_symbol_2))[0].elements);
-  (*(tint_symbol_1))[1] = float3((*(tint_symbol_2))[0].elements).zxy;
-  (*(tint_symbol_1))[0][1] = (*(tint_symbol_2))[1].elements[0];
+  *(tint_symbol_1) = *(tint_symbol_2);
+  (*(tint_symbol_1))[1].elements = (*(tint_symbol_2))[0].elements;
+  (*(tint_symbol_1))[1].elements = packed_float3(float3((*(tint_symbol_2))[0].elements).zxy);
+  (*(tint_symbol_1))[0].elements[1] = (*(tint_symbol_2))[1].elements[0];
 }
 
-kernel void f(const constant tint_array<tint_packed_vec3_f32_array_element, 3>* tint_symbol_5 [[buffer(0)]], threadgroup tint_symbol_6* tint_symbol_4 [[threadgroup(0)]], uint local_invocation_index [[thread_index_in_threadgroup]]) {
-  threadgroup float3x3* const tint_symbol_3 = &((*(tint_symbol_4)).w);
-  f_inner(local_invocation_index, tint_symbol_3, tint_symbol_5);
+kernel void f(const constant tint_array<tint_packed_vec3_f32_array_element, 3>* tint_symbol_4 [[buffer(0)]], uint local_invocation_index [[thread_index_in_threadgroup]]) {
+  threadgroup tint_array<tint_packed_vec3_f32_array_element, 3> tint_symbol_3;
+  f_inner(local_invocation_index, &(tint_symbol_3), tint_symbol_4);
   return;
 }
 
