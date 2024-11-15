@@ -927,6 +927,9 @@ void Device::DestroyImpl() {
     // to them are guaranteed to be finished executing.
     mRenderPassCache = nullptr;
 
+    // Destroy the VkPipelineCache before VkDevice.
+    mMonolithicPipelineCache = nullptr;
+
     // Delete all the remaining VkDevice child objects immediately since the GPU timeline is
     // finished.
     GetFencedDeleter()->Tick(kMaxExecutionSerial);
