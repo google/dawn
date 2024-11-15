@@ -48,6 +48,7 @@
 #include "dawn/native/opengl/RenderPipelineGL.h"
 #include "dawn/native/opengl/SamplerGL.h"
 #include "dawn/native/opengl/ShaderModuleGL.h"
+#include "dawn/native/opengl/SharedFenceEGL.h"
 #include "dawn/native/opengl/SharedTextureMemoryEGL.h"
 #include "dawn/native/opengl/SwapChainEGL.h"
 #include "dawn/native/opengl/TextureGL.h"
@@ -308,6 +309,25 @@ ResultOrError<Ref<SharedTextureMemoryBase>> Device::ImportSharedTextureMemoryImp
     }
 }
 
+ResultOrError<Ref<SharedFenceBase>> Device::ImportSharedFenceImpl(
+    const SharedFenceDescriptor* descriptor) {
+    UnpackedPtr<SharedFenceDescriptor> unpacked;
+    DAWN_TRY_ASSIGN(unpacked, ValidateAndUnpack(descriptor));
+
+    wgpu::SType type;
+    DAWN_TRY_ASSIGN(type, (unpacked.ValidateBranches<Branch<SharedFenceSyncFDDescriptor>>()));
+
+    switch (type) {
+        case wgpu::SType::SharedFenceSyncFDDescriptor:
+            DAWN_INVALID_IF(!HasFeature(Feature::SharedFenceSyncFD), "%s is not enabled.",
+                            wgpu::FeatureName::SharedFenceSyncFD);
+            return SharedFenceEGL::Create(this, descriptor->label,
+                                          unpacked.Get<SharedFenceSyncFDDescriptor>());
+        default:
+            DAWN_UNREACHABLE();
+    }
+}
+
 MaybeError Device::ValidateTextureCanBeWrapped(const UnpackedPtr<TextureDescriptor>& descriptor) {
     DAWN_INVALID_IF(descriptor->dimension != wgpu::TextureDimension::e2D,
                     "Texture dimension (%s) is not %s.", descriptor->dimension,
@@ -415,7 +435,7 @@ Ref<TextureBase> Device::CreateTextureWrappingGLTexture(const ExternalImageDescr
 }
 
 MaybeError Device::TickImpl() {
-    ToBackend(GetQueue())->SubmitFenceSync();
+    DAWN_TRY(ToBackend(GetQueue())->SubmitFenceSync());
     return {};
 }
 
@@ -431,6 +451,7 @@ MaybeError Device::CopyFromStagingToTextureImpl(const BufferBase* source,
                                                 const TextureDataLayout& src,
                                                 const TextureCopy& dst,
                                                 const Extent3D& copySizePixels) {
+    // If implemented, be sure to call SynchronizeTextureBeforeUse on the destination texture.
     return DAWN_UNIMPLEMENTED_ERROR("Device unable to copy from staging buffer to texture.");
 }
 

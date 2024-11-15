@@ -28,8 +28,12 @@
 #ifndef SRC_DAWN_NATIVE_OPENGL_UTILSEGL_H_
 #define SRC_DAWN_NATIVE_OPENGL_UTILSEGL_H_
 
+#include "dawn/common/NonMovable.h"
+#include "dawn/common/RefCounted.h"
 #include "dawn/common/egl_platform.h"
 #include "dawn/native/Error.h"
+#include "dawn/native/IntegerTypes.h"
+#include "dawn/native/opengl/DisplayEGL.h"
 
 namespace dawn::native::opengl {
 
@@ -37,6 +41,35 @@ class EGLFunctions;
 
 const char* EGLErrorAsString(EGLint error);
 MaybeError CheckEGL(const EGLFunctions& egl, EGLBoolean result, const char* context);
+
+class WrappedEGLSync : public RefCounted, NonMovable {
+  public:
+    static ResultOrError<Ref<WrappedEGLSync>> Create(DisplayEGL* display,
+                                                     EGLenum type,
+                                                     const EGLint* attribs);
+
+    EGLSync Get() const;
+
+    // Call eglSignalSync with given mode. Requires sync type of EGL_SYNC_REUSABLE_KHR.
+    MaybeError Signal(EGLenum mode);
+
+    // Call eglClientWaitSync
+    ResultOrError<EGLenum> ClientWait(EGLint flags, Nanoseconds timeout);
+
+    // Call eglWaitSync (server wait)
+    MaybeError Wait();
+
+    // Call eglDupNativeFenceFDANDROID
+    ResultOrError<EGLint> DupFD();
+
+  protected:
+    WrappedEGLSync(DisplayEGL* display, EGLSync sync);
+    ~WrappedEGLSync() override;
+
+  private:
+    Ref<DisplayEGL> mDisplay;
+    EGLSync mSync = nullptr;
+};
 
 }  // namespace dawn::native::opengl
 

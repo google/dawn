@@ -146,6 +146,8 @@ class Device final : public DeviceBase {
         const UnpackedPtr<RenderPipelineDescriptor>& descriptor) override;
     ResultOrError<Ref<SharedTextureMemoryBase>> ImportSharedTextureMemoryImpl(
         const SharedTextureMemoryDescriptor* descriptor) override;
+    ResultOrError<Ref<SharedFenceBase>> ImportSharedFenceImpl(
+        const SharedFenceDescriptor* descriptor) override;
 
     GLenum GetBGRAInternalFormat(const OpenGLFunctions& gl) const;
     void DestroyImpl() override;

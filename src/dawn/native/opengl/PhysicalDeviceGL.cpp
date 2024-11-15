@@ -257,6 +257,11 @@ void PhysicalDevice::InitializeSupportedFeaturesImpl() {
         EnableFeature(dawn::native::Feature::SharedTextureMemoryAHardwareBuffer);
     }
 
+    if (mDisplay->egl.HasExt(EGLExt::NativeFenceSync) && mDisplay->egl.HasExt(EGLExt::WaitSync) &&
+        mFunctions.IsGLExtensionSupported("GL_OES_EGL_sync")) {
+        EnableFeature(dawn::native::Feature::SharedFenceSyncFD);
+    }
+
     // Non-zero baseInstance requires at least desktop OpenGL 4.2, and it is not supported in
     // OpenGL ES OpenGL:
     // https://www.khronos.org/registry/OpenGL-Refpages/gl4/html/glDrawElementsIndirect.xhtml

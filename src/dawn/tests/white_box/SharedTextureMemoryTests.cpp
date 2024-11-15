@@ -829,9 +829,6 @@ TEST_P(SharedTextureMemoryTests, ImportSharedTextureMemoryNoChain) {
 // Test that it is an error to import a shared fence with no chained struct.
 // Also test that ExportInfo reports an Undefined type for the error fence.
 TEST_P(SharedTextureMemoryTests, ImportSharedFenceNoChain) {
-    // TODO(dawn/42241435): No shared texture memory extensions are supported yet.
-    DAWN_TEST_UNSUPPORTED_IF(IsOpenGLES());
-
     wgpu::SharedFenceDescriptor desc;
     ASSERT_DEVICE_ERROR_MSG(wgpu::SharedFence fence = device.ImportSharedFence(&desc),
                             HasSubstr("chain"));
@@ -2245,9 +2242,6 @@ TEST_P(SharedTextureMemoryTests, RenderThenLoseOrDestroyDeviceBeforeEndAccessThe
     // Not supported if using the same device. Not possible to lose one without losing the other.
     DAWN_TEST_UNSUPPORTED_IF(GetParam().mBackend->UseSameDevice());
 
-    // TODO(dawn/42241435): No shared texture memory extensions are supported yet.
-    DAWN_TEST_UNSUPPORTED_IF(IsOpenGLES());
-
     // crbug.com/358166479
     DAWN_SUPPRESS_TEST_IF(IsLinux() && IsNvidia() && IsVulkan());
 
@@ -2314,9 +2308,6 @@ TEST_P(SharedTextureMemoryTests, RenderThenLoseOrDestroyDeviceBeforeEndAccessThe
 // Reads should happen strictly after the writes. The final write should wait for the reads.
 TEST_P(SharedTextureMemoryTests, SeparateDevicesWriteThenConcurrentReadThenWrite) {
     DAWN_TEST_UNSUPPORTED_IF(!GetParam().mBackend->SupportsConcurrentRead());
-
-    // TODO(dawn/42241435): No shared texture memory extensions are supported yet.
-    DAWN_TEST_UNSUPPORTED_IF(IsOpenGLES());
 
     // crbug.com/358166479
     DAWN_SUPPRESS_TEST_IF(IsLinux() && IsNvidia() && IsVulkan());

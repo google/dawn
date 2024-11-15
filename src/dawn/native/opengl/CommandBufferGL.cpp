@@ -605,6 +605,10 @@ MaybeError CommandBuffer::Execute() {
         switch (type) {
             case Command::BeginComputePass: {
                 mCommands.NextCommand<BeginComputePassCmd>();
+                for (TextureBase* texture :
+                     GetResourceUsages().computePasses[nextComputePassNumber].referencedTextures) {
+                    DAWN_TRY(ToBackend(texture)->SynchronizeTextureBeforeUse());
+                }
                 for (const SyncScopeResourceUsage& scope :
                      GetResourceUsages().computePasses[nextComputePassNumber].dispatchUsages) {
                     DAWN_TRY(LazyClearSyncScope(scope));
@@ -617,6 +621,10 @@ MaybeError CommandBuffer::Execute() {
 
             case Command::BeginRenderPass: {
                 auto* cmd = mCommands.NextCommand<BeginRenderPassCmd>();
+                for (TextureBase* texture :
+                     this->GetResourceUsages().renderPasses[nextRenderPassNumber].textures) {
+                    DAWN_TRY(ToBackend(texture)->SynchronizeTextureBeforeUse());
+                }
                 DAWN_TRY(
                     LazyClearSyncScope(GetResourceUsages().renderPasses[nextRenderPassNumber]));
                 LazyClearRenderPassAttachments(cmd);
@@ -660,14 +668,17 @@ MaybeError CommandBuffer::Execute() {
                 auto& src = copy->source;
                 auto& dst = copy->destination;
                 Buffer* buffer = ToBackend(src.buffer.Get());
+                Texture* texture = ToBackend(dst.texture.Get());
+
+                DAWN_TRY(texture->SynchronizeTextureBeforeUse());
 
                 buffer->EnsureDataInitialized();
                 SubresourceRange range = GetSubresourcesAffectedByCopy(dst, copy->copySize);
-                if (IsCompleteSubresourceCopiedTo(dst.texture.Get(), copy->copySize, dst.mipLevel,
+                if (IsCompleteSubresourceCopiedTo(texture, copy->copySize, dst.mipLevel,
                                                   dst.aspect)) {
-                    dst.texture->SetIsSubresourceContentInitialized(true, range);
+                    texture->SetIsSubresourceContentInitialized(true, range);
                 } else {
-                    DAWN_TRY(ToBackend(dst.texture)->EnsureSubresourceContentInitialized(range));
+                    DAWN_TRY(texture->EnsureSubresourceContentInitialized(range));
                 }
 
                 gl.BindBuffer(GL_PIXEL_UNPACK_BUFFER, buffer->GetHandle());
@@ -706,6 +717,7 @@ MaybeError CommandBuffer::Execute() {
                 }
 
                 buffer->EnsureDataInitializedAsDestination(copy);
+                DAWN_TRY(texture->SynchronizeTextureBeforeUse());
 
                 SubresourceRange subresources = GetSubresourcesAffectedByCopy(src, copy->copySize);
                 DAWN_TRY(texture->EnsureSubresourceContentInitialized(subresources));
@@ -824,6 +836,9 @@ MaybeError CommandBuffer::Execute() {
                 Extent3D copySize = ComputeTextureCopyExtent(dst, copy->copySize);
                 Texture* srcTexture = ToBackend(src.texture.Get());
                 Texture* dstTexture = ToBackend(dst.texture.Get());
+
+                DAWN_TRY(srcTexture->SynchronizeTextureBeforeUse());
+                DAWN_TRY(dstTexture->SynchronizeTextureBeforeUse());
 
                 SubresourceRange srcRange = GetSubresourcesAffectedByCopy(src, copy->copySize);
                 SubresourceRange dstRange = GetSubresourcesAffectedByCopy(dst, copy->copySize);
