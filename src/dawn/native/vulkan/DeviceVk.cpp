@@ -132,7 +132,6 @@ MaybeError Device::Initialize(const UnpackedPtr<DeviceDescriptor>& descriptor) {
     mExternalMemoryService = std::make_unique<external_memory::Service>(this);
 
     if (uint32_t(HasFeature(Feature::SharedFenceVkSemaphoreOpaqueFD)) +
-            uint32_t(HasFeature(Feature::SharedFenceVkSemaphoreSyncFD)) +
             uint32_t(HasFeature(Feature::SharedFenceSyncFD)) +
             uint32_t(HasFeature(Feature::SharedFenceVkSemaphoreZirconHandle)) >
         1) {
@@ -144,8 +143,7 @@ MaybeError Device::Initialize(const UnpackedPtr<DeviceDescriptor>& descriptor) {
     if (HasFeature(Feature::SharedFenceVkSemaphoreOpaqueFD)) {
         mExternalSemaphoreService = std::make_unique<external_semaphore::Service>(
             this, VK_EXTERNAL_SEMAPHORE_HANDLE_TYPE_OPAQUE_FD_BIT_KHR);
-    } else if (HasFeature(Feature::SharedFenceSyncFD) ||
-               HasFeature(Feature::SharedFenceVkSemaphoreSyncFD)) {
+    } else if (HasFeature(Feature::SharedFenceSyncFD)) {
         mExternalSemaphoreService = std::make_unique<external_semaphore::Service>(
             this, VK_EXTERNAL_SEMAPHORE_HANDLE_TYPE_SYNC_FD_BIT);
     } else if (HasFeature(Feature::SharedFenceVkSemaphoreZirconHandle)) {
@@ -313,10 +311,8 @@ ResultOrError<Ref<SharedFenceBase>> Device::ImportSharedFenceImpl(
                 this, descriptor->label,
                 unpacked.Get<SharedFenceVkSemaphoreZirconHandleDescriptor>());
         case wgpu::SType::SharedFenceSyncFDDescriptor:
-            DAWN_INVALID_IF(!HasFeature(Feature::SharedFenceSyncFD) &&
-                                !HasFeature(Feature::SharedFenceVkSemaphoreSyncFD),
-                            "%s or %s are not enabled.", wgpu::FeatureName::SharedFenceSyncFD,
-                            wgpu::FeatureName::SharedFenceVkSemaphoreSyncFD);
+            DAWN_INVALID_IF(!HasFeature(Feature::SharedFenceSyncFD), "%s is not enabled.",
+                            wgpu::FeatureName::SharedFenceSyncFD);
             return SharedFence::Create(this, descriptor->label,
                                        unpacked.Get<SharedFenceSyncFDDescriptor>());
         case wgpu::SType::SharedFenceVkSemaphoreOpaqueFDDescriptor:
