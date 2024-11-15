@@ -301,14 +301,14 @@ class Buffer::MapAsyncEvent2 : public TrackedEvent {
             return Callback();
         }
 
-        if (mStatus == WGPUMapAsyncStatus_Success) {
-            // Device destruction/loss implicitly makes the map requests aborted.
-            if (!mBuffer->mDevice->IsAlive()) {
-                mStatus = WGPUMapAsyncStatus_Aborted;
-                mMessage = "The Device was lost before mapping was resolved.";
-            }
+        // Device destruction/loss implicitly makes the map requests aborted.
+        if (!mBuffer->mDevice->IsAlive()) {
+            mStatus = WGPUMapAsyncStatus_Aborted;
+            mMessage = "The Device was lost before mapping was resolved.";
+        }
 
-            DAWN_ASSERT(mBuffer->mPendingMapRequest->type);
+        if (mStatus == WGPUMapAsyncStatus_Success) {
+            DAWN_ASSERT(mBuffer->mPendingMapRequest && mBuffer->mPendingMapRequest->type);
             switch (*mBuffer->mPendingMapRequest->type) {
                 case MapRequestType::Read:
                     mBuffer->mMappedState = MapState::MappedForRead;

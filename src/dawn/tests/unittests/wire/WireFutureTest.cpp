@@ -31,31 +31,15 @@
 
 namespace dawn::wire {
 
-WGPUCallbackMode ToWGPUCallbackMode(CallbackMode callbackMode) {
-    switch (callbackMode) {
-        case CallbackMode::WaitAny:
-            return WGPUCallbackMode_WaitAnyOnly;
-        case CallbackMode::ProcessEvents:
-            return WGPUCallbackMode_AllowProcessEvents;
-        case CallbackMode::Spontaneous:
-            return WGPUCallbackMode_AllowSpontaneous;
-        default:
-            DAWN_UNREACHABLE();
-    }
-}
-
 std::ostream& operator<<(std::ostream& os, const WireFutureTestParam& param) {
-    switch (param.mCallbackMode) {
-        case CallbackMode::Async:
-            os << "Async";
-            break;
-        case CallbackMode::WaitAny:
+    switch (param.callbackMode) {
+        case wgpu::CallbackMode::WaitAnyOnly:
             os << "WaitOnly";
             break;
-        case CallbackMode::ProcessEvents:
+        case wgpu::CallbackMode::AllowProcessEvents:
             os << "ProcessEvents";
             break;
-        case CallbackMode::Spontaneous:
+        case wgpu::CallbackMode::AllowSpontaneous:
             os << "Spontaneous";
             break;
     }

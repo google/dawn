@@ -238,6 +238,17 @@ class Server : public ServerBase {
         return result;
     }
 
+    // Wrapper RAII helper for structs with FreeMember calls.
+    template <typename Struct>
+    class FreeMembers : public Struct {
+      public:
+        explicit FreeMembers(const DawnProcTable& procs) : Struct({}), mProcs(procs) {}
+        ~FreeMembers() { (mProcs.*WGPUTraits<Struct>::FreeMembers)(*this); }
+
+      private:
+        const DawnProcTable& mProcs;
+    };
+
     void SetForwardingDeviceCallbacks(Known<WGPUDevice> device);
     void ClearDeviceCallbacks(WGPUDevice device);
 

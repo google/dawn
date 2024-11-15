@@ -27,6 +27,7 @@
 
 #include <vector>
 
+#include "absl/types/span.h"  // TODO(343500108): Use std::span when we have C++20.
 #include "dawn/common/StringViewUtils.h"
 #include "dawn/wire/SupportedFeatures.h"
 #include "dawn/wire/WireResult.h"
@@ -97,16 +98,16 @@ void Server::OnRequestDeviceCallback(RequestDeviceUserdata* data,
         return;
     }
 
-    WGPUSupportedFeatures supportedFeatures;
-    mProcs.deviceGetFeatures(device, &supportedFeatures);
-
     // The client should only be able to request supported features, so all enumerated
     // features that were enabled must also be supported by the wire.
     // Note: We fail the callback here, instead of immediately upon receiving
     // the request to preserve callback ordering.
-    for (uint32_t i = 0; i < supportedFeatures.featureCount; ++i) {
-        WGPUFeatureName f = supportedFeatures.features[i];
-        if (!IsFeatureSupported(f)) {
+    FreeMembers<WGPUSupportedFeatures> supportedFeatures(mProcs);
+    mProcs.deviceGetFeatures(device, &supportedFeatures);
+    absl::Span<const WGPUFeatureName> features(supportedFeatures.features,
+                                               supportedFeatures.featureCount);
+    for (WGPUFeatureName feature : features) {
+        if (!IsFeatureSupported(feature)) {
             // Release the device.
             mProcs.deviceRelease(device);
             device = nullptr;
@@ -114,13 +115,11 @@ void Server::OnRequestDeviceCallback(RequestDeviceUserdata* data,
             cmd.status = WGPURequestDeviceStatus_Error;
             cmd.message = ToOutputStringView("Requested feature not supported.");
             SerializeCommand(cmd);
-            mProcs.supportedFeaturesFreeMembers(supportedFeatures);
             return;
         }
     }
-
-    cmd.featuresCount = supportedFeatures.featureCount;
-    cmd.features = supportedFeatures.features;
+    cmd.featuresCount = features.size();
+    cmd.features = features.data();
 
     // Query and report the adapter limits, including DawnExperimentalSubgroupLimits and
     // DawnExperimentalImmediateDataLimits. Reporting to client.
@@ -145,7 +144,6 @@ void Server::OnRequestDeviceCallback(RequestDeviceUserdata* data,
         cmd.status = WGPURequestDeviceStatus_Unknown;
         cmd.message = ToOutputStringView("Destroyed before request was fulfilled.");
         SerializeCommand(cmd);
-        mProcs.supportedFeaturesFreeMembers(supportedFeatures);
         return;
     }
     DAWN_ASSERT(reservation.data != nullptr);
@@ -153,7 +151,6 @@ void Server::OnRequestDeviceCallback(RequestDeviceUserdata* data,
     reservation->info->self = reservation.AsHandle();
     SetForwardingDeviceCallbacks(reservation);
     SerializeCommand(cmd);
-    mProcs.supportedFeaturesFreeMembers(supportedFeatures);
 }
 
 }  // namespace dawn::wire::server

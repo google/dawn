@@ -43,6 +43,14 @@ struct WGPUTraits;
     };
 {% endfor %}
 
+{% for type in by_category["structure"] if type.has_free_members_function %}
+    {% set cType = as_cType(type.name) %}
+    template <>
+    struct WGPUTraits<{{cType}}> {
+        static constexpr auto FreeMembers = &DawnProcTable::{{as_varName(type.name, Name("free members"))}};
+    };
+{% endfor %}
+
 }  // namespace dawn::wire::server
 
 #endif  // DAWNWIRE_SERVER_WGPUTRAITS_AUTOGEN_H_

@@ -25,7 +25,11 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+#include <algorithm>
+
+#include "absl/types/span.h"  // TODO(343500108): Use std::span when we have C++20.
 #include "dawn/common/StringViewUtils.h"
+#include "dawn/wire/SupportedFeatures.h"
 #include "dawn/wire/server/ObjectStorage.h"
 #include "dawn/wire/server/Server.h"
 
@@ -83,17 +87,17 @@ void Server::OnRequestAdapterCallback(RequestAdapterUserdata* data,
     }
 
     // Query and report the adapter supported features.
-    WGPUSupportedFeatures supportedFeatures;
+    FreeMembers<WGPUSupportedFeatures> supportedFeatures(mProcs);
     mProcs.adapterGetFeatures(adapter, &supportedFeatures);
     cmd.featuresCount = supportedFeatures.featureCount;
     cmd.features = supportedFeatures.features;
 
     // Query and report the adapter info.
-    WGPUAdapterInfo info = {};
+    FreeMembers<WGPUAdapterInfo> info(mProcs);
     WGPUChainedStructOut** propertiesChain = &info.nextInChain;
 
     // Query AdapterPropertiesMemoryHeaps if the feature is supported.
-    WGPUAdapterPropertiesMemoryHeaps memoryHeapProperties = {};
+    FreeMembers<WGPUAdapterPropertiesMemoryHeaps> memoryHeapProperties(mProcs);
     memoryHeapProperties.chain.sType = WGPUSType_AdapterPropertiesMemoryHeaps;
     if (mProcs.adapterHasFeature(adapter, WGPUFeatureName_AdapterPropertiesMemoryHeaps)) {
         *propertiesChain = &memoryHeapProperties.chain;
@@ -136,9 +140,6 @@ void Server::OnRequestAdapterCallback(RequestAdapterUserdata* data,
     cmd.limits = &limits;
 
     SerializeCommand(cmd);
-    mProcs.adapterInfoFreeMembers(info);
-    mProcs.adapterPropertiesMemoryHeapsFreeMembers(memoryHeapProperties);
-    mProcs.supportedFeaturesFreeMembers(supportedFeatures);
 }
 
 }  // namespace dawn::wire::server

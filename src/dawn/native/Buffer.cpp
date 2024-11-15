@@ -317,9 +317,14 @@ struct BufferBase::MapAsyncEvent2 final : public BufferBase::MapAsyncEvent {
     // Create an event that's ready at creation (for errors, etc.)
     MapAsyncEvent2(DeviceBase* device,
                    const WGPUBufferMapCallbackInfo2& callbackInfo,
-                   const std::string& message)
+                   const std::string& message,
+                   WGPUBufferMapAsyncStatus status)
         : MapAsyncEvent(static_cast<wgpu::CallbackMode>(callbackInfo.mode)),
-          mBufferOrError(BufferErrorData{WGPUMapAsyncStatus_Error, message}),
+          mBufferOrError(BufferErrorData{
+              status == WGPUBufferMapAsyncStatus_ValidationError ? WGPUMapAsyncStatus_Error
+              : status == WGPUBufferMapAsyncStatus_DeviceLost    ? WGPUMapAsyncStatus_Aborted
+                                                                 : WGPUMapAsyncStatus_Unknown,
+              message}),
           mCallback(callbackInfo.callback),
           mUserdata1(callbackInfo.userdata1),
           mUserdata2(callbackInfo.userdata2) {
@@ -823,10 +828,10 @@ Future BufferBase::APIMapAsync2(wgpu::MapMode mode,
             size = mSize - offset;
         }
 
+        WGPUBufferMapAsyncStatus status = WGPUBufferMapAsyncStatus_ValidationError;
         MaybeError maybeError = [&]() -> MaybeError {
             DAWN_INVALID_IF(mState == BufferState::PendingMap,
                             "%s already has an outstanding map pending.", this);
-            WGPUBufferMapAsyncStatus status;
             DAWN_TRY(ValidateMapAsync(mode, offset, size, &status));
             DAWN_TRY(MapAsyncImpl(mode, offset, size));
             return {};
@@ -834,7 +839,8 @@ Future BufferBase::APIMapAsync2(wgpu::MapMode mode,
 
         if (maybeError.IsError()) {
             auto error = maybeError.AcquireError();
-            event = AcquireRef(new MapAsyncEvent2(GetDevice(), callbackInfo, error->GetMessage()));
+            event = AcquireRef(
+                new MapAsyncEvent2(GetDevice(), callbackInfo, error->GetMessage(), status));
             [[maybe_unused]] bool hadError = GetDevice()->ConsumedError(
                 std::move(error), "calling %s.MapAsync(%s, %u, %u, ...).", this, mode, offset,
                 size);

@@ -44,30 +44,22 @@ namespace {
 using testing::_;
 using testing::EmptySizedString;
 using testing::InvokeWithoutArgs;
+using testing::IsNull;
 using testing::NonEmptySizedString;
 using testing::NotNull;
 using testing::Return;
 using testing::SizedString;
 
 using WireCreateComputePipelineAsyncTestBase =
-    WireFutureTest<WGPUCreateComputePipelineAsyncCallback,
-                   WGPUCreateComputePipelineAsyncCallbackInfo,
-                   wgpuDeviceCreateComputePipelineAsync,
-                   wgpuDeviceCreateComputePipelineAsyncF>;
-using WireCreateRenderPipelineAsyncTestBase =
-    WireFutureTest<WGPUCreateRenderPipelineAsyncCallback,
-                   WGPUCreateRenderPipelineAsyncCallbackInfo,
-                   wgpuDeviceCreateRenderPipelineAsync,
-                   wgpuDeviceCreateRenderPipelineAsyncF>;
-
+    WireFutureTest<wgpu::CreateComputePipelineAsyncCallback2<void>*>;
 class WireCreateComputePipelineAsyncTest : public WireCreateComputePipelineAsyncTestBase {
   protected:
-    // Overridden version of wgpuDeviceCreateComputePipelineAsync that defers to the API call based
-    // on the test callback mode.
-    void DeviceCreateComputePipelineAsync(WGPUDevice d,
-                                          WGPUComputePipelineDescriptor const* desc,
-                                          void* userdata = nullptr) {
-        CallImpl(userdata, d, desc);
+    void CreateComputePipelineAsync(wgpu::ComputePipelineDescriptor const* desc) {
+        this->mFutureIDs.push_back(device
+                                       .CreateComputePipelineAsync(desc,
+                                                                   this->GetParam().callbackMode,
+                                                                   this->mMockCb.Callback())
+                                       .id);
     }
 
     // Sets up default descriptors to use in the tests.
@@ -76,8 +68,8 @@ class WireCreateComputePipelineAsyncTest : public WireCreateComputePipelineAsync
 
         apiPipeline = api.GetNewComputePipeline();
 
-        WGPUShaderModuleDescriptor shaderDesc = {};
-        mShader = wgpuDeviceCreateShaderModule(cDevice, &shaderDesc);
+        wgpu::ShaderModuleDescriptor shaderDesc = {};
+        mShader = device.CreateShaderModule(&shaderDesc);
         mApiShader = api.GetNewShaderModule();
         EXPECT_CALL(api, DeviceCreateShaderModule(apiDevice, _)).WillOnce(Return(mApiShader));
         FlushClient();
@@ -85,21 +77,33 @@ class WireCreateComputePipelineAsyncTest : public WireCreateComputePipelineAsync
         mDescriptor.compute.module = mShader;
     }
 
-    WGPUShaderModule mShader;
+    void TearDown() override {
+        // We must lose all references to objects before calling parent TearDown to avoid
+        // referencing the proc table after it gets cleared.
+        mDescriptor = {};
+        mShader = nullptr;
+
+        WireCreateComputePipelineAsyncTestBase::TearDown();
+    }
+
+    wgpu::ShaderModule mShader;
     WGPUShaderModule mApiShader;
-    WGPUComputePipelineDescriptor mDescriptor = {};
+    wgpu::ComputePipelineDescriptor mDescriptor = {};
 
     // A successfully created pipeline.
     WGPUComputePipeline apiPipeline;
 };
+
+using WireCreateRenderPipelineAsyncTestBase =
+    WireFutureTest<wgpu::CreateRenderPipelineAsyncCallback2<void>*>;
 class WireCreateRenderPipelineAsyncTest : public WireCreateRenderPipelineAsyncTestBase {
   protected:
-    // Overriden version of wgpuDeviceCreateRenderPipelineAsync that defers to the API call based on
-    // the test callback mode.
-    void DeviceCreateRenderPipelineAsync(WGPUDevice d,
-                                         WGPURenderPipelineDescriptor const* desc,
-                                         void* userdata = nullptr) {
-        CallImpl(userdata, d, desc);
+    void CreateRenderPipelineAsync(wgpu::RenderPipelineDescriptor const* desc) {
+        this->mFutureIDs.push_back(device
+                                       .CreateRenderPipelineAsync(desc,
+                                                                  this->GetParam().callbackMode,
+                                                                  this->mMockCb.Callback())
+                                       .id);
     }
 
     // Sets up default descriptors to use in the tests.
@@ -108,8 +112,8 @@ class WireCreateRenderPipelineAsyncTest : public WireCreateRenderPipelineAsyncTe
 
         apiPipeline = api.GetNewRenderPipeline();
 
-        WGPUShaderModuleDescriptor shaderDesc = {};
-        mShader = wgpuDeviceCreateShaderModule(cDevice, &shaderDesc);
+        wgpu::ShaderModuleDescriptor shaderDesc = {};
+        mShader = device.CreateShaderModule(&shaderDesc);
         mApiShader = api.GetNewShaderModule();
         EXPECT_CALL(api, DeviceCreateShaderModule(apiDevice, _)).WillOnce(Return(mApiShader));
         FlushClient();
@@ -119,20 +123,31 @@ class WireCreateRenderPipelineAsyncTest : public WireCreateRenderPipelineAsyncTe
         mDescriptor.fragment = &mFragment;
     }
 
-    WGPUShaderModule mShader;
+    void TearDown() override {
+        // We must lose all references to objects before calling parent TearDown to avoid
+        // referencing the proc table after it gets cleared.
+        mDescriptor = {};
+        mFragment = {};
+        mShader = nullptr;
+
+        WireCreateRenderPipelineAsyncTestBase::TearDown();
+    }
+
+    wgpu::ShaderModule mShader;
     WGPUShaderModule mApiShader;
-    WGPUFragmentState mFragment = {};
-    WGPURenderPipelineDescriptor mDescriptor = {};
+    wgpu::FragmentState mFragment = {};
+    wgpu::RenderPipelineDescriptor mDescriptor = {};
 
     // A successfully created pipeline.
     WGPURenderPipeline apiPipeline;
 };
+
 DAWN_INSTANTIATE_WIRE_FUTURE_TEST_P(WireCreateComputePipelineAsyncTest);
 DAWN_INSTANTIATE_WIRE_FUTURE_TEST_P(WireCreateRenderPipelineAsyncTest);
 
 // Test when creating a compute pipeline with CreateComputePipelineAsync() successfully.
 TEST_P(WireCreateComputePipelineAsyncTest, CreateSuccess) {
-    DeviceCreateComputePipelineAsync(cDevice, &mDescriptor, this);
+    CreateComputePipelineAsync(&mDescriptor);
 
     EXPECT_CALL(api, OnDeviceCreateComputePipelineAsync2(apiDevice, _, _))
         .WillOnce(InvokeWithoutArgs([&] {
@@ -145,7 +160,29 @@ TEST_P(WireCreateComputePipelineAsyncTest, CreateSuccess) {
     FlushFutures();
     ExpectWireCallbacksWhen([&](auto& mockCb) {
         EXPECT_CALL(mockCb,
-                    Call(WGPUCreatePipelineAsyncStatus_Success, NotNull(), SizedString(""), this))
+                    Call(wgpu::CreatePipelineAsyncStatus::Success, NotNull(), SizedString("")))
+            .Times(1);
+
+        FlushCallbacks();
+    });
+}
+
+// Test when creating a render pipeline with CreateRenderPipelineAsync() successfully.
+TEST_P(WireCreateRenderPipelineAsyncTest, CreateSuccess) {
+    CreateRenderPipelineAsync(&mDescriptor);
+
+    EXPECT_CALL(api, OnDeviceCreateRenderPipelineAsync2(apiDevice, _, _))
+        .WillOnce(InvokeWithoutArgs([&] {
+            api.CallDeviceCreateRenderPipelineAsync2Callback(apiDevice,
+                                                             WGPUCreatePipelineAsyncStatus_Success,
+                                                             apiPipeline, kEmptyOutputStringView);
+        }));
+
+    FlushClient();
+    FlushFutures();
+    ExpectWireCallbacksWhen([&](auto& mockCb) {
+        EXPECT_CALL(mockCb,
+                    Call(wgpu::CreatePipelineAsyncStatus::Success, NotNull(), EmptySizedString()))
             .Times(1);
 
         FlushCallbacks();
@@ -154,7 +191,7 @@ TEST_P(WireCreateComputePipelineAsyncTest, CreateSuccess) {
 
 // Test when creating a compute pipeline with CreateComputePipelineAsync() results in an error.
 TEST_P(WireCreateComputePipelineAsyncTest, CreateError) {
-    DeviceCreateComputePipelineAsync(cDevice, &mDescriptor, this);
+    CreateComputePipelineAsync(&mDescriptor);
 
     EXPECT_CALL(api, OnDeviceCreateComputePipelineAsync2(apiDevice, _, _))
         .WillOnce(InvokeWithoutArgs([&] {
@@ -166,30 +203,8 @@ TEST_P(WireCreateComputePipelineAsyncTest, CreateError) {
     FlushClient();
     FlushFutures();
     ExpectWireCallbacksWhen([&](auto& mockCb) {
-        EXPECT_CALL(mockCb, Call(WGPUCreatePipelineAsyncStatus_ValidationError, _,
-                                 SizedString("Some error message"), this))
-            .Times(1);
-
-        FlushCallbacks();
-    });
-}
-
-// Test when creating a render pipeline with CreateRenderPipelineAsync() successfully.
-TEST_P(WireCreateRenderPipelineAsyncTest, CreateSuccess) {
-    DeviceCreateRenderPipelineAsync(cDevice, &mDescriptor, this);
-
-    EXPECT_CALL(api, OnDeviceCreateRenderPipelineAsync2(apiDevice, _, _))
-        .WillOnce(InvokeWithoutArgs([&] {
-            api.CallDeviceCreateRenderPipelineAsync2Callback(apiDevice,
-                                                             WGPUCreatePipelineAsyncStatus_Success,
-                                                             apiPipeline, kEmptyOutputStringView);
-        }));
-
-    FlushClient();
-    FlushFutures();
-    ExpectWireCallbacksWhen([&](auto& mockCb) {
-        EXPECT_CALL(mockCb, Call(WGPUCreatePipelineAsyncStatus_Success, NotNull(),
-                                 EmptySizedString(), this))
+        EXPECT_CALL(mockCb, Call(wgpu::CreatePipelineAsyncStatus::ValidationError, IsNull(),
+                                 SizedString("Some error message")))
             .Times(1);
 
         FlushCallbacks();
@@ -198,7 +213,7 @@ TEST_P(WireCreateRenderPipelineAsyncTest, CreateSuccess) {
 
 // Test when creating a render pipeline with CreateRenderPipelineAsync() results in an error.
 TEST_P(WireCreateRenderPipelineAsyncTest, CreateError) {
-    DeviceCreateRenderPipelineAsync(cDevice, &mDescriptor, this);
+    CreateRenderPipelineAsync(&mDescriptor);
 
     EXPECT_CALL(api, OnDeviceCreateRenderPipelineAsync2(apiDevice, _, _))
         .WillOnce(InvokeWithoutArgs([&] {
@@ -210,8 +225,8 @@ TEST_P(WireCreateRenderPipelineAsyncTest, CreateError) {
     FlushClient();
     FlushFutures();
     ExpectWireCallbacksWhen([&](auto& mockCb) {
-        EXPECT_CALL(mockCb, Call(WGPUCreatePipelineAsyncStatus_ValidationError, _,
-                                 SizedString("Some error message"), this))
+        EXPECT_CALL(mockCb, Call(wgpu::CreatePipelineAsyncStatus::ValidationError, IsNull(),
+                                 SizedString("Some error message")))
             .Times(1);
 
         FlushCallbacks();
@@ -219,31 +234,9 @@ TEST_P(WireCreateRenderPipelineAsyncTest, CreateError) {
 }
 
 // Test that registering a callback then wire disconnect calls the callback with
-// Success.
-TEST_P(WireCreateRenderPipelineAsyncTest, CreateThenDisconnect) {
-    DeviceCreateRenderPipelineAsync(cDevice, &mDescriptor, this);
-
-    EXPECT_CALL(api, OnDeviceCreateRenderPipelineAsync2(apiDevice, _, _))
-        .WillOnce(InvokeWithoutArgs([&] {
-            api.CallDeviceCreateRenderPipelineAsync2Callback(apiDevice,
-                                                             WGPUCreatePipelineAsyncStatus_Success,
-                                                             apiPipeline, kEmptyOutputStringView);
-        }));
-
-    FlushClient();
-    ExpectWireCallbacksWhen([&](auto& mockCb) {
-        EXPECT_CALL(mockCb, Call(WGPUCreatePipelineAsyncStatus_InstanceDropped, nullptr,
-                                 NonEmptySizedString(), this))
-            .Times(1);
-
-        GetWireClient()->Disconnect();
-    });
-}
-
-// Test that registering a callback then wire disconnect calls the callback with
-// Success.
+// InstanceDropped.
 TEST_P(WireCreateComputePipelineAsyncTest, CreateThenDisconnect) {
-    DeviceCreateComputePipelineAsync(cDevice, &mDescriptor, this);
+    CreateComputePipelineAsync(&mDescriptor);
 
     EXPECT_CALL(api, OnDeviceCreateComputePipelineAsync2(apiDevice, _, _))
         .WillOnce(InvokeWithoutArgs([&] {
@@ -254,8 +247,30 @@ TEST_P(WireCreateComputePipelineAsyncTest, CreateThenDisconnect) {
 
     FlushClient();
     ExpectWireCallbacksWhen([&](auto& mockCb) {
-        EXPECT_CALL(mockCb, Call(WGPUCreatePipelineAsyncStatus_InstanceDropped, nullptr,
-                                 NonEmptySizedString(), this))
+        EXPECT_CALL(mockCb, Call(wgpu::CreatePipelineAsyncStatus::InstanceDropped, IsNull(),
+                                 NonEmptySizedString()))
+            .Times(1);
+
+        GetWireClient()->Disconnect();
+    });
+}
+
+// Test that registering a callback then wire disconnect calls the callback with
+// InstanceDropped.
+TEST_P(WireCreateRenderPipelineAsyncTest, CreateThenDisconnect) {
+    CreateRenderPipelineAsync(&mDescriptor);
+
+    EXPECT_CALL(api, OnDeviceCreateRenderPipelineAsync2(apiDevice, _, _))
+        .WillOnce(InvokeWithoutArgs([&] {
+            api.CallDeviceCreateRenderPipelineAsync2Callback(apiDevice,
+                                                             WGPUCreatePipelineAsyncStatus_Success,
+                                                             apiPipeline, kEmptyOutputStringView);
+        }));
+
+    FlushClient();
+    ExpectWireCallbacksWhen([&](auto& mockCb) {
+        EXPECT_CALL(mockCb, Call(wgpu::CreatePipelineAsyncStatus::InstanceDropped, IsNull(),
+                                 NonEmptySizedString()))
             .Times(1);
 
         GetWireClient()->Disconnect();
@@ -263,34 +278,94 @@ TEST_P(WireCreateComputePipelineAsyncTest, CreateThenDisconnect) {
 }
 
 // Test that registering a callback after wire disconnect calls the callback with
-// Success.
-TEST_P(WireCreateRenderPipelineAsyncTest, CreateAfterDisconnect) {
-    GetWireClient()->Disconnect();
-
-    ExpectWireCallbacksWhen([&](auto& mockCb) {
-        EXPECT_CALL(mockCb, Call(WGPUCreatePipelineAsyncStatus_InstanceDropped, nullptr,
-                                 NonEmptySizedString(), this))
-            .Times(1);
-
-        DeviceCreateRenderPipelineAsync(cDevice, &mDescriptor, this);
-    });
-}
-
-// Test that registering a callback after wire disconnect calls the callback with
-// Success.
+// InstanceDropped.
 TEST_P(WireCreateComputePipelineAsyncTest, CreateAfterDisconnect) {
     GetWireClient()->Disconnect();
 
     ExpectWireCallbacksWhen([&](auto& mockCb) {
-        EXPECT_CALL(mockCb, Call(WGPUCreatePipelineAsyncStatus_InstanceDropped, nullptr,
-                                 NonEmptySizedString(), this))
+        EXPECT_CALL(mockCb, Call(wgpu::CreatePipelineAsyncStatus::InstanceDropped, IsNull(),
+                                 NonEmptySizedString()))
             .Times(1);
 
-        DeviceCreateComputePipelineAsync(cDevice, &mDescriptor, this);
+        CreateComputePipelineAsync(&mDescriptor);
     });
 }
 
-// TODO(dawn:2298) Add tests for callbacks when the Instance is released.
+// Test that registering a callback after wire disconnect calls the callback with
+// InstanceDropped.
+TEST_P(WireCreateRenderPipelineAsyncTest, CreateAfterDisconnect) {
+    GetWireClient()->Disconnect();
+
+    ExpectWireCallbacksWhen([&](auto& mockCb) {
+        EXPECT_CALL(mockCb, Call(wgpu::CreatePipelineAsyncStatus::InstanceDropped, IsNull(),
+                                 NonEmptySizedString()))
+            .Times(1);
+
+        CreateRenderPipelineAsync(&mDescriptor);
+    });
+}
+
+TEST_P(WireCreateComputePipelineAsyncTest, CreateAndDropInstance) {
+    // For spontaneous, dropping the instance does not immediately call the callback because it is
+    // allowed to resolve later.
+    DAWN_SKIP_TEST_IF(IsSpontaneous());
+
+    CreateComputePipelineAsync(&mDescriptor);
+
+    ExpectWireCallbacksWhen([&](auto& mockCb) {
+        EXPECT_CALL(mockCb, Call(wgpu::CreatePipelineAsyncStatus::InstanceDropped, IsNull(),
+                                 NonEmptySizedString()))
+            .Times(1);
+
+        instance = nullptr;
+    });
+}
+
+TEST_P(WireCreateRenderPipelineAsyncTest, CreateAndDropInstance) {
+    // For spontaneous, dropping the instance does not immediately call the callback because it is
+    // allowed to resolve later.
+    DAWN_SKIP_TEST_IF(IsSpontaneous());
+
+    CreateRenderPipelineAsync(&mDescriptor);
+
+    ExpectWireCallbacksWhen([&](auto& mockCb) {
+        EXPECT_CALL(mockCb, Call(wgpu::CreatePipelineAsyncStatus::InstanceDropped, IsNull(),
+                                 NonEmptySizedString()))
+            .Times(1);
+
+        instance = nullptr;
+    });
+}
+
+TEST_P(WireCreateComputePipelineAsyncTest, CreateAfterDroppingInstance) {
+    // For spontaneous, dropping the instance does not immediately call the callback because it is
+    // allowed to resolve later.
+    DAWN_SKIP_TEST_IF(IsSpontaneous());
+    instance = nullptr;
+
+    ExpectWireCallbacksWhen([&](auto& mockCb) {
+        EXPECT_CALL(mockCb, Call(wgpu::CreatePipelineAsyncStatus::InstanceDropped, IsNull(),
+                                 NonEmptySizedString()))
+            .Times(1);
+
+        CreateComputePipelineAsync(&mDescriptor);
+    });
+}
+
+TEST_P(WireCreateRenderPipelineAsyncTest, CreateAfterDroppingInstance) {
+    // For spontaneous, dropping the instance does not immediately call the callback because it is
+    // allowed to resolve later.
+    DAWN_SKIP_TEST_IF(IsSpontaneous());
+    instance = nullptr;
+
+    ExpectWireCallbacksWhen([&](auto& mockCb) {
+        EXPECT_CALL(mockCb, Call(wgpu::CreatePipelineAsyncStatus::InstanceDropped, IsNull(),
+                                 NonEmptySizedString()))
+            .Times(1);
+
+        CreateRenderPipelineAsync(&mDescriptor);
+    });
+}
 
 // Test that if the server is deleted before the callback, it forces the
 // callback to complete.

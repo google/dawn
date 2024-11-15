@@ -238,7 +238,7 @@ TEST_P(DeviceLostTest, BufferMapAsyncFailsForWriting) {
 
     LoseDeviceForTesting();
 
-    EXPECT_CALL(mMapAsyncCb, Call(wgpu::MapAsyncStatus::Error, HasSubstr("is lost"))).Times(1);
+    EXPECT_CALL(mMapAsyncCb, Call(wgpu::MapAsyncStatus::Aborted, HasSubstr("is lost"))).Times(1);
     buffer.MapAsync(wgpu::MapMode::Write, 0, 4, wgpu::CallbackMode::AllowProcessEvents,
                     mMapAsyncCb.Callback());
 }
@@ -292,7 +292,7 @@ TEST_P(DeviceLostTest, BufferMapAsyncFailsForReading) {
 
     LoseDeviceForTesting();
 
-    EXPECT_CALL(mMapAsyncCb, Call(wgpu::MapAsyncStatus::Error, HasSubstr("is lost"))).Times(1);
+    EXPECT_CALL(mMapAsyncCb, Call(wgpu::MapAsyncStatus::Aborted, HasSubstr("is lost"))).Times(1);
     buffer.MapAsync(wgpu::MapMode::Read, 0, 4, wgpu::CallbackMode::AllowProcessEvents,
                     mMapAsyncCb.Callback());
 }
