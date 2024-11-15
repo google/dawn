@@ -50,6 +50,7 @@ import "src/tint/lang/core/texel_format.def"
 enum core_diagnostic_rule {
   // Rules defined in the spec.
   derivative_uniformity
+  subgroup_uniformity
 }
 
 // chromium-specific diagnostics

@@ -48,6 +48,7 @@ namespace tint::wgsl {
 enum class CoreDiagnosticRule : uint8_t {
     kUndefined,
     kDerivativeUniformity,
+    kSubgroupUniformity,
 };
 
 /// @param value the enum value
@@ -69,6 +70,7 @@ CoreDiagnosticRule ParseCoreDiagnosticRule(std::string_view str);
 
 constexpr std::string_view kCoreDiagnosticRuleStrings[] = {
     "derivative_uniformity",
+    "subgroup_uniformity",
 };
 
 /// Chromium-specific diagnostic rules.

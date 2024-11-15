@@ -260,7 +260,7 @@ TEST_F(ResolverDiagnosticControlTest, UnrecognizedCoreRuleName_Directive) {
     EXPECT_EQ(r()->error(),
               R"(12:34 warning: unrecognized diagnostic rule 'derivative_uniform'
 Did you mean 'derivative_uniformity'?
-Possible values: 'derivative_uniformity')");
+Possible values: 'derivative_uniformity', 'subgroup_uniformity')");
 }
 
 TEST_F(ResolverDiagnosticControlTest, UnrecognizedCoreRuleName_Attribute) {
@@ -271,7 +271,7 @@ TEST_F(ResolverDiagnosticControlTest, UnrecognizedCoreRuleName_Attribute) {
     EXPECT_EQ(r()->error(),
               R"(12:34 warning: unrecognized diagnostic rule 'derivative_uniform'
 Did you mean 'derivative_uniformity'?
-Possible values: 'derivative_uniformity')");
+Possible values: 'derivative_uniformity', 'subgroup_uniformity')");
 }
 
 TEST_F(ResolverDiagnosticControlTest, UnrecognizedChromiumRuleName_Directive) {

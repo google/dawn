@@ -177,6 +177,8 @@ Validator::Validator(
     // Set default severities for filterable diagnostic rules.
     diagnostic_filters_.Set(wgsl::CoreDiagnosticRule::kDerivativeUniformity,
                             wgsl::DiagnosticSeverity::kError);
+    diagnostic_filters_.Set(wgsl::CoreDiagnosticRule::kSubgroupUniformity,
+                            wgsl::DiagnosticSeverity::kError);
     diagnostic_filters_.Set(wgsl::ChromiumDiagnosticRule::kUnreachableCode,
                             wgsl::DiagnosticSeverity::kWarning);
 }
