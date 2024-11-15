@@ -1474,6 +1474,16 @@ crbug.com/dawn/366000875 webgpu:shader,validation,decl,var:var_access_mode_bad_o
 crbug.com/375467276 webgpu:shader,execution,expression,access,structure,index:buffer_align:* [ Failure ]
 crbug.com/375467276 webgpu:shader,validation,shader_io,align:* [ Failure ]
 
+# Temporary failures due to new subgroup_uniformity diagnostic rule.
+# CTS will be updated to fix these.
+crbug.com/369426560 webgpu:shader,execution,expression,call,builtin,quadBroadcast:compute,split:* [ Failure ]
+crbug.com/369426560 webgpu:shader,execution,expression,call,builtin,quadSwap:compute,split:* [ Failure ]
+crbug.com/369426560 webgpu:shader,execution,expression,call,builtin,subgroupAll:compute,split:* [ Failure ]
+crbug.com/369426560 webgpu:shader,execution,expression,call,builtin,subgroupAny:compute,split:* [ Failure ]
+crbug.com/369426560 webgpu:shader,execution,expression,call,builtin,subgroupBallot:compute,split:* [ Failure ]
+crbug.com/369426560 webgpu:shader,execution,expression,call,builtin,subgroupBallot:predicate_and_control_flow:* [ Failure ]
+crbug.com/369426560 webgpu:shader,execution,expression,call,builtin,subgroupBitwise:compute,split:* [ Failure ]
+
 # Minor accuracy issue with the introduction of texture sample bias clampling
 # specific subtest case: samplePoints="spiral";addressModeU="clamp-to-edge";addressModeV="mirror-repeat";minFilter="linear"
 crbug.com/dawn/371033198 [ amd mac ] webgpu:shader,execution,expression,call,builtin,textureSampleBias:sampled_2d_coords:format="bc1-rgba-unorm";filt="nearest";modeU="c";modeV="c";offset=true [ Failure ]

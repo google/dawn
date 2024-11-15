@@ -144,6 +144,32 @@ class BasicTest : public UniformityAnalysisTestBase,
         kFwidth,
         kFwidthCoarse,
         kFwidthFine,
+        // Subgroup functions:
+        kSubgroupBallot,
+        kSubgroupElect,
+        kSubgroupBroadcast,
+        kSubgroupBroadcastFirst,
+        kSubgroupShuffle,
+        kSubgroupShuffleXor,
+        kSubgroupShuffleUp,
+        kSubgroupShuffleDown,
+        kSubgroupAdd,
+        kSubgroupInclusiveAdd,
+        kSubgroupExclusiveAdd,
+        kSubgroupMul,
+        kSubgroupInclusiveMul,
+        kSubgroupExclusiveMul,
+        kSubgroupAnd,
+        kSubgroupOr,
+        kSubgroupXor,
+        kSubgroupMin,
+        kSubgroupMax,
+        kSubgroupAll,
+        kSubgroupAny,
+        kQuadBroadcast,
+        kQuadSwapX,
+        kQuadSwapY,
+        kQuadSwapDiagonal,
         // End of range marker:
         kEndOfFunctionRange,
     };
@@ -228,6 +254,56 @@ class BasicTest : public UniformityAnalysisTestBase,
                 return "_ = fwidthCoarse(1.0)";
             case kFwidthFine:
                 return "_ = fwidthFine(1.0)";
+            case kSubgroupBallot:
+                return "_ = subgroupBallot(true)";
+            case kSubgroupElect:
+                return "_ = subgroupElect()";
+            case kSubgroupBroadcast:
+                return "_ = subgroupBroadcast(1.0, 0)";
+            case kSubgroupBroadcastFirst:
+                return "_ = subgroupBroadcastFirst(1.0)";
+            case kSubgroupShuffle:
+                return "_ = subgroupShuffle(1.0, 0)";
+            case kSubgroupShuffleXor:
+                return "_ = subgroupShuffleXor(1.0, 0)";
+            case kSubgroupShuffleUp:
+                return "_ = subgroupShuffleUp(1.0, 1)";
+            case kSubgroupShuffleDown:
+                return "_ = subgroupShuffleDown(1.0, 1)";
+            case kSubgroupAdd:
+                return "_ = subgroupAdd(1.0)";
+            case kSubgroupInclusiveAdd:
+                return "_ = subgroupInclusiveAdd(1.0)";
+            case kSubgroupExclusiveAdd:
+                return "_ = subgroupExclusiveAdd(1.0)";
+            case kSubgroupMul:
+                return "_ = subgroupMul(1.0)";
+            case kSubgroupInclusiveMul:
+                return "_ = subgroupInclusiveMul(1.0)";
+            case kSubgroupExclusiveMul:
+                return "_ = subgroupExclusiveMul(1.0)";
+            case kSubgroupAnd:
+                return "_ = subgroupAnd(1)";
+            case kSubgroupOr:
+                return "_ = subgroupOr(1)";
+            case kSubgroupXor:
+                return "_ = subgroupXor(1)";
+            case kSubgroupMin:
+                return "_ = subgroupMin(1.0)";
+            case kSubgroupMax:
+                return "_ = subgroupMax(1.0)";
+            case kSubgroupAll:
+                return "_ = subgroupAll(true)";
+            case kSubgroupAny:
+                return "_ = subgroupAny(true)";
+            case kQuadBroadcast:
+                return "_ = quadBroadcast(1.0, 0)";
+            case kQuadSwapX:
+                return "_ = quadSwapX(1.0)";
+            case kQuadSwapY:
+                return "_ = quadSwapY(1.0)";
+            case kQuadSwapDiagonal:
+                return "_ = quadSwapDiagonal(1.0)";
             case kEndOfFunctionRange:
                 return "<invalid>";
         }
@@ -291,6 +367,31 @@ class BasicTest : public UniformityAnalysisTestBase,
             CASE(kFwidth);
             CASE(kFwidthCoarse);
             CASE(kFwidthFine);
+            CASE(kSubgroupBallot);
+            CASE(kSubgroupElect);
+            CASE(kSubgroupBroadcast);
+            CASE(kSubgroupBroadcastFirst);
+            CASE(kSubgroupShuffle);
+            CASE(kSubgroupShuffleXor);
+            CASE(kSubgroupShuffleUp);
+            CASE(kSubgroupShuffleDown);
+            CASE(kSubgroupAdd);
+            CASE(kSubgroupInclusiveAdd);
+            CASE(kSubgroupExclusiveAdd);
+            CASE(kSubgroupMul);
+            CASE(kSubgroupInclusiveMul);
+            CASE(kSubgroupExclusiveMul);
+            CASE(kSubgroupAnd);
+            CASE(kSubgroupOr);
+            CASE(kSubgroupXor);
+            CASE(kSubgroupMin);
+            CASE(kSubgroupMax);
+            CASE(kSubgroupAll);
+            CASE(kSubgroupAny);
+            CASE(kQuadBroadcast);
+            CASE(kQuadSwapX);
+            CASE(kQuadSwapY);
+            CASE(kQuadSwapDiagonal);
             case kEndOfFunctionRange:
                 break;
         }
@@ -305,6 +406,8 @@ TEST_P(BasicTest, ConditionalFunctionCall) {
     auto condition = static_cast<Condition>(std::get<0>(GetParam()));
     auto function = static_cast<Function>(std::get<1>(GetParam()));
     std::string src = R"(
+enable subgroups;
+
 var<private> p : i32;
 var<workgroup> w : i32;
 @group(0) @binding(0) var<uniform> u : i32;
@@ -9135,7 +9238,7 @@ note: reading from module-scope private variable 'v0' may result in a non-unifor
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-/// Tests for the derivative_uniformity diagnostic filter.
+/// Tests for diagnostic filter rules.
 ////////////////////////////////////////////////////////////////////////////////
 
 class UniformityAnalysisDiagnosticFilterTest
@@ -9157,7 +9260,9 @@ class UniformityAnalysisDiagnosticFilterTest
     }
 };
 
-TEST_P(UniformityAnalysisDiagnosticFilterTest, Directive) {
+// Test each diagnostic rule against directives and attributes on functions.
+
+TEST_P(UniformityAnalysisDiagnosticFilterTest, Directive_DerivativeUniformity) {
     auto& param = GetParam();
     StringStream ss;
     ss << "diagnostic(" << param << ", derivative_uniformity);" << R"(
@@ -9183,7 +9288,32 @@ fn foo() {
     }
 }
 
-TEST_P(UniformityAnalysisDiagnosticFilterTest, AttributeOnFunction) {
+TEST_P(UniformityAnalysisDiagnosticFilterTest, Directive_SubgroupUniformity) {
+    auto& param = GetParam();
+    StringStream ss;
+    ss << "enable subgroups;\n"
+       << "diagnostic(" << param << ", subgroup_uniformity);" << R"(
+@group(0) @binding(0) var<storage, read_write> non_uniform : i32;
+
+fn foo() {
+  if (non_uniform == 42) {
+    _ = subgroupElect();
+  }
+}
+)";
+
+    RunTest(ss.str(), param != wgsl::DiagnosticSeverity::kError);
+
+    if (param == wgsl::DiagnosticSeverity::kOff) {
+        EXPECT_TRUE(error_.empty());
+    } else {
+        StringStream err;
+        err << ToStr(param) << ": 'subgroupElect' must only be called";
+        EXPECT_THAT(error_, ::testing::HasSubstr(err.str()));
+    }
+}
+
+TEST_P(UniformityAnalysisDiagnosticFilterTest, AttributeOnFunction_DerivativeUniformity) {
     auto& param = GetParam();
     StringStream ss;
     ss << R"(
@@ -9208,6 +9338,34 @@ TEST_P(UniformityAnalysisDiagnosticFilterTest, AttributeOnFunction) {
         EXPECT_THAT(error_, ::testing::HasSubstr(err.str()));
     }
 }
+
+TEST_P(UniformityAnalysisDiagnosticFilterTest, AttributeOnFunction_SubgroupUniformity) {
+    auto& param = GetParam();
+    StringStream ss;
+    ss << R"(
+enable subgroups;
+@group(0) @binding(0) var<storage, read_write> non_uniform : i32;
+)" << "@diagnostic("
+       << param << ", subgroup_uniformity)" <<
+        R"(fn foo() {
+  if (non_uniform == 42) {
+    _ = subgroupElect();
+  }
+}
+)";
+
+    RunTest(ss.str(), param != wgsl::DiagnosticSeverity::kError);
+    if (param == wgsl::DiagnosticSeverity::kOff) {
+        EXPECT_TRUE(error_.empty());
+    } else {
+        StringStream err;
+        err << ToStr(param) << ": 'subgroupElect' must only be called";
+        EXPECT_THAT(error_, ::testing::HasSubstr(err.str()));
+    }
+}
+
+// Test the various places that the attributes can be used against just one diagnostic rule, to
+// avoid over-parameterizing the tests.
 
 TEST_P(UniformityAnalysisDiagnosticFilterTest, AttributeOnBlock) {
     auto& param = GetParam();

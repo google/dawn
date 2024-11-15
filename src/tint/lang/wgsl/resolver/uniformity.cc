@@ -1645,6 +1645,14 @@ class UniformityGraph {
                         callsite_tag = {CallSiteTag::CallSiteNoRestriction};
                         function_tag = ReturnValueMayBeNonUniform;
                     }
+                } else if (builtin->IsSubgroup()) {
+                    // Get the severity of subgroup uniformity violations in this context.
+                    auto severity = sem_.DiagnosticSeverity(
+                        call, wgsl::CoreDiagnosticRule::kSubgroupUniformity);
+                    if (severity != wgsl::DiagnosticSeverity::kOff) {
+                        callsite_tag = {CallSiteTag::CallSiteRequiredToBeUniform, severity};
+                    }
+                    function_tag = ReturnValueMayBeNonUniform;
                 }
             },
             [&](const sem::Function* func) {
