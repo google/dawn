@@ -57,7 +57,15 @@ struct MatrixInfo {
 
     /// @returns the identifier of an array that holds an vector column for each row of the matrix.
     ast::Type array(ast::Builder* b) const {
-        return b->ty.array(b->ty.vec<f32>(matrix->Rows()), u32(matrix->Columns()),
+        ast::Type col_type;
+        if (matrix->Type()->Is<core::type::F32>()) {
+            col_type = b->ty.vec<f32>(matrix->Rows());
+        } else if (matrix->Type()->Is<core::type::F16>()) {
+            col_type = b->ty.vec<f16>(matrix->Rows());
+        } else {
+            TINT_UNREACHABLE();
+        }
+        return b->ty.array(col_type, u32(matrix->Columns()),
                            Vector{
                                b->Stride(stride),
                            });
