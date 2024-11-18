@@ -2772,7 +2772,7 @@
         "extensible": false,
         "members": [
             {"name": "array stride", "type": "uint64_t"},
-            {"name": "step mode", "type": "vertex step mode", "default": "vertex"},
+            {"name": "step mode", "type": "vertex step mode"},
             {"name": "attribute count", "type": "size_t"},
             {"name": "attributes", "type": "vertex attribute", "annotation": "const*", "length": "attribute count"}
         ]
@@ -2780,8 +2780,8 @@
     "vertex step mode": {
         "category": "enum",
         "values": [
-            {"value": 0, "name": "undefined", "jsrepr": "undefined"},
-            {"value": 1, "name": "vertex buffer not used"},
+            {"value": 0, "name": "vertex buffer not used"},
+            {"value": 1, "name": "undefined", "jsrepr": "undefined"},
             {"value": 2, "name": "vertex"},
             {"value": 3, "name": "instance"}
         ]

@@ -968,22 +968,20 @@ RenderPipelineBase::RenderPipelineBase(DeviceBase* device,
 
     auto buffers =
         ityp::SpanFromUntyped<VertexBufferSlot>(descriptor->vertex.buffers, mVertexBufferCount);
-    for (auto [slot, bufferOrig] : Enumerate(buffers)) {
+    for (auto [slot, buffer] : Enumerate(buffers)) {
         // Skip unused slots
-        if (bufferOrig.stepMode == wgpu::VertexStepMode::VertexBufferNotUsed) {
+        if (buffer.stepMode == wgpu::VertexStepMode::VertexBufferNotUsed) {
             continue;
         }
 
-        // Make a local copy with defaulting applied, before copying the
-        // now-defaulted values into mVertexBufferInfos.
-        VertexBufferLayout buffer = bufferOrig.WithTrivialFrontendDefaults();
-
         mVertexBuffersUsed.set(slot);
         mVertexBufferInfos[slot].arrayStride = buffer.arrayStride;
-        mVertexBufferInfos[slot].stepMode = buffer.stepMode;
+        mVertexBufferInfos[slot].stepMode = (buffer.stepMode == wgpu::VertexStepMode::Undefined)
+                                                ? wgpu::VertexStepMode::Vertex
+                                                : buffer.stepMode;
         mVertexBufferInfos[slot].usedBytesInStride = 0;
         mVertexBufferInfos[slot].lastStride = 0;
-        switch (buffer.stepMode) {
+        switch (mVertexBufferInfos[slot].stepMode) {
             case wgpu::VertexStepMode::Vertex:
                 mVertexBuffersUsedAsVertexBuffer.set(slot);
                 break;
