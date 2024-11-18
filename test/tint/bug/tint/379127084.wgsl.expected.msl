@@ -234,7 +234,7 @@ FSOut tint_symbol_inner(FSIn _stageIn, thread tint_private_vars_struct* const ti
 
 fragment tint_symbol_5 tint_symbol(const device FSUniforms* tint_symbol_17 [[buffer(0)]], texture2d<float, access::sample> tint_symbol_18 [[texture(0)]], sampler tint_symbol_19 [[sampler(0)]], texture2d<float, access::sample> tint_symbol_20 [[texture(1)]], sampler tint_symbol_21 [[sampler(1)]], tint_symbol_4 tint_symbol_3 [[stage_in]]) {
   thread tint_private_vars_struct tint_private_vars = {};
-  FSIn const tint_symbol_6 = {.ssboIndicesVar=tint_symbol_3.ssboIndicesVar, .localCoordsVar=tint_symbol_3.localCoordsVar};
+  FSIn const tint_symbol_6 = FSIn{.ssboIndicesVar=tint_symbol_3.ssboIndicesVar, .localCoordsVar=tint_symbol_3.localCoordsVar};
   FSOut const inner_result = tint_symbol_inner(tint_symbol_6, &(tint_private_vars), tint_symbol_17, tint_symbol_18, tint_symbol_19, tint_symbol_20, tint_symbol_21);
   tint_symbol_5 wrapper_result = {};
   wrapper_result.sk_FragColor = inner_result.sk_FragColor;
