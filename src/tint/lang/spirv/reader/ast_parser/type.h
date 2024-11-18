@@ -157,6 +157,18 @@ struct F32 final : public Castable<F32, Type> {
 #endif  // NDEBUG
 };
 
+/// `f16` type
+struct F16 final : public Castable<F16, Type> {
+    /// @param b the ProgramBuilder used to construct the AST types
+    /// @returns the constructed ast::Type node for the given type
+    ast::Type Build(ProgramBuilder& b) const override;
+
+#ifndef NDEBUG
+    /// @returns a string representation of the type, for debug purposes only
+    std::string String() const override;
+#endif  // NDEBUG
+};
+
 /// `i32` type
 struct I32 final : public Castable<I32, Type> {
     /// @param b the ProgramBuilder used to construct the AST types
@@ -549,6 +561,8 @@ class TypeManager {
     const ast_parser::U32* U32();
     /// @return a F32 type. Repeated calls will return the same pointer.
     const ast_parser::F32* F32();
+    /// @return a F16 type. Repeated calls will return the same pointer.
+    const ast_parser::F16* F16();
     /// @return a I32 type. Repeated calls will return the same pointer.
     const ast_parser::I32* I32();
     /// @param ty the input type.

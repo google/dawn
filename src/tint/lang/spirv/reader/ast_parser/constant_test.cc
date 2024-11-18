@@ -42,6 +42,7 @@ std::string Preamble() {
     OpCapability Image1D
     OpCapability StorageImageExtendedFormats
     OpCapability ImageQuery
+    OpCapability Float16
     OpMemoryModel Logical Simple
   )";
 }
@@ -69,6 +70,7 @@ std::string CommonTypes() {
 
     %bool = OpTypeBool
     %float = OpTypeFloat 32
+    %half = OpTypeFloat 16
     %uint = OpTypeInt 32 0
     %int = OpTypeInt 32 1
 
@@ -81,6 +83,9 @@ std::string CommonTypes() {
     %v2float = OpTypeVector %float 2
     %v3float = OpTypeVector %float 3
     %v4float = OpTypeVector %float 4
+    %v2half = OpTypeVector %half 2
+    %v3half = OpTypeVector %half 3
+    %v4half = OpTypeVector %half 4
 
     %true = OpConstantTrue %bool
     %false = OpConstantFalse %bool
@@ -95,6 +100,9 @@ std::string CommonTypes() {
     %float_minus_5 = OpConstant %float -5
     %float_half = OpConstant %float 0.5
     %float_ten = OpConstant %float 10
+    %half_minus_5 = OpConstant %half -5
+    %half_half = OpConstant %half 0.5
+    %half_ten = OpConstant %half 10
   )";
 }
 
@@ -149,7 +157,10 @@ INSTANTIATE_TEST_SUITE_P(Scalars,
                              {"%uint", "%uint_max", "4294967295u"},
                              {"%float", "%float_minus_5", "-5.0f"},
                              {"%float", "%float_half", "0.5f"},
-                             {"%float", "%float_ten", "10.0f"}}));
+                             {"%float", "%float_ten", "10.0f"},
+                             {"%half", "%half_minus_5", "-5.0h"},
+                             {"%half", "%half_half", "0.5h"},
+                             {"%half", "%half_ten", "10.0h"}}));
 
 }  // namespace
 }  // namespace tint::spirv::reader::ast_parser
