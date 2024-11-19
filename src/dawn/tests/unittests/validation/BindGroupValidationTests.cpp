@@ -3646,5 +3646,45 @@ TEST_F(SamplerTypeBindingTest, SamplerAndBindGroupMatches) {
     }
 }
 
+class PipelineLayoutValidationTest : public ValidationTest {};
+
+// Test creating pipeline layout with null bind group layout works when unsafe APIs are allowed.
+TEST_F(PipelineLayoutValidationTest, CreateWithNullBindGroupLayout) {
+    for (uint32_t nullBGLIndex = 0; nullBGLIndex < 4; ++nullBGLIndex) {
+        std::vector<wgpu::BindGroupLayout> bgls(4);
+        for (uint32_t i = 0; i < 4; ++i) {
+            if (i == nullBGLIndex) {
+                continue;
+            }
+            bgls[i] = utils::MakeBindGroupLayout(
+                device, {{0, wgpu::ShaderStage::Compute, wgpu::StorageTextureAccess::WriteOnly,
+                          wgpu::TextureFormat::R32Float}});
+        }
+        utils::MakePipelineLayout(device, bgls);
+    }
+}
+
+class PipelineLayoutDontAllowUnsafeAPIValidationTest : public ValidationTest {
+  protected:
+    bool AllowUnsafeAPIs() override { return false; }
+};
+
+// Test currently creating pipeline layout with null bind group layout doesn't work when unsafe APIs
+// are not allowed.
+TEST_F(PipelineLayoutDontAllowUnsafeAPIValidationTest, CreateWithNullBindGroupLayout) {
+    for (uint32_t nullBGLIndex = 0; nullBGLIndex < 4; ++nullBGLIndex) {
+        std::vector<wgpu::BindGroupLayout> bgls(4);
+        for (uint32_t i = 0; i < 4; ++i) {
+            if (i == nullBGLIndex) {
+                continue;
+            }
+            bgls[i] = utils::MakeBindGroupLayout(
+                device, {{0, wgpu::ShaderStage::Compute, wgpu::StorageTextureAccess::WriteOnly,
+                          wgpu::TextureFormat::R32Float}});
+        }
+        ASSERT_DEVICE_ERROR(utils::MakePipelineLayout(device, bgls));
+    }
+}
+
 }  // anonymous namespace
 }  // namespace dawn

@@ -82,6 +82,14 @@ ResultOrError<UnpackedPtr<PipelineLayoutDescriptor>> ValidatePipelineLayoutDescr
 
     BindingCounts bindingCounts = {};
     for (uint32_t i = 0; i < descriptor->bindGroupLayoutCount; ++i) {
+        if (descriptor->bindGroupLayouts[i] == nullptr) {
+            if (device->IsToggleEnabled(Toggle::AllowUnsafeAPIs)) {
+                continue;
+            } else {
+                return DAWN_VALIDATION_ERROR("bindGroupLayouts[%i] cannot be nullptr", i);
+            }
+        }
+
         DAWN_TRY(device->ValidateObject(descriptor->bindGroupLayouts[i]));
         DAWN_INVALID_IF(descriptor->bindGroupLayouts[i]->GetPipelineCompatibilityToken() !=
                             pipelineCompatibilityToken,
@@ -137,6 +145,9 @@ PipelineLayoutBase::PipelineLayoutBase(DeviceBase* device,
     auto bgls = ityp::SpanFromUntyped<BindGroupIndex>(descriptor->bindGroupLayouts,
                                                       descriptor->bindGroupLayoutCount);
     for (auto [group, bgl] : Enumerate(bgls)) {
+        if (bgl == nullptr) {
+            continue;
+        }
         mBindGroupLayouts[group] = bgl;
         mMask.set(group);
     }
