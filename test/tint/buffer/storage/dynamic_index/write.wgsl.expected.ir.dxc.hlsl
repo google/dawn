@@ -77,32 +77,29 @@ void v_11(uint offset, float2x2 obj) {
 }
 
 void main_inner(uint idx) {
-  sb.Store((0u + (uint(idx) * 544u)), asuint(0.0f));
-  sb.Store((4u + (uint(idx) * 544u)), asuint(int(0)));
-  sb.Store((8u + (uint(idx) * 544u)), 0u);
-  sb.Store2((16u + (uint(idx) * 544u)), asuint((0.0f).xx));
-  uint v_12 = (24u + (uint(idx) * 544u));
-  sb.Store2(v_12, asuint(int2((int(0)).xx)));
-  sb.Store2((32u + (uint(idx) * 544u)), (0u).xx);
-  sb.Store3((48u + (uint(idx) * 544u)), asuint((0.0f).xxx));
-  uint v_13 = (64u + (uint(idx) * 544u));
-  sb.Store3(v_13, asuint(int3((int(0)).xxx)));
-  sb.Store3((80u + (uint(idx) * 544u)), (0u).xxx);
-  sb.Store4((96u + (uint(idx) * 544u)), asuint((0.0f).xxxx));
-  uint v_14 = (112u + (uint(idx) * 544u));
-  sb.Store4(v_14, asuint(int4((int(0)).xxxx)));
-  sb.Store4((128u + (uint(idx) * 544u)), (0u).xxxx);
-  v_11((144u + (uint(idx) * 544u)), float2x2((0.0f).xx, (0.0f).xx));
-  v_10((160u + (uint(idx) * 544u)), float2x3((0.0f).xxx, (0.0f).xxx));
-  v_9((192u + (uint(idx) * 544u)), float2x4((0.0f).xxxx, (0.0f).xxxx));
-  v_8((224u + (uint(idx) * 544u)), float3x2((0.0f).xx, (0.0f).xx, (0.0f).xx));
-  v_7((256u + (uint(idx) * 544u)), float3x3((0.0f).xxx, (0.0f).xxx, (0.0f).xxx));
-  v_6((304u + (uint(idx) * 544u)), float3x4((0.0f).xxxx, (0.0f).xxxx, (0.0f).xxxx));
-  v_5((352u + (uint(idx) * 544u)), float4x2((0.0f).xx, (0.0f).xx, (0.0f).xx, (0.0f).xx));
-  v_4((384u + (uint(idx) * 544u)), float4x3((0.0f).xxx, (0.0f).xxx, (0.0f).xxx, (0.0f).xxx));
-  v_3((448u + (uint(idx) * 544u)), float4x4((0.0f).xxxx, (0.0f).xxxx, (0.0f).xxxx, (0.0f).xxxx));
-  float3 v_15[2] = (float3[2])0;
-  v((512u + (uint(idx) * 544u)), v_15);
+  sb.Store((0u + (idx * 544u)), asuint(0.0f));
+  sb.Store((4u + (idx * 544u)), asuint(int(0)));
+  sb.Store((8u + (idx * 544u)), 0u);
+  sb.Store2((16u + (idx * 544u)), asuint((0.0f).xx));
+  sb.Store2((24u + (idx * 544u)), asuint(int2((int(0)).xx)));
+  sb.Store2((32u + (idx * 544u)), (0u).xx);
+  sb.Store3((48u + (idx * 544u)), asuint((0.0f).xxx));
+  sb.Store3((64u + (idx * 544u)), asuint(int3((int(0)).xxx)));
+  sb.Store3((80u + (idx * 544u)), (0u).xxx);
+  sb.Store4((96u + (idx * 544u)), asuint((0.0f).xxxx));
+  sb.Store4((112u + (idx * 544u)), asuint(int4((int(0)).xxxx)));
+  sb.Store4((128u + (idx * 544u)), (0u).xxxx);
+  v_11((144u + (idx * 544u)), float2x2((0.0f).xx, (0.0f).xx));
+  v_10((160u + (idx * 544u)), float2x3((0.0f).xxx, (0.0f).xxx));
+  v_9((192u + (idx * 544u)), float2x4((0.0f).xxxx, (0.0f).xxxx));
+  v_8((224u + (idx * 544u)), float3x2((0.0f).xx, (0.0f).xx, (0.0f).xx));
+  v_7((256u + (idx * 544u)), float3x3((0.0f).xxx, (0.0f).xxx, (0.0f).xxx));
+  v_6((304u + (idx * 544u)), float3x4((0.0f).xxxx, (0.0f).xxxx, (0.0f).xxxx));
+  v_5((352u + (idx * 544u)), float4x2((0.0f).xx, (0.0f).xx, (0.0f).xx, (0.0f).xx));
+  v_4((384u + (idx * 544u)), float4x3((0.0f).xxx, (0.0f).xxx, (0.0f).xxx, (0.0f).xxx));
+  v_3((448u + (idx * 544u)), float4x4((0.0f).xxxx, (0.0f).xxxx, (0.0f).xxxx, (0.0f).xxxx));
+  float3 v_12[2] = (float3[2])0;
+  v((512u + (idx * 544u)), v_12);
 }
 
 [numthreads(1, 1, 1)]

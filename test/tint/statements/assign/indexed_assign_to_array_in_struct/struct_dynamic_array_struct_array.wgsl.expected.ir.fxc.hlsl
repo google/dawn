@@ -14,10 +14,7 @@ void v_1(uint offset, InnerS obj) {
 [numthreads(1, 1, 1)]
 void main() {
   InnerS v = (InnerS)0;
-  uint v_2 = uniforms[0u].y;
-  uint v_3 = (uint(uniforms[0u].x) * 32u);
-  uint v_4 = (uint(v_2) * 4u);
-  InnerS v_5 = v;
-  v_1(((0u + v_3) + v_4), v_5);
+  InnerS v_2 = v;
+  v_1(((0u + (uniforms[0u].x * 32u)) + (uniforms[0u].y * 4u)), v_2);
 }
 

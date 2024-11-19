@@ -6,7 +6,7 @@ struct FragmentInputs {
 
 RWByteAddressBuffer output : register(u0);
 void main_inner(FragmentInputs inputs) {
-  output.Store((0u + (uint(inputs.subgroup_invocation_id) * 4u)), inputs.subgroup_size);
+  output.Store((0u + (inputs.subgroup_invocation_id * 4u)), inputs.subgroup_size);
 }
 
 void main() {

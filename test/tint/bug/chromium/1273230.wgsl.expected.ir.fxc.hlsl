@@ -52,23 +52,21 @@ uint3 toIndex4D(uint gridSize, uint index) {
 }
 
 float3 loadPosition(uint vertexIndex) {
-  float v_1 = asfloat(positions.Load((0u + (uint(((3u * vertexIndex) + 0u)) * 4u))));
-  float v_2 = asfloat(positions.Load((0u + (uint(((3u * vertexIndex) + 1u)) * 4u))));
-  float3 position = float3(v_1, v_2, asfloat(positions.Load((0u + (uint(((3u * vertexIndex) + 2u)) * 4u)))));
+  float3 position = float3(asfloat(positions.Load((0u + (((3u * vertexIndex) + 0u) * 4u)))), asfloat(positions.Load((0u + (((3u * vertexIndex) + 1u) * 4u)))), asfloat(positions.Load((0u + (((3u * vertexIndex) + 2u) * 4u)))));
   return position;
 }
 
 void doIgnore() {
   uint g43 = uniforms[0u].x;
   uint kj6 = dbg.Load(20u);
-  uint v_3 = 0u;
-  counters.InterlockedOr(uint(0u), 0u, v_3);
-  uint b53 = v_3;
+  uint v_1 = 0u;
+  counters.InterlockedOr(uint(0u), 0u, v_1);
+  uint b53 = v_1;
   uint rwg = indices.Load(0u);
   float rb5 = asfloat(positions.Load(0u));
-  int v_4 = int(0);
-  LUT.InterlockedOr(int(0u), int(0), v_4);
-  int g55 = v_4;
+  int v_2 = int(0);
+  LUT.InterlockedOr(int(0u), int(0), v_2);
+  int g55 = v_2;
 }
 
 void main_count_inner(uint3 GlobalInvocationID) {
@@ -77,18 +75,18 @@ void main_count_inner(uint3 GlobalInvocationID) {
     return;
   }
   doIgnore();
-  uint i0 = indices.Load((0u + (uint(((3u * triangleIndex) + 0u)) * 4u)));
-  uint i1 = indices.Load((0u + (uint(((3u * i0) + 1u)) * 4u)));
-  uint i2 = indices.Load((0u + (uint(((3u * i0) + 2u)) * 4u)));
+  uint i0 = indices.Load((0u + (((3u * triangleIndex) + 0u) * 4u)));
+  uint i1 = indices.Load((0u + (((3u * i0) + 1u) * 4u)));
+  uint i2 = indices.Load((0u + (((3u * i0) + 2u) * 4u)));
   float3 p0 = loadPosition(i0);
   float3 p1 = loadPosition(i0);
   float3 p2 = loadPosition(i2);
   float3 center = (((p0 + p2) + p1) / 3.0f);
   float3 voxelPos = toVoxelPos(p1);
   uint lIndex = toIndex1D(uniforms[0u].y, p0);
-  int v_5 = int(0);
-  LUT.InterlockedAdd(int((0u + (uint(i1) * 4u))), int(1), v_5);
-  int triangleOffset = v_5;
+  int v_3 = int(0);
+  LUT.InterlockedAdd(int((0u + (i1 * 4u))), int(1), v_3);
+  int triangleOffset = v_3;
 }
 
 [numthreads(128, 1, 1)]

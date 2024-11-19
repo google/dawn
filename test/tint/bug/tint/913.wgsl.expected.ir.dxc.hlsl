@@ -103,9 +103,9 @@ void main_inner(uint3 GlobalInvocationID) {
   }
   uint outputIndex = ((GlobalInvocationID.y * dstSize.x) + GlobalInvocationID.x);
   if (success) {
-    output.Store((0u + (uint(outputIndex) * 4u)), 1u);
+    output.Store((0u + (outputIndex * 4u)), 1u);
   } else {
-    output.Store((0u + (uint(outputIndex) * 4u)), 0u);
+    output.Store((0u + (outputIndex * 4u)), 0u);
   }
 }
 

@@ -21,7 +21,7 @@ float mm_readA(uint row, uint col) {
     v = false;
   }
   if (v) {
-    float result = asfloat(firstMatrix.Load((0u + (uint(((row * uniforms[0u].y) + col)) * 4u))));
+    float result = asfloat(firstMatrix.Load((0u + (((row * uniforms[0u].y) + col) * 4u))));
     return result;
   }
   return 0.0f;
@@ -35,7 +35,7 @@ float mm_readB(uint row, uint col) {
     v_1 = false;
   }
   if (v_1) {
-    float result = asfloat(secondMatrix.Load((0u + (uint(((row * uniforms[0u].z) + col)) * 4u))));
+    float result = asfloat(secondMatrix.Load((0u + (((row * uniforms[0u].z) + col) * 4u))));
     return result;
   }
   return 0.0f;
@@ -50,7 +50,7 @@ void mm_write(uint row, uint col, float value) {
   }
   if (v_2) {
     uint index = (col + (row * uniforms[0u].z));
-    resultMatrix.Store((0u + (uint(index) * 4u)), asuint(value));
+    resultMatrix.Store((0u + (index * 4u)), asuint(value));
   }
 }
 

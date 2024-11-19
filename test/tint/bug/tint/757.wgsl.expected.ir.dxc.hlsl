@@ -21,8 +21,7 @@ void main_inner(uint3 GlobalInvocationID) {
       } else {
         break;
       }
-      uint v_2 = (uint((flatIndex + i)) * 4u);
-      result.Store((0u + v_2), asuint(texel.x));
+      result.Store((0u + ((flatIndex + i) * 4u)), asuint(texel.x));
       {
         i = (i + 1u);
       }

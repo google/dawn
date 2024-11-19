@@ -247,7 +247,7 @@ RWByteAddressBuffer dst : register(u1);
 void foo() {
   uint v = 0u;
   dst.GetDimensions(v);
-  dst.Store((0u + (uint(min(0u, ((v / 4u) - 1u))) * 4u)), 123u);
+  dst.Store((0u + (min(0u, ((v / 4u) - 1u)) * 4u)), 123u);
 }
 
 )");
@@ -275,7 +275,7 @@ cbuffer cbuffer_tint_storage_buffer_sizes : register(b0, space30) {
   uint4 tint_storage_buffer_sizes[1];
 };
 void foo() {
-  dst.Store((0u + (uint(min(0u, ((tint_storage_buffer_sizes[0u].x / 4u) - 1u))) * 4u)), 123u);
+  dst.Store((0u + (min(0u, ((tint_storage_buffer_sizes[0u].x / 4u) - 1u)) * 4u)), 123u);
 }
 
 )");

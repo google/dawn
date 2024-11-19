@@ -10,7 +10,7 @@ str v(uint offset) {
 }
 
 str func(uint pointer_indices[1]) {
-  str v_2 = v((0u + (uint(pointer_indices[0u]) * 4u)));
+  str v_2 = v((0u + (pointer_indices[0u] * 4u)));
   return v_2;
 }
 

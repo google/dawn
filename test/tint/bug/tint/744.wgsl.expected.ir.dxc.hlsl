@@ -23,9 +23,7 @@ void main_inner(uint3 global_id) {
       }
       uint a = (i + (resultCell.x * dimInner));
       uint b = (resultCell.y + (i * dimOutter));
-      uint v = result;
-      uint v_1 = firstMatrix.Load((0u + (uint(a) * 4u)));
-      result = (v + (v_1 * secondMatrix.Load((0u + (uint(b) * 4u)))));
+      result = (result + (firstMatrix.Load((0u + (a * 4u))) * secondMatrix.Load((0u + (b * 4u)))));
       {
         i = (i + 1u);
       }
@@ -33,8 +31,7 @@ void main_inner(uint3 global_id) {
     }
   }
   uint index = (resultCell.y + (resultCell.x * dimOutter));
-  uint v_2 = (uint(index) * 4u);
-  resultMatrix.Store((0u + v_2), result);
+  resultMatrix.Store((0u + (index * 4u)), result);
 }
 
 [numthreads(2, 2, 1)]

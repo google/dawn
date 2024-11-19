@@ -359,8 +359,11 @@ struct State {
                 offset->byte_offset += idx_value->Value()->ValueAs<uint32_t>() * elm_size;
             },
             [&](core::ir::Value* val) {
-                offset->expr.Push(
-                    b.Multiply(ty.u32(), b.Convert(ty.u32(), val), u32(elm_size))->Result(0));
+                auto* idx = val;
+                if (val->Type() != ty.u32()) {
+                    idx = b.Convert(ty.u32(), val)->Result(0);
+                }
+                offset->expr.Push(b.Multiply(ty.u32(), idx, u32(elm_size))->Result(0));
             },
             TINT_ICE_ON_NO_MATCH);
     }
