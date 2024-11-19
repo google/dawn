@@ -56,6 +56,9 @@ struct FeaturesSet {
     void EnableFeature(wgpu::FeatureName feature);
     bool IsEnabled(Feature feature) const;
     bool IsEnabled(wgpu::FeatureName feature) const;
+    // Returns |count|, the number of features. Writes out all |count| values if |features| is
+    // non-null.
+    size_t EnumerateFeatures(wgpu::FeatureName* features) const;
     std::vector<const char*> GetEnabledFeatureNames() const;
     void ToSupportedFeatures(SupportedFeatures* supportedFeatures) const;
 };

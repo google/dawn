@@ -74,6 +74,16 @@ bool LimitsAndFeatures::HasFeature(WGPUFeatureName feature) const {
     return mFeatures.contains(feature);
 }
 
+size_t LimitsAndFeatures::EnumerateFeatures(WGPUFeatureName* features) const {
+    if (features != nullptr) {
+        for (WGPUFeatureName f : mFeatures) {
+            *features = f;
+            ++features;
+        }
+    }
+    return mFeatures.size();
+}
+
 void LimitsAndFeatures::ToSupportedFeatures(WGPUSupportedFeatures* supportedFeatures) const {
     if (!supportedFeatures) {
         return;
