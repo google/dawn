@@ -3664,6 +3664,48 @@ TEST_F(PipelineLayoutValidationTest, CreateWithNullBindGroupLayout) {
     }
 }
 
+// Test the pipeline layout with null bind group layout must match the corresponding binding in
+// shader.
+TEST_F(PipelineLayoutValidationTest, ShaderMatchesPipelineLayoutWithNullBindGroupLayout) {
+    for (uint32_t nullBGLIndex = 0; nullBGLIndex < 4; ++nullBGLIndex) {
+        std::vector<wgpu::BindGroupLayout> bgls(4);
+        for (uint32_t i = 0; i < 4; ++i) {
+            if (i == nullBGLIndex) {
+                continue;
+            }
+            bgls[i] = utils::MakeBindGroupLayout(
+                device, {{0, wgpu::ShaderStage::Compute, wgpu::BufferBindingType::Storage}});
+        }
+        wgpu::PipelineLayout pipelineLayout = utils::MakePipelineLayout(device, bgls);
+
+        for (uint32_t missedGroupIndex = 0; missedGroupIndex < 4; ++missedGroupIndex) {
+            std::ostringstream stream;
+            for (uint32_t i = 0; i < 4; ++i) {
+                if (i != missedGroupIndex) {
+                    stream << "@group(" << i << ") @binding(0) var<storage, read_write> outputData"
+                           << i << " : u32;\n";
+                }
+            }
+            stream << "@compute @workgroup_size(1, 1) fn main() {\n";
+            for (uint32_t i = 0; i < 4; ++i) {
+                if (i != missedGroupIndex) {
+                    stream << "outputData" << i << " = 1u;\n";
+                }
+            }
+            stream << "};";
+            wgpu::ComputePipelineDescriptor computePipelineDescriptor = {};
+            computePipelineDescriptor.compute.module =
+                utils::CreateShaderModule(device, stream.str());
+            computePipelineDescriptor.layout = pipelineLayout;
+            if (missedGroupIndex == nullBGLIndex) {
+                device.CreateComputePipeline(&computePipelineDescriptor);
+            } else {
+                ASSERT_DEVICE_ERROR(device.CreateComputePipeline(&computePipelineDescriptor));
+            }
+        }
+    }
+}
+
 class PipelineLayoutDontAllowUnsafeAPIValidationTest : public ValidationTest {
   protected:
     bool AllowUnsafeAPIs() override { return false; }
