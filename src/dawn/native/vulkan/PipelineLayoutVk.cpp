@@ -31,6 +31,8 @@
 #include <utility>
 
 #include "dawn/common/BitSetIterator.h"
+#include "dawn/common/Range.h"
+#include "dawn/common/ityp_bitset.h"
 #include "dawn/native/vulkan/BindGroupLayoutVk.h"
 #include "dawn/native/vulkan/DeviceVk.h"
 #include "dawn/native/vulkan/FencedDeleter.h"
@@ -51,21 +53,24 @@ ResultOrError<Ref<PipelineLayout>> PipelineLayout::Create(
 ResultOrError<Ref<RefCountedVkHandle<VkPipelineLayout>>> PipelineLayout::CreateVkPipelineLayout(
     uint32_t internalImmediateDataSize) {
     // Compute the array of VkDescriptorSetLayouts that will be chained in the create info.
-    // TODO(crbug.com/dawn/277) Vulkan doesn't allow holes in this array, should we expose
-    // this constraints at the Dawn level?
-    uint32_t numSetLayouts = 0;
-    std::array<VkDescriptorSetLayout, kMaxBindGroups> setLayouts;
-    for (BindGroupIndex setIndex : IterateBitSet(GetBindGroupLayoutsMask())) {
-        const BindGroupLayoutInternalBase* bindGroupLayout = GetBindGroupLayout(setIndex);
-        setLayouts[numSetLayouts] = ToBackend(bindGroupLayout)->GetHandle();
-        numSetLayouts++;
+    BindGroupMask bindGroupMask = GetBindGroupLayoutsMask();
+    BindGroupIndex highestBindGroupIndex = GetHighestBitIndexPlusOne(bindGroupMask);
+    PerBindGroup<VkDescriptorSetLayout> setLayouts;
+    for (BindGroupIndex i : Range(highestBindGroupIndex)) {
+        if (bindGroupMask[i]) {
+            setLayouts[i] = ToBackend(GetBindGroupLayout(i))->GetHandle();
+        } else {
+            setLayouts[i] =
+                ToBackend(GetDevice()->GetEmptyBindGroupLayout()->GetInternalBindGroupLayout())
+                    ->GetHandle();
+        }
     }
 
     VkPipelineLayoutCreateInfo createInfo;
     createInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
     createInfo.pNext = nullptr;
     createInfo.flags = 0;
-    createInfo.setLayoutCount = numSetLayouts;
+    createInfo.setLayoutCount = static_cast<uint32_t>(highestBindGroupIndex);
     createInfo.pSetLayouts = AsVkArray(setLayouts.data());
     createInfo.pushConstantRangeCount = 0;
     createInfo.pPushConstantRanges = nullptr;
@@ -96,18 +101,23 @@ ResultOrError<Ref<RefCountedVkHandle<VkPipelineLayout>>> PipelineLayout::CreateV
 }
 
 MaybeError PipelineLayout::Initialize() {
-    uint32_t numSetLayouts = 0;
-    std::array<const CachedObject*, kMaxBindGroups> cachedObjects;
-    for (BindGroupIndex setIndex : IterateBitSet(GetBindGroupLayoutsMask())) {
-        const BindGroupLayoutInternalBase* bindGroupLayout = GetBindGroupLayout(setIndex);
-        cachedObjects[numSetLayouts] = bindGroupLayout;
-        numSetLayouts++;
+    BindGroupMask bindGroupMask = GetBindGroupLayoutsMask();
+    BindGroupIndex highestBindGroupIndex = GetHighestBitIndexPlusOne(bindGroupMask);
+    PerBindGroup<const CachedObject*> cachedObjects;
+    for (BindGroupIndex i : Range(highestBindGroupIndex)) {
+        if (bindGroupMask[i]) {
+            cachedObjects[i] = GetBindGroupLayout(i);
+        } else {
+            cachedObjects[i] = GetDevice()->GetEmptyBindGroupLayout()->GetInternalBindGroupLayout();
+        }
     }
 
     // Record bind group layout objects and user immediate data size into pipeline layout cache key.
     // It represents pipeline layout base attributes and ignored future changes caused by internal
     // immediate data size from pipeline.
-    StreamIn(&mCacheKey, stream::Iterable(cachedObjects.data(), numSetLayouts),
+    uint32_t numSetLayoutsWithHoles =
+        static_cast<uint32_t>(GetHighestBitIndexPlusOne(bindGroupMask));
+    StreamIn(&mCacheKey, stream::Iterable(cachedObjects.data(), numSetLayoutsWithHoles),
              GetImmediateDataRangeByteSize());
 
     return {};
