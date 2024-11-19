@@ -2484,7 +2484,7 @@ var LibraryWebGPU = {
   // --------------------------------------------------------------------------
 };
 
-// Inverted index used by EnumerateFeatures/HasFeature
+// Inverted index used by GetFeatures/HasFeature
 LibraryWebGPU.$WebGPU.FeatureNameString2Enum = {};
 for (var value in LibraryWebGPU.$WebGPU.FeatureName) {
   LibraryWebGPU.$WebGPU.FeatureNameString2Enum[LibraryWebGPU.$WebGPU.FeatureName[value]] = value;

@@ -2009,10 +2009,6 @@ bool DeviceBase::APIHasFeature(wgpu::FeatureName feature) const {
     return mEnabledFeatures.IsEnabled(feature);
 }
 
-size_t DeviceBase::APIEnumerateFeatures(wgpu::FeatureName* features) const {
-    return mEnabledFeatures.EnumerateFeatures(features);
-}
-
 void DeviceBase::APIGetFeatures(wgpu::SupportedFeatures* features) const {
     this->APIGetFeatures(reinterpret_cast<SupportedFeatures*>(features));
 }
