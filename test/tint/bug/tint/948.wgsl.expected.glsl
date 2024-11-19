@@ -52,17 +52,14 @@ mat4 getFrameData_f1_(inout float frameID) {
   float x_25 = v.inner.spriteCount;
   fX = (x_15 / x_25);
   float x_37 = fX;
-  vec2 v_1 = vec2(x_37, 0.0f);
-  vec4 x_40 = texture(frameMapTexture_frameMapSampler, v_1, clamp(0.0f, -16.0f, 15.9899997711181640625f));
+  vec4 x_40 = texture(frameMapTexture_frameMapSampler, vec2(x_37, 0.0f), clamp(0.0f, -16.0f, 15.9899997711181640625f));
   float x_44 = fX;
-  vec2 v_2 = vec2(x_44, 0.25f);
-  vec4 x_47 = texture(frameMapTexture_frameMapSampler, v_2, clamp(0.0f, -16.0f, 15.9899997711181640625f));
+  vec4 x_47 = texture(frameMapTexture_frameMapSampler, vec2(x_44, 0.25f), clamp(0.0f, -16.0f, 15.9899997711181640625f));
   float x_51 = fX;
-  vec2 v_3 = vec2(x_51, 0.5f);
-  vec4 x_54 = texture(frameMapTexture_frameMapSampler, v_3, clamp(0.0f, -16.0f, 15.9899997711181640625f));
-  vec4 v_4 = vec4(x_40[0u], x_40[1u], x_40[2u], x_40[3u]);
-  vec4 v_5 = vec4(x_47[0u], x_47[1u], x_47[2u], x_47[3u]);
-  return mat4(v_4, v_5, vec4(x_54[0u], x_54[1u], x_54[2u], x_54[3u]), vec4(0.0f));
+  vec4 x_54 = texture(frameMapTexture_frameMapSampler, vec2(x_51, 0.5f), clamp(0.0f, -16.0f, 15.9899997711181640625f));
+  vec4 v_1 = vec4(x_40[0u], x_40[1u], x_40[2u], x_40[3u]);
+  vec4 v_2 = vec4(x_47[0u], x_47[1u], x_47[2u], x_47[3u]);
+  return mat4(v_1, v_2, vec4(x_54[0u], x_54[1u], x_54[2u], x_54[3u]), vec4(0.0f));
 }
 float tint_float_modulo(float x, float y) {
   return (x - (y * trunc((x / y))));
@@ -132,8 +129,7 @@ void main_1() {
       }
       float x_166 = frameID_1;
       float x_169 = v.inner.spriteCount;
-      vec2 v_6 = vec2(((x_166 + 0.5f) / x_169), 0.0f);
-      vec4 x_172 = texture(animationMapTexture_animationMapSampler, v_6, clamp(0.0f, -16.0f, 15.9899997711181640625f));
+      vec4 x_172 = texture(animationMapTexture_animationMapSampler, vec2(((x_166 + 0.5f) / x_169), 0.0f), clamp(0.0f, -16.0f, 15.9899997711181640625f));
       animationData = x_172;
       float x_174 = animationData.y;
       if ((x_174 > 0.0f)) {
@@ -180,8 +176,8 @@ void main_1() {
       offset_1 = (vec2(x_235[0u], x_235[1u]) * x_237);
       vec4 x_241 = frameData[2];
       vec4 x_244 = frameData[0];
-      vec2 v_7 = vec2(x_241[0u], x_241[1u]);
-      ratio = (v_7 / vec2(x_244[3u], x_244[2u]));
+      vec2 v_3 = vec2(x_241[0u], x_241[1u]);
+      ratio = (v_3 / vec2(x_244[3u], x_244[2u]));
       float x_248 = frameData[2].z;
       if ((x_248 == 1.0f)) {
         vec2 x_252 = tileUV;
@@ -206,9 +202,9 @@ void main_1() {
         vec4 x_290 = color;
         vec4 x_292 = nc;
         float x_295 = nc.w;
-        vec3 v_8 = vec3(x_290[0u], x_290[1u], x_290[2u]);
-        vec3 v_9 = vec3(x_292[0u], x_292[1u], x_292[2u]);
-        mixed = mix(v_8, v_9, vec3(x_295, x_295, x_295));
+        vec3 v_4 = vec3(x_290[0u], x_290[1u], x_290[2u]);
+        vec3 v_5 = vec3(x_292[0u], x_292[1u], x_292[2u]);
+        mixed = mix(v_4, v_5, vec3(x_295, x_295, x_295));
         vec3 x_298 = mixed;
         float x_299 = alpha;
         color = vec4(x_298[0u], x_298[1u], x_298[2u], x_299);

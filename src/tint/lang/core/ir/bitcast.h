@@ -70,6 +70,9 @@ class Bitcast final : public Castable<Bitcast, Call> {
 
     /// @returns the friendly name for the instruction
     std::string FriendlyName() const override { return "bitcast"; }
+
+    /// @returns an empty access as the bitcast neither loads nor stores.
+    Accesses GetSideEffects() const override { return Accesses{}; }
 };
 
 }  // namespace tint::core::ir

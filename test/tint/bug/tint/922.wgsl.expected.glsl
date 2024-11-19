@@ -78,10 +78,7 @@ vec4 Mul(Mat4x4_ m8, vec4 v) {
   vec4 x_e14 = v1;
   Mat4x4_ x_e16 = m9;
   vec4 x_e18 = v1;
-  float v_4 = dot(x_e4.mx, x_e6);
-  float v_5 = dot(x_e8.my, x_e10);
-  float v_6 = dot(x_e12.mz, x_e14);
-  return vec4(v_4, v_5, v_6, dot(x_e16.mw, x_e18));
+  return vec4(dot(x_e4.mx, x_e6), dot(x_e8.my, x_e10), dot(x_e12.mz, x_e14), dot(x_e16.mw, x_e18));
 }
 vec2 Mul2(Mat4x2_ m12, vec4 v4) {
   Mat4x2_ m13 = Mat4x2_(vec4(0.0f), vec4(0.0f));
@@ -92,8 +89,7 @@ vec2 Mul2(Mat4x2_ m12, vec4 v4) {
   vec4 x_e6 = v5;
   Mat4x2_ x_e8 = m13;
   vec4 x_e10 = v5;
-  float v_7 = dot(x_e4.mx, x_e6);
-  return vec2(v_7, dot(x_e8.my, x_e10));
+  return vec2(dot(x_e4.mx, x_e6), dot(x_e8.my, x_e10));
 }
 Mat4x4_ x_Mat4x4_(float n) {
   float n1 = 0.0f;
@@ -132,8 +128,8 @@ void main1() {
   Mat4x3_ t_PosMtx = Mat4x3_(vec4(0.0f), vec4(0.0f), vec4(0.0f));
   vec2 t_TexSpaceCoord = vec2(0.0f);
   float x_e15 = a_PosMtxIdx1;
-  int v_8 = tint_f32_to_i32(x_e15);
-  Mat4x3_ x_e18 = v_3.inner.u_PosMtx[v_8];
+  int v_4 = tint_f32_to_i32(x_e15);
+  Mat4x3_ x_e18 = v_3.inner.u_PosMtx[v_4];
   t_PosMtx = x_e18;
   Mat4x3_ x_e23 = t_PosMtx;
   Mat4x4_ x_e24 = x_Mat4x4_1(x_e23);
@@ -185,10 +181,10 @@ VertexOutput tint_symbol_1_inner(vec3 a_Position, vec2 a_UV, vec4 a_Color, vec3 
   return VertexOutput(x_e11, x_e13, x_e15);
 }
 void main() {
-  VertexOutput v_9 = tint_symbol_1_inner(tint_symbol_1_loc0_Input, tint_symbol_1_loc1_Input, tint_symbol_1_loc2_Input, tint_symbol_1_loc3_Input, tint_symbol_1_loc4_Input);
-  tint_symbol_1_loc0_Output = v_9.v_Color;
-  tint_symbol_1_loc1_Output = v_9.v_TexCoord;
-  gl_Position = v_9.member;
+  VertexOutput v_5 = tint_symbol_1_inner(tint_symbol_1_loc0_Input, tint_symbol_1_loc1_Input, tint_symbol_1_loc2_Input, tint_symbol_1_loc3_Input, tint_symbol_1_loc4_Input);
+  tint_symbol_1_loc0_Output = v_5.v_Color;
+  tint_symbol_1_loc1_Output = v_5.v_TexCoord;
+  gl_Position = v_5.member;
   gl_Position[1u] = -(gl_Position.y);
   gl_Position[2u] = ((2.0f * gl_Position.z) - gl_Position.w);
   gl_PointSize = 1.0f;

@@ -4,9 +4,7 @@ float fwidthFine_f1742d() {
   float arg_0 = 1.0f;
   float v = arg_0;
   float v_1 = ddx_fine(v);
-  float v_2 = ddy_fine(v);
-  float v_3 = abs(v_1);
-  float res = (v_3 + abs(v_2));
+  float res = (abs(v_1) + abs(ddy_fine(v)));
   return res;
 }
 

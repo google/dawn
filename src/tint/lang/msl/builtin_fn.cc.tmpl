@@ -28,4 +28,52 @@ const char* str(BuiltinFn i) {
     return "<unknown>";
 }
 
+tint::core::ir::Instruction::Accesses GetSideEffects(BuiltinFn fn) {
+    switch (fn) {
+        case BuiltinFn::kAtomicCompareExchangeWeakExplicit:
+        case BuiltinFn::kAtomicExchangeExplicit:
+        case BuiltinFn::kAtomicFetchAddExplicit:
+        case BuiltinFn::kAtomicFetchAndExplicit:
+        case BuiltinFn::kAtomicFetchMaxExplicit:
+        case BuiltinFn::kAtomicFetchMinExplicit:
+        case BuiltinFn::kAtomicFetchOrExplicit:
+        case BuiltinFn::kAtomicFetchSubExplicit:
+        case BuiltinFn::kAtomicFetchXorExplicit:
+        case BuiltinFn::kAtomicStoreExplicit:
+        case BuiltinFn::kFence:
+        case BuiltinFn::kThreadgroupBarrier:
+        case BuiltinFn::kSimdBallot:
+        case BuiltinFn::kQuadShuffleXor:
+            return core::ir::Instruction::Accesses{core::ir::Instruction::Access::kLoad, core::ir::Instruction::Access::kStore};
+
+        case BuiltinFn::kAtomicLoadExplicit:
+        case BuiltinFn::kGather:
+        case BuiltinFn::kGatherCompare:
+        case BuiltinFn::kRead:
+        case BuiltinFn::kSample:
+        case BuiltinFn::kSampleCompare:
+            return core::ir::Instruction::Accesses{core::ir::Instruction::Access::kLoad};
+
+        case BuiltinFn::kWrite:
+            return core::ir::Instruction::Accesses{core::ir::Instruction::Access::kStore};
+
+        case BuiltinFn::kDistance:
+        case BuiltinFn::kDot:
+        case BuiltinFn::kFmod:
+        case BuiltinFn::kFrexp:
+        case BuiltinFn::kGetWidth:
+        case BuiltinFn::kGetHeight:
+        case BuiltinFn::kGetDepth:
+        case BuiltinFn::kGetArraySize:
+        case BuiltinFn::kGetNumMipLevels:
+        case BuiltinFn::kGetNumSamples:
+        case BuiltinFn::kLength:
+        case BuiltinFn::kModf:
+        case BuiltinFn::kSign:
+        case BuiltinFn::kNone:
+            break;
+    }
+    return core::ir::Instruction::Accesses{};
+}
+
 }  // namespace tint::msl

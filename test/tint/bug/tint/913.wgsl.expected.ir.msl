@@ -37,39 +37,37 @@ bool aboutEqual(float value, float expect) {
 }
 
 void tint_symbol_inner(uint3 GlobalInvocationID, tint_module_vars_struct tint_module_vars) {
-  uint const v = tint_module_vars.src.get_width(0u);
-  uint2 const srcSize = uint2(v, tint_module_vars.src.get_height(0u));
-  uint const v_1 = tint_module_vars.dst.get_width(0u);
-  uint2 const dstSize = uint2(v_1, tint_module_vars.dst.get_height(0u));
+  uint2 const srcSize = uint2(tint_module_vars.src.get_width(0u), tint_module_vars.src.get_height(0u));
+  uint2 const dstSize = uint2(tint_module_vars.dst.get_width(0u), tint_module_vars.dst.get_height(0u));
   uint2 const dstTexCoord = uint2(GlobalInvocationID.xy);
   float4 const nonCoveredColor = float4(0.0f, 1.0f, 0.0f, 1.0f);
   bool success = true;
-  bool v_2 = false;
+  bool v = false;
   if ((dstTexCoord[0u] < (*tint_module_vars.uniforms).dstCopyOrigin[0u])) {
+    v = true;
+  } else {
+    v = (dstTexCoord[1u] < (*tint_module_vars.uniforms).dstCopyOrigin[1u]);
+  }
+  bool v_1 = false;
+  if (v) {
+    v_1 = true;
+  } else {
+    v_1 = (dstTexCoord[0u] >= ((*tint_module_vars.uniforms).dstCopyOrigin[0u] + (*tint_module_vars.uniforms).copySize[0u]));
+  }
+  bool v_2 = false;
+  if (v_1) {
     v_2 = true;
   } else {
-    v_2 = (dstTexCoord[1u] < (*tint_module_vars.uniforms).dstCopyOrigin[1u]);
+    v_2 = (dstTexCoord[1u] >= ((*tint_module_vars.uniforms).dstCopyOrigin[1u] + (*tint_module_vars.uniforms).copySize[1u]));
   }
-  bool v_3 = false;
   if (v_2) {
-    v_3 = true;
-  } else {
-    v_3 = (dstTexCoord[0u] >= ((*tint_module_vars.uniforms).dstCopyOrigin[0u] + (*tint_module_vars.uniforms).copySize[0u]));
-  }
-  bool v_4 = false;
-  if (v_3) {
-    v_4 = true;
-  } else {
-    v_4 = (dstTexCoord[1u] >= ((*tint_module_vars.uniforms).dstCopyOrigin[1u] + (*tint_module_vars.uniforms).copySize[1u]));
-  }
-  if (v_4) {
-    bool v_5 = false;
+    bool v_3 = false;
     if (success) {
-      v_5 = all((tint_module_vars.dst.read(uint2(int2(dstTexCoord)), 0) == nonCoveredColor));
+      v_3 = all((tint_module_vars.dst.read(uint2(int2(dstTexCoord)), 0) == nonCoveredColor));
     } else {
-      v_5 = false;
+      v_3 = false;
     }
-    success = v_5;
+    success = v_3;
   } else {
     uint2 srcTexCoord = ((dstTexCoord - (*tint_module_vars.uniforms).dstCopyOrigin) + (*tint_module_vars.uniforms).srcCopyOrigin);
     if (((*tint_module_vars.uniforms).dstTextureFlipY == 1u)) {
@@ -78,6 +76,20 @@ void tint_symbol_inner(uint3 GlobalInvocationID, tint_module_vars_struct tint_mo
     float4 const srcColor = tint_module_vars.src.read(uint2(int2(srcTexCoord)), 0);
     float4 const dstColor = tint_module_vars.dst.read(uint2(int2(dstTexCoord)), 0);
     if (((*tint_module_vars.uniforms).channelCount == 2u)) {
+      bool v_4 = false;
+      if (success) {
+        v_4 = aboutEqual(dstColor[0u], srcColor[0u]);
+      } else {
+        v_4 = false;
+      }
+      bool v_5 = false;
+      if (v_4) {
+        v_5 = aboutEqual(dstColor[1u], srcColor[1u]);
+      } else {
+        v_5 = false;
+      }
+      success = v_5;
+    } else {
       bool v_6 = false;
       if (success) {
         v_6 = aboutEqual(dstColor[0u], srcColor[0u]);
@@ -90,33 +102,19 @@ void tint_symbol_inner(uint3 GlobalInvocationID, tint_module_vars_struct tint_mo
       } else {
         v_7 = false;
       }
-      success = v_7;
-    } else {
       bool v_8 = false;
-      if (success) {
-        v_8 = aboutEqual(dstColor[0u], srcColor[0u]);
+      if (v_7) {
+        v_8 = aboutEqual(dstColor[2u], srcColor[2u]);
       } else {
         v_8 = false;
       }
       bool v_9 = false;
       if (v_8) {
-        v_9 = aboutEqual(dstColor[1u], srcColor[1u]);
+        v_9 = aboutEqual(dstColor[3u], srcColor[3u]);
       } else {
         v_9 = false;
       }
-      bool v_10 = false;
-      if (v_9) {
-        v_10 = aboutEqual(dstColor[2u], srcColor[2u]);
-      } else {
-        v_10 = false;
-      }
-      bool v_11 = false;
-      if (v_10) {
-        v_11 = aboutEqual(dstColor[3u], srcColor[3u]);
-      } else {
-        v_11 = false;
-      }
-      success = v_11;
+      success = v_9;
     }
   }
   uint const outputIndex = ((GlobalInvocationID[1u] * dstSize[0u]) + GlobalInvocationID[0u]);

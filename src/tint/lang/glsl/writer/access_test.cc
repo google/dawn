@@ -735,8 +735,7 @@ void main() {
   int v_2 = k;
   uint v_3 = (uint(sb.b_2.length()) - 1u);
   uint v_4 = min(uint(v), v_3);
-  uint v_5 = min(v_1, 2u);
-  float x = sb.b_2[v_4].b_1[v_5].b[min(uint(v_2), 2u)];
+  float x = sb.b_2[v_4].b_1[min(v_1, 2u)].b[min(uint(v_2), 2u)];
 }
 )");
 }
@@ -809,8 +808,7 @@ void main() {
   uint j = 1u;
   uint v = j;
   uint v_1 = min(4u, (uint(sb.b_2.length()) - 1u));
-  uint v_2 = min(v, 2u);
-  float x = sb.b_2[v_1].b_1[v_2].b.z;
+  float x = sb.b_2[v_1].b_1[min(v, 2u)].b.z;
 }
 )");
 }

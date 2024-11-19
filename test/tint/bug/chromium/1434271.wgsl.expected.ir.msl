@@ -147,8 +147,7 @@ void simulate_inner(uint3 GlobalInvocationID, tint_module_vars_struct tint_modul
 }
 
 void export_level_inner(uint3 coord, tint_module_vars_struct tint_module_vars) {
-  uint const v_5 = tint_module_vars.tex_out.get_width(0u);
-  if (all((coord.xy < uint2(uint2(v_5, tint_module_vars.tex_out.get_height(0u)))))) {
+  if (all((coord.xy < uint2(uint2(tint_module_vars.tex_out.get_width(0u), tint_module_vars.tex_out.get_height(0u)))))) {
     uint const dst_offset = (coord[0u] << ((coord[1u] * (*tint_module_vars.ubo).width) & 31u));
     uint const src_offset = ((coord[0u] - 2u) + ((coord[1u] >> (2u & 31u)) * (*tint_module_vars.ubo).width));
     float const a = (*tint_module_vars.buf_in).weights[(src_offset << (0u & 31u))];
@@ -157,8 +156,7 @@ void export_level_inner(uint3 coord, tint_module_vars_struct tint_module_vars) {
     float const d = (*tint_module_vars.buf_in).weights[((src_offset + 1u) + (*tint_module_vars.ubo).width)];
     float const sum = dot(float4(a, b, c, d), float4(1.0f));
     (*tint_module_vars.buf_out).weights[dst_offset] = fmod(sum, 4.0f);
-    float4 const v_6 = float4(a, (a * b), ((a / b) + c), sum);
-    float4 const probabilities = (v_6 + max(sum, 0.0f));
+    float4 const probabilities = (float4(a, (a * b), ((a / b) + c), sum) + max(sum, 0.0f));
     tint_module_vars.tex_out.write(probabilities, uint2(int2(coord.xy)));
   }
 }
@@ -171,11 +169,11 @@ vertex vertex_main_outputs vertex_main() {
 
 vertex vs_main_outputs vs_main(vs_main_inputs inputs [[stage_in]], const constant RenderParams_packed_vec3* render_params [[buffer(0)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.render_params=render_params};
-  VertexOutput const v_7 = vs_main_inner(VertexInput{.position=inputs.VertexInput_position, .color=inputs.VertexInput_color, .quad_pos=inputs.VertexInput_quad_pos}, tint_module_vars);
+  VertexOutput const v_5 = vs_main_inner(VertexInput{.position=inputs.VertexInput_position, .color=inputs.VertexInput_color, .quad_pos=inputs.VertexInput_quad_pos}, tint_module_vars);
   vs_main_outputs tint_wrapper_result = {};
-  tint_wrapper_result.VertexOutput_position = v_7.position;
-  tint_wrapper_result.VertexOutput_color = v_7.color;
-  tint_wrapper_result.VertexOutput_quad_pos = v_7.quad_pos;
+  tint_wrapper_result.VertexOutput_position = v_5.position;
+  tint_wrapper_result.VertexOutput_color = v_5.color;
+  tint_wrapper_result.VertexOutput_quad_pos = v_5.quad_pos;
   return tint_wrapper_result;
 }
 

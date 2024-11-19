@@ -28,26 +28,25 @@ void v_2(uint offset, S obj) {
 }
 
 matrix<float16_t, 2, 4> v_4(uint offset) {
-  vector<float16_t, 4> v_5 = tint_symbol.Load<vector<float16_t, 4> >((offset + 0u));
-  return matrix<float16_t, 2, 4>(v_5, tint_symbol.Load<vector<float16_t, 4> >((offset + 8u)));
+  return matrix<float16_t, 2, 4>(tint_symbol.Load<vector<float16_t, 4> >((offset + 0u)), tint_symbol.Load<vector<float16_t, 4> >((offset + 8u)));
 }
 
-Inner v_6(uint offset) {
-  float16_t v_7 = tint_symbol.Load<float16_t>((offset + 0u));
-  vector<float16_t, 3> v_8 = tint_symbol.Load<vector<float16_t, 3> >((offset + 8u));
-  Inner v_9 = {v_7, v_8, v_4((offset + 16u))};
-  return v_9;
+Inner v_5(uint offset) {
+  float16_t v_6 = tint_symbol.Load<float16_t>((offset + 0u));
+  vector<float16_t, 3> v_7 = tint_symbol.Load<vector<float16_t, 3> >((offset + 8u));
+  Inner v_8 = {v_6, v_7, v_4((offset + 16u))};
+  return v_8;
 }
 
-S v_10(uint offset) {
-  Inner v_11 = v_6((offset + 0u));
-  S v_12 = {v_11};
-  return v_12;
+S v_9(uint offset) {
+  Inner v_10 = v_5((offset + 0u));
+  S v_11 = {v_10};
+  return v_11;
 }
 
 [numthreads(1, 1, 1)]
 void main() {
-  S t = v_10(0u);
+  S t = v_9(0u);
   v_2(0u, t);
 }
 

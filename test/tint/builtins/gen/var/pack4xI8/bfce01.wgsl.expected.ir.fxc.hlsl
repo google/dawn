@@ -14,9 +14,8 @@ uint pack4xI8_bfce01() {
   int4 arg_0 = (int(1)).xxxx;
   int4 v = arg_0;
   uint4 v_1 = uint4(0u, 8u, 16u, 24u);
-  uint4 v_2 = asuint(v);
-  uint4 v_3 = ((v_2 & uint4((255u).xxxx)) << v_1);
-  uint res = dot(v_3, uint4((1u).xxxx));
+  uint4 v_2 = ((asuint(v) & uint4((255u).xxxx)) << v_1);
+  uint res = dot(v_2, uint4((1u).xxxx));
   return res;
 }
 
@@ -33,13 +32,13 @@ VertexOutput vertex_main_inner() {
   VertexOutput tint_symbol = (VertexOutput)0;
   tint_symbol.pos = (0.0f).xxxx;
   tint_symbol.prevent_dce = pack4xI8_bfce01();
-  VertexOutput v_4 = tint_symbol;
-  return v_4;
+  VertexOutput v_3 = tint_symbol;
+  return v_3;
 }
 
 vertex_main_outputs vertex_main() {
-  VertexOutput v_5 = vertex_main_inner();
-  vertex_main_outputs v_6 = {v_5.prevent_dce, v_5.pos};
-  return v_6;
+  VertexOutput v_4 = vertex_main_inner();
+  vertex_main_outputs v_5 = {v_4.prevent_dce, v_4.pos};
+  return v_5;
 }
 

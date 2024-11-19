@@ -6,7 +6,6 @@ void f() {
   vector<float16_t, 3> v = a;
   vector<float16_t, 3> v_1 = (b + b);
   vector<float16_t, 3> v_2 = (v / v_1);
-  vector<float16_t, 3> v_3 = floor(v_2);
-  vector<float16_t, 3> r = (v - ((((v_2 < (float16_t(0.0h)).xxx)) ? (ceil(v_2)) : (v_3)) * v_1));
+  vector<float16_t, 3> r = (v - ((((v_2 < (float16_t(0.0h)).xxx)) ? (ceil(v_2)) : (floor(v_2))) * v_1));
 }
 

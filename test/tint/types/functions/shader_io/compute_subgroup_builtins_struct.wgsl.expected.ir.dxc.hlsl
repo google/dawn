@@ -11,8 +11,7 @@ void main_inner(ComputeInputs inputs) {
 
 [numthreads(1, 1, 1)]
 void main() {
-  uint v = WaveGetLaneIndex();
-  ComputeInputs v_1 = {v, WaveGetLaneCount()};
-  main_inner(v_1);
+  ComputeInputs v = {WaveGetLaneIndex(), WaveGetLaneCount()};
+  main_inner(v);
 }
 

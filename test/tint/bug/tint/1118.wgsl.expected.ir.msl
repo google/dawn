@@ -95,16 +95,15 @@ void main_1(tint_module_vars_struct tint_module_vars) {
   float3 const x_99 = emissiveColor;
   float3 const x_103 = float3((*tint_module_vars.x_49).vAmbientColor);
   float4 const x_108 = baseColor;
-  float3 const v_1 = clamp((((x_96 * x_97) + x_99) + x_103), float3(0.0f), float3(1.0f));
-  finalDiffuse = (v_1 * float3(x_108[0u], x_108[1u], x_108[2u]));
+  finalDiffuse = (clamp((((x_96 * x_97) + x_99) + x_103), float3(0.0f), float3(1.0f)) * float3(x_108[0u], x_108[1u], x_108[2u]));
   finalSpecular = float3(0.0f);
   float3 const x_113 = finalDiffuse;
   float3 const x_114 = baseAmbientColor;
   float3 const x_116 = finalSpecular;
   float4 const x_118 = reflectionColor;
   float4 const x_121 = refractionColor;
-  float3 const v_2 = (((x_113 * x_114) + x_116) + float3(x_118[0u], x_118[1u], x_118[2u]));
-  float3 const x_123 = (v_2 + float3(x_121[0u], x_121[1u], x_121[2u]));
+  float3 const v_1 = (((x_113 * x_114) + x_116) + float3(x_118[0u], x_118[1u], x_118[2u]));
+  float3 const x_123 = (v_1 + float3(x_121[0u], x_121[1u], x_121[2u]));
   float const x_124 = alpha;
   color = float4(x_123[0u], x_123[1u], x_123[2u], x_124);
   float4 const x_129 = color;
@@ -122,11 +121,11 @@ main_out tint_symbol_inner(float fClipDistance3_param, float fClipDistance4_para
   (*tint_module_vars.fClipDistance3) = fClipDistance3_param;
   (*tint_module_vars.fClipDistance4) = fClipDistance4_param;
   main_1(tint_module_vars);
-  main_out const v_3 = main_out{.glFragColor_1=(*tint_module_vars.glFragColor)};
+  main_out const v_2 = main_out{.glFragColor_1=(*tint_module_vars.glFragColor)};
   if (!((*tint_module_vars.continue_execution))) {
     discard_fragment();
   }
-  return v_3;
+  return v_2;
 }
 
 fragment tint_symbol_outputs tint_symbol(tint_symbol_inputs inputs [[stage_in]], const constant Scene* x_29 [[buffer(0)]], const constant Material_packed_vec3* x_49 [[buffer(1)]], const constant Mesh* x_137 [[buffer(2)]]) {

@@ -2,9 +2,7 @@
 
 vec2 u = vec2(1.0f);
 ivec2 tint_v2f32_to_v2i32(vec2 value) {
-  ivec2 v_1 = ivec2(value);
-  ivec2 v_2 = mix(ivec2((-2147483647 - 1)), v_1, greaterThanEqual(value, vec2(-2147483648.0f)));
-  return mix(ivec2(2147483647), v_2, lessThanEqual(value, vec2(2147483520.0f)));
+  return mix(ivec2(2147483647), mix(ivec2((-2147483647 - 1)), ivec2(value), greaterThanEqual(value, vec2(-2147483648.0f))), lessThanEqual(value, vec2(2147483520.0f)));
 }
 void f() {
   ivec2 v = tint_v2f32_to_v2i32(u);

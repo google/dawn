@@ -49,6 +49,7 @@ libtint_source_set("intrinsic") {
     "${tint_src_dir}/lang/core",
     "${tint_src_dir}/lang/core/constant",
     "${tint_src_dir}/lang/core/intrinsic",
+    "${tint_src_dir}/lang/core/ir",
     "${tint_src_dir}/lang/core/type",
     "${tint_src_dir}/lang/glsl",
     "${tint_src_dir}/utils/containers",

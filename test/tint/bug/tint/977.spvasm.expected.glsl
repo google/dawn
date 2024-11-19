@@ -12,12 +12,9 @@ float binaryOperation_f1_f1_(inout float a, inout float b) {
   }
   float x_21 = b;
   if (!((round((x_21 - (2.0f * floor((x_21 / 2.0f))))) == 1.0f))) {
-    float v = abs(a);
-    x_26 = pow(v, b);
+    x_26 = pow(abs(a), b);
   } else {
-    float v_1 = sign(a);
-    float v_2 = abs(a);
-    x_26 = (v_1 * pow(v_2, b));
+    x_26 = (sign(a) * pow(abs(a), b));
   }
   float x_41 = x_26;
   return x_41;

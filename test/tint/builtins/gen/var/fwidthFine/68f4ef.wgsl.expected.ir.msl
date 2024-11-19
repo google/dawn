@@ -9,9 +9,7 @@ float4 fwidthFine_68f4ef() {
   float4 arg_0 = float4(1.0f);
   float4 const v = arg_0;
   float4 const v_1 = dfdx(v);
-  float4 const v_2 = dfdy(v);
-  float4 const v_3 = abs(v_1);
-  float4 res = (v_3 + abs(v_2));
+  float4 res = (abs(v_1) + abs(dfdy(v)));
   return res;
 }
 

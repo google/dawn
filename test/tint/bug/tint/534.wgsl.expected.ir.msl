@@ -43,8 +43,7 @@ uint4 tint_v4f32_to_v4u32(float4 value) {
 }
 
 void tint_symbol_inner(uint3 GlobalInvocationID, tint_module_vars_struct tint_module_vars) {
-  uint const v = tint_module_vars.src.get_width(0u);
-  uint2 size = uint2(v, tint_module_vars.src.get_height(0u));
+  uint2 size = uint2(tint_module_vars.src.get_width(0u), tint_module_vars.src.get_height(0u));
   uint2 dstTexCoord = GlobalInvocationID.xy;
   uint2 srcTexCoord = dstTexCoord;
   if (((*tint_module_vars.uniforms).dstTextureFlipY == 1u)) {
@@ -63,15 +62,15 @@ void tint_symbol_inner(uint3 GlobalInvocationID, tint_module_vars_struct tint_mo
       } else {
         break;
       }
-      uint const v_1 = i;
-      srcColorBits[v_1] = ConvertToFp16FloatValue(srcColor[i]);
-      bool v_2 = false;
+      uint const v = i;
+      srcColorBits[v] = ConvertToFp16FloatValue(srcColor[i]);
+      bool v_1 = false;
       if (success) {
-        v_2 = (srcColorBits[i] == dstColorBits[i]);
+        v_1 = (srcColorBits[i] == dstColorBits[i]);
       } else {
-        v_2 = false;
+        v_1 = false;
       }
-      success = v_2;
+      success = v_1;
       {
         i = (i + 1u);
       }

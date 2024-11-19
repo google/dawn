@@ -32,57 +32,39 @@ ary_ret v(uint offset) {
 }
 
 float4x4 v_4(uint offset) {
-  float4 v_5 = asfloat(sb.Load4((offset + 0u)));
-  float4 v_6 = asfloat(sb.Load4((offset + 16u)));
-  float4 v_7 = asfloat(sb.Load4((offset + 32u)));
-  return float4x4(v_5, v_6, v_7, asfloat(sb.Load4((offset + 48u))));
+  return float4x4(asfloat(sb.Load4((offset + 0u))), asfloat(sb.Load4((offset + 16u))), asfloat(sb.Load4((offset + 32u))), asfloat(sb.Load4((offset + 48u))));
 }
 
-float4x3 v_8(uint offset) {
-  float3 v_9 = asfloat(sb.Load3((offset + 0u)));
-  float3 v_10 = asfloat(sb.Load3((offset + 16u)));
-  float3 v_11 = asfloat(sb.Load3((offset + 32u)));
-  return float4x3(v_9, v_10, v_11, asfloat(sb.Load3((offset + 48u))));
+float4x3 v_5(uint offset) {
+  return float4x3(asfloat(sb.Load3((offset + 0u))), asfloat(sb.Load3((offset + 16u))), asfloat(sb.Load3((offset + 32u))), asfloat(sb.Load3((offset + 48u))));
 }
 
-float4x2 v_12(uint offset) {
-  float2 v_13 = asfloat(sb.Load2((offset + 0u)));
-  float2 v_14 = asfloat(sb.Load2((offset + 8u)));
-  float2 v_15 = asfloat(sb.Load2((offset + 16u)));
-  return float4x2(v_13, v_14, v_15, asfloat(sb.Load2((offset + 24u))));
+float4x2 v_6(uint offset) {
+  return float4x2(asfloat(sb.Load2((offset + 0u))), asfloat(sb.Load2((offset + 8u))), asfloat(sb.Load2((offset + 16u))), asfloat(sb.Load2((offset + 24u))));
 }
 
-float3x4 v_16(uint offset) {
-  float4 v_17 = asfloat(sb.Load4((offset + 0u)));
-  float4 v_18 = asfloat(sb.Load4((offset + 16u)));
-  return float3x4(v_17, v_18, asfloat(sb.Load4((offset + 32u))));
+float3x4 v_7(uint offset) {
+  return float3x4(asfloat(sb.Load4((offset + 0u))), asfloat(sb.Load4((offset + 16u))), asfloat(sb.Load4((offset + 32u))));
 }
 
-float3x3 v_19(uint offset) {
-  float3 v_20 = asfloat(sb.Load3((offset + 0u)));
-  float3 v_21 = asfloat(sb.Load3((offset + 16u)));
-  return float3x3(v_20, v_21, asfloat(sb.Load3((offset + 32u))));
+float3x3 v_8(uint offset) {
+  return float3x3(asfloat(sb.Load3((offset + 0u))), asfloat(sb.Load3((offset + 16u))), asfloat(sb.Load3((offset + 32u))));
 }
 
-float3x2 v_22(uint offset) {
-  float2 v_23 = asfloat(sb.Load2((offset + 0u)));
-  float2 v_24 = asfloat(sb.Load2((offset + 8u)));
-  return float3x2(v_23, v_24, asfloat(sb.Load2((offset + 16u))));
+float3x2 v_9(uint offset) {
+  return float3x2(asfloat(sb.Load2((offset + 0u))), asfloat(sb.Load2((offset + 8u))), asfloat(sb.Load2((offset + 16u))));
 }
 
-float2x4 v_25(uint offset) {
-  float4 v_26 = asfloat(sb.Load4((offset + 0u)));
-  return float2x4(v_26, asfloat(sb.Load4((offset + 16u))));
+float2x4 v_10(uint offset) {
+  return float2x4(asfloat(sb.Load4((offset + 0u))), asfloat(sb.Load4((offset + 16u))));
 }
 
-float2x3 v_27(uint offset) {
-  float3 v_28 = asfloat(sb.Load3((offset + 0u)));
-  return float2x3(v_28, asfloat(sb.Load3((offset + 16u))));
+float2x3 v_11(uint offset) {
+  return float2x3(asfloat(sb.Load3((offset + 0u))), asfloat(sb.Load3((offset + 16u))));
 }
 
-float2x2 v_29(uint offset) {
-  float2 v_30 = asfloat(sb.Load2((offset + 0u)));
-  return float2x2(v_30, asfloat(sb.Load2((offset + 8u))));
+float2x2 v_12(uint offset) {
+  return float2x2(asfloat(sb.Load2((offset + 0u))), asfloat(sb.Load2((offset + 8u))));
 }
 
 void main_inner(uint idx) {
@@ -98,34 +80,34 @@ void main_inner(uint idx) {
   float4 vec4_f32 = asfloat(sb.Load4((96u + (uint(idx) * 544u))));
   int4 vec4_i32 = asint(sb.Load4((112u + (uint(idx) * 544u))));
   uint4 vec4_u32 = sb.Load4((128u + (uint(idx) * 544u)));
-  float2x2 mat2x2_f32 = v_29((144u + (uint(idx) * 544u)));
-  float2x3 mat2x3_f32 = v_27((160u + (uint(idx) * 544u)));
-  float2x4 mat2x4_f32 = v_25((192u + (uint(idx) * 544u)));
-  float3x2 mat3x2_f32 = v_22((224u + (uint(idx) * 544u)));
-  float3x3 mat3x3_f32 = v_19((256u + (uint(idx) * 544u)));
-  float3x4 mat3x4_f32 = v_16((304u + (uint(idx) * 544u)));
-  float4x2 mat4x2_f32 = v_12((352u + (uint(idx) * 544u)));
-  float4x3 mat4x3_f32 = v_8((384u + (uint(idx) * 544u)));
+  float2x2 mat2x2_f32 = v_12((144u + (uint(idx) * 544u)));
+  float2x3 mat2x3_f32 = v_11((160u + (uint(idx) * 544u)));
+  float2x4 mat2x4_f32 = v_10((192u + (uint(idx) * 544u)));
+  float3x2 mat3x2_f32 = v_9((224u + (uint(idx) * 544u)));
+  float3x3 mat3x3_f32 = v_8((256u + (uint(idx) * 544u)));
+  float3x4 mat3x4_f32 = v_7((304u + (uint(idx) * 544u)));
+  float4x2 mat4x2_f32 = v_6((352u + (uint(idx) * 544u)));
+  float4x3 mat4x3_f32 = v_5((384u + (uint(idx) * 544u)));
   float4x4 mat4x4_f32 = v_4((448u + (uint(idx) * 544u)));
   float3 arr2_vec3_f32[2] = v((512u + (uint(idx) * 544u)));
-  int v_31 = (tint_f32_to_i32(scalar_f32) + scalar_i32);
-  int v_32 = (v_31 + int(scalar_u32));
-  int v_33 = ((v_32 + tint_f32_to_i32(vec2_f32.x)) + vec2_i32.x);
-  int v_34 = (v_33 + int(vec2_u32.x));
-  int v_35 = ((v_34 + tint_f32_to_i32(vec3_f32.y)) + vec3_i32.y);
-  int v_36 = (v_35 + int(vec3_u32.y));
-  int v_37 = ((v_36 + tint_f32_to_i32(vec4_f32.z)) + vec4_i32.z);
-  int v_38 = (v_37 + int(vec4_u32.z));
-  int v_39 = (v_38 + tint_f32_to_i32(mat2x2_f32[int(0)].x));
-  int v_40 = (v_39 + tint_f32_to_i32(mat2x3_f32[int(0)].x));
-  int v_41 = (v_40 + tint_f32_to_i32(mat2x4_f32[int(0)].x));
-  int v_42 = (v_41 + tint_f32_to_i32(mat3x2_f32[int(0)].x));
-  int v_43 = (v_42 + tint_f32_to_i32(mat3x3_f32[int(0)].x));
-  int v_44 = (v_43 + tint_f32_to_i32(mat3x4_f32[int(0)].x));
-  int v_45 = (v_44 + tint_f32_to_i32(mat4x2_f32[int(0)].x));
-  int v_46 = (v_45 + tint_f32_to_i32(mat4x3_f32[int(0)].x));
-  int v_47 = (v_46 + tint_f32_to_i32(mat4x4_f32[int(0)].x));
-  s.Store(0u, asuint((v_47 + tint_f32_to_i32(arr2_vec3_f32[int(0)].x))));
+  int v_13 = (tint_f32_to_i32(scalar_f32) + scalar_i32);
+  int v_14 = (v_13 + int(scalar_u32));
+  int v_15 = ((v_14 + tint_f32_to_i32(vec2_f32.x)) + vec2_i32.x);
+  int v_16 = (v_15 + int(vec2_u32.x));
+  int v_17 = ((v_16 + tint_f32_to_i32(vec3_f32.y)) + vec3_i32.y);
+  int v_18 = (v_17 + int(vec3_u32.y));
+  int v_19 = ((v_18 + tint_f32_to_i32(vec4_f32.z)) + vec4_i32.z);
+  int v_20 = (v_19 + int(vec4_u32.z));
+  int v_21 = (v_20 + tint_f32_to_i32(mat2x2_f32[int(0)].x));
+  int v_22 = (v_21 + tint_f32_to_i32(mat2x3_f32[int(0)].x));
+  int v_23 = (v_22 + tint_f32_to_i32(mat2x4_f32[int(0)].x));
+  int v_24 = (v_23 + tint_f32_to_i32(mat3x2_f32[int(0)].x));
+  int v_25 = (v_24 + tint_f32_to_i32(mat3x3_f32[int(0)].x));
+  int v_26 = (v_25 + tint_f32_to_i32(mat3x4_f32[int(0)].x));
+  int v_27 = (v_26 + tint_f32_to_i32(mat4x2_f32[int(0)].x));
+  int v_28 = (v_27 + tint_f32_to_i32(mat4x3_f32[int(0)].x));
+  int v_29 = (v_28 + tint_f32_to_i32(mat4x4_f32[int(0)].x));
+  s.Store(0u, asuint((v_29 + tint_f32_to_i32(arr2_vec3_f32[int(0)].x))));
 }
 
 [numthreads(1, 1, 1)]

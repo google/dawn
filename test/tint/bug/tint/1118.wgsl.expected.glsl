@@ -97,16 +97,15 @@ void main_1() {
   vec3 x_99 = emissiveColor;
   vec3 x_103 = v_1.inner.vAmbientColor;
   vec4 x_108 = baseColor;
-  vec3 v_4 = clamp((((x_96 * x_97) + x_99) + x_103), vec3(0.0f), vec3(1.0f));
-  finalDiffuse = (v_4 * vec3(x_108[0u], x_108[1u], x_108[2u]));
+  finalDiffuse = (clamp((((x_96 * x_97) + x_99) + x_103), vec3(0.0f), vec3(1.0f)) * vec3(x_108[0u], x_108[1u], x_108[2u]));
   finalSpecular = vec3(0.0f);
   vec3 x_113 = finalDiffuse;
   vec3 x_114 = baseAmbientColor;
   vec3 x_116 = finalSpecular;
   vec4 x_118 = reflectionColor;
   vec4 x_121 = refractionColor;
-  vec3 v_5 = (((x_113 * x_114) + x_116) + vec3(x_118[0u], x_118[1u], x_118[2u]));
-  vec3 x_123 = (v_5 + vec3(x_121[0u], x_121[1u], x_121[2u]));
+  vec3 v_4 = (((x_113 * x_114) + x_116) + vec3(x_118[0u], x_118[1u], x_118[2u]));
+  vec3 x_123 = (v_4 + vec3(x_121[0u], x_121[1u], x_121[2u]));
   float x_124 = alpha;
   color = vec4(x_123[0u], x_123[1u], x_123[2u], x_124);
   vec4 x_129 = color;
@@ -123,11 +122,11 @@ main_out tint_symbol_inner(float fClipDistance3_param, float fClipDistance4_para
   fClipDistance3 = fClipDistance3_param;
   fClipDistance4 = fClipDistance4_param;
   main_1();
-  main_out v_6 = main_out(glFragColor);
+  main_out v_5 = main_out(glFragColor);
   if (!(continue_execution)) {
     discard;
   }
-  return v_6;
+  return v_5;
 }
 void main() {
   tint_symbol_loc0_Output = tint_symbol_inner(tint_symbol_loc2_Input, tint_symbol_loc3_Input).glFragColor_1;

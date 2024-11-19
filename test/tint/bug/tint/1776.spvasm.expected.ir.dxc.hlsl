@@ -6,9 +6,8 @@ struct S {
 
 ByteAddressBuffer sb : register(t0);
 S v(uint offset) {
-  float4 v_1 = asfloat(sb.Load4((offset + 0u)));
-  S v_2 = {v_1, asint(sb.Load((offset + 16u)))};
-  return v_2;
+  S v_1 = {asfloat(sb.Load4((offset + 0u))), asint(sb.Load((offset + 16u)))};
+  return v_1;
 }
 
 void main_1() {

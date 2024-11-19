@@ -84,8 +84,7 @@ float3x3 cotangent_frame_vf3_vf3_vf2_vf2_(inout float3 normal_1, inout float3 p,
   float3 x_182 = tangent;
   float3 x_184 = bitangent;
   float3 x_185 = bitangent;
-  float v = dot(x_181, x_182);
-  invmax = rsqrt(max(v, dot(x_184, x_185)));
+  invmax = rsqrt(max(dot(x_181, x_182), dot(x_184, x_185)));
   float3 x_189 = tangent;
   float x_190 = invmax;
   float3 x_191 = (x_189 * x_190);
@@ -93,9 +92,9 @@ float3x3 cotangent_frame_vf3_vf3_vf2_vf2_(inout float3 normal_1, inout float3 p,
   float x_193 = invmax;
   float3 x_194 = (x_192 * x_193);
   float3 x_195 = normal_1;
-  float3 v_1 = float3(x_191.x, x_191.y, x_191.z);
-  float3 v_2 = float3(x_194.x, x_194.y, x_194.z);
-  return float3x3(v_1, v_2, float3(x_195.x, x_195.y, x_195.z));
+  float3 v = float3(x_191.x, x_191.y, x_191.z);
+  float3 v_1 = float3(x_194.x, x_194.y, x_194.z);
+  return float3x3(v, v_1, float3(x_195.x, x_195.y, x_195.z));
 }
 
 float3x3 transposeMat3_mf33_(inout float3x3 inMatrix) {
@@ -121,9 +120,9 @@ float3x3 transposeMat3_mf33_(inout float3x3 inMatrix) {
   float x_91 = i1.z;
   float x_93 = i2.z;
   float3 x_94 = float3(x_89, x_91, x_93);
-  float3 v_3 = float3(x_78.x, x_78.y, x_78.z);
-  float3 v_4 = float3(x_86.x, x_86.y, x_86.z);
-  outMatrix = float3x3(v_3, v_4, float3(x_94.x, x_94.y, x_94.z));
+  float3 v_2 = float3(x_78.x, x_78.y, x_78.z);
+  float3 v_3 = float3(x_86.x, x_86.y, x_86.z);
+  outMatrix = float3x3(v_2, v_3, float3(x_94.x, x_94.y, x_94.z));
   float3x3 x_110 = outMatrix;
   return x_110;
 }
@@ -275,8 +274,7 @@ void main_1() {
   float3 x_334 = mul(-(x_332), x_331);
   float3x3 x_337 = invTBN;
   float3 x_338 = output5;
-  float v_5 = length(float2(x_334.x, x_334.y));
-  parallaxLimit = (v_5 / mul(-(x_338), x_337).z);
+  parallaxLimit = (length(float2(x_334.x, x_334.y)) / mul(-(x_338), x_337).z);
   float x_345 = asfloat(x_269[9u].w);
   float x_346 = parallaxLimit;
   parallaxLimit = (x_346 * x_345);
@@ -291,8 +289,7 @@ void main_1() {
   float3 x_362 = output5;
   float3x3 x_365 = invTBN;
   float4 x_366 = v_output2;
-  float3 v_6 = mul(-(x_362), x_361);
-  numSamples = (15.0f + (dot(v_6, mul(float3(x_366.x, x_366.y, x_366.z), x_365)) * -11.0f));
+  numSamples = (15.0f + (dot(mul(-(x_362), x_361), mul(float3(x_366.x, x_366.y, x_366.z), x_365)) * -11.0f));
   float x_374 = numSamples;
   stepSize = (1.0f / x_374);
   currRayHeight = 1.0f;
@@ -430,13 +427,13 @@ main_out main_inner(float2 vMainuv_param, float4 v_output1_param, bool gl_FrontF
   v_uv = v_uv_param;
   v_output2 = v_output2_param;
   main_1();
-  main_out v_7 = {glFragColor};
-  return v_7;
+  main_out v_4 = {glFragColor};
+  return v_4;
 }
 
 main_outputs main(main_inputs inputs) {
-  main_out v_8 = main_inner(inputs.vMainuv_param, inputs.v_output1_param, inputs.gl_FrontFacing_param, inputs.v_uv_param, inputs.v_output2_param);
-  main_outputs v_9 = {v_8.glFragColor_1};
-  return v_9;
+  main_out v_5 = main_inner(inputs.vMainuv_param, inputs.v_output1_param, inputs.gl_FrontFacing_param, inputs.v_uv_param, inputs.v_output2_param);
+  main_outputs v_6 = {v_5.glFragColor_1};
+  return v_6;
 }
 

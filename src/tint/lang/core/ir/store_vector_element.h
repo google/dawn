@@ -89,6 +89,9 @@ class StoreVectorElement final : public Castable<StoreVectorElement, OperandInst
 
     /// @returns the friendly name for the instruction
     std::string FriendlyName() const override { return "store_vector_element"; }
+
+    /// @returns the side effects for this instruction
+    Accesses GetSideEffects() const override { return Accesses{Access::kStore}; }
 };
 
 }  // namespace tint::core::ir

@@ -338,10 +338,7 @@ TEST_F(HlslWriterTest, AccessStorageMatrix) {
     EXPECT_EQ(output_.hlsl, R"(
 ByteAddressBuffer v : register(t0);
 float4x4 v_1(uint offset) {
-  float4 v_2 = asfloat(v.Load4((offset + 0u)));
-  float4 v_3 = asfloat(v.Load4((offset + 16u)));
-  float4 v_4 = asfloat(v.Load4((offset + 32u)));
-  return float4x4(v_2, v_3, v_4, asfloat(v.Load4((offset + 48u))));
+  return float4x4(asfloat(v.Load4((offset + 0u))), asfloat(v.Load4((offset + 16u))), asfloat(v.Load4((offset + 32u))), asfloat(v.Load4((offset + 48u))));
 }
 
 void foo() {
@@ -424,9 +421,8 @@ TEST_F(HlslWriterTest, AccessStorageStruct) {
 
 ByteAddressBuffer v : register(t0);
 SB v_1(uint offset) {
-  int v_2 = asint(v.Load((offset + 0u)));
-  SB v_3 = {v_2, asfloat(v.Load((offset + 4u)))};
-  return v_3;
+  SB v_2 = {asint(v.Load((offset + 0u))), asfloat(v.Load((offset + 4u)))};
+  return v_2;
 }
 
 void foo() {
@@ -507,34 +503,32 @@ ary_ret v_1(uint offset) {
 }
 
 float3x3 v_5(uint offset) {
-  float3 v_6 = asfloat(v.Load3((offset + 0u)));
-  float3 v_7 = asfloat(v.Load3((offset + 16u)));
-  return float3x3(v_6, v_7, asfloat(v.Load3((offset + 32u))));
+  return float3x3(asfloat(v.Load3((offset + 0u))), asfloat(v.Load3((offset + 16u))), asfloat(v.Load3((offset + 32u))));
 }
 
-Inner v_8(uint offset) {
-  float3x3 v_9 = v_5((offset + 0u));
-  float3 v_10[5] = v_1((offset + 48u));
-  Inner v_11 = {v_9, v_10};
-  return v_11;
+Inner v_6(uint offset) {
+  float3x3 v_7 = v_5((offset + 0u));
+  float3 v_8[5] = v_1((offset + 48u));
+  Inner v_9 = {v_7, v_8};
+  return v_9;
 }
 
-Outer v_12(uint offset) {
-  float v_13 = asfloat(v.Load((offset + 0u)));
-  Inner v_14 = v_8((offset + 16u));
-  Outer v_15 = {v_13, v_14};
-  return v_15;
+Outer v_10(uint offset) {
+  float v_11 = asfloat(v.Load((offset + 0u)));
+  Inner v_12 = v_6((offset + 16u));
+  Outer v_13 = {v_11, v_12};
+  return v_13;
 }
 
-SB v_16(uint offset) {
-  int v_17 = asint(v.Load((offset + 0u)));
-  Outer v_18 = v_12((offset + 16u));
-  SB v_19 = {v_17, v_18};
-  return v_19;
+SB v_14(uint offset) {
+  int v_15 = asint(v.Load((offset + 0u)));
+  Outer v_16 = v_10((offset + 16u));
+  SB v_17 = {v_15, v_16};
+  return v_17;
 }
 
 void foo() {
-  SB a = v_16(0u);
+  SB a = v_14(0u);
   float b = asfloat(v.Load(136u));
 }
 
@@ -717,19 +711,16 @@ TEST_F(HlslWriterTest, AccessComplexDynamicAccessChain) {
 RWByteAddressBuffer sb : register(u0);
 void foo() {
   int i = int(4);
-  int v = i;
   uint j = 1u;
-  uint v_1 = j;
+  uint v = j;
   int k = int(2);
-  int v_2 = k;
-  uint v_3 = 0u;
-  sb.GetDimensions(v_3);
-  uint v_4 = (((v_3 - 16u) / 128u) - 1u);
-  uint v_5 = min(uint(v), v_4);
-  uint v_6 = min(v_1, 2u);
-  uint v_7 = (uint(v_5) * 128u);
-  uint v_8 = (uint(v_6) * 32u);
-  float x = asfloat(sb.Load((((48u + v_7) + v_8) + (uint(min(uint(v_2), 2u)) * 4u))));
+  int v_1 = k;
+  uint v_2 = 0u;
+  sb.GetDimensions(v_2);
+  uint v_3 = (((v_2 - 16u) / 128u) - 1u);
+  uint v_4 = (uint(min(uint(i), v_3)) * 128u);
+  uint v_5 = (uint(min(v, 2u)) * 32u);
+  float x = asfloat(sb.Load((((48u + v_4) + v_5) + (uint(min(uint(v_1), 2u)) * 4u))));
 }
 
 )");
@@ -770,13 +761,11 @@ TEST_F(HlslWriterTest, AccessComplexDynamicAccessChainSplit) {
 RWByteAddressBuffer sb : register(u0);
 void foo() {
   uint j = 1u;
-  uint v = j;
-  uint v_1 = 0u;
-  sb.GetDimensions(v_1);
-  uint v_2 = min(4u, (((v_1 - 16u) / 128u) - 1u));
-  uint v_3 = min(v, 2u);
-  uint v_4 = (uint(v_2) * 128u);
-  float x = asfloat(sb.Load(((56u + v_4) + (uint(v_3) * 32u))));
+  uint v = 0u;
+  sb.GetDimensions(v);
+  uint v_1 = min(j, 2u);
+  uint v_2 = (uint(min(4u, (((v - 16u) / 128u) - 1u))) * 128u);
+  float x = asfloat(sb.Load(((56u + v_2) + (uint(v_1) * 32u))));
 }
 
 )");
@@ -1002,10 +991,7 @@ cbuffer cbuffer_v : register(b0) {
   uint4 v[4];
 };
 float4x4 v_1(uint start_byte_offset) {
-  float4 v_2 = asfloat(v[(start_byte_offset / 16u)]);
-  float4 v_3 = asfloat(v[((16u + start_byte_offset) / 16u)]);
-  float4 v_4 = asfloat(v[((32u + start_byte_offset) / 16u)]);
-  return float4x4(v_2, v_3, v_4, asfloat(v[((48u + start_byte_offset) / 16u)]));
+  return float4x4(asfloat(v[(start_byte_offset / 16u)]), asfloat(v[((16u + start_byte_offset) / 16u)]), asfloat(v[((32u + start_byte_offset) / 16u)]), asfloat(v[((48u + start_byte_offset) / 16u)]));
 }
 
 void foo() {
@@ -1037,8 +1023,7 @@ cbuffer cbuffer_v : register(b0) {
   uint4 v[2];
 };
 float2x3 v_1(uint start_byte_offset) {
-  float3 v_2 = asfloat(v[(start_byte_offset / 16u)].xyz);
-  return float2x3(v_2, asfloat(v[((16u + start_byte_offset) / 16u)].xyz));
+  return float2x3(asfloat(v[(start_byte_offset / 16u)].xyz), asfloat(v[((16u + start_byte_offset) / 16u)].xyz));
 }
 
 void foo() {
@@ -1390,9 +1375,8 @@ cbuffer cbuffer_v : register(b0) {
   uint4 v[1];
 };
 SB v_1(uint start_byte_offset) {
-  int v_2 = asint(v[(start_byte_offset / 16u)][((start_byte_offset % 16u) / 4u)]);
-  SB v_3 = {v_2, asfloat(v[((4u + start_byte_offset) / 16u)][(((4u + start_byte_offset) % 16u) / 4u)])};
-  return v_3;
+  SB v_2 = {asint(v[(start_byte_offset / 16u)][((start_byte_offset % 16u) / 4u)]), asfloat(v[((4u + start_byte_offset) / 16u)][(((4u + start_byte_offset) % 16u) / 4u)])};
+  return v_2;
 }
 
 void foo() {
@@ -1517,34 +1501,32 @@ ary_ret v_1(uint start_byte_offset) {
 }
 
 float3x3 v_5(uint start_byte_offset) {
-  float3 v_6 = asfloat(v[(start_byte_offset / 16u)].xyz);
-  float3 v_7 = asfloat(v[((16u + start_byte_offset) / 16u)].xyz);
-  return float3x3(v_6, v_7, asfloat(v[((32u + start_byte_offset) / 16u)].xyz));
+  return float3x3(asfloat(v[(start_byte_offset / 16u)].xyz), asfloat(v[((16u + start_byte_offset) / 16u)].xyz), asfloat(v[((32u + start_byte_offset) / 16u)].xyz));
 }
 
-Inner v_8(uint start_byte_offset) {
-  float3x3 v_9 = v_5(start_byte_offset);
-  float3 v_10[5] = v_1((48u + start_byte_offset));
-  Inner v_11 = {v_9, v_10};
-  return v_11;
+Inner v_6(uint start_byte_offset) {
+  float3x3 v_7 = v_5(start_byte_offset);
+  float3 v_8[5] = v_1((48u + start_byte_offset));
+  Inner v_9 = {v_7, v_8};
+  return v_9;
 }
 
-Outer v_12(uint start_byte_offset) {
-  float v_13 = asfloat(v[(start_byte_offset / 16u)][((start_byte_offset % 16u) / 4u)]);
-  Inner v_14 = v_8((16u + start_byte_offset));
-  Outer v_15 = {v_13, v_14};
-  return v_15;
+Outer v_10(uint start_byte_offset) {
+  float v_11 = asfloat(v[(start_byte_offset / 16u)][((start_byte_offset % 16u) / 4u)]);
+  Inner v_12 = v_6((16u + start_byte_offset));
+  Outer v_13 = {v_11, v_12};
+  return v_13;
 }
 
-SB v_16(uint start_byte_offset) {
-  int v_17 = asint(v[(start_byte_offset / 16u)][((start_byte_offset % 16u) / 4u)]);
-  Outer v_18 = v_12((16u + start_byte_offset));
-  SB v_19 = {v_17, v_18};
-  return v_19;
+SB v_14(uint start_byte_offset) {
+  int v_15 = asint(v[(start_byte_offset / 16u)][((start_byte_offset % 16u) / 4u)]);
+  Outer v_16 = v_10((16u + start_byte_offset));
+  SB v_17 = {v_15, v_16};
+  return v_17;
 }
 
 void foo() {
-  SB a = v_16(0u);
+  SB a = v_14(0u);
   float b = asfloat(v[8u].z);
 }
 

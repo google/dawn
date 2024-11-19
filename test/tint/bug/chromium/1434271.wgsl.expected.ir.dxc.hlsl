@@ -79,55 +79,48 @@ void rgba32uintin() {
 }
 
 float4x4 v_1(uint start_byte_offset) {
-  float4 v_2 = asfloat(render_params[(start_byte_offset / 16u)]);
-  float4 v_3 = asfloat(render_params[((16u + start_byte_offset) / 16u)]);
-  float4 v_4 = asfloat(render_params[((32u + start_byte_offset) / 16u)]);
-  return float4x4(v_2, v_3, v_4, asfloat(render_params[((48u + start_byte_offset) / 16u)]));
+  return float4x4(asfloat(render_params[(start_byte_offset / 16u)]), asfloat(render_params[((16u + start_byte_offset) / 16u)]), asfloat(render_params[((32u + start_byte_offset) / 16u)]), asfloat(render_params[((48u + start_byte_offset) / 16u)]));
 }
 
 VertexOutput vs_main_inner(VertexInput tint_symbol) {
-  float3 v_5 = asfloat(render_params[4u].xyz);
-  float3 quad_pos = mul(tint_symbol.quad_pos, float2x3(v_5, asfloat(render_params[5u].xyz)));
+  float3 quad_pos = mul(tint_symbol.quad_pos, float2x3(asfloat(render_params[4u].xyz), asfloat(render_params[5u].xyz)));
   float3 position = (tint_symbol.position - (quad_pos + 0.00999999977648258209f));
   VertexOutput tint_symbol_1 = (VertexOutput)0;
-  float4x4 v_6 = v_1(0u);
-  tint_symbol_1.position = mul(float4(position, 1.0f), v_6);
+  float4x4 v_2 = v_1(0u);
+  tint_symbol_1.position = mul(float4(position, 1.0f), v_2);
   tint_symbol_1.color = tint_symbol.color;
   tint_symbol_1.quad_pos = tint_symbol.quad_pos;
-  VertexOutput v_7 = tint_symbol_1;
-  return v_7;
+  VertexOutput v_3 = tint_symbol_1;
+  return v_3;
 }
 
-void v_8(uint offset, Particle obj) {
+void v_4(uint offset, Particle obj) {
   data.Store3((offset + 0u), asuint(obj.position));
   data.Store((offset + 12u), asuint(obj.lifetime));
   data.Store4((offset + 16u), asuint(obj.color));
   data.Store2((offset + 32u), asuint(obj.velocity));
 }
 
-Particle v_9(uint offset) {
-  float3 v_10 = asfloat(data.Load3((offset + 0u)));
-  float v_11 = asfloat(data.Load((offset + 12u)));
-  float4 v_12 = asfloat(data.Load4((offset + 16u)));
-  Particle v_13 = {v_10, v_11, v_12, asfloat(data.Load2((offset + 32u)))};
-  return v_13;
+Particle v_5(uint offset) {
+  Particle v_6 = {asfloat(data.Load3((offset + 0u))), asfloat(data.Load((offset + 12u))), asfloat(data.Load4((offset + 16u))), asfloat(data.Load2((offset + 32u)))};
+  return v_6;
 }
 
 void simulate_inner(uint3 GlobalInvocationID) {
-  float2 v_14 = asfloat(sim_params[1u]).xy;
-  float2 v_15 = (v_14 * float2(GlobalInvocationID.xy));
-  rand_seed = (v_15 * asfloat(sim_params[1u]).zw);
+  float2 v_7 = asfloat(sim_params[1u]).xy;
+  float2 v_8 = (v_7 * float2(GlobalInvocationID.xy));
+  rand_seed = (v_8 * asfloat(sim_params[1u]).zw);
   uint idx = GlobalInvocationID.x;
-  Particle particle = v_9((0u + (uint(idx) * 48u)));
-  uint v_16 = (uint(idx) * 48u);
-  Particle v_17 = particle;
-  v_8((0u + v_16), v_17);
+  Particle particle = v_5((0u + (uint(idx) * 48u)));
+  uint v_9 = (uint(idx) * 48u);
+  Particle v_10 = particle;
+  v_4((0u + v_9), v_10);
 }
 
 void export_level_inner(uint3 coord) {
-  uint2 v_18 = (0u).xx;
-  tex_out.GetDimensions(v_18.x, v_18.y);
-  if (all((coord.xy < uint2(v_18)))) {
+  uint2 v_11 = (0u).xx;
+  tex_out.GetDimensions(v_11.x, v_11.y);
+  if (all((coord.xy < uint2(v_11)))) {
     uint dst_offset = (coord.x << ((coord.y * ubo[0u].x) & 31u));
     uint src_offset = ((coord.x - 2u) + ((coord.y >> (2u & 31u)) * ubo[0u].x));
     float a = asfloat(buf_in.Load((0u + (uint((src_offset << (0u & 31u))) * 4u))));
@@ -135,26 +128,24 @@ void export_level_inner(uint3 coord) {
     float c = asfloat(buf_in.Load((0u + (uint(((src_offset + 1u) + ubo[0u].x)) * 4u))));
     float d = asfloat(buf_in.Load((0u + (uint(((src_offset + 1u) + ubo[0u].x)) * 4u))));
     float sum = dot(float4(a, b, c, d), (1.0f).xxxx);
-    uint v_19 = (uint(dst_offset) * 4u);
-    float v_20 = (sum / 4.0f);
-    float v_21 = floor(v_20);
-    buf_out.Store((0u + v_19), asuint((sum - ((((v_20 < 0.0f)) ? (ceil(v_20)) : (v_21)) * 4.0f))));
-    float4 v_22 = float4(a, (a * b), ((a / b) + c), sum);
-    float4 probabilities = (v_22 + max(sum, 0.0f));
+    uint v_12 = (uint(dst_offset) * 4u);
+    float v_13 = (sum / 4.0f);
+    buf_out.Store((0u + v_12), asuint((sum - ((((v_13 < 0.0f)) ? (ceil(v_13)) : (floor(v_13))) * 4.0f))));
+    float4 probabilities = (float4(a, (a * b), ((a / b) + c), sum) + max(sum, 0.0f));
     tex_out[int2(coord.xy)] = probabilities;
   }
 }
 
 vertex_main_outputs vertex_main() {
-  vertex_main_outputs v_23 = {vertex_main_inner()};
-  return v_23;
+  vertex_main_outputs v_14 = {vertex_main_inner()};
+  return v_14;
 }
 
 vs_main_outputs vs_main(vs_main_inputs inputs) {
-  VertexInput v_24 = {inputs.VertexInput_position, inputs.VertexInput_color, inputs.VertexInput_quad_pos};
-  VertexOutput v_25 = vs_main_inner(v_24);
-  vs_main_outputs v_26 = {v_25.color, v_25.quad_pos, v_25.position};
-  return v_26;
+  VertexInput v_15 = {inputs.VertexInput_position, inputs.VertexInput_color, inputs.VertexInput_quad_pos};
+  VertexOutput v_16 = vs_main_inner(v_15);
+  vs_main_outputs v_17 = {v_16.color, v_16.quad_pos, v_16.position};
+  return v_17;
 }
 
 [numthreads(64, 1, 1)]

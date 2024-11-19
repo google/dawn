@@ -13,8 +13,7 @@ RWByteAddressBuffer prevent_dce : register(u0);
 float16_t trunc_cc2b0d() {
   float16_t arg_0 = float16_t(1.5h);
   float16_t v = arg_0;
-  float16_t v_1 = floor(v);
-  float16_t res = (((v < float16_t(0.0h))) ? (ceil(v)) : (v_1));
+  float16_t res = (((v < float16_t(0.0h))) ? (ceil(v)) : (floor(v)));
   return res;
 }
 
@@ -31,13 +30,13 @@ VertexOutput vertex_main_inner() {
   VertexOutput tint_symbol = (VertexOutput)0;
   tint_symbol.pos = (0.0f).xxxx;
   tint_symbol.prevent_dce = trunc_cc2b0d();
-  VertexOutput v_2 = tint_symbol;
-  return v_2;
+  VertexOutput v_1 = tint_symbol;
+  return v_1;
 }
 
 vertex_main_outputs vertex_main() {
-  VertexOutput v_3 = vertex_main_inner();
-  vertex_main_outputs v_4 = {v_3.prevent_dce, v_3.pos};
-  return v_4;
+  VertexOutput v_2 = vertex_main_inner();
+  vertex_main_outputs v_3 = {v_2.prevent_dce, v_2.pos};
+  return v_3;
 }
 

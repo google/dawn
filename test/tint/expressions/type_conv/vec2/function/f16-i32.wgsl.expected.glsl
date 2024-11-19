@@ -7,9 +7,7 @@ f16vec2 m() {
   return f16vec2(t);
 }
 ivec2 tint_v2f16_to_v2i32(f16vec2 value) {
-  ivec2 v_1 = ivec2(value);
-  ivec2 v_2 = mix(ivec2((-2147483647 - 1)), v_1, greaterThanEqual(value, f16vec2(-65504.0hf)));
-  return mix(ivec2(2147483647), v_2, lessThanEqual(value, f16vec2(65504.0hf)));
+  return mix(ivec2(2147483647), mix(ivec2((-2147483647 - 1)), ivec2(value), greaterThanEqual(value, f16vec2(-65504.0hf))), lessThanEqual(value, f16vec2(65504.0hf)));
 }
 void f() {
   ivec2 v = tint_v2f16_to_v2i32(m());

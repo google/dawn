@@ -142,8 +142,7 @@ void tint_symbol_inner(uint3 GlobalInvocationID, tint_module_vars_struct tint_mo
                 p[2u] = boxMin[2u];
               }
               p[3u] = 1.0f;
-              float const v_8 = dp;
-              dp = (v_8 + min(0.0f, dot(p, frustumPlanes[i])));
+              dp = (dp + min(0.0f, dot(p, frustumPlanes[i])));
               {
                 i = (i + 1u);
               }
@@ -152,13 +151,13 @@ void tint_symbol_inner(uint3 GlobalInvocationID, tint_module_vars_struct tint_mo
           }
           if ((dp >= 0.0f)) {
             uint tileId = uint(as_type<int>((as_type<uint>(x) + as_type<uint>(as_type<int>((as_type<uint>(y) * as_type<uint>(TILE_COUNT_X)))))));
-            bool v_9 = false;
+            bool v_8 = false;
             if ((tileId < 0u)) {
-              v_9 = true;
+              v_8 = true;
             } else {
-              v_9 = (tileId >= (*tint_module_vars.config).numTiles);
+              v_8 = (tileId >= (*tint_module_vars.config).numTiles);
             }
-            if (v_9) {
+            if (v_8) {
               {
                 x = as_type<int>((as_type<uint>(x) + as_type<uint>(1)));
               }

@@ -17,8 +17,7 @@ void foo() {
         }
         default:
         {
-          uint v = (0u + (uint(i) * 4u));
-          buffer.Store(v, asuint(int(2)));
+          buffer.Store((0u + (uint(i) * 4u)), asuint(int(2)));
           break;
         }
       }

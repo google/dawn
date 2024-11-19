@@ -11,9 +11,7 @@ float textureSampleCompare_a3ca7e(tint_module_vars_struct tint_module_vars) {
   float3 arg_2 = float3(1.0f);
   int arg_3 = 1;
   float arg_4 = 1.0f;
-  float3 const v = arg_2;
-  float const v_1 = arg_4;
-  float res = tint_module_vars.arg_0.sample_compare(tint_module_vars.arg_1, v, max(arg_3, 0), v_1);
+  float res = tint_module_vars.arg_0.sample_compare(tint_module_vars.arg_1, arg_2, max(arg_3, 0), arg_4);
   return res;
 }
 

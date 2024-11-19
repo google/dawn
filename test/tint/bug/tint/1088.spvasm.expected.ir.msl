@@ -56,12 +56,10 @@ void main_1(tint_module_vars_struct tint_module_vars) {
   float3 p = 0.0f;
   q = float4((*tint_module_vars.position_1)[0u], (*tint_module_vars.position_1)[1u], (*tint_module_vars.position_1)[2u], 1.0f);
   p = q.xyz;
-  float const v = p[0u];
-  p[0u] = (v + sin((((*tint_module_vars.x_14).test[0].el * (*tint_module_vars.position_1)[1u]) + (*tint_module_vars.x_14).time)));
-  float const v_1 = p[1u];
-  p[1u] = (v_1 + sin(((*tint_module_vars.x_14).time + 4.0f)));
-  float4x4 const v_2 = (*tint_module_vars.x_14).worldViewProjection;
-  (*tint_module_vars.gl_Position) = (v_2 * float4(p[0u], p[1u], p[2u], 1.0f));
+  p[0u] = (p[0u] + sin((((*tint_module_vars.x_14).test[0].el * (*tint_module_vars.position_1)[1u]) + (*tint_module_vars.x_14).time)));
+  p[1u] = (p[1u] + sin(((*tint_module_vars.x_14).time + 4.0f)));
+  float4x4 const v = (*tint_module_vars.x_14).worldViewProjection;
+  (*tint_module_vars.gl_Position) = (v * float4(p[0u], p[1u], p[2u], 1.0f));
   (*tint_module_vars.vUV) = (*tint_module_vars.uv);
   (*tint_module_vars.gl_Position)[1u] = ((*tint_module_vars.gl_Position)[1u] * -1.0f);
 }
@@ -81,9 +79,9 @@ vertex tint_symbol_outputs tint_symbol(tint_symbol_inputs inputs [[stage_in]], c
   thread float3 normal = 0.0f;
   thread float4 gl_Position = 0.0f;
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.position_1=(&position_1), .x_14=x_14, .vUV=(&vUV), .uv=(&uv), .normal=(&normal), .gl_Position=(&gl_Position)};
-  main_out const v_3 = tint_symbol_inner(inputs.position_1_param, inputs.uv_param, inputs.normal_param, tint_module_vars);
+  main_out const v_1 = tint_symbol_inner(inputs.position_1_param, inputs.uv_param, inputs.normal_param, tint_module_vars);
   tint_symbol_outputs tint_wrapper_result = {};
-  tint_wrapper_result.main_out_gl_Position = v_3.gl_Position;
-  tint_wrapper_result.main_out_vUV_1 = v_3.vUV_1;
+  tint_wrapper_result.main_out_gl_Position = v_1.gl_Position;
+  tint_wrapper_result.main_out_vUV_1 = v_1.vUV_1;
   return tint_wrapper_result;
 }

@@ -27,10 +27,7 @@ Texture2D<float4> permutationsSampler_1_Texture : register(t1, space1);
 SamplerState noiseSampler_1_Sampler : register(s2, space1);
 Texture2D<float4> noiseSampler_1_Texture : register(t3, space1);
 float4x4 v(uint offset) {
-  float4 v_1 = asfloat(_storage1.Load4((offset + 0u)));
-  float4 v_2 = asfloat(_storage1.Load4((offset + 16u)));
-  float4 v_3 = asfloat(_storage1.Load4((offset + 32u)));
-  return float4x4(v_1, v_2, v_3, asfloat(_storage1.Load4((offset + 48u))));
+  return float4x4(asfloat(_storage1.Load4((offset + 0u))), asfloat(_storage1.Load4((offset + 16u))), asfloat(_storage1.Load4((offset + 32u))), asfloat(_storage1.Load4((offset + 48u))));
 }
 
 void _skslMain(FSIn _stageIn, inout FSOut _stageOut) {
@@ -43,8 +40,8 @@ void _skslMain(FSIn _stageIn, inout FSOut _stageOut) {
   int _61_o = int(0);
   {
     while(true) {
-      int v_4 = _61_o;
-      if ((v_4 < asint(_storage1.Load((20u + (uint(shadingSsboIndex) * 128u)))))) {
+      int v_1 = _61_o;
+      if ((v_1 < asint(_storage1.Load((20u + (uint(shadingSsboIndex) * 128u)))))) {
         float4 _62_f = (0.0f).xxxx;
         float2 _skTemp2 = floor(_57_k);
         _62_f = float4(_skTemp2, _62_f.zw);
@@ -53,10 +50,8 @@ void _skslMain(FSIn _stageIn, inout FSOut _stageOut) {
           float4 _skTemp3 = step(_59_m.xyxy, _62_f);
           _62_f = (_62_f - (_skTemp3 * _59_m.xyxy));
         }
-        float2 v_5 = float2(float2(((_62_f.x + 0.5f) * 0.00390625f), 0.5f));
-        float _63_g = permutationsSampler_1_Texture.SampleBias(permutationsSampler_1_Sampler, v_5, clamp(-0.47499999403953552246f, -16.0f, 15.9899997711181640625f)).x;
-        float2 v_6 = float2(float2(((_62_f.z + 0.5f) * 0.00390625f), 0.5f));
-        float _64_h = permutationsSampler_1_Texture.SampleBias(permutationsSampler_1_Sampler, v_6, clamp(-0.47499999403953552246f, -16.0f, 15.9899997711181640625f)).x;
+        float _63_g = permutationsSampler_1_Texture.SampleBias(permutationsSampler_1_Sampler, float2(float2(((_62_f.x + 0.5f) * 0.00390625f), 0.5f)), clamp(-0.47499999403953552246f, -16.0f, 15.9899997711181640625f)).x;
+        float _64_h = permutationsSampler_1_Texture.SampleBias(permutationsSampler_1_Sampler, float2(float2(((_62_f.z + 0.5f) * 0.00390625f), 0.5f)), clamp(-0.47499999403953552246f, -16.0f, 15.9899997711181640625f)).x;
         float2 _65_i = float2(_63_g, _64_h);
         if (false) {
           float2 _skTemp4 = floor(((_65_i * (255.0f).xx) + (0.5f).xx));
@@ -74,18 +69,14 @@ void _skslMain(FSIn _stageIn, inout FSOut _stageOut) {
         {
           while(true) {
             float _73_i = ((float(_72_h) + 0.5f) * 0.25f);
-            float v_7 = float(_67_p.x);
-            float2 v_8 = float2(v_7, float(_73_i));
-            float4 _74_j = noiseSampler_1_Texture.SampleBias(noiseSampler_1_Sampler, v_8, clamp(-0.47499999403953552246f, -16.0f, 15.9899997711181640625f));
-            float v_9 = float(_67_p.y);
-            float2 v_10 = float2(v_9, float(_73_i));
-            float4 _75_k = noiseSampler_1_Texture.SampleBias(noiseSampler_1_Sampler, v_10, clamp(-0.47499999403953552246f, -16.0f, 15.9899997711181640625f));
-            float v_11 = float(_67_p.w);
-            float2 v_12 = float2(v_11, float(_73_i));
-            float4 _76_l = noiseSampler_1_Texture.SampleBias(noiseSampler_1_Sampler, v_12, clamp(-0.47499999403953552246f, -16.0f, 15.9899997711181640625f));
-            float v_13 = float(_67_p.z);
-            float2 v_14 = float2(v_13, float(_73_i));
-            float4 _77_m = noiseSampler_1_Texture.SampleBias(noiseSampler_1_Sampler, v_14, clamp(-0.47499999403953552246f, -16.0f, 15.9899997711181640625f));
+            float v_2 = float(_67_p.x);
+            float4 _74_j = noiseSampler_1_Texture.SampleBias(noiseSampler_1_Sampler, float2(v_2, float(_73_i)), clamp(-0.47499999403953552246f, -16.0f, 15.9899997711181640625f));
+            float v_3 = float(_67_p.y);
+            float4 _75_k = noiseSampler_1_Texture.SampleBias(noiseSampler_1_Sampler, float2(v_3, float(_73_i)), clamp(-0.47499999403953552246f, -16.0f, 15.9899997711181640625f));
+            float v_4 = float(_67_p.w);
+            float4 _76_l = noiseSampler_1_Texture.SampleBias(noiseSampler_1_Sampler, float2(v_4, float(_73_i)), clamp(-0.47499999403953552246f, -16.0f, 15.9899997711181640625f));
+            float v_5 = float(_67_p.z);
+            float4 _77_m = noiseSampler_1_Texture.SampleBias(noiseSampler_1_Sampler, float2(v_5, float(_73_i)), clamp(-0.47499999403953552246f, -16.0f, 15.9899997711181640625f));
             float2 _78_n = _68_d;
             float _skTemp7 = dot((((_74_j.yw + (_74_j.xz * 0.00390625f)) * 2.0f) - 1.0f), _78_n);
             float _79_o = _skTemp7;
@@ -134,9 +125,9 @@ void _skslMain(FSIn _stageIn, inout FSOut _stageOut) {
   }
   float4 _skTemp15 = saturate(_58_l);
   _58_l = _skTemp15;
-  float3 v_15 = float3(_58_l.xyz);
-  float3 v_16 = float3((v_15 * float(_58_l.w)));
-  float _skTemp16 = dot(float3(0.21259999275207519531f, 0.71520000696182250977f, 0.07220000028610229492f), float4(v_16, float(float(_58_l.w))).xyz);
+  float3 v_6 = float3(_58_l.xyz);
+  float3 v_7 = float3((v_6 * float(_58_l.w)));
+  float _skTemp16 = dot(float3(0.21259999275207519531f, 0.71520000696182250977f, 0.07220000028610229492f), float4(v_7, float(float(_58_l.w))).xyz);
   float _skTemp17 = saturate(_skTemp16);
   float4 _84_a = float4(0.0f, 0.0f, 0.0f, _skTemp17);
   int _85_d = asint(_storage1.Load((112u + (uint(shadingSsboIndex) * 128u))));
@@ -169,9 +160,9 @@ void _skslMain(FSIn _stageIn, inout FSOut _stageOut) {
     float _skTemp23 = max(_84_a.w, 0.00009999999747378752f);
     _84_a = float4((_84_a.xyz / _skTemp23), _84_a.w);
   }
-  float4x4 v_17 = v((32u + (uint(shadingSsboIndex) * 128u)));
-  float4 v_18 = mul(float4(_84_a), v_17);
-  float4 _94_f = float4((v_18 + asfloat(_storage1.Load4((96u + (uint(shadingSsboIndex) * 128u))))));
+  float4x4 v_8 = v((32u + (uint(shadingSsboIndex) * 128u)));
+  float4 v_9 = mul(float4(_84_a), v_8);
+  float4 _94_f = float4((v_9 + asfloat(_storage1.Load4((96u + (uint(shadingSsboIndex) * 128u))))));
   if (bool(_85_d)) {
     float _skTemp24 = abs(((2.0f * _94_f.z) - 1.0f));
     float _95_b = ((1.0f - _skTemp24) * _94_f.y);
@@ -199,14 +190,14 @@ void _skslMain(FSIn _stageIn, inout FSOut _stageOut) {
 FSOut main_inner(FSIn _stageIn) {
   FSOut _stageOut = (FSOut)0;
   _skslMain(_stageIn, _stageOut);
-  FSOut v_19 = _stageOut;
-  return v_19;
+  FSOut v_10 = _stageOut;
+  return v_10;
 }
 
 main_outputs main(main_inputs inputs) {
-  FSIn v_20 = {inputs.FSIn_ssboIndicesVar, inputs.FSIn_localCoordsVar};
-  FSOut v_21 = main_inner(v_20);
-  main_outputs v_22 = {v_21.sk_FragColor};
-  return v_22;
+  FSIn v_11 = {inputs.FSIn_ssboIndicesVar, inputs.FSIn_localCoordsVar};
+  FSOut v_12 = main_inner(v_11);
+  main_outputs v_13 = {v_12.sk_FragColor};
+  return v_13;
 }
 

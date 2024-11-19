@@ -57,10 +57,7 @@ struct frag_main_outputs {
 
 float4 vert_main_inner(float2 a_particlePos, float2 a_particleVel, float2 a_pos) {
   float angle = -(atan2(a_particleVel[0u], a_particleVel[1u]));
-  float const v = (a_pos[0u] * cos(angle));
-  float const v_1 = (v - (a_pos[1u] * sin(angle)));
-  float const v_2 = (a_pos[0u] * sin(angle));
-  float2 pos = float2(v_1, (v_2 + (a_pos[1u] * cos(angle))));
+  float2 pos = float2(((a_pos[0u] * cos(angle)) - (a_pos[1u] * sin(angle))), ((a_pos[0u] * sin(angle)) + (a_pos[1u] * cos(angle))));
   return float4((pos + a_particlePos), 0.0f, 1.0f);
 }
 
@@ -98,17 +95,14 @@ void comp_main_inner(uint3 gl_GlobalInvocationID, tint_module_vars_struct tint_m
       }
       pos = (*tint_module_vars.particlesA).particles[i].pos.xy;
       vel = (*tint_module_vars.particlesA).particles[i].vel.xy;
-      float const v_3 = distance(pos, vPos);
-      if ((v_3 < (*tint_module_vars.params).rule1Distance)) {
+      if ((distance(pos, vPos) < (*tint_module_vars.params).rule1Distance)) {
         cMass = (cMass + pos);
         cMassCount = as_type<int>((as_type<uint>(cMassCount) + as_type<uint>(1)));
       }
-      float const v_4 = distance(pos, vPos);
-      if ((v_4 < (*tint_module_vars.params).rule2Distance)) {
+      if ((distance(pos, vPos) < (*tint_module_vars.params).rule2Distance)) {
         colVel = (colVel - (pos - vPos));
       }
-      float const v_5 = distance(pos, vPos);
-      if ((v_5 < (*tint_module_vars.params).rule3Distance)) {
+      if ((distance(pos, vPos) < (*tint_module_vars.params).rule3Distance)) {
         cVel = (cVel + vel);
         cVelCount = as_type<int>((as_type<uint>(cVelCount) + as_type<uint>(1)));
       }
@@ -119,19 +113,18 @@ void comp_main_inner(uint3 gl_GlobalInvocationID, tint_module_vars_struct tint_m
     }
   }
   if ((cMassCount > 0)) {
-    float2 const v_6 = cMass;
-    float const v_7 = float(cMassCount);
-    float2 const v_8 = (v_6 / float2(v_7, float(cMassCount)));
-    cMass = (v_8 - vPos);
+    float2 const v = cMass;
+    float const v_1 = float(cMassCount);
+    float2 const v_2 = (v / float2(v_1, float(cMassCount)));
+    cMass = (v_2 - vPos);
   }
   if ((cVelCount > 0)) {
-    float2 const v_9 = cVel;
-    float const v_10 = float(cVelCount);
-    cVel = (v_9 / float2(v_10, float(cVelCount)));
+    float2 const v_3 = cVel;
+    float const v_4 = float(cVelCount);
+    cVel = (v_3 / float2(v_4, float(cVelCount)));
   }
   vVel = (((vVel + (cMass * (*tint_module_vars.params).rule1Scale)) + (colVel * (*tint_module_vars.params).rule2Scale)) + (cVel * (*tint_module_vars.params).rule3Scale));
-  float2 const v_11 = normalize(vVel);
-  vVel = (v_11 * clamp(length(vVel), 0.0f, 0.10000000149011611938f));
+  vVel = (normalize(vVel) * clamp(length(vVel), 0.0f, 0.10000000149011611938f));
   vPos = (vPos + (vVel * (*tint_module_vars.params).deltaT));
   if ((vPos[0u] < -1.0f)) {
     vPos[0u] = 1.0f;

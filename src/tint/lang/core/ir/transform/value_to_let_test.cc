@@ -972,8 +972,7 @@ TEST_F(IR_ValueToLetTest, NameMe2) {
   $B1: {
     %i:i32 = max 1i, 2i
     %v:ptr<function, i32, read_write> = var, %i
-    %4:i32 = max 3i, 4i
-    %x:i32 = let %4
+    %x:i32 = max 3i, 4i
     %y:i32 = load %v
     %z:i32 = add %y, %x
     store %v, %z

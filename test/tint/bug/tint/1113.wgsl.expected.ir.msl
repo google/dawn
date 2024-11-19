@@ -68,8 +68,7 @@ float3 toVoxelPos(float3 position, tint_module_vars_struct tint_module_vars) {
   float3 bbMin = float3((*tint_module_vars.uniforms).bbMin[0u], (*tint_module_vars.uniforms).bbMin[1u], (*tint_module_vars.uniforms).bbMin[2u]);
   float3 bbMax = float3((*tint_module_vars.uniforms).bbMax[0u], (*tint_module_vars.uniforms).bbMax[1u], (*tint_module_vars.uniforms).bbMax[2u]);
   float3 bbSize = (bbMax - bbMin);
-  float const v = max(bbSize[0u], bbSize[1u]);
-  float cubeSize = max(v, bbSize[2u]);
+  float cubeSize = max(max(bbSize[0u], bbSize[1u]), bbSize[2u]);
   float gridSize = float((*tint_module_vars.uniforms).gridSize);
   float gx = ((gridSize * (position[0u] - (*tint_module_vars.uniforms).bbMin[0u])) / cubeSize);
   float gy = ((gridSize * (position[1u] - (*tint_module_vars.uniforms).bbMin[1u])) / cubeSize);
@@ -87,8 +86,7 @@ uint toIndex1D(uint gridSize, float3 voxelPos) {
 }
 
 uint tint_mod_u32(uint lhs, uint rhs) {
-  uint const v_1 = select(rhs, 1u, (rhs == 0u));
-  return (lhs - ((lhs / v_1) * v_1));
+  return (lhs - ((lhs / select(rhs, 1u, (rhs == 0u))) * select(rhs, 1u, (rhs == 0u))));
 }
 
 uint tint_div_u32(uint lhs, uint rhs) {

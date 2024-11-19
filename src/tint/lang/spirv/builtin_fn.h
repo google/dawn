@@ -40,6 +40,7 @@
 #include <cstdint>
 #include <string>
 
+#include "src/tint/lang/core/ir/call.h"
 #include "src/tint/utils/traits/traits.h"
 
 // \cond DO_NOT_DOCUMENT
@@ -95,6 +96,9 @@ template <typename STREAM, typename = traits::EnableIfIsOStream<STREAM>>
 auto& operator<<(STREAM& o, BuiltinFn i) {
     return o << str(i);
 }
+
+/// @returns access restrictions for a function
+tint::core::ir::Instruction::Accesses GetSideEffects(BuiltinFn fn);
 
 }  // namespace tint::spirv
 // \endcond

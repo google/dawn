@@ -13,11 +13,10 @@ ivec3 insertBits_428b0b() {
   uint arg_3 = 1u;
   ivec3 v_1 = arg_0;
   ivec3 v_2 = arg_1;
-  uint v_3 = arg_3;
-  uint v_4 = min(arg_2, 32u);
-  uint v_5 = min(v_3, (32u - v_4));
-  int v_6 = int(v_4);
-  ivec3 res = bitfieldInsert(v_1, v_2, v_6, int(v_5));
+  uint v_3 = min(arg_2, 32u);
+  uint v_4 = min(arg_3, (32u - v_3));
+  int v_5 = int(v_3);
+  ivec3 res = bitfieldInsert(v_1, v_2, v_5, int(v_4));
   return res;
 }
 void main() {
@@ -36,11 +35,10 @@ ivec3 insertBits_428b0b() {
   uint arg_3 = 1u;
   ivec3 v_1 = arg_0;
   ivec3 v_2 = arg_1;
-  uint v_3 = arg_3;
-  uint v_4 = min(arg_2, 32u);
-  uint v_5 = min(v_3, (32u - v_4));
-  int v_6 = int(v_4);
-  ivec3 res = bitfieldInsert(v_1, v_2, v_6, int(v_5));
+  uint v_3 = min(arg_2, 32u);
+  uint v_4 = min(arg_3, (32u - v_3));
+  int v_5 = int(v_3);
+  ivec3 res = bitfieldInsert(v_1, v_2, v_5, int(v_4));
   return res;
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
@@ -63,11 +61,10 @@ ivec3 insertBits_428b0b() {
   uint arg_3 = 1u;
   ivec3 v = arg_0;
   ivec3 v_1 = arg_1;
-  uint v_2 = arg_3;
-  uint v_3 = min(arg_2, 32u);
-  uint v_4 = min(v_2, (32u - v_3));
-  int v_5 = int(v_3);
-  ivec3 res = bitfieldInsert(v, v_1, v_5, int(v_4));
+  uint v_2 = min(arg_2, 32u);
+  uint v_3 = min(arg_3, (32u - v_2));
+  int v_4 = int(v_2);
+  ivec3 res = bitfieldInsert(v, v_1, v_4, int(v_3));
   return res;
 }
 VertexOutput vertex_main_inner() {
@@ -77,10 +74,10 @@ VertexOutput vertex_main_inner() {
   return tint_symbol;
 }
 void main() {
-  VertexOutput v_6 = vertex_main_inner();
-  gl_Position = v_6.pos;
+  VertexOutput v_5 = vertex_main_inner();
+  gl_Position = v_5.pos;
   gl_Position[1u] = -(gl_Position.y);
   gl_Position[2u] = ((2.0f * gl_Position.z) - gl_Position.w);
-  vertex_main_loc0_Output = v_6.prevent_dce;
+  vertex_main_loc0_Output = v_5.prevent_dce;
   gl_PointSize = 1.0f;
 }

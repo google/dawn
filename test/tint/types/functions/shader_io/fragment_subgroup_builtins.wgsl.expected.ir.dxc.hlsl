@@ -5,7 +5,6 @@ void main_inner(uint subgroup_invocation_id, uint subgroup_size) {
 }
 
 void main() {
-  uint v = WaveGetLaneIndex();
-  main_inner(v, WaveGetLaneCount());
+  main_inner(WaveGetLaneIndex(), WaveGetLaneCount());
 }
 

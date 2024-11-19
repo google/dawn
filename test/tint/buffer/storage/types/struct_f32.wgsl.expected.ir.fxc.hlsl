@@ -28,26 +28,25 @@ void v_2(uint offset, S obj) {
 }
 
 float2x4 v_4(uint offset) {
-  float4 v_5 = asfloat(tint_symbol.Load4((offset + 0u)));
-  return float2x4(v_5, asfloat(tint_symbol.Load4((offset + 16u))));
+  return float2x4(asfloat(tint_symbol.Load4((offset + 0u))), asfloat(tint_symbol.Load4((offset + 16u))));
 }
 
-Inner v_6(uint offset) {
-  float v_7 = asfloat(tint_symbol.Load((offset + 0u)));
-  float3 v_8 = asfloat(tint_symbol.Load3((offset + 16u)));
-  Inner v_9 = {v_7, v_8, v_4((offset + 32u))};
-  return v_9;
+Inner v_5(uint offset) {
+  float v_6 = asfloat(tint_symbol.Load((offset + 0u)));
+  float3 v_7 = asfloat(tint_symbol.Load3((offset + 16u)));
+  Inner v_8 = {v_6, v_7, v_4((offset + 32u))};
+  return v_8;
 }
 
-S v_10(uint offset) {
-  Inner v_11 = v_6((offset + 0u));
-  S v_12 = {v_11};
-  return v_12;
+S v_9(uint offset) {
+  Inner v_10 = v_5((offset + 0u));
+  S v_11 = {v_10};
+  return v_11;
 }
 
 [numthreads(1, 1, 1)]
 void main() {
-  S t = v_10(0u);
+  S t = v_9(0u);
   v_2(0u, t);
 }
 

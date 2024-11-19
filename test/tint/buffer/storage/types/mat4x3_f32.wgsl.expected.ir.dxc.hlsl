@@ -9,10 +9,7 @@ void v(uint offset, float4x3 obj) {
 }
 
 float4x3 v_1(uint offset) {
-  float3 v_2 = asfloat(tint_symbol.Load3((offset + 0u)));
-  float3 v_3 = asfloat(tint_symbol.Load3((offset + 16u)));
-  float3 v_4 = asfloat(tint_symbol.Load3((offset + 32u)));
-  return float4x3(v_2, v_3, v_4, asfloat(tint_symbol.Load3((offset + 48u))));
+  return float4x3(asfloat(tint_symbol.Load3((offset + 0u))), asfloat(tint_symbol.Load3((offset + 16u))), asfloat(tint_symbol.Load3((offset + 32u))), asfloat(tint_symbol.Load3((offset + 48u))));
 }
 
 [numthreads(1, 1, 1)]

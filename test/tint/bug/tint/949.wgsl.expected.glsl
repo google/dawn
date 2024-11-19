@@ -105,8 +105,7 @@ mat3 cotangent_frame_vf3_vf3_vf2_vf2_(inout vec3 normal_1, inout vec3 p, inout v
   vec3 x_182 = tangent;
   vec3 x_184 = bitangent;
   vec3 x_185 = bitangent;
-  float v_2 = dot(x_181, x_182);
-  invmax = inversesqrt(max(v_2, dot(x_184, x_185)));
+  invmax = inversesqrt(max(dot(x_181, x_182), dot(x_184, x_185)));
   vec3 x_189 = tangent;
   float x_190 = invmax;
   vec3 x_191 = (x_189 * x_190);
@@ -114,9 +113,9 @@ mat3 cotangent_frame_vf3_vf3_vf2_vf2_(inout vec3 normal_1, inout vec3 p, inout v
   float x_193 = invmax;
   vec3 x_194 = (x_192 * x_193);
   vec3 x_195 = normal_1;
-  vec3 v_3 = vec3(x_191[0u], x_191[1u], x_191[2u]);
-  vec3 v_4 = vec3(x_194[0u], x_194[1u], x_194[2u]);
-  return mat3(v_3, v_4, vec3(x_195[0u], x_195[1u], x_195[2u]));
+  vec3 v_2 = vec3(x_191[0u], x_191[1u], x_191[2u]);
+  vec3 v_3 = vec3(x_194[0u], x_194[1u], x_194[2u]);
+  return mat3(v_2, v_3, vec3(x_195[0u], x_195[1u], x_195[2u]));
 }
 mat3 transposeMat3_mf33_(inout mat3 inMatrix) {
   vec3 i0 = vec3(0.0f);
@@ -141,9 +140,9 @@ mat3 transposeMat3_mf33_(inout mat3 inMatrix) {
   float x_91 = i1.z;
   float x_93 = i2.z;
   vec3 x_94 = vec3(x_89, x_91, x_93);
-  vec3 v_5 = vec3(x_78[0u], x_78[1u], x_78[2u]);
-  vec3 v_6 = vec3(x_86[0u], x_86[1u], x_86[2u]);
-  outMatrix = mat3(v_5, v_6, vec3(x_94[0u], x_94[1u], x_94[2u]));
+  vec3 v_4 = vec3(x_78[0u], x_78[1u], x_78[2u]);
+  vec3 v_5 = vec3(x_86[0u], x_86[1u], x_86[2u]);
+  outMatrix = mat3(v_4, v_5, vec3(x_94[0u], x_94[1u], x_94[2u]));
   mat3 x_110 = outMatrix;
   return x_110;
 }

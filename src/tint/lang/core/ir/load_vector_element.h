@@ -80,6 +80,9 @@ class LoadVectorElement final : public Castable<LoadVectorElement, OperandInstru
 
     /// @returns the friendly name for the instruction
     std::string FriendlyName() const override { return "load_vector_element"; }
+
+    /// @returns the side effects for this instruction
+    Accesses GetSideEffects() const override { return Accesses{Access::kLoad}; }
 };
 
 }  // namespace tint::core::ir

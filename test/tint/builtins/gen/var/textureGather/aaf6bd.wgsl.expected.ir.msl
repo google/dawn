@@ -20,8 +20,7 @@ struct vertex_main_outputs {
 int4 textureGather_aaf6bd(tint_module_vars_struct tint_module_vars) {
   float3 arg_3 = float3(1.0f);
   int arg_4 = 1;
-  float3 const v = arg_3;
-  int4 res = tint_module_vars.arg_1.gather(tint_module_vars.arg_2, v, max(arg_4, 0), component::y);
+  int4 res = tint_module_vars.arg_1.gather(tint_module_vars.arg_2, arg_3, max(arg_4, 0), component::y);
   return res;
 }
 
@@ -44,9 +43,9 @@ VertexOutput vertex_main_inner(tint_module_vars_struct tint_module_vars) {
 
 vertex vertex_main_outputs vertex_main(texturecube_array<int, access::sample> arg_1 [[texture(0)]], sampler arg_2 [[sampler(0)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.arg_1=arg_1, .arg_2=arg_2};
-  VertexOutput const v_1 = vertex_main_inner(tint_module_vars);
+  VertexOutput const v = vertex_main_inner(tint_module_vars);
   vertex_main_outputs tint_wrapper_result = {};
-  tint_wrapper_result.VertexOutput_pos = v_1.pos;
-  tint_wrapper_result.VertexOutput_prevent_dce = v_1.prevent_dce;
+  tint_wrapper_result.VertexOutput_pos = v.pos;
+  tint_wrapper_result.VertexOutput_prevent_dce = v.prevent_dce;
   return tint_wrapper_result;
 }

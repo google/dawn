@@ -15,11 +15,10 @@ int4 extractBits_fb850f() {
   uint arg_1 = 1u;
   uint arg_2 = 1u;
   int4 v = arg_0;
-  uint v_1 = arg_2;
-  uint v_2 = min(arg_1, 32u);
-  uint v_3 = (32u - min(32u, (v_2 + v_1)));
-  int4 v_4 = (((v_3 < 32u)) ? ((v << uint4((v_3).xxxx))) : ((int(0)).xxxx));
-  int4 res = ((((v_3 + v_2) < 32u)) ? ((v_4 >> uint4(((v_3 + v_2)).xxxx))) : (((v_4 >> (31u).xxxx) >> (1u).xxxx)));
+  uint v_1 = min(arg_1, 32u);
+  uint v_2 = (32u - min(32u, (v_1 + arg_2)));
+  int4 v_3 = (((v_2 < 32u)) ? ((v << uint4((v_2).xxxx))) : ((int(0)).xxxx));
+  int4 res = ((((v_2 + v_1) < 32u)) ? ((v_3 >> uint4(((v_2 + v_1)).xxxx))) : (((v_3 >> (31u).xxxx) >> (1u).xxxx)));
   return res;
 }
 
@@ -36,13 +35,13 @@ VertexOutput vertex_main_inner() {
   VertexOutput tint_symbol = (VertexOutput)0;
   tint_symbol.pos = (0.0f).xxxx;
   tint_symbol.prevent_dce = extractBits_fb850f();
-  VertexOutput v_5 = tint_symbol;
-  return v_5;
+  VertexOutput v_4 = tint_symbol;
+  return v_4;
 }
 
 vertex_main_outputs vertex_main() {
-  VertexOutput v_6 = vertex_main_inner();
-  vertex_main_outputs v_7 = {v_6.prevent_dce, v_6.pos};
-  return v_7;
+  VertexOutput v_5 = vertex_main_inner();
+  vertex_main_outputs v_6 = {v_5.prevent_dce, v_5.pos};
+  return v_6;
 }
 

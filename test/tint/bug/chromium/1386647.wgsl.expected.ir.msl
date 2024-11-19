@@ -2,8 +2,7 @@
 using namespace metal;
 
 uint tint_mod_u32(uint lhs, uint rhs) {
-  uint const v_1 = select(rhs, 1u, (rhs == 0u));
-  return (lhs - ((lhs / v_1) * v_1));
+  return (lhs - ((lhs / select(rhs, 1u, (rhs == 0u))) * select(rhs, 1u, (rhs == 0u))));
 }
 
 void f_inner(uint3 v) {

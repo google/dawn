@@ -16,8 +16,7 @@ float4 textureSampleBaseClampToEdge_9ca02c() {
   uint2 v = (0u).xx;
   arg_0.GetDimensions(v.x, v.y);
   float2 v_1 = ((0.5f).xx / float2(v));
-  float2 v_2 = clamp((1.0f).xx, v_1, ((1.0f).xx - v_1));
-  float4 res = arg_0.SampleLevel(arg_1, v_2, float(0.0f));
+  float4 res = arg_0.SampleLevel(arg_1, clamp((1.0f).xx, v_1, ((1.0f).xx - v_1)), float(0.0f));
   return res;
 }
 
@@ -34,13 +33,13 @@ VertexOutput vertex_main_inner() {
   VertexOutput tint_symbol = (VertexOutput)0;
   tint_symbol.pos = (0.0f).xxxx;
   tint_symbol.prevent_dce = textureSampleBaseClampToEdge_9ca02c();
-  VertexOutput v_3 = tint_symbol;
-  return v_3;
+  VertexOutput v_2 = tint_symbol;
+  return v_2;
 }
 
 vertex_main_outputs vertex_main() {
-  VertexOutput v_4 = vertex_main_inner();
-  vertex_main_outputs v_5 = {v_4.prevent_dce, v_4.pos};
-  return v_5;
+  VertexOutput v_3 = vertex_main_inner();
+  vertex_main_outputs v_4 = {v_3.prevent_dce, v_3.pos};
+  return v_4;
 }
 

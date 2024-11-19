@@ -61,4 +61,8 @@ MemberBuiltinCall* MemberBuiltinCall::Clone(core::ir::CloneContext& ctx) {
                                                        std::move(new_args));
 }
 
+tint::core::ir::Instruction::Accesses MemberBuiltinCall::GetSideEffects() const {
+    return hlsl::GetSideEffects(func_);
+}
+
 }  // namespace tint::hlsl::ir

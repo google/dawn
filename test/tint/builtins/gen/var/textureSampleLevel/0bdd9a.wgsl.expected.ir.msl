@@ -23,8 +23,7 @@ float4 textureSampleLevel_0bdd9a(tint_module_vars_struct tint_module_vars) {
   float arg_4 = 1.0f;
   float3 const v = arg_2;
   int const v_1 = arg_3;
-  level const v_2 = level(arg_4);
-  float4 res = tint_module_vars.arg_0.sample(tint_module_vars.arg_1, v, max(v_1, 0), v_2);
+  float4 res = tint_module_vars.arg_0.sample(tint_module_vars.arg_1, v, max(v_1, 0), level(arg_4));
   return res;
 }
 
@@ -47,9 +46,9 @@ VertexOutput vertex_main_inner(tint_module_vars_struct tint_module_vars) {
 
 vertex vertex_main_outputs vertex_main(texturecube_array<float, access::sample> arg_0 [[texture(0)]], sampler arg_1 [[sampler(0)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.arg_0=arg_0, .arg_1=arg_1};
-  VertexOutput const v_3 = vertex_main_inner(tint_module_vars);
+  VertexOutput const v_2 = vertex_main_inner(tint_module_vars);
   vertex_main_outputs tint_wrapper_result = {};
-  tint_wrapper_result.VertexOutput_pos = v_3.pos;
-  tint_wrapper_result.VertexOutput_prevent_dce = v_3.prevent_dce;
+  tint_wrapper_result.VertexOutput_pos = v_2.pos;
+  tint_wrapper_result.VertexOutput_prevent_dce = v_2.prevent_dce;
   return tint_wrapper_result;
 }

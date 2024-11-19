@@ -36,13 +36,10 @@ vec4 vcolor_S0 = vec4(0.0f);
 layout(location = 0) in vec4 tint_symbol_loc0_Input;
 layout(location = 0) out vec4 tint_symbol_loc0_Output;
 ivec4 tint_div_v4i32(ivec4 lhs, ivec4 rhs) {
-  bvec4 v_1 = equal(rhs, ivec4(0));
-  bvec4 v_2 = equal(lhs, ivec4((-2147483647 - 1)));
-  bvec4 v_3 = equal(rhs, ivec4(-1));
-  uvec4 v_4 = uvec4(v_2);
-  bvec4 v_5 = bvec4((v_4 & uvec4(v_3)));
-  uvec4 v_6 = uvec4(v_1);
-  return (lhs / mix(rhs, ivec4(1), bvec4((v_6 | uvec4(v_5)))));
+  uvec4 v_1 = uvec4(equal(lhs, ivec4((-2147483647 - 1))));
+  bvec4 v_2 = bvec4((v_1 & uvec4(equal(rhs, ivec4(-1)))));
+  uvec4 v_3 = uvec4(equal(rhs, ivec4(0)));
+  return (lhs / mix(rhs, ivec4(1), bvec4((v_3 | uvec4(v_2)))));
 }
 int tint_f32_to_i32(float value) {
   return mix(2147483647, mix((-2147483647 - 1), int(value), (value >= -2147483648.0f)), (value <= 2147483520.0f));

@@ -7,9 +7,7 @@ struct tint_module_vars_struct {
 };
 
 uint3 textureDimensions_31799c(tint_module_vars_struct tint_module_vars) {
-  uint const v = tint_module_vars.arg_0.get_width(0u);
-  uint const v_1 = tint_module_vars.arg_0.get_height(0u);
-  uint3 res = uint3(v, v_1, tint_module_vars.arg_0.get_depth(0u));
+  uint3 res = uint3(tint_module_vars.arg_0.get_width(0u), tint_module_vars.arg_0.get_height(0u), tint_module_vars.arg_0.get_depth(0u));
   return res;
 }
 

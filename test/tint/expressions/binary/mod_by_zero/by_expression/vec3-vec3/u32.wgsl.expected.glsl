@@ -1,8 +1,7 @@
 #version 310 es
 
 uvec3 tint_mod_v3u32(uvec3 lhs, uvec3 rhs) {
-  uvec3 v = mix(rhs, uvec3(1u), equal(rhs, uvec3(0u)));
-  return (lhs - ((lhs / v) * v));
+  return (lhs - ((lhs / mix(rhs, uvec3(1u), equal(rhs, uvec3(0u)))) * mix(rhs, uvec3(1u), equal(rhs, uvec3(0u)))));
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {

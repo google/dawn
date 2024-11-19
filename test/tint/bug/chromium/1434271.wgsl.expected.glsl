@@ -172,8 +172,7 @@ void export_level_inner(uvec3 coord) {
     float d = buf_in.weights[v_2];
     float sum = dot(vec4(a, b, c, d), vec4(1.0f));
     buf_out.weights[dst_offset] = tint_float_modulo(sum, 4.0f);
-    vec4 v_3 = vec4(a, (a * b), ((a / b) + c), sum);
-    vec4 probabilities = (v_3 + max(sum, 0.0f));
+    vec4 probabilities = (vec4(a, (a * b), ((a / b) + c), sum) + max(sum, 0.0f));
     imageStore(tex_out, ivec2(coord.xy), probabilities);
   }
 }

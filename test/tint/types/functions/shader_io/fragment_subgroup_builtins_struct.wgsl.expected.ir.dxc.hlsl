@@ -10,8 +10,7 @@ void main_inner(FragmentInputs inputs) {
 }
 
 void main() {
-  uint v = WaveGetLaneIndex();
-  FragmentInputs v_1 = {v, WaveGetLaneCount()};
-  main_inner(v_1);
+  FragmentInputs v = {WaveGetLaneIndex(), WaveGetLaneCount()};
+  main_inner(v);
 }
 

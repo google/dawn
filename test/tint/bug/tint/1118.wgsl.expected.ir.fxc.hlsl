@@ -80,16 +80,15 @@ void main_1() {
   float3 x_99 = emissiveColor;
   float3 x_103 = asfloat(x_49[1u].xyz);
   float4 x_108 = baseColor;
-  float3 v_1 = clamp((((x_96 * x_97) + x_99) + x_103), (0.0f).xxx, (1.0f).xxx);
-  finalDiffuse = (v_1 * float3(x_108.x, x_108.y, x_108.z));
+  finalDiffuse = (clamp((((x_96 * x_97) + x_99) + x_103), (0.0f).xxx, (1.0f).xxx) * float3(x_108.x, x_108.y, x_108.z));
   finalSpecular = (0.0f).xxx;
   float3 x_113 = finalDiffuse;
   float3 x_114 = baseAmbientColor;
   float3 x_116 = finalSpecular;
   float4 x_118 = reflectionColor;
   float4 x_121 = refractionColor;
-  float3 v_2 = (((x_113 * x_114) + x_116) + float3(x_118.x, x_118.y, x_118.z));
-  float3 x_123 = (v_2 + float3(x_121.x, x_121.y, x_121.z));
+  float3 v_1 = (((x_113 * x_114) + x_116) + float3(x_118.x, x_118.y, x_118.z));
+  float3 x_123 = (v_1 + float3(x_121.x, x_121.y, x_121.z));
   float x_124 = alpha;
   color = float4(x_123.x, x_123.y, x_123.z, x_124);
   float4 x_129 = color;
@@ -107,16 +106,16 @@ main_out main_inner(float fClipDistance3_param, float fClipDistance4_param) {
   fClipDistance3 = fClipDistance3_param;
   fClipDistance4 = fClipDistance4_param;
   main_1();
-  main_out v_3 = {glFragColor};
-  return v_3;
+  main_out v_2 = {glFragColor};
+  return v_2;
 }
 
 main_outputs main(main_inputs inputs) {
-  main_out v_4 = main_inner(inputs.fClipDistance3_param, inputs.fClipDistance4_param);
-  main_outputs v_5 = {v_4.glFragColor_1};
+  main_out v_3 = main_inner(inputs.fClipDistance3_param, inputs.fClipDistance4_param);
+  main_outputs v_4 = {v_3.glFragColor_1};
   if (!(continue_execution)) {
     discard;
   }
-  return v_5;
+  return v_4;
 }
 

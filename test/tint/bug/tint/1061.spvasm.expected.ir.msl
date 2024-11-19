@@ -22,10 +22,7 @@ void main_1(tint_module_vars_struct tint_module_vars) {
   float f = 0.0f;
   float4 v = 0.0f;
   f = 1.0f;
-  float const v_1 = sin(f);
-  float const v_2 = cos(f);
-  float const v_3 = exp2(f);
-  v = float4(v_1, v_2, v_3, log(f));
+  v = float4(sin(f), cos(f), exp2(f), log(f));
   if ((distance(v, (*tint_module_vars.x_7).r) < 0.10000000149011611938f)) {
     (*tint_module_vars.x_GLF_color) = float4(1.0f, 0.0f, 0.0f, 1.0f);
   } else {

@@ -57,6 +57,9 @@ class Call : public Castable<Call, OperandInstruction<4, 1>> {
     /// @param arg the argument value to append
     void AppendArg(ir::Value* arg) { AddOperand(operands_.Length(), arg); }
 
+    /// @returns the side effects for this instruction
+    Accesses GetSideEffects() const override { return Accesses{Access::kLoad, Access::kStore}; }
+
   protected:
     /// Constructor
     explicit Call(Id id);

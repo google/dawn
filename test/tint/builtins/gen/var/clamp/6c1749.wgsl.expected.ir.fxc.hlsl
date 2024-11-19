@@ -14,8 +14,7 @@ int2 clamp_6c1749() {
   int2 arg_0 = (int(1)).xx;
   int2 arg_1 = (int(1)).xx;
   int2 arg_2 = (int(1)).xx;
-  int2 v = arg_2;
-  int2 res = min(max(arg_0, arg_1), v);
+  int2 res = min(max(arg_0, arg_1), arg_2);
   return res;
 }
 
@@ -32,13 +31,13 @@ VertexOutput vertex_main_inner() {
   VertexOutput tint_symbol = (VertexOutput)0;
   tint_symbol.pos = (0.0f).xxxx;
   tint_symbol.prevent_dce = clamp_6c1749();
-  VertexOutput v_1 = tint_symbol;
-  return v_1;
+  VertexOutput v = tint_symbol;
+  return v;
 }
 
 vertex_main_outputs vertex_main() {
-  VertexOutput v_2 = vertex_main_inner();
-  vertex_main_outputs v_3 = {v_2.prevent_dce, v_2.pos};
-  return v_3;
+  VertexOutput v_1 = vertex_main_inner();
+  vertex_main_outputs v_2 = {v_1.prevent_dce, v_1.pos};
+  return v_2;
 }
 

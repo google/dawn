@@ -127,10 +127,7 @@ float4 Mul(Mat4x4_ m8, float4 v) {
   float4 const x_e14 = v1;
   Mat4x4_ const x_e16 = m9;
   float4 const x_e18 = v1;
-  float const v_1 = dot(x_e4.mx, x_e6);
-  float const v_2 = dot(x_e8.my, x_e10);
-  float const v_3 = dot(x_e12.mz, x_e14);
-  return float4(v_1, v_2, v_3, dot(x_e16.mw, x_e18));
+  return float4(dot(x_e4.mx, x_e6), dot(x_e8.my, x_e10), dot(x_e12.mz, x_e14), dot(x_e16.mw, x_e18));
 }
 
 float3 Mul1(Mat4x3_ m10, float4 v2) {
@@ -144,9 +141,7 @@ float3 Mul1(Mat4x3_ m10, float4 v2) {
   float4 const x_e10 = v3;
   Mat4x3_ const x_e12 = m11;
   float4 const x_e14 = v3;
-  float const v_4 = dot(x_e4.mx, x_e6);
-  float const v_5 = dot(x_e8.my, x_e10);
-  return float3(v_4, v_5, dot(x_e12.mz, x_e14));
+  return float3(dot(x_e4.mx, x_e6), dot(x_e8.my, x_e10), dot(x_e12.mz, x_e14));
 }
 
 float2 Mul2(Mat4x2_ m12, float4 v4) {
@@ -158,8 +153,7 @@ float2 Mul2(Mat4x2_ m12, float4 v4) {
   float4 const x_e6 = v5;
   Mat4x2_ const x_e8 = m13;
   float4 const x_e10 = v5;
-  float const v_6 = dot(x_e4.mx, x_e6);
-  return float2(v_6, dot(x_e8.my, x_e10));
+  return float2(dot(x_e4.mx, x_e6), dot(x_e8.my, x_e10));
 }
 
 float4 Mul3(float3 v6, Mat4x3_ m14) {
@@ -179,10 +173,7 @@ float4 Mul3(float3 v6, Mat4x3_ m14) {
   Mat4x3_ const x_e20 = m15;
   float3 const x_e21 = Mat4x3GetCol3_(x_e20);
   float3 const x_e22 = v7;
-  float const v_7 = dot(x_e6, x_e7);
-  float const v_8 = dot(x_e11, x_e12);
-  float const v_9 = dot(x_e16, x_e17);
-  return float4(v_7, v_8, v_9, dot(x_e21, x_e22));
+  return float4(dot(x_e6, x_e7), dot(x_e11, x_e12), dot(x_e16, x_e17), dot(x_e21, x_e22));
 }
 
 Mat4x4_ x_Mat4x4_(float n) {
@@ -330,10 +321,10 @@ vertex tint_symbol_outputs tint_symbol(tint_symbol_inputs inputs [[stage_in]], c
   thread float2 v_TexCoord = 0.0f;
   thread float4 gl_Position = 0.0f;
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.global=global, .global1=global1, .global2=global2, .a_Position1=(&a_Position1), .a_UV1=(&a_UV1), .a_Color1=(&a_Color1), .a_Normal1=(&a_Normal1), .a_PosMtxIdx1=(&a_PosMtxIdx1), .v_Color=(&v_Color), .v_TexCoord=(&v_TexCoord), .gl_Position=(&gl_Position)};
-  VertexOutput const v_10 = tint_symbol_inner(inputs.a_Position, inputs.a_UV, inputs.a_Color, inputs.a_Normal, inputs.a_PosMtxIdx, tint_module_vars);
+  VertexOutput const v_1 = tint_symbol_inner(inputs.a_Position, inputs.a_UV, inputs.a_Color, inputs.a_Normal, inputs.a_PosMtxIdx, tint_module_vars);
   tint_symbol_outputs tint_wrapper_result = {};
-  tint_wrapper_result.VertexOutput_v_Color = v_10.v_Color;
-  tint_wrapper_result.VertexOutput_v_TexCoord = v_10.v_TexCoord;
-  tint_wrapper_result.VertexOutput_member = v_10.member;
+  tint_wrapper_result.VertexOutput_v_Color = v_1.v_Color;
+  tint_wrapper_result.VertexOutput_v_TexCoord = v_1.v_TexCoord;
+  tint_wrapper_result.VertexOutput_member = v_1.member;
   return tint_wrapper_result;
 }

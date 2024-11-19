@@ -3,9 +3,7 @@
 
 f16vec4 u = f16vec4(1.0hf);
 uvec4 tint_v4f16_to_v4u32(f16vec4 value) {
-  uvec4 v_1 = uvec4(value);
-  uvec4 v_2 = mix(uvec4(0u), v_1, greaterThanEqual(value, f16vec4(0.0hf)));
-  return mix(uvec4(4294967295u), v_2, lessThanEqual(value, f16vec4(65504.0hf)));
+  return mix(uvec4(4294967295u), mix(uvec4(0u), uvec4(value), greaterThanEqual(value, f16vec4(0.0hf))), lessThanEqual(value, f16vec4(65504.0hf)));
 }
 void f() {
   uvec4 v = tint_v4f16_to_v4u32(u);

@@ -49,6 +49,14 @@ class Instruction : public Castable<Instruction> {
   public:
     using Id = uint32_t;
 
+    /// Kinds of memory access the call will do.
+    enum class Access {
+        kLoad,
+        kStore,
+    };
+    /// Accesses is a set of of Access
+    using Accesses = EnumSet<Access>;
+
     /// Destructor
     ~Instruction() override;
 
@@ -97,6 +105,9 @@ class Instruction : public Castable<Instruction> {
     /// @param ctx the CloneContext used to clone this instruction
     /// @returns a clone of this instruction
     virtual Instruction* Clone(CloneContext& ctx) = 0;
+
+    /// @returns the side effects for this instruction
+    virtual Accesses GetSideEffects() const { return Accesses{}; }
 
     /// @returns true if the Instruction has not been destroyed with Destroy()
     bool Alive() const { return !flags_.Contains(Flag::kDead); }

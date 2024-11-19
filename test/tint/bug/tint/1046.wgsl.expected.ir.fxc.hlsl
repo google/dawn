@@ -59,33 +59,28 @@ float4 getColor(FragmentInput fragment) {
 }
 
 float4x4 v(uint start_byte_offset) {
-  float4 v_1 = asfloat(uniforms[(start_byte_offset / 16u)]);
-  float4 v_2 = asfloat(uniforms[((16u + start_byte_offset) / 16u)]);
-  float4 v_3 = asfloat(uniforms[((32u + start_byte_offset) / 16u)]);
-  return float4x4(v_1, v_2, v_3, asfloat(uniforms[((48u + start_byte_offset) / 16u)]));
+  return float4x4(asfloat(uniforms[(start_byte_offset / 16u)]), asfloat(uniforms[((16u + start_byte_offset) / 16u)]), asfloat(uniforms[((32u + start_byte_offset) / 16u)]), asfloat(uniforms[((48u + start_byte_offset) / 16u)]));
 }
 
-Uniforms v_4(uint start_byte_offset) {
-  float4x4 v_5 = v(start_byte_offset);
-  float4x4 v_6 = v((64u + start_byte_offset));
-  uint v_7 = uniforms[((128u + start_byte_offset) / 16u)][(((128u + start_byte_offset) % 16u) / 4u)];
-  uint v_8 = uniforms[((132u + start_byte_offset) / 16u)][(((132u + start_byte_offset) % 16u) / 4u)];
-  Uniforms v_9 = {v_5, v_6, v_7, v_8, asfloat(uniforms[((144u + start_byte_offset) / 16u)])};
-  return v_9;
+Uniforms v_1(uint start_byte_offset) {
+  float4x4 v_2 = v(start_byte_offset);
+  float4x4 v_3 = v((64u + start_byte_offset));
+  Uniforms v_4 = {v_2, v_3, uniforms[((128u + start_byte_offset) / 16u)][(((128u + start_byte_offset) % 16u) / 4u)], uniforms[((132u + start_byte_offset) / 16u)][(((132u + start_byte_offset) % 16u) / 4u)], asfloat(uniforms[((144u + start_byte_offset) / 16u)])};
+  return v_4;
 }
 
 FragmentOutput main_inner(FragmentInput fragment) {
   FragmentOutput output = (FragmentOutput)0;
   output.color = float4(1.0f, 0.0f, 0.0f, 1.0f);
-  v_4(0u);
-  FragmentOutput v_10 = output;
-  return v_10;
+  v_1(0u);
+  FragmentOutput v_5 = output;
+  return v_5;
 }
 
 main_outputs main(main_inputs inputs) {
-  FragmentInput v_11 = {float4(inputs.FragmentInput_position.xyz, (1.0f / inputs.FragmentInput_position.w)), inputs.FragmentInput_view_position, inputs.FragmentInput_normal, inputs.FragmentInput_uv, inputs.FragmentInput_color};
-  FragmentOutput v_12 = main_inner(v_11);
-  main_outputs v_13 = {v_12.color};
-  return v_13;
+  FragmentInput v_6 = {float4(inputs.FragmentInput_position.xyz, (1.0f / inputs.FragmentInput_position.w)), inputs.FragmentInput_view_position, inputs.FragmentInput_normal, inputs.FragmentInput_uv, inputs.FragmentInput_color};
+  FragmentOutput v_7 = main_inner(v_6);
+  main_outputs v_8 = {v_7.color};
+  return v_8;
 }
 

@@ -149,28 +149,23 @@ void v_23(uint offset, float2x2 obj) {
 }
 
 void main_inner(uint idx) {
-  uint v_24 = (0u + (uint(idx) * 800u));
-  sb.Store(v_24, asuint(0.0f));
-  uint v_25 = (4u + (uint(idx) * 800u));
-  sb.Store(v_25, asuint(int(0)));
+  sb.Store((0u + (uint(idx) * 800u)), asuint(0.0f));
+  sb.Store((4u + (uint(idx) * 800u)), asuint(int(0)));
   sb.Store((8u + (uint(idx) * 800u)), 0u);
   sb.Store<float16_t>((12u + (uint(idx) * 800u)), float16_t(0.0h));
-  uint v_26 = (16u + (uint(idx) * 800u));
-  sb.Store2(v_26, asuint((0.0f).xx));
-  uint v_27 = (24u + (uint(idx) * 800u));
-  sb.Store2(v_27, asuint(int2((int(0)).xx)));
+  sb.Store2((16u + (uint(idx) * 800u)), asuint((0.0f).xx));
+  uint v_24 = (24u + (uint(idx) * 800u));
+  sb.Store2(v_24, asuint(int2((int(0)).xx)));
   sb.Store2((32u + (uint(idx) * 800u)), (0u).xx);
   sb.Store<vector<float16_t, 2> >((40u + (uint(idx) * 800u)), (float16_t(0.0h)).xx);
-  uint v_28 = (48u + (uint(idx) * 800u));
-  sb.Store3(v_28, asuint((0.0f).xxx));
-  uint v_29 = (64u + (uint(idx) * 800u));
-  sb.Store3(v_29, asuint(int3((int(0)).xxx)));
+  sb.Store3((48u + (uint(idx) * 800u)), asuint((0.0f).xxx));
+  uint v_25 = (64u + (uint(idx) * 800u));
+  sb.Store3(v_25, asuint(int3((int(0)).xxx)));
   sb.Store3((80u + (uint(idx) * 800u)), (0u).xxx);
   sb.Store<vector<float16_t, 3> >((96u + (uint(idx) * 800u)), (float16_t(0.0h)).xxx);
-  uint v_30 = (112u + (uint(idx) * 800u));
-  sb.Store4(v_30, asuint((0.0f).xxxx));
-  uint v_31 = (128u + (uint(idx) * 800u));
-  sb.Store4(v_31, asuint(int4((int(0)).xxxx)));
+  sb.Store4((112u + (uint(idx) * 800u)), asuint((0.0f).xxxx));
+  uint v_26 = (128u + (uint(idx) * 800u));
+  sb.Store4(v_26, asuint(int4((int(0)).xxxx)));
   sb.Store4((144u + (uint(idx) * 800u)), (0u).xxxx);
   sb.Store<vector<float16_t, 4> >((160u + (uint(idx) * 800u)), (float16_t(0.0h)).xxxx);
   v_23((168u + (uint(idx) * 800u)), float2x2((0.0f).xx, (0.0f).xx));
@@ -191,10 +186,10 @@ void main_inner(uint idx) {
   v((648u + (uint(idx) * 800u)), matrix<float16_t, 4, 2>((float16_t(0.0h)).xx, (float16_t(0.0h)).xx, (float16_t(0.0h)).xx, (float16_t(0.0h)).xx));
   v_8((664u + (uint(idx) * 800u)), matrix<float16_t, 4, 3>((float16_t(0.0h)).xxx, (float16_t(0.0h)).xxx, (float16_t(0.0h)).xxx, (float16_t(0.0h)).xxx));
   v_7((696u + (uint(idx) * 800u)), matrix<float16_t, 4, 4>((float16_t(0.0h)).xxxx, (float16_t(0.0h)).xxxx, (float16_t(0.0h)).xxxx, (float16_t(0.0h)).xxxx));
-  float3 v_32[2] = (float3[2])0;
-  v_4((736u + (uint(idx) * 800u)), v_32);
-  matrix<float16_t, 4, 2> v_33[2] = (matrix<float16_t, 4, 2>[2])0;
-  v_1((768u + (uint(idx) * 800u)), v_33);
+  float3 v_27[2] = (float3[2])0;
+  v_4((736u + (uint(idx) * 800u)), v_27);
+  matrix<float16_t, 4, 2> v_28[2] = (matrix<float16_t, 4, 2>[2])0;
+  v_1((768u + (uint(idx) * 800u)), v_28);
 }
 
 [numthreads(1, 1, 1)]

@@ -55,8 +55,7 @@ vec3 toVoxelPos(vec3 position) {
   vec3 bbMin = vec3(v.inner.bbMin.x, v.inner.bbMin.y, v.inner.bbMin.z);
   vec3 bbMax = vec3(v.inner.bbMax.x, v.inner.bbMax.y, v.inner.bbMax.z);
   vec3 bbSize = (bbMin - bbMin);
-  float v_2 = max(bbMax.x, bbMax.y);
-  float cubeSize = max(v_2, bbSize.z);
+  float cubeSize = max(max(bbMax.x, bbMax.y), bbSize.z);
   float gridSize = float(v.inner.gridSize);
   float gx = ((cubeSize * (position[0u] - v.inner.bbMin.x)) / cubeSize);
   float gy = ((gx * (position[1u] - v.inner.bbMin.y)) / gridSize);
@@ -64,9 +63,7 @@ vec3 toVoxelPos(vec3 position) {
   return vec3(gz, gz, gz);
 }
 uvec3 tint_v3f32_to_v3u32(vec3 value) {
-  uvec3 v_3 = uvec3(value);
-  uvec3 v_4 = mix(uvec3(0u), v_3, greaterThanEqual(value, vec3(0.0f)));
-  return mix(uvec3(4294967295u), v_4, lessThanEqual(value, vec3(4294967040.0f)));
+  return mix(uvec3(4294967295u), mix(uvec3(0u), uvec3(value), greaterThanEqual(value, vec3(0.0f))), lessThanEqual(value, vec3(4294967040.0f)));
 }
 uint toIndex1D(uint gridSize, vec3 voxelPos) {
   uvec3 icoord = tint_v3f32_to_v3u32(voxelPos);
@@ -90,20 +87,20 @@ void main_count_inner(uvec3 GlobalInvocationID) {
     return;
   }
   doIgnore();
-  uint v_5 = ((3u * triangleIndex) + 0u);
-  uint i0 = indices.values[v_5];
-  uint v_6 = ((3u * i0) + 1u);
-  uint i1 = indices.values[v_6];
-  uint v_7 = ((3u * i0) + 2u);
-  uint i2 = indices.values[v_7];
+  uint v_2 = ((3u * triangleIndex) + 0u);
+  uint i0 = indices.values[v_2];
+  uint v_3 = ((3u * i0) + 1u);
+  uint i1 = indices.values[v_3];
+  uint v_4 = ((3u * i0) + 2u);
+  uint i2 = indices.values[v_4];
   vec3 p0 = loadPosition(i0);
   vec3 p1 = loadPosition(i0);
   vec3 p2 = loadPosition(i2);
   vec3 center = (((p0 + p2) + p1) / 3.0f);
   vec3 voxelPos = toVoxelPos(p1);
   uint lIndex = toIndex1D(v.inner.gridSize, p0);
-  uint v_8 = i1;
-  int triangleOffset = atomicAdd(LUT.values[v_8], 1);
+  uint v_5 = i1;
+  int triangleOffset = atomicAdd(LUT.values[v_5], 1);
 }
 layout(local_size_x = 128, local_size_y = 1, local_size_z = 1) in;
 void main() {

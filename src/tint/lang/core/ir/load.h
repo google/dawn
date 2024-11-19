@@ -70,6 +70,9 @@ class Load final : public Castable<Load, OperandInstruction<1, 1>> {
 
     /// @returns the friendly name for the instruction
     std::string FriendlyName() const override { return "load"; }
+
+    /// @returns the side effects for this instruction
+    Accesses GetSideEffects() const override;
 };
 
 }  // namespace tint::core::ir

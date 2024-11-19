@@ -77,25 +77,20 @@ void v_11(uint offset, float2x2 obj) {
 }
 
 void main_inner(uint idx) {
-  uint v_12 = (0u + (uint(idx) * 544u));
-  sb.Store(v_12, asuint(0.0f));
-  uint v_13 = (4u + (uint(idx) * 544u));
-  sb.Store(v_13, asuint(int(0)));
+  sb.Store((0u + (uint(idx) * 544u)), asuint(0.0f));
+  sb.Store((4u + (uint(idx) * 544u)), asuint(int(0)));
   sb.Store((8u + (uint(idx) * 544u)), 0u);
-  uint v_14 = (16u + (uint(idx) * 544u));
-  sb.Store2(v_14, asuint((0.0f).xx));
-  uint v_15 = (24u + (uint(idx) * 544u));
-  sb.Store2(v_15, asuint(int2((int(0)).xx)));
+  sb.Store2((16u + (uint(idx) * 544u)), asuint((0.0f).xx));
+  uint v_12 = (24u + (uint(idx) * 544u));
+  sb.Store2(v_12, asuint(int2((int(0)).xx)));
   sb.Store2((32u + (uint(idx) * 544u)), (0u).xx);
-  uint v_16 = (48u + (uint(idx) * 544u));
-  sb.Store3(v_16, asuint((0.0f).xxx));
-  uint v_17 = (64u + (uint(idx) * 544u));
-  sb.Store3(v_17, asuint(int3((int(0)).xxx)));
+  sb.Store3((48u + (uint(idx) * 544u)), asuint((0.0f).xxx));
+  uint v_13 = (64u + (uint(idx) * 544u));
+  sb.Store3(v_13, asuint(int3((int(0)).xxx)));
   sb.Store3((80u + (uint(idx) * 544u)), (0u).xxx);
-  uint v_18 = (96u + (uint(idx) * 544u));
-  sb.Store4(v_18, asuint((0.0f).xxxx));
-  uint v_19 = (112u + (uint(idx) * 544u));
-  sb.Store4(v_19, asuint(int4((int(0)).xxxx)));
+  sb.Store4((96u + (uint(idx) * 544u)), asuint((0.0f).xxxx));
+  uint v_14 = (112u + (uint(idx) * 544u));
+  sb.Store4(v_14, asuint(int4((int(0)).xxxx)));
   sb.Store4((128u + (uint(idx) * 544u)), (0u).xxxx);
   v_11((144u + (uint(idx) * 544u)), float2x2((0.0f).xx, (0.0f).xx));
   v_10((160u + (uint(idx) * 544u)), float2x3((0.0f).xxx, (0.0f).xxx));
@@ -106,8 +101,8 @@ void main_inner(uint idx) {
   v_5((352u + (uint(idx) * 544u)), float4x2((0.0f).xx, (0.0f).xx, (0.0f).xx, (0.0f).xx));
   v_4((384u + (uint(idx) * 544u)), float4x3((0.0f).xxx, (0.0f).xxx, (0.0f).xxx, (0.0f).xxx));
   v_3((448u + (uint(idx) * 544u)), float4x4((0.0f).xxxx, (0.0f).xxxx, (0.0f).xxxx, (0.0f).xxxx));
-  float3 v_20[2] = (float3[2])0;
-  v((512u + (uint(idx) * 544u)), v_20);
+  float3 v_15[2] = (float3[2])0;
+  v((512u + (uint(idx) * 544u)), v_15);
 }
 
 [numthreads(1, 1, 1)]

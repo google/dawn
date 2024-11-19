@@ -123,8 +123,7 @@ float3x3 cotangent_frame_vf3_vf3_vf2_vf2_(thread float3* const normal_1, thread 
   float3 const x_182 = tangent;
   float3 const x_184 = bitangent;
   float3 const x_185 = bitangent;
-  float const v = dot(x_181, x_182);
-  invmax = rsqrt(max(v, dot(x_184, x_185)));
+  invmax = rsqrt(max(dot(x_181, x_182), dot(x_184, x_185)));
   float3 const x_189 = tangent;
   float const x_190 = invmax;
   float3 const x_191 = (x_189 * x_190);
@@ -132,9 +131,9 @@ float3x3 cotangent_frame_vf3_vf3_vf2_vf2_(thread float3* const normal_1, thread 
   float const x_193 = invmax;
   float3 const x_194 = (x_192 * x_193);
   float3 const x_195 = (*normal_1);
-  float3 const v_1 = float3(x_191[0u], x_191[1u], x_191[2u]);
-  float3 const v_2 = float3(x_194[0u], x_194[1u], x_194[2u]);
-  return float3x3(v_1, v_2, float3(x_195[0u], x_195[1u], x_195[2u]));
+  float3 const v = float3(x_191[0u], x_191[1u], x_191[2u]);
+  float3 const v_1 = float3(x_194[0u], x_194[1u], x_194[2u]);
+  return float3x3(v, v_1, float3(x_195[0u], x_195[1u], x_195[2u]));
 }
 
 float3x3 transposeMat3_mf33_(thread float3x3* const inMatrix) {
@@ -160,9 +159,9 @@ float3x3 transposeMat3_mf33_(thread float3x3* const inMatrix) {
   float const x_91 = i1[2u];
   float const x_93 = i2[2u];
   float3 const x_94 = float3(x_89, x_91, x_93);
-  float3 const v_3 = float3(x_78[0u], x_78[1u], x_78[2u]);
-  float3 const v_4 = float3(x_86[0u], x_86[1u], x_86[2u]);
-  outMatrix = float3x3(v_3, v_4, float3(x_94[0u], x_94[1u], x_94[2u]));
+  float3 const v_2 = float3(x_78[0u], x_78[1u], x_78[2u]);
+  float3 const v_3 = float3(x_86[0u], x_86[1u], x_86[2u]);
+  outMatrix = float3x3(v_2, v_3, float3(x_94[0u], x_94[1u], x_94[2u]));
   float3x3 const x_110 = outMatrix;
   return x_110;
 }

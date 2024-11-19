@@ -54,4 +54,8 @@ BuiltinCall* BuiltinCall::Clone(core::ir::CloneContext& ctx) {
     return ctx.ir.CreateInstruction<BuiltinCall>(new_result, func_, new_args);
 }
 
+tint::core::ir::Instruction::Accesses BuiltinCall::GetSideEffects() const {
+    return glsl::GetSideEffects(func_);
+}
+
 }  // namespace tint::glsl::ir

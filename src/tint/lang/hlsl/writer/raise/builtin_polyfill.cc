@@ -1046,8 +1046,10 @@ struct State {
                     TINT_UNREACHABLE();
             }
 
-            core::ir::Instruction* builtin = b.MemberCall<hlsl::ir::MemberBuiltinCall>(
+            auto* member_call = b.MemberCall<hlsl::ir::MemberBuiltinCall>(
                 ty.vec4(ret_ty), hlsl::BuiltinFn::kLoad, tex, call_args);
+
+            core::ir::Instruction* builtin = member_call;
             if (!swizzle.IsEmpty()) {
                 builtin = b.Swizzle(ty.f32(), builtin, swizzle);
             } else {

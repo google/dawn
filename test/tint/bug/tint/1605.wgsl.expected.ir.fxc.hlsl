@@ -6,8 +6,7 @@ bool func_3() {
   {
     int i = int(0);
     while(true) {
-      int v = i;
-      if ((v < asint(b[0u].x))) {
+      if ((i < asint(b[0u].x))) {
       } else {
         break;
       }

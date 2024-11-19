@@ -8,10 +8,7 @@ cbuffer cbuffer_u : register(b0) {
 };
 groupshared float4x3 w;
 float4x3 v(uint start_byte_offset) {
-  float3 v_1 = asfloat(u[(start_byte_offset / 16u)].xyz);
-  float3 v_2 = asfloat(u[((16u + start_byte_offset) / 16u)].xyz);
-  float3 v_3 = asfloat(u[((32u + start_byte_offset) / 16u)].xyz);
-  return float4x3(v_1, v_2, v_3, asfloat(u[((48u + start_byte_offset) / 16u)].xyz));
+  return float4x3(asfloat(u[(start_byte_offset / 16u)].xyz), asfloat(u[((16u + start_byte_offset) / 16u)].xyz), asfloat(u[((32u + start_byte_offset) / 16u)].xyz), asfloat(u[((48u + start_byte_offset) / 16u)].xyz));
 }
 
 void f_inner(uint tint_local_index) {

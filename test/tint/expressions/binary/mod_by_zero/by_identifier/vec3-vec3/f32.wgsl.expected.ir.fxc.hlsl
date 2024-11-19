@@ -6,7 +6,6 @@ void f() {
   float3 v = a;
   float3 v_1 = b;
   float3 v_2 = (v / v_1);
-  float3 v_3 = floor(v_2);
-  float3 r = (v - ((((v_2 < (0.0f).xxx)) ? (ceil(v_2)) : (v_3)) * v_1));
+  float3 r = (v - ((((v_2 < (0.0f).xxx)) ? (ceil(v_2)) : (floor(v_2))) * v_1));
 }
 

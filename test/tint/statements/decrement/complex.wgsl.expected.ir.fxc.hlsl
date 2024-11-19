@@ -39,22 +39,20 @@ void main() {
     uint v_4 = (uint(v_2) * 16u);
     int v_5 = idx3();
     int v_6 = (asint(buffer.Load((((0u + v_3) + v_4) + (uint(v_5) * 4u)))) - int(1));
-    uint v_7 = (((0u + v_3) + v_4) + (uint(v_5) * 4u));
-    buffer.Store(v_7, asuint(v_6));
+    buffer.Store((((0u + v_3) + v_4) + (uint(v_5) * 4u)), asuint(v_6));
     while(true) {
       if ((v < 10u)) {
       } else {
         break;
       }
       {
-        int v_8 = idx4();
-        int v_9 = idx5();
-        uint v_10 = (uint(v_8) * 64u);
-        uint v_11 = (uint(v_9) * 16u);
-        int v_12 = idx6();
-        int v_13 = (asint(buffer.Load((((0u + v_10) + v_11) + (uint(v_12) * 4u)))) - int(1));
-        uint v_14 = (((0u + v_10) + v_11) + (uint(v_12) * 4u));
-        buffer.Store(v_14, asuint(v_13));
+        int v_7 = idx4();
+        int v_8 = idx5();
+        uint v_9 = (uint(v_7) * 64u);
+        uint v_10 = (uint(v_8) * 16u);
+        int v_11 = idx6();
+        int v_12 = (asint(buffer.Load((((0u + v_9) + v_10) + (uint(v_11) * 4u)))) - int(1));
+        buffer.Store((((0u + v_9) + v_10) + (uint(v_11) * 4u)), asuint(v_12));
       }
       continue;
     }

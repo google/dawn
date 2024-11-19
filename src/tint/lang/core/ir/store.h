@@ -82,6 +82,9 @@ class Store final : public Castable<Store, OperandInstruction<2, 0>> {
 
     /// @returns the friendly name for the instruction
     std::string FriendlyName() const override { return "store"; }
+
+    /// @returns the side effects for this instruction
+    Accesses GetSideEffects() const override { return Accesses{Access::kStore}; }
 };
 
 }  // namespace tint::core::ir

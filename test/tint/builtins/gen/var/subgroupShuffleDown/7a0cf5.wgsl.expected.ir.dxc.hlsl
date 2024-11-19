@@ -3,9 +3,7 @@ RWByteAddressBuffer prevent_dce : register(u0);
 float2 subgroupShuffleDown_7a0cf5() {
   float2 arg_0 = (1.0f).xx;
   uint arg_1 = 1u;
-  float2 v = arg_0;
-  uint v_1 = arg_1;
-  float2 res = WaveReadLaneAt(v, (WaveGetLaneIndex() + v_1));
+  float2 res = WaveReadLaneAt(arg_0, (WaveGetLaneIndex() + arg_1));
   return res;
 }
 

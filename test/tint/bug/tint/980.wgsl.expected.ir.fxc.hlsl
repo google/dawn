@@ -13,8 +13,7 @@ float3 Bad(uint index, float3 rd) {
 }
 
 void main_inner(uint idx) {
-  uint v_3 = io.Load(12u);
-  io.Store3(0u, asuint(Bad(v_3, asfloat(io.Load3(0u)))));
+  io.Store3(0u, asuint(Bad(io.Load(12u), asfloat(io.Load3(0u)))));
 }
 
 [numthreads(1, 1, 1)]

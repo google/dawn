@@ -18,11 +18,7 @@ struct vertex_main_outputs {
 uint firstLeadingBit_f0779d() {
   uint arg_0 = 1u;
   uint const v = arg_0;
-  uint const v_1 = select(16u, 0u, ((v & 4294901760u) == 0u));
-  uint const v_2 = select(8u, 0u, (((v >> v_1) & 65280u) == 0u));
-  uint const v_3 = select(4u, 0u, ((((v >> v_1) >> v_2) & 240u) == 0u));
-  uint const v_4 = select(2u, 0u, (((((v >> v_1) >> v_2) >> v_3) & 12u) == 0u));
-  uint res = select((v_1 | (v_2 | (v_3 | (v_4 | select(1u, 0u, ((((((v >> v_1) >> v_2) >> v_3) >> v_4) & 2u) == 0u)))))), 4294967295u, (((((v >> v_1) >> v_2) >> v_3) >> v_4) == 0u));
+  uint res = select((select(16u, 0u, ((v & 4294901760u) == 0u)) | (select(8u, 0u, (((v >> select(16u, 0u, ((v & 4294901760u) == 0u))) & 65280u) == 0u)) | (select(4u, 0u, ((((v >> select(16u, 0u, ((v & 4294901760u) == 0u))) >> select(8u, 0u, (((v >> select(16u, 0u, ((v & 4294901760u) == 0u))) & 65280u) == 0u))) & 240u) == 0u)) | (select(2u, 0u, (((((v >> select(16u, 0u, ((v & 4294901760u) == 0u))) >> select(8u, 0u, (((v >> select(16u, 0u, ((v & 4294901760u) == 0u))) & 65280u) == 0u))) >> select(4u, 0u, ((((v >> select(16u, 0u, ((v & 4294901760u) == 0u))) >> select(8u, 0u, (((v >> select(16u, 0u, ((v & 4294901760u) == 0u))) & 65280u) == 0u))) & 240u) == 0u))) & 12u) == 0u)) | select(1u, 0u, ((((((v >> select(16u, 0u, ((v & 4294901760u) == 0u))) >> select(8u, 0u, (((v >> select(16u, 0u, ((v & 4294901760u) == 0u))) & 65280u) == 0u))) >> select(4u, 0u, ((((v >> select(16u, 0u, ((v & 4294901760u) == 0u))) >> select(8u, 0u, (((v >> select(16u, 0u, ((v & 4294901760u) == 0u))) & 65280u) == 0u))) & 240u) == 0u))) >> select(2u, 0u, (((((v >> select(16u, 0u, ((v & 4294901760u) == 0u))) >> select(8u, 0u, (((v >> select(16u, 0u, ((v & 4294901760u) == 0u))) & 65280u) == 0u))) >> select(4u, 0u, ((((v >> select(16u, 0u, ((v & 4294901760u) == 0u))) >> select(8u, 0u, (((v >> select(16u, 0u, ((v & 4294901760u) == 0u))) & 65280u) == 0u))) & 240u) == 0u))) & 12u) == 0u))) & 2u) == 0u)))))), 4294967295u, (((((v >> select(16u, 0u, ((v & 4294901760u) == 0u))) >> select(8u, 0u, (((v >> select(16u, 0u, ((v & 4294901760u) == 0u))) & 65280u) == 0u))) >> select(4u, 0u, ((((v >> select(16u, 0u, ((v & 4294901760u) == 0u))) >> select(8u, 0u, (((v >> select(16u, 0u, ((v & 4294901760u) == 0u))) & 65280u) == 0u))) & 240u) == 0u))) >> select(2u, 0u, (((((v >> select(16u, 0u, ((v & 4294901760u) == 0u))) >> select(8u, 0u, (((v >> select(16u, 0u, ((v & 4294901760u) == 0u))) & 65280u) == 0u))) >> select(4u, 0u, ((((v >> select(16u, 0u, ((v & 4294901760u) == 0u))) >> select(8u, 0u, (((v >> select(16u, 0u, ((v & 4294901760u) == 0u))) & 65280u) == 0u))) & 240u) == 0u))) & 12u) == 0u))) == 0u));
   return res;
 }
 
@@ -44,9 +40,9 @@ VertexOutput vertex_main_inner() {
 }
 
 vertex vertex_main_outputs vertex_main() {
-  VertexOutput const v_5 = vertex_main_inner();
+  VertexOutput const v_1 = vertex_main_inner();
   vertex_main_outputs tint_wrapper_result = {};
-  tint_wrapper_result.VertexOutput_pos = v_5.pos;
-  tint_wrapper_result.VertexOutput_prevent_dce = v_5.prevent_dce;
+  tint_wrapper_result.VertexOutput_pos = v_1.pos;
+  tint_wrapper_result.VertexOutput_prevent_dce = v_1.prevent_dce;
   return tint_wrapper_result;
 }

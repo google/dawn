@@ -9,10 +9,7 @@ void v(uint offset, matrix<float16_t, 4, 2> obj) {
 }
 
 matrix<float16_t, 4, 2> v_1(uint offset) {
-  vector<float16_t, 2> v_2 = tint_symbol.Load<vector<float16_t, 2> >((offset + 0u));
-  vector<float16_t, 2> v_3 = tint_symbol.Load<vector<float16_t, 2> >((offset + 4u));
-  vector<float16_t, 2> v_4 = tint_symbol.Load<vector<float16_t, 2> >((offset + 8u));
-  return matrix<float16_t, 4, 2>(v_2, v_3, v_4, tint_symbol.Load<vector<float16_t, 2> >((offset + 12u)));
+  return matrix<float16_t, 4, 2>(tint_symbol.Load<vector<float16_t, 2> >((offset + 0u)), tint_symbol.Load<vector<float16_t, 2> >((offset + 4u)), tint_symbol.Load<vector<float16_t, 2> >((offset + 8u)), tint_symbol.Load<vector<float16_t, 2> >((offset + 12u)));
 }
 
 [numthreads(1, 1, 1)]

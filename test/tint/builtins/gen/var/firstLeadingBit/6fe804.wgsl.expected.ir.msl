@@ -18,11 +18,7 @@ struct vertex_main_outputs {
 uint2 firstLeadingBit_6fe804() {
   uint2 arg_0 = uint2(1u);
   uint2 const v = arg_0;
-  uint2 const v_1 = select(uint2(16u), uint2(0u), ((v & uint2(4294901760u)) == uint2(0u)));
-  uint2 const v_2 = select(uint2(8u), uint2(0u), (((v >> v_1) & uint2(65280u)) == uint2(0u)));
-  uint2 const v_3 = select(uint2(4u), uint2(0u), ((((v >> v_1) >> v_2) & uint2(240u)) == uint2(0u)));
-  uint2 const v_4 = select(uint2(2u), uint2(0u), (((((v >> v_1) >> v_2) >> v_3) & uint2(12u)) == uint2(0u)));
-  uint2 res = select((v_1 | (v_2 | (v_3 | (v_4 | select(uint2(1u), uint2(0u), ((((((v >> v_1) >> v_2) >> v_3) >> v_4) & uint2(2u)) == uint2(0u))))))), uint2(4294967295u), (((((v >> v_1) >> v_2) >> v_3) >> v_4) == uint2(0u)));
+  uint2 res = select((select(uint2(16u), uint2(0u), ((v & uint2(4294901760u)) == uint2(0u))) | (select(uint2(8u), uint2(0u), (((v >> select(uint2(16u), uint2(0u), ((v & uint2(4294901760u)) == uint2(0u)))) & uint2(65280u)) == uint2(0u))) | (select(uint2(4u), uint2(0u), ((((v >> select(uint2(16u), uint2(0u), ((v & uint2(4294901760u)) == uint2(0u)))) >> select(uint2(8u), uint2(0u), (((v >> select(uint2(16u), uint2(0u), ((v & uint2(4294901760u)) == uint2(0u)))) & uint2(65280u)) == uint2(0u)))) & uint2(240u)) == uint2(0u))) | (select(uint2(2u), uint2(0u), (((((v >> select(uint2(16u), uint2(0u), ((v & uint2(4294901760u)) == uint2(0u)))) >> select(uint2(8u), uint2(0u), (((v >> select(uint2(16u), uint2(0u), ((v & uint2(4294901760u)) == uint2(0u)))) & uint2(65280u)) == uint2(0u)))) >> select(uint2(4u), uint2(0u), ((((v >> select(uint2(16u), uint2(0u), ((v & uint2(4294901760u)) == uint2(0u)))) >> select(uint2(8u), uint2(0u), (((v >> select(uint2(16u), uint2(0u), ((v & uint2(4294901760u)) == uint2(0u)))) & uint2(65280u)) == uint2(0u)))) & uint2(240u)) == uint2(0u)))) & uint2(12u)) == uint2(0u))) | select(uint2(1u), uint2(0u), ((((((v >> select(uint2(16u), uint2(0u), ((v & uint2(4294901760u)) == uint2(0u)))) >> select(uint2(8u), uint2(0u), (((v >> select(uint2(16u), uint2(0u), ((v & uint2(4294901760u)) == uint2(0u)))) & uint2(65280u)) == uint2(0u)))) >> select(uint2(4u), uint2(0u), ((((v >> select(uint2(16u), uint2(0u), ((v & uint2(4294901760u)) == uint2(0u)))) >> select(uint2(8u), uint2(0u), (((v >> select(uint2(16u), uint2(0u), ((v & uint2(4294901760u)) == uint2(0u)))) & uint2(65280u)) == uint2(0u)))) & uint2(240u)) == uint2(0u)))) >> select(uint2(2u), uint2(0u), (((((v >> select(uint2(16u), uint2(0u), ((v & uint2(4294901760u)) == uint2(0u)))) >> select(uint2(8u), uint2(0u), (((v >> select(uint2(16u), uint2(0u), ((v & uint2(4294901760u)) == uint2(0u)))) & uint2(65280u)) == uint2(0u)))) >> select(uint2(4u), uint2(0u), ((((v >> select(uint2(16u), uint2(0u), ((v & uint2(4294901760u)) == uint2(0u)))) >> select(uint2(8u), uint2(0u), (((v >> select(uint2(16u), uint2(0u), ((v & uint2(4294901760u)) == uint2(0u)))) & uint2(65280u)) == uint2(0u)))) & uint2(240u)) == uint2(0u)))) & uint2(12u)) == uint2(0u)))) & uint2(2u)) == uint2(0u))))))), uint2(4294967295u), (((((v >> select(uint2(16u), uint2(0u), ((v & uint2(4294901760u)) == uint2(0u)))) >> select(uint2(8u), uint2(0u), (((v >> select(uint2(16u), uint2(0u), ((v & uint2(4294901760u)) == uint2(0u)))) & uint2(65280u)) == uint2(0u)))) >> select(uint2(4u), uint2(0u), ((((v >> select(uint2(16u), uint2(0u), ((v & uint2(4294901760u)) == uint2(0u)))) >> select(uint2(8u), uint2(0u), (((v >> select(uint2(16u), uint2(0u), ((v & uint2(4294901760u)) == uint2(0u)))) & uint2(65280u)) == uint2(0u)))) & uint2(240u)) == uint2(0u)))) >> select(uint2(2u), uint2(0u), (((((v >> select(uint2(16u), uint2(0u), ((v & uint2(4294901760u)) == uint2(0u)))) >> select(uint2(8u), uint2(0u), (((v >> select(uint2(16u), uint2(0u), ((v & uint2(4294901760u)) == uint2(0u)))) & uint2(65280u)) == uint2(0u)))) >> select(uint2(4u), uint2(0u), ((((v >> select(uint2(16u), uint2(0u), ((v & uint2(4294901760u)) == uint2(0u)))) >> select(uint2(8u), uint2(0u), (((v >> select(uint2(16u), uint2(0u), ((v & uint2(4294901760u)) == uint2(0u)))) & uint2(65280u)) == uint2(0u)))) & uint2(240u)) == uint2(0u)))) & uint2(12u)) == uint2(0u)))) == uint2(0u)));
   return res;
 }
 
@@ -44,9 +40,9 @@ VertexOutput vertex_main_inner() {
 }
 
 vertex vertex_main_outputs vertex_main() {
-  VertexOutput const v_5 = vertex_main_inner();
+  VertexOutput const v_1 = vertex_main_inner();
   vertex_main_outputs tint_wrapper_result = {};
-  tint_wrapper_result.VertexOutput_pos = v_5.pos;
-  tint_wrapper_result.VertexOutput_prevent_dce = v_5.prevent_dce;
+  tint_wrapper_result.VertexOutput_pos = v_1.pos;
+  tint_wrapper_result.VertexOutput_prevent_dce = v_1.prevent_dce;
   return tint_wrapper_result;
 }

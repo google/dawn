@@ -7,8 +7,7 @@ void v(uint offset, matrix<float16_t, 2, 4> obj) {
 }
 
 matrix<float16_t, 2, 4> v_1(uint offset) {
-  vector<float16_t, 4> v_2 = tint_symbol.Load<vector<float16_t, 4> >((offset + 0u));
-  return matrix<float16_t, 2, 4>(v_2, tint_symbol.Load<vector<float16_t, 4> >((offset + 8u)));
+  return matrix<float16_t, 2, 4>(tint_symbol.Load<vector<float16_t, 4> >((offset + 0u)), tint_symbol.Load<vector<float16_t, 4> >((offset + 8u)));
 }
 
 [numthreads(1, 1, 1)]
