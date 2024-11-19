@@ -125,6 +125,7 @@ tint_add_target(tint_lang_core_ir lib
   lang/core/ir/override.cc
   lang/core/ir/override.h
   lang/core/ir/referenced_functions.h
+  lang/core/ir/referenced_module_decls.h
   lang/core/ir/referenced_module_vars.h
   lang/core/ir/return.cc
   lang/core/ir/return.h
@@ -222,6 +223,7 @@ tint_add_target(tint_lang_core_ir_test test
   lang/core/ir/operand_instruction_test.cc
   lang/core/ir/override_test.cc
   lang/core/ir/referenced_functions_test.cc
+  lang/core/ir/referenced_module_decls_test.cc
   lang/core/ir/referenced_module_vars_test.cc
   lang/core/ir/return_test.cc
   lang/core/ir/store_test.cc
@@ -243,6 +245,7 @@ tint_target_add_dependencies(tint_lang_core_ir_test test
   tint_lang_core_constant
   tint_lang_core_intrinsic
   tint_lang_core_ir
+  tint_lang_core_ir_type
   tint_lang_core_type
   tint_utils_containers
   tint_utils_diagnostic

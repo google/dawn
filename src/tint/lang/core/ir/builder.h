@@ -1417,7 +1417,7 @@ class Builder {
     /// Creates a new `let` declaration, with an unassigned value
     /// @param type the let type
     /// @returns the instruction
-    ir::Let* Let(const type::Type* type) {
+    ir::Let* Let(const core::type::Type* type) {
         auto* let = ir.CreateInstruction<ir::Let>(InstructionResult(type), nullptr);
         Append(let);
         return let;
@@ -1791,7 +1791,7 @@ class Builder {
     /// @param name the override name
     /// @param type the override type
     /// @returns the instruction
-    ir::Override* Override(std::string_view name, const type::Type* type) {
+    ir::Override* Override(std::string_view name, const core::type::Type* type) {
         return Override(Source{}, name, type);
     }
 
@@ -1799,7 +1799,7 @@ class Builder {
     /// @param name the override name
     /// @param type the override type
     /// @returns the instruction
-    ir::Override* Override(Source src, std::string_view name, const type::Type* type) {
+    ir::Override* Override(Source src, std::string_view name, const core::type::Type* type) {
         auto* override = ir.CreateInstruction<ir::Override>(InstructionResult(type));
         ir.SetName(override->Result(0), name);
         ir.SetSource(override, src);
@@ -1810,7 +1810,7 @@ class Builder {
     /// Creates a new `override` declaration, with an unassigned value
     /// @param type the override type
     /// @returns the instruction
-    ir::Override* Override(const type::Type* type) {
+    ir::Override* Override(const core::type::Type* type) {
         auto* override = ir.CreateInstruction<ir::Override>(InstructionResult(type));
         Append(override);
         return override;

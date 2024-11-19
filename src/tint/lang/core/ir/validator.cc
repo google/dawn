@@ -72,11 +72,13 @@
 #include "src/tint/lang/core/ir/switch.h"
 #include "src/tint/lang/core/ir/swizzle.h"
 #include "src/tint/lang/core/ir/terminate_invocation.h"
+#include "src/tint/lang/core/ir/type/array_count.h"
 #include "src/tint/lang/core/ir/unary.h"
 #include "src/tint/lang/core/ir/unreachable.h"
 #include "src/tint/lang/core/ir/unused.h"
 #include "src/tint/lang/core/ir/user_call.h"
 #include "src/tint/lang/core/ir/var.h"
+#include "src/tint/lang/core/type/array.h"
 #include "src/tint/lang/core/type/bool.h"
 #include "src/tint/lang/core/type/f32.h"
 #include "src/tint/lang/core/type/i32.h"
@@ -114,7 +116,7 @@ using namespace tint::core::fluent_types;  // NOLINT
 namespace tint::core::ir {
 
 struct ValidatedType {
-    const type::Type* ty;
+    const core::type::Type* ty;
     Capabilities caps;
 };
 
@@ -160,8 +162,8 @@ bool InvariantOnlyIfAlsoPosition(const tint::core::IOAttributes& attr) {
 /// Note: Does not handle corner cases like if certain capabilities are
 /// enabled.
 bool IsValidFunctionParamType(const core::type::Type* ty) {
-    return ty->IsConstructible() || ty->Is<type::Pointer>() || ty->Is<type::Texture>() ||
-           ty->Is<type::Sampler>();
+    return ty->IsConstructible() || ty->Is<core::type::Pointer>() ||
+           ty->Is<core::type::Texture>() || ty->Is<core::type::Sampler>();
 }
 
 /// @returns true if @p ty is a non-struct and decorated with @builtin(position), or if it is a
@@ -790,7 +792,7 @@ class Validator {
 
     // @param ty the type to get the name for
     /// @returns the styled name for the given type
-    StyledText NameOf(const type::Type* ty);
+    StyledText NameOf(const core::type::Type* ty);
 
     /// @param v the value to get the name for
     /// @returns the styled name for the given value
@@ -906,7 +908,7 @@ class Validator {
     /// @returns a function that validates builtins on function params
     auto CheckBuiltinFunctionParam(const std::string& err) {
         return [this, err](const FunctionParam* param, const IOAttributes& attr,
-                           const type::Type* ty) {
+                           const core::type::Type* ty) {
             if (!attr.builtin.has_value()) {
                 return;
             }
@@ -920,7 +922,8 @@ class Validator {
 
     /// @returns a function that validates builtins on function returns
     auto CheckBuiltinFunctionReturn(const std::string& err) {
-        return [this, err](const Function* func, const IOAttributes& attr, const type::Type* ty) {
+        return [this, err](const Function* func, const IOAttributes& attr,
+                           const core::type::Type* ty) {
             if (!attr.builtin.has_value()) {
                 return;
             }
@@ -961,7 +964,7 @@ class Validator {
     template <typename MSG_ANCHOR>
     auto CheckFrontFacingIfBoolFunc(const std::string& err) {
         return [this, err](const MSG_ANCHOR* msg_anchor, const IOAttributes& attr,
-                           const type::Type* ty) {
+                           const core::type::Type* ty) {
             if (ty->Is<core::type::Bool>() && attr.builtin != BuiltinValue::kFrontFacing) {
                 AddError(msg_anchor) << err;
             }
@@ -973,7 +976,7 @@ class Validator {
     template <typename MSG_ANCHOR>
     auto CheckNotBool(const std::string& err) {
         return [this, err](const MSG_ANCHOR* msg_anchor, [[maybe_unused]] const IOAttributes& attr,
-                           const type::Type* ty) {
+                           const core::type::Type* ty) {
             if (ty->Is<core::type::Bool>()) {
                 AddError(msg_anchor) << err;
             }
@@ -1241,7 +1244,7 @@ class Validator {
     ScopeStack scope_stack_;
     Vector<std::function<void()>, 16> tasks_;
     SymbolTable symbols_ = SymbolTable::Wrap(mod_.symbols);
-    type::Manager type_mgr_ = type::Manager::Wrap(mod_.Types());
+    core::type::Manager type_mgr_ = core::type::Manager::Wrap(mod_.Types());
     Hashmap<const ir::Block*, const ir::Function*, 64> block_to_function_{};
     Hashmap<const ir::Function*, Hashset<const ir::UserCall*, 4>, 4> user_func_calls_;
     Hashset<const ir::Discard*, 4> discards_;
@@ -1482,14 +1485,14 @@ void Validator::AddDeclarationNote(const InstructionResult* res) {
 StyledText Validator::NameOf(const CastableBase* decl) {
     return tint::Switch(
         decl,  //
-        [&](const type::Type* ty) { return NameOf(ty); },
+        [&](const core::type::Type* ty) { return NameOf(ty); },
         [&](const Value* value) { return NameOf(value); },
         [&](const Instruction* inst) { return NameOf(inst); },
         [&](const Block* block) { return NameOf(block); },  //
         TINT_ICE_ON_NO_MATCH);
 }
 
-StyledText Validator::NameOf(const type::Type* ty) {
+StyledText Validator::NameOf(const core::type::Type* ty) {
     auto name = ty ? ty->FriendlyName() : "undef";
     return StyledText{} << style::Type(name);
 }
@@ -1669,10 +1672,10 @@ void Validator::CheckType(const core::type::Type* root,
         return;
     }
 
-    auto visit = [&](const type::Type* type) {
+    auto visit = [&](const core::type::Type* type) {
         return tint::Switch(
             type,
-            [&](const type::Reference*) {
+            [&](const core::type::Reference*) {
                 // Reference types are guarded by the AllowRefTypes capability.
                 if (!capabilities_.Contains(Capability::kAllowRefTypes) ||
                     ignore_caps.Contains(Capability::kAllowRefTypes)) {
@@ -1685,10 +1688,10 @@ void Validator::CheckType(const core::type::Type* root,
                 }
                 return true;
             },
-            [&](const type::Pointer*) {
+            [&](const core::type::Pointer*) {
                 if (type != root) {
                     // Nesting pointer types inside structures is guarded by a capability.
-                    if (!(root->Is<type::Struct>() &&
+                    if (!(root->Is<core::type::Struct>() &&
                           capabilities_.Contains(Capability::kAllowPointersInStructures))) {
                         diag() << "nested pointer types are not permitted";
                         return false;
@@ -1696,7 +1699,7 @@ void Validator::CheckType(const core::type::Type* root,
                 }
                 return true;
             },
-            [&](const type::I8*) {
+            [&](const core::type::I8*) {
                 // i8 types are guarded by the Allow8BitIntegers capability.
                 if (!capabilities_.Contains(Capability::kAllow8BitIntegers)) {
                     diag() << "8-bit integer types are not permitted";
@@ -1704,7 +1707,7 @@ void Validator::CheckType(const core::type::Type* root,
                 }
                 return true;
             },
-            [&](const type::U8*) {
+            [&](const core::type::U8*) {
                 // u8 types are guarded by the Allow8BitIntegers capability.
                 if (!capabilities_.Contains(Capability::kAllow8BitIntegers)) {
                     diag() << "8-bit integer types are not permitted";
@@ -1715,8 +1718,8 @@ void Validator::CheckType(const core::type::Type* root,
             [](Default) { return true; });
     };
 
-    Vector<const type::Type*, 8> stack{root};
-    Hashset<const type::Type*, 8> seen{};
+    Vector<const core::type::Type*, 8> stack{root};
+    Hashset<const core::type::Type*, 8> seen{};
     while (!stack.IsEmpty()) {
         auto* ty = stack.Pop();
         if (!ty) {
@@ -1726,7 +1729,7 @@ void Validator::CheckType(const core::type::Type* root,
             return;
         }
 
-        if (auto* view = ty->As<type::MemoryView>(); view && seen.Add(view)) {
+        if (auto* view = ty->As<core::type::MemoryView>(); view && seen.Add(view)) {
             stack.Push(view->StoreType());
             continue;
         }
@@ -1896,12 +1899,12 @@ void Validator::CheckFunction(const Function* func) {
         }
 
         AddressSpace address_space = AddressSpace::kUndefined;
-        auto* mv = param->Type()->As<type::MemoryView>();
+        auto* mv = param->Type()->As<core::type::MemoryView>();
         if (mv) {
             address_space = mv->AddressSpace();
         } else {
             // ModuleScopeVars transform in MSL backends unwraps pointers to handles
-            if (param->Type()->IsAnyOf<type::Texture, type::Sampler>()) {
+            if (param->Type()->IsAnyOf<core::type::Texture, core::type::Sampler>()) {
                 address_space = AddressSpace::kHandle;
             }
         }
@@ -1984,7 +1987,7 @@ void Validator::CheckFunction(const Function* func) {
             CheckFrontFacingIfBoolFunc<Function>("entry point return members can not be bool"));
 
         for (auto var : referenced_module_vars_.TransitiveReferences(func)) {
-            const auto* mv = var->Result(0)->Type()->As<type::MemoryView>();
+            const auto* mv = var->Result(0)->Type()->As<core::type::MemoryView>();
             const auto* ty = var->Result(0)->Type()->UnwrapPtrOrRef();
             const auto attr = var->Attributes();
             if (!mv || !ty) {
@@ -2303,7 +2306,7 @@ void Validator::CheckVar(const Var* var) {
         return;
     }
 
-    auto* mv = result_type->As<type::MemoryView>();
+    auto* mv = result_type->As<core::type::MemoryView>();
     if (!mv) {
         AddError(var) << "result type must be a pointer or a reference";
         return;
@@ -2314,6 +2317,16 @@ void Validator::CheckVar(const Var* var) {
         if (result != Success) {
             AddError(var) << result.Failure();
             return;
+        }
+    }
+
+    if (mv->AddressSpace() == AddressSpace::kWorkgroup) {
+        if (auto* ary = result_type->UnwrapPtr()->As<core::type::Array>()) {
+            if (auto* count = ary->Count()->As<core::ir::type::ValueArrayCount>()) {
+                if (!scope_stack_.Contains(count->value)) {
+                    AddError(var) << NameOf(count->value) << " is not in scope";
+                }
+            }
         }
     }
 
@@ -2422,7 +2435,7 @@ void Validator::CheckBitcast(const Bitcast* bitcast) {
 void Validator::CheckBuiltinCall(const BuiltinCall* call) {
     auto args =
         Transform<8>(call->Args(), [&](const ir::Value* v) { return v ? v->Type() : nullptr; });
-    if (args.Any([&](const type::Type* ty) { return ty == nullptr; })) {
+    if (args.Any([&](const core::type::Type* ty) { return ty == nullptr; })) {
         AddError(call) << "argument to builtin has undefined type";
         return;
     }
@@ -2454,7 +2467,7 @@ void Validator::CheckBuiltinCall(const BuiltinCall* call) {
 }
 
 void Validator::CheckMemberBuiltinCall(const MemberBuiltinCall* call) {
-    auto args = Vector<const type::Type*, 8>({call->Object()->Type()});
+    auto args = Vector<const core::type::Type*, 8>({call->Object()->Type()});
     for (auto* arg : call->Args()) {
         args.Push(arg->Type());
     }
@@ -2491,7 +2504,7 @@ void Validator::CheckConstruct(const Construct* construct) {
         return;
     }
 
-    if (auto* str = As<type::Struct>(construct->Result(0)->Type())) {
+    if (auto* str = As<core::type::Struct>(construct->Result(0)->Type())) {
         auto members = str->Members();
         if (args.Length() != str->Members().Length()) {
             AddError(construct) << "structure has " << members.Length()
@@ -2647,14 +2660,14 @@ void Validator::CheckAccess(const Access* a) {
     }
 
     auto* want = a->Result(0)->Type();
-    auto* want_view = want->As<type::MemoryView>();
+    auto* want_view = want->As<core::type::MemoryView>();
     bool ok = true;
     if (obj_view) {
         // Pointer source always means pointer result.
         ok = want_view && ty == want_view->StoreType();
         if (ok) {
             // Also check that the address space and access modes match.
-            ok = obj_view->Is<type::Pointer>() == want_view->Is<type::Pointer>() &&
+            ok = obj_view->Is<core::type::Pointer>() == want_view->Is<core::type::Pointer>() &&
                  obj_view->AddressSpace() == want_view->AddressSpace() &&
                  obj_view->Access() == want_view->Access();
         }

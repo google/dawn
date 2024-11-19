@@ -36,6 +36,7 @@
 #include "src/tint/lang/core/ir/builder.h"
 #include "src/tint/lang/core/ir/function_param.h"
 #include "src/tint/lang/core/ir/ir_helper_test.h"
+#include "src/tint/lang/core/ir/type/array_count.h"
 #include "src/tint/lang/core/ir/validator.h"
 #include "src/tint/lang/core/number.h"
 #include "src/tint/lang/core/type/manager.h"
@@ -4492,8 +4493,8 @@ TEST_F(IR_ValidatorTest, Access_IndexVector_ViaMatrix) {
 
 TEST_F(IR_ValidatorTest, Access_ExtractPointerFromStruct) {
     auto* ptr = ty.ptr<private_, i32>();
-    Vector<type::Manager::StructMemberDesc, 1> members{
-        type::Manager::StructMemberDesc{mod.symbols.New("a"), ptr},
+    Vector<core::type::Manager::StructMemberDesc, 1> members{
+        core::type::Manager::StructMemberDesc{mod.symbols.New("a"), ptr},
     };
     auto* str = ty.Struct(mod.symbols.New("MyStruct"), std::move(members));
     auto* f = b.Function("my_func", ty.void_());
@@ -9132,11 +9133,11 @@ note: # Disassembly
 }
 
 template <typename T>
-static const type::Type* TypeBuilder(type::Manager& m) {
+static const core::type::Type* TypeBuilder(core::type::Manager& m) {
     return m.Get<T>();
 }
 template <typename T>
-static const type::Type* RefTypeBuilder(type::Manager& m) {
+static const core::type::Type* RefTypeBuilder(core::type::Manager& m) {
     return m.ref<AddressSpace::kFunction, T>();
 }
 using TypeBuilderFn = decltype(&TypeBuilder<i32>);
@@ -9152,7 +9153,7 @@ TEST_P(IR_ValidatorRefTypeTest, Var) {
 
     auto* fn = b.Function("my_func", ty.void_());
     b.Append(fn->Block(), [&] {
-        if (auto* view = type->As<type::MemoryView>()) {
+        if (auto* view = type->As<core::type::MemoryView>()) {
             b.Var(view);
         } else {
             b.Var(ty.ptr<function>(type));
@@ -10007,6 +10008,37 @@ $B1: {  # root
     ret
   }
 }
+)");
+}
+
+TEST_F(IR_ValidatorTest, OverrideArrayInvalidValue) {
+    core::ir::Override* o = nullptr;
+    b.Append(mod.root_block, [&] {
+        o = b.Override(ty.u32());
+
+        auto* c1 = ty.Get<core::ir::type::ValueArrayCount>(o->Result(0));
+        auto* a1 = ty.Get<core::type::Array>(ty.i32(), c1, 4u, 4u, 4u, 4u);
+
+        b.Var("a", ty.ptr(workgroup, a1, read_write));
+    });
+    o->Destroy();
+
+    auto res = ir::Validate(mod, core::ir::Capabilities{core::ir::Capability::kAllowOverrides});
+    ASSERT_NE(res, Success);
+    EXPECT_EQ(res.Failure().reason.Str(),
+              R"(:2:51 error: var: %2 is not in scope
+  %a:ptr<workgroup, array<i32, %2>, read_write> = var
+                                                  ^^^
+
+:1:1 note: in block
+$B1: {  # root
+^^^
+
+note: # Disassembly
+$B1: {  # root
+  %a:ptr<workgroup, array<i32, %2>, read_write> = var
+}
+
 )");
 }
 
