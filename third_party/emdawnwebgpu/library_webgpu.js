@@ -1728,8 +1728,8 @@ var LibraryWebGPU = {
     if (viewFormatCount) {
       var viewFormatsPtr = {{{ makeGetValue('descriptor', C_STRUCTS.WGPUTextureDescriptor.viewFormats, '*') }}};
       // viewFormatsPtr pointer to an array of TextureFormat which is an enum of size uint32_t
-      desc["viewFormats"] = Array.from({{{ makeHEAPView('32', 'viewFormatsPtr', `viewFormatsPtr + viewFormatCount * 4`) }}},
-        function(format) { return WebGPU.TextureFormat[format]; });
+      desc['viewFormats'] = Array.from({{{ makeHEAPView('32', 'viewFormatsPtr', 'viewFormatsPtr + viewFormatCount * 4') }}},
+        format => WebGPU.TextureFormat[format]);
     }
 
     var device = WebGPU.getJsObject(devicePtr);
@@ -2336,9 +2336,6 @@ var LibraryWebGPU = {
     var context = WebGPU.getJsObject(surfacePtr);
 
 #if ASSERTIONS
-    var viewFormatCount = {{{ gpu.makeGetU32('config', C_STRUCTS.WGPUSurfaceConfiguration.viewFormatCount) }}};
-    var viewFormats = {{{ makeGetValue('config', C_STRUCTS.WGPUSurfaceConfiguration.viewFormats, '*') }}};
-    assert(viewFormatCount === 0 && viewFormats === 0, "TODO: Support viewFormats.");
     assert({{{ gpu.PresentMode.Fifo }}} ===
       {{{ gpu.makeGetU32('config', C_STRUCTS.WGPUSurfaceConfiguration.presentMode) }}});
 #endif
@@ -2364,6 +2361,15 @@ var LibraryWebGPU = {
       "alphaMode": WebGPU.CompositeAlphaMode[
         {{{ gpu.makeGetU32('config', C_STRUCTS.WGPUSurfaceConfiguration.alphaMode) }}}],
     };
+
+    var viewFormatCount = {{{ gpu.makeGetU32('config', C_STRUCTS.WGPUSurfaceConfiguration.viewFormatCount) }}};
+    if (viewFormatCount) {
+      var viewFormatsPtr = {{{ makeGetValue('config', C_STRUCTS.WGPUSurfaceConfiguration.viewFormats, '*') }}};
+      // viewFormatsPtr pointer to an array of TextureFormat which is an enum of size uint32_t
+      configuration['viewFormats'] = Array.from({{{ makeHEAPView('32', 'viewFormatsPtr', 'viewFormatsPtr + viewFormatCount * 4') }}},
+        format => WebGPU.TextureFormat[format]);
+    }
+
     context.configure(configuration);
   },
 
