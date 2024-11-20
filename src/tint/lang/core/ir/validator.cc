@@ -1861,10 +1861,12 @@ void Validator::CheckRootBlock(const Block* blk) {
 }
 
 void Validator::CheckOnlyUsedInRootBlock(const Instruction* inst) {
-    for (auto& usage : inst->Result(0)->UsagesSorted()) {
-        if (usage.instruction->Block() != mod_.root_block) {
-            AddError(inst) << "root block: instruction used outside of root block "
-                           << inst->TypeInfo().name;
+    if (inst->Result(0)) {
+        for (auto& usage : inst->Result(0)->UsagesSorted()) {
+            if (usage.instruction->Block() != mod_.root_block) {
+                AddError(inst) << "root block: instruction used outside of root block "
+                               << inst->TypeInfo().name;
+            }
         }
     }
 
