@@ -47,7 +47,6 @@ class Adapter final : public ObjectWithEventsBase {
 
     WGPUStatus GetLimits(WGPUSupportedLimits* limits) const;
     bool HasFeature(WGPUFeatureName feature) const;
-    size_t EnumerateFeatures(WGPUFeatureName* features) const;
     void SetLimits(const WGPUSupportedLimits* limits);
     void SetFeatures(const WGPUFeatureName* features, uint32_t featuresCount);
     void SetInfo(const WGPUAdapterInfo* info);

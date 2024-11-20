@@ -164,15 +164,10 @@ TEST_F(DeviceCreationTest, CreateDeviceRequiringExperimentalFeatures) {
             wgpu::Device device = unsafeAdapter.CreateDevice(&deviceDescriptor);
             EXPECT_NE(device, nullptr);
 
-            ASSERT_EQ(1u, device.EnumerateFeatures(nullptr));
-            wgpu::FeatureName enabledFeature;
-            device.EnumerateFeatures(&enabledFeature);
-            EXPECT_EQ(enabledFeature, featureName);
-
             wgpu::SupportedFeatures supportedFeatures;
             device.GetFeatures(&supportedFeatures);
             ASSERT_EQ(1u, supportedFeatures.featureCount);
-            EXPECT_EQ(enabledFeature, supportedFeatures.features[0]);
+            EXPECT_EQ(featureName, supportedFeatures.features[0]);
         }
 
         // Test creating device with AllowUnsafeApis enabled in device toggle descriptor will
@@ -189,15 +184,10 @@ TEST_F(DeviceCreationTest, CreateDeviceRequiringExperimentalFeatures) {
                 wgpu::Device device = adapter.CreateDevice(&deviceDescriptor);
                 EXPECT_NE(device, nullptr);
 
-                ASSERT_EQ(1u, device.EnumerateFeatures(nullptr));
-                wgpu::FeatureName enabledFeature;
-                device.EnumerateFeatures(&enabledFeature);
-                EXPECT_EQ(enabledFeature, featureName);
-
                 wgpu::SupportedFeatures supportedFeatures;
                 device.GetFeatures(&supportedFeatures);
                 ASSERT_EQ(1u, supportedFeatures.featureCount);
-                EXPECT_EQ(enabledFeature, supportedFeatures.features[0]);
+                EXPECT_EQ(featureName, supportedFeatures.features[0]);
             }
 
             // Test on adapter with AllowUnsafeApis disabled.
@@ -205,15 +195,10 @@ TEST_F(DeviceCreationTest, CreateDeviceRequiringExperimentalFeatures) {
                 wgpu::Device device = unsafeAdapter.CreateDevice(&deviceDescriptor);
                 EXPECT_NE(device, nullptr);
 
-                ASSERT_EQ(1u, device.EnumerateFeatures(nullptr));
-                wgpu::FeatureName enabledFeature;
-                device.EnumerateFeatures(&enabledFeature);
-                EXPECT_EQ(enabledFeature, featureName);
-
                 wgpu::SupportedFeatures supportedFeatures;
                 device.GetFeatures(&supportedFeatures);
                 ASSERT_EQ(1u, supportedFeatures.featureCount);
-                EXPECT_EQ(enabledFeature, supportedFeatures.features[0]);
+                EXPECT_EQ(featureName, supportedFeatures.features[0]);
             }
         }
 

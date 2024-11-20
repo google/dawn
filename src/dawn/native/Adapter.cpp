@@ -224,10 +224,6 @@ bool AdapterBase::APIHasFeature(wgpu::FeatureName feature) const {
     return mSupportedFeatures.IsEnabled(feature);
 }
 
-size_t AdapterBase::APIEnumerateFeatures(wgpu::FeatureName* features) const {
-    return mSupportedFeatures.EnumerateFeatures(features);
-}
-
 void AdapterBase::APIGetFeatures(wgpu::SupportedFeatures* features) const {
     this->APIGetFeatures(reinterpret_cast<SupportedFeatures*>(features));
 }

@@ -155,14 +155,6 @@
                 ]
             },
             {
-                "name": "enumerate features",
-                "tags": ["deprecated"],
-                "returns": "size_t",
-                "args": [
-                    {"name": "features", "type": "feature name", "annotation": "*"}
-                ]
-            },
-            {
                 "name": "get features",
                 "returns": "void",
                 "args": [
@@ -1564,14 +1556,6 @@
                 "returns": "bool",
                 "args": [
                     {"name": "feature", "type": "feature name"}
-                ]
-            },
-            {
-                "name": "enumerate features",
-                "tags": ["deprecated"],
-                "returns": "size_t",
-                "args": [
-                    {"name": "features", "type": "feature name", "annotation": "*"}
                 ]
             },
             {
