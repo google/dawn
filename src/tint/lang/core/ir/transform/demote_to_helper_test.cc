@@ -538,7 +538,11 @@ TEST_F(IR_DemoteToHelperTest, TextureStore) {
 
     auto* front_facing = b.FunctionParam("front_facing", ty.bool_());
     front_facing->SetBuiltin(BuiltinValue::kFrontFacing);
+
     auto* coord = b.FunctionParam("coord", ty.vec2<i32>());
+    IOAttributes coord_attr;
+    coord_attr.location = 0;
+    coord->SetAttributes(coord_attr);
     auto* ep = b.Function("ep", ty.f32(), Function::PipelineStage::kFragment);
     ep->SetParams({front_facing, coord});
     ep->SetReturnLocation(0_u);
@@ -559,7 +563,7 @@ $B1: {  # root
   %texture:ptr<handle, texture_storage_2d<r32float, write>, read> = var @binding_point(0, 0)
 }
 
-%ep = @fragment func(%front_facing:bool [@front_facing], %coord:vec2<i32>):f32 [@location(0)] {
+%ep = @fragment func(%front_facing:bool [@front_facing], %coord:vec2<i32> [@location(0)]):f32 [@location(0)] {
   $B2: {
     if %front_facing [t: $B3] {  # if_1
       $B3: {  # true
@@ -581,7 +585,7 @@ $B1: {  # root
   %continue_execution:ptr<private, bool, read_write> = var, true
 }
 
-%ep = @fragment func(%front_facing:bool [@front_facing], %coord:vec2<i32>):f32 [@location(0)] {
+%ep = @fragment func(%front_facing:bool [@front_facing], %coord:vec2<i32> [@location(0)]):f32 [@location(0)] {
   $B2: {
     if %front_facing [t: $B3] {  # if_1
       $B3: {  # true

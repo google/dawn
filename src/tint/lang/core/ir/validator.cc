@@ -140,16 +140,6 @@ bool TransitivelyHolds(const Block* block, const Instruction* inst) {
     return false;
 }
 
-/// @returns true if @p attr contains both a location and builtin decoration
-bool HasLocationAndBuiltin(const tint::core::IOAttributes& attr) {
-    return attr.builtin.has_value() && attr.location.has_value();
-}
-
-/// @returns true if @p attr contains one of location or builtin decoration
-bool HasLocationOrBuiltin(const tint::core::IOAttributes& attr) {
-    return attr.builtin.has_value() || attr.location.has_value();
-}
-
 /// @return true if @param attr does not have invariant decoration or if it also has position
 /// decoration
 bool InvariantOnlyIfAlsoPosition(const tint::core::IOAttributes& attr) {
@@ -187,7 +177,7 @@ bool IsPositionPresent(const IOAttributes& attr, const core::type::Type* ty) {
 /// If the type that the attributes are attached to is a struct, the check is run over the members,
 /// otherwise it run on the attributes directly.
 ///
-/// @param msg_anchor what to associate errors with, i.e. the 'foo' of AddError(foo)
+/// @param msg_anchor what to associate errors with, e.g. the 'foo' of AddError(foo)
 /// @param ty_attr the directly attached attributes
 /// @param ty the type of the thing that the attributes are attached to
 /// @param is_not_struct_impl has the signature 'void(const MSG_ANCHOR*, const IOAttributes&)' and
@@ -237,7 +227,7 @@ void CheckFunctionParamAttributes(const FunctionParam* param,
 /// If the type that the attributes are attached to is a struct, the check is run over the members,
 /// otherwise it run on the attributes directly.
 ///
-/// @param msg_anchor what to associate errors with, i.e. the 'foo' of AddError(foo)
+/// @param msg_anchor what to associate errors with, e.g. the 'foo' of AddError(foo)
 /// @param ty_attr the directly attached attributes
 /// @param ty the type of the thing that the attributes are attached to
 /// @param is_not_struct_impl has the signature 'void(const MSG_ANCHOR*, const IOAttributes&, const
@@ -650,6 +640,86 @@ Result<SuccessType, std::string> ValidateBuiltIn(BuiltinValue builtin,
     return Success;
 }
 
+// Annotations that can be associated with a value that are used for shader IO, e.g. binding_points,
+// @location, being in workgroup address space, etc.
+enum class IOAnnotation : uint8_t {
+    /// @group + @binding
+    kBindingPoint,
+    /// @location
+    kLocation,
+    /// @builtin(...)
+    kBuiltin,
+    /// Pointer to Workgroup address space
+    kWorkgroup,
+    /// @color
+    kColor,
+};
+
+/// @returns text describing the annotation for error logging
+std::string ToString(IOAnnotation value) {
+    switch (value) {
+        case IOAnnotation::kBindingPoint:
+            return "@group + @binding";
+        case IOAnnotation::kLocation:
+            return "@location";
+        case IOAnnotation::kBuiltin:
+            return "built-in";
+        case IOAnnotation::kWorkgroup:
+            return "<workgroup>";
+        case IOAnnotation::kColor:
+            return "@color";
+    }
+    TINT_ICE() << "Unknown enum passed to ToString(IOAnnotation)";
+}
+
+/// @returns a human-readable string of all the entries in a set of IOAnnotations
+std::string ToString(const EnumSet<IOAnnotation>& values) {
+    std::stringstream result;
+    result << "[ ";
+    bool first = true;
+    for (auto v : values) {
+        if (!first) {
+            result << ", ";
+        }
+        first = false;
+        result << ToString(v);
+    }
+    result << " ]";
+    return result.str();
+}
+
+/// Adds appropriate entries to annotations, based on what values are present in attributes
+/// @param annotations the set to updated
+/// @param attr the attributes to be examined
+/// @returns Success if none of the values being added where already present, otherwise returns the
+/// first non-unique value as a Failure
+Result<SuccessType, IOAnnotation> AddIOAnnotationsFromIOAttributes(
+    EnumSet<IOAnnotation>& annotations,
+    const IOAttributes& attr) {
+    if (attr.location.has_value()) {
+        if (annotations.Contains(IOAnnotation::kLocation)) {
+            return IOAnnotation::kLocation;
+        }
+        annotations.Add(IOAnnotation::kLocation);
+    }
+
+    if (attr.builtin.has_value()) {
+        if (annotations.Contains(IOAnnotation::kBuiltin)) {
+            return IOAnnotation::kBuiltin;
+        }
+        annotations.Add(IOAnnotation::kBuiltin);
+    }
+
+    if (attr.color.has_value()) {
+        if (annotations.Contains(IOAnnotation::kColor)) {
+            return IOAnnotation::kColor;
+        }
+        annotations.Add(IOAnnotation::kColor);
+    }
+
+    return Success;
+}
+
 /// The core IR validator.
 class Validator {
   public:
@@ -935,29 +1005,6 @@ class Validator {
         };
     }
 
-    /// @returns a function that validates that location and builtin attributes are not present at
-    ///          the same time
-    /// @param err error message to log when check fails
-    template <typename MSG_ANCHOR>
-    auto CheckDoesNotHaveBothLocationAndBuiltinFunc(const std::string& err) {
-        return [this, err](const MSG_ANCHOR* msg_anchor, const IOAttributes& attr) {
-            if (HasLocationAndBuiltin(attr)) {
-                AddError(msg_anchor) << err;
-            }
-        };
-    }
-
-    /// @returns a function that validates that either a location or builtin attribute are present
-    /// @param err error message to log when check fails
-    template <typename MSG_ANCHOR>
-    auto CheckHasLocationOrBuiltinFunc(const std::string& err) {
-        return [this, err](const MSG_ANCHOR* msg_anchor, const IOAttributes& attr) {
-            if (!HasLocationOrBuiltin(attr)) {
-                AddError(msg_anchor) << err;
-            }
-        };
-    }
-
     /// @returns a function that validates that type is bool iff decorated with
     /// @builtin(front_facing)
     /// @param err error message to log when check fails
@@ -1005,6 +1052,22 @@ class Validator {
         const std::optional<struct BindingPoint>& binding_point,
         AddressSpace address_space,
         const std::string& target_str = "variable");
+
+    /// Validates shader IO annotations for entry point input/output
+    /// Note: Call is required to ensure that the value being validated is associated with an entry
+    ///       point function
+    /// @param ty type of the value under test
+    /// @param binding_point the binding information associated with the value
+    /// @param attr IO attributes associated with the values
+    /// @param target_str string to insert in error message describing what has a binding_point,
+    /// something like 'input param' or 'return value'
+    /// @returns Success if one, and only one, shader IO is present, otherwise a Failure with the
+    /// error reason is returned
+    Result<SuccessType, std::string> ValidateShaderIOAnnotations(
+        const core::type::Type* ty,
+        const std::optional<struct BindingPoint>& binding_point,
+        const core::IOAttributes& attr,
+        const std::string& target_str);
 
     /// Validates the given let
     /// @param l the let to validate
@@ -1874,15 +1937,6 @@ void Validator::CheckFunction(const Function* func) {
                 "invariant can only decorate a param member iff it is also "
                 "decorated with position"));
 
-        if (func->Stage() != Function::PipelineStage::kUndefined) {
-            CheckFunctionParamAttributes(
-                param,
-                CheckDoesNotHaveBothLocationAndBuiltinFunc<FunctionParam>(
-                    "a builtin and location cannot be both declared for a param"),
-                CheckDoesNotHaveBothLocationAndBuiltinFunc<FunctionParam>(
-                    "a builtin and location cannot be both declared for a struct member"));
-        }
-
         if (func->Stage() == Function::PipelineStage::kFragment) {
             CheckFunctionParamAttributesAndType(
                 param,
@@ -1910,9 +1964,19 @@ void Validator::CheckFunction(const Function* func) {
         }
 
         if (func->Stage() != Function::PipelineStage::kUndefined) {
-            auto result = ValidateBindingPoint(param->BindingPoint(), address_space, "input param");
-            if (result != Success) {
-                AddError(param) << result.Failure();
+            {
+                auto result = ValidateShaderIOAnnotations(param->Type(), param->BindingPoint(),
+                                                          param->Attributes(), "input param");
+                if (result != Success) {
+                    AddError(param) << result.Failure();
+                }
+            }
+            {
+                auto result =
+                    ValidateBindingPoint(param->BindingPoint(), address_space, "input param");
+                if (result != Success) {
+                    AddError(param) << result.Failure();
+                }
             }
         } else {
             if (param->BindingPoint().has_value()) {
@@ -1937,16 +2001,6 @@ void Validator::CheckFunction(const Function* func) {
             "invariant can only decorate outputs iff they are also position builtins"),
         CheckInvariantFunc<Function>(
             "invariant can only decorate output members iff they are also position builtins"));
-
-    if (func->Stage() != Function::PipelineStage::kUndefined) {
-        CheckFunctionReturnAttributes(
-            func,
-            CheckDoesNotHaveBothLocationAndBuiltinFunc<Function>(
-                "a builtin and location cannot be both declared for a function return"),
-            CheckDoesNotHaveBothLocationAndBuiltinFunc<Function>(
-                "a builtin and location cannot be both declared for a struct member"));
-    }
-
     // void needs to be filtered out, since it isn't constructible, but used in the IR when no
     // return is specified.
     if (DAWN_UNLIKELY(!func->ReturnType()->Is<core::type::Void>() &&
@@ -1968,20 +2022,13 @@ void Validator::CheckFunction(const Function* func) {
         }
     }
 
-    if (func->Stage() == Function::PipelineStage::kFragment) {
-        if (!func->ReturnType()->Is<core::type::Void>()) {
-            CheckFunctionReturnAttributes(
-                func,
-                CheckHasLocationOrBuiltinFunc<Function>(
-                    "a non-void return for an entry point must have a "
-                    "builtin or location decoration"),
-                CheckHasLocationOrBuiltinFunc<Function>(
-                    "members of struct used for returns of entry points must have a builtin or "
-                    "location decoration"));
-        }
-    }
-
     if (func->Stage() != Function::PipelineStage::kUndefined) {
+        auto result = ValidateShaderIOAnnotations(func->ReturnType(), std::nullopt,
+                                                  func->ReturnAttributes(), "return values");
+        if (result != Success) {
+            AddError(func) << result.Failure();
+        }
+
         CheckFunctionReturnAttributesAndType(
             func, CheckFrontFacingIfBoolFunc<Function>("entry point returns can not be bool"),
             CheckFrontFacingIfBoolFunc<Function>("entry point return members can not be bool"));
@@ -2338,20 +2385,10 @@ void Validator::CheckVar(const Var* var) {
 
     if (var->Block() == mod_.root_block) {
         if (mv->AddressSpace() == AddressSpace::kIn || mv->AddressSpace() == AddressSpace::kOut) {
-            if (HasLocationAndBuiltin(var->Attributes())) {
-                AddError(var)
-                    << "a builtin and location cannot be both declared for a module scope var";
-                return;
-            }
-
-            if (auto* s = var->Result(0)->Type()->UnwrapPtrOrRef()->As<core::type::Struct>()) {
-                for (auto* mem : s->Members()) {
-                    if (HasLocationAndBuiltin(mem->Attributes())) {
-                        AddError(var) << "a builtin and location cannot be both declared for a "
-                                         "module scope var struct member";
-                        return;
-                    }
-                }
+            auto result = ValidateShaderIOAnnotations(var->Result(0)->Type(), var->BindingPoint(),
+                                                      var->Attributes(), "module scope variable");
+            if (result != Success) {
+                AddError(var) << result.Failure();
             }
         }
     }
@@ -2380,6 +2417,70 @@ Result<SuccessType, std::string> Validator::ValidateBindingPoint(
                 return "a non-resource " + target_str + " has binding point";
             }
             break;
+    }
+    return Success;
+}
+
+Result<SuccessType, std::string> Validator::ValidateShaderIOAnnotations(
+    const core::type::Type* ty,
+    const std::optional<struct BindingPoint>& binding_point,
+    const core::IOAttributes& attr,
+    const std::string& target_str) {
+    EnumSet<IOAnnotation> annotations;
+    // Since there is no entries in the set at this point, this should never fail.
+    TINT_ASSERT(AddIOAnnotationsFromIOAttributes(annotations, attr) == Success);
+    if (binding_point.has_value()) {
+        annotations.Add(IOAnnotation::kBindingPoint);
+    }
+    if (auto* mv = ty->As<core::type::MemoryView>()) {
+        if (mv->AddressSpace() == AddressSpace::kWorkgroup) {
+            annotations.Add(IOAnnotation::kWorkgroup);
+        }
+    }
+
+    // void being annotated should never occur
+    TINT_ASSERT(!ty->Is<core::type::Void>() || annotations.Empty());
+    if (ty->Is<core::type::Void>()) {
+        return Success;
+    }
+
+    if (auto* ty_struct = ty->UnwrapPtrOrRef()->As<core::type::Struct>()) {
+        for (const auto* mem : ty_struct->Members()) {
+            EnumSet<IOAnnotation> mem_annotations = annotations;
+            auto add_result = AddIOAnnotationsFromIOAttributes(mem_annotations, mem->Attributes());
+            if (add_result != Success) {
+                return target_str +
+                       " struct member has same IO annotation, as top-level struct, '" +
+                       ToString(add_result.Failure()) + "'";
+            }
+
+            if (capabilities_.Contains(Capability::kAllowPointersInStructures)) {
+                if (auto* mv = mem->Type()->As<core::type::MemoryView>()) {
+                    if (mv->AddressSpace() == AddressSpace::kWorkgroup) {
+                        mem_annotations.Add(IOAnnotation::kWorkgroup);
+                    }
+                }
+            }
+
+            if (mem_annotations.Empty()) {
+                return target_str +
+                       " struct members must have at least one IO annotation, e.g. a binding "
+                       "point, a location, etc";
+            }
+
+            if (mem_annotations.Size() > 1) {
+                return target_str + " struct member has more than one IO annotation, " +
+                       ToString(mem_annotations);
+            }
+        }
+    } else {
+        if (annotations.Empty()) {
+            return target_str +
+                   " must have at least one IO annotation, e.g. a binding point, a location, etc";
+        }
+        if (annotations.Size() > 1) {
+            return target_str + " has more than one IO annotation, " + ToString(annotations);
+        }
     }
     return Success;
 }

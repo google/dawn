@@ -66,9 +66,7 @@ class IR_ValidatorTest : public IRTestHelper {
     /// Builds and returns a basic 'vertex' entry point function, named @p name
     Function* VertexEntryPoint(const std::string& name = "f") {
         auto* f = b.Function(name, ty.vec4<f32>(), Function::PipelineStage::kVertex);
-        IOAttributes attr;
-        attr.builtin = BuiltinValue::kPosition;
-        f->SetReturnAttributes(attr);
+        f->SetReturnBuiltin(BuiltinValue::kPosition);
         return f;
     }
 
@@ -78,10 +76,8 @@ class IR_ValidatorTest : public IRTestHelper {
                          const std::string& name,
                          BuiltinValue builtin,
                          const core::type::Type* type) {
-        IOAttributes attr;
-        attr.builtin = builtin;
         auto* p = b.FunctionParam(name, type);
-        p->SetAttributes(attr);
+        p->SetBuiltin(builtin);
         func->AppendParam(p);
     }
 
@@ -438,14 +434,12 @@ note: # Disassembly
 )");
 }
 
-TEST_F(IR_ValidatorTest, Function_Param_BothLocationAndBuiltin) {
+TEST_F(IR_ValidatorTest, Function_Param_MultipleIOAnnotations) {
     auto* f = FragmentEntryPoint("my_func");
 
     auto* p = b.FunctionParam("my_param", ty.vec4<f32>());
-    IOAttributes attr;
-    attr.builtin = BuiltinValue::kPosition;
-    attr.location = 0;
-    p->SetAttributes(attr);
+    p->SetBuiltin(BuiltinValue::kPosition);
+    p->SetLocation(0);
     f->SetParams({p});
 
     b.Append(f->Block(), [&] { b.Return(f); });
@@ -453,7 +447,7 @@ TEST_F(IR_ValidatorTest, Function_Param_BothLocationAndBuiltin) {
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_EQ(res.Failure().reason.Str(),
-              R"(:1:27 error: a builtin and location cannot be both declared for a param
+              R"(:1:27 error: input param has more than one IO annotation, [ @location, built-in ]
 %my_func = @fragment func(%my_param:vec4<f32> [@location(0), @position]):void {
                           ^^^^^^^^^^^^^^^^^^^
 
@@ -466,12 +460,12 @@ note: # Disassembly
 )");
 }
 
-TEST_F(IR_ValidatorTest, Function_Param_Struct_BothLocationAndBuiltin) {
+TEST_F(IR_ValidatorTest, Function_Param_Struct_MultipleIOAnnotations) {
     auto* f = FragmentEntryPoint("my_func");
 
     IOAttributes attr;
     attr.builtin = BuiltinValue::kPosition;
-    attr.location = 0;
+    attr.color = 0;
     auto* str_ty =
         ty.Struct(mod.symbols.New("MyStruct"), {
                                                    {mod.symbols.New("a"), ty.vec4<f32>(), attr},
@@ -483,17 +477,170 @@ TEST_F(IR_ValidatorTest, Function_Param_Struct_BothLocationAndBuiltin) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.Str(),
-              R"(:5:27 error: a builtin and location cannot be both declared for a struct member
+    EXPECT_EQ(
+        res.Failure().reason.Str(),
+        R"(:5:27 error: input param struct member has more than one IO annotation, [ built-in, @color ]
 %my_func = @fragment func(%my_param:MyStruct):void {
                           ^^^^^^^^^^^^^^^^^^
 
 note: # Disassembly
 MyStruct = struct @align(16) {
-  a:vec4<f32> @offset(0), @location(0), @builtin(position)
+  a:vec4<f32> @offset(0), @color(0), @builtin(position)
 }
 
 %my_func = @fragment func(%my_param:MyStruct):void {
+  $B1: {
+    ret
+  }
+}
+)");
+}
+
+TEST_F(IR_ValidatorTest, Function_Param_MissingIOAnnotations) {
+    auto* f = FragmentEntryPoint("my_func");
+
+    auto* p = b.FunctionParam("my_param", ty.vec4<f32>());
+    f->SetParams({p});
+
+    b.Append(f->Block(), [&] { b.Return(f); });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_EQ(
+        res.Failure().reason.Str(),
+        R"(:1:27 error: input param must have at least one IO annotation, e.g. a binding point, a location, etc
+%my_func = @fragment func(%my_param:vec4<f32>):void {
+                          ^^^^^^^^^^^^^^^^^^^
+
+note: # Disassembly
+%my_func = @fragment func(%my_param:vec4<f32>):void {
+  $B1: {
+    ret
+  }
+}
+)");
+}
+
+TEST_F(IR_ValidatorTest, Function_Param_Struct_MissingIOAnnotations) {
+    auto* f = ComputeEntryPoint("my_func");
+
+    auto* str_ty =
+        ty.Struct(mod.symbols.New("MyStruct"), {
+                                                   {mod.symbols.New("a"), ty.vec4<f32>(), {}},
+                                               });
+    auto* p = b.FunctionParam("my_param", str_ty);
+    f->SetParams({p});
+
+    b.Append(f->Block(), [&] { b.Return(f); });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_EQ(
+        res.Failure().reason.Str(),
+        R"(:5:54 error: input param struct members must have at least one IO annotation, e.g. a binding point, a location, etc
+%my_func = @compute @workgroup_size(1u, 1u, 1u) func(%my_param:MyStruct):void {
+                                                     ^^^^^^^^^^^^^^^^^^
+
+note: # Disassembly
+MyStruct = struct @align(16) {
+  a:vec4<f32> @offset(0)
+}
+
+%my_func = @compute @workgroup_size(1u, 1u, 1u) func(%my_param:MyStruct):void {
+  $B1: {
+    ret
+  }
+}
+)");
+}
+
+TEST_F(IR_ValidatorTest, Function_Param_Struct_DuplicateAnnotations) {
+    auto* f = ComputeEntryPoint("my_func");
+    IOAttributes attr;
+    attr.location = 0;
+    auto* str_ty =
+        ty.Struct(mod.symbols.New("MyStruct"), {
+                                                   {mod.symbols.New("a"), ty.vec4<f32>(), attr},
+                                               });
+    auto* p = b.FunctionParam("my_param", str_ty);
+    p->SetLocation(0);
+    f->SetParams({p});
+
+    b.Append(f->Block(), [&] { b.Return(f); });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_EQ(
+        res.Failure().reason.Str(),
+        R"(:5:54 error: input param struct member has same IO annotation, as top-level struct, '@location'
+%my_func = @compute @workgroup_size(1u, 1u, 1u) func(%my_param:MyStruct [@location(0)]):void {
+                                                     ^^^^^^^^^^^^^^^^^^
+
+note: # Disassembly
+MyStruct = struct @align(16) {
+  a:vec4<f32> @offset(0), @location(0)
+}
+
+%my_func = @compute @workgroup_size(1u, 1u, 1u) func(%my_param:MyStruct [@location(0)]):void {
+  $B1: {
+    ret
+  }
+}
+)");
+}
+
+TEST_F(IR_ValidatorTest, Function_Param_WorkgroupPlusOtherIOAnnotation) {
+    auto* f = ComputeEntryPoint("my_func");
+    auto* p = b.FunctionParam("my_param", ty.ptr<workgroup, i32>());
+    p->SetLocation(0);
+    f->SetParams({p});
+
+    b.Append(f->Block(), [&] { b.Return(f); });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_EQ(
+        res.Failure().reason.Str(),
+        R"(:1:54 error: input param has more than one IO annotation, [ @location, <workgroup> ]
+%my_func = @compute @workgroup_size(1u, 1u, 1u) func(%my_param:ptr<workgroup, i32, read_write> [@location(0)]):void {
+                                                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+note: # Disassembly
+%my_func = @compute @workgroup_size(1u, 1u, 1u) func(%my_param:ptr<workgroup, i32, read_write> [@location(0)]):void {
+  $B1: {
+    ret
+  }
+}
+)");
+}
+
+TEST_F(IR_ValidatorTest, Function_Param_Struct_WorkgroupPlusOtherIOAnnotations) {
+    auto* f = ComputeEntryPoint("my_func");
+    IOAttributes attr;
+    attr.location = 0;
+    auto* str_ty = ty.Struct(mod.symbols.New("MyStruct"),
+                             {
+                                 {mod.symbols.New("a"), ty.ptr<workgroup, i32>(), attr},
+                             });
+    auto* p = b.FunctionParam("my_param", str_ty);
+    f->SetParams({p});
+
+    b.Append(f->Block(), [&] { b.Return(f); });
+
+    auto res = ir::Validate(mod, Capabilities{Capability::kAllowPointersInStructures});
+    ASSERT_NE(res, Success);
+    EXPECT_EQ(
+        res.Failure().reason.Str(),
+        R"(:5:54 error: input param struct member has more than one IO annotation, [ @location, <workgroup> ]
+%my_func = @compute @workgroup_size(1u, 1u, 1u) func(%my_param:MyStruct):void {
+                                                     ^^^^^^^^^^^^^^^^^^
+
+note: # Disassembly
+MyStruct = struct @align(1) {
+  a:ptr<workgroup, i32, read_write> @offset(0), @location(0)
+}
+
+%my_func = @compute @workgroup_size(1u, 1u, 1u) func(%my_param:MyStruct):void {
   $B1: {
     ret
   }
@@ -568,10 +715,8 @@ TEST_F(IR_ValidatorTest, Function_Param_InvariantWithPosition) {
     auto* f = b.Function("my_func", ty.void_(), Function::PipelineStage::kFragment);
 
     auto* p = b.FunctionParam("my_param", ty.vec4<f32>());
-    IOAttributes attr;
-    attr.builtin = BuiltinValue::kPosition;
-    attr.invariant = true;
-    p->SetAttributes(attr);
+    p->SetInvariant(true);
+    p->SetBuiltin(BuiltinValue::kPosition);
     f->SetParams({p});
 
     b.Append(f->Block(), [&] { b.Return(f); });
@@ -583,9 +728,7 @@ TEST_F(IR_ValidatorTest, Function_Param_InvariantWithPosition) {
 TEST_F(IR_ValidatorTest, Function_Param_InvariantWithoutPosition) {
     auto* f = b.Function("my_func", ty.void_());
     auto* p = b.FunctionParam("my_param", ty.vec4<f32>());
-    IOAttributes attr;
-    attr.invariant = true;
-    p->SetAttributes(attr);
+    p->SetInvariant(true);
     f->SetParams({p});
 
     b.Append(f->Block(), [&] { b.Return(f); });
@@ -686,19 +829,16 @@ note: # Disassembly
 )");
 }
 
-TEST_F(IR_ValidatorTest, Function_Return_BothLocationAndBuiltin) {
+TEST_F(IR_ValidatorTest, Function_Return_MultipleIOAnnotations) {
     auto* f = VertexEntryPoint("my_func");
-    IOAttributes attr;
-    attr.builtin = BuiltinValue::kPosition;
-    attr.location = 0;
-    f->SetReturnAttributes(attr);
+    f->SetReturnLocation(0);
 
     b.Append(f->Block(), [&] { b.Unreachable(); });
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_EQ(res.Failure().reason.Str(),
-              R"(:1:1 error: a builtin and location cannot be both declared for a function return
+              R"(:1:1 error: return values has more than one IO annotation, [ @location, built-in ]
 %my_func = @vertex func():vec4<f32> [@location(0), @position] {
 ^^^^^^^^
 
@@ -711,7 +851,7 @@ note: # Disassembly
 )");
 }
 
-TEST_F(IR_ValidatorTest, Function_Return_Struct_BothLocationAndBuiltin) {
+TEST_F(IR_ValidatorTest, Function_Return_Struct_MultipleIOAnnotations) {
     IOAttributes attr;
     attr.builtin = BuiltinValue::kPosition;
     attr.location = 0;
@@ -724,8 +864,9 @@ TEST_F(IR_ValidatorTest, Function_Return_Struct_BothLocationAndBuiltin) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.Str(),
-              R"(:5:1 error: a builtin and location cannot be both declared for a struct member
+    EXPECT_EQ(
+        res.Failure().reason.Str(),
+        R"(:5:1 error: return values struct member has more than one IO annotation, [ @location, built-in ]
 %my_func = @vertex func():MyStruct {
 ^^^^^^^^
 
@@ -742,7 +883,7 @@ MyStruct = struct @align(16) {
 )");
 }
 
-TEST_F(IR_ValidatorTest, Function_Return_NonVoid_MissingLocationAndBuiltin) {
+TEST_F(IR_ValidatorTest, Function_Return_NonVoid_MissingIOAnnotations) {
     auto* f = b.Function("my_func", ty.f32(), Function::PipelineStage::kFragment);
 
     b.Append(f->Block(), [&] { b.Unreachable(); });
@@ -751,7 +892,7 @@ TEST_F(IR_ValidatorTest, Function_Return_NonVoid_MissingLocationAndBuiltin) {
     ASSERT_NE(res, Success);
     EXPECT_EQ(
         res.Failure().reason.Str(),
-        R"(:1:1 error: a non-void return for an entry point must have a builtin or location decoration
+        R"(:1:1 error: return values must have at least one IO annotation, e.g. a binding point, a location, etc
 %my_func = @fragment func():f32 {
 ^^^^^^^^
 
@@ -764,7 +905,7 @@ note: # Disassembly
 )");
 }
 
-TEST_F(IR_ValidatorTest, Function_Return_NonVoid_Struct_MissingLocationAndBuiltin) {
+TEST_F(IR_ValidatorTest, Function_Return_NonVoid_Struct_MissingIOAnnotations) {
     auto* str_ty = ty.Struct(mod.symbols.New("MyStruct"), {
                                                               {mod.symbols.New("a"), ty.f32(), {}},
                                                           });
@@ -776,7 +917,7 @@ TEST_F(IR_ValidatorTest, Function_Return_NonVoid_Struct_MissingLocationAndBuilti
     ASSERT_NE(res, Success);
     EXPECT_EQ(
         res.Failure().reason.Str(),
-        R"(:5:1 error: members of struct used for returns of entry points must have a builtin or location decoration
+        R"(:5:1 error: return values struct members must have at least one IO annotation, e.g. a binding point, a location, etc
 %my_func = @fragment func():MyStruct {
 ^^^^^^^^
 
@@ -794,12 +935,9 @@ MyStruct = struct @align(4) {
 }
 
 TEST_F(IR_ValidatorTest, Function_Return_InvariantWithPosition) {
-    IOAttributes attr;
-    attr.builtin = BuiltinValue::kPosition;
-    attr.invariant = true;
-
     auto* f = b.Function("my_func", ty.vec4<f32>(), Function::PipelineStage::kVertex);
-    f->SetReturnAttributes(attr);
+    f->SetReturnBuiltin(BuiltinValue::kPosition);
+    f->SetReturnInvariant(true);
 
     b.Append(f->Block(), [&] { b.Unreachable(); });
 
@@ -808,11 +946,8 @@ TEST_F(IR_ValidatorTest, Function_Return_InvariantWithPosition) {
 }
 
 TEST_F(IR_ValidatorTest, Function_Return_InvariantWithoutPosition) {
-    IOAttributes attr;
-    attr.invariant = true;
-
     auto* f = b.Function("my_func", ty.vec4<f32>());
-    f->SetReturnAttributes(attr);
+    f->SetReturnInvariant(true);
 
     b.Append(f->Block(), [&] { b.Unreachable(); });
 
@@ -973,6 +1108,7 @@ note: # Disassembly
 TEST_F(IR_ValidatorTest, Function_Compute_NonVoidReturn) {
     auto* f = b.Function("my_func", ty.f32(), core::ir::Function::PipelineStage::kCompute);
     f->SetWorkgroupSize(b.Constant(1_u), b.Constant(1_u), b.Constant(1_u));
+    f->SetReturnLocation(0);
 
     b.Append(f->Block(), [&] { b.Unreachable(); });
 
@@ -980,11 +1116,11 @@ TEST_F(IR_ValidatorTest, Function_Compute_NonVoidReturn) {
     ASSERT_NE(res, Success);
     EXPECT_EQ(res.Failure().reason.Str(),
               R"(:1:1 error: compute entry point must not have a return type
-%my_func = @compute @workgroup_size(1u, 1u, 1u) func():f32 {
+%my_func = @compute @workgroup_size(1u, 1u, 1u) func():f32 [@location(0)] {
 ^^^^^^^^
 
 note: # Disassembly
-%my_func = @compute @workgroup_size(1u, 1u, 1u) func():f32 {
+%my_func = @compute @workgroup_size(1u, 1u, 1u) func():f32 [@location(0)] {
   $B1: {
     unreachable
   }
@@ -1229,17 +1365,19 @@ MyStruct = struct @align(4) {
 
 TEST_F(IR_ValidatorTest, Function_Vertex_MissingPosition) {
     auto* f = b.Function("my_func", ty.vec4<f32>(), Function::PipelineStage::kVertex);
+    f->SetReturnLocation(0);
+
     b.Append(f->Block(), [&] { b.Unreachable(); });
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_EQ(res.Failure().reason.Str(),
               R"(:1:1 error: position must be declared for vertex entry point output
-%my_func = @vertex func():vec4<f32> {
+%my_func = @vertex func():vec4<f32> [@location(0)] {
 ^^^^^^^^
 
 note: # Disassembly
-%my_func = @vertex func():vec4<f32> {
+%my_func = @vertex func():vec4<f32> [@location(0)] {
   $B1: {
     unreachable
   }
@@ -1249,18 +1387,20 @@ note: # Disassembly
 
 TEST_F(IR_ValidatorTest, Function_NonFragment_BoolInput) {
     auto* f = VertexEntryPoint();
-    f->AppendParam(b.FunctionParam("invalid", ty.bool_()));
+    auto* p = b.FunctionParam("invalid", ty.bool_());
+    p->SetLocation(0);
+    f->AppendParam(p);
     b.Append(f->Block(), [&] { b.Unreachable(); });
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_EQ(res.Failure().reason.Str(),
               R"(:1:19 error: entry point params can only be a bool for fragment shaders
-%f = @vertex func(%invalid:bool):vec4<f32> [@position] {
+%f = @vertex func(%invalid:bool [@location(0)]):vec4<f32> [@position] {
                   ^^^^^^^^^^^^^
 
 note: # Disassembly
-%f = @vertex func(%invalid:bool):vec4<f32> [@position] {
+%f = @vertex func(%invalid:bool [@location(0)]):vec4<f32> [@position] {
   $B1: {
     unreachable
   }
@@ -1270,7 +1410,9 @@ note: # Disassembly
 
 TEST_F(IR_ValidatorTest, Function_NonFragment_BoolOutput) {
     auto* f = VertexEntryPoint();
-    AddReturn(f, "invalid", ty.bool_());
+    IOAttributes attr;
+    attr.location = 0;
+    AddReturn(f, "invalid", ty.bool_(), attr);
     b.Append(f->Block(), [&] { b.Unreachable(); });
 
     auto res = ir::Validate(mod);
@@ -1283,7 +1425,7 @@ TEST_F(IR_ValidatorTest, Function_NonFragment_BoolOutput) {
 note: # Disassembly
 OutputStruct = struct @align(16) {
   pos:vec4<f32> @offset(0), @builtin(position)
-  invalid:bool @offset(16)
+  invalid:bool @offset(16), @location(0)
 }
 
 %f = @vertex func():OutputStruct {
@@ -1296,7 +1438,9 @@ OutputStruct = struct @align(16) {
 
 TEST_F(IR_ValidatorTest, Function_Fragment_BoolInputWithoutFrontFacing) {
     auto* f = FragmentEntryPoint();
-    f->AppendParam(b.FunctionParam("invalid", ty.bool_()));
+    auto* p = b.FunctionParam("invalid", ty.bool_());
+    p->SetLocation(0);
+    f->AppendParam(p);
     b.Append(f->Block(), [&] { b.Unreachable(); });
 
     auto res = ir::Validate(mod);
@@ -1304,11 +1448,11 @@ TEST_F(IR_ValidatorTest, Function_Fragment_BoolInputWithoutFrontFacing) {
     EXPECT_EQ(
         res.Failure().reason.Str(),
         R"(:1:21 error: fragment entry point params can only be a bool if decorated with @builtin(front_facing)
-%f = @fragment func(%invalid:bool):void {
+%f = @fragment func(%invalid:bool [@location(0)]):void {
                     ^^^^^^^^^^^^^
 
 note: # Disassembly
-%f = @fragment func(%invalid:bool):void {
+%f = @fragment func(%invalid:bool [@location(0)]):void {
   $B1: {
     unreachable
   }
@@ -1343,6 +1487,9 @@ TEST_F(IR_ValidatorTest, Function_BoolOutput_via_MSV) {
     auto* f = ComputeEntryPoint();
 
     auto* v = b.Var(ty.ptr(AddressSpace::kOut, ty.bool_(), core::Access::kReadWrite));
+    IOAttributes attr;
+    attr.location = 0;
+    v->SetAttributes(attr);
     mod.root_block->Append(v);
 
     b.Append(f->Block(), [&] {
@@ -1361,7 +1508,7 @@ TEST_F(IR_ValidatorTest, Function_BoolOutput_via_MSV) {
 
 note: # Disassembly
 $B1: {  # root
-  %1:ptr<__out, bool, read_write> = var
+  %1:ptr<__out, bool, read_write> = var @location(0)
 }
 
 %f = @compute @workgroup_size(1u, 1u, 1u) func():void {
@@ -1377,6 +1524,9 @@ TEST_F(IR_ValidatorTest, Function_BoolInputWithoutFrontFacing_via_MSV) {
     auto* f = FragmentEntryPoint();
 
     auto* invalid = b.Var("invalid", AddressSpace::kIn, ty.bool_());
+    IOAttributes attr;
+    attr.location = 0;
+    invalid->SetAttributes(attr);
     mod.root_block->Append(invalid);
 
     b.Append(f->Block(), [&] {
@@ -1396,7 +1546,7 @@ TEST_F(IR_ValidatorTest, Function_BoolInputWithoutFrontFacing_via_MSV) {
 
 note: # Disassembly
 $B1: {  # root
-  %invalid:ptr<__in, bool, read> = var
+  %invalid:ptr<__in, bool, read> = var @location(0)
 }
 
 %f = @fragment func():void {
@@ -5200,7 +5350,7 @@ $B1: {  # root
 )");
 }
 
-TEST_F(IR_ValidatorTest, Var_IOBothLocationAndBuiltin) {
+TEST_F(IR_ValidatorTest, Var_MultipleIOAnnotations) {
     auto* v = b.Var<AddressSpace::kIn, vec4<f32>>();
     IOAttributes attr;
     attr.builtin = BuiltinValue::kPosition;
@@ -5212,7 +5362,7 @@ TEST_F(IR_ValidatorTest, Var_IOBothLocationAndBuiltin) {
     ASSERT_NE(res, Success);
     EXPECT_EQ(
         res.Failure().reason.Str(),
-        R"(:2:35 error: var: a builtin and location cannot be both declared for a module scope var
+        R"(:2:35 error: var: module scope variable has more than one IO annotation, [ @location, built-in ]
   %1:ptr<__in, vec4<f32>, read> = var @location(0) @builtin(position)
                                   ^^^
 
@@ -5228,10 +5378,10 @@ $B1: {  # root
 )");
 }
 
-TEST_F(IR_ValidatorTest, Var_Struct_IOBothLocationAndBuiltin) {
+TEST_F(IR_ValidatorTest, Var_Struct_MultipleIOAnnotations) {
     IOAttributes attr;
     attr.builtin = BuiltinValue::kPosition;
-    attr.location = 0;
+    attr.color = 0;
 
     auto* str_ty =
         ty.Struct(mod.symbols.New("MyStruct"), {
@@ -5244,7 +5394,7 @@ TEST_F(IR_ValidatorTest, Var_Struct_IOBothLocationAndBuiltin) {
     ASSERT_NE(res, Success);
     EXPECT_EQ(
         res.Failure().reason.Str(),
-        R"(:6:41 error: var: a builtin and location cannot be both declared for a module scope var struct member
+        R"(:6:41 error: var: module scope variable struct member has more than one IO annotation, [ built-in, @color ]
   %1:ptr<__out, MyStruct, read_write> = var
                                         ^^^
 
@@ -5254,7 +5404,62 @@ $B1: {  # root
 
 note: # Disassembly
 MyStruct = struct @align(4) {
-  a:f32 @offset(0), @location(0), @builtin(position)
+  a:f32 @offset(0), @color(0), @builtin(position)
+}
+
+$B1: {  # root
+  %1:ptr<__out, MyStruct, read_write> = var
+}
+
+)");
+}
+
+TEST_F(IR_ValidatorTest, Var_MissingIOAnnotations) {
+    auto* v = b.Var<AddressSpace::kIn, vec4<f32>>();
+    mod.root_block->Append(v);
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_EQ(
+        res.Failure().reason.Str(),
+        R"(:2:35 error: var: module scope variable must have at least one IO annotation, e.g. a binding point, a location, etc
+  %1:ptr<__in, vec4<f32>, read> = var
+                                  ^^^
+
+:1:1 note: in block
+$B1: {  # root
+^^^
+
+note: # Disassembly
+$B1: {  # root
+  %1:ptr<__in, vec4<f32>, read> = var
+}
+
+)");
+}
+
+TEST_F(IR_ValidatorTest, Var_Struct_MissingIOAnnotations) {
+    auto* str_ty = ty.Struct(mod.symbols.New("MyStruct"), {
+                                                              {mod.symbols.New("a"), ty.f32(), {}},
+                                                          });
+    auto* v = b.Var(ty.ptr(AddressSpace::kOut, str_ty, read_write));
+    mod.root_block->Append(v);
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_EQ(
+        res.Failure().reason.Str(),
+        R"(:6:41 error: var: module scope variable struct members must have at least one IO annotation, e.g. a binding point, a location, etc
+  %1:ptr<__out, MyStruct, read_write> = var
+                                        ^^^
+
+:5:1 note: in block
+$B1: {  # root
+^^^
+
+note: # Disassembly
+MyStruct = struct @align(4) {
+  a:f32 @offset(0)
 }
 
 $B1: {  # root

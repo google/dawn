@@ -1528,7 +1528,7 @@ TEST_F(SpirvWriter_ShaderIOTest, F16_IO_WithoutPolyfill) {
     auto* in1 = b.FunctionParam("in1", ty.f16());
     auto* in2 = b.FunctionParam("in2", ty.vec4<f16>());
     in1->SetLocation(1);
-    in1->SetLocation(2);
+    in2->SetLocation(2);
     auto* func = b.Function("main", outputs, core::ir::Function::PipelineStage::kFragment);
     func->SetParams({in1, in2});
     b.Append(func->Block(), [&] {  //
@@ -1541,7 +1541,7 @@ Outputs = struct @align(8) {
   out2:vec4<f16> @offset(8), @location(2)
 }
 
-%main = @fragment func(%in1:f16 [@location(2)], %in2:vec4<f16>):Outputs {
+%main = @fragment func(%in1:f16 [@location(1)], %in2:vec4<f16> [@location(2)]):Outputs {
   $B1: {
     %4:Outputs = construct %in1, %in2
     ret %4
@@ -1557,8 +1557,8 @@ Outputs = struct @align(8) {
 }
 
 $B1: {  # root
-  %main_loc2_Input:ptr<__in, f16, read> = var @location(2)
-  %main_Input:ptr<__in, vec4<f16>, read> = var
+  %main_loc1_Input:ptr<__in, f16, read> = var @location(1)
+  %main_loc2_Input:ptr<__in, vec4<f16>, read> = var @location(2)
   %main_loc1_Output:ptr<__out, f16, write> = var @location(1)
   %main_loc2_Output:ptr<__out, vec4<f16>, write> = var @location(2)
 }
@@ -1571,8 +1571,8 @@ $B1: {  # root
 }
 %main = @fragment func():void {
   $B3: {
-    %10:f16 = load %main_loc2_Input
-    %11:vec4<f16> = load %main_Input
+    %10:f16 = load %main_loc1_Input
+    %11:vec4<f16> = load %main_loc2_Input
     %12:Outputs = call %main_inner, %10, %11
     %13:f16 = access %12, 0u
     store %main_loc1_Output, %13
@@ -1622,7 +1622,7 @@ TEST_F(SpirvWriter_ShaderIOTest, F16_IO_WithPolyfill) {
     auto* in1 = b.FunctionParam("in1", ty.f16());
     auto* in2 = b.FunctionParam("in2", ty.vec4<f16>());
     in1->SetLocation(1);
-    in1->SetLocation(2);
+    in2->SetLocation(2);
     auto* func = b.Function("main", outputs, core::ir::Function::PipelineStage::kFragment);
     func->SetParams({in1, in2});
     b.Append(func->Block(), [&] {  //
@@ -1635,7 +1635,7 @@ Outputs = struct @align(8) {
   out2:vec4<f16> @offset(8), @location(2)
 }
 
-%main = @fragment func(%in1:f16 [@location(2)], %in2:vec4<f16>):Outputs {
+%main = @fragment func(%in1:f16 [@location(1)], %in2:vec4<f16> [@location(2)]):Outputs {
   $B1: {
     %4:Outputs = construct %in1, %in2
     ret %4
@@ -1651,8 +1651,8 @@ Outputs = struct @align(8) {
 }
 
 $B1: {  # root
-  %main_loc2_Input:ptr<__in, f32, read> = var @location(2)
-  %main_Input:ptr<__in, vec4<f32>, read> = var
+  %main_loc1_Input:ptr<__in, f32, read> = var @location(1)
+  %main_loc2_Input:ptr<__in, vec4<f32>, read> = var @location(2)
   %main_loc1_Output:ptr<__out, f32, write> = var @location(1)
   %main_loc2_Output:ptr<__out, vec4<f32>, write> = var @location(2)
 }
@@ -1665,9 +1665,9 @@ $B1: {  # root
 }
 %main = @fragment func():void {
   $B3: {
-    %10:f32 = load %main_loc2_Input
+    %10:f32 = load %main_loc1_Input
     %11:f16 = convert %10
-    %12:vec4<f32> = load %main_Input
+    %12:vec4<f32> = load %main_loc2_Input
     %13:vec4<f16> = convert %12
     %14:Outputs = call %main_inner, %11, %13
     %15:f16 = access %14, 0u
