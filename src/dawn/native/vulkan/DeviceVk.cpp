@@ -336,10 +336,10 @@ MaybeError Device::TickImpl() {
          mDescriptorAllocatorsPendingDeallocation.IterateUpTo(completedSerial)) {
         allocator->FinishDeallocation(completedSerial);
     }
+    mDescriptorAllocatorsPendingDeallocation.ClearUpTo(completedSerial);
 
     GetResourceMemoryAllocator()->Tick(completedSerial);
     GetFencedDeleter()->Tick(completedSerial);
-    mDescriptorAllocatorsPendingDeallocation.ClearUpTo(completedSerial);
 
     DAWN_TRY(queue->SubmitPendingCommands());
     DAWN_TRY(CheckDebugLayerAndGenerateErrors());
@@ -912,11 +912,11 @@ void Device::DestroyImpl() {
          mDescriptorAllocatorsPendingDeallocation.IterateUpTo(kMaxExecutionSerial)) {
         allocator->FinishDeallocation(kMaxExecutionSerial);
     }
+    mDescriptorAllocatorsPendingDeallocation.ClearUpTo(kMaxExecutionSerial);
 
     // Releasing the uploader enqueues buffers to be released.
     // Call Tick() again to clear them before releasing the deleter.
     GetResourceMemoryAllocator()->Tick(kMaxExecutionSerial);
-    mDescriptorAllocatorsPendingDeallocation.ClearUpTo(kMaxExecutionSerial);
 
     // Allow recycled memory to be deleted.
     GetResourceMemoryAllocator()->DestroyPool();
