@@ -2440,9 +2440,10 @@ Result<SuccessType, std::string> Validator::ValidateShaderIOAnnotations(
         }
     }
 
-    // void being annotated should never occur
-    TINT_ASSERT(!ty->Is<core::type::Void>() || annotations.Empty());
     if (ty->Is<core::type::Void>()) {
+        if (!annotations.Empty()) {
+            return target_str + " with void type should never be annotated";
+        }
         return Success;
     }
 

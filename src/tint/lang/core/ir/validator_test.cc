@@ -883,6 +883,27 @@ MyStruct = struct @align(16) {
 )");
 }
 
+TEST_F(IR_ValidatorTest, Function_Return_Void_IOAnnotation) {
+    auto* f = FragmentEntryPoint();
+    f->SetReturnLocation(0);
+    b.Append(f->Block(), [&] { b.Unreachable(); });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_EQ(res.Failure().reason.Str(),
+              R"(:1:1 error: return values with void type should never be annotated
+%f = @fragment func():void [@location(0)] {
+^^
+
+note: # Disassembly
+%f = @fragment func():void [@location(0)] {
+  $B1: {
+    unreachable
+  }
+}
+)");
+}
+
 TEST_F(IR_ValidatorTest, Function_Return_NonVoid_MissingIOAnnotations) {
     auto* f = b.Function("my_func", ty.f32(), Function::PipelineStage::kFragment);
 
