@@ -14,13 +14,9 @@ struct tint_array {
     T elements[N];
 };
 
-#define TINT_ISOLATE_UB(VOLATILE_NAME) \
-  {volatile bool VOLATILE_NAME = false; if (VOLATILE_NAME) break;}
-
 kernel void foo(device tint_array<int, 10>* tint_symbol [[buffer(0)]]) {
   int i = 0;
   while(true) {
-    TINT_ISOLATE_UB(tint_volatile_false);
     int x = (*(tint_symbol))[i];
     {
       int x_1 = (*(tint_symbol))[x];

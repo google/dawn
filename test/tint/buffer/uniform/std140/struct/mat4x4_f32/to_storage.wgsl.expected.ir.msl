@@ -22,9 +22,6 @@ struct S {
   /* 0x0084 */ tint_array<int8_t, 60> tint_pad_2;
 };
 
-#define TINT_ISOLATE_UB(VOLATILE_NAME) \
-  {volatile bool VOLATILE_NAME = false; if (VOLATILE_NAME) break;}
-
 struct tint_module_vars_struct {
   const constant tint_array<S, 4>* u;
   device tint_array<S, 4>* s;
@@ -41,7 +38,6 @@ void tint_store_and_preserve_padding(device tint_array<S, 4>* const target, tint
     uint v = 0u;
     v = 0u;
     while(true) {
-      TINT_ISOLATE_UB(tint_volatile_false)
       uint const v_1 = v;
       if ((v_1 >= 4u)) {
         break;

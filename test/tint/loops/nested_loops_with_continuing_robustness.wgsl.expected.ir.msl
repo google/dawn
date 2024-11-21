@@ -1,0 +1,32 @@
+#include <metal_stdlib>
+using namespace metal;
+
+#define TINT_ISOLATE_UB(VOLATILE_NAME) \
+  {volatile bool VOLATILE_NAME = false; if (VOLATILE_NAME) break;}
+
+int f() {
+  int i = 0;
+  int j = 0;
+  {
+    while(true) {
+      TINT_ISOLATE_UB(tint_volatile_false)
+      if ((i > 4)) {
+        return 1;
+      }
+      {
+        while(true) {
+          TINT_ISOLATE_UB(tint_volatile_false_1)
+          if ((j > 4)) {
+            return 2;
+          }
+          {
+            j = as_type<int>((as_type<uint>(j) + as_type<uint>(1)));
+          }
+          continue;
+        }
+      }
+      /* unreachable */
+    }
+  }
+  /* unreachable */
+}

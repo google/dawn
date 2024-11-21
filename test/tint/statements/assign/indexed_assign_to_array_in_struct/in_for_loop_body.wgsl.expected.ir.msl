@@ -29,9 +29,6 @@ struct OuterS {
   tint_array<InnerS, 8> a1;
 };
 
-#define TINT_ISOLATE_UB(VOLATILE_NAME) \
-  {volatile bool VOLATILE_NAME = false; if (VOLATILE_NAME) break;}
-
 kernel void tint_symbol(const constant Uniforms* uniforms [[buffer(0)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.uniforms=uniforms};
   InnerS v = {};
@@ -39,7 +36,6 @@ kernel void tint_symbol(const constant Uniforms* uniforms [[buffer(0)]]) {
   {
     int i = 0;
     while(true) {
-      TINT_ISOLATE_UB(tint_volatile_false)
       if ((i < 4)) {
       } else {
         break;

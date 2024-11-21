@@ -1,0 +1,96 @@
+; SPIR-V
+; Version: 1.3
+; Generator: Google Tint Compiler; 1
+; Bound: 49
+; Schema: 0
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %unused_entry_point "unused_entry_point"
+               OpExecutionMode %unused_entry_point LocalSize 1 1 1
+               OpName %f "f"
+               OpName %return_value "return_value"
+               OpName %continue_execution "continue_execution"
+               OpName %i "i"
+               OpName %j "j"
+               OpName %unused_entry_point "unused_entry_point"
+        %int = OpTypeInt 32 1
+          %3 = OpTypeFunction %int
+%_ptr_Function_int = OpTypePointer Function %int
+          %7 = OpConstantNull %int
+       %bool = OpTypeBool
+%_ptr_Function_bool = OpTypePointer Function %bool
+       %true = OpConstantTrue %bool
+      %int_1 = OpConstant %int 1
+      %int_4 = OpConstant %int 4
+      %false = OpConstantFalse %bool
+      %int_2 = OpConstant %int 2
+       %void = OpTypeVoid
+         %47 = OpTypeFunction %void
+          %f = OpFunction %int None %3
+          %4 = OpLabel
+%return_value = OpVariable %_ptr_Function_int Function %7
+%continue_execution = OpVariable %_ptr_Function_bool Function
+          %i = OpVariable %_ptr_Function_int Function %7
+          %j = OpVariable %_ptr_Function_int Function %7
+               OpStore %continue_execution %true
+               OpBranch %16
+         %16 = OpLabel
+               OpLoopMerge %17 %15 None
+               OpBranch %14
+         %14 = OpLabel
+         %18 = OpLoad %int %i None
+         %19 = OpIAdd %int %18 %int_1
+               OpStore %i %19 None
+         %21 = OpLoad %int %i None
+         %22 = OpSGreaterThan %bool %21 %int_4
+               OpSelectionMerge %24 None
+               OpBranchConditional %22 %25 %24
+         %25 = OpLabel
+               OpStore %continue_execution %false None
+               OpStore %return_value %int_1 None
+               OpBranch %24
+         %24 = OpLabel
+         %27 = OpLoad %bool %continue_execution None
+               OpSelectionMerge %28 None
+               OpBranchConditional %27 %29 %28
+         %29 = OpLabel
+               OpBranch %32
+         %32 = OpLabel
+               OpLoopMerge %33 %31 None
+               OpBranch %30
+         %30 = OpLabel
+         %34 = OpLoad %int %j None
+         %35 = OpIAdd %int %34 %int_1
+               OpStore %j %35 None
+         %36 = OpLoad %int %j None
+         %37 = OpSGreaterThan %bool %36 %int_4
+               OpSelectionMerge %38 None
+               OpBranchConditional %37 %39 %38
+         %39 = OpLabel
+               OpStore %continue_execution %false None
+               OpStore %return_value %int_2 None
+               OpBranch %38
+         %38 = OpLabel
+         %41 = OpLoad %bool %continue_execution None
+               OpSelectionMerge %42 None
+               OpBranchConditional %41 %43 %42
+         %43 = OpLabel
+               OpBranch %31
+         %42 = OpLabel
+               OpBranch %33
+         %31 = OpLabel
+               OpBranch %32
+         %33 = OpLabel
+               OpBranch %28
+         %28 = OpLabel
+               OpBranch %17
+         %15 = OpLabel
+               OpBranch %16
+         %17 = OpLabel
+         %44 = OpLoad %int %return_value None
+               OpReturnValue %44
+               OpFunctionEnd
+%unused_entry_point = OpFunction %void None %47
+         %48 = OpLabel
+               OpReturn
+               OpFunctionEnd

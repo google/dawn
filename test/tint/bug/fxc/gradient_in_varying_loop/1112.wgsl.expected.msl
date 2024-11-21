@@ -1,10 +1,6 @@
 #include <metal_stdlib>
 
 using namespace metal;
-
-#define TINT_ISOLATE_UB(VOLATILE_NAME) \
-  {volatile bool VOLATILE_NAME = false; if (VOLATILE_NAME) break;}
-
 struct tint_symbol_3 {
   float2 vUV [[user(locn0)]];
 };
@@ -18,7 +14,6 @@ float4 tint_symbol_inner(float2 vUV, texture2d<float, access::sample> tint_symbo
   float3 const random = tint_symbol_1.rgb;
   int i = 0;
   while(true) {
-    TINT_ISOLATE_UB(tint_volatile_false);
     if ((i < 1)) {
     } else {
       break;

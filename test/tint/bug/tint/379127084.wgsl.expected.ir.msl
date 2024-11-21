@@ -55,9 +55,6 @@ struct tint_module_vars_struct {
   texture2d<float, access::sample> noiseSampler_1_Texture;
 };
 
-#define TINT_ISOLATE_UB(VOLATILE_NAME) \
-  {volatile bool VOLATILE_NAME = false; if (VOLATILE_NAME) break;}
-
 struct tint_symbol_outputs {
   float4 FSOut_sk_FragColor [[color(0)]];
 };
@@ -77,7 +74,6 @@ void _skslMain(FSIn _stageIn, thread FSOut* const _stageOut, tint_module_vars_st
   int _61_o = 0;
   {
     while(true) {
-      TINT_ISOLATE_UB(tint_volatile_false)
       if ((_61_o < (*tint_module_vars._storage1).fsUniformData[(*tint_module_vars.shadingSsboIndex)].numOctaves_1)) {
         float4 _62_f = 0.0f;
         float2 const _skTemp2 = floor(_57_k);
@@ -107,7 +103,6 @@ void _skslMain(FSIn _stageIn, thread FSOut* const _stageOut, tint_module_vars_st
         int _72_h = 0;
         {
           while(true) {
-            TINT_ISOLATE_UB(tint_volatile_false_1)
             float const _73_i = ((float(_72_h) + 0.5f) * 0.25f);
             float const v_2 = float(_67_p[0u]);
             float2 const v_3 = float2(v_2, float(_73_i));

@@ -37,6 +37,12 @@ namespace {
 
 using MslASTPrinterTest = TestHelper;
 
+Options NoRobustness() {
+    Options o;
+    o.disable_robustness = true;
+    return o;
+}
+
 TEST_F(MslASTPrinterTest, Emit_Loop) {
     auto* body = Block(Break());
     auto* continuing = Block();
@@ -57,6 +63,29 @@ using namespace metal;
 fragment void F() {
   while(true) {
     TINT_ISOLATE_UB(tint_volatile_false);
+    break;
+  }
+  return;
+}
+
+)");
+}
+
+TEST_F(MslASTPrinterTest, Emit_Loop_WithoutRobustness) {
+    auto* body = Block(Break());
+    auto* continuing = Block();
+    auto* l = Loop(body, continuing);
+
+    Func("F", tint::Empty, ty.void_(), Vector{l}, Vector{Stage(ast::PipelineStage::kFragment)});
+
+    ASTPrinter& gen = Build(NoRobustness());
+
+    ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
+    EXPECT_EQ(gen.Result(), R"(#include <metal_stdlib>
+
+using namespace metal;
+fragment void F() {
+  while(true) {
     break;
   }
   return;
@@ -101,6 +130,37 @@ fragment void F() {
 )");
 }
 
+TEST_F(MslASTPrinterTest, Emit_LoopWithContinuing_WithoutRobustness) {
+    Func("a_statement", {}, ty.void_(), tint::Empty);
+
+    auto* body = Block(Break());
+    auto* continuing = Block(CallStmt(Call("a_statement")));
+    auto* l = Loop(body, continuing);
+
+    Func("F", tint::Empty, ty.void_(), Vector{l}, Vector{Stage(ast::PipelineStage::kFragment)});
+
+    ASTPrinter& gen = Build(NoRobustness());
+
+    ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
+    EXPECT_EQ(gen.Result(), R"(#include <metal_stdlib>
+
+using namespace metal;
+void a_statement() {
+}
+
+fragment void F() {
+  while(true) {
+    break;
+    {
+      a_statement();
+    }
+  }
+  return;
+}
+
+)");
+}
+
 TEST_F(MslASTPrinterTest, Emit_LoopWithContinuing_BreakIf) {
     Func("a_statement", {}, ty.void_(), {});
 
@@ -126,6 +186,38 @@ void a_statement() {
 fragment void F() {
   while(true) {
     TINT_ISOLATE_UB(tint_volatile_false);
+    break;
+    {
+      a_statement();
+      if (true) { break; }
+    }
+  }
+  return;
+}
+
+)");
+}
+
+TEST_F(MslASTPrinterTest, Emit_LoopWithContinuing_BreakIf_WithoutRobustness) {
+    Func("a_statement", {}, ty.void_(), {});
+
+    auto* body = Block(Break());
+    auto* continuing = Block(CallStmt(Call("a_statement")), BreakIf(true));
+    auto* l = Loop(body, continuing);
+
+    Func("F", tint::Empty, ty.void_(), Vector{l}, Vector{Stage(ast::PipelineStage::kFragment)});
+
+    ASTPrinter& gen = Build(NoRobustness());
+
+    ASSERT_TRUE(gen.Generate()) << gen.Diagnostics();
+    EXPECT_EQ(gen.Result(), R"(#include <metal_stdlib>
+
+using namespace metal;
+void a_statement() {
+}
+
+fragment void F() {
+  while(true) {
     break;
     {
       a_statement();
@@ -176,6 +268,42 @@ TEST_F(MslASTPrinterTest, Emit_LoopNestedWithContinuing) {
 )");
 }
 
+TEST_F(MslASTPrinterTest, Emit_LoopNestedWithContinuing_WithoutRobustness) {
+    Func("a_statement", {}, ty.void_(), tint::Empty);
+
+    GlobalVar("lhs", ty.f32(), core::AddressSpace::kPrivate);
+    GlobalVar("rhs", ty.f32(), core::AddressSpace::kPrivate);
+
+    auto* body = Block(Break());
+    auto* continuing = Block(CallStmt(Call("a_statement")));
+    auto* inner = Loop(body, continuing);
+
+    body = Block(inner);
+
+    continuing = Block(Assign("lhs", "rhs"), BreakIf(true));
+
+    auto* outer = Loop(body, continuing);
+
+    Func("F", tint::Empty, ty.void_(), Vector{outer}, Vector{Stage(ast::PipelineStage::kFragment)});
+
+    ASTPrinter& gen = Build(NoRobustness());
+
+    ASSERT_TRUE(gen.EmitStatement(outer)) << gen.Diagnostics();
+    EXPECT_EQ(gen.Result(), R"(while(true) {
+  while(true) {
+    break;
+    {
+      a_statement();
+    }
+  }
+  {
+    lhs = rhs;
+    if (true) { break; }
+  }
+}
+)");
+}
+
 TEST_F(MslASTPrinterTest, Emit_LoopWithVarUsedInContinuing) {
     // loop {
     //   var lhs : f32 = 2.5;
@@ -211,6 +339,40 @@ TEST_F(MslASTPrinterTest, Emit_LoopWithVarUsedInContinuing) {
 )");
 }
 
+TEST_F(MslASTPrinterTest, Emit_LoopWithVarUsedInContinuing_WithoutRobustness) {
+    // loop {
+    //   var lhs : f32 = 2.5;
+    //   var other : f32;
+    //   continuing {
+    //     lhs = rhs
+    //   }
+    // }
+    //
+
+    GlobalVar("rhs", ty.f32(), core::AddressSpace::kPrivate);
+
+    auto* body = Block(Decl(Var("lhs", ty.f32(), Expr(2.5_f))),  //
+                       Decl(Var("other", ty.f32())),             //
+                       Break());
+
+    auto* continuing = Block(Assign("lhs", "rhs"));
+    auto* outer = Loop(body, continuing);
+    WrapInFunction(outer);
+
+    ASTPrinter& gen = Build(NoRobustness());
+
+    ASSERT_TRUE(gen.EmitStatement(outer)) << gen.Diagnostics();
+    EXPECT_EQ(gen.Result(), R"(while(true) {
+  float lhs = 2.5f;
+  float other = 0.0f;
+  break;
+  {
+    lhs = rhs;
+  }
+}
+)");
+}
+
 TEST_F(MslASTPrinterTest, Emit_ForLoop) {
     // for(; ; ) {
     //   return;
@@ -230,6 +392,24 @@ TEST_F(MslASTPrinterTest, Emit_ForLoop) {
 )");
 }
 
+TEST_F(MslASTPrinterTest, Emit_ForLoop_WithoutRobustness) {
+    // for(; ; ) {
+    //   return;
+    // }
+
+    auto* f = For(nullptr, nullptr, nullptr,  //
+                  Block(Return()));
+    WrapInFunction(f);
+
+    ASTPrinter& gen = Build(NoRobustness());
+
+    ASSERT_TRUE(gen.EmitStatement(f)) << gen.Diagnostics();
+    EXPECT_EQ(gen.Result(), R"(for(; ; ) {
+  return;
+}
+)");
+}
+
 TEST_F(MslASTPrinterTest, Emit_ForLoopWithSimpleInit) {
     // for(var i : i32; ; ) {
     //   return;
@@ -244,6 +424,24 @@ TEST_F(MslASTPrinterTest, Emit_ForLoopWithSimpleInit) {
     ASSERT_TRUE(gen.EmitStatement(f)) << gen.Diagnostics();
     EXPECT_EQ(gen.Result(), R"(for(int i = 0; ; ) {
   TINT_ISOLATE_UB(tint_volatile_false);
+  return;
+}
+)");
+}
+
+TEST_F(MslASTPrinterTest, Emit_ForLoopWithSimpleInit_WithoutRobustness) {
+    // for(var i : i32; ; ) {
+    //   return;
+    // }
+
+    auto* f = For(Decl(Var("i", ty.i32())), nullptr, nullptr,  //
+                  Block(Return()));
+    WrapInFunction(f);
+
+    ASTPrinter& gen = Build(NoRobustness());
+
+    ASSERT_TRUE(gen.EmitStatement(f)) << gen.Diagnostics();
+    EXPECT_EQ(gen.Result(), R"(for(int i = 0; ; ) {
   return;
 }
 )");
@@ -282,6 +480,38 @@ TEST_F(MslASTPrinterTest, Emit_ForLoopWithMultiStmtInit) {
 )");
 }
 
+TEST_F(MslASTPrinterTest, Emit_ForLoopWithMultiStmtInit_WithoutRobustness) {
+    // fn f(i : i32) {}
+    //
+    // var<workgroup> a : atomic<i32>;
+    // for({f(1i); f(2i);}; ; ) {
+    //   return;
+    // }
+
+    Func("f", Vector{Param("i", ty.i32())}, ty.void_(), tint::Empty);
+    auto f = [&](auto&& expr) { return CallStmt(Call("f", expr)); };
+
+    GlobalVar("a", ty.atomic<i32>(), core::AddressSpace::kWorkgroup);
+    auto* multi_stmt = Block(f(1_i), f(2_i));
+    auto* loop = For(multi_stmt, nullptr, nullptr,  //
+                     Block(Return()));
+    WrapInFunction(loop);
+
+    ASTPrinter& gen = Build(NoRobustness());
+
+    ASSERT_TRUE(gen.EmitStatement(loop)) << gen.Diagnostics();
+    EXPECT_EQ(gen.Result(), R"({
+  {
+    f(1);
+    f(2);
+  }
+  for(; ; ) {
+    return;
+  }
+}
+)");
+}
+
 TEST_F(MslASTPrinterTest, Emit_ForLoopWithSimpleCond) {
     // for(; true; ) {
     //   return;
@@ -296,6 +526,24 @@ TEST_F(MslASTPrinterTest, Emit_ForLoopWithSimpleCond) {
     ASSERT_TRUE(gen.EmitStatement(f)) << gen.Diagnostics();
     EXPECT_EQ(gen.Result(), R"(for(; true; ) {
   TINT_ISOLATE_UB(tint_volatile_false);
+  return;
+}
+)");
+}
+
+TEST_F(MslASTPrinterTest, Emit_ForLoopWithSimpleCond_WithoutRobustness) {
+    // for(; true; ) {
+    //   return;
+    // }
+
+    auto* f = For(nullptr, true, nullptr,  //
+                  Block(Return()));
+    WrapInFunction(f);
+
+    ASTPrinter& gen = Build(NoRobustness());
+
+    ASSERT_TRUE(gen.EmitStatement(f)) << gen.Diagnostics();
+    EXPECT_EQ(gen.Result(), R"(for(; true; ) {
   return;
 }
 )");
@@ -317,6 +565,26 @@ TEST_F(MslASTPrinterTest, Emit_ForLoopWithSimpleCont) {
     EXPECT_EQ(gen.Result(),
               R"(for(; ; i = as_type<int>((as_type<uint>(i) + as_type<uint>(1)))) {
   TINT_ISOLATE_UB(tint_volatile_false);
+  return;
+}
+)");
+}
+
+TEST_F(MslASTPrinterTest, Emit_ForLoopWithSimpleCont_WithoutRobustness) {
+    // for(; ; i = i + 1) {
+    //   return;
+    // }
+
+    auto* v = Decl(Var("i", ty.i32()));
+    auto* f = For(nullptr, nullptr, Assign("i", Add("i", 1_i)),  //
+                  Block(Return()));
+    WrapInFunction(v, f);
+
+    ASTPrinter& gen = Build(NoRobustness());
+
+    ASSERT_TRUE(gen.EmitStatement(f)) << gen.Diagnostics();
+    EXPECT_EQ(gen.Result(),
+              R"(for(; ; i = as_type<int>((as_type<uint>(i) + as_type<uint>(1)))) {
   return;
 }
 )");
@@ -353,6 +621,36 @@ TEST_F(MslASTPrinterTest, Emit_ForLoopWithMultiStmtCont) {
 )");
 }
 
+TEST_F(MslASTPrinterTest, Emit_ForLoopWithMultiStmtCont_WithoutRobustness) {
+    // fn f(i : i32) {}
+    //
+    // var<workgroup> a : atomic<i32>;
+    // for(; ; { f(1i); f(2i); }) {
+    //   return;
+    // }
+
+    Func("f", Vector{Param("i", ty.i32())}, ty.void_(), tint::Empty);
+    auto f = [&](auto&& expr) { return CallStmt(Call("f", expr)); };
+
+    GlobalVar("a", ty.atomic<i32>(), core::AddressSpace::kWorkgroup);
+    auto* multi_stmt = Block(f(1_i), f(2_i));
+    auto* loop = For(nullptr, nullptr, multi_stmt,  //
+                     Block(Return()));
+    WrapInFunction(loop);
+
+    ASTPrinter& gen = Build(NoRobustness());
+
+    ASSERT_TRUE(gen.EmitStatement(loop)) << gen.Diagnostics();
+    EXPECT_EQ(gen.Result(), R"(while(true) {
+  return;
+  {
+    f(1);
+    f(2);
+  }
+}
+)");
+}
+
 TEST_F(MslASTPrinterTest, Emit_ForLoopWithSimpleInitCondCont) {
     // for(var i : i32; true; i = i + 1) {
     //   return;
@@ -370,6 +668,27 @@ TEST_F(MslASTPrinterTest, Emit_ForLoopWithSimpleInitCondCont) {
     EXPECT_EQ(gen.Result(),
               R"(for(int i = 0; true; i = as_type<int>((as_type<uint>(i) + as_type<uint>(1)))) {
   TINT_ISOLATE_UB(tint_volatile_false);
+  a_statement();
+}
+)");
+}
+
+TEST_F(MslASTPrinterTest, Emit_ForLoopWithSimpleInitCondCont_WithoutRobustness) {
+    // for(var i : i32; true; i = i + 1) {
+    //   return;
+    // }
+
+    Func("a_statement", {}, ty.void_(), tint::Empty);
+
+    auto* f = For(Decl(Var("i", ty.i32())), true, Assign("i", Add("i", 1_i)),
+                  Block(CallStmt(Call("a_statement"))));
+    WrapInFunction(f);
+
+    ASTPrinter& gen = Build(NoRobustness());
+
+    ASSERT_TRUE(gen.EmitStatement(f)) << gen.Diagnostics();
+    EXPECT_EQ(gen.Result(),
+              R"(for(int i = 0; true; i = as_type<int>((as_type<uint>(i) + as_type<uint>(1)))) {
   a_statement();
 }
 )");
@@ -414,6 +733,44 @@ TEST_F(MslASTPrinterTest, Emit_ForLoopWithMultiStmtInitCondCont) {
 )");
 }
 
+TEST_F(MslASTPrinterTest, Emit_ForLoopWithMultiStmtInitCondCont_WithoutRobustness) {
+    // fn f(i : i32) {}
+    //
+    // var<workgroup> a : atomic<i32>;
+    // for({ f(1i); f(2i); }; true; { f(3i); f(4i); }) {
+    //   return;
+    // }
+
+    Func("f", Vector{Param("i", ty.i32())}, ty.void_(), tint::Empty);
+    auto f = [&](auto&& expr) { return CallStmt(Call("f", expr)); };
+
+    GlobalVar("a", ty.atomic<i32>(), core::AddressSpace::kWorkgroup);
+    auto* multi_stmt_a = Block(f(1_i), f(2_i));
+    auto* multi_stmt_b = Block(f(3_i), f(4_i));
+    auto* loop = For(multi_stmt_a, Expr(true), multi_stmt_b,  //
+                     Block(Return()));
+    WrapInFunction(loop);
+
+    ASTPrinter& gen = Build(NoRobustness());
+
+    ASSERT_TRUE(gen.EmitStatement(loop)) << gen.Diagnostics();
+    EXPECT_EQ(gen.Result(), R"({
+  {
+    f(1);
+    f(2);
+  }
+  while(true) {
+    if (!(true)) { break; }
+    return;
+    {
+      f(3);
+      f(4);
+    }
+  }
+}
+)");
+}
+
 TEST_F(MslASTPrinterTest, Emit_While) {
     // while(true) {
     //   return;
@@ -427,6 +784,23 @@ TEST_F(MslASTPrinterTest, Emit_While) {
     ASSERT_TRUE(gen.EmitStatement(f)) << gen.Diagnostics();
     EXPECT_EQ(gen.Result(), R"(while(true) {
   TINT_ISOLATE_UB(tint_volatile_false);
+  return;
+}
+)");
+}
+
+TEST_F(MslASTPrinterTest, Emit_While_WithoutRobustness) {
+    // while(true) {
+    //   return;
+    // }
+
+    auto* f = While(Expr(true), Block(Return()));
+    WrapInFunction(f);
+
+    ASTPrinter& gen = Build(NoRobustness());
+
+    ASSERT_TRUE(gen.EmitStatement(f)) << gen.Diagnostics();
+    EXPECT_EQ(gen.Result(), R"(while(true) {
   return;
 }
 )");
@@ -450,6 +824,23 @@ TEST_F(MslASTPrinterTest, Emit_While_WithContinue) {
 )");
 }
 
+TEST_F(MslASTPrinterTest, Emit_While_WithContinue_WithoutRobustness) {
+    // while(true) {
+    //   continue;
+    // }
+
+    auto* f = While(Expr(true), Block(Continue()));
+    WrapInFunction(f);
+
+    ASTPrinter& gen = Build(NoRobustness());
+
+    ASSERT_TRUE(gen.EmitStatement(f)) << gen.Diagnostics();
+    EXPECT_EQ(gen.Result(), R"(while(true) {
+  continue;
+}
+)");
+}
+
 TEST_F(MslASTPrinterTest, Emit_WhileWithMultiCond) {
     // while(true && false) {
     //   return;
@@ -466,6 +857,26 @@ TEST_F(MslASTPrinterTest, Emit_WhileWithMultiCond) {
     ASSERT_TRUE(gen.EmitStatement(f)) << gen.Diagnostics();
     EXPECT_EQ(gen.Result(), R"(while((t && false)) {
   TINT_ISOLATE_UB(tint_volatile_false);
+  return;
+}
+)");
+}
+
+TEST_F(MslASTPrinterTest, Emit_WhileWithMultiCond_WithoutRobustness) {
+    // while(true && false) {
+    //   return;
+    // }
+
+    auto* t = Let("t", Expr(true));
+    auto* multi_stmt = LogicalAnd(t, false);
+    // create<ast::BinaryExpression>(core::BinaryOp::kLogicalAnd, Expr(t), Expr(false));
+    auto* f = While(multi_stmt, Block(Return()));
+    WrapInFunction(t, f);
+
+    ASTPrinter& gen = Build(NoRobustness());
+
+    ASSERT_TRUE(gen.EmitStatement(f)) << gen.Diagnostics();
+    EXPECT_EQ(gen.Result(), R"(while((t && false)) {
   return;
 }
 )");

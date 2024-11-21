@@ -56,9 +56,6 @@ struct tint_module_vars_struct {
   const constant Uniforms* uniforms;
 };
 
-#define TINT_ISOLATE_UB(VOLATILE_NAME) \
-  {volatile bool VOLATILE_NAME = false; if (VOLATILE_NAME) break;}
-
 void tint_symbol_inner(uint3 GlobalInvocationID, tint_module_vars_struct tint_module_vars) {
   uint index = GlobalInvocationID[0u];
   if ((index >= (*tint_module_vars.config).numLights)) {
@@ -91,7 +88,6 @@ void tint_symbol_inner(uint3 GlobalInvocationID, tint_module_vars_struct tint_mo
   {
     int y = 0;
     while(true) {
-      TINT_ISOLATE_UB(tint_volatile_false)
       if ((y < TILE_COUNT_Y)) {
       } else {
         break;
@@ -99,7 +95,6 @@ void tint_symbol_inner(uint3 GlobalInvocationID, tint_module_vars_struct tint_mo
       {
         int x = 0;
         while(true) {
-          TINT_ISOLATE_UB(tint_volatile_false_1)
           if ((x < TILE_COUNT_X)) {
           } else {
             break;
@@ -120,7 +115,6 @@ void tint_symbol_inner(uint3 GlobalInvocationID, tint_module_vars_struct tint_mo
           {
             uint i = 0u;
             while(true) {
-              TINT_ISOLATE_UB(tint_volatile_false_2)
               if ((i < 6u)) {
               } else {
                 break;

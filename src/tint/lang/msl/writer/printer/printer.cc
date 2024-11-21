@@ -96,6 +96,7 @@
 #include "src/tint/lang/msl/type/bias.h"
 #include "src/tint/lang/msl/type/gradient.h"
 #include "src/tint/lang/msl/type/level.h"
+#include "src/tint/lang/msl/writer/common/options.h"
 #include "src/tint/lang/msl/writer/common/printer_support.h"
 #include "src/tint/utils/containers/map.h"
 #include "src/tint/utils/generator/text_generator.h"
@@ -113,7 +114,8 @@ class Printer : public tint::TextGenerator {
   public:
     /// Constructor
     /// @param module the Tint IR module to generate
-    explicit Printer(core::ir::Module& module) : ir_(module) {}
+    explicit Printer(core::ir::Module& module, const Options& options)
+        : ir_(module), options_(options) {}
 
     /// @returns the generated MSL shader
     tint::Result<PrintResult> Generate() {
@@ -159,6 +161,8 @@ class Printer : public tint::TextGenerator {
     Hashmap<const core::type::Struct*, std::string, 4> builtin_struct_names_;
 
     core::ir::Module& ir_;
+    /// MSL writer options
+    Options options_;
 
     /// A hashmap of value to name
     Hashmap<const core::ir::Value*, std::string, 32> names_;
@@ -676,7 +680,9 @@ class Printer : public tint::TextGenerator {
             Line() << "while(true) {";
             {
                 ScopedIndent si(current_buffer_);
-                Line() << IsolateUB();
+                if (!options_.disable_robustness) {
+                    Line() << IsolateUB();
+                }
                 EmitBlock(l->Body());
             }
             Line() << "}";
@@ -1759,8 +1765,8 @@ class Printer : public tint::TextGenerator {
 
 }  // namespace
 
-Result<PrintResult> Print(core::ir::Module& module) {
-    return Printer{module}.Generate();
+Result<PrintResult> Print(core::ir::Module& module, const Options& options) {
+    return Printer{module, options}.Generate();
 }
 
 PrintResult::PrintResult() = default;

@@ -1,9 +1,6 @@
 #include <metal_stdlib>
 using namespace metal;
 
-#define TINT_ISOLATE_UB(VOLATILE_NAME) \
-  {volatile bool VOLATILE_NAME = false; if (VOLATILE_NAME) break;}
-
 void some_loop_body() {
 }
 
@@ -12,7 +9,6 @@ void f() {
   {
     int i = 0;
     while(true) {
-      TINT_ISOLATE_UB(tint_volatile_false)
       bool v = false;
       if ((i < 5)) {
         v = (j < 10);

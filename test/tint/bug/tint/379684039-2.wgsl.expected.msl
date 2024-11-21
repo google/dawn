@@ -14,9 +14,6 @@ struct tint_array {
     T elements[N];
 };
 
-#define TINT_ISOLATE_UB(VOLATILE_NAME) \
-  {volatile bool VOLATILE_NAME = false; if (VOLATILE_NAME) break;}
-
 struct tint_private_vars_struct {
   uint idx;
 };
@@ -34,7 +31,6 @@ struct FSUniforms {
 void tint_symbol(thread tint_private_vars_struct* const tint_private_vars, const device FSUniforms* const tint_symbol_2) {
   int2 tint_symbol_1 = int2(0);
   while(true) {
-    TINT_ISOLATE_UB(tint_volatile_false);
     if ((tint_symbol_1[1] >= (*(tint_symbol_2)).fsUniformData[(*(tint_private_vars)).idx].size[1])) {
       break;
     }

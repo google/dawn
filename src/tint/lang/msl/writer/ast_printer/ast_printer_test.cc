@@ -230,16 +230,12 @@ struct tint_array {
     T elements[N];
 };
 
-#define TINT_ISOLATE_UB(VOLATILE_NAME) \
-  {volatile bool VOLATILE_NAME = false; if (VOLATILE_NAME) break;}
-
 struct tint_symbol_4 {
   tint_array<float2x2, 4> m;
 };
 
 void tint_zero_workgroup_memory(uint local_idx, threadgroup tint_array<float2x2, 4>* const tint_symbol) {
   for(uint idx = local_idx; (idx < 4u); idx = (idx + 1u)) {
-    TINT_ISOLATE_UB(tint_volatile_false);
     uint const i = idx;
     (*(tint_symbol))[i] = float2x2(float2(0.0f), float2(0.0f));
   }

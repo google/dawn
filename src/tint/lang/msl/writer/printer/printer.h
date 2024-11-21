@@ -32,6 +32,7 @@
 #include <unordered_map>
 #include <vector>
 
+#include "src/tint/lang/msl/writer/common/options.h"
 #include "src/tint/utils/result/result.h"
 
 // Forward declarations
@@ -70,7 +71,7 @@ struct PrintResult {
 
 /// @param module the Tint IR module to generate
 /// @returns the result of printing the MSL shader on success, or failure
-Result<PrintResult> Print(core::ir::Module& module);
+Result<PrintResult> Print(core::ir::Module& module, const Options& options);
 
 }  // namespace tint::msl::writer
 

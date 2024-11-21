@@ -8,9 +8,6 @@ struct tint_module_vars_struct {
   thread bool* continue_execution;
 };
 
-#define TINT_ISOLATE_UB(VOLATILE_NAME) \
-  {volatile bool VOLATILE_NAME = false; if (VOLATILE_NAME) break;}
-
 struct foo_outputs {
   int tint_symbol [[color(0)]];
 };
@@ -32,7 +29,6 @@ int foo_inner(float in, float2 coord, tint_module_vars_struct tint_module_vars) 
   {
     int i = 0;
     while(true) {
-      TINT_ISOLATE_UB(tint_volatile_false)
       if ((i < 10)) {
       } else {
         break;

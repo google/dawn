@@ -27,14 +27,10 @@ struct tint_module_vars_struct {
   const device FSUniforms* _storage;
 };
 
-#define TINT_ISOLATE_UB(VOLATILE_NAME) \
-  {volatile bool VOLATILE_NAME = false; if (VOLATILE_NAME) break;}
-
 void tint_symbol(tint_module_vars_struct tint_module_vars) {
   int2 tint_symbol_1 = int2(0);
   {
     while(true) {
-      TINT_ISOLATE_UB(tint_volatile_false)
       if ((tint_symbol_1[1u] >= (*tint_module_vars._storage).fsUniformData[(*tint_module_vars.idx)].size[1u])) {
         break;
       }

@@ -38,9 +38,6 @@ struct tint_module_vars_struct {
   device Particles* particlesB;
 };
 
-#define TINT_ISOLATE_UB(VOLATILE_NAME) \
-  {volatile bool VOLATILE_NAME = false; if (VOLATILE_NAME) break;}
-
 struct vert_main_outputs {
   float4 tint_symbol [[position]];
 };
@@ -82,7 +79,6 @@ void comp_main_inner(uint3 gl_GlobalInvocationID, tint_module_vars_struct tint_m
   {
     uint i = 0u;
     while(true) {
-      TINT_ISOLATE_UB(tint_volatile_false)
       if ((i < 5u)) {
       } else {
         break;

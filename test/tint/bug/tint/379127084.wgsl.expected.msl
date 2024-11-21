@@ -14,9 +14,6 @@ struct tint_array {
     T elements[N];
 };
 
-#define TINT_ISOLATE_UB(VOLATILE_NAME) \
-  {volatile bool VOLATILE_NAME = false; if (VOLATILE_NAME) break;}
-
 struct tint_private_vars_struct {
   uint shadingSsboIndex;
 };
@@ -64,7 +61,6 @@ void _skslMain(FSIn _stageIn, thread FSOut* const _stageOut, thread tint_private
     {
       int _61_o = 0;
       while(true) {
-        TINT_ISOLATE_UB(tint_volatile_false);
         if ((_61_o < (*(tint_symbol_7)).fsUniformData[(*(tint_private_vars)).shadingSsboIndex].numOctaves_1)) {
           {
             float4 _62_f = 0.0f;
@@ -95,7 +91,6 @@ void _skslMain(FSIn _stageIn, thread FSOut* const _stageOut, thread tint_private
             {
               int _72_h = 0;
               while(true) {
-                TINT_ISOLATE_UB(tint_volatile_false_1);
                 {
                   float const _73_i = ((float(_72_h) + 0.5f) * 0.25f);
                   float4 const _74_j = tint_symbol_10.sample(tint_symbol_11, float2(float(_67_p[0]), float(_73_i)), bias(-0.47499999403953552246f));

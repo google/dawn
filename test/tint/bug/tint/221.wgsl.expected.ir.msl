@@ -22,9 +22,6 @@ struct tint_module_vars_struct {
   device Buf* b;
 };
 
-#define TINT_ISOLATE_UB(VOLATILE_NAME) \
-  {volatile bool VOLATILE_NAME = false; if (VOLATILE_NAME) break;}
-
 uint tint_mod_u32(uint lhs, uint rhs) {
   return (lhs - ((lhs / select(rhs, 1u, (rhs == 0u))) * select(rhs, 1u, (rhs == 0u))));
 }
@@ -34,7 +31,6 @@ kernel void tint_symbol(device Buf* b [[buffer(0)]]) {
   uint i = 0u;
   {
     while(true) {
-      TINT_ISOLATE_UB(tint_volatile_false)
       if ((i >= (*tint_module_vars.b).count)) {
         break;
       }

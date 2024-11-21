@@ -22,9 +22,6 @@ struct tint_module_vars_struct {
   thread uint* v;
 };
 
-#define TINT_ISOLATE_UB(VOLATILE_NAME) \
-  {volatile bool VOLATILE_NAME = false; if (VOLATILE_NAME) break;}
-
 int idx1(tint_module_vars_struct tint_module_vars) {
   (*tint_module_vars.v) = ((*tint_module_vars.v) + 1u);
   return 1;
@@ -62,7 +59,6 @@ void tint_symbol_1(tint_module_vars_struct tint_module_vars) {
     int const v_3 = idx3(tint_module_vars);
     (*v_2)[v_3] = as_type<int>((as_type<uint>((*v_2)[v_3]) + as_type<uint>(1)));
     while(true) {
-      TINT_ISOLATE_UB(tint_volatile_false)
       if (((*tint_module_vars.v) < 10u)) {
       } else {
         break;

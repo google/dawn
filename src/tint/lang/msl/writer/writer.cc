@@ -54,7 +54,7 @@ Result<Output> Generate(core::ir::Module& ir, const Options& options) {
     }
 
     // Generate the MSL code.
-    auto result = Print(ir);
+    auto result = Print(ir, options);
     if (result != Success) {
         return result.Failure();
     }
@@ -87,7 +87,7 @@ Result<Output> Generate(const Program& program, const Options& options) {
     output.needs_storage_buffer_sizes = sanitized_result.needs_storage_buffer_sizes;
 
     // Generate the MSL code.
-    auto impl = std::make_unique<ASTPrinter>(sanitized_result.program);
+    auto impl = std::make_unique<ASTPrinter>(sanitized_result.program, options);
     if (!impl->Generate()) {
         return Failure{impl->Diagnostics()};
     }

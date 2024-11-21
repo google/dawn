@@ -31,9 +31,6 @@ struct tint_module_vars_struct {
   const constant Uniforms* uniforms;
 };
 
-#define TINT_ISOLATE_UB(VOLATILE_NAME) \
-  {volatile bool VOLATILE_NAME = false; if (VOLATILE_NAME) break;}
-
 uint ConvertToFp16FloatValue(float fp32) {
   return 1u;
 }
@@ -57,7 +54,6 @@ void tint_symbol_inner(uint3 GlobalInvocationID, tint_module_vars_struct tint_mo
   {
     uint i = 0u;
     while(true) {
-      TINT_ISOLATE_UB(tint_volatile_false)
       if ((i < (*tint_module_vars.uniforms).channelCount)) {
       } else {
         break;

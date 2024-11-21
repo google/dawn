@@ -1,10 +1,6 @@
 #include <metal_stdlib>
 
 using namespace metal;
-
-#define TINT_ISOLATE_UB(VOLATILE_NAME) \
-  {volatile bool VOLATILE_NAME = false; if (VOLATILE_NAME) break;}
-
 int tint_workgroupUniformLoad(threadgroup int* const p) {
   threadgroup_barrier(mem_flags::mem_threadgroup);
   int const result = *(p);
@@ -16,7 +12,6 @@ void foo(threadgroup int* const tint_symbol_4, threadgroup int* const tint_symbo
   {
     int i = 0;
     while(true) {
-      TINT_ISOLATE_UB(tint_volatile_false);
       int const tint_symbol = i;
       int const tint_symbol_1 = tint_workgroupUniformLoad(tint_symbol_4);
       if (!((tint_symbol < tint_symbol_1))) {

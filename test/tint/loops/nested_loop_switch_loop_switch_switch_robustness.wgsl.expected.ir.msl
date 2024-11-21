@@ -1,0 +1,93 @@
+#include <metal_stdlib>
+using namespace metal;
+
+#define TINT_ISOLATE_UB(VOLATILE_NAME) \
+  {volatile bool VOLATILE_NAME = false; if (VOLATILE_NAME) break;}
+
+kernel void tint_symbol() {
+  int k = 0;
+  {
+    int i = 0;
+    while(true) {
+      TINT_ISOLATE_UB(tint_volatile_false)
+      if ((i < 2)) {
+      } else {
+        break;
+      }
+      bool tint_continue = false;
+      switch(i) {
+        case 0:
+        {
+          {
+            int j = 0;
+            while(true) {
+              TINT_ISOLATE_UB(tint_volatile_false_1)
+              if ((j < 2)) {
+              } else {
+                break;
+              }
+              bool tint_continue_1 = false;
+              switch(j) {
+                case 0:
+                {
+                  tint_continue_1 = true;
+                  break;
+                }
+                case 1:
+                {
+                  bool tint_continue_2 = false;
+                  switch(k) {
+                    case 0:
+                    {
+                      tint_continue_2 = true;
+                      break;
+                    }
+                    default:
+                    {
+                      break;
+                    }
+                  }
+                  if (tint_continue_2) {
+                    tint_continue_1 = true;
+                    break;
+                  }
+                  break;
+                }
+                default:
+                {
+                  break;
+                }
+              }
+              if (tint_continue_1) {
+                {
+                  j = as_type<int>((as_type<uint>(j) + as_type<uint>(2)));
+                }
+                continue;
+              }
+              {
+                j = as_type<int>((as_type<uint>(j) + as_type<uint>(2)));
+              }
+              continue;
+            }
+          }
+          tint_continue = true;
+          break;
+        }
+        default:
+        {
+          break;
+        }
+      }
+      if (tint_continue) {
+        {
+          i = as_type<int>((as_type<uint>(i) + as_type<uint>(2)));
+        }
+        continue;
+      }
+      {
+        i = as_type<int>((as_type<uint>(i) + as_type<uint>(2)));
+      }
+      continue;
+    }
+  }
+}

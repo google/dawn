@@ -14,9 +14,6 @@ struct tint_array {
     T elements[N];
 };
 
-#define TINT_ISOLATE_UB(VOLATILE_NAME) \
-  {volatile bool VOLATILE_NAME = false; if (VOLATILE_NAME) break;}
-
 struct S {
   /* 0x0000 */ int before;
   /* 0x0004 */ half3x2 m;
@@ -33,7 +30,6 @@ void assign_and_preserve_padding_1(device S* const dest, S value) {
 
 void assign_and_preserve_padding(device tint_array<S, 4>* const dest, tint_array<S, 4> value) {
   for(uint i = 0u; (i < 4u); i = (i + 1u)) {
-    TINT_ISOLATE_UB(tint_volatile_false);
     assign_and_preserve_padding_1(&((*(dest))[i]), value[i]);
   }
 }

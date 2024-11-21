@@ -14,9 +14,6 @@ struct tint_array {
     T elements[N];
 };
 
-#define TINT_ISOLATE_UB(VOLATILE_NAME) \
-  {volatile bool VOLATILE_NAME = false; if (VOLATILE_NAME) break;}
-
 struct Uniforms {
   /* 0x0000 */ uint2 aShape;
   /* 0x0008 */ uint2 bShape;
@@ -33,7 +30,6 @@ void tint_symbol_inner(uint3 global_id, const constant Uniforms* const tint_symb
   uint const dimOutter = (*(tint_symbol_1)).outShape[1];
   uint result = 0u;
   for(uint i = 0u; (i < dimInner); i = (i + 1u)) {
-    TINT_ISOLATE_UB(tint_volatile_false);
     uint const a = (i + (resultCell[0] * dimInner));
     uint const b = (resultCell[1] + (i * dimOutter));
     result = (result + ((*(tint_symbol_2)).numbers[a] * (*(tint_symbol_3)).numbers[b]));

@@ -33,6 +33,12 @@ using namespace tint::core::number_suffixes;  // NOLINT
 namespace tint::msl::writer {
 namespace {
 
+Options NoRobustness() {
+    Options o;
+    o.disable_robustness = true;
+    return o;
+}
+
 TEST_F(MslWriterTest, Loop) {
     auto* func = b.Function("a", ty.void_());
     b.Append(func->Block(), [&] {
@@ -60,6 +66,29 @@ void a() {
 )");
 }
 
+TEST_F(MslWriterTest, Loop_WithoutRobustness) {
+    auto* func = b.Function("a", ty.void_());
+    b.Append(func->Block(), [&] {
+        auto* l = b.Loop();
+        b.Append(l->Body(), [&] { b.ExitLoop(l); });
+        b.Append(l->Continuing(), [&] { b.NextIteration(l); });
+        b.Return(func);
+    });
+
+    ASSERT_TRUE(Generate(NoRobustness())) << err_ << output_.msl;
+    EXPECT_EQ(output_.msl, R"(#include <metal_stdlib>
+using namespace metal;
+
+void a() {
+  {
+    while(true) {
+      break;
+    }
+  }
+}
+)");
+}
+
 TEST_F(MslWriterTest, LoopContinueAndBreakIf) {
     auto* func = b.Function("a", ty.void_());
     b.Append(func->Block(), [&] {
@@ -80,6 +109,32 @@ void a() {
   {
     while(true) {
       TINT_ISOLATE_UB(tint_volatile_false)
+      {
+        if (true) { break; }
+      }
+      continue;
+    }
+  }
+}
+)");
+}
+
+TEST_F(MslWriterTest, LoopContinueAndBreakIf_WithoutRobustness) {
+    auto* func = b.Function("a", ty.void_());
+    b.Append(func->Block(), [&] {
+        auto* l = b.Loop();
+        b.Append(l->Body(), [&] { b.Continue(l); });
+        b.Append(l->Continuing(), [&] { b.BreakIf(l, true); });
+        b.Return(func);
+    });
+
+    ASSERT_TRUE(Generate(NoRobustness())) << err_ << output_.msl;
+    EXPECT_EQ(output_.msl, R"(#include <metal_stdlib>
+using namespace metal;
+
+void a() {
+  {
+    while(true) {
       {
         if (true) { break; }
       }
@@ -125,6 +180,37 @@ void a() {
 )");
 }
 
+TEST_F(MslWriterTest, LoopBodyVarInContinue_WithoutRobustness) {
+    auto* func = b.Function("a", ty.void_());
+    b.Append(func->Block(), [&] {
+        auto* l = b.Loop();
+        b.Append(l->Body(), [&] {
+            auto* v = b.Var("v", true);
+            b.Continue(l);
+
+            b.Append(l->Continuing(), [&] { b.BreakIf(l, v); });
+        });
+        b.Return(func);
+    });
+
+    ASSERT_TRUE(Generate(NoRobustness())) << err_ << output_.msl;
+    EXPECT_EQ(output_.msl, R"(#include <metal_stdlib>
+using namespace metal;
+
+void a() {
+  {
+    while(true) {
+      bool v = true;
+      {
+        if (v) { break; }
+      }
+      continue;
+    }
+  }
+}
+)");
+}
+
 TEST_F(MslWriterTest, LoopInitializer) {
     auto* func = b.Function("a", ty.void_());
     b.Append(func->Block(), [&] {
@@ -151,6 +237,38 @@ void a() {
     bool v = true;
     while(true) {
       TINT_ISOLATE_UB(tint_volatile_false)
+      {
+        if (v) { break; }
+      }
+      continue;
+    }
+  }
+}
+)");
+}
+
+TEST_F(MslWriterTest, LoopInitializer_WithoutRobustness) {
+    auto* func = b.Function("a", ty.void_());
+    b.Append(func->Block(), [&] {
+        auto* l = b.Loop();
+        b.Append(l->Initializer(), [&] {
+            auto* v = b.Var("v", true);
+            b.NextIteration(l);
+
+            b.Append(l->Body(), [&] { b.Continue(l); });
+            b.Append(l->Continuing(), [&] { b.BreakIf(l, v); });
+        });
+        b.Return(func);
+    });
+
+    ASSERT_TRUE(Generate(NoRobustness())) << err_ << output_.msl;
+    EXPECT_EQ(output_.msl, R"(#include <metal_stdlib>
+using namespace metal;
+
+void a() {
+  {
+    bool v = true;
+    while(true) {
       {
         if (v) { break; }
       }

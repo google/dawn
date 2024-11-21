@@ -58,7 +58,7 @@ class TestHelperBase : public BASE, public ProgramBuilder {
     /// @note The generator is only built once. Multiple calls to Build() will
     /// return the same ASTPrinter without rebuilding.
     /// @return the built generator
-    ASTPrinter& Build() {
+    ASTPrinter& Build(const Options& options = {}) {
         if (gen_) {
             return *gen_;
         }
@@ -69,7 +69,7 @@ class TestHelperBase : public BASE, public ProgramBuilder {
         if (!program->IsValid()) {
             ADD_FAILURE() << program->Diagnostics();
         }
-        gen_ = std::make_unique<ASTPrinter>(*program);
+        gen_ = std::make_unique<ASTPrinter>(*program, options);
         return *gen_;
     }
 
@@ -96,7 +96,7 @@ class TestHelperBase : public BASE, public ProgramBuilder {
             ADD_FAILURE() << result.program.Diagnostics();
         }
         *program = std::move(result.program);
-        gen_ = std::make_unique<ASTPrinter>(*program);
+        gen_ = std::make_unique<ASTPrinter>(*program, options);
         return *gen_;
     }
 
@@ -105,6 +105,7 @@ class TestHelperBase : public BASE, public ProgramBuilder {
 
   private:
     std::unique_ptr<ASTPrinter> gen_;
+    std::unique_ptr<ASTPrinter> gen_with_options_;
 };
 
 /// Test helper

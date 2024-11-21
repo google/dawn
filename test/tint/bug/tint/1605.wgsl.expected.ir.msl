@@ -5,14 +5,10 @@ struct tint_module_vars_struct {
   const constant int* b;
 };
 
-#define TINT_ISOLATE_UB(VOLATILE_NAME) \
-  {volatile bool VOLATILE_NAME = false; if (VOLATILE_NAME) break;}
-
 bool func_3(tint_module_vars_struct tint_module_vars) {
   {
     int i = 0;
     while(true) {
-      TINT_ISOLATE_UB(tint_volatile_false)
       if ((i < (*tint_module_vars.b))) {
       } else {
         break;
@@ -20,7 +16,6 @@ bool func_3(tint_module_vars_struct tint_module_vars) {
       {
         int j = -1;
         while(true) {
-          TINT_ISOLATE_UB(tint_volatile_false_1)
           if ((j == 1)) {
           } else {
             break;

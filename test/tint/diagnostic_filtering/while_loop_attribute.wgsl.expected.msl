@@ -13,10 +13,6 @@
 #include <metal_stdlib>
 
 using namespace metal;
-
-#define TINT_ISOLATE_UB(VOLATILE_NAME) \
-  {volatile bool VOLATILE_NAME = false; if (VOLATILE_NAME) break;}
-
 struct tint_symbol_4 {
   float x [[user(locn0)]];
 };
@@ -24,7 +20,6 @@ struct tint_symbol_4 {
 void tint_symbol_inner(float x) {
   float4 v = float4(0.0f);
   while(true) {
-    TINT_ISOLATE_UB(tint_volatile_false);
     bool tint_symbol_1 = (x > 0.0f);
     if (tint_symbol_1) {
       float const tint_symbol_2 = dfdx(1.0f);

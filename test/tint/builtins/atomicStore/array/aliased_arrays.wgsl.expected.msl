@@ -14,12 +14,8 @@ struct tint_array {
     T elements[N];
 };
 
-#define TINT_ISOLATE_UB(VOLATILE_NAME) \
-  {volatile bool VOLATILE_NAME = false; if (VOLATILE_NAME) break;}
-
 void tint_zero_workgroup_memory(uint local_idx, threadgroup tint_array<tint_array<tint_array<atomic_uint, 1>, 2>, 3>* const tint_symbol) {
   for(uint idx = local_idx; (idx < 6u); idx = (idx + 1u)) {
-    TINT_ISOLATE_UB(tint_volatile_false);
     uint const i = (idx / 2u);
     uint const i_1 = (idx % 2u);
     uint const i_2 = (idx % 1u);

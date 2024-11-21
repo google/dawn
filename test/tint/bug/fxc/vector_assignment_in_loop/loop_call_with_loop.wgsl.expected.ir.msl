@@ -8,14 +8,10 @@ struct tint_module_vars_struct {
   thread bool2* v2b;
 };
 
-#define TINT_ISOLATE_UB(VOLATILE_NAME) \
-  {volatile bool VOLATILE_NAME = false; if (VOLATILE_NAME) break;}
-
 void foo(tint_module_vars_struct tint_module_vars) {
   {
     int i = 0;
     while(true) {
-      TINT_ISOLATE_UB(tint_volatile_false)
       if ((i < 2)) {
       } else {
         break;
@@ -41,7 +37,6 @@ kernel void tint_symbol() {
   {
     int i = 0;
     while(true) {
-      TINT_ISOLATE_UB(tint_volatile_false_1)
       if ((i < 2)) {
       } else {
         break;

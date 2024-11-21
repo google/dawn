@@ -14,16 +14,12 @@ struct tint_array {
     T elements[N];
 };
 
-#define TINT_ISOLATE_UB(VOLATILE_NAME) \
-  {volatile bool VOLATILE_NAME = false; if (VOLATILE_NAME) break;}
-
 struct str {
   int i;
 };
 
 void tint_zero_workgroup_memory(uint local_idx, threadgroup tint_array<str, 4>* const tint_symbol_3) {
   for(uint idx = local_idx; (idx < 4u); idx = (idx + 1u)) {
-    TINT_ISOLATE_UB(tint_volatile_false);
     uint const i_1 = idx;
     str const tint_symbol_1 = str{};
     (*(tint_symbol_3))[i_1] = tint_symbol_1;
