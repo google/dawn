@@ -42,7 +42,7 @@ struct ExternalTextureParams_tint_packed_vec3 {
   float2 samplePlane0RectMax;
   float2 samplePlane1RectMin;
   float2 samplePlane1RectMax;
-  uint2 visibleSize;
+  uint2 apparentSize;
   float2 plane1CoordFactor;
 };
 
@@ -59,7 +59,7 @@ struct ExternalTextureParams {
   float2 samplePlane0RectMax;
   float2 samplePlane1RectMin;
   float2 samplePlane1RectMax;
-  uint2 visibleSize;
+  uint2 apparentSize;
   float2 plane1CoordFactor;
 };
 

@@ -106,17 +106,20 @@ class ExternalTextureTestsBase : public Parent {
             })");
     }
 
-    wgpu::ExternalTextureDescriptor InitExternalTextureDescriptor(wgpu::TextureView plane0,
-                                                                  wgpu::TextureView plane1 = {}) {
+    wgpu::ExternalTextureDescriptor InitExternalTextureDescriptor(wgpu::Texture plane0,
+                                                                  wgpu::Texture plane1 = nullptr) {
         wgpu::ExternalTextureDescriptor desc;
-        desc.plane0 = plane0;
-        desc.plane1 = plane1;
+        desc.plane0 = plane0.CreateView();
+        desc.plane1 = plane1 != nullptr ? plane1.CreateView() : nullptr;
 
         const auto& conversion = plane1 == nullptr ? noopRGBConversion : bt709Conversion;
         desc.yuvToRgbConversionMatrix = conversion.yuvToRgbConversionMatrix.data();
         desc.gamutConversionMatrix = conversion.gamutConversionMatrix.data();
         desc.srcTransferFunctionParameters = conversion.srcTransferFunctionParameters.data();
         desc.dstTransferFunctionParameters = conversion.dstTransferFunctionParameters.data();
+        desc.cropOrigin = {0, 0};
+        desc.cropSize = {plane0.GetWidth(), plane0.GetHeight()};
+        desc.apparentSize = {plane0.GetWidth(), plane0.GetHeight()};
 
         return desc;
     }
@@ -232,15 +235,8 @@ class ExternalTextureTests : public ExternalTextureTestsBase<DawnTest> {
 TEST_P(ExternalTextureTests, CreateExternalTextureSuccess) {
     wgpu::Texture texture = Create2DTexture(device, kWidth, kHeight, kFormat, kSampledUsage);
 
-    // Create a texture view for the external texture
-    wgpu::TextureView view = texture.CreateView();
-
-    // Create an ExternalTextureDescriptor from the texture view
-    wgpu::ExternalTextureDescriptor externalDesc = InitExternalTextureDescriptor(view);
-    externalDesc.visibleOrigin = {0, 0};
-    externalDesc.visibleSize = {kWidth, kHeight};
-
     // Import the external texture
+    wgpu::ExternalTextureDescriptor externalDesc = InitExternalTextureDescriptor(texture);
     wgpu::ExternalTexture externalTexture = device.CreateExternalTexture(&externalDesc);
 
     ASSERT_NE(externalTexture.Get(), nullptr);
@@ -257,12 +253,9 @@ TEST_P(ExternalTextureTests, SampleExternalTexture) {
         Create2DTexture(device, kWidth, kHeight, kFormat,
                         wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::RenderAttachment);
 
-    // Create a texture view for the external texture
-    wgpu::TextureView externalView = sampledTexture.CreateView();
-
     // Initialize texture with green to ensure it is sampled from later.
     {
-        utils::ComboRenderPassDescriptor renderPass({externalView}, nullptr);
+        utils::ComboRenderPassDescriptor renderPass({sampledTexture.CreateView()}, nullptr);
         renderPass.cColorAttachments[0].clearValue = {0.0f, 1.0f, 0.0f, 1.0f};
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
         wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
@@ -279,12 +272,8 @@ TEST_P(ExternalTextureTests, SampleExternalTexture) {
     descriptor.cTargets[0].format = kFormat;
     wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&descriptor);
 
-    // Create an ExternalTextureDescriptor from the texture view
-    wgpu::ExternalTextureDescriptor externalDesc = InitExternalTextureDescriptor(externalView);
-    externalDesc.visibleOrigin = {0, 0};
-    externalDesc.visibleSize = {kWidth, kHeight};
-
     // Import the external texture
+    wgpu::ExternalTextureDescriptor externalDesc = InitExternalTextureDescriptor(sampledTexture);
     wgpu::ExternalTexture externalTexture = device.CreateExternalTexture(&externalDesc);
 
     // Create a sampler and bind group
@@ -324,12 +313,9 @@ TEST_P(ExternalTextureTests, SampleExternalTextureDifferingGroup) {
         Create2DTexture(device, kWidth, kHeight, kFormat,
                         wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::RenderAttachment);
 
-    // Create a texture view for the external texture
-    wgpu::TextureView externalView = sampledTexture.CreateView();
-
     // Initialize texture with green to ensure it is sampled from later.
     {
-        utils::ComboRenderPassDescriptor renderPass({externalView}, nullptr);
+        utils::ComboRenderPassDescriptor renderPass({sampledTexture.CreateView()}, nullptr);
         renderPass.cColorAttachments[0].clearValue = {0.0f, 1.0f, 0.0f, 1.0f};
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
         wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
@@ -355,12 +341,8 @@ TEST_P(ExternalTextureTests, SampleExternalTextureDifferingGroup) {
     descriptor.cTargets[0].format = kFormat;
     wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&descriptor);
 
-    // Create an ExternalTextureDescriptor from the texture view
-    wgpu::ExternalTextureDescriptor externalDesc = InitExternalTextureDescriptor(externalView);
-    externalDesc.visibleOrigin = {0, 0};
-    externalDesc.visibleSize = {kWidth, kHeight};
-
     // Import the external texture
+    wgpu::ExternalTextureDescriptor externalDesc = InitExternalTextureDescriptor(sampledTexture);
     wgpu::ExternalTexture externalTexture = device.CreateExternalTexture(&externalDesc);
 
     // Create a sampler and bind group
@@ -433,13 +415,9 @@ TEST_P(ExternalTextureTests, SampleMultiplanarExternalTexture) {
         descriptor.cTargets[0].format = kFormat;
         wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&descriptor);
 
-        // Create an ExternalTextureDescriptor from the texture views
-        wgpu::ExternalTextureDescriptor externalDesc =
-            InitExternalTextureDescriptor(externalViewPlane0, externalViewPlane1);
-        externalDesc.visibleOrigin = {0, 0};
-        externalDesc.visibleSize = {kWidth, kHeight};
-
         // Import the external texture
+        wgpu::ExternalTextureDescriptor externalDesc =
+            InitExternalTextureDescriptor(sampledTexturePlane0, sampledTexturePlane1);
         wgpu::ExternalTexture externalTexture = device.CreateExternalTexture(&externalDesc);
 
         // Create a sampler and bind group
@@ -511,13 +489,9 @@ TEST_P(ExternalTextureTests, SampleMultiplanarExternalTextureNorm16) {
         descriptor.cTargets[0].format = kFormat;
         wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&descriptor);
 
-        // Create an ExternalTextureDescriptor from the texture views
-        wgpu::ExternalTextureDescriptor externalDesc =
-            InitExternalTextureDescriptor(externalViewPlane0, externalViewPlane1);
-        externalDesc.visibleOrigin = {0, 0};
-        externalDesc.visibleSize = {kWidth, kHeight};
-
         // Import the external texture
+        wgpu::ExternalTextureDescriptor externalDesc =
+            InitExternalTextureDescriptor(sampledTexturePlane0, sampledTexturePlane1);
         wgpu::ExternalTexture externalTexture = device.CreateExternalTexture(&externalDesc);
 
         // Create a sampler and bind group
@@ -576,13 +550,8 @@ TEST_P(ExternalTextureTests, RotateAndOrFlipSampleSinglePlane) {
         descriptor.cTargets[0].format = kFormat;
         wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&descriptor);
 
-        // Create an ExternalTextureDescriptor from the texture view
-        wgpu::ExternalTextureDescriptor externalDesc =
-            InitExternalTextureDescriptor(sourceTexture.CreateView());
-        externalDesc.visibleOrigin = {0, 0};
-        externalDesc.visibleSize = {kWidth, kHeight};
-
         // Import the external texture
+        wgpu::ExternalTextureDescriptor externalDesc = InitExternalTextureDescriptor(sourceTexture);
         wgpu::ExternalTexture externalTexture = device.CreateExternalTexture(&externalDesc);
 
         // Create a sampler and bind group
@@ -648,15 +617,10 @@ TEST_P(ExternalTextureTests, RotateAndOrFlipSampleSinglePlane) {
         descriptor.cTargets[0].format = kFormat;
         wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&descriptor);
 
-        // Create an ExternalTextureDescriptor from the texture view
-        wgpu::ExternalTextureDescriptor externalDesc =
-            InitExternalTextureDescriptor(sourceTexture.CreateView());
+        // Import the external texture
+        wgpu::ExternalTextureDescriptor externalDesc = InitExternalTextureDescriptor(sourceTexture);
         externalDesc.rotation = exp.rotation;
         externalDesc.mirrored = exp.mirrored;
-        externalDesc.visibleOrigin = {0, 0};
-        externalDesc.visibleSize = {kWidth, kHeight};
-
-        // Import the external texture
         wgpu::ExternalTexture externalTexture = device.CreateExternalTexture(&externalDesc);
 
         // Create a sampler and bind group
@@ -692,7 +656,7 @@ TEST_P(ExternalTextureTests, RotateAndOrFlipSampleSinglePlane) {
     }
 }
 
-// Test for a bug found during review where the visibleSize was not correctly rotated during the
+// Test for a bug found during review where the cropSize was not correctly rotated during the
 // initialization of the ExternalTexture, which could lead to incorrect textureLoad operations when
 // rotating 90 and 270 degrees.
 TEST_P(ExternalTextureTests, RotateAndOrFlipTextureLoadSinglePlaneNotSquare) {
@@ -759,15 +723,11 @@ TEST_P(ExternalTextureTests, RotateAndOrFlipTextureLoadSinglePlaneNotSquare) {
         descriptor.cTargets[0].format = kFormat;
         wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&descriptor);
 
-        // Create an ExternalTextureDescriptor from the texture view
-        wgpu::ExternalTextureDescriptor externalDesc =
-            InitExternalTextureDescriptor(sourceTexture.CreateView());
+        // Import the external texture and make the bindgroup.
+        wgpu::ExternalTextureDescriptor externalDesc = InitExternalTextureDescriptor(sourceTexture);
         externalDesc.rotation = exp.rotation;
         externalDesc.mirrored = exp.mirrored;
-        externalDesc.visibleOrigin = {0, 0};
-        externalDesc.visibleSize = {sourceTexture.GetWidth(), sourceTexture.GetHeight()};
 
-        // Import the external texture and make the bindgroup.
         wgpu::ExternalTexture externalTexture = device.CreateExternalTexture(&externalDesc);
         wgpu::BindGroup bindGroup = utils::MakeBindGroup(
             device, pipeline.GetBindGroupLayout(0), {{1, externalTexture}, {0, dimensionBuffer}});
@@ -836,10 +796,8 @@ TEST_P(ExternalTextureTests, RotateAndOrFlipSampleMultiplanar) {
         wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&descriptor);
 
         // Create an ExternalTextureDescriptor from the texture view
-        wgpu::ExternalTextureDescriptor externalDesc = InitExternalTextureDescriptor(
-            sourceTexturePlane0.CreateView(), sourceTexturePlane1.CreateView());
-        externalDesc.visibleOrigin = {0, 0};
-        externalDesc.visibleSize = {kWidth, kHeight};
+        wgpu::ExternalTextureDescriptor externalDesc =
+            InitExternalTextureDescriptor(sourceTexturePlane0, sourceTexturePlane1);
 
         // Import the external texture
         wgpu::ExternalTexture externalTexture = device.CreateExternalTexture(&externalDesc);
@@ -907,15 +865,11 @@ TEST_P(ExternalTextureTests, RotateAndOrFlipSampleMultiplanar) {
         descriptor.cTargets[0].format = kFormat;
         wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&descriptor);
 
-        // Create an ExternalTextureDescriptor from the texture view
-        wgpu::ExternalTextureDescriptor externalDesc = InitExternalTextureDescriptor(
-            sourceTexturePlane0.CreateView(), sourceTexturePlane1.CreateView());
+        // Import the external texture
+        wgpu::ExternalTextureDescriptor externalDesc =
+            InitExternalTextureDescriptor(sourceTexturePlane0, sourceTexturePlane1);
         externalDesc.rotation = exp.rotation;
         externalDesc.mirrored = exp.mirrored;
-        externalDesc.visibleOrigin = {0, 0};
-        externalDesc.visibleSize = {kWidth, kHeight};
-
-        // Import the external texture
         wgpu::ExternalTexture externalTexture = device.CreateExternalTexture(&externalDesc);
 
         // Create a sampler and bind group
@@ -968,8 +922,8 @@ TEST_P(ExternalTextureTests, CropSinglePlane) {
                         wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::RenderAttachment);
 
     struct CropExpectation {
-        wgpu::Origin2D visibleOrigin;
-        wgpu::Extent2D visibleSize;
+        wgpu::Origin2D cropOrigin;
+        wgpu::Extent2D cropSize;
         wgpu::ExternalTextureRotation rotation;
         utils::RGBA8 upperLeftColor;
         utils::RGBA8 upperRightColor;
@@ -1051,14 +1005,12 @@ TEST_P(ExternalTextureTests, CropSinglePlane) {
         descriptor.cTargets[0].format = kFormat;
         wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&descriptor);
 
-        // Create an ExternalTextureDescriptor from the texture view
-        wgpu::ExternalTextureDescriptor externalDesc =
-            InitExternalTextureDescriptor(sourceTexture.CreateView());
-        externalDesc.rotation = exp.rotation;
-        externalDesc.visibleOrigin = exp.visibleOrigin;
-        externalDesc.visibleSize = exp.visibleSize;
-
         // Import the external texture
+        wgpu::ExternalTextureDescriptor externalDesc = InitExternalTextureDescriptor(sourceTexture);
+        externalDesc.rotation = exp.rotation;
+        externalDesc.cropOrigin = exp.cropOrigin;
+        externalDesc.cropSize = exp.cropSize;
+        externalDesc.apparentSize = exp.cropSize;
         wgpu::ExternalTexture externalTexture = device.CreateExternalTexture(&externalDesc);
 
         // Create a sampler and bind group
@@ -1090,6 +1042,75 @@ TEST_P(ExternalTextureTests, CropSinglePlane) {
     }
 }
 
+// Test that the apparentSize takes effect by using it to scale a texture and "blitting" it.
+TEST_P(ExternalTextureTests, ApparentSizeEffect) {
+    // Create the test pipeline
+    wgpu::ShaderModule blitAndOutputSize = utils::CreateShaderModule(this->device, R"(
+        @group(0) @binding(0) var t : texture_external;
+        @group(0) @binding(1) var<storage, read_write> dimensions : vec2u;
+
+        @fragment fn main(@builtin(position) FragCoord : vec4f)
+                                 -> @location(0) vec4f {
+            dimensions = textureDimensions(t);
+            return textureLoad(t, vec2u(FragCoord.xy));
+        })");
+
+    utils::ComboRenderPipelineDescriptor descriptor;
+    descriptor.vertex.module = vsModule;
+    descriptor.cFragment.module = blitAndOutputSize;
+    descriptor.cTargets[0].format = kFormat;
+    wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&descriptor);
+
+    // The source texture will contain a quad and have a larger apparent size.
+    wgpu::Texture sourceTexture =
+        Create2DTexture(device, 2, 2, kFormat,
+                        wgpu::TextureUsage::TextureBinding | wgpu::TextureUsage::RenderAttachment);
+    RenderQuad(sourceTexture,
+               {kGreen.rgbaFloats, kColor1.rgbaFloats, kRed.rgbaFloats, kBlue.rgbaFloats});
+
+    wgpu::ExternalTextureDescriptor externalDesc = InitExternalTextureDescriptor(sourceTexture);
+    externalDesc.apparentSize = {8, 16};
+    wgpu::ExternalTexture externalTexture = device.CreateExternalTexture(&externalDesc);
+
+    // The texture that will receive the blit operation, uses apparentSize
+    wgpu::Texture renderTexture = Create2DTexture(
+        device, externalDesc.apparentSize.width, externalDesc.apparentSize.height, kFormat,
+        wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::RenderAttachment);
+
+    // The buffer that will receive the result of `textureDimensions`
+    wgpu::BufferDescriptor bufDesc;
+    bufDesc.size = 8;
+    bufDesc.usage = wgpu::BufferUsage::Storage | wgpu::BufferUsage::CopySrc;
+    wgpu::Buffer dimensionBuffer = device.CreateBuffer(&bufDesc);
+
+    wgpu::BindGroup bindGroup = utils::MakeBindGroup(device, pipeline.GetBindGroupLayout(0),
+                                                     {{0, externalTexture}, {1, dimensionBuffer}});
+
+    // Do the blit
+    utils::ComboRenderPassDescriptor renderPass({renderTexture.CreateView()});
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+    wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
+    {
+        pass.SetPipeline(pipeline);
+        pass.SetBindGroup(0, bindGroup);
+        pass.Draw(6);
+        pass.End();
+    }
+
+    wgpu::CommandBuffer commands = encoder.Finish();
+    queue.Submit(1, &commands);
+
+    // Check that the apparentSize is correct and that the center of the quad has moved due to the
+    // scaling with apparentSize.
+    EXPECT_BUFFER_U32_EQ(externalDesc.apparentSize.width, dimensionBuffer, 0);
+    EXPECT_BUFFER_U32_EQ(externalDesc.apparentSize.height, dimensionBuffer, 4);
+
+    EXPECT_PIXEL_RGBA8_EQ(kGreen.rgba, renderTexture, 3, 7);
+    EXPECT_PIXEL_RGBA8_EQ(kColor1.rgba, renderTexture, 4, 7);
+    EXPECT_PIXEL_RGBA8_EQ(kRed.rgba, renderTexture, 3, 8);
+    EXPECT_PIXEL_RGBA8_EQ(kBlue.rgba, renderTexture, 4, 8);
+}
+
 // This test draws a 2x2 multi-colored square surrounded by a 1px black border. We test the external
 // texture crop functionality by cropping to specific ranges inside the texture.
 TEST_P(ExternalTextureTests, CropMultiplanar) {
@@ -1116,8 +1137,8 @@ TEST_P(ExternalTextureTests, CropMultiplanar) {
                         wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::RenderAttachment);
 
     struct CropExpectation {
-        wgpu::Origin2D visibleOrigin;
-        wgpu::Extent2D visibleSize;
+        wgpu::Origin2D cropOrigin;
+        wgpu::Extent2D cropSize;
         wgpu::ExternalTextureRotation rotation;
         utils::RGBA8 upperLeftColor;
         utils::RGBA8 upperRightColor;
@@ -1198,14 +1219,13 @@ TEST_P(ExternalTextureTests, CropMultiplanar) {
         descriptor.cTargets[0].format = kFormat;
         wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&descriptor);
 
-        // Create an ExternalTextureDescriptor from the texture view
-        wgpu::ExternalTextureDescriptor externalDesc = InitExternalTextureDescriptor(
-            sourceTexturePlane0.CreateView(), sourceTexturePlane1.CreateView());
-        externalDesc.rotation = exp.rotation;
-        externalDesc.visibleOrigin = exp.visibleOrigin;
-        externalDesc.visibleSize = exp.visibleSize;
-
         // Import the external texture
+        wgpu::ExternalTextureDescriptor externalDesc =
+            InitExternalTextureDescriptor(sourceTexturePlane0, sourceTexturePlane1);
+        externalDesc.rotation = exp.rotation;
+        externalDesc.cropOrigin = exp.cropOrigin;
+        externalDesc.cropSize = exp.cropSize;
+        externalDesc.apparentSize = exp.cropSize;
         wgpu::ExternalTexture externalTexture = device.CreateExternalTexture(&externalDesc);
 
         // Create a sampler and bind group
@@ -1249,14 +1269,11 @@ TEST_P(ExternalTextureTests, SampleExternalTextureAlpha) {
         Create2DTexture(device, kWidth, kHeight, kFormat,
                         wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::RenderAttachment);
 
-    // Create a texture view for the external texture
-    wgpu::TextureView externalView = sampledTexture.CreateView();
-
     utils::RGBA8 kColor = {255, 255, 255, 128};
 
     // Initialize texture with green to ensure it is sampled from later.
     {
-        utils::ComboRenderPassDescriptor renderPass({externalView}, nullptr);
+        utils::ComboRenderPassDescriptor renderPass({sampledTexture.CreateView()}, nullptr);
         renderPass.cColorAttachments[0].clearValue = {kColor.r / 255.0f, kColor.g / 255.0f,
                                                       kColor.b / 255.0f, kColor.a / 255.0f};
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
@@ -1274,12 +1291,8 @@ TEST_P(ExternalTextureTests, SampleExternalTextureAlpha) {
     descriptor.cTargets[0].format = kFormat;
     wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&descriptor);
 
-    // Create an ExternalTextureDescriptor from the texture view
-    wgpu::ExternalTextureDescriptor externalDesc = InitExternalTextureDescriptor(externalView);
-    externalDesc.visibleOrigin = {0, 0};
-    externalDesc.visibleSize = {kWidth, kHeight};
-
     // Import the external texture
+    wgpu::ExternalTextureDescriptor externalDesc = InitExternalTextureDescriptor(sampledTexture);
     wgpu::ExternalTexture externalTexture = device.CreateExternalTexture(&externalDesc);
 
     // Create a sampler and bind group
@@ -1548,17 +1561,11 @@ class ExternalTextureOOBTests : public ExternalTextureTestsBase<DawnTestWithPara
         descriptor.cTargets[0].format = kFormat;
         wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&descriptor);
 
-        // Create an ExternalTextureDescriptor from the texture view
-        wgpu::ExternalTextureDescriptor externalDesc = InitExternalTextureDescriptor(
-            sourceTexturePlane0.CreateView(), sourceTexturePlane1.CreateView());
+        // Import the external texture
+        wgpu::ExternalTextureDescriptor externalDesc =
+            InitExternalTextureDescriptor(sourceTexturePlane0, sourceTexturePlane1);
         externalDesc.rotation = rotation;
         externalDesc.mirrored = flip == Flip::Mirrored;
-
-        // Visible rect excludes border region.
-        externalDesc.visibleOrigin = {0, 0};
-        externalDesc.visibleSize = {kPlaneWidth, kPlaneHeight};
-
-        // Import the external texture
         wgpu::ExternalTexture externalTexture = device.CreateExternalTexture(&externalDesc);
 
         // Create a sampler and bind group

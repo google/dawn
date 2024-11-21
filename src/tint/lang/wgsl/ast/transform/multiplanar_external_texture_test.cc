@@ -158,7 +158,7 @@ struct ExternalTextureParams {
   samplePlane0RectMax : vec2<f32>,
   samplePlane1RectMin : vec2<f32>,
   samplePlane1RectMax : vec2<f32>,
-  visibleSize : vec2<u32>,
+  apparentSize : vec2<u32>,
   plane1CoordFactor : vec2<f32>,
 }
 
@@ -171,7 +171,7 @@ struct ExternalTextureParams {
 @fragment
 fn main(@builtin(position) coord : vec4<f32>) -> @location(0) vec4<f32> {
   var dim : vec2<u32>;
-  dim = (ext_tex_params.visibleSize + vec2<u32>(1));
+  dim = (ext_tex_params.apparentSize + vec2<u32>(1));
   return vec4<f32>(0.0, 0.0, 0.0, 0.0);
 }
 )";
@@ -218,7 +218,7 @@ struct ExternalTextureParams {
   samplePlane0RectMax : vec2<f32>,
   samplePlane1RectMin : vec2<f32>,
   samplePlane1RectMax : vec2<f32>,
-  visibleSize : vec2<u32>,
+  apparentSize : vec2<u32>,
   plane1CoordFactor : vec2<f32>,
 }
 
@@ -236,7 +236,7 @@ fn gammaCorrection(v : vec3<f32>, params : GammaTransferParams) -> vec3<f32> {
 }
 
 fn textureLoadExternal(plane0 : texture_2d<f32>, plane1 : texture_2d<f32>, coord : vec2<u32>, params : ExternalTextureParams) -> vec4<f32> {
-  let clampedCoords = min(vec2<u32>(coord), params.visibleSize);
+  let clampedCoords = min(vec2<u32>(coord), params.apparentSize);
   let plane0_clamped = vec2<u32>(round((params.loadTransform * vec3<f32>(vec2<f32>(clampedCoords), 1))));
   var color : vec4<f32>;
   if ((params.numPlanes == 1)) {
@@ -307,7 +307,7 @@ struct ExternalTextureParams {
   samplePlane0RectMax : vec2<f32>,
   samplePlane1RectMin : vec2<f32>,
   samplePlane1RectMax : vec2<f32>,
-  visibleSize : vec2<u32>,
+  apparentSize : vec2<u32>,
   plane1CoordFactor : vec2<f32>,
 }
 
@@ -318,7 +318,7 @@ struct ExternalTextureParams {
 @fragment
 fn main(@builtin(position) coord : vec4<f32>) -> @location(0) vec4<f32> {
   var dim : vec2<u32>;
-  dim = (ext_tex_params.visibleSize + vec2<u32>(1));
+  dim = (ext_tex_params.apparentSize + vec2<u32>(1));
   return vec4<f32>(0.0, 0.0, 0.0, 0.0);
 }
 
@@ -369,7 +369,7 @@ struct ExternalTextureParams {
   samplePlane0RectMax : vec2<f32>,
   samplePlane1RectMin : vec2<f32>,
   samplePlane1RectMax : vec2<f32>,
-  visibleSize : vec2<u32>,
+  apparentSize : vec2<u32>,
   plane1CoordFactor : vec2<f32>,
 }
 
@@ -456,7 +456,7 @@ struct ExternalTextureParams {
   samplePlane0RectMax : vec2<f32>,
   samplePlane1RectMin : vec2<f32>,
   samplePlane1RectMax : vec2<f32>,
-  visibleSize : vec2<u32>,
+  apparentSize : vec2<u32>,
   plane1CoordFactor : vec2<f32>,
 }
 
@@ -544,7 +544,7 @@ struct ExternalTextureParams {
   samplePlane0RectMax : vec2<f32>,
   samplePlane1RectMin : vec2<f32>,
   samplePlane1RectMax : vec2<f32>,
-  visibleSize : vec2<u32>,
+  apparentSize : vec2<u32>,
   plane1CoordFactor : vec2<f32>,
 }
 
@@ -562,7 +562,7 @@ fn gammaCorrection(v : vec3<f32>, params : GammaTransferParams) -> vec3<f32> {
 }
 
 fn textureLoadExternal(plane0 : texture_2d<f32>, plane1 : texture_2d<f32>, coord : vec2<i32>, params : ExternalTextureParams) -> vec4<f32> {
-  let clampedCoords = min(vec2<u32>(coord), params.visibleSize);
+  let clampedCoords = min(vec2<u32>(coord), params.apparentSize);
   let plane0_clamped = vec2<u32>(round((params.loadTransform * vec3<f32>(vec2<f32>(clampedCoords), 1))));
   var color : vec4<f32>;
   if ((params.numPlanes == 1)) {
@@ -580,7 +580,7 @@ fn textureLoadExternal(plane0 : texture_2d<f32>, plane1 : texture_2d<f32>, coord
 }
 
 fn textureLoadExternal_1(plane0 : texture_2d<f32>, plane1 : texture_2d<f32>, coord : vec2<u32>, params : ExternalTextureParams) -> vec4<f32> {
-  let clampedCoords = min(vec2<u32>(coord), params.visibleSize);
+  let clampedCoords = min(vec2<u32>(coord), params.apparentSize);
   let plane0_clamped = vec2<u32>(round((params.loadTransform * vec3<f32>(vec2<f32>(clampedCoords), 1))));
   var color : vec4<f32>;
   if ((params.numPlanes == 1)) {
@@ -650,7 +650,7 @@ struct ExternalTextureParams {
   samplePlane0RectMax : vec2<f32>,
   samplePlane1RectMin : vec2<f32>,
   samplePlane1RectMax : vec2<f32>,
-  visibleSize : vec2<u32>,
+  apparentSize : vec2<u32>,
   plane1CoordFactor : vec2<f32>,
 }
 
@@ -666,7 +666,7 @@ fn gammaCorrection(v : vec3<f32>, params : GammaTransferParams) -> vec3<f32> {
 }
 
 fn textureLoadExternal(plane0 : texture_2d<f32>, plane1 : texture_2d<f32>, coord : vec2<i32>, params : ExternalTextureParams) -> vec4<f32> {
-  let clampedCoords = min(vec2<u32>(coord), params.visibleSize);
+  let clampedCoords = min(vec2<u32>(coord), params.apparentSize);
   let plane0_clamped = vec2<u32>(round((params.loadTransform * vec3<f32>(vec2<f32>(clampedCoords), 1))));
   var color : vec4<f32>;
   if ((params.numPlanes == 1)) {
@@ -684,7 +684,7 @@ fn textureLoadExternal(plane0 : texture_2d<f32>, plane1 : texture_2d<f32>, coord
 }
 
 fn textureLoadExternal_1(plane0 : texture_2d<f32>, plane1 : texture_2d<f32>, coord : vec2<u32>, params : ExternalTextureParams) -> vec4<f32> {
-  let clampedCoords = min(vec2<u32>(coord), params.visibleSize);
+  let clampedCoords = min(vec2<u32>(coord), params.apparentSize);
   let plane0_clamped = vec2<u32>(round((params.loadTransform * vec3<f32>(vec2<f32>(clampedCoords), 1))));
   var color : vec4<f32>;
   if ((params.numPlanes == 1)) {
@@ -755,7 +755,7 @@ struct ExternalTextureParams {
   samplePlane0RectMax : vec2<f32>,
   samplePlane1RectMin : vec2<f32>,
   samplePlane1RectMax : vec2<f32>,
-  visibleSize : vec2<u32>,
+  apparentSize : vec2<u32>,
   plane1CoordFactor : vec2<f32>,
 }
 
@@ -793,7 +793,7 @@ fn textureSampleExternal(plane0 : texture_2d<f32>, plane1 : texture_2d<f32>, smp
 }
 
 fn textureLoadExternal(plane0 : texture_2d<f32>, plane1 : texture_2d<f32>, coord : vec2<i32>, params : ExternalTextureParams) -> vec4<f32> {
-  let clampedCoords = min(vec2<u32>(coord), params.visibleSize);
+  let clampedCoords = min(vec2<u32>(coord), params.apparentSize);
   let plane0_clamped = vec2<u32>(round((params.loadTransform * vec3<f32>(vec2<f32>(clampedCoords), 1))));
   var color : vec4<f32>;
   if ((params.numPlanes == 1)) {
@@ -860,7 +860,7 @@ struct ExternalTextureParams {
   samplePlane0RectMax : vec2<f32>,
   samplePlane1RectMin : vec2<f32>,
   samplePlane1RectMax : vec2<f32>,
-  visibleSize : vec2<u32>,
+  apparentSize : vec2<u32>,
   plane1CoordFactor : vec2<f32>,
 }
 
@@ -894,7 +894,7 @@ fn textureSampleExternal(plane0 : texture_2d<f32>, plane1 : texture_2d<f32>, smp
 }
 
 fn textureLoadExternal(plane0 : texture_2d<f32>, plane1 : texture_2d<f32>, coord : vec2<i32>, params : ExternalTextureParams) -> vec4<f32> {
-  let clampedCoords = min(vec2<u32>(coord), params.visibleSize);
+  let clampedCoords = min(vec2<u32>(coord), params.apparentSize);
   let plane0_clamped = vec2<u32>(round((params.loadTransform * vec3<f32>(vec2<f32>(clampedCoords), 1))));
   var color : vec4<f32>;
   if ((params.numPlanes == 1)) {
@@ -971,7 +971,7 @@ struct ExternalTextureParams {
   samplePlane0RectMax : vec2<f32>,
   samplePlane1RectMin : vec2<f32>,
   samplePlane1RectMax : vec2<f32>,
-  visibleSize : vec2<u32>,
+  apparentSize : vec2<u32>,
   plane1CoordFactor : vec2<f32>,
 }
 
@@ -1086,7 +1086,7 @@ struct ExternalTextureParams {
   samplePlane0RectMax : vec2<f32>,
   samplePlane1RectMin : vec2<f32>,
   samplePlane1RectMax : vec2<f32>,
-  visibleSize : vec2<u32>,
+  apparentSize : vec2<u32>,
   plane1CoordFactor : vec2<f32>,
 }
 
@@ -1183,7 +1183,7 @@ struct ExternalTextureParams {
   samplePlane0RectMax : vec2<f32>,
   samplePlane1RectMin : vec2<f32>,
   samplePlane1RectMax : vec2<f32>,
-  visibleSize : vec2<u32>,
+  apparentSize : vec2<u32>,
   plane1CoordFactor : vec2<f32>,
 }
 
@@ -1280,7 +1280,7 @@ struct ExternalTextureParams {
   samplePlane0RectMax : vec2<f32>,
   samplePlane1RectMin : vec2<f32>,
   samplePlane1RectMax : vec2<f32>,
-  visibleSize : vec2<u32>,
+  apparentSize : vec2<u32>,
   plane1CoordFactor : vec2<f32>,
 }
 
@@ -1379,7 +1379,7 @@ struct ExternalTextureParams {
   samplePlane0RectMax : vec2<f32>,
   samplePlane1RectMin : vec2<f32>,
   samplePlane1RectMax : vec2<f32>,
-  visibleSize : vec2<u32>,
+  apparentSize : vec2<u32>,
   plane1CoordFactor : vec2<f32>,
 }
 
@@ -1487,7 +1487,7 @@ struct ExternalTextureParams {
   samplePlane0RectMax : vec2<f32>,
   samplePlane1RectMin : vec2<f32>,
   samplePlane1RectMax : vec2<f32>,
-  visibleSize : vec2<u32>,
+  apparentSize : vec2<u32>,
   plane1CoordFactor : vec2<f32>,
 }
 
@@ -1596,7 +1596,7 @@ struct ExternalTextureParams {
   samplePlane0RectMax : vec2<f32>,
   samplePlane1RectMin : vec2<f32>,
   samplePlane1RectMax : vec2<f32>,
-  visibleSize : vec2<u32>,
+  apparentSize : vec2<u32>,
   plane1CoordFactor : vec2<f32>,
 }
 
@@ -1701,7 +1701,7 @@ struct ExternalTextureParams {
   samplePlane0RectMax : vec2<f32>,
   samplePlane1RectMin : vec2<f32>,
   samplePlane1RectMax : vec2<f32>,
-  visibleSize : vec2<u32>,
+  apparentSize : vec2<u32>,
   plane1CoordFactor : vec2<f32>,
 }
 
@@ -1794,12 +1794,12 @@ struct ExternalTextureParams {
   samplePlane0RectMax : vec2<f32>,
   samplePlane1RectMin : vec2<f32>,
   samplePlane1RectMax : vec2<f32>,
-  visibleSize : vec2<u32>,
+  apparentSize : vec2<u32>,
   plane1CoordFactor : vec2<f32>,
 }
 
 fn f(ext_tex : texture_2d<f32>, ext_tex_plane_1 : texture_2d<f32>, ext_tex_params : ExternalTextureParams) -> vec2<u32> {
-  return (ext_tex_params.visibleSize + vec2<u32>(1));
+  return (ext_tex_params.apparentSize + vec2<u32>(1));
 }
 )";
 
@@ -1853,7 +1853,7 @@ struct ExternalTextureParams {
   samplePlane0RectMax : vec2<f32>,
   samplePlane1RectMin : vec2<f32>,
   samplePlane1RectMax : vec2<f32>,
-  visibleSize : vec2<u32>,
+  apparentSize : vec2<u32>,
   plane1CoordFactor : vec2<f32>,
 }
 
@@ -1953,7 +1953,7 @@ struct ExternalTextureParams {
   samplePlane0RectMax : vec2<f32>,
   samplePlane1RectMin : vec2<f32>,
   samplePlane1RectMax : vec2<f32>,
-  visibleSize : vec2<u32>,
+  apparentSize : vec2<u32>,
   plane1CoordFactor : vec2<f32>,
 }
 

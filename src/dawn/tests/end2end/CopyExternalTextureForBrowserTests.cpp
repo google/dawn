@@ -162,8 +162,9 @@ class CopyExternalTextureForBrowserTests : public Parent {
         externalDesc.plane0 = externalTexturePlane0.CreateView();
         externalDesc.plane1 = externalTexturePlane1.CreateView();
 
-        externalDesc.visibleOrigin = {0, 0};
-        externalDesc.visibleSize = {kWidth, kHeight};
+        externalDesc.cropOrigin = {0, 0};
+        externalDesc.cropSize = {kWidth, kHeight};
+        externalDesc.apparentSize = {kWidth, kHeight};
 
         // Import the external texture
         return this->device.CreateExternalTexture(&externalDesc);

@@ -22,7 +22,7 @@ struct tint_ExternalTextureParams {
   float2 samplePlane0RectMax;
   float2 samplePlane1RectMin;
   float2 samplePlane1RectMax;
-  uint2 visibleSize;
+  uint2 apparentSize;
   float2 plane1CoordFactor;
 };
 
@@ -44,7 +44,7 @@ float3 tint_GammaCorrection(float3 v, tint_GammaTransferParams params) {
 }
 
 float4 tint_TextureLoadExternal(Texture2D<float4> plane_0, Texture2D<float4> plane_1, tint_ExternalTextureParams params, uint2 coords) {
-  float2 v_4 = round(mul(float3(float2(min(coords, params.visibleSize)), 1.0f), params.loadTransform));
+  float2 v_4 = round(mul(float3(float2(min(coords, params.apparentSize)), 1.0f), params.loadTransform));
   uint2 v_5 = tint_v2f32_to_v2u32(v_4);
   float3 v_6 = (0.0f).xxx;
   float v_7 = 0.0f;

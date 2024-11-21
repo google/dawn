@@ -22,7 +22,7 @@ struct tint_ExternalTextureParams {
   float2 samplePlane0RectMax;
   float2 samplePlane1RectMin;
   float2 samplePlane1RectMax;
-  uint2 visibleSize;
+  uint2 apparentSize;
   float2 plane1CoordFactor;
 };
 
@@ -91,7 +91,7 @@ tint_ExternalTextureParams v_10(uint start_byte_offset) {
 
 uint2 textureDimensions_cdc6c9() {
   tint_ExternalTextureParams v_31 = v_10(0u);
-  uint2 res = (v_31.visibleSize + (1u).xx);
+  uint2 res = (v_31.apparentSize + (1u).xx);
   return res;
 }
 

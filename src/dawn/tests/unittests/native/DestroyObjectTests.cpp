@@ -384,7 +384,8 @@ TEST_F(DestroyObjectTests, ExternalTextureNativeExplicit) {
     desc.gamutConversionMatrix = placeholderConstantArray.data();
     desc.srcTransferFunctionParameters = placeholderConstantArray.data();
     desc.dstTransferFunctionParameters = placeholderConstantArray.data();
-    desc.visibleSize = {1, 1};
+    desc.cropSize = {1, 1};
+    desc.apparentSize = {1, 1};
     desc.plane0 = textureViewMock.Get();
 
     Ref<ExternalTextureMock> externalTextureMock = ExternalTextureMock::Create(mDeviceMock, &desc);
@@ -414,7 +415,8 @@ TEST_F(DestroyObjectTests, ExternalTextureApiExplicit) {
     desc.gamutConversionMatrix = placeholderConstantArray.data();
     desc.srcTransferFunctionParameters = placeholderConstantArray.data();
     desc.dstTransferFunctionParameters = placeholderConstantArray.data();
-    desc.visibleSize = {1, 1};
+    desc.cropSize = {1, 1};
+    desc.apparentSize = {1, 1};
     desc.plane0 = textureViewMock.Get();
 
     Ref<ExternalTextureMock> externalTextureMock = ExternalTextureMock::Create(mDeviceMock, &desc);
@@ -448,7 +450,8 @@ TEST_F(DestroyObjectTests, ExternalTextureImplicit) {
     desc.gamutConversionMatrix = placeholderConstantArray.data();
     desc.srcTransferFunctionParameters = placeholderConstantArray.data();
     desc.dstTransferFunctionParameters = placeholderConstantArray.data();
-    desc.visibleSize = {1, 1};
+    desc.cropSize = {1, 1};
+    desc.apparentSize = {1, 1};
     desc.plane0 = textureViewMock.Get();
 
     Ref<ExternalTextureMock> externalTextureMock = ExternalTextureMock::Create(mDeviceMock, &desc);
@@ -985,7 +988,8 @@ TEST_F(DestroyObjectTests, DestroyObjectsApiExplicit) {
         desc.gamutConversionMatrix = placeholderConstantArray.data();
         desc.srcTransferFunctionParameters = placeholderConstantArray.data();
         desc.dstTransferFunctionParameters = placeholderConstantArray.data();
-        desc.visibleSize = {1, 1};
+        desc.cropSize = {1, 1};
+        desc.apparentSize = {1, 1};
         desc.plane0 = textureViewMock.Get();
 
         ScopedRawPtrExpectation scoped(mDeviceMock);

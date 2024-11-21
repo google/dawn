@@ -36,7 +36,7 @@ struct tint_ExternalTextureParams_std140 {
   vec2 samplePlane0RectMax;
   vec2 samplePlane1RectMin;
   vec2 samplePlane1RectMax;
-  uvec2 visibleSize;
+  uvec2 apparentSize;
   vec2 plane1CoordFactor;
 };
 

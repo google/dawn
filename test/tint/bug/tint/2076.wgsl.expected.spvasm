@@ -37,7 +37,7 @@
                OpMemberName %tint_ExternalTextureParams_std140 15 "samplePlane0RectMax"
                OpMemberName %tint_ExternalTextureParams_std140 16 "samplePlane1RectMin"
                OpMemberName %tint_ExternalTextureParams_std140 17 "samplePlane1RectMax"
-               OpMemberName %tint_ExternalTextureParams_std140 18 "visibleSize"
+               OpMemberName %tint_ExternalTextureParams_std140 18 "apparentSize"
                OpMemberName %tint_ExternalTextureParams_std140 19 "plane1CoordFactor"
                OpName %tint_ExternalTextureParams_std140 "tint_ExternalTextureParams_std140"
                OpMemberName %randomTexture_params_block_std140 0 "inner"

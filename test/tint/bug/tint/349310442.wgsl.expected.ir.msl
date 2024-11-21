@@ -25,7 +25,7 @@ struct tint_ExternalTextureParams {
   float2 samplePlane0RectMax;
   float2 samplePlane1RectMin;
   float2 samplePlane1RectMax;
-  uint2 visibleSize;
+  uint2 apparentSize;
   float2 plane1CoordFactor;
 };
 
@@ -60,7 +60,7 @@ struct tint_ExternalTextureParams_packed_vec3 {
   /* 0x00e8 */ float2 samplePlane0RectMax;
   /* 0x00f0 */ float2 samplePlane1RectMin;
   /* 0x00f8 */ float2 samplePlane1RectMax;
-  /* 0x0100 */ uint2 visibleSize;
+  /* 0x0100 */ uint2 apparentSize;
   /* 0x0108 */ float2 plane1CoordFactor;
 };
 
@@ -76,7 +76,7 @@ float3 tint_GammaCorrection(float3 v, tint_GammaTransferParams params) {
 }
 
 float4 tint_TextureLoadExternal(texture2d<float, access::sample> plane_0, texture2d<float, access::sample> plane_1, tint_ExternalTextureParams params, uint2 coords) {
-  float2 const v_2 = rint((params.loadTransform * float3(float2(min(coords, params.visibleSize)), 1.0f)));
+  float2 const v_2 = rint((params.loadTransform * float3(float2(min(coords, params.apparentSize)), 1.0f)));
   uint2 const v_3 = uint2(v_2);
   float3 v_4 = 0.0f;
   float v_5 = 0.0f;
@@ -109,7 +109,7 @@ tint_ExternalTextureParams tint_load_struct_packed_vec3(const constant tint_Exte
   float3 const v_16 = float3(v_15[0u].packed);
   float3 const v_17 = float3(v_15[1u].packed);
   float3x3 const v_18 = float3x3(v_16, v_17, float3(v_15[2u].packed));
-  return tint_ExternalTextureParams{.numPlanes=v_10, .doYuvToRgbConversionOnly=v_11, .yuvToRgbConversionMatrix=v_12, .gammaDecodeParams=v_13, .gammaEncodeParams=v_14, .gamutConversionMatrix=v_18, .sampleTransform=(*from).sampleTransform, .loadTransform=(*from).loadTransform, .samplePlane0RectMin=(*from).samplePlane0RectMin, .samplePlane0RectMax=(*from).samplePlane0RectMax, .samplePlane1RectMin=(*from).samplePlane1RectMin, .samplePlane1RectMax=(*from).samplePlane1RectMax, .visibleSize=(*from).visibleSize, .plane1CoordFactor=(*from).plane1CoordFactor};
+  return tint_ExternalTextureParams{.numPlanes=v_10, .doYuvToRgbConversionOnly=v_11, .yuvToRgbConversionMatrix=v_12, .gammaDecodeParams=v_13, .gammaEncodeParams=v_14, .gamutConversionMatrix=v_18, .sampleTransform=(*from).sampleTransform, .loadTransform=(*from).loadTransform, .samplePlane0RectMin=(*from).samplePlane0RectMin, .samplePlane0RectMax=(*from).samplePlane0RectMax, .samplePlane1RectMin=(*from).samplePlane1RectMin, .samplePlane1RectMax=(*from).samplePlane1RectMax, .apparentSize=(*from).apparentSize, .plane1CoordFactor=(*from).plane1CoordFactor};
 }
 
 kernel void i(texture2d<float, access::sample> t_plane0 [[texture(0)]], texture2d<float, access::sample> t_plane1 [[texture(1)]], const constant tint_ExternalTextureParams_packed_vec3* t_params [[buffer(2)]]) {
