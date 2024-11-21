@@ -95,32 +95,9 @@ TEST_F(ResolverSubgroupsExtensionTest, UseSubgroupSizeAttribWithExtension) {
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
 
-// Using a subgroup_size builtin attribute with chromium_experimental_subgroups enabled should pass.
-TEST_F(ResolverSubgroupsExtensionTest, UseSubgroupSizeAttribWithExperimentalExtension) {
-    Enable(wgsl::Extension::kChromiumExperimentalSubgroups);
-    Structure("Inputs",
-              Vector{
-                  Member("a", ty.u32(), Vector{Builtin(core::BuiltinValue::kSubgroupSize)}),
-              });
-
-    EXPECT_TRUE(r()->Resolve()) << r()->error();
-}
-
 // Using a subgroup_invocation_id builtin attribute with subgroups enabled should pass.
 TEST_F(ResolverSubgroupsExtensionTest, UseSubgroupInvocationIdAttribWithExtension) {
     Enable(wgsl::Extension::kSubgroups);
-    Structure("Inputs",
-              Vector{
-                  Member("a", ty.u32(), Vector{Builtin(core::BuiltinValue::kSubgroupInvocationId)}),
-              });
-
-    EXPECT_TRUE(r()->Resolve()) << r()->error();
-}
-
-// Using a subgroup_invocation_id builtin attribute with chromium_experimental_subgroups enabled
-// should pass.
-TEST_F(ResolverSubgroupsExtensionTest, UseSubgroupInvocationIdAttribWithExperimentalExtension) {
-    Enable(wgsl::Extension::kChromiumExperimentalSubgroups);
     Structure("Inputs",
               Vector{
                   Member("a", ty.u32(), Vector{Builtin(core::BuiltinValue::kSubgroupInvocationId)}),

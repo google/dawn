@@ -737,8 +737,6 @@ void PhysicalDevice::InitializeSupportedFeaturesImpl() {
             [*mDevice supportsFamily:MTLGPUFamilyMac2]) {
             EnableFeature(Feature::Subgroups);
             EnableFeature(Feature::SubgroupsF16);
-            // TODO(349125474): Remove deprecated ChromiumExperimentalSubgroups.
-            EnableFeature(Feature::ChromiumExperimentalSubgroups);
         }
     }
 

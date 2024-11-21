@@ -1821,11 +1821,6 @@ void DeviceBase::SetWGSLExtensionAllowList() {
     if (mEnabledFeatures.IsEnabled(Feature::ShaderF16)) {
         mWGSLAllowedFeatures.extensions.insert(tint::wgsl::Extension::kF16);
     }
-    // TODO(349125474): Remove deprecated ChromiumExperimentalSubgroups.
-    if (mEnabledFeatures.IsEnabled(Feature::ChromiumExperimentalSubgroups)) {
-        mWGSLAllowedFeatures.extensions.insert(
-            tint::wgsl::Extension::kChromiumExperimentalSubgroups);
-    }
     if (mEnabledFeatures.IsEnabled(Feature::Subgroups)) {
         mWGSLAllowedFeatures.extensions.insert(tint::wgsl::Extension::kSubgroups);
     }
@@ -1973,9 +1968,7 @@ wgpu::Status DeviceBase::APIGetLimits(SupportedLimits* limits) const {
 
     if (auto* subgroupLimits = unpacked.Get<DawnExperimentalSubgroupLimits>()) {
         wgpu::ChainedStructOut* originalChain = subgroupLimits->nextInChain;
-        // TODO(349125474): Remove deprecated ChromiumExperimentalSubgroups.
-        if (!(HasFeature(Feature::Subgroups) ||
-              HasFeature(Feature::ChromiumExperimentalSubgroups))) {
+        if (!HasFeature(Feature::Subgroups)) {
             // If subgroups feature is not enabled, return the default-initialized
             // DawnExperimentalSubgroupLimits object, where minSubgroupSize and
             // maxSubgroupSize are WGPU_LIMIT_U32_UNDEFINED.

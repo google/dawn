@@ -497,24 +497,14 @@ ResultOrError<VulkanDeviceKnobs> Device::CreateDevice(VkPhysicalDevice vkPhysica
     }
 
     // Set device feature for subgroups with f16 types.
-    // TODO(349125474): Remove deprecated ChromiumExperimentalSubgroups.
-    if (HasFeature(Feature::SubgroupsF16) || HasFeature(Feature::ChromiumExperimentalSubgroups)) {
-        // If ChromiumExperimentalSubgroups feature is required, set the shaderSubgroupExtendedTypes
-        // as-is, so that subgroups functions with f16 can be used if supported by backend.
-        if (HasFeature(Feature::ChromiumExperimentalSubgroups)) {
-            if (usedKnobs.HasExt(DeviceExt::ShaderSubgroupExtendedTypes)) {
-                usedKnobs.shaderSubgroupExtendedTypes = mDeviceInfo.shaderSubgroupExtendedTypes;
-                featuresChain.Add(&usedKnobs.shaderSubgroupExtendedTypes);
-            }
-        } else {
-            DAWN_ASSERT(usedKnobs.HasExt(DeviceExt::ShaderSubgroupExtendedTypes) &&
-                        mDeviceInfo.shaderSubgroupExtendedTypes.shaderSubgroupExtendedTypes ==
-                            VK_TRUE &&
-                        HasFeature(Feature::ShaderF16) && HasFeature(Feature::Subgroups));
+    if (HasFeature(Feature::SubgroupsF16)) {
+        DAWN_ASSERT(usedKnobs.HasExt(DeviceExt::ShaderSubgroupExtendedTypes) &&
+                    mDeviceInfo.shaderSubgroupExtendedTypes.shaderSubgroupExtendedTypes ==
+                        VK_TRUE &&
+                    HasFeature(Feature::ShaderF16) && HasFeature(Feature::Subgroups));
 
-            usedKnobs.shaderSubgroupExtendedTypes = mDeviceInfo.shaderSubgroupExtendedTypes;
-            featuresChain.Add(&usedKnobs.shaderSubgroupExtendedTypes);
-        }
+        usedKnobs.shaderSubgroupExtendedTypes = mDeviceInfo.shaderSubgroupExtendedTypes;
+        featuresChain.Add(&usedKnobs.shaderSubgroupExtendedTypes);
     }
 
     if (HasFeature(Feature::DualSourceBlending)) {

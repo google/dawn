@@ -98,15 +98,6 @@ static constexpr FeatureEnumAndInfo kFeatureInfo[] = {
      {"Allows textures with formats \"r32float\" \"rg32float\" and \"rgba32float\" to be "
       "blendable.",
       "https://gpuweb.github.io/gpuweb/#float32-blendable", FeatureInfo::FeatureState::Stable}},
-    {Feature::ChromiumExperimentalSubgroups,
-     {"DEPRECATED, use subgroups and subgroups-f16 features instead. "
-      "Experimental, allows using subgroup and supports the \"enable "
-      "chromium_experimental_subgroups\" directive in WGSL. Only used to investigate the semantic "
-      "of subgroups and should not be relied upon. Note that currently \"enable "
-      "chromium_experimental_subgroups\" feature allows using subgroups functions with f16 types "
-      "within WGSL, but doesn't ensure that backend supports it.",
-      "https://dawn.googlesource.com/dawn/+/refs/heads/main/docs/dawn/features/shader_features.md",
-      FeatureInfo::FeatureState::Experimental}},
     {Feature::ChromiumExperimentalSubgroupUniformControlFlow,
      {"Experimental, supports VK_KHR_shader_subgroup_uniform_control_flow on Vulkan devices. Only "
       "used to investigate the semantic of subgroups and should not be relied upon.",

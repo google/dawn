@@ -130,8 +130,8 @@ ResultOrError<d3d::CompiledShader> ShaderModule::Compile(
     SingleShaderStage stage,
     const PipelineLayout* layout,
     uint32_t compileFlags,
-    const std::optional<dawn::native::d3d::InterStageShaderVariablesMask>& usedInterstageVariables,
-    std::optional<uint32_t> maxSubgroupSizeForFullSubgroups) {
+    const std::optional<dawn::native::d3d::InterStageShaderVariablesMask>&
+        usedInterstageVariables) {
     Device* device = ToBackend(GetDevice());
     TRACE_EVENT0(device->GetPlatform(), General, "ShaderModuleD3D12::Compile");
     DAWN_ASSERT(!IsError());
@@ -146,7 +146,6 @@ ResultOrError<d3d::CompiledShader> ShaderModule::Compile(
     req.hlsl.disableSymbolRenaming = device->IsToggleEnabled(Toggle::DisableSymbolRenaming);
     req.hlsl.dumpShaders = device->IsToggleEnabled(Toggle::DumpShaders);
     req.hlsl.useTintIR = device->IsToggleEnabled(Toggle::UseTintIR);
-    req.hlsl.maxSubgroupSizeForFullSubgroups = maxSubgroupSizeForFullSubgroups;
 
     req.bytecode.hasShaderF16Feature = device->HasFeature(Feature::ShaderF16);
     req.bytecode.compileFlags = compileFlags;

@@ -253,9 +253,8 @@ MaybeError TranslateToHLSL(d3d::HlslCompilationRequest r,
     // Validate workgroup size after program runs transforms.
     if (r.stage == SingleShaderStage::Compute) {
         Extent3D _;
-        DAWN_TRY_ASSIGN(
-            _, ValidateComputeStageWorkgroupSize(transformedProgram, remappedEntryPointName->data(),
-                                                 r.limits, r.maxSubgroupSizeForFullSubgroups));
+        DAWN_TRY_ASSIGN(_, ValidateComputeStageWorkgroupSize(
+                               transformedProgram, remappedEntryPointName->data(), r.limits));
     }
 
     bool usesVertexIndex = false;

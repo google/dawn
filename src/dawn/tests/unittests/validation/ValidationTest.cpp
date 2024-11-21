@@ -319,11 +319,6 @@ uint32_t ValidationTest::GetDeviceCreationDeprecationWarningExpectation(
     for (uint32_t i = 0; i < descriptor.requiredFeatureCount; ++i) {
         requiredFeatureSet.insert(descriptor.requiredFeatures[i]);
     }
-    // ChromiumExperimentalSubgroups feature is deprecated.
-    // TODO(349125474): Remove deprecated ChromiumExperimentalSubgroups.
-    if (requiredFeatureSet.count(wgpu::FeatureName::ChromiumExperimentalSubgroups)) {
-        expectedDeprecatedCount++;
-    }
 
     return expectedDeprecatedCount;
 }

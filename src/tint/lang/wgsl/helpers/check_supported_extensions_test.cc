@@ -42,7 +42,7 @@ TEST_F(CheckSupportedExtensionsTest, Supported) {
     ASSERT_TRUE(CheckSupportedExtensions("writer", AST(), Diagnostics(),
                                          Vector{
                                              wgsl::Extension::kF16,
-                                             wgsl::Extension::kChromiumExperimentalSubgroups,
+                                             wgsl::Extension::kChromiumExperimentalSubgroupMatrix,
                                          }));
 }
 
@@ -51,7 +51,7 @@ TEST_F(CheckSupportedExtensionsTest, Unsupported) {
 
     ASSERT_FALSE(CheckSupportedExtensions("writer", AST(), Diagnostics(),
                                           Vector{
-                                              wgsl::Extension::kChromiumExperimentalSubgroups,
+                                              wgsl::Extension::kChromiumExperimentalSubgroupMatrix,
                                           }));
     EXPECT_EQ(Diagnostics().Str(), "12:34 error: writer backend does not support extension 'f16'");
 }

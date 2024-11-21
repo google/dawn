@@ -488,17 +488,12 @@ MaybeError ComputePipeline::InitializeImpl() {
     DAWN_TRY_ASSIGN(transformedProgram, RunTransforms(&transformManager, &(tintProgram->program),
                                                       transformInputs, nullptr, nullptr));
 
-    // Do the workgroup size validation, although different backend will have different
-    // fullSubgroups parameter.
+    // Do the workgroup size validation.
     const CombinedLimits& limits = GetDevice()->GetLimits();
     Extent3D _;
     DAWN_TRY_ASSIGN(
-        _, ValidateComputeStageWorkgroupSize(
-               transformedProgram, computeStage.entryPoint.c_str(),
-               LimitsForCompilationRequest::Create(limits.v1), /* maxSubgroupSizeForFullSubgroups */
-               IsFullSubgroupsRequired()
-                   ? std::make_optional(limits.experimentalSubgroupLimits.maxSubgroupSize)
-                   : std::nullopt));
+        _, ValidateComputeStageWorkgroupSize(transformedProgram, computeStage.entryPoint.c_str(),
+                                             LimitsForCompilationRequest::Create(limits.v1)));
 
     return {};
 }

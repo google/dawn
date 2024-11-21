@@ -84,15 +84,9 @@ MaybeError ComputePipeline::InitializeImpl() {
     d3dDesc.pRootSignature = ToBackend(GetLayout())->GetRootSignature();
 
     d3d::CompiledShader compiledShader;
-    DAWN_TRY_ASSIGN(
-        compiledShader,
-        module->Compile(
-            computeStage, SingleShaderStage::Compute, ToBackend(GetLayout()), compileFlags,
-            /* usedInterstageVariables */ {},
-            /* maxSubgroupSizeForFullSubgroups */
-            IsFullSubgroupsRequired()
-                ? std::make_optional(device->GetLimits().experimentalSubgroupLimits.maxSubgroupSize)
-                : std::nullopt));
+    DAWN_TRY_ASSIGN(compiledShader, module->Compile(computeStage, SingleShaderStage::Compute,
+                                                    ToBackend(GetLayout()), compileFlags,
+                                                    /* usedInterstageVariables */ {}));
     d3dDesc.CS = {compiledShader.shaderBlob.Data(), compiledShader.shaderBlob.Size()};
 
     StreamIn(&mCacheKey, d3dDesc, ToBackend(GetLayout())->GetRootSignatureBlob());

@@ -287,12 +287,6 @@ ResultOrError<Ref<DeviceBase>> AdapterBase::CreateDeviceInternal(
     // creating a device for internal usage with AllowUnsafeAPI enabled from an adapter that
     // disabled AllowUnsafeAPIS.
     for (wgpu::FeatureName requiredFeature : requiredFeatureSet) {
-        // TODO(349125474): Remove deprecated ChromiumExperimentalSubgroups.
-        if (requiredFeature == wgpu::FeatureName::ChromiumExperimentalSubgroups) {
-            GetInstance()->EmitDeprecationWarning(
-                "Feature chromium-experimental-subgroups is deprecated. Use features subgroups and "
-                "subgroups-f16 instead.");
-        }
         FeatureValidationResult result =
             mPhysicalDevice->ValidateFeatureSupportedWithToggles(requiredFeature, deviceToggles);
         DAWN_INVALID_IF(!result.success, "Invalid feature required: %s",
@@ -302,12 +296,9 @@ ResultOrError<Ref<DeviceBase>> AdapterBase::CreateDeviceInternal(
     // TODO(349125474): Decide if this validation is needed, see
     // https://github.com/gpuweb/gpuweb/issues/4734 for detail.
     if (requiredFeatureSet.count(wgpu::FeatureName::SubgroupsF16) > 0) {
-        // TODO(349125474): Remove deprecated ChromiumExperimentalSubgroups.
-        DAWN_INVALID_IF(
-            (requiredFeatureSet.count(wgpu::FeatureName::Subgroups) == 0) &&
-                (requiredFeatureSet.count(wgpu::FeatureName::ChromiumExperimentalSubgroups) == 0),
-            "Feature %s must be required together with feature %s.",
-            wgpu::FeatureName::SubgroupsF16, wgpu::FeatureName::Subgroups);
+        DAWN_INVALID_IF((requiredFeatureSet.count(wgpu::FeatureName::Subgroups) == 0),
+                        "Feature %s must be required together with feature %s.",
+                        wgpu::FeatureName::SubgroupsF16, wgpu::FeatureName::Subgroups);
         DAWN_INVALID_IF(requiredFeatureSet.count(wgpu::FeatureName::ShaderF16) == 0,
                         "Feature %s must be required together with feature %s.",
                         wgpu::FeatureName::SubgroupsF16, wgpu::FeatureName::ShaderF16);

@@ -386,26 +386,6 @@ void PhysicalDevice::InitializeSupportedFeaturesImpl() {
     EnableFeature(Feature::AdapterPropertiesVk);
     EnableFeature(Feature::DawnLoadResolveTexture);
 
-    // TODO(349125474): Remove deprecated ChromiumExperimentalSubgroups.
-    // Enable ChromiumExperimentalSubgroups feature if:
-    // 1. Vulkan API version is 1.1 or later, and
-    // 2. subgroupSupportedStages includes compute stage bit, and
-    // 3. subgroupSupportedOperations includes basic and ballot bits, and
-    // 4. VK_EXT_subgroup_size_control extension is valid, and both subgroupSizeControl
-    //    and computeFullSubgroups is TRUE in VkPhysicalDeviceSubgroupSizeControlFeaturesEXT.
-    // Notes that these requirement doesn't ensure all subgroups features are supported by the
-    // Vulkan backend. For example, currently ChromiumExperimentalSubgroups feature allows using
-    // subgroups functions with f16 types in WGSL, but doesn't ensure that backend supports it.
-    if ((mDeviceInfo.properties.apiVersion >= VK_API_VERSION_1_1) &&
-        (mDeviceInfo.subgroupProperties.supportedStages & VK_SHADER_STAGE_COMPUTE_BIT) &&
-        (mDeviceInfo.subgroupProperties.supportedOperations & VK_SUBGROUP_FEATURE_BASIC_BIT) &&
-        (mDeviceInfo.subgroupProperties.supportedOperations & VK_SUBGROUP_FEATURE_BALLOT_BIT) &&
-        (mDeviceInfo.HasExt(DeviceExt::SubgroupSizeControl)) &&
-        (mDeviceInfo.subgroupSizeControlFeatures.subgroupSizeControl == VK_TRUE) &&
-        (mDeviceInfo.subgroupSizeControlFeatures.computeFullSubgroups == VK_TRUE)) {
-        EnableFeature(Feature::ChromiumExperimentalSubgroups);
-    }
-
     // Enable Subgroups feature if:
     // 1. Vulkan API version is 1.1 or later, and
     // 2. subgroupSupportedStages includes compute and fragment stage bit, and

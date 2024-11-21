@@ -1526,9 +1526,6 @@ bool Converter::Convert(wgpu::FeatureName& out, interop::GPUFeatureName in) {
         case interop::GPUFeatureName::kDualSourceBlending:
             out = wgpu::FeatureName::DualSourceBlending;
             return true;
-        case interop::GPUFeatureName::kChromiumExperimentalSubgroups:
-            out = wgpu::FeatureName::ChromiumExperimentalSubgroups;
-            return true;
         case interop::GPUFeatureName::kChromiumExperimentalSubgroupUniformControlFlow:
             out = wgpu::FeatureName::ChromiumExperimentalSubgroupUniformControlFlow;
             return true;
@@ -1553,7 +1550,6 @@ bool Converter::Convert(interop::GPUFeatureName& out, wgpu::FeatureName in) {
 
     switch (in) {
         CASE(BGRA8UnormStorage, kBgra8UnormStorage);
-        CASE(ChromiumExperimentalSubgroups, kChromiumExperimentalSubgroups);
         CASE(ChromiumExperimentalSubgroupUniformControlFlow,
              kChromiumExperimentalSubgroupUniformControlFlow);
         CASE(Depth32FloatStencil8, kDepth32FloatStencil8);

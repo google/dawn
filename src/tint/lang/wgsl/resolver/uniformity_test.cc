@@ -617,10 +617,9 @@ struct BuiltinEntry {
 class ComputeBuiltin : public UniformityAnalysisTestBase,
                        public ::testing::TestWithParam<BuiltinEntry> {};
 TEST_P(ComputeBuiltin, AsParam) {
-    std::string src = std::string((GetParam().name == "subgroup_size")
-                                      ? R"(enable chromium_experimental_subgroups;
+    std::string src = std::string((GetParam().name == "subgroup_size") ? R"(enable subgroups;
 )"
-                                      : "") +
+                                                                       : "") +
                       R"(
 @compute @workgroup_size(64)
 fn main(@builtin()" + GetParam().name +
@@ -652,10 +651,9 @@ test:4:16 note: builtin 'b' of 'main' may be non-uniform
 }
 
 TEST_P(ComputeBuiltin, InStruct) {
-    std::string src = std::string((GetParam().name == "subgroup_size")
-                                      ? R"(enable chromium_experimental_subgroups;
+    std::string src = std::string((GetParam().name == "subgroup_size") ? R"(enable subgroups;
 )"
-                                      : "") +
+                                                                       : "") +
                       R"(
 struct S {
   @builtin()" + GetParam().name +
@@ -738,10 +736,9 @@ test:9:7 note: parameter 's' of 'main' may be non-uniform
 class FragmentBuiltin : public UniformityAnalysisTestBase,
                         public ::testing::TestWithParam<BuiltinEntry> {};
 TEST_P(FragmentBuiltin, AsParam) {
-    std::string src = std::string((GetParam().name == "subgroup_size")
-                                      ? R"(enable chromium_experimental_subgroups;
+    std::string src = std::string((GetParam().name == "subgroup_size") ? R"(enable subgroups;
 )"
-                                      : R"(
+                                                                       : R"(
                                       )") +
                       R"(
 @fragment
@@ -773,10 +770,9 @@ test:5:16 note: builtin 'b' of 'main' may be non-uniform
 }
 
 TEST_P(FragmentBuiltin, InStruct) {
-    std::string src = std::string((GetParam().name == "subgroup_size")
-                                      ? R"(enable chromium_experimental_subgroups;
+    std::string src = std::string((GetParam().name == "subgroup_size") ? R"(enable subgroups;
 )"
-                                      : R"(
+                                                                       : R"(
                                       )") +
                       R"(
 struct S {

@@ -84,8 +84,6 @@ enum extension {
   chromium_disable_uniformity_analysis
   // A Chromium-specific extension for push constants
   chromium_experimental_push_constant
-  // A Chromium-specific extension that adds basic subgroup functionality.
-  chromium_experimental_subgroups
   // A Chromium-specific extension that enables features for graphite
   chromium_internal_graphite
   // A Chromium-specific extension that enables features for input

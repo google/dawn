@@ -248,11 +248,11 @@ class State {
                         attrs.Push(b.Builtin(core::BuiltinValue::kSampleMask));
                         break;
                     case core::BuiltinValue::kSubgroupInvocationId:
-                        Enable(wgsl::Extension::kChromiumExperimentalSubgroups);
+                        Enable(wgsl::Extension::kSubgroups);
                         attrs.Push(b.Builtin(core::BuiltinValue::kSubgroupInvocationId));
                         break;
                     case core::BuiltinValue::kSubgroupSize:
-                        Enable(wgsl::Extension::kChromiumExperimentalSubgroups);
+                        Enable(wgsl::Extension::kSubgroups);
                         attrs.Push(b.Builtin(core::BuiltinValue::kSubgroupSize));
                         break;
                     case core::BuiltinValue::kClipDistances:
@@ -681,7 +681,9 @@ class State {
                     case wgsl::BuiltinFn::kQuadSwapX:
                     case wgsl::BuiltinFn::kQuadSwapY:
                     case wgsl::BuiltinFn::kQuadSwapDiagonal:
-                        Enable(wgsl::Extension::kChromiumExperimentalSubgroups);
+                        Enable(wgsl::Extension::kF16);
+                        Enable(wgsl::Extension::kSubgroups);
+                        Enable(wgsl::Extension::kSubgroupsF16);
                         break;
                     default:
                         break;
@@ -1081,7 +1083,7 @@ class State {
                 }
                 if (auto builtin = ir_attrs.builtin) {
                     if (RequiresSubgroups(*builtin)) {
-                        Enable(wgsl::Extension::kChromiumExperimentalSubgroups);
+                        Enable(wgsl::Extension::kSubgroups);
                     } else if (*builtin == core::BuiltinValue::kClipDistances) {
                         Enable(wgsl::Extension::kClipDistances);
                     }
@@ -1258,8 +1260,7 @@ class State {
         }
     }
 
-    /// @returns true if the builtin value requires the kChromiumExperimentalSubgroups extension to
-    /// be enabled.
+    /// @returns true if the builtin value requires the kSubgroups extension to be enabled.
     bool RequiresSubgroups(core::BuiltinValue builtin) {
         switch (builtin) {
             case core::BuiltinValue::kSubgroupInvocationId:

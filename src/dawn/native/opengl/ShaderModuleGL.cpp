@@ -569,8 +569,7 @@ ResultOrError<GLuint> ShaderModule::CompileShader(
                 // Validate workgroup size after program runs transforms.
                 Extent3D _;
                 DAWN_TRY_ASSIGN(_, ValidateComputeStageWorkgroupSize(
-                                       program, remappedEntryPoint.c_str(), r.limits,
-                                       /* fullSubgroups */ {}));
+                                       program, remappedEntryPoint.c_str(), r.limits));
             }
 
             // Intentionally assign entry point to empty to avoid a redundant 'SingleEntryPoint'

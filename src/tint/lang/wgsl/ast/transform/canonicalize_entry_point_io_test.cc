@@ -4339,7 +4339,7 @@ fn frag_main() -> tint_symbol {
 
 TEST_F(CanonicalizeEntryPointIOTest, SubgroupBuiltins_Hlsl) {
     auto* src = R"(
-enable chromium_experimental_subgroups;
+enable subgroups;
 
 @compute @workgroup_size(64)
 fn frag_main(@builtin(subgroup_invocation_id) id : u32,
@@ -4349,7 +4349,7 @@ fn frag_main(@builtin(subgroup_invocation_id) id : u32,
 )";
 
     auto* expect = R"(
-enable chromium_experimental_subgroups;
+enable subgroups;
 
 @internal(intrinsic_wave_get_lane_index) @internal(disable_validation__function_has_no_body)
 fn __WaveGetLaneIndex() -> u32
@@ -4376,7 +4376,7 @@ fn frag_main() {
 
 TEST_F(CanonicalizeEntryPointIOTest, SubgroupBuiltinsStruct_Hlsl) {
     auto* src = R"(
-enable chromium_experimental_subgroups;
+enable subgroups;
 
 struct Inputs {
   @builtin(subgroup_invocation_id) id : u32,
@@ -4390,7 +4390,7 @@ fn frag_main(inputs : Inputs) {
 )";
 
     auto* expect = R"(
-enable chromium_experimental_subgroups;
+enable subgroups;
 
 @internal(intrinsic_wave_get_lane_index) @internal(disable_validation__function_has_no_body)
 fn __WaveGetLaneIndex() -> u32

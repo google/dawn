@@ -78,38 +78,20 @@ MaybeError ComputePipeline::InitializeImpl() {
     ShaderModule* module = ToBackend(computeStage.module.Get());
 
     ShaderModule::ModuleAndSpirv moduleAndSpirv;
-    DAWN_TRY_ASSIGN(
-        moduleAndSpirv,
-        module->GetHandleAndSpirv(
-            SingleShaderStage::Compute, computeStage, layout,
-            /*clampFragDepth*/ false,
-            /*emitPointSize*/ false,
-            /* maxSubgroupSizeForFullSubgroups */
-            IsFullSubgroupsRequired()
-                ? std::make_optional(device->GetLimits().experimentalSubgroupLimits.maxSubgroupSize)
-                : std::nullopt));
+    DAWN_TRY_ASSIGN(moduleAndSpirv,
+                    module->GetHandleAndSpirv(SingleShaderStage::Compute, computeStage, layout,
+                                              /*clampFragDepth*/ false,
+                                              /*emitPointSize*/ false));
 
     createInfo.stage.module = moduleAndSpirv.module;
     createInfo.stage.pName = moduleAndSpirv.remappedEntryPoint.c_str();
-
-    if (IsFullSubgroupsRequired()) {
-        // Workgroup size validation is handled in ValidateComputeStageWorkgroupSize when compiling
-        // shader module. Vulkan device that support Subgroups feature must support
-        // computeFullSubgroups.
-        DAWN_ASSERT(device->GetDeviceInfo().subgroupSizeControlFeatures.computeFullSubgroups);
-        createInfo.stage.flags |= VK_PIPELINE_SHADER_STAGE_CREATE_REQUIRE_FULL_SUBGROUPS_BIT |
-                                  VK_PIPELINE_SHADER_STAGE_CREATE_ALLOW_VARYING_SUBGROUP_SIZE_BIT;
-    }
-
     createInfo.stage.pSpecializationInfo = nullptr;
 
     VkPipelineShaderStageRequiredSubgroupSizeCreateInfoEXT subgroupSizeInfo = {};
     PNextChainBuilder stageExtChain(&createInfo.stage);
 
     uint32_t computeSubgroupSize = device->GetComputeSubgroupSize();
-    // If experimental full subgroups is required, pipeline is created with varying subgroup size
-    // enabled, and thus do not use explicit subgroup size control.
-    if (computeSubgroupSize != 0u && !IsFullSubgroupsRequired()) {
+    if (computeSubgroupSize != 0u) {
         DAWN_ASSERT(device->GetDeviceInfo().HasExt(DeviceExt::SubgroupSizeControl));
         subgroupSizeInfo.requiredSubgroupSize = computeSubgroupSize;
         stageExtChain.Add(

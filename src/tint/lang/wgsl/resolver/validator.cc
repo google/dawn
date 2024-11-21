@@ -1080,8 +1080,7 @@ bool Validator::BuiltinAttribute(const ast::BuiltinAttribute* attr,
             break;
         case core::BuiltinValue::kSubgroupInvocationId:
         case core::BuiltinValue::kSubgroupSize:
-            if (!(enabled_extensions_.Contains(wgsl::Extension::kChromiumExperimentalSubgroups) ||
-                  enabled_extensions_.Contains(wgsl::Extension::kSubgroups))) {
+            if (!enabled_extensions_.Contains(wgsl::Extension::kSubgroups)) {
                 AddError(attr->source)
                     << "use of " << style::Attribute("@builtin")
                     << style::Code("(", style::Enum(builtin), ")")
@@ -2016,19 +2015,15 @@ bool Validator::RequiredFeaturesForBuiltinFn(const sem::Call* call) const {
     }
 
     if (builtin->IsSubgroup()) {
-        // The `chromium_experimental_subgroups` extension enables all subgroup features. Otherwise,
-        // we need `subgroups`, or `subgroups_f16` for f16 functions.
-        if (!enabled_extensions_.Contains(wgsl::Extension::kChromiumExperimentalSubgroups)) {
-            auto ext = wgsl::Extension::kSubgroups;
-            if (builtin->ReturnType()->DeepestElement()->Is<core::type::F16>()) {
-                ext = wgsl::Extension::kSubgroupsF16;
-            }
-            if (!enabled_extensions_.Contains(ext)) {
-                AddError(call->Declaration()->source)
-                    << "cannot call built-in function " << style::Function(builtin->Fn())
-                    << " without extension " << style::Code(wgsl::ToString(ext));
-                return false;
-            }
+        auto ext = wgsl::Extension::kSubgroups;
+        if (builtin->ReturnType()->DeepestElement()->Is<core::type::F16>()) {
+            ext = wgsl::Extension::kSubgroupsF16;
+        }
+        if (!enabled_extensions_.Contains(ext)) {
+            AddError(call->Declaration()->source)
+                << "cannot call built-in function " << style::Function(builtin->Fn())
+                << " without extension " << style::Code(wgsl::ToString(ext));
+            return false;
         }
     }
 

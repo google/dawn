@@ -76,9 +76,6 @@ bool TransformedShaderModuleCacheKey::operator==(
     if (!std::equal(constants.begin(), constants.end(), other.constants.begin())) {
         return false;
     }
-    if (maxSubgroupSizeForFullSubgroups != other.maxSubgroupSizeForFullSubgroups) {
-        return false;
-    }
     if (emitPointSize != other.emitPointSize) {
         return false;
     }
@@ -205,8 +202,7 @@ ShaderModule::~ShaderModule() = default;
     X(std::string_view, entryPointName)                                                          \
     X(bool, disableSymbolRenaming)                                                               \
     X(tint::spirv::writer::Options, tintOptions)                                                 \
-    X(CacheKey::UnsafeUnkeyedValue<dawn::platform::Platform*>, platform)                         \
-    X(std::optional<uint32_t>, maxSubgroupSizeForFullSubgroups)
+    X(CacheKey::UnsafeUnkeyedValue<dawn::platform::Platform*>, platform)
 
 DAWN_MAKE_CACHE_REQUEST(SpirvCompilationRequest, SPIRV_COMPILATION_REQUEST_MEMBERS);
 #undef SPIRV_COMPILATION_REQUEST_MEMBERS
@@ -218,8 +214,7 @@ ResultOrError<ShaderModule::ModuleAndSpirv> ShaderModule::GetHandleAndSpirv(
     const ProgrammableStage& programmableStage,
     const PipelineLayout* layout,
     bool clampFragDepth,
-    bool emitPointSize,
-    std::optional<uint32_t> maxSubgroupSizeForFullSubgroups) {
+    bool emitPointSize) {
     TRACE_EVENT0(GetDevice()->GetPlatform(), General, "ShaderModuleVk::GetHandleAndSpirv");
 
     ScopedTintICEHandler scopedICEHandler(GetDevice());
@@ -228,9 +223,9 @@ ResultOrError<ShaderModule::ModuleAndSpirv> ShaderModule::GetHandleAndSpirv(
     // TODO(chromium:345359083): Improve the computation of the cache key. For example, it isn't
     // ideal to use `reinterpret_cast<uintptr_t>(layout)` as the layout may be freed and
     // reallocated during the runtime.
-    auto cacheKey = TransformedShaderModuleCacheKey{
-        reinterpret_cast<uintptr_t>(layout), programmableStage.entryPoint.c_str(),
-        programmableStage.constants, maxSubgroupSizeForFullSubgroups, emitPointSize};
+    auto cacheKey = TransformedShaderModuleCacheKey{reinterpret_cast<uintptr_t>(layout),
+                                                    programmableStage.entryPoint.c_str(),
+                                                    programmableStage.constants, emitPointSize};
     auto handleAndSpirv = mTransformedShaderModuleCache->Find(cacheKey);
     if (handleAndSpirv.has_value()) {
         return std::move(*handleAndSpirv);
@@ -346,7 +341,6 @@ ResultOrError<ShaderModule::ModuleAndSpirv> ShaderModule::GetHandleAndSpirv(
     req.disableSymbolRenaming = GetDevice()->IsToggleEnabled(Toggle::DisableSymbolRenaming);
     req.platform = UnsafeUnkeyedValue(GetDevice()->GetPlatform());
     req.substituteOverrideConfig = std::move(substituteOverrideConfig);
-    req.maxSubgroupSizeForFullSubgroups = maxSubgroupSizeForFullSubgroups;
     req.tintOptions.statically_paired_texture_binding_points =
         std::move(statically_paired_texture_binding_points);
     req.tintOptions.clamp_frag_depth = clampFragDepth;
@@ -440,8 +434,7 @@ ResultOrError<ShaderModule::ModuleAndSpirv> ShaderModule::GetHandleAndSpirv(
             if (r.stage == SingleShaderStage::Compute) {
                 Extent3D _;
                 DAWN_TRY_ASSIGN(_, ValidateComputeStageWorkgroupSize(
-                                       program, remappedEntryPoint.c_str(), r.limits,
-                                       r.maxSubgroupSizeForFullSubgroups));
+                                       program, remappedEntryPoint.c_str(), r.limits));
             }
 
             TRACE_EVENT0(r.platform.UnsafeGetValue(), General, "tint::spirv::writer::Generate()");

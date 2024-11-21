@@ -163,10 +163,8 @@ void PhysicalDevice::InitializeSupportedFeaturesImpl() {
         shaderF16Enabled = true;
     }
 
-    // ChromiumExperimentalSubgroups requires SM >= 6.0 and capabilities flags.
+    // Subgroups feature requires SM >= 6.0 and capabilities flags.
     if (GetBackend()->IsDXCAvailable() && mDeviceInfo.supportsWaveOps) {
-        // TODO(349125474): Remove deprecated ChromiumExperimentalSubgroups.
-        EnableFeature(Feature::ChromiumExperimentalSubgroups);
         EnableFeature(Feature::Subgroups);
         // D3D12 devices that support both native f16 and wave ops can support subgroups-f16.
         if (shaderF16Enabled) {
@@ -399,8 +397,6 @@ FeatureValidationResult PhysicalDevice::ValidateFeatureSupportedWithTogglesImpl(
             case wgpu::FeatureName::ShaderF16:
             case wgpu::FeatureName::Subgroups:
             case wgpu::FeatureName::SubgroupsF16:
-            // TODO(349125474): Remove deprecated ChromiumExperimentalSubgroups.
-            case wgpu::FeatureName::ChromiumExperimentalSubgroups:
                 return FeatureValidationResult(
                     absl::StrFormat("Feature %s requires DXC for D3D12.", feature));
             default:

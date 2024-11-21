@@ -42,7 +42,7 @@ TEST_F(SubgroupBallotTest, EmptyModule) {
 
 TEST_F(SubgroupBallotTest, DirectUse) {
     auto* src = R"(
-enable chromium_experimental_subgroups;
+enable subgroups;
 
 @compute @workgroup_size(64)
 fn foo() {
@@ -53,7 +53,7 @@ fn foo() {
 
     auto* expect =
         R"(
-enable chromium_experimental_subgroups;
+enable subgroups;
 
 @internal(simd_ballot) @internal(disable_validation__function_has_no_body)
 fn tint_msl_simd_ballot(pred : bool) -> vec2<u32>
@@ -84,7 +84,7 @@ fn foo(@builtin(subgroup_size) tint_subgroup_size : u32) {
 
 TEST_F(SubgroupBallotTest, IndirectUse) {
     auto* src = R"(
-enable chromium_experimental_subgroups;
+enable subgroups;
 
 fn bar() -> vec4u {
   let pred = true;
@@ -99,7 +99,7 @@ fn foo() {
 
     auto* expect =
         R"(
-enable chromium_experimental_subgroups;
+enable subgroups;
 
 @internal(simd_ballot) @internal(disable_validation__function_has_no_body)
 fn tint_msl_simd_ballot(pred : bool) -> vec2<u32>
@@ -134,7 +134,7 @@ fn foo(@builtin(subgroup_size) tint_subgroup_size : u32) {
 
 TEST_F(SubgroupBallotTest, PreexistingSubgroupSizeBuiltin) {
     auto* src = R"(
-enable chromium_experimental_subgroups;
+enable subgroups;
 
 @compute @workgroup_size(64)
 fn foo(@builtin(workgroup_id) group_id: vec3u,
@@ -148,7 +148,7 @@ fn foo(@builtin(workgroup_id) group_id: vec3u,
 
     auto* expect =
         R"(
-enable chromium_experimental_subgroups;
+enable subgroups;
 
 @internal(simd_ballot) @internal(disable_validation__function_has_no_body)
 fn tint_msl_simd_ballot(pred : bool) -> vec2<u32>

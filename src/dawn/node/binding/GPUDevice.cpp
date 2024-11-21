@@ -193,9 +193,7 @@ interop::Interface<interop::GPUSupportedLimits> GPUDevice::getLimits(Napi::Env e
     };
 
     // Query the subgroup limits only if subgroups feature is enabled on the device.
-    // TODO(349125474): Remove deprecated ChromiumExperimentalSubgroups.
-    if (device_.HasFeature(wgpu::FeatureName::Subgroups) ||
-        device_.HasFeature(wgpu::FeatureName::ChromiumExperimentalSubgroups)) {
+    if (device_.HasFeature(wgpu::FeatureName::Subgroups)) {
         InsertInChain(&subgroupLimits);
     }
 
