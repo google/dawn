@@ -179,7 +179,7 @@ wgpu::TextureSampleType TintSampledKindToSampleType(
             // Note that Float is compatible with both Float and UnfilterableFloat.
             return wgpu::TextureSampleType::Float;
         case tint::inspector::ResourceBinding::SampledKind::kUnknown:
-            return wgpu::TextureSampleType::Undefined;
+            return wgpu::TextureSampleType::BindingNotUsed;
     }
     DAWN_UNREACHABLE();
 }

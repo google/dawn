@@ -485,7 +485,7 @@ TEST_F(GetBindGroupLayoutTests, BindingType) {
                     BindGroupLayoutCacheEq(pipeline.GetBindGroupLayout(0)));
     }
 
-    binding.buffer.type = wgpu::BufferBindingType::Undefined;
+    binding.buffer.type = wgpu::BufferBindingType::BindingNotUsed;
     binding.buffer.minBindingSize = 0;
     {
         binding.texture.sampleType = wgpu::TextureSampleType::UnfilterableFloat;
@@ -511,7 +511,7 @@ TEST_F(GetBindGroupLayoutTests, BindingType) {
                     BindGroupLayoutCacheEq(pipeline.GetBindGroupLayout(0)));
     }
 
-    binding.texture.sampleType = wgpu::TextureSampleType::Undefined;
+    binding.texture.sampleType = wgpu::TextureSampleType::BindingNotUsed;
     {
         binding.sampler.type = wgpu::SamplerBindingType::Filtering;
         wgpu::RenderPipeline pipeline = RenderPipelineFromFragmentShader(R"(

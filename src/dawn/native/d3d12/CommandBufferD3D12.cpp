@@ -527,7 +527,7 @@ class BindGroupStateTracker : public BindGroupTrackerBase<false, uint64_t> {
                     commandList->SetComputeRootShaderResourceView(parameterIndex, bufferLocation);
                 }
                 break;
-            case wgpu::BufferBindingType::Undefined:
+            case wgpu::BufferBindingType::BindingNotUsed:
                 DAWN_UNREACHABLE();
         }
     }

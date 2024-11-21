@@ -160,7 +160,7 @@ MaybeError ProgrammableEncoder::ValidateSetBindGroup(BindGroupIndex index,
             case kInternalStorageBufferBinding:
                 requiredAlignment = GetDevice()->GetLimits().v1.minStorageBufferOffsetAlignment;
                 break;
-            case wgpu::BufferBindingType::Undefined:
+            case wgpu::BufferBindingType::BindingNotUsed:
                 DAWN_UNREACHABLE();
         }
 

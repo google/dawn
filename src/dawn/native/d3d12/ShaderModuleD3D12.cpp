@@ -222,7 +222,7 @@ ResultOrError<d3d::CompiledShader> ShaderModule::Compile(
                             srcBindingPoint, tint::hlsl::writer::binding::Storage{
                                                  dstBindingPoint.group, dstBindingPoint.binding});
                         break;
-                    case wgpu::BufferBindingType::Undefined:
+                    case wgpu::BufferBindingType::BindingNotUsed:
                         DAWN_UNREACHABLE();
                         break;
                 }

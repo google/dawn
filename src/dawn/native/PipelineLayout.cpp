@@ -202,17 +202,17 @@ ResultOrError<Ref<PipelineLayoutBase>> PipelineLayoutBase::CreateDefault(
             modifiedEntry->buffer.type == mergedEntry.buffer.type &&
             modifiedEntry->sampler.type == mergedEntry.sampler.type &&
             // Compatibility between these sample types is checked below.
-            (modifiedEntry->texture.sampleType != wgpu::TextureSampleType::Undefined) ==
-                (mergedEntry.texture.sampleType != wgpu::TextureSampleType::Undefined) &&
+            (modifiedEntry->texture.sampleType != wgpu::TextureSampleType::BindingNotUsed) ==
+                (mergedEntry.texture.sampleType != wgpu::TextureSampleType::BindingNotUsed) &&
             modifiedEntry->storageTexture.access == mergedEntry.storageTexture.access;
 
         // Minimum buffer binding size excluded because we take the maximum seen across stages.
-        if (modifiedEntry->buffer.type != wgpu::BufferBindingType::Undefined) {
+        if (modifiedEntry->buffer.type != wgpu::BufferBindingType::BindingNotUsed) {
             compatible = compatible && modifiedEntry->buffer.hasDynamicOffset ==
                                            mergedEntry.buffer.hasDynamicOffset;
         }
 
-        if (modifiedEntry->texture.sampleType != wgpu::TextureSampleType::Undefined) {
+        if (modifiedEntry->texture.sampleType != wgpu::TextureSampleType::BindingNotUsed) {
             // Sample types are compatible if they are exactly equal,
             // or if the |modifiedEntry| is Float and the |mergedEntry| is UnfilterableFloat.
             // Note that the |mergedEntry| never has type Float. Texture bindings all start
@@ -229,7 +229,7 @@ ResultOrError<Ref<PipelineLayoutBase>> PipelineLayoutBase::CreateDefault(
                 modifiedEntry->texture.multisampled == mergedEntry.texture.multisampled;
         }
 
-        if (modifiedEntry->storageTexture.access != wgpu::StorageTextureAccess::Undefined) {
+        if (modifiedEntry->storageTexture.access != wgpu::StorageTextureAccess::BindingNotUsed) {
             compatible =
                 compatible &&
                 modifiedEntry->storageTexture.format == mergedEntry.storageTexture.format &&

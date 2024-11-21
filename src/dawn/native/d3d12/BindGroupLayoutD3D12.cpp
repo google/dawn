@@ -51,7 +51,7 @@ D3D12_DESCRIPTOR_RANGE_TYPE WGPUBindingInfoToDescriptorRangeType(const BindingIn
                     return D3D12_DESCRIPTOR_RANGE_TYPE_UAV;
                 case wgpu::BufferBindingType::ReadOnlyStorage:
                     return D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
-                case wgpu::BufferBindingType::Undefined:
+                case wgpu::BufferBindingType::BindingNotUsed:
                     DAWN_UNREACHABLE();
             }
         },
@@ -71,7 +71,7 @@ D3D12_DESCRIPTOR_RANGE_TYPE WGPUBindingInfoToDescriptorRangeType(const BindingIn
                     return D3D12_DESCRIPTOR_RANGE_TYPE_UAV;
                 case wgpu::StorageTextureAccess::ReadOnly:
                     return D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
-                case wgpu::StorageTextureAccess::Undefined:
+                case wgpu::StorageTextureAccess::BindingNotUsed:
                     DAWN_UNREACHABLE();
             }
         },

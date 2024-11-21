@@ -161,7 +161,7 @@ tint::msl::writer::Bindings generateBindingInfo(
                             arrayLengthFromUniform.bindpoint_to_size_index.emplace(
                                 srcBindingPoint, dstBindingPoint.binding);
                             break;
-                        case wgpu::BufferBindingType::Undefined:
+                        case wgpu::BufferBindingType::BindingNotUsed:
                             DAWN_UNREACHABLE();
                             break;
                     }

@@ -278,7 +278,7 @@ ResultOrError<ShaderModule::ModuleAndSpirv> ShaderModule::GetHandleAndSpirv(
                                 tint::spirv::writer::binding::Storage{dstBindingPoint.group,
                                                                       dstBindingPoint.binding});
                             break;
-                        case wgpu::BufferBindingType::Undefined:
+                        case wgpu::BufferBindingType::BindingNotUsed:
                             DAWN_UNREACHABLE();
                             break;
                     }

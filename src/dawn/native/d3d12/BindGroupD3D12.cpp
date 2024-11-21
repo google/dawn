@@ -140,7 +140,7 @@ BindGroup::BindGroup(Device* device,
                                                       descriptorHeapOffsets[bindingIndex]));
                         break;
                     }
-                    case wgpu::BufferBindingType::Undefined:
+                    case wgpu::BufferBindingType::BindingNotUsed:
                         DAWN_UNREACHABLE();
                 }
             },
@@ -190,7 +190,7 @@ BindGroup::BindGroup(Device* device,
                                                       descriptorHeapOffsets[bindingIndex]));
                         break;
                     }
-                    case wgpu::StorageTextureAccess::Undefined:
+                    case wgpu::StorageTextureAccess::BindingNotUsed:
                         DAWN_UNREACHABLE();
                 }
             },
