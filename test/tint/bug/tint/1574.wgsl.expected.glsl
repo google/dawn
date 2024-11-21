@@ -22,7 +22,7 @@ buffer a_i32_block_1_ssbo {
 shared uint b_u32;
 shared int b_i32;
 void tint_symbol_inner(uint tint_local_index) {
-  if ((tint_local_index == 0u)) {
+  if ((tint_local_index < 1u)) {
     atomicExchange(b_u32, 0u);
     atomicExchange(b_i32, 0);
   }

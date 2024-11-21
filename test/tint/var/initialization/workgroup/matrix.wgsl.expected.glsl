@@ -2,7 +2,7 @@
 
 shared mat2x3 v;
 void tint_symbol_inner(uint tint_local_index) {
-  if ((tint_local_index == 0u)) {
+  if ((tint_local_index < 1u)) {
     v = mat2x3(vec3(0.0f), vec3(0.0f));
   }
   barrier();

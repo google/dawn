@@ -46,7 +46,7 @@ void compute_main_1() {
 }
 
 void compute_main_inner_1(uint local_invocation_index_1_param) {
-  if ((local_invocation_index_1_param == 0u)) {
+  if ((local_invocation_index_1_param < 1u)) {
     int v_5 = int(0);
     InterlockedExchange(arg_0, int(0), v_5);
   }

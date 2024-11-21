@@ -22,7 +22,7 @@ matrix<float16_t, 3, 2> v_2(uint start_byte_offset) {
 }
 
 void f_inner(uint tint_local_index) {
-  if ((tint_local_index == 0u)) {
+  if ((tint_local_index < 1u)) {
     w = matrix<float16_t, 3, 2>((float16_t(0.0h)).xx, (float16_t(0.0h)).xx, (float16_t(0.0h)).xx);
   }
   GroupMemoryBarrierWithGroupSync();

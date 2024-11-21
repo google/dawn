@@ -31,7 +31,7 @@ matrix<float16_t, 4, 3> v_4(uint start_byte_offset) {
 }
 
 void f_inner(uint tint_local_index) {
-  if ((tint_local_index == 0u)) {
+  if ((tint_local_index < 1u)) {
     w = matrix<float16_t, 4, 3>((float16_t(0.0h)).xxx, (float16_t(0.0h)).xxx, (float16_t(0.0h)).xxx, (float16_t(0.0h)).xxx);
   }
   GroupMemoryBarrierWithGroupSync();

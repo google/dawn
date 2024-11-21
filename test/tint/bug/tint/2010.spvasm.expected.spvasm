@@ -328,7 +328,7 @@
   %x_3_param = OpFunctionParameter %v3uint
 %tint_local_index = OpFunctionParameter %uint
         %191 = OpLabel
-        %192 = OpIEqual %bool %tint_local_index %uint_0
+        %192 = OpULessThan %bool %tint_local_index %uint_1
                OpSelectionMerge %193 None
                OpBranchConditional %192 %194 %193
         %194 = OpLabel

@@ -23,7 +23,7 @@
 %F_local_invocation_index_Input = OpVariable %_ptr_Input_uint Input
        %void = OpTypeVoid
          %12 = OpTypeFunction %void %uint
-     %uint_0 = OpConstant %uint 0
+     %uint_1 = OpConstant %uint 1
        %bool = OpTypeBool
          %19 = OpConstantNull %mat2v2float
      %uint_2 = OpConstant %uint 2
@@ -36,7 +36,7 @@
     %F_inner = OpFunction %void None %12
      %mat2x2 = OpFunctionParameter %uint
          %13 = OpLabel
-         %14 = OpIEqual %bool %mat2x2 %uint_0
+         %14 = OpULessThan %bool %mat2x2 %uint_1
                OpSelectionMerge %17 None
                OpBranchConditional %14 %18 %17
          %18 = OpLabel

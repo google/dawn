@@ -104,7 +104,7 @@ groupshared float2x2 m97;
 groupshared float2x2 m98;
 groupshared float2x2 m99;
 void tint_symbol_inner(uint idx) {
-  if ((idx == 0u)) {
+  if ((idx < 1u)) {
     m00 = float2x2((0.0f).xx, (0.0f).xx);
     m01 = float2x2((0.0f).xx, (0.0f).xx);
     m02 = float2x2((0.0f).xx, (0.0f).xx);

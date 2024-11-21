@@ -9,7 +9,7 @@ void func(uint pointer_indices[1]) {
 }
 
 void main_inner(uint tint_local_index) {
-  if ((tint_local_index == 0u)) {
+  if ((tint_local_index < 1u)) {
     S = float2x2((0.0f).xx, (0.0f).xx);
   }
   GroupMemoryBarrierWithGroupSync();

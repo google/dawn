@@ -20,7 +20,7 @@ void atomicCompareExchangeWeak_83580d() {
 }
 
 void compute_main_inner(uint tint_local_index) {
-  if ((tint_local_index == 0u)) {
+  if ((tint_local_index < 1u)) {
     uint v_3 = 0u;
     InterlockedExchange(arg_0, 0u, v_3);
   }

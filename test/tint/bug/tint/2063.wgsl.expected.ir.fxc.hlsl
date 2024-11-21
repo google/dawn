@@ -5,7 +5,7 @@ struct compute_main_inputs {
 
 groupshared int arg_0;
 void compute_main_inner(uint tint_local_index) {
-  if ((tint_local_index == 0u)) {
+  if ((tint_local_index < 1u)) {
     int v = int(0);
     InterlockedExchange(arg_0, int(0), v);
   }

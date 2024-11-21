@@ -6,7 +6,7 @@ uniform u_block_1_ubo {
 } v;
 shared mat3x4 w;
 void f_inner(uint tint_local_index) {
-  if ((tint_local_index == 0u)) {
+  if ((tint_local_index < 1u)) {
     w = mat3x4(vec4(0.0f), vec4(0.0f), vec4(0.0f));
   }
   barrier();

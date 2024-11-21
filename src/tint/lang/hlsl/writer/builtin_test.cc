@@ -495,7 +495,7 @@ struct foo_inputs {
 
 groupshared SB v;
 void foo_inner(uint tint_local_index) {
-  if ((tint_local_index == 0u)) {
+  if ((tint_local_index < 1u)) {
     v.padding = (0.0f).xxxx;
     int v_1 = int(0);
     InterlockedExchange(v.a, int(0), v_1);
@@ -546,7 +546,7 @@ struct foo_inputs {
 
 groupshared SB v;
 void foo_inner(uint tint_local_index) {
-  if ((tint_local_index == 0u)) {
+  if ((tint_local_index < 1u)) {
     v.padding = (0.0f).xxxx;
     int v_1 = int(0);
     InterlockedExchange(v.a, int(0), v_1);
@@ -600,7 +600,7 @@ struct foo_inputs {
 
 groupshared SB v;
 void foo_inner(uint tint_local_index) {
-  if ((tint_local_index == 0u)) {
+  if ((tint_local_index < 1u)) {
     v.padding = (0.0f).xxxx;
     int v_1 = int(0);
     InterlockedExchange(v.a, int(0), v_1);
@@ -662,7 +662,7 @@ struct foo_inputs {
 
 groupshared SB v;
 void foo_inner(uint tint_local_index) {
-  if ((tint_local_index == 0u)) {
+  if ((tint_local_index < 1u)) {
     v.padding = (0.0f).xxxx;
     int v_1 = int(0);
     InterlockedExchange(v.a, int(0), v_1);
@@ -705,7 +705,7 @@ TEST_P(HlslBuiltinWorkgroupAtomic, Access) {
 
 groupshared int v;
 void foo_inner(uint tint_local_index) {
-  if ((tint_local_index == 0u)) {
+  if ((tint_local_index < 1u)) {
     int v_1 = int(0);
     InterlockedExchange(v, int(0), v_1);
   }

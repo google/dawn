@@ -13,7 +13,7 @@ int func() {
 }
 
 void main_inner(uint tint_local_index) {
-  if ((tint_local_index == 0u)) {
+  if ((tint_local_index < 1u)) {
     str v = (str)0;
     S = v;
   }

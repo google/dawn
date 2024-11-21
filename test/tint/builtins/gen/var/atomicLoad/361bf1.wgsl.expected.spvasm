@@ -1,7 +1,7 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 1
-; Bound: 38
+; Bound: 39
 ; Schema: 0
                OpCapability Shader
                OpMemoryModel Logical GLSL450
@@ -36,10 +36,11 @@
 %_ptr_Function_uint = OpTypePointer Function %uint
        %void = OpTypeVoid
          %21 = OpTypeFunction %void %uint
+     %uint_1 = OpConstant %uint 1
        %bool = OpTypeBool
    %uint_264 = OpConstant %uint 264
 %_ptr_StorageBuffer_uint = OpTypePointer StorageBuffer %uint
-         %34 = OpTypeFunction %void
+         %35 = OpTypeFunction %void
 %atomicLoad_361bf1 = OpFunction %uint None %10
          %11 = OpLabel
         %res = OpVariable %_ptr_Function_uint Function
@@ -51,22 +52,22 @@
 %compute_main_inner = OpFunction %void None %21
 %tint_local_index = OpFunctionParameter %uint
          %22 = OpLabel
-         %23 = OpIEqual %bool %tint_local_index %uint_0
-               OpSelectionMerge %25 None
-               OpBranchConditional %23 %26 %25
-         %26 = OpLabel
+         %23 = OpULessThan %bool %tint_local_index %uint_1
+               OpSelectionMerge %26 None
+               OpBranchConditional %23 %27 %26
+         %27 = OpLabel
                OpAtomicStore %arg_0 %uint_2 %uint_0 %uint_0
-               OpBranch %25
-         %25 = OpLabel
+               OpBranch %26
+         %26 = OpLabel
                OpControlBarrier %uint_2 %uint_2 %uint_264
-         %30 = OpFunctionCall %uint %atomicLoad_361bf1
-         %31 = OpAccessChain %_ptr_StorageBuffer_uint %1 %uint_0
-               OpStore %31 %30 None
+         %31 = OpFunctionCall %uint %atomicLoad_361bf1
+         %32 = OpAccessChain %_ptr_StorageBuffer_uint %1 %uint_0
+               OpStore %32 %31 None
                OpReturn
                OpFunctionEnd
-%compute_main = OpFunction %void None %34
-         %35 = OpLabel
-         %36 = OpLoad %uint %compute_main_local_invocation_index_Input None
-         %37 = OpFunctionCall %void %compute_main_inner %36
+%compute_main = OpFunction %void None %35
+         %36 = OpLabel
+         %37 = OpLoad %uint %compute_main_local_invocation_index_Input None
+         %38 = OpFunctionCall %void %compute_main_inner %37
                OpReturn
                OpFunctionEnd

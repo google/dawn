@@ -5,7 +5,7 @@ void uses_a() {
   a = (a + 1);
 }
 void main1_inner(uint tint_local_index) {
-  if ((tint_local_index == 0u)) {
+  if ((tint_local_index < 1u)) {
     a = 0;
   }
   barrier();
@@ -23,7 +23,7 @@ void uses_b() {
   b = (b * 2);
 }
 void main2_inner(uint tint_local_index) {
-  if ((tint_local_index == 0u)) {
+  if ((tint_local_index < 1u)) {
     b = 0;
   }
   barrier();
@@ -57,7 +57,7 @@ void outer() {
   no_uses();
 }
 void main3_inner(uint tint_local_index) {
-  if ((tint_local_index == 0u)) {
+  if ((tint_local_index < 1u)) {
     a = 0;
     b = 0;
   }

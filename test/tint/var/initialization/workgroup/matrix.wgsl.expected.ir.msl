@@ -26,7 +26,7 @@ struct tint_symbol_2 {
 };
 
 void tint_symbol_inner(uint tint_local_index, tint_module_vars_struct tint_module_vars) {
-  if ((tint_local_index == 0u)) {
+  if ((tint_local_index < 1u)) {
     (*tint_module_vars.v)[0u].packed = packed_float3(float2x3(float3(0.0f), float3(0.0f))[0u]);
     (*tint_module_vars.v)[1u].packed = packed_float3(float2x3(float3(0.0f), float3(0.0f))[1u]);
   }

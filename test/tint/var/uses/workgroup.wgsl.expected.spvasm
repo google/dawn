@@ -53,7 +53,7 @@
       %int_2 = OpConstant %int 2
       %int_0 = OpConstant %int 0
          %37 = OpTypeFunction %void %uint
-     %uint_0 = OpConstant %uint 0
+     %uint_1 = OpConstant %uint 1
        %bool = OpTypeBool
      %uint_2 = OpConstant %uint 2
    %uint_264 = OpConstant %uint 264
@@ -95,7 +95,7 @@
 %main1_inner = OpFunction %void None %37
 %tint_local_index = OpFunctionParameter %uint
          %38 = OpLabel
-         %39 = OpIEqual %bool %tint_local_index %uint_0
+         %39 = OpULessThan %bool %tint_local_index %uint_1
                OpSelectionMerge %42 None
                OpBranchConditional %39 %43 %42
          %43 = OpLabel
@@ -110,7 +110,7 @@
 %main2_inner = OpFunction %void None %37
 %tint_local_index_0 = OpFunctionParameter %uint
          %51 = OpLabel
-         %52 = OpIEqual %bool %tint_local_index_0 %uint_0
+         %52 = OpULessThan %bool %tint_local_index_0 %uint_1
                OpSelectionMerge %53 None
                OpBranchConditional %52 %54 %53
          %54 = OpLabel
@@ -125,7 +125,7 @@
 %main3_inner = OpFunction %void None %37
 %tint_local_index_1 = OpFunctionParameter %uint
          %60 = OpLabel
-         %61 = OpIEqual %bool %tint_local_index_1 %uint_0
+         %61 = OpULessThan %bool %tint_local_index_1 %uint_1
                OpSelectionMerge %62 None
                OpBranchConditional %61 %63 %62
          %63 = OpLabel

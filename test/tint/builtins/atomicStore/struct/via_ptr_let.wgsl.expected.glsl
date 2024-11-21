@@ -9,7 +9,7 @@ struct S {
 
 shared S wg;
 void compute_main_inner(uint tint_local_index) {
-  if ((tint_local_index == 0u)) {
+  if ((tint_local_index < 1u)) {
     wg.x = 0;
     atomicExchange(wg.a, 0u);
     wg.y = 0u;

@@ -2,7 +2,7 @@
 
 shared mat2 W;
 void F_inner(uint tint_symbol) {
-  if ((tint_symbol == 0u)) {
+  if ((tint_symbol < 1u)) {
     W = mat2(vec2(0.0f), vec2(0.0f));
   }
   barrier();

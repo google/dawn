@@ -146,7 +146,7 @@ void main_1(tint_module_vars_struct tint_module_vars) {
 }
 
 void tint_symbol_inner(uint3 x_3_param, uint tint_local_index, tint_module_vars_struct tint_module_vars) {
-  if ((tint_local_index == 0u)) {
+  if ((tint_local_index < 1u)) {
     atomic_store_explicit(tint_module_vars.x_34, 0u, memory_order_relaxed);
     atomic_store_explicit(tint_module_vars.x_35, 0u, memory_order_relaxed);
     atomic_store_explicit(tint_module_vars.x_36, 0u, memory_order_relaxed);

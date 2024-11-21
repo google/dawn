@@ -14,7 +14,7 @@ float16_t workgroupUniformLoad_e07d08() {
   return res;
 }
 void compute_main_inner(uint tint_local_index) {
-  if ((tint_local_index == 0u)) {
+  if ((tint_local_index < 1u)) {
     arg_0 = 0.0hf;
   }
   barrier();

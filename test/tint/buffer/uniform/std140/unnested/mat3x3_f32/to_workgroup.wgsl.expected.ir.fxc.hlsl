@@ -12,7 +12,7 @@ float3x3 v(uint start_byte_offset) {
 }
 
 void f_inner(uint tint_local_index) {
-  if ((tint_local_index == 0u)) {
+  if ((tint_local_index < 1u)) {
     w = float3x3((0.0f).xxx, (0.0f).xxx, (0.0f).xxx);
   }
   GroupMemoryBarrierWithGroupSync();

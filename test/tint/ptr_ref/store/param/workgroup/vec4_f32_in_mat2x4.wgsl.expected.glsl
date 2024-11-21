@@ -5,7 +5,7 @@ void func(uint pointer_indices[1]) {
   S[pointer_indices[0u]] = vec4(0.0f);
 }
 void tint_symbol_inner(uint tint_local_index) {
-  if ((tint_local_index == 0u)) {
+  if ((tint_local_index < 1u)) {
     S = mat2x4(vec4(0.0f), vec4(0.0f));
   }
   barrier();

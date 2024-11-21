@@ -5,7 +5,7 @@ vec2 func(uint pointer_indices[1]) {
   return S[pointer_indices[0u]];
 }
 void tint_symbol_inner(uint tint_local_index) {
-  if ((tint_local_index == 0u)) {
+  if ((tint_local_index < 1u)) {
     S = mat2(vec2(0.0f), vec2(0.0f));
   }
   barrier();

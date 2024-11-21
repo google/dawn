@@ -70,15 +70,15 @@
 %main_local_invocation_index_Input = OpVariable %_ptr_Input_uint Input
        %void = OpTypeVoid
          %18 = OpTypeFunction %void %uint
-     %uint_0 = OpConstant %uint 0
+     %uint_1 = OpConstant %uint 1
        %bool = OpTypeBool
      %uint_2 = OpConstant %uint 2
+     %uint_0 = OpConstant %uint 0
       %int_0 = OpConstant %int 0
    %uint_264 = OpConstant %uint 264
 %_ptr_Function_uint = OpTypePointer Function %uint
     %uint_42 = OpConstant %uint 42
 %_ptr_StorageBuffer_uint = OpTypePointer StorageBuffer %uint
-     %uint_1 = OpConstant %uint 1
 %__atomic_compare_exchange_result_u32 = OpTypeStruct %uint %bool
 %_ptr_Function_int = OpTypePointer Function %int
      %int_42 = OpConstant %int 42
@@ -92,7 +92,7 @@
     %value_0 = OpVariable %_ptr_Function_int Function
     %value_1 = OpVariable %_ptr_Function_uint Function
     %value_2 = OpVariable %_ptr_Function_int Function
-         %20 = OpIEqual %bool %tint_local_index %uint_0
+         %20 = OpULessThan %bool %tint_local_index %uint_1
                OpSelectionMerge %23 None
                OpBranchConditional %20 %24 %23
          %24 = OpLabel
@@ -102,11 +102,11 @@
          %23 = OpLabel
                OpControlBarrier %uint_2 %uint_2 %uint_264
                OpStore %value %uint_42
-         %34 = OpLoad %uint %value None
-         %35 = OpAccessChain %_ptr_StorageBuffer_uint %1 %uint_0
-         %37 = OpAtomicCompareExchange %uint %35 %uint_1 %uint_0 %uint_0 %34 %uint_0
-         %39 = OpIEqual %bool %37 %uint_0
-         %r1 = OpCompositeConstruct %__atomic_compare_exchange_result_u32 %37 %39
+         %35 = OpLoad %uint %value None
+         %36 = OpAccessChain %_ptr_StorageBuffer_uint %1 %uint_0
+         %38 = OpAtomicCompareExchange %uint %36 %uint_1 %uint_0 %uint_0 %35 %uint_0
+         %39 = OpIEqual %bool %38 %uint_0
+         %r1 = OpCompositeConstruct %__atomic_compare_exchange_result_u32 %38 %39
          %42 = OpLoad %uint %value None
          %43 = OpAccessChain %_ptr_StorageBuffer_uint %1 %uint_0
          %44 = OpAtomicCompareExchange %uint %43 %uint_1 %uint_0 %uint_0 %42 %uint_0

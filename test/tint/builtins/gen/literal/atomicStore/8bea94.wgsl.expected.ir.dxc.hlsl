@@ -10,7 +10,7 @@ void atomicStore_8bea94() {
 }
 
 void compute_main_inner(uint tint_local_index) {
-  if ((tint_local_index == 0u)) {
+  if ((tint_local_index < 1u)) {
     int v_1 = int(0);
     InterlockedExchange(arg_0, int(0), v_1);
   }

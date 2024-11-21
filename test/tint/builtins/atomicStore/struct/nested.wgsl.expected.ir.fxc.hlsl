@@ -26,7 +26,7 @@ struct compute_main_inputs {
 
 groupshared S2 wg;
 void compute_main_inner(uint tint_local_index) {
-  if ((tint_local_index == 0u)) {
+  if ((tint_local_index < 1u)) {
     wg.x = int(0);
     wg.y = int(0);
     wg.z = int(0);

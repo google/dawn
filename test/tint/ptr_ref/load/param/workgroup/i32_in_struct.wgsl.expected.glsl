@@ -10,7 +10,7 @@ int func() {
   return S.i;
 }
 void tint_symbol_inner(uint tint_local_index) {
-  if ((tint_local_index == 0u)) {
+  if ((tint_local_index < 1u)) {
     S = str(0);
   }
   barrier();

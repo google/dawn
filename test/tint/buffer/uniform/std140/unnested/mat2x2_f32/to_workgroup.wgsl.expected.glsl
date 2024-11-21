@@ -7,7 +7,7 @@ uniform u_block_std140_1_ubo {
 } v;
 shared mat2 w;
 void f_inner(uint tint_local_index) {
-  if ((tint_local_index == 0u)) {
+  if ((tint_local_index < 1u)) {
     w = mat2(vec2(0.0f), vec2(0.0f));
   }
   barrier();

@@ -51,11 +51,11 @@
 %compute_main_local_invocation_index_Input = OpVariable %_ptr_Input_uint Input
        %void = OpTypeVoid
          %13 = OpTypeFunction %void %uint
-     %uint_0 = OpConstant %uint 0
+     %uint_1 = OpConstant %uint 1
        %bool = OpTypeBool
 %_ptr_Workgroup_int = OpTypePointer Workgroup %int
+     %uint_0 = OpConstant %uint 0
       %int_0 = OpConstant %int 0
-     %uint_1 = OpConstant %uint 1
      %uint_2 = OpConstant %uint 2
      %uint_3 = OpConstant %uint 3
 %_ptr_Workgroup_uint = OpTypePointer Workgroup %uint
@@ -64,14 +64,14 @@
 %compute_main_inner = OpFunction %void None %13
 %tint_local_index = OpFunctionParameter %uint
          %14 = OpLabel
-         %15 = OpIEqual %bool %tint_local_index %uint_0
+         %15 = OpULessThan %bool %tint_local_index %uint_1
                OpSelectionMerge %18 None
                OpBranchConditional %15 %19 %18
          %19 = OpLabel
          %20 = OpAccessChain %_ptr_Workgroup_int %wg %uint_0
                OpStore %20 %int_0 None
-         %23 = OpAccessChain %_ptr_Workgroup_int %wg %uint_1
-               OpStore %23 %int_0 None
+         %24 = OpAccessChain %_ptr_Workgroup_int %wg %uint_1
+               OpStore %24 %int_0 None
          %25 = OpAccessChain %_ptr_Workgroup_int %wg %uint_2
                OpStore %25 %int_0 None
          %27 = OpAccessChain %_ptr_Workgroup_int %wg %uint_3 %uint_0

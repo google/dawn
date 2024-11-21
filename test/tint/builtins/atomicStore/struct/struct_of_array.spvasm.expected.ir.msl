@@ -60,7 +60,7 @@ void compute_main_1(tint_module_vars_struct tint_module_vars) {
 }
 
 void compute_main_inner_1(uint local_invocation_index_1_param, tint_module_vars_struct tint_module_vars) {
-  if ((local_invocation_index_1_param == 0u)) {
+  if ((local_invocation_index_1_param < 1u)) {
     (*tint_module_vars.wg).x = 0;
     (*tint_module_vars.wg).y = 0u;
   }

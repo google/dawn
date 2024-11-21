@@ -6,7 +6,7 @@ buffer tint_symbol_block_1_ssbo {
   uint inner;
 } v;
 void tint_symbol_1_inner(uvec3 global_id, uvec3 local_id, uint tint_local_index) {
-  if ((tint_local_index == 0u)) {
+  if ((tint_local_index < 1u)) {
     sh_atomic_failed = 0u;
   }
   barrier();

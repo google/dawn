@@ -349,7 +349,7 @@ TEST_F(SpirvWriterTest, StorageVar_Workgroup_WithVulkan) {
 %foo_local_invocation_index_Input = OpVariable %_ptr_Input_uint Input   ; BuiltIn LocalInvocationIndex
        %void = OpTypeVoid
          %10 = OpTypeFunction %void %uint
-     %uint_0 = OpConstant %uint 0
+     %uint_1 = OpConstant %uint 1
        %bool = OpTypeBool
       %int_0 = OpConstant %int 0
      %uint_2 = OpConstant %uint 2
@@ -361,7 +361,7 @@ TEST_F(SpirvWriterTest, StorageVar_Workgroup_WithVulkan) {
   %foo_inner = OpFunction %void None %10
 %tint_local_index = OpFunctionParameter %uint
          %11 = OpLabel
-         %12 = OpIEqual %bool %tint_local_index %uint_0
+         %12 = OpULessThan %bool %tint_local_index %uint_1
                OpSelectionMerge %15 None
                OpBranchConditional %12 %16 %15
          %16 = OpLabel

@@ -5,7 +5,7 @@ struct main_inputs {
 
 groupshared float2x3 v;
 void main_inner(uint tint_local_index) {
-  if ((tint_local_index == 0u)) {
+  if ((tint_local_index < 1u)) {
     v = float2x3((0.0f).xxx, (0.0f).xxx);
   }
   GroupMemoryBarrierWithGroupSync();

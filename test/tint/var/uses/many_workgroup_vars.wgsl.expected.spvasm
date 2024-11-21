@@ -221,7 +221,7 @@
 %tint_symbol_local_invocation_index_Input = OpVariable %_ptr_Input_uint Input
        %void = OpTypeVoid
         %111 = OpTypeFunction %void %uint
-     %uint_0 = OpConstant %uint 0
+     %uint_1 = OpConstant %uint 1
        %bool = OpTypeBool
         %118 = OpConstantNull %mat2v2float
      %uint_2 = OpConstant %uint 2
@@ -235,7 +235,7 @@
 %tint_symbol_inner = OpFunction %void None %111
         %idx = OpFunctionParameter %uint
         %112 = OpLabel
-        %113 = OpIEqual %bool %idx %uint_0
+        %113 = OpULessThan %bool %idx %uint_1
                OpSelectionMerge %116 None
                OpBranchConditional %113 %117 %116
         %117 = OpLabel

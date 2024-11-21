@@ -274,7 +274,7 @@ struct SB {
 
 shared SB v;
 void foo_inner(uint tint_local_index) {
-  if ((tint_local_index == 0u)) {
+  if ((tint_local_index < 1u)) {
     v.padding = vec4(0.0f);
     atomicExchange(v.a, 0);
     atomicExchange(v.b, 0u);
@@ -319,7 +319,7 @@ struct SB {
 
 shared SB v;
 void foo_inner(uint tint_local_index) {
-  if ((tint_local_index == 0u)) {
+  if ((tint_local_index < 1u)) {
     v.padding = vec4(0.0f);
     atomicExchange(v.a, 0);
     atomicExchange(v.b, 0u);
@@ -370,7 +370,7 @@ struct atomic_compare_exchange_result_i32 {
 
 shared SB v;
 void foo_inner(uint tint_local_index) {
-  if ((tint_local_index == 0u)) {
+  if ((tint_local_index < 1u)) {
     v.padding = vec4(0.0f);
     atomicExchange(v.a, 0);
     atomicExchange(v.b, 0u);

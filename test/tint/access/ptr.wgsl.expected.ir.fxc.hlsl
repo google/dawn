@@ -49,7 +49,7 @@ int call_builtin_with_mod_scope_ptr() {
 }
 
 void main_inner(uint tint_local_index) {
-  if ((tint_local_index == 0u)) {
+  if ((tint_local_index < 1u)) {
     int v_3 = int(0);
     InterlockedExchange(g1, int(0), v_3);
   }

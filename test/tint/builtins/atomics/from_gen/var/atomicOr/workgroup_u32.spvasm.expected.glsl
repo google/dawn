@@ -20,7 +20,7 @@ void compute_main_1() {
   compute_main_inner(x_32);
 }
 void compute_main_inner_1(uint local_invocation_index_1_param) {
-  if ((local_invocation_index_1_param == 0u)) {
+  if ((local_invocation_index_1_param < 1u)) {
     atomicExchange(arg_0, 0u);
   }
   barrier();

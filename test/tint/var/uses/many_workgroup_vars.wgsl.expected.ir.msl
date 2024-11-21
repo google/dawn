@@ -208,7 +208,7 @@ struct tint_symbol_101 {
 };
 
 void tint_symbol_inner(uint idx, tint_module_vars_struct tint_module_vars) {
-  if ((idx == 0u)) {
+  if ((idx < 1u)) {
     (*tint_module_vars.m00) = float2x2(float2(0.0f), float2(0.0f));
     (*tint_module_vars.m01) = float2x2(float2(0.0f), float2(0.0f));
     (*tint_module_vars.m02) = float2x2(float2(0.0f), float2(0.0f));

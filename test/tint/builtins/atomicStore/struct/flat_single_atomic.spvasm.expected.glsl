@@ -21,7 +21,7 @@ void compute_main_1() {
   compute_main_inner(x_35);
 }
 void compute_main_inner_1(uint local_invocation_index_1_param) {
-  if ((local_invocation_index_1_param == 0u)) {
+  if ((local_invocation_index_1_param < 1u)) {
     wg.x = 0;
     atomicExchange(wg.a, 0u);
     wg.y = 0u;

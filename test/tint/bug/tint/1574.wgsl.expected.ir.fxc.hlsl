@@ -18,7 +18,7 @@ RWByteAddressBuffer a_i32 : register(u1);
 groupshared uint b_u32;
 groupshared int b_i32;
 void main_inner(uint tint_local_index) {
-  if ((tint_local_index == 0u)) {
+  if ((tint_local_index < 1u)) {
     uint v = 0u;
     InterlockedExchange(b_u32, 0u, v);
     int v_1 = int(0);

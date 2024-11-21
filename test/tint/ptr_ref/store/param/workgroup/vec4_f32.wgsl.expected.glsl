@@ -5,7 +5,7 @@ void func() {
   S = vec4(0.0f);
 }
 void tint_symbol_inner(uint tint_local_index) {
-  if ((tint_local_index == 0u)) {
+  if ((tint_local_index < 1u)) {
     S = vec4(0.0f);
   }
   barrier();

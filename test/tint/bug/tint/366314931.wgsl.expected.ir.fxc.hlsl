@@ -11,7 +11,7 @@ struct main_inputs {
 groupshared S wgvar;
 RWByteAddressBuffer output : register(u0);
 void main_inner(uint tint_local_index) {
-  if ((tint_local_index == 0u)) {
+  if ((tint_local_index < 1u)) {
     wgvar.v = (0u).xxx;
     uint v_1 = 0u;
     InterlockedExchange(wgvar.u, 0u, v_1);

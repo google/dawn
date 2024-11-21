@@ -12,7 +12,7 @@ void atomicCompareExchangeWeak_83580d() {
   atomic_compare_exchange_result_u32 res = atomic_compare_exchange_result_u32(v, (v == 1u));
 }
 void compute_main_inner(uint tint_local_index) {
-  if ((tint_local_index == 0u)) {
+  if ((tint_local_index < 1u)) {
     atomicExchange(arg_0, 0u);
   }
   barrier();

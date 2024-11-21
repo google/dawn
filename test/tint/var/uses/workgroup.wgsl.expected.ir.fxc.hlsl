@@ -38,7 +38,7 @@ void outer() {
 }
 
 void main1_inner(uint tint_local_index) {
-  if ((tint_local_index == 0u)) {
+  if ((tint_local_index < 1u)) {
     a = int(0);
   }
   GroupMemoryBarrierWithGroupSync();
@@ -47,7 +47,7 @@ void main1_inner(uint tint_local_index) {
 }
 
 void main2_inner(uint tint_local_index) {
-  if ((tint_local_index == 0u)) {
+  if ((tint_local_index < 1u)) {
     b = int(0);
   }
   GroupMemoryBarrierWithGroupSync();
@@ -56,7 +56,7 @@ void main2_inner(uint tint_local_index) {
 }
 
 void main3_inner(uint tint_local_index) {
-  if ((tint_local_index == 0u)) {
+  if ((tint_local_index < 1u)) {
     a = int(0);
     b = int(0);
   }

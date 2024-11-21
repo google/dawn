@@ -2,7 +2,7 @@
 
 shared int i;
 void tint_symbol_inner(uint tint_local_index) {
-  if ((tint_local_index == 0u)) {
+  if ((tint_local_index < 1u)) {
     i = 0;
   }
   barrier();
