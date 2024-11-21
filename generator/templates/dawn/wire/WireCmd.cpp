@@ -488,7 +488,9 @@
         DAWN_ASSERT(chainedStruct != nullptr);
         size_t result = 0;
         while (chainedStruct != nullptr) {
-            switch (chainedStruct->sType) {
+            uint32_t sType_as_uint;
+            std::memcpy(&sType_as_uint, &(chainedStruct->sType), sizeof(uint32_t));
+            switch (sType_as_uint) {
                 {% for sType in sTypes %}
                     case {{as_cEnum(types["s type"].name, sType.name)}}: {
                         const auto& typedStruct = *reinterpret_cast<{{as_cType(sType.name)}} const *>(chainedStruct);
@@ -514,7 +516,9 @@
         DAWN_ASSERT(chainedStruct != nullptr);
         DAWN_ASSERT(buffer != nullptr);
         do {
-            switch (chainedStruct->sType) {
+            uint32_t sType_as_uint;
+            std::memcpy(&sType_as_uint, &(chainedStruct->sType), sizeof(uint32_t));
+            switch (sType_as_uint) {
                 {% for sType in sTypes %}
                     {% set CType = as_cType(sType.name) %}
                     case {{as_cEnum(types["s type"].name, sType.name)}}: {
@@ -535,8 +539,8 @@
                 default: {
                     // Invalid enum. Serialize just the transfer header with Invalid as the sType.
                     // TODO(crbug.com/dawn/369): Unknown sTypes are silently discarded.
-                    if (chainedStruct->sType != WGPUSType(0)) {
-                        dawn::WarningLog() << "Unknown sType " << chainedStruct->sType << " discarded.";
+                    if (sType_as_uint != 0u) {
+                        dawn::WarningLog() << "Unknown sType " << sType_as_uint << " discarded.";
                     }
 
                     WGPUChainedStructTransfer* transfer;
