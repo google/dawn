@@ -223,6 +223,11 @@ class Device::DeviceLostEvent : public TrackedEvent {
             mMessage = "A valid external Instance reference no longer exists.";
         }
 
+        // Some users may use the device lost callback to deallocate resources allocated for the
+        // uncaptured error callback, so reset the uncaptured error callback before calling the
+        // device lost callback.
+        mDevice->mUncapturedErrorCallbackInfo = kEmptyUncapturedErrorCallbackInfo;
+
         void* userdata1 = mDevice->mDeviceLostInfo.userdata1.ExtractAsDangling();
         void* userdata2 = mDevice->mDeviceLostInfo.userdata2.ExtractAsDangling();
 
@@ -232,7 +237,6 @@ class Device::DeviceLostEvent : public TrackedEvent {
             mDevice->mDeviceLostInfo.callback(&device, mReason, ToOutputStringView(mMessage),
                                               userdata1, userdata2);
         }
-        mDevice->mUncapturedErrorCallbackInfo = kEmptyUncapturedErrorCallbackInfo;
     }
 
     WGPUDeviceLostReason mReason;

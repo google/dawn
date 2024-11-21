@@ -272,6 +272,13 @@ void DeviceBase::DeviceLostEvent::Complete(EventCompletionType completionType) {
         mMessage = "A valid external Instance reference no longer exists.";
     }
 
+    // Some users may use the device lost callback to deallocate resources allocated for the
+    // uncaptured error callback, so reset the uncaptured error callback before calling the
+    // device lost callback.
+    if (mDevice != nullptr) {
+        mDevice->mUncapturedErrorCallbackInfo = kEmptyUncapturedErrorCallbackInfo;
+    }
+
     auto device = ToAPI(mDevice.Get());
     void* userdata1 = mUserdata1.ExtractAsDangling();
     void* userdata2 = mUserdata2.ExtractAsDangling();
@@ -282,12 +289,6 @@ void DeviceBase::DeviceLostEvent::Complete(EventCompletionType completionType) {
     }
     if (mCallback) {
         mCallback(&device, ToAPI(mReason), ToOutputStringView(mMessage), userdata1, userdata2);
-    }
-
-    // After the device lost callback fires, the uncaptured error callback is no longer valid so we
-    // unset it here.
-    if (mDevice != nullptr) {
-        mDevice->mUncapturedErrorCallbackInfo = kEmptyUncapturedErrorCallbackInfo;
     }
 
     mDevice = nullptr;
