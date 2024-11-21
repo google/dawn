@@ -1114,6 +1114,10 @@ void {{CppType}}::SetUncapturedErrorCallback(L callback) {
     {% for type in by_category["structure"] %}
         using {{as_cppType(type.name)}} = {{c_namespace.namespace_case()}}::{{as_cppType(type.name)}};
     {% endfor %}
+    {% for type in by_category["callback function"] %}
+        template <typename... T>
+        using {{as_cppType(type.name)}} = typename {{c_namespace.namespace_case()}}::{{as_cppType(type.name)}}<T...>;
+    {% endfor %}
 {% endif %}
 
 {% for typeDef in by_category["typedef"] %}
