@@ -38,8 +38,7 @@ void RenameConflictsFuzzer(core::ir::Module& module) {
         return;
     }
 
-    core::ir::Capabilities capabilities;
-    if (auto res = Validate(module, capabilities); res != Success) {
+    if (auto res = Validate(module, kRenameConflictsCapabilities); res != Success) {
         TINT_ICE() << "result of RenameConflicts failed IR validation\n" << res.Failure();
     }
 }

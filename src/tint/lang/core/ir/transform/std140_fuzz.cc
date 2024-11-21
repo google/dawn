@@ -57,8 +57,7 @@ void Std140Fuzzer(Module& module) {
         return;
     }
 
-    Capabilities capabilities;
-    if (auto res = Validate(module, capabilities); res != Success) {
+    if (auto res = Validate(module, kStd140Capabilities); res != Success) {
         TINT_ICE() << "result of Std140 failed IR validation\n" << res.Failure();
     }
 }

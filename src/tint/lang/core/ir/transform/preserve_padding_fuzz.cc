@@ -38,8 +38,7 @@ void PreservePaddingFuzzer(Module& module) {
         return;
     }
 
-    Capabilities capabilities;
-    if (auto res = Validate(module, capabilities); res != Success) {
+    if (auto res = Validate(module, kPreservePaddingCapabilities); res != Success) {
         TINT_ICE() << "result of PreservePadding failed IR validation\n" << res.Failure();
     }
 }

@@ -38,8 +38,7 @@ void AddEmptyEntryPointFuzzer(Module& module) {
         return;
     }
 
-    Capabilities capabilities;
-    if (auto res = Validate(module, capabilities); res != Success) {
+    if (auto res = Validate(module, kAddEmptyEntryPointCapabilities); res != Success) {
         TINT_ICE() << "result of AddEmptyEntryPoint failed IR validation\n" << res.Failure();
     }
 }

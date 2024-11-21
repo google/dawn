@@ -38,8 +38,8 @@ void VectorizeScalarMatrixConstructorsFuzzer(Module& module) {
         return;
     }
 
-    Capabilities capabilities;
-    if (auto res = Validate(module, capabilities); res != Success) {
+    if (auto res = Validate(module, kVectorizeScalarMatrixConstructorsCapabilities);
+        res != Success) {
         TINT_ICE() << "result of VectorizeScalarMatrixConstructors failed IR validation\n"
                    << res.Failure();
     }

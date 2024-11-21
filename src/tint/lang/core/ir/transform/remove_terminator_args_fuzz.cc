@@ -38,8 +38,7 @@ void RemoveTerminatorArgsFuzzer(Module& module) {
         return;
     }
 
-    Capabilities capabilities;
-    if (auto res = Validate(module, capabilities); res != Success) {
+    if (auto res = Validate(module, kRemoveTerminatorArgsCapabilities); res != Success) {
         TINT_ICE() << "result of RemoveTerminatorArgs failed IR validation\n" << res.Failure();
     }
 }
