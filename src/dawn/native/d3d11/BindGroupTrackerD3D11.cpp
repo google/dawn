@@ -338,7 +338,7 @@ ComputePassBindGroupTracker::~ComputePassBindGroupTracker() {
 
 void ComputePassBindGroupTracker::UnapplyComputeBindings(BindGroupIndex index) {
     auto* deviceContext = GetCommandContext()->GetD3D11DeviceContext4();
-    BindGroupLayoutInternalBase* groupLayout =
+    const BindGroupLayoutInternalBase* groupLayout =
         mLastAppliedPipelineLayout->GetBindGroupLayout(index);
     const auto& indices = ToBackend(mLastAppliedPipelineLayout)->GetBindingIndexInfo()[index];
 

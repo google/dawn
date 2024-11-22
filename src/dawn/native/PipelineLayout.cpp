@@ -451,10 +451,6 @@ const BindGroupLayoutInternalBase* PipelineLayoutBase::GetBindGroupLayout(
     return GetFrontendBindGroupLayout(group)->GetInternalBindGroupLayout();
 }
 
-BindGroupLayoutInternalBase* PipelineLayoutBase::GetBindGroupLayout(BindGroupIndex group) {
-    return GetFrontendBindGroupLayout(group)->GetInternalBindGroupLayout();
-}
-
 const BindGroupMask& PipelineLayoutBase::GetBindGroupLayoutsMask() const {
     DAWN_ASSERT(!IsError());
     return mMask;
