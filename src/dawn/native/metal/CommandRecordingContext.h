@@ -38,8 +38,8 @@ namespace dawn::native::metal {
 class Queue;
 
 struct MTLSharedEventAndSignalValue {
-    NSPRef<id> sharedEvent;
-    uint64_t signaledValue;
+    NSPRef<id> sharedEvent = nullptr;
+    uint64_t signaledValue = 0;
 };
 
 // This class wraps a MTLCommandBuffer and tracks which Metal encoder is open.
@@ -78,12 +78,19 @@ class CommandRecordingContext : NonMovable {
     void WaitForSharedEvent(id<MTLSharedEvent> sharedEvent, uint64_t signaledValue)
         API_AVAILABLE(macos(10.14), ios(12.0));
 
+    MaybeError EncodeSharedEventWorkaround() API_AVAILABLE(macos(10.14), ios(12.0));
+
   private:
     const raw_ptr<const Queue> mQueue;
     NSPRef<id<MTLCommandBuffer>> mCommands;
     NSPRef<id<MTLBlitCommandEncoder>> mBlit;
     NSPRef<id<MTLComputeCommandEncoder>> mCompute;
     NSPRef<id<MTLRenderCommandEncoder>> mRender;
+
+    // Shared event and signal used to serialize command buffer passes with an immediate signal and
+    // wait for workarounds such as the one needed in crbug.com/372698905.
+    MTLSharedEventAndSignalValue mSerializeWorkaround;
+
     bool mInEncoder = false;
     bool mNeedsSubmit = false;
     bool mUsed = false;

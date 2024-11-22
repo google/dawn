@@ -422,11 +422,6 @@ void Texture::SynchronizeTextureBeforeUse(CommandRecordingContext* commandContex
         if (contents != nullptr) {
             contents->AcquirePendingFences(&fences);
         }
-        // Consume the wait events on the texture. They will be empty after this loop.
-        for (auto waitEvent : std::move(mWaitEvents)) {
-            commandContext->WaitForSharedEvent(
-                static_cast<id<MTLSharedEvent>>(*waitEvent.sharedEvent), waitEvent.signaledValue);
-        }
         for (const auto& fence : fences) {
             commandContext->WaitForSharedEvent(ToBackend(fence.object)->GetMTLSharedEvent(),
                                                fence.signaledValue);

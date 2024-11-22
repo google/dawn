@@ -136,6 +136,7 @@ enum class Toggle {
     D3D12ExpandShaderResourceStateTransitionsToCopySource,
     GLDepthBiasModifier,
     VulkanMonolithicPipelineCache,
+    MetalSerializeTimestampGenerationAndResolution,
 
     // Unresolved issues.
     NoWorkaroundSampleMaskBecomesZeroForAllButLastColorTarget,

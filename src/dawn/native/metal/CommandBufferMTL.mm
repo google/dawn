@@ -1227,6 +1227,10 @@ MaybeError CommandBuffer::FillCommands(CommandRecordingContext* commandContext) 
                 } else {
                     if (@available(macOS 10.15, iOS 14.0, *)) {
                         destination->TrackUsage();
+                        if (GetDevice()->IsToggleEnabled(
+                                Toggle::MetalSerializeTimestampGenerationAndResolution)) {
+                            DAWN_TRY(commandContext->EncodeSharedEventWorkaround());
+                        }
                         [commandContext->EnsureBlit()
                               resolveCounters:querySet->GetCounterSampleBuffer()
                                       inRange:NSMakeRange(cmd->firstQuery, cmd->queryCount)
