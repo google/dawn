@@ -332,11 +332,12 @@ MaybeError Device::TickImpl() {
     ExecutionSerial completedSerial = queue->GetCompletedCommandSerial();
     queue->RecycleCompletedCommands(completedSerial);
 
-    for (Ref<DescriptorSetAllocator>& allocator :
-         mDescriptorAllocatorsPendingDeallocation.IterateUpTo(completedSerial)) {
-        allocator->FinishDeallocation(completedSerial);
-    }
-    mDescriptorAllocatorsPendingDeallocation.ClearUpTo(completedSerial);
+    mDescriptorAllocatorsPendingDeallocation.Use([&](auto pending) {
+        for (Ref<DescriptorSetAllocator>& allocator : pending->IterateUpTo(completedSerial)) {
+            allocator->FinishDeallocation(completedSerial);
+        }
+        pending->ClearUpTo(completedSerial);
+    });
 
     GetResourceMemoryAllocator()->Tick(completedSerial);
     GetFencedDeleter()->Tick(completedSerial);
@@ -383,8 +384,8 @@ external_semaphore::Service* Device::GetExternalSemaphoreService() const {
 }
 
 void Device::EnqueueDeferredDeallocation(DescriptorSetAllocator* allocator) {
-    mDescriptorAllocatorsPendingDeallocation.Enqueue(allocator,
-                                                     GetQueue()->GetPendingCommandSerial());
+    mDescriptorAllocatorsPendingDeallocation->Enqueue(allocator,
+                                                      GetQueue()->GetPendingCommandSerial());
 }
 
 ResultOrError<VulkanDeviceKnobs> Device::CreateDevice(VkPhysicalDevice vkPhysicalDevice) {
@@ -898,11 +899,12 @@ void Device::DestroyImpl() {
 
     ToBackend(GetPhysicalDevice())->GetVulkanInstance()->StopListeningForDeviceMessages(this);
 
-    for (Ref<DescriptorSetAllocator>& allocator :
-         mDescriptorAllocatorsPendingDeallocation.IterateUpTo(kMaxExecutionSerial)) {
-        allocator->FinishDeallocation(kMaxExecutionSerial);
-    }
-    mDescriptorAllocatorsPendingDeallocation.ClearUpTo(kMaxExecutionSerial);
+    mDescriptorAllocatorsPendingDeallocation.Use([&](auto pending) {
+        for (Ref<DescriptorSetAllocator>& allocator : pending->IterateUpTo(kMaxExecutionSerial)) {
+            allocator->FinishDeallocation(kMaxExecutionSerial);
+        }
+        pending->ClearUpTo(kMaxExecutionSerial);
+    });
 
     // Releasing the uploader enqueues buffers to be released.
     // Call Tick() again to clear them before releasing the deleter.
