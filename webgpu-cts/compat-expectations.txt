@@ -132,7 +132,6 @@ crbug.com/341282603 [ intel-0x4680 linux ] webgpu:api,operation,command_buffer,q
 crbug.com/341282605 [ intel-0x4680 linux ] webgpu:shader,execution,limits:switch_case_selectors: [ Failure ]
 crbug.com/341327470 [ intel-0x4680 linux ] webgpu:shader,execution,expression,call,builtin,asin:f32:* [ Failure ]
 crbug.com/341327470 [ intel-0x4680 linux ] webgpu:shader,execution,expression,call,builtin,fwidthFine:f32:* [ Failure ]
-crbug.com/341327471 [ intel-0x4680 linux ] webgpu:web_platform,canvas,getCurrentTexture:resize:* [ Failure ]
 crbug.com/341327472 [ intel-0x4680 linux ] webgpu:api,validation,state,device_lost,destroy:* [ Failure ]
 
 # Untriaged from manual CTS roll
@@ -1035,9 +1034,6 @@ crbug.com/0000 [ android ] webgpu:shader,execution,expression,call,builtin,textu
 crbug.com/0000 [ android ] webgpu:shader,execution,expression,call,builtin,textureGatherCompare:sampled_2d_coords:stage="v";format="depth32float";filt="linear";mode="m";offset=true [ Failure ]
 crbug.com/0000 [ android ] webgpu:shader,execution,expression,call,builtin,textureGatherCompare:sampled_2d_coords:stage="v";format="depth32float";filt="nearest";mode="m";offset=true [ Failure ]
 
-crbug.com/0000 [ android ] webgpu:shader,execution,expression,call,builtin,textureLoad:multisampled:stage="c";texture_type="texture_depth_multisampled_2d";format="depth24plus" [ Failure ]
-crbug.com/0000 [ android ] webgpu:shader,execution,expression,call,builtin,textureLoad:multisampled:stage="f";texture_type="texture_depth_multisampled_2d";format="depth24plus" [ Failure ]
-crbug.com/0000 [ android ] webgpu:shader,execution,expression,call,builtin,textureLoad:multisampled:stage="v";texture_type="texture_depth_multisampled_2d";format="depth24plus" [ Failure ]
 
 crbug.com/0000 [ android ] webgpu:shader,execution,expression,call,builtin,textureNumLayers:storage:format="r32float";view_type="full" [ Failure ]
 crbug.com/0000 [ android ] webgpu:shader,execution,expression,call,builtin,textureNumLayers:storage:format="r32sint";view_type="full" [ Failure ]
@@ -3336,13 +3332,12 @@ crbug.com/dawn/0000 [ android arm ] webgpu:web_platform,copyToTexture,canvas:cop
 crbug.com/dawn/0000 [ android arm ] webgpu:web_platform,copyToTexture,canvas:copy_contents_from_gpu_context_canvas:canvasType="offscreen";srcAndDstInSameGPUDevice=false;dstColorFormat="r16float";srcAlphaMode="premultiplied";dstAlphaMode="premultiplied";srcDoFlipYDuringCopy=false [ Failure ]
 crbug.com/dawn/0000 [ android arm ] webgpu:web_platform,copyToTexture,canvas:copy_contents_from_gpu_context_canvas:canvasType="offscreen";srcAndDstInSameGPUDevice=false;dstColorFormat="r16float";srcAlphaMode="premultiplied";dstAlphaMode="premultiplied";srcDoFlipYDuringCopy=true [ Failure ]
 crbug.com/dawn/0000 [ android arm ] webgpu:web_platform,copyToTexture,canvas:copy_contents_from_gpu_context_canvas:canvasType="offscreen";srcAndDstInSameGPUDevice=false;dstColorFormat="r32float";srcAlphaMode="premultiplied";dstAlphaMode="opaque";srcDoFlipYDuringCopy=false [ Failure ]
-crbug.com/dawn/0000 [ android arm ] webgpu:web_platform,copyToTexture,canvas:copy_contents_from_gpu_context_canvas:canvasType="offscreen";srcAndDstInSameGPUDevice=false;dstColorFormat="r8unorm";srcAlphaMode="premultiplied";dstAlphaMode="premultiplied";srcDoFlipYDuringCopy=false [ Failure ]
+crbug.com/dawn/0000 [ android-t arm ] webgpu:web_platform,copyToTexture,canvas:copy_contents_from_gpu_context_canvas:canvasType="offscreen";srcAndDstInSameGPUDevice=false;dstColorFormat="r8unorm";srcAlphaMode="premultiplied";dstAlphaMode="premultiplied";srcDoFlipYDuringCopy=false [ Failure ]
 crbug.com/dawn/0000 [ android arm ] webgpu:web_platform,copyToTexture,canvas:copy_contents_from_gpu_context_canvas:canvasType="offscreen";srcAndDstInSameGPUDevice=false;dstColorFormat="rgba32float";srcAlphaMode="premultiplied";dstAlphaMode="premultiplied";srcDoFlipYDuringCopy=true [ Failure ]
 crbug.com/dawn/0000 [ android arm ] webgpu:web_platform,copyToTexture,canvas:copy_contents_from_gpu_context_canvas:canvasType="offscreen";srcAndDstInSameGPUDevice=false;dstColorFormat="rgba8unorm";srcAlphaMode="premultiplied";dstAlphaMode="opaque";srcDoFlipYDuringCopy=false [ Failure ]
 crbug.com/dawn/0000 [ android arm ] webgpu:web_platform,copyToTexture,canvas:copy_contents_from_gpu_context_canvas:canvasType="offscreen";srcAndDstInSameGPUDevice=false;dstColorFormat="rgba8unorm";srcAlphaMode="premultiplied";dstAlphaMode="opaque";srcDoFlipYDuringCopy=true [ Failure ]
 crbug.com/dawn/0000 [ android arm ] webgpu:web_platform,copyToTexture,canvas:copy_contents_from_gpu_context_canvas:canvasType="offscreen";srcAndDstInSameGPUDevice=false;dstColorFormat="rgba8unorm";srcAlphaMode="premultiplied";dstAlphaMode="premultiplied";srcDoFlipYDuringCopy=false [ Failure ]
 crbug.com/dawn/0000 [ android arm ] webgpu:web_platform,copyToTexture,canvas:copy_contents_from_gpu_context_canvas:canvasType="offscreen";srcAndDstInSameGPUDevice=false;dstColorFormat="rgba8unorm";srcAlphaMode="premultiplied";dstAlphaMode="premultiplied";srcDoFlipYDuringCopy=true [ Failure ]
-crbug.com/dawn/0000 [ android arm ] webgpu:web_platform,copyToTexture,canvas:copy_contents_from_gpu_context_canvas:canvasType="offscreen";srcAndDstInSameGPUDevice=false;dstColorFormat="rgba8unorm-srgb";srcAlphaMode="premultiplied";dstAlphaMode="opaque";srcDoFlipYDuringCopy=false [ Failure ]
 crbug.com/dawn/0000 [ android arm ] webgpu:web_platform,copyToTexture,canvas:copy_contents_from_gpu_context_canvas:canvasType="onscreen";srcAndDstInSameGPUDevice=false;dstColorFormat="r32float";srcAlphaMode="premultiplied";dstAlphaMode="opaque";srcDoFlipYDuringCopy=false [ Failure ]
 crbug.com/dawn/0000 [ android arm ] webgpu:web_platform,copyToTexture,canvas:copy_contents_from_gpu_context_canvas:canvasType="onscreen";srcAndDstInSameGPUDevice=false;dstColorFormat="r32float";srcAlphaMode="premultiplied";dstAlphaMode="opaque";srcDoFlipYDuringCopy=true [ Failure ]
 crbug.com/dawn/0000 [ android arm ] webgpu:web_platform,copyToTexture,canvas:copy_contents_from_gpu_context_canvas:canvasType="onscreen";srcAndDstInSameGPUDevice=false;dstColorFormat="r32float";srcAlphaMode="premultiplied";dstAlphaMode="premultiplied";srcDoFlipYDuringCopy=false [ Failure ]
