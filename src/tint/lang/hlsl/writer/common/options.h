@@ -149,26 +149,36 @@ struct ArrayLengthFromUniformOptions {
     TINT_REFLECT(ArrayLengthFromUniformOptions, ubo_binding, bindpoint_to_size_index);
 };
 
-/// Data used to specify pixel local mappings
-struct PixelLocalOptions {
-    /// Index of pixel_local structure member index to attachment index
-    std::unordered_map<uint32_t, uint32_t> attachments;
-
-    /// The supported pixel local storage attachment format
+/// Data for a single pixel local attachment
+struct PixelLocalAttachment {
+    /// The supported pixel local storage attachment formats
     enum class TexelFormat : uint8_t {
         kR32Sint,
         kR32Uint,
         kR32Float,
         kUndefined,
     };
-    /// Index of pixel_local structure member index to pixel local storage attachment format
-    std::unordered_map<uint32_t, TexelFormat> attachment_formats;
+
+    // Pixel local storage attachment index
+    uint32_t index = uint32_t(-1);
+
+    // Pixel local storage attachment format
+    TexelFormat format = TexelFormat::kUndefined;
+
+    /// Reflect the fields of this class so that it can be used by tint::ForeachField()
+    TINT_REFLECT(PixelLocalAttachment, index, format);
+};
+
+/// Data used to specify pixel local mappings
+struct PixelLocalOptions {
+    // Index of pixel_local structure member index to attachment info
+    std::unordered_map<uint32_t, PixelLocalAttachment> attachments;
 
     /// The bind group index of all pixel local storage attachments
     uint32_t group_index = 0;
 
     /// Reflect the fields of this class so that it can be used by tint::ForeachField()
-    TINT_REFLECT(PixelLocalOptions, attachments, attachment_formats, group_index);
+    TINT_REFLECT(PixelLocalOptions, attachments, group_index);
 };
 
 /// Configuration options used for generating HLSL.
@@ -252,8 +262,8 @@ struct Options {
 
 namespace tint {
 
-/// Reflect valid value ranges for the PixelLocalOptions::TexelFormat enum.
-TINT_REFLECT_ENUM_RANGE(hlsl::writer::PixelLocalOptions::TexelFormat, kR32Sint, kR32Float);
+/// Reflect valid value ranges for the PixelLocalAttachment::TexelFormat enum.
+TINT_REFLECT_ENUM_RANGE(hlsl::writer::PixelLocalAttachment::TexelFormat, kR32Sint, kR32Float);
 TINT_REFLECT_ENUM_RANGE(hlsl::writer::Options::Compiler, kFXC, kDXC);
 
 }  // namespace tint

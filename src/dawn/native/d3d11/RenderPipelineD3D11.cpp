@@ -495,7 +495,8 @@ MaybeError RenderPipeline::InitializeShaders() {
                 ToBackend(GetLayout())->GetTotalUAVBindingCount() -
                 static_cast<uint32_t>(storageAttachmentSlots.size());
             for (size_t i = 0; i < storageAttachmentSlots.size(); i++) {
-                pixelLocalOptions->attachments[i] = basePixelLocalAttachmentIndex + i;
+                auto& attachment = pixelLocalOptions->attachments[i];
+                attachment.index = basePixelLocalAttachmentIndex + i;
 
                 static_assert(
                     RenderPipelineBase::kImplicitPLSSlotFormat == wgpu::TextureFormat::R32Uint,
@@ -504,16 +505,16 @@ MaybeError RenderPipeline::InitializeShaders() {
                         // We use R32Uint as default pixel local storage attachment format
                     case wgpu::TextureFormat::Undefined:
                     case wgpu::TextureFormat::R32Uint:
-                        pixelLocalOptions->attachment_formats[i] =
-                            tint::hlsl::writer::PixelLocalOptions::TexelFormat::kR32Uint;
+                        attachment.format =
+                            tint::hlsl::writer::PixelLocalAttachment::TexelFormat::kR32Uint;
                         break;
                     case wgpu::TextureFormat::R32Sint:
-                        pixelLocalOptions->attachment_formats[i] =
-                            tint::hlsl::writer::PixelLocalOptions::TexelFormat::kR32Sint;
+                        attachment.format =
+                            tint::hlsl::writer::PixelLocalAttachment::TexelFormat::kR32Sint;
                         break;
                     case wgpu::TextureFormat::R32Float:
-                        pixelLocalOptions->attachment_formats[i] =
-                            tint::hlsl::writer::PixelLocalOptions::TexelFormat::kR32Float;
+                        attachment.format =
+                            tint::hlsl::writer::PixelLocalAttachment::TexelFormat::kR32Float;
                         break;
                     default:
                         DAWN_UNREACHABLE();

@@ -77,8 +77,7 @@ struct HlslWriterPixelLocalTest : core::ir::transform::TransformTest {
     }
     PixelLocalConfig OneArgConfig() {
         PixelLocalConfig config;
-        config.options.attachment_formats.emplace(0, PixelLocalOptions::TexelFormat::kR32Uint);
-        config.options.attachments.emplace(0, 10);
+        config.options.attachments[0] = {10, PixelLocalAttachment::TexelFormat::kR32Uint};
         config.options.group_index = 7;
         return config;
     }
@@ -104,12 +103,9 @@ struct HlslWriterPixelLocalTest : core::ir::transform::TransformTest {
     }
     PixelLocalConfig ThreeArgConfig() {
         PixelLocalConfig config;
-        config.options.attachment_formats.emplace(0, PixelLocalOptions::TexelFormat::kR32Uint);
-        config.options.attachment_formats.emplace(1, PixelLocalOptions::TexelFormat::kR32Sint);
-        config.options.attachment_formats.emplace(2, PixelLocalOptions::TexelFormat::kR32Float);
-        config.options.attachments.emplace(0, 10);
-        config.options.attachments.emplace(1, 12);
-        config.options.attachments.emplace(2, 14);
+        config.options.attachments[0] = {10, PixelLocalAttachment::TexelFormat::kR32Uint};
+        config.options.attachments[1] = {12, PixelLocalAttachment::TexelFormat::kR32Sint};
+        config.options.attachments[2] = {14, PixelLocalAttachment::TexelFormat::kR32Float};
         config.options.group_index = 7;
         return config;
     }
@@ -885,9 +881,9 @@ $B1: {  # root
 
     auto config = ThreeArgConfig();
     // Overwrite the three format types to mismatch the ones in the IR
-    config.options.attachment_formats[0] = PixelLocalOptions::TexelFormat::kR32Float;
-    config.options.attachment_formats[1] = PixelLocalOptions::TexelFormat::kR32Uint;
-    config.options.attachment_formats[2] = PixelLocalOptions::TexelFormat::kR32Sint;
+    config.options.attachments[0].format = PixelLocalAttachment::TexelFormat::kR32Float;
+    config.options.attachments[1].format = PixelLocalAttachment::TexelFormat::kR32Uint;
+    config.options.attachments[2].format = PixelLocalAttachment::TexelFormat::kR32Sint;
     Run(PixelLocal, config);
 
     EXPECT_EQ(expect, str());

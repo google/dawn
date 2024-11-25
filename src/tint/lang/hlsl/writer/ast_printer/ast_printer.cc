@@ -286,24 +286,26 @@ SanitizedResult Sanitize(const Program& in, const Options& options) {
     {
         PixelLocal::Config cfg;
         for (auto it : options.pixel_local.attachments) {
-            cfg.pls_member_to_rov_reg.Add(it.first, it.second);
-        }
-        for (auto it : options.pixel_local.attachment_formats) {
+            uint32_t member_index = it.first;
+            auto& attachment = it.second;
+
+            cfg.pls_member_to_rov_reg.Add(member_index, attachment.index);
+
             core::TexelFormat format = core::TexelFormat::kUndefined;
-            switch (it.second) {
-                case PixelLocalOptions::TexelFormat::kR32Sint:
+            switch (attachment.format) {
+                case PixelLocalAttachment::TexelFormat::kR32Sint:
                     format = core::TexelFormat::kR32Sint;
                     break;
-                case PixelLocalOptions::TexelFormat::kR32Uint:
+                case PixelLocalAttachment::TexelFormat::kR32Uint:
                     format = core::TexelFormat::kR32Uint;
                     break;
-                case PixelLocalOptions::TexelFormat::kR32Float:
+                case PixelLocalAttachment::TexelFormat::kR32Float:
                     format = core::TexelFormat::kR32Float;
                     break;
                 default:
                     TINT_ICE() << "missing texel format for pixel local storage attachment";
             }
-            cfg.pls_member_to_rov_format.Add(it.first, format);
+            cfg.pls_member_to_rov_format.Add(member_index, format);
         }
         cfg.rov_group_index = options.pixel_local.group_index;
         data.Add<PixelLocal::Config>(cfg);

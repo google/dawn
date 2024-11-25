@@ -161,7 +161,7 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
         RUN_TRANSFORM(core::ir::transform::ZeroInitWorkgroupMemory, module);
     }
 
-    const bool pixel_local_enabled = !options.pixel_local.attachment_formats.empty();
+    const bool pixel_local_enabled = !options.pixel_local.attachments.empty();
 
     // ShaderIO must be run before DecomposeUniformAccess because it might
     // introduce a uniform buffer for kNumWorkgroups.
