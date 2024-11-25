@@ -136,8 +136,10 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
     // produce pointers to matrices.
     RUN_TRANSFORM(core::ir::transform::CombineAccessInstructions, module);
 
-    // DemoteToHelper must come before any transform that introduces non-core instructions.
-    RUN_TRANSFORM(core::ir::transform::DemoteToHelper, module);
+    if (!options.use_demote_to_helper_invocation_extensions) {
+        // DemoteToHelper must come before any transform that introduces non-core instructions.
+        RUN_TRANSFORM(core::ir::transform::DemoteToHelper, module);
+    }
 
     RUN_TRANSFORM(raise::BuiltinPolyfill, module, options.use_vulkan_memory_model);
     RUN_TRANSFORM(raise::ExpandImplicitSplats, module);

@@ -174,6 +174,8 @@ static constexpr std::array<DeviceExtInfo, kDeviceExtCount> sDeviceExtInfos{{
     {DeviceExt::ShaderIntegerDotProduct, "VK_KHR_shader_integer_dot_product", VulkanVersion_1_3},
     {DeviceExt::ZeroInitializeWorkgroupMemory, "VK_KHR_zero_initialize_workgroup_memory",
      VulkanVersion_1_3},
+    {DeviceExt::DemoteToHelperInvocation, "VK_EXT_shader_demote_to_helper_invocation",
+     VulkanVersion_1_3},
     {DeviceExt::Maintenance4, "VK_KHR_maintenance4", VulkanVersion_1_3},
     {DeviceExt::SubgroupSizeControl, "VK_EXT_subgroup_size_control", VulkanVersion_1_3},
 
@@ -284,6 +286,7 @@ DeviceExtSet EnsureDependencies(const DeviceExtSet& advertisedExts,
             case DeviceExt::DepthClipEnable:
             case DeviceExt::ShaderIntegerDotProduct:
             case DeviceExt::ZeroInitializeWorkgroupMemory:
+            case DeviceExt::DemoteToHelperInvocation:
             case DeviceExt::Maintenance4:
             case DeviceExt::Robustness2:
             case DeviceExt::SubgroupSizeControl:

@@ -304,6 +304,12 @@ ResultOrError<VulkanDeviceInfo> GatherDeviceInfo(const PhysicalDevice& device) {
                 VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ZERO_INITIALIZE_WORKGROUP_MEMORY_FEATURES);
         }
 
+        if (info.extensions[DeviceExt::DemoteToHelperInvocation]) {
+            featuresChain.Add(
+                &info.demoteToHelperInvocationFeatures,
+                VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_DEMOTE_TO_HELPER_INVOCATION_FEATURES_EXT);
+        }
+
         if (info.extensions[DeviceExt::Robustness2]) {
             featuresChain.Add(&info.robustness2Features,
                               VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ROBUSTNESS_2_FEATURES_EXT);
