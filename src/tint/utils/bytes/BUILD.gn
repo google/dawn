@@ -47,15 +47,11 @@ libtint_source_set("bytes") {
   sources = [
     "buffer_reader.cc",
     "buffer_reader.h",
-    "buffer_writer.h",
-    "bytes.cc",
     "decoder.h",
     "endianness.h",
     "reader.cc",
     "reader.h",
     "swap.h",
-    "writer.cc",
-    "writer.h",
   ]
   deps = [
     "${dawn_root}/src/utils:utils",
@@ -76,7 +72,6 @@ if (tint_build_unittests) {
   tint_unittests_source_set("unittests") {
     sources = [
       "buffer_reader_test.cc",
-      "buffer_writer_test.cc",
       "decoder_test.cc",
       "swap_test.cc",
     ]
