@@ -72,7 +72,6 @@ cc_binary(
     "//src/tint/lang/wgsl/writer/raise:test",
     "//src/tint/lang/wgsl:test",
     "//src/tint/utils/bytes:test",
-    "//src/tint/utils/cli:test",
     "//src/tint/utils/command:test",
     "//src/tint/utils/containers:test",
     "//src/tint/utils/diagnostic:test",
@@ -81,13 +80,12 @@ cc_binary(
     "//src/tint/utils/macros:test",
     "//src/tint/utils/math:test",
     "//src/tint/utils/memory:test",
-    "//src/tint/utils/reflection:test",
     "//src/tint/utils/result:test",
     "//src/tint/utils/rtti:test",
     "//src/tint/utils/strconv:test",
     "//src/tint/utils/symbol:test",
     "//src/tint/utils/text:test",
-    "//src/tint/utils/traits:test",
+    "//src/tint/utils:test",
     "@gtest",
   ] + select({
     ":tint_build_glsl_writer": [

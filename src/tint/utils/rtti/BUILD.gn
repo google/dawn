@@ -50,6 +50,7 @@ libtint_source_set("rtti") {
     "ignore.h",
     "switch.cc",
     "switch.h",
+    "traits.h",
   ]
   deps = [
     "${dawn_root}/src/utils:utils",
@@ -57,7 +58,6 @@ libtint_source_set("rtti") {
     "${tint_src_dir}/utils/macros",
     "${tint_src_dir}/utils/math",
     "${tint_src_dir}/utils/memory",
-    "${tint_src_dir}/utils/traits",
   ]
 }
 if (tint_build_unittests) {
@@ -65,6 +65,7 @@ if (tint_build_unittests) {
     sources = [
       "castable_test.cc",
       "switch_test.cc",
+      "traits_test.cc",
     ]
     deps = [
       "${dawn_root}/src/utils:utils",
@@ -73,7 +74,6 @@ if (tint_build_unittests) {
       "${tint_src_dir}/utils/math",
       "${tint_src_dir}/utils/memory",
       "${tint_src_dir}/utils/rtti",
-      "${tint_src_dir}/utils/traits",
     ]
   }
 }
@@ -87,7 +87,6 @@ if (tint_build_benchmarks) {
       "${tint_src_dir}/utils/math",
       "${tint_src_dir}/utils/memory",
       "${tint_src_dir}/utils/rtti",
-      "${tint_src_dir}/utils/traits",
     ]
   }
 }

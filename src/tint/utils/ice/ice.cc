@@ -28,10 +28,9 @@
 #include "src/tint/utils/ice/ice.h"
 
 #include <iostream>
-#include <memory>
 #include <string>
 
-#include "src/tint/utils/debug/debugger.h"
+#include "src/tint/utils/ice/debugger.h"
 #include "src/tint/utils/macros/compiler.h"
 
 namespace tint {

@@ -57,7 +57,6 @@ tint_target_add_dependencies(tint_lang_glsl lib
   tint_utils_math
   tint_utils_memory
   tint_utils_rtti
-  tint_utils_traits
 )
 
 tint_target_add_external_dependencies(tint_lang_glsl lib

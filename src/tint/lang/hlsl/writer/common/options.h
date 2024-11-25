@@ -36,7 +36,7 @@
 #include "src/tint/api/common/binding_point.h"
 #include "src/tint/lang/core/access.h"
 #include "src/tint/utils/math/hash.h"
-#include "src/tint/utils/reflection/reflection.h"
+#include "src/tint/utils/reflection.h"
 
 namespace tint::hlsl::writer {
 

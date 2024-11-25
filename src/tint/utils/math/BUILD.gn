@@ -68,7 +68,6 @@ if (tint_build_unittests) {
       "${tint_src_dir}/utils/math",
       "${tint_src_dir}/utils/memory",
       "${tint_src_dir}/utils/rtti",
-      "${tint_src_dir}/utils/traits",
     ]
   }
 }

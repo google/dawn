@@ -39,12 +39,13 @@
 # Kind:      lib
 ################################################################################
 tint_add_target(tint_utils_ice lib
+  utils/ice/debugger.cc
+  utils/ice/debugger.h
   utils/ice/ice.cc
   utils/ice/ice.h
 )
 
 tint_target_add_dependencies(tint_utils_ice lib
-  tint_utils_debug
   tint_utils_macros
 )
 

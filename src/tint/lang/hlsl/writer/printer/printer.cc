@@ -110,7 +110,6 @@
 #include "src/tint/lang/hlsl/type/uint8_t4_packed.h"
 #include "src/tint/utils/containers/hashmap.h"
 #include "src/tint/utils/containers/map.h"
-#include "src/tint/utils/generator/text_generator.h"
 #include "src/tint/utils/ice/ice.h"
 #include "src/tint/utils/macros/compiler.h"
 #include "src/tint/utils/macros/scoped_assignment.h"
@@ -118,6 +117,7 @@
 #include "src/tint/utils/strconv/float_to_string.h"
 #include "src/tint/utils/text/string.h"
 #include "src/tint/utils/text/string_stream.h"
+#include "src/tint/utils/text_generator.h"
 
 using namespace tint::core::fluent_types;  // NOLINT
 

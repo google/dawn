@@ -39,13 +39,14 @@ load("@bazel_skylib//lib:selects.bzl", "selects")
 cc_library(
   name = "ice",
   srcs = [
+    "debugger.cc",
     "ice.cc",
   ],
   hdrs = [
+    "debugger.h",
     "ice.h",
   ],
   deps = [
-    "//src/tint/utils/debug",
     "//src/tint/utils/macros",
     "//src/utils",
   ],

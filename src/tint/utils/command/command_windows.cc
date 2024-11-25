@@ -34,7 +34,6 @@
 #include <dbghelp.h>
 #include <string>
 
-#include "src/tint/utils/macros/defer.h"
 #include "src/tint/utils/system/executable_path.h"
 #include "src/tint/utils/text/string_stream.h"
 

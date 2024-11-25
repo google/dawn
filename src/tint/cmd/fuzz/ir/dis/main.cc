@@ -36,7 +36,7 @@
 #include "src/tint/lang/core/ir/disassembler.h"
 #include "src/tint/lang/spirv/writer/writer.h"
 #include "src/tint/lang/wgsl/writer/writer.h"
-#include "src/tint/utils/cli/cli.h"
+#include "src/tint/utils/command/cli.h"
 #include "src/tint/utils/containers/transform.h"
 #include "src/tint/utils/macros/defer.h"
 #include "src/tint/utils/text/color_mode.h"

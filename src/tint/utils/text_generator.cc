@@ -25,12 +25,10 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "src/tint/utils/generator/text_generator.h"
+#include "src/tint/utils/text_generator.h"
 
 #include <algorithm>
-#include <limits>
 
-#include "src/tint/utils/containers/map.h"
 #include "src/tint/utils/ice/ice.h"
 
 namespace tint {
@@ -53,6 +51,7 @@ TextGenerator::LineWriter::~LineWriter() {
 }
 
 TextGenerator::TextBuffer::TextBuffer() = default;
+
 TextGenerator::TextBuffer::~TextBuffer() = default;
 
 void TextGenerator::TextBuffer::IncrementIndent() {

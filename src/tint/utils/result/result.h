@@ -33,8 +33,8 @@
 
 #include "src/tint/utils/diagnostic/diagnostic.h"
 #include "src/tint/utils/ice/ice.h"
+#include "src/tint/utils/rtti/traits.h"
 #include "src/tint/utils/text/string_stream.h"
-#include "src/tint/utils/traits/traits.h"
 
 namespace tint {
 

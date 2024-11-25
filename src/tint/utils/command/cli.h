@@ -25,8 +25,8 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef SRC_TINT_UTILS_CLI_CLI_H_
-#define SRC_TINT_UTILS_CLI_CLI_H_
+#ifndef SRC_TINT_UTILS_COMMAND_CLI_H_
+#define SRC_TINT_UTILS_COMMAND_CLI_H_
 
 #include <deque>
 #include <optional>
@@ -438,4 +438,4 @@ class EnumOption : public Option {
 
 }  // namespace tint::cli
 
-#endif  // SRC_TINT_UTILS_CLI_CLI_H_
+#endif  // SRC_TINT_UTILS_COMMAND_CLI_H_

@@ -1,4 +1,4 @@
-// Copyright 2022 The Dawn & Tint Authors
+// Copyright 2024 The Dawn & Tint Authors
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
@@ -25,51 +25,25 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "src/tint/utils/debug/debugger.h"
+#ifndef SRC_TINT_UTILS_INTERNAL_LIMITS_H_
+#define SRC_TINT_UTILS_INTERNAL_LIMITS_H_
 
-#ifdef TINT_ENABLE_BREAK_IN_DEBUGGER
+#include <cstddef>
+#include <cstdint>
 
-#ifdef _MSC_VER
-#include <Windows.h>
-#elif defined(__linux__)
-#include <signal.h>
-#include <fstream>
-#include <string>
-#endif
+// Contains constants for internal limits used within Tint. These limits are not specified in the
+// WGSL spec, but are practical heuristics to limit certain operations that are known to cause
+// memory or runtime issues, i.e. creation of arrays with 100k elements that cause IR binary
+// decoding to take pathologically long times to run.
 
-#ifdef _MSC_VER
-#define TINT_DEBUGGER_BREAK_DEFINED
-void tint::debugger::Break() {
-    if (::IsDebuggerPresent()) {
-        ::DebugBreak();
-    }
-}
+namespace tint::internal_limits {
 
-#elif defined(__linux__)
+// Limits the number of elements appearing in the constructor for an array
+constexpr size_t kMaxArrayConstructorElements = 32767;
 
-#define TINT_DEBUGGER_BREAK_DEFINED
-void tint::debugger::Break() {
-    // A process is being traced (debugged) if "/proc/self/status" contains a
-    // line with "TracerPid: <non-zero-digit>...".
-    bool is_traced = false;
-    std::ifstream fin("/proc/self/status");
-    std::string line;
-    while (!is_traced && std::getline(fin, line)) {
-        const char kPrefix[] = "TracerPid:\t";
-        static constexpr int kPrefixLen = sizeof(kPrefix) - 1;
-        if (line.length() > kPrefixLen && line.compare(0, kPrefixLen, kPrefix) == 0) {
-            is_traced = line[kPrefixLen] != '0';
-        }
-    }
+// Limits the number of elements in an array type
+constexpr int64_t kMaxArrayElementCount = 65536;
 
-    if (is_traced) {
-        raise(SIGTRAP);
-    }
-}
-#endif  // platform
+}  // namespace tint::internal_limits
 
-#endif  // TINT_ENABLE_BREAK_IN_DEBUGGER
-
-#ifndef TINT_DEBUGGER_BREAK_DEFINED
-void tint::debugger::Break() {}
-#endif
+#endif  // SRC_TINT_UTILS_INTERNAL_LIMITS_H_

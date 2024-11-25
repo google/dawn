@@ -25,8 +25,8 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef SRC_TINT_UTILS_SOCKET_RWMUTEX_H_
-#define SRC_TINT_UTILS_SOCKET_RWMUTEX_H_
+#ifndef SRC_TINT_UTILS_RWMUTEX_H_
+#define SRC_TINT_UTILS_RWMUTEX_H_
 
 #include <condition_variable>
 #include <mutex>
@@ -204,4 +204,4 @@ WLock& WLock::operator=(WLock&& other) {
 
 }  // namespace tint::socket
 
-#endif  // SRC_TINT_UTILS_SOCKET_RWMUTEX_H_
+#endif  // SRC_TINT_UTILS_RWMUTEX_H_

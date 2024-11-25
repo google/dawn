@@ -33,7 +33,7 @@
 #if TINT_BUILD_IR_BINARY
 
 #include "src/tint/lang/core/ir/binary/decode.h"
-#include "src/tint/utils/cli/cli.h"
+#include "src/tint/utils/command/cli.h"
 #include "src/tint/utils/containers/vector.h"
 #include "src/tint/utils/macros/defer.h"
 

@@ -45,12 +45,13 @@ if (tint_build_unittests || tint_build_benchmarks) {
 
 libtint_source_set("ice") {
   sources = [
+    "debugger.cc",
+    "debugger.h",
     "ice.cc",
     "ice.h",
   ]
   deps = [
     "${dawn_root}/src/utils:utils",
-    "${tint_src_dir}/utils/debug",
     "${tint_src_dir}/utils/macros",
   ]
 }

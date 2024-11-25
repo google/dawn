@@ -39,7 +39,7 @@
 
 #include <cstdint>
 
-#include "src/tint/utils/traits/traits.h"
+#include "src/tint/utils/rtti/traits.h"
 
 /// \cond DO_NOT_DOCUMENT
 /// There is a bug in doxygen where this enum conflicts with the ast::Attribute

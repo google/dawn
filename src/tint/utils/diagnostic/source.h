@@ -34,8 +34,8 @@
 #include <tuple>
 #include <vector>
 
+#include "src/tint/utils/rtti/traits.h"
 #include "src/tint/utils/text/string_stream.h"
-#include "src/tint/utils/traits/traits.h"
 
 namespace tint {
 

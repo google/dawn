@@ -41,7 +41,7 @@
 #endif
 
 #include "src/tint/utils/macros/compiler.h"
-#include "src/tint/utils/socket/socket.h"
+#include "src/tint/utils/socket.h"
 
 namespace {
 

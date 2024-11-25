@@ -41,7 +41,7 @@
 #include <string>
 
 #include "src/tint/lang/core/ir/call.h"
-#include "src/tint/utils/traits/traits.h"
+#include "src/tint/utils/rtti/traits.h"
 
 // \cond DO_NOT_DOCUMENT
 namespace tint::spirv {

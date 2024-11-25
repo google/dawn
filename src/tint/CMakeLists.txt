@@ -315,7 +315,7 @@ function(tint_fuzzer_compile_options TARGET)
 endfunction()
 
 if(TINT_ENABLE_BREAK_IN_DEBUGGER)
-  set_source_files_properties(utils/debug/debugger.cc
+  set_source_files_properties(utils/ice/debugger.cc
     PROPERTIES COMPILE_DEFINITIONS "TINT_ENABLE_BREAK_IN_DEBUGGER=1")
 endif()
 

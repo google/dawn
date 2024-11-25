@@ -25,15 +25,12 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef SRC_TINT_UTILS_ID_GENERATION_ID_H_
-#define SRC_TINT_UTILS_ID_GENERATION_ID_H_
+#ifndef SRC_TINT_UTILS_GENERATION_ID_H_
+#define SRC_TINT_UTILS_GENERATION_ID_H_
 
 #include <stdint.h>
-#include <utility>
 
-#include "src/tint/utils/ice/ice.h"
-#include "src/tint/utils/text/string_stream.h"
-#include "src/tint/utils/traits/traits.h"
+#include "src/tint/utils/rtti/traits.h"
 
 namespace tint {
 
@@ -133,4 +130,4 @@ void AssertGenerationIDsEqual(GenerationID a,
 
 }  // namespace tint
 
-#endif  // SRC_TINT_UTILS_ID_GENERATION_ID_H_
+#endif  // SRC_TINT_UTILS_GENERATION_ID_H_

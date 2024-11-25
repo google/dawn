@@ -40,12 +40,12 @@
 #include "src/tint/utils/containers/vector.h"
 #include "src/tint/utils/diagnostic/diagnostic.h"
 #include "src/tint/utils/diagnostic/source.h"
+#include "src/tint/utils/generation_id.h"
 #include "src/tint/utils/ice/ice.h"
-#include "src/tint/utils/id/generation_id.h"
 #include "src/tint/utils/macros/compiler.h"
 #include "src/tint/utils/rtti/castable.h"
+#include "src/tint/utils/rtti/traits.h"
 #include "src/tint/utils/symbol/symbol.h"
-#include "src/tint/utils/traits/traits.h"
 
 // Forward declarations
 namespace tint::ast {

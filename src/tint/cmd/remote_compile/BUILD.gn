@@ -45,8 +45,8 @@ tint_executable("remote_compile") {
   deps = [
     "${dawn_root}/src/utils:utils",
     "${tint_src_dir}:thread",
+    "${tint_src_dir}/utils",
     "${tint_src_dir}/utils/macros",
-    "${tint_src_dir}/utils/socket",
   ]
 
   if (tint_build_msl_writer) {

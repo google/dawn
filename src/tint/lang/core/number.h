@@ -36,8 +36,8 @@
 
 #include "src/tint/utils/macros/compiler.h"
 #include "src/tint/utils/result/result.h"
+#include "src/tint/utils/rtti/traits.h"
 #include "src/tint/utils/text/string_stream.h"
-#include "src/tint/utils/traits/traits.h"
 
 // Forward declaration
 namespace tint::core {

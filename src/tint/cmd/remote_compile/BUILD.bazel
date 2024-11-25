@@ -42,8 +42,8 @@ cc_binary(
     "main.cc",
   ],
   deps = [
+    "//src/tint/utils",
     "//src/tint/utils/macros",
-    "//src/tint/utils/socket",
     "//src/utils",
     
   ] + select({

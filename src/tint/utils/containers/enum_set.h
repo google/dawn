@@ -34,7 +34,7 @@
 #include <utility>
 
 #include "src/tint/utils/math/hash.h"
-#include "src/tint/utils/traits/traits.h"
+#include "src/tint/utils/rtti/traits.h"
 
 namespace tint {
 

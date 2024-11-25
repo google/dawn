@@ -44,6 +44,7 @@ tint_add_target(tint_utils_rtti lib
   utils/rtti/ignore.h
   utils/rtti/switch.cc
   utils/rtti/switch.h
+  utils/rtti/traits.h
 )
 
 tint_target_add_dependencies(tint_utils_rtti lib
@@ -51,7 +52,6 @@ tint_target_add_dependencies(tint_utils_rtti lib
   tint_utils_macros
   tint_utils_math
   tint_utils_memory
-  tint_utils_traits
 )
 
 tint_target_add_external_dependencies(tint_utils_rtti lib
@@ -65,6 +65,7 @@ tint_target_add_external_dependencies(tint_utils_rtti lib
 tint_add_target(tint_utils_rtti_test test
   utils/rtti/castable_test.cc
   utils/rtti/switch_test.cc
+  utils/rtti/traits_test.cc
 )
 
 tint_target_add_dependencies(tint_utils_rtti_test test
@@ -72,7 +73,6 @@ tint_target_add_dependencies(tint_utils_rtti_test test
   tint_utils_math
   tint_utils_memory
   tint_utils_rtti
-  tint_utils_traits
 )
 
 tint_target_add_external_dependencies(tint_utils_rtti_test test
@@ -93,7 +93,6 @@ tint_target_add_dependencies(tint_utils_rtti_bench bench
   tint_utils_math
   tint_utils_memory
   tint_utils_rtti
-  tint_utils_traits
 )
 
 tint_target_add_external_dependencies(tint_utils_rtti_bench bench

@@ -59,7 +59,6 @@ if (tint_build_spv_reader || tint_build_spv_writer) {
       "${tint_src_dir}/utils/result",
       "${tint_src_dir}/utils/rtti",
       "${tint_src_dir}/utils/text",
-      "${tint_src_dir}/utils/traits",
     ]
 
     if (tint_build_spv_reader || tint_build_spv_writer) {
@@ -86,7 +85,6 @@ if (tint_build_unittests) {
         "${tint_src_dir}/utils/result",
         "${tint_src_dir}/utils/rtti",
         "${tint_src_dir}/utils/text",
-        "${tint_src_dir}/utils/traits",
       ]
 
       if (tint_build_spv_reader || tint_build_spv_writer) {

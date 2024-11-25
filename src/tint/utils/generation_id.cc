@@ -1,4 +1,4 @@
-// Copyright 2023 The Dawn & Tint Authors
+// Copyright 2021 The Dawn & Tint Authors
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
@@ -25,11 +25,47 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "src/tint/utils/traits/traits.h"
+#include "src/tint/utils/generation_id.h"
 
-#if defined(__clang__)
-#pragma clang diagnostic ignored "-Wmissing-variable-declarations"
-#endif
+#include <atomic>
 
-// A placeholder symbol used to emit a symbol for this lib target.
-int tint_utils_traits_symbol = 1;
+#include "src/tint/utils/ice/ice.h"
+
+namespace tint {
+
+namespace {
+
+std::atomic<uint32_t> next_generation_id{1};
+
+}  // namespace
+
+GenerationID::GenerationID() = default;
+
+GenerationID::GenerationID(uint32_t id) : val(id) {}
+
+GenerationID GenerationID::New() {
+    return GenerationID(next_generation_id++);
+}
+
+namespace detail {
+
+/// AssertGenerationIDsEqual is called by TINT_ASSERT_GENERATION_IDS_EQUAL() and
+/// TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID() to assert that the GenerationIDs
+/// `a` and `b` are equal.
+void AssertGenerationIDsEqual(GenerationID a,
+                              GenerationID b,
+                              bool if_valid,
+                              const char* msg,
+                              const char* file,
+                              size_t line) {
+    if (a == b) {
+        return;  // matched
+    }
+    if (if_valid && (!a || !b)) {
+        return;  //  a or b were not valid
+    }
+    tint::InternalCompilerError(file, line) << msg;
+}
+
+}  // namespace detail
+}  // namespace tint

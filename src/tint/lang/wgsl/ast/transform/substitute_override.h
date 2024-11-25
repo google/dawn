@@ -34,7 +34,7 @@
 #include "src/tint/api/common/override_id.h"
 
 #include "src/tint/lang/wgsl/ast/transform/transform.h"
-#include "src/tint/utils/reflection/reflection.h"
+#include "src/tint/utils/reflection.h"
 
 namespace tint::ast::transform {
 

@@ -35,26 +35,83 @@
 ################################################################################
 
 include(utils/bytes/BUILD.cmake)
-include(utils/cli/BUILD.cmake)
 include(utils/command/BUILD.cmake)
-include(utils/constants/BUILD.cmake)
 include(utils/containers/BUILD.cmake)
-include(utils/debug/BUILD.cmake)
 include(utils/diagnostic/BUILD.cmake)
 include(utils/file/BUILD.cmake)
-include(utils/generator/BUILD.cmake)
 include(utils/ice/BUILD.cmake)
-include(utils/id/BUILD.cmake)
 include(utils/macros/BUILD.cmake)
 include(utils/math/BUILD.cmake)
 include(utils/memory/BUILD.cmake)
 include(utils/protos/BUILD.cmake)
-include(utils/reflection/BUILD.cmake)
 include(utils/result/BUILD.cmake)
 include(utils/rtti/BUILD.cmake)
-include(utils/socket/BUILD.cmake)
 include(utils/strconv/BUILD.cmake)
 include(utils/symbol/BUILD.cmake)
 include(utils/system/BUILD.cmake)
 include(utils/text/BUILD.cmake)
-include(utils/traits/BUILD.cmake)
+
+################################################################################
+# Target:    tint_utils
+# Kind:      lib
+################################################################################
+tint_add_target(tint_utils lib
+  utils/generation_id.cc
+  utils/generation_id.h
+  utils/internal_limits.h
+  utils/reflection.cc
+  utils/reflection.h
+  utils/rwmutex.h
+  utils/socket.cc
+  utils/socket.h
+  utils/text_generator.cc
+  utils/text_generator.h
+)
+
+tint_target_add_dependencies(tint_utils lib
+  tint_utils_containers
+  tint_utils_diagnostic
+  tint_utils_ice
+  tint_utils_macros
+  tint_utils_math
+  tint_utils_memory
+  tint_utils_result
+  tint_utils_rtti
+  tint_utils_text
+)
+
+tint_target_add_external_dependencies(tint_utils lib
+  "src_utils"
+)
+
+if(TINT_BUILD_IS_WIN)
+  tint_target_add_external_dependencies(tint_utils lib
+    "winsock"
+  )
+endif(TINT_BUILD_IS_WIN)
+
+################################################################################
+# Target:    tint_utils_test
+# Kind:      test
+################################################################################
+tint_add_target(tint_utils_test test
+  utils/reflection_test.cc
+)
+
+tint_target_add_dependencies(tint_utils_test test
+  tint_utils
+  tint_utils_containers
+  tint_utils_diagnostic
+  tint_utils_ice
+  tint_utils_macros
+  tint_utils_math
+  tint_utils_memory
+  tint_utils_result
+  tint_utils_rtti
+  tint_utils_text
+)
+
+tint_target_add_external_dependencies(tint_utils_test test
+  "gtest"
+  "src_utils"
+)

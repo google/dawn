@@ -25,8 +25,8 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef SRC_TINT_UTILS_TRAITS_TRAITS_H_
-#define SRC_TINT_UTILS_TRAITS_TRAITS_H_
+#ifndef SRC_TINT_UTILS_RTTI_TRAITS_H_
+#define SRC_TINT_UTILS_RTTI_TRAITS_H_
 
 #include <ostream>
 #include <string>
@@ -278,4 +278,4 @@ static constexpr bool HasOperatorShiftLeft = detail::HasOperatorShiftLeft<LHS, R
 
 }  // namespace tint::traits
 
-#endif  // SRC_TINT_UTILS_TRAITS_TRAITS_H_
+#endif  // SRC_TINT_UTILS_RTTI_TRAITS_H_

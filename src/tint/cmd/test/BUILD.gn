@@ -78,8 +78,8 @@ if (tint_build_unittests) {
       "${tint_src_dir}/lang/wgsl/sem:unittests",
       "${tint_src_dir}/lang/wgsl/writer/ir_to_program:unittests",
       "${tint_src_dir}/lang/wgsl/writer/raise:unittests",
+      "${tint_src_dir}/utils:unittests",
       "${tint_src_dir}/utils/bytes:unittests",
-      "${tint_src_dir}/utils/cli:unittests",
       "${tint_src_dir}/utils/command:unittests",
       "${tint_src_dir}/utils/containers:unittests",
       "${tint_src_dir}/utils/diagnostic:unittests",
@@ -88,13 +88,11 @@ if (tint_build_unittests) {
       "${tint_src_dir}/utils/macros:unittests",
       "${tint_src_dir}/utils/math:unittests",
       "${tint_src_dir}/utils/memory:unittests",
-      "${tint_src_dir}/utils/reflection:unittests",
       "${tint_src_dir}/utils/result:unittests",
       "${tint_src_dir}/utils/rtti:unittests",
       "${tint_src_dir}/utils/strconv:unittests",
       "${tint_src_dir}/utils/symbol:unittests",
       "${tint_src_dir}/utils/text:unittests",
-      "${tint_src_dir}/utils/traits:unittests",
     ]
 
     if (tint_build_glsl_writer) {
