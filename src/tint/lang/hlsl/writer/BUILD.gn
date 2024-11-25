@@ -151,10 +151,14 @@ if (tint_build_benchmarks) {
         "${tint_src_dir}/api/common",
         "${tint_src_dir}/lang/core",
         "${tint_src_dir}/lang/core/constant",
+        "${tint_src_dir}/lang/core/ir",
         "${tint_src_dir}/lang/core/type",
         "${tint_src_dir}/lang/hlsl/writer/common",
+        "${tint_src_dir}/lang/hlsl/writer/helpers",
         "${tint_src_dir}/lang/wgsl",
         "${tint_src_dir}/lang/wgsl/ast",
+        "${tint_src_dir}/lang/wgsl/common",
+        "${tint_src_dir}/lang/wgsl/features",
         "${tint_src_dir}/lang/wgsl/program",
         "${tint_src_dir}/lang/wgsl/sem",
         "${tint_src_dir}/utils",
@@ -175,7 +179,10 @@ if (tint_build_benchmarks) {
       }
 
       if (tint_build_wgsl_reader) {
-        deps += [ "${tint_src_dir}/cmd/bench:bench" ]
+        deps += [
+          "${tint_src_dir}/cmd/bench:bench",
+          "${tint_src_dir}/lang/wgsl/reader",
+        ]
       }
     }
   }
