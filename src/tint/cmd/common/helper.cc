@@ -577,4 +577,8 @@ std::string OverrideTypeToString(tint::inspector::Override::Type type) {
     return "unknown";
 }
 
+bool IsStdout(const std::string& name) {
+    return name.empty() || name == "-";
+}
+
 }  // namespace tint::cmd
