@@ -29,7 +29,6 @@
 // upstream webgpu.idl.
 
 enum GPUFeatureName {
-    "chromium-experimental-subgroup-uniform-control-flow",
     // subgroups, subgroups-f16 and multi-draw-indirect features are not in webgpu.idl yet.
     "subgroups",
     "subgroups-f16",

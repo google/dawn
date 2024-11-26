@@ -370,13 +370,6 @@ ResultOrError<ShaderModule::ModuleAndSpirv> ShaderModule::GetHandleAndSpirv(
     req.tintOptions.disable_polyfill_integer_div_mod =
         GetDevice()->IsToggleEnabled(Toggle::DisablePolyfillsOnIntegerDivisonAndModulo);
 
-    // Set subgroup uniform control flow flag for subgroup experiment, if device has
-    // Chromium-experimental-subgroup-uniform-control-flow feature. (dawn:464)
-    if (GetDevice()->HasFeature(Feature::ChromiumExperimentalSubgroupUniformControlFlow)) {
-        req.tintOptions.experimental_require_subgroup_uniform_control_flow = true;
-    } else {
-        req.tintOptions.experimental_require_subgroup_uniform_control_flow = false;
-    }
     // Pass matrices to user functions by pointer on Qualcomm devices to workaround a known bug.
     // See crbug.com/tint/2045.
     if (ToBackend(GetDevice()->GetPhysicalDevice())->IsAndroidQualcomm()) {

@@ -323,11 +323,6 @@ ResultOrError<VulkanDeviceInfo> GatherDeviceInfo(const PhysicalDevice& device) {
         // Check subgroup features and properties
         propertiesChain.Add(&info.subgroupProperties,
                             VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SUBGROUP_PROPERTIES);
-        if (info.extensions[DeviceExt::ShaderSubgroupUniformControlFlow]) {
-            featuresChain.Add(
-                &info.shaderSubgroupUniformControlFlowFeatures,
-                VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_SUBGROUP_UNIFORM_CONTROL_FLOW_FEATURES_KHR);
-        }
         if (info.extensions[DeviceExt::ShaderSubgroupExtendedTypes]) {
             featuresChain.Add(
                 &info.shaderSubgroupExtendedTypes,

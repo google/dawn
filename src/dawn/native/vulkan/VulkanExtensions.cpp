@@ -184,8 +184,6 @@ static constexpr std::array<DeviceExtInfo, kDeviceExtCount> sDeviceExtInfos{{
     {DeviceExt::Swapchain, "VK_KHR_swapchain", NeverPromoted},
     {DeviceExt::QueueFamilyForeign, "VK_EXT_queue_family_foreign", NeverPromoted},
     {DeviceExt::Robustness2, "VK_EXT_robustness2", NeverPromoted},
-    {DeviceExt::ShaderSubgroupUniformControlFlow, "VK_KHR_shader_subgroup_uniform_control_flow",
-     NeverPromoted},
     {DeviceExt::DisplayTiming, "VK_GOOGLE_display_timing", NeverPromoted},
 
     {DeviceExt::ExternalMemoryAndroidHardwareBuffer,
@@ -290,7 +288,6 @@ DeviceExtSet EnsureDependencies(const DeviceExtSet& advertisedExts,
             case DeviceExt::Maintenance4:
             case DeviceExt::Robustness2:
             case DeviceExt::SubgroupSizeControl:
-            case DeviceExt::ShaderSubgroupUniformControlFlow:
             case DeviceExt::ShaderSubgroupExtendedTypes:
                 hasDependencies = HasDep(DeviceExt::GetPhysicalDeviceProperties2);
                 break;

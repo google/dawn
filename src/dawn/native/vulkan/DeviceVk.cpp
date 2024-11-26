@@ -533,17 +533,6 @@ ResultOrError<VulkanDeviceKnobs> Device::CreateDevice(VkPhysicalDevice vkPhysica
         featuresChain.Add(&usedKnobs.robustness2Features);
     }
 
-    if (HasFeature(Feature::ChromiumExperimentalSubgroupUniformControlFlow)) {
-        DAWN_ASSERT(
-            usedKnobs.HasExt(DeviceExt::ShaderSubgroupUniformControlFlow) &&
-            mDeviceInfo.shaderSubgroupUniformControlFlowFeatures.shaderSubgroupUniformControlFlow ==
-                VK_TRUE);
-
-        usedKnobs.shaderSubgroupUniformControlFlowFeatures =
-            mDeviceInfo.shaderSubgroupUniformControlFlowFeatures;
-        featuresChain.Add(&usedKnobs.shaderSubgroupUniformControlFlowFeatures);
-    }
-
     if (HasFeature(Feature::YCbCrVulkanSamplers) &&
         mDeviceInfo.HasExt(DeviceExt::SamplerYCbCrConversion) &&
         mDeviceInfo.HasExt(DeviceExt::ExternalMemoryAndroidHardwareBuffer)) {
