@@ -33,16 +33,7 @@
 namespace tint::core::ir::transform {
 namespace {
 
-void ZeroInitWorkgroupMemoryFuzzer(Module& module) {
-    if (auto res = ZeroInitWorkgroupMemory(module); res != Success) {
-        return;
-    }
-
-    Capabilities capabilities;
-    if (auto res = Validate(module, capabilities); res != Success) {
-        TINT_ICE() << "result of ZeroInitWorkgroupMemory failed IR validation\n" << res.Failure();
-    }
-}
+constexpr auto& ZeroInitWorkgroupMemoryFuzzer = ZeroInitWorkgroupMemory;
 
 }  // namespace
 }  // namespace tint::core::ir::transform

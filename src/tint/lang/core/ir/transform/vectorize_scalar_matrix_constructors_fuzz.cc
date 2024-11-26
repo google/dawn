@@ -33,17 +33,7 @@
 namespace tint::core::ir::transform {
 namespace {
 
-void VectorizeScalarMatrixConstructorsFuzzer(Module& module) {
-    if (auto res = VectorizeScalarMatrixConstructors(module); res != Success) {
-        return;
-    }
-
-    if (auto res = Validate(module, kVectorizeScalarMatrixConstructorsCapabilities);
-        res != Success) {
-        TINT_ICE() << "result of VectorizeScalarMatrixConstructors failed IR validation\n"
-                   << res.Failure();
-    }
-}
+constexpr auto& VectorizeScalarMatrixConstructorsFuzzer = VectorizeScalarMatrixConstructors;
 
 }  // namespace
 }  // namespace tint::core::ir::transform

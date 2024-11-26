@@ -54,9 +54,9 @@ bool CanRun(const core::ir::Module& module) {
     return true;
 }
 
-void IRFuzzer(core::ir::Module& module, Options options) {
+Result<SuccessType> IRFuzzer(core::ir::Module& module, Options options) {
     if (!CanRun(module)) {
-        return;
+        return Failure{"Cannot run module"};
     }
 
     options.bindings = GenerateBindings(module);
@@ -77,6 +77,7 @@ void IRFuzzer(core::ir::Module& module, Options options) {
     }
 
     [[maybe_unused]] auto output = Generate(module, options);
+    return Success;
 }
 
 }  // namespace

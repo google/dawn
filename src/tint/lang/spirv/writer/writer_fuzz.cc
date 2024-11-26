@@ -49,16 +49,17 @@ bool CanRun(const core::ir::Module& module) {
     return true;
 }
 
-void IRFuzzer(core::ir::Module& module, Options options) {
+Result<SuccessType> IRFuzzer(core::ir::Module& module, Options options) {
     if (!CanRun(module)) {
-        return;
+        return Failure{"Cannot run module"};
     }
 
     options.bindings = GenerateBindings(module);
     auto output = Generate(module, options);
     if (output != Success) {
-        return;
+        return output.Failure();
     }
+
     auto& spirv = output->spirv;
     if (auto res = validate::Validate(Slice(spirv.data(), spirv.size()), SPV_ENV_VULKAN_1_1);
         res != Success) {
@@ -67,6 +68,8 @@ void IRFuzzer(core::ir::Module& module, Options options) {
                    << "IR:\n"
                    << core::ir::Disassembler(module).Plain();
     }
+
+    return Success;
 }
 
 }  // namespace

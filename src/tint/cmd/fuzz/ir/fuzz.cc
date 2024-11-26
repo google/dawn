@@ -88,7 +88,7 @@ void Register(const IRFuzzer& fuzzer) {
             if (auto val = core::ir::Validate(ir.Get()); val != Success) {
                 TINT_ICE() << val.Failure();
             }
-            fn(ir.Get(), data);
+            [[maybe_unused]] auto result = fn(ir.Get(), data);
         },
     });
 #endif
@@ -129,13 +129,29 @@ void Run(const std::function<tint::core::ir::Module()>& acquire_module,
                     std::cout << " • [" << i << "] Running: " << currently_running << '\n';
                 }
                 auto mod = acquire_module();
-                if (tint::core::ir::Validate(mod, fuzzer.capabilities) != tint::Success) {
+                if (tint::core::ir::Validate(mod, fuzzer.pre_capabilities) != tint::Success) {
+                    // Failing before running indicates that this input violates the pre-conditions
+                    // for this pass, so should be skipped.
                     if (options.verbose) {
-                        std::cout << "   Failed to validate against fuzzer capabilities\n";
+                        std::cout
+                            << "   Failed to validate against fuzzer capabilities before running\n";
                     }
                     return;
                 }
-                fuzzer.fn(mod, data);
+
+                if (auto result = fuzzer.fn(mod, data); result != Success) {
+                    if (options.verbose) {
+                        std::cout << "   Failed to execute fuzzer: " << result.Failure() << "\n";
+                    }
+                }
+
+                if (auto result = tint::core::ir::Validate(mod, fuzzer.post_capabilities);
+                    result != Success) {
+                    // Failing after running indicates the pass is doing something unexpected and
+                    // has violated its own post-conditions.
+                    TINT_ICE() << "Failed to validate against fuzzer capabilities after running:\n"
+                               << result.Failure() << "\n";
+                }
             }));
         }
         for (auto& thread : threads) {
@@ -154,13 +170,30 @@ void Run(const std::function<tint::core::ir::Module()>& acquire_module,
                 std::cout << " • Running: " << currently_running << '\n';
             }
             auto mod = acquire_module();
-            if (tint::core::ir::Validate(mod, fuzzer.capabilities) != tint::Success) {
+            if (tint::core::ir::Validate(mod, fuzzer.pre_capabilities) != tint::Success) {
+                // Failing before running indicates that this input violates the pre-conditions for
+                // this pass, so should be skipped.
                 if (options.verbose) {
-                    std::cout << "   Failed to validate against fuzzer capabilities\n";
+                    std::cout
+                        << "   Failed to validate against fuzzer capabilities before running\n";
                 }
                 continue;
             }
-            fuzzer.fn(mod, data);
+
+            if (auto result = fuzzer.fn(mod, data); result != Success) {
+                if (options.verbose) {
+                    std::cout << "   Failed to execute fuzzer: " << result.Failure() << "\n";
+                }
+                continue;
+            }
+
+            if (auto result = tint::core::ir::Validate(mod, fuzzer.post_capabilities);
+                result != Success) {
+                // Failing after running indicates the pass is doing something unexpected and
+                // has violated its own post-conditions.
+                TINT_ICE() << "Failed to validate against fuzzer capabilities after running:\n"
+                           << result.Failure() << "\n";
+            }
         }
     }
 

@@ -33,15 +33,7 @@
 namespace tint::core::ir::transform {
 namespace {
 
-void RemoveTerminatorArgsFuzzer(Module& module) {
-    if (auto res = RemoveTerminatorArgs(module); res != Success) {
-        return;
-    }
-
-    if (auto res = Validate(module, kRemoveTerminatorArgsCapabilities); res != Success) {
-        TINT_ICE() << "result of RemoveTerminatorArgs failed IR validation\n" << res.Failure();
-    }
-}
+constexpr auto& RemoveTerminatorArgsFuzzer = RemoveTerminatorArgs;
 
 }  // namespace
 }  // namespace tint::core::ir::transform

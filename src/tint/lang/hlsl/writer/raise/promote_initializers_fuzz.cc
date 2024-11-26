@@ -34,19 +34,12 @@
 namespace tint::hlsl::writer::raise {
 namespace {
 
-void PromoteInitializersFuzzer(core::ir::Module& module) {
-    if (auto res = PromoteInitializers(module); res != Success) {
-        return;
-    }
-
-    core::ir::Capabilities capabilities{core::ir::Capability::kAllowModuleScopeLets};
-    if (auto res = Validate(module, capabilities); res != Success) {
-        TINT_ICE() << "result of PromoteInitializers failed IR validation\n" << res.Failure();
-    }
-}
+constexpr auto& PromoteInitializersFuzzer = PromoteInitializers;
 
 }  // namespace
 }  // namespace tint::hlsl::writer::raise
 
 TINT_IR_MODULE_FUZZER(tint::hlsl::writer::raise::PromoteInitializersFuzzer,
-                      tint::hlsl::writer::raise::kPromoteInitializersCapabilities);
+                      tint::hlsl::writer::raise::kPromoteInitializersCapabilities,
+                      tint::hlsl::writer::raise::kPromoteInitializersCapabilities +
+                          tint::core::ir::Capability::kAllowModuleScopeLets);

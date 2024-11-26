@@ -248,7 +248,7 @@ bool CanRun(const core::ir::Module& module, Options& options) {
     return true;
 }
 
-void IRFuzzer(core::ir::Module& module) {
+Result<SuccessType> IRFuzzer(core::ir::Module& module) {
     // TODO(375388101): We cannot run the backend for every entry point in the module unless we
     // clone the whole module each time, so for now we just generate the first entry point.
 
@@ -268,10 +268,11 @@ void IRFuzzer(core::ir::Module& module) {
     // TODO(377391551): Enable fuzzing of options.
     auto options = GenerateOptions(module);
     if (!CanRun(module, options)) {
-        return;
+        return Failure{"Cannot run module"};
     }
 
     [[maybe_unused]] auto output = Generate(module, options, "");
+    return Success;
 }
 
 }  // namespace

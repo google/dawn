@@ -33,15 +33,7 @@
 namespace tint::core::ir::transform {
 namespace {
 
-void PreservePaddingFuzzer(Module& module) {
-    if (auto res = PreservePadding(module); res != Success) {
-        return;
-    }
-
-    if (auto res = Validate(module, kPreservePaddingCapabilities); res != Success) {
-        TINT_ICE() << "result of PreservePadding failed IR validation\n" << res.Failure();
-    }
-}
+constexpr auto& PreservePaddingFuzzer = PreservePadding;
 
 }  // namespace
 }  // namespace tint::core::ir::transform

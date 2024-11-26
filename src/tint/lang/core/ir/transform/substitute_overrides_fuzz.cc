@@ -34,16 +34,7 @@
 namespace tint::core::ir::transform {
 namespace {
 
-void SubstituteOverridesFuzzer(Module& module, SubstituteOverridesConfig config) {
-    if (auto res = SubstituteOverrides(module, config); res != Success) {
-        return;
-    }
-
-    Capabilities capabilities;
-    if (auto res = Validate(module, capabilities); res != Success) {
-        TINT_ICE() << "result of SubstituteOverrides failed IR validation\n" << res.Failure();
-    }
-}
+constexpr auto& SubstituteOverridesFuzzer = SubstituteOverrides;
 
 }  // namespace
 }  // namespace tint::core::ir::transform

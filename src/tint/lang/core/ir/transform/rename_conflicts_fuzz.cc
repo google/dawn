@@ -33,15 +33,7 @@
 namespace tint::core::ir::transform {
 namespace {
 
-void RenameConflictsFuzzer(core::ir::Module& module) {
-    if (auto res = RenameConflicts(module); res != Success) {
-        return;
-    }
-
-    if (auto res = Validate(module, kRenameConflictsCapabilities); res != Success) {
-        TINT_ICE() << "result of RenameConflicts failed IR validation\n" << res.Failure();
-    }
-}
+constexpr auto& RenameConflictsFuzzer = RenameConflicts;
 
 }  // namespace
 }  // namespace tint::core::ir::transform

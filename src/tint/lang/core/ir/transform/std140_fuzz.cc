@@ -48,18 +48,12 @@ bool CanRun(Module& module) {
     return true;
 }
 
-void Std140Fuzzer(Module& module) {
+Result<SuccessType> Std140Fuzzer(Module& module) {
     if (!CanRun(module)) {
-        return;
+        return Failure{"Cannot run module"};
     }
 
-    if (auto res = Std140(module); res != Success) {
-        return;
-    }
-
-    if (auto res = Validate(module, kStd140Capabilities); res != Success) {
-        TINT_ICE() << "result of Std140 failed IR validation\n" << res.Failure();
-    }
+    return Std140(module);
 }
 
 }  // namespace
