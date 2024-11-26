@@ -66,7 +66,6 @@
     X(maxBufferSize)                             \
     X(maxVertexAttributes)                       \
     X(maxVertexBufferArrayStride)                \
-    X(maxInterStageShaderComponents)             \
     X(maxInterStageShaderVariables)              \
     X(maxColorAttachments)                       \
     X(maxColorAttachmentBytesPerSample)          \
