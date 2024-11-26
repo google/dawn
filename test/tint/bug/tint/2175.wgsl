@@ -1,4 +1,4 @@
-// flags: --rename-all
+// flags: --transform renamer --rename-all
 
 const v = vec4();
 const x = v.x * 2u;

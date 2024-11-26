@@ -662,6 +662,109 @@ Options:
     return true;
 }
 
+tint::Result<tint::Program> ProcessASTTransforms(Options& options,
+                                                 tint::inspector::Inspector& inspector,
+                                                 tint::Program& program) {
+    tint::ast::transform::Manager transform_manager;
+    tint::ast::transform::DataMap transform_inputs;
+
+    // Renaming must always come first
+    switch (options.format) {
+        case Format::kMsl: {
+#if TINT_BUILD_MSL_WRITER
+            transform_inputs.Add<tint::ast::transform::Renamer::Config>(
+                options.rename_all ? tint::ast::transform::Renamer::Target::kAll
+                                   : tint::ast::transform::Renamer::Target::kMslKeywords,
+                /* preserve_unicode */ false);
+            transform_manager.Add<tint::ast::transform::Renamer>();
+#endif  // TINT_BUILD_MSL_WRITER
+            break;
+        }
+#if TINT_BUILD_GLSL_WRITER
+        case Format::kGlsl: {
+            transform_inputs.Add<tint::ast::transform::Renamer::Config>(
+                options.rename_all ? tint::ast::transform::Renamer::Target::kAll
+                                   : tint::ast::transform::Renamer::Target::kGlslKeywords,
+                /* preserve_unicode */ false);
+            transform_manager.Add<tint::ast::transform::Renamer>();
+            break;
+        }
+#endif  // TINT_BUILD_GLSL_WRITER
+        case Format::kHlsl:
+        case Format::kHlslFxc: {
+#if TINT_BUILD_HLSL_WRITER
+            transform_inputs.Add<tint::ast::transform::Renamer::Config>(
+                options.rename_all ? tint::ast::transform::Renamer::Target::kAll
+                                   : tint::ast::transform::Renamer::Target::kHlslKeywords,
+                /* preserve_unicode */ false);
+            transform_manager.Add<tint::ast::transform::Renamer>();
+#endif  // TINT_BUILD_HLSL_WRITER
+            break;
+        }
+        default:
+            break;
+    }
+
+    // If overrides are provided, add the SubstituteOverride transform.
+    if (!options.overrides.IsEmpty()) {
+        options.transforms.Push("substitute_override");
+    }
+
+    for (const auto& name : options.transforms) {
+        if (name == "first_index_offset") {
+            transform_inputs.Add<tint::ast::transform::FirstIndexOffset::BindingPoint>(0, 0);
+            transform_manager.Add<tint::ast::transform::FirstIndexOffset>();
+        } else if (name == "renamer") {
+            transform_manager.Add<tint::ast::transform::Renamer>();
+        } else if (name == "robustness") {
+            options.enable_robustness = true;
+        } else if (name == "substitute_override") {
+            auto override_names = inspector.GetNamedOverrideIds();
+
+            std::unordered_map<tint::OverrideId, double> values;
+            values.reserve(options.overrides.Count());
+            for (auto& override : options.overrides) {
+                const auto& override_name = override.key.Value();
+                const auto& override_value = override.value;
+                if (override_name.empty()) {
+                    return tint::Failure("empty override name");
+                }
+
+                auto num =
+                    tint::strconv::ParseNumber<decltype(tint::OverrideId::value)>(override_name);
+                if (num == tint::Success) {
+                    tint::OverrideId id{num.Get()};
+                    values.emplace(id, override_value);
+                    continue;
+                }
+
+                auto it = override_names.find(override_name);
+                if (it == override_names.end()) {
+                    return tint::Failure("unknown override '" + override_name + "'");
+                }
+                values.emplace(it->second, override_value);
+            }
+
+            tint::ast::transform::SubstituteOverride::Config cfg;
+            cfg.map = std::move(values);
+
+            transform_inputs.Add<tint::ast::transform::SubstituteOverride::Config>(cfg);
+            transform_manager.Add<tint::ast::transform::SubstituteOverride>();
+
+        } else {
+            return tint::Failure("Unknown transform: " + name);
+        }
+    }
+
+    if (options.emit_single_entry_point) {
+        transform_manager.append(std::make_unique<tint::ast::transform::SingleEntryPoint>());
+        transform_inputs.Add<tint::ast::transform::SingleEntryPoint::Config>(options.ep_name);
+    }
+
+    tint::ast::transform::DataMap outputs;
+    return transform_manager.Run(program, std::move(transform_inputs), outputs);
+}
+
 #if TINT_BUILD_SPV_WRITER
 std::string Disassemble(const std::vector<uint32_t>& data) {
     std::string spv_errors;
@@ -1257,153 +1360,10 @@ int main(int argc, const char** argv) {
         tint::cmd::PrintInspectorBindings(inspector);
     }
 
-    tint::ast::transform::Manager transform_manager;
-    tint::ast::transform::DataMap transform_inputs;
-
-    // Renaming must always come first
-    switch (options.format) {
-        case Format::kMsl: {
-#if TINT_BUILD_MSL_WRITER
-            transform_inputs.Add<tint::ast::transform::Renamer::Config>(
-                options.rename_all ? tint::ast::transform::Renamer::Target::kAll
-                                   : tint::ast::transform::Renamer::Target::kMslKeywords,
-                /* preserve_unicode */ false);
-            transform_manager.Add<tint::ast::transform::Renamer>();
-#endif  // TINT_BUILD_MSL_WRITER
-            break;
-        }
-#if TINT_BUILD_GLSL_WRITER
-        case Format::kGlsl: {
-            transform_inputs.Add<tint::ast::transform::Renamer::Config>(
-                options.rename_all ? tint::ast::transform::Renamer::Target::kAll
-                                   : tint::ast::transform::Renamer::Target::kGlslKeywords,
-                /* preserve_unicode */ false);
-            transform_manager.Add<tint::ast::transform::Renamer>();
-            break;
-        }
-#endif  // TINT_BUILD_GLSL_WRITER
-        case Format::kHlsl:
-        case Format::kHlslFxc: {
-#if TINT_BUILD_HLSL_WRITER
-            transform_inputs.Add<tint::ast::transform::Renamer::Config>(
-                options.rename_all ? tint::ast::transform::Renamer::Target::kAll
-                                   : tint::ast::transform::Renamer::Target::kHlslKeywords,
-                /* preserve_unicode */ false);
-            transform_manager.Add<tint::ast::transform::Renamer>();
-#endif  // TINT_BUILD_HLSL_WRITER
-            break;
-        }
-        default: {
-            if (options.rename_all) {
-                transform_manager.Add<tint::ast::transform::Renamer>();
-            }
-            break;
-        }
-    }
-
-    struct TransformFactory {
-        const char* name;
-        /// Build and adds the transform to the transform manager.
-        /// Parameters:
-        ///   manager   - the transform manager. Add transforms to this.
-        ///   inputs    - the input data to the transform manager. Add inputs to this.
-        /// Returns true on success, false on error (program will immediately exit)
-        std::function<bool(tint::ast::transform::Manager& manager,
-                           tint::ast::transform::DataMap& inputs)>
-            make;
-    };
-    std::vector<TransformFactory> transforms = {
-        {"first_index_offset",
-         [](tint::ast::transform::Manager& m, tint::ast::transform::DataMap& i) {
-             i.Add<tint::ast::transform::FirstIndexOffset::BindingPoint>(0, 0);
-             m.Add<tint::ast::transform::FirstIndexOffset>();
-             return true;
-         }},
-        {"renamer",
-         [](tint::ast::transform::Manager& m, tint::ast::transform::DataMap&) {
-             m.Add<tint::ast::transform::Renamer>();
-             return true;
-         }},
-        {"robustness",
-         [&](tint::ast::transform::Manager&,
-             tint::ast::transform::DataMap&) {  // enabled via writer option
-             options.enable_robustness = true;
-             return true;
-         }},
-        {"substitute_override",
-         [&](tint::ast::transform::Manager& m, tint::ast::transform::DataMap& i) {
-             tint::ast::transform::SubstituteOverride::Config cfg;
-
-             std::unordered_map<tint::OverrideId, double> values;
-             values.reserve(options.overrides.Count());
-
-             for (auto& override : options.overrides) {
-                 const auto& name = override.key.Value();
-                 const auto& value = override.value;
-                 if (name.empty()) {
-                     std::cerr << "empty override name\n";
-                     return false;
-                 }
-                 if (auto num = tint::strconv::ParseNumber<decltype(tint::OverrideId::value)>(name);
-                     num == tint::Success) {
-                     tint::OverrideId id{num.Get()};
-                     values.emplace(id, value);
-                 } else {
-                     auto override_names = inspector.GetNamedOverrideIds();
-                     auto it = override_names.find(name);
-                     if (it == override_names.end()) {
-                         std::cerr << "unknown override '" << name << "'\n";
-                         return false;
-                     }
-                     values.emplace(it->second, value);
-                 }
-             }
-
-             cfg.map = std::move(values);
-
-             i.Add<tint::ast::transform::SubstituteOverride::Config>(cfg);
-             m.Add<tint::ast::transform::SubstituteOverride>();
-             return true;
-         }},
-    };
-
-    auto enable_transform = [&](std::string_view name) {
-        for (auto& t : transforms) {
-            if (t.name == name) {
-                return t.make(transform_manager, transform_inputs);
-            }
-        }
-
-        std::cerr << "Unknown transform: " << name << "\n";
-        return false;
-    };
-
-    // If overrides are provided, add the SubstituteOverride transform.
-    if (!options.overrides.IsEmpty()) {
-        if (!enable_transform("substitute_override")) {
-            return 1;
-        }
-    }
-
-    for (const auto& name : options.transforms) {
-        // TODO(dsinclair): The vertex pulling transform requires setup code to
-        // be run that needs user input. Should we find a way to support that here
-        // maybe through a provided file?
-        if (!enable_transform(name)) {
-            return 1;
-        }
-    }
-
-    if (options.emit_single_entry_point) {
-        transform_manager.append(std::make_unique<tint::ast::transform::SingleEntryPoint>());
-        transform_inputs.Add<tint::ast::transform::SingleEntryPoint::Config>(options.ep_name);
-    }
-
-    tint::ast::transform::DataMap outputs;
-    auto program = transform_manager.Run(info.program, std::move(transform_inputs), outputs);
-    if (!program.IsValid()) {
-        tint::cmd::PrintWGSL(std::cerr, program);
-        std::cerr << program.Diagnostics() << "\n";
+    auto res = ProcessASTTransforms(options, inspector, info.program);
+    if (res != tint::Success || !res->IsValid()) {
+        tint::cmd::PrintWGSL(std::cerr, res.Get());
+        std::cerr << res->Diagnostics() << "\n";
         return 1;
     }
 
@@ -1411,23 +1371,23 @@ int main(int argc, const char** argv) {
     switch (options.format) {
         case Format::kSpirv:
         case Format::kSpvAsm:
-            success = GenerateSpirv(program, options);
+            success = GenerateSpirv(res.Get(), options);
             break;
         case Format::kWgsl:
-            success = GenerateWgsl(program, options);
+            success = GenerateWgsl(res.Get(), options);
             break;
         case Format::kMsl:
-            success = GenerateMsl(program, options);
+            success = GenerateMsl(res.Get(), options);
             break;
         case Format::kHlsl:
         case Format::kHlslFxc:
-            success = GenerateHlsl(program, options);
+            success = GenerateHlsl(res.Get(), options);
             break;
         case Format::kGlsl:
-            success = GenerateGlsl(program, options);
+            success = GenerateGlsl(res.Get(), options);
             break;
         case Format::kIr:
-            success = DumpIR(program, options);
+            success = DumpIR(res.Get(), options);
             break;
         case Format::kNone:
             break;
