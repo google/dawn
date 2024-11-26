@@ -1982,6 +1982,8 @@
             {"name": "label", "type": "string view", "optional": true},
             {"name": "plane 0", "type": "texture view"},
             {"name": "plane 1", "type": "texture view", "optional": true},
+            {"name": "visible origin", "type": "origin 2D"},
+            {"name": "visible size", "type": "extent 2D"},
             {"name": "crop origin", "type": "origin 2D"},
             {"name": "crop size", "type": "extent 2D"},
             {"name": "apparent size", "type": "extent 2D"},
