@@ -83,6 +83,7 @@
 #include "src/tint/lang/core/type/f32.h"
 #include "src/tint/lang/core/type/i32.h"
 #include "src/tint/lang/core/type/i8.h"
+#include "src/tint/lang/core/type/matrix.h"
 #include "src/tint/lang/core/type/memory_view.h"
 #include "src/tint/lang/core/type/pointer.h"
 #include "src/tint/lang/core/type/reference.h"
@@ -936,7 +937,8 @@ class Validator {
                                  size_t num_results,
                                  size_t num_operands);
 
-    /// Checks that @p type does not use any types that are prohibited by the target capabilities.
+    /// Checks that @p type is allowed by the spec, and does not use any types that are prohibited
+    /// by the target capabilities.
     /// @param type the type
     /// @param diag a function that creates an error diagnostic for the source of the type
     /// @param ignore_caps a set of capabilities to ignore for this check
@@ -1774,6 +1776,20 @@ void Validator::CheckType(const core::type::Type* root,
                 // u8 types are guarded by the Allow8BitIntegers capability.
                 if (!capabilities_.Contains(Capability::kAllow8BitIntegers)) {
                     diag() << "8-bit integer types are not permitted";
+                    return false;
+                }
+                return true;
+            },
+            [&](const core::type::Vector* v) {
+                if (!v->Type()->IsScalar()) {
+                    diag() << "vector elements must be scalars";
+                    return false;
+                }
+                return true;
+            },
+            [&](const core::type::Matrix* m) {
+                if (!m->Type()->IsFloatScalar()) {
+                    diag() << "matrix elements must be float scalars";
                     return false;
                 }
                 return true;

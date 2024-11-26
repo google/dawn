@@ -4907,6 +4907,106 @@ note: # Disassembly
 )");
 }
 
+TEST_F(IR_ValidatorTest, Type_VectorElements) {
+    auto* f = b.Function("my_func", ty.void_());
+
+    b.Append(f->Block(), [&] {
+        b.Var("u32_valid", AddressSpace::kFunction, ty.vec4(ty.u32()));
+        b.Var("i32_valid", AddressSpace::kFunction, ty.vec4(ty.i32()));
+        b.Var("bool_valid", AddressSpace::kFunction, ty.vec2(ty.bool_()));
+        b.Var("f16_valid", AddressSpace::kFunction, ty.vec3(ty.f16()));
+        b.Var("f32_valid", AddressSpace::kFunction, ty.vec3(ty.f32()));
+        b.Var("void_invalid", AddressSpace::kFunction, ty.vec2(ty.void_()));
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_EQ(res.Failure().reason.Str(), R"(:8:5 error: var: vector elements must be scalars
+    %void_invalid:ptr<function, vec2<void>, read_write> = var
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+:2:3 note: in block
+  $B1: {
+  ^^^
+
+note: # Disassembly
+%my_func = func():void {
+  $B1: {
+    %u32_valid:ptr<function, vec4<u32>, read_write> = var
+    %i32_valid:ptr<function, vec4<i32>, read_write> = var
+    %bool_valid:ptr<function, vec2<bool>, read_write> = var
+    %f16_valid:ptr<function, vec3<f16>, read_write> = var
+    %f32_valid:ptr<function, vec3<f32>, read_write> = var
+    %void_invalid:ptr<function, vec2<void>, read_write> = var
+    ret
+  }
+}
+)");
+}
+
+TEST_F(IR_ValidatorTest, Type_MatrixElements) {
+    auto* f = b.Function("my_func", ty.void_());
+
+    b.Append(f->Block(), [&] {
+        b.Var("u32_invalid", AddressSpace::kFunction, ty.mat2x2(ty.u32()));
+        b.Var("i32_invalid", AddressSpace::kFunction, ty.mat3x2(ty.i32()));
+        b.Var("bool_invalid", AddressSpace::kFunction, ty.mat4x2(ty.bool_()));
+        b.Var("f16_valid", AddressSpace::kFunction, ty.mat2x3(ty.f16()));
+        b.Var("f32_valid", AddressSpace::kFunction, ty.mat4x4(ty.f32()));
+        b.Var("void_invalid", AddressSpace::kFunction, ty.mat3x3(ty.void_()));
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_EQ(res.Failure().reason.Str(), R"(:3:5 error: var: matrix elements must be float scalars
+    %u32_invalid:ptr<function, mat2x2<u32>, read_write> = var
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+:2:3 note: in block
+  $B1: {
+  ^^^
+
+:4:5 error: var: matrix elements must be float scalars
+    %i32_invalid:ptr<function, mat3x2<i32>, read_write> = var
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+:2:3 note: in block
+  $B1: {
+  ^^^
+
+:5:5 error: var: matrix elements must be float scalars
+    %bool_invalid:ptr<function, mat4x2<bool>, read_write> = var
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+:2:3 note: in block
+  $B1: {
+  ^^^
+
+:8:5 error: var: matrix elements must be float scalars
+    %void_invalid:ptr<function, mat3x3<void>, read_write> = var
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+:2:3 note: in block
+  $B1: {
+  ^^^
+
+note: # Disassembly
+%my_func = func():void {
+  $B1: {
+    %u32_invalid:ptr<function, mat2x2<u32>, read_write> = var
+    %i32_invalid:ptr<function, mat3x2<i32>, read_write> = var
+    %bool_invalid:ptr<function, mat4x2<bool>, read_write> = var
+    %f16_valid:ptr<function, mat2x3<f16>, read_write> = var
+    %f32_valid:ptr<function, mat4x4<f32>, read_write> = var
+    %void_invalid:ptr<function, mat3x3<void>, read_write> = var
+    ret
+  }
+}
+)");
+}
+
 TEST_F(IR_ValidatorTest, Var_RootBlock_NullResult) {
     auto* v = mod.CreateInstruction<ir::Var>(nullptr);
     v->SetInitializer(b.Constant(0_i));
