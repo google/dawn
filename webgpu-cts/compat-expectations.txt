@@ -3191,23 +3191,6 @@ crbug.com/361116751 [ android arm ] webgpu:shader,execution,expression,call,buil
 crbug.com/361116751 [ android arm ] webgpu:shader,execution,expression,call,builtin,textureLoad:storage_textures_2d_array:stage="v";* [ Failure ]
 crbug.com/361116751 [ android arm ] webgpu:shader,execution,expression,call,builtin,textureLoad:storage_textures_3d:stage="v";* [ Failure ]
 
-# copyTextureToTexture failures on Pixel 6 (snorm formats)
-crbug.com/373648908 [ android arm ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,array:srcFormat="r8snorm";dstFormat="r8snorm";dimension="2d" [ Failure ]
-crbug.com/373648908 [ android arm ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,array:srcFormat="r8snorm";dstFormat="r8snorm";dimension="3d" [ Failure ]
-crbug.com/373648908 [ android arm ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,array:srcFormat="rg8snorm";dstFormat="rg8snorm";dimension="2d" [ Failure ]
-crbug.com/373648908 [ android arm ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,array:srcFormat="rg8snorm";dstFormat="rg8snorm";dimension="3d" [ Failure ]
-crbug.com/373648908 [ android arm ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,array:srcFormat="rgba8snorm";dstFormat="rgba8snorm";dimension="2d" [ Failure ]
-crbug.com/373648908 [ android arm ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,array:srcFormat="rgba8snorm";dstFormat="rgba8snorm";dimension="3d" [ Failure ]
-crbug.com/373648908 [ android arm ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,non_array:srcFormat="r8snorm";dstFormat="r8snorm";dimension="1d" [ Failure ]
-crbug.com/373648908 [ android arm ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,non_array:srcFormat="r8snorm";dstFormat="r8snorm";dimension="2d" [ Failure ]
-crbug.com/373648908 [ android arm ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,non_array:srcFormat="r8snorm";dstFormat="r8snorm";dimension="3d" [ Failure ]
-crbug.com/373648908 [ android arm ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,non_array:srcFormat="rg8snorm";dstFormat="rg8snorm";dimension="1d" [ Failure ]
-crbug.com/373648908 [ android arm ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,non_array:srcFormat="rg8snorm";dstFormat="rg8snorm";dimension="2d" [ Failure ]
-crbug.com/373648908 [ android arm ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,non_array:srcFormat="rg8snorm";dstFormat="rg8snorm";dimension="3d" [ Failure ]
-crbug.com/373648908 [ android arm ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,non_array:srcFormat="rgba8snorm";dstFormat="rgba8snorm";dimension="1d" [ Failure ]
-crbug.com/373648908 [ android arm ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,non_array:srcFormat="rgba8snorm";dstFormat="rgba8snorm";dimension="2d" [ Failure ]
-crbug.com/373648908 [ android arm ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,non_array:srcFormat="rgba8snorm";dstFormat="rgba8snorm";dimension="3d" [ Failure ]
-
 # uninitialized_texture_is_zero failures on Pixel 6
 crbug.com/373664069 [ android arm ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="1d";readMethod="CopyToTexture";format="r8snorm" [ Failure ]
 crbug.com/373664069 [ android arm ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="1d";readMethod="CopyToTexture";format="rg8snorm" [ Failure ]

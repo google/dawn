@@ -1003,6 +1003,11 @@ bool ShouldUseT2B2TForT2T(const DeviceBase* device,
         device->IsToggleEnabled(Toggle::UseT2B2TForSRGBTextureCopy)) {
         return true;
     }
+    // Snorm
+    if (srcFormat.IsSnorm() &&
+        device->IsToggleEnabled(Toggle::UseBlitForSnormTextureToBufferCopy)) {
+        return true;
+    }
     return false;
 }
 
