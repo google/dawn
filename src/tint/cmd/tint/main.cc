@@ -1349,11 +1349,9 @@ int main(int argc, const char** argv) {
     }
 #endif  // TINT_BUILD_SYNTAX_TREE_WRITER
 
-#if TINT_BUILD_WGSL_READER
     if (options.dump_ir) {
         DumpIR(info.program, options);
     }
-#endif  // TINT_BUILD_WGSL_READER
 
     tint::inspector::Inspector inspector(info.program);
     if (options.dump_inspector_bindings) {
