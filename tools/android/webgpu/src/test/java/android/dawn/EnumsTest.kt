@@ -9,7 +9,7 @@ class EnumsTest {
     fun uniqueEnumsBufferBindingType() {
         val values = HashSet<BufferBindingType>()
         arrayOf(
-            BufferBindingType.BindingNotUsed,
+            BufferBindingType.Undefined,
             BufferBindingType.Uniform,
             BufferBindingType.Storage,
             BufferBindingType.ReadOnlyStorage

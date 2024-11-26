@@ -348,7 +348,7 @@ std::pair<tint::glsl::writer::Bindings, BindingMap> GenerateBindingInfo(
                             srcBindingPoint,
                             tint::glsl::writer::binding::Storage{dstBindingPoint.binding});
                         break;
-                    case wgpu::BufferBindingType::BindingNotUsed:
+                    case wgpu::BufferBindingType::Undefined:
                         DAWN_UNREACHABLE();
                         break;
                 }

@@ -96,7 +96,7 @@ MaybeError ValidateBindGroupLayoutEntry(DeviceBase* device,
 
     int bindingMemberCount = 0;
 
-    if (entry->buffer.type != wgpu::BufferBindingType::BindingNotUsed) {
+    if (entry->buffer.type != wgpu::BufferBindingType::Undefined) {
         bindingMemberCount++;
         const BufferBindingLayout& buffer = entry->buffer;
 
@@ -118,12 +118,12 @@ MaybeError ValidateBindGroupLayoutEntry(DeviceBase* device,
         }
     }
 
-    if (entry->sampler.type != wgpu::SamplerBindingType::BindingNotUsed) {
+    if (entry->sampler.type != wgpu::SamplerBindingType::Undefined) {
         bindingMemberCount++;
         DAWN_TRY(ValidateSamplerBindingType(entry->sampler.type));
     }
 
-    if (entry->texture.sampleType != wgpu::TextureSampleType::BindingNotUsed) {
+    if (entry->texture.sampleType != wgpu::TextureSampleType::Undefined) {
         bindingMemberCount++;
         const TextureBindingLayout& texture = entry->texture;
         // The kInternalResolveAttachmentSampleType is used internally and not a value
@@ -165,7 +165,7 @@ MaybeError ValidateBindGroupLayoutEntry(DeviceBase* device,
             "Sample type for multisampled texture binding was %s.", wgpu::TextureSampleType::Float);
     }
 
-    if (entry->storageTexture.access != wgpu::StorageTextureAccess::BindingNotUsed) {
+    if (entry->storageTexture.access != wgpu::StorageTextureAccess::Undefined) {
         bindingMemberCount++;
         const StorageTextureBindingLayout& storageTexture = entry->storageTexture;
         DAWN_TRY(ValidateStorageTextureAccess(storageTexture.access));
@@ -391,11 +391,11 @@ bool operator!=(const BindingInfo& a, const BindingInfo& b) {
 }
 
 bool IsBufferBinding(const UnpackedPtr<BindGroupLayoutEntry>& binding) {
-    return binding->buffer.type != wgpu::BufferBindingType::BindingNotUsed;
+    return binding->buffer.type != wgpu::BufferBindingType::Undefined;
 }
 
 bool BindingHasDynamicOffset(const UnpackedPtr<BindGroupLayoutEntry>& binding) {
-    if (binding->buffer.type != wgpu::BufferBindingType::BindingNotUsed) {
+    if (binding->buffer.type != wgpu::BufferBindingType::Undefined) {
         return binding->buffer.hasDynamicOffset;
     }
     return false;
@@ -406,18 +406,18 @@ BindingInfo CreateBindGroupLayoutInfo(const UnpackedPtr<BindGroupLayoutEntry>& b
     bindingInfo.binding = BindingNumber(binding->binding);
     bindingInfo.visibility = binding->visibility;
 
-    if (binding->buffer.type != wgpu::BufferBindingType::BindingNotUsed) {
+    if (binding->buffer.type != wgpu::BufferBindingType::Undefined) {
         bindingInfo.bindingLayout = BufferBindingInfo(binding->buffer);
-    } else if (binding->sampler.type != wgpu::SamplerBindingType::BindingNotUsed) {
+    } else if (binding->sampler.type != wgpu::SamplerBindingType::Undefined) {
         bindingInfo.bindingLayout = SamplerBindingInfo(binding->sampler);
-    } else if (binding->texture.sampleType != wgpu::TextureSampleType::BindingNotUsed) {
+    } else if (binding->texture.sampleType != wgpu::TextureSampleType::Undefined) {
         if (binding->texture.viewDimension == kInternalInputAttachmentDim) {
             bindingInfo.bindingLayout = InputAttachmentBindingInfo(binding->texture.sampleType);
         } else {
             bindingInfo.bindingLayout =
                 TextureBindingInfo(binding->texture.WithTrivialFrontendDefaults());
         }
-    } else if (binding->storageTexture.access != wgpu::StorageTextureAccess::BindingNotUsed) {
+    } else if (binding->storageTexture.access != wgpu::StorageTextureAccess::Undefined) {
         bindingInfo.bindingLayout =
             StorageTextureBindingInfo(binding->storageTexture.WithTrivialFrontendDefaults());
     } else if (auto* staticSamplerBindingLayout = binding.Get<StaticSamplerBindingLayout>()) {
@@ -773,7 +773,7 @@ bool BindGroupLayoutInternalBase::IsStorageBufferBinding(BindingIndex bindingInd
         case wgpu::BufferBindingType::Storage:
         case wgpu::BufferBindingType::ReadOnlyStorage:
             return true;
-        case wgpu::BufferBindingType::BindingNotUsed:
+        case wgpu::BufferBindingType::Undefined:
             break;
     }
     DAWN_UNREACHABLE();

@@ -1389,7 +1389,7 @@ bool Converter::Convert(wgpu::StorageTextureBindingLayout& out,
 }
 
 bool Converter::Convert(wgpu::BufferBindingType& out, const interop::GPUBufferBindingType& in) {
-    out = wgpu::BufferBindingType::BindingNotUsed;
+    out = wgpu::BufferBindingType::Undefined;
     switch (in) {
         case interop::GPUBufferBindingType::kUniform:
             out = wgpu::BufferBindingType::Uniform;
@@ -1405,7 +1405,7 @@ bool Converter::Convert(wgpu::BufferBindingType& out, const interop::GPUBufferBi
 }
 
 bool Converter::Convert(wgpu::TextureSampleType& out, const interop::GPUTextureSampleType& in) {
-    out = wgpu::TextureSampleType::BindingNotUsed;
+    out = wgpu::TextureSampleType::Undefined;
     switch (in) {
         case interop::GPUTextureSampleType::kFloat:
             out = wgpu::TextureSampleType::Float;
@@ -1427,7 +1427,7 @@ bool Converter::Convert(wgpu::TextureSampleType& out, const interop::GPUTextureS
 }
 
 bool Converter::Convert(wgpu::SamplerBindingType& out, const interop::GPUSamplerBindingType& in) {
-    out = wgpu::SamplerBindingType::BindingNotUsed;
+    out = wgpu::SamplerBindingType::Undefined;
     switch (in) {
         case interop::GPUSamplerBindingType::kFiltering:
             out = wgpu::SamplerBindingType::Filtering;
@@ -1444,7 +1444,7 @@ bool Converter::Convert(wgpu::SamplerBindingType& out, const interop::GPUSampler
 
 bool Converter::Convert(wgpu::StorageTextureAccess& out,
                         const interop::GPUStorageTextureAccess& in) {
-    out = wgpu::StorageTextureAccess::BindingNotUsed;
+    out = wgpu::StorageTextureAccess::Undefined;
     switch (in) {
         case interop::GPUStorageTextureAccess::kWriteOnly:
             out = wgpu::StorageTextureAccess::WriteOnly;

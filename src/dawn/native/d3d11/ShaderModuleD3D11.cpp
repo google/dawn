@@ -147,7 +147,7 @@ ResultOrError<d3d::CompiledShader> ShaderModule::Compile(
                             srcBindingPoint, tint::hlsl::writer::binding::Storage{
                                                  dstBindingPoint.group, dstBindingPoint.binding});
                         break;
-                    case wgpu::BufferBindingType::BindingNotUsed:
+                    case wgpu::BufferBindingType::Undefined:
                         DAWN_UNREACHABLE();
                         break;
                 }
