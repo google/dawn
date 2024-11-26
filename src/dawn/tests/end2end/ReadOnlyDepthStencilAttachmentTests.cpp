@@ -113,20 +113,39 @@ class ReadOnlyDepthStencilAttachmentTests
             bgl = utils::MakeBindGroupLayout(device, {});
         } else if (spec.sampledAspect == wgpu::TextureAspect::DepthOnly) {
             // Sample from depth attachment and draw that sampled texel into color buffer.
-            pipelineDescriptor.cFragment.module = utils::CreateShaderModule(device, R"(
-                    @group(0) @binding(0) var samp : sampler;
-                    @group(0) @binding(1) var tex : texture_depth_2d;
+            if (IsCompatibilityMode()) {
+                // Can not use texture_depth_xx with non-comparison sampler in compat mode.
+                pipelineDescriptor.cFragment.module = utils::CreateShaderModule(device, R"(
+                        @group(0) @binding(0) var samp : sampler;
+                        @group(0) @binding(1) var tex : texture_2d<f32>;
 
-                    @fragment
-                    fn main(@builtin(position) FragCoord : vec4f) -> @location(0) vec4f {
-                        return vec4f(textureSample(tex, samp, FragCoord.xy), 0.0, 0.0, 0.0);
-                    })");
-            bgl = utils::MakeBindGroupLayout(
-                device,
-                {
-                    {0, wgpu::ShaderStage::Fragment, wgpu::SamplerBindingType::NonFiltering},
-                    {1, wgpu::ShaderStage::Fragment, wgpu::TextureSampleType::Depth},
-                });
+                        @fragment
+                        fn main(@builtin(position) FragCoord : vec4f) -> @location(0) vec4f {
+                            return vec4f(textureSample(tex, samp, FragCoord.xy).r, 0.0, 0.0, 0.0);
+                        })");
+                bgl = utils::MakeBindGroupLayout(
+                    device,
+                    {
+                        {0, wgpu::ShaderStage::Fragment, wgpu::SamplerBindingType::NonFiltering},
+                        {1, wgpu::ShaderStage::Fragment,
+                         wgpu::TextureSampleType::UnfilterableFloat},
+                    });
+            } else {
+                pipelineDescriptor.cFragment.module = utils::CreateShaderModule(device, R"(
+                        @group(0) @binding(0) var samp : sampler;
+                        @group(0) @binding(1) var tex : texture_depth_2d;
+
+                        @fragment
+                        fn main(@builtin(position) FragCoord : vec4f) -> @location(0) vec4f {
+                            return vec4f(textureSample(tex, samp, FragCoord.xy), 0.0, 0.0, 0.0);
+                        })");
+                bgl = utils::MakeBindGroupLayout(
+                    device,
+                    {
+                        {0, wgpu::ShaderStage::Fragment, wgpu::SamplerBindingType::NonFiltering},
+                        {1, wgpu::ShaderStage::Fragment, wgpu::TextureSampleType::Depth},
+                    });
+            }
         } else {
             DAWN_ASSERT(spec.sampledAspect == wgpu::TextureAspect::StencilOnly);
             // Sample from stencil attachment and draw that sampled texel into color buffer.

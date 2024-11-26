@@ -669,6 +669,8 @@ ResultOrError<std::unique_ptr<EntryPointMetadata>> ReflectEntryPointUsingTint(
     }
 
     metadata->usesTextureLoadWithDepthTexture = entryPoint.has_texture_load_with_depth_texture;
+    metadata->usesDepthTextureWithNonComparisonSampler =
+        entryPoint.has_depth_texture_with_non_comparison_sampler;
 
     const CombinedLimits& limits = device->GetLimits();
     const uint32_t maxVertexAttributes = limits.v1.maxVertexAttributes;

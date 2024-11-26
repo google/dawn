@@ -132,6 +132,12 @@ std::tuple<ComponentType, CompositionType> CalculateComponentAndComposition(
     return {componentType, compositionType};
 }
 
+bool IsTextureBuiltinThatUsesNonComparisonSampler(tint::wgsl::BuiltinFn builtin_fn) {
+    return builtin_fn == wgsl::BuiltinFn::kTextureSample ||
+           builtin_fn == wgsl::BuiltinFn::kTextureSampleLevel ||
+           builtin_fn == wgsl::BuiltinFn::kTextureGather;
+}
+
 }  // namespace
 
 Inspector::Inspector(const Program& program) : program_(program) {}
@@ -261,6 +267,23 @@ EntryPoint Inspector::GetEntryPoint(const tint::ast::Function* func) {
             return {};
         };
         entry_point.has_texture_load_with_depth_texture =
+            !GetTextureUsagesForEntryPoint(*func, filter).empty();
+    }
+
+    {
+        auto filter = [](const tint::sem::Call* call,
+                         tint::wgsl::BuiltinFn builtin_fn) -> std::optional<TextureUsageType> {
+            if (IsTextureBuiltinThatUsesNonComparisonSampler(builtin_fn)) {
+                if (call->Arguments()[0]
+                        ->Type()
+                        ->IsAnyOf<core::type::DepthTexture,
+                                  core::type::DepthMultisampledTexture>()) {
+                    return TextureUsageType::kDepthTextureWithNonComparisonSampler;
+                }
+            }
+            return {};
+        };
+        entry_point.has_depth_texture_with_non_comparison_sampler =
             !GetTextureUsagesForEntryPoint(*func, filter).empty();
     }
 

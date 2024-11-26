@@ -100,6 +100,12 @@ ResultOrError<ShaderModuleEntryPoint> ValidateProgrammableStage(DeviceBase* devi
                     "stage (%s), entry point \"%s\"",
                     metadata.stage, entryPoint.name);
 
+    DAWN_INVALID_IF(
+        device->IsCompatibilityMode() && metadata.usesDepthTextureWithNonComparisonSampler,
+        "texture_depth_xx can not be used with non-comparison samplers in compatibility mode in "
+        "stage (%s), entry point \"%s\"",
+        metadata.stage, entryPoint.name);
+
     // Validate if overridable constants exist in shader module
     // pipelineBase is not yet constructed at this moment so iterate constants from descriptor
     size_t numUninitializedConstants = metadata.uninitializedOverrides.size();

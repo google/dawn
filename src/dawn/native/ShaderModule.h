@@ -279,6 +279,7 @@ struct EntryPointMetadata {
     bool usesSampleIndex = false;
     bool usesVertexIndex = false;
     bool usesTextureLoadWithDepthTexture = false;
+    bool usesDepthTextureWithNonComparisonSampler = false;
 
     // Immediate Data block byte size
     uint32_t immediateDataRangeByteSize = 0;

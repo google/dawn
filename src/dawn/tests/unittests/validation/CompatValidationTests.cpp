@@ -254,6 +254,103 @@ TEST_F(CompatValidationTest, CanNotCreatePipelineWithTextureLoadOfDepthTexture) 
     }
 }
 
+TEST_F(CompatValidationTest, CanNotCreatePipelineWithDepthTextureUsedWithNonComparisonSampler) {
+    wgpu::ShaderModule module = utils::CreateShaderModule(device, R"(
+        @group(1) @binding(0) var s: sampler;
+        @group(1) @binding(1) var sc: sampler_comparison;
+        @group(0) @binding(0) var tex2d : texture_depth_2d;
+        @group(0) @binding(1) var tex2dArray: texture_depth_2d_array;
+        @group(0) @binding(2) var texCube : texture_depth_cube;
+        @group(0) @binding(3) var texCubeArray : texture_depth_cube_array;
+
+        @vertex fn vs() -> @builtin(position) vec4f {
+            return vec4f(0);
+        }
+
+        // valid
+        @fragment fn main0() -> @location(0) vec4f {
+            return textureGatherCompare(tex2d, sc, vec2(0), 0) +
+                   textureGatherCompare(tex2dArray, sc, vec2(0), 0, 0) +
+                   textureGatherCompare(texCube, sc, vec3(0), 0) +
+                   textureGatherCompare(texCubeArray, sc, vec3(0), 0, 0) +
+                   vec4f(textureSampleCompare(tex2d, sc, vec2(0), 0)) +
+                   vec4f(textureSampleCompare(tex2dArray, sc, vec2(0), 0, 0)) +
+                   vec4f(textureSampleCompare(texCube, sc, vec3(0), 0)) +
+                   vec4f(textureSampleCompare(texCubeArray, sc, vec3(0), 0, 0)) +
+                   vec4f(textureSampleCompareLevel(tex2d, sc, vec2(0), 0)) +
+                   vec4f(textureSampleCompareLevel(tex2dArray, sc, vec2(0), 0, 0)) +
+                   vec4f(textureSampleCompareLevel(texCube, sc, vec3(0), 0)) +
+                   vec4f(textureSampleCompareLevel(texCubeArray, sc, vec3(0), 0, 0)) ;
+        }
+
+        @fragment fn main1() -> @location(0) vec4f {
+            return textureGather(tex2d, s, vec2(0));
+        }
+
+        @fragment fn main2() -> @location(0) vec4f {
+            return textureGather(tex2dArray, s, vec2(0), 0);
+        }
+
+        @fragment fn main3() -> @location(0) vec4f {
+            return textureGather(texCube, s, vec3(0));
+        }
+
+        @fragment fn main4() -> @location(0) vec4f {
+            return textureGather(texCubeArray, s, vec3(0), 0);
+        }
+
+        @fragment fn main5() -> @location(0) vec4f {
+            return vec4f(textureSample(tex2d, s, vec2(0)));
+        }
+
+        @fragment fn main6() -> @location(0) vec4f {
+            return vec4f(textureSample(tex2dArray, s, vec2(0), 0));
+        }
+
+        @fragment fn main7() -> @location(0) vec4f {
+            return vec4f(textureSample(texCube, s, vec3(0)));
+        }
+
+        @fragment fn main8() -> @location(0) vec4f {
+            return vec4f(textureSample(texCubeArray, s, vec3(0), 0));
+        }
+
+        @fragment fn main9() -> @location(0) vec4f {
+            return vec4f(textureSampleLevel(tex2d, s, vec2(0), 0));
+        }
+
+        @fragment fn main10() -> @location(0) vec4f {
+            return vec4f(textureSampleLevel(tex2dArray, s, vec2(0), 0, 0));
+        }
+
+        @fragment fn main11() -> @location(0) vec4f {
+            return vec4f(textureSampleLevel(texCube, s, vec3(0), 0));
+        }
+
+        @fragment fn main12() -> @location(0) vec4f {
+            return vec4f(textureSampleLevel(texCubeArray, s, vec3(0), 0, 0));
+        }
+    )");
+
+    const char* entryPoints[] = {"main0", "main1", "main2", "main3",  "main4",  "main5", "main6",
+                                 "main7", "main8", "main9", "main10", "main11", "main12"};
+    for (auto entryPoint : entryPoints) {
+        utils::ComboRenderPipelineDescriptor pDesc;
+        pDesc.vertex.module = module;
+        pDesc.cFragment.module = module;
+        pDesc.cFragment.entryPoint = entryPoint;
+        pDesc.cFragment.targetCount = 1;
+        pDesc.cTargets[0].format = wgpu::TextureFormat::RGBA8Unorm;
+        if (entryPoint == entryPoints[0]) {
+            device.CreateRenderPipeline(&pDesc);
+        } else {
+            ASSERT_DEVICE_ERROR(
+                device.CreateRenderPipeline(&pDesc),
+                testing::HasSubstr("texture_depth_xx can not be used with non-comparison samplers "
+                                   "in compatibility mode"));
+        }
+    }
+}
 TEST_F(CompatValidationTest, CanNotUseSampleMask) {
     wgpu::ShaderModule moduleSampleMaskOutput = utils::CreateShaderModule(device, R"(
         @vertex fn vs() -> @builtin(position) vec4f {

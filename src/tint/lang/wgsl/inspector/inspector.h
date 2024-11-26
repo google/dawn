@@ -309,6 +309,8 @@ class Inspector {
         kTextureNumLevels,
         /// textureNumSamples
         kTextureNumSamples,
+        /// depth texture with non-comparison sampler
+        kDepthTextureWithNonComparisonSampler,
     };
     /// Information on level and sample calls by a given texture binding point
     struct TextureUsageInfo {

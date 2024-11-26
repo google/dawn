@@ -680,11 +680,29 @@ TEST_P(DepthStencilSamplingTest, CheckDepthTextureRange) {
             }
             return 0.0;
         }
+
+        // Check each depth texture texel has the expected value and outputs a "bool".
+        // Compat can not use texture_depth_2d with a non-comparison sampler
+        @group(0) @binding(0) var t2 : texture_2d<f32>;
+        @fragment fn fs2Compat(@builtin(position) pos : vec4f) -> @location(0) f32 {
+            let x = pos.x / kWidth;
+            let depth = textureSample(t2, s, vec2(x, 0.5)).r;
+
+            let index = pos.x - 0.5;
+            let expectedDepth = index / (kWidth - 1.0);
+
+            if (abs(depth - expectedDepth) < 0.001) {
+                return 1.0;
+            }
+            return 0.0;
+        }
     )");
 
     wgpu::BindGroupLayout bgl = utils::MakeBindGroupLayout(
         device, {
-                    {0, wgpu::ShaderStage::Fragment, wgpu::TextureSampleType::Depth},
+                    {0, wgpu::ShaderStage::Fragment,
+                     IsCompatibilityMode() ? wgpu::TextureSampleType::UnfilterableFloat
+                                           : wgpu::TextureSampleType::Depth},
                     {1, wgpu::ShaderStage::Fragment, wgpu::SamplerBindingType::NonFiltering},
                 });
 
@@ -708,7 +726,7 @@ TEST_P(DepthStencilSamplingTest, CheckDepthTextureRange) {
     pDesc2.layout = device.CreatePipelineLayout(&plDescriptor);
     pDesc2.vertex.module = module;
     pDesc2.cFragment.module = module;
-    pDesc2.cFragment.entryPoint = "fs2";
+    pDesc2.cFragment.entryPoint = IsCompatibilityMode() ? "fs2Compat" : "fs2";
     pDesc2.cTargets[0].format = wgpu::TextureFormat::R32Float;
     pDesc2.primitive.topology = wgpu::PrimitiveTopology::PointList;
     wgpu::RenderPipeline pipeline2 = device.CreateRenderPipeline(&pDesc2);
