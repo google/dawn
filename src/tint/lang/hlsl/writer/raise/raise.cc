@@ -176,8 +176,10 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
 
     // DemoteToHelper must come before any transform that introduces non-core instructions.
     // Run after ShaderIO to ensure the discards are added to the entry point it introduces.
-    RUN_TRANSFORM(core::ir::transform::DemoteToHelper, module);
-
+    // TODO(crbug.com/42250787): This is only necessary when FXC is being used.
+    if (options.compiler == tint::hlsl::writer::Options::Compiler::kFXC) {
+        RUN_TRANSFORM(core::ir::transform::DemoteToHelper, module);
+    }
     RUN_TRANSFORM(core::ir::transform::DirectVariableAccess, module,
                   core::ir::transform::DirectVariableAccessOptions{});
     // DecomposeStorageAccess must come after Robustness and DirectVariableAccess

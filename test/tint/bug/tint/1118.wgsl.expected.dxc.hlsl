@@ -1,5 +1,3 @@
-static bool tint_discarded = false;
-
 static float fClipDistance3 = 0.0f;
 static float fClipDistance4 = 0.0f;
 cbuffer cbuffer_x_29 : register(b0) {
@@ -32,11 +30,11 @@ void main_1() {
   float4 color = float4(0.0f, 0.0f, 0.0f, 0.0f);
   float x_9 = fClipDistance3;
   if ((x_9 > 0.0f)) {
-    tint_discarded = true;
+    discard;
   }
   float x_17 = fClipDistance4;
   if ((x_17 > 0.0f)) {
-    tint_discarded = true;
+    discard;
   }
   float4 x_34 = asfloat(x_29[0]);
   float3 x_38 = (0.0f).xxx;
@@ -112,8 +110,5 @@ tint_symbol_2 main(tint_symbol_1 tint_symbol) {
   main_out inner_result = main_inner(tint_symbol.fClipDistance3_param, tint_symbol.fClipDistance4_param);
   tint_symbol_2 wrapper_result = (tint_symbol_2)0;
   wrapper_result.glFragColor_1 = inner_result.glFragColor_1;
-  if (tint_discarded) {
-    discard;
-  }
   return wrapper_result;
 }

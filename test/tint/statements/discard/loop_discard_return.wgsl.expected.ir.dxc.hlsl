@@ -1,9 +1,8 @@
 
-static bool continue_execution = true;
 void f() {
   {
     while(true) {
-      continue_execution = false;
+      discard;
       return;
     }
   }

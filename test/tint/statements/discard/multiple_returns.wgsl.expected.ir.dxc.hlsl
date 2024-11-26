@@ -1,28 +1,18 @@
 
 RWByteAddressBuffer non_uniform_global : register(u0);
 RWByteAddressBuffer output : register(u1);
-static bool continue_execution = true;
 void main() {
   if ((asint(non_uniform_global.Load(0u)) < int(0))) {
-    continue_execution = false;
+    discard;
   }
-  float v = ddx(1.0f);
-  if (continue_execution) {
-    output.Store(0u, asuint(v));
-  }
+  output.Store(0u, asuint(ddx(1.0f)));
   if ((asfloat(output.Load(0u)) < 0.0f)) {
     int i = int(0);
     {
       while(true) {
-        float v_1 = asfloat(output.Load(0u));
-        if ((v_1 > float(i))) {
-          float v_2 = float(i);
-          if (continue_execution) {
-            output.Store(0u, asuint(v_2));
-          }
-          if (!(continue_execution)) {
-            discard;
-          }
+        float v = asfloat(output.Load(0u));
+        if ((v > float(i))) {
+          output.Store(0u, asuint(float(i)));
           return;
         }
         {
@@ -32,13 +22,7 @@ void main() {
         continue;
       }
     }
-    if (!(continue_execution)) {
-      discard;
-    }
     return;
-  }
-  if (!(continue_execution)) {
-    discard;
   }
 }
 

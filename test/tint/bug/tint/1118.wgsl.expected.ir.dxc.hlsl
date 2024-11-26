@@ -24,7 +24,6 @@ cbuffer cbuffer_x_137 : register(b2) {
   uint4 x_137[1];
 };
 static float4 glFragColor = (0.0f).xxxx;
-static bool continue_execution = true;
 void main_1() {
   float3 viewDirectionW = (0.0f).xxx;
   float4 baseColor = (0.0f).xxxx;
@@ -44,11 +43,11 @@ void main_1() {
   float4 color = (0.0f).xxxx;
   float x_9 = fClipDistance3;
   if ((x_9 > 0.0f)) {
-    continue_execution = false;
+    discard;
   }
   float x_17 = fClipDistance4;
   if ((x_17 > 0.0f)) {
-    continue_execution = false;
+    discard;
   }
   float4 x_34 = asfloat(x_29[0u]);
   float3 x_38 = (0.0f).xxx;
@@ -113,9 +112,6 @@ main_out main_inner(float fClipDistance3_param, float fClipDistance4_param) {
 main_outputs main(main_inputs inputs) {
   main_out v_3 = main_inner(inputs.fClipDistance3_param, inputs.fClipDistance4_param);
   main_outputs v_4 = {v_3.glFragColor_1};
-  if (!(continue_execution)) {
-    discard;
-  }
   return v_4;
 }
 

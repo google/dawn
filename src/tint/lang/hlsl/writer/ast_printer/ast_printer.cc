@@ -342,8 +342,10 @@ SanitizedResult Sanitize(const Program& in, const Options& options) {
 
     // DemoteToHelper must come after CanonicalizeEntryPointIO, PromoteSideEffectsToDecl, and
     // ExpandCompoundAssignment.
-    // TODO(crbug.com/tint/1752): This is only necessary when FXC is being used.
-    manager.Add<ast::transform::DemoteToHelper>();
+    // TODO(crbug.com/42250787): This is only necessary when FXC is being used.
+    if (options.compiler == tint::hlsl::writer::Options::Compiler::kFXC) {
+        manager.Add<ast::transform::DemoteToHelper>();
+    }
 
     // ArrayLengthFromUniform must come after SimplifyPointers as it assumes that the form of the
     // array length argument is &var.array.

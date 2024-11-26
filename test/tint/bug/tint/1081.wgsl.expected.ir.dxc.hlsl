@@ -7,10 +7,9 @@ struct main_inputs {
 };
 
 
-static bool continue_execution = true;
 int f(int x) {
   if ((x == int(10))) {
-    continue_execution = false;
+    discard;
   }
   return x;
 }
@@ -33,9 +32,6 @@ int main_inner(int3 x) {
 
 main_outputs main(main_inputs inputs) {
   main_outputs v = {main_inner(inputs.x)};
-  if (!(continue_execution)) {
-    discard;
-  }
   return v;
 }
 

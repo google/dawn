@@ -1,8 +1,7 @@
 
-static bool continue_execution = true;
 void f(bool cond) {
   if (cond) {
-    continue_execution = false;
+    discard;
     return;
   }
 }

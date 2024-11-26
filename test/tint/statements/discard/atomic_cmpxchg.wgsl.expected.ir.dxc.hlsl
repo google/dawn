@@ -9,19 +9,13 @@ struct foo_outputs {
 
 
 RWByteAddressBuffer a : register(u0);
-static bool continue_execution = true;
 int foo_inner() {
-  continue_execution = false;
+  discard;
   int x = int(0);
-  atomic_compare_exchange_result_i32 v = (atomic_compare_exchange_result_i32)0;
-  if (continue_execution) {
-    int v_1 = int(0);
-    a.InterlockedCompareExchange(int(0u), int(0), int(1), v_1);
-    int v_2 = v_1;
-    atomic_compare_exchange_result_i32 v_3 = {v_2, (v_2 == int(0))};
-    v = v_3;
-  }
-  atomic_compare_exchange_result_i32 result = v;
+  int v = int(0);
+  a.InterlockedCompareExchange(int(0u), int(0), int(1), v);
+  int v_1 = v;
+  atomic_compare_exchange_result_i32 result = {v_1, (v_1 == int(0))};
   if (result.exchanged) {
     x = result.old_value;
   }
@@ -29,10 +23,7 @@ int foo_inner() {
 }
 
 foo_outputs foo() {
-  foo_outputs v_4 = {foo_inner()};
-  if (!(continue_execution)) {
-    discard;
-  }
-  return v_4;
+  foo_outputs v_2 = {foo_inner()};
+  return v_2;
 }
 

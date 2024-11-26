@@ -1,7 +1,6 @@
 
-static bool continue_execution = true;
 void f() {
-  continue_execution = false;
+  discard;
 }
 
 [numthreads(1, 1, 1)]

@@ -1,10 +1,12 @@
-static bool tint_discarded = false;
-
 int f(int x) {
-  if ((x == 10)) {
-    tint_discarded = true;
+  if (true) {
+    if ((x == 10)) {
+      discard;
+    }
+    return x;
   }
-  return x;
+  int unused;
+  return unused;
 }
 
 struct tint_symbol_1 {
@@ -29,8 +31,5 @@ tint_symbol_2 main(tint_symbol_1 tint_symbol) {
   int inner_result = main_inner(tint_symbol.x);
   tint_symbol_2 wrapper_result = (tint_symbol_2)0;
   wrapper_result.value = inner_result;
-  if (tint_discarded) {
-    discard;
-  }
   return wrapper_result;
 }

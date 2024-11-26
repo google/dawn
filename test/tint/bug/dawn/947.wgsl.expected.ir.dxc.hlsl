@@ -26,7 +26,6 @@ cbuffer cbuffer_uniforms : register(b0) {
 };
 SamplerState mySampler : register(s1);
 Texture2D<float4> myTexture : register(t2);
-static bool continue_execution = true;
 VertexOutputs vs_main_inner(uint VertexIndex) {
   float2 texcoord[3] = {float2(-0.5f, 0.0f), float2(1.5f, 0.0f), float2(0.5f, 2.0f)};
   VertexOutputs output = (VertexOutputs)0;
@@ -44,7 +43,7 @@ VertexOutputs vs_main_inner(uint VertexIndex) {
 float4 fs_main_inner(float2 texcoord) {
   float2 clampedTexcoord = clamp(texcoord, (0.0f).xx, (1.0f).xx);
   if (!(all((clampedTexcoord == texcoord)))) {
-    continue_execution = false;
+    discard;
   }
   float4 srcColor = (0.0f).xxxx;
   return srcColor;
@@ -58,9 +57,6 @@ vs_main_outputs vs_main(vs_main_inputs inputs) {
 
 fs_main_outputs fs_main(fs_main_inputs inputs) {
   fs_main_outputs v_3 = {fs_main_inner(inputs.texcoord)};
-  if (!(continue_execution)) {
-    discard;
-  }
   return v_3;
 }
 
