@@ -129,7 +129,9 @@ Result<RaiseResult> Raise(core::ir::Module& module, const Options& options) {
     RUN_TRANSFORM(core::ir::transform::RemoveContinueInSwitch, module);
 
     // DemoteToHelper must come before any transform that introduces non-core instructions.
-    RUN_TRANSFORM(core::ir::transform::DemoteToHelper, module);
+    if (!options.disable_demote_to_helper) {
+        RUN_TRANSFORM(core::ir::transform::DemoteToHelper, module);
+    }
 
     RUN_TRANSFORM(raise::ShaderIO, module,
                   raise::ShaderIOConfig{options.emit_vertex_point_size, options.fixed_sample_mask});

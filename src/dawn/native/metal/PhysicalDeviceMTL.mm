@@ -444,6 +444,14 @@ void PhysicalDevice::SetupBackendDeviceToggles(dawn::platform::Platform* platfor
         deviceToggles->Default(Toggle::MetalEnableVertexPulling, true);
     }
 
+    // Shader `discard_fragment` changed semantics to be uniform in Metal 2.3+. See section 6.10.1.3
+    // of the Metal Spec (v3.2).
+    if (@available(macOS 11.0, iOS 14.0, *)) {
+        deviceToggles->Default(Toggle::DisableDemoteToHelper, true);
+    } else {
+        deviceToggles->ForceSet(Toggle::DisableDemoteToHelper, false);
+    }
+
     // TODO(crbug.com/dawn/846): tighten this workaround when the driver bug is fixed.
     deviceToggles->Default(Toggle::AlwaysResolveIntoZeroLevelAndLayer, true);
 

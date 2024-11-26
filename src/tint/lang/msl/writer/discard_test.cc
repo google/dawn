@@ -32,7 +32,7 @@ using namespace tint::core::number_suffixes;  // NOLINT
 namespace tint::msl::writer {
 namespace {
 
-TEST_F(MslWriterTest, Discard) {
+TEST_F(MslWriterTest, DiscardWithDemoteToHelper) {
     auto* func = b.Function("foo", ty.void_());
     b.Append(func->Block(), [&] {
         auto* if_ = b.If(true);
@@ -49,7 +49,10 @@ TEST_F(MslWriterTest, Discard) {
         b.Return(ep);
     });
 
-    ASSERT_TRUE(Generate()) << err_ << output_.msl;
+    Options options;
+    options.disable_demote_to_helper = false;
+
+    ASSERT_TRUE(Generate(options)) << err_ << output_.msl;
     EXPECT_EQ(output_.msl, MetalHeader() + R"(
 struct tint_module_vars_struct {
   thread bool* continue_execution;
@@ -68,6 +71,40 @@ fragment void frag_main() {
   if (!((*tint_module_vars.continue_execution))) {
     discard_fragment();
   }
+}
+)");
+}
+
+TEST_F(MslWriterTest, DiscardWithoutDemoteToHelper) {
+    auto* func = b.Function("foo", ty.void_());
+    b.Append(func->Block(), [&] {
+        auto* if_ = b.If(true);
+        b.Append(if_->True(), [&] {
+            b.Discard();
+            b.ExitIf(if_);
+        });
+        b.Return(func);
+    });
+
+    auto* ep = b.Function("frag_main", ty.void_(), core::ir::Function::PipelineStage::kFragment);
+    b.Append(ep->Block(), [&] {
+        b.Call(func);
+        b.Return(ep);
+    });
+
+    Options options;
+    options.disable_demote_to_helper = true;
+
+    ASSERT_TRUE(Generate(options)) << err_ << output_.msl;
+    EXPECT_EQ(output_.msl, MetalHeader() + R"(
+void foo() {
+  if (true) {
+    discard_fragment();
+  }
+}
+
+fragment void frag_main() {
+  foo();
 }
 )");
 }

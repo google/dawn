@@ -940,6 +940,7 @@ bool GenerateMsl([[maybe_unused]] const tint::Program& program,
     gen_options.pixel_local_attachments = options.pixel_local_attachments;
     gen_options.bindings = tint::msl::writer::GenerateBindings(*input_program);
     gen_options.array_length_from_uniform.ubo_binding = 30;
+    gen_options.disable_demote_to_helper = options.disable_demote_to_helper;
 
     // Add array_length_from_uniform entries for all storage buffers with runtime sized arrays.
     std::unordered_set<tint::BindingPoint> storage_bindings;
@@ -990,6 +991,11 @@ bool GenerateMsl([[maybe_unused]] const tint::Program& program,
             enable->HasExtension(tint::wgsl::Extension::kChromiumExperimentalFramebufferFetch)) {
             msl_version = std::max(msl_version, tint::msl::validate::MslVersion::kMsl_2_3);
         }
+    }
+
+    // The correct behavior for platform demote to helper in metal 2.3+.
+    if (options.disable_demote_to_helper) {
+        msl_version = std::max(msl_version, tint::msl::validate::MslVersion::kMsl_2_3);
     }
 
     if (options.validate && options.skip_hash.count(hash) == 0) {
