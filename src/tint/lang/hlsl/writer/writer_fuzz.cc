@@ -36,41 +36,6 @@
 namespace tint::hlsl::writer {
 namespace {
 
-Options GenerateOptions(core::ir::Module& module, Options::Compiler compiler) {
-    Options options;
-    options.disable_robustness = false;
-    options.disable_workgroup_init = false;
-    options.truncate_interstage_variables = false;
-    options.polyfill_reflect_vec2_f32 = false;
-    options.polyfill_dot_4x8_packed = false;
-    options.disable_polyfill_integer_div_mod = false;
-    options.polyfill_pack_unpack_4x8 = false;
-    options.interstage_locations = {};
-    options.root_constant_binding_point = {};
-    options.pixel_local = {};
-
-    options.compiler = compiler;
-    options.bindings = GenerateBindings(module);
-
-    options.array_length_from_uniform.ubo_binding = {30, 0};
-
-    // Add array_length_from_uniform entries for all storage buffers with runtime sized arrays.
-    std::unordered_set<tint::BindingPoint> storage_bindings;
-    for (auto* inst : *module.root_block) {
-        auto* var = inst->As<core::ir::Var>();
-        if (!var->Result(0)->Type()->UnwrapPtr()->HasFixedFootprint()) {
-            if (auto bp = var->BindingPoint()) {
-                if (storage_bindings.insert(bp.value()).second) {
-                    options.array_length_from_uniform.bindpoint_to_size_index.emplace(
-                        bp.value(), static_cast<uint32_t>(storage_bindings.size() - 1));
-                }
-            }
-        }
-    }
-
-    return options;
-}
-
 bool CanRun(const core::ir::Module& module) {
     // Check for unsupported module-scope variable address spaces and types.
     for (auto* inst : *module.root_block) {
@@ -89,22 +54,27 @@ bool CanRun(const core::ir::Module& module) {
     return true;
 }
 
-void IRFuzzerDXC(core::ir::Module& module) {
-    // TODO(377391551): Enable fuzzing of options.
-    auto options = GenerateOptions(module, Options::Compiler::kDXC);
+void IRFuzzer(core::ir::Module& module, Options options) {
     if (!CanRun(module)) {
         return;
     }
-    [[maybe_unused]] auto output = Generate(module, options);
-    // TODO(42251292): Fuzz DXC with HLSL output
-}
 
-void IRFuzzerFXC(core::ir::Module& module) {
-    // TODO(377391551): Enable fuzzing of options.
-    auto options = GenerateOptions(module, Options::Compiler::kFXC);
-    if (!CanRun(module)) {
-        return;
+    options.bindings = GenerateBindings(module);
+    options.array_length_from_uniform.ubo_binding = {30, 0};
+    // Add array_length_from_uniform entries for all storage buffers with runtime sized arrays.
+    std::unordered_set<tint::BindingPoint> storage_bindings;
+    for (auto* inst : *module.root_block) {
+        auto* var = inst->As<core::ir::Var>();
+        if (!var->Result(0)->Type()->UnwrapPtr()->HasFixedFootprint()) {
+            if (auto bp = var->BindingPoint()) {
+                if (storage_bindings.insert(bp.value()).second) {
+                    options.array_length_from_uniform.bindpoint_to_size_index.emplace(
+                        bp.value(), static_cast<uint32_t>(storage_bindings.size() - 1));
+                }
+            }
+        }
     }
+
     [[maybe_unused]] auto output = Generate(module, options);
     // TODO(42251292): Fuzz DXC with HLSL output
 }
@@ -112,5 +82,4 @@ void IRFuzzerFXC(core::ir::Module& module) {
 }  // namespace
 }  // namespace tint::hlsl::writer
 
-TINT_IR_MODULE_FUZZER(tint::hlsl::writer::IRFuzzerDXC, tint::core::ir::Capabilities{});
-TINT_IR_MODULE_FUZZER(tint::hlsl::writer::IRFuzzerFXC, tint::core::ir::Capabilities{});
+TINT_IR_MODULE_FUZZER(tint::hlsl::writer::IRFuzzer, tint::core::ir::Capabilities{});
