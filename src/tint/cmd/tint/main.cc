@@ -259,9 +259,7 @@ Format InferFormat(const std::string& filename) {
     return Format::kUnknown;
 }
 
-bool ParseArgs(tint::VectorRef<std::string_view> arguments,
-               std::string transform_names,
-               Options* opts) {
+bool ParseArgs(tint::VectorRef<std::string_view> arguments, Options* opts) {
     using namespace tint::cli;  // NOLINT(build/namespaces)
 
     tint::Vector<EnumName<Format>, 8> format_enum_names{
@@ -419,7 +417,11 @@ violations that may be produced)",
     auto& transforms =
         options.Add<StringOption>("transform", R"(Runs transforms, name list is comma separated
 Available transforms:
-)" + transform_names,
+    first_index_offset
+    renamer
+    robustness
+    substitute_override
+)",
                                   ShortName{"t"});
     TINT_DEFER({
         if (transforms.value.has_value()) {
@@ -1201,85 +1203,7 @@ int main(int argc, const char** argv) {
     tint::Initialize();
     tint::SetInternalCompilerErrorReporter(&tint::cmd::TintInternalCompilerErrorReporter);
 
-    struct TransformFactory {
-        const char* name;
-        /// Build and adds the transform to the transform manager.
-        /// Parameters:
-        ///   inspector - an inspector created from the parsed program
-        ///   manager   - the transform manager. Add transforms to this.
-        ///   inputs    - the input data to the transform manager. Add inputs to this.
-        /// Returns true on success, false on error (program will immediately exit)
-        std::function<bool(tint::inspector::Inspector& inspector,
-                           tint::ast::transform::Manager& manager,
-                           tint::ast::transform::DataMap& inputs)>
-            make;
-    };
-    std::vector<TransformFactory> transforms = {
-        {"first_index_offset",
-         [](tint::inspector::Inspector&, tint::ast::transform::Manager& m,
-            tint::ast::transform::DataMap& i) {
-             i.Add<tint::ast::transform::FirstIndexOffset::BindingPoint>(0, 0);
-             m.Add<tint::ast::transform::FirstIndexOffset>();
-             return true;
-         }},
-        {"renamer",
-         [](tint::inspector::Inspector&, tint::ast::transform::Manager& m,
-            tint::ast::transform::DataMap&) {
-             m.Add<tint::ast::transform::Renamer>();
-             return true;
-         }},
-        {"robustness",
-         [&](tint::inspector::Inspector&, tint::ast::transform::Manager&,
-             tint::ast::transform::DataMap&) {  // enabled via writer option
-             options.enable_robustness = true;
-             return true;
-         }},
-        {"substitute_override",
-         [&](tint::inspector::Inspector& inspector, tint::ast::transform::Manager& m,
-             tint::ast::transform::DataMap& i) {
-             tint::ast::transform::SubstituteOverride::Config cfg;
-
-             std::unordered_map<tint::OverrideId, double> values;
-             values.reserve(options.overrides.Count());
-
-             for (auto& override : options.overrides) {
-                 const auto& name = override.key.Value();
-                 const auto& value = override.value;
-                 if (name.empty()) {
-                     std::cerr << "empty override name\n";
-                     return false;
-                 }
-                 if (auto num = tint::strconv::ParseNumber<decltype(tint::OverrideId::value)>(name);
-                     num == tint::Success) {
-                     tint::OverrideId id{num.Get()};
-                     values.emplace(id, value);
-                 } else {
-                     auto override_names = inspector.GetNamedOverrideIds();
-                     auto it = override_names.find(name);
-                     if (it == override_names.end()) {
-                         std::cerr << "unknown override '" << name << "'\n";
-                         return false;
-                     }
-                     values.emplace(it->second, value);
-                 }
-             }
-
-             cfg.map = std::move(values);
-
-             i.Add<tint::ast::transform::SubstituteOverride::Config>(cfg);
-             m.Add<tint::ast::transform::SubstituteOverride>();
-             return true;
-         }},
-    };
-    auto transform_names = [&] {
-        tint::StringStream names;
-        for (auto& t : transforms) {
-            names << "   " << t.name << "\n";
-        }
-        return names.str();
-    };
-
-    if (!ParseArgs(arguments, transform_names(), &options)) {
+    if (!ParseArgs(arguments, &options)) {
         return 1;
     }
 
@@ -1377,15 +1301,80 @@ int main(int argc, const char** argv) {
         }
     }
 
+    struct TransformFactory {
+        const char* name;
+        /// Build and adds the transform to the transform manager.
+        /// Parameters:
+        ///   manager   - the transform manager. Add transforms to this.
+        ///   inputs    - the input data to the transform manager. Add inputs to this.
+        /// Returns true on success, false on error (program will immediately exit)
+        std::function<bool(tint::ast::transform::Manager& manager,
+                           tint::ast::transform::DataMap& inputs)>
+            make;
+    };
+    std::vector<TransformFactory> transforms = {
+        {"first_index_offset",
+         [](tint::ast::transform::Manager& m, tint::ast::transform::DataMap& i) {
+             i.Add<tint::ast::transform::FirstIndexOffset::BindingPoint>(0, 0);
+             m.Add<tint::ast::transform::FirstIndexOffset>();
+             return true;
+         }},
+        {"renamer",
+         [](tint::ast::transform::Manager& m, tint::ast::transform::DataMap&) {
+             m.Add<tint::ast::transform::Renamer>();
+             return true;
+         }},
+        {"robustness",
+         [&](tint::ast::transform::Manager&,
+             tint::ast::transform::DataMap&) {  // enabled via writer option
+             options.enable_robustness = true;
+             return true;
+         }},
+        {"substitute_override",
+         [&](tint::ast::transform::Manager& m, tint::ast::transform::DataMap& i) {
+             tint::ast::transform::SubstituteOverride::Config cfg;
+
+             std::unordered_map<tint::OverrideId, double> values;
+             values.reserve(options.overrides.Count());
+
+             for (auto& override : options.overrides) {
+                 const auto& name = override.key.Value();
+                 const auto& value = override.value;
+                 if (name.empty()) {
+                     std::cerr << "empty override name\n";
+                     return false;
+                 }
+                 if (auto num = tint::strconv::ParseNumber<decltype(tint::OverrideId::value)>(name);
+                     num == tint::Success) {
+                     tint::OverrideId id{num.Get()};
+                     values.emplace(id, value);
+                 } else {
+                     auto override_names = inspector.GetNamedOverrideIds();
+                     auto it = override_names.find(name);
+                     if (it == override_names.end()) {
+                         std::cerr << "unknown override '" << name << "'\n";
+                         return false;
+                     }
+                     values.emplace(it->second, value);
+                 }
+             }
+
+             cfg.map = std::move(values);
+
+             i.Add<tint::ast::transform::SubstituteOverride::Config>(cfg);
+             m.Add<tint::ast::transform::SubstituteOverride>();
+             return true;
+         }},
+    };
+
     auto enable_transform = [&](std::string_view name) {
         for (auto& t : transforms) {
             if (t.name == name) {
-                return t.make(inspector, transform_manager, transform_inputs);
+                return t.make(transform_manager, transform_inputs);
             }
         }
 
         std::cerr << "Unknown transform: " << name << "\n";
-        std::cerr << "Available transforms: \n" << transform_names() << "\n";
         return false;
     };
 
