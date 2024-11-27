@@ -57,7 +57,6 @@
 #include "src/tint/utils/diagnostic/formatter.h"
 #include "src/tint/utils/macros/defer.h"
 #include "src/tint/utils/text/string.h"
-#include "src/tint/utils/text/string_stream.h"
 #include "src/tint/utils/text/styled_text.h"
 #include "src/tint/utils/text/styled_text_printer.h"
 
@@ -100,42 +99,6 @@
 #if TINT_BUILD_GLSL_VALIDATOR
 #include "src/tint/lang/glsl/validate/validate.h"
 #endif  // TINT_BUILD_GLSL_VALIDATOR
-
-#if TINT_BUILD_WGSL_READER
-#define WGSL_READER_ONLY(x) x
-#else
-#define WGSL_READER_ONLY(x)
-#endif
-
-#if TINT_BUILD_SPV_WRITER
-#define SPV_WRITER_ONLY(x) x
-#else
-#define SPV_WRITER_ONLY(x)
-#endif
-
-#if TINT_BUILD_WGSL_WRITER
-#define WGSL_WRITER_ONLY(x) x
-#else
-#define WGSL_WRITER_ONLY(x)
-#endif
-
-#if TINT_BUILD_MSL_WRITER
-#define MSL_WRITER_ONLY(x) x
-#else
-#define MSL_WRITER_ONLY(x)
-#endif
-
-#if TINT_BUILD_HLSL_WRITER
-#define HLSL_WRITER_ONLY(x) x
-#else
-#define HLSL_WRITER_ONLY(x)
-#endif
-
-#if TINT_BUILD_GLSL_WRITER
-#define GLSL_WRITER_ONLY(x) x
-#else
-#define GLSL_WRITER_ONLY(x)
-#endif
 
 namespace {
 
@@ -266,14 +229,31 @@ bool ParseArgs(tint::VectorRef<std::string_view> arguments, Options* opts) {
         EnumName(Format::kNone, "none"),
     };
 
-    SPV_WRITER_ONLY(format_enum_names.Emplace(Format::kSpirv, "spirv"));
-    SPV_WRITER_ONLY(format_enum_names.Emplace(Format::kSpvAsm, "spvasm"));
-    WGSL_WRITER_ONLY(format_enum_names.Emplace(Format::kWgsl, "wgsl"));
-    MSL_WRITER_ONLY(format_enum_names.Emplace(Format::kMsl, "msl"));
-    HLSL_WRITER_ONLY(format_enum_names.Emplace(Format::kHlsl, "hlsl"));
-    HLSL_WRITER_ONLY(format_enum_names.Emplace(Format::kHlslFxc, "hlsl-fxc"));
-    GLSL_WRITER_ONLY(format_enum_names.Emplace(Format::kGlsl, "glsl"));
-    WGSL_READER_ONLY(format_enum_names.Emplace(Format::kIr, "ir"));
+#if TINT_BUILD_WGSL_WRITER
+    format_enum_names.Emplace(Format::kWgsl, "wgsl");
+#endif
+
+#if TINT_BUILD_WGSL_READER
+    format_enum_names.Emplace(Format::kIr, "ir");
+#endif
+
+#if TINT_BUILD_SPV_WRITER
+    format_enum_names.Emplace(Format::kSpirv, "spirv");
+    format_enum_names.Emplace(Format::kSpvAsm, "spvasm");
+#endif
+
+#if TINT_BUILD_MSL_WRITER
+    format_enum_names.Emplace(Format::kMsl, "msl");
+#endif
+
+#if TINT_BUILD_HLSL_WRITER
+    format_enum_names.Emplace(Format::kHlsl, "hlsl");
+    format_enum_names.Emplace(Format::kHlslFxc, "hlsl-fxc");
+#endif
+
+#if TINT_BUILD_GLSL_WRITER
+    format_enum_names.Emplace(Format::kGlsl, "glsl");
+#endif
 
     OptionSet options;
     auto& fmt = options.Add<EnumOption<Format>>("format",
