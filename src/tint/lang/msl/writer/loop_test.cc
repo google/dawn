@@ -279,5 +279,54 @@ void a() {
 )");
 }
 
+// Test that we elide the mechanism used to avoid infinite loop UB when we detect a loop as finite.
+TEST_F(MslWriterTest, LoopInitializer_WithRobustness_DetectedAsFinite) {
+    auto* func = b.Function("a", ty.void_());
+    b.Append(func->Block(), [&] {
+        auto* l = b.Loop();
+        b.Append(l->Initializer(), [&] {
+            auto* v = b.Var("v", 0_u);
+            b.NextIteration(l);
+
+            b.Append(l->Body(), [&] {
+                auto* ifelse = b.If(b.LessThan<bool>(b.Load(v), 10_u));
+                b.Append(ifelse->True(), [&] {  //
+                    b.ExitIf(ifelse);
+                });
+                b.Append(ifelse->False(), [&] {  //
+                    b.ExitLoop(l);
+                });
+                b.Continue(l);
+            });
+            b.Append(l->Continuing(), [&] {  //
+                b.Store(v, b.Add<u32>(b.Load(v), 1_u));
+                b.NextIteration(l);
+            });
+        });
+        b.Return(func);
+    });
+
+    ASSERT_TRUE(Generate(NoRobustness())) << err_ << output_.msl;
+    EXPECT_EQ(output_.msl, R"(#include <metal_stdlib>
+using namespace metal;
+
+void a() {
+  {
+    uint v = 0u;
+    while(true) {
+      if ((v < 10u)) {
+      } else {
+        break;
+      }
+      {
+        v = (v + 1u);
+      }
+      continue;
+    }
+  }
+}
+)");
+}
+
 }  // namespace
 }  // namespace tint::msl::writer
