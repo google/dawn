@@ -289,12 +289,8 @@ WGPUFuture Adapter::RequestDeviceF(const WGPUDeviceDescriptor* descriptor,
     WGPUDeviceDescriptor wireDescriptor = {};
     if (descriptor) {
         wireDescriptor = *descriptor;
-        wireDescriptor.deviceLostCallback = nullptr;
-        wireDescriptor.deviceLostUserdata = nullptr;
-        wireDescriptor.deviceLostCallbackInfo.callback = nullptr;
-        wireDescriptor.deviceLostCallbackInfo.userdata = nullptr;
-        wireDescriptor.uncapturedErrorCallbackInfo.callback = nullptr;
-        wireDescriptor.uncapturedErrorCallbackInfo.userdata = nullptr;
+        wireDescriptor.deviceLostCallbackInfo2 = {};
+        wireDescriptor.uncapturedErrorCallbackInfo2 = {};
     }
 
     AdapterRequestDeviceCmd cmd;
@@ -325,12 +321,8 @@ WGPUFuture Adapter::RequestDevice2(const WGPUDeviceDescriptor* descriptor,
     WGPUDeviceDescriptor wireDescriptor = {};
     if (descriptor) {
         wireDescriptor = *descriptor;
-        wireDescriptor.deviceLostCallback = nullptr;
-        wireDescriptor.deviceLostUserdata = nullptr;
-        wireDescriptor.deviceLostCallbackInfo.callback = nullptr;
-        wireDescriptor.deviceLostCallbackInfo.userdata = nullptr;
-        wireDescriptor.uncapturedErrorCallbackInfo.callback = nullptr;
-        wireDescriptor.uncapturedErrorCallbackInfo.userdata = nullptr;
+        wireDescriptor.deviceLostCallbackInfo2 = {};
+        wireDescriptor.uncapturedErrorCallbackInfo2 = {};
     }
 
     AdapterRequestDeviceCmd cmd;

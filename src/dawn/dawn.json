@@ -242,10 +242,6 @@
             {"name": "required features", "type": "feature name", "annotation": "const*", "length": "required feature count", "default": "nullptr"},
             {"name": "required limits", "type": "required limits", "annotation": "const*", "optional": true},
             {"name": "default queue", "type": "queue descriptor"},
-            {"name": "device lost callback", "type": "device lost callback", "default": "nullptr", "tags": ["deprecated"]},
-            {"name": "device lost userdata", "type": "void *", "default": "nullptr", "tags": ["deprecated"]},
-            {"name": "device lost callback info", "type": "device lost callback info"},
-            {"name": "uncaptured error callback info", "type": "uncaptured error callback info"},
             {"name": "device lost callback info 2", "type": "device lost callback info 2"},
             {"name": "uncaptured error callback info 2", "type": "uncaptured error callback info 2"}
         ]
@@ -1594,28 +1590,11 @@
                 "tags": ["dawn"]
             },
             {
-                "name": "set uncaptured error callback",
-                "no autolock": true,
-                "args": [
-                    {"name": "callback", "type": "error callback"},
-                    {"name": "userdata", "type": "void *"}
-                ]
-            },
-            {
                 "name": "set logging callback",
                 "no autolock": true,
                 "tags": ["dawn"],
                 "args": [
                     {"name": "callback", "type": "logging callback"},
-                    {"name": "userdata", "type": "void *"}
-                ]
-            },
-            {
-                "name": "set device lost callback",
-                "no autolock": true,
-                "tags": ["deprecated"],
-                "args": [
-                    {"name": "callback", "type": "device lost callback"},
                     {"name": "userdata", "type": "void *"}
                 ]
             },
