@@ -191,6 +191,40 @@ TEST_P(MultithreadTests, Device_DroppedInCallback_OnAnotherThread) {
     });
 }
 
+// Test that waiting for a device lost after it's lost does not block.
+TEST_P(MultithreadTests, Device_WaitForDroppedAfterDropped) {
+    auto future = device.GetLostFuture();
+
+    LoseDeviceForTesting();
+    EXPECT_EQ(GetInstance().WaitAny(future, 0), wgpu::WaitStatus::Success);
+
+    EXPECT_EQ(future.id, device.GetLostFuture().id);
+}
+
+// Test that we can wait for a device lost on another thread.
+TEST_P(MultithreadTests, Device_WaitForDroppedInAnotherThread) {
+    // TODO(crbug.com/dawn/1779): This test seems to cause flakiness in other sampling tests on
+    // NVIDIA.
+    DAWN_SUPPRESS_TEST_IF(IsD3D12() && IsNvidia());
+
+    enum class Step {
+        Begin,
+        Waiting,
+    };
+
+    LockStep<Step> lockStep(Step::Begin);
+    std::thread waitThread([&] {
+        auto future = device.GetLostFuture();
+        EXPECT_EQ(GetInstance().WaitAny(future, 0), wgpu::WaitStatus::TimedOut);
+        lockStep.Signal(Step::Waiting);
+        EXPECT_EQ(GetInstance().WaitAny(future, UINT64_MAX), wgpu::WaitStatus::Success);
+    });
+
+    lockStep.Wait(Step::Waiting);
+    LoseDeviceForTesting();
+    waitThread.join();
+}
+
 // Test that multiple buffers being created and mapped on multiple threads won't interfere with
 // each other.
 TEST_P(MultithreadTests, Buffers_MapInParallel) {

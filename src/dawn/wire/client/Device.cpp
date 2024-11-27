@@ -172,9 +172,10 @@ class Device::DeviceLostEvent : public TrackedEvent {
     EventType GetType() override { return kType; }
 
     WireResult ReadyHook(FutureID futureID, WGPUDeviceLostReason reason, WGPUStringView message) {
-        mReason = reason;
-        mMessage = ToString(message);
-        mDevice->mDeviceLostInfo.futureID = kNullFutureID;
+        if (mMessage.empty()) {
+            mReason = reason;
+            mMessage = ToString(message);
+        }
         return WireResult::Success;
     }
 
@@ -318,22 +319,18 @@ void Device::HandleLogging(WGPULoggingType loggingType, WGPUStringView message) 
 }
 
 void Device::HandleDeviceLost(WGPUDeviceLostReason reason, WGPUStringView message) {
-    FutureID futureID = GetDeviceLostFuture().id;
-    if (futureID != kNullFutureID) {
-        DAWN_CHECK(GetEventManager().SetFutureReady<DeviceLostEvent>(futureID, reason, message) ==
-                   WireResult::Success);
-    }
+    FutureID futureID = GetLostFuture().id;
+    DAWN_CHECK(GetEventManager().SetFutureReady<DeviceLostEvent>(futureID, reason, message) ==
+               WireResult::Success);
     mIsAlive = false;
 }
 
-WGPUFuture Device::GetDeviceLostFuture() {
+WGPUFuture Device::GetLostFuture() {
     // Lazily track the device lost event so that event ordering w.r.t RequestDevice is correct.
     if (mDeviceLostInfo.event != nullptr) {
-        auto [deviceLostFutureIDInternal, tracked] =
+        auto [deviceLostFutureIDInternal, _] =
             GetEventManager().TrackEvent(std::move(mDeviceLostInfo.event));
-        if (tracked) {
-            mDeviceLostInfo.futureID = deviceLostFutureIDInternal;
-        }
+        mDeviceLostInfo.futureID = deviceLostFutureIDInternal;
     }
     return {mDeviceLostInfo.futureID};
 }
