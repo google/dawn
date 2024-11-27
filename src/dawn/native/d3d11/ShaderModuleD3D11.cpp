@@ -252,18 +252,11 @@ ResultOrError<d3d::CompiledShader> ShaderModule::Compile(
     req.hlsl.tintOptions.polyfill_pack_unpack_4x8 = true;
 
     CacheResult<d3d::CompiledShader> compiledShader;
-    MaybeError compileError = [&]() -> MaybeError {
-        DAWN_TRY_LOAD_OR_RUN(compiledShader, device, std::move(req), d3d::CompiledShader::FromBlob,
-                             d3d::CompileShader, "D3D11.CompileShader");
-        return {};
-    }();
+    DAWN_TRY_LOAD_OR_RUN(compiledShader, device, std::move(req), d3d::CompiledShader::FromBlob,
+                         d3d::CompileShader, "D3D11.CompileShader");
 
     if (device->IsToggleEnabled(Toggle::DumpShaders)) {
         d3d::DumpFXCCompiledShader(device, *compiledShader, compileFlags);
-    }
-
-    if (compileError.IsError()) {
-        return {compileError.AcquireError()};
     }
 
     device->GetBlobCache()->EnsureStored(compiledShader);

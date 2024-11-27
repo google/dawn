@@ -59,39 +59,34 @@ void DumpDXCCompiledShader(Device* device,
                            const dawn::native::d3d::CompiledShader& compiledShader,
                            uint32_t compileFlags) {
     std::ostringstream dumpedMsg;
-    // The HLSL may be empty if compilation failed.
-    if (!compiledShader.hlslSource.empty()) {
-        dumpedMsg << "/* Dumped generated HLSL */\n" << compiledShader.hlslSource << "\n";
-    }
+    DAWN_ASSERT(!compiledShader.hlslSource.empty());
+    dumpedMsg << "/* Dumped generated HLSL */\n" << compiledShader.hlslSource << "\n";
 
-    // The blob may be empty if DXC compilation failed.
     const Blob& shaderBlob = compiledShader.shaderBlob;
-    if (!shaderBlob.Empty()) {
-        dumpedMsg << "/* DXC compile flags */\n"
-                  << dawn::native::d3d::CompileFlagsToString(compileFlags) << "\n";
-        dumpedMsg << "/* Dumped disassembled DXIL */\n";
-        DxcBuffer dxcBuffer;
-        dxcBuffer.Encoding = DXC_CP_UTF8;
-        dxcBuffer.Ptr = shaderBlob.Data();
-        dxcBuffer.Size = shaderBlob.Size();
+    DAWN_ASSERT(!shaderBlob.Empty());
+    dumpedMsg << "/* DXC compile flags */\n"
+              << dawn::native::d3d::CompileFlagsToString(compileFlags) << "\n";
+    dumpedMsg << "/* Dumped disassembled DXIL */\n";
+    DxcBuffer dxcBuffer;
+    dxcBuffer.Encoding = DXC_CP_UTF8;
+    dxcBuffer.Ptr = shaderBlob.Data();
+    dxcBuffer.Size = shaderBlob.Size();
 
-        ComPtr<IDxcResult> dxcResult;
-        device->GetDxcCompiler()->Disassemble(&dxcBuffer, IID_PPV_ARGS(&dxcResult));
+    ComPtr<IDxcResult> dxcResult;
+    device->GetDxcCompiler()->Disassemble(&dxcBuffer, IID_PPV_ARGS(&dxcResult));
 
-        ComPtr<IDxcBlobEncoding> disassembly;
-        if (dxcResult && dxcResult->HasOutput(DXC_OUT_DISASSEMBLY) &&
-            SUCCEEDED(
-                dxcResult->GetOutput(DXC_OUT_DISASSEMBLY, IID_PPV_ARGS(&disassembly), nullptr))) {
-            dumpedMsg << std::string_view(static_cast<const char*>(disassembly->GetBufferPointer()),
-                                          disassembly->GetBufferSize());
-        } else {
-            dumpedMsg << "DXC disassemble failed\n";
-            ComPtr<IDxcBlobEncoding> errors;
-            if (dxcResult && dxcResult->HasOutput(DXC_OUT_ERRORS) &&
-                SUCCEEDED(dxcResult->GetOutput(DXC_OUT_ERRORS, IID_PPV_ARGS(&errors), nullptr))) {
-                dumpedMsg << std::string_view(static_cast<const char*>(errors->GetBufferPointer()),
-                                              errors->GetBufferSize());
-            }
+    ComPtr<IDxcBlobEncoding> disassembly;
+    if (dxcResult && dxcResult->HasOutput(DXC_OUT_DISASSEMBLY) &&
+        SUCCEEDED(dxcResult->GetOutput(DXC_OUT_DISASSEMBLY, IID_PPV_ARGS(&disassembly), nullptr))) {
+        dumpedMsg << std::string_view(static_cast<const char*>(disassembly->GetBufferPointer()),
+                                      disassembly->GetBufferSize());
+    } else {
+        dumpedMsg << "DXC disassemble failed\n";
+        ComPtr<IDxcBlobEncoding> errors;
+        if (dxcResult && dxcResult->HasOutput(DXC_OUT_ERRORS) &&
+            SUCCEEDED(dxcResult->GetOutput(DXC_OUT_ERRORS, IID_PPV_ARGS(&errors), nullptr))) {
+            dumpedMsg << std::string_view(static_cast<const char*>(errors->GetBufferPointer()),
+                                          errors->GetBufferSize());
         }
     }
 
@@ -381,11 +376,8 @@ ResultOrError<d3d::CompiledShader> ShaderModule::Compile(
     req.hlsl.limits = LimitsForCompilationRequest::Create(limits.v1);
 
     CacheResult<d3d::CompiledShader> compiledShader;
-    MaybeError compileError = [&]() -> MaybeError {
-        DAWN_TRY_LOAD_OR_RUN(compiledShader, device, std::move(req), d3d::CompiledShader::FromBlob,
-                             d3d::CompileShader, "D3D12.CompileShader");
-        return {};
-    }();
+    DAWN_TRY_LOAD_OR_RUN(compiledShader, device, std::move(req), d3d::CompiledShader::FromBlob,
+                         d3d::CompileShader, "D3D12.CompileShader");
 
     if (device->IsToggleEnabled(Toggle::DumpShaders)) {
         if (device->IsToggleEnabled(Toggle::UseDXC)) {
@@ -393,10 +385,6 @@ ResultOrError<d3d::CompiledShader> ShaderModule::Compile(
         } else {
             d3d::DumpFXCCompiledShader(device, *compiledShader, compileFlags);
         }
-    }
-
-    if (compileError.IsError()) {
-        return {compileError.AcquireError()};
     }
 
     device->GetBlobCache()->EnsureStored(compiledShader);

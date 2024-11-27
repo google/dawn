@@ -393,28 +393,24 @@ void DumpFXCCompiledShader(Device* device,
                            const CompiledShader& compiledShader,
                            uint32_t compileFlags) {
     std::ostringstream dumpedMsg;
-    // The HLSL may be empty if compilation failed.
-    if (!compiledShader.hlslSource.empty()) {
-        dumpedMsg << "/* Dumped generated HLSL */\n" << compiledShader.hlslSource << "\n";
-    }
+    DAWN_ASSERT(!compiledShader.hlslSource.empty());
+    dumpedMsg << "/* Dumped generated HLSL */\n" << compiledShader.hlslSource << "\n";
 
-    // The blob may be empty if FXC compilation failed.
     const Blob& shaderBlob = compiledShader.shaderBlob;
-    if (!shaderBlob.Empty()) {
-        dumpedMsg << "/* FXC compile flags */\n" << CompileFlagsToString(compileFlags) << "\n";
-        dumpedMsg << "/* Dumped disassembled DXBC */\n";
-        ComPtr<ID3DBlob> disassembly;
-        UINT flags =
-            // Some literals are printed as floats with precision(6) which is not enough
-            // precision for values very close to 0, so always print literals as hex values.
-            D3D_DISASM_PRINT_HEX_LITERALS;
-        if (FAILED(device->GetFunctions()->d3dDisassemble(shaderBlob.Data(), shaderBlob.Size(),
-                                                          flags, nullptr, &disassembly))) {
-            dumpedMsg << "D3D disassemble failed\n";
-        } else {
-            dumpedMsg << std::string_view(static_cast<const char*>(disassembly->GetBufferPointer()),
-                                          disassembly->GetBufferSize());
-        }
+    DAWN_ASSERT(!shaderBlob.Empty());
+    dumpedMsg << "/* FXC compile flags */\n" << CompileFlagsToString(compileFlags) << "\n";
+    dumpedMsg << "/* Dumped disassembled DXBC */\n";
+    ComPtr<ID3DBlob> disassembly;
+    UINT flags =
+        // Some literals are printed as floats with precision(6) which is not enough
+        // precision for values very close to 0, so always print literals as hex values.
+        D3D_DISASM_PRINT_HEX_LITERALS;
+    if (FAILED(device->GetFunctions()->d3dDisassemble(shaderBlob.Data(), shaderBlob.Size(), flags,
+                                                      nullptr, &disassembly))) {
+        dumpedMsg << "D3D disassemble failed\n";
+    } else {
+        dumpedMsg << std::string_view(static_cast<const char*>(disassembly->GetBufferPointer()),
+                                      disassembly->GetBufferSize());
     }
 
     std::string logMessage = dumpedMsg.str();
