@@ -43,14 +43,14 @@ using HlslWriterPromoteInitializersTest = core::ir::transform::TransformTest;
 TEST_F(HlslWriterPromoteInitializersTest, NoStructInitializers) {
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
-        b.Var<private_>("a", b.Zero<i32>());
+        b.Var<function>("a", b.Zero<i32>());
         b.Return(func);
     });
 
     auto* src = R"(
 %foo = @fragment func():void {
   $B1: {
-    %a:ptr<private, i32, read_write> = var, 0i
+    %a:ptr<function, i32, read_write> = var, 0i
     ret
   }
 }
@@ -70,7 +70,7 @@ TEST_F(HlslWriterPromoteInitializersTest, StructInVarNoChange) {
 
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
-        b.Var<private_>("a", b.Composite(str_ty, 1_i));
+        b.Var<function>("a", b.Composite(str_ty, 1_i));
         b.Return(func);
     });
 
@@ -81,7 +81,7 @@ S = struct @align(4) {
 
 %foo = @fragment func():void {
   $B1: {
-    %a:ptr<private, S, read_write> = var, S(1i)
+    %a:ptr<function, S, read_write> = var, S(1i)
     ret
   }
 }
@@ -97,14 +97,14 @@ S = struct @align(4) {
 TEST_F(HlslWriterPromoteInitializersTest, ArrayInVarNoChange) {
     auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kFragment);
     b.Append(func->Block(), [&] {
-        b.Var<private_>("a", b.Zero<array<i32, 2>>());
+        b.Var<function>("a", b.Zero<array<i32, 2>>());
         b.Return(func);
     });
 
     auto* src = R"(
 %foo = @fragment func():void {
   $B1: {
-    %a:ptr<private, array<i32, 2>, read_write> = var, array<i32, 2>(0i)
+    %a:ptr<function, array<i32, 2>, read_write> = var, array<i32, 2>(0i)
     ret
   }
 }

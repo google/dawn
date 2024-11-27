@@ -30,6 +30,7 @@
 
 #include <string>
 
+#include "src/tint/lang/core/ir/validator.h"
 #include "src/tint/utils/result/result.h"
 
 // Forward declarations.

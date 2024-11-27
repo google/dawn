@@ -58,6 +58,8 @@ enum class Capability : uint8_t {
     kAllowRefTypes,
     /// Allows access instructions to create pointers to vector elements.
     kAllowVectorElementPointer,
+    /// Allows private address space variables in function scopes.
+    kAllowPrivateVarsInFunctions,
 };
 
 /// Capabilities is a set of Capability

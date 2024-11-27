@@ -1552,7 +1552,7 @@ TEST_F(IR_ValidatorTest, Function_BoolInputWithoutFrontFacing_via_MSV) {
 
     b.Append(f->Block(), [&] {
         auto* l = b.Load(invalid);
-        auto* v = b.Var("v", AddressSpace::kPrivate, ty.bool_());
+        auto* v = b.Var("v", AddressSpace::kFunction, ty.bool_());
         v->SetInitializer(l->Result(0));
         b.Unreachable();
     });
@@ -1573,7 +1573,7 @@ $B1: {  # root
 %f = @fragment func():void {
   $B2: {
     %3:bool = load %invalid
-    %v:ptr<private, bool, read_write> = var, %3
+    %v:ptr<function, bool, read_write> = var, %3
     unreachable
   }
 }
@@ -5150,21 +5150,42 @@ note: # Disassembly
 )");
 }
 
-TEST_F(IR_ValidatorTest, Var_Private_UnexpectedInputAttachmentIndex) {
+TEST_F(IR_ValidatorTest, Var_Function_OutsideFunctionScope) {
+    auto* v = b.Var<function, f32>();
+    mod.root_block->Append(v);
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_EQ(res.Failure().reason.Str(),
+              R"(:2:39 error: var: vars in the 'function' address space must be in a function scope
+  %1:ptr<function, f32, read_write> = var
+                                      ^^^
+
+:1:1 note: in block
+$B1: {  # root
+^^^
+
+note: # Disassembly
+$B1: {  # root
+  %1:ptr<function, f32, read_write> = var
+}
+
+)");
+}
+
+TEST_F(IR_ValidatorTest, Var_NonFunction_InsideFunctionScope) {
     auto* f = b.Function("my_func", ty.void_());
 
     b.Append(f->Block(), [&] {
-        auto* v = b.Var<private_, f32>();
-
-        v->SetInputAttachmentIndex(0);
+        b.Var<private_, f32>();
         b.Return(f);
     });
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_EQ(res.Failure().reason.Str(),
-              R"(:3:40 error: var: '@input_attachment_index' is not valid for non-handle var
-    %2:ptr<private, f32, read_write> = var @input_attachment_index(0)
+              R"(:3:40 error: var: vars in a function scope must be in the 'function' address space
+    %2:ptr<private, f32, read_write> = var
                                        ^^^
 
 :2:3 note: in block
@@ -5174,132 +5195,144 @@ TEST_F(IR_ValidatorTest, Var_Private_UnexpectedInputAttachmentIndex) {
 note: # Disassembly
 %my_func = func():void {
   $B1: {
-    %2:ptr<private, f32, read_write> = var @input_attachment_index(0)
+    %2:ptr<private, f32, read_write> = var
     ret
   }
 }
+)");
+}
+
+TEST_F(IR_ValidatorTest, Var_Private_InsideFunctionScopeWithCapability) {
+    auto* f = b.Function("my_func", ty.void_());
+
+    b.Append(f->Block(), [&] {
+        b.Var<private_, f32>();
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod, Capabilities{Capability::kAllowPrivateVarsInFunctions});
+    ASSERT_EQ(res, Success);
+}
+
+TEST_F(IR_ValidatorTest, Var_Private_UnexpectedInputAttachmentIndex) {
+    auto* v = b.Var<private_, f32>();
+    v->SetInputAttachmentIndex(0);
+    mod.root_block->Append(v);
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_EQ(res.Failure().reason.Str(),
+              R"(:2:38 error: var: '@input_attachment_index' is not valid for non-handle var
+  %1:ptr<private, f32, read_write> = var @input_attachment_index(0)
+                                     ^^^
+
+:1:1 note: in block
+$B1: {  # root
+^^^
+
+note: # Disassembly
+$B1: {  # root
+  %1:ptr<private, f32, read_write> = var @input_attachment_index(0)
+}
+
 )");
 }
 
 TEST_F(IR_ValidatorTest, Var_PushConstant_UnexpectedInputAttachmentIndex) {
-    auto* f = b.Function("my_func", ty.void_());
-
-    b.Append(f->Block(), [&] {
-        auto* v = b.Var<push_constant, f32>();
-        v->SetInputAttachmentIndex(0);
-        b.Return(f);
-    });
+    auto* v = b.Var<push_constant, f32>();
+    v->SetInputAttachmentIndex(0);
+    mod.root_block->Append(v);
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_EQ(res.Failure().reason.Str(),
-              R"(:3:40 error: var: '@input_attachment_index' is not valid for non-handle var
-    %2:ptr<push_constant, f32, read> = var @input_attachment_index(0)
-                                       ^^^
+              R"(:2:38 error: var: '@input_attachment_index' is not valid for non-handle var
+  %1:ptr<push_constant, f32, read> = var @input_attachment_index(0)
+                                     ^^^
 
-:2:3 note: in block
-  $B1: {
-  ^^^
+:1:1 note: in block
+$B1: {  # root
+^^^
 
 note: # Disassembly
-%my_func = func():void {
-  $B1: {
-    %2:ptr<push_constant, f32, read> = var @input_attachment_index(0)
-    ret
-  }
+$B1: {  # root
+  %1:ptr<push_constant, f32, read> = var @input_attachment_index(0)
 }
+
 )");
 }
 
 TEST_F(IR_ValidatorTest, Var_Storage_UnexpectedInputAttachmentIndex) {
-    auto* f = b.Function("my_func", ty.void_());
-
-    b.Append(f->Block(), [&] {
-        auto* v = b.Var<storage, f32>();
-        v->SetBindingPoint(0, 0);
-        v->SetInputAttachmentIndex(0);
-        b.Return(f);
-    });
+    auto* v = b.Var<storage, f32>();
+    v->SetBindingPoint(0, 0);
+    v->SetInputAttachmentIndex(0);
+    mod.root_block->Append(v);
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_EQ(res.Failure().reason.Str(),
-              R"(:3:40 error: var: '@input_attachment_index' is not valid for non-handle var
-    %2:ptr<storage, f32, read_write> = var @binding_point(0, 0) @input_attachment_index(0)
-                                       ^^^
+              R"(:2:38 error: var: '@input_attachment_index' is not valid for non-handle var
+  %1:ptr<storage, f32, read_write> = var @binding_point(0, 0) @input_attachment_index(0)
+                                     ^^^
 
-:2:3 note: in block
-  $B1: {
-  ^^^
+:1:1 note: in block
+$B1: {  # root
+^^^
 
 note: # Disassembly
-%my_func = func():void {
-  $B1: {
-    %2:ptr<storage, f32, read_write> = var @binding_point(0, 0) @input_attachment_index(0)
-    ret
-  }
+$B1: {  # root
+  %1:ptr<storage, f32, read_write> = var @binding_point(0, 0) @input_attachment_index(0)
 }
+
 )");
 }
 
 TEST_F(IR_ValidatorTest, Var_Uniform_UnexpectedInputAttachmentIndex) {
-    auto* f = b.Function("my_func", ty.void_());
-
-    b.Append(f->Block(), [&] {
-        auto* v = b.Var<uniform, f32>();
-        v->SetBindingPoint(0, 0);
-        v->SetInputAttachmentIndex(0);
-        b.Return(f);
-    });
+    auto* v = b.Var<uniform, f32>();
+    v->SetBindingPoint(0, 0);
+    v->SetInputAttachmentIndex(0);
+    mod.root_block->Append(v);
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_EQ(res.Failure().reason.Str(),
-              R"(:3:34 error: var: '@input_attachment_index' is not valid for non-handle var
-    %2:ptr<uniform, f32, read> = var @binding_point(0, 0) @input_attachment_index(0)
-                                 ^^^
+              R"(:2:32 error: var: '@input_attachment_index' is not valid for non-handle var
+  %1:ptr<uniform, f32, read> = var @binding_point(0, 0) @input_attachment_index(0)
+                               ^^^
 
-:2:3 note: in block
-  $B1: {
-  ^^^
+:1:1 note: in block
+$B1: {  # root
+^^^
 
 note: # Disassembly
-%my_func = func():void {
-  $B1: {
-    %2:ptr<uniform, f32, read> = var @binding_point(0, 0) @input_attachment_index(0)
-    ret
-  }
+$B1: {  # root
+  %1:ptr<uniform, f32, read> = var @binding_point(0, 0) @input_attachment_index(0)
 }
+
 )");
 }
 
 TEST_F(IR_ValidatorTest, Var_Workgroup_UnexpectedInputAttachmentIndex) {
-    auto* f = b.Function("my_func", ty.void_());
-
-    b.Append(f->Block(), [&] {
-        auto* v = b.Var<workgroup, f32>();
-        v->SetInputAttachmentIndex(0);
-        b.Return(f);
-    });
+    auto* v = b.Var<workgroup, f32>();
+    v->SetInputAttachmentIndex(0);
+    mod.root_block->Append(v);
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_EQ(res.Failure().reason.Str(),
-              R"(:3:42 error: var: '@input_attachment_index' is not valid for non-handle var
-    %2:ptr<workgroup, f32, read_write> = var @input_attachment_index(0)
-                                         ^^^
+              R"(:2:40 error: var: '@input_attachment_index' is not valid for non-handle var
+  %1:ptr<workgroup, f32, read_write> = var @input_attachment_index(0)
+                                       ^^^
 
-:2:3 note: in block
-  $B1: {
-  ^^^
+:1:1 note: in block
+$B1: {  # root
+^^^
 
 note: # Disassembly
-%my_func = func():void {
-  $B1: {
-    %2:ptr<workgroup, f32, read_write> = var @input_attachment_index(0)
-    ret
-  }
+$B1: {  # root
+  %1:ptr<workgroup, f32, read_write> = var @input_attachment_index(0)
 }
+
 )");
 }
 

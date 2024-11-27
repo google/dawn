@@ -47,7 +47,7 @@ using namespace tint::core::number_suffixes;  // NOLINT
 TEST_F(GlslWriterTest, EmitType_Array) {
     auto* func = b.ComputeFunction("foo");
     b.Append(func->Block(), [&] {
-        b.Var("a", ty.ptr(core::AddressSpace::kPrivate, ty.array<bool, 4>()));
+        b.Var("a", ty.ptr(core::AddressSpace::kFunction, ty.array<bool, 4>()));
         b.Return(func);
     });
 
@@ -63,7 +63,7 @@ void main() {
 TEST_F(GlslWriterTest, EmitType_ArrayOfArray) {
     auto* func = b.ComputeFunction("foo");
     b.Append(func->Block(), [&] {
-        b.Var("a", ty.ptr(core::AddressSpace::kPrivate, ty.array(ty.array<bool, 4>(), 5)));
+        b.Var("a", ty.ptr(core::AddressSpace::kFunction, ty.array(ty.array<bool, 4>(), 5)));
         b.Return(func);
     });
 
@@ -80,7 +80,7 @@ TEST_F(GlslWriterTest, EmitType_ArrayOfArrayOfArray) {
     auto* func = b.ComputeFunction("foo");
     b.Append(func->Block(), [&] {
         b.Var("a",
-              ty.ptr(core::AddressSpace::kPrivate, ty.array(ty.array(ty.array<bool, 4>(), 5), 6)));
+              ty.ptr(core::AddressSpace::kFunction, ty.array(ty.array(ty.array<bool, 4>(), 5), 6)));
         b.Return(func);
     });
 
@@ -100,7 +100,7 @@ TEST_F(GlslWriterTest, EmitType_StructArrayVec) {
                                             });
     auto* func = b.ComputeFunction("foo");
     b.Append(func->Block(), [&] {
-        b.Var("a", ty.ptr(core::AddressSpace::kPrivate, Inner));
+        b.Var("a", ty.ptr(core::AddressSpace::kFunction, Inner));
         b.Return(func);
     });
 
@@ -121,7 +121,7 @@ void main() {
 TEST_F(GlslWriterTest, EmitType_Bool) {
     auto* func = b.ComputeFunction("foo");
     b.Append(func->Block(), [&] {
-        b.Var("a", ty.ptr(core::AddressSpace::kPrivate, ty.bool_()));
+        b.Var("a", ty.ptr(core::AddressSpace::kFunction, ty.bool_()));
         b.Return(func);
     });
 
@@ -137,7 +137,7 @@ void main() {
 TEST_F(GlslWriterTest, EmitType_F32) {
     auto* func = b.ComputeFunction("foo");
     b.Append(func->Block(), [&] {
-        b.Var("a", ty.ptr(core::AddressSpace::kPrivate, ty.f32()));
+        b.Var("a", ty.ptr(core::AddressSpace::kFunction, ty.f32()));
         b.Return(func);
     });
 
@@ -153,7 +153,7 @@ void main() {
 TEST_F(GlslWriterTest, EmitType_F16) {
     auto* func = b.ComputeFunction("foo");
     b.Append(func->Block(), [&] {
-        b.Var("a", ty.ptr(core::AddressSpace::kPrivate, ty.f16()));
+        b.Var("a", ty.ptr(core::AddressSpace::kFunction, ty.f16()));
         b.Return(func);
     });
 
@@ -170,7 +170,7 @@ void main() {
 TEST_F(GlslWriterTest, EmitType_I32) {
     auto* func = b.ComputeFunction("foo");
     b.Append(func->Block(), [&] {
-        b.Var("a", ty.ptr(core::AddressSpace::kPrivate, ty.i32()));
+        b.Var("a", ty.ptr(core::AddressSpace::kFunction, ty.i32()));
         b.Return(func);
     });
 
@@ -186,7 +186,7 @@ void main() {
 TEST_F(GlslWriterTest, EmitType_Matrix_F32) {
     auto* func = b.ComputeFunction("foo");
     b.Append(func->Block(), [&] {
-        b.Var("a", ty.ptr(core::AddressSpace::kPrivate, ty.mat2x3<f32>()));
+        b.Var("a", ty.ptr(core::AddressSpace::kFunction, ty.mat2x3<f32>()));
         b.Return(func);
     });
 
@@ -202,7 +202,7 @@ void main() {
 TEST_F(GlslWriterTest, EmitType_MatrixSquare_F32) {
     auto* func = b.ComputeFunction("foo");
     b.Append(func->Block(), [&] {
-        b.Var("a", ty.ptr(core::AddressSpace::kPrivate, ty.mat2x2<f32>()));
+        b.Var("a", ty.ptr(core::AddressSpace::kFunction, ty.mat2x2<f32>()));
         b.Return(func);
     });
 
@@ -218,7 +218,7 @@ void main() {
 TEST_F(GlslWriterTest, EmitType_Matrix_F16) {
     auto* func = b.ComputeFunction("foo");
     b.Append(func->Block(), [&] {
-        b.Var("a", ty.ptr(core::AddressSpace::kPrivate, ty.mat2x3<f16>()));
+        b.Var("a", ty.ptr(core::AddressSpace::kFunction, ty.mat2x3<f16>()));
         b.Return(func);
     });
 
@@ -235,7 +235,7 @@ void main() {
 TEST_F(GlslWriterTest, EmitType_U32) {
     auto* func = b.ComputeFunction("foo");
     b.Append(func->Block(), [&] {
-        b.Var("a", ty.ptr(core::AddressSpace::kPrivate, ty.u32()));
+        b.Var("a", ty.ptr(core::AddressSpace::kFunction, ty.u32()));
         b.Return(func);
     });
 
@@ -277,7 +277,7 @@ void main() {
 TEST_F(GlslWriterTest, EmitType_Vector_F32) {
     auto* func = b.ComputeFunction("foo");
     b.Append(func->Block(), [&] {
-        b.Var("a", ty.ptr(core::AddressSpace::kPrivate, ty.vec3<f32>()));
+        b.Var("a", ty.ptr(core::AddressSpace::kFunction, ty.vec3<f32>()));
         b.Return(func);
     });
 
@@ -293,7 +293,7 @@ void main() {
 TEST_F(GlslWriterTest, EmitType_Vector_F16) {
     auto* func = b.ComputeFunction("foo");
     b.Append(func->Block(), [&] {
-        b.Var("a", ty.ptr(core::AddressSpace::kPrivate, ty.vec3<f16>()));
+        b.Var("a", ty.ptr(core::AddressSpace::kFunction, ty.vec3<f16>()));
         b.Return(func);
     });
 
@@ -310,7 +310,7 @@ void main() {
 TEST_F(GlslWriterTest, EmitType_Vector_I32) {
     auto* func = b.ComputeFunction("foo");
     b.Append(func->Block(), [&] {
-        b.Var("a", ty.ptr(core::AddressSpace::kPrivate, ty.vec2<i32>()));
+        b.Var("a", ty.ptr(core::AddressSpace::kFunction, ty.vec2<i32>()));
         b.Return(func);
     });
 
@@ -326,7 +326,7 @@ void main() {
 TEST_F(GlslWriterTest, EmitType_Vector_U32) {
     auto* func = b.ComputeFunction("foo");
     b.Append(func->Block(), [&] {
-        b.Var("a", ty.ptr(core::AddressSpace::kPrivate, ty.vec4<u32>()));
+        b.Var("a", ty.ptr(core::AddressSpace::kFunction, ty.vec4<u32>()));
         b.Return(func);
     });
 
@@ -342,7 +342,7 @@ void main() {
 TEST_F(GlslWriterTest, EmitType_Vector_bool) {
     auto* func = b.ComputeFunction("foo");
     b.Append(func->Block(), [&] {
-        b.Var("a", ty.ptr(core::AddressSpace::kPrivate, ty.vec3<bool>()));
+        b.Var("a", ty.ptr(core::AddressSpace::kFunction, ty.vec3<bool>()));
         b.Return(func);
     });
 
@@ -375,7 +375,7 @@ TEST_F(GlslWriterTest, EmitType_Struct) {
                                               });
     auto* func = b.ComputeFunction("foo");
     b.Append(func->Block(), [&] {
-        b.Var("a", ty.ptr(core::AddressSpace::kPrivate, s));
+        b.Var("a", ty.ptr(core::AddressSpace::kFunction, s));
         b.Return(func);
     });
 
@@ -401,8 +401,8 @@ TEST_F(GlslWriterTest, EmitType_Struct_Dedup) {
                                               });
     auto* func = b.ComputeFunction("foo");
     b.Append(func->Block(), [&] {
-        b.Var("a", ty.ptr(core::AddressSpace::kPrivate, s));
-        b.Var("b", ty.ptr(core::AddressSpace::kPrivate, s));
+        b.Var("a", ty.ptr(core::AddressSpace::kFunction, s));
+        b.Var("b", ty.ptr(core::AddressSpace::kFunction, s));
         b.Return(func);
     });
 
@@ -435,7 +435,7 @@ TEST_F(GlslWriterTest, EmitType_Struct_Nested) {
                                               });
     auto* func = b.ComputeFunction("foo");
     b.Append(func->Block(), [&] {
-        b.Var("a", ty.ptr(core::AddressSpace::kPrivate, s));
+        b.Var("a", ty.ptr(core::AddressSpace::kFunction, s));
         b.Return(func);
     });
 

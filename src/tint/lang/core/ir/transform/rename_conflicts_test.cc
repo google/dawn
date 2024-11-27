@@ -124,7 +124,7 @@ $B1: {  # root
 
 TEST_F(IRToProgramRenameConflictsTest, Conflict_RootBlockVarAndStructWithSameName) {
     auto* s = ty.Struct(b.ir.symbols.New("v"), {{b.ir.symbols.New("x"), ty.i32()}});
-    b.Append(mod.root_block, [&] { b.ir.SetName(b.Var(ty.ptr(function, s)), "v"); });
+    b.Append(mod.root_block, [&] { b.ir.SetName(b.Var(ty.ptr(private_, s)), "v"); });
 
     auto* src = R"(
 v = struct @align(4) {
@@ -132,7 +132,7 @@ v = struct @align(4) {
 }
 
 $B1: {  # root
-  %v:ptr<function, v, read_write> = var
+  %v:ptr<private, v, read_write> = var
 }
 
 )";
@@ -144,7 +144,7 @@ v = struct @align(4) {
 }
 
 $B1: {  # root
-  %v_1:ptr<function, v, read_write> = var
+  %v_1:ptr<private, v, read_write> = var
 }
 
 )";

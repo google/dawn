@@ -47,14 +47,14 @@ using namespace tint::core::number_suffixes;  // NOLINT
 TEST_F(MslWriterTest, EmitType_Array) {
     auto* func = b.Function("foo", ty.void_());
     b.Append(func->Block(), [&] {
-        b.Var("a", ty.ptr(core::AddressSpace::kPrivate, ty.array<bool, 4>()));
+        b.Var("a", ty.ptr(core::AddressSpace::kFunction, ty.array<bool, 4>()));
         b.Return(func);
     });
 
     ASSERT_TRUE(Generate()) << err_ << output_.msl;
     EXPECT_EQ(output_.msl, MetalHeader() + MetalArray() + R"(
 void foo() {
-  thread tint_array<bool, 4> a = {};
+  tint_array<bool, 4> a = {};
 }
 )");
 }
@@ -62,14 +62,14 @@ void foo() {
 TEST_F(MslWriterTest, EmitType_ArrayOfArray) {
     auto* func = b.Function("foo", ty.void_());
     b.Append(func->Block(), [&] {
-        b.Var("a", ty.ptr(core::AddressSpace::kPrivate, ty.array(ty.array<bool, 4>(), 5)));
+        b.Var("a", ty.ptr(core::AddressSpace::kFunction, ty.array(ty.array<bool, 4>(), 5)));
         b.Return(func);
     });
 
     ASSERT_TRUE(Generate()) << err_ << output_.msl;
     EXPECT_EQ(output_.msl, MetalHeader() + MetalArray() + R"(
 void foo() {
-  thread tint_array<tint_array<bool, 4>, 5> a = {};
+  tint_array<tint_array<bool, 4>, 5> a = {};
 }
 )");
 }
@@ -78,14 +78,14 @@ TEST_F(MslWriterTest, EmitType_ArrayOfArrayOfArray) {
     auto* func = b.Function("foo", ty.void_());
     b.Append(func->Block(), [&] {
         b.Var("a",
-              ty.ptr(core::AddressSpace::kPrivate, ty.array(ty.array(ty.array<bool, 4>(), 5), 6)));
+              ty.ptr(core::AddressSpace::kFunction, ty.array(ty.array(ty.array<bool, 4>(), 5), 6)));
         b.Return(func);
     });
 
     ASSERT_TRUE(Generate()) << err_ << output_.msl;
     EXPECT_EQ(output_.msl, MetalHeader() + MetalArray() + R"(
 void foo() {
-  thread tint_array<tint_array<tint_array<bool, 4>, 5>, 6> a = {};
+  tint_array<tint_array<tint_array<bool, 4>, 5>, 6> a = {};
 }
 )");
 }
@@ -93,14 +93,14 @@ void foo() {
 TEST_F(MslWriterTest, EmitType_RuntimeArray) {
     auto* func = b.Function("foo", ty.void_());
     b.Append(func->Block(), [&] {
-        b.Var("a", ty.ptr(core::AddressSpace::kPrivate, ty.array<bool, 0>()));
+        b.Var("a", ty.ptr(core::AddressSpace::kFunction, ty.array<bool, 0>()));
         b.Return(func);
     });
 
     ASSERT_TRUE(Generate()) << err_ << output_.msl;
     EXPECT_EQ(output_.msl, MetalHeader() + MetalArray() + R"(
 void foo() {
-  thread tint_array<bool, 1> a = {};
+  tint_array<bool, 1> a = {};
 }
 )");
 }
@@ -108,14 +108,14 @@ void foo() {
 TEST_F(MslWriterTest, EmitType_Bool) {
     auto* func = b.Function("foo", ty.void_());
     b.Append(func->Block(), [&] {
-        b.Var("a", ty.ptr(core::AddressSpace::kPrivate, ty.bool_()));
+        b.Var("a", ty.ptr(core::AddressSpace::kFunction, ty.bool_()));
         b.Return(func);
     });
 
     ASSERT_TRUE(Generate()) << err_ << output_.msl;
     EXPECT_EQ(output_.msl, MetalHeader() + R"(
 void foo() {
-  thread bool a = false;
+  bool a = false;
 }
 )");
 }
@@ -123,14 +123,14 @@ void foo() {
 TEST_F(MslWriterTest, EmitType_F32) {
     auto* func = b.Function("foo", ty.void_());
     b.Append(func->Block(), [&] {
-        b.Var("a", ty.ptr(core::AddressSpace::kPrivate, ty.f32()));
+        b.Var("a", ty.ptr(core::AddressSpace::kFunction, ty.f32()));
         b.Return(func);
     });
 
     ASSERT_TRUE(Generate()) << err_ << output_.msl;
     EXPECT_EQ(output_.msl, MetalHeader() + R"(
 void foo() {
-  thread float a = 0.0f;
+  float a = 0.0f;
 }
 )");
 }
@@ -138,14 +138,14 @@ void foo() {
 TEST_F(MslWriterTest, EmitType_F16) {
     auto* func = b.Function("foo", ty.void_());
     b.Append(func->Block(), [&] {
-        b.Var("a", ty.ptr(core::AddressSpace::kPrivate, ty.f16()));
+        b.Var("a", ty.ptr(core::AddressSpace::kFunction, ty.f16()));
         b.Return(func);
     });
 
     ASSERT_TRUE(Generate()) << err_ << output_.msl;
     EXPECT_EQ(output_.msl, MetalHeader() + R"(
 void foo() {
-  thread half a = 0.0h;
+  half a = 0.0h;
 }
 )");
 }
@@ -153,14 +153,14 @@ void foo() {
 TEST_F(MslWriterTest, EmitType_I32) {
     auto* func = b.Function("foo", ty.void_());
     b.Append(func->Block(), [&] {
-        b.Var("a", ty.ptr(core::AddressSpace::kPrivate, ty.i32()));
+        b.Var("a", ty.ptr(core::AddressSpace::kFunction, ty.i32()));
         b.Return(func);
     });
 
     ASSERT_TRUE(Generate()) << err_ << output_.msl;
     EXPECT_EQ(output_.msl, MetalHeader() + R"(
 void foo() {
-  thread int a = 0;
+  int a = 0;
 }
 )");
 }
@@ -168,14 +168,14 @@ void foo() {
 TEST_F(MslWriterTest, EmitType_Matrix_F32) {
     auto* func = b.Function("foo", ty.void_());
     b.Append(func->Block(), [&] {
-        b.Var("a", ty.ptr(core::AddressSpace::kPrivate, ty.mat2x3<f32>()));
+        b.Var("a", ty.ptr(core::AddressSpace::kFunction, ty.mat2x3<f32>()));
         b.Return(func);
     });
 
     ASSERT_TRUE(Generate()) << err_ << output_.msl;
     EXPECT_EQ(output_.msl, MetalHeader() + R"(
 void foo() {
-  thread float2x3 a = float2x3(0.0f);
+  float2x3 a = float2x3(0.0f);
 }
 )");
 }
@@ -183,28 +183,28 @@ void foo() {
 TEST_F(MslWriterTest, EmitType_Matrix_F16) {
     auto* func = b.Function("foo", ty.void_());
     b.Append(func->Block(), [&] {
-        b.Var("a", ty.ptr(core::AddressSpace::kPrivate, ty.mat2x3<f16>()));
+        b.Var("a", ty.ptr(core::AddressSpace::kFunction, ty.mat2x3<f16>()));
         b.Return(func);
     });
 
     ASSERT_TRUE(Generate()) << err_ << output_.msl;
     EXPECT_EQ(output_.msl, MetalHeader() + R"(
 void foo() {
-  thread half2x3 a = half2x3(0.0h);
+  half2x3 a = half2x3(0.0h);
 }
 )");
 }
 TEST_F(MslWriterTest, EmitType_U32) {
     auto* func = b.Function("foo", ty.void_());
     b.Append(func->Block(), [&] {
-        b.Var("a", ty.ptr(core::AddressSpace::kPrivate, ty.u32()));
+        b.Var("a", ty.ptr(core::AddressSpace::kFunction, ty.u32()));
         b.Return(func);
     });
 
     ASSERT_TRUE(Generate()) << err_ << output_.msl;
     EXPECT_EQ(output_.msl, MetalHeader() + R"(
 void foo() {
-  thread uint a = 0u;
+  uint a = 0u;
 }
 )");
 }
@@ -242,14 +242,14 @@ void foo(threadgroup atomic_int* const a) {
 TEST_F(MslWriterTest, EmitType_Vector) {
     auto* func = b.Function("foo", ty.void_());
     b.Append(func->Block(), [&] {
-        b.Var("a", ty.ptr(core::AddressSpace::kPrivate, ty.vec3<f32>()));
+        b.Var("a", ty.ptr(core::AddressSpace::kFunction, ty.vec3<f32>()));
         b.Return(func);
     });
 
     ASSERT_TRUE(Generate()) << err_ << output_.msl;
     EXPECT_EQ(output_.msl, MetalHeader() + R"(
 void foo() {
-  thread float3 a = 0.0f;
+  float3 a = 0.0f;
 }
 )");
 }
@@ -320,7 +320,7 @@ TEST_F(MslWriterTest, EmitType_Struct) {
                                               });
     auto* func = b.Function("foo", ty.void_());
     b.Append(func->Block(), [&] {
-        b.Var("a", ty.ptr(core::AddressSpace::kPrivate, s));
+        b.Var("a", ty.ptr(core::AddressSpace::kFunction, s));
         b.Return(func);
     });
 
@@ -332,7 +332,7 @@ struct S {
 };
 
 void foo() {
-  thread S a = {};
+  S a = {};
 }
 )");
 }
@@ -344,8 +344,8 @@ TEST_F(MslWriterTest, EmitType_Struct_Dedup) {
                                               });
     auto* func = b.Function("foo", ty.void_());
     b.Append(func->Block(), [&] {
-        b.Var("a", ty.ptr(core::AddressSpace::kPrivate, s));
-        b.Var("b", ty.ptr(core::AddressSpace::kPrivate, s));
+        b.Var("a", ty.ptr(core::AddressSpace::kFunction, s));
+        b.Var("b", ty.ptr(core::AddressSpace::kFunction, s));
         b.Return(func);
     });
 
@@ -357,8 +357,8 @@ struct S {
 };
 
 void foo() {
-  thread S a = {};
-  thread S b = {};
+  S a = {};
+  S b = {};
 }
 )");
 }
@@ -1145,14 +1145,14 @@ INSTANTIATE_TEST_SUITE_P(MslWriterTest,
 TEST_F(MslWriterTest, EmitType_SubgroupMatrixLeft) {
     auto* func = b.Function("foo", ty.void_());
     b.Append(func->Block(), [&] {
-        b.Var("a", ty.ptr(core::AddressSpace::kPrivate, ty.subgroup_matrix_left(ty.f32(), 8, 8)));
+        b.Var("a", ty.ptr(core::AddressSpace::kFunction, ty.subgroup_matrix_left(ty.f32(), 8, 8)));
         b.Return(func);
     });
 
     ASSERT_TRUE(Generate({}, validate::MslVersion::kMsl_2_3)) << err_ << output_.msl;
     EXPECT_EQ(output_.msl, MetalHeader() + R"(
 void foo() {
-  thread simdgroup_float8x8 a = make_filled_simdgroup_matrix<float, 8, 8>(0.0f);
+  simdgroup_float8x8 a = make_filled_simdgroup_matrix<float, 8, 8>(0.0f);
 }
 )");
 }
@@ -1177,14 +1177,15 @@ void foo() {
 TEST_F(MslWriterTest, EmitType_SubgroupMatrixResult) {
     auto* func = b.Function("foo", ty.void_());
     b.Append(func->Block(), [&] {
-        b.Var("a", ty.ptr(core::AddressSpace::kPrivate, ty.subgroup_matrix_result(ty.f32(), 8, 8)));
+        b.Var("a",
+              ty.ptr(core::AddressSpace::kFunction, ty.subgroup_matrix_result(ty.f32(), 8, 8)));
         b.Return(func);
     });
 
     ASSERT_TRUE(Generate({}, validate::MslVersion::kMsl_2_3)) << err_ << output_.msl;
     EXPECT_EQ(output_.msl, MetalHeader() + R"(
 void foo() {
-  thread simdgroup_float8x8 a = make_filled_simdgroup_matrix<float, 8, 8>(0.0f);
+  simdgroup_float8x8 a = make_filled_simdgroup_matrix<float, 8, 8>(0.0f);
 }
 )");
 }

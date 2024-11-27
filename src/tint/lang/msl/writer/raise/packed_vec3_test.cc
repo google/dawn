@@ -41,7 +41,7 @@ namespace {
 using MslWriter_PackedVec3Test = core::ir::transform::TransformTest;
 
 TEST_F(MslWriter_PackedVec3Test, NoModify_PrivateVar) {
-    auto* var = b.Var<function, vec3<u32>>("v");
+    auto* var = b.Var<private_, vec3<u32>>("v");
     mod.root_block->Append(var);
 
     auto* func = b.Function("foo", ty.vec3<u32>());
@@ -51,7 +51,7 @@ TEST_F(MslWriter_PackedVec3Test, NoModify_PrivateVar) {
 
     auto* src = R"(
 $B1: {  # root
-  %v:ptr<function, vec3<u32>, read_write> = var
+  %v:ptr<private, vec3<u32>, read_write> = var
 }
 
 %foo = func():vec3<u32> {

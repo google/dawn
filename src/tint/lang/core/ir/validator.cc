@@ -2377,12 +2377,23 @@ void Validator::CheckVar(const Var* var) {
         return;
     }
 
-    {
-        auto result = ValidateBindingPoint(var->BindingPoint(), mv->AddressSpace());
-        if (result != Success) {
-            AddError(var) << result.Failure();
+    if (var->Block() != mod_.root_block && mv->AddressSpace() != AddressSpace::kFunction) {
+        if (!capabilities_.Contains(Capability::kAllowPrivateVarsInFunctions) ||
+            mv->AddressSpace() != AddressSpace::kPrivate) {
+            AddError(var) << "vars in a function scope must be in the 'function' address space";
             return;
         }
+    }
+
+    if (var->Block() == mod_.root_block && mv->AddressSpace() == AddressSpace::kFunction) {
+        AddError(var) << "vars in the 'function' address space must be in a function scope";
+        return;
+    }
+
+    if (auto result = ValidateBindingPoint(var->BindingPoint(), mv->AddressSpace());
+        result != Success) {
+        AddError(var) << result.Failure();
+        return;
     }
 
     if (mv->AddressSpace() == AddressSpace::kWorkgroup) {
