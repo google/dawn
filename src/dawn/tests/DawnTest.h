@@ -343,11 +343,9 @@ class DawnTestBase {
     // Mock callbacks tracking errors and destruction. These are strict mocks because any errors or
     // device loss that aren't expected should result in test failures and not just some warnings
     // printed to stdout.
-    testing::StrictMock<
-        testing::MockCppCallback<void (*)(const wgpu::Device&, wgpu::ErrorType, wgpu::StringView)>>
+    testing::StrictMock<testing::MockCppCallback<wgpu::UncapturedErrorCallback<void>*>>
         mDeviceErrorCallback;
-    testing::StrictMock<testing::MockCppCallback<
-        void (*)(const wgpu::Device&, wgpu::DeviceLostReason, wgpu::StringView)>>
+    testing::StrictMock<testing::MockCppCallback<wgpu::DeviceLostCallback2<void>*>>
         mDeviceLostCallback;
 
     // Helper methods to implement the EXPECT_ macros

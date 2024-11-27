@@ -49,16 +49,6 @@ using testing::SizedString;
 using testing::StrictMock;
 
 // Mock classes to add expectations on the wire calling callbacks
-class MockDeviceErrorCallback {
-  public:
-    MOCK_METHOD(void, Call, (WGPUErrorType type, WGPUStringView message, void* userdata));
-};
-
-std::unique_ptr<StrictMock<MockDeviceErrorCallback>> mockDeviceErrorCallback;
-void ToMockDeviceErrorCallback(WGPUErrorType type, WGPUStringView message, void* userdata) {
-    mockDeviceErrorCallback->Call(type, message, userdata);
-}
-
 class MockDeviceLoggingCallback {
   public:
     MOCK_METHOD(void, Call, (WGPULoggingType type, WGPUStringView message, void* userdata));
@@ -69,16 +59,6 @@ void ToMockDeviceLoggingCallback(WGPULoggingType type, WGPUStringView message, v
     mockDeviceLoggingCallback->Call(type, message, userdata);
 }
 
-class MockDeviceLostCallback {
-  public:
-    MOCK_METHOD(void, Call, (WGPUDeviceLostReason reason, WGPUStringView message, void* userdata));
-};
-
-std::unique_ptr<StrictMock<MockDeviceLostCallback>> mockDeviceLostCallback;
-void ToMockDeviceLostCallback(WGPUDeviceLostReason reason, WGPUStringView message, void* userdata) {
-    mockDeviceLostCallback->Call(reason, message, userdata);
-}
-
 class WireErrorCallbackTests : public WireTest {
   public:
     WireErrorCallbackTests() {}
@@ -86,83 +66,14 @@ class WireErrorCallbackTests : public WireTest {
 
     void SetUp() override {
         WireTest::SetUp();
-
-        mockDeviceErrorCallback = std::make_unique<StrictMock<MockDeviceErrorCallback>>();
         mockDeviceLoggingCallback = std::make_unique<StrictMock<MockDeviceLoggingCallback>>();
-        mockDeviceLostCallback = std::make_unique<StrictMock<MockDeviceLostCallback>>();
     }
 
     void TearDown() override {
         WireTest::TearDown();
-
-        mockDeviceErrorCallback = nullptr;
         mockDeviceLoggingCallback = nullptr;
-        mockDeviceLostCallback = nullptr;
-    }
-
-    void FlushServer() {
-        WireTest::FlushServer();
-
-        Mock::VerifyAndClearExpectations(&mockDeviceErrorCallback);
     }
 };
-
-// Test the return wire for device validation error callbacks
-TEST_F(WireErrorCallbackTests, DeviceValidationErrorCallback) {
-    device.SetUncapturedErrorCallback(ToMockDeviceErrorCallback, this);
-
-    // Setting the error callback should stay on the client side and do nothing
-    FlushClient();
-
-    // Calling the callback on the server side will result in the callback being called on the
-    // client side
-    api.CallDeviceSetUncapturedErrorCallbackCallback(apiDevice, WGPUErrorType_Validation,
-                                                     ToOutputStringView("Some error message"));
-
-    EXPECT_CALL(*mockDeviceErrorCallback,
-                Call(WGPUErrorType_Validation, SizedString("Some error message"), this))
-        .Times(1);
-
-    FlushServer();
-}
-
-// Test the return wire for device OOM error callbacks
-TEST_F(WireErrorCallbackTests, DeviceOutOfMemoryErrorCallback) {
-    device.SetUncapturedErrorCallback(ToMockDeviceErrorCallback, this);
-
-    // Setting the error callback should stay on the client side and do nothing
-    FlushClient();
-
-    // Calling the callback on the server side will result in the callback being called on the
-    // client side
-    api.CallDeviceSetUncapturedErrorCallbackCallback(apiDevice, WGPUErrorType_OutOfMemory,
-                                                     ToOutputStringView("Some error message"));
-
-    EXPECT_CALL(*mockDeviceErrorCallback,
-                Call(WGPUErrorType_OutOfMemory, SizedString("Some error message"), this))
-        .Times(1);
-
-    FlushServer();
-}
-
-// Test the return wire for device internal error callbacks
-TEST_F(WireErrorCallbackTests, DeviceInternalErrorCallback) {
-    device.SetUncapturedErrorCallback(ToMockDeviceErrorCallback, this);
-
-    // Setting the error callback should stay on the client side and do nothing
-    FlushClient();
-
-    // Calling the callback on the server side will result in the callback being called on the
-    // client side
-    api.CallDeviceSetUncapturedErrorCallbackCallback(apiDevice, WGPUErrorType_Internal,
-                                                     ToOutputStringView("Some error message"));
-
-    EXPECT_CALL(*mockDeviceErrorCallback,
-                Call(WGPUErrorType_Internal, SizedString("Some error message"), this))
-        .Times(1);
-
-    FlushServer();
-}
 
 // Test the return wire for device user warning callbacks
 TEST_F(WireErrorCallbackTests, DeviceLoggingCallback) {
@@ -183,20 +94,33 @@ TEST_F(WireErrorCallbackTests, DeviceLoggingCallback) {
     FlushServer();
 }
 
-// Test the return wire for device lost callback
+// Test the return wire for device error callbacks.
+TEST_F(WireErrorCallbackTests, DeviceErrorCallbacks) {
+    static constexpr std::array<wgpu::ErrorType, 3> kErrorTypes = {
+        wgpu::ErrorType::Validation, wgpu::ErrorType::OutOfMemory, wgpu::ErrorType::Internal};
+
+    for (auto type : kErrorTypes) {
+        // Calling the callback on the server side will result in the callback being called on the
+        // client side when the server is flushed.
+        api.CallDeviceSetUncapturedErrorCallbackCallback(
+            apiDevice, static_cast<WGPUErrorType>(type), ToOutputStringView("Some error message"));
+        EXPECT_CALL(uncapturedErrorCallback,
+                    Call(CHandleIs(device.Get()), type, SizedString("Some error message")))
+            .Times(1);
+    }
+
+    FlushServer();
+}
+
+// Test the return wire for device lost callback.
 TEST_F(WireErrorCallbackTests, DeviceLostCallback) {
-    wgpuDeviceSetDeviceLostCallback(cDevice, ToMockDeviceLostCallback, this);
-
-    // Setting the error callback should stay on the client side and do nothing
-    FlushClient();
-
     // Calling the callback on the server side will result in the callback being called on the
-    // client side
+    // client side when the server is flushed.
     api.CallDeviceSetDeviceLostCallbackCallback(apiDevice, WGPUDeviceLostReason_Unknown,
                                                 ToOutputStringView("Some error message"));
 
-    EXPECT_CALL(*mockDeviceLostCallback,
-                Call(WGPUDeviceLostReason_Unknown, SizedString("Some error message"), this))
+    EXPECT_CALL(deviceLostCallback, Call(CHandleIs(device.Get()), wgpu::DeviceLostReason::Unknown,
+                                         SizedString("Some error message")))
         .Times(1);
 
     FlushServer();

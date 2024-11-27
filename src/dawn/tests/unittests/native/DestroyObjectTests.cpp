@@ -1030,7 +1030,12 @@ TEST_F(DestroyObjectTests, DestroyObjectsApiExplicit) {
     EXPECT_TRUE(FromAPI(csModule.Get())->IsAlive());
     EXPECT_TRUE(FromAPI(texture.Get())->IsAlive());
     EXPECT_TRUE(FromAPI(textureView.Get())->IsAlive());
+
+    EXPECT_CALL(mDeviceLostCallback,
+                Call(CHandleIs(device.Get()), wgpu::DeviceLostReason::Destroyed, _))
+        .Times(1);
     device.Destroy();
+
     EXPECT_FALSE(FromAPI(bindGroup.Get())->IsAlive());
     EXPECT_FALSE(FromAPI(bindGroupLayout.Get())->IsAlive());
     EXPECT_FALSE(FromAPI(buffer.Get())->IsAlive());

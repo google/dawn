@@ -133,11 +133,10 @@ void WireTest::SetUp() {
     // Create the device for testing.
     apiDevice = api.GetNewDevice();
     wgpu::DeviceDescriptor deviceDesc = {};
-    deviceDesc.deviceLostCallbackInfo = {nullptr, wgpu::CallbackMode::AllowSpontaneous,
-                                         deviceLostCallback.Callback(),
-                                         deviceLostCallback.MakeUserdata(this)};
-    deviceDesc.uncapturedErrorCallbackInfo = {nullptr, uncapturedErrorCallback.Callback(),
-                                              uncapturedErrorCallback.MakeUserdata(this)};
+    deviceDesc.SetDeviceLostCallback(wgpu::CallbackMode::AllowSpontaneous,
+                                     deviceLostCallback.Callback());
+    deviceDesc.SetUncapturedErrorCallback(uncapturedErrorCallback.TemplatedCallback(),
+                                          uncapturedErrorCallback.TemplatedCallbackUserdata());
     EXPECT_CALL(deviceLostCallback, Call).Times(AtMost(1));
 
     MockCallback<void (*)(wgpu::RequestDeviceStatus, wgpu::Device, wgpu::StringView, void*)>

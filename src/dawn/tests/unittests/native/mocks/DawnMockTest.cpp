@@ -32,6 +32,9 @@
 #include "dawn/dawn_proc.h"
 #include "dawn/native/ChainUtils.h"
 
+using testing::_;
+using testing::AtMost;
+
 namespace dawn::native {
 
 DawnMockTest::DawnMockTest() : mDeviceToggles(ToggleStage::Device) {}
@@ -42,15 +45,21 @@ void DawnMockTest::SetUp() {
     const auto& adapters = instance->EnumerateAdapters();
     DAWN_ASSERT(!adapters.empty());
 
-    auto result = ValidateAndUnpack(&mDeviceDescriptor);
-    DAWN_ASSERT(result.IsSuccess());
-    UnpackedPtr<DeviceDescriptor> packedDeviceDescriptor = result.AcquireSuccess();
+    wgpu::DeviceDescriptor desc = {};
+    desc.SetDeviceLostCallback(wgpu::CallbackMode::AllowSpontaneous,
+                               mDeviceLostCallback.Callback());
+    desc.SetUncapturedErrorCallback(mDeviceErrorCallback.TemplatedCallback(),
+                                    mDeviceErrorCallback.TemplatedCallbackUserdata());
+    DeviceDescriptor* nativeDesc = reinterpret_cast<DeviceDescriptor*>(&desc);
 
-    Ref<DeviceBase::DeviceLostEvent> lostEvent =
-        DeviceBase::DeviceLostEvent::Create(&mDeviceDescriptor);
+    auto result = ValidateAndUnpack(nativeDesc);
+    DAWN_ASSERT(result.IsSuccess());
+    UnpackedPtr<DeviceDescriptor> unpackedDesc = result.AcquireSuccess();
+
+    Ref<DeviceBase::DeviceLostEvent> lostEvent = DeviceBase::DeviceLostEvent::Create(nativeDesc);
 
     auto deviceMock = AcquireRef(new ::testing::NiceMock<DeviceMock>(
-        adapters[0].Get(), packedDeviceDescriptor, mDeviceToggles, std::move(lostEvent)));
+        adapters[0].Get(), unpackedDesc, mDeviceToggles, std::move(lostEvent)));
     mDeviceMock = deviceMock.Get();
     device = wgpu::Device::Acquire(ToAPI(ReturnToAPI<DeviceBase>(std::move(deviceMock))));
 }
@@ -59,6 +68,10 @@ void DawnMockTest::DropDevice() {
     if (device == nullptr) {
         return;
     }
+
+    EXPECT_CALL(mDeviceLostCallback,
+                Call(CHandleIs(device.Get()), wgpu::DeviceLostReason::Destroyed, _))
+        .Times(AtMost(1));
 
     // Since the device owns the instance in these tests, we need to explicitly verify that the
     // instance has completed all work. To do this, we take an additional ref to the instance here
