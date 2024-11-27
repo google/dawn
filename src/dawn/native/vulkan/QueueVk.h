@@ -36,7 +36,7 @@
 #include "dawn/common/vulkan_platform.h"
 #include "dawn/native/Device.h"
 #include "dawn/native/Queue.h"
-#include "dawn/native/vulkan/CommandRecordingContext.h"
+#include "dawn/native/vulkan/CommandRecordingContextVk.h"
 
 namespace dawn::native::vulkan {
 

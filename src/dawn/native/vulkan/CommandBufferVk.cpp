@@ -39,7 +39,7 @@
 #include "dawn/native/RenderBundle.h"
 #include "dawn/native/vulkan/BindGroupVk.h"
 #include "dawn/native/vulkan/BufferVk.h"
-#include "dawn/native/vulkan/CommandRecordingContext.h"
+#include "dawn/native/vulkan/CommandRecordingContextVk.h"
 #include "dawn/native/vulkan/ComputePipelineVk.h"
 #include "dawn/native/vulkan/DeviceVk.h"
 #include "dawn/native/vulkan/FencedDeleter.h"
@@ -206,7 +206,6 @@ MaybeError TransitionAndClearForSyncScope(Device* device,
                                               VK_PIPELINE_STAGE_DRAW_INDIRECT_BIT;
 
     struct Barriers {
-        std::vector<VkBufferMemoryBarrier> bufferBarriers;
         std::vector<VkImageMemoryBarrier> imageBarriers;
         VkPipelineStageFlags srcStages = 0;
         VkPipelineStageFlags dstStages = 0;
@@ -215,20 +214,9 @@ MaybeError TransitionAndClearForSyncScope(Device* device,
     Barriers vertexBarriers;
     Barriers nonVertexBarriers;
 
-    auto MergeBufferBarrier = [](Barriers* barriers, VkPipelineStageFlags srcStages,
-                                 VkPipelineStageFlags dstStages,
-                                 const VkBufferMemoryBarrier& bufferBarrier) {
-        barriers->srcStages |= srcStages;
-        barriers->dstStages |= dstStages;
-        barriers->bufferBarriers.push_back(bufferBarrier);
-    };
-
     for (size_t i = 0; i < scope.buffers.size(); ++i) {
         Buffer* buffer = ToBackend(scope.buffers[i]);
         buffer->EnsureDataInitialized(recordingContext);
-
-        VkPipelineStageFlags srcStages = 0;
-        VkPipelineStageFlags dstStages = 0;
 
         // `kIndirectBufferForFrontendValidation` is only for the front-end validation and should be
         // totally ignored in the backend resource tracking because:
@@ -242,13 +230,8 @@ MaybeError TransitionAndClearForSyncScope(Device* device,
         wgpu::BufferUsage usage =
             scope.bufferSyncInfos[i].usage & (~kIndirectBufferForFrontendValidation);
 
-        VkBufferMemoryBarrier bufferBarrier;
-        if (buffer->TrackUsageAndGetResourceBarrier(recordingContext, usage,
-                                                    scope.bufferSyncInfos[i].shaderStages,
-                                                    &bufferBarrier, &srcStages, &dstStages)) {
-            MergeBufferBarrier((dstStages & vertexStages) ? &vertexBarriers : &nonVertexBarriers,
-                               srcStages, dstStages, bufferBarrier);
-        }
+        buffer->TrackUsageAndGetResourceBarrier(recordingContext, usage,
+                                                scope.bufferSyncInfos[i].shaderStages);
     }
 
     auto MergeImageBarriers = [](Barriers* barriers, VkPipelineStageFlags srcStages,
@@ -289,13 +272,13 @@ MaybeError TransitionAndClearForSyncScope(Device* device,
     }
 
     for (const Barriers& barriers : {vertexBarriers, nonVertexBarriers}) {
-        if (!barriers.bufferBarriers.empty() || !barriers.imageBarriers.empty()) {
+        if (!barriers.imageBarriers.empty()) {
             device->fn.CmdPipelineBarrier(
                 recordingContext->commandBuffer, barriers.srcStages, barriers.dstStages, 0, 0,
-                nullptr, barriers.bufferBarriers.size(), barriers.bufferBarriers.data(),
-                barriers.imageBarriers.size(), barriers.imageBarriers.data());
+                nullptr, 0, nullptr, barriers.imageBarriers.size(), barriers.imageBarriers.data());
         }
     }
+    recordingContext->EmitBufferBarriers(device);
 
     return {};
 }
@@ -696,11 +679,13 @@ MaybeError CommandBuffer::RecordCommands(CommandRecordingContext* recordingConte
                     DAWN_TRY(ToBackend(dst.texture)
                                  ->EnsureSubresourceContentInitialized(recordingContext, range));
                 }
+
                 ToBackend(src.buffer)
                     ->TransitionUsageNow(recordingContext, wgpu::BufferUsage::CopySrc);
                 ToBackend(dst.texture)
                     ->TransitionUsageNow(recordingContext, wgpu::TextureUsage::CopyDst,
                                          wgpu::ShaderStage::None, range);
+
                 VkBuffer srcBuffer = ToBackend(src.buffer)->GetHandle();
                 VkImage dstImage = ToBackend(dst.texture)->GetHandle();
 

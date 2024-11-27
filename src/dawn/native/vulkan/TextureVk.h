@@ -224,12 +224,7 @@ class ImportedTextureBase : public Texture {
     //   Now it can be acquired for access again, or directly exported.
     //   Released: The texture is not associated to any external resource and cannot be used. This
     //   can happen before initialization, or after destruction.
-    enum class ExternalState {
-        PendingAcquire,
-        Acquired,
-        EagerlyTransitioned,
-        Released
-    };
+    enum class ExternalState { PendingAcquire, Acquired, EagerlyTransitioned, Released };
     ExternalState mExternalState = ExternalState::Released;
     ExternalState mLastExternalState = ExternalState::Released;
 
