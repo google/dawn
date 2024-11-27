@@ -55,6 +55,7 @@ if (tint_build_unittests) {
       "${tint_src_dir}/lang/core/constant:unittests",
       "${tint_src_dir}/lang/core/intrinsic:unittests",
       "${tint_src_dir}/lang/core/ir:unittests",
+      "${tint_src_dir}/lang/core/ir/analysis:unittests",
       "${tint_src_dir}/lang/core/ir/transform:unittests",
       "${tint_src_dir}/lang/core/type:unittests",
       "${tint_src_dir}/lang/glsl/ir:unittests",
