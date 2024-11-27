@@ -290,20 +290,6 @@ If not provided, will be inferred from output filename extension:
                                              Parameter{"name"});
     TINT_DEFER(opts->output_file = output.value.value_or(""));
 
-#if TINT_BUILD_HLSL_WRITER
-    auto& fxc_path =
-        options.Add<StringOption>("fxc", R"(Path to FXC dll, used to validate HLSL output.
-When specified, automatically enables HLSL validation)",
-                                  Parameter{"path"});
-    TINT_DEFER(opts->fxc_path = fxc_path.value.value_or(""));
-
-    auto& dxc_path =
-        options.Add<StringOption>("dxc", R"(Path to DXC dll, used to validate HLSL output.
-When specified, automatically enables HLSL validation)",
-                                  Parameter{"path"});
-    TINT_DEFER(opts->dxc_path = dxc_path.value.value_or(""));
-#endif  // TINT_BUILD_HLSL_WRITER
-
 #if TINT_BUILD_GLSL_WRITER
     auto& glsl_desktop = options.Add<BoolOption>(
         "glsl-desktop", "Set the version to the desktop GL instead of ES", Default{false});
@@ -366,7 +352,7 @@ violations that may be produced)",
         options.Add<BoolOption>("use-storage-input-output-16",
                                 "Use the StorageInputOutput16 SPIR-V capability", Default{true});
     TINT_DEFER(opts->use_storage_input_output_16 = *use_storage_input_output_16.value);
-#endif
+#endif  // TINT_BUILD_SPV_WRITER
 
     auto& disable_wg_init = options.Add<BoolOption>(
         "disable-workgroup-init", "Disable workgroup memory zero initialization", Default{false});
@@ -412,28 +398,25 @@ Available transforms:
     });
 
 #if TINT_BUILD_HLSL_WRITER
+    auto& fxc_path =
+        options.Add<StringOption>("fxc", R"(Path to FXC dll, used to validate HLSL output.
+When specified, automatically enables HLSL validation)",
+                                  Parameter{"path"});
+    TINT_DEFER(opts->fxc_path = fxc_path.value.value_or(""));
+
+    auto& dxc_path =
+        options.Add<StringOption>("dxc", R"(Path to DXC dll, used to validate HLSL output.
+When specified, automatically enables HLSL validation)",
+                                  Parameter{"path"});
+    TINT_DEFER(opts->dxc_path = dxc_path.value.value_or(""));
+
     auto& hlsl_rc_bp = options.Add<StringOption>("hlsl-root-constant-binding-point",
                                                  R"(Binding point for root constant.
 Specify the binding point for generated uniform buffer
 used for num_workgroups in HLSL. If not specified, then
 default to binding 0 of the largest used group plus 1,
 or group 0 if no resource bound)");
-#endif  // TINT_BUILD_HLSL_WRITER
 
-#if TINT_BUILD_HLSL_WRITER || TINT_BUILD_MSL_WRITER
-
-    auto& pixel_local_attachments =
-        options.Add<StringOption>("pixel_local_attachments",
-                                  R"(Pixel local storage attachment bindings, comma-separated
-Each binding is of the form MEMBER_INDEX=ATTACHMENT_INDEX,
-where MEMBER_INDEX is the pixel-local structure member
-index and ATTACHMENT_INDEX is the index of the emitted
-attachment.
-)");
-
-#endif
-
-#if TINT_BUILD_HLSL_WRITER
     auto& pixel_local_attachment_formats =
         options.Add<StringOption>("pixel_local_attachment_formats",
                                   R"(Pixel local storage attachment formats, comma-separated
@@ -458,6 +441,19 @@ in the range [)" << kMinShaderModelForDXC
     auto& hlsl_shader_model = options.Add<ValueOption<uint32_t>>(
         "hlsl_shader_model", hlslShaderModelStream.str(), Default{kMinShaderModelForDXC});
 #endif  // TINT_BUILD_HLSL_WRITER
+
+#if TINT_BUILD_HLSL_WRITER || TINT_BUILD_MSL_WRITER
+
+    auto& pixel_local_attachments =
+        options.Add<StringOption>("pixel_local_attachments",
+                                  R"(Pixel local storage attachment bindings, comma-separated
+Each binding is of the form MEMBER_INDEX=ATTACHMENT_INDEX,
+where MEMBER_INDEX is the pixel-local structure member
+index and ATTACHMENT_INDEX is the index of the emitted
+attachment.
+)");
+
+#endif
 
     auto& skip_hash = options.Add<StringOption>(
         "skip-hash", R"(Skips validation if the hash of the output is equal to any
@@ -614,7 +610,8 @@ Options:
             }
 #if TINT_BUILD_MSL_WRITER
             opts->pixel_local_attachments.emplace(member_index.Get(), attachment_index.Get());
-#endif
+#endif  // TINT_BUILD_MSL_WRITER
+
 #if TINT_BUILD_HLSL_WRITER
             // We've already set the format for this member index, now set the attachment index
             auto iter = opts->pixel_local_options.attachments.find(member_index.Get());
@@ -624,10 +621,10 @@ Options:
                 return false;
             }
             iter->second.index = attachment_index.Get();
-#endif
+#endif  // TINT_BUILD_HLSL_WRITER
         }
     }
-#endif
+#endif  // TINT_BUILD_HLSL_WRITER || TINT_BUILD_MSL_WRITER
 
     auto files = result.Get();
     if (files.Length() > 1) {
