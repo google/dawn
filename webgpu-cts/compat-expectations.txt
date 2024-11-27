@@ -3192,12 +3192,6 @@ crbug.com/361116751 [ android arm ] webgpu:shader,execution,expression,call,buil
 crbug.com/361116751 [ android arm ] webgpu:shader,execution,expression,call,builtin,textureLoad:storage_textures_3d:stage="v";* [ Failure ]
 
 # uninitialized_texture_is_zero failures on Pixel 6
-crbug.com/373664069 [ android arm ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="1d";readMethod="CopyToTexture";format="r8snorm" [ Failure ]
-crbug.com/373664069 [ android arm ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="1d";readMethod="CopyToTexture";format="rg8snorm" [ Failure ]
-crbug.com/373664069 [ android arm ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="1d";readMethod="CopyToTexture";format="rgba8snorm" [ Failure ]
-crbug.com/373664069 [ android arm ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="CopyToTexture";format="r8snorm" [ Skip ]
-crbug.com/373664069 [ android arm ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="CopyToTexture";format="rg8snorm" [ Skip ]
-crbug.com/373664069 [ android arm ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="CopyToTexture";format="rgba8snorm" [ Skip ]
 crbug.com/373664069 [ android arm ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="Sample";format="r16sint" [ Skip ]
 crbug.com/373664069 [ android arm ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="Sample";format="r16uint" [ Skip ]
 crbug.com/373664069 [ android arm ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="Sample";format="r8sint" [ Skip ]
@@ -3211,9 +3205,6 @@ crbug.com/373664069 [ android arm ] webgpu:api,operation,resource_init,texture_z
 crbug.com/373664069 [ android arm ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="Sample";format="rgba16uint" [ Skip ]
 crbug.com/373664069 [ android arm ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="Sample";format="rgba8sint" [ Skip ]
 crbug.com/373664069 [ android arm ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="Sample";format="rgba8uint" [ Skip ]
-crbug.com/373664069 [ android arm ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="3d";readMethod="CopyToTexture";format="r8snorm" [ Failure ]
-crbug.com/373664069 [ android arm ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="3d";readMethod="CopyToTexture";format="rg8snorm" [ Failure ]
-crbug.com/373664069 [ android arm ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="3d";readMethod="CopyToTexture";format="rgba8snorm" [ Failure ]
 
 # CopyExternalImageToTexture failures on Pixel 6:
 crbug.com/373648910 [ android arm ] webgpu:api,validation,queue,copyToTexture,CopyExternalImageToTexture:source_image,crossOrigin:sourceImage="offscreenCanvas";isOriginClean=true [ Failure ]
