@@ -134,7 +134,6 @@ struct Options {
     std::string output_file = "-";  // Default to stdout
 
     std::unordered_set<uint32_t> skip_hash;
-    tint::Vector<std::string, 4> transforms;
     tint::Hashmap<std::string, double, 8> overrides;
 
     std::string ep_name;
@@ -376,20 +375,6 @@ violations that may be produced)",
     auto& print_hash = options.Add<BoolOption>("print-hash", "Emit the hash of the output program",
                                                Default{false});
     TINT_DEFER(opts->print_hash = *print_hash.value);
-
-    auto& transforms =
-        options.Add<StringOption>("transform", R"(Runs transforms, name list is comma separated
-Available transforms:
-    first_index_offset
-)",
-                                  ShortName{"t"});
-    TINT_DEFER({
-        if (transforms.value.has_value()) {
-            for (auto transform : tint::Split(*transforms.value, ",")) {
-                opts->transforms.Push(std::string(transform));
-            }
-        }
-    });
 
     auto& rename_all = options.Add<BoolOption>("rename-all", "Renames all symbols", Default{false});
     TINT_DEFER(opts->rename_all = *rename_all.value);
@@ -739,15 +724,6 @@ Options:
     auto res = AddSubstituteOverrides(options, inspector, transform_manager, transform_inputs);
     if (res != tint::Success) {
         return res.Failure();
-    }
-
-    for (const auto& name : options.transforms) {
-        if (name == "first_index_offset") {
-            transform_inputs.Add<tint::ast::transform::FirstIndexOffset::BindingPoint>(0, 0);
-            transform_manager.Add<tint::ast::transform::FirstIndexOffset>();
-        } else {
-            return tint::Failure("Unknown transform: " + name);
-        }
     }
 
     if (options.emit_single_entry_point) {
