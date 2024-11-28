@@ -5,16 +5,19 @@
 #include <metal_stdlib>
 using namespace metal;
 
-#define TINT_ISOLATE_UB(VOLATILE_NAME) \
-  {volatile bool VOLATILE_NAME = false; if (VOLATILE_NAME) break;}
-
 kernel void tint_symbol() {
   {
+    uint2 tint_loop_idx = 0u;
     while(true) {
-      TINT_ISOLATE_UB(tint_volatile_false)
+      if (all((tint_loop_idx == uint2(4294967295u)))) {
+        break;
+      }
       {
+        uint2 tint_loop_idx_1 = 0u;
         while(true) {
-          TINT_ISOLATE_UB(tint_volatile_false_1)
+          if (all((tint_loop_idx_1 == uint2(4294967295u)))) {
+            break;
+          }
           return;
         }
       }

@@ -13,9 +13,6 @@
 #include <metal_stdlib>
 using namespace metal;
 
-#define TINT_ISOLATE_UB(VOLATILE_NAME) \
-  {volatile bool VOLATILE_NAME = false; if (VOLATILE_NAME) break;}
-
 struct tint_symbol_inputs {
   float x [[user(locn0)]];
 };
@@ -23,8 +20,11 @@ struct tint_symbol_inputs {
 void tint_symbol_inner(float x) {
   float4 v = float4(0.0f);
   {
+    uint2 tint_loop_idx = 0u;
     while(true) {
-      TINT_ISOLATE_UB(tint_volatile_false)
+      if (all((tint_loop_idx == uint2(4294967295u)))) {
+        break;
+      }
       bool v_1 = false;
       if ((x > v.x)) {
         v_1 = (dfdx(1.0f) > 0.0f);
@@ -36,6 +36,10 @@ void tint_symbol_inner(float x) {
         break;
       }
       {
+        uint const tint_low_inc = (tint_loop_idx.x + 1u);
+        tint_loop_idx.x = tint_low_inc;
+        uint const tint_carry = uint((tint_low_inc == 0u));
+        tint_loop_idx.y = (tint_loop_idx.y + tint_carry);
       }
       continue;
     }

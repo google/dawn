@@ -35,9 +35,6 @@ struct tint_module_vars_struct {
   threadgroup tint_array<tint_array<tint_packed_vec3_f32_array_element, 256>, 4>* tile;
 };
 
-#define TINT_ISOLATE_UB(VOLATILE_NAME) \
-  {volatile bool VOLATILE_NAME = false; if (VOLATILE_NAME) break;}
-
 struct tint_symbol_2 {
   tint_array<tint_array<tint_packed_vec3_f32_array_element, 256>, 4> tint_symbol_1;
 };
@@ -51,7 +48,6 @@ void tint_symbol_inner(uint3 WorkGroupID, uint3 LocalInvocationID, uint tint_loc
     uint v = 0u;
     v = tint_local_index;
     while(true) {
-      TINT_ISOLATE_UB(tint_volatile_false)
       uint const v_1 = v;
       if ((v_1 >= 1024u)) {
         break;
@@ -138,9 +134,12 @@ void tint_symbol_inner(uint3 WorkGroupID, uint3 LocalInvocationID, uint tint_loc
           if (v_8) {
             float3 acc = float3(0.0f);
             {
+              uint2 tint_loop_idx = 0u;
               uint f = 0u;
               while(true) {
-                TINT_ISOLATE_UB(tint_volatile_false_1)
+                if (all((tint_loop_idx == uint2(4294967295u)))) {
+                  break;
+                }
                 if ((f < (*tint_module_vars.params).filterDim)) {
                 } else {
                   break;
@@ -150,6 +149,10 @@ void tint_symbol_inner(uint3 WorkGroupID, uint3 LocalInvocationID, uint tint_loc
                 float const v_10 = (1.0f / float((*tint_module_vars.params).filterDim));
                 acc = (v_9 + (v_10 * float3((*tint_module_vars.tile)[min(r, 3u)][min(i, 255u)].packed)));
                 {
+                  uint const tint_low_inc = (tint_loop_idx.x + 1u);
+                  tint_loop_idx.x = tint_low_inc;
+                  uint const tint_carry = uint((tint_low_inc == 0u));
+                  tint_loop_idx.y = (tint_loop_idx.y + tint_carry);
                   f = (f + 1u);
                 }
                 continue;

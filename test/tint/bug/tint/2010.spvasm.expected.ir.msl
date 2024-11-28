@@ -47,9 +47,6 @@ struct tint_module_vars_struct {
   const constant tint_array<uint4, 1>* tint_storage_buffer_sizes;
 };
 
-#define TINT_ISOLATE_UB(VOLATILE_NAME) \
-  {volatile bool VOLATILE_NAME = false; if (VOLATILE_NAME) break;}
-
 struct tint_symbol_6 {
   tint_array<S, 4096> tint_symbol_1;
   atomic_uint tint_symbol_2;
@@ -66,8 +63,11 @@ void main_1(tint_module_vars_struct tint_module_vars) {
   uint const x_52 = (*tint_module_vars.x_3).x;
   x_54 = 0u;
   {
+    uint2 tint_loop_idx = 0u;
     while(true) {
-      TINT_ISOLATE_UB(tint_volatile_false)
+      if (all((tint_loop_idx == uint2(4294967295u)))) {
+        break;
+      }
       uint x_55 = 0u;
       x_58 = (*tint_module_vars.x_6).field0.field0;
       if ((x_54 < x_58)) {
@@ -80,6 +80,10 @@ void main_1(tint_module_vars_struct tint_module_vars) {
         (*tint_module_vars.x_28)[min(x_62, 4095u)] = S{.field0=((x_67.xy + x_67.zw) * 0.5f), .field1=x_62};
       }
       {
+        uint const tint_low_inc = (tint_loop_idx.x + 1u);
+        tint_loop_idx.x = tint_low_inc;
+        uint const tint_carry = uint((tint_low_inc == 0u));
+        tint_loop_idx.y = (tint_loop_idx.y + tint_carry);
         x_55 = (x_54 + 32u);
         x_54 = x_55;
       }
@@ -101,8 +105,11 @@ void main_1(tint_module_vars_struct tint_module_vars) {
   x_85 = x_76.xyxy;
   x_88 = 1u;
   {
+    uint2 tint_loop_idx = 0u;
     while(true) {
-      TINT_ISOLATE_UB(tint_volatile_false_1)
+      if (all((tint_loop_idx == uint2(4294967295u)))) {
+        break;
+      }
       float4 x_111 = 0.0f;
       float4 x_86 = 0.0f;
       uint x_89 = 0u;
@@ -130,6 +137,10 @@ void main_1(tint_module_vars_struct tint_module_vars) {
         x_86 = x_111;
       }
       {
+        uint const tint_low_inc_1 = (tint_loop_idx.x + 1u);
+        tint_loop_idx.x = tint_low_inc_1;
+        uint const tint_carry_1 = uint((tint_low_inc_1 == 0u));
+        tint_loop_idx.y = (tint_loop_idx.y + tint_carry_1);
         x_89 = (x_88 + 32u);
         x_85 = x_86;
         x_88 = x_89;
@@ -159,7 +170,6 @@ void tint_symbol_inner(uint3 x_3_param, uint tint_local_index, tint_module_vars_
     uint v_2 = 0u;
     v_2 = tint_local_index;
     while(true) {
-      TINT_ISOLATE_UB(tint_volatile_false_2)
       uint const v_3 = v_2;
       if ((v_3 >= 4096u)) {
         break;

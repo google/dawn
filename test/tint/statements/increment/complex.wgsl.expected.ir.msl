@@ -23,9 +23,6 @@ struct tint_module_vars_struct {
   const constant tint_array<uint4, 1>* tint_storage_buffer_sizes;
 };
 
-#define TINT_ISOLATE_UB(VOLATILE_NAME) \
-  {volatile bool VOLATILE_NAME = false; if (VOLATILE_NAME) break;}
-
 int idx1(tint_module_vars_struct tint_module_vars) {
   (*tint_module_vars.v) = ((*tint_module_vars.v) + 1u);
   return 1;
@@ -58,6 +55,7 @@ int idx6(tint_module_vars_struct tint_module_vars) {
 
 void tint_symbol_1(tint_module_vars_struct tint_module_vars) {
   {
+    uint2 tint_loop_idx = 0u;
     int const v_1 = idx1(tint_module_vars);
     int const v_2 = idx2(tint_module_vars);
     uint const v_3 = (((*tint_module_vars.tint_storage_buffer_sizes)[0u].x / 64u) - 1u);
@@ -67,12 +65,18 @@ void tint_symbol_1(tint_module_vars_struct tint_module_vars) {
     int const v_7 = as_type<int>((as_type<uint>((*v_5)[min(uint(v_6), 3u)]) + as_type<uint>(1)));
     (*v_5)[min(uint(v_6), 3u)] = v_7;
     while(true) {
-      TINT_ISOLATE_UB(tint_volatile_false)
+      if (all((tint_loop_idx == uint2(4294967295u)))) {
+        break;
+      }
       if (((*tint_module_vars.v) < 10u)) {
       } else {
         break;
       }
       {
+        uint const tint_low_inc = (tint_loop_idx.x + 1u);
+        tint_loop_idx.x = tint_low_inc;
+        uint const tint_carry = uint((tint_low_inc == 0u));
+        tint_loop_idx.y = (tint_loop_idx.y + tint_carry);
         int const v_8 = idx4(tint_module_vars);
         int const v_9 = idx5(tint_module_vars);
         uint const v_10 = (((*tint_module_vars.tint_storage_buffer_sizes)[0u].x / 64u) - 1u);

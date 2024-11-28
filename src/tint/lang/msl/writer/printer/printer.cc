@@ -36,7 +36,6 @@
 #include "src/tint/lang/core/constant/splat.h"
 #include "src/tint/lang/core/fluent_types.h"
 #include "src/tint/lang/core/ir/access.h"
-#include "src/tint/lang/core/ir/analysis/loop_analysis.h"
 #include "src/tint/lang/core/ir/bitcast.h"
 #include "src/tint/lang/core/ir/break_if.h"
 #include "src/tint/lang/core/ir/constant.h"
@@ -146,9 +145,7 @@ class Printer : public tint::TextGenerator {
 
         // Emit functions.
         for (auto* func : ir_.DependencyOrderedFunctions()) {
-            loop_analysis_ = std::make_unique<core::ir::analysis::LoopAnalysis>(*func);
             EmitFunction(func);
-            loop_analysis_.reset();
         }
 
         StringStream ss;
@@ -168,8 +165,6 @@ class Printer : public tint::TextGenerator {
     core::ir::Module& ir_;
     /// MSL writer options
     Options options_;
-
-    std::unique_ptr<core::ir::analysis::LoopAnalysis> loop_analysis_;
 
     /// A hashmap of value to name
     Hashmap<const core::ir::Value*, std::string, 32> names_;
@@ -192,10 +187,6 @@ class Printer : public tint::TextGenerator {
     /// Unique name of the tint_array<T, N> template.
     /// Non-empty only if the template has been generated.
     std::string array_template_name_;
-
-    /// The name of the macro used to prevent UB affecting later control flow.
-    /// Do not use this directly, instead call IsolateUB().
-    std::string isolate_ub_macro_name_;
 
     /// Block to emit for a continuing
     std::function<void()> emit_continuing_;
@@ -228,26 +219,6 @@ class Printer : public tint::TextGenerator {
         Line() << "};";
 
         return array_template_name_;
-    }
-
-    /// Lazily generates the TINT_ISOLATE_UB macro, and returns a call to
-    /// the macro, passing in a unique identifier. The call tricks the MSL
-    /// compiler into thinking it might execute a `break`, but otherwise
-    /// has no effect in the generated code.
-    /// Invoke this inside the body of a loop to prevent the MSL compiler
-    /// from inferring the loop never terminates.
-    /// @returns a call to the TINT_ISOLATE_UB macro, creating that macro on first call
-    std::string IsolateUB() {
-        if (isolate_ub_macro_name_.empty()) {
-            TINT_SCOPED_ASSIGNMENT(current_buffer_, &preamble_buffer_);
-            isolate_ub_macro_name_ = UniqueIdentifier("TINT_ISOLATE_UB");
-            Line();
-            Line() << "#define " << isolate_ub_macro_name_ << "(VOLATILE_NAME) \\";
-            Line() << "  {volatile bool VOLATILE_NAME = false; if (VOLATILE_NAME) break;}";
-        }
-        StringStream ss;
-        ss << isolate_ub_macro_name_ << "(" << UniqueIdentifier("tint_volatile_false") << ")";
-        return ss.str();
     }
 
     /// Find all structures that are used in host-shareable address spaces and mark them as such so
@@ -682,19 +653,11 @@ class Printer : public tint::TextGenerator {
         Line() << "{";
         {
             ScopedIndent init(current_buffer_);
-
-            // Analyze the loop to determine if we need to guard against undefined behavior caused
-            // by infinite loops.
-            auto* info = loop_analysis_->GetInfo(*l);
-
             EmitBlock(l->Initializer());
 
             Line() << "while(true) {";
             {
                 ScopedIndent si(current_buffer_);
-                if (!options_.disable_robustness && !info->IsFinite()) {
-                    Line() << IsolateUB();
-                }
                 EmitBlock(l->Body());
             }
             Line() << "}";

@@ -38,6 +38,7 @@
 #include "src/tint/lang/core/ir/transform/demote_to_helper.h"
 #include "src/tint/lang/core/ir/transform/multiplanar_external_texture.h"
 #include "src/tint/lang/core/ir/transform/preserve_padding.h"
+#include "src/tint/lang/core/ir/transform/prevent_infinite_loops.h"
 #include "src/tint/lang/core/ir/transform/remove_continue_in_switch.h"
 #include "src/tint/lang/core/ir/transform/remove_terminator_args.h"
 #include "src/tint/lang/core/ir/transform/rename_conflicts.h"
@@ -73,6 +74,10 @@ Result<RaiseResult> Raise(core::ir::Module& module, const Options& options) {
     PopulateBindingRelatedOptions(options, remapper_data, multiplanar_map,
                                   array_length_from_uniform_options);
     RUN_TRANSFORM(core::ir::transform::BindingRemapper, module, remapper_data);
+
+    if (!options.disable_robustness) {
+        RUN_TRANSFORM(core::ir::transform::PreventInfiniteLoops, module);
+    }
 
     {
         core::ir::transform::BinaryPolyfillConfig binary_polyfills{};

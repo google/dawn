@@ -5,9 +5,6 @@ struct tint_module_vars_struct {
   thread bool* continue_execution;
 };
 
-#define TINT_ISOLATE_UB(VOLATILE_NAME) \
-  {volatile bool VOLATILE_NAME = false; if (VOLATILE_NAME) break;}
-
 struct tint_symbol_outputs {
   int tint_symbol_1 [[color(2)]];
 };
@@ -26,13 +23,20 @@ int f(int x, tint_module_vars_struct tint_module_vars) {
 int tint_symbol_inner(int3 x, tint_module_vars_struct tint_module_vars) {
   int y = x.x;
   {
+    uint2 tint_loop_idx = 0u;
     while(true) {
-      TINT_ISOLATE_UB(tint_volatile_false)
+      if (all((tint_loop_idx == uint2(4294967295u)))) {
+        break;
+      }
       int const r = f(y, tint_module_vars);
       if ((r == 0)) {
         break;
       }
       {
+        uint const tint_low_inc = (tint_loop_idx.x + 1u);
+        tint_loop_idx.x = tint_low_inc;
+        uint const tint_carry = uint((tint_low_inc == 0u));
+        tint_loop_idx.y = (tint_loop_idx.y + tint_carry);
       }
       continue;
     }

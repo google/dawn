@@ -29,23 +29,27 @@ struct OuterS {
   tint_array<InnerS, 8> a1;
 };
 
-#define TINT_ISOLATE_UB(VOLATILE_NAME) \
-  {volatile bool VOLATILE_NAME = false; if (VOLATILE_NAME) break;}
-
 kernel void tint_symbol(const constant Uniforms* uniforms [[buffer(0)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.uniforms=uniforms};
   InnerS v = {};
   OuterS s1 = {};
   int i = 0;
   {
+    uint2 tint_loop_idx = 0u;
     s1.a1[min((*tint_module_vars.uniforms).i, 7u)] = v;
     while(true) {
-      TINT_ISOLATE_UB(tint_volatile_false)
+      if (all((tint_loop_idx == uint2(4294967295u)))) {
+        break;
+      }
       if ((i < 4)) {
       } else {
         break;
       }
       {
+        uint const tint_low_inc = (tint_loop_idx.x + 1u);
+        tint_loop_idx.x = tint_low_inc;
+        uint const tint_carry = uint((tint_low_inc == 0u));
+        tint_loop_idx.y = (tint_loop_idx.y + tint_carry);
         i = as_type<int>((as_type<uint>(i) + as_type<uint>(1)));
       }
       continue;

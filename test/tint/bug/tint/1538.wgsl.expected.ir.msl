@@ -1,9 +1,6 @@
 #include <metal_stdlib>
 using namespace metal;
 
-#define TINT_ISOLATE_UB(VOLATILE_NAME) \
-  {volatile bool VOLATILE_NAME = false; if (VOLATILE_NAME) break;}
-
 template<typename T, size_t N>
 struct tint_array {
   const constant T& operator[](size_t i) const constant { return elements[i]; }
@@ -26,8 +23,11 @@ int g() {
 
 int f() {
   {
+    uint2 tint_loop_idx = 0u;
     while(true) {
-      TINT_ISOLATE_UB(tint_volatile_false)
+      if (all((tint_loop_idx == uint2(4294967295u)))) {
+        break;
+      }
       g();
       break;
     }
@@ -39,14 +39,21 @@ int f() {
 kernel void tint_symbol(device tint_array<uint, 1>* buf [[buffer(0)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.buf=buf};
   {
+    uint2 tint_loop_idx = 0u;
     while(true) {
-      TINT_ISOLATE_UB(tint_volatile_false_1)
+      if (all((tint_loop_idx == uint2(4294967295u)))) {
+        break;
+      }
       if (((*tint_module_vars.buf)[0u] == 0u)) {
         break;
       }
       int s = f();
       (*tint_module_vars.buf)[0u] = 0u;
       {
+        uint const tint_low_inc_1 = (tint_loop_idx.x + 1u);
+        tint_loop_idx.x = tint_low_inc_1;
+        uint const tint_carry_1 = uint((tint_low_inc_1 == 0u));
+        tint_loop_idx.y = (tint_loop_idx.y + tint_carry_1);
       }
       continue;
     }

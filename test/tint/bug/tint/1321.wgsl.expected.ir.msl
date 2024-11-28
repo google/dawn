@@ -13,9 +13,6 @@ struct tint_array {
   T elements[N];
 };
 
-#define TINT_ISOLATE_UB(VOLATILE_NAME) \
-  {volatile bool VOLATILE_NAME = false; if (VOLATILE_NAME) break;}
-
 int foo() {
   return 1;
 }
@@ -23,9 +20,12 @@ int foo() {
 fragment void tint_symbol() {
   tint_array<float, 4> arr = tint_array<float, 4>{};
   {
+    uint2 tint_loop_idx = 0u;
     thread float* const a = (&arr[min(uint(foo()), 3u)]);
     while(true) {
-      TINT_ISOLATE_UB(tint_volatile_false)
+      if (all((tint_loop_idx == uint2(4294967295u)))) {
+        break;
+      }
       float const x = (*a);
       break;
     }
