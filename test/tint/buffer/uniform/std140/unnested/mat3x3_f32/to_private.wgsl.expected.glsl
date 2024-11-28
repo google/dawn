@@ -14,5 +14,5 @@ void main() {
   p = mat3(v.inner_col0, v.inner_col1, v.inner_col2);
   p[1u] = mat3(v.inner_col0, v.inner_col1, v.inner_col2)[0u];
   p[1u] = mat3(v.inner_col0, v.inner_col1, v.inner_col2)[0u].zxy;
-  p[0u][1u] = mat3(v.inner_col0, v.inner_col1, v.inner_col2)[1u][0u];
+  p[0u].y = mat3(v.inner_col0, v.inner_col1, v.inner_col2)[1u].x;
 }

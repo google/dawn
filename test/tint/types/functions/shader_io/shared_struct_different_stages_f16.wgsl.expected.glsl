@@ -18,8 +18,8 @@ void main() {
   vert_main_loc1_Output = v.col1;
   vert_main_loc2_Output = v.col2;
   gl_Position = v.pos;
-  gl_Position[1u] = -(gl_Position.y);
-  gl_Position[2u] = ((2.0f * gl_Position.z) - gl_Position.w);
+  gl_Position.y = -(gl_Position.y);
+  gl_Position.z = ((2.0f * gl_Position.z) - gl_Position.w);
   gl_PointSize = 1.0f;
 }
 #version 310 es

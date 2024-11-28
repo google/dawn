@@ -113,9 +113,9 @@ mat3 cotangent_frame_vf3_vf3_vf2_vf2_(inout vec3 normal_1, inout vec3 p, inout v
   float x_193 = invmax;
   vec3 x_194 = (x_192 * x_193);
   vec3 x_195 = normal_1;
-  vec3 v_2 = vec3(x_191[0u], x_191[1u], x_191[2u]);
-  vec3 v_3 = vec3(x_194[0u], x_194[1u], x_194[2u]);
-  return mat3(v_2, v_3, vec3(x_195[0u], x_195[1u], x_195[2u]));
+  vec3 v_2 = vec3(x_191.x, x_191.y, x_191.z);
+  vec3 v_3 = vec3(x_194.x, x_194.y, x_194.z);
+  return mat3(v_2, v_3, vec3(x_195.x, x_195.y, x_195.z));
 }
 mat3 transposeMat3_mf33_(inout mat3 inMatrix) {
   vec3 i0 = vec3(0.0f);
@@ -140,9 +140,9 @@ mat3 transposeMat3_mf33_(inout mat3 inMatrix) {
   float x_91 = i1.z;
   float x_93 = i2.z;
   vec3 x_94 = vec3(x_89, x_91, x_93);
-  vec3 v_4 = vec3(x_78[0u], x_78[1u], x_78[2u]);
-  vec3 v_5 = vec3(x_86[0u], x_86[1u], x_86[2u]);
-  outMatrix = mat3(v_4, v_5, vec3(x_94[0u], x_94[1u], x_94[2u]));
+  vec3 v_4 = vec3(x_78.x, x_78.y, x_78.z);
+  vec3 v_5 = vec3(x_86.x, x_86.y, x_86.z);
+  outMatrix = mat3(v_4, v_5, vec3(x_94.x, x_94.y, x_94.z));
   mat3 x_110 = outMatrix;
   return x_110;
 }
@@ -171,14 +171,14 @@ lightingInfo computeHemisphericLighting_vf3_vf3_vf4_vf3_vf3_vf3_f1_(inout vec3 v
   float specComp = 0.0f;
   vec3 x_212 = vNormal;
   vec4 x_213 = lightData;
-  ndl = ((dot(x_212, vec3(x_213[0u], x_213[1u], x_213[2u])) * 0.5f) + 0.5f);
+  ndl = ((dot(x_212, vec3(x_213.x, x_213.y, x_213.z)) * 0.5f) + 0.5f);
   vec3 x_220 = groundColor;
   vec3 x_221 = diffuseColor;
   float x_222 = ndl;
   result.diffuse = mix(x_220, x_221, vec3(x_222, x_222, x_222));
   vec3 x_227 = viewDirectionW;
   vec4 x_228 = lightData;
-  angleW = normalize((x_227 + vec3(x_228[0u], x_228[1u], x_228[2u])));
+  angleW = normalize((x_227 + vec3(x_228.x, x_228.y, x_228.z)));
   vec3 x_233 = vNormal;
   vec3 x_234 = angleW;
   specComp = max(0.0f, dot(x_233, x_234));
@@ -252,10 +252,10 @@ void main_1() {
   tempTextureRead = x_262;
   vec4 x_264 = tempTextureRead;
   float x_273 = v.inner.textureInfoName;
-  rgb = (vec3(x_264[0u], x_264[1u], x_264[2u]) * x_273);
+  rgb = (vec3(x_264.x, x_264.y, x_264.z) * x_273);
   vec3 x_279 = v.inner.u_cameraPosition;
   vec4 x_282 = v_output1;
-  output5 = normalize((x_279 - vec3(x_282[0u], x_282[1u], x_282[2u])));
+  output5 = normalize((x_279 - vec3(x_282.x, x_282.y, x_282.z)));
   output4 = vec4(0.0f);
   uvOffset = vec2(0.0f);
   float x_292 = v.inner.u_bumpStrength;
@@ -272,9 +272,9 @@ void main_1() {
   TBNUV = x_307;
   vec4 x_310 = v_output2;
   float x_312 = normalScale;
-  param_3 = (vec3(x_310[0u], x_310[1u], x_310[2u]) * x_312);
+  param_3 = (vec3(x_310.x, x_310.y, x_310.z) * x_312);
   vec4 x_317 = v_output1;
-  param_4 = vec3(x_317[0u], x_317[1u], x_317[2u]);
+  param_4 = vec3(x_317.x, x_317.y, x_317.z);
   vec2 x_320 = TBNUV;
   param_5 = x_320;
   vec2 x_324 = v.inner.tangentSpaceParameter0;
@@ -290,14 +290,14 @@ void main_1() {
   vec3 x_334 = (x_331 * -(x_332));
   mat3 x_337 = invTBN;
   vec3 x_338 = output5;
-  parallaxLimit = (length(vec2(x_334[0u], x_334[1u])) / (x_337 * -(x_338))[2u]);
+  parallaxLimit = (length(vec2(x_334.x, x_334.y)) / (x_337 * -(x_338)).z);
   float x_345 = v.inner.u_parallaxScale;
   float x_346 = parallaxLimit;
   parallaxLimit = (x_346 * x_345);
   mat3 x_349 = invTBN;
   vec3 x_350 = output5;
   vec3 x_352 = (x_349 * -(x_350));
-  vOffsetDir = normalize(vec2(x_352[0u], x_352[1u]));
+  vOffsetDir = normalize(vec2(x_352.x, x_352.y));
   vec2 x_356 = vOffsetDir;
   float x_357 = parallaxLimit;
   vMaxOffset = (x_356 * x_357);
@@ -305,7 +305,7 @@ void main_1() {
   vec3 x_362 = output5;
   mat3 x_365 = invTBN;
   vec4 x_366 = v_output2;
-  numSamples = (15.0f + (dot((x_361 * -(x_362)), (x_365 * vec3(x_366[0u], x_366[1u], x_366[2u]))) * -11.0f));
+  numSamples = (15.0f + (dot((x_361 * -(x_362)), (x_365 * vec3(x_366.x, x_366.y, x_366.z))) * -11.0f));
   float x_374 = numSamples;
   stepSize = (1.0f / x_374);
   currRayHeight = 1.0f;
@@ -324,7 +324,7 @@ void main_1() {
       vec2 x_394 = v_uv;
       vec2 x_395 = vCurrOffset;
       vec4 x_397 = vec4(0.0f);
-      currSampledHeight = x_397[3u];
+      currSampledHeight = x_397.w;
       float x_400 = currSampledHeight;
       float x_401 = currRayHeight;
       if ((x_400 > x_401)) {
@@ -375,11 +375,11 @@ void main_1() {
   float x_454 = v.inner.u_bumpStrength;
   mat3 x_457 = TBN;
   param_8 = x_457;
-  param_9 = vec3(x_452[0u], x_452[1u], x_452[2u]);
+  param_9 = vec3(x_452.x, x_452.y, x_452.z);
   param_10 = (1.0f / x_454);
   vec3 x_461 = perturbNormal_mf33_vf3_f1_(param_8, param_9, param_10);
   vec4 x_462 = output4;
-  output4 = vec4(x_461[0u], x_461[1u], x_461[2u], x_462[3u]);
+  output4 = vec4(x_461.x, x_461.y, x_461.z, x_462.w);
   vec2 x_465 = v_uv;
   vec2 x_466 = uvOffset;
   output6 = (x_465 + x_466);
@@ -387,17 +387,17 @@ void main_1() {
   vec4 x_475 = texture(TextureSampler1Texture_TextureSampler1Sampler, x_474);
   tempTextureRead1 = x_475;
   vec4 x_477 = tempTextureRead1;
-  rgb1 = vec3(x_477[0u], x_477[1u], x_477[2u]);
+  rgb1 = vec3(x_477.x, x_477.y, x_477.z);
   vec3 x_481 = v.inner.u_cameraPosition;
   vec4 x_482 = v_output1;
-  viewDirectionW_1 = normalize((x_481 - vec3(x_482[0u], x_482[1u], x_482[2u])));
+  viewDirectionW_1 = normalize((x_481 - vec3(x_482.x, x_482.y, x_482.z)));
   shadow = 1.0f;
   float x_488 = u_Float;
   glossiness_1 = (1.0f * x_488);
   diffuseBase = vec3(0.0f);
   specularBase = vec3(0.0f);
   vec4 x_494 = output4;
-  normalW = vec3(x_494[0u], x_494[1u], x_494[2u]);
+  normalW = vec3(x_494.x, x_494.y, x_494.z);
   vec3 x_501 = viewDirectionW_1;
   param_11 = x_501;
   vec3 x_503 = normalW;
@@ -405,9 +405,9 @@ void main_1() {
   vec4 x_507 = v_1.inner.vLightData;
   param_13 = x_507;
   vec4 x_510 = v_1.inner.vLightDiffuse;
-  param_14 = vec3(x_510[0u], x_510[1u], x_510[2u]);
+  param_14 = vec3(x_510.x, x_510.y, x_510.z);
   vec4 x_514 = v_1.inner.vLightSpecular;
-  param_15 = vec3(x_514[0u], x_514[1u], x_514[2u]);
+  param_15 = vec3(x_514.x, x_514.y, x_514.z);
   vec3 x_518 = v_1.inner.vLightGround;
   param_16 = x_518;
   float x_520 = glossiness_1;
@@ -433,7 +433,7 @@ void main_1() {
   vec3 x_544 = specularOutput;
   output3 = (x_543 + x_544);
   vec3 x_548 = output3;
-  glFragColor = vec4(x_548[0u], x_548[1u], x_548[2u], 1.0f);
+  glFragColor = vec4(x_548.x, x_548.y, x_548.z, 1.0f);
 }
 main_out tint_symbol_1_inner(vec2 vMainuv_param, vec4 v_output1_param, bool tint_symbol_2, vec2 v_uv_param, vec4 v_output2_param) {
   vMainuv = vMainuv_param;

@@ -4,14 +4,14 @@ layout(location = 0) in vec2 vert_main_loc0_Input;
 layout(location = 1) in vec2 vert_main_loc1_Input;
 layout(location = 2) in vec2 vert_main_loc2_Input;
 vec4 vert_main_inner(vec2 a_particlePos, vec2 a_particleVel, vec2 a_pos) {
-  float angle = -(atan(a_particleVel[0u], a_particleVel[1u]));
-  vec2 pos = vec2(((a_pos[0u] * cos(angle)) - (a_pos[1u] * sin(angle))), ((a_pos[0u] * sin(angle)) + (a_pos[1u] * cos(angle))));
+  float angle = -(atan(a_particleVel.x, a_particleVel.y));
+  vec2 pos = vec2(((a_pos.x * cos(angle)) - (a_pos.y * sin(angle))), ((a_pos.x * sin(angle)) + (a_pos.y * cos(angle))));
   return vec4((pos + a_particlePos), 0.0f, 1.0f);
 }
 void main() {
   gl_Position = vert_main_inner(vert_main_loc0_Input, vert_main_loc1_Input, vert_main_loc2_Input);
-  gl_Position[1u] = -(gl_Position.y);
-  gl_Position[2u] = ((2.0f * gl_Position.z) - gl_Position.w);
+  gl_Position.y = -(gl_Position.y);
+  gl_Position.z = ((2.0f * gl_Position.z) - gl_Position.w);
   gl_PointSize = 1.0f;
 }
 #version 310 es
@@ -60,7 +60,7 @@ buffer particlesB_block_1_ssbo {
   Particles inner;
 } v_2;
 void comp_main_inner(uvec3 tint_symbol) {
-  uint index = tint_symbol[0u];
+  uint index = tint_symbol.x;
   if ((index >= 5u)) {
     return;
   }
@@ -124,16 +124,16 @@ void comp_main_inner(uvec3 tint_symbol) {
   vVel = (normalize(vVel) * clamp(length(vVel), 0.0f, 0.10000000149011611938f));
   vPos = (vPos + (vVel * v.inner.deltaT));
   if ((vPos.x < -1.0f)) {
-    vPos[0u] = 1.0f;
+    vPos.x = 1.0f;
   }
   if ((vPos.x > 1.0f)) {
-    vPos[0u] = -1.0f;
+    vPos.x = -1.0f;
   }
   if ((vPos.y < -1.0f)) {
-    vPos[1u] = 1.0f;
+    vPos.y = 1.0f;
   }
   if ((vPos.y > 1.0f)) {
-    vPos[1u] = -1.0f;
+    vPos.y = -1.0f;
   }
   uint v_12 = min(index, 4u);
   v_2.inner.particles[v_12].pos = vPos;

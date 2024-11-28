@@ -14,5 +14,5 @@ void main() {
   v_1.inner = mat2(v.inner_col0, v.inner_col1);
   v_1.inner[1u] = mat2(v.inner_col0, v.inner_col1)[0u];
   v_1.inner[1u] = mat2(v.inner_col0, v.inner_col1)[0u].yx;
-  v_1.inner[0u][1u] = mat2(v.inner_col0, v.inner_col1)[1u][0u];
+  v_1.inner[0u].y = mat2(v.inner_col0, v.inner_col1)[1u].x;
 }

@@ -57,9 +57,9 @@ vec3 toVoxelPos(vec3 position) {
   vec3 bbSize = (bbMax - bbMin);
   float cubeSize = max(max(bbSize.x, bbSize.y), bbSize.z);
   float gridSize = float(v.inner.gridSize);
-  float gx = ((gridSize * (position[0u] - v.inner.bbMin.x)) / cubeSize);
-  float gy = ((gridSize * (position[1u] - v.inner.bbMin.y)) / cubeSize);
-  float gz = ((gridSize * (position[2u] - v.inner.bbMin.z)) / cubeSize);
+  float gx = ((gridSize * (position.x - v.inner.bbMin.x)) / cubeSize);
+  float gy = ((gridSize * (position.y - v.inner.bbMin.y)) / cubeSize);
+  float gz = ((gridSize * (position.z - v.inner.bbMin.z)) / cubeSize);
   return vec3(gx, gy, gz);
 }
 uvec3 tint_v3f32_to_v3u32(vec3 value) {
@@ -95,7 +95,7 @@ void doIgnore() {
   int g55 = atomicOr(LUT.values[v_14], 0);
 }
 void main_count_inner(uvec3 GlobalInvocationID) {
-  uint triangleIndex = GlobalInvocationID[0u];
+  uint triangleIndex = GlobalInvocationID.x;
   if ((triangleIndex >= v.inner.numTriangles)) {
     return;
   }
@@ -199,7 +199,7 @@ void doIgnore() {
   int g55 = atomicOr(LUT.values[v_9], 0);
 }
 void main_create_lut_inner(uvec3 GlobalInvocationID) {
-  uint voxelIndex = GlobalInvocationID[0u];
+  uint voxelIndex = GlobalInvocationID.x;
   doIgnore();
   uint maxVoxels = ((v.inner.gridSize * v.inner.gridSize) * v.inner.gridSize);
   if ((voxelIndex >= maxVoxels)) {
@@ -279,9 +279,9 @@ vec3 toVoxelPos(vec3 position) {
   vec3 bbSize = (bbMax - bbMin);
   float cubeSize = max(max(bbSize.x, bbSize.y), bbSize.z);
   float gridSize = float(v.inner.gridSize);
-  float gx = ((gridSize * (position[0u] - v.inner.bbMin.x)) / cubeSize);
-  float gy = ((gridSize * (position[1u] - v.inner.bbMin.y)) / cubeSize);
-  float gz = ((gridSize * (position[2u] - v.inner.bbMin.z)) / cubeSize);
+  float gx = ((gridSize * (position.x - v.inner.bbMin.x)) / cubeSize);
+  float gy = ((gridSize * (position.y - v.inner.bbMin.y)) / cubeSize);
+  float gz = ((gridSize * (position.z - v.inner.bbMin.z)) / cubeSize);
   return vec3(gx, gy, gz);
 }
 uvec3 tint_v3f32_to_v3u32(vec3 value) {
@@ -317,7 +317,7 @@ void doIgnore() {
   int g55 = atomicOr(LUT.values[v_14], 0);
 }
 void main_sort_triangles_inner(uvec3 GlobalInvocationID) {
-  uint triangleIndex = GlobalInvocationID[0u];
+  uint triangleIndex = GlobalInvocationID.x;
   doIgnore();
   if ((triangleIndex >= v.inner.numTriangles)) {
     return;

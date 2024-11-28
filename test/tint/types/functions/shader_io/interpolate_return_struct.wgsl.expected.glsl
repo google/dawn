@@ -27,8 +27,8 @@ Out tint_symbol_1_inner() {
 void main() {
   Out v = tint_symbol_1_inner();
   gl_Position = v.pos;
-  gl_Position[1u] = -(gl_Position.y);
-  gl_Position[2u] = ((2.0f * gl_Position.z) - gl_Position.w);
+  gl_Position.y = -(gl_Position.y);
+  gl_Position.z = ((2.0f * gl_Position.z) - gl_Position.w);
   tint_symbol_1_loc0_Output = v.none;
   tint_symbol_1_loc1_Output = v.tint_symbol;
   tint_symbol_1_loc2_Output = v.perspective_center;

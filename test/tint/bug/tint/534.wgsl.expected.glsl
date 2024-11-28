@@ -38,7 +38,7 @@ void tint_symbol_1_inner(uvec3 GlobalInvocationID) {
   uvec2 dstTexCoord = GlobalInvocationID.xy;
   uvec2 srcTexCoord = dstTexCoord;
   if ((v.inner.dstTextureFlipY == 1u)) {
-    srcTexCoord[1u] = ((size.y - dstTexCoord.y) - 1u);
+    srcTexCoord.y = ((size.y - dstTexCoord.y) - 1u);
   }
   uvec2 v_2 = srcTexCoord;
   uint v_3 = (v_1.inner.tint_builtin_value_0 - 1u);
@@ -75,7 +75,7 @@ void tint_symbol_1_inner(uvec3 GlobalInvocationID) {
       continue;
     }
   }
-  uint outputIndex = ((GlobalInvocationID[1u] * uint(size.x)) + GlobalInvocationID[0u]);
+  uint outputIndex = ((GlobalInvocationID.y * uint(size.x)) + GlobalInvocationID.x);
   if (success) {
     uint v_12 = outputIndex;
     uint v_13 = min(v_12, (uint(tint_symbol.result.length()) - 1u));

@@ -49,5 +49,5 @@ void main() {
   b(v_1.inner[2u]);
   c(v_1.inner[2u].m);
   d(v_1.inner[0u].m[1u].ywxz);
-  e(v_1.inner[0u].m[1u].ywxz[0u]);
+  e(v_1.inner[0u].m[1u].ywxz.x);
 }

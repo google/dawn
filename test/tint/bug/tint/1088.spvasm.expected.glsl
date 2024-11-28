@@ -41,12 +41,12 @@ void main_1() {
   vec3 p = vec3(0.0f);
   q = vec4(position_1.x, position_1.y, position_1.z, 1.0f);
   p = q.xyz;
-  p[0u] = (p.x + sin(((v.inner.test[0u].el * position_1.y) + v.inner.time)));
-  p[1u] = (p.y + sin((v.inner.time + 4.0f)));
+  p.x = (p.x + sin(((v.inner.test[0u].el * position_1.y) + v.inner.time)));
+  p.y = (p.y + sin((v.inner.time + 4.0f)));
   mat4 v_1 = v.inner.worldViewProjection;
   tint_symbol = (v_1 * vec4(p.x, p.y, p.z, 1.0f));
   vUV = uv;
-  tint_symbol[1u] = (tint_symbol.y * -1.0f);
+  tint_symbol.y = (tint_symbol.y * -1.0f);
 }
 main_out tint_symbol_1_inner(vec3 position_1_param, vec2 uv_param, vec3 normal_param) {
   position_1 = position_1_param;
@@ -58,8 +58,8 @@ main_out tint_symbol_1_inner(vec3 position_1_param, vec2 uv_param, vec3 normal_p
 void main() {
   main_out v_2 = tint_symbol_1_inner(tint_symbol_1_loc0_Input, tint_symbol_1_loc2_Input, tint_symbol_1_loc1_Input);
   gl_Position = v_2.tint_symbol;
-  gl_Position[1u] = -(gl_Position.y);
-  gl_Position[2u] = ((2.0f * gl_Position.z) - gl_Position.w);
+  gl_Position.y = -(gl_Position.y);
+  gl_Position.z = ((2.0f * gl_Position.z) - gl_Position.w);
   tint_symbol_1_loc0_Output = v_2.vUV_1;
   gl_PointSize = 1.0f;
 }

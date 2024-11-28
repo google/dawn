@@ -92,22 +92,22 @@ void tint_symbol_inner(uint idx) {
   vec3 arr2_vec3_f32[2] = sb.arr[v_22].arr2_vec3_f32;
   int v_23 = (tint_f32_to_i32(scalar_f32) + scalar_i32);
   int v_24 = (v_23 + int(scalar_u32));
-  int v_25 = ((v_24 + tint_f32_to_i32(vec2_f32[0u])) + vec2_i32[0u]);
-  int v_26 = (v_25 + int(vec2_u32[0u]));
-  int v_27 = ((v_26 + tint_f32_to_i32(vec3_f32[1u])) + vec3_i32[1u]);
-  int v_28 = (v_27 + int(vec3_u32[1u]));
-  int v_29 = ((v_28 + tint_f32_to_i32(vec4_f32[2u])) + vec4_i32[2u]);
-  int v_30 = (v_29 + int(vec4_u32[2u]));
-  int v_31 = (v_30 + tint_f32_to_i32(mat2x2_f32[0u][0u]));
-  int v_32 = (v_31 + tint_f32_to_i32(mat2x3_f32[0u][0u]));
-  int v_33 = (v_32 + tint_f32_to_i32(mat2x4_f32[0u][0u]));
-  int v_34 = (v_33 + tint_f32_to_i32(mat3x2_f32[0u][0u]));
-  int v_35 = (v_34 + tint_f32_to_i32(mat3x3_f32[0u][0u]));
-  int v_36 = (v_35 + tint_f32_to_i32(mat3x4_f32[0u][0u]));
-  int v_37 = (v_36 + tint_f32_to_i32(mat4x2_f32[0u][0u]));
-  int v_38 = (v_37 + tint_f32_to_i32(mat4x3_f32[0u][0u]));
-  int v_39 = (v_38 + tint_f32_to_i32(mat4x4_f32[0u][0u]));
-  v.inner = (v_39 + tint_f32_to_i32(arr2_vec3_f32[0u][0u]));
+  int v_25 = ((v_24 + tint_f32_to_i32(vec2_f32.x)) + vec2_i32.x);
+  int v_26 = (v_25 + int(vec2_u32.x));
+  int v_27 = ((v_26 + tint_f32_to_i32(vec3_f32.y)) + vec3_i32.y);
+  int v_28 = (v_27 + int(vec3_u32.y));
+  int v_29 = ((v_28 + tint_f32_to_i32(vec4_f32.z)) + vec4_i32.z);
+  int v_30 = (v_29 + int(vec4_u32.z));
+  int v_31 = (v_30 + tint_f32_to_i32(mat2x2_f32[0u].x));
+  int v_32 = (v_31 + tint_f32_to_i32(mat2x3_f32[0u].x));
+  int v_33 = (v_32 + tint_f32_to_i32(mat2x4_f32[0u].x));
+  int v_34 = (v_33 + tint_f32_to_i32(mat3x2_f32[0u].x));
+  int v_35 = (v_34 + tint_f32_to_i32(mat3x3_f32[0u].x));
+  int v_36 = (v_35 + tint_f32_to_i32(mat3x4_f32[0u].x));
+  int v_37 = (v_36 + tint_f32_to_i32(mat4x2_f32[0u].x));
+  int v_38 = (v_37 + tint_f32_to_i32(mat4x3_f32[0u].x));
+  int v_39 = (v_38 + tint_f32_to_i32(mat4x4_f32[0u].x));
+  v.inner = (v_39 + tint_f32_to_i32(arr2_vec3_f32[0u].x));
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {

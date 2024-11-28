@@ -25,7 +25,7 @@ void f_inner(uint tint_local_index) {
   w = v.inner;
   w[1u] = v.inner[2u];
   w[1u][0u] = v.inner[0u][1u].ywxz;
-  w[1u][0u][0u] = v.inner[0u][1u].x;
+  w[1u][0u].x = v.inner[0u][1u].x;
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {

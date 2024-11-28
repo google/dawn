@@ -13,5 +13,5 @@ void main() {
   p = f16mat3(v.inner_col0, v.inner_col1, v.inner_col2);
   p[1u] = f16mat3(v.inner_col0, v.inner_col1, v.inner_col2)[0u];
   p[1u] = f16mat3(v.inner_col0, v.inner_col1, v.inner_col2)[0u].zxy;
-  p[0u][1u] = f16mat3(v.inner_col0, v.inner_col1, v.inner_col2)[1u][0u];
+  p[0u].y = f16mat3(v.inner_col0, v.inner_col1, v.inner_col2)[1u].x;
 }

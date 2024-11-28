@@ -10,5 +10,5 @@ void main() {
   p = v.inner;
   p[1u] = v.inner[0u];
   p[1u] = v.inner[0u].ywxz;
-  p[0u][1u] = v.inner[1u].x;
+  p[0u].y = v.inner[1u].x;
 }

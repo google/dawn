@@ -12,5 +12,5 @@ void main() {
   p = mat3x2(v.inner_col0, v.inner_col1, v.inner_col2);
   p[1u] = mat3x2(v.inner_col0, v.inner_col1, v.inner_col2)[0u];
   p[1u] = mat3x2(v.inner_col0, v.inner_col1, v.inner_col2)[0u].yx;
-  p[0u][1u] = mat3x2(v.inner_col0, v.inner_col1, v.inner_col2)[1u][0u];
+  p[0u].y = mat3x2(v.inner_col0, v.inner_col1, v.inner_col2)[1u].x;
 }

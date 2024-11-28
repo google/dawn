@@ -27,11 +27,11 @@ vec4 tint_symbol_inner(uint tint_symbol_1) {
   indexable = vec2[3](vec2(-1.0f, 1.0f), vec2(1.0f), vec2(-1.0f));
   vec2 x_51 = indexable[min(x_46, 2u)];
   vec2 x_52 = (mat2((x_23[0u] + x_28[0u]), (x_23[1u] + x_28[1u])) * x_51);
-  return vec4(x_52[0u], x_52[1u], 0.0f, 1.0f);
+  return vec4(x_52.x, x_52.y, 0.0f, 1.0f);
 }
 void main() {
   gl_Position = tint_symbol_inner(uint(gl_VertexID));
-  gl_Position[1u] = -(gl_Position.y);
-  gl_Position[2u] = ((2.0f * gl_Position.z) - gl_Position.w);
+  gl_Position.y = -(gl_Position.y);
+  gl_Position.z = ((2.0f * gl_Position.z) - gl_Position.w);
   gl_PointSize = 1.0f;
 }

@@ -13,5 +13,5 @@ void main() {
   v_1.inner = v.inner;
   v_1.inner[1u] = v.inner[2u];
   v_1.inner[1u][0u] = v.inner[0u][1u].ywxz;
-  v_1.inner[1u][0u][0u] = v.inner[0u][1u].x;
+  v_1.inner[1u][0u].x = v.inner[0u][1u].x;
 }

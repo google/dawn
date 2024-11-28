@@ -17,6 +17,6 @@ void main() {
   a(f16mat2x4(v_1.inner_col0, v_1.inner_col1));
   b(f16mat2x4(v_1.inner_col0, v_1.inner_col1)[1u]);
   b(f16mat2x4(v_1.inner_col0, v_1.inner_col1)[1u].ywxz);
-  c(f16mat2x4(v_1.inner_col0, v_1.inner_col1)[1u][0u]);
-  c(f16mat2x4(v_1.inner_col0, v_1.inner_col1)[1u].ywxz[0u]);
+  c(f16mat2x4(v_1.inner_col0, v_1.inner_col1)[1u].x);
+  c(f16mat2x4(v_1.inner_col0, v_1.inner_col1)[1u].ywxz.x);
 }

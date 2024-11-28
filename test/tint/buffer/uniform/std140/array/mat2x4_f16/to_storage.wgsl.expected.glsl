@@ -37,5 +37,5 @@ void main() {
   v_1.inner = v_3;
   v_1.inner[1u] = f16mat2x4(v.inner[2u].col0, v.inner[2u].col1);
   v_1.inner[1u][0u] = v.inner[0u].col1.ywxz;
-  v_1.inner[1u][0u][0u] = v.inner[0u].col1.x;
+  v_1.inner[1u][0u].x = v.inner[0u].col1.x;
 }

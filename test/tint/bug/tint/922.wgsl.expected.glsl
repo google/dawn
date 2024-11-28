@@ -151,7 +151,7 @@ void main1() {
   vec4 x_e50 = a_Color1;
   v_Color = x_e50;
   vec4 x_e52 = v_2.inner.u_Misc0_;
-  if ((x_e52[0u] == 2.0f)) {
+  if ((x_e52.x == 2.0f)) {
     vec3 x_e59 = a_Normal1;
     Mat4x2_ x_e64 = v_2.inner.u_TexMtx[0u];
     vec3 x_e65 = a_Normal1;
@@ -185,7 +185,7 @@ void main() {
   tint_symbol_1_loc0_Output = v_5.v_Color;
   tint_symbol_1_loc1_Output = v_5.v_TexCoord;
   gl_Position = v_5.member;
-  gl_Position[1u] = -(gl_Position.y);
-  gl_Position[2u] = ((2.0f * gl_Position.z) - gl_Position.w);
+  gl_Position.y = -(gl_Position.y);
+  gl_Position.z = ((2.0f * gl_Position.z) - gl_Position.w);
   gl_PointSize = 1.0f;
 }

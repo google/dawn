@@ -18,7 +18,7 @@ int foo_inner(float tint_symbol, vec2 coord) {
   if ((tint_symbol == 0.0f)) {
     continue_execution = false;
   }
-  int result = tint_f32_to_i32(texture(t_s, coord)[0u]);
+  int result = tint_f32_to_i32(texture(t_s, coord).x);
   {
     int i = 0;
     while(true) {

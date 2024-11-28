@@ -16,5 +16,5 @@ void main() {
   v_1.inner = f16mat3x2(v.inner_col0, v.inner_col1, v.inner_col2);
   v_1.inner[1u] = f16mat3x2(v.inner_col0, v.inner_col1, v.inner_col2)[0u];
   v_1.inner[1u] = f16mat3x2(v.inner_col0, v.inner_col1, v.inner_col2)[0u].yx;
-  v_1.inner[0u][1u] = f16mat3x2(v.inner_col0, v.inner_col1, v.inner_col2)[1u][0u];
+  v_1.inner[0u].y = f16mat3x2(v.inner_col0, v.inner_col1, v.inner_col2)[1u].x;
 }

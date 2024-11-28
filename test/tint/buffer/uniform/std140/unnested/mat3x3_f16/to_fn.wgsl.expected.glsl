@@ -18,6 +18,6 @@ void main() {
   a(f16mat3(v_1.inner_col0, v_1.inner_col1, v_1.inner_col2));
   b(f16mat3(v_1.inner_col0, v_1.inner_col1, v_1.inner_col2)[1u]);
   b(f16mat3(v_1.inner_col0, v_1.inner_col1, v_1.inner_col2)[1u].zxy);
-  c(f16mat3(v_1.inner_col0, v_1.inner_col1, v_1.inner_col2)[1u][0u]);
-  c(f16mat3(v_1.inner_col0, v_1.inner_col1, v_1.inner_col2)[1u].zxy[0u]);
+  c(f16mat3(v_1.inner_col0, v_1.inner_col1, v_1.inner_col2)[1u].x);
+  c(f16mat3(v_1.inner_col0, v_1.inner_col1, v_1.inner_col2)[1u].zxy.x);
 }

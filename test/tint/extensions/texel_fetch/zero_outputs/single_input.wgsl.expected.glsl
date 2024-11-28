@@ -6,7 +6,7 @@ in vec4 f_Input;
 void g(float a) {
 }
 void f_inner(vec4 fbf) {
-  g(fbf[1u]);
+  g(fbf.y);
 }
 void main() {
   f_inner(f_Input);

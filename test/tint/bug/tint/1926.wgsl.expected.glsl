@@ -14,7 +14,7 @@ void tint_symbol_1_inner(uvec3 global_id, uvec3 local_id, uint tint_local_index)
   uint v_1 = sh_atomic_failed;
   barrier();
   uint failed = v_1;
-  if ((local_id[0u] == 0u)) {
+  if ((local_id.x == 0u)) {
     v.inner = failed;
   }
 }

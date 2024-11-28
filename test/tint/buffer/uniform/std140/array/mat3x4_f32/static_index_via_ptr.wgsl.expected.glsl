@@ -13,5 +13,5 @@ void main() {
   mat3x4 l_a[4] = v.inner;
   mat3x4 l_a_i = v.inner[2u];
   vec4 l_a_i_i = v.inner[2u][1u];
-  v_1.inner = (((v.inner[2u][1u].x + l_a[0u][0u][0u]) + l_a_i[0u][0u]) + l_a_i_i[0u]);
+  v_1.inner = (((v.inner[2u][1u].x + l_a[0u][0u].x) + l_a_i[0u].x) + l_a_i_i.x);
 }

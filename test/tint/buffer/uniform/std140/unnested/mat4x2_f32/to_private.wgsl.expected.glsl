@@ -13,5 +13,5 @@ void main() {
   p = mat4x2(v.inner_col0, v.inner_col1, v.inner_col2, v.inner_col3);
   p[1u] = mat4x2(v.inner_col0, v.inner_col1, v.inner_col2, v.inner_col3)[0u];
   p[1u] = mat4x2(v.inner_col0, v.inner_col1, v.inner_col2, v.inner_col3)[0u].yx;
-  p[0u][1u] = mat4x2(v.inner_col0, v.inner_col1, v.inner_col2, v.inner_col3)[1u][0u];
+  p[0u].y = mat4x2(v.inner_col0, v.inner_col1, v.inner_col2, v.inner_col3)[1u].x;
 }

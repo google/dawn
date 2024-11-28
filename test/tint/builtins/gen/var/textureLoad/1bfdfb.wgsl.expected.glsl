@@ -82,10 +82,10 @@ vec4 tint_TextureLoadExternal(tint_ExternalTextureParams params, uvec2 coords) {
     ivec2 v_8 = ivec2(v_5);
     vec4 v_9 = texelFetch(arg_0_plane0, v_8, int(0u));
     v_6 = v_9.xyz;
-    v_7 = v_9[3u];
+    v_7 = v_9.w;
   } else {
     ivec2 v_10 = ivec2(v_5);
-    float v_11 = texelFetch(arg_0_plane0, v_10, int(0u))[0u];
+    float v_11 = texelFetch(arg_0_plane0, v_10, int(0u)).x;
     ivec2 v_12 = ivec2(uvec2((v_4 * params.plane1CoordFactor)));
     v_6 = (vec4(v_11, texelFetch(arg_0_plane1, v_12, int(0u)).xy, 1.0f) * params.yuvToRgbConversionMatrix);
     v_7 = 1.0f;
@@ -195,10 +195,10 @@ vec4 tint_TextureLoadExternal(tint_ExternalTextureParams params, uvec2 coords) {
     ivec2 v_8 = ivec2(v_5);
     vec4 v_9 = texelFetch(arg_0_plane0, v_8, int(0u));
     v_6 = v_9.xyz;
-    v_7 = v_9[3u];
+    v_7 = v_9.w;
   } else {
     ivec2 v_10 = ivec2(v_5);
-    float v_11 = texelFetch(arg_0_plane0, v_10, int(0u))[0u];
+    float v_11 = texelFetch(arg_0_plane0, v_10, int(0u)).x;
     ivec2 v_12 = ivec2(uvec2((v_4 * params.plane1CoordFactor)));
     v_6 = (vec4(v_11, texelFetch(arg_0_plane1, v_12, int(0u)).xy, 1.0f) * params.yuvToRgbConversionMatrix);
     v_7 = 1.0f;
@@ -311,10 +311,10 @@ vec4 tint_TextureLoadExternal(tint_ExternalTextureParams params, uvec2 coords) {
     ivec2 v_7 = ivec2(v_4);
     vec4 v_8 = texelFetch(arg_0_plane0, v_7, int(0u));
     v_5 = v_8.xyz;
-    v_6 = v_8[3u];
+    v_6 = v_8.w;
   } else {
     ivec2 v_9 = ivec2(v_4);
-    float v_10 = texelFetch(arg_0_plane0, v_9, int(0u))[0u];
+    float v_10 = texelFetch(arg_0_plane0, v_9, int(0u)).x;
     ivec2 v_11 = ivec2(uvec2((v_3 * params.plane1CoordFactor)));
     v_5 = (vec4(v_10, texelFetch(arg_0_plane1, v_11, int(0u)).xy, 1.0f) * params.yuvToRgbConversionMatrix);
     v_6 = 1.0f;
@@ -348,8 +348,8 @@ VertexOutput vertex_main_inner() {
 void main() {
   VertexOutput v_17 = vertex_main_inner();
   gl_Position = v_17.pos;
-  gl_Position[1u] = -(gl_Position.y);
-  gl_Position[2u] = ((2.0f * gl_Position.z) - gl_Position.w);
+  gl_Position.y = -(gl_Position.y);
+  gl_Position.z = ((2.0f * gl_Position.z) - gl_Position.w);
   vertex_main_loc0_Output = v_17.prevent_dce;
   gl_PointSize = 1.0f;
 }

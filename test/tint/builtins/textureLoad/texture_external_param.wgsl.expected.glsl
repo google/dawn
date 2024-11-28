@@ -76,10 +76,10 @@ vec4 tint_TextureLoadExternal(tint_ExternalTextureParams params, uvec2 coords) {
     ivec2 v_7 = ivec2(v_4);
     vec4 v_8 = texelFetch(arg_0_plane0, v_7, int(0u));
     v_5 = v_8.xyz;
-    v_6 = v_8[3u];
+    v_6 = v_8.w;
   } else {
     ivec2 v_9 = ivec2(v_4);
-    float v_10 = texelFetch(arg_0_plane0, v_9, int(0u))[0u];
+    float v_10 = texelFetch(arg_0_plane0, v_9, int(0u)).x;
     ivec2 v_11 = ivec2(uvec2((v_3 * params.plane1CoordFactor)));
     v_5 = (vec4(v_10, texelFetch(arg_0_plane1, v_11, int(0u)).xy, 1.0f) * params.yuvToRgbConversionMatrix);
     v_6 = 1.0f;
@@ -110,8 +110,8 @@ vec4 vertex_main_inner() {
 }
 void main() {
   gl_Position = vertex_main_inner();
-  gl_Position[1u] = -(gl_Position.y);
-  gl_Position[2u] = ((2.0f * gl_Position.z) - gl_Position.w);
+  gl_Position.y = -(gl_Position.y);
+  gl_Position.z = ((2.0f * gl_Position.z) - gl_Position.w);
   gl_PointSize = 1.0f;
 }
 #version 310 es
@@ -194,10 +194,10 @@ vec4 tint_TextureLoadExternal(tint_ExternalTextureParams params, uvec2 coords) {
     ivec2 v_7 = ivec2(v_4);
     vec4 v_8 = texelFetch(arg_0_plane0, v_7, int(0u));
     v_5 = v_8.xyz;
-    v_6 = v_8[3u];
+    v_6 = v_8.w;
   } else {
     ivec2 v_9 = ivec2(v_4);
-    float v_10 = texelFetch(arg_0_plane0, v_9, int(0u))[0u];
+    float v_10 = texelFetch(arg_0_plane0, v_9, int(0u)).x;
     ivec2 v_11 = ivec2(uvec2((v_3 * params.plane1CoordFactor)));
     v_5 = (vec4(v_10, texelFetch(arg_0_plane1, v_11, int(0u)).xy, 1.0f) * params.yuvToRgbConversionMatrix);
     v_6 = 1.0f;
@@ -303,10 +303,10 @@ vec4 tint_TextureLoadExternal(tint_ExternalTextureParams params, uvec2 coords) {
     ivec2 v_7 = ivec2(v_4);
     vec4 v_8 = texelFetch(arg_0_plane0, v_7, int(0u));
     v_5 = v_8.xyz;
-    v_6 = v_8[3u];
+    v_6 = v_8.w;
   } else {
     ivec2 v_9 = ivec2(v_4);
-    float v_10 = texelFetch(arg_0_plane0, v_9, int(0u))[0u];
+    float v_10 = texelFetch(arg_0_plane0, v_9, int(0u)).x;
     ivec2 v_11 = ivec2(uvec2((v_3 * params.plane1CoordFactor)));
     v_5 = (vec4(v_10, texelFetch(arg_0_plane1, v_11, int(0u)).xy, 1.0f) * params.yuvToRgbConversionMatrix);
     v_6 = 1.0f;

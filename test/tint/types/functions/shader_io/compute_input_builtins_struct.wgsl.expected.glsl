@@ -10,7 +10,7 @@ struct ComputeInputs {
 };
 
 void tint_symbol_inner(ComputeInputs inputs) {
-  uint foo = ((((inputs.local_invocation_id[0u] + inputs.local_invocation_index) + inputs.global_invocation_id[0u]) + inputs.workgroup_id[0u]) + inputs.num_workgroups[0u]);
+  uint foo = ((((inputs.local_invocation_id.x + inputs.local_invocation_index) + inputs.global_invocation_id.x) + inputs.workgroup_id.x) + inputs.num_workgroups.x);
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {

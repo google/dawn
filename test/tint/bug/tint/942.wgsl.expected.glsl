@@ -74,7 +74,7 @@ void tint_symbol_inner(uvec3 WorkGroupID, uvec3 LocalInvocationID, uint tint_loc
             loadIndex = loadIndex.yx;
           }
           uint v_7 = min(r, 3u);
-          uint v_8 = min(((4u * LocalInvocationID[0u]) + c), 255u);
+          uint v_8 = min(((4u * LocalInvocationID.x) + c), 255u);
           vec2 v_9 = (vec2(loadIndex) + vec2(0.25f));
           vec2 v_10 = (v_9 / vec2(dims));
           tile[v_7][v_8] = textureLod(inputTex_samp, v_10, float(0.0f)).xyz;
@@ -109,7 +109,7 @@ void tint_symbol_inner(uvec3 WorkGroupID, uvec3 LocalInvocationID, uint tint_loc
           if ((v_1.inner.value != 0u)) {
             writeIndex = writeIndex.yx;
           }
-          uint center = ((4u * LocalInvocationID[0u]) + c);
+          uint center = ((4u * LocalInvocationID.x) + c);
           bool v_11 = false;
           if ((center >= filterOffset)) {
             v_11 = (center < (256u - filterOffset));

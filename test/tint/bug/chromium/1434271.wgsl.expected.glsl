@@ -11,8 +11,8 @@ vec4 vertex_main_inner() {
 }
 void main() {
   gl_Position = vertex_main_inner();
-  gl_Position[1u] = -(gl_Position.y);
-  gl_Position[2u] = ((2.0f * gl_Position.z) - gl_Position.w);
+  gl_Position.y = -(gl_Position.y);
+  gl_Position.z = ((2.0f * gl_Position.z) - gl_Position.w);
   gl_PointSize = 1.0f;
 }
 #version 310 es
@@ -83,8 +83,8 @@ VertexOutput vs_main_inner(VertexInput tint_symbol) {
 void main() {
   VertexOutput v_2 = vs_main_inner(VertexInput(vs_main_loc0_Input, vs_main_loc1_Input, vs_main_loc2_Input));
   gl_Position = v_2.position;
-  gl_Position[1u] = -(gl_Position.y);
-  gl_Position[2u] = ((2.0f * gl_Position.z) - gl_Position.w);
+  gl_Position.y = -(gl_Position.y);
+  gl_Position.z = ((2.0f * gl_Position.z) - gl_Position.w);
   vs_main_loc0_Output = v_2.color;
   vs_main_loc1_Output = v_2.quad_pos;
   gl_PointSize = 1.0f;
@@ -128,7 +128,7 @@ void simulate_inner(uvec3 GlobalInvocationID) {
   vec2 v_1 = v.inner.seed.xy;
   vec2 v_2 = (v_1 * vec2(GlobalInvocationID.xy));
   rand_seed = (v_2 * v.inner.seed.zw);
-  uint idx = GlobalInvocationID[0u];
+  uint idx = GlobalInvocationID.x;
   uint v_3 = min(idx, (uint(data.particles.length()) - 1u));
   Particle particle = data.particles[v_3];
   uint v_4 = min(idx, (uint(data.particles.length()) - 1u));
@@ -164,8 +164,8 @@ float tint_float_modulo(float x, float y) {
 }
 void export_level_inner(uvec3 coord) {
   if (all(lessThan(coord.xy, uvec2(uvec2(imageSize(tex_out)))))) {
-    uint dst_offset = (coord[0u] << ((coord[1u] * v.inner.width) & 31u));
-    uint src_offset = ((coord[0u] - 2u) + ((coord[1u] >> (2u & 31u)) * v.inner.width));
+    uint dst_offset = (coord.x << ((coord.y * v.inner.width) & 31u));
+    uint src_offset = ((coord.x - 2u) + ((coord.y >> (2u & 31u)) * v.inner.width));
     uint v_1 = min((src_offset << (0u & 31u)), (uint(buf_in.weights.length()) - 1u));
     float a = buf_in.weights[v_1];
     uint v_2 = min((src_offset + 1u), (uint(buf_in.weights.length()) - 1u));

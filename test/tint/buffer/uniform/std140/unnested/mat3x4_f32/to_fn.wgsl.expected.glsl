@@ -16,5 +16,5 @@ void main() {
   b(v_1.inner[1u]);
   b(v_1.inner[1u].ywxz);
   c(v_1.inner[1u].x);
-  c(v_1.inner[1u].ywxz[0u]);
+  c(v_1.inner[1u].ywxz.x);
 }

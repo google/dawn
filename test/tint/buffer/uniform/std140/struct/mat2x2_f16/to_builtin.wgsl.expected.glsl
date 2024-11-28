@@ -45,5 +45,5 @@ layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
   f16mat2 t = transpose(f16mat2(v.inner[2u].m_col0, v.inner[2u].m_col1));
   float16_t l = length(v.inner[0u].m_col1.yx);
-  float16_t a = abs(v.inner[0u].m_col1.yx[0u]);
+  float16_t a = abs(v.inner[0u].m_col1.yx.x);
 }

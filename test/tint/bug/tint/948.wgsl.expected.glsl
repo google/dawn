@@ -57,9 +57,9 @@ mat4 getFrameData_f1_(inout float frameID) {
   vec4 x_47 = texture(frameMapTexture_frameMapSampler, vec2(x_44, 0.25f), clamp(0.0f, -16.0f, 15.9899997711181640625f));
   float x_51 = fX;
   vec4 x_54 = texture(frameMapTexture_frameMapSampler, vec2(x_51, 0.5f), clamp(0.0f, -16.0f, 15.9899997711181640625f));
-  vec4 v_1 = vec4(x_40[0u], x_40[1u], x_40[2u], x_40[3u]);
-  vec4 v_2 = vec4(x_47[0u], x_47[1u], x_47[2u], x_47[3u]);
-  return mat4(v_1, v_2, vec4(x_54[0u], x_54[1u], x_54[2u], x_54[3u]), vec4(0.0f));
+  vec4 v_1 = vec4(x_40.x, x_40.y, x_40.z, x_40.w);
+  vec4 v_2 = vec4(x_47.x, x_47.y, x_47.z, x_47.w);
+  return mat4(v_1, v_2, vec4(x_54.x, x_54.y, x_54.z, x_54.w), vec4(0.0f));
 }
 float tint_float_modulo(float x, float y) {
   return (x - (y * trunc((x / y))));
@@ -87,7 +87,7 @@ void main_1() {
   vec2 x_86 = tUV;
   tileUV = fract(x_86);
   float x_91 = tileUV.y;
-  tileUV[1u] = (1.0f - x_91);
+  tileUV.y = (1.0f - x_91);
   vec2 x_95 = tUV;
   tileID = floor(x_95);
   vec2 x_101 = v.inner.spriteMapSize;
@@ -111,7 +111,7 @@ void main_1() {
           vec2 x_150 = tileID;
           vec2 x_154 = v.inner.stageSize;
           vec4 x_156 = texture(tileMapsTexture1_tileMapsSampler, ((x_150 + vec2(0.5f)) / x_154), clamp(0.0f, -16.0f, 15.9899997711181640625f));
-          frameID_1 = x_156[0u];
+          frameID_1 = x_156.x;
           break;
         }
         case 0:
@@ -119,7 +119,7 @@ void main_1() {
           vec2 x_136 = tileID;
           vec2 x_140 = v.inner.stageSize;
           vec4 x_142 = texture(tileMapsTexture0_tileMapsSampler, ((x_136 + vec2(0.5f)) / x_140), clamp(0.0f, -16.0f, 15.9899997711181640625f));
-          frameID_1 = x_142[0u];
+          frameID_1 = x_142.x;
           break;
         }
         default:
@@ -170,18 +170,18 @@ void main_1() {
       frameData = x_225;
       vec4 x_228 = frameData[0u];
       vec2 x_231 = v.inner.spriteMapSize;
-      frameSize = (vec2(x_228[3u], x_228[2u]) / x_231);
+      frameSize = (vec2(x_228.w, x_228.z) / x_231);
       vec4 x_235 = frameData[0u];
       vec2 x_237 = sheetUnits;
-      offset_1 = (vec2(x_235[0u], x_235[1u]) * x_237);
+      offset_1 = (vec2(x_235.x, x_235.y) * x_237);
       vec4 x_241 = frameData[2u];
       vec4 x_244 = frameData[0u];
-      vec2 v_3 = vec2(x_241[0u], x_241[1u]);
-      ratio = (v_3 / vec2(x_244[3u], x_244[2u]));
+      vec2 v_3 = vec2(x_241.x, x_241.y);
+      ratio = (v_3 / vec2(x_244.w, x_244.z));
       float x_248 = frameData[2u].z;
       if ((x_248 == 1.0f)) {
         vec2 x_252 = tileUV;
-        tileUV = vec2(x_252[1u], x_252[0u]);
+        tileUV = vec2(x_252.y, x_252.x);
       }
       int x_254 = i;
       if ((x_254 == 0)) {
@@ -202,12 +202,12 @@ void main_1() {
         vec4 x_290 = color;
         vec4 x_292 = nc;
         float x_295 = nc.w;
-        vec3 v_4 = vec3(x_290[0u], x_290[1u], x_290[2u]);
-        vec3 v_5 = vec3(x_292[0u], x_292[1u], x_292[2u]);
+        vec3 v_4 = vec3(x_290.x, x_290.y, x_290.z);
+        vec3 v_5 = vec3(x_292.x, x_292.y, x_292.z);
         mixed = mix(v_4, v_5, vec3(x_295, x_295, x_295));
         vec3 x_298 = mixed;
         float x_299 = alpha;
-        color = vec4(x_298[0u], x_298[1u], x_298[2u], x_299);
+        color = vec4(x_298.x, x_298.y, x_298.z, x_299);
       }
       {
         int x_304 = i;
@@ -218,9 +218,9 @@ void main_1() {
   }
   vec3 x_310 = v.inner.colorMul;
   vec4 x_311 = color;
-  vec3 x_313 = (vec3(x_311[0u], x_311[1u], x_311[2u]) * x_310);
+  vec3 x_313 = (vec3(x_311.x, x_311.y, x_311.z) * x_310);
   vec4 x_314 = color;
-  color = vec4(x_313[0u], x_313[1u], x_313[2u], x_314[3u]);
+  color = vec4(x_313.x, x_313.y, x_313.z, x_314.w);
   vec4 x_318 = color;
   glFragColor = x_318;
 }

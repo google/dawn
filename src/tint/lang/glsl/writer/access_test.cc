@@ -138,7 +138,7 @@ TEST_F(GlslWriterTest, AccessStoreVectorElementConstantIndex) {
     EXPECT_EQ(output_.glsl, GlslHeader() + R"(
 void foo() {
   ivec4 vec = ivec4(0);
-  vec[1u] = 42;
+  vec.y = 42;
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
@@ -506,10 +506,10 @@ buffer v_block_1_ssbo {
   vec4 inner;
 } v_1;
 void main() {
-  v_1.inner[0u] = 2.0f;
-  v_1.inner[1u] = 4.0f;
-  v_1.inner[2u] = 8.0f;
-  v_1.inner[3u] = 16.0f;
+  v_1.inner.x = 2.0f;
+  v_1.inner.y = 4.0f;
+  v_1.inner.z = 8.0f;
+  v_1.inner.w = 16.0f;
 }
 )");
 }
@@ -1097,7 +1097,7 @@ uniform v_block_std140_1_ubo {
 void main() {
   mat2x3 a = mat2x3(v_1.inner_col0, v_1.inner_col1);
   vec3 b = mat2x3(v_1.inner_col0, v_1.inner_col1)[1u];
-  float c = mat2x3(v_1.inner_col0, v_1.inner_col1)[1u][2u];
+  float c = mat2x3(v_1.inner_col0, v_1.inner_col1)[1u].z;
 }
 )");
 }
@@ -1128,7 +1128,7 @@ uniform v_block_std140_1_ubo {
 void main() {
   f16mat2x3 a = f16mat2x3(v_1.inner_col0, v_1.inner_col1);
   f16vec3 b = f16mat2x3(v_1.inner_col0, v_1.inner_col1)[1u];
-  float16_t c = f16mat2x3(v_1.inner_col0, v_1.inner_col1)[1u][2u];
+  float16_t c = f16mat2x3(v_1.inner_col0, v_1.inner_col1)[1u].z;
 }
 )");
 }
@@ -1160,7 +1160,7 @@ uniform v_block_std140_1_ubo {
 void main() {
   mat3x2 a = mat3x2(v_1.inner_col0, v_1.inner_col1, v_1.inner_col2);
   vec2 b = mat3x2(v_1.inner_col0, v_1.inner_col1, v_1.inner_col2)[1u];
-  float c = mat3x2(v_1.inner_col0, v_1.inner_col1, v_1.inner_col2)[1u][1u];
+  float c = mat3x2(v_1.inner_col0, v_1.inner_col1, v_1.inner_col2)[1u].y;
 }
 )");
 }
@@ -1191,7 +1191,7 @@ uniform v_block_std140_1_ubo {
 void main() {
   mat2 a = mat2(v_1.inner_col0, v_1.inner_col1);
   vec2 b = mat2(v_1.inner_col0, v_1.inner_col1)[1u];
-  float c = mat2(v_1.inner_col0, v_1.inner_col1)[1u][1u];
+  float c = mat2(v_1.inner_col0, v_1.inner_col1)[1u].y;
 }
 )");
 }
@@ -1223,7 +1223,7 @@ uniform v_block_std140_1_ubo {
 void main() {
   f16mat2 a = f16mat2(v_1.inner_col0, v_1.inner_col1);
   f16vec2 b = f16mat2(v_1.inner_col0, v_1.inner_col1)[1u];
-  float16_t c = f16mat2(v_1.inner_col0, v_1.inner_col1)[1u][1u];
+  float16_t c = f16mat2(v_1.inner_col0, v_1.inner_col1)[1u].y;
 }
 )");
 }
@@ -1553,7 +1553,7 @@ buffer v_block_1_ssbo {
   vec3 inner;
 } v_1;
 void main() {
-  v_1.inner[1u] = 2.0f;
+  v_1.inner.y = 2.0f;
 }
 )");
 }
@@ -1579,7 +1579,7 @@ buffer v_block_1_ssbo {
   f16vec3 inner;
 } v_1;
 void main() {
-  v_1.inner[1u] = 2.0hf;
+  v_1.inner.y = 2.0hf;
 }
 )");
 }
@@ -1656,7 +1656,7 @@ buffer v_block_1_ssbo {
   mat4 inner;
 } v_1;
 void main() {
-  v_1.inner[1u][2u] = 5.0f;
+  v_1.inner[1u].z = 5.0f;
 }
 )");
 }
@@ -1683,7 +1683,7 @@ buffer v_block_1_ssbo {
   f16mat3x2 inner;
 } v_1;
 void main() {
-  v_1.inner[2u][1u] = 5.0hf;
+  v_1.inner[2u].y = 5.0hf;
 }
 )");
 }

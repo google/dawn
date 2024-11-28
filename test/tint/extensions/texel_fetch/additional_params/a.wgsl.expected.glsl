@@ -12,7 +12,7 @@ layout(location = 0) in vec4 f_loc0_Input;
 void g(float a, float b, float c) {
 }
 void f_inner(vec4 pos, vec4 fbf, In tint_symbol) {
-  g(pos[0u], fbf[0u], tint_symbol.uv[0u]);
+  g(pos.x, fbf.x, tint_symbol.uv.x);
 }
 void main() {
   vec4 v = gl_FragCoord;

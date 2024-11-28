@@ -19,7 +19,7 @@ void main_1() {
   uvec2 v_3 = (uvec2(textureSize(Src, int(v_2))) - uvec2(1u));
   ivec2 v_4 = ivec2(min(uvec2(ivec2(0)), v_3));
   srcValue = texelFetch(Src, v_4, int(v_2));
-  srcValue[0u] = (srcValue.x + 1u);
+  srcValue.x = (srcValue.x + 1u);
   uvec4 x_27 = srcValue;
   imageStore(Dst, ivec2(0), x_27);
 }

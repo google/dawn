@@ -50,7 +50,7 @@ uniform uniforms_block_1_ubo {
   Uniforms inner;
 } v_2;
 void tint_symbol_2_inner(uvec3 GlobalInvocationID) {
-  uint index = GlobalInvocationID[0u];
+  uint index = GlobalInvocationID.x;
   if ((index >= v_1.inner.numLights)) {
     return;
   }
@@ -60,13 +60,13 @@ void tint_symbol_2_inner(uvec3 GlobalInvocationID) {
   uint v_6 = min(v_5, (uint(lightsBuffer.lights.length()) - 1u));
   float v_7 = (lightsBuffer.lights[v_6].position.y - 0.10000000149011611938f);
   float v_8 = float(index);
-  lightsBuffer.lights[v_4].position[1u] = (v_7 + (0.00100000004749745131f * (v_8 - (64.0f * floor((float(index) / 64.0f))))));
+  lightsBuffer.lights[v_4].position.y = (v_7 + (0.00100000004749745131f * (v_8 - (64.0f * floor((float(index) / 64.0f))))));
   uint v_9 = index;
   uint v_10 = min(v_9, (uint(lightsBuffer.lights.length()) - 1u));
   if ((lightsBuffer.lights[v_10].position.y < v_2.inner.tint_symbol.y)) {
     uint v_11 = index;
     uint v_12 = min(v_11, (uint(lightsBuffer.lights.length()) - 1u));
-    lightsBuffer.lights[v_12].position[1u] = v_2.inner.tint_symbol_1.y;
+    lightsBuffer.lights[v_12].position.y = v_2.inner.tint_symbol_1.y;
   }
   mat4 M = v_2.inner.projectionMatrix;
   float viewNear = (-(M[3u].z) / (-1.0f + M[2u].z));
@@ -126,23 +126,23 @@ void tint_symbol_2_inner(uvec3 GlobalInvocationID) {
               vec4 p = vec4(0.0f);
               uint v_22 = min(i, 5u);
               if ((frustumPlanes[v_22].x > 0.0f)) {
-                p[0u] = boxMax.x;
+                p.x = boxMax.x;
               } else {
-                p[0u] = boxMin.x;
+                p.x = boxMin.x;
               }
               uint v_23 = min(i, 5u);
               if ((frustumPlanes[v_23].y > 0.0f)) {
-                p[1u] = boxMax.y;
+                p.y = boxMax.y;
               } else {
-                p[1u] = boxMin.y;
+                p.y = boxMin.y;
               }
               uint v_24 = min(i, 5u);
               if ((frustumPlanes[v_24].z > 0.0f)) {
-                p[2u] = boxMax.z;
+                p.z = boxMax.z;
               } else {
-                p[2u] = boxMin.z;
+                p.z = boxMin.z;
               }
-              p[3u] = 1.0f;
+              p.w = 1.0f;
               float v_25 = dp;
               vec4 v_26 = p;
               uint v_27 = min(i, 5u);
@@ -177,7 +177,7 @@ void tint_symbol_2_inner(uvec3 GlobalInvocationID) {
             }
             uint v_30 = min(tileId, 3u);
             uint v_31 = min(offset, 63u);
-            v.inner.data[v_30].lightId[v_31] = GlobalInvocationID[0u];
+            v.inner.data[v_30].lightId[v_31] = GlobalInvocationID.x;
           }
           {
             x = (x + 1);

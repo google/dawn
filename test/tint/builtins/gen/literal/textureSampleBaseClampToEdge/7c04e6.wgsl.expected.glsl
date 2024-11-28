@@ -80,9 +80,9 @@ vec4 tint_TextureSampleExternal(tint_ExternalTextureParams params, vec2 coords) 
   if ((params.numPlanes == 1u)) {
     vec4 v_7 = textureLod(arg_0_plane0_arg_1, clamp(v_4, params.samplePlane0RectMin, params.samplePlane0RectMax), float(0.0f));
     v_5 = v_7.xyz;
-    v_6 = v_7[3u];
+    v_6 = v_7.w;
   } else {
-    float v_8 = textureLod(arg_0_plane0_arg_1, clamp(v_4, params.samplePlane0RectMin, params.samplePlane0RectMax), float(0.0f))[0u];
+    float v_8 = textureLod(arg_0_plane0_arg_1, clamp(v_4, params.samplePlane0RectMin, params.samplePlane0RectMax), float(0.0f)).x;
     v_5 = (vec4(v_8, textureLod(arg_0_plane1_arg_1, clamp(v_4, params.samplePlane1RectMin, params.samplePlane1RectMax), float(0.0f)).xy, 1.0f) * params.yuvToRgbConversionMatrix);
     v_6 = 1.0f;
   }
@@ -187,9 +187,9 @@ vec4 tint_TextureSampleExternal(tint_ExternalTextureParams params, vec2 coords) 
   if ((params.numPlanes == 1u)) {
     vec4 v_7 = textureLod(arg_0_plane0_arg_1, clamp(v_4, params.samplePlane0RectMin, params.samplePlane0RectMax), float(0.0f));
     v_5 = v_7.xyz;
-    v_6 = v_7[3u];
+    v_6 = v_7.w;
   } else {
-    float v_8 = textureLod(arg_0_plane0_arg_1, clamp(v_4, params.samplePlane0RectMin, params.samplePlane0RectMax), float(0.0f))[0u];
+    float v_8 = textureLod(arg_0_plane0_arg_1, clamp(v_4, params.samplePlane0RectMin, params.samplePlane0RectMax), float(0.0f)).x;
     v_5 = (vec4(v_8, textureLod(arg_0_plane1_arg_1, clamp(v_4, params.samplePlane1RectMin, params.samplePlane1RectMax), float(0.0f)).xy, 1.0f) * params.yuvToRgbConversionMatrix);
     v_6 = 1.0f;
   }
@@ -297,9 +297,9 @@ vec4 tint_TextureSampleExternal(tint_ExternalTextureParams params, vec2 coords) 
   if ((params.numPlanes == 1u)) {
     vec4 v_6 = textureLod(arg_0_plane0_arg_1, clamp(v_3, params.samplePlane0RectMin, params.samplePlane0RectMax), float(0.0f));
     v_4 = v_6.xyz;
-    v_5 = v_6[3u];
+    v_5 = v_6.w;
   } else {
-    float v_7 = textureLod(arg_0_plane0_arg_1, clamp(v_3, params.samplePlane0RectMin, params.samplePlane0RectMax), float(0.0f))[0u];
+    float v_7 = textureLod(arg_0_plane0_arg_1, clamp(v_3, params.samplePlane0RectMin, params.samplePlane0RectMax), float(0.0f)).x;
     v_4 = (vec4(v_7, textureLod(arg_0_plane1_arg_1, clamp(v_3, params.samplePlane1RectMin, params.samplePlane1RectMax), float(0.0f)).xy, 1.0f) * params.yuvToRgbConversionMatrix);
     v_5 = 1.0f;
   }
@@ -330,8 +330,8 @@ VertexOutput vertex_main_inner() {
 void main() {
   VertexOutput v_12 = vertex_main_inner();
   gl_Position = v_12.pos;
-  gl_Position[1u] = -(gl_Position.y);
-  gl_Position[2u] = ((2.0f * gl_Position.z) - gl_Position.w);
+  gl_Position.y = -(gl_Position.y);
+  gl_Position.z = ((2.0f * gl_Position.z) - gl_Position.w);
   vertex_main_loc0_Output = v_12.prevent_dce;
   gl_PointSize = 1.0f;
 }

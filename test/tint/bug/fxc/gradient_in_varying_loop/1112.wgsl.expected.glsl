@@ -14,24 +14,24 @@ vec4 tint_symbol_inner(vec2 vUV) {
       } else {
         break;
       }
-      vec3 offset = vec3(random[0u]);
+      vec3 offset = vec3(random.x);
       bool v = false;
-      if ((offset[0u] < 0.0f)) {
+      if ((offset.x < 0.0f)) {
         v = true;
       } else {
-        v = (offset[1u] < 0.0f);
+        v = (offset.y < 0.0f);
       }
       bool v_1 = false;
       if (v) {
         v_1 = true;
       } else {
-        v_1 = (offset[0u] > 1.0f);
+        v_1 = (offset.x > 1.0f);
       }
       bool v_2 = false;
       if (v_1) {
         v_2 = true;
       } else {
-        v_2 = (offset[1u] > 1.0f);
+        v_2 = (offset.y > 1.0f);
       }
       if (v_2) {
         i = (i + 1);

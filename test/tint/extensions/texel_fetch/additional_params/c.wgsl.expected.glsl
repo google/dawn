@@ -14,7 +14,7 @@ in vec4 f_Input;
 void g(float a, float b, float c) {
 }
 void f_inner(In tint_symbol) {
-  g(tint_symbol.pos[0u], tint_symbol.uv[0u], tint_symbol.fbf[1u]);
+  g(tint_symbol.pos.x, tint_symbol.uv.x, tint_symbol.fbf.y);
 }
 void main() {
   f_inner(In(gl_FragCoord, f_loc0_Input, f_Input));

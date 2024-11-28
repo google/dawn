@@ -57,9 +57,9 @@ vec3 toVoxelPos(vec3 position) {
   vec3 bbSize = (bbMin - bbMin);
   float cubeSize = max(max(bbMax.x, bbMax.y), bbSize.z);
   float gridSize = float(v.inner.gridSize);
-  float gx = ((cubeSize * (position[0u] - v.inner.bbMin.x)) / cubeSize);
-  float gy = ((gx * (position[1u] - v.inner.bbMin.y)) / gridSize);
-  float gz = ((gridSize * (position[2u] - v.inner.bbMin.z)) / gridSize);
+  float gx = ((cubeSize * (position.x - v.inner.bbMin.x)) / cubeSize);
+  float gy = ((gx * (position.y - v.inner.bbMin.y)) / gridSize);
+  float gz = ((gridSize * (position.z - v.inner.bbMin.z)) / gridSize);
   return vec3(gz, gz, gz);
 }
 uvec3 tint_v3f32_to_v3u32(vec3 value) {
@@ -95,7 +95,7 @@ void doIgnore() {
   int g55 = atomicOr(LUT.values[v_14], 0);
 }
 void main_count_inner(uvec3 GlobalInvocationID) {
-  uint triangleIndex = GlobalInvocationID[0u];
+  uint triangleIndex = GlobalInvocationID.x;
   if ((triangleIndex >= v.inner.numTriangles)) {
     return;
   }

@@ -373,17 +373,6 @@ class Printer : public tint::TextGenerator {
         }
     }
 
-    void EmitStoreVectorElement(const core::ir::StoreVectorElement* l) {
-        auto out = Line();
-
-        EmitValue(out, l->To());
-        out << "[";
-        EmitValue(out, l->Index());
-        out << "] = ";
-        EmitValue(out, l->Value());
-        out << ";";
-    }
-
     void IdxToComponent(StringStream& out, uint32_t idx) {
         switch (idx) {
             case 0:
@@ -403,17 +392,30 @@ class Printer : public tint::TextGenerator {
         }
     }
 
-    void EmitLoadVectorElement(StringStream& out, const core::ir::LoadVectorElement* l) {
-        EmitValue(out, l->From());
-
-        if (auto* cnst = l->Index()->As<core::ir::Constant>()) {
+    void EmitVectorAccess(StringStream& out, const core::ir::Value* index) {
+        if (auto* cnst = index->As<core::ir::Constant>()) {
             out << ".";
             IdxToComponent(out, cnst->Value()->ValueAs<uint32_t>());
         } else {
             out << "[";
-            EmitValue(out, l->Index());
+            EmitValue(out, index);
             out << "]";
         }
+    }
+
+    void EmitStoreVectorElement(const core::ir::StoreVectorElement* s) {
+        auto out = Line();
+
+        EmitValue(out, s->To());
+        EmitVectorAccess(out, s->Index());
+        out << " = ";
+        EmitValue(out, s->Value());
+        out << ";";
+    }
+
+    void EmitLoadVectorElement(StringStream& out, const core::ir::LoadVectorElement* l) {
+        EmitValue(out, l->From());
+        EmitVectorAccess(out, l->Index());
     }
 
     void EmitSwizzle(StringStream& out, const core::ir::Swizzle* swizzle) {
@@ -550,6 +552,9 @@ class Printer : public tint::TextGenerator {
                     auto* member = s->Members()[c->Value()->ValueAs<uint32_t>()];
                     out << "." << member->Name().Name();
                     current_type = member->Type();
+                },
+                [&](const core::type::Vector*) {  //
+                    EmitVectorAccess(out, index);
                 },
                 [&](Default) {
                     out << "[";

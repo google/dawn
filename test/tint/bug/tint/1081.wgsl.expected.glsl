@@ -12,7 +12,7 @@ int f(int x) {
   return x;
 }
 int tint_symbol_inner(ivec3 x) {
-  int y = x[0u];
+  int y = x.x;
   {
     while(true) {
       int r = f(y);

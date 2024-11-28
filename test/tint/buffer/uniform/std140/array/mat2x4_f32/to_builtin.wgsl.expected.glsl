@@ -12,7 +12,7 @@ layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
   mat4x2 t = transpose(v.inner[2u]);
   float l = length(v.inner[0u][1u].ywxz);
-  float a = abs(v.inner[0u][1u].ywxz[0u]);
-  float v_2 = (t[0u][0u] + float(l));
+  float a = abs(v.inner[0u][1u].ywxz.x);
+  float v_2 = (t[0u].x + float(l));
   v_1.inner = (v_2 + float(a));
 }

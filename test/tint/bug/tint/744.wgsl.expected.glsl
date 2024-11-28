@@ -24,7 +24,7 @@ uniform uniforms_block_1_ubo {
   Uniforms inner;
 } v;
 void tint_symbol_inner(uvec3 global_id) {
-  uvec2 resultCell = uvec2(global_id[1u], global_id[0u]);
+  uvec2 resultCell = uvec2(global_id.y, global_id.x);
   uint dimInner = v.inner.aShape.y;
   uint dimOutter = v.inner.outShape.y;
   uint result = 0u;
@@ -35,8 +35,8 @@ void tint_symbol_inner(uvec3 global_id) {
       } else {
         break;
       }
-      uint a = (i + (resultCell[0u] * dimInner));
-      uint b = (resultCell[1u] + (i * dimOutter));
+      uint a = (i + (resultCell.x * dimInner));
+      uint b = (resultCell.y + (i * dimOutter));
       uint v_1 = result;
       uint v_2 = min(a, (uint(firstMatrix.numbers.length()) - 1u));
       uint v_3 = firstMatrix.numbers[v_2];
@@ -48,7 +48,7 @@ void tint_symbol_inner(uvec3 global_id) {
       continue;
     }
   }
-  uint index = (resultCell[1u] + (resultCell[0u] * dimOutter));
+  uint index = (resultCell.y + (resultCell.x * dimOutter));
   uint v_5 = min(index, (uint(resultMatrix.numbers.length()) - 1u));
   resultMatrix.numbers[v_5] = result;
 }

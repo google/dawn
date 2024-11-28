@@ -19,6 +19,6 @@ void main() {
   a(mat3(v_1.inner_col0, v_1.inner_col1, v_1.inner_col2));
   b(mat3(v_1.inner_col0, v_1.inner_col1, v_1.inner_col2)[1u]);
   b(mat3(v_1.inner_col0, v_1.inner_col1, v_1.inner_col2)[1u].zxy);
-  c(mat3(v_1.inner_col0, v_1.inner_col1, v_1.inner_col2)[1u][0u]);
-  c(mat3(v_1.inner_col0, v_1.inner_col1, v_1.inner_col2)[1u].zxy[0u]);
+  c(mat3(v_1.inner_col0, v_1.inner_col1, v_1.inner_col2)[1u].x);
+  c(mat3(v_1.inner_col0, v_1.inner_col1, v_1.inner_col2)[1u].zxy.x);
 }

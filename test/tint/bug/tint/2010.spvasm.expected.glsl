@@ -65,9 +65,9 @@ void main_1() {
   vec2 x_76 = x_28[0u].field0;
   if ((x_52 == 0u)) {
     uvec2 x_80 = floatBitsToUint(x_76);
-    uint x_81 = x_80[0u];
+    uint x_81 = x_80.x;
     atomicExchange(x_34, x_81);
-    uint x_82 = x_80[1u];
+    uint x_82 = x_80.y;
     atomicExchange(x_35, x_82);
     atomicExchange(x_36, x_81);
     atomicExchange(x_37, x_82);
@@ -90,16 +90,16 @@ void main_1() {
         vec2 x_99 = x_28[min(x_94, 4095u)].field0;
         vec2 x_101 = min(x_85.xy, x_99);
         vec4 x_103_1 = x_85;
-        x_103_1[0u] = x_101[0u];
+        x_103_1.x = x_101.x;
         vec4 x_103 = x_103_1;
         vec4 x_105_1 = x_103;
-        x_105_1[1u] = x_101[1u];
+        x_105_1.y = x_101.y;
         vec4 x_105 = x_105_1;
         vec2 x_107 = max(x_105_1.zw, x_99);
         vec4 x_109_1 = x_105;
-        x_109_1[2u] = x_107[0u];
+        x_109_1.z = x_107.x;
         x_111 = x_109_1;
-        x_111[3u] = x_107[1u];
+        x_111.w = x_107.y;
         x_86 = x_111;
       }
       {

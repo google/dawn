@@ -24,8 +24,8 @@ vertex_main_out vertex_main_inner() {
 }
 void main() {
   gl_Position = vertex_main_inner().tint_symbol_1_1;
-  gl_Position[1u] = -(gl_Position.y);
-  gl_Position[2u] = ((2.0f * gl_Position.z) - gl_Position.w);
+  gl_Position.y = -(gl_Position.y);
+  gl_Position.z = ((2.0f * gl_Position.z) - gl_Position.w);
   gl_PointSize = 1.0f;
 }
 #version 310 es

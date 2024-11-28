@@ -28,8 +28,8 @@ void main() {
   tint_symbol_loc2_Output = v.loc2;
   tint_symbol_loc3_Output = v.loc3;
   gl_Position = v.position;
-  gl_Position[1u] = -(gl_Position.y);
-  gl_Position[2u] = ((2.0f * gl_Position.z) - gl_Position.w);
+  gl_Position.y = -(gl_Position.y);
+  gl_Position.z = ((2.0f * gl_Position.z) - gl_Position.w);
   tint_symbol_loc4_Output = v.loc4;
   tint_symbol_loc5_Output = v.loc5;
   gl_PointSize = 1.0f;

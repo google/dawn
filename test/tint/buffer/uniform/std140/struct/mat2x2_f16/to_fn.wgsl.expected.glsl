@@ -83,5 +83,5 @@ void main() {
   b(tint_convert_S(v_1.inner[2u]));
   c(f16mat2(v_1.inner[2u].m_col0, v_1.inner[2u].m_col1));
   d(v_1.inner[0u].m_col1.yx);
-  e(v_1.inner[0u].m_col1.yx[0u]);
+  e(v_1.inner[0u].m_col1.yx.x);
 }

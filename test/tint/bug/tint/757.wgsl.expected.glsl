@@ -15,7 +15,7 @@ uniform tint_symbol_1_1_ubo {
 } v;
 uniform highp sampler2DArray myTexture;
 void tint_symbol_inner(uvec3 GlobalInvocationID) {
-  uint flatIndex = (((4u * GlobalInvocationID[2u]) + (2u * GlobalInvocationID[1u])) + GlobalInvocationID[0u]);
+  uint flatIndex = (((4u * GlobalInvocationID.z) + (2u * GlobalInvocationID.y)) + GlobalInvocationID.x);
   flatIndex = (flatIndex * 1u);
   ivec2 v_1 = ivec2(GlobalInvocationID.xy);
   uint v_2 = (uint(textureSize(myTexture, 0).z) - 1u);

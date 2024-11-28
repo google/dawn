@@ -58,8 +58,8 @@ VertexOutput vertex_main_inner() {
 void main() {
   VertexOutput v = vertex_main_inner();
   gl_Position = v.pos;
-  gl_Position[1u] = -(gl_Position.y);
-  gl_Position[2u] = ((2.0f * gl_Position.z) - gl_Position.w);
+  gl_Position.y = -(gl_Position.y);
+  gl_Position.z = ((2.0f * gl_Position.z) - gl_Position.w);
   vertex_main_loc0_Output = v.prevent_dce;
   gl_PointSize = 1.0f;
 }

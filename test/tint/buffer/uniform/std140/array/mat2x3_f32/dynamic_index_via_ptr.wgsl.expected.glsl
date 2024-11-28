@@ -46,5 +46,5 @@ void main() {
   mat2x3 l_a[4] = v_6;
   mat2x3 l_a_i = v_3;
   vec3 l_a_i_i = v_4;
-  v_1.inner = (((v_4[0u] + l_a[0u][0u][0u]) + l_a_i[0u][0u]) + l_a_i_i[0u]);
+  v_1.inner = (((v_4.x + l_a[0u][0u].x) + l_a_i[0u].x) + l_a_i_i.x);
 }
