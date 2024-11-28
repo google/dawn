@@ -1,25 +1,25 @@
-struct vec4f {
-  int i;
+struct tint_symbol {
+  int tint_symbol_1;
 };
 
-struct main_outputs {
-  float4 tint_symbol : SV_Position;
+struct tint_symbol_4_outputs {
+  float4 tint_symbol_2 : SV_Position;
 };
 
-struct main_inputs {
-  uint VertexIndex : SV_VertexID;
+struct tint_symbol_4_inputs {
+  uint tint_symbol_5 : SV_VertexID;
 };
 
 
-float4 main_inner(uint VertexIndex) {
-  vec4f s = {int(1)};
-  float f = float(s.i);
-  bool b = bool(f);
-  return ((b) ? ((1.0f).xxxx) : ((0.0f).xxxx));
+float4 tint_symbol_4_inner(uint tint_symbol_5) {
+  tint_symbol tint_symbol_6 = {int(1)};
+  float tint_symbol_7 = float(tint_symbol_6.tint_symbol_1);
+  bool tint_symbol_8 = bool(tint_symbol_7);
+  return ((tint_symbol_8) ? ((1.0f).xxxx) : ((0.0f).xxxx));
 }
 
-main_outputs main(main_inputs inputs) {
-  main_outputs v = {main_inner(inputs.VertexIndex)};
+tint_symbol_4_outputs tint_symbol_4(tint_symbol_4_inputs inputs) {
+  tint_symbol_4_outputs v = {tint_symbol_4_inner(inputs.tint_symbol_5)};
   return v;
 }
 

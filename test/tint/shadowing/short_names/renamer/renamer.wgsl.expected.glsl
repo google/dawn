@@ -1,6 +1,6 @@
 #version 310 es
 
-vec4 tint_symbol_inner(uint VertexIndex) {
+vec4 tint_symbol_inner(uint tint_symbol_1) {
   return vec4(0.0f, 0.0f, 0.0f, 1.0f);
 }
 void main() {

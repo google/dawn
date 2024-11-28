@@ -151,7 +151,6 @@ struct Options {
     bool emit_single_entry_point = false;
 
     bool rename_all = false;
-
     bool enable_robustness = true;
 
     bool dump_ir = false;
@@ -363,9 +362,6 @@ violations that may be produced)",
         "disable-demote-to-helper", "Disable demote to helper for discard", Default{false});
     TINT_DEFER(opts->disable_demote_to_helper = *disable_demote_to_helper.value);
 
-    auto& rename_all = options.Add<BoolOption>("rename-all", "Renames all symbols", Default{false});
-    TINT_DEFER(opts->rename_all = *rename_all.value);
-
     auto& dump_inspector_bindings = options.Add<BoolOption>(
         "dump-inspector-bindings", "Dump reflection data about bindings to stdout",
         Alias{"emit-inspector-bindings"}, Default{false});
@@ -385,7 +381,6 @@ violations that may be produced)",
         options.Add<StringOption>("transform", R"(Runs transforms, name list is comma separated
 Available transforms:
     first_index_offset
-    renamer
     substitute_override
 )",
                                   ShortName{"t"});
@@ -396,6 +391,9 @@ Available transforms:
             }
         }
     });
+
+    auto& rename_all = options.Add<BoolOption>("rename-all", "Renames all symbols", Default{false});
+    TINT_DEFER(opts->rename_all = *rename_all.value);
 
     auto& disable_robustness =
         options.Add<BoolOption>("disable-robustness", "Disable the robustness transform");
@@ -656,37 +654,44 @@ Options:
     // Renaming must always come first
     switch (options.format) {
         case Format::kMsl: {
-#if TINT_BUILD_MSL_WRITER
-            transform_inputs.Add<tint::ast::transform::Renamer::Config>(
-                options.rename_all ? tint::ast::transform::Renamer::Target::kAll
-                                   : tint::ast::transform::Renamer::Target::kMslKeywords,
-                /* preserve_unicode */ false);
+            if (!options.rename_all) {
+                transform_inputs.Add<tint::ast::transform::Renamer::Config>(
+                    tint::ast::transform::Renamer::Target::kMslKeywords,
+                    /* preserve_unicode */ false);
+            }
             transform_manager.Add<tint::ast::transform::Renamer>();
-#endif  // TINT_BUILD_MSL_WRITER
             break;
         }
-#if TINT_BUILD_GLSL_WRITER
         case Format::kGlsl: {
-            transform_inputs.Add<tint::ast::transform::Renamer::Config>(
-                options.rename_all ? tint::ast::transform::Renamer::Target::kAll
-                                   : tint::ast::transform::Renamer::Target::kGlslKeywords,
-                /* preserve_unicode */ false);
+            if (!options.rename_all) {
+                transform_inputs.Add<tint::ast::transform::Renamer::Config>(
+                    tint::ast::transform::Renamer::Target::kGlslKeywords,
+                    /* preserve_unicode */ false);
+            }
             transform_manager.Add<tint::ast::transform::Renamer>();
             break;
         }
-#endif  // TINT_BUILD_GLSL_WRITER
         case Format::kHlsl:
         case Format::kHlslFxc: {
-#if TINT_BUILD_HLSL_WRITER
-            transform_inputs.Add<tint::ast::transform::Renamer::Config>(
-                options.rename_all ? tint::ast::transform::Renamer::Target::kAll
-                                   : tint::ast::transform::Renamer::Target::kHlslKeywords,
-                /* preserve_unicode */ false);
+            if (!options.rename_all) {
+                transform_inputs.Add<tint::ast::transform::Renamer::Config>(
+                    tint::ast::transform::Renamer::Target::kHlslKeywords,
+                    /* preserve_unicode */ false);
+            }
             transform_manager.Add<tint::ast::transform::Renamer>();
-#endif  // TINT_BUILD_HLSL_WRITER
             break;
         }
-        default:
+        case Format::kSpirv:
+        case Format::kSpvAsm:
+        case Format::kWgsl:
+        case Format::kIr: {
+            if (options.rename_all) {
+                transform_manager.Add<tint::ast::transform::Renamer>();
+            }
+            break;
+        }
+        case Format::kNone:
+        case Format::kUnknown:
             break;
     }
 
@@ -699,8 +704,6 @@ Options:
         if (name == "first_index_offset") {
             transform_inputs.Add<tint::ast::transform::FirstIndexOffset::BindingPoint>(0, 0);
             transform_manager.Add<tint::ast::transform::FirstIndexOffset>();
-        } else if (name == "renamer") {
-            transform_manager.Add<tint::ast::transform::Renamer>();
         } else if (name == "substitute_override") {
             auto override_names = inspector.GetNamedOverrideIds();
 

@@ -1,18 +1,18 @@
-struct main_outputs {
-  float4 tint_symbol : SV_Position;
+struct tint_symbol_outputs {
+  float4 tint_symbol_2 : SV_Position;
 };
 
-struct main_inputs {
-  uint VertexIndex : SV_VertexID;
+struct tint_symbol_inputs {
+  uint tint_symbol_1 : SV_VertexID;
 };
 
 
-float4 main_inner(uint VertexIndex) {
+float4 tint_symbol_inner(uint tint_symbol_1) {
   return float4(0.0f, 0.0f, 0.0f, 1.0f);
 }
 
-main_outputs main(main_inputs inputs) {
-  main_outputs v = {main_inner(inputs.VertexIndex)};
+tint_symbol_outputs tint_symbol(tint_symbol_inputs inputs) {
+  tint_symbol_outputs v = {tint_symbol_inner(inputs.tint_symbol_1)};
   return v;
 }
 

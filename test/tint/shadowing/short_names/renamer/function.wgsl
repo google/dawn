@@ -1,4 +1,4 @@
-// flags: --transform renamer
+// flags: --rename-all
 
 // Evilness 😈. Don't go getting any ideas!
 fn vec4f() -> i32 { return 0; }

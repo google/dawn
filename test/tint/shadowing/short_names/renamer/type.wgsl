@@ -1,4 +1,4 @@
-// flags: --transform renamer
+// flags: --rename-all
 
 // Evilness 😈. Don't go getting any ideas!
 struct vec4f { i : i32, }
