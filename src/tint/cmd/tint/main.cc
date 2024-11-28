@@ -656,8 +656,7 @@ Options:
         case Format::kMsl: {
             if (!options.rename_all) {
                 transform_inputs.Add<tint::ast::transform::Renamer::Config>(
-                    tint::ast::transform::Renamer::Target::kMslKeywords,
-                    /* preserve_unicode */ false);
+                    tint::ast::transform::Renamer::Target::kMslKeywords);
             }
             transform_manager.Add<tint::ast::transform::Renamer>();
             break;
@@ -665,8 +664,7 @@ Options:
         case Format::kGlsl: {
             if (!options.rename_all) {
                 transform_inputs.Add<tint::ast::transform::Renamer::Config>(
-                    tint::ast::transform::Renamer::Target::kGlslKeywords,
-                    /* preserve_unicode */ false);
+                    tint::ast::transform::Renamer::Target::kGlslKeywords);
             }
             transform_manager.Add<tint::ast::transform::Renamer>();
             break;
@@ -675,8 +673,7 @@ Options:
         case Format::kHlslFxc: {
             if (!options.rename_all) {
                 transform_inputs.Add<tint::ast::transform::Renamer::Config>(
-                    tint::ast::transform::Renamer::Target::kHlslKeywords,
-                    /* preserve_unicode */ false);
+                    tint::ast::transform::Renamer::Target::kHlslKeywords);
             }
             transform_manager.Add<tint::ast::transform::Renamer>();
             break;

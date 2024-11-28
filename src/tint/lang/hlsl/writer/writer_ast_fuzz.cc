@@ -84,8 +84,7 @@ void ASTFuzzer(const tint::Program& program,
     if (!context.options.dxc.empty()) {
         dxc_path = context.options.dxc.c_str();
         ast::transform::DataMap inputs, outputs;
-        inputs.Add<ast::transform::Renamer::Config>(ast::transform::Renamer::Target::kHlslKeywords,
-                                                    /* preserve_unicode */ false);
+        inputs.Add<ast::transform::Renamer::Config>(ast::transform::Renamer::Target::kHlslKeywords);
         if (auto renamer_res = tint::ast::transform::Renamer{}.Apply(program, inputs, outputs)) {
             if (!renamer_res->IsValid()) {
                 TINT_ICE() << renamer_res->Diagnostics();

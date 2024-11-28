@@ -1263,14 +1263,20 @@ const char* const kReservedKeywordsMSL[] = {
 }  // namespace
 
 Renamer::Data::Data(Remappings&& r) : remappings(std::move(r)) {}
+
 Renamer::Data::Data(const Data&) = default;
+
 Renamer::Data::~Data() = default;
 
 Renamer::Config::Config() = default;
-Renamer::Config::Config(Target t, bool pu) : target(t), preserve_unicode(pu) {}
-Renamer::Config::Config(Target t, bool pu, Remappings&& remappings)
-    : target(t), preserve_unicode(pu), requested_names(std::move(remappings)) {}
+
+Renamer::Config::Config(Target t) : target(t) {}
+
+Renamer::Config::Config(Target t, Remappings&& remappings)
+    : target(t), requested_names(std::move(remappings)) {}
+
 Renamer::Config::Config(const Config&) = default;
+
 Renamer::Config::~Config() = default;
 
 Renamer::Renamer() = default;
@@ -1346,12 +1352,10 @@ Transform::ApplyResult Renamer::Apply(const Program& src,
     }
 
     Target target = Target::kAll;
-    bool preserve_unicode = false;
     const Remappings* requested_names = nullptr;
 
     if (auto* cfg = inputs.Get<Config>()) {
         target = cfg->target;
-        preserve_unicode = cfg->preserve_unicode;
         requested_names = &(cfg->requested_names);
     }
 
@@ -1362,9 +1366,8 @@ Transform::ApplyResult Renamer::Apply(const Program& src,
         }
         auto name = symbol.Name();
         if (!tint::utf8::IsASCII(name)) {
-            // name is non-ascii. All of the backend keywords are ascii, so rename if we're not
-            // preserving unicode symbols.
-            return !preserve_unicode;
+            // name is non-ascii. All of the backend keywords are ascii, so rename.
+            return true;
         }
         switch (target) {
             case Target::kGlslKeywords:

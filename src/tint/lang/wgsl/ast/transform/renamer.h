@@ -79,15 +79,13 @@ class Renamer final : public Castable<Renamer, Transform> {
 
         /// Constructor
         /// @param tgt the targets to rename
-        /// @param keep_unicode if false, symbols with non-ascii code-points are
         /// renamed
-        explicit Config(Target tgt, bool keep_unicode = false);
+        explicit Config(Target tgt);
 
         /// Constructor
         /// @param tgt the targets to rename
-        /// @param keep_unicode if false, symbols with non-ascii code-points are renamed
         /// @param remappings requested old to new name map
-        explicit Config(Target tgt, bool keep_unicode, Remappings&& remappings);
+        Config(Target tgt, Remappings&& remappings);
 
         /// Copy constructor
         Config(const Config&);
@@ -98,14 +96,11 @@ class Renamer final : public Castable<Renamer, Transform> {
         /// The targets to rename
         Target target = Target::kAll;
 
-        /// If false, symbols with non-ascii code-points are renamed.
-        bool preserve_unicode = false;
-
         /// Requested renaming rules
         Remappings requested_names = {};
 
         /// Reflection for this class
-        TINT_REFLECT(Config, target, preserve_unicode, requested_names);
+        TINT_REFLECT(Config, target, requested_names);
     };
 
     /// Constructor using a the configuration provided in the input Data

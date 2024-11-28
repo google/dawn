@@ -150,7 +150,6 @@ fn tint_symbol_2(@builtin(vertex_index) tint_symbol_3 : u32) -> tint_symbol {
 
     DataMap inputs;
     inputs.Add<Renamer::Config>(Renamer::Target::kAll,
-                                /* preserve_unicode */ false,
                                 /* remappings */
                                 Renamer::Remappings{
                                     {"var1", "user_var1"},
@@ -387,49 +386,6 @@ fn tint_symbol(@location(0) tint_symbol_1 : f32) -> @location(0) f32 {
     EXPECT_THAT(data->remappings, ContainerEq(expected_remappings));
 }
 
-TEST_F(RenamerTest, PreserveUnicode) {
-    auto src = R"(
-@fragment
-fn frag_main() {
-  var )" + std::string(kUnicodeIdentifier) +
-               R"( : i32;
-}
-)";
-
-    auto expect = src;
-
-    DataMap inputs;
-    inputs.Add<Renamer::Config>(Renamer::Target::kMslKeywords,
-                                /* preserve_unicode */ true);
-    auto got = Run<Renamer>(src, inputs);
-
-    EXPECT_EQ(expect, str(got));
-}
-
-TEST_F(RenamerTest, PreserveUnicodeRenameAll) {
-    auto src = R"(
-@fragment
-fn frag_main() {
-  var )" + std::string(kUnicodeIdentifier) +
-               R"( : i32;
-}
-)";
-
-    auto expect = R"(
-@fragment
-fn tint_symbol() {
-  var tint_symbol_1 : i32;
-}
-)";
-
-    DataMap inputs;
-    inputs.Add<Renamer::Config>(Renamer::Target::kAll,
-                                /* preserve_unicode */ true);
-    auto got = Run<Renamer>(src, inputs);
-
-    EXPECT_EQ(expect, str(got));
-}
-
 TEST_F(RenamerTest, AttemptSymbolCollision) {
     auto* src = R"(
 @vertex
@@ -533,8 +489,7 @@ fn frag_main() {
 )";
 
     DataMap inputs;
-    inputs.Add<Renamer::Config>(Renamer::Target::kGlslKeywords,
-                                /* preserve_unicode */ false);
+    inputs.Add<Renamer::Config>(Renamer::Target::kGlslKeywords);
     auto got = Run<Renamer>(src, inputs);
 
     EXPECT_EQ(expect, str(got));
@@ -559,8 +514,7 @@ fn frag_main() {
 )";
 
     DataMap inputs;
-    inputs.Add<Renamer::Config>(Renamer::Target::kHlslKeywords,
-                                /* preserve_unicode */ false);
+    inputs.Add<Renamer::Config>(Renamer::Target::kHlslKeywords);
     auto got = Run<Renamer>(src, inputs);
 
     EXPECT_EQ(expect, str(got));
@@ -585,8 +539,7 @@ fn frag_main() {
 )";
 
     DataMap inputs;
-    inputs.Add<Renamer::Config>(Renamer::Target::kMslKeywords,
-                                /* preserve_unicode */ false);
+    inputs.Add<Renamer::Config>(Renamer::Target::kMslKeywords);
     auto got = Run<Renamer>(src, inputs);
 
     EXPECT_EQ(expect, str(got));

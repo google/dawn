@@ -532,7 +532,7 @@ ResultOrError<GLuint> ShaderModule::CompileShader(
                 transformInputs.Add<tint::ast::transform::Renamer::Config>(
                     r.disableSymbolRenaming ? tint::ast::transform::Renamer::Target::kGlslKeywords
                                             : tint::ast::transform::Renamer::Target::kAll,
-                    false, std::move(assignedRenamings));
+                    std::move(assignedRenamings));
             }
 
             if (r.substituteOverrideConfig) {
