@@ -68,7 +68,8 @@ TEST_F(AdapterEnumerationTests, OnlyFallback) {
     adapterOptions.forceFallbackAdapter = true;
 
     const auto& adapters = instance.EnumerateAdapters(&adapterOptions);
-    for (const auto& adapter : adapters) {
+    for (const auto& nativeAdapter : adapters) {
+        wgpu::Adapter adapter = wgpu::Adapter(nativeAdapter.Get());
         wgpu::AdapterInfo info;
         adapter.GetInfo(&info);
 
@@ -86,7 +87,8 @@ TEST_F(AdapterEnumerationTests, OnlyVulkan) {
     adapterOptions.backendType = wgpu::BackendType::Vulkan;
 
     const auto& adapters = instance.EnumerateAdapters(&adapterOptions);
-    for (const auto& adapter : adapters) {
+    for (const auto& nativeAdapter : adapters) {
+        wgpu::Adapter adapter = wgpu::Adapter(nativeAdapter.Get());
         wgpu::AdapterInfo info;
         adapter.GetInfo(&info);
 
@@ -102,7 +104,8 @@ TEST_F(AdapterEnumerationTests, OnlyD3D11) {
     adapterOptions.backendType = wgpu::BackendType::D3D11;
 
     const auto& adapters = instance.EnumerateAdapters(&adapterOptions);
-    for (const auto& adapter : adapters) {
+    for (const auto& nativeAdapter : adapters) {
+        wgpu::Adapter adapter = wgpu::Adapter(nativeAdapter.Get());
         wgpu::AdapterInfo info;
         adapter.GetInfo(&info);
 
@@ -137,23 +140,25 @@ TEST_F(AdapterEnumerationTests, MatchingDXGIAdapterD3D11) {
         adapterOptions.backendType = wgpu::BackendType::D3D11;
         adapterOptions.nextInChain = &luidOptions;
 
-        const auto& adapters = instance.EnumerateAdapters(&adapterOptions);
-        if (adapters.empty()) {
+        const auto& nativeAdapters = instance.EnumerateAdapters(&adapterOptions);
+        if (nativeAdapters.empty()) {
             // Initialize of the backend may fail.
             continue;
         }
-        ASSERT_EQ(adapters.size(), 1u);
+        ASSERT_EQ(nativeAdapters.size(), 1u);
 
+        wgpu::Adapter adapter = wgpu::Adapter(nativeAdapters[0].Get());
         wgpu::AdapterInfo info;
-        adapters[0].GetInfo(&info);
+        adapter.GetInfo(&info);
         EXPECT_EQ(info.backendType, wgpu::BackendType::D3D11);
 
         // Test that enumeration again yields the same adapter device.
-        const auto& adaptersAgain = instance.EnumerateAdapters(&adapterOptions);
-        ASSERT_EQ(adaptersAgain.size(), 1u);
+        const auto& nativeAdaptersAgain = instance.EnumerateAdapters(&adapterOptions);
+        ASSERT_EQ(nativeAdaptersAgain.size(), 1u);
 
+        wgpu::Adapter adapterAgain = wgpu::Adapter(nativeAdaptersAgain[0].Get());
         wgpu::AdapterInfo infoAgain;
-        adaptersAgain[0].GetInfo(&infoAgain);
+        adapterAgain.GetInfo(&infoAgain);
 
         EXPECT_EQ(info.vendor, infoAgain.vendor);
         EXPECT_EQ(info.architecture, infoAgain.architecture);
@@ -176,7 +181,8 @@ TEST_F(AdapterEnumerationTests, OnlyD3D12) {
     adapterOptions.backendType = wgpu::BackendType::D3D12;
 
     const auto& adapters = instance.EnumerateAdapters(&adapterOptions);
-    for (const auto& adapter : adapters) {
+    for (const auto& nativeAdapter : adapters) {
+        wgpu::Adapter adapter = wgpu::Adapter(nativeAdapter.Get());
         wgpu::AdapterInfo info;
         adapter.GetInfo(&info);
 
@@ -211,23 +217,25 @@ TEST_F(AdapterEnumerationTests, MatchingDXGIAdapterD3D12) {
         adapterOptions.backendType = wgpu::BackendType::D3D12;
         adapterOptions.nextInChain = &luidOptions;
 
-        const auto& adapters = instance.EnumerateAdapters(&adapterOptions);
-        if (adapters.empty()) {
+        const auto& nativeAdapters = instance.EnumerateAdapters(&adapterOptions);
+        if (nativeAdapters.empty()) {
             // Initialize of the backend may fail.
             continue;
         }
-        ASSERT_EQ(adapters.size(), 1u);
+        ASSERT_EQ(nativeAdapters.size(), 1u);
 
+        wgpu::Adapter adapter = wgpu::Adapter(nativeAdapters[0].Get());
         wgpu::AdapterInfo info;
-        adapters[0].GetInfo(&info);
+        adapter.GetInfo(&info);
         EXPECT_EQ(info.backendType, wgpu::BackendType::D3D12);
 
         // Test that enumeration again yields the same adapter device.
-        const auto& adaptersAgain = instance.EnumerateAdapters(&adapterOptions);
-        ASSERT_EQ(adaptersAgain.size(), 1u);
+        const auto& nativeAdaptersAgain = instance.EnumerateAdapters(&adapterOptions);
+        ASSERT_EQ(nativeAdaptersAgain.size(), 1u);
 
+        wgpu::Adapter adaptersAgain = wgpu::Adapter(nativeAdaptersAgain[0].Get());
         wgpu::AdapterInfo infoAgain;
-        adaptersAgain[0].GetInfo(&infoAgain);
+        adaptersAgain.GetInfo(&infoAgain);
 
         EXPECT_EQ(info.vendor, infoAgain.vendor);
         EXPECT_EQ(info.architecture, infoAgain.architecture);
@@ -250,7 +258,8 @@ TEST_F(AdapterEnumerationTests, OnlyMetal) {
     adapterOptions.backendType = wgpu::BackendType::Metal;
 
     const auto& adapters = instance.EnumerateAdapters(&adapterOptions);
-    for (const auto& adapter : adapters) {
+    for (const auto& nativeAdapter : adapters) {
+        wgpu::Adapter adapter = wgpu::Adapter(nativeAdapter.Get());
         wgpu::AdapterInfo info;
         adapter.GetInfo(&info);
 
@@ -271,7 +280,8 @@ TEST_F(AdapterEnumerationTests, OneBackendThenTheOther) {
     {
         const auto& adapters = instance.EnumerateAdapters(&adapterOptions);
         metalAdapterCount = adapters.size();
-        for (const auto& adapter : adapters) {
+        for (const auto& nativeAdapter : adapters) {
+            wgpu::Adapter adapter = wgpu::Adapter(nativeAdapter.Get());
             wgpu::AdapterInfo info;
             adapter.GetInfo(&info);
 
@@ -283,7 +293,8 @@ TEST_F(AdapterEnumerationTests, OneBackendThenTheOther) {
         adapterOptions.backendType = wgpu::BackendType::Vulkan;
 
         const auto& adapters = instance.EnumerateAdapters(&adapterOptions);
-        for (const auto& adapter : adapters) {
+        for (const auto& nativeAdapter : adapters) {
+            wgpu::Adapter adapter = wgpu::Adapter(nativeAdapter.Get());
             wgpu::AdapterInfo info;
             adapter.GetInfo(&info);
 
@@ -297,7 +308,8 @@ TEST_F(AdapterEnumerationTests, OneBackendThenTheOther) {
 
         const auto& adapters = instance.EnumerateAdapters(&adapterOptions);
         uint32_t metalAdapterCount2 = adapters.size();
-        for (const auto& adapter : adapters) {
+        for (const auto& nativeAdapter : adapters) {
+            wgpu::Adapter adapter = wgpu::Adapter(nativeAdapter.Get());
             wgpu::AdapterInfo info;
             adapter.GetInfo(&info);
 

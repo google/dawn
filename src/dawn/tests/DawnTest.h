@@ -287,6 +287,7 @@ class DawnTestBase {
     bool IsBackendValidationEnabled() const;
     bool IsFullBackendValidationEnabled() const;
     bool IsCompatibilityMode() const;
+    bool IsCPU() const;
     bool RunSuppressedTests() const;
 
     bool IsDXC() const;

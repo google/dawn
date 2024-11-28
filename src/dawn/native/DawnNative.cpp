@@ -89,25 +89,8 @@ Adapter& Adapter::operator=(const Adapter& other) {
     return *this;
 }
 
-wgpu::Status Adapter::GetInfo(wgpu::AdapterInfo* info) const {
-    return GetInfo(reinterpret_cast<WGPUAdapterInfo*>(info));
-}
-
-wgpu::Status Adapter::GetInfo(WGPUAdapterInfo* info) const {
-    return mImpl->APIGetInfo(FromAPI(info));
-}
-
 WGPUAdapter Adapter::Get() const {
     return ToAPI(mImpl);
-}
-
-std::vector<const char*> Adapter::GetSupportedFeatures() const {
-    FeaturesSet supportedFeaturesSet = mImpl->GetSupportedFeatures();
-    return supportedFeaturesSet.GetEnabledFeatureNames();
-}
-
-wgpu::ConvertibleStatus Adapter::GetLimits(WGPUSupportedLimits* limits) const {
-    return mImpl->APIGetLimits(FromAPI(limits));
 }
 
 void Adapter::SetUseTieredLimits(bool useTieredLimits) {

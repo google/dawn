@@ -89,13 +89,6 @@ class DAWN_NATIVE_EXPORT Adapter {
     Adapter(const Adapter& other);
     Adapter& operator=(const Adapter& other);
 
-    // TODO(crbug.com/347047627): These methods are historical duplicates of
-    // those in webgpu_cpp.h. Update uses of these methods and remove them.
-    wgpu::Status GetInfo(wgpu::AdapterInfo* info) const;
-    wgpu::Status GetInfo(WGPUAdapterInfo* info) const;
-    std::vector<const char*> GetSupportedFeatures() const;
-    wgpu::ConvertibleStatus GetLimits(WGPUSupportedLimits* limits) const;
-
     void SetUseTieredLimits(bool useTieredLimits);
 
     // Check that the Adapter is able to support importing external images. This is necessary

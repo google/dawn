@@ -59,11 +59,13 @@ class AdapterCreationTest : public ::testing::TestWithParam<std::optional<wgpu::
 
         {
             auto nativeInstance = std::make_unique<native::Instance>();
+            // TODO(347047627): Use a webgpu.h version of enumerateAdapters
             for (native::Adapter& nativeAdapter : nativeInstance->EnumerateAdapters()) {
                 anyAdapterAvailable = true;
 
                 wgpu::AdapterInfo info;
-                nativeAdapter.GetInfo(&info);
+                wgpu::Adapter adapter = wgpu::Adapter(nativeAdapter.Get());
+                adapter.GetInfo(&info);
                 if (info.compatibilityMode) {
                     continue;
                 }

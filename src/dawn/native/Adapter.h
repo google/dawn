@@ -78,8 +78,6 @@ class AdapterBase : public RefCounted, public WeakRefSupport<AdapterBase> {
 
     void SetUseTieredLimits(bool useTieredLimits);
 
-    FeaturesSet GetSupportedFeatures() const;
-
     // Return the underlying PhysicalDevice.
     PhysicalDeviceBase* GetPhysicalDevice();
     const PhysicalDeviceBase* GetPhysicalDevice() const;

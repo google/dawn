@@ -70,10 +70,6 @@ void AdapterBase::SetUseTieredLimits(bool useTieredLimits) {
     mUseTieredLimits = useTieredLimits;
 }
 
-FeaturesSet AdapterBase::GetSupportedFeatures() const {
-    return mSupportedFeatures;
-}
-
 PhysicalDeviceBase* AdapterBase::GetPhysicalDevice() {
     return mPhysicalDevice.Get();
 }

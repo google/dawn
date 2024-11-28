@@ -56,7 +56,9 @@ class GPUAdapter final : public interop::GPUAdapter {
     bool getIsCompatibilityMode(Napi::Env) override;
 
   private:
-    dawn::native::Adapter adapter_;
+    // TODO(347047627): Remove nativeAdapter_ once we don't use CreateDevice.
+    dawn::native::Adapter nativeAdapter_;
+    wgpu::Adapter adapter_;
     const Flags& flags_;
     std::shared_ptr<AsyncRunner> async_;
 

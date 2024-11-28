@@ -407,18 +407,6 @@ bool FeaturesSet::IsEnabled(wgpu::FeatureName feature) const {
     return f != Feature::InvalidEnum && IsEnabled(f);
 }
 
-std::vector<const char*> FeaturesSet::GetEnabledFeatureNames() const {
-    std::vector<const char*> enabledFeatureNames(featuresBitSet.count());
-
-    uint32_t index = 0;
-    for (Feature feature : IterateBitSet(featuresBitSet)) {
-        DAWN_ASSERT(feature != Feature::InvalidEnum);
-        enabledFeatureNames[index] = kFeatureNameAndInfoList[feature].name;
-        ++index;
-    }
-    return enabledFeatureNames;
-}
-
 void FeaturesSet::ToSupportedFeatures(SupportedFeatures* supportedFeatures) const {
     if (!supportedFeatures) {
         return;

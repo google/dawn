@@ -31,8 +31,6 @@
 #include <webgpu/webgpu_cpp.h>
 
 #include <bitset>
-#include <string>
-#include <vector>
 
 #include "dawn/common/ityp_bitset.h"
 #include "dawn/native/DawnNative.h"
@@ -56,7 +54,6 @@ struct FeaturesSet {
     void EnableFeature(wgpu::FeatureName feature);
     bool IsEnabled(Feature feature) const;
     bool IsEnabled(wgpu::FeatureName feature) const;
-    std::vector<const char*> GetEnabledFeatureNames() const;
     void ToSupportedFeatures(SupportedFeatures* supportedFeatures) const;
 };
 

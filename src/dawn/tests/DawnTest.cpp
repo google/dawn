@@ -457,8 +457,10 @@ void DawnTestEnvironment::SelectPreferredAdapterProperties(const native::Instanc
             for (bool compatibilityMode : {false, true}) {
                 wgpu::RequestAdapterOptions adapterOptions;
                 adapterOptions.compatibilityMode = compatibilityMode;
-                for (const native::Adapter& adapter :
+                // TODO(347047627): Use a webgpu.h version of enumerateAdapters
+                for (const native::Adapter& nativeAdapter :
                      instance->EnumerateAdapters(&adapterOptions)) {
+                    wgpu::Adapter adapter = wgpu::Adapter(nativeAdapter.Get());
                     wgpu::AdapterInfo info;
                     adapter.GetInfo(&info);
 
@@ -476,7 +478,9 @@ void DawnTestEnvironment::SelectPreferredAdapterProperties(const native::Instanc
     for (bool compatibilityMode : {false, true}) {
         wgpu::RequestAdapterOptions adapterOptions;
         adapterOptions.compatibilityMode = compatibilityMode;
-        for (const native::Adapter& adapter : instance->EnumerateAdapters(&adapterOptions)) {
+        // TODO(347047627): Use a webgpu.h version of enumerateAdapters
+        for (const native::Adapter& nativeAdapter : instance->EnumerateAdapters(&adapterOptions)) {
+            wgpu::Adapter adapter = wgpu::Adapter(nativeAdapter.Get());
             wgpu::AdapterInfo info;
             adapter.GetInfo(&info);
 
@@ -736,18 +740,23 @@ DawnTestBase::DawnTestBase(const AdapterTestParam& param) : mParam(param) {
         adapterOptions.compatibilityMode = gCurrentTest->mParam.adapterProperties.compatibilityMode;
 
         // Find the adapter that exactly matches our adapter properties.
+        // TODO(347047627): Use a webgpu.h version of enumerateAdapters
         const auto& adapters = gTestEnv->GetInstance()->EnumerateAdapters(&adapterOptions);
         const auto& it =
             std::find_if(adapters.begin(), adapters.end(), [&](const native::Adapter& candidate) {
-                wgpu::AdapterInfo info;
-                candidate.GetInfo(&info);
+                WGPUAdapterInfo info = {};
+                native::GetProcs().adapterGetInfo(candidate.Get(), &info);
 
                 const auto& param = gCurrentTest->mParam;
-                return (param.adapterProperties.selected &&
-                        info.deviceID == param.adapterProperties.deviceID &&
-                        info.vendorID == param.adapterProperties.vendorID &&
-                        info.adapterType == param.adapterProperties.adapterType &&
-                        std::string_view(info.device) == param.adapterProperties.name);
+                bool result =
+                    (param.adapterProperties.selected &&
+                     info.deviceID == param.adapterProperties.deviceID &&
+                     info.vendorID == param.adapterProperties.vendorID &&
+                     info.adapterType == native::ToAPI(param.adapterProperties.adapterType) &&
+                     std::string_view(info.device.data, info.device.length) ==
+                         param.adapterProperties.name);
+                native::GetProcs().adapterInfoFreeMembers(info);
+                return result;
             });
         DAWN_ASSERT(it != adapters.end());
         gCurrentTest->mBackendAdapter = *it;
@@ -990,6 +999,10 @@ bool DawnTestBase::IsCompatibilityMode() const {
     return mParam.adapterProperties.compatibilityMode;
 }
 
+bool DawnTestBase::IsCPU() const {
+    return mParam.adapterProperties.adapterType == wgpu::AdapterType::CPU;
+}
+
 bool DawnTestBase::RunSuppressedTests() const {
     return gTestEnv->RunSuppressedTests();
 }
@@ -1120,7 +1133,8 @@ WGPUDevice DawnTestBase::CreateDeviceImpl(std::string isolationKey,
     }
 
     wgpu::SupportedLimits supportedLimits;
-    mBackendAdapter.GetLimits(reinterpret_cast<WGPUSupportedLimits*>(&supportedLimits));
+    native::GetProcs().adapterGetLimits(mBackendAdapter.Get(),
+                                        reinterpret_cast<WGPUSupportedLimits*>(&supportedLimits));
     wgpu::RequiredLimits requiredLimits = GetRequiredLimits(supportedLimits);
 
     wgpu::DeviceDescriptor deviceDescriptor =
