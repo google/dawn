@@ -6,7 +6,7 @@ float2 func(uint pointer_indices[1]) {
 
 [numthreads(1, 1, 1)]
 void main() {
-  uint v[1] = {uint(int(1))};
+  uint v[1] = {1u};
   float2 r = func(v);
 }
 

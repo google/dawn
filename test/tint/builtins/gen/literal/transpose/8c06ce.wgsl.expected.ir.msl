@@ -17,7 +17,7 @@ struct vertex_main_outputs {
 
 int transpose_8c06ce() {
   half4x3 res = half4x3(half3(1.0h), half3(1.0h), half3(1.0h), half3(1.0h));
-  return select(0, 1, (res[0][0] == 0.0h));
+  return select(0, 1, (res[0u][0u] == 0.0h));
 }
 
 fragment void fragment_main(device int* prevent_dce [[buffer(0)]]) {

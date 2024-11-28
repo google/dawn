@@ -18,6 +18,9 @@ struct strided_arr {
   /* 0x0008 */ tint_array<int8_t, 8> tint_pad;
 };
 
+#define TINT_ISOLATE_UB(VOLATILE_NAME) \
+  {volatile bool VOLATILE_NAME = false; if (VOLATILE_NAME) break;}
+
 struct SSBO {
   /* 0x0000 */ tint_array<strided_arr, 2> m;
 };
@@ -44,6 +47,7 @@ void tint_store_and_preserve_padding(device tint_array<strided_arr, 2>* const ta
     uint v_1 = 0u;
     v_1 = 0u;
     while(true) {
+      TINT_ISOLATE_UB(tint_volatile_false)
       uint const v_2 = v_1;
       if ((v_2 >= 2u)) {
         break;

@@ -25,17 +25,17 @@ void foo() {
   float a[4] = (float[4])0;
   {
     int tint_symbol_save = idx1();
-    a[tint_symbol_save] = (a[tint_symbol_save] * 2.0f);
+    a[min(uint(tint_symbol_save), 3u)] = (a[min(uint(tint_symbol_save), 3u)] * 2.0f);
     while (true) {
       int tint_symbol_2 = idx2();
-      if (!((a[tint_symbol_2] < 10.0f))) {
+      if (!((a[min(uint(tint_symbol_2), 3u)] < 10.0f))) {
         break;
       }
       {
       }
       {
         int tint_symbol_1_save = idx3();
-        a[tint_symbol_1_save] = (a[tint_symbol_1_save] + 1.0f);
+        a[min(uint(tint_symbol_1_save), 3u)] = (a[min(uint(tint_symbol_1_save), 3u)] + 1.0f);
       }
     }
   }

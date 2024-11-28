@@ -15,7 +15,7 @@ kernel void f(const constant half4x4* m [[buffer(0)]]) {
   thread int counter = 0;
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.m=m, .counter=(&counter)};
   const constant half4x4* const p_m = tint_module_vars.m;
-  const constant half4* const p_m_i = (&(*p_m)[i(tint_module_vars)]);
+  const constant half4* const p_m_i = (&(*p_m)[min(uint(i(tint_module_vars)), 3u)]);
   half4x4 const l_m = (*p_m);
   half4 const l_m_i = (*p_m_i);
 }

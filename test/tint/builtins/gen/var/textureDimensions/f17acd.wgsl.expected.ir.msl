@@ -18,6 +18,7 @@ struct vertex_main_outputs {
 
 uint textureDimensions_f17acd(tint_module_vars_struct tint_module_vars) {
   int arg_1 = 1;
+  min(uint(arg_1), (tint_module_vars.arg_0.get_num_mip_levels() - 1u));
   uint res = uint(tint_module_vars.arg_0.get_width());
   return res;
 }

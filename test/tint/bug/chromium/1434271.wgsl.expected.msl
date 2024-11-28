@@ -54,6 +54,10 @@ Particle tint_unpack_vec3_in_composite(Particle_tint_packed_vec3 in) {
   return result;
 }
 
+struct TintArrayLengths {
+  /* 0x0000 */ tint_array<uint4, 1> array_lengths;
+};
+
 void asinh_468a48() {
   half arg_0 = 0.0h;
   half res = asinh(arg_0);
@@ -156,16 +160,16 @@ void assign_and_preserve_padding(device Particle_tint_packed_vec3* const dest, P
   (*(dest)).velocity = value.velocity;
 }
 
-void simulate_inner(uint3 GlobalInvocationID, thread tint_private_vars_struct* const tint_private_vars, const constant SimulationParams* const tint_symbol_8, device Particles_tint_packed_vec3* const tint_symbol_9) {
+void simulate_inner(uint3 GlobalInvocationID, thread tint_private_vars_struct* const tint_private_vars, const constant SimulationParams* const tint_symbol_8, device Particles_tint_packed_vec3* const tint_symbol_9, const constant TintArrayLengths* const tint_symbol_10) {
   (*(tint_private_vars)).rand_seed = (((*(tint_symbol_8)).seed.xy * float2(GlobalInvocationID.xy)) * (*(tint_symbol_8)).seed.zw);
   uint const idx = GlobalInvocationID[0];
-  Particle particle = tint_unpack_vec3_in_composite((*(tint_symbol_9)).particles[idx]);
-  assign_and_preserve_padding(&((*(tint_symbol_9)).particles[idx]), particle);
+  Particle particle = tint_unpack_vec3_in_composite((*(tint_symbol_9)).particles[min(idx, ((((*(tint_symbol_10)).array_lengths[0u][0u] - 0u) / 48u) - 1u))]);
+  assign_and_preserve_padding(&((*(tint_symbol_9)).particles[min(idx, ((((*(tint_symbol_10)).array_lengths[0u][0u] - 0u) / 48u) - 1u))]), particle);
 }
 
-kernel void simulate(const constant SimulationParams* tint_symbol_10 [[buffer(1)]], device Particles_tint_packed_vec3* tint_symbol_11 [[buffer(2)]], uint3 GlobalInvocationID [[thread_position_in_grid]]) {
+kernel void simulate(const constant SimulationParams* tint_symbol_11 [[buffer(1)]], device Particles_tint_packed_vec3* tint_symbol_12 [[buffer(2)]], const constant TintArrayLengths* tint_symbol_13 [[buffer(30)]], uint3 GlobalInvocationID [[thread_position_in_grid]]) {
   thread tint_private_vars_struct tint_private_vars = {};
-  simulate_inner(GlobalInvocationID, &(tint_private_vars), tint_symbol_10, tint_symbol_11);
+  simulate_inner(GlobalInvocationID, &(tint_private_vars), tint_symbol_11, tint_symbol_12, tint_symbol_13);
   return;
 }
 
@@ -177,23 +181,23 @@ struct Buffer {
   /* 0x0000 */ tint_array<float, 1> weights;
 };
 
-void export_level_inner(uint3 coord, texture2d<float, access::write> tint_symbol_12, const constant UBO* const tint_symbol_13, const device Buffer* const tint_symbol_14, device Buffer* const tint_symbol_15) {
-  if (all((coord.xy < uint2(uint2(tint_symbol_12.get_width(), tint_symbol_12.get_height()))))) {
-    uint const dst_offset = (coord[0] << ((coord[1] * (*(tint_symbol_13)).width) & 31u));
-    uint const src_offset = ((coord[0] - 2u) + ((coord[1] >> 2u) * (*(tint_symbol_13)).width));
-    float const a = (*(tint_symbol_14)).weights[(src_offset << 0u)];
-    float const b = (*(tint_symbol_14)).weights[(src_offset + 1u)];
-    float const c = (*(tint_symbol_14)).weights[((src_offset + 1u) + (*(tint_symbol_13)).width)];
-    float const d = (*(tint_symbol_14)).weights[((src_offset + 1u) + (*(tint_symbol_13)).width)];
+void export_level_inner(uint3 coord, texture2d<float, access::write> tint_symbol_14, const constant UBO* const tint_symbol_15, const device Buffer* const tint_symbol_16, const constant TintArrayLengths* const tint_symbol_17, device Buffer* const tint_symbol_18) {
+  if (all((coord.xy < uint2(uint2(tint_symbol_14.get_width(), tint_symbol_14.get_height()))))) {
+    uint const dst_offset = (coord[0] << ((coord[1] * (*(tint_symbol_15)).width) & 31u));
+    uint const src_offset = ((coord[0] - 2u) + ((coord[1] >> 2u) * (*(tint_symbol_15)).width));
+    float const a = (*(tint_symbol_16)).weights[min((src_offset << 0u), ((((*(tint_symbol_17)).array_lengths[0u][1u] - 0u) / 4u) - 1u))];
+    float const b = (*(tint_symbol_16)).weights[min((src_offset + 1u), ((((*(tint_symbol_17)).array_lengths[0u][1u] - 0u) / 4u) - 1u))];
+    float const c = (*(tint_symbol_16)).weights[min(((src_offset + 1u) + (*(tint_symbol_15)).width), ((((*(tint_symbol_17)).array_lengths[0u][1u] - 0u) / 4u) - 1u))];
+    float const d = (*(tint_symbol_16)).weights[min(((src_offset + 1u) + (*(tint_symbol_15)).width), ((((*(tint_symbol_17)).array_lengths[0u][1u] - 0u) / 4u) - 1u))];
     float const sum = dot(float4(a, b, c, d), float4(1.0f));
-    (*(tint_symbol_15)).weights[dst_offset] = fmod(sum, 4.0f);
+    (*(tint_symbol_18)).weights[min(dst_offset, ((((*(tint_symbol_17)).array_lengths[0u][2u] - 0u) / 4u) - 1u))] = fmod(sum, 4.0f);
     float4 const probabilities = (float4(a, (a * b), ((a / b) + c), sum) + fmax(sum, 0.0f));
-    tint_symbol_12.write(probabilities, uint2(int2(coord.xy)));
+    tint_symbol_14.write(probabilities, uint2(int2(coord.xy)));
   }
 }
 
-kernel void export_level(texture2d<float, access::write> tint_symbol_16 [[texture(0)]], const constant UBO* tint_symbol_17 [[buffer(3)]], const device Buffer* tint_symbol_18 [[buffer(4)]], device Buffer* tint_symbol_19 [[buffer(0)]], uint3 coord [[thread_position_in_grid]]) {
-  export_level_inner(coord, tint_symbol_16, tint_symbol_17, tint_symbol_18, tint_symbol_19);
+kernel void export_level(texture2d<float, access::write> tint_symbol_19 [[texture(0)]], const constant UBO* tint_symbol_20 [[buffer(3)]], const device Buffer* tint_symbol_21 [[buffer(4)]], const constant TintArrayLengths* tint_symbol_22 [[buffer(30)]], device Buffer* tint_symbol_23 [[buffer(0)]], uint3 coord [[thread_position_in_grid]]) {
+  export_level_inner(coord, tint_symbol_19, tint_symbol_20, tint_symbol_21, tint_symbol_22, tint_symbol_23);
   return;
 }
 

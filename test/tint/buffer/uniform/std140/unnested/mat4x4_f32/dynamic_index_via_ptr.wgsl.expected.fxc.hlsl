@@ -20,7 +20,7 @@ float4x4 m_load(uint offset) {
 void f() {
   int p_m_i_save = i();
   float4x4 l_m = m_load(0u);
-  const uint scalar_offset_4 = ((16u * uint(p_m_i_save))) / 4;
+  const uint scalar_offset_4 = ((16u * min(uint(p_m_i_save), 3u))) / 4;
   float4 l_m_i = asfloat(m[scalar_offset_4 / 4]);
   return;
 }

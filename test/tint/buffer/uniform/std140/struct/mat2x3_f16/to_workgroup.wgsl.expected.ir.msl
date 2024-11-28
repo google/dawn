@@ -38,6 +38,9 @@ struct tint_module_vars_struct {
   threadgroup tint_array<S_packed_vec3, 4>* w;
 };
 
+#define TINT_ISOLATE_UB(VOLATILE_NAME) \
+  {volatile bool VOLATILE_NAME = false; if (VOLATILE_NAME) break;}
+
 struct tint_symbol_1 {
   tint_array<S_packed_vec3, 4> tint_symbol;
 };
@@ -76,6 +79,7 @@ void f_inner(uint tint_local_index, tint_module_vars_struct tint_module_vars) {
     uint v_7 = 0u;
     v_7 = tint_local_index;
     while(true) {
+      TINT_ISOLATE_UB(tint_volatile_false)
       uint const v_8 = v_7;
       if ((v_8 >= 4u)) {
         break;
@@ -89,13 +93,13 @@ void f_inner(uint tint_local_index, tint_module_vars_struct tint_module_vars) {
   }
   threadgroup_barrier(mem_flags::mem_threadgroup);
   tint_store_array_packed_vec3(tint_module_vars.w, tint_load_array_packed_vec3(tint_module_vars.u));
-  tint_store_array_packed_vec3_1((&(*tint_module_vars.w)[1]), tint_load_struct_packed_vec3((&(*tint_module_vars.u)[2])));
-  tint_array<tint_packed_vec3_f16_array_element, 2> const v_9 = (*tint_module_vars.u)[2].m;
+  tint_store_array_packed_vec3_1((&(*tint_module_vars.w)[1u]), tint_load_struct_packed_vec3((&(*tint_module_vars.u)[2u])));
+  tint_array<tint_packed_vec3_f16_array_element, 2> const v_9 = (*tint_module_vars.u)[2u].m;
   half3 const v_10 = half3(v_9[0u].packed);
   half2x3 const v_11 = half2x3(v_10, half3(v_9[1u].packed));
-  (*tint_module_vars.w)[3].m[0u].packed = packed_half3(v_11[0u]);
-  (*tint_module_vars.w)[3].m[1u].packed = packed_half3(v_11[1u]);
-  (*tint_module_vars.w)[1].m[0].packed = packed_half3(half3((*tint_module_vars.u)[0].m[1].packed).zxy);
+  (*tint_module_vars.w)[3u].m[0u].packed = packed_half3(v_11[0u]);
+  (*tint_module_vars.w)[3u].m[1u].packed = packed_half3(v_11[1u]);
+  (*tint_module_vars.w)[1u].m[0u].packed = packed_half3(half3((*tint_module_vars.u)[0u].m[1u].packed).zxy);
 }
 
 kernel void f(uint tint_local_index [[thread_index_in_threadgroup]], const constant tint_array<S_packed_vec3, 4>* u [[buffer(0)]], threadgroup tint_symbol_1* v_12 [[threadgroup(0)]]) {

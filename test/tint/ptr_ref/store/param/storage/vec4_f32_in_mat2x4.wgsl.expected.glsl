@@ -9,5 +9,5 @@ void func(uint pointer_indices[1]) {
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
-  func(uint[1](uint(1)));
+  func(uint[1](1u));
 }

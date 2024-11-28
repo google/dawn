@@ -19,6 +19,6 @@ struct tint_module_vars_struct {
 };
 
 void f(tint_module_vars_struct tint_module_vars) {
-  float const x = (*tint_module_vars.a)[0];
-  float const y = (*tint_module_vars.b)[0];
+  float const x = (*tint_module_vars.a)[0u];
+  float const y = (*tint_module_vars.b)[0u];
 }

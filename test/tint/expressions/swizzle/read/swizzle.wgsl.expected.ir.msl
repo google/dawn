@@ -22,5 +22,5 @@ void a() {
   int const b = a_1[0u];
   int4 const c = a_1.zzyy;
   S d = S{};
-  float3 const e = d.val[2].yzx;
+  float3 const e = d.val[2u].yzx;
 }

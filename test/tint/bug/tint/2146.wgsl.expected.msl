@@ -17,7 +17,7 @@ kernel void tint_symbol() {
   half4 a = half4(0.0h);
   half const b = 1.0h;
   int const tint_symbol_2 = 0;
-  a[tint_symbol_2] = (a[tint_symbol_2] + b);
+  a[min(uint(tint_symbol_2), 3u)] = (a[min(uint(tint_symbol_2), 3u)] + b);
   return;
 }
 

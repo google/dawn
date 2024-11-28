@@ -20,9 +20,9 @@ struct tint_module_vars_struct {
 
 kernel void f(const constant tint_array<half4x4, 4>* u [[buffer(0)]], device half* s [[buffer(1)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.u=u, .s=s};
-  half4x4 const t = transpose((*tint_module_vars.u)[2]);
-  half const l = length((*tint_module_vars.u)[0][1].ywxz);
-  half const a = abs((*tint_module_vars.u)[0][1].ywxz[0u]);
-  half const v = (t[0][0u] + half(l));
+  half4x4 const t = transpose((*tint_module_vars.u)[2u]);
+  half const l = length((*tint_module_vars.u)[0u][1u].ywxz);
+  half const a = abs((*tint_module_vars.u)[0u][1u].ywxz[0u]);
+  half const v = (t[0u][0u] + half(l));
   (*tint_module_vars.s) = (v + half(a));
 }

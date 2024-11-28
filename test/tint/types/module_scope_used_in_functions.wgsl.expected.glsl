@@ -18,7 +18,9 @@ void zoo() {
 void bar(float a, float b) {
   p = a;
   w = b;
-  v_1.inner[0] = v.inner.x;
+  uint v_2 = (uint(v_1.inner.length()) - 1u);
+  uint v_3 = min(uint(0), v_2);
+  v_1.inner[v_3] = v.inner.x;
   zoo();
 }
 void foo(float a) {

@@ -36,12 +36,12 @@ struct tint_symbol {
 VertexOutputs vs_main_inner(uint VertexIndex, const constant Uniforms* const tint_symbol_4) {
   tint_array<float2, 3> texcoord = tint_array<float2, 3>{float2(-0.5f, 0.0f), float2(1.5f, 0.0f), float2(0.5f, 2.0f)};
   VertexOutputs output = {};
-  output.position = float4(((texcoord[VertexIndex] * 2.0f) - float2(1.0f)), 0.0f, 1.0f);
+  output.position = float4(((texcoord[min(VertexIndex, 2u)] * 2.0f) - float2(1.0f)), 0.0f, 1.0f);
   bool flipY = ((*(tint_symbol_4)).u_scale[1] < 0.0f);
   if (flipY) {
-    output.texcoords = ((((texcoord[VertexIndex] * (*(tint_symbol_4)).u_scale) + (*(tint_symbol_4)).u_offset) * float2(1.0f, -1.0f)) + float2(0.0f, 1.0f));
+    output.texcoords = ((((texcoord[min(VertexIndex, 2u)] * (*(tint_symbol_4)).u_scale) + (*(tint_symbol_4)).u_offset) * float2(1.0f, -1.0f)) + float2(0.0f, 1.0f));
   } else {
-    output.texcoords = ((((texcoord[VertexIndex] * float2(1.0f, -1.0f)) + float2(0.0f, 1.0f)) * (*(tint_symbol_4)).u_scale) + (*(tint_symbol_4)).u_offset);
+    output.texcoords = ((((texcoord[min(VertexIndex, 2u)] * float2(1.0f, -1.0f)) + float2(0.0f, 1.0f)) * (*(tint_symbol_4)).u_scale) + (*(tint_symbol_4)).u_offset);
   }
   return output;
 }

@@ -12,6 +12,9 @@ S v(uint offset) {
 
 [numthreads(1, 1, 1)]
 void main() {
-  S x = v(32u);
+  uint v_2 = 0u;
+  sb.GetDimensions(v_2);
+  uint v_3 = ((v_2 / 32u) - 1u);
+  S x = v((0u + (min(uint(int(1)), v_3) * 32u)));
 }
 

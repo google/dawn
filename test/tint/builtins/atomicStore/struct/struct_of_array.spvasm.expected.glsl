@@ -20,7 +20,7 @@ void compute_main_inner(uint local_invocation_index_2) {
         break;
       }
       uint x_35 = idx;
-      atomicExchange(wg.a[x_35], 0u);
+      atomicExchange(wg.a[min(x_35, 9u)], 0u);
       {
         idx = (idx + 1u);
       }
@@ -28,7 +28,7 @@ void compute_main_inner(uint local_invocation_index_2) {
     }
   }
   barrier();
-  atomicExchange(wg.a[4], 1u);
+  atomicExchange(wg.a[4u], 1u);
 }
 void compute_main_1() {
   uint x_53 = local_invocation_index_1;

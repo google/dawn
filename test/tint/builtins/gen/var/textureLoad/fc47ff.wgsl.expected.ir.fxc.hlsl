@@ -3,7 +3,9 @@ RWByteAddressBuffer prevent_dce : register(u0);
 RWTexture2D<int4> arg_0 : register(u0, space1);
 int4 textureLoad_fc47ff() {
   uint2 arg_1 = (1u).xx;
-  int4 res = int4(arg_0.Load(int3(int2(arg_1), int(0))));
+  uint2 v = (0u).xx;
+  arg_0.GetDimensions(v.x, v.y);
+  int4 res = int4(arg_0.Load(int3(int2(min(arg_1, (v - (1u).xx))), int(0))));
   return res;
 }
 

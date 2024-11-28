@@ -1,10 +1,10 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 1
-; Bound: 53
+; Bound: 50
 ; Schema: 0
                OpCapability Shader
-         %42 = OpExtInstImport "GLSL.std.450"
+         %39 = OpExtInstImport "GLSL.std.450"
                OpMemoryModel Logical GLSL450
                OpEntryPoint GLCompute %f "f"
                OpExecutionMode %f LocalSize 1 1 1
@@ -52,41 +52,38 @@
          %15 = OpTypeFunction %void
 %_ptr_Uniform_v3float = OpTypePointer Uniform %v3float
      %uint_0 = OpConstant %uint 0
-        %int = OpTypeInt 32 1
-      %int_2 = OpConstant %int 2
-     %uint_1 = OpConstant %uint 1
      %uint_2 = OpConstant %uint 2
+     %uint_1 = OpConstant %uint 1
      %uint_3 = OpConstant %uint 3
 %mat4v3float = OpTypeMatrix %v3float 4
     %v4float = OpTypeVector %float 4
 %mat3v4float = OpTypeMatrix %v4float 3
-      %int_0 = OpConstant %int 0
 %_ptr_StorageBuffer_float = OpTypePointer StorageBuffer %float
           %f = OpFunction %void None %15
          %16 = OpLabel
-         %17 = OpAccessChain %_ptr_Uniform_v3float %1 %uint_0 %int_2 %uint_0
-         %22 = OpLoad %v3float %17 None
-         %23 = OpAccessChain %_ptr_Uniform_v3float %1 %uint_0 %int_2 %uint_1
-         %25 = OpLoad %v3float %23 None
-         %26 = OpAccessChain %_ptr_Uniform_v3float %1 %uint_0 %int_2 %uint_2
-         %28 = OpLoad %v3float %26 None
-         %29 = OpAccessChain %_ptr_Uniform_v3float %1 %uint_0 %int_2 %uint_3
-         %31 = OpLoad %v3float %29 None
-         %33 = OpCompositeConstruct %mat4v3float %22 %25 %28 %31
-          %t = OpTranspose %mat3v4float %33
-         %37 = OpAccessChain %_ptr_Uniform_v3float %1 %uint_0 %int_0 %uint_1
-         %39 = OpLoad %v3float %37 None
-         %40 = OpVectorShuffle %v3float %39 %39 2 0 1
-          %l = OpExtInst %float %42 Length %40
-         %43 = OpAccessChain %_ptr_Uniform_v3float %1 %uint_0 %int_0 %uint_1
-         %44 = OpLoad %v3float %43 None
-         %45 = OpVectorShuffle %v3float %44 %44 2 0 1
-         %46 = OpCompositeExtract %float %45 0
-          %a = OpExtInst %float %42 FAbs %46
-         %48 = OpCompositeExtract %float %t 0 0
-         %49 = OpFAdd %float %48 %l
-         %50 = OpFAdd %float %49 %a
-         %51 = OpAccessChain %_ptr_StorageBuffer_float %10 %uint_0
-               OpStore %51 %50 None
+         %17 = OpAccessChain %_ptr_Uniform_v3float %1 %uint_0 %uint_2 %uint_0
+         %21 = OpLoad %v3float %17 None
+         %22 = OpAccessChain %_ptr_Uniform_v3float %1 %uint_0 %uint_2 %uint_1
+         %24 = OpLoad %v3float %22 None
+         %25 = OpAccessChain %_ptr_Uniform_v3float %1 %uint_0 %uint_2 %uint_2
+         %26 = OpLoad %v3float %25 None
+         %27 = OpAccessChain %_ptr_Uniform_v3float %1 %uint_0 %uint_2 %uint_3
+         %29 = OpLoad %v3float %27 None
+         %31 = OpCompositeConstruct %mat4v3float %21 %24 %26 %29
+          %t = OpTranspose %mat3v4float %31
+         %35 = OpAccessChain %_ptr_Uniform_v3float %1 %uint_0 %uint_0 %uint_1
+         %36 = OpLoad %v3float %35 None
+         %37 = OpVectorShuffle %v3float %36 %36 2 0 1
+          %l = OpExtInst %float %39 Length %37
+         %40 = OpAccessChain %_ptr_Uniform_v3float %1 %uint_0 %uint_0 %uint_1
+         %41 = OpLoad %v3float %40 None
+         %42 = OpVectorShuffle %v3float %41 %41 2 0 1
+         %43 = OpCompositeExtract %float %42 0
+          %a = OpExtInst %float %39 FAbs %43
+         %45 = OpCompositeExtract %float %t 0 0
+         %46 = OpFAdd %float %45 %l
+         %47 = OpFAdd %float %46 %a
+         %48 = OpAccessChain %_ptr_StorageBuffer_float %10 %uint_0
+               OpStore %48 %47 None
                OpReturn
                OpFunctionEnd

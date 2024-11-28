@@ -12,7 +12,10 @@ struct vertex_main_outputs {
 RWByteAddressBuffer prevent_dce : register(u0);
 Texture2D<int4> arg_0 : register(t0, space1);
 int4 textureLoad_dbd554() {
-  int4 res = int4(arg_0.Load(int3(int2((int(1)).xx), int(0))));
+  uint2 v = (0u).xx;
+  arg_0.GetDimensions(v.x, v.y);
+  uint2 v_1 = (v - (1u).xx);
+  int4 res = int4(arg_0.Load(int3(int2(min(uint2((int(1)).xx), v_1)), int(0))));
   return res;
 }
 
@@ -29,13 +32,13 @@ VertexOutput vertex_main_inner() {
   VertexOutput tint_symbol = (VertexOutput)0;
   tint_symbol.pos = (0.0f).xxxx;
   tint_symbol.prevent_dce = textureLoad_dbd554();
-  VertexOutput v = tint_symbol;
-  return v;
+  VertexOutput v_2 = tint_symbol;
+  return v_2;
 }
 
 vertex_main_outputs vertex_main() {
-  VertexOutput v_1 = vertex_main_inner();
-  vertex_main_outputs v_2 = {v_1.prevent_dce, v_1.pos};
-  return v_2;
+  VertexOutput v_3 = vertex_main_inner();
+  vertex_main_outputs v_4 = {v_3.prevent_dce, v_3.pos};
+  return v_4;
 }
 

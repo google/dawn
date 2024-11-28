@@ -1,9 +1,10 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 1
-; Bound: 22
+; Bound: 36
 ; Schema: 0
                OpCapability Shader
+         %24 = OpExtInstImport "GLSL.std.450"
                OpMemoryModel Logical GLSL450
                OpEntryPoint GLCompute %main "main"
                OpExecutionMode %main LocalSize 1 1 1
@@ -33,17 +34,30 @@
           %6 = OpVariable %_ptr_StorageBuffer_out_block StorageBuffer
        %void = OpTypeVoid
          %11 = OpTypeFunction %void
-%_ptr_StorageBuffer_float = OpTypePointer StorageBuffer %float
+%_ptr_StorageBuffer__runtimearr_float = OpTypePointer StorageBuffer %_runtimearr_float
        %uint = OpTypeInt 32 0
      %uint_0 = OpConstant %uint 0
+     %uint_1 = OpConstant %uint 1
         %int = OpTypeInt 32 1
       %int_0 = OpConstant %int 0
+%_ptr_StorageBuffer_float = OpTypePointer StorageBuffer %float
+%_ptr_StorageBuffer__runtimearr_float_0 = OpTypePointer StorageBuffer %_runtimearr_float
 %_ptr_StorageBuffer_float_0 = OpTypePointer StorageBuffer %float
        %main = OpFunction %void None %11
          %12 = OpLabel
-         %13 = OpAccessChain %_ptr_StorageBuffer_float %6 %uint_0 %int_0
-         %19 = OpAccessChain %_ptr_StorageBuffer_float_0 %1 %uint_0 %int_0
-         %21 = OpLoad %float %19 None
-               OpStore %13 %21 None
+         %13 = OpAccessChain %_ptr_StorageBuffer__runtimearr_float %6 %uint_0
+         %17 = OpArrayLength %uint %6 0
+         %18 = OpISub %uint %17 %uint_1
+         %20 = OpBitcast %uint %int_0
+         %23 = OpExtInst %uint %24 UMin %20 %18
+         %25 = OpAccessChain %_ptr_StorageBuffer_float %6 %uint_0 %23
+         %27 = OpAccessChain %_ptr_StorageBuffer__runtimearr_float_0 %1 %uint_0
+         %29 = OpArrayLength %uint %1 0
+         %30 = OpISub %uint %29 %uint_1
+         %31 = OpBitcast %uint %int_0
+         %32 = OpExtInst %uint %24 UMin %31 %30
+         %33 = OpAccessChain %_ptr_StorageBuffer_float_0 %1 %uint_0 %32
+         %35 = OpLoad %float %33 None
+               OpStore %25 %35 None
                OpReturn
                OpFunctionEnd

@@ -1,4 +1,3 @@
-// flags: --transform robustness
 fn f() -> i32 {
     var i : i32;
     while (i < 4) {

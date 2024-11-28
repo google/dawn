@@ -22,6 +22,9 @@ float binaryOperation_f1_f1_(inout float a, inout float b) {
 }
 
 void main_1() {
+  uint tint_symbol_3 = 0u;
+  resultMatrix.GetDimensions(tint_symbol_3);
+  uint tint_symbol_4 = ((tint_symbol_3 - 0u) / 4u);
   int index = 0;
   int a_1 = 0;
   float param = 0.0f;
@@ -32,7 +35,7 @@ void main_1() {
   param = -4.0f;
   param_1 = -3.0f;
   float x_68 = binaryOperation_f1_f1_(param, param_1);
-  resultMatrix.Store((4u * uint(x_63)), asuint(x_68));
+  resultMatrix.Store((4u * min(uint(x_63), (tint_symbol_4 - 1u))), asuint(x_68));
   return;
 }
 

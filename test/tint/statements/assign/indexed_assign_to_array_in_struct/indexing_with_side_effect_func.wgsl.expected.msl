@@ -45,7 +45,7 @@ kernel void tint_symbol(const constant Uniforms* tint_symbol_2 [[buffer(0)]]) {
   InnerS v = {};
   OuterS s = {};
   uint const tint_symbol_1 = getNextIndex(&(tint_private_vars));
-  s.a1[tint_symbol_1].a2[(*(tint_symbol_2)).j] = v;
+  s.a1[min(tint_symbol_1, 7u)].a2[min((*(tint_symbol_2)).j, 7u)] = v;
   return;
 }
 

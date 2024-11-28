@@ -37,6 +37,7 @@ struct tint_module_vars_struct {
   const device FirstMatrix* firstMatrix;
   const device SecondMatrix* secondMatrix;
   const constant Uniforms* x_46;
+  const constant tint_array<uint4, 1>* tint_storage_buffer_sizes;
 };
 
 float binaryOperation_f1_f1_(thread float* const a, thread float* const b) {
@@ -65,7 +66,8 @@ void main_1(tint_module_vars_struct tint_module_vars) {
   param = -4.0f;
   param_1 = -3.0f;
   float const x_68 = binaryOperation_f1_f1_((&param), (&param_1));
-  (*tint_module_vars.resultMatrix).numbers[x_63] = x_68;
+  uint const v = ((((*tint_module_vars.tint_storage_buffer_sizes)[0u][0u] - 0u) / 4u) - 1u);
+  (*tint_module_vars.resultMatrix).numbers[min(uint(x_63), v)] = x_68;
 }
 
 void tint_symbol_1_inner(uint3 gl_GlobalInvocationID_param, tint_module_vars_struct tint_module_vars) {
@@ -73,8 +75,8 @@ void tint_symbol_1_inner(uint3 gl_GlobalInvocationID_param, tint_module_vars_str
   main_1(tint_module_vars);
 }
 
-kernel void tint_symbol_1(uint3 gl_GlobalInvocationID_param [[thread_position_in_grid]], device ResultMatrix* resultMatrix [[buffer(0)]]) {
+kernel void tint_symbol_1(uint3 gl_GlobalInvocationID_param [[thread_position_in_grid]], device ResultMatrix* resultMatrix [[buffer(0)]], const constant tint_array<uint4, 1>* tint_storage_buffer_sizes [[buffer(30)]]) {
   thread uint3 gl_GlobalInvocationID = 0u;
-  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.gl_GlobalInvocationID=(&gl_GlobalInvocationID), .resultMatrix=resultMatrix};
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.gl_GlobalInvocationID=(&gl_GlobalInvocationID), .resultMatrix=resultMatrix, .tint_storage_buffer_sizes=tint_storage_buffer_sizes};
   tint_symbol_1_inner(gl_GlobalInvocationID_param, tint_module_vars);
 }

@@ -32,7 +32,7 @@ kernel void f(const constant tint_array<tint_packed_vec3_f32_array_element, 2>* 
   thread int counter = 0;
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.m=m, .counter=(&counter)};
   const constant tint_array<tint_packed_vec3_f32_array_element, 2>* const p_m = tint_module_vars.m;
-  const constant packed_float3* const p_m_i = (&(*p_m)[i(tint_module_vars)].packed);
+  const constant packed_float3* const p_m_i = (&(*p_m)[min(uint(i(tint_module_vars)), 1u)].packed);
   tint_array<tint_packed_vec3_f32_array_element, 2> const v = (*p_m);
   float3 const v_1 = float3(v[0u].packed);
   float2x3 const l_m = float2x3(v_1, float3(v[1u].packed));

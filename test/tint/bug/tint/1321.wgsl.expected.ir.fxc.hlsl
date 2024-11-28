@@ -6,7 +6,7 @@ int foo() {
 void main() {
   float arr[4] = (float[4])0;
   {
-    int v = foo();
+    uint v = min(uint(foo()), 3u);
     while(true) {
       float x = arr[v];
       break;

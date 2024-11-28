@@ -94,7 +94,7 @@ vec4 tint_TextureLoadExternal(tint_ExternalTextureParams params, uvec2 coords) {
   return vec4(v_13, v_6);
 }
 vec4 textureLoad2d(tint_ExternalTextureParams tint_symbol_params, ivec2 coords) {
-  return tint_TextureLoadExternal(tint_symbol_params, uvec2(coords));
+  return tint_TextureLoadExternal(tint_symbol_params, min(uvec2(coords), ((tint_symbol_params.apparentSize + uvec2(1u)) - uvec2(1u))));
 }
 tint_ExternalTextureParams tint_convert_tint_ExternalTextureParams(tint_ExternalTextureParams_std140 tint_input) {
   mat3 v_14 = mat3(tint_input.gamutConversionMatrix_col0, tint_input.gamutConversionMatrix_col1, tint_input.gamutConversionMatrix_col2);
@@ -212,7 +212,7 @@ vec4 tint_TextureLoadExternal(tint_ExternalTextureParams params, uvec2 coords) {
   return vec4(v_13, v_6);
 }
 vec4 textureLoad2d(tint_ExternalTextureParams tint_symbol_params, ivec2 coords) {
-  return tint_TextureLoadExternal(tint_symbol_params, uvec2(coords));
+  return tint_TextureLoadExternal(tint_symbol_params, min(uvec2(coords), ((tint_symbol_params.apparentSize + uvec2(1u)) - uvec2(1u))));
 }
 tint_ExternalTextureParams tint_convert_tint_ExternalTextureParams(tint_ExternalTextureParams_std140 tint_input) {
   mat3 v_14 = mat3(tint_input.gamutConversionMatrix_col0, tint_input.gamutConversionMatrix_col1, tint_input.gamutConversionMatrix_col2);
@@ -321,7 +321,7 @@ vec4 tint_TextureLoadExternal(tint_ExternalTextureParams params, uvec2 coords) {
   return vec4(v_13, v_6);
 }
 vec4 textureLoad2d(tint_ExternalTextureParams tint_symbol_params, ivec2 coords) {
-  return tint_TextureLoadExternal(tint_symbol_params, uvec2(coords));
+  return tint_TextureLoadExternal(tint_symbol_params, min(uvec2(coords), ((tint_symbol_params.apparentSize + uvec2(1u)) - uvec2(1u))));
 }
 tint_ExternalTextureParams tint_convert_tint_ExternalTextureParams(tint_ExternalTextureParams_std140 tint_input) {
   mat3 v_14 = mat3(tint_input.gamutConversionMatrix_col0, tint_input.gamutConversionMatrix_col1, tint_input.gamutConversionMatrix_col2);

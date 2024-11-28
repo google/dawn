@@ -10,9 +10,12 @@ layout(binding = 0, rgba16i) uniform highp readonly iimage2DArray arg_0;
 ivec4 textureLoad_4638a0() {
   ivec2 arg_1 = ivec2(1);
   uint arg_2 = 1u;
-  uint v_1 = arg_2;
-  ivec2 v_2 = ivec2(arg_1);
-  ivec4 res = imageLoad(arg_0, ivec3(v_2, int(v_1)));
+  ivec2 v_1 = arg_1;
+  uint v_2 = arg_2;
+  uint v_3 = min(v_2, (uint(imageSize(arg_0).z) - 1u));
+  uvec2 v_4 = (uvec2(imageSize(arg_0).xy) - uvec2(1u));
+  ivec2 v_5 = ivec2(min(uvec2(v_1), v_4));
+  ivec4 res = imageLoad(arg_0, ivec3(v_5, int(v_3)));
   return res;
 }
 void main() {
@@ -28,9 +31,12 @@ layout(binding = 0, rgba16i) uniform highp readonly iimage2DArray arg_0;
 ivec4 textureLoad_4638a0() {
   ivec2 arg_1 = ivec2(1);
   uint arg_2 = 1u;
-  uint v_1 = arg_2;
-  ivec2 v_2 = ivec2(arg_1);
-  ivec4 res = imageLoad(arg_0, ivec3(v_2, int(v_1)));
+  ivec2 v_1 = arg_1;
+  uint v_2 = arg_2;
+  uint v_3 = min(v_2, (uint(imageSize(arg_0).z) - 1u));
+  uvec2 v_4 = (uvec2(imageSize(arg_0).xy) - uvec2(1u));
+  ivec2 v_5 = ivec2(min(uvec2(v_1), v_4));
+  ivec4 res = imageLoad(arg_0, ivec3(v_5, int(v_3)));
   return res;
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
@@ -50,9 +56,12 @@ layout(location = 0) flat out ivec4 vertex_main_loc0_Output;
 ivec4 textureLoad_4638a0() {
   ivec2 arg_1 = ivec2(1);
   uint arg_2 = 1u;
-  uint v = arg_2;
-  ivec2 v_1 = ivec2(arg_1);
-  ivec4 res = imageLoad(arg_0, ivec3(v_1, int(v)));
+  ivec2 v = arg_1;
+  uint v_1 = arg_2;
+  uint v_2 = min(v_1, (uint(imageSize(arg_0).z) - 1u));
+  uvec2 v_3 = (uvec2(imageSize(arg_0).xy) - uvec2(1u));
+  ivec2 v_4 = ivec2(min(uvec2(v), v_3));
+  ivec4 res = imageLoad(arg_0, ivec3(v_4, int(v_2)));
   return res;
 }
 VertexOutput vertex_main_inner() {
@@ -62,10 +71,10 @@ VertexOutput vertex_main_inner() {
   return tint_symbol;
 }
 void main() {
-  VertexOutput v_2 = vertex_main_inner();
-  gl_Position = v_2.pos;
+  VertexOutput v_5 = vertex_main_inner();
+  gl_Position = v_5.pos;
   gl_Position[1u] = -(gl_Position.y);
   gl_Position[2u] = ((2.0f * gl_Position.z) - gl_Position.w);
-  vertex_main_loc0_Output = v_2.prevent_dce;
+  vertex_main_loc0_Output = v_5.prevent_dce;
   gl_PointSize = 1.0f;
 }

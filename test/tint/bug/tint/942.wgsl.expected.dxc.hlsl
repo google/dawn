@@ -47,7 +47,7 @@ void main_inner(uint3 WorkGroupID, uint3 LocalInvocationID, uint local_invocatio
           if ((flip[0].x != 0u)) {
             loadIndex = loadIndex.yx;
           }
-          tile[r][((4u * LocalInvocationID.x) + c)] = inputTex.SampleLevel(samp, ((float2(loadIndex) + (0.25f).xx) / float2(dims)), 0.0f).rgb;
+          tile[min(r, 3u)][min(((4u * LocalInvocationID.x) + c), 255u)] = inputTex.SampleLevel(samp, ((float2(loadIndex) + (0.25f).xx) / float2(dims)), 0.0f).rgb;
         }
       }
     }
@@ -75,7 +75,7 @@ void main_inner(uint3 WorkGroupID, uint3 LocalInvocationID, uint local_invocatio
             {
               for(uint f = 0u; (f < params[0].x); f = (f + 1u)) {
                 uint i = ((center + f) - filterOffset);
-                acc = (acc + ((1.0f / float(params[0].x)) * tile[r][i]));
+                acc = (acc + ((1.0f / float(params[0].x)) * tile[min(r, 3u)][min(i, 255u)]));
               }
             }
             outputTex[writeIndex] = float4(acc, 1.0f);

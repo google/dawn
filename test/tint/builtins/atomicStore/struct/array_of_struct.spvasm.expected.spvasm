@@ -1,9 +1,10 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 1
-; Bound: 77
+; Bound: 82
 ; Schema: 0
                OpCapability Shader
+         %33 = OpExtInstImport "GLSL.std.450"
                OpMemoryModel Logical GLSL450
                OpEntryPoint GLCompute %compute_main "compute_main" %compute_main_local_invocation_index_Input
                OpExecutionMode %compute_main LocalSize 1 1 1
@@ -45,6 +46,7 @@
 %_ptr_Function_uint = OpTypePointer Function %uint
      %uint_0 = OpConstant %uint 0
        %bool = OpTypeBool
+     %uint_9 = OpConstant %uint 9
 %_ptr_Workgroup_int = OpTypePointer Workgroup %int
       %int_0 = OpConstant %int 0
 %_ptr_Workgroup_uint = OpTypePointer Workgroup %uint
@@ -52,8 +54,8 @@
      %uint_2 = OpConstant %uint 2
 %_ptr_Workgroup_uint_0 = OpTypePointer Workgroup %uint
    %uint_264 = OpConstant %uint 264
-      %int_4 = OpConstant %int 4
-         %50 = OpTypeFunction %void
+     %uint_4 = OpConstant %uint 4
+         %55 = OpTypeFunction %void
 %compute_main_inner = OpFunction %void None %16
 %local_invocation_index_2 = OpFunctionParameter %uint
          %17 = OpLabel
@@ -74,66 +76,69 @@
                OpBranch %24
          %29 = OpLabel
        %x_28 = OpLoad %uint %idx None
-         %32 = OpAccessChain %_ptr_Workgroup_int %wg %x_28 %uint_0
-               OpStore %32 %int_0 None
-         %35 = OpAccessChain %_ptr_Workgroup_uint %wg %x_28 %uint_1
-               OpAtomicStore %35 %uint_2 %uint_0 %uint_0
-         %40 = OpAccessChain %_ptr_Workgroup_uint_0 %wg %x_28 %uint_2
-               OpStore %40 %uint_0 None
+         %32 = OpExtInst %uint %33 UMin %x_28 %uint_9
+         %35 = OpAccessChain %_ptr_Workgroup_int %wg %32 %uint_0
+               OpStore %35 %int_0 None
+         %38 = OpExtInst %uint %33 UMin %x_28 %uint_9
+         %39 = OpAccessChain %_ptr_Workgroup_uint %wg %38 %uint_1
+               OpAtomicStore %39 %uint_2 %uint_0 %uint_0
+         %44 = OpExtInst %uint %33 UMin %x_28 %uint_9
+         %45 = OpAccessChain %_ptr_Workgroup_uint_0 %wg %44 %uint_2
+               OpStore %45 %uint_0 None
                OpBranch %22
          %22 = OpLabel
-         %42 = OpLoad %uint %idx None
-         %43 = OpIAdd %uint %42 %uint_1
-               OpStore %idx %43 None
+         %47 = OpLoad %uint %idx None
+         %48 = OpIAdd %uint %47 %uint_1
+               OpStore %idx %48 None
                OpBranch %23
          %24 = OpLabel
                OpControlBarrier %uint_2 %uint_2 %uint_264
-         %46 = OpAccessChain %_ptr_Workgroup_uint %wg %int_4 %uint_1
-               OpAtomicStore %46 %uint_2 %uint_0 %uint_1
+         %51 = OpAccessChain %_ptr_Workgroup_uint %wg %uint_4 %uint_1
+               OpAtomicStore %51 %uint_2 %uint_0 %uint_1
                OpReturn
                OpFunctionEnd
-%compute_main_1 = OpFunction %void None %50
-         %51 = OpLabel
+%compute_main_1 = OpFunction %void None %55
+         %56 = OpLabel
        %x_53 = OpLoad %uint %local_invocation_index_1 None
-         %53 = OpFunctionCall %void %compute_main_inner %x_53
+         %58 = OpFunctionCall %void %compute_main_inner %x_53
                OpReturn
                OpFunctionEnd
 %compute_main_inner_0 = OpFunction %void None %16
 %local_invocation_index_1_param = OpFunctionParameter %uint
-         %56 = OpLabel
-               OpBranch %57
-         %57 = OpLabel
-               OpBranch %60
-         %60 = OpLabel
-         %62 = OpPhi %uint %local_invocation_index_1_param %57 %63 %59
-               OpLoopMerge %61 %59 None
-               OpBranch %58
-         %58 = OpLabel
-         %64 = OpUGreaterThanEqual %bool %62 %uint_10
-               OpSelectionMerge %65 None
-               OpBranchConditional %64 %66 %65
-         %66 = OpLabel
-               OpBranch %61
-         %65 = OpLabel
-         %67 = OpAccessChain %_ptr_Workgroup_int %wg %62 %uint_0
-               OpStore %67 %int_0 None
-         %68 = OpAccessChain %_ptr_Workgroup_uint %wg %62 %uint_1
-               OpAtomicStore %68 %uint_2 %uint_0 %uint_0
-         %70 = OpAccessChain %_ptr_Workgroup_uint_0 %wg %62 %uint_2
-               OpStore %70 %uint_0 None
-               OpBranch %59
-         %59 = OpLabel
-         %63 = OpIAdd %uint %62 %uint_1
-               OpBranch %60
          %61 = OpLabel
+               OpBranch %62
+         %62 = OpLabel
+               OpBranch %65
+         %65 = OpLabel
+         %67 = OpPhi %uint %local_invocation_index_1_param %62 %68 %64
+               OpLoopMerge %66 %64 None
+               OpBranch %63
+         %63 = OpLabel
+         %69 = OpUGreaterThanEqual %bool %67 %uint_10
+               OpSelectionMerge %70 None
+               OpBranchConditional %69 %71 %70
+         %71 = OpLabel
+               OpBranch %66
+         %70 = OpLabel
+         %72 = OpAccessChain %_ptr_Workgroup_int %wg %67 %uint_0
+               OpStore %72 %int_0 None
+         %73 = OpAccessChain %_ptr_Workgroup_uint %wg %67 %uint_1
+               OpAtomicStore %73 %uint_2 %uint_0 %uint_0
+         %75 = OpAccessChain %_ptr_Workgroup_uint_0 %wg %67 %uint_2
+               OpStore %75 %uint_0 None
+               OpBranch %64
+         %64 = OpLabel
+         %68 = OpIAdd %uint %67 %uint_1
+               OpBranch %65
+         %66 = OpLabel
                OpControlBarrier %uint_2 %uint_2 %uint_264
                OpStore %local_invocation_index_1 %local_invocation_index_1_param None
-         %72 = OpFunctionCall %void %compute_main_1
+         %77 = OpFunctionCall %void %compute_main_1
                OpReturn
                OpFunctionEnd
-%compute_main = OpFunction %void None %50
-         %74 = OpLabel
-         %75 = OpLoad %uint %compute_main_local_invocation_index_Input None
-         %76 = OpFunctionCall %void %compute_main_inner_0 %75
+%compute_main = OpFunction %void None %55
+         %79 = OpLabel
+         %80 = OpLoad %uint %compute_main_local_invocation_index_Input None
+         %81 = OpFunctionCall %void %compute_main_inner_0 %80
                OpReturn
                OpFunctionEnd

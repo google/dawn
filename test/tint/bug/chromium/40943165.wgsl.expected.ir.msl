@@ -14,7 +14,7 @@ void F_inner(uint mat2x2_1, tint_module_vars_struct tint_module_vars) {
     (*tint_module_vars.W) = float2x2(float2(0.0f), float2(0.0f));
   }
   threadgroup_barrier(mem_flags::mem_threadgroup);
-  (*tint_module_vars.W)[0] = ((*tint_module_vars.W)[0] + 0.0f);
+  (*tint_module_vars.W)[0u] = ((*tint_module_vars.W)[0u] + 0.0f);
 }
 
 kernel void F(uint mat2x2 [[thread_index_in_threadgroup]], threadgroup tint_symbol_1* v [[threadgroup(0)]]) {

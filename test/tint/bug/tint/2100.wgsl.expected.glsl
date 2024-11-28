@@ -16,7 +16,7 @@ uniform tint_symbol_block_std140_1_ubo {
   S_std140 inner;
 } v;
 vec4 tint_symbol_1_inner() {
-  float x = v.inner.matrix_view[0].z;
+  float x = v.inner.matrix_view[0u].z;
   return vec4(x, 0.0f, 0.0f, 1.0f);
 }
 void main() {

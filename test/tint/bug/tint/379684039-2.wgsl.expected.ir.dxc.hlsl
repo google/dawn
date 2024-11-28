@@ -5,7 +5,9 @@ void main() {
   int2 vec = (int(0)).xx;
   {
     while(true) {
-      if ((vec.y >= asint(_storage.Load((116u + (idx * 128u)))))) {
+      uint v = 0u;
+      _storage.GetDimensions(v);
+      if ((vec.y >= asint(_storage.Load((116u + (min(idx, ((v / 128u) - 1u)) * 128u)))))) {
         break;
       }
       {

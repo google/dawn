@@ -9,5 +9,5 @@ struct S {
 
 S A[4] = S[4](S(0), S(0), S(0), S(0));
 void main() {
-  A[0] = S(1);
+  A[0u] = S(1);
 }

@@ -4,7 +4,7 @@ using namespace metal;
 uint4 textureLoad_a3f122(texture2d_array<uint, access::read_write> tint_symbol) {
   uint2 arg_1 = uint2(1u);
   uint arg_2 = 1u;
-  uint4 res = tint_symbol.read(uint2(arg_1), arg_2);
+  uint4 res = tint_symbol.read(uint2(min(arg_1, (uint2(tint_symbol.get_width(), tint_symbol.get_height()) - uint2(1u)))), min(arg_2, (tint_symbol.get_array_size() - 1u)));
   return res;
 }
 

@@ -9,7 +9,9 @@ buffer prevent_dce_block_1_ssbo {
 layout(binding = 0, r32i) uniform highp iimage2D arg_0;
 ivec4 textureLoad_c9f310() {
   int arg_1 = 1;
-  ivec4 res = imageLoad(arg_0, ivec2(ivec2(arg_1, 0)));
+  int v_1 = arg_1;
+  uint v_2 = (uvec2(imageSize(arg_0)).x - 1u);
+  ivec4 res = imageLoad(arg_0, ivec2(uvec2(min(uint(v_1), v_2), 0u)));
   return res;
 }
 void main() {
@@ -24,7 +26,9 @@ buffer prevent_dce_block_1_ssbo {
 layout(binding = 0, r32i) uniform highp iimage2D arg_0;
 ivec4 textureLoad_c9f310() {
   int arg_1 = 1;
-  ivec4 res = imageLoad(arg_0, ivec2(ivec2(arg_1, 0)));
+  int v_1 = arg_1;
+  uint v_2 = (uvec2(imageSize(arg_0)).x - 1u);
+  ivec4 res = imageLoad(arg_0, ivec2(uvec2(min(uint(v_1), v_2), 0u)));
   return res;
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;

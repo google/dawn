@@ -34,7 +34,7 @@ struct OuterS {
 kernel void tint_symbol(const constant Uniforms* tint_symbol_1 [[buffer(0)]]) {
   InnerS v = {};
   OuterS s = {};
-  s.a1[(*(tint_symbol_1)).i].a2[(*(tint_symbol_1)).j] = v;
+  s.a1[min((*(tint_symbol_1)).i, 7u)].a2[min((*(tint_symbol_1)).j, 7u)] = v;
   return;
 }
 

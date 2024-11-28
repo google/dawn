@@ -10,7 +10,7 @@ buffer prevent_dce_block_1_ssbo {
 int transpose_faeb05() {
   f16mat2x4 arg_0 = f16mat2x4(f16vec4(1.0hf), f16vec4(1.0hf));
   f16mat4x2 res = transpose(arg_0);
-  return mix(0, 1, (res[0].x == 0.0hf));
+  return mix(0, 1, (res[0u].x == 0.0hf));
 }
 void main() {
   v.inner = transpose_faeb05();
@@ -25,7 +25,7 @@ buffer prevent_dce_block_1_ssbo {
 int transpose_faeb05() {
   f16mat2x4 arg_0 = f16mat2x4(f16vec4(1.0hf), f16vec4(1.0hf));
   f16mat4x2 res = transpose(arg_0);
-  return mix(0, 1, (res[0].x == 0.0hf));
+  return mix(0, 1, (res[0u].x == 0.0hf));
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
@@ -44,7 +44,7 @@ layout(location = 0) flat out int vertex_main_loc0_Output;
 int transpose_faeb05() {
   f16mat2x4 arg_0 = f16mat2x4(f16vec4(1.0hf), f16vec4(1.0hf));
   f16mat4x2 res = transpose(arg_0);
-  return mix(0, 1, (res[0].x == 0.0hf));
+  return mix(0, 1, (res[0u].x == 0.0hf));
 }
 VertexOutput vertex_main_inner() {
   VertexOutput tint_symbol = VertexOutput(vec4(0.0f), 0);

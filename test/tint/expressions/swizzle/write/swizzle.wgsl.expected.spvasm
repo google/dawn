@@ -48,7 +48,7 @@
          %15 = OpAccessChain %_ptr_Function_int %a_0 %uint_2
                OpStore %15 %int_2 None
                OpStore %d %25
-         %26 = OpAccessChain %_ptr_Function_v3float %d %uint_0 %int_2
+         %26 = OpAccessChain %_ptr_Function_v3float %d %uint_0 %uint_2
          %28 = OpAccessChain %_ptr_Function_float %26 %uint_1
                OpStore %28 %float_3 None
                OpReturn

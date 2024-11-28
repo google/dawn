@@ -60,16 +60,16 @@
          %22 = OpConstantComposite %v4half %half_0x1p_0 %half_0x1p_0 %half_0x1p_0 %half_0x1p_0
          %21 = OpConstantComposite %mat3v4half %22 %22 %22
 %_ptr_Function_v4half = OpTypePointer Function %v4half
-      %int_0 = OpConstant %int 0
+       %uint = OpTypeInt 32 0
+     %uint_0 = OpConstant %uint 0
 %_ptr_Function_half = OpTypePointer Function %half
 %half_0x0p_0 = OpConstant %half 0x0p+0
        %bool = OpTypeBool
       %int_1 = OpConstant %int 1
+      %int_0 = OpConstant %int 0
        %void = OpTypeVoid
-         %37 = OpTypeFunction %void
+         %39 = OpTypeFunction %void
 %_ptr_StorageBuffer_int = OpTypePointer StorageBuffer %int
-       %uint = OpTypeInt 32 0
-     %uint_0 = OpConstant %uint 0
 %VertexOutput = OpTypeStruct %v4float %int
          %50 = OpTypeFunction %VertexOutput
 %_ptr_Function_VertexOutput = OpTypePointer Function %VertexOutput
@@ -83,21 +83,21 @@
          %15 = OpLabel
         %res = OpVariable %_ptr_Function_mat3v4half Function
                OpStore %res %21
-         %24 = OpAccessChain %_ptr_Function_v4half %res %int_0
-         %27 = OpAccessChain %_ptr_Function_half %24 %int_0
-         %29 = OpLoad %half %27 None
-         %30 = OpFOrdEqual %bool %29 %half_0x0p_0
-         %33 = OpSelect %int %30 %int_1 %int_0
-               OpReturnValue %33
+         %24 = OpAccessChain %_ptr_Function_v4half %res %uint_0
+         %28 = OpAccessChain %_ptr_Function_half %24 %uint_0
+         %30 = OpLoad %half %28 None
+         %31 = OpFOrdEqual %bool %30 %half_0x0p_0
+         %34 = OpSelect %int %31 %int_1 %int_0
+               OpReturnValue %34
                OpFunctionEnd
-%fragment_main = OpFunction %void None %37
-         %38 = OpLabel
-         %39 = OpFunctionCall %int %transpose_5f36bf
-         %40 = OpAccessChain %_ptr_StorageBuffer_int %1 %uint_0
-               OpStore %40 %39 None
+%fragment_main = OpFunction %void None %39
+         %40 = OpLabel
+         %41 = OpFunctionCall %int %transpose_5f36bf
+         %42 = OpAccessChain %_ptr_StorageBuffer_int %1 %uint_0
+               OpStore %42 %41 None
                OpReturn
                OpFunctionEnd
-%compute_main = OpFunction %void None %37
+%compute_main = OpFunction %void None %39
          %45 = OpLabel
          %46 = OpFunctionCall %int %transpose_5f36bf
          %47 = OpAccessChain %_ptr_StorageBuffer_int %1 %uint_0
@@ -115,7 +115,7 @@
          %62 = OpLoad %VertexOutput %out None
                OpReturnValue %62
                OpFunctionEnd
-%vertex_main = OpFunction %void None %37
+%vertex_main = OpFunction %void None %39
          %64 = OpLabel
          %65 = OpFunctionCall %VertexOutput %vertex_main_inner
          %66 = OpCompositeExtract %v4float %65 0

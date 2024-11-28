@@ -18,15 +18,15 @@ struct tint_module_vars_struct {
 };
 
 float f1(tint_array<float, 4> a) {
-  return a[3];
+  return a[3u];
 }
 
 float f2(tint_array<tint_array<float, 4>, 3> a) {
-  return a[2][3];
+  return a[2u][3u];
 }
 
 float f3(tint_array<tint_array<tint_array<float, 4>, 3>, 2> a) {
-  return a[1][2][3];
+  return a[1u][2u][3u];
 }
 
 kernel void tint_symbol(device float* s [[buffer(0)]]) {

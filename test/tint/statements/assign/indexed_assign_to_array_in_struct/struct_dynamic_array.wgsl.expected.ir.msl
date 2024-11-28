@@ -28,10 +28,11 @@ struct OuterS {
 struct tint_module_vars_struct {
   const constant Uniforms* uniforms;
   device OuterS* s1;
+  const constant tint_array<uint4, 1>* tint_storage_buffer_sizes;
 };
 
-kernel void tint_symbol(const constant Uniforms* uniforms [[buffer(0)]], device OuterS* s1 [[buffer(1)]]) {
-  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.uniforms=uniforms, .s1=s1};
+kernel void tint_symbol(const constant Uniforms* uniforms [[buffer(0)]], device OuterS* s1 [[buffer(1)]], const constant tint_array<uint4, 1>* tint_storage_buffer_sizes [[buffer(30)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.uniforms=uniforms, .s1=s1, .tint_storage_buffer_sizes=tint_storage_buffer_sizes};
   InnerS v = {};
-  (*tint_module_vars.s1).a1[(*tint_module_vars.uniforms).i] = v;
+  (*tint_module_vars.s1).a1[min((*tint_module_vars.uniforms).i, ((((*tint_module_vars.tint_storage_buffer_sizes)[0u][0u] - 0u) / 4u) - 1u))] = v;
 }

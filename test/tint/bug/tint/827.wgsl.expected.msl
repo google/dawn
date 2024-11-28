@@ -14,16 +14,25 @@ struct tint_array {
     T elements[N];
 };
 
+struct TintArrayLengths {
+  /* 0x0000 */ tint_array<uint4, 1> array_lengths;
+};
+
+int2 tint_clamp(int2 e, int2 low, int2 high) {
+  return min(max(e, low), high);
+}
+
 struct Result {
   /* 0x0000 */ tint_array<float, 1> values;
 };
 
-void tint_symbol_inner(uint3 GlobalInvocationId, device Result* const tint_symbol_1, depth2d<float, access::sample> tint_symbol_2) {
-  (*(tint_symbol_1)).values[((GlobalInvocationId[1] * 128u) + GlobalInvocationId[0])] = tint_symbol_2.read(uint2(int2(int(GlobalInvocationId[0]), int(GlobalInvocationId[1]))), 0);
+void tint_symbol_inner(uint3 GlobalInvocationId, depth2d<float, access::sample> tint_symbol_1, device Result* const tint_symbol_2, const constant TintArrayLengths* const tint_symbol_3) {
+  uint const level_idx = min(0u, (tint_symbol_1.get_num_mip_levels() - 1u));
+  (*(tint_symbol_2)).values[min(((GlobalInvocationId[1] * 128u) + GlobalInvocationId[0]), ((((*(tint_symbol_3)).array_lengths[0u][0u] - 0u) / 4u) - 1u))] = tint_symbol_1.read(uint2(tint_clamp(int2(int(GlobalInvocationId[0]), int(GlobalInvocationId[1])), int2(0), int2((uint2(tint_symbol_1.get_width(level_idx), tint_symbol_1.get_height(level_idx)) - uint2(1u))))), level_idx);
 }
 
-kernel void tint_symbol(device Result* tint_symbol_3 [[buffer(0)]], depth2d<float, access::sample> tint_symbol_4 [[texture(0)]], uint3 GlobalInvocationId [[thread_position_in_grid]]) {
-  tint_symbol_inner(GlobalInvocationId, tint_symbol_3, tint_symbol_4);
+kernel void tint_symbol(depth2d<float, access::sample> tint_symbol_4 [[texture(0)]], device Result* tint_symbol_5 [[buffer(0)]], const constant TintArrayLengths* tint_symbol_6 [[buffer(30)]], uint3 GlobalInvocationId [[thread_position_in_grid]]) {
+  tint_symbol_inner(GlobalInvocationId, tint_symbol_4, tint_symbol_5, tint_symbol_6);
   return;
 }
 

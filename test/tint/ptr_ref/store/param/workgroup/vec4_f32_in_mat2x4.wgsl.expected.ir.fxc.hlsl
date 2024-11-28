@@ -13,7 +13,7 @@ void main_inner(uint tint_local_index) {
     S = float2x4((0.0f).xxxx, (0.0f).xxxx);
   }
   GroupMemoryBarrierWithGroupSync();
-  uint v[1] = {uint(int(1))};
+  uint v[1] = {1u};
   func(v);
 }
 

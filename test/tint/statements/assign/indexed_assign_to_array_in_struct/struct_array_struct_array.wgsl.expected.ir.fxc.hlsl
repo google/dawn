@@ -22,7 +22,7 @@ void main() {
   uint v_2 = uniforms[0u].y;
   S1 tint_array_copy[8] = s.a1;
   InnerS v_3 = v;
-  tint_array_copy[v_1].a2[v_2] = v_3;
+  tint_array_copy[min(v_1, 7u)].a2[min(v_2, 7u)] = v_3;
   S1 v_4[8] = tint_array_copy;
   s.a1 = v_4;
 }

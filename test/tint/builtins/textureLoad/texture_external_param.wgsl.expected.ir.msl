@@ -104,7 +104,7 @@ float4 tint_TextureLoadExternal(texture2d<float, access::sample> plane_0, textur
 }
 
 float4 textureLoad2d(texture2d<float, access::sample> tint_symbol_plane0, texture2d<float, access::sample> tint_symbol_plane1, tint_ExternalTextureParams tint_symbol_params, int2 coords) {
-  return tint_TextureLoadExternal(tint_symbol_plane0, tint_symbol_plane1, tint_symbol_params, uint2(coords));
+  return tint_TextureLoadExternal(tint_symbol_plane0, tint_symbol_plane1, tint_symbol_params, min(uint2(coords), ((tint_symbol_params.apparentSize + uint2(1u)) - uint2(1u))));
 }
 
 tint_ExternalTextureParams tint_load_struct_packed_vec3(const constant tint_ExternalTextureParams_packed_vec3* const from) {

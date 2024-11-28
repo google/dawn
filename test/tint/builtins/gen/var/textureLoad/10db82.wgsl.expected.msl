@@ -4,7 +4,7 @@ using namespace metal;
 float4 textureLoad_10db82(texture2d_array<float, access::read> tint_symbol_1) {
   uint2 arg_1 = uint2(1u);
   uint arg_2 = 1u;
-  float4 res = tint_symbol_1.read(uint2(arg_1), arg_2);
+  float4 res = tint_symbol_1.read(uint2(min(arg_1, (uint2(tint_symbol_1.get_width(), tint_symbol_1.get_height()) - uint2(1u)))), min(arg_2, (tint_symbol_1.get_array_size() - 1u)));
   return res;
 }
 

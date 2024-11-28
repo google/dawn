@@ -30,6 +30,7 @@ struct tint_module_vars_struct {
   texture2d<float, access::sample> dst;
   device OutputBuf* output;
   const constant Uniforms* uniforms;
+  const constant tint_array<uint4, 1>* tint_storage_buffer_sizes;
 };
 
 bool aboutEqual(float value, float expect) {
@@ -63,7 +64,10 @@ void tint_symbol_inner(uint3 GlobalInvocationID, tint_module_vars_struct tint_mo
   if (v_2) {
     bool v_3 = false;
     if (success) {
-      v_3 = all((tint_module_vars.dst.read(uint2(int2(dstTexCoord)), 0) == nonCoveredColor));
+      int2 const v_4 = int2(dstTexCoord);
+      uint const v_5 = min(uint(0), (tint_module_vars.dst.get_num_mip_levels() - 1u));
+      uint2 const v_6 = (uint2(tint_module_vars.dst.get_width(v_5), tint_module_vars.dst.get_height(v_5)) - uint2(1u));
+      v_3 = all((tint_module_vars.dst.read(min(uint2(v_4), v_6), v_5) == nonCoveredColor));
     } else {
       v_3 = false;
     }
@@ -73,59 +77,65 @@ void tint_symbol_inner(uint3 GlobalInvocationID, tint_module_vars_struct tint_mo
     if (((*tint_module_vars.uniforms).dstTextureFlipY == 1u)) {
       srcTexCoord[1u] = ((srcSize[1u] - srcTexCoord[1u]) - 1u);
     }
-    float4 const srcColor = tint_module_vars.src.read(uint2(int2(srcTexCoord)), 0);
-    float4 const dstColor = tint_module_vars.dst.read(uint2(int2(dstTexCoord)), 0);
+    int2 const v_7 = int2(srcTexCoord);
+    uint const v_8 = min(uint(0), (tint_module_vars.src.get_num_mip_levels() - 1u));
+    uint2 const v_9 = (uint2(tint_module_vars.src.get_width(v_8), tint_module_vars.src.get_height(v_8)) - uint2(1u));
+    float4 const srcColor = tint_module_vars.src.read(min(uint2(v_7), v_9), v_8);
+    int2 const v_10 = int2(dstTexCoord);
+    uint const v_11 = min(uint(0), (tint_module_vars.dst.get_num_mip_levels() - 1u));
+    uint2 const v_12 = (uint2(tint_module_vars.dst.get_width(v_11), tint_module_vars.dst.get_height(v_11)) - uint2(1u));
+    float4 const dstColor = tint_module_vars.dst.read(min(uint2(v_10), v_12), v_11);
     if (((*tint_module_vars.uniforms).channelCount == 2u)) {
-      bool v_4 = false;
+      bool v_13 = false;
       if (success) {
-        v_4 = aboutEqual(dstColor[0u], srcColor[0u]);
+        v_13 = aboutEqual(dstColor[0u], srcColor[0u]);
       } else {
-        v_4 = false;
+        v_13 = false;
       }
-      bool v_5 = false;
-      if (v_4) {
-        v_5 = aboutEqual(dstColor[1u], srcColor[1u]);
+      bool v_14 = false;
+      if (v_13) {
+        v_14 = aboutEqual(dstColor[1u], srcColor[1u]);
       } else {
-        v_5 = false;
+        v_14 = false;
       }
-      success = v_5;
+      success = v_14;
     } else {
-      bool v_6 = false;
+      bool v_15 = false;
       if (success) {
-        v_6 = aboutEqual(dstColor[0u], srcColor[0u]);
+        v_15 = aboutEqual(dstColor[0u], srcColor[0u]);
       } else {
-        v_6 = false;
+        v_15 = false;
       }
-      bool v_7 = false;
-      if (v_6) {
-        v_7 = aboutEqual(dstColor[1u], srcColor[1u]);
+      bool v_16 = false;
+      if (v_15) {
+        v_16 = aboutEqual(dstColor[1u], srcColor[1u]);
       } else {
-        v_7 = false;
+        v_16 = false;
       }
-      bool v_8 = false;
-      if (v_7) {
-        v_8 = aboutEqual(dstColor[2u], srcColor[2u]);
+      bool v_17 = false;
+      if (v_16) {
+        v_17 = aboutEqual(dstColor[2u], srcColor[2u]);
       } else {
-        v_8 = false;
+        v_17 = false;
       }
-      bool v_9 = false;
-      if (v_8) {
-        v_9 = aboutEqual(dstColor[3u], srcColor[3u]);
+      bool v_18 = false;
+      if (v_17) {
+        v_18 = aboutEqual(dstColor[3u], srcColor[3u]);
       } else {
-        v_9 = false;
+        v_18 = false;
       }
-      success = v_9;
+      success = v_18;
     }
   }
   uint const outputIndex = ((GlobalInvocationID[1u] * dstSize[0u]) + GlobalInvocationID[0u]);
   if (success) {
-    (*tint_module_vars.output).result[outputIndex] = 1u;
+    (*tint_module_vars.output).result[min(outputIndex, ((((*tint_module_vars.tint_storage_buffer_sizes)[0u][1u] - 0u) / 4u) - 1u))] = 1u;
   } else {
-    (*tint_module_vars.output).result[outputIndex] = 0u;
+    (*tint_module_vars.output).result[min(outputIndex, ((((*tint_module_vars.tint_storage_buffer_sizes)[0u][1u] - 0u) / 4u) - 1u))] = 0u;
   }
 }
 
-kernel void tint_symbol(uint3 GlobalInvocationID [[thread_position_in_grid]], texture2d<float, access::sample> src [[texture(0)]], texture2d<float, access::sample> dst [[texture(1)]], device OutputBuf* output [[buffer(1)]], const constant Uniforms* uniforms [[buffer(0)]]) {
-  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.src=src, .dst=dst, .output=output, .uniforms=uniforms};
+kernel void tint_symbol(uint3 GlobalInvocationID [[thread_position_in_grid]], texture2d<float, access::sample> src [[texture(0)]], texture2d<float, access::sample> dst [[texture(1)]], device OutputBuf* output [[buffer(1)]], const constant Uniforms* uniforms [[buffer(0)]], const constant tint_array<uint4, 1>* tint_storage_buffer_sizes [[buffer(30)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.src=src, .dst=dst, .output=output, .uniforms=uniforms, .tint_storage_buffer_sizes=tint_storage_buffer_sizes};
   tint_symbol_inner(GlobalInvocationID, tint_module_vars);
 }

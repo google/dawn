@@ -114,14 +114,14 @@ kernel void tint_symbol(const device S_packed_vec3* sb [[buffer(1)]], device int
   int const v_15 = as_type<int>((as_type<uint>(v_14) + as_type<uint>(int(vec3_u32[1u]))));
   int const v_16 = as_type<int>((as_type<uint>(as_type<int>((as_type<uint>(v_15) + as_type<uint>(tint_f32_to_i32(vec4_f32[2u]))))) + as_type<uint>(vec4_i32[2u])));
   int const v_17 = as_type<int>((as_type<uint>(v_16) + as_type<uint>(int(vec4_u32[2u]))));
-  int const v_18 = as_type<int>((as_type<uint>(v_17) + as_type<uint>(tint_f32_to_i32(mat2x2_f32[0][0u]))));
-  int const v_19 = as_type<int>((as_type<uint>(v_18) + as_type<uint>(tint_f32_to_i32(mat2x3_f32[0][0u]))));
-  int const v_20 = as_type<int>((as_type<uint>(v_19) + as_type<uint>(tint_f32_to_i32(mat2x4_f32[0][0u]))));
-  int const v_21 = as_type<int>((as_type<uint>(v_20) + as_type<uint>(tint_f32_to_i32(mat3x2_f32[0][0u]))));
-  int const v_22 = as_type<int>((as_type<uint>(v_21) + as_type<uint>(tint_f32_to_i32(mat3x3_f32[0][0u]))));
-  int const v_23 = as_type<int>((as_type<uint>(v_22) + as_type<uint>(tint_f32_to_i32(mat3x4_f32[0][0u]))));
-  int const v_24 = as_type<int>((as_type<uint>(v_23) + as_type<uint>(tint_f32_to_i32(mat4x2_f32[0][0u]))));
-  int const v_25 = as_type<int>((as_type<uint>(v_24) + as_type<uint>(tint_f32_to_i32(mat4x3_f32[0][0u]))));
-  int const v_26 = as_type<int>((as_type<uint>(v_25) + as_type<uint>(tint_f32_to_i32(mat4x4_f32[0][0u]))));
-  (*tint_module_vars.s) = as_type<int>((as_type<uint>(as_type<int>((as_type<uint>(as_type<int>((as_type<uint>(v_26) + as_type<uint>(tint_f32_to_i32(arr2_vec3_f32[0][0u]))))) + as_type<uint>(struct_inner.scalar_i32)))) + as_type<uint>(array_struct_inner[0].scalar_i32)));
+  int const v_18 = as_type<int>((as_type<uint>(v_17) + as_type<uint>(tint_f32_to_i32(mat2x2_f32[0u][0u]))));
+  int const v_19 = as_type<int>((as_type<uint>(v_18) + as_type<uint>(tint_f32_to_i32(mat2x3_f32[0u][0u]))));
+  int const v_20 = as_type<int>((as_type<uint>(v_19) + as_type<uint>(tint_f32_to_i32(mat2x4_f32[0u][0u]))));
+  int const v_21 = as_type<int>((as_type<uint>(v_20) + as_type<uint>(tint_f32_to_i32(mat3x2_f32[0u][0u]))));
+  int const v_22 = as_type<int>((as_type<uint>(v_21) + as_type<uint>(tint_f32_to_i32(mat3x3_f32[0u][0u]))));
+  int const v_23 = as_type<int>((as_type<uint>(v_22) + as_type<uint>(tint_f32_to_i32(mat3x4_f32[0u][0u]))));
+  int const v_24 = as_type<int>((as_type<uint>(v_23) + as_type<uint>(tint_f32_to_i32(mat4x2_f32[0u][0u]))));
+  int const v_25 = as_type<int>((as_type<uint>(v_24) + as_type<uint>(tint_f32_to_i32(mat4x3_f32[0u][0u]))));
+  int const v_26 = as_type<int>((as_type<uint>(v_25) + as_type<uint>(tint_f32_to_i32(mat4x4_f32[0u][0u]))));
+  (*tint_module_vars.s) = as_type<int>((as_type<uint>(as_type<int>((as_type<uint>(as_type<int>((as_type<uint>(v_26) + as_type<uint>(tint_f32_to_i32(arr2_vec3_f32[0u][0u]))))) + as_type<uint>(struct_inner.scalar_i32)))) + as_type<uint>(array_struct_inner[0u].scalar_i32)));
 }

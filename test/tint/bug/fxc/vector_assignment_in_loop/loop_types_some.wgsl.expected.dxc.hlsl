@@ -62,20 +62,20 @@ void main() {
   bool4 v4b = bool4(false, false, false, false);
   {
     for(int i = 0; (i < 2); i = (i + 1)) {
-      set_vector_element(v2f, i, 1.0f);
-      set_vector_element_1(v2i, i, 1);
-      set_vector_element_2(v2u, i, 1u);
-      set_vector_element_3(v2b, i, true);
+      set_vector_element(v2f, min(uint(i), 1u), 1.0f);
+      set_vector_element_1(v2i, min(uint(i), 1u), 1);
+      set_vector_element_2(v2u, min(uint(i), 1u), 1u);
+      set_vector_element_3(v2b, min(uint(i), 1u), true);
     }
   }
   int i = 0;
-  set_vector_element_4(v3f, i, 1.0f);
-  set_vector_element_5(v4f, i, 1.0f);
-  set_vector_element_6(v3i, i, 1);
-  set_vector_element_7(v4i, i, 1);
-  set_vector_element_8(v3u, i, 1u);
-  set_vector_element_9(v4u, i, 1u);
-  set_vector_element_10(v3b, i, true);
-  set_vector_element_11(v4b, i, true);
+  set_vector_element_4(v3f, min(uint(i), 2u), 1.0f);
+  set_vector_element_5(v4f, min(uint(i), 3u), 1.0f);
+  set_vector_element_6(v3i, min(uint(i), 2u), 1);
+  set_vector_element_7(v4i, min(uint(i), 3u), 1);
+  set_vector_element_8(v3u, min(uint(i), 2u), 1u);
+  set_vector_element_9(v4u, min(uint(i), 3u), 1u);
+  set_vector_element_10(v3b, min(uint(i), 2u), true);
+  set_vector_element_11(v4b, min(uint(i), 3u), true);
   return;
 }

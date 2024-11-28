@@ -49,8 +49,8 @@ tint_array<half4x3, 4> tint_load_array_packed_vec3(const constant tint_array<tin
 kernel void f(const constant tint_array<tint_array<tint_packed_vec3_f16_array_element, 4>, 4>* a [[buffer(0)]], device half* s [[buffer(1)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.a=a, .s=s};
   const constant tint_array<tint_array<tint_packed_vec3_f16_array_element, 4>, 4>* const p_a = tint_module_vars.a;
-  const constant tint_array<tint_packed_vec3_f16_array_element, 4>* const p_a_2 = (&(*p_a)[2]);
-  const constant packed_half3* const p_a_2_1 = (&(*p_a_2)[1].packed);
+  const constant tint_array<tint_packed_vec3_f16_array_element, 4>* const p_a_2 = (&(*p_a)[2u]);
+  const constant packed_half3* const p_a_2_1 = (&(*p_a_2)[1u].packed);
   tint_array<half4x3, 4> const l_a = tint_load_array_packed_vec3(p_a);
   tint_array<tint_packed_vec3_f16_array_element, 4> const v_19 = (*p_a_2);
   half3 const v_20 = half3(v_19[0u].packed);
@@ -58,5 +58,5 @@ kernel void f(const constant tint_array<tint_array<tint_packed_vec3_f16_array_el
   half3 const v_22 = half3(v_19[2u].packed);
   half4x3 const l_a_i = half4x3(v_20, v_21, v_22, half3(v_19[3u].packed));
   half3 const l_a_i_i = half3((*p_a_2_1));
-  (*tint_module_vars.s) = ((((*p_a_2_1)[0u] + l_a[0][0][0u]) + l_a_i[0][0u]) + l_a_i_i[0u]);
+  (*tint_module_vars.s) = ((((*p_a_2_1)[0u] + l_a[0u][0u][0u]) + l_a_i[0u][0u]) + l_a_i_i[0u]);
 }

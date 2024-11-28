@@ -16,6 +16,6 @@ struct OuterS {
 kernel void tint_symbol(const constant Uniforms* uniforms [[buffer(0)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.uniforms=uniforms};
   OuterS s1 = {};
-  s1.m1[(*tint_module_vars.uniforms).i] = float4(1.0f);
-  s1.m1[(*tint_module_vars.uniforms).i][(*tint_module_vars.uniforms).i] = 1.0f;
+  s1.m1[min((*tint_module_vars.uniforms).i, 1u)] = float4(1.0f);
+  s1.m1[min((*tint_module_vars.uniforms).i, 1u)][min((*tint_module_vars.uniforms).i, 3u)] = 1.0f;
 }

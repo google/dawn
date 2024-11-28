@@ -16,5 +16,5 @@ void main() {
   signed_constant = signed_literal;
   unsigned_constant = signed_literal;
   shr_const_expr = signed_literal;
-  v.inner = ((((signed_literal[0] + unsigned_literal[0]) + signed_constant[0]) + unsigned_constant[0]) + shr_const_expr[0]);
+  v.inner = ((((signed_literal[0u] + unsigned_literal[0u]) + signed_constant[0u]) + unsigned_constant[0u]) + shr_const_expr[0u]);
 }

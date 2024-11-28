@@ -26,9 +26,9 @@ void main() {
   {
     S1 tint_symbol_1[8] = s.a1;
     uint tint_symbol_4 = getNextIndex();
-    uint tint_symbol_2_save = tint_symbol_4;
+    uint tint_symbol_2_save = min(tint_symbol_4, 7u);
     InnerS tint_symbol_3[8] = tint_symbol_1[tint_symbol_2_save].a2;
-    tint_symbol_3[uniforms[0].y] = v;
+    tint_symbol_3[min(uniforms[0].y, 7u)] = v;
     tint_symbol_1[tint_symbol_2_save].a2 = tint_symbol_3;
     s.a1 = tint_symbol_1;
   }

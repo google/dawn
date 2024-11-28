@@ -35,7 +35,7 @@ uint f0(device tint_array<uint, 1>* const p, uint p_length_2) {
 }
 
 kernel void tint_symbol(device tint_symbol_2* tint_symbol_1 [[buffer(0)]], const constant TintArrayLengths* tint_symbol_3 [[buffer(30)]]) {
-  (*(tint_symbol_1)).arr[0] = f0(&((*(tint_symbol_1)).arr), ((*(tint_symbol_3)).array_lengths[0u][0u] / 4u));
+  (*(tint_symbol_1)).arr[min(0u, (((*(tint_symbol_3)).array_lengths[0u][0u] / 4u) - 1u))] = f0(&((*(tint_symbol_1)).arr), ((*(tint_symbol_3)).array_lengths[0u][0u] / 4u));
   return;
 }
 

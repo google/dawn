@@ -1,7 +1,7 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 1
-; Bound: 103
+; Bound: 99
 ; Schema: 0
                OpCapability Shader
                OpCapability Float16
@@ -70,16 +70,12 @@
          %50 = OpConstantNull %_arr_mat2v3half_uint_4
 %_ptr_Function_mat2v3half = OpTypePointer Function %mat2v3half
 %_ptr_Function_mat2x3_f16_std140 = OpTypePointer Function %mat2x3_f16_std140
-        %int = OpTypeInt 32 1
-      %int_1 = OpConstant %int 1
 %_ptr_Uniform_v3half = OpTypePointer Uniform %v3half
-      %int_2 = OpConstant %int 2
 %_ptr_Workgroup_v3half = OpTypePointer Workgroup %v3half
-      %int_0 = OpConstant %int 0
 %_ptr_Uniform_half = OpTypePointer Uniform %half
 %_ptr_Workgroup_half = OpTypePointer Workgroup %half
 %_ptr_StorageBuffer_half = OpTypePointer StorageBuffer %half
-         %99 = OpTypeFunction %void
+         %95 = OpTypeFunction %void
     %f_inner = OpFunction %void None %22
 %tint_local_index = OpFunctionParameter %uint
          %23 = OpLabel
@@ -138,34 +134,34 @@
          %55 = OpLabel
          %69 = OpLoad %_arr_mat2v3half_uint_4 %48 None
                OpStore %w %69 None
-         %70 = OpAccessChain %_ptr_Workgroup_mat2v3half %w %int_1
-         %73 = OpAccessChain %_ptr_Uniform_v3half %1 %uint_0 %int_2 %uint_0
-         %76 = OpLoad %v3half %73 None
-         %77 = OpAccessChain %_ptr_Uniform_v3half %1 %uint_0 %int_2 %uint_1
-         %78 = OpLoad %v3half %77 None
-         %79 = OpCompositeConstruct %mat2v3half %76 %78
-               OpStore %70 %79 None
-         %80 = OpAccessChain %_ptr_Workgroup_v3half %w %int_1 %int_0
-         %83 = OpAccessChain %_ptr_Uniform_v3half %1 %uint_0 %int_0 %uint_1
-         %84 = OpLoad %v3half %83 None
-         %85 = OpVectorShuffle %v3half %84 %84 2 0 1
-               OpStore %80 %85 None
-         %86 = OpAccessChain %_ptr_Workgroup_v3half %w %int_1 %int_0
-         %87 = OpAccessChain %_ptr_Uniform_v3half %1 %uint_0 %int_0 %uint_1
-         %88 = OpAccessChain %_ptr_Uniform_half %87 %uint_0
-         %90 = OpLoad %half %88 None
-         %91 = OpAccessChain %_ptr_Workgroup_half %86 %uint_0
-               OpStore %91 %90 None
-         %93 = OpAccessChain %_ptr_Workgroup_v3half %w %int_1 %int_0
-         %94 = OpAccessChain %_ptr_Workgroup_half %93 %uint_0
-         %95 = OpLoad %half %94 None
-         %96 = OpAccessChain %_ptr_StorageBuffer_half %10 %uint_0
-               OpStore %96 %95 None
+         %70 = OpAccessChain %_ptr_Workgroup_mat2v3half %w %uint_1
+         %71 = OpAccessChain %_ptr_Uniform_v3half %1 %uint_0 %uint_2 %uint_0
+         %73 = OpLoad %v3half %71 None
+         %74 = OpAccessChain %_ptr_Uniform_v3half %1 %uint_0 %uint_2 %uint_1
+         %75 = OpLoad %v3half %74 None
+         %76 = OpCompositeConstruct %mat2v3half %73 %75
+               OpStore %70 %76 None
+         %77 = OpAccessChain %_ptr_Workgroup_v3half %w %uint_1 %uint_0
+         %79 = OpAccessChain %_ptr_Uniform_v3half %1 %uint_0 %uint_0 %uint_1
+         %80 = OpLoad %v3half %79 None
+         %81 = OpVectorShuffle %v3half %80 %80 2 0 1
+               OpStore %77 %81 None
+         %82 = OpAccessChain %_ptr_Workgroup_v3half %w %uint_1 %uint_0
+         %83 = OpAccessChain %_ptr_Uniform_v3half %1 %uint_0 %uint_0 %uint_1
+         %84 = OpAccessChain %_ptr_Uniform_half %83 %uint_0
+         %86 = OpLoad %half %84 None
+         %87 = OpAccessChain %_ptr_Workgroup_half %82 %uint_0
+               OpStore %87 %86 None
+         %89 = OpAccessChain %_ptr_Workgroup_v3half %w %uint_1 %uint_0
+         %90 = OpAccessChain %_ptr_Workgroup_half %89 %uint_0
+         %91 = OpLoad %half %90 None
+         %92 = OpAccessChain %_ptr_StorageBuffer_half %10 %uint_0
+               OpStore %92 %91 None
                OpReturn
                OpFunctionEnd
-          %f = OpFunction %void None %99
-        %100 = OpLabel
-        %101 = OpLoad %uint %f_local_invocation_index_Input None
-        %102 = OpFunctionCall %void %f_inner %101
+          %f = OpFunction %void None %95
+         %96 = OpLabel
+         %97 = OpLoad %uint %f_local_invocation_index_Input None
+         %98 = OpFunctionCall %void %f_inner %97
                OpReturn
                OpFunctionEnd

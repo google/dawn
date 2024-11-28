@@ -30,11 +30,11 @@ int foo() {
   thread S* const dst_struct_ptr = (&dst_struct);
   thread tint_array<tint_array<int, 4>, 2>* const dst_array_ptr = (&dst_array);
   dst_struct.arr = src;
-  dst_array[1] = src;
+  dst_array[1u] = src;
   (*dst_ptr) = src;
   (*dst_struct_ptr).arr = src;
-  (*dst_array_ptr)[0] = src;
-  return as_type<int>((as_type<uint>(as_type<int>((as_type<uint>((*dst_ptr)[0]) + as_type<uint>((*dst_struct_ptr).arr[0])))) + as_type<uint>((*dst_array_ptr)[0][0])));
+  (*dst_array_ptr)[0u] = src;
+  return as_type<int>((as_type<uint>(as_type<int>((as_type<uint>((*dst_ptr)[0u]) + as_type<uint>((*dst_struct_ptr).arr[0u])))) + as_type<uint>((*dst_array_ptr)[0u][0u])));
 }
 
 kernel void tint_symbol(device int* s [[buffer(0)]]) {

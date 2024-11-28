@@ -37,7 +37,11 @@ void tint_symbol_inner(uvec3 global_id) {
       }
       uint a = (i + (resultCell[0u] * dimInner));
       uint b = (resultCell[1u] + (i * dimOutter));
-      result = (result + (firstMatrix.numbers[a] * secondMatrix.numbers[b]));
+      uint v_1 = result;
+      uint v_2 = min(a, (uint(firstMatrix.numbers.length()) - 1u));
+      uint v_3 = firstMatrix.numbers[v_2];
+      uint v_4 = min(b, (uint(secondMatrix.numbers.length()) - 1u));
+      result = (v_1 + (v_3 * secondMatrix.numbers[v_4]));
       {
         i = (i + 1u);
       }
@@ -45,7 +49,8 @@ void tint_symbol_inner(uvec3 global_id) {
     }
   }
   uint index = (resultCell[1u] + (resultCell[0u] * dimOutter));
-  resultMatrix.numbers[index] = result;
+  uint v_5 = min(index, (uint(resultMatrix.numbers.length()) - 1u));
+  resultMatrix.numbers[v_5] = result;
 }
 layout(local_size_x = 2, local_size_y = 2, local_size_z = 1) in;
 void main() {

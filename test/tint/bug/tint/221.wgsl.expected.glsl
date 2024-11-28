@@ -21,7 +21,7 @@ void main() {
       if ((i >= v.inner.count)) {
         break;
       }
-      uint v_1 = i;
+      uint v_1 = min(i, 49u);
       if ((tint_mod_u32(i, 2u) == 0u)) {
         {
           v.inner.data[v_1] = (v.inner.data[v_1] * 2u);

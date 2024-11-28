@@ -10,8 +10,8 @@ float2x3 v(uint start_byte_offset) {
 [numthreads(1, 1, 1)]
 void f() {
   p = v(0u);
-  p[int(1)] = asfloat(u[0u].xyz);
-  p[int(1)] = asfloat(u[0u].xyz).zxy;
-  p[int(0)].y = asfloat(u[1u].x);
+  p[1u] = asfloat(u[0u].xyz);
+  p[1u] = asfloat(u[0u].xyz).zxy;
+  p[0u].y = asfloat(u[1u].x);
 }
 

@@ -5,5 +5,5 @@ void unused_entry_point() {
 
 void v() {
   int i = 1;
-  int b = (1).xx[i];
+  int b = (1).xx[min(uint(i), 1u)];
 }

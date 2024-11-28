@@ -18,7 +18,7 @@ str func(uint pointer_indices[1]) {
 
 [numthreads(1, 1, 1)]
 void main() {
-  uint v_3[1] = {uint(int(2))};
+  uint v_3[1] = {2u};
   str r = func(v_3);
 }
 

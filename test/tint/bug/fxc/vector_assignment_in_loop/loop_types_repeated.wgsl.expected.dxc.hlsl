@@ -26,14 +26,14 @@ void main() {
   bool2 v2b_2 = bool2(false, false);
   {
     for(int i = 0; (i < 2); i = (i + 1)) {
-      set_vector_element(v2f, i, 1.0f);
-      set_vector_element_1(v3i, i, 1);
-      set_vector_element_2(v4u, i, 1u);
-      set_vector_element_3(v2b, i, true);
-      set_vector_element(v2f_2, i, 1.0f);
-      set_vector_element_1(v3i_2, i, 1);
-      set_vector_element_2(v4u_2, i, 1u);
-      set_vector_element_3(v2b_2, i, true);
+      set_vector_element(v2f, min(uint(i), 1u), 1.0f);
+      set_vector_element_1(v3i, min(uint(i), 2u), 1);
+      set_vector_element_2(v4u, min(uint(i), 3u), 1u);
+      set_vector_element_3(v2b, min(uint(i), 1u), true);
+      set_vector_element(v2f_2, min(uint(i), 1u), 1.0f);
+      set_vector_element_1(v3i_2, min(uint(i), 2u), 1);
+      set_vector_element_2(v4u_2, min(uint(i), 3u), 1u);
+      set_vector_element_3(v2b_2, min(uint(i), 1u), true);
     }
   }
   return;

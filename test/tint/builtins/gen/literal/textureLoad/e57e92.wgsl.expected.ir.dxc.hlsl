@@ -12,8 +12,13 @@ struct vertex_main_outputs {
 RWByteAddressBuffer prevent_dce : register(u0);
 Texture2DArray<float4> arg_0 : register(t0, space1);
 float4 textureLoad_e57e92() {
-  int2 v = int2((1u).xx);
-  float4 res = float4(arg_0.Load(int4(v, int(int(1)), int(0))));
+  uint3 v = (0u).xxx;
+  arg_0.GetDimensions(v.x, v.y, v.z);
+  uint v_1 = min(uint(int(1)), (v.z - 1u));
+  uint3 v_2 = (0u).xxx;
+  arg_0.GetDimensions(v_2.x, v_2.y, v_2.z);
+  int2 v_3 = int2(min((1u).xx, (v_2.xy - (1u).xx)));
+  float4 res = float4(arg_0.Load(int4(v_3, int(v_1), int(0))));
   return res;
 }
 
@@ -30,13 +35,13 @@ VertexOutput vertex_main_inner() {
   VertexOutput tint_symbol = (VertexOutput)0;
   tint_symbol.pos = (0.0f).xxxx;
   tint_symbol.prevent_dce = textureLoad_e57e92();
-  VertexOutput v_1 = tint_symbol;
-  return v_1;
+  VertexOutput v_4 = tint_symbol;
+  return v_4;
 }
 
 vertex_main_outputs vertex_main() {
-  VertexOutput v_2 = vertex_main_inner();
-  vertex_main_outputs v_3 = {v_2.prevent_dce, v_2.pos};
-  return v_3;
+  VertexOutput v_5 = vertex_main_inner();
+  vertex_main_outputs v_6 = {v_5.prevent_dce, v_5.pos};
+  return v_6;
 }
 

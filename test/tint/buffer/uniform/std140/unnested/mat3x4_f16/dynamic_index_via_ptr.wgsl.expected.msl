@@ -14,7 +14,7 @@ kernel void f(const constant half3x4* tint_symbol_1 [[buffer(0)]]) {
   thread tint_private_vars_struct tint_private_vars = {};
   tint_private_vars.counter = 0;
   int const tint_symbol = i(&(tint_private_vars));
-  int const p_m_i_save = tint_symbol;
+  uint const p_m_i_save = min(uint(tint_symbol), 2u);
   half3x4 const l_m = *(tint_symbol_1);
   half4 const l_m_i = (*(tint_symbol_1))[p_m_i_save];
   return;

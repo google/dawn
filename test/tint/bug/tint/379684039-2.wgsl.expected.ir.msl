@@ -25,13 +25,18 @@ struct FSUniforms {
 struct tint_module_vars_struct {
   thread uint* idx;
   const device FSUniforms* _storage;
+  const constant tint_array<uint4, 1>* tint_storage_buffer_sizes;
 };
+
+#define TINT_ISOLATE_UB(VOLATILE_NAME) \
+  {volatile bool VOLATILE_NAME = false; if (VOLATILE_NAME) break;}
 
 void tint_symbol(tint_module_vars_struct tint_module_vars) {
   int2 tint_symbol_1 = int2(0);
   {
     while(true) {
-      if ((tint_symbol_1[1u] >= (*tint_module_vars._storage).fsUniformData[(*tint_module_vars.idx)].size[1u])) {
+      TINT_ISOLATE_UB(tint_volatile_false)
+      if ((tint_symbol_1[1u] >= (*tint_module_vars._storage).fsUniformData[min((*tint_module_vars.idx), ((((*tint_module_vars.tint_storage_buffer_sizes)[0u][0u] - 0u) / 128u) - 1u))].size[1u])) {
         break;
       }
       {

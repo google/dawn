@@ -32,7 +32,7 @@ struct Result {
 
 kernel void f(const constant UBO* tint_symbol [[buffer(0)]], device Result* tint_symbol_1 [[buffer(1)]]) {
   thread tint_private_vars_struct tint_private_vars = {};
-  tint_private_vars.s.data[(*(tint_symbol)).dynamic_idx] = 1;
+  tint_private_vars.s.data[min(uint((*(tint_symbol)).dynamic_idx), 63u)] = 1;
   (*(tint_symbol_1)).out = tint_private_vars.s.data[3];
   return;
 }

@@ -3,6 +3,7 @@
 using namespace metal;
 uint textureDimensions_b46d97(texture1d<int, access::sample> tint_symbol_1) {
   int arg_1 = 1;
+  uint const level_idx = min(uint(arg_1), (tint_symbol_1.get_num_mip_levels() - 1u));
   uint res = tint_symbol_1.get_width(0);
   return res;
 }

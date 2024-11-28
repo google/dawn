@@ -14,6 +14,9 @@ struct tint_array {
     T elements[N];
 };
 
+#define TINT_ISOLATE_UB(VOLATILE_NAME) \
+  {volatile bool VOLATILE_NAME = false; if (VOLATILE_NAME) break;}
+
 struct tint_symbol_1 {
   float2 a_particlePos [[attribute(0)]];
   float2 a_particleVel [[attribute(1)]];
@@ -76,8 +79,8 @@ void comp_main_inner(uint3 gl_GlobalInvocationID, device Particles* const tint_s
   if ((index >= 5u)) {
     return;
   }
-  float2 vPos = (*(tint_symbol_4)).particles[index].pos;
-  float2 vVel = (*(tint_symbol_4)).particles[index].vel;
+  float2 vPos = (*(tint_symbol_4)).particles[min(index, 4u)].pos;
+  float2 vVel = (*(tint_symbol_4)).particles[min(index, 4u)].vel;
   float2 cMass = float2(0.0f);
   float2 cVel = float2(0.0f);
   float2 colVel = float2(0.0f);
@@ -86,11 +89,12 @@ void comp_main_inner(uint3 gl_GlobalInvocationID, device Particles* const tint_s
   float2 pos = 0.0f;
   float2 vel = 0.0f;
   for(uint i = 0u; (i < 5u); i = (i + 1u)) {
+    TINT_ISOLATE_UB(tint_volatile_false);
     if ((i == index)) {
       continue;
     }
-    pos = (*(tint_symbol_4)).particles[i].pos.xy;
-    vel = (*(tint_symbol_4)).particles[i].vel.xy;
+    pos = (*(tint_symbol_4)).particles[min(i, 4u)].pos.xy;
+    vel = (*(tint_symbol_4)).particles[min(i, 4u)].vel.xy;
     if ((distance(pos, vPos) < (*(tint_symbol_5)).rule1Distance)) {
       cMass = (cMass + pos);
       cMassCount = as_type<int>((as_type<uint>(cMassCount) + as_type<uint>(1)));
@@ -124,8 +128,8 @@ void comp_main_inner(uint3 gl_GlobalInvocationID, device Particles* const tint_s
   if ((vPos[1] > 1.0f)) {
     vPos[1] = -1.0f;
   }
-  (*(tint_symbol_6)).particles[index].pos = vPos;
-  (*(tint_symbol_6)).particles[index].vel = vVel;
+  (*(tint_symbol_6)).particles[min(index, 4u)].pos = vPos;
+  (*(tint_symbol_6)).particles[min(index, 4u)].vel = vVel;
 }
 
 kernel void comp_main(device Particles* tint_symbol_7 [[buffer(1)]], const constant SimParams* tint_symbol_8 [[buffer(0)]], device Particles* tint_symbol_9 [[buffer(2)]], uint3 gl_GlobalInvocationID [[thread_position_in_grid]]) {

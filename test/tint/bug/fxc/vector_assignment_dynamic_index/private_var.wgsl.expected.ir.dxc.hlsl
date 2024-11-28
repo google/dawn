@@ -5,6 +5,6 @@ cbuffer cbuffer_i : register(b0) {
 static float3 v1 = (0.0f).xxx;
 [numthreads(1, 1, 1)]
 void main() {
-  v1[i[0u].x] = 1.0f;
+  v1[min(i[0u].x, 2u)] = 1.0f;
 }
 

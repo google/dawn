@@ -41,7 +41,7 @@
      %uint_2 = OpConstant %uint 2
 %_ptr_Workgroup_uint_0 = OpTypePointer Workgroup %uint
    %uint_264 = OpConstant %uint 264
-      %int_4 = OpConstant %int 4
+     %uint_4 = OpConstant %uint 4
          %46 = OpTypeFunction %void
 %compute_main_inner = OpFunction %void None %13
 %tint_local_index = OpFunctionParameter %uint
@@ -78,7 +78,7 @@
                OpBranch %30
          %31 = OpLabel
                OpControlBarrier %uint_2 %uint_2 %uint_264
-         %42 = OpAccessChain %_ptr_Workgroup_uint_0 %wg %uint_1 %int_4
+         %42 = OpAccessChain %_ptr_Workgroup_uint_0 %wg %uint_1 %uint_4
                OpAtomicStore %42 %uint_2 %uint_0 %uint_1
                OpReturn
                OpFunctionEnd

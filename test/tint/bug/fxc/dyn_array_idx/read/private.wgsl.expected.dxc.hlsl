@@ -11,6 +11,6 @@ static S s = (S)0;
 
 [numthreads(1, 1, 1)]
 void f() {
-  result.Store(0u, asuint(s.data[asint(ubo[0].x)]));
+  result.Store(0u, asuint(s.data[min(uint(asint(ubo[0].x)), 63u)]));
   return;
 }

@@ -21,11 +21,11 @@ layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
   {
     while(true) {
-      if ((v.inner[0] == 0u)) {
+      if ((v.inner[0u] == 0u)) {
         break;
       }
       int s = f();
-      v.inner[0] = 0u;
+      v.inner[0u] = 0u;
       {
       }
       continue;

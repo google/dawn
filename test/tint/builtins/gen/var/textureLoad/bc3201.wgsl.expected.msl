@@ -4,7 +4,8 @@ using namespace metal;
 uint4 textureLoad_bc3201(texture1d<uint, access::sample> tint_symbol_1) {
   uint arg_1 = 1u;
   uint arg_2 = 1u;
-  uint4 res = tint_symbol_1.read(uint(arg_1), 0);
+  uint const level_idx = min(uint(arg_2), (tint_symbol_1.get_num_mip_levels() - 1u));
+  uint4 res = tint_symbol_1.read(uint(min(arg_1, (tint_symbol_1.get_width(0) - 1u))), 0);
   return res;
 }
 

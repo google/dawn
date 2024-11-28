@@ -44,7 +44,10 @@ uint3 toIndex3D(uint gridSize, uint index) {
 }
 
 float3 loadPosition(uint vertexIndex) {
-  float3 position = float3(asfloat(positions.Load((4u * ((3u * vertexIndex) + 0u)))), asfloat(positions.Load((4u * ((3u * vertexIndex) + 1u)))), asfloat(positions.Load((4u * ((3u * vertexIndex) + 2u)))));
+  uint tint_symbol_8 = 0u;
+  positions.GetDimensions(tint_symbol_8);
+  uint tint_symbol_9 = ((tint_symbol_8 - 0u) / 4u);
+  float3 position = float3(asfloat(positions.Load((4u * min(((3u * vertexIndex) + 0u), (tint_symbol_9 - 1u))))), asfloat(positions.Load((4u * min(((3u * vertexIndex) + 1u), (tint_symbol_9 - 1u))))), asfloat(positions.Load((4u * min(((3u * vertexIndex) + 2u), (tint_symbol_9 - 1u))))));
   return position;
 }
 
@@ -63,12 +66,24 @@ int LUTatomicLoad(uint offset) {
 
 
 void doIgnore() {
+  uint tint_symbol_11 = 0u;
+  counters.GetDimensions(tint_symbol_11);
+  uint tint_symbol_12 = ((tint_symbol_11 - 0u) / 4u);
+  uint tint_symbol_14 = 0u;
+  indices.GetDimensions(tint_symbol_14);
+  uint tint_symbol_15 = ((tint_symbol_14 - 0u) / 4u);
+  uint tint_symbol_16 = 0u;
+  positions.GetDimensions(tint_symbol_16);
+  uint tint_symbol_17 = ((tint_symbol_16 - 0u) / 4u);
+  uint tint_symbol_19 = 0u;
+  LUT.GetDimensions(tint_symbol_19);
+  uint tint_symbol_20 = ((tint_symbol_19 - 0u) / 4u);
   uint g42 = uniforms[0].x;
   uint kj6 = dbg.Load(20u);
-  uint b53 = countersatomicLoad(0u);
-  uint rwg = indices.Load(0u);
-  float rb5 = asfloat(positions.Load(0u));
-  int g55 = LUTatomicLoad(0u);
+  uint b53 = countersatomicLoad((4u * min(0u, (tint_symbol_12 - 1u))));
+  uint rwg = indices.Load((4u * min(0u, (tint_symbol_15 - 1u))));
+  float rb5 = asfloat(positions.Load((4u * min(0u, (tint_symbol_17 - 1u)))));
+  int g55 = LUTatomicLoad((4u * min(0u, (tint_symbol_20 - 1u))));
 }
 
 struct tint_symbol_2 {
@@ -83,21 +98,27 @@ uint countersatomicAdd(uint offset, uint value) {
 
 
 void main_count_inner(uint3 GlobalInvocationID) {
+  uint tint_symbol_21 = 0u;
+  indices.GetDimensions(tint_symbol_21);
+  uint tint_symbol_22 = ((tint_symbol_21 - 0u) / 4u);
+  uint tint_symbol_23 = 0u;
+  counters.GetDimensions(tint_symbol_23);
+  uint tint_symbol_24 = ((tint_symbol_23 - 0u) / 4u);
   uint triangleIndex = GlobalInvocationID.x;
   if ((triangleIndex >= uniforms[0].x)) {
     return;
   }
   doIgnore();
-  uint i0 = indices.Load((4u * ((3u * triangleIndex) + 0u)));
-  uint i1 = indices.Load((4u * ((3u * triangleIndex) + 1u)));
-  uint i2 = indices.Load((4u * ((3u * triangleIndex) + 2u)));
+  uint i0 = indices.Load((4u * min(((3u * triangleIndex) + 0u), (tint_symbol_22 - 1u))));
+  uint i1 = indices.Load((4u * min(((3u * triangleIndex) + 1u), (tint_symbol_22 - 1u))));
+  uint i2 = indices.Load((4u * min(((3u * triangleIndex) + 2u), (tint_symbol_22 - 1u))));
   float3 p0 = loadPosition(i0);
   float3 p1 = loadPosition(i1);
   float3 p2 = loadPosition(i2);
   float3 center = (((p0 + p1) + p2) / 3.0f);
   float3 voxelPos = toVoxelPos(center);
   uint voxelIndex = toIndex1D(uniforms[0].y, voxelPos);
-  uint acefg = countersatomicAdd((4u * voxelIndex), 1u);
+  uint acefg = countersatomicAdd((4u * min(voxelIndex, (tint_symbol_24 - 1u))), 1u);
   if ((triangleIndex == 0u)) {
     dbg.Store(16u, asuint(uniforms[0].y));
     dbg.Store(32u, asuint(center.x));
@@ -130,19 +151,25 @@ void LUTatomicStore(uint offset, int value) {
 
 
 void main_create_lut_inner(uint3 GlobalInvocationID) {
+  uint tint_symbol_25 = 0u;
+  counters.GetDimensions(tint_symbol_25);
+  uint tint_symbol_26 = ((tint_symbol_25 - 0u) / 4u);
+  uint tint_symbol_27 = 0u;
+  LUT.GetDimensions(tint_symbol_27);
+  uint tint_symbol_28 = ((tint_symbol_27 - 0u) / 4u);
   uint voxelIndex = GlobalInvocationID.x;
   doIgnore();
   uint maxVoxels = ((uniforms[0].y * uniforms[0].y) * uniforms[0].y);
   if ((voxelIndex >= maxVoxels)) {
     return;
   }
-  uint numTriangles = countersatomicLoad((4u * voxelIndex));
+  uint numTriangles = countersatomicLoad((4u * min(voxelIndex, (tint_symbol_26 - 1u))));
   int offset = -1;
   if ((numTriangles > 0u)) {
     uint tint_symbol = dbgatomicAdd(0u, numTriangles);
     offset = int(tint_symbol);
   }
-  LUTatomicStore((4u * voxelIndex), offset);
+  LUTatomicStore((4u * min(voxelIndex, (tint_symbol_28 - 1u))), offset);
 }
 
 [numthreads(128, 1, 1)]
@@ -163,21 +190,27 @@ int LUTatomicAdd(uint offset, int value) {
 
 
 void main_sort_triangles_inner(uint3 GlobalInvocationID) {
+  uint tint_symbol_29 = 0u;
+  indices.GetDimensions(tint_symbol_29);
+  uint tint_symbol_30 = ((tint_symbol_29 - 0u) / 4u);
+  uint tint_symbol_31 = 0u;
+  LUT.GetDimensions(tint_symbol_31);
+  uint tint_symbol_32 = ((tint_symbol_31 - 0u) / 4u);
   uint triangleIndex = GlobalInvocationID.x;
   doIgnore();
   if ((triangleIndex >= uniforms[0].x)) {
     return;
   }
-  uint i0 = indices.Load((4u * ((3u * triangleIndex) + 0u)));
-  uint i1 = indices.Load((4u * ((3u * triangleIndex) + 1u)));
-  uint i2 = indices.Load((4u * ((3u * triangleIndex) + 2u)));
+  uint i0 = indices.Load((4u * min(((3u * triangleIndex) + 0u), (tint_symbol_30 - 1u))));
+  uint i1 = indices.Load((4u * min(((3u * triangleIndex) + 1u), (tint_symbol_30 - 1u))));
+  uint i2 = indices.Load((4u * min(((3u * triangleIndex) + 2u), (tint_symbol_30 - 1u))));
   float3 p0 = loadPosition(i0);
   float3 p1 = loadPosition(i1);
   float3 p2 = loadPosition(i2);
   float3 center = (((p0 + p1) + p2) / 3.0f);
   float3 voxelPos = toVoxelPos(center);
   uint voxelIndex = toIndex1D(uniforms[0].y, voxelPos);
-  int triangleOffset = LUTatomicAdd((4u * voxelIndex), 1);
+  int triangleOffset = LUTatomicAdd((4u * min(voxelIndex, (tint_symbol_32 - 1u))), 1);
 }
 
 [numthreads(128, 1, 1)]

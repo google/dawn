@@ -6,6 +6,6 @@ float2 func(inout float2 pointer) {
 
 [numthreads(1, 1, 1)]
 void main() {
-  float2 r = func(P[int(1)]);
+  float2 r = func(P[1u]);
 }
 

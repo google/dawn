@@ -10,11 +10,11 @@ int foo() {
   S dst_struct = (S)0;
   int dst_array[2][4] = (int[2][4])0;
   dst_struct.arr = src;
-  dst_array[int(1)] = src;
+  dst_array[1u] = src;
   tint_symbol = src;
   dst_struct.arr = src;
-  dst_array[int(0)] = src;
-  return ((tint_symbol[int(0)] + dst_struct.arr[int(0)]) + dst_array[int(0)][int(0)]);
+  dst_array[0u] = src;
+  return ((tint_symbol[0u] + dst_struct.arr[0u]) + dst_array[0u][0u]);
 }
 
 [numthreads(1, 1, 1)]

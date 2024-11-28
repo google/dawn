@@ -5,7 +5,8 @@ float textureLoad_cb57c2(depth2d_array<float, access::sample> tint_symbol_1) {
   uint2 arg_1 = uint2(1u);
   uint arg_2 = 1u;
   int arg_3 = 1;
-  float res = tint_symbol_1.read(uint2(arg_1), arg_2, arg_3);
+  uint const level_idx = min(uint(arg_3), (tint_symbol_1.get_num_mip_levels() - 1u));
+  float res = tint_symbol_1.read(uint2(min(arg_1, (uint2(tint_symbol_1.get_width(level_idx), tint_symbol_1.get_height(level_idx)) - uint2(1u)))), min(arg_2, (tint_symbol_1.get_array_size() - 1u)), level_idx);
   return res;
 }
 

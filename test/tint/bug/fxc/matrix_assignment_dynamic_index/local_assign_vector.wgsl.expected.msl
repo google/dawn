@@ -8,7 +8,7 @@ struct Uniforms {
 
 kernel void tint_symbol(const constant Uniforms* tint_symbol_1 [[buffer(0)]]) {
   float2x4 m1 = float2x4(0.0f);
-  m1[(*(tint_symbol_1)).i] = float4(1.0f);
+  m1[min((*(tint_symbol_1)).i, 1u)] = float4(1.0f);
   return;
 }
 

@@ -17,8 +17,8 @@ void c(half f_1) {
 kernel void f(const constant half3x4* u [[buffer(0)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.u=u};
   a((*tint_module_vars.u));
-  b((*tint_module_vars.u)[1]);
-  b((*tint_module_vars.u)[1].ywxz);
-  c((*tint_module_vars.u)[1][0u]);
-  c((*tint_module_vars.u)[1].ywxz[0u]);
+  b((*tint_module_vars.u)[1u]);
+  b((*tint_module_vars.u)[1u].ywxz);
+  c((*tint_module_vars.u)[1u][0u]);
+  c((*tint_module_vars.u)[1u].ywxz[0u]);
 }

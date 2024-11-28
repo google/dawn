@@ -12,5 +12,5 @@ float4 func(thread float4* const pointer) {
 kernel void tint_symbol() {
   thread float2x4 P = float2x4(0.0f);
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.P=(&P)};
-  float4 const r = func((&(*tint_module_vars.P)[1]));
+  float4 const r = func((&(*tint_module_vars.P)[1u]));
 }

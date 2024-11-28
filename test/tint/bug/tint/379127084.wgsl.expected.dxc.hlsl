@@ -13,7 +13,6 @@ struct FSOut {
 cbuffer cbuffer__uniform0 : register(b0) {
   uint4 _uniform0[2];
 };
-
 ByteAddressBuffer _storage1 : register(t2);
 static uint shadingSsboIndex = 0u;
 SamplerState permutationsSampler_1_Sampler : register(s0, space1);
@@ -27,22 +26,31 @@ float4x4 _storage1_load_2(uint offset) {
 
 void _skslMain(FSIn _stageIn, inout FSOut _stageOut) {
   {
+    uint tint_symbol_6 = 0u;
+    _storage1.GetDimensions(tint_symbol_6);
+    uint tint_symbol_7 = ((tint_symbol_6 - 0u) / 128u);
     shadingSsboIndex = _stageIn.ssboIndicesVar.y;
-    int _56_d = asint(_storage1.Load(((128u * shadingSsboIndex) + 16u)));
-    float2 _57_k = float2(((_stageIn.localCoordsVar + 0.5f) * asfloat(_storage1.Load2((128u * shadingSsboIndex)))));
+    int _56_d = asint(_storage1.Load(((128u * min(shadingSsboIndex, (tint_symbol_7 - 1u))) + 16u)));
+    float2 _57_k = float2(((_stageIn.localCoordsVar + 0.5f) * asfloat(_storage1.Load2((128u * min(shadingSsboIndex, (tint_symbol_7 - 1u)))))));
     float4 _58_l = (0.0f).xxxx;
-    float2 _59_m = float2(asfloat(_storage1.Load2(((128u * shadingSsboIndex) + 8u))));
+    float2 _59_m = float2(asfloat(_storage1.Load2(((128u * min(shadingSsboIndex, (tint_symbol_7 - 1u))) + 8u))));
     float _60_n = 1.0f;
     {
       int _61_o = 0;
       while (true) {
-        if ((_61_o < asint(_storage1.Load(((128u * shadingSsboIndex) + 20u))))) {
+        uint tint_symbol_8 = 0u;
+        _storage1.GetDimensions(tint_symbol_8);
+        uint tint_symbol_9 = ((tint_symbol_8 - 0u) / 128u);
+        if ((_61_o < asint(_storage1.Load(((128u * min(shadingSsboIndex, (tint_symbol_9 - 1u))) + 20u))))) {
           {
+            uint tint_symbol_10 = 0u;
+            _storage1.GetDimensions(tint_symbol_10);
+            uint tint_symbol_11 = ((tint_symbol_10 - 0u) / 128u);
             float4 _62_f = float4(0.0f, 0.0f, 0.0f, 0.0f);
             float2 _skTemp2 = floor(_57_k);
             _62_f = float4(_skTemp2, _62_f.zw);
             _62_f = float4(_62_f.xy, (_62_f.xy + (1.0f).xx));
-            if (bool(asint(_storage1.Load(((128u * shadingSsboIndex) + 24u))))) {
+            if (bool(asint(_storage1.Load(((128u * min(shadingSsboIndex, (tint_symbol_11 - 1u))) + 24u))))) {
               float4 _skTemp3 = step(_59_m.xyxy, _62_f);
               _62_f = (_62_f - (_skTemp3 * _59_m.xyxy));
             }
@@ -89,7 +97,7 @@ void _skslMain(FSIn _stageIn, inout FSOut _stageOut) {
                   float _skTemp12 = lerp(_79_o, _80_p, _69_e.x);
                   float _82_r = _skTemp12;
                   float _skTemp13 = lerp(_81_q, _82_r, _69_e.y);
-                  set_vector_element(_71_g, _72_h, _skTemp13);
+                  set_vector_element(_71_g, min(uint(_72_h), 3u), _skTemp13);
                 }
                 {
                   _72_h = (_72_h + 1);
@@ -123,7 +131,7 @@ void _skslMain(FSIn _stageIn, inout FSOut _stageOut) {
     float _skTemp16 = dot(float3(0.21259999275207519531f, 0.71520000696182250977f, 0.07220000028610229492f), float4(float3((float3(_58_l.xyz) * float(_58_l.w))), float(float(_58_l.w))).xyz);
     float _skTemp17 = saturate(_skTemp16);
     float4 _84_a = float4(0.0f, 0.0f, 0.0f, _skTemp17);
-    int _85_d = asint(_storage1.Load(((128u * shadingSsboIndex) + 112u)));
+    int _85_d = asint(_storage1.Load(((128u * min(shadingSsboIndex, (tint_symbol_7 - 1u))) + 112u)));
     if (bool(_85_d)) {
       {
         float4 _skTemp18 = float4(0.0f, 0.0f, 0.0f, 0.0f);
@@ -157,7 +165,7 @@ void _skslMain(FSIn _stageIn, inout FSOut _stageOut) {
         _84_a = float4((_84_a.xyz / _skTemp23), _84_a.w);
       }
     }
-    float4 _94_f = float4((mul(float4(_84_a), _storage1_load_2(((128u * shadingSsboIndex) + 32u))) + asfloat(_storage1.Load4(((128u * shadingSsboIndex) + 96u)))));
+    float4 _94_f = float4((mul(float4(_84_a), _storage1_load_2(((128u * min(shadingSsboIndex, (tint_symbol_7 - 1u))) + 32u))) + asfloat(_storage1.Load4(((128u * min(shadingSsboIndex, (tint_symbol_7 - 1u))) + 96u)))));
     if (bool(_85_d)) {
       {
         float _skTemp24 = abs(((2.0f * _94_f.z) - 1.0f));
@@ -172,7 +180,10 @@ void _skslMain(FSIn _stageIn, inout FSOut _stageOut) {
       }
     } else {
       {
-        if (bool(asint(_storage1.Load(((128u * shadingSsboIndex) + 116u))))) {
+        uint tint_symbol_12 = 0u;
+        _storage1.GetDimensions(tint_symbol_12);
+        uint tint_symbol_13 = ((tint_symbol_12 - 0u) / 128u);
+        if (bool(asint(_storage1.Load(((128u * min(shadingSsboIndex, (tint_symbol_13 - 1u))) + 116u))))) {
           float4 _skTemp29 = saturate(_94_f);
           _94_f = _skTemp29;
         } else {
@@ -202,8 +213,8 @@ FSOut main_inner(FSIn _stageIn) {
 }
 
 tint_symbol_4 main(tint_symbol_3 tint_symbol_2) {
-  FSIn tint_symbol_5 = {tint_symbol_2.ssboIndicesVar, tint_symbol_2.localCoordsVar};
-  FSOut inner_result = main_inner(tint_symbol_5);
+  FSIn tint_symbol_14 = {tint_symbol_2.ssboIndicesVar, tint_symbol_2.localCoordsVar};
+  FSOut inner_result = main_inner(tint_symbol_14);
   tint_symbol_4 wrapper_result = (tint_symbol_4)0;
   wrapper_result.sk_FragColor = inner_result.sk_FragColor;
   return wrapper_result;

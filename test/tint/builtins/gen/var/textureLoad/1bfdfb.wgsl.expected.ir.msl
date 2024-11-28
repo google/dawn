@@ -126,7 +126,7 @@ tint_ExternalTextureParams tint_load_struct_packed_vec3(const constant tint_Exte
 float4 textureLoad_1bfdfb(tint_module_vars_struct tint_module_vars) {
   uint2 arg_1 = uint2(1u);
   tint_ExternalTextureParams const v_19 = tint_load_struct_packed_vec3(tint_module_vars.arg_0_params);
-  float4 res = tint_TextureLoadExternal(tint_module_vars.arg_0_plane0, tint_module_vars.arg_0_plane1, v_19, arg_1);
+  float4 res = tint_TextureLoadExternal(tint_module_vars.arg_0_plane0, tint_module_vars.arg_0_plane1, v_19, min(arg_1, ((v_19.apparentSize + uint2(1u)) - uint2(1u))));
   return res;
 }
 

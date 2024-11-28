@@ -16,47 +16,47 @@ struct tint_array {
 void deref_const() {
   tint_array<int, 10> a = {};
   thread tint_array<int, 10>* const p = (&a);
-  int b = (*p)[0];
-  (*p)[0] = 42;
+  int b = (*p)[0u];
+  (*p)[0u] = 42;
 }
 
 void no_deref_const() {
   tint_array<int, 10> a = {};
   thread tint_array<int, 10>* const p = (&a);
-  int b = (*p)[0];
-  (*p)[0] = 42;
+  int b = (*p)[0u];
+  (*p)[0u] = 42;
 }
 
 void deref_let() {
   tint_array<int, 10> a = {};
   thread tint_array<int, 10>* const p = (&a);
   int const i = 0;
-  int b = (*p)[i];
-  (*p)[0] = 42;
+  int b = (*p)[min(uint(i), 9u)];
+  (*p)[0u] = 42;
 }
 
 void no_deref_let() {
   tint_array<int, 10> a = {};
   thread tint_array<int, 10>* const p = (&a);
   int const i = 0;
-  int b = (*p)[i];
-  (*p)[0] = 42;
+  int b = (*p)[min(uint(i), 9u)];
+  (*p)[0u] = 42;
 }
 
 void deref_var() {
   tint_array<int, 10> a = {};
   thread tint_array<int, 10>* const p = (&a);
   int i = 0;
-  int b = (*p)[i];
-  (*p)[0] = 42;
+  int b = (*p)[min(uint(i), 9u)];
+  (*p)[0u] = 42;
 }
 
 void no_deref_var() {
   tint_array<int, 10> a = {};
   thread tint_array<int, 10>* const p = (&a);
   int i = 0;
-  int b = (*p)[i];
-  (*p)[0] = 42;
+  int b = (*p)[min(uint(i), 9u)];
+  (*p)[0u] = 42;
 }
 
 kernel void tint_symbol() {

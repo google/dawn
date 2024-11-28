@@ -14,17 +14,21 @@ struct tint_array {
     T elements[N];
 };
 
+#define TINT_ISOLATE_UB(VOLATILE_NAME) \
+  {volatile bool VOLATILE_NAME = false; if (VOLATILE_NAME) break;}
+
 void foo(device tint_array<int, 4>* const arg) {
   bool tint_continue = false;
   for(int i = 0; (i < 4); i = as_type<int>((as_type<uint>(i) + as_type<uint>(1)))) {
+    TINT_ISOLATE_UB(tint_volatile_false);
     tint_continue = false;
-    switch((*(arg))[i]) {
+    switch((*(arg))[min(uint(i), 3u)]) {
       case 1: {
         tint_continue = true;
         break;
       }
       default: {
-        (*(arg))[i] = 2;
+        (*(arg))[min(uint(i), 3u)] = 2;
         break;
       }
     }

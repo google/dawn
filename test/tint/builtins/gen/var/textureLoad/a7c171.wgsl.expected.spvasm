@@ -1,9 +1,11 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 1
-; Bound: 36
+; Bound: 40
 ; Schema: 0
                OpCapability Shader
+               OpCapability ImageQuery
+         %23 = OpExtInstImport "GLSL.std.450"
                OpMemoryModel Logical GLSL450
                OpEntryPoint Fragment %fragment_main "fragment_main"
                OpEntryPoint GLCompute %compute_main "compute_main"
@@ -41,7 +43,7 @@
          %16 = OpConstantComposite %v2uint %uint_1 %uint_1
 %_ptr_Function_v4int = OpTypePointer Function %v4int
        %void = OpTypeVoid
-         %26 = OpTypeFunction %void
+         %30 = OpTypeFunction %void
 %_ptr_StorageBuffer_v4int = OpTypePointer StorageBuffer %v4int
      %uint_0 = OpConstant %uint 0
 %textureLoad_a7c171 = OpFunction %v4int None %10
@@ -51,22 +53,25 @@
                OpStore %arg_1 %16
          %18 = OpLoad %8 %arg_0 None
          %19 = OpLoad %v2uint %arg_1 None
-         %20 = OpImageRead %v4int %18 %19 None
-               OpStore %res %20
-         %23 = OpLoad %v4int %res None
-               OpReturnValue %23
+         %20 = OpImageQuerySize %v2uint %18
+         %21 = OpISub %v2uint %20 %16
+         %22 = OpExtInst %v2uint %23 UMin %19 %21
+         %24 = OpImageRead %v4int %18 %22 None
+               OpStore %res %24
+         %27 = OpLoad %v4int %res None
+               OpReturnValue %27
                OpFunctionEnd
-%fragment_main = OpFunction %void None %26
-         %27 = OpLabel
-         %28 = OpFunctionCall %v4int %textureLoad_a7c171
-         %29 = OpAccessChain %_ptr_StorageBuffer_v4int %1 %uint_0
-               OpStore %29 %28 None
+%fragment_main = OpFunction %void None %30
+         %31 = OpLabel
+         %32 = OpFunctionCall %v4int %textureLoad_a7c171
+         %33 = OpAccessChain %_ptr_StorageBuffer_v4int %1 %uint_0
+               OpStore %33 %32 None
                OpReturn
                OpFunctionEnd
-%compute_main = OpFunction %void None %26
-         %33 = OpLabel
-         %34 = OpFunctionCall %v4int %textureLoad_a7c171
-         %35 = OpAccessChain %_ptr_StorageBuffer_v4int %1 %uint_0
-               OpStore %35 %34 None
+%compute_main = OpFunction %void None %30
+         %37 = OpLabel
+         %38 = OpFunctionCall %v4int %textureLoad_a7c171
+         %39 = OpAccessChain %_ptr_StorageBuffer_v4int %1 %uint_0
+               OpStore %39 %38 None
                OpReturn
                OpFunctionEnd

@@ -93,6 +93,10 @@ uint2 tint_ftou(float2 v) {
   return select(uint2(4294967295u), select(uint2(v), uint2(0u), (v < float2(0.0f))), (v <= float2(4294967040.0f)));
 }
 
+int2 tint_clamp(int2 e, int2 low, int2 high) {
+  return min(max(e, low), high);
+}
+
 float3 gammaCorrection(float3 v, GammaTransferParams params) {
   bool3 const cond = (fabs(v) < float3(params.D));
   float3 const t = (sign(v) * ((params.C * fabs(v)) + params.F));
@@ -119,7 +123,7 @@ float4 textureLoadExternal(texture2d<float, access::sample> plane0, texture2d<fl
 }
 
 float4 textureLoad2d(texture2d<float, access::sample> tint_symbol, texture2d<float, access::sample> ext_tex_plane_1_1, ExternalTextureParams ext_tex_params_1, int2 coords) {
-  return textureLoadExternal(tint_symbol, ext_tex_plane_1_1, coords, ext_tex_params_1);
+  return textureLoadExternal(tint_symbol, ext_tex_plane_1_1, tint_clamp(coords, int2(0), int2(((ext_tex_params_1.apparentSize + uint2(1u)) - uint2(1u)))), ext_tex_params_1);
 }
 
 void doTextureLoad(texture2d<float, access::sample> tint_symbol_2, texture2d<float, access::sample> tint_symbol_3, const constant ExternalTextureParams_tint_packed_vec3* const tint_symbol_4) {

@@ -24,8 +24,12 @@ struct tint_symbol_2 {
   /* 0x0000 */ tint_array<S, 1> arr;
 };
 
-kernel void tint_symbol(const device tint_symbol_2* tint_symbol_1 [[buffer(0)]]) {
-  S const x = (*(tint_symbol_1)).arr[1];
+struct TintArrayLengths {
+  /* 0x0000 */ tint_array<uint4, 1> array_lengths;
+};
+
+kernel void tint_symbol(const device tint_symbol_2* tint_symbol_1 [[buffer(0)]], const constant TintArrayLengths* tint_symbol_3 [[buffer(30)]]) {
+  S const x = (*(tint_symbol_1)).arr[min(1u, (((*(tint_symbol_3)).array_lengths[0u][0u] / 32u) - 1u))];
   return;
 }
 

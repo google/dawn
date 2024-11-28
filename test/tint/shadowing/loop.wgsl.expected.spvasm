@@ -1,9 +1,10 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 1
-; Bound: 38
+; Bound: 44
 ; Schema: 0
                OpCapability Shader
+         %22 = OpExtInstImport "GLSL.std.450"
                OpMemoryModel Logical GLSL450
                OpEntryPoint GLCompute %foo "foo"
                OpExecutionMode %foo LocalSize 1 1 1
@@ -30,6 +31,7 @@
          %10 = OpTypeFunction %void
 %_ptr_Function_int = OpTypePointer Function %int
       %int_0 = OpConstant %int 0
+     %uint_9 = OpConstant %uint 9
 %_ptr_StorageBuffer_int = OpTypePointer StorageBuffer %int
      %uint_0 = OpConstant %uint 0
      %int_10 = OpConstant %int 10
@@ -46,25 +48,29 @@
                OpBranch %15
          %15 = OpLabel
          %19 = OpLoad %int %i None
-         %20 = OpAccessChain %_ptr_StorageBuffer_int %1 %uint_0 %19
-         %23 = OpLoad %int %20 None
-               OpStore %x %23
+         %20 = OpBitcast %uint %19
+         %21 = OpExtInst %uint %22 UMin %20 %uint_9
+         %24 = OpAccessChain %_ptr_StorageBuffer_int %1 %uint_0 %21
+         %27 = OpLoad %int %24 None
+               OpStore %x %27
                OpBranch %16
          %16 = OpLabel
-         %25 = OpLoad %int %x None
-         %26 = OpAccessChain %_ptr_StorageBuffer_int %1 %uint_0 %25
-         %27 = OpLoad %int %26 None
-               OpStore %x_0 %27
-         %29 = OpLoad %int %x_0 None
-         %30 = OpLoad %int %i None
-         %31 = OpIAdd %int %30 %29
-               OpStore %i %31 None
-         %32 = OpLoad %int %i None
-         %33 = OpSGreaterThan %bool %32 %int_10
-               OpBranchConditional %33 %18 %17
+         %29 = OpLoad %int %x None
+         %30 = OpBitcast %uint %29
+         %31 = OpExtInst %uint %22 UMin %30 %uint_9
+         %32 = OpAccessChain %_ptr_StorageBuffer_int %1 %uint_0 %31
+         %33 = OpLoad %int %32 None
+               OpStore %x_0 %33
+         %35 = OpLoad %int %x_0 None
+         %36 = OpLoad %int %i None
+         %37 = OpIAdd %int %36 %35
+               OpStore %i %37 None
+         %38 = OpLoad %int %i None
+         %39 = OpSGreaterThan %bool %38 %int_10
+               OpBranchConditional %39 %18 %17
          %18 = OpLabel
-         %36 = OpAccessChain %_ptr_StorageBuffer_int %1 %uint_0 %int_0
-         %37 = OpLoad %int %i None
-               OpStore %36 %37 None
+         %42 = OpAccessChain %_ptr_StorageBuffer_int %1 %uint_0 %uint_0
+         %43 = OpLoad %int %i None
+               OpStore %42 %43 None
                OpReturn
                OpFunctionEnd

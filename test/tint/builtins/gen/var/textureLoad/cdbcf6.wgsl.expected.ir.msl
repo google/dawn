@@ -9,7 +9,9 @@ struct tint_module_vars_struct {
 float4 textureLoad_cdbcf6(tint_module_vars_struct tint_module_vars) {
   uint2 arg_1 = uint2(1u);
   uint arg_2 = 1u;
-  float4 res = tint_module_vars.arg_0.read(arg_1, arg_2);
+  uint2 const v = arg_1;
+  uint const v_1 = min(arg_2, (tint_module_vars.arg_0.get_array_size() - 1u));
+  float4 res = tint_module_vars.arg_0.read(min(v, (uint2(tint_module_vars.arg_0.get_width(0u), tint_module_vars.arg_0.get_height(0u)) - uint2(1u))), v_1);
   return res;
 }
 

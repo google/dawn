@@ -16,9 +16,10 @@ int bar() {
 
 void main() {
   S x = (S)0;
-  int v = foo();
+  uint v = min(uint(foo()), 3u);
   int v_1 = bar();
-  x.a[v][v_1] = (x.a[v][v_1] + int(5));
+  int v_2 = (x.a[v][min(uint(v_1), 3u)] + int(5));
+  x.a[v][min(uint(v_1), 3u)] = v_2;
 }
 
 [numthreads(1, 1, 1)]

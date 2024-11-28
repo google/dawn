@@ -16,12 +16,12 @@ struct tint_array {
 
 uint foo(device uint* const tint_symbol_6) {
   tint_array<uint, 4> const tint_symbol_4 = tint_array<uint, 4>{0u, 1u, 2u, 4u};
-  return tint_symbol_4[*(tint_symbol_6)];
+  return tint_symbol_4[min(*(tint_symbol_6), 3u)];
 }
 
 kernel void tint_symbol_1(device uint* tint_symbol_7 [[buffer(0)]]) {
   tint_array<uint, 4> const tint_symbol_5 = tint_array<uint, 4>{0u, 1u, 2u, 4u};
-  uint const v = tint_symbol_5[*(tint_symbol_7)];
+  uint const v = tint_symbol_5[min(*(tint_symbol_7), 3u)];
   uint const tint_symbol_2 = v;
   uint const tint_symbol_3 = foo(tint_symbol_7);
   *(tint_symbol_7) = (tint_symbol_2 + tint_symbol_3);

@@ -27,9 +27,9 @@ void compute_main_inner(uint local_invocation_index_2) {
       uint x_35 = idx;
       uint v_1 = tint_div_u32(x_31, 2u);
       uint v_2 = tint_mod_u32(x_33, 2u);
-      uint v_3 = tint_mod_u32(x_35, 1u);
+      uint v_3 = min(tint_mod_u32(x_35, 1u), 0u);
       uint v_4 = 0u;
-      InterlockedExchange(wg[v_1][v_2][v_3], 0u, v_4);
+      InterlockedExchange(wg[min(v_1, 2u)][min(v_2, 1u)][v_3], 0u, v_4);
       {
         idx = (idx + 1u);
       }
@@ -38,7 +38,7 @@ void compute_main_inner(uint local_invocation_index_2) {
   }
   GroupMemoryBarrierWithGroupSync();
   uint v_5 = 0u;
-  InterlockedExchange(wg[int(2)][int(1)][int(0)], 1u, v_5);
+  InterlockedExchange(wg[2u][1u][0u], 1u, v_5);
 }
 
 void compute_main_1() {

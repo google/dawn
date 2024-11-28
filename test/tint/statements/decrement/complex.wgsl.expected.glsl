@@ -38,18 +38,26 @@ void tint_symbol_1() {
   {
     int v_2 = idx1();
     int v_3 = idx2();
-    int v_4 = idx3();
-    v_1.inner[v_2].a[v_3][v_4] = (v_1.inner[v_2].a[v_3][v_4] - 1);
+    uint v_4 = (uint(v_1.inner.length()) - 1u);
+    uint v_5 = min(uint(v_2), v_4);
+    uint v_6 = min(uint(v_3), 3u);
+    int v_7 = idx3();
+    int v_8 = (v_1.inner[v_5].a[v_6][min(uint(v_7), 3u)] - 1);
+    v_1.inner[v_5].a[v_6][min(uint(v_7), 3u)] = v_8;
     while(true) {
       if ((v < 10u)) {
       } else {
         break;
       }
       {
-        int v_5 = idx4();
-        int v_6 = idx5();
-        int v_7 = idx6();
-        v_1.inner[v_5].a[v_6][v_7] = (v_1.inner[v_5].a[v_6][v_7] - 1);
+        int v_9 = idx4();
+        int v_10 = idx5();
+        uint v_11 = (uint(v_1.inner.length()) - 1u);
+        uint v_12 = min(uint(v_9), v_11);
+        uint v_13 = min(uint(v_10), 3u);
+        int v_14 = idx6();
+        int v_15 = (v_1.inner[v_12].a[v_13][min(uint(v_14), 3u)] - 1);
+        v_1.inner[v_12].a[v_13][min(uint(v_14), 3u)] = v_15;
       }
       continue;
     }

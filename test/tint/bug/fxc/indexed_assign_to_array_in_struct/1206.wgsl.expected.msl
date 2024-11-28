@@ -53,6 +53,10 @@ Particle tint_unpack_vec3_in_composite_1(Particle_tint_packed_vec3 in) {
   return result;
 }
 
+struct TintArrayLengths {
+  /* 0x0000 */ tint_array<uint4, 1> array_lengths;
+};
+
 struct Simulation {
   /* 0x0000 */ uint i;
 };
@@ -61,9 +65,9 @@ struct Particles {
   tint_array<Particle, 1> p;
 };
 
-kernel void tint_symbol(const device Particles_tint_packed_vec3* tint_symbol_1 [[buffer(1)]], const constant Simulation* tint_symbol_2 [[buffer(0)]]) {
-  Particle particle = tint_unpack_vec3_in_composite_1((*(tint_symbol_1)).p[0]);
-  particle.position[(*(tint_symbol_2)).i] = particle.position[(*(tint_symbol_2)).i];
+kernel void tint_symbol(const device Particles_tint_packed_vec3* tint_symbol_1 [[buffer(1)]], const constant TintArrayLengths* tint_symbol_2 [[buffer(30)]], const constant Simulation* tint_symbol_3 [[buffer(0)]]) {
+  Particle particle = tint_unpack_vec3_in_composite_1((*(tint_symbol_1)).p[min(0u, ((((*(tint_symbol_2)).array_lengths[0u][0u] - 0u) / 176u) - 1u))]);
+  particle.position[min((*(tint_symbol_3)).i, 7u)] = particle.position[min((*(tint_symbol_3)).i, 7u)];
   return;
 }
 

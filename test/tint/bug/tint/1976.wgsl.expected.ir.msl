@@ -24,5 +24,6 @@ struct tint_module_vars_struct {
 
 kernel void tint_symbol(texture2d_ms<float, access::read> texture0 [[texture(0)]], device Results* results [[buffer(0)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.texture0=texture0, .results=results};
-  (*tint_module_vars.results).colorSamples[0] = tint_module_vars.texture0.read(uint2(int2(0)), 0)[0u];
+  uint2 const v = (uint2(tint_module_vars.texture0.get_width(), tint_module_vars.texture0.get_height()) - uint2(1u));
+  (*tint_module_vars.results).colorSamples[0u] = tint_module_vars.texture0.read(min(uint2(int2(0)), v), 0)[0u];
 }

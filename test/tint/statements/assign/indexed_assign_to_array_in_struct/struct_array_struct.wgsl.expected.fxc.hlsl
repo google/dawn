@@ -18,7 +18,7 @@ void main() {
   OuterS s1 = (OuterS)0;
   {
     S1 tint_symbol_1[8] = s1.a1;
-    tint_symbol_1[uniforms[0].x].s2 = v;
+    tint_symbol_1[min(uniforms[0].x, 7u)].s2 = v;
     s1.a1 = tint_symbol_1;
   }
   return;

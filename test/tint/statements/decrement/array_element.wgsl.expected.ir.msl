@@ -15,8 +15,11 @@ struct tint_array {
 
 struct tint_module_vars_struct {
   device tint_array<uint, 1>* a;
+  const constant tint_array<uint4, 1>* tint_storage_buffer_sizes;
 };
 
 void tint_symbol(tint_module_vars_struct tint_module_vars) {
-  (*tint_module_vars.a)[1] = ((*tint_module_vars.a)[1] - 1u);
+  uint const v = (((*tint_module_vars.tint_storage_buffer_sizes)[0u][0u] / 4u) - 1u);
+  device uint* const v_1 = (&(*tint_module_vars.a)[min(uint(1), v)]);
+  (*v_1) = ((*v_1) - 1u);
 }

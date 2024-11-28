@@ -20,7 +20,7 @@ void main() {
       i = (i + 1);
       {
         InnerS tint_symbol_1[8] = s1.a1;
-        tint_symbol_1[uniforms[0].x] = v;
+        tint_symbol_1[min(uniforms[0].x, 7u)] = v;
         s1.a1 = tint_symbol_1;
       }
     }

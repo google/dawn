@@ -20,5 +20,5 @@ struct S {
 
 uint f() {
   tint_array<S, 2> a = tint_array<S, 2>{};
-  return a[1].n[1];
+  return a[1u].n[1u];
 }

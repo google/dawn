@@ -28,10 +28,10 @@ kernel void f(const constant tint_array<float2x2, 4>* a [[buffer(0)]], device fl
   thread int counter = 0;
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.a=a, .s=s, .counter=(&counter)};
   const constant tint_array<float2x2, 4>* const p_a = tint_module_vars.a;
-  const constant float2x2* const p_a_i = (&(*p_a)[i(tint_module_vars)]);
-  const constant float2* const p_a_i_i = (&(*p_a_i)[i(tint_module_vars)]);
+  const constant float2x2* const p_a_i = (&(*p_a)[min(uint(i(tint_module_vars)), 3u)]);
+  const constant float2* const p_a_i_i = (&(*p_a_i)[min(uint(i(tint_module_vars)), 1u)]);
   tint_array<float2x2, 4> const l_a = (*p_a);
   float2x2 const l_a_i = (*p_a_i);
   float2 const l_a_i_i = (*p_a_i_i);
-  (*tint_module_vars.s) = ((((*p_a_i_i)[0u] + l_a[0][0][0u]) + l_a_i[0][0u]) + l_a_i_i[0u]);
+  (*tint_module_vars.s) = ((((*p_a_i_i)[0u] + l_a[0u][0u][0u]) + l_a_i[0u][0u]) + l_a_i_i[0u]);
 }

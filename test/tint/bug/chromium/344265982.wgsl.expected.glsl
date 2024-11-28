@@ -14,7 +14,7 @@ void foo() {
       } else {
         break;
       }
-      int v_1 = i;
+      uint v_1 = min(uint(i), 3u);
       bool tint_continue = false;
       switch(v.inner[v_1]) {
         case 1:
@@ -24,7 +24,7 @@ void foo() {
         }
         default:
         {
-          int v_2 = i;
+          uint v_2 = min(uint(i), 3u);
           v.inner[v_2] = 2;
           break;
         }

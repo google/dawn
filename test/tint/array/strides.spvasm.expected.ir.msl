@@ -18,6 +18,9 @@ struct strided_arr {
   /* 0x0004 */ tint_array<int8_t, 4> tint_pad;
 };
 
+#define TINT_ISOLATE_UB(VOLATILE_NAME) \
+  {volatile bool VOLATILE_NAME = false; if (VOLATILE_NAME) break;}
+
 struct strided_arr_1 {
   /* 0x0000 */ tint_array<tint_array<strided_arr, 2>, 3> el;
   /* 0x0030 */ tint_array<int8_t, 80> tint_pad_1;
@@ -40,6 +43,7 @@ void tint_store_and_preserve_padding_3(device tint_array<strided_arr, 2>* const 
     uint v = 0u;
     v = 0u;
     while(true) {
+      TINT_ISOLATE_UB(tint_volatile_false)
       uint const v_1 = v;
       if ((v_1 >= 2u)) {
         break;
@@ -58,6 +62,7 @@ void tint_store_and_preserve_padding_2(device tint_array<tint_array<strided_arr,
     uint v_2 = 0u;
     v_2 = 0u;
     while(true) {
+      TINT_ISOLATE_UB(tint_volatile_false_1)
       uint const v_3 = v_2;
       if ((v_3 >= 3u)) {
         break;
@@ -80,6 +85,7 @@ void tint_store_and_preserve_padding(device tint_array<strided_arr_1, 4>* const 
     uint v_4 = 0u;
     v_4 = 0u;
     while(true) {
+      TINT_ISOLATE_UB(tint_volatile_false_2)
       uint const v_5 = v_4;
       if ((v_5 >= 4u)) {
         break;
@@ -95,11 +101,11 @@ void tint_store_and_preserve_padding(device tint_array<strided_arr_1, 4>* const 
 
 void f_1(tint_module_vars_struct tint_module_vars) {
   tint_array<strided_arr_1, 4> const x_19 = (*tint_module_vars.s).a;
-  tint_array<tint_array<strided_arr, 2>, 3> const x_24 = (*tint_module_vars.s).a[3].el;
-  tint_array<strided_arr, 2> const x_28 = (*tint_module_vars.s).a[3].el[2];
-  float const x_32 = (*tint_module_vars.s).a[3].el[2][1].el;
+  tint_array<tint_array<strided_arr, 2>, 3> const x_24 = (*tint_module_vars.s).a[3u].el;
+  tint_array<strided_arr, 2> const x_28 = (*tint_module_vars.s).a[3u].el[2u];
+  float const x_32 = (*tint_module_vars.s).a[3u].el[2u][1u].el;
   tint_store_and_preserve_padding((&(*tint_module_vars.s).a), tint_array<strided_arr_1, 4>{});
-  (*tint_module_vars.s).a[3].el[2][1].el = 5.0f;
+  (*tint_module_vars.s).a[3u].el[2u][1u].el = 5.0f;
 }
 
 kernel void f(device S* s [[buffer(0)]]) {

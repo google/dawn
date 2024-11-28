@@ -96,43 +96,43 @@ ub_load_21_ret ub_load_21(uint offset) {
 }
 
 void main_inner(uint idx) {
-  const uint scalar_offset_28 = ((544u * idx)) / 4;
+  const uint scalar_offset_28 = ((544u * min(idx, 7u))) / 4;
   float scalar_f32 = asfloat(ub[scalar_offset_28 / 4][scalar_offset_28 % 4]);
-  const uint scalar_offset_29 = (((544u * idx) + 4u)) / 4;
+  const uint scalar_offset_29 = (((544u * min(idx, 7u)) + 4u)) / 4;
   int scalar_i32 = asint(ub[scalar_offset_29 / 4][scalar_offset_29 % 4]);
-  const uint scalar_offset_30 = (((544u * idx) + 8u)) / 4;
+  const uint scalar_offset_30 = (((544u * min(idx, 7u)) + 8u)) / 4;
   uint scalar_u32 = ub[scalar_offset_30 / 4][scalar_offset_30 % 4];
-  const uint scalar_offset_31 = (((544u * idx) + 16u)) / 4;
+  const uint scalar_offset_31 = (((544u * min(idx, 7u)) + 16u)) / 4;
   uint4 ubo_load_9 = ub[scalar_offset_31 / 4];
   float2 vec2_f32 = asfloat(((scalar_offset_31 & 2) ? ubo_load_9.zw : ubo_load_9.xy));
-  const uint scalar_offset_32 = (((544u * idx) + 24u)) / 4;
+  const uint scalar_offset_32 = (((544u * min(idx, 7u)) + 24u)) / 4;
   uint4 ubo_load_10 = ub[scalar_offset_32 / 4];
   int2 vec2_i32 = asint(((scalar_offset_32 & 2) ? ubo_load_10.zw : ubo_load_10.xy));
-  const uint scalar_offset_33 = (((544u * idx) + 32u)) / 4;
+  const uint scalar_offset_33 = (((544u * min(idx, 7u)) + 32u)) / 4;
   uint4 ubo_load_11 = ub[scalar_offset_33 / 4];
   uint2 vec2_u32 = ((scalar_offset_33 & 2) ? ubo_load_11.zw : ubo_load_11.xy);
-  const uint scalar_offset_34 = (((544u * idx) + 48u)) / 4;
+  const uint scalar_offset_34 = (((544u * min(idx, 7u)) + 48u)) / 4;
   float3 vec3_f32 = asfloat(ub[scalar_offset_34 / 4].xyz);
-  const uint scalar_offset_35 = (((544u * idx) + 64u)) / 4;
+  const uint scalar_offset_35 = (((544u * min(idx, 7u)) + 64u)) / 4;
   int3 vec3_i32 = asint(ub[scalar_offset_35 / 4].xyz);
-  const uint scalar_offset_36 = (((544u * idx) + 80u)) / 4;
+  const uint scalar_offset_36 = (((544u * min(idx, 7u)) + 80u)) / 4;
   uint3 vec3_u32 = ub[scalar_offset_36 / 4].xyz;
-  const uint scalar_offset_37 = (((544u * idx) + 96u)) / 4;
+  const uint scalar_offset_37 = (((544u * min(idx, 7u)) + 96u)) / 4;
   float4 vec4_f32 = asfloat(ub[scalar_offset_37 / 4]);
-  const uint scalar_offset_38 = (((544u * idx) + 112u)) / 4;
+  const uint scalar_offset_38 = (((544u * min(idx, 7u)) + 112u)) / 4;
   int4 vec4_i32 = asint(ub[scalar_offset_38 / 4]);
-  const uint scalar_offset_39 = (((544u * idx) + 128u)) / 4;
+  const uint scalar_offset_39 = (((544u * min(idx, 7u)) + 128u)) / 4;
   uint4 vec4_u32 = ub[scalar_offset_39 / 4];
-  float2x2 mat2x2_f32 = ub_load_12(((544u * idx) + 144u));
-  float2x3 mat2x3_f32 = ub_load_13(((544u * idx) + 160u));
-  float2x4 mat2x4_f32 = ub_load_14(((544u * idx) + 192u));
-  float3x2 mat3x2_f32 = ub_load_15(((544u * idx) + 224u));
-  float3x3 mat3x3_f32 = ub_load_16(((544u * idx) + 256u));
-  float3x4 mat3x4_f32 = ub_load_17(((544u * idx) + 304u));
-  float4x2 mat4x2_f32 = ub_load_18(((544u * idx) + 352u));
-  float4x3 mat4x3_f32 = ub_load_19(((544u * idx) + 384u));
-  float4x4 mat4x4_f32 = ub_load_20(((544u * idx) + 448u));
-  float3 arr2_vec3_f32[2] = ub_load_21(((544u * idx) + 512u));
+  float2x2 mat2x2_f32 = ub_load_12(((544u * min(idx, 7u)) + 144u));
+  float2x3 mat2x3_f32 = ub_load_13(((544u * min(idx, 7u)) + 160u));
+  float2x4 mat2x4_f32 = ub_load_14(((544u * min(idx, 7u)) + 192u));
+  float3x2 mat3x2_f32 = ub_load_15(((544u * min(idx, 7u)) + 224u));
+  float3x3 mat3x3_f32 = ub_load_16(((544u * min(idx, 7u)) + 256u));
+  float3x4 mat3x4_f32 = ub_load_17(((544u * min(idx, 7u)) + 304u));
+  float4x2 mat4x2_f32 = ub_load_18(((544u * min(idx, 7u)) + 352u));
+  float4x3 mat4x3_f32 = ub_load_19(((544u * min(idx, 7u)) + 384u));
+  float4x4 mat4x4_f32 = ub_load_20(((544u * min(idx, 7u)) + 448u));
+  float3 arr2_vec3_f32[2] = ub_load_21(((544u * min(idx, 7u)) + 512u));
   s.Store(0u, asuint((((((((((((((((((((((tint_ftoi(scalar_f32) + scalar_i32) + int(scalar_u32)) + tint_ftoi(vec2_f32.x)) + vec2_i32.x) + int(vec2_u32.x)) + tint_ftoi(vec3_f32.y)) + vec3_i32.y) + int(vec3_u32.y)) + tint_ftoi(vec4_f32.z)) + vec4_i32.z) + int(vec4_u32.z)) + tint_ftoi(mat2x2_f32[0].x)) + tint_ftoi(mat2x3_f32[0].x)) + tint_ftoi(mat2x4_f32[0].x)) + tint_ftoi(mat3x2_f32[0].x)) + tint_ftoi(mat3x3_f32[0].x)) + tint_ftoi(mat3x4_f32[0].x)) + tint_ftoi(mat4x2_f32[0].x)) + tint_ftoi(mat4x3_f32[0].x)) + tint_ftoi(mat4x4_f32[0].x)) + tint_ftoi(arr2_vec3_f32[0].x))));
 }
 

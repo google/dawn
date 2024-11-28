@@ -1,7 +1,7 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 1
-; Bound: 47
+; Bound: 44
 ; Schema: 0
                OpCapability Shader
                OpCapability Float16
@@ -43,9 +43,6 @@
      %uint_2 = OpConstant %uint 2
      %uint_3 = OpConstant %uint 3
 %_ptr_Private_v3half = OpTypePointer Private %v3half
-        %int = OpTypeInt 32 1
-      %int_1 = OpConstant %int 1
-      %int_0 = OpConstant %int 0
 %_ptr_Uniform_half = OpTypePointer Uniform %half
 %_ptr_Private_half = OpTypePointer Private %half
           %f = OpFunction %void None %12
@@ -60,20 +57,20 @@
          %27 = OpLoad %v3half %25 None
          %28 = OpCompositeConstruct %mat4v3half %18 %21 %24 %27
                OpStore %p %28 None
-         %29 = OpAccessChain %_ptr_Private_v3half %p %int_1
-         %33 = OpAccessChain %_ptr_Uniform_v3half %1 %uint_0
-         %34 = OpLoad %v3half %33 None
-               OpStore %29 %34 None
-         %35 = OpAccessChain %_ptr_Private_v3half %p %int_1
-         %36 = OpAccessChain %_ptr_Uniform_v3half %1 %uint_0
-         %37 = OpLoad %v3half %36 None
-         %38 = OpVectorShuffle %v3half %37 %37 2 0 1
-               OpStore %35 %38 None
-         %39 = OpAccessChain %_ptr_Private_v3half %p %int_0
-         %41 = OpAccessChain %_ptr_Uniform_v3half %1 %uint_1
-         %42 = OpAccessChain %_ptr_Uniform_half %41 %int_0
-         %44 = OpLoad %half %42 None
-         %45 = OpAccessChain %_ptr_Private_half %39 %int_1
-               OpStore %45 %44 None
+         %29 = OpAccessChain %_ptr_Private_v3half %p %uint_1
+         %31 = OpAccessChain %_ptr_Uniform_v3half %1 %uint_0
+         %32 = OpLoad %v3half %31 None
+               OpStore %29 %32 None
+         %33 = OpAccessChain %_ptr_Private_v3half %p %uint_1
+         %34 = OpAccessChain %_ptr_Uniform_v3half %1 %uint_0
+         %35 = OpLoad %v3half %34 None
+         %36 = OpVectorShuffle %v3half %35 %35 2 0 1
+               OpStore %33 %36 None
+         %37 = OpAccessChain %_ptr_Private_v3half %p %uint_0
+         %38 = OpAccessChain %_ptr_Uniform_v3half %1 %uint_1
+         %39 = OpAccessChain %_ptr_Uniform_half %38 %uint_0
+         %41 = OpLoad %half %39 None
+         %42 = OpAccessChain %_ptr_Private_half %37 %uint_1
+               OpStore %42 %41 None
                OpReturn
                OpFunctionEnd

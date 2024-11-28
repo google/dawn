@@ -6,7 +6,7 @@ struct main_inputs {
 RWByteAddressBuffer io : register(u0);
 float3 Bad(uint index, float3 rd) {
   float3 normal = (0.0f).xxx;
-  normal[index] = -(float(sign(rd[index])));
+  normal[min(index, 2u)] = -(float(sign(rd[min(index, 2u)])));
   return normalize(normal);
 }
 

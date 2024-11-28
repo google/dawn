@@ -20,9 +20,12 @@ int4 textureLoad_79e697(tint_module_vars_struct tint_module_vars) {
   int2 arg_1 = int2(1);
   int arg_2 = 1;
   int arg_3 = 1;
-  int const v = arg_2;
+  int2 const v = arg_1;
   int const v_1 = arg_3;
-  int4 res = tint_module_vars.arg_0.read(uint2(arg_1), v, v_1);
+  uint const v_2 = min(uint(arg_2), (tint_module_vars.arg_0.get_array_size() - 1u));
+  uint const v_3 = min(uint(v_1), (tint_module_vars.arg_0.get_num_mip_levels() - 1u));
+  uint2 const v_4 = (uint2(tint_module_vars.arg_0.get_width(v_3), tint_module_vars.arg_0.get_height(v_3)) - uint2(1u));
+  int4 res = tint_module_vars.arg_0.read(min(uint2(v), v_4), v_2, v_3);
   return res;
 }
 
@@ -45,9 +48,9 @@ VertexOutput vertex_main_inner(tint_module_vars_struct tint_module_vars) {
 
 vertex vertex_main_outputs vertex_main(texture2d_array<int, access::sample> arg_0 [[texture(0)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.arg_0=arg_0};
-  VertexOutput const v_2 = vertex_main_inner(tint_module_vars);
+  VertexOutput const v_5 = vertex_main_inner(tint_module_vars);
   vertex_main_outputs tint_wrapper_result = {};
-  tint_wrapper_result.VertexOutput_pos = v_2.pos;
-  tint_wrapper_result.VertexOutput_prevent_dce = v_2.prevent_dce;
+  tint_wrapper_result.VertexOutput_pos = v_5.pos;
+  tint_wrapper_result.VertexOutput_prevent_dce = v_5.prevent_dce;
   return tint_wrapper_result;
 }

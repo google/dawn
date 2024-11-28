@@ -14,7 +14,7 @@ int satomicLoad(uint offset) {
 
 
 int runTest() {
-  return satomicLoad((4u * (0u + uint(constants[0].x))));
+  return satomicLoad((4u * min((0u + uint(constants[0].x)), 2u)));
 }
 
 [numthreads(1, 1, 1)]

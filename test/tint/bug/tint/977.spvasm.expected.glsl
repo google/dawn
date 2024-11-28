@@ -30,7 +30,9 @@ void main_1() {
   param = -4.0f;
   param_1 = -3.0f;
   float x_68 = binaryOperation_f1_f1_(param, param_1);
-  resultMatrix.numbers[x_63] = x_68;
+  uint v = (uint(resultMatrix.numbers.length()) - 1u);
+  uint v_1 = min(uint(x_63), v);
+  resultMatrix.numbers[v_1] = x_68;
 }
 void tint_symbol_1_inner(uvec3 tint_symbol_2) {
   tint_symbol = tint_symbol_2;

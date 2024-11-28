@@ -17,19 +17,23 @@ struct tint_module_vars_struct {
   device tint_array<int, 10>* output;
 };
 
+#define TINT_ISOLATE_UB(VOLATILE_NAME) \
+  {volatile bool VOLATILE_NAME = false; if (VOLATILE_NAME) break;}
+
 kernel void foo(device tint_array<int, 10>* output [[buffer(0)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.output=output};
   int i = 0;
   {
     while(true) {
-      int x = (*tint_module_vars.output)[i];
+      TINT_ISOLATE_UB(tint_volatile_false)
+      int x = (*tint_module_vars.output)[min(uint(i), 9u)];
       {
-        int x_1 = (*tint_module_vars.output)[x];
+        int x_1 = (*tint_module_vars.output)[min(uint(x), 9u)];
         i = as_type<int>((as_type<uint>(i) + as_type<uint>(x_1)));
         if ((i > 10)) { break; }
       }
       continue;
     }
   }
-  (*tint_module_vars.output)[0] = i;
+  (*tint_module_vars.output)[0u] = i;
 }

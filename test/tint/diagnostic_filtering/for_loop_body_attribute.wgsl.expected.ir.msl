@@ -18,6 +18,9 @@ struct tint_module_vars_struct {
   sampler s;
 };
 
+#define TINT_ISOLATE_UB(VOLATILE_NAME) \
+  {volatile bool VOLATILE_NAME = false; if (VOLATILE_NAME) break;}
+
 struct tint_symbol_inputs {
   float x [[user(locn0)]];
 };
@@ -26,6 +29,7 @@ void tint_symbol_inner(float x, tint_module_vars_struct tint_module_vars) {
   float4 v = float4(0.0f);
   {
     while(true) {
+      TINT_ISOLATE_UB(tint_volatile_false)
       if ((x > v[0u])) {
       } else {
         break;

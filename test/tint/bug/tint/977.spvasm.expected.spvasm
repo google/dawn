@@ -1,7 +1,7 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 1
-; Bound: 104
+; Bound: 111
 ; Schema: 0
                OpCapability Shader
          %51 = OpExtInstImport "GLSL.std.450"
@@ -110,8 +110,10 @@
     %int_n10 = OpConstant %int -10
    %float_n4 = OpConstant %float -4
    %float_n3 = OpConstant %float -3
+%_ptr_StorageBuffer__runtimearr_float = OpTypePointer StorageBuffer %_runtimearr_float
+     %uint_1 = OpConstant %uint 1
 %_ptr_StorageBuffer_float = OpTypePointer StorageBuffer %float
-         %97 = OpTypeFunction %void %v3uint
+        %104 = OpTypeFunction %void %v3uint
 %binaryOperation_f1_f1_ = OpFunction %float None %28
      %a_root = OpFunctionParameter %_ptr_Function_float
      %b_root = OpFunctionParameter %_ptr_Function_float
@@ -183,20 +185,25 @@
                OpStore %param %float_n4 None
                OpStore %param_1 %float_n3 None
        %x_68 = OpFunctionCall %float %binaryOperation_f1_f1_ %param %param_1
-         %93 = OpAccessChain %_ptr_StorageBuffer_float %resultMatrix %uint_0 %x_63
-               OpStore %93 %x_68 None
+         %93 = OpAccessChain %_ptr_StorageBuffer__runtimearr_float %resultMatrix %uint_0
+         %95 = OpArrayLength %uint %resultMatrix 0
+         %96 = OpISub %uint %95 %uint_1
+         %98 = OpBitcast %uint %x_63
+         %99 = OpExtInst %uint %51 UMin %98 %96
+        %100 = OpAccessChain %_ptr_StorageBuffer_float %resultMatrix %uint_0 %99
+               OpStore %100 %x_68 None
                OpReturn
                OpFunctionEnd
- %main_inner = OpFunction %void None %97
+ %main_inner = OpFunction %void None %104
 %gl_GlobalInvocationID_param = OpFunctionParameter %v3uint
-         %98 = OpLabel
+        %105 = OpLabel
                OpStore %gl_GlobalInvocationID %gl_GlobalInvocationID_param None
-         %99 = OpFunctionCall %void %main_1
+        %106 = OpFunctionCall %void %main_1
                OpReturn
                OpFunctionEnd
        %main = OpFunction %void None %75
-        %101 = OpLabel
-        %102 = OpLoad %v3uint %main_global_invocation_id_Input None
-        %103 = OpFunctionCall %void %main_inner %102
+        %108 = OpLabel
+        %109 = OpLoad %v3uint %main_global_invocation_id_Input None
+        %110 = OpFunctionCall %void %main_inner %109
                OpReturn
                OpFunctionEnd

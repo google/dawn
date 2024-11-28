@@ -27,5 +27,5 @@ str func(const device str* const pointer) {
 
 kernel void tint_symbol(const device tint_array<str, 4>* S [[buffer(0)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.S=S};
-  str const r = func((&(*tint_module_vars.S)[2]));
+  str const r = func((&(*tint_module_vars.S)[2u]));
 }

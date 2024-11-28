@@ -26,7 +26,10 @@ float mm_readA(uint row, uint col) {
     tint_tmp = (col < uniforms[0].y);
   }
   if ((tint_tmp)) {
-    float result = asfloat(firstMatrix.Load((4u * ((row * uniforms[0].y) + col))));
+    uint tint_symbol_7 = 0u;
+    firstMatrix.GetDimensions(tint_symbol_7);
+    uint tint_symbol_8 = ((tint_symbol_7 - 0u) / 4u);
+    float result = asfloat(firstMatrix.Load((4u * min(((row * uniforms[0].y) + col), (tint_symbol_8 - 1u)))));
     return result;
   }
   return 0.0f;
@@ -38,7 +41,10 @@ float mm_readB(uint row, uint col) {
     tint_tmp_1 = (col < uniforms[0].z);
   }
   if ((tint_tmp_1)) {
-    float result = asfloat(secondMatrix.Load((4u * ((row * uniforms[0].z) + col))));
+    uint tint_symbol_9 = 0u;
+    secondMatrix.GetDimensions(tint_symbol_9);
+    uint tint_symbol_10 = ((tint_symbol_9 - 0u) / 4u);
+    float result = asfloat(secondMatrix.Load((4u * min(((row * uniforms[0].z) + col), (tint_symbol_10 - 1u)))));
     return result;
   }
   return 0.0f;
@@ -50,8 +56,11 @@ void mm_write(uint row, uint col, float value) {
     tint_tmp_2 = (col < uniforms[0].z);
   }
   if ((tint_tmp_2)) {
+    uint tint_symbol_12 = 0u;
+    resultMatrix.GetDimensions(tint_symbol_12);
+    uint tint_symbol_13 = ((tint_symbol_12 - 0u) / 4u);
     uint index = (col + (row * uniforms[0].z));
-    resultMatrix.Store((4u * index), asuint(value));
+    resultMatrix.Store((4u * min(index, (tint_symbol_13 - 1u))), asuint(value));
   }
 }
 
@@ -77,7 +86,7 @@ void main_inner(uint3 local_id, uint3 global_id, uint local_invocation_index) {
   float BCached[4] = (float[4])0;
   {
     for(uint index = 0u; (index < 16u); index = (index + 1u)) {
-      acc[index] = 0.0f;
+      acc[min(index, 15u)] = 0.0f;
     }
   }
   uint ColPerThreadA = 4u;
@@ -94,7 +103,7 @@ void main_inner(uint3 local_id, uint3 global_id, uint local_invocation_index) {
               uint inputCol = (tileColA + innerCol);
               uint tint_symbol = inputRow;
               uint tint_symbol_1 = inputCol;
-              mm_Asub[tint_symbol][tint_symbol_1] = mm_readA((globalRow + innerRow), ((t * 64u) + inputCol));
+              mm_Asub[min(tint_symbol, 63u)][min(tint_symbol_1, 63u)] = mm_readA((globalRow + innerRow), ((t * 64u) + inputCol));
             }
           }
         }
@@ -107,7 +116,7 @@ void main_inner(uint3 local_id, uint3 global_id, uint local_invocation_index) {
               uint inputCol = (tileCol + innerCol);
               uint tint_symbol_2 = innerCol;
               uint tint_symbol_3 = inputCol;
-              mm_Bsub[tint_symbol_2][tint_symbol_3] = mm_readB(((t * 64u) + inputRow), (globalCol + innerCol));
+              mm_Bsub[min(tint_symbol_2, 63u)][min(tint_symbol_3, 63u)] = mm_readB(((t * 64u) + inputRow), (globalCol + innerCol));
             }
           }
         }
@@ -117,16 +126,16 @@ void main_inner(uint3 local_id, uint3 global_id, uint local_invocation_index) {
         for(uint k = 0u; (k < 64u); k = (k + 1u)) {
           {
             for(uint inner = 0u; (inner < 4u); inner = (inner + 1u)) {
-              BCached[inner] = mm_Bsub[k][(tileCol + inner)];
+              BCached[min(inner, 3u)] = mm_Bsub[min(k, 63u)][min((tileCol + inner), 63u)];
             }
           }
           {
             for(uint innerRow = 0u; (innerRow < 4u); innerRow = (innerRow + 1u)) {
-              ACached = mm_Asub[(tileRow + innerRow)][k];
+              ACached = mm_Asub[min((tileRow + innerRow), 63u)][min(k, 63u)];
               {
                 for(uint innerCol = 0u; (innerCol < 4u); innerCol = (innerCol + 1u)) {
                   uint index = ((innerRow * 4u) + innerCol);
-                  acc[index] = (acc[index] + (ACached * BCached[innerCol]));
+                  acc[min(index, 15u)] = (acc[min(index, 15u)] + (ACached * BCached[min(innerCol, 3u)]));
                 }
               }
             }
@@ -141,7 +150,7 @@ void main_inner(uint3 local_id, uint3 global_id, uint local_invocation_index) {
       {
         for(uint innerCol = 0u; (innerCol < 4u); innerCol = (innerCol + 1u)) {
           uint index = ((innerRow * 4u) + innerCol);
-          mm_write((globalRow + innerRow), (globalCol + innerCol), acc[index]);
+          mm_write((globalRow + innerRow), (globalCol + innerCol), acc[min(index, 15u)]);
         }
       }
     }

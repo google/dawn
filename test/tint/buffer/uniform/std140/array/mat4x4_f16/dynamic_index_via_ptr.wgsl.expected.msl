@@ -27,9 +27,9 @@ kernel void f(const constant tint_array<half4x4, 4>* tint_symbol_2 [[buffer(0)]]
   thread tint_private_vars_struct tint_private_vars = {};
   tint_private_vars.counter = 0;
   int const tint_symbol = i(&(tint_private_vars));
-  int const p_a_i_save = tint_symbol;
+  uint const p_a_i_save = min(uint(tint_symbol), 3u);
   int const tint_symbol_1 = i(&(tint_private_vars));
-  int const p_a_i_i_save = tint_symbol_1;
+  uint const p_a_i_i_save = min(uint(tint_symbol_1), 3u);
   tint_array<half4x4, 4> const l_a = *(tint_symbol_2);
   half4x4 const l_a_i = (*(tint_symbol_2))[p_a_i_save];
   half4 const l_a_i_i = (*(tint_symbol_2))[p_a_i_save][p_a_i_i_save];

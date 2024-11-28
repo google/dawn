@@ -9,7 +9,7 @@ void tint_symbol_inner(uint tint_local_index) {
     S = mat2(vec2(0.0f), vec2(0.0f));
   }
   barrier();
-  func(uint[1](uint(1)));
+  func(uint[1](1u));
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {

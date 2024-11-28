@@ -129,9 +129,11 @@ void simulate_inner(uvec3 GlobalInvocationID) {
   vec2 v_2 = (v_1 * vec2(GlobalInvocationID.xy));
   rand_seed = (v_2 * v.inner.seed.zw);
   uint idx = GlobalInvocationID[0u];
-  Particle particle = data.particles[idx];
-  Particle v_3 = particle;
-  tint_store_and_preserve_padding(uint[1](idx), v_3);
+  uint v_3 = min(idx, (uint(data.particles.length()) - 1u));
+  Particle particle = data.particles[v_3];
+  uint v_4 = min(idx, (uint(data.particles.length()) - 1u));
+  Particle v_5 = particle;
+  tint_store_and_preserve_padding(uint[1](v_4), v_5);
 }
 layout(local_size_x = 64, local_size_y = 1, local_size_z = 1) in;
 void main() {
@@ -164,14 +166,19 @@ void export_level_inner(uvec3 coord) {
   if (all(lessThan(coord.xy, uvec2(uvec2(imageSize(tex_out)))))) {
     uint dst_offset = (coord[0u] << ((coord[1u] * v.inner.width) & 31u));
     uint src_offset = ((coord[0u] - 2u) + ((coord[1u] >> (2u & 31u)) * v.inner.width));
-    float a = buf_in.weights[(src_offset << (0u & 31u))];
-    float b = buf_in.weights[(src_offset + 1u)];
-    uint v_1 = ((src_offset + 1u) + v.inner.width);
-    float c = buf_in.weights[v_1];
-    uint v_2 = ((src_offset + 1u) + v.inner.width);
-    float d = buf_in.weights[v_2];
+    uint v_1 = min((src_offset << (0u & 31u)), (uint(buf_in.weights.length()) - 1u));
+    float a = buf_in.weights[v_1];
+    uint v_2 = min((src_offset + 1u), (uint(buf_in.weights.length()) - 1u));
+    float b = buf_in.weights[v_2];
+    uint v_3 = ((src_offset + 1u) + v.inner.width);
+    uint v_4 = min(v_3, (uint(buf_in.weights.length()) - 1u));
+    float c = buf_in.weights[v_4];
+    uint v_5 = ((src_offset + 1u) + v.inner.width);
+    uint v_6 = min(v_5, (uint(buf_in.weights.length()) - 1u));
+    float d = buf_in.weights[v_6];
     float sum = dot(vec4(a, b, c, d), vec4(1.0f));
-    buf_out.weights[dst_offset] = tint_float_modulo(sum, 4.0f);
+    uint v_7 = min(dst_offset, (uint(buf_out.weights.length()) - 1u));
+    buf_out.weights[v_7] = tint_float_modulo(sum, 4.0f);
     vec4 probabilities = (vec4(a, (a * b), ((a / b) + c), sum) + max(sum, 0.0f));
     imageStore(tex_out, ivec2(coord.xy), probabilities);
   }

@@ -35,7 +35,7 @@
 %_ptr_Function_S = OpTypePointer Function %S
          %24 = OpConstantNull %S
 %_ptr_Function_v3float = OpTypePointer Function %v3float
-      %int_2 = OpConstant %int 2
+     %uint_2 = OpConstant %uint 2
           %a = OpFunction %void None %3
           %4 = OpLabel
         %a_0 = OpVariable %_ptr_Function_v4int Function
@@ -46,7 +46,7 @@
          %15 = OpLoad %v4int %a_0 None
           %c = OpVectorShuffle %v4int %15 %15 2 2 1 1
                OpStore %d %24
-         %25 = OpAccessChain %_ptr_Function_v3float %d %uint_0 %int_2
+         %25 = OpAccessChain %_ptr_Function_v3float %d %uint_0 %uint_2
          %28 = OpLoad %v3float %25 None
           %e = OpVectorShuffle %v3float %28 %28 1 2 0
                OpReturn

@@ -7,5 +7,5 @@ float2 func(thread float2* const pointer) {
 
 kernel void tint_symbol() {
   float2x2 F = float2x2(0.0f);
-  float2 const r = func((&F[1]));
+  float2 const r = func((&F[1u]));
 }

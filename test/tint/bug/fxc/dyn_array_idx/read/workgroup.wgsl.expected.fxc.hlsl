@@ -26,7 +26,7 @@ struct tint_symbol_2 {
 
 void f_inner(uint local_invocation_index) {
   tint_zero_workgroup_memory(local_invocation_index);
-  result.Store(0u, asuint(s.data[asint(ubo[0].x)]));
+  result.Store(0u, asuint(s.data[min(uint(asint(ubo[0].x)), 63u)]));
 }
 
 [numthreads(1, 1, 1)]

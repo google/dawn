@@ -20,7 +20,7 @@ float2x2 m_load(uint offset) {
 void f() {
   int p_m_i_save = i();
   float2x2 l_m = m_load(0u);
-  const uint scalar_offset_2 = ((8u * uint(p_m_i_save))) / 4;
+  const uint scalar_offset_2 = ((8u * min(uint(p_m_i_save), 1u))) / 4;
   uint4 ubo_load_2 = m[scalar_offset_2 / 4];
   float2 l_m_i = asfloat(((scalar_offset_2 & 2) ? ubo_load_2.zw : ubo_load_2.xy));
   return;

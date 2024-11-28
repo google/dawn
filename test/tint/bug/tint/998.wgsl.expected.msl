@@ -32,7 +32,7 @@ struct Result {
 
 kernel void tint_symbol(const constant Constants* tint_symbol_1 [[buffer(0)]]) {
   thread tint_private_vars_struct tint_private_vars = {};
-  tint_private_vars.s.data[(*(tint_symbol_1)).zero] = 0u;
+  tint_private_vars.s.data[min((*(tint_symbol_1)).zero, 2u)] = 0u;
   return;
 }
 

@@ -107,7 +107,7 @@ tint_ExternalTextureParams tint_convert_tint_ExternalTextureParams(tint_External
 vec4 textureLoad_1bfdfb() {
   uvec2 arg_1 = uvec2(1u);
   tint_ExternalTextureParams v_17 = tint_convert_tint_ExternalTextureParams(v_2.inner);
-  vec4 res = tint_TextureLoadExternal(v_17, arg_1);
+  vec4 res = tint_TextureLoadExternal(v_17, min(arg_1, ((v_17.apparentSize + uvec2(1u)) - uvec2(1u))));
   return res;
 }
 void main() {
@@ -220,7 +220,7 @@ tint_ExternalTextureParams tint_convert_tint_ExternalTextureParams(tint_External
 vec4 textureLoad_1bfdfb() {
   uvec2 arg_1 = uvec2(1u);
   tint_ExternalTextureParams v_17 = tint_convert_tint_ExternalTextureParams(v_2.inner);
-  vec4 res = tint_TextureLoadExternal(v_17, arg_1);
+  vec4 res = tint_TextureLoadExternal(v_17, min(arg_1, ((v_17.apparentSize + uvec2(1u)) - uvec2(1u))));
   return res;
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
@@ -336,7 +336,7 @@ tint_ExternalTextureParams tint_convert_tint_ExternalTextureParams(tint_External
 vec4 textureLoad_1bfdfb() {
   uvec2 arg_1 = uvec2(1u);
   tint_ExternalTextureParams v_16 = tint_convert_tint_ExternalTextureParams(v_1.inner);
-  vec4 res = tint_TextureLoadExternal(v_16, arg_1);
+  vec4 res = tint_TextureLoadExternal(v_16, min(arg_1, ((v_16.apparentSize + uvec2(1u)) - uvec2(1u))));
   return res;
 }
 VertexOutput vertex_main_inner() {

@@ -102,11 +102,11 @@ float3x3 transposeMat3_mf33_(inout float3x3 inMatrix) {
   float3 i1 = (0.0f).xxx;
   float3 i2 = (0.0f).xxx;
   float3x3 outMatrix = float3x3((0.0f).xxx, (0.0f).xxx, (0.0f).xxx);
-  float3 x_60 = inMatrix[int(0)];
+  float3 x_60 = inMatrix[0u];
   i0 = x_60;
-  float3 x_64 = inMatrix[int(1)];
+  float3 x_64 = inMatrix[1u];
   i1 = x_64;
-  float3 x_68 = inMatrix[int(2)];
+  float3 x_68 = inMatrix[2u];
   i2 = x_68;
   float x_73 = i0.x;
   float x_75 = i1.x;

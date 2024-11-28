@@ -14,7 +14,12 @@ struct tint_array {
     T elements[N];
 };
 
-void tint_symbol(device tint_array<uint, 1>* const tint_symbol_2) {
-  (*(tint_symbol_2))[1] = ((*(tint_symbol_2))[1] - 1u);
+struct TintArrayLengths {
+  /* 0x0000 */ tint_array<uint4, 1> array_lengths;
+};
+
+void tint_symbol(const constant TintArrayLengths* const tint_symbol_2, device tint_array<uint, 1>* const tint_symbol_3) {
+  uint const tint_symbol_1_save = min(1u, (((*(tint_symbol_2)).array_lengths[0u][0u] / 4u) - 1u));
+  (*(tint_symbol_3))[tint_symbol_1_save] = ((*(tint_symbol_3))[tint_symbol_1_save] - 1u);
 }
 

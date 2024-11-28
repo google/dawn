@@ -10,7 +10,9 @@ struct vertex_main_outputs {
 };
 
 int4 textureLoad2d(texture2d<int, access::sample> tint_symbol, int2 coords, int level) {
-  return tint_symbol.read(uint2(coords), level);
+  uint const v = min(uint(level), (tint_symbol.get_num_mip_levels() - 1u));
+  uint2 const v_1 = (uint2(tint_symbol.get_width(v), tint_symbol.get_height(v)) - uint2(1u));
+  return tint_symbol.read(min(uint2(coords), v_1), v);
 }
 
 void doTextureLoad(tint_module_vars_struct tint_module_vars) {

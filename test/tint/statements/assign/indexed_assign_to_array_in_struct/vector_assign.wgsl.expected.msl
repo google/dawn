@@ -29,9 +29,9 @@ uint f(uint i) {
 kernel void tint_symbol(const constant Uniforms* tint_symbol_2 [[buffer(0)]]) {
   OuterS s1 = {};
   float3 v = 0.0f;
-  v[s1.a1[(*(tint_symbol_2)).i]] = 1.0f;
-  uint const tint_symbol_1 = f(s1.a1[(*(tint_symbol_2)).i]);
-  v[tint_symbol_1] = 1.0f;
+  v[min(s1.a1[min((*(tint_symbol_2)).i, 7u)], 2u)] = 1.0f;
+  uint const tint_symbol_1 = f(s1.a1[min((*(tint_symbol_2)).i, 7u)]);
+  v[min(tint_symbol_1, 2u)] = 1.0f;
   return;
 }
 

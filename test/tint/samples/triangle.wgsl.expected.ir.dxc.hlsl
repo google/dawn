@@ -13,7 +13,7 @@ struct frag_main_outputs {
 
 float4 vtx_main_inner(uint VertexIndex) {
   float2 v[3] = {float2(0.0f, 0.5f), (-0.5f).xx, float2(0.5f, -0.5f)};
-  return float4(v[VertexIndex], 0.0f, 1.0f);
+  return float4(v[min(VertexIndex, 2u)], 0.0f, 1.0f);
 }
 
 float4 frag_main_inner() {

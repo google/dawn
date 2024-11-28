@@ -16,5 +16,5 @@ layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
   f16mat3 v_1 = f16mat3(v.inner_col0, v.inner_col1, v.inner_col2);
   f16mat3 l_m = v_1;
-  f16vec3 l_m_i = v_1[i()];
+  f16vec3 l_m_i = v_1[min(uint(i()), 2u)];
 }

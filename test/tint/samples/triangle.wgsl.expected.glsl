@@ -1,7 +1,7 @@
 #version 310 es
 
 vec4 vtx_main_inner(uint VertexIndex) {
-  return vec4(vec2[3](vec2(0.0f, 0.5f), vec2(-0.5f), vec2(0.5f, -0.5f))[VertexIndex], 0.0f, 1.0f);
+  return vec4(vec2[3](vec2(0.0f, 0.5f), vec2(-0.5f), vec2(0.5f, -0.5f))[min(VertexIndex, 2u)], 0.0f, 1.0f);
 }
 void main() {
   gl_Position = vtx_main_inner(uint(gl_VertexID));

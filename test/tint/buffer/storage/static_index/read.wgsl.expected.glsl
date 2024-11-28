@@ -88,14 +88,14 @@ void main() {
   int v_7 = (v_6 + int(vec3_u32[1u]));
   int v_8 = ((v_7 + tint_f32_to_i32(vec4_f32[2u])) + vec4_i32[2u]);
   int v_9 = (v_8 + int(vec4_u32[2u]));
-  int v_10 = (v_9 + tint_f32_to_i32(mat2x2_f32[0][0u]));
-  int v_11 = (v_10 + tint_f32_to_i32(mat2x3_f32[0][0u]));
-  int v_12 = (v_11 + tint_f32_to_i32(mat2x4_f32[0][0u]));
-  int v_13 = (v_12 + tint_f32_to_i32(mat3x2_f32[0][0u]));
-  int v_14 = (v_13 + tint_f32_to_i32(mat3x3_f32[0][0u]));
-  int v_15 = (v_14 + tint_f32_to_i32(mat3x4_f32[0][0u]));
-  int v_16 = (v_15 + tint_f32_to_i32(mat4x2_f32[0][0u]));
-  int v_17 = (v_16 + tint_f32_to_i32(mat4x3_f32[0][0u]));
-  int v_18 = (v_17 + tint_f32_to_i32(mat4x4_f32[0][0u]));
-  v_1.inner = (((v_18 + tint_f32_to_i32(arr2_vec3_f32[0][0u])) + struct_inner.scalar_i32) + array_struct_inner[0].scalar_i32);
+  int v_10 = (v_9 + tint_f32_to_i32(mat2x2_f32[0u][0u]));
+  int v_11 = (v_10 + tint_f32_to_i32(mat2x3_f32[0u][0u]));
+  int v_12 = (v_11 + tint_f32_to_i32(mat2x4_f32[0u][0u]));
+  int v_13 = (v_12 + tint_f32_to_i32(mat3x2_f32[0u][0u]));
+  int v_14 = (v_13 + tint_f32_to_i32(mat3x3_f32[0u][0u]));
+  int v_15 = (v_14 + tint_f32_to_i32(mat3x4_f32[0u][0u]));
+  int v_16 = (v_15 + tint_f32_to_i32(mat4x2_f32[0u][0u]));
+  int v_17 = (v_16 + tint_f32_to_i32(mat4x3_f32[0u][0u]));
+  int v_18 = (v_17 + tint_f32_to_i32(mat4x4_f32[0u][0u]));
+  v_1.inner = (((v_18 + tint_f32_to_i32(arr2_vec3_f32[0u][0u])) + struct_inner.scalar_i32) + array_struct_inner[0u].scalar_i32);
 }

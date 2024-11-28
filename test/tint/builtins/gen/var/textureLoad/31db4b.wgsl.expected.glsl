@@ -9,7 +9,8 @@ buffer prevent_dce_block_1_ssbo {
 layout(binding = 0, r32ui) uniform highp readonly uimage2D arg_0;
 uvec4 textureLoad_31db4b() {
   uint arg_1 = 1u;
-  uvec4 res = imageLoad(arg_0, ivec2(uvec2(arg_1, 0u)));
+  uint v_1 = arg_1;
+  uvec4 res = imageLoad(arg_0, ivec2(uvec2(min(v_1, (uvec2(imageSize(arg_0)).x - 1u)), 0u)));
   return res;
 }
 void main() {
@@ -24,7 +25,8 @@ buffer prevent_dce_block_1_ssbo {
 layout(binding = 0, r32ui) uniform highp readonly uimage2D arg_0;
 uvec4 textureLoad_31db4b() {
   uint arg_1 = 1u;
-  uvec4 res = imageLoad(arg_0, ivec2(uvec2(arg_1, 0u)));
+  uint v_1 = arg_1;
+  uvec4 res = imageLoad(arg_0, ivec2(uvec2(min(v_1, (uvec2(imageSize(arg_0)).x - 1u)), 0u)));
   return res;
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
@@ -43,7 +45,8 @@ layout(binding = 0, r32ui) uniform highp readonly uimage2D arg_0;
 layout(location = 0) flat out uvec4 vertex_main_loc0_Output;
 uvec4 textureLoad_31db4b() {
   uint arg_1 = 1u;
-  uvec4 res = imageLoad(arg_0, ivec2(uvec2(arg_1, 0u)));
+  uint v = arg_1;
+  uvec4 res = imageLoad(arg_0, ivec2(uvec2(min(v, (uvec2(imageSize(arg_0)).x - 1u)), 0u)));
   return res;
 }
 VertexOutput vertex_main_inner() {
@@ -53,10 +56,10 @@ VertexOutput vertex_main_inner() {
   return tint_symbol;
 }
 void main() {
-  VertexOutput v = vertex_main_inner();
-  gl_Position = v.pos;
+  VertexOutput v_1 = vertex_main_inner();
+  gl_Position = v_1.pos;
   gl_Position[1u] = -(gl_Position.y);
   gl_Position[2u] = ((2.0f * gl_Position.z) - gl_Position.w);
-  vertex_main_loc0_Output = v.prevent_dce;
+  vertex_main_loc0_Output = v_1.prevent_dce;
   gl_PointSize = 1.0f;
 }

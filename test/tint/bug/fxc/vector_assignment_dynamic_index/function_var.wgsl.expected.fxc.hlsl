@@ -9,6 +9,6 @@ cbuffer cbuffer_i : register(b0) {
 [numthreads(1, 1, 1)]
 void main() {
   float3 v1 = float3(0.0f, 0.0f, 0.0f);
-  set_vector_element(v1, i[0].x, 1.0f);
+  set_vector_element(v1, min(i[0].x, 2u), 1.0f);
   return;
 }

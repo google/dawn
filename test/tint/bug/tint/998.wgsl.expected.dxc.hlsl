@@ -14,7 +14,7 @@ static S s = (S)0;
 void main() {
   {
     uint tint_symbol_1[3] = s.data;
-    tint_symbol_1[constants[0].x] = 0u;
+    tint_symbol_1[min(constants[0].x, 2u)] = 0u;
     s.data = tint_symbol_1;
   }
   return;

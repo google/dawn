@@ -17,7 +17,7 @@ struct vertex_main_outputs {
 };
 
 float4 textureLoad_388688(tint_module_vars_struct tint_module_vars) {
-  float4 res = tint_module_vars.arg_0.read(1u);
+  float4 res = tint_module_vars.arg_0.read(min(1u, (uint(tint_module_vars.arg_0.get_width()) - 1u)));
   return res;
 }
 

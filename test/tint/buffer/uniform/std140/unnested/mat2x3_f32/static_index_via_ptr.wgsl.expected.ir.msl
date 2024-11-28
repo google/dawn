@@ -31,7 +31,7 @@ int i(tint_module_vars_struct tint_module_vars) {
 kernel void f(const constant tint_array<tint_packed_vec3_f32_array_element, 2>* m [[buffer(0)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.m=m};
   const constant tint_array<tint_packed_vec3_f32_array_element, 2>* const p_m = tint_module_vars.m;
-  const constant packed_float3* const p_m_1 = (&(*p_m)[1].packed);
+  const constant packed_float3* const p_m_1 = (&(*p_m)[1u].packed);
   tint_array<tint_packed_vec3_f32_array_element, 2> const v = (*p_m);
   float3 const v_1 = float3(v[0u].packed);
   float2x3 const l_m = float2x3(v_1, float3(v[1u].packed));

@@ -13,6 +13,6 @@ cbuffer cbuffer_uniforms : register(b4, space1) {
 [numthreads(1, 1, 1)]
 void main() {
   OuterS s1 = (OuterS)0;
-  set_vector_element(s1.v1, uniforms[0].x, 1.0f);
+  set_vector_element(s1.v1, min(uniforms[0].x, 2u), 1.0f);
   return;
 }

@@ -19,7 +19,8 @@ void tint_symbol() {
     while(true) {
       int v = vec.y;
       uint v_1 = idx;
-      if ((v >= _storage.fsUniformData[v_1].size.y)) {
+      uint v_2 = min(v_1, (uint(_storage.fsUniformData.length()) - 1u));
+      if ((v >= _storage.fsUniformData[v_2].size.y)) {
         break;
       }
       {

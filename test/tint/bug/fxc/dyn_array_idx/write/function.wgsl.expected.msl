@@ -28,7 +28,7 @@ struct Result {
 
 kernel void f(const constant UBO* tint_symbol [[buffer(0)]], device Result* tint_symbol_1 [[buffer(1)]]) {
   S s = {};
-  s.data[(*(tint_symbol)).dynamic_idx] = 1;
+  s.data[min(uint((*(tint_symbol)).dynamic_idx), 63u)] = 1;
   (*(tint_symbol_1)).out = s.data[3];
   return;
 }

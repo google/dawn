@@ -1,8 +1,13 @@
 #include <metal_stdlib>
 
 using namespace metal;
+int2 tint_clamp(int2 e, int2 low, int2 high) {
+  return min(max(e, low), high);
+}
+
 int4 textureLoad_c2a480(texture2d<int, access::sample> tint_symbol_1) {
-  int4 res = tint_symbol_1.read(uint2(int2(1)), 1);
+  uint const level_idx = min(1u, (tint_symbol_1.get_num_mip_levels() - 1u));
+  int4 res = tint_symbol_1.read(uint2(tint_clamp(int2(1), int2(0), int2((uint2(tint_symbol_1.get_width(level_idx), tint_symbol_1.get_height(level_idx)) - uint2(1u))))), level_idx);
   return res;
 }
 

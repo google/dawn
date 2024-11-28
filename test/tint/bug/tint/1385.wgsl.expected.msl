@@ -14,16 +14,20 @@ struct tint_array {
     T elements[N];
 };
 
-struct tint_symbol_3 {
+struct tint_symbol_4 {
   /* 0x0000 */ tint_array<int, 1> arr;
 };
 
-int foo(const device tint_array<int, 1>* const tint_symbol_1) {
-  return (*(tint_symbol_1))[0];
+struct TintArrayLengths {
+  /* 0x0000 */ tint_array<uint4, 1> array_lengths;
+};
+
+int foo(const device tint_array<int, 1>* const tint_symbol_1, const constant TintArrayLengths* const tint_symbol_2) {
+  return (*(tint_symbol_1))[min(0u, (((*(tint_symbol_2)).array_lengths[0u][0u] / 4u) - 1u))];
 }
 
-kernel void tint_symbol(const device tint_symbol_3* tint_symbol_2 [[buffer(0)]]) {
-  foo(&((*(tint_symbol_2)).arr));
+kernel void tint_symbol(const device tint_symbol_4* tint_symbol_3 [[buffer(0)]], const constant TintArrayLengths* tint_symbol_5 [[buffer(30)]]) {
+  foo(&((*(tint_symbol_3)).arr), tint_symbol_5);
   return;
 }
 

@@ -9,7 +9,9 @@ struct tint_module_vars_struct {
 kernel void tint_symbol(texture2d<uint, access::sample> Src [[texture(0)]], texture2d<uint, access::write> Dst [[texture(1)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.Src=Src, .Dst=Dst};
   uint4 srcValue = 0u;
-  uint4 const x_22 = tint_module_vars.Src.read(uint2(int2(0)), 0);
+  uint const v = min(uint(0), (tint_module_vars.Src.get_num_mip_levels() - 1u));
+  uint2 const v_1 = (uint2(tint_module_vars.Src.get_width(v), tint_module_vars.Src.get_height(v)) - uint2(1u));
+  uint4 const x_22 = tint_module_vars.Src.read(min(uint2(int2(0)), v_1), v);
   srcValue = x_22;
   uint const x_24 = srcValue[0u];
   uint const x_25 = (x_24 + 1u);

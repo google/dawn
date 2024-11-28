@@ -61,6 +61,9 @@ struct tint_module_vars_struct {
   texture2d<float, access::sample> bumpSamplerTexture;
 };
 
+#define TINT_ISOLATE_UB(VOLATILE_NAME) \
+  {volatile bool VOLATILE_NAME = false; if (VOLATILE_NAME) break;}
+
 struct main_out {
   float4 glFragColor_1;
 };
@@ -138,11 +141,11 @@ float3x3 transposeMat3_mf33_(thread float3x3* const inMatrix) {
   float3 i1 = 0.0f;
   float3 i2 = 0.0f;
   float3x3 outMatrix = float3x3(0.0f);
-  float3 const x_60 = (*inMatrix)[0];
+  float3 const x_60 = (*inMatrix)[0u];
   i0 = x_60;
-  float3 const x_64 = (*inMatrix)[1];
+  float3 const x_64 = (*inMatrix)[1u];
   i1 = x_64;
-  float3 const x_68 = (*inMatrix)[2];
+  float3 const x_68 = (*inMatrix)[2u];
   i2 = x_68;
   float const x_73 = i0[0u];
   float const x_75 = i1[0u];
@@ -336,6 +339,7 @@ void main_1(tint_module_vars_struct tint_module_vars) {
   i = 0;
   {
     while(true) {
+      TINT_ISOLATE_UB(tint_volatile_false)
       int const x_388 = i;
       if ((x_388 < 15)) {
       } else {

@@ -19,11 +19,11 @@ struct tint_module_vars_struct {
 };
 
 half a(tint_array<half4x2, 4> a_1) {
-  return a_1[0][0][0u];
+  return a_1[0u][0u][0u];
 }
 
 half b(half4x2 m) {
-  return m[0][0u];
+  return m[0u][0u];
 }
 
 half c(half2 v) {
@@ -37,7 +37,7 @@ half d(half f_1) {
 kernel void f(const constant tint_array<half4x2, 4>* u [[buffer(0)]], device half* s [[buffer(1)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.u=u, .s=s};
   half const v_1 = a((*tint_module_vars.u));
-  half const v_2 = (v_1 + b((*tint_module_vars.u)[1]));
-  half const v_3 = (v_2 + c((*tint_module_vars.u)[1][0].yx));
-  (*tint_module_vars.s) = (v_3 + d((*tint_module_vars.u)[1][0].yx[0u]));
+  half const v_2 = (v_1 + b((*tint_module_vars.u)[1u]));
+  half const v_3 = (v_2 + c((*tint_module_vars.u)[1u][0u].yx));
+  (*tint_module_vars.s) = (v_3 + d((*tint_module_vars.u)[1u][0u].yx[0u]));
 }

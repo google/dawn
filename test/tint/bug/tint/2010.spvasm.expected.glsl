@@ -49,8 +49,9 @@ void main_1() {
       }
       uint x_62 = (x_54 + x_52);
       if ((x_62 >= x_58)) {
-        vec4 x_67 = x_9.field0[x_62];
-        x_28[x_62] = S(((x_67.xy + x_67.zw) * 0.5f), x_62);
+        uint v_1 = min(x_62, (uint(x_9.field0.length()) - 1u));
+        vec4 x_67 = x_9.field0[v_1];
+        x_28[min(x_62, 4095u)] = S(((x_67.xy + x_67.zw) * 0.5f), x_62);
       }
       {
         x_55 = (x_54 + 32u);
@@ -61,7 +62,7 @@ void main_1() {
   }
   barrier();
   int x_74 = int(x_58);
-  vec2 x_76 = x_28[0].field0;
+  vec2 x_76 = x_28[0u].field0;
   if ((x_52 == 0u)) {
     uvec2 x_80 = floatBitsToUint(x_76);
     uint x_81 = x_80[0u];
@@ -86,7 +87,7 @@ void main_1() {
       uint x_94 = (x_88 + x_52);
       x_86 = x_85;
       if ((x_94 >= x_90)) {
-        vec2 x_99 = x_28[x_94].field0;
+        vec2 x_99 = x_28[min(x_94, 4095u)].field0;
         vec2 x_101 = min(x_85.xy, x_99);
         vec4 x_103_1 = x_85;
         x_103_1[0u] = x_101[0u];
@@ -115,10 +116,12 @@ void main_1() {
   uint x_120 = atomicMax(x_36, floatBitsToUint(x_85.z));
   uint x_123 = atomicMax(x_37, floatBitsToUint(x_85.w));
   barrier();
-  float v_1 = uintBitsToFloat(atomicOr(x_34, 0u));
-  float v_2 = uintBitsToFloat(atomicOr(x_35, 0u));
-  float v_3 = uintBitsToFloat(atomicOr(x_36, 0u));
-  x_12.field0[0] = vec4(v_1, v_2, v_3, uintBitsToFloat(atomicOr(x_37, 0u)));
+  uint v_2 = (uint(x_12.field0.length()) - 1u);
+  uint v_3 = min(uint(0), v_2);
+  float v_4 = uintBitsToFloat(atomicOr(x_34, 0u));
+  float v_5 = uintBitsToFloat(atomicOr(x_35, 0u));
+  float v_6 = uintBitsToFloat(atomicOr(x_36, 0u));
+  x_12.field0[v_3] = vec4(v_4, v_5, v_6, uintBitsToFloat(atomicOr(x_37, 0u)));
 }
 void tint_symbol_inner(uvec3 x_3_param, uint tint_local_index) {
   if ((tint_local_index < 1u)) {
@@ -128,16 +131,16 @@ void tint_symbol_inner(uvec3 x_3_param, uint tint_local_index) {
     atomicExchange(x_37, 0u);
   }
   {
-    uint v_4 = 0u;
-    v_4 = tint_local_index;
+    uint v_7 = 0u;
+    v_7 = tint_local_index;
     while(true) {
-      uint v_5 = v_4;
-      if ((v_5 >= 4096u)) {
+      uint v_8 = v_7;
+      if ((v_8 >= 4096u)) {
         break;
       }
-      x_28[v_5] = S(vec2(0.0f), 0u);
+      x_28[v_8] = S(vec2(0.0f), 0u);
       {
-        v_4 = (v_5 + 32u);
+        v_7 = (v_8 + 32u);
       }
       continue;
     }

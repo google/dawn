@@ -34,5 +34,5 @@ struct tint_module_vars_struct {
 kernel void tint_symbol(const constant Constants* constants [[buffer(0)]]) {
   thread S s = {};
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.constants=constants, .s=(&s)};
-  (*tint_module_vars.s).data[(*tint_module_vars.constants).zero] = 0u;
+  (*tint_module_vars.s).data[min((*tint_module_vars.constants).zero, 2u)] = 0u;
 }

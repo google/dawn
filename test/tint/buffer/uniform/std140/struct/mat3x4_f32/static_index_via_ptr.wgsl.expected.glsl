@@ -20,10 +20,10 @@ uniform a_block_1_ubo {
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
   Outer l_a[4] = v.inner;
-  Outer l_a_3 = v.inner[3];
-  Inner l_a_3_a[4] = v.inner[3].a;
-  Inner l_a_3_a_2 = v.inner[3].a[2];
-  mat3x4 l_a_3_a_2_m = v.inner[3].a[2].m;
-  vec4 l_a_3_a_2_m_1 = v.inner[3].a[2].m[1];
-  float l_a_3_a_2_m_1_0 = v.inner[3].a[2].m[1].x;
+  Outer l_a_3 = v.inner[3u];
+  Inner l_a_3_a[4] = v.inner[3u].a;
+  Inner l_a_3_a_2 = v.inner[3u].a[2u];
+  mat3x4 l_a_3_a_2_m = v.inner[3u].a[2u].m;
+  vec4 l_a_3_a_2_m_1 = v.inner[3u].a[2u].m[1u];
+  float l_a_3_a_2_m_1_0 = v.inner[3u].a[2u].m[1u].x;
 }

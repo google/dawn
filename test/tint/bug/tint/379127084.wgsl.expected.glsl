@@ -40,25 +40,30 @@ layout(location = 0) out vec4 tint_symbol_loc0_Output;
 void _skslMain(FSIn _stageIn, inout FSOut _stageOut) {
   shadingSsboIndex = _stageIn.ssboIndicesVar[1u];
   uint v = shadingSsboIndex;
-  int _56_d = _storage1.fsUniformData[v].noiseType_1;
-  uint v_1 = shadingSsboIndex;
-  vec2 _57_k = vec2(((_stageIn.localCoordsVar + 0.5f) * _storage1.fsUniformData[v_1].baseFrequency_1));
-  vec4 _58_l = vec4(0.0f);
+  uint v_1 = min(v, (uint(_storage1.fsUniformData.length()) - 1u));
+  int _56_d = _storage1.fsUniformData[v_1].noiseType_1;
   uint v_2 = shadingSsboIndex;
-  vec2 _59_m = vec2(_storage1.fsUniformData[v_2].stitchData_1);
+  uint v_3 = min(v_2, (uint(_storage1.fsUniformData.length()) - 1u));
+  vec2 _57_k = vec2(((_stageIn.localCoordsVar + 0.5f) * _storage1.fsUniformData[v_3].baseFrequency_1));
+  vec4 _58_l = vec4(0.0f);
+  uint v_4 = shadingSsboIndex;
+  uint v_5 = min(v_4, (uint(_storage1.fsUniformData.length()) - 1u));
+  vec2 _59_m = vec2(_storage1.fsUniformData[v_5].stitchData_1);
   float _60_n = 1.0f;
   int _61_o = 0;
   {
     while(true) {
-      int v_3 = _61_o;
-      uint v_4 = shadingSsboIndex;
-      if ((v_3 < _storage1.fsUniformData[v_4].numOctaves_1)) {
+      int v_6 = _61_o;
+      uint v_7 = shadingSsboIndex;
+      uint v_8 = min(v_7, (uint(_storage1.fsUniformData.length()) - 1u));
+      if ((v_6 < _storage1.fsUniformData[v_8].numOctaves_1)) {
         vec4 _62_f = vec4(0.0f);
         vec2 _skTemp2 = floor(_57_k);
         _62_f = vec4(_skTemp2, _62_f.zw);
         _62_f = vec4(_62_f.xy, (_62_f.xy + vec2(1.0f)));
-        uint v_5 = shadingSsboIndex;
-        if (bool(_storage1.fsUniformData[v_5].stitching_1)) {
+        uint v_9 = shadingSsboIndex;
+        uint v_10 = min(v_9, (uint(_storage1.fsUniformData.length()) - 1u));
+        if (bool(_storage1.fsUniformData[v_10].stitching_1)) {
           vec4 _skTemp3 = step(_59_m.xyxy, _62_f);
           _62_f = (_62_f - (_skTemp3 * _59_m.xyxy));
         }
@@ -81,14 +86,14 @@ void _skslMain(FSIn _stageIn, inout FSOut _stageOut) {
         {
           while(true) {
             float _73_i = ((float(_72_h) + 0.5f) * 0.25f);
-            float v_6 = float(_67_p[0u]);
-            vec4 _74_j = texture(noiseSampler_1_Texture_noiseSampler_1_Sampler, vec2(v_6, float(_73_i)), clamp(-0.47499999403953552246f, -16.0f, 15.9899997711181640625f));
-            float v_7 = float(_67_p[1u]);
-            vec4 _75_k = texture(noiseSampler_1_Texture_noiseSampler_1_Sampler, vec2(v_7, float(_73_i)), clamp(-0.47499999403953552246f, -16.0f, 15.9899997711181640625f));
-            float v_8 = float(_67_p[3u]);
-            vec4 _76_l = texture(noiseSampler_1_Texture_noiseSampler_1_Sampler, vec2(v_8, float(_73_i)), clamp(-0.47499999403953552246f, -16.0f, 15.9899997711181640625f));
-            float v_9 = float(_67_p[2u]);
-            vec4 _77_m = texture(noiseSampler_1_Texture_noiseSampler_1_Sampler, vec2(v_9, float(_73_i)), clamp(-0.47499999403953552246f, -16.0f, 15.9899997711181640625f));
+            float v_11 = float(_67_p[0u]);
+            vec4 _74_j = texture(noiseSampler_1_Texture_noiseSampler_1_Sampler, vec2(v_11, float(_73_i)), clamp(-0.47499999403953552246f, -16.0f, 15.9899997711181640625f));
+            float v_12 = float(_67_p[1u]);
+            vec4 _75_k = texture(noiseSampler_1_Texture_noiseSampler_1_Sampler, vec2(v_12, float(_73_i)), clamp(-0.47499999403953552246f, -16.0f, 15.9899997711181640625f));
+            float v_13 = float(_67_p[3u]);
+            vec4 _76_l = texture(noiseSampler_1_Texture_noiseSampler_1_Sampler, vec2(v_13, float(_73_i)), clamp(-0.47499999403953552246f, -16.0f, 15.9899997711181640625f));
+            float v_14 = float(_67_p[2u]);
+            vec4 _77_m = texture(noiseSampler_1_Texture_noiseSampler_1_Sampler, vec2(v_14, float(_73_i)), clamp(-0.47499999403953552246f, -16.0f, 15.9899997711181640625f));
             vec2 _78_n = _68_d;
             float _skTemp7 = dot((((_74_j.yw + (_74_j.xz * 0.00390625f)) * 2.0f) - 1.0f), _78_n);
             float _79_o = _skTemp7;
@@ -106,7 +111,7 @@ void _skslMain(FSIn _stageIn, inout FSOut _stageOut) {
             float _skTemp12 = mix(_79_o, _80_p, _69_e[0u]);
             float _82_r = _skTemp12;
             float _skTemp13 = mix(_81_q, _82_r, _69_e[1u]);
-            _71_g[_72_h] = _skTemp13;
+            _71_g[min(uint(_72_h), 3u)] = _skTemp13;
             {
               _72_h = (_72_h + 1);
               if ((_72_h >= 4)) { break; }
@@ -137,13 +142,14 @@ void _skslMain(FSIn _stageIn, inout FSOut _stageOut) {
   }
   vec4 _skTemp15 = clamp(_58_l, vec4(0.0f), vec4(1.0f));
   _58_l = _skTemp15;
-  vec3 v_10 = vec3(_58_l.xyz);
-  vec3 v_11 = vec3((v_10 * float(_58_l.w)));
-  float _skTemp16 = dot(vec3(0.21259999275207519531f, 0.71520000696182250977f, 0.07220000028610229492f), vec4(v_11, float(float(_58_l.w))).xyz);
+  vec3 v_15 = vec3(_58_l.xyz);
+  vec3 v_16 = vec3((v_15 * float(_58_l.w)));
+  float _skTemp16 = dot(vec3(0.21259999275207519531f, 0.71520000696182250977f, 0.07220000028610229492f), vec4(v_16, float(float(_58_l.w))).xyz);
   float _skTemp17 = clamp(_skTemp16, 0.0f, 1.0f);
   vec4 _84_a = vec4(0.0f, 0.0f, 0.0f, _skTemp17);
-  uint v_12 = shadingSsboIndex;
-  int _85_d = _storage1.fsUniformData[v_12].inHSL_4;
+  uint v_17 = shadingSsboIndex;
+  uint v_18 = min(v_17, (uint(_storage1.fsUniformData.length()) - 1u));
+  int _85_d = _storage1.fsUniformData[v_18].inHSL_4;
   if (bool(_85_d)) {
     vec4 _skTemp18 = vec4(0.0f);
     if ((_84_a.y < _84_a.z)) {
@@ -173,11 +179,13 @@ void _skslMain(FSIn _stageIn, inout FSOut _stageOut) {
     float _skTemp23 = max(_84_a.w, 0.00009999999747378752f);
     _84_a = vec4((_84_a.xyz / _skTemp23), _84_a.w);
   }
-  uint v_13 = shadingSsboIndex;
-  mat4 v_14 = _storage1.fsUniformData[v_13].matrix_4;
-  vec4 v_15 = (v_14 * vec4(_84_a));
-  uint v_16 = shadingSsboIndex;
-  vec4 _94_f = vec4((v_15 + _storage1.fsUniformData[v_16].translate_4));
+  uint v_19 = shadingSsboIndex;
+  uint v_20 = min(v_19, (uint(_storage1.fsUniformData.length()) - 1u));
+  mat4 v_21 = _storage1.fsUniformData[v_20].matrix_4;
+  vec4 v_22 = (v_21 * vec4(_84_a));
+  uint v_23 = shadingSsboIndex;
+  uint v_24 = min(v_23, (uint(_storage1.fsUniformData.length()) - 1u));
+  vec4 _94_f = vec4((v_22 + _storage1.fsUniformData[v_24].translate_4));
   if (bool(_85_d)) {
     float _skTemp24 = abs(((2.0f * _94_f.z) - 1.0f));
     float _95_b = ((1.0f - _skTemp24) * _94_f.y);
@@ -189,8 +197,9 @@ void _skslMain(FSIn _stageIn, inout FSOut _stageOut) {
     vec4 _skTemp28 = clamp(vec4(((((_97_d - 0.5f) * _95_b) + _94_f.z) * _94_f.w), _94_f.w), vec4(0.0f), vec4(1.0f));
     _94_f = _skTemp28;
   } else {
-    uint v_17 = shadingSsboIndex;
-    if (bool(_storage1.fsUniformData[v_17].clampRGB_4)) {
+    uint v_25 = shadingSsboIndex;
+    uint v_26 = min(v_25, (uint(_storage1.fsUniformData.length()) - 1u));
+    if (bool(_storage1.fsUniformData[v_26].clampRGB_4)) {
       vec4 _skTemp29 = clamp(_94_f, vec4(0.0f), vec4(1.0f));
       _94_f = _skTemp29;
     } else {

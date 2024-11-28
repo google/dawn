@@ -120,7 +120,7 @@ float4 textureLoadExternal(texture2d<float, access::sample> plane0, texture2d<fl
 
 float4 textureLoad_1bfdfb(texture2d<float, access::sample> tint_symbol_1, texture2d<float, access::sample> tint_symbol_2, const constant ExternalTextureParams_tint_packed_vec3* const tint_symbol_3) {
   uint2 arg_1 = uint2(1u);
-  float4 res = textureLoadExternal(tint_symbol_1, tint_symbol_2, arg_1, tint_unpack_vec3_in_composite_1(*(tint_symbol_3)));
+  float4 res = textureLoadExternal(tint_symbol_1, tint_symbol_2, min(arg_1, (((*(tint_symbol_3)).apparentSize + uint2(1u)) - uint2(1u))), tint_unpack_vec3_in_composite_1(*(tint_symbol_3)));
   return res;
 }
 

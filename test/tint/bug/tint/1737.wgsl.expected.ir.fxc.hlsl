@@ -2,8 +2,8 @@
 groupshared float a[10];
 groupshared float b[20];
 void f() {
-  float x = a[int(0)];
-  float y = b[int(0)];
+  float x = a[0u];
+  float y = b[0u];
 }
 
 [numthreads(1, 1, 1)]

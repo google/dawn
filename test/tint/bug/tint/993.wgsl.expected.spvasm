@@ -1,9 +1,10 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 1
-; Bound: 37
+; Bound: 40
 ; Schema: 0
                OpCapability Shader
+         %26 = OpExtInstImport "GLSL.std.450"
                OpMemoryModel Logical GLSL450
                OpEntryPoint GLCompute %main "main"
                OpExecutionMode %main LocalSize 1 1 1
@@ -59,25 +60,27 @@
          %18 = OpTypeFunction %int
 %_ptr_Uniform_uint = OpTypePointer Uniform %uint
      %uint_0 = OpConstant %uint 0
+     %uint_2 = OpConstant %uint 2
 %_ptr_StorageBuffer_int = OpTypePointer StorageBuffer %int
      %uint_1 = OpConstant %uint 1
        %void = OpTypeVoid
-         %31 = OpTypeFunction %void
+         %34 = OpTypeFunction %void
 %_ptr_StorageBuffer_uint = OpTypePointer StorageBuffer %uint
     %runTest = OpFunction %int None %18
          %19 = OpLabel
          %20 = OpAccessChain %_ptr_Uniform_uint %1 %uint_0 %uint_0
          %23 = OpLoad %uint %20 None
          %24 = OpIAdd %uint %uint_0 %23
-         %25 = OpAccessChain %_ptr_StorageBuffer_int %10 %uint_0 %uint_0 %24
-         %27 = OpAtomicLoad %int %25 %uint_1 %uint_0
-               OpReturnValue %27
+         %25 = OpExtInst %uint %26 UMin %24 %uint_2
+         %28 = OpAccessChain %_ptr_StorageBuffer_int %10 %uint_0 %uint_0 %25
+         %30 = OpAtomicLoad %int %28 %uint_1 %uint_0
+               OpReturnValue %30
                OpFunctionEnd
-       %main = OpFunction %void None %31
-         %32 = OpLabel
-         %33 = OpAccessChain %_ptr_StorageBuffer_uint %6 %uint_0 %uint_0
-         %35 = OpFunctionCall %int %runTest
-         %36 = OpBitcast %uint %35
-               OpStore %33 %36 None
+       %main = OpFunction %void None %34
+         %35 = OpLabel
+         %36 = OpAccessChain %_ptr_StorageBuffer_uint %6 %uint_0 %uint_0
+         %38 = OpFunctionCall %int %runTest
+         %39 = OpBitcast %uint %38
+               OpStore %36 %39 None
                OpReturn
                OpFunctionEnd

@@ -13,7 +13,9 @@ RWByteAddressBuffer prevent_dce : register(u0);
 Texture1D<float4> arg_0 : register(t0, space1);
 float4 textureLoad_e92dd0() {
   uint arg_1 = 1u;
-  float4 res = float4(arg_0.Load(int2(int(arg_1), int(0))));
+  uint v = 0u;
+  arg_0.GetDimensions(v);
+  float4 res = float4(arg_0.Load(int2(int(min(arg_1, (v - 1u))), int(0))));
   return res;
 }
 
@@ -30,13 +32,13 @@ VertexOutput vertex_main_inner() {
   VertexOutput tint_symbol = (VertexOutput)0;
   tint_symbol.pos = (0.0f).xxxx;
   tint_symbol.prevent_dce = textureLoad_e92dd0();
-  VertexOutput v = tint_symbol;
-  return v;
+  VertexOutput v_1 = tint_symbol;
+  return v_1;
 }
 
 vertex_main_outputs vertex_main() {
-  VertexOutput v_1 = vertex_main_inner();
-  vertex_main_outputs v_2 = {v_1.prevent_dce, v_1.pos};
-  return v_2;
+  VertexOutput v_2 = vertex_main_inner();
+  vertex_main_outputs v_3 = {v_2.prevent_dce, v_2.pos};
+  return v_3;
 }
 

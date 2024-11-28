@@ -29,7 +29,7 @@ void main() {
   int tint_symbol_1 = bar();
   {
     int4 tint_symbol_3[4] = x.a;
-    set_vector_element(tint_symbol_3[tint_symbol_save], tint_symbol_1, (x.a[tint_symbol_save][tint_symbol_1] + 5));
+    set_vector_element(tint_symbol_3[min(uint(tint_symbol_save), 3u)], min(uint(tint_symbol_1), 3u), (x.a[min(uint(tint_symbol_save), 3u)][min(uint(tint_symbol_1), 3u)] + 5));
     x.a = tint_symbol_3;
   }
 }

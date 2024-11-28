@@ -12,7 +12,7 @@ struct Uniforms {
 
 kernel void tint_symbol(const constant Uniforms* tint_symbol_1 [[buffer(0)]]) {
   thread tint_private_vars_struct tint_private_vars = {};
-  tint_private_vars.m1[(*(tint_symbol_1)).i][0] = 1.0f;
+  tint_private_vars.m1[min((*(tint_symbol_1)).i, 1u)][0] = 1.0f;
   return;
 }
 

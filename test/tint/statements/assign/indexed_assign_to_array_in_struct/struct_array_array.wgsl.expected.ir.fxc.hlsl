@@ -18,7 +18,7 @@ void main() {
   uint v_2 = uniforms[0u].y;
   InnerS tint_array_copy[8][8] = s1.a1;
   InnerS v_3 = v;
-  tint_array_copy[v_1][v_2] = v_3;
+  tint_array_copy[min(v_1, 7u)][min(v_2, 7u)] = v_3;
   InnerS v_4[8][8] = tint_array_copy;
   s1.a1 = v_4;
 }

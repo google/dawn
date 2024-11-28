@@ -148,10 +148,11 @@ struct Options {
     bool validate = false;
     bool print_hash = false;
     bool dump_inspector_bindings = false;
-    bool enable_robustness = false;
     bool emit_single_entry_point = false;
 
     bool rename_all = false;
+
+    bool enable_robustness = true;
 
     bool dump_ir = false;
     bool use_ir = false;
@@ -385,7 +386,6 @@ violations that may be produced)",
 Available transforms:
     first_index_offset
     renamer
-    robustness
     substitute_override
 )",
                                   ShortName{"t"});
@@ -395,6 +395,13 @@ Available transforms:
                 opts->transforms.Push(std::string(transform));
             }
         }
+    });
+
+    auto& disable_robustness =
+        options.Add<BoolOption>("disable-robustness", "Disable the robustness transform");
+    TINT_DEFER({
+        auto disable = disable_robustness.value.value_or(false);
+        opts->enable_robustness = !disable;
     });
 
 #if TINT_BUILD_HLSL_WRITER
@@ -694,8 +701,6 @@ Options:
             transform_manager.Add<tint::ast::transform::FirstIndexOffset>();
         } else if (name == "renamer") {
             transform_manager.Add<tint::ast::transform::Renamer>();
-        } else if (name == "robustness") {
-            options.enable_robustness = true;
         } else if (name == "substitute_override") {
             auto override_names = inspector.GetNamedOverrideIds();
 

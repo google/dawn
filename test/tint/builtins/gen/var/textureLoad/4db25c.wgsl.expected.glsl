@@ -10,9 +10,10 @@ uniform highp sampler2DMS arg_0;
 float textureLoad_4db25c() {
   uvec2 arg_1 = uvec2(1u);
   uint arg_2 = 1u;
-  uint v_1 = arg_2;
-  ivec2 v_2 = ivec2(arg_1);
-  float res = texelFetch(arg_0, v_2, int(v_1)).x;
+  uvec2 v_1 = arg_1;
+  uint v_2 = arg_2;
+  ivec2 v_3 = ivec2(min(v_1, (uvec2(textureSize(arg_0)) - uvec2(1u))));
+  float res = texelFetch(arg_0, v_3, int(v_2)).x;
   return res;
 }
 void main() {
@@ -28,9 +29,10 @@ uniform highp sampler2DMS arg_0;
 float textureLoad_4db25c() {
   uvec2 arg_1 = uvec2(1u);
   uint arg_2 = 1u;
-  uint v_1 = arg_2;
-  ivec2 v_2 = ivec2(arg_1);
-  float res = texelFetch(arg_0, v_2, int(v_1)).x;
+  uvec2 v_1 = arg_1;
+  uint v_2 = arg_2;
+  ivec2 v_3 = ivec2(min(v_1, (uvec2(textureSize(arg_0)) - uvec2(1u))));
+  float res = texelFetch(arg_0, v_3, int(v_2)).x;
   return res;
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
@@ -50,9 +52,10 @@ layout(location = 0) flat out float vertex_main_loc0_Output;
 float textureLoad_4db25c() {
   uvec2 arg_1 = uvec2(1u);
   uint arg_2 = 1u;
-  uint v = arg_2;
-  ivec2 v_1 = ivec2(arg_1);
-  float res = texelFetch(arg_0, v_1, int(v)).x;
+  uvec2 v = arg_1;
+  uint v_1 = arg_2;
+  ivec2 v_2 = ivec2(min(v, (uvec2(textureSize(arg_0)) - uvec2(1u))));
+  float res = texelFetch(arg_0, v_2, int(v_1)).x;
   return res;
 }
 VertexOutput vertex_main_inner() {
@@ -62,10 +65,10 @@ VertexOutput vertex_main_inner() {
   return tint_symbol;
 }
 void main() {
-  VertexOutput v_2 = vertex_main_inner();
-  gl_Position = v_2.pos;
+  VertexOutput v_3 = vertex_main_inner();
+  gl_Position = v_3.pos;
   gl_Position[1u] = -(gl_Position.y);
   gl_Position[2u] = ((2.0f * gl_Position.z) - gl_Position.w);
-  vertex_main_loc0_Output = v_2.prevent_dce;
+  vertex_main_loc0_Output = v_3.prevent_dce;
   gl_PointSize = 1.0f;
 }

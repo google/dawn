@@ -32,7 +32,7 @@ struct tint_symbol_1_outputs {
 };
 
 float4 tint_symbol_1_inner(tint_module_vars_struct tint_module_vars) {
-  float const x = (*tint_module_vars.tint_symbol).matrix_view[0][2u];
+  float const x = (*tint_module_vars.tint_symbol).matrix_view[0u][2u];
   return float4(x, 0.0f, 0.0f, 1.0f);
 }
 

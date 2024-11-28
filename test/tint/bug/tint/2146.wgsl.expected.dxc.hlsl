@@ -17,6 +17,6 @@ void main() {
   vector<float16_t, 4> a = (float16_t(0.0h)).xxxx;
   float16_t b = float16_t(1.0h);
   int tint_symbol_1 = 0;
-  set_vector_element(a, tint_symbol_1, (a[tint_symbol_1] + b));
+  set_vector_element(a, min(uint(tint_symbol_1), 3u), (a[min(uint(tint_symbol_1), 3u)] + b));
   return;
 }

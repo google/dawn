@@ -2,7 +2,8 @@
 
 using namespace metal;
 uint2 textureDimensions_3fc3dc(texture2d_array<float, access::sample> tint_symbol_1) {
-  uint2 res = uint2(tint_symbol_1.get_width(1u), tint_symbol_1.get_height(1u));
+  uint const level_idx = min(1u, (tint_symbol_1.get_num_mip_levels() - 1u));
+  uint2 res = uint2(tint_symbol_1.get_width(level_idx), tint_symbol_1.get_height(level_idx));
   return res;
 }
 

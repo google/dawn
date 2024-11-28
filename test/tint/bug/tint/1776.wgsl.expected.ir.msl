@@ -21,9 +21,11 @@ struct S {
 
 struct tint_module_vars_struct {
   const device tint_array<S, 1>* sb;
+  const constant tint_array<uint4, 1>* tint_storage_buffer_sizes;
 };
 
-kernel void tint_symbol(const device tint_array<S, 1>* sb [[buffer(0)]]) {
-  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.sb=sb};
-  S const x = (*tint_module_vars.sb)[1];
+kernel void tint_symbol(const device tint_array<S, 1>* sb [[buffer(0)]], const constant tint_array<uint4, 1>* tint_storage_buffer_sizes [[buffer(30)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.sb=sb, .tint_storage_buffer_sizes=tint_storage_buffer_sizes};
+  uint const v = (((*tint_module_vars.tint_storage_buffer_sizes)[0u][0u] / 32u) - 1u);
+  S const x = (*tint_module_vars.sb)[min(uint(1), v)];
 }

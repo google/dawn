@@ -44,8 +44,15 @@ void main_inner(uint3 GlobalInvocationID) {
   if (v_4) {
     bool v_5 = false;
     if (success) {
-      int2 v_6 = int2(int2(dstTexCoord));
-      v_5 = all((float4(tint_symbol.Load(int3(v_6, int(int(0))))) == nonCoveredColor));
+      int2 v_6 = int2(dstTexCoord);
+      uint3 v_7 = (0u).xxx;
+      tint_symbol.GetDimensions(0u, v_7.x, v_7.y, v_7.z);
+      uint v_8 = min(uint(int(0)), (v_7.z - 1u));
+      uint3 v_9 = (0u).xxx;
+      tint_symbol.GetDimensions(uint(v_8), v_9.x, v_9.y, v_9.z);
+      uint2 v_10 = (v_9.xy - (1u).xx);
+      int2 v_11 = int2(min(uint2(v_6), v_10));
+      v_5 = all((float4(tint_symbol.Load(int3(v_11, int(v_8)))) == nonCoveredColor));
     } else {
       v_5 = false;
     }
@@ -55,57 +62,75 @@ void main_inner(uint3 GlobalInvocationID) {
     if ((uniforms[0u].x == 1u)) {
       srcTexCoord.y = ((srcSize.y - srcTexCoord.y) - 1u);
     }
-    int2 v_7 = int2(int2(srcTexCoord));
-    float4 srcColor = float4(src.Load(int3(v_7, int(int(0)))));
-    int2 v_8 = int2(int2(dstTexCoord));
-    float4 dstColor = float4(tint_symbol.Load(int3(v_8, int(int(0)))));
+    int2 v_12 = int2(srcTexCoord);
+    uint3 v_13 = (0u).xxx;
+    src.GetDimensions(0u, v_13.x, v_13.y, v_13.z);
+    uint v_14 = min(uint(int(0)), (v_13.z - 1u));
+    uint3 v_15 = (0u).xxx;
+    src.GetDimensions(uint(v_14), v_15.x, v_15.y, v_15.z);
+    uint2 v_16 = (v_15.xy - (1u).xx);
+    int2 v_17 = int2(min(uint2(v_12), v_16));
+    float4 srcColor = float4(src.Load(int3(v_17, int(v_14))));
+    int2 v_18 = int2(dstTexCoord);
+    uint3 v_19 = (0u).xxx;
+    tint_symbol.GetDimensions(0u, v_19.x, v_19.y, v_19.z);
+    uint v_20 = min(uint(int(0)), (v_19.z - 1u));
+    uint3 v_21 = (0u).xxx;
+    tint_symbol.GetDimensions(uint(v_20), v_21.x, v_21.y, v_21.z);
+    uint2 v_22 = (v_21.xy - (1u).xx);
+    int2 v_23 = int2(min(uint2(v_18), v_22));
+    float4 dstColor = float4(tint_symbol.Load(int3(v_23, int(v_20))));
     if ((uniforms[0u].y == 2u)) {
-      bool v_9 = false;
+      bool v_24 = false;
       if (success) {
-        v_9 = aboutEqual(dstColor.x, srcColor.x);
+        v_24 = aboutEqual(dstColor.x, srcColor.x);
       } else {
-        v_9 = false;
+        v_24 = false;
       }
-      bool v_10 = false;
-      if (v_9) {
-        v_10 = aboutEqual(dstColor.y, srcColor.y);
+      bool v_25 = false;
+      if (v_24) {
+        v_25 = aboutEqual(dstColor.y, srcColor.y);
       } else {
-        v_10 = false;
+        v_25 = false;
       }
-      success = v_10;
+      success = v_25;
     } else {
-      bool v_11 = false;
+      bool v_26 = false;
       if (success) {
-        v_11 = aboutEqual(dstColor.x, srcColor.x);
+        v_26 = aboutEqual(dstColor.x, srcColor.x);
       } else {
-        v_11 = false;
+        v_26 = false;
       }
-      bool v_12 = false;
-      if (v_11) {
-        v_12 = aboutEqual(dstColor.y, srcColor.y);
+      bool v_27 = false;
+      if (v_26) {
+        v_27 = aboutEqual(dstColor.y, srcColor.y);
       } else {
-        v_12 = false;
+        v_27 = false;
       }
-      bool v_13 = false;
-      if (v_12) {
-        v_13 = aboutEqual(dstColor.z, srcColor.z);
+      bool v_28 = false;
+      if (v_27) {
+        v_28 = aboutEqual(dstColor.z, srcColor.z);
       } else {
-        v_13 = false;
+        v_28 = false;
       }
-      bool v_14 = false;
-      if (v_13) {
-        v_14 = aboutEqual(dstColor.w, srcColor.w);
+      bool v_29 = false;
+      if (v_28) {
+        v_29 = aboutEqual(dstColor.w, srcColor.w);
       } else {
-        v_14 = false;
+        v_29 = false;
       }
-      success = v_14;
+      success = v_29;
     }
   }
   uint outputIndex = ((GlobalInvocationID.y * dstSize.x) + GlobalInvocationID.x);
   if (success) {
-    output.Store((0u + (outputIndex * 4u)), 1u);
+    uint v_30 = 0u;
+    output.GetDimensions(v_30);
+    output.Store((0u + (min(outputIndex, ((v_30 / 4u) - 1u)) * 4u)), 1u);
   } else {
-    output.Store((0u + (outputIndex * 4u)), 0u);
+    uint v_31 = 0u;
+    output.GetDimensions(v_31);
+    output.Store((0u + (min(outputIndex, ((v_31 / 4u) - 1u)) * 4u)), 0u);
   }
 }
 

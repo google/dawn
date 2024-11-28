@@ -15,7 +15,7 @@ void compute_main_inner(uint local_invocation_index_2) {
       }
       uint x_26 = idx;
       uint v = 0u;
-      InterlockedExchange(wg[x_26], 0u, v);
+      InterlockedExchange(wg[min(x_26, 3u)], 0u, v);
       {
         idx = (idx + 1u);
       }
@@ -24,7 +24,7 @@ void compute_main_inner(uint local_invocation_index_2) {
   }
   GroupMemoryBarrierWithGroupSync();
   uint v_1 = 0u;
-  InterlockedExchange(wg[int(1)], 1u, v_1);
+  InterlockedExchange(wg[1u], 1u, v_1);
 }
 
 void compute_main_1() {

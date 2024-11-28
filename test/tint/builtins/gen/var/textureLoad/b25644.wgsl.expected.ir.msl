@@ -9,8 +9,10 @@ struct tint_module_vars_struct {
 uint4 textureLoad_b25644(tint_module_vars_struct tint_module_vars) {
   int2 arg_1 = int2(1);
   uint arg_2 = 1u;
-  uint const v = arg_2;
-  uint4 res = tint_module_vars.arg_0.read(uint2(arg_1), v);
+  int2 const v = arg_1;
+  uint const v_1 = min(arg_2, (tint_module_vars.arg_0.get_array_size() - 1u));
+  uint2 const v_2 = (uint2(tint_module_vars.arg_0.get_width(0u), tint_module_vars.arg_0.get_height(0u)) - uint2(1u));
+  uint4 res = tint_module_vars.arg_0.read(min(uint2(v), v_2), v_1);
   return res;
 }
 

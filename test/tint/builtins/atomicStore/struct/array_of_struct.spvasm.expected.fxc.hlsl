@@ -29,10 +29,10 @@ void compute_main_inner(uint local_invocation_index_2) {
       break;
     }
     uint x_28 = idx;
-    wg[x_28].x = 0;
+    wg[min(x_28, 9u)].x = 0;
     uint atomic_result_1 = 0u;
-    InterlockedExchange(wg[x_28].a, 0u, atomic_result_1);
-    wg[x_28].y = 0u;
+    InterlockedExchange(wg[min(x_28, 9u)].a, 0u, atomic_result_1);
+    wg[min(x_28, 9u)].y = 0u;
     {
       idx = (idx + 1u);
     }

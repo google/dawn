@@ -6,6 +6,6 @@ void func(inout float4 pointer) {
 
 [numthreads(1, 1, 1)]
 void main() {
-  func(P[int(1)]);
+  func(P[1u]);
 }
 

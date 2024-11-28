@@ -5,6 +5,9 @@ struct tint_module_vars_struct {
   thread bool* continue_execution;
 };
 
+#define TINT_ISOLATE_UB(VOLATILE_NAME) \
+  {volatile bool VOLATILE_NAME = false; if (VOLATILE_NAME) break;}
+
 struct tint_symbol_outputs {
   int tint_symbol_1 [[color(2)]];
 };
@@ -24,6 +27,7 @@ int tint_symbol_inner(int3 x, tint_module_vars_struct tint_module_vars) {
   int y = x[0u];
   {
     while(true) {
+      TINT_ISOLATE_UB(tint_volatile_false)
       int const r = f(y, tint_module_vars);
       if ((r == 0)) {
         break;

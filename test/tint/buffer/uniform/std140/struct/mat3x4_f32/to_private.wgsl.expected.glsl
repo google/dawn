@@ -33,7 +33,7 @@ S p[4] = S[4](S(0, 0u, 0u, 0u, mat3x4(vec4(0.0f), vec4(0.0f), vec4(0.0f)), 0, 0u
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
   p = v.inner;
-  p[1] = v.inner[2];
-  p[3].m = v.inner[2].m;
-  p[1].m[0] = v.inner[0].m[1].ywxz;
+  p[1u] = v.inner[2u];
+  p[3u].m = v.inner[2u].m;
+  p[1u].m[0u] = v.inner[0u].m[1u].ywxz;
 }

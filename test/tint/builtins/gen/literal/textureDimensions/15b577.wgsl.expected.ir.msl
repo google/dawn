@@ -17,7 +17,7 @@ struct vertex_main_outputs {
 };
 
 uint2 textureDimensions_15b577(tint_module_vars_struct tint_module_vars) {
-  uint const v = uint(1);
+  uint const v = min(uint(1), (tint_module_vars.arg_0.get_num_mip_levels() - 1u));
   uint2 res = uint2(tint_module_vars.arg_0.get_width(v), tint_module_vars.arg_0.get_height(v));
   return res;
 }

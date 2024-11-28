@@ -14,7 +14,9 @@ buffer sb_block_1_ssbo {
   S inner[];
 } sb;
 void main_1() {
-  S x_18 = sb.inner[1];
+  uint v = (uint(sb.inner.length()) - 1u);
+  uint v_1 = min(uint(1), v);
+  S x_18 = sb.inner[v_1];
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {

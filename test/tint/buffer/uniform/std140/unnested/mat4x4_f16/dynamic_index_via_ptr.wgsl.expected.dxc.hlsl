@@ -36,7 +36,7 @@ matrix<float16_t, 4, 4> m_load(uint offset) {
 void f() {
   int p_m_i_save = i();
   matrix<float16_t, 4, 4> l_m = m_load(0u);
-  const uint scalar_offset_4 = ((8u * uint(p_m_i_save))) / 4;
+  const uint scalar_offset_4 = ((8u * min(uint(p_m_i_save), 3u))) / 4;
   uint4 ubo_load_9 = m[scalar_offset_4 / 4];
   uint2 ubo_load_8 = ((scalar_offset_4 & 2) ? ubo_load_9.zw : ubo_load_9.xy);
   vector<float16_t, 2> ubo_load_8_xz = vector<float16_t, 2>(f16tof32(ubo_load_8 & 0xFFFF));

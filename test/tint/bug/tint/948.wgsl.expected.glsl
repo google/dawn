@@ -168,17 +168,17 @@ void main_1() {
       param = (x_222 + 0.5f);
       mat4 x_225 = getFrameData_f1_(param);
       frameData = x_225;
-      vec4 x_228 = frameData[0];
+      vec4 x_228 = frameData[0u];
       vec2 x_231 = v.inner.spriteMapSize;
       frameSize = (vec2(x_228[3u], x_228[2u]) / x_231);
-      vec4 x_235 = frameData[0];
+      vec4 x_235 = frameData[0u];
       vec2 x_237 = sheetUnits;
       offset_1 = (vec2(x_235[0u], x_235[1u]) * x_237);
-      vec4 x_241 = frameData[2];
-      vec4 x_244 = frameData[0];
+      vec4 x_241 = frameData[2u];
+      vec4 x_244 = frameData[0u];
       vec2 v_3 = vec2(x_241[0u], x_241[1u]);
       ratio = (v_3 / vec2(x_244[3u], x_244[2u]));
-      float x_248 = frameData[2].z;
+      float x_248 = frameData[2u].z;
       if ((x_248 == 1.0f)) {
         vec2 x_252 = tileUV;
         tileUV = vec2(x_252[1u], x_252[0u]);

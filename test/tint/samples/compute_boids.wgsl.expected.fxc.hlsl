@@ -50,8 +50,8 @@ void comp_main_inner(uint3 gl_GlobalInvocationID) {
   if ((index >= 5u)) {
     return;
   }
-  float2 vPos = asfloat(particlesA.Load2((16u * index)));
-  float2 vVel = asfloat(particlesA.Load2(((16u * index) + 8u)));
+  float2 vPos = asfloat(particlesA.Load2((16u * min(index, 4u))));
+  float2 vVel = asfloat(particlesA.Load2(((16u * min(index, 4u)) + 8u)));
   float2 cMass = (0.0f).xx;
   float2 cVel = (0.0f).xx;
   float2 colVel = (0.0f).xx;
@@ -64,8 +64,8 @@ void comp_main_inner(uint3 gl_GlobalInvocationID) {
       if ((i == index)) {
         continue;
       }
-      pos = asfloat(particlesA.Load2((16u * i))).xy;
-      vel = asfloat(particlesA.Load2(((16u * i) + 8u))).xy;
+      pos = asfloat(particlesA.Load2((16u * min(i, 4u)))).xy;
+      vel = asfloat(particlesA.Load2(((16u * min(i, 4u)) + 8u))).xy;
       if ((distance(pos, vPos) < asfloat(params[0].y))) {
         cMass = (cMass + pos);
         cMassCount = (cMassCount + 1);
@@ -100,8 +100,8 @@ void comp_main_inner(uint3 gl_GlobalInvocationID) {
   if ((vPos.y > 1.0f)) {
     vPos.y = -1.0f;
   }
-  particlesB.Store2((16u * index), asuint(vPos));
-  particlesB.Store2(((16u * index) + 8u), asuint(vVel));
+  particlesB.Store2((16u * min(index, 4u)), asuint(vPos));
+  particlesB.Store2(((16u * min(index, 4u)) + 8u), asuint(vVel));
 }
 
 [numthreads(1, 1, 1)]

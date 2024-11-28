@@ -63,10 +63,10 @@ Outer tint_convert_Outer(Outer_std140 tint_input) {
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
-  int v_4 = i();
-  int v_5 = i();
+  uint v_4 = min(uint(i()), 3u);
+  uint v_5 = min(uint(i()), 3u);
   mat2 v_6 = mat2(v.inner[v_4].a[v_5].m_col0, v.inner[v_4].a[v_5].m_col1);
-  vec2 v_7 = v_6[i()];
+  vec2 v_7 = v_6[min(uint(i()), 1u)];
   Outer_std140 v_8[4] = v.inner;
   Outer v_9[4] = Outer[4](Outer(Inner[4](Inner(mat2(vec2(0.0f), vec2(0.0f))), Inner(mat2(vec2(0.0f), vec2(0.0f))), Inner(mat2(vec2(0.0f), vec2(0.0f))), Inner(mat2(vec2(0.0f), vec2(0.0f))))), Outer(Inner[4](Inner(mat2(vec2(0.0f), vec2(0.0f))), Inner(mat2(vec2(0.0f), vec2(0.0f))), Inner(mat2(vec2(0.0f), vec2(0.0f))), Inner(mat2(vec2(0.0f), vec2(0.0f))))), Outer(Inner[4](Inner(mat2(vec2(0.0f), vec2(0.0f))), Inner(mat2(vec2(0.0f), vec2(0.0f))), Inner(mat2(vec2(0.0f), vec2(0.0f))), Inner(mat2(vec2(0.0f), vec2(0.0f))))), Outer(Inner[4](Inner(mat2(vec2(0.0f), vec2(0.0f))), Inner(mat2(vec2(0.0f), vec2(0.0f))), Inner(mat2(vec2(0.0f), vec2(0.0f))), Inner(mat2(vec2(0.0f), vec2(0.0f))))));
   {
@@ -107,5 +107,5 @@ void main() {
   Inner l_a_i_a_i = tint_convert_Inner(v.inner[v_4].a[v_5]);
   mat2 l_a_i_a_i_m = v_6;
   vec2 l_a_i_a_i_m_i = v_7;
-  float l_a_i_a_i_m_i_i = v_7[i()];
+  float l_a_i_a_i_m_i_i = v_7[min(uint(i()), 1u)];
 }

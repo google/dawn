@@ -9,7 +9,7 @@ buffer prevent_dce_block_1_ssbo {
 int transpose_31d679() {
   mat2 arg_0 = mat2(vec2(1.0f), vec2(1.0f));
   mat2 res = transpose(arg_0);
-  return mix(0, 1, (res[0].x == 0.0f));
+  return mix(0, 1, (res[0u].x == 0.0f));
 }
 void main() {
   v.inner = transpose_31d679();
@@ -23,7 +23,7 @@ buffer prevent_dce_block_1_ssbo {
 int transpose_31d679() {
   mat2 arg_0 = mat2(vec2(1.0f), vec2(1.0f));
   mat2 res = transpose(arg_0);
-  return mix(0, 1, (res[0].x == 0.0f));
+  return mix(0, 1, (res[0u].x == 0.0f));
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
@@ -41,7 +41,7 @@ layout(location = 0) flat out int vertex_main_loc0_Output;
 int transpose_31d679() {
   mat2 arg_0 = mat2(vec2(1.0f), vec2(1.0f));
   mat2 res = transpose(arg_0);
-  return mix(0, 1, (res[0].x == 0.0f));
+  return mix(0, 1, (res[0u].x == 0.0f));
 }
 VertexOutput vertex_main_inner() {
   VertexOutput tint_symbol = VertexOutput(vec4(0.0f), 0);

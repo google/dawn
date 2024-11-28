@@ -4,6 +4,7 @@
 ; Bound: 98
 ; Schema: 0
                OpCapability Shader
+         %43 = OpExtInstImport "GLSL.std.450"
                OpMemoryModel Logical GLSL450
                OpEntryPoint GLCompute %compute_main "compute_main" %compute_main_local_invocation_index_Input
                OpExecutionMode %compute_main LocalSize 1 1 1
@@ -53,10 +54,6 @@
        %bool = OpTypeBool
 %_ptr_Workgroup_uint = OpTypePointer Workgroup %uint
    %uint_264 = OpConstant %uint 264
-        %int = OpTypeInt 32 1
-      %int_2 = OpConstant %int 2
-      %int_1 = OpConstant %int 1
-      %int_0 = OpConstant %int 0
          %56 = OpTypeFunction %void
          %81 = OpTypeFunction %uint %uint %uint
 %compute_main_inner = OpFunction %void None %18
@@ -84,18 +81,21 @@
          %37 = OpFunctionCall %uint %tint_div_u32 %x_31 %uint_2
          %39 = OpFunctionCall %uint %tint_mod_u32 %x_33 %uint_2
          %41 = OpFunctionCall %uint %tint_mod_u32 %x_35 %uint_1
-         %42 = OpAccessChain %_ptr_Workgroup_uint %wg %37 %39 %41
-               OpAtomicStore %42 %uint_2 %uint_0 %uint_0
+         %42 = OpExtInst %uint %43 UMin %37 %uint_2
+         %44 = OpExtInst %uint %43 UMin %39 %uint_1
+         %45 = OpExtInst %uint %43 UMin %41 %uint_0
+         %46 = OpAccessChain %_ptr_Workgroup_uint %wg %42 %44 %45
+               OpAtomicStore %46 %uint_2 %uint_0 %uint_0
                OpBranch %24
          %24 = OpLabel
-         %45 = OpLoad %uint %idx None
-         %46 = OpIAdd %uint %45 %uint_1
-               OpStore %idx %46 None
+         %49 = OpLoad %uint %idx None
+         %50 = OpIAdd %uint %49 %uint_1
+               OpStore %idx %50 None
                OpBranch %25
          %26 = OpLabel
                OpControlBarrier %uint_2 %uint_2 %uint_264
-         %49 = OpAccessChain %_ptr_Workgroup_uint %wg %int_2 %int_1 %int_0
-               OpAtomicStore %49 %uint_2 %uint_0 %uint_1
+         %53 = OpAccessChain %_ptr_Workgroup_uint %wg %uint_2 %uint_1 %uint_0
+               OpAtomicStore %53 %uint_2 %uint_0 %uint_1
                OpReturn
                OpFunctionEnd
 %compute_main_1 = OpFunction %void None %56

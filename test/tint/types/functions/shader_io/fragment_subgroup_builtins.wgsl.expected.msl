@@ -14,16 +14,20 @@ struct tint_array {
     T elements[N];
 };
 
-struct tint_symbol_3 {
+struct tint_symbol_4 {
   /* 0x0000 */ tint_array<uint, 1> arr;
 };
 
-void tint_symbol_inner(uint subgroup_invocation_id, uint subgroup_size, device tint_array<uint, 1>* const tint_symbol_1) {
-  (*(tint_symbol_1))[subgroup_invocation_id] = subgroup_size;
+struct TintArrayLengths {
+  /* 0x0000 */ tint_array<uint4, 1> array_lengths;
+};
+
+void tint_symbol_inner(uint subgroup_invocation_id, uint subgroup_size, device tint_array<uint, 1>* const tint_symbol_1, const constant TintArrayLengths* const tint_symbol_2) {
+  (*(tint_symbol_1))[min(subgroup_invocation_id, (((*(tint_symbol_2)).array_lengths[0u][0u] / 4u) - 1u))] = subgroup_size;
 }
 
-fragment void tint_symbol(device tint_symbol_3* tint_symbol_2 [[buffer(0)]], uint subgroup_invocation_id [[thread_index_in_simdgroup]], uint subgroup_size [[threads_per_simdgroup]]) {
-  tint_symbol_inner(subgroup_invocation_id, subgroup_size, &((*(tint_symbol_2)).arr));
+fragment void tint_symbol(device tint_symbol_4* tint_symbol_3 [[buffer(0)]], const constant TintArrayLengths* tint_symbol_5 [[buffer(30)]], uint subgroup_invocation_id [[thread_index_in_simdgroup]], uint subgroup_size [[threads_per_simdgroup]]) {
+  tint_symbol_inner(subgroup_invocation_id, subgroup_size, &((*(tint_symbol_3)).arr), tint_symbol_5);
   return;
 }
 

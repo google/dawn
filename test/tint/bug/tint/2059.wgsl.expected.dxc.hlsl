@@ -167,7 +167,7 @@ void main() {
   float3x3 m = float3x3(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
   {
     for(uint c = 0u; (c < 3u); c = (c + 1u)) {
-      set_matrix_column(m, c, float3(float(((c * 3u) + 1u)), float(((c * 3u) + 2u)), float(((c * 3u) + 3u))));
+      set_matrix_column(m, min(c, 2u), float3(float(((c * 3u) + 1u)), float(((c * 3u) + 2u)), float(((c * 3u) + 3u))));
     }
   }
   {

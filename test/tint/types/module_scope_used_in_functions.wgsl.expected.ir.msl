@@ -18,6 +18,7 @@ struct tint_module_vars_struct {
   threadgroup float* w;
   const device float2* uniforms;
   device tint_array<float, 1>* storages;
+  const constant tint_array<uint4, 1>* tint_storage_buffer_sizes;
 };
 
 struct tint_symbol_2 {
@@ -34,7 +35,9 @@ void zoo(tint_module_vars_struct tint_module_vars) {
 void bar(float a, float b, tint_module_vars_struct tint_module_vars) {
   (*tint_module_vars.p) = a;
   (*tint_module_vars.w) = b;
-  (*tint_module_vars.storages)[0] = (*tint_module_vars.uniforms)[0u];
+  uint const v = (((*tint_module_vars.tint_storage_buffer_sizes)[0u][0u] / 4u) - 1u);
+  device float* const v_1 = (&(*tint_module_vars.storages)[min(uint(0), v)]);
+  (*v_1) = (*tint_module_vars.uniforms)[0u];
   zoo(tint_module_vars);
 }
 
@@ -52,8 +55,8 @@ void tint_symbol_inner(uint tint_local_index, tint_module_vars_struct tint_modul
   foo(1.0f, tint_module_vars);
 }
 
-kernel void tint_symbol(uint tint_local_index [[thread_index_in_threadgroup]], threadgroup tint_symbol_2* v [[threadgroup(0)]], const device float2* uniforms [[buffer(1)]], device tint_array<float, 1>* storages [[buffer(0)]]) {
+kernel void tint_symbol(uint tint_local_index [[thread_index_in_threadgroup]], threadgroup tint_symbol_2* v_2 [[threadgroup(0)]], const device float2* uniforms [[buffer(1)]], device tint_array<float, 1>* storages [[buffer(0)]], const constant tint_array<uint4, 1>* tint_storage_buffer_sizes [[buffer(30)]]) {
   thread float p = 0.0f;
-  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.p=(&p), .w=(&(*v).tint_symbol_1), .uniforms=uniforms, .storages=storages};
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.p=(&p), .w=(&(*v_2).tint_symbol_1), .uniforms=uniforms, .storages=storages, .tint_storage_buffer_sizes=tint_storage_buffer_sizes};
   tint_symbol_inner(tint_local_index, tint_module_vars);
 }

@@ -21,7 +21,7 @@ void main() {
       } else {
         break;
       }
-      uint v_1 = uniforms[0u].x;
+      uint v_1 = min(uniforms[0u].x, 7u);
       InnerS v_2 = v;
       s1.a1[v_1] = v_2;
       {

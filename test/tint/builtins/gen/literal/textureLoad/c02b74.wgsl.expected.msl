@@ -1,8 +1,12 @@
 #include <metal_stdlib>
 
 using namespace metal;
+int tint_clamp(int e, int low, int high) {
+  return min(max(e, low), high);
+}
+
 float4 textureLoad_c02b74(texture1d<float, access::read> tint_symbol_1) {
-  float4 res = tint_symbol_1.read(uint(1));
+  float4 res = tint_symbol_1.read(uint(tint_clamp(1, 0, int((tint_symbol_1.get_width(0) - 1u)))));
   return res;
 }
 

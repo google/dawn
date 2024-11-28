@@ -18,11 +18,11 @@ struct tint_array {
 };
 
 uint foo(tint_module_vars_struct tint_module_vars) {
-  return tint_array<uint, 4>{0u, 1u, 2u, 4u}[(*tint_module_vars.tint_symbol)];
+  return tint_array<uint, 4>{0u, 1u, 2u, 4u}[min((*tint_module_vars.tint_symbol), 3u)];
 }
 
 kernel void tint_symbol_1(device uint* tint_symbol [[buffer(0)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.tint_symbol=tint_symbol};
-  uint const v = tint_array<uint, 4>{0u, 1u, 2u, 4u}[(*tint_module_vars.tint_symbol)];
+  uint const v = tint_array<uint, 4>{0u, 1u, 2u, 4u}[min((*tint_module_vars.tint_symbol), 3u)];
   (*tint_module_vars.tint_symbol) = (v + foo(tint_module_vars));
 }

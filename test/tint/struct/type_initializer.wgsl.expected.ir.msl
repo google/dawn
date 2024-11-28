@@ -52,5 +52,5 @@ kernel void tint_symbol() {
   S1 const subexpr_nested_nonempty_with_expr = S2{.e=1, .f=S1{.a=2, .b=x, .c=as_type<int>((as_type<uint>(x) + as_type<uint>(1))), .d=nested_nonempty.i.f.d}}.f;
   tint_array<T, 2> const aosoa_empty = tint_array<T, 2>{};
   tint_array<T, 2> const aosoa_nonempty = tint_array<T, 2>{T{.a=tint_array<int, 2>{1, 2}}, T{.a=tint_array<int, 2>{3, 4}}};
-  tint_array<T, 2> const aosoa_nonempty_with_expr = tint_array<T, 2>{T{.a=tint_array<int, 2>{1, as_type<int>((as_type<uint>(aosoa_nonempty[0].a[0]) + as_type<uint>(1)))}}, aosoa_nonempty[1]};
+  tint_array<T, 2> const aosoa_nonempty_with_expr = tint_array<T, 2>{T{.a=tint_array<int, 2>{1, as_type<int>((as_type<uint>(aosoa_nonempty[0u].a[0u]) + as_type<uint>(1)))}}, aosoa_nonempty[1u]};
 }

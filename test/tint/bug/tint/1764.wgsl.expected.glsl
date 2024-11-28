@@ -18,7 +18,7 @@ void tint_symbol_inner(uint tint_local_index) {
     }
   }
   barrier();
-  W[0] = 42;
+  W[0u] = 42;
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {

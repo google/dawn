@@ -30,16 +30,16 @@ int idx3() {
 void foo() {
   float a[4] = float[4](0.0f, 0.0f, 0.0f, 0.0f);
   {
-    int v_2 = idx1();
+    uint v_2 = min(uint(idx1()), 3u);
     a[v_2] = (a[v_2] * 2.0f);
     while(true) {
-      int v_3 = idx2();
+      uint v_3 = min(uint(idx2()), 3u);
       if ((a[v_3] < 10.0f)) {
       } else {
         break;
       }
       {
-        int v_4 = idx3();
+        uint v_4 = min(uint(idx3()), 3u);
         a[v_4] = (a[v_4] + 1.0f);
       }
       continue;

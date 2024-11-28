@@ -31,6 +31,9 @@ struct tint_module_vars_struct {
   threadgroup S* s;
 };
 
+#define TINT_ISOLATE_UB(VOLATILE_NAME) \
+  {volatile bool VOLATILE_NAME = false; if (VOLATILE_NAME) break;}
+
 struct tint_symbol_1 {
   S tint_symbol;
 };
@@ -40,6 +43,7 @@ void f_inner(uint tint_local_index, tint_module_vars_struct tint_module_vars) {
     uint v = 0u;
     v = tint_local_index;
     while(true) {
+      TINT_ISOLATE_UB(tint_volatile_false)
       uint const v_1 = v;
       if ((v_1 >= 64u)) {
         break;
@@ -52,8 +56,8 @@ void f_inner(uint tint_local_index, tint_module_vars_struct tint_module_vars) {
     }
   }
   threadgroup_barrier(mem_flags::mem_threadgroup);
-  (*tint_module_vars.s).data[(*tint_module_vars.ubo).dynamic_idx] = 1;
-  (*tint_module_vars.result).out = (*tint_module_vars.s).data[3];
+  (*tint_module_vars.s).data[min(uint((*tint_module_vars.ubo).dynamic_idx), 63u)] = 1;
+  (*tint_module_vars.result).out = (*tint_module_vars.s).data[3u];
 }
 
 kernel void f(uint tint_local_index [[thread_index_in_threadgroup]], const constant UBO* ubo [[buffer(0)]], device Result* result [[buffer(1)]], threadgroup tint_symbol_1* v_2 [[threadgroup(0)]]) {

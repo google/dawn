@@ -35,7 +35,7 @@ float4 main_inner(uint gl_VertexIndex) {
   uint x_46 = gl_VertexIndex;
   float2 tint_symbol_3[3] = {float2(-1.0f, 1.0f), (1.0f).xx, (-1.0f).xx};
   indexable = tint_symbol_3;
-  float2 x_51 = indexable[x_46];
+  float2 x_51 = indexable[min(x_46, 2u)];
   float2 x_52 = mul(x_51, float2x2((x_23[0u] + x_28[0u]), (x_23[1u] + x_28[1u])));
   return float4(x_52.x, x_52.y, 0.0f, 1.0f);
 }

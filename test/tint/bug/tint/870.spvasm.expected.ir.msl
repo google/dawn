@@ -32,12 +32,12 @@ struct tint_module_vars_struct {
 void main_1(tint_module_vars_struct tint_module_vars) {
   tint_array<int, 6> orientation = {};
   tint_array<int, 6> const x_23 = (*tint_module_vars.sspp962805860buildInformation).passthru.orientation;
-  orientation[0] = x_23[0u];
-  orientation[1] = x_23[1u];
-  orientation[2] = x_23[2u];
-  orientation[3] = x_23[3u];
-  orientation[4] = x_23[4u];
-  orientation[5] = x_23[5u];
+  orientation[0u] = x_23[0u];
+  orientation[1u] = x_23[1u];
+  orientation[2u] = x_23[2u];
+  orientation[3u] = x_23[3u];
+  orientation[4u] = x_23[4u];
+  orientation[5u] = x_23[5u];
 }
 
 fragment void tint_symbol(const device x_B4_BuildInformation* sspp962805860buildInformation [[buffer(0)]]) {

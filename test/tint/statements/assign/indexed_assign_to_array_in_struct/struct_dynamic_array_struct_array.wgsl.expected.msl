@@ -14,6 +14,10 @@ struct tint_array {
     T elements[N];
 };
 
+struct TintArrayLengths {
+  /* 0x0000 */ tint_array<uint4, 1> array_lengths;
+};
+
 struct Uniforms {
   /* 0x0000 */ uint i;
   /* 0x0004 */ uint j;
@@ -31,9 +35,9 @@ struct OuterS {
   /* 0x0000 */ tint_array<S1, 1> a1;
 };
 
-kernel void tint_symbol(device OuterS* tint_symbol_1 [[buffer(1)]], const constant Uniforms* tint_symbol_2 [[buffer(0)]]) {
+kernel void tint_symbol(device OuterS* tint_symbol_1 [[buffer(1)]], const constant Uniforms* tint_symbol_2 [[buffer(0)]], const constant TintArrayLengths* tint_symbol_3 [[buffer(30)]]) {
   InnerS v = {};
-  (*(tint_symbol_1)).a1[(*(tint_symbol_2)).i].a2[(*(tint_symbol_2)).j] = v;
+  (*(tint_symbol_1)).a1[min((*(tint_symbol_2)).i, ((((*(tint_symbol_3)).array_lengths[0u][0u] - 0u) / 32u) - 1u))].a2[min((*(tint_symbol_2)).j, 7u)] = v;
   return;
 }
 

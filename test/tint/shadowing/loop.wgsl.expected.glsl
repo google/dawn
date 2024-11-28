@@ -9,10 +9,10 @@ void main() {
   int i = 0;
   {
     while(true) {
-      int v_1 = i;
+      uint v_1 = min(uint(i), 9u);
       int x = v.inner[v_1];
       {
-        int v_2 = x;
+        uint v_2 = min(uint(x), 9u);
         int x_1 = v.inner[v_2];
         i = (i + x_1);
         if ((i > 10)) { break; }
@@ -20,5 +20,5 @@ void main() {
       continue;
     }
   }
-  v.inner[0] = i;
+  v.inner[0u] = i;
 }

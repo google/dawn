@@ -16,5 +16,5 @@ uint globalId2Index(tint_module_vars_struct tint_module_vars) {
 kernel void tint_symbol() {
   half4 a = half4(0.0h);
   half const b = 1.0h;
-  a[0] = (a[0] + b);
+  a[0u] = (a[0u] + b);
 }

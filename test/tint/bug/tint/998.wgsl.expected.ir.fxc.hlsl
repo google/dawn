@@ -12,7 +12,7 @@ static S s = (S)0;
 void main() {
   uint v = constants[0u].x;
   uint tint_array_copy[3] = s.data;
-  tint_array_copy[v] = 0u;
+  tint_array_copy[min(v, 2u)] = 0u;
   uint v_1[3] = tint_array_copy;
   s.data = v_1;
 }

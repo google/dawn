@@ -1,9 +1,10 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 1
-; Bound: 28
+; Bound: 32
 ; Schema: 0
                OpCapability Shader
+         %21 = OpExtInstImport "GLSL.std.450"
                OpMemoryModel Logical GLSL450
                OpEntryPoint GLCompute %main "main"
                OpExecutionMode %main LocalSize 1 1 1
@@ -35,8 +36,9 @@
          %15 = OpConstantNull %mat2v4float
 %_ptr_Uniform_uint = OpTypePointer Uniform %uint
      %uint_0 = OpConstant %uint 0
-%_ptr_Function_v4float = OpTypePointer Function %v4float
      %uint_1 = OpConstant %uint 1
+%_ptr_Function_v4float = OpTypePointer Function %v4float
+     %uint_3 = OpConstant %uint 3
 %_ptr_Function_float = OpTypePointer Function %float
     %float_1 = OpConstant %float 1
        %main = OpFunction %void None %8
@@ -44,10 +46,12 @@
          %m1 = OpVariable %_ptr_Function_mat2v4float Function %15
          %16 = OpAccessChain %_ptr_Uniform_uint %1 %uint_0 %uint_0
          %19 = OpLoad %uint %16 None
-         %20 = OpAccessChain %_ptr_Function_v4float %m1 %19
-         %22 = OpAccessChain %_ptr_Uniform_uint %1 %uint_0 %uint_1
-         %24 = OpLoad %uint %22 None
-         %25 = OpAccessChain %_ptr_Function_float %20 %24
-               OpStore %25 %float_1 None
+         %20 = OpExtInst %uint %21 UMin %19 %uint_1
+         %23 = OpAccessChain %_ptr_Function_v4float %m1 %20
+         %25 = OpAccessChain %_ptr_Uniform_uint %1 %uint_0 %uint_1
+         %26 = OpLoad %uint %25 None
+         %27 = OpExtInst %uint %21 UMin %26 %uint_3
+         %29 = OpAccessChain %_ptr_Function_float %23 %27
+               OpStore %29 %float_1 None
                OpReturn
                OpFunctionEnd

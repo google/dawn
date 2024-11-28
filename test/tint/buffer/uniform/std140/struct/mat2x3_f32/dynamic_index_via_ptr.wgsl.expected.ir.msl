@@ -73,11 +73,11 @@ kernel void f(const constant tint_array<Outer_packed_vec3, 4>* a [[buffer(0)]]) 
   thread int counter = 0;
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.a=a, .counter=(&counter)};
   const constant tint_array<Outer_packed_vec3, 4>* const p_a = tint_module_vars.a;
-  const constant Outer_packed_vec3* const p_a_i = (&(*p_a)[i(tint_module_vars)]);
+  const constant Outer_packed_vec3* const p_a_i = (&(*p_a)[min(uint(i(tint_module_vars)), 3u)]);
   const constant tint_array<Inner_packed_vec3, 4>* const p_a_i_a = (&(*p_a_i).a);
-  const constant Inner_packed_vec3* const p_a_i_a_i = (&(*p_a_i_a)[i(tint_module_vars)]);
+  const constant Inner_packed_vec3* const p_a_i_a_i = (&(*p_a_i_a)[min(uint(i(tint_module_vars)), 3u)]);
   const constant tint_array<tint_packed_vec3_f32_array_element, 2>* const p_a_i_a_i_m = (&(*p_a_i_a_i).m);
-  const constant packed_float3* const p_a_i_a_i_m_i = (&(*p_a_i_a_i_m)[i(tint_module_vars)].packed);
+  const constant packed_float3* const p_a_i_a_i_m_i = (&(*p_a_i_a_i_m)[min(uint(i(tint_module_vars)), 1u)].packed);
   tint_array<Outer, 4> const l_a = tint_load_array_packed_vec3_1(p_a);
   Outer const l_a_i = tint_load_struct_packed_vec3_1(p_a_i);
   tint_array<Inner, 4> const l_a_i_a = tint_load_array_packed_vec3(p_a_i_a);
@@ -86,5 +86,5 @@ kernel void f(const constant tint_array<Outer_packed_vec3, 4>* a [[buffer(0)]]) 
   float3 const v_9 = float3(v_8[0u].packed);
   float2x3 const l_a_i_a_i_m = float2x3(v_9, float3(v_8[1u].packed));
   float3 const l_a_i_a_i_m_i = float3((*p_a_i_a_i_m_i));
-  float const l_a_i_a_i_m_i_i = (*p_a_i_a_i_m_i)[i(tint_module_vars)];
+  float const l_a_i_a_i_m_i_i = (*p_a_i_a_i_m_i)[min(uint(i(tint_module_vars)), 2u)];
 }

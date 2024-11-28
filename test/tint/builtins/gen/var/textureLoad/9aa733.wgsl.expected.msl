@@ -4,7 +4,8 @@ using namespace metal;
 int4 textureLoad_9aa733(texture2d<int, access::sample> tint_symbol_1) {
   uint2 arg_1 = uint2(1u);
   int arg_2 = 1;
-  int4 res = tint_symbol_1.read(uint2(arg_1), arg_2);
+  uint const level_idx = min(uint(arg_2), (tint_symbol_1.get_num_mip_levels() - 1u));
+  int4 res = tint_symbol_1.read(uint2(min(arg_1, (uint2(tint_symbol_1.get_width(level_idx), tint_symbol_1.get_height(level_idx)) - uint2(1u)))), level_idx);
   return res;
 }
 

@@ -115,5 +115,5 @@ tint_ExternalTextureParams tint_load_struct_packed_vec3(const constant tint_Exte
 kernel void i(texture2d<float, access::sample> t_plane0 [[texture(0)]], texture2d<float, access::sample> t_plane1 [[texture(1)]], const constant tint_ExternalTextureParams_packed_vec3* t_params [[buffer(2)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.t_plane0=t_plane0, .t_plane1=t_plane1, .t_params=t_params};
   tint_ExternalTextureParams const v_19 = tint_load_struct_packed_vec3(tint_module_vars.t_params);
-  float4 r = tint_TextureLoadExternal(tint_module_vars.t_plane0, tint_module_vars.t_plane1, v_19, uint2(int2(0)));
+  float4 r = tint_TextureLoadExternal(tint_module_vars.t_plane0, tint_module_vars.t_plane1, v_19, min(uint2(int2(0)), ((v_19.apparentSize + uint2(1u)) - uint2(1u))));
 }

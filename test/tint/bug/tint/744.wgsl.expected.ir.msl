@@ -28,6 +28,7 @@ struct tint_module_vars_struct {
   const device Matrix* secondMatrix;
   device Matrix* resultMatrix;
   const constant Uniforms* uniforms;
+  const constant tint_array<uint4, 1>* tint_storage_buffer_sizes;
 };
 
 void tint_symbol_inner(uint3 global_id, tint_module_vars_struct tint_module_vars) {
@@ -44,7 +45,7 @@ void tint_symbol_inner(uint3 global_id, tint_module_vars_struct tint_module_vars
       }
       uint const a = (i + (resultCell[0u] * dimInner));
       uint const b = (resultCell[1u] + (i * dimOutter));
-      result = (result + ((*tint_module_vars.firstMatrix).numbers[a] * (*tint_module_vars.secondMatrix).numbers[b]));
+      result = (result + ((*tint_module_vars.firstMatrix).numbers[min(a, ((((*tint_module_vars.tint_storage_buffer_sizes)[0u][0u] - 0u) / 4u) - 1u))] * (*tint_module_vars.secondMatrix).numbers[min(b, ((((*tint_module_vars.tint_storage_buffer_sizes)[0u][1u] - 0u) / 4u) - 1u))]));
       {
         i = (i + 1u);
       }
@@ -52,10 +53,10 @@ void tint_symbol_inner(uint3 global_id, tint_module_vars_struct tint_module_vars
     }
   }
   uint const index = (resultCell[1u] + (resultCell[0u] * dimOutter));
-  (*tint_module_vars.resultMatrix).numbers[index] = result;
+  (*tint_module_vars.resultMatrix).numbers[min(index, ((((*tint_module_vars.tint_storage_buffer_sizes)[0u][2u] - 0u) / 4u) - 1u))] = result;
 }
 
-kernel void tint_symbol(uint3 global_id [[thread_position_in_grid]], const device Matrix* firstMatrix [[buffer(2)]], const device Matrix* secondMatrix [[buffer(3)]], device Matrix* resultMatrix [[buffer(1)]], const constant Uniforms* uniforms [[buffer(0)]]) {
-  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.firstMatrix=firstMatrix, .secondMatrix=secondMatrix, .resultMatrix=resultMatrix, .uniforms=uniforms};
+kernel void tint_symbol(uint3 global_id [[thread_position_in_grid]], const device Matrix* firstMatrix [[buffer(2)]], const device Matrix* secondMatrix [[buffer(3)]], device Matrix* resultMatrix [[buffer(1)]], const constant Uniforms* uniforms [[buffer(0)]], const constant tint_array<uint4, 1>* tint_storage_buffer_sizes [[buffer(30)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.firstMatrix=firstMatrix, .secondMatrix=secondMatrix, .resultMatrix=resultMatrix, .uniforms=uniforms, .tint_storage_buffer_sizes=tint_storage_buffer_sizes};
   tint_symbol_inner(global_id, tint_module_vars);
 }

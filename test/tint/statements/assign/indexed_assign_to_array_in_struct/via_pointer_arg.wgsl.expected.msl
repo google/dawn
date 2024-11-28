@@ -28,7 +28,7 @@ struct OuterS {
 
 void f(thread OuterS* const p, const constant Uniforms* const tint_symbol_1) {
   InnerS v = {};
-  (*(p)).a1[(*(tint_symbol_1)).i] = v;
+  (*(p)).a1[min((*(tint_symbol_1)).i, 7u)] = v;
 }
 
 kernel void tint_symbol(const constant Uniforms* tint_symbol_2 [[buffer(0)]]) {

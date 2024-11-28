@@ -23,7 +23,7 @@ struct tint_symbol_outputs {
 
 float4 tint_symbol_inner() {
   int const zero = 0;
-  return float4(tint_array<Normals, 1>{Normals{.f=float3(0.0f, 0.0f, 1.0f)}}[zero].f, 1.0f);
+  return float4(tint_array<Normals, 1>{Normals{.f=float3(0.0f, 0.0f, 1.0f)}}[min(uint(zero), 0u)].f, 1.0f);
 }
 
 vertex tint_symbol_outputs tint_symbol() {

@@ -17,6 +17,9 @@ struct tint_module_vars_struct {
   threadgroup tint_array<int, 246>* W;
 };
 
+#define TINT_ISOLATE_UB(VOLATILE_NAME) \
+  {volatile bool VOLATILE_NAME = false; if (VOLATILE_NAME) break;}
+
 struct tint_symbol_2 {
   tint_array<int, 246> tint_symbol_1;
 };
@@ -26,6 +29,7 @@ void tint_symbol_inner(uint tint_local_index, tint_module_vars_struct tint_modul
     uint v = 0u;
     v = tint_local_index;
     while(true) {
+      TINT_ISOLATE_UB(tint_volatile_false)
       uint const v_1 = v;
       if ((v_1 >= 246u)) {
         break;
@@ -39,7 +43,7 @@ void tint_symbol_inner(uint tint_local_index, tint_module_vars_struct tint_modul
   }
   threadgroup_barrier(mem_flags::mem_threadgroup);
   threadgroup tint_array<int, 246>* const p = tint_module_vars.W;
-  (*p)[0] = 42;
+  (*p)[0u] = 42;
 }
 
 kernel void tint_symbol(uint tint_local_index [[thread_index_in_threadgroup]], threadgroup tint_symbol_2* v_2 [[threadgroup(0)]]) {

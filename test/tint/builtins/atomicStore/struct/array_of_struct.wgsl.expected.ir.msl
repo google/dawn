@@ -23,6 +23,9 @@ struct tint_module_vars_struct {
   threadgroup tint_array<S, 10>* wg;
 };
 
+#define TINT_ISOLATE_UB(VOLATILE_NAME) \
+  {volatile bool VOLATILE_NAME = false; if (VOLATILE_NAME) break;}
+
 struct tint_symbol_1 {
   tint_array<S, 10> tint_symbol;
 };
@@ -32,6 +35,7 @@ void compute_main_inner(uint tint_local_index, tint_module_vars_struct tint_modu
     uint v = 0u;
     v = tint_local_index;
     while(true) {
+      TINT_ISOLATE_UB(tint_volatile_false)
       uint const v_1 = v;
       if ((v_1 >= 10u)) {
         break;
@@ -46,7 +50,7 @@ void compute_main_inner(uint tint_local_index, tint_module_vars_struct tint_modu
     }
   }
   threadgroup_barrier(mem_flags::mem_threadgroup);
-  atomic_store_explicit((&(*tint_module_vars.wg)[4].a), 1u, memory_order_relaxed);
+  atomic_store_explicit((&(*tint_module_vars.wg)[4u].a), 1u, memory_order_relaxed);
 }
 
 kernel void compute_main(uint tint_local_index [[thread_index_in_threadgroup]], threadgroup tint_symbol_1* v_2 [[threadgroup(0)]]) {

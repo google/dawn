@@ -29,7 +29,11 @@ struct tint_module_vars_struct {
   texture2d<float, access::sample> dst;
   device OutputBuf* output;
   const constant Uniforms* uniforms;
+  const constant tint_array<uint4, 1>* tint_storage_buffer_sizes;
 };
+
+#define TINT_ISOLATE_UB(VOLATILE_NAME) \
+  {volatile bool VOLATILE_NAME = false; if (VOLATILE_NAME) break;}
 
 uint ConvertToFp16FloatValue(float fp32) {
   return 1u;
@@ -46,27 +50,32 @@ void tint_symbol_inner(uint3 GlobalInvocationID, tint_module_vars_struct tint_mo
   if (((*tint_module_vars.uniforms).dstTextureFlipY == 1u)) {
     srcTexCoord[1u] = ((size[1u] - dstTexCoord[1u]) - 1u);
   }
-  float4 srcColor = tint_module_vars.src.read(srcTexCoord, 0);
-  float4 dstColor = tint_module_vars.dst.read(dstTexCoord, 0);
+  uint2 const v = srcTexCoord;
+  uint const v_1 = min(uint(0), (tint_module_vars.src.get_num_mip_levels() - 1u));
+  float4 srcColor = tint_module_vars.src.read(min(v, (uint2(tint_module_vars.src.get_width(v_1), tint_module_vars.src.get_height(v_1)) - uint2(1u))), v_1);
+  uint2 const v_2 = dstTexCoord;
+  uint const v_3 = min(uint(0), (tint_module_vars.dst.get_num_mip_levels() - 1u));
+  float4 dstColor = tint_module_vars.dst.read(min(v_2, (uint2(tint_module_vars.dst.get_width(v_3), tint_module_vars.dst.get_height(v_3)) - uint2(1u))), v_3);
   bool success = true;
   uint4 srcColorBits = 0u;
   uint4 dstColorBits = tint_v4f32_to_v4u32(dstColor);
   {
     uint i = 0u;
     while(true) {
+      TINT_ISOLATE_UB(tint_volatile_false)
       if ((i < (*tint_module_vars.uniforms).channelCount)) {
       } else {
         break;
       }
-      uint const v = i;
-      srcColorBits[v] = ConvertToFp16FloatValue(srcColor[i]);
-      bool v_1 = false;
+      uint const v_4 = i;
+      srcColorBits[min(v_4, 3u)] = ConvertToFp16FloatValue(srcColor[min(i, 3u)]);
+      bool v_5 = false;
       if (success) {
-        v_1 = (srcColorBits[i] == dstColorBits[i]);
+        v_5 = (srcColorBits[min(i, 3u)] == dstColorBits[min(i, 3u)]);
       } else {
-        v_1 = false;
+        v_5 = false;
       }
-      success = v_1;
+      success = v_5;
       {
         i = (i + 1u);
       }
@@ -75,13 +84,13 @@ void tint_symbol_inner(uint3 GlobalInvocationID, tint_module_vars_struct tint_mo
   }
   uint outputIndex = ((GlobalInvocationID[1u] * uint(size[0u])) + GlobalInvocationID[0u]);
   if (success) {
-    (*tint_module_vars.output).result[outputIndex] = 1u;
+    (*tint_module_vars.output).result[min(outputIndex, ((((*tint_module_vars.tint_storage_buffer_sizes)[0u][1u] - 0u) / 4u) - 1u))] = 1u;
   } else {
-    (*tint_module_vars.output).result[outputIndex] = 0u;
+    (*tint_module_vars.output).result[min(outputIndex, ((((*tint_module_vars.tint_storage_buffer_sizes)[0u][1u] - 0u) / 4u) - 1u))] = 0u;
   }
 }
 
-kernel void tint_symbol(uint3 GlobalInvocationID [[thread_position_in_grid]], texture2d<float, access::sample> src [[texture(0)]], texture2d<float, access::sample> dst [[texture(1)]], device OutputBuf* output [[buffer(1)]], const constant Uniforms* uniforms [[buffer(0)]]) {
-  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.src=src, .dst=dst, .output=output, .uniforms=uniforms};
+kernel void tint_symbol(uint3 GlobalInvocationID [[thread_position_in_grid]], texture2d<float, access::sample> src [[texture(0)]], texture2d<float, access::sample> dst [[texture(1)]], device OutputBuf* output [[buffer(1)]], const constant Uniforms* uniforms [[buffer(0)]], const constant tint_array<uint4, 1>* tint_storage_buffer_sizes [[buffer(30)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.src=src, .dst=dst, .output=output, .uniforms=uniforms, .tint_storage_buffer_sizes=tint_storage_buffer_sizes};
   tint_symbol_inner(GlobalInvocationID, tint_module_vars);
 }

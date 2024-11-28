@@ -7,6 +7,9 @@ struct tint_module_vars_struct {
   texture2d<float, access::sample> depthTexture;
 };
 
+#define TINT_ISOLATE_UB(VOLATILE_NAME) \
+  {volatile bool VOLATILE_NAME = false; if (VOLATILE_NAME) break;}
+
 struct tint_symbol_outputs {
   float4 tint_symbol_1 [[color(0)]];
 };
@@ -20,6 +23,7 @@ float4 tint_symbol_inner(float2 vUV, tint_module_vars_struct tint_module_vars) {
   int i = 0;
   {
     while(true) {
+      TINT_ISOLATE_UB(tint_volatile_false)
       if ((i < 1)) {
       } else {
         break;

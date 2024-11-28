@@ -30,12 +30,12 @@ static bool continue_execution = true;
 VertexOutputs vs_main_inner(uint VertexIndex) {
   float2 texcoord[3] = {float2(-0.5f, 0.0f), float2(1.5f, 0.0f), float2(0.5f, 2.0f)};
   VertexOutputs output = (VertexOutputs)0;
-  output.position = float4(((texcoord[VertexIndex] * 2.0f) - (1.0f).xx), 0.0f, 1.0f);
+  output.position = float4(((texcoord[min(VertexIndex, 2u)] * 2.0f) - (1.0f).xx), 0.0f, 1.0f);
   bool flipY = (asfloat(uniforms[0u].y) < 0.0f);
   if (flipY) {
-    output.texcoords = ((((texcoord[VertexIndex] * asfloat(uniforms[0u].xy)) + asfloat(uniforms[0u].zw)) * float2(1.0f, -1.0f)) + float2(0.0f, 1.0f));
+    output.texcoords = ((((texcoord[min(VertexIndex, 2u)] * asfloat(uniforms[0u].xy)) + asfloat(uniforms[0u].zw)) * float2(1.0f, -1.0f)) + float2(0.0f, 1.0f));
   } else {
-    output.texcoords = ((((texcoord[VertexIndex] * float2(1.0f, -1.0f)) + float2(0.0f, 1.0f)) * asfloat(uniforms[0u].xy)) + asfloat(uniforms[0u].zw));
+    output.texcoords = ((((texcoord[min(VertexIndex, 2u)] * float2(1.0f, -1.0f)) + float2(0.0f, 1.0f)) * asfloat(uniforms[0u].xy)) + asfloat(uniforms[0u].zw));
   }
   VertexOutputs v = output;
   return v;

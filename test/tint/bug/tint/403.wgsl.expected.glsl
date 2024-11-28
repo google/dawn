@@ -25,7 +25,7 @@ vec4 tint_symbol_inner(uint tint_symbol_1) {
   mat2 x_28 = mat2(v_1.inner.transform2_col0, v_1.inner.transform2_col1);
   uint x_46 = tint_symbol_1;
   indexable = vec2[3](vec2(-1.0f, 1.0f), vec2(1.0f), vec2(-1.0f));
-  vec2 x_51 = indexable[x_46];
+  vec2 x_51 = indexable[min(x_46, 2u)];
   vec2 x_52 = (mat2((x_23[0u] + x_28[0u]), (x_23[1u] + x_28[1u])) * x_51);
   return vec4(x_52[0u], x_52[1u], 0.0f, 1.0f);
 }

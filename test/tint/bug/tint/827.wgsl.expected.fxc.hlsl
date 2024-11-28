@@ -6,7 +6,10 @@ struct tint_symbol_1 {
 };
 
 void main_inner(uint3 GlobalInvocationId) {
-  result.Store((4u * ((GlobalInvocationId.y * 128u) + GlobalInvocationId.x)), asuint(tex.Load(int3(int(GlobalInvocationId.x), int(GlobalInvocationId.y), 0)).x));
+  uint tint_symbol_3 = 0u;
+  result.GetDimensions(tint_symbol_3);
+  uint tint_symbol_4 = ((tint_symbol_3 - 0u) / 4u);
+  result.Store((4u * min(((GlobalInvocationId.y * 128u) + GlobalInvocationId.x), (tint_symbol_4 - 1u))), asuint(tex.Load(int3(int(GlobalInvocationId.x), int(GlobalInvocationId.y), 0)).x));
 }
 
 [numthreads(1, 1, 1)]

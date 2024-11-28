@@ -258,7 +258,7 @@ void main1(tint_module_vars_struct tint_module_vars) {
   Mat4x3_ t_PosMtx = {};
   float2 t_TexSpaceCoord = 0.0f;
   float const x_e15 = (*tint_module_vars.a_PosMtxIdx1);
-  Mat4x3_ const x_e18 = (*tint_module_vars.global2).u_PosMtx[tint_f32_to_i32(x_e15)];
+  Mat4x3_ const x_e18 = (*tint_module_vars.global2).u_PosMtx[min(uint(tint_f32_to_i32(x_e15)), 31u)];
   t_PosMtx = x_e18;
   Mat4x3_ const x_e23 = t_PosMtx;
   Mat4x4_ const x_e24 = x_Mat4x4_1(x_e23);
@@ -282,14 +282,14 @@ void main1(tint_module_vars_struct tint_module_vars) {
   float4 const x_e52 = (*tint_module_vars.global1).u_Misc0_;
   if ((x_e52[0u] == 2.0f)) {
     float3 const x_e59 = (*tint_module_vars.a_Normal1);
-    Mat4x2_ const x_e64 = (*tint_module_vars.global1).u_TexMtx[0];
+    Mat4x2_ const x_e64 = (*tint_module_vars.global1).u_TexMtx[0u];
     float3 const x_e65 = (*tint_module_vars.a_Normal1);
     float2 const x_e68 = Mul2(x_e64, float4(x_e65, 1.0f));
     (*tint_module_vars.v_TexCoord) = x_e68.xy;
     return;
   } else {
     float2 const x_e73 = (*tint_module_vars.a_UV1);
-    Mat4x2_ const x_e79 = (*tint_module_vars.global1).u_TexMtx[0];
+    Mat4x2_ const x_e79 = (*tint_module_vars.global1).u_TexMtx[0u];
     float2 const x_e80 = (*tint_module_vars.a_UV1);
     float2 const x_e84 = Mul2(x_e79, float4(x_e80, 1.0f, 1.0f));
     (*tint_module_vars.v_TexCoord) = x_e84.xy;

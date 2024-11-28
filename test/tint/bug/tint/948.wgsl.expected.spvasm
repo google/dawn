@@ -483,7 +483,7 @@
                OpStore %param %246 None
       %x_225 = OpFunctionCall %mat4v4float %getFrameData_f1_ %param
                OpStore %frameData %x_225 None
-        %248 = OpAccessChain %_ptr_Function_v4float %frameData %int_0
+        %248 = OpAccessChain %_ptr_Function_v4float %frameData %uint_0
       %x_228 = OpLoad %v4float %248 None
         %250 = OpAccessChain %_ptr_Uniform_v2float %1 %uint_0 %uint_5
       %x_231 = OpLoad %v2float %250 None
@@ -492,7 +492,7 @@
         %254 = OpCompositeConstruct %v2float %252 %253
         %255 = OpFDiv %v2float %254 %x_231
                OpStore %frameSize %255 None
-        %256 = OpAccessChain %_ptr_Function_v4float %frameData %int_0
+        %256 = OpAccessChain %_ptr_Function_v4float %frameData %uint_0
       %x_235 = OpLoad %v4float %256 None
       %x_237 = OpLoad %v2float %sheetUnits None
         %259 = OpCompositeExtract %float %x_235 0
@@ -500,9 +500,9 @@
         %261 = OpCompositeConstruct %v2float %259 %260
         %262 = OpFMul %v2float %261 %x_237
                OpStore %offset_1 %262 None
-        %263 = OpAccessChain %_ptr_Function_v4float %frameData %int_2
+        %263 = OpAccessChain %_ptr_Function_v4float %frameData %uint_2
       %x_241 = OpLoad %v4float %263 None
-        %265 = OpAccessChain %_ptr_Function_v4float %frameData %int_0
+        %265 = OpAccessChain %_ptr_Function_v4float %frameData %uint_0
       %x_244 = OpLoad %v4float %265 None
         %267 = OpCompositeExtract %float %x_241 0
         %268 = OpCompositeExtract %float %x_241 1
@@ -512,7 +512,7 @@
         %272 = OpCompositeConstruct %v2float %270 %271
         %273 = OpFDiv %v2float %269 %272
                OpStore %ratio %273 None
-        %274 = OpAccessChain %_ptr_Function_v4float %frameData %int_2
+        %274 = OpAccessChain %_ptr_Function_v4float %frameData %uint_2
         %275 = OpAccessChain %_ptr_Function_float %274 %uint_2
       %x_248 = OpLoad %float %275 None
         %277 = OpFOrdEqual %bool %x_248 %float_1

@@ -25,13 +25,15 @@ struct sb_block {
 
 struct tint_module_vars_struct {
   const device sb_block* sb;
+  const constant tint_array<uint4, 1>* tint_storage_buffer_sizes;
 };
 
 void main_1(tint_module_vars_struct tint_module_vars) {
-  S const x_18 = (*tint_module_vars.sb).inner[1];
+  uint const v = ((((*tint_module_vars.tint_storage_buffer_sizes)[0u][0u] - 0u) / 32u) - 1u);
+  S const x_18 = (*tint_module_vars.sb).inner[min(uint(1), v)];
 }
 
-kernel void tint_symbol(const device sb_block* sb [[buffer(0)]]) {
-  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.sb=sb};
+kernel void tint_symbol(const device sb_block* sb [[buffer(0)]], const constant tint_array<uint4, 1>* tint_storage_buffer_sizes [[buffer(30)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.sb=sb, .tint_storage_buffer_sizes=tint_storage_buffer_sizes};
   main_1(tint_module_vars);
 }

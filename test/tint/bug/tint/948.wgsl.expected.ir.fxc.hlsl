@@ -157,17 +157,17 @@ void main_1() {
       param = (x_222 + 0.5f);
       float4x4 x_225 = getFrameData_f1_(param);
       frameData = x_225;
-      float4 x_228 = frameData[int(0)];
+      float4 x_228 = frameData[0u];
       float2 x_231 = asfloat(x_20[6u].xy);
       frameSize = (float2(x_228.w, x_228.z) / x_231);
-      float4 x_235 = frameData[int(0)];
+      float4 x_235 = frameData[0u];
       float2 x_237 = sheetUnits;
       offset_1 = (float2(x_235.x, x_235.y) * x_237);
-      float4 x_241 = frameData[int(2)];
-      float4 x_244 = frameData[int(0)];
+      float4 x_241 = frameData[2u];
+      float4 x_244 = frameData[0u];
       float2 v_3 = float2(x_241.x, x_241.y);
       ratio = (v_3 / float2(x_244.w, x_244.z));
-      float x_248 = frameData[int(2)].z;
+      float x_248 = frameData[2u].z;
       if ((x_248 == 1.0f)) {
         float2 x_252 = tileUV;
         tileUV = float2(x_252.y, x_252.x);

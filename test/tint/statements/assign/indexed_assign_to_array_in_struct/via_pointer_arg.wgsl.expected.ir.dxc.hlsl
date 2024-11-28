@@ -12,7 +12,7 @@ cbuffer cbuffer_uniforms : register(b4, space1) {
 };
 void f(inout OuterS p) {
   InnerS v = (InnerS)0;
-  uint v_1 = uniforms[0u].x;
+  uint v_1 = min(uniforms[0u].x, 7u);
   InnerS v_2 = v;
   p.a1[v_1] = v_2;
 }

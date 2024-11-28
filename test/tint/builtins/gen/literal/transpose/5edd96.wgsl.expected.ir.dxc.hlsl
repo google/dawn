@@ -12,7 +12,7 @@ struct vertex_main_outputs {
 RWByteAddressBuffer prevent_dce : register(u0);
 int transpose_5edd96() {
   matrix<float16_t, 2, 4> res = matrix<float16_t, 2, 4>((float16_t(1.0h)).xxxx, (float16_t(1.0h)).xxxx);
-  return (((res[int(0)].x == float16_t(0.0h))) ? (int(1)) : (int(0)));
+  return (((res[0u].x == float16_t(0.0h))) ? (int(1)) : (int(0)));
 }
 
 void fragment_main() {

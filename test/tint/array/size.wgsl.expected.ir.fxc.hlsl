@@ -14,6 +14,6 @@ void main() {
   unsigned_constant = v_2;
   float v_3[4] = signed_literal;
   shr_const_expr = v_3;
-  s.Store(0u, asuint(((((signed_literal[int(0)] + unsigned_literal[int(0)]) + signed_constant[int(0)]) + unsigned_constant[int(0)]) + shr_const_expr[int(0)])));
+  s.Store(0u, asuint(((((signed_literal[0u] + unsigned_literal[0u]) + signed_constant[0u]) + unsigned_constant[0u]) + shr_const_expr[0u])));
 }
 

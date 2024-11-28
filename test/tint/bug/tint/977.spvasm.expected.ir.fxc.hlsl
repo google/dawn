@@ -37,7 +37,10 @@ void main_1() {
   param = -4.0f;
   param_1 = -3.0f;
   float x_68 = binaryOperation_f1_f1_(param, param_1);
-  resultMatrix.Store((0u + (uint(x_63) * 4u)), asuint(x_68));
+  uint v_1 = 0u;
+  resultMatrix.GetDimensions(v_1);
+  uint v_2 = ((v_1 / 4u) - 1u);
+  resultMatrix.Store((0u + (min(uint(x_63), v_2) * 4u)), asuint(x_68));
 }
 
 void main_inner(uint3 gl_GlobalInvocationID_param) {

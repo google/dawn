@@ -13,7 +13,7 @@ void main() {
       if ((i >= b.Load(0u))) {
         break;
       }
-      uint v_1 = (i * 4u);
+      uint v_1 = (min(i, 49u) * 4u);
       if ((tint_mod_u32(i, 2u) == 0u)) {
         {
           b.Store((4u + v_1), (b.Load((4u + v_1)) * 2u));

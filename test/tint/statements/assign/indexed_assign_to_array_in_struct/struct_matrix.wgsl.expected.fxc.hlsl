@@ -27,7 +27,7 @@ cbuffer cbuffer_uniforms : register(b4, space1) {
 [numthreads(1, 1, 1)]
 void main() {
   OuterS s1 = (OuterS)0;
-  set_matrix_column(s1.m1, uniforms[0].x, (1.0f).xxxx);
-  set_matrix_scalar(s1.m1, uniforms[0].x, uniforms[0].x, 1.0f);
+  set_matrix_column(s1.m1, min(uniforms[0].x, 1u), (1.0f).xxxx);
+  set_matrix_scalar(s1.m1, min(uniforms[0].x, 1u), min(uniforms[0].x, 3u), 1.0f);
   return;
 }

@@ -41,7 +41,7 @@ void main_1() {
   vec3 p = vec3(0.0f);
   q = vec4(position_1.x, position_1.y, position_1.z, 1.0f);
   p = q.xyz;
-  p[0u] = (p.x + sin(((v.inner.test[0].el * position_1.y) + v.inner.time)));
+  p[0u] = (p.x + sin(((v.inner.test[0u].el * position_1.y) + v.inner.time)));
   p[1u] = (p.y + sin((v.inner.time + 4.0f)));
   mat4 v_1 = v.inner.worldViewProjection;
   tint_symbol = (v_1 * vec4(p.x, p.y, p.z, 1.0f));

@@ -11,7 +11,7 @@ RWByteAddressBuffer result : register(u1);
 void x(inout S p) {
   {
     int tint_symbol_2[64] = p.data;
-    tint_symbol_2[asint(ubo[0].x)] = 1;
+    tint_symbol_2[min(uint(asint(ubo[0].x)), 63u)] = 1;
     p.data = tint_symbol_2;
   }
 }

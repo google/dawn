@@ -17,7 +17,7 @@ struct vertex_main_outputs {
 };
 
 uint3 textureDimensions_6e6c7a(tint_module_vars_struct tint_module_vars) {
-  uint3 res = uint3(tint_module_vars.arg_0.get_width(1u), tint_module_vars.arg_0.get_height(1u), tint_module_vars.arg_0.get_depth(1u));
+  uint3 res = uint3(tint_module_vars.arg_0.get_width(min(1u, (tint_module_vars.arg_0.get_num_mip_levels() - 1u))), tint_module_vars.arg_0.get_height(min(1u, (tint_module_vars.arg_0.get_num_mip_levels() - 1u))), tint_module_vars.arg_0.get_depth(min(1u, (tint_module_vars.arg_0.get_num_mip_levels() - 1u))));
   return res;
 }
 

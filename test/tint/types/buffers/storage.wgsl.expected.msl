@@ -18,8 +18,12 @@ struct tint_symbol_2 {
   /* 0x0000 */ tint_array<float, 1> arr;
 };
 
-fragment void tint_symbol(const device tint_symbol_2* tint_symbol_1 [[buffer(0)]]) {
-  float a = (*(tint_symbol_1)).arr[0];
+struct TintArrayLengths {
+  /* 0x0000 */ tint_array<uint4, 1> array_lengths;
+};
+
+fragment void tint_symbol(const device tint_symbol_2* tint_symbol_1 [[buffer(0)]], const constant TintArrayLengths* tint_symbol_3 [[buffer(30)]]) {
+  float a = (*(tint_symbol_1)).arr[min(0u, (((*(tint_symbol_3)).array_lengths[0u][0u] / 4u) - 1u))];
   return;
 }
 

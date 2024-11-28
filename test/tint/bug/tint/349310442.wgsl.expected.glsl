@@ -101,5 +101,5 @@ tint_ExternalTextureParams tint_convert_tint_ExternalTextureParams(tint_External
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
   tint_ExternalTextureParams v_16 = tint_convert_tint_ExternalTextureParams(v_1.inner);
-  vec4 r = tint_TextureLoadExternal(v_16, uvec2(ivec2(0)));
+  vec4 r = tint_TextureLoadExternal(v_16, min(uvec2(ivec2(0)), ((v_16.apparentSize + uvec2(1u)) - uvec2(1u))));
 }

@@ -48,6 +48,9 @@ struct tint_module_vars_struct {
   thread float2* vUV;
 };
 
+#define TINT_ISOLATE_UB(VOLATILE_NAME) \
+  {volatile bool VOLATILE_NAME = false; if (VOLATILE_NAME) break;}
+
 struct main_out {
   float4 glFragColor_1;
 };
@@ -119,6 +122,7 @@ void main_1(tint_module_vars_struct tint_module_vars) {
   i = 0;
   {
     while(true) {
+      TINT_ISOLATE_UB(tint_volatile_false)
       int const x_122 = i;
       if ((x_122 < 2)) {
       } else {
@@ -160,6 +164,7 @@ void main_1(tint_module_vars_struct tint_module_vars) {
         f = 0.0f;
         {
           while(true) {
+            TINT_ISOLATE_UB(tint_volatile_false_1)
             float const x_193 = f;
             if ((x_193 < 8.0f)) {
             } else {
@@ -189,17 +194,17 @@ void main_1(tint_module_vars_struct tint_module_vars) {
       param = (x_222 + 0.5f);
       float4x4 const x_225 = getFrameData_f1_((&param), tint_module_vars);
       frameData = x_225;
-      float4 const x_228 = frameData[0];
+      float4 const x_228 = frameData[0u];
       float2 const x_231 = (*tint_module_vars.x_20).spriteMapSize;
       frameSize = (float2(x_228[3u], x_228[2u]) / x_231);
-      float4 const x_235 = frameData[0];
+      float4 const x_235 = frameData[0u];
       float2 const x_237 = sheetUnits;
       offset_1 = (float2(x_235[0u], x_235[1u]) * x_237);
-      float4 const x_241 = frameData[2];
-      float4 const x_244 = frameData[0];
+      float4 const x_241 = frameData[2u];
+      float4 const x_244 = frameData[0u];
       float2 const v_6 = float2(x_241[0u], x_241[1u]);
       ratio = (v_6 / float2(x_244[3u], x_244[2u]));
-      float const x_248 = frameData[2][2u];
+      float const x_248 = frameData[2u][2u];
       if ((x_248 == 1.0f)) {
         float2 const x_252 = tileUV;
         tileUV = float2(x_252[1u], x_252[0u]);

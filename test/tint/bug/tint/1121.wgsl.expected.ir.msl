@@ -54,6 +54,7 @@ struct tint_module_vars_struct {
   device Tiles* tileLightId;
   const constant Config* config;
   const constant Uniforms* uniforms;
+  const constant tint_array<uint4, 1>* tint_storage_buffer_sizes;
 };
 
 void tint_symbol_inner(uint3 GlobalInvocationID, tint_module_vars_struct tint_module_vars) {
@@ -61,27 +62,27 @@ void tint_symbol_inner(uint3 GlobalInvocationID, tint_module_vars_struct tint_mo
   if ((index >= (*tint_module_vars.config).numLights)) {
     return;
   }
-  device float4* const v = (&(*tint_module_vars.lightsBuffer).lights[index].position);
-  float const v_1 = ((*tint_module_vars.lightsBuffer).lights[index].position[1u] - 0.10000000149011611938f);
+  device float4* const v = (&(*tint_module_vars.lightsBuffer).lights[min(index, ((((*tint_module_vars.tint_storage_buffer_sizes)[0u][0u] - 0u) / 32u) - 1u))].position);
+  float const v_1 = ((*tint_module_vars.lightsBuffer).lights[min(index, ((((*tint_module_vars.tint_storage_buffer_sizes)[0u][0u] - 0u) / 32u) - 1u))].position[1u] - 0.10000000149011611938f);
   float const v_2 = float(index);
   (*v)[1u] = (v_1 + (0.00100000004749745131f * (v_2 - (64.0f * floor((float(index) / 64.0f))))));
-  if (((*tint_module_vars.lightsBuffer).lights[index].position[1u] < (*tint_module_vars.uniforms).min[1u])) {
-    (*tint_module_vars.lightsBuffer).lights[index].position[1u] = (*tint_module_vars.uniforms).max[1u];
+  if (((*tint_module_vars.lightsBuffer).lights[min(index, ((((*tint_module_vars.tint_storage_buffer_sizes)[0u][0u] - 0u) / 32u) - 1u))].position[1u] < (*tint_module_vars.uniforms).min[1u])) {
+    (*tint_module_vars.lightsBuffer).lights[min(index, ((((*tint_module_vars.tint_storage_buffer_sizes)[0u][0u] - 0u) / 32u) - 1u))].position[1u] = (*tint_module_vars.uniforms).max[1u];
   }
   float4x4 M = (*tint_module_vars.uniforms).projectionMatrix;
-  float viewNear = (-(M[3][2]) / (-1.0f + M[2][2]));
-  float viewFar = (-(M[3][2]) / (1.0f + M[2][2]));
-  float4 lightPos = (*tint_module_vars.lightsBuffer).lights[index].position;
+  float viewNear = (-(M[3u][2u]) / (-1.0f + M[2u][2u]));
+  float viewFar = (-(M[3u][2u]) / (1.0f + M[2u][2u]));
+  float4 lightPos = (*tint_module_vars.lightsBuffer).lights[min(index, ((((*tint_module_vars.tint_storage_buffer_sizes)[0u][0u] - 0u) / 32u) - 1u))].position;
   lightPos = ((*tint_module_vars.uniforms).viewMatrix * lightPos);
   lightPos = (lightPos / lightPos[3u]);
-  float lightRadius = (*tint_module_vars.lightsBuffer).lights[index].radius;
+  float lightRadius = (*tint_module_vars.lightsBuffer).lights[min(index, ((((*tint_module_vars.tint_storage_buffer_sizes)[0u][0u] - 0u) / 32u) - 1u))].radius;
   float4 const v_3 = lightPos;
   float4 boxMin = (v_3 - float4(float3(lightRadius), 0.0f));
   float4 const v_4 = lightPos;
   float4 boxMax = (v_4 + float4(float3(lightRadius), 0.0f));
   tint_array<float4, 6> frustumPlanes = {};
-  frustumPlanes[4] = float4(0.0f, 0.0f, -1.0f, viewNear);
-  frustumPlanes[5] = float4(0.0f, 0.0f, 1.0f, -(viewFar));
+  frustumPlanes[4u] = float4(0.0f, 0.0f, -1.0f, viewNear);
+  frustumPlanes[5u] = float4(0.0f, 0.0f, 1.0f, -(viewFar));
   int const TILE_SIZE = 16;
   int const TILE_COUNT_X = 2;
   int const TILE_COUNT_Y = 2;
@@ -105,12 +106,12 @@ void tint_symbol_inner(uint3 GlobalInvocationID, tint_module_vars_struct tint_mo
           int2 const v_6 = tilePixel0Idx;
           float2 const v_7 = (2.0f * float2(as_type<int2>((as_type<uint2>(v_6) + as_type<uint2>(int2(TILE_SIZE))))));
           float2 ceilCoord = ((v_7 / (*tint_module_vars.uniforms).fullScreenSize.xy) - float2(1.0f));
-          float2 viewFloorCoord = float2((((-(viewNear) * floorCoord[0u]) - (M[2][0] * viewNear)) / M[0][0]), (((-(viewNear) * floorCoord[1u]) - (M[2][1] * viewNear)) / M[1][1]));
-          float2 viewCeilCoord = float2((((-(viewNear) * ceilCoord[0u]) - (M[2][0] * viewNear)) / M[0][0]), (((-(viewNear) * ceilCoord[1u]) - (M[2][1] * viewNear)) / M[1][1]));
-          frustumPlanes[0] = float4(1.0f, 0.0f, (-(viewFloorCoord[0u]) / viewNear), 0.0f);
-          frustumPlanes[1] = float4(-1.0f, 0.0f, (viewCeilCoord[0u] / viewNear), 0.0f);
-          frustumPlanes[2] = float4(0.0f, 1.0f, (-(viewFloorCoord[1u]) / viewNear), 0.0f);
-          frustumPlanes[3] = float4(0.0f, -1.0f, (viewCeilCoord[1u] / viewNear), 0.0f);
+          float2 viewFloorCoord = float2((((-(viewNear) * floorCoord[0u]) - (M[2u][0u] * viewNear)) / M[0u][0u]), (((-(viewNear) * floorCoord[1u]) - (M[2u][1u] * viewNear)) / M[1u][1u]));
+          float2 viewCeilCoord = float2((((-(viewNear) * ceilCoord[0u]) - (M[2u][0u] * viewNear)) / M[0u][0u]), (((-(viewNear) * ceilCoord[1u]) - (M[2u][1u] * viewNear)) / M[1u][1u]));
+          frustumPlanes[0u] = float4(1.0f, 0.0f, (-(viewFloorCoord[0u]) / viewNear), 0.0f);
+          frustumPlanes[1u] = float4(-1.0f, 0.0f, (viewCeilCoord[0u] / viewNear), 0.0f);
+          frustumPlanes[2u] = float4(0.0f, 1.0f, (-(viewFloorCoord[1u]) / viewNear), 0.0f);
+          frustumPlanes[3u] = float4(0.0f, -1.0f, (viewCeilCoord[1u] / viewNear), 0.0f);
           float dp = 0.0f;
           {
             uint i = 0u;
@@ -120,23 +121,23 @@ void tint_symbol_inner(uint3 GlobalInvocationID, tint_module_vars_struct tint_mo
                 break;
               }
               float4 p = 0.0f;
-              if ((frustumPlanes[i][0u] > 0.0f)) {
+              if ((frustumPlanes[min(i, 5u)][0u] > 0.0f)) {
                 p[0u] = boxMax[0u];
               } else {
                 p[0u] = boxMin[0u];
               }
-              if ((frustumPlanes[i][1u] > 0.0f)) {
+              if ((frustumPlanes[min(i, 5u)][1u] > 0.0f)) {
                 p[1u] = boxMax[1u];
               } else {
                 p[1u] = boxMin[1u];
               }
-              if ((frustumPlanes[i][2u] > 0.0f)) {
+              if ((frustumPlanes[min(i, 5u)][2u] > 0.0f)) {
                 p[2u] = boxMax[2u];
               } else {
                 p[2u] = boxMin[2u];
               }
               p[3u] = 1.0f;
-              dp = (dp + min(0.0f, dot(p, frustumPlanes[i])));
+              dp = (dp + min(0.0f, dot(p, frustumPlanes[min(i, 5u)])));
               {
                 i = (i + 1u);
               }
@@ -157,14 +158,14 @@ void tint_symbol_inner(uint3 GlobalInvocationID, tint_module_vars_struct tint_mo
               }
               continue;
             }
-            uint offset = atomic_fetch_add_explicit((&(*tint_module_vars.tileLightId).data[tileId].count), 1u, memory_order_relaxed);
+            uint offset = atomic_fetch_add_explicit((&(*tint_module_vars.tileLightId).data[min(tileId, 3u)].count), 1u, memory_order_relaxed);
             if ((offset >= (*tint_module_vars.config).numTileLightSlot)) {
               {
                 x = as_type<int>((as_type<uint>(x) + as_type<uint>(1)));
               }
               continue;
             }
-            (*tint_module_vars.tileLightId).data[tileId].lightId[offset] = GlobalInvocationID[0u];
+            (*tint_module_vars.tileLightId).data[min(tileId, 3u)].lightId[min(offset, 63u)] = GlobalInvocationID[0u];
           }
           {
             x = as_type<int>((as_type<uint>(x) + as_type<uint>(1)));
@@ -180,7 +181,7 @@ void tint_symbol_inner(uint3 GlobalInvocationID, tint_module_vars_struct tint_mo
   }
 }
 
-kernel void tint_symbol(uint3 GlobalInvocationID [[thread_position_in_grid]], device LightsBuffer_packed_vec3* lightsBuffer [[buffer(2)]], device Tiles* tileLightId [[buffer(3)]], const constant Config* config [[buffer(0)]], const constant Uniforms* uniforms [[buffer(1)]]) {
-  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.lightsBuffer=lightsBuffer, .tileLightId=tileLightId, .config=config, .uniforms=uniforms};
+kernel void tint_symbol(uint3 GlobalInvocationID [[thread_position_in_grid]], device LightsBuffer_packed_vec3* lightsBuffer [[buffer(2)]], device Tiles* tileLightId [[buffer(3)]], const constant Config* config [[buffer(0)]], const constant Uniforms* uniforms [[buffer(1)]], const constant tint_array<uint4, 1>* tint_storage_buffer_sizes [[buffer(30)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.lightsBuffer=lightsBuffer, .tileLightId=tileLightId, .config=config, .uniforms=uniforms, .tint_storage_buffer_sizes=tint_storage_buffer_sizes};
   tint_symbol_inner(GlobalInvocationID, tint_module_vars);
 }

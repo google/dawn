@@ -14,7 +14,9 @@ void v_1(uint offset, InnerS obj) {
 [numthreads(1, 1, 1)]
 void main() {
   InnerS v = (InnerS)0;
-  InnerS v_2 = v;
-  v_1((0u + (uniforms[0u].x * 4u)), v_2);
+  uint v_2 = 0u;
+  s1.GetDimensions(v_2);
+  InnerS v_3 = v;
+  v_1((0u + (min(uniforms[0u].x, ((v_2 / 4u) - 1u)) * 4u)), v_3);
 }
 

@@ -22,7 +22,7 @@ matrix<float16_t, 3, 2> m_load(uint offset) {
 void f() {
   int p_m_i_save = i();
   matrix<float16_t, 3, 2> l_m = m_load(0u);
-  const uint scalar_offset_3 = ((4u * uint(p_m_i_save))) / 4;
+  const uint scalar_offset_3 = ((4u * min(uint(p_m_i_save), 2u))) / 4;
   uint ubo_load_3 = m[scalar_offset_3 / 4][scalar_offset_3 % 4];
   vector<float16_t, 2> l_m_i = vector<float16_t, 2>(float16_t(f16tof32(ubo_load_3 & 0xFFFF)), float16_t(f16tof32(ubo_load_3 >> 16)));
   return;

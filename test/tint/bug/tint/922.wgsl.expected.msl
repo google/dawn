@@ -242,7 +242,7 @@ void main1(thread tint_private_vars_struct* const tint_private_vars, const const
   Mat4x3_ t_PosMtx = {};
   float2 t_TexSpaceCoord = 0.0f;
   float const x_e15 = (*(tint_private_vars)).a_PosMtxIdx1;
-  Mat4x3_ const x_e18 = (*(tint_symbol_5)).u_PosMtx[tint_ftoi(x_e15)];
+  Mat4x3_ const x_e18 = (*(tint_symbol_5)).u_PosMtx[min(uint(tint_ftoi(x_e15)), 31u)];
   t_PosMtx = x_e18;
   Mat4x3_ const x_e23 = t_PosMtx;
   Mat4x4_ const x_e24 = x_Mat4x4_1(x_e23);

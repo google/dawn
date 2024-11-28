@@ -128,7 +128,7 @@ void main1() {
   Mat4x3_ t_PosMtx = Mat4x3_(vec4(0.0f), vec4(0.0f), vec4(0.0f));
   vec2 t_TexSpaceCoord = vec2(0.0f);
   float x_e15 = a_PosMtxIdx1;
-  int v_4 = tint_f32_to_i32(x_e15);
+  uint v_4 = min(uint(tint_f32_to_i32(x_e15)), 31u);
   Mat4x3_ x_e18 = v_3.inner.u_PosMtx[v_4];
   t_PosMtx = x_e18;
   Mat4x3_ x_e23 = t_PosMtx;
@@ -153,14 +153,14 @@ void main1() {
   vec4 x_e52 = v_2.inner.u_Misc0_;
   if ((x_e52[0u] == 2.0f)) {
     vec3 x_e59 = a_Normal1;
-    Mat4x2_ x_e64 = v_2.inner.u_TexMtx[0];
+    Mat4x2_ x_e64 = v_2.inner.u_TexMtx[0u];
     vec3 x_e65 = a_Normal1;
     vec2 x_e68 = Mul2(x_e64, vec4(x_e65, 1.0f));
     v_TexCoord = x_e68.xy;
     return;
   } else {
     vec2 x_e73 = a_UV1;
-    Mat4x2_ x_e79 = v_2.inner.u_TexMtx[0];
+    Mat4x2_ x_e79 = v_2.inner.u_TexMtx[0u];
     vec2 x_e80 = a_UV1;
     vec2 x_e84 = Mul2(x_e79, vec4(x_e80, 1.0f, 1.0f));
     v_TexCoord = x_e84.xy;

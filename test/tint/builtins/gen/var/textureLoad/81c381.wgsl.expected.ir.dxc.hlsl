@@ -14,9 +14,15 @@ Texture1D<float4> arg_0 : register(t0, space1);
 float4 textureLoad_81c381() {
   int arg_1 = int(1);
   int arg_2 = int(1);
-  int v = arg_2;
-  int v_1 = int(arg_1);
-  float4 res = float4(arg_0.Load(int2(v_1, int(v))));
+  int v = arg_1;
+  uint2 v_1 = (0u).xx;
+  arg_0.GetDimensions(0u, v_1.x, v_1.y);
+  uint v_2 = min(uint(arg_2), (v_1.y - 1u));
+  uint2 v_3 = (0u).xx;
+  arg_0.GetDimensions(uint(v_2), v_3.x, v_3.y);
+  uint v_4 = (v_3.x - 1u);
+  int v_5 = int(min(uint(v), v_4));
+  float4 res = float4(arg_0.Load(int2(v_5, int(v_2))));
   return res;
 }
 
@@ -33,13 +39,13 @@ VertexOutput vertex_main_inner() {
   VertexOutput tint_symbol = (VertexOutput)0;
   tint_symbol.pos = (0.0f).xxxx;
   tint_symbol.prevent_dce = textureLoad_81c381();
-  VertexOutput v_2 = tint_symbol;
-  return v_2;
+  VertexOutput v_6 = tint_symbol;
+  return v_6;
 }
 
 vertex_main_outputs vertex_main() {
-  VertexOutput v_3 = vertex_main_inner();
-  vertex_main_outputs v_4 = {v_3.prevent_dce, v_3.pos};
-  return v_4;
+  VertexOutput v_7 = vertex_main_inner();
+  vertex_main_outputs v_8 = {v_7.prevent_dce, v_7.pos};
+  return v_8;
 }
 

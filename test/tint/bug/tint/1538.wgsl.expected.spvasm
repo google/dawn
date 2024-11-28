@@ -62,7 +62,7 @@
                OpLoopMerge %27 %25 None
                OpBranch %24
          %24 = OpLabel
-         %28 = OpAccessChain %_ptr_StorageBuffer_uint %1 %uint_0 %int_0
+         %28 = OpAccessChain %_ptr_StorageBuffer_uint %1 %uint_0 %uint_0
          %31 = OpLoad %uint %28 None
          %32 = OpIEqual %bool %31 %uint_0
                OpSelectionMerge %34 None
@@ -72,7 +72,7 @@
          %34 = OpLabel
          %36 = OpFunctionCall %int %f
                OpStore %s %36
-         %39 = OpAccessChain %_ptr_StorageBuffer_uint %1 %uint_0 %int_0
+         %39 = OpAccessChain %_ptr_StorageBuffer_uint %1 %uint_0 %uint_0
                OpStore %39 %uint_0 None
                OpBranch %25
          %25 = OpLabel

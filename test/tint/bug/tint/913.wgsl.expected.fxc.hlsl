@@ -80,9 +80,15 @@ void main_inner(uint3 GlobalInvocationID) {
   }
   uint outputIndex = ((GlobalInvocationID.y * dstSize.x) + GlobalInvocationID.x);
   if (success) {
-    output.Store((4u * outputIndex), asuint(1u));
+    uint tint_symbol_10 = 0u;
+    output.GetDimensions(tint_symbol_10);
+    uint tint_symbol_11 = ((tint_symbol_10 - 0u) / 4u);
+    output.Store((4u * min(outputIndex, (tint_symbol_11 - 1u))), asuint(1u));
   } else {
-    output.Store((4u * outputIndex), asuint(0u));
+    uint tint_symbol_12 = 0u;
+    output.GetDimensions(tint_symbol_12);
+    uint tint_symbol_13 = ((tint_symbol_12 - 0u) / 4u);
+    output.Store((4u * min(outputIndex, (tint_symbol_13 - 1u))), asuint(0u));
   }
 }
 

@@ -14,8 +14,15 @@ struct tint_array {
     T elements[N];
 };
 
+#define TINT_ISOLATE_UB(VOLATILE_NAME) \
+  {volatile bool VOLATILE_NAME = false; if (VOLATILE_NAME) break;}
+
 struct tint_private_vars_struct {
   uint idx;
+};
+
+struct TintArrayLengths {
+  /* 0x0000 */ tint_array<uint4, 1> array_lengths;
 };
 
 struct FSUniformData {
@@ -28,10 +35,11 @@ struct FSUniforms {
   /* 0x0000 */ tint_array<FSUniformData, 1> fsUniformData;
 };
 
-void tint_symbol(thread tint_private_vars_struct* const tint_private_vars, const device FSUniforms* const tint_symbol_2) {
+void tint_symbol(thread tint_private_vars_struct* const tint_private_vars, const device FSUniforms* const tint_symbol_2, const constant TintArrayLengths* const tint_symbol_3) {
   int2 tint_symbol_1 = int2(0);
   while(true) {
-    if ((tint_symbol_1[1] >= (*(tint_symbol_2)).fsUniformData[(*(tint_private_vars)).idx].size[1])) {
+    TINT_ISOLATE_UB(tint_volatile_false);
+    if ((tint_symbol_1[1] >= (*(tint_symbol_2)).fsUniformData[min((*(tint_private_vars)).idx, ((((*(tint_symbol_3)).array_lengths[0u][0u] - 0u) / 128u) - 1u))].size[1])) {
       break;
     }
   }

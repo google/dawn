@@ -1,7 +1,7 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 1
-; Bound: 41
+; Bound: 38
 ; Schema: 0
                OpCapability Shader
                OpCapability Float16
@@ -37,9 +37,6 @@
      %uint_0 = OpConstant %uint 0
      %uint_1 = OpConstant %uint 1
 %_ptr_Private_v2half = OpTypePointer Private %v2half
-        %int = OpTypeInt 32 1
-      %int_1 = OpConstant %int 1
-      %int_0 = OpConstant %int 0
 %_ptr_Uniform_half = OpTypePointer Uniform %half
 %_ptr_Private_half = OpTypePointer Private %half
           %f = OpFunction %void None %12
@@ -50,20 +47,20 @@
          %21 = OpLoad %v2half %19 None
          %22 = OpCompositeConstruct %mat2v2half %18 %21
                OpStore %p %22 None
-         %23 = OpAccessChain %_ptr_Private_v2half %p %int_1
-         %27 = OpAccessChain %_ptr_Uniform_v2half %1 %uint_0
-         %28 = OpLoad %v2half %27 None
-               OpStore %23 %28 None
-         %29 = OpAccessChain %_ptr_Private_v2half %p %int_1
-         %30 = OpAccessChain %_ptr_Uniform_v2half %1 %uint_0
-         %31 = OpLoad %v2half %30 None
-         %32 = OpVectorShuffle %v2half %31 %31 1 0
-               OpStore %29 %32 None
-         %33 = OpAccessChain %_ptr_Private_v2half %p %int_0
-         %35 = OpAccessChain %_ptr_Uniform_v2half %1 %uint_1
-         %36 = OpAccessChain %_ptr_Uniform_half %35 %int_0
-         %38 = OpLoad %half %36 None
-         %39 = OpAccessChain %_ptr_Private_half %33 %int_1
-               OpStore %39 %38 None
+         %23 = OpAccessChain %_ptr_Private_v2half %p %uint_1
+         %25 = OpAccessChain %_ptr_Uniform_v2half %1 %uint_0
+         %26 = OpLoad %v2half %25 None
+               OpStore %23 %26 None
+         %27 = OpAccessChain %_ptr_Private_v2half %p %uint_1
+         %28 = OpAccessChain %_ptr_Uniform_v2half %1 %uint_0
+         %29 = OpLoad %v2half %28 None
+         %30 = OpVectorShuffle %v2half %29 %29 1 0
+               OpStore %27 %30 None
+         %31 = OpAccessChain %_ptr_Private_v2half %p %uint_0
+         %32 = OpAccessChain %_ptr_Uniform_v2half %1 %uint_1
+         %33 = OpAccessChain %_ptr_Uniform_half %32 %uint_0
+         %35 = OpLoad %half %33 None
+         %36 = OpAccessChain %_ptr_Private_half %31 %uint_1
+               OpStore %36 %35 None
                OpReturn
                OpFunctionEnd

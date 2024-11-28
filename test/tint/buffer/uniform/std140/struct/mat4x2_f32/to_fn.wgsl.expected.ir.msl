@@ -44,8 +44,8 @@ void e(float f_1) {
 kernel void f(const constant tint_array<S, 4>* u [[buffer(0)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.u=u};
   a((*tint_module_vars.u));
-  b((*tint_module_vars.u)[2]);
-  c((*tint_module_vars.u)[2].m);
-  d((*tint_module_vars.u)[0].m[1].yx);
-  e((*tint_module_vars.u)[0].m[1].yx[0u]);
+  b((*tint_module_vars.u)[2u]);
+  c((*tint_module_vars.u)[2u].m);
+  d((*tint_module_vars.u)[0u].m[1u].yx);
+  e((*tint_module_vars.u)[0u].m[1u].yx[0u]);
 }

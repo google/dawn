@@ -1,4 +1,3 @@
-// flags: --transform robustness
 @group(0) @binding(0) var t : texture_external;
 
 @group(0) @binding(1) var outImage : texture_storage_2d<rgba8unorm, write>;

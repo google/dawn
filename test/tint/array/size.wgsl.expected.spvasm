@@ -1,7 +1,7 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 1
-; Bound: 43
+; Bound: 41
 ; Schema: 0
                OpCapability Shader
                OpMemoryModel Logical GLSL450
@@ -33,10 +33,8 @@
 %_ptr_Function__arr_float_uint_4 = OpTypePointer Function %_arr_float_uint_4
          %14 = OpConstantNull %_arr_float_uint_4
 %_ptr_Function_float = OpTypePointer Function %float
-        %int = OpTypeInt 32 1
-      %int_0 = OpConstant %int 0
-%_ptr_StorageBuffer_float = OpTypePointer StorageBuffer %float
      %uint_0 = OpConstant %uint 0
+%_ptr_StorageBuffer_float = OpTypePointer StorageBuffer %float
        %main = OpFunction %void None %7
           %8 = OpLabel
 %signed_literal = OpVariable %_ptr_Function__arr_float_uint_4 Function %14
@@ -52,21 +50,21 @@
                OpStore %unsigned_constant %21 None
          %22 = OpLoad %_arr_float_uint_4 %signed_literal None
                OpStore %shr_const_expr %22 None
-         %23 = OpAccessChain %_ptr_Function_float %signed_literal %int_0
-         %27 = OpLoad %float %23 None
-         %28 = OpAccessChain %_ptr_Function_float %unsigned_literal %int_0
-         %29 = OpLoad %float %28 None
-         %30 = OpFAdd %float %27 %29
-         %31 = OpAccessChain %_ptr_Function_float %signed_constant %int_0
-         %32 = OpLoad %float %31 None
-         %33 = OpFAdd %float %30 %32
-         %34 = OpAccessChain %_ptr_Function_float %unsigned_constant %int_0
-         %35 = OpLoad %float %34 None
-         %36 = OpFAdd %float %33 %35
-         %37 = OpAccessChain %_ptr_Function_float %shr_const_expr %int_0
-         %38 = OpLoad %float %37 None
-         %39 = OpFAdd %float %36 %38
-         %40 = OpAccessChain %_ptr_StorageBuffer_float %1 %uint_0
-               OpStore %40 %39 None
+         %23 = OpAccessChain %_ptr_Function_float %signed_literal %uint_0
+         %26 = OpLoad %float %23 None
+         %27 = OpAccessChain %_ptr_Function_float %unsigned_literal %uint_0
+         %28 = OpLoad %float %27 None
+         %29 = OpFAdd %float %26 %28
+         %30 = OpAccessChain %_ptr_Function_float %signed_constant %uint_0
+         %31 = OpLoad %float %30 None
+         %32 = OpFAdd %float %29 %31
+         %33 = OpAccessChain %_ptr_Function_float %unsigned_constant %uint_0
+         %34 = OpLoad %float %33 None
+         %35 = OpFAdd %float %32 %34
+         %36 = OpAccessChain %_ptr_Function_float %shr_const_expr %uint_0
+         %37 = OpLoad %float %36 None
+         %38 = OpFAdd %float %35 %37
+         %39 = OpAccessChain %_ptr_StorageBuffer_float %1 %uint_0
+               OpStore %39 %38 None
                OpReturn
                OpFunctionEnd

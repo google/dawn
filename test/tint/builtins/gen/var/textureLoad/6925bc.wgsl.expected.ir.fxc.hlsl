@@ -15,8 +15,11 @@ float textureLoad_6925bc() {
   int2 arg_1 = (int(1)).xx;
   uint arg_2 = 1u;
   uint v = arg_2;
-  int2 v_1 = int2(arg_1);
-  float res = arg_0.Load(v_1, int(v)).x;
+  uint3 v_1 = (0u).xxx;
+  arg_0.GetDimensions(v_1.x, v_1.y, v_1.z);
+  uint2 v_2 = (v_1.xy - (1u).xx);
+  int2 v_3 = int2(min(uint2(arg_1), v_2));
+  float res = arg_0.Load(v_3, int(v)).x;
   return res;
 }
 
@@ -33,13 +36,13 @@ VertexOutput vertex_main_inner() {
   VertexOutput tint_symbol = (VertexOutput)0;
   tint_symbol.pos = (0.0f).xxxx;
   tint_symbol.prevent_dce = textureLoad_6925bc();
-  VertexOutput v_2 = tint_symbol;
-  return v_2;
+  VertexOutput v_4 = tint_symbol;
+  return v_4;
 }
 
 vertex_main_outputs vertex_main() {
-  VertexOutput v_3 = vertex_main_inner();
-  vertex_main_outputs v_4 = {v_3.prevent_dce, v_3.pos};
-  return v_4;
+  VertexOutput v_5 = vertex_main_inner();
+  vertex_main_outputs v_6 = {v_5.prevent_dce, v_5.pos};
+  return v_6;
 }
 

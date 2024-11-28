@@ -46,12 +46,12 @@ struct fs_main_inputs {
 VertexOutputs vs_main_inner(uint VertexIndex, tint_module_vars_struct tint_module_vars) {
   tint_array<float2, 3> texcoord = tint_array<float2, 3>{float2(-0.5f, 0.0f), float2(1.5f, 0.0f), float2(0.5f, 2.0f)};
   VertexOutputs output = {};
-  output.position = float4(((texcoord[VertexIndex] * 2.0f) - float2(1.0f)), 0.0f, 1.0f);
+  output.position = float4(((texcoord[min(VertexIndex, 2u)] * 2.0f) - float2(1.0f)), 0.0f, 1.0f);
   bool flipY = ((*tint_module_vars.uniforms).u_scale[1u] < 0.0f);
   if (flipY) {
-    output.texcoords = ((((texcoord[VertexIndex] * (*tint_module_vars.uniforms).u_scale) + (*tint_module_vars.uniforms).u_offset) * float2(1.0f, -1.0f)) + float2(0.0f, 1.0f));
+    output.texcoords = ((((texcoord[min(VertexIndex, 2u)] * (*tint_module_vars.uniforms).u_scale) + (*tint_module_vars.uniforms).u_offset) * float2(1.0f, -1.0f)) + float2(0.0f, 1.0f));
   } else {
-    output.texcoords = ((((texcoord[VertexIndex] * float2(1.0f, -1.0f)) + float2(0.0f, 1.0f)) * (*tint_module_vars.uniforms).u_scale) + (*tint_module_vars.uniforms).u_offset);
+    output.texcoords = ((((texcoord[min(VertexIndex, 2u)] * float2(1.0f, -1.0f)) + float2(0.0f, 1.0f)) * (*tint_module_vars.uniforms).u_scale) + (*tint_module_vars.uniforms).u_offset);
   }
   return output;
 }

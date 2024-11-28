@@ -15,13 +15,15 @@ struct tint_array {
 
 struct tint_module_vars_struct {
   const device tint_array<int, 1>* data;
+  const constant tint_array<uint4, 1>* tint_storage_buffer_sizes;
 };
 
 int foo(tint_module_vars_struct tint_module_vars) {
-  return (*tint_module_vars.data)[0];
+  uint const v = (((*tint_module_vars.tint_storage_buffer_sizes)[0u][0u] / 4u) - 1u);
+  return (*tint_module_vars.data)[min(uint(0), v)];
 }
 
-kernel void tint_symbol(const device tint_array<int, 1>* data [[buffer(0)]]) {
-  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.data=data};
+kernel void tint_symbol(const device tint_array<int, 1>* data [[buffer(0)]], const constant tint_array<uint4, 1>* tint_storage_buffer_sizes [[buffer(30)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.data=data, .tint_storage_buffer_sizes=tint_storage_buffer_sizes};
   foo(tint_module_vars);
 }

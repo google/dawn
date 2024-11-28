@@ -35,8 +35,8 @@ int bar(thread tint_private_vars_struct* const tint_private_vars) {
 void tint_symbol(thread tint_private_vars_struct* const tint_private_vars) {
   S x = S{};
   int const tint_symbol_3 = foo(tint_private_vars);
-  int const tint_symbol_1_save = tint_symbol_3;
+  uint const tint_symbol_1_save = min(uint(tint_symbol_3), 3u);
   int const tint_symbol_2 = bar(tint_private_vars);
-  x.a[tint_symbol_1_save][tint_symbol_2] = as_type<int>((as_type<uint>(x.a[tint_symbol_1_save][tint_symbol_2]) + as_type<uint>(5)));
+  x.a[tint_symbol_1_save][min(uint(tint_symbol_2), 3u)] = as_type<int>((as_type<uint>(x.a[tint_symbol_1_save][min(uint(tint_symbol_2), 3u)]) + as_type<uint>(5)));
 }
 

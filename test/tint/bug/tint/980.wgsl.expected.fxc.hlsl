@@ -4,7 +4,7 @@ void set_vector_element(inout float3 vec, int idx, float val) {
 
 float3 Bad(uint index, float3 rd) {
   float3 normal = (0.0f).xxx;
-  set_vector_element(normal, index, -(float(sign(rd[index]))));
+  set_vector_element(normal, min(index, 2u), -(float(sign(rd[min(index, 2u)]))));
   return normalize(normal);
 }
 

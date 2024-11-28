@@ -30,7 +30,7 @@ void main() {
       }
       i = (i + 1);
       {
-        uint v_2 = v_1.inner.i;
+        uint v_2 = min(v_1.inner.i, 7u);
         s1.a1[v_2] = v;
       }
       continue;

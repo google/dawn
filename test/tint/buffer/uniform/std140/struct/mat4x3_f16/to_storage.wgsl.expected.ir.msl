@@ -33,6 +33,9 @@ struct S {
   int after;
 };
 
+#define TINT_ISOLATE_UB(VOLATILE_NAME) \
+  {volatile bool VOLATILE_NAME = false; if (VOLATILE_NAME) break;}
+
 struct tint_module_vars_struct {
   const constant tint_array<S_packed_vec3, 4>* u;
   device tint_array<S_packed_vec3, 4>* s;
@@ -66,6 +69,7 @@ void tint_store_and_preserve_padding(device tint_array<S_packed_vec3, 4>* const 
     uint v_6 = 0u;
     v_6 = 0u;
     while(true) {
+      TINT_ISOLATE_UB(tint_volatile_false)
       uint const v_7 = v_6;
       if ((v_7 >= 4u)) {
         break;
@@ -89,11 +93,11 @@ tint_array<S, 4> tint_load_array_packed_vec3(const constant tint_array<S_packed_
 kernel void f(const constant tint_array<S_packed_vec3, 4>* u [[buffer(0)]], device tint_array<S_packed_vec3, 4>* s [[buffer(1)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.u=u, .s=s};
   tint_store_and_preserve_padding(tint_module_vars.s, tint_load_array_packed_vec3(tint_module_vars.u));
-  tint_store_and_preserve_padding_1((&(*tint_module_vars.s)[1]), tint_load_struct_packed_vec3((&(*tint_module_vars.u)[2])));
-  tint_array<tint_packed_vec3_f16_array_element, 4> const v_11 = (*tint_module_vars.u)[2].m;
+  tint_store_and_preserve_padding_1((&(*tint_module_vars.s)[1u]), tint_load_struct_packed_vec3((&(*tint_module_vars.u)[2u])));
+  tint_array<tint_packed_vec3_f16_array_element, 4> const v_11 = (*tint_module_vars.u)[2u].m;
   half3 const v_12 = half3(v_11[0u].packed);
   half3 const v_13 = half3(v_11[1u].packed);
   half3 const v_14 = half3(v_11[2u].packed);
-  tint_store_and_preserve_padding_2((&(*tint_module_vars.s)[3].m), half4x3(v_12, v_13, v_14, half3(v_11[3u].packed)));
-  (*tint_module_vars.s)[1].m[0].packed = packed_half3(half3((*tint_module_vars.u)[0].m[1].packed).zxy);
+  tint_store_and_preserve_padding_2((&(*tint_module_vars.s)[3u].m), half4x3(v_12, v_13, v_14, half3(v_11[3u].packed)));
+  (*tint_module_vars.s)[1u].m[0u].packed = packed_half3(half3((*tint_module_vars.u)[0u].m[1u].packed).zxy);
 }

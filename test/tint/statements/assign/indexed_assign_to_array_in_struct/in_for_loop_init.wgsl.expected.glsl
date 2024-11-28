@@ -23,7 +23,7 @@ void main() {
   OuterS s1 = OuterS(InnerS[8](InnerS(0), InnerS(0), InnerS(0), InnerS(0), InnerS(0), InnerS(0), InnerS(0), InnerS(0)));
   int i = 0;
   {
-    uint v_2 = v_1.inner.i;
+    uint v_2 = min(v_1.inner.i, 7u);
     s1.a1[v_2] = v;
     while(true) {
       if ((i < 4)) {

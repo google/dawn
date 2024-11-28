@@ -43,9 +43,9 @@ void main() {
   S1 subexpr_nested_nonempty_with_expr = v_4.f;
   T aosoa_empty[2] = (T[2])0;
   T aosoa_nonempty[2] = {{{int(1), int(2)}}, {{int(3), int(4)}}};
-  int v_5[2] = {int(1), (aosoa_nonempty[int(0)].a[int(0)] + int(1))};
+  int v_5[2] = {int(1), (aosoa_nonempty[0u].a[0u] + int(1))};
   T v_6 = {v_5};
-  T v_7 = aosoa_nonempty[int(1)];
+  T v_7 = aosoa_nonempty[1u];
   T aosoa_nonempty_with_expr[2] = {v_6, v_7};
 }
 

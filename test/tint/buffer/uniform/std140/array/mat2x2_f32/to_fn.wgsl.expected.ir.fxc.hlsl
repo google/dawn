@@ -4,11 +4,11 @@ cbuffer cbuffer_u : register(b0) {
 };
 RWByteAddressBuffer s : register(u1);
 float a(float2x2 a_1[4]) {
-  return a_1[int(0)][int(0)].x;
+  return a_1[0u][0u].x;
 }
 
 float b(float2x2 m) {
-  return m[int(0)].x;
+  return m[0u].x;
 }
 
 float c(float2 v) {

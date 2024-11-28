@@ -12,7 +12,7 @@ buffer io_block_1_ssbo {
 } v_1;
 vec3 Bad(uint index, vec3 rd) {
   vec3 normal = vec3(0.0f);
-  normal[index] = -(sign(rd[index]));
+  normal[min(index, 2u)] = -(sign(rd[min(index, 2u)]));
   return normalize(normal);
 }
 void tint_symbol_inner(uint idx) {

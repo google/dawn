@@ -17,7 +17,8 @@ struct vertex_main_outputs {
 };
 
 int4 textureLoad_4c423f(tint_module_vars_struct tint_module_vars) {
-  int4 res = tint_module_vars.arg_0.read(1u);
+  min(uint(1), (tint_module_vars.arg_0.get_num_mip_levels() - 1u));
+  int4 res = tint_module_vars.arg_0.read(min(1u, (uint(tint_module_vars.arg_0.get_width()) - 1u)));
   return res;
 }
 

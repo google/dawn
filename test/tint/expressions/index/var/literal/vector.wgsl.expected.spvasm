@@ -19,15 +19,15 @@
     %float_3 = OpConstant %float 3
           %8 = OpConstantComposite %v3float %float_1 %float_2 %float_3
 %_ptr_Function_float = OpTypePointer Function %float
-        %int = OpTypeInt 32 1
-      %int_1 = OpConstant %int 1
+       %uint = OpTypeInt 32 0
+     %uint_1 = OpConstant %uint 1
        %void = OpTypeVoid
          %19 = OpTypeFunction %void
           %f = OpFunction %float None %3
           %4 = OpLabel
           %v = OpVariable %_ptr_Function_v3float Function
                OpStore %v %8
-         %12 = OpAccessChain %_ptr_Function_float %v %int_1
+         %12 = OpAccessChain %_ptr_Function_float %v %uint_1
          %16 = OpLoad %float %12 None
                OpReturnValue %16
                OpFunctionEnd

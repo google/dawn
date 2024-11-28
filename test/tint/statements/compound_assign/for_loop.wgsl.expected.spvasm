@@ -1,9 +1,10 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 1
-; Bound: 66
+; Bound: 73
 ; Schema: 0
                OpCapability Shader
+         %48 = OpExtInstImport "GLSL.std.450"
                OpMemoryModel Logical GLSL450
                OpEntryPoint GLCompute %unused_entry_point "unused_entry_point"
                OpExecutionMode %unused_entry_point LocalSize 1 1 1
@@ -88,36 +89,42 @@
                OpBranch %40
          %40 = OpLabel
          %45 = OpFunctionCall %int %idx1
-         %46 = OpAccessChain %_ptr_Function_float %a %45
-         %48 = OpLoad %float %46 None
-         %49 = OpFMul %float %48 %float_2
-               OpStore %46 %49 None
+         %46 = OpBitcast %uint %45
+         %47 = OpExtInst %uint %48 UMin %46 %uint_3
+         %49 = OpAccessChain %_ptr_Function_float %a %47
+         %51 = OpLoad %float %49 None
+         %52 = OpFMul %float %51 %float_2
+               OpStore %49 %52 None
                OpBranch %43
          %43 = OpLabel
                OpLoopMerge %44 %42 None
                OpBranch %41
          %41 = OpLabel
-         %51 = OpFunctionCall %int %idx2
-         %52 = OpAccessChain %_ptr_Function_float %a %51
-         %53 = OpLoad %float %52 None
-         %54 = OpFOrdLessThan %bool %53 %float_10
-               OpSelectionMerge %57 None
-               OpBranchConditional %54 %57 %58
-         %58 = OpLabel
+         %54 = OpFunctionCall %int %idx2
+         %55 = OpBitcast %uint %54
+         %56 = OpExtInst %uint %48 UMin %55 %uint_3
+         %57 = OpAccessChain %_ptr_Function_float %a %56
+         %58 = OpLoad %float %57 None
+         %59 = OpFOrdLessThan %bool %58 %float_10
+               OpSelectionMerge %62 None
+               OpBranchConditional %59 %62 %63
+         %63 = OpLabel
                OpBranch %44
-         %57 = OpLabel
+         %62 = OpLabel
                OpBranch %42
          %42 = OpLabel
-         %59 = OpFunctionCall %int %idx3
-         %60 = OpAccessChain %_ptr_Function_float %a %59
-         %61 = OpLoad %float %60 None
-         %62 = OpFAdd %float %61 %float_1
-               OpStore %60 %62 None
+         %64 = OpFunctionCall %int %idx3
+         %65 = OpBitcast %uint %64
+         %66 = OpExtInst %uint %48 UMin %65 %uint_3
+         %67 = OpAccessChain %_ptr_Function_float %a %66
+         %68 = OpLoad %float %67 None
+         %69 = OpFAdd %float %68 %float_1
+               OpStore %67 %69 None
                OpBranch %43
          %44 = OpLabel
                OpReturn
                OpFunctionEnd
 %unused_entry_point = OpFunction %void None %33
-         %65 = OpLabel
+         %72 = OpLabel
                OpReturn
                OpFunctionEnd

@@ -17,7 +17,7 @@ struct vertex_main_outputs {
 };
 
 int4 textureLoad_714471(tint_module_vars_struct tint_module_vars) {
-  int4 res = tint_module_vars.arg_0.read(uint2(1u), 1u);
+  int4 res = tint_module_vars.arg_0.read(min(uint2(1u), (uint2(tint_module_vars.arg_0.get_width(min(1u, (tint_module_vars.arg_0.get_num_mip_levels() - 1u))), tint_module_vars.arg_0.get_height(min(1u, (tint_module_vars.arg_0.get_num_mip_levels() - 1u)))) - uint2(1u))), min(1u, (tint_module_vars.arg_0.get_num_mip_levels() - 1u)));
   return res;
 }
 

@@ -26,7 +26,7 @@ void foo(device tint_array<int, 4>* const arg) {
         break;
       }
       bool tint_continue = false;
-      switch((*arg)[i]) {
+      switch((*arg)[min(uint(i), 3u)]) {
         case 1:
         {
           tint_continue = true;
@@ -34,7 +34,7 @@ void foo(device tint_array<int, 4>* const arg) {
         }
         default:
         {
-          (*arg)[i] = 2;
+          (*arg)[min(uint(i), 3u)] = 2;
           break;
         }
       }

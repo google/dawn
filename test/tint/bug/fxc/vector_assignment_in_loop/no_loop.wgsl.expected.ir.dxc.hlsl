@@ -14,17 +14,17 @@ void main() {
   bool3 v3b = (false).xxx;
   bool4 v4b = (false).xxxx;
   int i = int(0);
-  v2f[i] = 1.0f;
-  v3f[i] = 1.0f;
-  v4f[i] = 1.0f;
-  v2i[i] = int(1);
-  v3i[i] = int(1);
-  v4i[i] = int(1);
-  v2u[i] = 1u;
-  v3u[i] = 1u;
-  v4u[i] = 1u;
-  v2b[i] = true;
-  v3b[i] = true;
-  v4b[i] = true;
+  v2f[min(uint(i), 1u)] = 1.0f;
+  v3f[min(uint(i), 2u)] = 1.0f;
+  v4f[min(uint(i), 3u)] = 1.0f;
+  v2i[min(uint(i), 1u)] = int(1);
+  v3i[min(uint(i), 2u)] = int(1);
+  v4i[min(uint(i), 3u)] = int(1);
+  v2u[min(uint(i), 1u)] = 1u;
+  v3u[min(uint(i), 2u)] = 1u;
+  v4u[min(uint(i), 3u)] = 1u;
+  v2b[min(uint(i), 1u)] = true;
+  v3b[min(uint(i), 2u)] = true;
+  v4b[min(uint(i), 3u)] = true;
 }
 

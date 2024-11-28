@@ -14,6 +14,9 @@ struct tint_array {
     T elements[N];
 };
 
+#define TINT_ISOLATE_UB(VOLATILE_NAME) \
+  {volatile bool VOLATILE_NAME = false; if (VOLATILE_NAME) break;}
+
 struct tint_packed_vec3_f32_array_element {
   /* 0x0000 */ packed_float3 elements;
   /* 0x000c */ tint_array<int8_t, 4> tint_pad;
@@ -105,7 +108,8 @@ void assign_and_preserve_padding_2(device tint_array<tint_packed_vec3_f32_array_
 
 void assign_and_preserve_padding_3(device tint_array<tint_packed_vec3_f32_array_element, 2>* const dest, tint_array<float3, 2> value) {
   for(uint i = 0u; (i < 2u); i = (i + 1u)) {
-    (*(dest))[i].elements = packed_float3(value[i]);
+    TINT_ISOLATE_UB(tint_volatile_false);
+    (*(dest))[min(i, 1u)].elements = packed_float3(value[min(i, 1u)]);
   }
 }
 

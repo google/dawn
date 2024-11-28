@@ -34,5 +34,5 @@ kernel void tint_symbol(const constant Uniforms* uniforms [[buffer(0)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.uniforms=uniforms};
   InnerS v = {};
   OuterS s1 = {};
-  s1.a1[(*tint_module_vars.uniforms).i][(*tint_module_vars.uniforms).j] = v;
+  s1.a1[min((*tint_module_vars.uniforms).i, 7u)][min((*tint_module_vars.uniforms).j, 7u)] = v;
 }

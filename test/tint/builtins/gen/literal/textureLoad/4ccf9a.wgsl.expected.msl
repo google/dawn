@@ -2,7 +2,7 @@
 
 using namespace metal;
 uint4 textureLoad_4ccf9a(texture3d<uint, access::read_write> tint_symbol) {
-  uint4 res = tint_symbol.read(uint3(uint3(1u)));
+  uint4 res = tint_symbol.read(uint3(min(uint3(1u), (uint3(tint_symbol.get_width(), tint_symbol.get_height(), tint_symbol.get_depth()) - uint3(1u)))));
   return res;
 }
 

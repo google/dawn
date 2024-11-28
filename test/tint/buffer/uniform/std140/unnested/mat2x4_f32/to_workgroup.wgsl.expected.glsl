@@ -11,9 +11,9 @@ void f_inner(uint tint_local_index) {
   }
   barrier();
   w = v.inner;
-  w[1] = v.inner[0];
-  w[1] = v.inner[0].ywxz;
-  w[0][1] = v.inner[1].x;
+  w[1u] = v.inner[0u];
+  w[1u] = v.inner[0u].ywxz;
+  w[0u][1u] = v.inner[1u].x;
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {

@@ -9,7 +9,7 @@ void F_inner(uint mat2x2_1) {
     W = float2x2((0.0f).xx, (0.0f).xx);
   }
   GroupMemoryBarrierWithGroupSync();
-  W[int(0)] = (W[int(0)] + 0.0f);
+  W[0u] = (W[0u] + 0.0f);
 }
 
 [numthreads(1, 1, 1)]

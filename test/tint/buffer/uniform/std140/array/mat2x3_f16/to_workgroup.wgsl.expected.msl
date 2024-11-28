@@ -14,6 +14,9 @@ struct tint_array {
     T elements[N];
 };
 
+#define TINT_ISOLATE_UB(VOLATILE_NAME) \
+  {volatile bool VOLATILE_NAME = false; if (VOLATILE_NAME) break;}
+
 struct tint_packed_vec3_f16_array_element {
   /* 0x0000 */ packed_half3 elements;
   /* 0x0006 */ tint_array<int8_t, 2> tint_pad;
@@ -26,6 +29,7 @@ tint_array<tint_packed_vec3_f16_array_element, 2> tint_pack_vec3_in_composite(ha
 
 void tint_zero_workgroup_memory(uint local_idx, threadgroup tint_array<tint_array<tint_packed_vec3_f16_array_element, 2>, 4>* const tint_symbol) {
   for(uint idx = local_idx; (idx < 4u); idx = (idx + 1u)) {
+    TINT_ISOLATE_UB(tint_volatile_false);
     uint const i = idx;
     (*(tint_symbol))[i] = tint_pack_vec3_in_composite(half2x3(half3(0.0h), half3(0.0h)));
   }

@@ -147,15 +147,15 @@ void main() {
   int v_40 = (v_39 + int(vec3_u32.y));
   int v_41 = ((v_40 + tint_f32_to_i32(vec4_f32.z)) + vec4_i32.z);
   int v_42 = (v_41 + int(vec4_u32.z));
-  int v_43 = (v_42 + tint_f32_to_i32(mat2x2_f32[int(0)].x));
-  int v_44 = (v_43 + tint_f32_to_i32(mat2x3_f32[int(0)].x));
-  int v_45 = (v_44 + tint_f32_to_i32(mat2x4_f32[int(0)].x));
-  int v_46 = (v_45 + tint_f32_to_i32(mat3x2_f32[int(0)].x));
-  int v_47 = (v_46 + tint_f32_to_i32(mat3x3_f32[int(0)].x));
-  int v_48 = (v_47 + tint_f32_to_i32(mat3x4_f32[int(0)].x));
-  int v_49 = (v_48 + tint_f32_to_i32(mat4x2_f32[int(0)].x));
-  int v_50 = (v_49 + tint_f32_to_i32(mat4x3_f32[int(0)].x));
-  int v_51 = (v_50 + tint_f32_to_i32(mat4x4_f32[int(0)].x));
-  s.Store(0u, asuint((((v_51 + tint_f32_to_i32(arr2_vec3_f32[int(0)].x)) + struct_inner.scalar_i32) + array_struct_inner[int(0)].scalar_i32)));
+  int v_43 = (v_42 + tint_f32_to_i32(mat2x2_f32[0u].x));
+  int v_44 = (v_43 + tint_f32_to_i32(mat2x3_f32[0u].x));
+  int v_45 = (v_44 + tint_f32_to_i32(mat2x4_f32[0u].x));
+  int v_46 = (v_45 + tint_f32_to_i32(mat3x2_f32[0u].x));
+  int v_47 = (v_46 + tint_f32_to_i32(mat3x3_f32[0u].x));
+  int v_48 = (v_47 + tint_f32_to_i32(mat3x4_f32[0u].x));
+  int v_49 = (v_48 + tint_f32_to_i32(mat4x2_f32[0u].x));
+  int v_50 = (v_49 + tint_f32_to_i32(mat4x3_f32[0u].x));
+  int v_51 = (v_50 + tint_f32_to_i32(mat4x4_f32[0u].x));
+  s.Store(0u, asuint((((v_51 + tint_f32_to_i32(arr2_vec3_f32[0u].x)) + struct_inner.scalar_i32) + array_struct_inner[0u].scalar_i32)));
 }
 

@@ -10,8 +10,8 @@ float3x4 v(uint start_byte_offset) {
 [numthreads(1, 1, 1)]
 void f() {
   p = v(0u);
-  p[int(1)] = asfloat(u[0u]);
-  p[int(1)] = asfloat(u[0u]).ywxz;
-  p[int(0)].y = asfloat(u[1u].x);
+  p[1u] = asfloat(u[0u]);
+  p[1u] = asfloat(u[0u]).ywxz;
+  p[0u].y = asfloat(u[1u].x);
 }
 

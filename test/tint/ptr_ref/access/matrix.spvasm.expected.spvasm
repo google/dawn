@@ -31,15 +31,15 @@
          %20 = OpConstantComposite %v3float %float_7 %float_8 %float_9
          %11 = OpConstantComposite %mat3v3float %12 %16 %20
 %_ptr_Function_v3float = OpTypePointer Function %v3float
-        %int = OpTypeInt 32 1
-      %int_1 = OpConstant %int 1
+       %uint = OpTypeInt 32 0
+     %uint_1 = OpConstant %uint 1
          %28 = OpConstantComposite %v3float %float_5 %float_5 %float_5
      %main_1 = OpFunction %void None %3
           %4 = OpLabel
           %m = OpVariable %_ptr_Function_mat3v3float Function
                OpStore %m %10
                OpStore %m %11 None
-         %24 = OpAccessChain %_ptr_Function_v3float %m %int_1
+         %24 = OpAccessChain %_ptr_Function_v3float %m %uint_1
                OpStore %24 %28 None
                OpReturn
                OpFunctionEnd

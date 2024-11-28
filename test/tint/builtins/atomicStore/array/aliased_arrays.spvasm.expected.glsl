@@ -21,8 +21,8 @@ void compute_main_inner(uint local_invocation_index_2) {
       uint x_35 = idx;
       uint v = tint_div_u32(x_31, 2u);
       uint v_1 = tint_mod_u32(x_33, 2u);
-      uint v_2 = tint_mod_u32(x_35, 1u);
-      atomicExchange(wg[v][v_1][v_2], 0u);
+      uint v_2 = min(tint_mod_u32(x_35, 1u), 0u);
+      atomicExchange(wg[min(v, 2u)][min(v_1, 1u)][v_2], 0u);
       {
         idx = (idx + 1u);
       }
@@ -30,7 +30,7 @@ void compute_main_inner(uint local_invocation_index_2) {
     }
   }
   barrier();
-  atomicExchange(wg[2][1][0], 1u);
+  atomicExchange(wg[2u][1u][0u], 1u);
 }
 void compute_main_1() {
   uint x_57 = local_invocation_index_1;

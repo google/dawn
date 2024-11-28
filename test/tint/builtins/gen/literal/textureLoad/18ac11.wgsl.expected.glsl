@@ -8,7 +8,7 @@ buffer prevent_dce_block_1_ssbo {
 } v;
 layout(binding = 0, rg32i) uniform highp readonly iimage2D arg_0;
 ivec4 textureLoad_18ac11() {
-  ivec4 res = imageLoad(arg_0, ivec2(uvec2(1u, 0u)));
+  ivec4 res = imageLoad(arg_0, ivec2(uvec2(min(1u, (uvec2(imageSize(arg_0)).x - 1u)), 0u)));
   return res;
 }
 void main() {
@@ -22,7 +22,7 @@ buffer prevent_dce_block_1_ssbo {
 } v;
 layout(binding = 0, rg32i) uniform highp readonly iimage2D arg_0;
 ivec4 textureLoad_18ac11() {
-  ivec4 res = imageLoad(arg_0, ivec2(uvec2(1u, 0u)));
+  ivec4 res = imageLoad(arg_0, ivec2(uvec2(min(1u, (uvec2(imageSize(arg_0)).x - 1u)), 0u)));
   return res;
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
@@ -40,7 +40,7 @@ struct VertexOutput {
 layout(binding = 0, rg32i) uniform highp readonly iimage2D arg_0;
 layout(location = 0) flat out ivec4 vertex_main_loc0_Output;
 ivec4 textureLoad_18ac11() {
-  ivec4 res = imageLoad(arg_0, ivec2(uvec2(1u, 0u)));
+  ivec4 res = imageLoad(arg_0, ivec2(uvec2(min(1u, (uvec2(imageSize(arg_0)).x - 1u)), 0u)));
   return res;
 }
 VertexOutput vertex_main_inner() {

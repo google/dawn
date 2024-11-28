@@ -1,4 +1,3 @@
-// flags: --transform robustness
 @compute @workgroup_size(1)
 fn main() {
   var j = 0;

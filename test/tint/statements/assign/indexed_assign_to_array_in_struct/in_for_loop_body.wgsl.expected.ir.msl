@@ -40,7 +40,7 @@ kernel void tint_symbol(const constant Uniforms* uniforms [[buffer(0)]]) {
       } else {
         break;
       }
-      s1.a1[(*tint_module_vars.uniforms).i] = v;
+      s1.a1[min((*tint_module_vars.uniforms).i, 7u)] = v;
       {
         i = as_type<int>((as_type<uint>(i) + as_type<uint>(1)));
       }

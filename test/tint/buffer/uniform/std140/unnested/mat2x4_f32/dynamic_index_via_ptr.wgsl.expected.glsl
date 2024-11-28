@@ -11,7 +11,7 @@ int i() {
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
-  int v_1 = i();
+  uint v_1 = min(uint(i()), 1u);
   mat2x4 l_m = v.inner;
   vec4 l_m_i = v.inner[v_1];
 }

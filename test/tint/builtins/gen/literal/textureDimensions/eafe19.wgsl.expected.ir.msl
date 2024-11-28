@@ -17,7 +17,7 @@ struct vertex_main_outputs {
 };
 
 uint2 textureDimensions_eafe19(tint_module_vars_struct tint_module_vars) {
-  uint2 res = uint2(tint_module_vars.arg_0.get_width(1u), tint_module_vars.arg_0.get_height(1u));
+  uint2 res = uint2(tint_module_vars.arg_0.get_width(min(1u, (tint_module_vars.arg_0.get_num_mip_levels() - 1u))), tint_module_vars.arg_0.get_height(min(1u, (tint_module_vars.arg_0.get_num_mip_levels() - 1u))));
   return res;
 }
 

@@ -8,6 +8,6 @@ RWByteAddressBuffer ssbo : register(u1);
 
 [numthreads(1, 1, 1)]
 void f() {
-  result.Store(0u, asuint(asint(ssbo.Load((4u * uint(asint(ubo[0].x)))))));
+  result.Store(0u, asuint(asint(ssbo.Load((4u * min(uint(asint(ubo[0].x)), 3u))))));
   return;
 }

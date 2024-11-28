@@ -34,6 +34,6 @@ void f() {
   float4x3 l_a[4] = v_1(0u);
   float4x3 l_a_i = v(128u);
   float3 l_a_i_i = asfloat(a[9u].xyz);
-  s.Store(0u, asuint((((asfloat(a[9u].x) + l_a[int(0)][int(0)].x) + l_a_i[int(0)].x) + l_a_i_i.x)));
+  s.Store(0u, asuint((((asfloat(a[9u].x) + l_a[0u][0u].x) + l_a_i[0u].x) + l_a_i_i.x)));
 }
 

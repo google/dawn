@@ -1,9 +1,11 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 1
-; Bound: 63
+; Bound: 79
 ; Schema: 0
                OpCapability Shader
+               OpCapability ImageQuery
+         %31 = OpExtInstImport "GLSL.std.450"
                OpMemoryModel Logical GLSL450
                OpEntryPoint Fragment %fragment_main "fragment_main"
                OpEntryPoint GLCompute %compute_main "compute_main"
@@ -56,66 +58,81 @@
 %_ptr_Output_float = OpTypePointer Output %float
 %vertex_main___point_size_Output = OpVariable %_ptr_Output_float Output
          %18 = OpTypeFunction %v4uint
-        %int = OpTypeInt 32 1
-      %v3int = OpTypeVector %int 3
-      %v2int = OpTypeVector %int 2
-      %int_1 = OpConstant %int 1
-         %24 = OpConstantComposite %v2int %int_1 %int_1
+     %v3uint = OpTypeVector %uint 3
+     %uint_0 = OpConstant %uint 0
      %uint_1 = OpConstant %uint 1
+        %int = OpTypeInt 32 1
+      %int_1 = OpConstant %int 1
+     %v2uint = OpTypeVector %uint 2
+         %39 = OpConstantComposite %v2uint %uint_1 %uint_1
+      %v2int = OpTypeVector %int 2
+         %41 = OpConstantComposite %v2int %int_1 %int_1
 %_ptr_Function_v4uint = OpTypePointer Function %v4uint
        %void = OpTypeVoid
-         %34 = OpTypeFunction %void
+         %51 = OpTypeFunction %void
 %_ptr_StorageBuffer_v4uint = OpTypePointer StorageBuffer %v4uint
-     %uint_0 = OpConstant %uint 0
 %VertexOutput = OpTypeStruct %v4float %v4uint
-         %46 = OpTypeFunction %VertexOutput
+         %62 = OpTypeFunction %VertexOutput
 %_ptr_Function_VertexOutput = OpTypePointer Function %VertexOutput
-         %50 = OpConstantNull %VertexOutput
+         %66 = OpConstantNull %VertexOutput
 %_ptr_Function_v4float = OpTypePointer Function %v4float
-         %53 = OpConstantNull %v4float
+         %69 = OpConstantNull %v4float
     %float_1 = OpConstant %float 1
 %textureLoad_656d76 = OpFunction %v4uint None %18
          %19 = OpLabel
         %res = OpVariable %_ptr_Function_v4uint Function
          %20 = OpLoad %8 %arg_0 None
-         %23 = OpCompositeConstruct %v3int %24 %int_1
-         %27 = OpImageFetch %v4uint %20 %23 Lod %uint_1
-               OpStore %res %27
-         %31 = OpLoad %v4uint %res None
-               OpReturnValue %31
+         %21 = OpImageQuerySizeLod %v3uint %20 %uint_0
+         %24 = OpCompositeExtract %uint %21 2
+         %25 = OpISub %uint %24 %uint_1
+         %27 = OpBitcast %uint %int_1
+         %30 = OpExtInst %uint %31 UMin %27 %25
+         %32 = OpImageQueryLevels %uint %20
+         %33 = OpISub %uint %32 %uint_1
+         %34 = OpExtInst %uint %31 UMin %uint_1 %33
+         %35 = OpImageQuerySizeLod %v3uint %20 %34
+         %36 = OpVectorShuffle %v2uint %35 %35 0 1
+         %38 = OpISub %v2uint %36 %39
+         %40 = OpBitcast %v2uint %41
+         %43 = OpExtInst %v2uint %31 UMin %40 %38
+         %44 = OpCompositeConstruct %v3uint %43 %30
+         %45 = OpImageFetch %v4uint %20 %44 Lod %34
+               OpStore %res %45
+         %48 = OpLoad %v4uint %res None
+               OpReturnValue %48
                OpFunctionEnd
-%fragment_main = OpFunction %void None %34
-         %35 = OpLabel
-         %36 = OpFunctionCall %v4uint %textureLoad_656d76
-         %37 = OpAccessChain %_ptr_StorageBuffer_v4uint %1 %uint_0
-               OpStore %37 %36 None
+%fragment_main = OpFunction %void None %51
+         %52 = OpLabel
+         %53 = OpFunctionCall %v4uint %textureLoad_656d76
+         %54 = OpAccessChain %_ptr_StorageBuffer_v4uint %1 %uint_0
+               OpStore %54 %53 None
                OpReturn
                OpFunctionEnd
-%compute_main = OpFunction %void None %34
-         %41 = OpLabel
-         %42 = OpFunctionCall %v4uint %textureLoad_656d76
-         %43 = OpAccessChain %_ptr_StorageBuffer_v4uint %1 %uint_0
-               OpStore %43 %42 None
+%compute_main = OpFunction %void None %51
+         %57 = OpLabel
+         %58 = OpFunctionCall %v4uint %textureLoad_656d76
+         %59 = OpAccessChain %_ptr_StorageBuffer_v4uint %1 %uint_0
+               OpStore %59 %58 None
                OpReturn
                OpFunctionEnd
-%vertex_main_inner = OpFunction %VertexOutput None %46
-         %47 = OpLabel
-        %out = OpVariable %_ptr_Function_VertexOutput Function %50
-         %51 = OpAccessChain %_ptr_Function_v4float %out %uint_0
-               OpStore %51 %53 None
-         %54 = OpAccessChain %_ptr_Function_v4uint %out %uint_1
-         %55 = OpFunctionCall %v4uint %textureLoad_656d76
-               OpStore %54 %55 None
-         %56 = OpLoad %VertexOutput %out None
-               OpReturnValue %56
+%vertex_main_inner = OpFunction %VertexOutput None %62
+         %63 = OpLabel
+        %out = OpVariable %_ptr_Function_VertexOutput Function %66
+         %67 = OpAccessChain %_ptr_Function_v4float %out %uint_0
+               OpStore %67 %69 None
+         %70 = OpAccessChain %_ptr_Function_v4uint %out %uint_1
+         %71 = OpFunctionCall %v4uint %textureLoad_656d76
+               OpStore %70 %71 None
+         %72 = OpLoad %VertexOutput %out None
+               OpReturnValue %72
                OpFunctionEnd
-%vertex_main = OpFunction %void None %34
-         %58 = OpLabel
-         %59 = OpFunctionCall %VertexOutput %vertex_main_inner
-         %60 = OpCompositeExtract %v4float %59 0
-               OpStore %vertex_main_position_Output %60 None
-         %61 = OpCompositeExtract %v4uint %59 1
-               OpStore %vertex_main_loc0_Output %61 None
+%vertex_main = OpFunction %void None %51
+         %74 = OpLabel
+         %75 = OpFunctionCall %VertexOutput %vertex_main_inner
+         %76 = OpCompositeExtract %v4float %75 0
+               OpStore %vertex_main_position_Output %76 None
+         %77 = OpCompositeExtract %v4uint %75 1
+               OpStore %vertex_main_loc0_Output %77 None
                OpStore %vertex_main___point_size_Output %float_1 None
                OpReturn
                OpFunctionEnd

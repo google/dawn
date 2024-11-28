@@ -2,7 +2,8 @@
 
 using namespace metal;
 uint4 textureLoad_216c37(texture1d<uint, access::sample> tint_symbol_1) {
-  uint4 res = tint_symbol_1.read(uint(1u), 0);
+  uint const level_idx = min(1u, (tint_symbol_1.get_num_mip_levels() - 1u));
+  uint4 res = tint_symbol_1.read(uint(min(1u, (tint_symbol_1.get_width(0) - 1u))), 0);
   return res;
 }
 

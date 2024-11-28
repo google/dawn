@@ -8,7 +8,7 @@ struct S_tint_packed_vec3 {
 
 float3 Bad(uint index, float3 rd) {
   float3 normal = float3(0.0f);
-  normal[index] = -(sign(rd[index]));
+  normal[min(index, 2u)] = -(sign(rd[min(index, 2u)]));
   return normalize(normal);
 }
 

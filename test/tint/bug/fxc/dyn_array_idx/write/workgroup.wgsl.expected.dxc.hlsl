@@ -26,7 +26,7 @@ struct tint_symbol_2 {
 
 void f_inner(uint local_invocation_index) {
   tint_zero_workgroup_memory(local_invocation_index);
-  s.data[asint(ubo[0].x)] = 1;
+  s.data[min(uint(asint(ubo[0].x)), 63u)] = 1;
   result.Store(0u, asuint(s.data[3]));
 }
 

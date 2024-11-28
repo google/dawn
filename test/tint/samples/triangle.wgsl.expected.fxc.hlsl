@@ -7,7 +7,7 @@ struct tint_symbol_2 {
 
 float4 vtx_main_inner(uint VertexIndex) {
   float2 tint_symbol_4[3] = {float2(0.0f, 0.5f), (-0.5f).xx, float2(0.5f, -0.5f)};
-  return float4(tint_symbol_4[VertexIndex], 0.0f, 1.0f);
+  return float4(tint_symbol_4[min(VertexIndex, 2u)], 0.0f, 1.0f);
 }
 
 tint_symbol_2 vtx_main(tint_symbol_1 tint_symbol) {

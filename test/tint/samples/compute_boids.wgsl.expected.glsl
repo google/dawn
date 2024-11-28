@@ -64,9 +64,9 @@ void comp_main_inner(uvec3 tint_symbol) {
   if ((index >= 5u)) {
     return;
   }
-  uint v_3 = index;
+  uint v_3 = min(index, 4u);
   vec2 vPos = v_1.inner.particles[v_3].pos;
-  uint v_4 = index;
+  uint v_4 = min(index, 4u);
   vec2 vVel = v_1.inner.particles[v_4].vel;
   vec2 cMass = vec2(0.0f);
   vec2 cVel = vec2(0.0f);
@@ -88,9 +88,9 @@ void comp_main_inner(uvec3 tint_symbol) {
         }
         continue;
       }
-      uint v_5 = i;
+      uint v_5 = min(i, 4u);
       pos = v_1.inner.particles[v_5].pos.xy;
-      uint v_6 = i;
+      uint v_6 = min(i, 4u);
       vel = v_1.inner.particles[v_6].vel.xy;
       if ((distance(pos, vPos) < v.inner.rule1Distance)) {
         cMass = (cMass + pos);
@@ -135,9 +135,9 @@ void comp_main_inner(uvec3 tint_symbol) {
   if ((vPos.y > 1.0f)) {
     vPos[1u] = -1.0f;
   }
-  uint v_12 = index;
+  uint v_12 = min(index, 4u);
   v_2.inner.particles[v_12].pos = vPos;
-  uint v_13 = index;
+  uint v_13 = min(index, 4u);
   v_2.inner.particles[v_13].vel = vVel;
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;

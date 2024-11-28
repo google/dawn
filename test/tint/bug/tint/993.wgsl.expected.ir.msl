@@ -32,7 +32,7 @@ struct tint_module_vars_struct {
 };
 
 int runTest(tint_module_vars_struct tint_module_vars) {
-  return atomic_load_explicit((&(*tint_module_vars.s).data[(0u + uint((*tint_module_vars.constants).zero))]), memory_order_relaxed);
+  return atomic_load_explicit((&(*tint_module_vars.s).data[min((0u + uint((*tint_module_vars.constants).zero)), 2u)]), memory_order_relaxed);
 }
 
 kernel void tint_symbol(const constant Constants* constants [[buffer(0)]], device Result* result [[buffer(1)]], device TestData* s [[buffer(2)]]) {
