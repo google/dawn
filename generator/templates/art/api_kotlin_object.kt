@@ -51,4 +51,11 @@ public class {{ obj.name.CamelCase() }}(public val handle: Long): AutoCloseable 
         {% endif %}
     {% endfor %}
     external override fun close();
+
+    //* By default, the equals() function implements referential equality.
+    //* see: https://kotlinlang.org/docs/equality.html#structural-equality
+    //* We convert to structural equality (in Kotlin) which acts as referential equality check for
+    //* the underlying Dawn object.
+    override fun equals(other: Any?): Boolean =
+        other is {{ obj.name.CamelCase() }} && other.handle == handle
 }
