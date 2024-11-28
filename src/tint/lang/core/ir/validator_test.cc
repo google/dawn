@@ -5411,6 +5411,85 @@ note: # Disassembly
 )");
 }
 
+TEST_F(IR_ValidatorTest, Var_Init_FunctionTypeInit) {
+    auto* invalid = b.Function("invalid_init", ty.void_());
+    b.Append(invalid->Block(), [&] { b.Return(invalid); });
+    auto* f = b.Function("my_func", ty.void_());
+
+    b.Append(f->Block(), [&] {
+        auto* i = b.Var<function, f32>("i");
+        i->SetInitializer(invalid);
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_EQ(res.Failure().reason.Str(),
+              R"(:8:41 error: var: initializer type 'function' does not match store type 'f32'
+    %i:ptr<function, f32, read_write> = var, %invalid_init
+                                        ^^^
+
+:7:3 note: in block
+  $B2: {
+  ^^^
+
+note: # Disassembly
+%invalid_init = func():void {
+  $B1: {
+    ret
+  }
+}
+%my_func = func():void {
+  $B2: {
+    %i:ptr<function, f32, read_write> = var, %invalid_init
+    ret
+  }
+}
+)");
+}
+
+TEST_F(IR_ValidatorTest, Var_Init_InvalidAddressSpace) {
+    auto* p = b.Var<private_, f32>("p");
+    p->SetInitializer(b.Constant(1_f));
+    mod.root_block->Append(p);
+    auto* s = b.Var<storage, f32>("s");
+    s->SetInitializer(b.Constant(1_f));
+    mod.root_block->Append(s);
+    auto* f = b.Function("my_func", ty.void_());
+
+    b.Append(f->Block(), [&] {
+        auto* v = b.Var<function, f32>("v");
+        v->SetInitializer(b.Constant(1_f));
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_EQ(
+        res.Failure().reason.Str(),
+        R"(:3:38 error: var: only variables in the function or private address space may be initialized
+  %s:ptr<storage, f32, read_write> = var, 1.0f
+                                     ^^^
+
+:1:1 note: in block
+$B1: {  # root
+^^^
+
+note: # Disassembly
+$B1: {  # root
+  %p:ptr<private, f32, read_write> = var, 1.0f
+  %s:ptr<storage, f32, read_write> = var, 1.0f
+}
+
+%my_func = func():void {
+  $B2: {
+    %v:ptr<function, f32, read_write> = var, 1.0f
+    ret
+  }
+}
+)");
+}
+
 TEST_F(IR_ValidatorTest, Var_HandleMissingBindingPoint) {
     auto* v = b.Var(ty.ptr<handle, i32>());
     mod.root_block->Append(v);
