@@ -173,7 +173,7 @@ crbug.com/dawn/2331 [ dawn-backend-validation intel-0x9bc5 ubuntu ] webgpu:api,v
 crbug.com/dawn/2332 [ dawn-backend-validation intel-0x9bc5 ubuntu ] webgpu:api,operation,command_buffer,image_copy:origins_and_extents:initMethod="WriteTexture";checkMethod="FullCopyT2B";* [ RetryOnFailure ]
 
 # Occlusion result incorrect with writeMask 0 on Intel
-crbug.com/dawn/1706 [ angle-d3d11 graphite-disabled intel-0x9bc5 release renderer-skia-gl win10 ] webgpu:api,operation,command_buffer,queries,occlusionQuery:occlusion_query,depth:writeMask=0;* [ Failure ]
+crbug.com/dawn/1706 [ angle-d3d11 intel-0x9bc5 release renderer-skia-gl win10 ] webgpu:api,operation,command_buffer,queries,occlusionQuery:occlusion_query,depth:writeMask=0;* [ Failure ]
 crbug.com/dawn/1706 [ angle-d3d11 intel release renderer-skia-gl win10 ] webgpu:api,operation,command_buffer,queries,occlusionQuery:occlusion_query,basic:writeMask=0;* [ Failure ]
 crbug.com/dawn/1706 [ angle-d3d11 intel release renderer-skia-gl win10 ] webgpu:api,operation,command_buffer,queries,occlusionQuery:occlusion_query,scissor:writeMask=0;* [ Failure ]
 crbug.com/dawn/1706 [ intel ] webgpu:api,operation,command_buffer,queries,occlusionQuery:occlusion_query,alpha_to_coverage:writeMask=0;* [ Failure ]
