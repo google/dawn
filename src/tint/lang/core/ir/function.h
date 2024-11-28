@@ -85,6 +85,18 @@ class Function : public Castable<Function, Value> {
     /// @returns the function pipeline stage
     PipelineStage Stage() const { return pipeline_stage_; }
 
+    /// @returns true if the function is an entry point
+    bool IsEntryPoint() const { return pipeline_stage_ != PipelineStage::kUndefined; }
+
+    /// @returns true if the function is a compute stage entry point
+    bool IsCompute() const { return pipeline_stage_ == PipelineStage::kCompute; }
+
+    /// @returns true if the function is a fragment stage entry point
+    bool IsFragment() const { return pipeline_stage_ == PipelineStage::kFragment; }
+
+    /// @returns true if the function is a vertex stage entry point
+    bool IsVertex() const { return pipeline_stage_ == PipelineStage::kVertex; }
+
     /// Sets the workgroup size
     /// @param x the x size
     /// @param y the y size
