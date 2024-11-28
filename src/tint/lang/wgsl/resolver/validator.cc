@@ -1974,9 +1974,27 @@ bool Validator::SubgroupBroadcast(const sem::Call* call) const {
         return false;
     }
 
-    if (id->Type()->IsSignedIntegerScalar() && constant_value->ValueAs<i32>() < 0) {
+    if (id->Type()->IsSignedIntegerScalar()) {
+        if (constant_value->ValueAs<i32>() < 0) {
+            AddError(id->Declaration()->source)
+                << "the sourceLaneIndex argument of subgroupBroadcast "
+                   "must be greater than or equal to zero";
+            return false;
+        }
+        if (constant_value->ValueAs<i32>() >= tint::internal_limits::kMaxSubgroupSize) {
+            AddError(id->Declaration()->source)
+                << "the sourceLaneIndex argument of subgroupBroadcast "
+                   "must be less than "
+                << tint::internal_limits::kMaxSubgroupSize;
+            return false;
+        }
+    }
+
+    if (id->Type()->IsUnsignedIntegerScalar() &&
+        constant_value->ValueAs<u32>() >= tint::internal_limits::kMaxSubgroupSize) {
         AddError(id->Declaration()->source) << "the sourceLaneIndex argument of subgroupBroadcast "
-                                               "must be greater than or equal to zero";
+                                               "must be less than "
+                                            << tint::internal_limits::kMaxSubgroupSize;
         return false;
     }
 
@@ -1999,9 +2017,24 @@ bool Validator::QuadBroadcast(const sem::Call* call) const {
         return false;
     }
 
-    if (id->Type()->IsSignedIntegerScalar() && constant_value->ValueAs<i32>() < 0) {
-        AddError(id->Declaration()->source)
-            << "the id argument of quadBroadcast must be greater than or equal to zero";
+    if (id->Type()->IsSignedIntegerScalar()) {
+        if (constant_value->ValueAs<i32>() < 0) {
+            AddError(id->Declaration()->source)
+                << "the id argument of quadBroadcast must be greater than or equal to zero";
+            return false;
+        }
+        if (constant_value->ValueAs<i32>() >= tint::internal_limits::kQuadSize) {
+            AddError(id->Declaration()->source)
+                << "the id argument of quadBroadcast must be less than "
+                << tint::internal_limits::kQuadSize;
+            return false;
+        }
+    }
+
+    if (id->Type()->IsUnsignedIntegerScalar() &&
+        constant_value->ValueAs<u32>() >= tint::internal_limits::kQuadSize) {
+        AddError(id->Declaration()->source) << "the id argument of quadBroadcast must be less than "
+                                            << tint::internal_limits::kQuadSize;
         return false;
     }
 

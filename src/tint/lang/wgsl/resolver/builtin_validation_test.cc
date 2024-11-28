@@ -1084,6 +1084,30 @@ TEST_F(ResolverBuiltinValidationTest, SubgroupBroadcastLaneArgMustBeNonNeg) {
         R"(12:34 error: the sourceLaneIndex argument of subgroupBroadcast must be greater than or equal to zero)");
 }
 
+TEST_F(ResolverBuiltinValidationTest, SubgroupBroadcastLaneArgMustLessThan128Signed) {
+    Enable(wgsl::Extension::kSubgroups);
+    Func("func", tint::Empty, ty.u32(),
+         Vector{
+             Return(Call("subgroupBroadcast", 1_u, Expr(Source{{12, 34}}, 128_i))),
+         });
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(
+        r()->error(),
+        R"(12:34 error: the sourceLaneIndex argument of subgroupBroadcast must be less than 128)");
+}
+
+TEST_F(ResolverBuiltinValidationTest, SubgroupBroadcastLaneArgMustLessThan128) {
+    Enable(wgsl::Extension::kSubgroups);
+    Func("func", tint::Empty, ty.u32(),
+         Vector{
+             Return(Call("subgroupBroadcast", 1_u, Expr(Source{{12, 34}}, 128_u))),
+         });
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(
+        r()->error(),
+        R"(12:34 error: the sourceLaneIndex argument of subgroupBroadcast must be less than 128)");
+}
+
 TEST_F(ResolverBuiltinValidationTest, QuadBroadcastIdArgMustBeNonNeg) {
     Enable(wgsl::Extension::kSubgroups);
     Func("func", tint::Empty, ty.u32(),
@@ -1094,6 +1118,38 @@ TEST_F(ResolverBuiltinValidationTest, QuadBroadcastIdArgMustBeNonNeg) {
     EXPECT_EQ(
         r()->error(),
         R"(12:34 error: the id argument of quadBroadcast must be greater than or equal to zero)");
+}
+
+TEST_F(ResolverBuiltinValidationTest, QuadBroadcastIdArgMustBeNonNeg4) {
+    Enable(wgsl::Extension::kSubgroups);
+    Func("func", tint::Empty, ty.u32(),
+         Vector{
+             Return(Call("quadBroadcast", 1_u, Expr(Source{{12, 34}}, -4_i))),
+         });
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(
+        r()->error(),
+        R"(12:34 error: the id argument of quadBroadcast must be greater than or equal to zero)");
+}
+
+TEST_F(ResolverBuiltinValidationTest, QuadBroadcastIdArgMustLessThan4Signed) {
+    Enable(wgsl::Extension::kSubgroups);
+    Func("func", tint::Empty, ty.u32(),
+         Vector{
+             Return(Call("quadBroadcast", 1_u, Expr(Source{{12, 34}}, 4_i))),
+         });
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(), R"(12:34 error: the id argument of quadBroadcast must be less than 4)");
+}
+
+TEST_F(ResolverBuiltinValidationTest, QuadBroadcastIdArgMustLessThan4) {
+    Enable(wgsl::Extension::kSubgroups);
+    Func("func", tint::Empty, ty.u32(),
+         Vector{
+             Return(Call("quadBroadcast", 1_u, Expr(Source{{12, 34}}, 4_u))),
+         });
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(), R"(12:34 error: the id argument of quadBroadcast must be less than 4)");
 }
 
 TEST_F(ResolverBuiltinValidationTest, TextureBarrier) {

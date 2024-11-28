@@ -44,6 +44,12 @@ constexpr size_t kMaxArrayConstructorElements = 32767;
 // Limits the number of elements in an array type
 constexpr int64_t kMaxArrayElementCount = 65536;
 
+// The max subgroup size supported. Used in validation.
+constexpr int64_t kMaxSubgroupSize = 128;
+
+// A quad (fragment) is composed of four invocations.
+constexpr int64_t kQuadSize = 4;
+
 }  // namespace tint::internal_limits
 
 #endif  // SRC_TINT_UTILS_INTERNAL_LIMITS_H_
