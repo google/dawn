@@ -44,22 +44,22 @@ void tint_symbol_inner(uint3 GlobalInvocationID, tint_module_vars_struct tint_mo
   float4 const nonCoveredColor = float4(0.0f, 1.0f, 0.0f, 1.0f);
   bool success = true;
   bool v = false;
-  if ((dstTexCoord[0u] < (*tint_module_vars.uniforms).dstCopyOrigin[0u])) {
+  if ((dstTexCoord.x < (*tint_module_vars.uniforms).dstCopyOrigin.x)) {
     v = true;
   } else {
-    v = (dstTexCoord[1u] < (*tint_module_vars.uniforms).dstCopyOrigin[1u]);
+    v = (dstTexCoord.y < (*tint_module_vars.uniforms).dstCopyOrigin.y);
   }
   bool v_1 = false;
   if (v) {
     v_1 = true;
   } else {
-    v_1 = (dstTexCoord[0u] >= ((*tint_module_vars.uniforms).dstCopyOrigin[0u] + (*tint_module_vars.uniforms).copySize[0u]));
+    v_1 = (dstTexCoord.x >= ((*tint_module_vars.uniforms).dstCopyOrigin.x + (*tint_module_vars.uniforms).copySize.x));
   }
   bool v_2 = false;
   if (v_1) {
     v_2 = true;
   } else {
-    v_2 = (dstTexCoord[1u] >= ((*tint_module_vars.uniforms).dstCopyOrigin[1u] + (*tint_module_vars.uniforms).copySize[1u]));
+    v_2 = (dstTexCoord.y >= ((*tint_module_vars.uniforms).dstCopyOrigin.y + (*tint_module_vars.uniforms).copySize.y));
   }
   if (v_2) {
     bool v_3 = false;
@@ -75,7 +75,7 @@ void tint_symbol_inner(uint3 GlobalInvocationID, tint_module_vars_struct tint_mo
   } else {
     uint2 srcTexCoord = ((dstTexCoord - (*tint_module_vars.uniforms).dstCopyOrigin) + (*tint_module_vars.uniforms).srcCopyOrigin);
     if (((*tint_module_vars.uniforms).dstTextureFlipY == 1u)) {
-      srcTexCoord[1u] = ((srcSize[1u] - srcTexCoord[1u]) - 1u);
+      srcTexCoord.y = ((srcSize.y - srcTexCoord.y) - 1u);
     }
     int2 const v_7 = int2(srcTexCoord);
     uint const v_8 = min(uint(0), (tint_module_vars.src.get_num_mip_levels() - 1u));
@@ -88,13 +88,13 @@ void tint_symbol_inner(uint3 GlobalInvocationID, tint_module_vars_struct tint_mo
     if (((*tint_module_vars.uniforms).channelCount == 2u)) {
       bool v_13 = false;
       if (success) {
-        v_13 = aboutEqual(dstColor[0u], srcColor[0u]);
+        v_13 = aboutEqual(dstColor.x, srcColor.x);
       } else {
         v_13 = false;
       }
       bool v_14 = false;
       if (v_13) {
-        v_14 = aboutEqual(dstColor[1u], srcColor[1u]);
+        v_14 = aboutEqual(dstColor.y, srcColor.y);
       } else {
         v_14 = false;
       }
@@ -102,36 +102,36 @@ void tint_symbol_inner(uint3 GlobalInvocationID, tint_module_vars_struct tint_mo
     } else {
       bool v_15 = false;
       if (success) {
-        v_15 = aboutEqual(dstColor[0u], srcColor[0u]);
+        v_15 = aboutEqual(dstColor.x, srcColor.x);
       } else {
         v_15 = false;
       }
       bool v_16 = false;
       if (v_15) {
-        v_16 = aboutEqual(dstColor[1u], srcColor[1u]);
+        v_16 = aboutEqual(dstColor.y, srcColor.y);
       } else {
         v_16 = false;
       }
       bool v_17 = false;
       if (v_16) {
-        v_17 = aboutEqual(dstColor[2u], srcColor[2u]);
+        v_17 = aboutEqual(dstColor.z, srcColor.z);
       } else {
         v_17 = false;
       }
       bool v_18 = false;
       if (v_17) {
-        v_18 = aboutEqual(dstColor[3u], srcColor[3u]);
+        v_18 = aboutEqual(dstColor.w, srcColor.w);
       } else {
         v_18 = false;
       }
       success = v_18;
     }
   }
-  uint const outputIndex = ((GlobalInvocationID[1u] * dstSize[0u]) + GlobalInvocationID[0u]);
+  uint const outputIndex = ((GlobalInvocationID.y * dstSize.x) + GlobalInvocationID.x);
   if (success) {
-    (*tint_module_vars.output).result[min(outputIndex, ((((*tint_module_vars.tint_storage_buffer_sizes)[0u][1u] - 0u) / 4u) - 1u))] = 1u;
+    (*tint_module_vars.output).result[min(outputIndex, ((((*tint_module_vars.tint_storage_buffer_sizes)[0u].y - 0u) / 4u) - 1u))] = 1u;
   } else {
-    (*tint_module_vars.output).result[min(outputIndex, ((((*tint_module_vars.tint_storage_buffer_sizes)[0u][1u] - 0u) / 4u) - 1u))] = 0u;
+    (*tint_module_vars.output).result[min(outputIndex, ((((*tint_module_vars.tint_storage_buffer_sizes)[0u].y - 0u) / 4u) - 1u))] = 0u;
   }
 }
 

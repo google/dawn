@@ -19,7 +19,7 @@ struct S {
 
 void a() {
   int4 a_1 = int4(0);
-  int const b = a_1[0u];
+  int const b = a_1.x;
   int4 const c = a_1.zzyy;
   S d = S{};
   float3 const e = d.val[2u].yzx;

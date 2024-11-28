@@ -54,14 +54,14 @@ struct tint_symbol_inputs {
 void main_1(tint_module_vars_struct tint_module_vars) {
   float4 q = 0.0f;
   float3 p = 0.0f;
-  q = float4((*tint_module_vars.position_1)[0u], (*tint_module_vars.position_1)[1u], (*tint_module_vars.position_1)[2u], 1.0f);
+  q = float4((*tint_module_vars.position_1).x, (*tint_module_vars.position_1).y, (*tint_module_vars.position_1).z, 1.0f);
   p = q.xyz;
-  p[0u] = (p[0u] + sin((((*tint_module_vars.x_14).test[0u].el * (*tint_module_vars.position_1)[1u]) + (*tint_module_vars.x_14).time)));
-  p[1u] = (p[1u] + sin(((*tint_module_vars.x_14).time + 4.0f)));
+  p.x = (p.x + sin((((*tint_module_vars.x_14).test[0u].el * (*tint_module_vars.position_1).y) + (*tint_module_vars.x_14).time)));
+  p.y = (p.y + sin(((*tint_module_vars.x_14).time + 4.0f)));
   float4x4 const v = (*tint_module_vars.x_14).worldViewProjection;
-  (*tint_module_vars.gl_Position) = (v * float4(p[0u], p[1u], p[2u], 1.0f));
+  (*tint_module_vars.gl_Position) = (v * float4(p.x, p.y, p.z, 1.0f));
   (*tint_module_vars.vUV) = (*tint_module_vars.uv);
-  (*tint_module_vars.gl_Position)[1u] = ((*tint_module_vars.gl_Position)[1u] * -1.0f);
+  (*tint_module_vars.gl_Position).y = ((*tint_module_vars.gl_Position).y * -1.0f);
 }
 
 main_out tint_symbol_inner(float3 position_1_param, float2 uv_param, float3 normal_param, tint_module_vars_struct tint_module_vars) {

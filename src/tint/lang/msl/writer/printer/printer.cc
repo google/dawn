@@ -735,45 +735,57 @@ class Printer : public tint::TextGenerator {
         Line() << "}";
     }
 
+    void IdxToComponent(StringStream& out, uint32_t idx) {
+        switch (idx) {
+            case 0:
+                out << "x";
+                break;
+            case 1:
+                out << "y";
+                break;
+            case 2:
+                out << "z";
+                break;
+            case 3:
+                out << "w";
+                break;
+            default:
+                TINT_UNREACHABLE() << "invalid index for component";
+        }
+    }
+
     void EmitSwizzle(StringStream& out, const core::ir::Swizzle* swizzle) {
         EmitValue(out, swizzle->Object());
         out << ".";
         for (const auto i : swizzle->Indices()) {
-            switch (i) {
-                case 0:
-                    out << "x";
-                    break;
-                case 1:
-                    out << "y";
-                    break;
-                case 2:
-                    out << "z";
-                    break;
-                case 3:
-                    out << "w";
-                    break;
-                default:
-                    TINT_UNREACHABLE();
-            }
+            IdxToComponent(out, i);
         }
     }
 
-    void EmitStoreVectorElement(const core::ir::StoreVectorElement* l) {
+    void EmitVectorAccess(StringStream& out, const core::ir::Value* index) {
+        if (auto* cnst = index->As<core::ir::Constant>()) {
+            out << ".";
+            IdxToComponent(out, cnst->Value()->ValueAs<uint32_t>());
+        } else {
+            out << "[";
+            EmitValue(out, index);
+            out << "]";
+        }
+    }
+
+    void EmitStoreVectorElement(const core::ir::StoreVectorElement* s) {
         auto out = Line();
 
-        EmitAndDerefIfNeeded(out, l->To());
-        out << "[";
-        EmitValue(out, l->Index());
-        out << "] = ";
-        EmitValue(out, l->Value());
+        EmitAndDerefIfNeeded(out, s->To());
+        EmitVectorAccess(out, s->Index());
+        out << " = ";
+        EmitValue(out, s->Value());
         out << ";";
     }
 
     void EmitLoadVectorElement(StringStream& out, const core::ir::LoadVectorElement* l) {
         EmitAndDerefIfNeeded(out, l->From());
-        out << "[";
-        EmitValue(out, l->Index());
-        out << "]";
+        EmitVectorAccess(out, l->Index());
     }
 
     /// Emit an if instruction
@@ -865,6 +877,9 @@ class Printer : public tint::TextGenerator {
                     auto* member = s->Members()[c->Value()->ValueAs<uint32_t>()];
                     out << "." << member->Name().Name();
                     current_type = member->Type();
+                },
+                [&](const core::type::Vector*) {  //
+                    EmitVectorAccess(out, index);
                 },
                 [&](Default) {
                     out << "[";

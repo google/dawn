@@ -53,8 +53,8 @@ struct frag_main_outputs {
 };
 
 float4 vert_main_inner(float2 a_particlePos, float2 a_particleVel, float2 a_pos) {
-  float angle = -(atan2(a_particleVel[0u], a_particleVel[1u]));
-  float2 pos = float2(((a_pos[0u] * cos(angle)) - (a_pos[1u] * sin(angle))), ((a_pos[0u] * sin(angle)) + (a_pos[1u] * cos(angle))));
+  float angle = -(atan2(a_particleVel.x, a_particleVel.y));
+  float2 pos = float2(((a_pos.x * cos(angle)) - (a_pos.y * sin(angle))), ((a_pos.x * sin(angle)) + (a_pos.y * cos(angle))));
   return float4((pos + a_particlePos), 0.0f, 1.0f);
 }
 
@@ -63,7 +63,7 @@ float4 frag_main_inner() {
 }
 
 void comp_main_inner(uint3 gl_GlobalInvocationID, tint_module_vars_struct tint_module_vars) {
-  uint index = gl_GlobalInvocationID[0u];
+  uint index = gl_GlobalInvocationID.x;
   if ((index >= 5u)) {
     return;
   }
@@ -122,17 +122,17 @@ void comp_main_inner(uint3 gl_GlobalInvocationID, tint_module_vars_struct tint_m
   vVel = (((vVel + (cMass * (*tint_module_vars.params).rule1Scale)) + (colVel * (*tint_module_vars.params).rule2Scale)) + (cVel * (*tint_module_vars.params).rule3Scale));
   vVel = (normalize(vVel) * clamp(length(vVel), 0.0f, 0.10000000149011611938f));
   vPos = (vPos + (vVel * (*tint_module_vars.params).deltaT));
-  if ((vPos[0u] < -1.0f)) {
-    vPos[0u] = 1.0f;
+  if ((vPos.x < -1.0f)) {
+    vPos.x = 1.0f;
   }
-  if ((vPos[0u] > 1.0f)) {
-    vPos[0u] = -1.0f;
+  if ((vPos.x > 1.0f)) {
+    vPos.x = -1.0f;
   }
-  if ((vPos[1u] < -1.0f)) {
-    vPos[1u] = 1.0f;
+  if ((vPos.y < -1.0f)) {
+    vPos.y = 1.0f;
   }
-  if ((vPos[1u] > 1.0f)) {
-    vPos[1u] = -1.0f;
+  if ((vPos.y > 1.0f)) {
+    vPos.y = -1.0f;
   }
   (*tint_module_vars.particlesB).particles[min(index, 4u)].pos = vPos;
   (*tint_module_vars.particlesB).particles[min(index, 4u)].vel = vVel;

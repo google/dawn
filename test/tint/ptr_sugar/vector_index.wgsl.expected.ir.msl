@@ -4,15 +4,15 @@ using namespace metal;
 void deref_const() {
   int3 a = 0;
   thread int3* const p = (&a);
-  int b = (*p)[0u];
-  (*p)[0u] = 42;
+  int b = (*p).x;
+  (*p).x = 42;
 }
 
 void no_deref_const() {
   int3 a = 0;
   thread int3* const p = (&a);
-  int b = (*p)[0u];
-  (*p)[0u] = 42;
+  int b = (*p).x;
+  (*p).x = 42;
 }
 
 void deref_let() {
@@ -20,7 +20,7 @@ void deref_let() {
   thread int3* const p = (&a);
   int const i = 0;
   int b = (*p)[min(uint(i), 2u)];
-  (*p)[0u] = 42;
+  (*p).x = 42;
 }
 
 void no_deref_let() {
@@ -28,7 +28,7 @@ void no_deref_let() {
   thread int3* const p = (&a);
   int const i = 0;
   int b = (*p)[min(uint(i), 2u)];
-  (*p)[0u] = 42;
+  (*p).x = 42;
 }
 
 void deref_var() {
@@ -36,7 +36,7 @@ void deref_var() {
   thread int3* const p = (&a);
   int i = 0;
   int b = (*p)[min(uint(i), 2u)];
-  (*p)[0u] = 42;
+  (*p).x = 42;
 }
 
 void no_deref_var() {
@@ -44,7 +44,7 @@ void no_deref_var() {
   thread int3* const p = (&a);
   int const i = 0;
   int b = (*p)[min(uint(i), 2u)];
-  (*p)[0u] = 42;
+  (*p).x = 42;
 }
 
 kernel void tint_symbol() {

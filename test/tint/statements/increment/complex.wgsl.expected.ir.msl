@@ -60,7 +60,7 @@ void tint_symbol_1(tint_module_vars_struct tint_module_vars) {
   {
     int const v_1 = idx1(tint_module_vars);
     int const v_2 = idx2(tint_module_vars);
-    uint const v_3 = (((*tint_module_vars.tint_storage_buffer_sizes)[0u][0u] / 64u) - 1u);
+    uint const v_3 = (((*tint_module_vars.tint_storage_buffer_sizes)[0u].x / 64u) - 1u);
     uint const v_4 = min(uint(v_1), v_3);
     device int4* const v_5 = (&(*tint_module_vars.tint_symbol)[v_4].a[min(uint(v_2), 3u)]);
     int const v_6 = idx3(tint_module_vars);
@@ -75,7 +75,7 @@ void tint_symbol_1(tint_module_vars_struct tint_module_vars) {
       {
         int const v_8 = idx4(tint_module_vars);
         int const v_9 = idx5(tint_module_vars);
-        uint const v_10 = (((*tint_module_vars.tint_storage_buffer_sizes)[0u][0u] / 64u) - 1u);
+        uint const v_10 = (((*tint_module_vars.tint_storage_buffer_sizes)[0u].x / 64u) - 1u);
         uint const v_11 = min(uint(v_8), v_10);
         device int4* const v_12 = (&(*tint_module_vars.tint_symbol)[v_11].a[min(uint(v_9), 3u)]);
         int const v_13 = idx6(tint_module_vars);

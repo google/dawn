@@ -84,5 +84,5 @@ kernel void f(const constant tint_array<tint_array<tint_packed_vec3_f32_array_el
   float3 const v_24 = float3(v_21[2u].packed);
   tint_store_and_preserve_padding_1((&(*tint_module_vars.s)[1u]), float4x3(v_22, v_23, v_24, float3(v_21[3u].packed)));
   (*tint_module_vars.s)[1u][0u].packed = packed_float3(float3((*tint_module_vars.u)[0u][1u].packed).zxy);
-  (*tint_module_vars.s)[1u][0u].packed[0u] = (*tint_module_vars.u)[0u][1u].packed[0u];
+  (*tint_module_vars.s)[1u][0u].packed.x = (*tint_module_vars.u)[0u][1u].packed.x;
 }

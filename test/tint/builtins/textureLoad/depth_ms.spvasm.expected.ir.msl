@@ -17,7 +17,7 @@ struct vertex_main_outputs {
 void textureLoad_6273b1(tint_module_vars_struct tint_module_vars) {
   float res = 0.0f;
   uint2 const v = (uint2(tint_module_vars.arg_0.get_width(), tint_module_vars.arg_0.get_height()) - uint2(1u));
-  res = float4(tint_module_vars.arg_0.read(min(uint2(int2(0)), v), 1), 0.0f, 0.0f, 0.0f)[0u];
+  res = float4(tint_module_vars.arg_0.read(min(uint2(int2(0)), v), 1), 0.0f, 0.0f, 0.0f).x;
 }
 
 void tint_symbol_2(float4 tint_symbol, tint_module_vars_struct tint_module_vars) {

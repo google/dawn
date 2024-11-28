@@ -13,10 +13,10 @@ void tint_symbol(tint_module_vars_struct tint_module_vars) {
   {
     while(true) {
       TINT_ISOLATE_UB(tint_volatile_false)
-      if ((tint_symbol_1[1u] >= (*tint_module_vars._storage)[1u])) {
+      if ((tint_symbol_1.y >= (*tint_module_vars._storage).y)) {
         break;
       }
-      if ((tint_symbol_1[1u] >= 0)) {
+      if ((tint_symbol_1.y >= 0)) {
         break;
       }
       {

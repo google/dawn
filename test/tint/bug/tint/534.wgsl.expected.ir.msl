@@ -48,7 +48,7 @@ void tint_symbol_inner(uint3 GlobalInvocationID, tint_module_vars_struct tint_mo
   uint2 dstTexCoord = GlobalInvocationID.xy;
   uint2 srcTexCoord = dstTexCoord;
   if (((*tint_module_vars.uniforms).dstTextureFlipY == 1u)) {
-    srcTexCoord[1u] = ((size[1u] - dstTexCoord[1u]) - 1u);
+    srcTexCoord.y = ((size.y - dstTexCoord.y) - 1u);
   }
   uint2 const v = srcTexCoord;
   uint const v_1 = min(uint(0), (tint_module_vars.src.get_num_mip_levels() - 1u));
@@ -82,11 +82,11 @@ void tint_symbol_inner(uint3 GlobalInvocationID, tint_module_vars_struct tint_mo
       continue;
     }
   }
-  uint outputIndex = ((GlobalInvocationID[1u] * uint(size[0u])) + GlobalInvocationID[0u]);
+  uint outputIndex = ((GlobalInvocationID.y * uint(size.x)) + GlobalInvocationID.x);
   if (success) {
-    (*tint_module_vars.output).result[min(outputIndex, ((((*tint_module_vars.tint_storage_buffer_sizes)[0u][1u] - 0u) / 4u) - 1u))] = 1u;
+    (*tint_module_vars.output).result[min(outputIndex, ((((*tint_module_vars.tint_storage_buffer_sizes)[0u].y - 0u) / 4u) - 1u))] = 1u;
   } else {
-    (*tint_module_vars.output).result[min(outputIndex, ((((*tint_module_vars.tint_storage_buffer_sizes)[0u][1u] - 0u) / 4u) - 1u))] = 0u;
+    (*tint_module_vars.output).result[min(outputIndex, ((((*tint_module_vars.tint_storage_buffer_sizes)[0u].y - 0u) / 4u) - 1u))] = 0u;
   }
 }
 

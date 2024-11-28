@@ -79,5 +79,5 @@ kernel void f(const constant tint_array<Outer_packed_vec3, 4>* a [[buffer(0)]]) 
   half3 const v_9 = half3(v_8[0u].packed);
   half2x3 const l_a_3_a_2_m = half2x3(v_9, half3(v_8[1u].packed));
   half3 const l_a_3_a_2_m_1 = half3((*p_a_3_a_2_m_1));
-  half const l_a_3_a_2_m_1_0 = (*p_a_3_a_2_m_1)[0u];
+  half const l_a_3_a_2_m_1_0 = (*p_a_3_a_2_m_1).x;
 }

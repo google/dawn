@@ -24,7 +24,7 @@ struct tint_module_vars_struct {
 };
 
 void tint_symbol_inner(ComputeInputs inputs, tint_module_vars_struct tint_module_vars) {
-  (*tint_module_vars.output)[min(inputs.subgroup_invocation_id, (((*tint_module_vars.tint_storage_buffer_sizes)[0u][0u] / 4u) - 1u))] = inputs.subgroup_size;
+  (*tint_module_vars.output)[min(inputs.subgroup_invocation_id, (((*tint_module_vars.tint_storage_buffer_sizes)[0u].x / 4u) - 1u))] = inputs.subgroup_size;
 }
 
 kernel void tint_symbol(uint ComputeInputs_subgroup_invocation_id [[thread_index_in_simdgroup]], uint ComputeInputs_subgroup_size [[threads_per_simdgroup]], device tint_array<uint, 1>* output [[buffer(0)]], const constant tint_array<uint4, 1>* tint_storage_buffer_sizes [[buffer(30)]]) {

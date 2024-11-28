@@ -30,5 +30,5 @@ kernel void f(const constant tint_array<S, 4>* u [[buffer(0)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.u=u};
   half4x2 const t = transpose((*tint_module_vars.u)[2u].m);
   half const l = length((*tint_module_vars.u)[0u].m[1u].ywxz);
-  half const a = abs((*tint_module_vars.u)[0u].m[1u].ywxz[0u]);
+  half const a = abs((*tint_module_vars.u)[0u].m[1u].ywxz.x);
 }

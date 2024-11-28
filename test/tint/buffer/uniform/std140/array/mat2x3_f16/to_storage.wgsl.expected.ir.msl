@@ -72,5 +72,5 @@ kernel void f(const constant tint_array<tint_array<tint_packed_vec3_f16_array_el
   half3 const v_14 = half3(v_13[0u].packed);
   tint_store_and_preserve_padding_1((&(*tint_module_vars.s)[1u]), half2x3(v_14, half3(v_13[1u].packed)));
   (*tint_module_vars.s)[1u][0u].packed = packed_half3(half3((*tint_module_vars.u)[0u][1u].packed).zxy);
-  (*tint_module_vars.s)[1u][0u].packed[0u] = (*tint_module_vars.u)[0u][1u].packed[0u];
+  (*tint_module_vars.s)[1u][0u].packed.x = (*tint_module_vars.u)[0u][1u].packed.x;
 }

@@ -24,15 +24,15 @@ struct tint_module_vars_struct {
 };
 
 half a(tint_array<half4x3, 4> a_1) {
-  return a_1[0u][0u][0u];
+  return a_1[0u][0u].x;
 }
 
 half b(half4x3 m) {
-  return m[0u][0u];
+  return m[0u].x;
 }
 
 half c(half3 v) {
-  return v[0u];
+  return v.x;
 }
 
 half d(half f_1) {
@@ -71,5 +71,5 @@ kernel void f(const constant tint_array<tint_array<tint_packed_vec3_f16_array_el
   half3 const v_24 = half3(v_21[2u].packed);
   half const v_25 = (v_20 + b(half4x3(v_22, v_23, v_24, half3(v_21[3u].packed))));
   half const v_26 = (v_25 + c(half3((*tint_module_vars.u)[1u][0u].packed).zxy));
-  (*tint_module_vars.s) = (v_26 + d(half3((*tint_module_vars.u)[1u][0u].packed).zxy[0u]));
+  (*tint_module_vars.s) = (v_26 + d(half3((*tint_module_vars.u)[1u][0u].packed).zxy.x));
 }

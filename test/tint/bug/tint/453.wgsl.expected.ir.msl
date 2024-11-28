@@ -13,7 +13,7 @@ kernel void tint_symbol(texture2d<uint, access::sample> Src [[texture(0)]], text
   uint2 const v_1 = (uint2(tint_module_vars.Src.get_width(v), tint_module_vars.Src.get_height(v)) - uint2(1u));
   uint4 const x_22 = tint_module_vars.Src.read(min(uint2(int2(0)), v_1), v);
   srcValue = x_22;
-  uint const x_24 = srcValue[0u];
+  uint const x_24 = srcValue.x;
   uint const x_25 = (x_24 + 1u);
   uint4 const x_27 = srcValue;
   tint_module_vars.Dst.write(x_27.xxxx, uint2(int2(0)));

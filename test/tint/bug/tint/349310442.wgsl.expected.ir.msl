@@ -83,9 +83,9 @@ float4 tint_TextureLoadExternal(texture2d<float, access::sample> plane_0, textur
   if ((params.numPlanes == 1u)) {
     float4 const v_6 = plane_0.read(v_3, 0u);
     v_4 = v_6.xyz;
-    v_5 = v_6[3u];
+    v_5 = v_6.w;
   } else {
-    float const v_7 = plane_0.read(v_3, 0u)[0u];
+    float const v_7 = plane_0.read(v_3, 0u).x;
     v_4 = (float4(v_7, plane_1.read(uint2((v_2 * params.plane1CoordFactor)), 0u).xy, 1.0f) * params.yuvToRgbConversionMatrix);
     v_5 = 1.0f;
   }

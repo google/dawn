@@ -11,9 +11,9 @@ struct tint_module_vars_struct {
 
 void f(tint_module_vars_struct tint_module_vars) {
   uint3 v = (*tint_module_vars.P).v;
-  uint x = (*tint_module_vars.P).v[0u];
-  uint y = (*tint_module_vars.P).v[1u];
-  uint z = (*tint_module_vars.P).v[2u];
+  uint x = (*tint_module_vars.P).v.x;
+  uint y = (*tint_module_vars.P).v.y;
+  uint z = (*tint_module_vars.P).v.z;
   uint2 xx = (*tint_module_vars.P).v.xx;
   uint2 xy = (*tint_module_vars.P).v.xy;
   uint2 xz = (*tint_module_vars.P).v.xz;

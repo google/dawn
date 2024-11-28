@@ -58,24 +58,24 @@ struct tint_module_vars_struct {
 };
 
 void tint_symbol_inner(uint3 GlobalInvocationID, tint_module_vars_struct tint_module_vars) {
-  uint index = GlobalInvocationID[0u];
+  uint index = GlobalInvocationID.x;
   if ((index >= (*tint_module_vars.config).numLights)) {
     return;
   }
-  device float4* const v = (&(*tint_module_vars.lightsBuffer).lights[min(index, ((((*tint_module_vars.tint_storage_buffer_sizes)[0u][0u] - 0u) / 32u) - 1u))].position);
-  float const v_1 = ((*tint_module_vars.lightsBuffer).lights[min(index, ((((*tint_module_vars.tint_storage_buffer_sizes)[0u][0u] - 0u) / 32u) - 1u))].position[1u] - 0.10000000149011611938f);
+  device float4* const v = (&(*tint_module_vars.lightsBuffer).lights[min(index, ((((*tint_module_vars.tint_storage_buffer_sizes)[0u].x - 0u) / 32u) - 1u))].position);
+  float const v_1 = ((*tint_module_vars.lightsBuffer).lights[min(index, ((((*tint_module_vars.tint_storage_buffer_sizes)[0u].x - 0u) / 32u) - 1u))].position.y - 0.10000000149011611938f);
   float const v_2 = float(index);
-  (*v)[1u] = (v_1 + (0.00100000004749745131f * (v_2 - (64.0f * floor((float(index) / 64.0f))))));
-  if (((*tint_module_vars.lightsBuffer).lights[min(index, ((((*tint_module_vars.tint_storage_buffer_sizes)[0u][0u] - 0u) / 32u) - 1u))].position[1u] < (*tint_module_vars.uniforms).min[1u])) {
-    (*tint_module_vars.lightsBuffer).lights[min(index, ((((*tint_module_vars.tint_storage_buffer_sizes)[0u][0u] - 0u) / 32u) - 1u))].position[1u] = (*tint_module_vars.uniforms).max[1u];
+  (*v).y = (v_1 + (0.00100000004749745131f * (v_2 - (64.0f * floor((float(index) / 64.0f))))));
+  if (((*tint_module_vars.lightsBuffer).lights[min(index, ((((*tint_module_vars.tint_storage_buffer_sizes)[0u].x - 0u) / 32u) - 1u))].position.y < (*tint_module_vars.uniforms).min.y)) {
+    (*tint_module_vars.lightsBuffer).lights[min(index, ((((*tint_module_vars.tint_storage_buffer_sizes)[0u].x - 0u) / 32u) - 1u))].position.y = (*tint_module_vars.uniforms).max.y;
   }
   float4x4 M = (*tint_module_vars.uniforms).projectionMatrix;
-  float viewNear = (-(M[3u][2u]) / (-1.0f + M[2u][2u]));
-  float viewFar = (-(M[3u][2u]) / (1.0f + M[2u][2u]));
-  float4 lightPos = (*tint_module_vars.lightsBuffer).lights[min(index, ((((*tint_module_vars.tint_storage_buffer_sizes)[0u][0u] - 0u) / 32u) - 1u))].position;
+  float viewNear = (-(M[3u].z) / (-1.0f + M[2u].z));
+  float viewFar = (-(M[3u].z) / (1.0f + M[2u].z));
+  float4 lightPos = (*tint_module_vars.lightsBuffer).lights[min(index, ((((*tint_module_vars.tint_storage_buffer_sizes)[0u].x - 0u) / 32u) - 1u))].position;
   lightPos = ((*tint_module_vars.uniforms).viewMatrix * lightPos);
-  lightPos = (lightPos / lightPos[3u]);
-  float lightRadius = (*tint_module_vars.lightsBuffer).lights[min(index, ((((*tint_module_vars.tint_storage_buffer_sizes)[0u][0u] - 0u) / 32u) - 1u))].radius;
+  lightPos = (lightPos / lightPos.w);
+  float lightRadius = (*tint_module_vars.lightsBuffer).lights[min(index, ((((*tint_module_vars.tint_storage_buffer_sizes)[0u].x - 0u) / 32u) - 1u))].radius;
   float4 const v_3 = lightPos;
   float4 boxMin = (v_3 - float4(float3(lightRadius), 0.0f));
   float4 const v_4 = lightPos;
@@ -106,12 +106,12 @@ void tint_symbol_inner(uint3 GlobalInvocationID, tint_module_vars_struct tint_mo
           int2 const v_6 = tilePixel0Idx;
           float2 const v_7 = (2.0f * float2(as_type<int2>((as_type<uint2>(v_6) + as_type<uint2>(int2(TILE_SIZE))))));
           float2 ceilCoord = ((v_7 / (*tint_module_vars.uniforms).fullScreenSize.xy) - float2(1.0f));
-          float2 viewFloorCoord = float2((((-(viewNear) * floorCoord[0u]) - (M[2u][0u] * viewNear)) / M[0u][0u]), (((-(viewNear) * floorCoord[1u]) - (M[2u][1u] * viewNear)) / M[1u][1u]));
-          float2 viewCeilCoord = float2((((-(viewNear) * ceilCoord[0u]) - (M[2u][0u] * viewNear)) / M[0u][0u]), (((-(viewNear) * ceilCoord[1u]) - (M[2u][1u] * viewNear)) / M[1u][1u]));
-          frustumPlanes[0u] = float4(1.0f, 0.0f, (-(viewFloorCoord[0u]) / viewNear), 0.0f);
-          frustumPlanes[1u] = float4(-1.0f, 0.0f, (viewCeilCoord[0u] / viewNear), 0.0f);
-          frustumPlanes[2u] = float4(0.0f, 1.0f, (-(viewFloorCoord[1u]) / viewNear), 0.0f);
-          frustumPlanes[3u] = float4(0.0f, -1.0f, (viewCeilCoord[1u] / viewNear), 0.0f);
+          float2 viewFloorCoord = float2((((-(viewNear) * floorCoord.x) - (M[2u].x * viewNear)) / M[0u].x), (((-(viewNear) * floorCoord.y) - (M[2u].y * viewNear)) / M[1u].y));
+          float2 viewCeilCoord = float2((((-(viewNear) * ceilCoord.x) - (M[2u].x * viewNear)) / M[0u].x), (((-(viewNear) * ceilCoord.y) - (M[2u].y * viewNear)) / M[1u].y));
+          frustumPlanes[0u] = float4(1.0f, 0.0f, (-(viewFloorCoord.x) / viewNear), 0.0f);
+          frustumPlanes[1u] = float4(-1.0f, 0.0f, (viewCeilCoord.x / viewNear), 0.0f);
+          frustumPlanes[2u] = float4(0.0f, 1.0f, (-(viewFloorCoord.y) / viewNear), 0.0f);
+          frustumPlanes[3u] = float4(0.0f, -1.0f, (viewCeilCoord.y / viewNear), 0.0f);
           float dp = 0.0f;
           {
             uint i = 0u;
@@ -121,22 +121,22 @@ void tint_symbol_inner(uint3 GlobalInvocationID, tint_module_vars_struct tint_mo
                 break;
               }
               float4 p = 0.0f;
-              if ((frustumPlanes[min(i, 5u)][0u] > 0.0f)) {
-                p[0u] = boxMax[0u];
+              if ((frustumPlanes[min(i, 5u)].x > 0.0f)) {
+                p.x = boxMax.x;
               } else {
-                p[0u] = boxMin[0u];
+                p.x = boxMin.x;
               }
-              if ((frustumPlanes[min(i, 5u)][1u] > 0.0f)) {
-                p[1u] = boxMax[1u];
+              if ((frustumPlanes[min(i, 5u)].y > 0.0f)) {
+                p.y = boxMax.y;
               } else {
-                p[1u] = boxMin[1u];
+                p.y = boxMin.y;
               }
-              if ((frustumPlanes[min(i, 5u)][2u] > 0.0f)) {
-                p[2u] = boxMax[2u];
+              if ((frustumPlanes[min(i, 5u)].z > 0.0f)) {
+                p.z = boxMax.z;
               } else {
-                p[2u] = boxMin[2u];
+                p.z = boxMin.z;
               }
-              p[3u] = 1.0f;
+              p.w = 1.0f;
               dp = (dp + min(0.0f, dot(p, frustumPlanes[min(i, 5u)])));
               {
                 i = (i + 1u);
@@ -165,7 +165,7 @@ void tint_symbol_inner(uint3 GlobalInvocationID, tint_module_vars_struct tint_mo
               }
               continue;
             }
-            (*tint_module_vars.tileLightId).data[min(tileId, 3u)].lightId[min(offset, 63u)] = GlobalInvocationID[0u];
+            (*tint_module_vars.tileLightId).data[min(tileId, 3u)].lightId[min(offset, 63u)] = GlobalInvocationID.x;
           }
           {
             x = as_type<int>((as_type<uint>(x) + as_type<uint>(1)));

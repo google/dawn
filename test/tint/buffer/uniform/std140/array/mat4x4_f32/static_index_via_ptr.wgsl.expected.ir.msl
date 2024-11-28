@@ -26,5 +26,5 @@ kernel void f(const constant tint_array<float4x4, 4>* a [[buffer(0)]], device fl
   tint_array<float4x4, 4> const l_a = (*p_a);
   float4x4 const l_a_i = (*p_a_2);
   float4 const l_a_i_i = (*p_a_2_1);
-  (*tint_module_vars.s) = ((((*p_a_2_1)[0u] + l_a[0u][0u][0u]) + l_a_i[0u][0u]) + l_a_i_i[0u]);
+  (*tint_module_vars.s) = ((((*p_a_2_1).x + l_a[0u][0u].x) + l_a_i[0u].x) + l_a_i_i.x);
 }

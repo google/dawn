@@ -10,7 +10,7 @@ struct ComputeInputs1 {
 };
 
 void tint_symbol_inner(ComputeInputs0 inputs0, uint local_invocation_index, uint3 global_invocation_id, ComputeInputs1 inputs1) {
-  uint const foo = (((inputs0.local_invocation_id[0u] + local_invocation_index) + global_invocation_id[0u]) + inputs1.workgroup_id[0u]);
+  uint const foo = (((inputs0.local_invocation_id.x + local_invocation_index) + global_invocation_id.x) + inputs1.workgroup_id.x);
 }
 
 kernel void tint_symbol(uint3 ComputeInputs0_local_invocation_id [[thread_position_in_threadgroup]], uint local_invocation_index [[thread_index_in_threadgroup]], uint3 global_invocation_id [[thread_position_in_grid]], uint3 ComputeInputs1_workgroup_id [[threadgroup_position_in_grid]]) {

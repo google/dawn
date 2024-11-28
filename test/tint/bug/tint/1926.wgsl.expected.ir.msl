@@ -19,7 +19,7 @@ void tint_symbol_inner(uint3 global_id, uint3 local_id, uint tint_local_index, t
   uint const v = (*tint_module_vars.sh_atomic_failed);
   threadgroup_barrier(mem_flags::mem_threadgroup);
   uint const failed = v;
-  if ((local_id[0u] == 0u)) {
+  if ((local_id.x == 0u)) {
     (*tint_module_vars.output) = failed;
   }
 }

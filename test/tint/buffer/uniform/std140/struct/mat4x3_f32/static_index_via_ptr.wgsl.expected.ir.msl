@@ -82,5 +82,5 @@ kernel void f(const constant tint_array<Outer_packed_vec3, 4>* a [[buffer(0)]]) 
   float3 const v_13 = float3(v_10[2u].packed);
   float4x3 const l_a_3_a_2_m = float4x3(v_11, v_12, v_13, float3(v_10[3u].packed));
   float3 const l_a_3_a_2_m_1 = float3((*p_a_3_a_2_m_1));
-  float const l_a_3_a_2_m_1_0 = (*p_a_3_a_2_m_1)[0u];
+  float const l_a_3_a_2_m_1_0 = (*p_a_3_a_2_m_1).x;
 }

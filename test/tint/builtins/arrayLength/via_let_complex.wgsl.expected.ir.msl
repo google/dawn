@@ -27,5 +27,5 @@ kernel void tint_symbol(const device S* G [[buffer(0)]], const constant tint_arr
   const device S* const p = tint_module_vars.G;
   const device S* const p2 = p;
   const device tint_array<int, 1>* const p3 = (&(*p).a);
-  uint const l1 = (((*tint_module_vars.tint_storage_buffer_sizes)[0u][0u] - 0u) / 4u);
+  uint const l1 = (((*tint_module_vars.tint_storage_buffer_sizes)[0u].x - 0u) / 4u);
 }

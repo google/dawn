@@ -40,6 +40,6 @@ kernel void f(const constant tint_array<tint_packed_vec3_f16_array_element, 4>* 
   a(half4x3(v_2, v_3, v_4, half3(v_1[3u].packed)));
   b(half3((*tint_module_vars.u)[1u].packed));
   b(half3((*tint_module_vars.u)[1u].packed).zxy);
-  c((*tint_module_vars.u)[1u].packed[0u]);
-  c(half3((*tint_module_vars.u)[1u].packed).zxy[0u]);
+  c((*tint_module_vars.u)[1u].packed.x);
+  c(half3((*tint_module_vars.u)[1u].packed).zxy.x);
 }

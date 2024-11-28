@@ -67,7 +67,7 @@ float4 getColor(FragmentInput tint_symbol, tint_module_vars_struct tint_module_v
   } else {
     if (((*tint_module_vars.uniforms).color_source == 1u)) {
       color = tint_symbol.normal;
-      color[3u] = 1.0f;
+      color.w = 1.0f;
     } else {
       if (((*tint_module_vars.uniforms).color_source == 2u)) {
         color = (*tint_module_vars.uniforms).color;

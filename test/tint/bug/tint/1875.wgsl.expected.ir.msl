@@ -24,7 +24,7 @@ struct tint_module_vars_struct {
 };
 
 void push_output(uint value, tint_module_vars_struct tint_module_vars) {
-  (*tint_module_vars.outputs).data[min((*tint_module_vars.count), ((((*tint_module_vars.tint_storage_buffer_sizes)[0u][0u] - 0u) / 4u) - 1u))] = value;
+  (*tint_module_vars.outputs).data[min((*tint_module_vars.count), ((((*tint_module_vars.tint_storage_buffer_sizes)[0u].x - 0u) / 4u) - 1u))] = value;
   (*tint_module_vars.count) = ((*tint_module_vars.count) + 1u);
 }
 

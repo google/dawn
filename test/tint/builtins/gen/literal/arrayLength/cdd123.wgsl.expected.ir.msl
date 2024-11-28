@@ -24,7 +24,7 @@ struct tint_module_vars_struct {
 };
 
 uint arrayLength_cdd123(tint_module_vars_struct tint_module_vars) {
-  uint res = (((*tint_module_vars.tint_storage_buffer_sizes)[0u][0u] - 0u) / 4u);
+  uint res = (((*tint_module_vars.tint_storage_buffer_sizes)[0u].x - 0u) / 4u);
   return res;
 }
 

@@ -94,9 +94,9 @@ float4 tint_TextureSampleExternal(texture2d<float, access::sample> plane_0, text
   if ((params.numPlanes == 1u)) {
     float4 const v_5 = plane_0.sample(tint_sampler, clamp(v_2, params.samplePlane0RectMin, params.samplePlane0RectMax), level(0.0f));
     v_3 = v_5.xyz;
-    v_4 = v_5[3u];
+    v_4 = v_5.w;
   } else {
-    float const v_6 = plane_0.sample(tint_sampler, clamp(v_2, params.samplePlane0RectMin, params.samplePlane0RectMax), level(0.0f))[0u];
+    float const v_6 = plane_0.sample(tint_sampler, clamp(v_2, params.samplePlane0RectMin, params.samplePlane0RectMax), level(0.0f)).x;
     v_3 = (float4(v_6, plane_1.sample(tint_sampler, clamp(v_2, params.samplePlane1RectMin, params.samplePlane1RectMax), level(0.0f)).xy, 1.0f) * params.yuvToRgbConversionMatrix);
     v_4 = 1.0f;
   }

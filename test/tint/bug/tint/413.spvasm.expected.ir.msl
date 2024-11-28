@@ -11,7 +11,7 @@ void main_1(tint_module_vars_struct tint_module_vars) {
   uint const v = min(uint(0), (tint_module_vars.Src.get_num_mip_levels() - 1u));
   uint2 const v_1 = (uint2(tint_module_vars.Src.get_width(v), tint_module_vars.Src.get_height(v)) - uint2(1u));
   srcValue = tint_module_vars.Src.read(min(uint2(int2(0)), v_1), v);
-  srcValue[0u] = (srcValue[0u] + 1u);
+  srcValue.x = (srcValue.x + 1u);
   uint4 const x_27 = srcValue;
   tint_module_vars.Dst.write(x_27, uint2(int2(0)));
 }

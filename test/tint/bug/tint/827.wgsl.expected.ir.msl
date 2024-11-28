@@ -24,9 +24,9 @@ struct tint_module_vars_struct {
 };
 
 void tint_symbol_inner(uint3 GlobalInvocationId, tint_module_vars_struct tint_module_vars) {
-  device float* const v = (&(*tint_module_vars.result).values[min(((GlobalInvocationId[1u] * 128u) + GlobalInvocationId[0u]), ((((*tint_module_vars.tint_storage_buffer_sizes)[0u][0u] - 0u) / 4u) - 1u))]);
-  int const v_1 = int(GlobalInvocationId[0u]);
-  int2 const v_2 = int2(v_1, int(GlobalInvocationId[1u]));
+  device float* const v = (&(*tint_module_vars.result).values[min(((GlobalInvocationId.y * 128u) + GlobalInvocationId.x), ((((*tint_module_vars.tint_storage_buffer_sizes)[0u].x - 0u) / 4u) - 1u))]);
+  int const v_1 = int(GlobalInvocationId.x);
+  int2 const v_2 = int2(v_1, int(GlobalInvocationId.y));
   uint const v_3 = min(uint(0), (tint_module_vars.tex.get_num_mip_levels() - 1u));
   uint2 const v_4 = (uint2(tint_module_vars.tex.get_width(v_3), tint_module_vars.tex.get_height(v_3)) - uint2(1u));
   (*v) = tint_module_vars.tex.read(min(uint2(v_2), v_4), v_3);

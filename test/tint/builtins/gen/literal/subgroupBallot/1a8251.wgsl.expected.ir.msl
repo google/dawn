@@ -19,15 +19,15 @@ uint4 subgroupBallot_1a8251(tint_module_vars_struct tint_module_vars) {
 fragment void fragment_main(uint tint_subgroup_size [[threads_per_simdgroup]], device uint4* prevent_dce [[buffer(0)]]) {
   thread uint2 tint_subgroup_size_mask = 0u;
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.prevent_dce=prevent_dce, .tint_subgroup_size_mask=(&tint_subgroup_size_mask)};
-  (*tint_module_vars.tint_subgroup_size_mask)[0u] = select((4294967295u >> (32u - tint_subgroup_size)), 4294967295u, (tint_subgroup_size > 32u));
-  (*tint_module_vars.tint_subgroup_size_mask)[1u] = select(0u, (4294967295u >> (64u - tint_subgroup_size)), (tint_subgroup_size > 32u));
+  (*tint_module_vars.tint_subgroup_size_mask).x = select((4294967295u >> (32u - tint_subgroup_size)), 4294967295u, (tint_subgroup_size > 32u));
+  (*tint_module_vars.tint_subgroup_size_mask).y = select(0u, (4294967295u >> (64u - tint_subgroup_size)), (tint_subgroup_size > 32u));
   (*tint_module_vars.prevent_dce) = subgroupBallot_1a8251(tint_module_vars);
 }
 
 kernel void compute_main(uint tint_subgroup_size [[threads_per_simdgroup]], device uint4* prevent_dce [[buffer(0)]]) {
   thread uint2 tint_subgroup_size_mask = 0u;
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.prevent_dce=prevent_dce, .tint_subgroup_size_mask=(&tint_subgroup_size_mask)};
-  (*tint_module_vars.tint_subgroup_size_mask)[0u] = select((4294967295u >> (32u - tint_subgroup_size)), 4294967295u, (tint_subgroup_size > 32u));
-  (*tint_module_vars.tint_subgroup_size_mask)[1u] = select(0u, (4294967295u >> (64u - tint_subgroup_size)), (tint_subgroup_size > 32u));
+  (*tint_module_vars.tint_subgroup_size_mask).x = select((4294967295u >> (32u - tint_subgroup_size)), 4294967295u, (tint_subgroup_size > 32u));
+  (*tint_module_vars.tint_subgroup_size_mask).y = select(0u, (4294967295u >> (64u - tint_subgroup_size)), (tint_subgroup_size > 32u));
   (*tint_module_vars.prevent_dce) = subgroupBallot_1a8251(tint_module_vars);
 }

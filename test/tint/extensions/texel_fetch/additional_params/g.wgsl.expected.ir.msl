@@ -9,7 +9,7 @@ void g(float a, float b) {
 }
 
 void f_inner(float4 fbf, float4 pos) {
-  g(fbf[3u], pos[0u]);
+  g(fbf.w, pos.x);
 }
 
 fragment void f(f_inputs inputs [[stage_in]], float4 pos [[position]]) {

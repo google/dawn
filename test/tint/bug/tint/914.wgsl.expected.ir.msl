@@ -49,7 +49,7 @@ float mm_readA(uint row, uint col, tint_module_vars_struct tint_module_vars) {
     v = false;
   }
   if (v) {
-    float const result = (*tint_module_vars.firstMatrix).numbers[min(((row * (*tint_module_vars.uniforms).dimInner) + col), ((((*tint_module_vars.tint_storage_buffer_sizes)[0u][0u] - 0u) / 4u) - 1u))];
+    float const result = (*tint_module_vars.firstMatrix).numbers[min(((row * (*tint_module_vars.uniforms).dimInner) + col), ((((*tint_module_vars.tint_storage_buffer_sizes)[0u].x - 0u) / 4u) - 1u))];
     return result;
   }
   return 0.0f;
@@ -63,7 +63,7 @@ float mm_readB(uint row, uint col, tint_module_vars_struct tint_module_vars) {
     v_1 = false;
   }
   if (v_1) {
-    float const result = (*tint_module_vars.secondMatrix).numbers[min(((row * (*tint_module_vars.uniforms).dimBOuter) + col), ((((*tint_module_vars.tint_storage_buffer_sizes)[0u][1u] - 0u) / 4u) - 1u))];
+    float const result = (*tint_module_vars.secondMatrix).numbers[min(((row * (*tint_module_vars.uniforms).dimBOuter) + col), ((((*tint_module_vars.tint_storage_buffer_sizes)[0u].y - 0u) / 4u) - 1u))];
     return result;
   }
   return 0.0f;
@@ -78,7 +78,7 @@ void mm_write(uint row, uint col, float value, tint_module_vars_struct tint_modu
   }
   if (v_2) {
     uint const index = (col + (row * (*tint_module_vars.uniforms).dimBOuter));
-    (*tint_module_vars.resultMatrix).numbers[min(index, ((((*tint_module_vars.tint_storage_buffer_sizes)[0u][2u] - 0u) / 4u) - 1u))] = value;
+    (*tint_module_vars.resultMatrix).numbers[min(index, ((((*tint_module_vars.tint_storage_buffer_sizes)[0u].z - 0u) / 4u) - 1u))] = value;
   }
 }
 
@@ -105,10 +105,10 @@ void tint_symbol_inner(uint3 local_id, uint3 global_id, uint tint_local_index, t
     }
   }
   threadgroup_barrier(mem_flags::mem_threadgroup);
-  uint const tileRow = (local_id[1u] * 4u);
-  uint const tileCol = (local_id[0u] * 4u);
-  uint const globalRow = (global_id[1u] * 4u);
-  uint const globalCol = (global_id[0u] * 4u);
+  uint const tileRow = (local_id.y * 4u);
+  uint const tileCol = (local_id.x * 4u);
+  uint const globalRow = (global_id.y * 4u);
+  uint const globalCol = (global_id.x * 4u);
   uint const numTiles = (tint_div_u32(((*tint_module_vars.uniforms).dimInner - 1u), 64u) + 1u);
   tint_array<float, 16> acc = {};
   float ACached = 0.0f;
@@ -128,9 +128,9 @@ void tint_symbol_inner(uint3 local_id, uint3 global_id, uint tint_local_index, t
     }
   }
   uint const ColPerThreadA = 4u;
-  uint const tileColA = (local_id[0u] * ColPerThreadA);
+  uint const tileColA = (local_id.x * ColPerThreadA);
   uint const RowPerThreadB = 4u;
-  uint const tileRowB = (local_id[1u] * RowPerThreadB);
+  uint const tileRowB = (local_id.y * RowPerThreadB);
   {
     uint t = 0u;
     while(true) {

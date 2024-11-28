@@ -12,5 +12,5 @@ kernel void f(const constant half2x2* u [[buffer(0)]]) {
   (*tint_module_vars.p) = (*tint_module_vars.u);
   (*tint_module_vars.p)[1u] = (*tint_module_vars.u)[0u];
   (*tint_module_vars.p)[1u] = (*tint_module_vars.u)[0u].yx;
-  (*tint_module_vars.p)[0u][1u] = (*tint_module_vars.u)[1u][0u];
+  (*tint_module_vars.p)[0u].y = (*tint_module_vars.u)[1u].x;
 }

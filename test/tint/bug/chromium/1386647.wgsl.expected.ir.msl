@@ -6,7 +6,7 @@ uint tint_mod_u32(uint lhs, uint rhs) {
 }
 
 void f_inner(uint3 v) {
-  uint const l = (v[0u] << (tint_mod_u32(v[1u], 1u) & 31u));
+  uint const l = (v.x << (tint_mod_u32(v.y, 1u) & 31u));
 }
 
 kernel void f(uint3 v [[thread_position_in_grid]]) {

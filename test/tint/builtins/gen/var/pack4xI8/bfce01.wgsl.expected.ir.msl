@@ -16,7 +16,7 @@ struct vertex_main_outputs {
 };
 
 uint tint_dot(uint4 lhs, uint4 rhs) {
-  return ((((lhs * rhs)[0u] + (lhs * rhs)[1u]) + (lhs * rhs)[2u]) + (lhs * rhs)[3u]);
+  return ((((lhs * rhs).x + (lhs * rhs).y) + (lhs * rhs).z) + (lhs * rhs).w);
 }
 
 uint pack4xI8_bfce01() {

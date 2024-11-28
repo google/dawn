@@ -16,7 +16,7 @@ struct vertex_main_outputs {
 };
 
 uint tint_dot(uint2 lhs, uint2 rhs) {
-  return ((lhs * rhs)[0u] + (lhs * rhs)[1u]);
+  return ((lhs * rhs).x + (lhs * rhs).y);
 }
 
 uint dot_97c7ee() {

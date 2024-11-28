@@ -93,7 +93,7 @@ void f_inner(uint tint_local_index, tint_module_vars_struct tint_module_vars) {
   (*tint_module_vars.w)[1u][1u].packed = packed_float3(v_20[1u]);
   (*tint_module_vars.w)[1u][2u].packed = packed_float3(v_20[2u]);
   (*tint_module_vars.w)[1u][0u].packed = packed_float3(float3((*tint_module_vars.u)[0u][1u].packed).zxy);
-  (*tint_module_vars.w)[1u][0u].packed[0u] = (*tint_module_vars.u)[0u][1u].packed[0u];
+  (*tint_module_vars.w)[1u][0u].packed.x = (*tint_module_vars.u)[0u][1u].packed.x;
 }
 
 kernel void f(uint tint_local_index [[thread_index_in_threadgroup]], const constant tint_array<tint_array<tint_packed_vec3_f32_array_element, 3>, 4>* u [[buffer(0)]], threadgroup tint_symbol_1* v_21 [[threadgroup(0)]]) {

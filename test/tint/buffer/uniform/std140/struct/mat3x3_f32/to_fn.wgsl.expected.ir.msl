@@ -76,5 +76,5 @@ kernel void f(const constant tint_array<S_packed_vec3, 4>* u [[buffer(0)]]) {
   float3 const v_11 = float3(v_9[1u].packed);
   c(float3x3(v_10, v_11, float3(v_9[2u].packed)));
   d(float3((*tint_module_vars.u)[0u].m[1u].packed).zxy);
-  e(float3((*tint_module_vars.u)[0u].m[1u].packed).zxy[0u]);
+  e(float3((*tint_module_vars.u)[0u].m[1u].packed).zxy.x);
 }

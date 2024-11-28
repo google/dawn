@@ -29,7 +29,7 @@ struct tint_module_vars_struct {
 };
 
 void tint_symbol_inner(uint3 GlobalInvocationID, tint_module_vars_struct tint_module_vars) {
-  uint flatIndex = (((4u * GlobalInvocationID[2u]) + (2u * GlobalInvocationID[1u])) + GlobalInvocationID[0u]);
+  uint flatIndex = (((4u * GlobalInvocationID.z) + (2u * GlobalInvocationID.y)) + GlobalInvocationID.x);
   flatIndex = (flatIndex * 1u);
   int2 const v = int2(GlobalInvocationID.xy);
   uint const v_1 = min(uint(0), (tint_module_vars.myTexture.get_array_size() - 1u));
@@ -43,7 +43,7 @@ void tint_symbol_inner(uint3 GlobalInvocationID, tint_module_vars_struct tint_mo
       } else {
         break;
       }
-      (*tint_module_vars.result).values[min((flatIndex + i), ((((*tint_module_vars.tint_storage_buffer_sizes)[0u][0u] - 0u) / 4u) - 1u))] = texel[0u];
+      (*tint_module_vars.result).values[min((flatIndex + i), ((((*tint_module_vars.tint_storage_buffer_sizes)[0u].x - 0u) / 4u) - 1u))] = texel.x;
       {
         i = (i + 1u);
       }

@@ -47,5 +47,5 @@ kernel void f(const constant tint_array<S, 4>* u [[buffer(0)]]) {
   b((*tint_module_vars.u)[2u]);
   c((*tint_module_vars.u)[2u].m);
   d((*tint_module_vars.u)[0u].m[1u].ywxz);
-  e((*tint_module_vars.u)[0u].m[1u].ywxz[0u]);
+  e((*tint_module_vars.u)[0u].m[1u].ywxz.x);
 }

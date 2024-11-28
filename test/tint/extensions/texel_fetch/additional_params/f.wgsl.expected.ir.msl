@@ -13,7 +13,7 @@ void g(float a, float b) {
 }
 
 void f_inner(In in, float4 fbf) {
-  g(in.pos[0u], fbf[1u]);
+  g(in.pos.x, fbf.y);
 }
 
 fragment void f(float4 In_pos [[position]], f_inputs inputs [[stage_in]]) {

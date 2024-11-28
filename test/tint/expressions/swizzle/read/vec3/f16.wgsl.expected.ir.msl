@@ -11,9 +11,9 @@ struct tint_module_vars_struct {
 
 void f(tint_module_vars_struct tint_module_vars) {
   half3 v = (*tint_module_vars.P).v;
-  half x = (*tint_module_vars.P).v[0u];
-  half y = (*tint_module_vars.P).v[1u];
-  half z = (*tint_module_vars.P).v[2u];
+  half x = (*tint_module_vars.P).v.x;
+  half y = (*tint_module_vars.P).v.y;
+  half z = (*tint_module_vars.P).v.z;
   half2 xx = (*tint_module_vars.P).v.xx;
   half2 xy = (*tint_module_vars.P).v.xy;
   half2 xz = (*tint_module_vars.P).v.xz;

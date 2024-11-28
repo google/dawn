@@ -6,6 +6,6 @@ struct tint_module_vars_struct {
 };
 
 void tint_symbol(tint_module_vars_struct tint_module_vars) {
-  (*tint_module_vars.a)[1u] = ((*tint_module_vars.a)[1u] + 1u);
-  (*tint_module_vars.a)[2u] = ((*tint_module_vars.a)[2u] + 1u);
+  (*tint_module_vars.a).y = ((*tint_module_vars.a).y + 1u);
+  (*tint_module_vars.a).z = ((*tint_module_vars.a).z + 1u);
 }

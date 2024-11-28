@@ -36,7 +36,7 @@ void tint_symbol(tint_module_vars_struct tint_module_vars) {
   {
     while(true) {
       TINT_ISOLATE_UB(tint_volatile_false)
-      if ((tint_symbol_1[1u] >= (*tint_module_vars._storage).fsUniformData[min((*tint_module_vars.idx), ((((*tint_module_vars.tint_storage_buffer_sizes)[0u][0u] - 0u) / 128u) - 1u))].size[1u])) {
+      if ((tint_symbol_1.y >= (*tint_module_vars._storage).fsUniformData[min((*tint_module_vars.idx), ((((*tint_module_vars.tint_storage_buffer_sizes)[0u].x - 0u) / 128u) - 1u))].size.y)) {
         break;
       }
       {

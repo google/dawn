@@ -39,5 +39,5 @@ kernel void f(const constant tint_array<S_packed_vec3, 4>* u [[buffer(0)]]) {
   float3 const v_3 = float3(v[2u].packed);
   float3x4 const t = transpose(float4x3(v_1, v_2, v_3, float3(v[3u].packed)));
   float const l = length(float3((*tint_module_vars.u)[0u].m[1u].packed).zxy);
-  float const a = abs(float3((*tint_module_vars.u)[0u].m[1u].packed).zxy[0u]);
+  float const a = abs(float3((*tint_module_vars.u)[0u].m[1u].packed).zxy.x);
 }

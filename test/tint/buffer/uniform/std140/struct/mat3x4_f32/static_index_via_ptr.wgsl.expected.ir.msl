@@ -40,5 +40,5 @@ kernel void f(const constant tint_array<Outer, 4>* a [[buffer(0)]]) {
   Inner const l_a_3_a_2 = (*p_a_3_a_2);
   float3x4 const l_a_3_a_2_m = (*p_a_3_a_2_m);
   float4 const l_a_3_a_2_m_1 = (*p_a_3_a_2_m_1);
-  float const l_a_3_a_2_m_1_0 = (*p_a_3_a_2_m_1)[0u];
+  float const l_a_3_a_2_m_1_0 = (*p_a_3_a_2_m_1).x;
 }

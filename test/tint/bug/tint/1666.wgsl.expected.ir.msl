@@ -36,7 +36,7 @@ void fixed_size_array() {
 
 void runtime_size_array(tint_module_vars_struct tint_module_vars) {
   int const idx = -1;
-  uint const v = (((*tint_module_vars.tint_storage_buffer_sizes)[0u][0u] / 4u) - 1u);
+  uint const v = (((*tint_module_vars.tint_storage_buffer_sizes)[0u].x / 4u) - 1u);
   float const x = (*tint_module_vars.rarr)[min(uint(idx), v)];
 }
 

@@ -28,7 +28,7 @@ int foo_inner(float in, float2 coord, tint_module_vars_struct tint_module_vars) 
   if ((in == 0.0f)) {
     (*tint_module_vars.continue_execution) = false;
   }
-  int result = tint_f32_to_i32(tint_module_vars.t.sample(tint_module_vars.s, coord)[0u]);
+  int result = tint_f32_to_i32(tint_module_vars.t.sample(tint_module_vars.s, coord).x);
   {
     int i = 0;
     while(true) {

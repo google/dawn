@@ -87,7 +87,7 @@ void tint_symbol_inner(uint3 WorkGroupID, uint3 LocalInvocationID, uint tint_loc
           if (((*tint_module_vars.flip).value != 0u)) {
             loadIndex = loadIndex.yx;
           }
-          threadgroup packed_float3* const v_4 = (&(*tint_module_vars.tile)[min(r, 3u)][min(((4u * LocalInvocationID[0u]) + c), 255u)].packed);
+          threadgroup packed_float3* const v_4 = (&(*tint_module_vars.tile)[min(r, 3u)][min(((4u * LocalInvocationID.x) + c), 255u)].packed);
           float2 const v_5 = (float2(loadIndex) + float2(0.25f));
           float2 const v_6 = (v_5 / float2(dims));
           (*v_4) = packed_float3(tint_module_vars.inputTex.sample(tint_module_vars.samp, v_6, level(0.0f)).xyz);
@@ -122,7 +122,7 @@ void tint_symbol_inner(uint3 WorkGroupID, uint3 LocalInvocationID, uint tint_loc
           if (((*tint_module_vars.flip).value != 0u)) {
             writeIndex = writeIndex.yx;
           }
-          uint const center = ((4u * LocalInvocationID[0u]) + c);
+          uint const center = ((4u * LocalInvocationID.x) + c);
           bool v_7 = false;
           if ((center >= filterOffset)) {
             v_7 = (center < (256u - filterOffset));

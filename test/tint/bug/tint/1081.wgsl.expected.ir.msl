@@ -24,7 +24,7 @@ int f(int x, tint_module_vars_struct tint_module_vars) {
 }
 
 int tint_symbol_inner(int3 x, tint_module_vars_struct tint_module_vars) {
-  int y = x[0u];
+  int y = x.x;
   {
     while(true) {
       TINT_ISOLATE_UB(tint_volatile_false)

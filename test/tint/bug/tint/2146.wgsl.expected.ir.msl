@@ -10,11 +10,11 @@ struct tint_module_vars_struct {
 };
 
 uint globalId2Index(tint_module_vars_struct tint_module_vars) {
-  return (*tint_module_vars.globalId)[0u];
+  return (*tint_module_vars.globalId).x;
 }
 
 kernel void tint_symbol() {
   half4 a = half4(0.0h);
   half const b = 1.0h;
-  a[0u] = (a[0u] + b);
+  a.x = (a.x + b);
 }

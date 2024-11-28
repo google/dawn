@@ -39,5 +39,5 @@ kernel void f(const constant tint_array<S_packed_vec3, 4>* u [[buffer(0)]]) {
   half3 const v_3 = half3(v[2u].packed);
   half3x4 const t = transpose(half4x3(v_1, v_2, v_3, half3(v[3u].packed)));
   half const l = length(half3((*tint_module_vars.u)[0u].m[1u].packed).zxy);
-  half const a = abs(half3((*tint_module_vars.u)[0u].m[1u].packed).zxy[0u]);
+  half const a = abs(half3((*tint_module_vars.u)[0u].m[1u].packed).zxy.x);
 }

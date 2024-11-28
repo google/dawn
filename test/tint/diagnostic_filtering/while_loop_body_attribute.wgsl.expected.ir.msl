@@ -30,7 +30,7 @@ void tint_symbol_inner(float x, tint_module_vars_struct tint_module_vars) {
   {
     while(true) {
       TINT_ISOLATE_UB(tint_volatile_false)
-      if ((x > v[0u])) {
+      if ((x > v.x)) {
       } else {
         break;
       }

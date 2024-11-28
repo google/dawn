@@ -24,15 +24,15 @@ struct tint_module_vars_struct {
 };
 
 float a(tint_array<float3x3, 4> a_1) {
-  return a_1[0u][0u][0u];
+  return a_1[0u][0u].x;
 }
 
 float b(float3x3 m) {
-  return m[0u][0u];
+  return m[0u].x;
 }
 
 float c(float3 v) {
-  return v[0u];
+  return v.x;
 }
 
 float d(float f_1) {
@@ -66,5 +66,5 @@ kernel void f(const constant tint_array<tint_array<tint_packed_vec3_f32_array_el
   float3 const v_19 = float3(v_17[1u].packed);
   float const v_20 = (v_16 + b(float3x3(v_18, v_19, float3(v_17[2u].packed))));
   float const v_21 = (v_20 + c(float3((*tint_module_vars.u)[1u][0u].packed).zxy));
-  (*tint_module_vars.s) = (v_21 + d(float3((*tint_module_vars.u)[1u][0u].packed).zxy[0u]));
+  (*tint_module_vars.s) = (v_21 + d(float3((*tint_module_vars.u)[1u][0u].packed).zxy.x));
 }

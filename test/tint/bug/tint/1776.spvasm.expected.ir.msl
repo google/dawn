@@ -29,7 +29,7 @@ struct tint_module_vars_struct {
 };
 
 void main_1(tint_module_vars_struct tint_module_vars) {
-  uint const v = ((((*tint_module_vars.tint_storage_buffer_sizes)[0u][0u] - 0u) / 32u) - 1u);
+  uint const v = ((((*tint_module_vars.tint_storage_buffer_sizes)[0u].x - 0u) / 32u) - 1u);
   S const x_18 = (*tint_module_vars.sb).inner[min(uint(1), v)];
 }
 

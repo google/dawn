@@ -26,7 +26,7 @@ void tint_symbol_inner(float x) {
     while(true) {
       TINT_ISOLATE_UB(tint_volatile_false)
       bool v_1 = false;
-      if ((x > v[0u])) {
+      if ((x > v.x)) {
         v_1 = (dfdx(1.0f) > 0.0f);
       } else {
         v_1 = false;

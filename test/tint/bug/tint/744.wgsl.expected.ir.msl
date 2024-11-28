@@ -32,9 +32,9 @@ struct tint_module_vars_struct {
 };
 
 void tint_symbol_inner(uint3 global_id, tint_module_vars_struct tint_module_vars) {
-  uint2 const resultCell = uint2(global_id[1u], global_id[0u]);
-  uint const dimInner = (*tint_module_vars.uniforms).aShape[1u];
-  uint const dimOutter = (*tint_module_vars.uniforms).outShape[1u];
+  uint2 const resultCell = uint2(global_id.y, global_id.x);
+  uint const dimInner = (*tint_module_vars.uniforms).aShape.y;
+  uint const dimOutter = (*tint_module_vars.uniforms).outShape.y;
   uint result = 0u;
   {
     uint i = 0u;
@@ -43,17 +43,17 @@ void tint_symbol_inner(uint3 global_id, tint_module_vars_struct tint_module_vars
       } else {
         break;
       }
-      uint const a = (i + (resultCell[0u] * dimInner));
-      uint const b = (resultCell[1u] + (i * dimOutter));
-      result = (result + ((*tint_module_vars.firstMatrix).numbers[min(a, ((((*tint_module_vars.tint_storage_buffer_sizes)[0u][0u] - 0u) / 4u) - 1u))] * (*tint_module_vars.secondMatrix).numbers[min(b, ((((*tint_module_vars.tint_storage_buffer_sizes)[0u][1u] - 0u) / 4u) - 1u))]));
+      uint const a = (i + (resultCell.x * dimInner));
+      uint const b = (resultCell.y + (i * dimOutter));
+      result = (result + ((*tint_module_vars.firstMatrix).numbers[min(a, ((((*tint_module_vars.tint_storage_buffer_sizes)[0u].x - 0u) / 4u) - 1u))] * (*tint_module_vars.secondMatrix).numbers[min(b, ((((*tint_module_vars.tint_storage_buffer_sizes)[0u].y - 0u) / 4u) - 1u))]));
       {
         i = (i + 1u);
       }
       continue;
     }
   }
-  uint const index = (resultCell[1u] + (resultCell[0u] * dimOutter));
-  (*tint_module_vars.resultMatrix).numbers[min(index, ((((*tint_module_vars.tint_storage_buffer_sizes)[0u][2u] - 0u) / 4u) - 1u))] = result;
+  uint const index = (resultCell.y + (resultCell.x * dimOutter));
+  (*tint_module_vars.resultMatrix).numbers[min(index, ((((*tint_module_vars.tint_storage_buffer_sizes)[0u].z - 0u) / 4u) - 1u))] = result;
 }
 
 kernel void tint_symbol(uint3 global_id [[thread_position_in_grid]], const device Matrix* firstMatrix [[buffer(2)]], const device Matrix* secondMatrix [[buffer(3)]], device Matrix* resultMatrix [[buffer(1)]], const constant Uniforms* uniforms [[buffer(0)]], const constant tint_array<uint4, 1>* tint_storage_buffer_sizes [[buffer(30)]]) {

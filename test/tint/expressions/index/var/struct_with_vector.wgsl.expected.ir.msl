@@ -8,5 +8,5 @@ struct S {
 
 uint f() {
   S a = S{};
-  return a.n[2u];
+  return a.n.z;
 }
