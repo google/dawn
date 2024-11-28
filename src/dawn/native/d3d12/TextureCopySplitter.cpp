@@ -149,6 +149,19 @@ TextureCopySubresource::CopyInfo* TextureCopySubresource::AddCopy() {
     return &this->copies[this->count++];
 }
 
+void FillTextureCopySubresourceCopyInfo(TextureCopySubresource::CopyInfo* copyInfo,
+                                        BufferTextureCopyDirection direction,
+                                        Origin3D bufferOffset,
+                                        Origin3D textureOffset,
+                                        Extent3D copySize,
+                                        Extent3D bufferSize,
+                                        uint64_t alignedOffset,
+                                        uint32_t bytesPerRow) {
+    ComputeSourceRegionForCopyInfo(copyInfo, direction, bufferOffset, textureOffset, copySize);
+    FillFootprintAndOffsetOfBufferLocation(&copyInfo->bufferLocation, alignedOffset, bufferSize,
+                                           bytesPerRow);
+}
+
 TextureCopySubresource Compute2DTextureCopySubresource(BufferTextureCopyDirection direction,
                                                        Origin3D origin,
                                                        Extent3D copySize,
@@ -166,16 +179,15 @@ TextureCopySubresource Compute2DTextureCopySubresource(BufferTextureCopyDirectio
     // If the provided offset to the data was already 512-aligned, we can simply copy the data
     // without further translation.
     if (offset == alignedOffset) {
-        copy.count = 1;
+        TextureCopySubresource::CopyInfo* copyInfo = copy.AddCopy();
 
         Origin3D textureOffset = origin;
         Origin3D bufferOffset = {0, 0, 0};
 
-        ComputeSourceRegionForCopyInfo(&copy.copies[0], direction, bufferOffset, textureOffset,
-                                       copySize);
-        FillFootprintAndOffsetOfBufferLocation(&copy.copies[0].bufferLocation, alignedOffset,
-                                               copySize, bytesPerRow);
+        Extent3D bufferSize = copySize;
 
+        FillTextureCopySubresourceCopyInfo(copyInfo, direction, bufferOffset, textureOffset,
+                                           copySize, bufferSize, alignedOffset, bytesPerRow);
         return copy;
     }
 
@@ -234,17 +246,16 @@ TextureCopySubresource Compute2DTextureCopySubresource(BufferTextureCopyDirectio
         //  |~~~~~~~~~~~~~~~~~+++++++++++++++++|
         //  |----------------------------------|
 
-        copy.count = 1;
+        TextureCopySubresource::CopyInfo* copyInfo = copy.AddCopy();
 
         Origin3D textureOffset = origin;
         Origin3D bufferOffset = texelOffset;
-        ComputeSourceRegionForCopyInfo(&copy.copies[0], direction, bufferOffset, textureOffset,
-                                       copySize);
 
         Extent3D bufferSize = {copySize.width + texelOffset.x, copySize.height + texelOffset.y,
                                copySize.depthOrArrayLayers};
-        FillFootprintAndOffsetOfBufferLocation(&copy.copies[0].bufferLocation, alignedOffset,
-                                               bufferSize, bytesPerRow);
+
+        FillTextureCopySubresourceCopyInfo(copyInfo, direction, bufferOffset, textureOffset,
+                                           copySize, bufferSize, alignedOffset, bytesPerRow);
 
         return copy;
     }
@@ -283,8 +294,7 @@ TextureCopySubresource Compute2DTextureCopySubresource(BufferTextureCopyDirectio
     //  |+++++++++|
     //  |---------|
 
-    copy.count = 2;
-
+    // Copy 0
     Origin3D textureOffset0 = origin;
 
     DAWN_ASSERT(bytesPerRow > byteOffsetInRowPitch);
@@ -293,13 +303,14 @@ TextureCopySubresource Compute2DTextureCopySubresource(BufferTextureCopyDirectio
                           copySize.depthOrArrayLayers};
 
     Origin3D bufferOffset0 = texelOffset;
-    ComputeSourceRegionForCopyInfo(&copy.copies[0], direction, bufferOffset0, textureOffset0,
-                                   copySize0);
     Extent3D bufferSize0 = {texelsPerRow, copySize.height + texelOffset.y,
                             copySize.depthOrArrayLayers};
-    FillFootprintAndOffsetOfBufferLocation(&copy.copies[0].bufferLocation, alignedOffset,
-                                           bufferSize0, bytesPerRow);
 
+    TextureCopySubresource::CopyInfo* copyInfo0 = copy.AddCopy();
+    FillTextureCopySubresourceCopyInfo(copyInfo0, direction, bufferOffset0, textureOffset0,
+                                       copySize0, bufferSize0, alignedOffset, bytesPerRow);
+
+    // Copy 1
     uint64_t offsetForCopy1 = offset + copySize0.width / blockInfo.width * blockInfo.byteSize;
     uint64_t alignedOffsetForCopy1 = AlignDownForDataPlacement(offsetForCopy1);
     Origin3D texelOffsetForCopy1 = ComputeTexelOffsets(
@@ -315,12 +326,12 @@ TextureCopySubresource Compute2DTextureCopySubresource(BufferTextureCopyDirectio
                           copySize.depthOrArrayLayers};
 
     Origin3D bufferOffset1 = texelOffsetForCopy1;
-    ComputeSourceRegionForCopyInfo(&copy.copies[1], direction, bufferOffset1, textureOffset1,
-                                   copySize1);
     Extent3D bufferSize1 = {copySize1.width + texelOffsetForCopy1.x,
                             copySize.height + texelOffsetForCopy1.y, copySize.depthOrArrayLayers};
-    FillFootprintAndOffsetOfBufferLocation(&copy.copies[1].bufferLocation, alignedOffsetForCopy1,
-                                           bufferSize1, bytesPerRow);
+
+    TextureCopySubresource::CopyInfo* copyInfo1 = copy.AddCopy();
+    FillTextureCopySubresourceCopyInfo(copyInfo1, direction, bufferOffset1, textureOffset1,
+                                       copySize1, bufferSize1, alignedOffsetForCopy1, bytesPerRow);
 
     return copy;
 }
