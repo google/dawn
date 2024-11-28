@@ -834,6 +834,75 @@ TEST_F(ResolverBuiltinValidationTest, WorkgroupUniformLoad_AtomicInStruct) {
         R"(error: workgroupUniformLoad must not be called with an argument that contains an atomic type)");
 }
 
+TEST_F(ResolverBuiltinValidationTest, SubgroupShuffleLaneArgMustBeNonNeg) {
+    Enable(wgsl::Extension::kSubgroups);
+    Func("func", tint::Empty, ty.u32(),
+         Vector{
+             Return(Call("subgroupShuffle", 1_u, Expr(Source{{12, 34}}, -1_i))),
+         });
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(
+        r()->error(),
+        R"(12:34 error: the sourceLaneIndex argument of subgroupShuffle must be greater than or equal to zero)");
+}
+
+TEST_F(ResolverBuiltinValidationTest, SubgroupShuffleLaneArgMustLessThan128Signed) {
+    Enable(wgsl::Extension::kSubgroups);
+    Func("func", tint::Empty, ty.u32(),
+         Vector{
+             Return(Call("subgroupShuffle", 1_u, Expr(Source{{12, 34}}, 128_i))),
+         });
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(
+        r()->error(),
+        R"(12:34 error: the sourceLaneIndex argument of subgroupShuffle must be less than 128)");
+}
+
+TEST_F(ResolverBuiltinValidationTest, SubgroupShuffleLaneArgMustLessThan128) {
+    Enable(wgsl::Extension::kSubgroups);
+    Func("func", tint::Empty, ty.u32(),
+         Vector{
+             Return(Call("subgroupShuffle", 1_u, Expr(Source{{12, 34}}, 128_u))),
+         });
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(
+        r()->error(),
+        R"(12:34 error: the sourceLaneIndex argument of subgroupShuffle must be less than 128)");
+}
+
+TEST_F(ResolverBuiltinValidationTest, SubgroupShuffleUpDeltaArgMustLessThan128) {
+    Enable(wgsl::Extension::kSubgroups);
+    Func("func", tint::Empty, ty.u32(),
+         Vector{
+             Return(Call("subgroupShuffleUp", 1_u, Expr(Source{{12, 34}}, 128_u))),
+         });
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(),
+              R"(12:34 error: the delta argument of subgroupShuffleUp must be less than 128)");
+}
+
+TEST_F(ResolverBuiltinValidationTest, SubgroupShuffleDownDeltaArgMustLessThan128) {
+    Enable(wgsl::Extension::kSubgroups);
+    Func("func", tint::Empty, ty.u32(),
+         Vector{
+             Return(Call("subgroupShuffleDown", 1_u, Expr(Source{{12, 34}}, 128_u))),
+         });
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(),
+              R"(12:34 error: the delta argument of subgroupShuffleDown must be less than 128)");
+}
+
+TEST_F(ResolverBuiltinValidationTest, SubgroupShuffleXorMaskArgMustLessThan128) {
+    Enable(wgsl::Extension::kSubgroups);
+    Func("func", tint::Empty, ty.u32(),
+         Vector{
+             Return(Call("subgroupShuffleXor", 1_u, Expr(Source{{12, 34}}, 128_u))),
+         });
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(),
+              R"(12:34 error: the mask argument of subgroupShuffleXor must be less than 128)");
+}
+
 TEST_F(ResolverBuiltinValidationTest, SubgroupBallotWithoutExtension) {
     // fn func { return subgroupBallot(true); }
     Func("func", tint::Empty, ty.vec4<u32>(),

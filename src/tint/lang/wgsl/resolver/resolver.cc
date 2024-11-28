@@ -2491,6 +2491,14 @@ sem::Call* Resolver::BuiltinCall(const ast::CallExpression* expr,
                 return nullptr;
             }
             break;
+        case wgsl::BuiltinFn::kSubgroupShuffle:
+        case wgsl::BuiltinFn::kSubgroupShuffleUp:
+        case wgsl::BuiltinFn::kSubgroupShuffleDown:
+        case wgsl::BuiltinFn::kSubgroupShuffleXor:
+            if (!validator_.SubgroupShuffleFunction(fn, call)) {
+                return nullptr;
+            }
+            break;
 
         case wgsl::BuiltinFn::kQuadBroadcast:
             if (!validator_.QuadBroadcast(call)) {
