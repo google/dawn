@@ -1,5 +1,3 @@
-// flags: --transform substitute_override
-
 override O = 123;
 alias A = array<i32, O*2>;
 

@@ -1,5 +1,3 @@
-// flags: --transform substitute_override
-
 override O = 0; // Try switching to 'const'
 
 fn f() {

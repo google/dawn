@@ -381,7 +381,6 @@ violations that may be produced)",
         options.Add<StringOption>("transform", R"(Runs transforms, name list is comma separated
 Available transforms:
     first_index_offset
-    substitute_override
 )",
                                   ShortName{"t"});
     TINT_DEFER({
@@ -644,14 +643,9 @@ Options:
     return true;
 }
 
-[[maybe_unused]] tint::Result<tint::Program> ProcessASTTransforms(
-    Options& options,
-    tint::inspector::Inspector& inspector,
-    tint::Program& program) {
-    tint::ast::transform::Manager transform_manager;
-    tint::ast::transform::DataMap transform_inputs;
-
-    // Renaming must always come first
+[[maybe_unused]] void AddRenamer(Options& options,
+                                 tint::ast::transform::Manager& transform_manager,
+                                 tint::ast::transform::DataMap& transform_inputs) {
     switch (options.format) {
         case Format::kMsl: {
             if (!options.rename_all) {
@@ -691,49 +685,66 @@ Options:
         case Format::kUnknown:
             break;
     }
+}
 
-    // If overrides are provided, add the SubstituteOverride transform.
-    if (!options.overrides.IsEmpty()) {
-        options.transforms.Push("substitute_override");
+[[maybe_unused]] tint::Result<tint::SuccessType> AddSubstituteOverrides(
+    Options& options,
+    tint::inspector::Inspector& inspector,
+    tint::ast::transform::Manager& transform_manager,
+    tint::ast::transform::DataMap& transform_inputs) {
+    auto override_names = inspector.GetNamedOverrideIds();
+
+    std::unordered_map<tint::OverrideId, double> values;
+    values.reserve(options.overrides.Count());
+    for (auto& override : options.overrides) {
+        const auto& override_name = override.key.Value();
+        const auto& override_value = override.value;
+        if (override_name.empty()) {
+            return tint::Failure("empty override name");
+        }
+
+        auto num = tint::strconv::ParseNumber<decltype(tint::OverrideId::value)>(override_name);
+        if (num == tint::Success) {
+            tint::OverrideId id{num.Get()};
+            values.emplace(id, override_value);
+            continue;
+        }
+
+        auto it = override_names.find(override_name);
+        if (it == override_names.end()) {
+            return tint::Failure("unknown override '" + override_name + "'");
+        }
+        values.emplace(it->second, override_value);
+    }
+
+    tint::ast::transform::SubstituteOverride::Config cfg;
+    cfg.map = std::move(values);
+
+    transform_inputs.Add<tint::ast::transform::SubstituteOverride::Config>(cfg);
+    transform_manager.Add<tint::ast::transform::SubstituteOverride>();
+
+    return tint::Success;
+}
+
+[[maybe_unused]] tint::Result<tint::Program> ProcessASTTransforms(
+    Options& options,
+    tint::inspector::Inspector& inspector,
+    tint::Program& program) {
+    tint::ast::transform::Manager transform_manager;
+    tint::ast::transform::DataMap transform_inputs;
+
+    // Renaming must always come first
+    AddRenamer(options, transform_manager, transform_inputs);
+
+    auto res = AddSubstituteOverrides(options, inspector, transform_manager, transform_inputs);
+    if (res != tint::Success) {
+        return res.Failure();
     }
 
     for (const auto& name : options.transforms) {
         if (name == "first_index_offset") {
             transform_inputs.Add<tint::ast::transform::FirstIndexOffset::BindingPoint>(0, 0);
             transform_manager.Add<tint::ast::transform::FirstIndexOffset>();
-        } else if (name == "substitute_override") {
-            auto override_names = inspector.GetNamedOverrideIds();
-
-            std::unordered_map<tint::OverrideId, double> values;
-            values.reserve(options.overrides.Count());
-            for (auto& override : options.overrides) {
-                const auto& override_name = override.key.Value();
-                const auto& override_value = override.value;
-                if (override_name.empty()) {
-                    return tint::Failure("empty override name");
-                }
-
-                auto num =
-                    tint::strconv::ParseNumber<decltype(tint::OverrideId::value)>(override_name);
-                if (num == tint::Success) {
-                    tint::OverrideId id{num.Get()};
-                    values.emplace(id, override_value);
-                    continue;
-                }
-
-                auto it = override_names.find(override_name);
-                if (it == override_names.end()) {
-                    return tint::Failure("unknown override '" + override_name + "'");
-                }
-                values.emplace(it->second, override_value);
-            }
-
-            tint::ast::transform::SubstituteOverride::Config cfg;
-            cfg.map = std::move(values);
-
-            transform_inputs.Add<tint::ast::transform::SubstituteOverride::Config>(cfg);
-            transform_manager.Add<tint::ast::transform::SubstituteOverride>();
-
         } else {
             return tint::Failure("Unknown transform: " + name);
         }
