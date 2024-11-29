@@ -9,7 +9,11 @@ void compute_main_inner(uint local_invocation_index_2) {
   uint idx = 0u;
   idx = local_invocation_index_2;
   {
+    uint2 tint_loop_idx = (0u).xx;
     while(true) {
+      if (all((tint_loop_idx == (4294967295u).xx))) {
+        break;
+      }
       if (!((idx < 4u))) {
         break;
       }
@@ -17,6 +21,10 @@ void compute_main_inner(uint local_invocation_index_2) {
       uint v = 0u;
       InterlockedExchange(wg[min(x_26, 3u)], 0u, v);
       {
+        uint tint_low_inc = (tint_loop_idx.x + 1u);
+        tint_loop_idx.x = tint_low_inc;
+        uint tint_carry = uint((tint_low_inc == 0u));
+        tint_loop_idx.y = (tint_loop_idx.y + tint_carry);
         idx = (idx + 1u);
       }
       continue;

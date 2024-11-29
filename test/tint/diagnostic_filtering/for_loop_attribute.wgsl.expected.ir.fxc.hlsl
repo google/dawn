@@ -18,7 +18,11 @@ struct main_inputs {
 void main_inner(float x) {
   float4 v = (0.0f).xxxx;
   {
+    uint2 tint_loop_idx = (0u).xx;
     while(true) {
+      if (all((tint_loop_idx == (4294967295u).xx))) {
+        break;
+      }
       bool v_1 = false;
       if ((x > v.x)) {
         v_1 = (ddx(1.0f) > 0.0f);
@@ -30,6 +34,10 @@ void main_inner(float x) {
         break;
       }
       {
+        uint tint_low_inc = (tint_loop_idx.x + 1u);
+        tint_loop_idx.x = tint_low_inc;
+        uint tint_carry = uint((tint_low_inc == 0u));
+        tint_loop_idx.y = (tint_loop_idx.y + tint_carry);
       }
       continue;
     }

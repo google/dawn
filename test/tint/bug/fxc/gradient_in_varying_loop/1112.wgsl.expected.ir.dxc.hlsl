@@ -14,7 +14,11 @@ float4 main_inner(float2 vUV) {
   float3 random = randomTexture.Sample(tint_symbol, vUV).xyz;
   int i = int(0);
   {
+    uint2 tint_loop_idx = (0u).xx;
     while(true) {
+      if (all((tint_loop_idx == (4294967295u).xx))) {
+        break;
+      }
       if ((i < int(1))) {
       } else {
         break;
@@ -41,12 +45,20 @@ float4 main_inner(float2 vUV) {
       if (v_2) {
         i = (i + int(1));
         {
+          uint tint_low_inc = (tint_loop_idx.x + 1u);
+          tint_loop_idx.x = tint_low_inc;
+          uint tint_carry = uint((tint_low_inc == 0u));
+          tint_loop_idx.y = (tint_loop_idx.y + tint_carry);
         }
         continue;
       }
       float sampleDepth = 0.0f;
       i = (i + int(1));
       {
+        uint tint_low_inc = (tint_loop_idx.x + 1u);
+        tint_loop_idx.x = tint_low_inc;
+        uint tint_carry = uint((tint_low_inc == 0u));
+        tint_loop_idx.y = (tint_loop_idx.y + tint_carry);
       }
       continue;
     }

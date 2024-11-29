@@ -45,7 +45,11 @@ void _skslMain(FSIn _stageIn, inout FSOut _stageOut) {
   float _60_n = 1.0f;
   int _61_o = int(0);
   {
+    uint2 tint_loop_idx = (0u).xx;
     while(true) {
+      if (all((tint_loop_idx == (4294967295u).xx))) {
+        break;
+      }
       uint v_4 = 0u;
       _storage1.GetDimensions(v_4);
       if ((_61_o < asint(_storage1.Load((20u + (min(shadingSsboIndex, ((v_4 / 128u) - 1u)) * 128u)))))) {
@@ -76,7 +80,11 @@ void _skslMain(FSIn _stageIn, inout FSOut _stageOut) {
         float4 _71_g = (0.0f).xxxx;
         int _72_h = int(0);
         {
+          uint2 tint_loop_idx_1 = (0u).xx;
           while(true) {
+            if (all((tint_loop_idx_1 == (4294967295u).xx))) {
+              break;
+            }
             float _73_i = ((float(_72_h) + 0.5f) * 0.25f);
             float v_6 = float(_67_p.x);
             float4 _74_j = noiseSampler_1_Texture.SampleBias(noiseSampler_1_Sampler, float2(v_6, float(_73_i)), clamp(-0.47499999403953552246f, -16.0f, 15.9899997711181640625f));
@@ -105,6 +113,10 @@ void _skslMain(FSIn _stageIn, inout FSOut _stageOut) {
             float _skTemp13 = lerp(_81_q, _82_r, _69_e.y);
             _71_g[min(uint(_72_h), 3u)] = _skTemp13;
             {
+              uint tint_low_inc_1 = (tint_loop_idx_1.x + 1u);
+              tint_loop_idx_1.x = tint_low_inc_1;
+              uint tint_carry_1 = uint((tint_low_inc_1 == 0u));
+              tint_loop_idx_1.y = (tint_loop_idx_1.y + tint_carry_1);
               _72_h = (_72_h + int(1));
               if ((_72_h >= int(4))) { break; }
             }
@@ -124,6 +136,10 @@ void _skslMain(FSIn _stageIn, inout FSOut _stageOut) {
         break;
       }
       {
+        uint tint_low_inc = (tint_loop_idx.x + 1u);
+        tint_loop_idx.x = tint_low_inc;
+        uint tint_carry = uint((tint_low_inc == 0u));
+        tint_loop_idx.y = (tint_loop_idx.y + tint_carry);
         _61_o = (_61_o + int(1));
       }
       continue;
