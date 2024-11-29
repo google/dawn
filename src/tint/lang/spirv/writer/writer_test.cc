@@ -72,7 +72,9 @@ TEST_F(SpirvWriterTest, Unreachable) {
         b.Return(func);
     });
 
-    ASSERT_TRUE(Generate()) << Error() << output_;
+    Options options;
+    options.disable_robustness = true;
+    ASSERT_TRUE(Generate(options)) << Error() << output_;
     EXPECT_INST(R"(
         %foo = OpFunction %void None %3
           %4 = OpLabel

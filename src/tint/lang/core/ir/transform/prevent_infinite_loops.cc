@@ -27,6 +27,8 @@
 
 #include "src/tint/lang/core/ir/transform/prevent_infinite_loops.h"
 
+#include <utility>
+
 #include "src/tint/lang/core/ir/analysis/loop_analysis.h"
 #include "src/tint/lang/core/ir/builder.h"
 #include "src/tint/lang/core/ir/module.h"
@@ -88,7 +90,13 @@ struct State {
             auto* ifelse = b.If(
                 b.Call<bool>(BuiltinFn::kAll,
                              b.Equal<vec2<bool>>(b.Load(idx), b.Splat<vec2<u32>>(u32::Highest()))));
-            b.Append(ifelse->True(), [&] { b.ExitLoop(loop); });
+            b.Append(ifelse->True(), [&] {
+                // If the loop produces result values, just use `undef` as this exit condition
+                // should never actually be hit.
+                Vector<Value*, 1> results;
+                results.Resize(loop->Results().Length(), nullptr);
+                b.ExitLoop(loop, std::move(results));
+            });
         });
 
         // Increment the index variable at the top of the continuing block.

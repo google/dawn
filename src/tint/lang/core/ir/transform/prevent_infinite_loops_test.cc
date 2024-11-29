@@ -721,5 +721,130 @@ TEST_F(IR_PreventInfiniteLoopsTest, MultipleNestedLoops) {
     EXPECT_EQ(expect, str());
 }
 
+TEST_F(IR_PreventInfiniteLoopsTest, LoopResults) {
+    auto* func = b.Function("func", ty.void_());
+    b.Append(func->Block(), [&] {  //
+        auto* loop = b.Loop();
+        loop->SetResults(Vector{
+            b.InstructionResult<u32>(),
+            b.InstructionResult<i32>(),
+            b.InstructionResult<f32>(),
+            b.InstructionResult<bool>(),
+        });
+        b.Append(loop->Initializer(), [&] {
+            auto* idx = b.Var<function, u32>("idx");
+            b.NextIteration(loop);
+
+            b.Append(loop->Body(), [&] {
+                auto* ifelse = b.If(b.LessThan<bool>(b.Load(idx), 10_u));
+                b.Append(ifelse->True(), [&] {  //
+                    b.ExitIf(ifelse);
+                });
+                b.Append(ifelse->False(), [&] {  //
+                    b.ExitLoop(loop, 1_u, 2_i, 3_f, true);
+                });
+                b.Store(idx, 0_u);
+                b.Continue(loop);
+
+                b.Append(loop->Continuing(), [&] {  //
+                    b.Store(idx, b.Add<u32>(b.Load(idx), 1_u));
+                    b.NextIteration(loop);
+                });
+            });
+        });
+        b.Return(func);
+    });
+
+    auto* src = R"(
+%func = func():void {
+  $B1: {
+    %2:u32, %3:i32, %4:f32, %5:bool = loop [i: $B2, b: $B3, c: $B4] {  # loop_1
+      $B2: {  # initializer
+        %idx:ptr<function, u32, read_write> = var
+        next_iteration  # -> $B3
+      }
+      $B3: {  # body
+        %7:u32 = load %idx
+        %8:bool = lt %7, 10u
+        if %8 [t: $B5, f: $B6] {  # if_1
+          $B5: {  # true
+            exit_if  # if_1
+          }
+          $B6: {  # false
+            exit_loop 1u, 2i, 3.0f, true  # loop_1
+          }
+        }
+        store %idx, 0u
+        continue  # -> $B4
+      }
+      $B4: {  # continuing
+        %9:u32 = load %idx
+        %10:u32 = add %9, 1u
+        store %idx, %10
+        next_iteration  # -> $B3
+      }
+    }
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%func = func():void {
+  $B1: {
+    %2:u32, %3:i32, %4:f32, %5:bool = loop [i: $B2, b: $B3, c: $B4] {  # loop_1
+      $B2: {  # initializer
+        %tint_loop_idx:ptr<function, vec2<u32>, read_write> = var
+        %idx:ptr<function, u32, read_write> = var
+        next_iteration  # -> $B3
+      }
+      $B3: {  # body
+        %8:vec2<u32> = load %tint_loop_idx
+        %9:vec2<bool> = eq %8, vec2<u32>(4294967295u)
+        %10:bool = all %9
+        if %10 [t: $B5] {  # if_1
+          $B5: {  # true
+            exit_loop undef, undef, undef, undef  # loop_1
+          }
+        }
+        %11:u32 = load %idx
+        %12:bool = lt %11, 10u
+        if %12 [t: $B6, f: $B7] {  # if_2
+          $B6: {  # true
+            exit_if  # if_2
+          }
+          $B7: {  # false
+            exit_loop 1u, 2i, 3.0f, true  # loop_1
+          }
+        }
+        store %idx, 0u
+        continue  # -> $B4
+      }
+      $B4: {  # continuing
+        %13:u32 = load_vector_element %tint_loop_idx, 0u
+        %tint_low_inc:u32 = add %13, 1u
+        store_vector_element %tint_loop_idx, 0u, %tint_low_inc
+        %15:bool = eq %tint_low_inc, 0u
+        %tint_carry:u32 = convert %15
+        %17:u32 = load_vector_element %tint_loop_idx, 1u
+        %18:u32 = add %17, %tint_carry
+        store_vector_element %tint_loop_idx, 1u, %18
+        %19:u32 = load %idx
+        %20:u32 = add %19, 1u
+        store %idx, %20
+        next_iteration  # -> $B3
+      }
+    }
+    ret
+  }
+}
+)";
+
+    Run(PreventInfiniteLoops);
+
+    EXPECT_EQ(expect, str());
+}
+
 }  // namespace
 }  // namespace tint::core::ir::transform
