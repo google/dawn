@@ -444,10 +444,6 @@ TEST_P(DrawIndexedIndirectTest, ValidateEncodeMultipleThenSubmitAtOnce) {
     // TODO(crbug.com/dawn/789): Test is failing under SwANGLE on Windows.
     DAWN_SUPPRESS_TEST_IF(IsANGLE() && IsWindows());
 
-    // TODO(crbug.com/dawn/1124): Fails on Intel+Vulkan+Windows for drivers
-    // older than 27.20.100.8587, which bots are actively using.
-    DAWN_SUPPRESS_TEST_IF(IsIntel() && IsVulkan() && IsWindows());
-
     // TODO(crbug.com/dawn/1292): Some Intel OpenGL drivers don't seem to like
     // the offsets that Tint/GLSL produces.
     DAWN_SUPPRESS_TEST_IF(IsIntel() && IsOpenGL() && IsLinux());
@@ -681,10 +677,6 @@ TEST_P(DrawIndexedIndirectTest, ValidateWithBundlesInDifferentPasses) {
 TEST_P(DrawIndexedIndirectTest, ValidateReusedBundleWithChangingParams) {
     // TODO(crbug.com/dawn/789): Test is failing under SwANGLE on Windows.
     DAWN_SUPPRESS_TEST_IF(IsANGLE() && IsWindows());
-
-    // TODO(crbug.com/dawn/1124): Fails on Intel+Vulkan+Windows for drivers
-    // older than 27.20.100.8587, which bots are actively using.
-    DAWN_SUPPRESS_TEST_IF(IsIntel() && IsVulkan() && IsWindows());
 
     // TODO(crbug.com/dawn/1292): Some Intel OpenGL drivers don't seem to like
     // the offsets that Tint/GLSL produces.
