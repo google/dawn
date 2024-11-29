@@ -174,6 +174,7 @@ MaybeError ValidateSampledTextureBinding(DeviceBase* device,
 
     SampleTypeBit supportedTypes = texture->GetFormat().GetAspectInfo(aspect).supportedSampleTypes;
     if (supportedTypes == SampleTypeBit::External) {
+        DAWN_ASSERT(texture->GetSharedResourceMemoryContents());
         supportedTypes =
             static_cast<SharedTextureMemoryContents*>(texture->GetSharedResourceMemoryContents())
                 ->GetExternalFormatSupportedSampleTypes();
