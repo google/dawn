@@ -83,10 +83,10 @@ int main(int argc, char *argv[]) {
   callbackInfo.nextInChain = nullptr;
   callbackInfo.mode = wgpu::CallbackMode::WaitAnyOnly;
   callbackInfo.callback = [](WGPURequestAdapterStatus status,
-                             WGPUAdapter adapter, const char *message,
+                             WGPUAdapter adapter, WGPUStringView message,
                              void *userdata) {
     if (status != WGPURequestAdapterStatus_Success) {
-      std::cerr << "Failed to get an adapter:" << message;
+      std::cerr << "Failed to get an adapter:" << message.data;
       return;
     }
     *static_cast<wgpu::Adapter *>(userdata) = wgpu::Adapter::Acquire(adapter);
@@ -105,11 +105,11 @@ int main(int argc, char *argv[]) {
 
   adapter.GetInfo(&info);
   std::cout << "VendorID: " << std::hex << info.vendorID << std::dec << "\n";
-  std::cout << "Vendor: " << info.vendor << "\n";
-  std::cout << "Architecture: " << info.architecture << "\n";
+  std::cout << "Vendor: " << info.vendor.data << "\n";
+  std::cout << "Architecture: " << info.architecture.data << "\n";
   std::cout << "DeviceID: " << std::hex << info.deviceID << std::dec << "\n";
-  std::cout << "Name: " << info.device << "\n";
-  std::cout << "Driver description: " << info.description << "\n";
+  std::cout << "Name: " << info.device.data << "\n";
+  std::cout << "Driver description: " << info.description.data << "\n";
   return EXIT_SUCCESS;
 }
 ```
