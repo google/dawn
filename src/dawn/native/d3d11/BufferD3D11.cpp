@@ -792,6 +792,9 @@ void GPUUsableBuffer::DestroyImpl() {
     //   other threads using the buffer since there are no other live refs.
     Buffer::DestroyImpl();
 
+    mSRVCache.clear();
+    mUAVCache.clear();
+
     mLastUpdatedStorage = nullptr;
     mCPUWritableStorage = nullptr;
     mMappedStorage = nullptr;
@@ -1245,7 +1248,18 @@ ResultOrError<ComPtr<ID3D11ShaderResourceView>> GPUUsableBuffer::UseAsSRV(
 
     DAWN_TRY_ASSIGN(d3dBuffer, GetD3D11NonConstantBuffer(commandContext));
 
-    return CreateD3D11ShaderResourceViewFromD3DBuffer(d3dBuffer, offset, size);
+    auto key = std::make_tuple(d3dBuffer, offset, size);
+    auto ite = mSRVCache.find(key);
+    if (ite != mSRVCache.end()) {
+        return ite->second;
+    }
+
+    ComPtr<ID3D11ShaderResourceView> srv;
+    DAWN_TRY_ASSIGN(srv, CreateD3D11ShaderResourceViewFromD3DBuffer(d3dBuffer, offset, size));
+
+    mSRVCache[key] = srv;
+
+    return srv;
 }
 
 ResultOrError<ComPtr<ID3D11UnorderedAccessView1>> GPUUsableBuffer::UseAsUAV(
@@ -1257,8 +1271,17 @@ ResultOrError<ComPtr<ID3D11UnorderedAccessView1>> GPUUsableBuffer::UseAsUAV(
     DAWN_TRY(SyncStorage(commandContext, storage));
 
     ComPtr<ID3D11UnorderedAccessView1> uav;
-    DAWN_TRY_ASSIGN(
-        uav, CreateD3D11UnorderedAccessViewFromD3DBuffer(storage->GetD3D11Buffer(), offset, size));
+    {
+        auto key = std::make_tuple(storage->GetD3D11Buffer(), offset, size);
+        auto ite = mUAVCache.find(key);
+        if (ite != mUAVCache.end()) {
+            uav = ite->second;
+        } else {
+            DAWN_TRY_ASSIGN(uav, CreateD3D11UnorderedAccessViewFromD3DBuffer(
+                                     storage->GetD3D11Buffer(), offset, size));
+            mUAVCache[key] = uav;
+        }
+    }
 
     // Since UAV will modify the storage's content, increment its revision.
     IncrStorageRevAndMakeLatest(commandContext, storage);
