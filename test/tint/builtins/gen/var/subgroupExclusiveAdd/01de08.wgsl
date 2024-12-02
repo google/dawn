@@ -39,7 +39,6 @@
 
 
 enable subgroups;
-enable subgroups_f16;
 
 enable f16;
 

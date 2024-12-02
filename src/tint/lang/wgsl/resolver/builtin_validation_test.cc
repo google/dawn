@@ -974,7 +974,7 @@ TEST_F(ResolverBuiltinValidationTest, SubgroupBroadcastWithExtension) {
     EXPECT_TRUE(r()->Resolve());
 }
 
-TEST_F(ResolverBuiltinValidationTest, SubgroupBroadcastWithoutExtension_F16) {
+TEST_F(ResolverBuiltinValidationTest, SubgroupBroadcastWithoutSubgroupsF16Extension_F16) {
     // enable f16;
     // enable subgroups;
     // fn func -> f16 { return subgroupBroadcast(1.h,0); }
@@ -985,10 +985,48 @@ TEST_F(ResolverBuiltinValidationTest, SubgroupBroadcastWithoutExtension_F16) {
              Return(Call(Source{{12, 34}}, "subgroupBroadcast", 1_h, 0_u)),
          });
 
+    EXPECT_TRUE(r()->Resolve());
+}
+
+TEST_F(ResolverBuiltinValidationTest, SubgroupBroadcastWithoutSubgroupsExtension_F16) {
+    // enable f16;
+    // fn func -> f16 { return subgroupBroadcast(1.h,0); }
+    Enable(wgsl::Extension::kF16);
+    Func("func", tint::Empty, ty.f16(),
+         Vector{
+             Return(Call(Source{{12, 34}}, "subgroupBroadcast", 1_h, 0_u)),
+         });
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(
         r()->error(),
-        R"(12:34 error: cannot call built-in function 'subgroupBroadcast' without extension 'subgroups_f16')");
+        R"(12:34 error: cannot call built-in function 'subgroupBroadcast' without extension 'subgroups')");
+}
+
+TEST_F(ResolverBuiltinValidationTest, SubgroupBroadcastWithoutShaderF16Extension_F16) {
+    // enable f16;
+    // fn func -> f16 { return subgroupBroadcast(1.h,0); }
+    Enable(wgsl::Extension::kSubgroups);
+    Func("func", tint::Empty, ty.f16(),
+         Vector{
+             Return(Call(Source{{12, 34}}, "subgroupBroadcast", 1_h, 0_u)),
+         });
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(), R"(error: 'f16' type used without 'f16' extension enabled)");
+}
+
+TEST_F(ResolverBuiltinValidationTest, SubgroupBroadcastWithSubgroupsF16WithoutShaderF16Extension) {
+    // enable f16;
+    // fn func -> f16 { return subgroupBroadcast(1.h,0); }
+    Enable(wgsl::Extension::kSubgroups);
+    Enable(wgsl::Extension::kSubgroupsF16);
+    Func("func", tint::Empty, ty.f16(),
+         Vector{
+             Return(Call(Source{{12, 34}}, "subgroupBroadcast", 1_h, 0_u)),
+         });
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(),
+              R"(error: 'f16' type used without 'f16' extension enabled
+error: extension 'subgroups_f16' cannot be used without extension 'f16')");
 }
 
 TEST_F(ResolverBuiltinValidationTest, SubgroupBroadcastWithExtensions_F16) {
@@ -998,6 +1036,7 @@ TEST_F(ResolverBuiltinValidationTest, SubgroupBroadcastWithExtensions_F16) {
     // fn func -> f16 { return subgroupBroadcast(1.h,0); }
     Enable(wgsl::Extension::kF16);
     Enable(wgsl::Extension::kSubgroups);
+    // TODO(crbug.com/380244620): Remove when 'subgroups_f16' has been fully deprecated.
     Enable(wgsl::Extension::kSubgroupsF16);
 
     Func("func", tint::Empty, ty.f16(),
@@ -1019,10 +1058,7 @@ TEST_F(ResolverBuiltinValidationTest, SubgroupBroadcastWithoutExtension_VecF16) 
              Return(Call(Source{{12, 34}}, "subgroupBroadcast", Call(ty.vec4<f16>(), 1_h), 0_u)),
          });
 
-    EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(
-        r()->error(),
-        R"(12:34 error: cannot call built-in function 'subgroupBroadcast' without extension 'subgroups_f16')");
+    EXPECT_TRUE(r()->Resolve());
 }
 
 TEST_F(ResolverBuiltinValidationTest, SubgroupBroadcastWithExtensions_VecF16) {
@@ -1032,6 +1068,7 @@ TEST_F(ResolverBuiltinValidationTest, SubgroupBroadcastWithExtensions_VecF16) {
     // fn func -> vec4<f16> { return subgroupBroadcast(vec4(1.h),0); }
     Enable(wgsl::Extension::kF16);
     Enable(wgsl::Extension::kSubgroups);
+    // TODO(crbug.com/380244620): Remove when 'subgroups_f16' has been fully deprecated.
     Enable(wgsl::Extension::kSubgroupsF16);
 
     Func("func", tint::Empty, ty.vec4<f16>(),

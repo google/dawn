@@ -368,7 +368,7 @@ static constexpr FeatureEnumAndInfo kFeatureInfo[] = {
       "https://github.com/gpuweb/gpuweb/blob/main/proposals/subgroups.md",
       FeatureInfo::FeatureState::Stable}},
     {Feature::SubgroupsF16,
-     {"Supports the \"enable subgroups_f16;\" directive in WGSL.",
+     {"Supports the \"enable subgroups_f16;\" directive in WGSL (deprecated).",
       "https://github.com/gpuweb/gpuweb/blob/main/proposals/subgroups.md",
       FeatureInfo::FeatureState::Stable}},
     {Feature::MultiDrawIndirect,

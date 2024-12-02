@@ -2103,14 +2103,11 @@ bool Validator::RequiredFeaturesForBuiltinFn(const sem::Call* call) const {
     }
 
     if (builtin->IsSubgroup()) {
-        auto ext = wgsl::Extension::kSubgroups;
-        if (builtin->ReturnType()->DeepestElement()->Is<core::type::F16>()) {
-            ext = wgsl::Extension::kSubgroupsF16;
-        }
-        if (!enabled_extensions_.Contains(ext)) {
+        if (!enabled_extensions_.Contains(wgsl::Extension::kSubgroups)) {
             AddError(call->Declaration()->source)
                 << "cannot call built-in function " << style::Function(builtin->Fn())
-                << " without extension " << style::Code(wgsl::ToString(ext));
+                << " without extension "
+                << style::Code(wgsl::ToString(wgsl::Extension::kSubgroups));
             return false;
         }
     }

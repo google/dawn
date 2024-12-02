@@ -683,7 +683,6 @@ class State {
                     case wgsl::BuiltinFn::kQuadSwapDiagonal:
                         Enable(wgsl::Extension::kF16);
                         Enable(wgsl::Extension::kSubgroups);
-                        Enable(wgsl::Extension::kSubgroupsF16);
                         break;
                     default:
                         break;

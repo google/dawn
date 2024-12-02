@@ -39,6 +39,7 @@
 
 
 enable subgroups;
+
 @group(0) @binding(0) var<storage, read_write> prevent_dce : vec2<u32>;
 
 

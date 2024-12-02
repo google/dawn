@@ -218,9 +218,6 @@ std::string MatrixVectorMultiplyPerf::GenerateShader() const {
     if (mUsingSubgroups) {
         code << "enable subgroups;\n";
     }
-    if (mUsingSubgroupsF16) {
-        code << "enable subgroups_f16;\n";
-    }
     switch (GetParam().mStoreType) {
         case StoreType::F32:
             code << "alias StoreType = vec4<f32>;\n";
