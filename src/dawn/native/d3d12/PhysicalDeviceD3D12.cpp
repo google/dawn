@@ -167,6 +167,7 @@ void PhysicalDevice::InitializeSupportedFeaturesImpl() {
     if (GetBackend()->IsDXCAvailable() && mDeviceInfo.supportsWaveOps) {
         EnableFeature(Feature::Subgroups);
         // D3D12 devices that support both native f16 and wave ops can support subgroups-f16.
+        // TODO(crbug.com/380244620): Remove when 'subgroups_f16' has been fully deprecated.
         if (shaderF16Enabled) {
             EnableFeature(Feature::SubgroupsF16);
         }
