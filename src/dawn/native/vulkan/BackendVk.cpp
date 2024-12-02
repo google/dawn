@@ -173,6 +173,14 @@ constexpr SkippedMessage kSkippedMessages[] = {
      "vkAllocateMemory(): pAllocateInfo->pNext<VkMemoryDedicatedAllocateInfo>"},
     // crbug.com/324282958
     {"NVIDIA", "vkBindImageMemory: memoryTypeIndex"},
+
+    // https://crbug.com/381887313
+    {"VUID-VkPipelineLayoutCreateInfo-descriptorType-03023",
+     "max per-stage uniform buffer bindings count (4) exceeds device "
+     "maxPerStageDescriptorUpdateAfterBindUniformBuffers limit (0)"},
+    {"VUID-VkPipelineLayoutCreateInfo-descriptorType-03022",
+     "max per-stage sampler bindings count (1) exceeds device "
+     "maxPerStageDescriptorUpdateAfterBindSamplers limit (0)"},
 };
 
 namespace dawn::native::vulkan {
