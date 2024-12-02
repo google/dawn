@@ -961,8 +961,8 @@ var LibraryWebGPU = {
       var sp = stackSave();
       var messagePtr = stringToUTF8OnStack(ex.message);
       var status =
-        ex instanceof AbortError ? {{{ gpu.MapAsyncStatus.Aborted }}} :
-        ex instanceof OperationError ? {{{ gpu.MapAsyncStatus.Error }}} :
+        ex.name === 'AbortError' ? {{{ gpu.MapAsyncStatus.Aborted }}} :
+        ex.name === 'OperationError' ? {{{ gpu.MapAsyncStatus.Error }}} :
         {{{ gpu.MapAsyncStatus.Unknown }}};
         _emwgpuOnMapAsyncCompleted(futureId, status, messagePtr);
         delete WebGPU.Internals.bufferOnUnmaps[bufferPtr];
