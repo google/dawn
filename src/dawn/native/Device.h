@@ -123,7 +123,7 @@ class DeviceBase : public ErrorSink, public RefCountedWithExternalCount<RefCount
     // users as the respective error rather than causing a device loss instead.
     void HandleError(std::unique_ptr<ErrorData> error,
                      InternalErrorType additionalAllowedErrors = InternalErrorType::None,
-                     wgpu::DeviceLostReason lost_reason = wgpu::DeviceLostReason::Unknown);
+                     WGPUDeviceLostReason lost_reason = WGPUDeviceLostReason_Unknown);
 
     MaybeError ValidateObject(const ApiObjectBase* object) const;
 
@@ -291,7 +291,6 @@ class DeviceBase : public ErrorSink, public RefCountedWithExternalCount<RefCount
     void APIGetFeatures(wgpu::SupportedFeatures* features) const;
     void APIGetFeatures(SupportedFeatures* features) const;
     wgpu::Status APIGetAdapterInfo(AdapterInfo* adapterInfo) const;
-    Future APIGetLostFuture() const;
     void APIInjectError(wgpu::ErrorType type, StringView message);
     bool APITick();
     void APIValidateTextureDescriptor(const TextureDescriptor* desc);
@@ -529,7 +528,6 @@ class DeviceBase : public ErrorSink, public RefCountedWithExternalCount<RefCount
     // ErrorSink implementation
     void ConsumeError(std::unique_ptr<ErrorData> error,
                       InternalErrorType additionalAllowedErrors = InternalErrorType::None) override;
-    void HandleDeviceLost(wgpu::DeviceLostReason reason, std::string_view message);
 
     bool HasPendingTasks();
     bool IsDeviceIdle();

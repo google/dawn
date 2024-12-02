@@ -130,8 +130,7 @@ class EventManager::TrackedEvent : public RefCounted {
     // EventCompletionType::Shutdown.
     ~TrackedEvent() override;
 
-    Future GetFuture() const;
-
+    class WaitRef;
     // Events may be one of two types:
     // - A queue and the ExecutionSerial after which the event will be completed.
     //   Used for queue completion.
