@@ -105,7 +105,6 @@ var LibraryWebGPU = {
           new Promise((resolve) => promise.finally(() => resolve(futureId)));
 #endif
       },
-      waitAnyPromisesList: [],
     },
 
     // Public utility functions useful for translating between WASM/JS. Most of
@@ -580,14 +579,12 @@ var LibraryWebGPU = {
   },
 
   // Returns a FutureID that was resolved, or kNullFutureId if timed out.
-#if ASYNCIFY
-  emwgpuWaitAny__async: true,
-#endif
   emwgpuWaitAny__i53abi: false,
   emwgpuWaitAny__sig: 'jppp',
-  emwgpuWaitAny: (futurePtr, futureCount, timeoutNSPtr) => {
 #if ASYNCIFY
-    var promises = WebGPU.Internals.waitAnyPromisesList;
+  emwgpuWaitAny__async: true,
+  emwgpuWaitAny: async (futurePtr, futureCount, timeoutNSPtr) => {
+    var promises = [];
     if (timeoutNSPtr) {
       var timeoutMS = {{{ gpu.makeGetU64('timeoutNSPtr', 0) }}} / 1000000;
       promises.length = futureCount + 1;
@@ -605,18 +602,15 @@ var LibraryWebGPU = {
       promises[i] = WebGPU.Internals.futures[futureId];
     }
 
-    var result = Asyncify.handleAsync(async () => {
-      return await Promise.race(promises);
-    });
-
-    // Clean up internal futures state.
-    delete WebGPU.Internals.futures[result];
-    WebGPU.Internals.waitAnyPromisesList.length = 0;
-    return result;
-#else
-    assert(false);
-#endif
+    var firstResolvedFuture = await Promise.race(promises);
+    delete WebGPU.Internals.futures[firstResolvedFuture];
+    return firstResolvedFuture;
   },
+#else
+  emwgpuWaitAny: () => {
+    abort('TODO: Implement asyncify-free WaitAny for timeout=0');
+  },
+#endif
 
   emwgpuGetPreferredFormat__sig: 'i',
   emwgpuGetPreferredFormat: () => {
