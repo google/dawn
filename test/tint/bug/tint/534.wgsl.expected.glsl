@@ -54,8 +54,12 @@ void tint_symbol_1_inner(uvec3 GlobalInvocationID) {
   uvec4 srcColorBits = uvec4(0u);
   uvec4 dstColorBits = tint_v4f32_to_v4u32(dstColor);
   {
+    uvec2 tint_loop_idx = uvec2(0u);
     uint i = 0u;
     while(true) {
+      if (all(equal(tint_loop_idx, uvec2(4294967295u)))) {
+        break;
+      }
       if ((i < v.inner.channelCount)) {
       } else {
         break;
@@ -70,6 +74,10 @@ void tint_symbol_1_inner(uvec3 GlobalInvocationID) {
       }
       success = v_11;
       {
+        uint tint_low_inc = (tint_loop_idx.x + 1u);
+        tint_loop_idx.x = tint_low_inc;
+        uint tint_carry = uint((tint_low_inc == 0u));
+        tint_loop_idx.y = (tint_loop_idx.y + tint_carry);
         i = (i + 1u);
       }
       continue;

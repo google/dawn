@@ -20,14 +20,22 @@ int foo_inner(float tint_symbol, vec2 coord) {
   }
   int result = tint_f32_to_i32(texture(t_s, coord).x);
   {
+    uvec2 tint_loop_idx = uvec2(0u);
     int i = 0;
     while(true) {
+      if (all(equal(tint_loop_idx, uvec2(4294967295u)))) {
+        break;
+      }
       if ((i < 10)) {
       } else {
         break;
       }
       result = (result + i);
       {
+        uint tint_low_inc = (tint_loop_idx.x + 1u);
+        tint_loop_idx.x = tint_low_inc;
+        uint tint_carry = uint((tint_low_inc == 0u));
+        tint_loop_idx.y = (tint_loop_idx.y + tint_carry);
         int v_1 = 0;
         if (continue_execution) {
           v_1 = atomicAdd(v.inner, 1);

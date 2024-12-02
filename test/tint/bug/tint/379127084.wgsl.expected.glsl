@@ -52,7 +52,11 @@ void _skslMain(FSIn _stageIn, inout FSOut _stageOut) {
   float _60_n = 1.0f;
   int _61_o = 0;
   {
+    uvec2 tint_loop_idx = uvec2(0u);
     while(true) {
+      if (all(equal(tint_loop_idx, uvec2(4294967295u)))) {
+        break;
+      }
       int v_6 = _61_o;
       uint v_7 = shadingSsboIndex;
       uint v_8 = min(v_7, (uint(_storage1.fsUniformData.length()) - 1u));
@@ -84,7 +88,11 @@ void _skslMain(FSIn _stageIn, inout FSOut _stageOut) {
         vec4 _71_g = vec4(0.0f);
         int _72_h = 0;
         {
+          uvec2 tint_loop_idx_1 = uvec2(0u);
           while(true) {
+            if (all(equal(tint_loop_idx_1, uvec2(4294967295u)))) {
+              break;
+            }
             float _73_i = ((float(_72_h) + 0.5f) * 0.25f);
             float v_11 = float(_67_p.x);
             vec4 _74_j = texture(noiseSampler_1_Texture_noiseSampler_1_Sampler, vec2(v_11, float(_73_i)), clamp(-0.47499999403953552246f, -16.0f, 15.9899997711181640625f));
@@ -113,6 +121,10 @@ void _skslMain(FSIn _stageIn, inout FSOut _stageOut) {
             float _skTemp13 = mix(_81_q, _82_r, _69_e.y);
             _71_g[min(uint(_72_h), 3u)] = _skTemp13;
             {
+              uint tint_low_inc_1 = (tint_loop_idx_1.x + 1u);
+              tint_loop_idx_1.x = tint_low_inc_1;
+              uint tint_carry_1 = uint((tint_low_inc_1 == 0u));
+              tint_loop_idx_1.y = (tint_loop_idx_1.y + tint_carry_1);
               _72_h = (_72_h + 1);
               if ((_72_h >= 4)) { break; }
             }
@@ -132,6 +144,10 @@ void _skslMain(FSIn _stageIn, inout FSOut _stageOut) {
         break;
       }
       {
+        uint tint_low_inc = (tint_loop_idx.x + 1u);
+        tint_loop_idx.x = tint_low_inc;
+        uint tint_carry = uint((tint_low_inc == 0u));
+        tint_loop_idx.y = (tint_loop_idx.y + tint_carry);
         _61_o = (_61_o + 1);
       }
       continue;

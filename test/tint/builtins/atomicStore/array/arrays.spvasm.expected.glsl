@@ -12,7 +12,11 @@ void compute_main_inner(uint local_invocation_index_2) {
   uint idx = 0u;
   idx = local_invocation_index_2;
   {
+    uvec2 tint_loop_idx = uvec2(0u);
     while(true) {
+      if (all(equal(tint_loop_idx, uvec2(4294967295u)))) {
+        break;
+      }
       if (!((idx < 6u))) {
         break;
       }
@@ -24,6 +28,10 @@ void compute_main_inner(uint local_invocation_index_2) {
       uint v_2 = min(tint_mod_u32(x_35, 1u), 0u);
       atomicExchange(wg[min(v, 2u)][min(v_1, 1u)][v_2], 0u);
       {
+        uint tint_low_inc = (tint_loop_idx.x + 1u);
+        tint_loop_idx.x = tint_low_inc;
+        uint tint_carry = uint((tint_low_inc == 0u));
+        tint_loop_idx.y = (tint_loop_idx.y + tint_carry);
         idx = (idx + 1u);
       }
       continue;

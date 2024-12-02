@@ -125,8 +125,12 @@ void tint_symbol_inner(uvec3 WorkGroupID, uvec3 LocalInvocationID, uint tint_loc
           if (v_12) {
             vec3 acc = vec3(0.0f);
             {
+              uvec2 tint_loop_idx = uvec2(0u);
               uint f = 0u;
               while(true) {
+                if (all(equal(tint_loop_idx, uvec2(4294967295u)))) {
+                  break;
+                }
                 if ((f < v.inner.filterDim)) {
                 } else {
                   break;
@@ -138,6 +142,10 @@ void tint_symbol_inner(uvec3 WorkGroupID, uvec3 LocalInvocationID, uint tint_loc
                 uint v_16 = min(i, 255u);
                 acc = (v_13 + (v_14 * tile[v_15][v_16]));
                 {
+                  uint tint_low_inc = (tint_loop_idx.x + 1u);
+                  tint_loop_idx.x = tint_low_inc;
+                  uint tint_carry = uint((tint_low_inc == 0u));
+                  tint_loop_idx.y = (tint_loop_idx.y + tint_carry);
                   f = (f + 1u);
                 }
                 continue;

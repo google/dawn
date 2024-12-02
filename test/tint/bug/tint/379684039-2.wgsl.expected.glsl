@@ -16,7 +16,11 @@ buffer FSUniforms_1_ssbo {
 void tint_symbol() {
   ivec2 vec = ivec2(0);
   {
+    uvec2 tint_loop_idx = uvec2(0u);
     while(true) {
+      if (all(equal(tint_loop_idx, uvec2(4294967295u)))) {
+        break;
+      }
       int v = vec.y;
       uint v_1 = idx;
       uint v_2 = min(v_1, (uint(_storage.fsUniformData.length()) - 1u));
@@ -24,6 +28,10 @@ void tint_symbol() {
         break;
       }
       {
+        uint tint_low_inc = (tint_loop_idx.x + 1u);
+        tint_loop_idx.x = tint_low_inc;
+        uint tint_carry = uint((tint_low_inc == 0u));
+        tint_loop_idx.y = (tint_loop_idx.y + tint_carry);
       }
       continue;
     }

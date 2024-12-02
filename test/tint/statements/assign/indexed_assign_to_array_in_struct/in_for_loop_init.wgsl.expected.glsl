@@ -23,14 +23,22 @@ void main() {
   OuterS s1 = OuterS(InnerS[8](InnerS(0), InnerS(0), InnerS(0), InnerS(0), InnerS(0), InnerS(0), InnerS(0), InnerS(0)));
   int i = 0;
   {
+    uvec2 tint_loop_idx = uvec2(0u);
     uint v_2 = min(v_1.inner.i, 7u);
     s1.a1[v_2] = v;
     while(true) {
+      if (all(equal(tint_loop_idx, uvec2(4294967295u)))) {
+        break;
+      }
       if ((i < 4)) {
       } else {
         break;
       }
       {
+        uint tint_low_inc = (tint_loop_idx.x + 1u);
+        tint_loop_idx.x = tint_low_inc;
+        uint tint_carry = uint((tint_low_inc == 0u));
+        tint_loop_idx.y = (tint_loop_idx.y + tint_carry);
         i = (i + 1);
       }
       continue;
