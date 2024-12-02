@@ -54,8 +54,8 @@ public class {{ obj.name.CamelCase() }}(public val handle: Long): AutoCloseable 
 
     //* By default, the equals() function implements referential equality.
     //* see: https://kotlinlang.org/docs/equality.html#structural-equality
-    //* We convert to structural equality (in Kotlin) which acts as referential equality check for
-    //* the underlying Dawn object.
+    //* A structural comparison of the wrapper object is equivalent to a referential comparison of
+    //* the wrapped object.
     override fun equals(other: Any?): Boolean =
         other is {{ obj.name.CamelCase() }} && other.handle == handle
 }
