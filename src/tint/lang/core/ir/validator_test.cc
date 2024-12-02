@@ -258,6 +258,37 @@ TEST_F(IR_ValidatorTest, Function) {
     EXPECT_EQ(ir::Validate(mod), Success);
 }
 
+TEST_F(IR_ValidatorTest, Function_NoType) {
+    auto* valid = b.Function("valid", ty.void_());
+    valid->Block()->Append(b.Return(valid));
+
+    auto* invalid = mod.CreateValue<ir::Function>(nullptr, ty.void_());
+    invalid->SetBlock(mod.blocks.Create<ir::Block>());
+    mod.SetName(invalid, "invalid");
+    mod.functions.Push(invalid);
+    invalid->Block()->Append(b.Return(invalid));
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_EQ(res.Failure().reason.Str(),
+              R"(:6:1 error: functions must have type '<function>'
+%invalid = func():void {
+^^^^^^^^
+
+note: # Disassembly
+%valid = func():void {
+  $B1: {
+    ret
+  }
+}
+%invalid = func():void {
+  $B2: {
+    ret
+  }
+}
+)");
+}
+
 TEST_F(IR_ValidatorTest, Function_Duplicate) {
     auto* f = b.Function("my_func", ty.void_());
     // Function would auto-push by the builder, so this adds a duplicate
@@ -5425,7 +5456,7 @@ TEST_F(IR_ValidatorTest, Var_Init_FunctionTypeInit) {
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_EQ(res.Failure().reason.Str(),
-              R"(:8:41 error: var: initializer type 'function' does not match store type 'f32'
+              R"(:8:41 error: var: initializer type '<function>' does not match store type 'f32'
     %i:ptr<function, f32, read_write> = var, %invalid_init
                                         ^^^
 

@@ -66,6 +66,8 @@ tint_add_target(tint_lang_core_type lib
   lang/core/type/f16.h
   lang/core/type/f32.cc
   lang/core/type/f32.h
+  lang/core/type/function.cc
+  lang/core/type/function.h
   lang/core/type/i32.cc
   lang/core/type/i32.h
   lang/core/type/i8.cc

@@ -30,6 +30,7 @@
 #include <utility>
 
 #include "src/tint/lang/core/constant/scalar.h"
+#include "src/tint/lang/core/type/function.h"
 #include "src/tint/lang/core/type/pointer.h"
 #include "src/tint/lang/core/type/reference.h"
 #include "src/tint/utils/ice/ice.h"
@@ -52,7 +53,7 @@ MultiInBlock* Builder::MultiInBlock() {
 }
 
 Function* Builder::Function(const core::type::Type* return_type, Function::PipelineStage stage) {
-    auto* ir_func = ir.CreateValue<ir::Function>(return_type, stage);
+    auto* ir_func = ir.CreateValue<ir::Function>(ir.Types().function(), return_type, stage);
     ir_func->SetBlock(Block());
     ir.functions.Push(ir_func);
     return ir_func;

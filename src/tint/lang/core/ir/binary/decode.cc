@@ -38,6 +38,7 @@
 #include "src/tint/lang/core/type/depth_multisampled_texture.h"
 #include "src/tint/lang/core/type/depth_texture.h"
 #include "src/tint/lang/core/type/external_texture.h"
+#include "src/tint/lang/core/type/function.h"
 #include "src/tint/lang/core/type/input_attachment.h"
 #include "src/tint/lang/core/type/invalid.h"
 #include "src/tint/lang/core/type/multisampled_texture.h"
@@ -237,7 +238,9 @@ struct Decoder {
     // Functions
     ////////////////////////////////////////////////////////////////////////////
     ir::Function* CreateFunction(const pb::Function&) {
-        return mod_out_.CreateValue<ir::Function>();
+        auto* result = mod_out_.CreateValue<ir::Function>();
+        result->SetType(mod_out_.Types().function());
+        return result;
     }
 
     void PopulateFunction(ir::Function* fn_out, const pb::Function& fn_in) {

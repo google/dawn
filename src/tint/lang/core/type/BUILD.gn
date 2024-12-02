@@ -72,6 +72,8 @@ libtint_source_set("type") {
     "f16.h",
     "f32.cc",
     "f32.h",
+    "function.cc",
+    "function.h",
     "i32.cc",
     "i32.h",
     "i8.cc",

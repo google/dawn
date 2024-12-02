@@ -52,6 +52,7 @@ class Array;
 class Bool;
 class F16;
 class F32;
+class Function;
 class I8;
 class I32;
 class Invalid;
@@ -186,6 +187,9 @@ class Manager final {
 
     /// @returns an invalid type
     const core::type::Invalid* invalid();
+
+    /// @returns an function type
+    const core::type::Function* function();
 
     /// @returns a void type
     const core::type::Void* void_();

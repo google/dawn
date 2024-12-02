@@ -81,6 +81,7 @@
 #include "src/tint/lang/core/type/array.h"
 #include "src/tint/lang/core/type/bool.h"
 #include "src/tint/lang/core/type/f32.h"
+#include "src/tint/lang/core/type/function.h"
 #include "src/tint/lang/core/type/i32.h"
 #include "src/tint/lang/core/type/i8.h"
 #include "src/tint/lang/core/type/matrix.h"
@@ -1628,9 +1629,7 @@ bool Validator::CheckOperand(const Instruction* inst, size_t idx) {
         return true;
     }
 
-    // ir::Function does not have a meaningful type, so does not override the default Type()
-    // behaviour.
-    if (DAWN_UNLIKELY(!operand->Is<ir::Function>() && operand->Type() == nullptr)) {
+    if (DAWN_UNLIKELY(operand->Type() == nullptr)) {
         AddError(inst, idx) << "operand type is undefined";
         return false;
     }
@@ -1893,6 +1892,11 @@ void Validator::CheckFunction(const Function* func) {
     // Scope holds the parameters and block
     scope_stack_.Push();
     TINT_DEFER(scope_stack_.Pop());
+
+    if (!func->Type() || !func->Type()->Is<core::type::Function>()) {
+        AddError(func) << "functions must have type '<function>'";
+        return;
+    }
 
     if (!func->Block()) {
         AddError(func) << "root block for function is undefined";
@@ -2380,14 +2384,6 @@ void Validator::CheckVar(const Var* var) {
         }
 
         if (!CheckOperand(var, ir::Var::kInitializerOperandOffset)) {
-            return;
-        }
-
-        if (var->Operand(ir::Var::kInitializerOperandOffset)->Is<ir::Function>()) {
-            // ir::Function has a null ->Type(), and won't be filtered by CheckOperand, so needs
-            // special handling here
-            AddError(var) << "initializer type 'function' does not match store type "
-                          << style::Type(var->Result(0)->Type()->UnwrapPtrOrRef()->FriendlyName());
             return;
         }
 

@@ -35,6 +35,7 @@
 #include "src/tint/lang/core/type/bool.h"
 #include "src/tint/lang/core/type/f16.h"
 #include "src/tint/lang/core/type/f32.h"
+#include "src/tint/lang/core/type/function.h"
 #include "src/tint/lang/core/type/i32.h"
 #include "src/tint/lang/core/type/i8.h"
 #include "src/tint/lang/core/type/invalid.h"
@@ -60,6 +61,10 @@ Manager::~Manager() = default;
 
 const core::type::Invalid* Manager::invalid() {
     return Get<core::type::Invalid>();
+}
+
+const core::type::Function* Manager::function() {
+    return Get<core::type::Function>();
 }
 
 const core::type::Void* Manager::void_() {

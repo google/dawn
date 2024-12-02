@@ -67,13 +67,18 @@ class Function : public Castable<Function, Value> {
     Function();
 
     /// Constructor
+    /// @param type the type of the function itself
     /// @param rt the function return type
     /// @param stage the function stage
     /// @param wg_size the workgroup_size
-    Function(const core::type::Type* rt,
+    Function(const core::type::Type* type,
+             const core::type::Type* rt,
              PipelineStage stage = PipelineStage::kUndefined,
              std::optional<std::array<Value*, 3>> wg_size = {});
     ~Function() override;
+
+    /// @copydoc Value::Type()
+    const core::type::Type* Type() const override { return type_; }
 
     /// @copydoc Instruction::Clone()
     Function* Clone(CloneContext& ctx) override;
@@ -132,6 +137,9 @@ class Function : public Castable<Function, Value> {
             z->Value()->ValueAs<uint32_t>(),
         }};
     }
+
+    /// @param type the type to return via ->Type()
+    void SetType(const core::type::Type* type) { type_ = type; }
 
     /// @param type the return type for the function
     void SetReturnType(const core::type::Type* type) { return_.type = type; }
@@ -216,6 +224,8 @@ class Function : public Castable<Function, Value> {
   private:
     PipelineStage pipeline_stage_ = PipelineStage::kUndefined;
     std::optional<std::array<Value*, 3>> workgroup_size_;
+
+    const core::type::Type* type_ = nullptr;
 
     struct {
         const core::type::Type* type = nullptr;
