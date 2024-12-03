@@ -3795,6 +3795,71 @@ note: # Disassembly
 )");
 }
 
+TEST_F(IR_ValidatorTest, Terminator_HasResult) {
+    auto* ret_func = b.Function("ret_func", ty.void_());
+    b.Append(ret_func->Block(), [&] {
+        auto* r = b.Return(ret_func);
+        r->SetResults(Vector{b.InstructionResult(ty.i32())});
+    });
+
+    auto* unreachable_func = b.Function("unreachable_func", ty.void_());
+    b.Append(unreachable_func->Block(), [&] {
+        auto* r = b.Unreachable();
+        r->SetResults(Vector{b.InstructionResult(ty.i32())});
+    });
+
+    auto* terminate_func = b.Function("terminate_func", ty.void_());
+    b.Append(terminate_func->Block(), [&] {
+        auto* r = b.TerminateInvocation();
+        r->SetResults(Vector{b.InstructionResult(ty.i32())});
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_EQ(res.Failure().reason.Str(),
+              R"(:3:5 error: return: expected exactly 0 results, got 1
+    ret
+    ^^^
+
+:2:3 note: in block
+  $B1: {
+  ^^^
+
+:8:5 error: unreachable: expected exactly 0 results, got 1
+    unreachable
+    ^^^^^^^^^^^
+
+:7:3 note: in block
+  $B2: {
+  ^^^
+
+:13:5 error: terminate_invocation: expected exactly 0 results, got 1
+    terminate_invocation
+    ^^^^^^^^^^^^^^^^^^^^
+
+:12:3 note: in block
+  $B3: {
+  ^^^
+
+note: # Disassembly
+%ret_func = func():void {
+  $B1: {
+    ret
+  }
+}
+%unreachable_func = func():void {
+  $B2: {
+    unreachable
+  }
+}
+%terminate_func = func():void {
+  $B3: {
+    terminate_invocation
+  }
+}
+)");
+}
+
 TEST_F(IR_ValidatorTest, Discard_NotInFragment) {
     auto* func = b.Function("foo", ty.void_());
     b.Append(func->Block(), [&] {
