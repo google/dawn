@@ -157,8 +157,7 @@ class Converter {
     [[nodiscard]] bool Convert(wgpu::TextureViewDimension& out,
                                const interop::GPUTextureViewDimension& in);
 
-    [[nodiscard]] bool Convert(wgpu::ProgrammableStageDescriptor& out,
-                               const interop::GPUProgrammableStage& in);
+    [[nodiscard]] bool Convert(wgpu::ComputeState& out, const interop::GPUProgrammableStage& in);
 
     [[nodiscard]] bool Convert(wgpu::ConstantEntry& out,
                                const std::string& in_name,

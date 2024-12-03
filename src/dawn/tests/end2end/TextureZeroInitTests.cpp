@@ -1139,7 +1139,6 @@ TEST_P(TextureZeroInitTest, ComputePassSampledTextureClear) {
 
     // Create compute pipeline
     wgpu::ComputePipelineDescriptor computePipelineDescriptor;
-    wgpu::ProgrammableStageDescriptor compute;
     const char* cs = R"(
         @group(0) @binding(0) var tex : texture_2d<f32>;
         struct Result {

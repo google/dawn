@@ -1178,7 +1178,7 @@
         "members": [
             {"name": "label", "type": "string view", "optional": true},
             {"name": "layout", "type": "pipeline layout", "optional": true},
-            {"name": "compute", "type": "programmable stage descriptor"}
+            {"name": "compute", "type": "compute state"}
         ]
     },
     "alpha mode": {
@@ -2865,6 +2865,10 @@
         ]
     },
     "programmable stage descriptor": {
+        "category": "typedef",
+        "type": "compute state"
+    },
+    "compute state": {
         "category": "structure",
         "extensible": "in",
         "members": [

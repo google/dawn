@@ -264,17 +264,17 @@ var LibraryWebGPU = {
       return WebGPU.getJsObject(layoutPtr);
     },
 
-    makeProgrammableStageDescriptor: (ptr) => {
+    makeComputeState: (ptr) => {
       if (!ptr) return undefined;
       {{{ gpu.makeCheckDescriptor('ptr') }}}
       var desc = {
         "module": WebGPU.getJsObject(
-          {{{ makeGetValue('ptr', C_STRUCTS.WGPUProgrammableStageDescriptor.module, '*') }}}),
+          {{{ makeGetValue('ptr', C_STRUCTS.WGPUComputeState.module, '*') }}}),
         "constants": WebGPU.makePipelineConstants(
-          {{{ gpu.makeGetU32('ptr', C_STRUCTS.WGPUProgrammableStageDescriptor.constantCount) }}},
-          {{{ makeGetValue('ptr', C_STRUCTS.WGPUProgrammableStageDescriptor.constants, '*') }}}),
+          {{{ gpu.makeGetU32('ptr', C_STRUCTS.WGPUComputeState.constantCount) }}},
+          {{{ makeGetValue('ptr', C_STRUCTS.WGPUComputeState.constants, '*') }}}),
         "entryPoint": WebGPU.makeStringFromOptionalStringView(
-          ptr + {{{ C_STRUCTS.WGPUProgrammableStageDescriptor.entryPoint }}}),
+          ptr + {{{ C_STRUCTS.WGPUComputeState.entryPoint }}}),
       };
       return desc;
     },
@@ -287,7 +287,7 @@ var LibraryWebGPU = {
           descriptor + {{{ C_STRUCTS.WGPUComputePipelineDescriptor.label }}}),
         "layout": WebGPU.makePipelineLayout(
           {{{ makeGetValue('descriptor', C_STRUCTS.WGPUComputePipelineDescriptor.layout, '*') }}}),
-        "compute": WebGPU.makeProgrammableStageDescriptor(
+        "compute": WebGPU.makeComputeState(
           descriptor + {{{ C_STRUCTS.WGPUComputePipelineDescriptor.compute }}}),
       };
       return desc;

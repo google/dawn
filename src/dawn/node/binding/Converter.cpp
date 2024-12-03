@@ -771,8 +771,7 @@ bool Converter::Convert(wgpu::TextureViewDimension& out,
     return Throw("invalid value for GPUTextureViewDimension");
 }
 
-bool Converter::Convert(wgpu::ProgrammableStageDescriptor& out,
-                        const interop::GPUProgrammableStage& in) {
+bool Converter::Convert(wgpu::ComputeState& out, const interop::GPUProgrammableStage& in) {
     out = {};
     out.module = *in.module.As<GPUShaderModule>();
 
