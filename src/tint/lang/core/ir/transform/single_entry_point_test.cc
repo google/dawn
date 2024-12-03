@@ -100,28 +100,6 @@ TEST_F(IR_SingleEntryPointTest, EntryPointNotFound) {
     EXPECT_DEATH_IF_SUPPORTED({ Run(SingleEntryPoint, "foo"); }, "internal compiler error");
 }
 
-TEST_F(IR_SingleEntryPointTest, MultipleEntryPointsMatch) {
-    EntryPoint("main");
-    EntryPoint("main");
-
-    auto* src = R"(
-%main = @fragment func():void {
-  $B1: {
-    ret
-  }
-}
-%main_1 = @fragment func():void {  # %main_1: 'main'
-  $B2: {
-    ret
-  }
-}
-)";
-
-    EXPECT_EQ(src, str());
-
-    EXPECT_DEATH_IF_SUPPORTED({ Run(SingleEntryPoint, "main"); }, "internal compiler error");
-}
-
 TEST_F(IR_SingleEntryPointTest, NoChangesNeeded) {
     EntryPoint("main");
 

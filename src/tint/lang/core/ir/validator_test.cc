@@ -318,6 +318,34 @@ note: # Disassembly
 )");
 }
 
+TEST_F(IR_ValidatorTest, Function_DuplicateEntryPointNames) {
+    auto* c = ComputeEntryPoint("dup");
+    c->Block()->Append(b.Return(c));
+
+    auto* f = FragmentEntryPoint("dup");
+    f->Block()->Append(b.Return(f));
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_EQ(res.Failure().reason.Str(),
+              R"(:6:1 error: entry point name 'dup' is not unique
+%dup_1 = @fragment func():void {  # %dup_1: 'dup'
+^^^^^^
+
+note: # Disassembly
+%dup = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    ret
+  }
+}
+%dup_1 = @fragment func():void {  # %dup_1: 'dup'
+  $B2: {
+    ret
+  }
+}
+)");
+}
+
 TEST_F(IR_ValidatorTest, Function_MultinBlock) {
     auto* f = b.Function("my_func", ty.void_());
     f->SetBlock(b.MultiInBlock());

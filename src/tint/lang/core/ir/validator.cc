@@ -1316,6 +1316,7 @@ class Validator {
     Hashset<const ir::Discard*, 4> discards_;
     core::ir::ReferencedModuleVars<const Module> referenced_module_vars_;
     Hashset<OverrideId, 8> seen_override_ids_;
+    Hashset<std::string, 4> entry_point_names_;
 
     Hashset<ValidatedType, 16> validated_types_{};
 };
@@ -1892,6 +1893,14 @@ void Validator::CheckFunction(const Function* func) {
     // Scope holds the parameters and block
     scope_stack_.Push();
     TINT_DEFER(scope_stack_.Pop());
+
+    // Checking the name early, so its usage can be recorded, even if the function is malformed.
+    if (func->Stage() != Function::PipelineStage::kUndefined) {
+        const auto name = mod_.NameOf(func).Name();
+        if (!entry_point_names_.Add(name)) {
+            AddError(func) << "entry point name " << style::Function(name) << " is not unique";
+        }
+    }
 
     if (!func->Type() || !func->Type()->Is<core::type::Function>()) {
         AddError(func) << "functions must have type '<function>'";
