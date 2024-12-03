@@ -100,10 +100,9 @@ class BindGroupLayout final : public BindGroupLayoutInternalBase {
 
     MutexProtected<SlabAllocator<BindGroup>> mBindGroupAllocator;
 
-    // TODO(https://crbug.com/dawn/2361): Rewrite those members with raw_ptr<T>.
+    // TODO(https://crbug.com/dawn/2361): Rewrite this member with raw_ptr<T>.
     // This is currently failing with MSVC cl.exe compiler.
     RAW_PTR_EXCLUSION MutexProtected<StagingDescriptorAllocator>* mSamplerAllocator = nullptr;
-    RAW_PTR_EXCLUSION MutexProtected<StagingDescriptorAllocator>* mViewAllocator = nullptr;
 };
 
 }  // namespace dawn::native::d3d12

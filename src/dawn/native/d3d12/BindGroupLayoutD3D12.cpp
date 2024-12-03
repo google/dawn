@@ -210,7 +210,6 @@ BindGroupLayout::BindGroupLayout(Device* device, const BindGroupLayoutDescriptor
         descriptorRanges.push_back(range);
     }
 
-    mViewAllocator = device->GetViewStagingDescriptorAllocator(GetCbvUavSrvDescriptorCount());
     mSamplerAllocator = device->GetSamplerStagingDescriptorAllocator(GetSamplerDescriptorCount());
 }
 
@@ -220,8 +219,10 @@ ResultOrError<Ref<BindGroup>> BindGroupLayout::AllocateBindGroup(
     uint32_t viewSizeIncrement = 0;
     CPUDescriptorHeapAllocation viewAllocation;
     if (GetCbvUavSrvDescriptorCount() > 0) {
-        DAWN_ASSERT(mViewAllocator != nullptr);
-        DAWN_TRY((*mViewAllocator).Use([&](auto viewAllocator) -> MaybeError {
+        auto* viewAllocator =
+            device->GetViewStagingDescriptorAllocator(GetCbvUavSrvDescriptorCount());
+        DAWN_ASSERT(viewAllocator != nullptr);
+        DAWN_TRY((*viewAllocator).Use([&](auto viewAllocator) -> MaybeError {
             DAWN_TRY_ASSIGN(viewAllocation, viewAllocator->AllocateCPUDescriptors());
             viewSizeIncrement = viewAllocator->GetSizeIncrement();
             return {};
@@ -245,7 +246,10 @@ ResultOrError<Ref<BindGroup>> BindGroupLayout::AllocateBindGroup(
 void BindGroupLayout::DeallocateBindGroup(BindGroup* bindGroup,
                                           CPUDescriptorHeapAllocation* viewAllocation) {
     if (viewAllocation->IsValid()) {
-        (*mViewAllocator)->Deallocate(viewAllocation);
+        Device* device = ToBackend(bindGroup->GetDevice());
+        auto* viewAllocator =
+            device->GetViewStagingDescriptorAllocator(GetCbvUavSrvDescriptorCount());
+        (*viewAllocator)->Deallocate(viewAllocation);
     }
 
     mBindGroupAllocator->Deallocate(bindGroup);
