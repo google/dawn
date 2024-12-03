@@ -3401,5 +3401,20 @@ fn a(x : f32) {
 )");
 }
 
+// Test that we rename declarations that shadow builtin types when they are used in arrays.
+// See crbug.com/380903161.
+TEST_F(IRToProgramRoundtripTest, BuiltinTypeNameShadowedAndUsedInArray) {
+    RUN_TEST(R"(
+fn a(f32 : f32) {
+  let x = array(1.0f);
+}
+)",
+             R"(
+fn a(f32_1 : f32) {
+  let x = array<f32, 1u>(1.0f);
+}
+)");
+}
+
 }  // namespace
 }  // namespace tint::wgsl

@@ -40,6 +40,7 @@
 #include "src/tint/lang/core/ir/transform/rename_conflicts.h"
 #include "src/tint/lang/core/ir/validator.h"
 #include "src/tint/lang/core/ir/var.h"
+#include "src/tint/lang/core/type/array.h"
 #include "src/tint/lang/core/type/matrix.h"
 #include "src/tint/lang/core/type/pointer.h"
 #include "src/tint/lang/core/type/scalar.h"
@@ -224,6 +225,10 @@ struct State {
                     EnsureResolvesToBuiltin("mat" + tint::ToString(m->Columns()) + "x" +
                                             tint::ToString(m->Rows()));
                     return m->Type();
+                },
+                [&](const core::type::Array* a) -> const core::type::Type* {
+                    EnsureResolvesToBuiltin("array");
+                    return a->ElemType();
                 },
                 [&](const core::type::Pointer* p) {
                     EnsureResolvesToBuiltin(tint::ToString(p->Access()));
