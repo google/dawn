@@ -2160,7 +2160,17 @@ void Validator::CheckWorkgroupSize(const Function* func) {
         }
 
         if (auto* r = size->As<ir::InstructionResult>()) {
-            if (r->Instruction() && r->Instruction()->Is<core::ir::Override>()) {
+            if (!r->Instruction()) {
+                AddError(func) << "instruction for @workgroup_size param is not defined";
+                return;
+            }
+
+            if (r->Instruction()->Block() != mod_.root_block) {
+                AddError(func) << "@workgroup_size param defined by non-module scope value";
+                return;
+            }
+
+            if (r->Instruction()->Is<core::ir::Override>()) {
                 continue;
             }
 

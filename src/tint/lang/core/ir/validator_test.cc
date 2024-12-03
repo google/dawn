@@ -1362,6 +1362,32 @@ note: # Disassembly
 )");
 }
 
+TEST_F(IR_ValidatorTest, Function_WorkgroupSize_NonRootBlockOverride) {
+    auto* f = ComputeEntryPoint();
+    Override* o;
+    b.Append(f->Block(), [&] {
+        o = b.Override(ty.u32());
+        b.Return(f);
+    });
+    f->SetWorkgroupSize({o->Result(0), o->Result(0), o->Result(0)});
+
+    auto res = ir::Validate(mod, Capabilities{Capability::kAllowOverrides});
+    ASSERT_NE(res, Success);
+    EXPECT_EQ(res.Failure().reason.Str(),
+              R"(:1:1 error: @workgroup_size param defined by non-module scope value
+%f = @compute @workgroup_size(%2, %2, %2) func():void {
+^^
+
+note: # Disassembly
+%f = @compute @workgroup_size(%2, %2, %2) func():void {
+  $B1: {
+    %2:u32 = override @id(0)
+    ret
+  }
+}
+)");
+}
+
 TEST_F(IR_ValidatorTest, Function_Vertex_BasicPosition) {
     auto* f = b.Function("my_func", ty.vec4<f32>(), Function::PipelineStage::kVertex);
     f->SetReturnBuiltin(BuiltinValue::kPosition);
