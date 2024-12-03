@@ -1238,10 +1238,7 @@ bool Validator::Function(const sem::Function* func, ast::PipelineStage stage) co
         }
 
         if (decl->body) {
-            sem::Behaviors behaviors{sem::Behavior::kNext};
-            if (auto* last = decl->body->Last()) {
-                behaviors = sem_.Get(last)->Behaviors();
-            }
+            auto behaviors = sem_.Get(decl->body)->Behaviors();
             if (behaviors.Contains(sem::Behavior::kNext)) {
                 auto end_source = decl->body->source.End();
                 end_source.range.begin.column--;
