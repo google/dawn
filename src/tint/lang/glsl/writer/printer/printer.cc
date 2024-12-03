@@ -1724,7 +1724,17 @@ class Printer : public tint::TextGenerator {
     }
 
     /// Emit an unreachable instruction
-    void EmitUnreachable() { Line() << "/* unreachable */"; }
+    void EmitUnreachable() {
+        Line() << "/* unreachable */";
+        if (!current_function_->ReturnType()->Is<core::type::Void>()) {
+            // If this is inside a non-void function, emit a return statement to avoid potential
+            // errors due to missing return statements.
+            auto out = Line();
+            out << "return ";
+            EmitZeroValue(out, current_function_->ReturnType());
+            out << ";";
+        }
+    }
 };
 
 }  // namespace

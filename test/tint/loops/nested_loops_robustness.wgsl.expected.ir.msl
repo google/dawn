@@ -34,7 +34,9 @@ int f() {
         }
       }
       /* unreachable */
+      return 0;
     }
   }
   /* unreachable */
+  return 0;
 }

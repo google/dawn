@@ -31,6 +31,7 @@ int f() {
         }
       }
       /* unreachable */
+      return int(0);
     }
   }
   /* unreachable */

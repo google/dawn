@@ -128,6 +128,32 @@ void main() {
 )");
 }
 
+TEST_F(GlslWriterTest, IfBothBranchesReturn_NonVoidFunction) {
+    auto* func = b.Function("foo", ty.u32());
+    b.Append(func->Block(), [&] {
+        auto* if_ = b.If(true);
+        b.Append(if_->True(), [&] { b.Return(func, 0_u); });
+        b.Append(if_->False(), [&] { b.Return(func, 1_u); });
+        b.Unreachable();
+    });
+
+    ASSERT_TRUE(Generate()) << err_ << output_.glsl;
+    EXPECT_EQ(output_.glsl, GlslHeader() + R"(
+uint foo() {
+  if (true) {
+    return 0u;
+  } else {
+    return 1u;
+  }
+  /* unreachable */
+  return 0u;
+}
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+void main() {
+}
+)");
+}
+
 TEST_F(GlslWriterTest, IfWithSinglePhi) {
     auto* func = b.Function("foo", ty.void_());
     b.Append(func->Block(), [&] {
