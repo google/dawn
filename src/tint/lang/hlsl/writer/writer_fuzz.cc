@@ -36,7 +36,7 @@
 namespace tint::hlsl::writer {
 namespace {
 
-bool CanRun(const core::ir::Module& module, const Options& options) {
+bool CanRun(const core::ir::Module& module) {
     // Check for unsupported module-scope variable address spaces and types.
     for (auto* inst : *module.root_block) {
         auto* var = inst->As<core::ir::Var>();
@@ -51,27 +51,44 @@ bool CanRun(const core::ir::Module& module, const Options& options) {
             return false;
         }
     }
-
-    for (auto& f : module.functions) {
-        if (f->IsEntryPoint()) {
-            // PixelLocal must only run for fragment shaders
-            if (!options.pixel_local.attachments.empty() && !f->IsFragment()) {
-                return false;
-            }
-            // Truncating interstage variables must only run for vertex shaders
-            if (options.truncate_interstage_variables && !f->IsVertex()) {
-                return false;
-            }
-        }
-    }
-
     return true;
 }
 
-Result<SuccessType> IRFuzzer(core::ir::Module& module, Options options) {
-    if (!CanRun(module, options)) {
+// Fuzzed options used to init tint::hlsl::writer::Options
+struct FuzzedOptions {
+    bool disable_robustness;
+    bool disable_workgroup_init;
+    bool polyfill_reflect_vec2_f32;
+    bool polyfill_dot_4x8_packed;
+    bool disable_polyfill_integer_div_mod;
+    bool polyfill_pack_unpack_4x8;
+    bool compiler_is_dxc;
+
+    /// Reflect the fields of this class so that it can be used by tint::ForeachField()
+    TINT_REFLECT(FuzzedOptions,
+                 disable_robustness,
+                 disable_workgroup_init,
+                 polyfill_reflect_vec2_f32,
+                 polyfill_dot_4x8_packed,
+                 disable_polyfill_integer_div_mod,
+                 polyfill_pack_unpack_4x8,
+                 compiler_is_dxc);
+};
+
+Result<SuccessType> IRFuzzer(core::ir::Module& module, FuzzedOptions fuzzed_options) {
+    if (!CanRun(module)) {
         return Failure{"Cannot run module"};
     }
+
+    Options options;
+    options.disable_robustness = fuzzed_options.disable_robustness;
+    options.disable_workgroup_init = fuzzed_options.disable_workgroup_init;
+    options.polyfill_reflect_vec2_f32 = fuzzed_options.polyfill_reflect_vec2_f32;
+    options.polyfill_dot_4x8_packed = fuzzed_options.polyfill_dot_4x8_packed;
+    options.disable_polyfill_integer_div_mod = fuzzed_options.disable_polyfill_integer_div_mod;
+    options.polyfill_pack_unpack_4x8 = fuzzed_options.polyfill_pack_unpack_4x8;
+    options.compiler =
+        fuzzed_options.compiler_is_dxc ? Options::Compiler::kDXC : Options::Compiler::kFXC;
 
     options.bindings = GenerateBindings(module);
     options.array_length_from_uniform.ubo_binding = {30, 0};
