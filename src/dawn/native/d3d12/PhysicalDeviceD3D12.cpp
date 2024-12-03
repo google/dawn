@@ -475,6 +475,10 @@ MaybeError PhysicalDevice::InitializeDebugLayerFilters() {
         // get rejected and generate a debug error. Then, we request 0 to get the allowed
         // allowed alignment.
         D3D12_MESSAGE_ID_CREATERESOURCE_INVALIDALIGNMENT,
+#if D3D12_SDK_VERSION >= 612
+        // This message id for small resource alignment was introduced in SDK 10.0.26100.0.
+        D3D12_MESSAGE_ID_CREATERESOURCE_INVALIDALIGNMENT_SMALLRESOURCE,
+#endif
 
         // WebGPU allows OOB vertex buffer access and relies on D3D12's robust buffer access
         // behavior.
