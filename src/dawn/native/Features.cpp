@@ -384,8 +384,12 @@ static constexpr FeatureEnumAndInfo kFeatureInfo[] = {
     {Feature::ChromiumExperimentalImmediateData,
      {"Support the \"enable chromium_experimental_immediate_data;\" directive in WGSL.",
       "https://github.com/gpuweb/gpuweb/blob/main/proposals/push-constants.md",
-      FeatureInfo::FeatureState::Experimental}}};
-
+      FeatureInfo::FeatureState::Experimental}},
+    {Feature::DawnTexelCopyBufferRowAlignment,
+     {"Expose the min row alignment in buffer for texel copy operations.",
+      "https://dawn.googlesource.com/dawn/+/refs/heads/main/docs/dawn/features/"
+      "dawn_texel_copy_buffer_row_alignment.md",
+      FeatureInfo::FeatureState::Stable}}};
 }  // anonymous namespace
 
 void FeaturesSet::EnableFeature(Feature feature) {

@@ -121,8 +121,9 @@ void Server::OnRequestDeviceCallback(RequestDeviceUserdata* data,
     cmd.featuresCount = features.size();
     cmd.features = features.data();
 
-    // Query and report the adapter limits, including DawnExperimentalSubgroupLimits and
-    // DawnExperimentalImmediateDataLimits. Reporting to client.
+    // Query and report the adapter limits, including DawnExperimentalSubgroupLimits,
+    // DawnExperimentalImmediateDataLimits and DawnTexelCopyBufferRowAlignmentLimits.
+    // Reporting to client.
     WGPUSupportedLimits limits = {};
 
     // Chained DawnExperimentalSubgroupLimits.
@@ -134,6 +135,11 @@ void Server::OnRequestDeviceCallback(RequestDeviceUserdata* data,
     WGPUDawnExperimentalImmediateDataLimits experimentalImmediateDataLimits = {};
     experimentalImmediateDataLimits.chain.sType = WGPUSType_DawnExperimentalImmediateDataLimits;
     experimentalSubgroupLimits.chain.next = &experimentalImmediateDataLimits.chain;
+
+    // Chained DawnTexelCopyBufferRowAlignmentLimits.
+    WGPUDawnTexelCopyBufferRowAlignmentLimits texelCopyBufferRowAlignmentLimits = {};
+    texelCopyBufferRowAlignmentLimits.chain.sType = WGPUSType_DawnTexelCopyBufferRowAlignmentLimits;
+    experimentalImmediateDataLimits.chain.next = &texelCopyBufferRowAlignmentLimits.chain;
 
     mProcs.deviceGetLimits(device, &limits);
     cmd.limits = &limits;

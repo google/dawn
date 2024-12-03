@@ -123,8 +123,8 @@ void Server::OnRequestAdapterCallback(RequestAdapterUserdata* data,
     mProcs.adapterGetInfo(adapter, &info);
     cmd.info = &info;
 
-    // Query and report the adapter limits, including DawnExperimentalSubgroupLimits and
-    // DawnExperimentalImmediateDataLimits.
+    // Query and report the adapter limits, including DawnExperimentalSubgroupLimits,
+    // DawnExperimentalImmediateDataLimits, and DawnTexelCopyBufferRowAlignmentLimits.
     WGPUSupportedLimits limits = {};
 
     WGPUDawnExperimentalSubgroupLimits experimentalSubgroupLimits = {};
@@ -135,6 +135,11 @@ void Server::OnRequestAdapterCallback(RequestAdapterUserdata* data,
     WGPUDawnExperimentalImmediateDataLimits experimentalImmediateDataLimits = {};
     experimentalImmediateDataLimits.chain.sType = WGPUSType_DawnExperimentalImmediateDataLimits;
     experimentalSubgroupLimits.chain.next = &experimentalImmediateDataLimits.chain;
+
+    // Chained DawnTexelCopyBufferRowAlignmentLimits.
+    WGPUDawnTexelCopyBufferRowAlignmentLimits texelCopyBufferRowAlignmentLimits = {};
+    texelCopyBufferRowAlignmentLimits.chain.sType = WGPUSType_DawnTexelCopyBufferRowAlignmentLimits;
+    experimentalImmediateDataLimits.chain.next = &texelCopyBufferRowAlignmentLimits.chain;
 
     mProcs.adapterGetLimits(adapter, &limits);
     cmd.limits = &limits;

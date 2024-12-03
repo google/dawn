@@ -60,6 +60,13 @@ WGPUStatus LimitsAndFeatures::GetLimits(WGPUSupportedLimits* limits) const {
                 *experimentalImmediateDataLimits = mExperimentalImmediateDataLimits;
                 break;
             }
+            case (WGPUSType_DawnTexelCopyBufferRowAlignmentLimits): {
+                auto* texelCopyBufferRowAlignmentLimits =
+                    reinterpret_cast<WGPUDawnTexelCopyBufferRowAlignmentLimits*>(chain);
+                // This assignment break the next field of WGPUChainedStructOut head.
+                *texelCopyBufferRowAlignmentLimits = mTexelCopyBufferRowAlignmentLimits;
+                break;
+            }
             default:
                 // Fail if unknown sType found.
                 return WGPUStatus_Error;
@@ -116,6 +123,13 @@ void LimitsAndFeatures::SetLimits(const WGPUSupportedLimits* limits) {
                     reinterpret_cast<WGPUDawnExperimentalImmediateDataLimits*>(chain);
                 mExperimentalImmediateDataLimits = *experimentalImmediateDataLimits;
                 mExperimentalImmediateDataLimits.chain.next = nullptr;
+                break;
+            }
+            case (WGPUSType_DawnTexelCopyBufferRowAlignmentLimits): {
+                auto* texelCopyBufferRowAlignmentLimits =
+                    reinterpret_cast<WGPUDawnTexelCopyBufferRowAlignmentLimits*>(chain);
+                mTexelCopyBufferRowAlignmentLimits = *texelCopyBufferRowAlignmentLimits;
+                mTexelCopyBufferRowAlignmentLimits.chain.next = nullptr;
                 break;
             }
             default:

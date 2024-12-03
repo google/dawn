@@ -185,6 +185,8 @@ void PhysicalDevice::InitializeSupportedFeaturesImpl() {
     if (formatSupport & D3D11_FORMAT_SUPPORT_TYPED_UNORDERED_ACCESS_VIEW) {
         EnableFeature(Feature::BGRA8UnormStorage);
     }
+
+    EnableFeature(Feature::DawnTexelCopyBufferRowAlignment);
 }
 
 MaybeError PhysicalDevice::InitializeSupportedLimitsImpl(CombinedLimits* limits) {
@@ -264,6 +266,9 @@ MaybeError PhysicalDevice::InitializeSupportedLimitsImpl(CombinedLimits* limits)
     limits->v1.maxInterStageShaderVariables = D3D11_PS_INPUT_REGISTER_COUNT - 2;
     limits->v1.maxInterStageShaderComponents =
         limits->v1.maxInterStageShaderVariables * D3D11_PS_INPUT_REGISTER_COMPONENTS;
+
+    // The BlitTextureToBuffer helper requires the alignment to be 4.
+    limits->texelCopyBufferRowAlignmentLimits.minTexelCopyBufferRowAlignment = 4;
 
     return {};
 }

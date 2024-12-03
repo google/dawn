@@ -39,6 +39,7 @@ struct CombinedLimits {
     Limits v1;
     DawnExperimentalSubgroupLimits experimentalSubgroupLimits;
     DawnExperimentalImmediateDataLimits experimentalImmediateDataLimits;
+    DawnTexelCopyBufferRowAlignmentLimits texelCopyBufferRowAlignmentLimits;
 };
 
 // Populate |limits| with the default limits.

@@ -50,6 +50,7 @@ class LimitsAndFeatures {
     WGPUSupportedLimits mLimits;
     WGPUDawnExperimentalSubgroupLimits mExperimentalSubgroupLimits;
     WGPUDawnExperimentalImmediateDataLimits mExperimentalImmediateDataLimits;
+    WGPUDawnTexelCopyBufferRowAlignmentLimits mTexelCopyBufferRowAlignmentLimits;
     absl::flat_hash_set<WGPUFeatureName> mFeatures;
 };
 

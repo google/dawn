@@ -202,20 +202,25 @@ class CopyTests {
         return textureData;
     }
 
-    static BufferSpec MinimumBufferSpec(uint32_t width,
-                                        uint32_t height,
-                                        uint32_t depth = 1,
-                                        wgpu::TextureFormat format = kDefaultFormat) {
+    static BufferSpec MinimumBufferSpec(
+        uint32_t width,
+        uint32_t height,
+        uint32_t depth = 1,
+        wgpu::TextureFormat format = kDefaultFormat,
+        uint32_t textureBytesPerRowAlignment = kTextureBytesPerRowAlignment) {
         return MinimumBufferSpec({width, height, depth}, kStrideComputeDefault,
                                  depth == 1 ? wgpu::kCopyStrideUndefined : kStrideComputeDefault,
-                                 format);
+                                 format, textureBytesPerRowAlignment);
     }
 
-    static BufferSpec MinimumBufferSpec(wgpu::Extent3D copyExtent,
-                                        uint32_t overrideBytesPerRow = kStrideComputeDefault,
-                                        uint32_t overrideRowsPerImage = kStrideComputeDefault,
-                                        wgpu::TextureFormat format = kDefaultFormat) {
-        uint32_t bytesPerRow = utils::GetMinimumBytesPerRow(format, copyExtent.width);
+    static BufferSpec MinimumBufferSpec(
+        wgpu::Extent3D copyExtent,
+        uint32_t overrideBytesPerRow = kStrideComputeDefault,
+        uint32_t overrideRowsPerImage = kStrideComputeDefault,
+        wgpu::TextureFormat format = kDefaultFormat,
+        uint32_t textureBytesPerRowAlignment = kTextureBytesPerRowAlignment) {
+        uint32_t bytesPerRow =
+            utils::GetMinimumBytesPerRow(format, copyExtent.width, textureBytesPerRowAlignment);
         if (overrideBytesPerRow != kStrideComputeDefault) {
             bytesPerRow = overrideBytesPerRow;
         }
@@ -262,6 +267,13 @@ class CopyTests_T2B : public CopyTests, public DawnTestWithParams<CopyTextureFor
         TextureSpec() { format = GetParam().mTextureFormat; }
     };
 
+    std::vector<wgpu::FeatureName> GetRequiredFeatures() override {
+        if (!SupportsFeatures({wgpu::FeatureName::DawnTexelCopyBufferRowAlignment})) {
+            return {};
+        }
+        return {wgpu::FeatureName::DawnTexelCopyBufferRowAlignment};
+    }
+
     void SetUp() override {
         DawnTestWithParams<CopyTextureFormatParams>::SetUp();
 
@@ -288,14 +300,26 @@ class CopyTests_T2B : public CopyTests, public DawnTestWithParams<CopyTextureFor
                                GetParam().mTextureFormat == wgpu::TextureFormat::RG11B10Ufloat) &&
                               (IsD3D11() || IsOpenGLES()) && IsIntelGen12());
     }
-    static BufferSpec MinimumBufferSpec(uint32_t width, uint32_t height, uint32_t depth = 1) {
-        return CopyTests::MinimumBufferSpec(width, height, depth, GetParam().mTextureFormat);
+    uint32_t GetTextureBytesPerRowAlignment() const {
+        if (!device.HasFeature(wgpu::FeatureName::DawnTexelCopyBufferRowAlignment)) {
+            return kTextureBytesPerRowAlignment;
+        }
+        wgpu::SupportedLimits limits{};
+        wgpu::DawnTexelCopyBufferRowAlignmentLimits alignmentLimits{};
+        limits.nextInChain = &alignmentLimits;
+        device.GetLimits(&limits);
+        return alignmentLimits.minTexelCopyBufferRowAlignment;
     }
-    static BufferSpec MinimumBufferSpec(wgpu::Extent3D copyExtent,
-                                        uint32_t overrideBytesPerRow = kStrideComputeDefault,
-                                        uint32_t overrideRowsPerImage = kStrideComputeDefault) {
+    BufferSpec MinimumBufferSpec(uint32_t width, uint32_t height, uint32_t depth = 1) {
+        return CopyTests::MinimumBufferSpec(width, height, depth, GetParam().mTextureFormat,
+                                            GetTextureBytesPerRowAlignment());
+    }
+    BufferSpec MinimumBufferSpec(wgpu::Extent3D copyExtent,
+                                 uint32_t overrideBytesPerRow = kStrideComputeDefault,
+                                 uint32_t overrideRowsPerImage = kStrideComputeDefault) {
         return CopyTests::MinimumBufferSpec(copyExtent, overrideBytesPerRow, overrideRowsPerImage,
-                                            GetParam().mTextureFormat);
+                                            GetParam().mTextureFormat,
+                                            GetTextureBytesPerRowAlignment());
     }
 
     void DoTest(

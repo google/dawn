@@ -33,6 +33,8 @@
 #include <functional>
 #include <ostream>
 
+#include "dawn/common/Constants.h"
+
 namespace dawn::utils {
 
 struct RGBA8 {
@@ -66,7 +68,9 @@ struct TextureDataCopyLayout {
     wgpu::Extent3D mipSize;
 };
 
-uint32_t GetMinimumBytesPerRow(wgpu::TextureFormat format, uint32_t width);
+uint32_t GetMinimumBytesPerRow(wgpu::TextureFormat format,
+                               uint32_t width,
+                               uint32_t textureBytesPerRowAlignment = kTextureBytesPerRowAlignment);
 TextureDataCopyLayout GetTextureDataCopyLayoutForTextureAtLevel(
     wgpu::TextureFormat format,
     wgpu::Extent3D textureSizeAtLevel0,

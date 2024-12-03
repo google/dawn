@@ -32,7 +32,6 @@
 #include <vector>
 
 #include "dawn/common/Assert.h"
-#include "dawn/common/Constants.h"
 #include "dawn/common/Math.h"
 #include "dawn/utils/TestUtils.h"
 #include "dawn/utils/TextureUtils.h"
@@ -53,11 +52,13 @@ std::ostream& operator<<(std::ostream& stream, const RGBA8& color) {
                   << ", " << static_cast<int>(color.b) << ", " << static_cast<int>(color.a) << ")";
 }
 
-uint32_t GetMinimumBytesPerRow(wgpu::TextureFormat format, uint32_t width) {
+uint32_t GetMinimumBytesPerRow(wgpu::TextureFormat format,
+                               uint32_t width,
+                               uint32_t textureBytesPerRowAlignment) {
     const uint32_t bytesPerBlock = dawn::utils::GetTexelBlockSizeInBytes(format);
     const uint32_t blockWidth = dawn::utils::GetTextureFormatBlockWidth(format);
     DAWN_ASSERT(width % blockWidth == 0);
-    return Align(bytesPerBlock * (width / blockWidth), kTextureBytesPerRowAlignment);
+    return Align(bytesPerBlock * (width / blockWidth), textureBytesPerRowAlignment);
 }
 
 TextureDataCopyLayout GetTextureDataCopyLayoutForTextureAtLevel(wgpu::TextureFormat format,

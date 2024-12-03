@@ -1839,6 +1839,15 @@
             {"name": "max immediate data range byte size", "type": "uint32_t", "default": "WGPU_LIMIT_U32_UNDEFINED"}
         ]
     },
+    "dawn texel copy buffer row alignment limits": {
+        "category": "structure",
+        "chained": "out",
+        "chain roots": ["supported limits"],
+        "tags": ["dawn"],
+        "members": [
+            {"name": "min texel copy buffer row alignment", "type": "uint32_t", "default": "WGPU_LIMIT_U32_UNDEFINED"}
+        ]
+    },
     "required limits": {
         "category": "structure",
         "extensible": "in",
@@ -2501,7 +2510,8 @@
             {"value": 51, "name": "dawn load resolve texture", "tags": ["dawn"]},
             {"value": 52, "name": "dawn partial load resolve texture", "tags": ["dawn"]},
             {"value": 53, "name": "multi draw indirect", "tags": ["dawn"]},
-            {"value": 54, "name": "clip distances", "tags": ["dawn"]}
+            {"value": 54, "name": "clip distances", "tags": ["dawn"]},
+            {"value": 55, "name": "dawn texel copy buffer row alignment", "tags": ["dawn"]}
         ]
     },
     "filter mode": {
@@ -4047,8 +4057,8 @@
             {"value": 55, "name": "y cb cr vk descriptor", "tags": ["dawn"]},
             {"value": 56, "name": "shared texture memory a hardware buffer properties", "tags": ["dawn", "native"]},
             {"value": 57, "name": "a hardware buffer properties", "tags": ["dawn", "native"]},
-            {"value": 58, "name": "dawn experimental immediate data limits", "tags": ["dawn"]}
-
+            {"value": 58, "name": "dawn experimental immediate data limits", "tags": ["dawn"]},
+            {"value": 59, "name": "dawn texel copy buffer row alignment limits", "tags": ["dawn"]}
         ]
     },
     "texture": {

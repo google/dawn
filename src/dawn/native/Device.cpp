@@ -380,6 +380,10 @@ DeviceBase::DeviceBase(AdapterBase* adapter,
     mLimits.experimentalImmediateDataLimits =
         GetPhysicalDevice()->GetLimits().experimentalImmediateDataLimits;
 
+    // Get texelCopyBufferRowAlignmentLimits from physical device
+    mLimits.texelCopyBufferRowAlignmentLimits =
+        GetPhysicalDevice()->GetLimits().texelCopyBufferRowAlignmentLimits;
+
     mFormatTable = BuildFormatTable(this);
 
     if (!descriptor->label.IsUndefined()) {
@@ -1886,6 +1890,21 @@ wgpu::Status DeviceBase::APIGetLimits(SupportedLimits* limits) const {
 
         // Recover origin chain.
         immediateDataLimits->nextInChain = originalChain;
+    }
+
+    if (auto* texelCopyBufferRowAlignmentLimits =
+            unpacked.Get<DawnTexelCopyBufferRowAlignmentLimits>()) {
+        wgpu::ChainedStructOut* originalChain = texelCopyBufferRowAlignmentLimits->nextInChain;
+        if (!HasFeature(Feature::DawnTexelCopyBufferRowAlignment)) {
+            // If the feature is not enabled, minTexelCopyBufferRowAlignment is default-initialized
+            // to WGPU_LIMIT_U32_UNDEFINED.
+            *texelCopyBufferRowAlignmentLimits = DawnTexelCopyBufferRowAlignmentLimits{};
+        } else {
+            *texelCopyBufferRowAlignmentLimits = mLimits.texelCopyBufferRowAlignmentLimits;
+        }
+
+        // Recover origin chain.
+        texelCopyBufferRowAlignmentLimits->nextInChain = originalChain;
     }
 
     return wgpu::Status::Success;
