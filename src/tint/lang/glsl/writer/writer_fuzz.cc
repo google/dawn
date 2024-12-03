@@ -278,4 +278,7 @@ Result<SuccessType> IRFuzzer(core::ir::Module& module) {
 }  // namespace
 }  // namespace tint::glsl::writer
 
-TINT_IR_MODULE_FUZZER(tint::glsl::writer::IRFuzzer, tint::core::ir::Capabilities{});
+TINT_IR_MODULE_FUZZER(tint::glsl::writer::IRFuzzer,
+                      tint::core::ir::Capabilities{},
+                      tint::core::ir::Capabilities{
+                          tint::core::ir::Capability::kAllowHandleVarsWithoutBindings});
