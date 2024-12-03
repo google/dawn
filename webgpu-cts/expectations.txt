@@ -7963,11 +7963,10 @@ crbug.com/0000 [ android-r qualcomm ] webgpu:shader,execution,expression,call,bu
 crbug.com/0000 [ android-r qualcomm ] webgpu:shader,execution,expression,call,builtin,textureSampleGrad:sampled_2d_coords:stage="c";format="astc-4x4-unorm";* [ Failure ]
 crbug.com/0000 [ android-r qualcomm ] webgpu:shader,execution,expression,call,builtin,textureSampleGrad:sampled_2d_coords:stage="c";format="astc-4x4-unorm-srgb";* [ Failure ]
 
-crbug.com/0000 [ win10 ] webgpu:shader,execution,expression,call,builtin,textureSampleCompareLevel:2d_coords:* [ Skip ]
-crbug.com/0000 [ linux intel-0x4680 ] webgpu:shader,execution,expression,call,builtin,textureSampleGrad:sampled_2d_coords:* [ Skip ]
+crbug.com/0000 [ linux ] webgpu:shader,execution,expression,call,builtin,textureSampleGrad:sampled_2d_coords:* [ Skip ]
+crbug.com/0000 [ linux ] webgpu:shader,execution,expression,call,builtin,textureSampleGrad:sampled_3d_coords:* [ Skip ]
 crbug.com/0000 [ linux intel-0x4680 ] webgpu:shader,execution,expression,call,builtin,textureSampleCompareLevel:arrayed_2d_coords:* [ Skip ]
 crbug.com/0000 [ linux nvidia-0x2184 ] webgpu:shader,execution,expression,call,builtin,textureSampleCompareLevel:2d_coords:* [ Skip ]
-crbug.com/0000 [ win10 intel-0x4680 ] webgpu:shader,execution,expression,call,builtin,textureSampleGrad:sampled_2d_coords:* [ Skip ]
-crbug.com/0000 [ win10 intel-0x9bc5 ] webgpu:shader,execution,expression,call,builtin,textureSampleGrad:sampled_2d_coords:* [ Skip ]
-crbug.com/0000 [ win10 nvidia-0x2184 ] webgpu:shader,execution,expression,call,builtin,textureSampleGrad:sampled_2d_coords:* [ Skip ]
-
+crbug.com/0000 [ win10 ] webgpu:shader,execution,expression,call,builtin,textureSampleCompareLevel:2d_coords:* [ Skip ]
+crbug.com/0000 [ win10 ] webgpu:shader,execution,expression,call,builtin,textureSampleGrad:sampled_2d_coords:* [ Skip ]
+crbug.com/0000 [ win10 ] webgpu:shader,execution,expression,call,builtin,textureSampleGrad:sampled_3d_coords:* [ Skip ]
