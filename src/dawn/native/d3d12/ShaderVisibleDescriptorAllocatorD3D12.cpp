@@ -228,6 +228,10 @@ MaybeError ShaderVisibleDescriptorAllocator::AllocateAndSwitchShaderVisibleHeap(
     return {};
 }
 
+Device* ShaderVisibleDescriptorAllocator::GetDevice() const {
+    return mDevice;
+}
+
 HeapVersionID ShaderVisibleDescriptorAllocator::GetShaderVisibleHeapSerialForTesting() const {
     return mHeapSerial;
 }

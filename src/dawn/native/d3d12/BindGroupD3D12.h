@@ -54,8 +54,7 @@ class BindGroup final : public BindGroupBase, public PlacementAllocated {
 
     // Returns true if the BindGroup was successfully populated.
     bool PopulateViews(MutexProtected<ShaderVisibleDescriptorAllocator>& viewAllocator);
-    bool PopulateSamplers(Device* device,
-                          MutexProtected<ShaderVisibleDescriptorAllocator>& samplerAllocator);
+    bool PopulateSamplers(MutexProtected<ShaderVisibleDescriptorAllocator>& samplerAllocator);
 
     D3D12_GPU_DESCRIPTOR_HANDLE GetBaseViewDescriptor() const;
     D3D12_GPU_DESCRIPTOR_HANDLE GetBaseSamplerDescriptor() const;

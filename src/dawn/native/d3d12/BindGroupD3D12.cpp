@@ -264,12 +264,11 @@ D3D12_GPU_DESCRIPTOR_HANDLE BindGroup::GetBaseSamplerDescriptor() const {
 }
 
 bool BindGroup::PopulateSamplers(
-    Device* device,
     MutexProtected<ShaderVisibleDescriptorAllocator>& samplerAllocator) {
     if (mSamplerAllocationEntry == nullptr) {
         return true;
     }
-    return mSamplerAllocationEntry->Populate(device, samplerAllocator);
+    return mSamplerAllocationEntry->Populate(samplerAllocator);
 }
 
 void BindGroup::SetSamplerAllocationEntry(Ref<SamplerHeapCacheEntry> entry) {

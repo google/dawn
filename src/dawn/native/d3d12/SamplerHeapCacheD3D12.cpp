@@ -73,13 +73,14 @@ SamplerHeapCacheEntry::~SamplerHeapCacheEntry() {
     DAWN_ASSERT(!mCPUAllocation.IsValid());
 }
 
-bool SamplerHeapCacheEntry::Populate(Device* device,
-                                     MutexProtected<ShaderVisibleDescriptorAllocator>& allocator) {
+bool SamplerHeapCacheEntry::Populate(MutexProtected<ShaderVisibleDescriptorAllocator>& allocator) {
     if (allocator->IsAllocationStillValid(mGPUAllocation)) {
         return true;
     }
 
     DAWN_ASSERT(!mSamplers.empty());
+
+    Device* device = allocator->GetDevice();
 
     // Attempt to allocate descriptors for the currently bound shader-visible heaps.
     // If either failed, return early to re-allocate and switch the heaps.

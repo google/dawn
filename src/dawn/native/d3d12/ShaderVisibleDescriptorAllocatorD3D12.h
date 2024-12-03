@@ -88,6 +88,8 @@ class ShaderVisibleDescriptorAllocator {
 
     bool IsAllocationStillValid(const GPUDescriptorHeapAllocation& allocation) const;
 
+    Device* GetDevice() const;
+
   private:
     struct SerialDescriptorHeap {
         ExecutionSerial heapSerial;
