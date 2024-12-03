@@ -753,8 +753,9 @@ MutexProtected<StagingDescriptorAllocator>* Device::GetViewStagingDescriptorAllo
 MutexProtected<StagingDescriptorAllocator>* Device::GetSamplerStagingDescriptorAllocator(
     uint32_t descriptorCount) const {
     DAWN_ASSERT(descriptorCount <= kMaxSamplerDescriptorsPerBindGroup);
+    DAWN_ASSERT(descriptorCount > 0);
     // This is Log2 of the next power of two, plus 1.
-    uint32_t allocatorIndex = descriptorCount == 0 ? 0 : Log2Ceil(descriptorCount) + 1;
+    uint32_t allocatorIndex = Log2Ceil(descriptorCount) + 1;
     return mSamplerAllocators[allocatorIndex].get();
 }
 

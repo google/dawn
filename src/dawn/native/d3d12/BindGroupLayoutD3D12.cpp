@@ -209,8 +209,6 @@ BindGroupLayout::BindGroupLayout(Device* device, const BindGroupLayoutDescriptor
 
         descriptorRanges.push_back(range);
     }
-
-    mSamplerAllocator = device->GetSamplerStagingDescriptorAllocator(GetSamplerDescriptorCount());
 }
 
 ResultOrError<Ref<BindGroup>> BindGroupLayout::AllocateBindGroup(
@@ -233,10 +231,9 @@ ResultOrError<Ref<BindGroup>> BindGroupLayout::AllocateBindGroup(
         mBindGroupAllocator->Allocate(device, descriptor, viewSizeIncrement, viewAllocation));
 
     if (GetSamplerDescriptorCount() > 0) {
-        DAWN_ASSERT(mSamplerAllocator != nullptr);
         Ref<SamplerHeapCacheEntry> samplerHeapCacheEntry;
-        DAWN_TRY_ASSIGN(samplerHeapCacheEntry, device->GetSamplerHeapCache()->GetOrCreate(
-                                                   bindGroup.Get(), *mSamplerAllocator));
+        DAWN_TRY_ASSIGN(samplerHeapCacheEntry,
+                        device->GetSamplerHeapCache()->GetOrCreate(bindGroup.Get()));
         bindGroup->SetSamplerAllocationEntry(std::move(samplerHeapCacheEntry));
     }
 
