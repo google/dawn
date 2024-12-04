@@ -1815,8 +1815,8 @@
         "chained": "out",
         "chain roots": ["adapter info"],
         "members": [
-            {"name": "min subgroup size", "type": "uint32_t", "default": "WGPU_LIMIT_U32_UNDEFINED"},
-            {"name": "max subgroup size", "type": "uint32_t", "default": "WGPU_LIMIT_U32_UNDEFINED"}
+            {"name": "subgroup min size", "type": "uint32_t", "default": "WGPU_LIMIT_U32_UNDEFINED"},
+            {"name": "subgroup max size", "type": "uint32_t", "default": "WGPU_LIMIT_U32_UNDEFINED"}
         ]
     },
     "dawn experimental subgroup limits": {
