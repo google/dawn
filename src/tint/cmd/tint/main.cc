@@ -26,7 +26,6 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <charconv>
-#include <cstdio>
 #include <iostream>
 #include <memory>
 #include <optional>
@@ -45,7 +44,6 @@
 #include "src/tint/lang/core/ir/disassembler.h"
 #include "src/tint/lang/core/ir/transform/single_entry_point.h"
 #include "src/tint/lang/wgsl/ast/module.h"
-#include "src/tint/lang/wgsl/ast/transform/first_index_offset.h"
 #include "src/tint/lang/wgsl/ast/transform/manager.h"
 #include "src/tint/lang/wgsl/ast/transform/renamer.h"
 #include "src/tint/lang/wgsl/ast/transform/single_entry_point.h"
@@ -176,7 +174,6 @@ struct Options {
 #if TINT_BUILD_HLSL_WRITER
     std::string fxc_path;
     std::string dxc_path;
-    std::optional<tint::BindingPoint> hlsl_root_constant_binding_point;
     uint32_t hlsl_shader_model = kMinShaderModelForDXC;
     tint::hlsl::writer::PixelLocalOptions pixel_local_options;
 #endif  // TINT_BUILD_HLSL_WRITER
@@ -399,13 +396,6 @@ When specified, automatically enables HLSL validation)",
                                   Parameter{"path"});
     TINT_DEFER(opts->dxc_path = dxc_path.value.value_or(""));
 
-    auto& hlsl_rc_bp = options.Add<StringOption>("hlsl-root-constant-binding-point",
-                                                 R"(Binding point for root constant.
-Specify the binding point for generated uniform buffer
-used for num_workgroups in HLSL. If not specified, then
-default to binding 0 of the largest used group plus 1,
-or group 0 if no resource bound)");
-
     auto& pixel_local_attachment_formats =
         options.Add<StringOption>("pixel_local_attachment_formats",
                                   R"(Pixel local storage attachment formats, comma-separated
@@ -415,10 +405,6 @@ index and ATTACHMENT_FORMAT is the format of the emitted
 attachment, which can only be one of the below value:
 R32Sint, R32Uint, R32Float.
 )");
-
-    auto& pixel_local_group_index = options.Add<ValueOption<uint32_t>>(
-        "pixel_local_group_index", "The bind group index of the pixel local attachments.",
-        Default{0});
 
     std::stringstream hlslShaderModelStream;
     hlslShaderModelStream << R"(
@@ -503,32 +489,6 @@ Options:
     }
 
 #if TINT_BUILD_HLSL_WRITER
-    if (hlsl_rc_bp.value.has_value()) {
-        auto binding_points = tint::Split(*hlsl_rc_bp.value, ",");
-        if (binding_points.Length() != 2) {
-            std::cerr << "Invalid binding point for " << hlsl_rc_bp.name << ": "
-                      << *hlsl_rc_bp.value << "\n";
-            return false;
-        }
-        auto group = tint::strconv::ParseUint32(binding_points[0]);
-        if (group != tint::Success) {
-            std::cerr << "Invalid group for " << hlsl_rc_bp.name << ": " << binding_points[0]
-                      << "\n";
-            return false;
-        }
-        auto binding = tint::strconv::ParseUint32(binding_points[1]);
-        if (binding != tint::Success) {
-            std::cerr << "Invalid binding for " << hlsl_rc_bp.name << ": " << binding_points[1]
-                      << "\n";
-            return false;
-        }
-        opts->hlsl_root_constant_binding_point = tint::BindingPoint{group.Get(), binding.Get()};
-    }
-
-    if (pixel_local_group_index.value.has_value()) {
-        opts->pixel_local_options.group_index = *pixel_local_group_index.value;
-    }
-
     if (pixel_local_attachment_formats.value.has_value()) {
         auto binding_formats = tint::Split(*pixel_local_attachment_formats.value, ",");
         for (auto& binding_format : binding_formats) {
@@ -1048,7 +1008,6 @@ bool GenerateHlsl([[maybe_unused]] Options& options,
     gen_options.disable_robustness = !options.enable_robustness;
     gen_options.disable_workgroup_init = options.disable_workgroup_init;
     gen_options.bindings = tint::hlsl::writer::GenerateBindings(res.Get());
-    gen_options.root_constant_binding_point = options.hlsl_root_constant_binding_point;
     gen_options.pixel_local = options.pixel_local_options;
     gen_options.polyfill_dot_4x8_packed = options.hlsl_shader_model < kMinShaderModelForDP4aInHLSL;
     gen_options.polyfill_pack_unpack_4x8 =
