@@ -1535,8 +1535,7 @@
             },
             {
                 "name": "get lost future",
-                "returns": "future",
-                "tags": ["emscripten"]
+                "returns": "future"
             },
             {
                 "name": "has feature",

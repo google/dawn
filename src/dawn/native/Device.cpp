@@ -300,6 +300,7 @@ DeviceBase::DeviceBase(AdapterBase* adapter,
       mNextPipelineCompatibilityToken(1) {
     DAWN_ASSERT(descriptor);
 
+    DAWN_ASSERT(mLostEvent);
     mLostEvent->mDevice = this;
 
 #if defined(DAWN_ENABLE_ASSERTS)
@@ -414,7 +415,6 @@ DeviceBase::~DeviceBase() {
     // We need to explicitly release the Queue before we complete the destructor so that the
     // Queue does not get destroyed after the Device.
     mQueue = nullptr;
-    mLostEvent = nullptr;
 }
 
 MaybeError DeviceBase::Initialize(Ref<QueueBase> defaultQueue) {
@@ -572,12 +572,7 @@ void DeviceBase::Destroy() {
     // Skip handling device facilities if they haven't even been created (or failed doing so)
     if (mState != State::BeingCreated) {
         // The device is being destroyed so it will be lost, call the application callback.
-        if (mLostEvent != nullptr) {
-            mLostEvent->mReason = wgpu::DeviceLostReason::Destroyed;
-            mLostEvent->mMessage = "Device was destroyed.";
-            GetInstance()->GetEventManager()->SetFutureReady(mLostEvent.Get());
-            mLostEvent = nullptr;
-        }
+        HandleDeviceLost(wgpu::DeviceLostReason::Destroyed, "Device was destroyed.");
 
         // Call all the callbacks immediately as the device is about to shut down.
         // TODO(crbug.com/dawn/826): Cancel the tasks that are in flight if possible.
@@ -659,9 +654,19 @@ void DeviceBase::APIDestroy() {
     Destroy();
 }
 
+void DeviceBase::HandleDeviceLost(wgpu::DeviceLostReason reason, std::string_view message) {
+    if (mLostEvent != nullptr) {
+        mLostEvent->mReason = reason;
+        mLostEvent->mMessage = message;
+        GetInstance()->GetEventManager()->SetFutureReady(mLostEvent.Get());
+        mLostFuture = mLostEvent->GetFuture();
+        mLostEvent = nullptr;
+    }
+}
+
 void DeviceBase::HandleError(std::unique_ptr<ErrorData> error,
                              InternalErrorType additionalAllowedErrors,
-                             WGPUDeviceLostReason lostReason) {
+                             wgpu::DeviceLostReason lostReason) {
     AppendDebugLayerMessages(error.get());
 
     InternalErrorType type = error->GetType();
@@ -717,13 +722,7 @@ void DeviceBase::HandleError(std::unique_ptr<ErrorData> error,
         // The device was lost, schedule the application callback's execution.
         // Note: we don't invoke the callbacks directly here because it could cause re-entrances ->
         // possible deadlock.
-        if (mLostEvent != nullptr) {
-            mLostEvent->mReason = FromAPI(lostReason);
-            mLostEvent->mMessage = messageStr;
-            GetInstance()->GetEventManager()->SetFutureReady(mLostEvent.Get());
-            mLostEvent = nullptr;
-        }
-
+        HandleDeviceLost(lostReason, messageStr);
         mQueue->HandleDeviceLoss();
 
         // TODO(crbug.com/dawn/826): Cancel the tasks that are in flight if possible.
@@ -887,7 +886,7 @@ void DeviceBase::APIForceLoss(wgpu::DeviceLostReason reason, StringView messageI
     // Note that since we are passing None as the allowedErrors, an additional message will be
     // appended noting that the error was unexpected. Since this call is for testing only it is not
     // too important, but useful for users to understand where the extra message is coming from.
-    HandleError(DAWN_INTERNAL_ERROR(std::string(message)), InternalErrorType::None, ToAPI(reason));
+    HandleError(DAWN_INTERNAL_ERROR(std::string(message)), InternalErrorType::None, reason);
 }
 
 DeviceBase::State DeviceBase::GetState() const {
@@ -1924,6 +1923,14 @@ void DeviceBase::APIGetFeatures(SupportedFeatures* features) const {
 
 wgpu::Status DeviceBase::APIGetAdapterInfo(AdapterInfo* adapterInfo) const {
     return mAdapter->APIGetInfo(adapterInfo);
+}
+
+Future DeviceBase::APIGetLostFuture() const {
+    if (mLostEvent) {
+        return mLostEvent->GetFuture();
+    }
+    DAWN_ASSERT(mLostFuture.id != kNullFutureID);
+    return mLostFuture;
 }
 
 void DeviceBase::APIInjectError(wgpu::ErrorType type, StringView message) {

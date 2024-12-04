@@ -541,6 +541,10 @@ EventManager::TrackedEvent::~TrackedEvent() {
     DAWN_ASSERT(mCompleted);
 }
 
+Future EventManager::TrackedEvent::GetFuture() const {
+    return {mFutureID};
+}
+
 const EventManager::TrackedEvent::CompletionData& EventManager::TrackedEvent::GetCompletionData()
     const {
     return mCompletionData;
