@@ -632,11 +632,9 @@ Options:
     }
 }
 
-[[maybe_unused]] tint::Result<tint::SuccessType> AddSubstituteOverrides(
+tint::Result<std::unordered_map<tint::OverrideId, double>> CreateOverrideMap(
     Options& options,
-    tint::inspector::Inspector& inspector,
-    tint::ast::transform::Manager& transform_manager,
-    tint::ast::transform::DataMap& transform_inputs) {
+    tint::inspector::Inspector& inspector) {
     auto override_names = inspector.GetNamedOverrideIds();
 
     std::unordered_map<tint::OverrideId, double> values;
@@ -661,14 +659,17 @@ Options:
         }
         values.emplace(it->second, override_value);
     }
+    return values;
+}
 
+void AddSubstituteOverrides(std::unordered_map<tint::OverrideId, double> values,
+                            tint::ast::transform::Manager& transform_manager,
+                            tint::ast::transform::DataMap& transform_inputs) {
     tint::ast::transform::SubstituteOverride::Config cfg;
     cfg.map = std::move(values);
 
     transform_inputs.Add<tint::ast::transform::SubstituteOverride::Config>(cfg);
     transform_manager.Add<tint::ast::transform::SubstituteOverride>();
-
-    return tint::Success;
 }
 
 [[maybe_unused]] tint::Result<tint::Program> ProcessASTTransforms(
@@ -681,10 +682,11 @@ Options:
     // Renaming must always come first
     AddRenamer(options, transform_manager, transform_inputs);
 
-    auto res = AddSubstituteOverrides(options, inspector, transform_manager, transform_inputs);
+    auto res = CreateOverrideMap(options, inspector);
     if (res != tint::Success) {
         return res.Failure();
     }
+    AddSubstituteOverrides(res.Get(), transform_manager, transform_inputs);
 
     if (options.emit_single_entry_point) {
         transform_manager.append(std::make_unique<tint::ast::transform::SingleEntryPoint>());
