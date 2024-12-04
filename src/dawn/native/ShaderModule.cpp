@@ -28,6 +28,8 @@
 #include "dawn/native/ShaderModule.h"
 
 #include <algorithm>
+#include <limits>
+#include <set>
 #include <sstream>
 #include <utility>
 
@@ -1025,8 +1027,51 @@ ResultOrError<std::unique_ptr<EntryPointMetadata>> ReflectEntryPointUsingTint(
                         resource.binding, resource.bind_group);
     }
 
+    // Compute the texture+sampler combination count.
+    if (device->IsCompatibilityMode()) {
+        tint::BindingPoint nonSamplerBindingPoint = {std::numeric_limits<uint32_t>::max()};
+        auto samplerAndNonSamplerTextureUses =
+            inspector->GetSamplerTextureUses(entryPoint.name, nonSamplerBindingPoint);
+
+        // separate sampled from non-sampled and put sampled in set
+        std::set<tint::BindingPoint> sampledTextures;
+        std::set<tint::BindingPoint> sampledExternalTextures;
+        std::vector<tint::BindingPoint> nonSampled;
+        uint32_t numSamplerTexturePairs = 0;
+        uint32_t numSamplerExternalTexturePairs = 0;
+
+        for (const auto& pair : samplerAndNonSamplerTextureUses) {
+            const auto& bindingGroupInfoMap =
+                metadata->bindings[BindGroupIndex(pair.texture_binding_point.group)];
+            const auto it =
+                bindingGroupInfoMap.find(BindingNumber(pair.texture_binding_point.binding));
+            auto isExternalTexture =
+                std::holds_alternative<ExternalTextureBindingInfo>(it->second.bindingInfo);
+            if (isExternalTexture) {
+                ++numSamplerExternalTexturePairs;
+                sampledExternalTextures.insert(pair.texture_binding_point);
+            } else if (pair.sampler_binding_point == nonSamplerBindingPoint) {
+                nonSampled.push_back(pair.texture_binding_point);
+            } else {
+                ++numSamplerTexturePairs;
+                sampledTextures.insert(pair.texture_binding_point);
+            }
+        }
+
+        // count the number of non-sampled that are not referenced by sampled pairs.
+        auto numNonSampled = std::count_if(
+            nonSampled.begin(), nonSampled.end(),
+            [&](const tint::BindingPoint& nonSampledBindingPoint) {
+                return sampledTextures.find(nonSampledBindingPoint) == sampledTextures.end();
+            });
+        metadata->numTextureSamplerCombinations = numSamplerTexturePairs + numNonSampled +
+                                                  numSamplerExternalTexturePairs * 3 +
+                                                  sampledExternalTextures.size();
+    }
+
     // Reflection of combined sampler and texture uses.
     auto samplerTextureUses = inspector->GetSamplerTextureUses(entryPoint.name);
+
     metadata->samplerTexturePairs.reserve(samplerTextureUses.Length());
     std::transform(samplerTextureUses.begin(), samplerTextureUses.end(),
                    std::back_inserter(metadata->samplerTexturePairs),

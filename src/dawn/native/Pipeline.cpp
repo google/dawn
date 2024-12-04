@@ -106,6 +106,15 @@ ResultOrError<ShaderModuleEntryPoint> ValidateProgrammableStage(DeviceBase* devi
         "stage (%s), entry point \"%s\"",
         metadata.stage, entryPoint.name);
 
+    const CombinedLimits& limits = device->GetLimits();
+    uint32_t maxCombos =
+        std::min(limits.v1.maxSampledTexturesPerShaderStage, limits.v1.maxSamplersPerShaderStage);
+    DAWN_INVALID_IF(
+        device->IsCompatibilityMode() && metadata.numTextureSamplerCombinations > maxCombos,
+        "Entry-point uses %u texture+sampler combinations which is more than the maximum of %u "
+        "combinations in compatibility mode",
+        metadata.numTextureSamplerCombinations, maxCombos);
+
     // Validate if overridable constants exist in shader module
     // pipelineBase is not yet constructed at this moment so iterate constants from descriptor
     size_t numUninitializedConstants = metadata.uninitializedOverrides.size();

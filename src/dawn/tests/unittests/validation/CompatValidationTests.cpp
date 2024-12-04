@@ -25,6 +25,7 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+#include <algorithm>
 #include <limits>
 #include <string>
 #include <vector>
@@ -351,6 +352,152 @@ TEST_F(CompatValidationTest, CanNotCreatePipelineWithDepthTextureUsedWithNonComp
         }
     }
 }
+
+TEST_F(CompatValidationTest, CanNotUseTooManyTextureSamplerCombos) {
+    wgpu::SupportedLimits limits;
+    device.GetLimits(&limits);
+    uint32_t maxCombos = std::min(limits.limits.maxSampledTexturesPerShaderStage,
+                                  limits.limits.maxSamplersPerShaderStage);
+
+    struct Test {
+        bool expectSuccess;
+        uint32_t numCombos;
+        uint32_t numNonSamplerUsages;
+        uint32_t numExternalTextures;
+        bool useSameExternalTexture;
+        wgpu::ShaderStage stages;
+    };
+    // clang-format off
+    Test comboTests[] = {
+        //                     num                 use
+        //                     non        num      same
+        //                     sampler    external external
+        // pass numCombos      uses       textures tex        stage
+        {true , maxCombos    , 0        , 0      , false, wgpu::ShaderStage::Vertex | wgpu::ShaderStage::Fragment},
+        {true , 1            , maxCombos, 0      , false, wgpu::ShaderStage::Vertex | wgpu::ShaderStage::Fragment},
+        {false, 2            , maxCombos, 0      , false, wgpu::ShaderStage::Vertex | wgpu::ShaderStage::Fragment},
+        {true , maxCombos - 4, 0        , 1      , false, wgpu::ShaderStage::Vertex},
+        {false, maxCombos - 3, 0        , 1      , false, wgpu::ShaderStage::Vertex},
+        {true , maxCombos - 8, 0        , 2      , false, wgpu::ShaderStage::Vertex},
+        {false, maxCombos - 7, 0        , 2      , false, wgpu::ShaderStage::Vertex},
+        {true , maxCombos - 7, 0        , 2      , true,  wgpu::ShaderStage::Vertex},
+        {false, maxCombos - 6, 0        , 2      , true,  wgpu::ShaderStage::Vertex},
+        {true , maxCombos - 4, 0        , 1      , false, wgpu::ShaderStage::Fragment},
+        {false, maxCombos - 3, 0        , 1      , false, wgpu::ShaderStage::Fragment},
+        {true , maxCombos - 8, 0        , 2      , false, wgpu::ShaderStage::Fragment},
+        {false, maxCombos - 7, 0        , 2      , false, wgpu::ShaderStage::Fragment},
+        {true , maxCombos - 7, 0        , 2      , true,  wgpu::ShaderStage::Fragment},
+        {false, maxCombos - 6, 0        , 2      , true,  wgpu::ShaderStage::Fragment},
+        {false, maxCombos + 1, 0        , 0      , false, wgpu::ShaderStage::Vertex},
+        {false, maxCombos + 1, 0        , 0      , false, wgpu::ShaderStage::Fragment},
+    };
+    // clang-format on
+    for (const auto& test : comboTests) {
+        uint32_t maxTexturesPerShaderStage =
+            limits.limits.maxSampledTexturesPerShaderStage - (test.numExternalTextures * 3);
+        auto numCombos = test.numCombos;
+        std::vector<std::string> textureDeclarations[2];
+        std::vector<std::string> samplerDeclarations[2];
+        std::vector<std::string> usages[2];
+        for (uint32_t stage = 0; stage < 2; ++stage) {
+            uint32_t count = 0;
+            for (uint32_t t = 0; count < numCombos && t < maxTexturesPerShaderStage; ++t) {
+                textureDeclarations[stage].push_back(
+                    absl::StrFormat("@group(%u) @binding(%u) var t%u_%u: texture_2d<f32>;",
+                                    stage * 2, t, stage, t));
+                for (uint32_t s = 0;
+                     count < numCombos && t < limits.limits.maxSamplersPerShaderStage; ++s) {
+                    if (t == 0) {
+                        samplerDeclarations[stage].push_back(
+                            absl::StrFormat("@group(%u) @binding(%u) var s%u_%u: sampler;",
+                                            (stage * 2) + 1, s, stage, s));
+                    }
+                    usages[stage].push_back(
+                        absl::StrFormat("c += textureSampleLevel(t%u_%u, s%u_%u, vec2f(0), 0);",
+                                        stage, t, stage, s));
+                    ++count;
+                }
+            }
+
+            for (uint32_t t = 0; t < test.numNonSamplerUsages; ++t) {
+                if (t >= textureDeclarations[stage].size()) {
+                    textureDeclarations[stage].push_back(
+                        absl::StrFormat("@group(%u) @binding(%u) var t%u_%u: texture_2d<f32>;",
+                                        stage * 2, t, stage, t));
+                }
+                usages[stage].push_back(
+                    absl::StrFormat("c += textureLoad(t%u_%u, vec2u(0), 0);", stage, t));
+            }
+
+            for (uint32_t t = 0; t < test.numExternalTextures; ++t) {
+                if (t == 0 || !test.useSameExternalTexture) {
+                    auto et = textureDeclarations[stage].size() + t;
+                    textureDeclarations[stage].push_back(
+                        absl::StrFormat("@group(%u) @binding(%u) var e%u_%u: texture_external;",
+                                        stage * 2, et, stage, t));
+                }
+                usages[stage].push_back(
+                    absl::StrFormat("c += textureSampleBaseClampToEdge(e%u_%u, s%u_%u, vec2f(0));",
+                                    stage, test.useSameExternalTexture ? 0 : t, stage,
+                                    test.useSameExternalTexture ? t : 0));
+            }
+        }
+
+        auto wgsl =
+            absl::StrFormat(R"(
+%s
+%s
+
+%s
+%s
+
+fn usage0() -> vec4f {
+  var c: vec4f;
+  %s
+  return c;
+}
+
+fn usage1() -> vec4f {
+  var c: vec4f;
+  %s
+  return c;
+}
+
+@vertex fn vs() -> @builtin(position) vec4f {
+  _ = %s;
+  return vec4f(0);
+}
+
+@group(2) @binding(0) var tt: texture_2d<f32>;
+
+@fragment fn fs() -> @location(0) vec4f {
+  return %s;
+}
+        )",
+                            absl::StrJoin(textureDeclarations[0], "\n"),
+                            absl::StrJoin(samplerDeclarations[0], "\n"),
+                            absl::StrJoin(textureDeclarations[1], "\n"),
+                            absl::StrJoin(samplerDeclarations[1], "\n"),
+                            absl::StrJoin(usages[0], "\n  "), absl::StrJoin(usages[1], "\n  "),
+                            test.stages & wgpu::ShaderStage::Vertex ? "usage0()" : "vec4f(0)",
+                            test.stages & wgpu::ShaderStage::Fragment ? "usage1()" : "vec4f(0)");
+
+        wgpu::ShaderModule module = utils::CreateShaderModule(device, wgsl.c_str());
+        utils::ComboRenderPipelineDescriptor descriptor;
+        descriptor.vertex.module = module;
+        descriptor.cFragment.module = module;
+        descriptor.cFragment.targetCount = 1;
+        descriptor.cTargets[0].format = wgpu::TextureFormat::RGBA8Unorm;
+
+        if (test.expectSuccess) {
+            device.CreateRenderPipeline(&descriptor);
+        } else {
+            ASSERT_DEVICE_ERROR(device.CreateRenderPipeline(&descriptor),
+                                testing::HasSubstr("compat"));
+        }
+    }
+}
+
 TEST_F(CompatValidationTest, CanNotUseSampleMask) {
     wgpu::ShaderModule moduleSampleMaskOutput = utils::CreateShaderModule(device, R"(
         @vertex fn vs() -> @builtin(position) vec4f {

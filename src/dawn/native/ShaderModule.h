@@ -283,6 +283,12 @@ struct EntryPointMetadata {
 
     // Immediate Data block byte size
     uint32_t immediateDataRangeByteSize = 0;
+
+    // Number of texture+sampler combinations, computed as
+    // 1 for every texture+sampler combination + 1 for every texture used
+    // without a sampler that wasn't previously counted.
+    // Note: this is only set in compatibility mode.
+    uint32_t numTextureSamplerCombinations = 0;
 };
 
 class ShaderModuleBase : public RefCountedWithExternalCount<ApiObjectBase>,
