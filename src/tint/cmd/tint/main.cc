@@ -317,7 +317,7 @@ If not provided, will be inferred from output filename extension:
 
 #if TINT_BUILD_HLSL_WRITER
     auto& pixel_local_attachment_formats =
-        options.Add<StringOption>("pixel_local_attachment_formats",
+        options.Add<StringOption>("pixel-local-attachment-formats",
                                   R"(Pixel local storage attachment formats, comma-separated
 Each binding is of the form MEMBER_INDEX=ATTACHMENT_FORMAT,
 where MEMBER_INDEX is the pixel-local structure member
@@ -334,12 +334,12 @@ in the range [)" << kMinShaderModelForDXC
                           << ", " << kMaxSupportedShaderModelForDXC
                           << "] are accepted. The integer \"6x\" represents shader model 6.x.";
     auto& hlsl_shader_model = options.Add<ValueOption<uint32_t>>(
-        "hlsl_shader_model", hlslShaderModelStream.str(), Default{kMinShaderModelForDXC});
+        "hlsl-shader-model", hlslShaderModelStream.str(), Default{kMinShaderModelForDXC});
 #endif  // TINT_BUILD_HLSL_WRITER
 
 #if TINT_BUILD_HLSL_WRITER || TINT_BUILD_MSL_WRITER
     auto& pixel_local_attachments =
-        options.Add<StringOption>("pixel_local_attachments",
+        options.Add<StringOption>("pixel-local-attachments",
                                   R"(Pixel local storage attachment bindings, comma-separated
 Each binding is of the form MEMBER_INDEX=ATTACHMENT_INDEX,
 where MEMBER_INDEX is the pixel-local structure member

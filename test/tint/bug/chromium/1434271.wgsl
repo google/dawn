@@ -1,7 +1,7 @@
 // Co/////														*																				/////
 
 
-// flags:  --hlsl_shader_model 62
+// flags:  --hlsl-shader-model 62
 enable f16;
 
 // fn asinh(f16) -> f16

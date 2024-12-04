@@ -1,4 +1,4 @@
-// flags: --hlsl_shader_model 66
+// flags: --hlsl-shader-model 66
 
 enable f16;
 
