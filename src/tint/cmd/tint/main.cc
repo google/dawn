@@ -286,29 +286,6 @@ If not provided, will be inferred from output filename extension:
                                              Parameter{"name"});
     TINT_DEFER(opts->output_file = output.value.value_or(""));
 
-#if TINT_BUILD_GLSL_WRITER
-    auto& glsl_desktop = options.Add<BoolOption>(
-        "glsl-desktop", "Set the version to the desktop GL instead of ES", Default{false});
-    TINT_DEFER(opts->glsl_desktop = *glsl_desktop.value);
-#endif  // TINT_BUILD_GLSL_WRITER
-
-#if TINT_BUILD_MSL_WRITER
-    auto& xcrun =
-        options.Add<StringOption>("xcrun", R"(Path to xcrun executable, used to validate MSL output.
-When specified, automatically enables MSL validation)",
-                                  Parameter{"path"});
-    TINT_DEFER({
-        if (xcrun.value.has_value()) {
-            opts->xcrun_path = *xcrun.value;
-            opts->validate = true;
-        }
-    });
-#endif  // TINT_BUILD_MSL_WRITER
-
-    auto& dump_ir = options.Add<BoolOption>("dump-ir", "Writes the IR to stdout", Alias{"emit-ir"},
-                                            Default{false});
-    TINT_DEFER(opts->dump_ir = *dump_ir.value);
-
     auto& use_ir = options.Add<BoolOption>(
         "use-ir", "Use the IR for writers and transforms when possible", Default{false});
     TINT_DEFER(opts->use_ir = *use_ir.value);
@@ -316,39 +293,6 @@ When specified, automatically enables MSL validation)",
     auto& use_ir_reader = options.Add<BoolOption>(
         "use-ir-reader", "Use the IR for the SPIR-V reader", Default{false});
     TINT_DEFER(opts->use_ir_reader = *use_ir_reader.value);
-
-    auto& verbose =
-        options.Add<BoolOption>("verbose", "Verbose output", ShortName{"v"}, Default{false});
-    TINT_DEFER(opts->verbose = *verbose.value);
-
-    auto& validate = options.Add<BoolOption>(
-        "validate", "Validates the generated shader with all available validators", Default{false});
-    TINT_DEFER(opts->validate = *validate.value);
-
-    auto& parse_only =
-        options.Add<BoolOption>("parse-only", "Stop after parsing the input", Default{false});
-    TINT_DEFER(opts->parse_only = *parse_only.value);
-
-#if TINT_BUILD_SPV_READER
-    auto& allow_nud =
-        options.Add<BoolOption>("allow-non-uniform-derivatives",
-                                R"(When using SPIR-V input, allow non-uniform derivatives by
-inserting a module-scope directive to suppress any uniformity
-violations that may be produced)",
-                                Default{false});
-    TINT_DEFER({
-        if (allow_nud.value.value_or(false)) {
-            opts->spirv_reader_options.allow_non_uniform_derivatives = true;
-        }
-    });
-#endif
-
-#if TINT_BUILD_SPV_WRITER
-    auto& use_storage_input_output_16 =
-        options.Add<BoolOption>("use-storage-input-output-16",
-                                "Use the StorageInputOutput16 SPIR-V capability", Default{true});
-    TINT_DEFER(opts->use_storage_input_output_16 = *use_storage_input_output_16.value);
-#endif  // TINT_BUILD_SPV_WRITER
 
     auto& disable_wg_init = options.Add<BoolOption>(
         "disable-workgroup-init", "Disable workgroup memory zero initialization", Default{false});
@@ -358,24 +302,6 @@ violations that may be produced)",
         "disable-demote-to-helper", "Disable demote to helper for discard", Default{false});
     TINT_DEFER(opts->disable_demote_to_helper = *disable_demote_to_helper.value);
 
-    auto& dump_inspector_bindings = options.Add<BoolOption>(
-        "dump-inspector-bindings", "Dump reflection data about bindings to stdout",
-        Alias{"emit-inspector-bindings"}, Default{false});
-    TINT_DEFER(opts->dump_inspector_bindings = *dump_inspector_bindings.value);
-
-#if TINT_BUILD_SYNTAX_TREE_WRITER
-    auto& dump_ast = options.Add<BoolOption>("dump-ast", "Writes the AST to stdout",
-                                             Alias{"emit-ast"}, Default{false});
-    TINT_DEFER(opts->dump_ast = *dump_ast.value);
-#endif  // TINT_BUILD_SYNTAX_TREE_WRITER
-
-    auto& print_hash = options.Add<BoolOption>("print-hash", "Emit the hash of the output program",
-                                               Default{false});
-    TINT_DEFER(opts->print_hash = *print_hash.value);
-
-    auto& rename_all = options.Add<BoolOption>("rename-all", "Renames all symbols", Default{false});
-    TINT_DEFER(opts->rename_all = *rename_all.value);
-
     auto& disable_robustness =
         options.Add<BoolOption>("disable-robustness", "Disable the robustness transform");
     TINT_DEFER({
@@ -383,19 +309,13 @@ violations that may be produced)",
         opts->enable_robustness = !disable;
     });
 
+    auto& rename_all = options.Add<BoolOption>("rename-all", "Renames all symbols", Default{false});
+    TINT_DEFER(opts->rename_all = *rename_all.value);
+
+    auto& overrides = options.Add<StringOption>(
+        "overrides", "Override values as IDENTIFIER=VALUE, comma-separated");
+
 #if TINT_BUILD_HLSL_WRITER
-    auto& fxc_path =
-        options.Add<StringOption>("fxc", R"(Path to FXC dll, used to validate HLSL output.
-When specified, automatically enables HLSL validation)",
-                                  Parameter{"path"});
-    TINT_DEFER(opts->fxc_path = fxc_path.value.value_or(""));
-
-    auto& dxc_path =
-        options.Add<StringOption>("dxc", R"(Path to DXC dll, used to validate HLSL output.
-When specified, automatically enables HLSL validation)",
-                                  Parameter{"path"});
-    TINT_DEFER(opts->dxc_path = dxc_path.value.value_or(""));
-
     auto& pixel_local_attachment_formats =
         options.Add<StringOption>("pixel_local_attachment_formats",
                                   R"(Pixel local storage attachment formats, comma-separated
@@ -418,7 +338,6 @@ in the range [)" << kMinShaderModelForDXC
 #endif  // TINT_BUILD_HLSL_WRITER
 
 #if TINT_BUILD_HLSL_WRITER || TINT_BUILD_MSL_WRITER
-
     auto& pixel_local_attachments =
         options.Add<StringOption>("pixel_local_attachments",
                                   R"(Pixel local storage attachment bindings, comma-separated
@@ -427,8 +346,11 @@ where MEMBER_INDEX is the pixel-local structure member
 index and ATTACHMENT_INDEX is the index of the emitted
 attachment.
 )");
-
 #endif
+
+    auto& print_hash = options.Add<BoolOption>("print-hash", "Emit the hash of the output program",
+                                               Default{false});
+    TINT_DEFER(opts->print_hash = *print_hash.value);
 
     auto& skip_hash = options.Add<StringOption>(
         "skip-hash", R"(Skips validation if the hash of the output is equal to any
@@ -448,8 +370,86 @@ of the hash codes in the comma separated list of hashes)");
         }
     });
 
-    auto& overrides = options.Add<StringOption>(
-        "overrides", "Override values as IDENTIFIER=VALUE, comma-separated");
+#if TINT_BUILD_SPV_READER
+    auto& allow_nud =
+        options.Add<BoolOption>("allow-non-uniform-derivatives",
+                                R"(When using SPIR-V input, allow non-uniform derivatives by
+inserting a module-scope directive to suppress any uniformity
+violations that may be produced)",
+                                Default{false});
+    TINT_DEFER({
+        if (allow_nud.value.value_or(false)) {
+            opts->spirv_reader_options.allow_non_uniform_derivatives = true;
+        }
+    });
+#endif
+
+#if TINT_BUILD_SPV_WRITER
+    auto& use_storage_input_output_16 =
+        options.Add<BoolOption>("use-storage-input-output-16",
+                                "Use the StorageInputOutput16 SPIR-V capability", Default{true});
+    TINT_DEFER(opts->use_storage_input_output_16 = *use_storage_input_output_16.value);
+#endif  // TINT_BUILD_SPV_WRITER
+
+#if TINT_BUILD_GLSL_WRITER
+    auto& glsl_desktop = options.Add<BoolOption>(
+        "glsl-desktop", "Set the version to the desktop GL instead of ES", Default{false});
+    TINT_DEFER(opts->glsl_desktop = *glsl_desktop.value);
+#endif  // TINT_BUILD_GLSL_WRITER
+
+#if TINT_BUILD_MSL_WRITER
+    auto& xcrun =
+        options.Add<StringOption>("xcrun", R"(Path to xcrun executable, used to validate MSL output.
+When specified, automatically enables MSL validation)",
+                                  Parameter{"path"});
+    TINT_DEFER({
+        if (xcrun.value.has_value()) {
+            opts->xcrun_path = *xcrun.value;
+            opts->validate = true;
+        }
+    });
+#endif  // TINT_BUILD_MSL_WRITER
+
+#if TINT_BUILD_HLSL_WRITER
+    auto& fxc_path =
+        options.Add<StringOption>("fxc", R"(Path to FXC dll, used to validate HLSL output.
+When specified, automatically enables HLSL validation)",
+                                  Parameter{"path"});
+    TINT_DEFER(opts->fxc_path = fxc_path.value.value_or(""));
+
+    auto& dxc_path =
+        options.Add<StringOption>("dxc", R"(Path to DXC dll, used to validate HLSL output.
+When specified, automatically enables HLSL validation)",
+                                  Parameter{"path"});
+    TINT_DEFER(opts->dxc_path = dxc_path.value.value_or(""));
+#endif  // TINT_BUILD_HLSL_WRITER
+
+    auto& validate = options.Add<BoolOption>(
+        "validate", "Validates the generated shader with all available validators", Default{false});
+    TINT_DEFER(opts->validate = *validate.value);
+
+    auto& dump_ir = options.Add<BoolOption>("dump-ir", "Writes the IR to stdout", Alias{"emit-ir"},
+                                            Default{false});
+    TINT_DEFER(opts->dump_ir = *dump_ir.value);
+
+    auto& dump_inspector_bindings = options.Add<BoolOption>(
+        "dump-inspector-bindings", "Dump reflection data about bindings to stdout",
+        Alias{"emit-inspector-bindings"}, Default{false});
+    TINT_DEFER(opts->dump_inspector_bindings = *dump_inspector_bindings.value);
+
+#if TINT_BUILD_SYNTAX_TREE_WRITER
+    auto& dump_ast = options.Add<BoolOption>("dump-ast", "Writes the AST to stdout",
+                                             Alias{"emit-ast"}, Default{false});
+    TINT_DEFER(opts->dump_ast = *dump_ast.value);
+#endif  // TINT_BUILD_SYNTAX_TREE_WRITER
+
+    auto& parse_only =
+        options.Add<BoolOption>("parse-only", "Stop after parsing the input", Default{false});
+    TINT_DEFER(opts->parse_only = *parse_only.value);
+
+    auto& verbose =
+        options.Add<BoolOption>("verbose", "Verbose output", ShortName{"v"}, Default{false});
+    TINT_DEFER(opts->verbose = *verbose.value);
 
     auto& help = options.Add<BoolOption>("help", "Show usage", ShortName{"h"});
 
