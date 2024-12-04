@@ -123,7 +123,7 @@ int DawnWireServerFuzzer::Run(const uint8_t* data,
         // TODO(347047627): Use a webgpu.h version of enumerateAdapters
         for (dawn::native::Adapter nativeAdapter : adapters) {
             WGPUAdapter cAdapter = nativeAdapter.Get();
-            wgpu::Adapter adapter = wgpu::Adapter::Acquire(cAdapter);
+            wgpu::Adapter adapter = cAdapter;
             if (sAdapterSupported(adapter)) {
                 dawn::native::GetProcs().adapterAddRef(cAdapter);
                 callback(WGPURequestAdapterStatus_Success, cAdapter, dawn::kEmptyOutputStringView,
