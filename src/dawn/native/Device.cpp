@@ -376,6 +376,13 @@ DeviceBase::DeviceBase(AdapterBase* adapter,
     // Get experimentalSubgroupLimits from physical device
     mLimits.experimentalSubgroupLimits =
         GetPhysicalDevice()->GetLimits().experimentalSubgroupLimits;
+    if (GetPhysicalDevice()->GetBackendType() == wgpu::BackendType::D3D12 &&
+        mToggles.IsEnabled(Toggle::D3D12RelaxMinSubgroupSizeTo8)) {
+        mLimits.experimentalSubgroupLimits.minSubgroupSize =
+            mLimits.experimentalSubgroupLimits.minSubgroupSize > 8
+                ? 8
+                : mLimits.experimentalSubgroupLimits.minSubgroupSize;
+    }
 
     // Get experimentalImmediateDataRangeByteSizeLimit from physical device
     mLimits.experimentalImmediateDataLimits =

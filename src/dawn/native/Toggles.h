@@ -139,6 +139,7 @@ enum class Toggle {
     GLDepthBiasModifier,
     VulkanMonolithicPipelineCache,
     MetalSerializeTimestampGenerationAndResolution,
+    D3D12RelaxMinSubgroupSizeTo8,
 
     // Unresolved issues.
     NoWorkaroundSampleMaskBecomesZeroForAllButLastColorTarget,

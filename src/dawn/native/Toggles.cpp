@@ -583,6 +583,12 @@ static constexpr ToggleEnumAndInfoList kToggleNameAndInfoList = {{
       "compute passes. This can be worked around by signaling and waiting for a shared event in "
       "between timestamp generation and resolution.",
       "crbug.com/372698905", ToggleStage::Device}},
+    {Toggle::D3D12RelaxMinSubgroupSizeTo8,
+     {"d3d12_relax_min_subgroup_size_to_8",
+      "Relax the adapters and devices' minSubgroupSize to the minimium of D3D12 reported "
+      "minWaveLaneCount and 8. Some D3D12 drivers is possible to run fragment shader with wave "
+      "count 8 while reporting minWaveLaneCount 16.",
+      "https://crbug.com/381969450", ToggleStage::Adapter}},
     {Toggle::NoWorkaroundSampleMaskBecomesZeroForAllButLastColorTarget,
      {"no_workaround_sample_mask_becomes_zero_for_all_but_last_color_target",
       "MacOS 12.0+ Intel has a bug where the sample mask is only applied for the last color "

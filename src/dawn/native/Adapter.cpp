@@ -113,6 +113,11 @@ wgpu::Status AdapterBase::APIGetLimits(SupportedLimits* limits) const {
         } else {
             // If adapter supports subgroups features, always return the valid subgroup limits.
             *subgroupLimits = mPhysicalDevice->GetLimits().experimentalSubgroupLimits;
+            if (mPhysicalDevice->GetBackendType() == wgpu::BackendType::D3D12 &&
+                mTogglesState.IsEnabled(Toggle::D3D12RelaxMinSubgroupSizeTo8)) {
+                subgroupLimits->minSubgroupSize =
+                    subgroupLimits->minSubgroupSize > 8 ? 8 : subgroupLimits->minSubgroupSize;
+            }
         }
 
         // Recover origin chain.

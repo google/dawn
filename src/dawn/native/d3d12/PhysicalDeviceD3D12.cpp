@@ -587,6 +587,12 @@ void PhysicalDevice::SetupBackendAdapterToggles(dawn::platform::Platform* platfo
     if (gpu_info::IsIntelGen11(vendorId, deviceId)) {
         adapterToggles->ForceSet(Toggle::D3D12DontUseShaderModel66OrHigher, true);
     }
+
+    // On Intel Gen12LP fragment shader is possible to run with wave lane count of 8
+    // while driver reporting WaveLaneCountMin being 16.
+    if (gpu_info::IsIntelGen12LP(vendorId, deviceId)) {
+        adapterToggles->Default(Toggle::D3D12RelaxMinSubgroupSizeTo8, true);
+    }
 }
 
 void PhysicalDevice::SetupBackendDeviceToggles(dawn::platform::Platform* platform,
