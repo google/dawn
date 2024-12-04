@@ -175,12 +175,20 @@ constexpr SkippedMessage kSkippedMessages[] = {
     {"NVIDIA", "vkBindImageMemory: memoryTypeIndex"},
 
     // https://crbug.com/381887313
-    {"VUID-VkPipelineLayoutCreateInfo-descriptorType-03023",
-     "max per-stage uniform buffer bindings count (4) exceeds device "
-     "maxPerStageDescriptorUpdateAfterBindUniformBuffers limit (0)"},
     {"VUID-VkPipelineLayoutCreateInfo-descriptorType-03022",
      "max per-stage sampler bindings count (1) exceeds device "
      "maxPerStageDescriptorUpdateAfterBindSamplers limit (0)"},
+    {"VUID-VkPipelineLayoutCreateInfo-descriptorType-03023",
+     "maxPerStageDescriptorUpdateAfterBindUniformBuffers limit (0)"},
+    {"VUID-VkPipelineLayoutCreateInfo-descriptorType-03024",
+     "max per-stage storage buffer bindings count (1) exceeds device "
+     "maxPerStageDescriptorUpdateAfterBindStorageBuffers limit (0)"},
+    {"VUID-VkPipelineLayoutCreateInfo-descriptorType-03025",
+     "max per-stage sampled image bindings count (1) exceeds device "
+     "maxPerStageDescriptorUpdateAfterBindSampledImages limit (0)"},
+    {"VUID-VkPipelineLayoutCreateInfo-pSetLayouts-03037",
+     "sum of uniform buffer bindings among all stages (4) exceeds device "
+     "maxDescriptorSetUpdateAfterBindUniformBuffers limit (0)"},
 };
 
 namespace dawn::native::vulkan {
