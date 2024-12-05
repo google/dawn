@@ -392,9 +392,16 @@ ResultOrError<ShaderModule::ModuleAndSpirv> ShaderModule::GetHandleAndSpirv(
             transformInputs.Add<tint::ast::transform::SingleEntryPoint::Config>(
                 std::string(r.entryPointName));
 
-            // Needs to run before all other transforms so that they can use builtin names safely.
+            // Rename symbols unless symbol renaming is disabled.
+            std::string remappedEntryPointName = std::string(r.entryPointName);
             if (!r.disableSymbolRenaming) {
+                constexpr char kRemappedEntryPointName[] = "dawn_entry_point";
+                tint::ast::transform::Renamer::Remappings requestedNames = {
+                    {remappedEntryPointName, kRemappedEntryPointName}};
                 transformManager.Add<tint::ast::transform::Renamer>();
+                transformInputs.Add<tint::ast::transform::Renamer::Config>(
+                    tint::ast::transform::Renamer::Target::kAll, std::move(requestedNames));
+                remappedEntryPointName = kRemappedEntryPointName;
             }
 
             if (r.substituteOverrideConfig) {
@@ -414,26 +421,11 @@ ResultOrError<ShaderModule::ModuleAndSpirv> ShaderModule::GetHandleAndSpirv(
                                               &transformOutputs, nullptr));
             }
 
-            // Get the entry point name after the renamer pass.
-            // TODO(dawn:2180): refactor out.
-            std::string remappedEntryPoint;
-            if (r.disableSymbolRenaming) {
-                remappedEntryPoint = r.entryPointName;
-            } else {
-                auto* data = transformOutputs.Get<tint::ast::transform::Renamer::Data>();
-                DAWN_ASSERT(data != nullptr);
-
-                auto it = data->remappings.find(r.entryPointName.data());
-                DAWN_ASSERT(it != data->remappings.end());
-                remappedEntryPoint = it->second;
-            }
-            DAWN_ASSERT(remappedEntryPoint != "");
-
             // Validate workgroup size after program runs transforms.
             if (r.stage == SingleShaderStage::Compute) {
                 Extent3D _;
                 DAWN_TRY_ASSIGN(_, ValidateComputeStageWorkgroupSize(
-                                       program, remappedEntryPoint.c_str(), r.limits));
+                                       program, remappedEntryPointName.c_str(), r.limits));
             }
 
             TRACE_EVENT0(r.platform.UnsafeGetValue(), General, "tint::spirv::writer::Generate()");
@@ -451,7 +443,7 @@ ResultOrError<ShaderModule::ModuleAndSpirv> ShaderModule::GetHandleAndSpirv(
 
             CompiledSpirv result;
             result.spirv = std::move(tintResult.Get().spirv);
-            result.remappedEntryPoint = remappedEntryPoint;
+            result.remappedEntryPoint = remappedEntryPointName;
             return result;
         },
         "Vulkan.CompileShaderToSPIRV");
