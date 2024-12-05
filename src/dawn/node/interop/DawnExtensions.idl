@@ -44,6 +44,13 @@ interface GPUAdapter {
     readonly attribute boolean isCompatibilityMode;
 };
 
+// Not in webgpu.idl yet
+interface GPUAdapterInfo {
+    readonly attribute (unsigned long or undefined) subgroupMinSize;
+    readonly attribute (unsigned long or undefined) subgroupMaxSize;
+};
+
+
 interface GPUCommandEncoder {
     undefined writeTimestamp(GPUQuerySet querySet, GPUSize32 queryIndex);
 };
@@ -68,6 +75,7 @@ enum WGSLFeatureName {
     "pointer_composite_access",
 };
 
+// TODO(crbug.com/354751907) Move to GPUAdapterInfo
 interface GPUSupportedLimits {
     readonly attribute (unsigned long or undefined) minSubgroupSize;
     readonly attribute (unsigned long or undefined) maxSubgroupSize;

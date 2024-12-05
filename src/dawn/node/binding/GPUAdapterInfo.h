@@ -48,12 +48,15 @@ class GPUAdapterInfo final : public interop::GPUAdapterInfo {
     std::string getArchitecture(Napi::Env) override;
     std::string getDevice(Napi::Env) override;
     std::string getDescription(Napi::Env) override;
+    std::variant<uint32_t, interop::UndefinedType> getSubgroupMinSize(Napi::Env) override;
+    std::variant<uint32_t, interop::UndefinedType> getSubgroupMaxSize(Napi::Env) override;
 
   private:
     std::string vendor_;
     std::string architecture_;
     std::string device_;
     std::string description_;
+    std::optional<wgpu::AdapterPropertiesSubgroups> subgroup_properties_;
 };
 
 }  // namespace wgpu::binding
