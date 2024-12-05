@@ -297,6 +297,7 @@ ResultOrError<CacheResult<MslCompilation>> TranslateToMSL(
     DAWN_TRY_LOAD_OR_RUN(
         mslCompilation, device, std::move(req), MslCompilation::FromBlob,
         [](MslCompilationRequest r) -> ResultOrError<MslCompilation> {
+            constexpr char kRemappedEntryPointName[] = "dawn_entry_point";
             tint::ast::transform::Manager transformManager;
             tint::ast::transform::DataMap transformInputs;
 
@@ -307,12 +308,13 @@ ResultOrError<CacheResult<MslCompilation>> TranslateToMSL(
             transformInputs.Add<tint::ast::transform::SingleEntryPoint::Config>(r.entryPointName);
 
             // Needs to run before all other transforms so that they can use builtin names safely.
+            tint::ast::transform::Renamer::Remappings requestedNames = {
+                {r.entryPointName, kRemappedEntryPointName}};
             transformManager.Add<tint::ast::transform::Renamer>();
-            if (r.disableSymbolRenaming) {
-                // We still need to rename MSL reserved keywords
-                transformInputs.Add<tint::ast::transform::Renamer::Config>(
-                    tint::ast::transform::Renamer::Target::kMslKeywords);
-            }
+            transformInputs.Add<tint::ast::transform::Renamer::Config>(
+                r.disableSymbolRenaming ? tint::ast::transform::Renamer::Target::kMslKeywords
+                                        : tint::ast::transform::Renamer::Target::kAll,
+                std::move(requestedNames));
 
             if (r.vertexPullingTransformConfig) {
                 transformManager.Add<tint::ast::transform::VertexPulling>();
@@ -337,27 +339,11 @@ ResultOrError<CacheResult<MslCompilation>> TranslateToMSL(
                                               &transformOutputs, nullptr));
             }
 
-            // TODO(dawn:2180): refactor out.
-            std::string remappedEntryPointName;
-            if (auto* data = transformOutputs.Get<tint::ast::transform::Renamer::Data>()) {
-                auto it = data->remappings.find(r.entryPointName);
-                if (it != data->remappings.end()) {
-                    remappedEntryPointName = it->second;
-                } else {
-                    DAWN_INVALID_IF(!r.disableSymbolRenaming,
-                                    "Could not find remapped name for entry point.");
-
-                    remappedEntryPointName = r.entryPointName;
-                }
-            } else {
-                return DAWN_VALIDATION_ERROR("Transform output missing renamer data.");
-            }
-
             Extent3D localSize{0, 0, 0};
             if (r.stage == SingleShaderStage::Compute) {
                 // Validate workgroup size after program runs transforms.
                 DAWN_TRY_ASSIGN(localSize, ValidateComputeStageWorkgroupSize(
-                                               program, remappedEntryPointName.data(), r.limits));
+                                               program, kRemappedEntryPointName, r.limits));
             }
 
             TRACE_EVENT0(r.platform.UnsafeGetValue(), General, "tint::msl::writer::Generate");
@@ -389,10 +375,10 @@ ResultOrError<CacheResult<MslCompilation>> TranslateToMSL(
             )" + msl;
 
             auto workgroupAllocations =
-                std::move(result->workgroup_allocations.at(remappedEntryPointName));
+                std::move(result->workgroup_allocations.at(kRemappedEntryPointName));
             return MslCompilation{{
                 std::move(msl),
-                std::move(remappedEntryPointName),
+                std::move(kRemappedEntryPointName),
                 result->needs_storage_buffer_sizes,
                 result->has_invariant_attribute,
                 std::move(workgroupAllocations),
