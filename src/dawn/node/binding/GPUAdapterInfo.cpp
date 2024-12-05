@@ -45,7 +45,7 @@ GPUAdapterInfo::GPUAdapterInfo(const wgpu::AdapterInfo& info)
         if (chain->sType == wgpu::SType::AdapterPropertiesSubgroups) {
             subgroup_properties_ = *static_cast<wgpu::AdapterPropertiesSubgroups*>(chain);
             // Clear to prevent using invalid pointer.
-            subgroup_properties_->nextInChain = nullptr;
+            subgroup_properties_.nextInChain = nullptr;
             break;
         }
     }
@@ -68,17 +68,11 @@ std::string GPUAdapterInfo::getDescription(Napi::Env) {
 }
 
 std::variant<uint32_t, interop::UndefinedType> GPUAdapterInfo::getSubgroupMinSize(Napi::Env) {
-    if (subgroup_properties_.has_value()) {
-        return subgroup_properties_->subgroupMinSize;
-    }
-    return interop::Undefined;
+    return subgroup_properties_.subgroupMinSize;
 }
 
 std::variant<uint32_t, interop::UndefinedType> GPUAdapterInfo::getSubgroupMaxSize(Napi::Env) {
-    if (subgroup_properties_.has_value()) {
-        return subgroup_properties_->subgroupMaxSize;
-    }
-    return interop::Undefined;
+    return subgroup_properties_.subgroupMaxSize;
 }
 
 }  // namespace wgpu::binding

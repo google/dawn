@@ -56,7 +56,7 @@ class GPUAdapterInfo final : public interop::GPUAdapterInfo {
     std::string architecture_;
     std::string device_;
     std::string description_;
-    std::optional<wgpu::AdapterPropertiesSubgroups> subgroup_properties_;
+    wgpu::AdapterPropertiesSubgroups subgroup_properties_;
 };
 
 }  // namespace wgpu::binding

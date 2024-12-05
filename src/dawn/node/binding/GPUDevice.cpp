@@ -211,6 +211,8 @@ interop::Interface<interop::GPUSupportedLimits> GPUDevice::getLimits(Napi::Env e
 
 interop::Interface<interop::GPUAdapterInfo> GPUDevice::getAdapterInfo(Napi::Env env) {
     wgpu::AdapterInfo adapterInfo = {};
+    wgpu::AdapterPropertiesSubgroups subgroupsProperties = {};
+    adapterInfo.nextInChain = &subgroupsProperties;
     device_.GetAdapterInfo(&adapterInfo);
 
     return interop::GPUAdapterInfo::Create<GPUAdapterInfo>(env, adapterInfo);
