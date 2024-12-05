@@ -57,7 +57,7 @@ void IncrementBindingCounts(BindingCounts* bindingCounts,
 
     uint32_t PerStageBindingCounts::*perStageBindingCountMember = nullptr;
 
-    if (entry->buffer.type != wgpu::BufferBindingType::Undefined) {
+    if (entry->buffer.type != wgpu::BufferBindingType::BindingNotUsed) {
         ++bindingCounts->bufferCount;
         const BufferBindingLayout& buffer = entry->buffer;
 
@@ -82,21 +82,21 @@ void IncrementBindingCounts(BindingCounts* bindingCounts,
                 perStageBindingCountMember = &PerStageBindingCounts::storageBufferCount;
                 break;
 
-            case wgpu::BufferBindingType::Undefined:
+            case wgpu::BufferBindingType::BindingNotUsed:
                 // Can't get here due to the enclosing if statement.
                 DAWN_UNREACHABLE();
                 break;
         }
-    } else if (entry->sampler.type != wgpu::SamplerBindingType::Undefined) {
+    } else if (entry->sampler.type != wgpu::SamplerBindingType::BindingNotUsed) {
         perStageBindingCountMember = &PerStageBindingCounts::samplerCount;
-    } else if (entry->texture.sampleType != wgpu::TextureSampleType::Undefined) {
+    } else if (entry->texture.sampleType != wgpu::TextureSampleType::BindingNotUsed) {
         if (entry->texture.viewDimension == kInternalInputAttachmentDim) {
             // Internal use only.
             return;
         } else {
             perStageBindingCountMember = &PerStageBindingCounts::sampledTextureCount;
         }
-    } else if (entry->storageTexture.access != wgpu::StorageTextureAccess::Undefined) {
+    } else if (entry->storageTexture.access != wgpu::StorageTextureAccess::BindingNotUsed) {
         perStageBindingCountMember = &PerStageBindingCounts::storageTextureCount;
     } else if (entry.Get<ExternalTextureBindingLayout>()) {
         perStageBindingCountMember = &PerStageBindingCounts::externalTextureCount;

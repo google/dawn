@@ -339,7 +339,7 @@ class BindGroupTracker : public BindGroupTrackerBase<false, uint64_t> {
                         case wgpu::BufferBindingType::ReadOnlyStorage:
                             target = GL_SHADER_STORAGE_BUFFER;
                             break;
-                        case wgpu::BufferBindingType::Undefined:
+                        case wgpu::BufferBindingType::BindingNotUsed:
                             DAWN_UNREACHABLE();
                     }
 
@@ -409,7 +409,7 @@ class BindGroupTracker : public BindGroupTrackerBase<false, uint64_t> {
                         case wgpu::StorageTextureAccess::ReadOnly:
                             access = GL_READ_ONLY;
                             break;
-                        case wgpu::StorageTextureAccess::Undefined:
+                        case wgpu::StorageTextureAccess::BindingNotUsed:
                             DAWN_UNREACHABLE();
                     }
 

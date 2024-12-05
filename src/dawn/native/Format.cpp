@@ -66,14 +66,14 @@ SampleTypeBit SampleTypeToSampleTypeBit(wgpu::TextureSampleType sampleType) {
         case wgpu::TextureSampleType::Sint:
         case wgpu::TextureSampleType::Uint:
         case wgpu::TextureSampleType::Depth:
-        case wgpu::TextureSampleType::Undefined:
+        case wgpu::TextureSampleType::BindingNotUsed:
             // When the compiler complains that you need to add a case statement here, please
             // also add a corresponding static assert below!
             break;
     }
 
-    static_assert(static_cast<uint32_t>(wgpu::TextureSampleType::Undefined) == 0);
-    if (sampleType == wgpu::TextureSampleType::Undefined) {
+    static_assert(static_cast<uint32_t>(wgpu::TextureSampleType::BindingNotUsed) == 0);
+    if (sampleType == wgpu::TextureSampleType::BindingNotUsed) {
         return SampleTypeBit::None;
     }
 

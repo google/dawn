@@ -77,7 +77,7 @@ MaybeError PipelineLayout::Initialize(Device* device) {
                         case wgpu::BufferBindingType::ReadOnlyStorage:
                             mIndexInfo[group][bindingIndex] = shaderResourceViewIndex++;
                             break;
-                        case wgpu::BufferBindingType::Undefined:
+                        case wgpu::BufferBindingType::BindingNotUsed:
                             DAWN_UNREACHABLE();
                     }
                 },
@@ -102,7 +102,7 @@ MaybeError PipelineLayout::Initialize(Device* device) {
                         case wgpu::StorageTextureAccess::ReadOnly:
                             mIndexInfo[group][bindingIndex] = shaderResourceViewIndex++;
                             break;
-                        case wgpu::StorageTextureAccess::Undefined:
+                        case wgpu::StorageTextureAccess::BindingNotUsed:
                             DAWN_UNREACHABLE();
                     }
                 },
