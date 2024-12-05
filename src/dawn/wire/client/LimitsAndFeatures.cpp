@@ -112,6 +112,7 @@ void LimitsAndFeatures::SetLimits(const WGPUSupportedLimits* limits) {
     for (auto* chain = limits->nextInChain; chain; chain = chain->next) {
         switch (chain->sType) {
             case (WGPUSType_DawnExperimentalSubgroupLimits): {
+                // TODO(crbug.com/354751907) Remove this, as it is now in AdapterInfo.
                 auto* experimentalSubgroupLimits =
                     reinterpret_cast<WGPUDawnExperimentalSubgroupLimits*>(chain);
                 mExperimentalSubgroupLimits = *experimentalSubgroupLimits;

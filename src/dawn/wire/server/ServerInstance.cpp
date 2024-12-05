@@ -120,6 +120,14 @@ void Server::OnRequestAdapterCallback(RequestAdapterUserdata* data,
         propertiesChain = &(*propertiesChain)->next;
     }
 
+    // Query AdapterPropertiesSubgroups if the feature is supported.
+    WGPUAdapterPropertiesSubgroups subgroupsProperties = {};
+    subgroupsProperties.chain.sType = WGPUSType_AdapterPropertiesSubgroups;
+    if (mProcs.adapterHasFeature(adapter, WGPUFeatureName_Subgroups)) {
+        *propertiesChain = &subgroupsProperties.chain;
+        propertiesChain = &(*propertiesChain)->next;
+    }
+
     mProcs.adapterGetInfo(adapter, &info);
     cmd.info = &info;
 
@@ -127,6 +135,7 @@ void Server::OnRequestAdapterCallback(RequestAdapterUserdata* data,
     // DawnExperimentalImmediateDataLimits, and DawnTexelCopyBufferRowAlignmentLimits.
     WGPUSupportedLimits limits = {};
 
+    // TODO(crbug.com/354751907) Remove this, as it is now in AdapterInfo.
     WGPUDawnExperimentalSubgroupLimits experimentalSubgroupLimits = {};
     experimentalSubgroupLimits.chain.sType = WGPUSType_DawnExperimentalSubgroupLimits;
     limits.nextInChain = &experimentalSubgroupLimits.chain;

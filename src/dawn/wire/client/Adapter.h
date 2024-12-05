@@ -76,6 +76,13 @@ class Adapter final : public ObjectWithEventsBase {
     std::vector<WGPUMemoryHeapInfo> mMemoryHeapInfo;
     WGPUAdapterPropertiesD3D mD3DProperties;
     WGPUAdapterPropertiesVk mVkProperties;
+    // Initialize subgroup properties so they can be read even if adapter
+    // acquisition fails.
+    WGPUAdapterPropertiesSubgroups mSubgroupsProperties = {
+        {nullptr, WGPUSType_AdapterPropertiesSubgroups},
+        4u,   // subgroupMinSize
+        128u  // subgroupMaxSize
+    };
 };
 
 }  // namespace dawn::wire::client

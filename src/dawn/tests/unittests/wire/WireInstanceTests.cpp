@@ -233,10 +233,16 @@ TEST_P(WireInstanceTests, RequestAdapterPassesChainedProperties) {
     fakeVkProperties.chain.sType = WGPUSType_AdapterPropertiesVk;
     fakeVkProperties.driverVersion = 0x801F6000;
 
+    WGPUAdapterPropertiesSubgroups fakeSubgroupsProperties = {};
+    fakeSubgroupsProperties.chain.sType = WGPUSType_AdapterPropertiesSubgroups;
+    fakeSubgroupsProperties.subgroupMinSize = 4;
+    fakeSubgroupsProperties.subgroupMaxSize = 128;
+
     std::initializer_list<WGPUFeatureName> fakeFeaturesList = {
         WGPUFeatureName_AdapterPropertiesMemoryHeaps,
         WGPUFeatureName_AdapterPropertiesD3D,
         WGPUFeatureName_AdapterPropertiesVk,
+        WGPUFeatureName_Subgroups,
     };
 
     // Expect the server to receive the message. Then, mock a fake reply.
@@ -266,6 +272,10 @@ TEST_P(WireInstanceTests, RequestAdapterPassesChainedProperties) {
                             case WGPUSType_AdapterPropertiesVk:
                                 *reinterpret_cast<WGPUAdapterPropertiesVk*>(chain) =
                                     fakeVkProperties;
+                                break;
+                            case WGPUSType_AdapterPropertiesSubgroups:
+                                *reinterpret_cast<WGPUAdapterPropertiesSubgroups*>(chain) =
+                                    fakeSubgroupsProperties;
                                 break;
                             default:
                                 ADD_FAILURE() << "Unexpected chain";
@@ -327,6 +337,17 @@ TEST_P(WireInstanceTests, RequestAdapterPassesChainedProperties) {
                 adapter.GetInfo(reinterpret_cast<wgpu::AdapterInfo*>(&info));
                 // Expect them to match.
                 EXPECT_EQ(vkProperties.driverVersion, fakeVkProperties.driverVersion);
+
+                // Get the Subgroups properties.
+                WGPUAdapterPropertiesSubgroups subgroupsProperties = {};
+                subgroupsProperties.chain.sType = WGPUSType_AdapterPropertiesSubgroups;
+                info.nextInChain = &subgroupsProperties.chain;
+                adapter.GetInfo(reinterpret_cast<wgpu::AdapterInfo*>(&info));
+                // Expect them to match.
+                EXPECT_EQ(subgroupsProperties.subgroupMinSize,
+                          fakeSubgroupsProperties.subgroupMinSize);
+                EXPECT_EQ(subgroupsProperties.subgroupMaxSize,
+                          fakeSubgroupsProperties.subgroupMaxSize);
             })));
 
         FlushCallbacks();

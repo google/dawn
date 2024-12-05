@@ -639,6 +639,7 @@ MaybeError PhysicalDevice::InitializeSupportedLimitsImpl(CombinedLimits* limits)
     }
 
     // Experimental limits for subgroups
+    // TODO(crbug.com/354751907) Move this to AdapterInfo
     limits->experimentalSubgroupLimits.minSubgroupSize =
         mDeviceInfo.subgroupSizeControlProperties.minSubgroupSize;
     limits->experimentalSubgroupLimits.maxSubgroupSize =
@@ -1035,6 +1036,13 @@ const AHBFunctions* PhysicalDevice::GetOrLoadAHBFunctions() {
 }
 
 void PhysicalDevice::PopulateBackendProperties(UnpackedPtr<AdapterInfo>& info) const {
+    if (auto* subgroupProperties = info.Get<AdapterPropertiesSubgroups>()) {
+        // Subgroups are supported only if subgroup size control is supported.
+        subgroupProperties->subgroupMinSize =
+            mDeviceInfo.subgroupSizeControlProperties.minSubgroupSize;
+        subgroupProperties->subgroupMaxSize =
+            mDeviceInfo.subgroupSizeControlProperties.maxSubgroupSize;
+    }
     if (auto* memoryHeapProperties = info.Get<AdapterPropertiesMemoryHeaps>()) {
         size_t count = mDeviceInfo.memoryHeaps.size();
         auto* heapInfo = new MemoryHeapInfo[count];

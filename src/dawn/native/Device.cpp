@@ -1868,6 +1868,7 @@ wgpu::Status DeviceBase::APIGetLimits(SupportedLimits* limits) const {
 
     limits->limits = mLimits.v1;
 
+    // TODO(354751907): Move this to AdapterInfo
     if (auto* subgroupLimits = unpacked.Get<DawnExperimentalSubgroupLimits>()) {
         wgpu::ChainedStructOut* originalChain = subgroupLimits->nextInChain;
         if (!HasFeature(Feature::Subgroups)) {

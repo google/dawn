@@ -585,7 +585,7 @@ static constexpr ToggleEnumAndInfoList kToggleNameAndInfoList = {{
       "crbug.com/372698905", ToggleStage::Device}},
     {Toggle::D3D12RelaxMinSubgroupSizeTo8,
      {"d3d12_relax_min_subgroup_size_to_8",
-      "Relax the adapters and devices' minSubgroupSize to the minimium of D3D12 reported "
+      "Relax the adapters and devices' subgroupMinSize to the minimium of D3D12 reported "
       "minWaveLaneCount and 8. Some D3D12 drivers is possible to run fragment shader with wave "
       "count 8 while reporting minWaveLaneCount 16.",
       "https://crbug.com/381969450", ToggleStage::Adapter}},

@@ -127,6 +127,7 @@ void Server::OnRequestDeviceCallback(RequestDeviceUserdata* data,
     WGPUSupportedLimits limits = {};
 
     // Chained DawnExperimentalSubgroupLimits.
+    // TODO(crbug.com/354751907) Remove this, as it is now in AdapterInfo.
     WGPUDawnExperimentalSubgroupLimits experimentalSubgroupLimits = {};
     experimentalSubgroupLimits.chain.sType = WGPUSType_DawnExperimentalSubgroupLimits;
     limits.nextInChain = &experimentalSubgroupLimits.chain;
