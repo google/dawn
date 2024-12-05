@@ -648,6 +648,14 @@ void PhysicalDevice::SetupBackendDeviceToggles(dawn::platform::Platform* platfor
     deviceToggles->Default(Toggle::D3D12CreateNotZeroedHeap,
                            GetDeviceInfo().supportsHeapFlagCreateNotZeroed);
 
+    // By default allow relaxed row pitch and offset in buffer-texture copies when possible,
+    // otherwise we should never enable this toggle.
+    if (!GetDeviceInfo().supportsUnrestrictedBufferTextureCopyPitch) {
+        deviceToggles->ForceSet(Toggle::D3D12RelaxBufferTextureCopyPitchAndOffsetAlignment, false);
+    }
+    deviceToggles->Default(Toggle::D3D12RelaxBufferTextureCopyPitchAndOffsetAlignment,
+                           GetDeviceInfo().supportsUnrestrictedBufferTextureCopyPitch);
+
     // Native support of packed 4x8 integer dot product required shader model 6.4 or higher, and
     // DXC 1.4 or higher.
     if (!(GetAppliedShaderModelUnderToggles(*deviceToggles) >= 64) ||

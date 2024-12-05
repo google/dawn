@@ -234,6 +234,31 @@ void Record2DBufferTextureCopyWithSplit(BufferTextureCopyDirection direction,
     }
 }
 
+void Record2DBufferTextureCopyWithRelaxedOffsetAndPitch(BufferTextureCopyDirection direction,
+                                                        ID3D12GraphicsCommandList* commandList,
+                                                        ID3D12Resource* bufferResource,
+                                                        const uint64_t offset,
+                                                        const uint32_t bytesPerRow,
+                                                        const uint32_t rowsPerImage,
+                                                        const TextureCopy& textureCopy,
+                                                        const TexelBlockInfo& blockInfo,
+                                                        const Extent3D& copySize) {
+    TextureCopySubresource copySubresource =
+        Compute2DTextureCopySubresourceWithRelaxedRowPitchAndOffset(
+            direction, textureCopy.origin, copySize, blockInfo, offset, bytesPerRow);
+
+    uint64_t bytesPerLayer = bytesPerRow * rowsPerImage;
+    uint64_t bufferOffsetForNextLayer = 0;
+    for (uint32_t copyLayer = 0; copyLayer < copySize.depthOrArrayLayers; ++copyLayer) {
+        uint32_t copyTextureLayer = copyLayer + textureCopy.origin.z;
+        RecordBufferTextureCopyFromSplits(direction, commandList, copySubresource, bufferResource,
+                                          bufferOffsetForNextLayer, bytesPerRow,
+                                          textureCopy.texture.Get(), textureCopy.mipLevel,
+                                          copyTextureLayer, textureCopy.aspect);
+        bufferOffsetForNextLayer += bytesPerLayer;
+    }
+}
+
 void RecordBufferTextureCopyWithBufferHandle(BufferTextureCopyDirection direction,
                                              ID3D12GraphicsCommandList* commandList,
                                              ID3D12Resource* bufferResource,
@@ -247,6 +272,9 @@ void RecordBufferTextureCopyWithBufferHandle(BufferTextureCopyDirection directio
     TextureBase* texture = textureCopy.texture.Get();
     const TexelBlockInfo& blockInfo = texture->GetFormat().GetAspectInfo(textureCopy.aspect).block;
 
+    bool useRelaxedRowPitchAndOffset = texture->GetDevice()->IsToggleEnabled(
+        Toggle::D3D12RelaxBufferTextureCopyPitchAndOffsetAlignment);
+
     switch (texture->GetDimension()) {
         case wgpu::TextureDimension::Undefined:
             DAWN_UNREACHABLE();
@@ -255,9 +283,14 @@ void RecordBufferTextureCopyWithBufferHandle(BufferTextureCopyDirection directio
             // 1D textures copy splits are a subset of the single-layer 2D texture copy splits,
             // at least while 1D textures can only have a single array layer.
             DAWN_ASSERT(texture->GetArrayLayers() == 1);
-
-            TextureCopySubresource copyRegions = Compute2DTextureCopySubresource(
-                direction, textureCopy.origin, copySize, blockInfo, offset, bytesPerRow);
+            TextureCopySubresource copyRegions;
+            if (useRelaxedRowPitchAndOffset) {
+                copyRegions = Compute2DTextureCopySubresourceWithRelaxedRowPitchAndOffset(
+                    direction, textureCopy.origin, copySize, blockInfo, offset, bytesPerRow);
+            } else {
+                copyRegions = Compute2DTextureCopySubresource(
+                    direction, textureCopy.origin, copySize, blockInfo, offset, bytesPerRow);
+            }
             RecordBufferTextureCopyFromSplits(direction, commandList, copyRegions, bufferResource,
                                               0, bytesPerRow, texture, textureCopy.mipLevel, 0,
                                               textureCopy.aspect);
@@ -267,9 +300,15 @@ void RecordBufferTextureCopyWithBufferHandle(BufferTextureCopyDirection directio
         // Record the CopyTextureRegion commands for 2D textures, with special handling of array
         // layers since each require their own set of copies.
         case wgpu::TextureDimension::e2D:
-            Record2DBufferTextureCopyWithSplit(direction, commandList, bufferResource, offset,
-                                               bytesPerRow, rowsPerImage, textureCopy, blockInfo,
-                                               copySize);
+            if (useRelaxedRowPitchAndOffset) {
+                Record2DBufferTextureCopyWithRelaxedOffsetAndPitch(
+                    direction, commandList, bufferResource, offset, bytesPerRow, rowsPerImage,
+                    textureCopy, blockInfo, copySize);
+            } else {
+                Record2DBufferTextureCopyWithSplit(direction, commandList, bufferResource, offset,
+                                                   bytesPerRow, rowsPerImage, textureCopy,
+                                                   blockInfo, copySize);
+            }
             break;
 
         case wgpu::TextureDimension::e3D: {

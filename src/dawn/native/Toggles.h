@@ -140,6 +140,7 @@ enum class Toggle {
     VulkanMonolithicPipelineCache,
     MetalSerializeTimestampGenerationAndResolution,
     D3D12RelaxMinSubgroupSizeTo8,
+    D3D12RelaxBufferTextureCopyPitchAndOffsetAlignment,
 
     // Unresolved issues.
     NoWorkaroundSampleMaskBecomesZeroForAllButLastColorTarget,

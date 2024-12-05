@@ -589,6 +589,11 @@ static constexpr ToggleEnumAndInfoList kToggleNameAndInfoList = {{
       "minWaveLaneCount and 8. Some D3D12 drivers is possible to run fragment shader with wave "
       "count 8 while reporting minWaveLaneCount 16.",
       "https://crbug.com/381969450", ToggleStage::Adapter}},
+    {Toggle::D3D12RelaxBufferTextureCopyPitchAndOffsetAlignment,
+     {"d3d12_relax_buffer_texture_copy_pitch_and_offset_alignment",
+      "Don't require the alignments of D3D12_TEXTURE_DATA_PITCH_ALIGNMENT (256) for row pitch "
+      "and D3D12_TEXTURE_DATA_PLACEMENT_ALIGNMENT (512) for offset in buffer-texture copies.",
+      "https://crbug.com/381000081", ToggleStage::Device}},
     {Toggle::NoWorkaroundSampleMaskBecomesZeroForAllButLastColorTarget,
      {"no_workaround_sample_mask_becomes_zero_for_all_but_last_color_target",
       "MacOS 12.0+ Intel has a bug where the sample mask is only applied for the last color "

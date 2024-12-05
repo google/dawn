@@ -682,4 +682,40 @@ TextureCopySubresource Compute3DTextureCopySplits(BufferTextureCopyDirection dir
 
     return copySubresource;
 }
+
+TextureCopySubresource Compute2DTextureCopySubresourceWithRelaxedRowPitchAndOffset(
+    BufferTextureCopyDirection direction,
+    Origin3D origin,
+    Extent3D copySize,
+    const TexelBlockInfo& blockInfo,
+    uint64_t offset,
+    uint32_t bytesPerRow) {
+    TextureCopySubresource copy;
+    auto* copyInfo = copy.AddCopy();
+
+    // You can visualize the data in the buffer (bufferLocation) like this:
+    // * copy data is visualized as '+'.
+    //
+    //                bufferOffset(0, 0, 0)
+    //                        ^
+    //                        |
+    // |<-------Offset------->|<-----------RowPitch----------->|----------|
+    // |----------------------|++++++++++++++++++++++~~~~~~~~~~|    |     |
+    //                        |++++++++++++++++++++++~~~~~~~~~~|CopyHeight|
+    //                        |++++++++++++++++++++++|         |    |     |
+    //                        |<-----CopyWidth------>|         |----------|
+    //
+    Origin3D textureOffset = {origin.x, origin.y, 0};
+    Origin3D bufferOffset = {0, 0, 0};
+    Extent3D copySizeOneLayer = {copySize.width, copySize.height, 1};
+    ComputeSourceRegionForCopyInfo(copyInfo, direction, bufferOffset, textureOffset,
+                                   copySizeOneLayer);
+
+    Extent3D bufferSize = {copySize.width, copySize.height, 1};
+
+    FillFootprintAndOffsetOfBufferLocation(&copyInfo->bufferLocation, offset, bufferSize,
+                                           bytesPerRow);
+
+    return copy;
+}
 }  // namespace dawn::native::d3d12
