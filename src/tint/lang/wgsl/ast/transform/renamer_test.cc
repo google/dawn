@@ -103,7 +103,7 @@ fn tint_symbol_2(@builtin(vertex_index) tint_symbol_1 : u32) -> @builtin(positio
     EXPECT_THAT(data->remappings, ContainerEq(expected_remappings));
 }
 
-TEST_F(RenamerTest, RequestedNames) {
+TEST_F(RenamerTest, RequestedNamesWithRenameAll) {
     auto* src = R"(
 struct ShaderIO {
     @location(1) var1: f32,
@@ -169,6 +169,80 @@ fn tint_symbol_2(@builtin(vertex_index) tint_symbol_3 : u32) -> tint_symbol {
     };
     EXPECT_THAT(data->remappings, ContainerEq(expected_remappings));
 }
+
+using RenamerTestRequestedNamesWithoutRenameAll = TransformTestWithParam<Renamer::Target>;
+
+TEST_P(RenamerTestRequestedNamesWithoutRenameAll, RequestedNames) {
+    auto* src = R"(
+struct ShaderIO {
+    @location(1) var1: f32,
+    @location(3) @interpolate(flat) var3: u32,
+    @builtin(position) pos: vec4f,
+}
+
+@vertex fn entry_point(@builtin(vertex_index) vert_idx : u32)
+     -> ShaderIO {
+  var pos = array(
+      vec2f(-1.0, 3.0),
+      vec2f(-1.0, -3.0),
+      vec2f(3.0, 0.0));
+
+  var shaderIO: ShaderIO;
+  shaderIO.var1 = 0.0;
+  shaderIO.var3 = 1u;
+  shaderIO.pos = vec4f(pos[vert_idx], 0.0, 1.0);
+
+  return shaderIO;
+}
+)";
+
+    auto* expect = R"(
+struct ShaderIO {
+  @location(1)
+  user_var1 : f32,
+  @location(3) @interpolate(flat)
+  user_var3 : u32,
+  @builtin(position)
+  pos : vec4f,
+}
+
+@vertex
+fn entry_point(@builtin(vertex_index) vert_idx : u32) -> ShaderIO {
+  var pos = array(vec2f(-(1.0), 3.0), vec2f(-(1.0), -(3.0)), vec2f(3.0, 0.0));
+  var shaderIO : ShaderIO;
+  shaderIO.user_var1 = 0.0;
+  shaderIO.user_var3 = 1u;
+  shaderIO.pos = vec4f(pos[vert_idx], 0.0, 1.0);
+  return shaderIO;
+}
+)";
+
+    DataMap inputs;
+    inputs.Add<Renamer::Config>(GetParam(),
+                                /* remappings */
+                                Renamer::Remappings{
+                                    {"var1", "user_var1"},
+                                    {"var3", "user_var3"},
+                                });
+    auto got = Run<Renamer>(src, inputs);
+
+    EXPECT_EQ(expect, str(got));
+
+    auto* data = got.data.Get<Renamer::Data>();
+
+    ASSERT_NE(data, nullptr);
+    Renamer::Remappings expected_remappings = {
+        {"var1", "user_var1"},
+        {"var3", "user_var3"},
+    };
+    EXPECT_THAT(data->remappings, ContainerEq(expected_remappings));
+}
+
+INSTANTIATE_TEST_SUITE_P(RenamerTestRequestedNamesWithoutRenameAll,
+                         RenamerTestRequestedNamesWithoutRenameAll,
+                         testing::Values(Renamer::Target::kGlslKeywords,
+                                         Renamer::Target::kHlslKeywords,
+                                         Renamer::Target::kMslKeywords));
 
 TEST_F(RenamerTest, PreserveSwizzles) {
     auto* src = R"(

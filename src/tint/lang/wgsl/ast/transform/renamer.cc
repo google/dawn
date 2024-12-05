@@ -1364,6 +1364,9 @@ Transform::ApplyResult Renamer::Apply(const Program& src,
         if (target == Target::kAll) {
             return true;
         }
+        if (requested_names->count(symbol.Name())) {
+            return true;
+        }
         auto name = symbol.Name();
         if (!tint::utf8::IsASCII(name)) {
             // name is non-ascii. All of the backend keywords are ascii, so rename.
