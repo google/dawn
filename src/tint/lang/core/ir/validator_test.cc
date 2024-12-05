@@ -3849,6 +3849,29 @@ note: # Disassembly
 )");
 }
 
+TEST_F(IR_ValidatorTest, Discard_OutsideFunction) {
+    auto* d = b.Discard();
+    mod.root_block->Append(d);
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_EQ(res.Failure().reason.Str(),
+              R"(:2:3 error: discard: root block: invalid instruction: tint::core::ir::Discard
+  discard
+  ^^^^^^^
+
+:1:1 note: in block
+$B1: {  # root
+^^^
+
+note: # Disassembly
+$B1: {  # root
+  discard
+}
+
+)");
+}
+
 TEST_F(IR_ValidatorTest, Terminator_HasResult) {
     auto* ret_func = b.Function("ret_func", ty.void_());
     b.Append(ret_func->Block(), [&] {

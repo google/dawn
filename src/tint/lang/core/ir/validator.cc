@@ -1250,6 +1250,10 @@ class Validator {
     /// @param inst the instruction
     /// @returns the function
     const ir::Function* ContainingFunction(const ir::Instruction* inst) {
+        if (inst->Block() == mod_.root_block) {
+            return nullptr;
+        }
+
         return block_to_function_.GetOrAdd(inst->Block(), [&] {  //
             return ContainingFunction(inst->Block()->Parent());
         });
@@ -1259,6 +1263,10 @@ class Validator {
     /// @param f the function
     /// @returns all end points that call the function
     Hashset<const ir::Function*, 4> ContainingEndPoints(const ir::Function* f) {
+        if (!f) {
+            return {};
+        }
+
         Hashset<const ir::Function*, 4> result{};
         Hashset<const ir::Function*, 4> visited{f};
 
@@ -1266,6 +1274,10 @@ class Validator {
         while (!call_sites.IsEmpty()) {
             auto call_site = call_sites.Pop();
             auto calling_function = ContainingFunction(call_site);
+            if (!calling_function) {
+                continue;
+            }
+
             if (visited.Contains(calling_function)) {
                 continue;
             }
@@ -1336,8 +1348,13 @@ Disassembler& Validator::Disassemble() {
 Result<SuccessType> Validator::Run() {
     RunStructuralSoundnessChecks();
 
-    CheckForOrphanedInstructions();
-    CheckForNonFragmentDiscards();
+    if (!diagnostics_.ContainsErrors()) {
+        CheckForOrphanedInstructions();
+    }
+
+    if (!diagnostics_.ContainsErrors()) {
+        CheckForNonFragmentDiscards();
+    }
 
     if (diagnostics_.ContainsErrors()) {
         diagnostics_.AddNote(Source{}) << "# Disassembly\n" << Disassemble().Text();
@@ -1860,6 +1877,9 @@ void Validator::CheckRootBlock(const Block* blk) {
                 } else {
                     AddError(inst) << "root block: invalid instruction: " << inst->TypeInfo().name;
                 }
+            },
+            [&](const core::ir::Discard* d) {
+                AddError(d) << "root block: invalid instruction: " << d->TypeInfo().name;
             },
             [&](Default) {
                 // Note, this validation is looser then it could be. There are only certain
