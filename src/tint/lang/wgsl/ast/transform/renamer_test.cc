@@ -56,10 +56,6 @@ TEST_F(RenamerTest, EmptyModule) {
     auto got = Run<Renamer>(src);
 
     EXPECT_EQ(expect, str(got));
-
-    auto* data = got.data.Get<Renamer::Data>();
-
-    ASSERT_EQ(data->remappings.size(), 0u);
 }
 
 TEST_F(RenamerTest, BasicModuleVertexIndex) {
@@ -91,16 +87,6 @@ fn tint_symbol_2(@builtin(vertex_index) tint_symbol_1 : u32) -> @builtin(positio
     auto got = Run<Renamer>(src);
 
     EXPECT_EQ(expect, str(got));
-
-    auto* data = got.data.Get<Renamer::Data>();
-
-    ASSERT_NE(data, nullptr);
-    Renamer::Remappings expected_remappings = {
-        {"vert_idx", "tint_symbol_1"},
-        {"test", "tint_symbol"},
-        {"entry", "tint_symbol_2"},
-    };
-    EXPECT_THAT(data->remappings, ContainerEq(expected_remappings));
 }
 
 TEST_F(RenamerTest, RequestedNamesWithRenameAll) {
@@ -158,16 +144,6 @@ fn tint_symbol_2(@builtin(vertex_index) tint_symbol_3 : u32) -> tint_symbol {
     auto got = Run<Renamer>(src, inputs);
 
     EXPECT_EQ(expect, str(got));
-
-    auto* data = got.data.Get<Renamer::Data>();
-
-    ASSERT_NE(data, nullptr);
-    Renamer::Remappings expected_remappings = {
-        {"pos", "tint_symbol_1"},      {"vert_idx", "tint_symbol_3"}, {"ShaderIO", "tint_symbol"},
-        {"shaderIO", "tint_symbol_4"}, {"main", "tint_symbol_2"},     {"var1", "user_var1"},
-        {"var3", "user_var3"},
-    };
-    EXPECT_THAT(data->remappings, ContainerEq(expected_remappings));
 }
 
 using RenamerTestRequestedNamesWithoutRenameAll = TransformTestWithParam<Renamer::Target>;
@@ -227,15 +203,6 @@ fn entry_point(@builtin(vertex_index) vert_idx : u32) -> ShaderIO {
     auto got = Run<Renamer>(src, inputs);
 
     EXPECT_EQ(expect, str(got));
-
-    auto* data = got.data.Get<Renamer::Data>();
-
-    ASSERT_NE(data, nullptr);
-    Renamer::Remappings expected_remappings = {
-        {"var1", "user_var1"},
-        {"var3", "user_var3"},
-    };
-    EXPECT_THAT(data->remappings, ContainerEq(expected_remappings));
 }
 
 INSTANTIATE_TEST_SUITE_P(RenamerTestRequestedNamesWithoutRenameAll,
@@ -270,15 +237,6 @@ fn tint_symbol() -> @builtin(position) vec4<f32> {
     auto got = Run<Renamer>(src);
 
     EXPECT_EQ(expect, str(got));
-
-    auto* data = got.data.Get<Renamer::Data>();
-
-    ASSERT_NE(data, nullptr);
-    Renamer::Remappings expected_remappings = {
-        {"entry", "tint_symbol"},  {"v", "tint_symbol_1"}, {"rgba", "tint_symbol_2"},
-        {"xyzw", "tint_symbol_3"}, {"z", "tint_symbol_4"},
-    };
-    EXPECT_THAT(data->remappings, ContainerEq(expected_remappings));
 }
 
 TEST_F(RenamerTest, PreserveSwizzles_ThroughMaterialize) {
@@ -296,15 +254,6 @@ const tint_symbol_1 = (tint_symbol.x * 2u);
     auto got = Run<Renamer>(src);
 
     EXPECT_EQ(expect, str(got));
-
-    auto* data = got.data.Get<Renamer::Data>();
-
-    ASSERT_NE(data, nullptr);
-    Renamer::Remappings expected_remappings = {
-        {"v", "tint_symbol"},
-        {"x", "tint_symbol_1"},
-    };
-    EXPECT_THAT(data->remappings, ContainerEq(expected_remappings));
 }
 
 TEST_F(RenamerTest, PreserveBuiltins) {
@@ -327,15 +276,6 @@ fn tint_symbol() -> @builtin(position) vec4<f32> {
     auto got = Run<Renamer>(src);
 
     EXPECT_EQ(expect, str(got));
-
-    auto* data = got.data.Get<Renamer::Data>();
-
-    ASSERT_NE(data, nullptr);
-    Renamer::Remappings expected_remappings = {
-        {"entry", "tint_symbol"},
-        {"blah", "tint_symbol_1"},
-    };
-    EXPECT_THAT(data->remappings, ContainerEq(expected_remappings));
 }
 
 TEST_F(RenamerTest, PreserveBuiltinTypes) {
@@ -362,15 +302,6 @@ fn tint_symbol() {
     auto got = Run<Renamer>(src);
 
     EXPECT_EQ(expect, str(got));
-
-    auto* data = got.data.Get<Renamer::Data>();
-
-    ASSERT_NE(data, nullptr);
-    Renamer::Remappings expected_remappings = {
-        {"entry", "tint_symbol"}, {"a", "tint_symbol_1"}, {"b", "tint_symbol_2"},
-        {"c", "tint_symbol_3"},   {"d", "tint_symbol_4"},
-    };
-    EXPECT_THAT(data->remappings, ContainerEq(expected_remappings));
 }
 
 TEST_F(RenamerTest, PreserveBuiltinTypes_ViaPointerDot) {
@@ -406,16 +337,6 @@ fn tint_symbol() {
     auto got = Run<Renamer>(src);
 
     EXPECT_EQ(expect, str(got));
-
-    auto* data = got.data.Get<Renamer::Data>();
-
-    ASSERT_NE(data, nullptr);
-    Renamer::Remappings expected_remappings = {
-        {"entry", "tint_symbol"}, {"m", "tint_symbol_1"},  {"p1", "tint_symbol_2"},
-        {"f", "tint_symbol_3"},   {"p2", "tint_symbol_4"}, {"a", "tint_symbol_5"},
-        {"b", "tint_symbol_6"},   {"c", "tint_symbol_7"},  {"d", "tint_symbol_8"},
-    };
-    EXPECT_THAT(data->remappings, ContainerEq(expected_remappings));
 }
 
 TEST_F(RenamerTest, PreserveCoreDiagnosticRuleName) {
@@ -449,15 +370,6 @@ fn tint_symbol(@location(0) tint_symbol_1 : f32) -> @location(0) f32 {
     auto got = Run<Renamer>(src);
 
     EXPECT_EQ(expect, str(got));
-
-    auto* data = got.data.Get<Renamer::Data>();
-
-    ASSERT_NE(data, nullptr);
-    Renamer::Remappings expected_remappings = {
-        {"entry", "tint_symbol"},
-        {"value", "tint_symbol_1"},
-    };
-    EXPECT_THAT(data->remappings, ContainerEq(expected_remappings));
 }
 
 TEST_F(RenamerTest, AttemptSymbolCollision) {
@@ -484,17 +396,6 @@ fn tint_symbol() -> @builtin(position) vec4<f32> {
     auto got = Run<Renamer>(src);
 
     EXPECT_EQ(expect, str(got));
-
-    auto* data = got.data.Get<Renamer::Data>();
-
-    ASSERT_NE(data, nullptr);
-    Renamer::Remappings expected_remappings = {
-        {"entry", "tint_symbol"},
-        {"tint_symbol", "tint_symbol_1"},
-        {"tint_symbol_2", "tint_symbol_2"},
-        {"tint_symbol_4", "tint_symbol_3"},
-    };
-    EXPECT_THAT(data->remappings, ContainerEq(expected_remappings));
 }
 
 TEST_F(RenamerTest, PreserveTexelFormatAndAccess) {
