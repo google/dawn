@@ -312,11 +312,17 @@ void RecordBufferTextureCopyWithBufferHandle(BufferTextureCopyDirection directio
             break;
 
         case wgpu::TextureDimension::e3D: {
-            // See comments in Compute3DTextureCopySplits() for more details.
-            TextureCopySubresource copyRegions =
-                Compute3DTextureCopySplits(direction, textureCopy.origin, copySize, blockInfo,
-                                           offset, bytesPerRow, rowsPerImage);
-
+            TextureCopySubresource copyRegions;
+            if (useRelaxedRowPitchAndOffset) {
+                copyRegions = Compute3DTextureCopySubresourceWithRelaxedRowPitchAndOffset(
+                    direction, textureCopy.origin, copySize, blockInfo, offset, bytesPerRow,
+                    rowsPerImage);
+            } else {
+                // See comments in Compute3DTextureCopySplits() for more details.
+                copyRegions =
+                    Compute3DTextureCopySplits(direction, textureCopy.origin, copySize, blockInfo,
+                                               offset, bytesPerRow, rowsPerImage);
+            }
             RecordBufferTextureCopyFromSplits(direction, commandList, copyRegions, bufferResource,
                                               0, bytesPerRow, texture, textureCopy.mipLevel, 0,
                                               textureCopy.aspect);

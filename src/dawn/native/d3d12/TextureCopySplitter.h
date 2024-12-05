@@ -128,6 +128,17 @@ TextureCopySubresource Compute2DTextureCopySubresourceWithRelaxedRowPitchAndOffs
     uint64_t offset,
     uint32_t bytesPerRow);
 
+// Compute the `TextureCopySubresource` for one subresource of a 3D texture with relaxed row pitch
+// and offset.
+TextureCopySubresource Compute3DTextureCopySubresourceWithRelaxedRowPitchAndOffset(
+    BufferTextureCopyDirection direction,
+    Origin3D origin,
+    Extent3D copySize,
+    const TexelBlockInfo& blockInfo,
+    uint64_t offset,
+    uint32_t bytesPerRow,
+    uint32_t rowsPerImage);
+
 }  // namespace dawn::native::d3d12
 
 #endif  // SRC_DAWN_NATIVE_D3D12_TEXTURECOPYSPLITTER_H_
