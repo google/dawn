@@ -176,19 +176,23 @@ constexpr SkippedMessage kSkippedMessages[] = {
 
     // https://crbug.com/381887313
     {"VUID-VkPipelineLayoutCreateInfo-descriptorType-03022",
-     "max per-stage sampler bindings count (1) exceeds device "
-     "maxPerStageDescriptorUpdateAfterBindSamplers limit (0)"},
+     "exceeds device maxPerStageDescriptorUpdateAfterBindSamplers limit (0)"},
     {"VUID-VkPipelineLayoutCreateInfo-descriptorType-03023",
      "maxPerStageDescriptorUpdateAfterBindUniformBuffers limit (0)"},
     {"VUID-VkPipelineLayoutCreateInfo-descriptorType-03024",
-     "max per-stage storage buffer bindings count (1) exceeds device "
-     "maxPerStageDescriptorUpdateAfterBindStorageBuffers limit (0)"},
+     "exceeds device maxPerStageDescriptorUpdateAfterBindStorageBuffers limit (0)"},
     {"VUID-VkPipelineLayoutCreateInfo-descriptorType-03025",
-     "max per-stage sampled image bindings count (1) exceeds device "
-     "maxPerStageDescriptorUpdateAfterBindSampledImages limit (0)"},
+     "exceeds device maxPerStageDescriptorUpdateAfterBindSampledImages limit (0)"},
+    {"VUID-VkPipelineLayoutCreateInfo-pSetLayouts-03036",
+     "exceeds device maxDescriptorSetUpdateAfterBindSamplers limit (0)"},
     {"VUID-VkPipelineLayoutCreateInfo-pSetLayouts-03037",
-     "sum of uniform buffer bindings among all stages (4) exceeds device "
-     "maxDescriptorSetUpdateAfterBindUniformBuffers limit (0)"},
+     "exceeds device maxDescriptorSetUpdateAfterBindUniformBuffers limit (0)"},
+    {"VUID-VkPipelineLayoutCreateInfo-pSetLayouts-03038",
+     "exceeds device maxDescriptorSetUpdateAfterBindUniformBuffersDynamic limit (0)"},
+    {"VUID-VkPipelineLayoutCreateInfo-pSetLayouts-03039",
+     "exceeds device maxDescriptorSetUpdateAfterBindStorageBuffers limit (0)"},
+    {"VUID-VkPipelineLayoutCreateInfo-pSetLayouts-03041",
+     "exceeds device maxDescriptorSetUpdateAfterBindSampledImages limit (0)"},
 };
 
 namespace dawn::native::vulkan {
