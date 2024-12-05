@@ -502,6 +502,7 @@ ResultOrError<GLuint> ShaderModule::CompileShader(
     DAWN_TRY_LOAD_OR_RUN(
         compilationResult, GetDevice(), std::move(req), GLSLCompilation::FromBlob,
         [](GLSLCompilationRequest r) -> ResultOrError<GLSLCompilation> {
+            constexpr char kRemappedEntryPointName[] = "dawn_entry_point";
             tint::ast::transform::Manager transformManager;
             tint::ast::transform::DataMap transformInputs;
 
@@ -509,7 +510,8 @@ ResultOrError<GLuint> ShaderModule::CompileShader(
             transformInputs.Add<tint::ast::transform::SingleEntryPoint::Config>(r.entryPointName);
 
             {
-                tint::ast::transform::Renamer::Remappings assignedRenamings = {};
+                tint::ast::transform::Renamer::Remappings assignedRenamings = {
+                    {r.entryPointName, kRemappedEntryPointName}};
 
                 // Give explicit renaming mappings for interstage variables
                 // Because GLSL requires interstage IO names to match.
@@ -548,35 +550,18 @@ ResultOrError<GLuint> ShaderModule::CompileShader(
             DAWN_TRY_ASSIGN(program, RunTransforms(&transformManager, r.inputProgram,
                                                    transformInputs, &transformOutputs, nullptr));
 
-            // TODO(dawn:2180): refactor out.
-            // Get the entry point name after the renamer pass.
-            // In the case of the entry-point name being a reserved GLSL keyword
-            // (including `main`) the entry-point would have been renamed
-            // regardless of the `disableSymbolRenaming` flag. Always check the
-            // rename map, and if the name was changed, get the new one.
-            auto* data = transformOutputs.Get<tint::ast::transform::Renamer::Data>();
-            DAWN_ASSERT(data != nullptr);
-            auto it = data->remappings.find(r.entryPointName.data());
-            std::string remappedEntryPoint;
-            if (it != data->remappings.end()) {
-                remappedEntryPoint = it->second;
-            } else {
-                remappedEntryPoint = r.entryPointName;
-            }
-            DAWN_ASSERT(remappedEntryPoint != "");
-
             if (r.stage == SingleShaderStage::Compute) {
                 // Validate workgroup size after program runs transforms.
                 Extent3D _;
                 DAWN_TRY_ASSIGN(_, ValidateComputeStageWorkgroupSize(
-                                       program, remappedEntryPoint.c_str(), r.limits));
+                                       program, kRemappedEntryPointName, r.limits));
             }
 
             // Intentionally assign entry point to empty to avoid a redundant 'SingleEntryPoint'
             // transform in Tint.
             // TODO(crbug.com/356424898): In the long run, we want to move SingleEntryPoint to Tint,
             // but that has interactions with SubstituteOverrides which need to be handled first.
-            remappedEntryPoint = "";
+            const std::string remappedEntryPoint = "";
 
             // Convert the AST program to an IR module.
             auto ir = tint::wgsl::reader::ProgramToLoweredIR(program);
