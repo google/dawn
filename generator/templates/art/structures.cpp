@@ -35,6 +35,7 @@
 #include <webgpu/webgpu.h>
 
 #include "dawn/common/Assert.h"
+#include "dawn/common/Log.h"
 #include "JNIContext.h"
 
 // Converts Kotlin objects representing Dawn structures into native structures that can be passed
@@ -72,24 +73,6 @@ void CallGetter(JNIEnv* env, jmethodID getter, jobject obj, T** result) {
     *result = reinterpret_cast<T*>(env->CallObjectMethod(obj, getter));
 }
 
-// Special-case noop handling of the two callback info that are part of other structures.
-// TODO(352710628) support converting callback info.
-void ToNative(JNIContext* c, JNIEnv* env, jobject obj, WGPUDeviceLostCallbackInfo* info) {
-    *info = {};
-}
-
-void ToNative(JNIContext* c, JNIEnv* env, jobject obj, WGPUUncapturedErrorCallbackInfo* info) {
-    *info = {};
-}
-
-jobject ToKotlin(JNIEnv *env, const WGPUDeviceLostCallbackInfo* input) {
-    return nullptr;
-}
-
-jobject ToKotlin(JNIEnv *env, const WGPUUncapturedErrorCallbackInfo* input) {
-    return nullptr;
-}
-
 // Special-case [Nullable]StringView
 void ToNative(JNIContext* c, JNIEnv* env, jstring obj, WGPUStringView* s) {
     if (obj == nullptr) {
@@ -110,7 +93,7 @@ jobject ToKotlin(JNIEnv* env, const WGPUStringView* s) {
     return env->NewStringUTF(nullTerminated.c_str());
 }
 
-{%- for structure in by_category['structure'] if include_structure(structure) %}
+{%- for structure in by_category['structure'] + by_category['callback info'] if include_structure(structure) %}
 
     //* Native -> Kotlin converter.
     //* TODO(b/354411474): Filter the structures for which to add a ToKotlin conversion.

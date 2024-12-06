@@ -712,11 +712,6 @@ def compute_kotlin_params(loaded_json, kotlin_json):
 
     def kotlin_record_members(members):
         for member in members:
-            # Skip over callback infos as we haven't implemented support for them yet.
-            # TODO(352710628) support converting callback info.
-            if member.type.category in ['callback info']:
-                continue
-
             # length parameters are omitted because Kotlin containers have 'length'.
             if member in [m.length for m in members]:
                 continue
@@ -763,9 +758,6 @@ def compute_kotlin_params(loaded_json, kotlin_json):
         return True
 
     def include_structure(structure):
-        # TODO(352710628) support converting callback info.
-        if structure.name.canonical_case().endswith(" callback info"):
-            return False
         if structure.name.canonical_case() == "string view":
             return False
         return True
@@ -1431,7 +1423,8 @@ class MultiGeneratorFromDawnJSON(Generator):
             ]
 
             by_category = params_kotlin['by_category']
-            for structure in by_category['structure']:
+            for structure in by_category['structure'] + by_category[
+                    'callback info']:
                 if structure.name.get() != "string view":
                     renders.append(
                         FileRender('art/api_kotlin_structure.kt',
@@ -1448,7 +1441,8 @@ class MultiGeneratorFromDawnJSON(Generator):
                         [RENDER_PARAMS_BASE, params_kotlin, {
                             'obj': obj
                         }]))
-            for function_pointer in by_category['function pointer']:
+            for function_pointer in (by_category['function pointer'] +
+                                     by_category['callback function']):
                 renders.append(
                     FileRender('art/api_kotlin_function_pointer.kt',
                                'java/' + jni_name(function_pointer) + '.kt', [

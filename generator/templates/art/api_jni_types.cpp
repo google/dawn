@@ -27,7 +27,7 @@
 
 {% macro arg_to_jni_type(arg) %}
     {%- if arg.length and arg.length != 'constant' -%}
-        {%- if arg.type.category in ['bitmask', 'enum', 'function pointer', 'object', 'structure'] -%}
+        {%- if arg.type.category in ['bitmask', 'callback function', 'enum', 'function pointer', 'object', 'callback info', 'structure'] -%}
             jobjectArray
         {%- elif arg.type.name.get() == 'void' -%}
             jobject
@@ -44,7 +44,7 @@
 {% macro to_jni_type(type) %}
     {%- if type.name.get() == "string view" -%}
         jstring
-    {%- elif type.category in ['function pointer', 'object', 'structure'] -%}
+    {%- elif type.category in ['callback function', 'function pointer', 'object', 'callback info', 'structure'] -%}
         jobject
     {%- elif type.category in ['bitmask', 'enum'] -%}
         jint
@@ -69,7 +69,7 @@
 {% endmacro %}
 
 {% macro jni_signature_single_value(type) %}
-    {%- if type.category in ['function pointer', 'object', 'structure'] -%}
+    {%- if type.category in ['function pointer', 'object', 'callback function', 'callback info', 'structure'] -%}
         L{{ jni_name(type) }};
     {%- elif type.category in ['bitmask', 'enum'] -%}
         {{ jni_signatures['int32_t'] }}//*  JvmInline makes lone bitmask/enums appear as integer to JNI.
@@ -96,7 +96,7 @@
     {% if size is string %}
         {% if member.type.name.get() in ['void const *', 'void *'] %}
             jobject {{ output }} = toByteBuffer(env, {{ input }}, {{ size }});
-        {% elif member.type.category in ['bitmask', 'enum', 'object', 'structure'] %}
+        {% elif member.type.category in ['bitmask', 'enum', 'object', 'callback info', 'structure'] %}
             //* Native container converted to a Kotlin container.
             jobjectArray {{ output }} = env->NewObjectArray(
                     {{ size }},
@@ -118,13 +118,16 @@
             jmethodID init = env->GetMethodID(clz, "<init>", "(J)V");
             {{ output }} = env->NewObject(clz, init, reinterpret_cast<jlong>({{ input }}));
         }
-    {% elif member.type.category == 'structure' %}
+    {% elif member.type.category in ['callback info', 'structure'] %}
         jobject {{ output }} = ToKotlin(env, {{ '&' if member.annotation not in ['*', 'const*'] }}{{ input }});
     {% elif member.type.name.get() == 'void *' %}
         jlong {{ output }} = reinterpret_cast<jlong>({{ input }});
     {% elif member.type.category in ['bitmask', 'enum', 'native'] %}
         //* We use Kotlin value classes for bitmask and enum, and they get inlined as lone values.
         {{ to_jni_type(member.type) }} {{ output }} = static_cast<{{ to_jni_type(member.type) }}>({{ input }});
+    {% elif member.type.category in ['callback function', 'function pointer'] %}
+        jobject {{ output }} = nullptr;
+        dawn::WarningLog() << "while converting {{ as_cType(member.type.name) }}: Native callbacks cannot be converted to Kotlin";
     {% else %}
         {{ unreachable_code() }}
     {% endif %}

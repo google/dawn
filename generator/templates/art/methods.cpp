@@ -40,11 +40,6 @@
 
 namespace dawn::kotlin_api {
 
-struct UserData {
-    JNIEnv *env;
-    jobject callback;
-};
-
 jobject toByteBuffer(JNIEnv *env, const void* address, jlong size) {
     if (!address) {
         return nullptr;
