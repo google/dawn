@@ -1884,20 +1884,25 @@ void Validator::CheckRootBlock(const Block* blk) {
             [&](const core::ir::Construct* c) {
                 if (capabilities_.Contains(Capability::kAllowModuleScopeLets)) {
                     CheckInstruction(c);
+                    CheckOnlyUsedInRootBlock(inst);
                 } else {
                     AddError(inst) << "root block: invalid instruction: " << inst->TypeInfo().name;
                 }
             },
-            [&](const core::ir::Discard* d) {
-                AddError(d) << "root block: invalid instruction: " << d->TypeInfo().name;
-            },
             [&](Default) {
-                // Note, this validation is looser then it could be. There are only certain
-                // expressions and builtins which can be used in an override. We can tighten this up
-                // later to a constrained set of instructions and builtins if necessary.
-                if (capabilities_.Contains(Capability::kAllowOverrides)) {
-                    // If overrides are allowed we can have regular instructions in the root block,
-                    // with the caveat that those instructions can _only_ be used in the root block.
+                // Note, this validation around kAllowOverrides is looser than it could be. There
+                // are only certain expressions and builtins which can be used in an override, but
+                // the current checks are only doing type level checking. To tighten this up will
+                // require walking up the tree to make sure that operands are const/override and
+                // builtins are allowed.
+                if (capabilities_.Contains(Capability::kAllowOverrides) &&
+                    inst->IsAnyOf<core::ir::Unary, core::ir::Binary, core::ir::CoreBuiltinCall,
+                                  core::ir::Convert, core::ir::Swizzle, core::ir::Access,
+                                  core::ir::Bitcast>()) {
+                    CheckInstruction(inst);
+                    // If overrides are allowed we can have certain regular instructions in the root
+                    // block, with the caveat that those instructions can _only_ be used in the root
+                    // block.
                     CheckOnlyUsedInRootBlock(inst);
                 } else {
                     AddError(inst) << "root block: invalid instruction: " << inst->TypeInfo().name;

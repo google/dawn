@@ -3849,9 +3849,8 @@ note: # Disassembly
 )");
 }
 
-TEST_F(IR_ValidatorTest, Discard_OutsideFunction) {
-    auto* d = b.Discard();
-    mod.root_block->Append(d);
+TEST_F(IR_ValidatorTest, Discard_RootBlock) {
+    mod.root_block->Append(b.Discard());
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
@@ -3869,6 +3868,55 @@ $B1: {  # root
   discard
 }
 
+)");
+}
+
+TEST_F(IR_ValidatorTest, Terminator_RootBlock) {
+    auto f = b.Function("f", ty.void_());
+    b.Append(f->Block(), [&] { b.Unreachable(); });
+
+    mod.root_block->Append(b.Return(f));
+    mod.root_block->Append(b.Unreachable());
+    mod.root_block->Append(b.TerminateInvocation());
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_EQ(res.Failure().reason.Str(),
+              R"(:2:3 error: return: root block: invalid instruction: tint::core::ir::Return
+  ret
+  ^^^
+
+:1:1 note: in block
+$B1: {  # root
+^^^
+
+:3:3 error: unreachable: root block: invalid instruction: tint::core::ir::Unreachable
+  unreachable
+  ^^^^^^^^^^^
+
+:1:1 note: in block
+$B1: {  # root
+^^^
+
+:4:3 error: terminate_invocation: root block: invalid instruction: tint::core::ir::TerminateInvocation
+  terminate_invocation
+  ^^^^^^^^^^^^^^^^^^^^
+
+:1:1 note: in block
+$B1: {  # root
+^^^
+
+note: # Disassembly
+$B1: {  # root
+  ret
+  unreachable
+  terminate_invocation
+}
+
+%f = func():void {
+  $B2: {
+    unreachable
+  }
+}
 )");
 }
 
@@ -4883,6 +4931,34 @@ note: # Disassembly
 )");
 }
 
+TEST_F(IR_ValidatorTest, If_RootBlock) {
+    auto* if_ = b.If(true);
+    if_->True()->Append(b.Unreachable());
+    mod.root_block->Append(if_);
+
+    auto res = ir::Validate(mod, core::ir::Capabilities{core::ir::Capability::kAllowOverrides});
+    ASSERT_NE(res, Success);
+    EXPECT_EQ(res.Failure().reason.Str(),
+              R"(:2:3 error: if: root block: invalid instruction: tint::core::ir::If
+  if true [t: $B2] {  # if_1
+  ^^^^^^^^^^^^^^^^
+
+:1:1 note: in block
+$B1: {  # root
+^^^
+
+note: # Disassembly
+$B1: {  # root
+  if true [t: $B2] {  # if_1
+    $B2: {  # true
+      unreachable
+    }
+  }
+}
+
+)");
+}
+
 TEST_F(IR_ValidatorTest, If_EmptyFalse) {
     auto* f = b.Function("my_func", ty.void_());
 
@@ -5040,6 +5116,34 @@ note: # Disassembly
 )");
 }
 
+TEST_F(IR_ValidatorTest, Loop_RootBlock) {
+    auto* l = b.Loop();
+    l->Body()->Append(b.ExitLoop(l));
+    mod.root_block->Append(l);
+
+    auto res = ir::Validate(mod, core::ir::Capabilities{core::ir::Capability::kAllowOverrides});
+    ASSERT_NE(res, Success);
+    EXPECT_EQ(res.Failure().reason.Str(),
+              R"(:2:3 error: loop: root block: invalid instruction: tint::core::ir::Loop
+  loop [b: $B2] {  # loop_1
+  ^^^^^^^^^^^^^
+
+:1:1 note: in block
+$B1: {  # root
+^^^
+
+note: # Disassembly
+$B1: {  # root
+  loop [b: $B2] {  # loop_1
+    $B2: {  # body
+      exit_loop  # loop_1
+    }
+  }
+}
+
+)");
+}
+
 TEST_F(IR_ValidatorTest, Loop_OnlyBody) {
     auto* f = b.Function("my_func", ty.void_());
 
@@ -5077,6 +5181,35 @@ note: # Disassembly
     ret
   }
 }
+)");
+}
+
+TEST_F(IR_ValidatorTest, Switch_RootBlock) {
+    auto* switch_ = b.Switch(1_i);
+    auto* def = b.DefaultCase(switch_);
+    def->Append(b.ExitSwitch(switch_));
+    mod.root_block->Append(switch_);
+
+    auto res = ir::Validate(mod, core::ir::Capabilities{core::ir::Capability::kAllowOverrides});
+    ASSERT_NE(res, Success);
+    EXPECT_EQ(res.Failure().reason.Str(),
+              R"(:2:3 error: switch: root block: invalid instruction: tint::core::ir::Switch
+  switch 1i [c: (default, $B2)] {  # switch_1
+  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+:1:1 note: in block
+$B1: {  # root
+^^^
+
+note: # Disassembly
+$B1: {  # root
+  switch 1i [c: (default, $B2)] {  # switch_1
+    $B2: {  # case
+      exit_switch  # switch_1
+    }
+  }
+}
+
 )");
 }
 
