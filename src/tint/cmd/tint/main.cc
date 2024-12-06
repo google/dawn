@@ -672,32 +672,6 @@ void AddSubstituteOverrides(std::unordered_map<tint::OverrideId, double> values,
     transform_manager.Add<tint::ast::transform::SubstituteOverride>();
 }
 
-// This will be removed once all the generators are moved over to the always run single entry point
-// version.
-[[maybe_unused]] tint::Result<tint::Program> ProcessASTTransformsOld(
-    Options& options,
-    tint::inspector::Inspector& inspector,
-    tint::Program& program) {
-    tint::ast::transform::Manager transform_manager;
-    tint::ast::transform::DataMap transform_inputs;
-
-    if (options.emit_single_entry_point) {
-        transform_manager.append(std::make_unique<tint::ast::transform::SingleEntryPoint>());
-        transform_inputs.Add<tint::ast::transform::SingleEntryPoint::Config>(options.ep_name);
-    }
-
-    AddRenamer(options, transform_manager, transform_inputs);
-
-    auto res = CreateOverrideMap(options, inspector);
-    if (res != tint::Success) {
-        return res.Failure();
-    }
-    AddSubstituteOverrides(res.Get(), transform_manager, transform_inputs);
-
-    tint::ast::transform::DataMap outputs;
-    return transform_manager.Run(program, std::move(transform_inputs), outputs);
-}
-
 [[maybe_unused]] tint::Result<tint::Program> ProcessASTTransforms(
     Options& options,
     tint::inspector::Inspector& inspector,
@@ -1339,103 +1313,74 @@ int main(int argc, const char** argv) {
         return GenerateWgsl(options, inspector, info.program) ? 0 : 1;
     }
 
-    if (options.format == Format::kNone || options.format == Format::kGlsl ||
-        options.format == Format::kHlsl || options.format == Format::kHlslFxc ||
-        options.format == Format::kMsl || options.format == Format::kSpirv ||
-        options.format == Format::kSpvAsm) {
-        auto generate = [&]() {
-            bool success = false;
-            switch (options.format) {
-                case Format::kSpirv:
-                case Format::kSpvAsm:
-                    success = GenerateSpirv(options, inspector, info.program);
-                    break;
-                case Format::kMsl:
-                    success = GenerateMsl(options, inspector, info.program);
-                    break;
-                case Format::kHlsl:
-                case Format::kHlslFxc:
-                    success = GenerateHlsl(options, inspector, info.program);
-                    break;
-                case Format::kGlsl:
-                    success = GenerateGlsl(options, inspector, info.program);
-                    break;
-                case Format::kNone:
-                    break;
-                case Format::kWgsl:
-                    TINT_UNREACHABLE();
-                default:
-                    std::cerr << "Unknown output format specified\n";
-                    return false;
-            }
-            if (!success) {
-                return false;
-            }
-            return true;
-        };
-
-        if (inspector.GetEntryPoints().empty()) {
-            return generate() ? 0 : 1;
-        }
-
-        bool success = true;
-        std::string outfile_name = options.output_file;
-        auto entry_points = inspector.GetEntryPoints();
-        for (auto& entry_point : entry_points) {
-            if (options.emit_single_entry_point && entry_point.name != options.ep_name) {
-                continue;
-            }
-
-            // If we're emitting to stdout, add a separator between the entry points. If we're going
-            // to a file, and we aren't emitting a single entry point, add the entry point name into
-            // the output file name.
-            if (tint::cmd::IsStdout(options.output_file)) {
-                if (entry_points.size() > 1) {
-                    if (options.format == Format::kSpvAsm) {
-                        std::cout << ";\n; ";
-                    } else {
-                        std::cout << "//\n// ";
-                    }
-                    std::cout << entry_point.name << "\n";
-                    if (options.format == Format::kSpvAsm) {
-                        std::cout << ";\n";
-                    } else {
-                        std::cout << "//\n";
-                    }
-                }
-            } else if (!options.emit_single_entry_point) {
-                auto pos = outfile_name.rfind(".");
-                if (pos == std::string_view::npos) {
-                    options.output_file = outfile_name + "." + entry_point.name;
-                } else {
-                    options.output_file = outfile_name.substr(0, pos) + "." + entry_point.name +
-                                          "." + outfile_name.substr(pos + 1);
-                }
-            }
-
-            options.ep_name = entry_point.name;
-            success &= generate();
-
-            if (options.emit_single_entry_point) {
-                break;
-            }
-        }
-        return success ? 0 : 1;
-
-    } else {
+    auto generate = [&]() {
         switch (options.format) {
             case Format::kSpirv:
             case Format::kSpvAsm:
+                return GenerateSpirv(options, inspector, info.program);
             case Format::kMsl:
+                return GenerateMsl(options, inspector, info.program);
             case Format::kHlsl:
             case Format::kHlslFxc:
+                return GenerateHlsl(options, inspector, info.program);
             case Format::kGlsl:
+                return GenerateGlsl(options, inspector, info.program);
             case Format::kWgsl:
-            case Format::kNone:
                 TINT_UNREACHABLE();
+            case Format::kNone:
+                break;
             default:
                 std::cerr << "Unknown output format specified\n";
-                return 1;
+                break;
+        }
+        return false;
+    };
+
+    if (inspector.GetEntryPoints().empty()) {
+        return generate() ? 0 : 1;
+    }
+
+    bool success = true;
+    std::string outfile_name = options.output_file;
+    auto entry_points = inspector.GetEntryPoints();
+    for (auto& entry_point : entry_points) {
+        if (options.emit_single_entry_point && entry_point.name != options.ep_name) {
+            continue;
+        }
+
+        // If we're emitting to stdout, add a separator between the entry points. If we're going
+        // to a file, and we aren't emitting a single entry point, add the entry point name into
+        // the output file name.
+        if (tint::cmd::IsStdout(options.output_file)) {
+            if (entry_points.size() > 1) {
+                if (options.format == Format::kSpvAsm) {
+                    std::cout << ";\n; ";
+                } else {
+                    std::cout << "//\n// ";
+                }
+                std::cout << entry_point.name << "\n";
+                if (options.format == Format::kSpvAsm) {
+                    std::cout << ";\n";
+                } else {
+                    std::cout << "//\n";
+                }
+            }
+        } else if (!options.emit_single_entry_point) {
+            auto pos = outfile_name.rfind(".");
+            if (pos == std::string_view::npos) {
+                options.output_file = outfile_name + "." + entry_point.name;
+            } else {
+                options.output_file = outfile_name.substr(0, pos) + "." + entry_point.name + "." +
+                                      outfile_name.substr(pos + 1);
+            }
+        }
+
+        options.ep_name = entry_point.name;
+        success &= generate();
+
+        if (options.emit_single_entry_point) {
+            break;
         }
     }
+    return success ? 0 : 1;
 }
