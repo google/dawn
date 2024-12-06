@@ -672,7 +672,9 @@ void AddSubstituteOverrides(std::unordered_map<tint::OverrideId, double> values,
     transform_manager.Add<tint::ast::transform::SubstituteOverride>();
 }
 
-[[maybe_unused]] tint::Result<tint::Program> ProcessASTTransforms(
+// This will be removed once all the generators are moved over to the always run single entry point
+// version.
+[[maybe_unused]] tint::Result<tint::Program> ProcessASTTransformsOld(
     Options& options,
     tint::inspector::Inspector& inspector,
     tint::Program& program) {
@@ -683,6 +685,28 @@ void AddSubstituteOverrides(std::unordered_map<tint::OverrideId, double> values,
         transform_manager.append(std::make_unique<tint::ast::transform::SingleEntryPoint>());
         transform_inputs.Add<tint::ast::transform::SingleEntryPoint::Config>(options.ep_name);
     }
+
+    AddRenamer(options, transform_manager, transform_inputs);
+
+    auto res = CreateOverrideMap(options, inspector);
+    if (res != tint::Success) {
+        return res.Failure();
+    }
+    AddSubstituteOverrides(res.Get(), transform_manager, transform_inputs);
+
+    tint::ast::transform::DataMap outputs;
+    return transform_manager.Run(program, std::move(transform_inputs), outputs);
+}
+
+[[maybe_unused]] tint::Result<tint::Program> ProcessASTTransforms(
+    Options& options,
+    tint::inspector::Inspector& inspector,
+    tint::Program& program) {
+    tint::ast::transform::Manager transform_manager;
+    tint::ast::transform::DataMap transform_inputs;
+
+    transform_manager.append(std::make_unique<tint::ast::transform::SingleEntryPoint>());
+    transform_inputs.Add<tint::ast::transform::SingleEntryPoint::Config>(options.ep_name);
 
     AddRenamer(options, transform_manager, transform_inputs);
 
@@ -745,7 +769,7 @@ bool GenerateSpirv([[maybe_unused]] Options& options,
                    [[maybe_unused]] tint::inspector::Inspector& inspector,
                    [[maybe_unused]] tint::Program& src_program) {
 #if TINT_BUILD_SPV_WRITER
-    auto res = ProcessASTTransforms(options, inspector, src_program);
+    auto res = ProcessASTTransformsOld(options, inspector, src_program);
     if (res != tint::Success || !res->IsValid()) {
         tint::cmd::PrintWGSL(std::cerr, res.Get());
         std::cerr << res->Diagnostics() << "\n";
@@ -865,7 +889,7 @@ bool GenerateMsl([[maybe_unused]] Options& options,
                  [[maybe_unused]] tint::inspector::Inspector& inspector,
                  [[maybe_unused]] tint::Program& src_program) {
 #if TINT_BUILD_MSL_WRITER
-    auto transform_res = ProcessASTTransforms(options, inspector, src_program);
+    auto transform_res = ProcessASTTransformsOld(options, inspector, src_program);
     if (transform_res != tint::Success || !transform_res->IsValid()) {
         tint::cmd::PrintWGSL(std::cerr, transform_res.Get());
         std::cerr << transform_res->Diagnostics() << "\n";
@@ -986,7 +1010,7 @@ bool GenerateHlsl([[maybe_unused]] Options& options,
                   [[maybe_unused]] tint::inspector::Inspector& inspector,
                   [[maybe_unused]] tint::Program& src_program) {
 #if TINT_BUILD_HLSL_WRITER
-    auto res = ProcessASTTransforms(options, inspector, src_program);
+    auto res = ProcessASTTransformsOld(options, inspector, src_program);
     if (res != tint::Success || !res->IsValid()) {
         tint::cmd::PrintWGSL(std::cerr, res.Get());
         std::cerr << res->Diagnostics() << "\n";
@@ -1120,7 +1144,7 @@ bool GenerateGlsl([[maybe_unused]] Options& options,
                   [[maybe_unused]] tint::inspector::Inspector& src_inspector,
                   [[maybe_unused]] tint::Program& src_program) {
 #if TINT_BUILD_GLSL_WRITER
-    auto res = ProcessASTTransforms(options, src_inspector, src_program);
+    auto res = ProcessASTTransformsOld(options, src_inspector, src_program);
     if (res != tint::Success || !res->IsValid()) {
         tint::cmd::PrintWGSL(std::cerr, res.Get());
         std::cerr << res->Diagnostics() << "\n";
@@ -1128,8 +1152,7 @@ bool GenerateGlsl([[maybe_unused]] Options& options,
     }
     tint::inspector::Inspector inspector(res.Get());
 
-    auto generate = [&](const tint::Program& prg, const std::string entry_point_name,
-                        [[maybe_unused]] tint::ast::PipelineStage stage) -> bool {
+    auto generate = [&](const tint::Program& prg, const std::string entry_point_name) -> bool {
         tint::glsl::writer::Options gen_options;
 
         if (options.glsl_desktop) {
@@ -1192,6 +1215,18 @@ bool GenerateGlsl([[maybe_unused]] Options& options,
         }
 
         if (options.validate && options.skip_hash.count(hash) == 0) {
+            tint::ast::PipelineStage stage = tint::ast::PipelineStage::kCompute;
+            switch (entry_point.stage) {
+                case tint::inspector::PipelineStage::kCompute:
+                    stage = tint::ast::PipelineStage::kCompute;
+                    break;
+                case tint::inspector::PipelineStage::kVertex:
+                    stage = tint::ast::PipelineStage::kVertex;
+                    break;
+                case tint::inspector::PipelineStage::kFragment:
+                    stage = tint::ast::PipelineStage::kFragment;
+                    break;
+            }
 #if !TINT_BUILD_GLSL_VALIDATOR
             std::cerr << "GLSL validator not enabled in tint build\n";
             return false;
@@ -1212,24 +1247,12 @@ bool GenerateGlsl([[maybe_unused]] Options& options,
     if (inspector.GetEntryPoints().empty()) {
         // Pass empty string here so that the GLSL generator will generate
         // code for all functions, reachable or not.
-        return generate(res.Get(), "", tint::ast::PipelineStage::kCompute);
+        return generate(res.Get(), "");
     }
 
     bool success = true;
     for (auto& entry_point : inspector.GetEntryPoints()) {
-        tint::ast::PipelineStage stage = tint::ast::PipelineStage::kCompute;
-        switch (entry_point.stage) {
-            case tint::inspector::PipelineStage::kCompute:
-                stage = tint::ast::PipelineStage::kCompute;
-                break;
-            case tint::inspector::PipelineStage::kVertex:
-                stage = tint::ast::PipelineStage::kVertex;
-                break;
-            case tint::inspector::PipelineStage::kFragment:
-                stage = tint::ast::PipelineStage::kFragment;
-                break;
-        }
-        success &= generate(res.Get(), entry_point.name, stage);
+        success &= generate(res.Get(), entry_point.name);
     }
     return success;
 #else
@@ -1337,32 +1360,113 @@ int main(int argc, const char** argv) {
         return GenerateWgsl(options, inspector, info.program) ? 0 : 1;
     }
 
-    bool success = false;
-    switch (options.format) {
-        case Format::kSpirv:
-        case Format::kSpvAsm:
-            success = GenerateSpirv(options, inspector, info.program);
-            break;
-        case Format::kMsl:
-            success = GenerateMsl(options, inspector, info.program);
-            break;
-        case Format::kHlsl:
-        case Format::kHlslFxc:
-            success = GenerateHlsl(options, inspector, info.program);
-            break;
-        case Format::kGlsl:
-            success = GenerateGlsl(options, inspector, info.program);
-            break;
-        case Format::kWgsl:
-            TINT_UNREACHABLE();
-        case Format::kNone:
-            break;
-        default:
-            std::cerr << "Unknown output format specified\n";
+    if (options.format == Format::kNone) {
+        auto generate = [&]() {
+            bool success = false;
+            switch (options.format) {
+                case Format::kSpirv:
+                case Format::kSpvAsm:
+                    success = GenerateSpirv(options, inspector, info.program);
+                    break;
+                case Format::kMsl:
+                    success = GenerateMsl(options, inspector, info.program);
+                    break;
+                case Format::kHlsl:
+                case Format::kHlslFxc:
+                    success = GenerateHlsl(options, inspector, info.program);
+                    break;
+                case Format::kGlsl:
+                    success = GenerateGlsl(options, inspector, info.program);
+                    break;
+                case Format::kNone:
+                    break;
+                case Format::kWgsl:
+                    TINT_UNREACHABLE();
+                default:
+                    std::cerr << "Unknown output format specified\n";
+                    return false;
+            }
+            if (!success) {
+                return false;
+            }
+            return true;
+        };
+
+        if (inspector.GetEntryPoints().empty()) {
+            return generate() ? 0 : 1;
+        }
+
+        bool success = true;
+        std::string outfile_name = options.output_file;
+        auto entry_points = inspector.GetEntryPoints();
+        for (auto& entry_point : entry_points) {
+            if (options.emit_single_entry_point && entry_point.name != options.ep_name) {
+                continue;
+            }
+
+            // If we're emitting to stdout, add a separator between the entry points. If we're going
+            // to a file, and we aren't emitting a single entry point, add the entry point name into
+            // the output file name.
+            if (tint::cmd::IsStdout(options.output_file)) {
+                if (entry_points.size() > 1) {
+                    if (options.format == Format::kSpvAsm) {
+                        std::cout << ";\n; ";
+                    } else {
+                        std::cout << "//\n// ";
+                    }
+                    std::cout << entry_point.name << "\n";
+                    if (options.format == Format::kSpvAsm) {
+                        std::cout << ";\n";
+                    } else {
+                        std::cout << "//\n";
+                    }
+                }
+            } else if (!options.emit_single_entry_point) {
+                auto pos = outfile_name.rfind(".");
+                if (pos == std::string_view::npos) {
+                    options.output_file = outfile_name + "." + entry_point.name;
+                } else {
+                    options.output_file = outfile_name.substr(0, pos) + "." + entry_point.name +
+                                          "." + outfile_name.substr(pos + 1);
+                }
+            }
+
+            options.ep_name = entry_point.name;
+            success &= generate();
+
+            if (options.emit_single_entry_point) {
+                break;
+            }
+        }
+        return success ? 0 : 1;
+
+    } else {
+        bool success = false;
+        switch (options.format) {
+            case Format::kSpirv:
+            case Format::kSpvAsm:
+                success = GenerateSpirv(options, inspector, info.program);
+                break;
+            case Format::kMsl:
+                success = GenerateMsl(options, inspector, info.program);
+                break;
+            case Format::kHlsl:
+            case Format::kHlslFxc:
+                success = GenerateHlsl(options, inspector, info.program);
+                break;
+            case Format::kGlsl:
+                success = GenerateGlsl(options, inspector, info.program);
+                break;
+            case Format::kWgsl:
+            case Format::kNone:
+                TINT_UNREACHABLE();
+            default:
+                std::cerr << "Unknown output format specified\n";
+                return 1;
+        }
+        if (!success) {
             return 1;
-    }
-    if (!success) {
-        return 1;
+        }
     }
 
     return 0;
