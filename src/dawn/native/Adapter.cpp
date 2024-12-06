@@ -102,8 +102,11 @@ wgpu::Status AdapterBase::APIGetLimits(SupportedLimits* limits) const {
         limits->limits = mPhysicalDevice->GetLimits().v1;
     }
 
-    // TODO(349125474): Deprecate DawnExperimentalSubgroupLimits.
+    // TODO(crbug.com/382520104): Remove DawnExperimentalSubgroupLimits.
     if (auto* subgroupLimits = unpacked.Get<DawnExperimentalSubgroupLimits>()) {
+        mInstance->EmitDeprecationWarning(
+            "DawnExperimentalSubgroupLimits is deprecated, use AdapterPropertiesSubgroups "
+            "instead.");
         wgpu::ChainedStructOut* originalChain = subgroupLimits->nextInChain;
         if (!mSupportedFeatures.IsEnabled(wgpu::FeatureName::Subgroups)) {
             // If subgroups features are not supported, return the default-initialized
