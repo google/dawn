@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 #version 460
 precision highp float;
 precision highp int;
@@ -21,6 +24,9 @@ vec4 textureLoad_bc882d() {
 void main() {
   v.inner = textureLoad_bc882d();
 }
+//
+// compute_main
+//
 #version 460
 
 layout(binding = 0, std430)

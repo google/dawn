@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 #version 310 es
 precision highp float;
 precision highp int;
@@ -8,6 +11,9 @@ void log_b8088d() {
 void main() {
   log_b8088d();
 }
+//
+// compute_main
+//
 #version 310 es
 
 void log_b8088d() {
@@ -17,6 +23,9 @@ layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
   log_b8088d();
 }
+//
+// vertex_main
+//
 #version 310 es
 
 

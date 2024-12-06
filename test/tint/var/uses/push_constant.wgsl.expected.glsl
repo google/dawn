@@ -1,3 +1,6 @@
+//
+// main1
+//
 #version 310 es
 
 
@@ -13,6 +16,9 @@ layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
   uses_a();
 }
+//
+// main2
+//
 #version 310 es
 
 
@@ -31,6 +37,9 @@ layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
   uses_uses_a();
 }
+//
+// main3
+//
 #version 310 es
 
 
@@ -46,6 +55,9 @@ layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
   uses_b();
 }
+//
+// main4
+//
 #version 310 es
 
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;

@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 #version 310 es
 #extension GL_AMD_gpu_shader_half_float: require
 precision highp float;
@@ -14,6 +17,9 @@ f16vec3 fract_958a1d() {
 void main() {
   v.inner = fract_958a1d();
 }
+//
+// compute_main
+//
 #version 310 es
 #extension GL_AMD_gpu_shader_half_float: require
 
@@ -29,6 +35,9 @@ layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
   v.inner = fract_958a1d();
 }
+//
+// vertex_main
+//
 #version 310 es
 #extension GL_AMD_gpu_shader_half_float: require
 

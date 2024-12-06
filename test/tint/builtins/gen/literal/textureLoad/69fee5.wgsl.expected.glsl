@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 #version 310 es
 precision highp float;
 precision highp int;
@@ -17,6 +20,9 @@ vec4 textureLoad_69fee5() {
 void main() {
   v.inner = textureLoad_69fee5();
 }
+//
+// compute_main
+//
 #version 310 es
 
 layout(binding = 0, std430)

@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 #version 310 es
 precision highp float;
 precision highp int;
@@ -23,6 +26,9 @@ uint atomicAdd_8a199a() {
 void main() {
   v.inner = atomicAdd_8a199a();
 }
+//
+// compute_main
+//
 #version 310 es
 
 

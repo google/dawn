@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 #version 310 es
 precision highp float;
 precision highp int;
@@ -18,6 +21,9 @@ void atomicStore_cdc29e() {
 void main() {
   atomicStore_cdc29e();
 }
+//
+// compute_main
+//
 #version 310 es
 
 

@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 #version 310 es
 precision highp float;
 precision highp int;
@@ -18,6 +21,9 @@ uint dot_7548a0() {
 void main() {
   v.inner = dot_7548a0();
 }
+//
+// compute_main
+//
 #version 310 es
 
 layout(binding = 0, std430)
@@ -37,6 +43,9 @@ layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
   v.inner = dot_7548a0();
 }
+//
+// vertex_main
+//
 #version 310 es
 
 

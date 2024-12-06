@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 #version 310 es
 precision highp float;
 precision highp int;
@@ -17,6 +20,9 @@ uint arrayLength_1588cd() {
 void main() {
   v.inner = arrayLength_1588cd();
 }
+//
+// compute_main
+//
 #version 310 es
 
 layout(binding = 0, std430)
@@ -35,6 +41,9 @@ layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
   v.inner = arrayLength_1588cd();
 }
+//
+// vertex_main
+//
 #version 310 es
 
 

@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 #version 310 es
 precision highp float;
 precision highp int;
@@ -8,6 +11,9 @@ void sqrt_072192() {
 void main() {
   sqrt_072192();
 }
+//
+// compute_main
+//
 #version 310 es
 
 void sqrt_072192() {
@@ -17,6 +23,9 @@ layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
   sqrt_072192();
 }
+//
+// vertex_main
+//
 #version 310 es
 
 

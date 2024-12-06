@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 #version 310 es
 precision highp float;
 precision highp int;
@@ -9,6 +12,9 @@ void ldexp_376938() {
 void main() {
   ldexp_376938();
 }
+//
+// compute_main
+//
 #version 310 es
 
 void ldexp_376938() {
@@ -19,6 +25,9 @@ layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
   ldexp_376938();
 }
+//
+// vertex_main
+//
 #version 310 es
 
 

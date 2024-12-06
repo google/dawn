@@ -1,3 +1,6 @@
+//
+// vert_main1
+//
 #version 310 es
 
 
@@ -21,6 +24,9 @@ void main() {
   vert_main1_loc0_Output = v.loc0;
   gl_PointSize = 1.0f;
 }
+//
+// vert_main2
+//
 #version 310 es
 
 

@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 #version 310 es
 precision highp float;
 precision highp int;
@@ -9,6 +12,9 @@ void select_494051() {
 void main() {
   select_494051();
 }
+//
+// compute_main
+//
 #version 310 es
 
 void select_494051() {
@@ -19,6 +25,9 @@ layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
   select_494051();
 }
+//
+// vertex_main
+//
 #version 310 es
 
 

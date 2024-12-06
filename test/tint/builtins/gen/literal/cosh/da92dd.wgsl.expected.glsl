@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 #version 310 es
 precision highp float;
 precision highp int;
@@ -13,6 +16,9 @@ float cosh_da92dd() {
 void main() {
   v.inner = cosh_da92dd();
 }
+//
+// compute_main
+//
 #version 310 es
 
 layout(binding = 0, std430)
@@ -27,6 +33,9 @@ layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
   v.inner = cosh_da92dd();
 }
+//
+// vertex_main
+//
 #version 310 es
 
 

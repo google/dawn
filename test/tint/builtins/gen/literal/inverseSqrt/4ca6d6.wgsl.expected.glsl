@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 #version 310 es
 precision highp float;
 precision highp int;
@@ -8,6 +11,9 @@ void inverseSqrt_4ca6d6() {
 void main() {
   inverseSqrt_4ca6d6();
 }
+//
+// compute_main
+//
 #version 310 es
 
 void inverseSqrt_4ca6d6() {
@@ -17,6 +23,9 @@ layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
   inverseSqrt_4ca6d6();
 }
+//
+// vertex_main
+//
 #version 310 es
 
 

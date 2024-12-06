@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 #version 310 es
 #extension GL_AMD_gpu_shader_half_float: require
 precision highp float;
@@ -17,6 +20,9 @@ f16vec3 mix_63f2fd() {
 void main() {
   v.inner = mix_63f2fd();
 }
+//
+// compute_main
+//
 #version 310 es
 #extension GL_AMD_gpu_shader_half_float: require
 
@@ -35,6 +41,9 @@ layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
   v.inner = mix_63f2fd();
 }
+//
+// vertex_main
+//
 #version 310 es
 #extension GL_AMD_gpu_shader_half_float: require
 

@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 #version 460
 precision highp float;
 precision highp int;
@@ -21,6 +24,9 @@ uvec4 textureLoad_eecf7d() {
 void main() {
   v.inner = textureLoad_eecf7d();
 }
+//
+// compute_main
+//
 #version 460
 
 layout(binding = 0, std430)
@@ -43,6 +49,9 @@ layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
   v.inner = textureLoad_eecf7d();
 }
+//
+// vertex_main
+//
 #version 460
 
 

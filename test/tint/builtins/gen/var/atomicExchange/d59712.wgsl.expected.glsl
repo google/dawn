@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 #version 310 es
 precision highp float;
 precision highp int;
@@ -23,6 +26,9 @@ uint atomicExchange_d59712() {
 void main() {
   v.inner = atomicExchange_d59712();
 }
+//
+// compute_main
+//
 #version 310 es
 
 

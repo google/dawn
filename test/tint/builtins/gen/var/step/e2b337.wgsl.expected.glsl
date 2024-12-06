@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 #version 310 es
 precision highp float;
 precision highp int;
@@ -15,6 +18,9 @@ vec4 step_e2b337() {
 void main() {
   v.inner = step_e2b337();
 }
+//
+// compute_main
+//
 #version 310 es
 
 layout(binding = 0, std430)
@@ -31,6 +37,9 @@ layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
   v.inner = step_e2b337();
 }
+//
+// vertex_main
+//
 #version 310 es
 
 

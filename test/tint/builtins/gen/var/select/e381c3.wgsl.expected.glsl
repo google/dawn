@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 #version 310 es
 precision highp float;
 precision highp int;
@@ -9,6 +12,9 @@ void select_e381c3() {
 void main() {
   select_e381c3();
 }
+//
+// compute_main
+//
 #version 310 es
 
 void select_e381c3() {
@@ -19,6 +25,9 @@ layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
   select_e381c3();
 }
+//
+// vertex_main
+//
 #version 310 es
 
 

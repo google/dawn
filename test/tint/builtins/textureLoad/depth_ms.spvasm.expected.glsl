@@ -1,3 +1,6 @@
+//
+// vertex_main
+//
 #version 310 es
 
 
@@ -30,6 +33,9 @@ void main() {
   gl_Position.z = ((2.0f * gl_Position.z) - gl_Position.w);
   gl_PointSize = 1.0f;
 }
+//
+// fragment_main
+//
 #version 310 es
 precision highp float;
 precision highp int;
@@ -47,6 +53,9 @@ void fragment_main_1() {
 void main() {
   fragment_main_1();
 }
+//
+// compute_main
+//
 #version 310 es
 
 uniform highp sampler2DMS arg_0;

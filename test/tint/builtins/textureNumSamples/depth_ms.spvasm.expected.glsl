@@ -1,3 +1,6 @@
+//
+// vertex_main
+//
 #version 310 es
 
 
@@ -35,6 +38,9 @@ void main() {
   gl_Position.z = ((2.0f * gl_Position.z) - gl_Position.w);
   gl_PointSize = 1.0f;
 }
+//
+// fragment_main
+//
 #version 310 es
 precision highp float;
 precision highp int;
@@ -45,7 +51,7 @@ struct TintTextureUniformData {
 };
 
 layout(binding = 0, std140)
-uniform tint_symbol_3_1_ubo {
+uniform tint_symbol_1_ubo {
   TintTextureUniformData inner;
 } v;
 void textureNumSamples_a3c8a0() {
@@ -58,6 +64,9 @@ void fragment_main_1() {
 void main() {
   fragment_main_1();
 }
+//
+// compute_main
+//
 #version 310 es
 
 
@@ -66,7 +75,7 @@ struct TintTextureUniformData {
 };
 
 layout(binding = 0, std140)
-uniform tint_symbol_3_1_ubo {
+uniform tint_symbol_1_ubo {
   TintTextureUniformData inner;
 } v;
 void textureNumSamples_a3c8a0() {

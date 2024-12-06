@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 #version 460
 precision highp float;
 precision highp int;
@@ -12,6 +15,9 @@ void textureStore_8cd611() {
 void main() {
   textureStore_8cd611();
 }
+//
+// compute_main
+//
 #version 460
 
 layout(binding = 0, r8) uniform highp writeonly image3D arg_0;

@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 #version 460
 precision highp float;
 precision highp int;
@@ -15,6 +18,9 @@ void textureStore_bd6602() {
 void main() {
   textureStore_bd6602();
 }
+//
+// compute_main
+//
 #version 460
 
 layout(binding = 0, rg32ui) uniform highp uimage2DArray arg_0;

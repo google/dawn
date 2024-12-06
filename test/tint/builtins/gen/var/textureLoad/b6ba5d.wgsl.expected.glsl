@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 #version 310 es
 precision highp float;
 precision highp int;
@@ -12,7 +15,7 @@ buffer prevent_dce_block_1_ssbo {
   float inner;
 } v;
 layout(binding = 0, std140)
-uniform tint_symbol_1_1_ubo {
+uniform tint_symbol_1_ubo {
   TintTextureUniformData inner;
 } v_1;
 uniform highp sampler2DArray arg_0;
@@ -35,6 +38,9 @@ float textureLoad_b6ba5d() {
 void main() {
   v.inner = textureLoad_b6ba5d();
 }
+//
+// compute_main
+//
 #version 310 es
 
 
@@ -47,7 +53,7 @@ buffer prevent_dce_block_1_ssbo {
   float inner;
 } v;
 layout(binding = 0, std140)
-uniform tint_symbol_1_1_ubo {
+uniform tint_symbol_1_ubo {
   TintTextureUniformData inner;
 } v_1;
 uniform highp sampler2DArray arg_0;
@@ -71,6 +77,9 @@ layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
   v.inner = textureLoad_b6ba5d();
 }
+//
+// vertex_main
+//
 #version 310 es
 
 

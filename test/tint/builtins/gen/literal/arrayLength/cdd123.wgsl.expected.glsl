@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 #version 310 es
 precision highp float;
 precision highp int;
@@ -17,6 +20,9 @@ uint arrayLength_cdd123() {
 void main() {
   v.inner = arrayLength_cdd123();
 }
+//
+// compute_main
+//
 #version 310 es
 
 layout(binding = 0, std430)

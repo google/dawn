@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 #version 310 es
 precision highp float;
 precision highp int;
@@ -14,6 +17,9 @@ uint textureDimensions_20ecef() {
 void main() {
   v.inner = textureDimensions_20ecef();
 }
+//
+// compute_main
+//
 #version 310 es
 
 layout(binding = 0, std430)

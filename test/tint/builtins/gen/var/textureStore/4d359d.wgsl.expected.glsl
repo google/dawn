@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 #version 460
 precision highp float;
 precision highp int;
@@ -15,6 +18,9 @@ void textureStore_4d359d() {
 void main() {
   textureStore_4d359d();
 }
+//
+// compute_main
+//
 #version 460
 
 layout(binding = 0, rg32ui) uniform highp writeonly uimage2DArray arg_0;

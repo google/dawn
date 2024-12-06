@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 #version 310 es
 precision highp float;
 precision highp int;
@@ -12,6 +15,9 @@ void textureStore_cd6755() {
 void main() {
   textureStore_cd6755();
 }
+//
+// compute_main
+//
 #version 310 es
 
 layout(binding = 0, r32ui) uniform highp writeonly uimage3D arg_0;

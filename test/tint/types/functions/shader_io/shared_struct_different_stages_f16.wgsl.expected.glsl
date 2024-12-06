@@ -1,3 +1,6 @@
+//
+// vert_main
+//
 #version 310 es
 #extension GL_AMD_gpu_shader_half_float: require
 
@@ -22,6 +25,9 @@ void main() {
   gl_Position.z = ((2.0f * gl_Position.z) - gl_Position.w);
   gl_PointSize = 1.0f;
 }
+//
+// frag_main
+//
 #version 310 es
 #extension GL_AMD_gpu_shader_half_float: require
 precision highp float;

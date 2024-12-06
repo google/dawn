@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 #version 310 es
 precision highp float;
 precision highp int;
@@ -17,6 +20,9 @@ uvec4 textureLoad_02ef1f() {
 void main() {
   v.inner = textureLoad_02ef1f();
 }
+//
+// compute_main
+//
 #version 310 es
 
 layout(binding = 0, std430)

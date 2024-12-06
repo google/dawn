@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 #version 310 es
 precision highp float;
 precision highp int;
@@ -14,6 +17,9 @@ vec2 exp2_d6777c() {
 void main() {
   v.inner = exp2_d6777c();
 }
+//
+// compute_main
+//
 #version 310 es
 
 layout(binding = 0, std430)
@@ -29,6 +35,9 @@ layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
   v.inner = exp2_d6777c();
 }
+//
+// vertex_main
+//
 #version 310 es
 
 

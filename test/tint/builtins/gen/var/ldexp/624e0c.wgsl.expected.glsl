@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 #version 310 es
 #extension GL_AMD_gpu_shader_half_float: require
 precision highp float;
@@ -16,6 +19,9 @@ float16_t ldexp_624e0c() {
 void main() {
   v.inner = ldexp_624e0c();
 }
+//
+// compute_main
+//
 #version 310 es
 #extension GL_AMD_gpu_shader_half_float: require
 
@@ -33,6 +39,9 @@ layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
   v.inner = ldexp_624e0c();
 }
+//
+// vertex_main
+//
 #version 310 es
 #extension GL_AMD_gpu_shader_half_float: require
 

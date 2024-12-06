@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 #version 310 es
 precision highp float;
 precision highp int;
@@ -14,6 +17,9 @@ void textureStore_6da692() {
 void main() {
   textureStore_6da692();
 }
+//
+// compute_main
+//
 #version 310 es
 
 layout(binding = 0, rgba16ui) uniform highp writeonly uimage2DArray arg_0;

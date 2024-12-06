@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 #version 310 es
 precision highp float;
 precision highp int;
@@ -8,6 +11,9 @@ void sinh_a3da7c() {
 void main() {
   sinh_a3da7c();
 }
+//
+// compute_main
+//
 #version 310 es
 
 void sinh_a3da7c() {
@@ -17,6 +23,9 @@ layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
   sinh_a3da7c();
 }
+//
+// vertex_main
+//
 #version 310 es
 
 

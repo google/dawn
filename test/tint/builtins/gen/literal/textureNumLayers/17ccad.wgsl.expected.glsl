@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 #version 460
 precision highp float;
 precision highp int;
@@ -14,6 +17,9 @@ uint textureNumLayers_17ccad() {
 void main() {
   v.inner = textureNumLayers_17ccad();
 }
+//
+// compute_main
+//
 #version 460
 
 layout(binding = 0, std430)

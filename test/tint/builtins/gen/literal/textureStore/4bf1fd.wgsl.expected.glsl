@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 #version 310 es
 precision highp float;
 precision highp int;
@@ -9,6 +12,9 @@ void textureStore_4bf1fd() {
 void main() {
   textureStore_4bf1fd();
 }
+//
+// compute_main
+//
 #version 310 es
 
 layout(binding = 0, r32ui) uniform highp uimage2D arg_0;

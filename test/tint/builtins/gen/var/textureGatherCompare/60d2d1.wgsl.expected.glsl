@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 #version 460
 precision highp float;
 precision highp int;
@@ -19,6 +22,9 @@ vec4 textureGatherCompare_60d2d1() {
 void main() {
   v.inner = textureGatherCompare_60d2d1();
 }
+//
+// compute_main
+//
 #version 460
 
 layout(binding = 0, std430)
@@ -39,6 +45,9 @@ layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
   v.inner = textureGatherCompare_60d2d1();
 }
+//
+// vertex_main
+//
 #version 460
 
 

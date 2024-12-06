@@ -705,8 +705,12 @@ void AddSubstituteOverrides(std::unordered_map<tint::OverrideId, double> values,
     tint::ast::transform::Manager transform_manager;
     tint::ast::transform::DataMap transform_inputs;
 
-    transform_manager.append(std::make_unique<tint::ast::transform::SingleEntryPoint>());
-    transform_inputs.Add<tint::ast::transform::SingleEntryPoint::Config>(options.ep_name);
+    // In the case where there are no entry points, the ep_name is blank and we need to skip single
+    // entry point.
+    if (options.ep_name != "") {
+        transform_manager.append(std::make_unique<tint::ast::transform::SingleEntryPoint>());
+        transform_inputs.Add<tint::ast::transform::SingleEntryPoint::Config>(options.ep_name);
+    }
 
     AddRenamer(options, transform_manager, transform_inputs);
 
@@ -1137,84 +1141,77 @@ bool GenerateHlsl([[maybe_unused]] Options& options,
 
 /// Generate GLSL code for a program.
 /// @param options the options that Tint was invoked with
-/// @param src_inspector the inspector
+/// @param inspector the inspector
 /// @param src_program the program to generate
 /// @returns true on success
 bool GenerateGlsl([[maybe_unused]] Options& options,
-                  [[maybe_unused]] tint::inspector::Inspector& src_inspector,
+                  [[maybe_unused]] tint::inspector::Inspector& inspector,
                   [[maybe_unused]] tint::Program& src_program) {
 #if TINT_BUILD_GLSL_WRITER
-    auto res = ProcessASTTransformsOld(options, src_inspector, src_program);
+    auto res = ProcessASTTransforms(options, inspector, src_program);
     if (res != tint::Success || !res->IsValid()) {
         tint::cmd::PrintWGSL(std::cerr, res.Get());
         std::cerr << res->Diagnostics() << "\n";
         return 1;
     }
-    tint::inspector::Inspector inspector(res.Get());
 
-    auto generate = [&](const tint::Program& prg, const std::string entry_point_name) -> bool {
-        tint::glsl::writer::Options gen_options;
+    tint::glsl::writer::Options gen_options;
+    if (options.glsl_desktop) {
+        gen_options.version =
+            tint::glsl::writer::Version(tint::glsl::writer::Version::Standard::kDesktop, 4, 6);
+    } else {
+        gen_options.version = tint::glsl::writer::Version();
+    }
 
-        if (options.glsl_desktop) {
-            gen_options.version =
-                tint::glsl::writer::Version(tint::glsl::writer::Version::Standard::kDesktop, 4, 6);
-        } else {
-            gen_options.version = tint::glsl::writer::Version();
-        }
+    gen_options.disable_robustness = !options.enable_robustness;
 
-        gen_options.disable_robustness = !options.enable_robustness;
+    auto entry_point = inspector.GetEntryPoint(options.ep_name);
+    uint32_t offset = entry_point.push_constant_size;
 
-        auto entry_point = inspector.GetEntryPoint(entry_point_name);
-        uint32_t offset = entry_point.push_constant_size;
+    if (entry_point.instance_index_used) {
+        // Place the first_instance push constant member after user-defined push constants (if
+        // any).
+        gen_options.first_instance_offset = offset;
+        offset += 4;
+    }
+    if (entry_point.frag_depth_used) {
+        gen_options.depth_range_offsets = {offset + 0, offset + 4};
+        offset += 8;
+    }
 
-        if (entry_point.instance_index_used) {
-            // Place the first_instance push constant member after user-defined push constants (if
-            // any).
-            gen_options.first_instance_offset = offset;
-            offset += 4;
-        }
-        if (entry_point.frag_depth_used) {
-            gen_options.depth_range_offsets = {offset + 0, offset + 4};
-            offset += 8;
-        }
+    // Convert the AST program to an IR module.
+    auto ir = tint::wgsl::reader::ProgramToLoweredIR(res.Get());
+    if (ir != tint::Success) {
+        std::cerr << "Failed to generate IR: " << ir << "\n";
+        return false;
+    }
 
-        // Convert the AST program to an IR module.
-        auto ir = tint::wgsl::reader::ProgramToLoweredIR(prg);
-        if (ir != tint::Success) {
-            std::cerr << "Failed to generate IR: " << ir << "\n";
-            return false;
-        }
+    // Generate binding options.
+    gen_options.bindings = tint::glsl::writer::GenerateBindings(ir.Get());
 
-        // The GLSL backend assumes single entry point.
-        if (!entry_point_name.empty()) {
-            auto single_result =
-                tint::core::ir::transform::SingleEntryPoint(ir.Get(), entry_point_name);
-            if (single_result != tint::Success) {
-                std::cerr << single_result.Failure().reason.Str() << "\n";
-                return false;
-            }
-        }
+    // Generate GLSL.
+    auto result = tint::glsl::writer::Generate(ir.Get(), gen_options, "");
+    if (result != tint::Success) {
+        std::cerr << "Failed to generate: " << result.Failure() << "\n";
+        return false;
+    }
 
-        // Generate binding options.
-        gen_options.bindings = tint::glsl::writer::GenerateBindings(ir.Get());
+    if (!tint::cmd::WriteFile(options.output_file, "w", result->glsl)) {
+        return false;
+    }
 
-        // Generate GLSL.
-        auto result = tint::glsl::writer::Generate(ir.Get(), gen_options, "");
-        if (result != tint::Success) {
-            std::cerr << "Failed to generate: " << result.Failure() << "\n";
-            return false;
-        }
+    const auto hash = tint::CRC32(result->glsl.c_str());
+    if (options.print_hash) {
+        PrintHash(hash);
+    }
 
-        if (!tint::cmd::WriteFile(options.output_file, "w", result->glsl)) {
-            return false;
-        }
-
-        const auto hash = tint::CRC32(result->glsl.c_str());
-        if (options.print_hash) {
-            PrintHash(hash);
-        }
-
-        if (options.validate && options.skip_hash.count(hash) == 0) {
+    if (options.validate && options.skip_hash.count(hash) == 0) {
+#if !TINT_BUILD_GLSL_VALIDATOR
+        std::cerr << "GLSL validator not enabled in tint build\n";
+        return false;
+#else
+        // If there is no entry point name there is nothing to validate
+        if (options.ep_name != "") {
             tint::ast::PipelineStage stage = tint::ast::PipelineStage::kCompute;
             switch (entry_point.stage) {
                 case tint::inspector::PipelineStage::kCompute:
@@ -1227,34 +1224,16 @@ bool GenerateGlsl([[maybe_unused]] Options& options,
                     stage = tint::ast::PipelineStage::kFragment;
                     break;
             }
-#if !TINT_BUILD_GLSL_VALIDATOR
-            std::cerr << "GLSL validator not enabled in tint build\n";
-            return false;
-#else
-            // If there is no entry point name there is nothing to validate
-            if (entry_point_name != "") {
-                auto val = tint::glsl::validate::Validate(result->glsl, stage);
-                if (val != tint::Success) {
-                    std::cerr << val.Failure();
-                    return false;
-                }
+
+            auto val = tint::glsl::validate::Validate(result->glsl, stage);
+            if (val != tint::Success) {
+                std::cerr << val.Failure();
+                return false;
             }
-#endif  // !TINT_BUILD_GLSL_VALIDATOR
         }
-        return true;
-    };
-
-    if (inspector.GetEntryPoints().empty()) {
-        // Pass empty string here so that the GLSL generator will generate
-        // code for all functions, reachable or not.
-        return generate(res.Get(), "");
+#endif  // !TINT_BUILD_GLSL_VALIDATOR
     }
-
-    bool success = true;
-    for (auto& entry_point : inspector.GetEntryPoints()) {
-        success &= generate(res.Get(), entry_point.name);
-    }
-    return success;
+    return true;
 #else
     std::cerr << "GLSL writer not enabled in tint build\n";
     return false;
@@ -1360,7 +1339,7 @@ int main(int argc, const char** argv) {
         return GenerateWgsl(options, inspector, info.program) ? 0 : 1;
     }
 
-    if (options.format == Format::kNone) {
+    if (options.format == Format::kNone || options.format == Format::kGlsl) {
         auto generate = [&]() {
             bool success = false;
             switch (options.format) {
@@ -1455,8 +1434,6 @@ int main(int argc, const char** argv) {
                 success = GenerateHlsl(options, inspector, info.program);
                 break;
             case Format::kGlsl:
-                success = GenerateGlsl(options, inspector, info.program);
-                break;
             case Format::kWgsl:
             case Format::kNone:
                 TINT_UNREACHABLE();

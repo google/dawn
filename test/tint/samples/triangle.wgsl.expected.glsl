@@ -1,3 +1,6 @@
+//
+// vtx_main
+//
 #version 310 es
 
 vec4 vtx_main_inner(uint VertexIndex) {
@@ -9,6 +12,9 @@ void main() {
   gl_Position.z = ((2.0f * gl_Position.z) - gl_Position.w);
   gl_PointSize = 1.0f;
 }
+//
+// frag_main
+//
 #version 310 es
 precision highp float;
 precision highp int;

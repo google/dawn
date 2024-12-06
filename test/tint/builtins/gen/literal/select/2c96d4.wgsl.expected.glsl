@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 #version 310 es
 precision highp float;
 precision highp int;
@@ -8,6 +11,9 @@ void select_2c96d4() {
 void main() {
   select_2c96d4();
 }
+//
+// compute_main
+//
 #version 310 es
 
 void select_2c96d4() {
@@ -17,6 +23,9 @@ layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
   select_2c96d4();
 }
+//
+// vertex_main
+//
 #version 310 es
 
 

@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 #version 310 es
 precision highp float;
 precision highp int;
@@ -8,6 +11,9 @@ void log_697e1d() {
 void main() {
   log_697e1d();
 }
+//
+// compute_main
+//
 #version 310 es
 
 void log_697e1d() {
@@ -17,6 +23,9 @@ layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
   log_697e1d();
 }
+//
+// vertex_main
+//
 #version 310 es
 
 

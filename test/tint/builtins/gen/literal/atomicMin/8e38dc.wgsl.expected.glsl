@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 #version 310 es
 precision highp float;
 precision highp int;
@@ -22,6 +25,9 @@ int atomicMin_8e38dc() {
 void main() {
   v.inner = atomicMin_8e38dc();
 }
+//
+// compute_main
+//
 #version 310 es
 
 

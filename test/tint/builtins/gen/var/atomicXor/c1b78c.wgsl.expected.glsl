@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 #version 310 es
 precision highp float;
 precision highp int;
@@ -23,6 +26,9 @@ int atomicXor_c1b78c() {
 void main() {
   v.inner = atomicXor_c1b78c();
 }
+//
+// compute_main
+//
 #version 310 es
 
 

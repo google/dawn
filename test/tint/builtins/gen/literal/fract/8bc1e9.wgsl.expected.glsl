@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 #version 310 es
 precision highp float;
 precision highp int;
@@ -13,6 +16,9 @@ vec4 fract_8bc1e9() {
 void main() {
   v.inner = fract_8bc1e9();
 }
+//
+// compute_main
+//
 #version 310 es
 
 layout(binding = 0, std430)
@@ -27,6 +33,9 @@ layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
   v.inner = fract_8bc1e9();
 }
+//
+// vertex_main
+//
 #version 310 es
 
 

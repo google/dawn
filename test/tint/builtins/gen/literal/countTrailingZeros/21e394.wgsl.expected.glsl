@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 #version 310 es
 precision highp float;
 precision highp int;
@@ -13,6 +16,9 @@ uint countTrailingZeros_21e394() {
 void main() {
   v.inner = countTrailingZeros_21e394();
 }
+//
+// compute_main
+//
 #version 310 es
 
 layout(binding = 0, std430)
@@ -27,6 +33,9 @@ layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
   v.inner = countTrailingZeros_21e394();
 }
+//
+// vertex_main
+//
 #version 310 es
 
 

@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 #version 310 es
 precision highp float;
 precision highp int;
@@ -12,7 +15,7 @@ buffer prevent_dce_block_1_ssbo {
   uvec2 inner;
 } v;
 layout(binding = 0, std140)
-uniform tint_symbol_1_1_ubo {
+uniform tint_symbol_1_ubo {
   TintTextureUniformData inner;
 } v_1;
 uniform highp isamplerCube arg_0;
@@ -23,6 +26,9 @@ uvec2 textureDimensions_64dc74() {
 void main() {
   v.inner = textureDimensions_64dc74();
 }
+//
+// compute_main
+//
 #version 310 es
 
 
@@ -35,7 +41,7 @@ buffer prevent_dce_block_1_ssbo {
   uvec2 inner;
 } v;
 layout(binding = 0, std140)
-uniform tint_symbol_1_1_ubo {
+uniform tint_symbol_1_ubo {
   TintTextureUniformData inner;
 } v_1;
 uniform highp isamplerCube arg_0;
@@ -47,6 +53,9 @@ layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
   v.inner = textureDimensions_64dc74();
 }
+//
+// vertex_main
+//
 #version 310 es
 
 

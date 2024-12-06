@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 #version 310 es
 precision highp float;
 precision highp int;
@@ -13,6 +16,9 @@ vec3 asinh_2265ee() {
 void main() {
   v.inner = asinh_2265ee();
 }
+//
+// compute_main
+//
 #version 310 es
 
 layout(binding = 0, std430)
@@ -27,6 +33,9 @@ layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
   v.inner = asinh_2265ee();
 }
+//
+// vertex_main
+//
 #version 310 es
 
 

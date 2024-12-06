@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 #version 310 es
 precision highp float;
 precision highp int;
@@ -14,6 +17,9 @@ vec4 textureSampleGrad_7cd6de() {
 void main() {
   v.inner = textureSampleGrad_7cd6de();
 }
+//
+// compute_main
+//
 #version 310 es
 
 layout(binding = 0, std430)
@@ -29,6 +35,9 @@ layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
   v.inner = textureSampleGrad_7cd6de();
 }
+//
+// vertex_main
+//
 #version 310 es
 
 

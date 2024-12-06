@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 #version 310 es
 precision highp float;
 precision highp int;
@@ -9,6 +12,9 @@ void textureStore_f8dead() {
 void main() {
   textureStore_f8dead();
 }
+//
+// compute_main
+//
 #version 310 es
 
 layout(binding = 0, rgba8ui) uniform highp writeonly uimage3D arg_0;

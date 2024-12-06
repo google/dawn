@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 #version 310 es
 precision highp float;
 precision highp int;
@@ -8,6 +11,9 @@ void cosh_c892bb() {
 void main() {
   cosh_c892bb();
 }
+//
+// compute_main
+//
 #version 310 es
 
 void cosh_c892bb() {
@@ -17,6 +23,9 @@ layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
   cosh_c892bb();
 }
+//
+// vertex_main
+//
 #version 310 es
 
 

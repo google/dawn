@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 #version 310 es
 precision highp float;
 precision highp int;
@@ -11,6 +14,9 @@ void textureStore_bedbfc() {
 void main() {
   textureStore_bedbfc();
 }
+//
+// compute_main
+//
 #version 310 es
 
 layout(binding = 0, rgba8) uniform highp writeonly image3D arg_0;

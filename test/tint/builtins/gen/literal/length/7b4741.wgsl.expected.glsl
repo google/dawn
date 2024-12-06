@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 #version 310 es
 precision highp float;
 precision highp int;
@@ -8,6 +11,9 @@ void length_7b4741() {
 void main() {
   length_7b4741();
 }
+//
+// compute_main
+//
 #version 310 es
 
 void length_7b4741() {
@@ -17,6 +23,9 @@ layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
   length_7b4741();
 }
+//
+// vertex_main
+//
 #version 310 es
 
 

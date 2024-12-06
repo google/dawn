@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 #version 310 es
 precision highp float;
 precision highp int;
@@ -22,6 +25,9 @@ int atomicAdd_d32fe4() {
 void main() {
   v.inner = atomicAdd_d32fe4();
 }
+//
+// compute_main
+//
 #version 310 es
 
 

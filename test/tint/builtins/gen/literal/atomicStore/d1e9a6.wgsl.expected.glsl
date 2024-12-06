@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 #version 310 es
 precision highp float;
 precision highp int;
@@ -17,6 +20,9 @@ void atomicStore_d1e9a6() {
 void main() {
   atomicStore_d1e9a6();
 }
+//
+// compute_main
+//
 #version 310 es
 
 

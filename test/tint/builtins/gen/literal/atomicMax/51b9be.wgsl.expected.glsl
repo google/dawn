@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 #version 310 es
 precision highp float;
 precision highp int;
@@ -22,6 +25,9 @@ uint atomicMax_51b9be() {
 void main() {
   v.inner = atomicMax_51b9be();
 }
+//
+// compute_main
+//
 #version 310 es
 
 

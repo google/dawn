@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 #version 460
 precision highp float;
 precision highp int;
@@ -14,6 +17,9 @@ uvec3 textureDimensions_a20ba2() {
 void main() {
   v.inner = textureDimensions_a20ba2();
 }
+//
+// compute_main
+//
 #version 460
 
 layout(binding = 0, std430)

@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 #version 310 es
 precision highp float;
 precision highp int;
@@ -12,6 +15,9 @@ void textureStore_3d1ebe() {
 void main() {
   textureStore_3d1ebe();
 }
+//
+// compute_main
+//
 #version 310 es
 
 layout(binding = 0, r32f) uniform highp image2D arg_0;
