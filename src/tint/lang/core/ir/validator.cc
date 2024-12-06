@@ -1757,7 +1757,12 @@ void Validator::CheckType(const core::type::Type* root,
     auto visit = [&](const core::type::Type* type) {
         return tint::Switch(
             type,
-            [&](const core::type::Reference*) {
+            [&](const core::type::Reference* ref) {
+                if (ref->StoreType()->Is<core::type::Void>()) {
+                    diag() << "references to void are not permitted";
+                    return false;
+                }
+
                 // Reference types are guarded by the AllowRefTypes capability.
                 if (!capabilities_.Contains(Capability::kAllowRefTypes) ||
                     ignore_caps.Contains(Capability::kAllowRefTypes)) {
@@ -1770,7 +1775,12 @@ void Validator::CheckType(const core::type::Type* root,
                 }
                 return true;
             },
-            [&](const core::type::Pointer*) {
+            [&](const core::type::Pointer* ptr) {
+                if (ptr->StoreType()->Is<core::type::Void>()) {
+                    diag() << "pointers to void are not permitted";
+                    return false;
+                }
+
                 if (type != root) {
                     // Nesting pointer types inside structures is guarded by a capability.
                     if (!(root->Is<core::type::Struct>() &&

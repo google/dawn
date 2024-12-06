@@ -5203,6 +5203,27 @@ $B1: {  # root
 )");
 }
 
+TEST_F(IR_ValidatorTest, Var_VoidType) {
+    mod.root_block->Append(b.Var(ty.ptr(private_, ty.void_())));
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_EQ(res.Failure().reason.Str(), R"(:2:3 error: var: pointers to void are not permitted
+  %1:ptr<private, void, read_write> = var
+  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+:1:1 note: in block
+$B1: {  # root
+^^^
+
+note: # Disassembly
+$B1: {  # root
+  %1:ptr<private, void, read_write> = var
+}
+
+)");
+}
+
 TEST_F(IR_ValidatorTest, Var_Function_NullResult) {
     auto* v = mod.CreateInstruction<ir::Var>(nullptr);
     v->SetInitializer(b.Constant(0_i));
@@ -9897,6 +9918,20 @@ TEST_F(IR_ValidatorTest, PointerToPointer) {
                 testing::HasSubstr("nested pointer types are not permitted"));
 }
 
+TEST_F(IR_ValidatorTest, PointerToVoid) {
+    auto* type = ty.ptr(AddressSpace::kFunction, ty.void_());
+    auto* fn = b.Function("my_func", ty.void_());
+    fn->SetParams(Vector{b.FunctionParam(type)});
+    b.Append(fn->Block(), [&] {  //
+        b.Return(fn);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(res.Failure().reason.Str(),
+                testing::HasSubstr("pointers to void are not permitted"));
+}
+
 TEST_F(IR_ValidatorTest, ReferenceToReference) {
     auto* type = ty.ref<function>(ty.ref<function, i32>());
     auto* fn = b.Function("my_func", ty.void_());
@@ -9912,6 +9947,23 @@ TEST_F(IR_ValidatorTest, ReferenceToReference) {
     ASSERT_NE(res, Success);
     EXPECT_THAT(res.Failure().reason.Str(),
                 testing::HasSubstr("nested reference types are not permitted"));
+}
+
+TEST_F(IR_ValidatorTest, ReferenceToVoid) {
+    auto* type = ty.ref(AddressSpace::kFunction, ty.void_());
+    auto* fn = b.Function("my_func", ty.void_());
+    b.Append(fn->Block(), [&] {  //
+        b.Var(type);
+        b.Return(fn);
+    });
+
+    Capabilities caps;
+    caps.Add(Capability::kAllowRefTypes);
+
+    auto res = ir::Validate(mod, caps);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(res.Failure().reason.Str(),
+                testing::HasSubstr("references to void are not permitted"));
 }
 
 TEST_F(IR_ValidatorTest, PointerInStructure_WithoutCapability) {
