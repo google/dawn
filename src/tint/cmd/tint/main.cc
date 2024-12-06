@@ -135,6 +135,7 @@ struct Options {
     tint::Hashmap<std::string, double, 8> overrides;
 
     std::string ep_name;
+    bool emit_single_entry_point = false;
 
     Format format = Format::kUnknown;
 
@@ -145,7 +146,6 @@ struct Options {
     bool validate = false;
     bool print_hash = false;
     bool dump_inspector_bindings = false;
-    bool emit_single_entry_point = false;
 
     bool rename_all = false;
     bool enable_robustness = true;
@@ -679,7 +679,11 @@ void AddSubstituteOverrides(std::unordered_map<tint::OverrideId, double> values,
     tint::ast::transform::Manager transform_manager;
     tint::ast::transform::DataMap transform_inputs;
 
-    // Renaming must always come first
+    if (options.emit_single_entry_point) {
+        transform_manager.append(std::make_unique<tint::ast::transform::SingleEntryPoint>());
+        transform_inputs.Add<tint::ast::transform::SingleEntryPoint::Config>(options.ep_name);
+    }
+
     AddRenamer(options, transform_manager, transform_inputs);
 
     auto res = CreateOverrideMap(options, inspector);
@@ -687,11 +691,6 @@ void AddSubstituteOverrides(std::unordered_map<tint::OverrideId, double> values,
         return res.Failure();
     }
     AddSubstituteOverrides(res.Get(), transform_manager, transform_inputs);
-
-    if (options.emit_single_entry_point) {
-        transform_manager.append(std::make_unique<tint::ast::transform::SingleEntryPoint>());
-        transform_inputs.Add<tint::ast::transform::SingleEntryPoint::Config>(options.ep_name);
-    }
 
     tint::ast::transform::DataMap outputs;
     return transform_manager.Run(program, std::move(transform_inputs), outputs);
@@ -746,7 +745,6 @@ bool GenerateSpirv([[maybe_unused]] Options& options,
                    [[maybe_unused]] tint::inspector::Inspector& inspector,
                    [[maybe_unused]] tint::Program& src_program) {
 #if TINT_BUILD_SPV_WRITER
-
     auto res = ProcessASTTransforms(options, inspector, src_program);
     if (res != tint::Success || !res->IsValid()) {
         tint::cmd::PrintWGSL(std::cerr, res.Get());
@@ -813,23 +811,15 @@ bool GenerateSpirv([[maybe_unused]] Options& options,
 /// Generate WGSL code for a program.
 /// @param options the options that Tint was invoked with
 /// @param inspector the inspector
-/// @param src_program the program to generate
+/// @param program the program to generate
 /// @returns true on success
 bool GenerateWgsl([[maybe_unused]] Options& options,
                   [[maybe_unused]] tint::inspector::Inspector& inspector,
-                  [[maybe_unused]] tint::Program& src_program) {
+                  [[maybe_unused]] tint::Program& program) {
 #if TINT_BUILD_WGSL_WRITER
-
-    auto res = ProcessASTTransforms(options, inspector, src_program);
-    if (res != tint::Success || !res->IsValid()) {
-        tint::cmd::PrintWGSL(std::cerr, res.Get());
-        std::cerr << res->Diagnostics() << "\n";
-        return 1;
-    }
-
     // TODO(jrprice): Provide a way for the user to set non-default options.
     tint::wgsl::writer::Options gen_options;
-    auto result = tint::wgsl::writer::Generate(res.Get(), gen_options);
+    auto result = tint::wgsl::writer::Generate(program, gen_options);
     if (result != tint::Success) {
         std::cerr << "Failed to generate: " << result.Failure() << "\n";
         return false;
@@ -875,7 +865,6 @@ bool GenerateMsl([[maybe_unused]] Options& options,
                  [[maybe_unused]] tint::inspector::Inspector& inspector,
                  [[maybe_unused]] tint::Program& src_program) {
 #if TINT_BUILD_MSL_WRITER
-
     auto transform_res = ProcessASTTransforms(options, inspector, src_program);
     if (transform_res != tint::Success || !transform_res->IsValid()) {
         tint::cmd::PrintWGSL(std::cerr, transform_res.Get());
@@ -965,7 +954,7 @@ bool GenerateMsl([[maybe_unused]] Options& options,
         const char* default_xcrun_exe = "metal.exe";
 #else
         const char* default_xcrun_exe = "xcrun";
-#endif
+#endif  // _WIN32
         auto xcrun = tint::Command::LookPath(
             options.xcrun_path.empty() ? default_xcrun_exe : std::string(options.xcrun_path));
         if (xcrun.Found()) {
@@ -1131,7 +1120,6 @@ bool GenerateGlsl([[maybe_unused]] Options& options,
                   [[maybe_unused]] tint::inspector::Inspector& src_inspector,
                   [[maybe_unused]] tint::Program& src_program) {
 #if TINT_BUILD_GLSL_WRITER
-
     auto res = ProcessASTTransforms(options, src_inspector, src_program);
     if (res != tint::Success || !res->IsValid()) {
         tint::cmd::PrintWGSL(std::cerr, res.Get());
@@ -1216,7 +1204,7 @@ bool GenerateGlsl([[maybe_unused]] Options& options,
                     return false;
                 }
             }
-#endif
+#endif  // !TINT_BUILD_GLSL_VALIDATOR
         }
         return true;
     };
@@ -1343,15 +1331,17 @@ int main(int argc, const char** argv) {
     if (options.dump_inspector_bindings) {
         tint::cmd::PrintInspectorBindings(inspector);
     }
+    // Handle WGSL special as we want multiple shaders in a single file, unlike other formats where
+    // we run single entry point.
+    if (options.format == Format::kWgsl) {
+        return GenerateWgsl(options, inspector, info.program) ? 0 : 1;
+    }
 
     bool success = false;
     switch (options.format) {
         case Format::kSpirv:
         case Format::kSpvAsm:
             success = GenerateSpirv(options, inspector, info.program);
-            break;
-        case Format::kWgsl:
-            success = GenerateWgsl(options, inspector, info.program);
             break;
         case Format::kMsl:
             success = GenerateMsl(options, inspector, info.program);
@@ -1363,6 +1353,8 @@ int main(int argc, const char** argv) {
         case Format::kGlsl:
             success = GenerateGlsl(options, inspector, info.program);
             break;
+        case Format::kWgsl:
+            TINT_UNREACHABLE();
         case Format::kNone:
             break;
         default:

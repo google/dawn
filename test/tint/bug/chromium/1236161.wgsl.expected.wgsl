@@ -1,3 +1,3 @@
-fn tint_symbol() {
-  let tint_symbol_1 = modf(1.0).whole;
+fn i() {
+  let s = modf(1.0).whole;
 }

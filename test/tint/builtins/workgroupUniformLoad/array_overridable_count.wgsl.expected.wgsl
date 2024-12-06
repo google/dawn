@@ -1,4 +1,4 @@
-const wgsize : i32 = 64i;
+override wgsize : i32;
 
 var<workgroup> v : array<i32, (wgsize * 2)>;
 
