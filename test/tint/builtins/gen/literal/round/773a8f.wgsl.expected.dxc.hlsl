@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 void round_773a8f() {
   float res = 4.0f;
 }
@@ -6,11 +9,23 @@ void fragment_main() {
   round_773a8f();
   return;
 }
+//
+// compute_main
+//
+void round_773a8f() {
+  float res = 4.0f;
+}
 
 [numthreads(1, 1, 1)]
 void compute_main() {
   round_773a8f();
   return;
+}
+//
+// vertex_main
+//
+void round_773a8f() {
+  float res = 4.0f;
 }
 
 struct VertexOutput {

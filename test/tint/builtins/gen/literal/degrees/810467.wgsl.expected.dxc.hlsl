@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 void degrees_810467() {
   float2 res = (57.295780181884765625f).xx;
 }
@@ -6,11 +9,23 @@ void fragment_main() {
   degrees_810467();
   return;
 }
+//
+// compute_main
+//
+void degrees_810467() {
+  float2 res = (57.295780181884765625f).xx;
+}
 
 [numthreads(1, 1, 1)]
 void compute_main() {
   degrees_810467();
   return;
+}
+//
+// vertex_main
+//
+void degrees_810467() {
+  float2 res = (57.295780181884765625f).xx;
 }
 
 struct VertexOutput {

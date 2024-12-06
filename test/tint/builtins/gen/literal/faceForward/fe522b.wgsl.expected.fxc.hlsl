@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 void faceForward_fe522b() {
   float3 res = (-1.0f).xxx;
 }
@@ -6,11 +9,23 @@ void fragment_main() {
   faceForward_fe522b();
   return;
 }
+//
+// compute_main
+//
+void faceForward_fe522b() {
+  float3 res = (-1.0f).xxx;
+}
 
 [numthreads(1, 1, 1)]
 void compute_main() {
   faceForward_fe522b();
   return;
+}
+//
+// vertex_main
+//
+void faceForward_fe522b() {
+  float3 res = (-1.0f).xxx;
 }
 
 struct VertexOutput {

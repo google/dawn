@@ -1,3 +1,31 @@
+//
+// fragment_main
+//
+
+void max_de6b87() {
+  float2 res = (1.0f).xx;
+}
+
+void fragment_main() {
+  max_de6b87();
+}
+
+//
+// compute_main
+//
+
+void max_de6b87() {
+  float2 res = (1.0f).xx;
+}
+
+[numthreads(1, 1, 1)]
+void compute_main() {
+  max_de6b87();
+}
+
+//
+// vertex_main
+//
 struct VertexOutput {
   float4 pos;
 };
@@ -9,15 +37,6 @@ struct vertex_main_outputs {
 
 void max_de6b87() {
   float2 res = (1.0f).xx;
-}
-
-void fragment_main() {
-  max_de6b87();
-}
-
-[numthreads(1, 1, 1)]
-void compute_main() {
-  max_de6b87();
 }
 
 VertexOutput vertex_main_inner() {

@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 RWByteAddressBuffer prevent_dce : register(u0);
 
 int subgroupInclusiveMul_9a54ec() {
@@ -9,6 +12,16 @@ int subgroupInclusiveMul_9a54ec() {
 void fragment_main() {
   prevent_dce.Store(0u, asuint(subgroupInclusiveMul_9a54ec()));
   return;
+}
+//
+// compute_main
+//
+RWByteAddressBuffer prevent_dce : register(u0);
+
+int subgroupInclusiveMul_9a54ec() {
+  int arg_0 = 1;
+  int res = (WavePrefixProduct(arg_0) * arg_0);
+  return res;
 }
 
 [numthreads(1, 1, 1)]

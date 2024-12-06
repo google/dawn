@@ -1,11 +1,3 @@
-struct FragmentInput {
-  float4 position;
-  float4 view_position;
-  float4 normal;
-  float2 uv;
-  float4 color;
-};
-
 struct Uniforms {
   float4x4 worldView;
   float4x4 proj;
@@ -15,6 +7,14 @@ struct Uniforms {
 };
 
 struct FragmentOutput {
+  float4 color;
+};
+
+struct FragmentInput {
+  float4 position;
+  float4 view_position;
+  float4 normal;
+  float2 uv;
   float4 color;
 };
 
@@ -37,27 +37,6 @@ cbuffer cbuffer_uniforms : register(b0) {
 ByteAddressBuffer pointLights : register(t1);
 SamplerState mySampler : register(s2);
 Texture2D<float4> myTexture : register(t3);
-float4 getColor(FragmentInput fragment) {
-  float4 color = (0.0f).xxxx;
-  if ((uniforms[8u].y == 0u)) {
-    color = fragment.color;
-  } else {
-    if ((uniforms[8u].y == 1u)) {
-      color = fragment.normal;
-      color.w = 1.0f;
-    } else {
-      if ((uniforms[8u].y == 2u)) {
-        color = asfloat(uniforms[9u]);
-      } else {
-        if ((uniforms[8u].y == 3u)) {
-          color = myTexture.Sample(mySampler, fragment.uv);
-        }
-      }
-    }
-  }
-  return color;
-}
-
 float4x4 v(uint start_byte_offset) {
   return float4x4(asfloat(uniforms[(start_byte_offset / 16u)]), asfloat(uniforms[((16u + start_byte_offset) / 16u)]), asfloat(uniforms[((32u + start_byte_offset) / 16u)]), asfloat(uniforms[((48u + start_byte_offset) / 16u)]));
 }

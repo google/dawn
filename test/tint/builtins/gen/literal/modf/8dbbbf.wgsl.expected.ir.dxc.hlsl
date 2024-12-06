@@ -1,3 +1,41 @@
+//
+// fragment_main
+//
+struct modf_result_f16 {
+  float16_t fract;
+  float16_t whole;
+};
+
+
+void modf_8dbbbf() {
+  modf_result_f16 res = {float16_t(-0.5h), float16_t(-1.0h)};
+}
+
+void fragment_main() {
+  modf_8dbbbf();
+}
+
+//
+// compute_main
+//
+struct modf_result_f16 {
+  float16_t fract;
+  float16_t whole;
+};
+
+
+void modf_8dbbbf() {
+  modf_result_f16 res = {float16_t(-0.5h), float16_t(-1.0h)};
+}
+
+[numthreads(1, 1, 1)]
+void compute_main() {
+  modf_8dbbbf();
+}
+
+//
+// vertex_main
+//
 struct modf_result_f16 {
   float16_t fract;
   float16_t whole;
@@ -14,15 +52,6 @@ struct vertex_main_outputs {
 
 void modf_8dbbbf() {
   modf_result_f16 res = {float16_t(-0.5h), float16_t(-1.0h)};
-}
-
-void fragment_main() {
-  modf_8dbbbf();
-}
-
-[numthreads(1, 1, 1)]
-void compute_main() {
-  modf_8dbbbf();
 }
 
 VertexOutput vertex_main_inner() {

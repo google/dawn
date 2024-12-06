@@ -1,3 +1,31 @@
+//
+// fragment_main
+//
+
+void transpose_dc671a() {
+  float4x4 res = float4x4((1.0f).xxxx, (1.0f).xxxx, (1.0f).xxxx, (1.0f).xxxx);
+}
+
+void fragment_main() {
+  transpose_dc671a();
+}
+
+//
+// compute_main
+//
+
+void transpose_dc671a() {
+  float4x4 res = float4x4((1.0f).xxxx, (1.0f).xxxx, (1.0f).xxxx, (1.0f).xxxx);
+}
+
+[numthreads(1, 1, 1)]
+void compute_main() {
+  transpose_dc671a();
+}
+
+//
+// vertex_main
+//
 struct VertexOutput {
   float4 pos;
 };
@@ -9,15 +37,6 @@ struct vertex_main_outputs {
 
 void transpose_dc671a() {
   float4x4 res = float4x4((1.0f).xxxx, (1.0f).xxxx, (1.0f).xxxx, (1.0f).xxxx);
-}
-
-void fragment_main() {
-  transpose_dc671a();
-}
-
-[numthreads(1, 1, 1)]
-void compute_main() {
-  transpose_dc671a();
 }
 
 VertexOutput vertex_main_inner() {

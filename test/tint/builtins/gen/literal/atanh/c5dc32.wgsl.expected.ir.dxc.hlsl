@@ -1,3 +1,31 @@
+//
+// fragment_main
+//
+
+void atanh_c5dc32() {
+  float res = 0.54930615425109863281f;
+}
+
+void fragment_main() {
+  atanh_c5dc32();
+}
+
+//
+// compute_main
+//
+
+void atanh_c5dc32() {
+  float res = 0.54930615425109863281f;
+}
+
+[numthreads(1, 1, 1)]
+void compute_main() {
+  atanh_c5dc32();
+}
+
+//
+// vertex_main
+//
 struct VertexOutput {
   float4 pos;
 };
@@ -9,15 +37,6 @@ struct vertex_main_outputs {
 
 void atanh_c5dc32() {
   float res = 0.54930615425109863281f;
-}
-
-void fragment_main() {
-  atanh_c5dc32();
-}
-
-[numthreads(1, 1, 1)]
-void compute_main() {
-  atanh_c5dc32();
 }
 
 VertexOutput vertex_main_inner() {

@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 RWByteAddressBuffer prevent_dce : register(u0);
 
 uint pack4xU8_b70b53() {
@@ -10,11 +13,29 @@ void fragment_main() {
   prevent_dce.Store(0u, asuint(pack4xU8_b70b53()));
   return;
 }
+//
+// compute_main
+//
+RWByteAddressBuffer prevent_dce : register(u0);
+
+uint pack4xU8_b70b53() {
+  uint4 arg_0 = (1u).xxxx;
+  uint res = uint(pack_u8(arg_0));
+  return res;
+}
 
 [numthreads(1, 1, 1)]
 void compute_main() {
   prevent_dce.Store(0u, asuint(pack4xU8_b70b53()));
   return;
+}
+//
+// vertex_main
+//
+uint pack4xU8_b70b53() {
+  uint4 arg_0 = (1u).xxxx;
+  uint res = uint(pack_u8(arg_0));
+  return res;
 }
 
 struct VertexOutput {

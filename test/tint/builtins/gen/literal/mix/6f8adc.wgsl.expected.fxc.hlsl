@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 RWByteAddressBuffer prevent_dce : register(u0);
 
 float2 mix_6f8adc() {
@@ -9,11 +12,27 @@ void fragment_main() {
   prevent_dce.Store2(0u, asuint(mix_6f8adc()));
   return;
 }
+//
+// compute_main
+//
+RWByteAddressBuffer prevent_dce : register(u0);
+
+float2 mix_6f8adc() {
+  float2 res = (1.0f).xx;
+  return res;
+}
 
 [numthreads(1, 1, 1)]
 void compute_main() {
   prevent_dce.Store2(0u, asuint(mix_6f8adc()));
   return;
+}
+//
+// vertex_main
+//
+float2 mix_6f8adc() {
+  float2 res = (1.0f).xx;
+  return res;
 }
 
 struct VertexOutput {

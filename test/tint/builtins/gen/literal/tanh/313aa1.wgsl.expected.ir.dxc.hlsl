@@ -1,3 +1,31 @@
+//
+// fragment_main
+//
+
+void tanh_313aa1() {
+  float res = 0.76159417629241943359f;
+}
+
+void fragment_main() {
+  tanh_313aa1();
+}
+
+//
+// compute_main
+//
+
+void tanh_313aa1() {
+  float res = 0.76159417629241943359f;
+}
+
+[numthreads(1, 1, 1)]
+void compute_main() {
+  tanh_313aa1();
+}
+
+//
+// vertex_main
+//
 struct VertexOutput {
   float4 pos;
 };
@@ -9,15 +37,6 @@ struct vertex_main_outputs {
 
 void tanh_313aa1() {
   float res = 0.76159417629241943359f;
-}
-
-void fragment_main() {
-  tanh_313aa1();
-}
-
-[numthreads(1, 1, 1)]
-void compute_main() {
-  tanh_313aa1();
 }
 
 VertexOutput vertex_main_inner() {

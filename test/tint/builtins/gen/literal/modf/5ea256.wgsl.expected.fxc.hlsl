@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 struct modf_result_vec3_f32 {
   float3 fract;
   float3 whole;
@@ -10,11 +13,31 @@ void fragment_main() {
   modf_5ea256();
   return;
 }
+//
+// compute_main
+//
+struct modf_result_vec3_f32 {
+  float3 fract;
+  float3 whole;
+};
+void modf_5ea256() {
+  modf_result_vec3_f32 res = {(-0.5f).xxx, (-1.0f).xxx};
+}
 
 [numthreads(1, 1, 1)]
 void compute_main() {
   modf_5ea256();
   return;
+}
+//
+// vertex_main
+//
+struct modf_result_vec3_f32 {
+  float3 fract;
+  float3 whole;
+};
+void modf_5ea256() {
+  modf_result_vec3_f32 res = {(-0.5f).xxx, (-1.0f).xxx};
 }
 
 struct VertexOutput {

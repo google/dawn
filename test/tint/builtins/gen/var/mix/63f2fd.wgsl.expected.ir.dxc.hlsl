@@ -1,13 +1,6 @@
-struct VertexOutput {
-  float4 pos;
-  vector<float16_t, 3> prevent_dce;
-};
-
-struct vertex_main_outputs {
-  nointerpolation vector<float16_t, 3> VertexOutput_prevent_dce : TEXCOORD0;
-  float4 VertexOutput_pos : SV_Position;
-};
-
+//
+// fragment_main
+//
 
 RWByteAddressBuffer prevent_dce : register(u0);
 vector<float16_t, 3> mix_63f2fd() {
@@ -22,9 +15,44 @@ void fragment_main() {
   prevent_dce.Store<vector<float16_t, 3> >(0u, mix_63f2fd());
 }
 
+//
+// compute_main
+//
+
+RWByteAddressBuffer prevent_dce : register(u0);
+vector<float16_t, 3> mix_63f2fd() {
+  vector<float16_t, 3> arg_0 = (float16_t(1.0h)).xxx;
+  vector<float16_t, 3> arg_1 = (float16_t(1.0h)).xxx;
+  vector<float16_t, 3> arg_2 = (float16_t(1.0h)).xxx;
+  vector<float16_t, 3> res = lerp(arg_0, arg_1, arg_2);
+  return res;
+}
+
 [numthreads(1, 1, 1)]
 void compute_main() {
   prevent_dce.Store<vector<float16_t, 3> >(0u, mix_63f2fd());
+}
+
+//
+// vertex_main
+//
+struct VertexOutput {
+  float4 pos;
+  vector<float16_t, 3> prevent_dce;
+};
+
+struct vertex_main_outputs {
+  nointerpolation vector<float16_t, 3> VertexOutput_prevent_dce : TEXCOORD0;
+  float4 VertexOutput_pos : SV_Position;
+};
+
+
+vector<float16_t, 3> mix_63f2fd() {
+  vector<float16_t, 3> arg_0 = (float16_t(1.0h)).xxx;
+  vector<float16_t, 3> arg_1 = (float16_t(1.0h)).xxx;
+  vector<float16_t, 3> arg_2 = (float16_t(1.0h)).xxx;
+  vector<float16_t, 3> res = lerp(arg_0, arg_1, arg_2);
+  return res;
 }
 
 VertexOutput vertex_main_inner() {

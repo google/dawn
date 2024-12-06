@@ -1,3 +1,41 @@
+//
+// fragment_main
+//
+struct frexp_result_vec2_f32 {
+  float2 fract;
+  int2 exp;
+};
+
+
+void frexp_eb2421() {
+  frexp_result_vec2_f32 res = {(0.5f).xx, (int(1)).xx};
+}
+
+void fragment_main() {
+  frexp_eb2421();
+}
+
+//
+// compute_main
+//
+struct frexp_result_vec2_f32 {
+  float2 fract;
+  int2 exp;
+};
+
+
+void frexp_eb2421() {
+  frexp_result_vec2_f32 res = {(0.5f).xx, (int(1)).xx};
+}
+
+[numthreads(1, 1, 1)]
+void compute_main() {
+  frexp_eb2421();
+}
+
+//
+// vertex_main
+//
 struct frexp_result_vec2_f32 {
   float2 fract;
   int2 exp;
@@ -14,15 +52,6 @@ struct vertex_main_outputs {
 
 void frexp_eb2421() {
   frexp_result_vec2_f32 res = {(0.5f).xx, (int(1)).xx};
-}
-
-void fragment_main() {
-  frexp_eb2421();
-}
-
-[numthreads(1, 1, 1)]
-void compute_main() {
-  frexp_eb2421();
 }
 
 VertexOutput vertex_main_inner() {

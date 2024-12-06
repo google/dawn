@@ -1,3 +1,6 @@
+//
+// vertex_main
+//
 Texture2DMS<float4> arg_0 : register(t0, space1);
 static float4 tint_symbol_1 = (0.0f).xxxx;
 
@@ -39,6 +42,18 @@ tint_symbol_3 vertex_main() {
   wrapper_result.tint_symbol_1_1 = inner_result.tint_symbol_1_1;
   return wrapper_result;
 }
+//
+// fragment_main
+//
+Texture2DMS<float4> arg_0 : register(t0, space1);
+
+void textureNumSamples_a3c8a0() {
+  int res = 0;
+  uint3 tint_tmp;
+  arg_0.GetDimensions(tint_tmp.x, tint_tmp.y, tint_tmp.z);
+  res = int(tint_tmp.z);
+  return;
+}
 
 void fragment_main_1() {
   textureNumSamples_a3c8a0();
@@ -47,6 +62,18 @@ void fragment_main_1() {
 
 void fragment_main() {
   fragment_main_1();
+  return;
+}
+//
+// compute_main
+//
+Texture2DMS<float4> arg_0 : register(t0, space1);
+
+void textureNumSamples_a3c8a0() {
+  int res = 0;
+  uint3 tint_tmp;
+  arg_0.GetDimensions(tint_tmp.x, tint_tmp.y, tint_tmp.z);
+  res = int(tint_tmp.z);
   return;
 }
 

@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 void select_4e60da() {
   float2 res = (1.0f).xx;
 }
@@ -6,11 +9,23 @@ void fragment_main() {
   select_4e60da();
   return;
 }
+//
+// compute_main
+//
+void select_4e60da() {
+  float2 res = (1.0f).xx;
+}
 
 [numthreads(1, 1, 1)]
 void compute_main() {
   select_4e60da();
   return;
+}
+//
+// vertex_main
+//
+void select_4e60da() {
+  float2 res = (1.0f).xx;
 }
 
 struct VertexOutput {

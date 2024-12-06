@@ -1,3 +1,31 @@
+//
+// fragment_main
+//
+
+void exp_bda5bb() {
+  float3 res = (2.71828174591064453125f).xxx;
+}
+
+void fragment_main() {
+  exp_bda5bb();
+}
+
+//
+// compute_main
+//
+
+void exp_bda5bb() {
+  float3 res = (2.71828174591064453125f).xxx;
+}
+
+[numthreads(1, 1, 1)]
+void compute_main() {
+  exp_bda5bb();
+}
+
+//
+// vertex_main
+//
 struct VertexOutput {
   float4 pos;
 };
@@ -9,15 +37,6 @@ struct vertex_main_outputs {
 
 void exp_bda5bb() {
   float3 res = (2.71828174591064453125f).xxx;
-}
-
-void fragment_main() {
-  exp_bda5bb();
-}
-
-[numthreads(1, 1, 1)]
-void compute_main() {
-  exp_bda5bb();
 }
 
 VertexOutput vertex_main_inner() {

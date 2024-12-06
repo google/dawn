@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 void saturate_e40fb6() {
   float2 res = (1.0f).xx;
 }
@@ -6,11 +9,23 @@ void fragment_main() {
   saturate_e40fb6();
   return;
 }
+//
+// compute_main
+//
+void saturate_e40fb6() {
+  float2 res = (1.0f).xx;
+}
 
 [numthreads(1, 1, 1)]
 void compute_main() {
   saturate_e40fb6();
   return;
+}
+//
+// vertex_main
+//
+void saturate_e40fb6() {
+  float2 res = (1.0f).xx;
 }
 
 struct VertexOutput {

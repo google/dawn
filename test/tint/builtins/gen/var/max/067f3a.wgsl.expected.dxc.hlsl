@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 void max_067f3a() {
   int2 res = (1).xx;
 }
@@ -6,11 +9,23 @@ void fragment_main() {
   max_067f3a();
   return;
 }
+//
+// compute_main
+//
+void max_067f3a() {
+  int2 res = (1).xx;
+}
 
 [numthreads(1, 1, 1)]
 void compute_main() {
   max_067f3a();
   return;
+}
+//
+// vertex_main
+//
+void max_067f3a() {
+  int2 res = (1).xx;
 }
 
 struct VertexOutput {

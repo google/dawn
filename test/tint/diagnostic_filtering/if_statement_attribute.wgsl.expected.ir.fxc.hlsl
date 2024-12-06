@@ -15,8 +15,6 @@ struct main_inputs {
 };
 
 
-Texture2D<float4> t : register(t1);
-SamplerState s : register(s2);
 void main_inner(float x) {
   if ((x > 0.0f)) {
   } else {

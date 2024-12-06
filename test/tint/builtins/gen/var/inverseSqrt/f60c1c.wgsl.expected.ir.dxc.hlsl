@@ -1,3 +1,31 @@
+//
+// fragment_main
+//
+
+void inverseSqrt_f60c1c() {
+  float2 res = (1.0f).xx;
+}
+
+void fragment_main() {
+  inverseSqrt_f60c1c();
+}
+
+//
+// compute_main
+//
+
+void inverseSqrt_f60c1c() {
+  float2 res = (1.0f).xx;
+}
+
+[numthreads(1, 1, 1)]
+void compute_main() {
+  inverseSqrt_f60c1c();
+}
+
+//
+// vertex_main
+//
 struct VertexOutput {
   float4 pos;
 };
@@ -9,15 +37,6 @@ struct vertex_main_outputs {
 
 void inverseSqrt_f60c1c() {
   float2 res = (1.0f).xx;
-}
-
-void fragment_main() {
-  inverseSqrt_f60c1c();
-}
-
-[numthreads(1, 1, 1)]
-void compute_main() {
-  inverseSqrt_f60c1c();
 }
 
 VertexOutput vertex_main_inner() {

@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 RWByteAddressBuffer prevent_dce : register(u0);
 
 vector<float16_t, 2> select_ed7c13() {
@@ -12,11 +15,33 @@ void fragment_main() {
   prevent_dce.Store<vector<float16_t, 2> >(0u, select_ed7c13());
   return;
 }
+//
+// compute_main
+//
+RWByteAddressBuffer prevent_dce : register(u0);
+
+vector<float16_t, 2> select_ed7c13() {
+  vector<float16_t, 2> arg_0 = (float16_t(1.0h)).xx;
+  vector<float16_t, 2> arg_1 = (float16_t(1.0h)).xx;
+  bool2 arg_2 = (true).xx;
+  vector<float16_t, 2> res = (arg_2 ? arg_1 : arg_0);
+  return res;
+}
 
 [numthreads(1, 1, 1)]
 void compute_main() {
   prevent_dce.Store<vector<float16_t, 2> >(0u, select_ed7c13());
   return;
+}
+//
+// vertex_main
+//
+vector<float16_t, 2> select_ed7c13() {
+  vector<float16_t, 2> arg_0 = (float16_t(1.0h)).xx;
+  vector<float16_t, 2> arg_1 = (float16_t(1.0h)).xx;
+  bool2 arg_2 = (true).xx;
+  vector<float16_t, 2> res = (arg_2 ? arg_1 : arg_0);
+  return res;
 }
 
 struct VertexOutput {

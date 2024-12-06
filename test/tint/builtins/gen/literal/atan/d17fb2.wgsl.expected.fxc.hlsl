@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 void atan_d17fb2() {
   float4 res = (0.78539818525314331055f).xxxx;
 }
@@ -6,11 +9,23 @@ void fragment_main() {
   atan_d17fb2();
   return;
 }
+//
+// compute_main
+//
+void atan_d17fb2() {
+  float4 res = (0.78539818525314331055f).xxxx;
+}
 
 [numthreads(1, 1, 1)]
 void compute_main() {
   atan_d17fb2();
   return;
+}
+//
+// vertex_main
+//
+void atan_d17fb2() {
+  float4 res = (0.78539818525314331055f).xxxx;
 }
 
 struct VertexOutput {

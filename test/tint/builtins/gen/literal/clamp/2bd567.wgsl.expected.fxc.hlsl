@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 RWByteAddressBuffer prevent_dce : register(u0);
 
 float clamp_2bd567() {
@@ -9,11 +12,27 @@ void fragment_main() {
   prevent_dce.Store(0u, asuint(clamp_2bd567()));
   return;
 }
+//
+// compute_main
+//
+RWByteAddressBuffer prevent_dce : register(u0);
+
+float clamp_2bd567() {
+  float res = 1.0f;
+  return res;
+}
 
 [numthreads(1, 1, 1)]
 void compute_main() {
   prevent_dce.Store(0u, asuint(clamp_2bd567()));
   return;
+}
+//
+// vertex_main
+//
+float clamp_2bd567() {
+  float res = 1.0f;
+  return res;
 }
 
 struct VertexOutput {

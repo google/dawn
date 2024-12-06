@@ -1,3 +1,31 @@
+//
+// fragment_main
+//
+
+void select_9b478d() {
+  int res = int(1);
+}
+
+void fragment_main() {
+  select_9b478d();
+}
+
+//
+// compute_main
+//
+
+void select_9b478d() {
+  int res = int(1);
+}
+
+[numthreads(1, 1, 1)]
+void compute_main() {
+  select_9b478d();
+}
+
+//
+// vertex_main
+//
 struct VertexOutput {
   float4 pos;
 };
@@ -9,15 +37,6 @@ struct vertex_main_outputs {
 
 void select_9b478d() {
   int res = int(1);
-}
-
-void fragment_main() {
-  select_9b478d();
-}
-
-[numthreads(1, 1, 1)]
-void compute_main() {
-  select_9b478d();
 }
 
 VertexOutput vertex_main_inner() {

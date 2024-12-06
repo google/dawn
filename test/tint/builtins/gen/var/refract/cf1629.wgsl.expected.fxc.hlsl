@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 void refract_cf1629() {
   float2 res = (-3.0f).xx;
 }
@@ -6,11 +9,23 @@ void fragment_main() {
   refract_cf1629();
   return;
 }
+//
+// compute_main
+//
+void refract_cf1629() {
+  float2 res = (-3.0f).xx;
+}
 
 [numthreads(1, 1, 1)]
 void compute_main() {
   refract_cf1629();
   return;
+}
+//
+// vertex_main
+//
+void refract_cf1629() {
+  float2 res = (-3.0f).xx;
 }
 
 struct VertexOutput {

@@ -1,3 +1,31 @@
+//
+// fragment_main
+//
+
+void refract_d7569b() {
+  float3 res = (-5.0f).xxx;
+}
+
+void fragment_main() {
+  refract_d7569b();
+}
+
+//
+// compute_main
+//
+
+void refract_d7569b() {
+  float3 res = (-5.0f).xxx;
+}
+
+[numthreads(1, 1, 1)]
+void compute_main() {
+  refract_d7569b();
+}
+
+//
+// vertex_main
+//
 struct VertexOutput {
   float4 pos;
 };
@@ -9,15 +37,6 @@ struct vertex_main_outputs {
 
 void refract_d7569b() {
   float3 res = (-5.0f).xxx;
-}
-
-void fragment_main() {
-  refract_d7569b();
-}
-
-[numthreads(1, 1, 1)]
-void compute_main() {
-  refract_d7569b();
 }
 
 VertexOutput vertex_main_inner() {

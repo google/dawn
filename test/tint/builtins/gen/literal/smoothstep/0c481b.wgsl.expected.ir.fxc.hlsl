@@ -1,3 +1,31 @@
+//
+// fragment_main
+//
+
+void smoothstep_0c481b() {
+  float2 res = (0.5f).xx;
+}
+
+void fragment_main() {
+  smoothstep_0c481b();
+}
+
+//
+// compute_main
+//
+
+void smoothstep_0c481b() {
+  float2 res = (0.5f).xx;
+}
+
+[numthreads(1, 1, 1)]
+void compute_main() {
+  smoothstep_0c481b();
+}
+
+//
+// vertex_main
+//
 struct VertexOutput {
   float4 pos;
 };
@@ -9,15 +37,6 @@ struct vertex_main_outputs {
 
 void smoothstep_0c481b() {
   float2 res = (0.5f).xx;
-}
-
-void fragment_main() {
-  smoothstep_0c481b();
-}
-
-[numthreads(1, 1, 1)]
-void compute_main() {
-  smoothstep_0c481b();
 }
 
 VertexOutput vertex_main_inner() {

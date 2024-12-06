@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 
 RWByteAddressBuffer prevent_dce : register(u0);
 int3 subgroupShuffleXor_7435fe() {
@@ -7,6 +10,16 @@ int3 subgroupShuffleXor_7435fe() {
 
 void fragment_main() {
   prevent_dce.Store3(0u, asuint(subgroupShuffleXor_7435fe()));
+}
+
+//
+// compute_main
+//
+
+RWByteAddressBuffer prevent_dce : register(u0);
+int3 subgroupShuffleXor_7435fe() {
+  int3 res = WaveReadLaneAt((int(1)).xxx, (WaveGetLaneIndex() ^ 1u));
+  return res;
 }
 
 [numthreads(1, 1, 1)]

@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 void fract_ed00ca() {
   float2 res = (0.25f).xx;
 }
@@ -6,11 +9,23 @@ void fragment_main() {
   fract_ed00ca();
   return;
 }
+//
+// compute_main
+//
+void fract_ed00ca() {
+  float2 res = (0.25f).xx;
+}
 
 [numthreads(1, 1, 1)]
 void compute_main() {
   fract_ed00ca();
   return;
+}
+//
+// vertex_main
+//
+void fract_ed00ca() {
+  float2 res = (0.25f).xx;
 }
 
 struct VertexOutput {

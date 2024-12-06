@@ -1,9 +1,9 @@
-struct tint_symbol {
-  float4 value : SV_Position;
-};
-
 cbuffer cbuffer_declared_after_usage : register(b0) {
   uint4 declared_after_usage[1];
+};
+
+struct tint_symbol {
+  float4 value : SV_Position;
 };
 
 float4 main_inner() {

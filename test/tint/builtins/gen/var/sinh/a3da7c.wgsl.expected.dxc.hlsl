@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 void sinh_a3da7c() {
   float4 res = (1.17520117759704589844f).xxxx;
 }
@@ -6,11 +9,23 @@ void fragment_main() {
   sinh_a3da7c();
   return;
 }
+//
+// compute_main
+//
+void sinh_a3da7c() {
+  float4 res = (1.17520117759704589844f).xxxx;
+}
 
 [numthreads(1, 1, 1)]
 void compute_main() {
   sinh_a3da7c();
   return;
+}
+//
+// vertex_main
+//
+void sinh_a3da7c() {
+  float4 res = (1.17520117759704589844f).xxxx;
 }
 
 struct VertexOutput {

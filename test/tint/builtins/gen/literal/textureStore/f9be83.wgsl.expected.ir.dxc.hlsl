@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 
 RWTexture2DArray<int4> arg_0 : register(u0, space1);
 void textureStore_f9be83() {
@@ -6,6 +9,15 @@ void textureStore_f9be83() {
 
 void fragment_main() {
   textureStore_f9be83();
+}
+
+//
+// compute_main
+//
+
+RWTexture2DArray<int4> arg_0 : register(u0, space1);
+void textureStore_f9be83() {
+  arg_0[int3((int(1)).xx, int(int(1)))] = (int(1)).xxxx;
 }
 
 [numthreads(1, 1, 1)]

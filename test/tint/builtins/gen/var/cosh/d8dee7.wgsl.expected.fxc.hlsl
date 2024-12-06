@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 void cosh_d8dee7() {
   float4 res = (1.0f).xxxx;
 }
@@ -6,11 +9,23 @@ void fragment_main() {
   cosh_d8dee7();
   return;
 }
+//
+// compute_main
+//
+void cosh_d8dee7() {
+  float4 res = (1.0f).xxxx;
+}
 
 [numthreads(1, 1, 1)]
 void compute_main() {
   cosh_d8dee7();
   return;
+}
+//
+// vertex_main
+//
+void cosh_d8dee7() {
+  float4 res = (1.0f).xxxx;
 }
 
 struct VertexOutput {

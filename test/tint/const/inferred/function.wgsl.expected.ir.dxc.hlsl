@@ -3,9 +3,6 @@ struct main_outputs {
 };
 
 
-void const_decls() {
-}
-
 float4 main_inner() {
   return (0.0f).xxxx;
 }

@@ -1,3 +1,41 @@
+//
+// fragment_main
+//
+struct modf_result_vec2_f16 {
+  vector<float16_t, 2> fract;
+  vector<float16_t, 2> whole;
+};
+
+
+void modf_a545b9() {
+  modf_result_vec2_f16 res = {(float16_t(-0.5h)).xx, (float16_t(-1.0h)).xx};
+}
+
+void fragment_main() {
+  modf_a545b9();
+}
+
+//
+// compute_main
+//
+struct modf_result_vec2_f16 {
+  vector<float16_t, 2> fract;
+  vector<float16_t, 2> whole;
+};
+
+
+void modf_a545b9() {
+  modf_result_vec2_f16 res = {(float16_t(-0.5h)).xx, (float16_t(-1.0h)).xx};
+}
+
+[numthreads(1, 1, 1)]
+void compute_main() {
+  modf_a545b9();
+}
+
+//
+// vertex_main
+//
 struct modf_result_vec2_f16 {
   vector<float16_t, 2> fract;
   vector<float16_t, 2> whole;
@@ -14,15 +52,6 @@ struct vertex_main_outputs {
 
 void modf_a545b9() {
   modf_result_vec2_f16 res = {(float16_t(-0.5h)).xx, (float16_t(-1.0h)).xx};
-}
-
-void fragment_main() {
-  modf_a545b9();
-}
-
-[numthreads(1, 1, 1)]
-void compute_main() {
-  modf_a545b9();
 }
 
 VertexOutput vertex_main_inner() {

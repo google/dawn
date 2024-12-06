@@ -1,3 +1,31 @@
+//
+// fragment_main
+//
+
+void asinh_cf8603() {
+  float4 res = (0.88137358427047729492f).xxxx;
+}
+
+void fragment_main() {
+  asinh_cf8603();
+}
+
+//
+// compute_main
+//
+
+void asinh_cf8603() {
+  float4 res = (0.88137358427047729492f).xxxx;
+}
+
+[numthreads(1, 1, 1)]
+void compute_main() {
+  asinh_cf8603();
+}
+
+//
+// vertex_main
+//
 struct VertexOutput {
   float4 pos;
 };
@@ -9,15 +37,6 @@ struct vertex_main_outputs {
 
 void asinh_cf8603() {
   float4 res = (0.88137358427047729492f).xxxx;
-}
-
-void fragment_main() {
-  asinh_cf8603();
-}
-
-[numthreads(1, 1, 1)]
-void compute_main() {
-  asinh_cf8603();
 }
 
 VertexOutput vertex_main_inner() {

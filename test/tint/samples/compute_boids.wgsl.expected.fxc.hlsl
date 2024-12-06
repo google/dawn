@@ -1,3 +1,6 @@
+//
+// vert_main
+//
 struct tint_symbol_1 {
   float2 a_particlePos : TEXCOORD0;
   float2 a_particleVel : TEXCOORD1;
@@ -19,8 +22,10 @@ tint_symbol_2 vert_main(tint_symbol_1 tint_symbol) {
   wrapper_result.value = inner_result;
   return wrapper_result;
 }
-
-struct tint_symbol_3 {
+//
+// frag_main
+//
+struct tint_symbol {
   float4 value : SV_Target0;
 };
 
@@ -28,20 +33,22 @@ float4 frag_main_inner() {
   return (1.0f).xxxx;
 }
 
-tint_symbol_3 frag_main() {
-  float4 inner_result_1 = frag_main_inner();
-  tint_symbol_3 wrapper_result_1 = (tint_symbol_3)0;
-  wrapper_result_1.value = inner_result_1;
-  return wrapper_result_1;
+tint_symbol frag_main() {
+  float4 inner_result = frag_main_inner();
+  tint_symbol wrapper_result = (tint_symbol)0;
+  wrapper_result.value = inner_result;
+  return wrapper_result;
 }
-
+//
+// comp_main
+//
 cbuffer cbuffer_params : register(b0) {
   uint4 params[2];
 };
 RWByteAddressBuffer particlesA : register(u1);
 RWByteAddressBuffer particlesB : register(u2);
 
-struct tint_symbol_5 {
+struct tint_symbol_1 {
   uint3 gl_GlobalInvocationID : SV_DispatchThreadID;
 };
 
@@ -105,7 +112,7 @@ void comp_main_inner(uint3 gl_GlobalInvocationID) {
 }
 
 [numthreads(1, 1, 1)]
-void comp_main(tint_symbol_5 tint_symbol_4) {
-  comp_main_inner(tint_symbol_4.gl_GlobalInvocationID);
+void comp_main(tint_symbol_1 tint_symbol) {
+  comp_main_inner(tint_symbol.gl_GlobalInvocationID);
   return;
 }

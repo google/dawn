@@ -1,5 +1,6 @@
-static bool tint_discarded = false;
-
+//
+// vs_main
+//
 cbuffer cbuffer_uniforms : register(b0) {
   uint4 uniforms[1];
 };
@@ -36,14 +37,15 @@ tint_symbol_2 vs_main(tint_symbol_1 tint_symbol) {
   wrapper_result.position = inner_result.position;
   return wrapper_result;
 }
+//
+// fs_main
+//
+static bool tint_discarded = false;
 
-SamplerState mySampler : register(s1);
-Texture2D<float4> myTexture : register(t2);
-
-struct tint_symbol_4 {
+struct tint_symbol_1 {
   float2 texcoord : TEXCOORD0;
 };
-struct tint_symbol_5 {
+struct tint_symbol_2 {
   float4 value : SV_Target0;
 };
 
@@ -56,12 +58,12 @@ float4 fs_main_inner(float2 texcoord) {
   return srcColor;
 }
 
-tint_symbol_5 fs_main(tint_symbol_4 tint_symbol_3) {
-  float4 inner_result_1 = fs_main_inner(tint_symbol_3.texcoord);
-  tint_symbol_5 wrapper_result_1 = (tint_symbol_5)0;
-  wrapper_result_1.value = inner_result_1;
+tint_symbol_2 fs_main(tint_symbol_1 tint_symbol) {
+  float4 inner_result = fs_main_inner(tint_symbol.texcoord);
+  tint_symbol_2 wrapper_result = (tint_symbol_2)0;
+  wrapper_result.value = inner_result;
   if (tint_discarded) {
     discard;
   }
-  return wrapper_result_1;
+  return wrapper_result;
 }

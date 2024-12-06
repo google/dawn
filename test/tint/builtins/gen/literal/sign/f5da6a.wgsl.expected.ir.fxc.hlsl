@@ -1,3 +1,31 @@
+//
+// fragment_main
+//
+
+void sign_f5da6a() {
+  float4 res = (1.0f).xxxx;
+}
+
+void fragment_main() {
+  sign_f5da6a();
+}
+
+//
+// compute_main
+//
+
+void sign_f5da6a() {
+  float4 res = (1.0f).xxxx;
+}
+
+[numthreads(1, 1, 1)]
+void compute_main() {
+  sign_f5da6a();
+}
+
+//
+// vertex_main
+//
 struct VertexOutput {
   float4 pos;
 };
@@ -9,15 +37,6 @@ struct vertex_main_outputs {
 
 void sign_f5da6a() {
   float4 res = (1.0f).xxxx;
-}
-
-void fragment_main() {
-  sign_f5da6a();
-}
-
-[numthreads(1, 1, 1)]
-void compute_main() {
-  sign_f5da6a();
 }
 
 VertexOutput vertex_main_inner() {

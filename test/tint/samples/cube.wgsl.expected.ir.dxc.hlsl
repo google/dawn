@@ -1,3 +1,6 @@
+//
+// vtx_main
+//
 struct VertexOutput {
   float4 vtxFragColor;
   float4 Position;
@@ -18,14 +21,6 @@ struct vtx_main_inputs {
   float4 VertexInput_color : TEXCOORD1;
 };
 
-struct frag_main_outputs {
-  float4 tint_symbol : SV_Target0;
-};
-
-struct frag_main_inputs {
-  float4 fragColor : TEXCOORD0;
-};
-
 
 cbuffer cbuffer_uniforms : register(b0) {
   uint4 uniforms[4];
@@ -42,10 +37,6 @@ VertexOutput vtx_main_inner(VertexInput input) {
   return v_1;
 }
 
-float4 frag_main_inner(float4 fragColor) {
-  return fragColor;
-}
-
 vtx_main_outputs vtx_main(vtx_main_inputs inputs) {
   VertexInput v_2 = {inputs.VertexInput_cur_position, inputs.VertexInput_color};
   VertexOutput v_3 = vtx_main_inner(v_2);
@@ -53,8 +44,24 @@ vtx_main_outputs vtx_main(vtx_main_inputs inputs) {
   return v_4;
 }
 
+//
+// frag_main
+//
+struct frag_main_outputs {
+  float4 tint_symbol : SV_Target0;
+};
+
+struct frag_main_inputs {
+  float4 fragColor : TEXCOORD0;
+};
+
+
+float4 frag_main_inner(float4 fragColor) {
+  return fragColor;
+}
+
 frag_main_outputs frag_main(frag_main_inputs inputs) {
-  frag_main_outputs v_5 = {frag_main_inner(inputs.fragColor)};
-  return v_5;
+  frag_main_outputs v = {frag_main_inner(inputs.fragColor)};
+  return v;
 }
 

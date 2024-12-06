@@ -9,7 +9,6 @@ struct main_inputs {
 
 SamplerState tint_symbol : register(s0);
 Texture2D<float4> randomTexture : register(t1);
-Texture2D<float4> depthTexture : register(t2);
 float4 main_inner(float2 vUV) {
   float3 random = randomTexture.Sample(tint_symbol, vUV).xyz;
   int i = int(0);

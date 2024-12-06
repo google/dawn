@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 void abs_aedb6d() {
   float res = 1.0f;
 }
@@ -6,11 +9,23 @@ void fragment_main() {
   abs_aedb6d();
   return;
 }
+//
+// compute_main
+//
+void abs_aedb6d() {
+  float res = 1.0f;
+}
 
 [numthreads(1, 1, 1)]
 void compute_main() {
   abs_aedb6d();
   return;
+}
+//
+// vertex_main
+//
+void abs_aedb6d() {
+  float res = 1.0f;
 }
 
 struct VertexOutput {

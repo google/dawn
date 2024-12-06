@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 
 RWByteAddressBuffer prevent_dce : register(u0);
 uint2 subgroupAdd_1280c8() {
@@ -8,6 +11,17 @@ uint2 subgroupAdd_1280c8() {
 
 void fragment_main() {
   prevent_dce.Store2(0u, subgroupAdd_1280c8());
+}
+
+//
+// compute_main
+//
+
+RWByteAddressBuffer prevent_dce : register(u0);
+uint2 subgroupAdd_1280c8() {
+  uint2 arg_0 = (1u).xx;
+  uint2 res = WaveActiveSum(arg_0);
+  return res;
 }
 
 [numthreads(1, 1, 1)]

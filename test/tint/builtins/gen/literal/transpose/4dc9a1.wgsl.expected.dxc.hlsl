@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 RWByteAddressBuffer prevent_dce : register(u0);
 
 int transpose_4dc9a1() {
@@ -9,11 +12,27 @@ void fragment_main() {
   prevent_dce.Store(0u, asuint(transpose_4dc9a1()));
   return;
 }
+//
+// compute_main
+//
+RWByteAddressBuffer prevent_dce : register(u0);
+
+int transpose_4dc9a1() {
+  float3x2 res = float3x2((1.0f).xx, (1.0f).xx, (1.0f).xx);
+  return ((res[0][0] == 0.0f) ? 1 : 0);
+}
 
 [numthreads(1, 1, 1)]
 void compute_main() {
   prevent_dce.Store(0u, asuint(transpose_4dc9a1()));
   return;
+}
+//
+// vertex_main
+//
+int transpose_4dc9a1() {
+  float3x2 res = float3x2((1.0f).xx, (1.0f).xx, (1.0f).xx);
+  return ((res[0][0] == 0.0f) ? 1 : 0);
 }
 
 struct VertexOutput {

@@ -1,3 +1,31 @@
+//
+// fragment_main
+//
+
+void ceil_e0b70a() {
+  float res = 2.0f;
+}
+
+void fragment_main() {
+  ceil_e0b70a();
+}
+
+//
+// compute_main
+//
+
+void ceil_e0b70a() {
+  float res = 2.0f;
+}
+
+[numthreads(1, 1, 1)]
+void compute_main() {
+  ceil_e0b70a();
+}
+
+//
+// vertex_main
+//
 struct VertexOutput {
   float4 pos;
 };
@@ -9,15 +37,6 @@ struct vertex_main_outputs {
 
 void ceil_e0b70a() {
   float res = 2.0f;
-}
-
-void fragment_main() {
-  ceil_e0b70a();
-}
-
-[numthreads(1, 1, 1)]
-void compute_main() {
-  ceil_e0b70a();
 }
 
 VertexOutput vertex_main_inner() {

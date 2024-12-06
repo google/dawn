@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 void mix_ef3575() {
   float2 res = (1.0f).xx;
 }
@@ -6,11 +9,23 @@ void fragment_main() {
   mix_ef3575();
   return;
 }
+//
+// compute_main
+//
+void mix_ef3575() {
+  float2 res = (1.0f).xx;
+}
 
 [numthreads(1, 1, 1)]
 void compute_main() {
   mix_ef3575();
   return;
+}
+//
+// vertex_main
+//
+void mix_ef3575() {
+  float2 res = (1.0f).xx;
 }
 
 struct VertexOutput {

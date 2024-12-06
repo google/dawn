@@ -1,3 +1,31 @@
+//
+// fragment_main
+//
+
+void acosh_490aae() {
+  float4 res = (1.0f).xxxx;
+}
+
+void fragment_main() {
+  acosh_490aae();
+}
+
+//
+// compute_main
+//
+
+void acosh_490aae() {
+  float4 res = (1.0f).xxxx;
+}
+
+[numthreads(1, 1, 1)]
+void compute_main() {
+  acosh_490aae();
+}
+
+//
+// vertex_main
+//
 struct VertexOutput {
   float4 pos;
 };
@@ -9,15 +37,6 @@ struct vertex_main_outputs {
 
 void acosh_490aae() {
   float4 res = (1.0f).xxxx;
-}
-
-void fragment_main() {
-  acosh_490aae();
-}
-
-[numthreads(1, 1, 1)]
-void compute_main() {
-  acosh_490aae();
 }
 
 VertexOutput vertex_main_inner() {

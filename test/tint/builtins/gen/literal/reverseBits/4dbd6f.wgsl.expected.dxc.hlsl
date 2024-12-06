@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 RWByteAddressBuffer prevent_dce : register(u0);
 
 int4 reverseBits_4dbd6f() {
@@ -9,11 +12,27 @@ void fragment_main() {
   prevent_dce.Store4(0u, asuint(reverseBits_4dbd6f()));
   return;
 }
+//
+// compute_main
+//
+RWByteAddressBuffer prevent_dce : register(u0);
+
+int4 reverseBits_4dbd6f() {
+  int4 res = (-2147483648).xxxx;
+  return res;
+}
 
 [numthreads(1, 1, 1)]
 void compute_main() {
   prevent_dce.Store4(0u, asuint(reverseBits_4dbd6f()));
   return;
+}
+//
+// vertex_main
+//
+int4 reverseBits_4dbd6f() {
+  int4 res = (-2147483648).xxxx;
+  return res;
 }
 
 struct VertexOutput {

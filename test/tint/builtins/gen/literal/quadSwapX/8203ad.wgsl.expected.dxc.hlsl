@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 RWByteAddressBuffer prevent_dce : register(u0);
 
 uint quadSwapX_8203ad() {
@@ -8,6 +11,15 @@ uint quadSwapX_8203ad() {
 void fragment_main() {
   prevent_dce.Store(0u, asuint(quadSwapX_8203ad()));
   return;
+}
+//
+// compute_main
+//
+RWByteAddressBuffer prevent_dce : register(u0);
+
+uint quadSwapX_8203ad() {
+  uint res = QuadReadAcrossX(1u);
+  return res;
 }
 
 [numthreads(1, 1, 1)]

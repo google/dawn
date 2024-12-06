@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 float4 tint_acosh(float4 x) {
   return log((x + sqrt(((x * x) - 1.0f))));
 }
@@ -14,11 +17,37 @@ void fragment_main() {
   prevent_dce.Store4(0u, asuint(acosh_d51ccb()));
   return;
 }
+//
+// compute_main
+//
+float4 tint_acosh(float4 x) {
+  return log((x + sqrt(((x * x) - 1.0f))));
+}
+
+RWByteAddressBuffer prevent_dce : register(u0);
+
+float4 acosh_d51ccb() {
+  float4 arg_0 = (1.54308068752288818359f).xxxx;
+  float4 res = tint_acosh(arg_0);
+  return res;
+}
 
 [numthreads(1, 1, 1)]
 void compute_main() {
   prevent_dce.Store4(0u, asuint(acosh_d51ccb()));
   return;
+}
+//
+// vertex_main
+//
+float4 tint_acosh(float4 x) {
+  return log((x + sqrt(((x * x) - 1.0f))));
+}
+
+float4 acosh_d51ccb() {
+  float4 arg_0 = (1.54308068752288818359f).xxxx;
+  float4 res = tint_acosh(arg_0);
+  return res;
 }
 
 struct VertexOutput {

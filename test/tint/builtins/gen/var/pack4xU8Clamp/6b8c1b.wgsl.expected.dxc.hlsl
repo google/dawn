@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 uint tint_pack_4xu8_clamp(uint4 a) {
   uint4 a_clamp = clamp(a, (0u).xxxx, (255u).xxxx);
   uint4 a_u8 = uint4((a_clamp << uint4(0u, 8u, 16u, 24u)));
@@ -16,11 +19,41 @@ void fragment_main() {
   prevent_dce.Store(0u, asuint(pack4xU8Clamp_6b8c1b()));
   return;
 }
+//
+// compute_main
+//
+uint tint_pack_4xu8_clamp(uint4 a) {
+  uint4 a_clamp = clamp(a, (0u).xxxx, (255u).xxxx);
+  uint4 a_u8 = uint4((a_clamp << uint4(0u, 8u, 16u, 24u)));
+  return dot(a_u8, (1u).xxxx);
+}
+
+RWByteAddressBuffer prevent_dce : register(u0);
+
+uint pack4xU8Clamp_6b8c1b() {
+  uint4 arg_0 = (1u).xxxx;
+  uint res = tint_pack_4xu8_clamp(arg_0);
+  return res;
+}
 
 [numthreads(1, 1, 1)]
 void compute_main() {
   prevent_dce.Store(0u, asuint(pack4xU8Clamp_6b8c1b()));
   return;
+}
+//
+// vertex_main
+//
+uint tint_pack_4xu8_clamp(uint4 a) {
+  uint4 a_clamp = clamp(a, (0u).xxxx, (255u).xxxx);
+  uint4 a_u8 = uint4((a_clamp << uint4(0u, 8u, 16u, 24u)));
+  return dot(a_u8, (1u).xxxx);
+}
+
+uint pack4xU8Clamp_6b8c1b() {
+  uint4 arg_0 = (1u).xxxx;
+  uint res = tint_pack_4xu8_clamp(arg_0);
+  return res;
 }
 
 struct VertexOutput {

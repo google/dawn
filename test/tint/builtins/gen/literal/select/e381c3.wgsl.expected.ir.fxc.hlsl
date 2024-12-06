@@ -1,3 +1,31 @@
+//
+// fragment_main
+//
+
+void select_e381c3() {
+  int4 res = (int(1)).xxxx;
+}
+
+void fragment_main() {
+  select_e381c3();
+}
+
+//
+// compute_main
+//
+
+void select_e381c3() {
+  int4 res = (int(1)).xxxx;
+}
+
+[numthreads(1, 1, 1)]
+void compute_main() {
+  select_e381c3();
+}
+
+//
+// vertex_main
+//
 struct VertexOutput {
   float4 pos;
 };
@@ -9,15 +37,6 @@ struct vertex_main_outputs {
 
 void select_e381c3() {
   int4 res = (int(1)).xxxx;
-}
-
-void fragment_main() {
-  select_e381c3();
-}
-
-[numthreads(1, 1, 1)]
-void compute_main() {
-  select_e381c3();
 }
 
 VertexOutput vertex_main_inner() {

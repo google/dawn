@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 RWByteAddressBuffer prevent_dce : register(u0);
 
 int3 extractBits_e04f5d() {
@@ -9,11 +12,27 @@ void fragment_main() {
   prevent_dce.Store3(0u, asuint(extractBits_e04f5d()));
   return;
 }
+//
+// compute_main
+//
+RWByteAddressBuffer prevent_dce : register(u0);
+
+int3 extractBits_e04f5d() {
+  int3 res = (0).xxx;
+  return res;
+}
 
 [numthreads(1, 1, 1)]
 void compute_main() {
   prevent_dce.Store3(0u, asuint(extractBits_e04f5d()));
   return;
+}
+//
+// vertex_main
+//
+int3 extractBits_e04f5d() {
+  int3 res = (0).xxx;
+  return res;
 }
 
 struct VertexOutput {

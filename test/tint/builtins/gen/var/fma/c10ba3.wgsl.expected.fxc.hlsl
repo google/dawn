@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 RWByteAddressBuffer prevent_dce : register(u0);
 
 float fma_c10ba3() {
@@ -12,11 +15,33 @@ void fragment_main() {
   prevent_dce.Store(0u, asuint(fma_c10ba3()));
   return;
 }
+//
+// compute_main
+//
+RWByteAddressBuffer prevent_dce : register(u0);
+
+float fma_c10ba3() {
+  float arg_0 = 1.0f;
+  float arg_1 = 1.0f;
+  float arg_2 = 1.0f;
+  float res = mad(arg_0, arg_1, arg_2);
+  return res;
+}
 
 [numthreads(1, 1, 1)]
 void compute_main() {
   prevent_dce.Store(0u, asuint(fma_c10ba3()));
   return;
+}
+//
+// vertex_main
+//
+float fma_c10ba3() {
+  float arg_0 = 1.0f;
+  float arg_1 = 1.0f;
+  float arg_2 = 1.0f;
+  float res = mad(arg_0, arg_1, arg_2);
+  return res;
 }
 
 struct VertexOutput {

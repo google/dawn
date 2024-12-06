@@ -1,3 +1,33 @@
+//
+// fragment_main
+//
+
+void select_dfab3b() {
+  bool arg_2 = true;
+  int3 res = ((arg_2) ? ((int(1)).xxx) : ((int(1)).xxx));
+}
+
+void fragment_main() {
+  select_dfab3b();
+}
+
+//
+// compute_main
+//
+
+void select_dfab3b() {
+  bool arg_2 = true;
+  int3 res = ((arg_2) ? ((int(1)).xxx) : ((int(1)).xxx));
+}
+
+[numthreads(1, 1, 1)]
+void compute_main() {
+  select_dfab3b();
+}
+
+//
+// vertex_main
+//
 struct VertexOutput {
   float4 pos;
 };
@@ -10,15 +40,6 @@ struct vertex_main_outputs {
 void select_dfab3b() {
   bool arg_2 = true;
   int3 res = ((arg_2) ? ((int(1)).xxx) : ((int(1)).xxx));
-}
-
-void fragment_main() {
-  select_dfab3b();
-}
-
-[numthreads(1, 1, 1)]
-void compute_main() {
-  select_dfab3b();
 }
 
 VertexOutput vertex_main_inner() {

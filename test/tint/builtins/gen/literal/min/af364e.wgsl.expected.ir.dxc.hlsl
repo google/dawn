@@ -1,3 +1,31 @@
+//
+// fragment_main
+//
+
+void min_af364e() {
+  int4 res = (int(1)).xxxx;
+}
+
+void fragment_main() {
+  min_af364e();
+}
+
+//
+// compute_main
+//
+
+void min_af364e() {
+  int4 res = (int(1)).xxxx;
+}
+
+[numthreads(1, 1, 1)]
+void compute_main() {
+  min_af364e();
+}
+
+//
+// vertex_main
+//
 struct VertexOutput {
   float4 pos;
 };
@@ -9,15 +37,6 @@ struct vertex_main_outputs {
 
 void min_af364e() {
   int4 res = (int(1)).xxxx;
-}
-
-void fragment_main() {
-  min_af364e();
-}
-
-[numthreads(1, 1, 1)]
-void compute_main() {
-  min_af364e();
 }
 
 VertexOutput vertex_main_inner() {

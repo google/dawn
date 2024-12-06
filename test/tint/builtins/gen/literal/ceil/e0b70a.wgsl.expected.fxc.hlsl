@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 void ceil_e0b70a() {
   float res = 2.0f;
 }
@@ -6,11 +9,23 @@ void fragment_main() {
   ceil_e0b70a();
   return;
 }
+//
+// compute_main
+//
+void ceil_e0b70a() {
+  float res = 2.0f;
+}
 
 [numthreads(1, 1, 1)]
 void compute_main() {
   ceil_e0b70a();
   return;
+}
+//
+// vertex_main
+//
+void ceil_e0b70a() {
+  float res = 2.0f;
 }
 
 struct VertexOutput {

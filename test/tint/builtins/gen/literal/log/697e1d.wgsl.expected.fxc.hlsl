@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 void log_697e1d() {
   float4 res = (0.0f).xxxx;
 }
@@ -6,11 +9,23 @@ void fragment_main() {
   log_697e1d();
   return;
 }
+//
+// compute_main
+//
+void log_697e1d() {
+  float4 res = (0.0f).xxxx;
+}
 
 [numthreads(1, 1, 1)]
 void compute_main() {
   log_697e1d();
   return;
+}
+//
+// vertex_main
+//
+void log_697e1d() {
+  float4 res = (0.0f).xxxx;
 }
 
 struct VertexOutput {

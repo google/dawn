@@ -1,3 +1,31 @@
+//
+// fragment_main
+//
+
+void sqrt_4ac2c5() {
+  float4 res = (1.0f).xxxx;
+}
+
+void fragment_main() {
+  sqrt_4ac2c5();
+}
+
+//
+// compute_main
+//
+
+void sqrt_4ac2c5() {
+  float4 res = (1.0f).xxxx;
+}
+
+[numthreads(1, 1, 1)]
+void compute_main() {
+  sqrt_4ac2c5();
+}
+
+//
+// vertex_main
+//
 struct VertexOutput {
   float4 pos;
 };
@@ -9,15 +37,6 @@ struct vertex_main_outputs {
 
 void sqrt_4ac2c5() {
   float4 res = (1.0f).xxxx;
-}
-
-void fragment_main() {
-  sqrt_4ac2c5();
-}
-
-[numthreads(1, 1, 1)]
-void compute_main() {
-  sqrt_4ac2c5();
 }
 
 VertexOutput vertex_main_inner() {

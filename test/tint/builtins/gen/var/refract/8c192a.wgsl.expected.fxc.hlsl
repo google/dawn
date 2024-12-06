@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 void refract_8c192a() {
   float4 res = (-7.0f).xxxx;
 }
@@ -6,11 +9,23 @@ void fragment_main() {
   refract_8c192a();
   return;
 }
+//
+// compute_main
+//
+void refract_8c192a() {
+  float4 res = (-7.0f).xxxx;
+}
 
 [numthreads(1, 1, 1)]
 void compute_main() {
   refract_8c192a();
   return;
+}
+//
+// vertex_main
+//
+void refract_8c192a() {
+  float4 res = (-7.0f).xxxx;
 }
 
 struct VertexOutput {

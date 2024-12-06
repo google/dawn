@@ -1,3 +1,31 @@
+//
+// fragment_main
+//
+
+void degrees_c0880c() {
+  float3 res = (57.295780181884765625f).xxx;
+}
+
+void fragment_main() {
+  degrees_c0880c();
+}
+
+//
+// compute_main
+//
+
+void degrees_c0880c() {
+  float3 res = (57.295780181884765625f).xxx;
+}
+
+[numthreads(1, 1, 1)]
+void compute_main() {
+  degrees_c0880c();
+}
+
+//
+// vertex_main
+//
 struct VertexOutput {
   float4 pos;
 };
@@ -9,15 +37,6 @@ struct vertex_main_outputs {
 
 void degrees_c0880c() {
   float3 res = (57.295780181884765625f).xxx;
-}
-
-void fragment_main() {
-  degrees_c0880c();
-}
-
-[numthreads(1, 1, 1)]
-void compute_main() {
-  degrees_c0880c();
 }
 
 VertexOutput vertex_main_inner() {

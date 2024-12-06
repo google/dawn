@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 
 RWTexture2D<float4> arg_0 : register(u0, space1);
 void textureStore_c1c664() {
@@ -6,6 +9,15 @@ void textureStore_c1c664() {
 
 void fragment_main() {
   textureStore_c1c664();
+}
+
+//
+// compute_main
+//
+
+RWTexture2D<float4> arg_0 : register(u0, space1);
+void textureStore_c1c664() {
+  arg_0[(int(1)).xx] = (1.0f).xxxx;
 }
 
 [numthreads(1, 1, 1)]

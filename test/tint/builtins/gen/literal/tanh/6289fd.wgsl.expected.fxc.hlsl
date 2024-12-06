@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 void tanh_6289fd() {
   float3 res = (0.76159417629241943359f).xxx;
 }
@@ -6,11 +9,23 @@ void fragment_main() {
   tanh_6289fd();
   return;
 }
+//
+// compute_main
+//
+void tanh_6289fd() {
+  float3 res = (0.76159417629241943359f).xxx;
+}
 
 [numthreads(1, 1, 1)]
 void compute_main() {
   tanh_6289fd();
   return;
+}
+//
+// vertex_main
+//
+void tanh_6289fd() {
+  float3 res = (0.76159417629241943359f).xxx;
 }
 
 struct VertexOutput {

@@ -1,3 +1,31 @@
+//
+// fragment_main
+//
+
+void sign_55339e() {
+  int3 res = (int(1)).xxx;
+}
+
+void fragment_main() {
+  sign_55339e();
+}
+
+//
+// compute_main
+//
+
+void sign_55339e() {
+  int3 res = (int(1)).xxx;
+}
+
+[numthreads(1, 1, 1)]
+void compute_main() {
+  sign_55339e();
+}
+
+//
+// vertex_main
+//
 struct VertexOutput {
   float4 pos;
 };
@@ -9,15 +37,6 @@ struct vertex_main_outputs {
 
 void sign_55339e() {
   int3 res = (int(1)).xxx;
-}
-
-void fragment_main() {
-  sign_55339e();
-}
-
-[numthreads(1, 1, 1)]
-void compute_main() {
-  sign_55339e();
 }
 
 VertexOutput vertex_main_inner() {

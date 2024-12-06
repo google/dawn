@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 float3 tint_degrees(float3 param_0) {
   return param_0 * 57.29577951308232286465;
 }
@@ -14,11 +17,37 @@ void fragment_main() {
   prevent_dce.Store3(0u, asuint(degrees_2af623()));
   return;
 }
+//
+// compute_main
+//
+float3 tint_degrees(float3 param_0) {
+  return param_0 * 57.29577951308232286465;
+}
+
+RWByteAddressBuffer prevent_dce : register(u0);
+
+float3 degrees_2af623() {
+  float3 arg_0 = (1.0f).xxx;
+  float3 res = tint_degrees(arg_0);
+  return res;
+}
 
 [numthreads(1, 1, 1)]
 void compute_main() {
   prevent_dce.Store3(0u, asuint(degrees_2af623()));
   return;
+}
+//
+// vertex_main
+//
+float3 tint_degrees(float3 param_0) {
+  return param_0 * 57.29577951308232286465;
+}
+
+float3 degrees_2af623() {
+  float3 arg_0 = (1.0f).xxx;
+  float3 res = tint_degrees(arg_0);
+  return res;
 }
 
 struct VertexOutput {

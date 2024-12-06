@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 void select_17441a() {
   bool arg_2 = true;
   float4 res = (arg_2 ? (1.0f).xxxx : (1.0f).xxxx);
@@ -7,11 +10,25 @@ void fragment_main() {
   select_17441a();
   return;
 }
+//
+// compute_main
+//
+void select_17441a() {
+  bool arg_2 = true;
+  float4 res = (arg_2 ? (1.0f).xxxx : (1.0f).xxxx);
+}
 
 [numthreads(1, 1, 1)]
 void compute_main() {
   select_17441a();
   return;
+}
+//
+// vertex_main
+//
+void select_17441a() {
+  bool arg_2 = true;
+  float4 res = (arg_2 ? (1.0f).xxxx : (1.0f).xxxx);
 }
 
 struct VertexOutput {

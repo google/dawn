@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 void determinant_c8251d() {
   float res = 0.0f;
 }
@@ -6,11 +9,23 @@ void fragment_main() {
   determinant_c8251d();
   return;
 }
+//
+// compute_main
+//
+void determinant_c8251d() {
+  float res = 0.0f;
+}
 
 [numthreads(1, 1, 1)]
 void compute_main() {
   determinant_c8251d();
   return;
+}
+//
+// vertex_main
+//
+void determinant_c8251d() {
+  float res = 0.0f;
 }
 
 struct VertexOutput {

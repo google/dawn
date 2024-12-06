@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 void select_dfab3b() {
   bool arg_2 = true;
   int3 res = (arg_2 ? (1).xxx : (1).xxx);
@@ -7,11 +10,25 @@ void fragment_main() {
   select_dfab3b();
   return;
 }
+//
+// compute_main
+//
+void select_dfab3b() {
+  bool arg_2 = true;
+  int3 res = (arg_2 ? (1).xxx : (1).xxx);
+}
 
 [numthreads(1, 1, 1)]
 void compute_main() {
   select_dfab3b();
   return;
+}
+//
+// vertex_main
+//
+void select_dfab3b() {
+  bool arg_2 = true;
+  int3 res = (arg_2 ? (1).xxx : (1).xxx);
 }
 
 struct VertexOutput {

@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 void select_3a14be() {
   int2 res = (1).xx;
 }
@@ -6,11 +9,23 @@ void fragment_main() {
   select_3a14be();
   return;
 }
+//
+// compute_main
+//
+void select_3a14be() {
+  int2 res = (1).xx;
+}
 
 [numthreads(1, 1, 1)]
 void compute_main() {
   select_3a14be();
   return;
+}
+//
+// vertex_main
+//
+void select_3a14be() {
+  int2 res = (1).xx;
 }
 
 struct VertexOutput {

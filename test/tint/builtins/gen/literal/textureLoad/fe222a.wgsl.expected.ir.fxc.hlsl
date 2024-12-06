@@ -1,13 +1,6 @@
-struct VertexOutput {
-  float4 pos;
-  float4 prevent_dce;
-};
-
-struct vertex_main_outputs {
-  nointerpolation float4 VertexOutput_prevent_dce : TEXCOORD0;
-  float4 VertexOutput_pos : SV_Position;
-};
-
+//
+// fragment_main
+//
 
 RWByteAddressBuffer prevent_dce : register(u0);
 Texture1D<float4> arg_0 : register(t0, space1);
@@ -23,9 +16,46 @@ void fragment_main() {
   prevent_dce.Store4(0u, asuint(textureLoad_fe222a()));
 }
 
+//
+// compute_main
+//
+
+RWByteAddressBuffer prevent_dce : register(u0);
+Texture1D<float4> arg_0 : register(t0, space1);
+float4 textureLoad_fe222a() {
+  uint v = 0u;
+  arg_0.GetDimensions(v);
+  uint v_1 = (v - 1u);
+  float4 res = float4(arg_0.Load(int2(int(min(uint(int(1)), v_1)), int(0))));
+  return res;
+}
+
 [numthreads(1, 1, 1)]
 void compute_main() {
   prevent_dce.Store4(0u, asuint(textureLoad_fe222a()));
+}
+
+//
+// vertex_main
+//
+struct VertexOutput {
+  float4 pos;
+  float4 prevent_dce;
+};
+
+struct vertex_main_outputs {
+  nointerpolation float4 VertexOutput_prevent_dce : TEXCOORD0;
+  float4 VertexOutput_pos : SV_Position;
+};
+
+
+Texture1D<float4> arg_0 : register(t0, space1);
+float4 textureLoad_fe222a() {
+  uint v = 0u;
+  arg_0.GetDimensions(v);
+  uint v_1 = (v - 1u);
+  float4 res = float4(arg_0.Load(int2(int(min(uint(int(1)), v_1)), int(0))));
+  return res;
 }
 
 VertexOutput vertex_main_inner() {

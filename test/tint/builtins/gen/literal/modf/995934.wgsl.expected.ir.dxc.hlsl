@@ -1,3 +1,41 @@
+//
+// fragment_main
+//
+struct modf_result_vec4_f16 {
+  vector<float16_t, 4> fract;
+  vector<float16_t, 4> whole;
+};
+
+
+void modf_995934() {
+  modf_result_vec4_f16 res = {(float16_t(-0.5h)).xxxx, (float16_t(-1.0h)).xxxx};
+}
+
+void fragment_main() {
+  modf_995934();
+}
+
+//
+// compute_main
+//
+struct modf_result_vec4_f16 {
+  vector<float16_t, 4> fract;
+  vector<float16_t, 4> whole;
+};
+
+
+void modf_995934() {
+  modf_result_vec4_f16 res = {(float16_t(-0.5h)).xxxx, (float16_t(-1.0h)).xxxx};
+}
+
+[numthreads(1, 1, 1)]
+void compute_main() {
+  modf_995934();
+}
+
+//
+// vertex_main
+//
 struct modf_result_vec4_f16 {
   vector<float16_t, 4> fract;
   vector<float16_t, 4> whole;
@@ -14,15 +52,6 @@ struct vertex_main_outputs {
 
 void modf_995934() {
   modf_result_vec4_f16 res = {(float16_t(-0.5h)).xxxx, (float16_t(-1.0h)).xxxx};
-}
-
-void fragment_main() {
-  modf_995934();
-}
-
-[numthreads(1, 1, 1)]
-void compute_main() {
-  modf_995934();
 }
 
 VertexOutput vertex_main_inner() {

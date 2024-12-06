@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 void step_38cd79() {
   float4 res = (1.0f).xxxx;
 }
@@ -6,11 +9,23 @@ void fragment_main() {
   step_38cd79();
   return;
 }
+//
+// compute_main
+//
+void step_38cd79() {
+  float4 res = (1.0f).xxxx;
+}
 
 [numthreads(1, 1, 1)]
 void compute_main() {
   step_38cd79();
   return;
+}
+//
+// vertex_main
+//
+void step_38cd79() {
+  float4 res = (1.0f).xxxx;
 }
 
 struct VertexOutput {

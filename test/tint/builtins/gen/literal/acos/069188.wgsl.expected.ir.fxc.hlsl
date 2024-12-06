@@ -1,3 +1,31 @@
+//
+// fragment_main
+//
+
+void acos_069188() {
+  float3 res = (0.25f).xxx;
+}
+
+void fragment_main() {
+  acos_069188();
+}
+
+//
+// compute_main
+//
+
+void acos_069188() {
+  float3 res = (0.25f).xxx;
+}
+
+[numthreads(1, 1, 1)]
+void compute_main() {
+  acos_069188();
+}
+
+//
+// vertex_main
+//
 struct VertexOutput {
   float4 pos;
 };
@@ -9,15 +37,6 @@ struct vertex_main_outputs {
 
 void acos_069188() {
   float3 res = (0.25f).xxx;
-}
-
-void fragment_main() {
-  acos_069188();
-}
-
-[numthreads(1, 1, 1)]
-void compute_main() {
-  acos_069188();
 }
 
 VertexOutput vertex_main_inner() {

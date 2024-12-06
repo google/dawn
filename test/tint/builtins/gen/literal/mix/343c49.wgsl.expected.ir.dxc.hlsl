@@ -1,3 +1,31 @@
+//
+// fragment_main
+//
+
+void mix_343c49() {
+  float3 res = (1.0f).xxx;
+}
+
+void fragment_main() {
+  mix_343c49();
+}
+
+//
+// compute_main
+//
+
+void mix_343c49() {
+  float3 res = (1.0f).xxx;
+}
+
+[numthreads(1, 1, 1)]
+void compute_main() {
+  mix_343c49();
+}
+
+//
+// vertex_main
+//
 struct VertexOutput {
   float4 pos;
 };
@@ -9,15 +37,6 @@ struct vertex_main_outputs {
 
 void mix_343c49() {
   float3 res = (1.0f).xxx;
-}
-
-void fragment_main() {
-  mix_343c49();
-}
-
-[numthreads(1, 1, 1)]
-void compute_main() {
-  mix_343c49();
 }
 
 VertexOutput vertex_main_inner() {

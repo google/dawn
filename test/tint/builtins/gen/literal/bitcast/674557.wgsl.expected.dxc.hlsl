@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 RWByteAddressBuffer prevent_dce : register(u0);
 
 vector<float16_t, 2> bitcast_674557() {
@@ -9,11 +12,27 @@ void fragment_main() {
   prevent_dce.Store<vector<float16_t, 2> >(0u, bitcast_674557());
   return;
 }
+//
+// compute_main
+//
+RWByteAddressBuffer prevent_dce : register(u0);
+
+vector<float16_t, 2> bitcast_674557() {
+  vector<float16_t, 2> res = vector<float16_t, 2>(float16_t(0.00000005960464477539h), float16_t(0.0h));
+  return res;
+}
 
 [numthreads(1, 1, 1)]
 void compute_main() {
   prevent_dce.Store<vector<float16_t, 2> >(0u, bitcast_674557());
   return;
+}
+//
+// vertex_main
+//
+vector<float16_t, 2> bitcast_674557() {
+  vector<float16_t, 2> res = vector<float16_t, 2>(float16_t(0.00000005960464477539h), float16_t(0.0h));
+  return res;
 }
 
 struct VertexOutput {

@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 void smoothstep_0c4ffc() {
   float4 res = (0.5f).xxxx;
 }
@@ -6,11 +9,23 @@ void fragment_main() {
   smoothstep_0c4ffc();
   return;
 }
+//
+// compute_main
+//
+void smoothstep_0c4ffc() {
+  float4 res = (0.5f).xxxx;
+}
 
 [numthreads(1, 1, 1)]
 void compute_main() {
   smoothstep_0c4ffc();
   return;
+}
+//
+// vertex_main
+//
+void smoothstep_0c4ffc() {
+  float4 res = (0.5f).xxxx;
 }
 
 struct VertexOutput {

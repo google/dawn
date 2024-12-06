@@ -1014,7 +1014,7 @@ bool GenerateHlsl([[maybe_unused]] Options& options,
                   [[maybe_unused]] tint::inspector::Inspector& inspector,
                   [[maybe_unused]] tint::Program& src_program) {
 #if TINT_BUILD_HLSL_WRITER
-    auto res = ProcessASTTransformsOld(options, inspector, src_program);
+    auto res = ProcessASTTransforms(options, inspector, src_program);
     if (res != tint::Success || !res->IsValid()) {
         tint::cmd::PrintWGSL(std::cerr, res.Get());
         std::cerr << res->Diagnostics() << "\n";
@@ -1339,7 +1339,8 @@ int main(int argc, const char** argv) {
         return GenerateWgsl(options, inspector, info.program) ? 0 : 1;
     }
 
-    if (options.format == Format::kNone || options.format == Format::kGlsl) {
+    if (options.format == Format::kNone || options.format == Format::kGlsl ||
+        options.format == Format::kHlsl || options.format == Format::kHlslFxc) {
         auto generate = [&]() {
             bool success = false;
             switch (options.format) {
@@ -1431,8 +1432,6 @@ int main(int argc, const char** argv) {
                 break;
             case Format::kHlsl:
             case Format::kHlslFxc:
-                success = GenerateHlsl(options, inspector, info.program);
-                break;
             case Format::kGlsl:
             case Format::kWgsl:
             case Format::kNone:

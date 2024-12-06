@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 struct frexp_result_vec2_f32 {
   float2 fract;
   int2 exp;
@@ -18,11 +21,47 @@ void fragment_main() {
   frexp_eb2421();
   return;
 }
+//
+// compute_main
+//
+struct frexp_result_vec2_f32 {
+  float2 fract;
+  int2 exp;
+};
+frexp_result_vec2_f32 tint_frexp(float2 param_0) {
+  float2 exp;
+  float2 fract = sign(param_0) * frexp(param_0, exp);
+  frexp_result_vec2_f32 result = {fract, int2(exp)};
+  return result;
+}
+
+void frexp_eb2421() {
+  float2 arg_0 = (1.0f).xx;
+  frexp_result_vec2_f32 res = tint_frexp(arg_0);
+}
 
 [numthreads(1, 1, 1)]
 void compute_main() {
   frexp_eb2421();
   return;
+}
+//
+// vertex_main
+//
+struct frexp_result_vec2_f32 {
+  float2 fract;
+  int2 exp;
+};
+frexp_result_vec2_f32 tint_frexp(float2 param_0) {
+  float2 exp;
+  float2 fract = sign(param_0) * frexp(param_0, exp);
+  frexp_result_vec2_f32 result = {fract, int2(exp)};
+  return result;
+}
+
+void frexp_eb2421() {
+  float2 arg_0 = (1.0f).xx;
+  frexp_result_vec2_f32 res = tint_frexp(arg_0);
 }
 
 struct VertexOutput {

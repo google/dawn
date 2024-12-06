@@ -1,6 +1,5 @@
 SamplerState tint_symbol : register(s0);
 Texture2D<float4> randomTexture : register(t1);
-Texture2D<float4> depthTexture : register(t2);
 
 struct tint_symbol_3 {
   float2 vUV : TEXCOORD0;

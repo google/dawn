@@ -1,3 +1,31 @@
+//
+// fragment_main
+//
+
+void sinh_c4df74() {
+  float res = 1.17520117759704589844f;
+}
+
+void fragment_main() {
+  sinh_c4df74();
+}
+
+//
+// compute_main
+//
+
+void sinh_c4df74() {
+  float res = 1.17520117759704589844f;
+}
+
+[numthreads(1, 1, 1)]
+void compute_main() {
+  sinh_c4df74();
+}
+
+//
+// vertex_main
+//
 struct VertexOutput {
   float4 pos;
 };
@@ -9,15 +37,6 @@ struct vertex_main_outputs {
 
 void sinh_c4df74() {
   float res = 1.17520117759704589844f;
-}
-
-void fragment_main() {
-  sinh_c4df74();
-}
-
-[numthreads(1, 1, 1)]
-void compute_main() {
-  sinh_c4df74();
 }
 
 VertexOutput vertex_main_inner() {

@@ -1,13 +1,6 @@
-struct VertexOutput {
-  float4 pos;
-  float4 prevent_dce;
-};
-
-struct vertex_main_outputs {
-  nointerpolation float4 VertexOutput_prevent_dce : TEXCOORD0;
-  float4 VertexOutput_pos : SV_Position;
-};
-
+//
+// fragment_main
+//
 
 RWByteAddressBuffer prevent_dce : register(u0);
 float4 round_106c0b() {
@@ -19,9 +12,38 @@ void fragment_main() {
   prevent_dce.Store4(0u, asuint(round_106c0b()));
 }
 
+//
+// compute_main
+//
+
+RWByteAddressBuffer prevent_dce : register(u0);
+float4 round_106c0b() {
+  float4 res = (4.0f).xxxx;
+  return res;
+}
+
 [numthreads(1, 1, 1)]
 void compute_main() {
   prevent_dce.Store4(0u, asuint(round_106c0b()));
+}
+
+//
+// vertex_main
+//
+struct VertexOutput {
+  float4 pos;
+  float4 prevent_dce;
+};
+
+struct vertex_main_outputs {
+  nointerpolation float4 VertexOutput_prevent_dce : TEXCOORD0;
+  float4 VertexOutput_pos : SV_Position;
+};
+
+
+float4 round_106c0b() {
+  float4 res = (4.0f).xxxx;
+  return res;
 }
 
 VertexOutput vertex_main_inner() {

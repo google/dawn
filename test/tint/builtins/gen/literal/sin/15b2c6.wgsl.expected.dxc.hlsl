@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 void sin_15b2c6() {
   float4 res = (1.0f).xxxx;
 }
@@ -6,11 +9,23 @@ void fragment_main() {
   sin_15b2c6();
   return;
 }
+//
+// compute_main
+//
+void sin_15b2c6() {
+  float4 res = (1.0f).xxxx;
+}
 
 [numthreads(1, 1, 1)]
 void compute_main() {
   sin_15b2c6();
   return;
+}
+//
+// vertex_main
+//
+void sin_15b2c6() {
+  float4 res = (1.0f).xxxx;
 }
 
 struct VertexOutput {

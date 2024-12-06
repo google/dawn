@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 void sign_3bdab6() {
   int4 res = (1).xxxx;
 }
@@ -6,11 +9,23 @@ void fragment_main() {
   sign_3bdab6();
   return;
 }
+//
+// compute_main
+//
+void sign_3bdab6() {
+  int4 res = (1).xxxx;
+}
 
 [numthreads(1, 1, 1)]
 void compute_main() {
   sign_3bdab6();
   return;
+}
+//
+// vertex_main
+//
+void sign_3bdab6() {
+  int4 res = (1).xxxx;
 }
 
 struct VertexOutput {

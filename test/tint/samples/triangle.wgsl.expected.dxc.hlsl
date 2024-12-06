@@ -1,3 +1,6 @@
+//
+// vtx_main
+//
 struct tint_symbol_1 {
   uint VertexIndex : SV_VertexID;
 };
@@ -6,8 +9,8 @@ struct tint_symbol_2 {
 };
 
 float4 vtx_main_inner(uint VertexIndex) {
-  float2 tint_symbol_4[3] = {float2(0.0f, 0.5f), (-0.5f).xx, float2(0.5f, -0.5f)};
-  return float4(tint_symbol_4[min(VertexIndex, 2u)], 0.0f, 1.0f);
+  float2 tint_symbol_3[3] = {float2(0.0f, 0.5f), (-0.5f).xx, float2(0.5f, -0.5f)};
+  return float4(tint_symbol_3[min(VertexIndex, 2u)], 0.0f, 1.0f);
 }
 
 tint_symbol_2 vtx_main(tint_symbol_1 tint_symbol) {
@@ -16,8 +19,10 @@ tint_symbol_2 vtx_main(tint_symbol_1 tint_symbol) {
   wrapper_result.value = inner_result;
   return wrapper_result;
 }
-
-struct tint_symbol_3 {
+//
+// frag_main
+//
+struct tint_symbol {
   float4 value : SV_Target0;
 };
 
@@ -25,9 +30,9 @@ float4 frag_main_inner() {
   return float4(1.0f, 0.0f, 0.0f, 1.0f);
 }
 
-tint_symbol_3 frag_main() {
-  float4 inner_result_1 = frag_main_inner();
-  tint_symbol_3 wrapper_result_1 = (tint_symbol_3)0;
-  wrapper_result_1.value = inner_result_1;
-  return wrapper_result_1;
+tint_symbol frag_main() {
+  float4 inner_result = frag_main_inner();
+  tint_symbol wrapper_result = (tint_symbol)0;
+  wrapper_result.value = inner_result;
+  return wrapper_result;
 }

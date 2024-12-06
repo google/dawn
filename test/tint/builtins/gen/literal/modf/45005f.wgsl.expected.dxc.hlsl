@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 struct modf_result_vec3_f16 {
   vector<float16_t, 3> fract;
   vector<float16_t, 3> whole;
@@ -10,11 +13,31 @@ void fragment_main() {
   modf_45005f();
   return;
 }
+//
+// compute_main
+//
+struct modf_result_vec3_f16 {
+  vector<float16_t, 3> fract;
+  vector<float16_t, 3> whole;
+};
+void modf_45005f() {
+  modf_result_vec3_f16 res = {(float16_t(-0.5h)).xxx, (float16_t(-1.0h)).xxx};
+}
 
 [numthreads(1, 1, 1)]
 void compute_main() {
   modf_45005f();
   return;
+}
+//
+// vertex_main
+//
+struct modf_result_vec3_f16 {
+  vector<float16_t, 3> fract;
+  vector<float16_t, 3> whole;
+};
+void modf_45005f() {
+  modf_result_vec3_f16 res = {(float16_t(-0.5h)).xxx, (float16_t(-1.0h)).xxx};
 }
 
 struct VertexOutput {

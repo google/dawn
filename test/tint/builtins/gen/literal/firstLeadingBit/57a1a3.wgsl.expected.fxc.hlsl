@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 RWByteAddressBuffer prevent_dce : register(u0);
 
 int firstLeadingBit_57a1a3() {
@@ -9,11 +12,27 @@ void fragment_main() {
   prevent_dce.Store(0u, asuint(firstLeadingBit_57a1a3()));
   return;
 }
+//
+// compute_main
+//
+RWByteAddressBuffer prevent_dce : register(u0);
+
+int firstLeadingBit_57a1a3() {
+  int res = 0;
+  return res;
+}
 
 [numthreads(1, 1, 1)]
 void compute_main() {
   prevent_dce.Store(0u, asuint(firstLeadingBit_57a1a3()));
   return;
+}
+//
+// vertex_main
+//
+int firstLeadingBit_57a1a3() {
+  int res = 0;
+  return res;
 }
 
 struct VertexOutput {

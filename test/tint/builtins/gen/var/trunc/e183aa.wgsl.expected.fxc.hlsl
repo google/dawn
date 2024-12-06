@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 float4 tint_trunc(float4 param_0) {
   return param_0 < 0 ? ceil(param_0) : floor(param_0);
 }
@@ -14,11 +17,37 @@ void fragment_main() {
   prevent_dce.Store4(0u, asuint(trunc_e183aa()));
   return;
 }
+//
+// compute_main
+//
+float4 tint_trunc(float4 param_0) {
+  return param_0 < 0 ? ceil(param_0) : floor(param_0);
+}
+
+RWByteAddressBuffer prevent_dce : register(u0);
+
+float4 trunc_e183aa() {
+  float4 arg_0 = (1.5f).xxxx;
+  float4 res = tint_trunc(arg_0);
+  return res;
+}
 
 [numthreads(1, 1, 1)]
 void compute_main() {
   prevent_dce.Store4(0u, asuint(trunc_e183aa()));
   return;
+}
+//
+// vertex_main
+//
+float4 tint_trunc(float4 param_0) {
+  return param_0 < 0 ? ceil(param_0) : floor(param_0);
+}
+
+float4 trunc_e183aa() {
+  float4 arg_0 = (1.5f).xxxx;
+  float4 res = tint_trunc(arg_0);
+  return res;
 }
 
 struct VertexOutput {

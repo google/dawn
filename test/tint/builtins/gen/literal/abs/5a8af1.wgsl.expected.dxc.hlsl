@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 void abs_5a8af1() {
   int res = 1;
 }
@@ -6,11 +9,23 @@ void fragment_main() {
   abs_5a8af1();
   return;
 }
+//
+// compute_main
+//
+void abs_5a8af1() {
+  int res = 1;
+}
 
 [numthreads(1, 1, 1)]
 void compute_main() {
   abs_5a8af1();
   return;
+}
+//
+// vertex_main
+//
+void abs_5a8af1() {
+  int res = 1;
 }
 
 struct VertexOutput {

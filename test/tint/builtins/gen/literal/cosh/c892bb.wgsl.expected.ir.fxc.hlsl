@@ -1,3 +1,31 @@
+//
+// fragment_main
+//
+
+void cosh_c892bb() {
+  float res = 1.0f;
+}
+
+void fragment_main() {
+  cosh_c892bb();
+}
+
+//
+// compute_main
+//
+
+void cosh_c892bb() {
+  float res = 1.0f;
+}
+
+[numthreads(1, 1, 1)]
+void compute_main() {
+  cosh_c892bb();
+}
+
+//
+// vertex_main
+//
 struct VertexOutput {
   float4 pos;
 };
@@ -9,15 +37,6 @@ struct vertex_main_outputs {
 
 void cosh_c892bb() {
   float res = 1.0f;
-}
-
-void fragment_main() {
-  cosh_c892bb();
-}
-
-[numthreads(1, 1, 1)]
-void compute_main() {
-  cosh_c892bb();
 }
 
 VertexOutput vertex_main_inner() {

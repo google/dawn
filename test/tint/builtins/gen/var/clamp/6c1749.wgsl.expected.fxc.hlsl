@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 int2 tint_clamp(int2 e, int2 low, int2 high) {
   return min(max(e, low), high);
 }
@@ -16,11 +19,41 @@ void fragment_main() {
   prevent_dce.Store2(0u, asuint(clamp_6c1749()));
   return;
 }
+//
+// compute_main
+//
+int2 tint_clamp(int2 e, int2 low, int2 high) {
+  return min(max(e, low), high);
+}
+
+RWByteAddressBuffer prevent_dce : register(u0);
+
+int2 clamp_6c1749() {
+  int2 arg_0 = (1).xx;
+  int2 arg_1 = (1).xx;
+  int2 arg_2 = (1).xx;
+  int2 res = tint_clamp(arg_0, arg_1, arg_2);
+  return res;
+}
 
 [numthreads(1, 1, 1)]
 void compute_main() {
   prevent_dce.Store2(0u, asuint(clamp_6c1749()));
   return;
+}
+//
+// vertex_main
+//
+int2 tint_clamp(int2 e, int2 low, int2 high) {
+  return min(max(e, low), high);
+}
+
+int2 clamp_6c1749() {
+  int2 arg_0 = (1).xx;
+  int2 arg_1 = (1).xx;
+  int2 arg_2 = (1).xx;
+  int2 res = tint_clamp(arg_0, arg_1, arg_2);
+  return res;
 }
 
 struct VertexOutput {

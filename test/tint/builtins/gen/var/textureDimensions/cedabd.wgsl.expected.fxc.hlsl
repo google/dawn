@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 RWByteAddressBuffer prevent_dce : register(u0);
 Texture1D<int4> arg_0 : register(t0, space1);
 
@@ -12,11 +15,34 @@ void fragment_main() {
   prevent_dce.Store(0u, asuint(textureDimensions_cedabd()));
   return;
 }
+//
+// compute_main
+//
+RWByteAddressBuffer prevent_dce : register(u0);
+Texture1D<int4> arg_0 : register(t0, space1);
+
+uint textureDimensions_cedabd() {
+  uint tint_tmp;
+  arg_0.GetDimensions(tint_tmp);
+  uint res = tint_tmp;
+  return res;
+}
 
 [numthreads(1, 1, 1)]
 void compute_main() {
   prevent_dce.Store(0u, asuint(textureDimensions_cedabd()));
   return;
+}
+//
+// vertex_main
+//
+Texture1D<int4> arg_0 : register(t0, space1);
+
+uint textureDimensions_cedabd() {
+  uint tint_tmp;
+  arg_0.GetDimensions(tint_tmp);
+  uint res = tint_tmp;
+  return res;
 }
 
 struct VertexOutput {

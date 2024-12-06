@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 void length_936ad5() {
   float res = 0.0f;
 }
@@ -6,11 +9,23 @@ void fragment_main() {
   length_936ad5();
   return;
 }
+//
+// compute_main
+//
+void length_936ad5() {
+  float res = 0.0f;
+}
 
 [numthreads(1, 1, 1)]
 void compute_main() {
   length_936ad5();
   return;
+}
+//
+// vertex_main
+//
+void length_936ad5() {
+  float res = 0.0f;
 }
 
 struct VertexOutput {

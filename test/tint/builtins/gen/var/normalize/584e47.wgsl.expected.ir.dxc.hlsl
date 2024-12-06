@@ -1,3 +1,31 @@
+//
+// fragment_main
+//
+
+void normalize_584e47() {
+  float2 res = (0.70710676908493041992f).xx;
+}
+
+void fragment_main() {
+  normalize_584e47();
+}
+
+//
+// compute_main
+//
+
+void normalize_584e47() {
+  float2 res = (0.70710676908493041992f).xx;
+}
+
+[numthreads(1, 1, 1)]
+void compute_main() {
+  normalize_584e47();
+}
+
+//
+// vertex_main
+//
 struct VertexOutput {
   float4 pos;
 };
@@ -9,15 +37,6 @@ struct vertex_main_outputs {
 
 void normalize_584e47() {
   float2 res = (0.70710676908493041992f).xx;
-}
-
-void fragment_main() {
-  normalize_584e47();
-}
-
-[numthreads(1, 1, 1)]
-void compute_main() {
-  normalize_584e47();
 }
 
 VertexOutput vertex_main_inner() {

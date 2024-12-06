@@ -1,6 +1,3 @@
-cbuffer cbuffer_constants : register(b0) {
-  uint4 constants[1];
-};
 Texture2DArray<float4> myTexture : register(t1);
 RWByteAddressBuffer result : register(u3);
 

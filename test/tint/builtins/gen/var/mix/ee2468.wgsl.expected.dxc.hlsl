@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 RWByteAddressBuffer prevent_dce : register(u0);
 
 vector<float16_t, 4> mix_ee2468() {
@@ -12,11 +15,33 @@ void fragment_main() {
   prevent_dce.Store<vector<float16_t, 4> >(0u, mix_ee2468());
   return;
 }
+//
+// compute_main
+//
+RWByteAddressBuffer prevent_dce : register(u0);
+
+vector<float16_t, 4> mix_ee2468() {
+  vector<float16_t, 4> arg_0 = (float16_t(1.0h)).xxxx;
+  vector<float16_t, 4> arg_1 = (float16_t(1.0h)).xxxx;
+  vector<float16_t, 4> arg_2 = (float16_t(1.0h)).xxxx;
+  vector<float16_t, 4> res = lerp(arg_0, arg_1, arg_2);
+  return res;
+}
 
 [numthreads(1, 1, 1)]
 void compute_main() {
   prevent_dce.Store<vector<float16_t, 4> >(0u, mix_ee2468());
   return;
+}
+//
+// vertex_main
+//
+vector<float16_t, 4> mix_ee2468() {
+  vector<float16_t, 4> arg_0 = (float16_t(1.0h)).xxxx;
+  vector<float16_t, 4> arg_1 = (float16_t(1.0h)).xxxx;
+  vector<float16_t, 4> arg_2 = (float16_t(1.0h)).xxxx;
+  vector<float16_t, 4> res = lerp(arg_0, arg_1, arg_2);
+  return res;
 }
 
 struct VertexOutput {

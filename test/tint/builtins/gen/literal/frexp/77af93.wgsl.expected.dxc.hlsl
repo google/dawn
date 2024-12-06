@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 struct frexp_result_vec4_f32 {
   float4 fract;
   int4 exp;
@@ -10,11 +13,31 @@ void fragment_main() {
   frexp_77af93();
   return;
 }
+//
+// compute_main
+//
+struct frexp_result_vec4_f32 {
+  float4 fract;
+  int4 exp;
+};
+void frexp_77af93() {
+  frexp_result_vec4_f32 res = {(0.5f).xxxx, (1).xxxx};
+}
 
 [numthreads(1, 1, 1)]
 void compute_main() {
   frexp_77af93();
   return;
+}
+//
+// vertex_main
+//
+struct frexp_result_vec4_f32 {
+  float4 fract;
+  int4 exp;
+};
+void frexp_77af93() {
+  frexp_result_vec4_f32 res = {(0.5f).xxxx, (1).xxxx};
 }
 
 struct VertexOutput {

@@ -1,3 +1,31 @@
+//
+// fragment_main
+//
+
+void log2_6b8954() {
+  float2 res = (0.0f).xx;
+}
+
+void fragment_main() {
+  log2_6b8954();
+}
+
+//
+// compute_main
+//
+
+void log2_6b8954() {
+  float2 res = (0.0f).xx;
+}
+
+[numthreads(1, 1, 1)]
+void compute_main() {
+  log2_6b8954();
+}
+
+//
+// vertex_main
+//
 struct VertexOutput {
   float4 pos;
 };
@@ -9,15 +37,6 @@ struct vertex_main_outputs {
 
 void log2_6b8954() {
   float2 res = (0.0f).xx;
-}
-
-void fragment_main() {
-  log2_6b8954();
-}
-
-[numthreads(1, 1, 1)]
-void compute_main() {
-  log2_6b8954();
 }
 
 VertexOutput vertex_main_inner() {

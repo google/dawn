@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 void acosh_9f213e() {
   float3 res = (1.0f).xxx;
 }
@@ -6,11 +9,23 @@ void fragment_main() {
   acosh_9f213e();
   return;
 }
+//
+// compute_main
+//
+void acosh_9f213e() {
+  float3 res = (1.0f).xxx;
+}
 
 [numthreads(1, 1, 1)]
 void compute_main() {
   acosh_9f213e();
   return;
+}
+//
+// vertex_main
+//
+void acosh_9f213e() {
+  float3 res = (1.0f).xxx;
 }
 
 struct VertexOutput {

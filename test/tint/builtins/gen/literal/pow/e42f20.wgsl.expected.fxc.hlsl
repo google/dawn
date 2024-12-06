@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 void pow_e42f20() {
   float3 res = (1.0f).xxx;
 }
@@ -6,11 +9,23 @@ void fragment_main() {
   pow_e42f20();
   return;
 }
+//
+// compute_main
+//
+void pow_e42f20() {
+  float3 res = (1.0f).xxx;
+}
 
 [numthreads(1, 1, 1)]
 void compute_main() {
   pow_e42f20();
   return;
+}
+//
+// vertex_main
+//
+void pow_e42f20() {
+  float3 res = (1.0f).xxx;
 }
 
 struct VertexOutput {

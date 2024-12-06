@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 void fma_143d5d() {
   float4 res = (2.0f).xxxx;
 }
@@ -6,11 +9,23 @@ void fragment_main() {
   fma_143d5d();
   return;
 }
+//
+// compute_main
+//
+void fma_143d5d() {
+  float4 res = (2.0f).xxxx;
+}
 
 [numthreads(1, 1, 1)]
 void compute_main() {
   fma_143d5d();
   return;
+}
+//
+// vertex_main
+//
+void fma_143d5d() {
+  float4 res = (2.0f).xxxx;
 }
 
 struct VertexOutput {

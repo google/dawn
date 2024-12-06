@@ -1,3 +1,31 @@
+//
+// fragment_main
+//
+
+void determinant_c8251d() {
+  float res = 0.0f;
+}
+
+void fragment_main() {
+  determinant_c8251d();
+}
+
+//
+// compute_main
+//
+
+void determinant_c8251d() {
+  float res = 0.0f;
+}
+
+[numthreads(1, 1, 1)]
+void compute_main() {
+  determinant_c8251d();
+}
+
+//
+// vertex_main
+//
 struct VertexOutput {
   float4 pos;
 };
@@ -9,15 +37,6 @@ struct vertex_main_outputs {
 
 void determinant_c8251d() {
   float res = 0.0f;
-}
-
-void fragment_main() {
-  determinant_c8251d();
-}
-
-[numthreads(1, 1, 1)]
-void compute_main() {
-  determinant_c8251d();
 }
 
 VertexOutput vertex_main_inner() {

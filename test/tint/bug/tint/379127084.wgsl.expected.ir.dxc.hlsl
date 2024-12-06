@@ -17,9 +17,6 @@ struct main_inputs {
 };
 
 
-cbuffer cbuffer__uniform0 : register(b0) {
-  uint4 _uniform0[2];
-};
 ByteAddressBuffer _storage1 : register(t2);
 static uint shadingSsboIndex = 0u;
 SamplerState permutationsSampler_1_Sampler : register(s0, space1);

@@ -1,3 +1,31 @@
+//
+// fragment_main
+//
+
+void asinh_16b543() {
+  float2 res = (0.88137358427047729492f).xx;
+}
+
+void fragment_main() {
+  asinh_16b543();
+}
+
+//
+// compute_main
+//
+
+void asinh_16b543() {
+  float2 res = (0.88137358427047729492f).xx;
+}
+
+[numthreads(1, 1, 1)]
+void compute_main() {
+  asinh_16b543();
+}
+
+//
+// vertex_main
+//
 struct VertexOutput {
   float4 pos;
 };
@@ -9,15 +37,6 @@ struct vertex_main_outputs {
 
 void asinh_16b543() {
   float2 res = (0.88137358427047729492f).xx;
-}
-
-void fragment_main() {
-  asinh_16b543();
-}
-
-[numthreads(1, 1, 1)]
-void compute_main() {
-  asinh_16b543();
 }
 
 VertexOutput vertex_main_inner() {

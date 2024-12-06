@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 void max_caa3d7() {
   int res = 1;
 }
@@ -6,11 +9,23 @@ void fragment_main() {
   max_caa3d7();
   return;
 }
+//
+// compute_main
+//
+void max_caa3d7() {
+  int res = 1;
+}
 
 [numthreads(1, 1, 1)]
 void compute_main() {
   max_caa3d7();
   return;
+}
+//
+// vertex_main
+//
+void max_caa3d7() {
+  int res = 1;
 }
 
 struct VertexOutput {

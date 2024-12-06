@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 void asinh_51079e() {
   float3 res = (0.88137358427047729492f).xxx;
 }
@@ -6,11 +9,23 @@ void fragment_main() {
   asinh_51079e();
   return;
 }
+//
+// compute_main
+//
+void asinh_51079e() {
+  float3 res = (0.88137358427047729492f).xxx;
+}
 
 [numthreads(1, 1, 1)]
 void compute_main() {
   asinh_51079e();
   return;
+}
+//
+// vertex_main
+//
+void asinh_51079e() {
+  float3 res = (0.88137358427047729492f).xxx;
 }
 
 struct VertexOutput {

@@ -1,3 +1,41 @@
+//
+// fragment_main
+//
+struct frexp_result_f16 {
+  float16_t fract;
+  int exp;
+};
+
+
+void frexp_5257dd() {
+  frexp_result_f16 res = {float16_t(0.5h), int(1)};
+}
+
+void fragment_main() {
+  frexp_5257dd();
+}
+
+//
+// compute_main
+//
+struct frexp_result_f16 {
+  float16_t fract;
+  int exp;
+};
+
+
+void frexp_5257dd() {
+  frexp_result_f16 res = {float16_t(0.5h), int(1)};
+}
+
+[numthreads(1, 1, 1)]
+void compute_main() {
+  frexp_5257dd();
+}
+
+//
+// vertex_main
+//
 struct frexp_result_f16 {
   float16_t fract;
   int exp;
@@ -14,15 +52,6 @@ struct vertex_main_outputs {
 
 void frexp_5257dd() {
   frexp_result_f16 res = {float16_t(0.5h), int(1)};
-}
-
-void fragment_main() {
-  frexp_5257dd();
-}
-
-[numthreads(1, 1, 1)]
-void compute_main() {
-  frexp_5257dd();
 }
 
 VertexOutput vertex_main_inner() {

@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 
 RWByteAddressBuffer prevent_dce : register(u0);
 vector<float16_t, 4> quadSwapX_02834c() {
@@ -7,6 +10,16 @@ vector<float16_t, 4> quadSwapX_02834c() {
 
 void fragment_main() {
   prevent_dce.Store<vector<float16_t, 4> >(0u, quadSwapX_02834c());
+}
+
+//
+// compute_main
+//
+
+RWByteAddressBuffer prevent_dce : register(u0);
+vector<float16_t, 4> quadSwapX_02834c() {
+  vector<float16_t, 4> res = QuadReadAcrossX((float16_t(1.0h)).xxxx);
+  return res;
 }
 
 [numthreads(1, 1, 1)]

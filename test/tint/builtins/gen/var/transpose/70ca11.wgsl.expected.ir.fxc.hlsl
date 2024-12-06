@@ -1,3 +1,31 @@
+//
+// fragment_main
+//
+
+void transpose_70ca11() {
+  float3x2 res = float3x2((1.0f).xx, (1.0f).xx, (1.0f).xx);
+}
+
+void fragment_main() {
+  transpose_70ca11();
+}
+
+//
+// compute_main
+//
+
+void transpose_70ca11() {
+  float3x2 res = float3x2((1.0f).xx, (1.0f).xx, (1.0f).xx);
+}
+
+[numthreads(1, 1, 1)]
+void compute_main() {
+  transpose_70ca11();
+}
+
+//
+// vertex_main
+//
 struct VertexOutput {
   float4 pos;
 };
@@ -9,15 +37,6 @@ struct vertex_main_outputs {
 
 void transpose_70ca11() {
   float3x2 res = float3x2((1.0f).xx, (1.0f).xx, (1.0f).xx);
-}
-
-void fragment_main() {
-  transpose_70ca11();
-}
-
-[numthreads(1, 1, 1)]
-void compute_main() {
-  transpose_70ca11();
 }
 
 VertexOutput vertex_main_inner() {

@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 void acos_4dac75() {
   float4 res = (0.25f).xxxx;
 }
@@ -6,11 +9,23 @@ void fragment_main() {
   acos_4dac75();
   return;
 }
+//
+// compute_main
+//
+void acos_4dac75() {
+  float4 res = (0.25f).xxxx;
+}
 
 [numthreads(1, 1, 1)]
 void compute_main() {
   acos_4dac75();
   return;
+}
+//
+// vertex_main
+//
+void acos_4dac75() {
+  float4 res = (0.25f).xxxx;
 }
 
 struct VertexOutput {

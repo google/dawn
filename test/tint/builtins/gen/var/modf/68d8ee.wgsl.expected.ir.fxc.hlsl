@@ -1,3 +1,41 @@
+//
+// fragment_main
+//
+struct modf_result_vec3_f32 {
+  float3 fract;
+  float3 whole;
+};
+
+
+void modf_68d8ee() {
+  modf_result_vec3_f32 res = {(-0.5f).xxx, (-1.0f).xxx};
+}
+
+void fragment_main() {
+  modf_68d8ee();
+}
+
+//
+// compute_main
+//
+struct modf_result_vec3_f32 {
+  float3 fract;
+  float3 whole;
+};
+
+
+void modf_68d8ee() {
+  modf_result_vec3_f32 res = {(-0.5f).xxx, (-1.0f).xxx};
+}
+
+[numthreads(1, 1, 1)]
+void compute_main() {
+  modf_68d8ee();
+}
+
+//
+// vertex_main
+//
 struct modf_result_vec3_f32 {
   float3 fract;
   float3 whole;
@@ -14,15 +52,6 @@ struct vertex_main_outputs {
 
 void modf_68d8ee() {
   modf_result_vec3_f32 res = {(-0.5f).xxx, (-1.0f).xxx};
-}
-
-void fragment_main() {
-  modf_68d8ee();
-}
-
-[numthreads(1, 1, 1)]
-void compute_main() {
-  modf_68d8ee();
 }
 
 VertexOutput vertex_main_inner() {

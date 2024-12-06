@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 RWByteAddressBuffer prevent_dce : register(u0);
 
 float3 acos_a610c4() {
@@ -10,11 +13,29 @@ void fragment_main() {
   prevent_dce.Store3(0u, asuint(acos_a610c4()));
   return;
 }
+//
+// compute_main
+//
+RWByteAddressBuffer prevent_dce : register(u0);
+
+float3 acos_a610c4() {
+  float3 arg_0 = (0.96891242265701293945f).xxx;
+  float3 res = acos(arg_0);
+  return res;
+}
 
 [numthreads(1, 1, 1)]
 void compute_main() {
   prevent_dce.Store3(0u, asuint(acos_a610c4()));
   return;
+}
+//
+// vertex_main
+//
+float3 acos_a610c4() {
+  float3 arg_0 = (0.96891242265701293945f).xxx;
+  float3 res = acos(arg_0);
+  return res;
 }
 
 struct VertexOutput {

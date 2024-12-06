@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 int2 tint_extract_bits(int2 v, uint offset, uint count) {
   uint s = min(offset, 32u);
   uint e = min(32u, (s + count));
@@ -21,11 +24,51 @@ void fragment_main() {
   prevent_dce.Store2(0u, asuint(extractBits_a99a8d()));
   return;
 }
+//
+// compute_main
+//
+int2 tint_extract_bits(int2 v, uint offset, uint count) {
+  uint s = min(offset, 32u);
+  uint e = min(32u, (s + count));
+  uint shl = (32u - e);
+  uint shr = (shl + s);
+  int2 shl_result = ((shl < 32u) ? (v << uint2((shl).xx)) : (0).xx);
+  return ((shr < 32u) ? (shl_result >> uint2((shr).xx)) : ((shl_result >> (31u).xx) >> (1u).xx));
+}
+
+RWByteAddressBuffer prevent_dce : register(u0);
+
+int2 extractBits_a99a8d() {
+  int2 arg_0 = (1).xx;
+  uint arg_1 = 1u;
+  uint arg_2 = 1u;
+  int2 res = tint_extract_bits(arg_0, arg_1, arg_2);
+  return res;
+}
 
 [numthreads(1, 1, 1)]
 void compute_main() {
   prevent_dce.Store2(0u, asuint(extractBits_a99a8d()));
   return;
+}
+//
+// vertex_main
+//
+int2 tint_extract_bits(int2 v, uint offset, uint count) {
+  uint s = min(offset, 32u);
+  uint e = min(32u, (s + count));
+  uint shl = (32u - e);
+  uint shr = (shl + s);
+  int2 shl_result = ((shl < 32u) ? (v << uint2((shl).xx)) : (0).xx);
+  return ((shr < 32u) ? (shl_result >> uint2((shr).xx)) : ((shl_result >> (31u).xx) >> (1u).xx));
+}
+
+int2 extractBits_a99a8d() {
+  int2 arg_0 = (1).xx;
+  uint arg_1 = 1u;
+  uint arg_2 = 1u;
+  int2 res = tint_extract_bits(arg_0, arg_1, arg_2);
+  return res;
 }
 
 struct VertexOutput {

@@ -1,3 +1,31 @@
+//
+// fragment_main
+//
+
+void sign_ab6301() {
+  float3 res = (1.0f).xxx;
+}
+
+void fragment_main() {
+  sign_ab6301();
+}
+
+//
+// compute_main
+//
+
+void sign_ab6301() {
+  float3 res = (1.0f).xxx;
+}
+
+[numthreads(1, 1, 1)]
+void compute_main() {
+  sign_ab6301();
+}
+
+//
+// vertex_main
+//
 struct VertexOutput {
   float4 pos;
 };
@@ -9,15 +37,6 @@ struct vertex_main_outputs {
 
 void sign_ab6301() {
   float3 res = (1.0f).xxx;
-}
-
-void fragment_main() {
-  sign_ab6301();
-}
-
-[numthreads(1, 1, 1)]
-void compute_main() {
-  sign_ab6301();
 }
 
 VertexOutput vertex_main_inner() {

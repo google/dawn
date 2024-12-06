@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 RWTexture1D<float4> arg_0 : register(u0, space1);
 
 void textureStore_706236() {
@@ -7,6 +10,14 @@ void textureStore_706236() {
 void fragment_main() {
   textureStore_706236();
   return;
+}
+//
+// compute_main
+//
+RWTexture1D<float4> arg_0 : register(u0, space1);
+
+void textureStore_706236() {
+  arg_0[1] = (1.0f).xxxx;
 }
 
 [numthreads(1, 1, 1)]

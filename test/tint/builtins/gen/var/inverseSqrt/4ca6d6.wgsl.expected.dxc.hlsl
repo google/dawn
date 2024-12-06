@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 void inverseSqrt_4ca6d6() {
   float res = 1.0f;
 }
@@ -6,11 +9,23 @@ void fragment_main() {
   inverseSqrt_4ca6d6();
   return;
 }
+//
+// compute_main
+//
+void inverseSqrt_4ca6d6() {
+  float res = 1.0f;
+}
 
 [numthreads(1, 1, 1)]
 void compute_main() {
   inverseSqrt_4ca6d6();
   return;
+}
+//
+// vertex_main
+//
+void inverseSqrt_4ca6d6() {
+  float res = 1.0f;
 }
 
 struct VertexOutput {

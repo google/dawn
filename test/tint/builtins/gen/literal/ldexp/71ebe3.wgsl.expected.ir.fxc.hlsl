@@ -1,3 +1,31 @@
+//
+// fragment_main
+//
+
+void ldexp_71ebe3() {
+  float res = 2.0f;
+}
+
+void fragment_main() {
+  ldexp_71ebe3();
+}
+
+//
+// compute_main
+//
+
+void ldexp_71ebe3() {
+  float res = 2.0f;
+}
+
+[numthreads(1, 1, 1)]
+void compute_main() {
+  ldexp_71ebe3();
+}
+
+//
+// vertex_main
+//
 struct VertexOutput {
   float4 pos;
 };
@@ -9,15 +37,6 @@ struct vertex_main_outputs {
 
 void ldexp_71ebe3() {
   float res = 2.0f;
-}
-
-void fragment_main() {
-  ldexp_71ebe3();
-}
-
-[numthreads(1, 1, 1)]
-void compute_main() {
-  ldexp_71ebe3();
 }
 
 VertexOutput vertex_main_inner() {

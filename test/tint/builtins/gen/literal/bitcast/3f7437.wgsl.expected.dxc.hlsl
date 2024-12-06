@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 RWByteAddressBuffer prevent_dce : register(u0);
 
 int4 bitcast_3f7437() {
@@ -9,11 +12,27 @@ void fragment_main() {
   prevent_dce.Store4(0u, asuint(bitcast_3f7437()));
   return;
 }
+//
+// compute_main
+//
+RWByteAddressBuffer prevent_dce : register(u0);
+
+int4 bitcast_3f7437() {
+  int4 res = (1).xxxx;
+  return res;
+}
 
 [numthreads(1, 1, 1)]
 void compute_main() {
   prevent_dce.Store4(0u, asuint(bitcast_3f7437()));
   return;
+}
+//
+// vertex_main
+//
+int4 bitcast_3f7437() {
+  int4 res = (1).xxxx;
+  return res;
 }
 
 struct VertexOutput {

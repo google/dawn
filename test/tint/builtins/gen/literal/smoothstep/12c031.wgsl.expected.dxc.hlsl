@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 RWByteAddressBuffer prevent_dce : register(u0);
 
 vector<float16_t, 2> smoothstep_12c031() {
@@ -9,11 +12,27 @@ void fragment_main() {
   prevent_dce.Store<vector<float16_t, 2> >(0u, smoothstep_12c031());
   return;
 }
+//
+// compute_main
+//
+RWByteAddressBuffer prevent_dce : register(u0);
+
+vector<float16_t, 2> smoothstep_12c031() {
+  vector<float16_t, 2> res = (float16_t(0.5h)).xx;
+  return res;
+}
 
 [numthreads(1, 1, 1)]
 void compute_main() {
   prevent_dce.Store<vector<float16_t, 2> >(0u, smoothstep_12c031());
   return;
+}
+//
+// vertex_main
+//
+vector<float16_t, 2> smoothstep_12c031() {
+  vector<float16_t, 2> res = (float16_t(0.5h)).xx;
+  return res;
 }
 
 struct VertexOutput {

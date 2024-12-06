@@ -1,3 +1,31 @@
+//
+// fragment_main
+//
+
+void floor_dcd5a2() {
+  float res = 1.0f;
+}
+
+void fragment_main() {
+  floor_dcd5a2();
+}
+
+//
+// compute_main
+//
+
+void floor_dcd5a2() {
+  float res = 1.0f;
+}
+
+[numthreads(1, 1, 1)]
+void compute_main() {
+  floor_dcd5a2();
+}
+
+//
+// vertex_main
+//
 struct VertexOutput {
   float4 pos;
 };
@@ -9,15 +37,6 @@ struct vertex_main_outputs {
 
 void floor_dcd5a2() {
   float res = 1.0f;
-}
-
-void fragment_main() {
-  floor_dcd5a2();
-}
-
-[numthreads(1, 1, 1)]
-void compute_main() {
-  floor_dcd5a2();
 }
 
 VertexOutput vertex_main_inner() {

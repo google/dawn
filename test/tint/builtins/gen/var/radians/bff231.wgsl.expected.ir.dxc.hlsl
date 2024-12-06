@@ -1,3 +1,31 @@
+//
+// fragment_main
+//
+
+void radians_bff231() {
+  float res = 0.01745329238474369049f;
+}
+
+void fragment_main() {
+  radians_bff231();
+}
+
+//
+// compute_main
+//
+
+void radians_bff231() {
+  float res = 0.01745329238474369049f;
+}
+
+[numthreads(1, 1, 1)]
+void compute_main() {
+  radians_bff231();
+}
+
+//
+// vertex_main
+//
 struct VertexOutput {
   float4 pos;
 };
@@ -9,15 +37,6 @@ struct vertex_main_outputs {
 
 void radians_bff231() {
   float res = 0.01745329238474369049f;
-}
-
-void fragment_main() {
-  radians_bff231();
-}
-
-[numthreads(1, 1, 1)]
-void compute_main() {
-  radians_bff231();
 }
 
 VertexOutput vertex_main_inner() {

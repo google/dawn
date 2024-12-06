@@ -1,4 +1,43 @@
+//
+// fragment_main
+//
 RWByteAddressBuffer prevent_dce : register(u0);
+ByteAddressBuffer sb_ro : register(t1);
+
+uint arrayLength_cfca0a() {
+  uint tint_symbol_1 = 0u;
+  sb_ro.GetDimensions(tint_symbol_1);
+  uint tint_symbol_2 = ((tint_symbol_1 - 0u) / 4u);
+  uint res = tint_symbol_2;
+  return res;
+}
+
+void fragment_main() {
+  prevent_dce.Store(0u, asuint(arrayLength_cfca0a()));
+  return;
+}
+//
+// compute_main
+//
+RWByteAddressBuffer prevent_dce : register(u0);
+ByteAddressBuffer sb_ro : register(t1);
+
+uint arrayLength_cfca0a() {
+  uint tint_symbol_1 = 0u;
+  sb_ro.GetDimensions(tint_symbol_1);
+  uint tint_symbol_2 = ((tint_symbol_1 - 0u) / 4u);
+  uint res = tint_symbol_2;
+  return res;
+}
+
+[numthreads(1, 1, 1)]
+void compute_main() {
+  prevent_dce.Store(0u, asuint(arrayLength_cfca0a()));
+  return;
+}
+//
+// vertex_main
+//
 ByteAddressBuffer sb_ro : register(t1);
 
 uint arrayLength_cfca0a() {
@@ -7,17 +46,6 @@ uint arrayLength_cfca0a() {
   uint tint_symbol_4 = ((tint_symbol_3 - 0u) / 4u);
   uint res = tint_symbol_4;
   return res;
-}
-
-void fragment_main() {
-  prevent_dce.Store(0u, asuint(arrayLength_cfca0a()));
-  return;
-}
-
-[numthreads(1, 1, 1)]
-void compute_main() {
-  prevent_dce.Store(0u, asuint(arrayLength_cfca0a()));
-  return;
 }
 
 struct VertexOutput {

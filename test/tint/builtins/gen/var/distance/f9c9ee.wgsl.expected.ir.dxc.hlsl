@@ -1,3 +1,31 @@
+//
+// fragment_main
+//
+
+void distance_f9c9ee() {
+  float res = 0.0f;
+}
+
+void fragment_main() {
+  distance_f9c9ee();
+}
+
+//
+// compute_main
+//
+
+void distance_f9c9ee() {
+  float res = 0.0f;
+}
+
+[numthreads(1, 1, 1)]
+void compute_main() {
+  distance_f9c9ee();
+}
+
+//
+// vertex_main
+//
 struct VertexOutput {
   float4 pos;
 };
@@ -9,15 +37,6 @@ struct vertex_main_outputs {
 
 void distance_f9c9ee() {
   float res = 0.0f;
-}
-
-void fragment_main() {
-  distance_f9c9ee();
-}
-
-[numthreads(1, 1, 1)]
-void compute_main() {
-  distance_f9c9ee();
 }
 
 VertexOutput vertex_main_inner() {

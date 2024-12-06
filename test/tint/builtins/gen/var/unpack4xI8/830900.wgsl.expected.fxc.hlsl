@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 int4 tint_unpack_4xi8(uint a) {
   uint4 a_vec4u = uint4((a).xxxx);
   int4 a_vec4i = asint((a_vec4u << uint4(24u, 16u, 8u, 0u)));
@@ -16,11 +19,41 @@ void fragment_main() {
   prevent_dce.Store4(0u, asuint(unpack4xI8_830900()));
   return;
 }
+//
+// compute_main
+//
+int4 tint_unpack_4xi8(uint a) {
+  uint4 a_vec4u = uint4((a).xxxx);
+  int4 a_vec4i = asint((a_vec4u << uint4(24u, 16u, 8u, 0u)));
+  return (a_vec4i >> (24u).xxxx);
+}
+
+RWByteAddressBuffer prevent_dce : register(u0);
+
+int4 unpack4xI8_830900() {
+  uint arg_0 = 1u;
+  int4 res = tint_unpack_4xi8(arg_0);
+  return res;
+}
 
 [numthreads(1, 1, 1)]
 void compute_main() {
   prevent_dce.Store4(0u, asuint(unpack4xI8_830900()));
   return;
+}
+//
+// vertex_main
+//
+int4 tint_unpack_4xi8(uint a) {
+  uint4 a_vec4u = uint4((a).xxxx);
+  int4 a_vec4i = asint((a_vec4u << uint4(24u, 16u, 8u, 0u)));
+  return (a_vec4i >> (24u).xxxx);
+}
+
+int4 unpack4xI8_830900() {
+  uint arg_0 = 1u;
+  int4 res = tint_unpack_4xi8(arg_0);
+  return res;
 }
 
 struct VertexOutput {

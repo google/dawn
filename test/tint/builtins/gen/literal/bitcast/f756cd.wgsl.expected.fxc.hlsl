@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 RWByteAddressBuffer prevent_dce : register(u0);
 
 uint3 bitcast_f756cd() {
@@ -9,11 +12,27 @@ void fragment_main() {
   prevent_dce.Store3(0u, asuint(bitcast_f756cd()));
   return;
 }
+//
+// compute_main
+//
+RWByteAddressBuffer prevent_dce : register(u0);
+
+uint3 bitcast_f756cd() {
+  uint3 res = (1u).xxx;
+  return res;
+}
 
 [numthreads(1, 1, 1)]
 void compute_main() {
   prevent_dce.Store3(0u, asuint(bitcast_f756cd()));
   return;
+}
+//
+// vertex_main
+//
+uint3 bitcast_f756cd() {
+  uint3 res = (1u).xxx;
+  return res;
 }
 
 struct VertexOutput {

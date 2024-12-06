@@ -1,3 +1,31 @@
+//
+// fragment_main
+//
+
+void max_19070a() {
+  int4 res = (int(1)).xxxx;
+}
+
+void fragment_main() {
+  max_19070a();
+}
+
+//
+// compute_main
+//
+
+void max_19070a() {
+  int4 res = (int(1)).xxxx;
+}
+
+[numthreads(1, 1, 1)]
+void compute_main() {
+  max_19070a();
+}
+
+//
+// vertex_main
+//
 struct VertexOutput {
   float4 pos;
 };
@@ -9,15 +37,6 @@ struct vertex_main_outputs {
 
 void max_19070a() {
   int4 res = (int(1)).xxxx;
-}
-
-void fragment_main() {
-  max_19070a();
-}
-
-[numthreads(1, 1, 1)]
-void compute_main() {
-  max_19070a();
 }
 
 VertexOutput vertex_main_inner() {

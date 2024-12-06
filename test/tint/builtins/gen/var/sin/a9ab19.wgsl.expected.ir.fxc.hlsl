@@ -1,3 +1,31 @@
+//
+// fragment_main
+//
+
+void sin_a9ab19() {
+  float res = 1.0f;
+}
+
+void fragment_main() {
+  sin_a9ab19();
+}
+
+//
+// compute_main
+//
+
+void sin_a9ab19() {
+  float res = 1.0f;
+}
+
+[numthreads(1, 1, 1)]
+void compute_main() {
+  sin_a9ab19();
+}
+
+//
+// vertex_main
+//
 struct VertexOutput {
   float4 pos;
 };
@@ -9,15 +37,6 @@ struct vertex_main_outputs {
 
 void sin_a9ab19() {
   float res = 1.0f;
-}
-
-void fragment_main() {
-  sin_a9ab19();
-}
-
-[numthreads(1, 1, 1)]
-void compute_main() {
-  sin_a9ab19();
 }
 
 VertexOutput vertex_main_inner() {

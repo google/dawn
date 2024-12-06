@@ -1,6 +1,38 @@
+//
+// main1
+//
+static int a = 0;
+
+void uses_a() {
+  a = (a + 1);
+}
+
+[numthreads(1, 1, 1)]
+void main1() {
+  a = 42;
+  uses_a();
+  return;
+}
+//
+// main2
+//
+static int b = 0;
+
+void uses_b() {
+  b = (b * 2);
+}
+
+[numthreads(1, 1, 1)]
+void main2() {
+  b = 7;
+  uses_b();
+  return;
+}
+//
+// main3
+//
 static int a = 0;
 static int b = 0;
-static int c = 0;
 
 void uses_a() {
   a = (a + 1);
@@ -26,24 +58,15 @@ void outer() {
 }
 
 [numthreads(1, 1, 1)]
-void main1() {
-  a = 42;
-  uses_a();
-  return;
-}
-
-[numthreads(1, 1, 1)]
-void main2() {
-  b = 7;
-  uses_b();
-  return;
-}
-
-[numthreads(1, 1, 1)]
 void main3() {
   outer();
   no_uses();
   return;
+}
+//
+// main4
+//
+void no_uses() {
 }
 
 [numthreads(1, 1, 1)]

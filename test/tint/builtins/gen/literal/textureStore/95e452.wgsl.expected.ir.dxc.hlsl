@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 
 RWTexture2D<int4> arg_0 : register(u0, space1);
 void textureStore_95e452() {
@@ -6,6 +9,15 @@ void textureStore_95e452() {
 
 void fragment_main() {
   textureStore_95e452();
+}
+
+//
+// compute_main
+//
+
+RWTexture2D<int4> arg_0 : register(u0, space1);
+void textureStore_95e452() {
+  arg_0[(1u).xx] = (int(1)).xxxx;
 }
 
 [numthreads(1, 1, 1)]

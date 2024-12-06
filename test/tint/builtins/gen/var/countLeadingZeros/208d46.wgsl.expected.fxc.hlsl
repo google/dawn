@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 uint tint_count_leading_zeros(uint v) {
   uint x = uint(v);
   uint b16 = ((x <= 65535u) ? 16u : 0u);
@@ -25,11 +28,59 @@ void fragment_main() {
   prevent_dce.Store(0u, asuint(countLeadingZeros_208d46()));
   return;
 }
+//
+// compute_main
+//
+uint tint_count_leading_zeros(uint v) {
+  uint x = uint(v);
+  uint b16 = ((x <= 65535u) ? 16u : 0u);
+  x = (x << b16);
+  uint b8 = ((x <= 16777215u) ? 8u : 0u);
+  x = (x << b8);
+  uint b4 = ((x <= 268435455u) ? 4u : 0u);
+  x = (x << b4);
+  uint b2 = ((x <= 1073741823u) ? 2u : 0u);
+  x = (x << b2);
+  uint b1 = ((x <= 2147483647u) ? 1u : 0u);
+  uint is_zero = ((x == 0u) ? 1u : 0u);
+  return uint((((((b16 | b8) | b4) | b2) | b1) + is_zero));
+}
+
+RWByteAddressBuffer prevent_dce : register(u0);
+
+uint countLeadingZeros_208d46() {
+  uint arg_0 = 1u;
+  uint res = tint_count_leading_zeros(arg_0);
+  return res;
+}
 
 [numthreads(1, 1, 1)]
 void compute_main() {
   prevent_dce.Store(0u, asuint(countLeadingZeros_208d46()));
   return;
+}
+//
+// vertex_main
+//
+uint tint_count_leading_zeros(uint v) {
+  uint x = uint(v);
+  uint b16 = ((x <= 65535u) ? 16u : 0u);
+  x = (x << b16);
+  uint b8 = ((x <= 16777215u) ? 8u : 0u);
+  x = (x << b8);
+  uint b4 = ((x <= 268435455u) ? 4u : 0u);
+  x = (x << b4);
+  uint b2 = ((x <= 1073741823u) ? 2u : 0u);
+  x = (x << b2);
+  uint b1 = ((x <= 2147483647u) ? 1u : 0u);
+  uint is_zero = ((x == 0u) ? 1u : 0u);
+  return uint((((((b16 | b8) | b4) | b2) | b1) + is_zero));
+}
+
+uint countLeadingZeros_208d46() {
+  uint arg_0 = 1u;
+  uint res = tint_count_leading_zeros(arg_0);
+  return res;
 }
 
 struct VertexOutput {

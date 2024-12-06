@@ -1,3 +1,6 @@
+//
+// main0
+//
 struct tint_symbol {
   int value : SV_Target0;
 };
@@ -12,8 +15,10 @@ tint_symbol main0() {
   wrapper_result.value = inner_result;
   return wrapper_result;
 }
-
-struct tint_symbol_1 {
+//
+// main1
+//
+struct tint_symbol {
   uint value : SV_Target1;
 };
 
@@ -21,14 +26,16 @@ uint main1_inner() {
   return 1u;
 }
 
-tint_symbol_1 main1() {
-  uint inner_result_1 = main1_inner();
-  tint_symbol_1 wrapper_result_1 = (tint_symbol_1)0;
-  wrapper_result_1.value = inner_result_1;
-  return wrapper_result_1;
+tint_symbol main1() {
+  uint inner_result = main1_inner();
+  tint_symbol wrapper_result = (tint_symbol)0;
+  wrapper_result.value = inner_result;
+  return wrapper_result;
 }
-
-struct tint_symbol_2 {
+//
+// main2
+//
+struct tint_symbol {
   float value : SV_Target2;
 };
 
@@ -36,14 +43,16 @@ float main2_inner() {
   return 1.0f;
 }
 
-tint_symbol_2 main2() {
-  float inner_result_2 = main2_inner();
-  tint_symbol_2 wrapper_result_2 = (tint_symbol_2)0;
-  wrapper_result_2.value = inner_result_2;
-  return wrapper_result_2;
+tint_symbol main2() {
+  float inner_result = main2_inner();
+  tint_symbol wrapper_result = (tint_symbol)0;
+  wrapper_result.value = inner_result;
+  return wrapper_result;
 }
-
-struct tint_symbol_3 {
+//
+// main3
+//
+struct tint_symbol {
   float4 value : SV_Target3;
 };
 
@@ -51,14 +60,16 @@ float4 main3_inner() {
   return float4(1.0f, 2.0f, 3.0f, 4.0f);
 }
 
-tint_symbol_3 main3() {
-  float4 inner_result_3 = main3_inner();
-  tint_symbol_3 wrapper_result_3 = (tint_symbol_3)0;
-  wrapper_result_3.value = inner_result_3;
-  return wrapper_result_3;
+tint_symbol main3() {
+  float4 inner_result = main3_inner();
+  tint_symbol wrapper_result = (tint_symbol)0;
+  wrapper_result.value = inner_result;
+  return wrapper_result;
 }
-
-struct tint_symbol_4 {
+//
+// main4
+//
+struct tint_symbol {
   float16_t value : SV_Target4;
 };
 
@@ -66,14 +77,16 @@ float16_t main4_inner() {
   return float16_t(2.25h);
 }
 
-tint_symbol_4 main4() {
-  float16_t inner_result_4 = main4_inner();
-  tint_symbol_4 wrapper_result_4 = (tint_symbol_4)0;
-  wrapper_result_4.value = inner_result_4;
-  return wrapper_result_4;
+tint_symbol main4() {
+  float16_t inner_result = main4_inner();
+  tint_symbol wrapper_result = (tint_symbol)0;
+  wrapper_result.value = inner_result;
+  return wrapper_result;
 }
-
-struct tint_symbol_5 {
+//
+// main5
+//
+struct tint_symbol {
   vector<float16_t, 3> value : SV_Target5;
 };
 
@@ -81,9 +94,9 @@ vector<float16_t, 3> main5_inner() {
   return vector<float16_t, 3>(float16_t(3.0h), float16_t(5.0h), float16_t(8.0h));
 }
 
-tint_symbol_5 main5() {
-  vector<float16_t, 3> inner_result_5 = main5_inner();
-  tint_symbol_5 wrapper_result_5 = (tint_symbol_5)0;
-  wrapper_result_5.value = inner_result_5;
-  return wrapper_result_5;
+tint_symbol main5() {
+  vector<float16_t, 3> inner_result = main5_inner();
+  tint_symbol wrapper_result = (tint_symbol)0;
+  wrapper_result.value = inner_result;
+  return wrapper_result;
 }

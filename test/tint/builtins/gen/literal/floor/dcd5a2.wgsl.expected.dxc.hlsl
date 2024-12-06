@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 void floor_dcd5a2() {
   float res = 1.0f;
 }
@@ -6,11 +9,23 @@ void fragment_main() {
   floor_dcd5a2();
   return;
 }
+//
+// compute_main
+//
+void floor_dcd5a2() {
+  float res = 1.0f;
+}
 
 [numthreads(1, 1, 1)]
 void compute_main() {
   floor_dcd5a2();
   return;
+}
+//
+// vertex_main
+//
+void floor_dcd5a2() {
+  float res = 1.0f;
 }
 
 struct VertexOutput {

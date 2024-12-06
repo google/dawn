@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 void cos_af7447() {
   float2 res = (1.0f).xx;
 }
@@ -6,11 +9,23 @@ void fragment_main() {
   cos_af7447();
   return;
 }
+//
+// compute_main
+//
+void cos_af7447() {
+  float2 res = (1.0f).xx;
+}
 
 [numthreads(1, 1, 1)]
 void compute_main() {
   cos_af7447();
   return;
+}
+//
+// vertex_main
+//
+void cos_af7447() {
+  float2 res = (1.0f).xx;
 }
 
 struct VertexOutput {

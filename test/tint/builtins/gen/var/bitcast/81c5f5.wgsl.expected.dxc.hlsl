@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 uint2 tint_bitcast_from_f16(vector<float16_t, 4> src) {
   uint4 r = f32tof16(float4(src));
   return asuint(uint2((r.x & 0xffff) | ((r.y & 0xffff) << 16), (r.z & 0xffff) | ((r.w & 0xffff) << 16)));
@@ -15,11 +18,39 @@ void fragment_main() {
   prevent_dce.Store2(0u, asuint(bitcast_81c5f5()));
   return;
 }
+//
+// compute_main
+//
+uint2 tint_bitcast_from_f16(vector<float16_t, 4> src) {
+  uint4 r = f32tof16(float4(src));
+  return asuint(uint2((r.x & 0xffff) | ((r.y & 0xffff) << 16), (r.z & 0xffff) | ((r.w & 0xffff) << 16)));
+}
+
+RWByteAddressBuffer prevent_dce : register(u0);
+
+uint2 bitcast_81c5f5() {
+  vector<float16_t, 4> arg_0 = (float16_t(1.0h)).xxxx;
+  uint2 res = tint_bitcast_from_f16(arg_0);
+  return res;
+}
 
 [numthreads(1, 1, 1)]
 void compute_main() {
   prevent_dce.Store2(0u, asuint(bitcast_81c5f5()));
   return;
+}
+//
+// vertex_main
+//
+uint2 tint_bitcast_from_f16(vector<float16_t, 4> src) {
+  uint4 r = f32tof16(float4(src));
+  return asuint(uint2((r.x & 0xffff) | ((r.y & 0xffff) << 16), (r.z & 0xffff) | ((r.w & 0xffff) << 16)));
+}
+
+uint2 bitcast_81c5f5() {
+  vector<float16_t, 4> arg_0 = (float16_t(1.0h)).xxxx;
+  uint2 res = tint_bitcast_from_f16(arg_0);
+  return res;
 }
 
 struct VertexOutput {

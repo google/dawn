@@ -2,12 +2,6 @@
 cbuffer cbuffer_m : register(b0) {
   uint4 m[2];
 };
-static int counter = int(0);
-int i() {
-  counter = (counter + int(1));
-  return counter;
-}
-
 float2x4 v(uint start_byte_offset) {
   return float2x4(asfloat(m[(start_byte_offset / 16u)]), asfloat(m[((16u + start_byte_offset) / 16u)]));
 }
