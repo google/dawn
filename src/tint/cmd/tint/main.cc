@@ -773,7 +773,7 @@ bool GenerateSpirv([[maybe_unused]] Options& options,
                    [[maybe_unused]] tint::inspector::Inspector& inspector,
                    [[maybe_unused]] tint::Program& src_program) {
 #if TINT_BUILD_SPV_WRITER
-    auto res = ProcessASTTransformsOld(options, inspector, src_program);
+    auto res = ProcessASTTransforms(options, inspector, src_program);
     if (res != tint::Success || !res->IsValid()) {
         tint::cmd::PrintWGSL(std::cerr, res.Get());
         std::cerr << res->Diagnostics() << "\n";
@@ -1341,7 +1341,8 @@ int main(int argc, const char** argv) {
 
     if (options.format == Format::kNone || options.format == Format::kGlsl ||
         options.format == Format::kHlsl || options.format == Format::kHlslFxc ||
-        options.format == Format::kMsl) {
+        options.format == Format::kMsl || options.format == Format::kSpirv ||
+        options.format == Format::kSpvAsm) {
         auto generate = [&]() {
             bool success = false;
             switch (options.format) {
@@ -1422,12 +1423,9 @@ int main(int argc, const char** argv) {
         return success ? 0 : 1;
 
     } else {
-        bool success = false;
         switch (options.format) {
             case Format::kSpirv:
             case Format::kSpvAsm:
-                success = GenerateSpirv(options, inspector, info.program);
-                break;
             case Format::kMsl:
             case Format::kHlsl:
             case Format::kHlslFxc:
@@ -1439,10 +1437,5 @@ int main(int argc, const char** argv) {
                 std::cerr << "Unknown output format specified\n";
                 return 1;
         }
-        if (!success) {
-            return 1;
-        }
     }
-
-    return 0;
 }

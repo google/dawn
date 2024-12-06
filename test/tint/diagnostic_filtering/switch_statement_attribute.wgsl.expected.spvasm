@@ -13,34 +13,22 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 1
-; Bound: 37
+; Bound: 31
 ; Schema: 0
                OpCapability Shader
                OpMemoryModel Logical GLSL450
                OpEntryPoint Fragment %main "main" %main_loc0_Input
                OpExecutionMode %main OriginUpperLeft
-               OpName %t "t"
-               OpName %s "s"
                OpName %main_loc0_Input "main_loc0_Input"
                OpName %main_inner "main_inner"
                OpName %x "x"
                OpName %main "main"
-               OpDecorate %t DescriptorSet 0
-               OpDecorate %t Binding 1
-               OpDecorate %s DescriptorSet 0
-               OpDecorate %s Binding 2
                OpDecorate %main_loc0_Input Location 0
       %float = OpTypeFloat 32
-          %3 = OpTypeImage %float 2D 0 0 0 1 Unknown
-%_ptr_UniformConstant_3 = OpTypePointer UniformConstant %3
-          %t = OpVariable %_ptr_UniformConstant_3 UniformConstant
-          %7 = OpTypeSampler
-%_ptr_UniformConstant_7 = OpTypePointer UniformConstant %7
-          %s = OpVariable %_ptr_UniformConstant_7 UniformConstant
 %_ptr_Input_float = OpTypePointer Input %float
 %main_loc0_Input = OpVariable %_ptr_Input_float Input
        %void = OpTypeVoid
-         %13 = OpTypeFunction %void %float
+          %7 = OpTypeFunction %void %float
     %float_0 = OpConstant %float 0
        %bool = OpTypeBool
     %float_1 = OpConstant %float 1
@@ -48,32 +36,32 @@
         %int = OpTypeInt 32 1
       %int_1 = OpConstant %int 1
       %int_0 = OpConstant %int 0
-         %33 = OpTypeFunction %void
- %main_inner = OpFunction %void None %13
+         %27 = OpTypeFunction %void
+ %main_inner = OpFunction %void None %7
           %x = OpFunctionParameter %float
+          %8 = OpLabel
+          %9 = OpFOrdEqual %bool %x %float_0
+               OpSelectionMerge %12 None
+               OpBranchConditional %9 %13 %14
+         %13 = OpLabel
+         %15 = OpDPdx %float %float_1
+         %17 = OpFOrdEqual %bool %15 %float_0
+               OpBranch %12
          %14 = OpLabel
-         %15 = OpFOrdEqual %bool %x %float_0
-               OpSelectionMerge %18 None
-               OpBranchConditional %15 %19 %20
-         %19 = OpLabel
-         %21 = OpDPdx %float %float_1
-         %23 = OpFOrdEqual %bool %21 %float_0
-               OpBranch %18
-         %20 = OpLabel
-               OpBranch %18
-         %18 = OpLabel
-         %24 = OpPhi %bool %23 %19 %false %20
-         %27 = OpSelect %int %24 %int_1 %int_0
-               OpSelectionMerge %31 None
-               OpSwitch %27 %30
-         %30 = OpLabel
-               OpBranch %31
-         %31 = OpLabel
+               OpBranch %12
+         %12 = OpLabel
+         %18 = OpPhi %bool %17 %13 %false %14
+         %21 = OpSelect %int %18 %int_1 %int_0
+               OpSelectionMerge %25 None
+               OpSwitch %21 %24
+         %24 = OpLabel
+               OpBranch %25
+         %25 = OpLabel
                OpReturn
                OpFunctionEnd
-       %main = OpFunction %void None %33
-         %34 = OpLabel
-         %35 = OpLoad %float %main_loc0_Input None
-         %36 = OpFunctionCall %void %main_inner %35
+       %main = OpFunction %void None %27
+         %28 = OpLabel
+         %29 = OpLoad %float %main_loc0_Input None
+         %30 = OpFunctionCall %void %main_inner %29
                OpReturn
                OpFunctionEnd

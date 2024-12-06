@@ -1,57 +1,72 @@
+;
+; main1
+;
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 1
-; Bound: 27
+; Bound: 13
 ; Schema: 0
                OpCapability Shader
                OpMemoryModel Logical GLSL450
                OpEntryPoint Fragment %main1 "main1" %main1_frag_depth_Output
-               OpEntryPoint Fragment %main2 "main2" %main2_sample_mask_Output
                OpExecutionMode %main1 OriginUpperLeft
                OpExecutionMode %main1 DepthReplacing
-               OpExecutionMode %main2 OriginUpperLeft
                OpName %main1_frag_depth_Output "main1_frag_depth_Output"
-               OpName %main2_sample_mask_Output "main2_sample_mask_Output"
                OpName %main1_inner "main1_inner"
-               OpName %main2_inner "main2_inner"
                OpName %main1 "main1"
-               OpName %main2 "main2"
                OpDecorate %main1_frag_depth_Output BuiltIn FragDepth
-               OpDecorate %_arr_uint_uint_1 ArrayStride 4
-               OpDecorate %main2_sample_mask_Output BuiltIn SampleMask
       %float = OpTypeFloat 32
 %_ptr_Output_float = OpTypePointer Output %float
 %main1_frag_depth_Output = OpVariable %_ptr_Output_float Output
+          %5 = OpTypeFunction %float
+    %float_1 = OpConstant %float 1
+       %void = OpTypeVoid
+         %10 = OpTypeFunction %void
+%main1_inner = OpFunction %float None %5
+          %6 = OpLabel
+               OpReturnValue %float_1
+               OpFunctionEnd
+      %main1 = OpFunction %void None %10
+         %11 = OpLabel
+         %12 = OpFunctionCall %float %main1_inner
+               OpStore %main1_frag_depth_Output %12 None
+               OpReturn
+               OpFunctionEnd
+;
+; main2
+;
+; SPIR-V
+; Version: 1.3
+; Generator: Google Tint Compiler; 1
+; Bound: 17
+; Schema: 0
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint Fragment %main2 "main2" %main2_sample_mask_Output
+               OpExecutionMode %main2 OriginUpperLeft
+               OpName %main2_sample_mask_Output "main2_sample_mask_Output"
+               OpName %main2_inner "main2_inner"
+               OpName %main2 "main2"
+               OpDecorate %_arr_uint_uint_1 ArrayStride 4
+               OpDecorate %main2_sample_mask_Output BuiltIn SampleMask
        %uint = OpTypeInt 32 0
      %uint_1 = OpConstant %uint 1
 %_arr_uint_uint_1 = OpTypeArray %uint %uint_1
 %_ptr_Output__arr_uint_uint_1 = OpTypePointer Output %_arr_uint_uint_1
 %main2_sample_mask_Output = OpVariable %_ptr_Output__arr_uint_uint_1 Output
-         %10 = OpTypeFunction %float
-    %float_1 = OpConstant %float 1
-         %14 = OpTypeFunction %uint
+          %7 = OpTypeFunction %uint
        %void = OpTypeVoid
-         %18 = OpTypeFunction %void
+         %11 = OpTypeFunction %void
 %_ptr_Output_uint = OpTypePointer Output %uint
      %uint_0 = OpConstant %uint 0
-%main1_inner = OpFunction %float None %10
-         %11 = OpLabel
-               OpReturnValue %float_1
-               OpFunctionEnd
-%main2_inner = OpFunction %uint None %14
-         %15 = OpLabel
+%main2_inner = OpFunction %uint None %7
+          %8 = OpLabel
                OpReturnValue %uint_1
                OpFunctionEnd
-      %main1 = OpFunction %void None %18
-         %19 = OpLabel
-         %20 = OpFunctionCall %float %main1_inner
-               OpStore %main1_frag_depth_Output %20 None
-               OpReturn
-               OpFunctionEnd
-      %main2 = OpFunction %void None %18
-         %22 = OpLabel
-         %23 = OpFunctionCall %uint %main2_inner
-         %24 = OpAccessChain %_ptr_Output_uint %main2_sample_mask_Output %uint_0
-               OpStore %24 %23 None
+      %main2 = OpFunction %void None %11
+         %12 = OpLabel
+         %13 = OpFunctionCall %uint %main2_inner
+         %14 = OpAccessChain %_ptr_Output_uint %main2_sample_mask_Output %uint_0
+               OpStore %14 %13 None
                OpReturn
                OpFunctionEnd
