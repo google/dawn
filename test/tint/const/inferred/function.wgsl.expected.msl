@@ -1,9 +1,6 @@
 #include <metal_stdlib>
 
 using namespace metal;
-void const_decls() {
-}
-
 struct tint_symbol_1 {
   float4 value [[color(0)]];
 };

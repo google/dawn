@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 #include <metal_stdlib>
 
 using namespace metal;
@@ -6,14 +9,44 @@ void select_431dfb() {
   int2 res = select(int2(1), int2(1), arg_2);
 }
 
+struct VertexOutput {
+  float4 pos;
+};
+
 fragment void fragment_main() {
   select_431dfb();
   return;
 }
 
+//
+// compute_main
+//
+#include <metal_stdlib>
+
+using namespace metal;
+void select_431dfb() {
+  bool2 arg_2 = bool2(true);
+  int2 res = select(int2(1), int2(1), arg_2);
+}
+
+struct VertexOutput {
+  float4 pos;
+};
+
 kernel void compute_main() {
   select_431dfb();
   return;
+}
+
+//
+// vertex_main
+//
+#include <metal_stdlib>
+
+using namespace metal;
+void select_431dfb() {
+  bool2 arg_2 = bool2(true);
+  int2 res = select(int2(1), int2(1), arg_2);
 }
 
 struct VertexOutput {

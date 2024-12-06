@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 #include <metal_stdlib>
 
 using namespace metal;
@@ -7,14 +10,48 @@ half4 asin_3cfbd4() {
   return res;
 }
 
-fragment void fragment_main(device half4* tint_symbol_1 [[buffer(0)]]) {
-  *(tint_symbol_1) = asin_3cfbd4();
+struct VertexOutput {
+  float4 pos;
+  half4 prevent_dce;
+};
+
+fragment void fragment_main(device half4* tint_symbol [[buffer(0)]]) {
+  *(tint_symbol) = asin_3cfbd4();
   return;
 }
 
-kernel void compute_main(device half4* tint_symbol_2 [[buffer(0)]]) {
-  *(tint_symbol_2) = asin_3cfbd4();
+//
+// compute_main
+//
+#include <metal_stdlib>
+
+using namespace metal;
+half4 asin_3cfbd4() {
+  half4 arg_0 = half4(0.479248046875h);
+  half4 res = asin(arg_0);
+  return res;
+}
+
+struct VertexOutput {
+  float4 pos;
+  half4 prevent_dce;
+};
+
+kernel void compute_main(device half4* tint_symbol [[buffer(0)]]) {
+  *(tint_symbol) = asin_3cfbd4();
   return;
+}
+
+//
+// vertex_main
+//
+#include <metal_stdlib>
+
+using namespace metal;
+half4 asin_3cfbd4() {
+  half4 arg_0 = half4(0.479248046875h);
+  half4 res = asin(arg_0);
+  return res;
 }
 
 struct VertexOutput {

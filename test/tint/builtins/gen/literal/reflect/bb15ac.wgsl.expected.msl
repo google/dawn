@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 #include <metal_stdlib>
 
 using namespace metal;
@@ -6,14 +9,46 @@ half2 reflect_bb15ac() {
   return res;
 }
 
-fragment void fragment_main(device half2* tint_symbol_1 [[buffer(0)]]) {
-  *(tint_symbol_1) = reflect_bb15ac();
+struct VertexOutput {
+  float4 pos;
+  half2 prevent_dce;
+};
+
+fragment void fragment_main(device half2* tint_symbol [[buffer(0)]]) {
+  *(tint_symbol) = reflect_bb15ac();
   return;
 }
 
-kernel void compute_main(device half2* tint_symbol_2 [[buffer(0)]]) {
-  *(tint_symbol_2) = reflect_bb15ac();
+//
+// compute_main
+//
+#include <metal_stdlib>
+
+using namespace metal;
+half2 reflect_bb15ac() {
+  half2 res = half2(-3.0h);
+  return res;
+}
+
+struct VertexOutput {
+  float4 pos;
+  half2 prevent_dce;
+};
+
+kernel void compute_main(device half2* tint_symbol [[buffer(0)]]) {
+  *(tint_symbol) = reflect_bb15ac();
   return;
+}
+
+//
+// vertex_main
+//
+#include <metal_stdlib>
+
+using namespace metal;
+half2 reflect_bb15ac() {
+  half2 res = half2(-3.0h);
+  return res;
 }
 
 struct VertexOutput {

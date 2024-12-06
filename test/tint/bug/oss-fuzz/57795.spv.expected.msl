@@ -14,16 +14,6 @@ struct tint_array {
     T elements[N];
 };
 
-struct S_6 {
-  tint_array<tint_array<float3, 18>, 13> field0;
-};
-
-struct tint_private_vars_struct {
-  tint_array<float4x4, 58> x_75;
-  tint_array<S_6, 46> x_82;
-  tint_array<float3, 37> x_85;
-};
-
 struct S {
   float3x3 field0;
 };
@@ -46,6 +36,10 @@ struct S_4 {
 
 struct S_5 {
   S_4 field0;
+};
+
+struct S_6 {
+  tint_array<tint_array<float3, 18>, 13> field0;
 };
 
 struct S_7 {

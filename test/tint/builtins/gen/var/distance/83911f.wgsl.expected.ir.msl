@@ -1,3 +1,32 @@
+//
+// fragment_main
+//
+#include <metal_stdlib>
+using namespace metal;
+
+void distance_83911f() {
+  float res = 0.0f;
+}
+
+fragment void fragment_main() {
+  distance_83911f();
+}
+//
+// compute_main
+//
+#include <metal_stdlib>
+using namespace metal;
+
+void distance_83911f() {
+  float res = 0.0f;
+}
+
+kernel void compute_main() {
+  distance_83911f();
+}
+//
+// vertex_main
+//
 #include <metal_stdlib>
 using namespace metal;
 
@@ -11,14 +40,6 @@ struct vertex_main_outputs {
 
 void distance_83911f() {
   float res = 0.0f;
-}
-
-fragment void fragment_main() {
-  distance_83911f();
-}
-
-kernel void compute_main() {
-  distance_83911f();
 }
 
 VertexOutput vertex_main_inner() {

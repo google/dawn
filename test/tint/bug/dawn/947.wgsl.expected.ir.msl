@@ -1,3 +1,6 @@
+//
+// vs_main
+//
 #include <metal_stdlib>
 using namespace metal;
 
@@ -13,9 +16,6 @@ struct Uniforms {
 
 struct tint_module_vars_struct {
   const constant Uniforms* uniforms;
-  sampler mySampler;
-  texture2d<float, access::sample> myTexture;
-  thread bool* continue_execution;
 };
 
 template<typename T, size_t N>
@@ -35,14 +35,6 @@ struct vs_main_outputs {
   float4 VertexOutputs_position [[position]];
 };
 
-struct fs_main_outputs {
-  float4 tint_symbol [[color(0)]];
-};
-
-struct fs_main_inputs {
-  float2 texcoord [[user(locn0)]];
-};
-
 VertexOutputs vs_main_inner(uint VertexIndex, tint_module_vars_struct tint_module_vars) {
   tint_array<float2, 3> texcoord = tint_array<float2, 3>{float2(-0.5f, 0.0f), float2(1.5f, 0.0f), float2(0.5f, 2.0f)};
   VertexOutputs output = {};
@@ -56,6 +48,32 @@ VertexOutputs vs_main_inner(uint VertexIndex, tint_module_vars_struct tint_modul
   return output;
 }
 
+vertex vs_main_outputs vs_main(uint VertexIndex [[vertex_id]], const constant Uniforms* uniforms [[buffer(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.uniforms=uniforms};
+  VertexOutputs const v = vs_main_inner(VertexIndex, tint_module_vars);
+  vs_main_outputs tint_wrapper_result = {};
+  tint_wrapper_result.VertexOutputs_texcoords = v.texcoords;
+  tint_wrapper_result.VertexOutputs_position = v.position;
+  return tint_wrapper_result;
+}
+//
+// fs_main
+//
+#include <metal_stdlib>
+using namespace metal;
+
+struct tint_module_vars_struct {
+  thread bool* continue_execution;
+};
+
+struct fs_main_outputs {
+  float4 tint_symbol [[color(0)]];
+};
+
+struct fs_main_inputs {
+  float2 texcoord [[user(locn0)]];
+};
+
 float4 fs_main_inner(float2 texcoord, tint_module_vars_struct tint_module_vars) {
   float2 clampedTexcoord = clamp(texcoord, float2(0.0f), float2(1.0f));
   if (!(all((clampedTexcoord == texcoord)))) {
@@ -66,15 +84,6 @@ float4 fs_main_inner(float2 texcoord, tint_module_vars_struct tint_module_vars) 
     discard_fragment();
   }
   return srcColor;
-}
-
-vertex vs_main_outputs vs_main(uint VertexIndex [[vertex_id]], const constant Uniforms* uniforms [[buffer(0)]]) {
-  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.uniforms=uniforms};
-  VertexOutputs const v = vs_main_inner(VertexIndex, tint_module_vars);
-  vs_main_outputs tint_wrapper_result = {};
-  tint_wrapper_result.VertexOutputs_texcoords = v.texcoords;
-  tint_wrapper_result.VertexOutputs_position = v.position;
-  return tint_wrapper_result;
 }
 
 fragment fs_main_outputs fs_main(fs_main_inputs inputs [[stage_in]]) {

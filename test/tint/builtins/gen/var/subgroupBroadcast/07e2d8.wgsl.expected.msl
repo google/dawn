@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 #include <metal_stdlib>
 
 using namespace metal;
@@ -12,8 +15,20 @@ fragment void fragment_main(device half* tint_symbol [[buffer(0)]]) {
   return;
 }
 
-kernel void compute_main(device half* tint_symbol_1 [[buffer(0)]]) {
-  *(tint_symbol_1) = subgroupBroadcast_07e2d8();
+//
+// compute_main
+//
+#include <metal_stdlib>
+
+using namespace metal;
+half subgroupBroadcast_07e2d8() {
+  half arg_0 = 1.0h;
+  half res = simd_broadcast(arg_0,ushort(1u));
+  return res;
+}
+
+kernel void compute_main(device half* tint_symbol [[buffer(0)]]) {
+  *(tint_symbol) = subgroupBroadcast_07e2d8();
   return;
 }
 

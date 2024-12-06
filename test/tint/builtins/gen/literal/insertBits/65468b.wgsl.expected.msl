@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 #include <metal_stdlib>
 
 using namespace metal;
@@ -6,14 +9,46 @@ int insertBits_65468b() {
   return res;
 }
 
-fragment void fragment_main(device int* tint_symbol_1 [[buffer(0)]]) {
-  *(tint_symbol_1) = insertBits_65468b();
+struct VertexOutput {
+  float4 pos;
+  int prevent_dce;
+};
+
+fragment void fragment_main(device int* tint_symbol [[buffer(0)]]) {
+  *(tint_symbol) = insertBits_65468b();
   return;
 }
 
-kernel void compute_main(device int* tint_symbol_2 [[buffer(0)]]) {
-  *(tint_symbol_2) = insertBits_65468b();
+//
+// compute_main
+//
+#include <metal_stdlib>
+
+using namespace metal;
+int insertBits_65468b() {
+  int res = 3;
+  return res;
+}
+
+struct VertexOutput {
+  float4 pos;
+  int prevent_dce;
+};
+
+kernel void compute_main(device int* tint_symbol [[buffer(0)]]) {
+  *(tint_symbol) = insertBits_65468b();
   return;
+}
+
+//
+// vertex_main
+//
+#include <metal_stdlib>
+
+using namespace metal;
+int insertBits_65468b() {
+  int res = 3;
+  return res;
 }
 
 struct VertexOutput {

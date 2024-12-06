@@ -1,3 +1,32 @@
+//
+// fragment_main
+//
+#include <metal_stdlib>
+using namespace metal;
+
+void sinh_c4df74() {
+  float res = 1.17520117759704589844f;
+}
+
+fragment void fragment_main() {
+  sinh_c4df74();
+}
+//
+// compute_main
+//
+#include <metal_stdlib>
+using namespace metal;
+
+void sinh_c4df74() {
+  float res = 1.17520117759704589844f;
+}
+
+kernel void compute_main() {
+  sinh_c4df74();
+}
+//
+// vertex_main
+//
 #include <metal_stdlib>
 using namespace metal;
 
@@ -11,14 +40,6 @@ struct vertex_main_outputs {
 
 void sinh_c4df74() {
   float res = 1.17520117759704589844f;
-}
-
-fragment void fragment_main() {
-  sinh_c4df74();
-}
-
-kernel void compute_main() {
-  sinh_c4df74();
 }
 
 VertexOutput vertex_main_inner() {

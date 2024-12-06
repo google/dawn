@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 #include <metal_stdlib>
 
 using namespace metal;
@@ -6,14 +9,46 @@ float length_becebf() {
   return res;
 }
 
-fragment void fragment_main(device float* tint_symbol_1 [[buffer(0)]]) {
-  *(tint_symbol_1) = length_becebf();
+struct VertexOutput {
+  float4 pos;
+  float prevent_dce;
+};
+
+fragment void fragment_main(device float* tint_symbol [[buffer(0)]]) {
+  *(tint_symbol) = length_becebf();
   return;
 }
 
-kernel void compute_main(device float* tint_symbol_2 [[buffer(0)]]) {
-  *(tint_symbol_2) = length_becebf();
+//
+// compute_main
+//
+#include <metal_stdlib>
+
+using namespace metal;
+float length_becebf() {
+  float res = 0.0f;
+  return res;
+}
+
+struct VertexOutput {
+  float4 pos;
+  float prevent_dce;
+};
+
+kernel void compute_main(device float* tint_symbol [[buffer(0)]]) {
+  *(tint_symbol) = length_becebf();
   return;
+}
+
+//
+// vertex_main
+//
+#include <metal_stdlib>
+
+using namespace metal;
+float length_becebf() {
+  float res = 0.0f;
+  return res;
 }
 
 struct VertexOutput {

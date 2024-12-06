@@ -1,9 +1,50 @@
+//
+// fragment_main
+//
 #include <metal_stdlib>
 using namespace metal;
 
 struct tint_module_vars_struct {
   device packed_uint3* prevent_dce;
 };
+
+uint3 firstLeadingBit_3fd7d0() {
+  uint3 arg_0 = uint3(1u);
+  uint3 const v = arg_0;
+  uint3 res = select((select(uint3(16u), uint3(0u), ((v & uint3(4294901760u)) == uint3(0u))) | (select(uint3(8u), uint3(0u), (((v >> select(uint3(16u), uint3(0u), ((v & uint3(4294901760u)) == uint3(0u)))) & uint3(65280u)) == uint3(0u))) | (select(uint3(4u), uint3(0u), ((((v >> select(uint3(16u), uint3(0u), ((v & uint3(4294901760u)) == uint3(0u)))) >> select(uint3(8u), uint3(0u), (((v >> select(uint3(16u), uint3(0u), ((v & uint3(4294901760u)) == uint3(0u)))) & uint3(65280u)) == uint3(0u)))) & uint3(240u)) == uint3(0u))) | (select(uint3(2u), uint3(0u), (((((v >> select(uint3(16u), uint3(0u), ((v & uint3(4294901760u)) == uint3(0u)))) >> select(uint3(8u), uint3(0u), (((v >> select(uint3(16u), uint3(0u), ((v & uint3(4294901760u)) == uint3(0u)))) & uint3(65280u)) == uint3(0u)))) >> select(uint3(4u), uint3(0u), ((((v >> select(uint3(16u), uint3(0u), ((v & uint3(4294901760u)) == uint3(0u)))) >> select(uint3(8u), uint3(0u), (((v >> select(uint3(16u), uint3(0u), ((v & uint3(4294901760u)) == uint3(0u)))) & uint3(65280u)) == uint3(0u)))) & uint3(240u)) == uint3(0u)))) & uint3(12u)) == uint3(0u))) | select(uint3(1u), uint3(0u), ((((((v >> select(uint3(16u), uint3(0u), ((v & uint3(4294901760u)) == uint3(0u)))) >> select(uint3(8u), uint3(0u), (((v >> select(uint3(16u), uint3(0u), ((v & uint3(4294901760u)) == uint3(0u)))) & uint3(65280u)) == uint3(0u)))) >> select(uint3(4u), uint3(0u), ((((v >> select(uint3(16u), uint3(0u), ((v & uint3(4294901760u)) == uint3(0u)))) >> select(uint3(8u), uint3(0u), (((v >> select(uint3(16u), uint3(0u), ((v & uint3(4294901760u)) == uint3(0u)))) & uint3(65280u)) == uint3(0u)))) & uint3(240u)) == uint3(0u)))) >> select(uint3(2u), uint3(0u), (((((v >> select(uint3(16u), uint3(0u), ((v & uint3(4294901760u)) == uint3(0u)))) >> select(uint3(8u), uint3(0u), (((v >> select(uint3(16u), uint3(0u), ((v & uint3(4294901760u)) == uint3(0u)))) & uint3(65280u)) == uint3(0u)))) >> select(uint3(4u), uint3(0u), ((((v >> select(uint3(16u), uint3(0u), ((v & uint3(4294901760u)) == uint3(0u)))) >> select(uint3(8u), uint3(0u), (((v >> select(uint3(16u), uint3(0u), ((v & uint3(4294901760u)) == uint3(0u)))) & uint3(65280u)) == uint3(0u)))) & uint3(240u)) == uint3(0u)))) & uint3(12u)) == uint3(0u)))) & uint3(2u)) == uint3(0u))))))), uint3(4294967295u), (((((v >> select(uint3(16u), uint3(0u), ((v & uint3(4294901760u)) == uint3(0u)))) >> select(uint3(8u), uint3(0u), (((v >> select(uint3(16u), uint3(0u), ((v & uint3(4294901760u)) == uint3(0u)))) & uint3(65280u)) == uint3(0u)))) >> select(uint3(4u), uint3(0u), ((((v >> select(uint3(16u), uint3(0u), ((v & uint3(4294901760u)) == uint3(0u)))) >> select(uint3(8u), uint3(0u), (((v >> select(uint3(16u), uint3(0u), ((v & uint3(4294901760u)) == uint3(0u)))) & uint3(65280u)) == uint3(0u)))) & uint3(240u)) == uint3(0u)))) >> select(uint3(2u), uint3(0u), (((((v >> select(uint3(16u), uint3(0u), ((v & uint3(4294901760u)) == uint3(0u)))) >> select(uint3(8u), uint3(0u), (((v >> select(uint3(16u), uint3(0u), ((v & uint3(4294901760u)) == uint3(0u)))) & uint3(65280u)) == uint3(0u)))) >> select(uint3(4u), uint3(0u), ((((v >> select(uint3(16u), uint3(0u), ((v & uint3(4294901760u)) == uint3(0u)))) >> select(uint3(8u), uint3(0u), (((v >> select(uint3(16u), uint3(0u), ((v & uint3(4294901760u)) == uint3(0u)))) & uint3(65280u)) == uint3(0u)))) & uint3(240u)) == uint3(0u)))) & uint3(12u)) == uint3(0u)))) == uint3(0u)));
+  return res;
+}
+
+fragment void fragment_main(device packed_uint3* prevent_dce [[buffer(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.prevent_dce=prevent_dce};
+  (*tint_module_vars.prevent_dce) = packed_uint3(firstLeadingBit_3fd7d0());
+}
+//
+// compute_main
+//
+#include <metal_stdlib>
+using namespace metal;
+
+struct tint_module_vars_struct {
+  device packed_uint3* prevent_dce;
+};
+
+uint3 firstLeadingBit_3fd7d0() {
+  uint3 arg_0 = uint3(1u);
+  uint3 const v = arg_0;
+  uint3 res = select((select(uint3(16u), uint3(0u), ((v & uint3(4294901760u)) == uint3(0u))) | (select(uint3(8u), uint3(0u), (((v >> select(uint3(16u), uint3(0u), ((v & uint3(4294901760u)) == uint3(0u)))) & uint3(65280u)) == uint3(0u))) | (select(uint3(4u), uint3(0u), ((((v >> select(uint3(16u), uint3(0u), ((v & uint3(4294901760u)) == uint3(0u)))) >> select(uint3(8u), uint3(0u), (((v >> select(uint3(16u), uint3(0u), ((v & uint3(4294901760u)) == uint3(0u)))) & uint3(65280u)) == uint3(0u)))) & uint3(240u)) == uint3(0u))) | (select(uint3(2u), uint3(0u), (((((v >> select(uint3(16u), uint3(0u), ((v & uint3(4294901760u)) == uint3(0u)))) >> select(uint3(8u), uint3(0u), (((v >> select(uint3(16u), uint3(0u), ((v & uint3(4294901760u)) == uint3(0u)))) & uint3(65280u)) == uint3(0u)))) >> select(uint3(4u), uint3(0u), ((((v >> select(uint3(16u), uint3(0u), ((v & uint3(4294901760u)) == uint3(0u)))) >> select(uint3(8u), uint3(0u), (((v >> select(uint3(16u), uint3(0u), ((v & uint3(4294901760u)) == uint3(0u)))) & uint3(65280u)) == uint3(0u)))) & uint3(240u)) == uint3(0u)))) & uint3(12u)) == uint3(0u))) | select(uint3(1u), uint3(0u), ((((((v >> select(uint3(16u), uint3(0u), ((v & uint3(4294901760u)) == uint3(0u)))) >> select(uint3(8u), uint3(0u), (((v >> select(uint3(16u), uint3(0u), ((v & uint3(4294901760u)) == uint3(0u)))) & uint3(65280u)) == uint3(0u)))) >> select(uint3(4u), uint3(0u), ((((v >> select(uint3(16u), uint3(0u), ((v & uint3(4294901760u)) == uint3(0u)))) >> select(uint3(8u), uint3(0u), (((v >> select(uint3(16u), uint3(0u), ((v & uint3(4294901760u)) == uint3(0u)))) & uint3(65280u)) == uint3(0u)))) & uint3(240u)) == uint3(0u)))) >> select(uint3(2u), uint3(0u), (((((v >> select(uint3(16u), uint3(0u), ((v & uint3(4294901760u)) == uint3(0u)))) >> select(uint3(8u), uint3(0u), (((v >> select(uint3(16u), uint3(0u), ((v & uint3(4294901760u)) == uint3(0u)))) & uint3(65280u)) == uint3(0u)))) >> select(uint3(4u), uint3(0u), ((((v >> select(uint3(16u), uint3(0u), ((v & uint3(4294901760u)) == uint3(0u)))) >> select(uint3(8u), uint3(0u), (((v >> select(uint3(16u), uint3(0u), ((v & uint3(4294901760u)) == uint3(0u)))) & uint3(65280u)) == uint3(0u)))) & uint3(240u)) == uint3(0u)))) & uint3(12u)) == uint3(0u)))) & uint3(2u)) == uint3(0u))))))), uint3(4294967295u), (((((v >> select(uint3(16u), uint3(0u), ((v & uint3(4294901760u)) == uint3(0u)))) >> select(uint3(8u), uint3(0u), (((v >> select(uint3(16u), uint3(0u), ((v & uint3(4294901760u)) == uint3(0u)))) & uint3(65280u)) == uint3(0u)))) >> select(uint3(4u), uint3(0u), ((((v >> select(uint3(16u), uint3(0u), ((v & uint3(4294901760u)) == uint3(0u)))) >> select(uint3(8u), uint3(0u), (((v >> select(uint3(16u), uint3(0u), ((v & uint3(4294901760u)) == uint3(0u)))) & uint3(65280u)) == uint3(0u)))) & uint3(240u)) == uint3(0u)))) >> select(uint3(2u), uint3(0u), (((((v >> select(uint3(16u), uint3(0u), ((v & uint3(4294901760u)) == uint3(0u)))) >> select(uint3(8u), uint3(0u), (((v >> select(uint3(16u), uint3(0u), ((v & uint3(4294901760u)) == uint3(0u)))) & uint3(65280u)) == uint3(0u)))) >> select(uint3(4u), uint3(0u), ((((v >> select(uint3(16u), uint3(0u), ((v & uint3(4294901760u)) == uint3(0u)))) >> select(uint3(8u), uint3(0u), (((v >> select(uint3(16u), uint3(0u), ((v & uint3(4294901760u)) == uint3(0u)))) & uint3(65280u)) == uint3(0u)))) & uint3(240u)) == uint3(0u)))) & uint3(12u)) == uint3(0u)))) == uint3(0u)));
+  return res;
+}
+
+kernel void compute_main(device packed_uint3* prevent_dce [[buffer(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.prevent_dce=prevent_dce};
+  (*tint_module_vars.prevent_dce) = packed_uint3(firstLeadingBit_3fd7d0());
+}
+//
+// vertex_main
+//
+#include <metal_stdlib>
+using namespace metal;
 
 struct VertexOutput {
   float4 pos;
@@ -20,16 +61,6 @@ uint3 firstLeadingBit_3fd7d0() {
   uint3 const v = arg_0;
   uint3 res = select((select(uint3(16u), uint3(0u), ((v & uint3(4294901760u)) == uint3(0u))) | (select(uint3(8u), uint3(0u), (((v >> select(uint3(16u), uint3(0u), ((v & uint3(4294901760u)) == uint3(0u)))) & uint3(65280u)) == uint3(0u))) | (select(uint3(4u), uint3(0u), ((((v >> select(uint3(16u), uint3(0u), ((v & uint3(4294901760u)) == uint3(0u)))) >> select(uint3(8u), uint3(0u), (((v >> select(uint3(16u), uint3(0u), ((v & uint3(4294901760u)) == uint3(0u)))) & uint3(65280u)) == uint3(0u)))) & uint3(240u)) == uint3(0u))) | (select(uint3(2u), uint3(0u), (((((v >> select(uint3(16u), uint3(0u), ((v & uint3(4294901760u)) == uint3(0u)))) >> select(uint3(8u), uint3(0u), (((v >> select(uint3(16u), uint3(0u), ((v & uint3(4294901760u)) == uint3(0u)))) & uint3(65280u)) == uint3(0u)))) >> select(uint3(4u), uint3(0u), ((((v >> select(uint3(16u), uint3(0u), ((v & uint3(4294901760u)) == uint3(0u)))) >> select(uint3(8u), uint3(0u), (((v >> select(uint3(16u), uint3(0u), ((v & uint3(4294901760u)) == uint3(0u)))) & uint3(65280u)) == uint3(0u)))) & uint3(240u)) == uint3(0u)))) & uint3(12u)) == uint3(0u))) | select(uint3(1u), uint3(0u), ((((((v >> select(uint3(16u), uint3(0u), ((v & uint3(4294901760u)) == uint3(0u)))) >> select(uint3(8u), uint3(0u), (((v >> select(uint3(16u), uint3(0u), ((v & uint3(4294901760u)) == uint3(0u)))) & uint3(65280u)) == uint3(0u)))) >> select(uint3(4u), uint3(0u), ((((v >> select(uint3(16u), uint3(0u), ((v & uint3(4294901760u)) == uint3(0u)))) >> select(uint3(8u), uint3(0u), (((v >> select(uint3(16u), uint3(0u), ((v & uint3(4294901760u)) == uint3(0u)))) & uint3(65280u)) == uint3(0u)))) & uint3(240u)) == uint3(0u)))) >> select(uint3(2u), uint3(0u), (((((v >> select(uint3(16u), uint3(0u), ((v & uint3(4294901760u)) == uint3(0u)))) >> select(uint3(8u), uint3(0u), (((v >> select(uint3(16u), uint3(0u), ((v & uint3(4294901760u)) == uint3(0u)))) & uint3(65280u)) == uint3(0u)))) >> select(uint3(4u), uint3(0u), ((((v >> select(uint3(16u), uint3(0u), ((v & uint3(4294901760u)) == uint3(0u)))) >> select(uint3(8u), uint3(0u), (((v >> select(uint3(16u), uint3(0u), ((v & uint3(4294901760u)) == uint3(0u)))) & uint3(65280u)) == uint3(0u)))) & uint3(240u)) == uint3(0u)))) & uint3(12u)) == uint3(0u)))) & uint3(2u)) == uint3(0u))))))), uint3(4294967295u), (((((v >> select(uint3(16u), uint3(0u), ((v & uint3(4294901760u)) == uint3(0u)))) >> select(uint3(8u), uint3(0u), (((v >> select(uint3(16u), uint3(0u), ((v & uint3(4294901760u)) == uint3(0u)))) & uint3(65280u)) == uint3(0u)))) >> select(uint3(4u), uint3(0u), ((((v >> select(uint3(16u), uint3(0u), ((v & uint3(4294901760u)) == uint3(0u)))) >> select(uint3(8u), uint3(0u), (((v >> select(uint3(16u), uint3(0u), ((v & uint3(4294901760u)) == uint3(0u)))) & uint3(65280u)) == uint3(0u)))) & uint3(240u)) == uint3(0u)))) >> select(uint3(2u), uint3(0u), (((((v >> select(uint3(16u), uint3(0u), ((v & uint3(4294901760u)) == uint3(0u)))) >> select(uint3(8u), uint3(0u), (((v >> select(uint3(16u), uint3(0u), ((v & uint3(4294901760u)) == uint3(0u)))) & uint3(65280u)) == uint3(0u)))) >> select(uint3(4u), uint3(0u), ((((v >> select(uint3(16u), uint3(0u), ((v & uint3(4294901760u)) == uint3(0u)))) >> select(uint3(8u), uint3(0u), (((v >> select(uint3(16u), uint3(0u), ((v & uint3(4294901760u)) == uint3(0u)))) & uint3(65280u)) == uint3(0u)))) & uint3(240u)) == uint3(0u)))) & uint3(12u)) == uint3(0u)))) == uint3(0u)));
   return res;
-}
-
-fragment void fragment_main(device packed_uint3* prevent_dce [[buffer(0)]]) {
-  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.prevent_dce=prevent_dce};
-  (*tint_module_vars.prevent_dce) = packed_uint3(firstLeadingBit_3fd7d0());
-}
-
-kernel void compute_main(device packed_uint3* prevent_dce [[buffer(0)]]) {
-  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.prevent_dce=prevent_dce};
-  (*tint_module_vars.prevent_dce) = packed_uint3(firstLeadingBit_3fd7d0());
 }
 
 VertexOutput vertex_main_inner() {

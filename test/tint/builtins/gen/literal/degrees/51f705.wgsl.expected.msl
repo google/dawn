@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 #include <metal_stdlib>
 
 using namespace metal;
@@ -6,14 +9,46 @@ float degrees_51f705() {
   return res;
 }
 
-fragment void fragment_main(device float* tint_symbol_1 [[buffer(0)]]) {
-  *(tint_symbol_1) = degrees_51f705();
+struct VertexOutput {
+  float4 pos;
+  float prevent_dce;
+};
+
+fragment void fragment_main(device float* tint_symbol [[buffer(0)]]) {
+  *(tint_symbol) = degrees_51f705();
   return;
 }
 
-kernel void compute_main(device float* tint_symbol_2 [[buffer(0)]]) {
-  *(tint_symbol_2) = degrees_51f705();
+//
+// compute_main
+//
+#include <metal_stdlib>
+
+using namespace metal;
+float degrees_51f705() {
+  float res = 57.2957763671875f;
+  return res;
+}
+
+struct VertexOutput {
+  float4 pos;
+  float prevent_dce;
+};
+
+kernel void compute_main(device float* tint_symbol [[buffer(0)]]) {
+  *(tint_symbol) = degrees_51f705();
   return;
+}
+
+//
+// vertex_main
+//
+#include <metal_stdlib>
+
+using namespace metal;
+float degrees_51f705() {
+  float res = 57.2957763671875f;
+  return res;
 }
 
 struct VertexOutput {

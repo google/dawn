@@ -1,3 +1,34 @@
+//
+// fragment_main
+//
+#include <metal_stdlib>
+using namespace metal;
+
+void select_dfab3b() {
+  bool arg_2 = true;
+  int3 res = select(int3(1), int3(1), arg_2);
+}
+
+fragment void fragment_main() {
+  select_dfab3b();
+}
+//
+// compute_main
+//
+#include <metal_stdlib>
+using namespace metal;
+
+void select_dfab3b() {
+  bool arg_2 = true;
+  int3 res = select(int3(1), int3(1), arg_2);
+}
+
+kernel void compute_main() {
+  select_dfab3b();
+}
+//
+// vertex_main
+//
 #include <metal_stdlib>
 using namespace metal;
 
@@ -12,14 +43,6 @@ struct vertex_main_outputs {
 void select_dfab3b() {
   bool arg_2 = true;
   int3 res = select(int3(1), int3(1), arg_2);
-}
-
-fragment void fragment_main() {
-  select_dfab3b();
-}
-
-kernel void compute_main() {
-  select_dfab3b();
 }
 
 VertexOutput vertex_main_inner() {

@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 #include <metal_stdlib>
 
 using namespace metal;
@@ -10,14 +13,52 @@ void modf_995934() {
   modf_result_vec4_f16 res = modf_result_vec4_f16{.fract=half4(-0.5h), .whole=half4(-1.0h)};
 }
 
+struct VertexOutput {
+  float4 pos;
+};
+
 fragment void fragment_main() {
   modf_995934();
   return;
 }
 
+//
+// compute_main
+//
+#include <metal_stdlib>
+
+using namespace metal;
+
+struct modf_result_vec4_f16 {
+  half4 fract;
+  half4 whole;
+};
+void modf_995934() {
+  modf_result_vec4_f16 res = modf_result_vec4_f16{.fract=half4(-0.5h), .whole=half4(-1.0h)};
+}
+
+struct VertexOutput {
+  float4 pos;
+};
+
 kernel void compute_main() {
   modf_995934();
   return;
+}
+
+//
+// vertex_main
+//
+#include <metal_stdlib>
+
+using namespace metal;
+
+struct modf_result_vec4_f16 {
+  half4 fract;
+  half4 whole;
+};
+void modf_995934() {
+  modf_result_vec4_f16 res = modf_result_vec4_f16{.fract=half4(-0.5h), .whole=half4(-1.0h)};
 }
 
 struct VertexOutput {

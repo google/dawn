@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 #include <metal_stdlib>
 
 using namespace metal;
@@ -7,14 +10,48 @@ half4 sinh_ba7e25() {
   return res;
 }
 
-fragment void fragment_main(device half4* tint_symbol_1 [[buffer(0)]]) {
-  *(tint_symbol_1) = sinh_ba7e25();
+struct VertexOutput {
+  float4 pos;
+  half4 prevent_dce;
+};
+
+fragment void fragment_main(device half4* tint_symbol [[buffer(0)]]) {
+  *(tint_symbol) = sinh_ba7e25();
   return;
 }
 
-kernel void compute_main(device half4* tint_symbol_2 [[buffer(0)]]) {
-  *(tint_symbol_2) = sinh_ba7e25();
+//
+// compute_main
+//
+#include <metal_stdlib>
+
+using namespace metal;
+half4 sinh_ba7e25() {
+  half4 arg_0 = half4(1.0h);
+  half4 res = sinh(arg_0);
+  return res;
+}
+
+struct VertexOutput {
+  float4 pos;
+  half4 prevent_dce;
+};
+
+kernel void compute_main(device half4* tint_symbol [[buffer(0)]]) {
+  *(tint_symbol) = sinh_ba7e25();
   return;
+}
+
+//
+// vertex_main
+//
+#include <metal_stdlib>
+
+using namespace metal;
+half4 sinh_ba7e25() {
+  half4 arg_0 = half4(1.0h);
+  half4 res = sinh(arg_0);
+  return res;
 }
 
 struct VertexOutput {

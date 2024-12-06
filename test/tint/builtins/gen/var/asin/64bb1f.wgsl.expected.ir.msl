@@ -1,3 +1,32 @@
+//
+// fragment_main
+//
+#include <metal_stdlib>
+using namespace metal;
+
+void asin_64bb1f() {
+  float4 res = float4(0.5f);
+}
+
+fragment void fragment_main() {
+  asin_64bb1f();
+}
+//
+// compute_main
+//
+#include <metal_stdlib>
+using namespace metal;
+
+void asin_64bb1f() {
+  float4 res = float4(0.5f);
+}
+
+kernel void compute_main() {
+  asin_64bb1f();
+}
+//
+// vertex_main
+//
 #include <metal_stdlib>
 using namespace metal;
 
@@ -11,14 +40,6 @@ struct vertex_main_outputs {
 
 void asin_64bb1f() {
   float4 res = float4(0.5f);
-}
-
-fragment void fragment_main() {
-  asin_64bb1f();
-}
-
-kernel void compute_main() {
-  asin_64bb1f();
 }
 
 VertexOutput vertex_main_inner() {

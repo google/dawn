@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 #include <metal_stdlib>
 
 using namespace metal;
@@ -9,14 +12,52 @@ half smoothstep_586e12() {
   return res;
 }
 
-fragment void fragment_main(device half* tint_symbol_1 [[buffer(0)]]) {
-  *(tint_symbol_1) = smoothstep_586e12();
+struct VertexOutput {
+  float4 pos;
+  half prevent_dce;
+};
+
+fragment void fragment_main(device half* tint_symbol [[buffer(0)]]) {
+  *(tint_symbol) = smoothstep_586e12();
   return;
 }
 
-kernel void compute_main(device half* tint_symbol_2 [[buffer(0)]]) {
-  *(tint_symbol_2) = smoothstep_586e12();
+//
+// compute_main
+//
+#include <metal_stdlib>
+
+using namespace metal;
+half smoothstep_586e12() {
+  half arg_0 = 2.0h;
+  half arg_1 = 4.0h;
+  half arg_2 = 3.0h;
+  half res = smoothstep(arg_0, arg_1, arg_2);
+  return res;
+}
+
+struct VertexOutput {
+  float4 pos;
+  half prevent_dce;
+};
+
+kernel void compute_main(device half* tint_symbol [[buffer(0)]]) {
+  *(tint_symbol) = smoothstep_586e12();
   return;
+}
+
+//
+// vertex_main
+//
+#include <metal_stdlib>
+
+using namespace metal;
+half smoothstep_586e12() {
+  half arg_0 = 2.0h;
+  half arg_1 = 4.0h;
+  half arg_2 = 3.0h;
+  half res = smoothstep(arg_0, arg_1, arg_2);
+  return res;
 }
 
 struct VertexOutput {

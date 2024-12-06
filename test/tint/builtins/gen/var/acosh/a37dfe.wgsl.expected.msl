@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 #include <metal_stdlib>
 
 using namespace metal;
@@ -11,14 +14,56 @@ half acosh_a37dfe() {
   return res;
 }
 
-fragment void fragment_main(device half* tint_symbol_1 [[buffer(0)]]) {
-  *(tint_symbol_1) = acosh_a37dfe();
+struct VertexOutput {
+  float4 pos;
+  half prevent_dce;
+};
+
+fragment void fragment_main(device half* tint_symbol [[buffer(0)]]) {
+  *(tint_symbol) = acosh_a37dfe();
   return;
 }
 
-kernel void compute_main(device half* tint_symbol_2 [[buffer(0)]]) {
-  *(tint_symbol_2) = acosh_a37dfe();
+//
+// compute_main
+//
+#include <metal_stdlib>
+
+using namespace metal;
+half tint_acosh(half x) {
+  return select(acosh(x), 0.0h, (x < 1.0h));
+}
+
+half acosh_a37dfe() {
+  half arg_0 = 1.54296875h;
+  half res = tint_acosh(arg_0);
+  return res;
+}
+
+struct VertexOutput {
+  float4 pos;
+  half prevent_dce;
+};
+
+kernel void compute_main(device half* tint_symbol [[buffer(0)]]) {
+  *(tint_symbol) = acosh_a37dfe();
   return;
+}
+
+//
+// vertex_main
+//
+#include <metal_stdlib>
+
+using namespace metal;
+half tint_acosh(half x) {
+  return select(acosh(x), 0.0h, (x < 1.0h));
+}
+
+half acosh_a37dfe() {
+  half arg_0 = 1.54296875h;
+  half res = tint_acosh(arg_0);
+  return res;
 }
 
 struct VertexOutput {

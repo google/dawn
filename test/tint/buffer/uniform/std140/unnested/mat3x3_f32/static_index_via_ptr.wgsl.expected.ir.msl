@@ -20,13 +20,7 @@ struct tint_packed_vec3_f32_array_element {
 
 struct tint_module_vars_struct {
   const constant tint_array<tint_packed_vec3_f32_array_element, 3>* m;
-  thread int* counter;
 };
-
-int i(tint_module_vars_struct tint_module_vars) {
-  (*tint_module_vars.counter) = as_type<int>((as_type<uint>((*tint_module_vars.counter)) + as_type<uint>(1)));
-  return (*tint_module_vars.counter);
-}
 
 kernel void f(const constant tint_array<tint_packed_vec3_f32_array_element, 3>* m [[buffer(0)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.m=m};

@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 #include <metal_stdlib>
 
 using namespace metal;
@@ -7,14 +10,48 @@ half2 acos_004aff() {
   return res;
 }
 
-fragment void fragment_main(device half2* tint_symbol_1 [[buffer(0)]]) {
-  *(tint_symbol_1) = acos_004aff();
+struct VertexOutput {
+  float4 pos;
+  half2 prevent_dce;
+};
+
+fragment void fragment_main(device half2* tint_symbol [[buffer(0)]]) {
+  *(tint_symbol) = acos_004aff();
   return;
 }
 
-kernel void compute_main(device half2* tint_symbol_2 [[buffer(0)]]) {
-  *(tint_symbol_2) = acos_004aff();
+//
+// compute_main
+//
+#include <metal_stdlib>
+
+using namespace metal;
+half2 acos_004aff() {
+  half2 arg_0 = half2(0.96875h);
+  half2 res = acos(arg_0);
+  return res;
+}
+
+struct VertexOutput {
+  float4 pos;
+  half2 prevent_dce;
+};
+
+kernel void compute_main(device half2* tint_symbol [[buffer(0)]]) {
+  *(tint_symbol) = acos_004aff();
   return;
+}
+
+//
+// vertex_main
+//
+#include <metal_stdlib>
+
+using namespace metal;
+half2 acos_004aff() {
+  half2 arg_0 = half2(0.96875h);
+  half2 res = acos(arg_0);
+  return res;
 }
 
 struct VertexOutput {

@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 #include <metal_stdlib>
 
 using namespace metal;
@@ -5,14 +8,42 @@ void distance_ac5535() {
   float res = 0.0f;
 }
 
+struct VertexOutput {
+  float4 pos;
+};
+
 fragment void fragment_main() {
   distance_ac5535();
   return;
 }
 
+//
+// compute_main
+//
+#include <metal_stdlib>
+
+using namespace metal;
+void distance_ac5535() {
+  float res = 0.0f;
+}
+
+struct VertexOutput {
+  float4 pos;
+};
+
 kernel void compute_main() {
   distance_ac5535();
   return;
+}
+
+//
+// vertex_main
+//
+#include <metal_stdlib>
+
+using namespace metal;
+void distance_ac5535() {
+  float res = 0.0f;
 }
 
 struct VertexOutput {

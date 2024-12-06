@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 #include <metal_stdlib>
 
 using namespace metal;
@@ -8,14 +11,50 @@ half distance_892a5d() {
   return res;
 }
 
-fragment void fragment_main(device half* tint_symbol_1 [[buffer(0)]]) {
-  *(tint_symbol_1) = distance_892a5d();
+struct VertexOutput {
+  float4 pos;
+  half prevent_dce;
+};
+
+fragment void fragment_main(device half* tint_symbol [[buffer(0)]]) {
+  *(tint_symbol) = distance_892a5d();
   return;
 }
 
-kernel void compute_main(device half* tint_symbol_2 [[buffer(0)]]) {
-  *(tint_symbol_2) = distance_892a5d();
+//
+// compute_main
+//
+#include <metal_stdlib>
+
+using namespace metal;
+half distance_892a5d() {
+  half2 arg_0 = half2(1.0h);
+  half2 arg_1 = half2(1.0h);
+  half res = distance(arg_0, arg_1);
+  return res;
+}
+
+struct VertexOutput {
+  float4 pos;
+  half prevent_dce;
+};
+
+kernel void compute_main(device half* tint_symbol [[buffer(0)]]) {
+  *(tint_symbol) = distance_892a5d();
   return;
+}
+
+//
+// vertex_main
+//
+#include <metal_stdlib>
+
+using namespace metal;
+half distance_892a5d() {
+  half2 arg_0 = half2(1.0h);
+  half2 arg_1 = half2(1.0h);
+  half res = distance(arg_0, arg_1);
+  return res;
 }
 
 struct VertexOutput {

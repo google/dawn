@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 #include <metal_stdlib>
 
 using namespace metal;
@@ -7,14 +10,48 @@ half2 ceil_18c240() {
   return res;
 }
 
-fragment void fragment_main(device half2* tint_symbol_1 [[buffer(0)]]) {
-  *(tint_symbol_1) = ceil_18c240();
+struct VertexOutput {
+  float4 pos;
+  half2 prevent_dce;
+};
+
+fragment void fragment_main(device half2* tint_symbol [[buffer(0)]]) {
+  *(tint_symbol) = ceil_18c240();
   return;
 }
 
-kernel void compute_main(device half2* tint_symbol_2 [[buffer(0)]]) {
-  *(tint_symbol_2) = ceil_18c240();
+//
+// compute_main
+//
+#include <metal_stdlib>
+
+using namespace metal;
+half2 ceil_18c240() {
+  half2 arg_0 = half2(1.5h);
+  half2 res = ceil(arg_0);
+  return res;
+}
+
+struct VertexOutput {
+  float4 pos;
+  half2 prevent_dce;
+};
+
+kernel void compute_main(device half2* tint_symbol [[buffer(0)]]) {
+  *(tint_symbol) = ceil_18c240();
   return;
+}
+
+//
+// vertex_main
+//
+#include <metal_stdlib>
+
+using namespace metal;
+half2 ceil_18c240() {
+  half2 arg_0 = half2(1.5h);
+  half2 res = ceil(arg_0);
+  return res;
 }
 
 struct VertexOutput {

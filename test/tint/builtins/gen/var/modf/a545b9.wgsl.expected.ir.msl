@@ -1,3 +1,48 @@
+//
+// fragment_main
+//
+#include <metal_stdlib>
+using namespace metal;
+
+struct modf_result_vec2_f16 {
+  half2 fract;
+  half2 whole;
+};
+
+void modf_a545b9() {
+  half2 arg_0 = half2(-1.5h);
+  modf_result_vec2_f16 v = {};
+  v.fract = modf(arg_0, v.whole);
+  modf_result_vec2_f16 res = v;
+}
+
+fragment void fragment_main() {
+  modf_a545b9();
+}
+//
+// compute_main
+//
+#include <metal_stdlib>
+using namespace metal;
+
+struct modf_result_vec2_f16 {
+  half2 fract;
+  half2 whole;
+};
+
+void modf_a545b9() {
+  half2 arg_0 = half2(-1.5h);
+  modf_result_vec2_f16 v = {};
+  v.fract = modf(arg_0, v.whole);
+  modf_result_vec2_f16 res = v;
+}
+
+kernel void compute_main() {
+  modf_a545b9();
+}
+//
+// vertex_main
+//
 #include <metal_stdlib>
 using namespace metal;
 
@@ -19,14 +64,6 @@ void modf_a545b9() {
   modf_result_vec2_f16 v = {};
   v.fract = modf(arg_0, v.whole);
   modf_result_vec2_f16 res = v;
-}
-
-fragment void fragment_main() {
-  modf_a545b9();
-}
-
-kernel void compute_main() {
-  modf_a545b9();
 }
 
 VertexOutput vertex_main_inner() {

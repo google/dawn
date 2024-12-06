@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 #include <metal_stdlib>
 
 using namespace metal;
@@ -5,14 +8,42 @@ void sin_15b2c6() {
   float4 res = float4(1.0f);
 }
 
+struct VertexOutput {
+  float4 pos;
+};
+
 fragment void fragment_main() {
   sin_15b2c6();
   return;
 }
 
+//
+// compute_main
+//
+#include <metal_stdlib>
+
+using namespace metal;
+void sin_15b2c6() {
+  float4 res = float4(1.0f);
+}
+
+struct VertexOutput {
+  float4 pos;
+};
+
 kernel void compute_main() {
   sin_15b2c6();
   return;
+}
+
+//
+// vertex_main
+//
+#include <metal_stdlib>
+
+using namespace metal;
+void sin_15b2c6() {
+  float4 res = float4(1.0f);
 }
 
 struct VertexOutput {

@@ -14,10 +14,6 @@ struct tint_array {
     T elements[N];
 };
 
-struct tint_private_vars_struct {
-  int counter;
-};
-
 struct tint_packed_vec3_f32_array_element {
   /* 0x0000 */ packed_float3 elements;
   /* 0x000c */ tint_array<int8_t, 4> tint_pad;
@@ -26,11 +22,6 @@ struct tint_packed_vec3_f32_array_element {
 float3x3 tint_unpack_vec3_in_composite(tint_array<tint_packed_vec3_f32_array_element, 3> in) {
   float3x3 result = float3x3(float3(in[0].elements), float3(in[1].elements), float3(in[2].elements));
   return result;
-}
-
-int i(thread tint_private_vars_struct* const tint_private_vars) {
-  (*(tint_private_vars)).counter = as_type<int>((as_type<uint>((*(tint_private_vars)).counter) + as_type<uint>(1)));
-  return (*(tint_private_vars)).counter;
 }
 
 kernel void f(const constant tint_array<tint_packed_vec3_f32_array_element, 3>* tint_symbol [[buffer(0)]]) {

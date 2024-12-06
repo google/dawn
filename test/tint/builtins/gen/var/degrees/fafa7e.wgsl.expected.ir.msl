@@ -1,3 +1,32 @@
+//
+// fragment_main
+//
+#include <metal_stdlib>
+using namespace metal;
+
+void degrees_fafa7e() {
+  float res = 57.295780181884765625f;
+}
+
+fragment void fragment_main() {
+  degrees_fafa7e();
+}
+//
+// compute_main
+//
+#include <metal_stdlib>
+using namespace metal;
+
+void degrees_fafa7e() {
+  float res = 57.295780181884765625f;
+}
+
+kernel void compute_main() {
+  degrees_fafa7e();
+}
+//
+// vertex_main
+//
 #include <metal_stdlib>
 using namespace metal;
 
@@ -11,14 +40,6 @@ struct vertex_main_outputs {
 
 void degrees_fafa7e() {
   float res = 57.295780181884765625f;
-}
-
-fragment void fragment_main() {
-  degrees_fafa7e();
-}
-
-kernel void compute_main() {
-  degrees_fafa7e();
 }
 
 VertexOutput vertex_main_inner() {

@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 #include <metal_stdlib>
 
 using namespace metal;
@@ -6,14 +9,46 @@ int transpose_854336() {
   return select(0, 1, (res[0][0] == 0.0f));
 }
 
-fragment void fragment_main(device int* tint_symbol_1 [[buffer(0)]]) {
-  *(tint_symbol_1) = transpose_854336();
+struct VertexOutput {
+  float4 pos;
+  int prevent_dce;
+};
+
+fragment void fragment_main(device int* tint_symbol [[buffer(0)]]) {
+  *(tint_symbol) = transpose_854336();
   return;
 }
 
-kernel void compute_main(device int* tint_symbol_2 [[buffer(0)]]) {
-  *(tint_symbol_2) = transpose_854336();
+//
+// compute_main
+//
+#include <metal_stdlib>
+
+using namespace metal;
+int transpose_854336() {
+  float3x3 res = float3x3(float3(1.0f), float3(1.0f), float3(1.0f));
+  return select(0, 1, (res[0][0] == 0.0f));
+}
+
+struct VertexOutput {
+  float4 pos;
+  int prevent_dce;
+};
+
+kernel void compute_main(device int* tint_symbol [[buffer(0)]]) {
+  *(tint_symbol) = transpose_854336();
   return;
+}
+
+//
+// vertex_main
+//
+#include <metal_stdlib>
+
+using namespace metal;
+int transpose_854336() {
+  float3x3 res = float3x3(float3(1.0f), float3(1.0f), float3(1.0f));
+  return select(0, 1, (res[0][0] == 0.0f));
 }
 
 struct VertexOutput {

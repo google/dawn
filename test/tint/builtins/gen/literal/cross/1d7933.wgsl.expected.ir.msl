@@ -1,3 +1,32 @@
+//
+// fragment_main
+//
+#include <metal_stdlib>
+using namespace metal;
+
+void cross_1d7933() {
+  float3 res = float3(0.0f);
+}
+
+fragment void fragment_main() {
+  cross_1d7933();
+}
+//
+// compute_main
+//
+#include <metal_stdlib>
+using namespace metal;
+
+void cross_1d7933() {
+  float3 res = float3(0.0f);
+}
+
+kernel void compute_main() {
+  cross_1d7933();
+}
+//
+// vertex_main
+//
 #include <metal_stdlib>
 using namespace metal;
 
@@ -11,14 +40,6 @@ struct vertex_main_outputs {
 
 void cross_1d7933() {
   float3 res = float3(0.0f);
-}
-
-fragment void fragment_main() {
-  cross_1d7933();
-}
-
-kernel void compute_main() {
-  cross_1d7933();
 }
 
 VertexOutput vertex_main_inner() {

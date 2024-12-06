@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 #include <metal_stdlib>
 
 using namespace metal;
@@ -9,14 +12,52 @@ half3 clamp_b195eb() {
   return res;
 }
 
-fragment void fragment_main(device packed_half3* tint_symbol_1 [[buffer(0)]]) {
-  *(tint_symbol_1) = packed_half3(clamp_b195eb());
+struct VertexOutput {
+  float4 pos;
+  half3 prevent_dce;
+};
+
+fragment void fragment_main(device packed_half3* tint_symbol [[buffer(0)]]) {
+  *(tint_symbol) = packed_half3(clamp_b195eb());
   return;
 }
 
-kernel void compute_main(device packed_half3* tint_symbol_2 [[buffer(0)]]) {
-  *(tint_symbol_2) = packed_half3(clamp_b195eb());
+//
+// compute_main
+//
+#include <metal_stdlib>
+
+using namespace metal;
+half3 clamp_b195eb() {
+  half3 arg_0 = half3(1.0h);
+  half3 arg_1 = half3(1.0h);
+  half3 arg_2 = half3(1.0h);
+  half3 res = clamp(arg_0, arg_1, arg_2);
+  return res;
+}
+
+struct VertexOutput {
+  float4 pos;
+  half3 prevent_dce;
+};
+
+kernel void compute_main(device packed_half3* tint_symbol [[buffer(0)]]) {
+  *(tint_symbol) = packed_half3(clamp_b195eb());
   return;
+}
+
+//
+// vertex_main
+//
+#include <metal_stdlib>
+
+using namespace metal;
+half3 clamp_b195eb() {
+  half3 arg_0 = half3(1.0h);
+  half3 arg_1 = half3(1.0h);
+  half3 arg_2 = half3(1.0h);
+  half3 res = clamp(arg_0, arg_1, arg_2);
+  return res;
 }
 
 struct VertexOutput {

@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 #include <metal_stdlib>
 
 using namespace metal;
@@ -5,14 +8,42 @@ void transpose_ace596() {
   float2x3 res = float2x3(float3(1.0f), float3(1.0f));
 }
 
+struct VertexOutput {
+  float4 pos;
+};
+
 fragment void fragment_main() {
   transpose_ace596();
   return;
 }
 
+//
+// compute_main
+//
+#include <metal_stdlib>
+
+using namespace metal;
+void transpose_ace596() {
+  float2x3 res = float2x3(float3(1.0f), float3(1.0f));
+}
+
+struct VertexOutput {
+  float4 pos;
+};
+
 kernel void compute_main() {
   transpose_ace596();
   return;
+}
+
+//
+// vertex_main
+//
+#include <metal_stdlib>
+
+using namespace metal;
+void transpose_ace596() {
+  float2x3 res = float2x3(float3(1.0f), float3(1.0f));
 }
 
 struct VertexOutput {

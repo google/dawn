@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 #include <metal_stdlib>
 
 using namespace metal;
@@ -11,8 +14,19 @@ fragment void fragment_main(device half4* tint_symbol [[buffer(0)]]) {
   return;
 }
 
-kernel void compute_main(device half4* tint_symbol_1 [[buffer(0)]]) {
-  *(tint_symbol_1) = quadBroadcast_4d9898();
+//
+// compute_main
+//
+#include <metal_stdlib>
+
+using namespace metal;
+half4 quadBroadcast_4d9898() {
+  half4 res = quad_broadcast(half4(1.0h),1);
+  return res;
+}
+
+kernel void compute_main(device half4* tint_symbol [[buffer(0)]]) {
+  *(tint_symbol) = quadBroadcast_4d9898();
   return;
 }
 

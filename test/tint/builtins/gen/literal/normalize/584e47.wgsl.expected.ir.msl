@@ -1,3 +1,32 @@
+//
+// fragment_main
+//
+#include <metal_stdlib>
+using namespace metal;
+
+void normalize_584e47() {
+  float2 res = float2(0.70710676908493041992f);
+}
+
+fragment void fragment_main() {
+  normalize_584e47();
+}
+//
+// compute_main
+//
+#include <metal_stdlib>
+using namespace metal;
+
+void normalize_584e47() {
+  float2 res = float2(0.70710676908493041992f);
+}
+
+kernel void compute_main() {
+  normalize_584e47();
+}
+//
+// vertex_main
+//
 #include <metal_stdlib>
 using namespace metal;
 
@@ -11,14 +40,6 @@ struct vertex_main_outputs {
 
 void normalize_584e47() {
   float2 res = float2(0.70710676908493041992f);
-}
-
-fragment void fragment_main() {
-  normalize_584e47();
-}
-
-kernel void compute_main() {
-  normalize_584e47();
 }
 
 VertexOutput vertex_main_inner() {

@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 #include <metal_stdlib>
 
 using namespace metal;
@@ -6,14 +9,46 @@ int bitcast_16cba4() {
   return res;
 }
 
-fragment void fragment_main(device int* tint_symbol_1 [[buffer(0)]]) {
-  *(tint_symbol_1) = bitcast_16cba4();
+struct VertexOutput {
+  float4 pos;
+  int prevent_dce;
+};
+
+fragment void fragment_main(device int* tint_symbol [[buffer(0)]]) {
+  *(tint_symbol) = bitcast_16cba4();
   return;
 }
 
-kernel void compute_main(device int* tint_symbol_2 [[buffer(0)]]) {
-  *(tint_symbol_2) = bitcast_16cba4();
+//
+// compute_main
+//
+#include <metal_stdlib>
+
+using namespace metal;
+int bitcast_16cba4() {
+  int res = 1065353216;
+  return res;
+}
+
+struct VertexOutput {
+  float4 pos;
+  int prevent_dce;
+};
+
+kernel void compute_main(device int* tint_symbol [[buffer(0)]]) {
+  *(tint_symbol) = bitcast_16cba4();
   return;
+}
+
+//
+// vertex_main
+//
+#include <metal_stdlib>
+
+using namespace metal;
+int bitcast_16cba4() {
+  int res = 1065353216;
+  return res;
 }
 
 struct VertexOutput {

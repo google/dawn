@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 #include <metal_stdlib>
 
 using namespace metal;
@@ -5,14 +8,42 @@ void saturate_78b37c() {
   float res = 1.0f;
 }
 
+struct VertexOutput {
+  float4 pos;
+};
+
 fragment void fragment_main() {
   saturate_78b37c();
   return;
 }
 
+//
+// compute_main
+//
+#include <metal_stdlib>
+
+using namespace metal;
+void saturate_78b37c() {
+  float res = 1.0f;
+}
+
+struct VertexOutput {
+  float4 pos;
+};
+
 kernel void compute_main() {
   saturate_78b37c();
   return;
+}
+
+//
+// vertex_main
+//
+#include <metal_stdlib>
+
+using namespace metal;
+void saturate_78b37c() {
+  float res = 1.0f;
 }
 
 struct VertexOutput {

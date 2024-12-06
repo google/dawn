@@ -21,13 +21,8 @@ struct S {
   tint_array<uint, 3> data;
 };
 
-struct Result {
-  uint value;
-};
-
 struct tint_module_vars_struct {
   const constant Constants* constants;
-  device Result* result;
   thread S* s;
 };
 

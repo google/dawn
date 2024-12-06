@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 #include <metal_stdlib>
 
 using namespace metal;
@@ -7,14 +10,48 @@ int any_2ab91a() {
   return select(0, 1, all((res == false)));
 }
 
-fragment void fragment_main(device int* tint_symbol_1 [[buffer(0)]]) {
-  *(tint_symbol_1) = any_2ab91a();
+struct VertexOutput {
+  float4 pos;
+  int prevent_dce;
+};
+
+fragment void fragment_main(device int* tint_symbol [[buffer(0)]]) {
+  *(tint_symbol) = any_2ab91a();
   return;
 }
 
-kernel void compute_main(device int* tint_symbol_2 [[buffer(0)]]) {
-  *(tint_symbol_2) = any_2ab91a();
+//
+// compute_main
+//
+#include <metal_stdlib>
+
+using namespace metal;
+int any_2ab91a() {
+  bool arg_0 = true;
+  bool res = any(arg_0);
+  return select(0, 1, all((res == false)));
+}
+
+struct VertexOutput {
+  float4 pos;
+  int prevent_dce;
+};
+
+kernel void compute_main(device int* tint_symbol [[buffer(0)]]) {
+  *(tint_symbol) = any_2ab91a();
   return;
+}
+
+//
+// vertex_main
+//
+#include <metal_stdlib>
+
+using namespace metal;
+int any_2ab91a() {
+  bool arg_0 = true;
+  bool res = any(arg_0);
+  return select(0, 1, all((res == false)));
 }
 
 struct VertexOutput {

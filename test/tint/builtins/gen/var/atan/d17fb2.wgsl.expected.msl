@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 #include <metal_stdlib>
 
 using namespace metal;
@@ -5,14 +8,42 @@ void atan_d17fb2() {
   float4 res = float4(0.78539818525314331055f);
 }
 
+struct VertexOutput {
+  float4 pos;
+};
+
 fragment void fragment_main() {
   atan_d17fb2();
   return;
 }
 
+//
+// compute_main
+//
+#include <metal_stdlib>
+
+using namespace metal;
+void atan_d17fb2() {
+  float4 res = float4(0.78539818525314331055f);
+}
+
+struct VertexOutput {
+  float4 pos;
+};
+
 kernel void compute_main() {
   atan_d17fb2();
   return;
+}
+
+//
+// vertex_main
+//
+#include <metal_stdlib>
+
+using namespace metal;
+void atan_d17fb2() {
+  float4 res = float4(0.78539818525314331055f);
 }
 
 struct VertexOutput {

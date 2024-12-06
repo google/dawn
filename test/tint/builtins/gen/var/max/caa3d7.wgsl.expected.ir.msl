@@ -1,3 +1,32 @@
+//
+// fragment_main
+//
+#include <metal_stdlib>
+using namespace metal;
+
+void max_caa3d7() {
+  int res = 1;
+}
+
+fragment void fragment_main() {
+  max_caa3d7();
+}
+//
+// compute_main
+//
+#include <metal_stdlib>
+using namespace metal;
+
+void max_caa3d7() {
+  int res = 1;
+}
+
+kernel void compute_main() {
+  max_caa3d7();
+}
+//
+// vertex_main
+//
 #include <metal_stdlib>
 using namespace metal;
 
@@ -11,14 +40,6 @@ struct vertex_main_outputs {
 
 void max_caa3d7() {
   int res = 1;
-}
-
-fragment void fragment_main() {
-  max_caa3d7();
-}
-
-kernel void compute_main() {
-  max_caa3d7();
 }
 
 VertexOutput vertex_main_inner() {

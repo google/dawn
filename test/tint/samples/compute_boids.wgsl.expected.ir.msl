@@ -1,3 +1,52 @@
+//
+// vert_main
+//
+#include <metal_stdlib>
+using namespace metal;
+
+struct vert_main_outputs {
+  float4 tint_symbol [[position]];
+};
+
+struct vert_main_inputs {
+  float2 a_particlePos [[attribute(0)]];
+  float2 a_particleVel [[attribute(1)]];
+  float2 a_pos [[attribute(2)]];
+};
+
+float4 vert_main_inner(float2 a_particlePos, float2 a_particleVel, float2 a_pos) {
+  float angle = -(atan2(a_particleVel.x, a_particleVel.y));
+  float2 pos = float2(((a_pos.x * cos(angle)) - (a_pos.y * sin(angle))), ((a_pos.x * sin(angle)) + (a_pos.y * cos(angle))));
+  return float4((pos + a_particlePos), 0.0f, 1.0f);
+}
+
+vertex vert_main_outputs vert_main(vert_main_inputs inputs [[stage_in]]) {
+  vert_main_outputs tint_wrapper_result = {};
+  tint_wrapper_result.tint_symbol = vert_main_inner(inputs.a_particlePos, inputs.a_particleVel, inputs.a_pos);
+  return tint_wrapper_result;
+}
+//
+// frag_main
+//
+#include <metal_stdlib>
+using namespace metal;
+
+struct frag_main_outputs {
+  float4 tint_symbol [[color(0)]];
+};
+
+float4 frag_main_inner() {
+  return float4(1.0f);
+}
+
+fragment frag_main_outputs frag_main() {
+  frag_main_outputs tint_wrapper_result = {};
+  tint_wrapper_result.tint_symbol = frag_main_inner();
+  return tint_wrapper_result;
+}
+//
+// comp_main
+//
 #include <metal_stdlib>
 using namespace metal;
 
@@ -37,30 +86,6 @@ struct tint_module_vars_struct {
   device Particles* particlesA;
   device Particles* particlesB;
 };
-
-struct vert_main_outputs {
-  float4 tint_symbol [[position]];
-};
-
-struct vert_main_inputs {
-  float2 a_particlePos [[attribute(0)]];
-  float2 a_particleVel [[attribute(1)]];
-  float2 a_pos [[attribute(2)]];
-};
-
-struct frag_main_outputs {
-  float4 tint_symbol_1 [[color(0)]];
-};
-
-float4 vert_main_inner(float2 a_particlePos, float2 a_particleVel, float2 a_pos) {
-  float angle = -(atan2(a_particleVel.x, a_particleVel.y));
-  float2 pos = float2(((a_pos.x * cos(angle)) - (a_pos.y * sin(angle))), ((a_pos.x * sin(angle)) + (a_pos.y * cos(angle))));
-  return float4((pos + a_particlePos), 0.0f, 1.0f);
-}
-
-float4 frag_main_inner() {
-  return float4(1.0f);
-}
 
 void comp_main_inner(uint3 gl_GlobalInvocationID, tint_module_vars_struct tint_module_vars) {
   uint index = gl_GlobalInvocationID.x;
@@ -136,18 +161,6 @@ void comp_main_inner(uint3 gl_GlobalInvocationID, tint_module_vars_struct tint_m
   }
   (*tint_module_vars.particlesB).particles[min(index, 4u)].pos = vPos;
   (*tint_module_vars.particlesB).particles[min(index, 4u)].vel = vVel;
-}
-
-vertex vert_main_outputs vert_main(vert_main_inputs inputs [[stage_in]]) {
-  vert_main_outputs tint_wrapper_result = {};
-  tint_wrapper_result.tint_symbol = vert_main_inner(inputs.a_particlePos, inputs.a_particleVel, inputs.a_pos);
-  return tint_wrapper_result;
-}
-
-fragment frag_main_outputs frag_main() {
-  frag_main_outputs tint_wrapper_result = {};
-  tint_wrapper_result.tint_symbol_1 = frag_main_inner();
-  return tint_wrapper_result;
 }
 
 kernel void comp_main(uint3 gl_GlobalInvocationID [[thread_position_in_grid]], const constant SimParams* params [[buffer(0)]], device Particles* particlesA [[buffer(1)]], device Particles* particlesB [[buffer(2)]]) {

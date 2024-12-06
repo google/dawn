@@ -1,3 +1,32 @@
+//
+// fragment_main
+//
+#include <metal_stdlib>
+using namespace metal;
+
+void transpose_70ca11() {
+  float3x2 res = float3x2(float2(1.0f), float2(1.0f), float2(1.0f));
+}
+
+fragment void fragment_main() {
+  transpose_70ca11();
+}
+//
+// compute_main
+//
+#include <metal_stdlib>
+using namespace metal;
+
+void transpose_70ca11() {
+  float3x2 res = float3x2(float2(1.0f), float2(1.0f), float2(1.0f));
+}
+
+kernel void compute_main() {
+  transpose_70ca11();
+}
+//
+// vertex_main
+//
 #include <metal_stdlib>
 using namespace metal;
 
@@ -11,14 +40,6 @@ struct vertex_main_outputs {
 
 void transpose_70ca11() {
   float3x2 res = float3x2(float2(1.0f), float2(1.0f), float2(1.0f));
-}
-
-fragment void fragment_main() {
-  transpose_70ca11();
-}
-
-kernel void compute_main() {
-  transpose_70ca11();
 }
 
 VertexOutput vertex_main_inner() {

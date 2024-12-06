@@ -1,3 +1,48 @@
+//
+// fragment_main
+//
+#include <metal_stdlib>
+using namespace metal;
+
+struct frexp_result_vec2_f32 {
+  float2 fract;
+  int2 exp;
+};
+
+void frexp_eb2421() {
+  float2 arg_0 = float2(1.0f);
+  frexp_result_vec2_f32 v = {};
+  v.fract = frexp(arg_0, v.exp);
+  frexp_result_vec2_f32 res = v;
+}
+
+fragment void fragment_main() {
+  frexp_eb2421();
+}
+//
+// compute_main
+//
+#include <metal_stdlib>
+using namespace metal;
+
+struct frexp_result_vec2_f32 {
+  float2 fract;
+  int2 exp;
+};
+
+void frexp_eb2421() {
+  float2 arg_0 = float2(1.0f);
+  frexp_result_vec2_f32 v = {};
+  v.fract = frexp(arg_0, v.exp);
+  frexp_result_vec2_f32 res = v;
+}
+
+kernel void compute_main() {
+  frexp_eb2421();
+}
+//
+// vertex_main
+//
 #include <metal_stdlib>
 using namespace metal;
 
@@ -19,14 +64,6 @@ void frexp_eb2421() {
   frexp_result_vec2_f32 v = {};
   v.fract = frexp(arg_0, v.exp);
   frexp_result_vec2_f32 res = v;
-}
-
-fragment void fragment_main() {
-  frexp_eb2421();
-}
-
-kernel void compute_main() {
-  frexp_eb2421();
 }
 
 VertexOutput vertex_main_inner() {

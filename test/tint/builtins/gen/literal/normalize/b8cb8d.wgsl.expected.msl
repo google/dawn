@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 #include <metal_stdlib>
 
 using namespace metal;
@@ -6,14 +9,46 @@ half4 normalize_b8cb8d() {
   return res;
 }
 
-fragment void fragment_main(device half4* tint_symbol_1 [[buffer(0)]]) {
-  *(tint_symbol_1) = normalize_b8cb8d();
+struct VertexOutput {
+  float4 pos;
+  half4 prevent_dce;
+};
+
+fragment void fragment_main(device half4* tint_symbol [[buffer(0)]]) {
+  *(tint_symbol) = normalize_b8cb8d();
   return;
 }
 
-kernel void compute_main(device half4* tint_symbol_2 [[buffer(0)]]) {
-  *(tint_symbol_2) = normalize_b8cb8d();
+//
+// compute_main
+//
+#include <metal_stdlib>
+
+using namespace metal;
+half4 normalize_b8cb8d() {
+  half4 res = half4(0.5h);
+  return res;
+}
+
+struct VertexOutput {
+  float4 pos;
+  half4 prevent_dce;
+};
+
+kernel void compute_main(device half4* tint_symbol [[buffer(0)]]) {
+  *(tint_symbol) = normalize_b8cb8d();
   return;
+}
+
+//
+// vertex_main
+//
+#include <metal_stdlib>
+
+using namespace metal;
+half4 normalize_b8cb8d() {
+  half4 res = half4(0.5h);
+  return res;
 }
 
 struct VertexOutput {

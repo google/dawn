@@ -1,9 +1,52 @@
+//
+// fragment_main
+//
 #include <metal_stdlib>
 using namespace metal;
 
 struct tint_module_vars_struct {
   device uint4* prevent_dce;
 };
+
+uint4 select_c4a4ef() {
+  uint4 arg_0 = uint4(1u);
+  uint4 arg_1 = uint4(1u);
+  bool4 arg_2 = bool4(true);
+  uint4 res = select(arg_0, arg_1, arg_2);
+  return res;
+}
+
+fragment void fragment_main(device uint4* prevent_dce [[buffer(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.prevent_dce=prevent_dce};
+  (*tint_module_vars.prevent_dce) = select_c4a4ef();
+}
+//
+// compute_main
+//
+#include <metal_stdlib>
+using namespace metal;
+
+struct tint_module_vars_struct {
+  device uint4* prevent_dce;
+};
+
+uint4 select_c4a4ef() {
+  uint4 arg_0 = uint4(1u);
+  uint4 arg_1 = uint4(1u);
+  bool4 arg_2 = bool4(true);
+  uint4 res = select(arg_0, arg_1, arg_2);
+  return res;
+}
+
+kernel void compute_main(device uint4* prevent_dce [[buffer(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.prevent_dce=prevent_dce};
+  (*tint_module_vars.prevent_dce) = select_c4a4ef();
+}
+//
+// vertex_main
+//
+#include <metal_stdlib>
+using namespace metal;
 
 struct VertexOutput {
   float4 pos;
@@ -21,16 +64,6 @@ uint4 select_c4a4ef() {
   bool4 arg_2 = bool4(true);
   uint4 res = select(arg_0, arg_1, arg_2);
   return res;
-}
-
-fragment void fragment_main(device uint4* prevent_dce [[buffer(0)]]) {
-  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.prevent_dce=prevent_dce};
-  (*tint_module_vars.prevent_dce) = select_c4a4ef();
-}
-
-kernel void compute_main(device uint4* prevent_dce [[buffer(0)]]) {
-  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.prevent_dce=prevent_dce};
-  (*tint_module_vars.prevent_dce) = select_c4a4ef();
 }
 
 VertexOutput vertex_main_inner() {

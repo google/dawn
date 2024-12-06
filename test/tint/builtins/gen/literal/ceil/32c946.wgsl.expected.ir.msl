@@ -1,3 +1,32 @@
+//
+// fragment_main
+//
+#include <metal_stdlib>
+using namespace metal;
+
+void ceil_32c946() {
+  float3 res = float3(2.0f);
+}
+
+fragment void fragment_main() {
+  ceil_32c946();
+}
+//
+// compute_main
+//
+#include <metal_stdlib>
+using namespace metal;
+
+void ceil_32c946() {
+  float3 res = float3(2.0f);
+}
+
+kernel void compute_main() {
+  ceil_32c946();
+}
+//
+// vertex_main
+//
 #include <metal_stdlib>
 using namespace metal;
 
@@ -11,14 +40,6 @@ struct vertex_main_outputs {
 
 void ceil_32c946() {
   float3 res = float3(2.0f);
-}
-
-fragment void fragment_main() {
-  ceil_32c946();
-}
-
-kernel void compute_main() {
-  ceil_32c946();
 }
 
 VertexOutput vertex_main_inner() {

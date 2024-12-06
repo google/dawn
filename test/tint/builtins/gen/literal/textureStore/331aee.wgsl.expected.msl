@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 #include <metal_stdlib>
 
 using namespace metal;
@@ -10,8 +13,18 @@ fragment void fragment_main(texture3d<float, access::write> tint_symbol_1 [[text
   return;
 }
 
-kernel void compute_main(texture3d<float, access::write> tint_symbol_2 [[texture(0)]]) {
-  textureStore_331aee(tint_symbol_2);
+//
+// compute_main
+//
+#include <metal_stdlib>
+
+using namespace metal;
+void textureStore_331aee(texture3d<float, access::write> tint_symbol) {
+  tint_symbol.write(float4(1.0f), uint3(int3(1)));
+}
+
+kernel void compute_main(texture3d<float, access::write> tint_symbol_1 [[texture(0)]]) {
+  textureStore_331aee(tint_symbol_1);
   return;
 }
 

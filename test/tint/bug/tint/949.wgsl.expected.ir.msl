@@ -57,8 +57,6 @@ struct tint_module_vars_struct {
   sampler TextureSampler1Sampler;
   const constant Light0_packed_vec3* light0;
   thread float4* glFragColor;
-  sampler bumpSamplerSampler;
-  texture2d<float, access::sample> bumpSamplerTexture;
 };
 
 struct main_out {

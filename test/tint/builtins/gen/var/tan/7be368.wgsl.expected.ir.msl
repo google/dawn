@@ -1,3 +1,32 @@
+//
+// fragment_main
+//
+#include <metal_stdlib>
+using namespace metal;
+
+void tan_7be368() {
+  float2 res = float2(1.55740773677825927734f);
+}
+
+fragment void fragment_main() {
+  tan_7be368();
+}
+//
+// compute_main
+//
+#include <metal_stdlib>
+using namespace metal;
+
+void tan_7be368() {
+  float2 res = float2(1.55740773677825927734f);
+}
+
+kernel void compute_main() {
+  tan_7be368();
+}
+//
+// vertex_main
+//
 #include <metal_stdlib>
 using namespace metal;
 
@@ -11,14 +40,6 @@ struct vertex_main_outputs {
 
 void tan_7be368() {
   float2 res = float2(1.55740773677825927734f);
-}
-
-fragment void fragment_main() {
-  tan_7be368();
-}
-
-kernel void compute_main() {
-  tan_7be368();
 }
 
 VertexOutput vertex_main_inner() {

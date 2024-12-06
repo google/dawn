@@ -1,3 +1,32 @@
+//
+// fragment_main
+//
+#include <metal_stdlib>
+using namespace metal;
+
+void refract_d7569b() {
+  float3 res = float3(-5.0f);
+}
+
+fragment void fragment_main() {
+  refract_d7569b();
+}
+//
+// compute_main
+//
+#include <metal_stdlib>
+using namespace metal;
+
+void refract_d7569b() {
+  float3 res = float3(-5.0f);
+}
+
+kernel void compute_main() {
+  refract_d7569b();
+}
+//
+// vertex_main
+//
 #include <metal_stdlib>
 using namespace metal;
 
@@ -11,14 +40,6 @@ struct vertex_main_outputs {
 
 void refract_d7569b() {
   float3 res = float3(-5.0f);
-}
-
-fragment void fragment_main() {
-  refract_d7569b();
-}
-
-kernel void compute_main() {
-  refract_d7569b();
 }
 
 VertexOutput vertex_main_inner() {

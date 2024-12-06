@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 #include <metal_stdlib>
 
 using namespace metal;
@@ -12,14 +15,58 @@ half3 degrees_dfe8f4() {
   return res;
 }
 
-fragment void fragment_main(device packed_half3* tint_symbol_1 [[buffer(0)]]) {
-  *(tint_symbol_1) = packed_half3(degrees_dfe8f4());
+struct VertexOutput {
+  float4 pos;
+  half3 prevent_dce;
+};
+
+fragment void fragment_main(device packed_half3* tint_symbol [[buffer(0)]]) {
+  *(tint_symbol) = packed_half3(degrees_dfe8f4());
   return;
 }
 
-kernel void compute_main(device packed_half3* tint_symbol_2 [[buffer(0)]]) {
-  *(tint_symbol_2) = packed_half3(degrees_dfe8f4());
+//
+// compute_main
+//
+#include <metal_stdlib>
+
+using namespace metal;
+
+half3 tint_degrees(half3 param_0) {
+  return param_0 * 57.29577951308232286465;
+}
+
+half3 degrees_dfe8f4() {
+  half3 arg_0 = half3(1.0h);
+  half3 res = tint_degrees(arg_0);
+  return res;
+}
+
+struct VertexOutput {
+  float4 pos;
+  half3 prevent_dce;
+};
+
+kernel void compute_main(device packed_half3* tint_symbol [[buffer(0)]]) {
+  *(tint_symbol) = packed_half3(degrees_dfe8f4());
   return;
+}
+
+//
+// vertex_main
+//
+#include <metal_stdlib>
+
+using namespace metal;
+
+half3 tint_degrees(half3 param_0) {
+  return param_0 * 57.29577951308232286465;
+}
+
+half3 degrees_dfe8f4() {
+  half3 arg_0 = half3(1.0h);
+  half3 res = tint_degrees(arg_0);
+  return res;
 }
 
 struct VertexOutput {

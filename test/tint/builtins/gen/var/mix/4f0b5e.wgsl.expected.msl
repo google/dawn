@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 #include <metal_stdlib>
 
 using namespace metal;
@@ -9,14 +12,52 @@ float mix_4f0b5e() {
   return res;
 }
 
-fragment void fragment_main(device float* tint_symbol_1 [[buffer(0)]]) {
-  *(tint_symbol_1) = mix_4f0b5e();
+struct VertexOutput {
+  float4 pos;
+  float prevent_dce;
+};
+
+fragment void fragment_main(device float* tint_symbol [[buffer(0)]]) {
+  *(tint_symbol) = mix_4f0b5e();
   return;
 }
 
-kernel void compute_main(device float* tint_symbol_2 [[buffer(0)]]) {
-  *(tint_symbol_2) = mix_4f0b5e();
+//
+// compute_main
+//
+#include <metal_stdlib>
+
+using namespace metal;
+float mix_4f0b5e() {
+  float arg_0 = 1.0f;
+  float arg_1 = 1.0f;
+  float arg_2 = 1.0f;
+  float res = mix(arg_0, arg_1, arg_2);
+  return res;
+}
+
+struct VertexOutput {
+  float4 pos;
+  float prevent_dce;
+};
+
+kernel void compute_main(device float* tint_symbol [[buffer(0)]]) {
+  *(tint_symbol) = mix_4f0b5e();
   return;
+}
+
+//
+// vertex_main
+//
+#include <metal_stdlib>
+
+using namespace metal;
+float mix_4f0b5e() {
+  float arg_0 = 1.0f;
+  float arg_1 = 1.0f;
+  float arg_2 = 1.0f;
+  float res = mix(arg_0, arg_1, arg_2);
+  return res;
 }
 
 struct VertexOutput {

@@ -1,9 +1,46 @@
+//
+// fragment_main
+//
 #include <metal_stdlib>
 using namespace metal;
 
 struct tint_module_vars_struct {
   device half4* prevent_dce;
 };
+
+half4 bitcast_429d64() {
+  half4 res = half4(0.0h, 1.875h, 0.0h, 1.875h);
+  return res;
+}
+
+fragment void fragment_main(device half4* prevent_dce [[buffer(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.prevent_dce=prevent_dce};
+  (*tint_module_vars.prevent_dce) = bitcast_429d64();
+}
+//
+// compute_main
+//
+#include <metal_stdlib>
+using namespace metal;
+
+struct tint_module_vars_struct {
+  device half4* prevent_dce;
+};
+
+half4 bitcast_429d64() {
+  half4 res = half4(0.0h, 1.875h, 0.0h, 1.875h);
+  return res;
+}
+
+kernel void compute_main(device half4* prevent_dce [[buffer(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.prevent_dce=prevent_dce};
+  (*tint_module_vars.prevent_dce) = bitcast_429d64();
+}
+//
+// vertex_main
+//
+#include <metal_stdlib>
+using namespace metal;
 
 struct VertexOutput {
   float4 pos;
@@ -18,16 +55,6 @@ struct vertex_main_outputs {
 half4 bitcast_429d64() {
   half4 res = half4(0.0h, 1.875h, 0.0h, 1.875h);
   return res;
-}
-
-fragment void fragment_main(device half4* prevent_dce [[buffer(0)]]) {
-  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.prevent_dce=prevent_dce};
-  (*tint_module_vars.prevent_dce) = bitcast_429d64();
-}
-
-kernel void compute_main(device half4* prevent_dce [[buffer(0)]]) {
-  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.prevent_dce=prevent_dce};
-  (*tint_module_vars.prevent_dce) = bitcast_429d64();
 }
 
 VertexOutput vertex_main_inner() {

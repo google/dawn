@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 #include <metal_stdlib>
 
 using namespace metal;
@@ -6,14 +9,46 @@ half determinant_fc12a5() {
   return res;
 }
 
-fragment void fragment_main(device half* tint_symbol_1 [[buffer(0)]]) {
-  *(tint_symbol_1) = determinant_fc12a5();
+struct VertexOutput {
+  float4 pos;
+  half prevent_dce;
+};
+
+fragment void fragment_main(device half* tint_symbol [[buffer(0)]]) {
+  *(tint_symbol) = determinant_fc12a5();
   return;
 }
 
-kernel void compute_main(device half* tint_symbol_2 [[buffer(0)]]) {
-  *(tint_symbol_2) = determinant_fc12a5();
+//
+// compute_main
+//
+#include <metal_stdlib>
+
+using namespace metal;
+half determinant_fc12a5() {
+  half res = 0.0h;
+  return res;
+}
+
+struct VertexOutput {
+  float4 pos;
+  half prevent_dce;
+};
+
+kernel void compute_main(device half* tint_symbol [[buffer(0)]]) {
+  *(tint_symbol) = determinant_fc12a5();
   return;
+}
+
+//
+// vertex_main
+//
+#include <metal_stdlib>
+
+using namespace metal;
+half determinant_fc12a5() {
+  half res = 0.0h;
+  return res;
 }
 
 struct VertexOutput {

@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 #include <metal_stdlib>
 
 using namespace metal;
@@ -9,14 +12,52 @@ int select_cb9301() {
   return select(0, 1, all((res == bool2(false))));
 }
 
-fragment void fragment_main(device int* tint_symbol_1 [[buffer(0)]]) {
-  *(tint_symbol_1) = select_cb9301();
+struct VertexOutput {
+  float4 pos;
+  int prevent_dce;
+};
+
+fragment void fragment_main(device int* tint_symbol [[buffer(0)]]) {
+  *(tint_symbol) = select_cb9301();
   return;
 }
 
-kernel void compute_main(device int* tint_symbol_2 [[buffer(0)]]) {
-  *(tint_symbol_2) = select_cb9301();
+//
+// compute_main
+//
+#include <metal_stdlib>
+
+using namespace metal;
+int select_cb9301() {
+  bool2 arg_0 = bool2(true);
+  bool2 arg_1 = bool2(true);
+  bool2 arg_2 = bool2(true);
+  bool2 res = select(arg_0, arg_1, arg_2);
+  return select(0, 1, all((res == bool2(false))));
+}
+
+struct VertexOutput {
+  float4 pos;
+  int prevent_dce;
+};
+
+kernel void compute_main(device int* tint_symbol [[buffer(0)]]) {
+  *(tint_symbol) = select_cb9301();
   return;
+}
+
+//
+// vertex_main
+//
+#include <metal_stdlib>
+
+using namespace metal;
+int select_cb9301() {
+  bool2 arg_0 = bool2(true);
+  bool2 arg_1 = bool2(true);
+  bool2 arg_2 = bool2(true);
+  bool2 res = select(arg_0, arg_1, arg_2);
+  return select(0, 1, all((res == bool2(false))));
 }
 
 struct VertexOutput {

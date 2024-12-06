@@ -1,3 +1,32 @@
+//
+// fragment_main
+//
+#include <metal_stdlib>
+using namespace metal;
+
+void min_371bd6() {
+  int3 res = int3(1);
+}
+
+fragment void fragment_main() {
+  min_371bd6();
+}
+//
+// compute_main
+//
+#include <metal_stdlib>
+using namespace metal;
+
+void min_371bd6() {
+  int3 res = int3(1);
+}
+
+kernel void compute_main() {
+  min_371bd6();
+}
+//
+// vertex_main
+//
 #include <metal_stdlib>
 using namespace metal;
 
@@ -11,14 +40,6 @@ struct vertex_main_outputs {
 
 void min_371bd6() {
   int3 res = int3(1);
-}
-
-fragment void fragment_main() {
-  min_371bd6();
-}
-
-kernel void compute_main() {
-  min_371bd6();
 }
 
 VertexOutput vertex_main_inner() {

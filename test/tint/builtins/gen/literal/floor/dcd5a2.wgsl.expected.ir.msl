@@ -1,3 +1,32 @@
+//
+// fragment_main
+//
+#include <metal_stdlib>
+using namespace metal;
+
+void floor_dcd5a2() {
+  float res = 1.0f;
+}
+
+fragment void fragment_main() {
+  floor_dcd5a2();
+}
+//
+// compute_main
+//
+#include <metal_stdlib>
+using namespace metal;
+
+void floor_dcd5a2() {
+  float res = 1.0f;
+}
+
+kernel void compute_main() {
+  floor_dcd5a2();
+}
+//
+// vertex_main
+//
 #include <metal_stdlib>
 using namespace metal;
 
@@ -11,14 +40,6 @@ struct vertex_main_outputs {
 
 void floor_dcd5a2() {
   float res = 1.0f;
-}
-
-fragment void fragment_main() {
-  floor_dcd5a2();
-}
-
-kernel void compute_main() {
-  floor_dcd5a2();
 }
 
 VertexOutput vertex_main_inner() {

@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 #include <metal_stdlib>
 
 using namespace metal;
@@ -6,14 +9,46 @@ half round_9078ef() {
   return res;
 }
 
-fragment void fragment_main(device half* tint_symbol_1 [[buffer(0)]]) {
-  *(tint_symbol_1) = round_9078ef();
+struct VertexOutput {
+  float4 pos;
+  half prevent_dce;
+};
+
+fragment void fragment_main(device half* tint_symbol [[buffer(0)]]) {
+  *(tint_symbol) = round_9078ef();
   return;
 }
 
-kernel void compute_main(device half* tint_symbol_2 [[buffer(0)]]) {
-  *(tint_symbol_2) = round_9078ef();
+//
+// compute_main
+//
+#include <metal_stdlib>
+
+using namespace metal;
+half round_9078ef() {
+  half res = 4.0h;
+  return res;
+}
+
+struct VertexOutput {
+  float4 pos;
+  half prevent_dce;
+};
+
+kernel void compute_main(device half* tint_symbol [[buffer(0)]]) {
+  *(tint_symbol) = round_9078ef();
   return;
+}
+
+//
+// vertex_main
+//
+#include <metal_stdlib>
+
+using namespace metal;
+half round_9078ef() {
+  half res = 4.0h;
+  return res;
 }
 
 struct VertexOutput {

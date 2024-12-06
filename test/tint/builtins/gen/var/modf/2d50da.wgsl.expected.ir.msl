@@ -1,3 +1,48 @@
+//
+// fragment_main
+//
+#include <metal_stdlib>
+using namespace metal;
+
+struct modf_result_vec2_f32 {
+  float2 fract;
+  float2 whole;
+};
+
+void modf_2d50da() {
+  float2 arg_0 = float2(-1.5f);
+  modf_result_vec2_f32 v = {};
+  v.fract = modf(arg_0, v.whole);
+  modf_result_vec2_f32 res = v;
+}
+
+fragment void fragment_main() {
+  modf_2d50da();
+}
+//
+// compute_main
+//
+#include <metal_stdlib>
+using namespace metal;
+
+struct modf_result_vec2_f32 {
+  float2 fract;
+  float2 whole;
+};
+
+void modf_2d50da() {
+  float2 arg_0 = float2(-1.5f);
+  modf_result_vec2_f32 v = {};
+  v.fract = modf(arg_0, v.whole);
+  modf_result_vec2_f32 res = v;
+}
+
+kernel void compute_main() {
+  modf_2d50da();
+}
+//
+// vertex_main
+//
 #include <metal_stdlib>
 using namespace metal;
 
@@ -19,14 +64,6 @@ void modf_2d50da() {
   modf_result_vec2_f32 v = {};
   v.fract = modf(arg_0, v.whole);
   modf_result_vec2_f32 res = v;
-}
-
-fragment void fragment_main() {
-  modf_2d50da();
-}
-
-kernel void compute_main() {
-  modf_2d50da();
 }
 
 VertexOutput vertex_main_inner() {

@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 #include <metal_stdlib>
 
 using namespace metal;
@@ -5,14 +8,42 @@ void atanh_70d5bd() {
   float2 res = float2(0.54930615425109863281f);
 }
 
+struct VertexOutput {
+  float4 pos;
+};
+
 fragment void fragment_main() {
   atanh_70d5bd();
   return;
 }
 
+//
+// compute_main
+//
+#include <metal_stdlib>
+
+using namespace metal;
+void atanh_70d5bd() {
+  float2 res = float2(0.54930615425109863281f);
+}
+
+struct VertexOutput {
+  float4 pos;
+};
+
 kernel void compute_main() {
   atanh_70d5bd();
   return;
+}
+
+//
+// vertex_main
+//
+#include <metal_stdlib>
+
+using namespace metal;
+void atanh_70d5bd() {
+  float2 res = float2(0.54930615425109863281f);
 }
 
 struct VertexOutput {

@@ -1,9 +1,52 @@
+//
+// fragment_main
+//
 #include <metal_stdlib>
 using namespace metal;
 
 struct tint_module_vars_struct {
   device half* prevent_dce;
 };
+
+half select_10e73b() {
+  half arg_0 = 1.0h;
+  half arg_1 = 1.0h;
+  bool arg_2 = true;
+  half res = select(arg_0, arg_1, arg_2);
+  return res;
+}
+
+fragment void fragment_main(device half* prevent_dce [[buffer(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.prevent_dce=prevent_dce};
+  (*tint_module_vars.prevent_dce) = select_10e73b();
+}
+//
+// compute_main
+//
+#include <metal_stdlib>
+using namespace metal;
+
+struct tint_module_vars_struct {
+  device half* prevent_dce;
+};
+
+half select_10e73b() {
+  half arg_0 = 1.0h;
+  half arg_1 = 1.0h;
+  bool arg_2 = true;
+  half res = select(arg_0, arg_1, arg_2);
+  return res;
+}
+
+kernel void compute_main(device half* prevent_dce [[buffer(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.prevent_dce=prevent_dce};
+  (*tint_module_vars.prevent_dce) = select_10e73b();
+}
+//
+// vertex_main
+//
+#include <metal_stdlib>
+using namespace metal;
 
 struct VertexOutput {
   float4 pos;
@@ -21,16 +64,6 @@ half select_10e73b() {
   bool arg_2 = true;
   half res = select(arg_0, arg_1, arg_2);
   return res;
-}
-
-fragment void fragment_main(device half* prevent_dce [[buffer(0)]]) {
-  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.prevent_dce=prevent_dce};
-  (*tint_module_vars.prevent_dce) = select_10e73b();
-}
-
-kernel void compute_main(device half* prevent_dce [[buffer(0)]]) {
-  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.prevent_dce=prevent_dce};
-  (*tint_module_vars.prevent_dce) = select_10e73b();
 }
 
 VertexOutput vertex_main_inner() {

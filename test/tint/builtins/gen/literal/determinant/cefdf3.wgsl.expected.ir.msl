@@ -1,3 +1,32 @@
+//
+// fragment_main
+//
+#include <metal_stdlib>
+using namespace metal;
+
+void determinant_cefdf3() {
+  float res = 0.0f;
+}
+
+fragment void fragment_main() {
+  determinant_cefdf3();
+}
+//
+// compute_main
+//
+#include <metal_stdlib>
+using namespace metal;
+
+void determinant_cefdf3() {
+  float res = 0.0f;
+}
+
+kernel void compute_main() {
+  determinant_cefdf3();
+}
+//
+// vertex_main
+//
 #include <metal_stdlib>
 using namespace metal;
 
@@ -11,14 +40,6 @@ struct vertex_main_outputs {
 
 void determinant_cefdf3() {
   float res = 0.0f;
-}
-
-fragment void fragment_main() {
-  determinant_cefdf3();
-}
-
-kernel void compute_main() {
-  determinant_cefdf3();
 }
 
 VertexOutput vertex_main_inner() {

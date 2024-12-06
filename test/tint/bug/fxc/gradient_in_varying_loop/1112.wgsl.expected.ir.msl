@@ -4,7 +4,6 @@ using namespace metal;
 struct tint_module_vars_struct {
   sampler Sampler;
   texture2d<float, access::sample> randomTexture;
-  texture2d<float, access::sample> depthTexture;
 };
 
 struct tint_symbol_outputs {

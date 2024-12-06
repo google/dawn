@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 #include <metal_stdlib>
 
 using namespace metal;
@@ -6,14 +9,46 @@ half3 sqrt_895a0c() {
   return res;
 }
 
-fragment void fragment_main(device packed_half3* tint_symbol_1 [[buffer(0)]]) {
-  *(tint_symbol_1) = packed_half3(sqrt_895a0c());
+struct VertexOutput {
+  float4 pos;
+  half3 prevent_dce;
+};
+
+fragment void fragment_main(device packed_half3* tint_symbol [[buffer(0)]]) {
+  *(tint_symbol) = packed_half3(sqrt_895a0c());
   return;
 }
 
-kernel void compute_main(device packed_half3* tint_symbol_2 [[buffer(0)]]) {
-  *(tint_symbol_2) = packed_half3(sqrt_895a0c());
+//
+// compute_main
+//
+#include <metal_stdlib>
+
+using namespace metal;
+half3 sqrt_895a0c() {
+  half3 res = half3(1.0h);
+  return res;
+}
+
+struct VertexOutput {
+  float4 pos;
+  half3 prevent_dce;
+};
+
+kernel void compute_main(device packed_half3* tint_symbol [[buffer(0)]]) {
+  *(tint_symbol) = packed_half3(sqrt_895a0c());
   return;
+}
+
+//
+// vertex_main
+//
+#include <metal_stdlib>
+
+using namespace metal;
+half3 sqrt_895a0c() {
+  half3 res = half3(1.0h);
+  return res;
 }
 
 struct VertexOutput {

@@ -1,8 +1,50 @@
+//
+// fragment_main
+//
 #include <metal_stdlib>
 using namespace metal;
 
 struct tint_module_vars_struct {
   device uint2* prevent_dce;
+  depthcube<float, access::sample> arg_0;
+};
+
+uint2 textureDimensions_d3accd(tint_module_vars_struct tint_module_vars) {
+  uint2 res = uint2(tint_module_vars.arg_0.get_width(min(1u, (tint_module_vars.arg_0.get_num_mip_levels() - 1u))), tint_module_vars.arg_0.get_height(min(1u, (tint_module_vars.arg_0.get_num_mip_levels() - 1u))));
+  return res;
+}
+
+fragment void fragment_main(device uint2* prevent_dce [[buffer(0)]], depthcube<float, access::sample> arg_0 [[texture(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.prevent_dce=prevent_dce, .arg_0=arg_0};
+  (*tint_module_vars.prevent_dce) = textureDimensions_d3accd(tint_module_vars);
+}
+//
+// compute_main
+//
+#include <metal_stdlib>
+using namespace metal;
+
+struct tint_module_vars_struct {
+  device uint2* prevent_dce;
+  depthcube<float, access::sample> arg_0;
+};
+
+uint2 textureDimensions_d3accd(tint_module_vars_struct tint_module_vars) {
+  uint2 res = uint2(tint_module_vars.arg_0.get_width(min(1u, (tint_module_vars.arg_0.get_num_mip_levels() - 1u))), tint_module_vars.arg_0.get_height(min(1u, (tint_module_vars.arg_0.get_num_mip_levels() - 1u))));
+  return res;
+}
+
+kernel void compute_main(device uint2* prevent_dce [[buffer(0)]], depthcube<float, access::sample> arg_0 [[texture(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.prevent_dce=prevent_dce, .arg_0=arg_0};
+  (*tint_module_vars.prevent_dce) = textureDimensions_d3accd(tint_module_vars);
+}
+//
+// vertex_main
+//
+#include <metal_stdlib>
+using namespace metal;
+
+struct tint_module_vars_struct {
   depthcube<float, access::sample> arg_0;
 };
 
@@ -19,16 +61,6 @@ struct vertex_main_outputs {
 uint2 textureDimensions_d3accd(tint_module_vars_struct tint_module_vars) {
   uint2 res = uint2(tint_module_vars.arg_0.get_width(min(1u, (tint_module_vars.arg_0.get_num_mip_levels() - 1u))), tint_module_vars.arg_0.get_height(min(1u, (tint_module_vars.arg_0.get_num_mip_levels() - 1u))));
   return res;
-}
-
-fragment void fragment_main(device uint2* prevent_dce [[buffer(0)]], depthcube<float, access::sample> arg_0 [[texture(0)]]) {
-  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.prevent_dce=prevent_dce, .arg_0=arg_0};
-  (*tint_module_vars.prevent_dce) = textureDimensions_d3accd(tint_module_vars);
-}
-
-kernel void compute_main(device uint2* prevent_dce [[buffer(0)]], depthcube<float, access::sample> arg_0 [[texture(0)]]) {
-  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.prevent_dce=prevent_dce, .arg_0=arg_0};
-  (*tint_module_vars.prevent_dce) = textureDimensions_d3accd(tint_module_vars);
 }
 
 VertexOutput vertex_main_inner(tint_module_vars_struct tint_module_vars) {

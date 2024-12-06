@@ -1,3 +1,32 @@
+//
+// fragment_main
+//
+#include <metal_stdlib>
+using namespace metal;
+
+void fma_eb25d7() {
+  float3 res = float3(2.0f);
+}
+
+fragment void fragment_main() {
+  fma_eb25d7();
+}
+//
+// compute_main
+//
+#include <metal_stdlib>
+using namespace metal;
+
+void fma_eb25d7() {
+  float3 res = float3(2.0f);
+}
+
+kernel void compute_main() {
+  fma_eb25d7();
+}
+//
+// vertex_main
+//
 #include <metal_stdlib>
 using namespace metal;
 
@@ -11,14 +40,6 @@ struct vertex_main_outputs {
 
 void fma_eb25d7() {
   float3 res = float3(2.0f);
-}
-
-fragment void fragment_main() {
-  fma_eb25d7();
-}
-
-kernel void compute_main() {
-  fma_eb25d7();
 }
 
 VertexOutput vertex_main_inner() {

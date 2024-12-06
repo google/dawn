@@ -17,26 +17,9 @@ struct ResultMatrix {
   /* 0x0000 */ tint_array<float, 1> numbers;
 };
 
-struct FirstMatrix {
-  tint_array<float, 1> numbers;
-};
-
-struct SecondMatrix {
-  tint_array<float, 1> numbers;
-};
-
-struct Uniforms {
-  float tint_symbol;
-  int sizeA;
-  int sizeB;
-};
-
 struct tint_module_vars_struct {
   thread uint3* gl_GlobalInvocationID;
   device ResultMatrix* resultMatrix;
-  const device FirstMatrix* firstMatrix;
-  const device SecondMatrix* secondMatrix;
-  const constant Uniforms* x_46;
   const constant tint_array<uint4, 1>* tint_storage_buffer_sizes;
 };
 

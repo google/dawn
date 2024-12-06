@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 #include <metal_stdlib>
 
 using namespace metal;
@@ -19,14 +22,72 @@ uint dot4U8Packed_fbed7b() {
   return res;
 }
 
-fragment void fragment_main(device uint* tint_symbol_1 [[buffer(0)]]) {
-  *(tint_symbol_1) = dot4U8Packed_fbed7b();
+struct VertexOutput {
+  float4 pos;
+  uint prevent_dce;
+};
+
+fragment void fragment_main(device uint* tint_symbol [[buffer(0)]]) {
+  *(tint_symbol) = dot4U8Packed_fbed7b();
   return;
 }
 
-kernel void compute_main(device uint* tint_symbol_2 [[buffer(0)]]) {
-  *(tint_symbol_2) = dot4U8Packed_fbed7b();
+//
+// compute_main
+//
+#include <metal_stdlib>
+
+using namespace metal;
+
+template<typename T>
+T tint_dot4(vec<T,4> a, vec<T,4> b) {
+  return a[0]*b[0] + a[1]*b[1] + a[2]*b[2] + a[3]*b[3];
+}
+uint tint_dot4_u8_packed(uint a, uint b) {
+  uint4 const a_u8 = ((uint4(a) >> uint4(24u, 16u, 8u, 0u)) & uint4(255u));
+  uint4 const b_u8 = ((uint4(b) >> uint4(24u, 16u, 8u, 0u)) & uint4(255u));
+  return tint_dot4(a_u8, b_u8);
+}
+
+uint dot4U8Packed_fbed7b() {
+  uint arg_0 = 1u;
+  uint arg_1 = 1u;
+  uint res = tint_dot4_u8_packed(arg_0, arg_1);
+  return res;
+}
+
+struct VertexOutput {
+  float4 pos;
+  uint prevent_dce;
+};
+
+kernel void compute_main(device uint* tint_symbol [[buffer(0)]]) {
+  *(tint_symbol) = dot4U8Packed_fbed7b();
   return;
+}
+
+//
+// vertex_main
+//
+#include <metal_stdlib>
+
+using namespace metal;
+
+template<typename T>
+T tint_dot4(vec<T,4> a, vec<T,4> b) {
+  return a[0]*b[0] + a[1]*b[1] + a[2]*b[2] + a[3]*b[3];
+}
+uint tint_dot4_u8_packed(uint a, uint b) {
+  uint4 const a_u8 = ((uint4(a) >> uint4(24u, 16u, 8u, 0u)) & uint4(255u));
+  uint4 const b_u8 = ((uint4(b) >> uint4(24u, 16u, 8u, 0u)) & uint4(255u));
+  return tint_dot4(a_u8, b_u8);
+}
+
+uint dot4U8Packed_fbed7b() {
+  uint arg_0 = 1u;
+  uint arg_1 = 1u;
+  uint res = tint_dot4_u8_packed(arg_0, arg_1);
+  return res;
 }
 
 struct VertexOutput {

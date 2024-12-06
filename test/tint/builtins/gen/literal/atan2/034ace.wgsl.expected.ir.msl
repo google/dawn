@@ -1,3 +1,32 @@
+//
+// fragment_main
+//
+#include <metal_stdlib>
+using namespace metal;
+
+void atan2_034ace() {
+  float res = 0.78539818525314331055f;
+}
+
+fragment void fragment_main() {
+  atan2_034ace();
+}
+//
+// compute_main
+//
+#include <metal_stdlib>
+using namespace metal;
+
+void atan2_034ace() {
+  float res = 0.78539818525314331055f;
+}
+
+kernel void compute_main() {
+  atan2_034ace();
+}
+//
+// vertex_main
+//
 #include <metal_stdlib>
 using namespace metal;
 
@@ -11,14 +40,6 @@ struct vertex_main_outputs {
 
 void atan2_034ace() {
   float res = 0.78539818525314331055f;
-}
-
-fragment void fragment_main() {
-  atan2_034ace();
-}
-
-kernel void compute_main() {
-  atan2_034ace();
 }
 
 VertexOutput vertex_main_inner() {

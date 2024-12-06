@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 #include <metal_stdlib>
 
 using namespace metal;
@@ -7,14 +10,48 @@ half inverseSqrt_440300() {
   return res;
 }
 
-fragment void fragment_main(device half* tint_symbol_1 [[buffer(0)]]) {
-  *(tint_symbol_1) = inverseSqrt_440300();
+struct VertexOutput {
+  float4 pos;
+  half prevent_dce;
+};
+
+fragment void fragment_main(device half* tint_symbol [[buffer(0)]]) {
+  *(tint_symbol) = inverseSqrt_440300();
   return;
 }
 
-kernel void compute_main(device half* tint_symbol_2 [[buffer(0)]]) {
-  *(tint_symbol_2) = inverseSqrt_440300();
+//
+// compute_main
+//
+#include <metal_stdlib>
+
+using namespace metal;
+half inverseSqrt_440300() {
+  half arg_0 = 1.0h;
+  half res = rsqrt(arg_0);
+  return res;
+}
+
+struct VertexOutput {
+  float4 pos;
+  half prevent_dce;
+};
+
+kernel void compute_main(device half* tint_symbol [[buffer(0)]]) {
+  *(tint_symbol) = inverseSqrt_440300();
   return;
+}
+
+//
+// vertex_main
+//
+#include <metal_stdlib>
+
+using namespace metal;
+half inverseSqrt_440300() {
+  half arg_0 = 1.0h;
+  half res = rsqrt(arg_0);
+  return res;
 }
 
 struct VertexOutput {

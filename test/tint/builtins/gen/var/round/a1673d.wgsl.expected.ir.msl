@@ -1,3 +1,32 @@
+//
+// fragment_main
+//
+#include <metal_stdlib>
+using namespace metal;
+
+void round_a1673d() {
+  float3 res = float3(4.0f);
+}
+
+fragment void fragment_main() {
+  round_a1673d();
+}
+//
+// compute_main
+//
+#include <metal_stdlib>
+using namespace metal;
+
+void round_a1673d() {
+  float3 res = float3(4.0f);
+}
+
+kernel void compute_main() {
+  round_a1673d();
+}
+//
+// vertex_main
+//
 #include <metal_stdlib>
 using namespace metal;
 
@@ -11,14 +40,6 @@ struct vertex_main_outputs {
 
 void round_a1673d() {
   float3 res = float3(4.0f);
-}
-
-fragment void fragment_main() {
-  round_a1673d();
-}
-
-kernel void compute_main() {
-  round_a1673d();
 }
 
 VertexOutput vertex_main_inner() {

@@ -1,3 +1,32 @@
+//
+// fragment_main
+//
+#include <metal_stdlib>
+using namespace metal;
+
+void mix_ef3575() {
+  float2 res = float2(1.0f);
+}
+
+fragment void fragment_main() {
+  mix_ef3575();
+}
+//
+// compute_main
+//
+#include <metal_stdlib>
+using namespace metal;
+
+void mix_ef3575() {
+  float2 res = float2(1.0f);
+}
+
+kernel void compute_main() {
+  mix_ef3575();
+}
+//
+// vertex_main
+//
 #include <metal_stdlib>
 using namespace metal;
 
@@ -11,14 +40,6 @@ struct vertex_main_outputs {
 
 void mix_ef3575() {
   float2 res = float2(1.0f);
-}
-
-fragment void fragment_main() {
-  mix_ef3575();
-}
-
-kernel void compute_main() {
-  mix_ef3575();
 }
 
 VertexOutput vertex_main_inner() {

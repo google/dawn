@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 #include <metal_stdlib>
 
 using namespace metal;
@@ -8,14 +11,50 @@ half2 max_34956e() {
   return res;
 }
 
-fragment void fragment_main(device half2* tint_symbol_1 [[buffer(0)]]) {
-  *(tint_symbol_1) = max_34956e();
+struct VertexOutput {
+  float4 pos;
+  half2 prevent_dce;
+};
+
+fragment void fragment_main(device half2* tint_symbol [[buffer(0)]]) {
+  *(tint_symbol) = max_34956e();
   return;
 }
 
-kernel void compute_main(device half2* tint_symbol_2 [[buffer(0)]]) {
-  *(tint_symbol_2) = max_34956e();
+//
+// compute_main
+//
+#include <metal_stdlib>
+
+using namespace metal;
+half2 max_34956e() {
+  half2 arg_0 = half2(1.0h);
+  half2 arg_1 = half2(1.0h);
+  half2 res = fmax(arg_0, arg_1);
+  return res;
+}
+
+struct VertexOutput {
+  float4 pos;
+  half2 prevent_dce;
+};
+
+kernel void compute_main(device half2* tint_symbol [[buffer(0)]]) {
+  *(tint_symbol) = max_34956e();
   return;
+}
+
+//
+// vertex_main
+//
+#include <metal_stdlib>
+
+using namespace metal;
+half2 max_34956e() {
+  half2 arg_0 = half2(1.0h);
+  half2 arg_1 = half2(1.0h);
+  half2 res = fmax(arg_0, arg_1);
+  return res;
 }
 
 struct VertexOutput {

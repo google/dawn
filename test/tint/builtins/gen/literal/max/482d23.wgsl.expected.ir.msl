@@ -1,3 +1,32 @@
+//
+// fragment_main
+//
+#include <metal_stdlib>
+using namespace metal;
+
+void max_482d23() {
+  int3 res = int3(1);
+}
+
+fragment void fragment_main() {
+  max_482d23();
+}
+//
+// compute_main
+//
+#include <metal_stdlib>
+using namespace metal;
+
+void max_482d23() {
+  int3 res = int3(1);
+}
+
+kernel void compute_main() {
+  max_482d23();
+}
+//
+// vertex_main
+//
 #include <metal_stdlib>
 using namespace metal;
 
@@ -11,14 +40,6 @@ struct vertex_main_outputs {
 
 void max_482d23() {
   int3 res = int3(1);
-}
-
-fragment void fragment_main() {
-  max_482d23();
-}
-
-kernel void compute_main() {
-  max_482d23();
 }
 
 VertexOutput vertex_main_inner() {

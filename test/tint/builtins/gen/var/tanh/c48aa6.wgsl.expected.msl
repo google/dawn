@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 #include <metal_stdlib>
 
 using namespace metal;
@@ -5,14 +8,42 @@ void tanh_c48aa6() {
   float2 res = float2(0.76159417629241943359f);
 }
 
+struct VertexOutput {
+  float4 pos;
+};
+
 fragment void fragment_main() {
   tanh_c48aa6();
   return;
 }
 
+//
+// compute_main
+//
+#include <metal_stdlib>
+
+using namespace metal;
+void tanh_c48aa6() {
+  float2 res = float2(0.76159417629241943359f);
+}
+
+struct VertexOutput {
+  float4 pos;
+};
+
 kernel void compute_main() {
   tanh_c48aa6();
   return;
+}
+
+//
+// vertex_main
+//
+#include <metal_stdlib>
+
+using namespace metal;
+void tanh_c48aa6() {
+  float2 res = float2(0.76159417629241943359f);
 }
 
 struct VertexOutput {

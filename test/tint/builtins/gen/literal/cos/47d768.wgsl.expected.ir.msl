@@ -1,3 +1,32 @@
+//
+// fragment_main
+//
+#include <metal_stdlib>
+using namespace metal;
+
+void cos_47d768() {
+  float4 res = float4(1.0f);
+}
+
+fragment void fragment_main() {
+  cos_47d768();
+}
+//
+// compute_main
+//
+#include <metal_stdlib>
+using namespace metal;
+
+void cos_47d768() {
+  float4 res = float4(1.0f);
+}
+
+kernel void compute_main() {
+  cos_47d768();
+}
+//
+// vertex_main
+//
 #include <metal_stdlib>
 using namespace metal;
 
@@ -11,14 +40,6 @@ struct vertex_main_outputs {
 
 void cos_47d768() {
   float4 res = float4(1.0f);
-}
-
-fragment void fragment_main() {
-  cos_47d768();
-}
-
-kernel void compute_main() {
-  cos_47d768();
 }
 
 VertexOutput vertex_main_inner() {

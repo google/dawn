@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 #include <metal_stdlib>
 
 using namespace metal;
@@ -5,14 +8,42 @@ void tan_a0966f() {
   float4 res = float4(1.55740773677825927734f);
 }
 
+struct VertexOutput {
+  float4 pos;
+};
+
 fragment void fragment_main() {
   tan_a0966f();
   return;
 }
 
+//
+// compute_main
+//
+#include <metal_stdlib>
+
+using namespace metal;
+void tan_a0966f() {
+  float4 res = float4(1.55740773677825927734f);
+}
+
+struct VertexOutput {
+  float4 pos;
+};
+
 kernel void compute_main() {
   tan_a0966f();
   return;
+}
+
+//
+// vertex_main
+//
+#include <metal_stdlib>
+
+using namespace metal;
+void tan_a0966f() {
+  float4 res = float4(1.55740773677825927734f);
 }
 
 struct VertexOutput {

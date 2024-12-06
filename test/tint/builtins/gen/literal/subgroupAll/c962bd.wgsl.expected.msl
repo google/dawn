@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 #include <metal_stdlib>
 
 using namespace metal;
@@ -11,8 +14,19 @@ fragment void fragment_main(device int* tint_symbol [[buffer(0)]]) {
   return;
 }
 
-kernel void compute_main(device int* tint_symbol_1 [[buffer(0)]]) {
-  *(tint_symbol_1) = subgroupAll_c962bd();
+//
+// compute_main
+//
+#include <metal_stdlib>
+
+using namespace metal;
+int subgroupAll_c962bd() {
+  bool res = simd_all(true);
+  return select(0, 1, all((res == false)));
+}
+
+kernel void compute_main(device int* tint_symbol [[buffer(0)]]) {
+  *(tint_symbol) = subgroupAll_c962bd();
   return;
 }
 

@@ -1,3 +1,6 @@
+//
+// vertex_main
+//
 #include <metal_stdlib>
 
 using namespace metal;
@@ -45,23 +48,55 @@ vertex tint_symbol_3 vertex_main(depth2d_ms<float, access::read> tint_symbol_8 [
   return wrapper_result;
 }
 
-void fragment_main_1(depth2d_ms<float, access::read> tint_symbol_9) {
-  textureNumSamples_a3c8a0(tint_symbol_9);
+//
+// fragment_main
+//
+#include <metal_stdlib>
+
+using namespace metal;
+void textureNumSamples_a3c8a0(depth2d_ms<float, access::read> tint_symbol) {
+  int res = 0;
+  res = int(tint_symbol.get_num_samples());
   return;
 }
 
-fragment void fragment_main(depth2d_ms<float, access::read> tint_symbol_10 [[texture(0)]]) {
-  fragment_main_1(tint_symbol_10);
+struct vertex_main_out {
+  float4 tint_symbol_1_1;
+};
+
+void fragment_main_1(depth2d_ms<float, access::read> tint_symbol_1) {
+  textureNumSamples_a3c8a0(tint_symbol_1);
   return;
 }
 
-void compute_main_1(depth2d_ms<float, access::read> tint_symbol_11) {
-  textureNumSamples_a3c8a0(tint_symbol_11);
+fragment void fragment_main(depth2d_ms<float, access::read> tint_symbol_2 [[texture(0)]]) {
+  fragment_main_1(tint_symbol_2);
   return;
 }
 
-kernel void compute_main(depth2d_ms<float, access::read> tint_symbol_12 [[texture(0)]]) {
-  compute_main_1(tint_symbol_12);
+//
+// compute_main
+//
+#include <metal_stdlib>
+
+using namespace metal;
+void textureNumSamples_a3c8a0(depth2d_ms<float, access::read> tint_symbol) {
+  int res = 0;
+  res = int(tint_symbol.get_num_samples());
+  return;
+}
+
+struct vertex_main_out {
+  float4 tint_symbol_1_1;
+};
+
+void compute_main_1(depth2d_ms<float, access::read> tint_symbol_1) {
+  textureNumSamples_a3c8a0(tint_symbol_1);
+  return;
+}
+
+kernel void compute_main(depth2d_ms<float, access::read> tint_symbol_2 [[texture(0)]]) {
+  compute_main_1(tint_symbol_2);
   return;
 }
 

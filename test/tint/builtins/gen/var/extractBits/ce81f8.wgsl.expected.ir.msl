@@ -1,9 +1,54 @@
+//
+// fragment_main
+//
 #include <metal_stdlib>
 using namespace metal;
 
 struct tint_module_vars_struct {
   device uint* prevent_dce;
 };
+
+uint extractBits_ce81f8() {
+  uint arg_0 = 1u;
+  uint arg_1 = 1u;
+  uint arg_2 = 1u;
+  uint const v = min(arg_1, 32u);
+  uint res = extract_bits(arg_0, v, min(arg_2, (32u - v)));
+  return res;
+}
+
+fragment void fragment_main(device uint* prevent_dce [[buffer(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.prevent_dce=prevent_dce};
+  (*tint_module_vars.prevent_dce) = extractBits_ce81f8();
+}
+//
+// compute_main
+//
+#include <metal_stdlib>
+using namespace metal;
+
+struct tint_module_vars_struct {
+  device uint* prevent_dce;
+};
+
+uint extractBits_ce81f8() {
+  uint arg_0 = 1u;
+  uint arg_1 = 1u;
+  uint arg_2 = 1u;
+  uint const v = min(arg_1, 32u);
+  uint res = extract_bits(arg_0, v, min(arg_2, (32u - v)));
+  return res;
+}
+
+kernel void compute_main(device uint* prevent_dce [[buffer(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.prevent_dce=prevent_dce};
+  (*tint_module_vars.prevent_dce) = extractBits_ce81f8();
+}
+//
+// vertex_main
+//
+#include <metal_stdlib>
+using namespace metal;
 
 struct VertexOutput {
   float4 pos;
@@ -22,16 +67,6 @@ uint extractBits_ce81f8() {
   uint const v = min(arg_1, 32u);
   uint res = extract_bits(arg_0, v, min(arg_2, (32u - v)));
   return res;
-}
-
-fragment void fragment_main(device uint* prevent_dce [[buffer(0)]]) {
-  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.prevent_dce=prevent_dce};
-  (*tint_module_vars.prevent_dce) = extractBits_ce81f8();
-}
-
-kernel void compute_main(device uint* prevent_dce [[buffer(0)]]) {
-  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.prevent_dce=prevent_dce};
-  (*tint_module_vars.prevent_dce) = extractBits_ce81f8();
 }
 
 VertexOutput vertex_main_inner() {

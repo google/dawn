@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 #include <metal_stdlib>
 
 using namespace metal;
@@ -6,14 +9,46 @@ int3 extractBits_e04f5d() {
   return res;
 }
 
-fragment void fragment_main(device packed_int3* tint_symbol_1 [[buffer(0)]]) {
-  *(tint_symbol_1) = packed_int3(extractBits_e04f5d());
+struct VertexOutput {
+  float4 pos;
+  int3 prevent_dce;
+};
+
+fragment void fragment_main(device packed_int3* tint_symbol [[buffer(0)]]) {
+  *(tint_symbol) = packed_int3(extractBits_e04f5d());
   return;
 }
 
-kernel void compute_main(device packed_int3* tint_symbol_2 [[buffer(0)]]) {
-  *(tint_symbol_2) = packed_int3(extractBits_e04f5d());
+//
+// compute_main
+//
+#include <metal_stdlib>
+
+using namespace metal;
+int3 extractBits_e04f5d() {
+  int3 res = int3(0);
+  return res;
+}
+
+struct VertexOutput {
+  float4 pos;
+  int3 prevent_dce;
+};
+
+kernel void compute_main(device packed_int3* tint_symbol [[buffer(0)]]) {
+  *(tint_symbol) = packed_int3(extractBits_e04f5d());
   return;
+}
+
+//
+// vertex_main
+//
+#include <metal_stdlib>
+
+using namespace metal;
+int3 extractBits_e04f5d() {
+  int3 res = int3(0);
+  return res;
 }
 
 struct VertexOutput {

@@ -6,13 +6,13 @@ struct FBF {
   int4 c3;
 };
 
+void g(float a, float b, int c) {
+}
+
 struct tint_symbol_1 {
   float4 c1 [[color(1)]];
   int4 c3 [[color(3)]];
 };
-
-void g(float a, float b, int c) {
-}
 
 void f_inner(float4 pos, FBF fbf) {
   g(fbf.c1[0], pos[1], fbf.c3[2]);

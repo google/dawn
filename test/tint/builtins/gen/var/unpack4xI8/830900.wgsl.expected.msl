@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 #include <metal_stdlib>
 
 using namespace metal;
@@ -13,14 +16,60 @@ int4 unpack4xI8_830900() {
   return res;
 }
 
-fragment void fragment_main(device int4* tint_symbol_1 [[buffer(0)]]) {
-  *(tint_symbol_1) = unpack4xI8_830900();
+struct VertexOutput {
+  float4 pos;
+  int4 prevent_dce;
+};
+
+fragment void fragment_main(device int4* tint_symbol [[buffer(0)]]) {
+  *(tint_symbol) = unpack4xI8_830900();
   return;
 }
 
-kernel void compute_main(device int4* tint_symbol_2 [[buffer(0)]]) {
-  *(tint_symbol_2) = unpack4xI8_830900();
+//
+// compute_main
+//
+#include <metal_stdlib>
+
+using namespace metal;
+int4 tint_unpack_4xi8(uint a) {
+  uint4 const a_vec4u = uint4(a);
+  int4 const a_vec4i = as_type<int4>((a_vec4u << uint4(24u, 16u, 8u, 0u)));
+  return (a_vec4i >> uint4(24u));
+}
+
+int4 unpack4xI8_830900() {
+  uint arg_0 = 1u;
+  int4 res = tint_unpack_4xi8(arg_0);
+  return res;
+}
+
+struct VertexOutput {
+  float4 pos;
+  int4 prevent_dce;
+};
+
+kernel void compute_main(device int4* tint_symbol [[buffer(0)]]) {
+  *(tint_symbol) = unpack4xI8_830900();
   return;
+}
+
+//
+// vertex_main
+//
+#include <metal_stdlib>
+
+using namespace metal;
+int4 tint_unpack_4xi8(uint a) {
+  uint4 const a_vec4u = uint4(a);
+  int4 const a_vec4i = as_type<int4>((a_vec4u << uint4(24u, 16u, 8u, 0u)));
+  return (a_vec4i >> uint4(24u));
+}
+
+int4 unpack4xI8_830900() {
+  uint arg_0 = 1u;
+  int4 res = tint_unpack_4xi8(arg_0);
+  return res;
 }
 
 struct VertexOutput {

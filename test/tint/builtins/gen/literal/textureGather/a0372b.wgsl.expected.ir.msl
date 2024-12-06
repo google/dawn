@@ -1,8 +1,52 @@
+//
+// fragment_main
+//
 #include <metal_stdlib>
 using namespace metal;
 
 struct tint_module_vars_struct {
   device uint4* prevent_dce;
+  texture2d_array<uint, access::sample> arg_1;
+  sampler arg_2;
+};
+
+uint4 textureGather_a0372b(tint_module_vars_struct tint_module_vars) {
+  uint4 res = tint_module_vars.arg_1.gather(tint_module_vars.arg_2, float2(1.0f), 1u, int2(0), component::y);
+  return res;
+}
+
+fragment void fragment_main(device uint4* prevent_dce [[buffer(0)]], texture2d_array<uint, access::sample> arg_1 [[texture(0)]], sampler arg_2 [[sampler(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.prevent_dce=prevent_dce, .arg_1=arg_1, .arg_2=arg_2};
+  (*tint_module_vars.prevent_dce) = textureGather_a0372b(tint_module_vars);
+}
+//
+// compute_main
+//
+#include <metal_stdlib>
+using namespace metal;
+
+struct tint_module_vars_struct {
+  device uint4* prevent_dce;
+  texture2d_array<uint, access::sample> arg_1;
+  sampler arg_2;
+};
+
+uint4 textureGather_a0372b(tint_module_vars_struct tint_module_vars) {
+  uint4 res = tint_module_vars.arg_1.gather(tint_module_vars.arg_2, float2(1.0f), 1u, int2(0), component::y);
+  return res;
+}
+
+kernel void compute_main(device uint4* prevent_dce [[buffer(0)]], texture2d_array<uint, access::sample> arg_1 [[texture(0)]], sampler arg_2 [[sampler(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.prevent_dce=prevent_dce, .arg_1=arg_1, .arg_2=arg_2};
+  (*tint_module_vars.prevent_dce) = textureGather_a0372b(tint_module_vars);
+}
+//
+// vertex_main
+//
+#include <metal_stdlib>
+using namespace metal;
+
+struct tint_module_vars_struct {
   texture2d_array<uint, access::sample> arg_1;
   sampler arg_2;
 };
@@ -20,16 +64,6 @@ struct vertex_main_outputs {
 uint4 textureGather_a0372b(tint_module_vars_struct tint_module_vars) {
   uint4 res = tint_module_vars.arg_1.gather(tint_module_vars.arg_2, float2(1.0f), 1u, int2(0), component::y);
   return res;
-}
-
-fragment void fragment_main(device uint4* prevent_dce [[buffer(0)]], texture2d_array<uint, access::sample> arg_1 [[texture(0)]], sampler arg_2 [[sampler(0)]]) {
-  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.prevent_dce=prevent_dce, .arg_1=arg_1, .arg_2=arg_2};
-  (*tint_module_vars.prevent_dce) = textureGather_a0372b(tint_module_vars);
-}
-
-kernel void compute_main(device uint4* prevent_dce [[buffer(0)]], texture2d_array<uint, access::sample> arg_1 [[texture(0)]], sampler arg_2 [[sampler(0)]]) {
-  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.prevent_dce=prevent_dce, .arg_1=arg_1, .arg_2=arg_2};
-  (*tint_module_vars.prevent_dce) = textureGather_a0372b(tint_module_vars);
 }
 
 VertexOutput vertex_main_inner(tint_module_vars_struct tint_module_vars) {

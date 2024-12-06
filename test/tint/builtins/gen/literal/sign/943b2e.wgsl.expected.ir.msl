@@ -1,3 +1,32 @@
+//
+// fragment_main
+//
+#include <metal_stdlib>
+using namespace metal;
+
+void sign_943b2e() {
+  int2 res = int2(1);
+}
+
+fragment void fragment_main() {
+  sign_943b2e();
+}
+//
+// compute_main
+//
+#include <metal_stdlib>
+using namespace metal;
+
+void sign_943b2e() {
+  int2 res = int2(1);
+}
+
+kernel void compute_main() {
+  sign_943b2e();
+}
+//
+// vertex_main
+//
 #include <metal_stdlib>
 using namespace metal;
 
@@ -11,14 +40,6 @@ struct vertex_main_outputs {
 
 void sign_943b2e() {
   int2 res = int2(1);
-}
-
-fragment void fragment_main() {
-  sign_943b2e();
-}
-
-kernel void compute_main() {
-  sign_943b2e();
 }
 
 VertexOutput vertex_main_inner() {

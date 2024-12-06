@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 #include <metal_stdlib>
 
 using namespace metal;
@@ -7,14 +10,48 @@ float2 sinh_b9860e() {
   return res;
 }
 
-fragment void fragment_main(device float2* tint_symbol_1 [[buffer(0)]]) {
-  *(tint_symbol_1) = sinh_b9860e();
+struct VertexOutput {
+  float4 pos;
+  float2 prevent_dce;
+};
+
+fragment void fragment_main(device float2* tint_symbol [[buffer(0)]]) {
+  *(tint_symbol) = sinh_b9860e();
   return;
 }
 
-kernel void compute_main(device float2* tint_symbol_2 [[buffer(0)]]) {
-  *(tint_symbol_2) = sinh_b9860e();
+//
+// compute_main
+//
+#include <metal_stdlib>
+
+using namespace metal;
+float2 sinh_b9860e() {
+  float2 arg_0 = float2(1.0f);
+  float2 res = sinh(arg_0);
+  return res;
+}
+
+struct VertexOutput {
+  float4 pos;
+  float2 prevent_dce;
+};
+
+kernel void compute_main(device float2* tint_symbol [[buffer(0)]]) {
+  *(tint_symbol) = sinh_b9860e();
   return;
+}
+
+//
+// vertex_main
+//
+#include <metal_stdlib>
+
+using namespace metal;
+float2 sinh_b9860e() {
+  float2 arg_0 = float2(1.0f);
+  float2 res = sinh(arg_0);
+  return res;
 }
 
 struct VertexOutput {

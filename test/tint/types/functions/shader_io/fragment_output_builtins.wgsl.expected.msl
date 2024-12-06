@@ -1,3 +1,6 @@
+//
+// main1
+//
 #include <metal_stdlib>
 
 using namespace metal;
@@ -16,7 +19,13 @@ fragment tint_symbol main1() {
   return wrapper_result;
 }
 
-struct tint_symbol_1 {
+//
+// main2
+//
+#include <metal_stdlib>
+
+using namespace metal;
+struct tint_symbol {
   uint value [[sample_mask]];
 };
 
@@ -24,10 +33,10 @@ uint main2_inner() {
   return 1u;
 }
 
-fragment tint_symbol_1 main2() {
-  uint const inner_result_1 = main2_inner();
-  tint_symbol_1 wrapper_result_1 = {};
-  wrapper_result_1.value = inner_result_1;
-  return wrapper_result_1;
+fragment tint_symbol main2() {
+  uint const inner_result = main2_inner();
+  tint_symbol wrapper_result = {};
+  wrapper_result.value = inner_result;
+  return wrapper_result;
 }
 

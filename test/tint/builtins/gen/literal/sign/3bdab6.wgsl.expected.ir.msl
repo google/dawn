@@ -1,3 +1,32 @@
+//
+// fragment_main
+//
+#include <metal_stdlib>
+using namespace metal;
+
+void sign_3bdab6() {
+  int4 res = int4(1);
+}
+
+fragment void fragment_main() {
+  sign_3bdab6();
+}
+//
+// compute_main
+//
+#include <metal_stdlib>
+using namespace metal;
+
+void sign_3bdab6() {
+  int4 res = int4(1);
+}
+
+kernel void compute_main() {
+  sign_3bdab6();
+}
+//
+// vertex_main
+//
 #include <metal_stdlib>
 using namespace metal;
 
@@ -11,14 +40,6 @@ struct vertex_main_outputs {
 
 void sign_3bdab6() {
   int4 res = int4(1);
-}
-
-fragment void fragment_main() {
-  sign_3bdab6();
-}
-
-kernel void compute_main() {
-  sign_3bdab6();
 }
 
 VertexOutput vertex_main_inner() {

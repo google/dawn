@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 #include <metal_stdlib>
 
 using namespace metal;
@@ -9,14 +12,52 @@ float2 mix_2fadab() {
   return res;
 }
 
-fragment void fragment_main(device float2* tint_symbol_1 [[buffer(0)]]) {
-  *(tint_symbol_1) = mix_2fadab();
+struct VertexOutput {
+  float4 pos;
+  float2 prevent_dce;
+};
+
+fragment void fragment_main(device float2* tint_symbol [[buffer(0)]]) {
+  *(tint_symbol) = mix_2fadab();
   return;
 }
 
-kernel void compute_main(device float2* tint_symbol_2 [[buffer(0)]]) {
-  *(tint_symbol_2) = mix_2fadab();
+//
+// compute_main
+//
+#include <metal_stdlib>
+
+using namespace metal;
+float2 mix_2fadab() {
+  float2 arg_0 = float2(1.0f);
+  float2 arg_1 = float2(1.0f);
+  float arg_2 = 1.0f;
+  float2 res = mix(arg_0, arg_1, arg_2);
+  return res;
+}
+
+struct VertexOutput {
+  float4 pos;
+  float2 prevent_dce;
+};
+
+kernel void compute_main(device float2* tint_symbol [[buffer(0)]]) {
+  *(tint_symbol) = mix_2fadab();
   return;
+}
+
+//
+// vertex_main
+//
+#include <metal_stdlib>
+
+using namespace metal;
+float2 mix_2fadab() {
+  float2 arg_0 = float2(1.0f);
+  float2 arg_1 = float2(1.0f);
+  float arg_2 = 1.0f;
+  float2 res = mix(arg_0, arg_1, arg_2);
+  return res;
 }
 
 struct VertexOutput {

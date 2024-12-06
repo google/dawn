@@ -1,3 +1,32 @@
+//
+// fragment_main
+//
+#include <metal_stdlib>
+using namespace metal;
+
+void reflect_d7e210() {
+  float4 res = float4(-7.0f);
+}
+
+fragment void fragment_main() {
+  reflect_d7e210();
+}
+//
+// compute_main
+//
+#include <metal_stdlib>
+using namespace metal;
+
+void reflect_d7e210() {
+  float4 res = float4(-7.0f);
+}
+
+kernel void compute_main() {
+  reflect_d7e210();
+}
+//
+// vertex_main
+//
 #include <metal_stdlib>
 using namespace metal;
 
@@ -11,14 +40,6 @@ struct vertex_main_outputs {
 
 void reflect_d7e210() {
   float4 res = float4(-7.0f);
-}
-
-fragment void fragment_main() {
-  reflect_d7e210();
-}
-
-kernel void compute_main() {
-  reflect_d7e210();
 }
 
 VertexOutput vertex_main_inner() {

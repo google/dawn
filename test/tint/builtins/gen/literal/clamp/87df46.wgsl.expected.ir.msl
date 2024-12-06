@@ -1,3 +1,32 @@
+//
+// fragment_main
+//
+#include <metal_stdlib>
+using namespace metal;
+
+void clamp_87df46() {
+  float4 res = float4(1.0f);
+}
+
+fragment void fragment_main() {
+  clamp_87df46();
+}
+//
+// compute_main
+//
+#include <metal_stdlib>
+using namespace metal;
+
+void clamp_87df46() {
+  float4 res = float4(1.0f);
+}
+
+kernel void compute_main() {
+  clamp_87df46();
+}
+//
+// vertex_main
+//
 #include <metal_stdlib>
 using namespace metal;
 
@@ -11,14 +40,6 @@ struct vertex_main_outputs {
 
 void clamp_87df46() {
   float4 res = float4(1.0f);
-}
-
-fragment void fragment_main() {
-  clamp_87df46();
-}
-
-kernel void compute_main() {
-  clamp_87df46();
 }
 
 VertexOutput vertex_main_inner() {

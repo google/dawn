@@ -65,9 +65,6 @@ struct tint_module_vars_struct {
   const constant tint_array<uint4, 1>* tint_storage_buffer_sizes;
 };
 
-void marg8uintin() {
-}
-
 float3 toVoxelPos(float3 position, tint_module_vars_struct tint_module_vars) {
   float3 bbMin = float3((*tint_module_vars.uniforms).bbMin.x, (*tint_module_vars.uniforms).bbMin.y, (*tint_module_vars.uniforms).bbMin.z);
   float3 bbMax = float3((*tint_module_vars.uniforms).bbMax.x, (*tint_module_vars.uniforms).bbMax.y, (*tint_module_vars.uniforms).bbMax.z);
@@ -87,21 +84,6 @@ uint3 tint_v3f32_to_v3u32(float3 value) {
 uint toIndex1D(uint gridSize, float3 voxelPos) {
   uint3 icoord = tint_v3f32_to_v3u32(voxelPos);
   return ((icoord.x + (gridSize * icoord.y)) + ((gridSize * gridSize) * icoord.z));
-}
-
-uint tint_mod_u32(uint lhs, uint rhs) {
-  return (lhs - ((lhs / select(rhs, 1u, (rhs == 0u))) * select(rhs, 1u, (rhs == 0u))));
-}
-
-uint tint_div_u32(uint lhs, uint rhs) {
-  return (lhs / select(rhs, 1u, (rhs == 0u)));
-}
-
-uint3 toIndex4D(uint gridSize, uint index) {
-  uint z = tint_div_u32(gridSize, (index * index));
-  uint y = tint_div_u32((gridSize - ((gridSize * gridSize) * z)), gridSize);
-  uint x = tint_mod_u32(index, gridSize);
-  return uint3(z, y, y);
 }
 
 float3 loadPosition(uint vertexIndex, tint_module_vars_struct tint_module_vars) {

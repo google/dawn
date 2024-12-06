@@ -1,3 +1,32 @@
+//
+// fragment_main
+//
+#include <metal_stdlib>
+using namespace metal;
+
+void abs_577d6e() {
+  int2 res = int2(1);
+}
+
+fragment void fragment_main() {
+  abs_577d6e();
+}
+//
+// compute_main
+//
+#include <metal_stdlib>
+using namespace metal;
+
+void abs_577d6e() {
+  int2 res = int2(1);
+}
+
+kernel void compute_main() {
+  abs_577d6e();
+}
+//
+// vertex_main
+//
 #include <metal_stdlib>
 using namespace metal;
 
@@ -11,14 +40,6 @@ struct vertex_main_outputs {
 
 void abs_577d6e() {
   int2 res = int2(1);
-}
-
-fragment void fragment_main() {
-  abs_577d6e();
-}
-
-kernel void compute_main() {
-  abs_577d6e();
 }
 
 VertexOutput vertex_main_inner() {

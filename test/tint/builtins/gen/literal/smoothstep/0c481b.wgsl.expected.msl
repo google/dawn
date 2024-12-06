@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 #include <metal_stdlib>
 
 using namespace metal;
@@ -5,14 +8,42 @@ void smoothstep_0c481b() {
   float2 res = float2(0.5f);
 }
 
+struct VertexOutput {
+  float4 pos;
+};
+
 fragment void fragment_main() {
   smoothstep_0c481b();
   return;
 }
 
+//
+// compute_main
+//
+#include <metal_stdlib>
+
+using namespace metal;
+void smoothstep_0c481b() {
+  float2 res = float2(0.5f);
+}
+
+struct VertexOutput {
+  float4 pos;
+};
+
 kernel void compute_main() {
   smoothstep_0c481b();
   return;
+}
+
+//
+// vertex_main
+//
+#include <metal_stdlib>
+
+using namespace metal;
+void smoothstep_0c481b() {
+  float2 res = float2(0.5f);
 }
 
 struct VertexOutput {

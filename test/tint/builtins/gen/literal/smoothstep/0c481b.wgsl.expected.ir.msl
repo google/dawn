@@ -1,3 +1,32 @@
+//
+// fragment_main
+//
+#include <metal_stdlib>
+using namespace metal;
+
+void smoothstep_0c481b() {
+  float2 res = float2(0.5f);
+}
+
+fragment void fragment_main() {
+  smoothstep_0c481b();
+}
+//
+// compute_main
+//
+#include <metal_stdlib>
+using namespace metal;
+
+void smoothstep_0c481b() {
+  float2 res = float2(0.5f);
+}
+
+kernel void compute_main() {
+  smoothstep_0c481b();
+}
+//
+// vertex_main
+//
 #include <metal_stdlib>
 using namespace metal;
 
@@ -11,14 +40,6 @@ struct vertex_main_outputs {
 
 void smoothstep_0c481b() {
   float2 res = float2(0.5f);
-}
-
-fragment void fragment_main() {
-  smoothstep_0c481b();
-}
-
-kernel void compute_main() {
-  smoothstep_0c481b();
 }
 
 VertexOutput vertex_main_inner() {

@@ -1,12 +1,12 @@
 #include <metal_stdlib>
 
 using namespace metal;
-struct tint_symbol_1 {
-  float4 value [[position]];
-};
-
 struct DeclaredAfterUsage {
   /* 0x0000 */ float f;
+};
+
+struct tint_symbol_1 {
+  float4 value [[position]];
 };
 
 float4 tint_symbol_inner(const constant DeclaredAfterUsage* const tint_symbol_2) {

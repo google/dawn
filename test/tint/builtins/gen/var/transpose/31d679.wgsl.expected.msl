@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 #include <metal_stdlib>
 
 using namespace metal;
@@ -7,14 +10,48 @@ int transpose_31d679() {
   return select(0, 1, (res[0][0] == 0.0f));
 }
 
-fragment void fragment_main(device int* tint_symbol_1 [[buffer(0)]]) {
-  *(tint_symbol_1) = transpose_31d679();
+struct VertexOutput {
+  float4 pos;
+  int prevent_dce;
+};
+
+fragment void fragment_main(device int* tint_symbol [[buffer(0)]]) {
+  *(tint_symbol) = transpose_31d679();
   return;
 }
 
-kernel void compute_main(device int* tint_symbol_2 [[buffer(0)]]) {
-  *(tint_symbol_2) = transpose_31d679();
+//
+// compute_main
+//
+#include <metal_stdlib>
+
+using namespace metal;
+int transpose_31d679() {
+  float2x2 arg_0 = float2x2(float2(1.0f), float2(1.0f));
+  float2x2 res = transpose(arg_0);
+  return select(0, 1, (res[0][0] == 0.0f));
+}
+
+struct VertexOutput {
+  float4 pos;
+  int prevent_dce;
+};
+
+kernel void compute_main(device int* tint_symbol [[buffer(0)]]) {
+  *(tint_symbol) = transpose_31d679();
   return;
+}
+
+//
+// vertex_main
+//
+#include <metal_stdlib>
+
+using namespace metal;
+int transpose_31d679() {
+  float2x2 arg_0 = float2x2(float2(1.0f), float2(1.0f));
+  float2x2 res = transpose(arg_0);
+  return select(0, 1, (res[0][0] == 0.0f));
 }
 
 struct VertexOutput {

@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 #include <metal_stdlib>
 
 using namespace metal;
@@ -5,14 +8,42 @@ void normalize_e7def8() {
   float3 res = float3(0.57735025882720947266f);
 }
 
+struct VertexOutput {
+  float4 pos;
+};
+
 fragment void fragment_main() {
   normalize_e7def8();
   return;
 }
 
+//
+// compute_main
+//
+#include <metal_stdlib>
+
+using namespace metal;
+void normalize_e7def8() {
+  float3 res = float3(0.57735025882720947266f);
+}
+
+struct VertexOutput {
+  float4 pos;
+};
+
 kernel void compute_main() {
   normalize_e7def8();
   return;
+}
+
+//
+// vertex_main
+//
+#include <metal_stdlib>
+
+using namespace metal;
+void normalize_e7def8() {
+  float3 res = float3(0.57735025882720947266f);
 }
 
 struct VertexOutput {

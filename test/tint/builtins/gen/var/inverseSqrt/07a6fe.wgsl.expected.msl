@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 #include <metal_stdlib>
 
 using namespace metal;
@@ -5,14 +8,42 @@ void inverseSqrt_07a6fe() {
   float4 res = float4(1.0f);
 }
 
+struct VertexOutput {
+  float4 pos;
+};
+
 fragment void fragment_main() {
   inverseSqrt_07a6fe();
   return;
 }
 
+//
+// compute_main
+//
+#include <metal_stdlib>
+
+using namespace metal;
+void inverseSqrt_07a6fe() {
+  float4 res = float4(1.0f);
+}
+
+struct VertexOutput {
+  float4 pos;
+};
+
 kernel void compute_main() {
   inverseSqrt_07a6fe();
   return;
+}
+
+//
+// vertex_main
+//
+#include <metal_stdlib>
+
+using namespace metal;
+void inverseSqrt_07a6fe() {
+  float4 res = float4(1.0f);
 }
 
 struct VertexOutput {

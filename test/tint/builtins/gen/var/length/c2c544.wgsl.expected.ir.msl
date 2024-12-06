@@ -1,3 +1,32 @@
+//
+// fragment_main
+//
+#include <metal_stdlib>
+using namespace metal;
+
+void length_c2c544() {
+  float res = 0.0f;
+}
+
+fragment void fragment_main() {
+  length_c2c544();
+}
+//
+// compute_main
+//
+#include <metal_stdlib>
+using namespace metal;
+
+void length_c2c544() {
+  float res = 0.0f;
+}
+
+kernel void compute_main() {
+  length_c2c544();
+}
+//
+// vertex_main
+//
 #include <metal_stdlib>
 using namespace metal;
 
@@ -11,14 +40,6 @@ struct vertex_main_outputs {
 
 void length_c2c544() {
   float res = 0.0f;
-}
-
-fragment void fragment_main() {
-  length_c2c544();
-}
-
-kernel void compute_main() {
-  length_c2c544();
 }
 
 VertexOutput vertex_main_inner() {

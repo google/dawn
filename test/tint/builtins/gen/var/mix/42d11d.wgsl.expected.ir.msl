@@ -1,3 +1,32 @@
+//
+// fragment_main
+//
+#include <metal_stdlib>
+using namespace metal;
+
+void mix_42d11d() {
+  float2 res = float2(1.0f);
+}
+
+fragment void fragment_main() {
+  mix_42d11d();
+}
+//
+// compute_main
+//
+#include <metal_stdlib>
+using namespace metal;
+
+void mix_42d11d() {
+  float2 res = float2(1.0f);
+}
+
+kernel void compute_main() {
+  mix_42d11d();
+}
+//
+// vertex_main
+//
 #include <metal_stdlib>
 using namespace metal;
 
@@ -11,14 +40,6 @@ struct vertex_main_outputs {
 
 void mix_42d11d() {
   float2 res = float2(1.0f);
-}
-
-fragment void fragment_main() {
-  mix_42d11d();
-}
-
-kernel void compute_main() {
-  mix_42d11d();
 }
 
 VertexOutput vertex_main_inner() {

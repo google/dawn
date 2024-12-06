@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 #include <metal_stdlib>
 
 using namespace metal;
@@ -7,14 +10,48 @@ float4 exp_0f70eb() {
   return res;
 }
 
-fragment void fragment_main(device float4* tint_symbol_1 [[buffer(0)]]) {
-  *(tint_symbol_1) = exp_0f70eb();
+struct VertexOutput {
+  float4 pos;
+  float4 prevent_dce;
+};
+
+fragment void fragment_main(device float4* tint_symbol [[buffer(0)]]) {
+  *(tint_symbol) = exp_0f70eb();
   return;
 }
 
-kernel void compute_main(device float4* tint_symbol_2 [[buffer(0)]]) {
-  *(tint_symbol_2) = exp_0f70eb();
+//
+// compute_main
+//
+#include <metal_stdlib>
+
+using namespace metal;
+float4 exp_0f70eb() {
+  float4 arg_0 = float4(1.0f);
+  float4 res = exp(arg_0);
+  return res;
+}
+
+struct VertexOutput {
+  float4 pos;
+  float4 prevent_dce;
+};
+
+kernel void compute_main(device float4* tint_symbol [[buffer(0)]]) {
+  *(tint_symbol) = exp_0f70eb();
   return;
+}
+
+//
+// vertex_main
+//
+#include <metal_stdlib>
+
+using namespace metal;
+float4 exp_0f70eb() {
+  float4 arg_0 = float4(1.0f);
+  float4 res = exp(arg_0);
+  return res;
 }
 
 struct VertexOutput {

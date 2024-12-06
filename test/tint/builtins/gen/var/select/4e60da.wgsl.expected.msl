@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 #include <metal_stdlib>
 
 using namespace metal;
@@ -6,14 +9,44 @@ void select_4e60da() {
   float2 res = select(float2(1.0f), float2(1.0f), arg_2);
 }
 
+struct VertexOutput {
+  float4 pos;
+};
+
 fragment void fragment_main() {
   select_4e60da();
   return;
 }
 
+//
+// compute_main
+//
+#include <metal_stdlib>
+
+using namespace metal;
+void select_4e60da() {
+  bool arg_2 = true;
+  float2 res = select(float2(1.0f), float2(1.0f), arg_2);
+}
+
+struct VertexOutput {
+  float4 pos;
+};
+
 kernel void compute_main() {
   select_4e60da();
   return;
+}
+
+//
+// vertex_main
+//
+#include <metal_stdlib>
+
+using namespace metal;
+void select_4e60da() {
+  bool arg_2 = true;
+  float2 res = select(float2(1.0f), float2(1.0f), arg_2);
 }
 
 struct VertexOutput {

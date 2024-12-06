@@ -1,3 +1,52 @@
+//
+// fragment_main
+//
+#include <metal_stdlib>
+
+using namespace metal;
+float textureSampleLevel_ae92a2(depthcube<float, access::sample> tint_symbol, sampler tint_symbol_1) {
+  float3 arg_2 = float3(1.0f);
+  uint arg_3 = 1u;
+  float res = tint_symbol.sample(tint_symbol_1, arg_2, level(arg_3));
+  return res;
+}
+
+struct VertexOutput {
+  float4 pos;
+  float prevent_dce;
+};
+
+fragment void fragment_main(device float* tint_symbol_2 [[buffer(0)]], depthcube<float, access::sample> tint_symbol_3 [[texture(0)]], sampler tint_symbol_4 [[sampler(0)]]) {
+  *(tint_symbol_2) = textureSampleLevel_ae92a2(tint_symbol_3, tint_symbol_4);
+  return;
+}
+
+//
+// compute_main
+//
+#include <metal_stdlib>
+
+using namespace metal;
+float textureSampleLevel_ae92a2(depthcube<float, access::sample> tint_symbol, sampler tint_symbol_1) {
+  float3 arg_2 = float3(1.0f);
+  uint arg_3 = 1u;
+  float res = tint_symbol.sample(tint_symbol_1, arg_2, level(arg_3));
+  return res;
+}
+
+struct VertexOutput {
+  float4 pos;
+  float prevent_dce;
+};
+
+kernel void compute_main(device float* tint_symbol_2 [[buffer(0)]], depthcube<float, access::sample> tint_symbol_3 [[texture(0)]], sampler tint_symbol_4 [[sampler(0)]]) {
+  *(tint_symbol_2) = textureSampleLevel_ae92a2(tint_symbol_3, tint_symbol_4);
+  return;
+}
+
+//
+// vertex_main
+//
 #include <metal_stdlib>
 
 using namespace metal;
@@ -6,16 +55,6 @@ float textureSampleLevel_ae92a2(depthcube<float, access::sample> tint_symbol_1, 
   uint arg_3 = 1u;
   float res = tint_symbol_1.sample(tint_symbol_2, arg_2, level(arg_3));
   return res;
-}
-
-fragment void fragment_main(device float* tint_symbol_3 [[buffer(0)]], depthcube<float, access::sample> tint_symbol_4 [[texture(0)]], sampler tint_symbol_5 [[sampler(0)]]) {
-  *(tint_symbol_3) = textureSampleLevel_ae92a2(tint_symbol_4, tint_symbol_5);
-  return;
-}
-
-kernel void compute_main(device float* tint_symbol_6 [[buffer(0)]], depthcube<float, access::sample> tint_symbol_7 [[texture(0)]], sampler tint_symbol_8 [[sampler(0)]]) {
-  *(tint_symbol_6) = textureSampleLevel_ae92a2(tint_symbol_7, tint_symbol_8);
-  return;
 }
 
 struct VertexOutput {
@@ -28,15 +67,15 @@ struct tint_symbol {
   float4 pos [[position]];
 };
 
-VertexOutput vertex_main_inner(depthcube<float, access::sample> tint_symbol_9, sampler tint_symbol_10) {
+VertexOutput vertex_main_inner(depthcube<float, access::sample> tint_symbol_3, sampler tint_symbol_4) {
   VertexOutput out = {};
   out.pos = float4(0.0f);
-  out.prevent_dce = textureSampleLevel_ae92a2(tint_symbol_9, tint_symbol_10);
+  out.prevent_dce = textureSampleLevel_ae92a2(tint_symbol_3, tint_symbol_4);
   return out;
 }
 
-vertex tint_symbol vertex_main(depthcube<float, access::sample> tint_symbol_11 [[texture(0)]], sampler tint_symbol_12 [[sampler(0)]]) {
-  VertexOutput const inner_result = vertex_main_inner(tint_symbol_11, tint_symbol_12);
+vertex tint_symbol vertex_main(depthcube<float, access::sample> tint_symbol_5 [[texture(0)]], sampler tint_symbol_6 [[sampler(0)]]) {
+  VertexOutput const inner_result = vertex_main_inner(tint_symbol_5, tint_symbol_6);
   tint_symbol wrapper_result = {};
   wrapper_result.pos = inner_result.pos;
   wrapper_result.prevent_dce = inner_result.prevent_dce;

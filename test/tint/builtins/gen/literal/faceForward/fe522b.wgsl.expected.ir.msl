@@ -1,3 +1,32 @@
+//
+// fragment_main
+//
+#include <metal_stdlib>
+using namespace metal;
+
+void faceForward_fe522b() {
+  float3 res = float3(-1.0f);
+}
+
+fragment void fragment_main() {
+  faceForward_fe522b();
+}
+//
+// compute_main
+//
+#include <metal_stdlib>
+using namespace metal;
+
+void faceForward_fe522b() {
+  float3 res = float3(-1.0f);
+}
+
+kernel void compute_main() {
+  faceForward_fe522b();
+}
+//
+// vertex_main
+//
 #include <metal_stdlib>
 using namespace metal;
 
@@ -11,14 +40,6 @@ struct vertex_main_outputs {
 
 void faceForward_fe522b() {
   float3 res = float3(-1.0f);
-}
-
-fragment void fragment_main() {
-  faceForward_fe522b();
-}
-
-kernel void compute_main() {
-  faceForward_fe522b();
 }
 
 VertexOutput vertex_main_inner() {

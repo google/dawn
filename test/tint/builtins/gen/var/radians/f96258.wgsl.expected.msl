@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 #include <metal_stdlib>
 
 using namespace metal;
@@ -12,14 +15,58 @@ float3 radians_f96258() {
   return res;
 }
 
-fragment void fragment_main(device packed_float3* tint_symbol_1 [[buffer(0)]]) {
-  *(tint_symbol_1) = packed_float3(radians_f96258());
+struct VertexOutput {
+  float4 pos;
+  float3 prevent_dce;
+};
+
+fragment void fragment_main(device packed_float3* tint_symbol [[buffer(0)]]) {
+  *(tint_symbol) = packed_float3(radians_f96258());
   return;
 }
 
-kernel void compute_main(device packed_float3* tint_symbol_2 [[buffer(0)]]) {
-  *(tint_symbol_2) = packed_float3(radians_f96258());
+//
+// compute_main
+//
+#include <metal_stdlib>
+
+using namespace metal;
+
+float3 tint_radians(float3 param_0) {
+  return param_0 * 0.01745329251994329547;
+}
+
+float3 radians_f96258() {
+  float3 arg_0 = float3(1.0f);
+  float3 res = tint_radians(arg_0);
+  return res;
+}
+
+struct VertexOutput {
+  float4 pos;
+  float3 prevent_dce;
+};
+
+kernel void compute_main(device packed_float3* tint_symbol [[buffer(0)]]) {
+  *(tint_symbol) = packed_float3(radians_f96258());
   return;
+}
+
+//
+// vertex_main
+//
+#include <metal_stdlib>
+
+using namespace metal;
+
+float3 tint_radians(float3 param_0) {
+  return param_0 * 0.01745329251994329547;
+}
+
+float3 radians_f96258() {
+  float3 arg_0 = float3(1.0f);
+  float3 res = tint_radians(arg_0);
+  return res;
 }
 
 struct VertexOutput {

@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 #include <metal_stdlib>
 
 using namespace metal;
@@ -6,14 +9,46 @@ float2 radians_61687a() {
   return res;
 }
 
-fragment void fragment_main(device float2* tint_symbol_1 [[buffer(0)]]) {
-  *(tint_symbol_1) = radians_61687a();
+struct VertexOutput {
+  float4 pos;
+  float2 prevent_dce;
+};
+
+fragment void fragment_main(device float2* tint_symbol [[buffer(0)]]) {
+  *(tint_symbol) = radians_61687a();
   return;
 }
 
-kernel void compute_main(device float2* tint_symbol_2 [[buffer(0)]]) {
-  *(tint_symbol_2) = radians_61687a();
+//
+// compute_main
+//
+#include <metal_stdlib>
+
+using namespace metal;
+float2 radians_61687a() {
+  float2 res = float2(0.01745329238474369049f);
+  return res;
+}
+
+struct VertexOutput {
+  float4 pos;
+  float2 prevent_dce;
+};
+
+kernel void compute_main(device float2* tint_symbol [[buffer(0)]]) {
+  *(tint_symbol) = radians_61687a();
   return;
+}
+
+//
+// vertex_main
+//
+#include <metal_stdlib>
+
+using namespace metal;
+float2 radians_61687a() {
+  float2 res = float2(0.01745329238474369049f);
+  return res;
 }
 
 struct VertexOutput {

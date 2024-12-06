@@ -893,7 +893,7 @@ bool GenerateMsl([[maybe_unused]] Options& options,
                  [[maybe_unused]] tint::inspector::Inspector& inspector,
                  [[maybe_unused]] tint::Program& src_program) {
 #if TINT_BUILD_MSL_WRITER
-    auto transform_res = ProcessASTTransformsOld(options, inspector, src_program);
+    auto transform_res = ProcessASTTransforms(options, inspector, src_program);
     if (transform_res != tint::Success || !transform_res->IsValid()) {
         tint::cmd::PrintWGSL(std::cerr, transform_res.Get());
         std::cerr << transform_res->Diagnostics() << "\n";
@@ -1340,7 +1340,8 @@ int main(int argc, const char** argv) {
     }
 
     if (options.format == Format::kNone || options.format == Format::kGlsl ||
-        options.format == Format::kHlsl || options.format == Format::kHlslFxc) {
+        options.format == Format::kHlsl || options.format == Format::kHlslFxc ||
+        options.format == Format::kMsl) {
         auto generate = [&]() {
             bool success = false;
             switch (options.format) {
@@ -1428,8 +1429,6 @@ int main(int argc, const char** argv) {
                 success = GenerateSpirv(options, inspector, info.program);
                 break;
             case Format::kMsl:
-                success = GenerateMsl(options, inspector, info.program);
-                break;
             case Format::kHlsl:
             case Format::kHlslFxc:
             case Format::kGlsl:

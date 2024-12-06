@@ -1,3 +1,32 @@
+//
+// fragment_main
+//
+#include <metal_stdlib>
+using namespace metal;
+
+void ldexp_fdbc7b() {
+  float res = 2.0f;
+}
+
+fragment void fragment_main() {
+  ldexp_fdbc7b();
+}
+//
+// compute_main
+//
+#include <metal_stdlib>
+using namespace metal;
+
+void ldexp_fdbc7b() {
+  float res = 2.0f;
+}
+
+kernel void compute_main() {
+  ldexp_fdbc7b();
+}
+//
+// vertex_main
+//
 #include <metal_stdlib>
 using namespace metal;
 
@@ -11,14 +40,6 @@ struct vertex_main_outputs {
 
 void ldexp_fdbc7b() {
   float res = 2.0f;
-}
-
-fragment void fragment_main() {
-  ldexp_fdbc7b();
-}
-
-kernel void compute_main() {
-  ldexp_fdbc7b();
 }
 
 VertexOutput vertex_main_inner() {

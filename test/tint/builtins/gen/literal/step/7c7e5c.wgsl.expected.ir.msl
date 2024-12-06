@@ -1,3 +1,32 @@
+//
+// fragment_main
+//
+#include <metal_stdlib>
+using namespace metal;
+
+void step_7c7e5c() {
+  float2 res = float2(1.0f);
+}
+
+fragment void fragment_main() {
+  step_7c7e5c();
+}
+//
+// compute_main
+//
+#include <metal_stdlib>
+using namespace metal;
+
+void step_7c7e5c() {
+  float2 res = float2(1.0f);
+}
+
+kernel void compute_main() {
+  step_7c7e5c();
+}
+//
+// vertex_main
+//
 #include <metal_stdlib>
 using namespace metal;
 
@@ -11,14 +40,6 @@ struct vertex_main_outputs {
 
 void step_7c7e5c() {
   float2 res = float2(1.0f);
-}
-
-fragment void fragment_main() {
-  step_7c7e5c();
-}
-
-kernel void compute_main() {
-  step_7c7e5c();
 }
 
 VertexOutput vertex_main_inner() {

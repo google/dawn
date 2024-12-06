@@ -10,11 +10,6 @@ struct FSOut {
   float4 sk_FragColor;
 };
 
-struct IntrinsicUniforms {
-  float4 viewport;
-  float4 dstCopyBounds;
-};
-
 template<typename T, size_t N>
 struct tint_array {
   const constant T& operator[](size_t i) const constant { return elements[i]; }
@@ -46,7 +41,6 @@ struct FSUniforms {
 };
 
 struct tint_module_vars_struct {
-  const constant IntrinsicUniforms* _uniform0;
   const device FSUniforms* _storage1;
   thread uint* shadingSsboIndex;
   sampler permutationsSampler_1_Sampler;

@@ -1,9 +1,46 @@
+//
+// fragment_main
+//
 #include <metal_stdlib>
 using namespace metal;
 
 struct tint_module_vars_struct {
   device packed_float3* prevent_dce;
 };
+
+float3 clamp_867397() {
+  float3 res = float3(1.0f);
+  return res;
+}
+
+fragment void fragment_main(device packed_float3* prevent_dce [[buffer(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.prevent_dce=prevent_dce};
+  (*tint_module_vars.prevent_dce) = packed_float3(clamp_867397());
+}
+//
+// compute_main
+//
+#include <metal_stdlib>
+using namespace metal;
+
+struct tint_module_vars_struct {
+  device packed_float3* prevent_dce;
+};
+
+float3 clamp_867397() {
+  float3 res = float3(1.0f);
+  return res;
+}
+
+kernel void compute_main(device packed_float3* prevent_dce [[buffer(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.prevent_dce=prevent_dce};
+  (*tint_module_vars.prevent_dce) = packed_float3(clamp_867397());
+}
+//
+// vertex_main
+//
+#include <metal_stdlib>
+using namespace metal;
 
 struct VertexOutput {
   float4 pos;
@@ -18,16 +55,6 @@ struct vertex_main_outputs {
 float3 clamp_867397() {
   float3 res = float3(1.0f);
   return res;
-}
-
-fragment void fragment_main(device packed_float3* prevent_dce [[buffer(0)]]) {
-  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.prevent_dce=prevent_dce};
-  (*tint_module_vars.prevent_dce) = packed_float3(clamp_867397());
-}
-
-kernel void compute_main(device packed_float3* prevent_dce [[buffer(0)]]) {
-  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.prevent_dce=prevent_dce};
-  (*tint_module_vars.prevent_dce) = packed_float3(clamp_867397());
 }
 
 VertexOutput vertex_main_inner() {

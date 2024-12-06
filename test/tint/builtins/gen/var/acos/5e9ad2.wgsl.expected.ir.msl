@@ -1,3 +1,32 @@
+//
+// fragment_main
+//
+#include <metal_stdlib>
+using namespace metal;
+
+void acos_5e9ad2() {
+  float res = 0.25f;
+}
+
+fragment void fragment_main() {
+  acos_5e9ad2();
+}
+//
+// compute_main
+//
+#include <metal_stdlib>
+using namespace metal;
+
+void acos_5e9ad2() {
+  float res = 0.25f;
+}
+
+kernel void compute_main() {
+  acos_5e9ad2();
+}
+//
+// vertex_main
+//
 #include <metal_stdlib>
 using namespace metal;
 
@@ -11,14 +40,6 @@ struct vertex_main_outputs {
 
 void acos_5e9ad2() {
   float res = 0.25f;
-}
-
-fragment void fragment_main() {
-  acos_5e9ad2();
-}
-
-kernel void compute_main() {
-  acos_5e9ad2();
 }
 
 VertexOutput vertex_main_inner() {

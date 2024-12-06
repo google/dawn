@@ -1,3 +1,6 @@
+//
+// vtx_main
+//
 #include <metal_stdlib>
 using namespace metal;
 
@@ -17,16 +20,8 @@ struct vtx_main_outputs {
   float4 tint_symbol [[position]];
 };
 
-struct frag_main_outputs {
-  float4 tint_symbol_1 [[color(0)]];
-};
-
 float4 vtx_main_inner(uint VertexIndex) {
   return float4(tint_array<float2, 3>{float2(0.0f, 0.5f), float2(-0.5f), float2(0.5f, -0.5f)}[min(VertexIndex, 2u)], 0.0f, 1.0f);
-}
-
-float4 frag_main_inner() {
-  return float4(1.0f, 0.0f, 0.0f, 1.0f);
 }
 
 vertex vtx_main_outputs vtx_main(uint VertexIndex [[vertex_id]]) {
@@ -34,9 +29,22 @@ vertex vtx_main_outputs vtx_main(uint VertexIndex [[vertex_id]]) {
   tint_wrapper_result.tint_symbol = vtx_main_inner(VertexIndex);
   return tint_wrapper_result;
 }
+//
+// frag_main
+//
+#include <metal_stdlib>
+using namespace metal;
+
+struct frag_main_outputs {
+  float4 tint_symbol [[color(0)]];
+};
+
+float4 frag_main_inner() {
+  return float4(1.0f, 0.0f, 0.0f, 1.0f);
+}
 
 fragment frag_main_outputs frag_main() {
   frag_main_outputs tint_wrapper_result = {};
-  tint_wrapper_result.tint_symbol_1 = frag_main_inner();
+  tint_wrapper_result.tint_symbol = frag_main_inner();
   return tint_wrapper_result;
 }

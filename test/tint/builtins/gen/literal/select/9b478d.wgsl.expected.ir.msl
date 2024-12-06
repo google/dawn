@@ -1,3 +1,32 @@
+//
+// fragment_main
+//
+#include <metal_stdlib>
+using namespace metal;
+
+void select_9b478d() {
+  int res = 1;
+}
+
+fragment void fragment_main() {
+  select_9b478d();
+}
+//
+// compute_main
+//
+#include <metal_stdlib>
+using namespace metal;
+
+void select_9b478d() {
+  int res = 1;
+}
+
+kernel void compute_main() {
+  select_9b478d();
+}
+//
+// vertex_main
+//
 #include <metal_stdlib>
 using namespace metal;
 
@@ -11,14 +40,6 @@ struct vertex_main_outputs {
 
 void select_9b478d() {
   int res = 1;
-}
-
-fragment void fragment_main() {
-  select_9b478d();
-}
-
-kernel void compute_main() {
-  select_9b478d();
 }
 
 VertexOutput vertex_main_inner() {

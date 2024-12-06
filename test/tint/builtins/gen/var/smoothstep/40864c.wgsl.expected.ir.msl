@@ -1,9 +1,52 @@
+//
+// fragment_main
+//
 #include <metal_stdlib>
 using namespace metal;
 
 struct tint_module_vars_struct {
   device float4* prevent_dce;
 };
+
+float4 smoothstep_40864c() {
+  float4 arg_0 = float4(2.0f);
+  float4 arg_1 = float4(4.0f);
+  float4 arg_2 = float4(3.0f);
+  float4 res = smoothstep(arg_0, arg_1, arg_2);
+  return res;
+}
+
+fragment void fragment_main(device float4* prevent_dce [[buffer(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.prevent_dce=prevent_dce};
+  (*tint_module_vars.prevent_dce) = smoothstep_40864c();
+}
+//
+// compute_main
+//
+#include <metal_stdlib>
+using namespace metal;
+
+struct tint_module_vars_struct {
+  device float4* prevent_dce;
+};
+
+float4 smoothstep_40864c() {
+  float4 arg_0 = float4(2.0f);
+  float4 arg_1 = float4(4.0f);
+  float4 arg_2 = float4(3.0f);
+  float4 res = smoothstep(arg_0, arg_1, arg_2);
+  return res;
+}
+
+kernel void compute_main(device float4* prevent_dce [[buffer(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.prevent_dce=prevent_dce};
+  (*tint_module_vars.prevent_dce) = smoothstep_40864c();
+}
+//
+// vertex_main
+//
+#include <metal_stdlib>
+using namespace metal;
 
 struct VertexOutput {
   float4 pos;
@@ -21,16 +64,6 @@ float4 smoothstep_40864c() {
   float4 arg_2 = float4(3.0f);
   float4 res = smoothstep(arg_0, arg_1, arg_2);
   return res;
-}
-
-fragment void fragment_main(device float4* prevent_dce [[buffer(0)]]) {
-  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.prevent_dce=prevent_dce};
-  (*tint_module_vars.prevent_dce) = smoothstep_40864c();
-}
-
-kernel void compute_main(device float4* prevent_dce [[buffer(0)]]) {
-  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.prevent_dce=prevent_dce};
-  (*tint_module_vars.prevent_dce) = smoothstep_40864c();
 }
 
 VertexOutput vertex_main_inner() {

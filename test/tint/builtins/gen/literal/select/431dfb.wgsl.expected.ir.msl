@@ -1,3 +1,32 @@
+//
+// fragment_main
+//
+#include <metal_stdlib>
+using namespace metal;
+
+void select_431dfb() {
+  int2 res = int2(1);
+}
+
+fragment void fragment_main() {
+  select_431dfb();
+}
+//
+// compute_main
+//
+#include <metal_stdlib>
+using namespace metal;
+
+void select_431dfb() {
+  int2 res = int2(1);
+}
+
+kernel void compute_main() {
+  select_431dfb();
+}
+//
+// vertex_main
+//
 #include <metal_stdlib>
 using namespace metal;
 
@@ -11,14 +40,6 @@ struct vertex_main_outputs {
 
 void select_431dfb() {
   int2 res = int2(1);
-}
-
-fragment void fragment_main() {
-  select_431dfb();
-}
-
-kernel void compute_main() {
-  select_431dfb();
 }
 
 VertexOutput vertex_main_inner() {

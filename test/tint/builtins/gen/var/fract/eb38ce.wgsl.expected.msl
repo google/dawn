@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 #include <metal_stdlib>
 
 using namespace metal;
@@ -7,14 +10,48 @@ half fract_eb38ce() {
   return res;
 }
 
-fragment void fragment_main(device half* tint_symbol_1 [[buffer(0)]]) {
-  *(tint_symbol_1) = fract_eb38ce();
+struct VertexOutput {
+  float4 pos;
+  half prevent_dce;
+};
+
+fragment void fragment_main(device half* tint_symbol [[buffer(0)]]) {
+  *(tint_symbol) = fract_eb38ce();
   return;
 }
 
-kernel void compute_main(device half* tint_symbol_2 [[buffer(0)]]) {
-  *(tint_symbol_2) = fract_eb38ce();
+//
+// compute_main
+//
+#include <metal_stdlib>
+
+using namespace metal;
+half fract_eb38ce() {
+  half arg_0 = 1.25h;
+  half res = fract(arg_0);
+  return res;
+}
+
+struct VertexOutput {
+  float4 pos;
+  half prevent_dce;
+};
+
+kernel void compute_main(device half* tint_symbol [[buffer(0)]]) {
+  *(tint_symbol) = fract_eb38ce();
   return;
+}
+
+//
+// vertex_main
+//
+#include <metal_stdlib>
+
+using namespace metal;
+half fract_eb38ce() {
+  half arg_0 = 1.25h;
+  half res = fract(arg_0);
+  return res;
 }
 
 struct VertexOutput {

@@ -6,12 +6,12 @@ struct In {
   float4 pos;
 };
 
+void g(int a, float b) {
+}
+
 struct tint_symbol_1 {
   int4 fbf [[color(3)]];
 };
-
-void g(int a, float b) {
-}
 
 void f_inner(In in) {
   g(in.fbf[3], in.pos[0]);

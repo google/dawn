@@ -1,3 +1,34 @@
+//
+// fragment_main
+//
+#include <metal_stdlib>
+using namespace metal;
+
+void ldexp_71ebe3() {
+  int arg_1 = 1;
+  float res = ldexp(1.0f, arg_1);
+}
+
+fragment void fragment_main() {
+  ldexp_71ebe3();
+}
+//
+// compute_main
+//
+#include <metal_stdlib>
+using namespace metal;
+
+void ldexp_71ebe3() {
+  int arg_1 = 1;
+  float res = ldexp(1.0f, arg_1);
+}
+
+kernel void compute_main() {
+  ldexp_71ebe3();
+}
+//
+// vertex_main
+//
 #include <metal_stdlib>
 using namespace metal;
 
@@ -12,14 +43,6 @@ struct vertex_main_outputs {
 void ldexp_71ebe3() {
   int arg_1 = 1;
   float res = ldexp(1.0f, arg_1);
-}
-
-fragment void fragment_main() {
-  ldexp_71ebe3();
-}
-
-kernel void compute_main() {
-  ldexp_71ebe3();
 }
 
 VertexOutput vertex_main_inner() {

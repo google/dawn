@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 #include <metal_stdlib>
 
 using namespace metal;
@@ -8,14 +11,50 @@ uint min_46c5d3() {
   return res;
 }
 
-fragment void fragment_main(device uint* tint_symbol_1 [[buffer(0)]]) {
-  *(tint_symbol_1) = min_46c5d3();
+struct VertexOutput {
+  float4 pos;
+  uint prevent_dce;
+};
+
+fragment void fragment_main(device uint* tint_symbol [[buffer(0)]]) {
+  *(tint_symbol) = min_46c5d3();
   return;
 }
 
-kernel void compute_main(device uint* tint_symbol_2 [[buffer(0)]]) {
-  *(tint_symbol_2) = min_46c5d3();
+//
+// compute_main
+//
+#include <metal_stdlib>
+
+using namespace metal;
+uint min_46c5d3() {
+  uint arg_0 = 1u;
+  uint arg_1 = 1u;
+  uint res = min(arg_0, arg_1);
+  return res;
+}
+
+struct VertexOutput {
+  float4 pos;
+  uint prevent_dce;
+};
+
+kernel void compute_main(device uint* tint_symbol [[buffer(0)]]) {
+  *(tint_symbol) = min_46c5d3();
   return;
+}
+
+//
+// vertex_main
+//
+#include <metal_stdlib>
+
+using namespace metal;
+uint min_46c5d3() {
+  uint arg_0 = 1u;
+  uint arg_1 = 1u;
+  uint res = min(arg_0, arg_1);
+  return res;
 }
 
 struct VertexOutput {

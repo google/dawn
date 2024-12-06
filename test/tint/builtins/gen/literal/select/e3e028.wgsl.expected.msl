@@ -1,3 +1,6 @@
+//
+// fragment_main
+//
 #include <metal_stdlib>
 
 using namespace metal;
@@ -6,14 +9,46 @@ int select_e3e028() {
   return select(0, 1, all((res == bool4(false))));
 }
 
-fragment void fragment_main(device int* tint_symbol_1 [[buffer(0)]]) {
-  *(tint_symbol_1) = select_e3e028();
+struct VertexOutput {
+  float4 pos;
+  int prevent_dce;
+};
+
+fragment void fragment_main(device int* tint_symbol [[buffer(0)]]) {
+  *(tint_symbol) = select_e3e028();
   return;
 }
 
-kernel void compute_main(device int* tint_symbol_2 [[buffer(0)]]) {
-  *(tint_symbol_2) = select_e3e028();
+//
+// compute_main
+//
+#include <metal_stdlib>
+
+using namespace metal;
+int select_e3e028() {
+  bool4 res = bool4(true);
+  return select(0, 1, all((res == bool4(false))));
+}
+
+struct VertexOutput {
+  float4 pos;
+  int prevent_dce;
+};
+
+kernel void compute_main(device int* tint_symbol [[buffer(0)]]) {
+  *(tint_symbol) = select_e3e028();
   return;
+}
+
+//
+// vertex_main
+//
+#include <metal_stdlib>
+
+using namespace metal;
+int select_e3e028() {
+  bool4 res = bool4(true);
+  return select(0, 1, all((res == bool4(false))));
 }
 
 struct VertexOutput {
