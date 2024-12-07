@@ -178,7 +178,7 @@ constexpr SkippedMessage kSkippedMessages[] = {
     {"VUID-VkPipelineLayoutCreateInfo-descriptorType-03022",
      "exceeds device maxPerStageDescriptorUpdateAfterBindSamplers limit (0)"},
     {"VUID-VkPipelineLayoutCreateInfo-descriptorType-03023",
-     "maxPerStageDescriptorUpdateAfterBindUniformBuffers limit (0)"},
+     "exceeds device maxPerStageDescriptorUpdateAfterBindUniformBuffers limit (0)"},
     {"VUID-VkPipelineLayoutCreateInfo-descriptorType-03024",
      "exceeds device maxPerStageDescriptorUpdateAfterBindStorageBuffers limit (0)"},
     {"VUID-VkPipelineLayoutCreateInfo-descriptorType-03025",
@@ -199,6 +199,10 @@ constexpr SkippedMessage kSkippedMessages[] = {
      "exceeds device maxDescriptorSetUpdateAfterBindStorageBuffersDynamic limit (0)"},
     {"VUID-VkPipelineLayoutCreateInfo-pSetLayouts-03041",
      "exceeds device maxDescriptorSetUpdateAfterBindSampledImages limit (0)"},
+    {"VUID-VkPipelineLayoutCreateInfo-pSetLayouts-03042",
+     "exceeds device maxDescriptorSetUpdateAfterBindStorageImages limit (0)"},
+    {"VUID-VkPipelineLayoutCreateInfo-pSetLayouts-03043",
+     "exceeds device maxDescriptorSetUpdateAfterBindInputAttachments limit (0)"},
 };
 
 namespace dawn::native::vulkan {
