@@ -200,7 +200,6 @@ ShaderModule::~ShaderModule() = default;
     X(std::optional<tint::ast::transform::SubstituteOverride::Config>, substituteOverrideConfig) \
     X(LimitsForCompilationRequest, limits)                                                       \
     X(std::string_view, entryPointName)                                                          \
-    X(bool, disableSymbolRenaming)                                                               \
     X(tint::spirv::writer::Options, tintOptions)                                                 \
     X(CacheKey::UnsafeUnkeyedValue<dawn::platform::Platform*>, platform)
 
@@ -338,9 +337,12 @@ ResultOrError<ShaderModule::ModuleAndSpirv> ShaderModule::GetHandleAndSpirv(
     auto tintProgram = GetTintProgram();
     req.inputProgram = &(tintProgram->program);
     req.entryPointName = programmableStage.entryPoint;
-    req.disableSymbolRenaming = GetDevice()->IsToggleEnabled(Toggle::DisableSymbolRenaming);
     req.platform = UnsafeUnkeyedValue(GetDevice()->GetPlatform());
     req.substituteOverrideConfig = std::move(substituteOverrideConfig);
+
+    req.tintOptions.remapped_entry_point_name = kRemappedEntryPointName;
+    req.tintOptions.strip_all_names = !GetDevice()->IsToggleEnabled(Toggle::DisableSymbolRenaming);
+
     req.tintOptions.statically_paired_texture_binding_points =
         std::move(statically_paired_texture_binding_points);
     req.tintOptions.clamp_frag_depth = clampFragDepth;
@@ -387,22 +389,9 @@ ResultOrError<ShaderModule::ModuleAndSpirv> ShaderModule::GetHandleAndSpirv(
             tint::ast::transform::DataMap transformInputs;
 
             // Many Vulkan drivers can't handle multi-entrypoint shader modules.
-            // Run before the renamer so that the entry point name matches `entryPointName` still.
             transformManager.append(std::make_unique<tint::ast::transform::SingleEntryPoint>());
             transformInputs.Add<tint::ast::transform::SingleEntryPoint::Config>(
                 std::string(r.entryPointName));
-
-            // Rename symbols unless symbol renaming is disabled.
-            std::string remappedEntryPointName = std::string(r.entryPointName);
-            if (!r.disableSymbolRenaming) {
-                constexpr char kRemappedEntryPointName[] = "dawn_entry_point";
-                tint::ast::transform::Renamer::Remappings requestedNames = {
-                    {remappedEntryPointName, kRemappedEntryPointName}};
-                transformManager.Add<tint::ast::transform::Renamer>();
-                transformInputs.Add<tint::ast::transform::Renamer::Config>(
-                    tint::ast::transform::Renamer::Target::kAll, std::move(requestedNames));
-                remappedEntryPointName = kRemappedEntryPointName;
-            }
 
             if (r.substituteOverrideConfig) {
                 // This needs to run after SingleEntryPoint transform which removes unused overrides
@@ -425,7 +414,7 @@ ResultOrError<ShaderModule::ModuleAndSpirv> ShaderModule::GetHandleAndSpirv(
             if (r.stage == SingleShaderStage::Compute) {
                 Extent3D _;
                 DAWN_TRY_ASSIGN(_, ValidateComputeStageWorkgroupSize(
-                                       program, remappedEntryPointName.c_str(), r.limits));
+                                       program, r.entryPointName.data(), r.limits));
             }
 
             TRACE_EVENT0(r.platform.UnsafeGetValue(), General, "tint::spirv::writer::Generate()");
@@ -443,7 +432,7 @@ ResultOrError<ShaderModule::ModuleAndSpirv> ShaderModule::GetHandleAndSpirv(
 
             CompiledSpirv result;
             result.spirv = std::move(tintResult.Get().spirv);
-            result.remappedEntryPoint = remappedEntryPointName;
+            result.remappedEntryPoint = kRemappedEntryPointName;
             return result;
         },
         "Vulkan.CompileShaderToSPIRV");

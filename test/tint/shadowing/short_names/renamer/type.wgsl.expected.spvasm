@@ -5,36 +5,25 @@
 ; Schema: 0
                OpCapability Shader
                OpMemoryModel Logical GLSL450
-               OpEntryPoint Vertex %tint_symbol_4 "tint_symbol_4" %tint_symbol_4_vertex_index_Input %tint_symbol_4_position_Output %tint_symbol_4___point_size_Output
-               OpName %tint_symbol_4_vertex_index_Input "tint_symbol_4_vertex_index_Input"
-               OpName %tint_symbol_4_position_Output "tint_symbol_4_position_Output"
-               OpName %tint_symbol_4___point_size_Output "tint_symbol_4___point_size_Output"
-               OpName %tint_symbol_4_inner "tint_symbol_4_inner"
-               OpName %tint_symbol_5 "tint_symbol_5"
-               OpMemberName %tint_symbol 0 "tint_symbol_1"
-               OpName %tint_symbol "tint_symbol"
-               OpName %tint_symbol_6 "tint_symbol_6"
-               OpName %tint_symbol_7 "tint_symbol_7"
-               OpName %tint_symbol_8 "tint_symbol_8"
-               OpName %tint_symbol_4 "tint_symbol_4"
-               OpDecorate %tint_symbol_4_vertex_index_Input BuiltIn VertexIndex
-               OpDecorate %tint_symbol_4_position_Output BuiltIn Position
-               OpDecorate %tint_symbol_4___point_size_Output BuiltIn PointSize
-               OpMemberDecorate %tint_symbol 0 Offset 0
+               OpEntryPoint Vertex %29 "tint_entry_point" %gl_VertexIndex %gl_Position %gl_PointSize
+               OpDecorate %gl_VertexIndex BuiltIn VertexIndex
+               OpDecorate %gl_Position BuiltIn Position
+               OpDecorate %gl_PointSize BuiltIn PointSize
+               OpMemberDecorate %_struct_15 0 Offset 0
        %uint = OpTypeInt 32 0
 %_ptr_Input_uint = OpTypePointer Input %uint
-%tint_symbol_4_vertex_index_Input = OpVariable %_ptr_Input_uint Input
+%gl_VertexIndex = OpVariable %_ptr_Input_uint Input
       %float = OpTypeFloat 32
     %v4float = OpTypeVector %float 4
 %_ptr_Output_v4float = OpTypePointer Output %v4float
-%tint_symbol_4_position_Output = OpVariable %_ptr_Output_v4float Output
+%gl_Position = OpVariable %_ptr_Output_v4float Output
 %_ptr_Output_float = OpTypePointer Output %float
-%tint_symbol_4___point_size_Output = OpVariable %_ptr_Output_float Output
+%gl_PointSize = OpVariable %_ptr_Output_float Output
          %12 = OpTypeFunction %v4float %uint
         %int = OpTypeInt 32 1
-%tint_symbol = OpTypeStruct %int
+ %_struct_15 = OpTypeStruct %int
       %int_1 = OpConstant %int 1
-%tint_symbol_6 = OpConstantComposite %tint_symbol %int_1
+         %14 = OpConstantComposite %_struct_15 %int_1
        %bool = OpTypeBool
          %22 = OpConstantNull %float
      %v4bool = OpTypeVector %bool 4
@@ -43,21 +32,21 @@
          %28 = OpConstantNull %v4float
        %void = OpTypeVoid
          %31 = OpTypeFunction %void
-%tint_symbol_4_inner = OpFunction %v4float None %12
-%tint_symbol_5 = OpFunctionParameter %uint
+         %10 = OpFunction %v4float None %12
+         %11 = OpFunctionParameter %uint
          %13 = OpLabel
-         %18 = OpCompositeExtract %int %tint_symbol_6 0
-%tint_symbol_7 = OpConvertSToF %float %18
-%tint_symbol_8 = OpFUnordNotEqual %bool %tint_symbol_7 %22
-         %24 = OpCompositeConstruct %v4bool %tint_symbol_8 %tint_symbol_8 %tint_symbol_8 %tint_symbol_8
+         %18 = OpCompositeExtract %int %14 0
+         %19 = OpConvertSToF %float %18
+         %21 = OpFUnordNotEqual %bool %19 %22
+         %24 = OpCompositeConstruct %v4bool %21 %21 %21 %21
          %25 = OpSelect %v4float %24 %26 %28
                OpReturnValue %25
                OpFunctionEnd
-%tint_symbol_4 = OpFunction %void None %31
+         %29 = OpFunction %void None %31
          %32 = OpLabel
-         %33 = OpLoad %uint %tint_symbol_4_vertex_index_Input None
-         %34 = OpFunctionCall %v4float %tint_symbol_4_inner %33
-               OpStore %tint_symbol_4_position_Output %34 None
-               OpStore %tint_symbol_4___point_size_Output %float_1 None
+         %33 = OpLoad %uint %gl_VertexIndex None
+         %34 = OpFunctionCall %v4float %10 %33
+               OpStore %gl_Position %34 None
+               OpStore %gl_PointSize %float_1 None
                OpReturn
                OpFunctionEnd

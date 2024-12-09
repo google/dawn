@@ -29,6 +29,7 @@
 
 #include <utility>
 
+#include "src/tint/lang/core/ir/module.h"
 #include "src/tint/lang/core/ir/transform/add_empty_entry_point.h"
 #include "src/tint/lang/core/ir/transform/bgra8unorm_polyfill.h"
 #include "src/tint/lang/core/ir/transform/binary_polyfill.h"

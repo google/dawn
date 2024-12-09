@@ -619,6 +619,8 @@ Options:
         }
         case Format::kSpirv:
         case Format::kSpvAsm:
+            // Renaming is handled in the backend.
+            break;
         case Format::kWgsl:
         case Format::kIr: {
             if (options.rename_all) {
@@ -762,6 +764,10 @@ bool GenerateSpirv([[maybe_unused]] Options& options,
     }
 
     tint::spirv::writer::Options gen_options;
+    if (options.rename_all) {
+        gen_options.remapped_entry_point_name = "tint_entry_point";
+        gen_options.strip_all_names = true;
+    }
     gen_options.disable_robustness = !options.enable_robustness;
     gen_options.disable_workgroup_init = options.disable_workgroup_init;
     gen_options.use_storage_input_output_16 = options.use_storage_input_output_16;

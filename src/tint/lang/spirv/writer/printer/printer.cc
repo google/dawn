@@ -27,6 +27,7 @@
 
 #include "src/tint/lang/spirv/writer/printer/printer.h"
 
+#include <string>
 #include <utility>
 
 #include "spirv/unified1/GLSL.std.450.h"
@@ -379,9 +380,7 @@ class Printer {
         auto id = Constant(constant->Value());
 
         // Set the name for the SPIR-V result ID if provided in the module.
-        if (auto name = ir_.NameOf(constant)) {
-            module_.PushDebug(spv::Op::OpName, {id, Operand(name.Name())});
-        }
+        PushName(id, constant);
 
         return id;
     }
@@ -594,10 +593,7 @@ class Printer {
                                    Operand(effective_row_count * matrix_type->Type()->Size())});
             }
 
-            if (member->Name().IsValid()) {
-                module_.PushDebug(spv::Op::OpMemberName,
-                                  {operands[0], member->Index(), Operand(member->Name().Name())});
-            }
+            PushMemberName(id, member->Index(), member->Name());
         }
         module_.PushType(spv::Op::OpTypeStruct, std::move(operands));
 
@@ -606,9 +602,7 @@ class Printer {
             module_.PushAnnot(spv::Op::OpDecorate, {id, U32Operand(SpvDecorationBlock)});
         }
 
-        if (str->Name().IsValid()) {
-            module_.PushDebug(spv::Op::OpName, {operands[0], Operand(str->Name().Name())});
-        }
+        PushName(id, str->Name());
     }
 
     /// Emit a texture type.
@@ -710,7 +704,7 @@ class Printer {
         auto id = Value(func);
 
         // Emit the function name.
-        module_.PushDebug(spv::Op::OpName, {id, Operand(ir_.NameOf(func).Name())});
+        PushName(id, func);
 
         // Emit OpEntryPoint and OpExecutionMode declarations if needed.
         if (func->Stage() != core::ir::Function::PipelineStage::kUndefined) {
@@ -730,9 +724,7 @@ class Printer {
             auto param_id = Value(param);
             params.push_back(Instruction(spv::Op::OpFunctionParameter, {param_type_id, param_id}));
             function_type.param_type_ids.Push(param_type_id);
-            if (auto name = ir_.NameOf(param)) {
-                module_.PushDebug(spv::Op::OpName, {param_id, Operand(name.Name())});
-            }
+            PushName(param_id, param);
         }
 
         // Get the ID for the function type (creating it if needed).
@@ -796,7 +788,16 @@ class Printer {
                 TINT_ICE() << "undefined pipeline stage for entry point";
         }
 
-        OperandList operands = {U32Operand(stage), id, ir_.NameOf(func).Name()};
+        // Use the remapped entry point name if requested, otherwise use the original name.
+        std::string name;
+        if (options_.remapped_entry_point_name) {
+            name = *options_.remapped_entry_point_name;
+        } else {
+            name = ir_.NameOf(func).Name();
+        }
+        TINT_ASSERT(!name.empty());
+
+        OperandList operands = {U32Operand(stage), id, name};
 
         // Add the list of all referenced shader IO variables.
         for (auto* global : *ir_.root_block) {
@@ -928,9 +929,7 @@ class Printer {
 
             // Set the name for the SPIR-V result ID if provided in the module.
             if (inst->Result(0) && !inst->Is<core::ir::Var>()) {
-                if (auto name = ir_.NameOf(inst)) {
-                    module_.PushDebug(spv::Op::OpName, {Value(inst), Operand(name.Name())});
-                }
+                PushName(Value(inst), inst);
             }
         }
     }
@@ -2388,9 +2387,7 @@ class Printer {
         }
 
         // Set the name if present.
-        if (auto name = ir_.NameOf(var)) {
-            module_.PushDebug(spv::Op::OpName, {id, Operand(name.Name())});
-        }
+        PushName(id, var);
     }
 
     /// Emit a let instruction.
@@ -2518,6 +2515,25 @@ class Printer {
                 return SpvImageFormatUnknown;
         }
         return SpvImageFormatUnknown;
+    }
+
+    /// Set the debug name of an instruction.
+    void PushName(uint32_t id, core::ir::Instruction* inst) { PushName(id, ir_.NameOf(inst)); }
+    /// Set the debug name of a value.
+    void PushName(uint32_t id, core::ir::Value* value) { PushName(id, ir_.NameOf(value)); }
+    /// Set the debug name for a SPIR-V ID.
+    void PushName(uint32_t id, const Symbol& name) {
+        // Only set the name if it is valid and if we are not stripping user identifiers.
+        if (name && !options_.strip_all_names) {
+            module_.PushDebug(spv::Op::OpName, {id, Operand(name.Name())});
+        }
+    }
+    /// Set the debug member name for a SPIR-V ID.
+    void PushMemberName(uint32_t id, uint32_t index, const Symbol& name) {
+        // Only set the name if it is valid and if we are not stripping user identifiers.
+        if (name && !options_.strip_all_names) {
+            module_.PushDebug(spv::Op::OpMemberName, {id, index, Operand(name.Name())});
+        }
     }
 };
 

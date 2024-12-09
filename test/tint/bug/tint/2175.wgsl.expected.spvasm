@@ -5,25 +5,22 @@
 ; Schema: 0
                OpCapability Shader
                OpMemoryModel Logical GLSL450
-               OpEntryPoint GLCompute %tint_symbol_3 "tint_symbol_3"
-               OpExecutionMode %tint_symbol_3 LocalSize 1 1 1
-               OpMemberName %tint_symbol_2_block 0 "inner"
-               OpName %tint_symbol_2_block "tint_symbol_2_block"
-               OpName %tint_symbol_3 "tint_symbol_3"
-               OpMemberDecorate %tint_symbol_2_block 0 Offset 0
-               OpDecorate %tint_symbol_2_block Block
+               OpEntryPoint GLCompute %5 "tint_entry_point"
+               OpExecutionMode %5 LocalSize 1 1 1
+               OpMemberDecorate %_struct_3 0 Offset 0
+               OpDecorate %_struct_3 Block
                OpDecorate %1 DescriptorSet 0
                OpDecorate %1 Binding 0
                OpDecorate %1 Coherent
        %uint = OpTypeInt 32 0
-%tint_symbol_2_block = OpTypeStruct %uint
-%_ptr_StorageBuffer_tint_symbol_2_block = OpTypePointer StorageBuffer %tint_symbol_2_block
-          %1 = OpVariable %_ptr_StorageBuffer_tint_symbol_2_block StorageBuffer
+  %_struct_3 = OpTypeStruct %uint
+%_ptr_StorageBuffer__struct_3 = OpTypePointer StorageBuffer %_struct_3
+          %1 = OpVariable %_ptr_StorageBuffer__struct_3 StorageBuffer
        %void = OpTypeVoid
           %7 = OpTypeFunction %void
 %_ptr_StorageBuffer_uint = OpTypePointer StorageBuffer %uint
      %uint_0 = OpConstant %uint 0
-%tint_symbol_3 = OpFunction %void None %7
+          %5 = OpFunction %void None %7
           %8 = OpLabel
           %9 = OpAccessChain %_ptr_StorageBuffer_uint %1 %uint_0
                OpStore %9 %uint_0 None

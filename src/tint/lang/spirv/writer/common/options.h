@@ -28,6 +28,8 @@
 #ifndef SRC_TINT_LANG_SPIRV_WRITER_COMMON_OPTIONS_H_
 #define SRC_TINT_LANG_SPIRV_WRITER_COMMON_OPTIONS_H_
 
+#include <optional>
+#include <string>
 #include <unordered_map>
 #include <unordered_set>
 
@@ -129,6 +131,9 @@ struct Bindings {
 
 /// Configuration options used for generating SPIR-V.
 struct Options {
+    /// An optional remapped name to use when emitting the entry point.
+    std::optional<std::string> remapped_entry_point_name;
+
     /// The bindings
     Bindings bindings;
 
@@ -137,6 +142,9 @@ struct Options {
     // duplicate spir-v bindings, since they must map to the spir-v bindings of
     // the samplers with which they are paired.
     std::unordered_set<BindingPoint> statically_paired_texture_binding_points = {};
+
+    /// Set to `true` to strip all user-declared identifiers from the module.
+    bool strip_all_names = false;
 
     /// Set to `true` to disable software robustness that prevents out-of-bounds accesses.
     bool disable_robustness = false;
@@ -181,8 +189,10 @@ struct Options {
 
     /// Reflect the fields of this class so that it can be used by tint::ForeachField()
     TINT_REFLECT(Options,
+                 remapped_entry_point_name,
                  bindings,
                  statically_paired_texture_binding_points,
+                 strip_all_names,
                  disable_robustness,
                  disable_image_robustness,
                  disable_runtime_sized_array_index_clamping,
