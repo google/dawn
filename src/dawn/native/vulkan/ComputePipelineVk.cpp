@@ -84,7 +84,7 @@ MaybeError ComputePipeline::InitializeImpl() {
                                               /*emitPointSize*/ false));
 
     createInfo.stage.module = moduleAndSpirv.module;
-    createInfo.stage.pName = moduleAndSpirv.remappedEntryPoint.c_str();
+    createInfo.stage.pName = kRemappedEntryPointName;
     createInfo.stage.pSpecializationInfo = nullptr;
 
     VkPipelineShaderStageRequiredSubgroupSizeCreateInfoEXT subgroupSizeInfo = {};

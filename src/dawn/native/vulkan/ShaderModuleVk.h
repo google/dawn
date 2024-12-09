@@ -72,7 +72,6 @@ class ShaderModule final : public ShaderModuleBase {
         VkShaderModule module;
         const uint32_t* spirv;
         size_t wordCount;
-        std::string remappedEntryPoint;
         bool hasInputAttachment;
     };
 

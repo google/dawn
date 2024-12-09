@@ -379,7 +379,7 @@ MaybeError RenderPipeline::InitializeImpl() {
         shaderStage->flags = 0;
         shaderStage->pSpecializationInfo = nullptr;
         shaderStage->stage = vkStage;
-        shaderStageEntryPoints[stageCount] = moduleAndSpirv.remappedEntryPoint;
+        shaderStageEntryPoints[stageCount] = kRemappedEntryPointName;
         shaderStage->pName = shaderStageEntryPoints[stageCount].c_str();
 
         stageCount++;
