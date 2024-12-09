@@ -93,6 +93,7 @@ void Register(const IRFuzzer& fuzzer) {
             ir_context.options.filter = context.options.filter;
             ir_context.options.run_concurrently = context.options.run_concurrently;
             ir_context.options.verbose = context.options.verbose;
+            ir_context.options.dxc = context.options.dxc;
             ir_context.options.dump = context.options.dump;
             [[maybe_unused]] auto result = fn(ir.Get(), ir_context, data);
         },
