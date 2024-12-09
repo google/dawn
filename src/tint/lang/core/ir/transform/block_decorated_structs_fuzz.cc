@@ -33,7 +33,9 @@
 namespace tint::core::ir::transform {
 namespace {
 
-constexpr auto& BlockDecoratedStructsFuzzer = BlockDecoratedStructs;
+Result<SuccessType> BlockDecoratedStructsFuzzer(Module& ir, const fuzz::ir::Context&) {
+    return BlockDecoratedStructs(ir);
+}
 
 }  // namespace
 }  // namespace tint::core::ir::transform

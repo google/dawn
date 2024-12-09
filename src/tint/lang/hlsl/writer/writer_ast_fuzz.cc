@@ -105,7 +105,7 @@ void ASTFuzzer(const tint::Program& program,
     }
 
     if (context.options.dump) {
-        std::cout << "Dumping generated HLSL:\n" << res->hlsl << std::endl;
+        std::cout << "Dumping generated HLSL:\n" << res->hlsl << "\n";
     }
 
     if (dxc.Found()) {

@@ -37,6 +37,7 @@ namespace {
 // impl function cannot be passed in directly to fuzzing infra
 Result<SuccessType> ArrayLengthFromUniformFuzzer(
     Module& module,
+    const fuzz::ir::Context&,
     BindingPoint ubo_binding,
     const std::unordered_map<BindingPoint, uint32_t>& bindpoint_to_size_index) {
     if (auto res = ArrayLengthFromUniform(module, ubo_binding, bindpoint_to_size_index);

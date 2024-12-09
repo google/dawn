@@ -33,7 +33,9 @@
 namespace tint::core::ir::transform {
 namespace {
 
-constexpr auto& PreservePaddingFuzzer = PreservePadding;
+Result<SuccessType> PreservePaddingFuzzer(Module& ir, const fuzz::ir::Context&) {
+    return PreservePadding(ir);
+}
 
 }  // namespace
 }  // namespace tint::core::ir::transform

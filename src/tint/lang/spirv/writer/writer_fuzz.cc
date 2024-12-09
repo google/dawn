@@ -49,7 +49,7 @@ bool CanRun(const core::ir::Module& module) {
     return true;
 }
 
-Result<SuccessType> IRFuzzer(core::ir::Module& module, Options options) {
+Result<SuccessType> IRFuzzer(core::ir::Module& module, const fuzz::ir::Context&, Options options) {
     if (!CanRun(module)) {
         return Failure{"Cannot run module"};
     }

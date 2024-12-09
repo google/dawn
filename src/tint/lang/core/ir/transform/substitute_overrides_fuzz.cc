@@ -34,7 +34,11 @@
 namespace tint::core::ir::transform {
 namespace {
 
-constexpr auto& SubstituteOverridesFuzzer = SubstituteOverrides;
+Result<SuccessType> SubstituteOverridesFuzzer(Module& ir,
+                                              const fuzz::ir::Context&,
+                                              const SubstituteOverridesConfig& cfg) {
+    return SubstituteOverrides(ir, cfg);
+}
 
 }  // namespace
 }  // namespace tint::core::ir::transform

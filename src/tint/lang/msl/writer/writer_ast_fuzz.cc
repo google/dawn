@@ -64,7 +64,7 @@ void ASTFuzzer(const tint::Program& program, const fuzz::wgsl::Context& context,
     auto res = tint::msl::writer::Generate(program, options);
 
     if (res == Success && context.options.dump) {
-        std::cout << "Dumping generated MSL:\n" << res->msl << std::endl;
+        std::cout << "Dumping generated MSL:\n" << res->msl << "\n";
     }
 }
 

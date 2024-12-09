@@ -34,7 +34,7 @@
 namespace tint::core::ir::binary {
 namespace {
 
-Result<SuccessType> IRBinaryRoundtripFuzzer(core::ir::Module& module) {
+Result<SuccessType> IRBinaryRoundtripFuzzer(core::ir::Module& module, const fuzz::ir::Context&) {
     auto encoded = EncodeToBinary(module);
     if (encoded != Success) {
         // Failing to encode, not ICE'ing, indicates that an internal limit to the IR binary

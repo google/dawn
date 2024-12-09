@@ -25,6 +25,8 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+#include <iostream>
+
 #include "src/tint/cmd/fuzz/ir/fuzz.h"
 #include "src/tint/lang/core/ir/core_builtin_call.h"
 #include "src/tint/lang/core/ir/module.h"
@@ -248,7 +250,7 @@ bool CanRun(const core::ir::Module& module, Options& options) {
     return true;
 }
 
-Result<SuccessType> IRFuzzer(core::ir::Module& module) {
+Result<SuccessType> IRFuzzer(core::ir::Module& module, const fuzz::ir::Context& context) {
     // TODO(375388101): We cannot run the backend for every entry point in the module unless we
     // clone the whole module each time, so for now we just generate the first entry point.
 
@@ -271,7 +273,12 @@ Result<SuccessType> IRFuzzer(core::ir::Module& module) {
         return Failure{"Cannot run module"};
     }
 
-    [[maybe_unused]] auto output = Generate(module, options, "");
+    auto output = Generate(module, options, "");
+
+    if (output == Success && context.options.dump) {
+        std::cout << "Dumping generated GLSL:\n" << output->glsl << "\n";
+    }
+
     return Success;
 }
 

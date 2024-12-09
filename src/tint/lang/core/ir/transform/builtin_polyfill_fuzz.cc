@@ -33,7 +33,11 @@
 namespace tint::core::ir::transform {
 namespace {
 
-constexpr auto& BuiltinPolyfillFuzzer = BuiltinPolyfill;
+Result<SuccessType> BuiltinPolyfillFuzzer(Module& ir,
+                                          const fuzz::ir::Context&,
+                                          const BuiltinPolyfillConfig& config) {
+    return BuiltinPolyfill(ir, config);
+}
 
 }  // namespace
 }  // namespace tint::core::ir::transform

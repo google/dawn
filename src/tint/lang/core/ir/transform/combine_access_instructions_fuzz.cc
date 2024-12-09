@@ -33,7 +33,9 @@
 namespace tint::core::ir::transform {
 namespace {
 
-constexpr auto& CombineAccessInstructionsFuzzer = CombineAccessInstructions;
+Result<SuccessType> CombineAccessInstructionsFuzzer(Module& ir, const fuzz::ir::Context&) {
+    return CombineAccessInstructions(ir);
+}
 
 }  // namespace
 }  // namespace tint::core::ir::transform

@@ -33,7 +33,9 @@
 namespace tint::core::ir::transform {
 namespace {
 
-constexpr auto& RenameConflictsFuzzer = RenameConflicts;
+Result<SuccessType> RenameConflictsFuzzer(Module& ir, const fuzz::ir::Context&) {
+    return RenameConflicts(ir);
+}
 
 }  // namespace
 }  // namespace tint::core::ir::transform

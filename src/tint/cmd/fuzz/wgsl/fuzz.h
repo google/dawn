@@ -105,8 +105,8 @@ struct ProgramFuzzer {
         } else {
             return ProgramFuzzer{
                 name,
-                [fn](const Program& program, const Context& options, Slice<const std::byte>) {
-                    fn(program, options);
+                [fn](const Program& program, const Context& context, Slice<const std::byte>) {
+                    fn(program, context);
                 },
             };
         }

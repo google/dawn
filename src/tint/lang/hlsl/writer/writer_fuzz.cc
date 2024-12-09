@@ -25,6 +25,8 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+#include <iostream>
+
 #include "src/tint/cmd/fuzz/ir/fuzz.h"
 #include "src/tint/lang/core/ir/module.h"
 #include "src/tint/lang/core/ir/var.h"
@@ -75,7 +77,9 @@ struct FuzzedOptions {
                  compiler_is_dxc);
 };
 
-Result<SuccessType> IRFuzzer(core::ir::Module& module, FuzzedOptions fuzzed_options) {
+Result<SuccessType> IRFuzzer(core::ir::Module& module,
+                             const fuzz::ir::Context& context,
+                             FuzzedOptions fuzzed_options) {
     if (!CanRun(module)) {
         return Failure{"Cannot run module"};
     }
@@ -106,7 +110,11 @@ Result<SuccessType> IRFuzzer(core::ir::Module& module, FuzzedOptions fuzzed_opti
         }
     }
 
-    [[maybe_unused]] auto output = Generate(module, options);
+    auto output = Generate(module, options);
+
+    if (output == Success && context.options.dump) {
+        std::cout << "Dumping generated HLSL:\n" << output->hlsl << "\n";
+    }
     // TODO(42251292): Fuzz DXC with HLSL output
     return Success;
 }
