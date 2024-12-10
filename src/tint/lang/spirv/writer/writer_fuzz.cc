@@ -37,7 +37,12 @@
 namespace tint::spirv::writer {
 namespace {
 
-bool CanRun(const core::ir::Module& module) {
+bool CanRun(const core::ir::Module& module, const Options& options) {
+    // If a remapped entry point name is provided, it must not be empty.
+    if (options.remapped_entry_point_name && options.remapped_entry_point_name->empty()) {
+        return false;
+    }
+
     // Check for unsupported module-scope variable address spaces and types.
     for (auto* inst : *module.root_block) {
         auto* var = inst->As<core::ir::Var>();
@@ -50,7 +55,7 @@ bool CanRun(const core::ir::Module& module) {
 }
 
 Result<SuccessType> IRFuzzer(core::ir::Module& module, const fuzz::ir::Context&, Options options) {
-    if (!CanRun(module)) {
+    if (!CanRun(module, options)) {
         return Failure{"Cannot run module"};
     }
 
