@@ -300,10 +300,60 @@ MaybeError ValidateTextureSize(const DeviceBase* device,
                          limits.v1.maxTextureDimension3D};
             break;
     }
-    DAWN_INVALID_IF(
-        descriptor->size.width > maxExtent.width || descriptor->size.height > maxExtent.height ||
-            descriptor->size.depthOrArrayLayers > maxExtent.depthOrArrayLayers,
-        "Texture size (%s) exceeded maximum texture size (%s).", &descriptor->size, &maxExtent);
+
+    if (DAWN_UNLIKELY(descriptor->size.width > maxExtent.width ||
+                      descriptor->size.height > maxExtent.height ||
+                      descriptor->size.depthOrArrayLayers > maxExtent.depthOrArrayLayers)) {
+        SupportedLimits adapterLimits;
+        wgpu::Status status = device->GetAdapter()->APIGetLimits(&adapterLimits);
+        DAWN_ASSERT(status == wgpu::Status::Success);
+
+        Extent3D maxExtentAdapter;
+        std::string limitName;
+        uint32_t limitValue;
+        switch (descriptor->dimension) {
+            case wgpu::TextureDimension::Undefined:
+                DAWN_UNREACHABLE();
+            case wgpu::TextureDimension::e1D:
+                maxExtentAdapter = {adapterLimits.limits.maxTextureDimension1D, 1, 1};
+                limitName = "maxTextureDimension1D";
+                limitValue = adapterLimits.limits.maxTextureDimension1D;
+                break;
+            case wgpu::TextureDimension::e2D:
+                maxExtentAdapter = {adapterLimits.limits.maxTextureDimension2D,
+                                    adapterLimits.limits.maxTextureDimension2D,
+                                    adapterLimits.limits.maxTextureArrayLayers};
+                if (descriptor->size.width > maxExtent.width ||
+                    descriptor->size.height > maxExtent.height) {
+                    limitName = "maxTextureDimension2D";
+                    limitValue = adapterLimits.limits.maxTextureDimension2D;
+                } else {
+                    limitName = "maxTextureArrayLayers";
+                    limitValue = adapterLimits.limits.maxTextureArrayLayers;
+                }
+                break;
+            case wgpu::TextureDimension::e3D:
+                maxExtentAdapter = {adapterLimits.limits.maxTextureDimension3D,
+                                    adapterLimits.limits.maxTextureDimension3D,
+                                    adapterLimits.limits.maxTextureDimension3D};
+                limitName = "maxTextureDimension3D";
+                limitValue = adapterLimits.limits.maxTextureDimension3D;
+                break;
+        }
+
+        std::string increaseLimitAdvice =
+            (descriptor->size.width <= maxExtentAdapter.width &&
+             descriptor->size.height <= maxExtentAdapter.height &&
+             descriptor->size.depthOrArrayLayers <= maxExtentAdapter.depthOrArrayLayers)
+                ? absl::StrFormat(
+                      " This adapter supports a higher %s of %u, which can be specified in "
+                      "requiredLimits when calling requestDevice(). Limits differ by hardware, so "
+                      "always check the adapter limits prior to requesting a higher limit.",
+                      limitName, limitValue)
+                : "";
+        return DAWN_VALIDATION_ERROR("Texture size (%s) exceeded maximum texture size (%s).%s",
+                                     &descriptor->size, &maxExtent, increaseLimitAdvice);
+    }
 
     switch (descriptor->dimension) {
         case wgpu::TextureDimension::Undefined:
