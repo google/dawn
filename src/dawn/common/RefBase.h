@@ -28,6 +28,7 @@
 #ifndef SRC_DAWN_COMMON_REFBASE_H_
 #define SRC_DAWN_COMMON_REFBASE_H_
 
+#include <cstddef>
 #include <type_traits>
 #include <utility>
 

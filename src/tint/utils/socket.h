@@ -28,6 +28,9 @@
 #ifndef SRC_TINT_UTILS_SOCKET_H_
 #define SRC_TINT_UTILS_SOCKET_H_
 
+#include <stddef.h>
+#include <stdint.h>
+
 #include <memory>
 
 namespace tint::socket {
