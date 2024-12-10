@@ -1434,7 +1434,8 @@ MaybeError CommandBuffer::SetupRenderPass(CommandRecordingContext* commandContex
         device->GetD3D12Device()->CreateDepthStencilView(
             ToBackend(view->GetTexture())->GetD3D12Resource(), &viewDesc, baseDescriptor);
 
-        renderPassBuilder->SetDepthStencilView(baseDescriptor);
+        renderPassBuilder->SetDepthStencilView(baseDescriptor, attachmentInfo.depthReadOnly,
+                                               attachmentInfo.stencilReadOnly);
 
         const bool hasDepth = view->GetTexture()->GetFormat().HasDepth();
         const bool hasStencil = view->GetTexture()->GetFormat().HasStencil();

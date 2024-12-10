@@ -92,7 +92,9 @@ class RenderPassBuilder {
     void SetRenderTargetView(ColorAttachmentIndex attachmentIndex,
                              D3D12_CPU_DESCRIPTOR_HANDLE baseDescriptor,
                              bool isNullRTV);
-    void SetDepthStencilView(D3D12_CPU_DESCRIPTOR_HANDLE baseDescriptor);
+    void SetDepthStencilView(D3D12_CPU_DESCRIPTOR_HANDLE baseDescriptor,
+                             bool isDepthReadOnly,
+                             bool isStencilReadOnly);
 
   private:
     ColorAttachmentIndex mHighestColorAttachmentIndexPlusOne{uint8_t(0)};
