@@ -215,7 +215,7 @@ crbug.com/42241502 [ dawn-backend-validation nvidia-0x2184 nvidia_ge_31.0.15.460
 crbug.com/dawn/2408 [ nvidia-0x2184 nvidia_ge_31.0.15.4601 win10 ] webgpu:api,operation,command_buffer,image_copy:offsets_and_sizes:initMethod="WriteTexture";checkMethod="PartialCopyT2B";* [ Failure ]
 crbug.com/dawn/2428 [ dawn-backend-validation nvidia-0x2184 nvidia_ge_31.0.15.4601 release-x64 target-cpu-64 webgpu-dxc-enabled webgpu-no-worker win10 ] webgpu:api,operation,rendering,basic:large_draw:* [ Failure ]
 crbug.com/dawn/2428 [ nvidia-0x2184 nvidia_ge_31.0.15.4601 webgpu-dxc-disabled webgpu-no-worker win10 ] webgpu:api,operation,rendering,basic:large_draw:* [ Failure ]
-crbug.com/dawn/2439 [ dawn-backend-validation nvidia-0x2184 nvidia_ge_31.0.15.4601 target-cpu-32 webgpu-adapter-default webgpu-dxc-disabled win10 ] webgpu:web_platform,external_texture,video:importExternalTexture,sampleWithVideoFrameWithVisibleRectParam:* [ Failure ]
+crbug.com/dawn/2439 [ win10 nvidia-0x2184 nvidia_ge_31.0.15.4601 ] webgpu:web_platform,external_texture,video:importExternalTexture,sampleWithVideoFrameWithVisibleRectParam:* [ Failure ]
 
 # Failures on Android U. These fail on Android T as well, but need to be "immutable"
 # so the roller won't remove the Android U versions of the expectations.
@@ -1464,7 +1464,7 @@ crbug.com/dawn/0000 [ dawn-backend-validation graphite-disabled no-asan no-clang
 crbug.com/dawn/0000 [ dawn-backend-validation graphite-enabled no-asan no-clang-coverage nvidia-0x2184 nvidia_ge_31.0.15.4601 release-x64 target-cpu-64 webgpu-adapter-default webgpu-dxc-disabled win10 ] webgpu:web_platform,copyToTexture,ImageBitmap:copy_subrect_from_2D_Canvas:* [ Failure ]
 crbug.com/dawn/0000 [ dawn-backend-validation graphite-enabled no-asan no-clang-coverage nvidia-0x2184 nvidia_lt_535.183.01 release-x64 target-cpu-64 webgpu-adapter-default webgpu-dxc-enabled win10 ] webgpu:web_platform,copyToTexture,ImageBitmap:copy_subrect_from_2D_Canvas:* [ Failure ]
 crbug.com/dawn/0000 [ dawn-backend-validation no-asan no-clang-coverage release-x64 target-cpu-64 webgpu-adapter-default win10 ] webgpu:web_platform,copyToTexture,ImageBitmap:copy_subrect_from_ImageData:* [ Failure ]
-crbug.com/dawn/0000 [ dawn-backend-validation no-asan no-clang-coverage release-x64 target-cpu-64 webgpu-adapter-default win10 ] webgpu:web_platform,copyToTexture,ImageData:copy_subrect_from_ImageData:* [ Failure ]
+crbug.com/dawn/0000 [ webgpu-adapter-default win10 ] webgpu:web_platform,copyToTexture,ImageData:copy_subrect_from_ImageData:* [ Failure ]
 
 # Miscellaneous flakes that are too flaky for retry
 crbug.com/dawn/0000 [ android-r qualcomm ] webgpu:api,operation,render_pipeline,overrides:precision:isAsync=true [ Failure ]
