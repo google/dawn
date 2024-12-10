@@ -144,7 +144,7 @@ void Register([[maybe_unused]] const IRFuzzer& fuzzer);
 /// @param options the options for running the fuzzers
 /// @param data additional data used for fuzzing
 void Run(const std::function<tint::core::ir::Module()>& acquire_module,
-         const Context& context,
+         const Options& options,
          Slice<const std::byte> data);
 #endif  // TINT_BUILD_IR_BINARY
 
