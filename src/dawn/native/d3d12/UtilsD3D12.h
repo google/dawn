@@ -72,6 +72,10 @@ void RecordBufferTextureCopy(BufferTextureCopyDirection direction,
 
 void SetDebugName(Device* device, ID3D12Object* object, const char* prefix, std::string label = "");
 
+constexpr DXGI_FORMAT GetNullRTVDXGIFormatForD3D12RenderPass() {
+    return DXGI_FORMAT_R8G8B8A8_UNORM;
+}
+
 }  // namespace dawn::native::d3d12
 
 #endif  // SRC_DAWN_NATIVE_D3D12_UTILSD3D12_H_

@@ -1407,7 +1407,7 @@ MaybeError CommandBuffer::SetupRenderPass(CommandRecordingContext* commandContex
                     device->GetRenderTargetViewAllocator()->AllocateTransientCPUDescriptors());
                 nullRTV = nullRTVAllocation.GetBaseDescriptor();
                 D3D12_RENDER_TARGET_VIEW_DESC nullRTVDesc;
-                nullRTVDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+                nullRTVDesc.Format = GetNullRTVDXGIFormatForD3D12RenderPass();
                 nullRTVDesc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;
                 nullRTVDesc.Texture2D.MipSlice = 0;
                 nullRTVDesc.Texture2D.PlaneSlice = 0;
