@@ -27,7 +27,6 @@
 
 #include "src/tint/lang/spirv/writer/writer.h"
 
-#include <memory>
 #include <utility>
 
 #include "src/tint/lang/spirv/writer/common/option_helpers.h"
@@ -47,21 +46,12 @@ Result<Output> Generate(core::ir::Module& ir, const Options& options) {
         }
     }
 
-    Output output;
-
     // Raise from core-dialect to SPIR-V-dialect.
     if (auto res = Raise(ir, options); res != Success) {
         return std::move(res.Failure());
     }
 
-    // Generate the SPIR-V code.
-    auto spirv = Print(ir, options);
-    if (spirv != Success) {
-        return std::move(spirv.Failure());
-    }
-    output.spirv = std::move(spirv.Get());
-
-    return output;
+    return Print(ir, options);
 }
 
 }  // namespace tint::spirv::writer

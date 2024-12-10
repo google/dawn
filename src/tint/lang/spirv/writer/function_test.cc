@@ -46,6 +46,12 @@ TEST_F(SpirvWriterTest, Function_Empty) {
                OpReturn
                OpFunctionEnd
 )");
+    EXPECT_TRUE(workgroup_info.has_value());
+
+    // There is always an injected entry point if none exists in the source program.
+    EXPECT_EQ(workgroup_info->x, 1u);
+    EXPECT_EQ(workgroup_info->y, 1u);
+    EXPECT_EQ(workgroup_info->z, 1u);
 }
 
 // Test that we do not emit the same function type more than once.
@@ -113,6 +119,10 @@ TEST_F(SpirvWriterTest, Function_EntryPoint_Compute) {
                OpReturn
                OpFunctionEnd
 )");
+    EXPECT_TRUE(workgroup_info.has_value());
+    EXPECT_EQ(workgroup_info->x, 32u);
+    EXPECT_EQ(workgroup_info->y, 4u);
+    EXPECT_EQ(workgroup_info->z, 1u);
 }
 
 TEST_F(SpirvWriterTest, Function_EntryPoint_Fragment) {
@@ -139,6 +149,7 @@ TEST_F(SpirvWriterTest, Function_EntryPoint_Fragment) {
                OpReturn
                OpFunctionEnd
 )");
+    EXPECT_FALSE(workgroup_info.has_value());
 }
 
 TEST_F(SpirvWriterTest, Function_EntryPoint_Vertex) {
@@ -190,6 +201,7 @@ TEST_F(SpirvWriterTest, Function_EntryPoint_Vertex) {
                OpReturn
                OpFunctionEnd
 )");
+    EXPECT_FALSE(workgroup_info.has_value());
 }
 
 TEST_F(SpirvWriterTest, Function_EntryPoint_Multiple) {

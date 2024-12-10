@@ -28,11 +28,8 @@
 #ifndef SRC_TINT_LANG_SPIRV_WRITER_PRINTER_PRINTER_H_
 #define SRC_TINT_LANG_SPIRV_WRITER_PRINTER_PRINTER_H_
 
-#include <cstdint>
-#include <vector>
-
-#include "src/tint/lang/spirv/writer/common/module.h"
 #include "src/tint/lang/spirv/writer/common/options.h"
+#include "src/tint/lang/spirv/writer/common/output.h"
 #include "src/tint/utils/result/result.h"
 
 // Forward declarations
@@ -45,7 +42,7 @@ namespace tint::spirv::writer {
 /// @returns the generated SPIR-V instructions on success, or failure
 /// @param module the Tint IR module to generate
 /// @param options the printer options
-tint::Result<std::vector<uint32_t>> Print(core::ir::Module& module, const Options& options);
+tint::Result<Output> Print(core::ir::Module& module, const Options& options);
 
 }  // namespace tint::spirv::writer
 

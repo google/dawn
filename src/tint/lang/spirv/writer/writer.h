@@ -30,7 +30,7 @@
 
 #include "src/tint/lang/core/ir/module.h"
 #include "src/tint/lang/spirv/writer/common/options.h"
-#include "src/tint/lang/spirv/writer/output.h"
+#include "src/tint/lang/spirv/writer/common/output.h"
 #include "src/tint/utils/result/result.h"
 
 namespace tint::spirv::writer {

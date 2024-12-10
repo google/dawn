@@ -25,11 +25,11 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef SRC_TINT_LANG_SPIRV_WRITER_OUTPUT_H_
-#define SRC_TINT_LANG_SPIRV_WRITER_OUTPUT_H_
+#ifndef SRC_TINT_LANG_SPIRV_WRITER_COMMON_OUTPUT_H_
+#define SRC_TINT_LANG_SPIRV_WRITER_COMMON_OUTPUT_H_
 
 #include <cstdint>
-#include <string>
+#include <optional>
 #include <vector>
 
 namespace tint::spirv::writer {
@@ -49,10 +49,23 @@ struct Output {
     /// @returns this
     Output& operator=(const Output&);
 
+    /// Workgroup size information
+    struct WorkgroupInfo {
+        /// The x-component
+        uint32_t x;
+        /// The y-component
+        uint32_t y;
+        /// The z-component
+        uint32_t z;
+    };
+
     /// The generated SPIR-V.
     std::vector<uint32_t> spirv;
+
+    /// The workgroup size information, if the entry point was a compute shader
+    std::optional<WorkgroupInfo> workgroup_info = std::nullopt;
 };
 
 }  // namespace tint::spirv::writer
 
-#endif  // SRC_TINT_LANG_SPIRV_WRITER_OUTPUT_H_
+#endif  // SRC_TINT_LANG_SPIRV_WRITER_COMMON_OUTPUT_H_

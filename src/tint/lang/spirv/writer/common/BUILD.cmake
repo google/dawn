@@ -54,6 +54,8 @@ tint_add_target(tint_lang_spirv_writer_common lib
   lang/spirv/writer/common/option_helper.cc
   lang/spirv/writer/common/option_helpers.h
   lang/spirv/writer/common/options.h
+  lang/spirv/writer/common/output.cc
+  lang/spirv/writer/common/output.h
 )
 
 tint_target_add_dependencies(tint_lang_spirv_writer_common lib
