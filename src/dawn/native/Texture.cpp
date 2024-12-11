@@ -345,11 +345,7 @@ MaybeError ValidateTextureSize(const DeviceBase* device,
             (descriptor->size.width <= maxExtentAdapter.width &&
              descriptor->size.height <= maxExtentAdapter.height &&
              descriptor->size.depthOrArrayLayers <= maxExtentAdapter.depthOrArrayLayers)
-                ? absl::StrFormat(
-                      " This adapter supports a higher %s of %u, which can be specified in "
-                      "requiredLimits when calling requestDevice(). Limits differ by hardware, so "
-                      "always check the adapter limits prior to requesting a higher limit.",
-                      limitName, limitValue)
+                ? MakeIncreaseLimitMessage(limitName, limitValue)
                 : "";
         return DAWN_VALIDATION_ERROR("Texture size (%s) exceeded maximum texture size (%s).%s",
                                      &descriptor->size, &maxExtent, increaseLimitAdvice);

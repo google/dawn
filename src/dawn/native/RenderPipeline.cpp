@@ -201,9 +201,14 @@ ResultOrError<ShaderModuleEntryPoint> ValidateVertexState(
 
     const CombinedLimits& limits = device->GetLimits();
 
-    DAWN_INVALID_IF(descriptor->bufferCount > limits.v1.maxVertexBuffers,
-                    "Vertex buffer count (%u) exceeds the maximum number of vertex buffers (%u).",
-                    descriptor->bufferCount, limits.v1.maxVertexBuffers);
+    const uint32_t maxVertexBuffers = limits.v1.maxVertexBuffers;
+    if (DAWN_UNLIKELY(descriptor->bufferCount > maxVertexBuffers)) {
+        return DAWN_VALIDATION_ERROR(
+            "Vertex buffer count (%u) exceeds the maximum number of vertex buffers (%u).%s",
+            descriptor->bufferCount, maxVertexBuffers,
+            DAWN_INCREASE_LIMIT_MESSAGE(device->GetAdapter(), maxVertexBuffers,
+                                        descriptor->bufferCount));
+    }
 
     ShaderModuleEntryPoint entryPoint;
     DAWN_TRY_ASSIGN_CONTEXT(
