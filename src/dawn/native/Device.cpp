@@ -500,9 +500,11 @@ void DeviceBase::WillDropLastExternalRef() {
     }
 
     // Flush last remaining callback tasks.
-    do {
-        FlushCallbackTaskQueue();
-    } while (!mCallbackTaskManager->IsEmpty());
+    if (mCallbackTaskManager) {
+        do {
+            FlushCallbackTaskQueue();
+        } while (!mCallbackTaskManager->IsEmpty());
+    }
 
     auto deviceLock(GetScopedLock());
     // Drop the device's reference to the queue. Because the application dropped the last external
