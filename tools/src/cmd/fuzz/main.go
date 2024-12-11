@@ -82,6 +82,7 @@ func run() error {
 	build := ""
 	flag.BoolVar(&t.verbose, "verbose", false, "print additional output")
 	flag.BoolVar(&check, "check", false, "check that all the end-to-end test do not fail")
+	flag.BoolVar(&t.dump, "dump", false, "dumps shader input/output from fuzzer")
 	flag.StringVar(&t.filter, "filter", "", "filter the fuzzers run to those with this substring")
 	flag.StringVar(&t.corpus, "corpus", defaultCorpusDir(), "the corpus directory")
 	flag.StringVar(&build, "build", defaultBuildDir(), "the build directory")
@@ -117,7 +118,7 @@ func run() error {
 	}{
 		{"tint_wgsl_fuzzer", &t.wgslFuzzer},
 	} {
-		*fuzzer.path = filepath.Join(build, fuzzer.name)
+		*fuzzer.path = filepath.Join(build, fuzzer.name+fileutils.ExeExt)
 		if !fileutils.IsExe(*fuzzer.path) {
 			return fmt.Errorf("fuzzer not found at '%v'", *fuzzer.path)
 		}
@@ -134,7 +135,8 @@ func run() error {
 }
 
 type tool struct {
-	verbose      bool
+	verbose      bool   // prints the name of each fuzzer before running
+	dump         bool   // dumps shader input/output from fuzzer
 	filter       string // filter fuzzers to those with this substring
 	corpus       string // directory of test files
 	out          string // where to emit new test files
@@ -142,7 +144,7 @@ type tool struct {
 	numProcesses int    // number of concurrent processes to spawn
 }
 
-// check() runs the fuzzers against all the .wgsl files under to the corpus directory,
+// check() runs the fuzzers against all the .wgsl files under the corpus directory,
 // ensuring that the fuzzers do not error for the given file.
 func (t tool) check() error {
 	wgslFiles, err := glob.Glob(filepath.Join(t.corpus, "**.wgsl"))
@@ -212,6 +214,9 @@ func (t tool) run() error {
 	if t.verbose {
 		args = append(args, "--verbose")
 	}
+	if t.dump {
+		args = append(args, "--dump")
+	}
 	if t.filter != "" {
 		args = append(args, "--filter="+t.filter)
 	}
@@ -224,7 +229,7 @@ func (t tool) run() error {
 			out := bytes.Buffer{}
 			cmd.Stdout = &out
 			cmd.Stderr = &out
-			if t.verbose {
+			if t.verbose || t.dump {
 				cmd.Stdout = io.MultiWriter(&out, os.Stdout)
 				cmd.Stderr = io.MultiWriter(&out, os.Stderr)
 			}
