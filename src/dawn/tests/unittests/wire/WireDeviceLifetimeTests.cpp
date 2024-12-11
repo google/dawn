@@ -53,13 +53,11 @@ class WireDeviceLifetimeTests : public testing::Test {
         options.backendType = wgpu::BackendType::Null;
 
         instance.RequestAdapter(
-            &options,
-            [](WGPURequestAdapterStatus status, WGPUAdapter cAdapter, WGPUStringView,
-               void* userdata) {
-                ASSERT_EQ(status, WGPURequestAdapterStatus_Success);
-                *static_cast<wgpu::Adapter*>(userdata) = wgpu::Adapter::Acquire(cAdapter);
-            },
-            &adapter);
+            &options, wgpu::CallbackMode::AllowSpontaneous,
+            [this](wgpu::RequestAdapterStatus status, wgpu::Adapter a, wgpu::StringView) {
+                ASSERT_EQ(status, wgpu::RequestAdapterStatus::Success);
+                adapter = std::move(a);
+            });
         ASSERT_TRUE(wireHelper->FlushClient());
         ASSERT_TRUE(wireHelper->FlushServer());
         ASSERT_NE(adapter, nullptr);
