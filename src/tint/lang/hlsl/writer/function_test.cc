@@ -1101,15 +1101,17 @@ TEST_F(HlslWriterTest, WorkgroupStorageSizeEmpty) {
 
 TEST_F(HlslWriterTest, WorkgroupStorageSizeSimple) {
     auto* var = mod.root_block->Append(b.Var("var", ty.ptr(workgroup, ty.f32())));
+    auto* var2 = mod.root_block->Append(b.Var("var2", ty.ptr(workgroup, ty.i32())));
 
     auto* func = b.ComputeFunction("main", 32_u, 4_u, 1_u);
     b.Append(func->Block(), [&] {  //
         b.Let("x", var);
+        b.Let("y", var2);
         b.Return(func);
     });
 
     ASSERT_TRUE(Generate()) << err_ << output_.hlsl;
-    EXPECT_EQ(16u, output_.workgroup_info.storage_size);
+    EXPECT_EQ(32u, output_.workgroup_info.storage_size);
 }
 
 TEST_F(HlslWriterTest, WorkgroupStorageSizeCompoundTypes) {
