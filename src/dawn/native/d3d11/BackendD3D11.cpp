@@ -103,8 +103,8 @@ std::vector<Ref<PhysicalDeviceBase>> Backend::DiscoverPhysicalDevices(
         return {};
     }
 
-    FeatureLevel featureLevel =
-        options->compatibilityMode ? FeatureLevel::Compatibility : FeatureLevel::Core;
+    wgpu::FeatureLevel featureLevel =
+        options->compatibilityMode ? wgpu::FeatureLevel::Compatibility : wgpu::FeatureLevel::Core;
 
     ComPtr<IDXGIAdapter> dxgiAdapter;
     ComPtr<ID3D11Device> d3d11Device;

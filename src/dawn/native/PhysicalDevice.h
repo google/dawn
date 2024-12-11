@@ -102,7 +102,7 @@ class PhysicalDeviceBase : public RefCounted {
 
     virtual bool SupportsExternalImages() const = 0;
 
-    virtual bool SupportsFeatureLevel(FeatureLevel featureLevel) const = 0;
+    virtual bool SupportsFeatureLevel(wgpu::FeatureLevel featureLevel) const = 0;
 
     // Backend-specific force-setting and defaulting device toggles
     virtual void SetupBackendAdapterToggles(dawn::platform::Platform* platform,

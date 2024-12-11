@@ -136,8 +136,8 @@ std::vector<Ref<PhysicalDeviceBase>> Backend::DiscoverPhysicalDevices(
         return {};
     }
 
-    FeatureLevel featureLevel =
-        options->compatibilityMode ? FeatureLevel::Compatibility : FeatureLevel::Core;
+    wgpu::FeatureLevel featureLevel =
+        options->compatibilityMode ? wgpu::FeatureLevel::Compatibility : wgpu::FeatureLevel::Core;
 
     // Get or create just the physical device matching the dxgi adapter.
     if (auto* luidOptions = options.Get<RequestAdapterOptionsLUID>()) {

@@ -49,7 +49,7 @@ static constexpr DeviceDescriptor kDefaultDeviceDesc = {};
 
 AdapterBase::AdapterBase(InstanceBase* instance,
                          Ref<PhysicalDeviceBase> physicalDevice,
-                         FeatureLevel featureLevel,
+                         wgpu::FeatureLevel featureLevel,
                          const TogglesState& requiredAdapterToggles,
                          wgpu::PowerPreference powerPreference)
     : mInstance(instance),
@@ -227,7 +227,7 @@ wgpu::Status AdapterBase::APIGetInfo(AdapterInfo* info) const {
     info->adapterType = mPhysicalDevice->GetAdapterType();
     info->vendorID = mPhysicalDevice->GetVendorId();
     info->deviceID = mPhysicalDevice->GetDeviceId();
-    info->compatibilityMode = mFeatureLevel == FeatureLevel::Compatibility;
+    info->compatibilityMode = mFeatureLevel == wgpu::FeatureLevel::Compatibility;
 
     return wgpu::Status::Success;
 }
@@ -476,7 +476,7 @@ const TogglesState& AdapterBase::GetTogglesState() const {
     return mTogglesState;
 }
 
-FeatureLevel AdapterBase::GetFeatureLevel() const {
+wgpu::FeatureLevel AdapterBase::GetFeatureLevel() const {
     return mFeatureLevel;
 }
 

@@ -35,6 +35,7 @@ class MappedNamedConstantsTest {
         DeviceLostReason::class,
         ErrorFilter::class,
         ErrorType::class,
+        FeatureLevel::class,
         FeatureName::class,
         FilterMode::class,
         FrontFace::class,

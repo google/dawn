@@ -182,7 +182,7 @@ class InstanceBase final : public ErrorSink, public RefCountedWithExternalCount<
     // Helper function that create adapter on given physical device handling required adapter
     // toggles descriptor.
     Ref<AdapterBase> CreateAdapter(Ref<PhysicalDeviceBase> physicalDevice,
-                                   FeatureLevel featureLevel,
+                                   wgpu::FeatureLevel featureLevel,
                                    const DawnTogglesDescriptor* requiredAdapterToggles,
                                    wgpu::PowerPreference powerPreference);
 

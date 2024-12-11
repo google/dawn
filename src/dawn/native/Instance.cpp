@@ -334,7 +334,7 @@ Future InstanceBase::APIRequestAdapter2(const RequestAdapterOptions* options,
 }
 
 Ref<AdapterBase> InstanceBase::CreateAdapter(Ref<PhysicalDeviceBase> physicalDevice,
-                                             FeatureLevel featureLevel,
+                                             wgpu::FeatureLevel featureLevel,
                                              const DawnTogglesDescriptor* requiredAdapterToggles,
                                              wgpu::PowerPreference powerPreference) {
     // Set up toggles state for default adapter from given toggles descriptor and inherit from
@@ -373,9 +373,9 @@ std::vector<Ref<AdapterBase>> InstanceBase::EnumerateAdapters(
     UnpackedPtr<RequestAdapterOptions> unpacked = Unpack(options);
     auto* togglesDesc = unpacked.Get<DawnTogglesDescriptor>();
 
-    FeatureLevel featureLevel = (options->compatibilityMode && !options->forceFallbackAdapter)
-                                    ? FeatureLevel::Compatibility
-                                    : FeatureLevel::Core;
+    wgpu::FeatureLevel featureLevel = (options->compatibilityMode && !options->forceFallbackAdapter)
+                                          ? wgpu::FeatureLevel::Compatibility
+                                          : wgpu::FeatureLevel::Core;
     std::vector<Ref<AdapterBase>> adapters;
     for (const auto& physicalDevice : EnumeratePhysicalDevices(unpacked)) {
         DAWN_ASSERT(physicalDevice->SupportsFeatureLevel(featureLevel));

@@ -430,7 +430,7 @@ TEST_F(DeviceToggleTest, DeviceOverridingInstanceToggle) {
     Ref<native::AdapterBase> adapter = native::FromAPI(nullAdapter.Get());
 
     native::PhysicalDeviceBase* nullPhysicalDevice = adapter->GetPhysicalDevice();
-    native::FeatureLevel featureLevel = adapter->GetFeatureLevel();
+    wgpu::FeatureLevel featureLevel = adapter->GetFeatureLevel();
 
     // Create null adapters with the AllowUnsafeAPIs toggle set/forced to enabled/disabled, using
     // the same physical device and feature level as the known null adapter.
@@ -554,7 +554,7 @@ TEST_F(DeviceToggleTest, DeviceOverridingAdapterToggle) {
     ASSERT_FALSE(adapter->GetTogglesState().IsSet(native::Toggle::UseDXC));
 
     native::PhysicalDeviceBase* nullPhysicalDevice = adapter->GetPhysicalDevice();
-    native::FeatureLevel featureLevel = adapter->GetFeatureLevel();
+    wgpu::FeatureLevel featureLevel = adapter->GetFeatureLevel();
 
     // Create null adapters with the UseDXC toggle set/forced to enabled/disabled, using the same
     // physical device and feature level as the known null adapter.

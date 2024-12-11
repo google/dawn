@@ -118,6 +118,7 @@ dawn_json_generator("kotlin_gen") {
     "java/android/dawn/ErrorFilter.kt",
     "java/android/dawn/ErrorType.kt",
     "java/android/dawn/Extent3D.kt",
+    "java/android/dawn/FeatureLevel.kt",
     "java/android/dawn/FeatureName.kt",
     "java/android/dawn/FilterMode.kt",
     "java/android/dawn/FragmentState.kt",

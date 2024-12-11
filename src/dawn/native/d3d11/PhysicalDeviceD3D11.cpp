@@ -56,16 +56,19 @@ bool PhysicalDevice::SupportsExternalImages() const {
     return true;
 }
 
-bool PhysicalDevice::SupportsFeatureLevel(FeatureLevel featureLevel) const {
+bool PhysicalDevice::SupportsFeatureLevel(wgpu::FeatureLevel featureLevel) const {
     // TODO(dawn:1820): compare D3D11 feature levels with Dawn feature levels.
     switch (featureLevel) {
-        case FeatureLevel::Core: {
+        case wgpu::FeatureLevel::Core: {
             return mFeatureLevel >= D3D_FEATURE_LEVEL_11_1;
         }
-        case FeatureLevel::Compatibility: {
+        case wgpu::FeatureLevel::Compatibility: {
             return true;
         }
+        case wgpu::FeatureLevel::Undefined:
+            break;
     }
+    DAWN_UNREACHABLE();
 }
 
 const DeviceInfo& PhysicalDevice::GetDeviceInfo() const {

@@ -2435,6 +2435,14 @@
             {"name": "shared event", "type": "void *"}
         ]
     },
+    "feature level": {
+        "category": "enum",
+        "values": [
+            {"value": 0, "name": "undefined", "jsrepr": "undefined"},
+            {"value": 1, "name": "compatibility"},
+            {"value": 2, "name": "core"}
+        ]
+    },
     "feature name": {
         "category": "enum",
         "values": [

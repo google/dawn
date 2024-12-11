@@ -125,9 +125,9 @@ bool PhysicalDeviceBase::IsFeatureSupportedWithToggles(wgpu::FeatureName feature
 
 void PhysicalDeviceBase::GetDefaultLimitsForSupportedFeatureLevel(Limits* limits) const {
     // If the physical device does not support core then the defaults are compat defaults.
-    GetDefaultLimits(limits, SupportsFeatureLevel(FeatureLevel::Core)
-                                 ? FeatureLevel::Core
-                                 : FeatureLevel::Compatibility);
+    GetDefaultLimits(limits, SupportsFeatureLevel(wgpu::FeatureLevel::Core)
+                                 ? wgpu::FeatureLevel::Core
+                                 : wgpu::FeatureLevel::Compatibility);
 }
 
 FeaturesSet PhysicalDeviceBase::GetSupportedFeatures(const TogglesState& toggles) const {

@@ -221,20 +221,20 @@ bool IsLimitUndefined<uint64_t>(uint64_t value) {
 
 }  // namespace
 
-void GetDefaultLimits(Limits* limits, FeatureLevel featureLevel) {
+void GetDefaultLimits(Limits* limits, wgpu::FeatureLevel featureLevel) {
     DAWN_ASSERT(limits != nullptr);
 #define X(Better, limitName, compat, base, ...) \
-    limits->limitName = featureLevel == FeatureLevel::Compatibility ? compat : base;
+    limits->limitName = featureLevel == wgpu::FeatureLevel::Compatibility ? compat : base;
     LIMITS(X)
 #undef X
 }
 
-Limits ReifyDefaultLimits(const Limits& limits, FeatureLevel featureLevel) {
+Limits ReifyDefaultLimits(const Limits& limits, wgpu::FeatureLevel featureLevel) {
     Limits out;
 #define X(Class, limitName, compat, base, ...)                                         \
     {                                                                                  \
         const auto defaultLimit = static_cast<decltype(limits.limitName)>(             \
-            featureLevel == FeatureLevel::Compatibility ? compat : base);              \
+            featureLevel == wgpu::FeatureLevel::Compatibility ? compat : base);        \
         if (IsLimitUndefined(limits.limitName) ||                                      \
             CheckLimit<LimitClass::Class>::IsBetter(defaultLimit, limits.limitName)) { \
             /* If the limit is undefined or the default is better, use the default */  \
