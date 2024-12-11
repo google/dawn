@@ -373,9 +373,13 @@ std::vector<Ref<AdapterBase>> InstanceBase::EnumerateAdapters(
     UnpackedPtr<RequestAdapterOptions> unpacked = Unpack(options);
     auto* togglesDesc = unpacked.Get<DawnTogglesDescriptor>();
 
-    wgpu::FeatureLevel featureLevel = (options->compatibilityMode && !options->forceFallbackAdapter)
-                                          ? wgpu::FeatureLevel::Compatibility
-                                          : wgpu::FeatureLevel::Core;
+    wgpu::FeatureLevel featureLevel = wgpu::FeatureLevel::Core;
+    if ((options->featureLevel == wgpu::FeatureLevel::Compatibility ||
+         options->compatibilityMode) &&
+        !options->forceFallbackAdapter) {
+        featureLevel = wgpu::FeatureLevel::Compatibility;
+    }
+
     std::vector<Ref<AdapterBase>> adapters;
     for (const auto& physicalDevice : EnumeratePhysicalDevices(unpacked)) {
         DAWN_ASSERT(physicalDevice->SupportsFeatureLevel(featureLevel));

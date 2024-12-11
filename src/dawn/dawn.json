@@ -74,6 +74,7 @@
         "extensible": "in",
         "members": [
             {"name": "compatible surface", "type": "surface", "optional": true},
+            {"name": "feature level", "type": "feature level", "default": "core"},
             {"name": "power preference", "type": "power preference", "default": "undefined"},
             {"name": "backend type", "type": "backend type", "default": "undefined"},
             {"name": "force fallback adapter", "type": "bool", "default": "false"},
