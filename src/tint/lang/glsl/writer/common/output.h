@@ -25,14 +25,46 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "src/tint/lang/glsl/writer/output.h"
+#ifndef SRC_TINT_LANG_GLSL_WRITER_COMMON_OUTPUT_H_
+#define SRC_TINT_LANG_GLSL_WRITER_COMMON_OUTPUT_H_
+
+#include <cstdint>
+#include <string>
+#include <utility>
+#include <vector>
 
 namespace tint::glsl::writer {
 
-Output::Output() = default;
+/// The output produced when generating GLSL.
+struct Output {
+    /// Constructor
+    Output();
 
-Output::~Output() = default;
+    /// Destructor
+    ~Output();
 
-Output::Output(const Output&) = default;
+    /// Copy constructor
+    Output(const Output&);
+
+    Output& operator=(const Output&) = default;
+
+    /// Workgroup size information
+    struct WorkgroupInfo {
+        /// The x-component
+        uint32_t x = 0;
+        /// The y-component
+        uint32_t y = 0;
+        /// The z-component
+        uint32_t z = 0;
+    };
+
+    /// The generated GLSL.
+    std::string glsl = "";
+
+    /// The workgroup size information, if the entry point was a compute shader
+    WorkgroupInfo workgroup_info{};
+};
 
 }  // namespace tint::glsl::writer
+
+#endif  // SRC_TINT_LANG_GLSL_WRITER_COMMON_OUTPUT_H_

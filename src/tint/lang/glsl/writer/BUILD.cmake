@@ -46,8 +46,6 @@ if(TINT_BUILD_GLSL_WRITER)
 # Condition: TINT_BUILD_GLSL_WRITER
 ################################################################################
 tint_add_target(tint_lang_glsl_writer lib
-  lang/glsl/writer/output.cc
-  lang/glsl/writer/output.h
   lang/glsl/writer/writer.cc
   lang/glsl/writer/writer.h
 )

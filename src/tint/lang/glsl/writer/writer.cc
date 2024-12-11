@@ -36,21 +36,12 @@
 namespace tint::glsl::writer {
 
 Result<Output> Generate(core::ir::Module& ir, const Options& options, const std::string&) {
-    Output output;
-
     // Raise from core-dialect to GLSL-dialect.
     if (auto res = Raise(ir, options); res != Success) {
         return res.Failure();
     }
 
-    // Generate the GLSL code.
-    auto result = Print(ir, options.version);
-    if (result != Success) {
-        return result.Failure();
-    }
-    output.glsl = result.Get();
-
-    return output;
+    return Print(ir, options.version);
 }
 
 }  // namespace tint::glsl::writer

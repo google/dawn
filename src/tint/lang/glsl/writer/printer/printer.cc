@@ -114,7 +114,7 @@ class Printer : public tint::TextGenerator {
     Printer(core::ir::Module& module, const Version& version) : ir_(module), version_(version) {}
 
     /// @returns the generated GLSL shader
-    tint::Result<std::string> Generate() {
+    tint::Result<Output> Generate() {
         auto valid = core::ir::ValidateAndDumpIfNeeded(
             ir_, "glsl.Printer",
             core::ir::Capabilities{core::ir::Capability::kAllowHandleVarsWithoutBindings});
@@ -152,11 +152,14 @@ class Printer : public tint::TextGenerator {
         }
         ss << main_buffer_.String();
 
-        return ss.str();
+        result_.glsl = ss.str();
+        return result_;
     }
 
   private:
     core::ir::Module& ir_;
+
+    Output result_;
 
     const Version& version_;
 
@@ -282,6 +285,10 @@ class Printer : public tint::TextGenerator {
                 auto& wg = wg_opt.value();
                 Line() << "layout(local_size_x = " << wg[0] << ", local_size_y = " << wg[1]
                        << ", local_size_z = " << wg[2] << ") in;";
+
+                result_.workgroup_info.x = wg[0];
+                result_.workgroup_info.y = wg[1];
+                result_.workgroup_info.z = wg[2];
             }
 
             EmitType(out, func->ReturnType());
@@ -1739,7 +1746,7 @@ class Printer : public tint::TextGenerator {
 
 }  // namespace
 
-Result<std::string> Print(core::ir::Module& module, const Version& version) {
+Result<Output> Print(core::ir::Module& module, const Version& version) {
     return Printer{module, version}.Generate();
 }
 

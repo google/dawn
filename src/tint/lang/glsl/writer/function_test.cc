@@ -27,6 +27,8 @@
 
 #include "src/tint/lang/glsl/writer/helper_test.h"
 
+using namespace tint::core::number_suffixes;  // NOLINT
+
 namespace tint::glsl::writer {
 namespace {
 
@@ -41,6 +43,25 @@ layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
 }
 )");
+    EXPECT_EQ(1u, output_.workgroup_info.x);
+    EXPECT_EQ(1u, output_.workgroup_info.y);
+    EXPECT_EQ(1u, output_.workgroup_info.z);
+}
+
+TEST_F(GlslWriterTest, Function_ComputeWgSize) {
+    auto* func = b.ComputeFunction("main", 2_u, 4_u, 6_u);
+    func->Block()->Append(b.Return(func));
+
+    Options opts{};
+    ASSERT_TRUE(Generate(opts, tint::ast::PipelineStage::kCompute)) << err_ << output_.glsl;
+    EXPECT_EQ(output_.glsl, GlslHeader() + R"(
+layout(local_size_x = 2, local_size_y = 4, local_size_z = 6) in;
+void main() {
+}
+)");
+    EXPECT_EQ(2u, output_.workgroup_info.x);
+    EXPECT_EQ(4u, output_.workgroup_info.y);
+    EXPECT_EQ(6u, output_.workgroup_info.z);
 }
 
 TEST_F(GlslWriterTest, FunctionWithParams) {
@@ -69,6 +90,9 @@ precision highp int;
 void main() {
 }
 )");
+    EXPECT_EQ(0u, output_.workgroup_info.x);
+    EXPECT_EQ(0u, output_.workgroup_info.y);
+    EXPECT_EQ(0u, output_.workgroup_info.z);
 }
 
 }  // namespace

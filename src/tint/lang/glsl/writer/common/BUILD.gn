@@ -49,6 +49,8 @@ if (tint_build_glsl_writer) {
       "option_helpers.h",
       "options.cc",
       "options.h",
+      "output.cc",
+      "output.h",
       "printer_support.cc",
       "printer_support.h",
       "version.h",

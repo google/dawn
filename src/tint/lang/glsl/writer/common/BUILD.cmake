@@ -45,6 +45,8 @@ tint_add_target(tint_lang_glsl_writer_common lib
   lang/glsl/writer/common/option_helpers.h
   lang/glsl/writer/common/options.cc
   lang/glsl/writer/common/options.h
+  lang/glsl/writer/common/output.cc
+  lang/glsl/writer/common/output.h
   lang/glsl/writer/common/printer_support.cc
   lang/glsl/writer/common/printer_support.h
   lang/glsl/writer/common/version.h

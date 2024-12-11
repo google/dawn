@@ -31,7 +31,7 @@
 #include <string>
 
 #include "src/tint/lang/glsl/writer/common/options.h"
-#include "src/tint/lang/glsl/writer/output.h"
+#include "src/tint/lang/glsl/writer/common/output.h"
 #include "src/tint/utils/diagnostic/diagnostic.h"
 #include "src/tint/utils/result/result.h"
 

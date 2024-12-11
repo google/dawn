@@ -25,34 +25,14 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef SRC_TINT_LANG_GLSL_WRITER_OUTPUT_H_
-#define SRC_TINT_LANG_GLSL_WRITER_OUTPUT_H_
-
-#include <string>
-#include <utility>
-#include <vector>
-
-#include "src/tint/lang/wgsl/ast/pipeline_stage.h"
+#include "src/tint/lang/glsl/writer/common/output.h"
 
 namespace tint::glsl::writer {
 
-/// The output produced when generating GLSL.
-struct Output {
-    /// Constructor
-    Output();
+Output::Output() = default;
 
-    /// Destructor
-    ~Output();
+Output::~Output() = default;
 
-    /// Copy constructor
-    Output(const Output&);
-
-    Output& operator=(const Output&) = default;
-
-    /// The generated GLSL.
-    std::string glsl = "";
-};
+Output::Output(const Output&) = default;
 
 }  // namespace tint::glsl::writer
-
-#endif  // SRC_TINT_LANG_GLSL_WRITER_OUTPUT_H_
