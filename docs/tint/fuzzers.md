@@ -13,26 +13,52 @@ Tint's fuzzers are implemented as functions registered with the macros:
 
 The fuzzer targets can be build with either CMake or GN:
 
-- CMake: Define `TINT_BUILD_FUZZERS=1` (pass `-DTINT_BUILD_FUZZERS=1` to `CMake`, or set in `CMakeCache.txt`)
+- CMake: Define `TINT_BUILD_FUZZERS=1` (pass `-DTINT_BUILD_FUZZERS=1` to `CMake`)
 - GN: Define `use_libfuzzer = true` in `args.gn`.
 
-## Local fuzzing
+## Running fuzzers
 
-The [`tint_wgsl_fuzzer`](#tint_wgsl_fuzzer) and [`tint_ir_fuzzer`](#tint_ir_fuzzer) executables accept the [standard `libFuzzer` command line arguments](https://llvm.org/docs/LibFuzzer.html#options) with extended command line arguments described below.
+### Local fuzzing
+
+The [`tint_wgsl_fuzzer`](#tint_wgsl_fuzzer) and [`tint_ir_fuzzer`](#tint_ir_fuzzer) executables accept the [standard `libFuzzer` command line arguments](https://llvm.org/docs/LibFuzzer.html#options) with [extended command line arguments](#extended-command-line-arguments) described below.
 
 There's also a helper tool to run the fuzzers locally:
 
-- To run the local fuzzers across the full number of CPU threads available on the system, seeded with the corpus in [`test/tint`](../../test/tint), run:
+- To run the local fuzzers across the full number of CPU threads available on the system, seeded with the corpus in [`test/tint`](../../test/tint), and using the dictionary in `src/tint/cmd/fuzz/wgsl/dictionary.txt` run:
 
   `tools/run fuzz`
 
-- To check that all the test files in [`test/tint`](../../test/tint) pass the fuzzers without error and then exit, run:
+- To check that all the test files in the corpus directory, [`test/tint`](../../test/tint) by default, pass the fuzzers without error and then exit, run:
 
   `tools/run fuzz --check`
 
   Note: This is run by Dawn's CQ presubmit to check that fuzzers aren't accidentally broken.
 
-## Registering a new `tint::Program` fuzzer
+- To run the local fuzzers using the same corpus used by ClusterFuzz:
+
+  `tools/run fuzz -corpus out/libfuzz/gen/fuzzers/wgsl_corpus`
+
+  Note that this corpus directory is generated when building the GN target `tint_generate_wgsl_corpus`.
+
+### Generating the corpus
+
+Generate the `tint_wgsl_fuzzer` corpus using the `tint_generate_wgsl_corpus` GN target, which produces a corpus in `<build_dir>/gen/fuzzers/wgsl_corpus`. Pass in the path to the corpus directory as an argument to the fuzzer executable to use it. It's also a good idea to pass in the dictionary with `-dict=src/tint/cmd/fuzz/wgsl/dictionary.txt`:
+
+```bash
+autoninja -C out/libfuzz tint_generate_wgsl_corpus
+out/libfuzz/tint_wgsl_fuzzer.exe -dict=src/tint/cmd/fuzz/wgsl/dictionary.txt out/libfuzz/gen/fuzzers/wgsl_corpus
+```
+
+Similarly, the `tint_ir_fuzzer` corpus can be generated using the `tint_generate_ir_corpus` GN target, producing the corpus in `<build_dir>/gen/fuzzers/ir_corpus`. For the IR fuzzer, we don't pass in the dictionary, since we are using lpm for mutating (the proto file effectively defines the dictionary):
+
+```bash
+autoninja -C out/libfuzz tint_generate_ir_corpus
+out/libfuzz/tint_ir_fuzzer.exe out/libfuzz/gen/fuzzers/ir_corpus
+```
+
+## Writing fuzzers
+
+### Registering a new `tint::Program` fuzzer
 
 1. Create a new source file with a `_fuzz.cc` suffix.
 2. `#include "src/tint/cmd/fuzz/wgsl/fuzz.h"`
@@ -75,10 +101,9 @@ void MyWGSLFuzzer(const tint::Program& program, bool a_fuzzer_provided_value) {
 }  // namespace tint::my_namespace
 
 TINT_WGSL_PROGRAM_FUZZER(tint::my_namespace::MyWGSLFuzzer);
-
 ```
 
-## Registering a new `tint::core::ir::Module` fuzzer
+### Registering a new `tint::core::ir::Module` fuzzer
 
 1. Create a new source file with a `_fuzz.cc` suffix.
 2. `#include "src/tint/cmd/fuzz/ir/fuzz.h"`
@@ -108,10 +133,9 @@ void MyIRFuzzer(core::ir::Module& module) {
 }  // namespace tint::my_namespace
 
 TINT_IR_MODULE_FUZZER(tint::my_namespace::MyIRFuzzer);
-
 ```
 
-## Additional fuzzer data
+### Additional fuzzer data
 
 WGSL and IR fuzzer functions can also declare any number of additional parameters, which will be populated with fuzzer provided data. These additional parameters must come at the end of the signatures described above, and can be of the following types:
 
@@ -129,12 +153,15 @@ Tint has two fuzzer executable targets:
 
 The entry point for the fuzzer lives at [`src/tint/cmd/fuzz/wgsl/main_fuzz.cc`](../../src/tint/cmd/fuzz/wgsl/main_fuzz.cc).
 
-#### Command line flags
+#### Extended command line arguments
+
+On top of the [standard `libFuzzer` command line arguments](https://llvm.org/docs/LibFuzzer.html#options), the fuzzers support the following extended command line arguments:
 
 - `--help`: lists the command line arguments.
-- `--filter`: only runs the fuzzer functions that contain the given string in its name.
+- `--filter=<name>`: only runs the fuzzer functions that contain the given string in its name.
 - `--concurrent`: each of the fuzzer functions will be run on a separate, concurrent thread. This potentially offers performance improvements, and also tests for concurrent execution.
 - `--verbose` : prints verbose information about what the fuzzer is doing.
+- `--dump` : prints shader source, including input WGSL, and genreated HLSL, MSL, and GLSL.
 
 #### Behavior
 
@@ -148,3 +175,51 @@ The `tint_wgsl_fuzzer` will do the following:
 ### `tint_ir_fuzzer`
 
 TODO: Document when landed.
+
+## Debugging
+
+To debug a specific registered fuzzer function, one strategy is to add a `TINT_ICE` call at the top of the function, and then run the fuzzer with `-filter <name>` to have it only run that specific fuzzer. When the function is called, the libfuzzer harness will emit a crash file that can be used as input on subsequent runs. Remove the `TINT_ICE` and run the fuzzer again using this crash file.
+
+For example, if we wish to debug `tint::msl::writer::IRFuzzer`, we would first insert a `TINT_ICE` at the top:
+
+```c++
+Result<SuccessType> IRFuzzer(core::ir::Module& module,
+                             const fuzz::ir::Context& context,
+                             Options options) {
+    TINT_ICE() << "Crash";
+    // Comment out the rest of the body to avoid unreachable code warnings
+}
+```
+
+Build and run the fuzzer, filtering in this function:
+
+```bash
+autoninja -C out/libfuzz tint_wgsl_fuzzer
+out/libfuzz/tint_wgsl_fuzzer -filter=tint::msl::writer::IRFuzzer
+```
+
+It can take a little while before libfuzzer generates a valid input WGSL, but eventually it will call into the function and crash on the ICE:
+
+```
+...
+#71607  NEW    cov: 3633 ft: 8316 corp: 1045/8248b lim: 25 exec/s: 2469 rss: 158Mb L: 8/25 MS: 2 ShuffleBytes-PersAutoDict- DE: "true"-
+#71669  NEW    cov: 3633 ft: 8317 corp: 1046/8266b lim: 25 exec/s: 2471 rss: 158Mb L: 18/25 MS: 2 CMP-ChangeByte- DE: "if"-
+#71697  REDUCE cov: 3633 ft: 8317 corp: 1046/8264b lim: 25 exec/s: 2472 rss: 158Mb L: 6/25 MS: 3 PersAutoDict-ChangeBit-EraseBytes- DE: "\001\002"-
+ICE while running fuzzer: 'tint::msl::writer::IRFuzzer'
+..\..\src\tint\lang\msl\writer\writer_fuzz.cc:63 internal compiler error: Crash
+==25204== ERROR: libFuzzer: deadly signal
+NOTE: libFuzzer has rudimentary signal handlers.
+      Combine libFuzzer with AddressSanitizer or similar for better crash reports.
+SUMMARY: libFuzzer: deadly signal
+MS: 1 PersAutoDict- DE: "or"-; base unit: b34d87c378ebbbfbfd475303dcc75d1d1b2a7c7a
+0x2f,0x2f,0x33,0x33,0x33,0x33,0x6f,0x72,0x33,0x33,0x33,0x33,0x33,0x33,0x33,0x33,0x33,0x33,0x2a,0x2a,0x30,0x32,
+//3333or3333333333**02
+artifact_prefix='./'; Test unit written to ./crash-21563a85afd5322d9e17c1c43fd3d4029778d6e7
+Base64: Ly8zMzMzb3IzMzMzMzMzMzMzKiowMg==
+```
+
+Note that the second to last line specifies that the input test was written to a file. Now we can remove the `TINT_ICE` and run the fuzzer with just this file as input:
+
+```bash
+out/libfuzz/tint_wgsl_fuzzer ./crash-21563a85afd5322d9e17c1c43fd3d4029778d6e7
+```
