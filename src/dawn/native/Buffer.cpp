@@ -461,9 +461,13 @@ ResultOrError<UnpackedPtr<BufferDescriptor>> ValidateBufferDescriptor(
                     "Buffer is mapped at creation but its size (%u) is not a multiple of 4.",
                     descriptor->size);
 
-    DAWN_INVALID_IF(descriptor->size > device->GetLimits().v1.maxBufferSize,
-                    "Buffer size (%u) exceeds the max buffer size limit (%u).", descriptor->size,
-                    device->GetLimits().v1.maxBufferSize);
+    uint64_t maxBufferSize = device->GetLimits().v1.maxBufferSize;
+    if (DAWN_UNLIKELY(descriptor->size > maxBufferSize)) {
+        return DAWN_VALIDATION_ERROR(
+            "Buffer size (%u) exceeds the max buffer size limit (%u).%s", descriptor->size,
+            maxBufferSize,
+            DAWN_INCREASE_LIMIT_MESSAGE(device->GetAdapter(), maxBufferSize, descriptor->size));
+    }
 
     return unpacked;
 }
