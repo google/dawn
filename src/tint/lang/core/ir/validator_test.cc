@@ -3159,7 +3159,7 @@ note: # Disassembly
 )");
 }
 
-TEST_F(IR_ValidatorTest, CallToBuiltinMissingResult) {
+TEST_F(IR_ValidatorTest, CallToBuiltin_MissingResult) {
     auto* f = b.Function("f", ty.void_());
     b.Append(f->Block(), [&] {
         auto* c = b.Call(ty.f32(), BuiltinFn::kAbs, 1_f);
@@ -3188,7 +3188,7 @@ note: # Disassembly
 )");
 }
 
-TEST_F(IR_ValidatorTest, CallToBuiltinMismatchResultType) {
+TEST_F(IR_ValidatorTest, CallToBuiltin_MismatchResultType) {
     auto* f = b.Function("f", ty.void_());
     b.Append(f->Block(), [&] {
         auto* c = b.Call(ty.f32(), BuiltinFn::kAbs, 1_f);
@@ -3217,7 +3217,7 @@ note: # Disassembly
 )");
 }
 
-TEST_F(IR_ValidatorTest, CallToBuiltinArgNullType) {
+TEST_F(IR_ValidatorTest, CallToBuiltin_ArgNullType) {
     auto* f = b.Function("f", ty.void_());
     b.Append(f->Block(), [&] {
         auto* i = b.Var<function, f32>("i");
@@ -3254,6 +3254,52 @@ note: # Disassembly
     %i:ptr<function, f32, read_write> = var, 0.0f
     %3:undef = load %i
     %4:f32 = abs %3
+    ret
+  }
+}
+)");
+}
+
+TEST_F(IR_ValidatorTest, CallToBuiltin_NonSingularResult) {
+    auto* f = b.Function("f", ty.void_());
+    b.Append(f->Block(), [&] {
+        auto* i = b.Var<function, f32>("i");
+        i->SetInitializer(b.Constant(0_f));
+        auto* load = b.Load(i);
+        auto* load_ret = load->Result(0);
+        auto* too_many_call = b.Call(ty.f32(), BuiltinFn::kAbs, load_ret);
+        too_many_call->SetResults(Vector{load_ret, load_ret});
+        auto* too_few_call = b.Call(ty.f32(), BuiltinFn::kAbs, load_ret);
+        too_few_call->ClearResults();
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_EQ(res.Failure().reason.Str(),
+              R"(:5:14 error: abs: call to builtin has 2 results, when 1 is expected
+    %3:f32 = abs %3
+             ^^^
+
+:2:3 note: in block
+  $B1: {
+  ^^^
+
+:6:13 error: abs: call to builtin has 0 results, when 1 is expected
+    undef = abs %3
+            ^^^
+
+:2:3 note: in block
+  $B1: {
+  ^^^
+
+note: # Disassembly
+%f = func():void {
+  $B1: {
+    %i:ptr<function, f32, read_write> = var, 0.0f
+    %3:f32 = load %i
+    %3:f32 = abs %3
+    undef = abs %3
     ret
   }
 }

@@ -2673,6 +2673,12 @@ void Validator::CheckBuiltinCall(const BuiltinCall* call) {
 
     TINT_ASSERT(builtin->return_type);
 
+    if (call->Results().Length() != 1) {
+        AddError(call) << "call to builtin has " << call->Results().Length()
+                       << " results, when 1 is expected";
+        return;
+    }
+
     if (call->Result(0) == nullptr) {
         AddError(call) << "call to builtin does not have a return type";
         return;
