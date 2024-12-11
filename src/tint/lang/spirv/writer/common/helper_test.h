@@ -99,7 +99,7 @@ class SpirvWriterTestHelperBase : public BASE {
     std::string output_;
 
     /// Workgroup info
-    std::optional<Output::WorkgroupInfo> workgroup_info;
+    Output::WorkgroupInfo workgroup_info;
 
     /// @returns the error string from the validation
     std::string Error() const { return err_; }

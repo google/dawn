@@ -204,10 +204,8 @@ class Printer {
         writer.WriteHeader(module_.IdBound(), kWriterVersion);
         writer.WriteModule(module_);
 
-        Output output;
-        output.spirv = std::move(writer.Result());
-        output.workgroup_info = workgroup_info;
-        return output;
+        output_.spirv = std::move(writer.Result());
+        return output_;
     }
 
   private:
@@ -216,6 +214,8 @@ class Printer {
     Options options_;
     writer::Module module_;
     BinaryWriter writer_;
+
+    Output output_;
 
     /// A function type used for an OpTypeFunction declaration.
     struct FunctionType {
@@ -281,9 +281,6 @@ class Printer {
     uint32_t switch_merge_label_ = 0;
 
     bool zero_init_workgroup_memory_ = false;
-
-    /// Workgroup information emitted
-    std::optional<Output::WorkgroupInfo> workgroup_info = std::nullopt;
 
     /// Builds the SPIR-V from the IR
     Result<SuccessType> Generate() {
@@ -774,9 +771,12 @@ class Printer {
 
                 auto const_wg_size = func->WorkgroupSizeAsConst();
                 TINT_ASSERT(const_wg_size);
+                auto wg_size = *const_wg_size;
 
                 // Store the workgroup information away to return from the generator.
-                workgroup_info = {(*const_wg_size)[0], (*const_wg_size)[1], (*const_wg_size)[2]};
+                output_.workgroup_info.x = wg_size[0];
+                output_.workgroup_info.y = wg_size[1];
+                output_.workgroup_info.z = wg_size[2];
 
                 module_.PushExecutionMode(
                     spv::Op::OpExecutionMode,
@@ -854,8 +854,8 @@ class Printer {
     void EmitRootBlock(core::ir::Block* root_block) {
         for (auto* inst : *root_block) {
             Switch(
-                inst,                                   //
-                [&](core::ir::Var* v) { EmitVar(v); },  //
+                inst,                                         //
+                [&](core::ir::Var* v) { EmitGlobalVar(v); },  //
                 TINT_ICE_ON_NO_MATCH);
         }
     }
@@ -2285,6 +2285,20 @@ class Printer {
         if (attrs.invariant) {
             module_.PushAnnot(spv::Op::OpDecorate, {id, U32Operand(SpvDecorationInvariant)});
         }
+    }
+
+    void EmitGlobalVar(core::ir::Var* var) {
+        auto* ptr = var->Result(0)->Type()->As<core::type::Pointer>();
+        if (ptr->AddressSpace() == core::AddressSpace::kWorkgroup) {
+            auto* ty = ptr->StoreType();
+            uint32_t align = ty->Align();
+            uint32_t size = ty->Size();
+
+            // This essentially matches std430 layout rules from GLSL, which are in
+            // turn specified as an upper bound for Vulkan layout sizing.
+            output_.workgroup_info.storage_size += tint::RoundUp(16u, tint::RoundUp(align, size));
+        }
+        EmitVar(var);
     }
 
     /// Emit a var instruction.
