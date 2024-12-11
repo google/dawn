@@ -408,13 +408,6 @@ ResultOrError<ShaderModule::ModuleAndSpirv> ShaderModule::GetHandleAndSpirv(
                                               &transformOutputs, nullptr));
             }
 
-            // Validate workgroup size after program runs transforms.
-            if (r.stage == SingleShaderStage::Compute) {
-                Extent3D _;
-                DAWN_TRY_ASSIGN(_, ValidateComputeStageWorkgroupSize(
-                                       program, r.entryPointName.data(), r.limits));
-            }
-
             TRACE_EVENT0(r.platform.UnsafeGetValue(), General, "tint::spirv::writer::Generate()");
 
             // Convert the AST program to an IR module.
@@ -427,6 +420,16 @@ ResultOrError<ShaderModule::ModuleAndSpirv> ShaderModule::GetHandleAndSpirv(
             DAWN_INVALID_IF(tintResult != tint::Success,
                             "An error occurred while generating SPIR-V\n%s",
                             tintResult.Failure().reason.Str());
+
+            // Workgroup validation has to come after `Generate` because it may require overrides to
+            // have been substituted.
+            if (r.stage == SingleShaderStage::Compute) {
+                Extent3D _;
+                DAWN_TRY_ASSIGN(_, ValidateComputeStageWorkgroupSize(
+                                       tintResult->workgroup_info.x, tintResult->workgroup_info.y,
+                                       tintResult->workgroup_info.z,
+                                       tintResult->workgroup_info.storage_size, r.limits));
+            }
 
             CompiledSpirv result;
             result.spirv = std::move(tintResult.Get().spirv);

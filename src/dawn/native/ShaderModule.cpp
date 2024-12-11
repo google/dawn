@@ -1118,39 +1118,46 @@ ResultOrError<Extent3D> ValidateComputeStageWorkgroupSize(
     const char* entryPointName,
     const LimitsForCompilationRequest& limits) {
     tint::inspector::Inspector inspector(program);
+
     // At this point the entry point must exist and must have workgroup size values.
     tint::inspector::EntryPoint entryPoint = inspector.GetEntryPoint(entryPointName);
     DAWN_ASSERT(entryPoint.workgroup_size.has_value());
     const tint::inspector::WorkgroupSize& workgroup_size = entryPoint.workgroup_size.value();
 
-    DAWN_INVALID_IF(workgroup_size.x < 1 || workgroup_size.y < 1 || workgroup_size.z < 1,
+    return ValidateComputeStageWorkgroupSize(workgroup_size.x, workgroup_size.y, workgroup_size.z,
+                                             entryPoint.workgroup_storage_size, limits);
+}
+
+ResultOrError<Extent3D> ValidateComputeStageWorkgroupSize(
+    uint32_t x,
+    uint32_t y,
+    uint32_t z,
+    size_t workgroupStorageSize,
+    const LimitsForCompilationRequest& limits) {
+    DAWN_INVALID_IF(x < 1 || y < 1 || z < 1,
                     "Entry-point uses workgroup_size(%u, %u, %u) that are below the "
                     "minimum allowed (1, 1, 1).",
-                    workgroup_size.x, workgroup_size.y, workgroup_size.z);
+                    x, y, z);
 
-    DAWN_INVALID_IF(workgroup_size.x > limits.maxComputeWorkgroupSizeX ||
-                        workgroup_size.y > limits.maxComputeWorkgroupSizeY ||
-                        workgroup_size.z > limits.maxComputeWorkgroupSizeZ,
+    DAWN_INVALID_IF(x > limits.maxComputeWorkgroupSizeX || y > limits.maxComputeWorkgroupSizeY ||
+                        z > limits.maxComputeWorkgroupSizeZ,
                     "Entry-point uses workgroup_size(%u, %u, %u) that exceeds the "
                     "maximum allowed (%u, %u, %u).",
-                    workgroup_size.x, workgroup_size.y, workgroup_size.z,
-                    limits.maxComputeWorkgroupSizeX, limits.maxComputeWorkgroupSizeY,
+                    x, y, z, limits.maxComputeWorkgroupSizeX, limits.maxComputeWorkgroupSizeY,
                     limits.maxComputeWorkgroupSizeZ);
 
-    uint64_t numInvocations =
-        static_cast<uint64_t>(workgroup_size.x) * workgroup_size.y * workgroup_size.z;
+    uint64_t numInvocations = static_cast<uint64_t>(x) * y * z;
     DAWN_INVALID_IF(numInvocations > limits.maxComputeInvocationsPerWorkgroup,
                     "The total number of workgroup invocations (%u) exceeds the "
                     "maximum allowed (%u).",
                     numInvocations, limits.maxComputeInvocationsPerWorkgroup);
 
-    const size_t workgroupStorageSize = entryPoint.workgroup_storage_size;
     DAWN_INVALID_IF(workgroupStorageSize > limits.maxComputeWorkgroupStorageSize,
                     "The total use of workgroup storage (%u bytes) is larger than "
                     "the maximum allowed (%u bytes).",
                     workgroupStorageSize, limits.maxComputeWorkgroupStorageSize);
 
-    return Extent3D{workgroup_size.x, workgroup_size.y, workgroup_size.z};
+    return Extent3D{x, y, z};
 }
 
 ShaderModuleParseResult::ShaderModuleParseResult() = default;
