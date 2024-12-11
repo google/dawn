@@ -25,47 +25,16 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef SRC_TINT_LANG_MSL_WRITER_OUTPUT_H_
-#define SRC_TINT_LANG_MSL_WRITER_OUTPUT_H_
-
-#include <cstdint>
-#include <string>
-#include <unordered_map>
-#include <unordered_set>
-#include <vector>
+#include "src/tint/lang/msl/writer/common/output.h"
 
 namespace tint::msl::writer {
 
-/// The output produced when generating MSL.
-struct Output {
-    /// Constructor
-    Output();
+Output::Output() = default;
 
-    /// Destructor
-    ~Output();
+Output::~Output() = default;
 
-    /// Copy constructor
-    Output(const Output&);
+Output::Output(const Output&) = default;
 
-    /// Copy assignment
-    /// @returns this
-    Output& operator=(const Output&);
-
-    /// The generated MSL.
-    std::string msl = "";
-
-    /// True if the shader needs a UBO of buffer sizes.
-    bool needs_storage_buffer_sizes = false;
-
-    /// True if the generated shader uses the invariant attribute.
-    bool has_invariant_attribute = false;
-
-    /// A map from entry point name to a list of dynamic workgroup allocations.
-    /// Each entry in the vector is the size of the workgroup allocation that
-    /// should be created for that index.
-    std::unordered_map<std::string, std::vector<uint32_t>> workgroup_allocations;
-};
+Output& Output::operator=(const Output&) = default;
 
 }  // namespace tint::msl::writer
-
-#endif  // SRC_TINT_LANG_MSL_WRITER_OUTPUT_H_

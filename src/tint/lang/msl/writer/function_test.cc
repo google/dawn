@@ -28,7 +28,8 @@
 #include "src/tint/lang/core/type/sampled_texture.h"
 #include "src/tint/lang/msl/writer/helper_test.h"
 
-using namespace tint::core::fluent_types;  // NOLINT
+using namespace tint::core::fluent_types;     // NOLINT
+using namespace tint::core::number_suffixes;  // NOLINT
 
 namespace tint::msl::writer {
 namespace {
@@ -42,6 +43,28 @@ TEST_F(MslWriterTest, Function_Empty) {
 void foo() {
 }
 )");
+
+    // MSL doesn't inject an empty entry point, so in this case there is no result.
+    EXPECT_EQ(output_.workgroup_info.x, 0u);
+    EXPECT_EQ(output_.workgroup_info.y, 0u);
+    EXPECT_EQ(output_.workgroup_info.z, 0u);
+}
+
+TEST_F(MslWriterTest, Function_EntryPoint_Compute) {
+    auto* func = b.ComputeFunction("cmp_main", 32_u, 4_u, 1_u);
+    b.Append(func->Block(), [&] {  //
+        b.Return(func);
+    });
+
+    ASSERT_TRUE(Generate()) << err_ << output_.msl;
+    EXPECT_EQ(output_.msl, MetalHeader() + R"(
+kernel void cmp_main() {
+}
+)");
+
+    EXPECT_EQ(output_.workgroup_info.x, 32u);
+    EXPECT_EQ(output_.workgroup_info.y, 4u);
+    EXPECT_EQ(output_.workgroup_info.z, 1u);
 }
 
 TEST_F(MslWriterTest, EntryPointParameterBufferBindingPoint) {
@@ -70,6 +93,9 @@ fragment void foo(device int* storage_var [[buffer(1)]], const constant int* uni
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.storage_var=storage_var, .uniform_var=uniform_var};
 }
 )");
+    EXPECT_EQ(output_.workgroup_info.x, 0u);
+    EXPECT_EQ(output_.workgroup_info.y, 0u);
+    EXPECT_EQ(output_.workgroup_info.z, 0u);
 }
 
 TEST_F(MslWriterTest, EntryPointParameterHandleBindingPoint) {

@@ -48,8 +48,6 @@ if(TINT_BUILD_MSL_WRITER)
 # Condition: TINT_BUILD_MSL_WRITER
 ################################################################################
 tint_add_target(tint_lang_msl_writer lib
-  lang/msl/writer/output.cc
-  lang/msl/writer/output.h
   lang/msl/writer/writer.cc
   lang/msl/writer/writer.h
 )

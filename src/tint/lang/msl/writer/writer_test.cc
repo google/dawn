@@ -84,11 +84,11 @@ kernel void foo(uint tint_local_index [[thread_index_in_threadgroup]], threadgro
   foo_inner(tint_local_index, tint_module_vars);
 }
 )");
-    ASSERT_EQ(output_.workgroup_allocations.size(), 2u);
-    ASSERT_EQ(output_.workgroup_allocations.count("foo"), 1u);
-    ASSERT_EQ(output_.workgroup_allocations.count("bar"), 1u);
-    EXPECT_THAT(output_.workgroup_allocations.at("foo"), testing::ElementsAre(8u));
-    EXPECT_THAT(output_.workgroup_allocations.at("bar"), testing::ElementsAre());
+    ASSERT_EQ(output_.workgroup_info.allocations.size(), 2u);
+    ASSERT_EQ(output_.workgroup_info.allocations.count("foo"), 1u);
+    ASSERT_EQ(output_.workgroup_info.allocations.count("bar"), 1u);
+    EXPECT_THAT(output_.workgroup_info.allocations.at("foo"), testing::ElementsAre(8u));
+    EXPECT_THAT(output_.workgroup_info.allocations.at("bar"), testing::ElementsAre());
 }
 
 TEST_F(MslWriterTest, NeedsStorageBufferSizes_False) {

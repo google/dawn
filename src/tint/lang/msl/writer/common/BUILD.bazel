@@ -41,11 +41,13 @@ cc_library(
   srcs = [
     "option_helpers.cc",
     "options.cc",
+    "output.cc",
     "printer_support.cc",
   ],
   hdrs = [
     "option_helpers.h",
     "options.h",
+    "output.h",
     "printer_support.h",
   ],
   deps = [

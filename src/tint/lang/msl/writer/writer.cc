@@ -53,16 +53,13 @@ Result<Output> Generate(core::ir::Module& ir, const Options& options) {
         return raise_result.Failure();
     }
 
-    // Generate the MSL code.
     auto result = Print(ir, options);
     if (result != Success) {
         return result.Failure();
     }
-    output.msl = result->msl;
-    output.workgroup_allocations = std::move(result->workgroup_allocations);
-    output.needs_storage_buffer_sizes = raise_result->needs_storage_buffer_sizes;
-    output.has_invariant_attribute = result->has_invariant_attribute;
-    return output;
+
+    result->needs_storage_buffer_sizes = raise_result->needs_storage_buffer_sizes;
+    return result;
 }
 
 Result<Output> Generate(const Program& program, const Options& options) {
@@ -93,7 +90,7 @@ Result<Output> Generate(const Program& program, const Options& options) {
     }
     output.msl = impl->Result();
     output.has_invariant_attribute = impl->HasInvariant();
-    output.workgroup_allocations = impl->DynamicWorkgroupAllocations();
+    output.workgroup_info.allocations = impl->DynamicWorkgroupAllocations();
 
     return output;
 }

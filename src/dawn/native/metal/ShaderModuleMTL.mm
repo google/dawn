@@ -375,7 +375,7 @@ ResultOrError<CacheResult<MslCompilation>> TranslateToMSL(
             )" + msl;
 
             auto workgroupAllocations =
-                std::move(result->workgroup_allocations.at(kRemappedEntryPointName));
+                std::move(result->workgroup_info.allocations.at(kRemappedEntryPointName));
             return MslCompilation{{
                 std::move(msl),
                 std::move(kRemappedEntryPointName),
