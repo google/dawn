@@ -96,7 +96,7 @@ void _skslMain(FSIn _stageIn, thread FSOut* const _stageOut, tint_module_vars_st
         float4 const _67_p = _66_j;
         float2 const _skTemp5 = fract(_57_k);
         float2 const _68_d = _skTemp5;
-        float2 const _skTemp6 = smoothstep(float2(0.0f), float2(1.0f), _68_d);
+        float2 const _skTemp6 = (clamp(((_68_d - float2(0.0f)) / (float2(1.0f) - float2(0.0f))), float2(0.0f), float2(1.0f)) * (clamp(((_68_d - float2(0.0f)) / (float2(1.0f) - float2(0.0f))), float2(0.0f), float2(1.0f)) * (float2(3.0f) - (float2(2.0f) * clamp(((_68_d - float2(0.0f)) / (float2(1.0f) - float2(0.0f))), float2(0.0f), float2(1.0f))))));
         float2 const _69_e = _skTemp6;
         float4 _71_g = 0.0f;
         int _72_h = 0;

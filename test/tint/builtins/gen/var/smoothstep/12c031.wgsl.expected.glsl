@@ -14,7 +14,9 @@ f16vec2 smoothstep_12c031() {
   f16vec2 arg_0 = f16vec2(2.0hf);
   f16vec2 arg_1 = f16vec2(4.0hf);
   f16vec2 arg_2 = f16vec2(3.0hf);
-  f16vec2 res = smoothstep(arg_0, arg_1, arg_2);
+  f16vec2 v_1 = arg_0;
+  f16vec2 v_2 = clamp(((arg_2 - v_1) / (arg_1 - v_1)), f16vec2(0.0hf), f16vec2(1.0hf));
+  f16vec2 res = (v_2 * (v_2 * (f16vec2(3.0hf) - (f16vec2(2.0hf) * v_2))));
   return res;
 }
 void main() {
@@ -34,7 +36,9 @@ f16vec2 smoothstep_12c031() {
   f16vec2 arg_0 = f16vec2(2.0hf);
   f16vec2 arg_1 = f16vec2(4.0hf);
   f16vec2 arg_2 = f16vec2(3.0hf);
-  f16vec2 res = smoothstep(arg_0, arg_1, arg_2);
+  f16vec2 v_1 = arg_0;
+  f16vec2 v_2 = clamp(((arg_2 - v_1) / (arg_1 - v_1)), f16vec2(0.0hf), f16vec2(1.0hf));
+  f16vec2 res = (v_2 * (v_2 * (f16vec2(3.0hf) - (f16vec2(2.0hf) * v_2))));
   return res;
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
@@ -58,7 +62,9 @@ f16vec2 smoothstep_12c031() {
   f16vec2 arg_0 = f16vec2(2.0hf);
   f16vec2 arg_1 = f16vec2(4.0hf);
   f16vec2 arg_2 = f16vec2(3.0hf);
-  f16vec2 res = smoothstep(arg_0, arg_1, arg_2);
+  f16vec2 v = arg_0;
+  f16vec2 v_1 = clamp(((arg_2 - v) / (arg_1 - v)), f16vec2(0.0hf), f16vec2(1.0hf));
+  f16vec2 res = (v_1 * (v_1 * (f16vec2(3.0hf) - (f16vec2(2.0hf) * v_1))));
   return res;
 }
 VertexOutput vertex_main_inner() {
@@ -68,10 +74,10 @@ VertexOutput vertex_main_inner() {
   return tint_symbol;
 }
 void main() {
-  VertexOutput v = vertex_main_inner();
-  gl_Position = v.pos;
+  VertexOutput v_2 = vertex_main_inner();
+  gl_Position = v_2.pos;
   gl_Position.y = -(gl_Position.y);
   gl_Position.z = ((2.0f * gl_Position.z) - gl_Position.w);
-  vertex_main_loc0_Output = v.prevent_dce;
+  vertex_main_loc0_Output = v_2.prevent_dce;
   gl_PointSize = 1.0f;
 }

@@ -7,7 +7,9 @@ float3 smoothstep_aad1db() {
   float3 arg_0 = (2.0f).xxx;
   float3 arg_1 = (4.0f).xxx;
   float3 arg_2 = (3.0f).xxx;
-  float3 res = smoothstep(arg_0, arg_1, arg_2);
+  float3 v = arg_0;
+  float3 v_1 = clamp(((arg_2 - v) / (arg_1 - v)), (0.0f).xxx, (1.0f).xxx);
+  float3 res = (v_1 * (v_1 * ((3.0f).xxx - ((2.0f).xxx * v_1))));
   return res;
 }
 
@@ -24,7 +26,9 @@ float3 smoothstep_aad1db() {
   float3 arg_0 = (2.0f).xxx;
   float3 arg_1 = (4.0f).xxx;
   float3 arg_2 = (3.0f).xxx;
-  float3 res = smoothstep(arg_0, arg_1, arg_2);
+  float3 v = arg_0;
+  float3 v_1 = clamp(((arg_2 - v) / (arg_1 - v)), (0.0f).xxx, (1.0f).xxx);
+  float3 res = (v_1 * (v_1 * ((3.0f).xxx - ((2.0f).xxx * v_1))));
   return res;
 }
 
@@ -51,7 +55,9 @@ float3 smoothstep_aad1db() {
   float3 arg_0 = (2.0f).xxx;
   float3 arg_1 = (4.0f).xxx;
   float3 arg_2 = (3.0f).xxx;
-  float3 res = smoothstep(arg_0, arg_1, arg_2);
+  float3 v = arg_0;
+  float3 v_1 = clamp(((arg_2 - v) / (arg_1 - v)), (0.0f).xxx, (1.0f).xxx);
+  float3 res = (v_1 * (v_1 * ((3.0f).xxx - ((2.0f).xxx * v_1))));
   return res;
 }
 
@@ -59,13 +65,13 @@ VertexOutput vertex_main_inner() {
   VertexOutput tint_symbol = (VertexOutput)0;
   tint_symbol.pos = (0.0f).xxxx;
   tint_symbol.prevent_dce = smoothstep_aad1db();
-  VertexOutput v = tint_symbol;
-  return v;
+  VertexOutput v_2 = tint_symbol;
+  return v_2;
 }
 
 vertex_main_outputs vertex_main() {
-  VertexOutput v_1 = vertex_main_inner();
-  vertex_main_outputs v_2 = {v_1.prevent_dce, v_1.pos};
-  return v_2;
+  VertexOutput v_3 = vertex_main_inner();
+  vertex_main_outputs v_4 = {v_3.prevent_dce, v_3.pos};
+  return v_4;
 }
 

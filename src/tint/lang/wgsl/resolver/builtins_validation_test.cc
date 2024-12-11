@@ -1669,7 +1669,7 @@ TEST_P(SmoothstepPartialConst, Scalar) {
         EXPECT_FALSE(r()->Resolve());
         StringStream ss;
         ss << "12:34 error: smoothstep called with 'low' (" << params.lowStr
-           << ") not less than 'high' (" << params.highStr << ")";
+           << ") equal to 'high' (" << params.highStr << ")";
         auto expect = ss.str();
         EXPECT_EQ(r()->error(), expect);
     }
@@ -1706,7 +1706,7 @@ TEST_P(SmoothstepPartialConst, Vector) {
         EXPECT_FALSE(r()->Resolve());
         StringStream ss;
         ss << "12:34 error: smoothstep called with 'low' (" << params.lowStr
-           << ") not less than 'high' (" << params.highStr << ")";
+           << ") equal to 'high' (" << params.highStr << ")";
         auto expect = ss.str();
         EXPECT_EQ(r()->error(), expect);
     }
@@ -1738,36 +1738,36 @@ std::vector<SmoothstepPartialConstCase> smoothstepCases() {
 
         //  AInt AInt
         {DataType<f32>::AST, Mk(1_a), Mk(1_a), false, "1.0", "1.0"},
-        {DataType<f32>::AST, Mk(1_a), Mk(0_a), false, "1.0", "0.0"},
+        {DataType<f32>::AST, Mk(1_a), Mk(0_a), true, "1.0", "0.0"},
         //  AFloat AInt
         {DataType<f32>::AST, Mk(1.0_a), Mk(1_a), false, "1.0", "1.0"},
-        {DataType<f32>::AST, Mk(1.0_a), Mk(0_a), false, "1.0", "0.0"},
+        {DataType<f32>::AST, Mk(1.0_a), Mk(0_a), true, "1.0", "0.0"},
         //  AInt AFloat
         {DataType<f32>::AST, Mk(1_a), Mk(1.0_a), false, "1.0", "1.0"},
-        {DataType<f32>::AST, Mk(1_a), Mk(0.0_a), false, "1.0", "0.0"},
+        {DataType<f32>::AST, Mk(1_a), Mk(0.0_a), true, "1.0", "0.0"},
 
         //  AFloat AFloat
         {DataType<f32>::AST, Mk(1.0_a), Mk(1.0_a), false, "1.0", "1.0"},
-        {DataType<f32>::AST, Mk(1.0_a), Mk(0.0_a), false, "1.0", "0.0"},
+        {DataType<f32>::AST, Mk(1.0_a), Mk(0.0_a), true, "1.0", "0.0"},
 
         //  AInt f32
         {DataType<f32>::AST, Mk(1_a), Mk(1_f), false, "1.0", "1.0"},
-        {DataType<f32>::AST, Mk(1_a), Mk(0_f), false, "1.0", "0.0"},
+        {DataType<f32>::AST, Mk(1_a), Mk(0_f), true, "1.0", "0.0"},
         //  f32 AInt
         {DataType<f32>::AST, Mk(1_f), Mk(1_a), false, "1.0", "1.0"},
-        {DataType<f32>::AST, Mk(1_f), Mk(0_a), false, "1.0", "0.0"},
+        {DataType<f32>::AST, Mk(1_f), Mk(0_a), true, "1.0", "0.0"},
 
         //  AFloat f32
         {DataType<f32>::AST, Mk(1.0_a), Mk(1_f), false, "1.0", "1.0"},
-        {DataType<f32>::AST, Mk(1.0_a), Mk(0_f), false, "1.0", "0.0"},
+        {DataType<f32>::AST, Mk(1.0_a), Mk(0_f), true, "1.0", "0.0"},
 
         //  f32 AFloat
         {DataType<f32>::AST, Mk(1_a), Mk(1.0_a), false, "1.0", "1.0"},
-        {DataType<f32>::AST, Mk(1_a), Mk(0.0_a), false, "1.0", "0.0"},
+        {DataType<f32>::AST, Mk(1_a), Mk(0.0_a), true, "1.0", "0.0"},
 
         //  f32 f32
         {DataType<f32>::AST, Mk(1_f), Mk(1.0_f), false, "1.0", "1.0"},
-        {DataType<f32>::AST, Mk(1_f), Mk(0.0_f), false, "1.0", "0.0"},
+        {DataType<f32>::AST, Mk(1_f), Mk(0.0_f), true, "1.0", "0.0"},
     };
 }
 

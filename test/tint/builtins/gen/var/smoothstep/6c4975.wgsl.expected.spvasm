@@ -4,10 +4,10 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 1
-; Bound: 31
+; Bound: 40
 ; Schema: 0
                OpCapability Shader
-         %19 = OpExtInstImport "GLSL.std.450"
+         %22 = OpExtInstImport "GLSL.std.450"
                OpMemoryModel Logical GLSL450
                OpEntryPoint Fragment %fragment_main "fragment_main"
                OpExecutionMode %fragment_main OriginUpperLeft
@@ -33,8 +33,10 @@
     %float_2 = OpConstant %float 2
     %float_4 = OpConstant %float 4
     %float_3 = OpConstant %float 3
+    %float_0 = OpConstant %float 0
+    %float_1 = OpConstant %float 1
        %void = OpTypeVoid
-         %24 = OpTypeFunction %void
+         %33 = OpTypeFunction %void
 %_ptr_StorageBuffer_float = OpTypePointer StorageBuffer %float
        %uint = OpTypeInt 32 0
      %uint_0 = OpConstant %uint 0
@@ -50,16 +52,23 @@
          %15 = OpLoad %float %arg_0 None
          %16 = OpLoad %float %arg_1 None
          %17 = OpLoad %float %arg_2 None
-         %18 = OpExtInst %float %19 SmoothStep %15 %16 %17
-               OpStore %res %18
-         %21 = OpLoad %float %res None
-               OpReturnValue %21
+         %18 = OpFSub %float %17 %15
+         %19 = OpFSub %float %16 %15
+         %20 = OpFDiv %float %18 %19
+         %21 = OpExtInst %float %22 NClamp %20 %float_0 %float_1
+         %25 = OpFMul %float %float_2 %21
+         %26 = OpFSub %float %float_3 %25
+         %27 = OpFMul %float %21 %26
+         %28 = OpFMul %float %21 %27
+               OpStore %res %28
+         %30 = OpLoad %float %res None
+               OpReturnValue %30
                OpFunctionEnd
-%fragment_main = OpFunction %void None %24
-         %25 = OpLabel
-         %26 = OpFunctionCall %float %smoothstep_6c4975
-         %27 = OpAccessChain %_ptr_StorageBuffer_float %1 %uint_0
-               OpStore %27 %26 None
+%fragment_main = OpFunction %void None %33
+         %34 = OpLabel
+         %35 = OpFunctionCall %float %smoothstep_6c4975
+         %36 = OpAccessChain %_ptr_StorageBuffer_float %1 %uint_0
+               OpStore %36 %35 None
                OpReturn
                OpFunctionEnd
 ;
@@ -68,10 +77,10 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 1
-; Bound: 31
+; Bound: 40
 ; Schema: 0
                OpCapability Shader
-         %19 = OpExtInstImport "GLSL.std.450"
+         %22 = OpExtInstImport "GLSL.std.450"
                OpMemoryModel Logical GLSL450
                OpEntryPoint GLCompute %compute_main "compute_main"
                OpExecutionMode %compute_main LocalSize 1 1 1
@@ -97,8 +106,10 @@
     %float_2 = OpConstant %float 2
     %float_4 = OpConstant %float 4
     %float_3 = OpConstant %float 3
+    %float_0 = OpConstant %float 0
+    %float_1 = OpConstant %float 1
        %void = OpTypeVoid
-         %24 = OpTypeFunction %void
+         %33 = OpTypeFunction %void
 %_ptr_StorageBuffer_float = OpTypePointer StorageBuffer %float
        %uint = OpTypeInt 32 0
      %uint_0 = OpConstant %uint 0
@@ -114,16 +125,23 @@
          %15 = OpLoad %float %arg_0 None
          %16 = OpLoad %float %arg_1 None
          %17 = OpLoad %float %arg_2 None
-         %18 = OpExtInst %float %19 SmoothStep %15 %16 %17
-               OpStore %res %18
-         %21 = OpLoad %float %res None
-               OpReturnValue %21
+         %18 = OpFSub %float %17 %15
+         %19 = OpFSub %float %16 %15
+         %20 = OpFDiv %float %18 %19
+         %21 = OpExtInst %float %22 NClamp %20 %float_0 %float_1
+         %25 = OpFMul %float %float_2 %21
+         %26 = OpFSub %float %float_3 %25
+         %27 = OpFMul %float %21 %26
+         %28 = OpFMul %float %21 %27
+               OpStore %res %28
+         %30 = OpLoad %float %res None
+               OpReturnValue %30
                OpFunctionEnd
-%compute_main = OpFunction %void None %24
-         %25 = OpLabel
-         %26 = OpFunctionCall %float %smoothstep_6c4975
-         %27 = OpAccessChain %_ptr_StorageBuffer_float %1 %uint_0
-               OpStore %27 %26 None
+%compute_main = OpFunction %void None %33
+         %34 = OpLabel
+         %35 = OpFunctionCall %float %smoothstep_6c4975
+         %36 = OpAccessChain %_ptr_StorageBuffer_float %1 %uint_0
+               OpStore %36 %35 None
                OpReturn
                OpFunctionEnd
 ;
@@ -132,10 +150,10 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 1
-; Bound: 49
+; Bound: 57
 ; Schema: 0
                OpCapability Shader
-         %22 = OpExtInstImport "GLSL.std.450"
+         %25 = OpExtInstImport "GLSL.std.450"
                OpMemoryModel Logical GLSL450
                OpEntryPoint Vertex %vertex_main "vertex_main" %vertex_main_position_Output %vertex_main_loc0_Output %vertex_main___point_size_Output
                OpName %vertex_main_position_Output "vertex_main_position_Output"
@@ -170,18 +188,19 @@
     %float_2 = OpConstant %float 2
     %float_4 = OpConstant %float 4
     %float_3 = OpConstant %float 3
+    %float_0 = OpConstant %float 0
+    %float_1 = OpConstant %float 1
 %VertexOutput = OpTypeStruct %v4float %float
-         %27 = OpTypeFunction %VertexOutput
+         %36 = OpTypeFunction %VertexOutput
 %_ptr_Function_VertexOutput = OpTypePointer Function %VertexOutput
-         %31 = OpConstantNull %VertexOutput
+         %40 = OpConstantNull %VertexOutput
 %_ptr_Function_v4float = OpTypePointer Function %v4float
        %uint = OpTypeInt 32 0
      %uint_0 = OpConstant %uint 0
-         %36 = OpConstantNull %v4float
+         %45 = OpConstantNull %v4float
      %uint_1 = OpConstant %uint 1
        %void = OpTypeVoid
-         %43 = OpTypeFunction %void
-    %float_1 = OpConstant %float 1
+         %52 = OpTypeFunction %void
 %smoothstep_6c4975 = OpFunction %float None %9
          %10 = OpLabel
       %arg_0 = OpVariable %_ptr_Function_float Function
@@ -194,29 +213,36 @@
          %18 = OpLoad %float %arg_0 None
          %19 = OpLoad %float %arg_1 None
          %20 = OpLoad %float %arg_2 None
-         %21 = OpExtInst %float %22 SmoothStep %18 %19 %20
-               OpStore %res %21
-         %24 = OpLoad %float %res None
-               OpReturnValue %24
+         %21 = OpFSub %float %20 %18
+         %22 = OpFSub %float %19 %18
+         %23 = OpFDiv %float %21 %22
+         %24 = OpExtInst %float %25 NClamp %23 %float_0 %float_1
+         %28 = OpFMul %float %float_2 %24
+         %29 = OpFSub %float %float_3 %28
+         %30 = OpFMul %float %24 %29
+         %31 = OpFMul %float %24 %30
+               OpStore %res %31
+         %33 = OpLoad %float %res None
+               OpReturnValue %33
                OpFunctionEnd
-%vertex_main_inner = OpFunction %VertexOutput None %27
-         %28 = OpLabel
-        %out = OpVariable %_ptr_Function_VertexOutput Function %31
-         %32 = OpAccessChain %_ptr_Function_v4float %out %uint_0
-               OpStore %32 %36 None
-         %37 = OpAccessChain %_ptr_Function_float %out %uint_1
-         %39 = OpFunctionCall %float %smoothstep_6c4975
-               OpStore %37 %39 None
-         %40 = OpLoad %VertexOutput %out None
-               OpReturnValue %40
+%vertex_main_inner = OpFunction %VertexOutput None %36
+         %37 = OpLabel
+        %out = OpVariable %_ptr_Function_VertexOutput Function %40
+         %41 = OpAccessChain %_ptr_Function_v4float %out %uint_0
+               OpStore %41 %45 None
+         %46 = OpAccessChain %_ptr_Function_float %out %uint_1
+         %48 = OpFunctionCall %float %smoothstep_6c4975
+               OpStore %46 %48 None
+         %49 = OpLoad %VertexOutput %out None
+               OpReturnValue %49
                OpFunctionEnd
-%vertex_main = OpFunction %void None %43
-         %44 = OpLabel
-         %45 = OpFunctionCall %VertexOutput %vertex_main_inner
-         %46 = OpCompositeExtract %v4float %45 0
-               OpStore %vertex_main_position_Output %46 None
-         %47 = OpCompositeExtract %float %45 1
-               OpStore %vertex_main_loc0_Output %47 None
+%vertex_main = OpFunction %void None %52
+         %53 = OpLabel
+         %54 = OpFunctionCall %VertexOutput %vertex_main_inner
+         %55 = OpCompositeExtract %v4float %54 0
+               OpStore %vertex_main_position_Output %55 None
+         %56 = OpCompositeExtract %float %54 1
+               OpStore %vertex_main_loc0_Output %56 None
                OpStore %vertex_main___point_size_Output %float_1 None
                OpReturn
                OpFunctionEnd

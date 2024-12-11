@@ -91,6 +91,9 @@ struct State {
                             worklist.Push(builtin);
                         }
                         break;
+                    case core::BuiltinFn::kSmoothstep:
+                        worklist.Push(builtin);
+                        break;
                     case core::BuiltinFn::kExtractBits:
                         if (config.extract_bits != BuiltinPolyfillLevel::kNone) {
                             worklist.Push(builtin);
@@ -191,6 +194,9 @@ struct State {
                     break;
                 case core::BuiltinFn::kDegrees:
                     Degrees(builtin);
+                    break;
+                case core::BuiltinFn::kSmoothstep:
+                    SmoothStep(builtin);
                     break;
                 case core::BuiltinFn::kExtractBits:
                     ExtractBits(builtin);
@@ -403,6 +409,46 @@ struct State {
         b.InsertBefore(call, [&] {
             auto* mul = b.Multiply(arg->Type(), arg, value);
             mul->SetResults(Vector{call->DetachResult()});
+        });
+        call->Destroy();
+    }
+
+    /// Polyfill an `smoothStep()` builtin call.
+    /// @param call the builtin call instruction
+    void SmoothStep(ir::CoreBuiltinCall* call) {
+        auto* edge0_arg = call->Args()[0];
+        auto* edge1_arg = call->Args()[1];
+        auto* x_arg = call->Args()[2];
+        auto* type = x_arg->Type();
+        ir::Constant* zero = nullptr;
+        ir::Constant* one = nullptr;
+        ir::Constant* two = nullptr;
+        ir::Constant* three = nullptr;
+        if (type->DeepestElement()->Is<core::type::F32>()) {
+            zero = b.MatchWidth(0_f, type);
+            one = b.MatchWidth(1_f, type);
+            two = b.MatchWidth(2_f, type);
+            three = b.MatchWidth(3_f, type);
+        } else if (type->DeepestElement()->Is<core::type::F16>()) {
+            zero = b.MatchWidth(0_h, type);
+            one = b.MatchWidth(1_h, type);
+            two = b.MatchWidth(2_h, type);
+            three = b.MatchWidth(3_h, type);
+        }
+
+        b.InsertBefore(call, [&] {
+            auto* dividend = b.Subtract(type, x_arg, edge0_arg);
+            auto* divisor = b.Subtract(type, edge1_arg, edge0_arg);
+            auto* quotient = b.Divide(type, dividend, divisor);
+            auto* t_clamped = b.Call(type, core::BuiltinFn::kClamp, quotient, zero, one);
+
+            // Smoothstep is a well defined function.
+            // result = t * t * (3.0 - 2.0 * t);
+            auto* smooth_result =
+                b.Multiply(type, t_clamped,
+                           b.Multiply(type, t_clamped,
+                                      b.Subtract(type, three, b.Multiply(type, two, t_clamped))));
+            smooth_result->SetResults(Vector{call->DetachResult()});
         });
         call->Destroy();
     }

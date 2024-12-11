@@ -1524,6 +1524,9 @@ crbug.com/0000 [ linux nvidia ] webgpu:web_platform,copyToTexture,ImageBitmap:fr
 crbug.com/dawn/366000875 webgpu:shader,validation,decl,var:var_access_mode_bad_other_template_contents:accessMode="read";prefix="storage,";suffix="," [ Failure ]
 crbug.com/dawn/366000875 webgpu:shader,validation,decl,var:var_access_mode_bad_other_template_contents:accessMode="read_write";prefix="storage,";suffix="," [ Failure ]
 
+# Temporary Failures change in behavior of Smoothstep function
+crbug.com/379909620 webgpu:shader,validation,expression,call,builtin,smoothstep:* [ Failure ]
+
 # Failures due to change in `@align()` validation.
 crbug.com/375467276 webgpu:shader,execution,expression,access,structure,index:buffer_align:* [ Failure ]
 crbug.com/375467276 webgpu:shader,validation,shader_io,align:* [ Failure ]

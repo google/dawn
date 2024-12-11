@@ -2067,6 +2067,9 @@ crbug.com/dawn/0000 [ android arm ] webgpu:api,validation,error_scope:simple:err
 
 ### This section represents tests which may require CTS changes.
 
+# Temporary Failures change in behavior of Smoothstep function
+crbug.com/379909620 webgpu:shader,validation,expression,call,builtin,smoothstep:* [ Failure ]
+
 # Failures due to change in `@align()` validation.
 crbug.com/375467276 webgpu:shader,execution,expression,access,structure,index:buffer_align:* [ Failure ]
 

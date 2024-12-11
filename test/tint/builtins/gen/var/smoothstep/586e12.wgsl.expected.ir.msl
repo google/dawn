@@ -12,7 +12,9 @@ half smoothstep_586e12() {
   half arg_0 = 2.0h;
   half arg_1 = 4.0h;
   half arg_2 = 3.0h;
-  half res = smoothstep(arg_0, arg_1, arg_2);
+  half const v = arg_0;
+  half const v_1 = clamp(((arg_2 - v) / (arg_1 - v)), 0.0h, 1.0h);
+  half res = (v_1 * (v_1 * (3.0h - (2.0h * v_1))));
   return res;
 }
 
@@ -34,7 +36,9 @@ half smoothstep_586e12() {
   half arg_0 = 2.0h;
   half arg_1 = 4.0h;
   half arg_2 = 3.0h;
-  half res = smoothstep(arg_0, arg_1, arg_2);
+  half const v = arg_0;
+  half const v_1 = clamp(((arg_2 - v) / (arg_1 - v)), 0.0h, 1.0h);
+  half res = (v_1 * (v_1 * (3.0h - (2.0h * v_1))));
   return res;
 }
 
@@ -62,7 +66,9 @@ half smoothstep_586e12() {
   half arg_0 = 2.0h;
   half arg_1 = 4.0h;
   half arg_2 = 3.0h;
-  half res = smoothstep(arg_0, arg_1, arg_2);
+  half const v = arg_0;
+  half const v_1 = clamp(((arg_2 - v) / (arg_1 - v)), 0.0h, 1.0h);
+  half res = (v_1 * (v_1 * (3.0h - (2.0h * v_1))));
   return res;
 }
 
@@ -74,9 +80,9 @@ VertexOutput vertex_main_inner() {
 }
 
 vertex vertex_main_outputs vertex_main() {
-  VertexOutput const v = vertex_main_inner();
+  VertexOutput const v_2 = vertex_main_inner();
   vertex_main_outputs tint_wrapper_result = {};
-  tint_wrapper_result.VertexOutput_pos = v.pos;
-  tint_wrapper_result.VertexOutput_prevent_dce = v.prevent_dce;
+  tint_wrapper_result.VertexOutput_pos = v_2.pos;
+  tint_wrapper_result.VertexOutput_prevent_dce = v_2.prevent_dce;
   return tint_wrapper_result;
 }
