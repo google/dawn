@@ -30,8 +30,6 @@
 
 #include <cstdint>
 #include <string>
-#include <utility>
-#include <vector>
 
 namespace tint::glsl::writer {
 
@@ -56,6 +54,9 @@ struct Output {
         uint32_t y = 0;
         /// The z-component
         uint32_t z = 0;
+
+        /// The needed workgroup storage size
+        size_t storage_size = 0;
     };
 
     /// The generated GLSL.

@@ -949,9 +949,19 @@ class Printer : public tint::TextGenerator {
             case core::AddressSpace::kUniform:
                 EmitUniformVar(var);
                 break;
-            case core::AddressSpace::kWorkgroup:
+            case core::AddressSpace::kWorkgroup: {
+                auto* ty = ptr->StoreType();
+                uint32_t align = ty->Align();
+                uint32_t size = ty->Size();
+
+                // This essentially matches std430 layout rules from GLSL, which are in
+                // turn specified as an upper bound for Vulkan layout sizing.
+                result_.workgroup_info.storage_size +=
+                    tint::RoundUp(16u, tint::RoundUp(align, size));
+
                 EmitWorkgroupVar(var);
                 break;
+            }
             case core::AddressSpace::kHandle:
                 EmitHandleVar(var);
                 break;
