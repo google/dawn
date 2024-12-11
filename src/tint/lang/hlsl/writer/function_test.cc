@@ -56,6 +56,9 @@ void unused_entry_point() {
 }
 
 )");
+    EXPECT_EQ(1u, output_.workgroup_info.x);
+    EXPECT_EQ(1u, output_.workgroup_info.y);
+    EXPECT_EQ(1u, output_.workgroup_info.z);
 }
 
 TEST_F(HlslWriterTest, FunctionWithParams) {
@@ -123,6 +126,9 @@ void main(main_inputs inputs) {
 }
 
 )");
+    EXPECT_EQ(0u, output_.workgroup_info.x);
+    EXPECT_EQ(0u, output_.workgroup_info.y);
+    EXPECT_EQ(0u, output_.workgroup_info.z);
 }
 
 TEST_F(HlslWriterTest, FunctionPtrParameter) {
@@ -318,6 +324,9 @@ void frag_main(frag_main_inputs inputs) {
 }
 
 )");
+    EXPECT_EQ(0u, output_.workgroup_info.x);
+    EXPECT_EQ(0u, output_.workgroup_info.y);
+    EXPECT_EQ(0u, output_.workgroup_info.z);
 }
 
 TEST_F(HlslWriterTest, FunctionEntryPointSharedStructHelperFunction) {
@@ -790,6 +799,10 @@ void main() {
 }
 
 )");
+
+    EXPECT_EQ(2u, output_.workgroup_info.x);
+    EXPECT_EQ(4u, output_.workgroup_info.y);
+    EXPECT_EQ(6u, output_.workgroup_info.z);
 }
 
 TEST_F(HlslWriterTest, FunctionWithArrayParams) {

@@ -154,7 +154,7 @@ class Printer : public tint::TextGenerator {
     explicit Printer(core::ir::Module& module) : ir_(module) {}
 
     /// @returns the generated HLSL shader
-    tint::Result<PrintResult> Generate() {
+    tint::Result<Output> Generate() {
         core::ir::Capabilities capabilities{
             core::ir::Capability::kAllowModuleScopeLets,
             core::ir::Capability::kAllowVectorElementPointer,
@@ -181,7 +181,7 @@ class Printer : public tint::TextGenerator {
 
   private:
     /// The result of printing the module.
-    PrintResult result_;
+    Output result_;
 
     core::ir::Module& ir_;
 
@@ -231,6 +231,11 @@ class Printer : public tint::TextGenerator {
 
                 auto& wg = wg_opt.value();
                 Line() << "[numthreads(" << wg[0] << ", " << wg[1] << ", " << wg[2] << ")]";
+
+                // Store the workgroup information away to return from the generator.
+                result_.workgroup_info.x = wg[0];
+                result_.workgroup_info.y = wg[1];
+                result_.workgroup_info.z = wg[2];
             }
 
             auto out = Line();
@@ -1703,16 +1708,8 @@ class Printer : public tint::TextGenerator {
 
 }  // namespace
 
-Result<PrintResult> Print(core::ir::Module& module) {
+Result<Output> Print(core::ir::Module& module) {
     return Printer{module}.Generate();
 }
-
-PrintResult::PrintResult() = default;
-
-PrintResult::~PrintResult() = default;
-
-PrintResult::PrintResult(const PrintResult&) = default;
-
-PrintResult& PrintResult::operator=(const PrintResult&) = default;
 
 }  // namespace tint::hlsl::writer

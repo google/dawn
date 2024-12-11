@@ -25,8 +25,8 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef SRC_TINT_LANG_HLSL_WRITER_OUTPUT_H_
-#define SRC_TINT_LANG_HLSL_WRITER_OUTPUT_H_
+#ifndef SRC_TINT_LANG_HLSL_WRITER_COMMON_OUTPUT_H_
+#define SRC_TINT_LANG_HLSL_WRITER_COMMON_OUTPUT_H_
 
 #include <string>
 #include <unordered_set>
@@ -51,6 +51,16 @@ struct Output {
     /// Copy assign
     Output& operator=(const Output&);
 
+    /// Workgroup size information
+    struct WorkgroupInfo {
+        /// The x-component
+        uint32_t x = 0;
+        /// The y-component
+        uint32_t y = 0;
+        /// The z-component
+        uint32_t z = 0;
+    };
+
     /// The generated HLSL.
     std::string hlsl = "";
 
@@ -60,8 +70,11 @@ struct Output {
     /// Indices into the array_length_from_uniform binding that are statically
     /// used.
     std::unordered_set<uint32_t> used_array_length_from_uniform_indices;
+
+    /// The workgroup size information, if the entry point was a compute shader
+    WorkgroupInfo workgroup_info{};
 };
 
 }  // namespace tint::hlsl::writer
 
-#endif  // SRC_TINT_LANG_HLSL_WRITER_OUTPUT_H_
+#endif  // SRC_TINT_LANG_HLSL_WRITER_COMMON_OUTPUT_H_

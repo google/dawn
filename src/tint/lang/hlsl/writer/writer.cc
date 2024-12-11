@@ -70,17 +70,16 @@ Result<Output> Generate(core::ir::Module& ir, const Options& options) {
     if (result != Success) {
         return result.Failure();
     }
-    output.hlsl = result->hlsl;
 
     // Collect the list of entry points in the generated program.
     for (auto func : ir.functions) {
         if (func->Stage() != core::ir::Function::PipelineStage::kUndefined) {
             auto name = ir.NameOf(func).Name();
-            output.entry_points.push_back({name, ir_to_ast_stage(func->Stage())});
+            result->entry_points.push_back({name, ir_to_ast_stage(func->Stage())});
         }
     }
 
-    return output;
+    return result;
 }
 
 Result<Output> Generate(const Program& program, const Options& options) {

@@ -55,6 +55,8 @@ cc_library(
     "//src/tint/lang/hlsl/intrinsic",
     "//src/tint/lang/hlsl/ir",
     "//src/tint/lang/hlsl/type",
+    "//src/tint/lang/hlsl/writer/common",
+    "//src/tint/lang/wgsl/ast",
     "//src/tint/utils",
     "//src/tint/utils/containers",
     "//src/tint/utils/diagnostic",

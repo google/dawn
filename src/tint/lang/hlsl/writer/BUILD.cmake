@@ -48,8 +48,6 @@ if(TINT_BUILD_HLSL_WRITER)
 # Condition: TINT_BUILD_HLSL_WRITER
 ################################################################################
 tint_add_target(tint_lang_hlsl_writer lib
-  lang/hlsl/writer/output.cc
-  lang/hlsl/writer/output.h
   lang/hlsl/writer/writer.cc
   lang/hlsl/writer/writer.h
 )

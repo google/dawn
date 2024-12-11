@@ -43,12 +43,15 @@ tint_add_target(tint_lang_hlsl_writer_common lib
   lang/hlsl/writer/common/option_helpers.h
   lang/hlsl/writer/common/options.cc
   lang/hlsl/writer/common/options.h
+  lang/hlsl/writer/common/output.cc
+  lang/hlsl/writer/common/output.h
 )
 
 tint_target_add_dependencies(tint_lang_hlsl_writer_common lib
   tint_api_common
   tint_lang_core
   tint_lang_core_common
+  tint_lang_wgsl_ast
   tint_utils
   tint_utils_containers
   tint_utils_diagnostic
