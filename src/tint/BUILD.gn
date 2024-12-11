@@ -124,9 +124,6 @@ config("tint_public_config") {
   if (tint_build_ir_fuzzer) {
     assert(tint_build_ir_binary,
            "tint_build_ir_fuzzer requires tint_build_ir_binary")
-    assert(
-        !is_asan || build_with_chromium,
-        "tint_build_ir_fuzzer: ASAN not yet supported in non-Chromium builds (b/345196552)")
     defines += [ "TINT_BUILD_IR_FUZZER=1" ]
   } else {
     defines += [ "TINT_BUILD_IR_FUZZER=0" ]
