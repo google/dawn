@@ -39,11 +39,13 @@
 #include "src/tint/lang/core/ir/type/array_count.h"
 #include "src/tint/lang/core/ir/validator.h"
 #include "src/tint/lang/core/number.h"
+#include "src/tint/lang/core/texel_format.h"
 #include "src/tint/lang/core/type/manager.h"
 #include "src/tint/lang/core/type/matrix.h"
 #include "src/tint/lang/core/type/memory_view.h"
 #include "src/tint/lang/core/type/pointer.h"
 #include "src/tint/lang/core/type/reference.h"
+#include "src/tint/lang/core/type/storage_texture.h"
 #include "src/tint/lang/core/type/struct.h"
 #include "src/tint/utils/text/string.h"
 
@@ -5310,6 +5312,77 @@ note: # Disassembly
     ret
   }
 }
+)");
+}
+
+TEST_F(IR_ValidatorTest, Type_StorageTextureDimension) {
+    auto* valid =
+        b.Var("valid", AddressSpace::kStorage,
+              ty.storage_texture(core::type::TextureDimension::k2d, core::TexelFormat::kRgba32Float,
+                                 core::Access::kReadWrite),
+              read_write);
+    valid->SetBindingPoint(0, 0);
+    mod.root_block->Append(valid);
+
+    auto* cube =
+        b.Var("cube_invalid", AddressSpace::kStorage,
+              ty.storage_texture(core::type::TextureDimension::kCube,
+                                 core::TexelFormat::kRgba32Float, core::Access::kReadWrite),
+              read_write);
+    cube->SetBindingPoint(1, 1);
+    mod.root_block->Append(cube);
+
+    auto* cube_array =
+        b.Var("cube_array_invalid", AddressSpace::kStorage,
+              ty.storage_texture(core::type::TextureDimension::kCubeArray,
+                                 core::TexelFormat::kRgba32Float, core::Access::kReadWrite),
+              read_write);
+    cube_array->SetBindingPoint(2, 2);
+    mod.root_block->Append(cube_array);
+
+    auto* none =
+        b.Var("none_invalid", AddressSpace::kStorage,
+              ty.storage_texture(core::type::TextureDimension::kNone,
+                                 core::TexelFormat::kRgba32Float, core::Access::kReadWrite),
+              read_write);
+    none->SetBindingPoint(3, 3);
+    mod.root_block->Append(none);
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_EQ(res.Failure().reason.Str(),
+              R"(:3:3 error: var: dimension 'cube' for storage textures does not in WGSL yet
+  %cube_invalid:ptr<storage, texture_storage_cube<rgba32float, read_write>, read_write> = var @binding_point(1, 1)
+  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+:1:1 note: in block
+$B1: {  # root
+^^^
+
+:4:3 error: var: dimension 'cube_array' for storage textures does not in WGSL yet
+  %cube_array_invalid:ptr<storage, texture_storage_cube_array<rgba32float, read_write>, read_write> = var @binding_point(2, 2)
+  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+:1:1 note: in block
+$B1: {  # root
+^^^
+
+:5:3 error: var: invalid texture dimension 'none'
+  %none_invalid:ptr<storage, texture_storage_none<rgba32float, read_write>, read_write> = var @binding_point(3, 3)
+  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+:1:1 note: in block
+$B1: {  # root
+^^^
+
+note: # Disassembly
+$B1: {  # root
+  %valid:ptr<storage, texture_storage_2d<rgba32float, read_write>, read_write> = var @binding_point(0, 0)
+  %cube_invalid:ptr<storage, texture_storage_cube<rgba32float, read_write>, read_write> = var @binding_point(1, 1)
+  %cube_array_invalid:ptr<storage, texture_storage_cube_array<rgba32float, read_write>, read_write> = var @binding_point(2, 2)
+  %none_invalid:ptr<storage, texture_storage_none<rgba32float, read_write>, read_write> = var @binding_point(3, 3)
+}
+
 )");
 }
 

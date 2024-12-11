@@ -34,6 +34,7 @@
 #include "src/tint/lang/core/address_space.h"
 #include "src/tint/lang/core/fluent_types.h"
 #include "src/tint/lang/core/number.h"
+#include "src/tint/lang/core/texel_format.h"
 #include "src/tint/lang/core/type/atomic.h"
 #include "src/tint/lang/core/type/external_texture.h"
 #include "src/tint/lang/core/type/sampler.h"
@@ -59,6 +60,7 @@ class Invalid;
 class Matrix;
 class Pointer;
 class Reference;
+class StorageTexture;
 class U8;
 class U32;
 class Vector;
@@ -253,6 +255,14 @@ class Manager final {
     /// @param inner the inner type
     /// @returns a vec4 type with the element type @p inner
     const core::type::Vector* vec4(const core::type::Type* inner);
+
+    /// @param dim the dimensionality of the texture
+    /// @param format the texel format of the texture
+    /// @param access the access control type of the texture
+    /// @returns a storage texture type with the provided params
+    const core::type::StorageTexture* storage_texture(TextureDimension dim,
+                                                      core::TexelFormat format,
+                                                      core::Access access);
 
     /// Return a type with element type `el_ty` that has the same number of vector components as
     /// `match`. If `match` is scalar just return `el_ty`.

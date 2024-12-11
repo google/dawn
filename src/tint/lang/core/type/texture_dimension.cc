@@ -32,7 +32,7 @@ namespace tint::core::type {
 std::string_view ToString(core::type::TextureDimension dim) {
     switch (dim) {
         case core::type::TextureDimension::kNone:
-            return "None";
+            return "none";
         case core::type::TextureDimension::k1d:
             return "1d";
         case core::type::TextureDimension::k2d:

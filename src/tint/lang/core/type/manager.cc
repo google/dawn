@@ -42,6 +42,7 @@
 #include "src/tint/lang/core/type/matrix.h"
 #include "src/tint/lang/core/type/pointer.h"
 #include "src/tint/lang/core/type/reference.h"
+#include "src/tint/lang/core/type/storage_texture.h"
 #include "src/tint/lang/core/type/type.h"
 #include "src/tint/lang/core/type/u32.h"
 #include "src/tint/lang/core/type/u8.h"
@@ -144,6 +145,13 @@ const core::type::Vector* Manager::vec3(const core::type::Type* inner) {
 
 const core::type::Vector* Manager::vec4(const core::type::Type* inner) {
     return vec(inner, 4);
+}
+
+const core::type::StorageTexture* Manager::storage_texture(TextureDimension dim,
+                                                           core::TexelFormat format,
+                                                           core::Access access) {
+    const auto* subtype = StorageTexture::SubtypeFor(format, *this);
+    return Get<core::type::StorageTexture>(dim, format, access, subtype);
 }
 
 const core::type::Matrix* Manager::mat(const core::type::Type* inner,
