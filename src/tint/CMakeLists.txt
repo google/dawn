@@ -59,9 +59,10 @@ if (TINT_BUILD_IR_BINARY)
 endif()
 
 if (TINT_BUILD_IR_FUZZER AND NOT TINT_BUILD_IR_BINARY)
-  message(FATAL_ERROR "Building IR fuzzer 'TINT_BUILD_IR_FUZZER' is enabled, "
-                      "but building IR binary format 'TINT_BUILD_IR_BINARY' is "
-                      "not")
+  message(FATAL_ERROR "TINT_BUILD_IR_FUZZER requires TINT_BUILD_IR_BINARY")
+endif()
+if (TINT_BUILD_IR_FUZZER AND NOT (((NOT IS_ASAN) OR BUILD_WITH_CHROMIUM)))
+  message(FATAL_ERROR "TINT_BUILD_IR_FUZZER: ASAN not yet supported in non-Chromium builds (b/345196552)")
 endif()
 
 ################################################################################

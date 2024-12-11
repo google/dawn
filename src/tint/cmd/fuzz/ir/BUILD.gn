@@ -80,8 +80,7 @@ tint_fuzz_source_set("fuzz") {
     ]
   }
 }
-if (tint_build_ir_binary && tint_build_ir_fuzzer &&
-    (!is_asan || build_with_chromium)) {
+if (tint_build_ir_binary && tint_build_ir_fuzzer) {
   tint_fuzzer_test("ir") {
     output_name = "tint_ir_fuzzer"
     sources = [ "main_fuzz.cc" ]

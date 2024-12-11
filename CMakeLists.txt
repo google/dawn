@@ -387,7 +387,9 @@ include(DawnCompilerWarningFlags)
 include(DawnInitializeBuildType)
 include(DawnLibrary)
 
+# Set vars used as conditions in generated CMake build files
 set(IS_ASAN ${DAWN_ENABLE_ASAN})
+set(BUILD_WITH_CHROMIUM FALSE)
 
 if (NOT ${TINT_LIB_FUZZING_ENGINE_LINK_OPTIONS} STREQUAL "")
   message(STATUS "Using provided LIB_FUZZING_ENGINE options: ${TINT_LIB_FUZZING_ENGINE_LINK_OPTIONS}")
