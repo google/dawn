@@ -550,13 +550,6 @@ ResultOrError<GLuint> ShaderModule::CompileShader(
             DAWN_TRY_ASSIGN(program, RunTransforms(&transformManager, r.inputProgram,
                                                    transformInputs, &transformOutputs, nullptr));
 
-            if (r.stage == SingleShaderStage::Compute) {
-                // Validate workgroup size after program runs transforms.
-                Extent3D _;
-                DAWN_TRY_ASSIGN(_, ValidateComputeStageWorkgroupSize(
-                                       program, kRemappedEntryPointName, r.limits));
-            }
-
             // Intentionally assign entry point to empty to avoid a redundant 'SingleEntryPoint'
             // transform in Tint.
             // TODO(crbug.com/356424898): In the long run, we want to move SingleEntryPoint to Tint,
@@ -572,6 +565,17 @@ ResultOrError<GLuint> ShaderModule::CompileShader(
             auto result = tint::glsl::writer::Generate(ir.Get(), r.tintOptions, remappedEntryPoint);
             DAWN_INVALID_IF(result != tint::Success, "An error occurred while generating GLSL:\n%s",
                             result.Failure().reason.Str());
+
+            // Workgroup validation has to come after `Generate` because it may require overrides to
+            // have been substituted.
+            if (r.stage == SingleShaderStage::Compute) {
+                // Validate workgroup size after program runs transforms.
+                Extent3D _;
+                DAWN_TRY_ASSIGN(_, ValidateComputeStageWorkgroupSize(
+                                       result->workgroup_info.x, result->workgroup_info.y,
+                                       result->workgroup_info.z,
+                                       result->workgroup_info.storage_size, r.limits));
+            }
 
             return GLSLCompilation{{std::move(result->glsl)}};
         },
