@@ -153,6 +153,11 @@ Instance::Instance(const WGPUInstanceDescriptor* desc)
     tint::Initialize();
 }
 
+Instance::Instance(const wgpu::InstanceDescriptor* desc)
+    : mImpl(APICreateInstance(reinterpret_cast<const InstanceDescriptor*>(desc))) {
+    tint::Initialize();
+}
+
 Instance::Instance(InstanceBase* impl) : mImpl(impl) {
     if (mImpl != nullptr) {
         mImpl->APIAddRef();

@@ -151,6 +151,7 @@ struct DAWN_NATIVE_EXPORT DawnInstanceDescriptor : wgpu::ChainedStruct {
 class DAWN_NATIVE_EXPORT Instance {
   public:
     explicit Instance(const WGPUInstanceDescriptor* desc = nullptr);
+    explicit Instance(const wgpu::InstanceDescriptor* desc);
     explicit Instance(InstanceBase* impl);
     ~Instance();
 
