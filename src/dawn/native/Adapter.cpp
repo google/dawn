@@ -203,6 +203,14 @@ wgpu::Status AdapterBase::APIGetInfo(AdapterInfo* info) const {
 
     mPhysicalDevice->PopulateBackendProperties(unpacked);
 
+    if (auto* subgroupsProperties = unpacked.Get<AdapterPropertiesSubgroups>()) {
+        if (mPhysicalDevice->GetBackendType() == wgpu::BackendType::D3D12 &&
+            mTogglesState.IsEnabled(Toggle::D3D12RelaxMinSubgroupSizeTo8)) {
+            subgroupsProperties->subgroupMinSize =
+                std::min(subgroupsProperties->subgroupMinSize, 8u);
+        }
+    }
+
     // Allocate space for all strings.
     size_t allocSize = mPhysicalDevice->GetVendorName().length() +
                        mPhysicalDevice->GetArchitectureName().length() +
