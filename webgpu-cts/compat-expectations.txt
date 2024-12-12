@@ -10232,10 +10232,7 @@ crbug.com/0000 [ android-chromium android-pixel-6 android-t angle-opengles arm d
 
 crbug.com/0000 [ intel ] webgpu:api,validation,queue,destroyed,query_set:resolveQuerySet:* [ Skip ]
 crbug.com/0000 [ intel ] webgpu:shader,execution,expression,call,builtin,textureSampleCompareLevel:3d_coords:* [ Skip ]
-crbug.com/0000 [ win10 ] webgpu:shader,execution,expression,call,builtin,textureSampleCompareLevel:2d_coords:* [ Skip ]
 crbug.com/0000 [ intel-0x4680 linux ] webgpu:shader,execution,expression,call,builtin,textureSampleGrad:sampled_2d_coords:* [ Skip ]
 crbug.com/0000 [ intel-0x4680 linux ] webgpu:shader,execution,expression,call,builtin,textureSampleCompareLevel:arrayed_2d_coords:* [ Skip ]
-crbug.com/0000 [ linux nvidia-0x2184 ] webgpu:shader,execution,expression,call,builtin,textureSampleCompareLevel:2d_coords:* [ Skip ]
 crbug.com/0000 [ intel-0x4680 win10 ] webgpu:shader,execution,expression,call,builtin,textureSampleGrad:sampled_2d_coords:* [ Skip ]
 crbug.com/0000 [ intel-0x9bc5 win10 ] webgpu:shader,execution,expression,call,builtin,textureSampleGrad:sampled_2d_coords:* [ Skip ]
-crbug.com/0000 [ nvidia-0x2184 win10 ] webgpu:shader,execution,expression,call,builtin,textureSampleGrad:sampled_2d_coords:* [ Skip ]
