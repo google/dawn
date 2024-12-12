@@ -38,9 +38,15 @@ namespace tint::spirv::writer {
 namespace {
 
 bool CanRun(const core::ir::Module& module, const Options& options) {
-    // If a remapped entry point name is provided, it must not be empty.
-    if (options.remapped_entry_point_name && options.remapped_entry_point_name->empty()) {
-        return false;
+    // If a remapped entry point name is provided, it must not be empty, and must not contain
+    // embedded null characters.
+    if (options.remapped_entry_point_name) {
+        if (options.remapped_entry_point_name->empty()) {
+            return false;
+        }
+        if (options.remapped_entry_point_name->find('\0') != std::string::npos) {
+            return false;
+        }
     }
 
     // Check for unsupported module-scope variable address spaces and types.
