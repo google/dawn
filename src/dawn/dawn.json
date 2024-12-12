@@ -2848,7 +2848,6 @@
     "pipeline layout storage attachment": {
         "category": "structure",
         "tags": ["dawn"],
-        "extensible": "in",
         "members": [
             {"name": "offset", "type": "uint64_t", "default": 0},
             {"name": "format", "type": "texture format"}
