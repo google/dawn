@@ -9407,6 +9407,37 @@ note: # Disassembly
 )");
 }
 
+TEST_F(IR_ValidatorTest, Load_NonReadableSource) {
+    auto* f = b.Function("my_func", ty.void_());
+
+    b.Append(f->Block(), [&] {
+        auto* var = b.Var(ty.ptr<function, i32, core::Access::kWrite>());
+        b.Append(mod.CreateInstruction<ir::Load>(b.InstructionResult(ty.i32()), var->Result(0)));
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_EQ(res.Failure().reason.Str(),
+              R"(:4:19 error: load: load source operand has a non-readable access type, 'write'
+    %3:i32 = load %2
+                  ^^
+
+:2:3 note: in block
+  $B1: {
+  ^^^
+
+note: # Disassembly
+%my_func = func():void {
+  $B1: {
+    %2:ptr<function, i32, write> = var
+    %3:i32 = load %2
+    ret
+  }
+}
+)");
+}
+
 TEST_F(IR_ValidatorTest, Store_NullTo) {
     auto* f = b.Function("my_func", ty.void_());
 
@@ -9663,6 +9694,37 @@ note: # Disassembly
     %2:ptr<function, i32, read_write> = var
     %3:undef = construct 42u
     store %2, %3
+    ret
+  }
+}
+)");
+}
+
+TEST_F(IR_ValidatorTest, Store_NonWriteableTarget) {
+    auto* f = b.Function("my_func", ty.void_());
+
+    b.Append(f->Block(), [&] {
+        auto* var = b.Var(ty.ptr<function, i32, core::Access::kRead>());
+        b.Append(mod.CreateInstruction<ir::Store>(var->Result(0), b.Constant(42_i)));
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_EQ(res.Failure().reason.Str(),
+              R"(:4:11 error: store: store target operand has a non-writeable access type, 'read'
+    store %2, 42i
+          ^^
+
+:2:3 note: in block
+  $B1: {
+  ^^^
+
+note: # Disassembly
+%my_func = func():void {
+  $B1: {
+    %2:ptr<function, i32, read> = var
+    store %2, 42i
     ret
   }
 }

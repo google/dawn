@@ -3317,6 +3317,14 @@ void Validator::CheckLoad(const Load* l) {
             AddError(l, Load::kFromOperandOffset) << "load source operand is not a memory view";
             return;
         }
+
+        if (mv->Access() != core::Access::kRead && mv->Access() != core::Access::kReadWrite) {
+            AddError(l, Load::kFromOperandOffset)
+                << "load source operand has a non-readable access type, "
+                << style::Literal(ToString(mv->Access()));
+            return;
+        }
+
         if (l->Result(0)->Type() != mv->StoreType()) {
             AddError(l, Load::kFromOperandOffset)
                 << "result type " << style::Type(l->Result(0)->Type()->FriendlyName())
@@ -3338,6 +3346,14 @@ void Validator::CheckStore(const Store* s) {
                 AddError(s, Store::kToOperandOffset) << "store target operand is not a memory view";
                 return;
             }
+
+            if (mv->Access() != core::Access::kWrite && mv->Access() != core::Access::kReadWrite) {
+                AddError(s, Store::kToOperandOffset)
+                    << "store target operand has a non-writeable access type, "
+                    << style::Literal(ToString(mv->Access()));
+                return;
+            }
+
             auto* value_type = from->Type();
             auto* store_type = mv->StoreType();
             if (value_type != store_type) {
