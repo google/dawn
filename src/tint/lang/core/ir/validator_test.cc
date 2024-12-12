@@ -6209,7 +6209,6 @@ note: # Disassembly
 
 TEST_F(IR_ValidatorTest, Let_NullValue) {
     auto* v = mod.CreateInstruction<ir::Let>(b.InstructionResult(ty.f32()), nullptr);
-
     auto* f = b.Function("my_func", ty.void_());
 
     auto sb = b.Append(f->Block());
@@ -6290,6 +6289,73 @@ note: # Disassembly
 %my_func = func():void {
   $B1: {
     %2:f32 = let 1i
+    ret
+  }
+}
+)");
+}
+
+TEST_F(IR_ValidatorTest, Let_VoidResult) {
+    auto* f = b.Function("my_func", ty.void_());
+    b.Append(f->Block(), [&] {
+        auto* l = mod.CreateInstruction<ir::Let>(b.InstructionResult(ty.void_()), b.Constant(1_i));
+        b.Append(l);
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_EQ(res.Failure().reason.Str(),
+              R"(:3:15 error: let: result type cannot be void
+    %2:void = let 1i
+              ^^^
+
+:2:3 note: in block
+  $B1: {
+  ^^^
+
+note: # Disassembly
+%my_func = func():void {
+  $B1: {
+    %2:void = let 1i
+    ret
+  }
+}
+)");
+}
+
+TEST_F(IR_ValidatorTest, Let_VoidValue) {
+    auto* v = b.Function("void_func", ty.void_());
+    b.Append(v->Block(), [&] { b.Return(v); });
+
+    auto* f = b.Function("my_func", ty.void_());
+    b.Append(f->Block(), [&] {
+        auto* l = mod.CreateInstruction<ir::Let>(b.InstructionResult(ty.i32()), b.Value(b.Call(v)));
+        b.Append(l);
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_EQ(res.Failure().reason.Str(),
+              R"(:9:14 error: let: value type cannot be void
+    %4:i32 = let %3
+             ^^^
+
+:7:3 note: in block
+  $B2: {
+  ^^^
+
+note: # Disassembly
+%void_func = func():void {
+  $B1: {
+    ret
+  }
+}
+%my_func = func():void {
+  $B2: {
+    %3:void = call %void_func
+    %4:i32 = let %3
     ret
   }
 }

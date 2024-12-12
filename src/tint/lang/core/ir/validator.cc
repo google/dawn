@@ -2607,15 +2607,22 @@ void Validator::CheckLet(const Let* l) {
         return;
     }
 
-    if (l->Result(0) && l->Value()) {
-        if (l->Result(0)->Type() != l->Value()->Type()) {
-            auto result_type_name =
-                l->Result(0)->Type() ? l->Result(0)->Type()->FriendlyName() : "undef";
-            auto value_type_name =
-                l->Value()->Type() ? l->Value()->Type()->FriendlyName() : "undef";
-            AddError(l) << "result type " << style::Type(result_type_name)
-                        << " does not match value type " << style::Type(value_type_name);
-        }
+    if (l->Result(0)->Type()->Is<core::type::Void>()) {
+        AddError(l) << "result type cannot be void";
+        return;
+    }
+
+    if (l->Value()->Type()->Is<core::type::Void>()) {
+        AddError(l) << "value type cannot be void";
+        return;
+    }
+
+    if (l->Result(0)->Type() != l->Value()->Type()) {
+        auto result_type_name =
+            l->Result(0)->Type() ? l->Result(0)->Type()->FriendlyName() : "undef";
+        auto value_type_name = l->Value()->Type() ? l->Value()->Type()->FriendlyName() : "undef";
+        AddError(l) << "result type " << style::Type(result_type_name)
+                    << " does not match value type " << style::Type(value_type_name);
     }
 }
 
