@@ -63,6 +63,9 @@ struct Output {
         /// Each entry in the vector is the size of the workgroup allocation that
         /// should be created for that index.
         std::unordered_map<std::string, std::vector<uint32_t>> allocations;
+
+        /// The needed workgroup storage size
+        size_t storage_size = 0;
     };
 
     /// The generated MSL.

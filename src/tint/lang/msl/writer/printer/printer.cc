@@ -406,9 +406,33 @@ class Printer : public tint::TextGenerator {
                 }
                 if (ptr && ptr->AddressSpace() == core::AddressSpace::kWorkgroup &&
                     func->Stage() == core::ir::Function::PipelineStage::kCompute) {
+                    auto* ty = ptr->StoreType();
+
                     auto& allocations = result_.workgroup_info.allocations.at(func_name);
                     out << " [[threadgroup(" << allocations.size() << ")]]";
-                    allocations.push_back(ptr->StoreType()->Size());
+                    allocations.push_back(ty->Size());
+
+                    // Currently type is always a struct, if this changes in the future we'll need
+                    // to update this to handle non-struct data as well.
+                    TINT_ASSERT(ty->Is<core::type::Struct>());
+
+                    // This essentially matches std430 layout rules from GLSL, which are in
+                    // turn specified as an upper bound for Vulkan layout sizing.
+                    //
+                    // Since Metal is even less specific, we assume Vulkan behavior as a
+                    // good-enough approximation everywhere.
+                    //
+                    // We can't just take the `ty` size here because we've bundled multiple items
+                    // into the struct, but this actually needs the non-bundled rounded size. e.g.
+                    // 2-f32 values would be 32bytes in the non-struct case but 16 bytes struct
+                    // case.
+                    for (auto& mem : ty->As<core::type::Struct>()->Members()) {
+                        auto mem_ty = mem->Type();
+                        uint32_t align = mem_ty->Align();
+                        uint32_t size = mem_ty->Size();
+                        result_.workgroup_info.storage_size +=
+                            tint::RoundUp(16u, tint::RoundUp(align, size));
+                    }
                 }
             }
 
