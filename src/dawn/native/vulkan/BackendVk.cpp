@@ -203,6 +203,22 @@ constexpr SkippedMessage kSkippedMessages[] = {
      "exceeds device maxDescriptorSetUpdateAfterBindStorageImages limit (0)"},
     {"VUID-VkPipelineLayoutCreateInfo-pSetLayouts-03043",
      "exceeds device maxDescriptorSetUpdateAfterBindInputAttachments limit (0)"},
+
+    // crbug.com/383121397
+    {"VUID-VkShaderModuleCreateInfo-pCode-08740",
+     "SPIR-V Capability GroupNonUniform was declared, but"},
+    {"VUID-VkShaderModuleCreateInfo-pCode-08740",
+     "SPIR-V Capability GroupNonUniformArithmetic was declared, but"},
+    {"VUID-VkShaderModuleCreateInfo-pCode-08740",
+     "SPIR-V Capability GroupNonUniformBallot was declared, but"},
+    {"VUID-VkShaderModuleCreateInfo-pCode-08740",
+     "SPIR-V Capability GroupNonUniformQuad was declared, but"},
+    {"VUID-VkShaderModuleCreateInfo-pCode-08740",
+     "SPIR-V Capability GroupNonUniformShuffle was declared, but"},
+    {"VUID-VkShaderModuleCreateInfo-pCode-08740",
+     "SPIR-V Capability GroupNonUniformShuffleRelative was declared, but"},
+    {"VUID-VkShaderModuleCreateInfo-pCode-08740",
+     "SPIR-V Capability GroupNonUniformVote was declared, but"},
 };
 
 namespace dawn::native::vulkan {
