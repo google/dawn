@@ -462,12 +462,11 @@ ResultOrError<UnpackedPtr<BufferDescriptor>> ValidateBufferDescriptor(
                     descriptor->size);
 
     uint64_t maxBufferSize = device->GetLimits().v1.maxBufferSize;
-    if (DAWN_UNLIKELY(descriptor->size > maxBufferSize)) {
-        return DAWN_VALIDATION_ERROR(
-            "Buffer size (%u) exceeds the max buffer size limit (%u).%s", descriptor->size,
-            maxBufferSize,
-            DAWN_INCREASE_LIMIT_MESSAGE(device->GetAdapter(), maxBufferSize, descriptor->size));
-    }
+    DAWN_INVALID_IF(
+        descriptor->size > maxBufferSize,
+        "Buffer size (%u) exceeds the max buffer size limit (%u).%s", descriptor->size,
+        maxBufferSize,
+        DAWN_INCREASE_LIMIT_MESSAGE(device->GetAdapter(), maxBufferSize, descriptor->size));
 
     return unpacked;
 }

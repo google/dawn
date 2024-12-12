@@ -707,14 +707,13 @@ MaybeError ValidateColorAttachmentBytesPerSample(DeviceBase* device,
     }
     uint32_t maxColorAttachmentBytesPerSample =
         device->GetLimits().v1.maxColorAttachmentBytesPerSample;
-    if (DAWN_UNLIKELY(totalByteSize > maxColorAttachmentBytesPerSample)) {
-        return DAWN_VALIDATION_ERROR(
-            "Total color attachment bytes per sample (%u) exceeds maximum (%u) with formats "
-            "(%s).%s",
-            totalByteSize, maxColorAttachmentBytesPerSample, TextureFormatsToString(formats),
-            DAWN_INCREASE_LIMIT_MESSAGE(device->GetAdapter(), maxColorAttachmentBytesPerSample,
-                                        totalByteSize));
-    }
+    DAWN_INVALID_IF(
+        totalByteSize > maxColorAttachmentBytesPerSample,
+        "Total color attachment bytes per sample (%u) exceeds maximum (%u) with formats "
+        "(%s).%s",
+        totalByteSize, maxColorAttachmentBytesPerSample, TextureFormatsToString(formats),
+        DAWN_INCREASE_LIMIT_MESSAGE(device->GetAdapter(), maxColorAttachmentBytesPerSample,
+                                    totalByteSize));
 
     return {};
 }

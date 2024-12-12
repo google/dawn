@@ -36,6 +36,7 @@
 #include "dawn/common/Enumerator.h"
 #include "dawn/common/ityp_array.h"
 #include "dawn/common/ityp_span.h"
+#include "dawn/native/Adapter.h"
 #include "dawn/native/ChainUtils.h"
 #include "dawn/native/CommandValidation.h"
 #include "dawn/native/Commands.h"
@@ -202,13 +203,11 @@ ResultOrError<ShaderModuleEntryPoint> ValidateVertexState(
     const CombinedLimits& limits = device->GetLimits();
 
     const uint32_t maxVertexBuffers = limits.v1.maxVertexBuffers;
-    if (DAWN_UNLIKELY(descriptor->bufferCount > maxVertexBuffers)) {
-        return DAWN_VALIDATION_ERROR(
-            "Vertex buffer count (%u) exceeds the maximum number of vertex buffers (%u).%s",
-            descriptor->bufferCount, maxVertexBuffers,
-            DAWN_INCREASE_LIMIT_MESSAGE(device->GetAdapter(), maxVertexBuffers,
-                                        descriptor->bufferCount));
-    }
+    DAWN_INVALID_IF(descriptor->bufferCount > maxVertexBuffers,
+                    "Vertex buffer count (%u) exceeds the maximum number of vertex buffers (%u).%s",
+                    descriptor->bufferCount, maxVertexBuffers,
+                    DAWN_INCREASE_LIMIT_MESSAGE(device->GetAdapter(), maxVertexBuffers,
+                                                descriptor->bufferCount));
 
     ShaderModuleEntryPoint entryPoint;
     DAWN_TRY_ASSIGN_CONTEXT(
@@ -676,8 +675,11 @@ ResultOrError<ShaderModuleEntryPoint> ValidateFragmentState(DeviceBase* device,
 
     uint32_t maxColorAttachments = device->GetLimits().v1.maxColorAttachments;
     DAWN_INVALID_IF(descriptor->targetCount > maxColorAttachments,
-                    "Number of targets (%u) exceeds the maximum (%u).", descriptor->targetCount,
-                    maxColorAttachments);
+                    "Number of targets (%u) exceeds the maximum (%u).%s", descriptor->targetCount,
+                    maxColorAttachments,
+                    DAWN_INCREASE_LIMIT_MESSAGE(device->GetAdapter(), maxColorAttachments,
+                                                descriptor->targetCount));
+
     auto targets =
         ityp::SpanFromUntyped<ColorAttachmentIndex>(descriptor->targets, descriptor->targetCount);
 
