@@ -18,21 +18,21 @@ struct VertexOutputs {
   float4 position;
 };
 
-struct tint_symbol_outputs {
+struct main_outputs {
   float VertexOutputs_clipDistance [[clip_distance]] [3];
   float4 VertexOutputs_position [[position]];
 };
 
-VertexOutputs tint_symbol_inner() {
+VertexOutputs main_inner() {
   return VertexOutputs{.clipDistance=tint_array<float, 3>{}, .position=float4(1.0f, 2.0f, 3.0f, 4.0f)};
 }
 
-vertex tint_symbol_outputs tint_symbol() {
-  VertexOutputs const v = tint_symbol_inner();
-  tint_symbol_outputs tint_wrapper_result = {};
-  tint_wrapper_result.VertexOutputs_clipDistance[0u] = v.clipDistance[0u];
-  tint_wrapper_result.VertexOutputs_clipDistance[1u] = v.clipDistance[1u];
-  tint_wrapper_result.VertexOutputs_clipDistance[2u] = v.clipDistance[2u];
-  tint_wrapper_result.VertexOutputs_position = v.position;
+vertex main_outputs v() {
+  VertexOutputs const v_1 = main_inner();
+  main_outputs tint_wrapper_result = {};
+  tint_wrapper_result.VertexOutputs_clipDistance[0u] = v_1.clipDistance[0u];
+  tint_wrapper_result.VertexOutputs_clipDistance[1u] = v_1.clipDistance[1u];
+  tint_wrapper_result.VertexOutputs_clipDistance[2u] = v_1.clipDistance[2u];
+  tint_wrapper_result.VertexOutputs_position = v_1.position;
   return tint_wrapper_result;
 }

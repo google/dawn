@@ -40,7 +40,7 @@ void main_1(tint_module_vars_struct tint_module_vars) {
   orientation[5u] = x_23[5u];
 }
 
-fragment void tint_symbol(const device x_B4_BuildInformation* sspp962805860buildInformation [[buffer(0)]]) {
+fragment void v(const device x_B4_BuildInformation* sspp962805860buildInformation [[buffer(0)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.sspp962805860buildInformation=sspp962805860buildInformation};
   main_1(tint_module_vars);
 }

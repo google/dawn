@@ -6,7 +6,7 @@ void constant_with_non_constant() {
   float2 b = float2(1.0f, a);
 }
 
-kernel void tint_symbol() {
+kernel void v() {
   bool bool_var1 = true;
   bool bool_var2 = true;
   bool bool_var3 = true;

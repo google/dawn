@@ -17,11 +17,11 @@ struct tint_module_vars_struct {
   threadgroup tint_array<int, 3>* zero;
 };
 
-struct tint_symbol_2 {
-  tint_array<int, 3> tint_symbol_1;
+struct tint_symbol_1 {
+  tint_array<int, 3> tint_symbol;
 };
 
-void tint_symbol_inner(uint tint_local_index, tint_module_vars_struct tint_module_vars) {
+void main_inner(uint tint_local_index, tint_module_vars_struct tint_module_vars) {
   if ((tint_local_index < 3u)) {
     (*tint_module_vars.zero)[tint_local_index] = 0;
   }
@@ -29,7 +29,7 @@ void tint_symbol_inner(uint tint_local_index, tint_module_vars_struct tint_modul
   tint_array<int, 3> v = (*tint_module_vars.zero);
 }
 
-kernel void tint_symbol(uint tint_local_index [[thread_index_in_threadgroup]], threadgroup tint_symbol_2* v_1 [[threadgroup(0)]]) {
-  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.zero=(&(*v_1).tint_symbol_1)};
-  tint_symbol_inner(tint_local_index, tint_module_vars);
+kernel void v_1(uint tint_local_index [[thread_index_in_threadgroup]], threadgroup tint_symbol_1* v_2 [[threadgroup(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.zero=(&(*v_2).tint_symbol)};
+  main_inner(tint_local_index, tint_module_vars);
 }

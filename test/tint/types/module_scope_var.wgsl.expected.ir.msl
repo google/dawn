@@ -31,11 +31,11 @@ struct tint_module_vars_struct {
   threadgroup float* wg_var;
 };
 
-struct tint_symbol_2 {
-  float tint_symbol_1;
+struct tint_symbol_1 {
+  float tint_symbol;
 };
 
-void tint_symbol_inner(uint tint_local_index, tint_module_vars_struct tint_module_vars) {
+void main_inner(uint tint_local_index, tint_module_vars_struct tint_module_vars) {
   if ((tint_local_index < 1u)) {
     (*tint_module_vars.wg_var) = 0.0f;
   }
@@ -53,7 +53,7 @@ void tint_symbol_inner(uint tint_local_index, tint_module_vars_struct tint_modul
   (*tint_module_vars.wg_var) = 42.0f;
 }
 
-kernel void tint_symbol(uint tint_local_index [[thread_index_in_threadgroup]], threadgroup tint_symbol_2* v [[threadgroup(0)]]) {
+kernel void v(uint tint_local_index [[thread_index_in_threadgroup]], threadgroup tint_symbol_1* v_1 [[threadgroup(0)]]) {
   thread bool bool_var = false;
   thread int i32_var = 0;
   thread uint u32_var = 0u;
@@ -64,6 +64,6 @@ kernel void tint_symbol(uint tint_local_index [[thread_index_in_threadgroup]], t
   thread float2x3 m2x3_var = float2x3(0.0f);
   thread tint_array<float, 4> arr_var = {};
   thread S struct_var = {};
-  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.bool_var=(&bool_var), .i32_var=(&i32_var), .u32_var=(&u32_var), .f32_var=(&f32_var), .v2i32_var=(&v2i32_var), .v3u32_var=(&v3u32_var), .v4f32_var=(&v4f32_var), .m2x3_var=(&m2x3_var), .arr_var=(&arr_var), .struct_var=(&struct_var), .wg_var=(&(*v).tint_symbol_1)};
-  tint_symbol_inner(tint_local_index, tint_module_vars);
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.bool_var=(&bool_var), .i32_var=(&i32_var), .u32_var=(&u32_var), .f32_var=(&f32_var), .v2i32_var=(&v2i32_var), .v3u32_var=(&v3u32_var), .v4f32_var=(&v4f32_var), .m2x3_var=(&m2x3_var), .arr_var=(&arr_var), .struct_var=(&struct_var), .wg_var=(&(*v_1).tint_symbol)};
+  main_inner(tint_local_index, tint_module_vars);
 }

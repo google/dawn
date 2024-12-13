@@ -18,17 +18,17 @@ struct tint_module_vars_struct {
   sampler s;
 };
 
-struct tint_symbol_inputs {
+struct main_inputs {
   float x [[user(locn0)]];
 };
 
-void tint_symbol_inner(float x, tint_module_vars_struct tint_module_vars) {
+void main_inner(float x, tint_module_vars_struct tint_module_vars) {
   if ((x > 0.0f)) {
     tint_module_vars.t.sample(tint_module_vars.s, float2(0.0f));
   }
 }
 
-fragment void tint_symbol(tint_symbol_inputs inputs [[stage_in]], texture2d<float, access::sample> t [[texture(0)]], sampler s [[sampler(0)]]) {
+fragment void v(main_inputs inputs [[stage_in]], texture2d<float, access::sample> t [[texture(0)]], sampler s [[sampler(0)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.t=t, .s=s};
-  tint_symbol_inner(inputs.x, tint_module_vars);
+  main_inner(inputs.x, tint_module_vars);
 }

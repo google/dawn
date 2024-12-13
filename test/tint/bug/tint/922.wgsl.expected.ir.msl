@@ -64,13 +64,13 @@ struct VertexOutput {
   float4 member;
 };
 
-struct tint_symbol_outputs {
+struct main_outputs {
   float4 VertexOutput_v_Color [[user(locn0)]];
   float2 VertexOutput_v_TexCoord [[user(locn1)]];
   float4 VertexOutput_member [[position]];
 };
 
-struct tint_symbol_inputs {
+struct main_inputs {
   float3 a_Position [[attribute(0)]];
   float2 a_UV [[attribute(1)]];
   float4 a_Color [[attribute(2)]];
@@ -186,7 +186,7 @@ void main1(tint_module_vars_struct tint_module_vars) {
   /* unreachable */
 }
 
-VertexOutput tint_symbol_inner(float3 a_Position, float2 a_UV, float4 a_Color, float3 a_Normal, float a_PosMtxIdx, tint_module_vars_struct tint_module_vars) {
+VertexOutput main_inner(float3 a_Position, float2 a_UV, float4 a_Color, float3 a_Normal, float a_PosMtxIdx, tint_module_vars_struct tint_module_vars) {
   (*tint_module_vars.a_Position1) = a_Position;
   (*tint_module_vars.a_UV1) = a_UV;
   (*tint_module_vars.a_Color1) = a_Color;
@@ -199,7 +199,7 @@ VertexOutput tint_symbol_inner(float3 a_Position, float2 a_UV, float4 a_Color, f
   return VertexOutput{.v_Color=x_e11, .v_TexCoord=x_e13, .member=x_e15};
 }
 
-vertex tint_symbol_outputs tint_symbol(tint_symbol_inputs inputs [[stage_in]], const constant ub_SceneParams* global [[buffer(1)]], const constant ub_MaterialParams* global1 [[buffer(2)]], const constant ub_PacketParams* global2 [[buffer(0)]]) {
+vertex main_outputs v_1(main_inputs inputs [[stage_in]], const constant ub_SceneParams* global [[buffer(1)]], const constant ub_MaterialParams* global1 [[buffer(2)]], const constant ub_PacketParams* global2 [[buffer(0)]]) {
   thread float3 a_Position1 = 0.0f;
   thread float2 a_UV1 = 0.0f;
   thread float4 a_Color1 = 0.0f;
@@ -209,10 +209,10 @@ vertex tint_symbol_outputs tint_symbol(tint_symbol_inputs inputs [[stage_in]], c
   thread float2 v_TexCoord = 0.0f;
   thread float4 gl_Position = 0.0f;
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.global=global, .global1=global1, .global2=global2, .a_Position1=(&a_Position1), .a_UV1=(&a_UV1), .a_Color1=(&a_Color1), .a_Normal1=(&a_Normal1), .a_PosMtxIdx1=(&a_PosMtxIdx1), .v_Color=(&v_Color), .v_TexCoord=(&v_TexCoord), .gl_Position=(&gl_Position)};
-  VertexOutput const v_1 = tint_symbol_inner(inputs.a_Position, inputs.a_UV, inputs.a_Color, inputs.a_Normal, inputs.a_PosMtxIdx, tint_module_vars);
-  tint_symbol_outputs tint_wrapper_result = {};
-  tint_wrapper_result.VertexOutput_v_Color = v_1.v_Color;
-  tint_wrapper_result.VertexOutput_v_TexCoord = v_1.v_TexCoord;
-  tint_wrapper_result.VertexOutput_member = v_1.member;
+  VertexOutput const v_2 = main_inner(inputs.a_Position, inputs.a_UV, inputs.a_Color, inputs.a_Normal, inputs.a_PosMtxIdx, tint_module_vars);
+  main_outputs tint_wrapper_result = {};
+  tint_wrapper_result.VertexOutput_v_Color = v_2.v_Color;
+  tint_wrapper_result.VertexOutput_v_TexCoord = v_2.v_TexCoord;
+  tint_wrapper_result.VertexOutput_member = v_2.member;
   return tint_wrapper_result;
 }

@@ -39,7 +39,7 @@ void no_deref_frexp() {
   int exp = (*p).exp;
 }
 
-kernel void tint_symbol() {
+kernel void v() {
   deref_modf();
   no_deref_modf();
   deref_frexp();

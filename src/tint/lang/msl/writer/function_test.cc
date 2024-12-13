@@ -100,8 +100,8 @@ fragment void foo(device int* storage_var [[buffer(1)]], const constant int* uni
 
 TEST_F(MslWriterTest, EntryPointParameterHandleBindingPoint) {
     auto* t = ty.Get<core::type::SampledTexture>(core::type::TextureDimension::k2d, ty.f32());
-    auto* texture = b.Var("texture", ty.ptr<handle>(t));
-    auto* sampler = b.Var("sampler", ty.ptr<handle>(ty.sampler()));
+    auto* texture = b.Var("t", ty.ptr<handle>(t));
+    auto* sampler = b.Var("s", ty.ptr<handle>(ty.sampler()));
     texture->SetBindingPoint(0, 1);
     sampler->SetBindingPoint(0, 2);
     mod.root_block->Append(texture);
@@ -119,12 +119,12 @@ TEST_F(MslWriterTest, EntryPointParameterHandleBindingPoint) {
 using namespace metal;
 
 struct tint_module_vars_struct {
-  texture2d<float, access::sample> texture;
-  sampler sampler;
+  texture2d<float, access::sample> t;
+  sampler s;
 };
 
-fragment void foo(texture2d<float, access::sample> texture [[texture(1)]], sampler sampler [[sampler(2)]]) {
-  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.texture=texture, .sampler=sampler};
+fragment void foo(texture2d<float, access::sample> t [[texture(1)]], sampler s [[sampler(2)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.t=t, .s=s};
 }
 )");
 }

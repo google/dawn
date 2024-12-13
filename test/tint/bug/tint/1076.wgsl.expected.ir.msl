@@ -6,27 +6,27 @@ struct FragIn {
   uint mask;
 };
 
-struct tint_symbol_outputs {
+struct main_outputs {
   float FragIn_a [[color(0)]];
   uint FragIn_mask [[sample_mask]];
 };
 
-struct tint_symbol_inputs {
+struct main_inputs {
   float FragIn_a [[user(locn0)]];
   float b [[user(locn1)]];
 };
 
-FragIn tint_symbol_inner(FragIn in, float b) {
+FragIn main_inner(FragIn in, float b) {
   if ((in.mask == 0u)) {
     return in;
   }
   return FragIn{.a=b, .mask=1u};
 }
 
-fragment tint_symbol_outputs tint_symbol(tint_symbol_inputs inputs [[stage_in]], uint FragIn_mask [[sample_mask]]) {
-  FragIn const v = tint_symbol_inner(FragIn{.a=inputs.FragIn_a, .mask=FragIn_mask}, inputs.b);
-  tint_symbol_outputs tint_wrapper_result = {};
-  tint_wrapper_result.FragIn_a = v.a;
-  tint_wrapper_result.FragIn_mask = v.mask;
+fragment main_outputs v(main_inputs inputs [[stage_in]], uint FragIn_mask [[sample_mask]]) {
+  FragIn const v_1 = main_inner(FragIn{.a=inputs.FragIn_a, .mask=FragIn_mask}, inputs.b);
+  main_outputs tint_wrapper_result = {};
+  tint_wrapper_result.FragIn_a = v_1.a;
+  tint_wrapper_result.FragIn_mask = v_1.mask;
   return tint_wrapper_result;
 }

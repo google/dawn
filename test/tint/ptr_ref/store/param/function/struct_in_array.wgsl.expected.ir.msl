@@ -21,7 +21,7 @@ void func(thread str* const pointer) {
   (*pointer) = str{};
 }
 
-kernel void tint_symbol() {
+kernel void v() {
   tint_array<str, 4> F = {};
   func((&F[2u]));
 }

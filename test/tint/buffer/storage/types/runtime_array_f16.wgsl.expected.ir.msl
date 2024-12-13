@@ -19,10 +19,10 @@ struct tint_module_vars_struct {
   const constant tint_array<uint4, 1>* tint_storage_buffer_sizes;
 };
 
-kernel void tint_symbol(const device tint_array<half, 1>* in [[buffer(1)]], device tint_array<half, 1>* out [[buffer(0)]], const constant tint_array<uint4, 1>* tint_storage_buffer_sizes [[buffer(30)]]) {
+kernel void v(const device tint_array<half, 1>* in [[buffer(1)]], device tint_array<half, 1>* out [[buffer(0)]], const constant tint_array<uint4, 1>* tint_storage_buffer_sizes [[buffer(30)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.in=in, .out=out, .tint_storage_buffer_sizes=tint_storage_buffer_sizes};
-  uint const v = (((*tint_module_vars.tint_storage_buffer_sizes)[0u].y / 2u) - 1u);
-  device half* const v_1 = (&(*tint_module_vars.out)[min(uint(0), v)]);
-  uint const v_2 = (((*tint_module_vars.tint_storage_buffer_sizes)[0u].x / 2u) - 1u);
-  (*v_1) = (*tint_module_vars.in)[min(uint(0), v_2)];
+  uint const v_1 = (((*tint_module_vars.tint_storage_buffer_sizes)[0u].y / 2u) - 1u);
+  device half* const v_2 = (&(*tint_module_vars.out)[min(uint(0), v_1)]);
+  uint const v_3 = (((*tint_module_vars.tint_storage_buffer_sizes)[0u].x / 2u) - 1u);
+  (*v_2) = (*tint_module_vars.in)[min(uint(0), v_3)];
 }

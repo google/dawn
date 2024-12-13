@@ -11,8 +11,8 @@ struct tint_module_vars_struct {
   threadgroup atomic_int* g1;
 };
 
-struct tint_symbol_2 {
-  atomic_int tint_symbol_1;
+struct tint_symbol_1 {
+  atomic_int tint_symbol;
 };
 
 int accept_value(int val) {
@@ -52,7 +52,7 @@ int call_builtin_with_mod_scope_ptr(tint_module_vars_struct tint_module_vars) {
   return atomic_load_explicit(tint_module_vars.g1, memory_order_relaxed);
 }
 
-void tint_symbol_inner(uint tint_local_index, tint_module_vars_struct tint_module_vars) {
+void main_inner(uint tint_local_index, tint_module_vars_struct tint_module_vars) {
   if ((tint_local_index < 1u)) {
     atomic_store_explicit(tint_module_vars.g1, 0, memory_order_relaxed);
   }
@@ -70,7 +70,7 @@ void tint_symbol_inner(uint tint_local_index, tint_module_vars_struct tint_modul
   (*tint_module_vars.s) = as_type<int>((as_type<uint>(as_type<int>((as_type<uint>(v_6) + as_type<uint>(call_builtin_with_mod_scope_ptr(tint_module_vars))))) + as_type<uint>(t1)));
 }
 
-kernel void tint_symbol(uint tint_local_index [[thread_index_in_threadgroup]], device int* s [[buffer(0)]], threadgroup tint_symbol_2* v_7 [[threadgroup(0)]]) {
-  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.s=s, .g1=(&(*v_7).tint_symbol_1)};
-  tint_symbol_inner(tint_local_index, tint_module_vars);
+kernel void v_7(uint tint_local_index [[thread_index_in_threadgroup]], device int* s [[buffer(0)]], threadgroup tint_symbol_1* v_8 [[threadgroup(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.s=s, .g1=(&(*v_8).tint_symbol)};
+  main_inner(tint_local_index, tint_module_vars);
 }

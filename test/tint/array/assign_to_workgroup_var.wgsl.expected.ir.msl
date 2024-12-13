@@ -26,10 +26,10 @@ struct tint_module_vars_struct {
   threadgroup tint_array<tint_array<tint_array<int, 2>, 3>, 4>* dst_nested;
 };
 
-struct tint_symbol_4 {
+struct tint_symbol_3 {
+  tint_array<int4, 4> tint_symbol;
   tint_array<int4, 4> tint_symbol_1;
-  tint_array<int4, 4> tint_symbol_2;
-  tint_array<tint_array<tint_array<int, 2>, 3>, 4> tint_symbol_3;
+  tint_array<tint_array<tint_array<int, 2>, 3>, 4> tint_symbol_2;
 };
 
 tint_array<int4, 4> ret_arr() {
@@ -57,7 +57,7 @@ void foo(tint_array<int4, 4> src_param, tint_module_vars_struct tint_module_vars
   (*tint_module_vars.dst_nested) = src_nested;
 }
 
-void tint_symbol_inner(uint tint_local_index, tint_module_vars_struct tint_module_vars) {
+void main_inner(uint tint_local_index, tint_module_vars_struct tint_module_vars) {
   {
     uint v = 0u;
     v = tint_local_index;
@@ -94,8 +94,8 @@ void tint_symbol_inner(uint tint_local_index, tint_module_vars_struct tint_modul
   foo(val, tint_module_vars);
 }
 
-kernel void tint_symbol(uint tint_local_index [[thread_index_in_threadgroup]], threadgroup tint_symbol_4* v_4 [[threadgroup(0)]], const constant S* src_uniform [[buffer(0)]], device S* src_storage [[buffer(1)]]) {
+kernel void v_4(uint tint_local_index [[thread_index_in_threadgroup]], threadgroup tint_symbol_3* v_5 [[threadgroup(0)]], const constant S* src_uniform [[buffer(0)]], device S* src_storage [[buffer(1)]]) {
   thread tint_array<int4, 4> src_private = {};
-  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.src_private=(&src_private), .src_workgroup=(&(*v_4).tint_symbol_1), .src_uniform=src_uniform, .src_storage=src_storage, .dst=(&(*v_4).tint_symbol_2), .dst_nested=(&(*v_4).tint_symbol_3)};
-  tint_symbol_inner(tint_local_index, tint_module_vars);
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.src_private=(&src_private), .src_workgroup=(&(*v_5).tint_symbol), .src_uniform=src_uniform, .src_storage=src_storage, .dst=(&(*v_5).tint_symbol_1), .dst_nested=(&(*v_5).tint_symbol_2)};
+  main_inner(tint_local_index, tint_module_vars);
 }

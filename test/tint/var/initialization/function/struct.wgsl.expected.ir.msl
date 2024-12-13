@@ -6,6 +6,6 @@ struct S {
   float b;
 };
 
-kernel void tint_symbol() {
+kernel void v_1() {
   S v = {};
 }

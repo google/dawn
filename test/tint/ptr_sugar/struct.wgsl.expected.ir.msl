@@ -19,7 +19,7 @@ void no_deref() {
   (*p).x = 42;
 }
 
-kernel void tint_symbol() {
+kernel void v() {
   deref();
   no_deref();
 }

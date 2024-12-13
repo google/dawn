@@ -51,6 +51,9 @@
 namespace dawn::native::metal {
 namespace {
 
+// The name to use when remapping entry points.
+constexpr char kRemappedEntryPointName[] = "dawn_entry_point";
+
 using OptionalVertexPullingTransformConfig =
     std::optional<tint::ast::transform::VertexPulling::Config>;
 
@@ -274,6 +277,11 @@ ResultOrError<CacheResult<MslCompilation>> TranslateToMSL(
     req.disableSymbolRenaming = device->IsToggleEnabled(Toggle::DisableSymbolRenaming);
     req.platform = UnsafeUnkeyedValue(device->GetPlatform());
 
+    req.use_tint_ir = device->IsToggleEnabled(Toggle::UseTintIR);
+    if (req.use_tint_ir) {
+        req.tintOptions.strip_all_names = !req.disableSymbolRenaming;
+        req.tintOptions.remapped_entry_point_name = kRemappedEntryPointName;
+    }
     req.tintOptions.disable_robustness = !device->IsRobustnessEnabled();
     req.tintOptions.buffer_size_ubo_index = kBufferLengthBufferSlot;
     req.tintOptions.fixed_sample_mask = sampleMask;
@@ -286,7 +294,6 @@ ResultOrError<CacheResult<MslCompilation>> TranslateToMSL(
     req.tintOptions.array_length_from_uniform = std::move(arrayLengthFromUniform);
     req.tintOptions.pixel_local_attachments = std::move(pixelLocalAttachments);
     req.tintOptions.bindings = std::move(bindings);
-    req.use_tint_ir = device->IsToggleEnabled(Toggle::UseTintIR);
     req.tintOptions.disable_polyfill_integer_div_mod =
         device->IsToggleEnabled(Toggle::DisablePolyfillsOnIntegerDivisonAndModulo);
 
@@ -297,7 +304,6 @@ ResultOrError<CacheResult<MslCompilation>> TranslateToMSL(
     DAWN_TRY_LOAD_OR_RUN(
         mslCompilation, device, std::move(req), MslCompilation::FromBlob,
         [](MslCompilationRequest r) -> ResultOrError<MslCompilation> {
-            constexpr char kRemappedEntryPointName[] = "dawn_entry_point";
             tint::ast::transform::Manager transformManager;
             tint::ast::transform::DataMap transformInputs;
 
@@ -307,14 +313,16 @@ ResultOrError<CacheResult<MslCompilation>> TranslateToMSL(
             transformManager.Add<tint::ast::transform::SingleEntryPoint>();
             transformInputs.Add<tint::ast::transform::SingleEntryPoint::Config>(r.entryPointName);
 
-            // Needs to run before all other transforms so that they can use builtin names safely.
-            tint::ast::transform::Renamer::Remappings requestedNames = {
-                {r.entryPointName, kRemappedEntryPointName}};
-            transformManager.Add<tint::ast::transform::Renamer>();
-            transformInputs.Add<tint::ast::transform::Renamer::Config>(
-                r.disableSymbolRenaming ? tint::ast::transform::Renamer::Target::kMslKeywords
-                                        : tint::ast::transform::Renamer::Target::kAll,
-                std::move(requestedNames));
+            if (!r.use_tint_ir) {
+                // Needs to run before other transforms so that they can use builtin names safely.
+                tint::ast::transform::Renamer::Remappings requestedNames = {
+                    {r.entryPointName, kRemappedEntryPointName}};
+                transformManager.Add<tint::ast::transform::Renamer>();
+                transformInputs.Add<tint::ast::transform::Renamer::Config>(
+                    r.disableSymbolRenaming ? tint::ast::transform::Renamer::Target::kMslKeywords
+                                            : tint::ast::transform::Renamer::Target::kAll,
+                    std::move(requestedNames));
+            }
 
             if (r.vertexPullingTransformConfig) {
                 transformManager.Add<tint::ast::transform::VertexPulling>();

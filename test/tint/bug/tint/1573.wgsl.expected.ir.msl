@@ -16,7 +16,7 @@ atomic_compare_exchange_result_u32 v(device atomic_uint* const atomic_ptr, uint 
   return atomic_compare_exchange_result_u32{.old_value=old_value, .exchanged=v_1};
 }
 
-kernel void tint_symbol(device atomic_uint* a [[buffer(0)]]) {
+kernel void v_2(device atomic_uint* a [[buffer(0)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.a=a};
   uint value = 42u;
   atomic_compare_exchange_result_u32 const result = v(tint_module_vars.a, 0u, value);

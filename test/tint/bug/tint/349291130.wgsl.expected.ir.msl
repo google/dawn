@@ -2,14 +2,14 @@
 using namespace metal;
 
 struct tint_module_vars_struct {
-  texture2d<float, access::sample> tint_symbol;
+  texture2d<float, access::sample> tint_member;
 };
 
-kernel void e(texture2d<float, access::sample> tint_symbol [[texture(0)]]) {
-  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.tint_symbol=tint_symbol};
+kernel void e(texture2d<float, access::sample> v [[texture(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.tint_member=v};
   {
     uint2 tint_loop_idx = 0u;
-    uint level = tint_module_vars.tint_symbol.get_num_mip_levels();
+    uint level = tint_module_vars.tint_member.get_num_mip_levels();
     while(true) {
       if (all((tint_loop_idx == uint2(4294967295u)))) {
         break;

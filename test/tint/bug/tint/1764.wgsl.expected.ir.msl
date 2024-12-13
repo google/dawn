@@ -17,11 +17,11 @@ struct tint_module_vars_struct {
   threadgroup tint_array<int, 246>* W;
 };
 
-struct tint_symbol_2 {
-  tint_array<int, 246> tint_symbol_1;
+struct tint_symbol_1 {
+  tint_array<int, 246> tint_symbol;
 };
 
-void tint_symbol_inner(uint tint_local_index, tint_module_vars_struct tint_module_vars) {
+void main_inner(uint tint_local_index, tint_module_vars_struct tint_module_vars) {
   {
     uint v = 0u;
     v = tint_local_index;
@@ -42,7 +42,7 @@ void tint_symbol_inner(uint tint_local_index, tint_module_vars_struct tint_modul
   (*p)[0u] = 42;
 }
 
-kernel void tint_symbol(uint tint_local_index [[thread_index_in_threadgroup]], threadgroup tint_symbol_2* v_2 [[threadgroup(0)]]) {
-  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.W=(&(*v_2).tint_symbol_1)};
-  tint_symbol_inner(tint_local_index, tint_module_vars);
+kernel void v_2(uint tint_local_index [[thread_index_in_threadgroup]], threadgroup tint_symbol_1* v_3 [[threadgroup(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.W=(&(*v_3).tint_symbol)};
+  main_inner(tint_local_index, tint_module_vars);
 }

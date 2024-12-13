@@ -28,6 +28,8 @@
 #ifndef SRC_TINT_LANG_MSL_WRITER_COMMON_OPTIONS_H_
 #define SRC_TINT_LANG_MSL_WRITER_COMMON_OPTIONS_H_
 
+#include <optional>
+#include <string>
 #include <unordered_map>
 
 #include "src/tint/api/common/binding_point.h"
@@ -135,6 +137,12 @@ struct Options {
     /// @returns this Options
     Options& operator=(const Options&);
 
+    /// An optional remapped name to use when emitting the entry point.
+    std::optional<std::string> remapped_entry_point_name = {};
+
+    /// Set to `true` to strip all user-declared identifiers from the module.
+    bool strip_all_names = false;
+
     /// Set to `true` to disable software robustness that prevents out-of-bounds accesses.
     bool disable_robustness = false;
 
@@ -171,6 +179,8 @@ struct Options {
 
     /// Reflect the fields of this class so that it can be used by tint::ForeachField()
     TINT_REFLECT(Options,
+                 remapped_entry_point_name,
+                 strip_all_names,
                  disable_robustness,
                  disable_workgroup_init,
                  disable_demote_to_helper,

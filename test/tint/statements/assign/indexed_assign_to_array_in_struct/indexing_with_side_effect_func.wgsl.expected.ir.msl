@@ -40,11 +40,11 @@ uint getNextIndex(tint_module_vars_struct tint_module_vars) {
   return (*tint_module_vars.nextIndex);
 }
 
-kernel void tint_symbol(const constant Uniforms* uniforms [[buffer(0)]]) {
+kernel void v_1(const constant Uniforms* uniforms [[buffer(0)]]) {
   thread uint nextIndex = 0u;
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.nextIndex=(&nextIndex), .uniforms=uniforms};
   InnerS v = {};
   OuterS s = {};
-  uint const v_1 = getNextIndex(tint_module_vars);
-  s.a1[min(v_1, 7u)].a2[min((*tint_module_vars.uniforms).j, 7u)] = v;
+  uint const v_2 = getNextIndex(tint_module_vars);
+  s.a1[min(v_2, 7u)].a2[min((*tint_module_vars.uniforms).j, 7u)] = v;
 }

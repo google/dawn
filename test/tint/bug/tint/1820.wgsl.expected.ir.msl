@@ -32,5 +32,5 @@ void bar(float x, tint_module_vars_struct tint_module_vars) {
   }
 }
 
-void tint_symbol() {
+void v() {
 }

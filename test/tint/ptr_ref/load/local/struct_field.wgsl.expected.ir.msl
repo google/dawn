@@ -5,7 +5,7 @@ struct S {
   int i;
 };
 
-kernel void tint_symbol() {
+kernel void v() {
   S V = {};
   int i = V.i;
 }

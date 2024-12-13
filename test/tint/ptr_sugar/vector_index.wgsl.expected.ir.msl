@@ -47,7 +47,7 @@ void no_deref_var() {
   (*p).x = 42;
 }
 
-kernel void tint_symbol() {
+kernel void v() {
   deref_const();
   no_deref_const();
   deref_let();

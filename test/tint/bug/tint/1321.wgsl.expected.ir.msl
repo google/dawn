@@ -17,7 +17,7 @@ int foo() {
   return 1;
 }
 
-fragment void tint_symbol() {
+fragment void v() {
   tint_array<float, 4> arr = tint_array<float, 4>{};
   {
     uint2 tint_loop_idx = 0u;

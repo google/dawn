@@ -8,6 +8,6 @@ void main_1() {
   float3 const x_19 = v.xzy;
 }
 
-kernel void tint_symbol() {
+kernel void v_1() {
   main_1();
 }

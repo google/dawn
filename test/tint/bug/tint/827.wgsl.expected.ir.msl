@@ -23,7 +23,7 @@ struct tint_module_vars_struct {
   const constant tint_array<uint4, 1>* tint_storage_buffer_sizes;
 };
 
-void tint_symbol_inner(uint3 GlobalInvocationId, tint_module_vars_struct tint_module_vars) {
+void main_inner(uint3 GlobalInvocationId, tint_module_vars_struct tint_module_vars) {
   device float* const v = (&(*tint_module_vars.result).values[min(((GlobalInvocationId.y * 128u) + GlobalInvocationId.x), ((((*tint_module_vars.tint_storage_buffer_sizes)[0u].x - 0u) / 4u) - 1u))]);
   int const v_1 = int(GlobalInvocationId.x);
   int2 const v_2 = int2(v_1, int(GlobalInvocationId.y));
@@ -32,7 +32,7 @@ void tint_symbol_inner(uint3 GlobalInvocationId, tint_module_vars_struct tint_mo
   (*v) = tint_module_vars.tex.read(min(uint2(v_2), v_4), v_3);
 }
 
-kernel void tint_symbol(uint3 GlobalInvocationId [[thread_position_in_grid]], depth2d<float, access::sample> tex [[texture(0)]], device Result* result [[buffer(0)]], const constant tint_array<uint4, 1>* tint_storage_buffer_sizes [[buffer(30)]]) {
+kernel void v_5(uint3 GlobalInvocationId [[thread_position_in_grid]], depth2d<float, access::sample> tex [[texture(0)]], device Result* result [[buffer(0)]], const constant tint_array<uint4, 1>* tint_storage_buffer_sizes [[buffer(30)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.tex=tex, .result=result, .tint_storage_buffer_sizes=tint_storage_buffer_sizes};
-  tint_symbol_inner(GlobalInvocationId, tint_module_vars);
+  main_inner(GlobalInvocationId, tint_module_vars);
 }

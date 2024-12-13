@@ -28,7 +28,7 @@ void foo(tint_module_vars_struct tint_module_vars) {
   }
 }
 
-kernel void tint_symbol() {
+kernel void v() {
   thread float2 v2f = 0.0f;
   thread int3 v3i = 0;
   thread uint4 v4u = 0u;

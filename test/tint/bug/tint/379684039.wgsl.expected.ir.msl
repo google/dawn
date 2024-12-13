@@ -5,18 +5,18 @@ struct tint_module_vars_struct {
   const device int2* _storage;
 };
 
-void tint_symbol(tint_module_vars_struct tint_module_vars) {
-  int2 tint_symbol_1 = int2(0);
+void v(tint_module_vars_struct tint_module_vars) {
+  int2 v_1 = int2(0);
   {
     uint2 tint_loop_idx = 0u;
     while(true) {
       if (all((tint_loop_idx == uint2(4294967295u)))) {
         break;
       }
-      if ((tint_symbol_1.y >= (*tint_module_vars._storage).y)) {
+      if ((v_1.y >= (*tint_module_vars._storage).y)) {
         break;
       }
-      if ((tint_symbol_1.y >= 0)) {
+      if ((v_1.y >= 0)) {
         break;
       }
       {

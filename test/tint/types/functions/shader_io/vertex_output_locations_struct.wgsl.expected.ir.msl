@@ -9,7 +9,7 @@ struct VertexOutputs {
   float4 position;
 };
 
-struct tint_symbol_outputs {
+struct main_outputs {
   int VertexOutputs_loc0 [[user(locn0)]] [[flat]];
   uint VertexOutputs_loc1 [[user(locn1)]] [[flat]];
   float VertexOutputs_loc2 [[user(locn2)]];
@@ -17,17 +17,17 @@ struct tint_symbol_outputs {
   float4 VertexOutputs_position [[position]];
 };
 
-VertexOutputs tint_symbol_inner() {
+VertexOutputs main_inner() {
   return VertexOutputs{.loc0=1, .loc1=1u, .loc2=1.0f, .loc3=float4(1.0f, 2.0f, 3.0f, 4.0f), .position=float4(0.0f)};
 }
 
-vertex tint_symbol_outputs tint_symbol() {
-  VertexOutputs const v = tint_symbol_inner();
-  tint_symbol_outputs tint_wrapper_result = {};
-  tint_wrapper_result.VertexOutputs_loc0 = v.loc0;
-  tint_wrapper_result.VertexOutputs_loc1 = v.loc1;
-  tint_wrapper_result.VertexOutputs_loc2 = v.loc2;
-  tint_wrapper_result.VertexOutputs_loc3 = v.loc3;
-  tint_wrapper_result.VertexOutputs_position = v.position;
+vertex main_outputs v() {
+  VertexOutputs const v_1 = main_inner();
+  main_outputs tint_wrapper_result = {};
+  tint_wrapper_result.VertexOutputs_loc0 = v_1.loc0;
+  tint_wrapper_result.VertexOutputs_loc1 = v_1.loc1;
+  tint_wrapper_result.VertexOutputs_loc2 = v_1.loc2;
+  tint_wrapper_result.VertexOutputs_loc3 = v_1.loc3;
+  tint_wrapper_result.VertexOutputs_position = v_1.position;
   return tint_wrapper_result;
 }

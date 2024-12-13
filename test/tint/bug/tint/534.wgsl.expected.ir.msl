@@ -40,7 +40,7 @@ uint4 tint_v4f32_to_v4u32(float4 value) {
   return select(uint4(4294967295u), select(uint4(0u), uint4(value), (value >= float4(0.0f))), (value <= float4(4294967040.0f)));
 }
 
-void tint_symbol_inner(uint3 GlobalInvocationID, tint_module_vars_struct tint_module_vars) {
+void main_inner(uint3 GlobalInvocationID, tint_module_vars_struct tint_module_vars) {
   uint2 size = uint2(tint_module_vars.src.get_width(0u), tint_module_vars.src.get_height(0u));
   uint2 dstTexCoord = GlobalInvocationID.xy;
   uint2 srcTexCoord = dstTexCoord;
@@ -94,7 +94,7 @@ void tint_symbol_inner(uint3 GlobalInvocationID, tint_module_vars_struct tint_mo
   }
 }
 
-kernel void tint_symbol(uint3 GlobalInvocationID [[thread_position_in_grid]], texture2d<float, access::sample> src [[texture(0)]], texture2d<float, access::sample> dst [[texture(1)]], device OutputBuf* output [[buffer(1)]], const constant Uniforms* uniforms [[buffer(0)]], const constant tint_array<uint4, 1>* tint_storage_buffer_sizes [[buffer(30)]]) {
+kernel void v_6(uint3 GlobalInvocationID [[thread_position_in_grid]], texture2d<float, access::sample> src [[texture(0)]], texture2d<float, access::sample> dst [[texture(1)]], device OutputBuf* output [[buffer(1)]], const constant Uniforms* uniforms [[buffer(0)]], const constant tint_array<uint4, 1>* tint_storage_buffer_sizes [[buffer(30)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.src=src, .dst=dst, .output=output, .uniforms=uniforms, .tint_storage_buffer_sizes=tint_storage_buffer_sizes};
-  tint_symbol_inner(GlobalInvocationID, tint_module_vars);
+  main_inner(GlobalInvocationID, tint_module_vars);
 }

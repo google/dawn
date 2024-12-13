@@ -10,7 +10,7 @@ void main_1(tint_module_vars_struct tint_module_vars) {
   (*tint_module_vars.I) = 123;
 }
 
-kernel void tint_symbol() {
+kernel void v() {
   thread int I = 0;
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.I=(&I)};
   main_1(tint_module_vars);

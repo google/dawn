@@ -21,7 +21,7 @@ tint_array<int, 4> func(thread tint_array<int, 4>* const pointer) {
   return (*pointer);
 }
 
-kernel void tint_symbol() {
+kernel void v() {
   str F = {};
   tint_array<int, 4> const r = func((&F.arr));
 }

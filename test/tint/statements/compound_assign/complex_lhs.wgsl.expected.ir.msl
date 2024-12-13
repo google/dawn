@@ -31,11 +31,11 @@ int bar(tint_module_vars_struct tint_module_vars) {
   return (*tint_module_vars.counter);
 }
 
-void tint_symbol(tint_module_vars_struct tint_module_vars) {
+void v(tint_module_vars_struct tint_module_vars) {
   S x = S{};
   thread S* const p = (&x);
-  thread int4* const v = (&(*p).a[min(uint(foo(tint_module_vars)), 3u)]);
-  int const v_1 = bar(tint_module_vars);
-  int const v_2 = as_type<int>((as_type<uint>((*v)[min(uint(v_1), 3u)]) + as_type<uint>(5)));
-  (*v)[min(uint(v_1), 3u)] = v_2;
+  thread int4* const v_1 = (&(*p).a[min(uint(foo(tint_module_vars)), 3u)]);
+  int const v_2 = bar(tint_module_vars);
+  int const v_3 = as_type<int>((as_type<uint>((*v_1)[min(uint(v_2), 3u)]) + as_type<uint>(5)));
+  (*v_1)[min(uint(v_2), 3u)] = v_3;
 }

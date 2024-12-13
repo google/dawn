@@ -13,6 +13,6 @@ struct tint_array {
   T elements[N];
 };
 
-fragment void tint_symbol() {
+fragment void v() {
   tint_array<int, 5> a = {};
 }

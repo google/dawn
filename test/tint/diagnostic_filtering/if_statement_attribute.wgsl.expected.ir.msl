@@ -13,11 +13,11 @@
 #include <metal_stdlib>
 using namespace metal;
 
-struct tint_symbol_inputs {
+struct main_inputs {
   float x [[user(locn0)]];
 };
 
-void tint_symbol_inner(float x) {
+void main_inner(float x) {
   if ((x > 0.0f)) {
   } else {
     if ((dfdx(1.0f) > 0.0f)) {
@@ -25,6 +25,6 @@ void tint_symbol_inner(float x) {
   }
 }
 
-fragment void tint_symbol(tint_symbol_inputs inputs [[stage_in]]) {
-  tint_symbol_inner(inputs.x);
+fragment void v(main_inputs inputs [[stage_in]]) {
+  main_inner(inputs.x);
 }

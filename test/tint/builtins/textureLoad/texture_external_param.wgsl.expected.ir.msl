@@ -74,7 +74,7 @@ struct tint_module_vars_struct {
 };
 
 struct vertex_main_outputs {
-  float4 tint_symbol_1 [[position]];
+  float4 tint_symbol [[position]];
 };
 
 float3 tint_GammaCorrection(float3 v, tint_GammaTransferParams params) {
@@ -106,8 +106,8 @@ float4 tint_TextureLoadExternal(texture2d<float, access::sample> plane_0, textur
   return float4(v_9, v_5);
 }
 
-float4 textureLoad2d(texture2d<float, access::sample> tint_symbol_plane0, texture2d<float, access::sample> tint_symbol_plane1, tint_ExternalTextureParams tint_symbol_params, int2 coords) {
-  return tint_TextureLoadExternal(tint_symbol_plane0, tint_symbol_plane1, tint_symbol_params, min(uint2(coords), ((tint_symbol_params.apparentSize + uint2(1u)) - uint2(1u))));
+float4 textureLoad2d(texture2d<float, access::sample> texture_plane0, texture2d<float, access::sample> texture_plane1, tint_ExternalTextureParams texture_params, int2 coords) {
+  return tint_TextureLoadExternal(texture_plane0, texture_plane1, texture_params, min(uint2(coords), ((texture_params.apparentSize + uint2(1u)) - uint2(1u))));
 }
 
 tint_ExternalTextureParams tint_load_struct_packed_vec3(const constant tint_ExternalTextureParams_packed_vec3* const from) {
@@ -135,7 +135,7 @@ float4 vertex_main_inner(tint_module_vars_struct tint_module_vars) {
 vertex vertex_main_outputs vertex_main(texture2d<float, access::sample> arg_0_plane0 [[texture(0)]], texture2d<float, access::sample> arg_0_plane1 [[texture(1)]], const constant tint_ExternalTextureParams_packed_vec3* arg_0_params [[buffer(2)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.arg_0_plane0=arg_0_plane0, .arg_0_plane1=arg_0_plane1, .arg_0_params=arg_0_params};
   vertex_main_outputs tint_wrapper_result = {};
-  tint_wrapper_result.tint_symbol_1 = vertex_main_inner(tint_module_vars);
+  tint_wrapper_result.tint_symbol = vertex_main_inner(tint_module_vars);
   return tint_wrapper_result;
 }
 //
@@ -242,8 +242,8 @@ float4 tint_TextureLoadExternal(texture2d<float, access::sample> plane_0, textur
   return float4(v_9, v_5);
 }
 
-float4 textureLoad2d(texture2d<float, access::sample> tint_symbol_plane0, texture2d<float, access::sample> tint_symbol_plane1, tint_ExternalTextureParams tint_symbol_params, int2 coords) {
-  return tint_TextureLoadExternal(tint_symbol_plane0, tint_symbol_plane1, tint_symbol_params, min(uint2(coords), ((tint_symbol_params.apparentSize + uint2(1u)) - uint2(1u))));
+float4 textureLoad2d(texture2d<float, access::sample> texture_plane0, texture2d<float, access::sample> texture_plane1, tint_ExternalTextureParams texture_params, int2 coords) {
+  return tint_TextureLoadExternal(texture_plane0, texture_plane1, texture_params, min(uint2(coords), ((texture_params.apparentSize + uint2(1u)) - uint2(1u))));
 }
 
 tint_ExternalTextureParams tint_load_struct_packed_vec3(const constant tint_ExternalTextureParams_packed_vec3* const from) {
@@ -371,8 +371,8 @@ float4 tint_TextureLoadExternal(texture2d<float, access::sample> plane_0, textur
   return float4(v_9, v_5);
 }
 
-float4 textureLoad2d(texture2d<float, access::sample> tint_symbol_plane0, texture2d<float, access::sample> tint_symbol_plane1, tint_ExternalTextureParams tint_symbol_params, int2 coords) {
-  return tint_TextureLoadExternal(tint_symbol_plane0, tint_symbol_plane1, tint_symbol_params, min(uint2(coords), ((tint_symbol_params.apparentSize + uint2(1u)) - uint2(1u))));
+float4 textureLoad2d(texture2d<float, access::sample> texture_plane0, texture2d<float, access::sample> texture_plane1, tint_ExternalTextureParams texture_params, int2 coords) {
+  return tint_TextureLoadExternal(texture_plane0, texture_plane1, texture_params, min(uint2(coords), ((texture_params.apparentSize + uint2(1u)) - uint2(1u))));
 }
 
 tint_ExternalTextureParams tint_load_struct_packed_vec3(const constant tint_ExternalTextureParams_packed_vec3* const from) {

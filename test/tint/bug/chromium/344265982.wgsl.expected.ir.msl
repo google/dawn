@@ -14,7 +14,7 @@ struct tint_array {
 };
 
 struct tint_module_vars_struct {
-  device tint_array<int, 4>* tint_symbol;
+  device tint_array<int, 4>* tint_member;
 };
 
 void foo(device tint_array<int, 4>* const arg) {
@@ -52,7 +52,7 @@ void foo(device tint_array<int, 4>* const arg) {
   }
 }
 
-fragment void tint_symbol_1(device tint_array<int, 4>* tint_symbol [[buffer(0)]]) {
-  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.tint_symbol=tint_symbol};
-  foo(tint_module_vars.tint_symbol);
+fragment void v(device tint_array<int, 4>* v_1 [[buffer(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.tint_member=v_1};
+  foo(tint_module_vars.tint_member);
 }

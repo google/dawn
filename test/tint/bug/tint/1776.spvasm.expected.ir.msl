@@ -33,7 +33,7 @@ void main_1(tint_module_vars_struct tint_module_vars) {
   S const x_18 = (*tint_module_vars.sb).inner[min(uint(1), v)];
 }
 
-kernel void tint_symbol(const device sb_block* sb [[buffer(0)]], const constant tint_array<uint4, 1>* tint_storage_buffer_sizes [[buffer(30)]]) {
+kernel void v_1(const device sb_block* sb [[buffer(0)]], const constant tint_array<uint4, 1>* tint_storage_buffer_sizes [[buffer(30)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.sb=sb, .tint_storage_buffer_sizes=tint_storage_buffer_sizes};
   main_1(tint_module_vars);
 }

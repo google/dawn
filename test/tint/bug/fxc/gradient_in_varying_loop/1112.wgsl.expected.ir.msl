@@ -6,15 +6,15 @@ struct tint_module_vars_struct {
   texture2d<float, access::sample> randomTexture;
 };
 
-struct tint_symbol_outputs {
-  float4 tint_symbol_1 [[color(0)]];
+struct main_outputs {
+  float4 tint_symbol [[color(0)]];
 };
 
-struct tint_symbol_inputs {
+struct main_inputs {
   float2 vUV [[user(locn0)]];
 };
 
-float4 tint_symbol_inner(float2 vUV, tint_module_vars_struct tint_module_vars) {
+float4 main_inner(float2 vUV, tint_module_vars_struct tint_module_vars) {
   float3 const random = tint_module_vars.randomTexture.sample(tint_module_vars.Sampler, vUV).xyz;
   int i = 0;
   {
@@ -70,9 +70,9 @@ float4 tint_symbol_inner(float2 vUV, tint_module_vars_struct tint_module_vars) {
   return float4(1.0f);
 }
 
-fragment tint_symbol_outputs tint_symbol(tint_symbol_inputs inputs [[stage_in]], sampler Sampler [[sampler(0)]], texture2d<float, access::sample> randomTexture [[texture(0)]]) {
+fragment main_outputs v_3(main_inputs inputs [[stage_in]], sampler Sampler [[sampler(0)]], texture2d<float, access::sample> randomTexture [[texture(0)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.Sampler=Sampler, .randomTexture=randomTexture};
-  tint_symbol_outputs tint_wrapper_result = {};
-  tint_wrapper_result.tint_symbol_1 = tint_symbol_inner(inputs.vUV, tint_module_vars);
+  main_outputs tint_wrapper_result = {};
+  tint_wrapper_result.tint_symbol = main_inner(inputs.vUV, tint_module_vars);
   return tint_wrapper_result;
 }

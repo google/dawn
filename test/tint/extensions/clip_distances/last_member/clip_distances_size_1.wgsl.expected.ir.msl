@@ -18,19 +18,19 @@ struct VertexOutputs {
   tint_array<float, 1> clipDistance;
 };
 
-struct tint_symbol_outputs {
+struct main_outputs {
   float4 VertexOutputs_position [[position]];
   float VertexOutputs_clipDistance [[clip_distance]] [1];
 };
 
-VertexOutputs tint_symbol_inner() {
+VertexOutputs main_inner() {
   return VertexOutputs{.position=float4(1.0f, 2.0f, 3.0f, 4.0f), .clipDistance=tint_array<float, 1>{}};
 }
 
-vertex tint_symbol_outputs tint_symbol() {
-  VertexOutputs const v = tint_symbol_inner();
-  tint_symbol_outputs tint_wrapper_result = {};
-  tint_wrapper_result.VertexOutputs_position = v.position;
-  tint_wrapper_result.VertexOutputs_clipDistance[0u] = v.clipDistance[0u];
+vertex main_outputs v() {
+  VertexOutputs const v_1 = main_inner();
+  main_outputs tint_wrapper_result = {};
+  tint_wrapper_result.VertexOutputs_position = v_1.position;
+  tint_wrapper_result.VertexOutputs_clipDistance[0u] = v_1.clipDistance[0u];
   return tint_wrapper_result;
 }

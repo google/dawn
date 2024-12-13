@@ -5,5 +5,5 @@
 #include <metal_stdlib>
 using namespace metal;
 
-kernel void tint_symbol() {
+kernel void v() {
 }

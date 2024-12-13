@@ -18,7 +18,7 @@ struct tint_module_vars_struct {
   sampler s;
 };
 
-struct tint_symbol_inputs {
+struct main_inputs {
   float x [[user(locn0)]];
 };
 
@@ -26,7 +26,7 @@ int tint_f32_to_i32(float value) {
   return select(2147483647, select((-2147483647 - 1), int(value), (value >= -2147483648.0f)), (value <= 2147483520.0f));
 }
 
-void tint_symbol_inner(float x, tint_module_vars_struct tint_module_vars) {
+void main_inner(float x, tint_module_vars_struct tint_module_vars) {
   switch(tint_f32_to_i32(x)) {
     default:
     {
@@ -36,7 +36,7 @@ void tint_symbol_inner(float x, tint_module_vars_struct tint_module_vars) {
   }
 }
 
-fragment void tint_symbol(tint_symbol_inputs inputs [[stage_in]], texture2d<float, access::sample> t [[texture(0)]], sampler s [[sampler(0)]]) {
+fragment void v(main_inputs inputs [[stage_in]], texture2d<float, access::sample> t [[texture(0)]], sampler s [[sampler(0)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.t=t, .s=s};
-  tint_symbol_inner(inputs.x, tint_module_vars);
+  main_inner(inputs.x, tint_module_vars);
 }

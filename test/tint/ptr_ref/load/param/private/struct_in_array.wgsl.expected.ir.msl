@@ -25,7 +25,7 @@ str func(thread str* const pointer) {
   return (*pointer);
 }
 
-kernel void tint_symbol() {
+kernel void v() {
   thread tint_array<str, 4> P = {};
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.P=(&P)};
   str const r = func((&(*tint_module_vars.P)[2u]));

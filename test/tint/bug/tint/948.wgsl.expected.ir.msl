@@ -52,11 +52,11 @@ struct main_out {
   float4 glFragColor_1;
 };
 
-struct tint_symbol_outputs {
+struct main_outputs {
   float4 main_out_glFragColor_1 [[color(0)]];
 };
 
-struct tint_symbol_inputs {
+struct main_inputs {
   float2 tUV_param [[user(locn2)]];
   float2 tileID_1_param [[user(locn5)]];
   float2 levelUnits_param [[user(locn4)]];
@@ -262,7 +262,7 @@ void main_1(tint_module_vars_struct tint_module_vars) {
   (*tint_module_vars.glFragColor) = x_318;
 }
 
-main_out tint_symbol_inner(float2 tUV_param, float2 tileID_1_param, float2 levelUnits_param, float2 stageUnits_1_param, float3 vPosition_param, float2 vUV_param, tint_module_vars_struct tint_module_vars) {
+main_out main_inner(float2 tUV_param, float2 tileID_1_param, float2 levelUnits_param, float2 stageUnits_1_param, float3 vPosition_param, float2 vUV_param, tint_module_vars_struct tint_module_vars) {
   (*tint_module_vars.tUV) = tUV_param;
   (*tint_module_vars.tileID_1) = tileID_1_param;
   (*tint_module_vars.levelUnits) = levelUnits_param;
@@ -273,7 +273,7 @@ main_out tint_symbol_inner(float2 tUV_param, float2 tileID_1_param, float2 level
   return main_out{.glFragColor_1=(*tint_module_vars.glFragColor)};
 }
 
-fragment tint_symbol_outputs tint_symbol(tint_symbol_inputs inputs [[stage_in]], const constant LeftOver_packed_vec3* x_20 [[buffer(0)]], texture2d<float, access::sample> frameMapTexture [[texture(3)]], sampler frameMapSampler [[sampler(2)]], texture2d<float, access::sample> tileMapsTexture0 [[texture(1)]], sampler tileMapsSampler [[sampler(0)]], texture2d<float, access::sample> tileMapsTexture1 [[texture(0)]], texture2d<float, access::sample> animationMapTexture [[texture(2)]], sampler animationMapSampler [[sampler(1)]], texture2d<float, access::sample> spriteSheetTexture [[texture(4)]], sampler spriteSheetSampler [[sampler(3)]]) {
+fragment main_outputs v_9(main_inputs inputs [[stage_in]], const constant LeftOver_packed_vec3* x_20 [[buffer(0)]], texture2d<float, access::sample> frameMapTexture [[texture(3)]], sampler frameMapSampler [[sampler(2)]], texture2d<float, access::sample> tileMapsTexture0 [[texture(1)]], sampler tileMapsSampler [[sampler(0)]], texture2d<float, access::sample> tileMapsTexture1 [[texture(0)]], texture2d<float, access::sample> animationMapTexture [[texture(2)]], sampler animationMapSampler [[sampler(1)]], texture2d<float, access::sample> spriteSheetTexture [[texture(4)]], sampler spriteSheetSampler [[sampler(3)]]) {
   thread float2 tUV = 0.0f;
   thread float mt = 0.0f;
   thread float4 glFragColor = 0.0f;
@@ -283,7 +283,7 @@ fragment tint_symbol_outputs tint_symbol(tint_symbol_inputs inputs [[stage_in]],
   thread float3 vPosition = 0.0f;
   thread float2 vUV = 0.0f;
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.x_20=x_20, .frameMapTexture=frameMapTexture, .frameMapSampler=frameMapSampler, .tUV=(&tUV), .tileMapsTexture0=tileMapsTexture0, .tileMapsSampler=tileMapsSampler, .tileMapsTexture1=tileMapsTexture1, .animationMapTexture=animationMapTexture, .animationMapSampler=animationMapSampler, .mt=(&mt), .spriteSheetTexture=spriteSheetTexture, .spriteSheetSampler=spriteSheetSampler, .glFragColor=(&glFragColor), .tileID_1=(&tileID_1), .levelUnits=(&levelUnits), .stageUnits_1=(&stageUnits_1), .vPosition=(&vPosition), .vUV=(&vUV)};
-  tint_symbol_outputs tint_wrapper_result = {};
-  tint_wrapper_result.main_out_glFragColor_1 = tint_symbol_inner(inputs.tUV_param, inputs.tileID_1_param, inputs.levelUnits_param, inputs.stageUnits_1_param, inputs.vPosition_param, inputs.vUV_param, tint_module_vars).glFragColor_1;
+  main_outputs tint_wrapper_result = {};
+  tint_wrapper_result.main_out_glFragColor_1 = main_inner(inputs.tUV_param, inputs.tileID_1_param, inputs.levelUnits_param, inputs.stageUnits_1_param, inputs.vPosition_param, inputs.vUV_param, tint_module_vars).glFragColor_1;
   return tint_wrapper_result;
 }

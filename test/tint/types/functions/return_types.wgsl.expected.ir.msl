@@ -57,7 +57,7 @@ S ret_struct() {
   return S{};
 }
 
-kernel void tint_symbol() {
+kernel void v() {
   bool const a = ret_bool();
   int const b = ret_i32();
   uint const c = ret_u32();

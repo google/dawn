@@ -6,11 +6,11 @@ struct frexp_result_f32 {
   int exp;
 };
 
-kernel void tint_symbol() {
+kernel void v() {
   float const in = 1.25f;
-  frexp_result_f32 v = {};
-  v.fract = frexp(in, v.exp);
-  frexp_result_f32 const res = v;
+  frexp_result_f32 v_1 = {};
+  v_1.fract = frexp(in, v_1.exp);
+  frexp_result_f32 const res = v_1;
   float const fract = res.fract;
   int const exp = res.exp;
 }

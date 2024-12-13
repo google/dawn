@@ -49,26 +49,26 @@ struct tint_module_vars_struct {
   texture2d<float, access::sample> myTexture;
 };
 
-struct tint_symbol_outputs {
+struct main_outputs {
   float4 FragmentOutput_color [[color(0)]];
 };
 
-struct tint_symbol_inputs {
+struct main_inputs {
   float4 FragmentInput_view_position [[user(locn0)]];
   float4 FragmentInput_normal [[user(locn1)]];
   float2 FragmentInput_uv [[user(locn2)]];
   float4 FragmentInput_color [[user(locn3)]];
 };
 
-FragmentOutput tint_symbol_inner(FragmentInput tint_symbol_1, tint_module_vars_struct tint_module_vars) {
+FragmentOutput main_inner(FragmentInput v, tint_module_vars_struct tint_module_vars) {
   FragmentOutput output = {};
   output.color = float4(1.0f, 0.0f, 0.0f, 1.0f);
   return output;
 }
 
-fragment tint_symbol_outputs tint_symbol(float4 FragmentInput_position [[position]], tint_symbol_inputs inputs [[stage_in]], const constant Uniforms* uniforms [[buffer(0)]], sampler mySampler [[sampler(0)]], texture2d<float, access::sample> myTexture [[texture(0)]]) {
+fragment main_outputs v_1(float4 FragmentInput_position [[position]], main_inputs inputs [[stage_in]], const constant Uniforms* uniforms [[buffer(0)]], sampler mySampler [[sampler(0)]], texture2d<float, access::sample> myTexture [[texture(0)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.uniforms=uniforms, .mySampler=mySampler, .myTexture=myTexture};
-  tint_symbol_outputs tint_wrapper_result = {};
-  tint_wrapper_result.FragmentOutput_color = tint_symbol_inner(FragmentInput{.position=FragmentInput_position, .view_position=inputs.FragmentInput_view_position, .normal=inputs.FragmentInput_normal, .uv=inputs.FragmentInput_uv, .color=inputs.FragmentInput_color}, tint_module_vars).color;
+  main_outputs tint_wrapper_result = {};
+  tint_wrapper_result.FragmentOutput_color = main_inner(FragmentInput{.position=FragmentInput_position, .view_position=inputs.FragmentInput_view_position, .normal=inputs.FragmentInput_normal, .uv=inputs.FragmentInput_uv, .color=inputs.FragmentInput_color}, tint_module_vars).color;
   return tint_wrapper_result;
 }

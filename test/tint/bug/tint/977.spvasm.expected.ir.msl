@@ -53,13 +53,13 @@ void main_1(tint_module_vars_struct tint_module_vars) {
   (*tint_module_vars.resultMatrix).numbers[min(uint(x_63), v)] = x_68;
 }
 
-void tint_symbol_1_inner(uint3 gl_GlobalInvocationID_param, tint_module_vars_struct tint_module_vars) {
+void main_inner(uint3 gl_GlobalInvocationID_param, tint_module_vars_struct tint_module_vars) {
   (*tint_module_vars.gl_GlobalInvocationID) = gl_GlobalInvocationID_param;
   main_1(tint_module_vars);
 }
 
-kernel void tint_symbol_1(uint3 gl_GlobalInvocationID_param [[thread_position_in_grid]], device ResultMatrix* resultMatrix [[buffer(0)]], const constant tint_array<uint4, 1>* tint_storage_buffer_sizes [[buffer(30)]]) {
+kernel void v_1(uint3 gl_GlobalInvocationID_param [[thread_position_in_grid]], device ResultMatrix* resultMatrix [[buffer(0)]], const constant tint_array<uint4, 1>* tint_storage_buffer_sizes [[buffer(30)]]) {
   thread uint3 gl_GlobalInvocationID = 0u;
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.gl_GlobalInvocationID=(&gl_GlobalInvocationID), .resultMatrix=resultMatrix, .tint_storage_buffer_sizes=tint_storage_buffer_sizes};
-  tint_symbol_1_inner(gl_GlobalInvocationID_param, tint_module_vars);
+  main_inner(gl_GlobalInvocationID_param, tint_module_vars);
 }

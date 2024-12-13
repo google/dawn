@@ -25,7 +25,7 @@ void no_deref_inc() {
   (*p).x = as_type<int>((as_type<uint>((*p).x) + as_type<uint>(1)));
 }
 
-kernel void tint_symbol() {
+kernel void v() {
   deref();
   no_deref();
   deref_inc();

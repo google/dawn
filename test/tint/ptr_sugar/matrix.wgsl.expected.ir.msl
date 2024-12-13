@@ -15,7 +15,7 @@ void no_deref() {
   (*p)[0u] = float3(1.0f, 2.0f, 3.0f);
 }
 
-kernel void tint_symbol() {
+kernel void v() {
   deref();
   no_deref();
 }

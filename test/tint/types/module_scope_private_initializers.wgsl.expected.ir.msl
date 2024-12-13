@@ -6,7 +6,7 @@ struct tint_module_vars_struct {
   thread float* b;
 };
 
-kernel void tint_symbol() {
+kernel void v() {
   thread float a = 1.0f;
   thread float b = 0.0f;
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.a=(&a), .b=(&b)};

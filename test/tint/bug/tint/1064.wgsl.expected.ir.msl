@@ -1,7 +1,7 @@
 #include <metal_stdlib>
 using namespace metal;
 
-fragment void tint_symbol() {
+fragment void v() {
   {
     uint2 tint_loop_idx = 0u;
     while(true) {

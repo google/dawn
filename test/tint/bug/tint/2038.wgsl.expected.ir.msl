@@ -17,7 +17,7 @@ struct tint_module_vars_struct {
   device tint_array<uint, 2>* output;
 };
 
-kernel void tint_symbol(device tint_array<uint, 2>* output [[buffer(0)]]) {
+kernel void v(device tint_array<uint, 2>* output [[buffer(0)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.output=output};
   if (false) {
     (*tint_module_vars.output)[0u] = 1u;

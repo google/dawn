@@ -5,7 +5,7 @@
 #include <metal_stdlib>
 using namespace metal;
 
-kernel void tint_symbol() {
+kernel void v() {
   {
     uint2 tint_loop_idx = 0u;
     while(true) {

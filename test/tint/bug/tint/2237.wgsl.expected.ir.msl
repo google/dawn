@@ -2,7 +2,7 @@
 using namespace metal;
 
 struct tint_module_vars_struct {
-  device uint* tint_symbol;
+  device uint* tint_member;
 };
 
 template<typename T, size_t N>
@@ -18,11 +18,11 @@ struct tint_array {
 };
 
 uint foo(tint_module_vars_struct tint_module_vars) {
-  return tint_array<uint, 4>{0u, 1u, 2u, 4u}[min((*tint_module_vars.tint_symbol), 3u)];
+  return tint_array<uint, 4>{0u, 1u, 2u, 4u}[min((*tint_module_vars.tint_member), 3u)];
 }
 
-kernel void tint_symbol_1(device uint* tint_symbol [[buffer(0)]]) {
-  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.tint_symbol=tint_symbol};
-  uint const v = tint_array<uint, 4>{0u, 1u, 2u, 4u}[min((*tint_module_vars.tint_symbol), 3u)];
-  (*tint_module_vars.tint_symbol) = (v + foo(tint_module_vars));
+kernel void v_1(device uint* v_2 [[buffer(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.tint_member=v_2};
+  uint const v = tint_array<uint, 4>{0u, 1u, 2u, 4u}[min((*tint_module_vars.tint_member), 3u)];
+  (*tint_module_vars.tint_member) = (v + foo(tint_module_vars));
 }

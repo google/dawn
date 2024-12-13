@@ -24,7 +24,7 @@ struct tint_module_vars_struct {
   thread bool4* v4bool_var5;
 };
 
-kernel void tint_symbol() {
+kernel void v() {
   thread bool bool_var1 = true;
   thread bool bool_var2 = true;
   thread bool bool_var3 = true;

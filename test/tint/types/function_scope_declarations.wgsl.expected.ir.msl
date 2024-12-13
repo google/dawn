@@ -17,7 +17,7 @@ struct S {
   float a;
 };
 
-kernel void tint_symbol() {
+kernel void v() {
   bool bool_var = false;
   bool const bool_let = false;
   int i32_var = 0;

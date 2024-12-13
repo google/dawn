@@ -5,11 +5,11 @@ struct tint_module_vars_struct {
   thread bool* continue_execution;
 };
 
-struct tint_symbol_outputs {
-  int tint_symbol_1 [[color(2)]];
+struct main_outputs {
+  int tint_symbol [[color(2)]];
 };
 
-struct tint_symbol_inputs {
+struct main_inputs {
   int3 x [[user(locn1)]] [[flat]];
 };
 
@@ -20,7 +20,7 @@ int f(int x, tint_module_vars_struct tint_module_vars) {
   return x;
 }
 
-int tint_symbol_inner(int3 x, tint_module_vars_struct tint_module_vars) {
+int main_inner(int3 x, tint_module_vars_struct tint_module_vars) {
   int y = x.x;
   {
     uint2 tint_loop_idx = 0u;
@@ -47,10 +47,10 @@ int tint_symbol_inner(int3 x, tint_module_vars_struct tint_module_vars) {
   return y;
 }
 
-fragment tint_symbol_outputs tint_symbol(tint_symbol_inputs inputs [[stage_in]]) {
+fragment main_outputs v(main_inputs inputs [[stage_in]]) {
   thread bool continue_execution = true;
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.continue_execution=(&continue_execution)};
-  tint_symbol_outputs tint_wrapper_result = {};
-  tint_wrapper_result.tint_symbol_1 = tint_symbol_inner(inputs.x, tint_module_vars);
+  main_outputs tint_wrapper_result = {};
+  tint_wrapper_result.tint_symbol = main_inner(inputs.x, tint_module_vars);
   return tint_wrapper_result;
 }

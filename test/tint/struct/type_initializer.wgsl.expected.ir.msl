@@ -35,15 +35,15 @@ struct T {
   tint_array<int, 2> a;
 };
 
-kernel void tint_symbol() {
+kernel void v() {
   int const x = 42;
   S1 const empty = S1{};
   S1 const nonempty = S1{.a=1, .b=2, .c=3, .d=4};
   S1 const nonempty_with_expr = S1{.a=1, .b=x, .c=as_type<int>((as_type<uint>(x) + as_type<uint>(1))), .d=nonempty.d};
   S3 const nested_empty = S3{};
   S3 const nested_nonempty = S3{.g=1, .h=S1{.a=2, .b=3, .c=4, .d=5}, .i=S2{.e=6, .f=S1{.a=7, .b=8, .c=9, .d=10}}};
-  S1 const v = S1{.a=2, .b=x, .c=as_type<int>((as_type<uint>(x) + as_type<uint>(1))), .d=nested_nonempty.i.f.d};
-  S3 const nested_nonempty_with_expr = S3{.g=1, .h=v, .i=S2{.e=6, .f=nonempty}};
+  S1 const v_1 = S1{.a=2, .b=x, .c=as_type<int>((as_type<uint>(x) + as_type<uint>(1))), .d=nested_nonempty.i.f.d};
+  S3 const nested_nonempty_with_expr = S3{.g=1, .h=v_1, .i=S2{.e=6, .f=nonempty}};
   int const subexpr_empty = 0;
   int const subexpr_nonempty = 2;
   int const subexpr_nonempty_with_expr = S1{.a=1, .b=x, .c=as_type<int>((as_type<uint>(x) + as_type<uint>(1))), .d=nonempty.d}.c;

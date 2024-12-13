@@ -9,7 +9,7 @@ float4 func(thread float4* const pointer) {
   return (*pointer);
 }
 
-kernel void tint_symbol() {
+kernel void v() {
   str F = {};
   float4 const r = func((&F.i));
 }

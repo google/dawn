@@ -30,6 +30,6 @@ struct S {
   S_inner member_struct;
 };
 
-kernel void tint_symbol() {
+kernel void v() {
   S const s = S{};
 }

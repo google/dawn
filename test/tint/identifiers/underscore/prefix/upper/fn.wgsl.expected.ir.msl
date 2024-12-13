@@ -15,7 +15,7 @@ void _B() {
   _A();
 }
 
-kernel void tint_symbol() {
+kernel void v() {
   B();
   _B();
 }

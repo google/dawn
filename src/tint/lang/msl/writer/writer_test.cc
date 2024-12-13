@@ -179,5 +179,57 @@ kernel void foo(device tint_array<uint, 1>* a [[buffer(0)]], const constant tint
     EXPECT_TRUE(output_.needs_storage_buffer_sizes);
 }
 
+TEST_F(MslWriterTest, StripAllNames) {
+    auto* str =
+        ty.Struct(mod.symbols.New("MyStruct"), {
+                                                   {mod.symbols.Register("a"), ty.i32()},
+                                                   {mod.symbols.Register("b"), ty.vec4<i32>()},
+                                               });
+    auto* foo = b.Function("foo", ty.u32());
+    auto* param = b.FunctionParam("param", ty.u32());
+    foo->AppendParam(param);
+    b.Append(foo->Block(), [&] {  //
+        b.Return(foo, param);
+    });
+
+    auto* func = b.ComputeFunction("main");
+    auto* idx = b.FunctionParam("idx", ty.u32());
+    idx->SetBuiltin(core::BuiltinValue::kLocalInvocationIndex);
+    func->AppendParam(idx);
+    b.Append(func->Block(), [&] {  //
+        auto* var = b.Var("str", ty.ptr<function>(str));
+        auto* val = b.Load(var);
+        mod.SetName(val, "val");
+        auto* a = b.Access<i32>(val, 0_u);
+        mod.SetName(a, "a");
+        b.Let("let", b.Call<u32>(foo, idx));
+        b.Return(func);
+    });
+
+    Options options;
+    options.remapped_entry_point_name = "tint_entry_point";
+    options.strip_all_names = true;
+    ASSERT_TRUE(Generate(options)) << err_ << output_.msl;
+    EXPECT_EQ(output_.msl, MetalHeader() + R"(
+struct tint_struct {
+  int tint_member;
+  int4 tint_member_1;
+};
+
+uint v(uint v_1) {
+  return v_1;
+}
+
+void v_2(uint v_3) {
+  tint_struct v_4 = {};
+  uint const v_5 = v(v_3);
+}
+
+kernel void tint_entry_point(uint v_7 [[thread_index_in_threadgroup]]) {
+  v_2(v_7);
+}
+)");
+}
+
 }  // namespace
 }  // namespace tint::msl::writer
