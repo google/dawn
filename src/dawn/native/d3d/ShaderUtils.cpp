@@ -250,13 +250,6 @@ MaybeError TranslateToHLSL(d3d::HlslCompilationRequest r,
                                       &transformOutputs, nullptr));
     }
 
-    // Validate workgroup size after program runs transforms.
-    if (r.stage == SingleShaderStage::Compute) {
-        Extent3D _;
-        DAWN_TRY_ASSIGN(_, ValidateComputeStageWorkgroupSize(transformedProgram,
-                                                             kRemappedEntryPointName, r.limits));
-    }
-
     bool usesVertexIndex = false;
     bool usesInstanceIndex = false;
     if (r.stage == SingleShaderStage::Vertex) {
@@ -277,7 +270,25 @@ MaybeError TranslateToHLSL(d3d::HlslCompilationRequest r,
                         ir.Failure().reason.Str());
 
         result = tint::hlsl::writer::Generate(ir.Get(), r.tintOptions);
+
+        // Workgroup validation has to come after `Generate` because it may require overrides to
+        // have been substituted.
+        if (r.stage == SingleShaderStage::Compute) {
+            // Validate workgroup size and workgroup storage size.
+            Extent3D _;
+            DAWN_TRY_ASSIGN(
+                _, ValidateComputeStageWorkgroupSize(
+                       result->workgroup_info.x, result->workgroup_info.y, result->workgroup_info.z,
+                       result->workgroup_info.storage_size, r.limits));
+        }
     } else {
+        // Validate workgroup size after program runs transforms.
+        if (r.stage == SingleShaderStage::Compute) {
+            Extent3D _;
+            DAWN_TRY_ASSIGN(_, ValidateComputeStageWorkgroupSize(
+                                   transformedProgram, kRemappedEntryPointName, r.limits));
+        }
+
         result = tint::hlsl::writer::Generate(transformedProgram, r.tintOptions);
     }
 
