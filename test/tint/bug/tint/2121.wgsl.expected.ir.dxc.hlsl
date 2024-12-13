@@ -7,21 +7,21 @@ struct main_outputs {
 };
 
 
-void foo(inout VSOut tint_symbol) {
+void foo(inout VSOut v) {
   float4 pos = float4(1.0f, 2.0f, 3.0f, 4.0f);
-  tint_symbol.pos = pos;
+  v.pos = pos;
 }
 
 VSOut main_inner() {
-  VSOut tint_symbol = (VSOut)0;
-  foo(tint_symbol);
-  VSOut v = tint_symbol;
-  return v;
+  VSOut v_1 = (VSOut)0;
+  foo(v_1);
+  VSOut v_2 = v_1;
+  return v_2;
 }
 
 main_outputs main() {
-  VSOut v_1 = main_inner();
-  main_outputs v_2 = {v_1.pos};
-  return v_2;
+  VSOut v_3 = main_inner();
+  main_outputs v_4 = {v_3.pos};
+  return v_4;
 }
 

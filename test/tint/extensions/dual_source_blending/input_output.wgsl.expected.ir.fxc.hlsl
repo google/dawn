@@ -19,18 +19,18 @@ struct frag_main_inputs {
 };
 
 
-FragOutput frag_main_inner(FragInput tint_symbol) {
+FragOutput frag_main_inner(FragInput v) {
   FragOutput output = (FragOutput)0;
-  output.color = tint_symbol.a;
-  output.blend = tint_symbol.b;
-  FragOutput v = output;
-  return v;
+  output.color = v.a;
+  output.blend = v.b;
+  FragOutput v_1 = output;
+  return v_1;
 }
 
 frag_main_outputs frag_main(frag_main_inputs inputs) {
-  FragInput v_1 = {inputs.FragInput_a, inputs.FragInput_b};
-  FragOutput v_2 = frag_main_inner(v_1);
-  frag_main_outputs v_3 = {v_2.color, v_2.blend};
-  return v_3;
+  FragInput v_2 = {inputs.FragInput_a, inputs.FragInput_b};
+  FragOutput v_3 = frag_main_inner(v_2);
+  frag_main_outputs v_4 = {v_3.color, v_3.blend};
+  return v_4;
 }
 

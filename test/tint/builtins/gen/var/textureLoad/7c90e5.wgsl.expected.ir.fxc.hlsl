@@ -98,16 +98,16 @@ uint4 textureLoad_7c90e5() {
 }
 
 VertexOutput vertex_main_inner() {
-  VertexOutput tint_symbol = (VertexOutput)0;
-  tint_symbol.pos = (0.0f).xxxx;
-  tint_symbol.prevent_dce = textureLoad_7c90e5();
-  VertexOutput v_10 = tint_symbol;
-  return v_10;
+  VertexOutput v_10 = (VertexOutput)0;
+  v_10.pos = (0.0f).xxxx;
+  v_10.prevent_dce = textureLoad_7c90e5();
+  VertexOutput v_11 = v_10;
+  return v_11;
 }
 
 vertex_main_outputs vertex_main() {
-  VertexOutput v_11 = vertex_main_inner();
-  vertex_main_outputs v_12 = {v_11.prevent_dce, v_11.pos};
-  return v_12;
+  VertexOutput v_12 = vertex_main_inner();
+  vertex_main_outputs v_13 = {v_12.prevent_dce, v_12.pos};
+  return v_13;
 }
 

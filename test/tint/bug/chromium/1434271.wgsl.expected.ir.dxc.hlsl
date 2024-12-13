@@ -86,23 +86,23 @@ float4x4 v(uint start_byte_offset) {
   return float4x4(asfloat(render_params[(start_byte_offset / 16u)]), asfloat(render_params[((16u + start_byte_offset) / 16u)]), asfloat(render_params[((32u + start_byte_offset) / 16u)]), asfloat(render_params[((48u + start_byte_offset) / 16u)]));
 }
 
-VertexOutput vs_main_inner(VertexInput tint_symbol_1) {
-  float3 quad_pos = mul(tint_symbol_1.quad_pos, float2x3(asfloat(render_params[4u].xyz), asfloat(render_params[5u].xyz)));
-  float3 position = (tint_symbol_1.position - (quad_pos + 0.00999999977648258209f));
-  VertexOutput tint_symbol_2 = (VertexOutput)0;
-  float4x4 v_1 = v(0u);
-  tint_symbol_2.position = mul(float4(position, 1.0f), v_1);
-  tint_symbol_2.color = tint_symbol_1.color;
-  tint_symbol_2.quad_pos = tint_symbol_1.quad_pos;
-  VertexOutput v_2 = tint_symbol_2;
-  return v_2;
+VertexOutput vs_main_inner(VertexInput v_1) {
+  float3 quad_pos = mul(v_1.quad_pos, float2x3(asfloat(render_params[4u].xyz), asfloat(render_params[5u].xyz)));
+  float3 position = (v_1.position - (quad_pos + 0.00999999977648258209f));
+  VertexOutput v_2 = (VertexOutput)0;
+  float4x4 v_3 = v(0u);
+  v_2.position = mul(float4(position, 1.0f), v_3);
+  v_2.color = v_1.color;
+  v_2.quad_pos = v_1.quad_pos;
+  VertexOutput v_4 = v_2;
+  return v_4;
 }
 
 vs_main_outputs vs_main(vs_main_inputs inputs) {
-  VertexInput v_3 = {inputs.VertexInput_position, inputs.VertexInput_color, inputs.VertexInput_quad_pos};
-  VertexOutput v_4 = vs_main_inner(v_3);
-  vs_main_outputs v_5 = {v_4.color, v_4.quad_pos, v_4.position};
-  return v_5;
+  VertexInput v_5 = {inputs.VertexInput_position, inputs.VertexInput_color, inputs.VertexInput_quad_pos};
+  VertexOutput v_6 = vs_main_inner(v_5);
+  vs_main_outputs v_7 = {v_6.color, v_6.quad_pos, v_6.position};
+  return v_7;
 }
 
 //

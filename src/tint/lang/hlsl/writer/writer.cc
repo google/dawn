@@ -39,23 +39,6 @@
 #include "src/tint/utils/ice/ice.h"
 
 namespace tint::hlsl::writer {
-namespace {
-
-ast::PipelineStage ir_to_ast_stage(core::ir::Function::PipelineStage stage) {
-    switch (stage) {
-        case core::ir::Function::PipelineStage::kCompute:
-            return ast::PipelineStage::kCompute;
-        case core::ir::Function::PipelineStage::kFragment:
-            return ast::PipelineStage::kFragment;
-        case core::ir::Function::PipelineStage::kVertex:
-            return ast::PipelineStage::kVertex;
-        default:
-            break;
-    }
-    TINT_UNREACHABLE();
-}
-
-}  // namespace
 
 Result<Output> Generate(core::ir::Module& ir, const Options& options) {
     Output output;
@@ -66,20 +49,7 @@ Result<Output> Generate(core::ir::Module& ir, const Options& options) {
         return res.Failure();
     }
 
-    auto result = Print(ir);
-    if (result != Success) {
-        return result.Failure();
-    }
-
-    // Collect the list of entry points in the generated program.
-    for (auto func : ir.functions) {
-        if (func->Stage() != core::ir::Function::PipelineStage::kUndefined) {
-            auto name = ir.NameOf(func).Name();
-            result->entry_points.push_back({name, ir_to_ast_stage(func->Stage())});
-        }
-    }
-
-    return result;
+    return Print(ir, options);
 }
 
 Result<Output> Generate(const Program& program, const Options& options) {

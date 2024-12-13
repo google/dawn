@@ -1,7 +1,7 @@
 
-RWByteAddressBuffer tint_symbol_2 : register(u0);
+RWByteAddressBuffer v : register(u0);
 [numthreads(1, 1, 1)]
-void tint_symbol_3() {
-  tint_symbol_2.Store(0u, 0u);
+void tint_entry_point() {
+  v.Store(0u, 0u);
 }
 

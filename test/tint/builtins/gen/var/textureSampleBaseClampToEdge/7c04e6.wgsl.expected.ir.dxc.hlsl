@@ -389,16 +389,16 @@ float4 textureSampleBaseClampToEdge_7c04e6() {
 }
 
 VertexOutput vertex_main_inner() {
-  VertexOutput tint_symbol = (VertexOutput)0;
-  tint_symbol.pos = (0.0f).xxxx;
-  tint_symbol.prevent_dce = textureSampleBaseClampToEdge_7c04e6();
-  VertexOutput v_45 = tint_symbol;
-  return v_45;
+  VertexOutput v_45 = (VertexOutput)0;
+  v_45.pos = (0.0f).xxxx;
+  v_45.prevent_dce = textureSampleBaseClampToEdge_7c04e6();
+  VertexOutput v_46 = v_45;
+  return v_46;
 }
 
 vertex_main_outputs vertex_main() {
-  VertexOutput v_46 = vertex_main_inner();
-  vertex_main_outputs v_47 = {v_46.prevent_dce, v_46.pos};
-  return v_47;
+  VertexOutput v_47 = vertex_main_inner();
+  vertex_main_outputs v_48 = {v_47.prevent_dce, v_47.pos};
+  return v_48;
 }
 

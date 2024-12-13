@@ -104,6 +104,7 @@ if (tint_build_unittests) {
         "switch_test.cc",
         "unary_test.cc",
         "var_let_test.cc",
+        "writer_test.cc",
       ]
       deps = [
         "${dawn_root}/src/utils:utils",

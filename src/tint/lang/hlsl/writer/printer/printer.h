@@ -30,6 +30,7 @@
 
 #include <string>
 
+#include "src/tint/lang/hlsl/writer/common/options.h"
 #include "src/tint/lang/hlsl/writer/common/output.h"
 #include "src/tint/utils/result/result.h"
 
@@ -41,8 +42,9 @@ class Module;
 namespace tint::hlsl::writer {
 
 /// @param module the Tint IR module to generate
+/// @param options the printer options
 /// @returns the result of printing the HLSL shader on success, or failure
-Result<Output> Print(core::ir::Module& module);
+Result<Output> Print(core::ir::Module& module, const Options& options);
 
 }  // namespace tint::hlsl::writer
 

@@ -1,7 +1,7 @@
 
 [numthreads(1, 1, 1)]
 void main() {
-  uint tint_symbol = 0u;
+  uint v = 0u;
   {
     uint2 tint_loop_idx = (0u).xx;
     while(true) {
@@ -30,7 +30,7 @@ void main() {
         }
         continue;
       }
-      tint_symbol = (tint_symbol + 1u);
+      v = (v + 1u);
       {
         uint tint_low_inc = (tint_loop_idx.x + 1u);
         tint_loop_idx.x = tint_low_inc;

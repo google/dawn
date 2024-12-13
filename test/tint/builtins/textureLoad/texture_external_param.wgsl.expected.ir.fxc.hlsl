@@ -30,7 +30,7 @@ struct tint_ExternalTextureParams {
 };
 
 struct vertex_main_outputs {
-  float4 tint_symbol_1 : SV_Position;
+  float4 tint_symbol : SV_Position;
 };
 
 
@@ -92,8 +92,8 @@ float4 tint_TextureLoadExternal(Texture2D<float4> plane_0, Texture2D<float4> pla
   return float4(v_21, v_7);
 }
 
-float4 textureLoad2d(Texture2D<float4> tint_symbol_plane0, Texture2D<float4> tint_symbol_plane1, tint_ExternalTextureParams tint_symbol_params, int2 coords) {
-  return tint_TextureLoadExternal(tint_symbol_plane0, tint_symbol_plane1, tint_symbol_params, uint2(coords));
+float4 textureLoad2d(Texture2D<float4> texture_plane0, Texture2D<float4> texture_plane1, tint_ExternalTextureParams texture_params, int2 coords) {
+  return tint_TextureLoadExternal(texture_plane0, texture_plane1, texture_params, uint2(coords));
 }
 
 float3x2 v_24(uint start_byte_offset) {
@@ -247,8 +247,8 @@ float4 tint_TextureLoadExternal(Texture2D<float4> plane_0, Texture2D<float4> pla
   return float4(v_21, v_7);
 }
 
-float4 textureLoad2d(Texture2D<float4> tint_symbol_plane0, Texture2D<float4> tint_symbol_plane1, tint_ExternalTextureParams tint_symbol_params, int2 coords) {
-  return tint_TextureLoadExternal(tint_symbol_plane0, tint_symbol_plane1, tint_symbol_params, uint2(coords));
+float4 textureLoad2d(Texture2D<float4> texture_plane0, Texture2D<float4> texture_plane1, tint_ExternalTextureParams texture_params, int2 coords) {
+  return tint_TextureLoadExternal(texture_plane0, texture_plane1, texture_params, uint2(coords));
 }
 
 float3x2 v_24(uint start_byte_offset) {
@@ -396,8 +396,8 @@ float4 tint_TextureLoadExternal(Texture2D<float4> plane_0, Texture2D<float4> pla
   return float4(v_21, v_7);
 }
 
-float4 textureLoad2d(Texture2D<float4> tint_symbol_plane0, Texture2D<float4> tint_symbol_plane1, tint_ExternalTextureParams tint_symbol_params, int2 coords) {
-  return tint_TextureLoadExternal(tint_symbol_plane0, tint_symbol_plane1, tint_symbol_params, uint2(coords));
+float4 textureLoad2d(Texture2D<float4> texture_plane0, Texture2D<float4> texture_plane1, tint_ExternalTextureParams texture_params, int2 coords) {
+  return tint_TextureLoadExternal(texture_plane0, texture_plane1, texture_params, uint2(coords));
 }
 
 float3x2 v_24(uint start_byte_offset) {

@@ -13,118 +13,118 @@ cbuffer cbuffer_src_uniform : register(b0) {
   uint4 src_uniform[4];
 };
 RWByteAddressBuffer src_storage : register(u1);
-groupshared int4 tint_symbol[4];
+groupshared int4 v[4];
 groupshared int dst_nested[4][3][2];
 typedef int4 ary_ret[4];
 ary_ret ret_arr() {
-  int4 v[4] = (int4[4])0;
-  return v;
-}
-
-S ret_struct_arr() {
-  S v_1 = (S)0;
+  int4 v_1[4] = (int4[4])0;
   return v_1;
 }
 
+S ret_struct_arr() {
+  S v_2 = (S)0;
+  return v_2;
+}
+
 typedef int4 ary_ret_1[4];
-ary_ret_1 v_2(uint offset) {
+ary_ret_1 v_3(uint offset) {
   int4 a[4] = (int4[4])0;
   {
-    uint v_3 = 0u;
-    v_3 = 0u;
+    uint v_4 = 0u;
+    v_4 = 0u;
     while(true) {
-      uint v_4 = v_3;
-      if ((v_4 >= 4u)) {
+      uint v_5 = v_4;
+      if ((v_5 >= 4u)) {
         break;
       }
-      a[v_4] = asint(src_storage.Load4((offset + (v_4 * 16u))));
+      a[v_5] = asint(src_storage.Load4((offset + (v_5 * 16u))));
       {
-        v_3 = (v_4 + 1u);
+        v_4 = (v_5 + 1u);
       }
       continue;
     }
   }
-  int4 v_5[4] = a;
-  return v_5;
+  int4 v_6[4] = a;
+  return v_6;
 }
 
 typedef int4 ary_ret_2[4];
-ary_ret_2 v_6(uint start_byte_offset) {
+ary_ret_2 v_7(uint start_byte_offset) {
   int4 a[4] = (int4[4])0;
   {
-    uint v_7 = 0u;
-    v_7 = 0u;
+    uint v_8 = 0u;
+    v_8 = 0u;
     while(true) {
-      uint v_8 = v_7;
-      if ((v_8 >= 4u)) {
+      uint v_9 = v_8;
+      if ((v_9 >= 4u)) {
         break;
       }
-      a[v_8] = asint(src_uniform[((start_byte_offset + (v_8 * 16u)) / 16u)]);
+      a[v_9] = asint(src_uniform[((start_byte_offset + (v_9 * 16u)) / 16u)]);
       {
-        v_7 = (v_8 + 1u);
+        v_8 = (v_9 + 1u);
       }
       continue;
     }
   }
-  int4 v_9[4] = a;
-  return v_9;
+  int4 v_10[4] = a;
+  return v_10;
 }
 
 void foo(int4 src_param[4]) {
   int4 src_function[4] = (int4[4])0;
-  int4 v_10[4] = {(int(1)).xxxx, (int(2)).xxxx, (int(3)).xxxx, (int(3)).xxxx};
-  tint_symbol = v_10;
-  tint_symbol = src_param;
-  int4 v_11[4] = ret_arr();
-  tint_symbol = v_11;
+  int4 v_11[4] = {(int(1)).xxxx, (int(2)).xxxx, (int(3)).xxxx, (int(3)).xxxx};
+  v = v_11;
+  v = src_param;
+  int4 v_12[4] = ret_arr();
+  v = v_12;
   int4 src_let[4] = (int4[4])0;
-  tint_symbol = src_let;
-  int4 v_12[4] = src_function;
-  tint_symbol = v_12;
-  int4 v_13[4] = src_private;
-  tint_symbol = v_13;
-  int4 v_14[4] = src_workgroup;
-  tint_symbol = v_14;
-  S v_15 = ret_struct_arr();
-  int4 v_16[4] = v_15.arr;
-  tint_symbol = v_16;
-  int4 v_17[4] = v_6(0u);
-  tint_symbol = v_17;
-  int4 v_18[4] = v_2(0u);
-  tint_symbol = v_18;
+  v = src_let;
+  int4 v_13[4] = src_function;
+  v = v_13;
+  int4 v_14[4] = src_private;
+  v = v_14;
+  int4 v_15[4] = src_workgroup;
+  v = v_15;
+  S v_16 = ret_struct_arr();
+  int4 v_17[4] = v_16.arr;
+  v = v_17;
+  int4 v_18[4] = v_7(0u);
+  v = v_18;
+  int4 v_19[4] = v_3(0u);
+  v = v_19;
   int src_nested[4][3][2] = (int[4][3][2])0;
-  int v_19[4][3][2] = src_nested;
-  dst_nested = v_19;
+  int v_20[4][3][2] = src_nested;
+  dst_nested = v_20;
 }
 
 void main_inner(uint tint_local_index) {
   {
-    uint v_20 = 0u;
-    v_20 = tint_local_index;
+    uint v_21 = 0u;
+    v_21 = tint_local_index;
     while(true) {
-      uint v_21 = v_20;
-      if ((v_21 >= 4u)) {
+      uint v_22 = v_21;
+      if ((v_22 >= 4u)) {
         break;
       }
-      src_workgroup[v_21] = (int(0)).xxxx;
-      tint_symbol[v_21] = (int(0)).xxxx;
+      src_workgroup[v_22] = (int(0)).xxxx;
+      v[v_22] = (int(0)).xxxx;
       {
-        v_20 = (v_21 + 1u);
+        v_21 = (v_22 + 1u);
       }
       continue;
     }
   }
   {
-    uint v_22 = 0u;
-    v_22 = tint_local_index;
+    uint v_23 = 0u;
+    v_23 = tint_local_index;
     while(true) {
-      uint v_23 = v_22;
-      if ((v_23 >= 24u)) {
+      uint v_24 = v_23;
+      if ((v_24 >= 24u)) {
         break;
       }
-      dst_nested[(v_23 / 6u)][((v_23 / 2u) % 3u)][(v_23 % 2u)] = int(0);
+      dst_nested[(v_24 / 6u)][((v_24 / 2u) % 3u)][(v_24 % 2u)] = int(0);
       {
-        v_22 = (v_23 + 1u);
+        v_23 = (v_24 + 1u);
       }
       continue;
     }

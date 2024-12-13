@@ -100,6 +100,7 @@ cc_library(
     "switch_test.cc",
     "unary_test.cc",
     "var_let_test.cc",
+    "writer_test.cc",
   ],
   deps = [
     "//src/tint/api/common",

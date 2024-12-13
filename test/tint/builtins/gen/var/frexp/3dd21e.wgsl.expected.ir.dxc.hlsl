@@ -70,16 +70,16 @@ void frexp_3dd21e() {
 }
 
 VertexOutput vertex_main_inner() {
-  VertexOutput tint_symbol = (VertexOutput)0;
-  tint_symbol.pos = (0.0f).xxxx;
+  VertexOutput v_4 = (VertexOutput)0;
+  v_4.pos = (0.0f).xxxx;
   frexp_3dd21e();
-  VertexOutput v_4 = tint_symbol;
-  return v_4;
+  VertexOutput v_5 = v_4;
+  return v_5;
 }
 
 vertex_main_outputs vertex_main() {
-  VertexOutput v_5 = vertex_main_inner();
-  vertex_main_outputs v_6 = {v_5.pos};
-  return v_6;
+  VertexOutput v_6 = vertex_main_inner();
+  vertex_main_outputs v_7 = {v_6.pos};
+  return v_7;
 }
 

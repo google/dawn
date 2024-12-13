@@ -15,18 +15,18 @@ struct main_inputs {
 };
 
 
-FragIn main_inner(FragIn tint_symbol, float b) {
-  if ((tint_symbol.mask == 0u)) {
-    return tint_symbol;
+FragIn main_inner(FragIn v, float b) {
+  if ((v.mask == 0u)) {
+    return v;
   }
-  FragIn v = {b, 1u};
-  return v;
+  FragIn v_1 = {b, 1u};
+  return v_1;
 }
 
 main_outputs main(main_inputs inputs) {
-  FragIn v_1 = {inputs.FragIn_a, inputs.FragIn_mask};
-  FragIn v_2 = main_inner(v_1, inputs.b);
-  main_outputs v_3 = {v_2.a, v_2.mask};
-  return v_3;
+  FragIn v_2 = {inputs.FragIn_a, inputs.FragIn_mask};
+  FragIn v_3 = main_inner(v_2, inputs.b);
+  main_outputs v_4 = {v_3.a, v_3.mask};
+  return v_4;
 }
 

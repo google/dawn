@@ -1,25 +1,25 @@
-struct tint_symbol {
-  int tint_symbol_1;
+struct tint_struct {
+  int tint_member;
 };
 
-struct tint_symbol_4_outputs {
-  float4 tint_symbol_2 : SV_Position;
+struct tint_struct_1 {
+  float4 tint_member_1 : SV_Position;
 };
 
-struct tint_symbol_4_inputs {
-  uint tint_symbol_5 : SV_VertexID;
+struct tint_struct_2 {
+  uint tint_member_2 : SV_VertexID;
 };
 
 
-float4 tint_symbol_4_inner(uint tint_symbol_5) {
-  tint_symbol tint_symbol_6 = {int(1)};
-  float tint_symbol_7 = float(tint_symbol_6.tint_symbol_1);
-  bool tint_symbol_8 = bool(tint_symbol_7);
-  return ((tint_symbol_8) ? ((1.0f).xxxx) : ((0.0f).xxxx));
+float4 v(uint v_1) {
+  tint_struct v_2 = {int(1)};
+  float v_3 = float(v_2.tint_member);
+  bool v_4 = bool(v_3);
+  return ((v_4) ? ((1.0f).xxxx) : ((0.0f).xxxx));
 }
 
-tint_symbol_4_outputs tint_symbol_4(tint_symbol_4_inputs inputs) {
-  tint_symbol_4_outputs v = {tint_symbol_4_inner(inputs.tint_symbol_5)};
-  return v;
+tint_struct_1 tint_entry_point(tint_struct_2 v_6) {
+  tint_struct_1 v_7 = {v(v_6.tint_member_2)};
+  return v_7;
 }
 

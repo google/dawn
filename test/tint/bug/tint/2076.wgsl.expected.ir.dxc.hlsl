@@ -1,5 +1,5 @@
 
-SamplerState tint_symbol : register(s1);
+SamplerState v : register(s1);
 Texture2D<float4> randomTexture_plane0 : register(t1);
 Texture2D<float4> randomTexture_plane1 : register(t3);
 cbuffer cbuffer_randomTexture_params : register(b4) {

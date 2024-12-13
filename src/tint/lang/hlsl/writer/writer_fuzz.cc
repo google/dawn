@@ -59,6 +59,7 @@ bool CanRun(const core::ir::Module& module) {
 
 // Fuzzed options used to init tint::hlsl::writer::Options
 struct FuzzedOptions {
+    bool strip_all_names;
     bool disable_robustness;
     bool disable_workgroup_init;
     bool polyfill_reflect_vec2_f32;
@@ -69,6 +70,7 @@ struct FuzzedOptions {
 
     /// Reflect the fields of this class so that it can be used by tint::ForeachField()
     TINT_REFLECT(FuzzedOptions,
+                 strip_all_names,
                  disable_robustness,
                  disable_workgroup_init,
                  polyfill_reflect_vec2_f32,
@@ -86,6 +88,7 @@ Result<SuccessType> IRFuzzer(core::ir::Module& module,
     }
 
     Options options;
+    options.strip_all_names = fuzzed_options.strip_all_names;
     options.disable_robustness = fuzzed_options.disable_robustness;
     options.disable_workgroup_init = fuzzed_options.disable_workgroup_init;
     options.polyfill_reflect_vec2_f32 = fuzzed_options.polyfill_reflect_vec2_f32;

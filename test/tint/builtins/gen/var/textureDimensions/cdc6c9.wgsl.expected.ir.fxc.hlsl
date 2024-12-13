@@ -287,16 +287,16 @@ uint2 textureDimensions_cdc6c9() {
 }
 
 VertexOutput vertex_main_inner() {
-  VertexOutput tint_symbol = (VertexOutput)0;
-  tint_symbol.pos = (0.0f).xxxx;
-  tint_symbol.prevent_dce = textureDimensions_cdc6c9();
-  VertexOutput v_32 = tint_symbol;
-  return v_32;
+  VertexOutput v_32 = (VertexOutput)0;
+  v_32.pos = (0.0f).xxxx;
+  v_32.prevent_dce = textureDimensions_cdc6c9();
+  VertexOutput v_33 = v_32;
+  return v_33;
 }
 
 vertex_main_outputs vertex_main() {
-  VertexOutput v_33 = vertex_main_inner();
-  vertex_main_outputs v_34 = {v_33.prevent_dce, v_33.pos};
-  return v_34;
+  VertexOutput v_34 = vertex_main_inner();
+  vertex_main_outputs v_35 = {v_34.prevent_dce, v_34.pos};
+  return v_35;
 }
 

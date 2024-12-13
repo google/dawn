@@ -218,14 +218,19 @@ MaybeError TranslateToHLSL(d3d::HlslCompilationRequest r,
     transformManager.Add<tint::ast::transform::SingleEntryPoint>();
     transformInputs.Add<tint::ast::transform::SingleEntryPoint::Config>(r.entryPointName.data());
 
-    // Needs to run before all other transforms so that they can use builtin names safely.
-    tint::ast::transform::Renamer::Remappings requestedNames = {
-        {std::string(r.entryPointName), kRemappedEntryPointName}};
-    transformManager.Add<tint::ast::transform::Renamer>();
-    transformInputs.Add<tint::ast::transform::Renamer::Config>(
-        r.disableSymbolRenaming ? tint::ast::transform::Renamer::Target::kHlslKeywords
-                                : tint::ast::transform::Renamer::Target::kAll,
-        std::move(requestedNames));
+    if (r.useTintIR) {
+        r.tintOptions.strip_all_names = !r.disableSymbolRenaming;
+        r.tintOptions.remapped_entry_point_name = kRemappedEntryPointName;
+    } else {
+        // Needs to run before all other transforms so that they can use builtin names safely.
+        tint::ast::transform::Renamer::Remappings requestedNames = {
+            {std::string(r.entryPointName), kRemappedEntryPointName}};
+        transformManager.Add<tint::ast::transform::Renamer>();
+        transformInputs.Add<tint::ast::transform::Renamer::Config>(
+            r.disableSymbolRenaming ? tint::ast::transform::Renamer::Target::kHlslKeywords
+                                    : tint::ast::transform::Renamer::Target::kAll,
+            std::move(requestedNames));
+    }
 
     if (r.stage == SingleShaderStage::Vertex) {
         transformManager.Add<tint::ast::transform::FirstIndexOffset>();

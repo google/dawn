@@ -25,11 +25,11 @@ struct main_inputs {
 };
 
 
-void main_inner(In tint_symbol) {
+void main_inner(In v) {
 }
 
 void main(main_inputs inputs) {
-  In v = {inputs.In_none, inputs.In_flat, inputs.In_perspective_center, inputs.In_perspective_centroid, inputs.In_perspective_sample, inputs.In_linear_center, inputs.In_linear_centroid, inputs.In_linear_sample, inputs.In_perspective_default, inputs.In_linear_default};
-  main_inner(v);
+  In v_1 = {inputs.In_none, inputs.In_flat, inputs.In_perspective_center, inputs.In_perspective_centroid, inputs.In_perspective_sample, inputs.In_linear_center, inputs.In_linear_centroid, inputs.In_linear_sample, inputs.In_perspective_default, inputs.In_linear_default};
+  main_inner(v_1);
 }
 
