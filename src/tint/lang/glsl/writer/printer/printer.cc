@@ -107,6 +107,15 @@ enum class LayoutFormat : uint8_t {
     kStd430,
 };
 
+/// Retrieve the gl_ string corresponding to a builtin.
+/// @param builtin the builtin
+/// @param address_space the address space (input or output)
+/// @returns the gl_ string corresponding to that builtin
+const char* GLSLBuiltinToString(core::BuiltinValue builtin, core::AddressSpace address_space);
+
+/// @returns true if @p ident is a GLSL keyword that needs to be avoided
+bool IsKeyword(std::string_view ident);
+
 /// PIMPL class for the MSL generator
 class Printer : public tint::TextGenerator {
   public:
@@ -190,7 +199,7 @@ class Printer : public tint::TextGenerator {
     Hashset<std::string, 4> emitted_extensions_;
 
     /// A hashmap of value to name
-    Hashmap<const core::ir::Value*, std::string, 32> names_;
+    Hashmap<const CastableBase*, std::string, 32> names_;
 
     /// Map of builtin structure to unique generated name
     Hashmap<const core::type::Struct*, std::string, 4> builtin_struct_names_;
@@ -210,12 +219,32 @@ class Printer : public tint::TextGenerator {
     /// Block to emit for a continuing
     std::function<void()> emit_continuing_;
 
+    /// @returns `true` if @p ident should be renamed
+    bool ShouldRename(std::string_view ident) {
+        return options_.strip_all_names || IsKeyword(ident) || !tint::utf8::IsASCII(ident);
+    }
+
     /// @returns the name of the given value, creating a new unique name if the value is unnamed in
     /// the module.
     std::string NameOf(const core::ir::Value* value) {
         return names_.GetOrAdd(value, [&] {
             auto sym = ir_.NameOf(value);
-            return sym.IsValid() ? sym.Name() : UniqueIdentifier("v");
+            if (!sym || ShouldRename(sym.NameView())) {
+                return UniqueIdentifier("v");
+            }
+            return sym.Name();
+        });
+    }
+
+    /// @param m the struct member
+    /// @returns the name to use for the struct member
+    std::string NameOf(const core::type::StructMember* m) {
+        return names_.GetOrAdd(m, [&] {
+            auto name = m->Name().Name();
+            if (ShouldRename(name)) {
+                return "member_" + std::to_string(m->Index());
+            }
+            return name;
         });
     }
 
@@ -231,12 +260,17 @@ class Printer : public tint::TextGenerator {
     /// with double underscores. If the structure is a builtin, then the returned name will be a
     /// unique name without the leading underscores.
     std::string StructName(const core::type::Struct* s) {
-        auto name = s->Name().Name();
-        if (HasPrefix(name, "__")) {
-            name =
-                builtin_struct_names_.GetOrAdd(s, [&] { return UniqueIdentifier(name.substr(2)); });
-        }
-        return name;
+        return names_.GetOrAdd(s, [&] {
+            auto name = s->Name().Name();
+            if (HasPrefix(name, "__")) {
+                name = builtin_struct_names_.GetOrAdd(
+                    s, [&] { return UniqueIdentifier(name.substr(2)); });
+            }
+            if (ShouldRename(name)) {
+                return UniqueIdentifier("tint_struct");
+            }
+            return name;
+        });
     }
 
     /// Find all structures that are used in host-shareable address spaces and mark them as such so
@@ -317,10 +351,10 @@ class Printer : public tint::TextGenerator {
             // Switch the entry point name to `main`. This makes the assumption that single entry
             // point is always run for GLSL, which is has to be, there can be only one entry point.
             // So, we swap the entry point name to `main` which is required for GLSL.
-            if (func->Stage() != core::ir::Function::PipelineStage::kUndefined) {
+            if (func->IsEntryPoint()) {
                 out << "main";
             } else {
-                out << ir_.NameOf(func).Name();
+                out << NameOf(func);
             }
 
             out << "(";
@@ -570,7 +604,7 @@ class Printer : public tint::TextGenerator {
                 [&](const core::type::Struct* s) {
                     auto* c = index->As<core::ir::Constant>();
                     auto* member = s->Members()[c->Value()->ValueAs<uint32_t>()];
-                    out << "." << member->Name().Name();
+                    out << "." << NameOf(member);
                     current_type = member->Type();
                 },
                 [&](const core::type::Vector*) {  //
@@ -724,7 +758,7 @@ class Printer : public tint::TextGenerator {
                 }
             }
 
-            EmitTypeAndName(out, mem->Type(), mem->Name().Name());
+            EmitTypeAndName(out, mem->Type(), NameOf(mem));
             out << ";";
 
             new_struct_to_old.Push(mem->Index());
@@ -1056,9 +1090,23 @@ class Printer : public tint::TextGenerator {
     }
 
     void EmitPushConstantVar(core::ir::Var* var) {
+        // We need to use the same name for the push constant structure and variable between
+        // different pipeline stages.
+        constexpr const char* kPushConstantStructName = "tint_push_constant_struct";
+        constexpr const char* kPushConstantVarName = "tint_push_constants";
+
         auto out = Line();
         EmitLayoutLocation(out, {0}, std::nullopt);
-        EmitVar(out, var);
+
+        auto* ptr = var->Result(0)->Type()->As<core::type::Pointer>();
+        auto* str = ptr->StoreType()->As<core::type::Struct>();
+        TINT_ASSERT(str);
+        names_.Add(str, kPushConstantStructName);
+        EmitStructType(str);
+
+        names_.Add(var->Result(0), kPushConstantVarName);
+        EmitTypeAndName(out, var->Result(0)->Type(), kPushConstantVarName);
+        out << ";";
     }
 
     void EmitIOVar(core::ir::Var* var) {
@@ -1072,7 +1120,9 @@ class Printer : public tint::TextGenerator {
                 EmitExtension(kOESSampleVariables);
             }
 
-            // Do not emit builtin (gl_) variables.
+            // Do not emit builtin (gl_) variables, but register the GLSL builtin names so that they
+            // are correct at the point of use.
+            names_.Add(var->Result(0), GLSLBuiltinToString(*attrs.builtin, addrspace));
             return;
         } else if (attrs.location) {
             // Use a fixed naming scheme for interstage variables so that they match between vertex
@@ -1797,6 +1847,419 @@ class Printer : public tint::TextGenerator {
         }
     }
 };
+
+const char* GLSLBuiltinToString(core::BuiltinValue builtin, core::AddressSpace address_space) {
+    switch (builtin) {
+        case core::BuiltinValue::kPosition: {
+            if (address_space == core::AddressSpace::kOut) {
+                return "gl_Position";
+            }
+            if (address_space == core::AddressSpace::kIn) {
+                return "gl_FragCoord";
+            }
+            TINT_UNREACHABLE();
+        }
+        case core::BuiltinValue::kVertexIndex:
+            return "gl_VertexID";
+        case core::BuiltinValue::kInstanceIndex:
+            return "gl_InstanceID";
+        case core::BuiltinValue::kFrontFacing:
+            return "gl_FrontFacing";
+        case core::BuiltinValue::kFragDepth:
+            return "gl_FragDepth";
+        case core::BuiltinValue::kLocalInvocationId:
+            return "gl_LocalInvocationID";
+        case core::BuiltinValue::kLocalInvocationIndex:
+            return "gl_LocalInvocationIndex";
+        case core::BuiltinValue::kGlobalInvocationId:
+            return "gl_GlobalInvocationID";
+        case core::BuiltinValue::kNumWorkgroups:
+            return "gl_NumWorkGroups";
+        case core::BuiltinValue::kWorkgroupId:
+            return "gl_WorkGroupID";
+        case core::BuiltinValue::kSampleIndex:
+            return "gl_SampleID";
+        case core::BuiltinValue::kSampleMask: {
+            if (address_space == core::AddressSpace::kIn) {
+                return "gl_SampleMaskIn";
+            } else {
+                return "gl_SampleMask";
+            }
+            TINT_UNREACHABLE();
+        }
+        case core::BuiltinValue::kPointSize:
+            return "gl_PointSize";
+        default:
+            TINT_UNREACHABLE();
+    }
+}
+
+// This list is used for a binary search and must be kept in sorted order.
+const char* const kReservedKeywordsGLSL[] = {
+    "abs",
+    "acos",
+    "acosh",
+    "active",
+    "all",
+    "any",
+    "asin",
+    "asinh",
+    "asm",
+    "atan",
+    "atanh",
+    "atomicAdd",
+    "atomicAnd",
+    "atomicCompSwap",
+    "atomicCounter",
+    "atomicCounterDecrement",
+    "atomicCounterIncrement",
+    "atomicExchange",
+    "atomicMax",
+    "atomicMin",
+    "atomicOr",
+    "atomicXor",
+    "atomic_uint",
+    "attribute",
+    "barrier",
+    "bitCount",
+    "bitfieldExtract",
+    "bitfieldInsert",
+    "bitfieldReverse",
+    "bool",
+    "break",
+    "buffer",
+    "bvec2",
+    "bvec3",
+    "bvec4",
+    "case",
+    "cast",
+    "ceil",
+    "centroid",
+    "clamp",
+    "class",
+    "coherent",
+    "common",
+    "const",
+    "continue",
+    "cos",
+    "cosh",
+    "cross",
+    "dFdx",
+    "dFdy",
+    "default",
+    "degrees",
+    "determinant",
+    "discard",
+    "distance",
+    "dmat2",
+    "dmat2x2",
+    "dmat2x3",
+    "dmat2x4",
+    "dmat3",
+    "dmat3x2",
+    "dmat3x3",
+    "dmat3x4",
+    "dmat4",
+    "dmat4x2",
+    "dmat4x3",
+    "dmat4x4",
+    "do",
+    "dot",
+    "double",
+    "dvec2",
+    "dvec3",
+    "dvec4",
+    "else",
+    "enum",
+    "equal",
+    "exp",
+    "exp2",
+    "extern",
+    "external",
+    "faceforward",
+    "false",
+    "filter",
+    "findLSB",
+    "findMSB",
+    "fixed",
+    "flat",
+    "float",
+    "floatBitsToInt",
+    "floatBitsToUint",
+    "floor",
+    "for",
+    "fract",
+    "frexp",
+    "fvec2",
+    "fvec3",
+    "fvec4",
+    "fwidth",
+    "gl_BaseInstance",
+    "gl_BaseVertex",
+    "gl_ClipDistance",
+    "gl_DepthRangeParameters",
+    "gl_DrawID",
+    "gl_FragCoord",
+    "gl_FragDepth",
+    "gl_FrontFacing",
+    "gl_GlobalInvocationID",
+    "gl_InstanceID",
+    "gl_LocalInvocationID",
+    "gl_LocalInvocationIndex",
+    "gl_NumSamples",
+    "gl_NumWorkGroups",
+    "gl_PerVertex",
+    "gl_PointCoord",
+    "gl_PointSize",
+    "gl_Position",
+    "gl_PrimitiveID",
+    "gl_SampleID",
+    "gl_SampleMask",
+    "gl_SampleMaskIn",
+    "gl_SamplePosition",
+    "gl_VertexID",
+    "gl_WorkGroupID",
+    "gl_WorkGroupSize",
+    "goto",
+    "greaterThan",
+    "greaterThanEqual",
+    "groupMemoryBarrier",
+    "half",
+    "highp",
+    "hvec2",
+    "hvec3",
+    "hvec4",
+    "if",
+    "iimage1D",
+    "iimage1DArray",
+    "iimage2D",
+    "iimage2DArray",
+    "iimage2DMS",
+    "iimage2DMSArray",
+    "iimage2DRect",
+    "iimage3D",
+    "iimageBuffer",
+    "iimageCube",
+    "iimageCubeArray",
+    "image1D",
+    "image1DArray",
+    "image2D",
+    "image2DArray",
+    "image2DMS",
+    "image2DMSArray",
+    "image2DRect",
+    "image3D",
+    "imageBuffer",
+    "imageCube",
+    "imageCubeArray",
+    "imageLoad",
+    "imageSize",
+    "imageStore",
+    "imulExtended",
+    "in",
+    "inline",
+    "inout",
+    "input",
+    "int",
+    "intBitsToFloat",
+    "interface",
+    "invariant",
+    "inverse",
+    "inversesqrt",
+    "isampler1D",
+    "isampler1DArray",
+    "isampler2D",
+    "isampler2DArray",
+    "isampler2DMS",
+    "isampler2DMSArray",
+    "isampler2DRect",
+    "isampler3D",
+    "isamplerBuffer",
+    "isamplerCube",
+    "isamplerCubeArray",
+    "isinf",
+    "isnan",
+    "ivec2",
+    "ivec3",
+    "ivec4",
+    "layout",
+    "ldexp",
+    "length",
+    "lessThan",
+    "lessThanEqual",
+    "log",
+    "log2",
+    "long",
+    "lowp",
+    "main",
+    "mat2",
+    "mat2x2",
+    "mat2x3",
+    "mat2x4",
+    "mat3",
+    "mat3x2",
+    "mat3x3",
+    "mat3x4",
+    "mat4",
+    "mat4x2",
+    "mat4x3",
+    "mat4x4",
+    "matrixCompMult",
+    "max",
+    "mediump",
+    "memoryBarrier",
+    "memoryBarrierAtomicCounter",
+    "memoryBarrierBuffer",
+    "memoryBarrierImage",
+    "memoryBarrierShared",
+    "min",
+    "mix",
+    "mod",
+    "modf",
+    "namespace",
+    "noinline",
+    "non_coherent",
+    "noncoherent",
+    "noperspective",
+    "normalize",
+    "not",
+    "notEqual",
+    "out",
+    "outerProduct",
+    "output",
+    "packHalf2x16",
+    "packSnorm2x16",
+    "packSnorm4x8",
+    "packUnorm2x16",
+    "packUnorm4x8",
+    "partition",
+    "patch",
+    "pow",
+    "precise",
+    "precision",
+    "public",
+    "radians",
+    "readonly",
+    "reflect",
+    "refract",
+    "resource",
+    "restrict",
+    "return",
+    "round",
+    "roundEven",
+    "sample",
+    "sampler1D",
+    "sampler1DArray",
+    "sampler1DArrayShadow",
+    "sampler1DShadow",
+    "sampler2D",
+    "sampler2DArray",
+    "sampler2DArrayShadow",
+    "sampler2DMS",
+    "sampler2DMSArray",
+    "sampler2DRect",
+    "sampler2DRectShadow",
+    "sampler2DShadow",
+    "sampler3D",
+    "sampler3DRect",
+    "samplerBuffer",
+    "samplerCube",
+    "samplerCubeArray",
+    "samplerCubeArrayShadow",
+    "samplerCubeShadow",
+    "shared",
+    "short",
+    "sign",
+    "sin",
+    "sinh",
+    "sizeof",
+    "smooth",
+    "smoothstep",
+    "sqrt",
+    "static",
+    "step",
+    "struct",
+    "subroutine",
+    "superp",
+    "switch",
+    "tan",
+    "tanh",
+    "template",
+    "texelFetch",
+    "texelFetchOffset",
+    "texture",
+    "textureGather",
+    "textureGatherOffset",
+    "textureGrad",
+    "textureGradOffset",
+    "textureLod",
+    "textureLodOffset",
+    "textureOffset",
+    "textureProj",
+    "textureProjGrad",
+    "textureProjGradOffset",
+    "textureProjLod",
+    "textureProjLodOffset",
+    "textureProjOffset",
+    "textureSize",
+    "this",
+    "transpose",
+    "true",
+    "trunc",
+    "typedef",
+    "uaddCarry",
+    "uimage1D",
+    "uimage1DArray",
+    "uimage2D",
+    "uimage2DArray",
+    "uimage2DMS",
+    "uimage2DMSArray",
+    "uimage2DRect",
+    "uimage3D",
+    "uimageBuffer",
+    "uimageCube",
+    "uimageCubeArray",
+    "uint",
+    "uintBitsToFloat",
+    "umulExtended",
+    "uniform",
+    "union",
+    "unpackHalf2x16",
+    "unpackSnorm2x16",
+    "unpackSnorm4x8",
+    "unpackUnorm2x16",
+    "unpackUnorm4x8",
+    "unsigned",
+    "usampler1D",
+    "usampler1DArray",
+    "usampler2D",
+    "usampler2DArray",
+    "usampler2DMS",
+    "usampler2DMSArray",
+    "usampler2DRect",
+    "usampler3D",
+    "usamplerBuffer",
+    "usamplerCube",
+    "usamplerCubeArray",
+    "using",
+    "usubBorrow",
+    "uvec2",
+    "uvec3",
+    "uvec4",
+    "varying",
+    "vec2",
+    "vec3",
+    "vec4",
+    "void",
+    "volatile",
+    "while",
+    "writeonly",
+};
+bool IsKeyword(std::string_view ident) {
+    return std::binary_search(std::begin(kReservedKeywordsGLSL), std::end(kReservedKeywordsGLSL),
+                              ident) ||
+           ident.compare(0, 3, "gl_") == 0 || ident.find("__") != std::string::npos;
+}
 
 }  // namespace
 

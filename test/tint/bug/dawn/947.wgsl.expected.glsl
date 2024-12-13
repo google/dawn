@@ -21,20 +21,20 @@ uniform v_uniforms_block_ubo {
 layout(location = 0) out vec2 tint_interstage_location0;
 VertexOutputs vs_main_inner(uint VertexIndex) {
   vec2 texcoord[3] = vec2[3](vec2(-0.5f, 0.0f), vec2(1.5f, 0.0f), vec2(0.5f, 2.0f));
-  VertexOutputs tint_symbol = VertexOutputs(vec2(0.0f), vec4(0.0f));
-  tint_symbol.position = vec4(((texcoord[min(VertexIndex, 2u)] * 2.0f) - vec2(1.0f)), 0.0f, 1.0f);
+  VertexOutputs v_1 = VertexOutputs(vec2(0.0f), vec4(0.0f));
+  v_1.position = vec4(((texcoord[min(VertexIndex, 2u)] * 2.0f) - vec2(1.0f)), 0.0f, 1.0f);
   bool flipY = (v.inner.u_scale.y < 0.0f);
   if (flipY) {
-    tint_symbol.texcoords = ((((texcoord[min(VertexIndex, 2u)] * v.inner.u_scale) + v.inner.u_offset) * vec2(1.0f, -1.0f)) + vec2(0.0f, 1.0f));
+    v_1.texcoords = ((((texcoord[min(VertexIndex, 2u)] * v.inner.u_scale) + v.inner.u_offset) * vec2(1.0f, -1.0f)) + vec2(0.0f, 1.0f));
   } else {
-    tint_symbol.texcoords = ((((texcoord[min(VertexIndex, 2u)] * vec2(1.0f, -1.0f)) + vec2(0.0f, 1.0f)) * v.inner.u_scale) + v.inner.u_offset);
+    v_1.texcoords = ((((texcoord[min(VertexIndex, 2u)] * vec2(1.0f, -1.0f)) + vec2(0.0f, 1.0f)) * v.inner.u_scale) + v.inner.u_offset);
   }
-  return tint_symbol;
+  return v_1;
 }
 void main() {
-  VertexOutputs v_1 = vs_main_inner(uint(gl_VertexID));
-  tint_interstage_location0 = v_1.texcoords;
-  gl_Position = v_1.position;
+  VertexOutputs v_2 = vs_main_inner(uint(gl_VertexID));
+  tint_interstage_location0 = v_2.texcoords;
+  gl_Position = v_2.position;
   gl_Position.y = -(gl_Position.y);
   gl_Position.z = ((2.0f * gl_Position.z) - gl_Position.w);
   gl_PointSize = 1.0f;

@@ -2,8 +2,8 @@
 
 
 struct frexp_result_f32 {
-  float fract;
-  int exp;
+  float member_0;
+  int member_1;
 };
 
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
@@ -11,9 +11,9 @@ void main() {
   float runtime_in = 1.25f;
   frexp_result_f32 res = frexp_result_f32(0.625f, 1);
   frexp_result_f32 v = frexp_result_f32(0.0f, 0);
-  v.fract = frexp(runtime_in, v.exp);
+  v.member_0 = frexp(runtime_in, v.member_1);
   res = v;
   res = frexp_result_f32(0.625f, 1);
-  float tint_symbol_1 = res.fract;
-  int tint_symbol_2 = res.exp;
+  float v_1 = res.member_0;
+  int v_2 = res.member_1;
 }

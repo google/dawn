@@ -3,7 +3,7 @@
 
 f16mat4x3 m = f16mat4x3(f16vec3(0.0hf, 1.0hf, 2.0hf), f16vec3(3.0hf, 4.0hf, 5.0hf), f16vec3(6.0hf, 7.0hf, 8.0hf), f16vec3(9.0hf, 10.0hf, 11.0hf));
 layout(binding = 0, std430)
-buffer tint_symbol_block_1_ssbo {
+buffer out_block_1_ssbo {
   f16mat4x3 inner;
 } v;
 void tint_store_and_preserve_padding(f16mat4x3 value_param) {

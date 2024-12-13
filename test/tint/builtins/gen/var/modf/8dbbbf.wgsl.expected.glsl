@@ -8,14 +8,14 @@ precision highp int;
 
 
 struct modf_result_f16 {
-  float16_t fract;
+  float16_t member_0;
   float16_t whole;
 };
 
 void modf_8dbbbf() {
   float16_t arg_0 = -1.5hf;
   modf_result_f16 v = modf_result_f16(0.0hf, 0.0hf);
-  v.fract = modf(arg_0, v.whole);
+  v.member_0 = modf(arg_0, v.whole);
   modf_result_f16 res = v;
 }
 void main() {
@@ -29,14 +29,14 @@ void main() {
 
 
 struct modf_result_f16 {
-  float16_t fract;
+  float16_t member_0;
   float16_t whole;
 };
 
 void modf_8dbbbf() {
   float16_t arg_0 = -1.5hf;
   modf_result_f16 v = modf_result_f16(0.0hf, 0.0hf);
-  v.fract = modf(arg_0, v.whole);
+  v.member_0 = modf(arg_0, v.whole);
   modf_result_f16 res = v;
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
@@ -51,7 +51,7 @@ void main() {
 
 
 struct modf_result_f16 {
-  float16_t fract;
+  float16_t member_0;
   float16_t whole;
 };
 
@@ -62,14 +62,14 @@ struct VertexOutput {
 void modf_8dbbbf() {
   float16_t arg_0 = -1.5hf;
   modf_result_f16 v = modf_result_f16(0.0hf, 0.0hf);
-  v.fract = modf(arg_0, v.whole);
+  v.member_0 = modf(arg_0, v.whole);
   modf_result_f16 res = v;
 }
 VertexOutput vertex_main_inner() {
-  VertexOutput tint_symbol = VertexOutput(vec4(0.0f));
-  tint_symbol.pos = vec4(0.0f);
+  VertexOutput v_1 = VertexOutput(vec4(0.0f));
+  v_1.pos = vec4(0.0f);
   modf_8dbbbf();
-  return tint_symbol;
+  return v_1;
 }
 void main() {
   gl_Position = vertex_main_inner().pos;

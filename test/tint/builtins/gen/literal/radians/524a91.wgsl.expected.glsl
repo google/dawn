@@ -37,10 +37,10 @@ void radians_524a91() {
   vec4 res = vec4(0.01745329238474369049f);
 }
 VertexOutput vertex_main_inner() {
-  VertexOutput tint_symbol = VertexOutput(vec4(0.0f));
-  tint_symbol.pos = vec4(0.0f);
+  VertexOutput v = VertexOutput(vec4(0.0f));
+  v.pos = vec4(0.0f);
   radians_524a91();
-  return tint_symbol;
+  return v;
 }
 void main() {
   gl_Position = vertex_main_inner().pos;

@@ -7,7 +7,7 @@ buffer f_non_uniform_global_block_ssbo {
   int inner;
 } v;
 layout(binding = 1, std430)
-buffer f_tint_symbol_block_ssbo {
+buffer f_output_block_ssbo {
   float inner;
 } v_1;
 bool continue_execution = true;

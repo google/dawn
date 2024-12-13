@@ -11,7 +11,7 @@ struct FragmentInputs {
   uint sample_mask;
 };
 
-void tint_symbol_inner(FragmentInputs inputs) {
+void main_inner(FragmentInputs inputs) {
   if (inputs.front_facing) {
     vec4 foo = inputs.position;
     uint bar = (inputs.sample_index + inputs.sample_mask);
@@ -21,5 +21,5 @@ void main() {
   vec4 v = gl_FragCoord;
   bool v_1 = gl_FrontFacing;
   uint v_2 = uint(gl_SampleID);
-  tint_symbol_inner(FragmentInputs(v, v_1, v_2, uint(gl_SampleMaskIn[0u])));
+  main_inner(FragmentInputs(v, v_1, v_2, uint(gl_SampleMaskIn[0u])));
 }

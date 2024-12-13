@@ -15,7 +15,7 @@ precision highp float;
 precision highp int;
 
 layout(location = 0) in float tint_interstage_location0;
-void tint_symbol_inner(float x) {
+void main_inner(float x) {
   {
     uvec2 tint_loop_idx = uvec2(0u);
     while(true) {
@@ -35,5 +35,5 @@ void tint_symbol_inner(float x) {
   }
 }
 void main() {
-  tint_symbol_inner(tint_interstage_location0);
+  main_inner(tint_interstage_location0);
 }

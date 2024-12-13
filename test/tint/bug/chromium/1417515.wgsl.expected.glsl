@@ -2,7 +2,7 @@
 
 
 struct modf_result_f32 {
-  float fract;
+  float member_0;
   float whole;
 };
 

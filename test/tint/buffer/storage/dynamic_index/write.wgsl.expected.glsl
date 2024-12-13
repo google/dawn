@@ -70,7 +70,7 @@ void tint_store_and_preserve_padding(uint target_indices[1], mat2x3 value_param)
   sb.arr[target_indices[0u]].mat2x3_f32[0u] = value_param[0u];
   sb.arr[target_indices[0u]].mat2x3_f32[1u] = value_param[1u];
 }
-void tint_symbol_inner(uint idx) {
+void main_inner(uint idx) {
   uint v_2 = min(idx, (uint(sb.arr.length()) - 1u));
   sb.arr[v_2].scalar_f32 = 0.0f;
   uint v_3 = min(idx, (uint(sb.arr.length()) - 1u));
@@ -114,5 +114,5 @@ void tint_symbol_inner(uint idx) {
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
-  tint_symbol_inner(gl_LocalInvocationIndex);
+  main_inner(gl_LocalInvocationIndex);
 }

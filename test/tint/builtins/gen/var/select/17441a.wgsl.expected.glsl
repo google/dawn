@@ -40,10 +40,10 @@ void select_17441a() {
   vec4 res = mix(vec4(1.0f), vec4(1.0f), bvec4(arg_2));
 }
 VertexOutput vertex_main_inner() {
-  VertexOutput tint_symbol = VertexOutput(vec4(0.0f));
-  tint_symbol.pos = vec4(0.0f);
+  VertexOutput v = VertexOutput(vec4(0.0f));
+  v.pos = vec4(0.0f);
   select_17441a();
-  return tint_symbol;
+  return v;
 }
 void main() {
   gl_Position = vertex_main_inner().pos;

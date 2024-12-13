@@ -26,8 +26,8 @@ struct Config {
 };
 
 struct Uniforms {
-  vec4 tint_symbol;
-  vec4 tint_symbol_1;
+  vec4 member_0;
+  vec4 member_1;
   mat4 viewMatrix;
   mat4 projectionMatrix;
   vec4 fullScreenSize;
@@ -49,7 +49,7 @@ layout(binding = 0, std140)
 uniform uniforms_block_1_ubo {
   Uniforms inner;
 } v_2;
-void tint_symbol_2_inner(uvec3 GlobalInvocationID) {
+void main_inner(uvec3 GlobalInvocationID) {
   uint index = GlobalInvocationID.x;
   if ((index >= v_1.inner.numLights)) {
     return;
@@ -63,10 +63,10 @@ void tint_symbol_2_inner(uvec3 GlobalInvocationID) {
   lightsBuffer.lights[v_4].position.y = (v_7 + (0.00100000004749745131f * (v_8 - (64.0f * floor((float(index) / 64.0f))))));
   uint v_9 = index;
   uint v_10 = min(v_9, (uint(lightsBuffer.lights.length()) - 1u));
-  if ((lightsBuffer.lights[v_10].position.y < v_2.inner.tint_symbol.y)) {
+  if ((lightsBuffer.lights[v_10].position.y < v_2.inner.member_0.y)) {
     uint v_11 = index;
     uint v_12 = min(v_11, (uint(lightsBuffer.lights.length()) - 1u));
-    lightsBuffer.lights[v_12].position.y = v_2.inner.tint_symbol_1.y;
+    lightsBuffer.lights[v_12].position.y = v_2.inner.member_1.y;
   }
   mat4 M = v_2.inner.projectionMatrix;
   float viewNear = (-(M[3u].z) / (-1.0f + M[2u].z));
@@ -194,5 +194,5 @@ void tint_symbol_2_inner(uvec3 GlobalInvocationID) {
 }
 layout(local_size_x = 64, local_size_y = 1, local_size_z = 1) in;
 void main() {
-  tint_symbol_2_inner(gl_GlobalInvocationID);
+  main_inner(gl_GlobalInvocationID);
 }

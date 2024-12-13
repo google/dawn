@@ -42,12 +42,12 @@ layout(location = 0) in vec4 tint_interstage_location0;
 layout(location = 1) in vec4 tint_interstage_location1;
 layout(location = 2) in vec2 tint_interstage_location2;
 layout(location = 3) in vec4 tint_interstage_location3;
-layout(location = 0) out vec4 tint_symbol_loc0_Output;
-FragmentOutput tint_symbol_inner(FragmentInput fragment) {
-  FragmentOutput tint_symbol_1 = FragmentOutput(vec4(0.0f));
-  tint_symbol_1.color = vec4(1.0f, 0.0f, 0.0f, 1.0f);
-  return tint_symbol_1;
+layout(location = 0) out vec4 main_loc0_Output;
+FragmentOutput main_inner(FragmentInput fragment) {
+  FragmentOutput v_1 = FragmentOutput(vec4(0.0f));
+  v_1.color = vec4(1.0f, 0.0f, 0.0f, 1.0f);
+  return v_1;
 }
 void main() {
-  tint_symbol_loc0_Output = tint_symbol_inner(FragmentInput(gl_FragCoord, tint_interstage_location0, tint_interstage_location1, tint_interstage_location2, tint_interstage_location3)).color;
+  main_loc0_Output = main_inner(FragmentInput(gl_FragCoord, tint_interstage_location0, tint_interstage_location1, tint_interstage_location2, tint_interstage_location3)).color;
 }

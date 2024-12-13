@@ -6,7 +6,7 @@ struct TintTextureUniformData {
 };
 
 layout(binding = 0, std140)
-uniform tint_symbol_1_1_ubo {
+uniform tint_symbol_1_ubo {
   TintTextureUniformData inner;
 } v;
 uniform highp samplerCube t_f;

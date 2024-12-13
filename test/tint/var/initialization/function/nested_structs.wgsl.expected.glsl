@@ -14,7 +14,7 @@ struct S3 {
 };
 
 layout(binding = 0, std430)
-buffer tint_symbol_block_1_ssbo {
+buffer out_block_1_ssbo {
   int inner;
 } v;
 int f(S3 s3) {

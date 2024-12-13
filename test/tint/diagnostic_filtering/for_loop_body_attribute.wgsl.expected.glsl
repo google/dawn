@@ -16,7 +16,7 @@ precision highp int;
 
 uniform highp sampler2D t_s;
 layout(location = 0) in float tint_interstage_location0;
-void tint_symbol_inner(float x) {
+void main_inner(float x) {
   vec4 v = vec4(0.0f);
   {
     uvec2 tint_loop_idx = uvec2(0u);
@@ -40,5 +40,5 @@ void tint_symbol_inner(float x) {
   }
 }
 void main() {
-  tint_symbol_inner(tint_interstage_location0);
+  main_inner(tint_interstage_location0);
 }

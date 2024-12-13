@@ -5,11 +5,11 @@ struct Out {
   vec4 pos;
 };
 
-Out tint_symbol_inner() {
+Out main_inner() {
   return Out(vec4(0.0f));
 }
 void main() {
-  gl_Position = tint_symbol_inner().pos;
+  gl_Position = main_inner().pos;
   gl_Position.y = -(gl_Position.y);
   gl_Position.z = ((2.0f * gl_Position.z) - gl_Position.w);
   gl_PointSize = 1.0f;

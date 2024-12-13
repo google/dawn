@@ -7,7 +7,7 @@ precision highp int;
 
 
 struct modf_result_vec3_f32 {
-  vec3 fract;
+  vec3 member_0;
   vec3 whole;
 };
 
@@ -24,7 +24,7 @@ void main() {
 
 
 struct modf_result_vec3_f32 {
-  vec3 fract;
+  vec3 member_0;
   vec3 whole;
 };
 
@@ -42,7 +42,7 @@ void main() {
 
 
 struct modf_result_vec3_f32 {
-  vec3 fract;
+  vec3 member_0;
   vec3 whole;
 };
 
@@ -54,10 +54,10 @@ void modf_5ea256() {
   modf_result_vec3_f32 res = modf_result_vec3_f32(vec3(-0.5f), vec3(-1.0f));
 }
 VertexOutput vertex_main_inner() {
-  VertexOutput tint_symbol = VertexOutput(vec4(0.0f));
-  tint_symbol.pos = vec4(0.0f);
+  VertexOutput v = VertexOutput(vec4(0.0f));
+  v.pos = vec4(0.0f);
   modf_5ea256();
-  return tint_symbol;
+  return v;
 }
 void main() {
   gl_Position = vertex_main_inner().pos;

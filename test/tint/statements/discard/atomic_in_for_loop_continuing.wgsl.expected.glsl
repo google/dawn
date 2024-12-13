@@ -14,8 +14,8 @@ layout(location = 0) out int foo_loc0_Output;
 int tint_f32_to_i32(float value) {
   return mix(2147483647, mix((-2147483647 - 1), int(value), (value >= -2147483648.0f)), (value <= 2147483520.0f));
 }
-int foo_inner(float tint_symbol, vec2 coord) {
-  if ((tint_symbol == 0.0f)) {
+int foo_inner(float v_1, vec2 coord) {
+  if ((v_1 == 0.0f)) {
     continue_execution = false;
   }
   int result = tint_f32_to_i32(texture(t_s, coord).x);
@@ -36,11 +36,11 @@ int foo_inner(float tint_symbol, vec2 coord) {
         tint_loop_idx.x = tint_low_inc;
         uint tint_carry = uint((tint_low_inc == 0u));
         tint_loop_idx.y = (tint_loop_idx.y + tint_carry);
-        int v_1 = 0;
+        int v_2 = 0;
         if (continue_execution) {
-          v_1 = atomicAdd(v.inner, 1);
+          v_2 = atomicAdd(v.inner, 1);
         }
-        i = v_1;
+        i = v_2;
       }
       continue;
     }

@@ -50,16 +50,16 @@ int transpose_d8f8ba() {
   return mix(0, 1, (res[0u].x == 0.0f));
 }
 VertexOutput vertex_main_inner() {
-  VertexOutput tint_symbol = VertexOutput(vec4(0.0f), 0);
-  tint_symbol.pos = vec4(0.0f);
-  tint_symbol.prevent_dce = transpose_d8f8ba();
-  return tint_symbol;
+  VertexOutput v = VertexOutput(vec4(0.0f), 0);
+  v.pos = vec4(0.0f);
+  v.prevent_dce = transpose_d8f8ba();
+  return v;
 }
 void main() {
-  VertexOutput v = vertex_main_inner();
-  gl_Position = v.pos;
+  VertexOutput v_1 = vertex_main_inner();
+  gl_Position = v_1.pos;
   gl_Position.y = -(gl_Position.y);
   gl_Position.z = ((2.0f * gl_Position.z) - gl_Position.w);
-  tint_interstage_location0 = v.prevent_dce;
+  tint_interstage_location0 = v_1.prevent_dce;
   gl_PointSize = 1.0f;
 }

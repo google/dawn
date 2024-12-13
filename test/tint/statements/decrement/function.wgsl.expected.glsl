@@ -1,6 +1,6 @@
 #version 310 es
 
-void tint_symbol() {
+void v() {
   int i = 0;
   i = (i - 1);
 }

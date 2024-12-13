@@ -4,14 +4,14 @@ precision highp int;
 
 bool continue_execution = true;
 layout(location = 1) flat in ivec3 tint_interstage_location1;
-layout(location = 2) out int tint_symbol_loc2_Output;
+layout(location = 2) out int main_loc2_Output;
 int f(int x) {
   if ((x == 10)) {
     continue_execution = false;
   }
   return x;
 }
-int tint_symbol_inner(ivec3 x) {
+int main_inner(ivec3 x) {
   int y = x.x;
   {
     uvec2 tint_loop_idx = uvec2(0u);
@@ -38,5 +38,5 @@ int tint_symbol_inner(ivec3 x) {
   return y;
 }
 void main() {
-  tint_symbol_loc2_Output = tint_symbol_inner(tint_interstage_location1);
+  main_loc2_Output = main_inner(tint_interstage_location1);
 }

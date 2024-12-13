@@ -4,8 +4,8 @@ precision highp int;
 
 uniform highp sampler2D randomTexture_Sampler;
 layout(location = 0) in vec2 tint_interstage_location0;
-layout(location = 0) out vec4 tint_symbol_loc0_Output;
-vec4 tint_symbol_inner(vec2 vUV) {
+layout(location = 0) out vec4 main_loc0_Output;
+vec4 main_inner(vec2 vUV) {
   vec3 random = texture(randomTexture_Sampler, vUV).xyz;
   int i = 0;
   {
@@ -61,5 +61,5 @@ vec4 tint_symbol_inner(vec2 vUV) {
   return vec4(1.0f);
 }
 void main() {
-  tint_symbol_loc0_Output = tint_symbol_inner(tint_interstage_location0);
+  main_loc0_Output = main_inner(tint_interstage_location0);
 }

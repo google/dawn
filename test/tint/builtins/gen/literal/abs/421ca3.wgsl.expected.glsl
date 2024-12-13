@@ -53,16 +53,16 @@ f16vec3 abs_421ca3() {
   return res;
 }
 VertexOutput vertex_main_inner() {
-  VertexOutput tint_symbol = VertexOutput(vec4(0.0f), f16vec3(0.0hf));
-  tint_symbol.pos = vec4(0.0f);
-  tint_symbol.prevent_dce = abs_421ca3();
-  return tint_symbol;
+  VertexOutput v = VertexOutput(vec4(0.0f), f16vec3(0.0hf));
+  v.pos = vec4(0.0f);
+  v.prevent_dce = abs_421ca3();
+  return v;
 }
 void main() {
-  VertexOutput v = vertex_main_inner();
-  gl_Position = v.pos;
+  VertexOutput v_1 = vertex_main_inner();
+  gl_Position = v_1.pos;
   gl_Position.y = -(gl_Position.y);
   gl_Position.z = ((2.0f * gl_Position.z) - gl_Position.w);
-  tint_interstage_location0 = v.prevent_dce;
+  tint_interstage_location0 = v_1.prevent_dce;
   gl_PointSize = 1.0f;
 }

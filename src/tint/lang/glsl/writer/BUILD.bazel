@@ -95,6 +95,7 @@ cc_library(
     "type_test.cc",
     "unary_test.cc",
     "var_and_let_test.cc",
+    "writer_test.cc",
   ] + select({
     ":tint_build_glsl_validator": [
       "helper_test.h",

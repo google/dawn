@@ -8,7 +8,7 @@ precision highp int;
 
 
 struct modf_result_f16 {
-  float16_t fract;
+  float16_t member_0;
   float16_t whole;
 };
 
@@ -26,7 +26,7 @@ void main() {
 
 
 struct modf_result_f16 {
-  float16_t fract;
+  float16_t member_0;
   float16_t whole;
 };
 
@@ -45,7 +45,7 @@ void main() {
 
 
 struct modf_result_f16 {
-  float16_t fract;
+  float16_t member_0;
   float16_t whole;
 };
 
@@ -57,10 +57,10 @@ void modf_8dbbbf() {
   modf_result_f16 res = modf_result_f16(-0.5hf, -1.0hf);
 }
 VertexOutput vertex_main_inner() {
-  VertexOutput tint_symbol = VertexOutput(vec4(0.0f));
-  tint_symbol.pos = vec4(0.0f);
+  VertexOutput v = VertexOutput(vec4(0.0f));
+  v.pos = vec4(0.0f);
   modf_8dbbbf();
-  return tint_symbol;
+  return v;
 }
 void main() {
   gl_Position = vertex_main_inner().pos;

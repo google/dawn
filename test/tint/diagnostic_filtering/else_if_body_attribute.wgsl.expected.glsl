@@ -16,7 +16,7 @@ precision highp int;
 
 uniform highp sampler2D t_s;
 layout(location = 0) in float tint_interstage_location0;
-void tint_symbol_inner(float x) {
+void main_inner(float x) {
   if ((x > 0.0f)) {
   } else {
     if ((x < 0.0f)) {
@@ -25,5 +25,5 @@ void tint_symbol_inner(float x) {
   }
 }
 void main() {
-  tint_symbol_inner(tint_interstage_location0);
+  main_inner(tint_interstage_location0);
 }

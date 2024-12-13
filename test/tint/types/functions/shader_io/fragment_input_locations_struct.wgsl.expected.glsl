@@ -14,12 +14,12 @@ layout(location = 0) flat in int tint_interstage_location0;
 layout(location = 1) flat in uint tint_interstage_location1;
 layout(location = 2) in float tint_interstage_location2;
 layout(location = 3) in vec4 tint_interstage_location3;
-void tint_symbol_inner(FragmentInputs inputs) {
+void main_inner(FragmentInputs inputs) {
   int i = inputs.loc0;
   uint u = inputs.loc1;
   float f = inputs.loc2;
   vec4 v = inputs.loc3;
 }
 void main() {
-  tint_symbol_inner(FragmentInputs(tint_interstage_location0, tint_interstage_location1, tint_interstage_location2, tint_interstage_location3));
+  main_inner(FragmentInputs(tint_interstage_location0, tint_interstage_location1, tint_interstage_location2, tint_interstage_location3));
 }

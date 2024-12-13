@@ -86,16 +86,16 @@ int dot4I8Packed_881e62() {
   return res;
 }
 VertexOutput vertex_main_inner() {
-  VertexOutput tint_symbol = VertexOutput(vec4(0.0f), 0);
-  tint_symbol.pos = vec4(0.0f);
-  tint_symbol.prevent_dce = dot4I8Packed_881e62();
-  return tint_symbol;
+  VertexOutput v_7 = VertexOutput(vec4(0.0f), 0);
+  v_7.pos = vec4(0.0f);
+  v_7.prevent_dce = dot4I8Packed_881e62();
+  return v_7;
 }
 void main() {
-  VertexOutput v_7 = vertex_main_inner();
-  gl_Position = v_7.pos;
+  VertexOutput v_8 = vertex_main_inner();
+  gl_Position = v_8.pos;
   gl_Position.y = -(gl_Position.y);
   gl_Position.z = ((2.0f * gl_Position.z) - gl_Position.w);
-  tint_interstage_location0 = v_7.prevent_dce;
+  tint_interstage_location0 = v_8.prevent_dce;
   gl_PointSize = 1.0f;
 }

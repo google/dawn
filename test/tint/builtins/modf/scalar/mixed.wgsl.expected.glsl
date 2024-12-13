@@ -2,7 +2,7 @@
 
 
 struct modf_result_f32 {
-  float fract;
+  float member_0;
   float whole;
 };
 
@@ -11,9 +11,9 @@ void main() {
   float runtime_in = 1.25f;
   modf_result_f32 res = modf_result_f32(0.25f, 1.0f);
   modf_result_f32 v = modf_result_f32(0.0f, 0.0f);
-  v.fract = modf(runtime_in, v.whole);
+  v.member_0 = modf(runtime_in, v.whole);
   res = v;
   res = modf_result_f32(0.25f, 1.0f);
-  float tint_symbol_1 = res.fract;
+  float v_1 = res.member_0;
   float whole = res.whole;
 }

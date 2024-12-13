@@ -13,8 +13,8 @@ buffer f_S_block_ssbo {
   int inner;
 } v;
 bool continue_execution = true;
-layout(location = 0) out vec4 tint_symbol_loc0_Output;
-vec4 tint_symbol_inner() {
+layout(location = 0) out vec4 main_loc0_Output;
+vec4 main_inner() {
   if (false) {
     continue_execution = false;
   }
@@ -31,5 +31,5 @@ vec4 tint_symbol_inner() {
   return v_3;
 }
 void main() {
-  tint_symbol_loc0_Output = tint_symbol_inner();
+  main_loc0_Output = main_inner();
 }

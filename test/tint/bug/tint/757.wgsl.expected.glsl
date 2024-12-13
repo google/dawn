@@ -10,11 +10,11 @@ buffer Result_1_ssbo {
   float values[];
 } result;
 layout(binding = 0, std140)
-uniform tint_symbol_1_1_ubo {
+uniform tint_symbol_1_ubo {
   TintTextureUniformData inner;
 } v;
 uniform highp sampler2DArray myTexture;
-void tint_symbol_inner(uvec3 GlobalInvocationID) {
+void main_inner(uvec3 GlobalInvocationID) {
   uint flatIndex = (((4u * GlobalInvocationID.z) + (2u * GlobalInvocationID.y)) + GlobalInvocationID.x);
   flatIndex = (flatIndex * 1u);
   ivec2 v_1 = ivec2(GlobalInvocationID.xy);
@@ -45,5 +45,5 @@ void tint_symbol_inner(uvec3 GlobalInvocationID) {
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
-  tint_symbol_inner(gl_GlobalInvocationID);
+  main_inner(gl_GlobalInvocationID);
 }

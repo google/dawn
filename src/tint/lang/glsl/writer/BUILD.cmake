@@ -107,6 +107,7 @@ tint_add_target(tint_lang_glsl_writer_test test
   lang/glsl/writer/type_test.cc
   lang/glsl/writer/unary_test.cc
   lang/glsl/writer/var_and_let_test.cc
+  lang/glsl/writer/writer_test.cc
 )
 
 tint_target_add_dependencies(tint_lang_glsl_writer_test test

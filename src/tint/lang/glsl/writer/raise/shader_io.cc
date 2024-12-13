@@ -64,56 +64,6 @@ struct StateImpl : core::ir::transform::ShaderIOBackendState {
     /// Destructor
     ~StateImpl() override {}
 
-    /// Retrieve the gl_ string corresponding to a builtin.
-    /// @param builtin the builtin
-    /// @param address_space the address space (input or output)
-    /// @returns the gl_ string corresponding to that builtin
-    const char* GLSLBuiltinToString(core::BuiltinValue builtin, core::AddressSpace address_space) {
-        switch (builtin) {
-            case core::BuiltinValue::kPosition: {
-                if (address_space == core::AddressSpace::kOut) {
-                    return "gl_Position";
-                }
-                if (address_space == core::AddressSpace::kIn) {
-                    return "gl_FragCoord";
-                }
-                TINT_UNREACHABLE();
-            }
-            case core::BuiltinValue::kVertexIndex:
-                return "gl_VertexID";
-            case core::BuiltinValue::kInstanceIndex:
-                return "gl_InstanceID";
-            case core::BuiltinValue::kFrontFacing:
-                return "gl_FrontFacing";
-            case core::BuiltinValue::kFragDepth:
-                return "gl_FragDepth";
-            case core::BuiltinValue::kLocalInvocationId:
-                return "gl_LocalInvocationID";
-            case core::BuiltinValue::kLocalInvocationIndex:
-                return "gl_LocalInvocationIndex";
-            case core::BuiltinValue::kGlobalInvocationId:
-                return "gl_GlobalInvocationID";
-            case core::BuiltinValue::kNumWorkgroups:
-                return "gl_NumWorkGroups";
-            case core::BuiltinValue::kWorkgroupId:
-                return "gl_WorkGroupID";
-            case core::BuiltinValue::kSampleIndex:
-                return "gl_SampleID";
-            case core::BuiltinValue::kSampleMask: {
-                if (address_space == core::AddressSpace::kIn) {
-                    return "gl_SampleMaskIn";
-                } else {
-                    return "gl_SampleMask";
-                }
-                TINT_UNREACHABLE();
-            }
-            case core::BuiltinValue::kPointSize:
-                return "gl_PointSize";
-            default:
-                TINT_UNREACHABLE();
-        }
-    }
-
     /// Declare a global variable for each IO entry listed in @p entries.
     /// @param vars the list of variables
     /// @param entries the entries to emit
@@ -127,11 +77,10 @@ struct StateImpl : core::ir::transform::ShaderIOBackendState {
                   const char* name_suffix) {
         for (auto io : entries) {
             StringStream name;
+            name << ir.NameOf(func).Name();
 
             const core::type::MemoryView* ptr = nullptr;
             if (io.attributes.builtin) {
-                name << GLSLBuiltinToString(*io.attributes.builtin, addrspace);
-
                 switch (io.attributes.builtin.value()) {
                     case core::BuiltinValue::kSampleMask:
                         ptr = ty.ptr(addrspace, ty.array(ty.i32(), 1), access);
@@ -145,8 +94,8 @@ struct StateImpl : core::ir::transform::ShaderIOBackendState {
                         ptr = ty.ptr(addrspace, io.type, access);
                         break;
                 }
+                name << "_" << *io.attributes.builtin;
             } else {
-                name << ir.NameOf(func).Name();
                 auto* type = io.type;
 
                 if (io.attributes.location) {

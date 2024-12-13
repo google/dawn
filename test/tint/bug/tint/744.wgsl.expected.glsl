@@ -23,7 +23,7 @@ layout(binding = 3, std140)
 uniform uniforms_block_1_ubo {
   Uniforms inner;
 } v;
-void tint_symbol_inner(uvec3 global_id) {
+void main_inner(uvec3 global_id) {
   uvec2 resultCell = uvec2(global_id.y, global_id.x);
   uint dimInner = v.inner.aShape.y;
   uint dimOutter = v.inner.outShape.y;
@@ -54,5 +54,5 @@ void tint_symbol_inner(uvec3 global_id) {
 }
 layout(local_size_x = 2, local_size_y = 2, local_size_z = 1) in;
 void main() {
-  tint_symbol_inner(gl_GlobalInvocationID);
+  main_inner(gl_GlobalInvocationID);
 }

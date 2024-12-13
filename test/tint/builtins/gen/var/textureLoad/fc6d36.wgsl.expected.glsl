@@ -77,16 +77,16 @@ ivec4 textureLoad_fc6d36() {
   return res;
 }
 VertexOutput vertex_main_inner() {
-  VertexOutput tint_symbol = VertexOutput(vec4(0.0f), ivec4(0));
-  tint_symbol.pos = vec4(0.0f);
-  tint_symbol.prevent_dce = textureLoad_fc6d36();
-  return tint_symbol;
+  VertexOutput v_6 = VertexOutput(vec4(0.0f), ivec4(0));
+  v_6.pos = vec4(0.0f);
+  v_6.prevent_dce = textureLoad_fc6d36();
+  return v_6;
 }
 void main() {
-  VertexOutput v_6 = vertex_main_inner();
-  gl_Position = v_6.pos;
+  VertexOutput v_7 = vertex_main_inner();
+  gl_Position = v_7.pos;
   gl_Position.y = -(gl_Position.y);
   gl_Position.z = ((2.0f * gl_Position.z) - gl_Position.w);
-  tint_interstage_location0 = v_6.prevent_dce;
+  tint_interstage_location0 = v_7.prevent_dce;
   gl_PointSize = 1.0f;
 }

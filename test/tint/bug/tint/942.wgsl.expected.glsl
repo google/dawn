@@ -26,14 +26,14 @@ uniform flip_block_1_ubo {
 } v_1;
 shared vec3 tile[4][256];
 layout(binding = 0, std140)
-uniform tint_symbol_1_1_ubo {
+uniform tint_symbol_1_ubo {
   TintTextureUniformData inner;
 } v_2;
 uniform highp sampler2D inputTex_samp;
 uint tint_div_u32(uint lhs, uint rhs) {
   return (lhs / mix(rhs, 1u, (rhs == 0u)));
 }
-void tint_symbol_inner(uvec3 WorkGroupID, uvec3 LocalInvocationID, uint tint_local_index) {
+void main_inner(uvec3 WorkGroupID, uvec3 LocalInvocationID, uint tint_local_index) {
   {
     uint v_3 = 0u;
     v_3 = tint_local_index;
@@ -170,5 +170,5 @@ void tint_symbol_inner(uvec3 WorkGroupID, uvec3 LocalInvocationID, uint tint_loc
 }
 layout(local_size_x = 64, local_size_y = 1, local_size_z = 1) in;
 void main() {
-  tint_symbol_inner(gl_WorkGroupID, gl_LocalInvocationID, gl_LocalInvocationIndex);
+  main_inner(gl_WorkGroupID, gl_LocalInvocationID, gl_LocalInvocationIndex);
 }

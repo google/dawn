@@ -2,7 +2,7 @@
 #extension GL_AMD_gpu_shader_half_float: require
 
 layout(binding = 0, std430)
-buffer tint_symbol_block_1_ssbo {
+buffer out_block_1_ssbo {
   f16mat3 inner;
 } v;
 void tint_store_and_preserve_padding(f16mat3 value_param) {

@@ -41,7 +41,7 @@ vec4 glFragColor = vec4(0.0f);
 bool continue_execution = true;
 layout(location = 2) in float tint_interstage_location2;
 layout(location = 3) in float tint_interstage_location3;
-layout(location = 0) out vec4 tint_symbol_loc0_Output;
+layout(location = 0) out vec4 main_loc0_Output;
 void main_1() {
   vec3 viewDirectionW = vec3(0.0f);
   vec4 baseColor = vec4(0.0f);
@@ -118,7 +118,7 @@ void main_1() {
   vec4 x_147 = color;
   glFragColor = x_147;
 }
-main_out tint_symbol_inner(float fClipDistance3_param, float fClipDistance4_param) {
+main_out main_inner(float fClipDistance3_param, float fClipDistance4_param) {
   fClipDistance3 = fClipDistance3_param;
   fClipDistance4 = fClipDistance4_param;
   main_1();
@@ -129,5 +129,5 @@ main_out tint_symbol_inner(float fClipDistance3_param, float fClipDistance4_para
   return v_5;
 }
 void main() {
-  tint_symbol_loc0_Output = tint_symbol_inner(tint_interstage_location2, tint_interstage_location3).glFragColor_1;
+  main_loc0_Output = main_inner(tint_interstage_location2, tint_interstage_location3).glFragColor_1;
 }

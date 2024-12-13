@@ -13,11 +13,11 @@ layout(location = 0) flat out int tint_interstage_location0;
 layout(location = 1) flat out uint tint_interstage_location1;
 layout(location = 2) out float tint_interstage_location2;
 layout(location = 3) out vec4 tint_interstage_location3;
-VertexOutputs tint_symbol_inner() {
+VertexOutputs main_inner() {
   return VertexOutputs(1, 1u, 1.0f, vec4(1.0f, 2.0f, 3.0f, 4.0f), vec4(0.0f));
 }
 void main() {
-  VertexOutputs v = tint_symbol_inner();
+  VertexOutputs v = main_inner();
   tint_interstage_location0 = v.loc0;
   tint_interstage_location1 = v.loc1;
   tint_interstage_location2 = v.loc2;

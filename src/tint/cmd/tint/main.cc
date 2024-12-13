@@ -605,11 +605,7 @@ Options:
             break;
         }
         case Format::kGlsl: {
-            if (!options.rename_all) {
-                transform_inputs.Add<tint::ast::transform::Renamer::Config>(
-                    tint::ast::transform::Renamer::Target::kGlslKeywords);
-            }
-            transform_manager.Add<tint::ast::transform::Renamer>();
+            // Renaming is handled in the backend.
             break;
         }
         case Format::kHlsl:
@@ -1144,6 +1140,7 @@ bool GenerateGlsl([[maybe_unused]] Options& options,
     }
 
     tint::glsl::writer::Options gen_options;
+    gen_options.strip_all_names = options.rename_all;
     if (options.glsl_desktop) {
         gen_options.version =
             tint::glsl::writer::Version(tint::glsl::writer::Version::Standard::kDesktop, 4, 6);

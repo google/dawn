@@ -10,11 +10,11 @@ buffer Result_1_ssbo {
   float values[];
 } result;
 layout(binding = 0, std140)
-uniform tint_symbol_1_1_ubo {
+uniform tint_symbol_1_ubo {
   TintTextureUniformData inner;
 } v;
 uniform highp sampler2D tex;
-void tint_symbol_inner(uvec3 GlobalInvocationId) {
+void main_inner(uvec3 GlobalInvocationId) {
   uint v_1 = min(((GlobalInvocationId.y * 128u) + GlobalInvocationId.x), (uint(result.values.length()) - 1u));
   int v_2 = int(GlobalInvocationId.x);
   ivec2 v_3 = ivec2(v_2, int(GlobalInvocationId.y));
@@ -26,5 +26,5 @@ void tint_symbol_inner(uvec3 GlobalInvocationId) {
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
-  tint_symbol_inner(gl_GlobalInvocationID);
+  main_inner(gl_GlobalInvocationID);
 }

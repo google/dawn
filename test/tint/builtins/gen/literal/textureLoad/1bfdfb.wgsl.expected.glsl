@@ -346,16 +346,16 @@ vec4 textureLoad_1bfdfb() {
   return res;
 }
 VertexOutput vertex_main_inner() {
-  VertexOutput tint_symbol = VertexOutput(vec4(0.0f), vec4(0.0f));
-  tint_symbol.pos = vec4(0.0f);
-  tint_symbol.prevent_dce = textureLoad_1bfdfb();
-  return tint_symbol;
+  VertexOutput v_17 = VertexOutput(vec4(0.0f), vec4(0.0f));
+  v_17.pos = vec4(0.0f);
+  v_17.prevent_dce = textureLoad_1bfdfb();
+  return v_17;
 }
 void main() {
-  VertexOutput v_17 = vertex_main_inner();
-  gl_Position = v_17.pos;
+  VertexOutput v_18 = vertex_main_inner();
+  gl_Position = v_18.pos;
   gl_Position.y = -(gl_Position.y);
   gl_Position.z = ((2.0f * gl_Position.z) - gl_Position.w);
-  tint_interstage_location0 = v_17.prevent_dce;
+  tint_interstage_location0 = v_18.prevent_dce;
   gl_PointSize = 1.0f;
 }

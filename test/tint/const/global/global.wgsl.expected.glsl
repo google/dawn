@@ -2,8 +2,8 @@
 precision highp float;
 precision highp int;
 
-layout(location = 0) out vec4 tint_symbol_loc0_Output;
-vec4 tint_symbol_inner() {
+layout(location = 0) out vec4 main_loc0_Output;
+vec4 main_inner() {
   int v1 = 1;
   uint v2 = 1u;
   float v3 = 1.0f;
@@ -15,5 +15,5 @@ vec4 tint_symbol_inner() {
   return vec4(0.0f);
 }
 void main() {
-  tint_symbol_loc0_Output = tint_symbol_inner();
+  main_loc0_Output = main_inner();
 }

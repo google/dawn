@@ -5,7 +5,7 @@ precision highp int;
 
 struct In {
   float none;
-  float tint_symbol;
+  float member_1;
   float perspective_center;
   float perspective_centroid;
   float perspective_sample;
@@ -26,8 +26,8 @@ layout(location = 6) centroid in float tint_interstage_location6;
 layout(location = 7) in float tint_interstage_location7;
 layout(location = 8) in float tint_interstage_location8;
 layout(location = 9) in float tint_interstage_location9;
-void tint_symbol_1_inner(In tint_symbol_2) {
+void main_inner(In v) {
 }
 void main() {
-  tint_symbol_1_inner(In(tint_interstage_location0, tint_interstage_location1, tint_interstage_location2, tint_interstage_location3, tint_interstage_location4, tint_interstage_location5, tint_interstage_location6, tint_interstage_location7, tint_interstage_location8, tint_interstage_location9));
+  main_inner(In(tint_interstage_location0, tint_interstage_location1, tint_interstage_location2, tint_interstage_location3, tint_interstage_location4, tint_interstage_location5, tint_interstage_location6, tint_interstage_location7, tint_interstage_location8, tint_interstage_location9));
 }
