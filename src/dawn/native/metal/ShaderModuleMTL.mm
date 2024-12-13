@@ -340,11 +340,6 @@ ResultOrError<CacheResult<MslCompilation>> TranslateToMSL(
             }
 
             Extent3D localSize{0, 0, 0};
-            if (r.stage == SingleShaderStage::Compute) {
-                // Validate workgroup size after program runs transforms.
-                DAWN_TRY_ASSIGN(localSize, ValidateComputeStageWorkgroupSize(
-                                               program, kRemappedEntryPointName, r.limits));
-            }
 
             TRACE_EVENT0(r.platform.UnsafeGetValue(), General, "tint::msl::writer::Generate");
             tint::Result<tint::msl::writer::Output> result;
@@ -356,7 +351,24 @@ ResultOrError<CacheResult<MslCompilation>> TranslateToMSL(
                                 ir.Failure().reason.Str());
 
                 result = tint::msl::writer::Generate(ir.Get(), r.tintOptions);
+
+                // Workgroup validation has to come after `Generate` because it may require
+                // overrides to have been substituted.
+                if (r.stage == SingleShaderStage::Compute) {
+                    // Validate workgroup size and workgroup storage size.
+                    DAWN_TRY_ASSIGN(localSize,
+                                    ValidateComputeStageWorkgroupSize(
+                                        result->workgroup_info.x, result->workgroup_info.y,
+                                        result->workgroup_info.z,
+                                        result->workgroup_info.storage_size, r.limits));
+                }
             } else {
+                if (r.stage == SingleShaderStage::Compute) {
+                    // Validate workgroup size after program runs transforms.
+                    DAWN_TRY_ASSIGN(localSize, ValidateComputeStageWorkgroupSize(
+                                                   program, kRemappedEntryPointName, r.limits));
+                }
+
                 result = tint::msl::writer::Generate(program, r.tintOptions);
             }
 
