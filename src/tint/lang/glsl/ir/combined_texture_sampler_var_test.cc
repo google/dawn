@@ -1,4 +1,4 @@
-// Copyright 2021 The Dawn & Tint Authors
+// Copyright 2024 The Dawn & Tint Authors
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
@@ -25,23 +25,39 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "src/tint/lang/glsl/writer/writer.h"
+#include "src/tint/lang/glsl/ir/combined_texture_sampler_var.h"
 
-#include <memory>
-#include <utility>
+#include "gtest/gtest.h"
+#include "src/tint/lang/core/ir/ir_helper_test.h"
+#include "src/tint/lang/core/ir/validator.h"
+#include "src/tint/lang/core/type/sampled_texture.h"
 
-#include "src/tint/lang/glsl/writer/printer/printer.h"
-#include "src/tint/lang/glsl/writer/raise/raise.h"
+using namespace tint::core::fluent_types;  // NOLINT
 
-namespace tint::glsl::writer {
+namespace tint::glsl::ir {
+namespace {
 
-Result<Output> Generate(core::ir::Module& ir, const Options& options, const std::string&) {
-    // Raise from core-dialect to GLSL-dialect.
-    if (auto res = Raise(ir, options); res != Success) {
-        return res.Failure();
-    }
+using namespace tint::core::number_suffixes;  // NOLINT
+                                              //
+using IR_GlslCombinedTextureSamplerTest = core::ir::IRTestHelper;
 
-    return Print(ir, options);
+TEST_F(IR_GlslCombinedTextureSamplerTest, Clone) {
+    BindingPoint texture_bp{1, 2};
+    BindingPoint sampler_bp{3, 4};
+    auto* type = ty.ptr<handle>(
+        ty.Get<core::type::SampledTexture>(core::type::TextureDimension::k2d, ty.f32()));
+    auto* var = mod.CreateInstruction<CombinedTextureSamplerVar>(b.InstructionResult(type),
+                                                                 texture_bp, sampler_bp);
+
+    auto* new_var = clone_ctx.Clone(var);
+
+    EXPECT_NE(var, new_var);
+    EXPECT_NE(var->Result(0), new_var->Result(0));
+    EXPECT_EQ(new_var->Result(0)->Type(), type);
+
+    EXPECT_EQ(new_var->TextureBindingPoint(), texture_bp);
+    EXPECT_EQ(new_var->SamplerBindingPoint(), sampler_bp);
 }
 
-}  // namespace tint::glsl::writer
+}  // namespace
+}  // namespace tint::glsl::ir

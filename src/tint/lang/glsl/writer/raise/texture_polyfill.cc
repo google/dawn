@@ -41,6 +41,7 @@
 #include "src/tint/lang/core/type/sampled_texture.h"
 #include "src/tint/lang/core/type/storage_texture.h"
 #include "src/tint/lang/glsl/ir/builtin_call.h"
+#include "src/tint/lang/glsl/ir/combined_texture_sampler_var.h"
 #include "src/tint/lang/glsl/ir/member_builtin_call.h"
 
 namespace tint::glsl::writer::raise {
@@ -269,32 +270,29 @@ struct State {
                            core::ir::Var* tex,
                            core::ir::Var* sampler,
                            const core::type::Pointer* tex_ty) {
-        std::string name;
-        auto it = (cfg.sampler_texture_to_name.find(key));
-        if (it != cfg.sampler_texture_to_name.end()) {
-            name = it->second;
-        } else {
-            name = ir.NameOf(tex).Name();
-            if (name.empty()) {
-                name = "t";
-            }
+        // Create a combined texture sampler variable and insert it into the root block.
+        auto* result = b.InstructionResult(tex_ty);
+        auto* var = ir.CreateInstruction<glsl::ir::CombinedTextureSamplerVar>(result, key.texture,
+                                                                              key.sampler);
+        ir.root_block->Append(var);
 
-            if (sampler) {
-                auto sampler_name = ir.NameOf(sampler).Name();
-                if (sampler_name.empty()) {
-                    sampler_name = "s";
-                }
-                name += "_" + sampler_name;
-            }
-            if (name.empty()) {
-                name = "v";
+        // Set the variable name based on the original texture and sampler names if provided.
+        StringStream name;
+        if (auto texture_name = ir.NameOf(tex)) {
+            name << texture_name.NameView();
+        } else {
+            name << "t";
+        }
+        if (sampler) {
+            name << "_";
+            if (auto sampler_name = ir.NameOf(sampler)) {
+                name << sampler_name.NameView();
+            } else {
+                name << "s";
             }
         }
+        ir.SetName(var, name.str());
 
-        core::ir::Var* var = nullptr;
-        // We may already be inside an insert block, so make a new insert block instead of
-        // appending directly to the root block.
-        b.Append(ir.root_block, [&] { var = b.Var(name, tex_ty); });
         return var;
     }
 

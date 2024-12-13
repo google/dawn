@@ -1,4 +1,4 @@
-// Copyright 2021 The Dawn & Tint Authors
+// Copyright 2024 The Dawn & Tint Authors
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
@@ -25,23 +25,32 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "src/tint/lang/glsl/writer/writer.h"
+#include "src/tint/lang/glsl/ir/combined_texture_sampler_var.h"
 
-#include <memory>
 #include <utility>
 
-#include "src/tint/lang/glsl/writer/printer/printer.h"
-#include "src/tint/lang/glsl/writer/raise/raise.h"
+#include "src/tint/lang/core/ir/clone_context.h"
+#include "src/tint/lang/core/ir/module.h"
+#include "src/tint/utils/ice/ice.h"
 
-namespace tint::glsl::writer {
+TINT_INSTANTIATE_TYPEINFO(tint::glsl::ir::CombinedTextureSamplerVar);
 
-Result<Output> Generate(core::ir::Module& ir, const Options& options, const std::string&) {
-    // Raise from core-dialect to GLSL-dialect.
-    if (auto res = Raise(ir, options); res != Success) {
-        return res.Failure();
-    }
+namespace tint::glsl::ir {
 
-    return Print(ir, options);
+CombinedTextureSamplerVar::CombinedTextureSamplerVar(Id id,
+                                                     core::ir::InstructionResult* result,
+                                                     tint::BindingPoint texture_bp,
+                                                     tint::BindingPoint sampler_bp)
+    : Base(id, result), sampler_binding_point_(sampler_bp) {
+    SetBindingPoint(texture_bp.group, texture_bp.binding);
 }
 
-}  // namespace tint::glsl::writer
+CombinedTextureSamplerVar::~CombinedTextureSamplerVar() = default;
+
+CombinedTextureSamplerVar* CombinedTextureSamplerVar::Clone(core::ir::CloneContext& ctx) {
+    auto* new_result = ctx.Clone(Result(0));
+    return ctx.ir.CreateInstruction<CombinedTextureSamplerVar>(new_result, TextureBindingPoint(),
+                                                               SamplerBindingPoint());
+}
+
+}  // namespace tint::glsl::ir

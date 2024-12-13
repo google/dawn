@@ -40,10 +40,12 @@ cc_library(
   name = "ir",
   srcs = [
     "builtin_call.cc",
+    "combined_texture_sampler_var.cc",
     "member_builtin_call.cc",
   ],
   hdrs = [
     "builtin_call.h",
+    "combined_texture_sampler_var.h",
     "member_builtin_call.h",
   ],
   deps = [
@@ -76,6 +78,7 @@ cc_library(
   alwayslink = True,
   srcs = [
     "builtin_call_test.cc",
+    "combined_texture_sampler_var_test.cc",
     "member_builtin_call_test.cc",
   ],
   deps = [

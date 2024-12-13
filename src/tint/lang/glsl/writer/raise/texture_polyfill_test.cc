@@ -78,7 +78,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %v:ptr<handle, texture_2d<f32>, read_write> = var
+  %v:ptr<handle, texture_2d<f32>, read_write> = combined_texture_sampler @binding_point(0, 0)
 }
 
 %foo = func():u32 {
@@ -130,7 +130,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %v:ptr<handle, texture_2d<f32>, read_write> = var
+  %v:ptr<handle, texture_2d<f32>, read_write> = combined_texture_sampler @binding_point(0, 0)
 }
 
 %foo = func():vec2<u32> {
@@ -181,7 +181,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %v:ptr<handle, texture_2d<f32>, read_write> = var
+  %v:ptr<handle, texture_2d<f32>, read_write> = combined_texture_sampler @binding_point(0, 0)
 }
 
 %foo = func():vec2<u32> {
@@ -233,7 +233,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %v:ptr<handle, texture_2d_array<f32>, read_write> = var
+  %v:ptr<handle, texture_2d_array<f32>, read_write> = combined_texture_sampler @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
@@ -338,7 +338,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %v:ptr<handle, texture_depth_multisampled_2d, read_write> = var
+  %v:ptr<handle, texture_depth_multisampled_2d, read_write> = combined_texture_sampler @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
@@ -391,7 +391,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %v:ptr<handle, texture_2d_array<f32>, read_write> = var
+  %v:ptr<handle, texture_2d_array<f32>, read_write> = combined_texture_sampler @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
@@ -444,7 +444,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %v:ptr<handle, texture_2d_array<f32>, read_write> = var
+  %v:ptr<handle, texture_2d_array<f32>, read_write> = combined_texture_sampler @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
@@ -498,7 +498,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %v:ptr<handle, texture_cube_array<f32>, read_write> = var
+  %v:ptr<handle, texture_cube_array<f32>, read_write> = combined_texture_sampler @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
@@ -551,7 +551,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %v:ptr<handle, texture_cube_array<f32>, read_write> = var
+  %v:ptr<handle, texture_cube_array<f32>, read_write> = combined_texture_sampler @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
@@ -660,7 +660,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %v:ptr<handle, texture_2d<f32>, read_write> = var
+  %v:ptr<handle, texture_2d<f32>, read_write> = combined_texture_sampler @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
@@ -715,7 +715,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %v:ptr<handle, texture_2d<i32>, read_write> = var
+  %v:ptr<handle, texture_2d<i32>, read_write> = combined_texture_sampler @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
@@ -769,7 +769,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %v:ptr<handle, texture_3d<f32>, read_write> = var
+  %v:ptr<handle, texture_3d<f32>, read_write> = combined_texture_sampler @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
@@ -825,7 +825,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %v:ptr<handle, texture_multisampled_2d<i32>, read_write> = var
+  %v:ptr<handle, texture_multisampled_2d<i32>, read_write> = combined_texture_sampler @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
@@ -1204,12 +1204,12 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %my_tex:ptr<handle, texture_2d<f32>, read_write> = var
+  %t:ptr<handle, texture_2d<f32>, read_write> = combined_texture_sampler @binding_point(0, 0)
 }
 
 %foo = func():vec2<u32> {
   $B2: {
-    %3:texture_2d<f32> = load %my_tex
+    %3:texture_2d<f32> = load %t
     %4:vec2<i32> = glsl.textureSize %3, 0i
     %5:vec2<u32> = bitcast %4
     ret %5
@@ -1221,12 +1221,6 @@ $B1: {  # root
 
     TexturePolyfillConfig cfg;
     cfg.placeholder_sampler_bind_point = {2, 2};
-
-    binding::CombinedTextureSamplerPair pair;
-    pair.texture = {0, 0};
-    pair.sampler = {2, 2};
-    cfg.sampler_texture_to_name[pair] = "my_tex";
-
     Run(TexturePolyfill, cfg);
     EXPECT_EQ(expect, str());
 }
@@ -1277,7 +1271,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %t_s:ptr<handle, texture_depth_2d, read> = var
+  %t_s:ptr<handle, texture_depth_2d, read> = combined_texture_sampler @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
@@ -1295,12 +1289,6 @@ $B1: {  # root
 
     TexturePolyfillConfig cfg;
     cfg.placeholder_sampler_bind_point = {2, 2};
-
-    binding::CombinedTextureSamplerPair pair;
-    pair.texture = {0, 0};
-    pair.sampler = {2, 2};
-    cfg.sampler_texture_to_name[pair] = "my_tex";
-
     Run(TexturePolyfill, cfg);
     EXPECT_EQ(expect, str());
 }
@@ -1353,7 +1341,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %t_s:ptr<handle, texture_depth_2d, read> = var
+  %t_s:ptr<handle, texture_depth_2d, read> = combined_texture_sampler @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
@@ -1372,12 +1360,6 @@ $B1: {  # root
 
     TexturePolyfillConfig cfg;
     cfg.placeholder_sampler_bind_point = {2, 2};
-
-    binding::CombinedTextureSamplerPair pair;
-    pair.texture = {0, 0};
-    pair.sampler = {2, 2};
-    cfg.sampler_texture_to_name[pair] = "my_tex";
-
     Run(TexturePolyfill, cfg);
     EXPECT_EQ(expect, str());
 }
@@ -1429,7 +1411,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %t_s:ptr<handle, texture_depth_cube_array, read> = var
+  %t_s:ptr<handle, texture_depth_cube_array, read> = combined_texture_sampler @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
@@ -1449,12 +1431,6 @@ $B1: {  # root
 
     TexturePolyfillConfig cfg;
     cfg.placeholder_sampler_bind_point = {2, 2};
-
-    binding::CombinedTextureSamplerPair pair;
-    pair.texture = {0, 0};
-    pair.sampler = {2, 2};
-    cfg.sampler_texture_to_name[pair] = "my_tex";
-
     Run(TexturePolyfill, cfg);
     EXPECT_EQ(expect, str());
 }
@@ -1508,7 +1484,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %t_s:ptr<handle, texture_depth_2d_array, read> = var
+  %t_s:ptr<handle, texture_depth_2d_array, read> = combined_texture_sampler @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
@@ -1529,12 +1505,6 @@ $B1: {  # root
 
     TexturePolyfillConfig cfg;
     cfg.placeholder_sampler_bind_point = {2, 2};
-
-    binding::CombinedTextureSamplerPair pair;
-    pair.texture = {0, 0};
-    pair.sampler = {2, 2};
-    cfg.sampler_texture_to_name[pair] = "my_tex";
-
     Run(TexturePolyfill, cfg);
     EXPECT_EQ(expect, str());
 }
@@ -1583,7 +1553,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %t_s:ptr<handle, texture_2d<i32>, read> = var
+  %t_s:ptr<handle, texture_2d<i32>, read> = combined_texture_sampler @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
@@ -1602,12 +1572,6 @@ $B1: {  # root
 
     TexturePolyfillConfig cfg;
     cfg.placeholder_sampler_bind_point = {2, 2};
-
-    binding::CombinedTextureSamplerPair pair;
-    pair.texture = {0, 0};
-    pair.sampler = {2, 2};
-    cfg.sampler_texture_to_name[pair] = "my_tex";
-
     Run(TexturePolyfill, cfg);
     EXPECT_EQ(expect, str());
 }
@@ -1656,7 +1620,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %t_s:ptr<handle, texture_2d<i32>, read> = var
+  %t_s:ptr<handle, texture_2d<i32>, read> = combined_texture_sampler @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
@@ -1675,12 +1639,6 @@ $B1: {  # root
 
     TexturePolyfillConfig cfg;
     cfg.placeholder_sampler_bind_point = {2, 2};
-
-    binding::CombinedTextureSamplerPair pair;
-    pair.texture = {0, 0};
-    pair.sampler = {2, 2};
-    cfg.sampler_texture_to_name[pair] = "my_tex";
-
     Run(TexturePolyfill, cfg);
     EXPECT_EQ(expect, str());
 }
@@ -1730,7 +1688,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %t_s:ptr<handle, texture_2d_array<i32>, read> = var
+  %t_s:ptr<handle, texture_2d_array<i32>, read> = combined_texture_sampler @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
@@ -1751,12 +1709,6 @@ $B1: {  # root
 
     TexturePolyfillConfig cfg;
     cfg.placeholder_sampler_bind_point = {2, 2};
-
-    binding::CombinedTextureSamplerPair pair;
-    pair.texture = {0, 0};
-    pair.sampler = {2, 2};
-    cfg.sampler_texture_to_name[pair] = "my_tex";
-
     Run(TexturePolyfill, cfg);
     EXPECT_EQ(expect, str());
 }
@@ -1808,7 +1760,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %t_s:ptr<handle, texture_2d_array<i32>, read> = var
+  %t_s:ptr<handle, texture_2d_array<i32>, read> = combined_texture_sampler @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
@@ -1829,12 +1781,6 @@ $B1: {  # root
 
     TexturePolyfillConfig cfg;
     cfg.placeholder_sampler_bind_point = {2, 2};
-
-    binding::CombinedTextureSamplerPair pair;
-    pair.texture = {0, 0};
-    pair.sampler = {2, 2};
-    cfg.sampler_texture_to_name[pair] = "my_tex";
-
     Run(TexturePolyfill, cfg);
     EXPECT_EQ(expect, str());
 }
@@ -1883,7 +1829,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %t_s:ptr<handle, texture_depth_2d, read> = var
+  %t_s:ptr<handle, texture_depth_2d, read> = combined_texture_sampler @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
@@ -1901,12 +1847,6 @@ $B1: {  # root
 
     TexturePolyfillConfig cfg;
     cfg.placeholder_sampler_bind_point = {2, 2};
-
-    binding::CombinedTextureSamplerPair pair;
-    pair.texture = {0, 0};
-    pair.sampler = {2, 2};
-    cfg.sampler_texture_to_name[pair] = "my_tex";
-
     Run(TexturePolyfill, cfg);
     EXPECT_EQ(expect, str());
 }
@@ -1955,7 +1895,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %t_s:ptr<handle, texture_depth_2d, read> = var
+  %t_s:ptr<handle, texture_depth_2d, read> = combined_texture_sampler @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
@@ -1973,12 +1913,6 @@ $B1: {  # root
 
     TexturePolyfillConfig cfg;
     cfg.placeholder_sampler_bind_point = {2, 2};
-
-    binding::CombinedTextureSamplerPair pair;
-    pair.texture = {0, 0};
-    pair.sampler = {2, 2};
-    cfg.sampler_texture_to_name[pair] = "my_tex";
-
     Run(TexturePolyfill, cfg);
     EXPECT_EQ(expect, str());
 }
@@ -2028,7 +1962,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %t_s:ptr<handle, texture_depth_2d_array, read> = var
+  %t_s:ptr<handle, texture_depth_2d_array, read> = combined_texture_sampler @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
@@ -2048,12 +1982,6 @@ $B1: {  # root
 
     TexturePolyfillConfig cfg;
     cfg.placeholder_sampler_bind_point = {2, 2};
-
-    binding::CombinedTextureSamplerPair pair;
-    pair.texture = {0, 0};
-    pair.sampler = {2, 2};
-    cfg.sampler_texture_to_name[pair] = "my_tex";
-
     Run(TexturePolyfill, cfg);
     EXPECT_EQ(expect, str());
 }
@@ -2105,7 +2033,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %t_s:ptr<handle, texture_depth_2d_array, read> = var
+  %t_s:ptr<handle, texture_depth_2d_array, read> = combined_texture_sampler @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
@@ -2125,12 +2053,6 @@ $B1: {  # root
 
     TexturePolyfillConfig cfg;
     cfg.placeholder_sampler_bind_point = {2, 2};
-
-    binding::CombinedTextureSamplerPair pair;
-    pair.texture = {0, 0};
-    pair.sampler = {2, 2};
-    cfg.sampler_texture_to_name[pair] = "my_tex";
-
     Run(TexturePolyfill, cfg);
     EXPECT_EQ(expect, str());
 }
@@ -2178,13 +2100,13 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %my_tex:ptr<handle, texture_2d<f32>, read> = var
+  %t_s:ptr<handle, texture_2d<f32>, read> = combined_texture_sampler @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
   $B2: {
     %3:vec2<f32> = construct 1.0f, 0.5f
-    %4:texture_2d<f32> = load %my_tex
+    %4:texture_2d<f32> = load %t_s
     %5:vec4<f32> = glsl.texture %4, %3
     %x:vec4<f32> = let %5
     ret
@@ -2196,12 +2118,6 @@ $B1: {  # root
 
     TexturePolyfillConfig cfg;
     cfg.placeholder_sampler_bind_point = {2, 2};
-
-    binding::CombinedTextureSamplerPair pair;
-    pair.texture = {0, 0};
-    pair.sampler = {0, 1};
-    cfg.sampler_texture_to_name[pair] = "my_tex";
-
     Run(TexturePolyfill, cfg);
     EXPECT_EQ(expect, str());
 }
@@ -2250,13 +2166,13 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %my_tex:ptr<handle, texture_2d<f32>, read> = var
+  %t_s:ptr<handle, texture_2d<f32>, read> = combined_texture_sampler @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
   $B2: {
     %3:vec2<f32> = construct 1.0f, 2.0f
-    %4:texture_2d<f32> = load %my_tex
+    %4:texture_2d<f32> = load %t_s
     %5:vec4<f32> = glsl.texture %4, %3
     %x:vec4<f32> = let %5
     ret
@@ -2268,12 +2184,6 @@ $B1: {  # root
 
     TexturePolyfillConfig cfg;
     cfg.placeholder_sampler_bind_point = {2, 2};
-
-    binding::CombinedTextureSamplerPair pair;
-    pair.texture = {0, 0};
-    pair.sampler = {0, 1};
-    cfg.sampler_texture_to_name[pair] = "my_tex";
-
     Run(TexturePolyfill, cfg);
     EXPECT_EQ(expect, str());
 }
@@ -2323,13 +2233,13 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %my_tex:ptr<handle, texture_2d<f32>, read> = var
+  %t_s:ptr<handle, texture_2d<f32>, read> = combined_texture_sampler @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
   $B2: {
     %3:vec2<f32> = construct 1.0f, 2.0f
-    %4:texture_2d<f32> = load %my_tex
+    %4:texture_2d<f32> = load %t_s
     %5:vec4<f32> = glsl.textureOffset %4, %3, vec2<i32>(4i, 5i)
     %x:vec4<f32> = let %5
     ret
@@ -2341,12 +2251,6 @@ $B1: {  # root
 
     TexturePolyfillConfig cfg;
     cfg.placeholder_sampler_bind_point = {2, 2};
-
-    binding::CombinedTextureSamplerPair pair;
-    pair.texture = {0, 0};
-    pair.sampler = {0, 1};
-    cfg.sampler_texture_to_name[pair] = "my_tex";
-
     Run(TexturePolyfill, cfg);
     EXPECT_EQ(expect, str());
 }
@@ -2396,13 +2300,13 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %my_tex:ptr<handle, texture_2d_array<f32>, read> = var
+  %t_s:ptr<handle, texture_2d_array<f32>, read> = combined_texture_sampler @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
   $B2: {
     %3:vec2<f32> = construct 1.0f, 2.0f
-    %4:texture_2d_array<f32> = load %my_tex
+    %4:texture_2d_array<f32> = load %t_s
     %5:f32 = convert 4u
     %6:vec3<f32> = construct %3, %5
     %7:vec4<f32> = glsl.texture %4, %6
@@ -2416,12 +2320,6 @@ $B1: {  # root
 
     TexturePolyfillConfig cfg;
     cfg.placeholder_sampler_bind_point = {2, 2};
-
-    binding::CombinedTextureSamplerPair pair;
-    pair.texture = {0, 0};
-    pair.sampler = {0, 1};
-    cfg.sampler_texture_to_name[pair] = "my_tex";
-
     Run(TexturePolyfill, cfg);
     EXPECT_EQ(expect, str());
 }
@@ -2473,13 +2371,13 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %my_tex:ptr<handle, texture_2d_array<f32>, read> = var
+  %t_s:ptr<handle, texture_2d_array<f32>, read> = combined_texture_sampler @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
   $B2: {
     %3:vec2<f32> = construct 1.0f, 2.0f
-    %4:texture_2d_array<f32> = load %my_tex
+    %4:texture_2d_array<f32> = load %t_s
     %5:f32 = convert 4u
     %6:vec3<f32> = construct %3, %5
     %7:vec4<f32> = glsl.textureOffset %4, %6, vec2<i32>(4i, 5i)
@@ -2493,12 +2391,6 @@ $B1: {  # root
 
     TexturePolyfillConfig cfg;
     cfg.placeholder_sampler_bind_point = {2, 2};
-
-    binding::CombinedTextureSamplerPair pair;
-    pair.texture = {0, 0};
-    pair.sampler = {0, 1};
-    cfg.sampler_texture_to_name[pair] = "my_tex";
-
     Run(TexturePolyfill, cfg);
     EXPECT_EQ(expect, str());
 }
@@ -2547,13 +2439,13 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %my_tex:ptr<handle, texture_3d<f32>, read> = var
+  %t_s:ptr<handle, texture_3d<f32>, read> = combined_texture_sampler @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
   $B2: {
     %3:vec3<f32> = construct 1.0f, 2.0f, 3.0f
-    %4:texture_3d<f32> = load %my_tex
+    %4:texture_3d<f32> = load %t_s
     %5:vec4<f32> = glsl.texture %4, %3
     %x:vec4<f32> = let %5
     ret
@@ -2565,12 +2457,6 @@ $B1: {  # root
 
     TexturePolyfillConfig cfg;
     cfg.placeholder_sampler_bind_point = {2, 2};
-
-    binding::CombinedTextureSamplerPair pair;
-    pair.texture = {0, 0};
-    pair.sampler = {0, 1};
-    cfg.sampler_texture_to_name[pair] = "my_tex";
-
     Run(TexturePolyfill, cfg);
     EXPECT_EQ(expect, str());
 }
@@ -2620,13 +2506,13 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %my_tex:ptr<handle, texture_3d<f32>, read> = var
+  %t_s:ptr<handle, texture_3d<f32>, read> = combined_texture_sampler @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
   $B2: {
     %3:vec3<f32> = construct 1.0f, 2.0f, 3.0f
-    %4:texture_3d<f32> = load %my_tex
+    %4:texture_3d<f32> = load %t_s
     %5:vec4<f32> = glsl.textureOffset %4, %3, vec3<i32>(4i, 5i, 6i)
     %x:vec4<f32> = let %5
     ret
@@ -2638,12 +2524,6 @@ $B1: {  # root
 
     TexturePolyfillConfig cfg;
     cfg.placeholder_sampler_bind_point = {2, 2};
-
-    binding::CombinedTextureSamplerPair pair;
-    pair.texture = {0, 0};
-    pair.sampler = {0, 1};
-    cfg.sampler_texture_to_name[pair] = "my_tex";
-
     Run(TexturePolyfill, cfg);
     EXPECT_EQ(expect, str());
 }
@@ -2692,13 +2572,13 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %my_tex:ptr<handle, texture_cube<f32>, read> = var
+  %t_s:ptr<handle, texture_cube<f32>, read> = combined_texture_sampler @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
   $B2: {
     %3:vec3<f32> = construct 1.0f, 2.0f, 3.0f
-    %4:texture_cube<f32> = load %my_tex
+    %4:texture_cube<f32> = load %t_s
     %5:vec4<f32> = glsl.texture %4, %3
     %x:vec4<f32> = let %5
     ret
@@ -2710,12 +2590,6 @@ $B1: {  # root
 
     TexturePolyfillConfig cfg;
     cfg.placeholder_sampler_bind_point = {2, 2};
-
-    binding::CombinedTextureSamplerPair pair;
-    pair.texture = {0, 0};
-    pair.sampler = {0, 1};
-    cfg.sampler_texture_to_name[pair] = "my_tex";
-
     Run(TexturePolyfill, cfg);
     EXPECT_EQ(expect, str());
 }
@@ -2765,13 +2639,13 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %my_tex:ptr<handle, texture_cube_array<f32>, read> = var
+  %t_s:ptr<handle, texture_cube_array<f32>, read> = combined_texture_sampler @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
   $B2: {
     %3:vec3<f32> = construct 1.0f, 2.0f, 3.0f
-    %4:texture_cube_array<f32> = load %my_tex
+    %4:texture_cube_array<f32> = load %t_s
     %5:f32 = convert 4u
     %6:vec4<f32> = construct %3, %5
     %7:vec4<f32> = glsl.texture %4, %6
@@ -2785,12 +2659,6 @@ $B1: {  # root
 
     TexturePolyfillConfig cfg;
     cfg.placeholder_sampler_bind_point = {2, 2};
-
-    binding::CombinedTextureSamplerPair pair;
-    pair.texture = {0, 0};
-    pair.sampler = {0, 1};
-    cfg.sampler_texture_to_name[pair] = "my_tex";
-
     Run(TexturePolyfill, cfg);
     EXPECT_EQ(expect, str());
 }
@@ -2839,13 +2707,13 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %my_tex:ptr<handle, texture_depth_2d, read> = var
+  %t_s:ptr<handle, texture_depth_2d, read> = combined_texture_sampler @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
   $B2: {
     %3:vec2<f32> = construct 1.0f, 2.0f
-    %4:texture_depth_2d = load %my_tex
+    %4:texture_depth_2d = load %t_s
     %5:vec3<f32> = construct %3, 0.0f
     %6:f32 = glsl.texture %4, %5
     %x:f32 = let %6
@@ -2858,12 +2726,6 @@ $B1: {  # root
 
     TexturePolyfillConfig cfg;
     cfg.placeholder_sampler_bind_point = {2, 2};
-
-    binding::CombinedTextureSamplerPair pair;
-    pair.texture = {0, 0};
-    pair.sampler = {0, 1};
-    cfg.sampler_texture_to_name[pair] = "my_tex";
-
     Run(TexturePolyfill, cfg);
     EXPECT_EQ(expect, str());
 }
@@ -2913,13 +2775,13 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %my_tex:ptr<handle, texture_depth_2d, read> = var
+  %t_s:ptr<handle, texture_depth_2d, read> = combined_texture_sampler @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
   $B2: {
     %3:vec2<f32> = construct 1.0f, 2.0f
-    %4:texture_depth_2d = load %my_tex
+    %4:texture_depth_2d = load %t_s
     %5:vec3<f32> = construct %3, 0.0f
     %6:f32 = glsl.textureOffset %4, %5, vec2<i32>(4i, 5i)
     %x:f32 = let %6
@@ -2932,12 +2794,6 @@ $B1: {  # root
 
     TexturePolyfillConfig cfg;
     cfg.placeholder_sampler_bind_point = {2, 2};
-
-    binding::CombinedTextureSamplerPair pair;
-    pair.texture = {0, 0};
-    pair.sampler = {0, 1};
-    cfg.sampler_texture_to_name[pair] = "my_tex";
-
     Run(TexturePolyfill, cfg);
     EXPECT_EQ(expect, str());
 }
@@ -2987,13 +2843,13 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %my_tex:ptr<handle, texture_depth_2d_array, read> = var
+  %t_s:ptr<handle, texture_depth_2d_array, read> = combined_texture_sampler @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
   $B2: {
     %3:vec2<f32> = construct 1.0f, 2.0f
-    %4:texture_depth_2d_array = load %my_tex
+    %4:texture_depth_2d_array = load %t_s
     %5:f32 = convert 4u
     %6:vec4<f32> = construct %3, %5, 0.0f
     %7:f32 = glsl.texture %4, %6
@@ -3007,12 +2863,6 @@ $B1: {  # root
 
     TexturePolyfillConfig cfg;
     cfg.placeholder_sampler_bind_point = {2, 2};
-
-    binding::CombinedTextureSamplerPair pair;
-    pair.texture = {0, 0};
-    pair.sampler = {0, 1};
-    cfg.sampler_texture_to_name[pair] = "my_tex";
-
     Run(TexturePolyfill, cfg);
     EXPECT_EQ(expect, str());
 }
@@ -3063,13 +2913,13 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %my_tex:ptr<handle, texture_depth_2d_array, read> = var
+  %t_s:ptr<handle, texture_depth_2d_array, read> = combined_texture_sampler @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
   $B2: {
     %3:vec2<f32> = construct 1.0f, 2.0f
-    %4:texture_depth_2d_array = load %my_tex
+    %4:texture_depth_2d_array = load %t_s
     %5:f32 = convert 4u
     %6:vec4<f32> = construct %3, %5, 0.0f
     %7:vec2<f32> = dpdx %3
@@ -3085,12 +2935,6 @@ $B1: {  # root
 
     TexturePolyfillConfig cfg;
     cfg.placeholder_sampler_bind_point = {2, 2};
-
-    binding::CombinedTextureSamplerPair pair;
-    pair.texture = {0, 0};
-    pair.sampler = {0, 1};
-    cfg.sampler_texture_to_name[pair] = "my_tex";
-
     Run(TexturePolyfill, cfg);
     EXPECT_EQ(expect, str());
 }
@@ -3140,13 +2984,13 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %my_tex:ptr<handle, texture_depth_cube_array, read> = var
+  %t_s:ptr<handle, texture_depth_cube_array, read> = combined_texture_sampler @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
   $B2: {
     %3:vec3<f32> = construct 1.0f, 2.0f, 3.0f
-    %4:texture_depth_cube_array = load %my_tex
+    %4:texture_depth_cube_array = load %t_s
     %5:f32 = convert 4u
     %6:vec4<f32> = construct %3, %5
     %7:f32 = glsl.texture %4, %6, 0.0f
@@ -3160,12 +3004,6 @@ $B1: {  # root
 
     TexturePolyfillConfig cfg;
     cfg.placeholder_sampler_bind_point = {2, 2};
-
-    binding::CombinedTextureSamplerPair pair;
-    pair.texture = {0, 0};
-    pair.sampler = {0, 1};
-    cfg.sampler_texture_to_name[pair] = "my_tex";
-
     Run(TexturePolyfill, cfg);
     EXPECT_EQ(expect, str());
 }
@@ -3214,13 +3052,13 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %my_tex:ptr<handle, texture_2d<f32>, read> = var
+  %t_s:ptr<handle, texture_2d<f32>, read> = combined_texture_sampler @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
   $B2: {
     %3:vec2<f32> = construct 1.0f, 2.0f
-    %4:texture_2d<f32> = load %my_tex
+    %4:texture_2d<f32> = load %t_s
     %5:vec4<f32> = glsl.texture %4, %3, 3.0f
     %x:vec4<f32> = let %5
     ret
@@ -3232,12 +3070,6 @@ $B1: {  # root
 
     TexturePolyfillConfig cfg;
     cfg.placeholder_sampler_bind_point = {2, 2};
-
-    binding::CombinedTextureSamplerPair pair;
-    pair.texture = {0, 0};
-    pair.sampler = {0, 1};
-    cfg.sampler_texture_to_name[pair] = "my_tex";
-
     Run(TexturePolyfill, cfg);
     EXPECT_EQ(expect, str());
 }
@@ -3288,13 +3120,13 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %my_tex:ptr<handle, texture_2d<f32>, read> = var
+  %t_s:ptr<handle, texture_2d<f32>, read> = combined_texture_sampler @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
   $B2: {
     %3:vec2<f32> = construct 1.0f, 2.0f
-    %4:texture_2d<f32> = load %my_tex
+    %4:texture_2d<f32> = load %t_s
     %5:vec4<f32> = glsl.textureOffset %4, %3, vec2<i32>(4i, 5i), 3.0f
     %x:vec4<f32> = let %5
     ret
@@ -3306,12 +3138,6 @@ $B1: {  # root
 
     TexturePolyfillConfig cfg;
     cfg.placeholder_sampler_bind_point = {2, 2};
-
-    binding::CombinedTextureSamplerPair pair;
-    pair.texture = {0, 0};
-    pair.sampler = {0, 1};
-    cfg.sampler_texture_to_name[pair] = "my_tex";
-
     Run(TexturePolyfill, cfg);
     EXPECT_EQ(expect, str());
 }
@@ -3362,13 +3188,13 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %my_tex:ptr<handle, texture_2d_array<f32>, read> = var
+  %t_s:ptr<handle, texture_2d_array<f32>, read> = combined_texture_sampler @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
   $B2: {
     %3:vec2<f32> = construct 1.0f, 2.0f
-    %4:texture_2d_array<f32> = load %my_tex
+    %4:texture_2d_array<f32> = load %t_s
     %5:f32 = convert 4u
     %6:vec3<f32> = construct %3, %5
     %7:vec4<f32> = glsl.texture %4, %6, 3.0f
@@ -3382,12 +3208,6 @@ $B1: {  # root
 
     TexturePolyfillConfig cfg;
     cfg.placeholder_sampler_bind_point = {2, 2};
-
-    binding::CombinedTextureSamplerPair pair;
-    pair.texture = {0, 0};
-    pair.sampler = {0, 1};
-    cfg.sampler_texture_to_name[pair] = "my_tex";
-
     Run(TexturePolyfill, cfg);
     EXPECT_EQ(expect, str());
 }
@@ -3439,13 +3259,13 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %my_tex:ptr<handle, texture_2d_array<f32>, read> = var
+  %t_s:ptr<handle, texture_2d_array<f32>, read> = combined_texture_sampler @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
   $B2: {
     %3:vec2<f32> = construct 1.0f, 2.0f
-    %4:texture_2d_array<f32> = load %my_tex
+    %4:texture_2d_array<f32> = load %t_s
     %5:f32 = convert 4u
     %6:vec3<f32> = construct %3, %5
     %7:vec4<f32> = glsl.textureOffset %4, %6, vec2<i32>(4i, 5i), 3.0f
@@ -3459,12 +3279,6 @@ $B1: {  # root
 
     TexturePolyfillConfig cfg;
     cfg.placeholder_sampler_bind_point = {2, 2};
-
-    binding::CombinedTextureSamplerPair pair;
-    pair.texture = {0, 0};
-    pair.sampler = {0, 1};
-    cfg.sampler_texture_to_name[pair] = "my_tex";
-
     Run(TexturePolyfill, cfg);
     EXPECT_EQ(expect, str());
 }
@@ -3513,13 +3327,13 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %my_tex:ptr<handle, texture_3d<f32>, read> = var
+  %t_s:ptr<handle, texture_3d<f32>, read> = combined_texture_sampler @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
   $B2: {
     %3:vec3<f32> = construct 1.0f, 2.0f, 3.0f
-    %4:texture_3d<f32> = load %my_tex
+    %4:texture_3d<f32> = load %t_s
     %5:vec4<f32> = glsl.texture %4, %3, 3.0f
     %x:vec4<f32> = let %5
     ret
@@ -3531,12 +3345,6 @@ $B1: {  # root
 
     TexturePolyfillConfig cfg;
     cfg.placeholder_sampler_bind_point = {2, 2};
-
-    binding::CombinedTextureSamplerPair pair;
-    pair.texture = {0, 0};
-    pair.sampler = {0, 1};
-    cfg.sampler_texture_to_name[pair] = "my_tex";
-
     Run(TexturePolyfill, cfg);
     EXPECT_EQ(expect, str());
 }
@@ -3587,13 +3395,13 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %my_tex:ptr<handle, texture_3d<f32>, read> = var
+  %t_s:ptr<handle, texture_3d<f32>, read> = combined_texture_sampler @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
   $B2: {
     %3:vec3<f32> = construct 1.0f, 2.0f, 3.0f
-    %4:texture_3d<f32> = load %my_tex
+    %4:texture_3d<f32> = load %t_s
     %5:vec4<f32> = glsl.textureOffset %4, %3, vec3<i32>(4i, 5i, 6i), 3.0f
     %x:vec4<f32> = let %5
     ret
@@ -3605,12 +3413,6 @@ $B1: {  # root
 
     TexturePolyfillConfig cfg;
     cfg.placeholder_sampler_bind_point = {2, 2};
-
-    binding::CombinedTextureSamplerPair pair;
-    pair.texture = {0, 0};
-    pair.sampler = {0, 1};
-    cfg.sampler_texture_to_name[pair] = "my_tex";
-
     Run(TexturePolyfill, cfg);
     EXPECT_EQ(expect, str());
 }
@@ -3659,13 +3461,13 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %my_tex:ptr<handle, texture_cube<f32>, read> = var
+  %t_s:ptr<handle, texture_cube<f32>, read> = combined_texture_sampler @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
   $B2: {
     %3:vec3<f32> = construct 1.0f, 2.0f, 3.0f
-    %4:texture_cube<f32> = load %my_tex
+    %4:texture_cube<f32> = load %t_s
     %5:vec4<f32> = glsl.texture %4, %3, 3.0f
     %x:vec4<f32> = let %5
     ret
@@ -3677,12 +3479,6 @@ $B1: {  # root
 
     TexturePolyfillConfig cfg;
     cfg.placeholder_sampler_bind_point = {2, 2};
-
-    binding::CombinedTextureSamplerPair pair;
-    pair.texture = {0, 0};
-    pair.sampler = {0, 1};
-    cfg.sampler_texture_to_name[pair] = "my_tex";
-
     Run(TexturePolyfill, cfg);
     EXPECT_EQ(expect, str());
 }
@@ -3733,13 +3529,13 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %my_tex:ptr<handle, texture_cube_array<f32>, read> = var
+  %t_s:ptr<handle, texture_cube_array<f32>, read> = combined_texture_sampler @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
   $B2: {
     %3:vec3<f32> = construct 1.0f, 2.0f, 3.0f
-    %4:texture_cube_array<f32> = load %my_tex
+    %4:texture_cube_array<f32> = load %t_s
     %5:f32 = convert 4u
     %6:vec4<f32> = construct %3, %5
     %7:vec4<f32> = glsl.texture %4, %6, 3.0f
@@ -3753,12 +3549,6 @@ $B1: {  # root
 
     TexturePolyfillConfig cfg;
     cfg.placeholder_sampler_bind_point = {2, 2};
-
-    binding::CombinedTextureSamplerPair pair;
-    pair.texture = {0, 0};
-    pair.sampler = {0, 1};
-    cfg.sampler_texture_to_name[pair] = "my_tex";
-
     Run(TexturePolyfill, cfg);
     EXPECT_EQ(expect, str());
 }
@@ -3807,13 +3597,13 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %my_tex:ptr<handle, texture_2d<f32>, read> = var
+  %t_s:ptr<handle, texture_2d<f32>, read> = combined_texture_sampler @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
   $B2: {
     %3:vec2<f32> = construct 1.0f, 2.0f
-    %4:texture_2d<f32> = load %my_tex
+    %4:texture_2d<f32> = load %t_s
     %5:f32 = convert 3.0f
     %6:vec4<f32> = glsl.textureLod %4, %3, %5
     %x:vec4<f32> = let %6
@@ -3826,12 +3616,6 @@ $B1: {  # root
 
     TexturePolyfillConfig cfg;
     cfg.placeholder_sampler_bind_point = {2, 2};
-
-    binding::CombinedTextureSamplerPair pair;
-    pair.texture = {0, 0};
-    pair.sampler = {0, 1};
-    cfg.sampler_texture_to_name[pair] = "my_tex";
-
     Run(TexturePolyfill, cfg);
     EXPECT_EQ(expect, str());
 }
@@ -3882,13 +3666,13 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %my_tex:ptr<handle, texture_2d<f32>, read> = var
+  %t_s:ptr<handle, texture_2d<f32>, read> = combined_texture_sampler @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
   $B2: {
     %3:vec2<f32> = construct 1.0f, 2.0f
-    %4:texture_2d<f32> = load %my_tex
+    %4:texture_2d<f32> = load %t_s
     %5:f32 = convert 3.0f
     %6:vec4<f32> = glsl.textureLodOffset %4, %3, %5, vec2<i32>(4i, 5i)
     %x:vec4<f32> = let %6
@@ -3901,12 +3685,6 @@ $B1: {  # root
 
     TexturePolyfillConfig cfg;
     cfg.placeholder_sampler_bind_point = {2, 2};
-
-    binding::CombinedTextureSamplerPair pair;
-    pair.texture = {0, 0};
-    pair.sampler = {0, 1};
-    cfg.sampler_texture_to_name[pair] = "my_tex";
-
     Run(TexturePolyfill, cfg);
     EXPECT_EQ(expect, str());
 }
@@ -3957,13 +3735,13 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %my_tex:ptr<handle, texture_2d_array<f32>, read> = var
+  %t_s:ptr<handle, texture_2d_array<f32>, read> = combined_texture_sampler @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
   $B2: {
     %3:vec2<f32> = construct 1.0f, 2.0f
-    %4:texture_2d_array<f32> = load %my_tex
+    %4:texture_2d_array<f32> = load %t_s
     %5:f32 = convert 4u
     %6:vec3<f32> = construct %3, %5
     %7:f32 = convert 3.0f
@@ -3978,12 +3756,6 @@ $B1: {  # root
 
     TexturePolyfillConfig cfg;
     cfg.placeholder_sampler_bind_point = {2, 2};
-
-    binding::CombinedTextureSamplerPair pair;
-    pair.texture = {0, 0};
-    pair.sampler = {0, 1};
-    cfg.sampler_texture_to_name[pair] = "my_tex";
-
     Run(TexturePolyfill, cfg);
     EXPECT_EQ(expect, str());
 }
@@ -4035,13 +3807,13 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %my_tex:ptr<handle, texture_2d_array<f32>, read> = var
+  %t_s:ptr<handle, texture_2d_array<f32>, read> = combined_texture_sampler @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
   $B2: {
     %3:vec2<f32> = construct 1.0f, 2.0f
-    %4:texture_2d_array<f32> = load %my_tex
+    %4:texture_2d_array<f32> = load %t_s
     %5:f32 = convert 4u
     %6:vec3<f32> = construct %3, %5
     %7:f32 = convert 3.0f
@@ -4056,12 +3828,6 @@ $B1: {  # root
 
     TexturePolyfillConfig cfg;
     cfg.placeholder_sampler_bind_point = {2, 2};
-
-    binding::CombinedTextureSamplerPair pair;
-    pair.texture = {0, 0};
-    pair.sampler = {0, 1};
-    cfg.sampler_texture_to_name[pair] = "my_tex";
-
     Run(TexturePolyfill, cfg);
     EXPECT_EQ(expect, str());
 }
@@ -4110,13 +3876,13 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %my_tex:ptr<handle, texture_3d<f32>, read> = var
+  %t_s:ptr<handle, texture_3d<f32>, read> = combined_texture_sampler @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
   $B2: {
     %3:vec3<f32> = construct 1.0f, 2.0f, 3.0f
-    %4:texture_3d<f32> = load %my_tex
+    %4:texture_3d<f32> = load %t_s
     %5:f32 = convert 3.0f
     %6:vec4<f32> = glsl.textureLod %4, %3, %5
     %x:vec4<f32> = let %6
@@ -4129,12 +3895,6 @@ $B1: {  # root
 
     TexturePolyfillConfig cfg;
     cfg.placeholder_sampler_bind_point = {2, 2};
-
-    binding::CombinedTextureSamplerPair pair;
-    pair.texture = {0, 0};
-    pair.sampler = {0, 1};
-    cfg.sampler_texture_to_name[pair] = "my_tex";
-
     Run(TexturePolyfill, cfg);
     EXPECT_EQ(expect, str());
 }
@@ -4185,13 +3945,13 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %my_tex:ptr<handle, texture_3d<f32>, read> = var
+  %t_s:ptr<handle, texture_3d<f32>, read> = combined_texture_sampler @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
   $B2: {
     %3:vec3<f32> = construct 1.0f, 2.0f, 3.0f
-    %4:texture_3d<f32> = load %my_tex
+    %4:texture_3d<f32> = load %t_s
     %5:f32 = convert 3.0f
     %6:vec4<f32> = glsl.textureLodOffset %4, %3, %5, vec3<i32>(4i, 5i, 6i)
     %x:vec4<f32> = let %6
@@ -4204,12 +3964,6 @@ $B1: {  # root
 
     TexturePolyfillConfig cfg;
     cfg.placeholder_sampler_bind_point = {2, 2};
-
-    binding::CombinedTextureSamplerPair pair;
-    pair.texture = {0, 0};
-    pair.sampler = {0, 1};
-    cfg.sampler_texture_to_name[pair] = "my_tex";
-
     Run(TexturePolyfill, cfg);
     EXPECT_EQ(expect, str());
 }
@@ -4258,13 +4012,13 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %my_tex:ptr<handle, texture_cube<f32>, read> = var
+  %t_s:ptr<handle, texture_cube<f32>, read> = combined_texture_sampler @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
   $B2: {
     %3:vec3<f32> = construct 1.0f, 2.0f, 3.0f
-    %4:texture_cube<f32> = load %my_tex
+    %4:texture_cube<f32> = load %t_s
     %5:f32 = convert 3.0f
     %6:vec4<f32> = glsl.textureLod %4, %3, %5
     %x:vec4<f32> = let %6
@@ -4277,12 +4031,6 @@ $B1: {  # root
 
     TexturePolyfillConfig cfg;
     cfg.placeholder_sampler_bind_point = {2, 2};
-
-    binding::CombinedTextureSamplerPair pair;
-    pair.texture = {0, 0};
-    pair.sampler = {0, 1};
-    cfg.sampler_texture_to_name[pair] = "my_tex";
-
     Run(TexturePolyfill, cfg);
     EXPECT_EQ(expect, str());
 }
@@ -4333,13 +4081,13 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %my_tex:ptr<handle, texture_cube_array<f32>, read> = var
+  %t_s:ptr<handle, texture_cube_array<f32>, read> = combined_texture_sampler @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
   $B2: {
     %3:vec3<f32> = construct 1.0f, 2.0f, 3.0f
-    %4:texture_cube_array<f32> = load %my_tex
+    %4:texture_cube_array<f32> = load %t_s
     %5:f32 = convert 4u
     %6:vec4<f32> = construct %3, %5
     %7:f32 = convert 3.0f
@@ -4354,12 +4102,6 @@ $B1: {  # root
 
     TexturePolyfillConfig cfg;
     cfg.placeholder_sampler_bind_point = {2, 2};
-
-    binding::CombinedTextureSamplerPair pair;
-    pair.texture = {0, 0};
-    pair.sampler = {0, 1};
-    cfg.sampler_texture_to_name[pair] = "my_tex";
-
     Run(TexturePolyfill, cfg);
     EXPECT_EQ(expect, str());
 }
@@ -4408,13 +4150,13 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %my_tex:ptr<handle, texture_depth_2d, read> = var
+  %t_s:ptr<handle, texture_depth_2d, read> = combined_texture_sampler @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
   $B2: {
     %3:vec2<f32> = construct 1.0f, 2.0f
-    %4:texture_depth_2d = load %my_tex
+    %4:texture_depth_2d = load %t_s
     %5:vec3<f32> = construct %3, 0.0f
     %6:f32 = convert 3i
     %7:f32 = glsl.textureLod %4, %5, %6
@@ -4428,12 +4170,6 @@ $B1: {  # root
 
     TexturePolyfillConfig cfg;
     cfg.placeholder_sampler_bind_point = {2, 2};
-
-    binding::CombinedTextureSamplerPair pair;
-    pair.texture = {0, 0};
-    pair.sampler = {0, 1};
-    cfg.sampler_texture_to_name[pair] = "my_tex";
-
     Run(TexturePolyfill, cfg);
     EXPECT_EQ(expect, str());
 }
@@ -4483,13 +4219,13 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %my_tex:ptr<handle, texture_depth_2d, read> = var
+  %t_s:ptr<handle, texture_depth_2d, read> = combined_texture_sampler @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
   $B2: {
     %3:vec2<f32> = construct 1.0f, 2.0f
-    %4:texture_depth_2d = load %my_tex
+    %4:texture_depth_2d = load %t_s
     %5:vec3<f32> = construct %3, 0.0f
     %6:f32 = convert 3u
     %7:f32 = glsl.textureLodOffset %4, %5, %6, vec2<i32>(4i, 5i)
@@ -4503,12 +4239,6 @@ $B1: {  # root
 
     TexturePolyfillConfig cfg;
     cfg.placeholder_sampler_bind_point = {2, 2};
-
-    binding::CombinedTextureSamplerPair pair;
-    pair.texture = {0, 0};
-    pair.sampler = {0, 1};
-    cfg.sampler_texture_to_name[pair] = "my_tex";
-
     Run(TexturePolyfill, cfg);
     EXPECT_EQ(expect, str());
 }
@@ -4558,13 +4288,13 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %my_tex:ptr<handle, texture_depth_2d_array, read> = var
+  %t_s:ptr<handle, texture_depth_2d_array, read> = combined_texture_sampler @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
   $B2: {
     %3:vec2<f32> = construct 1.0f, 2.0f
-    %4:texture_depth_2d_array = load %my_tex
+    %4:texture_depth_2d_array = load %t_s
     %5:f32 = convert 4u
     %6:vec4<f32> = construct %3, %5, 0.0f
     %7:f32 = convert 3i
@@ -4579,12 +4309,6 @@ $B1: {  # root
 
     TexturePolyfillConfig cfg;
     cfg.placeholder_sampler_bind_point = {2, 2};
-
-    binding::CombinedTextureSamplerPair pair;
-    pair.texture = {0, 0};
-    pair.sampler = {0, 1};
-    cfg.sampler_texture_to_name[pair] = "my_tex";
-
     Run(TexturePolyfill, cfg);
     EXPECT_EQ(expect, str());
 }
@@ -4636,13 +4360,13 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %my_tex:ptr<handle, texture_depth_2d_array, read> = var
+  %t_s:ptr<handle, texture_depth_2d_array, read> = combined_texture_sampler @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
   $B2: {
     %3:vec2<f32> = construct 1.0f, 2.0f
-    %4:texture_depth_2d_array = load %my_tex
+    %4:texture_depth_2d_array = load %t_s
     %5:f32 = convert 4u
     %6:vec4<f32> = construct %3, %5, 0.0f
     %7:f32 = convert 3u
@@ -4657,12 +4381,6 @@ $B1: {  # root
 
     TexturePolyfillConfig cfg;
     cfg.placeholder_sampler_bind_point = {2, 2};
-
-    binding::CombinedTextureSamplerPair pair;
-    pair.texture = {0, 0};
-    pair.sampler = {0, 1};
-    cfg.sampler_texture_to_name[pair] = "my_tex";
-
     Run(TexturePolyfill, cfg);
     EXPECT_EQ(expect, str());
 }
@@ -4712,13 +4430,13 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %my_tex:ptr<handle, texture_depth_cube_array, read> = var
+  %t_s:ptr<handle, texture_depth_cube_array, read> = combined_texture_sampler @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
   $B2: {
     %3:vec3<f32> = construct 1.0f, 2.0f, 3i
-    %4:texture_depth_cube_array = load %my_tex
+    %4:texture_depth_cube_array = load %t_s
     %5:f32 = convert 4u
     %6:vec4<f32> = construct %3, %5
     %7:f32 = convert 3i
@@ -4733,12 +4451,6 @@ $B1: {  # root
 
     TexturePolyfillConfig cfg;
     cfg.placeholder_sampler_bind_point = {2, 2};
-
-    binding::CombinedTextureSamplerPair pair;
-    pair.texture = {0, 0};
-    pair.sampler = {0, 1};
-    cfg.sampler_texture_to_name[pair] = "my_tex";
-
     Run(TexturePolyfill, cfg);
     EXPECT_EQ(expect, str());
 }
@@ -4791,7 +4503,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %my_tex:ptr<handle, texture_2d<f32>, read> = var
+  %t_s:ptr<handle, texture_2d<f32>, read> = combined_texture_sampler @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
@@ -4799,7 +4511,7 @@ $B1: {  # root
     %3:vec2<f32> = construct 1.0f, 2.0f
     %4:vec2<f32> = construct 3.0f, 4.0f
     %5:vec2<f32> = construct 6.0f, 7.0f
-    %6:texture_2d<f32> = load %my_tex
+    %6:texture_2d<f32> = load %t_s
     %7:vec4<f32> = glsl.textureGrad %6, %3, %4, %5
     %x:vec4<f32> = let %7
     ret
@@ -4811,12 +4523,6 @@ $B1: {  # root
 
     TexturePolyfillConfig cfg;
     cfg.placeholder_sampler_bind_point = {2, 2};
-
-    binding::CombinedTextureSamplerPair pair;
-    pair.texture = {0, 0};
-    pair.sampler = {0, 1};
-    cfg.sampler_texture_to_name[pair] = "my_tex";
-
     Run(TexturePolyfill, cfg);
     EXPECT_EQ(expect, str());
 }
@@ -4871,7 +4577,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %my_tex:ptr<handle, texture_2d<f32>, read> = var
+  %t_s:ptr<handle, texture_2d<f32>, read> = combined_texture_sampler @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
@@ -4879,7 +4585,7 @@ $B1: {  # root
     %3:vec2<f32> = construct 1.0f, 2.0f
     %4:vec2<f32> = construct 3.0f, 4.0f
     %5:vec2<f32> = construct 6.0f, 7.0f
-    %6:texture_2d<f32> = load %my_tex
+    %6:texture_2d<f32> = load %t_s
     %7:vec4<f32> = glsl.textureGradOffset %6, %3, %4, %5, vec2<i32>(4i, 5i)
     %x:vec4<f32> = let %7
     ret
@@ -4891,12 +4597,6 @@ $B1: {  # root
 
     TexturePolyfillConfig cfg;
     cfg.placeholder_sampler_bind_point = {2, 2};
-
-    binding::CombinedTextureSamplerPair pair;
-    pair.texture = {0, 0};
-    pair.sampler = {0, 1};
-    cfg.sampler_texture_to_name[pair] = "my_tex";
-
     Run(TexturePolyfill, cfg);
     EXPECT_EQ(expect, str());
 }
@@ -4951,7 +4651,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %my_tex:ptr<handle, texture_2d_array<f32>, read> = var
+  %t_s:ptr<handle, texture_2d_array<f32>, read> = combined_texture_sampler @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
@@ -4959,7 +4659,7 @@ $B1: {  # root
     %3:vec2<f32> = construct 1.0f, 2.0f
     %4:vec2<f32> = construct 3.0f, 4.0f
     %5:vec2<f32> = construct 6.0f, 7.0f
-    %6:texture_2d_array<f32> = load %my_tex
+    %6:texture_2d_array<f32> = load %t_s
     %7:f32 = convert 4u
     %8:vec3<f32> = construct %3, %7
     %9:vec4<f32> = glsl.textureGrad %6, %8, %4, %5
@@ -4973,12 +4673,6 @@ $B1: {  # root
 
     TexturePolyfillConfig cfg;
     cfg.placeholder_sampler_bind_point = {2, 2};
-
-    binding::CombinedTextureSamplerPair pair;
-    pair.texture = {0, 0};
-    pair.sampler = {0, 1};
-    cfg.sampler_texture_to_name[pair] = "my_tex";
-
     Run(TexturePolyfill, cfg);
     EXPECT_EQ(expect, str());
 }
@@ -5034,7 +4728,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %my_tex:ptr<handle, texture_2d_array<f32>, read> = var
+  %t_s:ptr<handle, texture_2d_array<f32>, read> = combined_texture_sampler @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
@@ -5042,7 +4736,7 @@ $B1: {  # root
     %3:vec2<f32> = construct 1.0f, 2.0f
     %4:vec2<f32> = construct 3.0f, 4.0f
     %5:vec2<f32> = construct 6.0f, 7.0f
-    %6:texture_2d_array<f32> = load %my_tex
+    %6:texture_2d_array<f32> = load %t_s
     %7:f32 = convert 4u
     %8:vec3<f32> = construct %3, %7
     %9:vec4<f32> = glsl.textureGradOffset %6, %8, %4, %5, vec2<i32>(4i, 5i)
@@ -5056,12 +4750,6 @@ $B1: {  # root
 
     TexturePolyfillConfig cfg;
     cfg.placeholder_sampler_bind_point = {2, 2};
-
-    binding::CombinedTextureSamplerPair pair;
-    pair.texture = {0, 0};
-    pair.sampler = {0, 1};
-    cfg.sampler_texture_to_name[pair] = "my_tex";
-
     Run(TexturePolyfill, cfg);
     EXPECT_EQ(expect, str());
 }
@@ -5114,7 +4802,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %my_tex:ptr<handle, texture_3d<f32>, read> = var
+  %t_s:ptr<handle, texture_3d<f32>, read> = combined_texture_sampler @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
@@ -5122,7 +4810,7 @@ $B1: {  # root
     %3:vec3<f32> = construct 1.0f, 2.0f, 3.0f
     %4:vec3<f32> = construct 3.0f, 4.0f, 5.0f
     %5:vec3<f32> = construct 6.0f, 7.0f, 8.0f
-    %6:texture_3d<f32> = load %my_tex
+    %6:texture_3d<f32> = load %t_s
     %7:vec4<f32> = glsl.textureGrad %6, %3, %4, %5
     %x:vec4<f32> = let %7
     ret
@@ -5134,12 +4822,6 @@ $B1: {  # root
 
     TexturePolyfillConfig cfg;
     cfg.placeholder_sampler_bind_point = {2, 2};
-
-    binding::CombinedTextureSamplerPair pair;
-    pair.texture = {0, 0};
-    pair.sampler = {0, 1};
-    cfg.sampler_texture_to_name[pair] = "my_tex";
-
     Run(TexturePolyfill, cfg);
     EXPECT_EQ(expect, str());
 }
@@ -5194,7 +4876,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %my_tex:ptr<handle, texture_3d<f32>, read> = var
+  %t_s:ptr<handle, texture_3d<f32>, read> = combined_texture_sampler @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
@@ -5202,7 +4884,7 @@ $B1: {  # root
     %3:vec3<f32> = construct 1.0f, 2.0f, 3.0f
     %4:vec3<f32> = construct 3.0f, 4.0f, 5.0f
     %5:vec3<f32> = construct 6.0f, 7.0f, 8.0f
-    %6:texture_3d<f32> = load %my_tex
+    %6:texture_3d<f32> = load %t_s
     %7:vec4<f32> = glsl.textureGradOffset %6, %3, %4, %5, vec3<i32>(4i, 5i, 6i)
     %x:vec4<f32> = let %7
     ret
@@ -5214,12 +4896,6 @@ $B1: {  # root
 
     TexturePolyfillConfig cfg;
     cfg.placeholder_sampler_bind_point = {2, 2};
-
-    binding::CombinedTextureSamplerPair pair;
-    pair.texture = {0, 0};
-    pair.sampler = {0, 1};
-    cfg.sampler_texture_to_name[pair] = "my_tex";
-
     Run(TexturePolyfill, cfg);
     EXPECT_EQ(expect, str());
 }
@@ -5272,7 +4948,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %my_tex:ptr<handle, texture_cube<f32>, read> = var
+  %t_s:ptr<handle, texture_cube<f32>, read> = combined_texture_sampler @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
@@ -5280,7 +4956,7 @@ $B1: {  # root
     %3:vec3<f32> = construct 1.0f, 2.0f, 3.0f
     %4:vec3<f32> = construct 3.0f, 4.0f, 5.0f
     %5:vec3<f32> = construct 6.0f, 7.0f, 8.0f
-    %6:texture_cube<f32> = load %my_tex
+    %6:texture_cube<f32> = load %t_s
     %7:vec4<f32> = glsl.textureGrad %6, %3, %4, %5
     %x:vec4<f32> = let %7
     ret
@@ -5292,12 +4968,6 @@ $B1: {  # root
 
     TexturePolyfillConfig cfg;
     cfg.placeholder_sampler_bind_point = {2, 2};
-
-    binding::CombinedTextureSamplerPair pair;
-    pair.texture = {0, 0};
-    pair.sampler = {0, 1};
-    cfg.sampler_texture_to_name[pair] = "my_tex";
-
     Run(TexturePolyfill, cfg);
     EXPECT_EQ(expect, str());
 }
@@ -5352,7 +5022,7 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %my_tex:ptr<handle, texture_cube_array<f32>, read> = var
+  %t_s:ptr<handle, texture_cube_array<f32>, read> = combined_texture_sampler @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
@@ -5360,7 +5030,7 @@ $B1: {  # root
     %3:vec3<f32> = construct 1.0f, 2.0f, 3.0f
     %4:vec3<f32> = construct 3.0f, 4.0f, 5.0f
     %5:vec3<f32> = construct 6.0f, 7.0f, 8.0f
-    %6:texture_cube_array<f32> = load %my_tex
+    %6:texture_cube_array<f32> = load %t_s
     %7:f32 = convert 4u
     %8:vec4<f32> = construct %3, %7
     %9:vec4<f32> = glsl.textureGrad %6, %8, %4, %5
@@ -5374,12 +5044,6 @@ $B1: {  # root
 
     TexturePolyfillConfig cfg;
     cfg.placeholder_sampler_bind_point = {2, 2};
-
-    binding::CombinedTextureSamplerPair pair;
-    pair.texture = {0, 0};
-    pair.sampler = {0, 1};
-    cfg.sampler_texture_to_name[pair] = "my_tex";
-
     Run(TexturePolyfill, cfg);
     EXPECT_EQ(expect, str());
 }
@@ -5428,13 +5092,13 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %my_tex:ptr<handle, texture_depth_2d, read> = var
+  %t_s:ptr<handle, texture_depth_2d, read> = combined_texture_sampler @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
   $B2: {
     %3:vec2<f32> = construct 1.0f, 2.0f
-    %4:texture_depth_2d = load %my_tex
+    %4:texture_depth_2d = load %t_s
     %5:vec3<f32> = construct %3, 3.0f
     %6:f32 = glsl.texture %4, %5
     %x:f32 = let %6
@@ -5447,12 +5111,6 @@ $B1: {  # root
 
     TexturePolyfillConfig cfg;
     cfg.placeholder_sampler_bind_point = {2, 2};
-
-    binding::CombinedTextureSamplerPair pair;
-    pair.texture = {0, 0};
-    pair.sampler = {0, 1};
-    cfg.sampler_texture_to_name[pair] = "my_tex";
-
     Run(TexturePolyfill, cfg);
     EXPECT_EQ(expect, str());
 }
@@ -5502,13 +5160,13 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %my_tex:ptr<handle, texture_depth_2d, read> = var
+  %t_s:ptr<handle, texture_depth_2d, read> = combined_texture_sampler @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
   $B2: {
     %3:vec2<f32> = construct 1.0f, 2.0f
-    %4:texture_depth_2d = load %my_tex
+    %4:texture_depth_2d = load %t_s
     %5:vec3<f32> = construct %3, 3.0f
     %6:f32 = glsl.textureOffset %4, %5, vec2<i32>(4i, 5i)
     %x:f32 = let %6
@@ -5521,12 +5179,6 @@ $B1: {  # root
 
     TexturePolyfillConfig cfg;
     cfg.placeholder_sampler_bind_point = {2, 2};
-
-    binding::CombinedTextureSamplerPair pair;
-    pair.texture = {0, 0};
-    pair.sampler = {0, 1};
-    cfg.sampler_texture_to_name[pair] = "my_tex";
-
     Run(TexturePolyfill, cfg);
     EXPECT_EQ(expect, str());
 }
@@ -5577,13 +5229,13 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %my_tex:ptr<handle, texture_depth_2d_array, read> = var
+  %t_s:ptr<handle, texture_depth_2d_array, read> = combined_texture_sampler @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
   $B2: {
     %3:vec2<f32> = construct 1.0f, 2.0f
-    %4:texture_depth_2d_array = load %my_tex
+    %4:texture_depth_2d_array = load %t_s
     %5:f32 = convert 4u
     %6:vec4<f32> = construct %3, %5, 3.0f
     %7:f32 = glsl.texture %4, %6
@@ -5597,12 +5249,6 @@ $B1: {  # root
 
     TexturePolyfillConfig cfg;
     cfg.placeholder_sampler_bind_point = {2, 2};
-
-    binding::CombinedTextureSamplerPair pair;
-    pair.texture = {0, 0};
-    pair.sampler = {0, 1};
-    cfg.sampler_texture_to_name[pair] = "my_tex";
-
     Run(TexturePolyfill, cfg);
     EXPECT_EQ(expect, str());
 }
@@ -5654,13 +5300,13 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %my_tex:ptr<handle, texture_depth_2d_array, read> = var
+  %t_s:ptr<handle, texture_depth_2d_array, read> = combined_texture_sampler @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
   $B2: {
     %3:vec2<f32> = construct 1.0f, 2.0f
-    %4:texture_depth_2d_array = load %my_tex
+    %4:texture_depth_2d_array = load %t_s
     %5:f32 = convert 4u
     %6:vec4<f32> = construct %3, %5, 3.0f
     %7:vec2<f32> = dpdx %3
@@ -5676,12 +5322,6 @@ $B1: {  # root
 
     TexturePolyfillConfig cfg;
     cfg.placeholder_sampler_bind_point = {2, 2};
-
-    binding::CombinedTextureSamplerPair pair;
-    pair.texture = {0, 0};
-    pair.sampler = {0, 1};
-    cfg.sampler_texture_to_name[pair] = "my_tex";
-
     Run(TexturePolyfill, cfg);
     EXPECT_EQ(expect, str());
 }
@@ -5730,13 +5370,13 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %my_tex:ptr<handle, texture_depth_cube, read> = var
+  %t_s:ptr<handle, texture_depth_cube, read> = combined_texture_sampler @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
   $B2: {
     %3:vec3<f32> = construct 1.0f, 2.0f, 3.0f
-    %4:texture_depth_cube = load %my_tex
+    %4:texture_depth_cube = load %t_s
     %5:vec4<f32> = construct %3, 3.0f
     %6:f32 = glsl.texture %4, %5
     %x:f32 = let %6
@@ -5749,12 +5389,6 @@ $B1: {  # root
 
     TexturePolyfillConfig cfg;
     cfg.placeholder_sampler_bind_point = {2, 2};
-
-    binding::CombinedTextureSamplerPair pair;
-    pair.texture = {0, 0};
-    pair.sampler = {0, 1};
-    cfg.sampler_texture_to_name[pair] = "my_tex";
-
     Run(TexturePolyfill, cfg);
     EXPECT_EQ(expect, str());
 }
@@ -5805,13 +5439,13 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %my_tex:ptr<handle, texture_depth_cube_array, read> = var
+  %t_s:ptr<handle, texture_depth_cube_array, read> = combined_texture_sampler @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
   $B2: {
     %3:vec3<f32> = construct 1.0f, 2.0f, 3.0f
-    %4:texture_depth_cube_array = load %my_tex
+    %4:texture_depth_cube_array = load %t_s
     %5:f32 = convert 4u
     %6:vec4<f32> = construct %3, %5
     %7:f32 = glsl.texture %4, %6, 3.0f
@@ -5825,12 +5459,6 @@ $B1: {  # root
 
     TexturePolyfillConfig cfg;
     cfg.placeholder_sampler_bind_point = {2, 2};
-
-    binding::CombinedTextureSamplerPair pair;
-    pair.texture = {0, 0};
-    pair.sampler = {0, 1};
-    cfg.sampler_texture_to_name[pair] = "my_tex";
-
     Run(TexturePolyfill, cfg);
     EXPECT_EQ(expect, str());
 }
@@ -5879,13 +5507,13 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %my_tex:ptr<handle, texture_depth_2d, read> = var
+  %t_s:ptr<handle, texture_depth_2d, read> = combined_texture_sampler @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
   $B2: {
     %3:vec2<f32> = construct 1.0f, 2.0f
-    %4:texture_depth_2d = load %my_tex
+    %4:texture_depth_2d = load %t_s
     %5:vec3<f32> = construct %3, 3.0f
     %6:f32 = glsl.texture %4, %5
     %x:f32 = let %6
@@ -5898,12 +5526,6 @@ $B1: {  # root
 
     TexturePolyfillConfig cfg;
     cfg.placeholder_sampler_bind_point = {2, 2};
-
-    binding::CombinedTextureSamplerPair pair;
-    pair.texture = {0, 0};
-    pair.sampler = {0, 1};
-    cfg.sampler_texture_to_name[pair] = "my_tex";
-
     Run(TexturePolyfill, cfg);
     EXPECT_EQ(expect, str());
 }
@@ -5954,13 +5576,13 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %my_tex:ptr<handle, texture_depth_2d, read> = var
+  %t_s:ptr<handle, texture_depth_2d, read> = combined_texture_sampler @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
   $B2: {
     %3:vec2<f32> = construct 1.0f, 2.0f
-    %4:texture_depth_2d = load %my_tex
+    %4:texture_depth_2d = load %t_s
     %5:vec3<f32> = construct %3, 3.0f
     %6:f32 = glsl.textureOffset %4, %5, vec2<i32>(4i, 5i)
     %x:f32 = let %6
@@ -5973,12 +5595,6 @@ $B1: {  # root
 
     TexturePolyfillConfig cfg;
     cfg.placeholder_sampler_bind_point = {2, 2};
-
-    binding::CombinedTextureSamplerPair pair;
-    pair.texture = {0, 0};
-    pair.sampler = {0, 1};
-    cfg.sampler_texture_to_name[pair] = "my_tex";
-
     Run(TexturePolyfill, cfg);
     EXPECT_EQ(expect, str());
 }
@@ -6029,13 +5645,13 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %my_tex:ptr<handle, texture_depth_2d_array, read> = var
+  %t_s:ptr<handle, texture_depth_2d_array, read> = combined_texture_sampler @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
   $B2: {
     %3:vec2<f32> = construct 1.0f, 2.0f
-    %4:texture_depth_2d_array = load %my_tex
+    %4:texture_depth_2d_array = load %t_s
     %5:f32 = convert 4u
     %6:vec4<f32> = construct %3, %5, 3.0f
     %7:f32 = glsl.texture %4, %6
@@ -6049,12 +5665,6 @@ $B1: {  # root
 
     TexturePolyfillConfig cfg;
     cfg.placeholder_sampler_bind_point = {2, 2};
-
-    binding::CombinedTextureSamplerPair pair;
-    pair.texture = {0, 0};
-    pair.sampler = {0, 1};
-    cfg.sampler_texture_to_name[pair] = "my_tex";
-
     Run(TexturePolyfill, cfg);
     EXPECT_EQ(expect, str());
 }
@@ -6106,13 +5716,13 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %my_tex:ptr<handle, texture_depth_2d_array, read> = var
+  %t_s:ptr<handle, texture_depth_2d_array, read> = combined_texture_sampler @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
   $B2: {
     %3:vec2<f32> = construct 1.0f, 2.0f
-    %4:texture_depth_2d_array = load %my_tex
+    %4:texture_depth_2d_array = load %t_s
     %5:f32 = convert 4u
     %6:vec4<f32> = construct %3, %5, 3.0f
     %7:f32 = glsl.textureGradOffset %4, %6, vec2<f32>(0.0f), vec2<f32>(0.0f), vec2<i32>(4i, 5i)
@@ -6126,12 +5736,6 @@ $B1: {  # root
 
     TexturePolyfillConfig cfg;
     cfg.placeholder_sampler_bind_point = {2, 2};
-
-    binding::CombinedTextureSamplerPair pair;
-    pair.texture = {0, 0};
-    pair.sampler = {0, 1};
-    cfg.sampler_texture_to_name[pair] = "my_tex";
-
     Run(TexturePolyfill, cfg);
     EXPECT_EQ(expect, str());
 }
@@ -6180,13 +5784,13 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %my_tex:ptr<handle, texture_depth_cube, read> = var
+  %t_s:ptr<handle, texture_depth_cube, read> = combined_texture_sampler @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
   $B2: {
     %3:vec3<f32> = construct 1.0f, 2.0f, 3.0f
-    %4:texture_depth_cube = load %my_tex
+    %4:texture_depth_cube = load %t_s
     %5:vec4<f32> = construct %3, 3.0f
     %6:f32 = glsl.texture %4, %5
     %x:f32 = let %6
@@ -6199,12 +5803,6 @@ $B1: {  # root
 
     TexturePolyfillConfig cfg;
     cfg.placeholder_sampler_bind_point = {2, 2};
-
-    binding::CombinedTextureSamplerPair pair;
-    pair.texture = {0, 0};
-    pair.sampler = {0, 1};
-    cfg.sampler_texture_to_name[pair] = "my_tex";
-
     Run(TexturePolyfill, cfg);
     EXPECT_EQ(expect, str());
 }
@@ -6255,13 +5853,13 @@ $B1: {  # root
 
     auto* expect = R"(
 $B1: {  # root
-  %my_tex:ptr<handle, texture_depth_cube_array, read> = var
+  %t_s:ptr<handle, texture_depth_cube_array, read> = combined_texture_sampler @binding_point(0, 0)
 }
 
 %foo = @fragment func():void {
   $B2: {
     %3:vec3<f32> = construct 1.0f, 2.0f, 3.0f
-    %4:texture_depth_cube_array = load %my_tex
+    %4:texture_depth_cube_array = load %t_s
     %5:f32 = convert 4u
     %6:vec4<f32> = construct %3, %5
     %7:f32 = glsl.texture %4, %6, 3.0f
@@ -6275,12 +5873,6 @@ $B1: {  # root
 
     TexturePolyfillConfig cfg;
     cfg.placeholder_sampler_bind_point = {2, 2};
-
-    binding::CombinedTextureSamplerPair pair;
-    pair.texture = {0, 0};
-    pair.sampler = {0, 1};
-    cfg.sampler_texture_to_name[pair] = "my_tex";
-
     Run(TexturePolyfill, cfg);
     EXPECT_EQ(expect, str());
 }

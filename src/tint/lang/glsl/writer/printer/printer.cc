@@ -81,7 +81,9 @@
 #include "src/tint/lang/core/type/vector.h"
 #include "src/tint/lang/core/type/void.h"
 #include "src/tint/lang/glsl/ir/builtin_call.h"
+#include "src/tint/lang/glsl/ir/combined_texture_sampler_var.h"
 #include "src/tint/lang/glsl/ir/member_builtin_call.h"
+#include "src/tint/lang/glsl/writer/common/options.h"
 #include "src/tint/lang/glsl/writer/common/printer_support.h"
 #include "src/tint/lang/glsl/writer/common/version.h"
 #include "src/tint/utils/containers/map.h"
@@ -110,8 +112,8 @@ class Printer : public tint::TextGenerator {
   public:
     /// Constructor
     /// @param module the Tint IR module to generate
-    /// @param version the GLSL version information
-    Printer(core::ir::Module& module, const Version& version) : ir_(module), version_(version) {}
+    /// @param options the options to use for generating code
+    Printer(core::ir::Module& module, const Options& options) : ir_(module), options_(options) {}
 
     /// @returns the generated GLSL shader
     tint::Result<Output> Generate() {
@@ -126,8 +128,9 @@ class Printer : public tint::TextGenerator {
             TINT_SCOPED_ASSIGNMENT(current_buffer_, &header_buffer_);
 
             auto out = Line();
-            out << "#version " << version_.major_version << version_.minor_version << "0";
-            if (version_.IsES()) {
+            out << "#version " << options_.version.major_version << options_.version.minor_version
+                << "0";
+            if (options_.version.IsES()) {
                 out << " es";
             }
         }
@@ -169,7 +172,7 @@ class Printer : public tint::TextGenerator {
 
     Output result_;
 
-    const Version& version_;
+    const Options& options_;
 
     /// The buffer holding header text
     TextBuffer header_buffer_;
@@ -845,7 +848,7 @@ class Printer : public tint::TextGenerator {
                     out << "writeonly ";
                     break;
                 case core::Access::kReadWrite: {
-                    if (version_.IsES()) {
+                    if (options_.version.IsES()) {
                         // ESSL 3.1 SPEC (chapter 4.9, Memory Access Qualifiers):
                         // Except for image variables qualified with the format qualifiers r32f,
                         // r32i, and r32ui, image variables must specify either memory qualifier
@@ -1037,6 +1040,18 @@ class Printer : public tint::TextGenerator {
             out << " ";
         }
 
+        // If this is a combined texture sampler variable, check the provided map to see if we need
+        // to give it a specific name.
+        if (auto* combined_texture_sampler = var->As<ir::CombinedTextureSamplerVar>()) {
+            binding::CombinedTextureSamplerPair key{
+                combined_texture_sampler->TextureBindingPoint(),
+                combined_texture_sampler->SamplerBindingPoint()};
+            auto itr = options_.bindings.sampler_texture_to_name.find(key);
+            if (itr != options_.bindings.sampler_texture_to_name.end()) {
+                names_.Add(var->Result(0), itr->second);
+            }
+        }
+
         EmitVar(out, var);
     }
 
@@ -1051,8 +1066,9 @@ class Printer : public tint::TextGenerator {
         auto addrspace = var->Result(0)->Type()->As<core::type::Pointer>()->AddressSpace();
 
         if (attrs.builtin.has_value()) {
-            if (version_.IsES() && (attrs.builtin == tint::core::BuiltinValue::kSampleIndex ||
-                                    attrs.builtin == tint::core::BuiltinValue::kSampleMask)) {
+            if (options_.version.IsES() &&
+                (attrs.builtin == tint::core::BuiltinValue::kSampleIndex ||
+                 attrs.builtin == tint::core::BuiltinValue::kSampleMask)) {
                 EmitExtension(kOESSampleVariables);
             }
 
@@ -1563,13 +1579,13 @@ class Printer : public tint::TextGenerator {
                 break;
             case core::BuiltinFn::kDpdxCoarse:
                 out << "dFdx";
-                if (version_.IsDesktop()) {
+                if (options_.version.IsDesktop()) {
                     out << "Coarse";
                 }
                 break;
             case core::BuiltinFn::kDpdxFine:
                 out << "dFdx";
-                if (version_.IsDesktop()) {
+                if (options_.version.IsDesktop()) {
                     out << "Fine";
                 }
                 break;
@@ -1578,13 +1594,13 @@ class Printer : public tint::TextGenerator {
                 break;
             case core::BuiltinFn::kDpdyCoarse:
                 out << "dFdy";
-                if (version_.IsDesktop()) {
+                if (options_.version.IsDesktop()) {
                     out << "Coarse";
                 }
                 break;
             case core::BuiltinFn::kDpdyFine:
                 out << "dFdy";
-                if (version_.IsDesktop()) {
+                if (options_.version.IsDesktop()) {
                     out << "Fine";
                 }
                 break;
@@ -1784,8 +1800,8 @@ class Printer : public tint::TextGenerator {
 
 }  // namespace
 
-Result<Output> Print(core::ir::Module& module, const Version& version) {
-    return Printer{module, version}.Generate();
+Result<Output> Print(core::ir::Module& module, const Options& options) {
+    return Printer{module, options}.Generate();
 }
 
 }  // namespace tint::glsl::writer
