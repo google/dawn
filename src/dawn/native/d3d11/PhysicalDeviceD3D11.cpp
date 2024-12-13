@@ -63,7 +63,7 @@ bool PhysicalDevice::SupportsFeatureLevel(wgpu::FeatureLevel featureLevel) const
             return mFeatureLevel >= D3D_FEATURE_LEVEL_11_1;
         }
         case wgpu::FeatureLevel::Compatibility: {
-            return true;
+            return mFeatureLevel >= D3D_FEATURE_LEVEL_11_0;
         }
         case wgpu::FeatureLevel::Undefined:
             break;
