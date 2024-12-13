@@ -58,7 +58,7 @@ struct VertexOutput {
   uint prevent_dce;
 };
 
-layout(location = 0) flat out uint vertex_main_loc0_Output;
+layout(location = 0) flat out uint tint_interstage_location0;
 uint tint_int_dot(uvec4 x, uvec4 y) {
   return ((((x.x * y.x) + (x.y * y.y)) + (x.z * y.z)) + (x.w * y.w));
 }
@@ -81,6 +81,6 @@ void main() {
   gl_Position = v_3.pos;
   gl_Position.y = -(gl_Position.y);
   gl_Position.z = ((2.0f * gl_Position.z) - gl_Position.w);
-  vertex_main_loc0_Output = v_3.prevent_dce;
+  tint_interstage_location0 = v_3.prevent_dce;
   gl_PointSize = 1.0f;
 }

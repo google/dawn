@@ -242,7 +242,7 @@ layout(binding = 2, std140)
 uniform v_arg_0_params_block_std140_ubo {
   tint_ExternalTextureParams_std140 inner;
 } v;
-layout(location = 0) flat out uvec2 vertex_main_loc0_Output;
+layout(location = 0) flat out uvec2 tint_interstage_location0;
 tint_ExternalTextureParams tint_convert_tint_ExternalTextureParams(tint_ExternalTextureParams_std140 tint_input) {
   mat3 v_1 = mat3(tint_input.gamutConversionMatrix_col0, tint_input.gamutConversionMatrix_col1, tint_input.gamutConversionMatrix_col2);
   mat3x2 v_2 = mat3x2(tint_input.sampleTransform_col0, tint_input.sampleTransform_col1, tint_input.sampleTransform_col2);
@@ -263,6 +263,6 @@ void main() {
   gl_Position = v_3.pos;
   gl_Position.y = -(gl_Position.y);
   gl_Position.z = ((2.0f * gl_Position.z) - gl_Position.w);
-  vertex_main_loc0_Output = v_3.prevent_dce;
+  tint_interstage_location0 = v_3.prevent_dce;
   gl_PointSize = 1.0f;
 }

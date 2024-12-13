@@ -46,7 +46,7 @@ struct VertexOutput {
   uvec2 prevent_dce;
 };
 
-layout(location = 0) flat out uvec2 vertex_main_loc0_Output;
+layout(location = 0) flat out uvec2 tint_interstage_location0;
 uvec2 bitcast_2b2738() {
   vec2 arg_0 = vec2(1.0f);
   uvec2 res = floatBitsToUint(arg_0);
@@ -63,6 +63,6 @@ void main() {
   gl_Position = v.pos;
   gl_Position.y = -(gl_Position.y);
   gl_Position.z = ((2.0f * gl_Position.z) - gl_Position.w);
-  vertex_main_loc0_Output = v.prevent_dce;
+  tint_interstage_location0 = v.prevent_dce;
   gl_PointSize = 1.0f;
 }

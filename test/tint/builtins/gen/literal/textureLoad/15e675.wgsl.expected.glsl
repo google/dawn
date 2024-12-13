@@ -53,7 +53,7 @@ struct VertexOutput {
 };
 
 layout(binding = 0, rgba8ui) uniform highp readonly uimage2DArray arg_0;
-layout(location = 0) flat out uvec4 vertex_main_loc0_Output;
+layout(location = 0) flat out uvec4 tint_interstage_location0;
 uvec4 textureLoad_15e675() {
   uint v = (uint(imageSize(arg_0).z) - 1u);
   uint v_1 = min(uint(1), v);
@@ -72,6 +72,6 @@ void main() {
   gl_Position = v_3.pos;
   gl_Position.y = -(gl_Position.y);
   gl_Position.z = ((2.0f * gl_Position.z) - gl_Position.w);
-  vertex_main_loc0_Output = v_3.prevent_dce;
+  tint_interstage_location0 = v_3.prevent_dce;
   gl_PointSize = 1.0f;
 }

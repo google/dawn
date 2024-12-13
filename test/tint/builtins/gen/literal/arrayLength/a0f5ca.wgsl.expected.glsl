@@ -56,7 +56,7 @@ layout(binding = 1, std430)
 buffer v_SB_RO_ssbo {
   float arg_0[];
 } sb_ro;
-layout(location = 0) flat out uint vertex_main_loc0_Output;
+layout(location = 0) flat out uint tint_interstage_location0;
 uint arrayLength_a0f5ca() {
   uint res = uint(sb_ro.arg_0.length());
   return res;
@@ -72,6 +72,6 @@ void main() {
   gl_Position = v.pos;
   gl_Position.y = -(gl_Position.y);
   gl_Position.z = ((2.0f * gl_Position.z) - gl_Position.w);
-  vertex_main_loc0_Output = v.prevent_dce;
+  tint_interstage_location0 = v.prevent_dce;
   gl_PointSize = 1.0f;
 }

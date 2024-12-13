@@ -48,7 +48,7 @@ struct VertexOutput {
   uvec3 prevent_dce;
 };
 
-layout(location = 0) flat out uvec3 vertex_main_loc0_Output;
+layout(location = 0) flat out uvec3 tint_interstage_location0;
 uvec3 firstLeadingBit_3fd7d0() {
   uvec3 arg_0 = uvec3(1u);
   uvec3 v = arg_0;
@@ -66,6 +66,6 @@ void main() {
   gl_Position = v_1.pos;
   gl_Position.y = -(gl_Position.y);
   gl_Position.z = ((2.0f * gl_Position.z) - gl_Position.w);
-  vertex_main_loc0_Output = v_1.prevent_dce;
+  tint_interstage_location0 = v_1.prevent_dce;
   gl_PointSize = 1.0f;
 }

@@ -46,7 +46,7 @@ struct VertexOutput {
   int prevent_dce;
 };
 
-layout(location = 0) flat out int vertex_main_loc0_Output;
+layout(location = 0) flat out int tint_interstage_location0;
 int transpose_854336() {
   mat3 arg_0 = mat3(vec3(1.0f), vec3(1.0f), vec3(1.0f));
   mat3 res = transpose(arg_0);
@@ -63,6 +63,6 @@ void main() {
   gl_Position = v.pos;
   gl_Position.y = -(gl_Position.y);
   gl_Position.z = ((2.0f * gl_Position.z) - gl_Position.w);
-  vertex_main_loc0_Output = v.prevent_dce;
+  tint_interstage_location0 = v.prevent_dce;
   gl_PointSize = 1.0f;
 }

@@ -11,15 +11,15 @@ struct Interface {
   vec4 pos;
 };
 
-layout(location = 1) out float vert_main_loc1_Output;
-layout(location = 2) out float16_t vert_main_loc2_Output;
+layout(location = 1) out float tint_interstage_location1;
+layout(location = 2) out float16_t tint_interstage_location2;
 Interface vert_main_inner() {
   return Interface(0.40000000596046447754f, 0.599609375hf, vec4(0.0f));
 }
 void main() {
   Interface v = vert_main_inner();
-  vert_main_loc1_Output = v.col1;
-  vert_main_loc2_Output = v.col2;
+  tint_interstage_location1 = v.col1;
+  tint_interstage_location2 = v.col2;
   gl_Position = v.pos;
   gl_Position.y = -(gl_Position.y);
   gl_Position.z = ((2.0f * gl_Position.z) - gl_Position.w);
@@ -40,12 +40,12 @@ struct Interface {
   vec4 pos;
 };
 
-layout(location = 1) in float frag_main_loc1_Input;
-layout(location = 2) in float16_t frag_main_loc2_Input;
+layout(location = 1) in float tint_interstage_location1;
+layout(location = 2) in float16_t tint_interstage_location2;
 void frag_main_inner(Interface colors) {
   float r = colors.col1;
   float16_t g = colors.col2;
 }
 void main() {
-  frag_main_inner(Interface(frag_main_loc1_Input, frag_main_loc2_Input, gl_FragCoord));
+  frag_main_inner(Interface(tint_interstage_location1, tint_interstage_location2, gl_FragCoord));
 }

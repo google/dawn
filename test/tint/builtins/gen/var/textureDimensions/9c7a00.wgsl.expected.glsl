@@ -75,7 +75,7 @@ uniform v_tint_symbol_1_ubo {
   TintTextureUniformData inner;
 } v;
 uniform highp usampler2D arg_0;
-layout(location = 0) flat out uint vertex_main_loc0_Output;
+layout(location = 0) flat out uint tint_interstage_location0;
 uint textureDimensions_9c7a00() {
   uint arg_1 = 1u;
   uint res = uvec2(textureSize(arg_0, int(min(arg_1, (v.inner.tint_builtin_value_0 - 1u))))).x;
@@ -92,6 +92,6 @@ void main() {
   gl_Position = v_1.pos;
   gl_Position.y = -(gl_Position.y);
   gl_Position.z = ((2.0f * gl_Position.z) - gl_Position.w);
-  vertex_main_loc0_Output = v_1.prevent_dce;
+  tint_interstage_location0 = v_1.prevent_dce;
   gl_PointSize = 1.0f;
 }

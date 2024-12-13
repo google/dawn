@@ -35,7 +35,7 @@ vec4 tint_symbol = vec4(0.0f);
 layout(location = 0) in vec3 tint_symbol_1_loc0_Input;
 layout(location = 2) in vec2 tint_symbol_1_loc2_Input;
 layout(location = 1) in vec3 tint_symbol_1_loc1_Input;
-layout(location = 0) out vec2 tint_symbol_1_loc0_Output;
+layout(location = 0) out vec2 tint_interstage_location0;
 void main_1() {
   vec4 q = vec4(0.0f);
   vec3 p = vec3(0.0f);
@@ -60,6 +60,6 @@ void main() {
   gl_Position = v_2.tint_symbol;
   gl_Position.y = -(gl_Position.y);
   gl_Position.z = ((2.0f * gl_Position.z) - gl_Position.w);
-  tint_symbol_1_loc0_Output = v_2.vUV_1;
+  tint_interstage_location0 = v_2.vUV_1;
   gl_PointSize = 1.0f;
 }

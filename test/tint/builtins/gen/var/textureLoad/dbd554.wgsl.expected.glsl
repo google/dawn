@@ -53,7 +53,7 @@ struct VertexOutput {
 };
 
 layout(binding = 0, rgba32i) uniform highp readonly iimage2D arg_0;
-layout(location = 0) flat out ivec4 vertex_main_loc0_Output;
+layout(location = 0) flat out ivec4 tint_interstage_location0;
 ivec4 textureLoad_dbd554() {
   ivec2 arg_1 = ivec2(1);
   ivec2 v = arg_1;
@@ -72,6 +72,6 @@ void main() {
   gl_Position = v_2.pos;
   gl_Position.y = -(gl_Position.y);
   gl_Position.z = ((2.0f * gl_Position.z) - gl_Position.w);
-  vertex_main_loc0_Output = v_2.prevent_dce;
+  tint_interstage_location0 = v_2.prevent_dce;
   gl_PointSize = 1.0f;
 }

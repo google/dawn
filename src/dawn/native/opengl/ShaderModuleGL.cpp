@@ -506,13 +506,6 @@ ResultOrError<GLuint> ShaderModule::CompileShader(
                 tint::ast::transform::Renamer::Remappings assignedRenamings = {
                     {r.entryPointName, kRemappedEntryPointName}};
 
-                // Give explicit renaming mappings for interstage variables
-                // Because GLSL requires interstage IO names to match.
-                for (const auto& it : r.interstageVariables) {
-                    assignedRenamings.emplace(
-                        it.second, "dawn_interstage_location_" + std::to_string(it.first));
-                }
-
                 // Needs to run early so that they can use builtin names safely.
                 // TODO(dawn:2180): move this transform into Tint.
                 transformManager.Add<tint::ast::transform::Renamer>();

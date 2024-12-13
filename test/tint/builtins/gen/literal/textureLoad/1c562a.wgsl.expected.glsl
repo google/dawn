@@ -77,7 +77,7 @@ uniform v_tint_symbol_1_ubo {
   TintTextureUniformData inner;
 } v;
 uniform highp usampler3D arg_0;
-layout(location = 0) flat out uvec4 vertex_main_loc0_Output;
+layout(location = 0) flat out uvec4 tint_interstage_location0;
 uvec4 textureLoad_1c562a() {
   uint v_1 = min(1u, (v.inner.tint_builtin_value_0 - 1u));
   ivec3 v_2 = ivec3(min(uvec3(1u), (uvec3(textureSize(arg_0, int(v_1))) - uvec3(1u))));
@@ -95,6 +95,6 @@ void main() {
   gl_Position = v_3.pos;
   gl_Position.y = -(gl_Position.y);
   gl_Position.z = ((2.0f * gl_Position.z) - gl_Position.w);
-  vertex_main_loc0_Output = v_3.prevent_dce;
+  tint_interstage_location0 = v_3.prevent_dce;
   gl_PointSize = 1.0f;
 }

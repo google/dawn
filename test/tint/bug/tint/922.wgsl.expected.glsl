@@ -63,8 +63,8 @@ layout(location = 1) in vec2 tint_symbol_1_loc1_Input;
 layout(location = 2) in vec4 tint_symbol_1_loc2_Input;
 layout(location = 3) in vec3 tint_symbol_1_loc3_Input;
 layout(location = 4) in float tint_symbol_1_loc4_Input;
-layout(location = 0) out vec4 tint_symbol_1_loc0_Output;
-layout(location = 1) out vec2 tint_symbol_1_loc1_Output;
+layout(location = 0) out vec4 tint_interstage_location0;
+layout(location = 1) out vec2 tint_interstage_location1;
 vec4 Mul(Mat4x4_ m8, vec4 v) {
   Mat4x4_ m9 = Mat4x4_(vec4(0.0f), vec4(0.0f), vec4(0.0f), vec4(0.0f));
   vec4 v1 = vec4(0.0f);
@@ -182,8 +182,8 @@ VertexOutput tint_symbol_1_inner(vec3 a_Position, vec2 a_UV, vec4 a_Color, vec3 
 }
 void main() {
   VertexOutput v_5 = tint_symbol_1_inner(tint_symbol_1_loc0_Input, tint_symbol_1_loc1_Input, tint_symbol_1_loc2_Input, tint_symbol_1_loc3_Input, tint_symbol_1_loc4_Input);
-  tint_symbol_1_loc0_Output = v_5.v_Color;
-  tint_symbol_1_loc1_Output = v_5.v_TexCoord;
+  tint_interstage_location0 = v_5.v_Color;
+  tint_interstage_location1 = v_5.v_TexCoord;
   gl_Position = v_5.member;
   gl_Position.y = -(gl_Position.y);
   gl_Position.z = ((2.0f * gl_Position.z) - gl_Position.w);

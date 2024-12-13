@@ -1048,6 +1048,7 @@ class Printer : public tint::TextGenerator {
 
     void EmitIOVar(core::ir::Var* var) {
         auto& attrs = var->Attributes();
+        auto addrspace = var->Result(0)->Type()->As<core::type::Pointer>()->AddressSpace();
 
         if (attrs.builtin.has_value()) {
             if (version_.IsES() && (attrs.builtin == tint::core::BuiltinValue::kSampleIndex ||
@@ -1057,6 +1058,16 @@ class Printer : public tint::TextGenerator {
 
             // Do not emit builtin (gl_) variables.
             return;
+        } else if (attrs.location) {
+            // Use a fixed naming scheme for interstage variables so that they match between vertex
+            // and fragment shaders.
+            if ((stage_ == core::ir::Function::PipelineStage::kVertex &&
+                 addrspace == core::AddressSpace::kOut) ||
+                (stage_ == core::ir::Function::PipelineStage::kFragment &&
+                 addrspace == core::AddressSpace::kIn)) {
+                names_.Add(var->Result(0),
+                           "tint_interstage_location" + std::to_string(attrs.location.value()));
+            }
         }
 
         auto out = Line();

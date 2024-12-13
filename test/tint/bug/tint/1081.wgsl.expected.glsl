@@ -3,7 +3,7 @@ precision highp float;
 precision highp int;
 
 bool continue_execution = true;
-layout(location = 1) flat in ivec3 tint_symbol_loc1_Input;
+layout(location = 1) flat in ivec3 tint_interstage_location1;
 layout(location = 2) out int tint_symbol_loc2_Output;
 int f(int x) {
   if ((x == 10)) {
@@ -38,5 +38,5 @@ int tint_symbol_inner(ivec3 x) {
   return y;
 }
 void main() {
-  tint_symbol_loc2_Output = tint_symbol_inner(tint_symbol_loc1_Input);
+  tint_symbol_loc2_Output = tint_symbol_inner(tint_interstage_location1);
 }

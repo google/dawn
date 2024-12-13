@@ -14,7 +14,7 @@
 precision highp float;
 precision highp int;
 
-layout(location = 0) in float tint_symbol_loc0_Input;
+layout(location = 0) in float tint_interstage_location0;
 void tint_symbol_inner(float x) {
   vec4 v = vec4(0.0f);
   {
@@ -44,5 +44,5 @@ void tint_symbol_inner(float x) {
   }
 }
 void main() {
-  tint_symbol_inner(tint_symbol_loc0_Input);
+  tint_symbol_inner(tint_interstage_location0);
 }

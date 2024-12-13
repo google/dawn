@@ -33,7 +33,7 @@ uniform f_x_4_block_std140_ubo {
 vec4 sk_FragColor = vec4(0.0f);
 bool sk_Clockwise = false;
 vec4 vcolor_S0 = vec4(0.0f);
-layout(location = 0) in vec4 tint_symbol_loc0_Input;
+layout(location = 0) in vec4 tint_interstage_location0;
 layout(location = 0) out vec4 tint_symbol_loc0_Output;
 ivec4 tint_div_v4i32(ivec4 lhs, ivec4 rhs) {
   uvec4 v_1 = uvec4(equal(lhs, ivec4((-2147483647 - 1))));
@@ -171,5 +171,5 @@ main_out tint_symbol_inner(bool sk_Clockwise_param, vec4 vcolor_S0_param) {
   return main_out(sk_FragColor);
 }
 void main() {
-  tint_symbol_loc0_Output = tint_symbol_inner(gl_FrontFacing, tint_symbol_loc0_Input).sk_FragColor_1;
+  tint_symbol_loc0_Output = tint_symbol_inner(gl_FrontFacing, tint_interstage_location0).sk_FragColor_1;
 }

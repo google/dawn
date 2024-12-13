@@ -71,10 +71,10 @@ layout(binding = 0, std430)
 buffer f_tint_symbol_block_ssbo {
   S inner;
 } v_1;
-layout(location = 0) in float frag_main_loc0_Input;
-layout(location = 1) flat in uint frag_main_loc1_Input;
-layout(location = 2) in float16_t frag_main_loc2_Input;
-layout(location = 3) in f16vec3 frag_main_loc3_Input;
+layout(location = 0) in float tint_interstage_location0;
+layout(location = 1) flat in uint tint_interstage_location1;
+layout(location = 2) in float16_t tint_interstage_location2;
+layout(location = 3) in f16vec3 tint_interstage_location3;
 void tint_store_and_preserve_padding(S value_param) {
   v_1.inner.f = value_param.f;
   v_1.inner.u = value_param.u;
@@ -91,5 +91,5 @@ void frag_main_inner(S tint_symbol_1) {
   tint_store_and_preserve_padding(tint_symbol_1);
 }
 void main() {
-  frag_main_inner(S(frag_main_loc0_Input, frag_main_loc1_Input, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, gl_FragCoord, 0u, 0u, 0u, 0u, frag_main_loc2_Input, 0u, 0u, 0u, 0u, 0u, 0u, 0u, frag_main_loc3_Input, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u));
+  frag_main_inner(S(tint_interstage_location0, tint_interstage_location1, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, gl_FragCoord, 0u, 0u, 0u, 0u, tint_interstage_location2, 0u, 0u, 0u, 0u, 0u, 0u, 0u, tint_interstage_location3, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u));
 }

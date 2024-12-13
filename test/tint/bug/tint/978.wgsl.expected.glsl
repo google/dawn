@@ -12,7 +12,7 @@ struct FragmentInput {
 };
 
 uniform highp sampler2DShadow depthMap_texSampler;
-layout(location = 2) in vec2 tint_symbol_loc2_Input;
+layout(location = 2) in vec2 tint_interstage_location2;
 layout(location = 0) out vec4 tint_symbol_loc0_Output;
 FragmentOutput tint_symbol_inner(FragmentInput fIn) {
   float tint_symbol_1 = texture(depthMap_texSampler, vec3(fIn.vUv, 0.0f));
@@ -22,5 +22,5 @@ FragmentOutput tint_symbol_inner(FragmentInput fIn) {
   return fOut;
 }
 void main() {
-  tint_symbol_loc0_Output = tint_symbol_inner(FragmentInput(tint_symbol_loc2_Input)).color;
+  tint_symbol_loc0_Output = tint_symbol_inner(FragmentInput(tint_interstage_location2)).color;
 }

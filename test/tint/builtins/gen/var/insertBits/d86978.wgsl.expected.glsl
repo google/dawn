@@ -62,7 +62,7 @@ struct VertexOutput {
   ivec4 prevent_dce;
 };
 
-layout(location = 0) flat out ivec4 vertex_main_loc0_Output;
+layout(location = 0) flat out ivec4 tint_interstage_location0;
 ivec4 insertBits_d86978() {
   ivec4 arg_0 = ivec4(1);
   ivec4 arg_1 = ivec4(1);
@@ -87,6 +87,6 @@ void main() {
   gl_Position = v_5.pos;
   gl_Position.y = -(gl_Position.y);
   gl_Position.z = ((2.0f * gl_Position.z) - gl_Position.w);
-  vertex_main_loc0_Output = v_5.prevent_dce;
+  tint_interstage_location0 = v_5.prevent_dce;
   gl_PointSize = 1.0f;
 }

@@ -52,7 +52,7 @@ struct VertexOutput {
 };
 
 uniform highp sampler2DArrayShadow arg_0_arg_1;
-layout(location = 0) flat out float vertex_main_loc0_Output;
+layout(location = 0) flat out float tint_interstage_location0;
 float textureSampleLevel_2974eb() {
   vec4 v = vec4(vec2(1.0f), float(1), 0.0f);
   float res = textureLod(arg_0_arg_1, v, float(1u));
@@ -69,6 +69,6 @@ void main() {
   gl_Position = v_1.pos;
   gl_Position.y = -(gl_Position.y);
   gl_Position.z = ((2.0f * gl_Position.z) - gl_Position.w);
-  vertex_main_loc0_Output = v_1.prevent_dce;
+  tint_interstage_location0 = v_1.prevent_dce;
   gl_PointSize = 1.0f;
 }

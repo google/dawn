@@ -34,8 +34,8 @@ buffer f_FSUniforms_ssbo {
 uint shadingSsboIndex = 0u;
 uniform highp sampler2D permutationsSampler_1_Texture_permutationsSampler_1_Sampler;
 uniform highp sampler2D noiseSampler_1_Texture_noiseSampler_1_Sampler;
-layout(location = 0) flat in uvec2 tint_symbol_loc0_Input;
-layout(location = 1) in vec2 tint_symbol_loc1_Input;
+layout(location = 0) flat in uvec2 tint_interstage_location0;
+layout(location = 1) in vec2 tint_interstage_location1;
 layout(location = 0) out vec4 tint_symbol_loc0_Output;
 void _skslMain(FSIn _stageIn, inout FSOut _stageOut) {
   shadingSsboIndex = _stageIn.ssboIndicesVar.y;
@@ -233,5 +233,5 @@ FSOut tint_symbol_inner(FSIn _stageIn) {
   return _stageOut;
 }
 void main() {
-  tint_symbol_loc0_Output = tint_symbol_inner(FSIn(tint_symbol_loc0_Input, tint_symbol_loc1_Input)).sk_FragColor;
+  tint_symbol_loc0_Output = tint_symbol_inner(FSIn(tint_interstage_location0, tint_interstage_location1)).sk_FragColor;
 }

@@ -50,7 +50,7 @@ struct VertexOutput {
   uint prevent_dce;
 };
 
-layout(location = 0) flat out uint vertex_main_loc0_Output;
+layout(location = 0) flat out uint tint_interstage_location0;
 uint clamp_a2de25() {
   uint arg_0 = 1u;
   uint arg_1 = 1u;
@@ -69,6 +69,6 @@ void main() {
   gl_Position = v.pos;
   gl_Position.y = -(gl_Position.y);
   gl_Position.z = ((2.0f * gl_Position.z) - gl_Position.w);
-  vertex_main_loc0_Output = v.prevent_dce;
+  tint_interstage_location0 = v.prevent_dce;
   gl_PointSize = 1.0f;
 }

@@ -306,7 +306,7 @@ uniform v_arg_0_params_block_std140_ubo {
 } v_1;
 uniform highp sampler2D arg_0_plane0;
 uniform highp sampler2D arg_0_plane1;
-layout(location = 0) flat out vec4 vertex_main_loc0_Output;
+layout(location = 0) flat out vec4 tint_interstage_location0;
 vec3 tint_GammaCorrection(vec3 v, tint_GammaTransferParams params) {
   vec3 v_2 = vec3(params.G);
   return mix((sign(v) * (pow(((params.A * abs(v)) + params.B), v_2) + params.E)), (sign(v) * ((params.C * abs(v)) + params.F)), lessThan(abs(v), vec3(params.D)));
@@ -359,6 +359,6 @@ void main() {
   gl_Position = v_17.pos;
   gl_Position.y = -(gl_Position.y);
   gl_Position.z = ((2.0f * gl_Position.z) - gl_Position.w);
-  vertex_main_loc0_Output = v_17.prevent_dce;
+  tint_interstage_location0 = v_17.prevent_dce;
   gl_PointSize = 1.0f;
 }

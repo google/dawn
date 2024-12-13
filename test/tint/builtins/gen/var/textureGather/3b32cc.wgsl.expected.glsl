@@ -51,7 +51,7 @@ struct VertexOutput {
 };
 
 uniform highp usamplerCube arg_1_arg_2;
-layout(location = 0) flat out uvec4 vertex_main_loc0_Output;
+layout(location = 0) flat out uvec4 tint_interstage_location0;
 uvec4 textureGather_3b32cc() {
   vec3 arg_3 = vec3(1.0f);
   vec3 v = arg_3;
@@ -69,6 +69,6 @@ void main() {
   gl_Position = v_1.pos;
   gl_Position.y = -(gl_Position.y);
   gl_Position.z = ((2.0f * gl_Position.z) - gl_Position.w);
-  vertex_main_loc0_Output = v_1.prevent_dce;
+  tint_interstage_location0 = v_1.prevent_dce;
   gl_PointSize = 1.0f;
 }

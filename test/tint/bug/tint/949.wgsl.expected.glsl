@@ -56,10 +56,10 @@ uniform f_light0_block_ubo {
 vec4 glFragColor = vec4(0.0f);
 uniform highp sampler2D TextureSamplerTexture_TextureSamplerSampler;
 uniform highp sampler2D TextureSampler1Texture_TextureSampler1Sampler;
-layout(location = 1) in vec2 tint_symbol_1_loc1_Input;
-layout(location = 0) in vec4 tint_symbol_1_loc0_Input;
-layout(location = 3) in vec2 tint_symbol_1_loc3_Input;
-layout(location = 2) in vec4 tint_symbol_1_loc2_Input;
+layout(location = 1) in vec2 tint_interstage_location1;
+layout(location = 0) in vec4 tint_interstage_location0;
+layout(location = 3) in vec2 tint_interstage_location3;
+layout(location = 2) in vec4 tint_interstage_location2;
 layout(location = 0) out vec4 tint_symbol_1_loc0_Output;
 mat3 cotangent_frame_vf3_vf3_vf2_vf2_(inout vec3 normal_1, inout vec3 p, inout vec2 uv, inout vec2 tangentSpaceParams) {
   vec3 dp1 = vec3(0.0f);
@@ -453,5 +453,5 @@ main_out tint_symbol_1_inner(vec2 vMainuv_param, vec4 v_output1_param, bool tint
   return main_out(glFragColor);
 }
 void main() {
-  tint_symbol_1_loc0_Output = tint_symbol_1_inner(tint_symbol_1_loc1_Input, tint_symbol_1_loc0_Input, gl_FrontFacing, tint_symbol_1_loc3_Input, tint_symbol_1_loc2_Input).glFragColor_1;
+  tint_symbol_1_loc0_Output = tint_symbol_1_inner(tint_interstage_location1, tint_interstage_location0, gl_FrontFacing, tint_interstage_location3, tint_interstage_location2).glFragColor_1;
 }

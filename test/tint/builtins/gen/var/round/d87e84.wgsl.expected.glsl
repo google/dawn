@@ -49,7 +49,7 @@ struct VertexOutput {
   f16vec2 prevent_dce;
 };
 
-layout(location = 0) flat out f16vec2 vertex_main_loc0_Output;
+layout(location = 0) flat out f16vec2 tint_interstage_location0;
 f16vec2 round_d87e84() {
   f16vec2 arg_0 = f16vec2(3.5hf);
   f16vec2 res = round(arg_0);
@@ -66,6 +66,6 @@ void main() {
   gl_Position = v.pos;
   gl_Position.y = -(gl_Position.y);
   gl_Position.z = ((2.0f * gl_Position.z) - gl_Position.w);
-  vertex_main_loc0_Output = v.prevent_dce;
+  tint_interstage_location0 = v.prevent_dce;
   gl_PointSize = 1.0f;
 }

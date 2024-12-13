@@ -14,8 +14,8 @@ struct FragInput {
   vec4 b;
 };
 
-layout(location = 0) in vec4 frag_main_loc0_Input;
-layout(location = 1) in vec4 frag_main_loc1_Input;
+layout(location = 0) in vec4 tint_interstage_location0;
+layout(location = 1) in vec4 tint_interstage_location1;
 layout(location = 0, index = 0) out vec4 frag_main_loc0_idx0_Output;
 layout(location = 0, index = 1) out vec4 frag_main_loc0_idx1_Output;
 FragOutput frag_main_inner(FragInput tint_symbol) {
@@ -25,7 +25,7 @@ FragOutput frag_main_inner(FragInput tint_symbol) {
   return tint_symbol_1;
 }
 void main() {
-  FragOutput v = frag_main_inner(FragInput(frag_main_loc0_Input, frag_main_loc1_Input));
+  FragOutput v = frag_main_inner(FragInput(tint_interstage_location0, tint_interstage_location1));
   frag_main_loc0_idx0_Output = v.color;
   frag_main_loc0_idx1_Output = v.blend;
 }

@@ -58,7 +58,7 @@ struct VertexOutput {
   int prevent_dce;
 };
 
-layout(location = 0) flat out int vertex_main_loc0_Output;
+layout(location = 0) flat out int tint_interstage_location0;
 int extractBits_249874() {
   int arg_0 = 1;
   uint arg_1 = 1u;
@@ -81,6 +81,6 @@ void main() {
   gl_Position = v_4.pos;
   gl_Position.y = -(gl_Position.y);
   gl_Position.z = ((2.0f * gl_Position.z) - gl_Position.w);
-  vertex_main_loc0_Output = v_4.prevent_dce;
+  tint_interstage_location0 = v_4.prevent_dce;
   gl_PointSize = 1.0f;
 }

@@ -44,7 +44,7 @@ struct VertexOutput {
   vec2 prevent_dce;
 };
 
-layout(location = 0) flat out vec2 vertex_main_loc0_Output;
+layout(location = 0) flat out vec2 tint_interstage_location0;
 vec2 tanh_5724b3() {
   vec2 res = vec2(0.76159417629241943359f);
   return res;
@@ -60,6 +60,6 @@ void main() {
   gl_Position = v.pos;
   gl_Position.y = -(gl_Position.y);
   gl_Position.z = ((2.0f * gl_Position.z) - gl_Position.w);
-  vertex_main_loc0_Output = v.prevent_dce;
+  tint_interstage_location0 = v.prevent_dce;
   gl_PointSize = 1.0f;
 }

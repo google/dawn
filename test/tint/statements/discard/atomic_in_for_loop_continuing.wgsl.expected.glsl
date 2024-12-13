@@ -8,8 +8,8 @@ buffer f_a_block_ssbo {
 } v;
 bool continue_execution = true;
 uniform highp sampler2D t_s;
-layout(location = 0) in float foo_loc0_Input;
-layout(location = 1) in vec2 foo_loc1_Input;
+layout(location = 0) in float tint_interstage_location0;
+layout(location = 1) in vec2 tint_interstage_location1;
 layout(location = 0) out int foo_loc0_Output;
 int tint_f32_to_i32(float value) {
   return mix(2147483647, mix((-2147483647 - 1), int(value), (value >= -2147483648.0f)), (value <= 2147483520.0f));
@@ -51,5 +51,5 @@ int foo_inner(float tint_symbol, vec2 coord) {
   return result;
 }
 void main() {
-  foo_loc0_Output = foo_inner(foo_loc0_Input, foo_loc1_Input);
+  foo_loc0_Output = foo_inner(tint_interstage_location0, tint_interstage_location1);
 }

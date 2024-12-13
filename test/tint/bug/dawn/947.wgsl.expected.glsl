@@ -18,7 +18,7 @@ layout(binding = 0, std140)
 uniform v_uniforms_block_ubo {
   Uniforms inner;
 } v;
-layout(location = 0) out vec2 vs_main_loc0_Output;
+layout(location = 0) out vec2 tint_interstage_location0;
 VertexOutputs vs_main_inner(uint VertexIndex) {
   vec2 texcoord[3] = vec2[3](vec2(-0.5f, 0.0f), vec2(1.5f, 0.0f), vec2(0.5f, 2.0f));
   VertexOutputs tint_symbol = VertexOutputs(vec2(0.0f), vec4(0.0f));
@@ -33,7 +33,7 @@ VertexOutputs vs_main_inner(uint VertexIndex) {
 }
 void main() {
   VertexOutputs v_1 = vs_main_inner(uint(gl_VertexID));
-  vs_main_loc0_Output = v_1.texcoords;
+  tint_interstage_location0 = v_1.texcoords;
   gl_Position = v_1.position;
   gl_Position.y = -(gl_Position.y);
   gl_Position.z = ((2.0f * gl_Position.z) - gl_Position.w);
@@ -47,7 +47,7 @@ precision highp float;
 precision highp int;
 
 bool continue_execution = true;
-layout(location = 0) in vec2 fs_main_loc0_Input;
+layout(location = 0) in vec2 tint_interstage_location0;
 layout(location = 0) out vec4 fs_main_loc0_Output;
 vec4 fs_main_inner(vec2 texcoord) {
   vec2 clampedTexcoord = clamp(texcoord, vec2(0.0f), vec2(1.0f));
@@ -61,5 +61,5 @@ vec4 fs_main_inner(vec2 texcoord) {
   return srcColor;
 }
 void main() {
-  fs_main_loc0_Output = fs_main_inner(fs_main_loc0_Input);
+  fs_main_loc0_Output = fs_main_inner(tint_interstage_location0);
 }

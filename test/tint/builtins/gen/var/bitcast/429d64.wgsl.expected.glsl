@@ -55,7 +55,7 @@ struct VertexOutput {
   f16vec4 prevent_dce;
 };
 
-layout(location = 0) flat out f16vec4 vertex_main_loc0_Output;
+layout(location = 0) flat out f16vec4 tint_interstage_location0;
 f16vec4 tint_bitcast_to_f16(vec2 src) {
   return f16vec4(unpackFloat2x16(floatBitsToUint(src).x), unpackFloat2x16(floatBitsToUint(src).y));
 }
@@ -75,6 +75,6 @@ void main() {
   gl_Position = v.pos;
   gl_Position.y = -(gl_Position.y);
   gl_Position.z = ((2.0f * gl_Position.z) - gl_Position.w);
-  vertex_main_loc0_Output = v.prevent_dce;
+  tint_interstage_location0 = v.prevent_dce;
   gl_PointSize = 1.0f;
 }

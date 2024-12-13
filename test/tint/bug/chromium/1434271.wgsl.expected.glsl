@@ -80,8 +80,8 @@ uniform v_render_params_block_ubo {
 layout(location = 0) in vec3 vs_main_loc0_Input;
 layout(location = 1) in vec4 vs_main_loc1_Input;
 layout(location = 2) in vec2 vs_main_loc2_Input;
-layout(location = 0) out vec4 vs_main_loc0_Output;
-layout(location = 1) out vec2 vs_main_loc1_Output;
+layout(location = 0) out vec4 tint_interstage_location0;
+layout(location = 1) out vec2 tint_interstage_location1;
 VertexOutput vs_main_inner(VertexInput tint_symbol) {
   vec3 quad_pos = (mat2x3(v.inner.right, v.inner.up) * tint_symbol.quad_pos);
   vec3 position = (tint_symbol.position - (quad_pos + 0.00999999977648258209f));
@@ -97,8 +97,8 @@ void main() {
   gl_Position = v_2.position;
   gl_Position.y = -(gl_Position.y);
   gl_Position.z = ((2.0f * gl_Position.z) - gl_Position.w);
-  vs_main_loc0_Output = v_2.color;
-  vs_main_loc1_Output = v_2.quad_pos;
+  tint_interstage_location0 = v_2.color;
+  tint_interstage_location1 = v_2.quad_pos;
   gl_PointSize = 1.0f;
 }
 //

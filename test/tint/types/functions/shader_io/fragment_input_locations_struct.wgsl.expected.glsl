@@ -10,10 +10,10 @@ struct FragmentInputs {
   vec4 loc3;
 };
 
-layout(location = 0) flat in int tint_symbol_loc0_Input;
-layout(location = 1) flat in uint tint_symbol_loc1_Input;
-layout(location = 2) in float tint_symbol_loc2_Input;
-layout(location = 3) in vec4 tint_symbol_loc3_Input;
+layout(location = 0) flat in int tint_interstage_location0;
+layout(location = 1) flat in uint tint_interstage_location1;
+layout(location = 2) in float tint_interstage_location2;
+layout(location = 3) in vec4 tint_interstage_location3;
 void tint_symbol_inner(FragmentInputs inputs) {
   int i = inputs.loc0;
   uint u = inputs.loc1;
@@ -21,5 +21,5 @@ void tint_symbol_inner(FragmentInputs inputs) {
   vec4 v = inputs.loc3;
 }
 void main() {
-  tint_symbol_inner(FragmentInputs(tint_symbol_loc0_Input, tint_symbol_loc1_Input, tint_symbol_loc2_Input, tint_symbol_loc3_Input));
+  tint_symbol_inner(FragmentInputs(tint_interstage_location0, tint_interstage_location1, tint_interstage_location2, tint_interstage_location3));
 }

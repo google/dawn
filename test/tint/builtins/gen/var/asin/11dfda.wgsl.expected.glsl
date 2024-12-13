@@ -49,7 +49,7 @@ struct VertexOutput {
   float16_t prevent_dce;
 };
 
-layout(location = 0) flat out float16_t vertex_main_loc0_Output;
+layout(location = 0) flat out float16_t tint_interstage_location0;
 float16_t asin_11dfda() {
   float16_t arg_0 = 0.479248046875hf;
   float16_t res = asin(arg_0);
@@ -66,6 +66,6 @@ void main() {
   gl_Position = v.pos;
   gl_Position.y = -(gl_Position.y);
   gl_Position.z = ((2.0f * gl_Position.z) - gl_Position.w);
-  vertex_main_loc0_Output = v.prevent_dce;
+  tint_interstage_location0 = v.prevent_dce;
   gl_PointSize = 1.0f;
 }

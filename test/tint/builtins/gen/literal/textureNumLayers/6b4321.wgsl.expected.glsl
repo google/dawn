@@ -47,7 +47,7 @@ struct VertexOutput {
 };
 
 uniform highp isamplerCubeArray arg_0;
-layout(location = 0) flat out uint vertex_main_loc0_Output;
+layout(location = 0) flat out uint tint_interstage_location0;
 uint textureNumLayers_6b4321() {
   uint res = uint(textureSize(arg_0, 0).z);
   return res;
@@ -63,6 +63,6 @@ void main() {
   gl_Position = v.pos;
   gl_Position.y = -(gl_Position.y);
   gl_Position.z = ((2.0f * gl_Position.z) - gl_Position.w);
-  vertex_main_loc0_Output = v.prevent_dce;
+  tint_interstage_location0 = v.prevent_dce;
   gl_PointSize = 1.0f;
 }

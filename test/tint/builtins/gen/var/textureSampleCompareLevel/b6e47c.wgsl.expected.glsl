@@ -57,7 +57,7 @@ struct VertexOutput {
 };
 
 uniform highp sampler2DArrayShadow arg_0_arg_1;
-layout(location = 0) flat out float vertex_main_loc0_Output;
+layout(location = 0) flat out float tint_interstage_location0;
 float textureSampleCompareLevel_b6e47c() {
   vec2 arg_2 = vec2(1.0f);
   int arg_3 = 1;
@@ -78,6 +78,6 @@ void main() {
   gl_Position = v_2.pos;
   gl_Position.y = -(gl_Position.y);
   gl_Position.z = ((2.0f * gl_Position.z) - gl_Position.w);
-  vertex_main_loc0_Output = v_2.prevent_dce;
+  tint_interstage_location0 = v_2.prevent_dce;
   gl_PointSize = 1.0f;
 }

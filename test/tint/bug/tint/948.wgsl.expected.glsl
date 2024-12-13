@@ -39,12 +39,12 @@ uniform highp sampler2D tileMapsTexture1_tileMapsSampler;
 uniform highp sampler2D tileMapsTexture0_tileMapsSampler;
 uniform highp sampler2D animationMapTexture_animationMapSampler;
 uniform highp sampler2D spriteSheetTexture_spriteSheetSampler;
-layout(location = 2) in vec2 tint_symbol_loc2_Input;
-layout(location = 5) in vec2 tint_symbol_loc5_Input;
-layout(location = 4) in vec2 tint_symbol_loc4_Input;
-layout(location = 3) in vec2 tint_symbol_loc3_Input;
-layout(location = 0) in vec3 tint_symbol_loc0_Input;
-layout(location = 1) in vec2 tint_symbol_loc1_Input;
+layout(location = 2) in vec2 tint_interstage_location2;
+layout(location = 5) in vec2 tint_interstage_location5;
+layout(location = 4) in vec2 tint_interstage_location4;
+layout(location = 3) in vec2 tint_interstage_location3;
+layout(location = 0) in vec3 tint_interstage_location0;
+layout(location = 1) in vec2 tint_interstage_location1;
 layout(location = 0) out vec4 tint_symbol_loc0_Output;
 mat4 getFrameData_f1_(inout float frameID) {
   float fX = 0.0f;
@@ -251,5 +251,5 @@ main_out tint_symbol_inner(vec2 tUV_param, vec2 tileID_1_param, vec2 levelUnits_
   return main_out(glFragColor);
 }
 void main() {
-  tint_symbol_loc0_Output = tint_symbol_inner(tint_symbol_loc2_Input, tint_symbol_loc5_Input, tint_symbol_loc4_Input, tint_symbol_loc3_Input, tint_symbol_loc0_Input, tint_symbol_loc1_Input).glFragColor_1;
+  tint_symbol_loc0_Output = tint_symbol_inner(tint_interstage_location2, tint_interstage_location5, tint_interstage_location4, tint_interstage_location3, tint_interstage_location0, tint_interstage_location1).glFragColor_1;
 }

@@ -53,7 +53,7 @@ struct VertexOutput {
 };
 
 uniform highp samplerCube arg_0_arg_1;
-layout(location = 0) flat out vec4 vertex_main_loc0_Output;
+layout(location = 0) flat out vec4 tint_interstage_location0;
 vec4 textureSampleLevel_c32df7() {
   vec3 arg_2 = vec3(1.0f);
   float arg_3 = 1.0f;
@@ -72,6 +72,6 @@ void main() {
   gl_Position = v_1.pos;
   gl_Position.y = -(gl_Position.y);
   gl_Position.z = ((2.0f * gl_Position.z) - gl_Position.w);
-  vertex_main_loc0_Output = v_1.prevent_dce;
+  tint_interstage_location0 = v_1.prevent_dce;
   gl_PointSize = 1.0f;
 }
