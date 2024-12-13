@@ -74,7 +74,7 @@ struct VertexInput {
 };
 
 layout(binding = 5, std140)
-uniform render_params_block_1_ubo {
+uniform v_render_params_block_ubo {
   RenderParams inner;
 } v;
 layout(location = 0) in vec3 vs_main_loc0_Input;

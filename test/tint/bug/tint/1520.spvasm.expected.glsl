@@ -27,7 +27,7 @@ struct main_out {
 };
 
 layout(binding = 0, std140)
-uniform x_4_block_std140_1_ubo {
+uniform f_x_4_block_std140_ubo {
   UniformBuffer_std140 inner;
 } v;
 vec4 sk_FragColor = vec4(0.0f);

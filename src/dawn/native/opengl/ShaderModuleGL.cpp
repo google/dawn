@@ -95,7 +95,6 @@ using InterstageLocationAndName = std::pair<uint32_t, std::string>;
     X(LimitsForCompilationRequest, limits)                                                       \
     X(bool, disableSymbolRenaming)                                                               \
     X(std::vector<InterstageLocationAndName>, interstageVariables)                               \
-    X(std::vector<std::string>, bufferBindingVariables)                                          \
     X(tint::glsl::writer::Options, tintOptions)                                                  \
     X(CacheKey::UnsafeUnkeyedValue<dawn::platform::Platform*>, platform)
 
@@ -329,12 +328,6 @@ std::pair<tint::glsl::writer::Bindings, BindingMap> GenerateBindingInfo(
                 std::get_if<BufferBindingInfo>(&shaderBindingInfo.bindingInfo);
 
             if (bufferBindingInfo) {
-                // For buffer bindings that can be shareable across stages, we need to rename them
-                // to avoid GL program link failures due to block naming issues.
-                if (stage != SingleShaderStage::Compute) {
-                    req.bufferBindingVariables.emplace_back(shaderBindingInfo.name);
-                }
-
                 switch (bufferBindingInfo->type) {
                     case wgpu::BufferBindingType::Uniform:
                         bindings.uniform.emplace(
@@ -518,14 +511,6 @@ ResultOrError<GLuint> ShaderModule::CompileShader(
                 for (const auto& it : r.interstageVariables) {
                     assignedRenamings.emplace(
                         it.second, "dawn_interstage_location_" + std::to_string(it.first));
-                }
-
-                // Prepend v_ or f_ to buffer binding variable names in order to avoid collisions in
-                // renamed interface blocks.
-                for (const auto& variableName : r.bufferBindingVariables) {
-                    assignedRenamings.emplace(
-                        variableName,
-                        (r.stage == SingleShaderStage::Vertex ? "v_" : "f_") + variableName);
                 }
 
                 // Needs to run early so that they can use builtin names safely.

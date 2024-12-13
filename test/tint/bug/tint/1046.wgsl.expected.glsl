@@ -30,11 +30,11 @@ struct FragmentInput {
 };
 
 layout(binding = 0, std140)
-uniform uniforms_block_1_ubo {
+uniform f_uniforms_block_ubo {
   Uniforms inner;
 } v;
 layout(binding = 1, std430)
-buffer PointLights_1_ssbo {
+buffer f_PointLights_ssbo {
   PointLight values[];
 } pointLights;
 uniform highp sampler2D myTexture;

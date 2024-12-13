@@ -23,7 +23,7 @@ struct main_out {
 };
 
 layout(binding = 9, std140)
-uniform x_20_block_1_ubo {
+uniform f_x_20_block_ubo {
   LeftOver inner;
 } v;
 vec2 tUV = vec2(0.0f);

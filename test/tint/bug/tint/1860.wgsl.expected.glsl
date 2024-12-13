@@ -6,7 +6,7 @@ struct DeclaredAfterUsage {
 };
 
 layout(binding = 0, std140)
-uniform declared_after_usage_block_1_ubo {
+uniform v_declared_after_usage_block_ubo {
   DeclaredAfterUsage inner;
 } v;
 vec4 tint_symbol_inner() {

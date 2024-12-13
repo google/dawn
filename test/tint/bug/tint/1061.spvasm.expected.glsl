@@ -12,7 +12,7 @@ struct main_out {
 };
 
 layout(binding = 0, std140)
-uniform x_7_block_1_ubo {
+uniform f_x_7_block_ubo {
   buf0 inner;
 } v_1;
 vec4 x_GLF_color = vec4(0.0f);

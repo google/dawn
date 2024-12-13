@@ -7,11 +7,11 @@ precision highp float;
 precision highp int;
 
 layout(binding = 0, std430)
-buffer prevent_dce_block_1_ssbo {
+buffer f_prevent_dce_block_ssbo {
   uint inner;
 } v;
 layout(binding = 1, std430)
-buffer SB_RO_1_ssbo {
+buffer f_SB_RO_ssbo {
   float16_t arg_0[];
 } sb_ro;
 uint arrayLength_8421b9() {
@@ -56,7 +56,7 @@ struct VertexOutput {
 };
 
 layout(binding = 1, std430)
-buffer SB_RO_1_ssbo {
+buffer v_SB_RO_ssbo {
   float16_t arg_0[];
 } sb_ro;
 layout(location = 0) flat out uint vertex_main_loc0_Output;

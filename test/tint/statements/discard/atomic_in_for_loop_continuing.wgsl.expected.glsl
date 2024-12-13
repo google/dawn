@@ -3,7 +3,7 @@ precision highp float;
 precision highp int;
 
 layout(binding = 2, std430)
-buffer a_block_1_ssbo {
+buffer f_a_block_ssbo {
   int inner;
 } v;
 bool continue_execution = true;

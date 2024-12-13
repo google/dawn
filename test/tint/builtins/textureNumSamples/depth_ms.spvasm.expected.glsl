@@ -14,7 +14,7 @@ struct vertex_main_out {
 
 vec4 tint_symbol_1 = vec4(0.0f);
 layout(binding = 0, std140)
-uniform tint_symbol_3_1_ubo {
+uniform v_tint_symbol_3_ubo {
   TintTextureUniformData inner;
 } v;
 void textureNumSamples_a3c8a0() {
@@ -51,7 +51,7 @@ struct TintTextureUniformData {
 };
 
 layout(binding = 0, std140)
-uniform tint_symbol_1_ubo {
+uniform f_tint_symbol_ubo {
   TintTextureUniformData inner;
 } v;
 void textureNumSamples_a3c8a0() {

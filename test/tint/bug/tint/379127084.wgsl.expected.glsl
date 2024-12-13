@@ -28,7 +28,7 @@ struct FSOut {
 };
 
 layout(binding = 2, std430)
-buffer FSUniforms_1_ssbo {
+buffer f_FSUniforms_ssbo {
   FSUniformData fsUniformData[];
 } _storage1;
 uint shadingSsboIndex = 0u;

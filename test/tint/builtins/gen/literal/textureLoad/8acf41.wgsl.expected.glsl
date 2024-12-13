@@ -63,11 +63,11 @@ struct tint_ExternalTextureParams {
 };
 
 layout(binding = 0, std430)
-buffer prevent_dce_block_1_ssbo {
+buffer f_prevent_dce_block_ssbo {
   vec4 inner;
 } v_1;
 layout(binding = 2, std140)
-uniform arg_0_params_block_std140_1_ubo {
+uniform f_arg_0_params_block_std140_ubo {
   tint_ExternalTextureParams_std140 inner;
 } v_2;
 uniform highp sampler2D arg_0_plane0;
@@ -299,7 +299,7 @@ struct VertexOutput {
 };
 
 layout(binding = 2, std140)
-uniform arg_0_params_block_std140_1_ubo {
+uniform v_arg_0_params_block_std140_ubo {
   tint_ExternalTextureParams_std140 inner;
 } v_1;
 uniform highp sampler2D arg_0_plane0;

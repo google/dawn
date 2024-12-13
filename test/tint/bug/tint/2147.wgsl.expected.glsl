@@ -9,7 +9,7 @@ struct atomic_compare_exchange_result_i32 {
 };
 
 layout(binding = 0, std430)
-buffer S_block_1_ssbo {
+buffer f_S_block_ssbo {
   int inner;
 } v;
 bool continue_execution = true;

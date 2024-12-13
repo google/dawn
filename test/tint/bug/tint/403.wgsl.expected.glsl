@@ -12,11 +12,11 @@ struct vertexUniformBuffer2_std140 {
 };
 
 layout(binding = 0, std140)
-uniform x_20_block_std140_1_ubo {
+uniform v_x_20_block_std140_ubo {
   vertexUniformBuffer1_std140 inner;
 } v;
 layout(binding = 0, std140)
-uniform x_26_block_std140_1_ubo {
+uniform v_x_26_block_std140_ubo {
   vertexUniformBuffer2_std140 inner;
 } v_1;
 vec4 tint_symbol_inner(uint tint_symbol_1) {

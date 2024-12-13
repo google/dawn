@@ -25,7 +25,7 @@ struct main_out {
 
 vec3 position_1 = vec3(0.0f);
 layout(binding = 2, std140)
-uniform x_14_block_1_ubo {
+uniform v_x_14_block_ubo {
   LeftOver inner;
 } v;
 vec2 vUV = vec2(0.0f);

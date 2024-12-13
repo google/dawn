@@ -7,7 +7,7 @@ precision highp float;
 precision highp int;
 
 layout(binding = 0, std430)
-buffer prevent_dce_block_1_ssbo {
+buffer f_prevent_dce_block_ssbo {
   f16vec4 inner;
 } v;
 f16vec4 log2_776088() {

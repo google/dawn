@@ -12,7 +12,7 @@ struct S_std140 {
 };
 
 layout(binding = 0, std140)
-uniform tint_symbol_block_std140_1_ubo {
+uniform v_tint_symbol_block_std140_ubo {
   S_std140 inner;
 } v;
 vec4 tint_symbol_1_inner() {

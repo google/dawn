@@ -39,15 +39,15 @@ struct VertexOutput {
 };
 
 layout(binding = 0, std140)
-uniform global_block_1_ubo {
+uniform v_global_block_ubo {
   ub_SceneParams inner;
 } v_1;
 layout(binding = 1, std140)
-uniform global1_block_1_ubo {
+uniform v_global1_block_ubo {
   ub_MaterialParams inner;
 } v_2;
 layout(binding = 2, std140)
-uniform global2_block_1_ubo {
+uniform v_global2_block_ubo {
   ub_PacketParams inner;
 } v_3;
 vec3 a_Position1 = vec3(0.0f);

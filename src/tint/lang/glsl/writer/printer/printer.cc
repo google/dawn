@@ -132,6 +132,14 @@ class Printer : public tint::TextGenerator {
             }
         }
 
+        // Find the entry point that we are emitting code for. There should be exactly one.
+        for (auto& func : ir_.functions) {
+            if (func->IsEntryPoint()) {
+                TINT_ASSERT(stage_ == core::ir::Function::PipelineStage::kUndefined);
+                stage_ = func->Stage();
+            }
+        }
+
         FindHostShareableStructs();
         EmitRootBlock();
 
@@ -169,6 +177,8 @@ class Printer : public tint::TextGenerator {
     /// The buffer holding preamble text
     TextBuffer preamble_buffer_;
 
+    /// The pipeline stage we are emitting code for.
+    core::ir::Function::PipelineStage stage_ = core::ir::Function::PipelineStage::kUndefined;
     /// The current function being emitted
     const core::ir::Function* current_function_ = nullptr;
     /// The current block being emitted
@@ -1063,7 +1073,14 @@ class Printer : public tint::TextGenerator {
                        const core::type::Struct* str) {
         TINT_ASSERT(str);
 
-        Line() << kind << " " << UniqueIdentifier(StructName(str)) << "_" << type_suffix << " {";
+        // Prefix the buffer name to avoid collisions between different stages in the same pipeline.
+        auto str_name = StructName(str);
+        if (stage_ == core::ir::Function::PipelineStage::kFragment) {
+            str_name = "f_" + str_name;
+        } else if (stage_ == core::ir::Function::PipelineStage::kVertex) {
+            str_name = "v_" + str_name;
+        }
+        Line() << kind << " " << UniqueIdentifier(str_name) << "_" << type_suffix << " {";
 
         {
             ScopedIndent si(current_buffer_);

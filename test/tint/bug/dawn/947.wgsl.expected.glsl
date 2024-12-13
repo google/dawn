@@ -15,7 +15,7 @@ struct VertexOutputs {
 };
 
 layout(binding = 0, std140)
-uniform uniforms_block_1_ubo {
+uniform v_uniforms_block_ubo {
   Uniforms inner;
 } v;
 layout(location = 0) out vec2 vs_main_loc0_Output;

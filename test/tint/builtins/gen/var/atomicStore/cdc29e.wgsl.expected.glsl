@@ -11,7 +11,7 @@ struct SB_RW {
 };
 
 layout(binding = 0, std430)
-buffer sb_rw_block_1_ssbo {
+buffer f_sb_rw_block_ssbo {
   SB_RW inner;
 } v;
 void atomicStore_cdc29e() {
