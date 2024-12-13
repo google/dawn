@@ -988,12 +988,12 @@ class State {
                 }
             },
             [&](const core::type::Array* a) {
-                auto el = Type(a->ElemType());
-                if (!el) {
+                if (ContainsBuiltinStruct(a)) {
                     // The element type is untypeable, so we need to infer it instead.
                     return ast::Type{b.Expr(b.Ident("array"))};
                 }
 
+                auto el = Type(a->ElemType());
                 Vector<const ast::Attribute*, 1> attrs;
                 if (!a->IsStrideImplicit()) {
                     attrs.Push(b.Stride(a->Stride()));
@@ -1053,8 +1053,7 @@ class State {
 
     ast::Type Struct(const core::type::Struct* s) {
         // Skip builtin structures.
-        // TODO(350778507): Consider using a struct flag for builtin structures instead.
-        if (tint::HasPrefix(s->Name().NameView(), "__")) {
+        if (ContainsBuiltinStruct(s)) {
             return ast::Type{};
         }
 
@@ -1106,6 +1105,20 @@ class State {
         });
 
         return b.ty(n);
+    }
+
+    bool ContainsBuiltinStruct(const core::type::Type* ty) {
+        if (auto* s = ty->As<core::type::Struct>()) {
+            // Note: We don't need to check the members of the struct, as builtin structures cannot
+            // be nested inside other structures.
+            // TODO(350778507): Consider using a struct flag for builtin structures instead.
+            if (tint::HasPrefix(s->Name().NameView(), "__")) {
+                return true;
+            }
+        } else if (auto* a = ty->As<core::type::Array>()) {
+            return ContainsBuiltinStruct(a->ElemType());
+        }
+        return false;
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
