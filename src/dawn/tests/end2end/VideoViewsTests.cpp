@@ -524,6 +524,10 @@ class VideoViewsTests : public VideoViewsTestsBase {
         DAWN_TEST_UNSUPPORTED_IF(UsesWire());
         DAWN_TEST_UNSUPPORTED_IF(!IsMultiPlanarFormatsSupported());
         DAWN_TEST_UNSUPPORTED_IF(!IsFormatSupported());
+        // TODO(382071071): compat mode doesn't allow different texture views to be used in
+        // a draw call. But the tests need texture views to sample and render to separate planes of
+        // a multiplanar texture.
+        DAWN_TEST_UNSUPPORTED_IF(IsCompatibilityMode());
 
         mBackend = VideoViewsTestBackend::Create();
         mBackend->OnSetUp(device);

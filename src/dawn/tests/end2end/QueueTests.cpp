@@ -636,6 +636,10 @@ TEST_P(QueueWriteTextureTests, VaryingBytesPerRowCube) {
     // TODO(crbug.com/dawn/42241333): diagnose stencil8 failure on Angle Swiftshader
     DAWN_SUPPRESS_TEST_IF(format == wgpu::TextureFormat::Stencil8 && IsANGLESwiftShader());
 
+    // TODO(383765096): D3D11 doesn't allow calling Gather() on R8_UINT
+    DAWN_SUPPRESS_TEST_IF(format == wgpu::TextureFormat::Stencil8 && IsD3D11() &&
+                          IsCompatibilityMode());
+
     constexpr uint32_t kWidth = 257;
     constexpr uint32_t kHeight = 257;
 
@@ -690,6 +694,9 @@ TEST_P(QueueWriteTextureTests, BytesPerRowWithOneRowCopy) {
 TEST_P(QueueWriteTextureTests, VaryingArrayBytesPerRow) {
     // TODO(crbug.com/dawn/2095): Failing on ANGLE + SwiftShader, needs investigation.
     DAWN_SUPPRESS_TEST_IF(IsANGLESwiftShader());
+
+    // TODO(383779503): reading stencil texture is too slow on D3D11.
+    DAWN_SUPPRESS_TEST_IF(IsD3D11() && GetParam().mTextureFormat == wgpu::TextureFormat::Stencil8);
 
     constexpr uint32_t kWidth = 257;
     constexpr uint32_t kHeight = 129;

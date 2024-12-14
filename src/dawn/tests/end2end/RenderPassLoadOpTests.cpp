@@ -486,6 +486,10 @@ TEST_P(RenderPassLoadOpTests, LoadOpClearNormalizedFormatsOutOfBound) {
 // Test clearing multiple color attachments with different big signed and unsigned integers can
 // still work correctly.
 TEST_P(RenderPassLoadOpTests, LoadOpClearWithBig32BitIntegralValuesOnMultipleColorAttachments) {
+    // TODO(383733873): ApplyClearBigIntegerColorValueWithDraw workaround doesn't work with multiple
+    // outputs in compat mode.
+    DAWN_TEST_UNSUPPORTED_IF(IsD3D11() && IsCompatibilityMode());
+
     constexpr int32_t kMaxInt32RepresentableInFloat = 1 << std::numeric_limits<float>::digits;
     constexpr int32_t kMinInt32RepresentableInFloat = -kMaxInt32RepresentableInFloat;
 
@@ -684,6 +688,10 @@ TEST_P(RenderPassLoadOpTests, LoadOpClearWithBig32BitIntegralValuesOnMultipleCol
 TEST_P(RenderPassLoadOpTests, MixedUseOfLoadOpLoadAndLoadOpClearWithBigIntegerValues) {
     // TODO(crbug.com/dawn/2295): diagnose this failure on Pixel 4 OpenGLES
     DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsAndroid() && IsQualcomm());
+
+    // TODO(383733873): ApplyClearBigIntegerColorValueWithDraw workaround doesn't work with multiple
+    // outputs in compat mode.
+    DAWN_TEST_UNSUPPORTED_IF(IsD3D11() && IsCompatibilityMode());
 
     constexpr int32_t kMaxUInt32RepresentableInFloat = 1 << std::numeric_limits<float>::digits;
 

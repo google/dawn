@@ -122,6 +122,10 @@ void SharedTextureMemoryTests::SetUp() {
         !SupportsFeatures(GetParam().mBackend->RequiredFeatures(GetAdapter().Get())));
     // TODO(crbug.com/342213634): Crashes on ChromeOS volteer devices.
     DAWN_SUPPRESS_TEST_IF(IsChromeOS() && IsVulkan() && IsIntel() && IsBackendValidationEnabled());
+
+    // Compat cannot create 2D texture view from a 2D array texture.
+    DAWN_TEST_UNSUPPORTED_IF(IsCompatibilityMode() && GetParam().mLayerCount > 1);
+
     GetParam().mBackend->SetUp();
 }
 

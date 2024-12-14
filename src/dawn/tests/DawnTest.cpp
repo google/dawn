@@ -484,11 +484,10 @@ void DawnTestEnvironment::SelectPreferredAdapterProperties(const native::Instanc
             wgpu::AdapterInfo info;
             adapter.GetInfo(&info);
 
-            // Skip non-OpenGLES compat adapters. Metal/Vulkan/D3D12 support
+            // Skip non-OpenGLES/D3D11 compat adapters. Metal/Vulkan/D3D12 support
             // core WebGPU.
-            // D3D11 is in an experimental state where it may support core.
-            // See crbug.com/dawn/1820 for determining d3d11 capabilities.
-            if (info.compatibilityMode && info.backendType != wgpu::BackendType::OpenGLES) {
+            if (info.compatibilityMode && info.backendType != wgpu::BackendType::OpenGLES &&
+                info.backendType != wgpu::BackendType::D3D11) {
                 continue;
             }
 

@@ -316,6 +316,10 @@ class TextureCorruptionTests : public DawnTestWithParams<TextureCorruptionTestsP
         uint32_t sampleCount = GetParam().mSampleCount;
         wgpu::Extent3D textureSize = {width, height, depthOrArrayLayerCount};
 
+        // Compat mode's max texture size is 4096.
+        // https://github.com/gpuweb/gpuweb/blob/main/proposals/compatibility-mode.md#10-lower-limits
+        DAWN_TEST_UNSUPPORTED_IF(IsCompatibilityMode() && (width > 4096 || height > 4096));
+
         // Pre-allocate textures. The incorrect write type may corrupt neighboring textures or
         // layers.
         std::vector<wgpu::Texture> textures;

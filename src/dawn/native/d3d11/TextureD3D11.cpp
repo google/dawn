@@ -1122,7 +1122,7 @@ ResultOrError<ComPtr<ID3D11ShaderResourceView>> Texture::GetStencilSRV(
             return {};
         };
 
-        // TODO(dawn:1705): Work out a way of GPU-GPU copy, rather than the CPU-GPU round trip.
+        // TODO(383779503): Work out a way of GPU-GPU copy, rather than the CPU-GPU round trip.
         GetDevice()->EmitWarningOnce("Sampling the stencil component is rather slow now.");
         DAWN_TRY(Read(commandContext, singleRange, {0, 0, 0}, size, bytesPerRow, rowsPerImage,
                       callback));
