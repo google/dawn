@@ -112,105 +112,6 @@ func (n *TreeNode[Data]) traverse(f func(n *TreeNode[Data]) error) error {
 	return nil
 }
 
-// Merger is a function used to merge the children nodes of a tree.
-// Merger is called with the Data of each child node. If the function returns a
-// non-nil Data pointer, then this is used as the merged result. If the function
-// returns nil, then the node will not be merged.
-type Merger[Data any] func([]Data) *Data
-
-// merge collapses tree nodes based on child node data, using the function f.
-// merge operates on the leaf nodes first, working its way towards the root of
-// the tree.
-// Returns the merged target data for this node, or nil if the node is not a
-// leaf and its children has non-uniform data.
-func (n *TreeNode[Data]) merge(f Merger[Data]) *Data {
-	// If the node is a leaf, then simply return the node's data.
-	if len(n.Children) == 0 {
-		return n.Data
-	}
-
-	// Build a map of child target to merged child data.
-	// A nil for the value indicates that one or more children could not merge.
-	mergedChildren := map[Target][]Data{}
-	for key, child := range n.Children {
-		// Call merge() on the child. Even if we cannot merge this node, we want
-		// to do this for all children so they can merge their sub-graphs.
-		childData := child.merge(f)
-
-		if childData == nil {
-			// If merge() returned nil, then the data could not be merged.
-			// Mark the entire target as unmergeable.
-			mergedChildren[key.Target] = nil
-			continue
-		}
-
-		// Fetch the merge list for this child's target.
-		list, found := mergedChildren[key.Target]
-		if !found {
-			// First child with the given target?
-			mergedChildren[key.Target] = []Data{*childData}
-			continue
-		}
-		if list != nil {
-			mergedChildren[key.Target] = append(list, *childData)
-		}
-	}
-
-	merge := func(in []Data) *Data {
-		switch len(in) {
-		case 0:
-			return nil // nothing to merge.
-		case 1:
-			return &in[0] // merge of a single item results in that item
-		default:
-			return f(in)
-		}
-	}
-
-	// Might it possible to merge this node?
-	maybeMergeable := true
-
-	// The merged data, per target
-	mergedTargets := map[Target]Data{}
-
-	// Attempt to merge each of the target's data
-	for target, list := range mergedChildren {
-		if list != nil { // nil == unmergeable target
-			if data := merge(list); data != nil {
-				// Merge success!
-				mergedTargets[target] = *data
-				continue
-			}
-		}
-		maybeMergeable = false // Merge of this node is not possible
-	}
-
-	// Remove all children that have been merged
-	for key := range n.Children {
-		if _, merged := mergedTargets[key.Target]; merged {
-			delete(n.Children, key)
-		}
-	}
-
-	// Add wildcards for merged targets
-	for target, data := range mergedTargets {
-		data := data // Don't take address of iterator
-		n.getOrCreateChild(TreeNodeChildKey{"*", target}).Data = &data
-	}
-
-	// If any of the targets are unmergeable, then we cannot merge the node itself.
-	if !maybeMergeable {
-		return nil
-	}
-
-	// All targets were merged. Attempt to merge each of the targets.
-	data := make([]Data, 0, len(mergedTargets))
-	for _, d := range mergedTargets {
-		data = append(data, d)
-	}
-	return merge(data)
-}
-
 // print writes a textual representation of this node and its children to w.
 // prefix is used as the line prefix for each node, which is appended with
 // whitespace for each child node.
@@ -280,23 +181,6 @@ func (t *Tree[Data]) Add(q Query, d Data) error {
 	return nil
 }
 
-// Split adds a new data to the tree, clearing any ancestor node's data.
-// Returns ErrDuplicateData if the tree already contains a data for the given node at query
-func (t *Tree[Data]) Split(q Query, d Data) error {
-	node := &t.TreeNode
-	q.Walk(func(q Query, t Target, n string) error {
-		delete(node.Children, TreeNodeChildKey{Name: "*", Target: t})
-		node.Data = nil
-		node = node.getOrCreateChild(TreeNodeChildKey{n, t})
-		return nil
-	})
-	if node.Data != nil {
-		return ErrDuplicateData{node.Query}
-	}
-	node.Data = &d
-	return nil
-}
-
 // GetOrCreate returns existing, or adds a new data to the tree.
 func (t *Tree[Data]) GetOrCreate(q Query, create func() Data) *Data {
 	node := &t.TreeNode
@@ -325,40 +209,6 @@ func (t *Tree[Data]) Get(q Query) *TreeNode[Data] {
 		return errStop
 	})
 	return node
-}
-
-// Reduce reduces the tree using the Merger function f.
-// If the Merger function returns a non-nil Data value, then this will be used
-// to replace the non-leaf node with a new leaf node holding the returned Data.
-// This process recurses up to the tree root.
-func (t *Tree[Data]) Reduce(f Merger[Data]) {
-	for _, root := range t.TreeNode.Children {
-		root.merge(f)
-	}
-}
-
-// ReduceUnder reduces the sub-tree under the given query using the Merger
-// function f.
-// If the Merger function returns a non-nil Data value, then this will be used
-// to replace the non-leaf node with a new leaf node holding the returned Data.
-// This process recurses up to the node pointed at by the query to.
-func (t *Tree[Data]) ReduceUnder(to Query, f Merger[Data]) error {
-	node := &t.TreeNode
-	return to.Walk(func(q Query, t Target, n string) error {
-		if n == "*" {
-			node.merge(f)
-			return nil
-		}
-		child, ok := node.Children[TreeNodeChildKey{n, t}]
-		if !ok {
-			return ErrNoDataForQuery{q}
-		}
-		node = child
-		if q == to {
-			node.merge(f)
-		}
-		return nil
-	})
 }
 
 // glob calls f for every node under the given query.
@@ -401,44 +251,6 @@ func (t *Tree[Data]) glob(fq Query, f func(f *TreeNode[Data]) error) error {
 		}
 		return nil
 	})
-}
-
-// Replace replaces the sub-tree matching the query 'what' with the Data 'with'
-func (t *Tree[Data]) Replace(what Query, with Data) error {
-	node := &t.TreeNode
-	return what.Walk(func(q Query, t Target, n string) error {
-		childKey := TreeNodeChildKey{n, t}
-		if q == what {
-			for key, child := range node.Children {
-				// Use Query.Contains() to handle matching of Cases
-				// (which are not split into tree nodes)
-				if q.Contains(child.Query) {
-					delete(node.Children, key)
-				}
-			}
-			node = node.getOrCreateChild(childKey)
-			node.Data = &with
-		} else {
-			child, ok := node.Children[childKey]
-			if !ok {
-				return ErrNoDataForQuery{q}
-			}
-			node = child
-		}
-		return nil
-	})
-}
-
-// List returns the tree nodes flattened as a list of QueryData
-func (t *Tree[Data]) List() []QueryData[Data] {
-	out := []QueryData[Data]{}
-	t.traverse(func(n *TreeNode[Data]) error {
-		if n.Data != nil {
-			out = append(out, QueryData[Data]{n.Query, *n.Data})
-		}
-		return nil
-	})
-	return out
 }
 
 // Glob returns a list of QueryData's for every node that is under the given
