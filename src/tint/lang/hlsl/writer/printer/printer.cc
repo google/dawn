@@ -262,9 +262,9 @@ class Printer : public tint::TextGenerator {
             // Remap the entry point name if requested.
             auto func_name = NameOf(func);
             if (func->IsEntryPoint()) {
-                if (options_.remapped_entry_point_name) {
-                    func_name = *options_.remapped_entry_point_name;
-                    TINT_ASSERT(!IsKeyword(func_name) && !func_name.empty());
+                if (!options_.remapped_entry_point_name.empty()) {
+                    func_name = options_.remapped_entry_point_name;
+                    TINT_ASSERT(!IsKeyword(func_name));
                 }
                 result_.entry_points.push_back({func_name, ir_to_ast_stage(func->Stage())});
             }

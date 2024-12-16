@@ -138,7 +138,7 @@ TEST_F(SpirvWriterTest, EntryPointName_NotRemapped) {
     });
 
     Options options;
-    options.remapped_entry_point_name = {};
+    options.remapped_entry_point_name = "";
     ASSERT_TRUE(Generate(options)) << Error() << output_;
     EXPECT_INST("OpEntryPoint GLCompute %main \"main\"");
 }

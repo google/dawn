@@ -138,7 +138,7 @@ struct Options {
     Options& operator=(const Options&);
 
     /// An optional remapped name to use when emitting the entry point.
-    std::optional<std::string> remapped_entry_point_name = {};
+    std::string remapped_entry_point_name = {};
 
     /// Set to `true` to strip all user-declared identifiers from the module.
     bool strip_all_names = false;

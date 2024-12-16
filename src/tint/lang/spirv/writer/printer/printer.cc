@@ -800,8 +800,8 @@ class Printer {
 
         // Use the remapped entry point name if requested, otherwise use the original name.
         std::string name;
-        if (options_.remapped_entry_point_name) {
-            name = *options_.remapped_entry_point_name;
+        if (!options_.remapped_entry_point_name.empty()) {
+            name = options_.remapped_entry_point_name;
         } else {
             name = ir_.NameOf(func).Name();
         }

@@ -132,7 +132,7 @@ struct Bindings {
 /// Configuration options used for generating SPIR-V.
 struct Options {
     /// An optional remapped name to use when emitting the entry point.
-    std::optional<std::string> remapped_entry_point_name;
+    std::string remapped_entry_point_name = {};
 
     /// The bindings
     Bindings bindings;
