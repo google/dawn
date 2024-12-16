@@ -44,6 +44,18 @@ bool CanRun(const core::ir::Module& module, const Options& options) {
         if (options.remapped_entry_point_name.find('\0') != std::string::npos) {
             return false;
         }
+
+        // Check for multiple entry points.
+        // TODO(375388101): Remove this check when SingleEntryPoint is part of the backend.
+        bool has_entry_point = false;
+        for (auto& func : module.functions) {
+            if (func->IsEntryPoint()) {
+                if (has_entry_point) {
+                    return false;
+                }
+                has_entry_point = true;
+            }
+        }
     }
 
     // Check for unsupported module-scope variable address spaces and types.
