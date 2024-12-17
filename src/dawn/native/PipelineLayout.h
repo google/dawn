@@ -95,6 +95,10 @@ class PipelineLayoutBase : public ApiObjectBase,
     bool HasPixelLocalStorage() const;
     const std::vector<wgpu::TextureFormat>& GetStorageAttachmentSlots() const;
     bool HasAnyStorageAttachments() const;
+    uint32_t GetNumStorageBufferBindingsInVertexStage() const;
+    uint32_t GetNumStorageTextureBindingsInVertexStage() const;
+    uint32_t GetNumStorageBufferBindingsInFragmentStage() const;
+    uint32_t GetNumStorageTextureBindingsInFragmentStage() const;
 
     // Utility functions to compute inherited bind groups.
     // Returns the inherited bind groups as a mask.
@@ -120,6 +124,10 @@ class PipelineLayoutBase : public ApiObjectBase,
     PerBindGroup<Ref<BindGroupLayoutBase>> mBindGroupLayouts;
     BindGroupMask mMask;
     bool mHasPLS = false;
+    uint32_t mNumStorageBufferBindingsInVertexStage = 0;
+    uint32_t mNumStorageTextureBindingsInVertexStage = 0;
+    uint32_t mNumStorageBufferBindingsInFragmentStage = 0;
+    uint32_t mNumStorageTextureBindingsInFragmentStage = 0;
     std::vector<wgpu::TextureFormat> mStorageAttachmentSlots;
     uint32_t mImmediateDataRangeByteSize = 0;
 };

@@ -285,6 +285,59 @@ ResultOrError<Ref<PipelineLayoutBase>> ValidateLayoutAndGetRenderPipelineDescrip
         outDescriptor->layout = layoutRef.Get();
     }
 
+    if (device->IsCompatibilityMode()) {
+        const auto& limits = device->GetLimits();
+
+        {
+            auto requestedLimit = outDescriptor->layout->GetNumStorageBufferBindingsInVertexStage();
+            auto maxStorageBuffersInVertexStage = limits.v1.maxStorageBuffersInVertexStage;
+            DAWN_INVALID_IF(
+                requestedLimit > maxStorageBuffersInVertexStage,
+                "number of storage buffers used in vertex stage (%u) exceeds "
+                "maxStorageBuffersInVertexStage (%u).%s",
+                requestedLimit, maxStorageBuffersInVertexStage,
+                DAWN_INCREASE_LIMIT_MESSAGE(device->GetAdapter(), maxStorageBuffersInVertexStage,
+                                            requestedLimit));
+        }
+        {
+            auto requestedLimit =
+                outDescriptor->layout->GetNumStorageTextureBindingsInVertexStage();
+            auto maxStorageTexturesInVertexStage = limits.v1.maxStorageTexturesInVertexStage;
+            DAWN_INVALID_IF(
+                requestedLimit > maxStorageTexturesInVertexStage,
+                "number of storage textures used in vertex stage (%u) exceeds "
+                "maxStorageTexturesInVertexStage (%u).%s",
+                requestedLimit, maxStorageTexturesInVertexStage,
+                DAWN_INCREASE_LIMIT_MESSAGE(device->GetAdapter(), maxStorageTexturesInVertexStage,
+                                            requestedLimit));
+        }
+        {
+            auto requestedLimit =
+                outDescriptor->layout->GetNumStorageBufferBindingsInFragmentStage();
+            auto maxStorageBuffersInFragmentStage = limits.v1.maxStorageBuffersInFragmentStage;
+            DAWN_INVALID_IF(
+                requestedLimit > maxStorageBuffersInFragmentStage,
+                "number of storage buffers used in fragment stage (%u) exceeds "
+                "maxStorageBuffersInFragmentStage (%u).%s",
+                requestedLimit, maxStorageBuffersInFragmentStage,
+                DAWN_INCREASE_LIMIT_MESSAGE(device->GetAdapter(), maxStorageBuffersInFragmentStage,
+                                            requestedLimit));
+        }
+        {
+            auto requestedLimit =
+                outDescriptor->layout->GetNumStorageTextureBindingsInFragmentStage();
+            auto maxStorageTexturesInFragmentStage = limits.v1.maxStorageTexturesInFragmentStage;
+
+            DAWN_INVALID_IF(
+                requestedLimit > maxStorageTexturesInFragmentStage,
+                "number of storage textures used in fragment stage (%u) exceeds "
+                "maxStorageTexturesInFragmentStage (%u).%s",
+                requestedLimit, maxStorageTexturesInFragmentStage,
+                DAWN_INCREASE_LIMIT_MESSAGE(device->GetAdapter(), maxStorageTexturesInFragmentStage,
+                                            requestedLimit));
+        }
+    }
+
     return layoutRef;
 }
 
@@ -467,6 +520,26 @@ MaybeError DeviceBase::Initialize(Ref<QueueBase> defaultQueue) {
         mMutex = AcquireRef(new Mutex);
     } else {
         mMutex = nullptr;
+    }
+
+    if (!IsCompatibilityMode()) {
+        // In core mode the maxStorageXXXInYYYStage are always set to maxStorageXXXPerShaderStage
+        // In compat they can vary but validation will fail if usage is >
+        // maxStorageXXXPerShaderStage In other words:
+        //   In compat, user requests 5 and 4 respectively so result:
+        //     device.limits.maxStorageBuffersInFragmentStage = 5;
+        //     device.limits.maxStorageBuffersPerShaderStage = 4;
+        //     It's ok to use 4 storage buffers in fragment stage but fails if 5 used.
+        //   In core, user requests 5 and 4 respectively so result:
+        //     device.limits.maxStorageBuffersInFragmentStage = 4;
+        //     device.limits.maxStorageBuffersPerShaderStage = 4;
+        //     It's ok to use 4 storage buffers in fragment stage but fails if 5 used.
+        //
+        // Note: these 4 limits are ignored in core validation.
+        mLimits.v1.maxStorageBuffersInFragmentStage = mLimits.v1.maxStorageBuffersPerShaderStage;
+        mLimits.v1.maxStorageTexturesInFragmentStage = mLimits.v1.maxStorageTexturesPerShaderStage;
+        mLimits.v1.maxStorageBuffersInVertexStage = mLimits.v1.maxStorageBuffersPerShaderStage;
+        mLimits.v1.maxStorageTexturesInVertexStage = mLimits.v1.maxStorageTexturesPerShaderStage;
     }
 
     mAdapter->GetInstance()->AddDevice(this);

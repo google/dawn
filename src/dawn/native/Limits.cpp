@@ -72,6 +72,8 @@
     X(Maximum,            maxSampledTexturesPerShaderStage,        16,        16,         16) \
     X(Maximum,                   maxSamplersPerShaderStage,        16,        16,         16) \
     X(Maximum,            maxStorageTexturesPerShaderStage,         4,         4,          8) \
+    X(Maximum,           maxStorageTexturesInFragmentStage,         0,         4,          8) \
+    X(Maximum,             maxStorageTexturesInVertexStage,         0,         4,          8) \
     X(Maximum,             maxUniformBuffersPerShaderStage,        12,        12,         12)
 
 // Tiers for limits related to storage buffer bindings. Should probably be merged with
@@ -79,8 +81,10 @@
 // TODO(crbug.com/dawn/685): Define these better. For now, use two tiers where one
 // offers slightly better than default limits.
 //
-#define LIMITS_STORAGE_BUFFER_BINDINGS(X)                                                           \
-    X(Maximum,             maxStorageBuffersPerShaderStage,         4,         8,          10)
+#define LIMITS_STORAGE_BUFFER_BINDINGS(X)                                                      \
+    X(Maximum,             maxStorageBuffersPerShaderStage,         4,         8,          10) \
+    X(Maximum,             maxStorageBuffersInFragmentStage,        0,         8,          10) \
+    X(Maximum,             maxStorageBuffersInVertexStage,          0,         8,          10)
 
 // TODO(crbug.com/dawn/685):
 // These limits aren't really tiered and could probably be grouped better.
@@ -346,6 +350,14 @@ void NormalizeLimits(Limits* limits) {
         std::min(limits->maxStorageBuffersPerShaderStage, kMaxStorageBuffersPerShaderStage);
     limits->maxStorageTexturesPerShaderStage =
         std::min(limits->maxStorageTexturesPerShaderStage, kMaxStorageTexturesPerShaderStage);
+    limits->maxStorageBuffersInVertexStage =
+        std::min(limits->maxStorageBuffersInVertexStage, kMaxStorageBuffersPerShaderStage);
+    limits->maxStorageTexturesInVertexStage =
+        std::min(limits->maxStorageTexturesInVertexStage, kMaxStorageTexturesPerShaderStage);
+    limits->maxStorageBuffersInFragmentStage =
+        std::min(limits->maxStorageBuffersInFragmentStage, kMaxStorageBuffersPerShaderStage);
+    limits->maxStorageTexturesInFragmentStage =
+        std::min(limits->maxStorageTexturesInFragmentStage, kMaxStorageTexturesPerShaderStage);
     limits->maxUniformBuffersPerShaderStage =
         std::min(limits->maxUniformBuffersPerShaderStage, kMaxUniformBuffersPerShaderStage);
 

@@ -64,6 +64,10 @@ TEST(Limits, ReifyDefaultLimits_PopulatesDefault) {
     Limits reified = ReifyDefaultLimits(limits, wgpu::FeatureLevel::Core);
     EXPECT_EQ(reified.maxComputeWorkgroupStorageSize, 16384u);
     EXPECT_EQ(reified.maxStorageBufferBindingSize, 134217728ul);
+    EXPECT_EQ(reified.maxStorageBuffersInFragmentStage, 8u);
+    EXPECT_EQ(reified.maxStorageTexturesInFragmentStage, 4u);
+    EXPECT_EQ(reified.maxStorageBuffersInVertexStage, 8u);
+    EXPECT_EQ(reified.maxStorageTexturesInVertexStage, 4u);
 }
 
 // Test |ReifyDefaultLimits| populates the default for wgpu::FeatureLevel::Compatibility
@@ -76,6 +80,10 @@ TEST(Limits, ReifyDefaultLimits_PopulatesDefault_Compat) {
     Limits reified = ReifyDefaultLimits(limits, wgpu::FeatureLevel::Compatibility);
     EXPECT_EQ(reified.maxTextureDimension1D, 4096u);
     EXPECT_EQ(reified.maxStorageBufferBindingSize, 134217728ul);
+    EXPECT_EQ(reified.maxStorageBuffersInFragmentStage, 0u);
+    EXPECT_EQ(reified.maxStorageTexturesInFragmentStage, 0u);
+    EXPECT_EQ(reified.maxStorageBuffersInVertexStage, 0u);
+    EXPECT_EQ(reified.maxStorageTexturesInVertexStage, 0u);
 }
 
 // Test |ReifyDefaultLimits| clamps to the default if

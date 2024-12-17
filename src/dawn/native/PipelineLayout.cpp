@@ -162,6 +162,23 @@ PipelineLayoutBase::PipelineLayoutBase(DeviceBase* device,
             mStorageAttachmentSlots[slot] = pls->storageAttachments[i].format;
         }
     }
+
+    BindingCounts bindingCounts = {};
+    for (uint32_t i = 0; i < descriptor->bindGroupLayoutCount; ++i) {
+        if (descriptor->bindGroupLayouts[i]) {
+            AccumulateBindingCounts(&bindingCounts, descriptor->bindGroupLayouts[i]
+                                                        ->GetInternalBindGroupLayout()
+                                                        ->GetBindingCountInfo());
+        }
+    }
+    mNumStorageBufferBindingsInVertexStage =
+        bindingCounts.perStage[SingleShaderStage::Vertex].storageBufferCount;
+    mNumStorageTextureBindingsInVertexStage =
+        bindingCounts.perStage[SingleShaderStage::Vertex].storageTextureCount;
+    mNumStorageBufferBindingsInFragmentStage =
+        bindingCounts.perStage[SingleShaderStage::Fragment].storageBufferCount;
+    mNumStorageTextureBindingsInFragmentStage =
+        bindingCounts.perStage[SingleShaderStage::Fragment].storageTextureCount;
 }
 
 PipelineLayoutBase::PipelineLayoutBase(DeviceBase* device,
@@ -544,6 +561,22 @@ bool PipelineLayoutBase::EqualityFunc::operator()(const PipelineLayoutBase* a,
 
 uint32_t PipelineLayoutBase::GetImmediateDataRangeByteSize() const {
     return mImmediateDataRangeByteSize;
+}
+
+uint32_t PipelineLayoutBase::GetNumStorageBufferBindingsInVertexStage() const {
+    return mNumStorageBufferBindingsInVertexStage;
+}
+
+uint32_t PipelineLayoutBase::GetNumStorageTextureBindingsInVertexStage() const {
+    return mNumStorageTextureBindingsInVertexStage;
+}
+
+uint32_t PipelineLayoutBase::GetNumStorageBufferBindingsInFragmentStage() const {
+    return mNumStorageBufferBindingsInFragmentStage;
+}
+
+uint32_t PipelineLayoutBase::GetNumStorageTextureBindingsInFragmentStage() const {
+    return mNumStorageTextureBindingsInFragmentStage;
 }
 
 }  // namespace dawn::native

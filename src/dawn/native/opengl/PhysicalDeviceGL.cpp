@@ -320,7 +320,11 @@ MaybeError PhysicalDevice::InitializeSupportedLimitsImpl(CombinedLimits* limits)
     limits->v1.maxStorageBuffersPerShaderStage = Get(gl, GL_MAX_SHADER_STORAGE_BUFFER_BINDINGS);
     // TODO(crbug.com/dawn/1834): Note that OpenGLES allows an implementation to have zero vertex
     // image uniforms, so this isn't technically correct for vertex shaders.
-    limits->v1.maxStorageTexturesPerShaderStage = Get(gl, GL_MAX_FRAGMENT_IMAGE_UNIFORMS);
+    limits->v1.maxStorageTexturesPerShaderStage = Get(gl, GL_MAX_COMPUTE_IMAGE_UNIFORMS);
+    limits->v1.maxStorageTexturesInFragmentStage = Get(gl, GL_MAX_FRAGMENT_IMAGE_UNIFORMS);
+    limits->v1.maxStorageBuffersInFragmentStage = Get(gl, GL_MAX_FRAGMENT_SHADER_STORAGE_BLOCKS);
+    limits->v1.maxStorageTexturesInVertexStage = Get(gl, GL_MAX_VERTEX_IMAGE_UNIFORMS);
+    limits->v1.maxStorageBuffersInVertexStage = Get(gl, GL_MAX_VERTEX_SHADER_STORAGE_BLOCKS);
 
     limits->v1.maxUniformBuffersPerShaderStage = Get(gl, GL_MAX_UNIFORM_BUFFER_BINDINGS);
     limits->v1.maxUniformBufferBindingSize = Get(gl, GL_MAX_UNIFORM_BLOCK_SIZE);

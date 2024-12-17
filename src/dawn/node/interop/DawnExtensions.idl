@@ -79,4 +79,8 @@ enum WGSLFeatureName {
 interface GPUSupportedLimits {
     readonly attribute (unsigned long or undefined) minSubgroupSize;
     readonly attribute (unsigned long or undefined) maxSubgroupSize;
+    readonly attribute (unsigned long or undefined) maxStorageBuffersInFragmentStage;
+    readonly attribute (unsigned long or undefined) maxStorageTexturesInFragmentStage;
+    readonly attribute (unsigned long or undefined) maxStorageBuffersInVertexStage;
+    readonly attribute (unsigned long or undefined) maxStorageTexturesInVertexStage;
 };
