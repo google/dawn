@@ -31,6 +31,7 @@
 #include "dawn/common/MatchVariant.h"
 #include "dawn/common/Math.h"
 #include "dawn/common/ityp_bitset.h"
+#include "dawn/native/Adapter.h"
 #include "dawn/native/BindGroupLayout.h"
 #include "dawn/native/Buffer.h"
 #include "dawn/native/ChainUtils.h"
@@ -84,18 +85,15 @@ MaybeError ValidateBufferBinding(const DeviceBase* device,
                     entry.offset, bufferSize, bindingSize, entry.buffer);
 
     wgpu::BufferUsage requiredUsage;
-    uint64_t maxBindingSize;
     uint64_t requiredBindingAlignment;
     switch (layout.type) {
         case wgpu::BufferBindingType::Uniform:
             requiredUsage = wgpu::BufferUsage::Uniform;
-            maxBindingSize = device->GetLimits().v1.maxUniformBufferBindingSize;
             requiredBindingAlignment = device->GetLimits().v1.minUniformBufferOffsetAlignment;
             break;
         case wgpu::BufferBindingType::Storage:
         case wgpu::BufferBindingType::ReadOnlyStorage:
             requiredUsage = wgpu::BufferUsage::Storage;
-            maxBindingSize = device->GetLimits().v1.maxStorageBufferBindingSize;
             requiredBindingAlignment = device->GetLimits().v1.minStorageBufferOffsetAlignment;
             DAWN_INVALID_IF(
                 bindingSize % 4 != 0,
@@ -104,7 +102,6 @@ MaybeError ValidateBufferBinding(const DeviceBase* device,
             break;
         case kInternalStorageBufferBinding:
             requiredUsage = kInternalStorageBuffer;
-            maxBindingSize = device->GetLimits().v1.maxStorageBufferBindingSize;
             requiredBindingAlignment = device->GetLimits().v1.minStorageBufferOffsetAlignment;
             break;
         case wgpu::BufferBindingType::BindingNotUsed:
@@ -123,9 +120,32 @@ MaybeError ValidateBufferBinding(const DeviceBase* device,
                     "Binding size (%u) of %s is smaller than the minimum binding size (%u).",
                     bindingSize, entry.buffer, layout.minBindingSize);
 
-    DAWN_INVALID_IF(bindingSize > maxBindingSize,
-                    "Binding size (%u) of %s is larger than the maximum binding size (%u).",
-                    bindingSize, entry.buffer, maxBindingSize);
+    uint64_t maxUniformBufferBindingSize;
+    uint64_t maxStorageBufferBindingSize;
+    switch (layout.type) {
+        case wgpu::BufferBindingType::Uniform:
+            maxUniformBufferBindingSize = device->GetLimits().v1.maxUniformBufferBindingSize;
+            DAWN_INVALID_IF(bindingSize > maxUniformBufferBindingSize,
+                            "Binding size (%u) of %s is larger than the maximum uniform buffer "
+                            "binding size (%u).%s",
+                            bindingSize, entry.buffer, maxUniformBufferBindingSize,
+                            DAWN_INCREASE_LIMIT_MESSAGE(device->GetAdapter(),
+                                                        maxUniformBufferBindingSize, bindingSize));
+            break;
+        case wgpu::BufferBindingType::Storage:
+        case wgpu::BufferBindingType::ReadOnlyStorage:
+        case kInternalStorageBufferBinding:
+            maxStorageBufferBindingSize = device->GetLimits().v1.maxStorageBufferBindingSize;
+            DAWN_INVALID_IF(bindingSize > maxStorageBufferBindingSize,
+                            "Binding size (%u) of %s is larger than the maximum storage buffer "
+                            "binding size (%u).%s",
+                            bindingSize, entry.buffer, maxStorageBufferBindingSize,
+                            DAWN_INCREASE_LIMIT_MESSAGE(device->GetAdapter(),
+                                                        maxStorageBufferBindingSize, bindingSize));
+            break;
+        case wgpu::BufferBindingType::BindingNotUsed:
+            DAWN_UNREACHABLE();
+    }
 
     return {};
 }
