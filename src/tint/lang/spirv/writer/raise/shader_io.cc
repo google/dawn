@@ -98,8 +98,8 @@ struct StateImpl : core::ir::transform::ShaderIOBackendState {
                 name << "_" << io.attributes.builtin.value();
 
                 // Vulkan requires that fragment integer builtin inputs be Flat decorated.
-                if (func->Stage() == core::ir::Function::PipelineStage::kFragment &&
-                    addrspace == core::AddressSpace::kIn && io.type->IsIntegerScalarOrVector()) {
+                if (func->IsFragment() && addrspace == core::AddressSpace::kIn &&
+                    io.type->IsIntegerScalarOrVector()) {
                     io.attributes.interpolation = {core::InterpolationType::kFlat};
                 }
             }

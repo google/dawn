@@ -1386,7 +1386,7 @@ void Validator::CheckForNonFragmentDiscards() {
     for (const auto& d : discards_) {
         const auto* f = ContainingFunction(d);
         for (const Function* ep : ContainingEndPoints(f)) {
-            if (ep->Stage() != Function::PipelineStage::kFragment) {
+            if (!ep->IsFragment()) {
                 AddError(d) << "cannot be called in non-fragment end point";
             }
         }
@@ -2019,7 +2019,7 @@ void Validator::CheckFunction(const Function* func) {
                 "invariant can only decorate a param member iff it is also "
                 "decorated with position"));
 
-        if (func->Stage() == Function::PipelineStage::kFragment) {
+        if (func->IsFragment()) {
             CheckFunctionParamAttributesAndType(
                 param,
                 CheckFrontFacingIfBoolFunc<FunctionParam>(
@@ -2128,8 +2128,7 @@ void Validator::CheckFunction(const Function* func) {
                 continue;
             }
 
-            if (func->Stage() == Function::PipelineStage::kFragment &&
-                mv->AddressSpace() == AddressSpace::kIn) {
+            if (func->IsFragment() && mv->AddressSpace() == AddressSpace::kIn) {
                 CheckIOAttributesAndType(
                     func, attr, ty,
                     CheckFrontFacingIfBoolFunc<Function>("input address space values referenced by "
@@ -2148,7 +2147,7 @@ void Validator::CheckFunction(const Function* func) {
         }
     }
 
-    if (func->Stage() == Function::PipelineStage::kVertex) {
+    if (func->IsVertex()) {
         CheckVertexEntryPoint(func);
     }
 
@@ -2157,7 +2156,7 @@ void Validator::CheckFunction(const Function* func) {
 }
 
 void Validator::CheckWorkgroupSize(const Function* func) {
-    if (func->Stage() != Function::PipelineStage::kCompute) {
+    if (!func->IsCompute()) {
         if (func->WorkgroupSize().has_value()) {
             AddError(func) << "@workgroup_size only valid on compute entry point";
         }

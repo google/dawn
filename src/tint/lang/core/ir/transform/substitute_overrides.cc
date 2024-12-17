@@ -124,7 +124,7 @@ struct State {
 
         // Find any workgroup_sizes to replace
         for (auto func : ir.functions) {
-            if (func->Stage() != core::ir::Function::PipelineStage::kCompute) {
+            if (!func->IsCompute()) {
                 continue;
             }
 

@@ -325,7 +325,7 @@ class Printer : public tint::TextGenerator {
         {
             auto out = Line();
 
-            if (func->Stage() == core::ir::Function::PipelineStage::kCompute) {
+            if (func->IsCompute()) {
                 auto wg_opt = func->WorkgroupSizeAsConst();
                 TINT_ASSERT(wg_opt.has_value());
 
@@ -342,7 +342,7 @@ class Printer : public tint::TextGenerator {
             out << " ";
 
             // Fragment shaders need a precision statement
-            if (func->Stage() == core::ir::Function::PipelineStage::kFragment) {
+            if (func->IsFragment()) {
                 auto pre = Line(&header_buffer_);
                 pre << "precision highp float;\n";
                 pre << "precision highp int;";

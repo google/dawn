@@ -232,7 +232,7 @@ struct State {
         auto rovs = CreateROVs(pixel_local_struct);
 
         for (auto f : ir.functions) {
-            if (f->Stage() == core::ir::Function::PipelineStage::kFragment) {
+            if (f->IsFragment()) {
                 ProcessFragmentEntryPoint(f, pixel_local_var, pixel_local_struct, rovs);
             }
         }

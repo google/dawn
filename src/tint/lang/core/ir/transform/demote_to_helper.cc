@@ -189,7 +189,7 @@ struct State {
                 [&](Return* ret) {
                     // Insert a conditional terminate invocation instruction before each return
                     // instruction in the entry point function.
-                    if (ret->Func()->Stage() == Function::PipelineStage::kFragment) {
+                    if (ret->Func()->IsFragment()) {
                         b.InsertBefore(ret, [&] {
                             auto* cond = b.Load(continue_execution);
                             auto* ifelse = b.If(b.Not<bool>(cond));
