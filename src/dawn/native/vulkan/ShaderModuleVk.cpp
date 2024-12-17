@@ -36,6 +36,7 @@
 #include "absl/container/flat_hash_map.h"
 #include "dawn/common/HashUtils.h"
 #include "dawn/common/MatchVariant.h"
+#include "dawn/native/Adapter.h"
 #include "dawn/native/CacheRequest.h"
 #include "dawn/native/PhysicalDevice.h"
 #include "dawn/native/Serializable.h"
@@ -197,6 +198,7 @@ ShaderModule::~ShaderModule() = default;
     X(const tint::Program*, inputProgram)                                                        \
     X(std::optional<tint::ast::transform::SubstituteOverride::Config>, substituteOverrideConfig) \
     X(LimitsForCompilationRequest, limits)                                                       \
+    X(CacheKey::UnsafeUnkeyedValue<const AdapterBase*>, adapter)                                 \
     X(std::string_view, entryPointName)                                                          \
     X(tint::spirv::writer::Options, tintOptions)                                                 \
     X(CacheKey::UnsafeUnkeyedValue<dawn::platform::Platform*>, platform)
@@ -378,6 +380,7 @@ ResultOrError<ShaderModule::ModuleAndSpirv> ShaderModule::GetHandleAndSpirv(
 
     const CombinedLimits& limits = GetDevice()->GetLimits();
     req.limits = LimitsForCompilationRequest::Create(limits.v1);
+    req.adapter = UnsafeUnkeyedValue(static_cast<const AdapterBase*>(GetDevice()->GetAdapter()));
 
     CacheResult<CompiledSpirv> compilation;
     DAWN_TRY_LOAD_OR_RUN(
@@ -425,10 +428,11 @@ ResultOrError<ShaderModule::ModuleAndSpirv> ShaderModule::GetHandleAndSpirv(
             // have been substituted.
             if (r.stage == SingleShaderStage::Compute) {
                 Extent3D _;
-                DAWN_TRY_ASSIGN(_, ValidateComputeStageWorkgroupSize(
-                                       tintResult->workgroup_info.x, tintResult->workgroup_info.y,
-                                       tintResult->workgroup_info.z,
-                                       tintResult->workgroup_info.storage_size, r.limits));
+                DAWN_TRY_ASSIGN(
+                    _, ValidateComputeStageWorkgroupSize(
+                           tintResult->workgroup_info.x, tintResult->workgroup_info.y,
+                           tintResult->workgroup_info.z, tintResult->workgroup_info.storage_size,
+                           r.limits, r.adapter.UnsafeGetValue()));
             }
 
             CompiledSpirv result;

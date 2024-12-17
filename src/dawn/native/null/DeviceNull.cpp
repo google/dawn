@@ -495,10 +495,10 @@ MaybeError ComputePipeline::InitializeImpl() {
     // Do the workgroup size validation.
     const CombinedLimits& limits = GetDevice()->GetLimits();
     Extent3D _;
-    DAWN_TRY_ASSIGN(
-        _, ValidateComputeStageWorkgroupSize(transformedProgram, computeStage.entryPoint.c_str(),
-                                             LimitsForCompilationRequest::Create(limits.v1)));
-
+    DAWN_TRY_ASSIGN(_, ValidateComputeStageWorkgroupSize(
+                           transformedProgram, computeStage.entryPoint.c_str(),
+                           LimitsForCompilationRequest::Create(limits.v1),
+                           static_cast<const AdapterBase*>(GetDevice()->GetAdapter())));
     return {};
 }
 

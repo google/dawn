@@ -1113,10 +1113,10 @@ MaybeError ReflectShaderUsingTint(const DeviceBase* device,
 }
 }  // anonymous namespace
 
-ResultOrError<Extent3D> ValidateComputeStageWorkgroupSize(
-    const tint::Program& program,
-    const char* entryPointName,
-    const LimitsForCompilationRequest& limits) {
+ResultOrError<Extent3D> ValidateComputeStageWorkgroupSize(const tint::Program& program,
+                                                          const char* entryPointName,
+                                                          const LimitsForCompilationRequest& limits,
+                                                          const AdapterBase* adapter) {
     tint::inspector::Inspector inspector(program);
 
     // At this point the entry point must exist and must have workgroup size values.
@@ -1125,37 +1125,67 @@ ResultOrError<Extent3D> ValidateComputeStageWorkgroupSize(
     const tint::inspector::WorkgroupSize& workgroup_size = entryPoint.workgroup_size.value();
 
     return ValidateComputeStageWorkgroupSize(workgroup_size.x, workgroup_size.y, workgroup_size.z,
-                                             entryPoint.workgroup_storage_size, limits);
+                                             entryPoint.workgroup_storage_size, limits, adapter);
 }
 
-ResultOrError<Extent3D> ValidateComputeStageWorkgroupSize(
-    uint32_t x,
-    uint32_t y,
-    uint32_t z,
-    size_t workgroupStorageSize,
-    const LimitsForCompilationRequest& limits) {
+ResultOrError<Extent3D> ValidateComputeStageWorkgroupSize(uint32_t x,
+                                                          uint32_t y,
+                                                          uint32_t z,
+                                                          size_t workgroupStorageSize,
+                                                          const LimitsForCompilationRequest& limits,
+                                                          const AdapterBase* adapter) {
     DAWN_INVALID_IF(x < 1 || y < 1 || z < 1,
                     "Entry-point uses workgroup_size(%u, %u, %u) that are below the "
                     "minimum allowed (1, 1, 1).",
                     x, y, z);
 
-    DAWN_INVALID_IF(x > limits.maxComputeWorkgroupSizeX || y > limits.maxComputeWorkgroupSizeY ||
-                        z > limits.maxComputeWorkgroupSizeZ,
-                    "Entry-point uses workgroup_size(%u, %u, %u) that exceeds the "
-                    "maximum allowed (%u, %u, %u).",
-                    x, y, z, limits.maxComputeWorkgroupSizeX, limits.maxComputeWorkgroupSizeY,
-                    limits.maxComputeWorkgroupSizeZ);
+    if (DAWN_UNLIKELY(x > limits.maxComputeWorkgroupSizeX || y > limits.maxComputeWorkgroupSizeY ||
+                      z > limits.maxComputeWorkgroupSizeZ)) {
+        SupportedLimits adapterLimits;
+        wgpu::Status status = adapter->APIGetLimits(&adapterLimits);
+        DAWN_ASSERT(status == wgpu::Status::Success);
+
+        uint32_t maxComputeWorkgroupSizeXAdapterLimit =
+            adapterLimits.limits.maxComputeWorkgroupSizeX;
+        uint32_t maxComputeWorkgroupSizeYAdapterLimit =
+            adapterLimits.limits.maxComputeWorkgroupSizeY;
+        uint32_t maxComputeWorkgroupSizeZAdapterLimit =
+            adapterLimits.limits.maxComputeWorkgroupSizeZ;
+        std::string increaseLimitAdvice =
+            (x <= maxComputeWorkgroupSizeXAdapterLimit &&
+             y <= maxComputeWorkgroupSizeYAdapterLimit && z <= maxComputeWorkgroupSizeZAdapterLimit)
+                ? absl::StrFormat(
+                      " This adapter supports higher maxComputeWorkgroupSizeX of %u, "
+                      "maxComputeWorkgroupSizeY of %u, and maxComputeWorkgroupSizeZ of %u, which "
+                      "can be specified in requiredLimits when calling requestDevice(). Limits "
+                      "differ by hardware, so always check the adapter limits prior to requesting "
+                      "a higher limit.",
+                      maxComputeWorkgroupSizeXAdapterLimit, maxComputeWorkgroupSizeYAdapterLimit,
+                      maxComputeWorkgroupSizeZAdapterLimit)
+                : "";
+        return DAWN_VALIDATION_ERROR(
+            "Entry-point uses workgroup_size(%u, %u, %u) that exceeds the "
+            "maximum allowed (%u, %u, %u).%s",
+            x, y, z, limits.maxComputeWorkgroupSizeX, limits.maxComputeWorkgroupSizeY,
+            limits.maxComputeWorkgroupSizeZ, increaseLimitAdvice);
+    }
 
     uint64_t numInvocations = static_cast<uint64_t>(x) * y * z;
-    DAWN_INVALID_IF(numInvocations > limits.maxComputeInvocationsPerWorkgroup,
-                    "The total number of workgroup invocations (%u) exceeds the "
-                    "maximum allowed (%u).",
-                    numInvocations, limits.maxComputeInvocationsPerWorkgroup);
+    uint32_t maxComputeInvocationsPerWorkgroup = limits.maxComputeInvocationsPerWorkgroup;
+    DAWN_INVALID_IF(
+        numInvocations > maxComputeInvocationsPerWorkgroup,
+        "The total number of workgroup invocations (%u) exceeds the "
+        "maximum allowed (%u).%s",
+        numInvocations, maxComputeInvocationsPerWorkgroup,
+        DAWN_INCREASE_LIMIT_MESSAGE(adapter, maxComputeInvocationsPerWorkgroup, numInvocations));
 
-    DAWN_INVALID_IF(workgroupStorageSize > limits.maxComputeWorkgroupStorageSize,
-                    "The total use of workgroup storage (%u bytes) is larger than "
-                    "the maximum allowed (%u bytes).",
-                    workgroupStorageSize, limits.maxComputeWorkgroupStorageSize);
+    uint32_t maxComputeWorkgroupStorageSize = limits.maxComputeWorkgroupStorageSize;
+    DAWN_INVALID_IF(
+        workgroupStorageSize > maxComputeWorkgroupStorageSize,
+        "The total use of workgroup storage (%u bytes) is larger than "
+        "the maximum allowed (%u bytes).%s",
+        workgroupStorageSize, maxComputeWorkgroupStorageSize,
+        DAWN_INCREASE_LIMIT_MESSAGE(adapter, maxComputeWorkgroupStorageSize, workgroupStorageSize));
 
     return Extent3D{x, y, z};
 }
