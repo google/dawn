@@ -42,7 +42,7 @@ namespace {
 
 void Run(ir::Module& ir) {
     for (auto& func : ir.functions) {
-        if (func->Stage() != Function::PipelineStage::kUndefined) {
+        if (func->IsEntryPoint()) {
             return;
         }
     }

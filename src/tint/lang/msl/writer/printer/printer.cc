@@ -227,7 +227,7 @@ class Printer : public tint::TextGenerator {
         // We only look at function parameters of entry points, since this is how binding resources
         // are handled in MSL.
         for (auto func : ir_.functions) {
-            if (func->Stage() == core::ir::Function::PipelineStage::kUndefined) {
+            if (!func->IsEntryPoint()) {
                 continue;
             }
             for (auto* param : func->Params()) {
@@ -347,7 +347,7 @@ class Printer : public tint::TextGenerator {
                 case core::ir::Function::PipelineStage::kUndefined:
                     break;
             }
-            if (func->Stage() != core::ir::Function::PipelineStage::kUndefined) {
+            if (func->IsEntryPoint()) {
                 result_.workgroup_info.allocations.insert({func_name, {}});
             }
 
@@ -365,8 +365,7 @@ class Printer : public tint::TextGenerator {
                 out << " ";
 
                 // Non-entrypoint pointers are set to `const` for the value
-                if (func->Stage() == core::ir::Function::PipelineStage::kUndefined &&
-                    param->Type()->Is<core::type::Pointer>()) {
+                if (!func->IsEntryPoint() && param->Type()->Is<core::type::Pointer>()) {
                     out << "const ";
                 }
 
@@ -378,8 +377,7 @@ class Printer : public tint::TextGenerator {
                     out << " [[" << name << "]]";
                 }
 
-                if (param->Type()->Is<core::type::Struct>() &&
-                    func->Stage() != core::ir::Function::PipelineStage::kUndefined) {
+                if (param->Type()->Is<core::type::Struct>() && func->IsEntryPoint()) {
                     out << " [[stage_in]]";
                 }
 

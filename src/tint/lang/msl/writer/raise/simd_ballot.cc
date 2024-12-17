@@ -73,7 +73,7 @@ struct State {
                                                                   return var == subgroup_size_mask;
                                                               });
         for (auto func : ir.functions) {
-            if (func->Stage() != core::ir::Function::PipelineStage::kUndefined) {
+            if (func->IsEntryPoint()) {
                 if (refs.TransitiveReferences(func).Contains(subgroup_size_mask)) {
                     SetSubgroupSizeMaskForEntryPoint(func);
                 }

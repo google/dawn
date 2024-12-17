@@ -42,7 +42,7 @@ Result<SuccessType> Run(ir::Module& ir, std::string_view entry_point_name) {
     // Find the entry point.
     ir::Function* entry_point = nullptr;
     for (auto& func : ir.functions) {
-        if (func->Stage() == Function::PipelineStage::kUndefined) {
+        if (!func->IsEntryPoint()) {
             continue;
         }
         if (ir.NameOf(func).NameView() == entry_point_name) {

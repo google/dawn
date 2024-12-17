@@ -60,7 +60,7 @@ void GenerateGLSL(benchmark::State& state, std::string input_name) {
 
         // Get the list of entry point names.
         for (auto func : ir->functions) {
-            if (func->Stage() != core::ir::Function::PipelineStage::kUndefined) {
+            if (func->IsEntryPoint()) {
                 names.push_back(ir->NameOf(func).Name());
             }
         }

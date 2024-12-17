@@ -1284,7 +1284,7 @@ class Validator {
             }
             visited.Add(calling_function);
 
-            if (calling_function->Stage() != Function::PipelineStage::kUndefined) {
+            if (calling_function->IsEntryPoint()) {
                 result.Add(calling_function);
             }
 
@@ -1946,7 +1946,7 @@ void Validator::CheckFunction(const Function* func) {
     TINT_DEFER(scope_stack_.Pop());
 
     // Checking the name early, so its usage can be recorded, even if the function is malformed.
-    if (func->Stage() != Function::PipelineStage::kUndefined) {
+    if (func->IsEntryPoint()) {
         const auto name = mod_.NameOf(func).Name();
         if (!entry_point_names_.Add(name)) {
             AddError(func) << "entry point name " << style::Function(name) << " is not unique";
@@ -2028,7 +2028,7 @@ void Validator::CheckFunction(const Function* func) {
                 CheckFrontFacingIfBoolFunc<FunctionParam>(
                     "fragment entry point param memebers can only be a bool if "
                     "decorated with @builtin(front_facing)"));
-        } else if (func->Stage() != Function::PipelineStage::kUndefined) {
+        } else if (func->IsEntryPoint()) {
             CheckFunctionParamAttributesAndType(
                 param, CheckNotBool<FunctionParam>(
                            "entry point params can only be a bool for fragment shaders"));
@@ -2045,7 +2045,7 @@ void Validator::CheckFunction(const Function* func) {
             }
         }
 
-        if (func->Stage() != Function::PipelineStage::kUndefined) {
+        if (func->IsEntryPoint()) {
             {
                 auto result = ValidateShaderIOAnnotations(param->Type(), param->BindingPoint(),
                                                           param->Attributes(), "input param");
@@ -2090,7 +2090,7 @@ void Validator::CheckFunction(const Function* func) {
         AddError(func) << "function return type must be constructible";
     }
 
-    if (func->Stage() != Function::PipelineStage::kUndefined) {
+    if (func->IsEntryPoint()) {
         if (DAWN_UNLIKELY(mod_.NameOf(func).Name().empty())) {
             AddError(func) << "entry points must have names";
         }
@@ -2104,7 +2104,7 @@ void Validator::CheckFunction(const Function* func) {
         }
     }
 
-    if (func->Stage() != Function::PipelineStage::kUndefined) {
+    if (func->IsEntryPoint()) {
         auto result = ValidateShaderIOAnnotations(func->ReturnType(), std::nullopt,
                                                   func->ReturnAttributes(), "return values");
         if (result != Success) {
@@ -2775,7 +2775,7 @@ void Validator::CheckUserCall(const UserCall* call) {
         return;
     }
 
-    if (call->Target()->Stage() != Function::PipelineStage::kUndefined) {
+    if (call->Target()->IsEntryPoint()) {
         AddError(call, UserCall::kFunctionOperandOffset)
             << "call target must not have a pipeline stage";
     }

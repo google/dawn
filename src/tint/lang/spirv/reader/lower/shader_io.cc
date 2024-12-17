@@ -85,7 +85,7 @@ struct State {
         // Use a worklist as `ProcessEntryPointOutputs()` will add new functions.
         Vector<core::ir::Function*, 4> entry_points;
         for (auto& func : ir.functions) {
-            if (func->Stage() != core::ir::Function::PipelineStage::kUndefined) {
+            if (func->IsEntryPoint()) {
                 entry_points.Push(func);
             }
         }
@@ -309,7 +309,7 @@ struct State {
     /// @returns the function parameter
     core::ir::Value* GetParameter(core::ir::Function* func, core::ir::Var* var) {
         return function_parameter_map.GetOrAddZero(func).GetOrAdd(var, [&] {
-            const bool entry_point = func->Stage() != core::ir::Function::PipelineStage::kUndefined;
+            const bool entry_point = func->IsEntryPoint();
             auto* var_type = var->Result(0)->Type()->UnwrapPtr();
 
             // Use a scalar u32 for sample_mask builtins for entry point parameters.

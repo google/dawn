@@ -711,7 +711,7 @@ class Printer {
         PushName(id, func);
 
         // Emit OpEntryPoint and OpExecutionMode declarations if needed.
-        if (func->Stage() != core::ir::Function::PipelineStage::kUndefined) {
+        if (func->IsEntryPoint()) {
             EmitEntryPoint(func, id);
         }
 

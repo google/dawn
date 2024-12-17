@@ -327,7 +327,7 @@ void Disassembler::EmitFunction(const Function* func) {
     }
     out_ << " =";
 
-    if (func->Stage() != Function::PipelineStage::kUndefined) {
+    if (func->IsEntryPoint()) {
         out_ << " " << StyleAttribute("@", func->Stage());
     }
     if (func->WorkgroupSize()) {

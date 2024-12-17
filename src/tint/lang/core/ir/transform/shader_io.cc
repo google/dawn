@@ -76,7 +76,7 @@ struct State {
         auto functions = ir.functions;
         for (auto& func : functions) {
             // Only process entry points.
-            if (func->Stage() == Function::PipelineStage::kUndefined) {
+            if (!func->IsEntryPoint()) {
                 continue;
             }
 

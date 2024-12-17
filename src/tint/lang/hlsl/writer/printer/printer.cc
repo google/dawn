@@ -277,7 +277,7 @@ class Printer : public tint::TextGenerator {
 
             out << " " << func_name << "(";
 
-            bool is_ep = func->Stage() != core::ir::Function::PipelineStage::kUndefined;
+            bool is_ep = func->IsEntryPoint();
             size_t i = 0;
             for (auto* param : func->Params()) {
                 if (i > 0) {

@@ -59,7 +59,7 @@ Options GenerateOptions(core::ir::Module& module) {
 
     // Set offsets for push constants used for certain builtins.
     for (auto& func : module.functions) {
-        if (func->Stage() == core::ir::Function::PipelineStage::kUndefined) {
+        if (!func->IsEntryPoint()) {
             continue;
         }
 
@@ -178,7 +178,7 @@ bool CanRun(const core::ir::Module& module, Options& options) {
 
     // Check for unsupported shader IO builtins.
     for (auto& func : module.functions) {
-        if (func->Stage() == core::ir::Function::PipelineStage::kUndefined) {
+        if (!func->IsEntryPoint()) {
             continue;
         }
 
@@ -257,7 +257,7 @@ Result<SuccessType> IRFuzzer(core::ir::Module& module, const fuzz::ir::Context& 
     // Strip the module down to a single entry point.
     core::ir::Function* entry_point = nullptr;
     for (auto& func : module.functions) {
-        if (func->Stage() != core::ir::Function::PipelineStage::kUndefined) {
+        if (func->IsEntryPoint()) {
             entry_point = func;
             break;
         }
