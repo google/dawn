@@ -121,9 +121,6 @@ func (c *cmd) RegisterFlags(ctx context.Context, cfg common.Config) ([]string, e
 	flag.BoolVar(&c.flags.preserve, "preserve", false, "do not abandon existing rolls")
 	flag.BoolVar(&c.flags.sendToGardener, "send-to-gardener", false, "send the CL to the WebGPU gardener for review")
 	flag.BoolVar(&c.flags.verbose, "verbose", false, "emit additional logging")
-	// Deprecated.
-	// TODO(crbug.com/372730248): Remove this flag once the roller stops passing it in.
-	flag.BoolVar(&c.flags.useSimplifiedCodepath, "use-simplified-codepath", false, "use the simplified codepath that only looks at unexpected failures")
 	flag.StringVar(&c.flags.parentSwarmingRunID, "parent-swarming-run-id", "", "parent swarming run id. All triggered tasks will be children of this task and will be canceled if the parent is canceled.")
 	flag.IntVar(&c.flags.maxAttempts, "max-attempts", 3, "number of update attempts before giving up")
 	return nil, nil

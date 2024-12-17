@@ -80,9 +80,6 @@ func (c *cmd) RegisterFlags(ctx context.Context, cfg common.Config) ([]string, e
 	c.flags.results.RegisterFlags(cfg)
 	c.flags.auth.Register(flag.CommandLine, auth.DefaultAuthOptions())
 	flag.BoolVar(&c.flags.verbose, "verbose", false, "emit additional logging")
-	// Deprecated.
-	// TODO(crbug.com/372730248): Remove this flag once the roller stops passing it in.
-	flag.BoolVar(&c.flags.useSimplifiedCodepath, "use-simplified-codepath", false, "use the simplified codepath that only looks at unexpected failures")
 	flag.Var(&c.flags.expectations, "expectations", "path to CTS expectations file(s) to update")
 	return nil, nil
 }
