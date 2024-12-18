@@ -977,6 +977,10 @@ RenderPipelineBase::RenderPipelineBase(DeviceBase* device,
         ityp::SpanFromUntyped<VertexBufferSlot>(descriptor->vertex.buffers, mVertexBufferCount);
     for (auto [slot, buffer] : Enumerate(buffers)) {
         // Skip unused slots
+        if (buffer.stepMode == wgpu::VertexStepMode::Undefined && buffer.attributeCount == 0) {
+            continue;
+        }
+        // TODO(crbug.com/383147017): Remove VertexBufferNotUsed.
         if (buffer.stepMode == wgpu::VertexStepMode::VertexBufferNotUsed) {
             continue;
         }
