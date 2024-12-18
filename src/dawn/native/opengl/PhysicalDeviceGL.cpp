@@ -89,13 +89,13 @@ uint32_t GetDeviceIdFromRender(std::string_view render) {
     return deviceId;
 }
 
-bool IsANGLEDesktopGL(std::string renderer) {
+bool IsANGLEDesktopGL(std::string_view renderer) {
     return renderer.find("ANGLE") != std::string::npos &&
            renderer.find("OpenGL") != std::string::npos &&
            renderer.find("OpenGL ES") == std::string::npos;
 }
 
-bool IsSwiftShader(std::string renderer) {
+bool IsSwiftShader(std::string_view renderer) {
     return renderer.find("SwiftShader") != std::string::npos;
 }
 
@@ -103,7 +103,8 @@ bool IsSwiftShader(std::string renderer) {
 
 // static
 ResultOrError<Ref<PhysicalDevice>> PhysicalDevice::Create(wgpu::BackendType backendType,
-                                                          Ref<DisplayEGL> display) {
+                                                          Ref<DisplayEGL> display,
+                                                          bool forceES31AndNoExtensions) {
     const EGLFunctions& egl = display->egl;
     EGLDisplay eglDisplay = display->GetDisplay();
 
@@ -111,8 +112,10 @@ ResultOrError<Ref<PhysicalDevice>> PhysicalDevice::Create(wgpu::BackendType back
     // that we can query the limits and other properties. Assumes that the limit are the same
     // irrespective of the context creation options.
     std::unique_ptr<ContextEGL> context;
-    DAWN_TRY_ASSIGN(context, ContextEGL::Create(display, backendType, /*useRobustness*/ false,
-                                                /*useANGLETextureSharing*/ false));
+    DAWN_TRY_ASSIGN(context,
+                    ContextEGL::Create(display, backendType, /*useRobustness*/ false,
+                                       /*useANGLETextureSharing*/ false,
+                                       /*forceES31AndNoExtensions*/ forceES31AndNoExtensions));
 
     EGLSurface prevDrawSurface = egl.GetCurrentSurface(EGL_DRAW);
     EGLSurface prevReadSurface = egl.GetCurrentSurface(EGL_READ);
@@ -449,10 +452,11 @@ ResultOrError<Ref<DeviceBase>> PhysicalDevice::CreateDeviceImpl(
     }
 
     bool useRobustness = !deviceToggles.IsEnabled(Toggle::DisableRobustness);
+    bool forceES31AndNoExtensions = deviceToggles.IsEnabled(Toggle::GLForceES31AndNoExtensions);
 
     std::unique_ptr<ContextEGL> context;
     DAWN_TRY_ASSIGN(context, ContextEGL::Create(mDisplay, GetBackendType(), useRobustness,
-                                                useANGLETextureSharing));
+                                                useANGLETextureSharing, forceES31AndNoExtensions));
 
     return Device::Create(adapter, descriptor, mFunctions, std::move(context), deviceToggles,
                           std::move(lostEvent));

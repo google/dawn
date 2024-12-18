@@ -63,6 +63,15 @@ std::vector<Ref<PhysicalDeviceBase>> Backend::DiscoverPhysicalDevices(
         return {};
     }
 
+    bool forceES31AndNoExtensions = false;
+    if (auto* togglesDesc = options.Get<DawnTogglesDescriptor>()) {
+        TogglesState toggles =
+            TogglesState::CreateFromTogglesDescriptor(togglesDesc, ToggleStage::Adapter);
+        if (toggles.IsEnabled(Toggle::GLForceES31AndNoExtensions)) {
+            forceES31AndNoExtensions = true;
+        }
+    }
+
     std::vector<Ref<PhysicalDeviceBase>> devices;
 
     // A helper function performing checks on the display we're trying to use, and adding the
@@ -80,7 +89,8 @@ std::vector<Ref<PhysicalDeviceBase>> Backend::DiscoverPhysicalDevices(
         }
 
         Ref<PhysicalDevice> device;
-        DAWN_TRY_ASSIGN(device, PhysicalDevice::Create(GetType(), std::move(display)));
+        DAWN_TRY_ASSIGN(device, PhysicalDevice::Create(GetType(), std::move(display),
+                                                       forceES31AndNoExtensions));
         devices.push_back(device);
 
         return {};

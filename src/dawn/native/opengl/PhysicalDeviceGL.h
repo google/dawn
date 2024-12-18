@@ -41,7 +41,8 @@ class DisplayEGL;
 class PhysicalDevice : public PhysicalDeviceBase {
   public:
     static ResultOrError<Ref<PhysicalDevice>> Create(wgpu::BackendType backendType,
-                                                     Ref<DisplayEGL> display);
+                                                     Ref<DisplayEGL> display,
+                                                     bool forceES31AndNoExtensions);
 
     ~PhysicalDevice() override = default;
 

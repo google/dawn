@@ -90,6 +90,11 @@ static constexpr std::array<ExtensionInfo, kExtensionCount> kExtensionInfos{{
     {EGLExt::ImageNativeBuffer, "EGL_ANDROID_image_native_buffer", NeverPromoted, ExtType::Display},
     {EGLExt::GetNativeClientBuffer, "EGL_ANDROID_get_native_client_buffer", NeverPromoted,
      ExtType::Display},
+
+    {EGLExt::ANGLECreateContextBackwardsCompatible, "EGL_ANGLE_create_context_backwards_compatible",
+     NeverPromoted, ExtType::Display},
+    {EGLExt::ANGLECreateContextExtensionsEnabled, "EGL_ANGLE_create_context_extensions_enabled",
+     NeverPromoted, ExtType::Display},
     //
 }};
 

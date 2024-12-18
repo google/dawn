@@ -46,14 +46,16 @@ class ContextEGL : NonMovable {
     static ResultOrError<std::unique_ptr<ContextEGL>> Create(Ref<DisplayEGL> display,
                                                              wgpu::BackendType backend,
                                                              bool useRobustness,
-                                                             bool useANGLETextureSharing);
+                                                             bool useANGLETextureSharing,
+                                                             bool forceES31AndNoExtensionss);
 
     explicit ContextEGL(Ref<DisplayEGL> display);
     ~ContextEGL();
 
     MaybeError Initialize(wgpu::BackendType backend,
                           bool useRobustness,
-                          bool useANGLETextureSharing);
+                          bool useANGLETextureSharing,
+                          bool forceES31AndNoExtensionss);
 
     // Make the surface used by all MakeCurrent until the scoper gets out of scope.
     class ScopedMakeSurfaceCurrent : NonMovable {

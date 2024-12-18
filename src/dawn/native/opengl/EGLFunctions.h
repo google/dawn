@@ -66,6 +66,10 @@ enum class EGLExt {
     ImageNativeBuffer,      // EGL_ANDROID_image_native_buffer
     GetNativeClientBuffer,  // EGL_ANDROID_get_native_client_buffer
 
+    // ANGLE specific
+    ANGLECreateContextBackwardsCompatible,  // EGL_ANGLE_create_context_backwards_compatible
+    ANGLECreateContextExtensionsEnabled,    // EGL_ANGLE_create_context_extensions_enabled
+
     EnumCount,
 };
 

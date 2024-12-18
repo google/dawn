@@ -39,15 +39,27 @@
 #define EGL_DISPLAY_TEXTURE_SHARE_GROUP_ANGLE 0x33AF
 #endif
 
+// https://chromium.googlesource.com/angle/angle/+/main/extensions/EGL_ANGLE_create_context_backwards_compatible.txt
+#ifndef EGL_CONTEXT_OPENGL_BACKWARDS_COMPATIBLE_ANGLE
+#define EGL_CONTEXT_OPENGL_BACKWARDS_COMPATIBLE_ANGLE 0x3483
+#endif
+
+// https://chromium.googlesource.com/angle/angle.git/+/refs/heads/chromium/5996/extensions/EGL_ANGLE_create_context_extensions_enabled.txt
+#ifndef EGL_EXTENSIONS_ENABLED_ANGLE
+#define EGL_EXTENSIONS_ENABLED_ANGLE 0x345F
+#endif
+
 namespace dawn::native::opengl {
 
 // static
 ResultOrError<std::unique_ptr<ContextEGL>> ContextEGL::Create(Ref<DisplayEGL> display,
                                                               wgpu::BackendType backend,
                                                               bool useRobustness,
-                                                              bool useANGLETextureSharing) {
+                                                              bool useANGLETextureSharing,
+                                                              bool forceES31AndNoExtensionss) {
     auto context = std::make_unique<ContextEGL>(std::move(display));
-    DAWN_TRY(context->Initialize(backend, useRobustness, useANGLETextureSharing));
+    DAWN_TRY(context->Initialize(backend, useRobustness, useANGLETextureSharing,
+                                 forceES31AndNoExtensionss));
     return std::move(context);
 }
 
@@ -66,7 +78,8 @@ ContextEGL::~ContextEGL() {
 
 MaybeError ContextEGL::Initialize(wgpu::BackendType backend,
                                   bool useRobustness,
-                                  bool useANGLETextureSharing) {
+                                  bool useANGLETextureSharing,
+                                  bool forceES31AndNoExtensionss) {
     const EGLFunctions& egl = mDisplay->egl;
 
     // Unless EGL_KHR_no_config is present, we need to choose an EGLConfig on context creation that
@@ -124,6 +137,15 @@ MaybeError ContextEGL::Initialize(wgpu::BackendType backend,
     if (useANGLETextureSharing) {
         DAWN_ASSERT(egl.HasExt(EGLExt::DisplayTextureShareGroup));
         AddAttrib(EGL_DISPLAY_TEXTURE_SHARE_GROUP_ANGLE, EGL_TRUE);
+    }
+
+    if (forceES31AndNoExtensionss) {
+        if (egl.HasExt(EGLExt::ANGLECreateContextBackwardsCompatible)) {
+            AddAttrib(EGL_CONTEXT_OPENGL_BACKWARDS_COMPATIBLE_ANGLE, EGL_FALSE);
+        }
+        if (egl.HasExt(EGLExt::ANGLECreateContextExtensionsEnabled)) {
+            AddAttrib(EGL_EXTENSIONS_ENABLED_ANGLE, EGL_FALSE);
+        }
     }
 
     // The attrib list is finished with an EGL_NONE tag.

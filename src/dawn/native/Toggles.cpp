@@ -564,6 +564,12 @@ static constexpr ToggleEnumAndInfoList kToggleNameAndInfoList = {{
       "while the WebGPU CTS is expecting n. Scale the depth bias value by multiple 0.5 on certain "
       "backends to achieve conformant result.",
       "https://crbug.com/42241017", ToggleStage::Device}},
+    {Toggle::GLForceES31AndNoExtensions,
+     {"gl_force_es_31_and_no_extensions",
+      "Force EGLContext creation with the minimal ES version and no extensions required by the "
+      "Compat spec, which for OpenGLES is version 3.1 with no extensions. This toggle is used by "
+      "end2end testing.",
+      "crbug.com/382084196", ToggleStage::Adapter}},
     {Toggle::VulkanMonolithicPipelineCache,
      {"vulkan_monolithic_pipeline_cache",
       "Use a monolithic VkPipelineCache per device. The embedder is responsible for calling "
