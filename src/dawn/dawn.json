@@ -2876,10 +2876,6 @@
             {"value": 4, "name": "mailbox"}
         ]
     },
-    "programmable stage descriptor": {
-        "category": "typedef",
-        "type": "compute state"
-    },
     "compute state": {
         "category": "structure",
         "extensible": "in",
