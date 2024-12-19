@@ -392,8 +392,9 @@ MaybeError ValidateBindGroupLayoutDescriptor(DeviceBase* device,
     // as static samplers can have associated texture entries that need to be validated first.
     DAWN_TRY(ValidateStaticSamplersWithTextureBindings(device, descriptor, bindingMap));
 
-    DAWN_TRY_CONTEXT(ValidateBindingCounts(device->GetLimits(), bindingCounts),
-                     "validating binding counts");
+    DAWN_TRY_CONTEXT(
+        ValidateBindingCounts(device->GetLimits(), bindingCounts, device->GetAdapter()),
+        "validating binding counts");
 
     return {};
 }

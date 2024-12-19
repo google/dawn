@@ -28,6 +28,7 @@
 #include "dawn/native/BindingInfo.h"
 
 #include "dawn/common/MatchVariant.h"
+#include "dawn/native/Adapter.h"
 #include "dawn/native/ChainUtils.h"
 #include "dawn/native/Limits.h"
 #include "dawn/native/Sampler.h"
@@ -132,105 +133,113 @@ void AccumulateBindingCounts(BindingCounts* bindingCounts, const BindingCounts& 
     }
 }
 
-MaybeError ValidateBindingCounts(const CombinedLimits& limits, const BindingCounts& bindingCounts) {
+MaybeError ValidateBindingCounts(const CombinedLimits& limits,
+                                 const BindingCounts& bindingCounts,
+                                 const AdapterBase* adapter) {
+    uint32_t maxDynamicUniformBuffersPerPipelineLayout =
+        limits.v1.maxDynamicUniformBuffersPerPipelineLayout;
     DAWN_INVALID_IF(
-        bindingCounts.dynamicUniformBufferCount >
-            limits.v1.maxDynamicUniformBuffersPerPipelineLayout,
+        bindingCounts.dynamicUniformBufferCount > maxDynamicUniformBuffersPerPipelineLayout,
         "The number of dynamic uniform buffers (%u) exceeds the maximum per-pipeline-layout "
-        "limit (%u).",
-        bindingCounts.dynamicUniformBufferCount,
-        limits.v1.maxDynamicUniformBuffersPerPipelineLayout);
+        "limit (%u).%s",
+        bindingCounts.dynamicUniformBufferCount, maxDynamicUniformBuffersPerPipelineLayout,
+        DAWN_INCREASE_LIMIT_MESSAGE(adapter, maxDynamicUniformBuffersPerPipelineLayout,
+                                    bindingCounts.dynamicUniformBufferCount));
 
+    uint32_t maxDynamicStorageBuffersPerPipelineLayout =
+        limits.v1.maxDynamicStorageBuffersPerPipelineLayout;
     DAWN_INVALID_IF(
-        bindingCounts.dynamicStorageBufferCount >
-            limits.v1.maxDynamicStorageBuffersPerPipelineLayout,
+        bindingCounts.dynamicStorageBufferCount > maxDynamicStorageBuffersPerPipelineLayout,
         "The number of dynamic storage buffers (%u) exceeds the maximum per-pipeline-layout "
-        "limit (%u).",
-        bindingCounts.dynamicStorageBufferCount,
-        limits.v1.maxDynamicStorageBuffersPerPipelineLayout);
+        "limit (%u).%s",
+        bindingCounts.dynamicStorageBufferCount, maxDynamicStorageBuffersPerPipelineLayout,
+        DAWN_INCREASE_LIMIT_MESSAGE(adapter, maxDynamicStorageBuffersPerPipelineLayout,
+                                    bindingCounts.dynamicStorageBufferCount));
 
+    uint32_t maxSampledTexturesPerShaderStage = limits.v1.maxSampledTexturesPerShaderStage;
+    uint32_t maxSamplersPerShaderStage = limits.v1.maxSamplersPerShaderStage;
+    uint32_t maxStorageBuffersPerShaderStage = limits.v1.maxStorageBuffersPerShaderStage;
+    uint32_t maxUniformBuffersPerShaderStage = limits.v1.maxUniformBuffersPerShaderStage;
+    uint32_t maxStorageTexturesPerShaderStage = limits.v1.maxStorageTexturesPerShaderStage;
     for (SingleShaderStage stage : IterateStages(kAllStages)) {
-        DAWN_INVALID_IF(bindingCounts.perStage[stage].sampledTextureCount >
-                            limits.v1.maxSampledTexturesPerShaderStage,
+        uint32_t sampledTextureCount = bindingCounts.perStage[stage].sampledTextureCount;
+        DAWN_INVALID_IF(sampledTextureCount > maxSampledTexturesPerShaderStage,
                         "The number of sampled textures (%u) in the %s stage exceeds the maximum "
-                        "per-stage limit (%u).",
-                        bindingCounts.perStage[stage].sampledTextureCount, stage,
-                        limits.v1.maxSampledTexturesPerShaderStage);
+                        "per-stage limit (%u).%s",
+                        sampledTextureCount, stage, maxSampledTexturesPerShaderStage,
+                        DAWN_INCREASE_LIMIT_MESSAGE(adapter, maxSampledTexturesPerShaderStage,
+                                                    sampledTextureCount));
 
-        // The per-stage number of external textures is bound by the maximum sampled textures
-        // per stage.
+        uint32_t externalTextureCount = bindingCounts.perStage[stage].externalTextureCount;
+        uint32_t sampledTextureAndExternalTextureCount =
+            sampledTextureCount + (externalTextureCount * kSampledTexturesPerExternalTexture);
         DAWN_INVALID_IF(
-            bindingCounts.perStage[stage].externalTextureCount >
-                limits.v1.maxSampledTexturesPerShaderStage / kSampledTexturesPerExternalTexture,
-            "The number of external textures (%u) in the %s stage exceeds the maximum "
-            "per-stage limit (%u).",
-            bindingCounts.perStage[stage].externalTextureCount, stage,
-            limits.v1.maxSampledTexturesPerShaderStage / kSampledTexturesPerExternalTexture);
+            sampledTextureAndExternalTextureCount > maxSampledTexturesPerShaderStage,
+            "The combination of sampled textures (%u) and external textures (%u × %u) in the %s "
+            "stage exceeds the maximum per-stage limit (%u).%s",
+            sampledTextureCount, externalTextureCount, kSampledTexturesPerExternalTexture, stage,
+            maxSampledTexturesPerShaderStage,
+            DAWN_INCREASE_LIMIT_MESSAGE(adapter, maxSampledTexturesPerShaderStage,
+                                        sampledTextureCount));
 
-        DAWN_INVALID_IF(
-            bindingCounts.perStage[stage].sampledTextureCount +
-                    (bindingCounts.perStage[stage].externalTextureCount *
-                     kSampledTexturesPerExternalTexture) >
-                limits.v1.maxSampledTexturesPerShaderStage,
-            "The combination of sampled textures (%u) and external textures (%u) in the %s "
-            "stage exceeds the maximum per-stage limit (%u).",
-            bindingCounts.perStage[stage].sampledTextureCount,
-            bindingCounts.perStage[stage].externalTextureCount, stage,
-            limits.v1.maxSampledTexturesPerShaderStage);
-
+        uint32_t samplerCount = bindingCounts.perStage[stage].samplerCount;
         // TODO(crbug.com/dawn/2463): Account for static samplers here.
         DAWN_INVALID_IF(
-            bindingCounts.perStage[stage].samplerCount > limits.v1.maxSamplersPerShaderStage,
+            samplerCount > maxSamplersPerShaderStage,
             "The number of samplers (%u) in the %s stage exceeds the maximum per-stage limit "
-            "(%u).",
-            bindingCounts.perStage[stage].samplerCount, stage, limits.v1.maxSamplersPerShaderStage);
+            "(%u).%s",
+            samplerCount, stage, maxSamplersPerShaderStage,
+            DAWN_INCREASE_LIMIT_MESSAGE(adapter, maxSamplersPerShaderStage, samplerCount));
 
+        uint32_t samplerAndExternalTextureCount =
+            samplerCount + (externalTextureCount * kSamplersPerExternalTexture);
         // TODO(crbug.com/dawn/2463): Account for static samplers here.
         DAWN_INVALID_IF(
-            bindingCounts.perStage[stage].samplerCount +
-                    (bindingCounts.perStage[stage].externalTextureCount *
-                     kSamplersPerExternalTexture) >
-                limits.v1.maxSamplersPerShaderStage,
-            "The combination of samplers (%u) and external textures (%u) in the %s stage "
-            "exceeds the maximum per-stage limit (%u).",
-            bindingCounts.perStage[stage].samplerCount,
-            bindingCounts.perStage[stage].externalTextureCount, stage,
-            limits.v1.maxSamplersPerShaderStage);
+            samplerAndExternalTextureCount > maxSamplersPerShaderStage,
+            "The combination of samplers (%u) and external textures (%u × %u) in the %s stage "
+            "exceeds the maximum per-stage limit (%u).%s",
+            samplerCount, externalTextureCount, kSamplersPerExternalTexture, stage,
+            maxSamplersPerShaderStage,
+            DAWN_INCREASE_LIMIT_MESSAGE(adapter, maxSamplersPerShaderStage,
+                                        samplerAndExternalTextureCount));
 
+        uint32_t storageBufferCount = bindingCounts.perStage[stage].storageBufferCount;
         DAWN_INVALID_IF(
-            bindingCounts.perStage[stage].storageBufferCount >
-                limits.v1.maxStorageBuffersPerShaderStage,
+            storageBufferCount > maxStorageBuffersPerShaderStage,
             "The number of storage buffers (%u) in the %s stage exceeds the maximum per-stage "
-            "limit (%u).",
-            bindingCounts.perStage[stage].storageBufferCount, stage,
-            limits.v1.maxStorageBuffersPerShaderStage);
+            "limit (%u).%s",
+            storageBufferCount, stage, maxStorageBuffersPerShaderStage,
+            DAWN_INCREASE_LIMIT_MESSAGE(adapter, maxStorageBuffersPerShaderStage,
+                                        storageBufferCount));
 
+        uint32_t storageTextureCount = bindingCounts.perStage[stage].storageTextureCount;
         DAWN_INVALID_IF(
-            bindingCounts.perStage[stage].storageTextureCount >
-                limits.v1.maxStorageTexturesPerShaderStage,
+            storageTextureCount > maxStorageTexturesPerShaderStage,
             "The number of storage textures (%u) in the %s stage exceeds the maximum per-stage "
-            "limit (%u).",
-            bindingCounts.perStage[stage].storageTextureCount, stage,
-            limits.v1.maxStorageTexturesPerShaderStage);
+            "limit (%u).%s",
+            storageTextureCount, stage, maxStorageTexturesPerShaderStage,
+            DAWN_INCREASE_LIMIT_MESSAGE(adapter, maxStorageTexturesPerShaderStage,
+                                        storageTextureCount));
 
+        uint32_t uniformBufferCount = bindingCounts.perStage[stage].uniformBufferCount;
         DAWN_INVALID_IF(
-            bindingCounts.perStage[stage].uniformBufferCount >
-                limits.v1.maxUniformBuffersPerShaderStage,
+            uniformBufferCount > maxUniformBuffersPerShaderStage,
             "The number of uniform buffers (%u) in the %s stage exceeds the maximum per-stage "
-            "limit (%u).",
-            bindingCounts.perStage[stage].uniformBufferCount, stage,
-            limits.v1.maxUniformBuffersPerShaderStage);
+            "limit (%u).%s",
+            uniformBufferCount, stage, maxUniformBuffersPerShaderStage,
+            DAWN_INCREASE_LIMIT_MESSAGE(adapter, maxUniformBuffersPerShaderStage,
+                                        uniformBufferCount));
 
+        uint32_t uniformBuffersAndExternalTextureCount =
+            uniformBufferCount + (externalTextureCount * kUniformsPerExternalTexture);
         DAWN_INVALID_IF(
-            bindingCounts.perStage[stage].uniformBufferCount +
-                    (bindingCounts.perStage[stage].externalTextureCount *
-                     kUniformsPerExternalTexture) >
-                limits.v1.maxUniformBuffersPerShaderStage,
-            "The combination of uniform buffers (%u) and external textures (%u) in the %s "
-            "stage exceeds the maximum per-stage limit (%u).",
-            bindingCounts.perStage[stage].uniformBufferCount,
-            bindingCounts.perStage[stage].externalTextureCount, stage,
-            limits.v1.maxUniformBuffersPerShaderStage);
+            uniformBuffersAndExternalTextureCount > maxUniformBuffersPerShaderStage,
+            "The combination of uniform buffers (%u) and external textures (%u × %u) in the %s "
+            "stage exceeds the maximum per-stage limit (%u).%s",
+            uniformBufferCount, externalTextureCount, kUniformsPerExternalTexture, stage,
+            maxUniformBuffersPerShaderStage,
+            DAWN_INCREASE_LIMIT_MESSAGE(adapter, maxUniformBuffersPerShaderStage,
+                                        uniformBuffersAndExternalTextureCount));
     }
 
     return {};
