@@ -219,6 +219,11 @@ constexpr SkippedMessage kSkippedMessages[] = {
      "SPIR-V Capability GroupNonUniformShuffleRelative was declared, but"},
     {"VUID-VkShaderModuleCreateInfo-pCode-08740",
      "SPIR-V Capability GroupNonUniformVote was declared, but"},
+
+    // crbug.com/385090855
+    {"VUID-RuntimeSpirv-None-06343",
+     "Group operations with subgroup scope must not be used if the shader stage is not in "
+     "subgroupSupportedStages"},
 };
 
 namespace dawn::native::vulkan {
