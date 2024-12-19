@@ -2523,7 +2523,8 @@
             {"value": 52, "name": "dawn partial load resolve texture", "tags": ["dawn"]},
             {"value": 53, "name": "multi draw indirect", "tags": ["dawn"]},
             {"value": 54, "name": "clip distances", "tags": ["dawn"]},
-            {"value": 55, "name": "dawn texel copy buffer row alignment", "tags": ["dawn"]}
+            {"value": 55, "name": "dawn texel copy buffer row alignment", "tags": ["dawn"]},
+            {"value": 56, "name": "flexible texture views", "tags": ["dawn"]}
         ]
     },
     "filter mode": {

@@ -58,6 +58,12 @@ void VideoViewsTestsBase::SetUp() {
     DAWN_TEST_UNSUPPORTED_IF(!IsMultiPlanarFormatsSupported());
     // TODO(crbug.com/342213634): Crashes on ChromeOS volteer devices.
     DAWN_SUPPRESS_TEST_IF(IsChromeOS() && IsVulkan() && IsIntel() && IsBackendValidationEnabled());
+
+    // compat mode doesn't allow different texture views to be used in a draw call unless
+    // FlexibleTextureViews feature is enabled. The tests need texture views to sample and render to
+    // separate planes of a multiplanar texture.
+    DAWN_TEST_UNSUPPORTED_IF(IsCompatibilityMode() &&
+                             !SupportsFeatures({wgpu::FeatureName::FlexibleTextureViews}));
 }
 
 std::vector<wgpu::FeatureName> VideoViewsTestsBase::GetRequiredFeatures() {
@@ -128,6 +134,10 @@ std::vector<wgpu::FeatureName> VideoViewsTestsBase::GetRequiredFeatures() {
     if (mIsSnorm16TextureFormatsSupported) {
         requiredFeatures.push_back(wgpu::FeatureName::Snorm16TextureFormats);
     }
+    if (SupportsFeatures({wgpu::FeatureName::FlexibleTextureViews})) {
+        requiredFeatures.push_back(wgpu::FeatureName::FlexibleTextureViews);
+    }
+
     requiredFeatures.push_back(wgpu::FeatureName::DawnInternalUsages);
     return requiredFeatures;
 }
@@ -524,10 +534,6 @@ class VideoViewsTests : public VideoViewsTestsBase {
         DAWN_TEST_UNSUPPORTED_IF(UsesWire());
         DAWN_TEST_UNSUPPORTED_IF(!IsMultiPlanarFormatsSupported());
         DAWN_TEST_UNSUPPORTED_IF(!IsFormatSupported());
-        // TODO(382071071): compat mode doesn't allow different texture views to be used in
-        // a draw call. But the tests need texture views to sample and render to separate planes of
-        // a multiplanar texture.
-        DAWN_TEST_UNSUPPORTED_IF(IsCompatibilityMode());
 
         mBackend = VideoViewsTestBackend::Create();
         mBackend->OnSetUp(device);

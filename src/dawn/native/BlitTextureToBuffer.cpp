@@ -962,7 +962,7 @@ MaybeError BlitTextureToBuffer(DeviceBase* device,
                                const Extent3D& copyExtent) {
     wgpu::TextureViewDimension textureViewDimension;
     {
-        if (device->IsCompatibilityMode()) {
+        if (!device->HasFlexibleTextureViews()) {
             textureViewDimension = src.texture->GetCompatibilityTextureBindingViewDimension();
         } else {
             wgpu::TextureDimension dimension = src.texture->GetDimension();

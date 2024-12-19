@@ -190,6 +190,7 @@ void PhysicalDevice::InitializeSupportedFeaturesImpl() {
     }
 
     EnableFeature(Feature::DawnTexelCopyBufferRowAlignment);
+    EnableFeature(Feature::FlexibleTextureViews);
 }
 
 MaybeError PhysicalDevice::InitializeSupportedLimitsImpl(CombinedLimits* limits) {

@@ -442,6 +442,8 @@ class DeviceBase : public ErrorSink, public RefCountedWithExternalCount<RefCount
 
     ResultOrError<Ref<BufferBase>> GetOrCreateTemporaryUniformBuffer(size_t size);
 
+    bool HasFlexibleTextureViews() const;
+
   protected:
     // Constructor used only for mocking and testing.
     DeviceBase();

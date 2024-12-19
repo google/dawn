@@ -183,10 +183,6 @@ TEST_P(DepthBiasTests, PositiveBiasOnFloat) {
 
 // Test adding positive bias to output with a clamp
 TEST_P(DepthBiasTests, PositiveBiasOnFloatWithClamp) {
-    // Clamping support in OpenGL is spotty
-    DAWN_TEST_UNSUPPORTED_IF(IsOpenGL());
-    DAWN_TEST_UNSUPPORTED_IF(IsOpenGLES());
-
     // Depth bias clamp is not supported in compat mode.
     // https://github.com/gpuweb/gpuweb/blob/main/proposals/compatibility-mode.md#9-depth-bias-clamp-must-be-zero
     DAWN_TEST_UNSUPPORTED_IF(IsCompatibilityMode());
@@ -225,10 +221,6 @@ TEST_P(DepthBiasTests, NegativeBiasOnFloat) {
 
 // Test adding negative bias to output with a clamp
 TEST_P(DepthBiasTests, NegativeBiasOnFloatWithClamp) {
-    // Clamping support in OpenGL is spotty
-    DAWN_TEST_UNSUPPORTED_IF(IsOpenGL());
-    DAWN_TEST_UNSUPPORTED_IF(IsOpenGLES());
-
     // Depth bias clamp is not supported in compat mode.
     // https://github.com/gpuweb/gpuweb/blob/main/proposals/compatibility-mode.md#9-depth-bias-clamp-must-be-zero
     DAWN_TEST_UNSUPPORTED_IF(IsCompatibilityMode());
@@ -348,10 +340,6 @@ TEST_P(DepthBiasTests, PositiveBiasOn24bit) {
 
 // Test adding positive bias to output with a clamp
 TEST_P(DepthBiasTests, PositiveBiasOn24bitWithClamp) {
-    // Clamping support in OpenGL is spotty
-    DAWN_TEST_UNSUPPORTED_IF(IsOpenGL());
-    DAWN_TEST_UNSUPPORTED_IF(IsOpenGLES());
-
     // Depth bias clamp is not supported in compat mode.
     // https://github.com/gpuweb/gpuweb/blob/main/proposals/compatibility-mode.md#9-depth-bias-clamp-must-be-zero
     DAWN_TEST_UNSUPPORTED_IF(IsCompatibilityMode());

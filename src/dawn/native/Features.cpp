@@ -92,7 +92,8 @@ static constexpr FeatureEnumAndInfo kFeatureInfo[] = {
      {"Allows the STORAGE usage on textures with format \"bgra8unorm\".",
       "https://gpuweb.github.io/gpuweb/#bgra8unorm-storage", FeatureInfo::FeatureState::Stable}},
     {Feature::Float32Filterable,
-     {"Allows textures with formats \"r32float\" \"rg32float\" and \"rgba32float\" to be filtered.",
+     {"Allows textures with formats \"r32float\" \"rg32float\" and \"rgba32float\" to be "
+      "filtered.",
       "https://gpuweb.github.io/gpuweb/#float32-filterable", FeatureInfo::FeatureState::Stable}},
     {Feature::Float32Blendable,
      {"Allows textures with formats \"r32float\" \"rg32float\" and \"rgba32float\" to be "
@@ -389,6 +390,11 @@ static constexpr FeatureEnumAndInfo kFeatureInfo[] = {
      {"Expose the min row alignment in buffer for texel copy operations.",
       "https://dawn.googlesource.com/dawn/+/refs/heads/main/docs/dawn/features/"
       "dawn_texel_copy_buffer_row_alignment.md",
+      FeatureInfo::FeatureState::Stable}},
+    {Feature::FlexibleTextureViews,
+     {"Remove the texture view restrictions in Compat Mode.",
+      "https://dawn.googlesource.com/dawn/+/refs/heads/main/docs/dawn/features/"
+      "flexible_texture_views.md",
       FeatureInfo::FeatureState::Stable}}};
 }  // anonymous namespace
 

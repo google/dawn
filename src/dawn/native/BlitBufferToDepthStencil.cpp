@@ -370,7 +370,7 @@ MaybeError BlitR8ToStencil(DeviceBase* device,
 
     // In compat mode view dimension needs to match texture binding view dimension.
     wgpu::TextureViewDimension textureViewDimension;
-    if (device->IsCompatibilityMode()) {
+    if (!device->HasFlexibleTextureViews()) {
         textureViewDimension = dataTexture->GetCompatibilityTextureBindingViewDimension();
     } else {
         textureViewDimension = wgpu::TextureViewDimension::e2DArray;

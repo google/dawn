@@ -105,6 +105,7 @@ std::vector<wgpu::FeatureName> SharedTextureMemoryTests::GetRequiredFeatures() {
         wgpu::FeatureName::TransientAttachments,
         wgpu::FeatureName::Unorm16TextureFormats,
         wgpu::FeatureName::BGRA8UnormStorage,
+        wgpu::FeatureName::FlexibleTextureViews,
     };
     for (auto feature : kOptionalFeatures) {
         if (SupportsFeatures({feature})) {
@@ -113,7 +114,7 @@ std::vector<wgpu::FeatureName> SharedTextureMemoryTests::GetRequiredFeatures() {
     }
 
     return features;
-}
+}  // namespace dawn
 
 void SharedTextureMemoryTests::SetUp() {
     DAWN_TEST_UNSUPPORTED_IF(UsesWire());
@@ -124,7 +125,9 @@ void SharedTextureMemoryTests::SetUp() {
     DAWN_SUPPRESS_TEST_IF(IsChromeOS() && IsVulkan() && IsIntel() && IsBackendValidationEnabled());
 
     // Compat cannot create 2D texture view from a 2D array texture.
-    DAWN_TEST_UNSUPPORTED_IF(IsCompatibilityMode() && GetParam().mLayerCount > 1);
+    DAWN_TEST_UNSUPPORTED_IF(IsCompatibilityMode() &&
+                             !SupportsFeatures({wgpu::FeatureName::FlexibleTextureViews}) &&
+                             GetParam().mLayerCount > 1);
 
     GetParam().mBackend->SetUp();
 }

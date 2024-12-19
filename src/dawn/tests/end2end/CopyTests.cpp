@@ -268,10 +268,14 @@ class CopyTests_T2B : public CopyTests, public DawnTestWithParams<CopyTextureFor
     };
 
     std::vector<wgpu::FeatureName> GetRequiredFeatures() override {
-        if (!SupportsFeatures({wgpu::FeatureName::DawnTexelCopyBufferRowAlignment})) {
-            return {};
+        std::vector<wgpu::FeatureName> requiredFeatures = {};
+        if (SupportsFeatures({wgpu::FeatureName::FlexibleTextureViews})) {
+            requiredFeatures.push_back(wgpu::FeatureName::FlexibleTextureViews);
         }
-        return {wgpu::FeatureName::DawnTexelCopyBufferRowAlignment};
+        if (SupportsFeatures({wgpu::FeatureName::DawnTexelCopyBufferRowAlignment})) {
+            requiredFeatures.push_back(wgpu::FeatureName::DawnTexelCopyBufferRowAlignment);
+        }
+        return requiredFeatures;
     }
 
     void SetUp() override {
@@ -1930,6 +1934,7 @@ TEST_P(CopyTests_T2B_Compat, TextureCubeRegionNonzeroRowsPerImage) {
 
 DAWN_INSTANTIATE_TEST_P(CopyTests_T2B_Compat,
                         {
+                            D3D11Backend(),
                             OpenGLBackend(),
                             OpenGLESBackend(),
                         },

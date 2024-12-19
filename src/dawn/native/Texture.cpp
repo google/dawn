@@ -572,7 +572,7 @@ wgpu::TextureViewDimension ResolveDefaultCompatiblityTextureBindingViewDimension
     const UnpackedPtr<TextureDescriptor>& descriptor) {
     // In non-compatibility mode this value is not used so return undefined so that it is not
     // used by mistake.
-    if (!device->IsCompatibilityMode()) {
+    if (device->HasFlexibleTextureViews()) {
         return wgpu::TextureViewDimension::Undefined;
     }
 
@@ -691,7 +691,7 @@ MaybeError ValidateTextureDescriptor(
     DAWN_TRY(ValidateTextureUsage(device, descriptor->dimension, usage, format,
                                   std::move(allowedSharedTextureMemoryUsage)));
     DAWN_TRY(ValidateTextureDimension(descriptor->dimension));
-    if (device->IsCompatibilityMode()) {
+    if (!device->HasFlexibleTextureViews()) {
         const auto textureBindingViewDimension =
             ResolveDefaultCompatiblityTextureBindingViewDimension(device, descriptor);
         DAWN_TRY_CONTEXT(ValidateTextureViewDimension(textureBindingViewDimension),

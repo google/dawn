@@ -47,6 +47,19 @@ constexpr uint32_t kBytesPerTexel = 4;
 
 class TextureViewTestBase : public DawnTest {
   protected:
+    std::vector<wgpu::FeatureName> GetRequiredFeatures() override {
+        std::vector<wgpu::FeatureName> requiredFeatures = {};
+        if (SupportsFeatures({wgpu::FeatureName::FlexibleTextureViews})) {
+            requiredFeatures.push_back(wgpu::FeatureName::FlexibleTextureViews);
+        }
+        return requiredFeatures;
+    }
+
+    bool HasFlexibleTextureViews() {
+        return !IsCompatibilityMode() ||
+               SupportsFeatures({wgpu::FeatureName::FlexibleTextureViews});
+    }
+
     wgpu::Texture Create2DTexture(uint32_t width,
                                   uint32_t height,
                                   uint32_t arrayLayerCount,
@@ -67,7 +80,7 @@ class TextureViewTestBase : public DawnTest {
         // Only set the textureBindingViewDimension in compat mode. It's not needed
         // nor used in non-compat.
         wgpu::TextureBindingViewDimensionDescriptor textureBindingViewDimensionDesc;
-        if (IsCompatibilityMode()) {
+        if (!HasFlexibleTextureViews()) {
             textureBindingViewDimensionDesc.textureBindingViewDimension =
                 textureBindingViewDimension;
             descriptor.nextInChain = &textureBindingViewDimensionDesc;
@@ -485,13 +498,13 @@ TEST_P(TextureViewSamplingTest, CubeArrayTextureSignedNegativeIndex) {
 
 // Test sampling from a 2D texture view created on a 2D array texture.
 TEST_P(TextureViewSamplingTest, Texture2DViewOn2DArrayTexture) {
-    DAWN_TEST_UNSUPPORTED_IF(IsCompatibilityMode());
+    DAWN_TEST_UNSUPPORTED_IF(!HasFlexibleTextureViews());
     Texture2DViewTest(6, 1, 4, 0);
 }
 
 // Test sampling from a 2D array texture view created on a 2D array texture.
 TEST_P(TextureViewSamplingTest, Texture2DArrayViewOn2DArrayTexture) {
-    DAWN_TEST_UNSUPPORTED_IF(IsCompatibilityMode());
+    DAWN_TEST_UNSUPPORTED_IF(!HasFlexibleTextureViews());
     Texture2DArrayViewTest(6, 1, 2, 0);
 }
 
@@ -531,13 +544,13 @@ TEST_P(TextureViewSamplingTest, Texture2DViewOnOneLevelOf2DTexture) {
 
 // Test sampling from a 2D texture view created on a mipmap level of a 2D array texture layer.
 TEST_P(TextureViewSamplingTest, Texture2DViewOnOneLevelOf2DArrayTexture) {
-    DAWN_TEST_UNSUPPORTED_IF(IsCompatibilityMode());
+    DAWN_TEST_UNSUPPORTED_IF(!HasFlexibleTextureViews());
     Texture2DViewTest(6, 6, 3, 4);
 }
 
 // Test sampling from a 2D array texture view created on a mipmap level of a 2D array texture.
 TEST_P(TextureViewSamplingTest, Texture2DArrayViewOnOneLevelOf2DArrayTexture) {
-    DAWN_TEST_UNSUPPORTED_IF(IsCompatibilityMode());
+    DAWN_TEST_UNSUPPORTED_IF(!HasFlexibleTextureViews());
     Texture2DArrayViewTest(6, 6, 2, 4);
 }
 
@@ -641,7 +654,7 @@ TEST_P(TextureViewSamplingTest, TextureCubeMapOnWholeTexture) {
 
 // Test sampling from a cube map texture view that covers a sub part of a 2D array texture.
 TEST_P(TextureViewSamplingTest, TextureCubeMapViewOnPartOfTexture) {
-    DAWN_TEST_UNSUPPORTED_IF(IsCompatibilityMode());
+    DAWN_TEST_UNSUPPORTED_IF(!HasFlexibleTextureViews());
     // TODO(dawn:1935): Total layers have to be at least 12 on Intel D3D11 Gen12.
     DAWN_SUPPRESS_TEST_IF(IsD3D11() && IsIntelGen12());
 
@@ -650,7 +663,7 @@ TEST_P(TextureViewSamplingTest, TextureCubeMapViewOnPartOfTexture) {
 
 // Test sampling from a cube map texture view that covers the last layer of a 2D array texture.
 TEST_P(TextureViewSamplingTest, TextureCubeMapViewCoveringLastLayer) {
-    DAWN_TEST_UNSUPPORTED_IF(IsCompatibilityMode());
+    DAWN_TEST_UNSUPPORTED_IF(!HasFlexibleTextureViews());
 
     // TODO(dawn:1812): the test fails with DXGI_ERROR_DEVICE_HUNG on Intel D3D11 driver.
     DAWN_SUPPRESS_TEST_IF(IsD3D11() && IsIntel());
