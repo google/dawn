@@ -46,7 +46,7 @@ struct GLFormat {
 };
 
 using GLFormatTable = ityp::array<FormatIndex, GLFormat, kKnownFormatCount>;
-GLFormatTable BuildGLFormatTable(GLenum internalFormatForBGRA);
+GLFormatTable BuildGLFormatTable(GLenum internalFormatForBGRA, GLenum internalFormatForStencil8);
 
 }  // namespace dawn::native::opengl
 

@@ -1608,13 +1608,14 @@ DAWN_INSTANTIATE_TEST_P(
      MetalBackend(
          {"metal_use_both_depth_and_stencil_attachments_for_combined_depth_stencil_formats"}),
      MetalBackend({"use_blit_for_buffer_to_stencil_texture_copy"}), OpenGLBackend(),
-     OpenGLESBackend(),
+     OpenGLESBackend(), OpenGLESBackend({"gl_force_es_31_and_no_extensions"}),
      // Test with the vulkan_use_s8 toggle forced on and off.
      VulkanBackend({"vulkan_use_s8"}, {}), VulkanBackend({}, {"vulkan_use_s8"})},
     std::vector<wgpu::TextureFormat>(utils::kStencilFormats.begin(), utils::kStencilFormats.end()));
 
 DAWN_INSTANTIATE_TEST_P(StencilCopyTests_Compat,
-                        {OpenGLBackend(), OpenGLESBackend()},
+                        {OpenGLBackend(), OpenGLESBackend(),
+                         OpenGLESBackend({"gl_force_es_31_and_no_extensions"})},
                         std::vector<wgpu::TextureFormat>(utils::kStencilFormats.begin(),
                                                          utils::kStencilFormats.end()));
 

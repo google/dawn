@@ -150,6 +150,7 @@ class Device final : public DeviceBase {
         const SharedFenceDescriptor* descriptor) override;
 
     GLenum GetBGRAInternalFormat(const OpenGLFunctions& gl) const;
+    GLenum GetStencil8InternalFormat(const OpenGLFunctions& gl) const;
     void DestroyImpl() override;
 
     const OpenGLFunctions mGL;
