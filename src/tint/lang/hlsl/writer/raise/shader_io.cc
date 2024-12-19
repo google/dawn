@@ -73,6 +73,10 @@ struct StateImpl : core::ir::transform::ShaderIOBackendState {
     std::optional<uint32_t> second_clip_distance_index;
     Hashset<uint32_t, 4> truncated_indices;
 
+    // If set, points to a var of type struct with fields for offsets to apply to vertex_index and
+    // instance_index
+    core::ir::Var* tint_first_index_offset = nullptr;
+
     /// Constructor
     StateImpl(core::ir::Module& mod, core::ir::Function* f, const ShaderIOConfig& c)
         : ShaderIOBackendState(mod, f), config(c) {}
@@ -199,6 +203,7 @@ struct StateImpl : core::ir::transform::ShaderIOBackendState {
         }
 
         Vector<MemberInfo, 4> input_data;
+        bool has_vertex_or_instance_index = false;
         for (uint32_t i = 0; i < inputs.Length(); ++i) {
             // Save the index of certain builtins for GetIndex. Although struct members will not be
             // added for these inputs, we still add entries to input_data so that other inputs with
@@ -210,6 +215,10 @@ struct StateImpl : core::ir::transform::ShaderIOBackendState {
                     subgroup_size_index = i;
                 } else if (*builtin == core::BuiltinValue::kNumWorkgroups) {
                     num_workgroups_index = i;
+                } else if (*builtin == core::BuiltinValue::kVertexIndex) {
+                    has_vertex_or_instance_index = true;
+                } else if (*builtin == core::BuiltinValue::kInstanceIndex) {
+                    has_vertex_or_instance_index = true;
                 }
             }
 
@@ -217,6 +226,22 @@ struct StateImpl : core::ir::transform::ShaderIOBackendState {
         }
 
         input_indices.Resize(input_data.Length());
+
+        if (config.first_index_offset_binding.has_value() && has_vertex_or_instance_index) {
+            // Create a FirstIndexOffset uniform buffer. GetInput will use this to offset the
+            // vertex/instance index.
+            TINT_ASSERT(func->IsVertex());
+            tint::Vector<tint::core::type::Manager::StructMemberDesc, 2> members;
+            auto* str = ty.Struct(ir.symbols.New("tint_first_index_offset_struct"),
+                                  {
+                                      {ir.symbols.New("vertex_index"), ty.u32(), {}},
+                                      {ir.symbols.New("instance_index"), ty.u32(), {}},
+                                  });
+            tint_first_index_offset = b.Var("tint_first_index_offset", uniform, str);
+            tint_first_index_offset->SetBindingPoint(config.first_index_offset_binding->group,
+                                                     config.first_index_offset_binding->binding);
+            ir.root_block->Append(tint_first_index_offset);
+        }
 
         // Sort the struct members to satisfy HLSL interfacing matching rules.
         // We use stable_sort so that two members with the same attributes maintain their relative
@@ -406,12 +431,27 @@ struct StateImpl : core::ir::transform::ShaderIOBackendState {
 
         core::ir::Value* v = builder.Access(inputs[idx].type, input_param, u32(index))->Result(0);
 
-        // If this is an input position builtin we need to invert the 'w' component of the vector.
         if (inputs[idx].attributes.builtin == core::BuiltinValue::kPosition) {
+            // If this is an input position builtin we need to invert the 'w' component of the
+            // vector.
             auto* w = builder.Access(ty.f32(), v, 3_u);
             auto* div = builder.Divide(ty.f32(), 1.0_f, w);
             auto* swizzle = builder.Swizzle(ty.vec3<f32>(), v, {0, 1, 2});
-            v = builder.Construct(ty.vec4<f32>(), swizzle, div)->Results()[0];
+            v = builder.Construct(ty.vec4<f32>(), swizzle, div)->Result(0);
+        } else if (config.first_index_offset_binding.has_value() &&
+                   inputs[idx].attributes.builtin == core::BuiltinValue::kVertexIndex) {
+            // Apply vertex_index offset
+            TINT_ASSERT(tint_first_index_offset);
+            auto* vertex_index_offset =
+                builder.Access(ty.ptr<uniform, u32>(), tint_first_index_offset, 0_u);
+            v = builder.Add<u32>(v, builder.Load(vertex_index_offset))->Result(0);
+        } else if (config.first_index_offset_binding.has_value() &&
+                   inputs[idx].attributes.builtin == core::BuiltinValue::kInstanceIndex) {
+            // Apply instance_index offset
+            TINT_ASSERT(tint_first_index_offset);
+            auto* instance_index_offset =
+                builder.Access(ty.ptr<uniform, u32>(), tint_first_index_offset, 1_u);
+            v = builder.Add<u32>(v, builder.Load(instance_index_offset))->Result(0);
         }
 
         return v;

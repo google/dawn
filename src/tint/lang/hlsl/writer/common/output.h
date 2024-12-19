@@ -76,6 +76,12 @@ struct Output {
 
     /// The workgroup size information, if the entry point was a compute shader
     WorkgroupInfo workgroup_info{};
+
+    /// True if the shader uses vertex_index
+    bool has_vertex_index = false;
+
+    /// True if the shader uses instance_index
+    bool has_instance_index = false;
 };
 
 }  // namespace tint::hlsl::writer

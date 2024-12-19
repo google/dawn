@@ -133,6 +133,7 @@ ResultOrError<d3d::CompiledShader> ShaderModule::Compile(
 
     ScopedTintICEHandler scopedICEHandler(device);
     const EntryPointMetadata& entryPoint = GetEntryPoint(programmableStage.entryPoint);
+    const bool useTintIR = device->IsToggleEnabled(Toggle::UseTintIR);
 
     d3d::D3DCompilationRequest req = {};
     req.tracePlatform = UnsafeUnkeyedValue(device->GetPlatform());
@@ -140,7 +141,7 @@ ResultOrError<d3d::CompiledShader> ShaderModule::Compile(
                                ->GetAppliedShaderModelUnderToggles(device->GetTogglesState());
     req.hlsl.disableSymbolRenaming = device->IsToggleEnabled(Toggle::DisableSymbolRenaming);
     req.hlsl.dumpShaders = device->IsToggleEnabled(Toggle::DumpShaders);
-    req.hlsl.useTintIR = device->IsToggleEnabled(Toggle::UseTintIR);
+    req.hlsl.useTintIR = useTintIR;
 
     req.bytecode.hasShaderF16Feature = device->HasFeature(Feature::ShaderF16);
     req.bytecode.compileFlags = compileFlags;
@@ -327,8 +328,10 @@ ResultOrError<d3d::CompiledShader> ShaderModule::Compile(
     req.hlsl.inputProgram = &(tintProgram->program);
     req.hlsl.entryPointName = programmableStage.entryPoint.c_str();
     req.hlsl.stage = stage;
-    req.hlsl.firstIndexOffsetShaderRegister = layout->GetFirstIndexOffsetShaderRegister();
-    req.hlsl.firstIndexOffsetRegisterSpace = layout->GetFirstIndexOffsetRegisterSpace();
+    if (!useTintIR) {
+        req.hlsl.firstIndexOffsetRegisterSpace = layout->GetFirstIndexOffsetRegisterSpace();
+        req.hlsl.firstIndexOffsetShaderRegister = layout->GetFirstIndexOffsetShaderRegister();
+    }
     req.hlsl.substituteOverrideConfig = std::move(substituteOverrideConfig);
 
     req.hlsl.tintOptions.disable_robustness = !device->IsRobustnessEnabled();
@@ -341,8 +344,14 @@ ResultOrError<d3d::CompiledShader> ShaderModule::Compile(
                                         : tint::hlsl::writer::Options::Compiler::kDXC;
 
     if (entryPoint.usesNumWorkgroups) {
+        DAWN_ASSERT(stage == SingleShaderStage::Compute);
         req.hlsl.tintOptions.root_constant_binding_point = tint::BindingPoint{
             layout->GetNumWorkgroupsRegisterSpace(), layout->GetNumWorkgroupsShaderRegister()};
+    } else if (useTintIR && stage == SingleShaderStage::Vertex) {
+        // For vertex shaders, use root constant to add FirstIndexOffset, if needed
+        req.hlsl.tintOptions.root_constant_binding_point =
+            tint::BindingPoint{layout->GetFirstIndexOffsetRegisterSpace(),
+                               layout->GetFirstIndexOffsetShaderRegister()};
     }
 
     // TODO(dawn:549): HLSL generation outputs the indices into the

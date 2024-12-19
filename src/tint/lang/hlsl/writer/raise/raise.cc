@@ -173,6 +173,7 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
     {
         raise::ShaderIOConfig config;
         config.num_workgroups_binding = options.root_constant_binding_point;
+        config.first_index_offset_binding = options.root_constant_binding_point;
         config.add_input_position_member = pixel_local_enabled;
         config.truncate_interstage_variables = options.truncate_interstage_variables;
         config.interstage_locations = std::move(options.interstage_locations);

@@ -208,9 +208,6 @@ ResultOrError<ComPtr<ID3DBlob>> CompileShaderFXC(const d3d::D3DBytecodeCompilati
 MaybeError TranslateToHLSL(d3d::HlslCompilationRequest r,
                            CacheKey::UnsafeUnkeyedValue<dawn::platform::Platform*> tracePlatform,
                            CompiledShader* compiledShader) {
-    std::ostringstream errorStream;
-    errorStream << "Tint HLSL failure:\n";
-
     tint::ast::transform::Manager transformManager;
     tint::ast::transform::DataMap transformInputs;
 
@@ -232,7 +229,7 @@ MaybeError TranslateToHLSL(d3d::HlslCompilationRequest r,
             std::move(requestedNames));
     }
 
-    if (r.stage == SingleShaderStage::Vertex) {
+    if (!r.useTintIR && r.stage == SingleShaderStage::Vertex) {
         transformManager.Add<tint::ast::transform::FirstIndexOffset>();
         transformInputs.Add<tint::ast::transform::FirstIndexOffset::BindingPoint>(
             r.firstIndexOffsetShaderRegister, r.firstIndexOffsetRegisterSpace);
@@ -257,7 +254,7 @@ MaybeError TranslateToHLSL(d3d::HlslCompilationRequest r,
 
     bool usesVertexIndex = false;
     bool usesInstanceIndex = false;
-    if (r.stage == SingleShaderStage::Vertex) {
+    if (!r.useTintIR && r.stage == SingleShaderStage::Vertex) {
         if (auto* data = transformOutputs.Get<tint::ast::transform::FirstIndexOffset::Data>()) {
             usesVertexIndex = data->has_vertex_index;
             usesInstanceIndex = data->has_instance_index;
@@ -300,6 +297,11 @@ MaybeError TranslateToHLSL(d3d::HlslCompilationRequest r,
 
     DAWN_INVALID_IF(result != tint::Success, "An error occurred while generating HLSL:\n%s",
                     result.Failure().reason.Str());
+
+    if (r.useTintIR && r.stage == SingleShaderStage::Vertex) {
+        usesVertexIndex = result->has_vertex_index;
+        usesInstanceIndex = result->has_instance_index;
+    }
 
     compiledShader->usesVertexIndex = usesVertexIndex;
     compiledShader->usesInstanceIndex = usesInstanceIndex;

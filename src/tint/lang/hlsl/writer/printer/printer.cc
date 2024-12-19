@@ -1569,6 +1569,17 @@ class Printer : public tint::TextGenerator {
                         ++which_clip_distance;
                     } else {
                         name = builtin_to_attribute(builtin.value());
+
+                        switch (builtin.value()) {
+                            case core::BuiltinValue::kVertexIndex:
+                                result_.has_vertex_index = true;
+                                break;
+                            case core::BuiltinValue::kInstanceIndex:
+                                result_.has_instance_index = true;
+                                break;
+                            default:
+                                break;
+                        }
                     }
                     TINT_ASSERT(!name.empty());
 
