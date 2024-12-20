@@ -64,6 +64,8 @@ tint_add_target(tint_lang_core_ir lib
   lang/core/ir/call.h
   lang/core/ir/clone_context.cc
   lang/core/ir/clone_context.h
+  lang/core/ir/const_param_validator.cc
+  lang/core/ir/const_param_validator.h
   lang/core/ir/constant.cc
   lang/core/ir/constant.h
   lang/core/ir/construct.cc
@@ -194,6 +196,7 @@ tint_add_target(tint_lang_core_ir_test test
   lang/core/ir/block_test.cc
   lang/core/ir/break_if_test.cc
   lang/core/ir/builder_test.cc
+  lang/core/ir/const_param_validator_test.cc
   lang/core/ir/constant_test.cc
   lang/core/ir/construct_test.cc
   lang/core/ir/continue_test.cc
