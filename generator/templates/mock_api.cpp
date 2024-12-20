@@ -98,10 +98,7 @@ void ProcTableAsClass::GetProcTable({{Prefix}}ProcTable* table) {
                     object->m{{Suffix}}Userdata = userdata;
                 {% endfor %}
 
-                {% if method.name.get() == 'pop error scope' %}
-                    //* Currently special casing popErrorScope since it has an old callback type.
-                    On{{Suffix}}({{-as_varName(type.name)}}, {.nextInChain = nullptr, .mode = WGPUCallbackMode_AllowProcessEvents, .callback = nullptr, .oldCallback = oldCallback, .userdata = userdata});
-                {% elif method.name.get() not in LegacyCallbackFunctions %}
+                {% if method.name.get() not in LegacyCallbackFunctions %}
                     On{{Suffix}}(
                         {{-as_varName(type.name)}}
                         {%- for arg in method.arguments if arg.type.category != 'function pointer' and arg.type.name.get() != 'void *' -%}

@@ -51,7 +51,7 @@ using testing::Return;
 using testing::SizedString;
 
 using WireCreateComputePipelineAsyncTestBase =
-    WireFutureTest<wgpu::CreateComputePipelineAsyncCallback2<void>*>;
+    WireFutureTest<wgpu::CreateComputePipelineAsyncCallback<void>*>;
 class WireCreateComputePipelineAsyncTest : public WireCreateComputePipelineAsyncTestBase {
   protected:
     void CreateComputePipelineAsync(wgpu::ComputePipelineDescriptor const* desc) {
@@ -95,7 +95,7 @@ class WireCreateComputePipelineAsyncTest : public WireCreateComputePipelineAsync
 };
 
 using WireCreateRenderPipelineAsyncTestBase =
-    WireFutureTest<wgpu::CreateRenderPipelineAsyncCallback2<void>*>;
+    WireFutureTest<wgpu::CreateRenderPipelineAsyncCallback<void>*>;
 class WireCreateRenderPipelineAsyncTest : public WireCreateRenderPipelineAsyncTestBase {
   protected:
     void CreateRenderPipelineAsync(wgpu::RenderPipelineDescriptor const* desc) {
@@ -149,11 +149,11 @@ DAWN_INSTANTIATE_WIRE_FUTURE_TEST_P(WireCreateRenderPipelineAsyncTest);
 TEST_P(WireCreateComputePipelineAsyncTest, CreateSuccess) {
     CreateComputePipelineAsync(&mDescriptor);
 
-    EXPECT_CALL(api, OnDeviceCreateComputePipelineAsync2(apiDevice, _, _))
+    EXPECT_CALL(api, OnDeviceCreateComputePipelineAsync(apiDevice, _, _))
         .WillOnce(InvokeWithoutArgs([&] {
-            api.CallDeviceCreateComputePipelineAsync2Callback(apiDevice,
-                                                              WGPUCreatePipelineAsyncStatus_Success,
-                                                              apiPipeline, kEmptyOutputStringView);
+            api.CallDeviceCreateComputePipelineAsyncCallback(apiDevice,
+                                                             WGPUCreatePipelineAsyncStatus_Success,
+                                                             apiPipeline, kEmptyOutputStringView);
         }));
 
     FlushClient();
@@ -171,11 +171,11 @@ TEST_P(WireCreateComputePipelineAsyncTest, CreateSuccess) {
 TEST_P(WireCreateRenderPipelineAsyncTest, CreateSuccess) {
     CreateRenderPipelineAsync(&mDescriptor);
 
-    EXPECT_CALL(api, OnDeviceCreateRenderPipelineAsync2(apiDevice, _, _))
+    EXPECT_CALL(api, OnDeviceCreateRenderPipelineAsync(apiDevice, _, _))
         .WillOnce(InvokeWithoutArgs([&] {
-            api.CallDeviceCreateRenderPipelineAsync2Callback(apiDevice,
-                                                             WGPUCreatePipelineAsyncStatus_Success,
-                                                             apiPipeline, kEmptyOutputStringView);
+            api.CallDeviceCreateRenderPipelineAsyncCallback(apiDevice,
+                                                            WGPUCreatePipelineAsyncStatus_Success,
+                                                            apiPipeline, kEmptyOutputStringView);
         }));
 
     FlushClient();
@@ -193,9 +193,9 @@ TEST_P(WireCreateRenderPipelineAsyncTest, CreateSuccess) {
 TEST_P(WireCreateComputePipelineAsyncTest, CreateError) {
     CreateComputePipelineAsync(&mDescriptor);
 
-    EXPECT_CALL(api, OnDeviceCreateComputePipelineAsync2(apiDevice, _, _))
+    EXPECT_CALL(api, OnDeviceCreateComputePipelineAsync(apiDevice, _, _))
         .WillOnce(InvokeWithoutArgs([&] {
-            api.CallDeviceCreateComputePipelineAsync2Callback(
+            api.CallDeviceCreateComputePipelineAsyncCallback(
                 apiDevice, WGPUCreatePipelineAsyncStatus_ValidationError, nullptr,
                 ToOutputStringView("Some error message"));
         }));
@@ -215,9 +215,9 @@ TEST_P(WireCreateComputePipelineAsyncTest, CreateError) {
 TEST_P(WireCreateRenderPipelineAsyncTest, CreateError) {
     CreateRenderPipelineAsync(&mDescriptor);
 
-    EXPECT_CALL(api, OnDeviceCreateRenderPipelineAsync2(apiDevice, _, _))
+    EXPECT_CALL(api, OnDeviceCreateRenderPipelineAsync(apiDevice, _, _))
         .WillOnce(InvokeWithoutArgs([&] {
-            api.CallDeviceCreateRenderPipelineAsync2Callback(
+            api.CallDeviceCreateRenderPipelineAsyncCallback(
                 apiDevice, WGPUCreatePipelineAsyncStatus_ValidationError, nullptr,
                 ToOutputStringView("Some error message"));
         }));
@@ -238,11 +238,11 @@ TEST_P(WireCreateRenderPipelineAsyncTest, CreateError) {
 TEST_P(WireCreateComputePipelineAsyncTest, CreateThenDisconnect) {
     CreateComputePipelineAsync(&mDescriptor);
 
-    EXPECT_CALL(api, OnDeviceCreateComputePipelineAsync2(apiDevice, _, _))
+    EXPECT_CALL(api, OnDeviceCreateComputePipelineAsync(apiDevice, _, _))
         .WillOnce(InvokeWithoutArgs([&] {
-            api.CallDeviceCreateComputePipelineAsync2Callback(apiDevice,
-                                                              WGPUCreatePipelineAsyncStatus_Success,
-                                                              apiPipeline, kEmptyOutputStringView);
+            api.CallDeviceCreateComputePipelineAsyncCallback(apiDevice,
+                                                             WGPUCreatePipelineAsyncStatus_Success,
+                                                             apiPipeline, kEmptyOutputStringView);
         }));
 
     FlushClient();
@@ -260,11 +260,11 @@ TEST_P(WireCreateComputePipelineAsyncTest, CreateThenDisconnect) {
 TEST_P(WireCreateRenderPipelineAsyncTest, CreateThenDisconnect) {
     CreateRenderPipelineAsync(&mDescriptor);
 
-    EXPECT_CALL(api, OnDeviceCreateRenderPipelineAsync2(apiDevice, _, _))
+    EXPECT_CALL(api, OnDeviceCreateRenderPipelineAsync(apiDevice, _, _))
         .WillOnce(InvokeWithoutArgs([&] {
-            api.CallDeviceCreateRenderPipelineAsync2Callback(apiDevice,
-                                                             WGPUCreatePipelineAsyncStatus_Success,
-                                                             apiPipeline, kEmptyOutputStringView);
+            api.CallDeviceCreateRenderPipelineAsyncCallback(apiDevice,
+                                                            WGPUCreatePipelineAsyncStatus_Success,
+                                                            apiPipeline, kEmptyOutputStringView);
         }));
 
     FlushClient();

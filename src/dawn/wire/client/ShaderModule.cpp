@@ -40,7 +40,7 @@ class ShaderModule::CompilationInfoEvent final : public TrackedEvent {
   public:
     static constexpr EventType kType = EventType::CompilationInfo;
 
-    CompilationInfoEvent(const WGPUCompilationInfoCallbackInfo2& callbackInfo,
+    CompilationInfoEvent(const WGPUCompilationInfoCallbackInfo& callbackInfo,
                          Ref<ShaderModule> shader)
         : TrackedEvent(callbackInfo.mode),
           mCallback(callbackInfo.callback),
@@ -102,7 +102,7 @@ class ShaderModule::CompilationInfoEvent final : public TrackedEvent {
         }
     }
 
-    WGPUCompilationInfoCallback2 mCallback;
+    WGPUCompilationInfoCallback mCallback;
     raw_ptr<void> mUserdata1;
     raw_ptr<void> mUserdata2;
 
@@ -117,39 +117,7 @@ ObjectType ShaderModule::GetObjectType() const {
     return ObjectType::ShaderModule;
 }
 
-namespace {
-
-void DefaultGetCompilationInfoCallback(WGPUCompilationInfoRequestStatus status,
-                                       const WGPUCompilationInfo* compilationInfo,
-                                       void* callback,
-                                       void* userdata) {
-    if (callback == nullptr) {
-        DAWN_ASSERT(userdata == nullptr);
-        return;
-    }
-    auto cb = reinterpret_cast<WGPUCompilationInfoCallback>(callback);
-    cb(status, compilationInfo, userdata);
-}
-
-}  // anonymous namespace
-
-void ShaderModule::GetCompilationInfo(WGPUCompilationInfoCallback callback, void* userdata) {
-    if (callback == nullptr) {
-        DAWN_ASSERT(userdata == nullptr);
-        return;
-    }
-    GetCompilationInfo2({nullptr, WGPUCallbackMode_AllowSpontaneous,
-                         &DefaultGetCompilationInfoCallback, reinterpret_cast<void*>(callback),
-                         userdata});
-}
-
-WGPUFuture ShaderModule::GetCompilationInfoF(const WGPUCompilationInfoCallbackInfo& callbackInfo) {
-    return GetCompilationInfo2(
-        {callbackInfo.nextInChain, callbackInfo.mode, &DefaultGetCompilationInfoCallback,
-         reinterpret_cast<void*>(callbackInfo.callback), callbackInfo.userdata});
-}
-
-WGPUFuture ShaderModule::GetCompilationInfo2(const WGPUCompilationInfoCallbackInfo2& callbackInfo) {
+WGPUFuture ShaderModule::GetCompilationInfo(const WGPUCompilationInfoCallbackInfo& callbackInfo) {
     auto [futureIDInternal, tracked] =
         GetEventManager().TrackEvent(std::make_unique<CompilationInfoEvent>(callbackInfo, this));
     if (!tracked) {

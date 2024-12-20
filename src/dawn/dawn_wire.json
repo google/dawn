@@ -37,8 +37,7 @@
             { "name": "future", "type": "future" },
             { "name": "mode", "type": "map mode" },
             { "name": "offset", "type": "uint64_t"},
-            { "name": "size", "type": "uint64_t"},
-            { "name": "userdata count", "type": "uint8_t", "_comment": "TODO(crbug.com/dawn/2509): Remove this once Chromium overrides the correct functions in the proc table."}
+            { "name": "size", "type": "uint64_t"}
         ],
         "buffer update mapped data": [
             { "name": "buffer id", "type": "ObjectId", "id_type": "buffer" },
@@ -82,8 +81,7 @@
         "queue on submitted work done": [
             { "name": "queue id", "type": "ObjectId", "id_type": "queue" },
             { "name": "event manager handle", "type": "ObjectHandle" },
-            { "name": "future", "type": "future" },
-            { "name": "userdata count", "type": "uint8_t", "_comment": "TODO(crbug.com/dawn/2509): Remove this once Chromium overrides the correct functions in the proc table."}
+            { "name": "future", "type": "future" }
         ],
         "queue write buffer": [
             {"name": "queue id", "type": "ObjectId", "id_type": "queue" },
@@ -132,10 +130,8 @@
         "buffer map async callback": [
             { "name": "event manager", "type": "ObjectHandle" },
             { "name": "future", "type": "future" },
-            { "name": "status", "type": "buffer map async status" },
-            { "name": "status2", "type": "map async status" },
+            { "name": "status", "type": "map async status" },
             { "name": "message", "type": "string view" },
-            { "name": "userdata count", "type": "uint8_t", "_comment": "TODO(crbug.com/dawn/2509): Remove this once Chromium overrides the correct functions in the proc table."},
             { "name": "read data update info length", "type": "uint64_t" },
             { "name": "read data update info", "type": "uint8_t", "annotation": "const*", "length": "read data update info length", "skip_serialize": true }
         ],
@@ -228,8 +224,6 @@
             "AdapterRequestDeviceF",
             "AdapterRequestDevice2",
             "BufferMapAsync",
-            "BufferMapAsyncF",
-            "BufferMapAsync2",
             "BufferGetConstMappedRange",
             "BufferGetMappedRange",
             "BufferGetMapState",
@@ -237,11 +231,7 @@
             "BufferGetUsage",
             "DeviceCreateBuffer",
             "DeviceCreateComputePipelineAsync",
-            "DeviceCreateComputePipelineAsyncF",
-            "DeviceCreateComputePipelineAsync2",
             "DeviceCreateRenderPipelineAsync",
-            "DeviceCreateRenderPipelineAsyncF",
-            "DeviceCreateRenderPipelineAsync2",
             "DeviceGetAdapter",
             "DeviceGetAdapterInfo",
             "DeviceGetFeatures",
@@ -259,13 +249,9 @@
             "InstanceRequestAdapterF",
             "InstanceRequestAdapter2",
             "ShaderModuleGetCompilationInfo",
-            "ShaderModuleGetCompilationInfoF",
-            "ShaderModuleGetCompilationInfo2",
             "QuerySetGetType",
             "QuerySetGetCount",
             "QueueOnSubmittedWorkDone",
-            "QueueOnSubmittedWorkDoneF",
-            "QueueOnSubmittedWorkDone2",
             "QueueWriteBuffer",
             "QueueWriteTexture",
             "SurfaceGetCapabilities",

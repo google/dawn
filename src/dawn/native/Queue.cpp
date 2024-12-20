@@ -155,33 +155,6 @@ ResultOrError<UploadHandle> UploadTextureDataAligningBytesPerRowAndOffset(
     return uploadHandle;
 }
 
-struct SubmittedWorkDone : TrackTaskCallback {
-    SubmittedWorkDone(dawn::platform::Platform* platform,
-                      WGPUQueueWorkDoneCallback callback,
-                      void* userdata)
-        : TrackTaskCallback(platform), mCallback(callback), mUserdata(userdata) {}
-    ~SubmittedWorkDone() override = default;
-
-  private:
-    void FinishImpl() override {
-        DAWN_ASSERT(mCallback != nullptr);
-        DAWN_ASSERT(mSerial != kMaxExecutionSerial);
-        TRACE_EVENT1(mPlatform, General, "Queue::SubmittedWorkDone::Finished", "serial",
-                     uint64_t(mSerial));
-        mCallback(WGPUQueueWorkDoneStatus_Success, mUserdata.ExtractAsDangling());
-        mCallback = nullptr;
-    }
-    void HandleDeviceLossImpl() override {
-        DAWN_ASSERT(mCallback != nullptr);
-        mCallback(WGPUQueueWorkDoneStatus_DeviceLost, mUserdata.ExtractAsDangling());
-        mCallback = nullptr;
-    }
-    void HandleShutDownImpl() override { HandleDeviceLossImpl(); }
-
-    WGPUQueueWorkDoneCallback mCallback = nullptr;
-    raw_ptr<void> mUserdata;
-};
-
 class ErrorQueue : public QueueBase {
   public:
     explicit ErrorQueue(DeviceBase* device, StringView label)
@@ -257,55 +230,15 @@ void QueueBase::APISubmit(uint32_t commandCount, CommandBufferBase* const* comma
         ityp::span<uint32_t, CommandBufferBase* const>(commands, commandCount));
 }
 
-void QueueBase::APIOnSubmittedWorkDone(WGPUQueueWorkDoneCallback callback, void* userdata) {
-    GetInstance()->EmitDeprecationWarning(
-        "Old OnSubmittedWorkDone APIs are deprecated. If using C please pass a CallbackInfo "
-        "struct that has two userdatas. Otherwise, if using C++, please use templated helpers.");
-
-    // The error status depends on the type of error so we let the validation function choose it
-    wgpu::QueueWorkDoneStatus status;
-    if (GetDevice()->ConsumedError(ValidateOnSubmittedWorkDone(&status))) {
-        GetDevice()->GetCallbackTaskManager()->AddCallbackTask(
-            [callback, status, userdata] { callback(ToAPI(status), userdata); });
-        return;
-    }
-
-    std::unique_ptr<SubmittedWorkDone> task =
-        std::make_unique<SubmittedWorkDone>(GetDevice()->GetPlatform(), callback, userdata);
-
-    // Technically we only need to wait for previously submitted work but OnSubmittedWorkDone is
-    // also used to make sure ALL queue work is finished in tests, so we also wait for pending
-    // commands (this is non-observable outside of tests so it's ok to do deviate a bit from the
-    // spec).
-    TrackTaskAfterEventualFlush(std::move(task));
-
-    TRACE_EVENT1(GetDevice()->GetPlatform(), General, "Queue::APIOnSubmittedWorkDone", "serial",
-                 uint64_t(GetPendingCommandSerial()));
-}
-
-Future QueueBase::APIOnSubmittedWorkDoneF(const QueueWorkDoneCallbackInfo& callbackInfo) {
-    GetInstance()->EmitDeprecationWarning(
-        "Old OnSubmittedWorkDone APIs are deprecated. If using C please pass a CallbackInfo "
-        "struct that has two userdatas. Otherwise, if using C++, please use templated helpers.");
-
-    return APIOnSubmittedWorkDone2(
-        {ToAPI(callbackInfo.nextInChain), ToAPI(callbackInfo.mode),
-         [](WGPUQueueWorkDoneStatus status, void* callback, void* userdata) {
-             auto cb = reinterpret_cast<WGPUQueueWorkDoneCallback>(callback);
-             cb(status, userdata);
-         },
-         reinterpret_cast<void*>(callbackInfo.callback), callbackInfo.userdata});
-}
-
-Future QueueBase::APIOnSubmittedWorkDone2(const WGPUQueueWorkDoneCallbackInfo2& callbackInfo) {
+Future QueueBase::APIOnSubmittedWorkDone(const WGPUQueueWorkDoneCallbackInfo& callbackInfo) {
     struct WorkDoneEvent final : public EventManager::TrackedEvent {
         std::optional<WGPUQueueWorkDoneStatus> mEarlyStatus;
-        WGPUQueueWorkDoneCallback2 mCallback;
+        WGPUQueueWorkDoneCallback mCallback;
         raw_ptr<void> mUserdata1;
         raw_ptr<void> mUserdata2;
 
         // Create an event backed by the given queue execution serial.
-        WorkDoneEvent(const WGPUQueueWorkDoneCallbackInfo2& callbackInfo,
+        WorkDoneEvent(const WGPUQueueWorkDoneCallbackInfo& callbackInfo,
                       QueueBase* queue,
                       ExecutionSerial serial)
             : TrackedEvent(static_cast<wgpu::CallbackMode>(callbackInfo.mode), queue, serial),
@@ -314,7 +247,7 @@ Future QueueBase::APIOnSubmittedWorkDone2(const WGPUQueueWorkDoneCallbackInfo2& 
               mUserdata2(callbackInfo.userdata2) {}
 
         // Create an event that's ready at creation (for errors, etc.)
-        WorkDoneEvent(const WGPUQueueWorkDoneCallbackInfo2& callbackInfo,
+        WorkDoneEvent(const WGPUQueueWorkDoneCallbackInfo& callbackInfo,
                       QueueBase* queue,
                       wgpu::QueueWorkDoneStatus earlyStatus)
             : TrackedEvent(static_cast<wgpu::CallbackMode>(callbackInfo.mode),
@@ -350,15 +283,8 @@ Future QueueBase::APIOnSubmittedWorkDone2(const WGPUQueueWorkDoneCallbackInfo2& 
         // re-entrancy.
         auto deviceLock(GetDevice()->GetScopedLock());
 
-        wgpu::QueueWorkDoneStatus validationEarlyStatus;
+        wgpu::QueueWorkDoneStatus validationEarlyStatus = wgpu::QueueWorkDoneStatus::Success;
         if (GetDevice()->ConsumedError(ValidateOnSubmittedWorkDone(&validationEarlyStatus))) {
-            // TODO(crbug.com/dawn/2021): This is here to pretend that things succeed when the
-            // device is lost. When the old OnSubmittedWorkDone is removed then we can update
-            // ValidateOnSubmittedWorkDone to just return the correct thing here.
-            if (validationEarlyStatus == wgpu::QueueWorkDoneStatus::DeviceLost) {
-                validationEarlyStatus = wgpu::QueueWorkDoneStatus::Success;
-            }
-
             // Note: if the callback is spontaneous, it'll get called in here.
             event = AcquireRef(new WorkDoneEvent(callbackInfo, this, validationEarlyStatus));
         } else {
@@ -641,7 +567,6 @@ MaybeError QueueBase::ValidateSubmit(uint32_t commandCount,
 }
 
 MaybeError QueueBase::ValidateOnSubmittedWorkDone(wgpu::QueueWorkDoneStatus* status) const {
-    *status = wgpu::QueueWorkDoneStatus::DeviceLost;
     DAWN_TRY(GetDevice()->ValidateIsAlive());
 
     *status = wgpu::QueueWorkDoneStatus::Error;

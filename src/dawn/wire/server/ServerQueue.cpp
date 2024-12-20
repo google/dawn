@@ -43,22 +43,15 @@ void Server::OnQueueWorkDone(QueueWorkDoneUserdata* data, WGPUQueueWorkDoneStatu
 
 WireResult Server::DoQueueOnSubmittedWorkDone(Known<WGPUQueue> queue,
                                               ObjectHandle eventManager,
-                                              WGPUFuture future,
-                                              uint8_t userdataCount) {
+                                              WGPUFuture future) {
     auto userdata = MakeUserdata<QueueWorkDoneUserdata>();
     userdata->queue = queue.AsHandle();
     userdata->eventManager = eventManager;
     userdata->future = future;
 
-    if (userdataCount == 1) {
-        mProcs.queueOnSubmittedWorkDone(queue->handle, ForwardToServer<&Server::OnQueueWorkDone>,
-                                        userdata.release());
-    } else {
-        mProcs.queueOnSubmittedWorkDone2(
-            queue->handle,
-            {nullptr, WGPUCallbackMode_AllowProcessEvents,
-             ForwardToServer2<&Server::OnQueueWorkDone>, userdata.release(), nullptr});
-    }
+    mProcs.queueOnSubmittedWorkDone(
+        queue->handle, {nullptr, WGPUCallbackMode_AllowProcessEvents,
+                        ForwardToServer2<&Server::OnQueueWorkDone>, userdata.release(), nullptr});
     return WireResult::Success;
 }
 

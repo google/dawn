@@ -59,9 +59,9 @@ using ::testing::StrictMock;
 using ::testing::Test;
 
 using MockComputePipelineAsyncCallback =
-    MockCppCallback<wgpu::CreateComputePipelineAsyncCallback2<void>*>;
+    MockCppCallback<wgpu::CreateComputePipelineAsyncCallback<void>*>;
 using MockRenderPipelineAsyncCallback =
-    MockCppCallback<wgpu::CreateRenderPipelineAsyncCallback2<void>*>;
+    MockCppCallback<wgpu::CreateRenderPipelineAsyncCallback<void>*>;
 
 static constexpr char kOomErrorMessage[] = "Out of memory error";
 static constexpr char kInternalErrorMessage[] = "Internal error";

@@ -48,7 +48,7 @@ using testing::_;
 using testing::MockCppCallback;
 using testing::StrictMock;
 
-using MockMapAsyncCallback = MockCppCallback<wgpu::BufferMapCallback2<void>*>;
+using MockMapAsyncCallback = MockCppCallback<wgpu::BufferMapCallback<void>*>;
 using FutureCallbackMode = wgpu::CallbackMode;
 
 DAWN_TEST_PARAM_STRUCT(BufferMappingTestParams, FutureCallbackMode);
@@ -66,7 +66,7 @@ class BufferMappingTests : public DawnTestWithParams<BufferMappingTestParams> {
                          wgpu::MapMode mode,
                          size_t offset,
                          size_t size,
-                         wgpu::BufferMapCallback2<> cb = nullptr) {
+                         wgpu::BufferMapCallback<> cb = nullptr) {
         wgpu::Future future;
 
         if (cb) {
