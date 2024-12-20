@@ -32,6 +32,7 @@
 #include <array>
 #include <cstddef>
 #include <cstring>
+#include <new>
 #include <utility>
 
 #include "src/tint/utils/macros/compiler.h"

@@ -29,6 +29,7 @@
 #include <webgpu/webgpu.h>
 
 #include <atomic>
+#include <chrono>
 #include <cstdint>
 #include <utility>
 #include <vector>
