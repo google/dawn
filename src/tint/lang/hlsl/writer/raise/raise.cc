@@ -142,9 +142,7 @@ Result<SuccessType> Raise(core::ir::Module& module, const Options& options) {
         // Direct3D guarantees to return zero for any resource that is accessed out of bounds, and
         // according to the description of the assembly store_uav_typed, out of bounds addressing
         // means nothing gets written to memory.
-        //
-        // TODO(crbug.com/377360326): Implement ignore for texture actions for performance
-        // config.texture_action = ast::transform::Robustness::Action::kIgnore;
+        config.clamp_texture = false;
 
         RUN_TRANSFORM(core::ir::transform::Robustness, module, config);
     }

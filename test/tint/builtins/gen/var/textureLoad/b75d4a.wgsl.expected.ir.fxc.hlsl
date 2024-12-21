@@ -8,11 +8,8 @@ float4 textureLoad_b75d4a() {
   int2 arg_1 = (int(1)).xx;
   uint arg_2 = 1u;
   uint v = arg_2;
-  uint3 v_1 = (0u).xxx;
-  arg_0.GetDimensions(v_1.x, v_1.y, v_1.z);
-  uint2 v_2 = (v_1.xy - (1u).xx);
-  int2 v_3 = int2(min(uint2(arg_1), v_2));
-  float4 res = float4(arg_0.Load(v_3, int(v)));
+  int2 v_1 = int2(arg_1);
+  float4 res = float4(arg_0.Load(v_1, int(v)));
   return res;
 }
 
@@ -30,11 +27,8 @@ float4 textureLoad_b75d4a() {
   int2 arg_1 = (int(1)).xx;
   uint arg_2 = 1u;
   uint v = arg_2;
-  uint3 v_1 = (0u).xxx;
-  arg_0.GetDimensions(v_1.x, v_1.y, v_1.z);
-  uint2 v_2 = (v_1.xy - (1u).xx);
-  int2 v_3 = int2(min(uint2(arg_1), v_2));
-  float4 res = float4(arg_0.Load(v_3, int(v)));
+  int2 v_1 = int2(arg_1);
+  float4 res = float4(arg_0.Load(v_1, int(v)));
   return res;
 }
 
@@ -62,25 +56,22 @@ float4 textureLoad_b75d4a() {
   int2 arg_1 = (int(1)).xx;
   uint arg_2 = 1u;
   uint v = arg_2;
-  uint3 v_1 = (0u).xxx;
-  arg_0.GetDimensions(v_1.x, v_1.y, v_1.z);
-  uint2 v_2 = (v_1.xy - (1u).xx);
-  int2 v_3 = int2(min(uint2(arg_1), v_2));
-  float4 res = float4(arg_0.Load(v_3, int(v)));
+  int2 v_1 = int2(arg_1);
+  float4 res = float4(arg_0.Load(v_1, int(v)));
   return res;
 }
 
 VertexOutput vertex_main_inner() {
-  VertexOutput v_4 = (VertexOutput)0;
-  v_4.pos = (0.0f).xxxx;
-  v_4.prevent_dce = textureLoad_b75d4a();
-  VertexOutput v_5 = v_4;
-  return v_5;
+  VertexOutput v_2 = (VertexOutput)0;
+  v_2.pos = (0.0f).xxxx;
+  v_2.prevent_dce = textureLoad_b75d4a();
+  VertexOutput v_3 = v_2;
+  return v_3;
 }
 
 vertex_main_outputs vertex_main() {
-  VertexOutput v_6 = vertex_main_inner();
-  vertex_main_outputs v_7 = {v_6.prevent_dce, v_6.pos};
-  return v_7;
+  VertexOutput v_4 = vertex_main_inner();
+  vertex_main_outputs v_5 = {v_4.prevent_dce, v_4.pos};
+  return v_5;
 }
 

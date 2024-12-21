@@ -26,22 +26,10 @@ void main_inner(uint3 GlobalInvocationID) {
   if ((uniforms[0u].x == 1u)) {
     srcTexCoord.y = ((size.y - dstTexCoord.y) - 1u);
   }
-  uint2 v_2 = srcTexCoord;
-  uint3 v_3 = (0u).xxx;
-  src.GetDimensions(0u, v_3.x, v_3.y, v_3.z);
-  uint v_4 = min(uint(int(0)), (v_3.z - 1u));
-  uint3 v_5 = (0u).xxx;
-  src.GetDimensions(uint(v_4), v_5.x, v_5.y, v_5.z);
-  int2 v_6 = int2(min(v_2, (v_5.xy - (1u).xx)));
-  float4 srcColor = float4(src.Load(int3(v_6, int(v_4))));
-  uint2 v_7 = dstTexCoord;
-  uint3 v_8 = (0u).xxx;
-  v.GetDimensions(0u, v_8.x, v_8.y, v_8.z);
-  uint v_9 = min(uint(int(0)), (v_8.z - 1u));
-  uint3 v_10 = (0u).xxx;
-  v.GetDimensions(uint(v_9), v_10.x, v_10.y, v_10.z);
-  int2 v_11 = int2(min(v_7, (v_10.xy - (1u).xx)));
-  float4 dstColor = float4(v.Load(int3(v_11, int(v_9))));
+  int2 v_2 = int2(srcTexCoord);
+  float4 srcColor = float4(src.Load(int3(v_2, int(int(0)))));
+  int2 v_3 = int2(dstTexCoord);
+  float4 dstColor = float4(v.Load(int3(v_3, int(int(0)))));
   bool success = true;
   uint4 srcColorBits = (0u).xxxx;
   uint4 dstColorBits = tint_v4f32_to_v4u32(dstColor);
@@ -56,15 +44,15 @@ void main_inner(uint3 GlobalInvocationID) {
       } else {
         break;
       }
-      uint v_12 = i;
-      srcColorBits[min(v_12, 3u)] = ConvertToFp16FloatValue(srcColor[min(i, 3u)]);
-      bool v_13 = false;
+      uint v_4 = i;
+      srcColorBits[min(v_4, 3u)] = ConvertToFp16FloatValue(srcColor[min(i, 3u)]);
+      bool v_5 = false;
       if (success) {
-        v_13 = (srcColorBits[min(i, 3u)] == dstColorBits[min(i, 3u)]);
+        v_5 = (srcColorBits[min(i, 3u)] == dstColorBits[min(i, 3u)]);
       } else {
-        v_13 = false;
+        v_5 = false;
       }
-      success = v_13;
+      success = v_5;
       {
         uint tint_low_inc = (tint_loop_idx.x + 1u);
         tint_loop_idx.x = tint_low_inc;
@@ -77,13 +65,13 @@ void main_inner(uint3 GlobalInvocationID) {
   }
   uint outputIndex = ((GlobalInvocationID.y * uint(size.x)) + GlobalInvocationID.x);
   if (success) {
-    uint v_14 = 0u;
-    output.GetDimensions(v_14);
-    output.Store((0u + (min(outputIndex, ((v_14 / 4u) - 1u)) * 4u)), 1u);
+    uint v_6 = 0u;
+    output.GetDimensions(v_6);
+    output.Store((0u + (min(outputIndex, ((v_6 / 4u) - 1u)) * 4u)), 1u);
   } else {
-    uint v_15 = 0u;
-    output.GetDimensions(v_15);
-    output.Store((0u + (min(outputIndex, ((v_15 / 4u) - 1u)) * 4u)), 0u);
+    uint v_7 = 0u;
+    output.GetDimensions(v_7);
+    output.Store((0u + (min(outputIndex, ((v_7 / 4u) - 1u)) * 4u)), 0u);
   }
 }
 

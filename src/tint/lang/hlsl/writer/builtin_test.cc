@@ -970,10 +970,8 @@ TEST_F(HlslWriterTest, BuiltinTextureDimension2dLOD) {
     EXPECT_EQ(output_.hlsl, R"(
 void foo(Texture2D<float4> t) {
   uint3 v = (0u).xxx;
-  t.GetDimensions(0u, v.x, v.y, v.z);
-  uint3 v_1 = (0u).xxx;
-  t.GetDimensions(uint(min(uint(int(1)), (v.z - 1u))), v_1.x, v_1.y, v_1.z);
-  uint2 d = v_1.xy;
+  t.GetDimensions(uint(int(1)), v.x, v.y, v.z);
+  uint2 d = v.xy;
 }
 
 [numthreads(1, 1, 1)]

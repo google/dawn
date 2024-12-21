@@ -6,9 +6,7 @@ RWByteAddressBuffer prevent_dce : register(u0);
 Texture1D<float4> arg_0 : register(t0, space1);
 float4 textureLoad_b7f74f() {
   uint arg_1 = 1u;
-  uint v = 0u;
-  arg_0.GetDimensions(v);
-  float4 res = float4(arg_0.Load(int2(int(min(arg_1, (v - 1u))), int(0))));
+  float4 res = float4(arg_0.Load(int2(int(arg_1), int(0))));
   return res;
 }
 
@@ -24,9 +22,7 @@ RWByteAddressBuffer prevent_dce : register(u0);
 Texture1D<float4> arg_0 : register(t0, space1);
 float4 textureLoad_b7f74f() {
   uint arg_1 = 1u;
-  uint v = 0u;
-  arg_0.GetDimensions(v);
-  float4 res = float4(arg_0.Load(int2(int(min(arg_1, (v - 1u))), int(0))));
+  float4 res = float4(arg_0.Load(int2(int(arg_1), int(0))));
   return res;
 }
 
@@ -52,23 +48,21 @@ struct vertex_main_outputs {
 Texture1D<float4> arg_0 : register(t0, space1);
 float4 textureLoad_b7f74f() {
   uint arg_1 = 1u;
-  uint v = 0u;
-  arg_0.GetDimensions(v);
-  float4 res = float4(arg_0.Load(int2(int(min(arg_1, (v - 1u))), int(0))));
+  float4 res = float4(arg_0.Load(int2(int(arg_1), int(0))));
   return res;
 }
 
 VertexOutput vertex_main_inner() {
-  VertexOutput v_1 = (VertexOutput)0;
-  v_1.pos = (0.0f).xxxx;
-  v_1.prevent_dce = textureLoad_b7f74f();
-  VertexOutput v_2 = v_1;
-  return v_2;
+  VertexOutput v = (VertexOutput)0;
+  v.pos = (0.0f).xxxx;
+  v.prevent_dce = textureLoad_b7f74f();
+  VertexOutput v_1 = v;
+  return v_1;
 }
 
 vertex_main_outputs vertex_main() {
-  VertexOutput v_3 = vertex_main_inner();
-  vertex_main_outputs v_4 = {v_3.prevent_dce, v_3.pos};
-  return v_4;
+  VertexOutput v_2 = vertex_main_inner();
+  vertex_main_outputs v_3 = {v_2.prevent_dce, v_2.pos};
+  return v_3;
 }
 

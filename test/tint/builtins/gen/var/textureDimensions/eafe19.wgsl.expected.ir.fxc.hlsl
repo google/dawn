@@ -7,10 +7,8 @@ Texture2DArray arg_0 : register(t0, space1);
 uint2 textureDimensions_eafe19() {
   uint arg_1 = 1u;
   uint4 v = (0u).xxxx;
-  arg_0.GetDimensions(0u, v.x, v.y, v.z, v.w);
-  uint4 v_1 = (0u).xxxx;
-  arg_0.GetDimensions(uint(min(arg_1, (v.w - 1u))), v_1.x, v_1.y, v_1.z, v_1.w);
-  uint2 res = v_1.xy;
+  arg_0.GetDimensions(uint(arg_1), v.x, v.y, v.z, v.w);
+  uint2 res = v.xy;
   return res;
 }
 
@@ -27,10 +25,8 @@ Texture2DArray arg_0 : register(t0, space1);
 uint2 textureDimensions_eafe19() {
   uint arg_1 = 1u;
   uint4 v = (0u).xxxx;
-  arg_0.GetDimensions(0u, v.x, v.y, v.z, v.w);
-  uint4 v_1 = (0u).xxxx;
-  arg_0.GetDimensions(uint(min(arg_1, (v.w - 1u))), v_1.x, v_1.y, v_1.z, v_1.w);
-  uint2 res = v_1.xy;
+  arg_0.GetDimensions(uint(arg_1), v.x, v.y, v.z, v.w);
+  uint2 res = v.xy;
   return res;
 }
 
@@ -57,24 +53,22 @@ Texture2DArray arg_0 : register(t0, space1);
 uint2 textureDimensions_eafe19() {
   uint arg_1 = 1u;
   uint4 v = (0u).xxxx;
-  arg_0.GetDimensions(0u, v.x, v.y, v.z, v.w);
-  uint4 v_1 = (0u).xxxx;
-  arg_0.GetDimensions(uint(min(arg_1, (v.w - 1u))), v_1.x, v_1.y, v_1.z, v_1.w);
-  uint2 res = v_1.xy;
+  arg_0.GetDimensions(uint(arg_1), v.x, v.y, v.z, v.w);
+  uint2 res = v.xy;
   return res;
 }
 
 VertexOutput vertex_main_inner() {
-  VertexOutput v_2 = (VertexOutput)0;
-  v_2.pos = (0.0f).xxxx;
-  v_2.prevent_dce = textureDimensions_eafe19();
-  VertexOutput v_3 = v_2;
-  return v_3;
+  VertexOutput v_1 = (VertexOutput)0;
+  v_1.pos = (0.0f).xxxx;
+  v_1.prevent_dce = textureDimensions_eafe19();
+  VertexOutput v_2 = v_1;
+  return v_2;
 }
 
 vertex_main_outputs vertex_main() {
-  VertexOutput v_4 = vertex_main_inner();
-  vertex_main_outputs v_5 = {v_4.prevent_dce, v_4.pos};
-  return v_5;
+  VertexOutput v_3 = vertex_main_inner();
+  vertex_main_outputs v_4 = {v_3.prevent_dce, v_3.pos};
+  return v_4;
 }
 

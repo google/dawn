@@ -7,14 +7,9 @@ Texture3D<float4> arg_0 : register(t0, space1);
 float4 textureLoad_21d1c4() {
   uint3 arg_1 = (1u).xxx;
   uint arg_2 = 1u;
-  uint3 v = arg_1;
-  uint4 v_1 = (0u).xxxx;
-  arg_0.GetDimensions(0u, v_1.x, v_1.y, v_1.z, v_1.w);
-  uint v_2 = min(arg_2, (v_1.w - 1u));
-  uint4 v_3 = (0u).xxxx;
-  arg_0.GetDimensions(uint(v_2), v_3.x, v_3.y, v_3.z, v_3.w);
-  int3 v_4 = int3(min(v, (v_3.xyz - (1u).xxx)));
-  float4 res = float4(arg_0.Load(int4(v_4, int(v_2))));
+  uint v = arg_2;
+  int3 v_1 = int3(arg_1);
+  float4 res = float4(arg_0.Load(int4(v_1, int(v))));
   return res;
 }
 
@@ -31,14 +26,9 @@ Texture3D<float4> arg_0 : register(t0, space1);
 float4 textureLoad_21d1c4() {
   uint3 arg_1 = (1u).xxx;
   uint arg_2 = 1u;
-  uint3 v = arg_1;
-  uint4 v_1 = (0u).xxxx;
-  arg_0.GetDimensions(0u, v_1.x, v_1.y, v_1.z, v_1.w);
-  uint v_2 = min(arg_2, (v_1.w - 1u));
-  uint4 v_3 = (0u).xxxx;
-  arg_0.GetDimensions(uint(v_2), v_3.x, v_3.y, v_3.z, v_3.w);
-  int3 v_4 = int3(min(v, (v_3.xyz - (1u).xxx)));
-  float4 res = float4(arg_0.Load(int4(v_4, int(v_2))));
+  uint v = arg_2;
+  int3 v_1 = int3(arg_1);
+  float4 res = float4(arg_0.Load(int4(v_1, int(v))));
   return res;
 }
 
@@ -65,28 +55,23 @@ Texture3D<float4> arg_0 : register(t0, space1);
 float4 textureLoad_21d1c4() {
   uint3 arg_1 = (1u).xxx;
   uint arg_2 = 1u;
-  uint3 v = arg_1;
-  uint4 v_1 = (0u).xxxx;
-  arg_0.GetDimensions(0u, v_1.x, v_1.y, v_1.z, v_1.w);
-  uint v_2 = min(arg_2, (v_1.w - 1u));
-  uint4 v_3 = (0u).xxxx;
-  arg_0.GetDimensions(uint(v_2), v_3.x, v_3.y, v_3.z, v_3.w);
-  int3 v_4 = int3(min(v, (v_3.xyz - (1u).xxx)));
-  float4 res = float4(arg_0.Load(int4(v_4, int(v_2))));
+  uint v = arg_2;
+  int3 v_1 = int3(arg_1);
+  float4 res = float4(arg_0.Load(int4(v_1, int(v))));
   return res;
 }
 
 VertexOutput vertex_main_inner() {
-  VertexOutput v_5 = (VertexOutput)0;
-  v_5.pos = (0.0f).xxxx;
-  v_5.prevent_dce = textureLoad_21d1c4();
-  VertexOutput v_6 = v_5;
-  return v_6;
+  VertexOutput v_2 = (VertexOutput)0;
+  v_2.pos = (0.0f).xxxx;
+  v_2.prevent_dce = textureLoad_21d1c4();
+  VertexOutput v_3 = v_2;
+  return v_3;
 }
 
 vertex_main_outputs vertex_main() {
-  VertexOutput v_7 = vertex_main_inner();
-  vertex_main_outputs v_8 = {v_7.prevent_dce, v_7.pos};
-  return v_8;
+  VertexOutput v_4 = vertex_main_inner();
+  vertex_main_outputs v_5 = {v_4.prevent_dce, v_4.pos};
+  return v_5;
 }
 
