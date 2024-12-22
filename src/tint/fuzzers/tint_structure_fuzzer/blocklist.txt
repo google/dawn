@@ -1,0 +1,4 @@
+src:tint_structure_fuzzer/syntax.cc
+src:tint_structure_fuzzer/syntax.h
+src:tint_structure_fuzzer/tint_structure_fuzzer.cc
+src:tint_structure_fuzzer/probabilities.h
