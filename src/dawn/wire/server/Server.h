@@ -129,6 +129,7 @@ struct MapUserdata : CallbackUserdata {
     uint64_t offset;
     uint64_t size;
     WGPUMapMode mode;
+    uint8_t userdataCount;
 };
 
 struct ErrorScopeUserdata : CallbackUserdata {
@@ -264,9 +265,10 @@ class Server : public ServerBase {
                                WGPUPopErrorScopeStatus status,
                                WGPUErrorType type,
                                WGPUStringView message);
-    void OnBufferMapAsyncCallback(MapUserdata* userdata,
-                                  WGPUMapAsyncStatus status,
-                                  WGPUStringView message);
+    void OnBufferMapAsyncCallback(MapUserdata* userdata, WGPUBufferMapAsyncStatus status);
+    void OnBufferMapAsyncCallback2(MapUserdata* userdata,
+                                   WGPUMapAsyncStatus status,
+                                   WGPUStringView message);
     void OnQueueWorkDone(QueueWorkDoneUserdata* userdata, WGPUQueueWorkDoneStatus status);
     void OnCreateComputePipelineAsyncCallback(CreatePipelineAsyncUserData* userdata,
                                               WGPUCreatePipelineAsyncStatus status,

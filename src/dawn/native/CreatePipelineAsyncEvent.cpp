@@ -54,15 +54,15 @@ namespace dawn::native {
 template <>
 const char* CreatePipelineAsyncEvent<
     ComputePipelineBase,
-    WGPUCreateComputePipelineAsyncCallbackInfo>::kDawnHistogramMetricsSuccess =
+    WGPUCreateComputePipelineAsyncCallbackInfo2>::kDawnHistogramMetricsSuccess =
     "CreateComputePipelineSuccess";
 template <>
 const char*
     CreatePipelineAsyncEvent<ComputePipelineBase,
-                             WGPUCreateComputePipelineAsyncCallbackInfo>::kDawnHistogramMetricsUS =
+                             WGPUCreateComputePipelineAsyncCallbackInfo2>::kDawnHistogramMetricsUS =
         "CreateComputePipelineUS";
 template <>
-void CreatePipelineAsyncEvent<ComputePipelineBase, WGPUCreateComputePipelineAsyncCallbackInfo>::
+void CreatePipelineAsyncEvent<ComputePipelineBase, WGPUCreateComputePipelineAsyncCallbackInfo2>::
     AddOrGetCachedPipeline() {
     DeviceBase* device = mPipeline->GetDevice();
     auto deviceLock(device->GetScopedLock());
@@ -74,16 +74,16 @@ void CreatePipelineAsyncEvent<ComputePipelineBase, WGPUCreateComputePipelineAsyn
 template <>
 const char* CreatePipelineAsyncEvent<
     RenderPipelineBase,
-    WGPUCreateRenderPipelineAsyncCallbackInfo>::kDawnHistogramMetricsSuccess =
+    WGPUCreateRenderPipelineAsyncCallbackInfo2>::kDawnHistogramMetricsSuccess =
     "CreateRenderPipelineSuccess";
 template <>
 const char*
     CreatePipelineAsyncEvent<RenderPipelineBase,
-                             WGPUCreateRenderPipelineAsyncCallbackInfo>::kDawnHistogramMetricsUS =
+                             WGPUCreateRenderPipelineAsyncCallbackInfo2>::kDawnHistogramMetricsUS =
         "CreateRenderPipelineUS";
 template <>
-void CreatePipelineAsyncEvent<RenderPipelineBase,
-                              WGPUCreateRenderPipelineAsyncCallbackInfo>::AddOrGetCachedPipeline() {
+void CreatePipelineAsyncEvent<RenderPipelineBase, WGPUCreateRenderPipelineAsyncCallbackInfo2>::
+    AddOrGetCachedPipeline() {
     DeviceBase* device = mPipeline->GetDevice();
     auto deviceLock(device->GetScopedLock());
     if (device->GetState() == DeviceBase::State::Alive) {
@@ -234,8 +234,8 @@ void CreatePipelineAsyncEvent<PipelineType, CreatePipelineAsyncCallbackInfo>::Co
 }
 
 template class CreatePipelineAsyncEvent<ComputePipelineBase,
-                                        WGPUCreateComputePipelineAsyncCallbackInfo>;
+                                        WGPUCreateComputePipelineAsyncCallbackInfo2>;
 template class CreatePipelineAsyncEvent<RenderPipelineBase,
-                                        WGPUCreateRenderPipelineAsyncCallbackInfo>;
+                                        WGPUCreateRenderPipelineAsyncCallbackInfo2>;
 
 }  // namespace dawn::native

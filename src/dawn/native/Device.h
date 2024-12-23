@@ -242,12 +242,23 @@ class DeviceBase : public ErrorSink, public RefCountedWithExternalCount<RefCount
     ComputePipelineBase* APICreateComputePipeline(const ComputePipelineDescriptor* descriptor);
     PipelineLayoutBase* APICreatePipelineLayout(const PipelineLayoutDescriptor* descriptor);
     QuerySetBase* APICreateQuerySet(const QuerySetDescriptor* descriptor);
-    Future APICreateComputePipelineAsync(
+    void APICreateComputePipelineAsync(const ComputePipelineDescriptor* descriptor,
+                                       WGPUCreateComputePipelineAsyncCallback callback,
+                                       void* userdata);
+    Future APICreateComputePipelineAsyncF(
         const ComputePipelineDescriptor* descriptor,
-        const WGPUCreateComputePipelineAsyncCallbackInfo& callbackInfo);
-    Future APICreateRenderPipelineAsync(
+        const CreateComputePipelineAsyncCallbackInfo& callbackInfo);
+    Future APICreateComputePipelineAsync2(
+        const ComputePipelineDescriptor* descriptor,
+        const WGPUCreateComputePipelineAsyncCallbackInfo2& callbackInfo);
+    void APICreateRenderPipelineAsync(const RenderPipelineDescriptor* descriptor,
+                                      WGPUCreateRenderPipelineAsyncCallback callback,
+                                      void* userdata);
+    Future APICreateRenderPipelineAsyncF(const RenderPipelineDescriptor* descriptor,
+                                         const CreateRenderPipelineAsyncCallbackInfo& callbackInfo);
+    Future APICreateRenderPipelineAsync2(
         const RenderPipelineDescriptor* descriptor,
-        const WGPUCreateRenderPipelineAsyncCallbackInfo& callbackInfo);
+        const WGPUCreateRenderPipelineAsyncCallbackInfo2& callbackInfo);
     RenderBundleEncoder* APICreateRenderBundleEncoder(
         const RenderBundleEncoderDescriptor* descriptor);
     RenderPipelineBase* APICreateRenderPipeline(const RenderPipelineDescriptor* descriptor);
@@ -289,7 +300,9 @@ class DeviceBase : public ErrorSink, public RefCountedWithExternalCount<RefCount
     void APISetUncapturedErrorCallback(wgpu::ErrorCallback callback, void* userdata);
     void APISetLoggingCallback(wgpu::LoggingCallback callback, void* userdata);
     void APIPushErrorScope(wgpu::ErrorFilter filter);
-    Future APIPopErrorScope(const WGPUPopErrorScopeCallbackInfo& callbackInfo);
+    void APIPopErrorScope(wgpu::ErrorCallback callback, void* userdata);
+    Future APIPopErrorScopeF(const PopErrorScopeCallbackInfo& callbackInfo);
+    Future APIPopErrorScope2(const WGPUPopErrorScopeCallbackInfo2& callbackInfo);
 
     MaybeError ValidateIsAlive() const;
 

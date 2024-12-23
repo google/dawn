@@ -73,7 +73,9 @@ class QueueBase : public ApiObjectBase, public ExecutionQueueBase {
 
     // Dawn API
     void APISubmit(uint32_t commandCount, CommandBufferBase* const* commands);
-    Future APIOnSubmittedWorkDone(const WGPUQueueWorkDoneCallbackInfo& callbackInfo);
+    void APIOnSubmittedWorkDone(WGPUQueueWorkDoneCallback callback, void* userdata);
+    Future APIOnSubmittedWorkDoneF(const QueueWorkDoneCallbackInfo& callbackInfo);
+    Future APIOnSubmittedWorkDone2(const WGPUQueueWorkDoneCallbackInfo2& callbackInfo);
     void APIWriteBuffer(BufferBase* buffer, uint64_t bufferOffset, const void* data, size_t size);
     void APIWriteTexture(const ImageCopyTexture* destination,
                          const void* data,

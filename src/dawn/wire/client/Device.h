@@ -67,16 +67,30 @@ class Device final : public RefCountedWithExternalCount<ObjectWithEventsBase> {
     // WebGPU API
     void SetLoggingCallback(WGPULoggingCallback errorCallback, void* errorUserdata);
     void InjectError(WGPUErrorType type, WGPUStringView message);
-    WGPUFuture PopErrorScope(const WGPUPopErrorScopeCallbackInfo& callbackInfo);
+    void PopErrorScope(WGPUErrorCallback callback, void* userdata);
+    WGPUFuture PopErrorScopeF(const WGPUPopErrorScopeCallbackInfo& callbackInfo);
+    WGPUFuture PopErrorScope2(const WGPUPopErrorScopeCallbackInfo2& callbackInfo);
 
     WGPUBuffer CreateBuffer(const WGPUBufferDescriptor* descriptor);
     WGPUBuffer CreateErrorBuffer(const WGPUBufferDescriptor* descriptor);
-    WGPUFuture CreateComputePipelineAsync(
+    void CreateComputePipelineAsync(WGPUComputePipelineDescriptor const* descriptor,
+                                    WGPUCreateComputePipelineAsyncCallback callback,
+                                    void* userdata);
+    WGPUFuture CreateComputePipelineAsyncF(
         WGPUComputePipelineDescriptor const* descriptor,
         const WGPUCreateComputePipelineAsyncCallbackInfo& callbackInfo);
-    WGPUFuture CreateRenderPipelineAsync(
+    WGPUFuture CreateComputePipelineAsync2(
+        WGPUComputePipelineDescriptor const* descriptor,
+        const WGPUCreateComputePipelineAsyncCallbackInfo2& callbackInfo);
+    void CreateRenderPipelineAsync(WGPURenderPipelineDescriptor const* descriptor,
+                                   WGPUCreateRenderPipelineAsyncCallback callback,
+                                   void* userdata);
+    WGPUFuture CreateRenderPipelineAsyncF(
         WGPURenderPipelineDescriptor const* descriptor,
         const WGPUCreateRenderPipelineAsyncCallbackInfo& callbackInfo);
+    WGPUFuture CreateRenderPipelineAsync2(
+        WGPURenderPipelineDescriptor const* descriptor,
+        const WGPUCreateRenderPipelineAsyncCallbackInfo2& callbackInfo);
 
     WGPUStatus GetLimits(WGPUSupportedLimits* limits) const;
     WGPUFuture GetLostFuture();
@@ -94,7 +108,7 @@ class Device final : public RefCountedWithExternalCount<ObjectWithEventsBase> {
               typename Cmd,
               typename CallbackInfo = typename Event::CallbackInfo,
               typename Descriptor = decltype(std::declval<Cmd>().descriptor)>
-    WGPUFuture CreatePipelineAsync(Descriptor const* descriptor, const CallbackInfo& callbackInfo);
+    WGPUFuture CreatePipelineAsyncF(Descriptor const* descriptor, const CallbackInfo& callbackInfo);
 
     LimitsAndFeatures mLimitsAndFeatures;
 

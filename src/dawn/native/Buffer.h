@@ -95,6 +95,7 @@ class BufferBase : public SharedResource {
     wgpu::BufferUsage GetUsage() const;
 
     MaybeError MapAtCreation();
+    void CallbackOnMapRequestCompleted(MapRequestID mapID, WGPUBufferMapAsyncStatus status);
 
     MaybeError ValidateCanUseOnQueueNow() const;
 
@@ -118,10 +119,19 @@ class BufferBase : public SharedResource {
     void DumpMemoryStatistics(dawn::native::MemoryDump* dump, const char* prefix) const;
 
     // Dawn API
-    Future APIMapAsync(wgpu::MapMode mode,
-                       size_t offset,
-                       size_t size,
-                       const WGPUBufferMapCallbackInfo& callbackInfo);
+    void APIMapAsync(wgpu::MapMode mode,
+                     size_t offset,
+                     size_t size,
+                     WGPUBufferMapCallback callback,
+                     void* userdata);
+    Future APIMapAsyncF(wgpu::MapMode mode,
+                        size_t offset,
+                        size_t size,
+                        const BufferMapCallbackInfo& callbackInfo);
+    Future APIMapAsync2(wgpu::MapMode mode,
+                        size_t offset,
+                        size_t size,
+                        const WGPUBufferMapCallbackInfo2& callbackInfo);
     void* APIGetMappedRange(size_t offset, size_t size);
     const void* APIGetConstMappedRange(size_t offset, size_t size);
     void APIUnmap();
@@ -145,6 +155,9 @@ class BufferBase : public SharedResource {
     ExecutionSerial mLastUsageSerial = ExecutionSerial(0);
 
   private:
+    std::function<void()> PrepareMappingCallback(MapRequestID mapID,
+                                                 WGPUBufferMapAsyncStatus status);
+
     virtual MaybeError MapAtCreationImpl() = 0;
     virtual MaybeError MapAsyncImpl(wgpu::MapMode mode, size_t offset, size_t size) = 0;
     virtual void UnmapImpl() = 0;
@@ -155,10 +168,10 @@ class BufferBase : public SharedResource {
     MaybeError ValidateMapAsync(wgpu::MapMode mode,
                                 size_t offset,
                                 size_t size,
-                                WGPUMapAsyncStatus* status) const;
+                                WGPUBufferMapAsyncStatus* status) const;
     MaybeError ValidateUnmap() const;
     bool CanGetMappedRange(bool writable, size_t offset, size_t size) const;
-    void UnmapInternal(WGPUMapAsyncStatus status, std::string_view message);
+    void UnmapInternal(WGPUBufferMapAsyncStatus callbackStatus);
 
     const uint64_t mSize = 0;
     const wgpu::BufferUsage mUsage = wgpu::BufferUsage::None;
@@ -174,11 +187,16 @@ class BufferBase : public SharedResource {
     // i.e. buffer->mStagingBuffer->mStagingBuffer... is not possible.
     Ref<BufferBase> mStagingBuffer;
 
+    WGPUBufferMapCallback mMapCallback = nullptr;
+    raw_ptr<void> mMapUserdata = nullptr;
+    MapRequestID mLastMapID = MapRequestID(0);
     wgpu::MapMode mMapMode = wgpu::MapMode::None;
     size_t mMapOffset = 0;
     size_t mMapSize = 0;
 
     struct MapAsyncEvent;
+    struct MapAsyncEvent1;
+    struct MapAsyncEvent2;
     Ref<MapAsyncEvent> mPendingMapEvent;
 };
 

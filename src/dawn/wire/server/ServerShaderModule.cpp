@@ -38,7 +38,7 @@ WireResult Server::DoShaderModuleGetCompilationInfo(Known<WGPUShaderModule> shad
     userdata->eventManager = eventManager;
     userdata->future = future;
 
-    mProcs.shaderModuleGetCompilationInfo(
+    mProcs.shaderModuleGetCompilationInfo2(
         shaderModule->handle,
         {nullptr, WGPUCallbackMode_AllowProcessEvents,
          ForwardToServer2<&Server::OnShaderModuleGetCompilationInfo>, userdata.release(), nullptr});

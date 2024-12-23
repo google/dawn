@@ -103,9 +103,9 @@ class CreatePipelineAsyncEvent final : public EventManager::TrackedEvent {
 };
 
 using CreateComputePipelineAsyncEvent =
-    CreatePipelineAsyncEvent<ComputePipelineBase, WGPUCreateComputePipelineAsyncCallbackInfo>;
+    CreatePipelineAsyncEvent<ComputePipelineBase, WGPUCreateComputePipelineAsyncCallbackInfo2>;
 using CreateRenderPipelineAsyncEvent =
-    CreatePipelineAsyncEvent<RenderPipelineBase, WGPUCreateRenderPipelineAsyncCallbackInfo>;
+    CreatePipelineAsyncEvent<RenderPipelineBase, WGPUCreateRenderPipelineAsyncCallbackInfo2>;
 
 }  // namespace dawn::native
 

@@ -641,7 +641,7 @@ struct WGPUBufferImpl final : public EventSource,
   WGPUFuture MapAsync(WGPUMapMode mode,
                       size_t offset,
                       size_t size,
-                      WGPUBufferMapCallbackInfo callbackInfo);
+                      WGPUBufferMapCallbackInfo2 callbackInfo);
   void Unmap();
 
  private:
@@ -714,7 +714,7 @@ struct WGPUShaderModuleImpl final : public EventSource, public RefCounted {
  public:
   WGPUShaderModuleImpl(const EventSource* source);
 
-  WGPUFuture GetCompilationInfo(WGPUCompilationInfoCallbackInfo callbackInfo);
+  WGPUFuture GetCompilationInfo(WGPUCompilationInfoCallbackInfo2 callbackInfo);
 
  private:
   friend class CompilationInfoEvent;
@@ -751,7 +751,7 @@ class CompilationInfoEvent final : public TrackedEvent {
 
   CompilationInfoEvent(InstanceID instance,
                        WGPUShaderModule shader,
-                       const WGPUCompilationInfoCallbackInfo& callbackInfo)
+                       const WGPUCompilationInfoCallbackInfo2& callbackInfo)
       : TrackedEvent(instance, callbackInfo.mode),
         mCallback(callbackInfo.callback),
         mUserdata1(callbackInfo.userdata1),
@@ -789,7 +789,7 @@ class CompilationInfoEvent final : public TrackedEvent {
   }
 
  private:
-  WGPUCompilationInfoCallback mCallback = nullptr;
+  WGPUCompilationInfoCallback2 mCallback = nullptr;
   void* mUserdata1 = nullptr;
   void* mUserdata2 = nullptr;
 
@@ -848,11 +848,11 @@ class CreatePipelineEventBase final : public TrackedEvent {
 using CreateComputePipelineEvent =
     CreatePipelineEventBase<WGPUComputePipeline,
                             EventType::CreateComputePipeline,
-                            WGPUCreateComputePipelineAsyncCallbackInfo>;
+                            WGPUCreateComputePipelineAsyncCallbackInfo2>;
 using CreateRenderPipelineEvent =
     CreatePipelineEventBase<WGPURenderPipeline,
                             EventType::CreateRenderPipeline,
-                            WGPUCreateRenderPipelineAsyncCallbackInfo>;
+                            WGPUCreateRenderPipelineAsyncCallbackInfo2>;
 
 class DeviceLostEvent final : public TrackedEvent {
  public:
@@ -908,7 +908,7 @@ class PopErrorScopeEvent final : public TrackedEvent {
   static constexpr EventType kType = EventType::PopErrorScope;
 
   PopErrorScopeEvent(InstanceID instance,
-                     const WGPUPopErrorScopeCallbackInfo& callbackInfo)
+                     const WGPUPopErrorScopeCallbackInfo2& callbackInfo)
       : TrackedEvent(instance, callbackInfo.mode),
         mCallback(callbackInfo.callback),
         mUserdata1(callbackInfo.userdata1),
@@ -939,7 +939,7 @@ class PopErrorScopeEvent final : public TrackedEvent {
   }
 
  private:
-  WGPUPopErrorScopeCallback mCallback = nullptr;
+  WGPUPopErrorScopeCallback2 mCallback = nullptr;
   void* mUserdata1 = nullptr;
   void* mUserdata2 = nullptr;
 
@@ -954,7 +954,7 @@ class MapAsyncEvent final : public TrackedEvent {
 
   MapAsyncEvent(InstanceID instance,
                 WGPUBuffer buffer,
-                const WGPUBufferMapCallbackInfo& callbackInfo)
+                const WGPUBufferMapCallbackInfo2& callbackInfo)
       : TrackedEvent(instance, callbackInfo.mode),
         mCallback(callbackInfo.callback),
         mUserdata1(callbackInfo.userdata1),
@@ -1001,7 +1001,7 @@ class MapAsyncEvent final : public TrackedEvent {
   }
 
  private:
-  WGPUBufferMapCallback mCallback = nullptr;
+  WGPUBufferMapCallback2 mCallback = nullptr;
   void* mUserdata1 = nullptr;
   void* mUserdata2 = nullptr;
 
@@ -1109,7 +1109,7 @@ class WorkDoneEvent final : public TrackedEvent {
   static constexpr EventType kType = EventType::WorkDone;
 
   WorkDoneEvent(InstanceID instance,
-                const WGPUQueueWorkDoneCallbackInfo& callbackInfo)
+                const WGPUQueueWorkDoneCallbackInfo2& callbackInfo)
       : TrackedEvent(instance, callbackInfo.mode),
         mCallback(callbackInfo.callback),
         mUserdata1(callbackInfo.userdata1),
@@ -1129,7 +1129,7 @@ class WorkDoneEvent final : public TrackedEvent {
   }
 
  private:
-  WGPUQueueWorkDoneCallback mCallback = nullptr;
+  WGPUQueueWorkDoneCallback2 mCallback = nullptr;
   void* mUserdata1 = nullptr;
   void* mUserdata2 = nullptr;
 
@@ -1306,7 +1306,7 @@ void* WGPUBufferImpl::GetMappedRange(size_t offset, size_t size) {
 WGPUFuture WGPUBufferImpl::MapAsync(WGPUMapMode mode,
                                     size_t offset,
                                     size_t size,
-                                    WGPUBufferMapCallbackInfo callbackInfo) {
+                                    WGPUBufferMapCallbackInfo2 callbackInfo) {
   auto [futureId, tracked] = GetEventManager().TrackEvent(
       std::make_unique<MapAsyncEvent>(GetInstanceId(), this, callbackInfo));
   if (!tracked) {
@@ -1450,7 +1450,7 @@ WGPUShaderModuleImpl::WGPUShaderModuleImpl(const EventSource* source)
     : EventSource(source) {}
 
 WGPUFuture WGPUShaderModuleImpl::GetCompilationInfo(
-    WGPUCompilationInfoCallbackInfo callbackInfo) {
+    WGPUCompilationInfoCallbackInfo2 callbackInfo) {
   auto [futureId, tracked] =
       GetEventManager().TrackEvent(std::make_unique<CompilationInfoEvent>(
           GetInstanceId(), this, callbackInfo));
@@ -1612,11 +1612,11 @@ void* wgpuBufferGetMappedRange(WGPUBuffer buffer, size_t offset, size_t size) {
   return buffer->GetMappedRange(offset, size);
 }
 
-WGPUFuture wgpuBufferMapAsync(WGPUBuffer buffer,
-                              WGPUMapMode mode,
-                              size_t offset,
-                              size_t size,
-                              WGPUBufferMapCallbackInfo callbackInfo) {
+WGPUFuture wgpuBufferMapAsync2(WGPUBuffer buffer,
+                               WGPUMapMode mode,
+                               size_t offset,
+                               size_t size,
+                               WGPUBufferMapCallbackInfo2 callbackInfo) {
   return buffer->MapAsync(mode, offset, size, callbackInfo);
 }
 
@@ -1651,10 +1651,29 @@ WGPUBuffer wgpuDeviceCreateBuffer(WGPUDevice device,
   return buffer;
 }
 
-WGPUFuture wgpuDeviceCreateComputePipelineAsync(
+void wgpuDeviceCreateComputePipelineAsync(
     WGPUDevice device,
     const WGPUComputePipelineDescriptor* descriptor,
-    WGPUCreateComputePipelineAsyncCallbackInfo callbackInfo) {
+    WGPUCreateComputePipelineAsyncCallback callback,
+    void* userdata) {
+  WGPUCreateComputePipelineAsyncCallbackInfo2 callbackInfo = {};
+  callbackInfo.mode = WGPUCallbackMode_AllowSpontaneous;
+  callbackInfo.callback =
+      [](WGPUCreatePipelineAsyncStatus status, WGPUComputePipeline pipeline,
+         WGPUStringView message, void* callback, void* userdata) {
+        auto cb =
+            reinterpret_cast<WGPUCreateComputePipelineAsyncCallback>(callback);
+        cb(status, pipeline, message, userdata);
+      };
+  callbackInfo.userdata1 = reinterpret_cast<void*>(callback);
+  callbackInfo.userdata2 = userdata;
+  wgpuDeviceCreateComputePipelineAsync2(device, descriptor, callbackInfo);
+}
+
+WGPUFuture wgpuDeviceCreateComputePipelineAsync2(
+    WGPUDevice device,
+    const WGPUComputePipelineDescriptor* descriptor,
+    WGPUCreateComputePipelineAsyncCallbackInfo2 callbackInfo) {
   auto [futureId, tracked] =
       GetEventManager().TrackEvent(std::make_unique<CreateComputePipelineEvent>(
           device->GetInstanceId(), callbackInfo));
@@ -1666,10 +1685,29 @@ WGPUFuture wgpuDeviceCreateComputePipelineAsync(
   return WGPUFuture{futureId};
 }
 
-WGPUFuture wgpuDeviceCreateRenderPipelineAsync(
+void wgpuDeviceCreateRenderPipelineAsync(
     WGPUDevice device,
     const WGPURenderPipelineDescriptor* descriptor,
-    WGPUCreateRenderPipelineAsyncCallbackInfo callbackInfo) {
+    WGPUCreateRenderPipelineAsyncCallback callback,
+    void* userdata) {
+  WGPUCreateRenderPipelineAsyncCallbackInfo2 callbackInfo = {};
+  callbackInfo.mode = WGPUCallbackMode_AllowSpontaneous;
+  callbackInfo.callback = [](WGPUCreatePipelineAsyncStatus status,
+                             WGPURenderPipeline pipeline,
+                             WGPUStringView message, void* callback,
+                             void* userdata) {
+    auto cb = reinterpret_cast<WGPUCreateRenderPipelineAsyncCallback>(callback);
+    cb(status, pipeline, message, userdata);
+  };
+  callbackInfo.userdata1 = reinterpret_cast<void*>(callback);
+  callbackInfo.userdata2 = userdata;
+  wgpuDeviceCreateRenderPipelineAsync2(device, descriptor, callbackInfo);
+}
+
+WGPUFuture wgpuDeviceCreateRenderPipelineAsync2(
+    WGPUDevice device,
+    const WGPURenderPipelineDescriptor* descriptor,
+    WGPUCreateRenderPipelineAsyncCallbackInfo2 callbackInfo) {
   auto [futureId, tracked] =
       GetEventManager().TrackEvent(std::make_unique<CreateRenderPipelineEvent>(
           device->GetInstanceId(), callbackInfo));
@@ -1701,8 +1739,9 @@ WGPUQueue wgpuDeviceGetQueue(WGPUDevice device) {
   return device->GetQueue();
 }
 
-WGPUFuture wgpuDevicePopErrorScope(WGPUDevice device,
-                                   WGPUPopErrorScopeCallbackInfo callbackInfo) {
+WGPUFuture wgpuDevicePopErrorScope2(
+    WGPUDevice device,
+    WGPUPopErrorScopeCallbackInfo2 callbackInfo) {
   auto [futureId, tracked] =
       GetEventManager().TrackEvent(std::make_unique<PopErrorScopeEvent>(
           device->GetInstanceId(), callbackInfo));
@@ -1773,9 +1812,9 @@ WGPUWaitStatus wgpuInstanceWaitAny(WGPUInstance instance,
 // Methods of Queue
 // ----------------------------------------------------------------------------
 
-WGPUFuture wgpuQueueOnSubmittedWorkDone(
+WGPUFuture wgpuQueueOnSubmittedWorkDone2(
     WGPUQueue queue,
-    WGPUQueueWorkDoneCallbackInfo callbackInfo) {
+    WGPUQueueWorkDoneCallbackInfo2 callbackInfo) {
   auto [futureId, tracked] = GetEventManager().TrackEvent(
       std::make_unique<WorkDoneEvent>(queue->GetInstanceId(), callbackInfo));
   if (!tracked) {
@@ -1810,9 +1849,9 @@ WGPUFuture wgpuQueueOnSubmittedWorkDone(
 // Methods of ShaderModule
 // ----------------------------------------------------------------------------
 
-WGPUFuture wgpuShaderModuleGetCompilationInfo(
+WGPUFuture wgpuShaderModuleGetCompilationInfo2(
     WGPUShaderModule shader,
-    WGPUCompilationInfoCallbackInfo callbackInfo) {
+    WGPUCompilationInfoCallbackInfo2 callbackInfo) {
   return shader->GetCompilationInfo(callbackInfo);
 }
 
