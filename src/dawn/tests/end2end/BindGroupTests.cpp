@@ -49,6 +49,8 @@ class BindGroupTests : public DawnTest {
             supported.limits.maxStorageBuffersInVertexStage;
         required.limits.maxStorageBuffersInFragmentStage =
             supported.limits.maxStorageBuffersInFragmentStage;
+        required.limits.maxStorageTexturesInFragmentStage =
+            supported.limits.maxStorageTexturesInFragmentStage;
         return required;
     }
 
@@ -1552,8 +1554,10 @@ TEST_P(BindGroupTests, CreateWithDestroyedResource) {
 
     // Test various usages and binding types since they take different backend code paths.
     doBufferTest(wgpu::BufferBindingType::Uniform, wgpu::BufferUsage::Uniform);
-    doBufferTest(wgpu::BufferBindingType::Storage, wgpu::BufferUsage::Storage);
-    doBufferTest(wgpu::BufferBindingType::ReadOnlyStorage, wgpu::BufferUsage::Storage);
+    if (GetSupportedLimits().limits.maxStorageBuffersInFragmentStage > 0) {
+        doBufferTest(wgpu::BufferBindingType::Storage, wgpu::BufferUsage::Storage);
+        doBufferTest(wgpu::BufferBindingType::ReadOnlyStorage, wgpu::BufferUsage::Storage);
+    }
 
     // Test a sampled texture.
     {

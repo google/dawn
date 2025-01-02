@@ -678,6 +678,79 @@ TEST_F(CompatValidationTest, CanNotCreateRGxxxStorageTexture) {
     }
 }
 
+TEST_F(CompatValidationTest, CanNotUseStorageBufferInFragmentAndVertexStageWithDefaultLimit0) {
+    const wgpu::ShaderStage stages[] = {
+        wgpu::ShaderStage::Compute,
+        wgpu::ShaderStage::Fragment,
+        wgpu::ShaderStage::Vertex,
+    };
+    const wgpu::BufferBindingType buffer_types[] = {
+        wgpu::BufferBindingType::Storage,
+        wgpu::BufferBindingType::ReadOnlyStorage,
+    };
+    for (auto stage : stages) {
+        for (auto buffer_type : buffer_types) {
+            if (stage == wgpu::ShaderStage::Vertex &&
+                buffer_type == wgpu::BufferBindingType::Storage) {
+                continue;
+            }
+            wgpu::BindGroupLayoutEntry entries[1];
+            entries[0].binding = 0;
+            entries[0].visibility = stage;
+            entries[0].buffer.type = buffer_type;
+
+            wgpu::BindGroupLayoutDescriptor descriptor;
+            descriptor.entryCount = 1;
+            descriptor.entries = entries;
+
+            if (stage == wgpu::ShaderStage::Compute) {
+                wgpu::BindGroupLayout layout = device.CreateBindGroupLayout(&descriptor);
+            } else {
+                ASSERT_DEVICE_ERROR(device.CreateBindGroupLayout(&descriptor),
+                                    testing::HasSubstr("maxStorageBuffers"));
+            }
+        }
+    }
+}
+
+TEST_F(CompatValidationTest, CanNotUseStorageTexturesInFragmentAndVertexStageWithDefaultLimit0) {
+    const wgpu::ShaderStage stages[] = {
+        wgpu::ShaderStage::Compute,
+        wgpu::ShaderStage::Fragment,
+        wgpu::ShaderStage::Vertex,
+    };
+    const wgpu::StorageTextureAccess access_types[] = {
+        wgpu::StorageTextureAccess::ReadOnly,
+        wgpu::StorageTextureAccess::ReadWrite,
+        wgpu::StorageTextureAccess::WriteOnly,
+    };
+    for (auto stage : stages) {
+        for (auto access : access_types) {
+            if (stage == wgpu::ShaderStage::Vertex &&
+                (access == wgpu::StorageTextureAccess::ReadWrite ||
+                 access == wgpu::StorageTextureAccess::WriteOnly)) {
+                continue;
+            }
+            wgpu::BindGroupLayoutEntry entries[1];
+            entries[0].binding = 0;
+            entries[0].visibility = stage;
+            entries[0].storageTexture.format = wgpu::TextureFormat::R32Float;
+            entries[0].storageTexture.access = access;
+
+            wgpu::BindGroupLayoutDescriptor descriptor;
+            descriptor.entryCount = 1;
+            descriptor.entries = entries;
+
+            if (stage == wgpu::ShaderStage::Compute) {
+                wgpu::BindGroupLayout layout = device.CreateBindGroupLayout(&descriptor);
+            } else {
+                ASSERT_DEVICE_ERROR(device.CreateBindGroupLayout(&descriptor),
+                                    testing::HasSubstr("maxStorageTextures"));
+            }
+        }
+    }
+}
+
 constexpr const char* kRenderTwoTexturesOneBindgroupWGSL = R"(
     @vertex
     fn vs(@builtin(vertex_index) VertexIndex : u32) -> @builtin(position) vec4f {
@@ -1888,6 +1961,178 @@ INSTANTIATE_TEST_SUITE_P(,
                          ::testing::Values(FlexibleTextureViewsFeature::Disabled,
                                            FlexibleTextureViewsFeature::Enabled),
                          CompatTextureViewValidationTests::PrintToStringParamName);
+
+class CompatLayoutLimitsTests : public CompatValidationTest {
+  protected:
+    wgpu::RequiredLimits GetRequiredLimits(const wgpu::SupportedLimits& supported) override {
+        wgpu::RequiredLimits required = {};
+        required.limits.maxStorageBuffersInFragmentStage =
+            supported.limits.maxStorageBuffersInFragmentStage / 2;
+        required.limits.maxStorageBuffersInVertexStage =
+            supported.limits.maxStorageBuffersInVertexStage / 2;
+        required.limits.maxStorageTexturesInFragmentStage =
+            supported.limits.maxStorageTexturesInFragmentStage / 2;
+        required.limits.maxStorageTexturesInVertexStage =
+            supported.limits.maxStorageTexturesInVertexStage / 2;
+        required.limits.maxStorageBuffersPerShaderStage =
+            supported.limits.maxStorageBuffersPerShaderStage;
+        required.limits.maxStorageTexturesPerShaderStage =
+            supported.limits.maxStorageTexturesPerShaderStage;
+        return required;
+    }
+
+    void DoBindGroupLayoutTest(uint32_t limitInStage,
+                               uint32_t limitPerStage,
+                               const wgpu::BindGroupLayoutEntry& entry,
+                               const char* expectedErrorSubstring) {
+        EXPECT_TRUE(limitInStage > 0);
+        EXPECT_TRUE(limitInStage < limitPerStage);
+
+        std::vector<wgpu::BindGroupLayoutEntry> entries(limitInStage + 1);
+        for (size_t i = 0; i < entries.size(); ++i) {
+            entries[i] = entry;
+            entries[i].binding = i;
+        }
+
+        wgpu::BindGroupLayoutDescriptor descriptor;
+        descriptor.entryCount = entries.size();
+        descriptor.entries = entries.data();
+        ASSERT_DEVICE_ERROR(device.CreateBindGroupLayout(&descriptor),
+                            testing::HasSubstr(expectedErrorSubstring));
+    }
+
+    void DoPipelineLayoutTest(uint32_t limitInStage,
+                              uint32_t limitPerStage,
+                              const wgpu::BindGroupLayoutEntry& entry,
+                              const char* expectedErrorSubstring) {
+        EXPECT_TRUE(limitInStage > 0);
+        EXPECT_TRUE(limitInStage < limitPerStage);
+
+        wgpu::BindGroupLayout bgls[2];
+
+        std::vector<wgpu::BindGroupLayoutEntry> entries(limitInStage);
+        for (size_t i = 0; i < entries.size(); ++i) {
+            entries[i] = entry;
+            entries[i].binding = i;
+        }
+
+        wgpu::BindGroupLayoutDescriptor descriptor;
+        descriptor.entryCount = entries.size();
+        descriptor.entries = entries.data();
+        bgls[0] = device.CreateBindGroupLayout(&descriptor);
+
+        descriptor.entryCount = 1;
+        descriptor.entries = entries.data();
+        bgls[1] = device.CreateBindGroupLayout(&descriptor);
+
+        wgpu::PipelineLayoutDescriptor pipelineLayoutDescriptor = {};
+        pipelineLayoutDescriptor.bindGroupLayoutCount = 2;
+        pipelineLayoutDescriptor.bindGroupLayouts = bgls;
+
+        ASSERT_DEVICE_ERROR(device.CreatePipelineLayout(&pipelineLayoutDescriptor),
+                            testing::HasSubstr(expectedErrorSubstring));
+    }
+};
+
+// Test that in compat we get an error if we use more than maxStorageBuffersInFragmentStage
+// when it's lower than maxStorageBuffersPerShaderStage in createBindGroupLayout
+TEST_F(CompatLayoutLimitsTests, CanNotPassLimitOfStorageBuffersInFragmentStageBindGroupLayout) {
+    const auto limits = GetSupportedLimits().limits;
+    wgpu::BindGroupLayoutEntry entry;
+    entry.visibility = wgpu::ShaderStage::Fragment;
+    entry.buffer.type = wgpu::BufferBindingType::ReadOnlyStorage;
+    DoBindGroupLayoutTest(limits.maxStorageBuffersInFragmentStage,
+                          limits.maxStorageBuffersPerShaderStage, entry,
+                          "maxStorageBuffersInFragmentStage");
+}
+
+// Test that in compat we get an error if we use more than maxStorageBuffersInVertexStage
+// when it's lower than maxStorageBuffersPerShaderStage in createBindGroupLayout
+TEST_F(CompatLayoutLimitsTests, CanNotPassLimitOfStorageBuffersInVertexStageBindGroupLayout) {
+    const auto limits = GetSupportedLimits().limits;
+    wgpu::BindGroupLayoutEntry entry;
+    entry.visibility = wgpu::ShaderStage::Vertex;
+    entry.buffer.type = wgpu::BufferBindingType::ReadOnlyStorage;
+    DoBindGroupLayoutTest(limits.maxStorageBuffersInVertexStage,
+                          limits.maxStorageBuffersPerShaderStage, entry,
+                          "maxStorageBuffersInVertexStage");
+}
+
+// Test that in compat we get an error if we use more than maxStorageTexturesInFragmentStage
+// when it's lower than maxStorageTexturesPerShaderStage in createBindGroupLayout
+TEST_F(CompatLayoutLimitsTests, CanNotPassLimitOfStorageTexturesInFragmentStageBindGroupLayout) {
+    const auto limits = GetSupportedLimits().limits;
+    wgpu::BindGroupLayoutEntry entry;
+    entry.visibility = wgpu::ShaderStage::Fragment;
+    entry.storageTexture.format = wgpu::TextureFormat::R32Float;
+    entry.storageTexture.access = wgpu::StorageTextureAccess::ReadOnly;
+    DoBindGroupLayoutTest(limits.maxStorageTexturesInFragmentStage,
+                          limits.maxStorageTexturesPerShaderStage, entry,
+                          "maxStorageTexturesInFragmentStage");
+}
+
+// Test that in compat we get an error if we use more than maxStorageTexturesInVertexStage
+// when it's lower than maxStorageTexturesPerShaderStage in createBindGroupLayout
+TEST_F(CompatLayoutLimitsTests, CanNotPassLimitOfStorageTexturesInVertexStageBindGroupLayout) {
+    const auto limits = GetSupportedLimits().limits;
+    wgpu::BindGroupLayoutEntry entry;
+    entry.visibility = wgpu::ShaderStage::Vertex;
+    entry.storageTexture.format = wgpu::TextureFormat::R32Float;
+    entry.storageTexture.access = wgpu::StorageTextureAccess::ReadOnly;
+    DoBindGroupLayoutTest(limits.maxStorageTexturesInVertexStage,
+                          limits.maxStorageTexturesPerShaderStage, entry,
+                          "maxStorageTexturesInVertexStage");
+}
+
+// Test that in compat we get an error if we use more than maxStorageBuffersInFragmentStage
+// when it's lower than maxStorageBuffersPerShaderStage in createPipelineLayout
+TEST_F(CompatLayoutLimitsTests, CanNotPassLimitOfStorageBuffersInFragmentStagePipelineLayout) {
+    const auto limits = GetSupportedLimits().limits;
+    wgpu::BindGroupLayoutEntry entry;
+    entry.visibility = wgpu::ShaderStage::Fragment;
+    entry.buffer.type = wgpu::BufferBindingType::ReadOnlyStorage;
+    DoPipelineLayoutTest(limits.maxStorageBuffersInFragmentStage,
+                         limits.maxStorageBuffersPerShaderStage, entry,
+                         "maxStorageBuffersInFragmentStage");
+}
+
+// Test that in compat we get an error if we use more than maxStorageBuffersInVertexStage
+// when it's lower than maxStorageBuffersPerShaderStage in createPipelineLayout
+TEST_F(CompatLayoutLimitsTests, CanNotPassLimitOfStorageBuffersInVertexStagePipelineLayout) {
+    const auto limits = GetSupportedLimits().limits;
+    wgpu::BindGroupLayoutEntry entry;
+    entry.visibility = wgpu::ShaderStage::Vertex;
+    entry.buffer.type = wgpu::BufferBindingType::ReadOnlyStorage;
+    DoPipelineLayoutTest(limits.maxStorageBuffersInVertexStage,
+                         limits.maxStorageBuffersPerShaderStage, entry,
+                         "maxStorageBuffersInVertexStage");
+}
+
+// Test that in compat we get an error if we use more than maxStorageTexturesInFragmentStage
+// when it's lower than maxStorageTexturesPerShaderStage in createPipelineLayout
+TEST_F(CompatLayoutLimitsTests, CanNotPassLimitOfStorageTexturesInFragmentStagePipelineLayout) {
+    const auto limits = GetSupportedLimits().limits;
+    wgpu::BindGroupLayoutEntry entry;
+    entry.visibility = wgpu::ShaderStage::Fragment;
+    entry.storageTexture.format = wgpu::TextureFormat::R32Float;
+    entry.storageTexture.access = wgpu::StorageTextureAccess::ReadOnly;
+    DoPipelineLayoutTest(limits.maxStorageTexturesInFragmentStage,
+                         limits.maxStorageTexturesPerShaderStage, entry,
+                         "maxStorageTexturesInFragmentStage");
+}
+
+// Test that in compat we get an error if we use more than maxStorageTexturesInVertexStage
+// when it's lower than maxStorageTexturesPerShaderStage in createPipelineLayout
+TEST_F(CompatLayoutLimitsTests, CanNotPassLimitOfStorageTexturesInVertexStagePipelineLayout) {
+    const auto limits = GetSupportedLimits().limits;
+    wgpu::BindGroupLayoutEntry entry;
+    entry.visibility = wgpu::ShaderStage::Vertex;
+    entry.storageTexture.format = wgpu::TextureFormat::R32Float;
+    entry.storageTexture.access = wgpu::StorageTextureAccess::ReadOnly;
+    DoPipelineLayoutTest(limits.maxStorageTexturesInVertexStage,
+                         limits.maxStorageTexturesPerShaderStage, entry,
+                         "maxStorageTexturesInVertexStage");
+}
 
 }  // anonymous namespace
 }  // namespace dawn

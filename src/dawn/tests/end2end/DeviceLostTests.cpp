@@ -51,6 +51,14 @@ static const int fakeUserData = 0;
 
 class DeviceLostTest : public DawnTest {
   protected:
+    wgpu::RequiredLimits GetRequiredLimits(const wgpu::SupportedLimits& supported) override {
+        // TODO(crbug.com/383593270): Enable all the limits.
+        wgpu::RequiredLimits required = {};
+        required.limits.maxStorageBuffersInFragmentStage =
+            supported.limits.maxStorageBuffersInFragmentStage;
+        return required;
+    }
+
     void SetUp() override {
         DAWN_TEST_UNSUPPORTED_IF(UsesWire());
         DawnTest::SetUp();
@@ -461,6 +469,8 @@ TEST_P(DeviceLostTest, DeviceLostBeforeCreatePipelineAsyncCallback) {
 // references to bind group layouts such that the cache was non-empty at the end
 // of shut down.
 TEST_P(DeviceLostTest, FreeBindGroupAfterDeviceLossWithPendingCommands) {
+    DAWN_SUPPRESS_TEST_IF(GetSupportedLimits().limits.maxStorageBuffersInFragmentStage < 1);
+
     wgpu::BindGroupLayout bgl = utils::MakeBindGroupLayout(
         device, {{0, wgpu::ShaderStage::Fragment, wgpu::BufferBindingType::Storage}});
 

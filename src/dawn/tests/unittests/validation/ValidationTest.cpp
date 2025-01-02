@@ -295,6 +295,10 @@ std::vector<wgpu::FeatureName> ValidationTest::GetRequiredFeatures() {
     return {};
 }
 
+wgpu::RequiredLimits ValidationTest::GetRequiredLimits(const wgpu::SupportedLimits&) {
+    return {};
+}
+
 std::vector<const char*> ValidationTest::GetEnabledToggles() {
     return {};
 }
@@ -410,6 +414,12 @@ void ValidationTest::SetUp(const wgpu::InstanceDescriptor* nativeDesc,
     auto requiredFeatures = GetRequiredFeatures();
     deviceDescriptor.requiredFeatures = requiredFeatures.data();
     deviceDescriptor.requiredFeatureCount = requiredFeatures.size();
+
+    wgpu::SupportedLimits supportedLimits;
+    dawn::native::GetProcs().adapterGetLimits(
+        mBackendAdapter.Get(), reinterpret_cast<WGPUSupportedLimits*>(&supportedLimits));
+    wgpu::RequiredLimits requiredLimits = GetRequiredLimits(supportedLimits);
+    deviceDescriptor.requiredLimits = &requiredLimits;
 
     device = RequestDeviceSync(deviceDescriptor);
     DAWN_ASSERT(device);

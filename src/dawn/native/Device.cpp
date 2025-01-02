@@ -285,59 +285,6 @@ ResultOrError<Ref<PipelineLayoutBase>> ValidateLayoutAndGetRenderPipelineDescrip
         outDescriptor->layout = layoutRef.Get();
     }
 
-    if (device->IsCompatibilityMode()) {
-        const auto& limits = device->GetLimits();
-
-        {
-            auto requestedLimit = outDescriptor->layout->GetNumStorageBufferBindingsInVertexStage();
-            auto maxStorageBuffersInVertexStage = limits.v1.maxStorageBuffersInVertexStage;
-            DAWN_INVALID_IF(
-                requestedLimit > maxStorageBuffersInVertexStage,
-                "number of storage buffers used in vertex stage (%u) exceeds "
-                "maxStorageBuffersInVertexStage (%u).%s",
-                requestedLimit, maxStorageBuffersInVertexStage,
-                DAWN_INCREASE_LIMIT_MESSAGE(device->GetAdapter(), maxStorageBuffersInVertexStage,
-                                            requestedLimit));
-        }
-        {
-            auto requestedLimit =
-                outDescriptor->layout->GetNumStorageTextureBindingsInVertexStage();
-            auto maxStorageTexturesInVertexStage = limits.v1.maxStorageTexturesInVertexStage;
-            DAWN_INVALID_IF(
-                requestedLimit > maxStorageTexturesInVertexStage,
-                "number of storage textures used in vertex stage (%u) exceeds "
-                "maxStorageTexturesInVertexStage (%u).%s",
-                requestedLimit, maxStorageTexturesInVertexStage,
-                DAWN_INCREASE_LIMIT_MESSAGE(device->GetAdapter(), maxStorageTexturesInVertexStage,
-                                            requestedLimit));
-        }
-        {
-            auto requestedLimit =
-                outDescriptor->layout->GetNumStorageBufferBindingsInFragmentStage();
-            auto maxStorageBuffersInFragmentStage = limits.v1.maxStorageBuffersInFragmentStage;
-            DAWN_INVALID_IF(
-                requestedLimit > maxStorageBuffersInFragmentStage,
-                "number of storage buffers used in fragment stage (%u) exceeds "
-                "maxStorageBuffersInFragmentStage (%u).%s",
-                requestedLimit, maxStorageBuffersInFragmentStage,
-                DAWN_INCREASE_LIMIT_MESSAGE(device->GetAdapter(), maxStorageBuffersInFragmentStage,
-                                            requestedLimit));
-        }
-        {
-            auto requestedLimit =
-                outDescriptor->layout->GetNumStorageTextureBindingsInFragmentStage();
-            auto maxStorageTexturesInFragmentStage = limits.v1.maxStorageTexturesInFragmentStage;
-
-            DAWN_INVALID_IF(
-                requestedLimit > maxStorageTexturesInFragmentStage,
-                "number of storage textures used in fragment stage (%u) exceeds "
-                "maxStorageTexturesInFragmentStage (%u).%s",
-                requestedLimit, maxStorageTexturesInFragmentStage,
-                DAWN_INCREASE_LIMIT_MESSAGE(device->GetAdapter(), maxStorageTexturesInFragmentStage,
-                                            requestedLimit));
-        }
-    }
-
     return layoutRef;
 }
 
