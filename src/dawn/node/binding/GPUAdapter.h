@@ -32,7 +32,6 @@
 
 #include <memory>
 
-#include "dawn/native/DawnNative.h"
 #include "src/dawn/node/binding/AsyncRunner.h"
 #include "src/dawn/node/interop/NodeAPI.h"
 #include "src/dawn/node/interop/WebGPU.h"
@@ -40,10 +39,10 @@
 namespace wgpu::binding {
 class Flags;
 
-// GPUAdapter is an implementation of interop::GPUAdapter that wraps a dawn::native::Adapter.
+// GPUAdapter is an implementation of interop::GPUAdapter that wraps a wgpu::Adapter.
 class GPUAdapter final : public interop::GPUAdapter {
   public:
-    GPUAdapter(dawn::native::Adapter a, const Flags& flags, std::shared_ptr<AsyncRunner> async);
+    GPUAdapter(wgpu::Adapter adapter, const Flags& flags, std::shared_ptr<AsyncRunner> async);
 
     // interop::GPUAdapter interface compliance
     interop::Promise<interop::Interface<interop::GPUDevice>> requestDevice(
@@ -56,8 +55,6 @@ class GPUAdapter final : public interop::GPUAdapter {
     bool getIsCompatibilityMode(Napi::Env) override;
 
   private:
-    // TODO(347047627): Remove nativeAdapter_ once we don't use CreateDevice.
-    dawn::native::Adapter nativeAdapter_;
     wgpu::Adapter adapter_;
     const Flags& flags_;
     std::shared_ptr<AsyncRunner> async_;
