@@ -469,20 +469,5 @@ TEST_F(VertexStateTest, BaseTypeMatchingForInexistentInput) {
     DoTest(wgpu::VertexFormat::Sint32x2);
 }
 
-// Test that non-zero attributeCount with VertexBufferNotUsed stepMode is invalid
-TEST_F(VertexStateTest, UnusedBufferZeroAttribute) {
-    // Non-zero attributeCount with non-VertexBufferNotUsed is valid
-    utils::ComboVertexState state;
-    state.vertexBufferCount = 1;
-    state.cVertexBuffers[0].arrayStride = 0;
-    state.cVertexBuffers[0].attributeCount = 1;
-    state.cVertexBuffers[0].stepMode = wgpu::VertexStepMode::Vertex;
-    CreatePipeline(true, state, kPlaceholderVertexShader);
-
-    // Non-zero attributeCount with VertexBufferNotUsed is invalid
-    state.cVertexBuffers[0].stepMode = wgpu::VertexStepMode::VertexBufferNotUsed;
-    CreatePipeline(false, state, kPlaceholderVertexShader);
-}
-
 }  // anonymous namespace
 }  // namespace dawn

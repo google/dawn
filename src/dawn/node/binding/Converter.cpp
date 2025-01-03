@@ -1100,13 +1100,13 @@ bool Converter::Convert(wgpu::VertexState& out, const interop::GPUVertexState& i
         return false;
     }
 
-    // Patch up the unused vertex buffer layouts to use wgpu::VertexStepMode::VertexBufferNotUsed.
+    // Patch up the unused vertex buffer layouts to use wgpu::VertexStepMode::Undefined.
     // The converter for optional value will have put the default value of wgpu::VertexBufferLayout
     // that has wgpu::VertexStepMode::Vertex.
     out.buffers = outBuffers;
     for (size_t i = 0; i < in.buffers.size(); i++) {
         if (!in.buffers[i].has_value()) {
-            outBuffers[i].stepMode = wgpu::VertexStepMode::VertexBufferNotUsed;
+            outBuffers[i].stepMode = wgpu::VertexStepMode::Undefined;
         }
     }
 

@@ -179,11 +179,6 @@ MaybeError ValidateVertexBufferLayout(DeviceBase* device,
     DAWN_INVALID_IF(buffer->arrayStride % 4 != 0,
                     "Vertex buffer arrayStride (%u) is not a multiple of 4.", buffer->arrayStride);
 
-    DAWN_INVALID_IF(
-        buffer->stepMode == wgpu::VertexStepMode::VertexBufferNotUsed && buffer->attributeCount > 0,
-        "attributeCount (%u) is not zero although vertex buffer stepMode is %s.",
-        buffer->attributeCount, wgpu::VertexStepMode::VertexBufferNotUsed);
-
     for (uint32_t i = 0; i < buffer->attributeCount; ++i) {
         DAWN_TRY_CONTEXT(ValidateVertexAttribute(device, &buffer->attributes[i], metadata,
                                                  buffer->arrayStride, attributesSetMask),
@@ -980,10 +975,6 @@ RenderPipelineBase::RenderPipelineBase(DeviceBase* device,
         if (buffer.stepMode == wgpu::VertexStepMode::Undefined && buffer.attributeCount == 0) {
             continue;
         }
-        // TODO(crbug.com/383147017): Remove VertexBufferNotUsed.
-        if (buffer.stepMode == wgpu::VertexStepMode::VertexBufferNotUsed) {
-            continue;
-        }
 
         mVertexBuffersUsed.set(slot);
         mVertexBufferInfos[slot].arrayStride = buffer.arrayStride;
@@ -999,7 +990,6 @@ RenderPipelineBase::RenderPipelineBase(DeviceBase* device,
             case wgpu::VertexStepMode::Instance:
                 mVertexBuffersUsedAsInstanceBuffer.set(slot);
                 break;
-            case wgpu::VertexStepMode::VertexBufferNotUsed:
             case wgpu::VertexStepMode::Undefined:
                 DAWN_UNREACHABLE();
         }

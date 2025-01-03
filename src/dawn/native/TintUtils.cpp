@@ -149,7 +149,6 @@ tint::ast::transform::VertexStepMode ToTintVertexStepMode(wgpu::VertexStepMode m
             return tint::ast::transform::VertexStepMode::kVertex;
         case wgpu::VertexStepMode::Instance:
             return tint::ast::transform::VertexStepMode::kInstance;
-        case wgpu::VertexStepMode::VertexBufferNotUsed:
         case wgpu::VertexStepMode::Undefined:
             break;
     }
