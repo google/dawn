@@ -31,6 +31,7 @@
 #include <webgpu/webgpu_cpp.h>
 
 #include <memory>
+#include <string>
 
 #include "src/dawn/node/binding/AsyncRunner.h"
 #include "src/dawn/node/interop/NodeAPI.h"
@@ -53,6 +54,7 @@ class GPUAdapter final : public interop::GPUAdapter {
     interop::Interface<interop::GPUAdapterInfo> getInfo(Napi::Env) override;
     bool getIsFallbackAdapter(Napi::Env) override;
     bool getIsCompatibilityMode(Napi::Env) override;
+    std::string getFeatureLevel(Napi::Env) override;
 
   private:
     wgpu::Adapter adapter_;

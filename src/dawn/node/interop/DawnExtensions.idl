@@ -42,6 +42,7 @@ dictionary GPURequestAdapterOptions {
 
 interface GPUAdapter {
     readonly attribute boolean isCompatibilityMode;
+    readonly attribute DOMString featureLevel;
 };
 
 // Not in webgpu.idl yet
