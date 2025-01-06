@@ -127,7 +127,7 @@ class Printer : public tint::TextGenerator {
             ir_, "msl.Printer",
             core::ir::Capabilities{
                 core::ir::Capability::kAllow8BitIntegers,
-                core::ir::Capability::kAllowPointersInStructures,
+                core::ir::Capability::kAllowPointersAndHandlesInStructures,
                 core::ir::Capability::kAllowPrivateVarsInFunctions,
             });
         if (valid != Success) {

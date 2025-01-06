@@ -1785,7 +1785,8 @@ void Validator::CheckType(const core::type::Type* root,
                 if (type != root) {
                     // Nesting pointer types inside structures is guarded by a capability.
                     if (!(root->Is<core::type::Struct>() &&
-                          capabilities_.Contains(Capability::kAllowPointersInStructures))) {
+                          capabilities_.Contains(
+                              Capability::kAllowPointersAndHandlesInStructures))) {
                         diag() << "nested pointer types are not permitted";
                         return false;
                     }
@@ -2000,8 +2001,8 @@ void Validator::CheckFunction(const Function* func) {
 
         if (!IsValidFunctionParamType(param->Type())) {
             auto struct_ty = param->Type()->As<core::type::Struct>();
-            if (!capabilities_.Contains(Capability::kAllowPointersInStructures) || !struct_ty ||
-                struct_ty->Members().Any([](const core::type::StructMember* m) {
+            if (!capabilities_.Contains(Capability::kAllowPointersAndHandlesInStructures) ||
+                !struct_ty || struct_ty->Members().Any([](const core::type::StructMember* m) {
                     return !IsValidFunctionParamType(m->Type());
                 })) {
                 AddError(param) << "function parameter type must be constructible, a pointer, a "
@@ -2570,7 +2571,7 @@ Result<SuccessType, std::string> Validator::ValidateShaderIOAnnotations(
                        ToString(add_result.Failure()) + "'";
             }
 
-            if (capabilities_.Contains(Capability::kAllowPointersInStructures)) {
+            if (capabilities_.Contains(Capability::kAllowPointersAndHandlesInStructures)) {
                 if (auto* mv = mem->Type()->As<core::type::MemoryView>()) {
                     if (mv->AddressSpace() == AddressSpace::kWorkgroup) {
                         mem_annotations.Add(IOAnnotation::kWorkgroup);

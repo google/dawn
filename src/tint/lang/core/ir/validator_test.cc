@@ -688,7 +688,7 @@ TEST_F(IR_ValidatorTest, Function_Param_Struct_WorkgroupPlusOtherIOAnnotations) 
 
     b.Append(f->Block(), [&] { b.Return(f); });
 
-    auto res = ir::Validate(mod, Capabilities{Capability::kAllowPointersInStructures});
+    auto res = ir::Validate(mod, Capabilities{Capability::kAllowPointersAndHandlesInStructures});
     ASSERT_NE(res, Success);
     EXPECT_EQ(
         res.Failure().reason.Str(),
@@ -4946,7 +4946,7 @@ TEST_F(IR_ValidatorTest, Access_ExtractPointerFromStruct) {
         b.Return(f);
     });
 
-    auto res = ir::Validate(mod, Capabilities{Capability::kAllowPointersInStructures});
+    auto res = ir::Validate(mod, Capabilities{Capability::kAllowPointersAndHandlesInStructures});
     ASSERT_EQ(res, Success);
 }
 
@@ -10373,7 +10373,7 @@ TEST_F(IR_ValidatorTest, PointerInStructure_WithCapability) {
     fn->SetParams({param});
     b.Append(fn->Block(), [&] { b.Return(fn); });
 
-    auto res = ir::Validate(mod, Capabilities{Capability::kAllowPointersInStructures});
+    auto res = ir::Validate(mod, Capabilities{Capability::kAllowPointersAndHandlesInStructures});
     EXPECT_EQ(res, Success) << res.Failure();
 }
 
