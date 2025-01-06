@@ -211,11 +211,14 @@ class Builder {
         cb();
     }
 
-    /// Calls @p cb with the builder inserting after @p val
-    /// @param val the insertion point for new instructions
-    /// @param cb the function to call with the builder inserting new instructions after @p val
+    /// Calls @p cb with the builder inserting at the first block position after @p val. This means
+    /// if a `FunctionParam` or `BlockParam` are provided, the callback will insert into the _next_
+    /// block seen after the parameters.
+    /// @param val the value used to determine which block to insert into
+    /// @param cb the function to call with the builder inserting new instructions in the first
+    /// block position after @p val
     template <typename FUNCTION>
-    void InsertAfter(ir::Value* val, FUNCTION&& cb) {
+    void InsertInBlockAfter(ir::Value* val, FUNCTION&& cb) {
         tint::Switch(
             val,
             [&](core::ir::InstructionResult* result) {
