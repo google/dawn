@@ -123,11 +123,11 @@ func parseConsole(s string) (Run, error) {
 		}
 		matches := consoleLineRE.FindStringSubmatch(line)
 		if len(matches) != 4 {
-			return Run{}, fmt.Errorf("Unable to parse the line:\n" + line)
+			return Run{}, fmt.Errorf("Unable to parse the line:\n%s", line)
 		}
 		ns, err := strconv.ParseFloat(matches[2], 64)
 		if err != nil {
-			return Run{}, fmt.Errorf("Unable to parse the duration: " + matches[2])
+			return Run{}, fmt.Errorf("Unable to parse the duration: %s", matches[2])
 		}
 
 		b = append(b, Benchmark{

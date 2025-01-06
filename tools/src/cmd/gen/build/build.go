@@ -562,7 +562,7 @@ func buildDependencies(p *Project) error {
 			for _, include := range route {
 				fmt.Fprintf(&err, "  %v:%v includes '%v'\n", include.file, include.inc.Line, include.inc.Path)
 			}
-			return fmt.Errorf(err.String())
+			return fmt.Errorf("%s", err.String())
 		}
 		return nil
 	}
@@ -605,7 +605,7 @@ func checkForCycles(p *Project) error {
 				fmt.Fprintln(&err, "  ", string(t))
 			}
 			fmt.Fprintln(&err, "  ", string(t.Name))
-			return fmt.Errorf(err.String())
+			return fmt.Errorf("%s", err.String())
 		}
 		return nil
 	}
