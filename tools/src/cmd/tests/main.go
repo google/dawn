@@ -137,6 +137,7 @@ func run() error {
 
 	var formatList, ignore, dxcPath, fxcPath, tintPath, xcrunPath string
 	var maxTableWidth int
+	var useIrReader bool
 	numCPU := runtime.NumCPU()
 	verbose, generateExpected, generateSkip := false, false, false
 	flag.StringVar(&formatList, "format", "all", "comma separated list of formats to emit. Possible values are: all, wgsl, spvasm, msl, msl-ir, hlsl, hlsl-ir, hlsl-dxc, hlsl-dxc-ir, hlsl-fxc, hlsl-fxc-ir, glsl")
@@ -148,6 +149,7 @@ func run() error {
 	flag.BoolVar(&verbose, "verbose", false, "print all run tests, including rows that all pass")
 	flag.BoolVar(&generateExpected, "generate-expected", false, "create or update all expected outputs")
 	flag.BoolVar(&generateSkip, "generate-skip", false, "create or update all expected outputs that fail with SKIP")
+	flag.BoolVar(&useIrReader, "use-ir-reader", false, "force use of IR SPIR-V Reader")
 	flag.IntVar(&numCPU, "j", numCPU, "maximum number of concurrent threads to run tests")
 	flag.IntVar(&maxTableWidth, "table-width", terminalWidth, "maximum width of the results table")
 	flag.Usage = showUsage
@@ -324,6 +326,7 @@ func run() error {
 		generateExpected: generateExpected,
 		generateSkip:     generateSkip,
 		validationCache:  validationCache,
+		useIrReader:      useIrReader,
 	}
 	for cpu := 0; cpu < numCPU; cpu++ {
 		go func() {
@@ -662,6 +665,7 @@ type runConfig struct {
 	generateExpected bool
 	generateSkip     bool
 	validationCache  validationCache
+	useIrReader      bool
 }
 
 // Skips the path portion of FXC warning/error strings, matching the rest.
@@ -727,6 +731,10 @@ func (j job) run(cfg runConfig) {
 
 		if useIr {
 			args = append(args, "--use-ir")
+		}
+
+		if cfg.useIrReader {
+			args = append(args, "--use-ir-reader")
 		}
 
 		// Append any skip-hashes, if they're found.
