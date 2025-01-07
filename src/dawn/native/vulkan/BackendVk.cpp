@@ -203,6 +203,10 @@ constexpr SkippedMessage kSkippedMessages[] = {
      "exceeds device maxDescriptorSetUpdateAfterBindStorageImages limit (0)"},
     {"VUID-VkPipelineLayoutCreateInfo-pSetLayouts-03043",
      "exceeds device maxDescriptorSetUpdateAfterBindInputAttachments limit (0)"},
+    {"VUID-vkCmdCopyBufferToImage-pRegions-00173",
+     "Detected overlap between source and dest regions in memory"},
+    {"VUID-vkCmdCopyImageToBuffer-pRegions-00184",
+     "Detected overlap between source and dest regions in memory"},
 
     // crbug.com/383121397
     {"VUID-VkShaderModuleCreateInfo-pCode-08740",
