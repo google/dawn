@@ -11085,5 +11085,95 @@ $B1: {  # root
 )");
 }
 
+using BitcastTypeTest = IRTestParamHelper<std::tuple<
+    /* bitcast allowed */ bool,
+    /* src type_builder */ TypeBuilderFn,
+    /* dest type_builder */ TypeBuilderFn>>;
+
+TEST_P(BitcastTypeTest, Check) {
+    bool bitcast_allowed = std::get<0>(GetParam());
+    auto* src_ty = std::get<1>(GetParam())(ty);
+    auto* dest_ty = std::get<2>(GetParam())(ty);
+
+    auto* fn = b.Function("my_func", ty.void_());
+    b.Append(fn->Block(), [&] {
+        b.Bitcast(dest_ty, b.Zero(src_ty));
+        b.Return(fn);
+    });
+
+    auto res = ir::Validate(mod);
+    if (bitcast_allowed) {
+        ASSERT_EQ(res, Success) << "Bitcast should be defined for '" << src_ty->FriendlyName()
+                                << "' -> '" << dest_ty->FriendlyName() << "': " << res.Failure();
+    } else {
+        ASSERT_NE(res, Success) << "Bitcast should NOT be defined for '" << src_ty->FriendlyName()
+                                << "' -> '" << dest_ty->FriendlyName() << "'";
+        EXPECT_THAT(res.Failure().reason.Str(), testing::HasSubstr("bitcast is not defined"));
+    }
+}
+
+INSTANTIATE_TEST_SUITE_P(
+    IR_ValidatorTest,
+    BitcastTypeTest,
+    testing::Values(
+        // Scalar identity
+        std::make_tuple(true, TypeBuilder<u32>, TypeBuilder<u32>),
+        std::make_tuple(true, TypeBuilder<i32>, TypeBuilder<i32>),
+        std::make_tuple(true, TypeBuilder<f32>, TypeBuilder<f32>),
+        std::make_tuple(true, TypeBuilder<f16>, TypeBuilder<f16>),
+
+        // Scalar reinterpretation
+        std::make_tuple(true, TypeBuilder<u32>, TypeBuilder<i32>),
+        std::make_tuple(true, TypeBuilder<u32>, TypeBuilder<f32>),
+        std::make_tuple(true, TypeBuilder<u32>, TypeBuilder<vec2<f16>>),
+        std::make_tuple(true, TypeBuilder<i32>, TypeBuilder<u32>),
+        std::make_tuple(true, TypeBuilder<i32>, TypeBuilder<f32>),
+        std::make_tuple(true, TypeBuilder<i32>, TypeBuilder<vec2<f16>>),
+        std::make_tuple(true, TypeBuilder<f32>, TypeBuilder<u32>),
+        std::make_tuple(true, TypeBuilder<f32>, TypeBuilder<i32>),
+        std::make_tuple(true, TypeBuilder<f32>, TypeBuilder<vec2<f16>>),
+        std::make_tuple(false, TypeBuilder<u32>, TypeBuilder<f16>),
+        std::make_tuple(false, TypeBuilder<i32>, TypeBuilder<f16>),
+        std::make_tuple(false, TypeBuilder<f32>, TypeBuilder<f16>),
+        std::make_tuple(false, TypeBuilder<f16>, TypeBuilder<u32>),
+        std::make_tuple(false, TypeBuilder<f16>, TypeBuilder<i32>),
+        std::make_tuple(false, TypeBuilder<f16>, TypeBuilder<f32>),
+        std::make_tuple(false, TypeBuilder<f16>, TypeBuilder<vec2<f16>>),
+
+        // Component-wise identity, sparsely (non-exhaustively) covering types and vector sizes
+        std::make_tuple(true, TypeBuilder<vec2<u32>>, TypeBuilder<vec2<u32>>),
+        std::make_tuple(true, TypeBuilder<vec3<i32>>, TypeBuilder<vec3<i32>>),
+        std::make_tuple(true, TypeBuilder<vec4<f32>>, TypeBuilder<vec4<f32>>),
+        std::make_tuple(true, TypeBuilder<vec3<f16>>, TypeBuilder<vec3<f16>>),
+        std::make_tuple(false, TypeBuilder<vec2<u32>>, TypeBuilder<vec3<u32>>),
+        std::make_tuple(false, TypeBuilder<vec2<u32>>, TypeBuilder<vec4<u32>>),
+        std::make_tuple(false, TypeBuilder<vec3<i32>>, TypeBuilder<vec2<i32>>),
+        std::make_tuple(false, TypeBuilder<vec3<i32>>, TypeBuilder<vec4<i32>>),
+        std::make_tuple(false, TypeBuilder<vec4<f32>>, TypeBuilder<vec2<f32>>),
+        std::make_tuple(false, TypeBuilder<vec4<f32>>, TypeBuilder<vec3<f32>>),
+
+        // Component-wise reinterpretation, sparsely (non-exhaustively) covering types and vector
+        // sizes
+        std::make_tuple(true, TypeBuilder<vec2<u32>>, TypeBuilder<vec2<i32>>),
+        std::make_tuple(true, TypeBuilder<vec3<u32>>, TypeBuilder<vec3<f32>>),
+        std::make_tuple(true, TypeBuilder<vec4<i32>>, TypeBuilder<vec4<u32>>),
+        std::make_tuple(true, TypeBuilder<vec3<i32>>, TypeBuilder<vec3<f32>>),
+        std::make_tuple(true, TypeBuilder<vec3<f32>>, TypeBuilder<vec3<u32>>),
+        std::make_tuple(true, TypeBuilder<vec2<f32>>, TypeBuilder<vec2<i32>>),
+        std::make_tuple(true, TypeBuilder<vec2<u32>>, TypeBuilder<vec4<f16>>),
+        std::make_tuple(true, TypeBuilder<vec2<i32>>, TypeBuilder<vec4<f16>>),
+        std::make_tuple(true, TypeBuilder<vec2<f32>>, TypeBuilder<vec4<f16>>),
+        std::make_tuple(false, TypeBuilder<vec4<u32>>, TypeBuilder<vec4<f16>>),
+        std::make_tuple(false, TypeBuilder<vec2<i32>>, TypeBuilder<vec2<f16>>),
+        std::make_tuple(false, TypeBuilder<vec4<f32>>, TypeBuilder<vec4<f16>>),
+        std::make_tuple(false, TypeBuilder<f16>, TypeBuilder<u32>),
+        std::make_tuple(false, TypeBuilder<f16>, TypeBuilder<i32>),
+        std::make_tuple(false, TypeBuilder<f16>, TypeBuilder<f32>),
+        std::make_tuple(false, TypeBuilder<f16>, TypeBuilder<vec2<f16>>)
+
+        // Intentionally omitting AbstractInt cases, since concretetization
+        // when creating IR should remove them
+        ));
+
 }  // namespace
 }  // namespace tint::core::ir
