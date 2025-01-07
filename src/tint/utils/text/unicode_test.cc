@@ -558,6 +558,8 @@ INSTANTIATE_TEST_SUITE_P(Invalid,
                              {0xf4, 0xff, 0x8f, 0x8f},  // 4-bytes, second byte's second-MSB set
                              {0xf4, 0x8f, 0xff, 0x8f},  // 4-bytes, third byte's second-MSB set
                              {0xf4, 0x8f, 0x8f, 0xff},  // 4-bytes, fourth byte's second-MSB set
+
+                             {0xe0, 0x9d, 0x81},  // Value out of range for 3-byte
                          }));
 
 }  // namespace utf8_tests
