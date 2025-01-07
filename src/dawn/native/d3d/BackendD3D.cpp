@@ -136,15 +136,12 @@ std::vector<Ref<PhysicalDeviceBase>> Backend::DiscoverPhysicalDevices(
         return {};
     }
 
-    wgpu::FeatureLevel featureLevel =
-        options->compatibilityMode ? wgpu::FeatureLevel::Compatibility : wgpu::FeatureLevel::Core;
-
     // Get or create just the physical device matching the dxgi adapter.
     if (auto* luidOptions = options.Get<RequestAdapterOptionsLUID>()) {
         Ref<PhysicalDeviceBase> physicalDevice;
         if (GetInstance()->ConsumedErrorAndWarnOnce(
                 GetOrCreatePhysicalDeviceFromLUID(luidOptions->adapterLUID), &physicalDevice) ||
-            !physicalDevice->SupportsFeatureLevel(featureLevel)) {
+            !physicalDevice->SupportsFeatureLevel(options->featureLevel)) {
             return {};
         }
         return {std::move(physicalDevice)};
@@ -180,7 +177,7 @@ std::vector<Ref<PhysicalDeviceBase>> Backend::DiscoverPhysicalDevices(
         if (GetInstance()->ConsumedErrorAndWarnOnce(
                 GetOrCreatePhysicalDeviceFromIDXGIAdapter(std::move(dxgiAdapter)),
                 &physicalDevice) ||
-            !physicalDevice->SupportsFeatureLevel(featureLevel)) {
+            !physicalDevice->SupportsFeatureLevel(options->featureLevel)) {
             continue;
         }
         physicalDevices.push_back(std::move(physicalDevice));

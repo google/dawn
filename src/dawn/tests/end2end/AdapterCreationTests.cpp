@@ -228,7 +228,7 @@ TEST_P(AdapterCreationTest, PreferLowPower) {
 // Test that requesting a Compatibility adapter is supported.
 TEST_P(AdapterCreationTest, Compatibility) {
     wgpu::RequestAdapterOptions options = {};
-    options.compatibilityMode = true;
+    options.featureLevel = wgpu::FeatureLevel::Compatibility;
 
     wgpu::Adapter adapter;
     EXPECT_CALL(mMockCb, Call(wgpu::RequestAdapterStatus::Success, _, EmptySizedString()))

@@ -369,7 +369,8 @@ void ValidationTest::SetUp(const wgpu::InstanceDescriptor* nativeDesc,
     // Initialize the adapter.
     wgpu::RequestAdapterOptions options = {};
     options.backendType = wgpu::BackendType::Null;
-    options.compatibilityMode = gCurrentTest->UseCompatibilityMode();
+    options.featureLevel = gCurrentTest->UseCompatibilityMode() ? wgpu::FeatureLevel::Compatibility
+                                                                : wgpu::FeatureLevel::Core;
     EXPECT_DEPRECATION_WARNINGS(
         instance.RequestAdapter(&options, wgpu::CallbackMode::AllowSpontaneous,
                                 [this](wgpu::RequestAdapterStatus, wgpu::Adapter result,

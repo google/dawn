@@ -36,10 +36,6 @@ enum GPUFeatureName {
     "chromium-experimental-immediate-data",
 };
 
-dictionary GPURequestAdapterOptions {
-    boolean compatibilityMode = false;
-};
-
 interface GPUAdapter {
     readonly attribute boolean isCompatibilityMode;
     readonly attribute DOMString featureLevel;

@@ -454,9 +454,10 @@ void DawnTestEnvironment::SelectPreferredAdapterProperties(const native::Instanc
     std::optional<wgpu::AdapterType> preferredDeviceType;
     [&] {
         for (wgpu::AdapterType devicePreference : mDevicePreferences) {
-            for (bool compatibilityMode : {false, true}) {
+            for (wgpu::FeatureLevel featureLevel :
+                 {wgpu::FeatureLevel::Core, wgpu::FeatureLevel::Compatibility}) {
                 wgpu::RequestAdapterOptions adapterOptions;
-                adapterOptions.compatibilityMode = compatibilityMode;
+                adapterOptions.featureLevel = featureLevel;
                 // TODO(347047627): Use a webgpu.h version of enumerateAdapters
                 for (const native::Adapter& nativeAdapter :
                      instance->EnumerateAdapters(&adapterOptions)) {
@@ -475,9 +476,10 @@ void DawnTestEnvironment::SelectPreferredAdapterProperties(const native::Instanc
     }();
 
     std::set<std::tuple<wgpu::BackendType, std::string, bool>> adapterNameSet;
-    for (bool compatibilityMode : {false, true}) {
+    for (wgpu::FeatureLevel featureLevel :
+         {wgpu::FeatureLevel::Core, wgpu::FeatureLevel::Compatibility}) {
         wgpu::RequestAdapterOptions adapterOptions;
-        adapterOptions.compatibilityMode = compatibilityMode;
+        adapterOptions.featureLevel = featureLevel;
         // TODO(347047627): Use a webgpu.h version of enumerateAdapters
         for (const native::Adapter& nativeAdapter : instance->EnumerateAdapters(&adapterOptions)) {
             wgpu::Adapter adapter = wgpu::Adapter(nativeAdapter.Get());
@@ -736,7 +738,9 @@ DawnTestBase::DawnTestBase(const AdapterTestParam& param) : mParam(param) {
         wgpu::RequestAdapterOptions adapterOptions;
         adapterOptions.nextInChain = &deviceTogglesHelper.togglesDesc;
         adapterOptions.backendType = gCurrentTest->mParam.adapterProperties.backendType;
-        adapterOptions.compatibilityMode = gCurrentTest->mParam.adapterProperties.compatibilityMode;
+        adapterOptions.featureLevel = gCurrentTest->mParam.adapterProperties.compatibilityMode
+                                          ? wgpu::FeatureLevel::Compatibility
+                                          : wgpu::FeatureLevel::Core;
 
         // Find the adapter that exactly matches our adapter properties.
         // TODO(347047627): Use a webgpu.h version of enumerateAdapters

@@ -152,7 +152,9 @@ int SampleBase::Run(unsigned int delay) {
     adapterOptions.nextInChain = togglesChain;
     adapterOptions.backendType = backendType;
     if (backendType != wgpu::BackendType::Undefined) {
-        adapterOptions.compatibilityMode = dawn::utils::BackendRequiresCompat(backendType);
+        adapterOptions.featureLevel = dawn::utils::BackendRequiresCompat(backendType)
+                                          ? wgpu::FeatureLevel::Compatibility
+                                          : wgpu::FeatureLevel::Core;
     }
 
     switch (adapterType) {

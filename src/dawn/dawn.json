@@ -77,8 +77,7 @@
             {"name": "feature level", "type": "feature level", "default": "core"},
             {"name": "power preference", "type": "power preference", "default": "undefined"},
             {"name": "backend type", "type": "backend type", "default": "undefined"},
-            {"name": "force fallback adapter", "type": "bool", "default": "false"},
-            {"name": "compatibility mode", "type": "bool", "default": "false", "tags": ["dawn", "emscripten"]}
+            {"name": "force fallback adapter", "type": "bool", "default": "false"}
         ]
     },
     "request adapter callback": {

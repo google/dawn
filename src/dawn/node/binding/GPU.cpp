@@ -143,7 +143,6 @@ interop::Promise<std::optional<interop::Interface<interop::GPUAdapter>>> GPU::re
 
     RequestAdapterOptions nativeOptions;
     nativeOptions.forceFallbackAdapter = options.forceFallbackAdapter;
-    nativeOptions.compatibilityMode = options.compatibilityMode;
 
     // Convert the feature level.
     nativeOptions.featureLevel = FeatureLevel::Undefined;

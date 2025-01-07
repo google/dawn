@@ -417,7 +417,9 @@ int main(int argc, const char* argv[]) {
     wgpu::RequestAdapterOptions options = {};
     options.backendType = backendOpt.GetValue();
     if (options.backendType != wgpu::BackendType::Undefined) {
-        options.compatibilityMode = dawn::utils::BackendRequiresCompat(options.backendType);
+        options.featureLevel = dawn::utils::BackendRequiresCompat(options.backendType)
+                                   ? wgpu::FeatureLevel::Compatibility
+                                   : wgpu::FeatureLevel::Core;
     }
 
     wgpu::Future adapterFuture = instance.RequestAdapter(

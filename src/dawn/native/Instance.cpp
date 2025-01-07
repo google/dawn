@@ -374,8 +374,7 @@ std::vector<Ref<AdapterBase>> InstanceBase::EnumerateAdapters(
     auto* togglesDesc = unpacked.Get<DawnTogglesDescriptor>();
 
     wgpu::FeatureLevel featureLevel = wgpu::FeatureLevel::Core;
-    if ((options->featureLevel == wgpu::FeatureLevel::Compatibility ||
-         options->compatibilityMode) &&
+    if (options->featureLevel == wgpu::FeatureLevel::Compatibility &&
         !options->forceFallbackAdapter) {
         featureLevel = wgpu::FeatureLevel::Compatibility;
     }
