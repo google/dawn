@@ -473,10 +473,6 @@ MaybeError PhysicalDevice::InitializeDebugLayerFilters() {
         // Temporary IDs: list of warnings that should be fixed or promoted
         //
 
-        // Remove after warning have been addressed
-        // https://crbug.com/dawn/421
-        D3D12_MESSAGE_ID_GPU_BASED_VALIDATION_INCOMPATIBLE_RESOURCE_STATE,
-
         // For small placed resource alignment, we first request the small alignment, which may
         // get rejected and generate a debug error. Then, we request 0 to get the allowed
         // allowed alignment.
