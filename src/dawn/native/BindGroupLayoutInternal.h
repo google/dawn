@@ -93,6 +93,7 @@ class BindGroupLayoutInternalBase : public ApiObjectBase,
                         const BindGroupLayoutInternalBase* b) const;
     };
 
+    bool IsEmpty() const;
     BindingIndex GetBindingCount() const;
     // Returns |BindingIndex| because buffers are packed at the front.
     BindingIndex GetBufferCount() const;

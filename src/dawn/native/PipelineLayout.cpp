@@ -146,7 +146,9 @@ PipelineLayoutBase::PipelineLayoutBase(DeviceBase* device,
     auto bgls = ityp::SpanFromUntyped<BindGroupIndex>(descriptor->bindGroupLayouts,
                                                       descriptor->bindGroupLayoutCount);
     for (auto [group, bgl] : Enumerate(bgls)) {
-        if (bgl == nullptr) {
+        // According to WebGPU SPEC of CreatePipelineLayout(), if bindGroupLayouts[i] is not null
+        // and bindGroupLayouts[i].[[descriptor]].entries is empty, set bindGroupLayouts[i] to null.
+        if (bgl == nullptr || bgl->IsEmpty()) {
             continue;
         }
         mBindGroupLayouts[group] = bgl;

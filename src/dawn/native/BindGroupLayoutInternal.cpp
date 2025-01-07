@@ -735,6 +735,10 @@ bool BindGroupLayoutInternalBase::EqualityFunc::operator()(
     return a->IsLayoutEqual(b);
 }
 
+bool BindGroupLayoutInternalBase::IsEmpty() const {
+    return mBindingInfo.empty();
+}
+
 BindingIndex BindGroupLayoutInternalBase::GetBindingCount() const {
     return mBindingInfo.size();
 }

@@ -50,6 +50,10 @@ ObjectType BindGroupLayoutBase::GetType() const {
     return ObjectType::BindGroupLayout;
 }
 
+bool BindGroupLayoutBase::IsEmpty() const {
+    return mInternalLayout == nullptr || mInternalLayout->IsEmpty();
+}
+
 // static
 Ref<BindGroupLayoutBase> BindGroupLayoutBase::MakeError(DeviceBase* device, StringView label) {
     return AcquireRef(new BindGroupLayoutBase(device, ObjectBase::kError, label));

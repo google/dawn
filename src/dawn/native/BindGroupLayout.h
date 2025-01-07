@@ -57,6 +57,8 @@ class BindGroupLayoutBase final : public ApiObjectBase {
         return mPipelineCompatibilityToken;
     }
 
+    bool IsEmpty() const;
+
   protected:
     void DestroyImpl() override;
 
