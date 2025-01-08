@@ -4,32 +4,42 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 1
-; Bound: 13
+; Bound: 16
 ; Schema: 0
                OpCapability Shader
                OpMemoryModel Logical GLSL450
                OpEntryPoint Fragment %main1 "main1" %main1_frag_depth_Output
                OpExecutionMode %main1 OriginUpperLeft
                OpExecutionMode %main1 DepthReplacing
+               OpMemberName %tint_push_constant_struct 0 "tint_frag_depth_min"
+               OpMemberName %tint_push_constant_struct 1 "tint_frag_depth_max"
+               OpName %tint_push_constant_struct "tint_push_constant_struct"
+               OpName %tint_push_constants "tint_push_constants"
                OpName %main1_frag_depth_Output "main1_frag_depth_Output"
                OpName %main1_inner "main1_inner"
                OpName %main1 "main1"
+               OpMemberDecorate %tint_push_constant_struct 0 Offset 0
+               OpMemberDecorate %tint_push_constant_struct 1 Offset 4
+               OpDecorate %tint_push_constant_struct Block
                OpDecorate %main1_frag_depth_Output BuiltIn FragDepth
       %float = OpTypeFloat 32
+%tint_push_constant_struct = OpTypeStruct %float %float
+%_ptr_PushConstant_tint_push_constant_struct = OpTypePointer PushConstant %tint_push_constant_struct
+%tint_push_constants = OpVariable %_ptr_PushConstant_tint_push_constant_struct PushConstant
 %_ptr_Output_float = OpTypePointer Output %float
 %main1_frag_depth_Output = OpVariable %_ptr_Output_float Output
-          %5 = OpTypeFunction %float
+          %8 = OpTypeFunction %float
     %float_1 = OpConstant %float 1
        %void = OpTypeVoid
-         %10 = OpTypeFunction %void
-%main1_inner = OpFunction %float None %5
-          %6 = OpLabel
+         %13 = OpTypeFunction %void
+%main1_inner = OpFunction %float None %8
+          %9 = OpLabel
                OpReturnValue %float_1
                OpFunctionEnd
-      %main1 = OpFunction %void None %10
-         %11 = OpLabel
-         %12 = OpFunctionCall %float %main1_inner
-               OpStore %main1_frag_depth_Output %12 None
+      %main1 = OpFunction %void None %13
+         %14 = OpLabel
+         %15 = OpFunctionCall %float %main1_inner
+               OpStore %main1_frag_depth_Output %15 None
                OpReturn
                OpFunctionEnd
 ;

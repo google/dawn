@@ -131,6 +131,16 @@ struct Bindings {
 
 /// Configuration options used for generating SPIR-V.
 struct Options {
+    struct RangeOffsets {
+        /// The offset of the min_depth push constant
+        uint32_t min = 0;
+        /// The offset of the max_depth push constant
+        uint32_t max = 0;
+
+        /// Reflect the fields of this class so that it can be used by tint::ForeachField()
+        TINT_REFLECT(RangeOffsets, min, max);
+    };
+
     /// An optional remapped name to use when emitting the entry point.
     std::string remapped_entry_point_name = {};
 
@@ -187,6 +197,9 @@ struct Options {
     /// Set to `true` if the Vulkan Memory Model should be used
     bool use_vulkan_memory_model = false;
 
+    /// Offsets of the minDepth and maxDepth push constants.
+    std::optional<RangeOffsets> depth_range_offsets;
+
     /// Reflect the fields of this class so that it can be used by tint::ForeachField()
     TINT_REFLECT(Options,
                  remapped_entry_point_name,
@@ -205,7 +218,8 @@ struct Options {
                  pass_matrix_by_pointer,
                  polyfill_dot_4x8_packed,
                  disable_polyfill_integer_div_mod,
-                 use_vulkan_memory_model);
+                 use_vulkan_memory_model,
+                 depth_range_offsets);
 };
 
 }  // namespace tint::spirv::writer
