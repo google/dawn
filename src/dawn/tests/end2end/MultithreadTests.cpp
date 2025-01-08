@@ -121,8 +121,8 @@ TEST_P(MultithreadTests, Device_DroppedOnAnotherThread) {
     DAWN_SUPPRESS_TEST_IF(IsD3D12() && IsNvidia());
     // TODO(crbug.com/42240870): Flaky on Linux TSAN Release
     DAWN_SUPPRESS_TEST_IF(IsLinux() && IsVulkan() && IsTsan());
-    // TODO(crbug.com/383339997): Failing on Linux/Vulkan with VVL.
-    DAWN_SUPPRESS_TEST_IF(IsLinux() && IsVulkan() && IsBackendValidationEnabled());
+    // TODO(crbug.com/383339997): Failing on Vulkan with VVL.
+    DAWN_SUPPRESS_TEST_IF(IsVulkan() && IsBackendValidationEnabled());
 
     std::vector<wgpu::Device> devices(5);
 
@@ -159,8 +159,8 @@ TEST_P(MultithreadTests, Device_DroppedInCallback_OnAnotherThread) {
     // NVIDIA.
     DAWN_SUPPRESS_TEST_IF(IsD3D12() && IsNvidia());
 
-    // TODO(crbug.com/383339997): Failing on Linux/Vulkan with VVL.
-    DAWN_SUPPRESS_TEST_IF(IsLinux() && IsVulkan() && IsBackendValidationEnabled());
+    // TODO(crbug.com/383339997): Failing on Vulkan with VVL.
+    DAWN_SUPPRESS_TEST_IF(IsVulkan() && IsBackendValidationEnabled());
 
     std::vector<wgpu::Device> devices(10);
 
@@ -211,8 +211,8 @@ TEST_P(MultithreadTests, Device_WaitForDroppedInAnotherThread) {
     // NVIDIA.
     DAWN_SUPPRESS_TEST_IF(IsD3D12() && IsNvidia());
 
-    // TODO(crbug.com/383339997): Failing on Linux/Vulkan with VVL.
-    DAWN_SUPPRESS_TEST_IF(IsLinux() && IsVulkan() && IsBackendValidationEnabled());
+    // TODO(crbug.com/383339997): Failing on Vulkan with VVL.
+    DAWN_SUPPRESS_TEST_IF(IsVulkan() && IsBackendValidationEnabled());
 
     enum class Step {
         Begin,
