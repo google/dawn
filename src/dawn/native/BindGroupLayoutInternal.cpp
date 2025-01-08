@@ -460,15 +460,18 @@ BindingInfo CreateBindGroupLayoutInfo(const UnpackedPtr<BindGroupLayoutEntry>& b
     bindingInfo.visibility = binding->visibility;
 
     if (binding->buffer.type != wgpu::BufferBindingType::BindingNotUsed) {
-        bindingInfo.bindingLayout = BufferBindingInfo(binding->buffer);
+        bindingInfo.bindingLayout =
+            BufferBindingInfo(binding->buffer.WithTrivialFrontendDefaults());
     } else if (binding->sampler.type != wgpu::SamplerBindingType::BindingNotUsed) {
-        bindingInfo.bindingLayout = SamplerBindingInfo(binding->sampler);
+        bindingInfo.bindingLayout =
+            SamplerBindingInfo(binding->sampler.WithTrivialFrontendDefaults());
     } else if (binding->texture.sampleType != wgpu::TextureSampleType::BindingNotUsed) {
+        auto textureBindingInfo =
+            TextureBindingInfo(binding->texture.WithTrivialFrontendDefaults());
         if (binding->texture.viewDimension == kInternalInputAttachmentDim) {
-            bindingInfo.bindingLayout = InputAttachmentBindingInfo(binding->texture.sampleType);
+            bindingInfo.bindingLayout = InputAttachmentBindingInfo(textureBindingInfo.sampleType);
         } else {
-            bindingInfo.bindingLayout =
-                TextureBindingInfo(binding->texture.WithTrivialFrontendDefaults());
+            bindingInfo.bindingLayout = textureBindingInfo;
         }
     } else if (binding->storageTexture.access != wgpu::StorageTextureAccess::BindingNotUsed) {
         bindingInfo.bindingLayout =
@@ -831,6 +834,7 @@ bool BindGroupLayoutInternalBase::IsStorageBufferBinding(BindingIndex bindingInd
         case wgpu::BufferBindingType::ReadOnlyStorage:
             return true;
         case wgpu::BufferBindingType::BindingNotUsed:
+        case wgpu::BufferBindingType::Undefined:
             break;
     }
     DAWN_UNREACHABLE();

@@ -233,6 +233,7 @@ MaybeError BindGroupTracker::ApplyBindGroup(BindGroupIndex index) {
                         break;
                     }
                     case wgpu::BufferBindingType::BindingNotUsed:
+                    case wgpu::BufferBindingType::Undefined:
                         DAWN_UNREACHABLE();
                 }
                 return {};
@@ -371,6 +372,7 @@ void ComputePassBindGroupTracker::UnapplyComputeBindings(BindGroupIndex index) {
                         break;
                     }
                     case wgpu::BufferBindingType::BindingNotUsed:
+                    case wgpu::BufferBindingType::Undefined:
                         DAWN_UNREACHABLE();
                 }
             },
@@ -498,6 +500,7 @@ MaybeError RenderPassBindGroupTracker::Apply() {
                             break;
                         }
                         case wgpu::BufferBindingType::BindingNotUsed:
+                        case wgpu::BufferBindingType::Undefined:
                             DAWN_UNREACHABLE();
                     }
                     return {};

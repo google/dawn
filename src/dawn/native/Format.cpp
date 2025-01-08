@@ -67,6 +67,7 @@ SampleTypeBit SampleTypeToSampleTypeBit(wgpu::TextureSampleType sampleType) {
         case wgpu::TextureSampleType::Uint:
         case wgpu::TextureSampleType::Depth:
         case wgpu::TextureSampleType::BindingNotUsed:
+        case wgpu::TextureSampleType::Undefined:
             // When the compiler complains that you need to add a case statement here, please
             // also add a corresponding static assert below!
             break;
@@ -77,25 +78,31 @@ SampleTypeBit SampleTypeToSampleTypeBit(wgpu::TextureSampleType sampleType) {
         return SampleTypeBit::None;
     }
 
+    static_assert(static_cast<uint32_t>(wgpu::TextureSampleType::Undefined) == 1);
+    if (sampleType == wgpu::TextureSampleType::Undefined) {
+        DAWN_UNREACHABLE();
+        return SampleTypeBit::None;
+    }
+
     // Check that SampleTypeBit bits are in the same position / order as the respective
     // wgpu::TextureSampleType value.
     static_assert(SampleTypeBit::Float ==
                   static_cast<SampleTypeBit>(
-                      1 << (static_cast<uint32_t>(wgpu::TextureSampleType::Float) - 1)));
+                      1 << (static_cast<uint32_t>(wgpu::TextureSampleType::Float) - 2)));
     static_assert(
         SampleTypeBit::UnfilterableFloat ==
         static_cast<SampleTypeBit>(
-            1 << (static_cast<uint32_t>(wgpu::TextureSampleType::UnfilterableFloat) - 1)));
+            1 << (static_cast<uint32_t>(wgpu::TextureSampleType::UnfilterableFloat) - 2)));
     static_assert(SampleTypeBit::Uint ==
                   static_cast<SampleTypeBit>(
-                      1 << (static_cast<uint32_t>(wgpu::TextureSampleType::Uint) - 1)));
+                      1 << (static_cast<uint32_t>(wgpu::TextureSampleType::Uint) - 2)));
     static_assert(SampleTypeBit::Sint ==
                   static_cast<SampleTypeBit>(
-                      1 << (static_cast<uint32_t>(wgpu::TextureSampleType::Sint) - 1)));
+                      1 << (static_cast<uint32_t>(wgpu::TextureSampleType::Sint) - 2)));
     static_assert(SampleTypeBit::Depth ==
                   static_cast<SampleTypeBit>(
-                      1 << (static_cast<uint32_t>(wgpu::TextureSampleType::Depth) - 1)));
-    return static_cast<SampleTypeBit>(1 << (static_cast<uint32_t>(sampleType) - 1));
+                      1 << (static_cast<uint32_t>(wgpu::TextureSampleType::Depth) - 2)));
+    return static_cast<SampleTypeBit>(1 << (static_cast<uint32_t>(sampleType) - 2));
 }
 
 const UnsupportedReason Format::supported;

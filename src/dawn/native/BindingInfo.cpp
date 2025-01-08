@@ -85,6 +85,7 @@ void IncrementBindingCounts(BindingCounts* bindingCounts,
 
             case wgpu::BufferBindingType::BindingNotUsed:
                 // Can't get here due to the enclosing if statement.
+            case wgpu::BufferBindingType::Undefined:
                 DAWN_UNREACHABLE();
                 break;
         }

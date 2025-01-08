@@ -127,6 +127,7 @@ void SyncScopeUsageTracker::AddBindGroup(BindGroupBase* group) {
                         BufferUsedAs(buffer, kReadOnlyStorageBuffer, bindingInfo.visibility);
                         break;
                     case wgpu::BufferBindingType::BindingNotUsed:
+                    case wgpu::BufferBindingType::Undefined:
                         DAWN_UNREACHABLE();
                 }
             },
@@ -157,6 +158,7 @@ void SyncScopeUsageTracker::AddBindGroup(BindGroupBase* group) {
                         TextureViewUsedAs(view, kReadOnlyStorageTexture, bindingInfo.visibility);
                         break;
                     case wgpu::StorageTextureAccess::BindingNotUsed:
+                    case wgpu::StorageTextureAccess::Undefined:
                         DAWN_UNREACHABLE();
                 }
             },

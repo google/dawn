@@ -218,6 +218,7 @@ ResultOrError<d3d::CompiledShader> ShaderModule::Compile(
                                                  dstBindingPoint.group, dstBindingPoint.binding});
                         break;
                     case wgpu::BufferBindingType::BindingNotUsed:
+                    case wgpu::BufferBindingType::Undefined:
                         DAWN_UNREACHABLE();
                         break;
                 }

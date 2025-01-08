@@ -527,6 +527,7 @@ class BindGroupStateTracker : public BindGroupTrackerBase<false, uint64_t> {
                 }
                 break;
             case wgpu::BufferBindingType::BindingNotUsed:
+            case wgpu::BufferBindingType::Undefined:
                 DAWN_UNREACHABLE();
         }
     }

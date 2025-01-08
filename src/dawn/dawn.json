@@ -378,16 +378,17 @@
         "category": "enum",
         "values": [
             {"value": 0, "name": "binding not used"},
-            {"value": 1, "name": "uniform"},
-            {"value": 2, "name": "storage"},
-            {"value": 3, "name": "read only storage"}
+            {"value": 1, "name": "undefined", "jsrepr": "undefined", "valid": false},
+            {"value": 2, "name": "uniform"},
+            {"value": 3, "name": "storage"},
+            {"value": 4, "name": "read only storage"}
         ]
     },
     "buffer binding layout": {
         "category": "structure",
         "extensible": "in",
         "members": [
-            {"name": "type", "type": "buffer binding type", "default": "binding not used"},
+            {"name": "type", "type": "buffer binding type", "default": "uniform"},
             {"name": "has dynamic offset", "type": "bool", "default": "false"},
             {"name": "min binding size", "type": "uint64_t", "default": "0"}
         ]
@@ -397,16 +398,17 @@
         "category": "enum",
         "values": [
             {"value": 0, "name": "binding not used"},
-            {"value": 1, "name": "filtering"},
-            {"value": 2, "name": "non filtering"},
-            {"value": 3, "name": "comparison"}
+            {"value": 1, "name": "undefined", "jsrepr": "undefined", "valid": false},
+            {"value": 2, "name": "filtering"},
+            {"value": 3, "name": "non filtering"},
+            {"value": 4, "name": "comparison"}
         ]
     },
     "sampler binding layout": {
         "category": "structure",
         "extensible": "in",
         "members": [
-            {"name": "type", "type": "sampler binding type", "default": "binding not used"}
+            {"name": "type", "type": "sampler binding type", "default": "filtering"}
         ]
     },
     "static sampler binding layout": {
@@ -423,18 +425,19 @@
         "category": "enum",
         "values": [
             {"value": 0, "name": "binding not used"},
-            {"value": 1, "name": "float"},
-            {"value": 2, "name": "unfilterable float"},
-            {"value": 3, "name": "depth"},
-            {"value": 4, "name": "sint"},
-            {"value": 5, "name": "uint"}
+            {"value": 1, "name": "undefined", "jsrepr": "undefined", "valid": false},
+            {"value": 2, "name": "float"},
+            {"value": 3, "name": "unfilterable float"},
+            {"value": 4, "name": "depth"},
+            {"value": 5, "name": "sint"},
+            {"value": 6, "name": "uint"}
         ]
     },
     "texture binding layout": {
         "category": "structure",
         "extensible": "in",
         "members": [
-            {"name": "sample type", "type": "texture sample type", "default": "binding not used"},
+            {"name": "sample type", "type": "texture sample type", "default": "float"},
             {"name": "view dimension", "type": "texture view dimension", "default": "2D"},
             {"name": "multisampled", "type": "bool", "default": "false"}
         ]
@@ -496,16 +499,17 @@
         "category": "enum",
         "values": [
             {"value": 0, "name": "binding not used"},
-            {"value": 1, "name": "write only"},
-            {"value": 2, "name": "read only"},
-            {"value": 3, "name": "read write"}
+            {"value": 1, "name": "undefined", "jsrepr": "undefined", "valid": false},
+            {"value": 2, "name": "write only"},
+            {"value": 3, "name": "read only"},
+            {"value": 4, "name": "read write"}
         ]
     },
     "storage texture binding layout": {
         "category": "structure",
         "extensible": "in",
         "members": [
-            {"name": "access", "type": "storage texture access", "default": "binding not used"},
+            {"name": "access", "type": "storage texture access", "default": "write only"},
             {"name": "format", "type": "texture format", "default": "undefined"},
             {"name": "view dimension", "type": "texture view dimension", "default": "2D"}
         ]

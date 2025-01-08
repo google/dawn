@@ -105,6 +105,7 @@ MaybeError ValidateBufferBinding(const DeviceBase* device,
             requiredBindingAlignment = device->GetLimits().v1.minStorageBufferOffsetAlignment;
             break;
         case wgpu::BufferBindingType::BindingNotUsed:
+        case wgpu::BufferBindingType::Undefined:
             DAWN_UNREACHABLE();
     }
 
@@ -144,6 +145,7 @@ MaybeError ValidateBufferBinding(const DeviceBase* device,
                                                         maxStorageBufferBindingSize, bindingSize));
             break;
         case wgpu::BufferBindingType::BindingNotUsed:
+        case wgpu::BufferBindingType::Undefined:
             DAWN_UNREACHABLE();
     }
 
