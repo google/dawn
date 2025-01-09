@@ -78,7 +78,6 @@
 #include "src/tint/lang/core/ir/unused.h"
 #include "src/tint/lang/core/ir/user_call.h"
 #include "src/tint/lang/core/ir/var.h"
-#include "src/tint/lang/core/type/abstract_int.h"
 #include "src/tint/lang/core/type/array.h"
 #include "src/tint/lang/core/type/bool.h"
 #include "src/tint/lang/core/type/f16.h"
@@ -1762,6 +1761,11 @@ void Validator::CheckType(const core::type::Type* root,
     }
 
     auto visit = [&](const core::type::Type* type) {
+        if (type->IsAbstract()) {
+            diag() << "abstracts are not permitted";
+            return false;
+        }
+
         return tint::Switch(
             type,
             [&](const core::type::Reference* ref) {
@@ -2697,11 +2701,6 @@ void Validator::CheckBitcastTypes(const Bitcast* bitcast) {
         if (result_type->Is<core::type::F16>()) {
             return;
         }
-    } else if (val_type->Is<core::type::AbstractInt>()) {
-        // AbstractInt -> u32
-        if (result_type->Is<core::type::U32>()) {
-            return;
-        }
     } else if (val_type->Is<core::type::Vector>()) {
         auto val_elements = val_type->Elements();
         if (!val_elements.type) {
@@ -2757,12 +2756,6 @@ void Validator::CheckBitcastTypes(const Bitcast* bitcast) {
                     result_type->IsAnyOf<core::type::U32, core::type::I32, core::type::F32>()) {
                     return;
                 }
-            }
-        } else if (val_elements.type->Is<core::type::AbstractInt>()) {
-            // vecN<AbstractInt> -> vecN<u32>
-            if (result_elements.has_value() && val_elements.count == result_elements->count &&
-                result_elements->type->Is<core::type::U32>()) {
-                return;
             }
         }
     }

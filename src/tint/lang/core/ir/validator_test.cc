@@ -40,6 +40,8 @@
 #include "src/tint/lang/core/ir/validator.h"
 #include "src/tint/lang/core/number.h"
 #include "src/tint/lang/core/texel_format.h"
+#include "src/tint/lang/core/type/abstract_float.h"
+#include "src/tint/lang/core/type/abstract_int.h"
 #include "src/tint/lang/core/type/manager.h"
 #include "src/tint/lang/core/type/matrix.h"
 #include "src/tint/lang/core/type/memory_view.h"
@@ -245,6 +247,179 @@ $B1: {  # root
 
 %f = func():void {
   $B2: {
+    ret
+  }
+}
+)");
+}
+
+TEST_F(IR_ValidatorTest, Abstract_Scalar) {
+    auto* f = b.Function("my_func", ty.void_());
+    b.Append(f->Block(), [&] {
+        b.Var("af", function, ty.AFloat());
+        b.Var("af", function, ty.AInt());
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_EQ(res.Failure().reason.Str(),
+              R"(:3:5 error: var: abstracts are not permitted
+    %af:ptr<function, abstract-float, read_write> = var
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+:2:3 note: in block
+  $B1: {
+  ^^^
+
+:4:5 error: var: abstracts are not permitted
+    %af_1:ptr<function, abstract-int, read_write> = var  # %af_1: 'af'
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+:2:3 note: in block
+  $B1: {
+  ^^^
+
+note: # Disassembly
+%my_func = func():void {
+  $B1: {
+    %af:ptr<function, abstract-float, read_write> = var
+    %af_1:ptr<function, abstract-int, read_write> = var  # %af_1: 'af'
+    ret
+  }
+}
+)");
+}
+
+TEST_F(IR_ValidatorTest, Abstract_Vector) {
+    auto* f = b.Function("my_func", ty.void_());
+    b.Append(f->Block(), [&] {
+        b.Var("af", function, ty.vec2<AFloat>());
+        b.Var("ai", function, ty.vec3<AInt>());
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_EQ(res.Failure().reason.Str(),
+              R"(:3:5 error: var: abstracts are not permitted
+    %af:ptr<function, vec2<abstract-float>, read_write> = var
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+:2:3 note: in block
+  $B1: {
+  ^^^
+
+:4:5 error: var: abstracts are not permitted
+    %ai:ptr<function, vec3<abstract-int>, read_write> = var
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+:2:3 note: in block
+  $B1: {
+  ^^^
+
+note: # Disassembly
+%my_func = func():void {
+  $B1: {
+    %af:ptr<function, vec2<abstract-float>, read_write> = var
+    %ai:ptr<function, vec3<abstract-int>, read_write> = var
+    ret
+  }
+}
+)");
+}
+
+TEST_F(IR_ValidatorTest, Abstract_Matrix) {
+    auto* f = b.Function("my_func", ty.void_());
+    b.Append(f->Block(), [&] {
+        b.Var("af", function, ty.mat2x2<AFloat>());
+        b.Var("ai", function, ty.mat3x4<AInt>());
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_EQ(res.Failure().reason.Str(),
+              R"(:3:5 error: var: abstracts are not permitted
+    %af:ptr<function, mat2x2<abstract-float>, read_write> = var
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+:2:3 note: in block
+  $B1: {
+  ^^^
+
+:4:5 error: var: abstracts are not permitted
+    %ai:ptr<function, mat3x4<abstract-int>, read_write> = var
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+:2:3 note: in block
+  $B1: {
+  ^^^
+
+note: # Disassembly
+%my_func = func():void {
+  $B1: {
+    %af:ptr<function, mat2x2<abstract-float>, read_write> = var
+    %ai:ptr<function, mat3x4<abstract-int>, read_write> = var
+    ret
+  }
+}
+)");
+}
+
+TEST_F(IR_ValidatorTest, Abstract_Struct) {
+    auto* str_ty =
+        ty.Struct(mod.symbols.New("MyStruct"), {
+                                                   {mod.symbols.New("af"), ty.AFloat(), {}},
+                                                   {mod.symbols.New("ai"), ty.AInt(), {}},
+                                               });
+    auto* v = b.Var(ty.ptr(private_, str_ty));
+    mod.root_block->Append(v);
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_EQ(res.Failure().reason.Str(),
+              R"(:7:3 error: var: abstracts are not permitted
+  %1:ptr<private, MyStruct, read_write> = var
+  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+:6:1 note: in block
+$B1: {  # root
+^^^
+
+note: # Disassembly
+MyStruct = struct @align(1) {
+  af:abstract-float @offset(0)
+  ai:abstract-int @offset(0)
+}
+
+$B1: {  # root
+  %1:ptr<private, MyStruct, read_write> = var
+}
+
+)");
+}
+
+TEST_F(IR_ValidatorTest, Abstract_FunctionParam) {
+    auto* f = b.Function("my_func", ty.void_());
+
+    f->SetParams({b.FunctionParam(ty.AFloat()), b.FunctionParam(ty.AInt())});
+    f->Block()->Append(b.Return(f));
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_EQ(res.Failure().reason.Str(),
+              R"(:1:17 error: abstracts are not permitted
+%my_func = func(%2:abstract-float, %3:abstract-int):void {
+                ^^^^^^^^^^^^^^^^^
+
+:1:36 error: abstracts are not permitted
+%my_func = func(%2:abstract-float, %3:abstract-int):void {
+                                   ^^^^^^^^^^^^^^^
+
+note: # Disassembly
+%my_func = func(%2:abstract-float, %3:abstract-int):void {
+  $B1: {
     ret
   }
 }
@@ -11170,9 +11345,6 @@ INSTANTIATE_TEST_SUITE_P(
         std::make_tuple(false, TypeBuilder<f16>, TypeBuilder<i32>),
         std::make_tuple(false, TypeBuilder<f16>, TypeBuilder<f32>),
         std::make_tuple(false, TypeBuilder<f16>, TypeBuilder<vec2<f16>>)
-
-        // Intentionally omitting AbstractInt cases, since concretetization
-        // when creating IR should remove them
         ));
 
 }  // namespace
