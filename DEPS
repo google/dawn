@@ -395,7 +395,7 @@ deps = {
   },
 
   'tools/cmake': {
-    'condition': '(fetch_cmake or dawn_node) and (host_os == "mac" or host_os == "linux")',
+    'condition': '(fetch_cmake or dawn_node)',
     'packages': [{
       'package': 'infra/3pp/tools/cmake/${{platform}}',
       'version': Var('dawn_cmake_version'),
@@ -583,31 +583,6 @@ hooks = [
     'condition': 'dawn_standalone',
     'action': ['python3', 'build/util/lastchange.py',
                '-o', 'build/util/LASTCHANGE'],
-  },
-  # TODO(https://crbug.com/1180257): Use CIPD for CMake on Windows.
-  {
-    'name': 'cmake_win32',
-    'pattern': '.',
-    'condition': '(fetch_cmake or dawn_node) and host_os == "win"',
-    'action': [ 'python3',
-                'third_party/depot_tools/download_from_google_storage.py',
-                '--no_resume',
-                '--platform=win32',
-                '--no_auth',
-                '--bucket', 'chromium-tools',
-                Var('dawn_cmake_win32_sha1'),
-                '-o', 'tools/cmake-win32.zip'
-    ],
-  },
-  {
-    'name': 'cmake_win32_extract',
-    'pattern': '.',
-    'condition': '(fetch_cmake or dawn_node) and host_os == "win"',
-    'action': [ 'python3',
-                'scripts/extract.py',
-                'tools/cmake-win32.zip',
-                'tools/cmake-win32/',
-    ],
   },
 
   # Node binaries, when dawn_node is enabled
