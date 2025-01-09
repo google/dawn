@@ -236,7 +236,15 @@ tint_add_target(tint_lang_core_ir_test test
   lang/core/ir/traverse_test.cc
   lang/core/ir/unreachable_test.cc
   lang/core/ir/user_call_test.cc
+  lang/core/ir/validator_access_test.cc
+  lang/core/ir/validator_builtin_test.cc
+  lang/core/ir/validator_call_test.cc
+  lang/core/ir/validator_flow_control_test.cc
+  lang/core/ir/validator_function_test.cc
   lang/core/ir/validator_test.cc
+  lang/core/ir/validator_test.h
+  lang/core/ir/validator_type_test.cc
+  lang/core/ir/validator_value_test.cc
   lang/core/ir/value_test.cc
   lang/core/ir/var_test.cc
 )
