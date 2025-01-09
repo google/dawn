@@ -30,6 +30,7 @@
 #include <algorithm>
 #include <climits>
 #include <cstdlib>
+#include <new>
 #include <utility>
 
 #include "dawn/common/Assert.h"
