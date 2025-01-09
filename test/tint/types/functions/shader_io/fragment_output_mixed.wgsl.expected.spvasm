@@ -1,9 +1,10 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 1
-; Bound: 46
+; Bound: 53
 ; Schema: 0
                OpCapability Shader
+         %47 = OpExtInstImport "GLSL.std.450"
                OpMemoryModel Logical GLSL450
                OpEntryPoint Fragment %main "main" %main_loc0_Output %main_frag_depth_Output %main_loc1_Output %main_loc2_Output %main_sample_mask_Output %main_loc3_Output
                OpExecutionMode %main OriginUpperLeft
@@ -75,6 +76,7 @@
          %25 = OpConstantComposite %FragmentOutputs %int_1 %float_2 %uint_1 %float_1 %uint_2 %30
        %void = OpTypeVoid
          %35 = OpTypeFunction %void
+%_ptr_PushConstant_float = OpTypePointer PushConstant %float
      %uint_0 = OpConstant %uint 0
  %main_inner = OpFunction %FragmentOutputs None %23
          %24 = OpLabel
@@ -86,15 +88,20 @@
          %38 = OpCompositeExtract %int %37 0
                OpStore %main_loc0_Output %38 None
          %39 = OpCompositeExtract %float %37 1
-               OpStore %main_frag_depth_Output %39 None
-         %40 = OpCompositeExtract %uint %37 2
-               OpStore %main_loc1_Output %40 None
-         %41 = OpCompositeExtract %float %37 3
-               OpStore %main_loc2_Output %41 None
-         %42 = OpCompositeExtract %uint %37 4
-         %43 = OpAccessChain %_ptr_Output_uint %main_sample_mask_Output %uint_0
-               OpStore %43 %42 None
-         %45 = OpCompositeExtract %v4float %37 5
-               OpStore %main_loc3_Output %45 None
+         %40 = OpAccessChain %_ptr_PushConstant_float %tint_push_constants %uint_0
+         %43 = OpLoad %float %40 None
+         %44 = OpAccessChain %_ptr_PushConstant_float %tint_push_constants %uint_1
+         %45 = OpLoad %float %44 None
+         %46 = OpExtInst %float %47 NClamp %39 %43 %45
+               OpStore %main_frag_depth_Output %46 None
+         %48 = OpCompositeExtract %uint %37 2
+               OpStore %main_loc1_Output %48 None
+         %49 = OpCompositeExtract %float %37 3
+               OpStore %main_loc2_Output %49 None
+         %50 = OpCompositeExtract %uint %37 4
+         %51 = OpAccessChain %_ptr_Output_uint %main_sample_mask_Output %uint_0
+               OpStore %51 %50 None
+         %52 = OpCompositeExtract %v4float %37 5
+               OpStore %main_loc3_Output %52 None
                OpReturn
                OpFunctionEnd
