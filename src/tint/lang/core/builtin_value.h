@@ -46,7 +46,8 @@ namespace tint::core {
 /// Builtin value defined with `@builtin(<name>)`.
 enum class BuiltinValue : uint8_t {
     kUndefined,
-    kPointSize,  // Tint-internal enum entry - not parsed
+    kCullDistance,  // Tint-internal enum entry - not parsed
+    kPointSize,     // Tint-internal enum entry - not parsed
     kClipDistances,
     kFragDepth,
     kFrontFacing,

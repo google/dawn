@@ -517,6 +517,7 @@ enum BuiltinValue {
     vertex_index = 13;
     workgroup_id = 14;
     clip_distances = 15;
+    cull_distance = 16;
 }
 
 enum BuiltinFn {

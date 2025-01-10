@@ -1409,6 +1409,8 @@ struct Decoder {
         switch (in) {
             case pb::BuiltinValue::point_size:
                 return core::BuiltinValue::kPointSize;
+            case pb::BuiltinValue::cull_distance:
+                return core::BuiltinValue::kCullDistance;
             case pb::BuiltinValue::frag_depth:
                 return core::BuiltinValue::kFragDepth;
             case pb::BuiltinValue::front_facing:

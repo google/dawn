@@ -326,6 +326,8 @@ class Printer {
         switch (builtin) {
             case core::BuiltinValue::kPointSize:
                 return SpvBuiltInPointSize;
+            case core::BuiltinValue::kCullDistance:
+                return SpvBuiltInCullDistance;
             case core::BuiltinValue::kFragDepth:
                 return SpvBuiltInFragDepth;
             case core::BuiltinValue::kFrontFacing:

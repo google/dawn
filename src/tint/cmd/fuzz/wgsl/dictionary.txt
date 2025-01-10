@@ -83,6 +83,7 @@
 "__atomic_compare_exchange_result"
 "__atomic_compare_exchange_result_i32"
 "__atomic_compare_exchange_result_u32"
+"__cull_distance"
 "__frexp_result"
 "__frexp_result_abstract"
 "__frexp_result_f16"

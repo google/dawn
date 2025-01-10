@@ -910,6 +910,8 @@ struct Encoder {
         switch (in) {
             case core::BuiltinValue::kPointSize:
                 return pb::BuiltinValue::point_size;
+            case core::BuiltinValue::kCullDistance:
+                return pb::BuiltinValue::cull_distance;
             case core::BuiltinValue::kFragDepth:
                 return pb::BuiltinValue::frag_depth;
             case core::BuiltinValue::kFrontFacing:

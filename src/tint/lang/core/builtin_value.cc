@@ -94,6 +94,8 @@ std::string_view ToString(BuiltinValue value) {
     switch (value) {
         case BuiltinValue::kUndefined:
             return "undefined";
+        case BuiltinValue::kCullDistance:
+            return "__cull_distance";
         case BuiltinValue::kPointSize:
             return "__point_size";
         case BuiltinValue::kClipDistances:
