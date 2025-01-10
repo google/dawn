@@ -64,7 +64,7 @@ enum builtin_value {
   clip_distances
   subgroup_invocation_id
   subgroup_size
-  __point_size
+  @internal __point_size
 }
 
 // https://www.w3.org/TR/WGSL/#interpolation

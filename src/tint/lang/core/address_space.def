@@ -7,7 +7,7 @@ enum address_space {
   storage
   push_constant
   pixel_local
-  __in
-  __out
+  @internal __in
+  @internal __out
   @internal handle
 }

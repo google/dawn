@@ -42,9 +42,6 @@ namespace tint::core {
 /// @param str the string to parse
 /// @returns the parsed enum, or BuiltinValue::kUndefined if the string could not be parsed.
 BuiltinValue ParseBuiltinValue(std::string_view str) {
-    if (str == "__point_size") {
-        return BuiltinValue::kPointSize;
-    }
     if (str == "clip_distances") {
         return BuiltinValue::kClipDistances;
     }
