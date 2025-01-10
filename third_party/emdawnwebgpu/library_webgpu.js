@@ -587,7 +587,7 @@ var LibraryWebGPU = {
   emwgpuWaitAny__sig: 'jppp',
 #if ASYNCIFY
   emwgpuWaitAny__async: true,
-  emwgpuWaitAny: async (futurePtr, futureCount, timeoutNSPtr) => {
+  emwgpuWaitAny: (futurePtr, futureCount, timeoutNSPtr) => Asyncify.handleAsync(async () => {
     var promises = [];
     if (timeoutNSPtr) {
       var timeoutMS = {{{ gpu.makeGetU64('timeoutNSPtr', 0) }}} / 1000000;
@@ -606,10 +606,10 @@ var LibraryWebGPU = {
       promises[i] = WebGPU.Internals.futures[futureId];
     }
 
-    var firstResolvedFuture = await Promise.race(promises);
+    const firstResolvedFuture = await Promise.race(promises);
     delete WebGPU.Internals.futures[firstResolvedFuture];
     return firstResolvedFuture;
-  },
+  }),
 #else
   emwgpuWaitAny: () => {
     abort('TODO: Implement asyncify-free WaitAny for timeout=0');
