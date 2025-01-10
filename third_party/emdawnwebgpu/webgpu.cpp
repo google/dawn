@@ -383,6 +383,15 @@ class EventSource {
 // order to handle Spontaneous events.
 class EventManager : NonMovable {
  public:
+  EventManager() {
+    // We set up a tracker for events that are registered against a null
+    // Instance because devices may have been created and injected before the
+    // Instance was created.
+    // TODO(crbug.com/388914937): Remove this once users are updated.
+    std::unique_lock<std::mutex> lock(mMutex);
+    mPerInstanceEvents.try_emplace(kNullInstanceId);
+  }
+
   void RegisterInstance(InstanceID instance) {
     assert(instance);
     std::unique_lock<std::mutex> lock(mMutex);
@@ -1529,7 +1538,7 @@ void wgpuSurfaceCapabilitiesFreeMembers(WGPUSurfaceCapabilities) {
 
 WGPUInstance wgpuCreateInstance(
     [[maybe_unused]] const WGPUInstanceDescriptor* descriptor) {
-  assert(descriptor == nullptr);  // descriptor not implemented yet
+  // TODO: descriptor not implemented yet.
   return new WGPUInstanceImpl();
 }
 
