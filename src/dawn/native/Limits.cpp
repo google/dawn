@@ -252,7 +252,9 @@ Limits ReifyDefaultLimits(const Limits& limits, wgpu::FeatureLevel featureLevel)
     return out;
 }
 
-MaybeError ValidateLimits(const Limits& supportedLimits, const Limits& requiredLimits) {
+MaybeError ValidateLimits(wgpu::FeatureLevel featureLevel,
+                          const Limits& supportedLimits,
+                          const Limits& requiredLimits) {
 #define X(Class, limitName, ...)                                                            \
     if (!IsLimitUndefined(requiredLimits.limitName)) {                                      \
         DAWN_TRY_CONTEXT(CheckLimit<LimitClass::Class>::Validate(supportedLimits.limitName, \
@@ -261,6 +263,28 @@ MaybeError ValidateLimits(const Limits& supportedLimits, const Limits& requiredL
     }
     LIMITS(X)
 #undef X
+
+#define PERSTAGE_DEPENDENT_LIMITS(X)                                       \
+    X(maxStorageBuffersInFragmentStage, maxStorageBuffersPerShaderStage)   \
+    X(maxStorageBuffersInVertexStage, maxStorageBuffersPerShaderStage)     \
+    X(maxStorageTexturesInFragmentStage, maxStorageTexturesPerShaderStage) \
+    X(maxStorageTexturesInVertexStage, maxStorageTexturesPerShaderStage)
+
+    Limits defaultLimits;
+    GetDefaultLimits(&defaultLimits, featureLevel);
+
+#define X(limitName, upperLimitName)                                                   \
+    if (!IsLimitUndefined(requiredLimits.limitName)) {                                 \
+        uint32_t upperLimit = IsLimitUndefined(requiredLimits.upperLimitName)          \
+                                  ? defaultLimits.upperLimitName                       \
+                                  : requiredLimits.upperLimitName;                     \
+        DAWN_INVALID_IF(requiredLimits.limitName > upperLimit,                         \
+                        #limitName " must be less then or equal to " #upperLimitName); \
+    }
+
+    PERSTAGE_DEPENDENT_LIMITS(X)
+#undef X
+
     return {};
 }
 

@@ -101,14 +101,15 @@ TEST(Limits, ReifyDefaultLimits_Clamps) {
 // Test |ValidateLimits| works to validate limits are not better
 // than supported.
 TEST(Limits, ValidateLimits) {
+    const wgpu::FeatureLevel featureLevel = wgpu::FeatureLevel::Core;
     // Start with the default for supported.
     Limits defaults;
-    GetDefaultLimits(&defaults, wgpu::FeatureLevel::Core);
+    GetDefaultLimits(&defaults, featureLevel);
 
     // Test supported == required is valid.
     {
         Limits required = defaults;
-        EXPECT_TRUE(ValidateLimits(defaults, required).IsSuccess());
+        EXPECT_TRUE(ValidateLimits(featureLevel, defaults, required).IsSuccess());
     }
 
     // Test supported == required is valid, when they are not default.
@@ -117,20 +118,20 @@ TEST(Limits, ValidateLimits) {
         Limits required = defaults;
         supported.maxBindGroups += 1;
         required.maxBindGroups += 1;
-        EXPECT_TRUE(ValidateLimits(supported, required).IsSuccess());
+        EXPECT_TRUE(ValidateLimits(featureLevel, supported, required).IsSuccess());
     }
 
     // Test that default-initialized (all undefined) is valid.
     {
         Limits required = {};
-        EXPECT_TRUE(ValidateLimits(defaults, required).IsSuccess());
+        EXPECT_TRUE(ValidateLimits(featureLevel, defaults, required).IsSuccess());
     }
 
     // Test that better than supported is invalid for "maximum" limits.
     {
         Limits required = {};
         required.maxTextureDimension3D = defaults.maxTextureDimension3D + 1;
-        MaybeError err = ValidateLimits(defaults, required);
+        MaybeError err = ValidateLimits(featureLevel, defaults, required);
         EXPECT_TRUE(err.IsError());
         err.AcquireError();
     }
@@ -139,14 +140,14 @@ TEST(Limits, ValidateLimits) {
     {
         Limits required = {};
         required.maxComputeWorkgroupSizeX = defaults.maxComputeWorkgroupSizeX - 1;
-        EXPECT_TRUE(ValidateLimits(defaults, required).IsSuccess());
+        EXPECT_TRUE(ValidateLimits(featureLevel, defaults, required).IsSuccess());
     }
 
     // Test that better than min is invalid for "alignment" limits.
     {
         Limits required = {};
         required.minUniformBufferOffsetAlignment = defaults.minUniformBufferOffsetAlignment / 2;
-        MaybeError err = ValidateLimits(defaults, required);
+        MaybeError err = ValidateLimits(featureLevel, defaults, required);
         EXPECT_TRUE(err.IsError());
         err.AcquireError();
     }
@@ -155,14 +156,143 @@ TEST(Limits, ValidateLimits) {
     {
         Limits required = {};
         required.minStorageBufferOffsetAlignment = defaults.minStorageBufferOffsetAlignment * 2;
-        EXPECT_TRUE(ValidateLimits(defaults, required).IsSuccess());
+        EXPECT_TRUE(ValidateLimits(featureLevel, defaults, required).IsSuccess());
     }
 
     // Test that worse than min and not a power of two is invalid for "alignment" limits.
     {
         Limits required = {};
         required.minStorageBufferOffsetAlignment = defaults.minStorageBufferOffsetAlignment * 3;
-        MaybeError err = ValidateLimits(defaults, required);
+        MaybeError err = ValidateLimits(featureLevel, defaults, required);
+        EXPECT_TRUE(err.IsError());
+        err.AcquireError();
+    }
+}
+
+// Test that maxStorage(Buffers|Textures)In(Fragment/Vertex)Stage
+// must be less than the requested dependent maxStorage(Buffers|Textures)PerShaderStage
+TEST(Limits, PerStageDependentLimitsRequested) {
+    const wgpu::FeatureLevel featureLevel = wgpu::FeatureLevel::Core;
+    // Start with the default for supported.
+    Limits defaults;
+    GetDefaultLimits(&defaults, featureLevel);
+
+    // Test at least one works.
+    {
+        Limits required = {};
+        required.maxStorageBuffersInFragmentStage = 2;
+        required.maxStorageBuffersPerShaderStage = 2;
+        EXPECT_TRUE(ValidateLimits(featureLevel, defaults, required).IsSuccess());
+    }
+
+    // Test maxStorageBuffersInFragmentStage fails if greater than
+    // requested maxStorageBuffersPerShaderStage
+    {
+        Limits required = {};
+        required.maxStorageBuffersInFragmentStage = 2;
+        required.maxStorageBuffersPerShaderStage = 1;
+        MaybeError err = ValidateLimits(featureLevel, defaults, required);
+        EXPECT_TRUE(err.IsError());
+        err.AcquireError();
+    }
+
+    // Test maxStorageBuffersInVertexStage fails if greater than
+    // requested maxStorageBuffersPerShaderStage
+    {
+        Limits required = {};
+        required.maxStorageBuffersInVertexStage = 2;
+        required.maxStorageBuffersPerShaderStage = 1;
+        MaybeError err = ValidateLimits(featureLevel, defaults, required);
+        EXPECT_TRUE(err.IsError());
+        err.AcquireError();
+    }
+
+    // Test maxStorageTexturesInFragmentStage fails if greater than
+    // requested maxStorageTexturesPerShaderStage
+    {
+        Limits required = {};
+        required.maxStorageTexturesInFragmentStage = 2;
+        required.maxStorageTexturesPerShaderStage = 1;
+        MaybeError err = ValidateLimits(featureLevel, defaults, required);
+        EXPECT_TRUE(err.IsError());
+        err.AcquireError();
+    }
+
+    // Test maxStorageTexturesInVertexStage fails if greater than requested
+    // maxStorageTexturesPerShaderStage
+    {
+        Limits required = {};
+        required.maxStorageTexturesInVertexStage = 2;
+        required.maxStorageTexturesPerShaderStage = 1;
+        MaybeError err = ValidateLimits(featureLevel, defaults, required);
+        EXPECT_TRUE(err.IsError());
+        err.AcquireError();
+    }
+}
+
+// Test that maxStorage(Buffers|Textures)In(Fragment/Vertex)Stage
+// must be less than the default dependent maxStorage(Buffers|Textures)PerShaderStage
+// if the dependent limit is not requested.
+TEST(Limits, PerStageDependentLimitsDefault) {
+    const wgpu::FeatureLevel featureLevel = wgpu::FeatureLevel::Core;
+    // Start with the default for supported.
+    Limits supported;
+    GetDefaultLimits(&supported, featureLevel);
+
+    const uint32_t kLimit = 100;
+
+    // set the supported higher than the default
+    supported.maxStorageBuffersInFragmentStage = kLimit;
+    supported.maxStorageBuffersInVertexStage = kLimit;
+    supported.maxStorageBuffersPerShaderStage = kLimit;
+    supported.maxStorageTexturesInFragmentStage = kLimit;
+    supported.maxStorageTexturesInVertexStage = kLimit;
+    supported.maxStorageTexturesPerShaderStage = kLimit;
+
+    // Check at least one works when limits match.
+    {
+        Limits required = {};
+        required.maxStorageBuffersInFragmentStage = kLimit;
+        required.maxStorageBuffersPerShaderStage = kLimit;
+        EXPECT_TRUE(ValidateLimits(featureLevel, supported, required).IsSuccess());
+    }
+
+    // Test maxStorageBuffersInFragmentStage fails if greater than
+    // requested maxStorageBuffersPerShaderStage
+    {
+        Limits required = {};
+        required.maxStorageBuffersInFragmentStage = kLimit;
+        MaybeError err = ValidateLimits(featureLevel, supported, required);
+        EXPECT_TRUE(err.IsError());
+        err.AcquireError();
+    }
+
+    // Test maxStorageBuffersInVertexStage fails if greater than
+    // requested maxStorageBuffersPerShaderStage
+    {
+        Limits required = {};
+        required.maxStorageBuffersInVertexStage = kLimit;
+        MaybeError err = ValidateLimits(featureLevel, supported, required);
+        EXPECT_TRUE(err.IsError());
+        err.AcquireError();
+    }
+
+    // Test maxStorageTexturesInFragmentStage fails if greater than
+    // requested maxStorageTexturesPerShaderStage
+    {
+        Limits required = {};
+        required.maxStorageTexturesInFragmentStage = kLimit;
+        MaybeError err = ValidateLimits(featureLevel, supported, required);
+        EXPECT_TRUE(err.IsError());
+        err.AcquireError();
+    }
+
+    // Test maxStorageTexturesInVertexStage fails if greater than requested
+    // maxStorageTexturesPerShaderStage
+    {
+        Limits required = {};
+        required.maxStorageTexturesInVertexStage = kLimit;
+        MaybeError err = ValidateLimits(featureLevel, supported, required);
         EXPECT_TRUE(err.IsError());
         err.AcquireError();
     }

@@ -1215,6 +1215,8 @@ class BufferMapExtendedUsagesTests : public DawnTest {
         wgpu::RequiredLimits required = {};
         required.limits.maxStorageBuffersInVertexStage =
             supported.limits.maxStorageBuffersInVertexStage;
+        required.limits.maxStorageBuffersPerShaderStage =
+            supported.limits.maxStorageBuffersPerShaderStage;
         return required;
     }
 

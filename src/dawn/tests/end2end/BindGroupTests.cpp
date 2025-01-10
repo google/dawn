@@ -49,8 +49,12 @@ class BindGroupTests : public DawnTest {
             supported.limits.maxStorageBuffersInVertexStage;
         required.limits.maxStorageBuffersInFragmentStage =
             supported.limits.maxStorageBuffersInFragmentStage;
+        required.limits.maxStorageBuffersPerShaderStage =
+            supported.limits.maxStorageBuffersPerShaderStage;
         required.limits.maxStorageTexturesInFragmentStage =
             supported.limits.maxStorageTexturesInFragmentStage;
+        required.limits.maxStorageTexturesPerShaderStage =
+            supported.limits.maxStorageTexturesPerShaderStage;
         return required;
     }
 

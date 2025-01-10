@@ -348,7 +348,8 @@ ResultOrError<Ref<DeviceBase>> AdapterBase::CreateDeviceInternal(
         wgpu::Status status = APIGetLimits(&supportedLimits);
         DAWN_ASSERT(status == wgpu::Status::Success);
 
-        DAWN_TRY_CONTEXT(ValidateLimits(supportedLimits.limits, descriptor->requiredLimits->limits),
+        DAWN_TRY_CONTEXT(ValidateLimits(GetFeatureLevel(), supportedLimits.limits,
+                                        descriptor->requiredLimits->limits),
                          "validating required limits");
     }
 

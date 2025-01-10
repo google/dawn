@@ -48,6 +48,8 @@ class DynamicBufferOffsetTests : public DawnTest {
         wgpu::RequiredLimits required = {};
         required.limits.maxStorageBuffersInFragmentStage =
             supported.limits.maxStorageBuffersInFragmentStage;
+        required.limits.maxStorageBuffersPerShaderStage =
+            supported.limits.maxStorageBuffersPerShaderStage;
         return required;
     }
 

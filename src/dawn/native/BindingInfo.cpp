@@ -246,43 +246,38 @@ MaybeError ValidateBindingCounts(const CombinedLimits& limits,
             DAWN_INCREASE_LIMIT_MESSAGE(adapter, maxUniformBuffersPerShaderStage,
                                         uniformBuffersAndExternalTextureCount));
 
-        if (adapter->GetFeatureLevel() == wgpu::FeatureLevel::Compatibility) {
-            switch (stage) {
-                case SingleShaderStage::Fragment:
-                    DAWN_INVALID_IF(
-                        storageBufferCount > maxStorageBuffersInFragmentStage,
-                        "number of storage buffers used in fragment stage (%u) exceeds "
-                        "maxStorageBuffersInFragmentStage (%u).%s",
-                        storageBufferCount, maxStorageBuffersInFragmentStage,
-                        DAWN_INCREASE_LIMIT_MESSAGE(adapter, maxStorageBuffersInFragmentStage,
-                                                    storageBufferCount));
-                    DAWN_INVALID_IF(
-                        storageTextureCount > maxStorageTexturesInFragmentStage,
-                        "number of storage textures used in fragment stage (%u) exceeds "
-                        "maxStorageTexturesInFragmentStage (%u).%s",
-                        storageTextureCount, maxStorageTexturesInFragmentStage,
-                        DAWN_INCREASE_LIMIT_MESSAGE(adapter, maxStorageTexturesInFragmentStage,
-                                                    storageTextureCount));
-                    break;
-                case SingleShaderStage::Vertex:
-                    DAWN_INVALID_IF(
-                        storageBufferCount > maxStorageBuffersInVertexStage,
-                        "number of storage buffers used in vertex stage (%u) exceeds "
-                        "maxStorageBuffersInVertexStage (%u).%s",
-                        storageBufferCount, maxStorageBuffersInVertexStage,
-                        DAWN_INCREASE_LIMIT_MESSAGE(adapter, maxStorageBuffersInVertexStage,
-                                                    storageBufferCount));
-                    DAWN_INVALID_IF(
-                        storageTextureCount > maxStorageTexturesInVertexStage,
-                        "number of storage textures used in vertex stage (%u) exceeds "
-                        "maxStorageTexturesInVertexStage (%u).%s",
-                        storageTextureCount, maxStorageTexturesInVertexStage,
-                        DAWN_INCREASE_LIMIT_MESSAGE(adapter, maxStorageTexturesInVertexStage,
-                                                    storageTextureCount));
-                    break;
-                default:
-                    break;
-            }
+        switch (stage) {
+            case SingleShaderStage::Fragment:
+                DAWN_INVALID_IF(storageBufferCount > maxStorageBuffersInFragmentStage,
+                                "number of storage buffers used in fragment stage (%u) exceeds "
+                                "maxStorageBuffersInFragmentStage (%u).%s",
+                                storageBufferCount, maxStorageBuffersInFragmentStage,
+                                DAWN_INCREASE_LIMIT_MESSAGE(
+                                    adapter, maxStorageBuffersInFragmentStage, storageBufferCount));
+                DAWN_INVALID_IF(
+                    storageTextureCount > maxStorageTexturesInFragmentStage,
+                    "number of storage textures used in fragment stage (%u) exceeds "
+                    "maxStorageTexturesInFragmentStage (%u).%s",
+                    storageTextureCount, maxStorageTexturesInFragmentStage,
+                    DAWN_INCREASE_LIMIT_MESSAGE(adapter, maxStorageTexturesInFragmentStage,
+                                                storageTextureCount));
+                break;
+            case SingleShaderStage::Vertex:
+                DAWN_INVALID_IF(storageBufferCount > maxStorageBuffersInVertexStage,
+                                "number of storage buffers used in vertex stage (%u) exceeds "
+                                "maxStorageBuffersInVertexStage (%u).%s",
+                                storageBufferCount, maxStorageBuffersInVertexStage,
+                                DAWN_INCREASE_LIMIT_MESSAGE(adapter, maxStorageBuffersInVertexStage,
+                                                            storageBufferCount));
+                DAWN_INVALID_IF(storageTextureCount > maxStorageTexturesInVertexStage,
+                                "number of storage textures used in vertex stage (%u) exceeds "
+                                "maxStorageTexturesInVertexStage (%u).%s",
+                                storageTextureCount, maxStorageTexturesInVertexStage,
+                                DAWN_INCREASE_LIMIT_MESSAGE(
+                                    adapter, maxStorageTexturesInVertexStage, storageTextureCount));
+                break;
+            default:
+                break;
         }
     }
 
