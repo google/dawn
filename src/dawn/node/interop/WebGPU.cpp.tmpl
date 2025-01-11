@@ -166,7 +166,7 @@ Wrappers* Wrappers::instance = nullptr;
         InstanceAccessor("size", &W{{$.Name}}::getSize, nullptr),
 {{-  end}}
 {{-  range $m := $methods}}
-        InstanceMethod("{{$m.Name}}", &W{{$.Name}}::{{$m.Name}}, static_cast<napi_property_attributes>(napi_writable | napi_configurable)),
+        InstanceMethod("{{$m.Name}}", &W{{$.Name}}::{{$m.Name}}, static_cast<napi_property_attributes>(napi_default_jsproperty)),
 {{-  end}}
 {{-  range $a := $attributes}}
 {{-   if not (HasAnnotation $a "SameObject")}}
@@ -370,7 +370,7 @@ Interface<{{$.Name}}> {{$.Name}}::Bind(Napi::Env env, std::unique_ptr<{{$.Name}}
 {{- range $a := AttributesOf $}}
 {{-   if HasAnnotation $a "SameObject"}}
   object.DefineProperty(Napi::PropertyDescriptor::Value(
-    "{{$a.Name}}", ToJS(env, wrapper->impl->get{{Title $a.Name}}(env))
+    "{{$a.Name}}", ToJS(env, wrapper->impl->get{{Title $a.Name}}(env)), napi_default_jsproperty
   ));
 {{-   end}}
 {{- end}}
