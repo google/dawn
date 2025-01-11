@@ -211,6 +211,11 @@ MaybeError SwapChain::InitializeSwapChainFromScratch() {
                                                  static_cast<HWND>(GetSurface()->GetHWND()),
                                                  &swapChainDesc, nullptr, nullptr, &swapChain1),
                 "Creating the IDXGISwapChain1"));
+
+            const HRESULT mwaResult = factory2->MakeWindowAssociation(static_cast<HWND>(GetSurface()->GetHWND()), DXGI_MWA_NO_ALT_ENTER);
+            if (mwaResult != DXGI_ERROR_NOT_CURRENTLY_AVAILABLE) {
+                DAWN_TRY(CheckHRESULT(mwaResult, "MakeWindowAssociation"));
+            }
             break;
         }
         case Surface::Type::WindowsCoreWindow: {
