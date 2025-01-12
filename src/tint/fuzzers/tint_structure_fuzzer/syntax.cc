@@ -36,7 +36,6 @@ struct ByteInputRnd {
         float f = static_cast<float>(x) / static_cast<float>(INT32_MAX);
         f = std::pow(f, 2.2f);
         return std::clamp(static_cast<uint32_t>(f * limit), 0u, limit - 1);
-        // return gen.GetUInt32(limit);
     }
 };
 
@@ -62,11 +61,6 @@ struct ByteInput {
             result = data[used];
             ++used;
         } else {
-            // if (used == size && !acceptTruncated) {
-            //     fprintf(stderr, "*** ByteInput reached end of data ***\n");
-            //     printHex(data, size);
-            //     fflush(stderr);
-            // }
             ++used;
         }
         return result;
@@ -253,7 +247,7 @@ const auto& nodes() {
     static std::array instance{
         // translation_unit:
         Node{
-            {/* NodeId::global_directive | many, */ NodeId::global_decl | many},
+            {NodeId::global_decl | many},
         },
         // additive_operator:
         Node{
@@ -823,28 +817,28 @@ GenerateFn ident(IdentType type) {
             "bool",
             "vec2<bool>",
             "vec3<bool>",
-            "vec4<bool>",  //
+            "vec4<bool>",
             "u32",
             "vec2<u32>",
             "vec3<u32>",
-            "vec4<u32>",  //
+            "vec4<u32>",
             "i32",
             "vec2<i32>",
             "vec3<i32>",
-            "vec4<i32>",  //
+            "vec4<i32>",
             "f32",
             "vec2<f32>",
             "vec3<f32>",
-            "vec4<f32>",  //
+            "vec4<f32>",
             "mat2x2<f32>",
             "mat2x3<f32>",
-            "mat2x4<f32>",  //
+            "mat2x4<f32>",
             "mat3x2<f32>",
             "mat3x3<f32>",
-            "mat3x4<f32>",  //
+            "mat3x4<f32>",
             "mat4x2<f32>",
             "mat4x3<f32>",
-            "mat4x4<f32>",  //
+            "mat4x4<f32>",
             "array<bool, 1>",
             "array<bool, 16>",
             "array<u32, 1>",
@@ -900,12 +894,12 @@ void count(MutationStat& stat, ByteInput& in, NodeId id, int depth = 0) {
     if (node.size() > 1) {
         ++stat.alternatives;
     }
-    uint8_t alternative = in.range(node.size(), false);  // alternative
+    uint8_t alternative = in.range(node.size(), false);
     auto& alt = node[alternative];
     for (const Subnode& subnode : alt) {
         int repetitions = 1;
         if (subnode.mod == '*') {
-            repetitions = in.range(maxRepeats + 1, true);  // repeat
+            repetitions = in.range(maxRepeats + 1, true);
             if (repetitions == 0) {
                 ++stat.repeats[0];
             } else if (repetitions == maxRepeats) {
@@ -914,14 +908,14 @@ void count(MutationStat& stat, ByteInput& in, NodeId id, int depth = 0) {
                 ++stat.repeats[1];
             }
         } else if (subnode.mod == '?') {
-            repetitions = in.range(2, true);  // optional
+            repetitions = in.range(2, true);
             ++stat.optionals[repetitions];
         }
         for (int i = 0; i < repetitions; ++i) {
             if (std::get_if<GenerateFn0>(&subnode.content)) {
                 // do nothing
             } else if (std::get_if<GenerateFn>(&subnode.content)) {
-                in.byteTerm();  // consume byte
+                in.byteTerm();
                 ++stat.terminals;
             } else if (const NodeId* nodeId = std::get_if<NodeId>(&subnode.content)) {
                 count(stat, in, *nodeId, depth + 1);
@@ -953,7 +947,6 @@ void mutateOne(ByteIn& in,
         uint8_t val = in.byteTerm();
         if (mutation == Mutation::RandomTerminal) {
             if (index-- == 0) {
-                // fprintf(stderr, "Mutation::RandomTerminal\n"), fflush(stderr);
                 val = gen.GetUInt32(256);
             }
         }
@@ -978,13 +971,11 @@ void mutateAlt(ByteIn& in,
             newRepetitions = repetitions = in.range(maxRepeats + 1, true);  // repeat
             if (mutation == Mutation::IncRepeat && repetitions < maxRepeats) {
                 if (index-- == 0) {
-                    // fprintf(stderr, "Mutation::IncRepeat\n"), fflush(stderr);
                     ++newRepetitions;
                 }
             }
             if (mutation == Mutation::DecRepeat && repetitions > 0) {
                 if (index-- == 0) {
-                    // fprintf(stderr, "Mutation::DecRepeat\n"), fflush(stderr);
                     --newRepetitions;
                 }
             }
@@ -994,20 +985,17 @@ void mutateAlt(ByteIn& in,
 
             if (repetitions == 0 && mutation >= Mutation::AddOptional) {
                 if (index-- == 0) {
-                    // fprintf(stderr, "Mutation::AddOptional\n"), fflush(stderr);
                     newRepetitions = 1;
                 }
             }
             if (repetitions == 1 && mutation >= Mutation::RemoveOptional) {
                 if (index-- == 0) {
-                    // fprintf(stderr, "Mutation::RemoveOptional\n"), fflush(stderr);
                     newRepetitions = 0;
                 }
             }
             out.push(newRepetitions);
         }
 
-        // common
         for (int i = 0; i < std::min(repetitions, newRepetitions); ++i) {
             mutateOne(in, out, mutation, index, subnode, gen, depth);
         }
@@ -1048,15 +1036,13 @@ void mutate(ByteIn& in,
                 mutateAlt(in, nullOut, mutation, index, node[alternative], gen, depth);
                 switch (mutation) {
                     case Mutation::NextAlternative:
-                        // fprintf(stderr, "Mutation::NextAlternative\n"), fflush(stderr);
                         alternative = (alternative + 1) % node.size();
                         break;
                     case Mutation::PrevAlternative:
-                        // fprintf(stderr, "Mutation::PrevAlternative\n"), fflush(stderr);
                         alternative = (alternative + node.size() - 1) % node.size();
                         break;
                     case Mutation::RandomAlternative: {
-                        // fprintf(stderr, "Mutation::RandomAlternative\n"), fflush(stderr);
+
                         uint8_t newAlternative = gen.GetUInt32(node.size() - 1);
                         alternative =
                             newAlternative >= alternative ? newAlternative + 1 : newAlternative;
@@ -1105,7 +1091,7 @@ void generate(ByteInput& in, TextOutput& out, NodeId id, int depth = 0) {
     }
 }
 
-}  // namespace
+}  
 
 std::vector<uint8_t> WGSLMutate(Mutation mutation,
                                 const uint8_t* data,

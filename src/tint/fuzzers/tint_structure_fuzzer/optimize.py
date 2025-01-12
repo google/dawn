@@ -17,6 +17,7 @@ def fn(args):
         "-mutate_depth=1", 
         "-max_total_time=30",
         "-print_funcs=0",
+        "-fsanitize-coverage-ignorelist=./blocklist.txt"
     ]
     print(f"Calling {args}...")
     result = subprocess.run(args, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
