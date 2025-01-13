@@ -65,12 +65,16 @@ class IntegerRangeAnalysis {
     explicit IntegerRangeAnalysis(ir::Function* func);
     ~IntegerRangeAnalysis();
 
-    /// Returns the integer range info of a given parameter, if it is an integer parameter.
+    /// Returns the integer range info of a given parameter with given index, if it is an integer
+    /// or an integer vector parameter. The index must not be over the maximum size of the vector
+    /// and must be 0 if the parameter is an integer.
     /// Otherwise is not analyzable and returns nullptr. If it is the first time to query the info,
     /// the result will also be stored into a cache for future queries.
     /// @param param the variable to get information about
+    /// @param index the vector component index when the parameter is a vector type. if the
+    /// parameter is a scalar, then `index` must be zero.
     /// @returns the integer range info
-    const IntegerRangeInfo* GetInfo(const FunctionParam* param);
+    const IntegerRangeInfo* GetInfo(const FunctionParam* param, uint32_t index = 0);
 
   private:
     IntegerRangeAnalysis(const IntegerRangeAnalysis&) = delete;

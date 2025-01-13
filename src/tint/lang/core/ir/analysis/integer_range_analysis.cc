@@ -46,13 +46,13 @@ IntegerRangeInfo::IntegerRangeInfo(uint64_t min_bound, uint64_t max_bound) {
 struct IntegerRangeAnalysisImpl {
     explicit IntegerRangeAnalysisImpl(Function* func) : function_(func) {}
 
-    const IntegerRangeInfo* GetInfo(const FunctionParam* param) {
-        if (!param->Type()->IsIntegerScalar()) {
+    const IntegerRangeInfo* GetInfo(const FunctionParam* param, uint32_t index) {
+        if (!param->Type()->IsIntegerScalarOrVector()) {
             return nullptr;
         }
 
-        const auto& info =
-            integer_function_param_range_info_map_.GetOrAdd(param, [&]() -> IntegerRangeInfo {
+        const auto& info = integer_function_param_range_info_map_.GetOrAdd(
+            param, [&]() -> Vector<IntegerRangeInfo, 3> {
                 if (param->Builtin() == core::BuiltinValue::kLocalInvocationIndex) {
                     // We shouldn't be trying to use range analysis on a module that has
                     // non-constant workgroup sizes, since we will always have replaced pipeline
@@ -63,31 +63,47 @@ struct IntegerRangeAnalysisImpl {
                     uint64_t max_bound =
                         workgroup_size[0] * workgroup_size[1] * workgroup_size[2] - 1u;
                     constexpr uint64_t kMinBound = 0;
-                    return IntegerRangeInfo(kMinBound, max_bound);
+
+                    return {IntegerRangeInfo(kMinBound, max_bound)};
+                }
+
+                if (param->Builtin() == core::BuiltinValue::kLocalInvocationId) {
+                    TINT_ASSERT(function_->WorkgroupSizeAsConst().has_value());
+                    std::array<uint32_t, 3> workgroup_size =
+                        function_->WorkgroupSizeAsConst().value();
+
+                    constexpr uint64_t kMinBound = 0;
+                    Vector<IntegerRangeInfo, 3> integerRanges;
+                    for (uint32_t size_x_y_z : workgroup_size) {
+                        integerRanges.Push({kMinBound, size_x_y_z - 1u});
+                    }
+                    return integerRanges;
                 }
 
                 if (param->Type()->IsUnsignedIntegerScalar()) {
-                    return IntegerRangeInfo(0, std::numeric_limits<uint64_t>::max());
+                    return {IntegerRangeInfo(0, std::numeric_limits<uint64_t>::max())};
                 } else {
                     TINT_ASSERT(param->Type()->IsSignedIntegerScalar());
-                    return IntegerRangeInfo(std::numeric_limits<int64_t>::min(),
-                                            std::numeric_limits<int64_t>::max());
+                    return {IntegerRangeInfo(std::numeric_limits<int64_t>::min(),
+                                             std::numeric_limits<int64_t>::max())};
                 }
             });
 
-        return &info;
+        TINT_ASSERT(info.Length() > index);
+        return &info[index];
     }
 
   private:
     Function* function_;
-    Hashmap<const FunctionParam*, IntegerRangeInfo, 4> integer_function_param_range_info_map_;
+    Hashmap<const FunctionParam*, Vector<IntegerRangeInfo, 3>, 4>
+        integer_function_param_range_info_map_;
 };
 
 IntegerRangeAnalysis::IntegerRangeAnalysis(Function* func)
     : impl_(new IntegerRangeAnalysisImpl(func)) {}
 IntegerRangeAnalysis::~IntegerRangeAnalysis() = default;
 
-const IntegerRangeInfo* IntegerRangeAnalysis::GetInfo(const FunctionParam* param) {
-    return impl_->GetInfo(param);
+const IntegerRangeInfo* IntegerRangeAnalysis::GetInfo(const FunctionParam* param, uint32_t index) {
+    return impl_->GetInfo(param, index);
 }
 }  // namespace tint::core::ir::analysis
