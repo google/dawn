@@ -44,10 +44,8 @@ using testing::Exactly;
 using testing::HasSubstr;
 using testing::MockCppCallback;
 
-using MockMapAsyncCallback = MockCppCallback<void (*)(wgpu::MapAsyncStatus, wgpu::StringView)>;
-using MockQueueWorkDoneCallback = MockCppCallback<void (*)(wgpu::QueueWorkDoneStatus)>;
-
-static const int fakeUserData = 0;
+using MockMapAsyncCallback = MockCppCallback<wgpu::BufferMapCallback<void>*>;
+using MockQueueWorkDoneCallback = MockCppCallback<wgpu::QueueWorkDoneCallback<void>*>;
 
 class DeviceLostTest : public DawnTest {
   protected:
@@ -71,11 +69,6 @@ class DeviceLostTest : public DawnTest {
             instance.ProcessEvents();  // Flush all callbacks.
             DawnTest::TearDown();
         }
-    }
-
-    static void MapFailCallback(WGPUBufferMapAsyncStatus status, void* userdata) {
-        EXPECT_EQ(WGPUBufferMapAsyncStatus_DeviceLost, status);
-        EXPECT_EQ(&fakeUserData, userdata);
     }
 
     template <typename T>

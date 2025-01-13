@@ -39,7 +39,7 @@ using testing::_;
 using testing::InvokeWithoutArgs;
 using testing::Return;
 
-using WireQueueTestBase = WireFutureTest<wgpu::QueueWorkDoneCallback2<void>*>;
+using WireQueueTestBase = WireFutureTest<wgpu::QueueWorkDoneCallback<void>*>;
 class WireQueueTests : public WireQueueTestBase {
   protected:
     void OnSubmittedWorkDone() {
@@ -54,8 +54,8 @@ DAWN_INSTANTIATE_WIRE_FUTURE_TEST_P(WireQueueTests);
 TEST_P(WireQueueTests, OnSubmittedWorkDoneSuccess) {
     OnSubmittedWorkDone();
 
-    EXPECT_CALL(api, OnQueueOnSubmittedWorkDone2(apiQueue, _)).WillOnce(InvokeWithoutArgs([&] {
-        api.CallQueueOnSubmittedWorkDone2Callback(apiQueue, WGPUQueueWorkDoneStatus_Success);
+    EXPECT_CALL(api, OnQueueOnSubmittedWorkDone(apiQueue, _)).WillOnce(InvokeWithoutArgs([&] {
+        api.CallQueueOnSubmittedWorkDoneCallback(apiQueue, WGPUQueueWorkDoneStatus_Success);
     }));
     FlushClient();
     FlushFutures();
@@ -71,8 +71,8 @@ TEST_P(WireQueueTests, OnSubmittedWorkDoneSuccess) {
 TEST_P(WireQueueTests, OnSubmittedWorkDoneError) {
     OnSubmittedWorkDone();
 
-    EXPECT_CALL(api, OnQueueOnSubmittedWorkDone2(apiQueue, _)).WillOnce(InvokeWithoutArgs([&] {
-        api.CallQueueOnSubmittedWorkDone2Callback(apiQueue, WGPUQueueWorkDoneStatus_Error);
+    EXPECT_CALL(api, OnQueueOnSubmittedWorkDone(apiQueue, _)).WillOnce(InvokeWithoutArgs([&] {
+        api.CallQueueOnSubmittedWorkDoneCallback(apiQueue, WGPUQueueWorkDoneStatus_Error);
     }));
     FlushClient();
     FlushFutures();
@@ -93,8 +93,8 @@ TEST_P(WireQueueTests, OnSubmittedWorkDoneBeforeDisconnectAfterReply) {
 
     OnSubmittedWorkDone();
 
-    EXPECT_CALL(api, OnQueueOnSubmittedWorkDone2(apiQueue, _)).WillOnce(InvokeWithoutArgs([&] {
-        api.CallQueueOnSubmittedWorkDone2Callback(apiQueue, WGPUQueueWorkDoneStatus_Error);
+    EXPECT_CALL(api, OnQueueOnSubmittedWorkDone(apiQueue, _)).WillOnce(InvokeWithoutArgs([&] {
+        api.CallQueueOnSubmittedWorkDoneCallback(apiQueue, WGPUQueueWorkDoneStatus_Error);
     }));
     FlushClient();
     FlushFutures();
@@ -112,8 +112,8 @@ TEST_P(WireQueueTests, OnSubmittedWorkDoneBeforeDisconnectAfterReply) {
 TEST_P(WireQueueTests, OnSubmittedWorkDoneBeforeDisconnectBeforeReply) {
     OnSubmittedWorkDone();
 
-    EXPECT_CALL(api, OnQueueOnSubmittedWorkDone2(apiQueue, _)).WillOnce(InvokeWithoutArgs([&] {
-        api.CallQueueOnSubmittedWorkDone2Callback(apiQueue, WGPUQueueWorkDoneStatus_Error);
+    EXPECT_CALL(api, OnQueueOnSubmittedWorkDone(apiQueue, _)).WillOnce(InvokeWithoutArgs([&] {
+        api.CallQueueOnSubmittedWorkDoneCallback(apiQueue, WGPUQueueWorkDoneStatus_Error);
     }));
     FlushClient();
 
@@ -141,8 +141,8 @@ TEST_P(WireQueueTests, OnSubmittedWorkDoneInsideCallbackBeforeDisconnect) {
     static constexpr size_t kNumRequests = 10;
     OnSubmittedWorkDone();
 
-    EXPECT_CALL(api, OnQueueOnSubmittedWorkDone2(apiQueue, _)).WillOnce(InvokeWithoutArgs([&] {
-        api.CallQueueOnSubmittedWorkDone2Callback(apiQueue, WGPUQueueWorkDoneStatus_Error);
+    EXPECT_CALL(api, OnQueueOnSubmittedWorkDone(apiQueue, _)).WillOnce(InvokeWithoutArgs([&] {
+        api.CallQueueOnSubmittedWorkDoneCallback(apiQueue, WGPUQueueWorkDoneStatus_Error);
     }));
     FlushClient();
 

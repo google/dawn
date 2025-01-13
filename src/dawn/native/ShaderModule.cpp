@@ -1584,58 +1584,17 @@ int ShaderModuleBase::GetTintProgramRecreateCountForTesting() const {
     return mTintData.Use([&](auto tintData) { return tintData->tintProgramRecreateCount; });
 }
 
-namespace {
-
-void DefaultGetCompilationInfoCallback(WGPUCompilationInfoRequestStatus status,
-                                       const WGPUCompilationInfo* compilationInfo,
-                                       void* callback,
-                                       void* userdata) {
-    if (callback == nullptr) {
-        DAWN_ASSERT(userdata == nullptr);
-        return;
-    }
-    auto cb = reinterpret_cast<WGPUCompilationInfoCallback>(callback);
-    cb(status, compilationInfo, userdata);
-}
-
-}  // anonymous namespace
-
-void ShaderModuleBase::APIGetCompilationInfo(wgpu::CompilationInfoCallback callback,
-                                             void* userdata) {
-    GetInstance()->EmitDeprecationWarning(
-        "Old GetCompilationInfo APIs are deprecated. If using C please pass a CallbackInfo struct "
-        "that has two userdatas. Otherwise, if using C++, please use templated helpers.");
-
-    if (callback == nullptr) {
-        return;
-    }
-    APIGetCompilationInfo2({nullptr, WGPUCallbackMode_AllowSpontaneous,
-                            &DefaultGetCompilationInfoCallback, reinterpret_cast<void*>(callback),
-                            userdata});
-}
-
-Future ShaderModuleBase::APIGetCompilationInfoF(const CompilationInfoCallbackInfo& callbackInfo) {
-    GetInstance()->EmitDeprecationWarning(
-        "Old GetCompilationInfo APIs are deprecated. If using C please pass a CallbackInfo struct "
-        "that has two userdatas. Otherwise, if using C++, please use templated helpers.");
-
-    return APIGetCompilationInfo2({ToAPI(callbackInfo.nextInChain), ToAPI(callbackInfo.mode),
-                                   &DefaultGetCompilationInfoCallback,
-                                   reinterpret_cast<void*>(callbackInfo.callback),
-                                   callbackInfo.userdata});
-}
-
-Future ShaderModuleBase::APIGetCompilationInfo2(
-    const WGPUCompilationInfoCallbackInfo2& callbackInfo) {
+Future ShaderModuleBase::APIGetCompilationInfo(
+    const WGPUCompilationInfoCallbackInfo& callbackInfo) {
     struct CompilationInfoEvent final : public EventManager::TrackedEvent {
-        WGPUCompilationInfoCallback2 mCallback;
+        WGPUCompilationInfoCallback mCallback;
         raw_ptr<void> mUserdata1;
         raw_ptr<void> mUserdata2;
         // Need to keep a Ref of the compilation messages in case the ShaderModule goes away before
         // the callback happens.
         Ref<ShaderModuleBase> mShaderModule;
 
-        CompilationInfoEvent(const WGPUCompilationInfoCallbackInfo2& callbackInfo,
+        CompilationInfoEvent(const WGPUCompilationInfoCallbackInfo& callbackInfo,
                              Ref<ShaderModuleBase> shaderModule)
             : TrackedEvent(static_cast<wgpu::CallbackMode>(callbackInfo.mode),
                            TrackedEvent::Completed{}),

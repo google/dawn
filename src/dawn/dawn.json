@@ -603,36 +603,12 @@
         "methods": [
             {
                 "name": "map async",
-                "args": [
-                    {"name": "mode", "type": "map mode"},
-                    {"name": "offset", "type": "size_t"},
-                    {"name": "size", "type": "size_t"},
-                    {"name": "callback", "type": "buffer map callback"},
-                    {"name": "userdata", "type": "void *"}
-                ]
-            },
-            {
-                "name": "map async f",
-                "_comment": "TODO(crbug.com/dawn/2021): This is dawn/emscripten-only until we rename it to replace the old API. See bug for details.",
-                "tags": ["dawn", "emscripten"],
                 "returns": "future",
                 "args": [
                     {"name": "mode", "type": "map mode"},
                     {"name": "offset", "type": "size_t"},
                     {"name": "size", "type": "size_t"},
                     {"name": "callback info", "type": "buffer map callback info"}
-                ]
-            },
-            {
-                "name": "map async 2",
-                "_comment": "TODO(crbug.com/dawn/2021): This is dawn/emscripten-only until we rename it to replace the old API. See bug for details.",
-                "tags": ["dawn", "emscripten"],
-                "returns": "future",
-                "args": [
-                    {"name": "mode", "type": "map mode"},
-                    {"name": "offset", "type": "size_t"},
-                    {"name": "size", "type": "size_t"},
-                    {"name": "callback info", "type": "buffer map callback info 2"}
                 ]
             },
             {
@@ -709,13 +685,6 @@
         ]
     },
     "buffer map callback": {
-        "category": "function pointer",
-        "args": [
-            {"name": "status", "type": "buffer map async status"},
-            {"name": "userdata", "type": "void *"}
-        ]
-    },
-    "buffer map callback 2": {
         "category": "callback function",
         "args": [
             {"name": "status", "type": "map async status"},
@@ -723,35 +692,10 @@
         ]
     },
     "buffer map callback info": {
-        "category": "structure",
-        "extensible": "in",
-        "members": [
-            {"name": "mode", "type": "callback mode"},
-            {"name": "callback", "type": "buffer map callback"},
-            {"name": "userdata", "type": "void *"}
-        ]
-    },
-    "buffer map callback info 2": {
         "category": "callback info",
         "members": [
             {"name": "mode", "type": "callback mode"},
-            {"name": "callback", "type": "buffer map callback 2"}
-        ]
-    },
-    "buffer map async status": {
-        "category": "enum",
-        "emscripten_no_enum_table": true,
-        "values": [
-            {"value": 1, "name": "success"},
-            {"value": 2, "name": "instance dropped"},
-            {"value": 3, "name": "validation error"},
-            {"value": 4, "name": "unknown"},
-            {"value": 5, "name": "device lost"},
-            {"value": 6, "name": "destroyed before callback"},
-            {"value": 7, "name": "unmapped before callback"},
-            {"value": 8, "name": "mapping already pending"},
-            {"value": 9, "name": "offset out of range"},
-            {"value": 10, "name": "size out of range"}
+            {"name": "callback", "type": "buffer map callback"}
         ]
     },
     "map async status": {
@@ -996,14 +940,6 @@
         ]
     },
     "compilation info callback": {
-        "category": "function pointer",
-        "args": [
-            {"name": "status", "type": "compilation info request status"},
-            {"name": "compilation info", "type": "compilation info", "annotation": "const*"},
-            {"name": "userdata", "type": "void *"}
-        ]
-    },
-    "compilation info callback 2": {
         "category": "callback function",
         "args": [
             {"name": "status", "type": "compilation info request status"},
@@ -1011,19 +947,10 @@
         ]
     },
     "compilation info callback info": {
-        "category": "structure",
-        "extensible": "in",
-        "members": [
-            {"name": "mode", "type": "callback mode"},
-            {"name": "callback", "type": "compilation info callback"},
-            {"name": "userdata", "type": "void *", "default": "nullptr"}
-        ]
-    },
-    "compilation info callback info 2": {
         "category": "callback info",
         "members": [
             {"name": "mode", "type": "callback mode"},
-            {"name": "callback", "type": "compilation info callback 2"}
+            {"name": "callback", "type": "compilation info callback"}
         ]
     },
     "compilation info request status": {
@@ -1213,15 +1140,6 @@
         ]
     },
     "create compute pipeline async callback": {
-        "category": "function pointer",
-        "args": [
-            {"name": "status", "type": "create pipeline async status"},
-            {"name": "pipeline", "type": "compute pipeline", "optional": true},
-            {"name": "message", "type": "string view"},
-            {"name": "userdata", "type": "void *"}
-        ]
-    },
-    "create compute pipeline async callback 2": {
         "category": "callback function",
         "args": [
             {"name": "status", "type": "create pipeline async status"},
@@ -1230,19 +1148,10 @@
         ]
     },
     "create compute pipeline async callback info": {
-        "category": "structure",
-        "extensible": "in",
-        "members": [
-            {"name": "mode", "type": "callback mode"},
-            {"name": "callback", "type": "create compute pipeline async callback"},
-            {"name": "userdata", "type": "void *"}
-        ]
-    },
-    "create compute pipeline async callback info 2": {
         "category": "callback info",
         "members": [
             {"name": "mode", "type": "callback mode"},
-            {"name": "callback", "type": "create compute pipeline async callback 2"}
+            {"name": "callback", "type": "create compute pipeline async callback"}
         ]
     },
     "create pipeline async status": {
@@ -1259,15 +1168,6 @@
         ]
     },
     "create render pipeline async callback": {
-        "category": "function pointer",
-        "args": [
-            {"name": "status", "type": "create pipeline async status"},
-            {"name": "pipeline", "type": "render pipeline", "optional": true},
-            {"name": "message", "type": "string view"},
-            {"name": "userdata", "type": "void *"}
-        ]
-    },
-    "create render pipeline async callback 2": {
         "category": "callback function",
         "args": [
             {"name": "status", "type": "create pipeline async status"},
@@ -1276,19 +1176,10 @@
         ]
     },
     "create render pipeline async callback info": {
-        "category": "structure",
-        "extensible": "in",
-        "members": [
-            {"name": "mode", "type": "callback mode"},
-            {"name": "callback", "type": "create render pipeline async callback"},
-            {"name": "userdata", "type": "void *"}
-        ]
-    },
-    "create render pipeline async callback info 2": {
         "category": "callback info",
         "members": [
             {"name": "mode", "type": "callback mode"},
-            {"name": "callback", "type": "create render pipeline async callback 2"}
+            {"name": "callback", "type": "create render pipeline async callback"}
         ]
     },
     "cull mode": {
@@ -1357,31 +1248,10 @@
             },
             {
                 "name": "create compute pipeline async",
-                "returns": "void",
-                "args": [
-                    {"name": "descriptor", "type": "compute pipeline descriptor", "annotation": "const*"},
-                    {"name": "callback", "type": "create compute pipeline async callback"},
-                    {"name": "userdata", "type": "void *"}
-                ]
-            },
-            {
-                "name": "create compute pipeline async f",
-                "_comment": "TODO(crbug.com/dawn/2021): This is dawn/emscripten-only until we rename it to replace the old API. See bug for details.",
-                "tags": ["dawn", "emscripten"],
                 "returns": "future",
                 "args": [
                     {"name": "descriptor", "type": "compute pipeline descriptor", "annotation": "const*"},
                     {"name": "callback info", "type": "create compute pipeline async callback info"}
-                ]
-            },
-            {
-                "name": "create compute pipeline async 2",
-                "_comment": "TODO(crbug.com/dawn/2021): This is dawn/emscripten-only until we rename it to replace the old API. See bug for details.",
-                "tags": ["dawn", "emscripten"],
-                "returns": "future",
-                "args": [
-                    {"name": "descriptor", "type": "compute pipeline descriptor", "annotation": "const*"},
-                    {"name": "callback info", "type": "create compute pipeline async callback info 2"}
                 ]
             },
             {
@@ -1413,31 +1283,10 @@
             },
             {
                 "name": "create render pipeline async",
-                "returns": "void",
-                "args": [
-                    {"name": "descriptor", "type": "render pipeline descriptor", "annotation": "const*"},
-                    {"name": "callback", "type": "create render pipeline async callback"},
-                    {"name": "userdata", "type": "void *"}
-                ]
-            },
-            {
-                "name": "create render pipeline async f",
-                "_comment": "TODO(crbug.com/dawn/2021): This is dawn/emscripten-only until we rename it to replace the old API. See bug for details.",
-                "tags": ["dawn", "emscripten"],
                 "returns": "future",
                 "args": [
                     {"name": "descriptor", "type": "render pipeline descriptor", "annotation": "const*"},
                     {"name": "callback info", "type": "create render pipeline async callback info"}
-                ]
-            },
-            {
-                "name": "create render pipeline async 2",
-                "_comment": "TODO(crbug.com/dawn/2021): This is dawn/emscripten-only until we rename it to replace the old API. See bug for details.",
-                "tags": ["dawn", "emscripten"],
-                "returns": "future",
-                "args": [
-                    {"name": "descriptor", "type": "render pipeline descriptor", "annotation": "const*"},
-                    {"name": "callback info", "type": "create render pipeline async callback info 2"}
                 ]
             },
             {
@@ -1610,27 +1459,9 @@
             {
                 "name": "pop error scope",
                 "no autolock": true,
-                "args": [
-                    {"name": "old callback", "type": "error callback"},
-                    {"name": "userdata", "type": "void *"}
-                ]
-            },
-            {
-                "name": "pop error scope f",
-                "_comment": "TODO(crbug.com/dawn/2021): This is dawn/emscripten-only until we rename it to replace the old API. See bug for details.",
-                "tags": ["dawn", "emscripten"],
                 "returns": "future",
                 "args": [
                     {"name": "callback info", "type": "pop error scope callback info"}
-                ]
-            },
-            {
-                "name": "pop error scope 2",
-                "_comment": "TODO(crbug.com/dawn/2021): This is dawn/emscripten-only until we rename it to replace the old API. See bug for details.",
-                "tags": ["dawn", "emscripten"],
-                "returns": "future",
-                "args": [
-                    {"name": "callback info", "type": "pop error scope callback info 2"}
                 ]
             },
             {
@@ -1744,15 +1575,6 @@
         ]
     },
     "pop error scope callback": {
-        "category": "function pointer",
-        "args": [
-            {"name": "status", "type": "pop error scope status"},
-            {"name": "type", "type": "error type"},
-            {"name": "message", "type": "string view"},
-            {"name": "userdata", "type": "void *"}
-        ]
-    },
-    "pop error scope callback 2": {
         "category": "callback function",
         "args": [
             {"name": "status", "type": "pop error scope status"},
@@ -1761,20 +1583,10 @@
         ]
     },
     "pop error scope callback info": {
-        "category": "structure",
-        "extensible": "in",
-        "members": [
-            {"name": "mode", "type": "callback mode", "default": "wait any only"},
-            {"name": "callback", "type": "pop error scope callback"},
-            {"name": "old callback", "type": "error callback", "_comment": "TODO(crbug.com/dawn/2021) Deprecate this field once we have moved callers to use the new callback signature."},
-            {"name": "userdata", "type": "void *", "default": "nullptr"}
-        ]
-    },
-    "pop error scope callback info 2": {
         "category": "callback info",
         "members": [
             {"name": "mode", "type": "callback mode"},
-            {"name": "callback", "type": "pop error scope callback 2"}
+            {"name": "callback", "type": "pop error scope callback"}
         ]
     },
     "limits": {
@@ -2950,28 +2762,9 @@
             },
             {
                 "name": "on submitted work done",
-                "tags": ["dawn", "upstream"],
-                "args": [
-                    {"name": "callback", "type": "queue work done callback"},
-                    {"name": "userdata", "type": "void *"}
-                ]
-            },
-            {
-                "name": "on submitted work done f",
-                "_comment": "TODO(crbug.com/dawn/2021): This is dawn/emscripten-only until we rename it to replace the old API. See bug for details.",
-                "tags": ["dawn", "emscripten"],
                 "returns": "future",
                 "args": [
                     {"name": "callback info", "type": "queue work done callback info"}
-                ]
-            },
-            {
-                "name": "on submitted work done 2",
-                "_comment": "TODO(crbug.com/dawn/2021): This is dawn/emscripten-only until we rename it to replace the old API. See bug for details.",
-                "tags": ["dawn", "emscripten"],
-                "returns": "future",
-                "args": [
-                    {"name": "callback info", "type": "queue work done callback info 2"}
                 ]
             },
             {
@@ -3032,32 +2825,16 @@
         ]
     },
     "queue work done callback": {
-        "category": "function pointer",
-        "args": [
-            {"name": "status", "type": "queue work done status"},
-            {"name": "userdata", "type": "void *"}
-        ]
-    },
-    "queue work done callback 2": {
         "category": "callback function",
         "args": [
             {"name": "status", "type": "queue work done status"}
         ]
     },
     "queue work done callback info": {
-        "category": "structure",
-        "extensible": "in",
-        "members": [
-            {"name": "mode", "type": "callback mode"},
-            {"name": "callback", "type": "queue work done callback"},
-            {"name": "userdata", "type": "void *"}
-        ]
-    },
-    "queue work done callback info 2": {
         "category": "callback info",
         "members": [
             {"name": "mode", "type": "callback mode"},
-            {"name": "callback", "type": "queue work done callback 2"}
+            {"name": "callback", "type": "queue work done callback"}
         ]
     },
     "queue work done status": {
@@ -3067,8 +2844,7 @@
             {"value": 1, "name": "success"},
             {"value": 2, "name": "instance dropped"},
             {"value": 3, "name": "error"},
-            {"value": 4, "name": "unknown"},
-            {"value": 5, "name": "device lost"}
+            {"value": 4, "name": "unknown"}
         ]
     },
 
@@ -3698,27 +3474,9 @@
         "methods": [
             {
                 "name": "get compilation info",
-                "args": [
-                    {"name": "callback", "type": "compilation info callback"},
-                    {"name": "userdata", "type": "void *"}
-                ]
-            },
-            {
-                "name": "get compilation info f",
-                "_comment": "TODO(crbug.com/dawn/2021): This is dawn/emscripten-only until we rename it to replace the old API. See bug for details.",
-                "tags": ["dawn", "emscripten"],
                 "returns": "future",
                 "args": [
                     {"name": "callback info", "type": "compilation info callback info"}
-                ]
-            },
-            {
-                "name": "get compilation info 2",
-                "_comment": "TODO(crbug.com/dawn/2021): This is dawn/emscripten-only until we rename it to replace the old API. See bug for details.",
-                "tags": ["dawn", "emscripten"],
-                "returns": "future",
-                "args": [
-                    {"name": "callback info", "type": "compilation info callback info 2"}
                 ]
             },
             {

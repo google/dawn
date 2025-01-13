@@ -340,10 +340,10 @@ class WireMemoryTransferServiceTestBase : public WireTest,
 
         // Mode independent expectations.
         EXPECT_CALL(api,
-                    OnBufferMapAsync2(apiBuffer, static_cast<WGPUMapMode>(mode), 0, kBufferSize, _))
+                    OnBufferMapAsync(apiBuffer, static_cast<WGPUMapMode>(mode), 0, kBufferSize, _))
             .WillOnce(InvokeWithoutArgs([&] {
-                api.CallBufferMapAsync2Callback(apiBuffer, WGPUMapAsyncStatus_Success,
-                                                kEmptyOutputStringView);
+                api.CallBufferMapAsyncCallback(apiBuffer, WGPUMapAsyncStatus_Success,
+                                               kEmptyOutputStringView);
             }));
         EXPECT_CALL(mMapAsyncCb, Call(wgpu::MapAsyncStatus::Success, _)).Times(1);
 
@@ -471,7 +471,7 @@ class WireMemoryTransferServiceTestBase : public WireTest,
     uint32_t mSerializeCreateInfo = kDataGenerator++;
     static constexpr size_t kDataSize = sizeof(uint32_t);
 
-    StrictMock<MockCppCallback<wgpu::BufferMapCallback2<void>*>> mMapAsyncCb;
+    StrictMock<MockCppCallback<wgpu::BufferMapCallback<void>*>> mMapAsyncCb;
 
     StrictMock<wire::server::MockMemoryTransferService> mServerMTS;
     StrictMock<wire::client::MockMemoryTransferService> mClientMTS;
@@ -614,11 +614,10 @@ TEST_P(WireMemoryTransferServiceBufferMapAsyncTests, Error) {
                     mMapAsyncCb.Callback());
 
     // Make the server respond to the callback with an error.
-    EXPECT_CALL(api,
-                OnBufferMapAsync2(apiBuffer, static_cast<WGPUMapMode>(mode), 0, kBufferSize, _))
+    EXPECT_CALL(api, OnBufferMapAsync(apiBuffer, static_cast<WGPUMapMode>(mode), 0, kBufferSize, _))
         .WillOnce(InvokeWithoutArgs([&] {
-            api.CallBufferMapAsync2Callback(apiBuffer, WGPUMapAsyncStatus_Error,
-                                            ToOutputStringView("Validation error"));
+            api.CallBufferMapAsyncCallback(apiBuffer, WGPUMapAsyncStatus_Error,
+                                           ToOutputStringView("Validation error"));
         }));
     FlushClient();
 
@@ -658,11 +657,10 @@ TEST_P(WireMemoryTransferServiceBufferMapAsyncTests, DeserializeDataUpdateFailur
     }
 
     // Set mode independent expectations for the map async call now.
-    EXPECT_CALL(api,
-                OnBufferMapAsync2(apiBuffer, static_cast<WGPUMapMode>(mode), 0, kBufferSize, _))
+    EXPECT_CALL(api, OnBufferMapAsync(apiBuffer, static_cast<WGPUMapMode>(mode), 0, kBufferSize, _))
         .WillOnce(InvokeWithoutArgs([&] {
-            api.CallBufferMapAsync2Callback(apiBuffer, WGPUMapAsyncStatus_Success,
-                                            kEmptyOutputStringView);
+            api.CallBufferMapAsyncCallback(apiBuffer, WGPUMapAsyncStatus_Success,
+                                           kEmptyOutputStringView);
         }));
 
     switch (mode) {

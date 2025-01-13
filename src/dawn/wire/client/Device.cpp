@@ -46,7 +46,7 @@ class PopErrorScopeEvent final : public TrackedEvent {
   public:
     static constexpr EventType kType = EventType::PopErrorScope;
 
-    explicit PopErrorScopeEvent(const WGPUPopErrorScopeCallbackInfo2& callbackInfo)
+    explicit PopErrorScopeEvent(const WGPUPopErrorScopeCallbackInfo& callbackInfo)
         : TrackedEvent(callbackInfo.mode),
           mCallback(callbackInfo.callback),
           mUserdata1(callbackInfo.userdata1),
@@ -72,7 +72,7 @@ class PopErrorScopeEvent final : public TrackedEvent {
         }
     }
 
-    WGPUPopErrorScopeCallback2 mCallback;
+    WGPUPopErrorScopeCallback mCallback;
     raw_ptr<void> mUserdata1;
     raw_ptr<void> mUserdata2;
 
@@ -145,11 +145,11 @@ class CreatePipelineEventBase : public TrackedEvent {
 using CreateComputePipelineEvent =
     CreatePipelineEventBase<ComputePipeline,
                             EventType::CreateComputePipeline,
-                            WGPUCreateComputePipelineAsyncCallbackInfo2>;
+                            WGPUCreateComputePipelineAsyncCallbackInfo>;
 using CreateRenderPipelineEvent =
     CreatePipelineEventBase<RenderPipeline,
                             EventType::CreateRenderPipeline,
-                            WGPUCreateRenderPipelineAsyncCallbackInfo2>;
+                            WGPUCreateRenderPipelineAsyncCallbackInfo>;
 
 static constexpr WGPUUncapturedErrorCallbackInfo2 kEmptyUncapturedErrorCallbackInfo = {
     nullptr, nullptr, nullptr, nullptr};
@@ -348,30 +348,7 @@ WireResult Client::DoDeviceLostCallback(ObjectHandle eventManager,
         .SetFutureReady<Device::DeviceLostEvent>(future.id, reason, message);
 }
 
-void Device::PopErrorScope(WGPUErrorCallback callback, void* userdata) {
-    static WGPUErrorCallback kDefaultCallback = [](WGPUErrorType, WGPUStringView, void*) {};
-
-    PopErrorScope2({nullptr, WGPUCallbackMode_AllowSpontaneous,
-                    [](WGPUPopErrorScopeStatus, WGPUErrorType type, WGPUStringView message,
-                       void* callback, void* userdata) {
-                        auto cb = reinterpret_cast<WGPUErrorCallback>(callback);
-                        cb(type, message, userdata);
-                    },
-                    reinterpret_cast<void*>(callback != nullptr ? callback : kDefaultCallback),
-                    userdata});
-}
-
-WGPUFuture Device::PopErrorScopeF(const WGPUPopErrorScopeCallbackInfo& callbackInfo) {
-    return PopErrorScope2({callbackInfo.nextInChain, callbackInfo.mode,
-                           [](WGPUPopErrorScopeStatus status, WGPUErrorType type,
-                              WGPUStringView message, void* callback, void* userdata) {
-                               auto cb = reinterpret_cast<WGPUPopErrorScopeCallback>(callback);
-                               cb(status, type, message, userdata);
-                           },
-                           reinterpret_cast<void*>(callbackInfo.callback), callbackInfo.userdata});
-}
-
-WGPUFuture Device::PopErrorScope2(const WGPUPopErrorScopeCallbackInfo2& callbackInfo) {
+WGPUFuture Device::PopErrorScope(const WGPUPopErrorScopeCallbackInfo& callbackInfo) {
     Client* client = GetClient();
     auto [futureIDInternal, tracked] =
         GetEventManager().TrackEvent(std::make_unique<PopErrorScopeEvent>(callbackInfo));
@@ -438,8 +415,8 @@ WGPUQueue Device::GetQueue() {
 }
 
 template <typename Event, typename Cmd, typename CallbackInfo, typename Descriptor>
-WGPUFuture Device::CreatePipelineAsyncF(Descriptor const* descriptor,
-                                        const CallbackInfo& callbackInfo) {
+WGPUFuture Device::CreatePipelineAsync(Descriptor const* descriptor,
+                                       const CallbackInfo& callbackInfo) {
     using Pipeline = typename Event::Pipeline;
 
     Client* client = GetClient();
@@ -461,38 +438,10 @@ WGPUFuture Device::CreatePipelineAsyncF(Descriptor const* descriptor,
     return {futureIDInternal};
 }
 
-void Device::CreateComputePipelineAsync(WGPUComputePipelineDescriptor const* descriptor,
-                                        WGPUCreateComputePipelineAsyncCallback callback,
-                                        void* userdata) {
-    CreateComputePipelineAsync2(
-        descriptor, {nullptr, WGPUCallbackMode_AllowSpontaneous,
-                     [](WGPUCreatePipelineAsyncStatus status, WGPUComputePipeline pipeline,
-                        WGPUStringView message, void* callback, void* userdata) {
-                         auto cb =
-                             reinterpret_cast<WGPUCreateComputePipelineAsyncCallback>(callback);
-                         cb(status, pipeline, message, userdata);
-                     },
-                     reinterpret_cast<void*>(callback), userdata});
-}
-
-WGPUFuture Device::CreateComputePipelineAsyncF(
+WGPUFuture Device::CreateComputePipelineAsync(
     WGPUComputePipelineDescriptor const* descriptor,
     const WGPUCreateComputePipelineAsyncCallbackInfo& callbackInfo) {
-    return CreateComputePipelineAsync2(
-        descriptor, {callbackInfo.nextInChain, callbackInfo.mode,
-                     [](WGPUCreatePipelineAsyncStatus status, WGPUComputePipeline pipeline,
-                        WGPUStringView message, void* callback, void* userdata) {
-                         auto cb =
-                             reinterpret_cast<WGPUCreateComputePipelineAsyncCallback>(callback);
-                         cb(status, pipeline, message, userdata);
-                     },
-                     reinterpret_cast<void*>(callbackInfo.callback), callbackInfo.userdata});
-}
-
-WGPUFuture Device::CreateComputePipelineAsync2(
-    WGPUComputePipelineDescriptor const* descriptor,
-    const WGPUCreateComputePipelineAsyncCallbackInfo2& callbackInfo) {
-    return CreatePipelineAsyncF<CreateComputePipelineEvent, DeviceCreateComputePipelineAsyncCmd>(
+    return CreatePipelineAsync<CreateComputePipelineEvent, DeviceCreateComputePipelineAsyncCmd>(
         descriptor, callbackInfo);
 }
 
@@ -504,38 +453,10 @@ WireResult Client::DoDeviceCreateComputePipelineAsyncCallback(ObjectHandle event
         .SetFutureReady<CreateComputePipelineEvent>(future.id, status, message);
 }
 
-void Device::CreateRenderPipelineAsync(WGPURenderPipelineDescriptor const* descriptor,
-                                       WGPUCreateRenderPipelineAsyncCallback callback,
-                                       void* userdata) {
-    CreateRenderPipelineAsync2(
-        descriptor, {nullptr, WGPUCallbackMode_AllowSpontaneous,
-                     [](WGPUCreatePipelineAsyncStatus status, WGPURenderPipeline pipeline,
-                        WGPUStringView message, void* callback, void* userdata) {
-                         auto cb =
-                             reinterpret_cast<WGPUCreateRenderPipelineAsyncCallback>(callback);
-                         cb(status, pipeline, message, userdata);
-                     },
-                     reinterpret_cast<void*>(callback), userdata});
-}
-
-WGPUFuture Device::CreateRenderPipelineAsyncF(
+WGPUFuture Device::CreateRenderPipelineAsync(
     WGPURenderPipelineDescriptor const* descriptor,
     const WGPUCreateRenderPipelineAsyncCallbackInfo& callbackInfo) {
-    return CreateRenderPipelineAsync2(
-        descriptor, {callbackInfo.nextInChain, callbackInfo.mode,
-                     [](WGPUCreatePipelineAsyncStatus status, WGPURenderPipeline pipeline,
-                        WGPUStringView message, void* callback, void* userdata) {
-                         auto cb =
-                             reinterpret_cast<WGPUCreateRenderPipelineAsyncCallback>(callback);
-                         cb(status, pipeline, message, userdata);
-                     },
-                     reinterpret_cast<void*>(callbackInfo.callback), callbackInfo.userdata});
-}
-
-WGPUFuture Device::CreateRenderPipelineAsync2(
-    WGPURenderPipelineDescriptor const* descriptor,
-    const WGPUCreateRenderPipelineAsyncCallbackInfo2& callbackInfo) {
-    return CreatePipelineAsyncF<CreateRenderPipelineEvent, DeviceCreateRenderPipelineAsyncCmd>(
+    return CreatePipelineAsync<CreateRenderPipelineEvent, DeviceCreateRenderPipelineAsyncCmd>(
         descriptor, callbackInfo);
 }
 

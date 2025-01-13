@@ -21,7 +21,6 @@ class MappedNamedConstantsTest {
         BlendFactor::class,
         BlendOperation::class,
         BufferBindingType::class,
-        BufferMapAsyncStatus::class,
         BufferMapState::class,
         BufferUsage::class,
         CallbackMode::class,
