@@ -29,6 +29,8 @@
 
 #include <algorithm>
 #include <memory>
+#include <string>
+#include <unordered_set>
 #include <utility>
 #include <vector>
 
@@ -79,8 +81,23 @@ class Parser {
         // Check for unsupported extensions.
         for (const auto& ext : spirv_context_->extensions()) {
             auto name = ext.GetOperand(0).AsString();
-            if (name != "SPV_KHR_storage_buffer_storage_class") {
+            if (name != "SPV_KHR_storage_buffer_storage_class" &&
+                name != "SPV_KHR_non_semantic_info") {
                 return Failure("SPIR-V extension '" + name + "' is not supported");
+            }
+        }
+
+        // Register imported instruction sets
+        for (const auto& import : spirv_context_->ext_inst_imports()) {
+            auto name = import.GetInOperand(0).AsString();
+
+            // TODO(dneto): Handle other extended instruction sets when needed.
+            if (name == "GLSL.std.450") {
+                glsl_std_450_imports_.insert(import.result_id());
+            } else if (name.find("NonSemantic.") == 0) {
+                ignored_imports_.insert(import.result_id());
+            } else {
+                return Failure("Unrecognized extended instruction set: " + name);
             }
         }
 
@@ -760,6 +777,12 @@ class Parser {
 
     /// The SPIR-V context containing the SPIR-V tools intermediate representation.
     std::unique_ptr<spvtools::opt::IRContext> spirv_context_;
+
+    // The set of IDs that are imports of the GLSL.std.450 extended instruction sets.
+    std::unordered_set<uint32_t> glsl_std_450_imports_;
+    // The set of IDs of imports that are ignored. For example, any "NonSemanticInfo." import is
+    // ignored.
+    std::unordered_set<uint32_t> ignored_imports_;
 };
 
 }  // namespace

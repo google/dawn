@@ -83,6 +83,7 @@ cc_library(
     "constant_test.cc",
     "function_test.cc",
     "helper_test.h",
+    "import_test.cc",
     "memory_test.cc",
     "misc_test.cc",
     "struct_test.cc",
