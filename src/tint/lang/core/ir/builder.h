@@ -1426,6 +1426,24 @@ class Builder {
         return let;
     }
 
+    /// Creates a new `let` declaration
+    /// @param value the value
+    /// @returns the instruction
+    template <
+        typename VALUE,
+        typename = std::enable_if_t<
+            !traits::IsTypeOrDerived<std::remove_pointer_t<std::decay_t<VALUE>>, core::type::Type>>>
+    ir::Let* Let(VALUE&& value) {
+        auto* val = Value(std::forward<VALUE>(value));
+        if (DAWN_UNLIKELY(!val)) {
+            TINT_ASSERT(val);
+            return nullptr;
+        }
+        auto* let = ir.CreateInstruction<ir::Let>(InstructionResult(val->Type()), val);
+        Append(let);
+        return let;
+    }
+
     /// Creates a return instruction
     /// @param func the function being returned
     /// @returns the instruction

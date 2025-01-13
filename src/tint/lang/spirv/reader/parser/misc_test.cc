@@ -114,5 +114,75 @@ tint_symbol_4 = struct @align(4) {
 )");
 }
 
+TEST_F(SpirvParserTest, Misc_OpCopyObject) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+       %void = OpTypeVoid
+       %bool = OpTypeBool
+       %uint = OpTypeInt 32 0
+        %int = OpTypeInt 32 1
+      %float = OpTypeFloat 32
+     %uint_2 = OpConstant %uint 2
+%_arr_uint_uint_2 = OpTypeArray %uint %uint_2
+     %v2uint = OpTypeVector %uint 2
+      %v2int = OpTypeVector %int 2
+    %v2float = OpTypeVector %float 2
+%mat2v2float = OpTypeMatrix %v2float 2
+ %_struct_13 = OpTypeStruct %bool %uint %int %float
+    %ep_type = OpTypeFunction %void
+       %main = OpFunction %void None %ep_type
+ %main_start = OpLabel
+          %1 = OpUndef %bool
+          %2 = OpUndef %uint
+          %3 = OpUndef %int
+          %4 = OpUndef %float
+          %5 = OpUndef %_arr_uint_uint_2
+          %6 = OpUndef %mat2v2float
+          %7 = OpUndef %v2uint
+          %8 = OpUndef %v2int
+          %9 = OpUndef %v2float
+         %10 = OpUndef %_struct_13
+         %11 = OpCopyObject %bool %1
+         %12 = OpCopyObject %uint %2
+         %13 = OpCopyObject %int %3
+         %14 = OpCopyObject %float %4
+         %15 = OpCopyObject %_arr_uint_uint_2 %5
+         %16 = OpCopyObject %mat2v2float %6
+         %17 = OpCopyObject %v2uint %7
+         %18 = OpCopyObject %v2int %8
+         %19 = OpCopyObject %v2float %9
+         %20 = OpCopyObject %_struct_13 %10
+               OpReturn
+               OpFunctionEnd
+)",
+              R"(
+tint_symbol_4 = struct @align(4) {
+  tint_symbol:bool @offset(0)
+  tint_symbol_1:u32 @offset(4)
+  tint_symbol_2:i32 @offset(8)
+  tint_symbol_3:f32 @offset(12)
+}
+
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:bool = let false
+    %3:u32 = let 0u
+    %4:i32 = let 0i
+    %5:f32 = let 0.0f
+    %6:array<u32, 2> = let array<u32, 2>(0u)
+    %7:mat2x2<f32> = let mat2x2<f32>(vec2<f32>(0.0f))
+    %8:vec2<u32> = let vec2<u32>(0u)
+    %9:vec2<i32> = let vec2<i32>(0i)
+    %10:vec2<f32> = let vec2<f32>(0.0f)
+    %11:tint_symbol_4 = let tint_symbol_4(false, 0u, 0i, 0.0f)
+    ret
+  }
+}
+)");
+}
+
 }  // namespace
 }  // namespace tint::spirv::reader

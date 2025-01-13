@@ -507,6 +507,9 @@ class Parser {
                 case spv::Op::OpUndef:
                     AddValue(inst.result_id(), b_.Zero(Type(inst.type_id())));
                     break;
+                case spv::Op::OpCopyObject:
+                    EmitCopyObject(inst);
+                    break;
                 case spv::Op::OpAccessChain:
                 case spv::Op::OpInBoundsAccessChain:
                     EmitAccess(inst);
@@ -550,6 +553,13 @@ class Parser {
                         << "unhandled SPIR-V instruction: " << static_cast<uint32_t>(inst.opcode());
             }
         }
+    }
+
+    /// @param inst the SPIR-V instruction for OpCopyObject
+    void EmitCopyObject(const spvtools::opt::Instruction& inst) {
+        // Make the result Id a pointer to the original copied value.
+        auto* l = b_.Let(Value(inst.GetSingleWordOperand(2)));
+        Emit(l, inst.result_id());
     }
 
     /// @param inst the SPIR-V instruction for OpAccessChain
