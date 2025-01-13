@@ -62,11 +62,25 @@ $ cd TestDawn
 Now, create a `hello_webgpu.cpp` C++ file within the `TestDawn` directory.
 
 ```cpp
-#include <webgpu/webgpu_cpp.h>
-#include <webgpu/webgpu_cpp_print.h>
+#include <dawn/webgpu_cpp.h>
+#include <dawn/webgpu_cpp_print.h>
 
 #include <cstdlib>
 #include <iostream>
+
+void AdapterCallback(WGPURequestAdapterStatus status,
+                     WGPUAdapter adapter,
+                    WGPUStringView message,
+                     void* userdata) {
+    if (status != WGPURequestAdapterStatus_Success) {
+        std::string messageStr = (message.data && message.length > 0) 
+                                 ? std::string(message.data, message.length) 
+                                 : "No message provided";
+        std::cerr << "Failed to get an adapter: " << messageStr << std::endl;
+        return;
+    }
+    *static_cast<wgpu::Adapter*>(userdata) = wgpu::Adapter::Acquire(adapter);
+}
 
 int main(int argc, char *argv[]) {
   wgpu::InstanceDescriptor instanceDescriptor{};
@@ -82,15 +96,8 @@ int main(int argc, char *argv[]) {
   wgpu::RequestAdapterCallbackInfo callbackInfo = {};
   callbackInfo.nextInChain = nullptr;
   callbackInfo.mode = wgpu::CallbackMode::WaitAnyOnly;
-  callbackInfo.callback = [](WGPURequestAdapterStatus status,
-                             WGPUAdapter adapter, const char *message,
-                             void *userdata) {
-    if (status != WGPURequestAdapterStatus_Success) {
-      std::cerr << "Failed to get an adapter:" << message;
-      return;
-    }
-    *static_cast<wgpu::Adapter *>(userdata) = wgpu::Adapter::Acquire(adapter);
-  };
+  callbackInfo.callback = AdapterCallback;
+
   callbackInfo.userdata = &adapter;
   instance.WaitAny(instance.RequestAdapter(&options, callbackInfo), UINT64_MAX);
   if (adapter == nullptr) {
@@ -112,6 +119,7 @@ int main(int argc, char *argv[]) {
   std::cout << "Driver description: " << info.description << "\n";
   return EXIT_SUCCESS;
 }
+
 ```
 
 ### Create CMakeLists.txt file
