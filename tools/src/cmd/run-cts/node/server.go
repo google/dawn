@@ -123,6 +123,9 @@ func (c *cmd) runServer(
 		if c.flags.compatibilityMode {
 			args = append(args, "--compat")
 		}
+		if c.flags.enforceDefaultLimits {
+			args = append(args, "--enforce-default-limits")
+		}
 		for _, f := range c.flags.dawn {
 			args = append(args, "--gpu-provider-flag", f)
 		}

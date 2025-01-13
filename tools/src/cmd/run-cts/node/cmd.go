@@ -59,6 +59,7 @@ type flags struct {
 	genCoverage          bool
 	compatibilityMode    bool
 	skipVSCodeInfo       bool
+	enforceDefaultLimits bool
 	dawn                 node.Flags
 }
 
@@ -109,6 +110,7 @@ func (c *cmd) RegisterFlags(ctx context.Context, cfg common.Config) ([]string, e
 	flag.StringVar(&c.flags.coverageFile, "export-coverage", "", "write coverage data to the given path")
 	flag.BoolVar(&c.flags.compatibilityMode, "compat", false, "run tests in compatibility mode")
 	flag.BoolVar(&c.flags.skipVSCodeInfo, "skip-vs-code-info", false, "skips emitting VS Code information")
+	flag.BoolVar(&c.flags.enforceDefaultLimits, "enforce-default-limits", false, "enforce the default limits (note: powerPreference tests may fail)")
 
 	return []string{"[query]"}, nil
 }
