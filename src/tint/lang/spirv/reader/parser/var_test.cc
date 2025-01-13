@@ -304,6 +304,37 @@ $B1: {  # root
 )");
 }
 
+TEST_F(SpirvParserTest, UniformConstantVar) {
+    EXPECT_IR(R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %1 "main"
+               OpExecutionMode %1 LocalSize 1 1 1
+               OpDecorate %6 DescriptorSet 1
+               OpDecorate %6 Binding 2
+       %void = OpTypeVoid
+       %samp = OpTypeSampler
+%_ptr_Uniform_samp = OpTypePointer UniformConstant %samp
+          %5 = OpTypeFunction %void
+          %6 = OpVariable %_ptr_Uniform_samp UniformConstant
+          %1 = OpFunction %void None %5
+          %7 = OpLabel
+               OpReturn
+               OpFunctionEnd
+)",
+              R"(
+$B1: {  # root
+  %1:ptr<handle, sampler, read> = var @binding_point(1, 2)
+}
+
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B2: {
+    ret
+  }
+}
+)");
+}
+
 struct BuiltinCase {
     std::string spirv_type;
     std::string spirv_builtin;

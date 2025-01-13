@@ -115,6 +115,8 @@ class Parser {
                 return core::AddressSpace::kStorage;
             case spv::StorageClass::Uniform:
                 return core::AddressSpace::kUniform;
+            case spv::StorageClass::UniformConstant:
+                return core::AddressSpace::kHandle;
             default:
                 TINT_UNIMPLEMENTED()
                     << "unhandled SPIR-V storage class: " << static_cast<uint32_t>(sc);
@@ -212,6 +214,10 @@ class Parser {
                     auto* ptr_ty = type->AsPointer();
                     return ty_.ptr(AddressSpace(ptr_ty->storage_class()),
                                    Type(ptr_ty->pointee_type()), access_mode);
+                }
+                case spvtools::opt::analysis::Type::kSampler: {
+                    // TODO(dsinclair): How to determine comparison samplers ...
+                    return ty_.sampler();
                 }
                 default:
                     TINT_UNIMPLEMENTED() << "unhandled SPIR-V type: " << type->str();
