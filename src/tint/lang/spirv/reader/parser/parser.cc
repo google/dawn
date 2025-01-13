@@ -421,8 +421,15 @@ class Parser {
     /// Emit the module-scope variables.
     void EmitModuleScopeVariables() {
         for (auto& inst : spirv_context_->module()->types_values()) {
-            if (inst.opcode() == spv::Op::OpVariable) {
-                EmitVar(inst);
+            switch (inst.opcode()) {
+                case spv::Op::OpVariable:
+                    EmitVar(inst);
+                    break;
+                case spv::Op::OpUndef:
+                    AddValue(inst.result_id(), b_.Zero(Type(inst.type_id())));
+                    break;
+                default:
+                    break;
             }
         }
     }
