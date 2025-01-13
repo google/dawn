@@ -92,6 +92,7 @@ if (tint_build_unittests) {
         "function_test.cc",
         "helper_test.h",
         "memory_test.cc",
+        "misc_test.cc",
         "struct_test.cc",
         "var_test.cc",
       ]
