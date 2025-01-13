@@ -2144,5 +2144,266 @@ $B1: {  # root
     EXPECT_EQ(expect, str());
 }
 
+TEST_F(SpirvReader_ShaderIOTest, PointSize) {
+    auto* builtin_str =
+        ty.Struct(mod.symbols.New("Builtins"), Vector{
+                                                   core::type::Manager::StructMemberDesc{
+                                                       mod.symbols.New("position"),
+                                                       ty.vec4<f32>(),
+                                                       BuiltinAttrs(core::BuiltinValue::kPosition),
+                                                   },
+                                                   core::type::Manager::StructMemberDesc{
+                                                       mod.symbols.New("point_size"),
+                                                       ty.f32(),
+                                                       BuiltinAttrs(core::BuiltinValue::kPointSize),
+                                                   },
+                                               });
+    auto* builtins = b.Var("builtins", ty.ptr(core::AddressSpace::kOut, builtin_str));
+    mod.root_block->Append(builtins);
+
+    auto* ep = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kVertex);
+    b.Append(ep->Block(), [&] {  //
+        auto* ptr = ty.ptr(core::AddressSpace::kOut, ty.vec4<f32>());
+        b.Store(b.Access(ptr, builtins, 0_u), b.Splat<vec4<f32>>(1_f));
+        b.Store(b.Access(ty.ptr(core::AddressSpace::kOut, ty.f32()), builtins, 1_u), 1_f);
+        b.Return(ep);
+    });
+
+    auto* src = R"(
+Builtins = struct @align(16) {
+  position:vec4<f32> @offset(0), @builtin(position)
+  point_size:f32 @offset(16), @builtin(__point_size)
+}
+
+$B1: {  # root
+  %builtins:ptr<__out, Builtins, read_write> = var
+}
+
+%foo = @vertex func():void {
+  $B2: {
+    %3:ptr<__out, vec4<f32>, read_write> = access %builtins, 0u
+    store %3, vec4<f32>(1.0f)
+    %4:ptr<__out, f32, read_write> = access %builtins, 1u
+    store %4, 1.0f
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+Builtins = struct @align(16) {
+  position:vec4<f32> @offset(0)
+  point_size:f32 @offset(16)
+}
+
+$B1: {  # root
+  %builtins:ptr<private, Builtins, read_write> = var
+}
+
+%foo_inner = func():void {
+  $B2: {
+    %3:ptr<private, vec4<f32>, read_write> = access %builtins, 0u
+    store %3, vec4<f32>(1.0f)
+    %4:ptr<private, f32, read_write> = access %builtins, 1u
+    store %4, 1.0f
+    ret
+  }
+}
+%foo = @vertex func():vec4<f32> [@position] {
+  $B3: {
+    %6:void = call %foo_inner
+    %7:ptr<private, vec4<f32>, read_write> = access %builtins, 0u
+    %8:vec4<f32> = load %7
+    ret %8
+  }
+}
+)";
+
+    Run(ShaderIO);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(SpirvReader_ShaderIOTest, Outputs_Struct_UnusedOutputs) {
+    auto* builtin_str = ty.Struct(mod.symbols.New("Builtins"),
+                                  Vector{
+                                      core::type::Manager::StructMemberDesc{
+                                          mod.symbols.New("position"),
+                                          ty.vec4<f32>(),
+                                          BuiltinAttrs(core::BuiltinValue::kPosition),
+                                      },
+                                      core::type::Manager::StructMemberDesc{
+                                          mod.symbols.New("clip_distance"),
+                                          ty.array<f32, 3>(),
+                                          BuiltinAttrs(core::BuiltinValue::kClipDistances),
+                                      },
+                                      core::type::Manager::StructMemberDesc{
+                                          mod.symbols.New("point_size"),
+                                          ty.f32(),
+                                          BuiltinAttrs(core::BuiltinValue::kPointSize),
+                                      },
+                                      core::type::Manager::StructMemberDesc{
+                                          mod.symbols.New("cull_distance"),
+                                          ty.array<f32, 3>(),
+                                          BuiltinAttrs(core::BuiltinValue::kCullDistance),
+                                      },
+                                  });
+    auto* builtins = b.Var("builtins", ty.ptr(core::AddressSpace::kOut, builtin_str));
+    mod.root_block->Append(builtins);
+
+    auto* ep = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kVertex);
+    b.Append(ep->Block(), [&] {  //
+        auto* ptr = ty.ptr(core::AddressSpace::kOut, ty.vec4<f32>());
+        b.Store(b.Access(ptr, builtins, 0_u), b.Splat<vec4<f32>>(1_f));
+        b.Return(ep);
+    });
+
+    auto* src = R"(
+Builtins = struct @align(16) {
+  position:vec4<f32> @offset(0), @builtin(position)
+  clip_distance:array<f32, 3> @offset(16), @builtin(clip_distances)
+  point_size:f32 @offset(28), @builtin(__point_size)
+  cull_distance:array<f32, 3> @offset(32), @builtin(__cull_distance)
+}
+
+$B1: {  # root
+  %builtins:ptr<__out, Builtins, read_write> = var
+}
+
+%foo = @vertex func():void {
+  $B2: {
+    %3:ptr<__out, vec4<f32>, read_write> = access %builtins, 0u
+    store %3, vec4<f32>(1.0f)
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+Builtins = struct @align(16) {
+  position:vec4<f32> @offset(0)
+  clip_distance:array<f32, 3> @offset(16)
+  point_size:f32 @offset(28)
+  cull_distance:array<f32, 3> @offset(32)
+}
+
+$B1: {  # root
+  %builtins:ptr<private, Builtins, read_write> = var
+}
+
+%foo_inner = func():void {
+  $B2: {
+    %3:ptr<private, vec4<f32>, read_write> = access %builtins, 0u
+    store %3, vec4<f32>(1.0f)
+    ret
+  }
+}
+%foo = @vertex func():vec4<f32> [@position] {
+  $B3: {
+    %5:void = call %foo_inner
+    %6:ptr<private, vec4<f32>, read_write> = access %builtins, 0u
+    %7:vec4<f32> = load %6
+    ret %7
+  }
+}
+)";
+
+    Run(ShaderIO);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(SpirvReader_ShaderIOTest, Outputs_Struct_MultipledUsed) {
+    auto* builtin_str = ty.Struct(mod.symbols.New("Builtins"),
+                                  Vector{
+                                      core::type::Manager::StructMemberDesc{
+                                          mod.symbols.New("position"),
+                                          ty.vec4<f32>(),
+                                          BuiltinAttrs(core::BuiltinValue::kPosition),
+                                      },
+                                      core::type::Manager::StructMemberDesc{
+                                          mod.symbols.New("clip_distance"),
+                                          ty.array<f32, 3>(),
+                                          BuiltinAttrs(core::BuiltinValue::kClipDistances),
+                                      },
+                                  });
+    auto* builtins = b.Var("builtins", ty.ptr(core::AddressSpace::kOut, builtin_str));
+    mod.root_block->Append(builtins);
+
+    auto* ep = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kVertex);
+    b.Append(ep->Block(), [&] {  //
+        auto* ptr1 = ty.ptr(core::AddressSpace::kOut, ty.vec4<f32>());
+        b.Store(b.Access(ptr1, builtins, 0_u), b.Splat<vec4<f32>>(1_f));
+
+        auto* ptr2 = ty.ptr(core::AddressSpace::kOut, ty.array<f32, 3>());
+        b.Store(b.Access(ptr2, builtins, 1_u), b.Splat<array<f32, 3>>(1_f));
+        b.Return(ep);
+    });
+
+    auto* src = R"(
+Builtins = struct @align(16) {
+  position:vec4<f32> @offset(0), @builtin(position)
+  clip_distance:array<f32, 3> @offset(16), @builtin(clip_distances)
+}
+
+$B1: {  # root
+  %builtins:ptr<__out, Builtins, read_write> = var
+}
+
+%foo = @vertex func():void {
+  $B2: {
+    %3:ptr<__out, vec4<f32>, read_write> = access %builtins, 0u
+    store %3, vec4<f32>(1.0f)
+    %4:ptr<__out, array<f32, 3>, read_write> = access %builtins, 1u
+    store %4, array<f32, 3>(1.0f)
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+Builtins = struct @align(16) {
+  position:vec4<f32> @offset(0)
+  clip_distance:array<f32, 3> @offset(16)
+}
+
+tint_symbol = struct @align(16) {
+  position:vec4<f32> @offset(0), @builtin(position)
+  clip_distance:array<f32, 3> @offset(16), @builtin(clip_distances)
+}
+
+$B1: {  # root
+  %builtins:ptr<private, Builtins, read_write> = var
+}
+
+%foo_inner = func():void {
+  $B2: {
+    %3:ptr<private, vec4<f32>, read_write> = access %builtins, 0u
+    store %3, vec4<f32>(1.0f)
+    %4:ptr<private, array<f32, 3>, read_write> = access %builtins, 1u
+    store %4, array<f32, 3>(1.0f)
+    ret
+  }
+}
+%foo = @vertex func():tint_symbol {
+  $B3: {
+    %6:void = call %foo_inner
+    %7:ptr<private, vec4<f32>, read_write> = access %builtins, 0u
+    %8:vec4<f32> = load %7
+    %9:ptr<private, array<f32, 3>, read_write> = access %builtins, 1u
+    %10:array<f32, 3> = load %9
+    %11:tint_symbol = construct %8, %10
+    ret %11
+  }
+}
+)";
+
+    Run(ShaderIO);
+
+    EXPECT_EQ(expect, str());
+}
 }  // namespace
 }  // namespace tint::spirv::reader::lower

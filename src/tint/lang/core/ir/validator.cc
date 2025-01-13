@@ -348,6 +348,17 @@ constexpr BuiltinChecker kPointSizeChecker{
     /* type_error */ "__point_size must be a f32",
 };
 
+constexpr BuiltinChecker kCullDistanceChecker{
+    /* name */ "__cull_distance",
+    /* stages */ EnumSet<Function::PipelineStage>(Function::PipelineStage::kVertex),
+    /* direction */ BuiltinChecker::IODirection::kOutput,
+    /* type_check */
+    [](const core::type::Type* ty) -> bool {
+        return ty->Is<core::type::Array>() && ty->DeepestElement()->Is<core::type::F32>();
+    },
+    /* type_error */ "__cull_distance must be an array of f32",
+};
+
 constexpr BuiltinChecker kFragDepthChecker{
     /* name */ "frag_depth",
     /* stages */ EnumSet<Function::PipelineStage>(Function::PipelineStage::kFragment),
@@ -465,6 +476,8 @@ const BuiltinChecker& BuiltinCheckerFor(BuiltinValue builtin) {
     switch (builtin) {
         case BuiltinValue::kPointSize:
             return kPointSizeChecker;
+        case BuiltinValue::kCullDistance:
+            return kCullDistanceChecker;
         case BuiltinValue::kFragDepth:
             return kFragDepthChecker;
         case BuiltinValue::kFrontFacing:
