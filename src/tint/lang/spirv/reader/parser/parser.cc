@@ -504,6 +504,9 @@ class Parser {
             switch (inst.opcode()) {
                 case spv::Op::OpNop:
                     break;
+                case spv::Op::OpUndef:
+                    AddValue(inst.result_id(), b_.Zero(Type(inst.type_id())));
+                    break;
                 case spv::Op::OpAccessChain:
                 case spv::Op::OpInBoundsAccessChain:
                     EmitAccess(inst);
