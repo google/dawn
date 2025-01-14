@@ -33,6 +33,7 @@ namespace {
 std::string Preamble() {
     return R"(
   OpCapability Shader
+  OpCapability Float16
   %glsl = OpExtInstImport "GLSL.std.450"
   OpMemoryModel Logical GLSL450
   OpEntryPoint GLCompute %100 "main"
@@ -44,6 +45,7 @@ std::string Preamble() {
   %uint = OpTypeInt 32 0
   %int = OpTypeInt 32 1
   %float = OpTypeFloat 32
+  %half = OpTypeFloat 16
 
   %uint_10 = OpConstant %uint 10
   %uint_15 = OpConstant %uint 15
@@ -54,15 +56,24 @@ std::string Preamble() {
   %float_50 = OpConstant %float 50
   %float_60 = OpConstant %float 60
   %float_70 = OpConstant %float 70
+  %half_50 = OpConstant %half 50
+  %half_60 = OpConstant %half 60
+  %half_70 = OpConstant %half 70
 
   %v2uint = OpTypeVector %uint 2
   %v2int = OpTypeVector %int 2
   %v2float = OpTypeVector %float 2
   %v3float = OpTypeVector %float 3
   %v4float = OpTypeVector %float 4
+  %v2half = OpTypeVector %half 2
+  %v3half = OpTypeVector %half 3
+  %v4half = OpTypeVector %half 4
   %mat2v2float = OpTypeMatrix %v2float 2
   %mat3v3float = OpTypeMatrix %v3float 3
   %mat4v4float = OpTypeMatrix %v4float 4
+  %mat2v2half = OpTypeMatrix %v2half 2
+  %mat3v3half = OpTypeMatrix %v3half 3
+  %mat4v4half = OpTypeMatrix %v4half 4
 
   %v2uint_10_20 = OpConstantComposite %v2uint %uint_10 %uint_20
   %v2uint_20_10 = OpConstantComposite %v2uint %uint_20 %uint_10
@@ -73,15 +84,22 @@ std::string Preamble() {
   %v2float_50_60 = OpConstantComposite %v2float %float_50 %float_60
   %v2float_60_50 = OpConstantComposite %v2float %float_60 %float_50
   %v2float_70_70 = OpConstantComposite %v2float %float_70 %float_70
+  %v2half_50_60 = OpConstantComposite %v2half %half_50 %half_60
 
   %v3float_50_60_70 = OpConstantComposite %v3float %float_50 %float_60 %float_70
   %v3float_60_70_50 = OpConstantComposite %v3float %float_60 %float_70 %float_50
+  %v3half_50_60_70 = OpConstantComposite %v3half %half_50 %half_60 %half_70
 
   %v4float_50_50_50_50 = OpConstantComposite %v4float %float_50 %float_50 %float_50 %float_50
+  %v4half_50_50_50_50 = OpConstantComposite %v4half %half_50 %half_50 %half_50 %half_50
 
   %mat2v2float_50_60 = OpConstantComposite %mat2v2float %v2float_50_60 %v2float_50_60
   %mat3v3float_50_60_70 = OpConstantComposite %mat3v3float %v3float_50_60_70 %v3float_50_60_70 %v3float_50_60_70
   %mat4v4float_50_50_50_50 = OpConstantComposite %mat4v4float %v4float_50_50_50_50 %v4float_50_50_50_50 %v4float_50_50_50_50 %v4float_50_50_50_50
+
+  %mat2v2half_50_60 = OpConstantComposite %mat2v2half %v2half_50_60 %v2half_50_60
+  %mat3v3half_50_60_70 = OpConstantComposite %mat3v3half %v3half_50_60_70 %v3half_50_60_70 %v3half_50_60_70
+  %mat4v4half_50_50_50_50 = OpConstantComposite %mat4v4half %v4half_50_50_50_50 %v4half_50_50_50_50 %v4half_50_50_50_50 %v4half_50_50_50_50
 
   %100 = OpFunction %void None %voidfn
   %entry = OpLabel
@@ -1374,6 +1392,8 @@ TEST_F(SpirvReaderTest, DISABLED_GlslStd450_Ldexp_Vector_Floatvec_Uintvec) {
 struct DeterminantData {
     std::string in;
     std::string out;
+    std::string ty;
+    std::string ty_name;
 };
 
 inline std::ostream& operator<<(std::ostream& out, DeterminantData c) {
@@ -1383,22 +1403,24 @@ inline std::ostream& operator<<(std::ostream& out, DeterminantData c) {
 
 using SpirvReaderTest_GlslStd450_Determinant = SpirvReaderTestWithParam<DeterminantData>;
 
-TEST_P(SpirvReaderTest_GlslStd450_Determinant, DISABLED_Test) {
+TEST_P(SpirvReaderTest_GlslStd450_Determinant, Test) {
     auto param = GetParam();
 
     EXPECT_IR(Preamble() + R"(
-     %1 = OpExtInst %float %glsl Determinant %)" +
-                  param.in + R"(
-     %2 = OpCopyObject %float %1
+     %1 = OpExtInst %)" +
+                  param.ty_name + R"( %glsl Determinant %)" + param.in + R"(
+     %2 = OpCopyObject %)" +
+                  param.ty_name + R"( %1
      OpReturn
      OpFunctionEnd
   )",
               R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:f32 = determinant )" +
-                  param.out + R"(
-    %3:f32 = let %2
+    %2:)" + param.ty +
+                  R"( = determinant )" + param.out + R"(
+    %3:)" + param.ty +
+                  R"( = let %2
     ret
   }
 }
@@ -1408,9 +1430,16 @@ TEST_P(SpirvReaderTest_GlslStd450_Determinant, DISABLED_Test) {
 INSTANTIATE_TEST_SUITE_P(
     SpirvReader,
     SpirvReaderTest_GlslStd450_Determinant,
-    ::testing::Values(DeterminantData{"m2x2f1", "mat2x2<f32>(vec2<f32>(50.0f, 60.0f))"},
-                      DeterminantData{"m3x3f1", "mat3x3<f32>(vec3<f32>(50.0f, 60.0f, 70.0f))"},
-                      DeterminantData{"m4x4f1", "mat4x4<f32>(vec4<f32>(50.0f))"}));
+    ::testing::Values(
+        DeterminantData{"mat2v2float_50_60", "mat2x2<f32>(vec2<f32>(50.0f, 60.0f))", "f32",
+                        "float"},
+        DeterminantData{"mat3v3float_50_60_70", "mat3x3<f32>(vec3<f32>(50.0f, 60.0f, 70.0f))",
+                        "f32", "float"},
+        DeterminantData{"mat4v4float_50_50_50_50", "mat4x4<f32>(vec4<f32>(50.0f))", "f32", "float"},
+        DeterminantData{"mat2v2half_50_60", "mat2x2<f16>(vec2<f16>(50.0h, 60.0h))", "f16", "half"},
+        DeterminantData{"mat3v3half_50_60_70", "mat3x3<f16>(vec3<f16>(50.0h, 60.0h, 70.0h))", "f16",
+                        "half"},
+        DeterminantData{"mat4v4half_50_50_50_50", "mat4x4<f16>(vec4<f16>(50.0h))", "f16", "half"}));
 
 }  // namespace
 }  // namespace tint::spirv::reader

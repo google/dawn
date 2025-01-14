@@ -655,6 +655,8 @@ class Parser {
                 return core::BuiltinFn::kCross;
             case GLSLstd450Degrees:
                 return core::BuiltinFn::kDegrees;
+            case GLSLstd450Determinant:
+                return core::BuiltinFn::kDeterminant;
             case GLSLstd450Distance:
                 return core::BuiltinFn::kDistance;
             case GLSLstd450Exp:
