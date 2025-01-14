@@ -55,12 +55,6 @@ class DynamicUploader {
     explicit DynamicUploader(DeviceBase* device);
     ~DynamicUploader() = default;
 
-    // We add functions to Release StagingBuffers to the DynamicUploader as there's
-    // currently no place to track the allocated staging buffers such that they're freed after
-    // pending commands are finished. This should be changed when better resource allocation is
-    // implemented.
-    void ReleaseStagingBuffer(Ref<BufferBase> stagingBuffer);
-
     ResultOrError<UploadHandle> Allocate(uint64_t allocationSize,
                                          ExecutionSerial serial,
                                          uint64_t offsetAlignment);
@@ -80,6 +74,8 @@ class DynamicUploader {
     ResultOrError<UploadHandle> AllocateInternal(uint64_t allocationSize,
                                                  ExecutionSerial serial,
                                                  uint64_t offsetAlignment);
+
+    void ReleaseStagingBuffer(Ref<BufferBase> stagingBuffer);
 
     std::vector<std::unique_ptr<RingBuffer>> mRingBuffers;
     SerialQueue<ExecutionSerial, Ref<BufferBase>> mReleasedStagingBuffers;
