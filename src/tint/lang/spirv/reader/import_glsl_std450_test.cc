@@ -502,7 +502,7 @@ TEST_P(SpirvReaderTest_GlslStd450_Inting_Inting, Scalar) {
 )");
 }
 
-TEST_P(SpirvReaderTest_GlslStd450_Inting_Inting_SignednessCoercing, DISABLED_Scalar_UnsignedArg) {
+TEST_P(SpirvReaderTest_GlslStd450_Inting_Inting_SignednessCoercing, Scalar_UnsignedArg) {
     EXPECT_IR(Preamble() + R"(
      %1 = OpExtInst %int %glsl )" +
                   GetParam().opcode +
@@ -514,27 +514,31 @@ TEST_P(SpirvReaderTest_GlslStd450_Inting_Inting_SignednessCoercing, DISABLED_Sca
               R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    let x_1 = )" + GetParam().wgsl_func +
-                  R"((bitcast<i32>(u1));
+    %2:i32 = bitcast 10u
+    %3:i32 = sign %2
+    %4:i32 = let %3
+    ret
   }
 }
 )");
 }
 
-TEST_P(SpirvReaderTest_GlslStd450_Inting_Inting_SignednessCoercing,
-       DISABLED_Scalar_UnsignedResult) {
+TEST_P(SpirvReaderTest_GlslStd450_Inting_Inting_SignednessCoercing, Scalar_UnsignedResult) {
     EXPECT_IR(Preamble() + R"(
      %1 = OpExtInst %uint %glsl )" +
                   GetParam().opcode +
                   R"( %int_30
+     %2 = OpCopyObject %uint %1
      OpReturn
      OpFunctionEnd
   )",
               R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    let x_1 = bitcast<u32>()" +
-                  GetParam().wgsl_func + R"((i1));
+    %2:i32 = sign 30i
+    %3:u32 = bitcast %2
+    %4:u32 = let %3
+    ret
   }
 }
 )");
@@ -562,38 +566,43 @@ TEST_P(SpirvReaderTest_GlslStd450_Inting_Inting, Vector) {
 )");
 }
 
-TEST_P(SpirvReaderTest_GlslStd450_Inting_Inting_SignednessCoercing, DISABLED_Vector_UnsignedArg) {
+TEST_P(SpirvReaderTest_GlslStd450_Inting_Inting_SignednessCoercing, Vector_UnsignedArg) {
     EXPECT_IR(Preamble() + R"(
      %1 = OpExtInst %v2int %glsl )" +
                   GetParam().opcode +
                   R"( %v2uint_10_20
+     %2 = OpCopyObject %v2int %1
      OpReturn
      OpFunctionEnd
   )",
               R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    let x_1 = )" + GetParam().wgsl_func +
-                  R"((bitcast<vec2i>(v2u1));
+    %2:vec2<i32> = bitcast vec2<u32>(10u, 20u)
+    %3:vec2<i32> = sign %2
+    %4:vec2<i32> = let %3
+    ret
   }
 }
 )");
 }
 
-TEST_P(SpirvReaderTest_GlslStd450_Inting_Inting_SignednessCoercing,
-       DISABLED_Vector_UnsignedResult) {
+TEST_P(SpirvReaderTest_GlslStd450_Inting_Inting_SignednessCoercing, Vector_UnsignedResult) {
     EXPECT_IR(Preamble() + R"(
      %1 = OpExtInst %v2uint %glsl )" +
                   GetParam().opcode +
                   R"( %v2int_30_40
+     %2 = OpCopyObject %v2uint %1
      OpReturn
      OpFunctionEnd
   )",
               R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    let x_1 = bitcast<vec2u>()" +
-                  GetParam().wgsl_func + R"((v2i1));
+    %2:vec2<i32> = sign vec2<i32>(30i, 40i)
+    %3:vec2<u32> = bitcast %2
+    %4:vec2<u32> = let %3
+    ret
   }
 }
 )");

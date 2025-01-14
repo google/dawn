@@ -667,7 +667,6 @@ class Parser {
             case GLSLstd450SAbs:
                 return core::BuiltinFn::kAbs;
             case GLSLstd450FSign:
-            case GLSLstd450SSign:
                 return core::BuiltinFn::kSign;
             case GLSLstd450FindILsb:
                 return core::BuiltinFn::kFirstTrailingBit;
@@ -759,6 +758,8 @@ class Parser {
 
     spirv::BuiltinFn GetGlslStd450SpirvEquivalentFuncName(uint32_t ext_opcode) {
         switch (ext_opcode) {
+            case GLSLstd450SSign:
+                return spirv::BuiltinFn::kSign;
             case GLSLstd450Normalize:
                 return spirv::BuiltinFn::kNormalize;
             case GLSLstd450MatrixInverse:
@@ -767,6 +768,14 @@ class Parser {
                 break;
         }
         return spirv::BuiltinFn::kNone;
+    }
+
+    Vector<const core::type::Type*, 1> GlslStd450ExplicitParams(uint32_t ext_opcode,
+                                                                const core::type::Type* result_ty) {
+        if (ext_opcode != GLSLstd450SSign) {
+            return {};
+        }
+        return {result_ty->DeepestElement()};
     }
 
     /// @param inst the SPIR-V instruction for OpAccessChain
@@ -788,7 +797,10 @@ class Parser {
 
         const auto spv_fn = GetGlslStd450SpirvEquivalentFuncName(ext_opcode);
         if (spv_fn != spirv::BuiltinFn::kNone) {
-            Emit(b_.Call<spirv::ir::BuiltinCall>(result_ty, spv_fn, operands), inst.result_id());
+            auto explicit_params = GlslStd450ExplicitParams(ext_opcode, result_ty);
+            Emit(b_.CallExplicit<spirv::ir::BuiltinCall>(result_ty, spv_fn, explicit_params,
+                                                         operands),
+                 inst.result_id());
             return;
         }
 

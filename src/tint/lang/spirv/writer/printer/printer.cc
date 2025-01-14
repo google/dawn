@@ -1390,6 +1390,9 @@ class Printer {
             case spirv::BuiltinFn::kSelect:
                 op = spv::Op::OpSelect;
                 break;
+            case spirv::BuiltinFn::kSign:
+                ext_inst(GLSLstd450SSign);
+                break;
             case spirv::BuiltinFn::kInverse:
                 ext_inst(GLSLstd450MatrixInverse);
                 break;

@@ -325,6 +325,9 @@ implicit(T: f32_f16) fn inverse(mat2x2<T>) -> mat2x2<T>
 implicit(T: f32_f16) fn inverse(mat3x3<T>) -> mat3x3<T>
 implicit(T: f32_f16) fn inverse(mat4x4<T>) -> mat4x4<T>
 
+implicit(T: iu32) fn sign<R: iu32>(T) -> R
+implicit(T: iu32, N: num) fn sign<R: iu32>(vec<N, T>) -> vec<N, R>
+
 ////////////////////////////////////////////////////////////////////////////////
 // SPV_KHR_integer_dot_product instructions
 ////////////////////////////////////////////////////////////////////////////////

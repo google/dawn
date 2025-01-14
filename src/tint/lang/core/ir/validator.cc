@@ -2791,7 +2791,8 @@ void Validator::CheckBuiltinCall(const BuiltinCall* call) {
     };
 
     auto builtin = core::intrinsic::LookupFn(context, call->FriendlyName().c_str(), call->FuncId(),
-                                             Empty, args, core::EvaluationStage::kRuntime);
+                                             call->ExplicitTemplateParams(), args,
+                                             core::EvaluationStage::kRuntime);
     if (builtin != Success) {
         AddError(call) << builtin.Failure();
         return;
@@ -2827,9 +2828,9 @@ void Validator::CheckMemberBuiltinCall(const MemberBuiltinCall* call) {
         symbols_,
     };
 
-    auto result =
-        core::intrinsic::LookupMemberFn(context, call->FriendlyName().c_str(), call->FuncId(),
-                                        Empty, std::move(args), core::EvaluationStage::kRuntime);
+    auto result = core::intrinsic::LookupMemberFn(context, call->FriendlyName().c_str(),
+                                                  call->FuncId(), call->ExplicitTemplateParams(),
+                                                  std::move(args), core::EvaluationStage::kRuntime);
     if (result != Success) {
         AddError(call) << result.Failure();
         return;

@@ -1152,6 +1152,23 @@ class Builder {
     /// Creates a builtin call instruction with an existing instruction result
     /// @param result the instruction result to use
     /// @param func the builtin function to call
+    /// @param explicit_params the explicit params
+    /// @param args the call arguments
+    /// @returns the instruction
+    template <typename KLASS, typename FUNC, typename... ARGS>
+    tint::traits::EnableIf<tint::traits::IsTypeOrDerived<KLASS, ir::BuiltinCall>, KLASS*>
+    CallExplicitWithResult(ir::InstructionResult* result,
+                           FUNC func,
+                           VectorRef<const core::type::Type*> explicit_params,
+                           ARGS&&... args) {
+        auto* inst = ir.CreateInstruction<KLASS>(result, func, Values(std::forward<ARGS>(args)...));
+        inst->SetExplicitTemplateParams(explicit_params);
+        return Append(inst);
+    }
+
+    /// Creates a builtin call instruction with an existing instruction result
+    /// @param result the instruction result to use
+    /// @param func the builtin function to call
     /// @param args the call arguments
     /// @returns the instruction
     template <typename KLASS, typename FUNC, typename... ARGS>
@@ -1159,6 +1176,22 @@ class Builder {
     CallWithResult(ir::InstructionResult* result, FUNC func, ARGS&&... args) {
         return Append(
             ir.CreateInstruction<KLASS>(result, func, Values(std::forward<ARGS>(args)...)));
+    }
+
+    /// Creates a builtin call instruction
+    /// @param type the return type of the call
+    /// @param func the builtin function to call
+    /// @param explicit_params the explicit parameters
+    /// @param args the call arguments
+    /// @returns the instruction
+    template <typename KLASS, typename FUNC, typename... ARGS>
+    tint::traits::EnableIf<tint::traits::IsTypeOrDerived<KLASS, ir::BuiltinCall>, KLASS*>
+    CallExplicit(const core::type::Type* type,
+                 FUNC func,
+                 VectorRef<const core::type::Type*> explicit_params,
+                 ARGS&&... args) {
+        return CallExplicitWithResult<KLASS>(InstructionResult(type), func, explicit_params,
+                                             Values(std::forward<ARGS>(args)...));
     }
 
     /// Creates a builtin call instruction

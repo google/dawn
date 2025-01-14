@@ -27,8 +27,6 @@
 
 #include "src/tint/lang/core/ir/call.h"
 
-#include <utility>
-
 TINT_INSTANTIATE_TYPEINFO(tint::core::ir::Call);
 
 namespace tint::core::ir {
@@ -36,5 +34,21 @@ namespace tint::core::ir {
 Call::Call(Id id) : Base(id) {}
 
 Call::~Call() = default;
+
+std::string Call::ExplicitTemplateParamsToStr() const {
+    std::string explicit_params;
+    auto ep = ExplicitTemplateParams();
+    if (!ep.IsEmpty()) {
+        explicit_params += "<";
+        for (size_t i = 0; i < ep.Length(); ++i) {
+            if (i > 0) {
+                explicit_params += ", ";
+            }
+            explicit_params += ep[i]->FriendlyName();
+        }
+        explicit_params += ">";
+    }
+    return explicit_params;
+}
 
 }  // namespace tint::core::ir

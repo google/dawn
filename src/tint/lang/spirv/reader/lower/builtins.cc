@@ -67,10 +67,38 @@ struct State {
                 case spirv::BuiltinFn::kInverse:
                     Inverse(builtin);
                     break;
+                case spirv::BuiltinFn::kSign:
+                    Sign(builtin);
+                    break;
                 default:
                     TINT_UNREACHABLE() << "unknown spirv builtin: " << builtin->Func();
             }
         }
+    }
+
+    // The `spirv.sign` method takes a `u32` operand which is not accepted in WGSL. If the operand
+    // is a `u32` or a `vec<N, u32>` then we need to bitcast the operand to `i32` before doing the
+    // comparison.
+    void Sign(spirv::ir::BuiltinCall* call) {
+        auto* arg = call->Args()[0];
+
+        b.InsertBefore(call, [&] {
+            auto* result_ty = call->Result(0)->Type();
+            if (arg->Type()->IsUnsignedIntegerScalarOrVector()) {
+                arg = b.Bitcast(ty.MatchWidth(ty.i32(), result_ty), arg)->Result(0);
+            }
+            auto* new_call =
+                b.Call(result_ty, core::BuiltinFn::kSign, Vector<core::ir::Value*, 1>{arg});
+
+            core::ir::Value* replacement = new_call->Result(0);
+            // If the call is a `u32` result type, we need to cast it to `i32`.
+            if (result_ty->DeepestElement() == ty.u32()) {
+                new_call->Result(0)->SetType(ty.MatchWidth(ty.i32(), result_ty));
+                replacement = b.Bitcast(result_ty, replacement)->Result(0);
+            }
+            call->Result(0)->ReplaceAllUsesWith(replacement);
+        });
+        call->Destroy();
     }
 
     void Normalize(spirv::ir::BuiltinCall* call) {
