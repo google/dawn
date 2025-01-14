@@ -180,6 +180,10 @@ TEST_P(GpuMemorySyncTests, RenderPass) {
 // Write into a storage buffer in a render pass. Then read that data in a compute
 // pass. And verify the data flow is correctly synchronized.
 TEST_P(GpuMemorySyncTests, RenderPassToComputePass) {
+    // TODO(crbug.com/388318201): assert failed in setSerial libANGLE/renderer/vulkan/vk_resource.h
+    DAWN_TEST_UNSUPPORTED_IF(IsCompatibilityMode() &&
+                             HasToggleEnabled("gl_force_es_31_and_no_extensions"));
+
     // Create pipeline, bind group, and buffer for render pass and compute pass.
     wgpu::Buffer buffer = CreateBuffer();
     utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, 1, 1);

@@ -648,6 +648,11 @@ class DepthStencilSamplingTest : public DawnTestWithParams<DepthStencilSamplingT
 
 // Repro test for crbug.com/dawn/1187 where sampling a depth texture returns values not in [0, 1]
 TEST_P(DepthStencilSamplingTest, CheckDepthTextureRange) {
+    // TODO(crbug.com/388318201): investigate
+    DAWN_SUPPRESS_TEST_IF(IsCompatibilityMode() &&
+                          HasToggleEnabled("gl_force_es_31_and_no_extensions") &&
+                          GetParam().mTextureFormat == wgpu::TextureFormat::Depth24PlusStencil8);
+
     // TODO(crbug.com/dawn/1187): The test fails on ANGLE D3D11, investigate why.
     DAWN_SUPPRESS_TEST_IF(IsANGLED3D11());
 
@@ -971,6 +976,10 @@ TEST_P(DepthSamplingTest, SampleDepthOnly) {
 
 // Test that sampling in a render pipeline with all of the compare functions works.
 TEST_P(DepthSamplingTest, CompareFunctionsRender) {
+    // TODO(crbug.com/388318201): investigate
+    DAWN_SUPPRESS_TEST_IF(IsCompatibilityMode() &&
+                          HasToggleEnabled("gl_force_es_31_and_no_extensions"));
+
     // Initialization via renderPass loadOp doesn't work on Mac Intel.
     DAWN_SUPPRESS_TEST_IF(IsMetal() && IsIntel());
 

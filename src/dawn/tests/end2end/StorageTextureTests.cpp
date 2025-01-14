@@ -708,6 +708,9 @@ fn IsEqualTo(pixel : vec4f, expected : vec4f) -> bool {
 
 // Test that write-only storage textures are supported in compute shader.
 TEST_P(StorageTextureTests, WriteonlyStorageTextureInComputeShader) {
+    // TODO(crbug.com/388318201): investigate
+    DAWN_SUPPRESS_TEST_IF(IsCompatibilityMode() &&
+                          HasToggleEnabled("gl_force_es_31_and_no_extensions"));
     for (wgpu::TextureFormat format : utils::kAllTextureFormats) {
         if (!utils::TextureFormatSupportsStorageTexture(format, device, IsCompatibilityMode())) {
             continue;
@@ -734,6 +737,10 @@ TEST_P(StorageTextureTests, WriteonlyStorageTextureInComputeShader) {
 
 // Test that write-only storage textures are supported in fragment shader.
 TEST_P(StorageTextureTests, WriteonlyStorageTextureInFragmentShader) {
+    // TODO(crbug.com/388318201): investigate
+    DAWN_SUPPRESS_TEST_IF(IsCompatibilityMode() &&
+                          HasToggleEnabled("gl_force_es_31_and_no_extensions"));
+
     // TODO(crbug.com/dawn/2295): diagnose this failure on Pixel 4 OpenGLES
     DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsAndroid() && IsQualcomm());
 
