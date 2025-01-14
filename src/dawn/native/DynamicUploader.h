@@ -66,11 +66,11 @@ class DynamicUploader {
                                          uint64_t offsetAlignment);
     void Deallocate(ExecutionSerial lastCompletedSerial, bool freeAll = false);
 
-    bool ShouldFlush();
+    bool ShouldFlush() const;
 
   private:
     static constexpr uint64_t kRingBufferSize = 4 * 1024 * 1024;
-    uint64_t GetTotalAllocatedSize();
+    uint64_t GetTotalAllocatedSize() const;
 
     struct RingBuffer {
         Ref<BufferBase> mStagingBuffer;

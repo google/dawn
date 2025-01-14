@@ -150,14 +150,14 @@ ResultOrError<UploadHandle> DynamicUploader::Allocate(uint64_t allocationSize,
     return AllocateInternal(allocationSize, serial, offsetAlignment);
 }
 
-bool DynamicUploader::ShouldFlush() {
+bool DynamicUploader::ShouldFlush() const {
     uint64_t kTotalAllocatedSizeThreshold = 64 * 1024 * 1024;
     // We use total allocated size instead of pending-upload size to prevent Dawn from allocating
     // too much GPU memory so that the risk of OOM can be minimized.
     return GetTotalAllocatedSize() > kTotalAllocatedSizeThreshold;
 }
 
-uint64_t DynamicUploader::GetTotalAllocatedSize() {
+uint64_t DynamicUploader::GetTotalAllocatedSize() const {
     uint64_t size = 0;
     for (const auto& buffer : mReleasedStagingBuffers.IterateAll()) {
         size += buffer->GetSize();
