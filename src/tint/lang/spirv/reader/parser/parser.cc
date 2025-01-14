@@ -426,13 +426,18 @@ class Parser {
 
     /// Emit an instruction to the current block.
     /// @param inst the instruction to emit
-    /// @param result_id an optional SPIR-V result ID to register the instruction result for
-    void Emit(core::ir::Instruction* inst, uint32_t result_id = 0) {
+    /// @param result_id the SPIR-V result ID to register the instruction result for
+    void Emit(core::ir::Instruction* inst, uint32_t result_id) {
         current_block_->Append(inst);
-        if (result_id != 0) {
-            TINT_ASSERT(inst->Results().Length() == 1u);
-            AddValue(result_id, inst->Result(0));
-        }
+        TINT_ASSERT(inst->Results().Length() == 1u);
+        AddValue(result_id, inst->Result(0));
+    }
+
+    /// Emit an instruction to the current block.
+    /// @param inst the instruction to emit
+    void EmitWithoutResult(core::ir::Instruction* inst) {
+        TINT_ASSERT(inst->Results().IsEmpty());
+        current_block_->Append(inst);
     }
 
     /// Emit the module-scope variables.
@@ -582,14 +587,15 @@ class Parser {
                     Emit(b_.Load(Value(inst.GetSingleWordOperand(2))), inst.result_id());
                     break;
                 case spv::Op::OpReturn:
-                    Emit(b_.Return(current_function_));
+                    EmitWithoutResult(b_.Return(current_function_));
                     break;
                 case spv::Op::OpReturnValue:
-                    Emit(b_.Return(current_function_, Value(inst.GetSingleWordOperand(0))));
+                    EmitWithoutResult(
+                        b_.Return(current_function_, Value(inst.GetSingleWordOperand(0))));
                     break;
                 case spv::Op::OpStore:
-                    Emit(b_.Store(Value(inst.GetSingleWordOperand(0)),
-                                  Value(inst.GetSingleWordOperand(1))));
+                    EmitWithoutResult(b_.Store(Value(inst.GetSingleWordOperand(0)),
+                                               Value(inst.GetSingleWordOperand(1))));
                     break;
                 case spv::Op::OpVariable:
                     EmitVar(inst);
