@@ -664,7 +664,6 @@ class Parser {
             case GLSLstd450Exp2:
                 return core::BuiltinFn::kExp2;
             case GLSLstd450FAbs:
-            case GLSLstd450SAbs:
                 return core::BuiltinFn::kAbs;
             case GLSLstd450FSign:
                 return core::BuiltinFn::kSign;
@@ -758,6 +757,8 @@ class Parser {
 
     spirv::BuiltinFn GetGlslStd450SpirvEquivalentFuncName(uint32_t ext_opcode) {
         switch (ext_opcode) {
+            case GLSLstd450SAbs:
+                return spirv::BuiltinFn::kAbs;
             case GLSLstd450SSign:
                 return spirv::BuiltinFn::kSign;
             case GLSLstd450Normalize:
@@ -772,7 +773,7 @@ class Parser {
 
     Vector<const core::type::Type*, 1> GlslStd450ExplicitParams(uint32_t ext_opcode,
                                                                 const core::type::Type* result_ty) {
-        if (ext_opcode != GLSLstd450SSign) {
+        if (ext_opcode != GLSLstd450SSign && ext_opcode != GLSLstd450SAbs) {
             return {};
         }
         return {result_ty->DeepestElement()};

@@ -70,6 +70,9 @@ struct State {
                 case spirv::BuiltinFn::kSign:
                     Sign(builtin);
                     break;
+                case spirv::BuiltinFn::kAbs:
+                    Abs(builtin);
+                    break;
                 default:
                     TINT_UNREACHABLE() << "unknown spirv builtin: " << builtin->Func();
             }
@@ -89,6 +92,28 @@ struct State {
             }
             auto* new_call =
                 b.Call(result_ty, core::BuiltinFn::kSign, Vector<core::ir::Value*, 1>{arg});
+
+            core::ir::Value* replacement = new_call->Result(0);
+            // If the call is a `u32` result type, we need to cast it to `i32`.
+            if (result_ty->DeepestElement() == ty.u32()) {
+                new_call->Result(0)->SetType(ty.MatchWidth(ty.i32(), result_ty));
+                replacement = b.Bitcast(result_ty, replacement)->Result(0);
+            }
+            call->Result(0)->ReplaceAllUsesWith(replacement);
+        });
+        call->Destroy();
+    }
+
+    void Abs(spirv::ir::BuiltinCall* call) {
+        auto* arg = call->Args()[0];
+
+        b.InsertBefore(call, [&] {
+            auto* result_ty = call->Result(0)->Type();
+            if (arg->Type()->IsUnsignedIntegerScalarOrVector()) {
+                arg = b.Bitcast(ty.MatchWidth(ty.i32(), result_ty), arg)->Result(0);
+            }
+            auto* new_call =
+                b.Call(result_ty, core::BuiltinFn::kAbs, Vector<core::ir::Value*, 1>{arg});
 
             core::ir::Value* replacement = new_call->Result(0);
             // If the call is a `u32` result type, we need to cast it to `i32`.

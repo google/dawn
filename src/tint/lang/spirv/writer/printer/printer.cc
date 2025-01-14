@@ -1286,6 +1286,9 @@ class Printer {
         };
 
         switch (builtin->Func()) {
+            case spirv::BuiltinFn::kAbs:
+                ext_inst(GLSLstd450SAbs);
+                break;
             case spirv::BuiltinFn::kArrayLength:
                 op = spv::Op::OpArrayLength;
                 break;

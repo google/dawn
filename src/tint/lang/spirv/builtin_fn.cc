@@ -114,6 +114,8 @@ const char* str(BuiltinFn i) {
             return "inverse";
         case BuiltinFn::kSign:
             return "sign";
+        case BuiltinFn::kAbs:
+            return "abs";
         case BuiltinFn::kSdot:
             return "sdot";
         case BuiltinFn::kUdot:
@@ -170,6 +172,7 @@ tint::core::ir::Instruction::Accesses GetSideEffects(BuiltinFn fn) {
         case BuiltinFn::kNormalize:
         case BuiltinFn::kInverse:
         case BuiltinFn::kSign:
+        case BuiltinFn::kAbs:
             break;
     }
     return core::ir::Instruction::Accesses{};

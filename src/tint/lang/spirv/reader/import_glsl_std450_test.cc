@@ -696,8 +696,7 @@ TEST_P(SpirvReaderTest_GlslStd450_Inting_IntingIntingInting, Vector) {
 
 INSTANTIATE_TEST_SUITE_P(SpirvReader,
                          SpirvReaderTest_GlslStd450_Inting_Inting,
-                         ::testing::Values(GlslStd450Case{"SAbs", "abs"},
-                                           GlslStd450Case{"FindILsb", "firstTrailingBit"},
+                         ::testing::Values(GlslStd450Case{"FindILsb", "firstTrailingBit"},
                                            GlslStd450Case{"FindSMsb", "firstLeadingBit"},
                                            GlslStd450Case{"SSign", "sign"}));
 
@@ -927,26 +926,6 @@ TEST_F(SpirvReaderTest, Normalize_Vector4) {
     %2:vec4<f32> = normalize vec4<f32>(50.0f)
     %3:vec4<f32> = let %2
     ret
-  }
-}
-)");
-}
-
-// Check that we convert signedness of operands and result type.
-// This is needed for each of the integer-based extended instructions.
-
-TEST_F(SpirvReaderTest, DISABLED_RectifyOperandsAndResult_SAbs) {
-    EXPECT_IR(Preamble() + R"(
-     %1 = OpExtInst %uint %glsl SAbs %uint_10
-     %2 = OpExtInst %v2uint %glsl SAbs %v2uint_10_20
-     OpReturn
-     OpFunctionEnd
-  )",
-              R"(
-%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
-  $B1: {
-    let x_1 = bitcast<u32>(abs(bitcast<i32>(u1)));
-    let x_2 = bitcast<vec2u>(abs(bitcast<vec2i>(v2u1)));
   }
 }
 )");
