@@ -1278,6 +1278,13 @@ class Printer {
         }
 
         spv::Op op = spv::Op::Max;
+
+        auto ext_inst = [&](enum GLSLstd450 inst) {
+            op = spv::Op::OpExtInst;
+            operands.push_back(ImportGlslStd450());
+            operands.push_back(U32Operand(inst));
+        };
+
         switch (builtin->Func()) {
             case spirv::BuiltinFn::kArrayLength:
                 op = spv::Op::OpArrayLength;
@@ -1369,9 +1376,7 @@ class Printer {
                 op = spv::Op::OpMatrixTimesVector;
                 break;
             case spirv::BuiltinFn::kNormalize:
-                op = spv::Op::OpExtInst;
-                operands.push_back(ImportGlslStd450());
-                operands.push_back(U32Operand(GLSLstd450Normalize));
+                ext_inst(GLSLstd450Normalize);
                 break;
             case spirv::BuiltinFn::kSampledImage:
                 op = spv::Op::OpSampledImage;
@@ -1386,9 +1391,7 @@ class Printer {
                 op = spv::Op::OpSelect;
                 break;
             case spirv::BuiltinFn::kInverse:
-                op = spv::Op::OpExtInst;
-                operands.push_back(ImportGlslStd450());
-                operands.push_back(U32Operand(GLSLstd450MatrixInverse));
+                ext_inst(GLSLstd450MatrixInverse);
                 break;
             case spirv::BuiltinFn::kUdot:
                 module_.PushExtension("SPV_KHR_integer_dot_product");
