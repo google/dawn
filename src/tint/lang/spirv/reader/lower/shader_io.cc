@@ -196,9 +196,12 @@ struct State {
             auto var_attributes = var->Attributes();
             auto var_type = var->Result(0)->Type()->UnwrapPtr();
             if (auto* str = var_type->As<core::type::Struct>()) {
+                bool skipped_member_emission = false;
+
                 // Add an output for each member of the struct.
                 for (auto* member : str->Members()) {
                     if (ShouldSkipMemberEmission(var, member)) {
+                        skipped_member_emission = true;
                         continue;
                     }
 
@@ -220,6 +223,15 @@ struct State {
                             b.Access(ty.ptr<private_>(member->Type()), var, u32(member->Index()));
                         results.Push(b.Load(access)->Result(0));
                     });
+                }
+
+                // If we skipped emission of any member, then we need to make sure the var is only
+                // used through `access` instructions, otherwise the members may no longer match due
+                // to the skipping.
+                if (skipped_member_emission) {
+                    for (auto& usage : var->Result(0)->UsagesUnsorted()) {
+                        TINT_ASSERT(usage->instruction->Is<core::ir::Access>());
+                    }
                 }
             } else {
                 // Load the final result from the original variable.
@@ -305,9 +317,7 @@ struct State {
             if (!chain) {
                 continue;
             }
-            if (chain->Indices().IsEmpty()) {
-                continue;
-            }
+            TINT_ASSERT(chain->Indices().Length() >= 1);
 
             // A member access has to be a constant index
             auto* cnst = chain->Indices()[0]->As<core::ir::Constant>();
