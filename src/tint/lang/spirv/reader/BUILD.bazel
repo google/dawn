@@ -84,6 +84,8 @@ cc_library(
   name = "test",
   alwayslink = True,
   srcs = [
+    "helper_test.h",
+    "import_glsl_std450_test.cc",
     "reader_test.cc",
   ],
   deps = [

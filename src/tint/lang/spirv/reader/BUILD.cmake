@@ -97,6 +97,8 @@ if(TINT_BUILD_SPV_READER)
 # Condition: TINT_BUILD_SPV_READER
 ################################################################################
 tint_add_target(tint_lang_spirv_reader_test test
+  lang/spirv/reader/helper_test.h
+  lang/spirv/reader/import_glsl_std450_test.cc
   lang/spirv/reader/reader_test.cc
 )
 
