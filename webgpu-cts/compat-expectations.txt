@@ -82,15 +82,13 @@
 # results: [ Failure RetryOnFailure Skip Slow ]
 # END TAG HEADER
 
-# Last rolled: 2025-01-07 07:56:06AM
+# Last rolled: 2025-01-14 06:08:40PM
 
 # conflicts_allowed: true
 
 # Temporary Failures due to the support of null bind group layouts in the creation of pipeline layout
 crbug.com/377836524 webgpu:api,validation,encoding,programmable,pipeline_bind_group_compat:default_bind_group_layouts_never_match,compute_pass:* [ Failure ]
 crbug.com/377836524 webgpu:api,validation,encoding,programmable,pipeline_bind_group_compat:default_bind_group_layouts_never_match,render_pass:* [ Failure ]
-crbug.com/377836524 webgpu:api,validation,encoding,programmable,pipeline_bind_group_compat:empty_bind_group_layouts_requires_empty_bind_groups,compute_pass:* [ Failure ]
-crbug.com/377836524 webgpu:api,validation,encoding,programmable,pipeline_bind_group_compat:empty_bind_group_layouts_requires_empty_bind_groups,render_pass:* [ Failure ]
 
 # Flaky memory_sync failures on Intel
 crbug.com/dawn/2083 [ intel-0x9bc5 linux ] webgpu:api,operation,memory_sync,buffer,multiple_buffers:ww:boundary="command-buffer";writeOps=["storage","b2b-copy"];contexts=["render-bundle-encoder","command-encoder"] [ Failure ]
