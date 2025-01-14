@@ -1385,6 +1385,11 @@ class Printer {
             case spirv::BuiltinFn::kSelect:
                 op = spv::Op::OpSelect;
                 break;
+            case spirv::BuiltinFn::kInverse:
+                op = spv::Op::OpExtInst;
+                operands.push_back(ImportGlslStd450());
+                operands.push_back(U32Operand(GLSLstd450MatrixInverse));
+                break;
             case spirv::BuiltinFn::kUdot:
                 module_.PushExtension("SPV_KHR_integer_dot_product");
                 module_.PushCapability(SpvCapabilityDotProductKHR);

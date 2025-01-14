@@ -82,6 +82,7 @@ enum class BuiltinFn : uint8_t {
     kVectorTimesMatrix,
     kVectorTimesScalar,
     kNormalize,
+    kInverse,
     kSdot,
     kUdot,
     kNone,

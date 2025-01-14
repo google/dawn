@@ -110,6 +110,8 @@ const char* str(BuiltinFn i) {
             return "vector_times_scalar";
         case BuiltinFn::kNormalize:
             return "normalize";
+        case BuiltinFn::kInverse:
+            return "inverse";
         case BuiltinFn::kSdot:
             return "sdot";
         case BuiltinFn::kUdot:
@@ -164,6 +166,7 @@ tint::core::ir::Instruction::Accesses GetSideEffects(BuiltinFn fn) {
         case BuiltinFn::kUdot:
         case BuiltinFn::kNone:
         case BuiltinFn::kNormalize:
+        case BuiltinFn::kInverse:
             break;
     }
     return core::ir::Instruction::Accesses{};

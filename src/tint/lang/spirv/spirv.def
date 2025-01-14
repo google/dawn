@@ -321,6 +321,10 @@ implicit(T: f32_f16, N: num) fn vector_times_scalar(vec<N, T>, T) -> vec<N, T>
 implicit(T: f32_f16) fn normalize(T) -> T
 implicit(N: num, T: f32_f16) fn normalize(vec<N, T>) -> vec<N, T>
 
+implicit(T: f32_f16) fn inverse(mat2x2<T>) -> mat2x2<T>
+implicit(T: f32_f16) fn inverse(mat3x3<T>) -> mat3x3<T>
+implicit(T: f32_f16) fn inverse(mat4x4<T>) -> mat4x4<T>
+
 ////////////////////////////////////////////////////////////////////////////////
 // SPV_KHR_integer_dot_product instructions
 ////////////////////////////////////////////////////////////////////////////////

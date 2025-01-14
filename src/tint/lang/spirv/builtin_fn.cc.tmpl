@@ -73,6 +73,7 @@ tint::core::ir::Instruction::Accesses GetSideEffects(BuiltinFn fn) {
         case BuiltinFn::kUdot:
         case BuiltinFn::kNone:
         case BuiltinFn::kNormalize:
+        case BuiltinFn::kInverse:
             break;
     }
     return core::ir::Instruction::Accesses{};
