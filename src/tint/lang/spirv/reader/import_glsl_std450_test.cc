@@ -832,7 +832,7 @@ INSTANTIATE_TEST_SUITE_P(SpirvReader,
 // So we have to test it separately, as it does not fit the patterns tested
 // above.
 
-TEST_F(SpirvReaderTest, DISABLED_Normalize_Scalar) {
+TEST_F(SpirvReaderTest, Normalize_Scalar) {
     // Scalar normalize maps to sign.
     EXPECT_IR(Preamble() + R"(
      %1 = OpExtInst %float %glsl Normalize %float_50
@@ -851,7 +851,7 @@ TEST_F(SpirvReaderTest, DISABLED_Normalize_Scalar) {
 )");
 }
 
-TEST_F(SpirvReaderTest, DISABLED_Normalize_Vector2) {
+TEST_F(SpirvReaderTest, Normalize_Vector2) {
     EXPECT_IR(Preamble() + R"(
      %1 = OpExtInst %v2float %glsl Normalize %v2float_50_60
      %2 = OpCopyObject %v2float %1
@@ -869,7 +869,7 @@ TEST_F(SpirvReaderTest, DISABLED_Normalize_Vector2) {
 )");
 }
 
-TEST_F(SpirvReaderTest, DISABLED_Normalize_Vector3) {
+TEST_F(SpirvReaderTest, Normalize_Vector3) {
     EXPECT_IR(Preamble() + R"(
      %1 = OpExtInst %v3float %glsl Normalize %v3float_50_60_70
      %2 = OpCopyObject %v3float %1
@@ -887,7 +887,7 @@ TEST_F(SpirvReaderTest, DISABLED_Normalize_Vector3) {
 )");
 }
 
-TEST_F(SpirvReaderTest, DISABLED_Normalize_Vector4) {
+TEST_F(SpirvReaderTest, Normalize_Vector4) {
     EXPECT_IR(Preamble() + R"(
      %1 = OpExtInst %v4float %glsl Normalize %v4float_50_50_50_50
      %2 = OpCopyObject %v4float %1

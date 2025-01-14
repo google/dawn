@@ -116,6 +116,7 @@ namespace tint::spirv::writer {
 namespace {
 
 constexpr uint32_t kWriterVersion = 1;
+constexpr const char* kGLSLstd450 = "GLSL.std.450";
 
 SpvStorageClass StorageClass(core::AddressSpace addrspace) {
     switch (addrspace) {
@@ -1271,6 +1272,11 @@ class Printer {
     void EmitSpirvBuiltinCall(spirv::ir::BuiltinCall* builtin) {
         auto id = Value(builtin);
 
+        OperandList operands;
+        if (!builtin->Result(0)->Type()->Is<core::type::Void>()) {
+            operands = {Type(builtin->Result(0)->Type()), id};
+        }
+
         spv::Op op = spv::Op::Max;
         switch (builtin->Func()) {
             case spirv::BuiltinFn::kArrayLength:
@@ -1362,6 +1368,11 @@ class Printer {
             case spirv::BuiltinFn::kMatrixTimesVector:
                 op = spv::Op::OpMatrixTimesVector;
                 break;
+            case spirv::BuiltinFn::kNormalize:
+                op = spv::Op::OpExtInst;
+                operands.push_back(ImportGlslStd450());
+                operands.push_back(U32Operand(GLSLstd450Normalize));
+                break;
             case spirv::BuiltinFn::kSampledImage:
                 op = spv::Op::OpSampledImage;
                 break;
@@ -1390,14 +1401,19 @@ class Printer {
                 TINT_ICE() << "undefined spirv ir function";
         }
 
-        OperandList operands;
-        if (!builtin->Result(0)->Type()->Is<core::type::Void>()) {
-            operands = {Type(builtin->Result(0)->Type()), id};
-        }
         for (auto* arg : builtin->Args()) {
             operands.push_back(Value(arg));
         }
         current_function_.PushInst(op, operands);
+    }
+
+    uint32_t ImportGlslStd450() {
+        return imports_.GetOrAdd(kGLSLstd450, [&] {
+            // Import the instruction set the first time it is requested.
+            auto import = module_.NextId();
+            module_.PushExtImport(spv::Op::OpExtInstImport, {import, Operand(kGLSLstd450)});
+            return import;
+        });
     }
 
     /// Emit a builtin function call instruction.
@@ -1426,14 +1442,8 @@ class Printer {
 
         // Helper to set up the opcode and operand list for a GLSL extended instruction.
         auto glsl_ext_inst = [&](enum GLSLstd450 inst) {
-            constexpr const char* kGLSLstd450 = "GLSL.std.450";
             op = spv::Op::OpExtInst;
-            operands.push_back(imports_.GetOrAdd(kGLSLstd450, [&] {
-                // Import the instruction set the first time it is requested.
-                auto import = module_.NextId();
-                module_.PushExtImport(spv::Op::OpExtInstImport, {import, Operand(kGLSLstd450)});
-                return import;
-            }));
+            operands.push_back(ImportGlslStd450());
             operands.push_back(U32Operand(inst));
         };
 

@@ -46,6 +46,8 @@ TINT_END_DISABLE_WARNING(NEWLINE_EOF);
 
 #include "src/tint/lang/core/ir/builder.h"
 #include "src/tint/lang/core/ir/module.h"
+#include "src/tint/lang/spirv/builtin_fn.h"
+#include "src/tint/lang/spirv/ir/builtin_call.h"
 #include "src/tint/lang/spirv/validate/validate.h"
 
 using namespace tint::core::fluent_types;  // NOLINT
@@ -633,7 +635,7 @@ class Parser {
     // Returns the WGSL standard library function for the given GLSL.std.450 extended instruction
     // operation code. This handles GLSL functions which directly translate to the WGSL equivalent.
     // Any non-direct translation is returned as `kNone`.
-    core::BuiltinFn GetGlslStd450FuncName(uint32_t ext_opcode) {
+    core::BuiltinFn GetGlslStd450WgslEquivalentFuncName(uint32_t ext_opcode) {
         switch (ext_opcode) {
             case GLSLstd450Acos:
                 return core::BuiltinFn::kAcos;
@@ -753,22 +755,40 @@ class Parser {
         return core::BuiltinFn::kNone;
     }
 
+    spirv::BuiltinFn GetGlslStd450SpirvEquivalentFuncName(uint32_t ext_opcode) {
+        switch (ext_opcode) {
+            case GLSLstd450Normalize:
+                return spirv::BuiltinFn::kNormalize;
+            default:
+                break;
+        }
+        return spirv::BuiltinFn::kNone;
+    }
+
     /// @param inst the SPIR-V instruction for OpAccessChain
     void EmitGlslStd450ExtInst(const spvtools::opt::Instruction& inst) {
         const auto ext_opcode = inst.GetSingleWordInOperand(1);
         auto* result_ty = Type(inst.type_id());
-
-        const auto fn = GetGlslStd450FuncName(ext_opcode);
-        if (fn == core::BuiltinFn::kNone) {
-            TINT_UNIMPLEMENTED() << "unhandled GLSL.std.450 instruction " << ext_opcode;
-        }
 
         Vector<core::ir::Value*, 4> operands;
         // All parameters to GLSL.std.450 extended instructions are IDs.
         for (uint32_t idx = 2; idx < inst.NumInOperands(); ++idx) {
             operands.Push(Value(inst.GetSingleWordInOperand(idx)));
         }
-        Emit(b_.Call(result_ty, fn, operands), inst.result_id());
+
+        const auto wgsl_fn = GetGlslStd450WgslEquivalentFuncName(ext_opcode);
+        if (wgsl_fn != core::BuiltinFn::kNone) {
+            Emit(b_.Call(result_ty, wgsl_fn, operands), inst.result_id());
+            return;
+        }
+
+        const auto spv_fn = GetGlslStd450SpirvEquivalentFuncName(ext_opcode);
+        if (spv_fn != spirv::BuiltinFn::kNone) {
+            Emit(b_.Call<spirv::ir::BuiltinCall>(result_ty, spv_fn, operands), inst.result_id());
+            return;
+        }
+
+        TINT_UNIMPLEMENTED() << "unhandled GLSL.std.450 instruction " << ext_opcode;
     }
 
     /// @param inst the SPIR-V instruction for OpAccessChain

@@ -25,33 +25,24 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "src/tint/lang/spirv/reader/lower/lower.h"
+#ifndef SRC_TINT_LANG_SPIRV_READER_LOWER_BUILTINS_H_
+#define SRC_TINT_LANG_SPIRV_READER_LOWER_BUILTINS_H_
 
-#include "src/tint/lang/core/ir/validator.h"
-#include "src/tint/lang/spirv/reader/lower/builtins.h"
-#include "src/tint/lang/spirv/reader/lower/shader_io.h"
-#include "src/tint/lang/spirv/reader/lower/vector_element_pointer.h"
+#include "src/tint/utils/result/result.h"
 
-namespace tint::spirv::reader {
-
-Result<SuccessType> Lower(core::ir::Module& mod) {
-#define RUN_TRANSFORM(name, ...)         \
-    do {                                 \
-        auto result = name(__VA_ARGS__); \
-        if (result != Success) {         \
-            return result;               \
-        }                                \
-    } while (false)
-
-    RUN_TRANSFORM(lower::VectorElementPointer, mod);
-    RUN_TRANSFORM(lower::ShaderIO, mod);
-    RUN_TRANSFORM(lower::Builtins, mod);
-
-    if (auto res = core::ir::ValidateAndDumpIfNeeded(mod, "spirv.Lower"); res != Success) {
-        return res.Failure();
-    }
-
-    return Success;
+// Forward declarations.
+namespace tint::core::ir {
+class Module;
 }
 
-}  // namespace tint::spirv::reader
+namespace tint::spirv::reader::lower {
+
+/// Builtins is a transform that converts SPIR-V builtin methods into the form expected by Tint's
+/// core IR.
+/// @param module the module to transform
+/// @returns success or failure
+Result<SuccessType> Builtins(core::ir::Module& module);
+
+}  // namespace tint::spirv::reader::lower
+
+#endif  // SRC_TINT_LANG_SPIRV_READER_LOWER_BUILTINS_H_

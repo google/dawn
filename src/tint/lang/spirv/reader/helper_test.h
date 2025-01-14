@@ -28,14 +28,12 @@
 #ifndef SRC_TINT_LANG_SPIRV_READER_HELPER_TEST_H_
 #define SRC_TINT_LANG_SPIRV_READER_HELPER_TEST_H_
 
-#include <iostream>
 #include <string>
-#include <vector>
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
+
 #include "src/tint/lang/core/ir/disassembler.h"
-#include "src/tint/lang/core/ir/module.h"
 #include "src/tint/lang/core/ir/validator.h"
 #include "src/tint/lang/spirv/reader/common/helper_test.h"
 #include "src/tint/lang/spirv/reader/reader.h"
