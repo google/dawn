@@ -309,7 +309,7 @@ MaybeError ValidateTextureSize(const DeviceBase* device,
         DAWN_ASSERT(status == wgpu::Status::Success);
 
         Extent3D maxExtentAdapter;
-        std::string limitName;
+        StringView limitName;
         uint32_t limitValue;
         switch (descriptor->dimension) {
             case wgpu::TextureDimension::Undefined:
