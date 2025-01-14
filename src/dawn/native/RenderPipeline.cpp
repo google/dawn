@@ -29,9 +29,7 @@
 
 #include <algorithm>
 #include <cmath>
-#include <string>
 
-#include "absl/strings/str_format.h"
 #include "dawn/common/BitSetIterator.h"
 #include "dawn/common/Enumerator.h"
 #include "dawn/common/ityp_array.h"
@@ -41,7 +39,6 @@
 #include "dawn/native/CommandValidation.h"
 #include "dawn/native/Commands.h"
 #include "dawn/native/Device.h"
-#include "dawn/native/Instance.h"
 #include "dawn/native/InternalPipelineStore.h"
 #include "dawn/native/ObjectContentHasher.h"
 #include "dawn/native/ObjectType_autogen.h"
@@ -521,17 +518,8 @@ MaybeError ValidateColorTargetState(
     DAWN_INVALID_IF(!format->IsColor() || !format->isRenderable,
                     "Color format (%s) is not color renderable.", format->format);
 
-    if (descriptor.blend && !format->isBlendable) {
-        DAWN_INVALID_IF(
-            !(format->GetAspectInfo(Aspect::Color).supportedSampleTypes & SampleTypeBit::Float),
-            "Blending is enabled but color format (%s) is not blendable.", format->format);
-
-        std::string warning = absl::StrFormat(
-            "Blending for color format (%s) requires the %s feature. Enabling "
-            "blendability with %s was an implementation bug and is deprecated.",
-            format->format, ToAPI(Feature::Float32Blendable), ToAPI(Feature::Float32Filterable));
-        device->EmitWarningOnce(warning.c_str());
-    }
+    DAWN_INVALID_IF(descriptor.blend && !format->isBlendable,
+                    "Blending is enabled but color format (%s) is not blendable.", format->format);
 
     if (!fragmentWritten) {
         DAWN_INVALID_IF(
