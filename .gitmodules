@@ -132,9 +132,6 @@
 	path = third_party/dxheaders
 	url = https://chromium.googlesource.com/external/github.com/microsoft/DirectX-Headers
 	gclient-condition = host_os != "win"
-[submodule "third_party/webgpu-headers"]
-	path = third_party/webgpu-headers
-	url = https://chromium.googlesource.com/external/github.com/webgpu-native/webgpu-headers
 [submodule "third_party/khronos/OpenGL-Registry"]
 	path = third_party/khronos/OpenGL-Registry
 	url = https://chromium.googlesource.com/external/github.com/KhronosGroup/OpenGL-Registry

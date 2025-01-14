@@ -353,10 +353,6 @@ deps = {
     'condition': 'host_os != "win"',
   },
 
-  'third_party/webgpu-headers': {
-    'url': '{chromium_git}/external/github.com/webgpu-native/webgpu-headers@8049c324dc7b3c09dc96ea04cb02860f272c8686',
-  },
-
   'third_party/khronos/OpenGL-Registry': {
     'url': '{chromium_git}/external/github.com/KhronosGroup/OpenGL-Registry@5bae8738b23d06968e7c3a41308568120943ae77',
   },
