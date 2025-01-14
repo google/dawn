@@ -615,10 +615,154 @@ class Parser {
             // Ignore it but don't error out.
             return;
         }
-        if (glsl_std_450_imports_.count(inst_set) == 0) {
-            TINT_UNIMPLEMENTED() << "unhandled extended instruction import with ID "
-                                 << inst.GetSingleWordInOperand(0);
+        if (glsl_std_450_imports_.count(inst_set) > 0) {
+            EmitGlslStd450ExtInst(inst);
+            return;
         }
+
+        TINT_UNIMPLEMENTED() << "unhandled extended instruction import with ID "
+                             << inst.GetSingleWordInOperand(0);
+    }
+
+    // Returns the WGSL standard library function for the given GLSL.std.450 extended instruction
+    // operation code. This handles GLSL functions which directly translate to the WGSL equivalent.
+    // Any non-direct translation is returned as `kNone`.
+    core::BuiltinFn GetGlslStd450FuncName(uint32_t ext_opcode) {
+        switch (ext_opcode) {
+            case GLSLstd450Acos:
+                return core::BuiltinFn::kAcos;
+            case GLSLstd450Asin:
+                return core::BuiltinFn::kAsin;
+            case GLSLstd450Atan:
+                return core::BuiltinFn::kAtan;
+            case GLSLstd450Atan2:
+                return core::BuiltinFn::kAtan2;
+            case GLSLstd450Ceil:
+                return core::BuiltinFn::kCeil;
+            case GLSLstd450Cos:
+                return core::BuiltinFn::kCos;
+            case GLSLstd450Cosh:
+                return core::BuiltinFn::kCosh;
+            case GLSLstd450Cross:
+                return core::BuiltinFn::kCross;
+            case GLSLstd450Degrees:
+                return core::BuiltinFn::kDegrees;
+            case GLSLstd450Distance:
+                return core::BuiltinFn::kDistance;
+            case GLSLstd450Exp:
+                return core::BuiltinFn::kExp;
+            case GLSLstd450Exp2:
+                return core::BuiltinFn::kExp2;
+            case GLSLstd450FAbs:
+            case GLSLstd450SAbs:
+                return core::BuiltinFn::kAbs;
+            case GLSLstd450FSign:
+            case GLSLstd450SSign:
+                return core::BuiltinFn::kSign;
+            case GLSLstd450FindILsb:
+                return core::BuiltinFn::kFirstTrailingBit;
+            case GLSLstd450FindSMsb:
+                return core::BuiltinFn::kFirstLeadingBit;
+            case GLSLstd450FindUMsb:
+                return core::BuiltinFn::kFirstLeadingBit;
+            case GLSLstd450Floor:
+                return core::BuiltinFn::kFloor;
+            case GLSLstd450Fract:
+                return core::BuiltinFn::kFract;
+            case GLSLstd450Fma:
+                return core::BuiltinFn::kFma;
+            case GLSLstd450InverseSqrt:
+                return core::BuiltinFn::kInverseSqrt;
+            case GLSLstd450Ldexp:
+                return core::BuiltinFn::kLdexp;
+            case GLSLstd450Length:
+                return core::BuiltinFn::kLength;
+            case GLSLstd450Log:
+                return core::BuiltinFn::kLog;
+            case GLSLstd450Log2:
+                return core::BuiltinFn::kLog2;
+            case GLSLstd450SClamp:
+            case GLSLstd450UClamp:
+            case GLSLstd450NClamp:
+            case GLSLstd450FClamp:  // FClamp is less prescriptive about NaN operands
+                return core::BuiltinFn::kClamp;
+            case GLSLstd450SMin:
+            case GLSLstd450UMin:
+            case GLSLstd450NMin:
+            case GLSLstd450FMin:  // FMin is less prescriptive about NaN operands
+                return core::BuiltinFn::kMin;
+            case GLSLstd450SMax:
+            case GLSLstd450UMax:
+            case GLSLstd450NMax:
+            case GLSLstd450FMax:  // FMax is less prescriptive about NaN operands
+                return core::BuiltinFn::kMax;
+            case GLSLstd450FMix:
+                return core::BuiltinFn::kMix;
+            case GLSLstd450PackSnorm4x8:
+                return core::BuiltinFn::kPack4X8Snorm;
+            case GLSLstd450PackUnorm4x8:
+                return core::BuiltinFn::kPack4X8Unorm;
+            case GLSLstd450PackSnorm2x16:
+                return core::BuiltinFn::kPack2X16Snorm;
+            case GLSLstd450PackUnorm2x16:
+                return core::BuiltinFn::kPack2X16Unorm;
+            case GLSLstd450PackHalf2x16:
+                return core::BuiltinFn::kPack2X16Float;
+            case GLSLstd450Pow:
+                return core::BuiltinFn::kPow;
+            case GLSLstd450Radians:
+                return core::BuiltinFn::kRadians;
+            case GLSLstd450Round:
+            case GLSLstd450RoundEven:
+                return core::BuiltinFn::kRound;
+            case GLSLstd450Sin:
+                return core::BuiltinFn::kSin;
+            case GLSLstd450Sinh:
+                return core::BuiltinFn::kSinh;
+            case GLSLstd450SmoothStep:
+                return core::BuiltinFn::kSmoothstep;
+            case GLSLstd450Sqrt:
+                return core::BuiltinFn::kSqrt;
+            case GLSLstd450Step:
+                return core::BuiltinFn::kStep;
+            case GLSLstd450Tan:
+                return core::BuiltinFn::kTan;
+            case GLSLstd450Tanh:
+                return core::BuiltinFn::kTanh;
+            case GLSLstd450Trunc:
+                return core::BuiltinFn::kTrunc;
+            case GLSLstd450UnpackSnorm4x8:
+                return core::BuiltinFn::kUnpack4X8Snorm;
+            case GLSLstd450UnpackUnorm4x8:
+                return core::BuiltinFn::kUnpack4X8Unorm;
+            case GLSLstd450UnpackSnorm2x16:
+                return core::BuiltinFn::kUnpack2X16Snorm;
+            case GLSLstd450UnpackUnorm2x16:
+                return core::BuiltinFn::kUnpack2X16Unorm;
+            case GLSLstd450UnpackHalf2x16:
+                return core::BuiltinFn::kUnpack2X16Float;
+            default:
+                break;
+        }
+        return core::BuiltinFn::kNone;
+    }
+
+    /// @param inst the SPIR-V instruction for OpAccessChain
+    void EmitGlslStd450ExtInst(const spvtools::opt::Instruction& inst) {
+        const auto ext_opcode = inst.GetSingleWordInOperand(1);
+        auto* result_ty = Type(inst.type_id());
+
+        const auto fn = GetGlslStd450FuncName(ext_opcode);
+        if (fn == core::BuiltinFn::kNone) {
+            TINT_UNIMPLEMENTED() << "unhandled GLSL.std.450 instruction " << ext_opcode;
+        }
+
+        Vector<core::ir::Value*, 4> operands;
+        // All parameters to GLSL.std.450 extended instructions are IDs.
+        for (uint32_t idx = 2; idx < inst.NumInOperands(); ++idx) {
+            operands.Push(Value(inst.GetSingleWordInOperand(idx)));
+        }
+        Emit(b_.Call(result_ty, fn, operands), inst.result_id());
     }
 
     /// @param inst the SPIR-V instruction for OpAccessChain

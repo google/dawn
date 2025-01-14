@@ -38,32 +38,6 @@ std::string Preamble() {
   OpEntryPoint GLCompute %100 "main"
   OpExecutionMode %100 LocalSize 1 1 1
 
-  OpName %u1 "u1"
-  OpName %u2 "u2"
-  OpName %u3 "u3"
-  OpName %i1 "i1"
-  OpName %i2 "i2"
-  OpName %i3 "i3"
-  OpName %f1 "f1"
-  OpName %f2 "f2"
-  OpName %f3 "f3"
-  OpName %v2u1 "v2u1"
-  OpName %v2u2 "v2u2"
-  OpName %v2u3 "v2u3"
-  OpName %v2i1 "v2i1"
-  OpName %v2i2 "v2i2"
-  OpName %v2i3 "v2i3"
-  OpName %v2f1 "v2f1"
-  OpName %v2f2 "v2f2"
-  OpName %v2f3 "v2f3"
-  OpName %v3f1 "v3f1"
-  OpName %v3f2 "v3f2"
-  OpName %v4f1 "v4f1"
-  OpName %v4f2 "v4f2"
-  OpName %m2x2f1 "m2x2f1"
-  OpName %m3x3f1 "m3x3f1"
-  OpName %m4x4f1 "m4x4f1"
-
   %void = OpTypeVoid
   %voidfn = OpTypeFunction %void
 
@@ -111,40 +85,6 @@ std::string Preamble() {
 
   %100 = OpFunction %void None %voidfn
   %entry = OpLabel
-
-  %u1 = OpCopyObject %uint %uint_10
-  %u2 = OpCopyObject %uint %uint_15
-  %u3 = OpCopyObject %uint %uint_20
-
-  %i1 = OpCopyObject %int %int_30
-  %i2 = OpCopyObject %int %int_35
-  %i3 = OpCopyObject %int %int_40
-
-  %f1 = OpCopyObject %float %float_50
-  %f2 = OpCopyObject %float %float_60
-  %f3 = OpCopyObject %float %float_70
-
-  %v2u1 = OpCopyObject %v2uint %v2uint_10_20
-  %v2u2 = OpCopyObject %v2uint %v2uint_20_10
-  %v2u3 = OpCopyObject %v2uint %v2uint_15_15
-
-  %v2i1 = OpCopyObject %v2int %v2int_30_40
-  %v2i2 = OpCopyObject %v2int %v2int_40_30
-  %v2i3 = OpCopyObject %v2int %v2int_35_35
-
-  %v2f1 = OpCopyObject %v2float %v2float_50_60
-  %v2f2 = OpCopyObject %v2float %v2float_60_50
-  %v2f3 = OpCopyObject %v2float %v2float_70_70
-
-  %v3f1 = OpCopyObject %v3float %v3float_50_60_70
-  %v3f2 = OpCopyObject %v3float %v3float_60_70_50
-
-  %v4f1 = OpCopyObject %v4float %v4float_50_50_50_50
-  %v4f2 = OpCopyObject %v4float %v4f1
-
-  %m2x2f1 = OpCopyObject %mat2v2float %mat2v2float_50_60
-  %m3x3f1 = OpCopyObject %mat3v3float %mat3v3float_50_60_70
-  %m4x4f1 = OpCopyObject %mat4v4float %mat4v4float_50_50_50_50
 )";
 }
 
@@ -187,10 +127,11 @@ using SpirvReaderTest_GlslStd450_Uinting_UintingUinting = SpirvReaderTestWithPar
 using SpirvReaderTest_GlslStd450_Uinting_UintingUintingUinting =
     SpirvReaderTestWithParam<GlslStd450Case>;
 
-TEST_P(SpirvReaderTest_GlslStd450_Float_Floating, DISABLED_Scalar) {
+TEST_P(SpirvReaderTest_GlslStd450_Float_Floating, Scalar) {
     EXPECT_IR(Preamble() + R"(
      %1 = OpExtInst %float %glsl )" +
-                  GetParam().opcode + R"( %f1
+                  GetParam().opcode + R"( %float_50
+     %2 = OpCopyObject %float %1
      OpReturn
      OpFunctionEnd
   )",
@@ -198,215 +139,257 @@ TEST_P(SpirvReaderTest_GlslStd450_Float_Floating, DISABLED_Scalar) {
               R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    let x_1 = )" + GetParam().wgsl_func +
-                  R"((f1);");
+    %2:f32 = )" + GetParam().wgsl_func +
+                  R"( 50.0f
+    %3:f32 = let %2
+    ret
   }
 }
 )");
 }
 
-TEST_P(SpirvReaderTest_GlslStd450_Float_Floating, DISABLED_Vector) {
+TEST_P(SpirvReaderTest_GlslStd450_Float_Floating, Vector) {
     EXPECT_IR(Preamble() + R"(
      %1 = OpExtInst %float %glsl )" +
-                  GetParam().opcode + R"( %v2f1
+                  GetParam().opcode + R"( %v2float_50_60
+     %2 = OpCopyObject %float %1
      OpReturn
      OpFunctionEnd
   )",
               R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    let x_1 = )" + GetParam().wgsl_func +
-                  R"((v2f1);
+    %2:f32 = )" + GetParam().wgsl_func +
+                  R"( vec2<f32>(50.0f, 60.0f)
+    %3:f32 = let %2
+    ret
   }
 }
 )");
 }
 
-TEST_P(SpirvReaderTest_GlslStd450_Float_FloatingFloating, DISABLED_Scalar) {
+TEST_P(SpirvReaderTest_GlslStd450_Float_FloatingFloating, Scalar) {
     EXPECT_IR(Preamble() + R"(
      %1 = OpExtInst %float %glsl )" +
-                  GetParam().opcode + R"( %f1 %f2
+                  GetParam().opcode + R"( %float_50 %float_60
+     %2 = OpCopyObject %float %1
      OpReturn
      OpFunctionEnd
   )",
               R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    let x_1 = )" + GetParam().wgsl_func +
-                  R"((f1, f2);"
+    %2:f32 = )" + GetParam().wgsl_func +
+                  R"( 50.0f, 60.0f
+    %3:f32 = let %2
+    ret
   }
 }
 )");
 }
 
-TEST_P(SpirvReaderTest_GlslStd450_Float_FloatingFloating, DISABLED_Vector) {
+TEST_P(SpirvReaderTest_GlslStd450_Float_FloatingFloating, Vector) {
     EXPECT_IR(Preamble() + R"(
      %1 = OpExtInst %float %glsl )" +
-                  GetParam().opcode + R"( %v2f1 %v2f2
+                  GetParam().opcode + R"( %v2float_50_60 %v2float_60_50
+     %2 = OpCopyObject %float %1
      OpReturn
      OpFunctionEnd
   )",
               R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    let x_1 = )" + GetParam().wgsl_func +
-                  R"((v2f1, v2f2);
+    %2:f32 = )" + GetParam().wgsl_func +
+                  R"( vec2<f32>(50.0f, 60.0f), vec2<f32>(60.0f, 50.0f)
+    %3:f32 = let %2
+    ret
   }
 }
 )");
 }
 
-TEST_P(SpirvReaderTest_GlslStd450_Floating_Floating, DISABLED_Scalar) {
+TEST_P(SpirvReaderTest_GlslStd450_Floating_Floating, Scalar) {
     EXPECT_IR(Preamble() + R"(
      %1 = OpExtInst %float %glsl )" +
-                  GetParam().opcode + R"( %f1
+                  GetParam().opcode + R"( %float_50
+     %2 = OpCopyObject %float %1
      OpReturn
      OpFunctionEnd
   )",
               R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    let x_1 = )" + GetParam().wgsl_func +
-                  R"((f1);
+    %2:f32 = )" + GetParam().wgsl_func +
+                  R"( 50.0f
+    %3:f32 = let %2
+    ret
   }
-}
-)");
+})");
 }
 
-TEST_P(SpirvReaderTest_GlslStd450_Floating_Floating, DISABLED_Vector) {
+TEST_P(SpirvReaderTest_GlslStd450_Floating_Floating, Vector) {
     EXPECT_IR(Preamble() + R"(
      %1 = OpExtInst %v2float %glsl )" +
-                  GetParam().opcode + R"( %v2f1
+                  GetParam().opcode + R"( %v2float_50_60
+     %2 = OpCopyObject %v2float %1
      OpReturn
      OpFunctionEnd
   )",
               R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    let x_1 = )" + GetParam().wgsl_func +
-                  R"((v2f1);
+    %2:vec2<f32> = )" +
+                  GetParam().wgsl_func +
+                  R"( vec2<f32>(50.0f, 60.0f)
+    %3:vec2<f32> = let %2
+    ret
   }
 }
 )");
 }
 
-TEST_P(SpirvReaderTest_GlslStd450_Floating_FloatingFloating, DISABLED_Scalar) {
+TEST_P(SpirvReaderTest_GlslStd450_Floating_FloatingFloating, Scalar) {
     EXPECT_IR(Preamble() + R"(
      %1 = OpExtInst %float %glsl )" +
-                  GetParam().opcode + R"( %f1 %f2
+                  GetParam().opcode + R"( %float_50 %float_60
+     %2 = OpCopyObject %float %1
      OpReturn
      OpFunctionEnd
   )",
               R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    let x_1 = )" + GetParam().wgsl_func +
-                  R"((f1, f2);
+    %2:f32 = )" + GetParam().wgsl_func +
+                  R"( 50.0f, 60.0f
+    %3:f32 = let %2
+    ret
   }
 }
 )");
 }
 
-TEST_P(SpirvReaderTest_GlslStd450_Floating_FloatingFloating, DISABLED_Vector) {
+TEST_P(SpirvReaderTest_GlslStd450_Floating_FloatingFloating, Vector) {
     EXPECT_IR(Preamble() + R"(
      %1 = OpExtInst %v2float %glsl )" +
-                  GetParam().opcode + R"( %v2f1 %v2f2
+                  GetParam().opcode + R"( %v2float_50_60 %v2float_60_50
+     %2 = OpCopyObject %v2float %1
      OpReturn
      OpFunctionEnd
   )",
               R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    let x_1 = )" + GetParam().wgsl_func +
-                  R"((v2f1, v2f2);
+    %2:vec2<f32> = )" +
+                  GetParam().wgsl_func +
+                  R"( vec2<f32>(50.0f, 60.0f), vec2<f32>(60.0f, 50.0f)
+    %3:vec2<f32> = let %2
+    ret
   }
 }
 )");
 }
 
-TEST_P(SpirvReaderTest_GlslStd450_Floating_FloatingFloatingFloating, DISABLED_Scalar) {
+TEST_P(SpirvReaderTest_GlslStd450_Floating_FloatingFloatingFloating, Scalar) {
     EXPECT_IR(Preamble() + R"(
      %1 = OpExtInst %float %glsl )" +
-                  GetParam().opcode + R"( %f1 %f2 %f3
+                  GetParam().opcode + R"( %float_50 %float_60 %float_70
+     %2 = OpCopyObject %float %1
      OpReturn
      OpFunctionEnd
   )",
               R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    let x_1 = )" + GetParam().wgsl_func +
-                  R"((f1, f2, f3);
+    %2:f32 = )" + GetParam().wgsl_func +
+                  R"( 50.0f, 60.0f, 70.0f
+    %3:f32 = let %2
+    ret
   }
 }
 )");
 }
 
-TEST_P(SpirvReaderTest_GlslStd450_Floating_FloatingFloatingFloating, DISABLED_Vector) {
-    EXPECT_IR(Preamble() + R"(
-     %1 = OpExtInst %v2float %glsl )" +
-                  GetParam().opcode +
-                  R"( %v2f1 %v2f2 %v2f3
-     OpReturn
-     OpFunctionEnd
-  )",
-              R"(
-%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
-  $B1: {
-    let x_1 = )" + GetParam().wgsl_func +
-                  R"((v2f1, v2f2, v2f3);
-  }
-}
-)");
-}
-
-TEST_P(SpirvReaderTest_GlslStd450_Floating_FloatingInting, DISABLED_Scalar) {
-    EXPECT_IR(Preamble() + R"(
-     %1 = OpExtInst %float %glsl )" +
-                  GetParam().opcode + R"( %f1 %i1
-     OpReturn
-     OpFunctionEnd
-  )",
-              R"(
-%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
-  $B1: {
-    let x_1 = )" + GetParam().wgsl_func +
-                  R"((f1, i1);
-}
-}
-)");
-}
-
-TEST_P(SpirvReaderTest_GlslStd450_Floating_FloatingInting, DISABLED_Vector) {
+TEST_P(SpirvReaderTest_GlslStd450_Floating_FloatingFloatingFloating, Vector) {
     EXPECT_IR(Preamble() + R"(
      %1 = OpExtInst %v2float %glsl )" +
                   GetParam().opcode +
-                  R"( %v2f1 %v2i1
+                  R"( %v2float_50_60 %v2float_60_50 %v2float_70_70
+     %2 = OpCopyObject %v2float %1
      OpReturn
      OpFunctionEnd
   )",
               R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    let x_1 = )" + GetParam().wgsl_func +
-                  R"((v2f1, v2i1);
+    %2:vec2<f32> = )" +
+                  GetParam().wgsl_func +
+                  R"( vec2<f32>(50.0f, 60.0f), vec2<f32>(60.0f, 50.0f), vec2<f32>(70.0f)
+    %3:vec2<f32> = let %2
+    ret
   }
 }
 )");
 }
 
-TEST_P(SpirvReaderTest_GlslStd450_Float3_Float3Float3, DISABLED_SpirvReader) {
+TEST_P(SpirvReaderTest_GlslStd450_Floating_FloatingInting, Scalar) {
+    EXPECT_IR(Preamble() + R"(
+     %1 = OpExtInst %float %glsl )" +
+                  GetParam().opcode + R"( %float_50 %int_30
+     %2 = OpCopyObject %float %1
+     OpReturn
+     OpFunctionEnd
+  )",
+              R"(
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:f32 = )" + GetParam().wgsl_func +
+                  R"( 50.0f, 30i
+    %3:f32 = let %2
+    ret
+  }
+}
+)");
+}
+
+TEST_P(SpirvReaderTest_GlslStd450_Floating_FloatingInting, Vector) {
+    EXPECT_IR(Preamble() + R"(
+     %1 = OpExtInst %v2float %glsl )" +
+                  GetParam().opcode +
+                  R"( %v2float_50_60 %v2int_30_40
+     %2 = OpCopyObject %v2float %1
+     OpReturn
+     OpFunctionEnd
+  )",
+              R"(
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:vec2<f32> = )" +
+                  GetParam().wgsl_func +
+                  R"( vec2<f32>(50.0f, 60.0f), vec2<i32>(30i, 40i)
+    %3:vec2<f32> = let %2
+    ret
+  }
+}
+)");
+}
+
+TEST_P(SpirvReaderTest_GlslStd450_Float3_Float3Float3, SpirvParser) {
     EXPECT_IR(Preamble() + R"(
      %1 = OpExtInst %v3float %glsl )" +
                   GetParam().opcode +
-                  R"( %v3f1 %v3f2
+                  R"( %v3float_50_60_70 %v3float_60_70_50
+     %2 = OpCopyObject %v3float %1
      OpReturn
      OpFunctionEnd
   )",
               R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    let x_1 = )" + GetParam().wgsl_func +
-                  R"((v3f1, v3f2);
+    %2:vec3<f32> = )" +
+                  GetParam().wgsl_func +
+                  R"( vec3<f32>(50.0f, 60.0f, 70.0f), vec3<f32>(60.0f, 70.0f, 50.0f)
+    %3:vec3<f32> = let %2
+    ret
   }
 }
 )");
@@ -480,19 +463,22 @@ INSTANTIATE_TEST_SUITE_P(SpirvReader,
                              {"FMix", "mix"},
                              {"SmoothStep", "smoothstep"}}));
 
-TEST_P(SpirvReaderTest_GlslStd450_Inting_Inting, DISABLED_Scalar) {
+TEST_P(SpirvReaderTest_GlslStd450_Inting_Inting, Scalar) {
     EXPECT_IR(Preamble() + R"(
      %1 = OpExtInst %int %glsl )" +
                   GetParam().opcode +
-                  R"( %i1
+                  R"( %int_30
+     %2 = OpCopyObject %int %1
      OpReturn
      OpFunctionEnd
   )",
               R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    let x_1 = )" + GetParam().wgsl_func +
-                  R"((i1);
+    %2:i32 = )" + GetParam().wgsl_func +
+                  R"( 30i
+    %3:i32 = let %2
+    ret
   }
 }
 )");
@@ -502,7 +488,8 @@ TEST_P(SpirvReaderTest_GlslStd450_Inting_Inting_SignednessCoercing, DISABLED_Sca
     EXPECT_IR(Preamble() + R"(
      %1 = OpExtInst %int %glsl )" +
                   GetParam().opcode +
-                  R"( %u1
+                  R"( %uint_10
+     %2 = OpCopyObject %int %1
      OpReturn
      OpFunctionEnd
   )",
@@ -521,7 +508,7 @@ TEST_P(SpirvReaderTest_GlslStd450_Inting_Inting_SignednessCoercing,
     EXPECT_IR(Preamble() + R"(
      %1 = OpExtInst %uint %glsl )" +
                   GetParam().opcode +
-                  R"( %i1
+                  R"( %int_30
      OpReturn
      OpFunctionEnd
   )",
@@ -535,19 +522,23 @@ TEST_P(SpirvReaderTest_GlslStd450_Inting_Inting_SignednessCoercing,
 )");
 }
 
-TEST_P(SpirvReaderTest_GlslStd450_Inting_Inting, DISABLED_Vector) {
+TEST_P(SpirvReaderTest_GlslStd450_Inting_Inting, Vector) {
     EXPECT_IR(Preamble() + R"(
      %1 = OpExtInst %v2int %glsl )" +
                   GetParam().opcode +
-                  R"( %v2i1
+                  R"( %v2int_30_40
+     %2 = OpCopyObject %v2int %1
      OpReturn
      OpFunctionEnd
   )",
               R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    let x_1 = )" + GetParam().wgsl_func +
-                  R"((v2i1);
+    %2:vec2<i32> = )" +
+                  GetParam().wgsl_func +
+                  R"( vec2<i32>(30i, 40i)
+    %3:vec2<i32> = let %2
+    ret
   }
 }
 )");
@@ -557,7 +548,7 @@ TEST_P(SpirvReaderTest_GlslStd450_Inting_Inting_SignednessCoercing, DISABLED_Vec
     EXPECT_IR(Preamble() + R"(
      %1 = OpExtInst %v2int %glsl )" +
                   GetParam().opcode +
-                  R"( %v2u1
+                  R"( %v2uint_10_20
      OpReturn
      OpFunctionEnd
   )",
@@ -576,7 +567,7 @@ TEST_P(SpirvReaderTest_GlslStd450_Inting_Inting_SignednessCoercing,
     EXPECT_IR(Preamble() + R"(
      %1 = OpExtInst %v2uint %glsl )" +
                   GetParam().opcode +
-                  R"( %v2i1
+                  R"( %v2int_30_40
      OpReturn
      OpFunctionEnd
   )",
@@ -590,73 +581,87 @@ TEST_P(SpirvReaderTest_GlslStd450_Inting_Inting_SignednessCoercing,
 )");
 }
 
-TEST_P(SpirvReaderTest_GlslStd450_Inting_IntingInting, DISABLED_Scalar) {
+TEST_P(SpirvReaderTest_GlslStd450_Inting_IntingInting, Scalar) {
     EXPECT_IR(Preamble() + R"(
      %1 = OpExtInst %int %glsl )" +
                   GetParam().opcode +
-                  R"( %i1 %i2
+                  R"( %int_30 %int_35
+     %2 = OpCopyObject %int %1
      OpReturn
      OpFunctionEnd
   )",
               R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    let x_1 = )" + GetParam().wgsl_func +
-                  R"((i1, i2);
+    %2:i32 = )" + GetParam().wgsl_func +
+                  R"( 30i, 35i
+    %3:i32 = let %2
+    ret
   }
 }
 )");
 }
 
-TEST_P(SpirvReaderTest_GlslStd450_Inting_IntingInting, DISABLED_Vector) {
+TEST_P(SpirvReaderTest_GlslStd450_Inting_IntingInting, Vector) {
     EXPECT_IR(Preamble() + R"(
      %1 = OpExtInst %v2int %glsl )" +
                   GetParam().opcode +
-                  R"( %v2i1 %v2i2
+                  R"( %v2int_30_40 %v2int_40_30
+     %2 = OpCopyObject %v2int %1
      OpReturn
      OpFunctionEnd
   )",
               R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    let x_1 = )" + GetParam().wgsl_func +
-                  R"((v2i1, v2i2);
+    %2:vec2<i32> = )" +
+                  GetParam().wgsl_func +
+                  R"( vec2<i32>(30i, 40i), vec2<i32>(40i, 30i)
+    %3:vec2<i32> = let %2
+    ret
   }
 }
 )");
 }
 
-TEST_P(SpirvReaderTest_GlslStd450_Inting_IntingIntingInting, DISABLED_Scalar) {
+TEST_P(SpirvReaderTest_GlslStd450_Inting_IntingIntingInting, Scalar) {
     EXPECT_IR(Preamble() + R"(
      %1 = OpExtInst %int %glsl )" +
                   GetParam().opcode +
-                  R"( %i1 %i2 %i3
+                  R"( %int_30 %int_35 %int_40
+     %2 = OpCopyObject %int %1
      OpReturn
      OpFunctionEnd
   )",
               R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    let x_1 = )" + GetParam().wgsl_func +
-                  R"((i1, i2, i3);
+    %2:i32 = )" + GetParam().wgsl_func +
+                  R"( 30i, 35i, 40i
+    %3:i32 = let %2
+    ret
   }
 }
 )");
 }
 
-TEST_P(SpirvReaderTest_GlslStd450_Inting_IntingIntingInting, DISABLED_Vector) {
+TEST_P(SpirvReaderTest_GlslStd450_Inting_IntingIntingInting, Vector) {
     EXPECT_IR(Preamble() + R"(
      %1 = OpExtInst %v2int %glsl )" +
                   GetParam().opcode +
-                  R"( %v2i1 %v2i2 %v2i3
+                  R"( %v2int_30_40 %v2int_40_30 %v2int_35_35
+     %2 = OpCopyObject %v2int %1
      OpReturn
      OpFunctionEnd
   )",
               R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    let x_1 = )" + GetParam().wgsl_func +
-                  R"((v2i1, v2i2, v2i3);
+    %2:vec2<i32> = )" +
+                  GetParam().wgsl_func +
+                  R"( vec2<i32>(30i, 40i), vec2<i32>(40i, 30i), vec2<i32>(35i)
+    %3:vec2<i32> = let %2
+    ret
   }
 }
 )");
@@ -682,107 +687,128 @@ INSTANTIATE_TEST_SUITE_P(SpirvReader,
                          SpirvReaderTest_GlslStd450_Inting_IntingIntingInting,
                          ::testing::Values(GlslStd450Case{"SClamp", "clamp"}));
 
-TEST_P(SpirvReaderTest_GlslStd450_Uinting_Uinting, DISABLED_Scalar) {
+TEST_P(SpirvReaderTest_GlslStd450_Uinting_Uinting, Scalar) {
     EXPECT_IR(Preamble() + R"(
      %1 = OpExtInst %uint %glsl )" +
                   GetParam().opcode +
-                  R"( %u1
+                  R"( %uint_10
+     %2 = OpCopyObject %uint %1
      OpReturn
      OpFunctionEnd
   )",
               R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    let x_1 = )" + GetParam().wgsl_func +
-                  R"((u1);
+    %2:u32 = )" + GetParam().wgsl_func +
+                  R"( 10u
+    %3:u32 = let %2
+    ret
   }
 }
 )");
 }
 
-TEST_P(SpirvReaderTest_GlslStd450_Uinting_Uinting, DISABLED_Vector) {
+TEST_P(SpirvReaderTest_GlslStd450_Uinting_Uinting, Vector) {
     EXPECT_IR(Preamble() + R"(
      %1 = OpExtInst %v2uint %glsl )" +
                   GetParam().opcode +
-                  R"( %v2u1
+                  R"( %v2uint_10_20
+     %2 = OpCopyObject %v2uint %1
      OpReturn
      OpFunctionEnd
   )",
               R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    let x_1 = )" + GetParam().wgsl_func +
-                  R"((v2u1);
+    %2:vec2<u32> = )" +
+                  GetParam().wgsl_func +
+                  R"( vec2<u32>(10u, 20u)
+    %3:vec2<u32> = let %2
+    ret
   }
 }
 )");
 }
 
-TEST_P(SpirvReaderTest_GlslStd450_Uinting_UintingUinting, DISABLED_Scalar) {
+TEST_P(SpirvReaderTest_GlslStd450_Uinting_UintingUinting, Scalar) {
     EXPECT_IR(Preamble() + R"(
      %1 = OpExtInst %uint %glsl )" +
-                  GetParam().opcode + R"( %u1 %u2
+                  GetParam().opcode + R"( %uint_10 %uint_15
+     %2 = OpCopyObject %uint %1
      OpReturn
      OpFunctionEnd
   )",
               R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    let x_1 = )" + GetParam().wgsl_func +
-                  R"((u1, u2);
+    %2:u32 = )" + GetParam().wgsl_func +
+                  R"( 10u, 15u
+    %3:u32 = let %2
+    ret
   }
 }
 )");
 }
 
-TEST_P(SpirvReaderTest_GlslStd450_Uinting_UintingUinting, DISABLED_Vector) {
+TEST_P(SpirvReaderTest_GlslStd450_Uinting_UintingUinting, Vector) {
     EXPECT_IR(Preamble() + R"(
      %1 = OpExtInst %v2uint %glsl )" +
                   GetParam().opcode +
-                  R"( %v2u1 %v2u2
+                  R"( %v2uint_10_20 %v2uint_20_10
+     %2 = OpCopyObject %v2uint %1
      OpReturn
      OpFunctionEnd
   )",
               R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    let x_1 = )" + GetParam().wgsl_func +
-                  R"((v2u1, v2u2);
+    %2:vec2<u32> = )" +
+                  GetParam().wgsl_func +
+                  R"( vec2<u32>(10u, 20u), vec2<u32>(20u, 10u)
+    %3:vec2<u32> = let %2
+    ret
   }
 }
 )");
 }
 
-TEST_P(SpirvReaderTest_GlslStd450_Uinting_UintingUintingUinting, DISABLED_Scalar) {
+TEST_P(SpirvReaderTest_GlslStd450_Uinting_UintingUintingUinting, Scalar) {
     EXPECT_IR(Preamble() + R"(
      %1 = OpExtInst %uint %glsl )" +
-                  GetParam().opcode + R"( %u1 %u2 %u3
+                  GetParam().opcode + R"( %uint_10 %uint_15 %uint_20
+     %2 = OpCopyObject %uint %1
      OpReturn
      OpFunctionEnd
   )",
               R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    let x_1 = )" + GetParam().wgsl_func +
-                  R"((u1, u2, u3);
+    %2:u32 = )" + GetParam().wgsl_func +
+                  R"( 10u, 15u, 20u
+    %3:u32 = let %2
+    ret
   }
 }
 )");
 }
 
-TEST_P(SpirvReaderTest_GlslStd450_Uinting_UintingUintingUinting, DISABLED_Vector) {
+TEST_P(SpirvReaderTest_GlslStd450_Uinting_UintingUintingUinting, Vector) {
     EXPECT_IR(Preamble() + R"(
      %1 = OpExtInst %v2uint %glsl )" +
                   GetParam().opcode +
-                  R"( %v2u1 %v2u2 %v2u3
+                  R"( %v2uint_10_20 %v2uint_20_10 %v2uint_15_15
+     %2 = OpCopyObject %v2uint %1
      OpReturn
      OpFunctionEnd
   )",
               R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    let x_1 = )" + GetParam().wgsl_func +
-                  R"((v2u1, v2u2, v2u3);
+    %2:vec2<u32> = )" +
+                  GetParam().wgsl_func +
+                  R"( vec2<u32>(10u, 20u), vec2<u32>(20u, 10u), vec2<u32>(15u)
+    %3:vec2<u32> = let %2
+    ret
   }
 }
 )");
@@ -809,62 +835,71 @@ INSTANTIATE_TEST_SUITE_P(SpirvReader,
 TEST_F(SpirvReaderTest, DISABLED_Normalize_Scalar) {
     // Scalar normalize maps to sign.
     EXPECT_IR(Preamble() + R"(
-     %1 = OpExtInst %float %glsl Normalize %f1
+     %1 = OpExtInst %float %glsl Normalize %float_50
+     %2 = OpCopyObject %float %1
      OpReturn
      OpFunctionEnd
   )",
               R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    let x_1 = sign(f1);
+    %2:f32 = sign 50.0f
+    %3:f32 = let %2
+    ret
   }
 }
 )");
 }
 
 TEST_F(SpirvReaderTest, DISABLED_Normalize_Vector2) {
-    // Scalar normalize always results in 1.0
     EXPECT_IR(Preamble() + R"(
-     %1 = OpExtInst %v2float %glsl Normalize %v2f1
+     %1 = OpExtInst %v2float %glsl Normalize %v2float_50_60
+     %2 = OpCopyObject %v2float %1
      OpReturn
      OpFunctionEnd
   )",
               R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    let x_1 = normalize(v2f1);
+    %2:vec2<f32> = normalize vec2<f32>(50.0f, 60.0f)
+    %3:vec2<f32> = let %2
+    ret
   }
 }
 )");
 }
 
 TEST_F(SpirvReaderTest, DISABLED_Normalize_Vector3) {
-    // Scalar normalize always results in 1.0
     EXPECT_IR(Preamble() + R"(
-     %1 = OpExtInst %v3float %glsl Normalize %v3f1
+     %1 = OpExtInst %v3float %glsl Normalize %v3float_50_60_70
+     %2 = OpCopyObject %v3float %1
      OpReturn
      OpFunctionEnd
   )",
               R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    let x_1 = normalize(v3f1);
+    %2:vec3<f32> = normalize vec3<f32>(50.0f, 60.0f, 70.0f)
+    %3:vec3<f32> = let %2
+    ret
   }
 }
 )");
 }
 
 TEST_F(SpirvReaderTest, DISABLED_Normalize_Vector4) {
-    // Scalar normalize always results in 1.0
     EXPECT_IR(Preamble() + R"(
-     %1 = OpExtInst %v4float %glsl Normalize %v4f1
+     %1 = OpExtInst %v4float %glsl Normalize %v4float_50_50_50_50
+     %2 = OpCopyObject %v4float %1
      OpReturn
      OpFunctionEnd
   )",
               R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    let x_1 = normalize(v4f1);
+    %2:vec4<f32> = normalize vec4<f32>(50.0f)
+    %3:vec4<f32> = let %2
+    ret
   }
 }
 )");
@@ -875,8 +910,8 @@ TEST_F(SpirvReaderTest, DISABLED_Normalize_Vector4) {
 
 TEST_F(SpirvReaderTest, DISABLED_RectifyOperandsAndResult_SAbs) {
     EXPECT_IR(Preamble() + R"(
-     %1 = OpExtInst %uint %glsl SAbs %u1
-     %2 = OpExtInst %v2uint %glsl SAbs %v2u1
+     %1 = OpExtInst %uint %glsl SAbs %uint_10
+     %2 = OpExtInst %v2uint %glsl SAbs %v2uint_10_20
      OpReturn
      OpFunctionEnd
   )",
@@ -892,8 +927,8 @@ TEST_F(SpirvReaderTest, DISABLED_RectifyOperandsAndResult_SAbs) {
 
 TEST_F(SpirvReaderTest, DISABLED_RectifyOperandsAndResult_SMax) {
     EXPECT_IR(Preamble() + R"(
-     %1 = OpExtInst %uint %glsl SMax %u1 %u2
-     %2 = OpExtInst %v2uint %glsl SMax %v2u1 %v2u2
+     %1 = OpExtInst %uint %glsl SMax %uint_10 %uint_15
+     %2 = OpExtInst %v2uint %glsl SMax %v2uint_10_20 %v2uint_20_10
      OpReturn
      OpFunctionEnd
   )",
@@ -909,8 +944,8 @@ TEST_F(SpirvReaderTest, DISABLED_RectifyOperandsAndResult_SMax) {
 
 TEST_F(SpirvReaderTest, DISABLED_RectifyOperandsAndResult_SMin) {
     EXPECT_IR(Preamble() + R"(
-     %1 = OpExtInst %uint %glsl SMin %u1 %u2
-     %2 = OpExtInst %v2uint %glsl SMin %v2u1 %v2u2
+     %1 = OpExtInst %uint %glsl SMin %uint_10 %uint_15
+     %2 = OpExtInst %v2uint %glsl SMin %v2uint_10_20 %v2uint_20_10
      OpReturn
      OpFunctionEnd
   )",
@@ -926,8 +961,8 @@ TEST_F(SpirvReaderTest, DISABLED_RectifyOperandsAndResult_SMin) {
 
 TEST_F(SpirvReaderTest, DISABLED_RectifyOperandsAndResult_SClamp) {
     EXPECT_IR(Preamble() + R"(
-     %1 = OpExtInst %uint %glsl SClamp %u1 %i2 %u3
-     %2 = OpExtInst %v2uint %glsl SClamp %v2u1 %v2i2 %v2u3
+     %1 = OpExtInst %uint %glsl SClamp %uint_10 %int_35 %uint_20
+     %2 = OpExtInst %v2uint %glsl SClamp %v2uint_10_20 %v2int_40_30 %v2uint_15_15
      OpReturn
      OpFunctionEnd
   )",
@@ -943,8 +978,8 @@ TEST_F(SpirvReaderTest, DISABLED_RectifyOperandsAndResult_SClamp) {
 
 TEST_F(SpirvReaderTest, DISABLED_RectifyOperandsAndResult_UMax) {
     EXPECT_IR(Preamble() + R"(
-     %1 = OpExtInst %int %glsl UMax %i1 %i2
-     %2 = OpExtInst %v2int %glsl UMax %v2i1 %v2i2
+     %1 = OpExtInst %int %glsl UMax %int_30 %int_35
+     %2 = OpExtInst %v2int %glsl UMax %v2int_30_40 %v2int_40_30
      OpReturn
      OpFunctionEnd
   )",
@@ -960,8 +995,8 @@ TEST_F(SpirvReaderTest, DISABLED_RectifyOperandsAndResult_UMax) {
 
 TEST_F(SpirvReaderTest, DISABLED_RectifyOperandsAndResult_UMin) {
     EXPECT_IR(Preamble() + R"(
-     %1 = OpExtInst %int %glsl UMin %i1 %i2
-     %2 = OpExtInst %v2int %glsl UMin %v2i1 %v2i2
+     %1 = OpExtInst %int %glsl UMin %int_30 %int_35
+     %2 = OpExtInst %v2int %glsl UMin %v2int_30_40 %v2int_40_30
      OpReturn
      OpFunctionEnd
   )",
@@ -977,8 +1012,8 @@ TEST_F(SpirvReaderTest, DISABLED_RectifyOperandsAndResult_UMin) {
 
 TEST_F(SpirvReaderTest, DISABLED_RectifyOperandsAndResult_UClamp) {
     EXPECT_IR(Preamble() + R"(
-     %1 = OpExtInst %int %glsl UClamp %i1 %u2 %i3
-     %2 = OpExtInst %v2int %glsl UClamp %v2i1 %v2u2 %v2i3
+     %1 = OpExtInst %int %glsl UClamp %int_30 %uint_15 %int_40
+     %2 = OpExtInst %v2int %glsl UClamp %v2int_30_40 %v2uint_20_10 %v2int_35_35
      OpReturn
      OpFunctionEnd
   )",
@@ -999,10 +1034,10 @@ TEST_F(SpirvReaderTest, DISABLED_RectifyOperandsAndResult_FindILsb) {
     // This is the first extended instruction we've supported which goes both
     // ways.
     EXPECT_IR(Preamble() + R"(
-     %1 = OpExtInst %uint %glsl FindILsb %i1
-     %2 = OpExtInst %v2uint %glsl FindILsb %v2i1
-     %3 = OpExtInst %int %glsl FindILsb %u1
-     %4 = OpExtInst %v2int %glsl FindILsb %v2u1
+     %1 = OpExtInst %uint %glsl FindILsb %int_30
+     %2 = OpExtInst %v2uint %glsl FindILsb %v2int_30_40
+     %3 = OpExtInst %int %glsl FindILsb %uint_10
+     %4 = OpExtInst %v2int %glsl FindILsb %v2uint_10_20
      OpReturn
      OpFunctionEnd
   )",
@@ -1030,23 +1065,23 @@ TEST_F(SpirvReaderTest, DISABLED_RectifyOperandsAndResult_FindSMsb) {
     EXPECT_IR(Preamble() + R"(
      ; signed arg
      ;    signed result
-     %1 = OpExtInst %int %glsl FindSMsb %i1
-     %2 = OpExtInst %v2int %glsl FindSMsb %v2i1
+     %1 = OpExtInst %int %glsl FindSMsb %int_30
+     %2 = OpExtInst %v2int %glsl FindSMsb %v2int_30_40
 
      ; signed arg
      ;    unsigned result
-     %3 = OpExtInst %uint %glsl FindSMsb %i1
-     %4 = OpExtInst %v2uint %glsl FindSMsb %v2i1
+     %3 = OpExtInst %uint %glsl FindSMsb %int_30
+     %4 = OpExtInst %v2uint %glsl FindSMsb %v2int_30_40
 
      ; unsigned arg
      ;    signed result
-     %5 = OpExtInst %int %glsl FindSMsb %u1
-     %6 = OpExtInst %v2int %glsl FindSMsb %v2u1
+     %5 = OpExtInst %int %glsl FindSMsb %uint_10
+     %6 = OpExtInst %v2int %glsl FindSMsb %v2uint_10_20
 
      ; unsigned arg
      ;    unsigned result
-     %7 = OpExtInst %uint %glsl FindSMsb %u1
-     %8 = OpExtInst %v2uint %glsl FindSMsb %v2u1
+     %7 = OpExtInst %uint %glsl FindSMsb %uint_10
+     %8 = OpExtInst %v2uint %glsl FindSMsb %v2uint_10_20
      OpReturn
      OpFunctionEnd
   )",
@@ -1078,23 +1113,23 @@ TEST_F(SpirvReaderTest, DISABLED_RectifyOperandsAndResult_FindUMsb) {
     EXPECT_IR(Preamble() + R"(
      ; signed arg
      ;    signed result
-     %1 = OpExtInst %int %glsl FindUMsb %i1
-     %2 = OpExtInst %v2int %glsl FindUMsb %v2i1
+     %1 = OpExtInst %int %glsl FindUMsb %int_30
+     %2 = OpExtInst %v2int %glsl FindUMsb %v2int_30_40
 
      ; signed arg
      ;    unsigned result
-     %3 = OpExtInst %uint %glsl FindUMsb %i1
-     %4 = OpExtInst %v2uint %glsl FindUMsb %v2i1
+     %3 = OpExtInst %uint %glsl FindUMsb %int_30
+     %4 = OpExtInst %v2uint %glsl FindUMsb %v2int_30_40
 
      ; unsigned arg
      ;    signed result
-     %5 = OpExtInst %int %glsl FindUMsb %u1
-     %6 = OpExtInst %v2int %glsl FindUMsb %v2u1
+     %5 = OpExtInst %int %glsl FindUMsb %uint_10
+     %6 = OpExtInst %v2int %glsl FindUMsb %v2uint_10_20
 
      ; unsigned arg
      ;    unsigned result
-     %7 = OpExtInst %uint %glsl FindUMsb %u1
-     %8 = OpExtInst %v2uint %glsl FindUMsb %v2u1
+     %7 = OpExtInst %uint %glsl FindUMsb %uint_10
+     %8 = OpExtInst %v2uint %glsl FindUMsb %v2uint_10_20
      OpReturn
      OpFunctionEnd
   )",
@@ -1127,19 +1162,24 @@ inline std::ostream& operator<<(std::ostream& out, DataPackingCase c) {
 
 using SpirvReaderTest_GlslStd450_DataPacking = SpirvReaderTestWithParam<DataPackingCase>;
 
-TEST_P(SpirvReaderTest_GlslStd450_DataPacking, DISABLED_Valid) {
+TEST_P(SpirvReaderTest_GlslStd450_DataPacking, Valid) {
     auto param = GetParam();
     EXPECT_IR(Preamble() + R"(
   %1 = OpExtInst %uint %glsl )" +
-                  param.opcode + (param.vec_size == 2 ? " %v2f1" : " %v4f1") + R"(
+                  param.opcode +
+                  (param.vec_size == 2 ? " %v2float_50_60" : " %v4float_50_50_50_50") + R"(
+  %2 = OpCopyObject %uint %1
   OpReturn
   OpFunctionEnd
   )",
               R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    let x_1 = )" + param.wgsl_func +
-                  "(v" + std::to_string(param.vec_size) + R"(f1);
+    %2:u32 = )" + param.wgsl_func +
+                  " vec" + std::to_string(param.vec_size) + "<f32>(50.0f" +
+                  (param.vec_size == 4 ? "" : ", 60.0f") + R"()
+    %3:u32 = let %2
+    ret
   }
 }
 )");
@@ -1156,20 +1196,28 @@ INSTANTIATE_TEST_SUITE_P(SpirvReader,
 
 using SpirvReaderTest_GlslStd450_DataUnpacking = SpirvReaderTestWithParam<DataPackingCase>;
 
-TEST_P(SpirvReaderTest_GlslStd450_DataUnpacking, DISABLED_Valid) {
+TEST_P(SpirvReaderTest_GlslStd450_DataUnpacking, Valid) {
     auto param = GetParam();
+    auto type = param.vec_size == 2 ? "%v2float" : "%v4float";
+    auto wgsl_type = "vec" + std::to_string(param.vec_size) + "<f32>";
+
     EXPECT_IR(Preamble() + R"(
   %1 = OpExtInst )" +
-                  (param.vec_size == 2 ? "%v2float" : "%v4float") + std::string(" %glsl ") +
-                  param.opcode + R"( %u1
+                  type + std::string(" %glsl ") + param.opcode + R"( %uint_10
+  %2 = OpCopyObject )" +
+                  type + R"( %1
   OpReturn
   OpFunctionEnd
   )",
               R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    let x_1 = )" + param.wgsl_func +
-                  R"((u1);
+    %2:)" + wgsl_type +
+                  " = " + param.wgsl_func +
+                  R"( 10u
+    %3:)" + wgsl_type +
+                  R"( = let %2
+    ret
   }
 }
 )");
@@ -1186,7 +1234,7 @@ INSTANTIATE_TEST_SUITE_P(SpirvReader,
 
 TEST_F(SpirvReaderTest, DISABLED_GlslStd450_Refract_Scalar) {
     EXPECT_IR(Preamble() + R"(
-     %1 = OpExtInst %float %glsl Refract %f1 %f2 %f3
+     %1 = OpExtInst %float %glsl Refract %float_50 %float_60 %float_70
      OpReturn
      OpFunctionEnd
   )",
@@ -1201,7 +1249,7 @@ TEST_F(SpirvReaderTest, DISABLED_GlslStd450_Refract_Scalar) {
 
 TEST_F(SpirvReaderTest, DISABLED_GlslStd450_Refract_Vector) {
     EXPECT_IR(Preamble() + R"(
-     %1 = OpExtInst %v2float %glsl Refract %v2f1 %v2f2 %f3
+     %1 = OpExtInst %v2float %glsl Refract %v2float_50_60 %v2float_60_50 %float_70
      OpReturn
      OpFunctionEnd
   )",
@@ -1219,8 +1267,8 @@ TEST_F(SpirvReaderTest, DISABLED_GlslStd450_FaceForward_Scalar) {
     // making a let-declaration for it, since it is the normal operand to
     // the builtin function, and code generation uses it twice.
     EXPECT_IR(Preamble() + R"(
-     %99 = OpFAdd %float %f1 %f1 ; normal operand has only one use
-     %1 = OpExtInst %float %glsl FaceForward %99 %f2 %f3
+     %99 = OpFAdd %float %float_50 %float_50 ; normal operand has only one use
+     %1 = OpExtInst %float %glsl FaceForward %99 %float_60 %float_70
      OpReturn
      OpFunctionEnd
   )",
@@ -1235,15 +1283,17 @@ TEST_F(SpirvReaderTest, DISABLED_GlslStd450_FaceForward_Scalar) {
 
 TEST_F(SpirvReaderTest, DISABLED_GlslStd450_FaceForward_Vector) {
     EXPECT_IR(Preamble() + R"(
-     %99 = OpFAdd %v2float %v2f1 %v2f1
-     %1 = OpExtInst %v2float %glsl FaceForward %v2f1 %v2f2 %v2f3
+     %1 = OpExtInst %v2float %glsl FaceForward %v2float_50_60 %v2float_60_50 %v2float_70_70
+     %2 = OpCopyObject %v2float %1
      OpReturn
      OpFunctionEnd
   )",
               R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    let x_1 = faceForward(v2f1, v2f2, v2f3);
+    %2:vec2<f32> = faceForward vec2<f32>(50.0f, 60.0f), vec2<f32>(60.0f, 50.0f), vec2<f32>(70.0f)
+    %2:vec2<f32> = let %2
+    ret
   }
 }
 )");
@@ -1251,16 +1301,18 @@ TEST_F(SpirvReaderTest, DISABLED_GlslStd450_FaceForward_Vector) {
 
 TEST_F(SpirvReaderTest, DISABLED_GlslStd450_Reflect_Scalar) {
     EXPECT_IR(Preamble() + R"(
-     %98 = OpFAdd %float %f1 %f1 ; has only one use
-     %99 = OpFAdd %float %f2 %f2 ; has only one use
+     %98 = OpFAdd %float %float_50 %float_50 ; has only one use
+     %99 = OpFAdd %float %float_60 %float_60 ; has only one use
      %1 = OpExtInst %float %glsl Reflect %98 %99
+     %2 = OpCopyObject %float %1
      OpReturn
      OpFunctionEnd
   )",
               R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    let x_1 = (x_98 - (2.0f * (x_99 * (x_99 * x_98))));
+    %2:f32 = (x_98 - (2.0f * (x_99 * (x_99 * x_98))));
+    %3:f32 = let %2
   }
 }
 )");
@@ -1268,18 +1320,21 @@ TEST_F(SpirvReaderTest, DISABLED_GlslStd450_Reflect_Scalar) {
 
 TEST_F(SpirvReaderTest, DISABLED_GlslStd450_Reflect_Vector) {
     EXPECT_IR(Preamble() + R"(
-     %98 = OpFAdd %v2float %v2f1 %v2f1
-     %99 = OpFAdd %v2float %v2f2 %v2f2
+     %98 = OpFAdd %v2float %v2float_50_60 %v2float_50_60
+     %99 = OpFAdd %v2float %v2float_60_50 %v2float_60_50
      %1 = OpExtInst %v2float %glsl Reflect %98 %99
+     %2 = OpCopyObject %v2float %1
      OpReturn
      OpFunctionEnd
   )",
               R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    let x_98 = (v2f1 + v2f1);
-    let x_99 = (v2f2 + v2f2);
-    let x_1 = reflect(x_98, x_99);
+    %2:vec2<f32> = add vec2<f32>(50.0f, 60.0f), vec2<f32>(50.0f, 60.0f)
+    %3:vec2<f32> = add vec2<f32>(60.0f, 50.0f), vec2<f32>(60.0f, 50.0f)
+    %4:vec2<f32> = reflect %2, %3
+    %5:vec2<f32> = let %4
+    ret
   }
 }
 )");
@@ -1288,7 +1343,7 @@ TEST_F(SpirvReaderTest, DISABLED_GlslStd450_Reflect_Vector) {
 // For ldexp with signed second argument, see above.
 TEST_F(SpirvReaderTest, DISABLED_GlslStd450_Ldexp_Scalar_Float_Uint) {
     EXPECT_IR(Preamble() + R"(
-     %1 = OpExtInst %float %glsl Ldexp %f1 %u1
+     %1 = OpExtInst %float %glsl Ldexp %float_50 %uint_10
      OpReturn
      OpFunctionEnd
   )",
@@ -1303,7 +1358,7 @@ TEST_F(SpirvReaderTest, DISABLED_GlslStd450_Ldexp_Scalar_Float_Uint) {
 
 TEST_F(SpirvReaderTest, DISABLED_GlslStd450_Ldexp_Vector_Floatvec_Uintvec) {
     EXPECT_IR(Preamble() + R"(
-     %1 = OpExtInst %v2float %glsl Ldexp %v2f1 %v2u1
+     %1 = OpExtInst %v2float %glsl Ldexp %v2float_50_60 %v2uint_10_20
      OpReturn
      OpFunctionEnd
   )",
@@ -1316,31 +1371,50 @@ TEST_F(SpirvReaderTest, DISABLED_GlslStd450_Ldexp_Vector_Floatvec_Uintvec) {
 )");
 }
 
-using SpirvReaderTest_GlslStd450_Determinant = SpirvReaderTestWithParam<std::string>;
+struct DeterminantData {
+    std::string in;
+    std::string out;
+};
+
+inline std::ostream& operator<<(std::ostream& out, DeterminantData c) {
+    out << "Determinant(" << c.in << ")";
+    return out;
+}
+
+using SpirvReaderTest_GlslStd450_Determinant = SpirvReaderTestWithParam<DeterminantData>;
 
 TEST_P(SpirvReaderTest_GlslStd450_Determinant, DISABLED_Test) {
+    auto param = GetParam();
+
     EXPECT_IR(Preamble() + R"(
      %1 = OpExtInst %float %glsl Determinant %)" +
-                  GetParam() + R"(
+                  param.in + R"(
+     %2 = OpCopyObject %float %1
      OpReturn
      OpFunctionEnd
   )",
               R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    let x_1 = determinant(" + GetParam() + ");
+    %2:f32 = determinant )" +
+                  param.out + R"(
+    %3:f32 = let %2
+    ret
   }
 }
 )");
 }
 
-INSTANTIATE_TEST_SUITE_P(SpirvReader,
-                         SpirvReaderTest_GlslStd450_Determinant,
-                         ::testing::Values("m2x2f1", "m3x3f1", "m4x4f1"));
+INSTANTIATE_TEST_SUITE_P(
+    SpirvReader,
+    SpirvReaderTest_GlslStd450_Determinant,
+    ::testing::Values(DeterminantData{"m2x2f1", "mat2x2<f32>(vec2<f32>(50.0f, 60.0f))"},
+                      DeterminantData{"m3x3f1", "mat3x3<f32>(vec3<f32>(50.0f, 60.0f, 70.0f))"},
+                      DeterminantData{"m4x4f1", "mat4x4<f32>(vec4<f32>(50.0f))"}));
 
 TEST_F(SpirvReaderTest, DISABLED_GlslStd450_MatrixInverse_mat2x2) {
     EXPECT_IR(Preamble() + R"(
-     %1 = OpExtInst %mat2v2float %glsl MatrixInverse %m2x2f1
+     %1 = OpExtInst %mat2v2float %glsl MatrixInverse %mat2v2float_50_60
      OpReturn
      OpFunctionEnd
   )",
@@ -1359,7 +1433,7 @@ TEST_F(SpirvReaderTest, DISABLED_GlslStd450_MatrixInverse_mat2x2) {
 
 TEST_F(SpirvReaderTest, DISABLED_GlslStd450_MatrixInverse_mat3x3) {
     EXPECT_IR(Preamble() + R"(
-     %1 = OpExtInst %mat3v3float %glsl MatrixInverse %m3x3f1
+     %1 = OpExtInst %mat3v3float %glsl MatrixInverse %mat3v3float_50_60_70
      OpReturn
      OpFunctionEnd
   )",
@@ -1384,7 +1458,7 @@ TEST_F(SpirvReaderTest, DISABLED_GlslStd450_MatrixInverse_mat3x3) {
 
 TEST_F(SpirvReaderTest, DISABLED_GlslStd450_MatrixInverse_mat4x4) {
     EXPECT_IR(Preamble() + R"(
-     %1 = OpExtInst %mat4v4float %glsl MatrixInverse %m4x4f1
+     %1 = OpExtInst %mat4v4float %glsl MatrixInverse %mat4v4float_50_50_50_50
      OpReturn
      OpFunctionEnd
   )",
@@ -1460,8 +1534,8 @@ TEST_F(SpirvReaderTest, DISABLED_GlslStd450_MatrixInverse_mat4x4) {
 
 TEST_F(SpirvReaderTest, DISABLED_GlslStd450_MatrixInverse_MultipleInScope) {
     EXPECT_IR(Preamble() + R"(
-     %1 = OpExtInst %mat2v2float %glsl MatrixInverse %m2x2f1
-     %2 = OpExtInst %mat2v2float %glsl MatrixInverse %m2x2f1
+     %1 = OpExtInst %mat2v2float %glsl MatrixInverse %mat2v2float_50_60
+     %2 = OpExtInst %mat2v2float %glsl MatrixInverse %mat2v2float_50_60
      OpReturn
      OpFunctionEnd
   )",
