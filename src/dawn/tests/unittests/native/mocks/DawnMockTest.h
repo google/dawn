@@ -53,7 +53,7 @@ class DawnMockTest : public ::testing::Test {
     // Device mock callbacks used throughout the tests.
     testing::StrictMock<testing::MockCppCallback<wgpu::UncapturedErrorCallback<void>*>>
         mDeviceErrorCallback;
-    testing::StrictMock<testing::MockCppCallback<wgpu::DeviceLostCallback2<void>*>>
+    testing::StrictMock<testing::MockCppCallback<wgpu::DeviceLostCallback<void>*>>
         mDeviceLostCallback;
 
     TogglesState mDeviceToggles;

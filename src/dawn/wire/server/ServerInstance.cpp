@@ -39,8 +39,7 @@ WireResult Server::DoInstanceRequestAdapter(Known<WGPUInstance> instance,
                                             ObjectHandle eventManager,
                                             WGPUFuture future,
                                             ObjectHandle adapterHandle,
-                                            const WGPURequestAdapterOptions* options,
-                                            uint8_t userdataCount) {
+                                            const WGPURequestAdapterOptions* options) {
     Reserved<WGPUAdapter> adapter;
     WIRE_TRY(Objects<WGPUAdapter>().Allocate(&adapter, adapterHandle, AllocationState::Reserved));
 
@@ -49,16 +48,10 @@ WireResult Server::DoInstanceRequestAdapter(Known<WGPUInstance> instance,
     userdata->future = future;
     userdata->adapterObjectId = adapter.id;
 
-    if (userdataCount == 1) {
-        mProcs.instanceRequestAdapter(instance->handle, options,
-                                      ForwardToServer<&Server::OnRequestAdapterCallback>,
-                                      userdata.release());
-    } else {
-        mProcs.instanceRequestAdapter2(
-            instance->handle, options,
-            {nullptr, WGPUCallbackMode_AllowSpontaneous,
-             ForwardToServer2<&Server::OnRequestAdapterCallback>, userdata.release(), nullptr});
-    }
+    mProcs.instanceRequestAdapter(
+        instance->handle, options,
+        {nullptr, WGPUCallbackMode_AllowSpontaneous,
+         ForwardToServer2<&Server::OnRequestAdapterCallback>, userdata.release(), nullptr});
     return WireResult::Success;
 }
 

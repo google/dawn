@@ -81,15 +81,6 @@
         ]
     },
     "request adapter callback": {
-        "category": "function pointer",
-        "args": [
-            {"name": "status", "type": "request adapter status"},
-            {"name": "adapter", "type": "adapter", "optional": true},
-            {"name": "message", "type": "string view"},
-            {"name": "userdata", "type": "void *"}
-        ]
-    },
-    "request adapter callback 2": {
         "category": "callback function",
         "args": [
             {"name": "status", "type": "request adapter status"},
@@ -98,19 +89,10 @@
         ]
     },
     "request adapter callback info": {
-         "category": "structure",
-         "extensible": "in",
-         "members": [
-            {"name": "mode", "type": "callback mode"},
-            {"name": "callback", "type": "request adapter callback"},
-            {"name": "userdata", "type": "void *"}
-         ]
-    },
-    "request adapter callback info 2": {
         "category": "callback info",
         "members": [
             {"name": "mode", "type": "callback mode"},
-            {"name": "callback", "type": "request adapter callback 2"}
+            {"name": "callback", "type": "request adapter callback"}
         ]
    },
     "request adapter status": {
@@ -163,30 +145,10 @@
             },
             {
                 "name": "request device",
-                "args": [
-                    {"name": "descriptor", "type": "device descriptor", "annotation": "const*", "optional": true, "no_default": true},
-                    {"name": "callback", "type": "request device callback"},
-                    {"name": "userdata", "type": "void *"}
-                ]
-            },
-            {
-                "name": "request device f",
-                "_comment": "TODO(crbug.com/dawn/2021): This is dawn/emscripten-only until we rename it to replace the old API. See bug for details.",
-                "tags": ["dawn", "emscripten"],
                 "returns": "future",
                 "args": [
                     {"name": "options", "type": "device descriptor", "annotation": "const*", "optional": true, "no_default": true},
                     {"name": "callback info", "type": "request device callback info"}
-                ]
-            },
-            {
-                "name": "request device 2",
-                "_comment": "TODO(crbug.com/dawn/2021): This is dawn/emscripten-only until we rename it to replace the old API. See bug for details.",
-                "tags": ["dawn", "emscripten"],
-                "returns": "future",
-                "args": [
-                    {"name": "options", "type": "device descriptor", "annotation": "const*", "optional": true, "no_default": true},
-                    {"name": "callback info", "type": "request device callback info 2"}
                 ]
             },
             {
@@ -242,8 +204,8 @@
             {"name": "required features", "type": "feature name", "annotation": "const*", "length": "required feature count", "default": "nullptr"},
             {"name": "required limits", "type": "required limits", "annotation": "const*", "optional": true},
             {"name": "default queue", "type": "queue descriptor"},
-            {"name": "device lost callback info 2", "type": "device lost callback info 2"},
-            {"name": "uncaptured error callback info 2", "type": "uncaptured error callback info 2"}
+            {"name": "device lost callback info", "type": "device lost callback info"},
+            {"name": "uncaptured error callback info", "type": "uncaptured error callback info"}
         ]
     },
     "dawn toggles descriptor": {
@@ -1481,23 +1443,6 @@
         ]
     },
     "device lost callback": {
-        "category": "function pointer",
-        "args": [
-            {"name": "reason", "type": "device lost reason"},
-            {"name": "message", "type": "string view"},
-            {"name": "userdata", "type": "void *"}
-        ]
-    },
-    "device lost callback new": {
-        "category": "function pointer",
-        "args": [
-            {"name": "device", "type": "device", "annotation": "const*", "length": 1},
-            {"name": "reason", "type": "device lost reason"},
-            {"name": "message", "type": "string view"},
-            {"name": "userdata", "type": "void *"}
-        ]
-    },
-    "device lost callback 2": {
         "category": "callback function",
         "args": [
             {"name": "device", "type": "device", "annotation": "const*", "length": 1},
@@ -1506,19 +1451,10 @@
         ]
     },
     "device lost callback info": {
-        "category": "structure",
-        "extensible": "in",
-        "members": [
-            {"name": "mode", "type": "callback mode", "default": "wait any only", "_comment": "TODO(crbug.com/dawn/2458) Default should be removed."},
-            {"name": "callback", "type": "device lost callback new", "default": "nullptr"},
-            {"name": "userdata", "type": "void *", "default": "nullptr"}
-        ]
-    },
-    "device lost callback info 2": {
         "category": "callback info",
         "members": [
             {"name": "mode", "type": "callback mode"},
-            {"name": "callback", "type": "device lost callback 2", "default": "nullptr"}
+            {"name": "callback", "type": "device lost callback", "default": "nullptr"}
         ]
     },
     "device lost reason": {
@@ -1536,14 +1472,6 @@
         "category": "native",
         "wasm type": "d"
     },
-    "error callback": {
-        "category": "function pointer",
-        "args": [
-            {"name": "type", "type": "error type"},
-            {"name": "message", "type": "string view"},
-            {"name": "userdata", "type": "void *"}
-        ]
-    },
     "uncaptured error callback": {
         "category": "callback function",
         "args": [
@@ -1553,14 +1481,6 @@
         ]
     },
     "uncaptured error callback info": {
-        "category": "structure",
-        "extensible": "in",
-        "members": [
-            {"name": "callback", "type": "error callback", "default": "nullptr"},
-            {"name": "userdata", "type": "void *", "default": "nullptr"}
-        ]
-    },
-    "uncaptured error callback info 2": {
         "category": "callback info",
         "members": [
             {"name": "callback", "type": "uncaptured error callback", "default": "nullptr"}
@@ -2445,30 +2365,10 @@
             },
             {
                 "name": "request adapter",
-                "args": [
-                    {"name": "options", "type": "request adapter options", "annotation": "const*", "optional": true, "no_default": true},
-                    {"name": "callback", "type": "request adapter callback"},
-                    {"name": "userdata", "type": "void *"}
-                ]
-            },
-            {
-                "name": "request adapter f",
-                "_comment": "TODO(crbug.com/dawn/2021): This is dawn/emscripten-only until we rename it to replace the old API. See bug for details.",
-                "tags": ["dawn", "emscripten"],
                 "returns": "future",
                 "args": [
                     {"name": "options", "type": "request adapter options", "annotation": "const*", "optional": true, "no_default": true},
                     {"name": "callback info", "type": "request adapter callback info"}
-                ]
-            },
-            {
-                "name": "request adapter 2",
-                "_comment": "TODO(crbug.com/dawn/2021): This is dawn/emscripten-only until we rename it to replace the old API. See bug for details.",
-                "tags": ["dawn", "emscripten"],
-                "returns": "future",
-                "args": [
-                    {"name": "options", "type": "request adapter options", "annotation": "const*", "optional": true, "no_default": true},
-                    {"name": "callback info", "type": "request adapter callback info 2"}
                 ]
             },
             {
@@ -3289,16 +3189,6 @@
     },
 
     "request device callback": {
-        "category": "function pointer",
-        "_comment": "crbug.com/1234617: Revisit optional status of device once requestDevice can return lost devices",
-        "args": [
-            {"name": "status", "type": "request device status"},
-            {"name": "device", "type": "device", "optional": true},
-            {"name": "message", "type": "string view"},
-            {"name": "userdata", "type": "void *"}
-        ]
-    },
-    "request device callback 2": {
         "category": "callback function",
         "_comment": "crbug.com/1234617: Revisit optional status of device once requestDevice can return lost devices",
         "args": [
@@ -3308,19 +3198,10 @@
         ]
     },
     "request device callback info": {
-         "category": "structure",
-         "extensible": "in",
-         "members": [
-            {"name": "mode", "type": "callback mode"},
-            {"name": "callback", "type": "request device callback"},
-            {"name": "userdata", "type": "void *"}
-         ]
-    },
-    "request device callback info 2": {
         "category": "callback info",
         "members": [
             {"name": "mode", "type": "callback mode"},
-            {"name": "callback", "type": "request device callback 2"}
+            {"name": "callback", "type": "request device callback"}
         ]
    },
 

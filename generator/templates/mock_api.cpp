@@ -79,11 +79,8 @@ void ProcTableAsClass::GetProcTable({{Prefix}}ProcTable* table) {
 //*   - setLoggingCallback
 {% set LegacyCallbackFunctions = ['set logging callback'] %}
 
-//* Manually implemented mock functions due to incompatibility.
-{% set ManuallyMockedFunctions = ['set device lost callback', 'set uncaptured error callback'] %}
-
 {% for type in by_category["object"] %}
-    {% for method in type.methods if method.name.get() not in ManuallyMockedFunctions %}
+    {% for method in type.methods %}
         {% set Suffix = as_CppMethodSuffix(type.name, method.name) %}
         {% if has_callback_arguments(method) %}
             {{as_cType(method.return_type.name)}} ProcTableAsClass::{{Suffix}}(
@@ -220,50 +217,12 @@ void ProcTableAsClass::GetProcTable({{Prefix}}ProcTable* table) {
 {% endfor %}
 
 // Manually implement some callback helpers for testing.
-void ProcTableAsClass::DeviceSetDeviceLostCallback(WGPUDevice device,
-                                                   WGPUDeviceLostCallback callback,
-                                                   void* userdata) {
-    ProcTableAsClass::Object* object = reinterpret_cast<ProcTableAsClass::Object*>(device);
-    object->mDeviceLostCallback = [](WGPUDevice const*, WGPUDeviceLostReason reason,
-                                     WGPUStringView message, void* callback, void* userdata) {
-        if (callback == nullptr) {
-            return;
-        }
-        auto cb = reinterpret_cast<WGPUDeviceLostCallback>(callback);
-        cb(reason, message, userdata);
-    };
-    object->mDeviceLostUserdata1 = reinterpret_cast<void*>(callback);
-    object->mDeviceLostUserdata2 = userdata;
-
-    OnDeviceSetDeviceLostCallback(device, callback, userdata);
-}
-void ProcTableAsClass::CallDeviceSetDeviceLostCallbackCallback(WGPUDevice device,
-                                                               WGPUDeviceLostReason reason,
-                                                               WGPUStringView message) {
+void ProcTableAsClass::CallDeviceLostCallback(WGPUDevice device, WGPUDeviceLostReason reason, WGPUStringView message) {
     ProcTableAsClass::Object* object = reinterpret_cast<ProcTableAsClass::Object*>(device);
     object->mDeviceLostCallback(&device, reason, message, object->mDeviceLostUserdata1,
                                 object->mDeviceLostUserdata2);
 }
-void ProcTableAsClass::DeviceSetUncapturedErrorCallback(WGPUDevice device,
-                                                        WGPUErrorCallback callback,
-                                                        void* userdata) {
-    ProcTableAsClass::Object* object = reinterpret_cast<ProcTableAsClass::Object*>(device);
-    object->mUncapturedErrorCallback = [](WGPUDevice const*, WGPUErrorType type,
-                                          WGPUStringView message, void* callback, void* userdata) {
-        if (callback == nullptr) {
-            return;
-        }
-        auto cb = reinterpret_cast<WGPUErrorCallback>(callback);
-        cb(type, message, userdata);
-    };
-    object->mUncapturedErrorUserdata1 = reinterpret_cast<void*>(callback);
-    object->mUncapturedErrorUserdata2 = userdata;
-
-    OnDeviceSetUncapturedErrorCallback(device, callback, userdata);
-}
-void ProcTableAsClass::CallDeviceSetUncapturedErrorCallbackCallback(WGPUDevice device,
-                                                                    WGPUErrorType type,
-                                                                    WGPUStringView message) {
+void ProcTableAsClass::CallDeviceUncapturedErrorCallback(WGPUDevice device, WGPUErrorType type, WGPUStringView message) {
     ProcTableAsClass::Object* object = reinterpret_cast<ProcTableAsClass::Object*>(device);
     object->mUncapturedErrorCallback(&device, type, message, object->mUncapturedErrorUserdata1,
                                      object->mUncapturedErrorUserdata2);

@@ -51,7 +51,7 @@ using testing::MockCppCallback;
 using testing::StrictMock;
 using testing::WithArg;
 
-using MockRequestAdapterCallback = MockCppCallback<wgpu::RequestAdapterCallback2<void>*>;
+using MockRequestAdapterCallback = MockCppCallback<wgpu::RequestAdapterCallback<void>*>;
 
 class AdapterCreationTest : public ::testing::TestWithParam<wgpu::CallbackMode> {
   protected:

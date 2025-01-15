@@ -102,8 +102,8 @@ TEST_F(WireErrorCallbackTests, DeviceErrorCallbacks) {
     for (auto type : kErrorTypes) {
         // Calling the callback on the server side will result in the callback being called on the
         // client side when the server is flushed.
-        api.CallDeviceSetUncapturedErrorCallbackCallback(
-            apiDevice, static_cast<WGPUErrorType>(type), ToOutputStringView("Some error message"));
+        api.CallDeviceUncapturedErrorCallback(apiDevice, static_cast<WGPUErrorType>(type),
+                                              ToOutputStringView("Some error message"));
         EXPECT_CALL(uncapturedErrorCallback,
                     Call(CHandleIs(device.Get()), type, SizedString("Some error message")))
             .Times(1);
@@ -116,8 +116,8 @@ TEST_F(WireErrorCallbackTests, DeviceErrorCallbacks) {
 TEST_F(WireErrorCallbackTests, DeviceLostCallback) {
     // Calling the callback on the server side will result in the callback being called on the
     // client side when the server is flushed.
-    api.CallDeviceSetDeviceLostCallbackCallback(apiDevice, WGPUDeviceLostReason_Unknown,
-                                                ToOutputStringView("Some error message"));
+    api.CallDeviceLostCallback(apiDevice, WGPUDeviceLostReason_Unknown,
+                               ToOutputStringView("Some error message"));
 
     EXPECT_CALL(deviceLostCallback, Call(CHandleIs(device.Get()), wgpu::DeviceLostReason::Unknown,
                                          SizedString("Some error message")))

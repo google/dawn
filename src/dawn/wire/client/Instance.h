@@ -44,13 +44,8 @@ class Instance final : public RefCountedWithExternalCount<ObjectWithEventsBase> 
 
     WireResult Initialize(const WGPUInstanceDescriptor* descriptor);
 
-    void RequestAdapter(const WGPURequestAdapterOptions* options,
-                        WGPURequestAdapterCallback callback,
-                        void* userdata);
-    WGPUFuture RequestAdapterF(const WGPURequestAdapterOptions* options,
-                               const WGPURequestAdapterCallbackInfo& callbackInfo);
-    WGPUFuture RequestAdapter2(const WGPURequestAdapterOptions* options,
-                               const WGPURequestAdapterCallbackInfo2& callbackInfo);
+    WGPUFuture RequestAdapter(const WGPURequestAdapterOptions* options,
+                              const WGPURequestAdapterCallbackInfo& callbackInfo);
 
     void ProcessEvents();
     WGPUWaitStatus WaitAny(size_t count, WGPUFutureWaitInfo* infos, uint64_t timeoutNS);

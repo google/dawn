@@ -75,19 +75,19 @@ class WireDeviceLifetimeTests : public testing::Test {
     // backend device separately.
     DawnProcTable BuildProcs() {
         DawnProcTable procs = native::GetProcs();
-        procs.adapterRequestDevice2 = [](WGPUAdapter self, const WGPUDeviceDescriptor* desc,
-                                         WGPURequestDeviceCallbackInfo2 callbackInfo) {
-            return native::GetProcs().adapterRequestDevice2(
+        procs.adapterRequestDevice = [](WGPUAdapter self, const WGPUDeviceDescriptor* desc,
+                                        WGPURequestDeviceCallbackInfo callbackInfo) {
+            return native::GetProcs().adapterRequestDevice(
                 self, desc,
                 {nullptr, callbackInfo.mode,
                  [](WGPURequestDeviceStatus status, WGPUDevice device, WGPUStringView message,
                     void* userdata, void*) {
                      lastBackendDevice = device;
-                     std::unique_ptr<WGPURequestDeviceCallbackInfo2> info(
-                         static_cast<WGPURequestDeviceCallbackInfo2*>(userdata));
+                     std::unique_ptr<WGPURequestDeviceCallbackInfo> info(
+                         static_cast<WGPURequestDeviceCallbackInfo*>(userdata));
                      info->callback(status, device, message, info->userdata1, info->userdata2);
                  },
-                 new WGPURequestDeviceCallbackInfo2(callbackInfo), nullptr});
+                 new WGPURequestDeviceCallbackInfo(callbackInfo), nullptr});
         };
 
         return procs;

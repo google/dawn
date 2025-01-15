@@ -83,12 +83,6 @@ struct ShaderModuleParseResult;
 class DeviceBase : public ErrorSink, public RefCountedWithExternalCount<RefCounted> {
   public:
     struct DeviceLostEvent final : public EventManager::TrackedEvent {
-        // TODO(https://crbug.com/dawn/2465): Pass just the DeviceLostCallbackInfo when setters are
-        // deprecated. Creates and sets the device lost event for the given device if applicable. If
-        // the device is nullptr, an event is still created, but the caller owns the last ref of the
-        // event. When passing a device, note that device construction can be successful but fail
-        // later at initialization, and this should only be called with the device if initialization
-        // was successful.
         static Ref<DeviceLostEvent> Create(const DeviceDescriptor* descriptor);
 
         // Event result fields need to be public so that they can easily be updated prior to
@@ -96,14 +90,14 @@ class DeviceBase : public ErrorSink, public RefCountedWithExternalCount<RefCount
         wgpu::DeviceLostReason mReason;
         std::string mMessage;
 
-        WGPUDeviceLostCallback2 mCallback = nullptr;
+        WGPUDeviceLostCallback mCallback = nullptr;
         raw_ptr<void> mUserdata1;
         raw_ptr<void> mUserdata2;
         // Note that the device is set when the event is passed to construct a device.
         Ref<DeviceBase> mDevice = nullptr;
 
       private:
-        explicit DeviceLostEvent(const WGPUDeviceLostCallbackInfo2& callbackInfo);
+        explicit DeviceLostEvent(const WGPUDeviceLostCallbackInfo& callbackInfo);
         ~DeviceLostEvent() override;
 
         void Complete(EventCompletionType completionType) override;
@@ -285,8 +279,6 @@ class DeviceBase : public ErrorSink, public RefCountedWithExternalCount<RefCount
     bool APITick();
     void APIValidateTextureDescriptor(const TextureDescriptor* desc);
 
-    void APISetDeviceLostCallback(wgpu::DeviceLostCallback callback, void* userdata);
-    void APISetUncapturedErrorCallback(wgpu::ErrorCallback callback, void* userdata);
     void APISetLoggingCallback(wgpu::LoggingCallback callback, void* userdata);
     void APIPushErrorScope(wgpu::ErrorFilter filter);
     Future APIPopErrorScope(const WGPUPopErrorScopeCallbackInfo& callbackInfo);
@@ -538,7 +530,7 @@ class DeviceBase : public ErrorSink, public RefCountedWithExternalCount<RefCount
                                                     const TextureCopy& dst,
                                                     const Extent3D& copySizePixels) = 0;
 
-    WGPUUncapturedErrorCallbackInfo2 mUncapturedErrorCallbackInfo;
+    WGPUUncapturedErrorCallbackInfo mUncapturedErrorCallbackInfo;
 
     std::shared_mutex mLoggingMutex;
     wgpu::LoggingCallback mLoggingCallback = nullptr;

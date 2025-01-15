@@ -346,7 +346,7 @@ class DawnTestBase {
     // printed to stdout.
     testing::StrictMock<testing::MockCppCallback<wgpu::UncapturedErrorCallback<void>*>>
         mDeviceErrorCallback;
-    testing::StrictMock<testing::MockCppCallback<wgpu::DeviceLostCallback2<void>*>>
+    testing::StrictMock<testing::MockCppCallback<wgpu::DeviceLostCallback<void>*>>
         mDeviceLostCallback;
 
     // Helper methods to implement the EXPECT_ macros

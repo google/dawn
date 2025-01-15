@@ -104,7 +104,7 @@ class Device final : public RefCountedWithExternalCount<ObjectWithEventsBase> {
     };
     DeviceLostInfo mDeviceLostInfo;
 
-    WGPUUncapturedErrorCallbackInfo2 mUncapturedErrorCallbackInfo;
+    WGPUUncapturedErrorCallbackInfo mUncapturedErrorCallbackInfo;
     WGPULoggingCallback mLoggingCallback = nullptr;
     raw_ptr<void> mLoggingUserdata = nullptr;
 

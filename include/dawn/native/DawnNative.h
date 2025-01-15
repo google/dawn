@@ -101,18 +101,6 @@ class DAWN_NATIVE_EXPORT Adapter {
     WGPUDevice CreateDevice(const wgpu::DeviceDescriptor* deviceDescriptor);
     WGPUDevice CreateDevice(const WGPUDeviceDescriptor* deviceDescriptor = nullptr);
 
-    void RequestDevice(const wgpu::DeviceDescriptor* descriptor,
-                       WGPURequestDeviceCallback callback,
-                       void* userdata);
-    void RequestDevice(const WGPUDeviceDescriptor* descriptor,
-                       WGPURequestDeviceCallback callback,
-                       void* userdata);
-    void RequestDevice(std::nullptr_t descriptor,
-                       WGPURequestDeviceCallback callback,
-                       void* userdata) {
-        RequestDevice(static_cast<const wgpu::DeviceDescriptor*>(descriptor), callback, userdata);
-    }
-
     // Returns the underlying WGPUAdapter object.
     WGPUAdapter Get() const;
 

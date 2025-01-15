@@ -299,7 +299,7 @@ class DeviceCreationFutureTest : public DeviceCreationTest,
         }
     }
 
-    MockCppCallback<wgpu::RequestDeviceCallback2<void>*> mMockCb;
+    MockCppCallback<wgpu::RequestDeviceCallback<void>*> mMockCb;
 };
 
 INSTANTIATE_TEST_SUITE_P(,

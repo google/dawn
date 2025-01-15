@@ -699,8 +699,8 @@ struct WGPUDeviceImpl final : public EventSource,
   void WillDropLastExternalRef() override;
 
   Ref<WGPUQueue> mQueue;
-  WGPUUncapturedErrorCallbackInfo2 mUncapturedErrorCallbackInfo =
-      WGPU_UNCAPTURED_ERROR_CALLBACK_INFO_2_INIT;
+  WGPUUncapturedErrorCallbackInfo mUncapturedErrorCallbackInfo =
+      WGPU_UNCAPTURED_ERROR_CALLBACK_INFO_INIT;
   FutureID mDeviceLostFutureId = kNullFutureId;
 };
 
@@ -869,7 +869,7 @@ class DeviceLostEvent final : public TrackedEvent {
 
   DeviceLostEvent(InstanceID instance,
                   WGPUDevice device,
-                  const WGPUDeviceLostCallbackInfo2& callbackInfo)
+                  const WGPUDeviceLostCallbackInfo& callbackInfo)
       : TrackedEvent(instance, callbackInfo.mode),
         mCallback(callbackInfo.callback),
         mUserdata1(callbackInfo.userdata1),
@@ -902,7 +902,7 @@ class DeviceLostEvent final : public TrackedEvent {
   }
 
  private:
-  WGPUDeviceLostCallback2 mCallback = nullptr;
+  WGPUDeviceLostCallback mCallback = nullptr;
   void* mUserdata1 = nullptr;
   void* mUserdata2 = nullptr;
 
@@ -1024,7 +1024,7 @@ class RequestAdapterEvent final : public TrackedEvent {
   static constexpr EventType kType = EventType::RequestAdapter;
 
   RequestAdapterEvent(InstanceID instance,
-                      const WGPURequestAdapterCallbackInfo2& callbackInfo)
+                      const WGPURequestAdapterCallbackInfo& callbackInfo)
       : TrackedEvent(instance, callbackInfo.mode),
         mCallback(callbackInfo.callback),
         mUserdata1(callbackInfo.userdata1),
@@ -1057,7 +1057,7 @@ class RequestAdapterEvent final : public TrackedEvent {
   }
 
  private:
-  WGPURequestAdapterCallback2 mCallback = nullptr;
+  WGPURequestAdapterCallback mCallback = nullptr;
   void* mUserdata1 = nullptr;
   void* mUserdata2 = nullptr;
 
@@ -1071,7 +1071,7 @@ class RequestDeviceEvent final : public TrackedEvent {
   static constexpr EventType kType = EventType::RequestDevice;
 
   RequestDeviceEvent(InstanceID instance,
-                     const WGPURequestDeviceCallbackInfo2& callbackInfo)
+                     const WGPURequestDeviceCallbackInfo& callbackInfo)
       : TrackedEvent(instance, callbackInfo.mode),
         mCallback(callbackInfo.callback),
         mUserdata1(callbackInfo.userdata1),
@@ -1104,7 +1104,7 @@ class RequestDeviceEvent final : public TrackedEvent {
   }
 
  private:
-  WGPURequestDeviceCallback2 mCallback = nullptr;
+  WGPURequestDeviceCallback mCallback = nullptr;
   void* mUserdata1 = nullptr;
   void* mUserdata2 = nullptr;
 
@@ -1377,11 +1377,11 @@ WGPUDeviceImpl::WGPUDeviceImpl(const EventSource* source,
                                const WGPUDeviceDescriptor* descriptor,
                                WGPUQueue queue)
     : EventSource(source),
-      mUncapturedErrorCallbackInfo(descriptor->uncapturedErrorCallbackInfo2) {
+      mUncapturedErrorCallbackInfo(descriptor->uncapturedErrorCallbackInfo) {
   // Create the DeviceLostEvent now.
   std::tie(mDeviceLostFutureId, std::ignore) =
       GetEventManager().TrackEvent(std::make_unique<DeviceLostEvent>(
-          source->GetInstanceId(), this, descriptor->deviceLostCallbackInfo2));
+          source->GetInstanceId(), this, descriptor->deviceLostCallbackInfo));
   mQueue.Acquire(queue);
 }
 
@@ -1546,27 +1546,10 @@ WGPUInstance wgpuCreateInstance(
 // Methods of Adapter
 // ----------------------------------------------------------------------------
 
-void wgpuAdapterRequestDevice(WGPUAdapter adapter,
-                              const WGPUDeviceDescriptor* descriptor,
-                              WGPURequestDeviceCallback callback,
-                              void* userdata) {
-  WGPURequestDeviceCallbackInfo2 callbackInfo = {};
-  callbackInfo.mode = WGPUCallbackMode_AllowSpontaneous;
-  callbackInfo.callback = [](WGPURequestDeviceStatus status, WGPUDevice device,
-                             WGPUStringView message, void* callback,
-                             void* userdata) {
-    auto cb = reinterpret_cast<WGPURequestDeviceCallback>(callback);
-    cb(status, device, message, userdata);
-  };
-  callbackInfo.userdata1 = reinterpret_cast<void*>(callback);
-  callbackInfo.userdata2 = userdata;
-  wgpuAdapterRequestDevice2(adapter, descriptor, callbackInfo);
-}
-
-WGPUFuture wgpuAdapterRequestDevice2(
+WGPUFuture wgpuAdapterRequestDevice(
     WGPUAdapter adapter,
     const WGPUDeviceDescriptor* descriptor,
-    WGPURequestDeviceCallbackInfo2 callbackInfo) {
+    WGPURequestDeviceCallbackInfo callbackInfo) {
   auto [futureId, tracked] =
       GetEventManager().TrackEvent(std::make_unique<RequestDeviceEvent>(
           adapter->GetInstanceId(), callbackInfo));
@@ -1731,27 +1714,10 @@ void wgpuInstanceProcessEvents(WGPUInstance instance) {
   instance->ProcessEvents();
 }
 
-void wgpuInstanceRequestAdapter(WGPUInstance instance,
-                                WGPURequestAdapterOptions const* options,
-                                WGPURequestAdapterCallback callback,
-                                void* userdata) {
-  WGPURequestAdapterCallbackInfo2 callbackInfo = {};
-  callbackInfo.mode = WGPUCallbackMode_AllowSpontaneous;
-  callbackInfo.callback = [](WGPURequestAdapterStatus status,
-                             WGPUAdapter adapter, WGPUStringView message,
-                             void* callback, void* userdata) {
-    auto cb = reinterpret_cast<WGPURequestAdapterCallback>(callback);
-    cb(status, adapter, message, userdata);
-  };
-  callbackInfo.userdata1 = reinterpret_cast<void*>(callback);
-  callbackInfo.userdata2 = userdata;
-  wgpuInstanceRequestAdapter2(instance, options, callbackInfo);
-}
-
-WGPUFuture wgpuInstanceRequestAdapter2(
+WGPUFuture wgpuInstanceRequestAdapter(
     WGPUInstance instance,
     WGPURequestAdapterOptions const* options,
-    WGPURequestAdapterCallbackInfo2 callbackInfo) {
+    WGPURequestAdapterCallbackInfo callbackInfo) {
   auto [futureId, tracked] =
       GetEventManager().TrackEvent(std::make_unique<RequestAdapterEvent>(
           instance->GetInstanceId(), callbackInfo));

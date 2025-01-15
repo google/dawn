@@ -52,12 +52,6 @@ class RequestAdapterEvent : public TrackedEvent {
     RequestAdapterEvent(const WGPURequestAdapterCallbackInfo& callbackInfo, Ref<Adapter> adapter)
         : TrackedEvent(callbackInfo.mode),
           mCallback(callbackInfo.callback),
-          mUserdata1(callbackInfo.userdata),
-          mAdapter(std::move(adapter)) {}
-
-    RequestAdapterEvent(const WGPURequestAdapterCallbackInfo2& callbackInfo, Ref<Adapter> adapter)
-        : TrackedEvent(callbackInfo.mode),
-          mCallback2(callbackInfo.callback),
           mUserdata1(callbackInfo.userdata1),
           mUserdata2(callbackInfo.userdata2),
           mAdapter(std::move(adapter)) {}
@@ -84,35 +78,22 @@ class RequestAdapterEvent : public TrackedEvent {
 
   private:
     void CompleteImpl(FutureID futureID, EventCompletionType completionType) override {
-        if (mCallback == nullptr && mCallback2 == nullptr) {
-            // If there's no callback, just clean up the resources.
-            mUserdata1.ExtractAsDangling();
-            mUserdata2.ExtractAsDangling();
-            return;
-        }
-
         if (completionType == EventCompletionType::Shutdown) {
             mStatus = WGPURequestAdapterStatus_InstanceDropped;
             mMessage = "A valid external Instance reference no longer exists.";
         }
 
+        void* userdata1 = mUserdata1.ExtractAsDangling();
+        void* userdata2 = mUserdata2.ExtractAsDangling();
         if (mCallback) {
             mCallback(mStatus,
                       mStatus == WGPURequestAdapterStatus_Success ? ReturnToAPI(std::move(mAdapter))
                                                                   : nullptr,
-                      ToOutputStringView(mMessage), mUserdata1.ExtractAsDangling());
-        } else {
-            mCallback2(mStatus,
-                       mStatus == WGPURequestAdapterStatus_Success
-                           ? ReturnToAPI(std::move(mAdapter))
-                           : nullptr,
-                       ToOutputStringView(mMessage), mUserdata1.ExtractAsDangling(),
-                       mUserdata2.ExtractAsDangling());
+                      ToOutputStringView(mMessage), userdata1, userdata2);
         }
     }
 
     WGPURequestAdapterCallback mCallback = nullptr;
-    WGPURequestAdapterCallback2 mCallback2 = nullptr;
     raw_ptr<void> mUserdata1;
     raw_ptr<void> mUserdata2;
 
@@ -196,18 +177,8 @@ WireResult Instance::Initialize(const WGPUInstanceDescriptor* descriptor) {
     return WireResult::Success;
 }
 
-void Instance::RequestAdapter(const WGPURequestAdapterOptions* options,
-                              WGPURequestAdapterCallback callback,
-                              void* userdata) {
-    WGPURequestAdapterCallbackInfo callbackInfo = {};
-    callbackInfo.mode = WGPUCallbackMode_AllowSpontaneous;
-    callbackInfo.callback = callback;
-    callbackInfo.userdata = userdata;
-    RequestAdapterF(options, callbackInfo);
-}
-
-WGPUFuture Instance::RequestAdapterF(const WGPURequestAdapterOptions* options,
-                                     const WGPURequestAdapterCallbackInfo& callbackInfo) {
+WGPUFuture Instance::RequestAdapter(const WGPURequestAdapterOptions* options,
+                                    const WGPURequestAdapterCallbackInfo& callbackInfo) {
     Client* client = GetClient();
     Ref<Adapter> adapter = client->Make<Adapter>(GetEventManagerHandle());
     auto [futureIDInternal, tracked] =
@@ -222,29 +193,6 @@ WGPUFuture Instance::RequestAdapterF(const WGPURequestAdapterOptions* options,
     cmd.future = {futureIDInternal};
     cmd.adapterObjectHandle = adapter->GetWireHandle();
     cmd.options = options;
-    cmd.userdataCount = 1;
-
-    client->SerializeCommand(cmd);
-    return {futureIDInternal};
-}
-
-WGPUFuture Instance::RequestAdapter2(const WGPURequestAdapterOptions* options,
-                                     const WGPURequestAdapterCallbackInfo2& callbackInfo) {
-    Client* client = GetClient();
-    Ref<Adapter> adapter = client->Make<Adapter>(GetEventManagerHandle());
-    auto [futureIDInternal, tracked] =
-        GetEventManager().TrackEvent(std::make_unique<RequestAdapterEvent>(callbackInfo, adapter));
-    if (!tracked) {
-        return {futureIDInternal};
-    }
-
-    InstanceRequestAdapterCmd cmd;
-    cmd.instanceId = GetWireId();
-    cmd.eventManagerHandle = GetEventManagerHandle();
-    cmd.future = {futureIDInternal};
-    cmd.adapterObjectHandle = adapter->GetWireHandle();
-    cmd.options = options;
-    cmd.userdataCount = 2;
 
     client->SerializeCommand(cmd);
     return {futureIDInternal};

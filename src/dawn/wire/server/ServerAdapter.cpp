@@ -41,8 +41,7 @@ WireResult Server::DoAdapterRequestDevice(Known<WGPUAdapter> adapter,
                                           WGPUFuture future,
                                           ObjectHandle deviceHandle,
                                           WGPUFuture deviceLostFuture,
-                                          const WGPUDeviceDescriptor* descriptor,
-                                          uint8_t userdataCount) {
+                                          const WGPUDeviceDescriptor* descriptor) {
     Reserved<WGPUDevice> device;
     WIRE_TRY(Objects<WGPUDevice>().Allocate(&device, deviceHandle, AllocationState::Reserved));
 
@@ -58,10 +57,10 @@ WireResult Server::DoAdapterRequestDevice(Known<WGPUAdapter> adapter,
     deviceLostUserdata->future = deviceLostFuture;
 
     WGPUDeviceDescriptor desc = *descriptor;
-    desc.deviceLostCallbackInfo2 = {nullptr, WGPUCallbackMode_AllowSpontaneous,
-                                    ForwardToServer2<&Server::OnDeviceLost>,
-                                    deviceLostUserdata.release(), nullptr};
-    desc.uncapturedErrorCallbackInfo2 = {
+    desc.deviceLostCallbackInfo = {nullptr, WGPUCallbackMode_AllowSpontaneous,
+                                   ForwardToServer2<&Server::OnDeviceLost>,
+                                   deviceLostUserdata.release(), nullptr};
+    desc.uncapturedErrorCallbackInfo = {
         nullptr,
         [](WGPUDevice const*, WGPUErrorType type, WGPUStringView message, void*, void* userdata) {
             DeviceInfo* info = static_cast<DeviceInfo*>(userdata);
@@ -69,16 +68,10 @@ WireResult Server::DoAdapterRequestDevice(Known<WGPUAdapter> adapter,
         },
         nullptr, device->info.get()};
 
-    if (userdataCount == 1) {
-        mProcs.adapterRequestDevice(adapter->handle, &desc,
-                                    ForwardToServer<&Server::OnRequestDeviceCallback>,
-                                    userdata.release());
-    } else {
-        mProcs.adapterRequestDevice2(
-            adapter->handle, &desc,
-            {nullptr, WGPUCallbackMode_AllowSpontaneous,
-             ForwardToServer2<&Server::OnRequestDeviceCallback>, userdata.release(), nullptr});
-    }
+    mProcs.adapterRequestDevice(
+        adapter->handle, &desc,
+        {nullptr, WGPUCallbackMode_AllowSpontaneous,
+         ForwardToServer2<&Server::OnRequestDeviceCallback>, userdata.release(), nullptr});
     return WireResult::Success;
 }
 

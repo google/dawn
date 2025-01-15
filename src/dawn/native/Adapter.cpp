@@ -381,30 +381,10 @@ AdapterBase::CreateDevice(const DeviceDescriptor* descriptor) {
     return {lostEvent, std::move(result)};
 }
 
-void AdapterBase::APIRequestDevice(const DeviceDescriptor* descriptor,
-                                   WGPURequestDeviceCallback callback,
-                                   void* userdata) {
-    // Default legacy callback mode for RequestDevice is spontaneous.
-    APIRequestDeviceF(descriptor,
-                      {nullptr, wgpu::CallbackMode::AllowSpontaneous, callback, userdata});
-}
-
-Future AdapterBase::APIRequestDeviceF(const DeviceDescriptor* descriptor,
-                                      const RequestDeviceCallbackInfo& callbackInfo) {
-    return APIRequestDevice2(
-        descriptor, {ToAPI(callbackInfo.nextInChain), ToAPI(callbackInfo.mode),
-                     [](WGPURequestDeviceStatus status, WGPUDevice device, WGPUStringView message,
-                        void* callback, void* userdata) {
-                         auto cb = reinterpret_cast<WGPURequestDeviceCallback>(callback);
-                         cb(status, device, message, userdata);
-                     },
-                     reinterpret_cast<void*>(callbackInfo.callback), callbackInfo.userdata});
-}
-
-Future AdapterBase::APIRequestDevice2(const DeviceDescriptor* descriptor,
-                                      const WGPURequestDeviceCallbackInfo2& callbackInfo) {
+Future AdapterBase::APIRequestDevice(const DeviceDescriptor* descriptor,
+                                     const WGPURequestDeviceCallbackInfo& callbackInfo) {
     struct RequestDeviceEvent final : public EventManager::TrackedEvent {
-        WGPURequestDeviceCallback2 mCallback;
+        WGPURequestDeviceCallback mCallback;
         raw_ptr<void> mUserdata1;
         raw_ptr<void> mUserdata2;
 
@@ -412,7 +392,7 @@ Future AdapterBase::APIRequestDevice2(const DeviceDescriptor* descriptor,
         Ref<DeviceBase> mDevice = nullptr;
         std::string mMessage;
 
-        RequestDeviceEvent(const WGPURequestDeviceCallbackInfo2& callbackInfo,
+        RequestDeviceEvent(const WGPURequestDeviceCallbackInfo& callbackInfo,
                            Ref<DeviceBase> device)
             : TrackedEvent(static_cast<wgpu::CallbackMode>(callbackInfo.mode),
                            TrackedEvent::Completed{}),
@@ -422,7 +402,7 @@ Future AdapterBase::APIRequestDevice2(const DeviceDescriptor* descriptor,
               mStatus(WGPURequestDeviceStatus_Success),
               mDevice(std::move(device)) {}
 
-        RequestDeviceEvent(const WGPURequestDeviceCallbackInfo2& callbackInfo,
+        RequestDeviceEvent(const WGPURequestDeviceCallbackInfo& callbackInfo,
                            const std::string& message)
             : TrackedEvent(static_cast<wgpu::CallbackMode>(callbackInfo.mode),
                            TrackedEvent::Completed{}),

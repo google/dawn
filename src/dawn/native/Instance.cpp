@@ -264,35 +264,15 @@ MaybeError InstanceBase::Initialize(const UnpackedPtr<InstanceDescriptor>& descr
     return {};
 }
 
-void InstanceBase::APIRequestAdapter(const RequestAdapterOptions* options,
-                                     WGPURequestAdapterCallback callback,
-                                     void* userdata) {
-    APIRequestAdapterF(
-        options, RequestAdapterCallbackInfo{nullptr, wgpu::CallbackMode::AllowSpontaneous, callback,
-                                            userdata});
-}
-
-Future InstanceBase::APIRequestAdapterF(const RequestAdapterOptions* options,
-                                        const RequestAdapterCallbackInfo& callbackInfo) {
-    return APIRequestAdapter2(
-        options, {ToAPI(callbackInfo.nextInChain), ToAPI(callbackInfo.mode),
-                  [](WGPURequestAdapterStatus status, WGPUAdapter adapter, WGPUStringView message,
-                     void* callback, void* userdata) {
-                      auto cb = reinterpret_cast<WGPURequestAdapterCallback>(callback);
-                      cb(status, adapter, message, userdata);
-                  },
-                  reinterpret_cast<void*>(callbackInfo.callback), callbackInfo.userdata});
-}
-
-Future InstanceBase::APIRequestAdapter2(const RequestAdapterOptions* options,
-                                        const WGPURequestAdapterCallbackInfo2& callbackInfo) {
+Future InstanceBase::APIRequestAdapter(const RequestAdapterOptions* options,
+                                       const WGPURequestAdapterCallbackInfo& callbackInfo) {
     struct RequestAdapterEvent final : public EventManager::TrackedEvent {
-        WGPURequestAdapterCallback2 mCallback;
+        WGPURequestAdapterCallback mCallback;
         raw_ptr<void> mUserdata1;
         raw_ptr<void> mUserdata2;
         Ref<AdapterBase> mAdapter;
 
-        RequestAdapterEvent(const WGPURequestAdapterCallbackInfo2& callbackInfo,
+        RequestAdapterEvent(const WGPURequestAdapterCallbackInfo& callbackInfo,
                             Ref<AdapterBase> adapter)
             : TrackedEvent(static_cast<wgpu::CallbackMode>(callbackInfo.mode),
                            TrackedEvent::Completed{}),
@@ -304,20 +284,22 @@ Future InstanceBase::APIRequestAdapter2(const RequestAdapterOptions* options,
         ~RequestAdapterEvent() override { EnsureComplete(EventCompletionType::Shutdown); }
 
         void Complete(EventCompletionType completionType) override {
+            void* userdata1 = mUserdata1.ExtractAsDangling();
+            void* userdata2 = mUserdata2.ExtractAsDangling();
+
             if (completionType == EventCompletionType::Shutdown) {
                 mCallback(WGPURequestAdapterStatus_InstanceDropped, nullptr, kEmptyOutputStringView,
-                          mUserdata1.ExtractAsDangling(), mUserdata2.ExtractAsDangling());
+                          userdata1, userdata2);
                 return;
             }
 
             WGPUAdapter adapter = ToAPI(ReturnToAPI(std::move(mAdapter)));
             if (adapter == nullptr) {
                 mCallback(WGPURequestAdapterStatus_Unavailable, nullptr,
-                          ToOutputStringView("No supported adapters"),
-                          mUserdata1.ExtractAsDangling(), mUserdata2.ExtractAsDangling());
+                          ToOutputStringView("No supported adapters"), userdata1, userdata2);
             } else {
                 mCallback(WGPURequestAdapterStatus_Success, adapter, kEmptyOutputStringView,
-                          mUserdata1.ExtractAsDangling(), mUserdata2.ExtractAsDangling());
+                          userdata1, userdata2);
             }
         }
     };

@@ -63,14 +63,11 @@ class ProcTableAsClass {
         //*   - setLoggingCallback
         {%- set LegacyCallbackFunctions = ['set logging callback'] %}
 
-        //* Manually implemented mock functions due to incompatibility.
-        {% set ManuallyMockedFunctions = ['set device lost callback', 'set uncaptured error callback'] %}
-
         {%- for type in by_category["object"] %}
 
             virtual void {{as_MethodSuffix(type.name, Name("add ref"))}}({{as_cType(type.name)}} self) = 0;
             virtual void {{as_MethodSuffix(type.name, Name("release"))}}({{as_cType(type.name)}} self) = 0;
-            {% for method in type.methods if method.name.get() not in ManuallyMockedFunctions %}
+            {% for method in type.methods %}
                 {% set Suffix = as_CppMethodSuffix(type.name, method.name) %}
                 {% if not has_callback_arguments(method) and not has_callback_info(method) and not has_callbackInfoStruct(method) %}
                     virtual {{as_cType(method.return_type.name)}} {{Suffix}}(
@@ -144,24 +141,8 @@ class ProcTableAsClass {
         {% endfor %}
 
         // Manually implement some callback helpers for testing.
-        void DeviceSetDeviceLostCallback(WGPUDevice device,
-                                         WGPUDeviceLostCallback callback,
-                                         void* userdata);
-        virtual void OnDeviceSetDeviceLostCallback(WGPUDevice device,
-                                                   WGPUDeviceLostCallback callback,
-                                                   void* userdata) = 0;
-        void CallDeviceSetDeviceLostCallbackCallback(WGPUDevice device,
-                                                     WGPUDeviceLostReason reason,
-                                                     WGPUStringView message);
-        void DeviceSetUncapturedErrorCallback(WGPUDevice device,
-                                              WGPUErrorCallback callback,
-                                              void* userdata);
-        virtual void OnDeviceSetUncapturedErrorCallback(WGPUDevice device,
-                                                        WGPUErrorCallback callback,
-                                                        void* userdata) = 0;
-        void CallDeviceSetUncapturedErrorCallbackCallback(WGPUDevice device,
-                                                          WGPUErrorType type,
-                                                          WGPUStringView message);
+        void CallDeviceLostCallback(WGPUDevice device, WGPUDeviceLostReason reason, WGPUStringView message);
+        void CallDeviceUncapturedErrorCallback(WGPUDevice device, WGPUErrorType type, WGPUStringView message);
 
         struct Object {
             ProcTableAsClass* procs = nullptr;
@@ -187,7 +168,7 @@ class ProcTableAsClass {
                 {% endfor %}
             {% endfor %}
             // Manually implement some callback helpers for testing.
-            WGPUDeviceLostCallback2 mDeviceLostCallback = nullptr;
+            WGPUDeviceLostCallback mDeviceLostCallback = nullptr;
             void* mDeviceLostUserdata1 = 0;
             void* mDeviceLostUserdata2 = 0;
             WGPUUncapturedErrorCallback mUncapturedErrorCallback = nullptr;
@@ -242,16 +223,6 @@ class MockProcTable : public ProcTableAsClass {
                     ), (override));
             {% endfor %}
         {% endfor %}
-
-        // Manually implement some callback helpers for testing.
-        MOCK_METHOD(void,
-                    OnDeviceSetDeviceLostCallback,
-                    (WGPUDevice device, WGPUDeviceLostCallback callback, void* userdata),
-                    (override));
-        MOCK_METHOD(void,
-                    OnDeviceSetUncapturedErrorCallback,
-                    (WGPUDevice device, WGPUErrorCallback callback, void* userdata),
-                    (override));
 };
 
 #endif  // MOCK_{{API}}_H

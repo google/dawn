@@ -113,20 +113,6 @@ WGPUDevice Adapter::CreateDevice(const WGPUDeviceDescriptor* deviceDescriptor) {
     return ToAPI(mImpl->APICreateDevice(FromAPI(deviceDescriptor)));
 }
 
-void Adapter::RequestDevice(const wgpu::DeviceDescriptor* descriptor,
-                            WGPURequestDeviceCallback callback,
-                            void* userdata) {
-    mImpl->APIRequestDevice(reinterpret_cast<const DeviceDescriptor*>(descriptor), callback,
-                            userdata);
-}
-
-void Adapter::RequestDevice(const WGPUDeviceDescriptor* descriptor,
-                            WGPURequestDeviceCallback callback,
-                            void* userdata) {
-    mImpl->APIRequestDevice(reinterpret_cast<const DeviceDescriptor*>(descriptor), callback,
-                            userdata);
-}
-
 void Adapter::ResetInternalDeviceForTesting() {
     [[maybe_unused]] bool hadError = mImpl->GetInstance()->ConsumedError(
         mImpl->GetPhysicalDevice()->ResetInternalDeviceForTesting());

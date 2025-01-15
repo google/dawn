@@ -151,7 +151,7 @@ using CreateRenderPipelineEvent =
                             EventType::CreateRenderPipeline,
                             WGPUCreateRenderPipelineAsyncCallbackInfo>;
 
-static constexpr WGPUUncapturedErrorCallbackInfo2 kEmptyUncapturedErrorCallbackInfo = {
+static constexpr WGPUUncapturedErrorCallbackInfo kEmptyUncapturedErrorCallbackInfo = {
     nullptr, nullptr, nullptr, nullptr};
 
 }  // namespace
@@ -160,7 +160,7 @@ class Device::DeviceLostEvent : public TrackedEvent {
   public:
     static constexpr EventType kType = EventType::DeviceLost;
 
-    DeviceLostEvent(const WGPUDeviceLostCallbackInfo2& callbackInfo, Ref<Device> device)
+    DeviceLostEvent(const WGPUDeviceLostCallbackInfo& callbackInfo, Ref<Device> device)
         : TrackedEvent(callbackInfo.mode),
           mCallback(callbackInfo.callback),
           mUserdata1(callbackInfo.userdata1),
@@ -201,7 +201,7 @@ class Device::DeviceLostEvent : public TrackedEvent {
         }
     }
 
-    WGPUDeviceLostCallback2 mCallback = nullptr;
+    WGPUDeviceLostCallback mCallback = nullptr;
     raw_ptr<void> mUserdata1 = nullptr;
     raw_ptr<void> mUserdata2 = nullptr;
 
@@ -219,7 +219,7 @@ Device::Device(const ObjectBaseParams& params,
     : RefCountedWithExternalCount<ObjectWithEventsBase>(params, eventManagerHandle),
       mAdapter(adapter) {
 #if defined(DAWN_ENABLE_ASSERTS)
-    static constexpr WGPUDeviceLostCallbackInfo2 kDefaultDeviceLostCallbackInfo = {
+    static constexpr WGPUDeviceLostCallbackInfo kDefaultDeviceLostCallbackInfo = {
         nullptr, WGPUCallbackMode_AllowSpontaneous,
         [](WGPUDevice const*, WGPUDeviceLostReason, WGPUStringView, void*, void*) {
             static bool calledOnce = false;
@@ -231,7 +231,7 @@ Device::Device(const ObjectBaseParams& params,
             }
         },
         nullptr, nullptr};
-    static constexpr WGPUUncapturedErrorCallbackInfo2 kDefaultUncapturedErrorCallbackInfo = {
+    static constexpr WGPUUncapturedErrorCallbackInfo kDefaultUncapturedErrorCallbackInfo = {
         nullptr,
         [](WGPUDevice const*, WGPUErrorType, WGPUStringView, void*, void*) {
             static bool calledOnce = false;
@@ -244,21 +244,21 @@ Device::Device(const ObjectBaseParams& params,
         },
         nullptr, nullptr};
 #else
-    static constexpr WGPUDeviceLostCallbackInfo2 kDefaultDeviceLostCallbackInfo = {
+    static constexpr WGPUDeviceLostCallbackInfo kDefaultDeviceLostCallbackInfo = {
         nullptr, WGPUCallbackMode_AllowSpontaneous, nullptr, nullptr, nullptr};
-    static constexpr WGPUUncapturedErrorCallbackInfo2 kDefaultUncapturedErrorCallbackInfo =
+    static constexpr WGPUUncapturedErrorCallbackInfo kDefaultUncapturedErrorCallbackInfo =
         kEmptyUncapturedErrorCallbackInfo;
 #endif  // DAWN_ENABLE_ASSERTS
 
-    WGPUDeviceLostCallbackInfo2 deviceLostCallbackInfo = kDefaultDeviceLostCallbackInfo;
-    if (descriptor != nullptr && descriptor->deviceLostCallbackInfo2.callback != nullptr) {
-        deviceLostCallbackInfo = descriptor->deviceLostCallbackInfo2;
+    WGPUDeviceLostCallbackInfo deviceLostCallbackInfo = kDefaultDeviceLostCallbackInfo;
+    if (descriptor != nullptr && descriptor->deviceLostCallbackInfo.callback != nullptr) {
+        deviceLostCallbackInfo = descriptor->deviceLostCallbackInfo;
     }
     mDeviceLostInfo.event = std::make_unique<DeviceLostEvent>(deviceLostCallbackInfo, this);
 
     mUncapturedErrorCallbackInfo = kDefaultUncapturedErrorCallbackInfo;
-    if (descriptor != nullptr && descriptor->uncapturedErrorCallbackInfo2.callback != nullptr) {
-        mUncapturedErrorCallbackInfo = descriptor->uncapturedErrorCallbackInfo2;
+    if (descriptor != nullptr && descriptor->uncapturedErrorCallbackInfo.callback != nullptr) {
+        mUncapturedErrorCallbackInfo = descriptor->uncapturedErrorCallbackInfo;
     }
 }
 

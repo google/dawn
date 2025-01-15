@@ -113,8 +113,7 @@
             { "name": "event manager handle", "type": "ObjectHandle" },
             { "name": "future", "type": "future" },
             { "name": "adapter object handle", "type": "ObjectHandle", "handle_type": "adapter"},
-            { "name": "options", "type": "request adapter options", "annotation": "const*", "optional": true },
-            { "name": "userdata count", "type": "uint8_t", "_comment": "TODO(crbug.com/dawn/2509): Remove this once Chromium overrides the correct functions in the proc table."}
+            { "name": "options", "type": "request adapter options", "annotation": "const*", "optional": true }
         ],
         "adapter request device": [
             { "name": "adapter id", "type": "ObjectId", "id_type": "adapter" },
@@ -122,8 +121,7 @@
             { "name": "future", "type": "future" },
             { "name": "device object handle", "type": "ObjectHandle", "handle_type": "device"},
             { "name": "device lost future", "type": "future" },
-            { "name": "descriptor", "type": "device descriptor", "annotation": "const*" },
-            { "name": "userdata count", "type": "uint8_t", "_comment": "TODO(crbug.com/dawn/2509): Remove this once Chromium overrides the correct functions in the proc table."}
+            { "name": "descriptor", "type": "device descriptor", "annotation": "const*" }
         ]
     },
     "return commands": {
@@ -221,8 +219,6 @@
             "AdapterGetLimits",
             "AdapterHasFeature",
             "AdapterRequestDevice",
-            "AdapterRequestDeviceF",
-            "AdapterRequestDevice2",
             "BufferMapAsync",
             "BufferGetConstMappedRange",
             "BufferGetMappedRange",
@@ -246,8 +242,6 @@
             "InstanceHasWGSLLanguageFeature",
             "InstanceCreateSurface",
             "InstanceRequestAdapter",
-            "InstanceRequestAdapterF",
-            "InstanceRequestAdapter2",
             "ShaderModuleGetCompilationInfo",
             "QuerySetGetType",
             "QuerySetGetCount",
