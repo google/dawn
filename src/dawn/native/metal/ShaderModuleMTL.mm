@@ -55,8 +55,7 @@ namespace {
 // The name to use when remapping entry points.
 constexpr char kRemappedEntryPointName[] = "dawn_entry_point";
 
-using OptionalVertexPullingTransformConfig =
-    std::optional<tint::ast::transform::VertexPulling::Config>;
+using OptionalVertexPullingTransformConfig = std::optional<tint::VertexPullingConfig>;
 
 #define MSL_COMPILATION_REQUEST_MEMBERS(X)                                                       \
     X(SingleShaderStage, stage)                                                                  \
@@ -227,7 +226,7 @@ ResultOrError<CacheResult<MslCompilation>> TranslateToMSL(
     tint::msl::writer::Bindings bindings =
         generateBindingInfo(stage, layout, moduleBindingInfo, arrayLengthFromUniform);
 
-    std::optional<tint::ast::transform::VertexPulling::Config> vertexPullingTransformConfig;
+    OptionalVertexPullingTransformConfig vertexPullingTransformConfig;
     if (stage == SingleShaderStage::Vertex &&
         device->IsToggleEnabled(Toggle::MetalEnableVertexPulling)) {
         vertexPullingTransformConfig =
@@ -329,9 +328,11 @@ ResultOrError<CacheResult<MslCompilation>> TranslateToMSL(
             }
 
             if (r.vertexPullingTransformConfig) {
+                tint::ast::transform::VertexPulling::Config config;
+                config.pulling_group = r.vertexPullingTransformConfig->pulling_group;
+                config.vertex_state = r.vertexPullingTransformConfig->vertex_state;
                 transformManager.Add<tint::ast::transform::VertexPulling>();
-                transformInputs.Add<tint::ast::transform::VertexPulling::Config>(
-                    std::move(r.vertexPullingTransformConfig).value());
+                transformInputs.Add<tint::ast::transform::VertexPulling::Config>(std::move(config));
             }
 
             if (r.substituteOverrideConfig) {

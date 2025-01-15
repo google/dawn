@@ -54,7 +54,7 @@ class ScopedTintICEHandler : public NonCopyable {
     ScopedTintICEHandler(ScopedTintICEHandler&&) = delete;
 };
 
-tint::ast::transform::VertexPulling::Config BuildVertexPullingTransformConfig(
+tint::VertexPullingConfig BuildVertexPullingTransformConfig(
     const RenderPipelineBase& renderPipeline,
     BindGroupIndex pullingBufferBindingSet);
 

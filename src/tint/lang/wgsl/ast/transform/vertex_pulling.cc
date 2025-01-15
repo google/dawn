@@ -28,6 +28,7 @@
 #include "src/tint/lang/wgsl/ast/transform/vertex_pulling.h"
 
 #include <algorithm>
+#include <unordered_map>
 #include <utility>
 
 #include "src/tint/lang/core/builtin_value.h"
@@ -1054,23 +1055,5 @@ VertexPulling::Config::Config() = default;
 VertexPulling::Config::Config(const Config&) = default;
 VertexPulling::Config::~Config() = default;
 VertexPulling::Config& VertexPulling::Config::operator=(const Config&) = default;
-
-VertexBufferLayoutDescriptor::VertexBufferLayoutDescriptor() = default;
-
-VertexBufferLayoutDescriptor::VertexBufferLayoutDescriptor(
-    uint32_t in_array_stride,
-    VertexStepMode in_step_mode,
-    std::vector<VertexAttributeDescriptor> in_attributes)
-    : array_stride(in_array_stride),
-      step_mode(in_step_mode),
-      attributes(std::move(in_attributes)) {}
-
-VertexBufferLayoutDescriptor::VertexBufferLayoutDescriptor(
-    const VertexBufferLayoutDescriptor& other) = default;
-
-VertexBufferLayoutDescriptor& VertexBufferLayoutDescriptor::operator=(
-    const VertexBufferLayoutDescriptor& other) = default;
-
-VertexBufferLayoutDescriptor::~VertexBufferLayoutDescriptor() = default;
 
 }  // namespace tint::ast::transform

@@ -48,6 +48,8 @@ libtint_source_set("common") {
     "binding_point.h",
     "common.cc",
     "override_id.h",
+    "vertex_pulling_config.cc",
+    "vertex_pulling_config.h",
   ]
   deps = [
     "${dawn_root}/src/utils:utils",
@@ -68,6 +70,7 @@ if (tint_build_unittests) {
     sources = [
       "binding_point_test.cc",
       "override_id_test.cc",
+      "vertex_pulling_config_test.cc",
     ]
     deps = [
       "${dawn_root}/src/utils:utils",
