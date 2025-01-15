@@ -697,12 +697,13 @@ var LibraryWebGPU = {
     {{{ makeSetValue('info', C_STRUCTS.WGPUAdapterInfo.adapterType, 'adapterType', 'i32') }}};
     {{{ makeSetValue('info', C_STRUCTS.WGPUAdapterInfo.vendorID, '0', 'i32') }}};
     {{{ makeSetValue('info', C_STRUCTS.WGPUAdapterInfo.deviceID, '0', 'i32') }}};
+    return {{{ gpu.Status.Success }}};
   },
 
   wgpuAdapterGetLimits: (adapterPtr, limitsOutPtr) => {
     var adapter = WebGPU.getJsObject(adapterPtr);
     WebGPU.fillLimitStruct(adapter.limits, limitsOutPtr);
-    return 1;
+    return {{{ gpu.Status.Success }}};
   },
 
   wgpuAdapterHasFeature: (adapterPtr, featureEnumValue) => {
@@ -1762,7 +1763,7 @@ var LibraryWebGPU = {
   wgpuDeviceGetLimits: (devicePtr, limitsOutPtr) => {
     var device = WebGPU.getJsObject(devicePtr);
     WebGPU.fillLimitStruct(device.limits, limitsOutPtr);
-    return 1;
+    return {{{ gpu.Status.Success }}};
   },
 
   wgpuDeviceHasFeature: (devicePtr, featureEnumValue) => {
@@ -1803,6 +1804,7 @@ var LibraryWebGPU = {
     {{{ makeSetValue('adapterInfo', C_STRUCTS.WGPUAdapterInfo.adapterType, 'adapterType', 'i32') }}};
     {{{ makeSetValue('adapterInfo', C_STRUCTS.WGPUAdapterInfo.vendorID, '0', 'i32') }}};
     {{{ makeSetValue('adapterInfo', C_STRUCTS.WGPUAdapterInfo.deviceID, '0', 'i32') }}};
+    return {{{ gpu.Status.Success }}};
   },
 
   emwgpuDevicePopErrorScope__deps: ['emwgpuOnPopErrorScopeCompleted'],
