@@ -39,7 +39,7 @@
         "copyright_year": "2019"
     },
 
-    "INTERNAL__HAVE_EMDAWNWEBGPU_HEADER": {
+    "INTERNAL_HAVE_EMDAWNWEBGPU_HEADER": {
         "category": "structure",
         "tags": ["emscripten"],
         "_comment": "TODO(issues.chromium.org/issues/366932309): The struct must have at least one field.",
