@@ -78,6 +78,7 @@ if (${DAWN_ENABLE_EMSCRIPTEN})
         endif()
 
         set(ARGS
+            ${Python3_EXECUTABLE}
             "${DAWN_EMSCRIPTEN_TOOLCHAIN}/tools/maint/gen_struct_info.py"
             -q
             "${EM_BUILD_GEN_DIR}/struct_info_webgpu.json"
