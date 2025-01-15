@@ -6588,7 +6588,7 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, Pack4xI8) {
     %u:ptr<function, vec4<i32>, read_write> = var, vec4<i32>(2i)
     %3:vec4<i32> = load %u
     %4:hlsl.int8_t4_packed = hlsl.pack_s8 %3
-    %5:u32 = convert %4
+    %5:u32 = hlsl.convert %4
     %a:u32 = let %5
     ret
   }
@@ -6625,7 +6625,7 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, Unpack4xI8) {
   $B1: {
     %u:ptr<function, u32, read_write> = var, 2u
     %3:u32 = load %u
-    %4:hlsl.int8_t4_packed = convert %3
+    %4:hlsl.int8_t4_packed = hlsl.convert %3
     %5:vec4<i32> = hlsl.unpack_s8s32 %4
     %a:vec4<i32> = let %5
     ret
@@ -6664,7 +6664,7 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, Pack4xU8) {
     %u:ptr<function, vec4<u32>, read_write> = var, vec4<u32>(2u)
     %3:vec4<u32> = load %u
     %4:hlsl.uint8_t4_packed = hlsl.pack_u8 %3
-    %5:u32 = convert %4
+    %5:u32 = hlsl.convert %4
     %a:u32 = let %5
     ret
   }
@@ -6701,7 +6701,7 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, Unpack4xU8) {
   $B1: {
     %u:ptr<function, u32, read_write> = var, 2u
     %3:u32 = load %u
-    %4:hlsl.uint8_t4_packed = convert %3
+    %4:hlsl.uint8_t4_packed = hlsl.convert %3
     %5:vec4<u32> = hlsl.unpack_u8u32 %4
     %a:vec4<u32> = let %5
     ret
@@ -6815,7 +6815,7 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, Pack4xI8Clamp) {
     %u:ptr<function, vec4<i32>, read_write> = var, vec4<i32>(2i)
     %3:vec4<i32> = load %u
     %4:hlsl.int8_t4_packed = hlsl.pack_clamp_s8 %3
-    %5:u32 = convert %4
+    %5:u32 = hlsl.convert %4
     %a:u32 = let %5
     ret
   }

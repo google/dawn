@@ -80,6 +80,8 @@ const char* str(BuiltinFn i) {
             return "pack_s8";
         case BuiltinFn::kPackClampS8:
             return "pack_clamp_s8";
+        case BuiltinFn::kConvert:
+            return "convert";
         case BuiltinFn::kSign:
             return "sign";
         case BuiltinFn::kTextureStore:
@@ -221,6 +223,7 @@ tint::core::ir::Instruction::Accesses GetSideEffects(BuiltinFn fn) {
         case BuiltinFn::kPackU8:
         case BuiltinFn::kPackS8:
         case BuiltinFn::kPackClampS8:
+        case BuiltinFn::kConvert:
         case BuiltinFn::kSign:
         case BuiltinFn::kUnpackS8S32:
         case BuiltinFn::kUnpackU8U32:

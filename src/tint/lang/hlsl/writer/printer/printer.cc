@@ -791,6 +791,14 @@ class Printer : public tint::TextGenerator {
             return;
         }
 
+        if (c->Func() == hlsl::BuiltinFn::kConvert) {
+            EmitType(out, c->Result(0)->Type());
+            out << "(";
+            EmitValue(out, c->Operand(0));
+            out << ")";
+            return;
+        }
+
         out << c->Func() << "(";
         bool needs_comma = false;
         for (const auto* arg : c->Args()) {

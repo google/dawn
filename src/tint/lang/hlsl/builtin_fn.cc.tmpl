@@ -88,6 +88,7 @@ tint::core::ir::Instruction::Accesses GetSideEffects(BuiltinFn fn) {
         case BuiltinFn::kPackU8:
         case BuiltinFn::kPackS8:
         case BuiltinFn::kPackClampS8:
+        case BuiltinFn::kConvert:
         case BuiltinFn::kSign:
         case BuiltinFn::kUnpackS8S32:
         case BuiltinFn::kUnpackU8U32:

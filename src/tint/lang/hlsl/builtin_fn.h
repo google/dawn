@@ -67,6 +67,7 @@ enum class BuiltinFn : uint8_t {
     kPackU8,
     kPackS8,
     kPackClampS8,
+    kConvert,
     kSign,
     kTextureStore,
     kUnpackS8S32,

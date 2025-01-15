@@ -1692,7 +1692,7 @@ struct State {
         b.InsertBefore(call, [&] {
             auto* type = ty.Get<hlsl::type::Int8T4Packed>();
             auto* packed = b.Call<hlsl::ir::BuiltinCall>(type, hlsl::BuiltinFn::kPackS8, args[0]);
-            auto* conv = b.Convert(ty.u32(), packed);
+            auto* conv = b.Call<hlsl::ir::BuiltinCall>(ty.u32(), hlsl::BuiltinFn::kConvert, packed);
 
             call->Result(0)->ReplaceAllUsesWith(conv->Result(0));
         });
@@ -1703,7 +1703,8 @@ struct State {
         auto args = call->Args();
         b.InsertBefore(call, [&] {
             auto* type = ty.Get<hlsl::type::Int8T4Packed>();
-            auto* conv = b.Convert(type, args[0]);
+            auto* conv = b.CallExplicit<hlsl::ir::BuiltinCall>(type, hlsl::BuiltinFn::kConvert,
+                                                               Vector{type}, args[0]);
 
             b.CallWithResult<hlsl::ir::BuiltinCall>(call->DetachResult(),
                                                     hlsl::BuiltinFn::kUnpackS8S32, conv);
@@ -1716,7 +1717,7 @@ struct State {
         b.InsertBefore(call, [&] {
             auto* type = ty.Get<hlsl::type::Uint8T4Packed>();
             auto* packed = b.Call<hlsl::ir::BuiltinCall>(type, hlsl::BuiltinFn::kPackU8, args[0]);
-            auto* conv = b.Convert(ty.u32(), packed);
+            auto* conv = b.Call<hlsl::ir::BuiltinCall>(ty.u32(), hlsl::BuiltinFn::kConvert, packed);
 
             call->Result(0)->ReplaceAllUsesWith(conv->Result(0));
         });
@@ -1727,7 +1728,8 @@ struct State {
         auto args = call->Args();
         b.InsertBefore(call, [&] {
             auto* type = ty.Get<hlsl::type::Uint8T4Packed>();
-            auto* conv = b.Convert(type, args[0]);
+            auto* conv = b.CallExplicit<hlsl::ir::BuiltinCall>(type, hlsl::BuiltinFn::kConvert,
+                                                               Vector{type}, args[0]);
 
             b.CallWithResult<hlsl::ir::BuiltinCall>(call->DetachResult(),
                                                     hlsl::BuiltinFn::kUnpackU8U32, conv);
@@ -1741,7 +1743,7 @@ struct State {
             auto* type = ty.Get<hlsl::type::Int8T4Packed>();
             auto* packed =
                 b.Call<hlsl::ir::BuiltinCall>(type, hlsl::BuiltinFn::kPackClampS8, args[0]);
-            auto* conv = b.Convert(ty.u32(), packed);
+            auto* conv = b.Call<hlsl::ir::BuiltinCall>(ty.u32(), hlsl::BuiltinFn::kConvert, packed);
 
             call->Result(0)->ReplaceAllUsesWith(conv->Result(0));
         });
