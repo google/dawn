@@ -300,7 +300,8 @@ struct UnpackedExpandedBglEntries {
 UnpackedExpandedBglEntries ExtractAndExpandBglEntries(
     const BindGroupLayoutDescriptor* descriptor,
     BindingCounts* bindingCounts,
-    ExternalTextureBindingExpansionMap* externalTextureBindingExpansions) {
+    ExternalTextureBindingExpansionMap* externalTextureBindingExpansions,
+    bool* needsCrossBindingValidation) {
     UnpackedExpandedBglEntries result;
     std::list<BindGroupLayoutEntry>& additionalEntries = result.additionalEntries;
     std::vector<UnpackedPtr<BindGroupLayoutEntry>>& expandedOutput = result.unpackedEntries;
@@ -352,6 +353,12 @@ UnpackedExpandedBglEntries ExtractAndExpandBglEntries(
             externalTextureBindingExpansions->insert(
                 {BindingNumber(entry->binding), bindingExpansion});
         } else {
+            if (auto* staticSamplerBindingLayout = entry.Get<StaticSamplerBindingLayout>()) {
+                if (staticSamplerBindingLayout->sampledTextureBinding != WGPU_LIMIT_U32_UNDEFINED) {
+                    *needsCrossBindingValidation = true;
+                }
+            }
+
             expandedOutput.push_back(entry);
         }
     }
@@ -627,7 +634,8 @@ BindGroupLayoutInternalBase::BindGroupLayoutInternalBase(
     ApiObjectBase::UntrackedByDeviceTag tag)
     : ApiObjectBase(device, descriptor->label), mUnexpandedBindingCount(descriptor->entryCount) {
     auto unpackedBindings = ExtractAndExpandBglEntries(descriptor, &mBindingCounts,
-                                                       &mExternalTextureBindingExpansionMap);
+                                                       &mExternalTextureBindingExpansionMap,
+                                                       &mNeedsCrossBindingValidation);
     auto& sortedBindings = unpackedBindings.unpackedEntries;
 
     std::sort(sortedBindings.begin(), sortedBindings.end(), SortBindingsCompare);
@@ -776,6 +784,10 @@ const BindingCounts& BindGroupLayoutInternalBase::GetBindingCountInfo() const {
 const ExternalTextureBindingExpansionMap&
 BindGroupLayoutInternalBase::GetExternalTextureBindingExpansionMap() const {
     return mExternalTextureBindingExpansionMap;
+}
+
+bool BindGroupLayoutInternalBase::NeedsCrossBindingValidation() const {
+    return mNeedsCrossBindingValidation;
 }
 
 uint32_t BindGroupLayoutInternalBase::GetUnexpandedBindingCount() const {

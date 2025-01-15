@@ -86,9 +86,11 @@ wgpu::Texture Create2DTexture(wgpu::Device& device) {
 #endif
 }
 
-wgpu::TextureViewDescriptor CreateDefaultViewDescriptor(wgpu::TextureViewDimension dimension) {
+wgpu::TextureViewDescriptor CreateDefaultViewDescriptor(
+    wgpu::TextureViewDimension dimension,
+    wgpu::TextureFormat format = kDefaultTextureFormat) {
     wgpu::TextureViewDescriptor descriptor;
-    descriptor.format = kDefaultTextureFormat;
+    descriptor.format = format;
     descriptor.dimension = dimension;
     descriptor.baseMipLevel = 0;
     if (dimension != wgpu::TextureViewDimension::e1D) {
@@ -311,7 +313,10 @@ TEST_P(YCbCrInfoTest, CreateBindGroupWithYCbCrSamplerSupported) {
     wgpu::BindGroupLayout layout = device.CreateBindGroupLayout(&layoutDesc);
 
     wgpu::Texture texture = Create2DTexture(device);
-    wgpu::TextureView textureView = Create2DTextureView(texture, &yCbCrDesc);
+
+    wgpu::YCbCrVkDescriptor yCbCrDescTex = {};
+    yCbCrDescTex.vkFormat = VK_FORMAT_R8G8B8A8_UNORM;
+    wgpu::TextureView textureView = Create2DTextureView(texture, &yCbCrDescTex);
 
     utils::MakeBindGroup(device, layout, {{1, textureView}});
 }
@@ -504,12 +509,110 @@ TEST_P(YCbCrInfoTest, BindGroupCreationForSamplerBindingTypeCausesError) {
         device, layout, {{1, device.CreateSampler(&samplerDesc0)}, {2, textureView}}));
 }
 
+// Tests that creating a bind group fails when YCbCr texture isn't sampled by a static sampler.
+TEST_P(YCbCrInfoTest, CreateBindGroupWithoutYCbCrSampler) {
+    std::vector<wgpu::BindGroupLayoutEntry> entries;
+
+    wgpu::YCbCrVkDescriptor yCbCrDesc = {};
+    yCbCrDesc.vkFormat = VK_FORMAT_R8G8B8A8_UNORM;
+
+    wgpu::BindGroupLayoutEntry& binding0 = entries.emplace_back();
+    binding0.binding = 0;
+    binding0.texture.sampleType = wgpu::TextureSampleType::Float;
+    binding0.texture.viewDimension = wgpu::TextureViewDimension::e2D;
+    binding0.texture.multisampled = false;
+
+    wgpu::BindGroupLayoutDescriptor layoutDesc = {};
+    layoutDesc.entryCount = entries.size();
+    layoutDesc.entries = entries.data();
+
+    wgpu::BindGroupLayout layout = device.CreateBindGroupLayout(&layoutDesc);
+
+    wgpu::Texture texture = Create2DTexture(device);
+    wgpu::TextureView textureView = Create2DTextureView(texture, &yCbCrDesc);
+
+    ASSERT_DEVICE_ERROR(utils::MakeBindGroup(device, layout, {{0, textureView}}));
+}
+
+// Tests that creating a bind group fails when a YCbCr static sampler samples a non-YCbCr texture.
+TEST_P(YCbCrInfoTest, CreatBindGroupYCbCrStaticSamplerWrongTexture) {
+    std::vector<wgpu::BindGroupLayoutEntry> entries;
+    wgpu::YCbCrVkDescriptor yCbCrDesc = {};
+    yCbCrDesc.vkFormat = VK_FORMAT_R8G8B8A8_UNORM;
+
+    wgpu::BindGroupLayoutEntry& binding0 = entries.emplace_back();
+    binding0.binding = 0;
+    wgpu::StaticSamplerBindingLayout staticSamplerBinding = {};
+    staticSamplerBinding.sampler = CreateYCbCrSampler(device, &yCbCrDesc);
+    staticSamplerBinding.sampledTextureBinding = 1;
+    binding0.nextInChain = &staticSamplerBinding;
+
+    wgpu::BindGroupLayoutEntry& binding1 = entries.emplace_back();
+    binding1.binding = 1;
+    binding1.texture.sampleType = wgpu::TextureSampleType::Float;
+    binding1.texture.viewDimension = wgpu::TextureViewDimension::e2D;
+    binding1.texture.multisampled = false;
+
+    wgpu::BindGroupLayoutDescriptor layoutDesc = {};
+    layoutDesc.entryCount = entries.size();
+    layoutDesc.entries = entries.data();
+
+    wgpu::BindGroupLayout layout = device.CreateBindGroupLayout(&layoutDesc);
+
+    wgpu::TextureDescriptor descriptor;
+    descriptor.dimension = wgpu::TextureDimension::e2D;
+    descriptor.size.width = 32;
+    descriptor.size.height = 32;
+    descriptor.size.depthOrArrayLayers = kDefaultLayerCount;
+    descriptor.sampleCount = 1u;
+    descriptor.format = wgpu::TextureFormat::RGBA8Snorm;
+    descriptor.mipLevelCount = kDefaultMipLevels;
+    descriptor.usage = wgpu::TextureUsage::TextureBinding;
+    wgpu::Texture texture = device.CreateTexture(&descriptor);
+
+    wgpu::TextureViewDescriptor textureDesc = CreateDefaultViewDescriptor(
+        wgpu::TextureViewDimension::e2D, wgpu::TextureFormat::RGBA8Snorm);
+    textureDesc.arrayLayerCount = 1;
+    wgpu::TextureView textureView = texture.CreateView(&textureDesc);
+
+    ASSERT_DEVICE_ERROR(utils::MakeBindGroup(device, layout, {{1, textureView}}));
+}
+
+// Tests that creating a bind group fails when a non-YCbCr static sampler samples a YCbCr texture.
+TEST_P(YCbCrInfoTest, CreatBindGroupYCbCrTextureWrongStaticSampler) {
+    std::vector<wgpu::BindGroupLayoutEntry> entries;
+
+    wgpu::BindGroupLayoutEntry& binding0 = entries.emplace_back();
+    binding0.binding = 0;
+    wgpu::StaticSamplerBindingLayout staticSamplerBinding = {};
+    wgpu::SamplerDescriptor samplerDesc;
+    staticSamplerBinding.sampler = device.CreateSampler(&samplerDesc);
+    staticSamplerBinding.sampledTextureBinding = 1;
+    binding0.nextInChain = &staticSamplerBinding;
+
+    wgpu::BindGroupLayoutEntry& binding1 = entries.emplace_back();
+    binding1.binding = 1;
+    binding1.texture.sampleType = wgpu::TextureSampleType::Float;
+    binding1.texture.viewDimension = wgpu::TextureViewDimension::e2D;
+    binding1.texture.multisampled = false;
+
+    wgpu::BindGroupLayoutDescriptor layoutDesc = {};
+    layoutDesc.entryCount = entries.size();
+    layoutDesc.entries = entries.data();
+
+    wgpu::BindGroupLayout layout = device.CreateBindGroupLayout(&layoutDesc);
+
+    wgpu::YCbCrVkDescriptor yCbCrDesc = {};
+    yCbCrDesc.vkFormat = VK_FORMAT_R8G8B8A8_UNORM;
+
+    wgpu::Texture texture = Create2DTexture(device);
+    wgpu::TextureView textureView = Create2DTextureView(texture, &yCbCrDesc);
+
+    ASSERT_DEVICE_ERROR(utils::MakeBindGroup(device, layout, {{1, textureView}}));
+}
+
 DAWN_INSTANTIATE_TEST(YCbCrInfoTest, VulkanBackend());
 
-// TODO(crbug.com/dawn/2476): Add test validating binding fails if texture view ycbcr info is
-// different from that on sampler
-// TODO(crbug.com/dawn/2476): Add test validating binding passes if texture view ycbcr info is same
-// as that on sampler
 // TODO(crbug.com/dawn/2476): Add validation that mipLevel, arrayLayers are always 1 along with 2D
 // view dimension (see
 // https://registry.khronos.org/vulkan/specs/1.3-extensions/man/html/VkImageCreateInfo.html) with

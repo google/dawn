@@ -1526,6 +1526,15 @@ wgpu::TextureUsage TextureViewBase::GetInternalUsage() const {
     return mInternalUsage;
 }
 
+bool TextureViewBase::IsYCbCr() const {
+    return false;
+}
+
+YCbCrVkDescriptor TextureViewBase::GetYCbCrVkDescriptor() const {
+    DAWN_UNREACHABLE();
+    return {};
+}
+
 ApiObjectList* TextureViewBase::GetObjectTrackingList() {
     if (mTexture != nullptr) {
         return mTexture->GetViewTrackingList();

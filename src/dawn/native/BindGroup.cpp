@@ -27,12 +27,17 @@
 
 #include "dawn/native/BindGroup.h"
 
+#include <variant>
+
+#include "absl/container/flat_hash_map.h"
 #include "dawn/common/Assert.h"
 #include "dawn/common/MatchVariant.h"
 #include "dawn/common/Math.h"
 #include "dawn/common/ityp_bitset.h"
 #include "dawn/native/Adapter.h"
 #include "dawn/native/BindGroupLayout.h"
+#include "dawn/native/BindGroupLayoutInternal.h"
+#include "dawn/native/BindingInfo.h"
 #include "dawn/native/Buffer.h"
 #include "dawn/native/ChainUtils.h"
 #include "dawn/native/CommandValidation.h"
@@ -345,6 +350,58 @@ void ForEachUnverifiedBufferBindingIndexImpl(const BindGroupLayoutInternalBase* 
     }
 }
 
+MaybeError ValidateStaticSamplersWithSampledTextures(const BindGroupDescriptor* descriptor,
+                                                     const BindGroupLayoutInternalBase* layout) {
+    absl::flat_hash_map<BindingNumber, uint32_t> bindingNumberToEntryIndexMap;
+    for (uint32_t i = 0; i < descriptor->entryCount; ++i) {
+        bindingNumberToEntryIndexMap[BindingNumber(descriptor->entries[i].binding)] = i;
+    }
+
+    // Entry indices of YCbCr textures sampled by a static sampler.
+    ityp::bitset<uint32_t, kMaxBindingsPerPipelineLayout> sampledYcbcrTextures;
+    for (BindingIndex index{0}; index < layout->GetBindingCount(); ++index) {
+        const BindingInfo& bindingInfo = layout->GetBindingInfo(index);
+        auto* staticSamplerLayout =
+            std::get_if<StaticSamplerBindingInfo>(&bindingInfo.bindingLayout);
+        if (staticSamplerLayout && staticSamplerLayout->isUsedForSingleTextureBinding) {
+            const SamplerBase* sampler = staticSamplerLayout->sampler.Get();
+
+            uint32_t textureEntryIndex = bindingNumberToEntryIndexMap.at(
+                BindingNumber(staticSamplerLayout->sampledTextureBinding));
+            const TextureViewBase* textureView = descriptor->entries[textureEntryIndex].textureView;
+
+            // Compare static sampler and sampled textures to make sure they are compatible.
+            if (sampler->IsYCbCr()) {
+                DAWN_INVALID_IF(!textureView->IsYCbCr(),
+                                "YCbCr static sampler at binding (%u) samples a non-YCbCr texture.",
+                                bindingInfo.binding);
+
+                sampledYcbcrTextures.set(textureEntryIndex);
+            } else {
+                DAWN_INVALID_IF(textureView->IsYCbCr(),
+                                "Non-YCbCr static sampler at binding (%u) samples a YCbCr texture.",
+                                bindingInfo.binding);
+            }
+        }
+    }
+
+    // Validate that all YCbCr texture entries are sampled by a static sampler.
+    const auto& bindingMap = layout->GetBindingMap();
+    for (uint32_t i = 0; i < descriptor->entryCount; ++i) {
+        const BindGroupEntry& entry = descriptor->entries[i];
+        const BindingInfo& bindingInfo =
+            layout->GetBindingInfo(bindingMap.at(BindingNumber(entry.binding)));
+        if (std::holds_alternative<TextureBindingInfo>(bindingInfo.bindingLayout) &&
+            entry.textureView && entry.textureView->IsYCbCr()) {
+            DAWN_INVALID_IF(!sampledYcbcrTextures.test(i),
+                            "YCbCr texture at binding (%u) is not sampled by a static sampler.",
+                            entry.binding);
+        }
+    }
+
+    return {};
+}
+
 }  // anonymous namespace
 
 MaybeError ValidateBindGroupDescriptor(DeviceBase* device,
@@ -370,6 +427,8 @@ MaybeError ValidateBindGroupDescriptor(DeviceBase* device,
 
     const BindGroupLayoutInternalBase::BindingMap& bindingMap = layout->GetBindingMap();
     DAWN_ASSERT(bindingMap.size() <= kMaxBindingsPerPipelineLayout);
+
+    bool needsCrossBindingValidation = layout->NeedsCrossBindingValidation();
 
     ityp::bitset<BindingIndex, kMaxBindingsPerPipelineLayout> bindingsSet;
     for (uint32_t i = 0; i < descriptor->entryCount; ++i) {
@@ -430,6 +489,11 @@ MaybeError ValidateBindGroupDescriptor(DeviceBase* device,
                                  "validating entries[%u] as a Sampled Texture."
                                  "\nExpected entry layout: %s",
                                  i, layout);
+                if (entry.textureView->IsYCbCr()) {
+                    // Need to validate that the YCbCr texture is statically sampled.
+                    needsCrossBindingValidation = true;
+                }
+
                 return {};
             },
             [&](const StorageTextureBindingInfo& layout) -> MaybeError {
@@ -464,6 +528,12 @@ MaybeError ValidateBindGroupDescriptor(DeviceBase* device,
     //
     // We don't validate the equality because it wouldn't be possible to cover it with a test.
     DAWN_ASSERT(bindingsSet.count() == expectedBindingsCount);
+
+    if (needsCrossBindingValidation) {
+        // This additional validation is only needed when there are static samplers used with a
+        // single texture binding and/or there are YCbCr textures.
+        DAWN_TRY(ValidateStaticSamplersWithSampledTextures(descriptor, layout));
+    }
 
     return {};
 }

@@ -113,6 +113,8 @@ class BindGroupLayoutInternalBase : public ApiObjectBase,
 
     uint32_t GetUnexpandedBindingCount() const;
 
+    bool NeedsCrossBindingValidation() const;
+
     // Tests that the BindingInfo of two bind groups are equal.
     bool IsLayoutEqual(const BindGroupLayoutInternalBase* other) const;
 
@@ -158,6 +160,7 @@ class BindGroupLayoutInternalBase : public ApiObjectBase,
     BindGroupLayoutInternalBase(DeviceBase* device, ObjectBase::ErrorTag tag, StringView label);
 
     BindingCounts mBindingCounts = {};
+    bool mNeedsCrossBindingValidation = false;
     ityp::vector<BindingIndex, BindingInfo> mBindingInfo;
 
     // Map from BindGroupLayoutEntry.binding to packed indices.

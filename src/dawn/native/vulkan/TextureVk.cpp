@@ -1873,6 +1873,7 @@ MaybeError TextureView::Initialize(const UnpackedPtr<TextureViewDescriptor>& des
 
     VkSamplerYcbcrConversionInfo samplerYCbCrInfo = {};
     if (auto* yCbCrVkDescriptor = descriptor.Get<YCbCrVkDescriptor>()) {
+        mIsYCbCr = true;
         mYCbCrVkDescriptor = *yCbCrVkDescriptor;
         mYCbCrVkDescriptor.nextInChain = nullptr;
 
@@ -2003,6 +2004,15 @@ ResultOrError<VkImageView> TextureView::GetOrCreate2DViewOn3D(uint32_t depthSlic
     mHandlesFor2DViewOn3D[depthSlice] = view;
 
     return view;
+}
+
+bool TextureView::IsYCbCr() const {
+    return mIsYCbCr;
+}
+
+YCbCrVkDescriptor TextureView::GetYCbCrVkDescriptor() const {
+    DAWN_ASSERT(IsYCbCr());
+    return mYCbCrVkDescriptor;
 }
 
 void TextureView::SetLabelImpl() {

@@ -138,6 +138,11 @@ bool SamplerBase::IsYCbCr() const {
     return mIsYCbCr;
 }
 
+YCbCrVkDescriptor SamplerBase::GetYCbCrVkDescriptor() const {
+    DAWN_ASSERT(IsYCbCr());
+    return mYCbCrVkDescriptor;
+}
+
 size_t SamplerBase::ComputeContentHash() {
     ObjectContentHasher recorder;
     // NOTE: We always hash the state of `mYCbCrVkDescriptor` to avoid splitting
