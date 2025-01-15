@@ -32,6 +32,8 @@
 
 #include "src/tint/lang/core/ir/function.h"
 #include "src/tint/lang/core/ir/module.h"
+#include "src/tint/lang/core/ir/var.h"
+#include "src/tint/lang/core/type/input_attachment.h"
 #include "src/tint/lang/hlsl/writer/ast_printer/ast_printer.h"
 #include "src/tint/lang/hlsl/writer/printer/printer.h"
 #include "src/tint/lang/hlsl/writer/raise/raise.h"
@@ -39,6 +41,31 @@
 #include "src/tint/utils/ice/ice.h"
 
 namespace tint::hlsl::writer {
+
+Result<SuccessType> CanGenerate(const core::ir::Module& ir, const Options& options) {
+    // Check for unsupported module-scope variable address spaces and types.
+    for (auto* inst : *ir.root_block) {
+        auto* var = inst->As<core::ir::Var>();
+        auto* ptr = var->Result(0)->Type()->As<core::type::Pointer>();
+        if (ptr->AddressSpace() == core::AddressSpace::kPushConstant) {
+            return Failure("push constants are not supported by the HLSL backend");
+        }
+        if (ptr->AddressSpace() == core::AddressSpace::kPixelLocal) {
+            // Check the pixel_local variables have corresponding entries in the PLS attachment map.
+            auto* str = ptr->StoreType()->As<core::type::Struct>();
+            for (uint32_t i = 0; i < str->Members().Length(); i++) {
+                if (options.pixel_local.attachments.count(i) == 0) {
+                    return Failure("missing pixel local attachment for member index " +
+                                   std::to_string(i));
+                }
+            }
+        }
+        if (ptr->StoreType()->Is<core::type::InputAttachment>()) {
+            return Failure("input attachments are not supported by the HLSL backend");
+        }
+    }
+    return Success;
+}
 
 Result<Output> Generate(core::ir::Module& ir, const Options& options) {
     // Raise the core-dialect to HLSL-dialect

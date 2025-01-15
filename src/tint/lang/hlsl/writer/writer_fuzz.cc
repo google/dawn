@@ -30,7 +30,6 @@
 #include "src/tint/cmd/fuzz/ir/fuzz.h"
 #include "src/tint/lang/core/ir/module.h"
 #include "src/tint/lang/core/ir/var.h"
-#include "src/tint/lang/core/type/input_attachment.h"
 #include "src/tint/lang/core/type/pointer.h"
 #include "src/tint/lang/hlsl/validate/validate.h"
 #include "src/tint/lang/hlsl/writer/helpers/generate_bindings.h"
@@ -38,24 +37,6 @@
 #include "src/tint/utils/command/command.h"
 namespace tint::hlsl::writer {
 namespace {
-
-bool CanRun(const core::ir::Module& module) {
-    // Check for unsupported module-scope variable address spaces and types.
-    for (auto* inst : *module.root_block) {
-        auto* var = inst->As<core::ir::Var>();
-        auto* ptr = var->Result(0)->Type()->As<core::type::Pointer>();
-        if (ptr->AddressSpace() == core::AddressSpace::kPushConstant) {
-            return false;
-        }
-        if (ptr->AddressSpace() == core::AddressSpace::kPixelLocal) {
-            return false;
-        }
-        if (ptr->StoreType()->Is<core::type::InputAttachment>()) {
-            return false;
-        }
-    }
-    return true;
-}
 
 // Fuzzed options used to init tint::hlsl::writer::Options
 struct FuzzedOptions {
@@ -83,10 +64,6 @@ struct FuzzedOptions {
 Result<SuccessType> IRFuzzer(core::ir::Module& module,
                              const fuzz::ir::Context& context,
                              FuzzedOptions fuzzed_options) {
-    if (!CanRun(module)) {
-        return Failure{"Cannot run module"};
-    }
-
     Options options;
     options.strip_all_names = fuzzed_options.strip_all_names;
     options.disable_robustness = fuzzed_options.disable_robustness;
@@ -112,6 +89,11 @@ Result<SuccessType> IRFuzzer(core::ir::Module& module,
                 }
             }
         }
+    }
+
+    auto check = CanGenerate(module, options);
+    if (check != Success) {
+        return check.Failure();
     }
 
     auto output = Generate(module, options);
