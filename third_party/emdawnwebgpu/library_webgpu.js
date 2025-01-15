@@ -16,10 +16,19 @@
     throw new Error("To use Dawn's library_webgpu.js, disable -sUSE_WEBGPU and first include Dawn's library_webgpu_struct_info.js and library_webgpu_enum_tables.js (before library_webgpu.js)");
   }
 
+  if (MEMORY64) {
+    throw new Error("The current implementation of Dawn's library_webgpu.js does not support MEMORY64 yet");
+  }
+
   // Helper functions for code generation
   globalThis.gpu = {
-    convertSentinelToUndefined: function(name) {
-      return `if (${name} == -1) ${name} = undefined;`;
+    convertSentinelToUndefined: function(name, argIsPassedAsPointerType) {
+      // When `CAN_ADDRESS_2GB` is true, value `-1` is normalized to `0xFFFFFFFF` for pointer.
+      if (CAN_ADDRESS_2GB && argIsPassedAsPointerType) {
+        return `if (${name} == 0xFFFFFFFF) ${name} = undefined;`;
+      } else {
+        return `if (${name} == -1) ${name} = undefined;`;
+      }
     },
 
     makeGetBool: function(struct, offset) {
@@ -880,7 +889,7 @@ var LibraryWebGPU = {
 
     if (size === 0) warnOnce('getMappedRange size=0 no longer means WGPU_WHOLE_MAP_SIZE');
 
-    {{{ gpu.convertSentinelToUndefined('size') }}}
+    {{{ gpu.convertSentinelToUndefined('size', true) }}}
 
     var mapped;
     try {
@@ -907,7 +916,7 @@ var LibraryWebGPU = {
 
     if (size === 0) warnOnce('getMappedRange size=0 no longer means WGPU_WHOLE_MAP_SIZE');
 
-    {{{ gpu.convertSentinelToUndefined('size') }}}
+    {{{ gpu.convertSentinelToUndefined('size', true) }}}
 
     var mapped;
     try {
@@ -948,7 +957,7 @@ var LibraryWebGPU = {
     var buffer = WebGPU.getJsObject(bufferPtr);
     WebGPU.Internals.bufferOnUnmaps[bufferPtr] = [];
 
-    {{{ gpu.convertSentinelToUndefined('size') }}}
+    {{{ gpu.convertSentinelToUndefined('size', true) }}}
 
     {{{ runtimeKeepalivePush() }}}
     WebGPU.Internals.futureInsert(futureId, buffer.mapAsync(mode, offset, size).then(() => {
