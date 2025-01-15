@@ -951,6 +951,14 @@ bool GenerateMsl([[maybe_unused]] Options& options,
             std::cerr << "Failed to generate IR: " << ir << "\n";
             return false;
         }
+
+        // Check that the module and options are supported by the backend.
+        auto check = tint::msl::writer::CanGenerate(ir.Get(), gen_options);
+        if (check != tint::Success) {
+            std::cerr << check.Failure() << "\n";
+            return false;
+        }
+
         result = tint::msl::writer::Generate(ir.Get(), gen_options);
     } else {
         result = tint::msl::writer::Generate(input_program, gen_options);

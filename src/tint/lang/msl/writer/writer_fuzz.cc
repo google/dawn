@@ -30,7 +30,6 @@
 #include "src/tint/cmd/fuzz/ir/fuzz.h"
 #include "src/tint/lang/core/ir/module.h"
 #include "src/tint/lang/core/ir/var.h"
-#include "src/tint/lang/core/type/input_attachment.h"
 #include "src/tint/lang/core/type/pointer.h"
 #include "src/tint/lang/msl/writer/helpers/generate_bindings.h"
 #include "src/tint/lang/msl/writer/writer.h"
@@ -38,31 +37,9 @@
 namespace tint::msl::writer {
 namespace {
 
-bool CanRun(const core::ir::Module& module, const Options&) {
-    // Check for unsupported module-scope variable address spaces and types.
-    for (auto* inst : *module.root_block) {
-        auto* var = inst->As<core::ir::Var>();
-        auto* ptr = var->Result(0)->Type()->As<core::type::Pointer>();
-        if (ptr->AddressSpace() == core::AddressSpace::kPushConstant) {
-            return false;
-        }
-        if (ptr->AddressSpace() == core::AddressSpace::kPixelLocal) {
-            return false;
-        }
-        if (ptr->StoreType()->Is<core::type::InputAttachment>()) {
-            return false;
-        }
-    }
-    return true;
-}
-
 Result<SuccessType> IRFuzzer(core::ir::Module& module,
                              const fuzz::ir::Context& context,
                              Options options) {
-    if (!CanRun(module, options)) {
-        return Failure{"Cannot run module"};
-    }
-
     options.bindings = GenerateBindings(module);
     options.array_length_from_uniform.ubo_binding = 30;
 
@@ -78,6 +55,11 @@ Result<SuccessType> IRFuzzer(core::ir::Module& module,
                 }
             }
         }
+    }
+
+    auto check = CanGenerate(module, options);
+    if (check != Success) {
+        return check.Failure();
     }
 
     auto output = Generate(module, options);

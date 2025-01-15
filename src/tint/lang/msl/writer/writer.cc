@@ -30,12 +30,33 @@
 #include <memory>
 #include <utility>
 
+#include "src/tint/lang/core/ir/module.h"
+#include "src/tint/lang/core/ir/var.h"
+#include "src/tint/lang/core/type/input_attachment.h"
 #include "src/tint/lang/msl/writer/ast_printer/ast_printer.h"
 #include "src/tint/lang/msl/writer/common/option_helpers.h"
 #include "src/tint/lang/msl/writer/printer/printer.h"
 #include "src/tint/lang/msl/writer/raise/raise.h"
 
 namespace tint::msl::writer {
+
+Result<SuccessType> CanGenerate(const core::ir::Module& ir, const Options&) {
+    // Check for unsupported module-scope variable address spaces and types.
+    for (auto* inst : *ir.root_block) {
+        auto* var = inst->As<core::ir::Var>();
+        auto* ptr = var->Result(0)->Type()->As<core::type::Pointer>();
+        if (ptr->AddressSpace() == core::AddressSpace::kPushConstant) {
+            return Failure("push constants are not supported by the MSL backend");
+        }
+        if (ptr->AddressSpace() == core::AddressSpace::kPixelLocal) {
+            return Failure("pixel_local address space is not supported by the MSL backend");
+        }
+        if (ptr->StoreType()->Is<core::type::InputAttachment>()) {
+            return Failure("input attachments are not supported by the MSL backend");
+        }
+    }
+    return Success;
+}
 
 Result<Output> Generate(core::ir::Module& ir, const Options& options) {
     {
