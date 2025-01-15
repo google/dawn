@@ -701,7 +701,14 @@ void AddSubstituteOverrides(std::unordered_map<tint::OverrideId, double> values,
     AddSubstituteOverrides(res.Get(), transform_manager, transform_inputs);
 
     tint::ast::transform::DataMap outputs;
-    return transform_manager.Run(program, std::move(transform_inputs), outputs);
+    auto transformed = transform_manager.Run(program, std::move(transform_inputs), outputs);
+    if (!transformed.IsValid()) {
+        std::stringstream err;
+        tint::cmd::PrintWGSL(err, transformed);
+        err << transformed.Diagnostics() << "\n";
+        return tint::Failure(err.str());
+    }
+    return transformed;
 }
 
 #if TINT_BUILD_SPV_WRITER
@@ -754,9 +761,8 @@ bool GenerateSpirv([[maybe_unused]] Options& options,
                    [[maybe_unused]] tint::Program& src_program) {
 #if TINT_BUILD_SPV_WRITER
     auto res = ProcessASTTransforms(options, inspector, src_program);
-    if (res != tint::Success || !res->IsValid()) {
-        tint::cmd::PrintWGSL(std::cerr, res.Get());
-        std::cerr << res->Diagnostics() << "\n";
+    if (res != tint::Success) {
+        std::cerr << res.Failure().reason << "\n";
         return 1;
     }
 
@@ -891,9 +897,8 @@ bool GenerateMsl([[maybe_unused]] Options& options,
                  [[maybe_unused]] tint::Program& src_program) {
 #if TINT_BUILD_MSL_WRITER
     auto transform_res = ProcessASTTransforms(options, inspector, src_program);
-    if (transform_res != tint::Success || !transform_res->IsValid()) {
-        tint::cmd::PrintWGSL(std::cerr, transform_res.Get());
-        std::cerr << transform_res->Diagnostics() << "\n";
+    if (transform_res != tint::Success) {
+        std::cerr << transform_res.Failure().reason << "\n";
         return 1;
     }
 
@@ -1016,9 +1021,8 @@ bool GenerateHlsl([[maybe_unused]] Options& options,
                   [[maybe_unused]] tint::Program& src_program) {
 #if TINT_BUILD_HLSL_WRITER
     auto res = ProcessASTTransforms(options, inspector, src_program);
-    if (res != tint::Success || !res->IsValid()) {
-        tint::cmd::PrintWGSL(std::cerr, res.Get());
-        std::cerr << res->Diagnostics() << "\n";
+    if (res != tint::Success) {
+        std::cerr << res.Failure().reason << "\n";
         return 1;
     }
 
@@ -1154,9 +1158,8 @@ bool GenerateGlsl([[maybe_unused]] Options& options,
                   [[maybe_unused]] tint::Program& src_program) {
 #if TINT_BUILD_GLSL_WRITER
     auto res = ProcessASTTransforms(options, inspector, src_program);
-    if (res != tint::Success || !res->IsValid()) {
-        tint::cmd::PrintWGSL(std::cerr, res.Get());
-        std::cerr << res->Diagnostics() << "\n";
+    if (res != tint::Success) {
+        std::cerr << res.Failure().reason << "\n";
         return 1;
     }
 
