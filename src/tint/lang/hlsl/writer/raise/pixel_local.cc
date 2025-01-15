@@ -177,6 +177,7 @@ struct State {
                 TINT_ASSERT(mem_ty->Is<core::type::Scalar>());
                 core::ir::Instruction* from =
                     b.Access(ty.ptr<private_>(mem_ty), pixel_local_var, u32(mem->Index()));
+                from = b.Load(from);
                 if (mem_ty != rov.subtype) {
                     // ROV and struct member types don't match
                     from = b.Convert(rov.subtype, from);
