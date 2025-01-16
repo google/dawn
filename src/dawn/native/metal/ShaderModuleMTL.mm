@@ -44,6 +44,7 @@
 #include "dawn/platform/DawnPlatform.h"
 #include "dawn/platform/metrics/HistogramMacros.h"
 #include "dawn/platform/tracing/TraceEvent.h"
+#include "src/tint/lang/core/ir/transform/vertex_pulling.h"
 
 #include <tint/tint.h>
 
@@ -325,14 +326,15 @@ ResultOrError<CacheResult<MslCompilation>> TranslateToMSL(
                     r.disableSymbolRenaming ? tint::ast::transform::Renamer::Target::kMslKeywords
                                             : tint::ast::transform::Renamer::Target::kAll,
                     std::move(requestedNames));
-            }
 
-            if (r.vertexPullingTransformConfig) {
-                tint::ast::transform::VertexPulling::Config config;
-                config.pulling_group = r.vertexPullingTransformConfig->pulling_group;
-                config.vertex_state = r.vertexPullingTransformConfig->vertex_state;
-                transformManager.Add<tint::ast::transform::VertexPulling>();
-                transformInputs.Add<tint::ast::transform::VertexPulling::Config>(std::move(config));
+                if (r.vertexPullingTransformConfig) {
+                    tint::ast::transform::VertexPulling::Config config;
+                    config.pulling_group = r.vertexPullingTransformConfig->pulling_group;
+                    config.vertex_state = r.vertexPullingTransformConfig->vertex_state;
+                    transformManager.Add<tint::ast::transform::VertexPulling>();
+                    transformInputs.Add<tint::ast::transform::VertexPulling::Config>(
+                        std::move(config));
+                }
             }
 
             if (r.substituteOverrideConfig) {
@@ -362,6 +364,15 @@ ResultOrError<CacheResult<MslCompilation>> TranslateToMSL(
                 DAWN_INVALID_IF(ir != tint::Success,
                                 "An error occurred while generating Tint IR\n%s",
                                 ir.Failure().reason.Str());
+
+                // TODO(380044409): Move this into the backend.
+                if (r.vertexPullingTransformConfig) {
+                    auto vertex_pulling_result = tint::core::ir::transform::VertexPulling(
+                        ir.Get(), *r.vertexPullingTransformConfig);
+                    DAWN_INVALID_IF(vertex_pulling_result != tint::Success,
+                                    "An error occurred while running vertex pulling:\n%s",
+                                    vertex_pulling_result.Failure().reason.Str());
+                }
 
                 result = tint::msl::writer::Generate(ir.Get(), r.tintOptions);
 
