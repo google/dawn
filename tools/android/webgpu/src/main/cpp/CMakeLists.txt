@@ -66,3 +66,21 @@ add_custom_command(DEPENDS dawncpp_headers POST_BUILD
                    COMMAND ${CMAKE_COMMAND} -E copy
                            ${CMAKE_CURRENT_BINARY_DIR}/dawn/gen/include/dawn/webgpu.h
                            ${CMAKE_SOURCE_DIR}/gen/include/dawn/webgpu.h)
+
+# Add unit test build configuration
+# To run use the following command:
+# ./gradlew -i connectedAndroidTest
+find_package(googletest REQUIRED CONFIG)
+find_package(junit-gtest REQUIRED CONFIG)
+add_library(webgpu_wrapper_tests SHARED ./../../androidTest/cpp/webgpu_wrapper_tests.cpp)
+target_include_directories(webgpu_wrapper_tests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+target_link_libraries(webgpu_wrapper_tests
+  PRIVATE
+    webgpu_c_bundled
+    android
+    atomic
+    log
+    googletest::gtest
+    googletest::gmock
+    junit-gtest::junit-gtest
+)
