@@ -627,9 +627,9 @@ static EventManager& GetEventManager() {
 // ----------------------------------------------------------------------------
 
 // Default struct declarations.
-#define DEFINE_WGPU_DEFAULT_STRUCT(Name)                     \
-  struct WGPU##Name##Impl final : public RefCounted {        \
-    WGPU##Name##Impl(const EventSource* source = nullptr) {} \
+#define DEFINE_WGPU_DEFAULT_STRUCT(Name)              \
+  struct WGPU##Name##Impl final : public RefCounted { \
+    WGPU##Name##Impl(const EventSource* = nullptr) {} \
   };
 WGPU_PASSTHROUGH_OBJECTS(DEFINE_WGPU_DEFAULT_STRUCT)
 
@@ -1795,8 +1795,8 @@ WGPUFuture wgpuShaderModuleGetCompilationInfo(
 // Methods of Surface
 // ----------------------------------------------------------------------------
 
-WGPUStatus wgpuSurfaceGetCapabilities(WGPUSurface surface,
-                                      WGPUAdapter adapter,
+WGPUStatus wgpuSurfaceGetCapabilities(WGPUSurface,
+                                      WGPUAdapter,
                                       WGPUSurfaceCapabilities* capabilities) {
   assert(capabilities->nextInChain == nullptr); // TODO: Return WGPUStatus_Error
 
