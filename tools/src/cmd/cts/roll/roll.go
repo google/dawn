@@ -77,21 +77,21 @@ const (
 )
 
 type rollerFlags struct {
-	gitPath               string
-	npmPath               string
-	nodePath              string
-	auth                  authcli.Flags
-	cacheDir              string
-	ctsGitURL             string
-	ctsRevision           string
-	force                 bool // Create a new roll, even if CTS is up to date
-	rebuild               bool // Rebuild the expectations file from scratch
-	preserve              bool // If false, abandon past roll changes
-	sendToGardener        bool // If true, automatically send to the gardener for review
-	verbose               bool
-	useSimplifiedCodepath bool
-	parentSwarmingRunID   string
-	maxAttempts           int
+	gitPath              string
+	npmPath              string
+	nodePath             string
+	auth                 authcli.Flags
+	cacheDir             string
+	ctsGitURL            string
+	ctsRevision          string
+	force                bool // Create a new roll, even if CTS is up to date
+	rebuild              bool // Rebuild the expectations file from scratch
+	preserve             bool // If false, abandon past roll changes
+	sendToGardener       bool // If true, automatically send to the gardener for review
+	verbose              bool
+	generateExplicitTags bool // If true, the most explicit tags will be used instead of several broad ones
+	parentSwarmingRunID  string
+	maxAttempts          int
 }
 
 type cmd struct {
@@ -121,7 +121,10 @@ func (c *cmd) RegisterFlags(ctx context.Context, cfg common.Config) ([]string, e
 	flag.BoolVar(&c.flags.preserve, "preserve", false, "do not abandon existing rolls")
 	flag.BoolVar(&c.flags.sendToGardener, "send-to-gardener", false, "send the CL to the WebGPU gardener for review")
 	flag.BoolVar(&c.flags.verbose, "verbose", false, "emit additional logging")
-	flag.StringVar(&c.flags.parentSwarmingRunID, "parent-swarming-run-id", "", "parent swarming run id. All triggered tasks will be children of this task and will be canceled if the parent is canceled.")
+	flag.BoolVar(&c.flags.generateExplicitTags, "generate-explicit-tags", false,
+		"Use the most explicit tags for expectations instead of several broad ones")
+	flag.StringVar(&c.flags.parentSwarmingRunID, "parent-swarming-run-id", "",
+		"parent swarming run id. All triggered tasks will be children of this task and will be canceled if the parent is canceled.")
 	flag.IntVar(&c.flags.maxAttempts, "max-attempts", 3, "number of update attempts before giving up")
 	return nil, nil
 }
@@ -429,7 +432,8 @@ func (r *roller) roll(ctx context.Context) error {
 			// TODO(crbug.com/372730248): Modify exInfo.expectations in place once
 			// the old code path is removed.
 			exInfo.newExpectations = exInfo.expectations.Clone()
-			err := exInfo.newExpectations.AddExpectationsForFailingResults(psResultsByExecutionMode[exInfo.executionMode], testlist, r.flags.verbose)
+			err := exInfo.newExpectations.AddExpectationsForFailingResults(psResultsByExecutionMode[exInfo.executionMode],
+				testlist, r.flags.generateExplicitTags, r.flags.verbose)
 			if err != nil {
 				return err
 			}

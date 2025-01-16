@@ -60,11 +60,11 @@ func (i *arrayFlags) Set(value string) error {
 
 type cmd struct {
 	flags struct {
-		results               common.ResultSource
-		expectations          arrayFlags
-		auth                  authcli.Flags
-		verbose               bool
-		useSimplifiedCodepath bool
+		results              common.ResultSource
+		expectations         arrayFlags
+		auth                 authcli.Flags
+		verbose              bool
+		generateExplicitTags bool // If true, the most explicit tags will be used instead of several broad ones
 	}
 }
 
@@ -80,6 +80,8 @@ func (c *cmd) RegisterFlags(ctx context.Context, cfg common.Config) ([]string, e
 	c.flags.results.RegisterFlags(cfg)
 	c.flags.auth.Register(flag.CommandLine, auth.DefaultAuthOptions())
 	flag.BoolVar(&c.flags.verbose, "verbose", false, "emit additional logging")
+	flag.BoolVar(&c.flags.generateExplicitTags, "generate-explicit-tags", false,
+		"Use the most explicit tags for expectations instead of several broad ones")
 	flag.Var(&c.flags.expectations, "expectations", "path to CTS expectations file(s) to update")
 	return nil, nil
 }
@@ -148,7 +150,7 @@ func (c *cmd) Run(ctx context.Context, cfg common.Config) error {
 			name = "compat"
 		}
 
-		err = ex.AddExpectationsForFailingResults(resultsByExecutionMode[name], testlist, c.flags.verbose)
+		err = ex.AddExpectationsForFailingResults(resultsByExecutionMode[name], testlist, c.flags.generateExplicitTags, c.flags.verbose)
 		// TODO(crbug.com/372730248): Report actual diagnostics.
 		diag := expectations.Diagnostics{}
 		if err != nil {

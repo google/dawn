@@ -78,19 +78,29 @@ func (t Tags) Clone() Tags {
 
 // RemoveLowerPriorityTags returns a copy of the provided tags with only the
 // highest priority tag of each tag set.
-func (t Tags) RemoveLowerPriorityTags(tags container.Set[string]) container.Set[string] {
+func (t Tags) RemoveLowerPriorityTags(tags result.Tags) result.Tags {
+	return t.removeXPriorityTagsImpl(tags, func(p1, p2 int) bool { return p1 < p2 })
+}
+
+// RemoveHigherPriorityTags returns a copy of the provided tags with only the
+// lowest priority tag of each tag set.
+func (t Tags) RemoveHigherPriorityTags(tagsToReduce result.Tags) result.Tags {
+	return t.removeXPriorityTagsImpl(tagsToReduce, func(p1, p2 int) bool { return p1 > p2 })
+}
+
+func (t Tags) removeXPriorityTagsImpl(tagsToReduce result.Tags, priorityComparison func(int, int) bool) result.Tags {
 	type TagPriority struct {
 		tag      string
 		priority int
 	}
 	highestPriorty := container.NewMap[string, *TagPriority]()
-	for tag := range tags {
+	for tag := range tagsToReduce {
 		info := t.ByName[tag]
 		tp := highestPriorty[info.Set]
 		if tp == nil {
 			tp = &TagPriority{tag: tag, priority: info.Priority}
 			highestPriorty[info.Set] = tp
-		} else if tp.priority < info.Priority {
+		} else if priorityComparison(tp.priority, info.Priority) {
 			tp.tag, tp.priority = tag, info.Priority
 		}
 	}

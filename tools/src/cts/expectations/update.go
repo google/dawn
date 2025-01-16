@@ -48,7 +48,9 @@ const (
 //
 // This will:
 //   - Remove expectations for non-existent tests.
-//   - Reduce result tags down to only the most explicit tag from each set
+//   - Reduce result tags down to either:
+//     --- Only the most explicit tag from each set
+//     --- Only a few very broad tags
 //   - Merge identical results together
 //   - Add new expectations to the one mutable chunk that is expected to
 //     be present in the file.
@@ -56,7 +58,7 @@ const (
 //
 // TODO(crbug.com/372730248): Return diagnostics.
 func (c *Content) AddExpectationsForFailingResults(results result.List,
-	testlist []query.Query, verbose bool) error {
+	testlist []query.Query, use_explicit_tags bool, verbose bool) error {
 	// Make a copy of the results. This code mutates the list.
 	results = append(result.List{}, results...)
 
@@ -80,8 +82,14 @@ func (c *Content) AddExpectationsForFailingResults(results result.List,
 	}
 
 	startTime = time.Now()
-	if err := c.reduceTagsToMostExplicitOnly(&results); err != nil {
-		return err
+	if use_explicit_tags {
+		if err := c.reduceTagsToMostExplicitOnly(&results); err != nil {
+			return err
+		}
+	} else {
+		if err := c.reduceTagsToBroadGroups(&results); err != nil {
+			return err
+		}
 	}
 	if verbose {
 		fmt.Printf("Reducing tags took %s\n", time.Now().Sub(startTime).String())
@@ -176,6 +184,90 @@ func (c *Content) reduceTagsToMostExplicitOnly(results *result.List) error {
 		(*results)[i] = res
 	}
 	return nil
+}
+
+// reduceTagsToBroadGroups modifies the given results argument in place so that
+// all contained results' tag sets only contain several broad but important
+// tags.
+func (c *Content) reduceTagsToBroadGroups(results *result.List) error {
+
+	osTagSet, gpuTagSet, deviceTagSet, err := c.getBroadTagSets()
+	if err != nil {
+		return err
+	}
+
+	for i, res := range *results {
+		// Do an initial culling so only the broad tags are left.
+		lowPriorityTags := c.Tags.RemoveHigherPriorityTags(res.Tags)
+		chosenTags := result.NewTags()
+
+		// If this is a remote platform, only use the device tag since OS type +
+		// GPU vendor can be inferred.
+		chosenDeviceTag, err := getAndAssertOneOverlappingTag(deviceTagSet, lowPriorityTags)
+		if err == nil {
+			chosenTags.Add(chosenDeviceTag)
+		} else {
+			chosenOsTag, err := getAndAssertOneOverlappingTag(osTagSet, lowPriorityTags)
+			if err != nil {
+				return err
+			}
+			chosenTags.Add(chosenOsTag)
+
+			chosenGpuTag, err := getAndAssertOneOverlappingTag(gpuTagSet, lowPriorityTags)
+			if err != nil {
+				return err
+			}
+			chosenTags.Add(chosenGpuTag)
+		}
+
+		// Modify the result's tags in place.
+		res.Tags = chosenTags
+		(*results)[i] = res
+	}
+
+	return nil
+}
+
+// getAndAssertOneOverlappingTag asserts that there is a single tag that is
+// shared between the given tags and returns it.
+func getAndAssertOneOverlappingTag(validTags, allTags result.Tags) (string, error) {
+	overlappingTags := validTags.Intersection(allTags)
+	if len(overlappingTags) != 1 {
+		return "", fmt.Errorf("Tags %v did not have exactly one overlap with %v", validTags, allTags)
+	}
+	return overlappingTags.One(), nil
+}
+
+// getBroadTagSets retrieves the Content's tag sets which correspond to the three
+// primary broad tags: OS, GPU, and device type.
+func (c *Content) getBroadTagSets() (result.Tags, result.Tags, result.Tags, error) {
+	// Determine which tag sets are the ones we care about. We do this by looking
+	// for the tag set that contains one of the well-known tags of that type, e.g.
+	// "android", "linux", "mac", or "win" for OS.
+	var osTagSet, gpuTagSet, deviceTagSet result.Tags
+	// TODO(crbug.com/344014313): Move these known tags into a JSON configuration
+	// file for easy modification once dependency injection is available to make
+	// testing possible.
+	knownOsTags := result.NewTags("android", "linux", "mac", "win")
+	knownGpuTags := result.NewTags("amd", "intel", "nvidia", "qualcomm")
+	knownDeviceTags := result.NewTags("android-pixel-4", "android-pixel-6",
+		"chromeos-board-amd64-generic", "fuchsia-board-qemu-x64")
+	for _, tagSet := range c.Tags.Sets {
+		if tagSet.Tags.ContainsAny(knownOsTags) {
+			osTagSet = tagSet.Tags
+		} else if tagSet.Tags.ContainsAny(knownGpuTags) {
+			gpuTagSet = tagSet.Tags
+		} else if tagSet.Tags.ContainsAny(knownDeviceTags) {
+			deviceTagSet = tagSet.Tags
+		}
+	}
+
+	if osTagSet == nil || gpuTagSet == nil || deviceTagSet == nil {
+		return nil, nil, nil, fmt.Errorf("Did not find expected tag sets. Known tags may be out of date. osTagSet: %v, gpuTagSet: %v, deviceTagSet: %v",
+			osTagSet, gpuTagSet, deviceTagSet)
+	}
+
+	return osTagSet, gpuTagSet, deviceTagSet, nil
 }
 
 // addExpectationsToMutableChunk adds expectations for the results contained
