@@ -85,6 +85,7 @@
 #include "src/tint/lang/wgsl/ast/transform/simplify_pointers.h"
 #include "src/tint/lang/wgsl/ast/transform/unshadow.h"
 #include "src/tint/lang/wgsl/ast/transform/vectorize_scalar_matrix_initializers.h"
+#include "src/tint/lang/wgsl/ast/transform/vertex_pulling.h"
 #include "src/tint/lang/wgsl/ast/transform/zero_init_workgroup_memory.h"
 #include "src/tint/lang/wgsl/ast/variable_decl_statement.h"
 #include "src/tint/lang/wgsl/helpers/check_supported_extensions.h"
@@ -161,6 +162,15 @@ SanitizedResult Sanitize(const Program& in, const Options& options) {
     manager.Add<ast::transform::Unshadow>();
 
     manager.Add<ast::transform::PromoteSideEffectsToDecl>();
+
+    // VertexPulling must come before Robustness.
+    if (options.vertex_pulling_config) {
+        ast::transform::VertexPulling::Config config;
+        config.pulling_group = options.vertex_pulling_config->pulling_group;
+        config.vertex_state = options.vertex_pulling_config->vertex_state;
+        manager.Add<ast::transform::VertexPulling>();
+        data.Add<ast::transform::VertexPulling::Config>(std::move(config));
+    }
 
     if (!options.disable_robustness) {
         // Robustness must come after PromoteSideEffectsToDecl

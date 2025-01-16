@@ -33,6 +33,7 @@
 #include <unordered_map>
 
 #include "src/tint/api/common/binding_point.h"
+#include "src/tint/api/common/vertex_pulling_config.h"
 #include "src/tint/utils/reflection.h"
 
 namespace tint::msl::writer {
@@ -174,7 +175,10 @@ struct Options {
     /// from which to load buffer sizes.
     ArrayLengthFromUniformOptions array_length_from_uniform = {};
 
-    /// The bindings
+    /// The optional vertex pulling configuration.
+    std::optional<VertexPullingConfig> vertex_pulling_config = {};
+
+    /// The bindings.
     Bindings bindings;
 
     /// Reflect the fields of this class so that it can be used by tint::ForeachField()
@@ -190,6 +194,7 @@ struct Options {
                  fixed_sample_mask,
                  pixel_local_attachments,
                  array_length_from_uniform,
+                 vertex_pulling_config,
                  bindings);
 };
 

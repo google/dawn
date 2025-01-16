@@ -231,5 +231,65 @@ kernel void tint_entry_point(uint v_7 [[thread_index_in_threadgroup]]) {
 )");
 }
 
+TEST_F(MslWriterTest, VertexPulling) {
+    auto* ep = b.Function("main", ty.vec4<f32>(), core::ir::Function::PipelineStage::kVertex);
+    ep->SetReturnBuiltin(core::BuiltinValue::kPosition);
+    auto* attr = b.FunctionParam<vec4<f32>>("attr");
+    attr->SetLocation(1);
+    ep->SetParams({attr});
+    b.Append(ep->Block(), [&] {  //
+        b.Return(ep, attr);
+    });
+
+    VertexPullingConfig vertex_pulling_config;
+    vertex_pulling_config.pulling_group = 4u;
+    vertex_pulling_config.vertex_state = {
+        {{4, VertexStepMode::kVertex, {{VertexFormat::kFloat32, 0, 1}}}}};
+    ArrayLengthFromUniformOptions array_length_config;
+    array_length_config.ubo_binding = 30u;
+    array_length_config.bindpoint_to_size_index.insert({BindingPoint{0u, 1u}, 0u});
+    Options options;
+    options.bindings.storage.emplace(BindingPoint{4u, 0u}, tint::msl::writer::binding::Storage{1u});
+    options.vertex_pulling_config = std::move(vertex_pulling_config);
+    options.array_length_from_uniform = std::move(array_length_config);
+
+    ASSERT_TRUE(Generate(options)) << err_ << output_.msl;
+    EXPECT_EQ(output_.msl, R"(#include <metal_stdlib>
+using namespace metal;
+
+template<typename T, size_t N>
+struct tint_array {
+  const constant T& operator[](size_t i) const constant { return elements[i]; }
+  device T& operator[](size_t i) device { return elements[i]; }
+  const device T& operator[](size_t i) const device { return elements[i]; }
+  thread T& operator[](size_t i) thread { return elements[i]; }
+  const thread T& operator[](size_t i) const thread { return elements[i]; }
+  threadgroup T& operator[](size_t i) threadgroup { return elements[i]; }
+  const threadgroup T& operator[](size_t i) const threadgroup { return elements[i]; }
+  T elements[N];
+};
+
+struct tint_module_vars_struct {
+  const device tint_array<uint, 1>* tint_vertex_buffer_0;
+  const constant tint_array<uint4, 1>* tint_storage_buffer_sizes;
+};
+
+struct main_outputs {
+  float4 tint_symbol [[position]];
+};
+
+float4 main_inner(uint tint_vertex_index, tint_module_vars_struct tint_module_vars) {
+  return float4(as_type<float>((*tint_module_vars.tint_vertex_buffer_0)[min(tint_vertex_index, (((*tint_module_vars.tint_storage_buffer_sizes)[0u].x / 4u) - 1u))]), 0.0f, 0.0f, 1.0f);
+}
+
+vertex main_outputs v(uint tint_vertex_index [[vertex_id]], const device tint_array<uint, 1>* tint_vertex_buffer_0 [[buffer(1)]], const constant tint_array<uint4, 1>* tint_storage_buffer_sizes [[buffer(30)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.tint_vertex_buffer_0=tint_vertex_buffer_0, .tint_storage_buffer_sizes=tint_storage_buffer_sizes};
+  main_outputs tint_wrapper_result = {};
+  tint_wrapper_result.tint_symbol = main_inner(tint_vertex_index, tint_module_vars);
+  return tint_wrapper_result;
+}
+)");
+}
+
 }  // namespace
 }  // namespace tint::msl::writer

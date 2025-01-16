@@ -677,8 +677,6 @@ source_set("sources") {
       "metal/UtilsMetal.mm",
     ]
 
-    deps += [ "${dawn_root}/src/tint/lang/core/ir/transform" ]
-
     # If a "build with ARC" config is present, remove it.
     if (filter_include(configs, [ "//build/config/compiler:enable_arc" ]) !=
         []) {

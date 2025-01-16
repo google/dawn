@@ -44,7 +44,6 @@
 #include "dawn/platform/DawnPlatform.h"
 #include "dawn/platform/metrics/HistogramMacros.h"
 #include "dawn/platform/tracing/TraceEvent.h"
-#include "src/tint/lang/core/ir/transform/vertex_pulling.h"
 
 #include <tint/tint.h>
 
@@ -61,7 +60,6 @@ using OptionalVertexPullingTransformConfig = std::optional<tint::VertexPullingCo
 #define MSL_COMPILATION_REQUEST_MEMBERS(X)                                                       \
     X(SingleShaderStage, stage)                                                                  \
     X(const tint::Program*, inputProgram)                                                        \
-    X(OptionalVertexPullingTransformConfig, vertexPullingTransformConfig)                        \
     X(std::optional<tint::ast::transform::SubstituteOverride::Config>, substituteOverrideConfig) \
     X(LimitsForCompilationRequest, limits)                                                       \
     X(CacheKey::UnsafeUnkeyedValue<const AdapterBase*>, adapter)                                 \
@@ -274,7 +272,6 @@ ResultOrError<CacheResult<MslCompilation>> TranslateToMSL(
     req.stage = stage;
     auto tintProgram = programmableStage.module->GetTintProgram();
     req.inputProgram = &(tintProgram->program);
-    req.vertexPullingTransformConfig = std::move(vertexPullingTransformConfig);
     req.substituteOverrideConfig = std::move(substituteOverrideConfig);
     req.entryPointName = programmableStage.entryPoint.c_str();
     req.disableSymbolRenaming = device->IsToggleEnabled(Toggle::DisableSymbolRenaming);
@@ -299,6 +296,7 @@ ResultOrError<CacheResult<MslCompilation>> TranslateToMSL(
     req.tintOptions.bindings = std::move(bindings);
     req.tintOptions.disable_polyfill_integer_div_mod =
         device->IsToggleEnabled(Toggle::DisablePolyfillsOnIntegerDivisonAndModulo);
+    req.tintOptions.vertex_pulling_config = std::move(vertexPullingTransformConfig);
 
     const CombinedLimits& limits = device->GetLimits();
     req.limits = LimitsForCompilationRequest::Create(limits.v1);
@@ -326,15 +324,6 @@ ResultOrError<CacheResult<MslCompilation>> TranslateToMSL(
                     r.disableSymbolRenaming ? tint::ast::transform::Renamer::Target::kMslKeywords
                                             : tint::ast::transform::Renamer::Target::kAll,
                     std::move(requestedNames));
-
-                if (r.vertexPullingTransformConfig) {
-                    tint::ast::transform::VertexPulling::Config config;
-                    config.pulling_group = r.vertexPullingTransformConfig->pulling_group;
-                    config.vertex_state = r.vertexPullingTransformConfig->vertex_state;
-                    transformManager.Add<tint::ast::transform::VertexPulling>();
-                    transformInputs.Add<tint::ast::transform::VertexPulling::Config>(
-                        std::move(config));
-                }
             }
 
             if (r.substituteOverrideConfig) {
@@ -364,15 +353,6 @@ ResultOrError<CacheResult<MslCompilation>> TranslateToMSL(
                 DAWN_INVALID_IF(ir != tint::Success,
                                 "An error occurred while generating Tint IR\n%s",
                                 ir.Failure().reason.Str());
-
-                // TODO(380044409): Move this into the backend.
-                if (r.vertexPullingTransformConfig) {
-                    auto vertex_pulling_result = tint::core::ir::transform::VertexPulling(
-                        ir.Get(), *r.vertexPullingTransformConfig);
-                    DAWN_INVALID_IF(vertex_pulling_result != tint::Success,
-                                    "An error occurred while running vertex pulling:\n%s",
-                                    vertex_pulling_result.Failure().reason.Str());
-                }
 
                 result = tint::msl::writer::Generate(ir.Get(), r.tintOptions);
 
