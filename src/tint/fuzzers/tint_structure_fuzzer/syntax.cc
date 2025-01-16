@@ -9,6 +9,7 @@
 #include <sstream>
 #include <string_view>
 #include <utility>
+#include <unordered_map>
 #include "src/tint/fuzzers/random_generator.h"
 #include "src/tint/utils/math/crc32.h"
 
@@ -18,8 +19,54 @@ namespace tint::fuzzers::structure_fuzzer {
 
 namespace {
 
+struct Context {
+    std::unordered_map<std::string, std::string> vars; 
+    RandomGenerator& gen;
+    int nextVarId = 0;
+
+    explicit Context(RandomGenerator& generator) : gen(generator) {}
+
+    std::string createVariable(const std::string& type) {
+        std::string name = "v" + std::to_string(nextVarId++);
+        vars[name] = type;
+        return name;
+    }
+
+    std::string getRandomVariable() {
+        if (vars.empty()) return "";
+        auto it = vars.begin();
+        std::advance(it, gen.GetUInt32(vars.size()));
+        return it->first;
+    }
+
+    bool shouldUseVariable() {
+        return !vars.empty() && gen.GetUInt32(2) == 0;
+    }
+};
+
+struct VariableContext {
+    std::unordered_map<std::string, std::string> vars;  
+    int nextVarId = 0;
+
+    std::string createVariable(const std::string& type) {
+        std::string name = "v" + std::to_string(nextVarId++);
+        vars[name] = type;
+        return name;
+    }
+
+    std::string getRandomVariable(RandomGenerator& gen) {
+        if (vars.empty()) return "";
+        auto it = vars.begin();
+        std::advance(it, gen.GetUInt32(vars.size()));
+        return it->first;
+    }
+};
+
 struct ByteInputRnd {
     RandomGenerator& gen;
+    Context& ctx;
+
+    ByteInputRnd(RandomGenerator& g, Context& c) : gen(g), ctx(c) {}
 
     uint8_t byteTerm() { return gen.GetUInt32(256); }
 
@@ -51,7 +98,10 @@ struct ByteInput {
     size_t size;
     size_t used;
     bool acceptTruncated;
-    RandomGenerator& gen;
+    Context& ctx;
+
+    ByteInput(const uint8_t* d, size_t s, size_t u, bool a, Context& c)
+        : data(d), size(s), used(u), acceptTruncated(a), ctx(c) {}
 
     void reset() { used = 0; }
 
@@ -70,7 +120,7 @@ struct ByteInput {
         if (used < size) {
             return byte();
         }
-        return gen.GetUInt32(256);
+        return ctx.gen.GetUInt32(256);
     }
 
     uint32_t range(uint32_t limit, bool repeat) INLINE {
@@ -82,9 +132,9 @@ struct ByteInput {
     }
 };
 
+
 struct ByteOutput {
     std::vector<uint8_t> out;
-
     void push(uint8_t val) { out.push_back(val); }
 };
 
@@ -95,6 +145,9 @@ struct ByteOutputNull {
 struct TextOutput {
     std::stringstream buffer;
     char last = 0;
+    Context& ctx;
+
+    explicit TextOutput(Context& c) : ctx(c) {}
 
     void raw(std::string_view s) INLINE {
         if (s.empty()) {
@@ -106,6 +159,7 @@ struct TextOutput {
         buffer << s;
         last = s.back();
     }
+
     void ident(int n, std::string_view prefix = "x") INLINE {
         raw(std::string(prefix) + std::to_string(n));
     }
@@ -867,16 +921,43 @@ GenerateFn ident(IdentType type) {
 }
 
 void floatLiteral(TextOutput& out) {
-    out.raw("3.1416");
+    if (out.ctx.shouldUseVariable()) {
+        out.raw(out.ctx.getRandomVariable());
+    } else {
+        out.raw("3.1416");
+        std::string var = out.ctx.createVariable("f32");
+        out.raw(" /* stored in " + var + " */");
+    }
 }
+
 void floatHexLiteral(TextOutput& out) {
-    out.raw("0x1.Fp4");
+    if (out.ctx.shouldUseVariable()) {
+        out.raw(out.ctx.getRandomVariable());
+    } else {
+        out.raw("0x1.Fp4");
+        std::string var = out.ctx.createVariable("f32");
+        out.raw(" /* stored in " + var + " */");
+    }
 }
+
 void decimalLiteral(TextOutput& out) {
-    out.raw("12345");
+    if (out.ctx.shouldUseVariable()) {
+        out.raw(out.ctx.getRandomVariable());
+    } else {
+        out.raw(std::to_string(out.ctx.gen.GetUInt32(1000)));
+        std::string var = out.ctx.createVariable("i32");
+        out.raw(" /* stored in " + var + " */");
+    }
 }
+
 void hexLiteral(TextOutput& out) {
-    out.raw("0xFFFF");
+    if (out.ctx.shouldUseVariable()) {
+        out.raw(out.ctx.getRandomVariable());
+    } else {
+        out.raw("0x" + std::to_string(out.ctx.gen.GetUInt32(0xFFFF)));
+        std::string var = out.ctx.createVariable("i32");
+        out.raw(" /* stored in " + var + " */");
+    }
 }
 
 struct MutationStat {
@@ -885,6 +966,165 @@ struct MutationStat {
     int optionals[2]{0, 0};
     int terminals = 0;
 };
+
+template <typename ByteIn, typename ByteOut>
+void mutate(ByteIn& in,
+            ByteOut& out,
+            Mutation mutation,
+            int& index,
+            NodeId id,
+            RandomGenerator& gen,
+            Context& ctx,
+            int depth = 0);
+
+template <typename ByteIn, typename ByteOut>
+void mutateOne(ByteIn& in,
+               ByteOut& out,
+               Mutation mutation,
+               int& index,
+               const Subnode& subnode,
+               RandomGenerator& gen,
+               Context& ctx,
+               int depth = 0);
+
+template <typename ByteIn, typename ByteOut>
+void mutateAlt(ByteIn& in,
+               ByteOut& out,
+               Mutation mutation,
+               int& index,
+               const std::vector<Subnode>& subnodes,
+               RandomGenerator& gen,
+               Context& ctx,
+               int depth = 0);
+
+template <typename ByteIn, typename ByteOut>
+void mutateOne(ByteIn& in,
+               ByteOut& out,
+               Mutation mutation,
+               int& index,
+               const Subnode& subnode,
+               RandomGenerator& gen,
+               Context& ctx,
+               int depth) {
+    if (const GenerateFn0* fn = std::get_if<GenerateFn0>(&subnode.content)) {
+    } else if (const GenerateFn* fn = std::get_if<GenerateFn>(&subnode.content)) {
+        uint8_t val = in.byteTerm();
+        if (mutation == Mutation::RandomTerminal) {
+            if (index-- == 0) {
+                val = gen.GetUInt32(256);
+            }
+        }
+        out.push(val);
+    } else if (const NodeId* nodeId = std::get_if<NodeId>(&subnode.content)) {
+        mutate(in, out, mutation, index, *nodeId, gen, ctx, depth + 1);
+    }
+}
+
+template <typename ByteIn, typename ByteOut>
+void mutateAlt(ByteIn& in,
+               ByteOut& out,
+               Mutation mutation,
+               int& index,
+               const std::vector<Subnode>& subnodes,
+               RandomGenerator& gen,
+               Context& ctx,
+               int depth) {
+    for (const Subnode& subnode : subnodes) {
+        int repetitions = 1;
+        int newRepetitions = 1;
+        if (subnode.mod == '*') {
+            newRepetitions = repetitions = in.range(maxRepeats + 1, true);
+            if (mutation == Mutation::IncRepeat && repetitions < maxRepeats) {
+                if (index-- == 0) {
+                    ++newRepetitions;
+                }
+            }
+            if (mutation == Mutation::DecRepeat && repetitions > 0) {
+                if (index-- == 0) {
+                    --newRepetitions;
+                }
+            }
+            out.push(newRepetitions);
+        } else if (subnode.mod == '?') {
+            newRepetitions = repetitions = in.range(2, true);
+            if (repetitions == 0 && mutation >= Mutation::AddOptional) {
+                if (index-- == 0) {
+                    newRepetitions = 1;
+                }
+            }
+            if (repetitions == 1 && mutation >= Mutation::RemoveOptional) {
+                if (index-- == 0) {
+                    newRepetitions = 0;
+                }
+            }
+            out.push(newRepetitions);
+        }
+
+        for (int i = 0; i < std::min(repetitions, newRepetitions); ++i) {
+            mutateOne(in, out, mutation, index, subnode, gen, ctx, depth);
+        }
+
+        if (newRepetitions > repetitions) {
+            ByteInputRnd rndIn{gen, ctx};
+            for (int i = 0; i < newRepetitions - repetitions; ++i) {
+                mutateOne(rndIn, out, mutation, index, subnode, gen, ctx, depth);
+            }
+        } else if (newRepetitions < repetitions) {
+            ByteOutputNull nullOut;
+            for (int i = 0; i < repetitions - newRepetitions; ++i) {
+                mutateOne(in, nullOut, mutation, index, subnode, gen, ctx, depth);
+            }
+        }
+    }
+}
+
+template <typename ByteIn, typename ByteOut>
+void mutate(ByteIn& in,
+            ByteOut& out,
+            Mutation mutation,
+            int& index,
+            NodeId id,
+            RandomGenerator& gen,
+            Context& ctx,
+            int depth) {
+    if (depth > maxDepth) {
+        return;
+    }
+    const Node& node = nodes()[static_cast<int>(id)];
+    uint8_t alternative = 0;
+    if (node.size() > 1) {
+        alternative = in.range(node.size(), false);
+        if (mutation >= Mutation::NextAlternative && mutation <= Mutation::RandomAlternative) {
+            if (index-- == 0) {
+                ByteOutputNull nullOut;
+                mutateAlt(in, nullOut, mutation, index, node[alternative], gen, ctx, depth);
+                switch (mutation) {
+                    case Mutation::NextAlternative:
+                        alternative = (alternative + 1) % node.size();
+                        break;
+                    case Mutation::PrevAlternative:
+                        alternative = (alternative + node.size() - 1) % node.size();
+                        break;
+                    case Mutation::RandomAlternative: {
+                        uint8_t newAlternative = gen.GetUInt32(node.size() - 1);
+                        alternative = newAlternative >= alternative ? newAlternative + 1 : newAlternative;
+                        break;
+                    }
+                    default:
+                        break;
+                }
+                assert(alternative < node.size());
+                out.push(alternative);
+                ByteInputRnd rndIn{gen, ctx};
+                mutateAlt(rndIn, out, mutation, index, node[alternative], gen, ctx, depth);
+                return;
+            }
+        }
+        out.push(alternative);
+    }
+    assert(alternative < node.size());
+    mutateAlt(in, out, mutation, index, node[alternative], gen, ctx, depth);
+}
 
 void count(MutationStat& stat, ByteInput& in, NodeId id, int depth = 0) {
     if (depth > maxDepth) {
@@ -913,7 +1153,7 @@ void count(MutationStat& stat, ByteInput& in, NodeId id, int depth = 0) {
         }
         for (int i = 0; i < repetitions; ++i) {
             if (std::get_if<GenerateFn0>(&subnode.content)) {
-                // do nothing
+                // Do nothing
             } else if (std::get_if<GenerateFn>(&subnode.content)) {
                 in.byteTerm();
                 ++stat.terminals;
@@ -922,147 +1162,6 @@ void count(MutationStat& stat, ByteInput& in, NodeId id, int depth = 0) {
             }
         }
     }
-}
-
-template <typename ByteIn, typename ByteOut>
-void mutate(ByteIn& in,
-            ByteOut& out,
-            Mutation mutation,
-            int& index,
-            NodeId id,
-            RandomGenerator& gen,
-            int depth = 0);
-
-template <typename ByteIn, typename ByteOut>
-void mutateOne(ByteIn& in,
-               ByteOut& out,
-               Mutation mutation,
-               int& index,
-               const Subnode& subnode,
-               RandomGenerator& gen,
-               int depth = 0) {
-    if (std::get_if<GenerateFn0>(&subnode.content)) {
-        // do nothing
-    } else if (std::get_if<GenerateFn>(&subnode.content)) {
-        uint8_t val = in.byteTerm();
-        if (mutation == Mutation::RandomTerminal) {
-            if (index-- == 0) {
-                val = gen.GetUInt32(256);
-            }
-        }
-        out.push(val);
-    } else if (const NodeId* nodeId = std::get_if<NodeId>(&subnode.content)) {
-        mutate(in, out, mutation, index, *nodeId, gen, depth + 1);
-    }
-}
-
-template <typename ByteIn, typename ByteOut>
-void mutateAlt(ByteIn& in,
-               ByteOut& out,
-               Mutation mutation,
-               int& index,
-               const std::vector<Subnode>& subnodes,
-               RandomGenerator& gen,
-               int depth = 0) {
-    for (const Subnode& subnode : subnodes) {
-        int repetitions = 1;
-        int newRepetitions = 1;
-        if (subnode.mod == '*') {
-            newRepetitions = repetitions = in.range(maxRepeats + 1, true);  // repeat
-            if (mutation == Mutation::IncRepeat && repetitions < maxRepeats) {
-                if (index-- == 0) {
-                    ++newRepetitions;
-                }
-            }
-            if (mutation == Mutation::DecRepeat && repetitions > 0) {
-                if (index-- == 0) {
-                    --newRepetitions;
-                }
-            }
-            out.push(newRepetitions);
-        } else if (subnode.mod == '?') {
-            newRepetitions = repetitions = in.range(2, true);  // optional
-
-            if (repetitions == 0 && mutation >= Mutation::AddOptional) {
-                if (index-- == 0) {
-                    newRepetitions = 1;
-                }
-            }
-            if (repetitions == 1 && mutation >= Mutation::RemoveOptional) {
-                if (index-- == 0) {
-                    newRepetitions = 0;
-                }
-            }
-            out.push(newRepetitions);
-        }
-
-        for (int i = 0; i < std::min(repetitions, newRepetitions); ++i) {
-            mutateOne(in, out, mutation, index, subnode, gen, depth);
-        }
-
-        if (newRepetitions > repetitions) {
-            ByteInputRnd rndIn{gen};
-            for (int i = 0; i < newRepetitions - repetitions; ++i) {
-                mutateOne(rndIn, out, mutation, index, subnode, gen, depth);
-            }
-        } else if (newRepetitions < repetitions) {
-            ByteOutputNull nullOut;
-            for (int i = 0; i < repetitions - newRepetitions; ++i) {
-                mutateOne(in, nullOut, mutation, index, subnode, gen, depth);
-            }
-        }
-    }
-}
-
-template <typename ByteIn, typename ByteOut>
-void mutate(ByteIn& in,
-            ByteOut& out,
-            Mutation mutation,
-            int& index,
-            NodeId id,
-            RandomGenerator& gen,
-            int depth) {
-    if (depth > maxDepth) {
-        return;
-    }
-    const Node& node = nodes()[static_cast<int>(id)];
-    uint8_t alternative = 0;
-    if (node.size() > 1) {
-        alternative = in.range(node.size(), false);
-        if (mutation >= Mutation::NextAlternative && mutation <= Mutation::RandomAlternative) {
-            if (index-- == 0) {
-                // skip old bytes from `in`
-                ByteOutputNull nullOut;
-                mutateAlt(in, nullOut, mutation, index, node[alternative], gen, depth);
-                switch (mutation) {
-                    case Mutation::NextAlternative:
-                        alternative = (alternative + 1) % node.size();
-                        break;
-                    case Mutation::PrevAlternative:
-                        alternative = (alternative + node.size() - 1) % node.size();
-                        break;
-                    case Mutation::RandomAlternative: {
-
-                        uint8_t newAlternative = gen.GetUInt32(node.size() - 1);
-                        alternative =
-                            newAlternative >= alternative ? newAlternative + 1 : newAlternative;
-                        break;
-                    }
-                    default:
-                        break;
-                }
-                assert(alternative < node.size());
-                out.push(alternative);
-                // emit random bytes to `out`
-                ByteInputRnd rndIn{gen};
-                mutateAlt(rndIn, out, mutation, index, node[alternative], gen, depth);
-                return;
-            }
-        }
-        out.push(alternative);
-    }
-    assert(alternative < node.size());
-    mutateAlt(in, out, mutation, index, node[alternative], gen, depth);
 }
 
 void generate(ByteInput& in, TextOutput& out, NodeId id, int depth = 0) {
@@ -1094,18 +1193,16 @@ void generate(ByteInput& in, TextOutput& out, NodeId id, int depth = 0) {
 }  
 
 std::vector<uint8_t> WGSLMutate(Mutation mutation,
-                                const uint8_t* data,
-                                size_t size,
-                                RandomGenerator& gen) {
-    ByteInput in{data, size, 0, true, gen};
+                               const uint8_t* data,
+                               size_t size,
+                               RandomGenerator& gen) {
+    Context ctx(gen);  
+    ByteInput in{data, size, 0, true, ctx};  
     ByteOutput out{};
     MutationStat stat{};
     int index = -1;
     count(stat, in, NodeId::translation_unit);
-#if 0
-    printf("a=%d r=(%d %d %d) o=(%d %d) t=%d\n", stat.alternatives, stat.repeats[0],
-           stat.repeats[1], stat.repeats[2], stat.optionals[0], stat.optionals[1], stat.terminals);
-#endif
+    
     while (index < 0) {
         index = -1;
         switch (mutation) {
@@ -1144,20 +1241,22 @@ std::vector<uint8_t> WGSLMutate(Mutation mutation,
         }
         if (index == -1) {
             mutation = static_cast<Mutation>((static_cast<unsigned>(mutation) + 1) %
-                                             (static_cast<unsigned>(Mutation::Last) + 1));
+                                           (static_cast<unsigned>(Mutation::Last) + 1));
         }
-    };
+    }
     in.reset();
-    mutate(in, out, mutation, index, NodeId::translation_unit, gen);
+    mutate(in, out, mutation, index, NodeId::translation_unit, gen, ctx, 0);
     return std::move(out.out);
 }
 
 std::string WGSLSource(const uint8_t* data, size_t size) {
     RandomGenerator gen{CRC32(data, size)};
-    ByteInput in{data, size, 0, false, gen};
-    TextOutput out{};
+    Context ctx(gen);
+    ByteInput in{data, size, 0, false, ctx};
+    TextOutput out(ctx);
     generate(in, out, NodeId::translation_unit);
     return std::move(out.buffer).str();
 }
 
 }  // namespace tint::fuzzers::structure_fuzzer
+
