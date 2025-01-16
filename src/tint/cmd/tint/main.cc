@@ -1223,6 +1223,13 @@ bool GenerateGlsl([[maybe_unused]] Options& options,
     // Generate binding options.
     gen_options.bindings = tint::glsl::writer::GenerateBindings(ir.Get());
 
+    // Check that the module and options are supported by the backend.
+    auto check = tint::glsl::writer::CanGenerate(ir.Get(), gen_options);
+    if (check != tint::Success) {
+        std::cerr << check.Failure() << "\n";
+        return false;
+    }
+
     // Generate GLSL.
     auto result = tint::glsl::writer::Generate(ir.Get(), gen_options, "");
     if (result != tint::Success) {

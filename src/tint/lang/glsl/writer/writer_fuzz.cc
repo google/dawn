@@ -105,151 +105,6 @@ Options GenerateOptions(core::ir::Module& module) {
     return options;
 }
 
-bool CanRun(const core::ir::Module& module, Options& options) {
-    // Make sure that every texture variable is in the texture_builtins_from_uniform binding list,
-    // otherwise TextureBuiltinsFromUniform will fail.
-    // Also make sure there is at most one user-declared push_constant, and make a note of its size.
-    uint32_t user_push_constant_size = 0;
-    for (auto* inst : *module.root_block) {
-        auto* var = inst->As<core::ir::Var>();
-
-        if (!var) {
-            continue;
-        }
-        auto* ptr = var->Result(0)->Type()->As<core::type::Pointer>();
-
-        // The pixel_local extension is not supported by the GLSL backend.
-        if (ptr->AddressSpace() == core::AddressSpace::kPixelLocal) {
-            return false;
-        }
-
-        if (ptr->StoreType()->Is<core::type::Texture>()) {
-            bool found = false;
-            auto binding_point = var->BindingPoint();
-            for (auto& bp :
-                 options.bindings.texture_builtins_from_uniform.ubo_bindingpoint_ordering) {
-                if (bp == binding_point) {
-                    found = true;
-                    break;
-                }
-            }
-            if (!found) {
-                return false;
-            }
-
-            // Check texel formats for read-write storage textures.
-            if (auto* st = ptr->StoreType()->As<core::type::StorageTexture>()) {
-                if (st->Access() == core::Access::kReadWrite) {
-                    switch (st->TexelFormat()) {
-                        case core::TexelFormat::kR32Float:
-                        case core::TexelFormat::kR32Sint:
-                        case core::TexelFormat::kR32Uint:
-                            break;
-                        default:
-                            return false;
-                    }
-                }
-            }
-        }
-
-        if (ptr->AddressSpace() == core::AddressSpace::kPushConstant) {
-            if (user_push_constant_size > 0) {
-                // We've already seen a user-declared push constant.
-                return false;
-            }
-            user_push_constant_size = tint::RoundUp(4u, ptr->StoreType()->Size());
-        }
-    }
-
-    // Check for calls to unsupported builtin functions.
-    for (auto* inst : module.Instructions()) {
-        auto* call = inst->As<core::ir::CoreBuiltinCall>();
-        if (!call) {
-            continue;
-        }
-
-        if (core::IsSubgroup(call->Func())) {
-            return false;
-        }
-        if (call->Func() == core::BuiltinFn::kInputAttachmentLoad) {
-            return false;
-        }
-    }
-
-    // Check for unsupported shader IO builtins.
-    for (auto& func : module.functions) {
-        if (!func->IsEntryPoint()) {
-            continue;
-        }
-
-        // subgroup builtins are not supported.
-        for (auto* param : func->Params()) {
-            if (auto* str = param->Type()->As<core::type::Struct>()) {
-                for (auto* member : str->Members()) {
-                    if (member->Attributes().builtin == core::BuiltinValue::kSubgroupInvocationId ||
-                        member->Attributes().builtin == core::BuiltinValue::kSubgroupSize) {
-                        return false;
-                    }
-                }
-            } else {
-                if (param->Builtin() == core::BuiltinValue::kSubgroupInvocationId ||
-                    param->Builtin() == core::BuiltinValue::kSubgroupSize) {
-                    return false;
-                }
-            }
-        }
-
-        // clip_distance is not supported.
-        if (auto* str = func->ReturnType()->As<core::type::Struct>()) {
-            for (auto* member : str->Members()) {
-                if (member->Attributes().builtin == core::BuiltinValue::kClipDistances) {
-                    return false;
-                }
-            }
-        }
-    }
-
-    static constexpr uint32_t kMaxOffset = 0x1000;
-    Hashset<uint32_t, 4> push_constant_word_offsets;
-    auto check_push_constant_offset = [&](uint32_t offset) {
-        // Excessive values can cause OOM / timeouts when padding structures in the printer.
-        if (offset > kMaxOffset) {
-            return false;
-        }
-        // Offset must be 4-byte aligned.
-        if (offset & 0x3) {
-            return false;
-        }
-        // Offset must not have already been used.
-        if (!push_constant_word_offsets.Add(offset >> 2)) {
-            return false;
-        }
-        // Offset must be after the user-defined push constants.
-        if (offset < user_push_constant_size) {
-            return false;
-        }
-        return true;
-    };
-
-    if (options.first_instance_offset &&
-        !check_push_constant_offset(*options.first_instance_offset)) {
-        return false;
-    }
-
-    if (options.first_vertex_offset && !check_push_constant_offset(*options.first_vertex_offset)) {
-        return false;
-    }
-
-    if (options.depth_range_offsets) {
-        if (!check_push_constant_offset(options.depth_range_offsets->max) ||
-            !check_push_constant_offset(options.depth_range_offsets->min)) {
-            return false;
-        }
-    }
-
-    return true;
-}
-
 Result<SuccessType> IRFuzzer(core::ir::Module& module, const fuzz::ir::Context& context) {
     // TODO(375388101): We cannot run the backend for every entry point in the module unless we
     // clone the whole module each time, so for now we just generate the first entry point.
@@ -269,8 +124,10 @@ Result<SuccessType> IRFuzzer(core::ir::Module& module, const fuzz::ir::Context& 
 
     // TODO(377391551): Enable fuzzing of options.
     auto options = GenerateOptions(module);
-    if (!CanRun(module, options)) {
-        return Failure{"Cannot run module"};
+
+    auto check = CanGenerate(module, options);
+    if (check != Success) {
+        return check.Failure();
     }
 
     auto output = Generate(module, options, "");
