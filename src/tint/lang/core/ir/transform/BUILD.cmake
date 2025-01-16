@@ -89,6 +89,8 @@ tint_add_target(tint_lang_core_ir_transform lib
   lang/core/ir/transform/value_to_let.h
   lang/core/ir/transform/vectorize_scalar_matrix_constructors.cc
   lang/core/ir/transform/vectorize_scalar_matrix_constructors.h
+  lang/core/ir/transform/vertex_pulling.cc
+  lang/core/ir/transform/vertex_pulling.h
   lang/core/ir/transform/zero_init_workgroup_memory.cc
   lang/core/ir/transform/zero_init_workgroup_memory.h
 )
@@ -150,6 +152,7 @@ tint_add_target(tint_lang_core_ir_transform_test test
   lang/core/ir/transform/substitute_overrides_test.cc
   lang/core/ir/transform/value_to_let_test.cc
   lang/core/ir/transform/vectorize_scalar_matrix_constructors_test.cc
+  lang/core/ir/transform/vertex_pulling_test.cc
   lang/core/ir/transform/zero_init_workgroup_memory_test.cc
 )
 
