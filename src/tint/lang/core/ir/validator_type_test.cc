@@ -748,16 +748,16 @@ INSTANTIATE_TEST_SUITE_P(Int8Types,
 TEST_F(IR_ValidatorTest, Int8Type_InstructionOperand_NotAllowed) {
     auto* fn = b.Function("my_func", ty.void_());
     b.Append(fn->Block(), [&] {
-        b.Convert(ty.i32(), u8(1));
+        b.Let("l", u8(1));
         b.Return(fn);
     });
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_EQ(res.Failure().reason.Str(),
-              R"(:3:22 error: convert: 8-bit integer types are not permitted
-    %2:i32 = convert 1u8
-                     ^^^
+              R"(:3:5 error: let: 8-bit integer types are not permitted
+    %l:u8 = let 1u8
+    ^^^^^
 
 :2:3 note: in block
   $B1: {
@@ -766,7 +766,7 @@ TEST_F(IR_ValidatorTest, Int8Type_InstructionOperand_NotAllowed) {
 note: # Disassembly
 %my_func = func():void {
   $B1: {
-    %2:i32 = convert 1u8
+    %l:u8 = let 1u8
     ret
   }
 }
@@ -776,7 +776,7 @@ note: # Disassembly
 TEST_F(IR_ValidatorTest, Int8Type_InstructionOperand_Allowed) {
     auto* fn = b.Function("my_func", ty.void_());
     b.Append(fn->Block(), [&] {
-        b.Convert(ty.i32(), u8(1));
+        b.Let("l", u8(1));
         b.Return(fn);
     });
 

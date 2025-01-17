@@ -627,6 +627,236 @@ note: # Disassembly
 )");
 }
 
+TEST_F(IR_ValidatorTest, Convert_ScalarToScalar) {
+    auto* f = b.Function("f", ty.void_());
+    auto* p = b.FunctionParam("p", ty.f32());
+    f->AppendParam(p);
+    b.Append(f->Block(), [&] {
+        b.Convert(ty.i32(), p);
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_EQ(res, Success);
+}
+
+TEST_F(IR_ValidatorTest, Convert_ScalarToVec) {
+    auto* f = b.Function("f", ty.void_());
+    auto* p = b.FunctionParam("p", ty.f32());
+    f->AppendParam(p);
+    b.Append(f->Block(), [&] {
+        b.Convert(ty.vec2<f32>(), p);
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    // There is a vector constructor that fills all elements with the scalar,
+    // this will start failing when checking for kConvertor is added.
+    ASSERT_EQ(res, Success);
+}
+
+TEST_F(IR_ValidatorTest, Convert_ScalarToMat) {
+    auto* f = b.Function("f", ty.void_());
+    auto* p = b.FunctionParam("p", ty.f32());
+    f->AppendParam(p);
+    b.Append(f->Block(), [&] {
+        b.Convert(ty.mat2x3<f32>(), p);
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(
+        res.Failure().reason.Str(),
+        testing::HasSubstr(":3:22 error: convert: no matching constructor for 'mat2x3<f32>(f32)'"));
+}
+
+TEST_F(IR_ValidatorTest, Convert_VecToVec) {
+    auto* f = b.Function("f", ty.void_());
+    auto* p = b.FunctionParam("p", ty.vec2<u32>());
+    f->AppendParam(p);
+    b.Append(f->Block(), [&] {
+        b.Convert(ty.vec2<f32>(), p);
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_EQ(res, Success);
+}
+
+TEST_F(IR_ValidatorTest, Convert_VecToVec_WidthMismatch) {
+    auto* f = b.Function("f", ty.void_());
+    auto* p = b.FunctionParam("p", ty.vec2<u32>());
+    f->AppendParam(p);
+    b.Append(f->Block(), [&] {
+        b.Convert(ty.vec4<f32>(), p);
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(res.Failure().reason.Str(),
+                testing::HasSubstr(
+                    ":3:20 error: convert: no matching constructor for 'vec4<f32>(vec2<u32>)'"));
+}
+
+TEST_F(IR_ValidatorTest, Convert_VecToScalar) {
+    auto* f = b.Function("f", ty.void_());
+    auto* p = b.FunctionParam("p", ty.vec2<u32>());
+    f->AppendParam(p);
+    b.Append(f->Block(), [&] {
+        b.Convert(ty.f32(), p);
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(
+        res.Failure().reason.Str(),
+        testing::HasSubstr(":3:14 error: convert: no matching constructor for 'f32(vec2<u32>)'"));
+}
+
+TEST_F(IR_ValidatorTest, Convert_VecToMat) {
+    auto* f = b.Function("f", ty.void_());
+    auto* p = b.FunctionParam("p", ty.vec2<u32>());
+    f->AppendParam(p);
+    b.Append(f->Block(), [&] {
+        b.Convert(ty.mat3x2<f32>(), p);
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(res.Failure().reason.Str(),
+                testing::HasSubstr(
+                    ":3:22 error: convert: no matching constructor for 'mat3x2<f32>(vec2<u32>)'"));
+}
+
+TEST_F(IR_ValidatorTest, Convert_MatToMat) {
+    auto* f = b.Function("f", ty.void_());
+    auto* p = b.FunctionParam("p", ty.mat4x4<f32>());
+    f->AppendParam(p);
+    b.Append(f->Block(), [&] {
+        b.Convert(ty.mat4x4<f16>(), p);
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_EQ(res, Success);
+}
+
+TEST_F(IR_ValidatorTest, Convert_MatToMat_ShapeMismatch) {
+    auto* f = b.Function("f", ty.void_());
+    auto* p = b.FunctionParam("p", ty.mat4x4<f32>());
+    f->AppendParam(p);
+    b.Append(f->Block(), [&] {
+        b.Convert(ty.mat2x2<f32>(), p);
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(
+        res.Failure().reason.Str(),
+        testing::HasSubstr(
+            ":3:22 error: convert: no matching constructor for 'mat2x2<f32>(mat4x4<f32>)'"));
+}
+
+TEST_F(IR_ValidatorTest, Convert_MatToScalar) {
+    auto* f = b.Function("f", ty.void_());
+    auto* p = b.FunctionParam("p", ty.mat4x4<f32>());
+    f->AppendParam(p);
+    b.Append(f->Block(), [&] {
+        b.Convert(ty.f32(), p);
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(
+        res.Failure().reason.Str(),
+        testing::HasSubstr(":3:14 error: convert: no matching constructor for 'f32(mat4x4<f32>)'"));
+}
+
+TEST_F(IR_ValidatorTest, Convert_MatToVec) {
+    auto* f = b.Function("f", ty.void_());
+    auto* p = b.FunctionParam("p", ty.mat4x4<u32>());
+    f->AppendParam(p);
+    b.Append(f->Block(), [&] {
+        b.Convert(ty.vec4<f32>(), p);
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(res.Failure().reason.Str(),
+                testing::HasSubstr(
+                    ":3:20 error: convert: no matching constructor for 'vec4<f32>(mat4x4<u32>)'"));
+}
+
+TEST_F(IR_ValidatorTest, Convert_4xU8ToU32) {
+    auto* f = b.Function("f", ty.void_());
+    auto* p = b.FunctionParam("p", ty.vec4<u8>());
+    f->AppendParam(p);
+    b.Append(f->Block(), [&] {
+        b.Convert(ty.u32(), p);
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod, Capabilities{Capability::kAllow8BitIntegers});
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(
+        res.Failure().reason.Str(),
+        testing::HasSubstr(":3:14 error: convert: no matching constructor for 'u32(vec4<u8>)'"));
+}
+
+TEST_F(IR_ValidatorTest, Convert_U32To4xU8) {
+    auto* f = b.Function("f", ty.void_());
+    auto* p = b.FunctionParam("p", ty.u32());
+    f->AppendParam(p);
+    b.Append(f->Block(), [&] {
+        b.Convert(ty.vec4<u8>(), p);
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod, Capabilities{Capability::kAllow8BitIntegers});
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(
+        res.Failure().reason.Str(),
+        testing::HasSubstr(":3:19 error: convert: no matching constructor for 'vec4<u8>(u32)'"));
+}
+
+TEST_F(IR_ValidatorTest, Convert_PtrToVal) {
+    auto* f = b.Function("f", ty.void_());
+    b.Append(f->Block(), [&] {
+        auto* v = b.Var("v", 0_u);
+        b.Convert(ty.u32(), v->Result(0));
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(res.Failure().reason.Str(),
+                testing::HasSubstr(":4:14 error: convert: no matching constructor for "
+                                   "'u32(ptr<function, u32, read_write>)'"));
+}
+
+TEST_F(IR_ValidatorTest, Convert_PtrToPtr) {
+    auto* f = b.Function("f", ty.void_());
+    b.Append(f->Block(), [&] {
+        auto* v = b.Var("v", 0_u);
+        b.Convert(v->Result(0)->Type(), v->Result(0));
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(
+        res.Failure().reason.Str(),
+        testing::HasSubstr(
+            ":4:41 error: convert: not defined for result type, 'ptr<function, u32, read_write>'"));
+}
+
 TEST_F(IR_ValidatorTest, Block_NoTerminator) {
     b.Function("my_func", ty.void_());
 
