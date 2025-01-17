@@ -164,6 +164,7 @@ Wrappers* Wrappers::instance = nullptr;
         InstanceMethod("has", &W{{$.Name}}::has),
         InstanceMethod("keys", &W{{$.Name}}::keys),
         InstanceAccessor("size", &W{{$.Name}}::getSize, nullptr),
+        InstanceMethod(Napi::Symbol::WellKnown(env,"iterator"), &W{{$.Name}}::iterator),
 {{-  end}}
 {{-  range $m := $methods}}
         InstanceMethod("{{$m.Name}}", &W{{$.Name}}::{{$m.Name}}, static_cast<napi_property_attributes>(napi_default_jsproperty)),
@@ -198,6 +199,9 @@ Wrappers* Wrappers::instance = nullptr;
     }
     Napi::Value getSize(const Napi::CallbackInfo& info) {
       return ToJS(info.Env(), impl->getSize(info.Env()));
+    }
+    Napi::Value iterator(const Napi::CallbackInfo& info) {
+      return impl->iterator(info);
     }
 {{-  end}}
 {{-  range $m := $methods}}

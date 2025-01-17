@@ -37,6 +37,7 @@
 #include "dawn/webgpu_cpp_print.h"
 #include "src/dawn/node/binding/Converter.h"
 #include "src/dawn/node/binding/GPUAdapter.h"
+#include "src/dawn/node/binding/IteratorHelper.h"
 #include "src/dawn/node/binding/TogglesLoader.h"
 
 #if defined(_WIN32)
@@ -311,6 +312,9 @@ interop::Interface<interop::WGSLLanguageFeatures> GPU::getWgslLanguageFeatures(N
             return out;
         }
         size_t getSize(Napi::Env env) { return features_.size(); }
+        Napi::Value iterator(const Napi::CallbackInfo& info) {
+            return CreateIterator(info, this->features_);
+        }
 
         InteropWGSLFeatureSet features_;
     };
