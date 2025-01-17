@@ -689,17 +689,19 @@ void PhysicalDevice::SetupBackendDeviceToggles(dawn::platform::Platform* platfor
         }
     }
 
-    // Currently this workaround is only needed on Intel Gen9, Gen9.5 and Gen12 GPUs.
+    // Currently this workaround is only needed on Intel Gen9, Gen9.5, Gen12 and Xe GPUs.
     // See http://crbug.com/dawn/1487 for more information.
     if (gpu_info::IsIntelGen9(vendorId, deviceId) || gpu_info::IsIntelGen12LP(vendorId, deviceId) ||
-        gpu_info::IsIntelGen12HP(vendorId, deviceId)) {
+        gpu_info::IsIntelGen12HP(vendorId, deviceId) ||
+        gpu_info::IsIntelXeLPG(vendorId, deviceId)) {
         deviceToggles->Default(Toggle::D3D12ForceClearCopyableDepthStencilTextureOnCreation, true);
     }
 
-    // Currently this workaround is only needed on Intel Gen12 GPUs.
+    // Currently this workaround is only needed on Intel Gen12 and Xe GPUs.
     // See http://crbug.com/dawn/1487 for more information.
     if (gpu_info::IsIntelGen12LP(vendorId, deviceId) ||
-        gpu_info::IsIntelGen12HP(vendorId, deviceId)) {
+        gpu_info::IsIntelGen12HP(vendorId, deviceId) ||
+        gpu_info::IsIntelXeLPG(vendorId, deviceId)) {
         deviceToggles->Default(Toggle::D3D12DontSetClearValueOnDepthTextureCreation, true);
     }
 
@@ -742,7 +744,8 @@ void PhysicalDevice::SetupBackendDeviceToggles(dawn::platform::Platform* platfor
 
     // B2T copy failed with stencil8 format on Intel ACM/MTL/ARL GPUs. See
     // https://issues.chromium.org/issues/368085621 for more information.
-    if (gpu_info::IsAlchemist(deviceId) || gpu_info::IsMeteorlakeOrArrowlake(deviceId)) {
+    if (gpu_info::IsIntelGen12HP(vendorId, deviceId) ||
+        gpu_info::IsIntelXeLPG(vendorId, deviceId)) {
         deviceToggles->Default(Toggle::UseBlitForBufferToStencilTextureCopy, true);
     }
 

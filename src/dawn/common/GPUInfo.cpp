@@ -115,14 +115,6 @@ bool IsSkylake(PCIDeviceID deviceId) {
     return (deviceId & 0xFF00) == 0x1900;
 }
 
-bool IsAlchemist(PCIDeviceID deviceId) {
-    return (deviceId & 0xFF00) == 0x5600;
-}
-
-bool IsMeteorlakeOrArrowlake(PCIDeviceID deviceId) {
-    return (deviceId & 0xFF00) == 0x7D00;
-}
-
 bool IsIrisPlus655(PCIDeviceID deviceId) {
     return std::find(IrisPlus655.cbegin(), IrisPlus655.cend(), deviceId) != IrisPlus655.cend();
 }
