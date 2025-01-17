@@ -59,8 +59,7 @@ class CommandRecordingContext : NonMovable {
     NSPRef<id<MTLCommandBuffer>> AcquireCommands();
 
     // Create blit pass encoder from blit pass descriptor
-    id<MTLBlitCommandEncoder> BeginBlit(MTLBlitPassDescriptor* descriptor)
-        API_AVAILABLE(macos(11.0), ios(14.0));
+    id<MTLBlitCommandEncoder> BeginBlit(MTLBlitPassDescriptor* descriptor);
     id<MTLBlitCommandEncoder> EnsureBlit();
     void EndBlit();
 
@@ -68,17 +67,15 @@ class CommandRecordingContext : NonMovable {
     id<MTLComputeCommandEncoder> BeginCompute();
     // Create configurable compute pass from a descriptor with serial dispatch type which commands
     // are executed sequentially.
-    id<MTLComputeCommandEncoder> BeginCompute(MTLComputePassDescriptor* descriptor)
-        API_AVAILABLE(macos(11.0), ios(14.0));
+    id<MTLComputeCommandEncoder> BeginCompute(MTLComputePassDescriptor* descriptor);
     void EndCompute();
 
     id<MTLRenderCommandEncoder> BeginRender(MTLRenderPassDescriptor* descriptor);
     void EndRender();
 
-    void WaitForSharedEvent(id<MTLSharedEvent> sharedEvent, uint64_t signaledValue)
-        API_AVAILABLE(macos(10.14), ios(12.0));
+    void WaitForSharedEvent(id<MTLSharedEvent> sharedEvent, uint64_t signaledValue);
 
-    MaybeError EncodeSharedEventWorkaround() API_AVAILABLE(macos(10.14), ios(12.0));
+    MaybeError EncodeSharedEventWorkaround();
 
   private:
     const raw_ptr<const Queue> mQueue;

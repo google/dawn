@@ -144,10 +144,8 @@ MaybeError EncodeEmptyMetalRenderPass(Device* device,
                                       MTLRenderPassDescriptor* mtlRenderPass,
                                       Extent3D size);
 
-bool SupportCounterSamplingAtCommandBoundary(id<MTLDevice> device)
-    API_AVAILABLE(macos(11.0), ios(14.0));
-bool SupportCounterSamplingAtStageBoundary(id<MTLDevice> device)
-    API_AVAILABLE(macos(11.0), ios(14.0));
+bool SupportCounterSamplingAtCommandBoundary(id<MTLDevice> device);
+bool SupportCounterSamplingAtStageBoundary(id<MTLDevice> device);
 
 }  // namespace dawn::native::metal
 

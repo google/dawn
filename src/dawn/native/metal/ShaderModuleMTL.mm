@@ -451,9 +451,7 @@ MaybeError ShaderModule::CreateFunction(SingleShaderStage stage,
 
     NSRef<MTLCompileOptions> compileOptions = AcquireNSRef([[MTLCompileOptions alloc] init]);
     if (mslCompilation->hasInvariantAttribute) {
-        if (@available(macOS 11.0, iOS 13.0, *)) {
-            (*compileOptions).preserveInvariance = true;
-        }
+        (*compileOptions).preserveInvariance = true;
     }
 
     (*compileOptions).fastMathEnabled = !GetStrictMath().value_or(false);
