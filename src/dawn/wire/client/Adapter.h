@@ -59,7 +59,7 @@ class Adapter final : public ObjectWithEventsBase {
     WGPUInstance GetInstance() const;
     WGPUDevice CreateDevice(const WGPUDeviceDescriptor*);
     WGPUStatus GetFormatCapabilities(WGPUTextureFormat format,
-                                     WGPUFormatCapabilities* capabilities);
+                                     WGPUDawnFormatCapabilities* capabilities);
 
   private:
     LimitsAndFeatures mLimitsAndFeatures;

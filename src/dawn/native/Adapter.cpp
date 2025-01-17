@@ -250,7 +250,7 @@ void APIAdapterPropertiesMemoryHeapsFreeMembers(
     delete[] memoryHeapProperties.heapInfo;
 }
 
-void APIDrmFormatCapabilitiesFreeMembers(WGPUDrmFormatCapabilities capabilities) {
+void APIDawnDrmFormatCapabilitiesFreeMembers(WGPUDawnDrmFormatCapabilities capabilities) {
     delete[] capabilities.properties;
 }
 
@@ -443,23 +443,23 @@ Future AdapterBase::APIRequestDevice(const DeviceDescriptor* descriptor,
 }
 
 wgpu::Status AdapterBase::APIGetFormatCapabilities(wgpu::TextureFormat format,
-                                                   FormatCapabilities* capabilities) {
-    if (!mSupportedFeatures.IsEnabled(wgpu::FeatureName::FormatCapabilities)) {
+                                                   DawnFormatCapabilities* capabilities) {
+    if (!mSupportedFeatures.IsEnabled(wgpu::FeatureName::DawnFormatCapabilities)) {
         [[maybe_unused]] bool hadError = mInstance->ConsumedError(
-            DAWN_VALIDATION_ERROR("Feature FormatCapabilities is not available."));
+            DAWN_VALIDATION_ERROR("Feature DawnFormatCapabilities is not available."));
         return wgpu::Status::Error;
     }
     DAWN_ASSERT(capabilities != nullptr);
 
-    UnpackedPtr<FormatCapabilities> unpacked;
+    UnpackedPtr<DawnFormatCapabilities> unpacked;
     if (mInstance->ConsumedError(ValidateAndUnpack(capabilities), &unpacked)) {
         return wgpu::Status::Error;
     }
 
-    if (unpacked.Get<DrmFormatCapabilities>() != nullptr &&
-        !mSupportedFeatures.IsEnabled(wgpu::FeatureName::DrmFormatCapabilities)) {
+    if (unpacked.Get<DawnDrmFormatCapabilities>() != nullptr &&
+        !mSupportedFeatures.IsEnabled(wgpu::FeatureName::DawnDrmFormatCapabilities)) {
         [[maybe_unused]] bool hadError = mInstance->ConsumedError(
-            DAWN_VALIDATION_ERROR("Feature DrmFormatCapabilities is not available."));
+            DAWN_VALIDATION_ERROR("Feature DawnDrmFormatCapabilities is not available."));
         return wgpu::Status::Error;
     }
 

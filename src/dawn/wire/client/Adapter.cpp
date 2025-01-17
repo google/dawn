@@ -314,7 +314,7 @@ WGPUDevice Adapter::CreateDevice(const WGPUDeviceDescriptor*) {
 }
 
 WGPUStatus Adapter::GetFormatCapabilities(WGPUTextureFormat format,
-                                          WGPUFormatCapabilities* capabilities) {
+                                          WGPUDawnFormatCapabilities* capabilities) {
     dawn::ErrorLog() << "adapter.GetFormatCapabilities not supported with dawn_wire.";
     return WGPUStatus_Error;
 }
@@ -331,8 +331,8 @@ DAWN_WIRE_EXPORT void wgpuDawnWireClientAdapterPropertiesMemoryHeapsFreeMembers(
     delete[] memoryHeapProperties.heapInfo;
 }
 
-DAWN_WIRE_EXPORT void wgpuDawnWireClientDrmFormatCapabilitiesFreeMembers(
-    WGPUDrmFormatCapabilities capabilities) {
+DAWN_WIRE_EXPORT void wgpuDawnWireClientDawnDrmFormatCapabilitiesFreeMembers(
+    WGPUDawnDrmFormatCapabilities capabilities) {
     delete[] capabilities.properties;
 }
 

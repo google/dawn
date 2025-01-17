@@ -122,7 +122,7 @@ class PhysicalDeviceBase : public RefCounted {
     // caller.
     virtual void PopulateBackendFormatCapabilities(
         wgpu::TextureFormat format,
-        UnpackedPtr<FormatCapabilities>& capabilities) const;
+        UnpackedPtr<DawnFormatCapabilities>& capabilities) const;
 
     virtual ResultOrError<PhysicalDeviceSurfaceCapabilities> GetSurfaceCapabilities(
         InstanceBase* instance,

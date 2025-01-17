@@ -36,7 +36,7 @@
 namespace dawn::native {
 
 enum class Feature {
-  {% for enum in types["feature name"].values if enum.valid %}
+  {% for enum in types["feature name"].values if (enum.valid and not is_enum_value_proxy(enum)) %}
     {{as_cppEnum(enum.name)}},
   {% endfor %}
   InvalidEnum,
@@ -45,7 +45,7 @@ enum class Feature {
 template<>
 struct EnumCount<Feature> {
     {% set counter = namespace(value = 0) %}
-    {% for enum in types["feature name"].values if enum.valid -%}
+    {% for enum in types["feature name"].values if (enum.valid and not is_enum_value_proxy(enum)) -%}
         {% set counter.value = counter.value + 1 %}
     {% endfor %}
     static constexpr uint32_t value = {{counter.value}};

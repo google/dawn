@@ -326,12 +326,12 @@ static constexpr FeatureEnumAndInfo kFeatureInfo[] = {
       "https://dawn.googlesource.com/dawn/+/refs/heads/main/docs/dawn/features/"
       "r8unorm_storage.md",
       FeatureInfo::FeatureState::Experimental}},
-    {Feature::FormatCapabilities,
+    {Feature::DawnFormatCapabilities,
      {"Supports querying the capabilities of a texture format.",
       "https://dawn.googlesource.com/dawn/+/refs/heads/main/docs/dawn/features/"
       "format_capabilities.md",
       FeatureInfo::FeatureState::Stable}},
-    {Feature::DrmFormatCapabilities,
+    {Feature::DawnDrmFormatCapabilities,
      {"Supports querying the DRM-related capabilities of a texture format.",
       "https://dawn.googlesource.com/dawn/+/refs/heads/main/docs/dawn/features/"
       "format_capabilities.md",

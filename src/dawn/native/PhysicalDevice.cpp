@@ -55,7 +55,7 @@ MaybeError PhysicalDeviceBase::Initialize() {
     EnableFeature(Feature::DawnNative);
     EnableFeature(Feature::DawnInternalUsages);
     EnableFeature(Feature::ImplicitDeviceSynchronization);
-    EnableFeature(Feature::FormatCapabilities);
+    EnableFeature(Feature::DawnFormatCapabilities);
     InitializeSupportedFeaturesImpl();
 
     DAWN_TRY_CONTEXT(
@@ -207,6 +207,6 @@ MaybeError PhysicalDeviceBase::ResetInternalDeviceForTestingImpl() {
 
 void PhysicalDeviceBase::PopulateBackendFormatCapabilities(
     wgpu::TextureFormat format,
-    UnpackedPtr<FormatCapabilities>& capabilities) const {}
+    UnpackedPtr<DawnFormatCapabilities>& capabilities) const {}
 
 }  // namespace dawn::native

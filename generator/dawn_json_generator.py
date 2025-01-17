@@ -152,12 +152,15 @@ class EnumType(Type):
             self.values.append(
                 EnumValue(Name(value_name), value, m.get('valid', True), m))
 
-        # Assert that all values are unique in enums
+        # Assert that all values except those with "enum_value_conflict": true are unique in enums
         all_values = set()
         for value in self.values:
             if value.value in all_values:
-                raise Exception("Duplicate value {} in enum {}".format(
-                    value.value, name))
+                #TODO(42241174) remove this condition once wgpu refactoring is complete.
+                if not value.json_data.get('enum_value_conflict', False):
+                    raise Exception(
+                        "Duplicate value {} for '{}' in enum '{}'".format(
+                            hex(value.value), value.name.get(), name))
             all_values.add(value.value)
         self.is_wire_transparent = True
 
@@ -1001,6 +1004,11 @@ def is_wire_serializable(type):
             and type.name.get() != 'void *')
 
 
+def is_enum_value_proxy(value):
+    return ('deprecated' in value.json_data.get('tags', [])
+            and value.json_data.get('enum_value_conflict', False))
+
+
 def unreachable_code(msg="unreachable_code"):
     assert False, msg
 
@@ -1064,6 +1072,7 @@ def make_base_render_params(metadata):
             'find_by_name': find_by_name,
             'print': print,
             'unreachable_code': unreachable_code,
+            'is_enum_value_proxy': is_enum_value_proxy,
         }
 
 

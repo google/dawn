@@ -1576,8 +1576,8 @@ bool Converter::Convert(interop::GPUFeatureName& out, wgpu::FeatureName in) {
         case wgpu::FeatureName::DawnInternalUsages:
         case wgpu::FeatureName::DawnMultiPlanarFormats:
         case wgpu::FeatureName::DawnNative:
-        case wgpu::FeatureName::DrmFormatCapabilities:
-        case wgpu::FeatureName::FormatCapabilities:
+        case wgpu::FeatureName::DawnDrmFormatCapabilities:
+        case wgpu::FeatureName::DawnFormatCapabilities:
         case wgpu::FeatureName::FramebufferFetch:
         case wgpu::FeatureName::HostMappedPointer:
         case wgpu::FeatureName::ImplicitDeviceSynchronization:
