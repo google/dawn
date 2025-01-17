@@ -396,6 +396,11 @@ void PhysicalDevice::SetupBackendDeviceToggles(dawn::platform::Platform* platfor
     bool supportsStencilWriteTexture =
         gl.GetVersion().IsDesktop() || gl.IsGLExtensionSupported("GL_OES_texture_stencil8");
 
+    bool isFloat32Renderable = gl.GetVersion().IsDesktop() || gl.IsAtLeastGLES(3, 2) ||
+                               gl.IsGLExtensionSupported("GL_EXT_color_buffer_float");
+    bool isFloat16Renderable =
+        isFloat32Renderable || gl.IsGLExtensionSupported("GL_EXT_color_buffer_half_float");
+
     // TODO(crbug.com/dawn/343): Investigate emulation.
     deviceToggles->Default(Toggle::DisableIndexedDrawBuffers, !supportsIndexedDrawBuffers);
     deviceToggles->Default(Toggle::DisableSampleVariables, !supportsSampleVariables);
@@ -423,6 +428,12 @@ void PhysicalDevice::SetupBackendDeviceToggles(dawn::platform::Platform* platfor
 
     // For OpenGL ES, use compute shader blit to emulate rgb9e5ufloat texture to buffer copies.
     deviceToggles->Default(Toggle::UseBlitForRGB9E5UfloatTextureCopy, gl.GetVersion().IsES());
+
+    // Use compute shader blit to emulate float16 texture to buffer copies if not color renderable.
+    deviceToggles->Default(Toggle::UseBlitForFloat16TextureCopy, !isFloat16Renderable);
+
+    // Use compute shader blit to emulate float32 texture to buffer copies if not color renderable.
+    deviceToggles->Default(Toggle::UseBlitForFloat32TextureCopy, !isFloat32Renderable);
 
     // Use a blit to emulate stencil-only buffer-to-texture copies.
     deviceToggles->Default(Toggle::UseBlitForBufferToStencilTextureCopy, true);

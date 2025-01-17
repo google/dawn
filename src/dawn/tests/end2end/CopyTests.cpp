@@ -288,13 +288,6 @@ class CopyTests_T2B : public CopyTests, public DawnTestWithParams<CopyTextureFor
             // GL_EXT_texture_format_BGRA8888 or GL_APPLE_texture_format_BGRA8888 is required for
             // compat mode.
             DAWN_TEST_UNSUPPORTED_IF(format == wgpu::TextureFormat::BGRA8Unorm);
-            // TODO(crbug.com/381214487): float16-renderable and float32-renderable features
-            DAWN_SUPPRESS_TEST_IF(format == wgpu::TextureFormat::R16Float ||
-                                  format == wgpu::TextureFormat::RG16Float ||
-                                  format == wgpu::TextureFormat::RGBA16Float ||
-                                  format == wgpu::TextureFormat::R32Float ||
-                                  format == wgpu::TextureFormat::RG32Float ||
-                                  format == wgpu::TextureFormat::RGBA32Float);
             // TODO(crbug.com/388318201): GL_R11F_G11F_B10F: Framebuffer incomplete.
             DAWN_SUPPRESS_TEST_IF(format == wgpu::TextureFormat::RG11B10Ufloat);
         }

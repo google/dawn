@@ -110,6 +110,8 @@ enum class Toggle {
     UseBlitForSnormTextureToBufferCopy,
     UseBlitForBGRA8UnormTextureToBufferCopy,
     UseBlitForRGB9E5UfloatTextureCopy,
+    UseBlitForFloat16TextureCopy,
+    UseBlitForFloat32TextureCopy,
     UseBlitForT2B,
     UseT2B2TForSRGBTextureCopy,
     D3D12ReplaceAddWithMinusWhenDstFactorIsZeroAndSrcFactorIsDstAlpha,

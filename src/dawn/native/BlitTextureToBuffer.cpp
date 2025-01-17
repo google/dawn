@@ -655,10 +655,28 @@ fn encodeVectorInU32General(v: vec4f) -> u32 {
 }
 )";
 
-// Directly loading R32Float values into dst_buf
+// Directly loading float32 values into dst_buf
 // No bit manipulation and packing is needed.
 constexpr std::string_view kLoadR32Float = R"(
     dst_buf[dstOffset] = textureLoadGeneral(src_tex, coord0, params.mipLevel).r;
+}
+)";
+constexpr std::string_view kLoadRG32Float = R"(
+    let v = textureLoadGeneral(src_tex, coord0, params.mipLevel);
+    // dstOffset is based on 8 bytes so we need to multiply by 2 to get uint32 offset.
+    let uintOffset = dstOffset << 1;
+    dst_buf[uintOffset] = v.r;
+    dst_buf[uintOffset + 1u] = v.g;
+}
+)";
+constexpr std::string_view kLoadRGBA32Float = R"(
+    let v = textureLoadGeneral(src_tex, coord0, params.mipLevel);
+    // dstOffset is based on 16 bytes so we need to multiply by 4.
+    let uintOffset = dstOffset << 2;
+    dst_buf[uintOffset] = v.r;
+    dst_buf[uintOffset + 1u] = v.g;
+    dst_buf[uintOffset + 2u] = v.b;
+    dst_buf[uintOffset + 3u] = v.a;
 }
 )";
 
@@ -819,6 +837,22 @@ ResultOrError<Ref<ComputePipelineBase>> GetOrCreateTextureToBufferPipeline(
             shader += kLoadR32Float;
             textureSampleType = wgpu::TextureSampleType::UnfilterableFloat;
             break;
+        case wgpu::TextureFormat::RG32Float:
+            AppendFloatTextureHead();
+            shader += kDstBufferF32;
+            shader += kCommonHead;
+            shader += kCommonStart;
+            shader += kLoadRG32Float;
+            textureSampleType = wgpu::TextureSampleType::UnfilterableFloat;
+            break;
+        case wgpu::TextureFormat::RGBA32Float:
+            AppendFloatTextureHead();
+            shader += kDstBufferF32;
+            shader += kCommonHead;
+            shader += kCommonStart;
+            shader += kLoadRGBA32Float;
+            textureSampleType = wgpu::TextureSampleType::UnfilterableFloat;
+            break;
         case wgpu::TextureFormat::Stencil8:
         case wgpu::TextureFormat::Depth24PlusStencil8:
             // Depth24PlusStencil8 can only copy with stencil aspect and is gated by validation.
@@ -908,13 +942,13 @@ ResultOrError<Ref<ComputePipelineBase>> GetOrCreateTextureToBufferPipeline(
     const uint32_t bytesPerTexel = format.GetAspectInfo(src.aspect).block.byteSize;
     // Size of one unit for a thread to write to. For format < 4 bytes, we always write 4 bytes at a
     // time.
-    const uint32_t ouputUnitSize = std::max(bytesPerTexel, 4u);
+    const uint32_t outputUnitSize = std::max(bytesPerTexel, 4u);
     const uint32_t adjustedWorkGroupSizeY =
         (viewDimension == wgpu::TextureViewDimension::e1D) ? 1 : kWorkgroupSizeY;
     const std::array<ConstantEntry, 3> constants = {{
         {nullptr, "workgroupSizeX", kWorkgroupSizeX},
         {nullptr, "workgroupSizeY", static_cast<double>(adjustedWorkGroupSizeY)},
-        {nullptr, "gOutputUnitSize", static_cast<double>(ouputUnitSize)},
+        {nullptr, "gOutputUnitSize", static_cast<double>(outputUnitSize)},
     }};
     computePipelineDescriptor.compute.constantCount = constants.size();
     computePipelineDescriptor.compute.constants = constants.data();
@@ -944,6 +978,8 @@ bool IsFormatSupportedByTextureToBufferBlit(wgpu::TextureFormat format) {
         case wgpu::TextureFormat::RG16Float:
         case wgpu::TextureFormat::RGBA16Float:
         case wgpu::TextureFormat::R32Float:
+        case wgpu::TextureFormat::RG32Float:
+        case wgpu::TextureFormat::RGBA32Float:
         case wgpu::TextureFormat::Depth16Unorm:
         case wgpu::TextureFormat::Depth32Float:
         case wgpu::TextureFormat::Stencil8:
@@ -1040,6 +1076,7 @@ MaybeError BlitTextureToBuffer(DeviceBase* device,
                 break;
             case 4:
             case 8:
+            case 16:
                 workgroupCountX = Align(copyExtent.width, kWorkgroupSizeX) / kWorkgroupSizeX;
                 break;
             default:
