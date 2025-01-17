@@ -32,6 +32,7 @@
 
 #include "dawn/native/D3D12Backend.h"
 #include "dawn/native/ResourceHeapAllocator.h"
+#include "dawn/native/d3d12/ResourceAllocatorManagerD3D12.h"
 #include "dawn/native/d3d12/d3d12_platform.h"
 #include "partition_alloc/pointers/raw_ptr.h"
 
@@ -43,7 +44,7 @@ class Device;
 class HeapAllocator : public ResourceHeapAllocator {
   public:
     HeapAllocator(Device* device,
-                  D3D12_HEAP_TYPE heapType,
+                  ResourceHeapKind resourceHeapKind,
                   D3D12_HEAP_FLAGS heapFlags,
                   MemorySegment memorySegment);
     ~HeapAllocator() override = default;
@@ -53,7 +54,7 @@ class HeapAllocator : public ResourceHeapAllocator {
 
   private:
     raw_ptr<Device> mDevice;
-    D3D12_HEAP_TYPE mHeapType;
+    ResourceHeapKind mResourceHeapKind;
     D3D12_HEAP_FLAGS mHeapFlags;
     MemorySegment mMemorySegment;
 };

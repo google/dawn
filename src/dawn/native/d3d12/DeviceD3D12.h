@@ -37,6 +37,7 @@
 #include "dawn/native/d3d12/CommandRecordingContext.h"
 #include "dawn/native/d3d12/D3D12Info.h"
 #include "dawn/native/d3d12/Forward.h"
+#include "dawn/native/d3d12/ResourceAllocatorManagerD3D12.h"
 #include "dawn/native/d3d12/TextureD3D12.h"
 
 namespace dawn::native::d3d {
@@ -47,7 +48,6 @@ namespace dawn::native::d3d12 {
 
 class PlatformFunctions;
 class ResidencyManager;
-class ResourceAllocatorManager;
 class SamplerHeapCache;
 class ShaderVisibleDescriptorAllocator;
 class StagingDescriptorAllocator;
@@ -113,7 +113,7 @@ class Device final : public d3d::Device {
                                             const Extent3D& copySizePixels) override;
 
     ResultOrError<ResourceHeapAllocation> AllocateMemory(
-        D3D12_HEAP_TYPE heapType,
+        ResourceHeapKind resourceHeapKind,
         const D3D12_RESOURCE_DESC& resourceDescriptor,
         D3D12_RESOURCE_STATES initialUsage,
         uint32_t formatBytesPerBlock,
@@ -169,6 +169,8 @@ class Device final : public d3d::Device {
     ComPtr<IDxcCompiler3> GetDxcCompiler() const;
 
     const PerStage<std::wstring>& GetDxcShaderProfiles() const;
+
+    uint32_t GetResourceHeapTier() const;
 
   private:
     using Base = d3d::Device;

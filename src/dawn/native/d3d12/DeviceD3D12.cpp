@@ -51,7 +51,6 @@
 #include "dawn/native/d3d12/QueueD3D12.h"
 #include "dawn/native/d3d12/RenderPipelineD3D12.h"
 #include "dawn/native/d3d12/ResidencyManagerD3D12.h"
-#include "dawn/native/d3d12/ResourceAllocatorManagerD3D12.h"
 #include "dawn/native/d3d12/SamplerD3D12.h"
 #include "dawn/native/d3d12/SamplerHeapCacheD3D12.h"
 #include "dawn/native/d3d12/ShaderModuleD3D12.h"
@@ -548,19 +547,23 @@ MaybeError Device::CopyFromStagingToTextureImpl(const BufferBase* source,
     return {};
 }
 
+uint32_t Device::GetResourceHeapTier() const {
+    return IsToggleEnabled(Toggle::UseD3D12ResourceHeapTier2) ? 2u : 1u;
+}
+
 void Device::DeallocateMemory(ResourceHeapAllocation& allocation) {
     (*mResourceAllocatorManager)->DeallocateMemory(allocation);
 }
 
 ResultOrError<ResourceHeapAllocation> Device::AllocateMemory(
-    D3D12_HEAP_TYPE heapType,
+    ResourceHeapKind resourceHeapKind,
     const D3D12_RESOURCE_DESC& resourceDescriptor,
     D3D12_RESOURCE_STATES initialUsage,
     uint32_t formatBytesPerBlock,
     bool forceAllocateAsCommittedResource) {
     // formatBytesPerBlock is needed only for color non-compressed formats for a workaround.
     return (*mResourceAllocatorManager)
-        ->AllocateMemory(heapType, resourceDescriptor, initialUsage, formatBytesPerBlock,
+        ->AllocateMemory(resourceHeapKind, resourceDescriptor, initialUsage, formatBytesPerBlock,
                          forceAllocateAsCommittedResource);
 }
 

@@ -135,6 +135,18 @@ D3D12_RESOURCE_DIMENSION D3D12TextureDimension(wgpu::TextureDimension dimension)
     }
 }
 
+ResourceHeapKind GetResourceHeapKind(D3D12_RESOURCE_FLAGS flags, uint32_t resourceHeapTier) {
+    if (resourceHeapTier >= 2u) {
+        return ResourceHeapKind::Default_AllBuffersAndTextures;
+    }
+
+    if ((flags & D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL) ||
+        (flags & D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET)) {
+        return ResourceHeapKind::Default_OnlyRenderableOrDepthTextures;
+    }
+    return ResourceHeapKind::Default_OnlyNonRenderableOrDepthTextures;
+}
+
 }  // namespace
 
 // static
@@ -252,10 +264,13 @@ MaybeError Texture::InitializeAsInternalTexture() {
             Toggle::DisableSubAllocationFor2DTextureWithCopyDstOrRenderAttachment)) &&
         GetDimension() == wgpu::TextureDimension::e2D &&
         (GetInternalUsage() & (wgpu::TextureUsage::CopyDst | wgpu::TextureUsage::RenderAttachment));
-    DAWN_TRY_ASSIGN(mResourceAllocation,
-                    device->AllocateMemory(D3D12_HEAP_TYPE_DEFAULT, resourceDescriptor,
-                                           D3D12_RESOURCE_STATE_COMMON, bytesPerBlock,
-                                           forceAllocateAsCommittedResource));
+
+    ResourceHeapKind resourceHeapKind =
+        GetResourceHeapKind(mD3D12ResourceFlags, ToBackend(GetDevice())->GetResourceHeapTier());
+    DAWN_TRY_ASSIGN(
+        mResourceAllocation,
+        device->AllocateMemory(resourceHeapKind, resourceDescriptor, D3D12_RESOURCE_STATE_COMMON,
+                               bytesPerBlock, forceAllocateAsCommittedResource));
 
     SetLabelImpl();
 

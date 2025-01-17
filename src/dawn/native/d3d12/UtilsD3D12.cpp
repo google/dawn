@@ -385,4 +385,35 @@ void SetDebugName(Device* device, ID3D12Object* object, const char* prefix, std:
     object->SetPrivateData(WKPDID_D3DDebugObjectName, objectName.length(), objectName.c_str());
 }
 
+D3D12_HEAP_TYPE GetD3D12HeapType(ResourceHeapKind resourceHeapKind) {
+    switch (resourceHeapKind) {
+        case ResourceHeapKind::Readback_OnlyBuffers:
+        case ResourceHeapKind::Readback_AllBuffersAndTextures:
+            return D3D12_HEAP_TYPE_READBACK;
+        case ResourceHeapKind::Default_AllBuffersAndTextures:
+        case ResourceHeapKind::Default_OnlyBuffers:
+        case ResourceHeapKind::Default_OnlyNonRenderableOrDepthTextures:
+        case ResourceHeapKind::Default_OnlyRenderableOrDepthTextures:
+            return D3D12_HEAP_TYPE_DEFAULT;
+        case ResourceHeapKind::Upload_OnlyBuffers:
+        case ResourceHeapKind::Upload_AllBuffersAndTextures:
+            return D3D12_HEAP_TYPE_UPLOAD;
+        case EnumCount:
+            DAWN_UNREACHABLE();
+    }
+}
+
+D3D12_HEAP_PROPERTIES GetD3D12HeapProperties(ResourceHeapKind resourceHeapKind) {
+    D3D12_HEAP_PROPERTIES heapProperties = {};
+
+    heapProperties.Type = GetD3D12HeapType(resourceHeapKind);
+
+    heapProperties.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_UNKNOWN;
+    heapProperties.MemoryPoolPreference = D3D12_MEMORY_POOL_UNKNOWN;
+    heapProperties.CreationNodeMask = 0;
+    heapProperties.VisibleNodeMask = 0;
+
+    return heapProperties;
+}
+
 }  // namespace dawn::native::d3d12

@@ -94,16 +94,6 @@ D3D12_RESOURCE_STATES D3D12BufferUsage(wgpu::BufferUsage usage) {
     return resourceState;
 }
 
-D3D12_HEAP_TYPE D3D12HeapType(wgpu::BufferUsage allowedUsage) {
-    if (allowedUsage & wgpu::BufferUsage::MapRead) {
-        return D3D12_HEAP_TYPE_READBACK;
-    } else if (allowedUsage & wgpu::BufferUsage::MapWrite) {
-        return D3D12_HEAP_TYPE_UPLOAD;
-    } else {
-        return D3D12_HEAP_TYPE_DEFAULT;
-    }
-}
-
 size_t D3D12BufferSizeAlignment(wgpu::BufferUsage usage) {
     if ((usage & wgpu::BufferUsage::Uniform) != 0) {
         // D3D buffers are always resource size aligned to 64KB. However, D3D12's validation
@@ -115,6 +105,26 @@ size_t D3D12BufferSizeAlignment(wgpu::BufferUsage usage) {
         return D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT;
     }
     return 1;
+}
+
+ResourceHeapKind GetResourceHeapKind(wgpu::BufferUsage bufferUsage, uint32_t resourceHeapTier) {
+    if (resourceHeapTier >= 2) {
+        if (bufferUsage & wgpu::BufferUsage::MapWrite) {
+            return ResourceHeapKind::Upload_AllBuffersAndTextures;
+        }
+        if (bufferUsage & wgpu::BufferUsage::MapRead) {
+            return ResourceHeapKind::Readback_AllBuffersAndTextures;
+        }
+        return ResourceHeapKind::Default_AllBuffersAndTextures;
+    }
+
+    if (bufferUsage & wgpu::BufferUsage::MapWrite) {
+        return ResourceHeapKind::Upload_OnlyBuffers;
+    }
+    if (bufferUsage & wgpu::BufferUsage::MapRead) {
+        return ResourceHeapKind::Readback_OnlyBuffers;
+    }
+    return ResourceHeapKind::Default_OnlyBuffers;
 }
 }  // namespace
 
@@ -179,33 +189,37 @@ MaybeError Buffer::Initialize(bool mappedAtCreation) {
     // and robust resource initialization.
     resourceDescriptor.Flags = D3D12ResourceFlags(GetInternalUsage() | wgpu::BufferUsage::CopyDst);
 
-    auto heapType = D3D12HeapType(GetInternalUsage());
+    ResourceHeapKind resourceHeapKind =
+        GetResourceHeapKind(GetInternalUsage(), ToBackend(GetDevice())->GetResourceHeapTier());
     mLastState = D3D12_RESOURCE_STATE_COMMON;
 
-    switch (heapType) {
-        // D3D12 requires buffers on the READBACK heap to have the D3D12_RESOURCE_STATE_COPY_DEST
-        // state
-        case D3D12_HEAP_TYPE_READBACK: {
+    switch (resourceHeapKind) {
+            // D3D12 requires buffers on the READBACK heap to have the
+            // D3D12_RESOURCE_STATE_COPY_DEST state
+        case ResourceHeapKind::Readback_AllBuffersAndTextures:
+        case ResourceHeapKind::Readback_OnlyBuffers: {
             mLastState |= D3D12_RESOURCE_STATE_COPY_DEST;
             mFixedResourceState = true;
             break;
         }
-        // D3D12 requires buffers on the UPLOAD heap to have the D3D12_RESOURCE_STATE_GENERIC_READ
-        // state
-        case D3D12_HEAP_TYPE_UPLOAD: {
+            // D3D12 requires buffers on the UPLOAD heap to have the
+            // D3D12_RESOURCE_STATE_GENERIC_READ state
+        case ResourceHeapKind::Upload_AllBuffersAndTextures:
+        case ResourceHeapKind::Upload_OnlyBuffers: {
             mLastState |= D3D12_RESOURCE_STATE_GENERIC_READ;
             mFixedResourceState = true;
             break;
         }
-        case D3D12_HEAP_TYPE_DEFAULT:
-        case D3D12_HEAP_TYPE_CUSTOM:
-        default:
+        case ResourceHeapKind::Default_AllBuffersAndTextures:
+        case ResourceHeapKind::Default_OnlyBuffers:
             break;
+        default:
+            DAWN_UNREACHABLE();
     }
 
-    DAWN_TRY_ASSIGN(
-        mResourceAllocation,
-        ToBackend(GetDevice())->AllocateMemory(heapType, resourceDescriptor, mLastState, 0));
+    DAWN_TRY_ASSIGN(mResourceAllocation,
+                    ToBackend(GetDevice())
+                        ->AllocateMemory(resourceHeapKind, resourceDescriptor, mLastState, 0));
 
     SetLabelImpl();
 
@@ -622,9 +636,7 @@ MaybeError Buffer::ClearBuffer(CommandRecordingContext* commandContext,
     Device* device = ToBackend(GetDevice());
     size = size > 0 ? size : GetAllocatedSize();
 
-    // The state of the buffers on UPLOAD heap must always be GENERIC_READ and cannot be
-    // changed away, so we can only clear such buffer with buffer mapping.
-    if (D3D12HeapType(GetInternalUsage()) == D3D12_HEAP_TYPE_UPLOAD) {
+    if (GetInternalUsage() & wgpu::BufferUsage::MapWrite) {
         DAWN_TRY(MapInternal(true, static_cast<size_t>(offset), static_cast<size_t>(size),
                              "D3D12 map at clear buffer"));
         memset(mMappedData, clearValue, size);
