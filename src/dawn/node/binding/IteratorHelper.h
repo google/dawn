@@ -48,8 +48,8 @@ class IteratorHelper {
     Napi::Value GetNextValue(Napi::Env env) { return interop::ToJS(env, *iter++); }
 
   private:
-    typename T::iterator iter;
-    typename T::iterator end;
+    typename T::const_iterator iter;
+    typename T::const_iterator end;
     Napi::ObjectReference ref;
 };
 
