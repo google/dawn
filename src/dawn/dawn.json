@@ -2227,10 +2227,8 @@
             {"value": 23, "name": "adapter properties D3D", "tags": ["dawn"]},
             {"value": 24, "name": "adapter properties vk", "tags": ["dawn"]},
             {"value": 25, "name": "r8 unorm storage", "tags": ["dawn"]},
-            {"value": 26, "name": "format capabilities", "enum_value_conflict": true, "tags": ["dawn", "deprecated"]},
-            {"value": 26, "name": "dawn format capabilities", "enum_value_conflict": true, "tags": ["dawn"]},
-            {"value": 27, "name": "drm format capabilities", "enum_value_conflict": true, "tags": ["dawn", "deprecated"]},
-            {"value": 27, "name": "dawn drm format capabilities", "enum_value_conflict": true, "tags": ["dawn"]},
+            {"value": 26, "name": "dawn format capabilities", "tags": ["dawn"]},
+            {"value": 27, "name": "dawn drm format capabilities", "tags": ["dawn"]},
             {"value": 28, "name": "norm16 texture formats", "tags": ["dawn"]},
             {"value": 29, "name": "multi planar format nv16", "tags": ["dawn"]},
             {"value": 30, "name": "multi planar format nv24", "tags": ["dawn"]},
@@ -2276,21 +2274,11 @@
         "category": "native",
         "wasm type": "f"
     },
-    "format capabilities": {
-        "tags": ["dawn", "deprecated"],
-        "category": "typedef",
-        "type": "dawn format capabilities"
-    },
     "dawn format capabilities": {
       "category": "structure",
       "tags": ["dawn"],
       "extensible": "out",
       "members": []
-    },
-    "drm format capabilities": {
-        "tags": ["dawn", "deprecated"],
-        "category": "typedef",
-        "type": "dawn drm format capabilities"
     },
     "dawn drm format capabilities": {
       "category": "structure",
@@ -2301,11 +2289,6 @@
           {"name": "properties count", "type": "size_t"},
           {"name": "properties", "type": "dawn drm format properties", "annotation": "const*", "length": "properties count"}
       ]
-    },
-    "drm format properties": {
-        "tags": ["dawn", "deprecated"],
-        "category": "typedef",
-        "type": "dawn drm format properties"
     },
     "dawn drm format properties": {
       "category": "structure",
@@ -3693,8 +3676,7 @@
             {"value": 22, "name": "adapter properties vk", "tags": ["dawn"]},
             {"value": 23, "name": "dawn wire WGSL control", "tags": ["dawn"]},
             {"value": 24, "name": "dawn WGSL blocklist", "tags": ["dawn", "native"]},
-            {"value": 25, "name": "drm format capabilities", "enum_value_conflict": true, "tags": ["dawn", "deprecated"]},
-            {"value": 25, "name": "dawn drm format capabilities", "enum_value_conflict": true, "tags": ["dawn"]},
+            {"value": 25, "name": "dawn drm format capabilities", "tags": ["dawn"]},
             {"value": 26, "name": "shader module compilation options", "tags": ["dawn"]},
             {"value": 27, "name": "color target state expand resolve texture dawn", "tags": ["dawn"]},
             {"value": 28, "name": "render pass descriptor expand resolve rect", "tags": ["dawn"]},
