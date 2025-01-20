@@ -153,28 +153,30 @@ struct State {
                     param->Destroy();
                 } else {
                     // Other parameters should be builtins, which can only be the vertex and
-                    // instance indices. Replace any indices we created with the user-declared ones.
+                    // instance indices. Replace any user-declared indices with the ones that we
+                    // created when setting up the buffers.
                     auto builtin = param->Builtin();
                     TINT_ASSERT(builtin);
                     switch (*builtin) {
                         case core::BuiltinValue::kVertexIndex:
                             if (vertex_index_) {
-                                vertex_index_->ReplaceAllUsesWith(param);
-                                vertex_index_->Destroy();
-                                vertex_index_ = nullptr;
+                                param->ReplaceAllUsesWith(vertex_index_);
+                                param->Destroy();
+                            } else {
+                                new_params.Push(param);
                             }
                             break;
                         case core::BuiltinValue::kInstanceIndex:
                             if (instance_index_) {
-                                instance_index_->ReplaceAllUsesWith(param);
-                                instance_index_->Destroy();
-                                instance_index_ = nullptr;
+                                param->ReplaceAllUsesWith(instance_index_);
+                                param->Destroy();
+                            } else {
+                                new_params.Push(param);
                             }
                             break;
                         default:
                             TINT_UNREACHABLE();
                     }
-                    new_params.Push(param);
                 }
             }
         });

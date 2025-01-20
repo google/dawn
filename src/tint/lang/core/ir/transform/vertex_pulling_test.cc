@@ -662,11 +662,11 @@ $B1: {  # root
   %tint_vertex_buffer_2:ptr<storage, array<u32>, read> = var @binding_point(4, 2)
 }
 
-%foo = @vertex func(%vertex_index:u32 [@vertex_index], %instance_index:u32 [@instance_index]):vec4<f32> [@position] {
+%foo = @vertex func(%tint_vertex_index:u32 [@vertex_index], %tint_instance_index:u32 [@instance_index]):vec4<f32> [@position] {
   $B2: {
-    %tint_vertex_buffer_1_base:u32 = mul %instance_index, 2u
-    %tint_vertex_buffer_2_base:u32 = mul %vertex_index, 4u
-    %9:ptr<storage, u32, read> = access %tint_vertex_buffer_0, %vertex_index
+    %tint_vertex_buffer_1_base:u32 = mul %tint_instance_index, 2u
+    %tint_vertex_buffer_2_base:u32 = mul %tint_vertex_index, 4u
+    %9:ptr<storage, u32, read> = access %tint_vertex_buffer_0, %tint_vertex_index
     %10:u32 = load %9
     %11:f32 = bitcast %10
     %12:ptr<storage, u32, read> = access %tint_vertex_buffer_1, %tint_vertex_buffer_1_base
@@ -680,7 +680,7 @@ $B1: {  # root
     %20:f32 = convert %19
     %21:i32 = access %18, 2u
     %22:f32 = convert %21
-    %23:u32 = add %vertex_index, %instance_index
+    %23:u32 = add %tint_vertex_index, %tint_instance_index
     %idx_add:u32 = let %23
     %25:f32 = access %18, 0u
     %26:vec4<f32> = construct %25, %20, %22, 1.0f
@@ -706,6 +706,218 @@ $B1: {  # root
          VertexStepMode::kVertex,
          {
              {VertexFormat::kSint32, 8, 2},
+         }},
+    }};
+    Run(VertexPulling, cfg);
+
+    EXPECT_EQ(expect, str());
+}
+
+// Test user-declared indices being used with multiple buffers, without strides and offsets.
+// See crbug.com/390568194.
+TEST_F(MslWriter_VertexPullingTest, ExistingVertexAndIndexAttribute_Params_MultipleBuffers) {
+    auto* ep = b.Function("foo", ty.vec4<f32>(), core::ir::Function::PipelineStage::kVertex);
+    auto* vertex_index = b.FunctionParam("vertex_index", ty.u32());
+    auto* instance_index = b.FunctionParam("instance_index", ty.u32());
+    auto* loc0 = b.FunctionParam("loc0", ty.f32());
+    auto* loc1 = b.FunctionParam("loc1", ty.f32());
+    auto* loc2 = b.FunctionParam("loc2", ty.f32());
+    auto* loc3 = b.FunctionParam("loc3", ty.f32());
+    loc0->SetLocation(0);
+    loc1->SetLocation(1);
+    loc2->SetLocation(2);
+    loc3->SetLocation(3);
+    vertex_index->SetBuiltin(core::BuiltinValue::kVertexIndex);
+    instance_index->SetBuiltin(core::BuiltinValue::kInstanceIndex);
+    ep->SetParams({vertex_index, instance_index, loc0, loc1, loc2, loc3});
+    ep->SetReturnBuiltin(core::BuiltinValue::kPosition);
+    b.Append(ep->Block(), [&] {  //
+        b.Let("idx_add", b.Add<u32>(vertex_index, instance_index));
+        b.Return(ep, b.Construct<vec4<f32>>(loc0, loc1, loc2, loc3));
+    });
+
+    auto* src = R"(
+%foo = @vertex func(%vertex_index:u32 [@vertex_index], %instance_index:u32 [@instance_index], %loc0:f32 [@location(0)], %loc1:f32 [@location(1)], %loc2:f32 [@location(2)], %loc3:f32 [@location(3)]):vec4<f32> [@position] {
+  $B1: {
+    %8:u32 = add %vertex_index, %instance_index
+    %idx_add:u32 = let %8
+    %10:vec4<f32> = construct %loc0, %loc1, %loc2, %loc3
+    ret %10
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+$B1: {  # root
+  %tint_vertex_buffer_0:ptr<storage, array<u32>, read> = var @binding_point(4, 0)
+  %tint_vertex_buffer_1:ptr<storage, array<u32>, read> = var @binding_point(4, 1)
+  %tint_vertex_buffer_2:ptr<storage, array<u32>, read> = var @binding_point(4, 2)
+  %tint_vertex_buffer_3:ptr<storage, array<u32>, read> = var @binding_point(4, 3)
+}
+
+%foo = @vertex func(%tint_vertex_index:u32 [@vertex_index], %tint_instance_index:u32 [@instance_index]):vec4<f32> [@position] {
+  $B2: {
+    %8:ptr<storage, u32, read> = access %tint_vertex_buffer_0, %tint_vertex_index
+    %9:u32 = load %8
+    %10:f32 = bitcast %9
+    %11:ptr<storage, u32, read> = access %tint_vertex_buffer_1, %tint_instance_index
+    %12:u32 = load %11
+    %13:f32 = bitcast %12
+    %14:ptr<storage, u32, read> = access %tint_vertex_buffer_2, %tint_vertex_index
+    %15:u32 = load %14
+    %16:f32 = bitcast %15
+    %17:ptr<storage, u32, read> = access %tint_vertex_buffer_3, %tint_instance_index
+    %18:u32 = load %17
+    %19:f32 = bitcast %18
+    %20:u32 = add %tint_vertex_index, %tint_instance_index
+    %idx_add:u32 = let %20
+    %22:vec4<f32> = construct %10, %13, %16, %19
+    ret %22
+  }
+}
+)";
+
+    VertexPullingConfig cfg;
+    cfg.pulling_group = 4u;
+    cfg.vertex_state = {{
+        {4,
+         VertexStepMode::kVertex,
+         {
+             {VertexFormat::kFloat32, 0, 0},
+         }},
+        {4,
+         VertexStepMode::kInstance,
+         {
+             {VertexFormat::kFloat32, 0, 1},
+         }},
+        {4,
+         VertexStepMode::kVertex,
+         {
+             {VertexFormat::kFloat32, 0, 2},
+         }},
+        {4,
+         VertexStepMode::kInstance,
+         {
+             {VertexFormat::kFloat32, 0, 3},
+         }},
+    }};
+    Run(VertexPulling, cfg);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(MslWriter_VertexPullingTest, ExistingVertexIndex_NotUsedByBuffer) {
+    auto* ep = b.Function("foo", ty.vec4<f32>(), core::ir::Function::PipelineStage::kVertex);
+    auto* vertex_index = b.FunctionParam("vertex_index", ty.u32());
+    auto* instance_index = b.FunctionParam("instance_index", ty.u32());
+    auto* loc0 = b.FunctionParam("loc0", ty.f32());
+    loc0->SetLocation(0);
+    vertex_index->SetBuiltin(core::BuiltinValue::kVertexIndex);
+    instance_index->SetBuiltin(core::BuiltinValue::kInstanceIndex);
+    ep->SetParams({vertex_index, instance_index, loc0});
+    ep->SetReturnBuiltin(core::BuiltinValue::kPosition);
+    b.Append(ep->Block(), [&] {  //
+        b.Let("idx_add", b.Add<u32>(vertex_index, instance_index));
+        b.Return(ep, b.Construct<vec4<f32>>(loc0));
+    });
+
+    auto* src = R"(
+%foo = @vertex func(%vertex_index:u32 [@vertex_index], %instance_index:u32 [@instance_index], %loc0:f32 [@location(0)]):vec4<f32> [@position] {
+  $B1: {
+    %5:u32 = add %vertex_index, %instance_index
+    %idx_add:u32 = let %5
+    %7:vec4<f32> = construct %loc0
+    ret %7
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+$B1: {  # root
+  %tint_vertex_buffer_0:ptr<storage, array<u32>, read> = var @binding_point(4, 0)
+}
+
+%foo = @vertex func(%vertex_index:u32 [@vertex_index], %tint_instance_index:u32 [@instance_index]):vec4<f32> [@position] {
+  $B2: {
+    %5:ptr<storage, u32, read> = access %tint_vertex_buffer_0, %tint_instance_index
+    %6:u32 = load %5
+    %7:f32 = bitcast %6
+    %8:u32 = add %vertex_index, %tint_instance_index
+    %idx_add:u32 = let %8
+    %10:vec4<f32> = construct %7
+    ret %10
+  }
+}
+)";
+
+    VertexPullingConfig cfg;
+    cfg.pulling_group = 4u;
+    cfg.vertex_state = {{
+        {4,
+         VertexStepMode::kInstance,
+         {
+             {VertexFormat::kFloat32, 0, 0},
+         }},
+    }};
+    Run(VertexPulling, cfg);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(MslWriter_VertexPullingTest, ExistingInstanceIndex_NotUsedByBuffer) {
+    auto* ep = b.Function("foo", ty.vec4<f32>(), core::ir::Function::PipelineStage::kVertex);
+    auto* vertex_index = b.FunctionParam("vertex_index", ty.u32());
+    auto* instance_index = b.FunctionParam("instance_index", ty.u32());
+    auto* loc0 = b.FunctionParam("loc0", ty.f32());
+    loc0->SetLocation(0);
+    vertex_index->SetBuiltin(core::BuiltinValue::kVertexIndex);
+    instance_index->SetBuiltin(core::BuiltinValue::kInstanceIndex);
+    ep->SetParams({vertex_index, instance_index, loc0});
+    ep->SetReturnBuiltin(core::BuiltinValue::kPosition);
+    b.Append(ep->Block(), [&] {  //
+        b.Let("idx_add", b.Add<u32>(vertex_index, instance_index));
+        b.Return(ep, b.Construct<vec4<f32>>(loc0));
+    });
+
+    auto* src = R"(
+%foo = @vertex func(%vertex_index:u32 [@vertex_index], %instance_index:u32 [@instance_index], %loc0:f32 [@location(0)]):vec4<f32> [@position] {
+  $B1: {
+    %5:u32 = add %vertex_index, %instance_index
+    %idx_add:u32 = let %5
+    %7:vec4<f32> = construct %loc0
+    ret %7
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+$B1: {  # root
+  %tint_vertex_buffer_0:ptr<storage, array<u32>, read> = var @binding_point(4, 0)
+}
+
+%foo = @vertex func(%instance_index:u32 [@instance_index], %tint_vertex_index:u32 [@vertex_index]):vec4<f32> [@position] {
+  $B2: {
+    %5:ptr<storage, u32, read> = access %tint_vertex_buffer_0, %tint_vertex_index
+    %6:u32 = load %5
+    %7:f32 = bitcast %6
+    %8:u32 = add %tint_vertex_index, %instance_index
+    %idx_add:u32 = let %8
+    %10:vec4<f32> = construct %7
+    ret %10
+  }
+}
+)";
+
+    VertexPullingConfig cfg;
+    cfg.pulling_group = 4u;
+    cfg.vertex_state = {{
+        {4,
+         VertexStepMode::kVertex,
+         {
+             {VertexFormat::kFloat32, 0, 0},
          }},
     }};
     Run(VertexPulling, cfg);
