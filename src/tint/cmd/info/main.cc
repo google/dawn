@@ -35,6 +35,8 @@
 #include "src/tint/lang/wgsl/inspector/entry_point.h"
 #include "src/tint/utils/text/string.h"
 
+TINT_BEGIN_DISABLE_WARNING(UNSAFE_BUFFER_USAGE);
+
 namespace {
 
 struct Options {
@@ -324,3 +326,5 @@ int main(int argc, const char** argv) {
 
     return 0;
 }
+
+TINT_END_DISABLE_WARNING(UNSAFE_BUFFER_USAGE);

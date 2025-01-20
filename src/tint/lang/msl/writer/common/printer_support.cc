@@ -43,6 +43,8 @@
 #include "src/tint/utils/rtti/switch.h"
 #include "src/tint/utils/strconv/float_to_string.h"
 
+TINT_BEGIN_DISABLE_WARNING(UNSAFE_BUFFER_USAGE);
+
 namespace tint::msl::writer {
 
 std::string BuiltinToAttribute(core::BuiltinValue builtin) {
@@ -271,3 +273,5 @@ void PrintI32(StringStream& out, int32_t value) {
 }
 
 }  // namespace tint::msl::writer
+
+TINT_END_DISABLE_WARNING(UNSAFE_BUFFER_USAGE);

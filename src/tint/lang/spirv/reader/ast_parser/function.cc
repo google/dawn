@@ -157,8 +157,9 @@
 using namespace tint::core::number_suffixes;  // NOLINT
 using namespace tint::core::fluent_types;     // NOLINT
 
-namespace tint::spirv::reader::ast_parser {
+TINT_BEGIN_DISABLE_WARNING(UNSAFE_BUFFER_USAGE);
 
+namespace tint::spirv::reader::ast_parser {
 namespace {
 
 constexpr uint32_t kMaxVectorLen = 4;
@@ -6474,3 +6475,5 @@ TINT_INSTANTIATE_TYPEINFO(tint::spirv::reader::ast_parser::StatementBuilder);
 TINT_INSTANTIATE_TYPEINFO(tint::spirv::reader::ast_parser::SwitchStatementBuilder);
 TINT_INSTANTIATE_TYPEINFO(tint::spirv::reader::ast_parser::IfStatementBuilder);
 TINT_INSTANTIATE_TYPEINFO(tint::spirv::reader::ast_parser::LoopStatementBuilder);
+
+TINT_BEGIN_DISABLE_WARNING(UNSAFE_BUFFER_USAGE);

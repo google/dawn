@@ -102,6 +102,8 @@
 using namespace tint::core::number_suffixes;  // NOLINT
 using namespace tint::core::fluent_types;     // NOLINT
 
+TINT_BEGIN_DISABLE_WARNING(UNSAFE_BUFFER_USAGE);
+
 namespace tint::hlsl::writer {
 namespace {
 
@@ -4901,3 +4903,5 @@ std::string ASTPrinter::UniqueIdentifier(const std::string& prefix /* = "" */) {
 }
 
 }  // namespace tint::hlsl::writer
+
+TINT_END_DISABLE_WARNING(UNSAFE_BUFFER_USAGE);

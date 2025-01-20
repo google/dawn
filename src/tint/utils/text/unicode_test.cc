@@ -36,6 +36,8 @@
 #include "gmock/gmock.h"
 #include "src/tint/utils/text/string.h"
 
+TINT_BEGIN_DISABLE_WARNING(UNSAFE_BUFFER_USAGE);
+
 /// Helper for constructing a CodePoint
 #define C(x) CodePoint(x)
 
@@ -848,3 +850,5 @@ INSTANTIATE_TEST_SUITE_P(Invalid,
 
 }  // namespace utf16_tests
 }  // namespace tint
+
+TINT_END_DISABLE_WARNING(UNSAFE_BUFFER_USAGE);

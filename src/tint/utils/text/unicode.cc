@@ -29,6 +29,10 @@
 
 #include <algorithm>
 
+#include "src/tint/utils/macros/compiler.h"
+
+TINT_BEGIN_DISABLE_WARNING(UNSAFE_BUFFER_USAGE);
+
 namespace tint {
 namespace {
 
@@ -528,3 +532,5 @@ size_t Encode(CodePoint code_point, uint16_t* ptr) {
 
 }  // namespace utf16
 }  // namespace tint
+
+TINT_END_DISABLE_WARNING(UNSAFE_BUFFER_USAGE);

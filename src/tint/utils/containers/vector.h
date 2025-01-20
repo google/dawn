@@ -44,6 +44,8 @@
 #include "src/tint/utils/memory/aligned_storage.h"
 #include "src/tint/utils/memory/bitcast.h"
 
+TINT_BEGIN_DISABLE_WARNING(UNSAFE_BUFFER_USAGE);
+
 #ifndef TINT_VECTOR_MUTATION_CHECKS_ENABLED
 #ifdef NDEBUG
 #define TINT_VECTOR_MUTATION_CHECKS_ENABLED 0
@@ -1300,5 +1302,7 @@ template <typename T>
 static constexpr bool IsVectorLike = tint::detail::IsVectorLike<T>::value;
 
 }  // namespace tint
+
+TINT_END_DISABLE_WARNING(UNSAFE_BUFFER_USAGE);
 
 #endif  // SRC_TINT_UTILS_CONTAINERS_VECTOR_H_

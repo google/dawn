@@ -41,6 +41,8 @@
 #include "src/tint/utils/memory/aligned_storage.h"
 #include "src/tint/utils/rtti/traits.h"
 
+TINT_BEGIN_DISABLE_WARNING(UNSAFE_BUFFER_USAGE);
+
 namespace tint {
 
 /// HashmapKey wraps the comparator type for a Hashmap and Hashset.
@@ -680,5 +682,7 @@ class HashmapBase {
 };
 
 }  // namespace tint
+
+TINT_END_DISABLE_WARNING(UNSAFE_BUFFER_USAGE);
 
 #endif  // SRC_TINT_UTILS_CONTAINERS_HASHMAP_BASE_H_

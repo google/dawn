@@ -46,6 +46,8 @@
 
 using namespace tint::core::fluent_types;  // NOLINT
 
+TINT_BEGIN_DISABLE_WARNING(UNSAFE_BUFFER_USAGE);
+
 namespace tint::wgsl::reader {
 namespace {
 
@@ -1299,3 +1301,5 @@ std::optional<Token::Type> Lexer::parse_keyword(std::string_view str) {
 }
 
 }  // namespace tint::wgsl::reader
+
+TINT_END_DISABLE_WARNING(UNSAFE_BUFFER_USAGE);

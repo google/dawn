@@ -45,6 +45,8 @@
 TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::Renamer);
 TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::Renamer::Config);
 
+TINT_BEGIN_DISABLE_WARNING(UNSAFE_BUFFER_USAGE);
+
 namespace tint::ast::transform {
 
 namespace {
@@ -1425,3 +1427,5 @@ Transform::ApplyResult Renamer::Apply(const Program& src, const DataMap& inputs,
 }
 
 }  // namespace tint::ast::transform
+
+TINT_END_DISABLE_WARNING(UNSAFE_BUFFER_USAGE);

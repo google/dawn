@@ -64,6 +64,8 @@
 #include "src/tint/lang/wgsl/writer/writer.h"
 #endif  // TINT_BUILD_WGSL_WRITER
 
+TINT_BEGIN_DISABLE_WARNING(UNSAFE_BUFFER_USAGE);
+
 namespace {
 
 enum class Format {
@@ -470,3 +472,5 @@ int main(int argc, const char** argv) {
 
     return 0;
 }
+
+TINT_END_DISABLE_WARNING(UNSAFE_BUFFER_USAGE);

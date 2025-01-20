@@ -98,6 +98,8 @@
 #include "src/tint/lang/glsl/validate/validate.h"
 #endif  // TINT_BUILD_GLSL_VALIDATOR
 
+TINT_BEGIN_DISABLE_WARNING(UNSAFE_BUFFER_USAGE);
+
 namespace {
 
 /// Prints the given hash value in a format string that the end-to-end test runner can parse.
@@ -1451,3 +1453,5 @@ int main(int argc, const char** argv) {
     }
     return success ? 0 : 1;
 }
+
+TINT_END_DISABLE_WARNING(UNSAFE_BUFFER_USAGE);

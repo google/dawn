@@ -56,6 +56,8 @@ using SOCKET = int;
 }  // anonymous namespace
 #endif
 
+TINT_BEGIN_DISABLE_WARNING(UNSAFE_BUFFER_USAGE);
+
 namespace tint::socket {
 namespace {
 constexpr SOCKET InvalidSocket = static_cast<SOCKET>(-1);
@@ -337,3 +339,5 @@ std::shared_ptr<Socket> Socket::Connect(const char* address,
 }
 
 }  // namespace tint::socket
+
+TINT_END_DISABLE_WARNING(UNSAFE_BUFFER_USAGE);

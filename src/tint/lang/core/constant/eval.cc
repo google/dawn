@@ -62,6 +62,8 @@
 using namespace tint::core::fluent_types;     // NOLINT
 using namespace tint::core::number_suffixes;  // NOLINT
 
+TINT_BEGIN_DISABLE_WARNING(UNSAFE_BUFFER_USAGE);
+
 namespace tint::core::constant {
 namespace {
 
@@ -4028,3 +4030,5 @@ diag::Diagnostic& Eval::AddNote(const Source& source) const {
 }
 
 }  // namespace tint::core::constant
+
+TINT_END_DISABLE_WARNING(UNSAFE_BUFFER_USAGE);

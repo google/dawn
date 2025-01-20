@@ -110,6 +110,8 @@
 #error "internal tint header being #included from tint.h"
 #endif
 
+TINT_BEGIN_DISABLE_WARNING(UNSAFE_BUFFER_USAGE);
+
 // Forward declarations
 namespace tint::ast {
 class CloneContext;
@@ -3627,5 +3629,7 @@ inline GenerationID GenerationIDOf(const ast::Builder* builder) {
 }
 
 }  // namespace tint
+
+TINT_END_DISABLE_WARNING(UNSAFE_BUFFER_USAGE);
 
 #endif  // SRC_TINT_LANG_WGSL_AST_BUILDER_H_

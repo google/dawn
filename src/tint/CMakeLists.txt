@@ -112,14 +112,13 @@ function(tint_default_compile_options TARGET)
     -Wno-c++98-compat
     -Wno-c++98-compat-pedantic
     -Wno-format-pedantic
-    -Wno-gnu-zero-variadic-macro-arguments
     -Wno-poison-system-directories
     -Wno-return-std-move-in-c++11
     -Wno-undefined-var-template
     -Wno-unknown-warning-option
-    -Wno-unsafe-buffer-usage
     -Wno-used-but-marked-unused
     -Weverything
+    -Wunsafe-buffer-usage
   )
 
   if(COMPILER_IS_GNU)

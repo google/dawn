@@ -31,6 +31,10 @@
 #include <stdint.h>
 #include <cstddef>
 
+#include "src/tint/utils/macros/compiler.h"
+
+TINT_BEGIN_DISABLE_WARNING(UNSAFE_BUFFER_USAGE);
+
 namespace tint {
 
 /// CRC32 immutable lookup table data.
@@ -94,5 +98,7 @@ inline uint32_t CRC32(const void* ptr, size_t size) {
 }
 
 }  // namespace tint
+
+TINT_END_DISABLE_WARNING(UNSAFE_BUFFER_USAGE);
 
 #endif  // SRC_TINT_UTILS_MATH_CRC32_H_
