@@ -160,7 +160,7 @@ MaybeError Device::Initialize(const UnpackedPtr<DeviceDescriptor>& descriptor) {
     mContext->MakeCurrent();
     const OpenGLFunctions& gl = mGL;
 
-    mFormatTable = BuildGLFormatTable(GetBGRAInternalFormat(gl), GetStencil8InternalFormat(gl));
+    mFormatTable = BuildGLFormatTable(gl);
 
     // Use the debug output functionality to get notified about GL errors
     // TODO(crbug.com/dawn/1475): add support for the KHR_debug and ARB_debug_output
@@ -217,24 +217,6 @@ const GLFormat& Device::GetGLFormat(const Format& format) {
     const GLFormat& result = mFormatTable[format.GetIndex()];
     DAWN_ASSERT(result.isSupportedOnBackend);
     return result;
-}
-
-GLenum Device::GetBGRAInternalFormat(const OpenGLFunctions& gl) const {
-    if (gl.IsGLExtensionSupported("GL_EXT_texture_format_BGRA8888") ||
-        gl.IsGLExtensionSupported("GL_APPLE_texture_format_BGRA8888")) {
-        return GL_BGRA8_EXT;
-    } else {
-        // Desktop GL will swizzle to/from RGBA8 for BGRA formats.
-        return GL_RGBA8;
-    }
-}
-
-GLenum Device::GetStencil8InternalFormat(const OpenGLFunctions& gl) const {
-    if (gl.GetVersion().IsDesktop() || gl.IsAtLeastGLES(3, 2) ||
-        gl.IsGLExtensionSupported("GL_OES_texture_stencil8")) {
-        return GL_STENCIL_INDEX8;
-    }
-    return GL_DEPTH24_STENCIL8;
 }
 
 ResultOrError<Ref<BindGroupBase>> Device::CreateBindGroupImpl(

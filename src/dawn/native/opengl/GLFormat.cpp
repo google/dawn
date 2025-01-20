@@ -29,13 +29,45 @@
 
 namespace dawn::native::opengl {
 
-GLFormatTable BuildGLFormatTable(GLenum internalFormatForBGRA, GLenum internalFormatForStencil8) {
+namespace {
+GLenum GetBGRAInternalFormat(const OpenGLFunctions& gl) {
+    if (gl.IsGLExtensionSupported("GL_EXT_texture_format_BGRA8888") ||
+        gl.IsGLExtensionSupported("GL_APPLE_texture_format_BGRA8888")) {
+        return GL_BGRA8_EXT;
+    } else {
+        // Desktop GL will swizzle to/from RGBA8 for BGRA formats.
+        return GL_RGBA8;
+    }
+}
+
+GLenum GetStencil8InternalFormat(const OpenGLFunctions& gl) {
+    if (gl.GetVersion().IsDesktop() || gl.IsAtLeastGLES(3, 2) ||
+        gl.IsGLExtensionSupported("GL_OES_texture_stencil8")) {
+        return GL_STENCIL_INDEX8;
+    }
+    return GL_DEPTH24_STENCIL8;
+}
+
+bool FormatSupportsTexStorage(const OpenGLFunctions& gl, GLenum internalFormat) {
+    if (internalFormat == GL_BGRA8_EXT && gl.GetVersion().IsES() &&
+        !gl.IsGLExtensionSupported("GL_EXT_texture_storage")) {
+        // GL_BGRA8_EXT is only valid for glTextureStorage if GL_EXT_texture_storage is present. The
+        // core glTextureStorage added in ES 3.0 does not add this format.
+        return false;
+    }
+
+    return true;
+}
+
+}  // namespace
+
+GLFormatTable BuildGLFormatTable(const OpenGLFunctions& gl) {
     GLFormatTable table;
 
     using Type = GLFormat::ComponentType;
 
-    auto AddFormat = [&table](wgpu::TextureFormat dawnFormat, GLenum internalFormat, GLenum format,
-                              GLenum type, Type componentType) {
+    auto AddFormat = [&table, &gl](wgpu::TextureFormat dawnFormat, GLenum internalFormat,
+                                   GLenum format, GLenum type, Type componentType) {
         FormatIndex index = ComputeFormatIndex(dawnFormat);
         DAWN_ASSERT(index < table.size());
 
@@ -44,6 +76,7 @@ GLFormatTable BuildGLFormatTable(GLenum internalFormatForBGRA, GLenum internalFo
         table[index].type = type;
         table[index].componentType = componentType;
         table[index].isSupportedOnBackend = true;
+        table[index].isSupportedForTextureStorage = FormatSupportsTexStorage(gl, internalFormat);
     };
 
     // It's dangerous to go alone, take this:
@@ -88,7 +121,7 @@ GLFormatTable BuildGLFormatTable(GLenum internalFormatForBGRA, GLenum internalFo
     AddFormat(wgpu::TextureFormat::RGBA8Uint, GL_RGBA8UI, GL_RGBA_INTEGER, GL_UNSIGNED_BYTE, Type::Uint);
     AddFormat(wgpu::TextureFormat::RGBA8Sint, GL_RGBA8I, GL_RGBA_INTEGER, GL_BYTE, Type::Int);
 
-    AddFormat(wgpu::TextureFormat::BGRA8Unorm, internalFormatForBGRA, GL_BGRA, GL_UNSIGNED_BYTE, Type::Float);
+    AddFormat(wgpu::TextureFormat::BGRA8Unorm, GetBGRAInternalFormat(gl), GL_BGRA, GL_UNSIGNED_BYTE, Type::Float);
     AddFormat(wgpu::TextureFormat::RGB10A2Uint, GL_RGB10_A2UI, GL_RGBA_INTEGER, GL_UNSIGNED_INT_2_10_10_10_REV, Type::Uint);
     AddFormat(wgpu::TextureFormat::RGB10A2Unorm, GL_RGB10_A2, GL_RGBA, GL_UNSIGNED_INT_2_10_10_10_REV, Type::Float);
     AddFormat(wgpu::TextureFormat::RG11B10Ufloat, GL_R11F_G11F_B10F, GL_RGB, GL_UNSIGNED_INT_10F_11F_11F_REV, Type::Float);
@@ -116,6 +149,7 @@ GLFormatTable BuildGLFormatTable(GLenum internalFormatForBGRA, GLenum internalFo
     AddFormat(wgpu::TextureFormat::Depth16Unorm, GL_DEPTH_COMPONENT16, GL_DEPTH_COMPONENT, GL_UNSIGNED_SHORT, Type::DepthStencil);
 
     // Internal format for stencil8 can be either GL_STENCIL_INDEX8 or GL_DEPTH24_STENCIL8
+    GLenum internalFormatForStencil8 = GetStencil8InternalFormat(gl);
     DAWN_ASSERT(internalFormatForStencil8 == GL_STENCIL_INDEX8 || internalFormatForStencil8 == GL_DEPTH24_STENCIL8);
     bool useStencilIndex8 = internalFormatForStencil8 == GL_STENCIL_INDEX8;
     AddFormat(wgpu::TextureFormat::Stencil8, internalFormatForStencil8, useStencilIndex8 ? GL_STENCIL : GL_DEPTH_STENCIL, useStencilIndex8 ? GL_UNSIGNED_BYTE : GL_UNSIGNED_INT_24_8, Type::DepthStencil);

@@ -1154,10 +1154,6 @@ TEST_P(CopyTextureForBrowser_Formats, ColorConversion) {
     DAWN_SUPPRESS_TEST_IF(IsCompatibilityMode() &&
                           GetParam().mDstFormat == wgpu::TextureFormat::BGRA8UnormSrgb);
 
-    // TODO(crbug.com/346356622): BGRA8unorm copy is failing on Qualcomm OpenGLES
-    DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsAndroid() && IsQualcomm() &&
-                          GetParam().mDstFormat == wgpu::TextureFormat::BGRA8Unorm);
-
     DAWN_SUPPRESS_TEST_IF(IsOpenGL() && IsLinux());
 
     // Skip OpenGL backend on linux because it fails on using *-srgb format as
