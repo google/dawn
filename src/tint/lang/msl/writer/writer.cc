@@ -40,7 +40,7 @@
 
 namespace tint::msl::writer {
 
-Result<SuccessType> CanGenerate(const core::ir::Module& ir, const Options&) {
+Result<SuccessType> CanGenerate(const core::ir::Module& ir, const Options& options) {
     // Check for unsupported module-scope variable address spaces and types.
     for (auto* inst : *ir.root_block) {
         auto* var = inst->As<core::ir::Var>();
@@ -55,6 +55,57 @@ Result<SuccessType> CanGenerate(const core::ir::Module& ir, const Options&) {
             return Failure("input attachments are not supported by the MSL backend");
         }
     }
+
+    // Check the vertex pulling config, if provided.
+    if (options.vertex_pulling_config) {
+        // Find the vertex entry point.
+        const core::ir::Function* ep = nullptr;
+        for (auto& func : ir.functions) {
+            if (func->IsVertex()) {
+                if (ep) {
+                    return Failure("vertex pulling config provided with multiple vertex shaders");
+                }
+                ep = func;
+            }
+        }
+        if (!ep) {
+            return Failure("vertex pulling config provided without a vertex shader");
+        }
+
+        // Gather all of the vertex attribute locations in the config.
+        Hashset<uint32_t, 4> locations;
+        for (auto& buffer : options.vertex_pulling_config->vertex_state) {
+            if (buffer.array_stride & 3) {
+                return Failure(
+                    "vertex pulling config contains array stride that is not a multiple of 4");
+            }
+            for (auto& attr : buffer.attributes) {
+                if (!locations.Add(attr.shader_location)) {
+                    return Failure("vertex pulling config contains duplicate shader locations");
+                }
+            }
+        }
+
+        // Check the parameters to make sure all vertex attributes are present in the config.
+        for (auto* param : ep->Params()) {
+            if (auto* str = param->Type()->As<core::type::Struct>()) {
+                for (auto* member : str->Members()) {
+                    if (auto loc = member->Attributes().location) {
+                        if (!locations.Contains(*loc)) {
+                            return Failure("shader location " + std::to_string(*loc) +
+                                           " missing from vertex pulling map");
+                        }
+                    }
+                }
+            } else if (auto loc = param->Location()) {
+                if (!locations.Contains(*loc)) {
+                    return Failure("shader location " + std::to_string(*loc) +
+                                   " missing from vertex pulling map");
+                }
+            }
+        }
+    }
+
     return Success;
 }
 
