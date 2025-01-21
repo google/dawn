@@ -5301,20 +5301,27 @@ crbug.com/363034688 [ dawn-no-backend-validation no-asan webgpu-dxc-disabled win
 
 # Flaky on MacBookPro16,1 (AMD) machines
 crbug.com/371963563 [ amd mac ] webgpu:shader,execution,expression,call,builtin,atomics,atomicAnd:and_workgroup:workgroupSize=64;dispatchSize=16;mapId="passthrough";scalarType="u32" [ RetryOnFailure ]
+crbug.com/371963563 [ amd mac ] webgpu:shader,execution,expression,call,builtin,atomics,atomicAnd:and_workgroup:workgroupSize=64;dispatchSize=16;mapId="remap";scalarType="i32" [ RetryOnFailure ]
 crbug.com/371963563 [ amd mac ] webgpu:shader,execution,expression,call,builtin,atomics,atomicAnd:and_workgroup:workgroupSize=64;dispatchSize=16;mapId="remap";scalarType="u32" [ RetryOnFailure ]
 crbug.com/371963563 [ amd mac ] webgpu:shader,execution,expression,call,builtin,atomics,atomicAnd:and_workgroup:workgroupSize=64;dispatchSize=1;mapId="passthrough";scalarType="i32" [ RetryOnFailure ]
 crbug.com/371963563 [ amd mac ] webgpu:shader,execution,expression,call,builtin,atomics,atomicAnd:and_workgroup:workgroupSize=64;dispatchSize=1;mapId="passthrough";scalarType="u32" [ RetryOnFailure ]
 crbug.com/371963563 [ amd mac ] webgpu:shader,execution,expression,call,builtin,atomics,atomicAnd:and_workgroup:workgroupSize=64;dispatchSize=1;mapId="remap";scalarType="i32" [ RetryOnFailure ]
 crbug.com/371963563 [ amd mac ] webgpu:shader,execution,expression,call,builtin,atomics,atomicAnd:and_workgroup:workgroupSize=64;dispatchSize=1;mapId="remap";scalarType="u32" [ RetryOnFailure ]
 crbug.com/371963563 [ amd mac ] webgpu:shader,execution,expression,call,builtin,atomics,atomicAnd:and_workgroup:workgroupSize=64;dispatchSize=4;mapId="passthrough";scalarType="i32" [ RetryOnFailure ]
+crbug.com/371963563 [ amd mac ] webgpu:shader,execution,expression,call,builtin,atomics,atomicAnd:and_workgroup:workgroupSize=64;dispatchSize=4;mapId="passthrough";scalarType="u32" [ RetryOnFailure ]
+crbug.com/371963563 [ amd mac ] webgpu:shader,execution,expression,call,builtin,atomics,atomicAnd:and_workgroup:workgroupSize=64;dispatchSize=4;mapId="remap";scalarType="i32" [ RetryOnFailure ]
 crbug.com/371963563 [ amd mac ] webgpu:shader,execution,expression,call,builtin,atomics,atomicAnd:and_workgroup:workgroupSize=64;dispatchSize=4;mapId="remap";scalarType="u32" [ RetryOnFailure ]
 crbug.com/371963563 [ amd mac ] webgpu:shader,execution,expression,call,builtin,atomics,atomicAnd:and_workgroup:workgroupSize=64;dispatchSize=8;mapId="passthrough";scalarType="i32" [ RetryOnFailure ]
 crbug.com/371963563 [ amd mac ] webgpu:shader,execution,expression,call,builtin,atomics,atomicAnd:and_workgroup:workgroupSize=64;dispatchSize=8;mapId="passthrough";scalarType="u32" [ RetryOnFailure ]
 crbug.com/371963563 [ amd mac ] webgpu:shader,execution,expression,call,builtin,atomics,atomicOr:or_workgroup:workgroupSize=64;dispatchSize=1;mapId="remap";scalarType="u32" [ RetryOnFailure ]
 crbug.com/371963563 [ amd mac ] webgpu:shader,execution,expression,call,builtin,atomics,atomicOr:or_workgroup:workgroupSize=64;dispatchSize=8;mapId="passthrough";scalarType="u32" [ RetryOnFailure ]
+crbug.com/371963563 [ amd mac ] webgpu:shader,execution,expression,call,builtin,atomics,atomicXor:xor_workgroup:workgroupSize=64;dispatchSize=4;mapId="passthrough";scalarType="u32" [ RetryOnFailure ]
+crbug.com/371963563 [ amd mac ] webgpu:shader,execution,expression,call,builtin,atomics,atomicXor:xor_workgroup:workgroupSize=64;dispatchSize=4;mapId="remap";scalarType="u32" [ RetryOnFailure ]
 crbug.com/372055513 [ amd mac ] webgpu:shader,execution,expression,call,builtin,subgroupBroadcast:workgroup_uniform_load:* [ RetryOnFailure ]
 crbug.com/372055515 [ amd mac ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="DepthTest";format=* [ RetryOnFailure ]
 crbug.com/372055515 [ amd mac ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="StencilTest";format=* [ RetryOnFailure ]
+crbug.com/391283121 [ amd mac ] webgpu:shader,execution,statement,discard:derivatives:useStorageBuffers=true [ RetryOnFailure ]
+crbug.com/391283121 [ amd mac ] webgpu:shader,execution,statement,discard:function_call:useStorageBuffers=true [ RetryOnFailure ]
 
 ################################################################################
 # Assorted failures that are missing bug associations (NEEDS TRIAGE)
