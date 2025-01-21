@@ -51,6 +51,8 @@ TINT_BEGIN_DISABLE_PROTOBUF_WARNINGS();
 #include "src/tint/utils/protos/ir_fuzz/ir_fuzz.pb.h"
 TINT_END_DISABLE_PROTOBUF_WARNINGS();
 
+TINT_BEGIN_DISABLE_WARNING(UNSAFE_BUFFER_USAGE);
+
 namespace {
 
 struct Options {
@@ -339,3 +341,5 @@ int main(int argc, const char** argv) {
 
     return EXIT_SUCCESS;
 }
+
+TINT_END_DISABLE_WARNING(UNSAFE_BUFFER_USAGE);

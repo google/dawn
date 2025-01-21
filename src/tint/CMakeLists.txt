@@ -119,6 +119,7 @@ function(tint_default_compile_options TARGET)
     -Wno-used-but-marked-unused
     -Weverything
     -Wunsafe-buffer-usage
+    -Wno-unsafe-buffer-usage-in-libc-call
   )
 
   if(COMPILER_IS_GNU)
