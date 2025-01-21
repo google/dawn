@@ -701,7 +701,6 @@ class Parser {
             case GLSLstd450NMin:
             case GLSLstd450FMin:  // FMin is less prescriptive about NaN operands
                 return core::BuiltinFn::kMin;
-            case GLSLstd450SMax:
             case GLSLstd450UMax:
             case GLSLstd450NMax:
             case GLSLstd450FMax:  // FMax is less prescriptive about NaN operands
@@ -767,6 +766,8 @@ class Parser {
                 return spirv::BuiltinFn::kNormalize;
             case GLSLstd450MatrixInverse:
                 return spirv::BuiltinFn::kInverse;
+            case GLSLstd450SMax:
+                return spirv::BuiltinFn::kMax;
             default:
                 break;
         }
@@ -775,10 +776,11 @@ class Parser {
 
     Vector<const core::type::Type*, 1> GlslStd450ExplicitParams(uint32_t ext_opcode,
                                                                 const core::type::Type* result_ty) {
-        if (ext_opcode != GLSLstd450SSign && ext_opcode != GLSLstd450SAbs) {
-            return {};
+        if (ext_opcode == GLSLstd450SSign || ext_opcode == GLSLstd450SAbs ||
+            ext_opcode == GLSLstd450SMax) {
+            return {result_ty->DeepestElement()};
         }
-        return {result_ty->DeepestElement()};
+        return {};
     }
 
     /// @param inst the SPIR-V instruction for OpAccessChain

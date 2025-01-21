@@ -931,23 +931,6 @@ TEST_F(SpirvReaderTest, Normalize_Vector4) {
 )");
 }
 
-TEST_F(SpirvReaderTest, DISABLED_RectifyOperandsAndResult_SMax) {
-    EXPECT_IR(Preamble() + R"(
-     %1 = OpExtInst %uint %glsl SMax %uint_10 %uint_15
-     %2 = OpExtInst %v2uint %glsl SMax %v2uint_10_20 %v2uint_20_10
-     OpReturn
-     OpFunctionEnd
-  )",
-              R"(
-%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
-  $B1: {
-    let x_1 = bitcast<u32>(max(bitcast<i32>(u1), bitcast<i32>(u2)));
-    let x_2 = bitcast<vec2u>(max(bitcast<vec2i>(v2u1), bitcast<vec2i>(v2u2)));
-  }
-}
-)");
-}
-
 TEST_F(SpirvReaderTest, DISABLED_RectifyOperandsAndResult_SMin) {
     EXPECT_IR(Preamble() + R"(
      %1 = OpExtInst %uint %glsl SMin %uint_10 %uint_15

@@ -67,6 +67,9 @@ std::string Preamble() {
   %v2int_10_20 = OpConstantComposite %v2int %int_10 %int_20
   %v2uint_10_20 = OpConstantComposite %v2uint %uint_10 %uint_20
 
+  %v2int_20_10 = OpConstantComposite %v2int %int_20 %int_10
+  %v2uint_20_10 = OpConstantComposite %v2uint %uint_20 %uint_10
+
   %v2float_50_60 = OpConstantComposite %v2float %float_50 %float_60
   %v3float_50_60_70 = OpConstantComposite %v3float %float_50 %float_60 %float_70
   %v4float_50_50_50_50 = OpConstantComposite %v4float %float_50 %float_50 %float_50 %float_50
@@ -236,6 +239,94 @@ TEST_F(SpirvParserTest, GlslStd450_SAbs_SignedToSigned) {
   $B1: {
     %2:i32 = spirv.abs<i32> 10i
     %3:vec2<i32> = spirv.abs<i32> vec2<i32>(10i, 20i)
+    %4:i32 = let %2
+    %5:vec2<i32> = let %3
+    ret
+  }
+}
+)");
+}
+
+TEST_F(SpirvParserTest, SMax_UnsignedToUnsigned) {
+    EXPECT_IR(Preamble() + R"(
+     %1 = OpExtInst %uint %glsl SMax %uint_10 %uint_10
+     %2 = OpExtInst %v2uint %glsl SMax %v2uint_10_20 %v2uint_20_10
+     %3 = OpCopyObject %uint %1
+     %4 = OpCopyObject %v2uint %2
+     OpReturn
+     OpFunctionEnd
+  )",
+              R"(
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:u32 = spirv.max<u32> 10u, 10u
+    %3:vec2<u32> = spirv.max<u32> vec2<u32>(10u, 20u), vec2<u32>(20u, 10u)
+    %4:u32 = let %2
+    %5:vec2<u32> = let %3
+    ret
+  }
+}
+)");
+}
+
+TEST_F(SpirvParserTest, SMax_SignedToSigned) {
+    EXPECT_IR(Preamble() + R"(
+     %1 = OpExtInst %int %glsl SMax %int_10 %int_10
+     %2 = OpExtInst %v2int %glsl SMax %v2int_10_20 %v2int_20_10
+     %3 = OpCopyObject %int %1
+     %4 = OpCopyObject %v2int %2
+     OpReturn
+     OpFunctionEnd
+  )",
+              R"(
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:i32 = spirv.max<i32> 10i, 10i
+    %3:vec2<i32> = spirv.max<i32> vec2<i32>(10i, 20i), vec2<i32>(20i, 10i)
+    %4:i32 = let %2
+    %5:vec2<i32> = let %3
+    ret
+  }
+}
+)");
+}
+
+TEST_F(SpirvParserTest, SMax_MixedToUnsigned) {
+    EXPECT_IR(Preamble() + R"(
+     %1 = OpExtInst %uint %glsl SMax %int_10 %uint_10
+     %2 = OpExtInst %v2uint %glsl SMax %v2int_10_20 %v2uint_20_10
+     %3 = OpCopyObject %uint %1
+     %4 = OpCopyObject %v2uint %2
+     OpReturn
+     OpFunctionEnd
+  )",
+              R"(
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:u32 = spirv.max<u32> 10i, 10u
+    %3:vec2<u32> = spirv.max<u32> vec2<i32>(10i, 20i), vec2<u32>(20u, 10u)
+    %4:u32 = let %2
+    %5:vec2<u32> = let %3
+    ret
+  }
+}
+)");
+}
+
+TEST_F(SpirvParserTest, SMax_MixedToSigned) {
+    EXPECT_IR(Preamble() + R"(
+     %1 = OpExtInst %int %glsl SMax %uint_10 %int_10
+     %2 = OpExtInst %v2int %glsl SMax %v2uint_10_20 %v2int_20_10
+     %3 = OpCopyObject %int %1
+     %4 = OpCopyObject %v2int %2
+     OpReturn
+     OpFunctionEnd
+  )",
+              R"(
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:i32 = spirv.max<i32> 10u, 10i
+    %3:vec2<i32> = spirv.max<i32> vec2<u32>(10u, 20u), vec2<i32>(20i, 10i)
     %4:i32 = let %2
     %5:vec2<i32> = let %3
     ret

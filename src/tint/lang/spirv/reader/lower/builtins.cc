@@ -73,58 +73,54 @@ struct State {
                 case spirv::BuiltinFn::kAbs:
                     Abs(builtin);
                     break;
+                case spirv::BuiltinFn::kMax:
+                    Max(builtin);
+                    break;
                 default:
                     TINT_UNREACHABLE() << "unknown spirv builtin: " << builtin->Func();
             }
         }
     }
 
-    // The `spirv.sign` method takes a `u32` operand which is not accepted in WGSL. If the operand
-    // is a `u32` or a `vec<N, u32>` then we need to bitcast the operand to `i32` before doing the
-    // comparison.
+    // The SPIR-V Signed methods all interpret their arguments as signed (regardless of the type of
+    // the argument). In order to satisfy this, we must bitcast any unsigned argument to a signed
+    // type before calling the WGSL equivalent method.
+    //
+    // The result of the WGSL method will match the arguments, or in this case a signed value. If
+    // the SPIR-V instruction expected an unsigned result we must bitcast the WGSL result to the
+    // corrrect unsigned type.
+    void WrapSignedSpirvMethods(spirv::ir::BuiltinCall* call, core::BuiltinFn func) {
+        auto args = call->Args();
+
+        b.InsertBefore(call, [&] {
+            auto* result_ty = call->Result(0)->Type();
+            Vector<core::ir::Value*, 2> new_args;
+
+            for (auto* arg : args) {
+                if (arg->Type()->IsUnsignedIntegerScalarOrVector()) {
+                    arg = b.Bitcast(ty.MatchWidth(ty.i32(), result_ty), arg)->Result(0);
+                }
+                new_args.Push(arg);
+            }
+
+            auto* new_call = b.Call(result_ty, func, new_args);
+
+            core::ir::Value* replacement = new_call->Result(0);
+
+            if (result_ty->DeepestElement() == ty.u32()) {
+                new_call->Result(0)->SetType(ty.MatchWidth(ty.i32(), result_ty));
+                replacement = b.Bitcast(result_ty, replacement)->Result(0);
+            }
+            call->Result(0)->ReplaceAllUsesWith(replacement);
+        });
+        call->Destroy();
+    }
+
     void Sign(spirv::ir::BuiltinCall* call) {
-        auto* arg = call->Args()[0];
-
-        b.InsertBefore(call, [&] {
-            auto* result_ty = call->Result(0)->Type();
-            if (arg->Type()->IsUnsignedIntegerScalarOrVector()) {
-                arg = b.Bitcast(ty.MatchWidth(ty.i32(), result_ty), arg)->Result(0);
-            }
-            auto* new_call =
-                b.Call(result_ty, core::BuiltinFn::kSign, Vector<core::ir::Value*, 1>{arg});
-
-            core::ir::Value* replacement = new_call->Result(0);
-            // If the call is a `u32` result type, we need to cast it to `i32`.
-            if (result_ty->DeepestElement() == ty.u32()) {
-                new_call->Result(0)->SetType(ty.MatchWidth(ty.i32(), result_ty));
-                replacement = b.Bitcast(result_ty, replacement)->Result(0);
-            }
-            call->Result(0)->ReplaceAllUsesWith(replacement);
-        });
-        call->Destroy();
+        WrapSignedSpirvMethods(call, core::BuiltinFn::kSign);
     }
-
-    void Abs(spirv::ir::BuiltinCall* call) {
-        auto* arg = call->Args()[0];
-
-        b.InsertBefore(call, [&] {
-            auto* result_ty = call->Result(0)->Type();
-            if (arg->Type()->IsUnsignedIntegerScalarOrVector()) {
-                arg = b.Bitcast(ty.MatchWidth(ty.i32(), result_ty), arg)->Result(0);
-            }
-            auto* new_call =
-                b.Call(result_ty, core::BuiltinFn::kAbs, Vector<core::ir::Value*, 1>{arg});
-
-            core::ir::Value* replacement = new_call->Result(0);
-            // If the call is a `u32` result type, we need to cast it to `i32`.
-            if (result_ty->DeepestElement() == ty.u32()) {
-                new_call->Result(0)->SetType(ty.MatchWidth(ty.i32(), result_ty));
-                replacement = b.Bitcast(result_ty, replacement)->Result(0);
-            }
-            call->Result(0)->ReplaceAllUsesWith(replacement);
-        });
-        call->Destroy();
-    }
+    void Abs(spirv::ir::BuiltinCall* call) { WrapSignedSpirvMethods(call, core::BuiltinFn::kAbs); }
+    void Max(spirv::ir::BuiltinCall* call) { WrapSignedSpirvMethods(call, core::BuiltinFn::kMax); }
 
     void Normalize(spirv::ir::BuiltinCall* call) {
         auto* arg = call->Args()[0];
