@@ -232,22 +232,36 @@ if (${DAWN_ENABLE_EMSCRIPTEN})
         set(emdawnwebgpu_test_sources
             "tests/FuturesTests.cpp"
         )
-        add_executable(emdawnwebgpu_tests ${emdawnwebgpu_test_sources})
-        set_target_properties(emdawnwebgpu_tests PROPERTIES
+        set(emdawnwebgpu_test_deps
+            dawn::dawn_wgpu_utils
+            emdawnwebgpu_cpp
+            gmock_main
+        )
+
+        add_executable(emdawnwebgpu_tests_asyncify ${emdawnwebgpu_test_sources})
+        set_target_properties(emdawnwebgpu_tests_asyncify PROPERTIES
             SUFFIX ".html")
         target_link_libraries(
-            emdawnwebgpu_tests
+            emdawnwebgpu_tests_asyncify
             PUBLIC
-                dawn::dawn_wgpu_utils
-                emdawnwebgpu_cpp
-                gmock_main
+                ${emdawnwebgpu_test_deps}
         )
-        target_link_options(emdawnwebgpu_tests PUBLIC
-            # We need ASYNCIFY for Future implementation. Note that for
-            # some reason, at the moment, these tests do not work with
-            # JSPI.
+        target_link_options(emdawnwebgpu_tests_asyncify PUBLIC
+            # We need Asyncify or JSPI for Future tests.
+            "-sASYNCIFY=1"
+        )
+
+        add_executable(emdawnwebgpu_tests_jspi ${emdawnwebgpu_test_sources})
+        set_target_properties(emdawnwebgpu_tests_jspi PROPERTIES
+            SUFFIX ".html")
+        target_link_libraries(
+            emdawnwebgpu_tests_jspi
+            PUBLIC
+                ${emdawnwebgpu_test_deps}
+        )
+        target_link_options(emdawnwebgpu_tests_jspi PUBLIC
+            # We need Asyncify or JSPI for Future tests.
             "-sJSPI=1"
         )
     endif()
-
 endif()
