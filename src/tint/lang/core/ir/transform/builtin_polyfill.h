@@ -86,6 +86,8 @@ struct BuiltinPolyfillConfig {
     /// Should `pack4xU8Clamp()` be polyfilled?
     /// TODO(tint:1497): remove the option once the bug in DXC is fixed.
     bool pack_4xu8_clamp = false;
+    /// Should `pack4x8snorm`, `pack4x8unorm`, `unpack4x8snorm` and `unpack4x8unorm` be polyfilled?
+    bool pack_unpack_4x8_norm = false;
 
     /// Reflection for this class
     TINT_REFLECT(BuiltinPolyfillConfig,
