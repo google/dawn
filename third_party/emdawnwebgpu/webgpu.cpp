@@ -37,9 +37,9 @@ void emwgpuSetLabel(void* ptr, const char* data, size_t length);
 
 // Note that for the JS entry points, we pass uint64_t as pointer and decode it
 // on the other side.
-FutureID emwgpuWaitAny(FutureID const* futurePtr,
-                       size_t futureCount,
-                       uint64_t const* timeoutNSPtr);
+double emwgpuWaitAny(FutureID const* futurePtr,
+                     size_t futureCount,
+                     uint64_t const* timeoutNSPtr);
 WGPUTextureFormat emwgpuGetPreferredFormat();
 
 // Device functions, i.e. creation functions to create JS backing objects given
@@ -479,8 +479,8 @@ class EventManager : NonMovable {
       }
 
       bool hasTimeout = timeoutNS != UINT64_MAX;
-      FutureID completedId = emwgpuWaitAny(futures.data(), count,
-                                           hasTimeout ? &timeoutNS : nullptr);
+      FutureID completedId = static_cast<FutureID>(emwgpuWaitAny(
+          futures.data(), count, hasTimeout ? &timeoutNS : nullptr));
       if (completedId == kNullFutureId) {
         return WGPUWaitStatus_TimedOut;
       }

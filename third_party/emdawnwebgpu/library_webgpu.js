@@ -18,9 +18,11 @@
 
   // Helper functions for code generation
   globalThis.gpu = {
-    convertSentinelToUndefined: function(name, argIsPassedAsPointerType) {
-      // When `CAN_ADDRESS_2GB` is true, value `-1` is normalized to `0xFFFFFFFF` for pointer.
-      if (CAN_ADDRESS_2GB && argIsPassedAsPointerType) {
+    convertSentinelToUndefined: function(name, argIsSizeT) {
+      // The sentinel value SIZE_MAX is passed as a "p" (pointer) arg, so it comes through as
+      // either `0xFFFFFFFF` or `-1` depending on whether `CAN_ADDRESS_2GB` is enabled.
+      if (CAN_ADDRESS_2GB && argIsSizeT) {
+        // Note CAN_ADDRESS_2GB is always false for MEMORY64 builds.
         return `if (${name} == 0xFFFFFFFF) ${name} = undefined;`;
       } else {
         return `if (${name} == -1) ${name} = undefined;`;
@@ -163,11 +165,12 @@ var LibraryWebGPU = {
     {{{ gpu.makeImportJsObject('Texture') }}}
     {{{ gpu.makeImportJsObject('TextureView') }}}
 
+    // TODO(crbug.com/42241415): Remove this after verifying that it's not used and/or updating users.
     errorCallback__deps: ['$stackSave', '$stackRestore', '$stringToUTF8OnStack'],
     errorCallback: (callback, type, message, userdata) => {
       var sp = stackSave();
       var messagePtr = stringToUTF8OnStack(message);
-      {{{ makeDynCall('vipp', 'callback') }}}(type, messagePtr, userdata);
+      {{{ makeDynCall('vipp', 'callback') }}}(type, {{{ gpu.passAsPointer('messagePtr') }}}, userdata);
       stackRestore(sp);
     },
 
@@ -558,7 +561,7 @@ var LibraryWebGPU = {
     {{{ WEBGPU_INT_TO_STRING_TABLES }}}
   },
 
-  // TODO(374150686): Remove this once it has been fully deprecated in users.
+  // TODO(crbug.com/374150686): Remove this once it has been fully deprecated in users.
   emscripten_webgpu_get_device__deps: ['wgpuDeviceAddRef'],
   emscripten_webgpu_get_device: () => {
 #if ASSERTIONS
@@ -617,7 +620,7 @@ var LibraryWebGPU = {
 
     const firstResolvedFuture = await Promise.race(promises);
     delete WebGPU.Internals.futures[firstResolvedFuture];
-    return {{{ gpu.passAsI64('firstResolvedFuture') }}};
+    return firstResolvedFuture;
   }),
 #else
   emwgpuWaitAny: () => {
@@ -822,7 +825,8 @@ var LibraryWebGPU = {
           device.onuncapturederror = (ev) => {};
           var sp = stackSave();
           var messagePtr = stringToUTF8OnStack(info.message);
-          _emwgpuOnDeviceLostCompleted(deviceLostFutureId, WebGPU.Int_DeviceLostReason[info.reason], messagePtr);
+          _emwgpuOnDeviceLostCompleted(deviceLostFutureId, WebGPU.Int_DeviceLostReason[info.reason],
+            {{{ gpu.passAsPointer('messagePtr') }}});
           stackRestore(sp);
         }));
       }
@@ -840,7 +844,7 @@ var LibraryWebGPU = {
           else if (ev.error instanceof GPUInternalError) type = {{{ gpu.ErrorType.Internal }}};
           var sp = stackSave();
           var messagePtr = stringToUTF8OnStack(ev.error.message);
-          _emwgpuOnUncapturedError(devicePtr, type, messagePtr);
+          _emwgpuOnUncapturedError(devicePtr, type, {{{ gpu.passAsPointer('messagePtr') }}});
           stackRestore(sp);
       };
 
@@ -850,9 +854,11 @@ var LibraryWebGPU = {
       {{{ runtimeKeepalivePop() }}}
       var sp = stackSave();
       var messagePtr = stringToUTF8OnStack(ex.message);
-      _emwgpuOnRequestDeviceCompleted(futureId, {{{ gpu.RequestDeviceStatus.Error }}}, devicePtr, messagePtr);
+      _emwgpuOnRequestDeviceCompleted(futureId, {{{ gpu.RequestDeviceStatus.Error }}},
+        {{{ gpu.passAsPointer('devicePtr') }}}, {{{ gpu.passAsPointer('messagePtr') }}});
       if (deviceLostFutureId) {
-        _emwgpuOnDeviceLostCompleted(deviceLostFutureId, {{{ gpu.DeviceLostReason.FailedCreation }}}, messagePtr);
+        _emwgpuOnDeviceLostCompleted(deviceLostFutureId, {{{ gpu.DeviceLostReason.FailedCreation }}},
+          {{{ gpu.passAsPointer('messagePtr') }}});
       }
       stackRestore(sp);
     }));
@@ -976,7 +982,7 @@ var LibraryWebGPU = {
         ex.name === 'AbortError' ? {{{ gpu.MapAsyncStatus.Aborted }}} :
         ex.name === 'OperationError' ? {{{ gpu.MapAsyncStatus.Error }}} :
         {{{ gpu.MapAsyncStatus.Unknown }}};
-        _emwgpuOnMapAsyncCompleted(futureId, status, messagePtr);
+        _emwgpuOnMapAsyncCompleted(futureId, status, {{{ gpu.passAsPointer('messagePtr') }}});
         delete WebGPU.Internals.bufferOnUnmaps[bufferPtr];
     }));
   },
@@ -1532,7 +1538,8 @@ var LibraryWebGPU = {
       {{{ runtimeKeepalivePop() }}}
       var pipelinePtr = _emwgpuCreateComputePipeline({{{ gpu.NULLPTR }}});
       WebGPU.Internals.jsObjectInsert(pipelinePtr, pipeline);
-      _emwgpuOnCreateComputePipelineCompleted(futureId, {{{ gpu.CreatePipelineAsyncStatus.Success }}}, pipelinePtr, 0);
+      _emwgpuOnCreateComputePipelineCompleted(futureId, {{{ gpu.CreatePipelineAsyncStatus.Success }}},
+        {{{ gpu.passAsPointer('pipelinePtr') }}}, {{{ gpu.NULLPTR }}});
     }, (pipelineError) => {
       {{{ runtimeKeepalivePop() }}}
       var sp = stackSave();
@@ -1541,7 +1548,8 @@ var LibraryWebGPU = {
         pipeline.reason === 'validation' ? {{{ gpu.CreatePipelineAsyncStatus.ValidationError }}} :
         pipeline.reason === 'internal' ? {{{ gpu.CreatePipelineAsyncStatus.InternalError }}} :
         {{{ gpu.CreatePipelineAsyncStatus.Unknown }}};
-      _emwgpuOnCreateComputePipelineCompleted(futureId, status, 0, messagePtr);
+      _emwgpuOnCreateComputePipelineCompleted(futureId, status,
+        {{{ gpu.NULLPTR }}}, {{{ gpu.passAsPointer('messagePtr') }}});
       stackRestore(sp);
     }));
   },
@@ -1649,7 +1657,8 @@ var LibraryWebGPU = {
         pipeline.reason === 'validation' ? {{{ gpu.CreatePipelineAsyncStatus.ValidationError }}} :
         pipeline.reason === 'internal' ? {{{ gpu.CreatePipelineAsyncStatus.InternalError }}} :
         {{{ gpu.CreatePipelineAsyncStatus.Unknown }}};
-        _emwgpuOnCreateRenderPipelineCompleted(futureId, status, 0, messagePtr);
+      _emwgpuOnCreateRenderPipelineCompleted(futureId, status,
+        {{{ gpu.NULLPTR }}}, {{{ gpu.passAsPointer('messagePtr') }}});
       stackRestore(sp);
     }));
   },
@@ -1838,13 +1847,17 @@ var LibraryWebGPU = {
 #endif
       var sp = stackSave();
       var messagePtr = gpuError ? stringToUTF8OnStack(gpuError.message) : 0;
-      _emwgpuOnPopErrorScopeCompleted(futureId, {{{ gpu.PopErrorScopeStatus.Success }}}, type, messagePtr);
+      _emwgpuOnPopErrorScopeCompleted(futureId,
+        {{{ gpu.PopErrorScopeStatus.Success }}}, type,
+        {{{ gpu.passAsPointer('messagePtr') }}});
       stackRestore(sp);
     }, (ex) => {
       {{{ runtimeKeepalivePop() }}}
       var sp = stackSave();
       var messagePtr = stringToUTF8OnStack(ex.message);
-      _emwgpuOnPopErrorScopeCompleted(futureId, {{{ gpu.PopErrorScopeStatus.Success }}}, {{{ gpu.ErrorType.Unknown }}}, messagePtr);
+      _emwgpuOnPopErrorScopeCompleted(futureId,
+        {{{ gpu.PopErrorScopeStatus.Success }}}, {{{ gpu.ErrorType.Unknown }}},
+        {{{ gpu.passAsPointer('messagePtr') }}});
       stackRestore(sp);
     }));
   },
@@ -1854,7 +1867,7 @@ var LibraryWebGPU = {
     device.pushErrorScope(WebGPU.ErrorFilter[filter]);
   },
 
-  // TODO(42241415) Remove this after verifying that it's not used and/or updating users.
+  // TODO(crbug.com/42241415): Remove this after verifying that it's not used and/or updating users.
   wgpuDeviceSetUncapturedErrorCallback__deps: ['$callUserCallback'],
   wgpuDeviceSetUncapturedErrorCallback: (devicePtr, callback, userdata) => {
     var device = WebGPU.getJsObject(devicePtr);
@@ -1941,7 +1954,8 @@ var LibraryWebGPU = {
     if (!('gpu' in navigator)) {
       var sp = stackSave();
       var messagePtr = stringToUTF8OnStack('WebGPU not available on this browser (navigator.gpu is not available)');
-      _emwgpuOnRequestAdapterCompleted(futureId, {{{ gpu.RequestAdapterStatus.Unavailable }}}, 0, messagePtr);
+      _emwgpuOnRequestAdapterCompleted(futureId, {{{ gpu.RequestAdapterStatus.Unavailable }}},
+        {{{ gpu.NULLPTR }}}, {{{ gpu.passAsPointer('messagePtr') }}});
       stackRestore(sp);
       return;
     }
@@ -1957,14 +1971,16 @@ var LibraryWebGPU = {
       } else {
         var sp = stackSave();
         var messagePtr = stringToUTF8OnStack('WebGPU not available on this browser (requestAdapter returned null)');
-        _emwgpuOnRequestAdapterCompleted(futureId, {{{ gpu.RequestAdapterStatus.Unavailable }}}, 0, messagePtr);
+        _emwgpuOnRequestAdapterCompleted(futureId, {{{ gpu.RequestAdapterStatus.Unavailable }}},
+          {{{ gpu.NULLPTR }}}, {{{ gpu.passAsPointer('messagePtr') }}});
         stackRestore(sp);
       }
     }, (ex) => {
       {{{ runtimeKeepalivePop() }}}
       var sp = stackSave();
       var messagePtr = stringToUTF8OnStack(ex.message);
-      _emwgpuOnRequestAdapterCompleted(futureId, {{{ gpu.RequestAdapterStatus.Error }}}, 0, messagePtr);
+      _emwgpuOnRequestAdapterCompleted(futureId, {{{ gpu.RequestAdapterStatus.Error }}},
+        {{{ gpu.NULLPTR }}}, {{{ gpu.passAsPointer('messagePtr') }}});
       stackRestore(sp);
     }));
   },
