@@ -465,24 +465,6 @@ def add_try_builder(name, os, properties):
         service_account = "dawn-try-builder@chops-service-accounts.iam.gserviceaccount.com",
     )
 
-def add_tricium_builder():
-    """Add a Try builder
-    """
-    luci.builder(
-        name = "dawn_analysis",
-        bucket = "try",
-        executable = get_tricium_executable(),
-        properties = {
-            "builder_group": "tryserver.client.dawn",
-        },
-        dimensions = {
-            "cores": "8",
-            "cpu": "x86-64",
-            "os": "Ubuntu-20.04",
-            "pool": "luci.flex.try",
-        },
-        service_account = "dawn-try-builder@chops-service-accounts.iam.gserviceaccount.com",
-    )
 
 def dawn_standalone_builder(name, clang, debug, cpu, fuzzer):
     """Adds both the CI and Try standalone builders as appropriate
@@ -738,16 +720,6 @@ def tricium_dawn_tryjob():
       os: string for the OS, should be one or linux|mac|win
       arch: string for the arch, or None
     """
-
-    add_tricium_builder()
-
-    luci.cq_tryjob_verifier(
-        cq_group = "Dawn-CQ",
-        builder = "dawn:try/dawn_analysis",
-        owner_whitelist = ["project-dawn-tryjob-access"],
-        mode_allowlist = [cq.MODE_ANALYZER_RUN],
-    )
-
     luci.cq_tryjob_verifier(
         cq_group = "Dawn-CQ",
         builder = "chromium:try/tricium-clang-tidy",
@@ -759,11 +731,6 @@ def tricium_dawn_tryjob():
             cq.location_filter(path_regexp = ".+\\.cc"),
             cq.location_filter(path_regexp = ".+\\.cpp"),
         ],
-    )
-
-    luci.list_view_entry(
-        list_view = "try",
-        builder = "try/dawn_analysis",
     )
 
 luci.gitiles_poller(
