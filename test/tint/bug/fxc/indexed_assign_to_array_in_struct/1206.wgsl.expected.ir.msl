@@ -49,26 +49,17 @@ struct tint_module_vars_struct {
 };
 
 tint_array<float3, 8> tint_load_array_packed_vec3(const device tint_array<tint_packed_vec3_f32_array_element, 8>* const from) {
-  float3 const v = float3((*from)[0u].packed);
-  float3 const v_1 = float3((*from)[1u].packed);
-  float3 const v_2 = float3((*from)[2u].packed);
-  float3 const v_3 = float3((*from)[3u].packed);
-  float3 const v_4 = float3((*from)[4u].packed);
-  float3 const v_5 = float3((*from)[5u].packed);
-  float3 const v_6 = float3((*from)[6u].packed);
-  return tint_array<float3, 8>{v, v_1, v_2, v_3, v_4, v_5, v_6, float3((*from)[7u].packed)};
+  return tint_array<float3, 8>{float3((*from)[0u].packed), float3((*from)[1u].packed), float3((*from)[2u].packed), float3((*from)[3u].packed), float3((*from)[4u].packed), float3((*from)[5u].packed), float3((*from)[6u].packed), float3((*from)[7u].packed)};
 }
 
 Particle tint_load_struct_packed_vec3(const device Particle_packed_vec3* const from) {
-  tint_array<float3, 8> const v_7 = tint_load_array_packed_vec3((&(*from).position));
-  float const v_8 = (*from).lifetime;
-  float4 const v_9 = (*from).color;
-  return Particle{.position=v_7, .lifetime=v_8, .color=v_9, .velocity=float3((*from).velocity)};
+  tint_array<float3, 8> const v = tint_load_array_packed_vec3((&(*from).position));
+  return Particle{.position=v, .lifetime=(*from).lifetime, .color=(*from).color, .velocity=float3((*from).velocity)};
 }
 
-kernel void v_10(const device Particles_packed_vec3* particles [[buffer(1)]], const constant Simulation* sim [[buffer(0)]], const constant tint_array<uint4, 1>* tint_storage_buffer_sizes [[buffer(30)]]) {
+kernel void v_1(const device Particles_packed_vec3* particles [[buffer(1)]], const constant Simulation* sim [[buffer(0)]], const constant tint_array<uint4, 1>* tint_storage_buffer_sizes [[buffer(30)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.particles=particles, .sim=sim, .tint_storage_buffer_sizes=tint_storage_buffer_sizes};
-  uint const v_11 = ((((*tint_module_vars.tint_storage_buffer_sizes)[0u].x - 0u) / 176u) - 1u);
-  Particle particle = tint_load_struct_packed_vec3((&(*tint_module_vars.particles).p[min(uint(0), v_11)]));
+  uint const v_2 = ((((*tint_module_vars.tint_storage_buffer_sizes)[0u].x - 0u) / 176u) - 1u);
+  Particle particle = tint_load_struct_packed_vec3((&(*tint_module_vars.particles).p[min(uint(0), v_2)]));
   particle.position[min((*tint_module_vars.sim).i, 7u)] = particle.position[min((*tint_module_vars.sim).i, 7u)];
 }

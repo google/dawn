@@ -41,15 +41,14 @@ struct tint_module_vars_struct {
 
 Inner tint_load_struct_packed_vec3(const constant Inner_packed_vec3* const from) {
   tint_array<tint_packed_vec3_f16_array_element, 2> const v = (*from).m;
-  half3 const v_1 = half3(v[0u].packed);
-  return Inner{.m=half2x3(v_1, half3(v[1u].packed))};
+  return Inner{.m=half2x3(half3(v[0u].packed), half3(v[1u].packed))};
 }
 
 tint_array<Inner, 4> tint_load_array_packed_vec3(const constant tint_array<Inner_packed_vec3, 4>* const from) {
-  Inner const v_2 = tint_load_struct_packed_vec3((&(*from)[0u]));
-  Inner const v_3 = tint_load_struct_packed_vec3((&(*from)[1u]));
-  Inner const v_4 = tint_load_struct_packed_vec3((&(*from)[2u]));
-  return tint_array<Inner, 4>{v_2, v_3, v_4, tint_load_struct_packed_vec3((&(*from)[3u]))};
+  Inner const v_1 = tint_load_struct_packed_vec3((&(*from)[0u]));
+  Inner const v_2 = tint_load_struct_packed_vec3((&(*from)[1u]));
+  Inner const v_3 = tint_load_struct_packed_vec3((&(*from)[2u]));
+  return tint_array<Inner, 4>{v_1, v_2, v_3, tint_load_struct_packed_vec3((&(*from)[3u]))};
 }
 
 Outer tint_load_struct_packed_vec3_1(const constant Outer_packed_vec3* const from) {
@@ -57,10 +56,10 @@ Outer tint_load_struct_packed_vec3_1(const constant Outer_packed_vec3* const fro
 }
 
 tint_array<Outer, 4> tint_load_array_packed_vec3_1(const constant tint_array<Outer_packed_vec3, 4>* const from) {
-  Outer const v_5 = tint_load_struct_packed_vec3_1((&(*from)[0u]));
-  Outer const v_6 = tint_load_struct_packed_vec3_1((&(*from)[1u]));
-  Outer const v_7 = tint_load_struct_packed_vec3_1((&(*from)[2u]));
-  return tint_array<Outer, 4>{v_5, v_6, v_7, tint_load_struct_packed_vec3_1((&(*from)[3u]))};
+  Outer const v_4 = tint_load_struct_packed_vec3_1((&(*from)[0u]));
+  Outer const v_5 = tint_load_struct_packed_vec3_1((&(*from)[1u]));
+  Outer const v_6 = tint_load_struct_packed_vec3_1((&(*from)[2u]));
+  return tint_array<Outer, 4>{v_4, v_5, v_6, tint_load_struct_packed_vec3_1((&(*from)[3u]))};
 }
 
 kernel void f(const constant tint_array<Outer_packed_vec3, 4>* a [[buffer(0)]]) {
@@ -75,9 +74,8 @@ kernel void f(const constant tint_array<Outer_packed_vec3, 4>* a [[buffer(0)]]) 
   Outer const l_a_3 = tint_load_struct_packed_vec3_1(p_a_3);
   tint_array<Inner, 4> const l_a_3_a = tint_load_array_packed_vec3(p_a_3_a);
   Inner const l_a_3_a_2 = tint_load_struct_packed_vec3(p_a_3_a_2);
-  tint_array<tint_packed_vec3_f16_array_element, 2> const v_8 = (*p_a_3_a_2_m);
-  half3 const v_9 = half3(v_8[0u].packed);
-  half2x3 const l_a_3_a_2_m = half2x3(v_9, half3(v_8[1u].packed));
+  tint_array<tint_packed_vec3_f16_array_element, 2> const v_7 = (*p_a_3_a_2_m);
+  half2x3 const l_a_3_a_2_m = half2x3(half3(v_7[0u].packed), half3(v_7[1u].packed));
   half3 const l_a_3_a_2_m_1 = half3((*p_a_3_a_2_m_1));
   half const l_a_3_a_2_m_1_0 = (*p_a_3_a_2_m_1).x;
 }

@@ -32,11 +32,10 @@ void main_inner(uint tint_local_index, tint_module_vars_struct tint_module_vars)
   }
   threadgroup_barrier(mem_flags::mem_threadgroup);
   tint_array<tint_packed_vec3_f32_array_element, 2> const v_1 = (*tint_module_vars.v);
-  float3 const v_2 = float3(v_1[0u].packed);
-  float2x3 const v_3 = float2x3(v_2, float3(v_1[1u].packed));
+  float2x3 const v_2 = float2x3(float3(v_1[0u].packed), float3(v_1[1u].packed));
 }
 
-kernel void v_4(uint tint_local_index [[thread_index_in_threadgroup]], threadgroup tint_symbol_1* v_5 [[threadgroup(0)]]) {
-  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.v=(&(*v_5).tint_symbol)};
+kernel void v_3(uint tint_local_index [[thread_index_in_threadgroup]], threadgroup tint_symbol_1* v_4 [[threadgroup(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.v=(&(*v_4).tint_symbol)};
   main_inner(tint_local_index, tint_module_vars);
 }

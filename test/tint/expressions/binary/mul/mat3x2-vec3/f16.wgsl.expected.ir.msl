@@ -26,6 +26,5 @@ struct tint_module_vars_struct {
 
 fragment void v(const constant S_packed_vec3* data [[buffer(0)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.data=data};
-  half3x2 const v_1 = (*tint_module_vars.data).tint_member;
-  half2 const x = (v_1 * half3((*tint_module_vars.data).vector));
+  half2 const x = ((*tint_module_vars.data).tint_member * half3((*tint_module_vars.data).vector));
 }

@@ -41,16 +41,15 @@ struct tint_module_vars_struct {
 S tint_load_struct_packed_vec3(const constant S_packed_vec3* const from) {
   int const v = (*from).before;
   tint_array<tint_packed_vec3_f32_array_element, 2> const v_1 = (*from).m;
-  float3 const v_2 = float3(v_1[0u].packed);
-  float2x3 const v_3 = float2x3(v_2, float3(v_1[1u].packed));
-  return S{.before=v, .m=v_3, .after=(*from).after};
+  float2x3 const v_2 = float2x3(float3(v_1[0u].packed), float3(v_1[1u].packed));
+  return S{.before=v, .m=v_2, .after=(*from).after};
 }
 
 tint_array<S, 4> tint_load_array_packed_vec3(const constant tint_array<S_packed_vec3, 4>* const from) {
-  S const v_4 = tint_load_struct_packed_vec3((&(*from)[0u]));
-  S const v_5 = tint_load_struct_packed_vec3((&(*from)[1u]));
-  S const v_6 = tint_load_struct_packed_vec3((&(*from)[2u]));
-  return tint_array<S, 4>{v_4, v_5, v_6, tint_load_struct_packed_vec3((&(*from)[3u]))};
+  S const v_3 = tint_load_struct_packed_vec3((&(*from)[0u]));
+  S const v_4 = tint_load_struct_packed_vec3((&(*from)[1u]));
+  S const v_5 = tint_load_struct_packed_vec3((&(*from)[2u]));
+  return tint_array<S, 4>{v_3, v_4, v_5, tint_load_struct_packed_vec3((&(*from)[3u]))};
 }
 
 kernel void f(const constant tint_array<S_packed_vec3, 4>* u [[buffer(0)]]) {
@@ -58,8 +57,7 @@ kernel void f(const constant tint_array<S_packed_vec3, 4>* u [[buffer(0)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.u=u, .p=(&p)};
   (*tint_module_vars.p) = tint_load_array_packed_vec3(tint_module_vars.u);
   (*tint_module_vars.p)[1u] = tint_load_struct_packed_vec3((&(*tint_module_vars.u)[2u]));
-  tint_array<tint_packed_vec3_f32_array_element, 2> const v_7 = (*tint_module_vars.u)[2u].m;
-  float3 const v_8 = float3(v_7[0u].packed);
-  (*tint_module_vars.p)[3u].m = float2x3(v_8, float3(v_7[1u].packed));
+  tint_array<tint_packed_vec3_f32_array_element, 2> const v_6 = (*tint_module_vars.u)[2u].m;
+  (*tint_module_vars.p)[3u].m = float2x3(float3(v_6[0u].packed), float3(v_6[1u].packed));
   (*tint_module_vars.p)[1u].m[0u] = float3((*tint_module_vars.u)[0u].m[1u].packed).zxy;
 }

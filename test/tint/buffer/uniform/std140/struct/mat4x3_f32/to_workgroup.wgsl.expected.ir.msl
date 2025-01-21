@@ -54,11 +54,8 @@ void tint_store_array_packed_vec3_1(threadgroup S_packed_vec3* const to, S value
 S tint_load_struct_packed_vec3(const constant S_packed_vec3* const from) {
   int const v = (*from).before;
   tint_array<tint_packed_vec3_f32_array_element, 4> const v_1 = (*from).m;
-  float3 const v_2 = float3(v_1[0u].packed);
-  float3 const v_3 = float3(v_1[1u].packed);
-  float3 const v_4 = float3(v_1[2u].packed);
-  float4x3 const v_5 = float4x3(v_2, v_3, v_4, float3(v_1[3u].packed));
-  return S{.before=v, .m=v_5, .after=(*from).after};
+  float4x3 const v_2 = float4x3(float3(v_1[0u].packed), float3(v_1[1u].packed), float3(v_1[2u].packed), float3(v_1[3u].packed));
+  return S{.before=v, .m=v_2, .after=(*from).after};
 }
 
 void tint_store_array_packed_vec3(threadgroup tint_array<S_packed_vec3, 4>* const to, tint_array<S, 4> value) {
@@ -69,24 +66,24 @@ void tint_store_array_packed_vec3(threadgroup tint_array<S_packed_vec3, 4>* cons
 }
 
 tint_array<S, 4> tint_load_array_packed_vec3(const constant tint_array<S_packed_vec3, 4>* const from) {
-  S const v_6 = tint_load_struct_packed_vec3((&(*from)[0u]));
-  S const v_7 = tint_load_struct_packed_vec3((&(*from)[1u]));
-  S const v_8 = tint_load_struct_packed_vec3((&(*from)[2u]));
-  return tint_array<S, 4>{v_6, v_7, v_8, tint_load_struct_packed_vec3((&(*from)[3u]))};
+  S const v_3 = tint_load_struct_packed_vec3((&(*from)[0u]));
+  S const v_4 = tint_load_struct_packed_vec3((&(*from)[1u]));
+  S const v_5 = tint_load_struct_packed_vec3((&(*from)[2u]));
+  return tint_array<S, 4>{v_3, v_4, v_5, tint_load_struct_packed_vec3((&(*from)[3u]))};
 }
 
 void f_inner(uint tint_local_index, tint_module_vars_struct tint_module_vars) {
   {
-    uint v_9 = 0u;
-    v_9 = tint_local_index;
+    uint v_6 = 0u;
+    v_6 = tint_local_index;
     while(true) {
-      uint const v_10 = v_9;
-      if ((v_10 >= 4u)) {
+      uint const v_7 = v_6;
+      if ((v_7 >= 4u)) {
         break;
       }
-      tint_store_array_packed_vec3_1((&(*tint_module_vars.w)[v_10]), S{});
+      tint_store_array_packed_vec3_1((&(*tint_module_vars.w)[v_7]), S{});
       {
-        v_9 = (v_10 + 1u);
+        v_6 = (v_7 + 1u);
       }
       continue;
     }
@@ -94,19 +91,16 @@ void f_inner(uint tint_local_index, tint_module_vars_struct tint_module_vars) {
   threadgroup_barrier(mem_flags::mem_threadgroup);
   tint_store_array_packed_vec3(tint_module_vars.w, tint_load_array_packed_vec3(tint_module_vars.u));
   tint_store_array_packed_vec3_1((&(*tint_module_vars.w)[1u]), tint_load_struct_packed_vec3((&(*tint_module_vars.u)[2u])));
-  tint_array<tint_packed_vec3_f32_array_element, 4> const v_11 = (*tint_module_vars.u)[2u].m;
-  float3 const v_12 = float3(v_11[0u].packed);
-  float3 const v_13 = float3(v_11[1u].packed);
-  float3 const v_14 = float3(v_11[2u].packed);
-  float4x3 const v_15 = float4x3(v_12, v_13, v_14, float3(v_11[3u].packed));
-  (*tint_module_vars.w)[3u].m[0u].packed = packed_float3(v_15[0u]);
-  (*tint_module_vars.w)[3u].m[1u].packed = packed_float3(v_15[1u]);
-  (*tint_module_vars.w)[3u].m[2u].packed = packed_float3(v_15[2u]);
-  (*tint_module_vars.w)[3u].m[3u].packed = packed_float3(v_15[3u]);
+  tint_array<tint_packed_vec3_f32_array_element, 4> const v_8 = (*tint_module_vars.u)[2u].m;
+  float4x3 const v_9 = float4x3(float3(v_8[0u].packed), float3(v_8[1u].packed), float3(v_8[2u].packed), float3(v_8[3u].packed));
+  (*tint_module_vars.w)[3u].m[0u].packed = packed_float3(v_9[0u]);
+  (*tint_module_vars.w)[3u].m[1u].packed = packed_float3(v_9[1u]);
+  (*tint_module_vars.w)[3u].m[2u].packed = packed_float3(v_9[2u]);
+  (*tint_module_vars.w)[3u].m[3u].packed = packed_float3(v_9[3u]);
   (*tint_module_vars.w)[1u].m[0u].packed = packed_float3(float3((*tint_module_vars.u)[0u].m[1u].packed).zxy);
 }
 
-kernel void f(uint tint_local_index [[thread_index_in_threadgroup]], const constant tint_array<S_packed_vec3, 4>* u [[buffer(0)]], threadgroup tint_symbol_1* v_16 [[threadgroup(0)]]) {
-  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.u=u, .w=(&(*v_16).tint_symbol)};
+kernel void f(uint tint_local_index [[thread_index_in_threadgroup]], const constant tint_array<S_packed_vec3, 4>* u [[buffer(0)]], threadgroup tint_symbol_1* v_10 [[threadgroup(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.u=u, .w=(&(*v_10).tint_symbol)};
   f_inner(tint_local_index, tint_module_vars);
 }

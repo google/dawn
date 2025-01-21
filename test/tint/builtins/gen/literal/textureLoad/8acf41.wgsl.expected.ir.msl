@@ -110,15 +110,13 @@ tint_ExternalTextureParams tint_load_struct_packed_vec3(const constant tint_Exte
   tint_GammaTransferParams const v_13 = (*from).gammaDecodeParams;
   tint_GammaTransferParams const v_14 = (*from).gammaEncodeParams;
   tint_array<tint_packed_vec3_f32_array_element, 3> const v_15 = (*from).gamutConversionMatrix;
-  float3 const v_16 = float3(v_15[0u].packed);
-  float3 const v_17 = float3(v_15[1u].packed);
-  float3x3 const v_18 = float3x3(v_16, v_17, float3(v_15[2u].packed));
-  return tint_ExternalTextureParams{.numPlanes=v_10, .doYuvToRgbConversionOnly=v_11, .yuvToRgbConversionMatrix=v_12, .gammaDecodeParams=v_13, .gammaEncodeParams=v_14, .gamutConversionMatrix=v_18, .sampleTransform=(*from).sampleTransform, .loadTransform=(*from).loadTransform, .samplePlane0RectMin=(*from).samplePlane0RectMin, .samplePlane0RectMax=(*from).samplePlane0RectMax, .samplePlane1RectMin=(*from).samplePlane1RectMin, .samplePlane1RectMax=(*from).samplePlane1RectMax, .apparentSize=(*from).apparentSize, .plane1CoordFactor=(*from).plane1CoordFactor};
+  float3x3 const v_16 = float3x3(float3(v_15[0u].packed), float3(v_15[1u].packed), float3(v_15[2u].packed));
+  return tint_ExternalTextureParams{.numPlanes=v_10, .doYuvToRgbConversionOnly=v_11, .yuvToRgbConversionMatrix=v_12, .gammaDecodeParams=v_13, .gammaEncodeParams=v_14, .gamutConversionMatrix=v_16, .sampleTransform=(*from).sampleTransform, .loadTransform=(*from).loadTransform, .samplePlane0RectMin=(*from).samplePlane0RectMin, .samplePlane0RectMax=(*from).samplePlane0RectMax, .samplePlane1RectMin=(*from).samplePlane1RectMin, .samplePlane1RectMax=(*from).samplePlane1RectMax, .apparentSize=(*from).apparentSize, .plane1CoordFactor=(*from).plane1CoordFactor};
 }
 
 float4 textureLoad_8acf41(tint_module_vars_struct tint_module_vars) {
-  tint_ExternalTextureParams const v_19 = tint_load_struct_packed_vec3(tint_module_vars.arg_0_params);
-  float4 res = tint_TextureLoadExternal(tint_module_vars.arg_0_plane0, tint_module_vars.arg_0_plane1, v_19, min(uint2(int2(1)), ((v_19.apparentSize + uint2(1u)) - uint2(1u))));
+  tint_ExternalTextureParams const v_17 = tint_load_struct_packed_vec3(tint_module_vars.arg_0_params);
+  float4 res = tint_TextureLoadExternal(tint_module_vars.arg_0_plane0, tint_module_vars.arg_0_plane1, v_17, min(uint2(int2(1)), ((v_17.apparentSize + uint2(1u)) - uint2(1u))));
   return res;
 }
 
@@ -238,15 +236,13 @@ tint_ExternalTextureParams tint_load_struct_packed_vec3(const constant tint_Exte
   tint_GammaTransferParams const v_13 = (*from).gammaDecodeParams;
   tint_GammaTransferParams const v_14 = (*from).gammaEncodeParams;
   tint_array<tint_packed_vec3_f32_array_element, 3> const v_15 = (*from).gamutConversionMatrix;
-  float3 const v_16 = float3(v_15[0u].packed);
-  float3 const v_17 = float3(v_15[1u].packed);
-  float3x3 const v_18 = float3x3(v_16, v_17, float3(v_15[2u].packed));
-  return tint_ExternalTextureParams{.numPlanes=v_10, .doYuvToRgbConversionOnly=v_11, .yuvToRgbConversionMatrix=v_12, .gammaDecodeParams=v_13, .gammaEncodeParams=v_14, .gamutConversionMatrix=v_18, .sampleTransform=(*from).sampleTransform, .loadTransform=(*from).loadTransform, .samplePlane0RectMin=(*from).samplePlane0RectMin, .samplePlane0RectMax=(*from).samplePlane0RectMax, .samplePlane1RectMin=(*from).samplePlane1RectMin, .samplePlane1RectMax=(*from).samplePlane1RectMax, .apparentSize=(*from).apparentSize, .plane1CoordFactor=(*from).plane1CoordFactor};
+  float3x3 const v_16 = float3x3(float3(v_15[0u].packed), float3(v_15[1u].packed), float3(v_15[2u].packed));
+  return tint_ExternalTextureParams{.numPlanes=v_10, .doYuvToRgbConversionOnly=v_11, .yuvToRgbConversionMatrix=v_12, .gammaDecodeParams=v_13, .gammaEncodeParams=v_14, .gamutConversionMatrix=v_16, .sampleTransform=(*from).sampleTransform, .loadTransform=(*from).loadTransform, .samplePlane0RectMin=(*from).samplePlane0RectMin, .samplePlane0RectMax=(*from).samplePlane0RectMax, .samplePlane1RectMin=(*from).samplePlane1RectMin, .samplePlane1RectMax=(*from).samplePlane1RectMax, .apparentSize=(*from).apparentSize, .plane1CoordFactor=(*from).plane1CoordFactor};
 }
 
 float4 textureLoad_8acf41(tint_module_vars_struct tint_module_vars) {
-  tint_ExternalTextureParams const v_19 = tint_load_struct_packed_vec3(tint_module_vars.arg_0_params);
-  float4 res = tint_TextureLoadExternal(tint_module_vars.arg_0_plane0, tint_module_vars.arg_0_plane1, v_19, min(uint2(int2(1)), ((v_19.apparentSize + uint2(1u)) - uint2(1u))));
+  tint_ExternalTextureParams const v_17 = tint_load_struct_packed_vec3(tint_module_vars.arg_0_params);
+  float4 res = tint_TextureLoadExternal(tint_module_vars.arg_0_plane0, tint_module_vars.arg_0_plane1, v_17, min(uint2(int2(1)), ((v_17.apparentSize + uint2(1u)) - uint2(1u))));
   return res;
 }
 
@@ -375,15 +371,13 @@ tint_ExternalTextureParams tint_load_struct_packed_vec3(const constant tint_Exte
   tint_GammaTransferParams const v_13 = (*from).gammaDecodeParams;
   tint_GammaTransferParams const v_14 = (*from).gammaEncodeParams;
   tint_array<tint_packed_vec3_f32_array_element, 3> const v_15 = (*from).gamutConversionMatrix;
-  float3 const v_16 = float3(v_15[0u].packed);
-  float3 const v_17 = float3(v_15[1u].packed);
-  float3x3 const v_18 = float3x3(v_16, v_17, float3(v_15[2u].packed));
-  return tint_ExternalTextureParams{.numPlanes=v_10, .doYuvToRgbConversionOnly=v_11, .yuvToRgbConversionMatrix=v_12, .gammaDecodeParams=v_13, .gammaEncodeParams=v_14, .gamutConversionMatrix=v_18, .sampleTransform=(*from).sampleTransform, .loadTransform=(*from).loadTransform, .samplePlane0RectMin=(*from).samplePlane0RectMin, .samplePlane0RectMax=(*from).samplePlane0RectMax, .samplePlane1RectMin=(*from).samplePlane1RectMin, .samplePlane1RectMax=(*from).samplePlane1RectMax, .apparentSize=(*from).apparentSize, .plane1CoordFactor=(*from).plane1CoordFactor};
+  float3x3 const v_16 = float3x3(float3(v_15[0u].packed), float3(v_15[1u].packed), float3(v_15[2u].packed));
+  return tint_ExternalTextureParams{.numPlanes=v_10, .doYuvToRgbConversionOnly=v_11, .yuvToRgbConversionMatrix=v_12, .gammaDecodeParams=v_13, .gammaEncodeParams=v_14, .gamutConversionMatrix=v_16, .sampleTransform=(*from).sampleTransform, .loadTransform=(*from).loadTransform, .samplePlane0RectMin=(*from).samplePlane0RectMin, .samplePlane0RectMax=(*from).samplePlane0RectMax, .samplePlane1RectMin=(*from).samplePlane1RectMin, .samplePlane1RectMax=(*from).samplePlane1RectMax, .apparentSize=(*from).apparentSize, .plane1CoordFactor=(*from).plane1CoordFactor};
 }
 
 float4 textureLoad_8acf41(tint_module_vars_struct tint_module_vars) {
-  tint_ExternalTextureParams const v_19 = tint_load_struct_packed_vec3(tint_module_vars.arg_0_params);
-  float4 res = tint_TextureLoadExternal(tint_module_vars.arg_0_plane0, tint_module_vars.arg_0_plane1, v_19, min(uint2(int2(1)), ((v_19.apparentSize + uint2(1u)) - uint2(1u))));
+  tint_ExternalTextureParams const v_17 = tint_load_struct_packed_vec3(tint_module_vars.arg_0_params);
+  float4 res = tint_TextureLoadExternal(tint_module_vars.arg_0_plane0, tint_module_vars.arg_0_plane1, v_17, min(uint2(int2(1)), ((v_17.apparentSize + uint2(1u)) - uint2(1u))));
   return res;
 }
 
@@ -396,9 +390,9 @@ VertexOutput vertex_main_inner(tint_module_vars_struct tint_module_vars) {
 
 vertex vertex_main_outputs vertex_main(texture2d<float, access::sample> arg_0_plane0 [[texture(0)]], texture2d<float, access::sample> arg_0_plane1 [[texture(1)]], const constant tint_ExternalTextureParams_packed_vec3* arg_0_params [[buffer(2)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.arg_0_plane0=arg_0_plane0, .arg_0_plane1=arg_0_plane1, .arg_0_params=arg_0_params};
-  VertexOutput const v_20 = vertex_main_inner(tint_module_vars);
+  VertexOutput const v_18 = vertex_main_inner(tint_module_vars);
   vertex_main_outputs tint_wrapper_result = {};
-  tint_wrapper_result.VertexOutput_pos = v_20.pos;
-  tint_wrapper_result.VertexOutput_prevent_dce = v_20.prevent_dce;
+  tint_wrapper_result.VertexOutput_pos = v_18.pos;
+  tint_wrapper_result.VertexOutput_prevent_dce = v_18.prevent_dce;
   return tint_wrapper_result;
 }

@@ -24,9 +24,7 @@ struct tint_module_vars_struct {
 float3x3 foo(tint_module_vars_struct tint_module_vars) {
   threadgroup_barrier(mem_flags::mem_threadgroup);
   tint_array<tint_packed_vec3_f32_array_element, 3> const v_1 = (*tint_module_vars.v);
-  float3 const v_2 = float3(v_1[0u].packed);
-  float3 const v_3 = float3(v_1[1u].packed);
-  float3x3 const v_4 = float3x3(v_2, v_3, float3(v_1[2u].packed));
+  float3x3 const v_2 = float3x3(float3(v_1[0u].packed), float3(v_1[1u].packed), float3(v_1[2u].packed));
   threadgroup_barrier(mem_flags::mem_threadgroup);
-  return v_4;
+  return v_2;
 }

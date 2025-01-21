@@ -34,9 +34,7 @@ struct tint_module_vars_struct {
 kernel void f(const constant tint_array<S_packed_vec3, 4>* u [[buffer(0)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.u=u};
   tint_array<tint_packed_vec3_f16_array_element, 3> const v = (*tint_module_vars.u)[2u].m;
-  half3 const v_1 = half3(v[0u].packed);
-  half3 const v_2 = half3(v[1u].packed);
-  half3x3 const t = transpose(half3x3(v_1, v_2, half3(v[2u].packed)));
+  half3x3 const t = transpose(half3x3(half3(v[0u].packed), half3(v[1u].packed), half3(v[2u].packed)));
   half const l = length(half3((*tint_module_vars.u)[0u].m[1u].packed).zxy);
   half const a = abs(half3((*tint_module_vars.u)[0u].m[1u].packed).zxy.x);
 }

@@ -25,10 +25,7 @@ struct tint_module_vars_struct {
 kernel void f(const constant tint_array<tint_packed_vec3_f32_array_element, 4>* u [[buffer(0)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.u=u};
   tint_array<tint_packed_vec3_f32_array_element, 4> const v = (*tint_module_vars.u);
-  float3 const v_1 = float3(v[0u].packed);
-  float3 const v_2 = float3(v[1u].packed);
-  float3 const v_3 = float3(v[2u].packed);
-  float3x4 const t = transpose(float4x3(v_1, v_2, v_3, float3(v[3u].packed)));
+  float3x4 const t = transpose(float4x3(float3(v[0u].packed), float3(v[1u].packed), float3(v[2u].packed), float3(v[3u].packed)));
   float const l = length(float3((*tint_module_vars.u)[1u].packed));
   float const a = abs(float3((*tint_module_vars.u)[0u].packed).zxy.x);
 }

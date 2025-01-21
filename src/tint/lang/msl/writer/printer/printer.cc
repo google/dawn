@@ -937,6 +937,12 @@ class Printer : public tint::TextGenerator {
             EmitValue(out, c->Args()[0]);
             out << "))";
             return;
+        } else if (c->Func() == msl::BuiltinFn::kConvert) {
+            EmitType(out, c->Result(0)->Type());
+            out << "(";
+            EmitValue(out, c->Operand(0));
+            out << ")";
+            return;
         }
 
         out << c->Func() << "(";

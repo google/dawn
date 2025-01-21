@@ -194,7 +194,7 @@ $B1: {  # root
 %foo = func():vec3<u32> {
   $B2: {
     %3:__packed_vec3<u32> = load %v
-    %4:vec3<u32> = convert %3
+    %4:vec3<u32> = msl.convert %3
     ret %4
   }
 }
@@ -237,7 +237,7 @@ $B1: {  # root
 %foo = func():vec3<u32> {
   $B2: {
     %3:__packed_vec3<u32> = load %v
-    %4:vec3<u32> = convert %3
+    %4:vec3<u32> = msl.convert %3
     ret %4
   }
 }
@@ -280,7 +280,7 @@ $B1: {  # root
 %foo = func():vec3<u32> {
   $B2: {
     %3:__packed_vec3<u32> = load %v
-    %4:vec3<u32> = convert %3
+    %4:vec3<u32> = msl.convert %3
     ret %4
   }
 }
@@ -373,7 +373,7 @@ $B1: {  # root
 
 %foo = func(%value:vec3<u32>):void {
   $B2: {
-    %4:__packed_vec3<u32> = convert %value
+    %4:__packed_vec3<u32> = msl.convert %value
     store %v, %4
     ret
   }
@@ -473,13 +473,13 @@ $B1: {  # root
   $B2: {
     %3:array<tint_packed_vec3_f32_array_element, 4> = load %v
     %4:__packed_vec3<f32> = access %3, 0u, 0u
-    %5:vec3<f32> = convert %4
+    %5:vec3<f32> = msl.convert %4
     %6:__packed_vec3<f32> = access %3, 1u, 0u
-    %7:vec3<f32> = convert %6
+    %7:vec3<f32> = msl.convert %6
     %8:__packed_vec3<f32> = access %3, 2u, 0u
-    %9:vec3<f32> = convert %8
+    %9:vec3<f32> = msl.convert %8
     %10:__packed_vec3<f32> = access %3, 3u, 0u
-    %11:vec3<f32> = convert %10
+    %11:vec3<f32> = msl.convert %10
     %12:mat4x3<f32> = construct %5, %7, %9, %11
     ret %12
   }
@@ -543,16 +543,16 @@ $B1: {  # root
   $B2: {
     %3:ptr<storage, __packed_vec3<f32>, read_write> = access %v, 0u, 0u
     %4:__packed_vec3<f32> = load %3
-    %5:vec3<f32> = convert %4
+    %5:vec3<f32> = msl.convert %4
     %6:ptr<storage, __packed_vec3<f32>, read_write> = access %v, 1u, 0u
     %7:__packed_vec3<f32> = load %6
-    %8:vec3<f32> = convert %7
+    %8:vec3<f32> = msl.convert %7
     %9:ptr<storage, __packed_vec3<f32>, read_write> = access %v, 2u, 0u
     %10:__packed_vec3<f32> = load %9
-    %11:vec3<f32> = convert %10
+    %11:vec3<f32> = msl.convert %10
     %12:ptr<storage, __packed_vec3<f32>, read_write> = access %v, 3u, 0u
     %13:__packed_vec3<f32> = load %12
-    %14:vec3<f32> = convert %13
+    %14:vec3<f32> = msl.convert %13
     %15:vec3<f32> = add %5, %8
     %16:vec3<f32> = add %15, %11
     %17:vec3<f32> = add %16, %14
@@ -676,19 +676,19 @@ $B1: {  # root
   $B2: {
     %4:ptr<storage, __packed_vec3<f32>, read_write> = access %v, 0u, 0u
     %5:vec3<f32> = access %value, 0u
-    %6:__packed_vec3<f32> = convert %5
+    %6:__packed_vec3<f32> = msl.convert %5
     store %4, %6
     %7:ptr<storage, __packed_vec3<f32>, read_write> = access %v, 1u, 0u
     %8:vec3<f32> = access %value, 1u
-    %9:__packed_vec3<f32> = convert %8
+    %9:__packed_vec3<f32> = msl.convert %8
     store %7, %9
     %10:ptr<storage, __packed_vec3<f32>, read_write> = access %v, 2u, 0u
     %11:vec3<f32> = access %value, 2u
-    %12:__packed_vec3<f32> = convert %11
+    %12:__packed_vec3<f32> = msl.convert %11
     store %10, %12
     %13:ptr<storage, __packed_vec3<f32>, read_write> = access %v, 3u, 0u
     %14:vec3<f32> = access %value, 3u
-    %15:__packed_vec3<f32> = convert %14
+    %15:__packed_vec3<f32> = msl.convert %14
     store %13, %15
     ret
   }
@@ -749,16 +749,16 @@ $B1: {  # root
 %foo = func(%value:vec3<f32>):void {
   $B2: {
     %4:ptr<storage, __packed_vec3<f32>, read_write> = access %v, 0u, 0u
-    %5:__packed_vec3<f32> = convert %value
+    %5:__packed_vec3<f32> = msl.convert %value
     store %4, %5
     %6:ptr<storage, __packed_vec3<f32>, read_write> = access %v, 1u, 0u
-    %7:__packed_vec3<f32> = convert %value
+    %7:__packed_vec3<f32> = msl.convert %value
     store %6, %7
     %8:ptr<storage, __packed_vec3<f32>, read_write> = access %v, 2u, 0u
-    %9:__packed_vec3<f32> = convert %value
+    %9:__packed_vec3<f32> = msl.convert %value
     store %8, %9
     %10:ptr<storage, __packed_vec3<f32>, read_write> = access %v, 3u, 0u
-    %11:__packed_vec3<f32> = convert %value
+    %11:__packed_vec3<f32> = msl.convert %value
     store %10, %11
     ret
   }
@@ -873,9 +873,9 @@ $B1: {  # root
   $B2: {
     %3:array<tint_packed_vec3_f16_array_element, 2> = load %v
     %4:__packed_vec3<f16> = access %3, 0u, 0u
-    %5:vec3<f16> = convert %4
+    %5:vec3<f16> = msl.convert %4
     %6:__packed_vec3<f16> = access %3, 1u, 0u
-    %7:vec3<f16> = convert %6
+    %7:vec3<f16> = msl.convert %6
     %8:mat2x3<f16> = construct %5, %7
     ret %8
   }
@@ -930,10 +930,10 @@ $B1: {  # root
   $B3: {
     %6:ptr<storage, __packed_vec3<f32>, read_write> = access %from, 0u, 0u
     %7:__packed_vec3<f32> = load %6
-    %8:vec3<f32> = convert %7
+    %8:vec3<f32> = msl.convert %7
     %9:ptr<storage, __packed_vec3<f32>, read_write> = access %from, 1u, 0u
     %10:__packed_vec3<f32> = load %9
-    %11:vec3<f32> = convert %10
+    %11:vec3<f32> = msl.convert %10
     %12:array<vec3<f32>, 2> = construct %8, %11
     ret %12
   }
@@ -1001,7 +1001,7 @@ $B1: {  # root
         %9:ptr<function, vec3<f32>, read_write> = access %6, %idx
         %10:ptr<storage, __packed_vec3<f32>, read_write> = access %from, %idx, 0u
         %11:__packed_vec3<f32> = load %10
-        %12:vec3<f32> = convert %11
+        %12:vec3<f32> = msl.convert %11
         store %9, %12
         continue  # -> $B6
       }
@@ -1064,10 +1064,10 @@ $B1: {  # root
   $B2: {
     %3:ptr<storage, __packed_vec3<f32>, read_write> = access %v, 0u, 0u
     %4:__packed_vec3<f32> = load %3
-    %5:vec3<f32> = convert %4
+    %5:vec3<f32> = msl.convert %4
     %6:ptr<storage, __packed_vec3<f32>, read_write> = access %v, 1u, 0u
     %7:__packed_vec3<f32> = load %6
-    %8:vec3<f32> = convert %7
+    %8:vec3<f32> = msl.convert %7
     %9:vec3<f32> = add %5, %8
     ret %9
   }
@@ -1181,11 +1181,11 @@ $B1: {  # root
   $B3: {
     %8:vec3<f32> = access %value_1, 0u
     %9:ptr<storage, __packed_vec3<f32>, read_write> = access %to, 0u, 0u
-    %10:__packed_vec3<f32> = convert %8
+    %10:__packed_vec3<f32> = msl.convert %8
     store %9, %10
     %11:vec3<f32> = access %value_1, 1u
     %12:ptr<storage, __packed_vec3<f32>, read_write> = access %to, 1u, 0u
-    %13:__packed_vec3<f32> = convert %11
+    %13:__packed_vec3<f32> = msl.convert %11
     store %12, %13
     ret
   }
@@ -1254,7 +1254,7 @@ $B1: {  # root
         }
         %10:vec3<f32> = access %value_1, %idx
         %11:ptr<storage, __packed_vec3<f32>, read_write> = access %to, %idx, 0u
-        %12:__packed_vec3<f32> = convert %10
+        %12:__packed_vec3<f32> = msl.convert %10
         store %11, %12
         continue  # -> $B6
       }
@@ -1316,10 +1316,10 @@ $B1: {  # root
 %foo = func(%value:vec3<f32>):void {
   $B2: {
     %4:ptr<storage, __packed_vec3<f32>, read_write> = access %v, 0u, 0u
-    %5:__packed_vec3<f32> = convert %value
+    %5:__packed_vec3<f32> = msl.convert %value
     store %4, %5
     %6:ptr<storage, __packed_vec3<f32>, read_write> = access %v, 1u, 0u
-    %7:__packed_vec3<f32> = convert %value
+    %7:__packed_vec3<f32> = msl.convert %value
     store %6, %7
     ret
   }
@@ -1430,10 +1430,10 @@ $B1: {  # root
   $B3: {
     %6:ptr<storage, __packed_vec3<f16>, read_write> = access %from, 0u, 0u
     %7:__packed_vec3<f16> = load %6
-    %8:vec3<f16> = convert %7
+    %8:vec3<f16> = msl.convert %7
     %9:ptr<storage, __packed_vec3<f16>, read_write> = access %from, 1u, 0u
     %10:__packed_vec3<f16> = load %9
-    %11:vec3<f16> = convert %10
+    %11:vec3<f16> = msl.convert %10
     %12:array<vec3<f16>, 2> = construct %8, %11
     ret %12
   }
@@ -1500,10 +1500,10 @@ $B1: {  # root
   $B4: {
     %15:ptr<storage, __packed_vec3<f32>, read_write> = access %from_1, 0u, 0u
     %16:__packed_vec3<f32> = load %15
-    %17:vec3<f32> = convert %16
+    %17:vec3<f32> = msl.convert %16
     %18:ptr<storage, __packed_vec3<f32>, read_write> = access %from_1, 1u, 0u
     %19:__packed_vec3<f32> = load %18
-    %20:vec3<f32> = convert %19
+    %20:vec3<f32> = msl.convert %19
     %21:array<vec3<f32>, 2> = construct %17, %20
     ret %21
   }
@@ -1587,10 +1587,10 @@ $B1: {  # root
   $B8: {
     %16:ptr<storage, __packed_vec3<f32>, read_write> = access %from_1, 0u, 0u
     %17:__packed_vec3<f32> = load %16
-    %18:vec3<f32> = convert %17
+    %18:vec3<f32> = msl.convert %17
     %19:ptr<storage, __packed_vec3<f32>, read_write> = access %from_1, 1u, 0u
     %20:__packed_vec3<f32> = load %19
-    %21:vec3<f32> = convert %20
+    %21:vec3<f32> = msl.convert %20
     %22:array<vec3<f32>, 2> = construct %18, %21
     ret %22
   }
@@ -1647,10 +1647,10 @@ $B1: {  # root
   $B3: {
     %7:ptr<storage, __packed_vec3<f32>, read_write> = access %from, 0u, 0u
     %8:__packed_vec3<f32> = load %7
-    %9:vec3<f32> = convert %8
+    %9:vec3<f32> = msl.convert %8
     %10:ptr<storage, __packed_vec3<f32>, read_write> = access %from, 1u, 0u
     %11:__packed_vec3<f32> = load %10
-    %12:vec3<f32> = convert %11
+    %12:vec3<f32> = msl.convert %11
     %13:array<vec3<f32>, 2> = construct %9, %12
     ret %13
   }
@@ -1722,11 +1722,11 @@ $B1: {  # root
   $B4: {
     %20:vec3<f32> = access %value_2, 0u
     %21:ptr<storage, __packed_vec3<f32>, read_write> = access %to_1, 0u, 0u
-    %22:__packed_vec3<f32> = convert %20
+    %22:__packed_vec3<f32> = msl.convert %20
     store %21, %22
     %23:vec3<f32> = access %value_2, 1u
     %24:ptr<storage, __packed_vec3<f32>, read_write> = access %to_1, 1u, 0u
-    %25:__packed_vec3<f32> = convert %23
+    %25:__packed_vec3<f32> = msl.convert %23
     store %24, %25
     ret
   }
@@ -1810,11 +1810,11 @@ $B1: {  # root
   $B8: {
     %17:vec3<f32> = access %value_2, 0u
     %18:ptr<storage, __packed_vec3<f32>, read_write> = access %to_1, 0u, 0u
-    %19:__packed_vec3<f32> = convert %17
+    %19:__packed_vec3<f32> = msl.convert %17
     store %18, %19
     %20:vec3<f32> = access %value_2, 1u
     %21:ptr<storage, __packed_vec3<f32>, read_write> = access %to_1, 1u, 0u
-    %22:__packed_vec3<f32> = convert %20
+    %22:__packed_vec3<f32> = msl.convert %20
     store %21, %22
     ret
   }
@@ -1869,10 +1869,10 @@ $B1: {  # root
   $B2: {
     %3:ptr<storage, __packed_vec3<f32>, read_write> = access %v, 0u, 0u
     %4:__packed_vec3<f32> = load %3
-    %5:vec3<f32> = convert %4
+    %5:vec3<f32> = msl.convert %4
     %6:ptr<storage, __packed_vec3<f32>, read_write> = access %v, 1u, 0u
     %7:__packed_vec3<f32> = load %6
-    %8:vec3<f32> = convert %7
+    %8:vec3<f32> = msl.convert %7
     %9:vec3<f32> = add %5, %8
     ret %9
   }
@@ -1952,17 +1952,17 @@ $B1: {  # root
   $B3: {
     %6:ptr<storage, __packed_vec3<u32>, read_write> = access %from, 0u
     %7:__packed_vec3<u32> = load %6
-    %8:vec3<u32> = convert %7
+    %8:vec3<u32> = msl.convert %7
     %9:ptr<storage, array<tint_packed_vec3_f32_array_element, 4>, read_write> = access %from, 1u
     %10:array<tint_packed_vec3_f32_array_element, 4> = load %9
     %11:__packed_vec3<f32> = access %10, 0u, 0u
-    %12:vec3<f32> = convert %11
+    %12:vec3<f32> = msl.convert %11
     %13:__packed_vec3<f32> = access %10, 1u, 0u
-    %14:vec3<f32> = convert %13
+    %14:vec3<f32> = msl.convert %13
     %15:__packed_vec3<f32> = access %10, 2u, 0u
-    %16:vec3<f32> = convert %15
+    %16:vec3<f32> = msl.convert %15
     %17:__packed_vec3<f32> = access %10, 3u, 0u
-    %18:vec3<f32> = convert %17
+    %18:vec3<f32> = msl.convert %17
     %19:mat4x3<f32> = construct %12, %14, %16, %18
     %20:ptr<storage, array<tint_packed_vec3_f32_array_element, 2>, read_write> = access %from, 2u
     %21:array<vec3<f32>, 2> = call %tint_load_array_packed_vec3, %20
@@ -1974,10 +1974,10 @@ $B1: {  # root
   $B4: {
     %25:ptr<storage, __packed_vec3<f32>, read_write> = access %from_1, 0u, 0u
     %26:__packed_vec3<f32> = load %25
-    %27:vec3<f32> = convert %26
+    %27:vec3<f32> = msl.convert %26
     %28:ptr<storage, __packed_vec3<f32>, read_write> = access %from_1, 1u, 0u
     %29:__packed_vec3<f32> = load %28
-    %30:vec3<f32> = convert %29
+    %30:vec3<f32> = msl.convert %29
     %31:array<vec3<f32>, 2> = construct %27, %30
     ret %31
   }
@@ -2059,17 +2059,17 @@ $B1: {  # root
   $B2: {
     %3:ptr<storage, __packed_vec3<u32>, read_write> = access %v, 0u
     %4:__packed_vec3<u32> = load %3
-    %5:vec3<u32> = convert %4
+    %5:vec3<u32> = msl.convert %4
     %6:ptr<storage, array<tint_packed_vec3_f32_array_element, 4>, read_write> = access %v, 1u
     %7:array<tint_packed_vec3_f32_array_element, 4> = load %6
     %8:__packed_vec3<f32> = access %7, 0u, 0u
-    %9:vec3<f32> = convert %8
+    %9:vec3<f32> = msl.convert %8
     %10:__packed_vec3<f32> = access %7, 1u, 0u
-    %11:vec3<f32> = convert %10
+    %11:vec3<f32> = msl.convert %10
     %12:__packed_vec3<f32> = access %7, 2u, 0u
-    %13:vec3<f32> = convert %12
+    %13:vec3<f32> = msl.convert %12
     %14:__packed_vec3<f32> = access %7, 3u, 0u
-    %15:vec3<f32> = convert %14
+    %15:vec3<f32> = msl.convert %14
     %16:mat4x3<f32> = construct %9, %11, %13, %15
     %17:ptr<storage, array<tint_packed_vec3_f32_array_element, 2>, read_write> = access %v, 2u
     %18:array<vec3<f32>, 2> = call %tint_load_array_packed_vec3, %17
@@ -2080,10 +2080,10 @@ $B1: {  # root
   $B3: {
     %21:ptr<storage, __packed_vec3<f32>, read_write> = access %from, 0u, 0u
     %22:__packed_vec3<f32> = load %21
-    %23:vec3<f32> = convert %22
+    %23:vec3<f32> = msl.convert %22
     %24:ptr<storage, __packed_vec3<f32>, read_write> = access %from, 1u, 0u
     %25:__packed_vec3<f32> = load %24
-    %26:vec3<f32> = convert %25
+    %26:vec3<f32> = msl.convert %25
     %27:array<vec3<f32>, 2> = construct %23, %26
     ret %27
   }
@@ -2166,25 +2166,25 @@ $B1: {  # root
   $B3: {
     %8:vec3<f32> = access %value_1, 0u
     %9:ptr<storage, __packed_vec3<f32>, read_write> = access %to, 0u
-    %10:__packed_vec3<f32> = convert %8
+    %10:__packed_vec3<f32> = msl.convert %8
     store %9, %10
     %11:mat4x3<f32> = access %value_1, 1u
     %12:ptr<storage, array<tint_packed_vec3_f32_array_element, 4>, read_write> = access %to, 1u
     %13:ptr<storage, __packed_vec3<f32>, read_write> = access %12, 0u, 0u
     %14:vec3<f32> = access %11, 0u
-    %15:__packed_vec3<f32> = convert %14
+    %15:__packed_vec3<f32> = msl.convert %14
     store %13, %15
     %16:ptr<storage, __packed_vec3<f32>, read_write> = access %12, 1u, 0u
     %17:vec3<f32> = access %11, 1u
-    %18:__packed_vec3<f32> = convert %17
+    %18:__packed_vec3<f32> = msl.convert %17
     store %16, %18
     %19:ptr<storage, __packed_vec3<f32>, read_write> = access %12, 2u, 0u
     %20:vec3<f32> = access %11, 2u
-    %21:__packed_vec3<f32> = convert %20
+    %21:__packed_vec3<f32> = msl.convert %20
     store %19, %21
     %22:ptr<storage, __packed_vec3<f32>, read_write> = access %12, 3u, 0u
     %23:vec3<f32> = access %11, 3u
-    %24:__packed_vec3<f32> = convert %23
+    %24:__packed_vec3<f32> = msl.convert %23
     store %22, %24
     %25:array<vec3<f32>, 2> = access %value_1, 2u
     %26:ptr<storage, array<tint_packed_vec3_f32_array_element, 2>, read_write> = access %to, 2u
@@ -2196,11 +2196,11 @@ $B1: {  # root
   $B4: {
     %31:vec3<f32> = access %value_2, 0u
     %32:ptr<storage, __packed_vec3<f32>, read_write> = access %to_1, 0u, 0u
-    %33:__packed_vec3<f32> = convert %31
+    %33:__packed_vec3<f32> = msl.convert %31
     store %32, %33
     %34:vec3<f32> = access %value_2, 1u
     %35:ptr<storage, __packed_vec3<f32>, read_write> = access %to_1, 1u, 0u
-    %36:__packed_vec3<f32> = convert %34
+    %36:__packed_vec3<f32> = msl.convert %34
     store %35, %36
     ret
   }
@@ -2283,13 +2283,13 @@ $B1: {  # root
 %foo = func(%value:vec3<f32>):void {
   $B2: {
     %4:ptr<storage, __packed_vec3<f32>, read_write> = access %v, 0u
-    %5:__packed_vec3<f32> = convert %value
+    %5:__packed_vec3<f32> = msl.convert %value
     store %4, %5
     %6:ptr<storage, __packed_vec3<f32>, read_write> = access %v, 1u, 3u, 0u
-    %7:__packed_vec3<f32> = convert %value
+    %7:__packed_vec3<f32> = msl.convert %value
     store %6, %7
     %8:ptr<storage, __packed_vec3<f32>, read_write> = access %v, 2u, 1u, 0u
-    %9:__packed_vec3<f32> = convert %value
+    %9:__packed_vec3<f32> = msl.convert %value
     store %8, %9
     ret
   }
@@ -2387,19 +2387,19 @@ $B1: {  # root
     %7:u32 = load %6
     %8:ptr<storage, __packed_vec3<u32>, read_write> = access %from, 1u
     %9:__packed_vec3<u32> = load %8
-    %10:vec3<u32> = convert %9
+    %10:vec3<u32> = msl.convert %9
     %11:ptr<storage, vec4<u32>, read_write> = access %from, 2u
     %12:vec4<u32> = load %11
     %13:ptr<storage, array<tint_packed_vec3_f32_array_element, 4>, read_write> = access %from, 3u
     %14:array<tint_packed_vec3_f32_array_element, 4> = load %13
     %15:__packed_vec3<f32> = access %14, 0u, 0u
-    %16:vec3<f32> = convert %15
+    %16:vec3<f32> = msl.convert %15
     %17:__packed_vec3<f32> = access %14, 1u, 0u
-    %18:vec3<f32> = convert %17
+    %18:vec3<f32> = msl.convert %17
     %19:__packed_vec3<f32> = access %14, 2u, 0u
-    %20:vec3<f32> = convert %19
+    %20:vec3<f32> = msl.convert %19
     %21:__packed_vec3<f32> = access %14, 3u, 0u
-    %22:vec3<f32> = convert %21
+    %22:vec3<f32> = msl.convert %21
     %23:mat4x3<f32> = construct %16, %18, %20, %22
     %24:ptr<storage, mat3x2<f32>, read_write> = access %from, 4u
     %25:mat3x2<f32> = load %24
@@ -2415,10 +2415,10 @@ $B1: {  # root
   $B4: {
     %33:ptr<storage, __packed_vec3<f32>, read_write> = access %from_1, 0u, 0u
     %34:__packed_vec3<f32> = load %33
-    %35:vec3<f32> = convert %34
+    %35:vec3<f32> = msl.convert %34
     %36:ptr<storage, __packed_vec3<f32>, read_write> = access %from_1, 1u, 0u
     %37:__packed_vec3<f32> = load %36
-    %38:vec3<f32> = convert %37
+    %38:vec3<f32> = msl.convert %37
     %39:array<vec3<f32>, 2> = construct %35, %38
     ret %39
   }
@@ -2530,19 +2530,19 @@ $B1: {  # root
     %4:u32 = load %3
     %5:ptr<storage, __packed_vec3<u32>, read_write> = access %v, 1u
     %6:__packed_vec3<u32> = load %5
-    %7:vec3<u32> = convert %6
+    %7:vec3<u32> = msl.convert %6
     %8:ptr<storage, vec4<u32>, read_write> = access %v, 2u
     %9:vec4<u32> = load %8
     %10:ptr<storage, array<tint_packed_vec3_f32_array_element, 4>, read_write> = access %v, 3u
     %11:array<tint_packed_vec3_f32_array_element, 4> = load %10
     %12:__packed_vec3<f32> = access %11, 0u, 0u
-    %13:vec3<f32> = convert %12
+    %13:vec3<f32> = msl.convert %12
     %14:__packed_vec3<f32> = access %11, 1u, 0u
-    %15:vec3<f32> = convert %14
+    %15:vec3<f32> = msl.convert %14
     %16:__packed_vec3<f32> = access %11, 2u, 0u
-    %17:vec3<f32> = convert %16
+    %17:vec3<f32> = msl.convert %16
     %18:__packed_vec3<f32> = access %11, 3u, 0u
-    %19:vec3<f32> = convert %18
+    %19:vec3<f32> = msl.convert %18
     %20:mat4x3<f32> = construct %13, %15, %17, %19
     %21:ptr<storage, mat3x2<f32>, read_write> = access %v, 4u
     %22:mat3x2<f32> = load %21
@@ -2557,10 +2557,10 @@ $B1: {  # root
   $B3: {
     %29:ptr<storage, __packed_vec3<f32>, read_write> = access %from, 0u, 0u
     %30:__packed_vec3<f32> = load %29
-    %31:vec3<f32> = convert %30
+    %31:vec3<f32> = msl.convert %30
     %32:ptr<storage, __packed_vec3<f32>, read_write> = access %from, 1u, 0u
     %33:__packed_vec3<f32> = load %32
-    %34:vec3<f32> = convert %33
+    %34:vec3<f32> = msl.convert %33
     %35:array<vec3<f32>, 2> = construct %31, %34
     ret %35
   }
@@ -2662,7 +2662,7 @@ $B1: {  # root
     store %9, %8
     %10:vec3<u32> = access %value_1, 1u
     %11:ptr<storage, __packed_vec3<u32>, read_write> = access %to, 1u
-    %12:__packed_vec3<u32> = convert %10
+    %12:__packed_vec3<u32> = msl.convert %10
     store %11, %12
     %13:vec4<u32> = access %value_1, 2u
     %14:ptr<storage, vec4<u32>, read_write> = access %to, 2u
@@ -2671,19 +2671,19 @@ $B1: {  # root
     %16:ptr<storage, array<tint_packed_vec3_f32_array_element, 4>, read_write> = access %to, 3u
     %17:ptr<storage, __packed_vec3<f32>, read_write> = access %16, 0u, 0u
     %18:vec3<f32> = access %15, 0u
-    %19:__packed_vec3<f32> = convert %18
+    %19:__packed_vec3<f32> = msl.convert %18
     store %17, %19
     %20:ptr<storage, __packed_vec3<f32>, read_write> = access %16, 1u, 0u
     %21:vec3<f32> = access %15, 1u
-    %22:__packed_vec3<f32> = convert %21
+    %22:__packed_vec3<f32> = msl.convert %21
     store %20, %22
     %23:ptr<storage, __packed_vec3<f32>, read_write> = access %16, 2u, 0u
     %24:vec3<f32> = access %15, 2u
-    %25:__packed_vec3<f32> = convert %24
+    %25:__packed_vec3<f32> = msl.convert %24
     store %23, %25
     %26:ptr<storage, __packed_vec3<f32>, read_write> = access %16, 3u, 0u
     %27:vec3<f32> = access %15, 3u
-    %28:__packed_vec3<f32> = convert %27
+    %28:__packed_vec3<f32> = msl.convert %27
     store %26, %28
     %29:mat3x2<f32> = access %value_1, 4u
     %30:ptr<storage, mat3x2<f32>, read_write> = access %to, 4u
@@ -2701,11 +2701,11 @@ $B1: {  # root
   $B4: {
     %39:vec3<f32> = access %value_2, 0u
     %40:ptr<storage, __packed_vec3<f32>, read_write> = access %to_1, 0u, 0u
-    %41:__packed_vec3<f32> = convert %39
+    %41:__packed_vec3<f32> = msl.convert %39
     store %40, %41
     %42:vec3<f32> = access %value_2, 1u
     %43:ptr<storage, __packed_vec3<f32>, read_write> = access %to_1, 1u, 0u
-    %44:__packed_vec3<f32> = convert %42
+    %44:__packed_vec3<f32> = msl.convert %42
     store %43, %44
     ret
   }
@@ -2871,7 +2871,7 @@ $B1: {  # root
     %load_outer_array:array<S, 16> = let %3
     %6:ptr<storage, __packed_vec3<f32>, read_write> = access %v, 7u, 1u, 3u, 1u, 0u
     %7:__packed_vec3<f32> = load %6
-    %8:vec3<f32> = convert %7
+    %8:vec3<f32> = msl.convert %7
     %load_matrix_column:vec3<f32> = let %8
     %10:array<S, 16> = construct
     %11:void = call %tint_store_array_packed_vec3, %v, %10
@@ -2913,7 +2913,7 @@ $B1: {  # root
   $B8: {
     %25:ptr<storage, __packed_vec3<u32>, read_write> = access %from_1, 0u
     %26:__packed_vec3<u32> = load %25
-    %27:vec3<u32> = convert %26
+    %27:vec3<u32> = msl.convert %26
     %28:ptr<storage, array<array<tint_packed_vec3_f32_array_element, 2>, 11>, read_write> = access %from_1, 1u
     %29:array<mat2x3<f32>, 11> = call %tint_load_array_packed_vec3_1, %28
     %31:S = construct %27, %29
@@ -2938,9 +2938,9 @@ $B1: {  # root
         %37:ptr<storage, array<tint_packed_vec3_f32_array_element, 2>, read_write> = access %from_2, %idx_1
         %38:array<tint_packed_vec3_f32_array_element, 2> = load %37
         %39:__packed_vec3<f32> = access %38, 0u, 0u
-        %40:vec3<f32> = convert %39
+        %40:vec3<f32> = msl.convert %39
         %41:__packed_vec3<f32> = access %38, 1u, 0u
-        %42:vec3<f32> = convert %41
+        %42:vec3<f32> = msl.convert %41
         %43:mat2x3<f32> = construct %40, %42
         store %36, %43
         continue  # -> $B12
@@ -2984,7 +2984,7 @@ $B1: {  # root
   $B19: {
     %57:vec3<u32> = access %value_1, 0u
     %58:ptr<storage, __packed_vec3<u32>, read_write> = access %to_1, 0u
-    %59:__packed_vec3<u32> = convert %57
+    %59:__packed_vec3<u32> = msl.convert %57
     store %58, %59
     %60:array<mat2x3<f32>, 11> = access %value_1, 1u
     %61:ptr<storage, array<array<tint_packed_vec3_f32_array_element, 2>, 11>, read_write> = access %to_1, 1u
@@ -3009,11 +3009,11 @@ $B1: {  # root
         %69:ptr<storage, array<tint_packed_vec3_f32_array_element, 2>, read_write> = access %to_2, %idx_3
         %70:ptr<storage, __packed_vec3<f32>, read_write> = access %69, 0u, 0u
         %71:vec3<f32> = access %68, 0u
-        %72:__packed_vec3<f32> = convert %71
+        %72:__packed_vec3<f32> = msl.convert %71
         store %70, %72
         %73:ptr<storage, __packed_vec3<f32>, read_write> = access %69, 1u, 0u
         %74:vec3<f32> = access %68, 1u
-        %75:__packed_vec3<f32> = convert %74
+        %75:__packed_vec3<f32> = msl.convert %74
         store %73, %75
         continue  # -> $B23
       }
@@ -3082,9 +3082,9 @@ $B1: {  # root
     %4:ptr<storage, __packed_vec3<f32>, read_write> = access %mat, 1u, 0u
     %col:ptr<storage, __packed_vec3<f32>, read_write> = let %4
     %6:__packed_vec3<f32> = load %col
-    %7:vec3<f32> = convert %6
+    %7:vec3<f32> = msl.convert %6
     %8:ptr<storage, __packed_vec3<f32>, read_write> = access %mat, 2u, 0u
-    %9:__packed_vec3<f32> = convert %7
+    %9:__packed_vec3<f32> = msl.convert %7
     store %8, %9
     store_vector_element %col, 2u, 42.0f
     ret
@@ -3163,9 +3163,9 @@ $B1: {  # root
 %bar = func(%mat:ptr<storage, array<tint_packed_vec3_f32_array_element, 4>, read_write>, %col:ptr<storage, __packed_vec3<f32>, read_write>):void {
   $B2: {
     %5:__packed_vec3<f32> = load %col
-    %6:vec3<f32> = convert %5
+    %6:vec3<f32> = msl.convert %5
     %7:ptr<storage, __packed_vec3<f32>, read_write> = access %mat, 2u, 0u
-    %8:__packed_vec3<f32> = convert %6
+    %8:__packed_vec3<f32> = msl.convert %6
     store %7, %8
     store_vector_element %col, 2u, 42.0f
     ret
@@ -3299,10 +3299,10 @@ $B1: {  # root
   $B3: {
     %15:ptr<uniform, __packed_vec3<f32>, read> = access %from, 0u, 0u
     %16:__packed_vec3<f32> = load %15
-    %17:vec3<f32> = convert %16
+    %17:vec3<f32> = msl.convert %16
     %18:ptr<uniform, __packed_vec3<f32>, read> = access %from, 1u, 0u
     %19:__packed_vec3<f32> = load %18
-    %20:vec3<f32> = convert %19
+    %20:vec3<f32> = msl.convert %19
     %21:array<vec3<f32>, 2> = construct %17, %20
     ret %21
   }
@@ -3311,10 +3311,10 @@ $B1: {  # root
   $B4: {
     %23:ptr<storage, __packed_vec3<f32>, read_write> = access %from_1, 0u, 0u
     %24:__packed_vec3<f32> = load %23
-    %25:vec3<f32> = convert %24
+    %25:vec3<f32> = msl.convert %24
     %26:ptr<storage, __packed_vec3<f32>, read_write> = access %from_1, 1u, 0u
     %27:__packed_vec3<f32> = load %26
-    %28:vec3<f32> = convert %27
+    %28:vec3<f32> = msl.convert %27
     %29:array<vec3<f32>, 2> = construct %25, %28
     ret %29
   }
@@ -3323,10 +3323,10 @@ $B1: {  # root
   $B5: {
     %31:ptr<workgroup, __packed_vec3<f32>, read_write> = access %from_2, 0u, 0u
     %32:__packed_vec3<f32> = load %31
-    %33:vec3<f32> = convert %32
+    %33:vec3<f32> = msl.convert %32
     %34:ptr<workgroup, __packed_vec3<f32>, read_write> = access %from_2, 1u, 0u
     %35:__packed_vec3<f32> = load %34
-    %36:vec3<f32> = convert %35
+    %36:vec3<f32> = msl.convert %35
     %37:array<vec3<f32>, 2> = construct %33, %36
     ret %37
   }
@@ -3389,11 +3389,11 @@ $B1: {  # root
   $B3: {
     %10:vec3<f32> = access %value, 0u
     %11:ptr<storage, __packed_vec3<f32>, read_write> = access %to, 0u, 0u
-    %12:__packed_vec3<f32> = convert %10
+    %12:__packed_vec3<f32> = msl.convert %10
     store %11, %12
     %13:vec3<f32> = access %value, 1u
     %14:ptr<storage, __packed_vec3<f32>, read_write> = access %to, 1u, 0u
-    %15:__packed_vec3<f32> = convert %13
+    %15:__packed_vec3<f32> = msl.convert %13
     store %14, %15
     ret
   }
@@ -3402,11 +3402,11 @@ $B1: {  # root
   $B4: {
     %18:vec3<f32> = access %value_1, 0u
     %19:ptr<workgroup, __packed_vec3<f32>, read_write> = access %to_1, 0u, 0u
-    %20:__packed_vec3<f32> = convert %18
+    %20:__packed_vec3<f32> = msl.convert %18
     store %19, %20
     %21:vec3<f32> = access %value_1, 1u
     %22:ptr<workgroup, __packed_vec3<f32>, read_write> = access %to_1, 1u, 0u
-    %23:__packed_vec3<f32> = convert %21
+    %23:__packed_vec3<f32> = msl.convert %21
     store %22, %23
     ret
   }
@@ -3499,7 +3499,7 @@ $B1: {  # root
   $B3: {
     %15:ptr<uniform, __packed_vec3<u32>, read> = access %from, 0u
     %16:__packed_vec3<u32> = load %15
-    %17:vec3<u32> = convert %16
+    %17:vec3<u32> = msl.convert %16
     %18:ptr<uniform, u32, read> = access %from, 1u
     %19:u32 = load %18
     %20:S = construct %17, %19
@@ -3510,7 +3510,7 @@ $B1: {  # root
   $B4: {
     %22:ptr<storage, __packed_vec3<u32>, read_write> = access %from_1, 0u
     %23:__packed_vec3<u32> = load %22
-    %24:vec3<u32> = convert %23
+    %24:vec3<u32> = msl.convert %23
     %25:ptr<storage, u32, read_write> = access %from_1, 1u
     %26:u32 = load %25
     %27:S = construct %24, %26
@@ -3521,7 +3521,7 @@ $B1: {  # root
   $B5: {
     %29:ptr<workgroup, __packed_vec3<u32>, read_write> = access %from_2, 0u
     %30:__packed_vec3<u32> = load %29
-    %31:vec3<u32> = convert %30
+    %31:vec3<u32> = msl.convert %30
     %32:ptr<workgroup, u32, read_write> = access %from_2, 1u
     %33:u32 = load %32
     %34:S = construct %31, %33
@@ -3602,7 +3602,7 @@ $B1: {  # root
   $B3: {
     %10:vec3<u32> = access %value, 0u
     %11:ptr<storage, __packed_vec3<u32>, read_write> = access %to, 0u
-    %12:__packed_vec3<u32> = convert %10
+    %12:__packed_vec3<u32> = msl.convert %10
     store %11, %12
     %13:u32 = access %value, 1u
     %14:ptr<storage, u32, read_write> = access %to, 1u
@@ -3614,7 +3614,7 @@ $B1: {  # root
   $B4: {
     %17:vec3<u32> = access %value_1, 0u
     %18:ptr<workgroup, __packed_vec3<u32>, read_write> = access %to_1, 0u
-    %19:__packed_vec3<u32> = convert %17
+    %19:__packed_vec3<u32> = msl.convert %17
     store %18, %19
     %20:u32 = access %value_1, 1u
     %21:ptr<workgroup, u32, read_write> = access %to_1, 1u

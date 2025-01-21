@@ -117,10 +117,8 @@ tint_ExternalTextureParams tint_load_struct_packed_vec3(const constant tint_Exte
   tint_GammaTransferParams const v_13 = (*from).gammaDecodeParams;
   tint_GammaTransferParams const v_14 = (*from).gammaEncodeParams;
   tint_array<tint_packed_vec3_f32_array_element, 3> const v_15 = (*from).gamutConversionMatrix;
-  float3 const v_16 = float3(v_15[0u].packed);
-  float3 const v_17 = float3(v_15[1u].packed);
-  float3x3 const v_18 = float3x3(v_16, v_17, float3(v_15[2u].packed));
-  return tint_ExternalTextureParams{.numPlanes=v_10, .doYuvToRgbConversionOnly=v_11, .yuvToRgbConversionMatrix=v_12, .gammaDecodeParams=v_13, .gammaEncodeParams=v_14, .gamutConversionMatrix=v_18, .sampleTransform=(*from).sampleTransform, .loadTransform=(*from).loadTransform, .samplePlane0RectMin=(*from).samplePlane0RectMin, .samplePlane0RectMax=(*from).samplePlane0RectMax, .samplePlane1RectMin=(*from).samplePlane1RectMin, .samplePlane1RectMax=(*from).samplePlane1RectMax, .apparentSize=(*from).apparentSize, .plane1CoordFactor=(*from).plane1CoordFactor};
+  float3x3 const v_16 = float3x3(float3(v_15[0u].packed), float3(v_15[1u].packed), float3(v_15[2u].packed));
+  return tint_ExternalTextureParams{.numPlanes=v_10, .doYuvToRgbConversionOnly=v_11, .yuvToRgbConversionMatrix=v_12, .gammaDecodeParams=v_13, .gammaEncodeParams=v_14, .gamutConversionMatrix=v_16, .sampleTransform=(*from).sampleTransform, .loadTransform=(*from).loadTransform, .samplePlane0RectMin=(*from).samplePlane0RectMin, .samplePlane0RectMax=(*from).samplePlane0RectMax, .samplePlane1RectMin=(*from).samplePlane1RectMin, .samplePlane1RectMax=(*from).samplePlane1RectMax, .apparentSize=(*from).apparentSize, .plane1CoordFactor=(*from).plane1CoordFactor};
 }
 
 void doTextureLoad(tint_module_vars_struct tint_module_vars) {
@@ -253,10 +251,8 @@ tint_ExternalTextureParams tint_load_struct_packed_vec3(const constant tint_Exte
   tint_GammaTransferParams const v_13 = (*from).gammaDecodeParams;
   tint_GammaTransferParams const v_14 = (*from).gammaEncodeParams;
   tint_array<tint_packed_vec3_f32_array_element, 3> const v_15 = (*from).gamutConversionMatrix;
-  float3 const v_16 = float3(v_15[0u].packed);
-  float3 const v_17 = float3(v_15[1u].packed);
-  float3x3 const v_18 = float3x3(v_16, v_17, float3(v_15[2u].packed));
-  return tint_ExternalTextureParams{.numPlanes=v_10, .doYuvToRgbConversionOnly=v_11, .yuvToRgbConversionMatrix=v_12, .gammaDecodeParams=v_13, .gammaEncodeParams=v_14, .gamutConversionMatrix=v_18, .sampleTransform=(*from).sampleTransform, .loadTransform=(*from).loadTransform, .samplePlane0RectMin=(*from).samplePlane0RectMin, .samplePlane0RectMax=(*from).samplePlane0RectMax, .samplePlane1RectMin=(*from).samplePlane1RectMin, .samplePlane1RectMax=(*from).samplePlane1RectMax, .apparentSize=(*from).apparentSize, .plane1CoordFactor=(*from).plane1CoordFactor};
+  float3x3 const v_16 = float3x3(float3(v_15[0u].packed), float3(v_15[1u].packed), float3(v_15[2u].packed));
+  return tint_ExternalTextureParams{.numPlanes=v_10, .doYuvToRgbConversionOnly=v_11, .yuvToRgbConversionMatrix=v_12, .gammaDecodeParams=v_13, .gammaEncodeParams=v_14, .gamutConversionMatrix=v_16, .sampleTransform=(*from).sampleTransform, .loadTransform=(*from).loadTransform, .samplePlane0RectMin=(*from).samplePlane0RectMin, .samplePlane0RectMax=(*from).samplePlane0RectMax, .samplePlane1RectMin=(*from).samplePlane1RectMin, .samplePlane1RectMax=(*from).samplePlane1RectMax, .apparentSize=(*from).apparentSize, .plane1CoordFactor=(*from).plane1CoordFactor};
 }
 
 void doTextureLoad(tint_module_vars_struct tint_module_vars) {
@@ -382,10 +378,8 @@ tint_ExternalTextureParams tint_load_struct_packed_vec3(const constant tint_Exte
   tint_GammaTransferParams const v_13 = (*from).gammaDecodeParams;
   tint_GammaTransferParams const v_14 = (*from).gammaEncodeParams;
   tint_array<tint_packed_vec3_f32_array_element, 3> const v_15 = (*from).gamutConversionMatrix;
-  float3 const v_16 = float3(v_15[0u].packed);
-  float3 const v_17 = float3(v_15[1u].packed);
-  float3x3 const v_18 = float3x3(v_16, v_17, float3(v_15[2u].packed));
-  return tint_ExternalTextureParams{.numPlanes=v_10, .doYuvToRgbConversionOnly=v_11, .yuvToRgbConversionMatrix=v_12, .gammaDecodeParams=v_13, .gammaEncodeParams=v_14, .gamutConversionMatrix=v_18, .sampleTransform=(*from).sampleTransform, .loadTransform=(*from).loadTransform, .samplePlane0RectMin=(*from).samplePlane0RectMin, .samplePlane0RectMax=(*from).samplePlane0RectMax, .samplePlane1RectMin=(*from).samplePlane1RectMin, .samplePlane1RectMax=(*from).samplePlane1RectMax, .apparentSize=(*from).apparentSize, .plane1CoordFactor=(*from).plane1CoordFactor};
+  float3x3 const v_16 = float3x3(float3(v_15[0u].packed), float3(v_15[1u].packed), float3(v_15[2u].packed));
+  return tint_ExternalTextureParams{.numPlanes=v_10, .doYuvToRgbConversionOnly=v_11, .yuvToRgbConversionMatrix=v_12, .gammaDecodeParams=v_13, .gammaEncodeParams=v_14, .gamutConversionMatrix=v_16, .sampleTransform=(*from).sampleTransform, .loadTransform=(*from).loadTransform, .samplePlane0RectMin=(*from).samplePlane0RectMin, .samplePlane0RectMax=(*from).samplePlane0RectMax, .samplePlane1RectMin=(*from).samplePlane1RectMin, .samplePlane1RectMax=(*from).samplePlane1RectMax, .apparentSize=(*from).apparentSize, .plane1CoordFactor=(*from).plane1CoordFactor};
 }
 
 void doTextureLoad(tint_module_vars_struct tint_module_vars) {

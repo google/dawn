@@ -106,12 +106,11 @@ struct vs_main_inputs {
 };
 
 VertexOutput vs_main_inner(VertexInput in, tint_module_vars_struct tint_module_vars) {
-  float3 const v = float3((*tint_module_vars.render_params).right);
-  float3 quad_pos = (float2x3(v, float3((*tint_module_vars.render_params).up)) * in.quad_pos);
+  float3 quad_pos = (float2x3(float3((*tint_module_vars.render_params).right), float3((*tint_module_vars.render_params).up)) * in.quad_pos);
   float3 position = (in.position - (quad_pos + 0.00999999977648258209f));
   VertexOutput out = {};
-  float4x4 const v_1 = (*tint_module_vars.render_params).modelViewProjectionMatrix;
-  out.position = (v_1 * float4(position, 1.0f));
+  float4x4 const v = (*tint_module_vars.render_params).modelViewProjectionMatrix;
+  out.position = (v * float4(position, 1.0f));
   out.color = in.color;
   out.quad_pos = in.quad_pos;
   return out;
@@ -119,11 +118,11 @@ VertexOutput vs_main_inner(VertexInput in, tint_module_vars_struct tint_module_v
 
 vertex vs_main_outputs vs_main(vs_main_inputs inputs [[stage_in]], const constant RenderParams_packed_vec3* render_params [[buffer(0)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.render_params=render_params};
-  VertexOutput const v_2 = vs_main_inner(VertexInput{.position=inputs.VertexInput_position, .color=inputs.VertexInput_color, .quad_pos=inputs.VertexInput_quad_pos}, tint_module_vars);
+  VertexOutput const v_1 = vs_main_inner(VertexInput{.position=inputs.VertexInput_position, .color=inputs.VertexInput_color, .quad_pos=inputs.VertexInput_quad_pos}, tint_module_vars);
   vs_main_outputs tint_wrapper_result = {};
-  tint_wrapper_result.VertexOutput_position = v_2.position;
-  tint_wrapper_result.VertexOutput_color = v_2.color;
-  tint_wrapper_result.VertexOutput_quad_pos = v_2.quad_pos;
+  tint_wrapper_result.VertexOutput_position = v_1.position;
+  tint_wrapper_result.VertexOutput_color = v_1.color;
+  tint_wrapper_result.VertexOutput_quad_pos = v_1.quad_pos;
   return tint_wrapper_result;
 }
 //
@@ -184,14 +183,13 @@ void tint_store_and_preserve_padding(device Particle_packed_vec3* const target, 
 }
 
 Particle tint_load_struct_packed_vec3(device Particle_packed_vec3* const from) {
-  float3 const v = float3((*from).position);
-  return Particle{.position=v, .lifetime=(*from).lifetime, .color=(*from).color, .velocity=(*from).velocity};
+  return Particle{.position=float3((*from).position), .lifetime=(*from).lifetime, .color=(*from).color, .velocity=(*from).velocity};
 }
 
 void simulate_inner(uint3 GlobalInvocationID, tint_module_vars_struct tint_module_vars) {
-  float2 const v_1 = (*tint_module_vars.sim_params).seed.xy;
-  float2 const v_2 = (v_1 * float2(GlobalInvocationID.xy));
-  (*tint_module_vars.rand_seed) = (v_2 * (*tint_module_vars.sim_params).seed.zw);
+  float2 const v = (*tint_module_vars.sim_params).seed.xy;
+  float2 const v_1 = (v * float2(GlobalInvocationID.xy));
+  (*tint_module_vars.rand_seed) = (v_1 * (*tint_module_vars.sim_params).seed.zw);
   uint const idx = GlobalInvocationID.x;
   Particle particle = tint_load_struct_packed_vec3((&(*tint_module_vars.data).particles[min(idx, ((((*tint_module_vars.tint_storage_buffer_sizes)[0u].x - 0u) / 48u) - 1u))]));
   tint_store_and_preserve_padding((&(*tint_module_vars.data).particles[min(idx, ((((*tint_module_vars.tint_storage_buffer_sizes)[0u].x - 0u) / 48u) - 1u))]), particle);

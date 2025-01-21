@@ -25,25 +25,13 @@ struct tint_module_vars_struct {
 
 tint_array<float4x3, 4> tint_load_array_packed_vec3(const constant tint_array<tint_array<tint_packed_vec3_f32_array_element, 4>, 4>* const from) {
   tint_array<tint_packed_vec3_f32_array_element, 4> const v = (*from)[0u];
-  float3 const v_1 = float3(v[0u].packed);
-  float3 const v_2 = float3(v[1u].packed);
-  float3 const v_3 = float3(v[2u].packed);
-  float4x3 const v_4 = float4x3(v_1, v_2, v_3, float3(v[3u].packed));
-  tint_array<tint_packed_vec3_f32_array_element, 4> const v_5 = (*from)[1u];
-  float3 const v_6 = float3(v_5[0u].packed);
-  float3 const v_7 = float3(v_5[1u].packed);
-  float3 const v_8 = float3(v_5[2u].packed);
-  float4x3 const v_9 = float4x3(v_6, v_7, v_8, float3(v_5[3u].packed));
-  tint_array<tint_packed_vec3_f32_array_element, 4> const v_10 = (*from)[2u];
-  float3 const v_11 = float3(v_10[0u].packed);
-  float3 const v_12 = float3(v_10[1u].packed);
-  float3 const v_13 = float3(v_10[2u].packed);
-  float4x3 const v_14 = float4x3(v_11, v_12, v_13, float3(v_10[3u].packed));
-  tint_array<tint_packed_vec3_f32_array_element, 4> const v_15 = (*from)[3u];
-  float3 const v_16 = float3(v_15[0u].packed);
-  float3 const v_17 = float3(v_15[1u].packed);
-  float3 const v_18 = float3(v_15[2u].packed);
-  return tint_array<float4x3, 4>{v_4, v_9, v_14, float4x3(v_16, v_17, v_18, float3(v_15[3u].packed))};
+  float4x3 const v_1 = float4x3(float3(v[0u].packed), float3(v[1u].packed), float3(v[2u].packed), float3(v[3u].packed));
+  tint_array<tint_packed_vec3_f32_array_element, 4> const v_2 = (*from)[1u];
+  float4x3 const v_3 = float4x3(float3(v_2[0u].packed), float3(v_2[1u].packed), float3(v_2[2u].packed), float3(v_2[3u].packed));
+  tint_array<tint_packed_vec3_f32_array_element, 4> const v_4 = (*from)[2u];
+  float4x3 const v_5 = float4x3(float3(v_4[0u].packed), float3(v_4[1u].packed), float3(v_4[2u].packed), float3(v_4[3u].packed));
+  tint_array<tint_packed_vec3_f32_array_element, 4> const v_6 = (*from)[3u];
+  return tint_array<float4x3, 4>{v_1, v_3, v_5, float4x3(float3(v_6[0u].packed), float3(v_6[1u].packed), float3(v_6[2u].packed), float3(v_6[3u].packed))};
 }
 
 kernel void f(const constant tint_array<tint_array<tint_packed_vec3_f32_array_element, 4>, 4>* a [[buffer(0)]], device float* s [[buffer(1)]]) {
@@ -52,11 +40,8 @@ kernel void f(const constant tint_array<tint_array<tint_packed_vec3_f32_array_el
   const constant tint_array<tint_packed_vec3_f32_array_element, 4>* const p_a_2 = (&(*p_a)[2u]);
   const constant packed_float3* const p_a_2_1 = (&(*p_a_2)[1u].packed);
   tint_array<float4x3, 4> const l_a = tint_load_array_packed_vec3(p_a);
-  tint_array<tint_packed_vec3_f32_array_element, 4> const v_19 = (*p_a_2);
-  float3 const v_20 = float3(v_19[0u].packed);
-  float3 const v_21 = float3(v_19[1u].packed);
-  float3 const v_22 = float3(v_19[2u].packed);
-  float4x3 const l_a_i = float4x3(v_20, v_21, v_22, float3(v_19[3u].packed));
+  tint_array<tint_packed_vec3_f32_array_element, 4> const v_7 = (*p_a_2);
+  float4x3 const l_a_i = float4x3(float3(v_7[0u].packed), float3(v_7[1u].packed), float3(v_7[2u].packed), float3(v_7[3u].packed));
   float3 const l_a_i_i = float3((*p_a_2_1));
   (*tint_module_vars.s) = ((((*p_a_2_1).x + l_a[0u][0u].x) + l_a_i[0u].x) + l_a_i_i.x);
 }

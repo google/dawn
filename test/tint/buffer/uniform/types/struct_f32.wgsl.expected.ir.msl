@@ -51,16 +51,14 @@ void tint_store_and_preserve_padding(device S_packed_vec3* const target, S value
 }
 
 Inner tint_load_struct_packed_vec3_1(const constant Inner_packed_vec3* const from) {
-  float const v = (*from).scalar_f32;
-  float3 const v_1 = float3((*from).vec3_f32);
-  return Inner{.scalar_f32=v, .vec3_f32=v_1, .mat2x4_f32=(*from).mat2x4_f32};
+  return Inner{.scalar_f32=(*from).scalar_f32, .vec3_f32=float3((*from).vec3_f32), .mat2x4_f32=(*from).mat2x4_f32};
 }
 
 S tint_load_struct_packed_vec3(const constant S_packed_vec3* const from) {
   return S{.inner=tint_load_struct_packed_vec3_1((&(*from).inner))};
 }
 
-kernel void v_2(const constant S_packed_vec3* u [[buffer(0)]], device S_packed_vec3* s [[buffer(1)]]) {
+kernel void v(const constant S_packed_vec3* u [[buffer(0)]], device S_packed_vec3* s [[buffer(1)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.u=u, .s=s};
   S const x = tint_load_struct_packed_vec3(tint_module_vars.u);
   tint_store_and_preserve_padding(tint_module_vars.s, x);

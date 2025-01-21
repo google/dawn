@@ -33,6 +33,7 @@
 #include "src/tint/lang/core/ir/builder.h"
 #include "src/tint/lang/core/ir/validator.h"
 #include "src/tint/lang/core/type/manager.h"
+#include "src/tint/lang/msl/ir/builtin_call.h"
 
 namespace tint::msl::writer::raise {
 namespace {
@@ -388,7 +389,8 @@ struct State {
                 for (uint32_t col = 0; col < mat->Columns(); col++) {
                     auto* packed_col =
                         b.Access(packed_col_type, packed_matrix, u32(col), u32(0))->Result(0);
-                    auto* unpacked_col = b.Convert(mat->ColumnType(), packed_col);
+                    auto* unpacked_col = b.Call<msl::ir::BuiltinCall>(
+                        mat->ColumnType(), msl::BuiltinFn::kConvert, packed_col);
                     columns.Push(unpacked_col->Result(0));
                 }
                 return b.Construct(unpacked_type, std::move(columns))->Result(0);
@@ -398,7 +400,10 @@ struct State {
             },
             [&](const core::type::Vector*) {
                 // Load the packed vector and convert it to the unpacked equivalent.
-                return b.Convert(unpacked_type, b.Load(from))->Result(0);
+                return b
+                    .Call<msl::ir::BuiltinCall>(unpacked_type, msl::BuiltinFn::kConvert,
+                                                b.Load(from))
+                    ->Result(0);
             },
             TINT_ICE_ON_NO_MATCH);
     }
@@ -536,7 +541,9 @@ struct State {
             },
             [&](const core::type::Vector*) {  //
                 // Convert the vector to the packed equivalent and store it.
-                b.Store(to, b.Convert(packed_type, value));
+                b.Store(to,
+                        b.Call<msl::ir::BuiltinCall>(packed_type, msl::BuiltinFn::kConvert, value)
+                            ->Result(0));
             },
             TINT_ICE_ON_NO_MATCH);
     }

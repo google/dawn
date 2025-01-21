@@ -14,10 +14,10 @@ void main_inner(uint tint_local_index, tint_module_vars_struct tint_module_vars)
     (*tint_module_vars.v) = packed_int3(int3(0));
   }
   threadgroup_barrier(mem_flags::mem_threadgroup);
-  int3 const v_1 = int3((*tint_module_vars.v));
+  int3((*tint_module_vars.v));
 }
 
-kernel void v_2(uint tint_local_index [[thread_index_in_threadgroup]], threadgroup tint_symbol_1* v_3 [[threadgroup(0)]]) {
-  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.v=(&(*v_3).tint_symbol)};
+kernel void v_1(uint tint_local_index [[thread_index_in_threadgroup]], threadgroup tint_symbol_1* v_2 [[threadgroup(0)]]) {
+  tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.v=(&(*v_2).tint_symbol)};
   main_inner(tint_local_index, tint_module_vars);
 }

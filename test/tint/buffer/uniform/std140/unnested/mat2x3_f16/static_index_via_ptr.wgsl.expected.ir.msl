@@ -27,7 +27,6 @@ kernel void f(const constant tint_array<tint_packed_vec3_f16_array_element, 2>* 
   const constant tint_array<tint_packed_vec3_f16_array_element, 2>* const p_m = tint_module_vars.m;
   const constant packed_half3* const p_m_1 = (&(*p_m)[1u].packed);
   tint_array<tint_packed_vec3_f16_array_element, 2> const v = (*p_m);
-  half3 const v_1 = half3(v[0u].packed);
-  half2x3 const l_m = half2x3(v_1, half3(v[1u].packed));
+  half2x3 const l_m = half2x3(half3(v[0u].packed), half3(v[1u].packed));
   half3 const l_m_1 = half3((*p_m_1));
 }

@@ -144,14 +144,10 @@ void main_inner(uint idx, tint_module_vars_struct tint_module_vars) {
   (*tint_module_vars.sb).arr[min(idx, ((((*tint_module_vars.tint_storage_buffer_sizes)[0u].x - 0u) / 800u) - 1u))].vec2_i32 = int2(0);
   (*tint_module_vars.sb).arr[min(idx, ((((*tint_module_vars.tint_storage_buffer_sizes)[0u].x - 0u) / 800u) - 1u))].vec2_u32 = uint2(0u);
   (*tint_module_vars.sb).arr[min(idx, ((((*tint_module_vars.tint_storage_buffer_sizes)[0u].x - 0u) / 800u) - 1u))].vec2_f16 = half2(0.0h);
-  device packed_float3* const v_2 = (&(*tint_module_vars.sb).arr[min(idx, ((((*tint_module_vars.tint_storage_buffer_sizes)[0u].x - 0u) / 800u) - 1u))].vec3_f32);
-  (*v_2) = packed_float3(float3(0.0f));
-  device packed_int3* const v_3 = (&(*tint_module_vars.sb).arr[min(idx, ((((*tint_module_vars.tint_storage_buffer_sizes)[0u].x - 0u) / 800u) - 1u))].vec3_i32);
-  (*v_3) = packed_int3(int3(0));
-  device packed_uint3* const v_4 = (&(*tint_module_vars.sb).arr[min(idx, ((((*tint_module_vars.tint_storage_buffer_sizes)[0u].x - 0u) / 800u) - 1u))].vec3_u32);
-  (*v_4) = packed_uint3(uint3(0u));
-  device packed_half3* const v_5 = (&(*tint_module_vars.sb).arr[min(idx, ((((*tint_module_vars.tint_storage_buffer_sizes)[0u].x - 0u) / 800u) - 1u))].vec3_f16);
-  (*v_5) = packed_half3(half3(0.0h));
+  (*tint_module_vars.sb).arr[min(idx, ((((*tint_module_vars.tint_storage_buffer_sizes)[0u].x - 0u) / 800u) - 1u))].vec3_f32 = packed_float3(float3(0.0f));
+  (*tint_module_vars.sb).arr[min(idx, ((((*tint_module_vars.tint_storage_buffer_sizes)[0u].x - 0u) / 800u) - 1u))].vec3_i32 = packed_int3(int3(0));
+  (*tint_module_vars.sb).arr[min(idx, ((((*tint_module_vars.tint_storage_buffer_sizes)[0u].x - 0u) / 800u) - 1u))].vec3_u32 = packed_uint3(uint3(0u));
+  (*tint_module_vars.sb).arr[min(idx, ((((*tint_module_vars.tint_storage_buffer_sizes)[0u].x - 0u) / 800u) - 1u))].vec3_f16 = packed_half3(half3(0.0h));
   (*tint_module_vars.sb).arr[min(idx, ((((*tint_module_vars.tint_storage_buffer_sizes)[0u].x - 0u) / 800u) - 1u))].vec4_f32 = float4(0.0f);
   (*tint_module_vars.sb).arr[min(idx, ((((*tint_module_vars.tint_storage_buffer_sizes)[0u].x - 0u) / 800u) - 1u))].vec4_i32 = int4(0);
   (*tint_module_vars.sb).arr[min(idx, ((((*tint_module_vars.tint_storage_buffer_sizes)[0u].x - 0u) / 800u) - 1u))].vec4_u32 = uint4(0u);
@@ -178,7 +174,7 @@ void main_inner(uint idx, tint_module_vars_struct tint_module_vars) {
   (*tint_module_vars.sb).arr[min(idx, ((((*tint_module_vars.tint_storage_buffer_sizes)[0u].x - 0u) / 800u) - 1u))].arr2_mat4x2_f16 = tint_array<half4x2, 2>{};
 }
 
-kernel void v_6(uint idx [[thread_index_in_threadgroup]], device S_packed_vec3* sb [[buffer(0)]], const constant tint_array<uint4, 1>* tint_storage_buffer_sizes [[buffer(30)]]) {
+kernel void v_2(uint idx [[thread_index_in_threadgroup]], device S_packed_vec3* sb [[buffer(0)]], const constant tint_array<uint4, 1>* tint_storage_buffer_sizes [[buffer(30)]]) {
   tint_module_vars_struct const tint_module_vars = tint_module_vars_struct{.sb=sb, .tint_storage_buffer_sizes=tint_storage_buffer_sizes};
   main_inner(idx, tint_module_vars);
 }

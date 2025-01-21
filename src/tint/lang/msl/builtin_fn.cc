@@ -110,6 +110,8 @@ const char* str(BuiltinFn i) {
             return "simd_ballot";
         case BuiltinFn::kQuadShuffleXor:
             return "quad_shuffle_xor";
+        case BuiltinFn::kConvert:
+            return "convert";
     }
     return "<unknown>";
 }
@@ -158,6 +160,7 @@ tint::core::ir::Instruction::Accesses GetSideEffects(BuiltinFn fn) {
         case BuiltinFn::kModf:
         case BuiltinFn::kSign:
         case BuiltinFn::kNone:
+        case BuiltinFn::kConvert:
             break;
     }
     return core::ir::Instruction::Accesses{};

@@ -96,6 +96,24 @@ inline const core::type::Type* BuildLevel(core::intrinsic::MatchState& state,
     return state.types.Get<type::Level>();
 }
 
+inline bool MatchPackedVec3(core::intrinsic::MatchState&, const core::type::Type* ty) {
+    if (ty->Is<core::intrinsic::Any>()) {
+        return true;
+    }
+
+    if (auto* v = ty->As<core::type::Vector>()) {
+        if (v->Packed()) {
+            return true;
+        }
+    }
+    return false;
+}
+
+inline const core::type::Vector* BuildPackedVec3(core::intrinsic::MatchState& state,
+                                                 const core::type::Type* el) {
+    return state.types.Get<core::type::Vector>(el, 3u, /* packed */ true);
+}
+
 }  // namespace tint::msl::intrinsic
 
 #endif  // SRC_TINT_LANG_MSL_INTRINSIC_TYPE_MATCHERS_H_
