@@ -49,7 +49,7 @@ class HeapAllocator;
 enum ResourceHeapKind {
     // Resource heap tier 2
     // Allows resource heaps to contain all buffer and textures types.
-    // This enables better heap re-use by avoiding the need for separate heaps and
+    // This enables better heap reuse by avoiding the need for separate heaps and
     // also reduces fragmentation.
     Readback_AllBuffersAndTextures,
     Upload_AllBuffersAndTextures,
@@ -63,6 +63,9 @@ enum ResourceHeapKind {
 
     Default_OnlyNonRenderableOrDepthTextures,
     Default_OnlyRenderableOrDepthTextures,
+
+    // Allows custom resource heaps to contain the buffers that support write-back CPU property.
+    Custom_WriteBack_OnlyBuffers,
 
     EnumCount,
     InvalidEnum = EnumCount,

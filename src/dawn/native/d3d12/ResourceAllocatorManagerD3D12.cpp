@@ -46,6 +46,12 @@ MemorySegment GetMemorySegment(Device* device, ResourceHeapKind resourceHeapKind
         return MemorySegment::Local;
     }
 
+    // Currently we only use Custom_WriteBack_OnlyBuffers on UMA architectures.
+    // TODO(386255678): consider ReBAR which is UMA Coherent.
+    if (resourceHeapKind == Custom_WriteBack_OnlyBuffers) {
+        return MemorySegment::Local;
+    }
+
     D3D12_HEAP_TYPE heapType = GetD3D12HeapType(resourceHeapKind);
     D3D12_HEAP_PROPERTIES heapProperties =
         device->GetD3D12Device()->GetCustomHeapProperties(0, heapType);
@@ -66,6 +72,7 @@ D3D12_HEAP_FLAGS GetD3D12HeapFlags(ResourceHeapKind resourceHeapKind) {
         case ResourceHeapKind::Default_OnlyBuffers:
         case ResourceHeapKind::Readback_OnlyBuffers:
         case ResourceHeapKind::Upload_OnlyBuffers:
+        case ResourceHeapKind::Custom_WriteBack_OnlyBuffers:
             return D3D12_HEAP_FLAG_ALLOW_ONLY_BUFFERS;
         case ResourceHeapKind::Default_OnlyNonRenderableOrDepthTextures:
             return D3D12_HEAP_FLAG_ALLOW_ONLY_NON_RT_DS_TEXTURES;
@@ -77,9 +84,23 @@ D3D12_HEAP_FLAGS GetD3D12HeapFlags(ResourceHeapKind resourceHeapKind) {
 }
 
 ResourceHeapKind GetResourceHeapKind(D3D12_RESOURCE_DIMENSION dimension,
-                                     D3D12_HEAP_TYPE heapType,
+                                     D3D12_HEAP_PROPERTIES heapProperties,
                                      D3D12_RESOURCE_FLAGS flags,
                                      uint32_t resourceHeapTier) {
+    D3D12_HEAP_TYPE heapType = heapProperties.Type;
+
+    // TODO(386255678):
+    // 1. Currently we only use Custom_WriteBack_OnlyBuffers on UMA architectures. Consider ReBAR
+    //    which is UMA Coherent.
+    // 2. Remove `GetResourceHeapKind()` as we should never have to convert back from the resource
+    //    to the ResourceHeapKind
+    if (heapType == D3D12_HEAP_TYPE_CUSTOM) {
+        DAWN_ASSERT(dimension == D3D12_RESOURCE_DIMENSION_BUFFER &&
+                    heapProperties.CPUPageProperty == D3D12_CPU_PAGE_PROPERTY_WRITE_BACK &&
+                    heapProperties.MemoryPoolPreference == D3D12_MEMORY_POOL_L0);
+        return ResourceHeapKind::Custom_WriteBack_OnlyBuffers;
+    }
+
     if (resourceHeapTier >= 2) {
         switch (heapType) {
             case D3D12_HEAP_TYPE_UPLOAD:
@@ -136,7 +157,7 @@ uint64_t GetInitialResourcePlacementAlignment(
         case D3D12_RESOURCE_DIMENSION_BUFFER:
             return requestedResourceDescriptor.Alignment;
 
-        // Always try using small resource placement aligment first when Alignment == 0 because if
+        // Always try using small resource placement alignment first when Alignment == 0 because if
         // Alignment is set to 0, the runtime will use 4MB for MSAA textures and 64KB for everything
         // else.
         // https://learn.microsoft.com/en-us/windows/win32/api/d3d12/ns-d3d12-d3d12_resource_desc
@@ -407,7 +428,7 @@ ResultOrError<ResourceHeapAllocation> ResourceAllocatorManager::AllocateMemory(
 
     // TODO(crbug.com/dawn/849): Conditionally disable sub-allocation.
     // For very large resources, there is no benefit to suballocate.
-    // For very small resources, it is inefficent to suballocate given the min. heap
+    // For very small resources, it is inefficient to suballocate given the min. heap
     // size could be much larger then the resource allocation.
     // Attempt to satisfy the request using sub-allocation (placed resource in a heap).
     if (!ShouldAllocateAsCommittedResource(mDevice, forceAllocateAsCommittedResource)) {
@@ -474,7 +495,7 @@ void ResourceAllocatorManager::FreeMemory(ResourceHeapAllocation& allocation) {
     const D3D12_RESOURCE_DESC resourceDescriptor = allocation.GetD3D12Resource()->GetDesc();
 
     const size_t resourceHeapKindIndex =
-        GetResourceHeapKind(resourceDescriptor.Dimension, heapProp.Type, resourceDescriptor.Flags,
+        GetResourceHeapKind(resourceDescriptor.Dimension, heapProp, resourceDescriptor.Flags,
                             mDevice->GetResourceHeapTier());
 
     mSubAllocatedResourceAllocators[resourceHeapKindIndex]->Deallocate(allocation);

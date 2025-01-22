@@ -192,6 +192,10 @@ void PhysicalDevice::InitializeSupportedFeaturesImpl() {
 
     EnableFeature(Feature::SharedTextureMemoryDXGISharedHandle);
     EnableFeature(Feature::SharedFenceDXGISharedHandle);
+
+    if (GetDeviceInfo().isUMA && GetDeviceInfo().isCacheCoherentUMA) {
+        EnableFeature(Feature::BufferMapExtendedUsages);
+    }
 }
 
 MaybeError PhysicalDevice::InitializeSupportedLimitsImpl(CombinedLimits* limits) {
@@ -831,7 +835,7 @@ ResultOrError<Ref<DeviceBase>> PhysicalDevice::CreateDeviceImpl(
 
 // Resets the backend device and creates a new one. If any D3D12 objects belonging to the
 // current ID3D12Device have not been destroyed, a non-zero value will be returned upon Reset()
-// and the subequent call to CreateDevice will return a handle the existing device instead of
+// and the subsequent call to CreateDevice will return a handle the existing device instead of
 // creating a new one.
 MaybeError PhysicalDevice::ResetInternalDeviceForTestingImpl() {
     [[maybe_unused]] auto refCount = mD3d12Device.Reset();
