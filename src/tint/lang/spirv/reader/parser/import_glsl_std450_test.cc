@@ -374,7 +374,8 @@ INSTANTIATE_TEST_SUITE_P(SpirvParser,
                          GlslStd450TwoParamTest,
                          ::testing::Values(GlslStd450TwoParams{"SMax", "smax"},
                                            GlslStd450TwoParams{"SMin", "smin"},
-                                           GlslStd450TwoParams{"UMax", "umax"}));
+                                           GlslStd450TwoParams{"UMax", "umax"},
+                                           GlslStd450TwoParams{"UMin", "umin"}));
 
 TEST_F(SpirvParserTest, GlslStd450_SClamp_UnsignedToUnsigned) {
     EXPECT_IR(Preamble() + R"(

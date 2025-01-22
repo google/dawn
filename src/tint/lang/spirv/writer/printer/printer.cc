@@ -1390,6 +1390,9 @@ class Printer {
             case spirv::BuiltinFn::kUmax:
                 ext_inst(GLSLstd450UMax);
                 break;
+            case spirv::BuiltinFn::kUmin:
+                ext_inst(GLSLstd450UMin);
+                break;
             case spirv::BuiltinFn::kNormalize:
                 ext_inst(GLSLstd450Normalize);
                 break;

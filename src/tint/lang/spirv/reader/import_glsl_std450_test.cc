@@ -646,23 +646,6 @@ TEST_F(SpirvReaderTest, Normalize_Vector4) {
 )");
 }
 
-TEST_F(SpirvReaderTest, DISABLED_RectifyOperandsAndResult_UMin) {
-    EXPECT_IR(Preamble() + R"(
-     %1 = OpExtInst %int %glsl UMin %int_30 %int_35
-     %2 = OpExtInst %v2int %glsl UMin %v2int_30_40 %v2int_40_30
-     OpReturn
-     OpFunctionEnd
-  )",
-              R"(
-%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
-  $B1: {
-    let x_1 = bitcast<i32>(min(bitcast<u32>(i1), bitcast<u32>(i2)));
-    let x_2 = bitcast<vec2i>(min(bitcast<vec2u>(v2i1), bitcast<vec2u>(v2i2)));
-  }
-}
-)");
-}
-
 TEST_F(SpirvReaderTest, DISABLED_RectifyOperandsAndResult_UClamp) {
     EXPECT_IR(Preamble() + R"(
      %1 = OpExtInst %int %glsl UClamp %int_30 %uint_15 %int_40

@@ -1551,7 +1551,8 @@ TEST_P(SpirvParser_BuiltinsTest_TwoParamUnsigned, MixedToSigned) {
 
 INSTANTIATE_TEST_SUITE_P(SpirvReader,
                          SpirvParser_BuiltinsTest_TwoParamUnsigned,
-                         ::testing::Values(SpirvReaderParams{spirv::BuiltinFn::kUmax, "max"}));
+                         ::testing::Values(SpirvReaderParams{spirv::BuiltinFn::kUmax, "max"},
+                                           SpirvReaderParams{spirv::BuiltinFn::kUmin, "min"}));
 
 TEST_F(SpirvParser_BuiltinsTest, SClamp_UnsignedToUnsigned) {
     auto* ep = b.ComputeFunction("foo");

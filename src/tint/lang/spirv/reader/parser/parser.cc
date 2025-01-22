@@ -695,7 +695,6 @@ class Parser {
             case GLSLstd450NClamp:
             case GLSLstd450FClamp:  // FClamp is less prescriptive about NaN operands
                 return core::BuiltinFn::kClamp;
-            case GLSLstd450UMin:
             case GLSLstd450NMin:
             case GLSLstd450FMin:  // FMin is less prescriptive about NaN operands
                 return core::BuiltinFn::kMin;
@@ -771,6 +770,8 @@ class Parser {
                 return spirv::BuiltinFn::kSclamp;
             case GLSLstd450UMax:
                 return spirv::BuiltinFn::kUmax;
+            case GLSLstd450UMin:
+                return spirv::BuiltinFn::kUmin;
             default:
                 break;
         }
@@ -781,7 +782,8 @@ class Parser {
                                                                 const core::type::Type* result_ty) {
         if (ext_opcode == GLSLstd450SSign || ext_opcode == GLSLstd450SAbs ||
             ext_opcode == GLSLstd450SMax || ext_opcode == GLSLstd450SMin ||
-            ext_opcode == GLSLstd450SClamp || ext_opcode == GLSLstd450UMax) {
+            ext_opcode == GLSLstd450SClamp || ext_opcode == GLSLstd450UMax ||
+            ext_opcode == GLSLstd450UMin) {
             return {result_ty->DeepestElement()};
         }
         return {};
