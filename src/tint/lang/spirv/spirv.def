@@ -335,6 +335,8 @@ implicit(T: iu32, U: iu32) fn max<R: iu32>(T, U) -> R
 implicit(T: iu32, U: iu32, N: num) fn max<R: iu32>(vec<N, T>, vec<N, U>) -> vec<N, R>
 implicit(T: iu32, U: iu32) fn min<R: iu32>(T, U) -> R
 implicit(T: iu32, U: iu32, N: num) fn min<R: iu32>(vec<N, T>, vec<N, U>) -> vec<N, R>
+implicit(T: iu32, U: iu32, V: iu32) fn clamp<R: iu32>(T, U, V) -> R
+implicit(T: iu32, U: iu32, V: iu32, N: num) fn clamp<R: iu32>(vec<N, T>, vec<N, U>,  vec<N, V>) -> vec<N, R>
 
 ////////////////////////////////////////////////////////////////////////////////
 // SPV_KHR_integer_dot_product instructions

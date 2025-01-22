@@ -78,6 +78,7 @@ tint::core::ir::Instruction::Accesses GetSideEffects(BuiltinFn fn) {
         case BuiltinFn::kAbs:
         case BuiltinFn::kMax:
         case BuiltinFn::kMin:
+        case BuiltinFn::kClamp:
             break;
     }
     return core::ir::Instruction::Accesses{};
