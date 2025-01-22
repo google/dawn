@@ -73,13 +73,13 @@ struct State {
                 case spirv::BuiltinFn::kAbs:
                     Abs(builtin);
                     break;
-                case spirv::BuiltinFn::kMax:
+                case spirv::BuiltinFn::kSmax:
                     Max(builtin);
                     break;
-                case spirv::BuiltinFn::kMin:
+                case spirv::BuiltinFn::kSmin:
                     Min(builtin);
                     break;
-                case spirv::BuiltinFn::kClamp:
+                case spirv::BuiltinFn::kSclamp:
                     Clamp(builtin);
                     break;
                 default:

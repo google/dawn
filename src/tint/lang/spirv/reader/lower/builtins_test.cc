@@ -1190,9 +1190,9 @@ TEST_P(SpirvParser_BuiltinsTest_TwoParam, UnsignedToUnsigned) {
     auto src = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:u32 = spirv.)" +
+    %2:u32 = spirv.s)" +
                params.name + R"(<u32> 10u, 15u
-    %3:vec2<u32> = spirv.)" +
+    %3:vec2<u32> = spirv.s)" +
                params.name + R"(<u32> vec2<u32>(10u), vec2<u32>(15u)
     ret
   }
@@ -1239,9 +1239,9 @@ TEST_P(SpirvParser_BuiltinsTest_TwoParam, SignedToSigned) {
     auto src = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:i32 = spirv.)" +
+    %2:i32 = spirv.s)" +
                params.name + R"(<i32> 10i, 15i
-    %3:vec2<i32> = spirv.)" +
+    %3:vec2<i32> = spirv.s)" +
                params.name + R"(<i32> vec2<i32>(10i), vec2<i32>(15i)
     ret
   }
@@ -1282,9 +1282,9 @@ TEST_P(SpirvParser_BuiltinsTest_TwoParam, MixedToUnsigned) {
     auto src = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:u32 = spirv.)" +
+    %2:u32 = spirv.s)" +
                params.name + R"(<u32> 10i, 10u
-    %3:vec2<u32> = spirv.)" +
+    %3:vec2<u32> = spirv.s)" +
                params.name + R"(<u32> vec2<i32>(10i), vec2<u32>(10u)
     ret
   }
@@ -1329,9 +1329,9 @@ TEST_P(SpirvParser_BuiltinsTest_TwoParam, MixedToSigned) {
     auto src = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:i32 = spirv.)" +
+    %2:i32 = spirv.s)" +
                params.name + R"(<i32> 10u, 10i
-    %3:vec2<i32> = spirv.)" +
+    %3:vec2<i32> = spirv.s)" +
                params.name + R"(<i32> vec2<u32>(10u), vec2<i32>(10i)
     ret
   }
@@ -1359,18 +1359,18 @@ TEST_P(SpirvParser_BuiltinsTest_TwoParam, MixedToSigned) {
 
 INSTANTIATE_TEST_SUITE_P(SpirvReader,
                          SpirvParser_BuiltinsTest_TwoParam,
-                         ::testing::Values(SpirvReaderParams{spirv::BuiltinFn::kMax, "max"},
-                                           SpirvReaderParams{spirv::BuiltinFn::kMin, "min"}));
+                         ::testing::Values(SpirvReaderParams{spirv::BuiltinFn::kSmax, "max"},
+                                           SpirvReaderParams{spirv::BuiltinFn::kSmin, "min"}));
 
 TEST_F(SpirvParser_BuiltinsTest, SClamp_UnsignedToUnsigned) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
-        b.CallExplicit<spirv::ir::BuiltinCall>(ty.u32(), spirv::BuiltinFn::kClamp,
+        b.CallExplicit<spirv::ir::BuiltinCall>(ty.u32(), spirv::BuiltinFn::kSclamp,
                                                Vector<const core::type::Type*, 1>{ty.u32()}, 10_u,
                                                15_u, 10_u);
         b.CallExplicit<spirv::ir::BuiltinCall>(
-            ty.vec2<u32>(), spirv::BuiltinFn::kClamp, Vector<const core::type::Type*, 1>{ty.u32()},
+            ty.vec2<u32>(), spirv::BuiltinFn::kSclamp, Vector<const core::type::Type*, 1>{ty.u32()},
             b.Splat(ty.vec2<u32>(), 10_u), b.Splat(ty.vec2<u32>(), 15_u),
             b.Splat(ty.vec2<u32>(), 10_u));
         b.Return(ep);
@@ -1379,8 +1379,8 @@ TEST_F(SpirvParser_BuiltinsTest, SClamp_UnsignedToUnsigned) {
     auto src = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:u32 = spirv.clamp<u32> 10u, 15u, 10u
-    %3:vec2<u32> = spirv.clamp<u32> vec2<u32>(10u), vec2<u32>(15u), vec2<u32>(10u)
+    %2:u32 = spirv.sclamp<u32> 10u, 15u, 10u
+    %3:vec2<u32> = spirv.sclamp<u32> vec2<u32>(10u), vec2<u32>(15u), vec2<u32>(10u)
     ret
   }
 }
@@ -1413,11 +1413,11 @@ TEST_F(SpirvParser_BuiltinsTest, SClamp_SignedToSigned) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
-        b.CallExplicit<spirv::ir::BuiltinCall>(ty.i32(), spirv::BuiltinFn::kClamp,
+        b.CallExplicit<spirv::ir::BuiltinCall>(ty.i32(), spirv::BuiltinFn::kSclamp,
                                                Vector<const core::type::Type*, 1>{ty.i32()}, 10_i,
                                                15_i, 10_i);
         b.CallExplicit<spirv::ir::BuiltinCall>(
-            ty.vec2<i32>(), spirv::BuiltinFn::kClamp, Vector<const core::type::Type*, 1>{ty.i32()},
+            ty.vec2<i32>(), spirv::BuiltinFn::kSclamp, Vector<const core::type::Type*, 1>{ty.i32()},
             b.Splat(ty.vec2<i32>(), 10_i), b.Splat(ty.vec2<i32>(), 15_i),
             b.Splat(ty.vec2<i32>(), 10_i));
         b.Return(ep);
@@ -1426,8 +1426,8 @@ TEST_F(SpirvParser_BuiltinsTest, SClamp_SignedToSigned) {
     auto src = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:i32 = spirv.clamp<i32> 10i, 15i, 10i
-    %3:vec2<i32> = spirv.clamp<i32> vec2<i32>(10i), vec2<i32>(15i), vec2<i32>(10i)
+    %2:i32 = spirv.sclamp<i32> 10i, 15i, 10i
+    %3:vec2<i32> = spirv.sclamp<i32> vec2<i32>(10i), vec2<i32>(15i), vec2<i32>(10i)
     ret
   }
 }
@@ -1452,11 +1452,11 @@ TEST_F(SpirvParser_BuiltinsTest, SClamp_MixedToUnsigned) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
-        b.CallExplicit<spirv::ir::BuiltinCall>(ty.u32(), spirv::BuiltinFn::kClamp,
+        b.CallExplicit<spirv::ir::BuiltinCall>(ty.u32(), spirv::BuiltinFn::kSclamp,
                                                Vector<const core::type::Type*, 1>{ty.u32()}, 10_i,
                                                10_u, 10_i);
         b.CallExplicit<spirv::ir::BuiltinCall>(
-            ty.vec2<u32>(), spirv::BuiltinFn::kClamp, Vector<const core::type::Type*, 1>{ty.u32()},
+            ty.vec2<u32>(), spirv::BuiltinFn::kSclamp, Vector<const core::type::Type*, 1>{ty.u32()},
             b.Splat(ty.vec2<i32>(), 10_i), b.Splat(ty.vec2<u32>(), 10_u),
             b.Splat(ty.vec2<i32>(), 10_i));
         b.Return(ep);
@@ -1465,8 +1465,8 @@ TEST_F(SpirvParser_BuiltinsTest, SClamp_MixedToUnsigned) {
     auto src = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:u32 = spirv.clamp<u32> 10i, 10u, 10i
-    %3:vec2<u32> = spirv.clamp<u32> vec2<i32>(10i), vec2<u32>(10u), vec2<i32>(10i)
+    %2:u32 = spirv.sclamp<u32> 10i, 10u, 10i
+    %3:vec2<u32> = spirv.sclamp<u32> vec2<i32>(10i), vec2<u32>(10u), vec2<i32>(10i)
     ret
   }
 }
@@ -1495,11 +1495,11 @@ TEST_F(SpirvParser_BuiltinsTest, SClamp_MixedToSigned) {
     auto* ep = b.ComputeFunction("foo");
 
     b.Append(ep->Block(), [&] {  //
-        b.CallExplicit<spirv::ir::BuiltinCall>(ty.i32(), spirv::BuiltinFn::kClamp,
+        b.CallExplicit<spirv::ir::BuiltinCall>(ty.i32(), spirv::BuiltinFn::kSclamp,
                                                Vector<const core::type::Type*, 1>{ty.i32()}, 10_u,
                                                10_i, 10_u);
         b.CallExplicit<spirv::ir::BuiltinCall>(
-            ty.vec2<i32>(), spirv::BuiltinFn::kClamp, Vector<const core::type::Type*, 1>{ty.i32()},
+            ty.vec2<i32>(), spirv::BuiltinFn::kSclamp, Vector<const core::type::Type*, 1>{ty.i32()},
             b.Splat(ty.vec2<u32>(), 10_u), b.Splat(ty.vec2<i32>(), 10_i),
             b.Splat(ty.vec2<u32>(), 10_u));
         b.Return(ep);
@@ -1508,8 +1508,8 @@ TEST_F(SpirvParser_BuiltinsTest, SClamp_MixedToSigned) {
     auto src = R"(
 %foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:i32 = spirv.clamp<i32> 10u, 10i, 10u
-    %3:vec2<i32> = spirv.clamp<i32> vec2<u32>(10u), vec2<i32>(10i), vec2<u32>(10u)
+    %2:i32 = spirv.sclamp<i32> 10u, 10i, 10u
+    %3:vec2<i32> = spirv.sclamp<i32> vec2<u32>(10u), vec2<i32>(10i), vec2<u32>(10u)
     ret
   }
 }

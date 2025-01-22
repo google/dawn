@@ -372,8 +372,8 @@ TEST_P(GlslStd450TwoParamTest, MixedToSigned) {
 
 INSTANTIATE_TEST_SUITE_P(SpirvParser,
                          GlslStd450TwoParamTest,
-                         ::testing::Values(GlslStd450TwoParams{"SMax", "max"},
-                                           GlslStd450TwoParams{"SMin", "min"}));
+                         ::testing::Values(GlslStd450TwoParams{"SMax", "smax"},
+                                           GlslStd450TwoParams{"SMin", "smin"}));
 
 TEST_F(SpirvParserTest, GlslStd450_SClamp_UnsignedToUnsigned) {
     EXPECT_IR(Preamble() + R"(
@@ -387,8 +387,8 @@ TEST_F(SpirvParserTest, GlslStd450_SClamp_UnsignedToUnsigned) {
               R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:u32 = spirv.clamp<u32> 10u, 10u, 10u
-    %3:vec2<u32> = spirv.clamp<u32> vec2<u32>(10u, 20u), vec2<u32>(20u, 10u), vec2<u32>(20u, 10u)
+    %2:u32 = spirv.sclamp<u32> 10u, 10u, 10u
+    %3:vec2<u32> = spirv.sclamp<u32> vec2<u32>(10u, 20u), vec2<u32>(20u, 10u), vec2<u32>(20u, 10u)
     %4:u32 = let %2
     %5:vec2<u32> = let %3
     ret
@@ -409,8 +409,8 @@ TEST_F(SpirvParserTest, GlslStd450_SClamp_SignedToSigned) {
               R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:i32 = spirv.clamp<i32> 10i, 10i, 10i
-    %3:vec2<i32> = spirv.clamp<i32> vec2<i32>(10i, 20i), vec2<i32>(20i, 10i), vec2<i32>(20i, 10i)
+    %2:i32 = spirv.sclamp<i32> 10i, 10i, 10i
+    %3:vec2<i32> = spirv.sclamp<i32> vec2<i32>(10i, 20i), vec2<i32>(20i, 10i), vec2<i32>(20i, 10i)
     %4:i32 = let %2
     %5:vec2<i32> = let %3
     ret
@@ -431,8 +431,8 @@ TEST_F(SpirvParserTest, GlslStd450_SClamp_MixedToUnsigned) {
               R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:u32 = spirv.clamp<u32> 10i, 10u, 10i
-    %3:vec2<u32> = spirv.clamp<u32> vec2<i32>(10i, 20i), vec2<u32>(20u, 10u), vec2<i32>(10i, 20i)
+    %2:u32 = spirv.sclamp<u32> 10i, 10u, 10i
+    %3:vec2<u32> = spirv.sclamp<u32> vec2<i32>(10i, 20i), vec2<u32>(20u, 10u), vec2<i32>(10i, 20i)
     %4:u32 = let %2
     %5:vec2<u32> = let %3
     ret
@@ -453,8 +453,8 @@ TEST_F(SpirvParserTest, GlslStd450_SClamp_MixedToSigned) {
               R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:i32 = spirv.clamp<i32> 10u, 10i, 10u
-    %3:vec2<i32> = spirv.clamp<i32> vec2<u32>(10u, 20u), vec2<i32>(20i, 10i), vec2<u32>(10u, 20u)
+    %2:i32 = spirv.sclamp<i32> 10u, 10i, 10u
+    %3:vec2<i32> = spirv.sclamp<i32> vec2<u32>(10u, 20u), vec2<i32>(20i, 10i), vec2<u32>(10u, 20u)
     %4:i32 = let %2
     %5:vec2<i32> = let %3
     ret

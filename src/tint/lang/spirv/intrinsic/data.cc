@@ -5654,22 +5654,22 @@ constexpr IntrinsicInfo kBuiltins[] = {
   },
   {
     /* [37] */
-    /* fn max<R : iu32>[T : iu32, U : iu32](T, U) -> R */
-    /* fn max<R : iu32>[T : iu32, U : iu32, N : num](vec<N, T>, vec<N, U>) -> vec<N, R> */
+    /* fn smax<R : iu32>[T : iu32, U : iu32](T, U) -> R */
+    /* fn smax<R : iu32>[T : iu32, U : iu32, N : num](vec<N, T>, vec<N, U>) -> vec<N, R> */
     /* num overloads */ 2,
     /* overloads */ OverloadIndex(156),
   },
   {
     /* [38] */
-    /* fn min<R : iu32>[T : iu32, U : iu32](T, U) -> R */
-    /* fn min<R : iu32>[T : iu32, U : iu32, N : num](vec<N, T>, vec<N, U>) -> vec<N, R> */
+    /* fn smin<R : iu32>[T : iu32, U : iu32](T, U) -> R */
+    /* fn smin<R : iu32>[T : iu32, U : iu32, N : num](vec<N, T>, vec<N, U>) -> vec<N, R> */
     /* num overloads */ 2,
     /* overloads */ OverloadIndex(156),
   },
   {
     /* [39] */
-    /* fn clamp<R : iu32>[T : iu32, U : iu32, V : iu32](T, U, V) -> R */
-    /* fn clamp<R : iu32>[T : iu32, U : iu32, V : iu32, N : num](vec<N, T>, vec<N, U>, vec<N, V>) -> vec<N, R> */
+    /* fn sclamp<R : iu32>[T : iu32, U : iu32, V : iu32](T, U, V) -> R */
+    /* fn sclamp<R : iu32>[T : iu32, U : iu32, V : iu32, N : num](vec<N, T>, vec<N, U>, vec<N, V>) -> vec<N, R> */
     /* num overloads */ 2,
     /* overloads */ OverloadIndex(158),
   },

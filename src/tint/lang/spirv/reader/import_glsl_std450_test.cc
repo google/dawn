@@ -135,15 +135,7 @@ using SpirvReaderTest_GlslStd450_Floating_FloatingInting = SpirvReaderTestWithPa
 using SpirvReaderTest_GlslStd450_Float3_Float3Float3 = SpirvReaderTestWithParam<GlslStd450Case>;
 
 using SpirvReaderTest_GlslStd450_Inting_Inting = SpirvReaderTestWithParam<GlslStd450Case>;
-using SpirvReaderTest_GlslStd450_Inting_Inting_SignednessCoercing =
-    SpirvReaderTestWithParam<GlslStd450Case>;
-using SpirvReaderTest_GlslStd450_Inting_IntingInting = SpirvReaderTestWithParam<GlslStd450Case>;
-using SpirvReaderTest_GlslStd450_Inting_IntingIntingInting =
-    SpirvReaderTestWithParam<GlslStd450Case>;
 using SpirvReaderTest_GlslStd450_Uinting_Uinting = SpirvReaderTestWithParam<GlslStd450Case>;
-using SpirvReaderTest_GlslStd450_Uinting_UintingUinting = SpirvReaderTestWithParam<GlslStd450Case>;
-using SpirvReaderTest_GlslStd450_Uinting_UintingUintingUinting =
-    SpirvReaderTestWithParam<GlslStd450Case>;
 
 TEST_P(SpirvReaderTest_GlslStd450_Float_Floating, Scalar) {
     EXPECT_IR(Preamble() + R"(
@@ -502,48 +494,6 @@ TEST_P(SpirvReaderTest_GlslStd450_Inting_Inting, Scalar) {
 )");
 }
 
-TEST_P(SpirvReaderTest_GlslStd450_Inting_Inting_SignednessCoercing, Scalar_UnsignedArg) {
-    EXPECT_IR(Preamble() + R"(
-     %1 = OpExtInst %int %glsl )" +
-                  GetParam().opcode +
-                  R"( %uint_10
-     %2 = OpCopyObject %int %1
-     OpReturn
-     OpFunctionEnd
-  )",
-              R"(
-%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
-  $B1: {
-    %2:i32 = bitcast 10u
-    %3:i32 = sign %2
-    %4:i32 = let %3
-    ret
-  }
-}
-)");
-}
-
-TEST_P(SpirvReaderTest_GlslStd450_Inting_Inting_SignednessCoercing, Scalar_UnsignedResult) {
-    EXPECT_IR(Preamble() + R"(
-     %1 = OpExtInst %uint %glsl )" +
-                  GetParam().opcode +
-                  R"( %int_30
-     %2 = OpCopyObject %uint %1
-     OpReturn
-     OpFunctionEnd
-  )",
-              R"(
-%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
-  $B1: {
-    %2:i32 = sign 30i
-    %3:u32 = bitcast %2
-    %4:u32 = let %3
-    ret
-  }
-}
-)");
-}
-
 TEST_P(SpirvReaderTest_GlslStd450_Inting_Inting, Vector) {
     EXPECT_IR(Preamble() + R"(
      %1 = OpExtInst %v2int %glsl )" +
@@ -566,152 +516,10 @@ TEST_P(SpirvReaderTest_GlslStd450_Inting_Inting, Vector) {
 )");
 }
 
-TEST_P(SpirvReaderTest_GlslStd450_Inting_Inting_SignednessCoercing, Vector_UnsignedArg) {
-    EXPECT_IR(Preamble() + R"(
-     %1 = OpExtInst %v2int %glsl )" +
-                  GetParam().opcode +
-                  R"( %v2uint_10_20
-     %2 = OpCopyObject %v2int %1
-     OpReturn
-     OpFunctionEnd
-  )",
-              R"(
-%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
-  $B1: {
-    %2:vec2<i32> = bitcast vec2<u32>(10u, 20u)
-    %3:vec2<i32> = sign %2
-    %4:vec2<i32> = let %3
-    ret
-  }
-}
-)");
-}
-
-TEST_P(SpirvReaderTest_GlslStd450_Inting_Inting_SignednessCoercing, Vector_UnsignedResult) {
-    EXPECT_IR(Preamble() + R"(
-     %1 = OpExtInst %v2uint %glsl )" +
-                  GetParam().opcode +
-                  R"( %v2int_30_40
-     %2 = OpCopyObject %v2uint %1
-     OpReturn
-     OpFunctionEnd
-  )",
-              R"(
-%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
-  $B1: {
-    %2:vec2<i32> = sign vec2<i32>(30i, 40i)
-    %3:vec2<u32> = bitcast %2
-    %4:vec2<u32> = let %3
-    ret
-  }
-}
-)");
-}
-
-TEST_P(SpirvReaderTest_GlslStd450_Inting_IntingInting, Scalar) {
-    EXPECT_IR(Preamble() + R"(
-     %1 = OpExtInst %int %glsl )" +
-                  GetParam().opcode +
-                  R"( %int_30 %int_35
-     %2 = OpCopyObject %int %1
-     OpReturn
-     OpFunctionEnd
-  )",
-              R"(
-%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
-  $B1: {
-    %2:i32 = )" + GetParam().wgsl_func +
-                  R"( 30i, 35i
-    %3:i32 = let %2
-    ret
-  }
-}
-)");
-}
-
-TEST_P(SpirvReaderTest_GlslStd450_Inting_IntingInting, Vector) {
-    EXPECT_IR(Preamble() + R"(
-     %1 = OpExtInst %v2int %glsl )" +
-                  GetParam().opcode +
-                  R"( %v2int_30_40 %v2int_40_30
-     %2 = OpCopyObject %v2int %1
-     OpReturn
-     OpFunctionEnd
-  )",
-              R"(
-%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
-  $B1: {
-    %2:vec2<i32> = )" +
-                  GetParam().wgsl_func +
-                  R"( vec2<i32>(30i, 40i), vec2<i32>(40i, 30i)
-    %3:vec2<i32> = let %2
-    ret
-  }
-}
-)");
-}
-
-TEST_P(SpirvReaderTest_GlslStd450_Inting_IntingIntingInting, Scalar) {
-    EXPECT_IR(Preamble() + R"(
-     %1 = OpExtInst %int %glsl )" +
-                  GetParam().opcode +
-                  R"( %int_30 %int_35 %int_40
-     %2 = OpCopyObject %int %1
-     OpReturn
-     OpFunctionEnd
-  )",
-              R"(
-%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
-  $B1: {
-    %2:i32 = )" + GetParam().wgsl_func +
-                  R"( 30i, 35i, 40i
-    %3:i32 = let %2
-    ret
-  }
-}
-)");
-}
-
-TEST_P(SpirvReaderTest_GlslStd450_Inting_IntingIntingInting, Vector) {
-    EXPECT_IR(Preamble() + R"(
-     %1 = OpExtInst %v2int %glsl )" +
-                  GetParam().opcode +
-                  R"( %v2int_30_40 %v2int_40_30 %v2int_35_35
-     %2 = OpCopyObject %v2int %1
-     OpReturn
-     OpFunctionEnd
-  )",
-              R"(
-%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
-  $B1: {
-    %2:vec2<i32> = )" +
-                  GetParam().wgsl_func +
-                  R"( vec2<i32>(30i, 40i), vec2<i32>(40i, 30i), vec2<i32>(35i)
-    %3:vec2<i32> = let %2
-    ret
-  }
-}
-)");
-}
-
 INSTANTIATE_TEST_SUITE_P(SpirvReader,
                          SpirvReaderTest_GlslStd450_Inting_Inting,
                          ::testing::Values(GlslStd450Case{"FindILsb", "firstTrailingBit"},
-                                           GlslStd450Case{"FindSMsb", "firstLeadingBit"},
-                                           GlslStd450Case{"SSign", "sign"}));
-
-INSTANTIATE_TEST_SUITE_P(SpirvReader,
-                         SpirvReaderTest_GlslStd450_Inting_Inting_SignednessCoercing,
-                         ::testing::Values(GlslStd450Case{"SSign", "sign"}));
-
-INSTANTIATE_TEST_SUITE_P(SpirvReader,
-                         SpirvReaderTest_GlslStd450_Inting_IntingInting,
-                         ::testing::Values(GlslStd450Case{"SMax", "max"},
-                                           GlslStd450Case{"SMin", "min"}));
-
-INSTANTIATE_TEST_SUITE_P(SpirvReader,
-                         SpirvReaderTest_GlslStd450_Inting_IntingIntingInting,
-                         ::testing::Values(GlslStd450Case{"SClamp", "clamp"}));
+                                           GlslStd450Case{"FindSMsb", "firstLeadingBit"}));
 
 TEST_P(SpirvReaderTest_GlslStd450_Uinting_Uinting, Scalar) {
     EXPECT_IR(Preamble() + R"(
@@ -756,103 +564,10 @@ TEST_P(SpirvReaderTest_GlslStd450_Uinting_Uinting, Vector) {
 )");
 }
 
-TEST_P(SpirvReaderTest_GlslStd450_Uinting_UintingUinting, Scalar) {
-    EXPECT_IR(Preamble() + R"(
-     %1 = OpExtInst %uint %glsl )" +
-                  GetParam().opcode + R"( %uint_10 %uint_15
-     %2 = OpCopyObject %uint %1
-     OpReturn
-     OpFunctionEnd
-  )",
-              R"(
-%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
-  $B1: {
-    %2:u32 = )" + GetParam().wgsl_func +
-                  R"( 10u, 15u
-    %3:u32 = let %2
-    ret
-  }
-}
-)");
-}
-
-TEST_P(SpirvReaderTest_GlslStd450_Uinting_UintingUinting, Vector) {
-    EXPECT_IR(Preamble() + R"(
-     %1 = OpExtInst %v2uint %glsl )" +
-                  GetParam().opcode +
-                  R"( %v2uint_10_20 %v2uint_20_10
-     %2 = OpCopyObject %v2uint %1
-     OpReturn
-     OpFunctionEnd
-  )",
-              R"(
-%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
-  $B1: {
-    %2:vec2<u32> = )" +
-                  GetParam().wgsl_func +
-                  R"( vec2<u32>(10u, 20u), vec2<u32>(20u, 10u)
-    %3:vec2<u32> = let %2
-    ret
-  }
-}
-)");
-}
-
-TEST_P(SpirvReaderTest_GlslStd450_Uinting_UintingUintingUinting, Scalar) {
-    EXPECT_IR(Preamble() + R"(
-     %1 = OpExtInst %uint %glsl )" +
-                  GetParam().opcode + R"( %uint_10 %uint_15 %uint_20
-     %2 = OpCopyObject %uint %1
-     OpReturn
-     OpFunctionEnd
-  )",
-              R"(
-%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
-  $B1: {
-    %2:u32 = )" + GetParam().wgsl_func +
-                  R"( 10u, 15u, 20u
-    %3:u32 = let %2
-    ret
-  }
-}
-)");
-}
-
-TEST_P(SpirvReaderTest_GlslStd450_Uinting_UintingUintingUinting, Vector) {
-    EXPECT_IR(Preamble() + R"(
-     %1 = OpExtInst %v2uint %glsl )" +
-                  GetParam().opcode +
-                  R"( %v2uint_10_20 %v2uint_20_10 %v2uint_15_15
-     %2 = OpCopyObject %v2uint %1
-     OpReturn
-     OpFunctionEnd
-  )",
-              R"(
-%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
-  $B1: {
-    %2:vec2<u32> = )" +
-                  GetParam().wgsl_func +
-                  R"( vec2<u32>(10u, 20u), vec2<u32>(20u, 10u), vec2<u32>(15u)
-    %3:vec2<u32> = let %2
-    ret
-  }
-}
-)");
-}
-
 INSTANTIATE_TEST_SUITE_P(SpirvReader,
                          SpirvReaderTest_GlslStd450_Uinting_Uinting,
                          ::testing::Values(GlslStd450Case{"FindILsb", "firstTrailingBit"},
                                            GlslStd450Case{"FindUMsb", "firstLeadingBit"}));
-
-INSTANTIATE_TEST_SUITE_P(SpirvReader,
-                         SpirvReaderTest_GlslStd450_Uinting_UintingUinting,
-                         ::testing::Values(GlslStd450Case{"UMax", "max"},
-                                           GlslStd450Case{"UMin", "min"}));
-
-INSTANTIATE_TEST_SUITE_P(SpirvReader,
-                         SpirvReaderTest_GlslStd450_Uinting_UintingUintingUinting,
-                         ::testing::Values(GlslStd450Case{"UClamp", "clamp"}));
 
 // Test Normalize.  WGSL does not have a scalar form of the normalize builtin.
 // So we have to test it separately, as it does not fit the patterns tested
