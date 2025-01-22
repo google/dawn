@@ -46,7 +46,6 @@ luci.project(
     notify = "luci-notify.appspot.com",
     scheduler = "luci-scheduler.appspot.com",
     swarming = "chromium-swarm.appspot.com",
-    tricium = "tricium-prod.appspot.com",
     acls = [
         acl.entry(
             roles = [
@@ -115,10 +114,6 @@ luci.bucket(
     acls = [
         acl.entry(
             acl.BUILDBUCKET_TRIGGERER,
-            # Allow Tricium prod to trigger analyzer tryjobs.
-            users = [
-                "tricium-prod@appspot.gserviceaccount.com",
-            ],
             groups = [
                 "project-dawn-tryjob-access",
                 "service-account-cq",
@@ -305,18 +300,6 @@ def get_presubmit_executable():
         cipd_version = "refs/heads/main",
     )
 
-def get_tricium_executable():
-    """Get standard executable for tricium
-
-    Returns:
-      A luci.recipe
-    """
-    return luci.recipe(
-        name = "dawn/analysis",
-        cipd_package = "infra/recipe_bundles/chromium.googlesource.com/chromium/tools/build",
-        cipd_version = "refs/heads/main",
-    )
-
 def get_os_from_arg(arg):
     """Get OS enum for a builder name string
 
@@ -464,7 +447,6 @@ def add_try_builder(name, os, properties):
         caches = get_default_caches(os, clang),
         service_account = "dawn-try-builder@chops-service-accounts.iam.gserviceaccount.com",
     )
-
 
 def dawn_standalone_builder(name, clang, debug, cpu, fuzzer):
     """Adds both the CI and Try standalone builders as appropriate
@@ -713,23 +695,20 @@ def chromium_dawn_tryjob(os, arch = None):
         )
         _add_branch_verifiers(_os_arch_to_branch_builder[os], os)
 
-def tricium_dawn_tryjob():
-    """Adds a tryjob that tests against Chromium
-
-    Args:
-      os: string for the OS, should be one or linux|mac|win
-      arch: string for the arch, or None
-    """
+def clang_tidy_dawn_tryjob():
+    """Adds a tryjob that runs clang tidy on new patchset upload."""
     luci.cq_tryjob_verifier(
         cq_group = "Dawn-CQ",
         builder = "chromium:try/tricium-clang-tidy",
         owner_whitelist = ["project-dawn-tryjob-access"],
-        mode_allowlist = [cq.MODE_ANALYZER_RUN],
+        experiment_percentage = 100,
+        disable_reuse = True,
+        mode_allowlist = [cq.MODE_NEW_PATCHSET_RUN],
         location_filters = [
-            cq.location_filter(path_regexp = ".+\\.h"),
-            cq.location_filter(path_regexp = ".+\\.c"),
-            cq.location_filter(path_regexp = ".+\\.cc"),
-            cq.location_filter(path_regexp = ".+\\.cpp"),
+            cq.location_filter(path_regexp = r".+\.h"),
+            cq.location_filter(path_regexp = r".+\.c"),
+            cq.location_filter(path_regexp = r".+\.cc"),
+            cq.location_filter(path_regexp = r".+\.cpp"),
         ],
     )
 
@@ -833,7 +812,7 @@ chromium_dawn_tryjob("win", "arm64")
 chromium_dawn_tryjob("android", "arm")
 chromium_dawn_tryjob("android", "arm64")
 
-tricium_dawn_tryjob()
+clang_tidy_dawn_tryjob()
 
 luci.cq_tryjob_verifier(
     cq_group = "Dawn-CQ",
@@ -954,6 +933,10 @@ def _create_dawn_cq_group(name, refs, refs_exclude = None):
             ),
             acl.entry(
                 acl.CQ_DRY_RUNNER,
+                groups = "project-dawn-tryjob-access",
+            ),
+            acl.entry(
+                acl.CQ_NEW_PATCHSET_RUN_TRIGGERER,
                 groups = "project-dawn-tryjob-access",
             ),
         ],
