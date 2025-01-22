@@ -565,7 +565,7 @@ class DeviceBase : public ErrorSink, public RefCountedWithExternalCount<RefCount
 
     TogglesState mToggles;
 
-    size_t mLazyClearCountForTesting = 0;
+    std::atomic_uint64_t mLazyClearCountForTesting = 0;
     std::atomic_uint64_t mNextPipelineCompatibilityToken;
 
     CombinedLimits mLimits;
