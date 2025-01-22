@@ -146,7 +146,7 @@ void WireTest::SetUp() {
     EXPECT_CALL(api, OnAdapterRequestDevice(apiAdapter, NotNull(), _))
         .WillOnce(WithArg<1>([&](const WGPUDeviceDescriptor* desc) {
             // Set on device creation to forward callbacks to the client.
-            EXPECT_CALL(api, OnDeviceSetLoggingCallback(apiDevice, NotNull(), NotNull())).Times(1);
+            EXPECT_CALL(api, OnDeviceSetLoggingCallback(apiDevice, _)).Times(1);
 
             // The mock objects currently require us to manually set the callbacks because we
             // are no longer explicitly calling the setters anymore.
@@ -206,7 +206,11 @@ void WireTest::TearDown() {
     if (mWireServer && apiDevice) {
         // These are called on server destruction to clear the callbacks. They must not be
         // called after the server is destroyed.
-        EXPECT_CALL(api, OnDeviceSetLoggingCallback(apiDevice, nullptr, nullptr)).Times(Exactly(1));
+        EXPECT_CALL(api, OnDeviceSetLoggingCallback(apiDevice, _))
+            .Times(Exactly(1))
+            .WillOnce(WithArg<1>([](const WGPULoggingCallbackInfo& callbackInfo) {
+                EXPECT_EQ(callbackInfo.callback, nullptr);
+            }));
     }
     mC2sBuf->SetHandler(nullptr);
     mWireServer = nullptr;
@@ -252,7 +256,11 @@ void WireTest::DeleteServer() {
     if (mWireServer) {
         // These are called on server destruction to clear the callbacks. They must not be
         // called after the server is destroyed.
-        EXPECT_CALL(api, OnDeviceSetLoggingCallback(apiDevice, nullptr, nullptr)).Times(Exactly(1));
+        EXPECT_CALL(api, OnDeviceSetLoggingCallback(apiDevice, _))
+            .Times(Exactly(1))
+            .WillOnce(WithArg<1>([](const WGPULoggingCallbackInfo& callbackInfo) {
+                EXPECT_EQ(callbackInfo.callback, nullptr);
+            }));
     }
     mC2sBuf->SetHandler(nullptr);
     mWireServer = nullptr;

@@ -976,7 +976,7 @@ def find_by_name(members, name):
     for member in members:
         if member.name.get() == name:
             return member
-    assert False
+    return None
 
 
 def has_callback_arguments(method):

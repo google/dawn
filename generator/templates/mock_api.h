@@ -58,18 +58,13 @@ class ProcTableAsClass {
             {{as_cType(type.name)}} GetNew{{type.name.CamelCase()}}();
         {% endfor %}
 
-        //* Generate the older Call*Callback if there is no Future call equivalent.
-        //* Includes:
-        //*   - setLoggingCallback
-        {%- set LegacyCallbackFunctions = ['set logging callback'] %}
-
         {%- for type in by_category["object"] %}
 
             virtual void {{as_MethodSuffix(type.name, Name("add ref"))}}({{as_cType(type.name)}} self) = 0;
             virtual void {{as_MethodSuffix(type.name, Name("release"))}}({{as_cType(type.name)}} self) = 0;
             {% for method in type.methods %}
                 {% set Suffix = as_CppMethodSuffix(type.name, method.name) %}
-                {% if not has_callback_arguments(method) and not has_callback_info(method) and not has_callbackInfoStruct(method) %}
+                {% if not has_callbackInfoStruct(method) %}
                     virtual {{as_cType(method.return_type.name)}} {{Suffix}}(
                         {{-as_cType(type.name)}} {{as_varName(type.name)}}
                         {%- for arg in method.arguments -%}
@@ -107,37 +102,6 @@ class ProcTableAsClass {
                 );
             {% endfor %}
 
-            {%- for method in type.methods if has_callback_info(method) or method.name.get() in LegacyCallbackFunctions %}
-
-                {% set Suffix = as_CppMethodSuffix(type.name, method.name) %}
-                //* The virtual function to call after saving the callback and userdata in the proc.
-                //* This function can be mocked.
-                virtual void On{{Suffix}}(
-                    {{-as_cType(type.name)}} {{as_varName(type.name)}}
-                    {%- for arg in method.arguments -%}
-                        , {{as_annotated_cType(arg)}}
-                    {%- endfor -%}
-                ) = 0;
-                {% for arg in method.arguments %}
-                    {% if arg.name.get() == 'callback info' %}
-                        {% for callback in types[arg.type.name.get()].members if callback.type.category == 'function pointer' %}
-                            void Call{{Suffix + callback.name.CamelCase()}}(
-                                {{-as_cType(type.name)}} {{as_varName(type.name)}}
-                                {%- for arg in callback.type.arguments -%}
-                                    {%- if not loop.last -%}, {{as_annotated_cType(arg)}}{%- endif -%}
-                                {%- endfor -%}
-                            );
-                        {% endfor %}
-                    {% elif arg.type.category == 'function pointer' %}
-                        void Call{{Suffix + arg.name.CamelCase()}}(
-                            {{-as_cType(type.name)}} {{as_varName(type.name)}}
-                            {%- for arg in arg.type.arguments -%}
-                                {%- if not loop.last -%}, {{as_annotated_cType(arg)}}{%- endif -%}
-                            {%- endfor -%}
-                        );
-                    {% endif %}
-                {% endfor %}
-            {% endfor %}
         {% endfor %}
 
         // Manually implement some callback helpers for testing.
@@ -147,18 +111,6 @@ class ProcTableAsClass {
         struct Object {
             ProcTableAsClass* procs = nullptr;
             {% for type in by_category["object"] %}
-                {% for method in type.methods if has_callback_info(method) or method.name.get() in LegacyCallbackFunctions %}
-                    void* m{{as_CppMethodSuffix(type.name, method.name)}}Userdata = 0;
-                    {% for arg in method.arguments %}
-                        {% if arg.name.get() == 'callback info' %}
-                            {% for callback in types[arg.type.name.get()].members if callback.type.category == 'function pointer' %}
-                                {{as_cType(callback.type.name)}} m{{as_CppMethodSuffix(type.name, method.name)}}{{callback.name.CamelCase()}} = nullptr;
-                            {% endfor %}
-                        {% elif arg.type.category == 'function pointer' %}
-                            {{as_cType(arg.type.name)}} m{{as_CppMethodSuffix(type.name, method.name)}}{{arg.name.CamelCase()}} = nullptr;
-                        {% endif %}
-                    {% endfor %}
-                {% endfor %}
                 {% for method in type.methods if has_callbackInfoStruct(method) %}
                     {% set CallbackInfoType = (method.arguments|last).type %}
                     {% set CallbackType = find_by_name(CallbackInfoType.members, "callback").type %}
@@ -194,7 +146,7 @@ class MockProcTable : public ProcTableAsClass {
 
             MOCK_METHOD(void, {{as_MethodSuffix(type.name, Name("add ref"))}}, ({{as_cType(type.name)}} self), (override));
             MOCK_METHOD(void, {{as_MethodSuffix(type.name, Name("release"))}}, ({{as_cType(type.name)}} self), (override));
-            {% for method in type.methods if not has_callback_arguments(method) and not has_callback_info(method) and not has_callbackInfoStruct(method) %}
+            {% for method in type.methods if not has_callbackInfoStruct(method) %}
                 MOCK_METHOD({{as_cType(method.return_type.name)}},{{" "}}
                     {{-as_MethodSuffix(type.name, method.name)}}, (
                         {{-as_cType(type.name)}} {{as_varName(type.name)}}
@@ -204,15 +156,6 @@ class MockProcTable : public ProcTableAsClass {
                     ), (override));
             {% endfor %}
 
-            {% for method in type.methods if has_callback_info(method) or method.name.get() in LegacyCallbackFunctions %}
-                MOCK_METHOD(void,{{" "-}}
-                    On{{as_CppMethodSuffix(type.name, method.name)}}, (
-                        {{-as_cType(type.name)}} {{as_varName(type.name)}}
-                        {%- for arg in method.arguments -%}
-                            , {{as_annotated_cType(arg)}}
-                        {%- endfor -%}
-                    ), (override));
-            {% endfor %}
             {% for method in type.methods if has_callbackInfoStruct(method) %}
                 MOCK_METHOD(void,{{" "-}}
                     On{{as_CppMethodSuffix(type.name, method.name)}}, (

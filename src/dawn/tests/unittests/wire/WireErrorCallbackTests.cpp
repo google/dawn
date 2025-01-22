@@ -48,36 +48,12 @@ using testing::SaveArg;
 using testing::SizedString;
 using testing::StrictMock;
 
-// Mock classes to add expectations on the wire calling callbacks
-class MockDeviceLoggingCallback {
-  public:
-    MOCK_METHOD(void, Call, (WGPULoggingType type, WGPUStringView message, void* userdata));
-};
-
-std::unique_ptr<StrictMock<MockDeviceLoggingCallback>> mockDeviceLoggingCallback;
-void ToMockDeviceLoggingCallback(WGPULoggingType type, WGPUStringView message, void* userdata) {
-    mockDeviceLoggingCallback->Call(type, message, userdata);
-}
-
-class WireErrorCallbackTests : public WireTest {
-  public:
-    WireErrorCallbackTests() {}
-    ~WireErrorCallbackTests() override = default;
-
-    void SetUp() override {
-        WireTest::SetUp();
-        mockDeviceLoggingCallback = std::make_unique<StrictMock<MockDeviceLoggingCallback>>();
-    }
-
-    void TearDown() override {
-        WireTest::TearDown();
-        mockDeviceLoggingCallback = nullptr;
-    }
-};
+class WireErrorCallbackTests : public WireTest {};
 
 // Test the return wire for device user warning callbacks
 TEST_F(WireErrorCallbackTests, DeviceLoggingCallback) {
-    device.SetLoggingCallback(ToMockDeviceLoggingCallback, this);
+    testing::MockCppCallback<wgpu::LoggingCallback<void>*> mockCallback;
+    device.SetLoggingCallback(mockCallback.Callback());
 
     // Setting the injected warning callback should stay on the client side and do nothing
     FlushClient();
@@ -87,9 +63,7 @@ TEST_F(WireErrorCallbackTests, DeviceLoggingCallback) {
     api.CallDeviceSetLoggingCallbackCallback(apiDevice, WGPULoggingType_Info,
                                              ToOutputStringView("Some message"));
 
-    EXPECT_CALL(*mockDeviceLoggingCallback,
-                Call(WGPULoggingType_Info, SizedString("Some message"), this))
-        .Times(1);
+    EXPECT_CALL(mockCallback, Call(wgpu::LoggingType::Info, SizedString("Some message"))).Times(1);
 
     FlushServer();
 }

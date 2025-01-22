@@ -194,8 +194,7 @@ class InstanceBase final : public ErrorSink, public RefCountedWithExternalCount<
     bool mBeginCaptureOnStartup = false;
     BackendValidationLevel mBackendValidationLevel = BackendValidationLevel::Disabled;
 
-    wgpu::LoggingCallback mLoggingCallback = nullptr;
-    raw_ptr<void> mLoggingCallbackUserdata = nullptr;
+    WGPULoggingCallbackInfo mLoggingCallbackInfo = {};
 
     std::unique_ptr<dawn::platform::Platform> mDefaultPlatform;
     raw_ptr<dawn::platform::Platform> mPlatform = nullptr;

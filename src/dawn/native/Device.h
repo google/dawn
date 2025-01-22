@@ -279,7 +279,7 @@ class DeviceBase : public ErrorSink, public RefCountedWithExternalCount<RefCount
     bool APITick();
     void APIValidateTextureDescriptor(const TextureDescriptor* desc);
 
-    void APISetLoggingCallback(wgpu::LoggingCallback callback, void* userdata);
+    void APISetLoggingCallback(const WGPULoggingCallbackInfo& callbackInfo);
     void APIPushErrorScope(wgpu::ErrorFilter filter);
     Future APIPopErrorScope(const WGPUPopErrorScopeCallbackInfo& callbackInfo);
 
@@ -530,11 +530,11 @@ class DeviceBase : public ErrorSink, public RefCountedWithExternalCount<RefCount
                                                     const TextureCopy& dst,
                                                     const Extent3D& copySizePixels) = 0;
 
-    WGPUUncapturedErrorCallbackInfo mUncapturedErrorCallbackInfo;
+    WGPUUncapturedErrorCallbackInfo mUncapturedErrorCallbackInfo =
+        WGPU_UNCAPTURED_ERROR_CALLBACK_INFO_INIT;
 
     std::shared_mutex mLoggingMutex;
-    wgpu::LoggingCallback mLoggingCallback = nullptr;
-    raw_ptr<void> mLoggingUserdata = nullptr;
+    WGPULoggingCallbackInfo mLoggingCallbackInfo = WGPU_LOGGING_CALLBACK_INFO_INIT;
 
     std::unique_ptr<ErrorScopeStack> mErrorScopeStack;
 

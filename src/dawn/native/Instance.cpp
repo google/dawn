@@ -116,6 +116,29 @@ wgpu::WGSLFeatureName ToWGPUFeature(tint::wgsl::LanguageFeature f) {
     DAWN_UNREACHABLE();
 }
 
+static constexpr WGPULoggingCallbackInfo kEmptyLoggingCallbackInfo = {nullptr, nullptr, nullptr,
+                                                                      nullptr};
+static constexpr WGPULoggingCallbackInfo kDefaultLoggingCallbackInfo = {
+    nullptr,
+    [](WGPULoggingType type, WGPUStringView message, void*, void*) {
+        std::string_view view = {message.data, message.length};
+        switch (static_cast<wgpu::LoggingType>(type)) {
+            case wgpu::LoggingType::Verbose:
+                dawn::DebugLog() << view;
+                break;
+            case wgpu::LoggingType::Info:
+                dawn::InfoLog() << view;
+                break;
+            case wgpu::LoggingType::Warning:
+                dawn::WarningLog() << view;
+                break;
+            case wgpu::LoggingType::Error:
+                dawn::ErrorLog() << view;
+                break;
+        }
+    },
+    nullptr, nullptr};
+
 }  // anonymous namespace
 
 wgpu::Status APIGetInstanceFeatures(InstanceFeatures* features) {
@@ -202,8 +225,7 @@ void InstanceBase::DisconnectDawnPlatform() {
 void InstanceBase::WillDropLastExternalRef() {
     // Stop tracking events. See comment on ShutDown.
     mEventManager.ShutDown();
-    mLoggingCallback = nullptr;
-    mLoggingCallbackUserdata = nullptr;
+    mLoggingCallbackInfo = kEmptyLoggingCallbackInfo;
 }
 
 // TODO(crbug.com/dawn/832): make the platform an initialization parameter of the instance.
@@ -222,29 +244,10 @@ MaybeError InstanceBase::Initialize(const UnpackedPtr<InstanceDescriptor>& descr
         mBackendValidationLevel = dawnDesc->backendValidationLevel;
         mBeginCaptureOnStartup = dawnDesc->beginCaptureOnStartup;
 
-        mLoggingCallback = dawnDesc->loggingCallback;
-        mLoggingCallbackUserdata = dawnDesc->loggingCallbackUserdata;
+        mLoggingCallbackInfo = dawnDesc->loggingCallbackInfo;
     }
-
-    if (!mLoggingCallback) {
-        mLoggingCallback = [](WGPULoggingType type, WGPUStringView message, void*) {
-            std::string_view view = {message.data, message.length};
-            switch (static_cast<wgpu::LoggingType>(type)) {
-                case wgpu::LoggingType::Verbose:
-                    dawn::DebugLog() << view;
-                    break;
-                case wgpu::LoggingType::Info:
-                    dawn::InfoLog() << view;
-                    break;
-                case wgpu::LoggingType::Warning:
-                    dawn::WarningLog() << view;
-                    break;
-                case wgpu::LoggingType::Error:
-                    dawn::ErrorLog() << view;
-                    break;
-            }
-        };
-        mLoggingCallbackUserdata = nullptr;
+    if (!mLoggingCallbackInfo.callback) {
+        mLoggingCallbackInfo = kDefaultLoggingCallbackInfo;
     }
 
     // Default paths to search are next to the shared library, next to the executable, and
@@ -476,9 +479,10 @@ bool InstanceBase::ConsumedErrorAndWarnOnce(MaybeError maybeErr) {
         return false;
     }
     std::string message = maybeErr.AcquireError()->GetFormattedMessage();
-    if (mWarningMessages.insert(message).second && mLoggingCallback) {
-        mLoggingCallback(WGPULoggingType_Warning, ToOutputStringView(message),
-                         mLoggingCallbackUserdata);
+    if (mWarningMessages.insert(message).second && mLoggingCallbackInfo.callback) {
+        mLoggingCallbackInfo.callback(WGPULoggingType_Warning, ToOutputStringView(message),
+                                      mLoggingCallbackInfo.userdata1,
+                                      mLoggingCallbackInfo.userdata2);
     }
     return true;
 }
@@ -583,10 +587,11 @@ void InstanceBase::ConsumeError(std::unique_ptr<ErrorData> error,
     // Note: `additionalAllowedErrors` is ignored. The instance considers every type of error to be
     // an error that is logged.
     DAWN_ASSERT(error != nullptr);
-    if (mLoggingCallback) {
+    if (mLoggingCallbackInfo.callback) {
         std::string messageStr = error->GetFormattedMessage();
-        mLoggingCallback(WGPULoggingType_Error, ToOutputStringView(messageStr),
-                         mLoggingCallbackUserdata);
+        mLoggingCallbackInfo.callback(WGPULoggingType_Error, ToOutputStringView(messageStr),
+                                      mLoggingCallbackInfo.userdata1,
+                                      mLoggingCallbackInfo.userdata2);
     }
 }
 

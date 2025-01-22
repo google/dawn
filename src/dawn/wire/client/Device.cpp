@@ -153,6 +153,8 @@ using CreateRenderPipelineEvent =
 
 static constexpr WGPUUncapturedErrorCallbackInfo kEmptyUncapturedErrorCallbackInfo = {
     nullptr, nullptr, nullptr, nullptr};
+static constexpr WGPULoggingCallbackInfo kEmptyLoggingCallbackInfo = {nullptr, nullptr, nullptr,
+                                                                      nullptr};
 
 }  // namespace
 
@@ -190,6 +192,7 @@ class Device::DeviceLostEvent : public TrackedEvent {
         // uncaptured error callback, so reset the uncaptured error callback before calling the
         // device lost callback.
         mDevice->mUncapturedErrorCallbackInfo = kEmptyUncapturedErrorCallbackInfo;
+        mDevice->mLoggingCallbackInfo = kEmptyLoggingCallbackInfo;
 
         void* userdata1 = mUserdata1.ExtractAsDangling();
         void* userdata2 = mUserdata2.ExtractAsDangling();
@@ -312,9 +315,9 @@ void Device::HandleError(WGPUErrorType errorType, WGPUStringView message) {
 }
 
 void Device::HandleLogging(WGPULoggingType loggingType, WGPUStringView message) {
-    if (mLoggingCallback) {
-        // Since client always run in single thread, calling the callback directly is safe.
-        mLoggingCallback(loggingType, message, mLoggingUserdata);
+    if (mLoggingCallbackInfo.callback) {
+        mLoggingCallbackInfo.callback(loggingType, message, mLoggingCallbackInfo.userdata1,
+                                      mLoggingCallbackInfo.userdata2);
     }
 }
 
@@ -335,9 +338,10 @@ WGPUFuture Device::GetLostFuture() {
     return {mDeviceLostInfo.futureID};
 }
 
-void Device::SetLoggingCallback(WGPULoggingCallback callback, void* userdata) {
-    mLoggingCallback = callback;
-    mLoggingUserdata = userdata;
+void Device::SetLoggingCallback(const WGPULoggingCallbackInfo& callbackInfo) {
+    if (mIsAlive) {
+        mLoggingCallbackInfo = callbackInfo;
+    }
 }
 
 WireResult Client::DoDeviceLostCallback(ObjectHandle eventManager,

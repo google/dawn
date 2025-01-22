@@ -1408,8 +1408,7 @@
                 "no autolock": true,
                 "tags": ["dawn"],
                 "args": [
-                    {"name": "callback", "type": "logging callback"},
-                    {"name": "userdata", "type": "void *"}
+                    {"name": "callback info", "type": "logging callback info"}
                 ]
             },
             {
@@ -1610,12 +1609,18 @@
         ]
     },
     "logging callback": {
-        "category": "function pointer",
+        "category": "callback function",
         "tags": ["dawn"],
         "args": [
             {"name": "type", "type": "logging type"},
-            {"name": "message", "type": "string view"},
-            {"name": "userdata", "type": "void *"}
+            {"name": "message", "type": "string view"}
+        ]
+    },
+    "logging callback info": {
+        "category": "callback info",
+        "tags": ["dawn"],
+        "members": [
+            {"name": "callback", "type": "logging callback", "default": "nullptr"}
         ]
     },
     "error filter": {

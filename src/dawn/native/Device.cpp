@@ -133,44 +133,10 @@ auto GetOrCreate(ContentLessObjectCache<RefCountedT>& cache,
 
 namespace {
 
-struct LoggingCallbackTask : CallbackTask {
-  public:
-    LoggingCallbackTask() = delete;
-    LoggingCallbackTask(wgpu::LoggingCallback loggingCallback,
-                        WGPULoggingType loggingType,
-                        const char* message,
-                        void* userdata)
-        : mCallback(loggingCallback),
-          mLoggingType(loggingType),
-          mMessage(message),
-          mUserdata(userdata) {
-        // Since the FinishImpl() will be called in uncertain future in which time the message
-        // may already disposed, we must keep a local copy in the CallbackTask.
-    }
-
-  private:
-    void FinishImpl() override { mCallback(mLoggingType, ToOutputStringView(mMessage), mUserdata); }
-
-    void HandleShutDownImpl() override {
-        // Do the logging anyway
-        mCallback(mLoggingType, ToOutputStringView(mMessage), mUserdata);
-    }
-
-    void HandleDeviceLossImpl() override {
-        mCallback(mLoggingType, ToOutputStringView(mMessage), mUserdata);
-    }
-
-    // As all deferred callback tasks will be triggered before modifying the registered
-    // callback or shutting down, we are ensured that callback function and userdata pointer
-    // stored in tasks is valid when triggered.
-    wgpu::LoggingCallback mCallback;
-    WGPULoggingType mLoggingType;
-    std::string mMessage;
-    raw_ptr<void> mUserdata;
-};
-
 static constexpr WGPUUncapturedErrorCallbackInfo kEmptyUncapturedErrorCallbackInfo = {
     nullptr, nullptr, nullptr, nullptr};
+static constexpr WGPULoggingCallbackInfo kEmptyLoggingCallbackInfo = {nullptr, nullptr, nullptr,
+                                                                      nullptr};
 
 }  // anonymous namespace
 
@@ -222,10 +188,14 @@ void DeviceBase::DeviceLostEvent::Complete(EventCompletionType completionType) {
     }
 
     // Some users may use the device lost callback to deallocate resources allocated for the
-    // uncaptured error callback, so reset the uncaptured error callback before calling the
+    // uncaptured error and logging callbacks, so reset these callbacks before calling the
     // device lost callback.
     if (mDevice != nullptr) {
         mDevice->mUncapturedErrorCallbackInfo = kEmptyUncapturedErrorCallbackInfo;
+        {
+            std::lock_guard<std::shared_mutex> lock(mDevice->mLoggingMutex);
+            mDevice->mLoggingCallbackInfo = kEmptyLoggingCallbackInfo;
+        }
     }
 
     auto device = ToAPI(mDevice.Get());
@@ -536,6 +506,10 @@ void DeviceBase::WillDropLastExternalRef() {
     // Reset callbacks since after dropping the last external reference, the application may have
     // freed any device-scope memory needed to run the callback.
     mUncapturedErrorCallbackInfo = kEmptyUncapturedErrorCallbackInfo;
+    {
+        std::lock_guard<std::shared_mutex> lock(mLoggingMutex);
+        mLoggingCallbackInfo = kEmptyLoggingCallbackInfo;
+    }
 
     mAdapter->GetInstance()->RemoveDevice(this);
 
@@ -786,10 +760,12 @@ void DeviceBase::ConsumeError(std::unique_ptr<ErrorData> error,
     HandleError(std::move(error), additionalAllowedErrors);
 }
 
-void DeviceBase::APISetLoggingCallback(wgpu::LoggingCallback callback, void* userdata) {
+void DeviceBase::APISetLoggingCallback(const WGPULoggingCallbackInfo& callbackInfo) {
+    if (mState != State::Alive) {
+        return;
+    }
     std::lock_guard<std::shared_mutex> lock(mLoggingMutex);
-    mLoggingCallback = callback;
-    mLoggingUserdata = userdata;
+    mLoggingCallbackInfo = callbackInfo;
 }
 
 void DeviceBase::APIPushErrorScope(wgpu::ErrorFilter filter) {
@@ -1767,8 +1743,10 @@ void DeviceBase::EmitLog(WGPULoggingType loggingType, std::string_view message) 
     // to SetLoggingCallback. Applications should not call SetLoggingCallback inside
     // the logging callback or they will deadlock.
     std::shared_lock<std::shared_mutex> lock(mLoggingMutex);
-    if (mLoggingCallback) {
-        mLoggingCallback(loggingType, ToOutputStringView(message), mLoggingUserdata);
+    if (mLoggingCallbackInfo.callback) {
+        mLoggingCallbackInfo.callback(loggingType, ToOutputStringView(message),
+                                      mLoggingCallbackInfo.userdata1,
+                                      mLoggingCallbackInfo.userdata2);
     }
 }
 

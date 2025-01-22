@@ -328,13 +328,13 @@ TEST_P(WireBufferMappingTests, DestroyCalledTooEarlyServerSideError) {
 
 // Check the map callback when the map request would have worked, but the device was released.
 TEST_P(WireBufferMappingTests, DeviceReleasedTooEarly) {
-    TestEarlyMapCancelled(
-        [&]() { device = nullptr; },
-        [&]() {
-            EXPECT_CALL(api, OnDeviceSetLoggingCallback(apiDevice, nullptr, nullptr)).Times(1);
-            EXPECT_CALL(api, DeviceRelease(apiDevice));
-        },
-        wgpu::MapAsyncStatus::Aborted, "The Device was lost before mapping was resolved.", false);
+    TestEarlyMapCancelled([&]() { device = nullptr; },
+                          [&]() {
+                              EXPECT_CALL(api, OnDeviceSetLoggingCallback(apiDevice, _)).Times(1);
+                              EXPECT_CALL(api, DeviceRelease(apiDevice));
+                          },
+                          wgpu::MapAsyncStatus::Aborted,
+                          "The Device was lost before mapping was resolved.", false);
     DefaultApiDeviceWasReleased();
 }
 
@@ -343,7 +343,7 @@ TEST_P(WireBufferMappingTests, DeviceReleasedTooEarlyServerSideError) {
     TestEarlyMapErrorCancelled(
         [&]() { device = nullptr; },
         [&]() {
-            EXPECT_CALL(api, OnDeviceSetLoggingCallback(apiDevice, nullptr, nullptr)).Times(1);
+            EXPECT_CALL(api, OnDeviceSetLoggingCallback(apiDevice, _)).Times(1);
             EXPECT_CALL(api, DeviceRelease(apiDevice));
         },
         wgpu::MapAsyncStatus::Aborted, "The Device was lost before mapping was resolved.", false);

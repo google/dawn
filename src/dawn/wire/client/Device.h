@@ -65,7 +65,7 @@ class Device final : public RefCountedWithExternalCount<ObjectWithEventsBase> {
     class DeviceLostEvent;
 
     // WebGPU API
-    void SetLoggingCallback(WGPULoggingCallback errorCallback, void* errorUserdata);
+    void SetLoggingCallback(const WGPULoggingCallbackInfo& callbackInfo);
     void InjectError(WGPUErrorType type, WGPUStringView message);
     WGPUFuture PopErrorScope(const WGPUPopErrorScopeCallbackInfo& callbackInfo);
 
@@ -104,9 +104,9 @@ class Device final : public RefCountedWithExternalCount<ObjectWithEventsBase> {
     };
     DeviceLostInfo mDeviceLostInfo;
 
-    WGPUUncapturedErrorCallbackInfo mUncapturedErrorCallbackInfo;
-    WGPULoggingCallback mLoggingCallback = nullptr;
-    raw_ptr<void> mLoggingUserdata = nullptr;
+    WGPUUncapturedErrorCallbackInfo mUncapturedErrorCallbackInfo =
+        WGPU_UNCAPTURED_ERROR_CALLBACK_INFO_INIT;
+    WGPULoggingCallbackInfo mLoggingCallbackInfo = WGPU_LOGGING_CALLBACK_INFO_INIT;
 
     Ref<Adapter> mAdapter;
     Ref<Queue> mQueue;
