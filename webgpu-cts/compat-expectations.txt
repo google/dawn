@@ -12200,6 +12200,8 @@ crbug.com/384676195 [ android-pixel-6 ] webgpu:api,validation,gpu_external_textu
 crbug.com/384676198 [ android-pixel-6 ] webgpu:api,operation,command_buffer,image_copy:rowsPerImage_and_bytesPerRow_depth_stencil:* [ RetryOnFailure ]
 
 # copyToTexture,ImageBitmap:* flaky on Pixel 6
+crbug.com/384672477 [ android-pixel-6 ] webgpu:web_platform,copyToTexture,ImageBitmap:copy_subrect_from_ImageData:* [ RetryOnFailure ]
+crbug.com/384672477 [ android-pixel-6 ] webgpu:web_platform,copyToTexture,ImageBitmap:from_canvas:* [ RetryOnFailure ]
 crbug.com/384672477 [ android-pixel-6 ] webgpu:web_platform,copyToTexture,ImageBitmap:from_ImageData:* [ RetryOnFailure ]
 
 # Compressed texture image_copy failures on Pixel 6
