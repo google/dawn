@@ -118,6 +118,8 @@ const char* str(BuiltinFn i) {
             return "abs";
         case BuiltinFn::kMax:
             return "max";
+        case BuiltinFn::kMin:
+            return "min";
         case BuiltinFn::kSdot:
             return "sdot";
         case BuiltinFn::kUdot:
@@ -176,6 +178,7 @@ tint::core::ir::Instruction::Accesses GetSideEffects(BuiltinFn fn) {
         case BuiltinFn::kSign:
         case BuiltinFn::kAbs:
         case BuiltinFn::kMax:
+        case BuiltinFn::kMin:
             break;
     }
     return core::ir::Instruction::Accesses{};

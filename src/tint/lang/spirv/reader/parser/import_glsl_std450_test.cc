@@ -247,10 +247,25 @@ TEST_F(SpirvParserTest, GlslStd450_SAbs_SignedToSigned) {
 )");
 }
 
-TEST_F(SpirvParserTest, SMax_UnsignedToUnsigned) {
+struct GlslStd450TwoParams {
+    std::string spv_name;
+    std::string ir_name;
+};
+[[maybe_unused]] inline std::ostream& operator<<(std::ostream& out, GlslStd450TwoParams c) {
+    out << c.spv_name;
+    return out;
+}
+
+using GlslStd450TwoParamTest = SpirvParserTestWithParam<GlslStd450TwoParams>;
+
+TEST_P(GlslStd450TwoParamTest, UnsignedToUnsigned) {
+    auto params = GetParam();
+
     EXPECT_IR(Preamble() + R"(
-     %1 = OpExtInst %uint %glsl SMax %uint_10 %uint_10
-     %2 = OpExtInst %v2uint %glsl SMax %v2uint_10_20 %v2uint_20_10
+     %1 = OpExtInst %uint %glsl )" +
+                  params.spv_name + R"( %uint_10 %uint_10
+     %2 = OpExtInst %v2uint %glsl )" +
+                  params.spv_name + R"( %v2uint_10_20 %v2uint_20_10
      %3 = OpCopyObject %uint %1
      %4 = OpCopyObject %v2uint %2
      OpReturn
@@ -259,8 +274,10 @@ TEST_F(SpirvParserTest, SMax_UnsignedToUnsigned) {
               R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:u32 = spirv.max<u32> 10u, 10u
-    %3:vec2<u32> = spirv.max<u32> vec2<u32>(10u, 20u), vec2<u32>(20u, 10u)
+    %2:u32 = spirv.)" +
+                  params.ir_name + R"(<u32> 10u, 10u
+    %3:vec2<u32> = spirv.)" +
+                  params.ir_name + R"(<u32> vec2<u32>(10u, 20u), vec2<u32>(20u, 10u)
     %4:u32 = let %2
     %5:vec2<u32> = let %3
     ret
@@ -269,10 +286,14 @@ TEST_F(SpirvParserTest, SMax_UnsignedToUnsigned) {
 )");
 }
 
-TEST_F(SpirvParserTest, SMax_SignedToSigned) {
+TEST_P(GlslStd450TwoParamTest, SignedToSigned) {
+    auto params = GetParam();
+
     EXPECT_IR(Preamble() + R"(
-     %1 = OpExtInst %int %glsl SMax %int_10 %int_10
-     %2 = OpExtInst %v2int %glsl SMax %v2int_10_20 %v2int_20_10
+     %1 = OpExtInst %int %glsl )" +
+                  params.spv_name + R"( %int_10 %int_10
+     %2 = OpExtInst %v2int %glsl )" +
+                  params.spv_name + R"( %v2int_10_20 %v2int_20_10
      %3 = OpCopyObject %int %1
      %4 = OpCopyObject %v2int %2
      OpReturn
@@ -281,8 +302,10 @@ TEST_F(SpirvParserTest, SMax_SignedToSigned) {
               R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:i32 = spirv.max<i32> 10i, 10i
-    %3:vec2<i32> = spirv.max<i32> vec2<i32>(10i, 20i), vec2<i32>(20i, 10i)
+    %2:i32 = spirv.)" +
+                  params.ir_name + R"(<i32> 10i, 10i
+    %3:vec2<i32> = spirv.)" +
+                  params.ir_name + R"(<i32> vec2<i32>(10i, 20i), vec2<i32>(20i, 10i)
     %4:i32 = let %2
     %5:vec2<i32> = let %3
     ret
@@ -291,10 +314,14 @@ TEST_F(SpirvParserTest, SMax_SignedToSigned) {
 )");
 }
 
-TEST_F(SpirvParserTest, SMax_MixedToUnsigned) {
+TEST_P(GlslStd450TwoParamTest, MixedToUnsigned) {
+    auto params = GetParam();
+
     EXPECT_IR(Preamble() + R"(
-     %1 = OpExtInst %uint %glsl SMax %int_10 %uint_10
-     %2 = OpExtInst %v2uint %glsl SMax %v2int_10_20 %v2uint_20_10
+     %1 = OpExtInst %uint %glsl )" +
+                  params.spv_name + R"( %int_10 %uint_10
+     %2 = OpExtInst %v2uint %glsl )" +
+                  params.spv_name + R"( %v2int_10_20 %v2uint_20_10
      %3 = OpCopyObject %uint %1
      %4 = OpCopyObject %v2uint %2
      OpReturn
@@ -303,8 +330,10 @@ TEST_F(SpirvParserTest, SMax_MixedToUnsigned) {
               R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:u32 = spirv.max<u32> 10i, 10u
-    %3:vec2<u32> = spirv.max<u32> vec2<i32>(10i, 20i), vec2<u32>(20u, 10u)
+    %2:u32 = spirv.)" +
+                  params.ir_name + R"(<u32> 10i, 10u
+    %3:vec2<u32> = spirv.)" +
+                  params.ir_name + R"(<u32> vec2<i32>(10i, 20i), vec2<u32>(20u, 10u)
     %4:u32 = let %2
     %5:vec2<u32> = let %3
     ret
@@ -313,10 +342,14 @@ TEST_F(SpirvParserTest, SMax_MixedToUnsigned) {
 )");
 }
 
-TEST_F(SpirvParserTest, SMax_MixedToSigned) {
+TEST_P(GlslStd450TwoParamTest, MixedToSigned) {
+    auto params = GetParam();
+
     EXPECT_IR(Preamble() + R"(
-     %1 = OpExtInst %int %glsl SMax %uint_10 %int_10
-     %2 = OpExtInst %v2int %glsl SMax %v2uint_10_20 %v2int_20_10
+     %1 = OpExtInst %int %glsl )" +
+                  params.spv_name + R"( %uint_10 %int_10
+     %2 = OpExtInst %v2int %glsl )" +
+                  params.spv_name + R"( %v2uint_10_20 %v2int_20_10
      %3 = OpCopyObject %int %1
      %4 = OpCopyObject %v2int %2
      OpReturn
@@ -325,8 +358,10 @@ TEST_F(SpirvParserTest, SMax_MixedToSigned) {
               R"(
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
-    %2:i32 = spirv.max<i32> 10u, 10i
-    %3:vec2<i32> = spirv.max<i32> vec2<u32>(10u, 20u), vec2<i32>(20i, 10i)
+    %2:i32 = spirv.)" +
+                  params.ir_name + R"(<i32> 10u, 10i
+    %3:vec2<i32> = spirv.)" +
+                  params.ir_name + R"(<i32> vec2<u32>(10u, 20u), vec2<i32>(20i, 10i)
     %4:i32 = let %2
     %5:vec2<i32> = let %3
     ret
@@ -334,6 +369,11 @@ TEST_F(SpirvParserTest, SMax_MixedToSigned) {
 }
 )");
 }
+
+INSTANTIATE_TEST_SUITE_P(SpirvParser,
+                         GlslStd450TwoParamTest,
+                         ::testing::Values(GlslStd450TwoParams{"SMax", "max"},
+                                           GlslStd450TwoParams{"SMin", "min"}));
 
 }  // namespace
 }  // namespace tint::spirv::reader

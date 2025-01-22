@@ -5570,12 +5570,19 @@ constexpr IntrinsicInfo kBuiltins[] = {
   },
   {
     /* [38] */
+    /* fn min<R : iu32>[T : iu32, U : iu32](T, U) -> R */
+    /* fn min<R : iu32>[T : iu32, U : iu32, N : num](vec<N, T>, vec<N, U>) -> vec<N, R> */
+    /* num overloads */ 2,
+    /* overloads */ OverloadIndex(156),
+  },
+  {
+    /* [39] */
     /* fn sdot(u32, u32, u32) -> i32 */
     /* num overloads */ 1,
     /* overloads */ OverloadIndex(169),
   },
   {
-    /* [39] */
+    /* [40] */
     /* fn udot(u32, u32, u32) -> u32 */
     /* num overloads */ 1,
     /* overloads */ OverloadIndex(170),

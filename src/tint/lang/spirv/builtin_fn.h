@@ -86,6 +86,7 @@ enum class BuiltinFn : uint8_t {
     kSign,
     kAbs,
     kMax,
+    kMin,
     kSdot,
     kUdot,
     kNone,
