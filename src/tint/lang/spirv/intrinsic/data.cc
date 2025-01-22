@@ -5675,12 +5675,19 @@ constexpr IntrinsicInfo kBuiltins[] = {
   },
   {
     /* [40] */
+    /* fn umax<R : iu32>[T : iu32, U : iu32](T, U) -> R */
+    /* fn umax<R : iu32>[T : iu32, U : iu32, N : num](vec<N, T>, vec<N, U>) -> vec<N, R> */
+    /* num overloads */ 2,
+    /* overloads */ OverloadIndex(156),
+  },
+  {
+    /* [41] */
     /* fn sdot(u32, u32, u32) -> i32 */
     /* num overloads */ 1,
     /* overloads */ OverloadIndex(171),
   },
   {
-    /* [41] */
+    /* [42] */
     /* fn udot(u32, u32, u32) -> u32 */
     /* num overloads */ 1,
     /* overloads */ OverloadIndex(172),

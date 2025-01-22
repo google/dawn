@@ -338,6 +338,9 @@ implicit(T: iu32, U: iu32, N: num) fn smin<R: iu32>(vec<N, T>, vec<N, U>) -> vec
 implicit(T: iu32, U: iu32, V: iu32) fn sclamp<R: iu32>(T, U, V) -> R
 implicit(T: iu32, U: iu32, V: iu32, N: num) fn sclamp<R: iu32>(vec<N, T>, vec<N, U>,  vec<N, V>) -> vec<N, R>
 
+implicit(T: iu32, U: iu32) fn umax<R: iu32>(T, U) -> R
+implicit(T: iu32, U: iu32, N: num) fn umax<R: iu32>(vec<N, T>, vec<N, U>) -> vec<N, R>
+
 ////////////////////////////////////////////////////////////////////////////////
 // SPV_KHR_integer_dot_product instructions
 ////////////////////////////////////////////////////////////////////////////////

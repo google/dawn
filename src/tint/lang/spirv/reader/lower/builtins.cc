@@ -74,13 +74,16 @@ struct State {
                     Abs(builtin);
                     break;
                 case spirv::BuiltinFn::kSmax:
-                    Max(builtin);
+                    SMax(builtin);
                     break;
                 case spirv::BuiltinFn::kSmin:
-                    Min(builtin);
+                    SMin(builtin);
                     break;
                 case spirv::BuiltinFn::kSclamp:
-                    Clamp(builtin);
+                    SClamp(builtin);
+                    break;
+                case spirv::BuiltinFn::kUmax:
+                    UMax(builtin);
                     break;
                 default:
                     TINT_UNREACHABLE() << "unknown spirv builtin: " << builtin->Func();
@@ -112,7 +115,6 @@ struct State {
             auto* new_call = b.Call(result_ty, func, new_args);
 
             core::ir::Value* replacement = new_call->Result(0);
-
             if (result_ty->DeepestElement() == ty.u32()) {
                 new_call->Result(0)->SetType(ty.MatchWidth(ty.i32(), result_ty));
                 replacement = b.Bitcast(result_ty, replacement)->Result(0);
@@ -126,10 +128,47 @@ struct State {
         WrapSignedSpirvMethods(call, core::BuiltinFn::kSign);
     }
     void Abs(spirv::ir::BuiltinCall* call) { WrapSignedSpirvMethods(call, core::BuiltinFn::kAbs); }
-    void Max(spirv::ir::BuiltinCall* call) { WrapSignedSpirvMethods(call, core::BuiltinFn::kMax); }
-    void Min(spirv::ir::BuiltinCall* call) { WrapSignedSpirvMethods(call, core::BuiltinFn::kMin); }
-    void Clamp(spirv::ir::BuiltinCall* call) {
+    void SMax(spirv::ir::BuiltinCall* call) { WrapSignedSpirvMethods(call, core::BuiltinFn::kMax); }
+    void SMin(spirv::ir::BuiltinCall* call) { WrapSignedSpirvMethods(call, core::BuiltinFn::kMin); }
+    void SClamp(spirv::ir::BuiltinCall* call) {
         WrapSignedSpirvMethods(call, core::BuiltinFn::kClamp);
+    }
+
+    // The SPIR-V Unsigned methods all interpret their arguments as unsigned (regardless of the type
+    // of the argument). In order to satisfy this, we must bitcast any signed argument to an
+    // unsigned type before calling the WGSL equivalent method.
+    //
+    // The result of the WGSL method will match the arguments, or in this case an unsigned value. If
+    // the SPIR-V instruction expected a signed result we must bitcast the WGSL result to the
+    // correct signed type.
+    void WrapUnsignedSpirvMethods(spirv::ir::BuiltinCall* call, core::BuiltinFn func) {
+        auto args = call->Args();
+
+        b.InsertBefore(call, [&] {
+            auto* result_ty = call->Result(0)->Type();
+            Vector<core::ir::Value*, 2> new_args;
+
+            for (auto* arg : args) {
+                if (arg->Type()->IsSignedIntegerScalarOrVector()) {
+                    arg = b.Bitcast(ty.MatchWidth(ty.u32(), result_ty), arg)->Result(0);
+                }
+                new_args.Push(arg);
+            }
+
+            auto* new_call = b.Call(result_ty, func, new_args);
+
+            core::ir::Value* replacement = new_call->Result(0);
+            if (result_ty->DeepestElement() == ty.i32()) {
+                new_call->Result(0)->SetType(ty.MatchWidth(ty.u32(), result_ty));
+                replacement = b.Bitcast(result_ty, replacement)->Result(0);
+            }
+            call->Result(0)->ReplaceAllUsesWith(replacement);
+        });
+        call->Destroy();
+    }
+
+    void UMax(spirv::ir::BuiltinCall* call) {
+        WrapUnsignedSpirvMethods(call, core::BuiltinFn::kMax);
     }
 
     void Normalize(spirv::ir::BuiltinCall* call) {

@@ -1170,10 +1170,10 @@ struct SpirvReaderParams {
     return out;
 }
 
-using SpirvParser_BuiltinsTest_TwoParam =
+using SpirvParser_BuiltinsTest_TwoParamSigned =
     core::ir::transform::TransformTestWithParam<SpirvReaderParams>;
 
-TEST_P(SpirvParser_BuiltinsTest_TwoParam, UnsignedToUnsigned) {
+TEST_P(SpirvParser_BuiltinsTest_TwoParamSigned, UnsignedToUnsigned) {
     auto& params = GetParam();
 
     auto* ep = b.ComputeFunction("foo");
@@ -1222,7 +1222,7 @@ TEST_P(SpirvParser_BuiltinsTest_TwoParam, UnsignedToUnsigned) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_P(SpirvParser_BuiltinsTest_TwoParam, SignedToSigned) {
+TEST_P(SpirvParser_BuiltinsTest_TwoParamSigned, SignedToSigned) {
     auto params = GetParam();
 
     auto* ep = b.ComputeFunction("foo");
@@ -1265,7 +1265,7 @@ TEST_P(SpirvParser_BuiltinsTest_TwoParam, SignedToSigned) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_P(SpirvParser_BuiltinsTest_TwoParam, MixedToUnsigned) {
+TEST_P(SpirvParser_BuiltinsTest_TwoParamSigned, MixedToUnsigned) {
     auto params = GetParam();
 
     auto* ep = b.ComputeFunction("foo");
@@ -1312,7 +1312,7 @@ TEST_P(SpirvParser_BuiltinsTest_TwoParam, MixedToUnsigned) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_P(SpirvParser_BuiltinsTest_TwoParam, MixedToSigned) {
+TEST_P(SpirvParser_BuiltinsTest_TwoParamSigned, MixedToSigned) {
     auto params = GetParam();
 
     auto* ep = b.ComputeFunction("foo");
@@ -1358,9 +1358,200 @@ TEST_P(SpirvParser_BuiltinsTest_TwoParam, MixedToSigned) {
 }
 
 INSTANTIATE_TEST_SUITE_P(SpirvReader,
-                         SpirvParser_BuiltinsTest_TwoParam,
+                         SpirvParser_BuiltinsTest_TwoParamSigned,
                          ::testing::Values(SpirvReaderParams{spirv::BuiltinFn::kSmax, "max"},
                                            SpirvReaderParams{spirv::BuiltinFn::kSmin, "min"}));
+
+using SpirvParser_BuiltinsTest_TwoParamUnsigned =
+    core::ir::transform::TransformTestWithParam<SpirvReaderParams>;
+
+TEST_P(SpirvParser_BuiltinsTest_TwoParamUnsigned, UnsignedToUnsigned) {
+    auto& params = GetParam();
+
+    auto* ep = b.ComputeFunction("foo");
+
+    b.Append(ep->Block(), [&] {  //
+        b.CallExplicit<spirv::ir::BuiltinCall>(
+            ty.u32(), params.fn, Vector<const core::type::Type*, 1>{ty.u32()}, 10_u, 15_u);
+        b.CallExplicit<spirv::ir::BuiltinCall>(
+            ty.vec2<u32>(), params.fn, Vector<const core::type::Type*, 1>{ty.u32()},
+            b.Splat(ty.vec2<u32>(), 10_u), b.Splat(ty.vec2<u32>(), 15_u));
+        b.Return(ep);
+    });
+
+    auto src = R"(
+%foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:u32 = spirv.u)" +
+               params.name + R"(<u32> 10u, 15u
+    %3:vec2<u32> = spirv.u)" +
+               params.name + R"(<u32> vec2<u32>(10u), vec2<u32>(15u)
+    ret
+  }
+}
+)";
+
+    EXPECT_EQ(src, str());
+    Run(Builtins);
+
+    auto expect = R"(
+%foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:u32 = )" + params.name +
+                  R"( 10u, 15u
+    %3:vec2<u32> = )" +
+                  params.name + R"( vec2<u32>(10u), vec2<u32>(15u)
+    ret
+  }
+}
+)";
+    EXPECT_EQ(expect, str());
+}
+
+TEST_P(SpirvParser_BuiltinsTest_TwoParamUnsigned, SignedToSigned) {
+    auto params = GetParam();
+
+    auto* ep = b.ComputeFunction("foo");
+
+    b.Append(ep->Block(), [&] {  //
+        b.CallExplicit<spirv::ir::BuiltinCall>(
+            ty.i32(), params.fn, Vector<const core::type::Type*, 1>{ty.i32()}, 10_i, 15_i);
+        b.CallExplicit<spirv::ir::BuiltinCall>(
+            ty.vec2<i32>(), params.fn, Vector<const core::type::Type*, 1>{ty.i32()},
+            b.Splat(ty.vec2<i32>(), 10_i), b.Splat(ty.vec2<i32>(), 15_i));
+        b.Return(ep);
+    });
+
+    auto src = R"(
+%foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:i32 = spirv.u)" +
+               params.name + R"(<i32> 10i, 15i
+    %3:vec2<i32> = spirv.u)" +
+               params.name + R"(<i32> vec2<i32>(10i), vec2<i32>(15i)
+    ret
+  }
+}
+)";
+
+    EXPECT_EQ(src, str());
+    Run(Builtins);
+
+    auto expect = R"(
+%foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:u32 = bitcast 10i
+    %3:u32 = bitcast 15i
+    %4:u32 = )" + params.name +
+                  R"( %2, %3
+    %5:i32 = bitcast %4
+    %6:vec2<u32> = bitcast vec2<i32>(10i)
+    %7:vec2<u32> = bitcast vec2<i32>(15i)
+    %8:vec2<u32> = )" +
+                  params.name + R"( %6, %7
+    %9:vec2<i32> = bitcast %8
+    ret
+  }
+}
+)";
+    EXPECT_EQ(expect, str());
+}
+
+TEST_P(SpirvParser_BuiltinsTest_TwoParamUnsigned, MixedToUnsigned) {
+    auto params = GetParam();
+
+    auto* ep = b.ComputeFunction("foo");
+
+    b.Append(ep->Block(), [&] {  //
+        b.CallExplicit<spirv::ir::BuiltinCall>(
+            ty.u32(), params.fn, Vector<const core::type::Type*, 1>{ty.u32()}, 10_i, 10_u);
+        b.CallExplicit<spirv::ir::BuiltinCall>(
+            ty.vec2<u32>(), params.fn, Vector<const core::type::Type*, 1>{ty.u32()},
+            b.Splat(ty.vec2<i32>(), 10_i), b.Splat(ty.vec2<u32>(), 10_u));
+        b.Return(ep);
+    });
+
+    auto src = R"(
+%foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:u32 = spirv.u)" +
+               params.name + R"(<u32> 10i, 10u
+    %3:vec2<u32> = spirv.u)" +
+               params.name + R"(<u32> vec2<i32>(10i), vec2<u32>(10u)
+    ret
+  }
+}
+)";
+
+    EXPECT_EQ(src, str());
+    Run(Builtins);
+
+    auto expect = R"(
+%foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:u32 = bitcast 10i
+    %3:u32 = )" + params.name +
+                  R"( %2, 10u
+    %4:vec2<u32> = bitcast vec2<i32>(10i)
+    %5:vec2<u32> = )" +
+                  params.name + R"( %4, vec2<u32>(10u)
+    ret
+  }
+}
+)";
+    EXPECT_EQ(expect, str());
+}
+
+TEST_P(SpirvParser_BuiltinsTest_TwoParamUnsigned, MixedToSigned) {
+    auto params = GetParam();
+
+    auto* ep = b.ComputeFunction("foo");
+
+    b.Append(ep->Block(), [&] {  //
+        b.CallExplicit<spirv::ir::BuiltinCall>(
+            ty.i32(), params.fn, Vector<const core::type::Type*, 1>{ty.i32()}, 10_u, 10_i);
+        b.CallExplicit<spirv::ir::BuiltinCall>(
+            ty.vec2<i32>(), params.fn, Vector<const core::type::Type*, 1>{ty.i32()},
+            b.Splat(ty.vec2<u32>(), 10_u), b.Splat(ty.vec2<i32>(), 10_i));
+        b.Return(ep);
+    });
+
+    auto src = R"(
+%foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:i32 = spirv.u)" +
+               params.name + R"(<i32> 10u, 10i
+    %3:vec2<i32> = spirv.u)" +
+               params.name + R"(<i32> vec2<u32>(10u), vec2<i32>(10i)
+    ret
+  }
+}
+)";
+
+    EXPECT_EQ(src, str());
+    Run(Builtins);
+
+    auto expect = R"(
+%foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:u32 = bitcast 10i
+    %3:u32 = )" + params.name +
+                  R"( 10u, %2
+    %4:i32 = bitcast %3
+    %5:vec2<u32> = bitcast vec2<i32>(10i)
+    %6:vec2<u32> = )" +
+                  params.name + R"( vec2<u32>(10u), %5
+    %7:vec2<i32> = bitcast %6
+    ret
+  }
+}
+)";
+    EXPECT_EQ(expect, str());
+}
+
+INSTANTIATE_TEST_SUITE_P(SpirvReader,
+                         SpirvParser_BuiltinsTest_TwoParamUnsigned,
+                         ::testing::Values(SpirvReaderParams{spirv::BuiltinFn::kUmax, "max"}));
 
 TEST_F(SpirvParser_BuiltinsTest, SClamp_UnsignedToUnsigned) {
     auto* ep = b.ComputeFunction("foo");

@@ -1387,6 +1387,9 @@ class Printer {
             case spirv::BuiltinFn::kSclamp:
                 ext_inst(GLSLstd450SClamp);
                 break;
+            case spirv::BuiltinFn::kUmax:
+                ext_inst(GLSLstd450UMax);
+                break;
             case spirv::BuiltinFn::kNormalize:
                 ext_inst(GLSLstd450Normalize);
                 break;
