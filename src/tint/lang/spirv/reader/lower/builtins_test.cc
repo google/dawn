@@ -1726,5 +1726,177 @@ TEST_F(SpirvParser_BuiltinsTest, SClamp_MixedToSigned) {
     EXPECT_EQ(expect, str());
 }
 
+TEST_F(SpirvParser_BuiltinsTest, UClamp_UnsignedToUnsigned) {
+    auto* ep = b.ComputeFunction("foo");
+
+    b.Append(ep->Block(), [&] {  //
+        b.CallExplicit<spirv::ir::BuiltinCall>(ty.u32(), spirv::BuiltinFn::kUclamp,
+                                               Vector<const core::type::Type*, 1>{ty.u32()}, 10_u,
+                                               15_u, 10_u);
+        b.CallExplicit<spirv::ir::BuiltinCall>(
+            ty.vec2<u32>(), spirv::BuiltinFn::kUclamp, Vector<const core::type::Type*, 1>{ty.u32()},
+            b.Splat(ty.vec2<u32>(), 10_u), b.Splat(ty.vec2<u32>(), 15_u),
+            b.Splat(ty.vec2<u32>(), 10_u));
+        b.Return(ep);
+    });
+
+    auto src = R"(
+%foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:u32 = spirv.uclamp<u32> 10u, 15u, 10u
+    %3:vec2<u32> = spirv.uclamp<u32> vec2<u32>(10u), vec2<u32>(15u), vec2<u32>(10u)
+    ret
+  }
+}
+)";
+
+    EXPECT_EQ(src, str());
+    Run(Builtins);
+
+    auto expect = R"(
+%foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:u32 = clamp 10u, 15u, 10u
+    %3:vec2<u32> = clamp vec2<u32>(10u), vec2<u32>(15u), vec2<u32>(10u)
+    ret
+  }
+}
+)";
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(SpirvParser_BuiltinsTest, UClamp_SignedToSigned) {
+    auto* ep = b.ComputeFunction("foo");
+
+    b.Append(ep->Block(), [&] {  //
+        b.CallExplicit<spirv::ir::BuiltinCall>(ty.i32(), spirv::BuiltinFn::kUclamp,
+                                               Vector<const core::type::Type*, 1>{ty.i32()}, 10_i,
+                                               15_i, 10_i);
+        b.CallExplicit<spirv::ir::BuiltinCall>(
+            ty.vec2<i32>(), spirv::BuiltinFn::kUclamp, Vector<const core::type::Type*, 1>{ty.i32()},
+            b.Splat(ty.vec2<i32>(), 10_i), b.Splat(ty.vec2<i32>(), 15_i),
+            b.Splat(ty.vec2<i32>(), 10_i));
+        b.Return(ep);
+    });
+
+    auto src = R"(
+%foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:i32 = spirv.uclamp<i32> 10i, 15i, 10i
+    %3:vec2<i32> = spirv.uclamp<i32> vec2<i32>(10i), vec2<i32>(15i), vec2<i32>(10i)
+    ret
+  }
+}
+)";
+
+    EXPECT_EQ(src, str());
+    Run(Builtins);
+
+    auto expect = R"(
+%foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:u32 = bitcast 10i
+    %3:u32 = bitcast 15i
+    %4:u32 = bitcast 10i
+    %5:u32 = clamp %2, %3, %4
+    %6:i32 = bitcast %5
+    %7:vec2<u32> = bitcast vec2<i32>(10i)
+    %8:vec2<u32> = bitcast vec2<i32>(15i)
+    %9:vec2<u32> = bitcast vec2<i32>(10i)
+    %10:vec2<u32> = clamp %7, %8, %9
+    %11:vec2<i32> = bitcast %10
+    ret
+  }
+}
+)";
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(SpirvParser_BuiltinsTest, UClamp_MixedToUnsigned) {
+    auto* ep = b.ComputeFunction("foo");
+
+    b.Append(ep->Block(), [&] {  //
+        b.CallExplicit<spirv::ir::BuiltinCall>(ty.u32(), spirv::BuiltinFn::kUclamp,
+                                               Vector<const core::type::Type*, 1>{ty.u32()}, 10_i,
+                                               10_u, 10_i);
+        b.CallExplicit<spirv::ir::BuiltinCall>(
+            ty.vec2<u32>(), spirv::BuiltinFn::kUclamp, Vector<const core::type::Type*, 1>{ty.u32()},
+            b.Splat(ty.vec2<i32>(), 10_i), b.Splat(ty.vec2<u32>(), 10_u),
+            b.Splat(ty.vec2<i32>(), 10_i));
+        b.Return(ep);
+    });
+
+    auto src = R"(
+%foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:u32 = spirv.uclamp<u32> 10i, 10u, 10i
+    %3:vec2<u32> = spirv.uclamp<u32> vec2<i32>(10i), vec2<u32>(10u), vec2<i32>(10i)
+    ret
+  }
+}
+)";
+
+    EXPECT_EQ(src, str());
+    Run(Builtins);
+
+    auto expect = R"(
+%foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:u32 = bitcast 10i
+    %3:u32 = bitcast 10i
+    %4:u32 = clamp %2, 10u, %3
+    %5:vec2<u32> = bitcast vec2<i32>(10i)
+    %6:vec2<u32> = bitcast vec2<i32>(10i)
+    %7:vec2<u32> = clamp %5, vec2<u32>(10u), %6
+    ret
+  }
+}
+)";
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(SpirvParser_BuiltinsTest, UClamp_MixedToSigned) {
+    auto* ep = b.ComputeFunction("foo");
+
+    b.Append(ep->Block(), [&] {  //
+        b.CallExplicit<spirv::ir::BuiltinCall>(ty.i32(), spirv::BuiltinFn::kUclamp,
+                                               Vector<const core::type::Type*, 1>{ty.i32()}, 10_u,
+                                               10_i, 10_u);
+        b.CallExplicit<spirv::ir::BuiltinCall>(
+            ty.vec2<i32>(), spirv::BuiltinFn::kUclamp, Vector<const core::type::Type*, 1>{ty.i32()},
+            b.Splat(ty.vec2<u32>(), 10_u), b.Splat(ty.vec2<i32>(), 10_i),
+            b.Splat(ty.vec2<u32>(), 10_u));
+        b.Return(ep);
+    });
+
+    auto src = R"(
+%foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:i32 = spirv.uclamp<i32> 10u, 10i, 10u
+    %3:vec2<i32> = spirv.uclamp<i32> vec2<u32>(10u), vec2<i32>(10i), vec2<u32>(10u)
+    ret
+  }
+}
+)";
+
+    EXPECT_EQ(src, str());
+    Run(Builtins);
+
+    auto expect = R"(
+%foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:u32 = bitcast 10i
+    %3:u32 = clamp 10u, %2, 10u
+    %4:i32 = bitcast %3
+    %5:vec2<u32> = bitcast vec2<i32>(10i)
+    %6:vec2<u32> = clamp vec2<u32>(10u), %5, vec2<u32>(10u)
+    %7:vec2<i32> = bitcast %6
+    ret
+  }
+}
+)";
+    EXPECT_EQ(expect, str());
+}
+
 }  // namespace
 }  // namespace tint::spirv::reader::lower

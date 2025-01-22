@@ -5689,12 +5689,19 @@ constexpr IntrinsicInfo kBuiltins[] = {
   },
   {
     /* [42] */
+    /* fn uclamp<R : iu32>[T : iu32, U : iu32, V : iu32](T, U, V) -> R */
+    /* fn uclamp<R : iu32>[T : iu32, U : iu32, V : iu32, N : num](vec<N, T>, vec<N, U>, vec<N, V>) -> vec<N, R> */
+    /* num overloads */ 2,
+    /* overloads */ OverloadIndex(158),
+  },
+  {
+    /* [43] */
     /* fn sdot(u32, u32, u32) -> i32 */
     /* num overloads */ 1,
     /* overloads */ OverloadIndex(171),
   },
   {
-    /* [43] */
+    /* [44] */
     /* fn udot(u32, u32, u32) -> u32 */
     /* num overloads */ 1,
     /* overloads */ OverloadIndex(172),

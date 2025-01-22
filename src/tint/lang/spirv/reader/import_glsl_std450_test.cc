@@ -646,23 +646,6 @@ TEST_F(SpirvReaderTest, Normalize_Vector4) {
 )");
 }
 
-TEST_F(SpirvReaderTest, DISABLED_RectifyOperandsAndResult_UClamp) {
-    EXPECT_IR(Preamble() + R"(
-     %1 = OpExtInst %int %glsl UClamp %int_30 %uint_15 %int_40
-     %2 = OpExtInst %v2int %glsl UClamp %v2int_30_40 %v2uint_20_10 %v2int_35_35
-     OpReturn
-     OpFunctionEnd
-  )",
-              R"(
-%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
-  $B1: {
-    let x_1 = bitcast<i32>(clamp(bitcast<u32>(i1), u2, bitcast<u32>(i3)));
-    let x_2 = bitcast<vec2i>(clamp(bitcast<vec2u>(v2i1), v2u2, bitcast<vec2u>(v2i3)));
-  }
-}
-)");
-}
-
 TEST_F(SpirvReaderTest, DISABLED_RectifyOperandsAndResult_FindILsb) {
     // Check conversion of:
     //   signed results to unsigned result to match first arg.
