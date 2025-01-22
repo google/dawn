@@ -7,9 +7,8 @@ void textureStore_f8aaf9() {
   int2 arg_1 = (int(1)).xx;
   int arg_2 = int(1);
   int4 arg_3 = (int(1)).xxxx;
-  int2 v = arg_1;
-  int4 v_1 = arg_3;
-  arg_0[int3(v, int(arg_2))] = v_1;
+  int4 v = arg_3;
+  arg_0[int3(arg_1, arg_2)] = v;
 }
 
 void fragment_main() {
@@ -25,9 +24,8 @@ void textureStore_f8aaf9() {
   int2 arg_1 = (int(1)).xx;
   int arg_2 = int(1);
   int4 arg_3 = (int(1)).xxxx;
-  int2 v = arg_1;
-  int4 v_1 = arg_3;
-  arg_0[int3(v, int(arg_2))] = v_1;
+  int4 v = arg_3;
+  arg_0[int3(arg_1, arg_2)] = v;
 }
 
 [numthreads(1, 1, 1)]

@@ -6,7 +6,7 @@ RWByteAddressBuffer sb_rw : register(u0);
 void atomicAdd_8a199a() {
   uint res = 0u;
   uint v = 0u;
-  sb_rw.InterlockedAdd(uint(0u), (0u - 1u), v);
+  sb_rw.InterlockedAdd(0u, (0u - 1u), v);
   uint x_9 = v;
   res = x_9;
 }
@@ -27,7 +27,7 @@ RWByteAddressBuffer sb_rw : register(u0);
 void atomicAdd_8a199a() {
   uint res = 0u;
   uint v = 0u;
-  sb_rw.InterlockedAdd(uint(0u), (0u - 1u), v);
+  sb_rw.InterlockedAdd(0u, (0u - 1u), v);
   uint x_9 = v;
   res = x_9;
 }

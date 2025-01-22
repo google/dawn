@@ -7,9 +7,7 @@ Texture1D<int4> arg_0 : register(t0, space1);
 int4 textureLoad_5a2f9d() {
   int arg_1 = int(1);
   int arg_2 = int(1);
-  int v = arg_2;
-  int v_1 = int(arg_1);
-  int4 res = int4(arg_0.Load(int2(v_1, int(v))));
+  int4 res = arg_0.Load(int2(arg_1, arg_2));
   return res;
 }
 
@@ -26,9 +24,7 @@ Texture1D<int4> arg_0 : register(t0, space1);
 int4 textureLoad_5a2f9d() {
   int arg_1 = int(1);
   int arg_2 = int(1);
-  int v = arg_2;
-  int v_1 = int(arg_1);
-  int4 res = int4(arg_0.Load(int2(v_1, int(v))));
+  int4 res = arg_0.Load(int2(arg_1, arg_2));
   return res;
 }
 
@@ -55,23 +51,21 @@ Texture1D<int4> arg_0 : register(t0, space1);
 int4 textureLoad_5a2f9d() {
   int arg_1 = int(1);
   int arg_2 = int(1);
-  int v = arg_2;
-  int v_1 = int(arg_1);
-  int4 res = int4(arg_0.Load(int2(v_1, int(v))));
+  int4 res = arg_0.Load(int2(arg_1, arg_2));
   return res;
 }
 
 VertexOutput vertex_main_inner() {
-  VertexOutput v_2 = (VertexOutput)0;
-  v_2.pos = (0.0f).xxxx;
-  v_2.prevent_dce = textureLoad_5a2f9d();
-  VertexOutput v_3 = v_2;
-  return v_3;
+  VertexOutput v = (VertexOutput)0;
+  v.pos = (0.0f).xxxx;
+  v.prevent_dce = textureLoad_5a2f9d();
+  VertexOutput v_1 = v;
+  return v_1;
 }
 
 vertex_main_outputs vertex_main() {
-  VertexOutput v_4 = vertex_main_inner();
-  vertex_main_outputs v_5 = {v_4.prevent_dce, v_4.pos};
-  return v_5;
+  VertexOutput v_2 = vertex_main_inner();
+  vertex_main_outputs v_3 = {v_2.prevent_dce, v_2.pos};
+  return v_3;
 }
 

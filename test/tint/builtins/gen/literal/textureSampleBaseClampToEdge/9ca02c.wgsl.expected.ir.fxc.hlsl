@@ -9,7 +9,7 @@ float4 textureSampleBaseClampToEdge_9ca02c() {
   uint2 v = (0u).xx;
   arg_0.GetDimensions(v.x, v.y);
   float2 v_1 = ((0.5f).xx / float2(v));
-  float4 res = arg_0.SampleLevel(arg_1, clamp((1.0f).xx, v_1, ((1.0f).xx - v_1)), float(0.0f));
+  float4 res = arg_0.SampleLevel(arg_1, clamp((1.0f).xx, v_1, ((1.0f).xx - v_1)), 0.0f);
   return res;
 }
 
@@ -28,7 +28,7 @@ float4 textureSampleBaseClampToEdge_9ca02c() {
   uint2 v = (0u).xx;
   arg_0.GetDimensions(v.x, v.y);
   float2 v_1 = ((0.5f).xx / float2(v));
-  float4 res = arg_0.SampleLevel(arg_1, clamp((1.0f).xx, v_1, ((1.0f).xx - v_1)), float(0.0f));
+  float4 res = arg_0.SampleLevel(arg_1, clamp((1.0f).xx, v_1, ((1.0f).xx - v_1)), 0.0f);
   return res;
 }
 
@@ -57,7 +57,7 @@ float4 textureSampleBaseClampToEdge_9ca02c() {
   uint2 v = (0u).xx;
   arg_0.GetDimensions(v.x, v.y);
   float2 v_1 = ((0.5f).xx / float2(v));
-  float4 res = arg_0.SampleLevel(arg_1, clamp((1.0f).xx, v_1, ((1.0f).xx - v_1)), float(0.0f));
+  float4 res = arg_0.SampleLevel(arg_1, clamp((1.0f).xx, v_1, ((1.0f).xx - v_1)), 0.0f);
   return res;
 }
 

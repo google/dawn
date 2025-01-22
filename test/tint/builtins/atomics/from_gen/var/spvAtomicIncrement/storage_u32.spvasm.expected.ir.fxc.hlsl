@@ -8,7 +8,7 @@ void atomicAdd_8a199a() {
   uint res = 0u;
   arg_1 = 1u;
   uint v = 0u;
-  sb_rw.InterlockedAdd(uint(0u), 1u, v);
+  sb_rw.InterlockedAdd(0u, 1u, v);
   uint x_13 = v;
   res = x_13;
 }
@@ -31,7 +31,7 @@ void atomicAdd_8a199a() {
   uint res = 0u;
   arg_1 = 1u;
   uint v = 0u;
-  sb_rw.InterlockedAdd(uint(0u), 1u, v);
+  sb_rw.InterlockedAdd(0u, 1u, v);
   uint x_13 = v;
   res = x_13;
 }

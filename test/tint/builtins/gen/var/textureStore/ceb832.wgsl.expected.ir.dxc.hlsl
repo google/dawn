@@ -7,9 +7,8 @@ void textureStore_ceb832() {
   uint2 arg_1 = (1u).xx;
   uint arg_2 = 1u;
   int4 arg_3 = (int(1)).xxxx;
-  uint2 v = arg_1;
-  int4 v_1 = arg_3;
-  arg_0[uint3(v, uint(arg_2))] = v_1;
+  int4 v = arg_3;
+  arg_0[uint3(arg_1, arg_2)] = v;
 }
 
 void fragment_main() {
@@ -25,9 +24,8 @@ void textureStore_ceb832() {
   uint2 arg_1 = (1u).xx;
   uint arg_2 = 1u;
   int4 arg_3 = (int(1)).xxxx;
-  uint2 v = arg_1;
-  int4 v_1 = arg_3;
-  arg_0[uint3(v, uint(arg_2))] = v_1;
+  int4 v = arg_3;
+  arg_0[uint3(arg_1, arg_2)] = v;
 }
 
 [numthreads(1, 1, 1)]

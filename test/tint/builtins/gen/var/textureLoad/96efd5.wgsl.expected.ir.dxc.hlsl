@@ -12,7 +12,7 @@ float4 textureLoad_96efd5() {
   uint v_1 = arg_3;
   int2 v_2 = int2(arg_1);
   int v_3 = int(v);
-  float4 res = float4(arg_0.Load(int4(v_2, v_3, int(v_1))));
+  float4 res = arg_0.Load(int4(v_2, v_3, int(v_1)));
   return res;
 }
 
@@ -34,7 +34,7 @@ float4 textureLoad_96efd5() {
   uint v_1 = arg_3;
   int2 v_2 = int2(arg_1);
   int v_3 = int(v);
-  float4 res = float4(arg_0.Load(int4(v_2, v_3, int(v_1))));
+  float4 res = arg_0.Load(int4(v_2, v_3, int(v_1)));
   return res;
 }
 
@@ -66,7 +66,7 @@ float4 textureLoad_96efd5() {
   uint v_1 = arg_3;
   int2 v_2 = int2(arg_1);
   int v_3 = int(v);
-  float4 res = float4(arg_0.Load(int4(v_2, v_3, int(v_1))));
+  float4 res = arg_0.Load(int4(v_2, v_3, int(v_1)));
   return res;
 }
 

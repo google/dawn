@@ -204,7 +204,8 @@ struct State {
                 [&](core::ir::Value* val) {
                     b.InsertBefore(a, [&] {
                         offset.byte_offset_expr.Push(
-                            b.Multiply(ty.u32(), u32(size), b.Convert(ty.u32(), val))->Result(0));
+                            b.Multiply(ty.u32(), u32(size), b.InsertConvertIfNeeded(ty.u32(), val))
+                                ->Result(0));
                     });
                 });
         };
@@ -292,7 +293,8 @@ struct State {
                 offset.byte_offset += (cnst->Value()->ValueAs<uint32_t>() * elem_byte_size);
             } else {
                 offset.byte_offset_expr.Push(
-                    b.Multiply(ty.u32(), b.Convert(ty.u32(), lve->Index()), u32(elem_byte_size))
+                    b.Multiply(ty.u32(), b.InsertConvertIfNeeded(ty.u32(), lve->Index()),
+                               u32(elem_byte_size))
                         ->Result(0));
             }
 

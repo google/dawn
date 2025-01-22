@@ -1260,6 +1260,14 @@ class Builder {
         return ConvertWithResult(InstructionResult(to), Value(std::forward<VAL>(val)));
     }
 
+    /// Adds a call to convert if destination type is different then the value's type
+    /// @param to the type converted to
+    /// @param val the value to be converted
+    /// @returns either result of the conversion or original value
+    ir::Value* InsertConvertIfNeeded(const core::type::Type* to, ir::Value* val) {
+        return val->Type()->Equals(*to) ? val : Convert(to, val)->Result(0);
+    }
+
     /// Creates a value constructor instruction with an existing instruction result
     /// @param result the instruction result to use
     /// @param args the arguments to the constructor

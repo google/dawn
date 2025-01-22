@@ -8,8 +8,7 @@ SamplerState arg_1 : register(s1, space1);
 float4 textureSampleLevel_0b0a1b() {
   float2 arg_2 = (1.0f).xx;
   float arg_3 = 1.0f;
-  float2 v = arg_2;
-  float4 res = arg_0.SampleLevel(arg_1, v, float(arg_3), (int(1)).xx);
+  float4 res = arg_0.SampleLevel(arg_1, arg_2, arg_3, (int(1)).xx);
   return res;
 }
 
@@ -27,8 +26,7 @@ SamplerState arg_1 : register(s1, space1);
 float4 textureSampleLevel_0b0a1b() {
   float2 arg_2 = (1.0f).xx;
   float arg_3 = 1.0f;
-  float2 v = arg_2;
-  float4 res = arg_0.SampleLevel(arg_1, v, float(arg_3), (int(1)).xx);
+  float4 res = arg_0.SampleLevel(arg_1, arg_2, arg_3, (int(1)).xx);
   return res;
 }
 
@@ -56,22 +54,21 @@ SamplerState arg_1 : register(s1, space1);
 float4 textureSampleLevel_0b0a1b() {
   float2 arg_2 = (1.0f).xx;
   float arg_3 = 1.0f;
-  float2 v = arg_2;
-  float4 res = arg_0.SampleLevel(arg_1, v, float(arg_3), (int(1)).xx);
+  float4 res = arg_0.SampleLevel(arg_1, arg_2, arg_3, (int(1)).xx);
   return res;
 }
 
 VertexOutput vertex_main_inner() {
-  VertexOutput v_1 = (VertexOutput)0;
-  v_1.pos = (0.0f).xxxx;
-  v_1.prevent_dce = textureSampleLevel_0b0a1b();
-  VertexOutput v_2 = v_1;
-  return v_2;
+  VertexOutput v = (VertexOutput)0;
+  v.pos = (0.0f).xxxx;
+  v.prevent_dce = textureSampleLevel_0b0a1b();
+  VertexOutput v_1 = v;
+  return v_1;
 }
 
 vertex_main_outputs vertex_main() {
-  VertexOutput v_3 = vertex_main_inner();
-  vertex_main_outputs v_4 = {v_3.prevent_dce, v_3.pos};
-  return v_4;
+  VertexOutput v_2 = vertex_main_inner();
+  vertex_main_outputs v_3 = {v_2.prevent_dce, v_2.pos};
+  return v_3;
 }
 

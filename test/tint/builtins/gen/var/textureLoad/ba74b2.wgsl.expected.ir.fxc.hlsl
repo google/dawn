@@ -7,9 +7,7 @@ RWTexture2DArray<int4> arg_0 : register(u0, space1);
 int4 textureLoad_ba74b2() {
   int2 arg_1 = (int(1)).xx;
   int arg_2 = int(1);
-  int v = arg_2;
-  int2 v_1 = int2(arg_1);
-  int4 res = int4(arg_0.Load(int4(v_1, int(v), int(0))));
+  int4 res = arg_0.Load(int4(arg_1, arg_2, int(0)));
   return res;
 }
 
@@ -26,9 +24,7 @@ RWTexture2DArray<int4> arg_0 : register(u0, space1);
 int4 textureLoad_ba74b2() {
   int2 arg_1 = (int(1)).xx;
   int arg_2 = int(1);
-  int v = arg_2;
-  int2 v_1 = int2(arg_1);
-  int4 res = int4(arg_0.Load(int4(v_1, int(v), int(0))));
+  int4 res = arg_0.Load(int4(arg_1, arg_2, int(0)));
   return res;
 }
 

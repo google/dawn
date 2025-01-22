@@ -7,7 +7,7 @@ Texture2DArray<uint4> arg_0 : register(t0, space1);
 uint4 textureLoad_8527b1() {
   int2 v = int2((1u).xx);
   int v_1 = int(1u);
-  uint4 res = uint4(arg_0.Load(int4(v, v_1, int(1u))));
+  uint4 res = arg_0.Load(int4(v, v_1, int(1u)));
   return res;
 }
 
@@ -24,7 +24,7 @@ Texture2DArray<uint4> arg_0 : register(t0, space1);
 uint4 textureLoad_8527b1() {
   int2 v = int2((1u).xx);
   int v_1 = int(1u);
-  uint4 res = uint4(arg_0.Load(int4(v, v_1, int(1u))));
+  uint4 res = arg_0.Load(int4(v, v_1, int(1u)));
   return res;
 }
 
@@ -51,7 +51,7 @@ Texture2DArray<uint4> arg_0 : register(t0, space1);
 uint4 textureLoad_8527b1() {
   int2 v = int2((1u).xx);
   int v_1 = int(1u);
-  uint4 res = uint4(arg_0.Load(int4(v, v_1, int(1u))));
+  uint4 res = arg_0.Load(int4(v, v_1, int(1u)));
   return res;
 }
 

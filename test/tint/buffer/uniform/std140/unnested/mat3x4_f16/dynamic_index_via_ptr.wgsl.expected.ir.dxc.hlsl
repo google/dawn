@@ -31,7 +31,7 @@ matrix<float16_t, 3, 4> v_4(uint start_byte_offset) {
 
 [numthreads(1, 1, 1)]
 void f() {
-  uint v_10 = (8u * uint(min(uint(i()), 2u)));
+  uint v_10 = (8u * min(uint(i()), 2u));
   matrix<float16_t, 3, 4> l_m = v_4(0u);
   uint4 v_11 = m[(v_10 / 16u)];
   vector<float16_t, 4> l_m_i = tint_bitcast_to_f16((((((v_10 % 16u) / 4u) == 2u)) ? (v_11.zw) : (v_11.xy)));

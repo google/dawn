@@ -6,7 +6,7 @@ RWByteAddressBuffer prevent_dce : register(u0);
 Texture1D<float4> arg_0 : register(t0, space1);
 float4 textureLoad_6d376a() {
   int v = int(1u);
-  float4 res = float4(arg_0.Load(int2(v, int(1u))));
+  float4 res = arg_0.Load(int2(v, int(1u)));
   return res;
 }
 
@@ -22,7 +22,7 @@ RWByteAddressBuffer prevent_dce : register(u0);
 Texture1D<float4> arg_0 : register(t0, space1);
 float4 textureLoad_6d376a() {
   int v = int(1u);
-  float4 res = float4(arg_0.Load(int2(v, int(1u))));
+  float4 res = arg_0.Load(int2(v, int(1u)));
   return res;
 }
 
@@ -48,7 +48,7 @@ struct vertex_main_outputs {
 Texture1D<float4> arg_0 : register(t0, space1);
 float4 textureLoad_6d376a() {
   int v = int(1u);
-  float4 res = float4(arg_0.Load(int2(v, int(1u))));
+  float4 res = arg_0.Load(int2(v, int(1u)));
   return res;
 }
 

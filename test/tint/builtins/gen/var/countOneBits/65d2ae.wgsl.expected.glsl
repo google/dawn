@@ -11,7 +11,7 @@ buffer f_prevent_dce_block_ssbo {
 } v;
 ivec3 countOneBits_65d2ae() {
   ivec3 arg_0 = ivec3(1);
-  ivec3 res = ivec3(bitCount(arg_0));
+  ivec3 res = bitCount(arg_0);
   return res;
 }
 void main() {
@@ -28,7 +28,7 @@ buffer prevent_dce_block_1_ssbo {
 } v;
 ivec3 countOneBits_65d2ae() {
   ivec3 arg_0 = ivec3(1);
-  ivec3 res = ivec3(bitCount(arg_0));
+  ivec3 res = bitCount(arg_0);
   return res;
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
@@ -49,7 +49,7 @@ struct VertexOutput {
 layout(location = 0) flat out ivec3 tint_interstage_location0;
 ivec3 countOneBits_65d2ae() {
   ivec3 arg_0 = ivec3(1);
-  ivec3 res = ivec3(bitCount(arg_0));
+  ivec3 res = bitCount(arg_0);
   return res;
 }
 VertexOutput vertex_main_inner() {

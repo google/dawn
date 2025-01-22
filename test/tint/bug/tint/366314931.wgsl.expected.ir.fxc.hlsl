@@ -21,7 +21,7 @@ void main_inner(uint tint_local_index) {
   InterlockedOr(wgvar.u, 0u, v_2);
   uint x = v_2;
   uint v_3 = 0u;
-  output.InterlockedExchange(uint(12u), x, v_3);
+  output.InterlockedExchange(12u, x, v_3);
 }
 
 [numthreads(1, 1, 1)]

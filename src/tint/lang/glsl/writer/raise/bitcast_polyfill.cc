@@ -194,7 +194,7 @@ struct State {
                         packed =
                             CreateBitcastToF32(packed->Type()->DeepestElement(), dst_type, packed);
                     } else {
-                        packed = b.Convert(dst_type, packed)->Result(0);
+                        packed = b.InsertConvertIfNeeded(dst_type, packed);
                     }
 
                     b.Return(f, packed);
@@ -234,17 +234,17 @@ struct State {
                 auto* src = b.FunctionParam("src", src_type);
                 f->SetParams({src});
                 b.Append(f->Block(), [&] {
-                    core::ir::Value* conv = nullptr;
-
-                    if (src->Type()->DeepestElement()->Is<core::type::F32>()) {
-                        conv =
-                            CreateBitcastFromF32(ty.u32(), ty.MatchWidth(ty.u32(), src_type), src);
+                    core::ir::Value* conv = src;
+                    if (conv->Type()->DeepestElement()->Is<core::type::F32>()) {
+                        conv = CreateBitcastFromF32(ty.u32(), ty.MatchWidth(ty.u32(), conv->Type()),
+                                                    conv);
                     } else {
-                        conv = b.Convert(ty.MatchWidth(ty.u32(), src->Type()), src)->Result(0);
+                        auto* target_ty = ty.MatchWidth(ty.u32(), conv->Type());
+                        conv = b.InsertConvertIfNeeded(target_ty, conv);
                     }
 
                     core::ir::Value* val = nullptr;
-                    if (src->Type()->Is<core::type::Vector>()) {
+                    if (conv->Type()->Is<core::type::Vector>()) {
                         auto* left = b.Call<glsl::ir::BuiltinCall>(
                             ty.vec2<f16>(), glsl::BuiltinFn::kUnpackFloat2X16,
                             b.Swizzle(ty.u32(), conv, {0}));

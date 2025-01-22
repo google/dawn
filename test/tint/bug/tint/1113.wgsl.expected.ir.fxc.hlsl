@@ -53,7 +53,7 @@ void doIgnore() {
   counters.GetDimensions(v_3);
   uint v_4 = ((v_3 / 4u) - 1u);
   uint v_5 = 0u;
-  counters.InterlockedOr(uint((0u + (min(uint(int(0)), v_4) * 4u))), 0u, v_5);
+  counters.InterlockedOr((0u + (min(uint(int(0)), v_4) * 4u)), 0u, v_5);
   uint b53 = v_5;
   uint v_6 = 0u;
   indices.GetDimensions(v_6);
@@ -95,7 +95,7 @@ void main_count_inner(uint3 GlobalInvocationID) {
   uint v_16 = 0u;
   counters.GetDimensions(v_16);
   uint v_17 = 0u;
-  counters.InterlockedAdd(uint((0u + (min(voxelIndex, ((v_16 / 4u) - 1u)) * 4u))), 1u, v_17);
+  counters.InterlockedAdd((0u + (min(voxelIndex, ((v_16 / 4u) - 1u)) * 4u)), 1u, v_17);
   uint acefg = v_17;
   if ((triangleIndex == 0u)) {
     dbg.Store(16u, uniforms[0u].y);
@@ -133,7 +133,7 @@ void doIgnore() {
   counters.GetDimensions(v);
   uint v_1 = ((v / 4u) - 1u);
   uint v_2 = 0u;
-  counters.InterlockedOr(uint((0u + (min(uint(int(0)), v_1) * 4u))), 0u, v_2);
+  counters.InterlockedOr((0u + (min(uint(int(0)), v_1) * 4u)), 0u, v_2);
   uint b53 = v_2;
   uint v_3 = 0u;
   indices.GetDimensions(v_3);
@@ -161,20 +161,19 @@ void main_create_lut_inner(uint3 GlobalInvocationID) {
   uint v_10 = 0u;
   counters.GetDimensions(v_10);
   uint v_11 = 0u;
-  counters.InterlockedOr(uint((0u + (min(voxelIndex, ((v_10 / 4u) - 1u)) * 4u))), 0u, v_11);
+  counters.InterlockedOr((0u + (min(voxelIndex, ((v_10 / 4u) - 1u)) * 4u)), 0u, v_11);
   uint numTriangles = v_11;
   int offset = int(-1);
   if ((numTriangles > 0u)) {
-    uint v_12 = numTriangles;
-    uint v_13 = 0u;
-    dbg.InterlockedAdd(uint(0u), v_12, v_13);
-    offset = int(v_13);
+    uint v_12 = 0u;
+    dbg.InterlockedAdd(0u, numTriangles, v_12);
+    offset = int(v_12);
   }
-  uint v_14 = 0u;
-  LUT.GetDimensions(v_14);
-  int v_15 = offset;
-  int v_16 = int(0);
-  LUT.InterlockedExchange(int((0u + (min(voxelIndex, ((v_14 / 4u) - 1u)) * 4u))), v_15, v_16);
+  uint v_13 = 0u;
+  LUT.GetDimensions(v_13);
+  int v_14 = offset;
+  int v_15 = int(0);
+  LUT.InterlockedExchange(int((0u + (min(voxelIndex, ((v_13 / 4u) - 1u)) * 4u))), v_14, v_15);
 }
 
 [numthreads(128, 1, 1)]
@@ -237,7 +236,7 @@ void doIgnore() {
   counters.GetDimensions(v_3);
   uint v_4 = ((v_3 / 4u) - 1u);
   uint v_5 = 0u;
-  counters.InterlockedOr(uint((0u + (min(uint(int(0)), v_4) * 4u))), 0u, v_5);
+  counters.InterlockedOr((0u + (min(uint(int(0)), v_4) * 4u)), 0u, v_5);
   uint b53 = v_5;
   uint v_6 = 0u;
   indices.GetDimensions(v_6);

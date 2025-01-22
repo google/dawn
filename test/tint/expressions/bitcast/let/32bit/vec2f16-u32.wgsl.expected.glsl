@@ -2,7 +2,7 @@
 #extension GL_AMD_gpu_shader_half_float: require
 
 uint tint_bitcast_from_f16(f16vec2 src) {
-  return uint(packFloat2x16(src));
+  return packFloat2x16(src);
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {

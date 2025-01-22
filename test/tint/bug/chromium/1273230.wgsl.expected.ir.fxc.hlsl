@@ -50,7 +50,7 @@ void doIgnore() {
   counters.GetDimensions(v_3);
   uint v_4 = ((v_3 / 4u) - 1u);
   uint v_5 = 0u;
-  counters.InterlockedOr(uint((0u + (min(uint(int(0)), v_4) * 4u))), 0u, v_5);
+  counters.InterlockedOr((0u + (min(uint(int(0)), v_4) * 4u)), 0u, v_5);
   uint b53 = v_5;
   uint v_6 = 0u;
   indices.GetDimensions(v_6);

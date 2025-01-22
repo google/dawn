@@ -6,10 +6,9 @@ RWByteAddressBuffer prevent_dce : register(u0);
 RWByteAddressBuffer sb_rw : register(u1);
 uint atomicMin_c67a74() {
   uint arg_1 = 1u;
-  uint v = arg_1;
-  uint v_1 = 0u;
-  sb_rw.InterlockedMin(uint(0u), v, v_1);
-  uint res = v_1;
+  uint v = 0u;
+  sb_rw.InterlockedMin(0u, arg_1, v);
+  uint res = v;
   return res;
 }
 
@@ -25,10 +24,9 @@ RWByteAddressBuffer prevent_dce : register(u0);
 RWByteAddressBuffer sb_rw : register(u1);
 uint atomicMin_c67a74() {
   uint arg_1 = 1u;
-  uint v = arg_1;
-  uint v_1 = 0u;
-  sb_rw.InterlockedMin(uint(0u), v, v_1);
-  uint res = v_1;
+  uint v = 0u;
+  sb_rw.InterlockedMin(0u, arg_1, v);
+  uint res = v;
   return res;
 }
 

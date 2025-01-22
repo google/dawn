@@ -11,7 +11,7 @@ buffer f_prevent_dce_block_ssbo {
 } v;
 uniform highp usamplerCube arg_1_arg_2;
 uvec4 textureGather_3b32cc() {
-  uvec4 res = textureGather(arg_1_arg_2, vec3(1.0f), int(1));
+  uvec4 res = textureGather(arg_1_arg_2, vec3(1.0f), 1);
   return res;
 }
 void main() {
@@ -28,7 +28,7 @@ buffer prevent_dce_block_1_ssbo {
 } v;
 uniform highp usamplerCube arg_1_arg_2;
 uvec4 textureGather_3b32cc() {
-  uvec4 res = textureGather(arg_1_arg_2, vec3(1.0f), int(1));
+  uvec4 res = textureGather(arg_1_arg_2, vec3(1.0f), 1);
   return res;
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
@@ -49,7 +49,7 @@ struct VertexOutput {
 uniform highp usamplerCube arg_1_arg_2;
 layout(location = 0) flat out uvec4 tint_interstage_location0;
 uvec4 textureGather_3b32cc() {
-  uvec4 res = textureGather(arg_1_arg_2, vec3(1.0f), int(1));
+  uvec4 res = textureGather(arg_1_arg_2, vec3(1.0f), 1);
   return res;
 }
 VertexOutput vertex_main_inner() {

@@ -6,7 +6,7 @@ RWByteAddressBuffer prevent_dce : register(u0);
 TextureCube<float4> arg_0 : register(t0, space1);
 SamplerState arg_1 : register(s1, space1);
 float4 textureSampleLevel_c32df7() {
-  float4 res = arg_0.SampleLevel(arg_1, (1.0f).xxx, float(1.0f));
+  float4 res = arg_0.SampleLevel(arg_1, (1.0f).xxx, 1.0f);
   return res;
 }
 
@@ -22,7 +22,7 @@ RWByteAddressBuffer prevent_dce : register(u0);
 TextureCube<float4> arg_0 : register(t0, space1);
 SamplerState arg_1 : register(s1, space1);
 float4 textureSampleLevel_c32df7() {
-  float4 res = arg_0.SampleLevel(arg_1, (1.0f).xxx, float(1.0f));
+  float4 res = arg_0.SampleLevel(arg_1, (1.0f).xxx, 1.0f);
   return res;
 }
 
@@ -48,7 +48,7 @@ struct vertex_main_outputs {
 TextureCube<float4> arg_0 : register(t0, space1);
 SamplerState arg_1 : register(s1, space1);
 float4 textureSampleLevel_c32df7() {
-  float4 res = arg_0.SampleLevel(arg_1, (1.0f).xxx, float(1.0f));
+  float4 res = arg_0.SampleLevel(arg_1, (1.0f).xxx, 1.0f);
   return res;
 }
 

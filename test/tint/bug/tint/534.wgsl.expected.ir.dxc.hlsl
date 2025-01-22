@@ -26,10 +26,8 @@ void main_inner(uint3 GlobalInvocationID) {
   if ((uniforms[0u].x == 1u)) {
     srcTexCoord.y = ((size.y - dstTexCoord.y) - 1u);
   }
-  int2 v_2 = int2(srcTexCoord);
-  float4 srcColor = float4(src.Load(int3(v_2, int(int(0)))));
-  int2 v_3 = int2(dstTexCoord);
-  float4 dstColor = float4(v.Load(int3(v_3, int(int(0)))));
+  float4 srcColor = src.Load(int3(int2(srcTexCoord), int(0)));
+  float4 dstColor = v.Load(int3(int2(dstTexCoord), int(0)));
   bool success = true;
   uint4 srcColorBits = (0u).xxxx;
   uint4 dstColorBits = tint_v4f32_to_v4u32(dstColor);
@@ -44,15 +42,15 @@ void main_inner(uint3 GlobalInvocationID) {
       } else {
         break;
       }
-      uint v_4 = i;
-      srcColorBits[min(v_4, 3u)] = ConvertToFp16FloatValue(srcColor[min(i, 3u)]);
-      bool v_5 = false;
+      uint v_2 = i;
+      srcColorBits[min(v_2, 3u)] = ConvertToFp16FloatValue(srcColor[min(i, 3u)]);
+      bool v_3 = false;
       if (success) {
-        v_5 = (srcColorBits[min(i, 3u)] == dstColorBits[min(i, 3u)]);
+        v_3 = (srcColorBits[min(i, 3u)] == dstColorBits[min(i, 3u)]);
       } else {
-        v_5 = false;
+        v_3 = false;
       }
-      success = v_5;
+      success = v_3;
       {
         uint tint_low_inc = (tint_loop_idx.x + 1u);
         tint_loop_idx.x = tint_low_inc;
@@ -65,13 +63,13 @@ void main_inner(uint3 GlobalInvocationID) {
   }
   uint outputIndex = ((GlobalInvocationID.y * uint(size.x)) + GlobalInvocationID.x);
   if (success) {
-    uint v_6 = 0u;
-    output.GetDimensions(v_6);
-    output.Store((0u + (min(outputIndex, ((v_6 / 4u) - 1u)) * 4u)), 1u);
+    uint v_4 = 0u;
+    output.GetDimensions(v_4);
+    output.Store((0u + (min(outputIndex, ((v_4 / 4u) - 1u)) * 4u)), 1u);
   } else {
-    uint v_7 = 0u;
-    output.GetDimensions(v_7);
-    output.Store((0u + (min(outputIndex, ((v_7 / 4u) - 1u)) * 4u)), 0u);
+    uint v_5 = 0u;
+    output.GetDimensions(v_5);
+    output.Store((0u + (min(outputIndex, ((v_5 / 4u) - 1u)) * 4u)), 0u);
   }
 }
 

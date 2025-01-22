@@ -7,7 +7,7 @@ Texture2DArray<float4> arg_0 : register(t0, space1);
 uint2 textureDimensions_3fc3dc() {
   uint arg_1 = 1u;
   uint4 v = (0u).xxxx;
-  arg_0.GetDimensions(uint(arg_1), v.x, v.y, v.z, v.w);
+  arg_0.GetDimensions(arg_1, v.x, v.y, v.z, v.w);
   uint2 res = v.xy;
   return res;
 }
@@ -25,7 +25,7 @@ Texture2DArray<float4> arg_0 : register(t0, space1);
 uint2 textureDimensions_3fc3dc() {
   uint arg_1 = 1u;
   uint4 v = (0u).xxxx;
-  arg_0.GetDimensions(uint(arg_1), v.x, v.y, v.z, v.w);
+  arg_0.GetDimensions(arg_1, v.x, v.y, v.z, v.w);
   uint2 res = v.xy;
   return res;
 }
@@ -53,7 +53,7 @@ Texture2DArray<float4> arg_0 : register(t0, space1);
 uint2 textureDimensions_3fc3dc() {
   uint arg_1 = 1u;
   uint4 v = (0u).xxxx;
-  arg_0.GetDimensions(uint(arg_1), v.x, v.y, v.z, v.w);
+  arg_0.GetDimensions(arg_1, v.x, v.y, v.z, v.w);
   uint2 res = v.xy;
   return res;
 }

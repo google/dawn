@@ -598,7 +598,7 @@ precision highp float;
 precision highp int;
 
 f16vec2 tint_bitcast_to_f16(uint src) {
-  return unpackFloat2x16(uint(src));
+  return unpackFloat2x16(src);
 }
 void main() {
   uint a = 1u;
@@ -621,7 +621,7 @@ precision highp float;
 precision highp int;
 
 uint tint_bitcast_from_f16(f16vec2 src) {
-  return uint(packFloat2x16(src));
+  return packFloat2x16(src);
 }
 void main() {
   f16vec2 a = f16vec2(1.0hf, 2.0hf);
@@ -737,8 +737,7 @@ precision highp float;
 precision highp int;
 
 f16vec4 tint_bitcast_to_f16(uvec2 src) {
-  uvec2 v = uvec2(src);
-  return f16vec4(unpackFloat2x16(v.x), unpackFloat2x16(v.y));
+  return f16vec4(unpackFloat2x16(src.x), unpackFloat2x16(src.y));
 }
 void main() {
   uvec2 a = uvec2(1u, 2u);
@@ -761,7 +760,7 @@ precision highp float;
 precision highp int;
 
 uvec2 tint_bitcast_from_f16(f16vec4 src) {
-  return uvec2(uvec2(packFloat2x16(src.xy), packFloat2x16(src.zw)));
+  return uvec2(packFloat2x16(src.xy), packFloat2x16(src.zw));
 }
 void main() {
   f16vec4 a = f16vec4(1.0hf, 2.0hf, 3.0hf, 4.0hf);
@@ -1237,8 +1236,7 @@ precision highp int;
 
 uniform highp sampler3D t;
 void main() {
-  ivec3 v = ivec3(ivec3(1, 2, 3));
-  vec4 x = texelFetch(t, v, int(4u));
+  vec4 x = texelFetch(t, ivec3(1, 2, 3), int(4u));
 }
 )");
 }
@@ -1265,8 +1263,7 @@ precision highp int;
 
 uniform highp isampler2DMS t;
 void main() {
-  ivec2 v = ivec2(ivec2(1, 2));
-  ivec4 x = texelFetch(t, v, int(3));
+  ivec4 x = texelFetch(t, ivec2(1, 2), 3);
 }
 )");
 }
@@ -1297,7 +1294,7 @@ precision highp int;
 
 layout(binding = 0, rg32f) uniform highp readonly image2D v;
 void main() {
-  vec4 x = imageLoad(v, ivec2(ivec2(1, 2)));
+  vec4 x = imageLoad(v, ivec2(1, 2));
 }
 )");
 }
@@ -3010,8 +3007,7 @@ precision highp int;
 
 uniform highp sampler2D t_s;
 void main() {
-  vec2 v = vec2(1.0f, 2.0f);
-  vec4 x = textureLod(t_s, v, float(3.0f));
+  vec4 x = textureLod(t_s, vec2(1.0f, 2.0f), 3.0f);
 }
 )");
 }
@@ -3047,8 +3043,7 @@ precision highp int;
 
 uniform highp sampler2D t_s;
 void main() {
-  vec2 v = vec2(1.0f, 2.0f);
-  vec4 x = textureLodOffset(t_s, v, float(3.0f), ivec2(4, 5));
+  vec4 x = textureLodOffset(t_s, vec2(1.0f, 2.0f), 3.0f, ivec2(4, 5));
 }
 )");
 }
@@ -3085,8 +3080,7 @@ precision highp int;
 uniform highp sampler2DArray t_s;
 void main() {
   vec2 v = vec2(1.0f, 2.0f);
-  vec3 v_1 = vec3(v, float(4u));
-  vec4 x = textureLod(t_s, v_1, float(3.0f));
+  vec4 x = textureLod(t_s, vec3(v, float(4u)), 3.0f);
 }
 )");
 }
@@ -3124,8 +3118,7 @@ precision highp int;
 uniform highp sampler2DArray t_s;
 void main() {
   vec2 v = vec2(1.0f, 2.0f);
-  vec3 v_1 = vec3(v, float(4u));
-  vec4 x = textureLodOffset(t_s, v_1, float(3.0f), ivec2(4, 5));
+  vec4 x = textureLodOffset(t_s, vec3(v, float(4u)), 3.0f, ivec2(4, 5));
 }
 )");
 }
@@ -3159,8 +3152,7 @@ precision highp int;
 
 uniform highp sampler3D t_s;
 void main() {
-  vec3 v = vec3(1.0f, 2.0f, 3.0f);
-  vec4 x = textureLod(t_s, v, float(3.0f));
+  vec4 x = textureLod(t_s, vec3(1.0f, 2.0f, 3.0f), 3.0f);
 }
 )");
 }
@@ -3196,8 +3188,7 @@ precision highp int;
 
 uniform highp sampler3D t_s;
 void main() {
-  vec3 v = vec3(1.0f, 2.0f, 3.0f);
-  vec4 x = textureLodOffset(t_s, v, float(3.0f), ivec3(4, 5, 6));
+  vec4 x = textureLodOffset(t_s, vec3(1.0f, 2.0f, 3.0f), 3.0f, ivec3(4, 5, 6));
 }
 )");
 }
@@ -3231,8 +3222,7 @@ precision highp int;
 
 uniform highp samplerCube t_s;
 void main() {
-  vec3 v = vec3(1.0f, 2.0f, 3.0f);
-  vec4 x = textureLod(t_s, v, float(3.0f));
+  vec4 x = textureLod(t_s, vec3(1.0f, 2.0f, 3.0f), 3.0f);
 }
 )");
 }
@@ -3272,8 +3262,7 @@ precision highp int;
 uniform highp samplerCubeArray t_s;
 void main() {
   vec3 v = vec3(1.0f, 2.0f, 3.0f);
-  vec4 v_1 = vec4(v, float(4u));
-  vec4 x = textureLod(t_s, v_1, float(3.0f));
+  vec4 x = textureLod(t_s, vec4(v, float(4u)), 3.0f);
 }
 )");
 }

@@ -5,7 +5,7 @@
 RWByteAddressBuffer sb_rw : register(u0);
 void atomicStore_cdc29e() {
   uint v = 0u;
-  sb_rw.InterlockedExchange(uint(0u), 1u, v);
+  sb_rw.InterlockedExchange(0u, 1u, v);
 }
 
 void fragment_main() {
@@ -19,7 +19,7 @@ void fragment_main() {
 RWByteAddressBuffer sb_rw : register(u0);
 void atomicStore_cdc29e() {
   uint v = 0u;
-  sb_rw.InterlockedExchange(uint(0u), 1u, v);
+  sb_rw.InterlockedExchange(0u, 1u, v);
 }
 
 [numthreads(1, 1, 1)]

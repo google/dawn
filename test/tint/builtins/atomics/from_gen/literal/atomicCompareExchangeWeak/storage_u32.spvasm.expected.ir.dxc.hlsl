@@ -16,7 +16,7 @@ RWByteAddressBuffer sb_rw : register(u0);
 void atomicCompareExchangeWeak_63d8e6() {
   x__atomic_compare_exchange_resultu32 res = (x__atomic_compare_exchange_resultu32)0;
   uint v = 0u;
-  sb_rw.InterlockedCompareExchange(uint(0u), 1u, 1u, v);
+  sb_rw.InterlockedCompareExchange(0u, 1u, 1u, v);
   uint v_1 = v;
   atomic_compare_exchange_result_u32 v_2 = {v_1, (v_1 == 1u)};
   uint old_value_1 = v_2.old_value;
@@ -51,7 +51,7 @@ RWByteAddressBuffer sb_rw : register(u0);
 void atomicCompareExchangeWeak_63d8e6() {
   x__atomic_compare_exchange_resultu32 res = (x__atomic_compare_exchange_resultu32)0;
   uint v = 0u;
-  sb_rw.InterlockedCompareExchange(uint(0u), 1u, 1u, v);
+  sb_rw.InterlockedCompareExchange(0u, 1u, 1u, v);
   uint v_1 = v;
   atomic_compare_exchange_result_u32 v_2 = {v_1, (v_1 == 1u)};
   uint old_value_1 = v_2.old_value;

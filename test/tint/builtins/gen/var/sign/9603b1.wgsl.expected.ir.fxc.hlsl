@@ -5,7 +5,7 @@
 RWByteAddressBuffer prevent_dce : register(u0);
 int3 sign_9603b1() {
   int3 arg_0 = (int(1)).xxx;
-  int3 res = int3(sign(arg_0));
+  int3 res = sign(arg_0);
   return res;
 }
 
@@ -20,7 +20,7 @@ void fragment_main() {
 RWByteAddressBuffer prevent_dce : register(u0);
 int3 sign_9603b1() {
   int3 arg_0 = (int(1)).xxx;
-  int3 res = int3(sign(arg_0));
+  int3 res = sign(arg_0);
   return res;
 }
 
@@ -45,7 +45,7 @@ struct vertex_main_outputs {
 
 int3 sign_9603b1() {
   int3 arg_0 = (int(1)).xxx;
-  int3 res = int3(sign(arg_0));
+  int3 res = sign(arg_0);
   return res;
 }
 

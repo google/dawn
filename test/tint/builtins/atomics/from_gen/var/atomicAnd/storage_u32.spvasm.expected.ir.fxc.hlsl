@@ -9,7 +9,7 @@ void atomicAnd_85a8d9() {
   arg_1 = 1u;
   uint x_18 = arg_1;
   uint v = 0u;
-  sb_rw.InterlockedAnd(uint(0u), x_18, v);
+  sb_rw.InterlockedAnd(0u, x_18, v);
   uint x_13 = v;
   res = x_13;
 }
@@ -33,7 +33,7 @@ void atomicAnd_85a8d9() {
   arg_1 = 1u;
   uint x_18 = arg_1;
   uint v = 0u;
-  sb_rw.InterlockedAnd(uint(0u), x_18, v);
+  sb_rw.InterlockedAnd(0u, x_18, v);
   uint x_13 = v;
   res = x_13;
 }

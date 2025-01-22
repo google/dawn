@@ -11,8 +11,7 @@ buffer f_prevent_dce_block_ssbo {
   f16vec4 inner;
 } v;
 f16vec4 tint_bitcast_to_f16(uvec2 src) {
-  uvec2 v_1 = uvec2(src);
-  return f16vec4(unpackFloat2x16(v_1.x), unpackFloat2x16(v_1.y));
+  return f16vec4(unpackFloat2x16(src.x), unpackFloat2x16(src.y));
 }
 f16vec4 bitcast_bc3994() {
   uvec2 arg_0 = uvec2(1u);
@@ -33,8 +32,7 @@ buffer prevent_dce_block_1_ssbo {
   f16vec4 inner;
 } v;
 f16vec4 tint_bitcast_to_f16(uvec2 src) {
-  uvec2 v_1 = uvec2(src);
-  return f16vec4(unpackFloat2x16(v_1.x), unpackFloat2x16(v_1.y));
+  return f16vec4(unpackFloat2x16(src.x), unpackFloat2x16(src.y));
 }
 f16vec4 bitcast_bc3994() {
   uvec2 arg_0 = uvec2(1u);
@@ -59,8 +57,7 @@ struct VertexOutput {
 
 layout(location = 0) flat out f16vec4 tint_interstage_location0;
 f16vec4 tint_bitcast_to_f16(uvec2 src) {
-  uvec2 v = uvec2(src);
-  return f16vec4(unpackFloat2x16(v.x), unpackFloat2x16(v.y));
+  return f16vec4(unpackFloat2x16(src.x), unpackFloat2x16(src.y));
 }
 f16vec4 bitcast_bc3994() {
   uvec2 arg_0 = uvec2(1u);
@@ -68,16 +65,16 @@ f16vec4 bitcast_bc3994() {
   return res;
 }
 VertexOutput vertex_main_inner() {
-  VertexOutput v_1 = VertexOutput(vec4(0.0f), f16vec4(0.0hf));
-  v_1.pos = vec4(0.0f);
-  v_1.prevent_dce = bitcast_bc3994();
-  return v_1;
+  VertexOutput v = VertexOutput(vec4(0.0f), f16vec4(0.0hf));
+  v.pos = vec4(0.0f);
+  v.prevent_dce = bitcast_bc3994();
+  return v;
 }
 void main() {
-  VertexOutput v_2 = vertex_main_inner();
-  gl_Position = v_2.pos;
+  VertexOutput v_1 = vertex_main_inner();
+  gl_Position = v_1.pos;
   gl_Position.y = -(gl_Position.y);
   gl_Position.z = ((2.0f * gl_Position.z) - gl_Position.w);
-  tint_interstage_location0 = v_2.prevent_dce;
+  tint_interstage_location0 = v_1.prevent_dce;
   gl_PointSize = 1.0f;
 }

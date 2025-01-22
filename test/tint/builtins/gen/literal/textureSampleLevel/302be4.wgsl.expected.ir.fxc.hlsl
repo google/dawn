@@ -6,8 +6,7 @@ RWByteAddressBuffer prevent_dce : register(u0);
 Texture2DArray<float4> arg_0 : register(t0, space1);
 SamplerState arg_1 : register(s1, space1);
 float4 textureSampleLevel_302be4() {
-  float3 v = float3((1.0f).xx, float(int(1)));
-  float4 res = arg_0.SampleLevel(arg_1, v, float(1.0f));
+  float4 res = arg_0.SampleLevel(arg_1, float3((1.0f).xx, float(int(1))), 1.0f);
   return res;
 }
 
@@ -23,8 +22,7 @@ RWByteAddressBuffer prevent_dce : register(u0);
 Texture2DArray<float4> arg_0 : register(t0, space1);
 SamplerState arg_1 : register(s1, space1);
 float4 textureSampleLevel_302be4() {
-  float3 v = float3((1.0f).xx, float(int(1)));
-  float4 res = arg_0.SampleLevel(arg_1, v, float(1.0f));
+  float4 res = arg_0.SampleLevel(arg_1, float3((1.0f).xx, float(int(1))), 1.0f);
   return res;
 }
 
@@ -50,22 +48,21 @@ struct vertex_main_outputs {
 Texture2DArray<float4> arg_0 : register(t0, space1);
 SamplerState arg_1 : register(s1, space1);
 float4 textureSampleLevel_302be4() {
-  float3 v = float3((1.0f).xx, float(int(1)));
-  float4 res = arg_0.SampleLevel(arg_1, v, float(1.0f));
+  float4 res = arg_0.SampleLevel(arg_1, float3((1.0f).xx, float(int(1))), 1.0f);
   return res;
 }
 
 VertexOutput vertex_main_inner() {
-  VertexOutput v_1 = (VertexOutput)0;
-  v_1.pos = (0.0f).xxxx;
-  v_1.prevent_dce = textureSampleLevel_302be4();
-  VertexOutput v_2 = v_1;
-  return v_2;
+  VertexOutput v = (VertexOutput)0;
+  v.pos = (0.0f).xxxx;
+  v.prevent_dce = textureSampleLevel_302be4();
+  VertexOutput v_1 = v;
+  return v_1;
 }
 
 vertex_main_outputs vertex_main() {
-  VertexOutput v_3 = vertex_main_inner();
-  vertex_main_outputs v_4 = {v_3.prevent_dce, v_3.pos};
-  return v_4;
+  VertexOutput v_2 = vertex_main_inner();
+  vertex_main_outputs v_3 = {v_2.prevent_dce, v_2.pos};
+  return v_3;
 }
 

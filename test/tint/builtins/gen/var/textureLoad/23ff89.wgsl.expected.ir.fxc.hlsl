@@ -9,7 +9,7 @@ uint4 textureLoad_23ff89() {
   uint arg_2 = 1u;
   uint v = arg_2;
   int2 v_1 = int2(arg_1);
-  uint4 res = uint4(arg_0.Load(int4(v_1, int(v), int(0))));
+  uint4 res = arg_0.Load(int4(v_1, int(v), int(0)));
   return res;
 }
 
@@ -28,7 +28,7 @@ uint4 textureLoad_23ff89() {
   uint arg_2 = 1u;
   uint v = arg_2;
   int2 v_1 = int2(arg_1);
-  uint4 res = uint4(arg_0.Load(int4(v_1, int(v), int(0))));
+  uint4 res = arg_0.Load(int4(v_1, int(v), int(0)));
   return res;
 }
 
@@ -57,7 +57,7 @@ uint4 textureLoad_23ff89() {
   uint arg_2 = 1u;
   uint v = arg_2;
   int2 v_1 = int2(arg_1);
-  uint4 res = uint4(arg_0.Load(int4(v_1, int(v), int(0))));
+  uint4 res = arg_0.Load(int4(v_1, int(v), int(0)));
   return res;
 }
 

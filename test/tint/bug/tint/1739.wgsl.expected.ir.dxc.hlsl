@@ -51,14 +51,14 @@ float4 tint_TextureLoadExternal(Texture2D<float4> plane_0, Texture2D<float4> pla
   float v_7 = 0.0f;
   if ((params.numPlanes == 1u)) {
     int2 v_8 = int2(v_5);
-    float4 v_9 = float4(plane_0.Load(int3(v_8, int(0u))));
+    float4 v_9 = plane_0.Load(int3(v_8, int(0u)));
     v_6 = v_9.xyz;
     v_7 = v_9.w;
   } else {
     int2 v_10 = int2(v_5);
-    float v_11 = float4(plane_0.Load(int3(v_10, int(0u)))).x;
+    float v_11 = plane_0.Load(int3(v_10, int(0u))).x;
     int2 v_12 = int2(tint_v2f32_to_v2u32((v_4 * params.plane1CoordFactor)));
-    v_6 = mul(params.yuvToRgbConversionMatrix, float4(v_11, float4(plane_1.Load(int3(v_12, int(0u)))).xy, 1.0f));
+    v_6 = mul(params.yuvToRgbConversionMatrix, float4(v_11, plane_1.Load(int3(v_12, int(0u))).xy, 1.0f));
     v_7 = 1.0f;
   }
   float3 v_13 = v_6;

@@ -22,7 +22,7 @@ void atomicCompareExchangeWeak_63d8e6() {
   uint x_21 = arg_2;
   uint x_22 = arg_1;
   uint v = 0u;
-  sb_rw.InterlockedCompareExchange(uint(0u), x_22, x_21, v);
+  sb_rw.InterlockedCompareExchange(0u, x_22, x_21, v);
   uint v_1 = v;
   atomic_compare_exchange_result_u32 v_2 = {v_1, (v_1 == x_22)};
   uint old_value_1 = v_2.old_value;
@@ -63,7 +63,7 @@ void atomicCompareExchangeWeak_63d8e6() {
   uint x_21 = arg_2;
   uint x_22 = arg_1;
   uint v = 0u;
-  sb_rw.InterlockedCompareExchange(uint(0u), x_22, x_21, v);
+  sb_rw.InterlockedCompareExchange(0u, x_22, x_21, v);
   uint v_1 = v;
   atomic_compare_exchange_result_u32 v_2 = {v_1, (v_1 == x_22)};
   uint old_value_1 = v_2.old_value;

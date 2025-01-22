@@ -6,7 +6,7 @@ RWByteAddressBuffer prevent_dce : register(u0);
 RWByteAddressBuffer sb_rw : register(u1);
 uint atomicExchange_d59712() {
   uint v = 0u;
-  sb_rw.InterlockedExchange(uint(0u), 1u, v);
+  sb_rw.InterlockedExchange(0u, 1u, v);
   uint res = v;
   return res;
 }
@@ -23,7 +23,7 @@ RWByteAddressBuffer prevent_dce : register(u0);
 RWByteAddressBuffer sb_rw : register(u1);
 uint atomicExchange_d59712() {
   uint v = 0u;
-  sb_rw.InterlockedExchange(uint(0u), 1u, v);
+  sb_rw.InterlockedExchange(0u, 1u, v);
   uint res = v;
   return res;
 }

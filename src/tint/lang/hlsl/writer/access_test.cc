@@ -958,7 +958,7 @@ void foo() {
   uint x = 1u;
   vector<float16_t, 4> a = tint_bitcast_to_f16(v[0u].xy);
   float16_t b = float16_t(f16tof32(v[0u].x));
-  uint v_5 = (uint(min(x, 3u)) * 2u);
+  uint v_5 = (min(x, 3u) * 2u);
   uint v_6 = v[(v_5 / 16u)][((v_5 % 16u) / 4u)];
   float16_t c = float16_t(f16tof32((v_6 >> ((((v_5 % 4u) == 0u)) ? (0u) : (16u)))));
   float16_t d = float16_t(f16tof32(v[0u].y));

@@ -11,7 +11,7 @@ buffer f_prevent_dce_block_ssbo {
   uvec2 inner;
 } v;
 uvec2 tint_bitcast_from_f16(f16vec4 src) {
-  return uvec2(uvec2(packFloat2x16(src.xy), packFloat2x16(src.zw)));
+  return uvec2(packFloat2x16(src.xy), packFloat2x16(src.zw));
 }
 uvec2 bitcast_81c5f5() {
   f16vec4 arg_0 = f16vec4(1.0hf);
@@ -32,7 +32,7 @@ buffer prevent_dce_block_1_ssbo {
   uvec2 inner;
 } v;
 uvec2 tint_bitcast_from_f16(f16vec4 src) {
-  return uvec2(uvec2(packFloat2x16(src.xy), packFloat2x16(src.zw)));
+  return uvec2(packFloat2x16(src.xy), packFloat2x16(src.zw));
 }
 uvec2 bitcast_81c5f5() {
   f16vec4 arg_0 = f16vec4(1.0hf);
@@ -57,7 +57,7 @@ struct VertexOutput {
 
 layout(location = 0) flat out uvec2 tint_interstage_location0;
 uvec2 tint_bitcast_from_f16(f16vec4 src) {
-  return uvec2(uvec2(packFloat2x16(src.xy), packFloat2x16(src.zw)));
+  return uvec2(packFloat2x16(src.xy), packFloat2x16(src.zw));
 }
 uvec2 bitcast_81c5f5() {
   f16vec4 arg_0 = f16vec4(1.0hf);

@@ -9,7 +9,7 @@ void atomicSub_15bfc9() {
   arg_1 = 1u;
   uint x_18 = arg_1;
   uint v = 0u;
-  sb_rw.InterlockedAdd(uint(0u), (0u - x_18), v);
+  sb_rw.InterlockedAdd(0u, (0u - x_18), v);
   uint x_13 = v;
   res = x_13;
 }
@@ -33,7 +33,7 @@ void atomicSub_15bfc9() {
   arg_1 = 1u;
   uint x_18 = arg_1;
   uint v = 0u;
-  sb_rw.InterlockedAdd(uint(0u), (0u - x_18), v);
+  sb_rw.InterlockedAdd(0u, (0u - x_18), v);
   uint x_13 = v;
   res = x_13;
 }

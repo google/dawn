@@ -11,7 +11,7 @@ buffer f_prevent_dce_block_ssbo {
 } v;
 uniform highp sampler3D arg_0_arg_1;
 vec4 textureSampleLevel_abfcc0() {
-  vec4 res = textureLod(arg_0_arg_1, vec3(1.0f), float(1.0f));
+  vec4 res = textureLod(arg_0_arg_1, vec3(1.0f), 1.0f);
   return res;
 }
 void main() {
@@ -28,7 +28,7 @@ buffer prevent_dce_block_1_ssbo {
 } v;
 uniform highp sampler3D arg_0_arg_1;
 vec4 textureSampleLevel_abfcc0() {
-  vec4 res = textureLod(arg_0_arg_1, vec3(1.0f), float(1.0f));
+  vec4 res = textureLod(arg_0_arg_1, vec3(1.0f), 1.0f);
   return res;
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
@@ -49,7 +49,7 @@ struct VertexOutput {
 uniform highp sampler3D arg_0_arg_1;
 layout(location = 0) flat out vec4 tint_interstage_location0;
 vec4 textureSampleLevel_abfcc0() {
-  vec4 res = textureLod(arg_0_arg_1, vec3(1.0f), float(1.0f));
+  vec4 res = textureLod(arg_0_arg_1, vec3(1.0f), 1.0f);
   return res;
 }
 VertexOutput vertex_main_inner() {

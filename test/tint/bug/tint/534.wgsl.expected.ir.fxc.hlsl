@@ -26,10 +26,8 @@ void main_inner(uint3 GlobalInvocationID) {
   if ((uniforms[0u].x == 1u)) {
     srcTexCoord.y = ((size.y - dstTexCoord.y) - 1u);
   }
-  int2 v_2 = int2(srcTexCoord);
-  float4 srcColor = float4(src.Load(int3(v_2, int(int(0)))));
-  int2 v_3 = int2(dstTexCoord);
-  float4 dstColor = float4(v.Load(int3(v_3, int(int(0)))));
+  float4 srcColor = src.Load(int3(int2(srcTexCoord), int(0)));
+  float4 dstColor = v.Load(int3(int2(dstTexCoord), int(0)));
   bool success = true;
   uint4 srcColorBits = (0u).xxxx;
   uint4 dstColorBits = tint_v4f32_to_v4u32(dstColor);
@@ -44,17 +42,17 @@ void main_inner(uint3 GlobalInvocationID) {
       } else {
         break;
       }
-      uint v_4 = i;
-      uint v_5 = ConvertToFp16FloatValue(srcColor[min(i, 3u)]);
-      uint4 v_6 = srcColorBits;
-      srcColorBits = (((v_4.xxxx == uint4(int(0), int(1), int(2), int(3)))) ? (v_5.xxxx) : (v_6));
-      bool v_7 = false;
+      uint v_2 = i;
+      uint v_3 = ConvertToFp16FloatValue(srcColor[min(i, 3u)]);
+      uint4 v_4 = srcColorBits;
+      srcColorBits = (((v_2.xxxx == uint4(int(0), int(1), int(2), int(3)))) ? (v_3.xxxx) : (v_4));
+      bool v_5 = false;
       if (success) {
-        v_7 = (srcColorBits[min(i, 3u)] == dstColorBits[min(i, 3u)]);
+        v_5 = (srcColorBits[min(i, 3u)] == dstColorBits[min(i, 3u)]);
       } else {
-        v_7 = false;
+        v_5 = false;
       }
-      success = v_7;
+      success = v_5;
       {
         uint tint_low_inc = (tint_loop_idx.x + 1u);
         tint_loop_idx.x = tint_low_inc;
@@ -67,13 +65,13 @@ void main_inner(uint3 GlobalInvocationID) {
   }
   uint outputIndex = ((GlobalInvocationID.y * uint(size.x)) + GlobalInvocationID.x);
   if (success) {
-    uint v_8 = 0u;
-    output.GetDimensions(v_8);
-    output.Store((0u + (min(outputIndex, ((v_8 / 4u) - 1u)) * 4u)), 1u);
+    uint v_6 = 0u;
+    output.GetDimensions(v_6);
+    output.Store((0u + (min(outputIndex, ((v_6 / 4u) - 1u)) * 4u)), 1u);
   } else {
-    uint v_9 = 0u;
-    output.GetDimensions(v_9);
-    output.Store((0u + (min(outputIndex, ((v_9 / 4u) - 1u)) * 4u)), 0u);
+    uint v_7 = 0u;
+    output.GetDimensions(v_7);
+    output.Store((0u + (min(outputIndex, ((v_7 / 4u) - 1u)) * 4u)), 0u);
   }
 }
 

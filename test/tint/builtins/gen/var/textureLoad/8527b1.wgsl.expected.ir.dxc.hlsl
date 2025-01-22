@@ -12,7 +12,7 @@ uint4 textureLoad_8527b1() {
   uint v_1 = arg_3;
   int2 v_2 = int2(arg_1);
   int v_3 = int(v);
-  uint4 res = uint4(arg_0.Load(int4(v_2, v_3, int(v_1))));
+  uint4 res = arg_0.Load(int4(v_2, v_3, int(v_1)));
   return res;
 }
 
@@ -34,7 +34,7 @@ uint4 textureLoad_8527b1() {
   uint v_1 = arg_3;
   int2 v_2 = int2(arg_1);
   int v_3 = int(v);
-  uint4 res = uint4(arg_0.Load(int4(v_2, v_3, int(v_1))));
+  uint4 res = arg_0.Load(int4(v_2, v_3, int(v_1)));
   return res;
 }
 
@@ -66,7 +66,7 @@ uint4 textureLoad_8527b1() {
   uint v_1 = arg_3;
   int2 v_2 = int2(arg_1);
   int v_3 = int(v);
-  uint4 res = uint4(arg_0.Load(int4(v_2, v_3, int(v_1))));
+  uint4 res = arg_0.Load(int4(v_2, v_3, int(v_1)));
   return res;
 }
 

@@ -2913,8 +2913,10 @@ void Validator::CheckConvert(const Convert* convert) {
     auto table = intrinsic::Table<intrinsic::Dialect>(type_mgr_, symbols_);
     auto match =
         table.Lookup(conv_ty, template_type, Vector{value_type}, core::EvaluationStage::kOverride);
-    if (match != Success) {
-        AddError(convert) << match.Failure();
+    if (match != Success || !match->info->flags.Contains(intrinsic::OverloadFlag::kIsConverter)) {
+        AddError(convert) << "No defined converter for " << StyledText{}
+                          << style::Type(value_type->FriendlyName()) << " -> " << StyledText{}
+                          << style::Type(result_type->FriendlyName());
         return;
     }
 }

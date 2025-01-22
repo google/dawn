@@ -7,7 +7,7 @@ Texture2D<int4> arg_0 : register(t0, space1);
 uint2 textureDimensions_a48049() {
   uint arg_1 = 1u;
   uint3 v = (0u).xxx;
-  arg_0.GetDimensions(uint(arg_1), v.x, v.y, v.z);
+  arg_0.GetDimensions(arg_1, v.x, v.y, v.z);
   uint2 res = v.xy;
   return res;
 }
@@ -25,7 +25,7 @@ Texture2D<int4> arg_0 : register(t0, space1);
 uint2 textureDimensions_a48049() {
   uint arg_1 = 1u;
   uint3 v = (0u).xxx;
-  arg_0.GetDimensions(uint(arg_1), v.x, v.y, v.z);
+  arg_0.GetDimensions(arg_1, v.x, v.y, v.z);
   uint2 res = v.xy;
   return res;
 }
@@ -53,7 +53,7 @@ Texture2D<int4> arg_0 : register(t0, space1);
 uint2 textureDimensions_a48049() {
   uint arg_1 = 1u;
   uint3 v = (0u).xxx;
-  arg_0.GetDimensions(uint(arg_1), v.x, v.y, v.z);
+  arg_0.GetDimensions(arg_1, v.x, v.y, v.z);
   uint2 res = v.xy;
   return res;
 }

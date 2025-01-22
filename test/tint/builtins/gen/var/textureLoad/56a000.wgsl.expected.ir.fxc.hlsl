@@ -6,7 +6,7 @@ RWByteAddressBuffer prevent_dce : register(u0);
 RWTexture1D<float4> arg_0 : register(u0, space1);
 float4 textureLoad_56a000() {
   int arg_1 = int(1);
-  float4 res = float4(arg_0.Load(int2(int(arg_1), int(0))));
+  float4 res = arg_0.Load(int2(arg_1, int(0)));
   return res;
 }
 
@@ -22,7 +22,7 @@ RWByteAddressBuffer prevent_dce : register(u0);
 RWTexture1D<float4> arg_0 : register(u0, space1);
 float4 textureLoad_56a000() {
   int arg_1 = int(1);
-  float4 res = float4(arg_0.Load(int2(int(arg_1), int(0))));
+  float4 res = arg_0.Load(int2(arg_1, int(0)));
   return res;
 }
 

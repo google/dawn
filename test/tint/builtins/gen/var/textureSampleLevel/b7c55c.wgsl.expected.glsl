@@ -16,8 +16,7 @@ vec4 textureSampleLevel_b7c55c() {
   float arg_4 = 1.0f;
   vec2 v_1 = arg_2;
   float v_2 = arg_4;
-  vec3 v_3 = vec3(v_1, float(arg_3));
-  vec4 res = textureLodOffset(arg_0_arg_1, v_3, float(v_2), ivec2(1));
+  vec4 res = textureLodOffset(arg_0_arg_1, vec3(v_1, float(arg_3)), v_2, ivec2(1));
   return res;
 }
 void main() {
@@ -39,8 +38,7 @@ vec4 textureSampleLevel_b7c55c() {
   float arg_4 = 1.0f;
   vec2 v_1 = arg_2;
   float v_2 = arg_4;
-  vec3 v_3 = vec3(v_1, float(arg_3));
-  vec4 res = textureLodOffset(arg_0_arg_1, v_3, float(v_2), ivec2(1));
+  vec4 res = textureLodOffset(arg_0_arg_1, vec3(v_1, float(arg_3)), v_2, ivec2(1));
   return res;
 }
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
@@ -66,21 +64,20 @@ vec4 textureSampleLevel_b7c55c() {
   float arg_4 = 1.0f;
   vec2 v = arg_2;
   float v_1 = arg_4;
-  vec3 v_2 = vec3(v, float(arg_3));
-  vec4 res = textureLodOffset(arg_0_arg_1, v_2, float(v_1), ivec2(1));
+  vec4 res = textureLodOffset(arg_0_arg_1, vec3(v, float(arg_3)), v_1, ivec2(1));
   return res;
 }
 VertexOutput vertex_main_inner() {
-  VertexOutput v_3 = VertexOutput(vec4(0.0f), vec4(0.0f));
-  v_3.pos = vec4(0.0f);
-  v_3.prevent_dce = textureSampleLevel_b7c55c();
-  return v_3;
+  VertexOutput v_2 = VertexOutput(vec4(0.0f), vec4(0.0f));
+  v_2.pos = vec4(0.0f);
+  v_2.prevent_dce = textureSampleLevel_b7c55c();
+  return v_2;
 }
 void main() {
-  VertexOutput v_4 = vertex_main_inner();
-  gl_Position = v_4.pos;
+  VertexOutput v_3 = vertex_main_inner();
+  gl_Position = v_3.pos;
   gl_Position.y = -(gl_Position.y);
   gl_Position.z = ((2.0f * gl_Position.z) - gl_Position.w);
-  tint_interstage_location0 = v_4.prevent_dce;
+  tint_interstage_location0 = v_3.prevent_dce;
   gl_PointSize = 1.0f;
 }

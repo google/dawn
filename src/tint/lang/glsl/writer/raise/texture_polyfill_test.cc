@@ -667,10 +667,9 @@ $B1: {  # root
   $B2: {
     %3:vec2<i32> = construct 0i, 0i
     %4:texture_2d<f32> = load %v
-    %5:vec2<i32> = convert %3
-    %6:i32 = convert 0u
-    %7:vec4<f32> = glsl.texelFetch %4, %5, %6
-    %x:vec4<f32> = let %7
+    %5:i32 = convert 0u
+    %6:vec4<f32> = glsl.texelFetch %4, %3, %5
+    %x:vec4<f32> = let %6
     ret
   }
 }
@@ -721,10 +720,8 @@ $B1: {  # root
 %foo = @fragment func():void {
   $B2: {
     %3:texture_2d<i32> = load %v
-    %4:vec2<i32> = convert vec2<i32>(0i)
-    %5:i32 = convert 0i
-    %6:vec4<i32> = glsl.texelFetch %3, %4, %5
-    %x:vec4<i32> = let %6
+    %4:vec4<i32> = glsl.texelFetch %3, vec2<i32>(0i), 0i
+    %x:vec4<i32> = let %4
     ret
   }
 }
@@ -775,10 +772,9 @@ $B1: {  # root
 %foo = @fragment func():void {
   $B2: {
     %3:texture_3d<f32> = load %v
-    %4:vec3<i32> = convert vec3<i32>(0i)
-    %5:i32 = convert 0u
-    %6:vec4<f32> = glsl.texelFetch %3, %4, %5
-    %x:vec4<f32> = let %6
+    %4:i32 = convert 0u
+    %5:vec4<f32> = glsl.texelFetch %3, vec3<i32>(0i), %4
+    %x:vec4<f32> = let %5
     ret
   }
 }
@@ -831,10 +827,9 @@ $B1: {  # root
 %foo = @fragment func():void {
   $B2: {
     %3:texture_multisampled_2d<i32> = load %v
-    %4:vec2<i32> = convert vec2<i32>(0i)
-    %5:i32 = convert 0u
-    %6:vec4<i32> = glsl.texelFetch %3, %4, %5
-    %x:vec4<i32> = let %6
+    %4:i32 = convert 0u
+    %5:vec4<i32> = glsl.texelFetch %3, vec2<i32>(0i), %4
+    %x:vec4<i32> = let %5
     ret
   }
 }
@@ -886,9 +881,8 @@ $B1: {  # root
 %foo = @fragment func():void {
   $B2: {
     %3:texture_storage_2d<rg32float, read> = load %v
-    %4:vec2<i32> = convert vec2<i32>(0i)
-    %5:vec4<f32> = glsl.imageLoad %3, %4
-    %x:vec4<f32> = let %5
+    %4:vec4<f32> = glsl.imageLoad %3, vec2<i32>(0i)
+    %x:vec4<f32> = let %4
     ret
   }
 }
@@ -1050,9 +1044,8 @@ $B1: {  # root
   $B2: {
     %3:texture_storage_2d_array<rgba32sint, read_write> = load %1
     %4:vec2<i32> = convert vec2<u32>(0u)
-    %5:i32 = convert 1i
-    %6:vec3<i32> = construct %4, %5
-    %7:void = glsl.imageStore %3, %6, vec4<i32>(5i, 0i, 0i, 1i)
+    %5:vec3<i32> = construct %4, 1i
+    %6:void = glsl.imageStore %3, %5, vec4<i32>(5i, 0i, 0i, 1i)
     ret
   }
 }
@@ -3604,9 +3597,8 @@ $B1: {  # root
   $B2: {
     %3:vec2<f32> = construct 1.0f, 2.0f
     %4:texture_2d<f32> = load %t_s
-    %5:f32 = convert 3.0f
-    %6:vec4<f32> = glsl.textureLod %4, %3, %5
-    %x:vec4<f32> = let %6
+    %5:vec4<f32> = glsl.textureLod %4, %3, 3.0f
+    %x:vec4<f32> = let %5
     ret
   }
 }
@@ -3673,9 +3665,8 @@ $B1: {  # root
   $B2: {
     %3:vec2<f32> = construct 1.0f, 2.0f
     %4:texture_2d<f32> = load %t_s
-    %5:f32 = convert 3.0f
-    %6:vec4<f32> = glsl.textureLodOffset %4, %3, %5, vec2<i32>(4i, 5i)
-    %x:vec4<f32> = let %6
+    %5:vec4<f32> = glsl.textureLodOffset %4, %3, 3.0f, vec2<i32>(4i, 5i)
+    %x:vec4<f32> = let %5
     ret
   }
 }
@@ -3744,9 +3735,8 @@ $B1: {  # root
     %4:texture_2d_array<f32> = load %t_s
     %5:f32 = convert 4u
     %6:vec3<f32> = construct %3, %5
-    %7:f32 = convert 3.0f
-    %8:vec4<f32> = glsl.textureLod %4, %6, %7
-    %x:vec4<f32> = let %8
+    %7:vec4<f32> = glsl.textureLod %4, %6, 3.0f
+    %x:vec4<f32> = let %7
     ret
   }
 }
@@ -3816,9 +3806,8 @@ $B1: {  # root
     %4:texture_2d_array<f32> = load %t_s
     %5:f32 = convert 4u
     %6:vec3<f32> = construct %3, %5
-    %7:f32 = convert 3.0f
-    %8:vec4<f32> = glsl.textureLodOffset %4, %6, %7, vec2<i32>(4i, 5i)
-    %x:vec4<f32> = let %8
+    %7:vec4<f32> = glsl.textureLodOffset %4, %6, 3.0f, vec2<i32>(4i, 5i)
+    %x:vec4<f32> = let %7
     ret
   }
 }
@@ -3883,9 +3872,8 @@ $B1: {  # root
   $B2: {
     %3:vec3<f32> = construct 1.0f, 2.0f, 3.0f
     %4:texture_3d<f32> = load %t_s
-    %5:f32 = convert 3.0f
-    %6:vec4<f32> = glsl.textureLod %4, %3, %5
-    %x:vec4<f32> = let %6
+    %5:vec4<f32> = glsl.textureLod %4, %3, 3.0f
+    %x:vec4<f32> = let %5
     ret
   }
 }
@@ -3952,9 +3940,8 @@ $B1: {  # root
   $B2: {
     %3:vec3<f32> = construct 1.0f, 2.0f, 3.0f
     %4:texture_3d<f32> = load %t_s
-    %5:f32 = convert 3.0f
-    %6:vec4<f32> = glsl.textureLodOffset %4, %3, %5, vec3<i32>(4i, 5i, 6i)
-    %x:vec4<f32> = let %6
+    %5:vec4<f32> = glsl.textureLodOffset %4, %3, 3.0f, vec3<i32>(4i, 5i, 6i)
+    %x:vec4<f32> = let %5
     ret
   }
 }
@@ -4019,9 +4006,8 @@ $B1: {  # root
   $B2: {
     %3:vec3<f32> = construct 1.0f, 2.0f, 3.0f
     %4:texture_cube<f32> = load %t_s
-    %5:f32 = convert 3.0f
-    %6:vec4<f32> = glsl.textureLod %4, %3, %5
-    %x:vec4<f32> = let %6
+    %5:vec4<f32> = glsl.textureLod %4, %3, 3.0f
+    %x:vec4<f32> = let %5
     ret
   }
 }
@@ -4090,9 +4076,8 @@ $B1: {  # root
     %4:texture_cube_array<f32> = load %t_s
     %5:f32 = convert 4u
     %6:vec4<f32> = construct %3, %5
-    %7:f32 = convert 3.0f
-    %8:vec4<f32> = glsl.textureLod %4, %6, %7
-    %x:vec4<f32> = let %8
+    %7:vec4<f32> = glsl.textureLod %4, %6, 3.0f
+    %x:vec4<f32> = let %7
     ret
   }
 }

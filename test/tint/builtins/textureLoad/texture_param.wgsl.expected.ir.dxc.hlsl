@@ -8,8 +8,7 @@ struct vertex_main_outputs {
 
 Texture2D<int4> arg_0 : register(t0, space1);
 int4 textureLoad2d(Texture2D<int4> v, int2 coords, int level) {
-  int2 v_1 = int2(coords);
-  return int4(v.Load(int3(v_1, int(level))));
+  return v.Load(int3(coords, level));
 }
 
 void doTextureLoad() {
@@ -22,8 +21,8 @@ float4 vertex_main_inner() {
 }
 
 vertex_main_outputs vertex_main() {
-  vertex_main_outputs v_2 = {vertex_main_inner()};
-  return v_2;
+  vertex_main_outputs v_1 = {vertex_main_inner()};
+  return v_1;
 }
 
 //
@@ -32,8 +31,7 @@ vertex_main_outputs vertex_main() {
 
 Texture2D<int4> arg_0 : register(t0, space1);
 int4 textureLoad2d(Texture2D<int4> v, int2 coords, int level) {
-  int2 v_1 = int2(coords);
-  return int4(v.Load(int3(v_1, int(level))));
+  return v.Load(int3(coords, level));
 }
 
 void doTextureLoad() {
@@ -50,8 +48,7 @@ void fragment_main() {
 
 Texture2D<int4> arg_0 : register(t0, space1);
 int4 textureLoad2d(Texture2D<int4> v, int2 coords, int level) {
-  int2 v_1 = int2(coords);
-  return int4(v.Load(int3(v_1, int(level))));
+  return v.Load(int3(coords, level));
 }
 
 void doTextureLoad() {

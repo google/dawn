@@ -6,7 +6,7 @@ RWByteAddressBuffer sb_rw : register(u0);
 void atomicMax_51b9be() {
   uint res = 0u;
   uint v = 0u;
-  sb_rw.InterlockedMax(uint(0u), 1u, v);
+  sb_rw.InterlockedMax(0u, 1u, v);
   uint x_9 = v;
   res = x_9;
 }
@@ -27,7 +27,7 @@ RWByteAddressBuffer sb_rw : register(u0);
 void atomicMax_51b9be() {
   uint res = 0u;
   uint v = 0u;
-  sb_rw.InterlockedMax(uint(0u), 1u, v);
+  sb_rw.InterlockedMax(0u, 1u, v);
   uint x_9 = v;
   res = x_9;
 }

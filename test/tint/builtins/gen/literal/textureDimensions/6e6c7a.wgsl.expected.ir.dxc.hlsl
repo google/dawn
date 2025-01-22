@@ -6,7 +6,7 @@ RWByteAddressBuffer prevent_dce : register(u0);
 Texture3D<uint4> arg_0 : register(t0, space1);
 uint3 textureDimensions_6e6c7a() {
   uint4 v = (0u).xxxx;
-  arg_0.GetDimensions(uint(1u), v.x, v.y, v.z, v.w);
+  arg_0.GetDimensions(1u, v.x, v.y, v.z, v.w);
   uint3 res = v.xyz;
   return res;
 }
@@ -23,7 +23,7 @@ RWByteAddressBuffer prevent_dce : register(u0);
 Texture3D<uint4> arg_0 : register(t0, space1);
 uint3 textureDimensions_6e6c7a() {
   uint4 v = (0u).xxxx;
-  arg_0.GetDimensions(uint(1u), v.x, v.y, v.z, v.w);
+  arg_0.GetDimensions(1u, v.x, v.y, v.z, v.w);
   uint3 res = v.xyz;
   return res;
 }
@@ -50,7 +50,7 @@ struct vertex_main_outputs {
 Texture3D<uint4> arg_0 : register(t0, space1);
 uint3 textureDimensions_6e6c7a() {
   uint4 v = (0u).xxxx;
-  arg_0.GetDimensions(uint(1u), v.x, v.y, v.z, v.w);
+  arg_0.GetDimensions(1u, v.x, v.y, v.z, v.w);
   uint3 res = v.xyz;
   return res;
 }
