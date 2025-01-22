@@ -288,8 +288,6 @@ class CopyTests_T2B : public CopyTests, public DawnTestWithParams<CopyTextureFor
             // GL_EXT_texture_format_BGRA8888 or GL_APPLE_texture_format_BGRA8888 is required for
             // compat mode.
             DAWN_TEST_UNSUPPORTED_IF(format == wgpu::TextureFormat::BGRA8Unorm);
-            // TODO(crbug.com/388318201): GL_R11F_G11F_B10F: Framebuffer incomplete.
-            DAWN_SUPPRESS_TEST_IF(format == wgpu::TextureFormat::RG11B10Ufloat);
         }
 
         // TODO(dawn:2129): Fail for Win ANGLE D3D11

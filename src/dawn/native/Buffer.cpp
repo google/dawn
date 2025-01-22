@@ -129,6 +129,7 @@ wgpu::BufferUsage AddInternalUsages(const DeviceBase* device, wgpu::BufferUsage 
             device->IsToggleEnabled(Toggle::UseBlitForSnormTextureToBufferCopy) ||
             device->IsToggleEnabled(Toggle::UseBlitForBGRA8UnormTextureToBufferCopy) ||
             device->IsToggleEnabled(Toggle::UseBlitForRGB9E5UfloatTextureCopy) ||
+            device->IsToggleEnabled(Toggle::UseBlitForRG11B10UfloatTextureCopy) ||
             device->IsToggleEnabled(Toggle::UseBlitForFloat16TextureCopy) ||
             device->IsToggleEnabled(Toggle::UseBlitForFloat32TextureCopy) ||
             device->IsToggleEnabled(Toggle::UseBlitForT2B);

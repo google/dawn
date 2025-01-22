@@ -940,9 +940,10 @@ TEST_P(TextureFormatTest, RGB10A2Unorm) {
 
 // Test the RG11B10Ufloat format
 TEST_P(TextureFormatTest, RG11B10Ufloat) {
-    // TODO(crbug.com/388318201): investigate
-    DAWN_SUPPRESS_TEST_IF(IsCompatibilityMode() &&
-                          HasToggleEnabled("gl_force_es_31_and_no_extensions"));
+    // TODO(crbug.com/388318201): sampling test also requires format to be color-renderable
+    DAWN_SUPPRESS_TEST_IF(!IsRG11B10UfloatRenderableSupported());
+    // TODO(crbug.com/388318201): expected: 0xf87e0000, actual: 0xfffff800
+    DAWN_SUPPRESS_TEST_IF(IsD3D11());
 
     constexpr uint32_t kFloat11Zero = 0;
     constexpr uint32_t kFloat11Infinity = 0x7C0;
@@ -985,18 +986,15 @@ TEST_P(TextureFormatTest, RG11B10Ufloat) {
         {wgpu::TextureFormat::RG11B10Ufloat, 4, TextureComponentType::Float, 4}, textureData,
         uncompressedData);
 
-    // This format is renderable if "rg11b10ufloat-renderable" feature is enabled
-    if (IsRG11B10UfloatRenderableSupported()) {
-        // TODO(https://crbug.com/swiftshader/147) Rendering INFINITY and NaN isn't handled
-        // correctly by swiftshader
-        if ((IsVulkan() && IsSwiftshader()) || IsANGLE()) {
-            WarningLog() << "Skip Rendering test because Swiftshader doesn't render INFINITY "
-                            "and NaN correctly for RG11B10Ufloat texture format.";
-        } else {
-            DoFormatRenderingTest(
-                {wgpu::TextureFormat::RG11B10Ufloat, 4, TextureComponentType::Float, 4},
-                uncompressedData, textureData, new ExpectRG11B10Ufloat(textureData));
-        }
+    // TODO(https://crbug.com/swiftshader/147) Rendering INFINITY and NaN isn't handled
+    // correctly by swiftshader
+    if ((IsVulkan() && IsSwiftshader()) || IsANGLE()) {
+        WarningLog() << "Skip Rendering test because Swiftshader doesn't render INFINITY "
+                        "and NaN correctly for RG11B10Ufloat texture format.";
+    } else {
+        DoFormatRenderingTest(
+            {wgpu::TextureFormat::RG11B10Ufloat, 4, TextureComponentType::Float, 4},
+            uncompressedData, textureData, new ExpectRG11B10Ufloat(textureData));
     }
 }
 

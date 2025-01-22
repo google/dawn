@@ -655,6 +655,39 @@ fn encodeVectorInU32General(v: vec4f) -> u32 {
 }
 )";
 
+// Storing rg11b10ufloat texel values
+// Reference:
+// https://www.khronos.org/opengl/wiki/Small_Float_Formats
+constexpr std::string_view kEncodeRG11B10UfloatInU32 = R"(
+fn encodeVectorInU32General(v: vec4f) -> u32 {
+    const n_rg = 6;    // number of mantissa bits (RG)
+    const n_b = 5;    // number of mantissa bits (B)
+    const e_max = 31;   // max exponent
+    const b = 15;    // exponent bias
+
+    // Calculate the exponent (biased)
+    let rbe = select(i32(floor(log2(v.r))), -b, v.r == 0.0);
+    let gbe = select(i32(floor(log2(v.g))), -b, v.g == 0.0);
+    let bbe = select(i32(floor(log2(v.b))), -b, v.b == 0.0);
+
+    // Calculate the exponent bits value.
+    let re = clamp(rbe + b, 0, e_max);
+    let ge = clamp(gbe + b, 0, e_max);
+    let be = clamp(bbe + b, 0, e_max);
+
+    // Calculate the mantissa for each component.
+    let rm = u32(round( select(v.r * exp2(-f32(re - b)) - 1.0, v.r * exp2(f32(b-1)), re == 0) * f32(1 << n_rg) ));
+    let gm = u32(round( select(v.g * exp2(-f32(ge - b)) - 1.0, v.g * exp2(f32(b-1)), ge == 0) * f32(1 << n_rg) ));
+    let bm = u32(round( select(v.b * exp2(-f32(be - b)) - 1.0, v.b * exp2(f32(b-1)), be == 0) * f32(1 << n_b) ));
+
+    let red = u32(re << n_rg) | rm;
+    let green = u32(ge << n_rg) | gm;
+    let blue = u32(be << n_b) | bm;
+
+    return (blue << 22) | (green << 11) | red;
+}
+)";
+
 // Directly loading float32 values into dst_buf
 // No bit manipulation and packing is needed.
 constexpr std::string_view kLoadR32Float = R"(
@@ -788,6 +821,16 @@ ResultOrError<Ref<ComputePipelineBase>> GetOrCreateTextureToBufferPipeline(
             AppendFloatTextureHead();
             shader += kDstBufferU32;
             shader += kEncodeRGB9E5UfloatInU32;
+            shader += kCommonHead;
+            shader += kCommonStart;
+            shader += kPackRGBAToU32;
+            shader += kCommonEnd;
+            textureSampleType = wgpu::TextureSampleType::Float;
+            break;
+        case wgpu::TextureFormat::RG11B10Ufloat:
+            AppendFloatTextureHead();
+            shader += kDstBufferU32;
+            shader += kEncodeRG11B10UfloatInU32;
             shader += kCommonHead;
             shader += kCommonStart;
             shader += kPackRGBAToU32;
@@ -974,6 +1017,7 @@ bool IsFormatSupportedByTextureToBufferBlit(wgpu::TextureFormat format) {
         case wgpu::TextureFormat::RGBA8Unorm:
         case wgpu::TextureFormat::BGRA8Unorm:
         case wgpu::TextureFormat::RGB9E5Ufloat:
+        case wgpu::TextureFormat::RG11B10Ufloat:
         case wgpu::TextureFormat::R16Float:
         case wgpu::TextureFormat::RG16Float:
         case wgpu::TextureFormat::RGBA16Float:

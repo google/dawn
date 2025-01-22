@@ -971,6 +971,11 @@ bool ShouldUseTextureToBufferBlit(const DeviceBase* device,
         device->IsToggleEnabled(Toggle::UseBlitForRGB9E5UfloatTextureCopy)) {
         return true;
     }
+    // RG11B10Ufloat
+    if (format.format == wgpu::TextureFormat::RG11B10Ufloat &&
+        device->IsToggleEnabled(Toggle::UseBlitForRG11B10UfloatTextureCopy)) {
+        return true;
+    }
     // float16
     if ((format.format == wgpu::TextureFormat::R16Float ||
          format.format == wgpu::TextureFormat::RG16Float ||
