@@ -646,32 +646,6 @@ TEST_F(SpirvReaderTest, Normalize_Vector4) {
 )");
 }
 
-TEST_F(SpirvReaderTest, DISABLED_RectifyOperandsAndResult_FindILsb) {
-    // Check conversion of:
-    //   signed results to unsigned result to match first arg.
-    //   unsigned results to signed result to match first arg.
-    // This is the first extended instruction we've supported which goes both
-    // ways.
-    EXPECT_IR(Preamble() + R"(
-     %1 = OpExtInst %uint %glsl FindILsb %int_30
-     %2 = OpExtInst %v2uint %glsl FindILsb %v2int_30_40
-     %3 = OpExtInst %int %glsl FindILsb %uint_10
-     %4 = OpExtInst %v2int %glsl FindILsb %v2uint_10_20
-     OpReturn
-     OpFunctionEnd
-  )",
-              R"(
-%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
-  $B1: {
-    let x_1 = bitcast<u32>(firstTrailingBit(i1));
-    let x_2 = bitcast<vec2u>(firstTrailingBit(v2i1));
-    let x_3 = bitcast<i32>(firstTrailingBit(u1));
-    let x_4 = bitcast<vec2i>(firstTrailingBit(v2u1));
-  }
-}
-)");
-}
-
 TEST_F(SpirvReaderTest, DISABLED_RectifyOperandsAndResult_FindSMsb) {
     // Check signedness conversion of arguments and results.
     //   SPIR-V signed arg -> keep it

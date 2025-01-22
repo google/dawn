@@ -496,5 +496,31 @@ INSTANTIATE_TEST_SUITE_P(SpirvParser,
                          ::testing::Values(GlslStd450TwoParams{"SClamp", "sclamp"},
                                            GlslStd450TwoParams{"UClamp", "uclamp"}));
 
+TEST_F(SpirvParserTest, FindILsb) {
+    EXPECT_IR(Preamble() + R"(
+     %1 = OpExtInst %uint %glsl FindILsb %int_10
+     %2 = OpExtInst %v2uint %glsl FindILsb %v2int_10_20
+     %3 = OpExtInst %int %glsl FindILsb %uint_10
+     %4 = OpExtInst %v2int %glsl FindILsb %v2uint_10_20
+     %5 = OpExtInst %v2uint %glsl FindILsb %v2uint_10_20
+     %6 = OpExtInst %v2int %glsl FindILsb %v2int_10_20
+     OpReturn
+     OpFunctionEnd
+  )",
+              R"(
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:u32 = spirv.findILsb<u32> 10i
+    %3:vec2<u32> = spirv.findILsb<u32> vec2<i32>(10i, 20i)
+    %4:i32 = spirv.findILsb<i32> 10u
+    %5:vec2<i32> = spirv.findILsb<i32> vec2<u32>(10u, 20u)
+    %6:vec2<u32> = spirv.findILsb<u32> vec2<u32>(10u, 20u)
+    %7:vec2<i32> = spirv.findILsb<i32> vec2<i32>(10i, 20i)
+    ret
+  }
+}
+)");
+}
+
 }  // namespace
 }  // namespace tint::spirv::reader

@@ -91,6 +91,9 @@ struct State {
                 case spirv::BuiltinFn::kUclamp:
                     UClamp(builtin);
                     break;
+                case spirv::BuiltinFn::kFindILsb:
+                    FindILsb(builtin);
+                    break;
                 default:
                     TINT_UNREACHABLE() << "unknown spirv builtin: " << builtin->Func();
             }
@@ -192,6 +195,24 @@ struct State {
                 fn = core::BuiltinFn::kSign;
             }
             b.CallWithResult(call->DetachResult(), fn, Vector<core::ir::Value*, 1>{arg});
+        });
+        call->Destroy();
+    }
+
+    void FindILsb(spirv::ir::BuiltinCall* call) {
+        auto* arg = call->Args()[0];
+
+        b.InsertBefore(call, [&] {
+            auto* arg_ty = arg->Type();
+            auto* ret_ty = call->Result(0)->Type();
+
+            auto* v =
+                b.Call(arg_ty, core::BuiltinFn::kFirstTrailingBit, Vector<core::ir::Value*, 1>{arg})
+                    ->Result(0);
+            if (arg_ty != ret_ty) {
+                v = b.Bitcast(ret_ty, v)->Result(0);
+            }
+            call->Result(0)->ReplaceAllUsesWith(v);
         });
         call->Destroy();
     }
