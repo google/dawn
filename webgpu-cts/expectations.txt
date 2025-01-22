@@ -11528,6 +11528,7 @@ crbug.com/0000 [ linux nvidia ] webgpu:web_platform,canvas,configure:alpha_mode:
 crbug.com/0000 [ linux nvidia ] webgpu:web_platform,canvas,configure:alpha_mode:canvasType="onscreen" [ Failure ]
 crbug.com/0000 [ linux nvidia ] webgpu:web_platform,canvas,configure:defaults:canvasType="offscreen" [ Failure ]
 crbug.com/0000 [ linux nvidia ] webgpu:web_platform,canvas,configure:defaults:canvasType="onscreen" [ Failure ]
+crbug.com/0000 [ linux nvidia ] webgpu:web_platform,canvas,configure:format:canvasType="offscreen";format="bc1-rgba-unorm" [ Failure ]
 crbug.com/0000 [ nvidia win ] webgpu:web_platform,canvas,configure:format:canvasType="offscreen";format="bc5-rg-snorm" [ Failure ]
 crbug.com/0000 [ nvidia win ] webgpu:web_platform,canvas,configure:format:canvasType="offscreen";format="rg8uint" [ Failure ]
 crbug.com/0000 [ intel linux ] webgpu:web_platform,canvas,configure:viewFormats:canvasType="onscreen";format="rgba8unorm";viewFormatFeature="_undef_" [ Failure ]
