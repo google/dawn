@@ -491,7 +491,7 @@ MaybeError BufferBase::MapAtCreationInternal() {
             DAWN_TRY(MapAtCreationImpl());
         } else {
             // If any of these fail, the buffer will be deleted and replaced with an error
-            // buffer. The staging buffer is used to return mappable data to inititalize the
+            // buffer. The staging buffer is used to return mappable data to initialize the
             // buffer contents. Allocate one as large as the real buffer size so that every byte
             // is initialized.
             // TODO(crbug.com/dawn/828): Suballocate and reuse memory from a larger staging
@@ -639,7 +639,7 @@ MaybeError BufferBase::Unmap() {
         return {};
     }
 
-    // Make sure writes are now visibile to the GPU if we used a staging buffer.
+    // Make sure writes are now visible to the GPU if we used a staging buffer.
     if (mState == BufferState::MappedAtCreation && mStagingBuffer != nullptr) {
         DAWN_TRY(CopyFromStagingBuffer());
     }

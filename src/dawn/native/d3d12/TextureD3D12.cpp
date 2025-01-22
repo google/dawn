@@ -530,7 +530,7 @@ void Texture::TransitionSubresourceRange(std::vector<D3D12_RESOURCE_BARRIER>* ba
                 mD3D12ResourceFlags & D3D12_RESOURCE_FLAG_ALLOW_SIMULTANEOUS_ACCESS) {
                 // Implicit texture state decays can only occur when the texture was implicitly
                 // transitioned to a read-only state. isValidToDecay is needed to differentiate
-                // between resources that were implictly or explicitly transitioned to a
+                // between resources that were implicitly or explicitly transitioned to a
                 // read-only state.
                 state->isValidToDecay = true;
                 state->lastDecaySerial = pendingCommandSerial;

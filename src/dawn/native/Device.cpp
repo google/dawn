@@ -571,7 +571,7 @@ void DeviceBase::Destroy() {
     //  - mCallbackTaskManager is not deleted since we flush the callback queue at the end
     // of Tick(). Note: that flush should always be empty since all callbacks are drained
     // inside Destroy() so there should be no outstanding tasks holding objects alive.
-    //  - Similiarly, mAsyncTaskManager is not deleted since we use it to return a status
+    //  - Similarly, mAsyncTaskManager is not deleted since we use it to return a status
     // from Tick() whether or not there is any more pending work.
 
     // Skip handling device facilities if they haven't even been created (or failed doing so)

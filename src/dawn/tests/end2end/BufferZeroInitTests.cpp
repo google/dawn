@@ -418,7 +418,7 @@ class BufferZeroInitTest : public DawnTest {
         constexpr wgpu::TextureFormat kColorAttachmentFormat = wgpu::TextureFormat::RGBA8Unorm;
         constexpr wgpu::Color kClearColorGreen = {0.f, 1.f, 0.f, 1.f};
 
-        // As long as the comptue shader is executed once, the pixel color of outImage will be set
+        // As long as the compute shader is executed once, the pixel color of outImage will be set
         // to red.
         const char* computeShader = R"(
             @group(0) @binding(0) var outImage : texture_storage_2d<rgba8unorm, write>;

@@ -365,7 +365,7 @@ void FillVulkanCreateInfoSizesAndType(const Texture& texture, VkImageCreateInfo*
 }
 
 Aspect ComputeCombinedAspect(Device* device, const Format& format) {
-    // In early Vulkan versions it is not possible to transition depth and stencil separetely so
+    // In early Vulkan versions it is not possible to transition depth and stencil separately so
     // textures with Depth|Stencil will be promoted to a single CombinedDepthStencil aspect
     // internally.
     if (format.aspects == (Aspect::Depth | Aspect::Stencil)) {
