@@ -142,6 +142,12 @@ class EnumType(Type):
             if prefix == 0 and 'native' in tags:
                 prefix = 0x0001_0000
 
+            if 'deprecated' not in tags:
+                if 'emscripten' in tags:
+                    assert value_name.startswith('emscripten')
+                else:
+                    assert not value_name.startswith('emscripten')
+
             value += prefix
 
             if value_name == "undefined":
@@ -295,6 +301,14 @@ class Record:
 
 class StructureType(Record, Type):
     def __init__(self, is_enabled, name, json_data):
+        tags = json_data.get('tags', [])
+        if 'deprecated' not in tags:
+            if 'emscripten' in tags:
+                if name != 'INTERNAL_HAVE_EMDAWNWEBGPU_HEADER':
+                    assert name.startswith('emscripten')
+            else:
+                assert not name.startswith('emscripten')
+
         Record.__init__(self, name)
         json_data_override = {}
         if 'members' in json_data:

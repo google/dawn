@@ -313,7 +313,7 @@ bool SampleBase::Setup() {
     surface = wgpu::glfw::CreateSurfaceForWindow(instance, window);
 #else
     // Create the surface.
-    wgpu::SurfaceDescriptorFromCanvasHTMLSelector canvasDesc{};
+    wgpu::EmscriptenSurfaceSourceCanvasHTMLSelector canvasDesc{};
     canvasDesc.selector = "#canvas";
 
     wgpu::SurfaceDescriptor surfaceDesc = {};
