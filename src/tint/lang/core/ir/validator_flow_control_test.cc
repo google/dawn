@@ -3174,8 +3174,9 @@ TEST_F(IR_ValidatorTest, Switch_ConditionPointer) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.Str(),
-              R"(error: switch: condition type must be an integer scalar
+    EXPECT_EQ(
+        res.Failure().reason.Str(),
+        R"(error: switch: condition type 'ptr<function, i32, read_write>' must be an integer scalar
 :2:3 note: in block
   $B1: {
   ^^^

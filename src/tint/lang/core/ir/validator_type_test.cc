@@ -239,7 +239,8 @@ TEST_F(IR_ValidatorTest, Type_VectorElements) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.Str(), R"(:8:5 error: var: vector elements must be scalars
+    EXPECT_EQ(res.Failure().reason.Str(),
+              R"(:8:5 error: var: vector elements, 'vec2<void>', must be scalars
     %void_invalid:ptr<function, vec2<void>, read_write> = var
     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -278,7 +279,7 @@ TEST_F(IR_ValidatorTest, Type_MatrixElements) {
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_EQ(res.Failure().reason.Str(),
-              R"(:3:5 error: var: matrix elements must be float scalars
+              R"(:3:5 error: var: matrix elements, 'mat2x2<u32>', must be float scalars
     %u32_invalid:ptr<function, mat2x2<u32>, read_write> = var
     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -286,7 +287,7 @@ TEST_F(IR_ValidatorTest, Type_MatrixElements) {
   $B1: {
   ^^^
 
-:4:5 error: var: matrix elements must be float scalars
+:4:5 error: var: matrix elements, 'mat3x2<i32>', must be float scalars
     %i32_invalid:ptr<function, mat3x2<i32>, read_write> = var
     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -294,7 +295,7 @@ TEST_F(IR_ValidatorTest, Type_MatrixElements) {
   $B1: {
   ^^^
 
-:5:5 error: var: matrix elements must be float scalars
+:5:5 error: var: matrix elements, 'mat4x2<bool>', must be float scalars
     %bool_invalid:ptr<function, mat4x2<bool>, read_write> = var
     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -302,7 +303,7 @@ TEST_F(IR_ValidatorTest, Type_MatrixElements) {
   $B1: {
   ^^^
 
-:8:5 error: var: matrix elements must be float scalars
+:8:5 error: var: matrix elements, 'mat3x3<void>', must be float scalars
     %void_invalid:ptr<function, mat3x3<void>, read_write> = var
     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 

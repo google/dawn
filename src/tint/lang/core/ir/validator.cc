@@ -1833,14 +1833,14 @@ void Validator::CheckType(const core::type::Type* root,
             },
             [&](const core::type::Vector* v) {
                 if (!v->Type()->IsScalar()) {
-                    diag() << "vector elements must be scalars";
+                    diag() << "vector elements, " << NameOf(type) << ", must be scalars";
                     return false;
                 }
                 return true;
             },
             [&](const core::type::Matrix* m) {
                 if (!m->Type()->IsFloatScalar()) {
-                    diag() << "matrix elements must be float scalars";
+                    diag() << "matrix elements, " << NameOf(type) << ", must be float scalars";
                     return false;
                 }
                 return true;
@@ -2027,7 +2027,8 @@ void Validator::CheckFunction(const Function* func) {
                 !struct_ty || struct_ty->Members().Any([](const core::type::StructMember* m) {
                     return !IsValidFunctionParamType(m->Type());
                 })) {
-                AddError(param) << "function parameter type must be constructible, a pointer, a "
+                AddError(param) << "function parameter type, " << NameOf(param->Type())
+                                << ", must be constructible, a pointer, a "
                                    "texture, or a sampler";
             }
         }
@@ -2049,7 +2050,7 @@ void Validator::CheckFunction(const Function* func) {
                     "fragment entry point params can only be a bool if decorated with "
                     "@builtin(front_facing)"),
                 CheckFrontFacingIfBoolFunc<FunctionParam>(
-                    "fragment entry point param memebers can only be a bool if "
+                    "fragment entry point param members can only be a bool if "
                     "decorated with @builtin(front_facing)"));
         } else if (func->IsEntryPoint()) {
             CheckFunctionParamAttributesAndType(
@@ -2123,7 +2124,8 @@ void Validator::CheckFunction(const Function* func) {
 
     if (func->Stage() == Function::PipelineStage::kCompute) {
         if (DAWN_UNLIKELY(func->ReturnType() && !func->ReturnType()->Is<core::type::Void>())) {
-            AddError(func) << "compute entry point must not have a return type";
+            AddError(func) << "compute entry point must not have a return type, found "
+                           << NameOf(func->ReturnType());
         }
     }
 
@@ -2135,8 +2137,8 @@ void Validator::CheckFunction(const Function* func) {
         }
 
         CheckFunctionReturnAttributesAndType(
-            func, CheckFrontFacingIfBoolFunc<Function>("entry point returns can not be bool"),
-            CheckFrontFacingIfBoolFunc<Function>("entry point return members can not be bool"));
+            func, CheckFrontFacingIfBoolFunc<Function>("entry point returns can not be 'bool'"),
+            CheckFrontFacingIfBoolFunc<Function>("entry point return members can not be 'bool'"));
 
         for (auto var : referenced_module_vars_.TransitiveReferences(func)) {
             const auto* mv = var->Result(0)->Type()->As<core::type::MemoryView>();
@@ -2154,18 +2156,17 @@ void Validator::CheckFunction(const Function* func) {
             if (func->IsFragment() && mv->AddressSpace() == AddressSpace::kIn) {
                 CheckIOAttributesAndType(
                     func, attr, ty,
-                    CheckFrontFacingIfBoolFunc<Function>("input address space values referenced by "
-                                                         "fragment shaders can only be a bool if "
-                                                         "decorated with @builtin(front_facing)"));
+                    CheckFrontFacingIfBoolFunc<Function>(
+                        "input address space values referenced by fragment shaders can only be "
+                        "'bool' if decorated with @builtin(front_facing)"));
 
             } else {
                 CheckIOAttributesAndType(
                     func, attr, ty,
                     CheckNotBool<Function>(
                         "IO address space values referenced by shader entry points can only be "
-                        "bool if "
-                        "in the input space, used only by fragment shaders and decorated with "
-                        "@builtin(front_facing)"));
+                        "'bool' if in the input space, used only by fragment shaders and decorated "
+                        "with @builtin(front_facing)"));
             }
         }
     }
@@ -2205,7 +2206,8 @@ void Validator::CheckWorkgroupSize(const Function* func) {
 
         auto* ty = size->Type();
         if (!ty->IsAnyOf<core::type::I32, core::type::U32>()) {
-            AddError(func) << "@workgroup_size params must be an i32 or u32";
+            AddError(func) << "@workgroup_size params must be an 'i32' or 'u32', received "
+                           << NameOf(ty);
             return;
         }
 
@@ -2214,7 +2216,7 @@ void Validator::CheckWorkgroupSize(const Function* func) {
         }
 
         if (sizes_ty != ty) {
-            AddError(func) << "@workgroup_size params must be all i32s or all u32s";
+            AddError(func) << "@workgroup_size params must be all 'i32's or all 'u32's";
             return;
         }
 
@@ -2422,8 +2424,7 @@ void Validator::CheckOverride(const Override* o) {
     }
 
     if (!o->Result(0)->Type()->IsScalar()) {
-        AddError(o) << "override type " << style::Type(o->Result(0)->Type()->FriendlyName())
-                    << " is not a scalar";
+        AddError(o) << "override type " << NameOf(o->Result(0)->Type()) << " is not a scalar";
         return;
     }
 
@@ -2432,9 +2433,8 @@ void Validator::CheckOverride(const Override* o) {
             return;
         }
         if (o->Initializer()->Type() != o->Result(0)->Type()) {
-            AddError(o) << "override type " << style::Type(o->Result(0)->Type()->FriendlyName())
-                        << " does not match initializer type "
-                        << style::Type(o->Initializer()->Type()->FriendlyName());
+            AddError(o) << "override type " << NameOf(o->Result(0)->Type())
+                        << " does not match initializer type " << NameOf(o->Initializer()->Type());
             return;
         }
     }
@@ -2454,7 +2454,8 @@ void Validator::CheckVar(const Var* var) {
 
     auto* mv = result_type->As<core::type::MemoryView>();
     if (!mv) {
-        AddError(var) << "result type must be a pointer or a reference";
+        AddError(var) << "result type " << NameOf(result_type)
+                      << " must be a pointer or a reference";
         return;
     }
 
@@ -2480,10 +2481,9 @@ void Validator::CheckVar(const Var* var) {
         }
 
         if (var->Initializer()->Type() != var->Result(0)->Type()->UnwrapPtrOrRef()) {
-            AddError(var) << "initializer type "
-                          << style::Type(var->Initializer()->Type()->FriendlyName())
+            AddError(var) << "initializer type " << NameOf(var->Initializer()->Type())
                           << " does not match store type "
-                          << style::Type(var->Result(0)->Type()->UnwrapPtrOrRef()->FriendlyName());
+                          << NameOf(var->Result(0)->Type()->UnwrapPtrOrRef());
             return;
         }
     }
@@ -2640,11 +2640,8 @@ void Validator::CheckLet(const Let* l) {
     }
 
     if (l->Result(0)->Type() != l->Value()->Type()) {
-        auto result_type_name =
-            l->Result(0)->Type() ? l->Result(0)->Type()->FriendlyName() : "undef";
-        auto value_type_name = l->Value()->Type() ? l->Value()->Type()->FriendlyName() : "undef";
-        AddError(l) << "result type " << style::Type(result_type_name)
-                    << " does not match value type " << style::Type(value_type_name);
+        AddError(l) << "result type " << NameOf(l->Result(0)->Type())
+                    << " does not match value type " << NameOf(l->Value()->Type());
     }
 }
 
@@ -2689,8 +2686,8 @@ void Validator::CheckBitcastTypes(const Bitcast* bitcast) {
     const auto* result_type = bitcast->Result(0)->Type();
 
     const auto add_error = [&]() {
-        AddError(bitcast) << "bitcast is not defined for " << style::Type(val_type->FriendlyName())
-                          << " -> " << style::Type(result_type->FriendlyName());
+        AddError(bitcast) << "bitcast is not defined for " << NameOf(val_type) << " -> "
+                          << NameOf(result_type);
     };
 
     // Check that there exists an overload for the provided types
@@ -2812,7 +2809,8 @@ void Validator::CheckBuiltinCall(const BuiltinCall* call) {
     }
 
     if (builtin->return_type != call->Result(0)->Type()) {
-        AddError(call) << "call result type does not match builtin return type";
+        AddError(call) << "call result type " << NameOf(call->Result(0)->Type())
+                       << "does not match builtin return type " << NameOf(builtin->return_type);
         return;
     }
 }
@@ -2837,10 +2835,8 @@ void Validator::CheckMemberBuiltinCall(const MemberBuiltinCall* call) {
     }
 
     if (result->return_type != call->Result(0)->Type()) {
-        AddError(call) << "member call result type ("
-                       << style::Type(call->Result(0)->Type()->FriendlyName())
-                       << ") does not match builtin return type ("
-                       << style::Type(result->return_type->FriendlyName()) << ")";
+        AddError(call) << "member call result type " << NameOf(call->Result(0)->Type())
+                       << " does not match builtin return type " << NameOf(result->return_type);
     }
 }
 
@@ -2869,9 +2865,8 @@ void Validator::CheckConstruct(const Construct* construct) {
             }
             if (args[i]->Type() != members[i]->Type()) {
                 AddError(construct, Construct::kArgsOperandOffset + i)
-                    << "structure member " << i << " is of type "
-                    << style::Type(members[i]->Type()->FriendlyName())
-                    << ", but argument is of type " << style::Type(args[i]->Type()->FriendlyName());
+                    << "type " << NameOf(args[i]->Type()) << " of argument " << i
+                    << " does not match type " << NameOf(members[i]->Type()) << " of struct member";
             }
         }
     }
@@ -2905,8 +2900,7 @@ void Validator::CheckConvert(const Convert* convert) {
         [&](Default) { conv_ty = intrinsic::CtorConv::kNone; });
 
     if (conv_ty == intrinsic::CtorConv::kNone) {
-        AddError(convert) << "not defined for result type, " << StyledText{}
-                          << style::Type(result_type->FriendlyName());
+        AddError(convert) << "not defined for result type, " << NameOf(result_type);
         return;
     }
 
@@ -2914,9 +2908,8 @@ void Validator::CheckConvert(const Convert* convert) {
     auto match =
         table.Lookup(conv_ty, template_type, Vector{value_type}, core::EvaluationStage::kOverride);
     if (match != Success || !match->info->flags.Contains(intrinsic::OverloadFlag::kIsConverter)) {
-        AddError(convert) << "No defined converter for " << StyledText{}
-                          << style::Type(value_type->FriendlyName()) << " -> " << StyledText{}
-                          << style::Type(result_type->FriendlyName());
+        AddError(convert) << "No defined converter for " << NameOf(value_type) << " -> "
+                          << NameOf(result_type);
         return;
     }
 }
@@ -2952,9 +2945,8 @@ void Validator::CheckUserCall(const UserCall* call) {
     for (size_t i = 0; i < args.Length(); i++) {
         if (args[i]->Type() != params[i]->Type()) {
             AddError(call, UserCall::kArgsOperandOffset + i)
-                << "function parameter " << i << " is of type "
-                << style::Type(params[i]->Type()->FriendlyName()) << ", but argument is of type "
-                << style::Type(args[i]->Type()->FriendlyName());
+                << "type " << NameOf(params[i]->Type()) << " of function parameter " << i
+                << " does not match argument type " << NameOf(args[i]->Type());
         }
     }
 }
@@ -2989,7 +2981,7 @@ void Validator::CheckAccess(const Access* a) {
                        << style::Type("ref<", obj_view->AddressSpace(), ", ", type->FriendlyName(),
                                       ", ", obj_view->Access(), ">");
             default:
-                return StyledText{} << style::Type(type->FriendlyName());
+                return NameOf(type);
         }
     };
 
@@ -3003,8 +2995,7 @@ void Validator::CheckAccess(const Access* a) {
 
         auto* index = a->Indices()[i];
         if (DAWN_UNLIKELY(!index->Type() || !index->Type()->IsIntegerScalar())) {
-            auto name = index->Type() ? index->Type()->FriendlyName() : "undef";
-            err() << "index must be integer, got " << name;
+            err() << "index type " << NameOf(index->Type()) << " must be an integer";
             return;
         }
 
@@ -3068,7 +3059,7 @@ void Validator::CheckAccess(const Access* a) {
     }
     if (DAWN_UNLIKELY(!ok)) {
         AddError(a) << "result of access chain is type " << desc_of(in_kind, ty)
-                    << " but instruction type is " << style::Type(want->FriendlyName());
+                    << " but instruction type is " << NameOf(want);
     }
 }
 
@@ -3090,10 +3081,9 @@ void Validator::CheckBinary(const Binary* b) {
 
         if (auto* result = b->Result(0)) {
             if (overload->return_type != result->Type()) {
-                AddError(b) << "result value type " << style::Type(result->Type()->FriendlyName())
-                            << " does not match "
+                AddError(b) << "result value type " << NameOf(result->Type()) << " does not match "
                             << style::Instruction(Disassemble().NameOf(b->Op())) << " result type "
-                            << style::Type(overload->return_type->FriendlyName());
+                            << NameOf(overload->return_type);
             }
         }
     }
@@ -3116,10 +3106,9 @@ void Validator::CheckUnary(const Unary* u) {
 
         if (auto* result = u->Result(0)) {
             if (overload->return_type != result->Type()) {
-                AddError(u) << "result value type " << style::Type(result->Type()->FriendlyName())
-                            << " does not match "
+                AddError(u) << "result value type " << NameOf(result->Type()) << " does not match "
                             << style::Instruction(Disassemble().NameOf(u->Op())) << " result type "
-                            << style::Type(overload->return_type->FriendlyName());
+                            << NameOf(overload->return_type);
             }
         }
     }
@@ -3130,8 +3119,7 @@ void Validator::CheckIf(const If* if_) {
     CheckOperand(if_, If::kConditionOperandOffset);
 
     if (if_->Condition() && !if_->Condition()->Type()->Is<core::type::Bool>()) {
-        AddError(if_, If::kConditionOperandOffset)
-            << "condition type must be " << style::Type("bool");
+        AddError(if_, If::kConditionOperandOffset) << "condition type must be 'bool'";
     }
 
     tasks_.Push([this] { control_stack_.Pop(); });
@@ -3212,8 +3200,7 @@ void Validator::CheckLoopContinuing(const Loop* loop) {
                     if (TransitivelyHolds(loop->Continuing(), use.instruction)) {
                         AddError(use.instruction, use.operand_index)
                             << NameOf(result)
-                            << " cannot be used in continuing block as it is declared after "
-                               "the "
+                            << " cannot be used in continuing block as it is declared after the "
                                "first "
                             << style::Instruction("continue") << " in the loop's body";
                         AddDeclarationNote(result);
@@ -3230,7 +3217,9 @@ void Validator::CheckSwitch(const Switch* s) {
     CheckOperand(s, Switch::kConditionOperandOffset);
 
     if (s->Condition() && !s->Condition()->Type()->IsIntegerScalar()) {
-        AddError(s, Switch::kConditionOperandOffset) << "condition type must be an integer scalar";
+        auto* cond_ty = s->Condition() ? s->Condition()->Type() : nullptr;
+        AddError(s, Switch::kConditionOperandOffset)
+            << "condition type " << NameOf(cond_ty) << " must be an integer scalar";
     }
 
     tasks_.Push([this] { control_stack_.Pop(); });
@@ -3481,7 +3470,8 @@ void Validator::CheckLoad(const Load* l) {
     if (auto* from = l->From()) {
         auto* mv = from->Type()->As<core::type::MemoryView>();
         if (!mv) {
-            AddError(l, Load::kFromOperandOffset) << "load source operand is not a memory view";
+            AddError(l, Load::kFromOperandOffset)
+                << "load source operand " << NameOf(from->Type()) << " is not a memory view";
             return;
         }
 
@@ -3494,9 +3484,8 @@ void Validator::CheckLoad(const Load* l) {
 
         if (l->Result(0)->Type() != mv->StoreType()) {
             AddError(l, Load::kFromOperandOffset)
-                << "result type " << style::Type(l->Result(0)->Type()->FriendlyName())
-                << " does not match source store type "
-                << style::Type(mv->StoreType()->FriendlyName());
+                << "result type " << NameOf(l->Result(0)->Type())
+                << " does not match source store type " << NameOf(mv->StoreType());
         }
     }
 }
@@ -3510,7 +3499,8 @@ void Validator::CheckStore(const Store* s) {
         if (auto* to = s->To()) {
             auto* mv = As<core::type::MemoryView>(to->Type());
             if (!mv) {
-                AddError(s, Store::kToOperandOffset) << "store target operand is not a memory view";
+                AddError(s, Store::kToOperandOffset)
+                    << "store target operand " << NameOf(to->Type()) << " is not a memory view";
                 return;
             }
 
@@ -3525,8 +3515,8 @@ void Validator::CheckStore(const Store* s) {
             auto* store_type = mv->StoreType();
             if (value_type != store_type) {
                 AddError(s, Store::kFromOperandOffset)
-                    << "value type " << style::Type(value_type->FriendlyName())
-                    << " does not match store type " << style::Type(store_type->FriendlyName());
+                    << "value type " << NameOf(value_type) << " does not match store type "
+                    << NameOf(store_type);
             }
         }
     }
@@ -3541,9 +3531,9 @@ void Validator::CheckLoadVectorElement(const LoadVectorElement* l) {
     if (auto* res = l->Result(0)) {
         if (auto* el_ty = GetVectorPtrElementType(l, LoadVectorElement::kFromOperandOffset)) {
             if (res->Type() != el_ty) {
-                AddResultError(l, 0) << "result type " << style::Type(res->Type()->FriendlyName())
-                                     << " does not match vector pointer element type "
-                                     << style::Type(el_ty->FriendlyName());
+                AddResultError(l, 0)
+                    << "result type " << NameOf(res->Type())
+                    << " does not match vector pointer element type " << NameOf(el_ty);
             }
         }
     }
@@ -3559,9 +3549,8 @@ void Validator::CheckStoreVectorElement(const StoreVectorElement* s) {
         if (auto* el_ty = GetVectorPtrElementType(s, StoreVectorElement::kToOperandOffset)) {
             if (value->Type() != el_ty) {
                 AddError(s, StoreVectorElement::kValueOperandOffset)
-                    << "value type " << style::Type(value->Type()->FriendlyName())
-                    << " does not match vector pointer element type "
-                    << style::Type(el_ty->FriendlyName());
+                    << "value type " << NameOf(value->Type())
+                    << " does not match vector pointer element type " << NameOf(el_ty);
             }
         }
     }
@@ -3590,9 +3579,8 @@ void Validator::CheckOperandsMatchTarget(const Instruction* source_inst,
         auto* target_type = target_value->Type();
         if (source_type != target_type) {
             AddError(source_inst, source_operand_offset + i)
-                << "operand with type " << style::Type(source_type->FriendlyName())
-                << " does not match " << NameOf(target) << " target type "
-                << style::Type(target_type->FriendlyName());
+                << "operand with type " << NameOf(source_type) << " does not match "
+                << NameOf(target) << " target type " << NameOf(target_type);
             AddDeclarationNote(target_value);
         }
     }
@@ -3617,8 +3605,7 @@ const core::type::Type* Validator::GetVectorPtrElementType(const Instruction* in
         }
     }
 
-    AddError(inst, idx) << "operand must be a pointer to vector, got "
-                        << style::Type(type->FriendlyName());
+    AddError(inst, idx) << "operand " << NameOf(type) << " must be a pointer to a vector";
     return nullptr;
 }
 

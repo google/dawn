@@ -788,7 +788,7 @@ TEST_F(IR_ValidatorTest, Load_SourceNotMemoryView) {
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_EQ(res.Failure().reason.Str(),
-              R"(:4:19 error: load: load source operand is not a memory view
+              R"(:4:19 error: load: load source operand 'i32' is not a memory view
     %3:f32 = load %l
                   ^^
 
@@ -1041,7 +1041,7 @@ TEST_F(IR_ValidatorTest, Store_TargetNotMemoryView) {
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_EQ(res.Failure().reason.Str(),
-              R"(:4:11 error: store: store target operand is not a memory view
+              R"(:4:11 error: store: store target operand 'i32' is not a memory view
     store %l, 42u
           ^^
 

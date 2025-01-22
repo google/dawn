@@ -557,7 +557,7 @@ TEST_F(IR_ValidatorTest, Function_ParameterWithVoidType) {
     ASSERT_NE(res, Success);
     EXPECT_EQ(
         res.Failure().reason.Str(),
-        R"(:1:17 error: function parameter type must be constructible, a pointer, a texture, or a sampler
+        R"(:1:17 error: function parameter type, 'void', must be constructible, a pointer, a texture, or a sampler
 %my_func = func(%my_param:void):void {
                 ^^^^^^^^^^^^^^
 
@@ -995,7 +995,7 @@ TEST_F(IR_ValidatorTest, Function_Compute_NonVoidReturn) {
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_EQ(res.Failure().reason.Str(),
-              R"(:1:1 error: compute entry point must not have a return type
+              R"(:1:1 error: compute entry point must not have a return type, found 'f32'
 %my_func = @compute @workgroup_size(1u, 1u, 1u) func():f32 [@location(0)] {
 ^^^^^^^^
 
@@ -1081,7 +1081,7 @@ TEST_F(IR_ValidatorTest, Function_WorkgroupSize_ParamWrongType) {
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_EQ(res.Failure().reason.Str(),
-              R"(:1:1 error: @workgroup_size params must be an i32 or u32
+              R"(:1:1 error: @workgroup_size params must be an 'i32' or 'u32', received 'f32'
 %f = @compute @workgroup_size(1.0f, 2u, 3u) func():void {
 ^^
 
@@ -1103,7 +1103,7 @@ TEST_F(IR_ValidatorTest, Function_WorkgroupSize_ParamsSameType) {
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_EQ(res.Failure().reason.Str(),
-              R"(:1:1 error: @workgroup_size params must be all i32s or all u32s
+              R"(:1:1 error: @workgroup_size params must be all 'i32's or all 'u32's
 %f = @compute @workgroup_size(1u, 2i, 3u) func():void {
 ^^
 
@@ -1324,7 +1324,7 @@ TEST_F(IR_ValidatorTest, Function_NonFragment_BoolOutput) {
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_EQ(res.Failure().reason.Str(),
-              R"(:6:1 error: entry point return members can not be bool
+              R"(:6:1 error: entry point return members can not be 'bool'
 %f = @vertex func():OutputStruct {
 ^^
 
@@ -1376,7 +1376,7 @@ TEST_F(IR_ValidatorTest, Function_Fragment_BoolOutput) {
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_EQ(res.Failure().reason.Str(),
-              R"(:1:1 error: entry point returns can not be bool
+              R"(:1:1 error: entry point returns can not be 'bool'
 %f = @fragment func():bool [@location(0)] {
 ^^
 
@@ -1408,7 +1408,7 @@ TEST_F(IR_ValidatorTest, Function_BoolOutput_via_MSV) {
     ASSERT_NE(res, Success);
     EXPECT_EQ(
         res.Failure().reason.Str(),
-        R"(:5:1 error: IO address space values referenced by shader entry points can only be bool if in the input space, used only by fragment shaders and decorated with @builtin(front_facing)
+        R"(:5:1 error: IO address space values referenced by shader entry points can only be 'bool' if in the input space, used only by fragment shaders and decorated with @builtin(front_facing)
 %f = @compute @workgroup_size(1u, 1u, 1u) func():void {
 ^^
 
@@ -1446,7 +1446,7 @@ TEST_F(IR_ValidatorTest, Function_BoolInputWithoutFrontFacing_via_MSV) {
     ASSERT_NE(res, Success);
     EXPECT_EQ(
         res.Failure().reason.Str(),
-        R"(:5:1 error: input address space values referenced by fragment shaders can only be a bool if decorated with @builtin(front_facing)
+        R"(:5:1 error: input address space values referenced by fragment shaders can only be 'bool' if decorated with @builtin(front_facing)
 %f = @fragment func():void {
 ^^
 

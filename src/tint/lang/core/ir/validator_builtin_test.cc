@@ -363,7 +363,7 @@ TEST_F(IR_ValidatorTest, Builtin_GlobalInvocationId_WrongIODirection) {
 %f = @compute @workgroup_size(1u, 1u, 1u) func():vec3<u32> [@global_invocation_id] {
 ^^
 
-:1:1 error: compute entry point must not have a return type
+:1:1 error: compute entry point must not have a return type, found 'vec3<u32>'
 %f = @compute @workgroup_size(1u, 1u, 1u) func():vec3<u32> [@global_invocation_id] {
 ^^
 
@@ -505,7 +505,7 @@ TEST_F(IR_ValidatorTest, Builtin_LocalInvocationId_WrongIODirection) {
 %f = @compute @workgroup_size(1u, 1u, 1u) func():vec3<u32> [@local_invocation_id] {
 ^^
 
-:1:1 error: compute entry point must not have a return type
+:1:1 error: compute entry point must not have a return type, found 'vec3<u32>'
 %f = @compute @workgroup_size(1u, 1u, 1u) func():vec3<u32> [@local_invocation_id] {
 ^^
 
@@ -576,7 +576,7 @@ TEST_F(IR_ValidatorTest, Builtin_LocalInvocationIndex_WrongIODirection) {
 %f = @compute @workgroup_size(1u, 1u, 1u) func():u32 [@local_invocation_index] {
 ^^
 
-:1:1 error: compute entry point must not have a return type
+:1:1 error: compute entry point must not have a return type, found 'u32'
 %f = @compute @workgroup_size(1u, 1u, 1u) func():u32 [@local_invocation_index] {
 ^^
 
@@ -647,7 +647,7 @@ TEST_F(IR_ValidatorTest, Builtin_NumWorkgroups_WrongIODirection) {
 %f = @compute @workgroup_size(1u, 1u, 1u) func():vec3<u32> [@num_workgroups] {
 ^^
 
-:1:1 error: compute entry point must not have a return type
+:1:1 error: compute entry point must not have a return type, found 'vec3<u32>'
 %f = @compute @workgroup_size(1u, 1u, 1u) func():vec3<u32> [@num_workgroups] {
 ^^
 
@@ -855,7 +855,7 @@ TEST_F(IR_ValidatorTest, Builtin_WorkgroupId_WrongIODirection) {
 %f = @compute @workgroup_size(1u, 1u, 1u) func():vec3<u32> [@workgroup_id] {
 ^^
 
-:1:1 error: compute entry point must not have a return type
+:1:1 error: compute entry point must not have a return type, found 'vec3<u32>'
 %f = @compute @workgroup_size(1u, 1u, 1u) func():vec3<u32> [@workgroup_id] {
 ^^
 

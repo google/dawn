@@ -204,7 +204,7 @@ TEST_F(IR_ValidatorTest, CallToFunctionWrongArgType) {
     ASSERT_NE(res, Success);
     EXPECT_EQ(
         res.Failure().reason.Str(),
-        R"(:8:28 error: call: function parameter 1 is of type 'i32', but argument is of type 'f32'
+        R"(:8:28 error: call: type 'i32' of function parameter 1 does not match argument type 'f32'
     %6:void = call %g, 1i, 2.0f, 3i
                            ^^^^
 
@@ -448,7 +448,7 @@ TEST_F(IR_ValidatorTest, CallToBuiltin_MismatchResultType) {
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_EQ(res.Failure().reason.Str(),
-              R"(:3:14 error: abs: call result type does not match builtin return type
+              R"(:3:14 error: abs: call result type 'i32'does not match builtin return type 'f32'
     %2:i32 = abs 1.0f
              ^^^
 

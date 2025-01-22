@@ -164,7 +164,7 @@ TEST_F(IR_ValidatorTest, Var_Function_NonPtrResult) {
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_EQ(res.Failure().reason.Str(),
-              R"(:3:14 error: var: result type must be a pointer or a reference
+              R"(:3:14 error: var: result type 'f32' must be a pointer or a reference
     %2:f32 = var
              ^^^
 
