@@ -780,47 +780,6 @@ INSTANTIATE_TEST_SUITE_P(SpirvReader,
                              {"UnpackUnorm2x16", "unpack2x16unorm", 2},
                              {"UnpackHalf2x16", "unpack2x16float", 2}}));
 
-TEST_F(SpirvReaderTest, DISABLED_GlslStd450_Reflect_Scalar) {
-    EXPECT_IR(Preamble() + R"(
-     %98 = OpFAdd %float %float_50 %float_50 ; has only one use
-     %99 = OpFAdd %float %float_60 %float_60 ; has only one use
-     %1 = OpExtInst %float %glsl Reflect %98 %99
-     %2 = OpCopyObject %float %1
-     OpReturn
-     OpFunctionEnd
-  )",
-              R"(
-%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
-  $B1: {
-    %2:f32 = (x_98 - (2.0f * (x_99 * (x_99 * x_98))));
-    %3:f32 = let %2
-  }
-}
-)");
-}
-
-TEST_F(SpirvReaderTest, DISABLED_GlslStd450_Reflect_Vector) {
-    EXPECT_IR(Preamble() + R"(
-     %98 = OpFAdd %v2float %v2float_50_60 %v2float_50_60
-     %99 = OpFAdd %v2float %v2float_60_50 %v2float_60_50
-     %1 = OpExtInst %v2float %glsl Reflect %98 %99
-     %2 = OpCopyObject %v2float %1
-     OpReturn
-     OpFunctionEnd
-  )",
-              R"(
-%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
-  $B1: {
-    %2:vec2<f32> = add vec2<f32>(50.0f, 60.0f), vec2<f32>(50.0f, 60.0f)
-    %3:vec2<f32> = add vec2<f32>(60.0f, 50.0f), vec2<f32>(60.0f, 50.0f)
-    %4:vec2<f32> = reflect %2, %3
-    %5:vec2<f32> = let %4
-    ret
-  }
-}
-)");
-}
-
 // For ldexp with signed second argument, see above.
 TEST_F(SpirvReaderTest, DISABLED_GlslStd450_Ldexp_Scalar_Float_Uint) {
     EXPECT_IR(Preamble() + R"(

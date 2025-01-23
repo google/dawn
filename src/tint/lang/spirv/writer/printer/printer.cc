@@ -1429,6 +1429,9 @@ class Printer {
             case spirv::BuiltinFn::kRefract:
                 ext_inst(GLSLstd450Refract);
                 break;
+            case spirv::BuiltinFn::kReflect:
+                ext_inst(GLSLstd450Reflect);
+                break;
             case spirv::BuiltinFn::kFaceForward:
                 ext_inst(GLSLstd450FaceForward);
                 break;

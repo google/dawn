@@ -354,6 +354,8 @@ implicit(T: iu32, N: num) fn findUMsb<R: iu32>(vec<N, T>) -> vec<N, R>
 
 implicit(T: f32_f16) fn refract(T, T, T) -> T
 implicit(T: f32_f16, N: num) fn refract(vec<N, T>, vec<N, T>, T) -> vec<N, T>
+implicit(T: f32_f16) fn reflect(T, T) -> T
+implicit(T: f32_f16, N: num) fn reflect(vec<N, T>, vec<N, T>) -> vec<N, T>
 
 implicit(T: f32_f16) fn faceForward(T, T, T) -> T
 implicit(T: f32_f16, N: num) fn faceForward(vec<N, T>, vec<N, T>, vec<N, T>) -> vec<N, T>

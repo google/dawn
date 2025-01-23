@@ -136,6 +136,8 @@ const char* str(BuiltinFn i) {
             return "findUMsb";
         case BuiltinFn::kRefract:
             return "refract";
+        case BuiltinFn::kReflect:
+            return "reflect";
         case BuiltinFn::kFaceForward:
             return "faceForward";
         case BuiltinFn::kSdot:
@@ -205,6 +207,7 @@ tint::core::ir::Instruction::Accesses GetSideEffects(BuiltinFn fn) {
         case BuiltinFn::kFindSMsb:
         case BuiltinFn::kFindUMsb:
         case BuiltinFn::kRefract:
+        case BuiltinFn::kReflect:
         case BuiltinFn::kFaceForward:
             break;
     }

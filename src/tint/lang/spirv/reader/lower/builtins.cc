@@ -103,6 +103,9 @@ struct State {
                 case spirv::BuiltinFn::kRefract:
                     Refract(builtin);
                     break;
+                case spirv::BuiltinFn::kReflect:
+                    Reflect(builtin);
+                    break;
                 case spirv::BuiltinFn::kFaceForward:
                     FaceForward(builtin);
                     break;
@@ -257,6 +260,27 @@ struct State {
             } else {
                 b.CallWithResult(call->DetachResult(), core::BuiltinFn::kRefract,
                                  Vector<core::ir::Value*, 3>{I, N, eta});
+            }
+        });
+        call->Destroy();
+    }
+
+    void Reflect(spirv::ir::BuiltinCall* call) {
+        auto args = call->Args();
+
+        auto* I = args[0];
+        auto* N = args[1];
+
+        b.InsertBefore(call, [&] {
+            if (I->Type()->IsFloatScalar()) {
+                auto* v = b.Multiply(I->Type(), I, N)->Result(0);
+                v = b.Multiply(I->Type(), v, N)->Result(0);
+                v = b.Multiply(I->Type(), v, 2.0_f)->Result(0);
+                v = b.Subtract(I->Type(), I, v)->Result(0);
+                call->Result(0)->ReplaceAllUsesWith(v);
+            } else {
+                b.CallWithResult(call->DetachResult(), core::BuiltinFn::kReflect,
+                                 Vector<core::ir::Value*, 2>{I, N});
             }
         });
         call->Destroy();
