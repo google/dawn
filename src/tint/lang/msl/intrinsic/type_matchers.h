@@ -30,6 +30,7 @@
 
 #include "src/tint/lang/core/intrinsic/table.h"
 #include "src/tint/lang/core/type/manager.h"
+#include "src/tint/lang/core/type/vector.h"
 #include "src/tint/lang/msl/type/bias.h"
 #include "src/tint/lang/msl/type/gradient.h"
 #include "src/tint/lang/msl/type/level.h"
