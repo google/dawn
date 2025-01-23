@@ -5703,12 +5703,19 @@ constexpr IntrinsicInfo kBuiltins[] = {
   },
   {
     /* [44] */
+    /* fn findSMsb<R : iu32>[T : iu32](T) -> R */
+    /* fn findSMsb<R : iu32>[T : iu32, N : num](vec<N, T>) -> vec<N, R> */
+    /* num overloads */ 2,
+    /* overloads */ OverloadIndex(154),
+  },
+  {
+    /* [45] */
     /* fn sdot(u32, u32, u32) -> i32 */
     /* num overloads */ 1,
     /* overloads */ OverloadIndex(171),
   },
   {
-    /* [45] */
+    /* [46] */
     /* fn udot(u32, u32, u32) -> u32 */
     /* num overloads */ 1,
     /* overloads */ OverloadIndex(172),

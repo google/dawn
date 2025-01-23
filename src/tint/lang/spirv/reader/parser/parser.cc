@@ -675,8 +675,6 @@ class Parser {
                 return core::BuiltinFn::kAbs;
             case GLSLstd450FSign:
                 return core::BuiltinFn::kSign;
-            case GLSLstd450FindSMsb:
-                return core::BuiltinFn::kFirstLeadingBit;
             case GLSLstd450FindUMsb:
                 return core::BuiltinFn::kFirstLeadingBit;
             case GLSLstd450Floor:
@@ -779,6 +777,8 @@ class Parser {
                 return spirv::BuiltinFn::kUclamp;
             case GLSLstd450FindILsb:
                 return spirv::BuiltinFn::kFindILsb;
+            case GLSLstd450FindSMsb:
+                return spirv::BuiltinFn::kFindSMsb;
             default:
                 break;
         }
@@ -791,7 +791,7 @@ class Parser {
             ext_opcode == GLSLstd450SMax || ext_opcode == GLSLstd450SMin ||
             ext_opcode == GLSLstd450SClamp || ext_opcode == GLSLstd450UMax ||
             ext_opcode == GLSLstd450UMin || ext_opcode == GLSLstd450UClamp ||
-            ext_opcode == GLSLstd450FindILsb) {
+            ext_opcode == GLSLstd450FindILsb || ext_opcode == GLSLstd450FindSMsb) {
             return {result_ty->DeepestElement()};
         }
         return {};

@@ -649,54 +649,6 @@ TEST_F(SpirvReaderTest, Normalize_Vector4) {
 )");
 }
 
-TEST_F(SpirvReaderTest, DISABLED_RectifyOperandsAndResult_FindSMsb) {
-    // Check signedness conversion of arguments and results.
-    //   SPIR-V signed arg -> keep it
-    //      signed result -> keep it
-    //      unsigned result -> cast result to unsigned
-    //
-    //   SPIR-V unsigned arg -> cast it to signed
-    //      signed result -> keept it
-    //      unsigned result -> cast result to unsigned
-    EXPECT_IR(Preamble() + R"(
-     ; signed arg
-     ;    signed result
-     %1 = OpExtInst %int %glsl FindSMsb %int_30
-     %2 = OpExtInst %v2int %glsl FindSMsb %v2int_30_40
-
-     ; signed arg
-     ;    unsigned result
-     %3 = OpExtInst %uint %glsl FindSMsb %int_30
-     %4 = OpExtInst %v2uint %glsl FindSMsb %v2int_30_40
-
-     ; unsigned arg
-     ;    signed result
-     %5 = OpExtInst %int %glsl FindSMsb %uint_10
-     %6 = OpExtInst %v2int %glsl FindSMsb %v2uint_10_20
-
-     ; unsigned arg
-     ;    unsigned result
-     %7 = OpExtInst %uint %glsl FindSMsb %uint_10
-     %8 = OpExtInst %v2uint %glsl FindSMsb %v2uint_10_20
-     OpReturn
-     OpFunctionEnd
-  )",
-              R"(
-%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
-  $B1: {
-    let x_1 = firstLeadingBit(i1);
-    let x_2 = firstLeadingBit(v2i1);
-    let x_3 = bitcast<u32>(firstLeadingBit(i1));
-    let x_4 = bitcast<vec2u>(firstLeadingBit(v2i1));
-    let x_5 = firstLeadingBit(bitcast<i32>(u1));
-    let x_6 = firstLeadingBit(bitcast<vec2i>(v2u1));
-    let x_7 = bitcast<u32>(firstLeadingBit(bitcast<i32>(u1)));
-    let x_8 = bitcast<vec2u>(firstLeadingBit(bitcast<vec2i>(v2u1)));
-  }
-}
-)");
-}
-
 TEST_F(SpirvReaderTest, DISABLED_RectifyOperandsAndResult_FindUMsb) {
     // Check signedness conversion of arguments and results.
     //   SPIR-V signed arg -> cast arg to unsigned

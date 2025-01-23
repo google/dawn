@@ -94,6 +94,9 @@ struct State {
                 case spirv::BuiltinFn::kFindILsb:
                     FindILsb(builtin);
                     break;
+                case spirv::BuiltinFn::kFindSMsb:
+                    FindSMsb(builtin);
+                    break;
                 default:
                     TINT_UNREACHABLE() << "unknown spirv builtin: " << builtin->Func();
             }
@@ -137,6 +140,9 @@ struct State {
         WrapSignedSpirvMethods(call, core::BuiltinFn::kSign);
     }
     void Abs(spirv::ir::BuiltinCall* call) { WrapSignedSpirvMethods(call, core::BuiltinFn::kAbs); }
+    void FindSMsb(spirv::ir::BuiltinCall* call) {
+        WrapSignedSpirvMethods(call, core::BuiltinFn::kFirstLeadingBit);
+    }
     void SMax(spirv::ir::BuiltinCall* call) { WrapSignedSpirvMethods(call, core::BuiltinFn::kMax); }
     void SMin(spirv::ir::BuiltinCall* call) { WrapSignedSpirvMethods(call, core::BuiltinFn::kMin); }
     void SClamp(spirv::ir::BuiltinCall* call) {

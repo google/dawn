@@ -159,104 +159,131 @@ TEST_F(SpirvParserTest, GlslStd450_MatrixInverse_MultipleInScope) {
 )");
 }
 
-TEST_F(SpirvParserTest, GlslStd450_SAbs_UnsignedToUnsigned) {
-    EXPECT_IR(Preamble() + R"(
-     %1 = OpExtInst %uint %glsl SAbs %uint_10
-     %2 = OpExtInst %v2uint %glsl SAbs %v2uint_10_20
-     %3 = OpCopyObject %uint %1
-     %4 = OpCopyObject %v2uint %2
-     OpReturn
-     OpFunctionEnd
-  )",
-              R"(
-%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
-  $B1: {
-    %2:u32 = spirv.abs<u32> 10u
-    %3:vec2<u32> = spirv.abs<u32> vec2<u32>(10u, 20u)
-    %4:u32 = let %2
-    %5:vec2<u32> = let %3
-    ret
-  }
-}
-)");
-}
-
-TEST_F(SpirvParserTest, GlslStd450_SAbs_UnsignedToSigned) {
-    EXPECT_IR(Preamble() + R"(
-     %1 = OpExtInst %int %glsl SAbs %uint_10
-     %2 = OpExtInst %v2int %glsl SAbs %v2uint_10_20
-     %3 = OpCopyObject %int %1
-     %4 = OpCopyObject %v2int %2
-     OpReturn
-     OpFunctionEnd
-  )",
-              R"(
-%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
-  $B1: {
-    %2:i32 = spirv.abs<i32> 10u
-    %3:vec2<i32> = spirv.abs<i32> vec2<u32>(10u, 20u)
-    %4:i32 = let %2
-    %5:vec2<i32> = let %3
-    ret
-  }
-}
-)");
-}
-
-TEST_F(SpirvParserTest, GlslStd450_SAbs_SignedToUnsigned) {
-    EXPECT_IR(Preamble() + R"(
-     %1 = OpExtInst %uint %glsl SAbs %int_10
-     %2 = OpExtInst %v2uint %glsl SAbs %v2int_10_20
-     %3 = OpCopyObject %uint %1
-     %4 = OpCopyObject %v2uint %2
-     OpReturn
-     OpFunctionEnd
-  )",
-              R"(
-%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
-  $B1: {
-    %2:u32 = spirv.abs<u32> 10i
-    %3:vec2<u32> = spirv.abs<u32> vec2<i32>(10i, 20i)
-    %4:u32 = let %2
-    %5:vec2<u32> = let %3
-    ret
-  }
-}
-)");
-}
-
-TEST_F(SpirvParserTest, GlslStd450_SAbs_SignedToSigned) {
-    EXPECT_IR(Preamble() + R"(
-     %1 = OpExtInst %int %glsl SAbs %int_10
-     %2 = OpExtInst %v2int %glsl SAbs %v2int_10_20
-     %3 = OpCopyObject %int %1
-     %4 = OpCopyObject %v2int %2
-     OpReturn
-     OpFunctionEnd
-  )",
-              R"(
-%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
-  $B1: {
-    %2:i32 = spirv.abs<i32> 10i
-    %3:vec2<i32> = spirv.abs<i32> vec2<i32>(10i, 20i)
-    %4:i32 = let %2
-    %5:vec2<i32> = let %3
-    ret
-  }
-}
-)");
-}
-
-struct GlslStd450TwoParams {
+struct GlslStd450Params {
     std::string spv_name;
     std::string ir_name;
 };
-[[maybe_unused]] inline std::ostream& operator<<(std::ostream& out, GlslStd450TwoParams c) {
+[[maybe_unused]] inline std::ostream& operator<<(std::ostream& out, GlslStd450Params c) {
     out << c.spv_name;
     return out;
 }
 
-using GlslStd450TwoParamTest = SpirvParserTestWithParam<GlslStd450TwoParams>;
+using GlslStd450OneParamTest = SpirvParserTestWithParam<GlslStd450Params>;
+
+TEST_P(GlslStd450OneParamTest, UnsignedToUnsigned) {
+    auto params = GetParam();
+    EXPECT_IR(Preamble() + R"(
+     %1 = OpExtInst %uint %glsl )" +
+                  params.spv_name + R"( %uint_10
+     %2 = OpExtInst %v2uint %glsl )" +
+                  params.spv_name + R"( %v2uint_10_20
+     %3 = OpCopyObject %uint %1
+     %4 = OpCopyObject %v2uint %2
+     OpReturn
+     OpFunctionEnd
+  )",
+              R"(
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:u32 = spirv.)" +
+                  params.ir_name + R"(<u32> 10u
+    %3:vec2<u32> = spirv.)" +
+                  params.ir_name + R"(<u32> vec2<u32>(10u, 20u)
+    %4:u32 = let %2
+    %5:vec2<u32> = let %3
+    ret
+  }
+}
+)");
+}
+
+TEST_P(GlslStd450OneParamTest, UnsignedToSigned) {
+    auto params = GetParam();
+    EXPECT_IR(Preamble() + R"(
+     %1 = OpExtInst %int %glsl )" +
+                  params.spv_name + R"( %uint_10
+     %2 = OpExtInst %v2int %glsl )" +
+                  params.spv_name + R"( %v2uint_10_20
+     %3 = OpCopyObject %int %1
+     %4 = OpCopyObject %v2int %2
+     OpReturn
+     OpFunctionEnd
+  )",
+              R"(
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:i32 = spirv.)" +
+                  params.ir_name + R"(<i32> 10u
+    %3:vec2<i32> = spirv.)" +
+                  params.ir_name + R"(<i32> vec2<u32>(10u, 20u)
+    %4:i32 = let %2
+    %5:vec2<i32> = let %3
+    ret
+  }
+}
+)");
+}
+
+TEST_P(GlslStd450OneParamTest, SignedToUnsigned) {
+    auto params = GetParam();
+    EXPECT_IR(Preamble() + R"(
+     %1 = OpExtInst %uint %glsl )" +
+                  params.spv_name + R"( %int_10
+     %2 = OpExtInst %v2uint %glsl )" +
+                  params.spv_name + R"( %v2int_10_20
+     %3 = OpCopyObject %uint %1
+     %4 = OpCopyObject %v2uint %2
+     OpReturn
+     OpFunctionEnd
+  )",
+              R"(
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:u32 = spirv.)" +
+                  params.ir_name + R"(<u32> 10i
+    %3:vec2<u32> = spirv.)" +
+                  params.ir_name + R"(<u32> vec2<i32>(10i, 20i)
+    %4:u32 = let %2
+    %5:vec2<u32> = let %3
+    ret
+  }
+}
+)");
+}
+
+TEST_P(GlslStd450OneParamTest, SignedToSigned) {
+    auto params = GetParam();
+    EXPECT_IR(Preamble() + R"(
+     %1 = OpExtInst %int %glsl )" +
+                  params.spv_name + R"( %int_10
+     %2 = OpExtInst %v2int %glsl )" +
+                  params.spv_name + R"( %v2int_10_20
+     %3 = OpCopyObject %int %1
+     %4 = OpCopyObject %v2int %2
+     OpReturn
+     OpFunctionEnd
+  )",
+              R"(
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:i32 = spirv.)" +
+                  params.ir_name + R"(<i32> 10i
+    %3:vec2<i32> = spirv.)" +
+                  params.ir_name + R"(<i32> vec2<i32>(10i, 20i)
+    %4:i32 = let %2
+    %5:vec2<i32> = let %3
+    ret
+  }
+}
+)");
+}
+
+INSTANTIATE_TEST_SUITE_P(SpirvParser,
+                         GlslStd450OneParamTest,
+                         ::testing::Values(GlslStd450Params{"SAbs", "abs"},
+                                           GlslStd450Params{"FindSMsb", "findSMsb"}));
+
+using GlslStd450TwoParamTest = SpirvParserTestWithParam<GlslStd450Params>;
 
 TEST_P(GlslStd450TwoParamTest, UnsignedToUnsigned) {
     auto params = GetParam();
@@ -372,12 +399,12 @@ TEST_P(GlslStd450TwoParamTest, MixedToSigned) {
 
 INSTANTIATE_TEST_SUITE_P(SpirvParser,
                          GlslStd450TwoParamTest,
-                         ::testing::Values(GlslStd450TwoParams{"SMax", "smax"},
-                                           GlslStd450TwoParams{"SMin", "smin"},
-                                           GlslStd450TwoParams{"UMax", "umax"},
-                                           GlslStd450TwoParams{"UMin", "umin"}));
+                         ::testing::Values(GlslStd450Params{"SMax", "smax"},
+                                           GlslStd450Params{"SMin", "smin"},
+                                           GlslStd450Params{"UMax", "umax"},
+                                           GlslStd450Params{"UMin", "umin"}));
 
-using GlslStd450ThreeParamTest = SpirvParserTestWithParam<GlslStd450TwoParams>;
+using GlslStd450ThreeParamTest = SpirvParserTestWithParam<GlslStd450Params>;
 
 TEST_P(GlslStd450ThreeParamTest, UnsignedToUnsigned) {
     auto params = GetParam();
@@ -493,8 +520,8 @@ TEST_P(GlslStd450ThreeParamTest, MixedToSigned) {
 
 INSTANTIATE_TEST_SUITE_P(SpirvParser,
                          GlslStd450ThreeParamTest,
-                         ::testing::Values(GlslStd450TwoParams{"SClamp", "sclamp"},
-                                           GlslStd450TwoParams{"UClamp", "uclamp"}));
+                         ::testing::Values(GlslStd450Params{"SClamp", "sclamp"},
+                                           GlslStd450Params{"UClamp", "uclamp"}));
 
 TEST_F(SpirvParserTest, FindILsb) {
     EXPECT_IR(Preamble() + R"(

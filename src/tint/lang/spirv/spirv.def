@@ -347,6 +347,8 @@ implicit(T: iu32, U: iu32, V: iu32, N: num) fn uclamp<R: iu32>(vec<N, T>, vec<N,
 
 implicit(T: iu32) fn findILsb<R: iu32>(T) -> R
 implicit(T: iu32, N: num) fn findILsb<R: iu32>(vec<N, T>) -> vec<N, R>
+implicit(T: iu32) fn findSMsb<R: iu32>(T) -> R
+implicit(T: iu32, N: num) fn findSMsb<R: iu32>(vec<N, T>) -> vec<N, R>
 
 ////////////////////////////////////////////////////////////////////////////////
 // SPV_KHR_integer_dot_product instructions
