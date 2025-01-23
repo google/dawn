@@ -163,7 +163,7 @@ MaybeError Buffer::InitializeAsExternalBuffer(ComPtr<ID3D12Resource> d3d12Buffer
                                               const UnpackedPtr<BufferDescriptor>& descriptor) {
     AllocationInfo info;
     info.mMethod = AllocationMethod::kExternal;
-    mResourceAllocation = {info, 0, std::move(d3d12Buffer), nullptr};
+    mResourceAllocation = {info, 0, std::move(d3d12Buffer), nullptr, ResourceHeapKind::InvalidEnum};
     mAllocatedSize = descriptor->size;
     return {};
 }
@@ -313,7 +313,8 @@ MaybeError Buffer::InitializeHostMapped(const BufferHostMappedPointer* hostMappe
 
     mResourceAllocation = {AllocationInfo{0, AllocationMethod::kExternal}, 0,
                            std::move(placedResource),
-                           /* heap is external, and not tracked for residency */ nullptr};
+                           /* heap is external, and not tracked for residency */ nullptr,
+                           ResourceHeapKind::InvalidEnum};
     mHostMappedHeap = std::move(heap);
     mHostMappedDisposeCallback = hostMappedDesc->disposeCallback;
     mHostMappedDisposeUserdata = hostMappedDesc->userdata;

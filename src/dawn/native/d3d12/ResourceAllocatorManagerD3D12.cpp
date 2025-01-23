@@ -37,6 +37,7 @@
 #include "dawn/native/d3d12/HeapAllocatorD3D12.h"
 #include "dawn/native/d3d12/HeapD3D12.h"
 #include "dawn/native/d3d12/ResidencyManagerD3D12.h"
+#include "dawn/native/d3d12/ResourceHeapAllocationD3D12.h"
 #include "dawn/native/d3d12/UtilsD3D12.h"
 
 namespace dawn::native::d3d12 {
@@ -79,73 +80,6 @@ D3D12_HEAP_FLAGS GetD3D12HeapFlags(ResourceHeapKind resourceHeapKind) {
         case ResourceHeapKind::Default_OnlyRenderableOrDepthTextures:
             return D3D12_HEAP_FLAG_ALLOW_ONLY_RT_DS_TEXTURES;
         case EnumCount:
-            DAWN_UNREACHABLE();
-    }
-}
-
-ResourceHeapKind GetResourceHeapKind(D3D12_RESOURCE_DIMENSION dimension,
-                                     D3D12_HEAP_PROPERTIES heapProperties,
-                                     D3D12_RESOURCE_FLAGS flags,
-                                     uint32_t resourceHeapTier) {
-    D3D12_HEAP_TYPE heapType = heapProperties.Type;
-
-    // TODO(386255678):
-    // 1. Currently we only use Custom_WriteBack_OnlyBuffers on UMA architectures. Consider ReBAR
-    //    which is UMA Coherent.
-    // 2. Remove `GetResourceHeapKind()` as we should never have to convert back from the resource
-    //    to the ResourceHeapKind
-    if (heapType == D3D12_HEAP_TYPE_CUSTOM) {
-        DAWN_ASSERT(dimension == D3D12_RESOURCE_DIMENSION_BUFFER &&
-                    heapProperties.CPUPageProperty == D3D12_CPU_PAGE_PROPERTY_WRITE_BACK &&
-                    heapProperties.MemoryPoolPreference == D3D12_MEMORY_POOL_L0);
-        return ResourceHeapKind::Custom_WriteBack_OnlyBuffers;
-    }
-
-    if (resourceHeapTier >= 2) {
-        switch (heapType) {
-            case D3D12_HEAP_TYPE_UPLOAD:
-                return ResourceHeapKind::Upload_AllBuffersAndTextures;
-            case D3D12_HEAP_TYPE_DEFAULT:
-                return ResourceHeapKind::Default_AllBuffersAndTextures;
-            case D3D12_HEAP_TYPE_READBACK:
-                return ResourceHeapKind::Readback_AllBuffersAndTextures;
-            default:
-                DAWN_UNREACHABLE();
-        }
-    }
-
-    switch (dimension) {
-        case D3D12_RESOURCE_DIMENSION_BUFFER: {
-            switch (heapType) {
-                case D3D12_HEAP_TYPE_UPLOAD:
-                    return ResourceHeapKind::Upload_OnlyBuffers;
-                case D3D12_HEAP_TYPE_DEFAULT:
-                    return ResourceHeapKind::Default_OnlyBuffers;
-                case D3D12_HEAP_TYPE_READBACK:
-                    return ResourceHeapKind::Readback_OnlyBuffers;
-                default:
-                    DAWN_UNREACHABLE();
-            }
-            break;
-        }
-        case D3D12_RESOURCE_DIMENSION_TEXTURE1D:
-        case D3D12_RESOURCE_DIMENSION_TEXTURE2D:
-        case D3D12_RESOURCE_DIMENSION_TEXTURE3D: {
-            switch (heapType) {
-                case D3D12_HEAP_TYPE_DEFAULT: {
-                    if ((flags & D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL) ||
-                        (flags & D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET)) {
-                        return ResourceHeapKind::Default_OnlyRenderableOrDepthTextures;
-                    }
-                    return ResourceHeapKind::Default_OnlyNonRenderableOrDepthTextures;
-                }
-
-                default:
-                    DAWN_UNREACHABLE();
-            }
-            break;
-        }
-        default:
             DAWN_UNREACHABLE();
     }
 }
@@ -455,7 +389,7 @@ ResultOrError<ResourceHeapAllocation> ResourceAllocatorManager::AllocateMemory(
 void ResourceAllocatorManager::Tick(ExecutionSerial completedSerial) {
     for (ResourceHeapAllocation& allocation : mAllocationsToDelete.IterateUpTo(completedSerial)) {
         if (allocation.GetInfo().mMethod == AllocationMethod::kSubAllocated) {
-            FreeMemory(allocation);
+            FreeSubAllocatedMemory(allocation);
         }
     }
     mAllocationsToDelete.ClearUpTo(completedSerial);
@@ -486,18 +420,10 @@ void ResourceAllocatorManager::DeallocateMemory(ResourceHeapAllocation& allocati
     DAWN_ASSERT(allocation.GetD3D12Resource() == nullptr);
 }
 
-void ResourceAllocatorManager::FreeMemory(ResourceHeapAllocation& allocation) {
+void ResourceAllocatorManager::FreeSubAllocatedMemory(ResourceHeapAllocation& allocation) {
     DAWN_ASSERT(allocation.GetInfo().mMethod == AllocationMethod::kSubAllocated);
 
-    D3D12_HEAP_PROPERTIES heapProp;
-    allocation.GetD3D12Resource()->GetHeapProperties(&heapProp, nullptr);
-
-    const D3D12_RESOURCE_DESC resourceDescriptor = allocation.GetD3D12Resource()->GetDesc();
-
-    const size_t resourceHeapKindIndex =
-        GetResourceHeapKind(resourceDescriptor.Dimension, heapProp, resourceDescriptor.Flags,
-                            mDevice->GetResourceHeapTier());
-
+    const size_t resourceHeapKindIndex = static_cast<size_t>(allocation.GetResourceHeapKind());
     mSubAllocatedResourceAllocators[resourceHeapKindIndex]->Deallocate(allocation);
 }
 
@@ -571,7 +497,7 @@ ResultOrError<ResourceHeapAllocation> ResourceAllocatorManager::CreatePlacedReso
     mDevice->GetResidencyManager()->UnlockAllocation(heap);
 
     return ResourceHeapAllocation{allocation.GetInfo(), allocation.GetOffset(),
-                                  std::move(placedResource), heap};
+                                  std::move(placedResource), heap, resourceHeapKind};
 }
 
 ResultOrError<ResourceHeapAllocation> ResourceAllocatorManager::CreateCommittedResource(
@@ -636,7 +562,8 @@ ResultOrError<ResourceHeapAllocation> ResourceAllocatorManager::CreateCommittedR
     info.mMethod = AllocationMethod::kDirect;
 
     return ResourceHeapAllocation{info,
-                                  /*offset*/ 0, std::move(committedResource), heap};
+                                  /*offset*/ 0, std::move(committedResource), heap,
+                                  resourceHeapKind};
 }
 
 void ResourceAllocatorManager::DestroyPool() {

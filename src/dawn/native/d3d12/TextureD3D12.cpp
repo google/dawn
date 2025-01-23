@@ -200,7 +200,8 @@ MaybeError Texture::InitializeAsExternalTexture(ComPtr<IUnknown> d3dTexture,
     // When creating the ResourceHeapAllocation, the resource heap is set to nullptr because the
     // texture is owned externally. The texture's owning entity must remain responsible for
     // memory management.
-    mResourceAllocation = {info, 0, std::move(d3d12Texture), nullptr};
+    mResourceAllocation = {info, 0, std::move(d3d12Texture), nullptr,
+                           ResourceHeapKind::InvalidEnum};
     mKeyedMutex = std::move(keyedMutex);
     mWaitFences = std::move(waitFences);
     mSwapChainTexture = isSwapChainTexture;
@@ -302,7 +303,8 @@ MaybeError Texture::InitializeAsSwapChainTexture(ComPtr<ID3D12Resource> d3d12Tex
     // When creating the ResourceHeapAllocation, the resource heap is set to nullptr because the
     // texture is owned externally. The texture's owning entity must remain responsible for
     // memory management.
-    mResourceAllocation = {info, 0, std::move(d3d12Texture), nullptr};
+    mResourceAllocation = {info, 0, std::move(d3d12Texture), nullptr,
+                           ResourceHeapKind::InvalidEnum};
 
     SetLabelHelper("Dawn_SwapChainTexture");
 
