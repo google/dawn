@@ -779,6 +779,8 @@ class Parser {
                 return spirv::BuiltinFn::kFindSMsb;
             case GLSLstd450FindUMsb:
                 return spirv::BuiltinFn::kFindUMsb;
+            case GLSLstd450Refract:
+                return spirv::BuiltinFn::kRefract;
             default:
                 break;
         }

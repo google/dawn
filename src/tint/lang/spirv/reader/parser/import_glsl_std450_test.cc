@@ -71,6 +71,7 @@ std::string Preamble() {
   %v2uint_20_10 = OpConstantComposite %v2uint %uint_20 %uint_10
 
   %v2float_50_60 = OpConstantComposite %v2float %float_50 %float_60
+  %v2float_60_50 = OpConstantComposite %v2float %float_60 %float_50
   %v3float_50_60_70 = OpConstantComposite %v3float %float_50 %float_60 %float_70
   %v4float_50_50_50_50 = OpConstantComposite %v4float %float_50 %float_50 %float_50 %float_50
 
@@ -544,6 +545,38 @@ TEST_F(SpirvParserTest, FindILsb) {
     %5:vec2<i32> = spirv.findILsb<i32> vec2<u32>(10u, 20u)
     %6:vec2<u32> = spirv.findILsb<u32> vec2<u32>(10u, 20u)
     %7:vec2<i32> = spirv.findILsb<i32> vec2<i32>(10i, 20i)
+    ret
+  }
+}
+)");
+}
+
+TEST_F(SpirvParserTest, Refract_Scalar) {
+    EXPECT_IR(Preamble() + R"(
+     %1 = OpExtInst %float %glsl Refract %float_50 %float_60 %float_70
+     OpReturn
+     OpFunctionEnd
+  )",
+              R"(
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:f32 = spirv.refract 50.0f, 60.0f, 70.0f
+    ret
+  }
+}
+)");
+}
+
+TEST_F(SpirvParserTest, Refract_Vector) {
+    EXPECT_IR(Preamble() + R"(
+     %1 = OpExtInst %v2float %glsl Refract %v2float_50_60 %v2float_60_50 %float_70
+     OpReturn
+     OpFunctionEnd
+  )",
+              R"(
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:vec2<f32> = spirv.refract vec2<f32>(50.0f, 60.0f), vec2<f32>(60.0f, 50.0f), 70.0f
     ret
   }
 }

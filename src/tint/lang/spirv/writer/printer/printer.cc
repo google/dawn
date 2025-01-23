@@ -1426,6 +1426,9 @@ class Printer {
             case spirv::BuiltinFn::kFindUMsb:
                 ext_inst(GLSLstd450FindUMsb);
                 break;
+            case spirv::BuiltinFn::kRefract:
+                ext_inst(GLSLstd450Refract);
+                break;
             case spirv::BuiltinFn::kUdot:
                 module_.PushExtension("SPV_KHR_integer_dot_product");
                 module_.PushCapability(SpvCapabilityDotProductKHR);

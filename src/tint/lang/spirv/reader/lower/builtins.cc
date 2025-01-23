@@ -100,6 +100,9 @@ struct State {
                 case spirv::BuiltinFn::kFindUMsb:
                     FindUMsb(builtin);
                     break;
+                case spirv::BuiltinFn::kRefract:
+                    Refract(builtin);
+                    break;
                 default:
                     TINT_UNREACHABLE() << "unknown spirv builtin: " << builtin->Func();
             }
@@ -225,6 +228,33 @@ struct State {
                 v = b.Bitcast(ret_ty, v)->Result(0);
             }
             call->Result(0)->ReplaceAllUsesWith(v);
+        });
+        call->Destroy();
+    }
+
+    void Refract(spirv::ir::BuiltinCall* call) {
+        auto args = call->Args();
+
+        auto* I = args[0];
+        auto* N = args[1];
+        auto* eta = args[2];
+
+        b.InsertBefore(call, [&] {
+            if (I->Type()->IsFloatScalar()) {
+                auto* src_ty = I->Type();
+                auto* vec_ty = ty.vec(src_ty, 2);
+                auto* zero = b.Zero(src_ty);
+                I = b.Construct(vec_ty, I, zero)->Result(0);
+                N = b.Construct(vec_ty, N, zero)->Result(0);
+
+                auto* c = b.Call(vec_ty, core::BuiltinFn::kRefract,
+                                 Vector<core::ir::Value*, 3>{I, N, eta});
+                auto* s = b.Swizzle(src_ty, c, {0});
+                call->Result(0)->ReplaceAllUsesWith(s->Result(0));
+            } else {
+                b.CallWithResult(call->DetachResult(), core::BuiltinFn::kRefract,
+                                 Vector<core::ir::Value*, 3>{I, N, eta});
+            }
         });
         call->Destroy();
     }

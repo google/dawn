@@ -85,6 +85,7 @@ tint::core::ir::Instruction::Accesses GetSideEffects(BuiltinFn fn) {
         case BuiltinFn::kFindILsb:
         case BuiltinFn::kFindSMsb:
         case BuiltinFn::kFindUMsb:
+        case BuiltinFn::kRefract:
             break;
     }
     return core::ir::Instruction::Accesses{};

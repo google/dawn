@@ -94,6 +94,7 @@ enum class BuiltinFn : uint8_t {
     kFindILsb,
     kFindSMsb,
     kFindUMsb,
+    kRefract,
     kSdot,
     kUdot,
     kNone,

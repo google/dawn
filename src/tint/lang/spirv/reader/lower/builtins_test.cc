@@ -2274,5 +2274,73 @@ TEST_F(SpirvParser_BuiltinsTest, FindILsb_UnsignedToSigned) {
     EXPECT_EQ(expect, str());
 }
 
+TEST_F(SpirvParser_BuiltinsTest, Refract_Scalar) {
+    auto* ep = b.ComputeFunction("foo");
+
+    b.Append(ep->Block(), [&] {  //
+        b.Call<spirv::ir::BuiltinCall>(ty.f32(), spirv::BuiltinFn::kRefract, 50_f, 60_f, 70_f);
+        b.Return(ep);
+    });
+
+    auto src = R"(
+%foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:f32 = spirv.refract 50.0f, 60.0f, 70.0f
+    ret
+  }
+}
+)";
+
+    EXPECT_EQ(src, str());
+    Run(Builtins);
+
+    auto expect = R"(
+%foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:vec2<f32> = construct 50.0f, 0.0f
+    %3:vec2<f32> = construct 60.0f, 0.0f
+    %4:vec2<f32> = refract %2, %3, 70.0f
+    %5:f32 = swizzle %4, x
+    ret
+  }
+}
+)";
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(SpirvParser_BuiltinsTest, Refract_Vector) {
+    auto* ep = b.ComputeFunction("foo");
+
+    b.Append(ep->Block(), [&] {  //
+        b.Call<spirv::ir::BuiltinCall>(ty.vec2<f32>(), spirv::BuiltinFn::kRefract,
+                                       b.Splat(ty.vec2<f32>(), 10_f), b.Splat(ty.vec2<f32>(), 20_f),
+                                       70_f);
+        b.Return(ep);
+    });
+
+    auto src = R"(
+%foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:vec2<f32> = spirv.refract vec2<f32>(10.0f), vec2<f32>(20.0f), 70.0f
+    ret
+  }
+}
+)";
+
+    EXPECT_EQ(src, str());
+    Run(Builtins);
+
+    auto expect = R"(
+%foo = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:vec2<f32> = refract vec2<f32>(10.0f), vec2<f32>(20.0f), 70.0f
+    ret
+  }
+}
+)";
+    EXPECT_EQ(expect, str());
+}
+
 }  // namespace
 }  // namespace tint::spirv::reader::lower

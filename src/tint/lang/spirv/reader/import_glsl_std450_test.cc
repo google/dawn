@@ -780,36 +780,6 @@ INSTANTIATE_TEST_SUITE_P(SpirvReader,
                              {"UnpackUnorm2x16", "unpack2x16unorm", 2},
                              {"UnpackHalf2x16", "unpack2x16float", 2}}));
 
-TEST_F(SpirvReaderTest, DISABLED_GlslStd450_Refract_Scalar) {
-    EXPECT_IR(Preamble() + R"(
-     %1 = OpExtInst %float %glsl Refract %float_50 %float_60 %float_70
-     OpReturn
-     OpFunctionEnd
-  )",
-              R"(
-%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
-  $B1: {
-    let x_1 = refract(vec2f(f1, 0.0f), vec2f(f2, 0.0f), f3).x;
-  }
-}
-)");
-}
-
-TEST_F(SpirvReaderTest, DISABLED_GlslStd450_Refract_Vector) {
-    EXPECT_IR(Preamble() + R"(
-     %1 = OpExtInst %v2float %glsl Refract %v2float_50_60 %v2float_60_50 %float_70
-     OpReturn
-     OpFunctionEnd
-  )",
-              R"(
-%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
-  $B1: {
-    let x_1 = refract(v2f1, v2f2, f3);
-  }
-}
-)");
-}
-
 TEST_F(SpirvReaderTest, DISABLED_GlslStd450_FaceForward_Scalar) {
     // The %99 sum only has one use.  Ensure it is evaluated only once by
     // making a let-declaration for it, since it is the normal operand to

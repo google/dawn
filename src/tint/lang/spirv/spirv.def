@@ -352,6 +352,9 @@ implicit(T: iu32, N: num) fn findSMsb<R: iu32>(vec<N, T>) -> vec<N, R>
 implicit(T: iu32) fn findUMsb<R: iu32>(T) -> R
 implicit(T: iu32, N: num) fn findUMsb<R: iu32>(vec<N, T>) -> vec<N, R>
 
+implicit(T: f32_f16) fn refract(T, T, T) -> T
+implicit(T: f32_f16, N: num) fn refract(vec<N, T>, vec<N, T>, T) -> vec<N, T>
+
 ////////////////////////////////////////////////////////////////////////////////
 // SPV_KHR_integer_dot_product instructions
 ////////////////////////////////////////////////////////////////////////////////
