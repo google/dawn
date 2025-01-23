@@ -31,6 +31,8 @@ package oswrapper
 import (
 	"os"
 	"path/filepath"
+
+	"github.com/spf13/afero"
 )
 
 type RealOSWrapper struct {
@@ -45,15 +47,31 @@ type RealFilesystemReaderWriter struct {
 	RealFilesystemWriter
 }
 
-type RealFilesystemReader struct{}
-type RealFilesystemWriter struct{}
+// Since these take Fs interface references instead of concrete implementations,
+// we could theoretically share most of the implementation between this and
+// MemMapFilesystemReader/Writer, relying on the fact that the real one will
+// have an OsFs and the test one will with a MemMapFs. However, since afero.Fs
+// does not implement MkdirTemp or Symlink, we would need to have some
+// differences anyways. So, keep the implementations completely separate for
+// now.
+type RealFilesystemReader struct {
+	fs afero.Fs
+}
+type RealFilesystemWriter struct {
+	fs afero.Fs
+}
 
 func GetRealOSWrapper() RealOSWrapper {
+	filesystem := afero.NewOsFs()
 	return RealOSWrapper{
 		RealEnvironProvider{},
 		RealFilesystemReaderWriter{
-			RealFilesystemReader{},
-			RealFilesystemWriter{},
+			RealFilesystemReader{
+				fs: filesystem,
+			},
+			RealFilesystemWriter{
+				fs: filesystem,
+			},
 		},
 	}
 }
@@ -74,12 +92,12 @@ func (RealEnvironProvider) UserHomeDir() (string, error) {
 	return os.UserHomeDir()
 }
 
-func (RealFilesystemReader) Open(name string) (*os.File, error) {
-	return os.Open(name)
+func (rfsr RealFilesystemReader) Open(name string) (afero.File, error) {
+	return rfsr.fs.Open(name)
 }
 
-func (RealFilesystemReader) OpenFile(name string, flag int, perm os.FileMode) (*os.File, error) {
-	return os.OpenFile(name, flag, perm)
+func (rfsr RealFilesystemReader) OpenFile(name string, flag int, perm os.FileMode) (afero.File, error) {
+	return rfsr.fs.OpenFile(name, flag, perm)
 }
 
 func (RealFilesystemReader) ReadFile(name string) ([]byte, error) {
@@ -94,8 +112,12 @@ func (RealFilesystemReader) Walk(root string, fn filepath.WalkFunc) error {
 	return filepath.Walk(root, fn)
 }
 
-func (RealFilesystemWriter) Create(name string) (*os.File, error) {
-	return os.Create(name)
+func (rfsw RealFilesystemWriter) Create(name string) (afero.File, error) {
+	return rfsw.fs.Create(name)
+}
+
+func (RealFilesystemWriter) Mkdir(path string, perm os.FileMode) error {
+	return os.Mkdir(path, perm)
 }
 
 func (RealFilesystemWriter) MkdirAll(path string, perm os.FileMode) error {
