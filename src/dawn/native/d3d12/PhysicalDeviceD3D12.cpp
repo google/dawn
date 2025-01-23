@@ -164,8 +164,11 @@ void PhysicalDevice::InitializeSupportedFeaturesImpl() {
         shaderF16Enabled = true;
     }
 
+    // The function subgroupBroadcast(f16) fails for some edge cases on intel gen-9 devices.
+    // See crbug.com/391680973
+    const bool kForceDisableSubgroups = gpu_info::IsIntelGen9(GetVendorId(), GetDeviceId());
     // Subgroups feature requires SM >= 6.0 and capabilities flags.
-    if (GetBackend()->IsDXCAvailable() && mDeviceInfo.supportsWaveOps) {
+    if (!kForceDisableSubgroups && GetBackend()->IsDXCAvailable() && mDeviceInfo.supportsWaveOps) {
         EnableFeature(Feature::Subgroups);
         // D3D12 devices that support both native f16 and wave ops can support subgroups-f16.
         // TODO(crbug.com/380244620): Remove when 'subgroups_f16' has been fully deprecated.
