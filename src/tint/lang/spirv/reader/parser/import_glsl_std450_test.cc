@@ -281,7 +281,8 @@ TEST_P(GlslStd450OneParamTest, SignedToSigned) {
 INSTANTIATE_TEST_SUITE_P(SpirvParser,
                          GlslStd450OneParamTest,
                          ::testing::Values(GlslStd450Params{"SAbs", "abs"},
-                                           GlslStd450Params{"FindSMsb", "findSMsb"}));
+                                           GlslStd450Params{"FindSMsb", "findSMsb"},
+                                           GlslStd450Params{"FindUMsb", "findUMsb"}));
 
 using GlslStd450TwoParamTest = SpirvParserTestWithParam<GlslStd450Params>;
 

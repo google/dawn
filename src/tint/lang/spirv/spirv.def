@@ -349,6 +349,8 @@ implicit(T: iu32) fn findILsb<R: iu32>(T) -> R
 implicit(T: iu32, N: num) fn findILsb<R: iu32>(vec<N, T>) -> vec<N, R>
 implicit(T: iu32) fn findSMsb<R: iu32>(T) -> R
 implicit(T: iu32, N: num) fn findSMsb<R: iu32>(vec<N, T>) -> vec<N, R>
+implicit(T: iu32) fn findUMsb<R: iu32>(T) -> R
+implicit(T: iu32, N: num) fn findUMsb<R: iu32>(vec<N, T>) -> vec<N, R>
 
 ////////////////////////////////////////////////////////////////////////////////
 // SPV_KHR_integer_dot_product instructions
