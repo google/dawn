@@ -641,10 +641,16 @@ class Parser {
         switch (ext_opcode) {
             case GLSLstd450Acos:
                 return core::BuiltinFn::kAcos;
+            case GLSLstd450Acosh:
+                return core::BuiltinFn::kAcosh;
             case GLSLstd450Asin:
                 return core::BuiltinFn::kAsin;
+            case GLSLstd450Asinh:
+                return core::BuiltinFn::kAsinh;
             case GLSLstd450Atan:
                 return core::BuiltinFn::kAtan;
+            case GLSLstd450Atanh:
+                return core::BuiltinFn::kAtanh;
             case GLSLstd450Atan2:
                 return core::BuiltinFn::kAtan2;
             case GLSLstd450Ceil:

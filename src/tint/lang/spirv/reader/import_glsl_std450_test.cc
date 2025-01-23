@@ -417,8 +417,11 @@ INSTANTIATE_TEST_SUITE_P(SpirvReader,
                          SpirvReaderTest_GlslStd450_Floating_Floating,
                          ::testing::ValuesIn(std::vector<GlslStd450Case>{
                              {"Acos", "acos"},                //
+                             {"Acosh", "acosh"},              //
                              {"Asin", "asin"},                //
+                             {"Asinh", "asinh"},              //
                              {"Atan", "atan"},                //
+                             {"Atanh", "atanh"},              //
                              {"Ceil", "ceil"},                //
                              {"Cos", "cos"},                  //
                              {"Cosh", "cosh"},                //
