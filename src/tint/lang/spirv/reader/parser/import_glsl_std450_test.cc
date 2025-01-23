@@ -72,6 +72,7 @@ std::string Preamble() {
 
   %v2float_50_60 = OpConstantComposite %v2float %float_50 %float_60
   %v2float_60_50 = OpConstantComposite %v2float %float_60 %float_50
+  %v2float_70_60 = OpConstantComposite %v2float %float_70 %float_60
   %v3float_50_60_70 = OpConstantComposite %v3float %float_50 %float_60 %float_70
   %v4float_50_50_50_50 = OpConstantComposite %v4float %float_50 %float_50 %float_50 %float_50
 
@@ -577,6 +578,42 @@ TEST_F(SpirvParserTest, Refract_Vector) {
 %main = @compute @workgroup_size(1u, 1u, 1u) func():void {
   $B1: {
     %2:vec2<f32> = spirv.refract vec2<f32>(50.0f, 60.0f), vec2<f32>(60.0f, 50.0f), 70.0f
+    ret
+  }
+}
+)");
+}
+
+TEST_F(SpirvParserTest, FaceForward_Scalar) {
+    EXPECT_IR(Preamble() + R"(
+     %99 = OpFAdd %float %float_50 %float_50 ; normal operand has only one use
+     %1 = OpExtInst %float %glsl FaceForward %99 %float_60 %float_70
+     OpReturn
+     OpFunctionEnd
+  )",
+              R"(
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:f32 = add 50.0f, 50.0f
+    %3:f32 = spirv.faceForward %2, 60.0f, 70.0f
+    ret
+  }
+}
+)");
+}
+
+TEST_F(SpirvParserTest, FaceForward_Vector) {
+    EXPECT_IR(Preamble() + R"(
+     %1 = OpExtInst %v2float %glsl FaceForward %v2float_50_60 %v2float_60_50 %v2float_70_60
+     %2 = OpCopyObject %v2float %1
+     OpReturn
+     OpFunctionEnd
+  )",
+              R"(
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:vec2<f32> = spirv.faceForward vec2<f32>(50.0f, 60.0f), vec2<f32>(60.0f, 50.0f), vec2<f32>(70.0f, 60.0f)
+    %3:vec2<f32> = let %2
     ret
   }
 }

@@ -780,43 +780,6 @@ INSTANTIATE_TEST_SUITE_P(SpirvReader,
                              {"UnpackUnorm2x16", "unpack2x16unorm", 2},
                              {"UnpackHalf2x16", "unpack2x16float", 2}}));
 
-TEST_F(SpirvReaderTest, DISABLED_GlslStd450_FaceForward_Scalar) {
-    // The %99 sum only has one use.  Ensure it is evaluated only once by
-    // making a let-declaration for it, since it is the normal operand to
-    // the builtin function, and code generation uses it twice.
-    EXPECT_IR(Preamble() + R"(
-     %99 = OpFAdd %float %float_50 %float_50 ; normal operand has only one use
-     %1 = OpExtInst %float %glsl FaceForward %99 %float_60 %float_70
-     OpReturn
-     OpFunctionEnd
-  )",
-              R"(
-%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
-  $B1: {
-    let x_1 = select(-(x_99), x_99, ((f2 * f3) < 0.0f));
-  }
-}
-)");
-}
-
-TEST_F(SpirvReaderTest, DISABLED_GlslStd450_FaceForward_Vector) {
-    EXPECT_IR(Preamble() + R"(
-     %1 = OpExtInst %v2float %glsl FaceForward %v2float_50_60 %v2float_60_50 %v2float_70_70
-     %2 = OpCopyObject %v2float %1
-     OpReturn
-     OpFunctionEnd
-  )",
-              R"(
-%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
-  $B1: {
-    %2:vec2<f32> = faceForward vec2<f32>(50.0f, 60.0f), vec2<f32>(60.0f, 50.0f), vec2<f32>(70.0f)
-    %2:vec2<f32> = let %2
-    ret
-  }
-}
-)");
-}
-
 TEST_F(SpirvReaderTest, DISABLED_GlslStd450_Reflect_Scalar) {
     EXPECT_IR(Preamble() + R"(
      %98 = OpFAdd %float %float_50 %float_50 ; has only one use

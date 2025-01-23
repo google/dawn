@@ -103,6 +103,9 @@ struct State {
                 case spirv::BuiltinFn::kRefract:
                     Refract(builtin);
                     break;
+                case spirv::BuiltinFn::kFaceForward:
+                    FaceForward(builtin);
+                    break;
                 default:
                     TINT_UNREACHABLE() << "unknown spirv builtin: " << builtin->Func();
             }
@@ -254,6 +257,25 @@ struct State {
             } else {
                 b.CallWithResult(call->DetachResult(), core::BuiltinFn::kRefract,
                                  Vector<core::ir::Value*, 3>{I, N, eta});
+            }
+        });
+        call->Destroy();
+    }
+
+    void FaceForward(spirv::ir::BuiltinCall* call) {
+        auto args = call->Args();
+        auto* N = args[0];
+        auto* I = args[1];
+        auto* Nref = args[2];
+
+        b.InsertBefore(call, [&] {
+            if (I->Type()->IsFloatScalar()) {
+                auto* neg = b.Negation(N->Type(), N);
+                auto* sel = b.Multiply(I->Type(), I, Nref)->Result(0);
+                sel = b.LessThan(ty.bool_(), sel, b.Zero(sel->Type()))->Result(0);
+                b.CallWithResult(call->DetachResult(), core::BuiltinFn::kSelect, neg, N, sel);
+            } else {
+                b.CallWithResult(call->DetachResult(), core::BuiltinFn::kFaceForward, N, I, Nref);
             }
         });
         call->Destroy();
