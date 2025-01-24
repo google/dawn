@@ -178,3 +178,6 @@
 	path = third_party/partition_alloc
 	url = https://chromium.googlesource.com/chromium/src/base/allocator/partition_allocator
 	gclient-condition = dawn_standalone
+[submodule "third_party/llvm-libc/src"]
+	path = third_party/llvm-libc/src
+	url = https://chromium.googlesource.com/external/github.com/llvm/llvm-project/libc.git

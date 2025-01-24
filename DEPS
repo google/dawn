@@ -70,7 +70,7 @@ vars = {
 
 deps = {
   'buildtools': {
-    'url': '{chromium_git}/chromium/src/buildtools@9cac81256beb5d4d36c8801afeae38fea34b8486',
+    'url': '{chromium_git}/chromium/src/buildtools@a660247d3c14a172b74b8e832ba1066b30183c97',
     'condition': 'dawn_standalone',
   },
   'third_party/clang-format/script': {
@@ -103,17 +103,23 @@ deps = {
   },
 
   'third_party/depot_tools': {
-    'url': '{chromium_git}/chromium/tools/depot_tools.git@58625e82c685426d441be5b422c9ad88e4867d20',
+    'url': '{chromium_git}/chromium/tools/depot_tools.git@db9a0b01c2ea01f925c9c46039bd07c4b35e26fe',
     'condition': 'dawn_standalone',
   },
 
   'third_party/libc++/src': {
-    'url': '{chromium_git}/external/github.com/llvm/llvm-project/libcxx.git@450ae0d29766e87ea12148e8c6c3352053f78e15',
+    'url': '{chromium_git}/external/github.com/llvm/llvm-project/libcxx.git@2e25154d49c29fa9aa42c30ad4a027bd30123434',
     'condition': 'dawn_standalone',
   },
 
   'third_party/libc++abi/src': {
-    'url': '{chromium_git}/external/github.com/llvm/llvm-project/libcxxabi.git@e5b130d5dc3058457ea0658a55ae6bb968f75f0e',
+    'url': '{chromium_git}/external/github.com/llvm/llvm-project/libcxxabi.git@8205ccf0f23545ebcd8846363ea1d29e77917a22',
+    'condition': 'dawn_standalone',
+  },
+
+  # Required by libc++
+  'third_party/llvm-libc/src': {
+    'url': '{chromium_git}/external/github.com/llvm/llvm-project/libc.git@a485ddbbb2ffe528c3ebf82b9d72a7297916531f',
     'condition': 'dawn_standalone',
   },
 
@@ -127,24 +133,16 @@ deps = {
   # The //build, //tools/clang, and //tools/rust deps should all be updated
   # in unison, as there are dependencies between them.
   'build': {
-    'url': '{chromium_git}/chromium/src/build@9d5c32282de17517d92763af2d11dbeb1f6539aa',
+    'url': '{chromium_git}/chromium/src/build@a252ef1991b42918f6e74bc8c26b6543afe7bb2e',
     'condition': 'dawn_standalone',
   },
   'tools/clang': {
-    'url': '{chromium_git}/chromium/src/tools/clang@53554bf3da41153f2e01f9ff234c194c156b7a93',
+    'url': '{chromium_git}/chromium/src/tools/clang@e262f0f8896e459fe7fd2a076af48d5746b1d332',
     'condition': 'dawn_standalone',
   },
   'tools/rust': {
-    'url': '{chromium_git}/chromium/src/tools/rust@ed0fe5c0e067bd64ab43eb7457e71680a81bd8e3',
+    'url': '{chromium_git}/chromium/src/tools/rust@05dbbfdcec4a7cc6c7cbf735d5a67d331a2f40da',
     'condition': 'dawn_standalone and checkout_rust',
-  },
-  'tools/clang/dsymutil': {
-    'packages': [{
-      'package': 'chromium/llvm-build-tools/dsymutil',
-      'version': 'M56jPzDv1620Rnm__jTMYS62Zi8rxHVq7yw0qeBFEgkC',
-    }],
-    'condition': 'dawn_standalone and (checkout_mac or checkout_ios)',
-    'dep_type': 'cipd',
   },
 
   # Linux sysroots for hermetic builds instead of relying on whatever is
@@ -535,8 +533,35 @@ hooks = [
     'action': ['python3', 'tools/rust/update_rust.py'],
     'condition': 'dawn_standalone and checkout_rust',
   },
+  # Pull dsymutil binaries using checked-in hashes.
   {
-    # Pull rc binaries using checked-in hashes.
+    'name': 'dsymutil_mac_arm64',
+    'pattern': '.',
+    'condition': 'dawn_standalone and host_os == "mac" and host_cpu == "arm64"',
+    'action': [ 'python3',
+                'third_party/depot_tools/download_from_google_storage.py',
+                '--no_resume',
+                '--no_auth',
+                '--bucket', 'chromium-browser-clang',
+                '-s', 'tools/clang/dsymutil/bin/dsymutil.arm64.sha1',
+                '-o', 'tools/clang/dsymutil/bin/dsymutil',
+    ],
+  },
+  {
+    'name': 'dsymutil_mac_x64',
+    'pattern': '.',
+    'condition': 'dawn_standalone and host_os == "mac" and host_cpu == "x64"',
+    'action': [ 'python3',
+                'third_party/depot_tools/download_from_google_storage.py',
+                '--no_resume',
+                '--no_auth',
+                '--bucket', 'chromium-browser-clang',
+                '-s', 'tools/clang/dsymutil/bin/dsymutil.x64.sha1',
+                '-o', 'tools/clang/dsymutil/bin/dsymutil',
+    ],
+  },
+  # Pull rc binaries using checked-in hashes.
+  {
     'name': 'rc_win',
     'pattern': '.',
     'condition': 'dawn_standalone and checkout_win and host_os == "win"',
@@ -572,6 +597,7 @@ hooks = [
                 '-s', 'build/toolchain/win/rc/mac/rc.sha1',
     ],
   },
+
   # Update build/util/LASTCHANGE.
   {
     'name': 'lastchange',
