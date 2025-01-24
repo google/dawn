@@ -5565,6 +5565,8 @@ crbug.com/373670513 [ android-pixel-6 ] webgpu:shader,execution,zero_init:comput
 crbug.com/373485785 [ intel win10 ] webgpu:shader,execution,zero_init:compute,zero_init:addressSpace="workgroup";* [ RetryOnFailure ]
 crbug.com/373485785 [ target-cpu-32 ] webgpu:shader,execution,zero_init:compute,zero_init:addressSpace="workgroup";* [ RetryOnFailure ]
 
+crbug.com/391917953 [ webgpu-service-worker linux release ] webgpu:idl,javascript:obj,Object_keys:type="adapter.limits" [ Failure ]
+
 ################################################################################
 # New flakes. Please triage.
 ################################################################################
