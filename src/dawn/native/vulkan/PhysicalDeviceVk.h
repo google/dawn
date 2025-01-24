@@ -50,7 +50,8 @@ class PhysicalDevice : public PhysicalDeviceBase {
 
     // PhysicalDeviceBase Implementation
     bool SupportsExternalImages() const override;
-    bool SupportsFeatureLevel(wgpu::FeatureLevel featureLevel) const override;
+    bool SupportsFeatureLevel(wgpu::FeatureLevel featureLevel,
+                              InstanceBase* instance) const override;
 
     const VulkanDeviceInfo& GetDeviceInfo() const;
     VkPhysicalDevice GetVkPhysicalDevice() const;
@@ -75,6 +76,9 @@ class PhysicalDevice : public PhysicalDeviceBase {
     void InitializeSupportedFeaturesImpl() override;
     MaybeError InitializeSupportedLimitsImpl(CombinedLimits* limits) override;
 
+    MaybeError InitializeSupportedLimitsInternal(wgpu::FeatureLevel featureLevel,
+                                                 CombinedLimits* limits);
+
     FeatureValidationResult ValidateFeatureSupportedWithTogglesImpl(
         wgpu::FeatureName feature,
         const TogglesState& toggles) const override;
@@ -98,11 +102,17 @@ class PhysicalDevice : public PhysicalDeviceBase {
         wgpu::TextureFormat format,
         UnpackedPtr<DawnFormatCapabilities>& capabilities) const override;
 
+    // Sets core feature level as not being supported and stores `error` with
+    // reason why core isn't supported.
+    void SetCoreNotSupported(std::unique_ptr<ErrorData> error);
+
     VkPhysicalDevice mVkPhysicalDevice;
     Ref<VulkanInstance> mVulkanInstance;
     VulkanDeviceInfo mDeviceInfo = {};
 
     uint32_t mDefaultComputeSubgroupSize = 0;
+    bool mSupportsCoreFeatureLevel = true;
+    mutable std::unique_ptr<ErrorData> mCoreError;
 
 #if DAWN_PLATFORM_IS(ANDROID)
     std::unique_ptr<AHBFunctions> mAHBFunctions;

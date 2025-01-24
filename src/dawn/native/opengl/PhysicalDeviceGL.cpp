@@ -478,7 +478,8 @@ ResultOrError<Ref<DeviceBase>> PhysicalDevice::CreateDeviceImpl(
                           std::move(lostEvent));
 }
 
-bool PhysicalDevice::SupportsFeatureLevel(wgpu::FeatureLevel featureLevel) const {
+bool PhysicalDevice::SupportsFeatureLevel(wgpu::FeatureLevel featureLevel,
+                                          InstanceBase* instance) const {
     return featureLevel == wgpu::FeatureLevel::Compatibility;
 }
 

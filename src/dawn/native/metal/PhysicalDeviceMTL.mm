@@ -330,7 +330,7 @@ bool PhysicalDevice::SupportsExternalImages() const {
     return false;
 }
 
-bool PhysicalDevice::SupportsFeatureLevel(wgpu::FeatureLevel) const {
+bool PhysicalDevice::SupportsFeatureLevel(wgpu::FeatureLevel, InstanceBase* instance) const {
     return true;
 }
 

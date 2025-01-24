@@ -31,8 +31,10 @@
 #include <string>
 #include <utility>
 
+#include "dawn/common/Assert.h"
 #include "dawn/common/GPUInfo.h"
 #include "dawn/native/ChainUtils.h"
+#include "dawn/native/Error.h"
 #include "dawn/native/Instance.h"
 #include "dawn/native/Limits.h"
 #include "dawn/native/vulkan/BackendVk.h"
@@ -188,8 +190,8 @@ MaybeError PhysicalDevice::InitializeImpl() {
     }
 
     // Needed for the respective WebGPU features.
-    if (!mDeviceInfo.features.depthBiasClamp) {
-        return DAWN_INTERNAL_ERROR("Vulkan depthBiasClamp feature required.");
+    if (mSupportsCoreFeatureLevel && !mDeviceInfo.features.depthBiasClamp) {
+        SetCoreNotSupported(DAWN_INTERNAL_ERROR("Vulkan depthBiasClamp feature required."));
     }
     if (!mDeviceInfo.features.fragmentStoresAndAtomics) {
         return DAWN_INTERNAL_ERROR("Vulkan fragmentStoresAndAtomics feature required.");
@@ -197,11 +199,11 @@ MaybeError PhysicalDevice::InitializeImpl() {
     if (!mDeviceInfo.features.fullDrawIndexUint32) {
         return DAWN_INTERNAL_ERROR("Vulkan fullDrawIndexUint32 feature required.");
     }
-    if (!mDeviceInfo.features.imageCubeArray) {
-        return DAWN_INTERNAL_ERROR("Vulkan imageCubeArray feature required.");
+    if (mSupportsCoreFeatureLevel && !mDeviceInfo.features.imageCubeArray) {
+        SetCoreNotSupported(DAWN_INTERNAL_ERROR("Vulkan imageCubeArray feature required."));
     }
-    if (!mDeviceInfo.features.independentBlend) {
-        return DAWN_INTERNAL_ERROR("Vulkan independentBlend feature required.");
+    if (mSupportsCoreFeatureLevel && !mDeviceInfo.features.independentBlend) {
+        SetCoreNotSupported(DAWN_INTERNAL_ERROR("Vulkan independentBlend feature required."));
     }
     if (!mDeviceInfo.features.sampleRateShading) {
         return DAWN_INTERNAL_ERROR("Vulkan sampleRateShading feature required.");
@@ -475,7 +477,22 @@ void PhysicalDevice::InitializeSupportedFeaturesImpl() {
 }
 
 MaybeError PhysicalDevice::InitializeSupportedLimitsImpl(CombinedLimits* limits) {
-    GetDefaultLimitsForSupportedFeatureLevel(&limits->v1);
+    if (mSupportsCoreFeatureLevel) {
+        MaybeError result = InitializeSupportedLimitsInternal(wgpu::FeatureLevel::Core, limits);
+        if (result.IsSuccess()) {
+            return result;
+        }
+
+        // Log a warning why core isn't supported and retry checking lower compat limits.
+        SetCoreNotSupported(result.AcquireError());
+    }
+
+    return InitializeSupportedLimitsInternal(wgpu::FeatureLevel::Compatibility, limits);
+}
+
+MaybeError PhysicalDevice::InitializeSupportedLimitsInternal(wgpu::FeatureLevel featureLevel,
+                                                             CombinedLimits* limits) {
+    GetDefaultLimits(&limits->v1, featureLevel);
     CombinedLimits baseLimits = *limits;
 
     const VkPhysicalDeviceLimits& vkLimits = mDeviceInfo.properties.limits;
@@ -664,7 +681,18 @@ bool PhysicalDevice::SupportsExternalImages() const {
                                                      mVulkanInstance->GetFunctions());
 }
 
-bool PhysicalDevice::SupportsFeatureLevel(wgpu::FeatureLevel) const {
+bool PhysicalDevice::SupportsFeatureLevel(wgpu::FeatureLevel featureLevel,
+                                          InstanceBase* instance) const {
+    if (featureLevel == wgpu::FeatureLevel::Core && !mSupportsCoreFeatureLevel) {
+        if (mCoreError && instance) {
+            // Log a warning explaining why this device doesn't support core the first time a core
+            // adapter is requested.
+            mCoreError->AppendContext(
+                absl::StrFormat("checking core feature level support on \"%s\"", GetName()));
+            instance->ConsumedErrorAndWarnOnce(std::move(mCoreError));
+        }
+        return false;
+    }
     return true;
 }
 
@@ -1113,6 +1141,13 @@ void PhysicalDevice::PopulateBackendFormatCapabilities(
             }
         }
     }
+}
+
+void PhysicalDevice::SetCoreNotSupported(std::unique_ptr<ErrorData> error) {
+    DAWN_ASSERT(mSupportsCoreFeatureLevel);
+    mSupportsCoreFeatureLevel = false;
+    DAWN_ASSERT(error);
+    mCoreError = std::move(error);
 }
 
 }  // namespace dawn::native::vulkan

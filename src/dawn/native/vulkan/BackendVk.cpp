@@ -657,11 +657,16 @@ std::vector<Ref<PhysicalDeviceBase>> Backend::DiscoverPhysicalDevices(
                 if (instance->ConsumedErrorAndWarnOnce(physicalDevice->Initialize())) {
                     continue;
                 }
+                // This loop can't filter adapters based on SupportsFeatureLevel() since the results
+                // are cached for subsequent calls that might have a different feature level.
                 mPhysicalDevices[icd].push_back(std::move(physicalDevice));
             }
         }
-        physicalDevices.insert(physicalDevices.end(), mPhysicalDevices[icd].begin(),
-                               mPhysicalDevices[icd].end());
+        for (auto& physicalDevice : mPhysicalDevices[icd]) {
+            if (physicalDevice->SupportsFeatureLevel(options->featureLevel, instance)) {
+                physicalDevices.push_back(physicalDevice);
+            }
+        }
     }
     return physicalDevices;
 }

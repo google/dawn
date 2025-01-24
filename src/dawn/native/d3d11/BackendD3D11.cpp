@@ -114,7 +114,7 @@ std::vector<Ref<PhysicalDeviceBase>> Backend::DiscoverPhysicalDevices(
         if (GetInstance()->ConsumedErrorAndWarnOnce(
                 CreatePhysicalDevice(std::move(dxgiAdapter), std::move(d3d11Device)),
                 &physicalDevice) ||
-            !physicalDevice->SupportsFeatureLevel(options->featureLevel)) {
+            !physicalDevice->SupportsFeatureLevel(options->featureLevel, GetInstance())) {
             return {};
         }
         return {std::move(physicalDevice)};

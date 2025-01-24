@@ -141,7 +141,7 @@ std::vector<Ref<PhysicalDeviceBase>> Backend::DiscoverPhysicalDevices(
         Ref<PhysicalDeviceBase> physicalDevice;
         if (GetInstance()->ConsumedErrorAndWarnOnce(
                 GetOrCreatePhysicalDeviceFromLUID(luidOptions->adapterLUID), &physicalDevice) ||
-            !physicalDevice->SupportsFeatureLevel(options->featureLevel)) {
+            !physicalDevice->SupportsFeatureLevel(options->featureLevel, GetInstance())) {
             return {};
         }
         return {std::move(physicalDevice)};
@@ -177,7 +177,7 @@ std::vector<Ref<PhysicalDeviceBase>> Backend::DiscoverPhysicalDevices(
         if (GetInstance()->ConsumedErrorAndWarnOnce(
                 GetOrCreatePhysicalDeviceFromIDXGIAdapter(std::move(dxgiAdapter)),
                 &physicalDevice) ||
-            !physicalDevice->SupportsFeatureLevel(options->featureLevel)) {
+            !physicalDevice->SupportsFeatureLevel(options->featureLevel, GetInstance())) {
             continue;
         }
         physicalDevices.push_back(std::move(physicalDevice));
