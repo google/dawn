@@ -983,9 +983,8 @@ class Impl {
                     if (b->Fn() == wgsl::BuiltinFn::kBitcast) {
                         inst = impl.builder_.Bitcast(ty, args[0]);
                     } else {
-                        auto* res = impl.builder_.InstructionResult(ty);
-                        inst = impl.builder_.ir.CreateInstruction<wgsl::ir::BuiltinCall>(
-                            res, b->Fn(), std::move(args));
+                        inst =
+                            impl.builder_.Call<wgsl::ir::BuiltinCall>(ty, b->Fn(), std::move(args));
                     }
                 } else if (sem->Target()->As<sem::ValueConstructor>()) {
                     inst = impl.builder_.Construct(ty, std::move(args));
