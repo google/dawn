@@ -6603,7 +6603,7 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, Unpack4xI8) {
   $B1: {
     %u:ptr<function, u32, read_write> = var, 2u
     %3:u32 = load %u
-    %4:hlsl.int8_t4_packed = hlsl.convert %3
+    %4:hlsl.int8_t4_packed = hlsl.convert<hlsl.int8_t4_packed> %3
     %5:vec4<i32> = hlsl.unpack_s8s32 %4
     %a:vec4<i32> = let %5
     ret
@@ -6679,7 +6679,7 @@ TEST_F(HlslWriter_BuiltinPolyfillTest, Unpack4xU8) {
   $B1: {
     %u:ptr<function, u32, read_write> = var, 2u
     %3:u32 = load %u
-    %4:hlsl.uint8_t4_packed = hlsl.convert %3
+    %4:hlsl.uint8_t4_packed = hlsl.convert<hlsl.uint8_t4_packed> %3
     %5:vec4<u32> = hlsl.unpack_u8u32 %4
     %a:vec4<u32> = let %5
     ret

@@ -72,9 +72,6 @@ class Call : public Castable<Call, OperandInstruction<4, 1>> {
     /// @returns the side effects for this instruction
     Accesses GetSideEffects() const override { return Accesses{Access::kLoad, Access::kStore}; }
 
-    /// Returns the explicit template parameters as a string.
-    std::string ExplicitTemplateParamsToStr() const;
-
   protected:
     /// Constructor
     explicit Call(Id id);

@@ -63,7 +63,7 @@ tint::core::ir::Instruction::Accesses BuiltinCall::GetSideEffects() const {
 }
 
 std::string BuiltinCall::FriendlyName() const {
-    return std::string("spirv.") + str(func_) + ExplicitTemplateParamsToStr();
+    return std::string("spirv.") + str(func_);
 }
 
 }  // namespace tint::spirv::ir
