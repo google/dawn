@@ -3714,10 +3714,6 @@ crbug.com/0000 [ intel-0x9bc5 win10 ] webgpu:shader,execution,expression,call,bu
 # Triaged/Manually Added Failures
 ################################################################################
 
-# Temporary Failures due to the support of null bind group layouts in the creation of pipeline layout
-crbug.com/377836524 webgpu:api,validation,encoding,programmable,pipeline_bind_group_compat:default_bind_group_layouts_never_match,compute_pass:* [ Failure ]
-crbug.com/377836524 webgpu:api,validation,encoding,programmable,pipeline_bind_group_compat:default_bind_group_layouts_never_match,render_pass:* [ Failure ]
-
 # Flaky memory_sync failures on Intel
 crbug.com/dawn/2083 [ intel-0x9bc5 linux ] webgpu:api,operation,memory_sync,buffer,multiple_buffers:ww:boundary="command-buffer";writeOps=["storage","b2b-copy"];contexts=["render-bundle-encoder","command-encoder"] [ Failure ]
 crbug.com/dawn/2083 [ intel-0x9bc5 linux ] webgpu:api,operation,memory_sync,buffer,multiple_buffers:ww:boundary="command-buffer";writeOps=["storage","b2b-copy"];contexts=["render-pass-encoder","command-encoder"] [ Failure ]
@@ -5507,12 +5503,6 @@ crbug.com/dawn/2168 [ linux ] webgpu:api,validation,error_scope:simple:errorType
 crbug.com/dawn/2168 [ android arm ] webgpu:api,validation,error_scope:current_scope:errorFilter="validation";stackDepth=100000 [ Failure ]
 
 ### This section represents tests which may require CTS changes.
-
-# Temporary Failures change in behavior of Smoothstep function
-crbug.com/379909620 webgpu:shader,validation,expression,call,builtin,smoothstep:* [ Failure ]
-
-# Failures due to change in `@align()` validation.
-crbug.com/375467276 webgpu:shader,execution,expression,access,structure,index:buffer_align:* [ Failure ]
 
 ### This section represents things that will require Compat validation
 ### These tests will never pass, but should be skipped in CTS once Compat
