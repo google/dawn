@@ -87,7 +87,7 @@ void Server::OnRequestAdapterCallback(RequestAdapterUserdata* data,
 
     // Query and report the adapter info.
     FreeMembers<WGPUAdapterInfo> info(mProcs);
-    WGPUChainedStructOut** propertiesChain = &info.nextInChain;
+    WGPUChainedStruct** propertiesChain = &info.nextInChain;
 
     // Query AdapterPropertiesMemoryHeaps if the feature is supported.
     FreeMembers<WGPUAdapterPropertiesMemoryHeaps> memoryHeapProperties(mProcs);

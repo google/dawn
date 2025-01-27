@@ -43,27 +43,27 @@ WGPUStatus LimitsAndFeatures::GetLimits(WGPUSupportedLimits* limits) const {
     limits->nextInChain = originalNextInChain;
     // Handle other requiring limits that chained after WGPUSupportedLimits
     for (auto* chain = limits->nextInChain; chain; chain = chain->next) {
-        // Store the WGPUChainedStructOut to restore the chain after assignment.
-        WGPUChainedStructOut originalChainedStructOut = *chain;
+        // Store the WGPUChainedStruct to restore the chain after assignment.
+        WGPUChainedStruct originalChainedStruct = *chain;
         switch (chain->sType) {
             case (WGPUSType_DawnExperimentalSubgroupLimits): {
                 auto* experimentalSubgroupLimits =
                     reinterpret_cast<WGPUDawnExperimentalSubgroupLimits*>(chain);
-                // This assignment break the next field of WGPUChainedStructOut head.
+                // This assignment break the next field of WGPUChainedStruct head.
                 *experimentalSubgroupLimits = mExperimentalSubgroupLimits;
                 break;
             }
             case (WGPUSType_DawnExperimentalImmediateDataLimits): {
                 auto* experimentalImmediateDataLimits =
                     reinterpret_cast<WGPUDawnExperimentalImmediateDataLimits*>(chain);
-                // This assignment break the next field of WGPUChainedStructOut head.
+                // This assignment break the next field of WGPUChainedStruct head.
                 *experimentalImmediateDataLimits = mExperimentalImmediateDataLimits;
                 break;
             }
             case (WGPUSType_DawnTexelCopyBufferRowAlignmentLimits): {
                 auto* texelCopyBufferRowAlignmentLimits =
                     reinterpret_cast<WGPUDawnTexelCopyBufferRowAlignmentLimits*>(chain);
-                // This assignment break the next field of WGPUChainedStructOut head.
+                // This assignment break the next field of WGPUChainedStruct head.
                 *texelCopyBufferRowAlignmentLimits = mTexelCopyBufferRowAlignmentLimits;
                 break;
             }
@@ -72,7 +72,7 @@ WGPUStatus LimitsAndFeatures::GetLimits(WGPUSupportedLimits* limits) const {
                 return WGPUStatus_Error;
         }
         // Restore the chain.
-        *chain = originalChainedStructOut;
+        *chain = originalChainedStruct;
     }
     return WGPUStatus_Success;
 }

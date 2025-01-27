@@ -160,7 +160,7 @@ void Adapter::SetInfo(const WGPUAdapterInfo* info) {
     mInfo.nextInChain = nullptr;
 
     // Loop through the chained struct.
-    WGPUChainedStructOut* chain = info->nextInChain;
+    WGPUChainedStruct* chain = info->nextInChain;
     while (chain != nullptr) {
         switch (chain->sType) {
             case WGPUSType_AdapterPropertiesMemoryHeaps: {
@@ -199,7 +199,7 @@ void Adapter::SetInfo(const WGPUAdapterInfo* info) {
 
 WGPUStatus Adapter::GetInfo(WGPUAdapterInfo* info) const {
     // Loop through the chained struct.
-    WGPUChainedStructOut* chain = info->nextInChain;
+    WGPUChainedStruct* chain = info->nextInChain;
     while (chain != nullptr) {
         switch (chain->sType) {
             case WGPUSType_AdapterPropertiesMemoryHeaps: {

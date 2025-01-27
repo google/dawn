@@ -150,14 +150,9 @@ typedef uint32_t {{API}}Bool;
 {% endfor %}
 
 typedef struct {{API}}ChainedStruct {
-    struct {{API}}ChainedStruct const * next;
+    struct {{API}}ChainedStruct * next;
     {{API}}SType sType;
 } {{API}}ChainedStruct {{API}}_STRUCTURE_ATTRIBUTE;
-
-typedef struct {{API}}ChainedStructOut {
-    struct {{API}}ChainedStructOut * next;
-    {{API}}SType sType;
-} {{API}}ChainedStructOut {{API}}_STRUCTURE_ATTRIBUTE;
 
 {% macro render_c_default_value(member) -%}
     {%- if member.annotation in ["*", "const*"] and member.optional or member.default_value == "nullptr" -%}
@@ -188,7 +183,7 @@ typedef struct {{API}}ChainedStructOut {
 
 {% for type in by_category["callback info"] %}
     typedef struct {{as_cType(type.name)}} {
-        {{API}}ChainedStruct const* nextInChain;
+        {{API}}ChainedStruct* nextInChain;
         {% for member in type.members %}
             {{as_annotated_cType(member)}};
         {% endfor %}
@@ -212,13 +207,11 @@ typedef struct {{API}}ChainedStructOut {
         // Can be chained in {{as_cType(root.name)}}
     {% endfor %}
     typedef struct {{as_cType(type.name)}} {
-        {% set Out = "Out" if type.output else "" %}
-        {% set const = "const " if not type.output else "" %}
         {% if type.extensible %}
-            {{API}}ChainedStruct{{Out}} {{const}}* nextInChain;
+            {{API}}ChainedStruct* nextInChain;
         {% endif %}
         {% if type.chained %}
-            {{API}}ChainedStruct{{Out}} chain;
+            {{API}}ChainedStruct chain;
         {% endif %}
         {% for member in type.members %}
             {{nullable_annotation(member)}}{{as_annotated_cType(member)}};

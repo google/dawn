@@ -257,7 +257,7 @@ TEST_P(WireInstanceTests, RequestAdapterPassesChainedProperties) {
             }
             EXPECT_CALL(api, AdapterGetInfo(apiAdapter, NotNull()))
                 .WillOnce(WithArg<1>(Invoke([&](WGPUAdapterInfo* info) {
-                    WGPUChainedStructOut* chain = info->nextInChain;
+                    WGPUChainedStruct* chain = info->nextInChain;
                     while (chain != nullptr) {
                         auto* next = chain->next;
                         switch (chain->sType) {
