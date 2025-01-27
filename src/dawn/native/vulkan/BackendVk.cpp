@@ -228,6 +228,10 @@ constexpr SkippedMessage kSkippedMessages[] = {
     {"VUID-RuntimeSpirv-None-06343",
      "Group operations with subgroup scope must not be used if the shader stage is not in "
      "subgroupSupportedStages"},
+
+    // crbug.com/392541999
+    {"UNASSIGNED-vkAllocateMemory-maxMemoryAllocationSize",
+     "is larger than maxMemoryAllocationSize (0)"},
 };
 
 namespace dawn::native::vulkan {
