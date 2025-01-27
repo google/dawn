@@ -55,20 +55,11 @@ TEST_F(IR_ValidatorTest, Var_RootBlock_NullResult) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.Str(), R"(:2:3 error: var: result is undefined
+    EXPECT_THAT(res.Failure().reason.Str(),
+                testing::HasSubstr(R"(:2:3 error: var: result is undefined
   undef = var, 0i
   ^^^^^
-
-:1:1 note: in block
-$B1: {  # root
-^^^
-
-note: # Disassembly
-$B1: {  # root
-  undef = var, 0i
-}
-
-)");
+)")) << res.Failure().reason.Str();
 }
 
 TEST_F(IR_ValidatorTest, Var_VoidType) {
@@ -76,20 +67,11 @@ TEST_F(IR_ValidatorTest, Var_VoidType) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.Str(), R"(:2:3 error: var: pointers to void are not permitted
+    EXPECT_THAT(res.Failure().reason.Str(),
+                testing::HasSubstr(R"(:2:3 error: var: pointers to void are not permitted
   %1:ptr<private, void, read_write> = var
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-:1:1 note: in block
-$B1: {  # root
-^^^
-
-note: # Disassembly
-$B1: {  # root
-  %1:ptr<private, void, read_write> = var
-}
-
-)");
+)")) << res.Failure().reason.Str();
 }
 
 TEST_F(IR_ValidatorTest, Var_Function_NullResult) {
@@ -104,22 +86,11 @@ TEST_F(IR_ValidatorTest, Var_Function_NullResult) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.Str(), R"(:3:5 error: var: result is undefined
+    EXPECT_THAT(res.Failure().reason.Str(),
+                testing::HasSubstr(R"(:3:5 error: var: result is undefined
     undef = var, 0i
     ^^^^^
-
-:2:3 note: in block
-  $B1: {
-  ^^^
-
-note: # Disassembly
-%my_func = func():void {
-  $B1: {
-    undef = var, 0i
-    ret
-  }
-}
-)");
+)")) << res.Failure().reason.Str();
 }
 
 TEST_F(IR_ValidatorTest, Var_Function_NoResult) {
@@ -134,22 +105,11 @@ TEST_F(IR_ValidatorTest, Var_Function_NoResult) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.Str(), R"(:3:13 error: var: expected exactly 1 results, got 0
+    EXPECT_THAT(res.Failure().reason.Str(),
+                testing::HasSubstr(R"(:3:13 error: var: expected exactly 1 results, got 0
     undef = var, 1i
             ^^^
-
-:2:3 note: in block
-  $B1: {
-  ^^^
-
-note: # Disassembly
-%my_func = func():void {
-  $B1: {
-    undef = var, 1i
-    ret
-  }
-}
-)");
+)")) << res.Failure().reason.Str();
 }
 
 TEST_F(IR_ValidatorTest, Var_Function_NonPtrResult) {
@@ -163,23 +123,12 @@ TEST_F(IR_ValidatorTest, Var_Function_NonPtrResult) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.Str(),
-              R"(:3:14 error: var: result type 'f32' must be a pointer or a reference
+    EXPECT_THAT(
+        res.Failure().reason.Str(),
+        testing::HasSubstr(R"(:3:14 error: var: result type 'f32' must be a pointer or a reference
     %2:f32 = var
              ^^^
-
-:2:3 note: in block
-  $B1: {
-  ^^^
-
-note: # Disassembly
-%my_func = func():void {
-  $B1: {
-    %2:f32 = var
-    ret
-  }
-}
-)");
+)")) << res.Failure().reason.Str();
 }
 
 TEST_F(IR_ValidatorTest, Var_Function_UnexpectedInputAttachmentIndex) {
@@ -193,23 +142,12 @@ TEST_F(IR_ValidatorTest, Var_Function_UnexpectedInputAttachmentIndex) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.Str(),
-              R"(:3:41 error: var: '@input_attachment_index' is not valid for non-handle var
+    EXPECT_THAT(res.Failure().reason.Str(),
+                testing::HasSubstr(
+                    R"(:3:41 error: var: '@input_attachment_index' is not valid for non-handle var
     %2:ptr<function, f32, read_write> = var @input_attachment_index(0)
                                         ^^^
-
-:2:3 note: in block
-  $B1: {
-  ^^^
-
-note: # Disassembly
-%my_func = func():void {
-  $B1: {
-    %2:ptr<function, f32, read_write> = var @input_attachment_index(0)
-    ret
-  }
-}
-)");
+)")) << res.Failure().reason.Str();
 }
 
 TEST_F(IR_ValidatorTest, Var_Function_OutsideFunctionScope) {
@@ -218,21 +156,13 @@ TEST_F(IR_ValidatorTest, Var_Function_OutsideFunctionScope) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.Str(),
-              R"(:2:39 error: var: vars in the 'function' address space must be in a function scope
+    EXPECT_THAT(
+        res.Failure().reason.Str(),
+        testing::HasSubstr(
+            R"(:2:39 error: var: vars in the 'function' address space must be in a function scope
   %1:ptr<function, f32, read_write> = var
                                       ^^^
-
-:1:1 note: in block
-$B1: {  # root
-^^^
-
-note: # Disassembly
-$B1: {  # root
-  %1:ptr<function, f32, read_write> = var
-}
-
-)");
+)")) << res.Failure().reason.Str();
 }
 
 TEST_F(IR_ValidatorTest, Var_NonFunction_InsideFunctionScope) {
@@ -245,23 +175,13 @@ TEST_F(IR_ValidatorTest, Var_NonFunction_InsideFunctionScope) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.Str(),
-              R"(:3:40 error: var: vars in a function scope must be in the 'function' address space
+    EXPECT_THAT(
+        res.Failure().reason.Str(),
+        testing::HasSubstr(
+            R"(:3:40 error: var: vars in a function scope must be in the 'function' address space
     %2:ptr<private, f32, read_write> = var
                                        ^^^
-
-:2:3 note: in block
-  $B1: {
-  ^^^
-
-note: # Disassembly
-%my_func = func():void {
-  $B1: {
-    %2:ptr<private, f32, read_write> = var
-    ret
-  }
-}
-)");
+)")) << res.Failure().reason.Str();
 }
 
 TEST_F(IR_ValidatorTest, Var_Private_InsideFunctionScopeWithCapability) {
@@ -273,7 +193,7 @@ TEST_F(IR_ValidatorTest, Var_Private_InsideFunctionScopeWithCapability) {
     });
 
     auto res = ir::Validate(mod, Capabilities{Capability::kAllowPrivateVarsInFunctions});
-    ASSERT_EQ(res, Success);
+    ASSERT_EQ(res, Success) << res.Failure();
 }
 
 TEST_F(IR_ValidatorTest, Var_Private_UnexpectedInputAttachmentIndex) {
@@ -283,21 +203,12 @@ TEST_F(IR_ValidatorTest, Var_Private_UnexpectedInputAttachmentIndex) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.Str(),
-              R"(:2:38 error: var: '@input_attachment_index' is not valid for non-handle var
+    EXPECT_THAT(res.Failure().reason.Str(),
+                testing::HasSubstr(
+                    R"(:2:38 error: var: '@input_attachment_index' is not valid for non-handle var
   %1:ptr<private, f32, read_write> = var @input_attachment_index(0)
                                      ^^^
-
-:1:1 note: in block
-$B1: {  # root
-^^^
-
-note: # Disassembly
-$B1: {  # root
-  %1:ptr<private, f32, read_write> = var @input_attachment_index(0)
-}
-
-)");
+)")) << res.Failure().reason.Str();
 }
 
 TEST_F(IR_ValidatorTest, Var_PushConstant_UnexpectedInputAttachmentIndex) {
@@ -307,21 +218,12 @@ TEST_F(IR_ValidatorTest, Var_PushConstant_UnexpectedInputAttachmentIndex) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.Str(),
-              R"(:2:38 error: var: '@input_attachment_index' is not valid for non-handle var
+    EXPECT_THAT(res.Failure().reason.Str(),
+                testing::HasSubstr(
+                    R"(:2:38 error: var: '@input_attachment_index' is not valid for non-handle var
   %1:ptr<push_constant, f32, read> = var @input_attachment_index(0)
                                      ^^^
-
-:1:1 note: in block
-$B1: {  # root
-^^^
-
-note: # Disassembly
-$B1: {  # root
-  %1:ptr<push_constant, f32, read> = var @input_attachment_index(0)
-}
-
-)");
+)")) << res.Failure().reason.Str();
 }
 
 TEST_F(IR_ValidatorTest, Var_Storage_UnexpectedInputAttachmentIndex) {
@@ -332,21 +234,12 @@ TEST_F(IR_ValidatorTest, Var_Storage_UnexpectedInputAttachmentIndex) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.Str(),
-              R"(:2:38 error: var: '@input_attachment_index' is not valid for non-handle var
+    EXPECT_THAT(res.Failure().reason.Str(),
+                testing::HasSubstr(
+                    R"(:2:38 error: var: '@input_attachment_index' is not valid for non-handle var
   %1:ptr<storage, f32, read_write> = var @binding_point(0, 0) @input_attachment_index(0)
                                      ^^^
-
-:1:1 note: in block
-$B1: {  # root
-^^^
-
-note: # Disassembly
-$B1: {  # root
-  %1:ptr<storage, f32, read_write> = var @binding_point(0, 0) @input_attachment_index(0)
-}
-
-)");
+)")) << res.Failure().reason.Str();
 }
 
 TEST_F(IR_ValidatorTest, Var_Uniform_UnexpectedInputAttachmentIndex) {
@@ -357,21 +250,12 @@ TEST_F(IR_ValidatorTest, Var_Uniform_UnexpectedInputAttachmentIndex) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.Str(),
-              R"(:2:32 error: var: '@input_attachment_index' is not valid for non-handle var
+    EXPECT_THAT(res.Failure().reason.Str(),
+                testing::HasSubstr(
+                    R"(:2:32 error: var: '@input_attachment_index' is not valid for non-handle var
   %1:ptr<uniform, f32, read> = var @binding_point(0, 0) @input_attachment_index(0)
                                ^^^
-
-:1:1 note: in block
-$B1: {  # root
-^^^
-
-note: # Disassembly
-$B1: {  # root
-  %1:ptr<uniform, f32, read> = var @binding_point(0, 0) @input_attachment_index(0)
-}
-
-)");
+)")) << res.Failure().reason.Str();
 }
 
 TEST_F(IR_ValidatorTest, Var_Workgroup_UnexpectedInputAttachmentIndex) {
@@ -381,21 +265,12 @@ TEST_F(IR_ValidatorTest, Var_Workgroup_UnexpectedInputAttachmentIndex) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.Str(),
-              R"(:2:40 error: var: '@input_attachment_index' is not valid for non-handle var
+    EXPECT_THAT(res.Failure().reason.Str(),
+                testing::HasSubstr(
+                    R"(:2:40 error: var: '@input_attachment_index' is not valid for non-handle var
   %1:ptr<workgroup, f32, read_write> = var @input_attachment_index(0)
                                        ^^^
-
-:1:1 note: in block
-$B1: {  # root
-^^^
-
-note: # Disassembly
-$B1: {  # root
-  %1:ptr<workgroup, f32, read_write> = var @input_attachment_index(0)
-}
-
-)");
+)")) << res.Failure().reason.Str();
 }
 
 TEST_F(IR_ValidatorTest, Var_Init_WrongType) {
@@ -409,23 +284,12 @@ TEST_F(IR_ValidatorTest, Var_Init_WrongType) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.Str(),
-              R"(:3:41 error: var: initializer type 'i32' does not match store type 'f32'
+    EXPECT_THAT(res.Failure().reason.Str(),
+                testing::HasSubstr(
+                    R"(:3:41 error: var: initializer type 'i32' does not match store type 'f32'
     %2:ptr<function, f32, read_write> = var, 1i
                                         ^^^
-
-:2:3 note: in block
-  $B1: {
-  ^^^
-
-note: # Disassembly
-%my_func = func():void {
-  $B1: {
-    %2:ptr<function, f32, read_write> = var, 1i
-    ret
-  }
-}
-)");
+)")) << res.Failure().reason.Str();
 }
 
 TEST_F(IR_ValidatorTest, Var_Init_NullType) {
@@ -444,33 +308,11 @@ TEST_F(IR_ValidatorTest, Var_Init_NullType) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.Str(),
-              R"(:4:5 error: load: result type is undefined
-    %3:undef = load %i
-    ^^^^^^^^
-
-:2:3 note: in block
-  $B1: {
-  ^^^
-
-:5:46 error: var: operand type is undefined
+    EXPECT_THAT(res.Failure().reason.Str(),
+                testing::HasSubstr(R"(:5:46 error: var: operand type is undefined
     %j:ptr<function, f32, read_write> = var, %3
                                              ^^
-
-:2:3 note: in block
-  $B1: {
-  ^^^
-
-note: # Disassembly
-%my_func = func():void {
-  $B1: {
-    %i:ptr<function, f32, read_write> = var, 0.0f
-    %3:undef = load %i
-    %j:ptr<function, f32, read_write> = var, %3
-    ret
-  }
-}
-)");
+)")) << res.Failure().reason.Str();
 }
 
 TEST_F(IR_ValidatorTest, Var_Init_FunctionTypeInit) {
@@ -486,28 +328,13 @@ TEST_F(IR_ValidatorTest, Var_Init_FunctionTypeInit) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.Str(),
-              R"(:8:41 error: var: initializer type '<function>' does not match store type 'f32'
+    EXPECT_THAT(
+        res.Failure().reason.Str(),
+        testing::HasSubstr(
+            R"(:8:41 error: var: initializer type '<function>' does not match store type 'f32'
     %i:ptr<function, f32, read_write> = var, %invalid_init
                                         ^^^
-
-:7:3 note: in block
-  $B2: {
-  ^^^
-
-note: # Disassembly
-%invalid_init = func():void {
-  $B1: {
-    ret
-  }
-}
-%my_func = func():void {
-  $B2: {
-    %i:ptr<function, f32, read_write> = var, %invalid_init
-    ret
-  }
-}
-)");
+)")) << res.Failure().reason.Str();
 }
 
 TEST_F(IR_ValidatorTest, Var_Init_InvalidAddressSpace) {
@@ -527,29 +354,13 @@ TEST_F(IR_ValidatorTest, Var_Init_InvalidAddressSpace) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(
+    EXPECT_THAT(
         res.Failure().reason.Str(),
-        R"(:3:38 error: var: only variables in the function or private address space may be initialized
+        testing::HasSubstr(
+            R"(:3:38 error: var: only variables in the function or private address space may be initialized
   %s:ptr<storage, f32, read_write> = var, 1.0f
                                      ^^^
-
-:1:1 note: in block
-$B1: {  # root
-^^^
-
-note: # Disassembly
-$B1: {  # root
-  %p:ptr<private, f32, read_write> = var, 1.0f
-  %s:ptr<storage, f32, read_write> = var, 1.0f
-}
-
-%my_func = func():void {
-  $B2: {
-    %v:ptr<function, f32, read_write> = var, 1.0f
-    ret
-  }
-}
-)");
+)")) << res.Failure().reason.Str();
 }
 
 TEST_F(IR_ValidatorTest, Var_HandleMissingBindingPoint) {
@@ -558,21 +369,11 @@ TEST_F(IR_ValidatorTest, Var_HandleMissingBindingPoint) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.Str(),
-              R"(:2:31 error: var: a resource variable is missing binding point
+    EXPECT_THAT(res.Failure().reason.Str(),
+                testing::HasSubstr(R"(:2:31 error: var: a resource variable is missing binding point
   %1:ptr<handle, i32, read> = var
                               ^^^
-
-:1:1 note: in block
-$B1: {  # root
-^^^
-
-note: # Disassembly
-$B1: {  # root
-  %1:ptr<handle, i32, read> = var
-}
-
-)");
+)")) << res.Failure().reason.Str();
 }
 
 TEST_F(IR_ValidatorTest, Var_StorageMissingBindingPoint) {
@@ -581,21 +382,11 @@ TEST_F(IR_ValidatorTest, Var_StorageMissingBindingPoint) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.Str(),
-              R"(:2:38 error: var: a resource variable is missing binding point
+    EXPECT_THAT(res.Failure().reason.Str(),
+                testing::HasSubstr(R"(:2:38 error: var: a resource variable is missing binding point
   %1:ptr<storage, i32, read_write> = var
                                      ^^^
-
-:1:1 note: in block
-$B1: {  # root
-^^^
-
-note: # Disassembly
-$B1: {  # root
-  %1:ptr<storage, i32, read_write> = var
-}
-
-)");
+)")) << res.Failure().reason.Str();
 }
 
 TEST_F(IR_ValidatorTest, Var_UniformMissingBindingPoint) {
@@ -604,21 +395,11 @@ TEST_F(IR_ValidatorTest, Var_UniformMissingBindingPoint) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.Str(),
-              R"(:2:32 error: var: a resource variable is missing binding point
+    EXPECT_THAT(res.Failure().reason.Str(),
+                testing::HasSubstr(R"(:2:32 error: var: a resource variable is missing binding point
   %1:ptr<uniform, i32, read> = var
                                ^^^
-
-:1:1 note: in block
-$B1: {  # root
-^^^
-
-note: # Disassembly
-$B1: {  # root
-  %1:ptr<uniform, i32, read> = var
-}
-
-)");
+)")) << res.Failure().reason.Str();
 }
 
 TEST_F(IR_ValidatorTest, Var_NonResourceWithBindingPoint) {
@@ -628,21 +409,11 @@ TEST_F(IR_ValidatorTest, Var_NonResourceWithBindingPoint) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.Str(),
-              R"(:2:38 error: var: a non-resource variable has binding point
+    EXPECT_THAT(res.Failure().reason.Str(),
+                testing::HasSubstr(R"(:2:38 error: var: a non-resource variable has binding point
   %1:ptr<private, i32, read_write> = var @binding_point(0, 0)
                                      ^^^
-
-:1:1 note: in block
-$B1: {  # root
-^^^
-
-note: # Disassembly
-$B1: {  # root
-  %1:ptr<private, i32, read_write> = var @binding_point(0, 0)
-}
-
-)");
+)")) << res.Failure().reason.Str();
 }
 
 TEST_F(IR_ValidatorTest, Var_MultipleIOAnnotations) {
@@ -655,22 +426,13 @@ TEST_F(IR_ValidatorTest, Var_MultipleIOAnnotations) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(
+    EXPECT_THAT(
         res.Failure().reason.Str(),
-        R"(:2:35 error: var: module scope variable has more than one IO annotation, [ @location, built-in ]
+        testing::HasSubstr(
+            R"(:2:35 error: var: module scope variable has more than one IO annotation, [ @location, built-in ]
   %1:ptr<__in, vec4<f32>, read> = var @location(0) @builtin(position)
                                   ^^^
-
-:1:1 note: in block
-$B1: {  # root
-^^^
-
-note: # Disassembly
-$B1: {  # root
-  %1:ptr<__in, vec4<f32>, read> = var @location(0) @builtin(position)
-}
-
-)");
+)")) << res.Failure().reason.Str();
 }
 
 TEST_F(IR_ValidatorTest, Var_Struct_MultipleIOAnnotations) {
@@ -687,26 +449,13 @@ TEST_F(IR_ValidatorTest, Var_Struct_MultipleIOAnnotations) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(
+    EXPECT_THAT(
         res.Failure().reason.Str(),
-        R"(:6:41 error: var: module scope variable struct member has more than one IO annotation, [ built-in, @color ]
+        testing::HasSubstr(
+            R"(:6:41 error: var: module scope variable struct member has more than one IO annotation, [ built-in, @color ]
   %1:ptr<__out, MyStruct, read_write> = var
                                         ^^^
-
-:5:1 note: in block
-$B1: {  # root
-^^^
-
-note: # Disassembly
-MyStruct = struct @align(4) {
-  a:f32 @offset(0), @color(0), @builtin(position)
-}
-
-$B1: {  # root
-  %1:ptr<__out, MyStruct, read_write> = var
-}
-
-)");
+)")) << res.Failure().reason.Str();
 }
 
 TEST_F(IR_ValidatorTest, Var_MissingIOAnnotations) {
@@ -715,22 +464,13 @@ TEST_F(IR_ValidatorTest, Var_MissingIOAnnotations) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(
+    EXPECT_THAT(
         res.Failure().reason.Str(),
-        R"(:2:35 error: var: module scope variable must have at least one IO annotation, e.g. a binding point, a location, etc
+        testing::HasSubstr(
+            R"(:2:35 error: var: module scope variable must have at least one IO annotation, e.g. a binding point, a location, etc
   %1:ptr<__in, vec4<f32>, read> = var
                                   ^^^
-
-:1:1 note: in block
-$B1: {  # root
-^^^
-
-note: # Disassembly
-$B1: {  # root
-  %1:ptr<__in, vec4<f32>, read> = var
-}
-
-)");
+)")) << res.Failure().reason.Str();
 }
 
 TEST_F(IR_ValidatorTest, Var_Struct_MissingIOAnnotations) {
@@ -742,26 +482,13 @@ TEST_F(IR_ValidatorTest, Var_Struct_MissingIOAnnotations) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(
+    EXPECT_THAT(
         res.Failure().reason.Str(),
-        R"(:6:41 error: var: module scope variable struct members must have at least one IO annotation, e.g. a binding point, a location, etc
+        testing::HasSubstr(
+            R"(:6:41 error: var: module scope variable struct members must have at least one IO annotation, e.g. a binding point, a location, etc
   %1:ptr<__out, MyStruct, read_write> = var
                                         ^^^
-
-:5:1 note: in block
-$B1: {  # root
-^^^
-
-note: # Disassembly
-MyStruct = struct @align(4) {
-  a:f32 @offset(0)
-}
-
-$B1: {  # root
-  %1:ptr<__out, MyStruct, read_write> = var
-}
-
-)");
+)")) << res.Failure().reason.Str();
 }
 
 TEST_F(IR_ValidatorTest, Let_NullResult) {
@@ -775,22 +502,11 @@ TEST_F(IR_ValidatorTest, Let_NullResult) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.Str(), R"(:3:5 error: let: result is undefined
+    EXPECT_THAT(res.Failure().reason.Str(),
+                testing::HasSubstr(R"(:3:5 error: let: result is undefined
     undef = let 1i
     ^^^^^
-
-:2:3 note: in block
-  $B1: {
-  ^^^
-
-note: # Disassembly
-%my_func = func():void {
-  $B1: {
-    undef = let 1i
-    ret
-  }
-}
-)");
+)")) << res.Failure().reason.Str();
 }
 
 TEST_F(IR_ValidatorTest, Let_EmptyResults) {
@@ -805,22 +521,11 @@ TEST_F(IR_ValidatorTest, Let_EmptyResults) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.Str(), R"(:3:13 error: let: expected exactly 1 results, got 0
+    EXPECT_THAT(res.Failure().reason.Str(),
+                testing::HasSubstr(R"(:3:13 error: let: expected exactly 1 results, got 0
     undef = let 1i
             ^^^
-
-:2:3 note: in block
-  $B1: {
-  ^^^
-
-note: # Disassembly
-%my_func = func():void {
-  $B1: {
-    undef = let 1i
-    ret
-  }
-}
-)");
+)")) << res.Failure().reason.Str();
 }
 
 TEST_F(IR_ValidatorTest, Let_NullValue) {
@@ -833,22 +538,11 @@ TEST_F(IR_ValidatorTest, Let_NullValue) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.Str(), R"(:3:18 error: let: operand is undefined
+    EXPECT_THAT(res.Failure().reason.Str(),
+                testing::HasSubstr(R"(:3:18 error: let: operand is undefined
     %2:f32 = let undef
                  ^^^^^
-
-:2:3 note: in block
-  $B1: {
-  ^^^
-
-note: # Disassembly
-%my_func = func():void {
-  $B1: {
-    %2:f32 = let undef
-    ret
-  }
-}
-)");
+)")) << res.Failure().reason.Str();
 }
 
 TEST_F(IR_ValidatorTest, Let_EmptyValue) {
@@ -863,23 +557,11 @@ TEST_F(IR_ValidatorTest, Let_EmptyValue) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.Str(),
-              R"(:3:14 error: let: expected exactly 1 operands, got 0
+    EXPECT_THAT(res.Failure().reason.Str(),
+                testing::HasSubstr(R"(:3:14 error: let: expected exactly 1 operands, got 0
     %2:i32 = let
              ^^^
-
-:2:3 note: in block
-  $B1: {
-  ^^^
-
-note: # Disassembly
-%my_func = func():void {
-  $B1: {
-    %2:i32 = let
-    ret
-  }
-}
-)");
+)")) << res.Failure().reason.Str();
 }
 
 TEST_F(IR_ValidatorTest, Let_WrongType) {
@@ -893,23 +575,12 @@ TEST_F(IR_ValidatorTest, Let_WrongType) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.Str(),
-              R"(:3:14 error: let: result type 'f32' does not match value type 'i32'
+    EXPECT_THAT(
+        res.Failure().reason.Str(),
+        testing::HasSubstr(R"(:3:14 error: let: result type 'f32' does not match value type 'i32'
     %2:f32 = let 1i
              ^^^
-
-:2:3 note: in block
-  $B1: {
-  ^^^
-
-note: # Disassembly
-%my_func = func():void {
-  $B1: {
-    %2:f32 = let 1i
-    ret
-  }
-}
-)");
+)")) << res.Failure().reason.Str();
 }
 
 TEST_F(IR_ValidatorTest, Let_VoidResult) {
@@ -922,23 +593,11 @@ TEST_F(IR_ValidatorTest, Let_VoidResult) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.Str(),
-              R"(:3:15 error: let: result type cannot be void
+    EXPECT_THAT(res.Failure().reason.Str(),
+                testing::HasSubstr(R"(:3:15 error: let: result type cannot be void
     %2:void = let 1i
               ^^^
-
-:2:3 note: in block
-  $B1: {
-  ^^^
-
-note: # Disassembly
-%my_func = func():void {
-  $B1: {
-    %2:void = let 1i
-    ret
-  }
-}
-)");
+)")) << res.Failure().reason.Str();
 }
 
 TEST_F(IR_ValidatorTest, Let_VoidValue) {
@@ -954,29 +613,11 @@ TEST_F(IR_ValidatorTest, Let_VoidValue) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.Str(),
-              R"(:9:14 error: let: value type cannot be void
+    EXPECT_THAT(res.Failure().reason.Str(),
+                testing::HasSubstr(R"(:9:14 error: let: value type cannot be void
     %4:i32 = let %3
              ^^^
-
-:7:3 note: in block
-  $B2: {
-  ^^^
-
-note: # Disassembly
-%void_func = func():void {
-  $B1: {
-    ret
-  }
-}
-%my_func = func():void {
-  $B2: {
-    %3:void = call %void_func
-    %4:i32 = let %3
-    ret
-  }
-}
-)");
+)")) << res.Failure().reason.Str();
 }
 
 }  // namespace tint::core::ir

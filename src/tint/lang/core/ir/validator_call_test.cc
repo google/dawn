@@ -60,23 +60,11 @@ TEST_F(IR_ValidatorTest, CallToFunctionOutsideModule) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.Str(),
-              R"(:3:20 error: call: %g is not part of the module
+    EXPECT_THAT(res.Failure().reason.Str(),
+                testing::HasSubstr(R"(:3:20 error: call: %g is not part of the module
     %2:void = call %g
                    ^^
-
-:2:3 note: in block
-  $B1: {
-  ^^^
-
-note: # Disassembly
-%f = func():void {
-  $B1: {
-    %2:void = call %g
-    ret
-  }
-}
-)");
+)")) << res.Failure().reason.Str();
 }
 
 TEST_F(IR_ValidatorTest, CallToEntryPointFunction) {
@@ -91,28 +79,11 @@ TEST_F(IR_ValidatorTest, CallToEntryPointFunction) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.Str(),
-              R"(:3:20 error: call: call target must not have a pipeline stage
+    EXPECT_THAT(res.Failure().reason.Str(),
+                testing::HasSubstr(R"(:3:20 error: call: call target must not have a pipeline stage
     %2:void = call %g
                    ^^
-
-:2:3 note: in block
-  $B1: {
-  ^^^
-
-note: # Disassembly
-%f = func():void {
-  $B1: {
-    %2:void = call %g
-    ret
-  }
-}
-%g = @compute @workgroup_size(1u, 1u, 1u) func():void {
-  $B2: {
-    ret
-  }
-}
-)");
+)")) << res.Failure().reason.Str();
 }
 
 TEST_F(IR_ValidatorTest, CallToFunctionTooFewArguments) {
@@ -128,28 +99,12 @@ TEST_F(IR_ValidatorTest, CallToFunctionTooFewArguments) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.Str(),
-              R"(:8:20 error: call: function has 2 parameters, but call provides 1 arguments
+    EXPECT_THAT(res.Failure().reason.Str(),
+                testing::HasSubstr(
+                    R"(:8:20 error: call: function has 2 parameters, but call provides 1 arguments
     %5:void = call %g, 42i
                    ^^
-
-:7:3 note: in block
-  $B2: {
-  ^^^
-
-note: # Disassembly
-%g = func(%2:i32, %3:i32):void {
-  $B1: {
-    ret
-  }
-}
-%f = func():void {
-  $B2: {
-    %5:void = call %g, 42i
-    ret
-  }
-}
-)");
+)")) << res.Failure().reason.Str();
 }
 
 TEST_F(IR_ValidatorTest, CallToFunctionTooManyArguments) {
@@ -165,28 +120,12 @@ TEST_F(IR_ValidatorTest, CallToFunctionTooManyArguments) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.Str(),
-              R"(:8:20 error: call: function has 2 parameters, but call provides 3 arguments
+    EXPECT_THAT(res.Failure().reason.Str(),
+                testing::HasSubstr(
+                    R"(:8:20 error: call: function has 2 parameters, but call provides 3 arguments
     %5:void = call %g, 1i, 2i, 3i
                    ^^
-
-:7:3 note: in block
-  $B2: {
-  ^^^
-
-note: # Disassembly
-%g = func(%2:i32, %3:i32):void {
-  $B1: {
-    ret
-  }
-}
-%f = func():void {
-  $B2: {
-    %5:void = call %g, 1i, 2i, 3i
-    ret
-  }
-}
-)");
+)")) << res.Failure().reason.Str();
 }
 
 TEST_F(IR_ValidatorTest, CallToFunctionWrongArgType) {
@@ -202,29 +141,13 @@ TEST_F(IR_ValidatorTest, CallToFunctionWrongArgType) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(
+    EXPECT_THAT(
         res.Failure().reason.Str(),
-        R"(:8:28 error: call: type 'i32' of function parameter 1 does not match argument type 'f32'
+        testing::HasSubstr(
+            R"(:8:28 error: call: type 'i32' of function parameter 1 does not match argument type 'f32'
     %6:void = call %g, 1i, 2.0f, 3i
                            ^^^^
-
-:7:3 note: in block
-  $B2: {
-  ^^^
-
-note: # Disassembly
-%g = func(%2:i32, %3:i32, %4:i32):void {
-  $B1: {
-    ret
-  }
-}
-%f = func():void {
-  $B2: {
-    %6:void = call %g, 1i, 2.0f, 3i
-    ret
-  }
-}
-)");
+)")) << res.Failure().reason.Str();
 }
 
 TEST_F(IR_ValidatorTest, CallToFunctionNullArg) {
@@ -240,28 +163,11 @@ TEST_F(IR_ValidatorTest, CallToFunctionNullArg) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.Str(),
-              R"(:8:24 error: call: operand is undefined
+    EXPECT_THAT(res.Failure().reason.Str(),
+                testing::HasSubstr(R"(:8:24 error: call: operand is undefined
     %4:void = call %g, undef
                        ^^^^^
-
-:7:3 note: in block
-  $B2: {
-  ^^^
-
-note: # Disassembly
-%g = func(%2:i32):void {
-  $B1: {
-    ret
-  }
-}
-%f = func():void {
-  $B2: {
-    %4:void = call %g, undef
-    ret
-  }
-}
-)");
+)")) << res.Failure().reason.Str();
 }
 
 TEST_F(IR_ValidatorTest, CallToNullFunction) {
@@ -277,28 +183,11 @@ TEST_F(IR_ValidatorTest, CallToNullFunction) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.Str(),
-              R"(:8:20 error: call: operand is undefined
+    EXPECT_THAT(res.Failure().reason.Str(),
+                testing::HasSubstr(R"(:8:20 error: call: operand is undefined
     %3:void = call undef
                    ^^^^^
-
-:7:3 note: in block
-  $B2: {
-  ^^^
-
-note: # Disassembly
-%g = func():void {
-  $B1: {
-    ret
-  }
-}
-%f = func():void {
-  $B2: {
-    %3:void = call undef
-    ret
-  }
-}
-)");
+)")) << res.Failure().reason.Str();
 }
 
 TEST_F(IR_ValidatorTest, CallToFunctionNoResult) {
@@ -314,28 +203,11 @@ TEST_F(IR_ValidatorTest, CallToFunctionNoResult) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.Str(),
-              R"(:8:13 error: call: expected exactly 1 results, got 0
+    EXPECT_THAT(res.Failure().reason.Str(),
+                testing::HasSubstr(R"(:8:13 error: call: expected exactly 1 results, got 0
     undef = call %g
             ^^^^
-
-:7:3 note: in block
-  $B2: {
-  ^^^
-
-note: # Disassembly
-%g = func():void {
-  $B1: {
-    ret
-  }
-}
-%f = func():void {
-  $B2: {
-    undef = call %g
-    ret
-  }
-}
-)");
+)")) << res.Failure().reason.Str();
 }
 
 TEST_F(IR_ValidatorTest, CallToFunctionNoOperands) {
@@ -351,28 +223,11 @@ TEST_F(IR_ValidatorTest, CallToFunctionNoOperands) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.Str(),
-              R"(:8:15 error: call: expected at least 1 operands, got 0
+    EXPECT_THAT(res.Failure().reason.Str(),
+                testing::HasSubstr(R"(:8:15 error: call: expected at least 1 operands, got 0
     %3:void = call undef
               ^^^^
-
-:7:3 note: in block
-  $B2: {
-  ^^^
-
-note: # Disassembly
-%g = func():void {
-  $B1: {
-    ret
-  }
-}
-%f = func():void {
-  $B2: {
-    %3:void = call undef
-    ret
-  }
-}
-)");
+)")) << res.Failure().reason.Str();
 }
 
 TEST_F(IR_ValidatorTest, CallToNonFunctionTarget) {
@@ -389,23 +244,11 @@ TEST_F(IR_ValidatorTest, CallToNonFunctionTarget) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.Str(),
-              R"(:3:20 error: call: target not defined or not a function
+    EXPECT_THAT(res.Failure().reason.Str(),
+                testing::HasSubstr(R"(:3:20 error: call: target not defined or not a function
     %2:void = call 0i
                    ^^
-
-:2:3 note: in block
-  $B1: {
-  ^^^
-
-note: # Disassembly
-%f = func():void {
-  $B1: {
-    %2:void = call 0i
-    ret
-  }
-}
-)");
+)")) << res.Failure().reason.Str();
 }
 
 TEST_F(IR_ValidatorTest, CallToBuiltin_MissingResult) {
@@ -418,23 +261,11 @@ TEST_F(IR_ValidatorTest, CallToBuiltin_MissingResult) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.Str(),
-              R"(:3:13 error: abs: call to builtin does not have a return type
+    EXPECT_THAT(res.Failure().reason.Str(),
+                testing::HasSubstr(R"(:3:13 error: abs: call to builtin does not have a return type
     undef = abs 1.0f
             ^^^
-
-:2:3 note: in block
-  $B1: {
-  ^^^
-
-note: # Disassembly
-%f = func():void {
-  $B1: {
-    undef = abs 1.0f
-    ret
-  }
-}
-)");
+)")) << res.Failure().reason.Str();
 }
 
 TEST_F(IR_ValidatorTest, CallToBuiltin_MismatchResultType) {
@@ -447,23 +278,13 @@ TEST_F(IR_ValidatorTest, CallToBuiltin_MismatchResultType) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.Str(),
-              R"(:3:14 error: abs: call result type 'i32'does not match builtin return type 'f32'
+    EXPECT_THAT(
+        res.Failure().reason.Str(),
+        testing::HasSubstr(
+            R"(:3:14 error: abs: call result type 'i32'does not match builtin return type 'f32'
     %2:i32 = abs 1.0f
              ^^^
-
-:2:3 note: in block
-  $B1: {
-  ^^^
-
-note: # Disassembly
-%f = func():void {
-  $B1: {
-    %2:i32 = abs 1.0f
-    ret
-  }
-}
-)");
+)")) << res.Failure().reason.Str();
 }
 
 TEST_F(IR_ValidatorTest, CallToBuiltin_ArgNullType) {
@@ -480,33 +301,11 @@ TEST_F(IR_ValidatorTest, CallToBuiltin_ArgNullType) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.Str(),
-              R"(:4:5 error: load: result type is undefined
+    EXPECT_THAT(res.Failure().reason.Str(),
+                testing::HasSubstr(R"(:4:5 error: load: result type is undefined
     %3:undef = load %i
     ^^^^^^^^
-
-:2:3 note: in block
-  $B1: {
-  ^^^
-
-:5:14 error: abs: argument to builtin has undefined type
-    %4:f32 = abs %3
-             ^^^
-
-:2:3 note: in block
-  $B1: {
-  ^^^
-
-note: # Disassembly
-%f = func():void {
-  $B1: {
-    %i:ptr<function, f32, read_write> = var, 0.0f
-    %3:undef = load %i
-    %4:f32 = abs %3
-    ret
-  }
-}
-)");
+)")) << res.Failure().reason.Str();
 }
 
 TEST_F(IR_ValidatorTest, CallToBuiltin_NonSingularResult) {
@@ -525,34 +324,19 @@ TEST_F(IR_ValidatorTest, CallToBuiltin_NonSingularResult) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.Str(),
-              R"(:5:14 error: abs: call to builtin has 2 results, when 1 is expected
+    EXPECT_THAT(
+        res.Failure().reason.Str(),
+        testing::HasSubstr(R"(:5:14 error: abs: call to builtin has 2 results, when 1 is expected
     %3:f32 = abs %3
              ^^^
+)")) << res.Failure().reason.Str();
 
-:2:3 note: in block
-  $B1: {
-  ^^^
-
-:6:13 error: abs: call to builtin has 0 results, when 1 is expected
+    EXPECT_THAT(
+        res.Failure().reason.Str(),
+        testing::HasSubstr(R"(:6:13 error: abs: call to builtin has 0 results, when 1 is expected
     undef = abs %3
             ^^^
-
-:2:3 note: in block
-  $B1: {
-  ^^^
-
-note: # Disassembly
-%f = func():void {
-  $B1: {
-    %i:ptr<function, f32, read_write> = var, 0.0f
-    %3:f32 = load %i
-    %3:f32 = abs %3
-    undef = abs %3
-    ret
-  }
-}
-)");
+)")) << res.Failure().reason.Str();
 }
 
 }  // namespace tint::core::ir

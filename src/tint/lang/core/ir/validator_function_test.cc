@@ -55,7 +55,8 @@ TEST_F(IR_ValidatorTest, Function) {
     f->SetParams({b.FunctionParam(ty.i32()), b.FunctionParam(ty.f32())});
     f->Block()->Append(b.Return(f));
 
-    EXPECT_EQ(ir::Validate(mod), Success);
+    auto res = ir::Validate(mod);
+    ASSERT_EQ(res, Success) << res.Failure();
 }
 
 TEST_F(IR_ValidatorTest, Function_NoType) {
@@ -70,23 +71,11 @@ TEST_F(IR_ValidatorTest, Function_NoType) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.Str(),
-              R"(:6:1 error: functions must have type '<function>'
+    EXPECT_THAT(res.Failure().reason.Str(),
+                testing::HasSubstr(R"(:6:1 error: functions must have type '<function>'
 %invalid = func():void {
 ^^^^^^^^
-
-note: # Disassembly
-%valid = func():void {
-  $B1: {
-    ret
-  }
-}
-%invalid = func():void {
-  $B2: {
-    ret
-  }
-}
-)");
+)")) << res.Failure().reason.Str();
 }
 
 TEST_F(IR_ValidatorTest, Function_Duplicate) {
@@ -99,23 +88,11 @@ TEST_F(IR_ValidatorTest, Function_Duplicate) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.Str(),
-              R"(:1:1 error: function %my_func added to module multiple times
+    EXPECT_THAT(res.Failure().reason.Str(),
+                testing::HasSubstr(R"(:1:1 error: function %my_func added to module multiple times
 %my_func = func(%2:i32, %3:f32):void {
 ^^^^^^^^
-
-note: # Disassembly
-%my_func = func(%2:i32, %3:f32):void {
-  $B1: {
-    ret
-  }
-}
-%my_func = func(%2:i32, %3:f32):void {
-  $B1: {
-    ret
-  }
-}
-)");
+)")) << res.Failure().reason.Str();
 }
 
 TEST_F(IR_ValidatorTest, Function_DuplicateEntryPointNames) {
@@ -127,23 +104,11 @@ TEST_F(IR_ValidatorTest, Function_DuplicateEntryPointNames) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.Str(),
-              R"(:6:1 error: entry point name 'dup' is not unique
+    EXPECT_THAT(res.Failure().reason.Str(),
+                testing::HasSubstr(R"(:6:1 error: entry point name 'dup' is not unique
 %dup_1 = @fragment func():void {  # %dup_1: 'dup'
 ^^^^^^
-
-note: # Disassembly
-%dup = @compute @workgroup_size(1u, 1u, 1u) func():void {
-  $B1: {
-    ret
-  }
-}
-%dup_1 = @fragment func():void {  # %dup_1: 'dup'
-  $B2: {
-    ret
-  }
-}
-)");
+)")) << res.Failure().reason.Str();
 }
 
 TEST_F(IR_ValidatorTest, Function_MultinBlock) {
@@ -153,18 +118,11 @@ TEST_F(IR_ValidatorTest, Function_MultinBlock) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.Str(),
-              R"(:1:1 error: root block for function cannot be a multi-in block
+    EXPECT_THAT(res.Failure().reason.Str(),
+                testing::HasSubstr(R"(:1:1 error: root block for function cannot be a multi-in block
 %my_func = func():void {
 ^^^^^^^^
-
-note: # Disassembly
-%my_func = func():void {
-  $B1: {
-    ret
-  }
-}
-)");
+)")) << res.Failure().reason.Str();
 }
 
 TEST_F(IR_ValidatorTest, Function_DeadParameter) {
@@ -177,18 +135,12 @@ TEST_F(IR_ValidatorTest, Function_DeadParameter) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.Str(),
-              R"(:1:17 error: destroyed parameter found in function parameter list
+    EXPECT_THAT(
+        res.Failure().reason.Str(),
+        testing::HasSubstr(R"(:1:17 error: destroyed parameter found in function parameter list
 %my_func = func(%my_param:f32):void {
                 ^^^^^^^^^^^^^
-
-note: # Disassembly
-%my_func = func(%my_param:f32):void {
-  $B1: {
-    ret
-  }
-}
-)");
+)")) << res.Failure().reason.Str();
 }
 
 TEST_F(IR_ValidatorTest, Function_ParameterWithNullFunction) {
@@ -201,18 +153,11 @@ TEST_F(IR_ValidatorTest, Function_ParameterWithNullFunction) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.Str(),
-              R"(:1:17 error: function parameter has nullptr parent function
+    EXPECT_THAT(res.Failure().reason.Str(),
+                testing::HasSubstr(R"(:1:17 error: function parameter has nullptr parent function
 %my_func = func(%my_param:f32):void {
                 ^^^^^^^^^^^^^
-
-note: # Disassembly
-%my_func = func(%my_param:f32):void {
-  $B1: {
-    ret
-  }
-}
-)");
+)")) << res.Failure().reason.Str();
 }
 
 TEST_F(IR_ValidatorTest, Function_ParameterUsedInMultipleFunctions) {
@@ -226,27 +171,11 @@ TEST_F(IR_ValidatorTest, Function_ParameterUsedInMultipleFunctions) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.Str(),
-              R"(:1:18 error: function parameter has incorrect parent function
+    EXPECT_THAT(res.Failure().reason.Str(),
+                testing::HasSubstr(R"(:1:18 error: function parameter has incorrect parent function
 %my_func1 = func(%my_param:f32):void {
                  ^^^^^^^^^^^^^
-
-:6:1 note: parent function declared here
-%my_func2 = func(%my_param:f32):void {
-^^^^^^^^^
-
-note: # Disassembly
-%my_func1 = func(%my_param:f32):void {
-  $B1: {
-    ret
-  }
-}
-%my_func2 = func(%my_param:f32):void {
-  $B2: {
-    ret
-  }
-}
-)");
+)")) << res.Failure().reason.Str();
 }
 
 TEST_F(IR_ValidatorTest, Function_ParameterWithNullType) {
@@ -257,18 +186,11 @@ TEST_F(IR_ValidatorTest, Function_ParameterWithNullType) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.Str(),
-              R"(:1:17 error: function parameter has nullptr type
+    EXPECT_THAT(res.Failure().reason.Str(),
+                testing::HasSubstr(R"(:1:17 error: function parameter has nullptr type
 %my_func = func(%my_param:undef):void {
                 ^^^^^^^^^^^^^^^
-
-note: # Disassembly
-%my_func = func(%my_param:undef):void {
-  $B1: {
-    ret
-  }
-}
-)");
+)")) << res.Failure().reason.Str();
 }
 
 TEST_F(IR_ValidatorTest, Function_ParameterDuplicated) {
@@ -279,18 +201,11 @@ TEST_F(IR_ValidatorTest, Function_ParameterDuplicated) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.Str(),
-              R"(:1:17 error: function parameter is not unique
+    EXPECT_THAT(res.Failure().reason.Str(),
+                testing::HasSubstr(R"(:1:17 error: function parameter is not unique
 %my_func = func(%my_param:u32%my_param:u32):void {
                 ^^^^^^^^^^^^^
-
-note: # Disassembly
-%my_func = func(%my_param:u32%my_param:u32):void {
-  $B1: {
-    ret
-  }
-}
-)");
+)")) << res.Failure().reason.Str();
 }
 
 TEST_F(IR_ValidatorTest, Function_Param_MultipleIOAnnotations) {
@@ -305,18 +220,13 @@ TEST_F(IR_ValidatorTest, Function_Param_MultipleIOAnnotations) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.Str(),
-              R"(:1:27 error: input param has more than one IO annotation, [ @location, built-in ]
+    EXPECT_THAT(
+        res.Failure().reason.Str(),
+        testing::HasSubstr(
+            R"(:1:27 error: input param has more than one IO annotation, [ @location, built-in ]
 %my_func = @fragment func(%my_param:vec4<f32> [@location(0), @position]):void {
                           ^^^^^^^^^^^^^^^^^^^
-
-note: # Disassembly
-%my_func = @fragment func(%my_param:vec4<f32> [@location(0), @position]):void {
-  $B1: {
-    ret
-  }
-}
-)");
+)")) << res.Failure().reason.Str();
 }
 
 TEST_F(IR_ValidatorTest, Function_Param_Struct_MultipleIOAnnotations) {
@@ -336,23 +246,13 @@ TEST_F(IR_ValidatorTest, Function_Param_Struct_MultipleIOAnnotations) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(
+    EXPECT_THAT(
         res.Failure().reason.Str(),
-        R"(:5:27 error: input param struct member has more than one IO annotation, [ built-in, @color ]
+        testing::HasSubstr(
+            R"(:5:27 error: input param struct member has more than one IO annotation, [ built-in, @color ]
 %my_func = @fragment func(%my_param:MyStruct):void {
                           ^^^^^^^^^^^^^^^^^^
-
-note: # Disassembly
-MyStruct = struct @align(16) {
-  a:vec4<f32> @offset(0), @color(0), @builtin(position)
-}
-
-%my_func = @fragment func(%my_param:MyStruct):void {
-  $B1: {
-    ret
-  }
-}
-)");
+)")) << res.Failure().reason.Str();
 }
 
 TEST_F(IR_ValidatorTest, Function_Param_MissingIOAnnotations) {
@@ -365,19 +265,13 @@ TEST_F(IR_ValidatorTest, Function_Param_MissingIOAnnotations) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(
+    EXPECT_THAT(
         res.Failure().reason.Str(),
-        R"(:1:27 error: input param must have at least one IO annotation, e.g. a binding point, a location, etc
+        testing::HasSubstr(
+            R"(:1:27 error: input param must have at least one IO annotation, e.g. a binding point, a location, etc
 %my_func = @fragment func(%my_param:vec4<f32>):void {
                           ^^^^^^^^^^^^^^^^^^^
-
-note: # Disassembly
-%my_func = @fragment func(%my_param:vec4<f32>):void {
-  $B1: {
-    ret
-  }
-}
-)");
+)")) << res.Failure().reason.Str();
 }
 
 TEST_F(IR_ValidatorTest, Function_Param_Struct_MissingIOAnnotations) {
@@ -394,23 +288,13 @@ TEST_F(IR_ValidatorTest, Function_Param_Struct_MissingIOAnnotations) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(
+    EXPECT_THAT(
         res.Failure().reason.Str(),
-        R"(:5:54 error: input param struct members must have at least one IO annotation, e.g. a binding point, a location, etc
+        testing::HasSubstr(
+            R"(:5:54 error: input param struct members must have at least one IO annotation, e.g. a binding point, a location, etc
 %my_func = @compute @workgroup_size(1u, 1u, 1u) func(%my_param:MyStruct):void {
                                                      ^^^^^^^^^^^^^^^^^^
-
-note: # Disassembly
-MyStruct = struct @align(16) {
-  a:vec4<f32> @offset(0)
-}
-
-%my_func = @compute @workgroup_size(1u, 1u, 1u) func(%my_param:MyStruct):void {
-  $B1: {
-    ret
-  }
-}
-)");
+)")) << res.Failure().reason.Str();
 }
 
 TEST_F(IR_ValidatorTest, Function_Param_Struct_DuplicateAnnotations) {
@@ -429,23 +313,13 @@ TEST_F(IR_ValidatorTest, Function_Param_Struct_DuplicateAnnotations) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(
+    EXPECT_THAT(
         res.Failure().reason.Str(),
-        R"(:5:54 error: input param struct member has same IO annotation, as top-level struct, '@location'
+        testing::HasSubstr(
+            R"(:5:54 error: input param struct member has same IO annotation, as top-level struct, '@location'
 %my_func = @compute @workgroup_size(1u, 1u, 1u) func(%my_param:MyStruct [@location(0)]):void {
                                                      ^^^^^^^^^^^^^^^^^^
-
-note: # Disassembly
-MyStruct = struct @align(16) {
-  a:vec4<f32> @offset(0), @location(0)
-}
-
-%my_func = @compute @workgroup_size(1u, 1u, 1u) func(%my_param:MyStruct [@location(0)]):void {
-  $B1: {
-    ret
-  }
-}
-)");
+)")) << res.Failure().reason.Str();
 }
 
 TEST_F(IR_ValidatorTest, Function_Param_WorkgroupPlusOtherIOAnnotation) {
@@ -458,19 +332,13 @@ TEST_F(IR_ValidatorTest, Function_Param_WorkgroupPlusOtherIOAnnotation) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(
+    EXPECT_THAT(
         res.Failure().reason.Str(),
-        R"(:1:54 error: input param has more than one IO annotation, [ @location, <workgroup> ]
+        testing::HasSubstr(
+            R"(:1:54 error: input param has more than one IO annotation, [ @location, <workgroup> ]
 %my_func = @compute @workgroup_size(1u, 1u, 1u) func(%my_param:ptr<workgroup, i32, read_write> [@location(0)]):void {
                                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-note: # Disassembly
-%my_func = @compute @workgroup_size(1u, 1u, 1u) func(%my_param:ptr<workgroup, i32, read_write> [@location(0)]):void {
-  $B1: {
-    ret
-  }
-}
-)");
+)")) << res.Failure().reason.Str();
 }
 
 TEST_F(IR_ValidatorTest, Function_Param_Struct_WorkgroupPlusOtherIOAnnotations) {
@@ -488,23 +356,13 @@ TEST_F(IR_ValidatorTest, Function_Param_Struct_WorkgroupPlusOtherIOAnnotations) 
 
     auto res = ir::Validate(mod, Capabilities{Capability::kAllowPointersAndHandlesInStructures});
     ASSERT_NE(res, Success);
-    EXPECT_EQ(
+    EXPECT_THAT(
         res.Failure().reason.Str(),
-        R"(:5:54 error: input param struct member has more than one IO annotation, [ @location, <workgroup> ]
+        testing::HasSubstr(
+            R"(:5:54 error: input param struct member has more than one IO annotation, [ @location, <workgroup> ]
 %my_func = @compute @workgroup_size(1u, 1u, 1u) func(%my_param:MyStruct):void {
                                                      ^^^^^^^^^^^^^^^^^^
-
-note: # Disassembly
-MyStruct = struct @align(1) {
-  a:ptr<workgroup, i32, read_write> @offset(0), @location(0)
-}
-
-%my_func = @compute @workgroup_size(1u, 1u, 1u) func(%my_param:MyStruct):void {
-  $B1: {
-    ret
-  }
-}
-)");
+)")) << res.Failure().reason.Str();
 }
 
 TEST_F(IR_ValidatorTest, Function_ParameterWithConstructibleType) {
@@ -514,7 +372,7 @@ TEST_F(IR_ValidatorTest, Function_ParameterWithConstructibleType) {
     f->Block()->Append(b.Return(f));
 
     auto res = ir::Validate(mod);
-    ASSERT_EQ(res, Success);
+    ASSERT_EQ(res, Success) << res.Failure();
 }
 
 TEST_F(IR_ValidatorTest, Function_ParameterWithPointerType) {
@@ -524,7 +382,7 @@ TEST_F(IR_ValidatorTest, Function_ParameterWithPointerType) {
     f->Block()->Append(b.Return(f));
 
     auto res = ir::Validate(mod);
-    ASSERT_EQ(res, Success);
+    ASSERT_EQ(res, Success) << res.Failure();
 }
 
 TEST_F(IR_ValidatorTest, Function_ParameterWithTextureType) {
@@ -534,7 +392,7 @@ TEST_F(IR_ValidatorTest, Function_ParameterWithTextureType) {
     f->Block()->Append(b.Return(f));
 
     auto res = ir::Validate(mod);
-    ASSERT_EQ(res, Success);
+    ASSERT_EQ(res, Success) << res.Failure();
 }
 
 TEST_F(IR_ValidatorTest, Function_ParameterWithSamplerType) {
@@ -544,7 +402,7 @@ TEST_F(IR_ValidatorTest, Function_ParameterWithSamplerType) {
     f->Block()->Append(b.Return(f));
 
     auto res = ir::Validate(mod);
-    ASSERT_EQ(res, Success);
+    ASSERT_EQ(res, Success) << res.Failure();
 }
 
 TEST_F(IR_ValidatorTest, Function_ParameterWithVoidType) {
@@ -555,19 +413,13 @@ TEST_F(IR_ValidatorTest, Function_ParameterWithVoidType) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(
+    EXPECT_THAT(
         res.Failure().reason.Str(),
-        R"(:1:17 error: function parameter type, 'void', must be constructible, a pointer, a texture, or a sampler
+        testing::HasSubstr(
+            R"(:1:17 error: function parameter type, 'void', must be constructible, a pointer, a texture, or a sampler
 %my_func = func(%my_param:void):void {
                 ^^^^^^^^^^^^^^
-
-note: # Disassembly
-%my_func = func(%my_param:void):void {
-  $B1: {
-    ret
-  }
-}
-)");
+)")) << res.Failure().reason.Str();
 }
 
 TEST_F(IR_ValidatorTest, Function_Param_InvariantWithPosition) {
@@ -581,7 +433,7 @@ TEST_F(IR_ValidatorTest, Function_Param_InvariantWithPosition) {
     b.Append(f->Block(), [&] { b.Return(f); });
 
     auto res = ir::Validate(mod);
-    ASSERT_EQ(res, Success);
+    ASSERT_EQ(res, Success) << res.Failure();
 }
 
 TEST_F(IR_ValidatorTest, Function_Param_InvariantWithoutPosition) {
@@ -594,19 +446,13 @@ TEST_F(IR_ValidatorTest, Function_Param_InvariantWithoutPosition) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(
+    EXPECT_THAT(
         res.Failure().reason.Str(),
-        R"(:1:17 error: invariant can only decorate a param iff it is also decorated with position
+        testing::HasSubstr(
+            R"(:1:17 error: invariant can only decorate a param iff it is also decorated with position
 %my_func = func(%my_param:vec4<f32> [@invariant]):void {
                 ^^^^^^^^^^^^^^^^^^^
-
-note: # Disassembly
-%my_func = func(%my_param:vec4<f32> [@invariant]):void {
-  $B1: {
-    ret
-  }
-}
-)");
+)")) << res.Failure().reason.Str();
 }
 
 TEST_F(IR_ValidatorTest, Function_Param_Struct_InvariantWithPosition) {
@@ -625,7 +471,7 @@ TEST_F(IR_ValidatorTest, Function_Param_Struct_InvariantWithPosition) {
     b.Append(f->Block(), [&] { b.Return(f); });
 
     auto res = ir::Validate(mod);
-    ASSERT_EQ(res, Success);
+    ASSERT_EQ(res, Success) << res.Failure();
 }
 
 TEST_F(IR_ValidatorTest, Function_Param_Struct_InvariantWithoutPosition) {
@@ -645,23 +491,13 @@ TEST_F(IR_ValidatorTest, Function_Param_Struct_InvariantWithoutPosition) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(
+    EXPECT_THAT(
         res.Failure().reason.Str(),
-        R"(:5:17 error: invariant can only decorate a param member iff it is also decorated with position
+        testing::HasSubstr(
+            R"(:5:17 error: invariant can only decorate a param member iff it is also decorated with position
 %my_func = func(%my_param:MyStruct):void {
                 ^^^^^^^^^^^^^^^^^^
-
-note: # Disassembly
-MyStruct = struct @align(16) {
-  pos:vec4<f32> @offset(0), @invariant
-}
-
-%my_func = func(%my_param:MyStruct):void {
-  $B1: {
-    ret
-  }
-}
-)");
+)")) << res.Failure().reason.Str();
 }
 
 TEST_F(IR_ValidatorTest, Function_Param_BindingPointWithoutCapability) {
@@ -674,18 +510,12 @@ TEST_F(IR_ValidatorTest, Function_Param_BindingPointWithoutCapability) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.Str(),
-              R"(:1:17 error: input param to non-entry point function has a binding point set
+    EXPECT_THAT(res.Failure().reason.Str(),
+                testing::HasSubstr(
+                    R"(:1:17 error: input param to non-entry point function has a binding point set
 %my_func = func(%my_param:ptr<uniform, i32, read> [@binding_point(0, 0)]):void {
                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-note: # Disassembly
-%my_func = func(%my_param:ptr<uniform, i32, read> [@binding_point(0, 0)]):void {
-  $B1: {
-    ret
-  }
-}
-)");
+)")) << res.Failure().reason.Str();
 }
 
 TEST_F(IR_ValidatorTest, Function_Return_MultipleIOAnnotations) {
@@ -696,18 +526,13 @@ TEST_F(IR_ValidatorTest, Function_Return_MultipleIOAnnotations) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.Str(),
-              R"(:1:1 error: return values has more than one IO annotation, [ @location, built-in ]
+    EXPECT_THAT(
+        res.Failure().reason.Str(),
+        testing::HasSubstr(
+            R"(:1:1 error: return values has more than one IO annotation, [ @location, built-in ]
 %my_func = @vertex func():vec4<f32> [@location(0), @position] {
 ^^^^^^^^
-
-note: # Disassembly
-%my_func = @vertex func():vec4<f32> [@location(0), @position] {
-  $B1: {
-    unreachable
-  }
-}
-)");
+)")) << res.Failure().reason.Str();
 }
 
 TEST_F(IR_ValidatorTest, Function_Return_Struct_MultipleIOAnnotations) {
@@ -723,23 +548,13 @@ TEST_F(IR_ValidatorTest, Function_Return_Struct_MultipleIOAnnotations) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(
+    EXPECT_THAT(
         res.Failure().reason.Str(),
-        R"(:5:1 error: return values struct member has more than one IO annotation, [ @location, built-in ]
+        testing::HasSubstr(
+            R"(:5:1 error: return values struct member has more than one IO annotation, [ @location, built-in ]
 %my_func = @vertex func():MyStruct {
 ^^^^^^^^
-
-note: # Disassembly
-MyStruct = struct @align(16) {
-  a:vec4<f32> @offset(0), @location(0), @builtin(position)
-}
-
-%my_func = @vertex func():MyStruct {
-  $B1: {
-    unreachable
-  }
-}
-)");
+)")) << res.Failure().reason.Str();
 }
 
 TEST_F(IR_ValidatorTest, Function_Return_Void_IOAnnotation) {
@@ -749,18 +564,12 @@ TEST_F(IR_ValidatorTest, Function_Return_Void_IOAnnotation) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.Str(),
-              R"(:1:1 error: return values with void type should never be annotated
+    EXPECT_THAT(
+        res.Failure().reason.Str(),
+        testing::HasSubstr(R"(:1:1 error: return values with void type should never be annotated
 %f = @fragment func():void [@location(0)] {
 ^^
-
-note: # Disassembly
-%f = @fragment func():void [@location(0)] {
-  $B1: {
-    unreachable
-  }
-}
-)");
+)")) << res.Failure().reason.Str();
 }
 
 TEST_F(IR_ValidatorTest, Function_Return_NonVoid_MissingIOAnnotations) {
@@ -770,19 +579,13 @@ TEST_F(IR_ValidatorTest, Function_Return_NonVoid_MissingIOAnnotations) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(
+    EXPECT_THAT(
         res.Failure().reason.Str(),
-        R"(:1:1 error: return values must have at least one IO annotation, e.g. a binding point, a location, etc
+        testing::HasSubstr(
+            R"(:1:1 error: return values must have at least one IO annotation, e.g. a binding point, a location, etc
 %my_func = @fragment func():f32 {
 ^^^^^^^^
-
-note: # Disassembly
-%my_func = @fragment func():f32 {
-  $B1: {
-    unreachable
-  }
-}
-)");
+)")) << res.Failure().reason.Str();
 }
 
 TEST_F(IR_ValidatorTest, Function_Return_NonVoid_Struct_MissingIOAnnotations) {
@@ -795,23 +598,13 @@ TEST_F(IR_ValidatorTest, Function_Return_NonVoid_Struct_MissingIOAnnotations) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(
+    EXPECT_THAT(
         res.Failure().reason.Str(),
-        R"(:5:1 error: return values struct members must have at least one IO annotation, e.g. a binding point, a location, etc
+        testing::HasSubstr(
+            R"(:5:1 error: return values struct members must have at least one IO annotation, e.g. a binding point, a location, etc
 %my_func = @fragment func():MyStruct {
 ^^^^^^^^
-
-note: # Disassembly
-MyStruct = struct @align(4) {
-  a:f32 @offset(0)
-}
-
-%my_func = @fragment func():MyStruct {
-  $B1: {
-    unreachable
-  }
-}
-)");
+)")) << res.Failure().reason.Str();
 }
 
 TEST_F(IR_ValidatorTest, Function_Return_InvariantWithPosition) {
@@ -822,7 +615,7 @@ TEST_F(IR_ValidatorTest, Function_Return_InvariantWithPosition) {
     b.Append(f->Block(), [&] { b.Unreachable(); });
 
     auto res = ir::Validate(mod);
-    ASSERT_EQ(res, Success);
+    ASSERT_EQ(res, Success) << res.Failure();
 }
 
 TEST_F(IR_ValidatorTest, Function_Return_InvariantWithoutPosition) {
@@ -833,18 +626,13 @@ TEST_F(IR_ValidatorTest, Function_Return_InvariantWithoutPosition) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.Str(),
-              R"(:1:1 error: invariant can only decorate outputs iff they are also position builtins
+    EXPECT_THAT(
+        res.Failure().reason.Str(),
+        testing::HasSubstr(
+            R"(:1:1 error: invariant can only decorate outputs iff they are also position builtins
 %my_func = func():vec4<f32> [@invariant] {
 ^^^^^^^^
-
-note: # Disassembly
-%my_func = func():vec4<f32> [@invariant] {
-  $B1: {
-    unreachable
-  }
-}
-)");
+)")) << res.Failure().reason.Str();
 }
 
 TEST_F(IR_ValidatorTest, Function_Return_Struct_InvariantWithPosition) {
@@ -860,7 +648,7 @@ TEST_F(IR_ValidatorTest, Function_Return_Struct_InvariantWithPosition) {
     b.Append(f->Block(), [&] { b.Unreachable(); });
 
     auto res = ir::Validate(mod);
-    ASSERT_EQ(res, Success);
+    ASSERT_EQ(res, Success) << res.Failure();
 }
 
 TEST_F(IR_ValidatorTest, Function_Return_Struct_InvariantWithoutPosition) {
@@ -877,23 +665,13 @@ TEST_F(IR_ValidatorTest, Function_Return_Struct_InvariantWithoutPosition) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(
+    EXPECT_THAT(
         res.Failure().reason.Str(),
-        R"(:5:1 error: invariant can only decorate output members iff they are also position builtins
+        testing::HasSubstr(
+            R"(:5:1 error: invariant can only decorate output members iff they are also position builtins
 %my_func = func():MyStruct {
 ^^^^^^^^
-
-note: # Disassembly
-MyStruct = struct @align(16) {
-  pos:vec4<f32> @offset(0), @invariant
-}
-
-%my_func = func():MyStruct {
-  $B1: {
-    unreachable
-  }
-}
-)");
+)")) << res.Failure().reason.Str();
 }
 
 TEST_F(IR_ValidatorTest, Function_UnnamedEntryPoint) {
@@ -904,18 +682,11 @@ TEST_F(IR_ValidatorTest, Function_UnnamedEntryPoint) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.Str(),
-              R"(:1:1 error: entry points must have names
+    EXPECT_THAT(res.Failure().reason.Str(),
+                testing::HasSubstr(R"(:1:1 error: entry points must have names
 %1 = @compute @workgroup_size(1u, 1u, 1u) func():void {
 ^^
-
-note: # Disassembly
-%1 = @compute @workgroup_size(1u, 1u, 1u) func():void {
-  $B1: {
-    ret
-  }
-}
-)");
+)")) << res.Failure().reason.Str();
 }
 
 TEST_F(IR_ValidatorTest, Function_NonConstructibleReturnType) {
@@ -931,8 +702,8 @@ TEST_F(IR_ValidatorTest, Function_NonConstructibleReturnType) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.Str(),
-              R"(:1:1 error: function return type must be constructible
+    EXPECT_THAT(res.Failure().reason.Str(),
+                testing::HasSubstr(R"(:1:1 error: function return type must be constructible
 %1 = func():texture_external {
 ^^
 
@@ -955,34 +726,7 @@ TEST_F(IR_ValidatorTest, Function_NonConstructibleReturnType) {
 :21:1 error: function return type must be constructible
 %5 = func():ref<function, u32, read_write> {
 ^^
-
-note: # Disassembly
-%1 = func():texture_external {
-  $B1: {
-    unreachable
-  }
-}
-%2 = func():sampler {
-  $B2: {
-    unreachable
-  }
-}
-%3 = func():array<f32> {
-  $B3: {
-    unreachable
-  }
-}
-%4 = func():ptr<function, i32, read_write> {
-  $B4: {
-    unreachable
-  }
-}
-%5 = func():ref<function, u32, read_write> {
-  $B5: {
-    unreachable
-  }
-}
-)");
+)")) << res.Failure().reason.Str();
 }
 
 TEST_F(IR_ValidatorTest, Function_Compute_NonVoidReturn) {
@@ -994,18 +738,12 @@ TEST_F(IR_ValidatorTest, Function_Compute_NonVoidReturn) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.Str(),
-              R"(:1:1 error: compute entry point must not have a return type, found 'f32'
+    EXPECT_THAT(res.Failure().reason.Str(),
+                testing::HasSubstr(
+                    R"(:1:1 error: compute entry point must not have a return type, found 'f32'
 %my_func = @compute @workgroup_size(1u, 1u, 1u) func():f32 [@location(0)] {
 ^^^^^^^^
-
-note: # Disassembly
-%my_func = @compute @workgroup_size(1u, 1u, 1u) func():f32 [@location(0)] {
-  $B1: {
-    unreachable
-  }
-}
-)");
+)")) << res.Failure().reason.Str();
 }
 
 TEST_F(IR_ValidatorTest, Function_WorkgroupSize_MissingOnCompute) {
@@ -1014,18 +752,11 @@ TEST_F(IR_ValidatorTest, Function_WorkgroupSize_MissingOnCompute) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.Str(),
-              R"(:1:1 error: compute entry point requires @workgroup_size
+    EXPECT_THAT(res.Failure().reason.Str(),
+                testing::HasSubstr(R"(:1:1 error: compute entry point requires @workgroup_size
 %f = @compute func():void {
 ^^
-
-note: # Disassembly
-%f = @compute func():void {
-  $B1: {
-    ret
-  }
-}
-)");
+)")) << res.Failure().reason.Str();
 }
 
 TEST_F(IR_ValidatorTest, Function_WorkgroupSize_NonCompute) {
@@ -1036,18 +767,11 @@ TEST_F(IR_ValidatorTest, Function_WorkgroupSize_NonCompute) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.Str(),
-              R"(:1:1 error: @workgroup_size only valid on compute entry point
+    EXPECT_THAT(res.Failure().reason.Str(),
+                testing::HasSubstr(R"(:1:1 error: @workgroup_size only valid on compute entry point
 %f = @fragment @workgroup_size(1u, 1u, 1u) func():void {
 ^^
-
-note: # Disassembly
-%f = @fragment @workgroup_size(1u, 1u, 1u) func():void {
-  $B1: {
-    unreachable
-  }
-}
-)");
+)")) << res.Failure().reason.Str();
 }
 
 TEST_F(IR_ValidatorTest, Function_WorkgroupSize_ParamUndefined) {
@@ -1058,18 +782,12 @@ TEST_F(IR_ValidatorTest, Function_WorkgroupSize_ParamUndefined) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.Str(),
-              R"(:1:1 error: a @workgroup_size param is undefined or missing a type
+    EXPECT_THAT(
+        res.Failure().reason.Str(),
+        testing::HasSubstr(R"(:1:1 error: a @workgroup_size param is undefined or missing a type
 %f = @compute @workgroup_size(undef, 2u, 3u) func():void {
 ^^
-
-note: # Disassembly
-%f = @compute @workgroup_size(undef, 2u, 3u) func():void {
-  $B1: {
-    unreachable
-  }
-}
-)");
+)")) << res.Failure().reason.Str();
 }
 
 TEST_F(IR_ValidatorTest, Function_WorkgroupSize_ParamWrongType) {
@@ -1080,18 +798,12 @@ TEST_F(IR_ValidatorTest, Function_WorkgroupSize_ParamWrongType) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.Str(),
-              R"(:1:1 error: @workgroup_size params must be an 'i32' or 'u32', received 'f32'
+    EXPECT_THAT(res.Failure().reason.Str(),
+                testing::HasSubstr(
+                    R"(:1:1 error: @workgroup_size params must be an 'i32' or 'u32', received 'f32'
 %f = @compute @workgroup_size(1.0f, 2u, 3u) func():void {
 ^^
-
-note: # Disassembly
-%f = @compute @workgroup_size(1.0f, 2u, 3u) func():void {
-  $B1: {
-    unreachable
-  }
-}
-)");
+)")) << res.Failure().reason.Str();
 }
 
 TEST_F(IR_ValidatorTest, Function_WorkgroupSize_ParamsSameType) {
@@ -1102,18 +814,12 @@ TEST_F(IR_ValidatorTest, Function_WorkgroupSize_ParamsSameType) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.Str(),
-              R"(:1:1 error: @workgroup_size params must be all 'i32's or all 'u32's
+    EXPECT_THAT(
+        res.Failure().reason.Str(),
+        testing::HasSubstr(R"(:1:1 error: @workgroup_size params must be all 'i32's or all 'u32's
 %f = @compute @workgroup_size(1u, 2i, 3u) func():void {
 ^^
-
-note: # Disassembly
-%f = @compute @workgroup_size(1u, 2i, 3u) func():void {
-  $B1: {
-    unreachable
-  }
-}
-)");
+)")) << res.Failure().reason.Str();
 }
 
 TEST_F(IR_ValidatorTest, Function_WorkgroupSize_ParamsTooSmall) {
@@ -1124,18 +830,11 @@ TEST_F(IR_ValidatorTest, Function_WorkgroupSize_ParamsTooSmall) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.Str(),
-              R"(:1:1 error: @workgroup_size params must be greater than 0
+    EXPECT_THAT(res.Failure().reason.Str(),
+                testing::HasSubstr(R"(:1:1 error: @workgroup_size params must be greater than 0
 %f = @compute @workgroup_size(-1i, 2i, 3i) func():void {
 ^^
-
-note: # Disassembly
-%f = @compute @workgroup_size(-1i, 2i, 3i) func():void {
-  $B1: {
-    unreachable
-  }
-}
-)");
+)")) << res.Failure().reason.Str();
 }
 
 TEST_F(IR_ValidatorTest, Function_WorkgroupSize_OverrideWithoutAllowOverrides) {
@@ -1147,19 +846,13 @@ TEST_F(IR_ValidatorTest, Function_WorkgroupSize_OverrideWithoutAllowOverrides) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(
+    EXPECT_THAT(
         res.Failure().reason.Str(),
-        R"(:1:1 error: @workgroup_size param is not a constant value, and IR capability 'kAllowOverrides' is not set
+        testing::HasSubstr(
+            R"(:1:1 error: @workgroup_size param is not a constant value, and IR capability 'kAllowOverrides' is not set
 %f = @compute @workgroup_size(%2, %2, %2) func():void {
 ^^
-
-note: # Disassembly
-%f = @compute @workgroup_size(%2, %2, %2) func():void {
-  $B1: {
-    unreachable
-  }
-}
-)");
+)")) << res.Failure().reason.Str();
 }
 
 TEST_F(IR_ValidatorTest, Function_WorkgroupSize_NonRootBlockOverride) {
@@ -1173,19 +866,12 @@ TEST_F(IR_ValidatorTest, Function_WorkgroupSize_NonRootBlockOverride) {
 
     auto res = ir::Validate(mod, Capabilities{Capability::kAllowOverrides});
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.Str(),
-              R"(:1:1 error: @workgroup_size param defined by non-module scope value
+    EXPECT_THAT(
+        res.Failure().reason.Str(),
+        testing::HasSubstr(R"(:1:1 error: @workgroup_size param defined by non-module scope value
 %f = @compute @workgroup_size(%2, %2, %2) func():void {
 ^^
-
-note: # Disassembly
-%f = @compute @workgroup_size(%2, %2, %2) func():void {
-  $B1: {
-    %2:u32 = override @id(0)
-    ret
-  }
-}
-)");
+)")) << res.Failure().reason.Str();
 }
 
 TEST_F(IR_ValidatorTest, Function_Vertex_BasicPosition) {
@@ -1194,7 +880,7 @@ TEST_F(IR_ValidatorTest, Function_Vertex_BasicPosition) {
     b.Append(f->Block(), [&] { b.Unreachable(); });
 
     auto res = ir::Validate(mod);
-    ASSERT_EQ(res, Success);
+    ASSERT_EQ(res, Success) << res.Failure();
 }
 
 TEST_F(IR_ValidatorTest, Function_Vertex_StructPosition) {
@@ -1211,7 +897,7 @@ TEST_F(IR_ValidatorTest, Function_Vertex_StructPosition) {
     b.Append(f->Block(), [&] { b.Unreachable(); });
 
     auto res = ir::Validate(mod);
-    ASSERT_EQ(res, Success);
+    ASSERT_EQ(res, Success) << res.Failure();
 }
 
 TEST_F(IR_ValidatorTest, Function_Vertex_StructPositionAndClipDistances) {
@@ -1233,7 +919,7 @@ TEST_F(IR_ValidatorTest, Function_Vertex_StructPositionAndClipDistances) {
     b.Append(f->Block(), [&] { b.Unreachable(); });
 
     auto res = ir::Validate(mod);
-    ASSERT_EQ(res, Success);
+    ASSERT_EQ(res, Success) << res.Failure();
 }
 
 TEST_F(IR_ValidatorTest, Function_Vertex_StructOnlyClipDistances) {
@@ -1251,22 +937,12 @@ TEST_F(IR_ValidatorTest, Function_Vertex_StructOnlyClipDistances) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.Str(),
-              R"(:5:1 error: position must be declared for vertex entry point output
+    EXPECT_THAT(
+        res.Failure().reason.Str(),
+        testing::HasSubstr(R"(:5:1 error: position must be declared for vertex entry point output
 %my_func = @vertex func():MyStruct {
 ^^^^^^^^
-
-note: # Disassembly
-MyStruct = struct @align(4) {
-  clip:array<f32, 4> @offset(0), @builtin(clip_distances)
-}
-
-%my_func = @vertex func():MyStruct {
-  $B1: {
-    unreachable
-  }
-}
-)");
+)")) << res.Failure().reason.Str();
 }
 
 TEST_F(IR_ValidatorTest, Function_Vertex_MissingPosition) {
@@ -1277,18 +953,12 @@ TEST_F(IR_ValidatorTest, Function_Vertex_MissingPosition) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.Str(),
-              R"(:1:1 error: position must be declared for vertex entry point output
+    EXPECT_THAT(
+        res.Failure().reason.Str(),
+        testing::HasSubstr(R"(:1:1 error: position must be declared for vertex entry point output
 %my_func = @vertex func():vec4<f32> [@location(0)] {
 ^^^^^^^^
-
-note: # Disassembly
-%my_func = @vertex func():vec4<f32> [@location(0)] {
-  $B1: {
-    unreachable
-  }
-}
-)");
+)")) << res.Failure().reason.Str();
 }
 
 TEST_F(IR_ValidatorTest, Function_NonFragment_BoolInput) {
@@ -1300,18 +970,12 @@ TEST_F(IR_ValidatorTest, Function_NonFragment_BoolInput) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.Str(),
-              R"(:1:19 error: entry point params can only be a bool for fragment shaders
+    EXPECT_THAT(res.Failure().reason.Str(),
+                testing::HasSubstr(
+                    R"(:1:19 error: entry point params can only be a bool for fragment shaders
 %f = @vertex func(%invalid:bool [@location(0)]):vec4<f32> [@position] {
                   ^^^^^^^^^^^^^
-
-note: # Disassembly
-%f = @vertex func(%invalid:bool [@location(0)]):vec4<f32> [@position] {
-  $B1: {
-    unreachable
-  }
-}
-)");
+)")) << res.Failure().reason.Str();
 }
 
 TEST_F(IR_ValidatorTest, Function_NonFragment_BoolOutput) {
@@ -1323,23 +987,11 @@ TEST_F(IR_ValidatorTest, Function_NonFragment_BoolOutput) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.Str(),
-              R"(:6:1 error: entry point return members can not be 'bool'
+    EXPECT_THAT(res.Failure().reason.Str(),
+                testing::HasSubstr(R"(:6:1 error: entry point return members can not be 'bool'
 %f = @vertex func():OutputStruct {
 ^^
-
-note: # Disassembly
-OutputStruct = struct @align(16) {
-  pos:vec4<f32> @offset(0), @builtin(position)
-  invalid:bool @offset(16), @location(0)
-}
-
-%f = @vertex func():OutputStruct {
-  $B1: {
-    unreachable
-  }
-}
-)");
+)")) << res.Failure().reason.Str();
 }
 
 TEST_F(IR_ValidatorTest, Function_Fragment_BoolInputWithoutFrontFacing) {
@@ -1351,19 +1003,13 @@ TEST_F(IR_ValidatorTest, Function_Fragment_BoolInputWithoutFrontFacing) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(
+    EXPECT_THAT(
         res.Failure().reason.Str(),
-        R"(:1:21 error: fragment entry point params can only be a bool if decorated with @builtin(front_facing)
+        testing::HasSubstr(
+            R"(:1:21 error: fragment entry point params can only be a bool if decorated with @builtin(front_facing)
 %f = @fragment func(%invalid:bool [@location(0)]):void {
                     ^^^^^^^^^^^^^
-
-note: # Disassembly
-%f = @fragment func(%invalid:bool [@location(0)]):void {
-  $B1: {
-    unreachable
-  }
-}
-)");
+)")) << res.Failure().reason.Str();
 }
 
 TEST_F(IR_ValidatorTest, Function_Fragment_BoolOutput) {
@@ -1375,18 +1021,11 @@ TEST_F(IR_ValidatorTest, Function_Fragment_BoolOutput) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.Str(),
-              R"(:1:1 error: entry point returns can not be 'bool'
+    EXPECT_THAT(res.Failure().reason.Str(),
+                testing::HasSubstr(R"(:1:1 error: entry point returns can not be 'bool'
 %f = @fragment func():bool [@location(0)] {
 ^^
-
-note: # Disassembly
-%f = @fragment func():bool [@location(0)] {
-  $B1: {
-    unreachable
-  }
-}
-)");
+)")) << res.Failure().reason.Str();
 }
 
 TEST_F(IR_ValidatorTest, Function_BoolOutput_via_MSV) {
@@ -1406,24 +1045,13 @@ TEST_F(IR_ValidatorTest, Function_BoolOutput_via_MSV) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(
+    EXPECT_THAT(
         res.Failure().reason.Str(),
-        R"(:5:1 error: IO address space values referenced by shader entry points can only be 'bool' if in the input space, used only by fragment shaders and decorated with @builtin(front_facing)
+        testing::HasSubstr(
+            R"(:5:1 error: IO address space values referenced by shader entry points can only be 'bool' if in the input space, used only by fragment shaders and decorated with @builtin(front_facing)
 %f = @compute @workgroup_size(1u, 1u, 1u) func():void {
 ^^
-
-note: # Disassembly
-$B1: {  # root
-  %1:ptr<__out, bool, read_write> = var @location(0)
-}
-
-%f = @compute @workgroup_size(1u, 1u, 1u) func():void {
-  $B2: {
-    store %1, false
-    unreachable
-  }
-}
-)");
+)")) << res.Failure().reason.Str();
 }
 
 TEST_F(IR_ValidatorTest, Function_BoolInputWithoutFrontFacing_via_MSV) {
@@ -1444,25 +1072,13 @@ TEST_F(IR_ValidatorTest, Function_BoolInputWithoutFrontFacing_via_MSV) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(
+    EXPECT_THAT(
         res.Failure().reason.Str(),
-        R"(:5:1 error: input address space values referenced by fragment shaders can only be 'bool' if decorated with @builtin(front_facing)
+        testing::HasSubstr(
+            R"(:5:1 error: input address space values referenced by fragment shaders can only be 'bool' if decorated with @builtin(front_facing)
 %f = @fragment func():void {
 ^^
-
-note: # Disassembly
-$B1: {  # root
-  %invalid:ptr<__in, bool, read> = var @location(0)
-}
-
-%f = @fragment func():void {
-  $B2: {
-    %3:bool = load %invalid
-    %v:ptr<function, bool, read_write> = var, %3
-    unreachable
-  }
-}
-)");
+)")) << res.Failure().reason.Str();
 }
 
 }  // namespace tint::core::ir

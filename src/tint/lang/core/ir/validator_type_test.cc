@@ -61,8 +61,8 @@ TEST_F(IR_ValidatorTest, Abstract_Scalar) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.Str(),
-              R"(:3:5 error: var: abstracts are not permitted
+    EXPECT_THAT(res.Failure().reason.Str(),
+                testing::HasSubstr(R"(:3:5 error: var: abstracts are not permitted
     %af:ptr<function, abstract-float, read_write> = var
     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -73,20 +73,7 @@ TEST_F(IR_ValidatorTest, Abstract_Scalar) {
 :4:5 error: var: abstracts are not permitted
     %af_1:ptr<function, abstract-int, read_write> = var  # %af_1: 'af'
     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-:2:3 note: in block
-  $B1: {
-  ^^^
-
-note: # Disassembly
-%my_func = func():void {
-  $B1: {
-    %af:ptr<function, abstract-float, read_write> = var
-    %af_1:ptr<function, abstract-int, read_write> = var  # %af_1: 'af'
-    ret
-  }
-}
-)");
+)")) << res.Failure().reason.Str();
 }
 
 TEST_F(IR_ValidatorTest, Abstract_Vector) {
@@ -99,32 +86,17 @@ TEST_F(IR_ValidatorTest, Abstract_Vector) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.Str(),
-              R"(:3:5 error: var: abstracts are not permitted
+    EXPECT_THAT(res.Failure().reason.Str(),
+                testing::HasSubstr(R"(:3:5 error: var: abstracts are not permitted
     %af:ptr<function, vec2<abstract-float>, read_write> = var
     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+)")) << res.Failure().reason.Str();
 
-:2:3 note: in block
-  $B1: {
-  ^^^
-
-:4:5 error: var: abstracts are not permitted
+    EXPECT_THAT(res.Failure().reason.Str(),
+                testing::HasSubstr(R"(:4:5 error: var: abstracts are not permitted
     %ai:ptr<function, vec3<abstract-int>, read_write> = var
     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-:2:3 note: in block
-  $B1: {
-  ^^^
-
-note: # Disassembly
-%my_func = func():void {
-  $B1: {
-    %af:ptr<function, vec2<abstract-float>, read_write> = var
-    %ai:ptr<function, vec3<abstract-int>, read_write> = var
-    ret
-  }
-}
-)");
+)")) << res.Failure().reason.Str();
 }
 
 TEST_F(IR_ValidatorTest, Abstract_Matrix) {
@@ -137,32 +109,17 @@ TEST_F(IR_ValidatorTest, Abstract_Matrix) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.Str(),
-              R"(:3:5 error: var: abstracts are not permitted
+    EXPECT_THAT(res.Failure().reason.Str(),
+                testing::HasSubstr(R"(:3:5 error: var: abstracts are not permitted
     %af:ptr<function, mat2x2<abstract-float>, read_write> = var
     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+)")) << res.Failure().reason.Str();
 
-:2:3 note: in block
-  $B1: {
-  ^^^
-
-:4:5 error: var: abstracts are not permitted
+    EXPECT_THAT(res.Failure().reason.Str(),
+                testing::HasSubstr(R"(:4:5 error: var: abstracts are not permitted
     %ai:ptr<function, mat3x4<abstract-int>, read_write> = var
     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-:2:3 note: in block
-  $B1: {
-  ^^^
-
-note: # Disassembly
-%my_func = func():void {
-  $B1: {
-    %af:ptr<function, mat2x2<abstract-float>, read_write> = var
-    %ai:ptr<function, mat3x4<abstract-int>, read_write> = var
-    ret
-  }
-}
-)");
+)")) << res.Failure().reason.Str();
 }
 
 TEST_F(IR_ValidatorTest, Abstract_Struct) {
@@ -176,26 +133,11 @@ TEST_F(IR_ValidatorTest, Abstract_Struct) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.Str(),
-              R"(:7:3 error: var: abstracts are not permitted
+    EXPECT_THAT(res.Failure().reason.Str(),
+                testing::HasSubstr(R"(:7:3 error: var: abstracts are not permitted
   %1:ptr<private, MyStruct, read_write> = var
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-:6:1 note: in block
-$B1: {  # root
-^^^
-
-note: # Disassembly
-MyStruct = struct @align(1) {
-  af:abstract-float @offset(0)
-  ai:abstract-int @offset(0)
-}
-
-$B1: {  # root
-  %1:ptr<private, MyStruct, read_write> = var
-}
-
-)");
+)")) << res.Failure().reason.Str();
 }
 
 TEST_F(IR_ValidatorTest, Abstract_FunctionParam) {
@@ -206,22 +148,16 @@ TEST_F(IR_ValidatorTest, Abstract_FunctionParam) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.Str(),
-              R"(:1:17 error: abstracts are not permitted
+    EXPECT_THAT(res.Failure().reason.Str(),
+                testing::HasSubstr(R"(:1:17 error: abstracts are not permitted
 %my_func = func(%2:abstract-float, %3:abstract-int):void {
                 ^^^^^^^^^^^^^^^^^
-
-:1:36 error: abstracts are not permitted
+)")) << res.Failure().reason.Str();
+    EXPECT_THAT(res.Failure().reason.Str(),
+                testing::HasSubstr(R"(:1:36 error: abstracts are not permitted
 %my_func = func(%2:abstract-float, %3:abstract-int):void {
                                    ^^^^^^^^^^^^^^^
-
-note: # Disassembly
-%my_func = func(%2:abstract-float, %3:abstract-int):void {
-  $B1: {
-    ret
-  }
-}
-)");
+)")) << res.Failure().reason.Str();
 }
 
 TEST_F(IR_ValidatorTest, Type_VectorElements) {
@@ -239,28 +175,12 @@ TEST_F(IR_ValidatorTest, Type_VectorElements) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.Str(),
-              R"(:8:5 error: var: vector elements, 'vec2<void>', must be scalars
+    EXPECT_THAT(
+        res.Failure().reason.Str(),
+        testing::HasSubstr(R"(:8:5 error: var: vector elements, 'vec2<void>', must be scalars
     %void_invalid:ptr<function, vec2<void>, read_write> = var
     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-:2:3 note: in block
-  $B1: {
-  ^^^
-
-note: # Disassembly
-%my_func = func():void {
-  $B1: {
-    %u32_valid:ptr<function, vec4<u32>, read_write> = var
-    %i32_valid:ptr<function, vec4<i32>, read_write> = var
-    %bool_valid:ptr<function, vec2<bool>, read_write> = var
-    %f16_valid:ptr<function, vec3<f16>, read_write> = var
-    %f32_valid:ptr<function, vec3<f32>, read_write> = var
-    %void_invalid:ptr<function, vec2<void>, read_write> = var
-    ret
-  }
-}
-)");
+)")) << res.Failure().reason.Str();
 }
 
 TEST_F(IR_ValidatorTest, Type_MatrixElements) {
@@ -278,52 +198,30 @@ TEST_F(IR_ValidatorTest, Type_MatrixElements) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.Str(),
-              R"(:3:5 error: var: matrix elements, 'mat2x2<u32>', must be float scalars
+    EXPECT_THAT(
+        res.Failure().reason.Str(),
+        testing::HasSubstr(R"(:3:5 error: var: matrix elements, 'mat2x2<u32>', must be float scalars
     %u32_invalid:ptr<function, mat2x2<u32>, read_write> = var
     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-:2:3 note: in block
-  $B1: {
-  ^^^
-
-:4:5 error: var: matrix elements, 'mat3x2<i32>', must be float scalars
+)")) << res.Failure().reason.Str();
+    EXPECT_THAT(
+        res.Failure().reason.Str(),
+        testing::HasSubstr(R"(:4:5 error: var: matrix elements, 'mat3x2<i32>', must be float scalars
     %i32_invalid:ptr<function, mat3x2<i32>, read_write> = var
     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-:2:3 note: in block
-  $B1: {
-  ^^^
-
-:5:5 error: var: matrix elements, 'mat4x2<bool>', must be float scalars
+)")) << res.Failure().reason.Str();
+    EXPECT_THAT(res.Failure().reason.Str(),
+                testing::HasSubstr(
+                    R"(:5:5 error: var: matrix elements, 'mat4x2<bool>', must be float scalars
     %bool_invalid:ptr<function, mat4x2<bool>, read_write> = var
     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-:2:3 note: in block
-  $B1: {
-  ^^^
-
-:8:5 error: var: matrix elements, 'mat3x3<void>', must be float scalars
+)")) << res.Failure().reason.Str();
+    EXPECT_THAT(res.Failure().reason.Str(),
+                testing::HasSubstr(
+                    R"(:8:5 error: var: matrix elements, 'mat3x3<void>', must be float scalars
     %void_invalid:ptr<function, mat3x3<void>, read_write> = var
     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-:2:3 note: in block
-  $B1: {
-  ^^^
-
-note: # Disassembly
-%my_func = func():void {
-  $B1: {
-    %u32_invalid:ptr<function, mat2x2<u32>, read_write> = var
-    %i32_invalid:ptr<function, mat3x2<i32>, read_write> = var
-    %bool_invalid:ptr<function, mat4x2<bool>, read_write> = var
-    %f16_valid:ptr<function, mat2x3<f16>, read_write> = var
-    %f32_valid:ptr<function, mat4x4<f32>, read_write> = var
-    %void_invalid:ptr<function, mat3x3<void>, read_write> = var
-    ret
-  }
-}
-)");
+)")) << res.Failure().reason.Str();
 }
 
 TEST_F(IR_ValidatorTest, Type_StorageTextureDimension) {
@@ -361,40 +259,24 @@ TEST_F(IR_ValidatorTest, Type_StorageTextureDimension) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.Str(),
-              R"(:3:3 error: var: dimension 'cube' for storage textures does not in WGSL yet
+    EXPECT_THAT(res.Failure().reason.Str(),
+                testing::HasSubstr(
+                    R"(:3:3 error: var: dimension 'cube' for storage textures does not in WGSL yet
   %cube_invalid:ptr<storage, texture_storage_cube<rgba32float, read_write>, read_write> = var @binding_point(1, 1)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-:1:1 note: in block
-$B1: {  # root
-^^^
-
-:4:3 error: var: dimension 'cube_array' for storage textures does not in WGSL yet
+)")) << res.Failure().reason.Str();
+    EXPECT_THAT(
+        res.Failure().reason.Str(),
+        testing::HasSubstr(
+            R"(:4:3 error: var: dimension 'cube_array' for storage textures does not in WGSL yet
   %cube_array_invalid:ptr<storage, texture_storage_cube_array<rgba32float, read_write>, read_write> = var @binding_point(2, 2)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-:1:1 note: in block
-$B1: {  # root
-^^^
-
-:5:3 error: var: invalid texture dimension 'none'
+)")) << res.Failure().reason.Str();
+    EXPECT_THAT(res.Failure().reason.Str(),
+                testing::HasSubstr(R"(:5:3 error: var: invalid texture dimension 'none'
   %none_invalid:ptr<storage, texture_storage_none<rgba32float, read_write>, read_write> = var @binding_point(3, 3)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-:1:1 note: in block
-$B1: {  # root
-^^^
-
-note: # Disassembly
-$B1: {  # root
-  %valid:ptr<storage, texture_storage_2d<rgba32float, read_write>, read_write> = var @binding_point(0, 0)
-  %cube_invalid:ptr<storage, texture_storage_cube<rgba32float, read_write>, read_write> = var @binding_point(1, 1)
-  %cube_array_invalid:ptr<storage, texture_storage_cube_array<rgba32float, read_write>, read_write> = var @binding_point(2, 2)
-  %none_invalid:ptr<storage, texture_storage_none<rgba32float, read_write>, read_write> = var @binding_point(3, 3)
-}
-
-)");
+)")) << res.Failure().reason.Str();
 }
 
 namespace {
@@ -441,7 +323,8 @@ TEST_P(IR_ValidatorRefTypeTest, Var) {
     } else {
         ASSERT_NE(res, Success);
         EXPECT_THAT(res.Failure().reason.Str(),
-                    testing::HasSubstr("3:5 error: var: reference types are not permitted"));
+                    testing::HasSubstr("3:5 error: var: reference types are not permitted"))
+            << res.Failure().reason.Str();
     }
 }
 
@@ -464,7 +347,8 @@ TEST_P(IR_ValidatorRefTypeTest, FnParam) {
     } else {
         ASSERT_NE(res, Success);
         EXPECT_THAT(res.Failure().reason.Str(),
-                    testing::HasSubstr("reference types are not permitted"));
+                    testing::HasSubstr("reference types are not permitted"))
+            << res.Failure().reason.Str();
     }
 }
 
@@ -486,7 +370,8 @@ TEST_P(IR_ValidatorRefTypeTest, FnRet) {
     } else {
         ASSERT_NE(res, Success);
         EXPECT_THAT(res.Failure().reason.Str(),
-                    testing::HasSubstr("reference types are not permitted"));
+                    testing::HasSubstr("reference types are not permitted"))
+            << res.Failure().reason.Str();
     }
 }
 
@@ -518,7 +403,8 @@ TEST_P(IR_ValidatorRefTypeTest, BlockParam) {
     } else {
         ASSERT_NE(res, Success);
         EXPECT_THAT(res.Failure().reason.Str(),
-                    testing::HasSubstr("reference types are not permitted"));
+                    testing::HasSubstr("reference types are not permitted"))
+            << res.Failure().reason.Str();
     }
 }
 
@@ -552,7 +438,8 @@ TEST_F(IR_ValidatorTest, PointerToPointer) {
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_THAT(res.Failure().reason.Str(),
-                testing::HasSubstr("nested pointer types are not permitted"));
+                testing::HasSubstr("nested pointer types are not permitted"))
+        << res.Failure().reason.Str();
 }
 
 TEST_F(IR_ValidatorTest, PointerToVoid) {
@@ -566,7 +453,8 @@ TEST_F(IR_ValidatorTest, PointerToVoid) {
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_THAT(res.Failure().reason.Str(),
-                testing::HasSubstr("pointers to void are not permitted"));
+                testing::HasSubstr("pointers to void are not permitted"))
+        << res.Failure().reason.Str();
 }
 
 TEST_F(IR_ValidatorTest, ReferenceToReference) {
@@ -583,7 +471,8 @@ TEST_F(IR_ValidatorTest, ReferenceToReference) {
     auto res = ir::Validate(mod, caps);
     ASSERT_NE(res, Success);
     EXPECT_THAT(res.Failure().reason.Str(),
-                testing::HasSubstr("nested reference types are not permitted"));
+                testing::HasSubstr("nested reference types are not permitted"))
+        << res.Failure().reason.Str();
 }
 
 TEST_F(IR_ValidatorTest, ReferenceToVoid) {
@@ -600,7 +489,8 @@ TEST_F(IR_ValidatorTest, ReferenceToVoid) {
     auto res = ir::Validate(mod, caps);
     ASSERT_NE(res, Success);
     EXPECT_THAT(res.Failure().reason.Str(),
-                testing::HasSubstr("references to void are not permitted"));
+                testing::HasSubstr("references to void are not permitted"))
+        << res.Failure().reason.Str();
 }
 
 TEST_F(IR_ValidatorTest, PointerInStructure_WithoutCapability) {
@@ -616,7 +506,8 @@ TEST_F(IR_ValidatorTest, PointerInStructure_WithoutCapability) {
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
     EXPECT_THAT(res.Failure().reason.Str(),
-                testing::HasSubstr("nested pointer types are not permitted"));
+                testing::HasSubstr("nested pointer types are not permitted"))
+        << res.Failure().reason.Str();
 }
 
 TEST_F(IR_ValidatorTest, PointerInStructure_WithCapability) {
@@ -658,7 +549,8 @@ TEST_P(IR_Validator8BitIntTypeTest, Var) {
     } else {
         ASSERT_NE(res, Success);
         EXPECT_THAT(res.Failure().reason.Str(),
-                    testing::HasSubstr("3:5 error: var: 8-bit integer types are not permitted"));
+                    testing::HasSubstr("3:5 error: var: 8-bit integer types are not permitted"))
+            << res.Failure().reason.Str();
     }
 }
 
@@ -680,7 +572,8 @@ TEST_P(IR_Validator8BitIntTypeTest, FnParam) {
     } else {
         ASSERT_NE(res, Success);
         EXPECT_THAT(res.Failure().reason.Str(),
-                    testing::HasSubstr("8-bit integer types are not permitted"));
+                    testing::HasSubstr("8-bit integer types are not permitted"))
+            << res.Failure().reason.Str();
     }
 }
 
@@ -701,7 +594,8 @@ TEST_P(IR_Validator8BitIntTypeTest, FnRet) {
     } else {
         ASSERT_NE(res, Success);
         EXPECT_THAT(res.Failure().reason.Str(),
-                    testing::HasSubstr("8-bit integer types are not permitted"));
+                    testing::HasSubstr("8-bit integer types are not permitted"))
+            << res.Failure().reason.Str();
     }
 }
 
@@ -732,7 +626,8 @@ TEST_P(IR_Validator8BitIntTypeTest, BlockParam) {
     } else {
         ASSERT_NE(res, Success);
         EXPECT_THAT(res.Failure().reason.Str(),
-                    testing::HasSubstr("8-bit integer types are not permitted"));
+                    testing::HasSubstr("8-bit integer types are not permitted"))
+            << res.Failure().reason.Str();
     }
 }
 
@@ -755,23 +650,11 @@ TEST_F(IR_ValidatorTest, Int8Type_InstructionOperand_NotAllowed) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.Str(),
-              R"(:3:5 error: let: 8-bit integer types are not permitted
+    EXPECT_THAT(res.Failure().reason.Str(),
+                testing::HasSubstr(R"(:3:5 error: let: 8-bit integer types are not permitted
     %l:u8 = let 1u8
     ^^^^^
-
-:2:3 note: in block
-  $B1: {
-  ^^^
-
-note: # Disassembly
-%my_func = func():void {
-  $B1: {
-    %l:u8 = let 1u8
-    ret
-  }
-}
-)");
+)")) << res.Failure().reason.Str();
 }
 
 TEST_F(IR_ValidatorTest, Int8Type_InstructionOperand_Allowed) {

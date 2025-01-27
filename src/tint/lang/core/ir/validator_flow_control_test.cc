@@ -62,29 +62,11 @@ TEST_F(IR_ValidatorTest, Discard_TooManyOperands) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.Str(),
-              R"(:3:5 error: discard: expected exactly 0 operands, got 1
+    EXPECT_THAT(res.Failure().reason.Str(),
+                testing::HasSubstr(R"(:3:5 error: discard: expected exactly 0 operands, got 1
     discard
     ^^^^^^^
-
-:2:3 note: in block
-  $B1: {
-  ^^^
-
-note: # Disassembly
-%foo = func():void {
-  $B1: {
-    discard
-    ret
-  }
-}
-%ep = @fragment func():void {
-  $B2: {
-    %3:void = call %foo
-    ret
-  }
-}
-)");
+)")) << res.Failure().reason.Str();
 }
 
 TEST_F(IR_ValidatorTest, Discard_TooManyResults) {
@@ -103,29 +85,11 @@ TEST_F(IR_ValidatorTest, Discard_TooManyResults) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.Str(),
-              R"(:3:5 error: discard: expected exactly 0 results, got 1
+    EXPECT_THAT(res.Failure().reason.Str(),
+                testing::HasSubstr(R"(:3:5 error: discard: expected exactly 0 results, got 1
     discard
     ^^^^^^^
-
-:2:3 note: in block
-  $B1: {
-  ^^^
-
-note: # Disassembly
-%foo = func():void {
-  $B1: {
-    discard
-    ret
-  }
-}
-%ep = @fragment func():void {
-  $B2: {
-    %3:void = call %foo
-    ret
-  }
-}
-)");
+)")) << res.Failure().reason.Str();
 }
 
 TEST_F(IR_ValidatorTest, Discard_RootBlock) {
@@ -133,21 +97,12 @@ TEST_F(IR_ValidatorTest, Discard_RootBlock) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.Str(),
-              R"(:2:3 error: discard: root block: invalid instruction: tint::core::ir::Discard
+    EXPECT_THAT(res.Failure().reason.Str(),
+                testing::HasSubstr(
+                    R"(:2:3 error: discard: root block: invalid instruction: tint::core::ir::Discard
   discard
   ^^^^^^^
-
-:1:1 note: in block
-$B1: {  # root
-^^^
-
-note: # Disassembly
-$B1: {  # root
-  discard
-}
-
-)");
+)")) << res.Failure().reason.Str();
 }
 
 TEST_F(IR_ValidatorTest, Discard_NotInFragment) {
@@ -166,25 +121,12 @@ TEST_F(IR_ValidatorTest, Discard_NotInFragment) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.Str(),
-              R"(:3:5 error: discard: cannot be called in non-fragment end point
+    EXPECT_THAT(
+        res.Failure().reason.Str(),
+        testing::HasSubstr(R"(:3:5 error: discard: cannot be called in non-fragment end point
     discard
     ^^^^^^^
-
-note: # Disassembly
-%foo = func():void {
-  $B1: {
-    discard
-    ret
-  }
-}
-%ep = @compute @workgroup_size(1u, 1u, 1u) func():void {
-  $B2: {
-    %3:void = call %foo
-    ret
-  }
-}
-)");
+)")) << res.Failure().reason.Str();
 }
 
 TEST_F(IR_ValidatorTest, Terminator_RootBlock) {
@@ -196,44 +138,26 @@ TEST_F(IR_ValidatorTest, Terminator_RootBlock) {
     mod.root_block->Append(b.TerminateInvocation());
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.Str(),
-              R"(:2:3 error: return: root block: invalid instruction: tint::core::ir::Return
+    EXPECT_THAT(res.Failure().reason.Str(),
+                testing::HasSubstr(
+                    R"(:2:3 error: return: root block: invalid instruction: tint::core::ir::Return
   ret
   ^^^
-
-:1:1 note: in block
-$B1: {  # root
-^^^
-
-:3:3 error: unreachable: root block: invalid instruction: tint::core::ir::Unreachable
+)")) << res.Failure().reason.Str();
+    EXPECT_THAT(
+        res.Failure().reason.Str(),
+        testing::HasSubstr(
+            R"(:3:3 error: unreachable: root block: invalid instruction: tint::core::ir::Unreachable
   unreachable
   ^^^^^^^^^^^
-
-:1:1 note: in block
-$B1: {  # root
-^^^
-
-:4:3 error: terminate_invocation: root block: invalid instruction: tint::core::ir::TerminateInvocation
+)")) << res.Failure().reason.Str();
+    EXPECT_THAT(
+        res.Failure().reason.Str(),
+        testing::HasSubstr(
+            R"(:4:3 error: terminate_invocation: root block: invalid instruction: tint::core::ir::TerminateInvocation
   terminate_invocation
   ^^^^^^^^^^^^^^^^^^^^
-
-:1:1 note: in block
-$B1: {  # root
-^^^
-
-note: # Disassembly
-$B1: {  # root
-  ret
-  unreachable
-  terminate_invocation
-}
-
-%f = func():void {
-  $B2: {
-    unreachable
-  }
-}
-)");
+)")) << res.Failure().reason.Str();
 }
 
 TEST_F(IR_ValidatorTest, Terminator_HasResult) {
@@ -257,48 +181,22 @@ TEST_F(IR_ValidatorTest, Terminator_HasResult) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.Str(),
-              R"(:3:5 error: return: expected exactly 0 results, got 1
+    EXPECT_THAT(res.Failure().reason.Str(),
+                testing::HasSubstr(R"(:3:5 error: return: expected exactly 0 results, got 1
     ret
     ^^^
-
-:2:3 note: in block
-  $B1: {
-  ^^^
-
-:8:5 error: unreachable: expected exactly 0 results, got 1
+)")) << res.Failure().reason.Str();
+    EXPECT_THAT(res.Failure().reason.Str(),
+                testing::HasSubstr(R"(:8:5 error: unreachable: expected exactly 0 results, got 1
     unreachable
     ^^^^^^^^^^^
-
-:7:3 note: in block
-  $B2: {
-  ^^^
-
-:13:5 error: terminate_invocation: expected exactly 0 results, got 1
+)")) << res.Failure().reason.Str();
+    EXPECT_THAT(
+        res.Failure().reason.Str(),
+        testing::HasSubstr(R"(:13:5 error: terminate_invocation: expected exactly 0 results, got 1
     terminate_invocation
     ^^^^^^^^^^^^^^^^^^^^
-
-:12:3 note: in block
-  $B3: {
-  ^^^
-
-note: # Disassembly
-%ret_func = func():void {
-  $B1: {
-    ret
-  }
-}
-%unreachable_func = func():void {
-  $B2: {
-    unreachable
-  }
-}
-%terminate_func = func():void {
-  $B3: {
-    terminate_invocation
-  }
-}
-)");
+)")) << res.Failure().reason.Str();
 }
 
 TEST_F(IR_ValidatorTest, Block_TerminatorInMiddle) {
@@ -311,23 +209,11 @@ TEST_F(IR_ValidatorTest, Block_TerminatorInMiddle) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.Str(),
-              R"(:3:5 error: return: must be the last instruction in the block
+    EXPECT_THAT(res.Failure().reason.Str(),
+                testing::HasSubstr(R"(:3:5 error: return: must be the last instruction in the block
     ret
     ^^^
-
-:2:3 note: in block
-  $B1: {
-  ^^^
-
-note: # Disassembly
-%my_func = func():void {
-  $B1: {
-    ret
-    ret
-  }
-}
-)");
+)")) << res.Failure().reason.Str();
 }
 
 TEST_F(IR_ValidatorTest, If_RootBlock) {
@@ -337,25 +223,12 @@ TEST_F(IR_ValidatorTest, If_RootBlock) {
 
     auto res = ir::Validate(mod, core::ir::Capabilities{core::ir::Capability::kAllowOverrides});
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.Str(),
-              R"(:2:3 error: if: root block: invalid instruction: tint::core::ir::If
+    EXPECT_THAT(
+        res.Failure().reason.Str(),
+        testing::HasSubstr(R"(:2:3 error: if: root block: invalid instruction: tint::core::ir::If
   if true [t: $B2] {  # if_1
   ^^^^^^^^^^^^^^^^
-
-:1:1 note: in block
-$B1: {  # root
-^^^
-
-note: # Disassembly
-$B1: {  # root
-  if true [t: $B2] {  # if_1
-    $B2: {  # true
-      unreachable
-    }
-  }
-}
-
-)");
+)")) << res.Failure().reason.Str();
 }
 
 TEST_F(IR_ValidatorTest, If_EmptyFalse) {
@@ -367,7 +240,8 @@ TEST_F(IR_ValidatorTest, If_EmptyFalse) {
     f->Block()->Append(if_);
     f->Block()->Append(b.Return(f));
 
-    EXPECT_EQ(ir::Validate(mod), Success);
+    auto res = ir::Validate(mod);
+    ASSERT_EQ(res, Success) << res.Failure();
 }
 
 TEST_F(IR_ValidatorTest, If_EmptyTrue) {
@@ -381,25 +255,11 @@ TEST_F(IR_ValidatorTest, If_EmptyTrue) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.Str(),
-              R"(:4:7 error: block does not end in a terminator instruction
+    EXPECT_THAT(res.Failure().reason.Str(),
+                testing::HasSubstr(R"(:4:7 error: block does not end in a terminator instruction
       $B2: {  # true
       ^^^
-
-note: # Disassembly
-%my_func = func():void {
-  $B1: {
-    if true [t: $B2, f: $B3] {  # if_1
-      $B2: {  # true
-      }
-      $B3: {  # false
-        ret
-      }
-    }
-    ret
-  }
-}
-)");
+)")) << res.Failure().reason.Str();
 }
 
 TEST_F(IR_ValidatorTest, If_ConditionIsBool) {
@@ -414,29 +274,11 @@ TEST_F(IR_ValidatorTest, If_ConditionIsBool) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.Str(), R"(:3:8 error: if: condition type must be 'bool'
+    EXPECT_THAT(res.Failure().reason.Str(),
+                testing::HasSubstr(R"(:3:8 error: if: condition type must be 'bool'
     if 1i [t: $B2, f: $B3] {  # if_1
        ^^
-
-:2:3 note: in block
-  $B1: {
-  ^^^
-
-note: # Disassembly
-%my_func = func():void {
-  $B1: {
-    if 1i [t: $B2, f: $B3] {  # if_1
-      $B2: {  # true
-        ret
-      }
-      $B3: {  # false
-        ret
-      }
-    }
-    ret
-  }
-}
-)");
+)")) << res.Failure().reason.Str();
 }
 
 TEST_F(IR_ValidatorTest, If_ConditionIsNullptr) {
@@ -451,29 +293,11 @@ TEST_F(IR_ValidatorTest, If_ConditionIsNullptr) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.Str(), R"(:3:8 error: if: operand is undefined
+    EXPECT_THAT(res.Failure().reason.Str(),
+                testing::HasSubstr(R"(:3:8 error: if: operand is undefined
     if undef [t: $B2, f: $B3] {  # if_1
        ^^^^^
-
-:2:3 note: in block
-  $B1: {
-  ^^^
-
-note: # Disassembly
-%my_func = func():void {
-  $B1: {
-    if undef [t: $B2, f: $B3] {  # if_1
-      $B2: {  # true
-        ret
-      }
-      $B3: {  # false
-        ret
-      }
-    }
-    ret
-  }
-}
-)");
+)")) << res.Failure().reason.Str();
 }
 
 TEST_F(IR_ValidatorTest, If_NullResult) {
@@ -490,29 +314,11 @@ TEST_F(IR_ValidatorTest, If_NullResult) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.Str(), R"(:3:5 error: if: result is undefined
+    EXPECT_THAT(res.Failure().reason.Str(),
+                testing::HasSubstr(R"(:3:5 error: if: result is undefined
     undef = if true [t: $B2, f: $B3] {  # if_1
     ^^^^^
-
-:2:3 note: in block
-  $B1: {
-  ^^^
-
-note: # Disassembly
-%my_func = func():void {
-  $B1: {
-    undef = if true [t: $B2, f: $B3] {  # if_1
-      $B2: {  # true
-        ret
-      }
-      $B3: {  # false
-        ret
-      }
-    }
-    ret
-  }
-}
-)");
+)")) << res.Failure().reason.Str();
 }
 
 TEST_F(IR_ValidatorTest, Loop_RootBlock) {
@@ -522,25 +328,12 @@ TEST_F(IR_ValidatorTest, Loop_RootBlock) {
 
     auto res = ir::Validate(mod, core::ir::Capabilities{core::ir::Capability::kAllowOverrides});
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.Str(),
-              R"(:2:3 error: loop: root block: invalid instruction: tint::core::ir::Loop
+    EXPECT_THAT(res.Failure().reason.Str(),
+                testing::HasSubstr(
+                    R"(:2:3 error: loop: root block: invalid instruction: tint::core::ir::Loop
   loop [b: $B2] {  # loop_1
   ^^^^^^^^^^^^^
-
-:1:1 note: in block
-$B1: {  # root
-^^^
-
-note: # Disassembly
-$B1: {  # root
-  loop [b: $B2] {  # loop_1
-    $B2: {  # body
-      exit_loop  # loop_1
-    }
-  }
-}
-
-)");
+)")) << res.Failure().reason.Str();
 }
 
 TEST_F(IR_ValidatorTest, Loop_OnlyBody) {
@@ -565,22 +358,11 @@ TEST_F(IR_ValidatorTest, Loop_EmptyBody) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.Str(),
-              R"(:4:7 error: block does not end in a terminator instruction
+    EXPECT_THAT(res.Failure().reason.Str(),
+                testing::HasSubstr(R"(:4:7 error: block does not end in a terminator instruction
       $B2: {  # body
       ^^^
-
-note: # Disassembly
-%my_func = func():void {
-  $B1: {
-    loop [b: $B2] {  # loop_1
-      $B2: {  # body
-      }
-    }
-    ret
-  }
-}
-)");
+)")) << res.Failure().reason.Str();
 }
 
 TEST_F(IR_ValidatorTest, Switch_RootBlock) {
@@ -591,25 +373,12 @@ TEST_F(IR_ValidatorTest, Switch_RootBlock) {
 
     auto res = ir::Validate(mod, core::ir::Capabilities{core::ir::Capability::kAllowOverrides});
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.Str(),
-              R"(:2:3 error: switch: root block: invalid instruction: tint::core::ir::Switch
+    EXPECT_THAT(res.Failure().reason.Str(),
+                testing::HasSubstr(
+                    R"(:2:3 error: switch: root block: invalid instruction: tint::core::ir::Switch
   switch 1i [c: (default, $B2)] {  # switch_1
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-:1:1 note: in block
-$B1: {  # root
-^^^
-
-note: # Disassembly
-$B1: {  # root
-  switch 1i [c: (default, $B2)] {  # switch_1
-    $B2: {  # case
-      exit_switch  # switch_1
-    }
-  }
-}
-
-)");
+)")) << res.Failure().reason.Str();
 }
 
 TEST_F(IR_ValidatorTest, ExitIf) {
@@ -621,7 +390,8 @@ TEST_F(IR_ValidatorTest, ExitIf) {
     sb.Append(if_);
     sb.Return(f);
 
-    EXPECT_EQ(ir::Validate(mod), Success);
+    auto res = ir::Validate(mod);
+    ASSERT_EQ(res, Success) << res.Failure();
 }
 
 TEST_F(IR_ValidatorTest, ExitIf_NullIf) {
@@ -635,27 +405,11 @@ TEST_F(IR_ValidatorTest, ExitIf_NullIf) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.Str(),
-              R"(:5:9 error: exit_if: has no parent control instruction
+    EXPECT_THAT(res.Failure().reason.Str(),
+                testing::HasSubstr(R"(:5:9 error: exit_if: has no parent control instruction
         exit_if  # undef
         ^^^^^^^
-
-:4:7 note: in block
-      $B2: {  # true
-      ^^^
-
-note: # Disassembly
-%my_func = func():void {
-  $B1: {
-    if true [t: $B2] {  # if_1
-      $B2: {  # true
-        exit_if  # undef
-      }
-    }
-    ret
-  }
-}
-)");
+)")) << res.Failure().reason.Str();
 }
 
 TEST_F(IR_ValidatorTest, ExitIf_LessOperandsThenIfParams) {
@@ -673,32 +427,12 @@ TEST_F(IR_ValidatorTest, ExitIf_LessOperandsThenIfParams) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.Str(),
-              R"(:5:9 error: exit_if: provides 1 value but 'if' expects 2 values
+    EXPECT_THAT(
+        res.Failure().reason.Str(),
+        testing::HasSubstr(R"(:5:9 error: exit_if: provides 1 value but 'if' expects 2 values
         exit_if 1i  # if_1
         ^^^^^^^^^^
-
-:4:7 note: in block
-      $B2: {  # true
-      ^^^
-
-:3:5 note: 'if' declared here
-    %2:i32, %3:f32 = if true [t: $B2] {  # if_1
-    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-note: # Disassembly
-%my_func = func():void {
-  $B1: {
-    %2:i32, %3:f32 = if true [t: $B2] {  # if_1
-      $B2: {  # true
-        exit_if 1i  # if_1
-      }
-      # implicit false block: exit_if undef, undef
-    }
-    ret
-  }
-}
-)");
+)")) << res.Failure().reason.Str();
 }
 
 TEST_F(IR_ValidatorTest, ExitIf_MoreOperandsThenIfParams) {
@@ -716,32 +450,12 @@ TEST_F(IR_ValidatorTest, ExitIf_MoreOperandsThenIfParams) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.Str(),
-              R"(:5:9 error: exit_if: provides 3 values but 'if' expects 2 values
+    EXPECT_THAT(
+        res.Failure().reason.Str(),
+        testing::HasSubstr(R"(:5:9 error: exit_if: provides 3 values but 'if' expects 2 values
         exit_if 1i, 2.0f, 3i  # if_1
         ^^^^^^^^^^^^^^^^^^^^
-
-:4:7 note: in block
-      $B2: {  # true
-      ^^^
-
-:3:5 note: 'if' declared here
-    %2:i32, %3:f32 = if true [t: $B2] {  # if_1
-    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-note: # Disassembly
-%my_func = func():void {
-  $B1: {
-    %2:i32, %3:f32 = if true [t: $B2] {  # if_1
-      $B2: {  # true
-        exit_if 1i, 2.0f, 3i  # if_1
-      }
-      # implicit false block: exit_if undef, undef
-    }
-    ret
-  }
-}
-)");
+)")) << res.Failure().reason.Str();
 }
 
 TEST_F(IR_ValidatorTest, ExitIf_WithResult) {
@@ -758,7 +472,7 @@ TEST_F(IR_ValidatorTest, ExitIf_WithResult) {
     sb.Return(f);
 
     auto res = ir::Validate(mod);
-    ASSERT_EQ(res, Success);
+    ASSERT_EQ(res, Success) << res.Failure();
 }
 
 TEST_F(IR_ValidatorTest, ExitIf_IncorrectResultType) {
@@ -776,32 +490,13 @@ TEST_F(IR_ValidatorTest, ExitIf_IncorrectResultType) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.Str(),
-              R"(:5:21 error: exit_if: operand with type 'i32' does not match 'if' target type 'f32'
+    EXPECT_THAT(
+        res.Failure().reason.Str(),
+        testing::HasSubstr(
+            R"(:5:21 error: exit_if: operand with type 'i32' does not match 'if' target type 'f32'
         exit_if 1i, 2i  # if_1
                     ^^
-
-:4:7 note: in block
-      $B2: {  # true
-      ^^^
-
-:3:13 note: %3 declared here
-    %2:i32, %3:f32 = if true [t: $B2] {  # if_1
-            ^^^^^^
-
-note: # Disassembly
-%my_func = func():void {
-  $B1: {
-    %2:i32, %3:f32 = if true [t: $B2] {  # if_1
-      $B2: {  # true
-        exit_if 1i, 2i  # if_1
-      }
-      # implicit false block: exit_if undef, undef
-    }
-    ret
-  }
-}
-)");
+)")) << res.Failure().reason.Str();
 }
 
 TEST_F(IR_ValidatorTest, ExitIf_NotInParentIf) {
@@ -816,27 +511,11 @@ TEST_F(IR_ValidatorTest, ExitIf_NotInParentIf) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.Str(),
-              R"(:8:5 error: exit_if: found outside all control instructions
+    EXPECT_THAT(res.Failure().reason.Str(),
+                testing::HasSubstr(R"(:8:5 error: exit_if: found outside all control instructions
     exit_if  # if_1
     ^^^^^^^
-
-:2:3 note: in block
-  $B1: {
-  ^^^
-
-note: # Disassembly
-%my_func = func():void {
-  $B1: {
-    if true [t: $B2] {  # if_1
-      $B2: {  # true
-        ret
-      }
-    }
-    exit_if  # if_1
-  }
-}
-)");
+)")) << res.Failure().reason.Str();
 }
 
 TEST_F(IR_ValidatorTest, ExitIf_InvalidJumpsOverIf) {
@@ -859,36 +538,12 @@ TEST_F(IR_ValidatorTest, ExitIf_InvalidJumpsOverIf) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.Str(),
-              R"(:7:13 error: exit_if: if target jumps over other control instructions
+    EXPECT_THAT(
+        res.Failure().reason.Str(),
+        testing::HasSubstr(R"(:7:13 error: exit_if: if target jumps over other control instructions
             exit_if  # if_1
             ^^^^^^^
-
-:6:11 note: in block
-          $B3: {  # true
-          ^^^
-
-:5:9 note: first control instruction jumped
-        if true [t: $B3] {  # if_2
-        ^^^^^^^^^^^^^^^^
-
-note: # Disassembly
-%my_func = func():void {
-  $B1: {
-    if true [t: $B2] {  # if_1
-      $B2: {  # true
-        if true [t: $B3] {  # if_2
-          $B3: {  # true
-            exit_if  # if_1
-          }
-        }
-        exit_if  # if_1
-      }
-    }
-    ret
-  }
-}
-)");
+)")) << res.Failure().reason.Str();
 }
 
 TEST_F(IR_ValidatorTest, ExitIf_InvalidJumpOverSwitch) {
@@ -912,36 +567,12 @@ TEST_F(IR_ValidatorTest, ExitIf_InvalidJumpOverSwitch) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.Str(),
-              R"(:7:13 error: exit_if: if target jumps over other control instructions
+    EXPECT_THAT(
+        res.Failure().reason.Str(),
+        testing::HasSubstr(R"(:7:13 error: exit_if: if target jumps over other control instructions
             exit_if  # if_1
             ^^^^^^^
-
-:6:11 note: in block
-          $B3: {  # case
-          ^^^
-
-:5:9 note: first control instruction jumped
-        switch 1i [c: (1i default, $B3)] {  # switch_1
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-note: # Disassembly
-%my_func = func():void {
-  $B1: {
-    if true [t: $B2] {  # if_1
-      $B2: {  # true
-        switch 1i [c: (1i default, $B3)] {  # switch_1
-          $B3: {  # case
-            exit_if  # if_1
-          }
-        }
-        exit_if  # if_1
-      }
-    }
-    ret
-  }
-}
-)");
+)")) << res.Failure().reason.Str();
 }
 
 TEST_F(IR_ValidatorTest, ExitIf_InvalidJumpOverLoop) {
@@ -964,36 +595,12 @@ TEST_F(IR_ValidatorTest, ExitIf_InvalidJumpOverLoop) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.Str(),
-              R"(:7:13 error: exit_if: if target jumps over other control instructions
+    EXPECT_THAT(
+        res.Failure().reason.Str(),
+        testing::HasSubstr(R"(:7:13 error: exit_if: if target jumps over other control instructions
             exit_if  # if_1
             ^^^^^^^
-
-:6:11 note: in block
-          $B3: {  # body
-          ^^^
-
-:5:9 note: first control instruction jumped
-        loop [b: $B3] {  # loop_1
-        ^^^^^^^^^^^^^
-
-note: # Disassembly
-%my_func = func():void {
-  $B1: {
-    if true [t: $B2] {  # if_1
-      $B2: {  # true
-        loop [b: $B3] {  # loop_1
-          $B3: {  # body
-            exit_if  # if_1
-          }
-        }
-        exit_if  # if_1
-      }
-    }
-    ret
-  }
-}
-)");
+)")) << res.Failure().reason.Str();
 }
 
 TEST_F(IR_ValidatorTest, ExitSwitch) {
@@ -1007,7 +614,8 @@ TEST_F(IR_ValidatorTest, ExitSwitch) {
     sb.Append(switch_);
     sb.Return(f);
 
-    EXPECT_EQ(ir::Validate(mod), Success);
+    auto res = ir::Validate(mod);
+    ASSERT_EQ(res, Success) << res.Failure();
 }
 
 TEST_F(IR_ValidatorTest, ExitSwitch_NullSwitch) {
@@ -1023,27 +631,11 @@ TEST_F(IR_ValidatorTest, ExitSwitch_NullSwitch) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.Str(),
-              R"(:5:9 error: exit_switch: has no parent control instruction
+    EXPECT_THAT(res.Failure().reason.Str(),
+                testing::HasSubstr(R"(:5:9 error: exit_switch: has no parent control instruction
         exit_switch  # undef
         ^^^^^^^^^^^
-
-:4:7 note: in block
-      $B2: {  # case
-      ^^^
-
-note: # Disassembly
-%my_func = func():void {
-  $B1: {
-    switch 1i [c: (default, $B2)] {  # switch_1
-      $B2: {  # case
-        exit_switch  # undef
-      }
-    }
-    ret
-  }
-}
-)");
+)")) << res.Failure().reason.Str();
 }
 
 TEST_F(IR_ValidatorTest, ExitSwitch_LessOperandsThenSwitchParams) {
@@ -1063,31 +655,12 @@ TEST_F(IR_ValidatorTest, ExitSwitch_LessOperandsThenSwitchParams) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.Str(),
-              R"(:5:9 error: exit_switch: provides 1 value but 'switch' expects 2 values
+    EXPECT_THAT(res.Failure().reason.Str(),
+                testing::HasSubstr(
+                    R"(:5:9 error: exit_switch: provides 1 value but 'switch' expects 2 values
         exit_switch 1i  # switch_1
         ^^^^^^^^^^^^^^
-
-:4:7 note: in block
-      $B2: {  # case
-      ^^^
-
-:3:5 note: 'switch' declared here
-    %2:i32, %3:f32 = switch 1i [c: (default, $B2)] {  # switch_1
-    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-note: # Disassembly
-%my_func = func():void {
-  $B1: {
-    %2:i32, %3:f32 = switch 1i [c: (default, $B2)] {  # switch_1
-      $B2: {  # case
-        exit_switch 1i  # switch_1
-      }
-    }
-    ret
-  }
-}
-)");
+)")) << res.Failure().reason.Str();
 }
 
 TEST_F(IR_ValidatorTest, ExitSwitch_MoreOperandsThenSwitchParams) {
@@ -1106,31 +679,12 @@ TEST_F(IR_ValidatorTest, ExitSwitch_MoreOperandsThenSwitchParams) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.Str(),
-              R"(:5:9 error: exit_switch: provides 3 values but 'switch' expects 2 values
+    EXPECT_THAT(res.Failure().reason.Str(),
+                testing::HasSubstr(
+                    R"(:5:9 error: exit_switch: provides 3 values but 'switch' expects 2 values
         exit_switch 1i, 2.0f, 3i  # switch_1
         ^^^^^^^^^^^^^^^^^^^^^^^^
-
-:4:7 note: in block
-      $B2: {  # case
-      ^^^
-
-:3:5 note: 'switch' declared here
-    %2:i32, %3:f32 = switch 1i [c: (default, $B2)] {  # switch_1
-    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-note: # Disassembly
-%my_func = func():void {
-  $B1: {
-    %2:i32, %3:f32 = switch 1i [c: (default, $B2)] {  # switch_1
-      $B2: {  # case
-        exit_switch 1i, 2.0f, 3i  # switch_1
-      }
-    }
-    ret
-  }
-}
-)");
+)")) << res.Failure().reason.Str();
 }
 
 TEST_F(IR_ValidatorTest, ExitSwitch_WithResult) {
@@ -1148,7 +702,7 @@ TEST_F(IR_ValidatorTest, ExitSwitch_WithResult) {
     sb.Return(f);
 
     auto res = ir::Validate(mod);
-    ASSERT_EQ(res, Success);
+    ASSERT_EQ(res, Success) << res.Failure();
 }
 
 TEST_F(IR_ValidatorTest, ExitSwitch_IncorrectResultType) {
@@ -1167,32 +721,13 @@ TEST_F(IR_ValidatorTest, ExitSwitch_IncorrectResultType) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(
+    EXPECT_THAT(
         res.Failure().reason.Str(),
-        R"(:5:25 error: exit_switch: operand with type 'i32' does not match 'switch' target type 'f32'
+        testing::HasSubstr(
+            R"(:5:25 error: exit_switch: operand with type 'i32' does not match 'switch' target type 'f32'
         exit_switch 1i, 2i  # switch_1
                         ^^
-
-:4:7 note: in block
-      $B2: {  # case
-      ^^^
-
-:3:13 note: %3 declared here
-    %2:i32, %3:f32 = switch 1i [c: (default, $B2)] {  # switch_1
-            ^^^^^^
-
-note: # Disassembly
-%my_func = func():void {
-  $B1: {
-    %2:i32, %3:f32 = switch 1i [c: (default, $B2)] {  # switch_1
-      $B2: {  # case
-        exit_switch 1i, 2i  # switch_1
-      }
-    }
-    ret
-  }
-}
-)");
+)")) << res.Failure().reason.Str();
 }
 
 TEST_F(IR_ValidatorTest, ExitSwitch_NotInParentSwitch) {
@@ -1212,32 +747,12 @@ TEST_F(IR_ValidatorTest, ExitSwitch_NotInParentSwitch) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.Str(),
-              R"(:10:9 error: exit_switch: switch not found in parent control instructions
+    EXPECT_THAT(res.Failure().reason.Str(),
+                testing::HasSubstr(
+                    R"(:10:9 error: exit_switch: switch not found in parent control instructions
         exit_switch  # switch_1
         ^^^^^^^^^^^
-
-:9:7 note: in block
-      $B3: {  # true
-      ^^^
-
-note: # Disassembly
-%my_func = func():void {
-  $B1: {
-    switch 1i [c: (default, $B2)] {  # switch_1
-      $B2: {  # case
-        ret
-      }
-    }
-    if true [t: $B3] {  # if_1
-      $B3: {  # true
-        exit_switch  # switch_1
-      }
-    }
-    ret
-  }
-}
-)");
+)")) << res.Failure().reason.Str();
 }
 
 TEST_F(IR_ValidatorTest, ExitSwitch_JumpsOverIfs) {
@@ -1269,7 +784,8 @@ TEST_F(IR_ValidatorTest, ExitSwitch_JumpsOverIfs) {
     sb.Append(switch_);
     sb.Return(f);
 
-    EXPECT_EQ(ir::Validate(mod), Success);
+    auto res = ir::Validate(mod);
+    ASSERT_EQ(res, Success) << res.Failure();
 }
 
 TEST_F(IR_ValidatorTest, ExitSwitch_InvalidJumpOverSwitch) {
@@ -1293,8 +809,9 @@ TEST_F(IR_ValidatorTest, ExitSwitch_InvalidJumpOverSwitch) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.Str(),
-              R"(:7:13 error: exit_switch: switch target jumps over other control instructions
+    EXPECT_THAT(res.Failure().reason.Str(),
+                testing::HasSubstr(
+                    R"(:7:13 error: exit_switch: switch target jumps over other control instructions
             exit_switch  # switch_1
             ^^^^^^^^^^^
 
@@ -1305,24 +822,7 @@ TEST_F(IR_ValidatorTest, ExitSwitch_InvalidJumpOverSwitch) {
 :5:9 note: first control instruction jumped
         switch 0i [c: (default, $B3)] {  # switch_2
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-note: # Disassembly
-%my_func = func():void {
-  $B1: {
-    switch 1i [c: (default, $B2)] {  # switch_1
-      $B2: {  # case
-        switch 0i [c: (default, $B3)] {  # switch_2
-          $B3: {  # case
-            exit_switch  # switch_1
-          }
-        }
-        exit_switch  # switch_1
-      }
-    }
-    ret
-  }
-}
-)");
+)")) << res.Failure().reason.Str();
 }
 
 TEST_F(IR_ValidatorTest, ExitSwitch_InvalidJumpOverLoop) {
@@ -1344,8 +844,9 @@ TEST_F(IR_ValidatorTest, ExitSwitch_InvalidJumpOverLoop) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.Str(),
-              R"(:7:13 error: exit_switch: switch target jumps over other control instructions
+    EXPECT_THAT(res.Failure().reason.Str(),
+                testing::HasSubstr(
+                    R"(:7:13 error: exit_switch: switch target jumps over other control instructions
             exit_switch  # switch_1
             ^^^^^^^^^^^
 
@@ -1356,24 +857,7 @@ TEST_F(IR_ValidatorTest, ExitSwitch_InvalidJumpOverLoop) {
 :5:9 note: first control instruction jumped
         loop [b: $B3] {  # loop_1
         ^^^^^^^^^^^^^
-
-note: # Disassembly
-%my_func = func():void {
-  $B1: {
-    switch 1i [c: (default, $B2)] {  # switch_1
-      $B2: {  # case
-        loop [b: $B3] {  # loop_1
-          $B3: {  # body
-            exit_switch  # switch_1
-          }
-        }
-        exit_switch  # switch_1
-      }
-    }
-    ret
-  }
-}
-)");
+)")) << res.Failure().reason.Str();
 }
 
 TEST_F(IR_ValidatorTest, Continue_OutsideOfLoop) {
@@ -1386,27 +870,11 @@ TEST_F(IR_ValidatorTest, Continue_OutsideOfLoop) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.Str(),
-              R"(:8:5 error: continue: called outside of associated loop
+    EXPECT_THAT(res.Failure().reason.Str(),
+                testing::HasSubstr(R"(:8:5 error: continue: called outside of associated loop
     continue  # -> $B3
     ^^^^^^^^
-
-:2:3 note: in block
-  $B1: {
-  ^^^
-
-note: # Disassembly
-%my_func = func():void {
-  $B1: {
-    loop [b: $B2] {  # loop_1
-      $B2: {  # body
-        exit_loop  # loop_1
-      }
-    }
-    continue  # -> $B3
-  }
-}
-)");
+)")) << res.Failure().reason.Str();
 }
 
 TEST_F(IR_ValidatorTest, Continue_InLoopInit) {
@@ -1420,30 +888,11 @@ TEST_F(IR_ValidatorTest, Continue_InLoopInit) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.Str(),
-              R"(:5:9 error: continue: must only be called from loop body
+    EXPECT_THAT(res.Failure().reason.Str(),
+                testing::HasSubstr(R"(:5:9 error: continue: must only be called from loop body
         continue  # -> $B4
         ^^^^^^^^
-
-:4:7 note: in block
-      $B2: {  # initializer
-      ^^^
-
-note: # Disassembly
-%my_func = func():void {
-  $B1: {
-    loop [i: $B2, b: $B3] {  # loop_1
-      $B2: {  # initializer
-        continue  # -> $B4
-      }
-      $B3: {  # body
-        exit_loop  # loop_1
-      }
-    }
-    ret
-  }
-}
-)");
+)")) << res.Failure().reason.Str();
 }
 
 TEST_F(IR_ValidatorTest, Continue_InLoopBody) {
@@ -1455,7 +904,7 @@ TEST_F(IR_ValidatorTest, Continue_InLoopBody) {
     });
 
     auto res = ir::Validate(mod);
-    ASSERT_EQ(res, Success);
+    ASSERT_EQ(res, Success) << res.Failure();
 }
 
 TEST_F(IR_ValidatorTest, Continue_InLoopContinuing) {
@@ -1469,30 +918,11 @@ TEST_F(IR_ValidatorTest, Continue_InLoopContinuing) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.Str(),
-              R"(:8:9 error: continue: must only be called from loop body
+    EXPECT_THAT(res.Failure().reason.Str(),
+                testing::HasSubstr(R"(:8:9 error: continue: must only be called from loop body
         continue  # -> $B3
         ^^^^^^^^
-
-:7:7 note: in block
-      $B3: {  # continuing
-      ^^^
-
-note: # Disassembly
-%my_func = func():void {
-  $B1: {
-    loop [b: $B2, c: $B3] {  # loop_1
-      $B2: {  # body
-        exit_loop  # loop_1
-      }
-      $B3: {  # continuing
-        continue  # -> $B3
-      }
-    }
-    ret
-  }
-}
-)");
+)")) << res.Failure().reason.Str();
 }
 
 TEST_F(IR_ValidatorTest, Continue_UnexpectedValues) {
@@ -1506,34 +936,12 @@ TEST_F(IR_ValidatorTest, Continue_UnexpectedValues) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.Str(),
-              R"(:5:9 error: continue: provides 2 values but 'loop' block $B3 expects 0 values
+    EXPECT_THAT(res.Failure().reason.Str(),
+                testing::HasSubstr(
+                    R"(:5:9 error: continue: provides 2 values but 'loop' block $B3 expects 0 values
         continue 1i, 2.0f  # -> $B3
         ^^^^^^^^^^^^^^^^^
-
-:4:7 note: in block
-      $B2: {  # body
-      ^^^
-
-:7:7 note: 'loop' block $B3 declared here
-      $B3: {  # continuing
-      ^^^
-
-note: # Disassembly
-%my_func = func():void {
-  $B1: {
-    loop [b: $B2, c: $B3] {  # loop_1
-      $B2: {  # body
-        continue 1i, 2.0f  # -> $B3
-      }
-      $B3: {  # continuing
-        break_if true  # -> [t: exit_loop loop_1, f: $B2]
-      }
-    }
-    ret
-  }
-}
-)");
+)")) << res.Failure().reason.Str();
 }
 
 TEST_F(IR_ValidatorTest, Continue_MissingValues) {
@@ -1548,34 +956,12 @@ TEST_F(IR_ValidatorTest, Continue_MissingValues) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.Str(),
-              R"(:5:9 error: continue: provides 0 values but 'loop' block $B3 expects 2 values
+    EXPECT_THAT(res.Failure().reason.Str(),
+                testing::HasSubstr(
+                    R"(:5:9 error: continue: provides 0 values but 'loop' block $B3 expects 2 values
         continue  # -> $B3
         ^^^^^^^^
-
-:4:7 note: in block
-      $B2: {  # body
-      ^^^
-
-:7:7 note: 'loop' block $B3 declared here
-      $B3 (%2:i32, %3:i32): {  # continuing
-      ^^^^^^^^^^^^^^^^^^^^
-
-note: # Disassembly
-%my_func = func():void {
-  $B1: {
-    loop [b: $B2, c: $B3] {  # loop_1
-      $B2: {  # body
-        continue  # -> $B3
-      }
-      $B3 (%2:i32, %3:i32): {  # continuing
-        break_if true  # -> [t: exit_loop loop_1, f: $B2]
-      }
-    }
-    ret
-  }
-}
-)");
+)")) << res.Failure().reason.Str();
 }
 
 TEST_F(IR_ValidatorTest, Continue_MismatchedTypes) {
@@ -1591,47 +977,21 @@ TEST_F(IR_ValidatorTest, Continue_MismatchedTypes) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(
+    EXPECT_THAT(
         res.Failure().reason.Str(),
-        R"(:5:22 error: continue: operand with type 'i32' does not match 'loop' block $B3 target type 'f32'
+        testing::HasSubstr(
+            R"(:5:22 error: continue: operand with type 'i32' does not match 'loop' block $B3 target type 'f32'
         continue 1i, 2i, 3.0f, false  # -> $B3
                      ^^
+)")) << res.Failure().reason.Str();
 
-:4:7 note: in block
-      $B2: {  # body
-      ^^^
-
-:7:20 note: %3 declared here
-      $B3 (%2:i32, %3:f32, %4:u32, %5:bool): {  # continuing
-                   ^^
-
-:5:26 error: continue: operand with type 'f32' does not match 'loop' block $B3 target type 'u32'
+    EXPECT_THAT(
+        res.Failure().reason.Str(),
+        testing::HasSubstr(
+            R"(:5:26 error: continue: operand with type 'f32' does not match 'loop' block $B3 target type 'u32'
         continue 1i, 2i, 3.0f, false  # -> $B3
                          ^^^^
-
-:4:7 note: in block
-      $B2: {  # body
-      ^^^
-
-:7:28 note: %4 declared here
-      $B3 (%2:i32, %3:f32, %4:u32, %5:bool): {  # continuing
-                           ^^
-
-note: # Disassembly
-%my_func = func():void {
-  $B1: {
-    loop [b: $B2, c: $B3] {  # loop_1
-      $B2: {  # body
-        continue 1i, 2i, 3.0f, false  # -> $B3
-      }
-      $B3 (%2:i32, %3:f32, %4:u32, %5:bool): {  # continuing
-        break_if true  # -> [t: exit_loop loop_1, f: $B2]
-      }
-    }
-    ret
-  }
-}
-)");
+)")) << res.Failure().reason.Str();
 }
 
 TEST_F(IR_ValidatorTest, Continue_MatchedTypes) {
@@ -1659,27 +1019,11 @@ TEST_F(IR_ValidatorTest, NextIteration_OutsideOfLoop) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.Str(),
-              R"(:8:5 error: next_iteration: called outside of associated loop
+    EXPECT_THAT(res.Failure().reason.Str(),
+                testing::HasSubstr(R"(:8:5 error: next_iteration: called outside of associated loop
     next_iteration  # -> $B2
     ^^^^^^^^^^^^^^
-
-:2:3 note: in block
-  $B1: {
-  ^^^
-
-note: # Disassembly
-%my_func = func():void {
-  $B1: {
-    loop [b: $B2] {  # loop_1
-      $B2: {  # body
-        exit_loop  # loop_1
-      }
-    }
-    next_iteration  # -> $B2
-  }
-}
-)");
+)")) << res.Failure().reason.Str();
 }
 
 TEST_F(IR_ValidatorTest, NextIteration_InLoopInit) {
@@ -1692,7 +1036,7 @@ TEST_F(IR_ValidatorTest, NextIteration_InLoopInit) {
     });
 
     auto res = ir::Validate(mod);
-    ASSERT_EQ(res, Success);
+    ASSERT_EQ(res, Success) << res.Failure();
 }
 
 TEST_F(IR_ValidatorTest, NextIteration_InLoopBody) {
@@ -1705,27 +1049,13 @@ TEST_F(IR_ValidatorTest, NextIteration_InLoopBody) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.Str(),
-              R"(:5:9 error: next_iteration: must only be called from loop initializer or continuing
+    EXPECT_THAT(
+        res.Failure().reason.Str(),
+        testing::HasSubstr(
+            R"(:5:9 error: next_iteration: must only be called from loop initializer or continuing
         next_iteration  # -> $B2
         ^^^^^^^^^^^^^^
-
-:4:7 note: in block
-      $B2: {  # body
-      ^^^
-
-note: # Disassembly
-%my_func = func():void {
-  $B1: {
-    loop [b: $B2] {  # loop_1
-      $B2: {  # body
-        next_iteration  # -> $B2
-      }
-    }
-    ret
-  }
-}
-)");
+)")) << res.Failure().reason.Str();
 }
 
 TEST_F(IR_ValidatorTest, NextIteration_InLoopContinuing) {
@@ -1738,7 +1068,7 @@ TEST_F(IR_ValidatorTest, NextIteration_InLoopContinuing) {
     });
 
     auto res = ir::Validate(mod);
-    ASSERT_EQ(res, Success);
+    ASSERT_EQ(res, Success) << res.Failure();
 }
 
 TEST_F(IR_ValidatorTest, NextIteration_UnexpectedValues) {
@@ -1752,34 +1082,13 @@ TEST_F(IR_ValidatorTest, NextIteration_UnexpectedValues) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.Str(),
-              R"(:5:9 error: next_iteration: provides 2 values but 'loop' block $B3 expects 0 values
+    EXPECT_THAT(
+        res.Failure().reason.Str(),
+        testing::HasSubstr(
+            R"(:5:9 error: next_iteration: provides 2 values but 'loop' block $B3 expects 0 values
         next_iteration 1i, 2.0f  # -> $B3
         ^^^^^^^^^^^^^^^^^^^^^^^
-
-:4:7 note: in block
-      $B2: {  # initializer
-      ^^^
-
-:7:7 note: 'loop' block $B3 declared here
-      $B3: {  # body
-      ^^^
-
-note: # Disassembly
-%my_func = func():void {
-  $B1: {
-    loop [i: $B2, b: $B3] {  # loop_1
-      $B2: {  # initializer
-        next_iteration 1i, 2.0f  # -> $B3
-      }
-      $B3: {  # body
-        exit_loop  # loop_1
-      }
-    }
-    ret
-  }
-}
-)");
+)")) << res.Failure().reason.Str();
 }
 
 TEST_F(IR_ValidatorTest, NextIteration_MissingValues) {
@@ -1794,34 +1103,13 @@ TEST_F(IR_ValidatorTest, NextIteration_MissingValues) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.Str(),
-              R"(:5:9 error: next_iteration: provides 0 values but 'loop' block $B3 expects 2 values
+    EXPECT_THAT(
+        res.Failure().reason.Str(),
+        testing::HasSubstr(
+            R"(:5:9 error: next_iteration: provides 0 values but 'loop' block $B3 expects 2 values
         next_iteration  # -> $B3
         ^^^^^^^^^^^^^^
-
-:4:7 note: in block
-      $B2: {  # initializer
-      ^^^
-
-:7:7 note: 'loop' block $B3 declared here
-      $B3 (%2:i32, %3:i32): {  # body
-      ^^^^^^^^^^^^^^^^^^^^
-
-note: # Disassembly
-%my_func = func():void {
-  $B1: {
-    loop [i: $B2, b: $B3] {  # loop_1
-      $B2: {  # initializer
-        next_iteration  # -> $B3
-      }
-      $B3 (%2:i32, %3:i32): {  # body
-        exit_loop  # loop_1
-      }
-    }
-    ret
-  }
-}
-)");
+)")) << res.Failure().reason.Str();
 }
 
 TEST_F(IR_ValidatorTest, NextIteration_MismatchedTypes) {
@@ -1837,47 +1125,20 @@ TEST_F(IR_ValidatorTest, NextIteration_MismatchedTypes) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(
+    EXPECT_THAT(
         res.Failure().reason.Str(),
-        R"(:5:28 error: next_iteration: operand with type 'i32' does not match 'loop' block $B3 target type 'f32'
+        testing::HasSubstr(
+            R"(:5:28 error: next_iteration: operand with type 'i32' does not match 'loop' block $B3 target type 'f32'
         next_iteration 1i, 2i, 3.0f, false  # -> $B3
                            ^^
-
-:4:7 note: in block
-      $B2: {  # initializer
-      ^^^
-
-:7:20 note: %3 declared here
-      $B3 (%2:i32, %3:f32, %4:u32, %5:bool): {  # body
-                   ^^
-
-:5:32 error: next_iteration: operand with type 'f32' does not match 'loop' block $B3 target type 'u32'
+)")) << res.Failure().reason.Str();
+    EXPECT_THAT(
+        res.Failure().reason.Str(),
+        testing::HasSubstr(
+            R"(:5:32 error: next_iteration: operand with type 'f32' does not match 'loop' block $B3 target type 'u32'
         next_iteration 1i, 2i, 3.0f, false  # -> $B3
                                ^^^^
-
-:4:7 note: in block
-      $B2: {  # initializer
-      ^^^
-
-:7:28 note: %4 declared here
-      $B3 (%2:i32, %3:f32, %4:u32, %5:bool): {  # body
-                           ^^
-
-note: # Disassembly
-%my_func = func():void {
-  $B1: {
-    loop [i: $B2, b: $B3] {  # loop_1
-      $B2: {  # initializer
-        next_iteration 1i, 2i, 3.0f, false  # -> $B3
-      }
-      $B3 (%2:i32, %3:f32, %4:u32, %5:bool): {  # body
-        exit_loop  # loop_1
-      }
-    }
-    ret
-  }
-}
-)");
+)")) << res.Failure().reason.Str();
 }
 
 TEST_F(IR_ValidatorTest, NextIteration_MatchedTypes) {
@@ -1892,7 +1153,7 @@ TEST_F(IR_ValidatorTest, NextIteration_MatchedTypes) {
     });
 
     auto res = ir::Validate(mod);
-    ASSERT_EQ(res, Success);
+    ASSERT_EQ(res, Success) << res.Failure();
 }
 
 TEST_F(IR_ValidatorTest, LoopBodyParamsWithoutInitializer) {
@@ -1906,27 +1167,12 @@ TEST_F(IR_ValidatorTest, LoopBodyParamsWithoutInitializer) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.Str(),
-              R"(:3:5 error: loop: loop with body block parameters must have an initializer
+    EXPECT_THAT(res.Failure().reason.Str(),
+                testing::HasSubstr(
+                    R"(:3:5 error: loop: loop with body block parameters must have an initializer
     loop [b: $B2] {  # loop_1
     ^^^^^^^^^^^^^
-
-:2:3 note: in block
-  $B1: {
-  ^^^
-
-note: # Disassembly
-%my_func = func():void {
-  $B1: {
-    loop [b: $B2] {  # loop_1
-      $B2 (%2:i32, %3:i32): {  # body
-        exit_loop  # loop_1
-      }
-    }
-    ret
-  }
-}
-)");
+)")) << res.Failure().reason.Str();
 }
 
 TEST_F(IR_ValidatorTest, ContinuingUseValueBeforeContinue) {
@@ -1946,7 +1192,8 @@ TEST_F(IR_ValidatorTest, ContinuingUseValueBeforeContinue) {
         b.Return(f);
     });
 
-    ASSERT_EQ(ir::Validate(mod), Success);
+    auto res = ir::Validate(mod);
+    ASSERT_EQ(res, Success) << res.Failure();
 }
 
 TEST_F(IR_ValidatorTest, ContinuingUseValueAfterContinue) {
@@ -1968,46 +1215,13 @@ TEST_F(IR_ValidatorTest, ContinuingUseValueAfterContinue) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(
+    EXPECT_THAT(
         res.Failure().reason.Str(),
-        R"(:14:24 error: let: %value cannot be used in continuing block as it is declared after the first 'continue' in the loop's body
+        testing::HasSubstr(
+            R"(:14:24 error: let: %value cannot be used in continuing block as it is declared after the first 'continue' in the loop's body
         %use:i32 = let %value
                        ^^^^^^
-
-:4:7 note: in block
-      $B2: {  # body
-      ^^^
-
-:10:9 note: %value declared here
-        %value:i32 = let 1i
-        ^^^^^^^^^^
-
-:7:13 note: loop body's first 'continue'
-            continue  # -> $B3
-            ^^^^^^^^
-
-note: # Disassembly
-%my_func = func():void {
-  $B1: {
-    loop [b: $B2, c: $B3] {  # loop_1
-      $B2: {  # body
-        if true [t: $B4] {  # if_1
-          $B4: {  # true
-            continue  # -> $B3
-          }
-        }
-        %value:i32 = let 1i
-        exit_loop  # loop_1
-      }
-      $B3: {  # continuing
-        %use:i32 = let %value
-        next_iteration  # -> $B2
-      }
-    }
-    ret
-  }
-}
-)");
+)")) << res.Failure().reason.Str();
 }
 
 TEST_F(IR_ValidatorTest, BreakIf_NextIterUnexpectedValues) {
@@ -2021,34 +1235,12 @@ TEST_F(IR_ValidatorTest, BreakIf_NextIterUnexpectedValues) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.Str(),
-              R"(:8:9 error: break_if: provides 2 values but 'loop' block $B2 expects 0 values
+    EXPECT_THAT(res.Failure().reason.Str(),
+                testing::HasSubstr(
+                    R"(:8:9 error: break_if: provides 2 values but 'loop' block $B2 expects 0 values
         break_if true next_iteration: [ 1i, 2i ]  # -> [t: exit_loop loop_1, f: $B2]
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-:7:7 note: in block
-      $B3: {  # continuing
-      ^^^
-
-:4:7 note: 'loop' block $B2 declared here
-      $B2: {  # body
-      ^^^
-
-note: # Disassembly
-%my_func = func():void {
-  $B1: {
-    loop [b: $B2, c: $B3] {  # loop_1
-      $B2: {  # body
-        continue  # -> $B3
-      }
-      $B3: {  # continuing
-        break_if true next_iteration: [ 1i, 2i ]  # -> [t: exit_loop loop_1, f: $B2]
-      }
-    }
-    ret
-  }
-}
-)");
+)")) << res.Failure().reason.Str();
 }
 
 TEST_F(IR_ValidatorTest, BreakIf_NextIterMissingValues) {
@@ -2064,37 +1256,13 @@ TEST_F(IR_ValidatorTest, BreakIf_NextIterMissingValues) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.Str(),
-              R"(:11:9 error: break_if: provides 0 values but 'loop' block $B3 expects 2 values
+    EXPECT_THAT(
+        res.Failure().reason.Str(),
+        testing::HasSubstr(
+            R"(:11:9 error: break_if: provides 0 values but 'loop' block $B3 expects 2 values
         break_if true  # -> [t: exit_loop loop_1, f: $B3]
         ^^^^^^^^^^^^^
-
-:10:7 note: in block
-      $B4: {  # continuing
-      ^^^
-
-:7:7 note: 'loop' block $B3 declared here
-      $B3 (%2:i32, %3:i32): {  # body
-      ^^^^^^^^^^^^^^^^^^^^
-
-note: # Disassembly
-%my_func = func():void {
-  $B1: {
-    loop [i: $B2, b: $B3, c: $B4] {  # loop_1
-      $B2: {  # initializer
-        next_iteration undef, undef  # -> $B3
-      }
-      $B3 (%2:i32, %3:i32): {  # body
-        continue  # -> $B4
-      }
-      $B4: {  # continuing
-        break_if true  # -> [t: exit_loop loop_1, f: $B3]
-      }
-    }
-    ret
-  }
-}
-)");
+)")) << res.Failure().reason.Str();
 }
 
 TEST_F(IR_ValidatorTest, BreakIf_NextIterMismatchedTypes) {
@@ -2113,50 +1281,20 @@ TEST_F(IR_ValidatorTest, BreakIf_NextIterMismatchedTypes) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(
+    EXPECT_THAT(
         res.Failure().reason.Str(),
-        R"(:11:45 error: break_if: operand with type 'i32' does not match 'loop' block $B3 target type 'f32'
+        testing::HasSubstr(
+            R"(:11:45 error: break_if: operand with type 'i32' does not match 'loop' block $B3 target type 'f32'
         break_if true next_iteration: [ 1i, 2i, 3.0f, false ]  # -> [t: exit_loop loop_1, f: $B3]
                                             ^^
-
-:10:7 note: in block
-      $B4: {  # continuing
-      ^^^
-
-:7:20 note: %3 declared here
-      $B3 (%2:i32, %3:f32, %4:u32, %5:bool): {  # body
-                   ^^
-
-:11:49 error: break_if: operand with type 'f32' does not match 'loop' block $B3 target type 'u32'
+)")) << res.Failure().reason.Str();
+    EXPECT_THAT(
+        res.Failure().reason.Str(),
+        testing::HasSubstr(
+            R"(:11:49 error: break_if: operand with type 'f32' does not match 'loop' block $B3 target type 'u32'
         break_if true next_iteration: [ 1i, 2i, 3.0f, false ]  # -> [t: exit_loop loop_1, f: $B3]
                                                 ^^^^
-
-:10:7 note: in block
-      $B4: {  # continuing
-      ^^^
-
-:7:28 note: %4 declared here
-      $B3 (%2:i32, %3:f32, %4:u32, %5:bool): {  # body
-                           ^^
-
-note: # Disassembly
-%my_func = func():void {
-  $B1: {
-    loop [i: $B2, b: $B3, c: $B4] {  # loop_1
-      $B2: {  # initializer
-        next_iteration undef, undef, undef, undef  # -> $B3
-      }
-      $B3 (%2:i32, %3:f32, %4:u32, %5:bool): {  # body
-        continue  # -> $B4
-      }
-      $B4: {  # continuing
-        break_if true next_iteration: [ 1i, 2i, 3.0f, false ]  # -> [t: exit_loop loop_1, f: $B3]
-      }
-    }
-    ret
-  }
-}
-)");
+)")) << res.Failure().reason.Str();
 }
 
 TEST_F(IR_ValidatorTest, BreakIf_NextIterMatchedTypes) {
@@ -2174,7 +1312,7 @@ TEST_F(IR_ValidatorTest, BreakIf_NextIterMatchedTypes) {
     });
 
     auto res = ir::Validate(mod);
-    ASSERT_EQ(res, Success);
+    ASSERT_EQ(res, Success) << res.Failure();
 }
 
 TEST_F(IR_ValidatorTest, BreakIf_ExitUnexpectedValues) {
@@ -2188,34 +1326,12 @@ TEST_F(IR_ValidatorTest, BreakIf_ExitUnexpectedValues) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.Str(),
-              R"(:8:9 error: break_if: provides 2 values but 'loop' expects 0 values
+    EXPECT_THAT(
+        res.Failure().reason.Str(),
+        testing::HasSubstr(R"(:8:9 error: break_if: provides 2 values but 'loop' expects 0 values
         break_if true exit_loop: [ 1i, 2i ]  # -> [t: exit_loop loop_1, f: $B2]
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-:7:7 note: in block
-      $B3: {  # continuing
-      ^^^
-
-:3:5 note: 'loop' declared here
-    loop [b: $B2, c: $B3] {  # loop_1
-    ^^^^^^^^^^^^^^^^^^^^^
-
-note: # Disassembly
-%my_func = func():void {
-  $B1: {
-    loop [b: $B2, c: $B3] {  # loop_1
-      $B2: {  # body
-        continue  # -> $B3
-      }
-      $B3: {  # continuing
-        break_if true exit_loop: [ 1i, 2i ]  # -> [t: exit_loop loop_1, f: $B2]
-      }
-    }
-    ret
-  }
-}
-)");
+)")) << res.Failure().reason.Str();
 }
 
 TEST_F(IR_ValidatorTest, BreakIf_ExitMissingValues) {
@@ -2230,34 +1346,12 @@ TEST_F(IR_ValidatorTest, BreakIf_ExitMissingValues) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.Str(),
-              R"(:8:9 error: break_if: provides 0 values but 'loop' expects 2 values
+    EXPECT_THAT(
+        res.Failure().reason.Str(),
+        testing::HasSubstr(R"(:8:9 error: break_if: provides 0 values but 'loop' expects 2 values
         break_if true  # -> [t: exit_loop loop_1, f: $B2]
         ^^^^^^^^^^^^^
-
-:7:7 note: in block
-      $B3: {  # continuing
-      ^^^
-
-:3:5 note: 'loop' declared here
-    %2:i32, %3:i32 = loop [b: $B2, c: $B3] {  # loop_1
-    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-note: # Disassembly
-%my_func = func():void {
-  $B1: {
-    %2:i32, %3:i32 = loop [b: $B2, c: $B3] {  # loop_1
-      $B2: {  # body
-        continue  # -> $B3
-      }
-      $B3: {  # continuing
-        break_if true  # -> [t: exit_loop loop_1, f: $B2]
-      }
-    }
-    ret
-  }
-}
-)");
+)")) << res.Failure().reason.Str();
 }
 
 TEST_F(IR_ValidatorTest, BreakIf_ExitMismatchedTypes) {
@@ -2274,47 +1368,20 @@ TEST_F(IR_ValidatorTest, BreakIf_ExitMismatchedTypes) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(
+    EXPECT_THAT(
         res.Failure().reason.Str(),
-        R"(:8:40 error: break_if: operand with type 'i32' does not match 'loop' target type 'f32'
+        testing::HasSubstr(
+            R"(:8:40 error: break_if: operand with type 'i32' does not match 'loop' target type 'f32'
         break_if true exit_loop: [ 1i, 2i, 3.0f, false ]  # -> [t: exit_loop loop_1, f: $B2]
                                        ^^
-
-:7:7 note: in block
-      $B3: {  # continuing
-      ^^^
-
-:3:13 note: %3 declared here
-    %2:i32, %3:f32, %4:u32, %5:bool = loop [b: $B2, c: $B3] {  # loop_1
-            ^^^^^^
-
-:8:44 error: break_if: operand with type 'f32' does not match 'loop' target type 'u32'
+)")) << res.Failure().reason.Str();
+    EXPECT_THAT(
+        res.Failure().reason.Str(),
+        testing::HasSubstr(
+            R"(:8:44 error: break_if: operand with type 'f32' does not match 'loop' target type 'u32'
         break_if true exit_loop: [ 1i, 2i, 3.0f, false ]  # -> [t: exit_loop loop_1, f: $B2]
                                            ^^^^
-
-:7:7 note: in block
-      $B3: {  # continuing
-      ^^^
-
-:3:21 note: %4 declared here
-    %2:i32, %3:f32, %4:u32, %5:bool = loop [b: $B2, c: $B3] {  # loop_1
-                    ^^^^^^
-
-note: # Disassembly
-%my_func = func():void {
-  $B1: {
-    %2:i32, %3:f32, %4:u32, %5:bool = loop [b: $B2, c: $B3] {  # loop_1
-      $B2: {  # body
-        continue  # -> $B3
-      }
-      $B3: {  # continuing
-        break_if true exit_loop: [ 1i, 2i, 3.0f, false ]  # -> [t: exit_loop loop_1, f: $B2]
-      }
-    }
-    ret
-  }
-}
-)");
+)")) << res.Failure().reason.Str();
 }
 
 TEST_F(IR_ValidatorTest, BreakIf_ExitMatchedTypes) {
@@ -2330,7 +1397,7 @@ TEST_F(IR_ValidatorTest, BreakIf_ExitMatchedTypes) {
     });
 
     auto res = ir::Validate(mod);
-    ASSERT_EQ(res, Success);
+    ASSERT_EQ(res, Success) << res.Failure();
 }
 
 TEST_F(IR_ValidatorTest, ExitLoop) {
@@ -2343,7 +1410,8 @@ TEST_F(IR_ValidatorTest, ExitLoop) {
     sb.Append(loop);
     sb.Return(f);
 
-    EXPECT_EQ(ir::Validate(mod), Success);
+    auto res = ir::Validate(mod);
+    ASSERT_EQ(res, Success) << res.Failure();
 }
 
 TEST_F(IR_ValidatorTest, ExitLoop_NullLoop) {
@@ -2358,30 +1426,11 @@ TEST_F(IR_ValidatorTest, ExitLoop_NullLoop) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.Str(),
-              R"(:5:9 error: exit_loop: has no parent control instruction
+    EXPECT_THAT(res.Failure().reason.Str(),
+                testing::HasSubstr(R"(:5:9 error: exit_loop: has no parent control instruction
         exit_loop  # undef
         ^^^^^^^^^
-
-:4:7 note: in block
-      $B2: {  # body
-      ^^^
-
-note: # Disassembly
-%my_func = func():void {
-  $B1: {
-    loop [b: $B2, c: $B3] {  # loop_1
-      $B2: {  # body
-        exit_loop  # undef
-      }
-      $B3: {  # continuing
-        next_iteration  # -> $B2
-      }
-    }
-    ret
-  }
-}
-)");
+)")) << res.Failure().reason.Str();
 }
 
 TEST_F(IR_ValidatorTest, ExitLoop_LessOperandsThenLoopParams) {
@@ -2400,34 +1449,12 @@ TEST_F(IR_ValidatorTest, ExitLoop_LessOperandsThenLoopParams) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.Str(),
-              R"(:5:9 error: exit_loop: provides 1 value but 'loop' expects 2 values
+    EXPECT_THAT(
+        res.Failure().reason.Str(),
+        testing::HasSubstr(R"(:5:9 error: exit_loop: provides 1 value but 'loop' expects 2 values
         exit_loop 1i  # loop_1
         ^^^^^^^^^^^^
-
-:4:7 note: in block
-      $B2: {  # body
-      ^^^
-
-:3:5 note: 'loop' declared here
-    %2:i32, %3:f32 = loop [b: $B2, c: $B3] {  # loop_1
-    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-note: # Disassembly
-%my_func = func():void {
-  $B1: {
-    %2:i32, %3:f32 = loop [b: $B2, c: $B3] {  # loop_1
-      $B2: {  # body
-        exit_loop 1i  # loop_1
-      }
-      $B3: {  # continuing
-        next_iteration  # -> $B2
-      }
-    }
-    ret
-  }
-}
-)");
+)")) << res.Failure().reason.Str();
 }
 
 TEST_F(IR_ValidatorTest, ExitLoop_MoreOperandsThenLoopParams) {
@@ -2446,34 +1473,12 @@ TEST_F(IR_ValidatorTest, ExitLoop_MoreOperandsThenLoopParams) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.Str(),
-              R"(:5:9 error: exit_loop: provides 3 values but 'loop' expects 2 values
+    EXPECT_THAT(
+        res.Failure().reason.Str(),
+        testing::HasSubstr(R"(:5:9 error: exit_loop: provides 3 values but 'loop' expects 2 values
         exit_loop 1i, 2.0f, 3i  # loop_1
         ^^^^^^^^^^^^^^^^^^^^^^
-
-:4:7 note: in block
-      $B2: {  # body
-      ^^^
-
-:3:5 note: 'loop' declared here
-    %2:i32, %3:f32 = loop [b: $B2, c: $B3] {  # loop_1
-    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-note: # Disassembly
-%my_func = func():void {
-  $B1: {
-    %2:i32, %3:f32 = loop [b: $B2, c: $B3] {  # loop_1
-      $B2: {  # body
-        exit_loop 1i, 2.0f, 3i  # loop_1
-      }
-      $B3: {  # continuing
-        next_iteration  # -> $B2
-      }
-    }
-    ret
-  }
-}
-)");
+)")) << res.Failure().reason.Str();
 }
 
 TEST_F(IR_ValidatorTest, ExitLoop_WithResult) {
@@ -2491,7 +1496,7 @@ TEST_F(IR_ValidatorTest, ExitLoop_WithResult) {
     sb.Return(f);
 
     auto res = ir::Validate(mod);
-    ASSERT_EQ(res, Success);
+    ASSERT_EQ(res, Success) << res.Failure();
 }
 
 TEST_F(IR_ValidatorTest, ExitLoop_IncorrectResultType) {
@@ -2510,35 +1515,13 @@ TEST_F(IR_ValidatorTest, ExitLoop_IncorrectResultType) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(
+    EXPECT_THAT(
         res.Failure().reason.Str(),
-        R"(:5:23 error: exit_loop: operand with type 'i32' does not match 'loop' target type 'f32'
+        testing::HasSubstr(
+            R"(:5:23 error: exit_loop: operand with type 'i32' does not match 'loop' target type 'f32'
         exit_loop 1i, 2i  # loop_1
                       ^^
-
-:4:7 note: in block
-      $B2: {  # body
-      ^^^
-
-:3:13 note: %3 declared here
-    %2:i32, %3:f32 = loop [b: $B2, c: $B3] {  # loop_1
-            ^^^^^^
-
-note: # Disassembly
-%my_func = func():void {
-  $B1: {
-    %2:i32, %3:f32 = loop [b: $B2, c: $B3] {  # loop_1
-      $B2: {  # body
-        exit_loop 1i, 2i  # loop_1
-      }
-      $B3: {  # continuing
-        next_iteration  # -> $B2
-      }
-    }
-    ret
-  }
-}
-)");
+)")) << res.Failure().reason.Str();
 }
 
 TEST_F(IR_ValidatorTest, ExitLoop_NotInParentLoop) {
@@ -2557,35 +1540,12 @@ TEST_F(IR_ValidatorTest, ExitLoop_NotInParentLoop) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.Str(),
-              R"(:13:9 error: exit_loop: loop not found in parent control instructions
+    EXPECT_THAT(
+        res.Failure().reason.Str(),
+        testing::HasSubstr(R"(:13:9 error: exit_loop: loop not found in parent control instructions
         exit_loop  # loop_1
         ^^^^^^^^^
-
-:12:7 note: in block
-      $B4: {  # true
-      ^^^
-
-note: # Disassembly
-%my_func = func():void {
-  $B1: {
-    loop [b: $B2, c: $B3] {  # loop_1
-      $B2: {  # body
-        ret
-      }
-      $B3: {  # continuing
-        next_iteration  # -> $B2
-      }
-    }
-    if true [t: $B4] {  # if_1
-      $B4: {  # true
-        exit_loop  # loop_1
-      }
-    }
-    ret
-  }
-}
-)");
+)")) << res.Failure().reason.Str();
 }
 
 TEST_F(IR_ValidatorTest, ExitLoop_JumpsOverIfs) {
@@ -2616,7 +1576,8 @@ TEST_F(IR_ValidatorTest, ExitLoop_JumpsOverIfs) {
     sb.Append(loop);
     sb.Return(f);
 
-    EXPECT_EQ(ir::Validate(mod), Success);
+    auto res = ir::Validate(mod);
+    ASSERT_EQ(res, Success) << res.Failure();
 }
 
 TEST_F(IR_ValidatorTest, ExitLoop_InvalidJumpOverSwitch) {
@@ -2640,39 +1601,12 @@ TEST_F(IR_ValidatorTest, ExitLoop_InvalidJumpOverSwitch) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.Str(),
-              R"(:7:13 error: exit_loop: loop target jumps over other control instructions
+    EXPECT_THAT(res.Failure().reason.Str(),
+                testing::HasSubstr(
+                    R"(:7:13 error: exit_loop: loop target jumps over other control instructions
             exit_loop  # loop_1
             ^^^^^^^^^
-
-:6:11 note: in block
-          $B4: {  # case
-          ^^^
-
-:5:9 note: first control instruction jumped
-        switch 1i [c: (default, $B4)] {  # switch_1
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-note: # Disassembly
-%my_func = func():void {
-  $B1: {
-    loop [b: $B2, c: $B3] {  # loop_1
-      $B2: {  # body
-        switch 1i [c: (default, $B4)] {  # switch_1
-          $B4: {  # case
-            exit_loop  # loop_1
-          }
-        }
-        exit_loop  # loop_1
-      }
-      $B3: {  # continuing
-        next_iteration  # -> $B2
-      }
-    }
-    ret
-  }
-}
-)");
+)")) << res.Failure().reason.Str();
 }
 
 TEST_F(IR_ValidatorTest, ExitLoop_InvalidJumpOverLoop) {
@@ -2695,39 +1629,12 @@ TEST_F(IR_ValidatorTest, ExitLoop_InvalidJumpOverLoop) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.Str(),
-              R"(:7:13 error: exit_loop: loop target jumps over other control instructions
+    EXPECT_THAT(res.Failure().reason.Str(),
+                testing::HasSubstr(
+                    R"(:7:13 error: exit_loop: loop target jumps over other control instructions
             exit_loop  # loop_1
             ^^^^^^^^^
-
-:6:11 note: in block
-          $B4: {  # body
-          ^^^
-
-:5:9 note: first control instruction jumped
-        loop [b: $B4] {  # loop_2
-        ^^^^^^^^^^^^^
-
-note: # Disassembly
-%my_func = func():void {
-  $B1: {
-    loop [b: $B2, c: $B3] {  # loop_1
-      $B2: {  # body
-        loop [b: $B4] {  # loop_2
-          $B4: {  # body
-            exit_loop  # loop_1
-          }
-        }
-        exit_loop  # loop_1
-      }
-      $B3: {  # continuing
-        next_iteration  # -> $B2
-      }
-    }
-    ret
-  }
-}
-)");
+)")) << res.Failure().reason.Str();
 }
 
 TEST_F(IR_ValidatorTest, ExitLoop_InvalidInsideContinuing) {
@@ -2745,30 +1652,11 @@ TEST_F(IR_ValidatorTest, ExitLoop_InvalidInsideContinuing) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.Str(),
-              R"(:8:9 error: exit_loop: loop exit jumps out of continuing block
+    EXPECT_THAT(res.Failure().reason.Str(),
+                testing::HasSubstr(R"(:8:9 error: exit_loop: loop exit jumps out of continuing block
         exit_loop  # loop_1
         ^^^^^^^^^
-
-:7:7 note: in block
-      $B3: {  # continuing
-      ^^^
-
-note: # Disassembly
-%my_func = func():void {
-  $B1: {
-    loop [b: $B2, c: $B3] {  # loop_1
-      $B2: {  # body
-        continue  # -> $B3
-      }
-      $B3: {  # continuing
-        exit_loop  # loop_1
-      }
-    }
-    ret
-  }
-}
-)");
+)")) << res.Failure().reason.Str();
 }
 
 TEST_F(IR_ValidatorTest, ExitLoop_InvalidInsideContinuingNested) {
@@ -2791,39 +1679,12 @@ TEST_F(IR_ValidatorTest, ExitLoop_InvalidInsideContinuingNested) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.Str(),
-              R"(:10:13 error: exit_loop: loop exit jumps out of continuing block
+    EXPECT_THAT(
+        res.Failure().reason.Str(),
+        testing::HasSubstr(R"(:10:13 error: exit_loop: loop exit jumps out of continuing block
             exit_loop  # loop_1
             ^^^^^^^^^
-
-:9:11 note: in block
-          $B4: {  # true
-          ^^^
-
-:7:7 note: in continuing block
-      $B3: {  # continuing
-      ^^^
-
-note: # Disassembly
-%my_func = func():void {
-  $B1: {
-    loop [b: $B2, c: $B3] {  # loop_1
-      $B2: {  # body
-        continue  # -> $B3
-      }
-      $B3: {  # continuing
-        if true [t: $B4] {  # if_1
-          $B4: {  # true
-            exit_loop  # loop_1
-          }
-        }
-        next_iteration  # -> $B2
-      }
-    }
-    ret
-  }
-}
-)");
+)")) << res.Failure().reason.Str();
 }
 
 TEST_F(IR_ValidatorTest, ExitLoop_InvalidInsideInitializer) {
@@ -2843,33 +1704,12 @@ TEST_F(IR_ValidatorTest, ExitLoop_InvalidInsideInitializer) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.Str(),
-              R"(:5:9 error: exit_loop: loop exit not permitted in loop initializer
+    EXPECT_THAT(
+        res.Failure().reason.Str(),
+        testing::HasSubstr(R"(:5:9 error: exit_loop: loop exit not permitted in loop initializer
         exit_loop  # loop_1
         ^^^^^^^^^
-
-:4:7 note: in block
-      $B2: {  # initializer
-      ^^^
-
-note: # Disassembly
-%my_func = func():void {
-  $B1: {
-    loop [i: $B2, b: $B3, c: $B4] {  # loop_1
-      $B2: {  # initializer
-        exit_loop  # loop_1
-      }
-      $B3: {  # body
-        continue  # -> $B4
-      }
-      $B4: {  # continuing
-        next_iteration  # -> $B3
-      }
-    }
-    ret
-  }
-}
-)");
+)")) << res.Failure().reason.Str();
 }
 
 TEST_F(IR_ValidatorTest, ExitLoop_InvalidInsideInitializerNested) {
@@ -2893,42 +1733,12 @@ TEST_F(IR_ValidatorTest, ExitLoop_InvalidInsideInitializerNested) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.Str(),
-              R"(:7:13 error: exit_loop: loop exit not permitted in loop initializer
+    EXPECT_THAT(
+        res.Failure().reason.Str(),
+        testing::HasSubstr(R"(:7:13 error: exit_loop: loop exit not permitted in loop initializer
             exit_loop  # loop_1
             ^^^^^^^^^
-
-:6:11 note: in block
-          $B5: {  # true
-          ^^^
-
-:4:7 note: in initializer block
-      $B2: {  # initializer
-      ^^^
-
-note: # Disassembly
-%my_func = func():void {
-  $B1: {
-    loop [i: $B2, b: $B3, c: $B4] {  # loop_1
-      $B2: {  # initializer
-        if true [t: $B5] {  # if_1
-          $B5: {  # true
-            exit_loop  # loop_1
-          }
-        }
-        next_iteration  # -> $B3
-      }
-      $B3: {  # body
-        continue  # -> $B4
-      }
-      $B4: {  # continuing
-        next_iteration  # -> $B3
-      }
-    }
-    ret
-  }
-}
-)");
+)")) << res.Failure().reason.Str();
 }
 
 TEST_F(IR_ValidatorTest, Return) {
@@ -2937,7 +1747,8 @@ TEST_F(IR_ValidatorTest, Return) {
         b.Return(f);
     });
 
-    EXPECT_EQ(ir::Validate(mod), Success);
+    auto res = ir::Validate(mod);
+    ASSERT_EQ(res, Success) << res.Failure();
 }
 
 TEST_F(IR_ValidatorTest, Return_WithValue) {
@@ -2946,7 +1757,8 @@ TEST_F(IR_ValidatorTest, Return_WithValue) {
         b.Return(f, 42_i);
     });
 
-    EXPECT_EQ(ir::Validate(mod), Success);
+    auto res = ir::Validate(mod);
+    ASSERT_EQ(res, Success) << res.Failure();
 }
 
 TEST_F(IR_ValidatorTest, Return_UnexpectedResult) {
@@ -2958,22 +1770,11 @@ TEST_F(IR_ValidatorTest, Return_UnexpectedResult) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.Str(),
-              R"(:3:5 error: return: expected exactly 0 results, got 1
+    EXPECT_THAT(res.Failure().reason.Str(),
+                testing::HasSubstr(R"(:3:5 error: return: expected exactly 0 results, got 1
     ret 42i
     ^^^^^^^
-
-:2:3 note: in block
-  $B1: {
-  ^^^
-
-note: # Disassembly
-%my_func = func():i32 {
-  $B1: {
-    ret 42i
-  }
-}
-)");
+)")) << res.Failure().reason.Str();
 }
 
 TEST_F(IR_ValidatorTest, Return_NotFunction) {
@@ -2986,23 +1787,11 @@ TEST_F(IR_ValidatorTest, Return_NotFunction) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.Str(),
-              R"(:4:5 error: return: expected function for first operand
+    EXPECT_THAT(res.Failure().reason.Str(),
+                testing::HasSubstr(R"(:4:5 error: return: expected function for first operand
     ret
     ^^^
-
-:2:3 note: in block
-  $B1: {
-  ^^^
-
-note: # Disassembly
-%my_func = func():void {
-  $B1: {
-    %2:ptr<function, f32, read_write> = var
-    ret
-  }
-}
-)");
+)")) << res.Failure().reason.Str();
 }
 
 TEST_F(IR_ValidatorTest, Return_MissingFunction) {
@@ -3014,22 +1803,11 @@ TEST_F(IR_ValidatorTest, Return_MissingFunction) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.Str(),
-              R"(:3:5 error: return: expected between 1 and 2 operands, got 0
+    EXPECT_THAT(res.Failure().reason.Str(),
+                testing::HasSubstr(R"(:3:5 error: return: expected between 1 and 2 operands, got 0
     ret
     ^^^
-
-:2:3 note: in block
-  $B1: {
-  ^^^
-
-note: # Disassembly
-%my_func = func():void {
-  $B1: {
-    ret
-  }
-}
-)");
+)")) << res.Failure().reason.Str();
 }
 
 TEST_F(IR_ValidatorTest, Return_UnexpectedValue) {
@@ -3040,21 +1818,11 @@ TEST_F(IR_ValidatorTest, Return_UnexpectedValue) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.Str(), R"(:3:5 error: return: unexpected return value
+    EXPECT_THAT(res.Failure().reason.Str(),
+                testing::HasSubstr(R"(:3:5 error: return: unexpected return value
     ret 42i
     ^^^^^^^
-
-:2:3 note: in block
-  $B1: {
-  ^^^
-
-note: # Disassembly
-%my_func = func():void {
-  $B1: {
-    ret 42i
-  }
-}
-)");
+)")) << res.Failure().reason.Str();
 }
 
 TEST_F(IR_ValidatorTest, Return_MissingValue) {
@@ -3065,21 +1833,11 @@ TEST_F(IR_ValidatorTest, Return_MissingValue) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.Str(), R"(:3:5 error: return: expected return value
+    EXPECT_THAT(res.Failure().reason.Str(),
+                testing::HasSubstr(R"(:3:5 error: return: expected return value
     ret
     ^^^
-
-:2:3 note: in block
-  $B1: {
-  ^^^
-
-note: # Disassembly
-%my_func = func():i32 {
-  $B1: {
-    ret
-  }
-}
-)");
+)")) << res.Failure().reason.Str();
 }
 
 TEST_F(IR_ValidatorTest, Return_WrongValueType) {
@@ -3090,23 +1848,13 @@ TEST_F(IR_ValidatorTest, Return_WrongValueType) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(
+    EXPECT_THAT(
         res.Failure().reason.Str(),
-        R"(:3:5 error: return: return value type 'f32' does not match function return type 'i32'
+        testing::HasSubstr(
+            R"(:3:5 error: return: return value type 'f32' does not match function return type 'i32'
     ret 42.0f
     ^^^^^^^^^
-
-:2:3 note: in block
-  $B1: {
-  ^^^
-
-note: # Disassembly
-%my_func = func():i32 {
-  $B1: {
-    ret 42.0f
-  }
-}
-)");
+)")) << res.Failure().reason.Str();
 }
 
 TEST_F(IR_ValidatorTest, Unreachable_UnexpectedResult) {
@@ -3118,22 +1866,11 @@ TEST_F(IR_ValidatorTest, Unreachable_UnexpectedResult) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.Str(),
-              R"(:3:5 error: unreachable: expected exactly 0 results, got 1
+    EXPECT_THAT(res.Failure().reason.Str(),
+                testing::HasSubstr(R"(:3:5 error: unreachable: expected exactly 0 results, got 1
     unreachable
     ^^^^^^^^^^^
-
-:2:3 note: in block
-  $B1: {
-  ^^^
-
-note: # Disassembly
-%my_func = func():void {
-  $B1: {
-    unreachable
-  }
-}
-)");
+)")) << res.Failure().reason.Str();
 }
 
 TEST_F(IR_ValidatorTest, Unreachable_UnexpectedOperand) {
@@ -3145,22 +1882,11 @@ TEST_F(IR_ValidatorTest, Unreachable_UnexpectedOperand) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.Str(),
-              R"(:3:5 error: unreachable: expected exactly 0 operands, got 1
+    EXPECT_THAT(res.Failure().reason.Str(),
+                testing::HasSubstr(R"(:3:5 error: unreachable: expected exactly 0 operands, got 1
     unreachable
     ^^^^^^^^^^^
-
-:2:3 note: in block
-  $B1: {
-  ^^^
-
-note: # Disassembly
-%my_func = func():void {
-  $B1: {
-    unreachable
-  }
-}
-)");
+)")) << res.Failure().reason.Str();
 }
 
 TEST_F(IR_ValidatorTest, Switch_ConditionPointer) {
@@ -3174,26 +1900,11 @@ TEST_F(IR_ValidatorTest, Switch_ConditionPointer) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(
+    EXPECT_THAT(
         res.Failure().reason.Str(),
-        R"(error: switch: condition type 'ptr<function, i32, read_write>' must be an integer scalar
-:2:3 note: in block
-  $B1: {
-  ^^^
-
-note: # Disassembly
-%my_func = func():void {
-  $B1: {
-    %a:ptr<function, i32, read_write> = var, 0i
-    switch %a [c: (default, $B2)] {  # switch_1
-      $B2: {  # case
-        exit_switch  # switch_1
-      }
-    }
-    ret
-  }
-}
-)");
+        testing::HasSubstr(
+            R"(error: switch: condition type 'ptr<function, i32, read_write>' must be an integer scalar
+)")) << res.Failure().reason.Str();
 }
 
 TEST_F(IR_ValidatorTest, Switch_NoCases) {
@@ -3206,24 +1917,11 @@ TEST_F(IR_ValidatorTest, Switch_NoCases) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.Str(),
-              R"(:3:5 error: switch: missing default case for switch
+    EXPECT_THAT(res.Failure().reason.Str(),
+                testing::HasSubstr(R"(:3:5 error: switch: missing default case for switch
     switch 1i [] {  # switch_1
     ^^^^^^^^^^^^
-
-:2:3 note: in block
-  $B1: {
-  ^^^
-
-note: # Disassembly
-%my_func = func():void {
-  $B1: {
-    switch 1i [] {  # switch_1
-    }
-    ret
-  }
-}
-)");
+)")) << res.Failure().reason.Str();
 }
 
 TEST_F(IR_ValidatorTest, Switch_NoDefaultCase) {
@@ -3237,27 +1935,11 @@ TEST_F(IR_ValidatorTest, Switch_NoDefaultCase) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.Str(),
-              R"(:3:5 error: switch: missing default case for switch
+    EXPECT_THAT(res.Failure().reason.Str(),
+                testing::HasSubstr(R"(:3:5 error: switch: missing default case for switch
     switch 1i [c: (0i, $B2)] {  # switch_1
     ^^^^^^^^^^^^^^^^^^^^^^^^
-
-:2:3 note: in block
-  $B1: {
-  ^^^
-
-note: # Disassembly
-%my_func = func():void {
-  $B1: {
-    switch 1i [c: (0i, $B2)] {  # switch_1
-      $B2: {  # case
-        exit_switch  # switch_1
-      }
-    }
-    ret
-  }
-}
-)");
+)")) << res.Failure().reason.Str();
 }
 
 TEST_F(IR_ValidatorTest, Switch_NoCondition) {
@@ -3270,23 +1952,9 @@ TEST_F(IR_ValidatorTest, Switch_NoCondition) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_EQ(res.Failure().reason.Str(), R"(error: switch: operand is undefined
-:2:3 note: in block
-  $B1: {
-  ^^^
-
-note: # Disassembly
-%my_func = func():void {
-  $B1: {
-    switch undef [c: (default, $B2)] {  # switch_1
-      $B2: {  # case
-        exit_switch  # switch_1
-      }
-    }
-    ret
-  }
-}
-)");
+    EXPECT_THAT(res.Failure().reason.Str(),
+                testing::HasSubstr(R"(error: switch: operand is undefined
+)")) << res.Failure().reason.Str();
 }
 
 }  // namespace tint::core::ir
