@@ -40,13 +40,12 @@
 namespace dawn::native::metal {
 
 namespace {
-// NOTE: When creating MTLTextures, we pass all Metal texture usages. See
-// discussion in https://bugs.chromium.org/p/dawn/issues/detail?id=2152#c14 and
-// following comments for both (a) why this is necessary and (b) why it is not
-// harmful to performance.
-const MTLTextureUsage kMetalTextureUsage = MTLTextureUsageShaderWrite | MTLTextureUsageShaderRead |
-                                           MTLTextureUsagePixelFormatView |
-                                           MTLTextureUsageRenderTarget;
+// NOTE: When creating MTLTextures, we pass all relevant Metal texture usages.
+// See discussion in https://bugs.chromium.org/p/dawn/issues/detail?id=2152#c14
+// and following comments for both (a) why this is necessary and (b) why it is
+// not harmful to performance.
+const MTLTextureUsage kMetalTextureUsage =
+    MTLTextureUsageShaderWrite | MTLTextureUsageShaderRead | MTLTextureUsageRenderTarget;
 
 ResultOrError<wgpu::TextureFormat> GetFormatEquivalentToIOSurfaceFormat(uint32_t format) {
     switch (format) {
