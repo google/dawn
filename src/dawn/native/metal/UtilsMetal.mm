@@ -813,41 +813,23 @@ bool SupportCounterSamplingAtStageBoundary(id<MTLDevice> device) {
     return [device supportsCounterSampling:MTLCounterSamplingPointAtStageBoundary];
 }
 
-MTLStorageMode IOSurfaceStorageMode() {
-#if DAWN_PLATFORM_IS(MACOS)
-    return MTLStorageModeManaged;
-#elif DAWN_PLATFORM_IS(IOS)
-    return MTLStorageModePrivate;
-#else
-#error "Unsupported Apple platform."
-#endif
-}
-
 id<MTLTexture> CreateTextureMtlForPlane(MTLTextureUsage mtlUsage,
                                         const Format& format,
                                         size_t plane,
                                         Device* device,
-                                        uint32_t sampleCount,
                                         IOSurfaceRef ioSurface) {
     Aspect aspect = GetPlaneAspect(format, plane);
     const auto& aspectInfo = format.GetAspectInfo(aspect);
 
-    NSRef<MTLTextureDescriptor> mtlDescRef = AcquireNSRef([MTLTextureDescriptor new]);
-    MTLTextureDescriptor* mtlDesc = mtlDescRef.Get();
-
-    mtlDesc.sampleCount = sampleCount;
-    mtlDesc.usage = mtlUsage;
-    mtlDesc.pixelFormat = MetalPixelFormat(device, aspectInfo.format);
-    mtlDesc.storageMode = IOSurfaceStorageMode();
-
-    mtlDesc.width = IOSurfaceGetWidthOfPlane(ioSurface, plane);
-    mtlDesc.height = IOSurfaceGetHeightOfPlane(ioSurface, plane);
-
     // Multiplanar texture is validated to only have single layer, single mipLevel
     // and 2d textures (depth == 1)
-    mtlDesc.mipmapLevelCount = 1;
-    mtlDesc.arrayLength = 1;
-    mtlDesc.depth = 1;
+    auto mtlDesc = [MTLTextureDescriptor
+        texture2DDescriptorWithPixelFormat:MetalPixelFormat(device, aspectInfo.format)
+                                     width:IOSurfaceGetWidthOfPlane(ioSurface, plane)
+                                    height:IOSurfaceGetHeightOfPlane(ioSurface, plane)
+                                 mipmapped:NO];
+    mtlDesc.usage = mtlUsage;
+
     return [device->GetMTLDevice() newTextureWithDescriptor:mtlDesc
                                                   iosurface:ioSurface
                                                       plane:plane];

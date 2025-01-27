@@ -79,7 +79,7 @@ class SharedTextureMemory final : public SharedTextureMemoryBase {
 
     absl::InlinedVector<NSPRef<id<MTLTexture>>, kMaxPlanesPerFormat> mMtlPlaneTextures;
     MTLPixelFormat mMtlFormat = MTLPixelFormatInvalid;
-    MTLTextureUsage mMtlUsage;
+    MTLTextureUsage mMtlUsage = MTLTextureUsageUnknown;
     CFRef<IOSurfaceRef> mIOSurface;
 };
 

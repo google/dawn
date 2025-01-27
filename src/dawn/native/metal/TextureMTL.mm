@@ -368,8 +368,8 @@ MaybeError Texture::InitializeAsInternalTexture(const UnpackedPtr<TextureDescrip
         const size_t numPlanes = IOSurfaceGetPlaneCount(GetIOSurface());
         mMtlPlaneTextures.resize(numPlanes);
         for (size_t plane = 0; plane < numPlanes; ++plane) {
-            mMtlPlaneTextures[plane] = AcquireNSPRef(CreateTextureMtlForPlane(
-                mMtlUsage, GetFormat(), plane, device, GetSampleCount(), GetIOSurface()));
+            mMtlPlaneTextures[plane] = AcquireNSPRef(
+                CreateTextureMtlForPlane(mMtlUsage, GetFormat(), plane, device, GetIOSurface()));
             if (mMtlPlaneTextures[plane] == nil) {
                 return DAWN_INTERNAL_ERROR("Failed to create MTLTexture plane view for IOSurface.");
             }

@@ -220,24 +220,19 @@ MaybeError SharedTextureMemory::CreateMtlTextures() {
     // is asked to create must be 2D/single-sampled/array length of 1/single
     // mipmap level.
     if (!format->IsMultiPlanar()) {
-        // Create the descriptor for the Metal texture.
-        NSRef<MTLTextureDescriptor> mtlDescRef = AcquireNSRef([MTLTextureDescriptor new]);
-        MTLTextureDescriptor* mtlDesc = mtlDescRef.Get();
+        mMtlUsage = kMetalTextureUsage;
+        mMtlFormat = MetalPixelFormat(device, format->format);
 
-        mtlDesc.storageMode = IOSurfaceStorageMode();
-        mtlDesc.width = properties.size.width;
-        mtlDesc.height = properties.size.height;
+        // Create the descriptor for the Metal texture.
+        auto mtlDesc =
+            [MTLTextureDescriptor texture2DDescriptorWithPixelFormat:mMtlFormat
+                                                               width:properties.size.width
+                                                              height:properties.size.height
+                                                           mipmapped:NO];
         // NOTE: MetalTextureDescriptor defaults to the values mentioned above
         // for the given parameters, so none of these need to be set explicitly.
+        mtlDesc.usage = mMtlUsage;
 
-        // Metal only allows format reinterpretation to happen on swizzle pattern or conversion
-        // between linear space and sRGB. For example, creating bgra8Unorm texture view on
-        // rgba8Unorm texture or creating rgba8Unorm_srgb texture view on rgab8Unorm texture.
-        mtlDesc.usage = kMetalTextureUsage;
-        mtlDesc.pixelFormat = MetalPixelFormat(device, format->format);
-
-        mMtlUsage = mtlDesc.usage;
-        mMtlFormat = mtlDesc.pixelFormat;
         mMtlPlaneTextures.resize(1);
         mMtlPlaneTextures[0] =
             AcquireNSPRef([device->GetMTLDevice() newTextureWithDescriptor:mtlDesc
@@ -247,11 +242,11 @@ MaybeError SharedTextureMemory::CreateMtlTextures() {
         mMtlUsage = kMetalTextureUsage;
         // Multiplanar format doesn't have equivalent MTLPixelFormat so just set it to invalid.
         mMtlFormat = MTLPixelFormatInvalid;
-        const size_t numPlanes = IOSurfaceGetPlaneCount(mIOSurface.Get());
-        mMtlPlaneTextures.resize(numPlanes);
-        for (size_t plane = 0; plane < numPlanes; ++plane) {
-            mMtlPlaneTextures[plane] = AcquireNSPRef(CreateTextureMtlForPlane(
-                mMtlUsage, *format, plane, device, /*sampleCount=*/1, mIOSurface.Get()));
+
+        mMtlPlaneTextures.resize(IOSurfaceGetPlaneCount(mIOSurface.Get()));
+        for (size_t plane = 0; plane < mMtlPlaneTextures.size(); ++plane) {
+            mMtlPlaneTextures[plane] = AcquireNSPRef(
+                CreateTextureMtlForPlane(mMtlUsage, *format, plane, device, mIOSurface.Get()));
             if (mMtlPlaneTextures[plane] == nil) {
                 return DAWN_INTERNAL_ERROR("Failed to create MTLTexture plane view for IOSurface.");
             }
