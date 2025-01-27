@@ -3508,6 +3508,56 @@ fn main() {
     ASSERT_EQ(0u, result.Length());
 }
 
+// Regression test for crbug.com/dawn/380433758.
+TEST_F(InspectorGetSamplerTextureUsesTest, DISABLED_DiamondSampler) {
+    std::string shader = R"(
+fn sample(t: texture_2d<f32>, s: sampler) -> vec4f {
+  return textureSampleLevel(t, s, vec2f(0), 0);
+}
+
+fn useCombos0() -> vec4f {
+  return sample(tex0_0, smp0_0);
+}
+
+fn useCombos1() -> vec4f {
+  return sample(tex1_15, smp0_0);
+}
+
+@group(0) @binding(0) var tex0_0: texture_2d<f32>;
+@group(0) @binding(1) var tex1_15: texture_2d<f32>;
+@group(0) @binding(2) var smp0_0: sampler;
+
+@vertex fn vs() -> @builtin(position) vec4f {
+  return useCombos0();
+}
+
+@fragment fn fs() -> @location(0) vec4f {
+  return vec4f(useCombos1());
+})";
+
+    Inspector& inspector = Initialize(shader);
+    {
+        auto result = inspector.GetSamplerTextureUses("vs");
+        ASSERT_FALSE(inspector.has_error()) << inspector.error();
+        ASSERT_EQ(1u, result.Length());
+
+        EXPECT_EQ(0u, result[0].sampler_binding_point.group);
+        EXPECT_EQ(2u, result[0].sampler_binding_point.binding);
+        EXPECT_EQ(0u, result[0].texture_binding_point.group);
+        EXPECT_EQ(0u, result[0].texture_binding_point.binding);
+    }
+    {
+        auto result = inspector.GetSamplerTextureUses("fs");
+        ASSERT_FALSE(inspector.has_error()) << inspector.error();
+        ASSERT_EQ(1u, result.Length());
+
+        EXPECT_EQ(0u, result[0].sampler_binding_point.group);
+        EXPECT_EQ(2u, result[0].sampler_binding_point.binding);
+        EXPECT_EQ(0u, result[0].texture_binding_point.group);
+        EXPECT_EQ(1u, result[0].texture_binding_point.binding);
+    }
+}
+
 TEST_F(InspectorGetSamplerTextureUsesTest, Simple) {
     std::string shader = R"(
 @group(0) @binding(1) var mySampler: sampler;
