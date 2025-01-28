@@ -197,20 +197,4 @@ GPUSupportedLimits::getMaxStorageTexturesInVertexStage(Napi::Env) {
         limits_.limits.maxStorageTexturesInVertexStage);
 }
 
-// TODO(crbug.com/354751907) Move to GPUAdapterInfo
-std::variant<uint32_t, interop::UndefinedType> GPUSupportedLimits::getMinSubgroupSize(Napi::Env) {
-    if (subgroup_limits_.has_value()) {
-        return subgroup_limits_->minSubgroupSize;
-    }
-    return interop::Undefined;
-}
-
-// TODO(crbug.com/354751907) Move to GPUAdapterInfo
-std::variant<uint32_t, interop::UndefinedType> GPUSupportedLimits::getMaxSubgroupSize(Napi::Env) {
-    if (subgroup_limits_.has_value()) {
-        return subgroup_limits_->maxSubgroupSize;
-    }
-    return interop::Undefined;
-}
-
 }  // namespace wgpu::binding

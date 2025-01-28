@@ -81,9 +81,6 @@ class GPUSupportedLimits final : public interop::GPUSupportedLimits {
         Napi::Env) override;
     std::variant<uint32_t, interop::UndefinedType> getMaxStorageTexturesInVertexStage(
         Napi::Env) override;
-    // TODO(354751907) Move subgroup min and max sizes to AdapterInfo
-    std::variant<uint32_t, interop::UndefinedType> getMinSubgroupSize(Napi::Env) override;
-    std::variant<uint32_t, interop::UndefinedType> getMaxSubgroupSize(Napi::Env) override;
 
   private:
     wgpu::SupportedLimits limits_;
