@@ -44,6 +44,7 @@ type QueryFunc = func(context.Context, []buildbucket.BuildID, string, RowHandler
 type Querier interface {
 	QueryTestResults(ctx context.Context, builds []buildbucket.BuildID, testPrefix string, f RowHandler) error
 	QueryUnsuppressedFailingTestResults(ctx context.Context, builds []buildbucket.BuildID, testPrefix string, f RowHandler) error
+	QueryRecentUniqueSuppressedTestResults(ctx context.Context, testPrefix string, f RowHandler) error
 }
 
 // BigQueryClient is a wrapper around bigquery.Client so that we can define new
@@ -159,6 +160,64 @@ func (bq BigQueryClient) QueryUnsuppressedFailingTestResults(
 	return bq.runQueryForBuilds(ctx, baseQuery, builds, testPrefix, f)
 }
 
+// QueryRecentUniqueSuppressedTestResults fetches the test results for the given
+// 'testPrefix' that:
+//  1. Were produced within the last 6 hours
+//  2. Had some sort of test suppression in place, regardless of whether the
+//     test passed or not.
+//
+// Results are grouped by unique test ID and typ tags, with other information
+// removed.
+//
+// f is called once per result and is expected to handle any processing or
+// storage of results.
+func (bq BigQueryClient) QueryRecentUniqueSuppressedTestResults(
+	ctx context.Context,
+	testPrefix string,
+	f RowHandler) error {
+
+	baseQuery := `
+		WITH
+			recent_results AS (
+				SELECT
+					test_id AS testid,
+          ARRAY(
+            SELECT t
+            FROM tr.tags t
+            WHERE key = "typ_tag"
+          ) as tags,
+					ARRAY(
+						SELECT value
+						FROM tr.tags
+						WHERE key = "raw_typ_expectation") as typ_expectations
+				FROM ` + "`chrome-luci-data.chromium.gpu_ci_test_results`" + ` tr
+				WHERE
+					TIME(partition_time) > TIME_SUB(CURRENT_TIME(), INTERVAL 6 HOUR)
+					AND STARTS_WITH(tr.test_id, "%v")
+			)
+		SELECT
+		  *
+		EXCEPT
+		  (typ_expectations)
+		FROM
+		  recent_results
+		WHERE
+		  (
+		  	ARRAY_LENGTH(typ_expectations) = 1
+		  	AND typ_expectations[0] != "Pass"
+		  )
+		  OR
+		  (
+		  	ARRAY_LENGTH(typ_expectations) > 1
+		  )
+    GROUP BY testid, tags
+`
+
+	query := fmt.Sprintf(baseQuery, testPrefix)
+
+	return bq.runQuery(ctx, query, f)
+}
+
 // runQueryForBuilds is a helper function for running queries limited to a set
 // of builds and prefix. See callers of this function for additional information.
 func (bq BigQueryClient) runQueryForBuilds(
@@ -169,6 +228,12 @@ func (bq BigQueryClient) runQueryForBuilds(
 	}
 	query := fmt.Sprintf(baseQuery, strings.Join(buildIds, ","), testPrefix)
 
+	return bq.runQuery(ctx, query, f)
+}
+
+// runQuery is a helper function to run the provided 'query' and call 'f' for
+// each resulting row.
+func (bq BigQueryClient) runQuery(ctx context.Context, query string, f RowHandler) error {
 	q := bq.client.Query(query)
 	iter, err := q.Read(ctx)
 	if err != nil {

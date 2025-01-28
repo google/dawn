@@ -35,6 +35,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"reflect"
 	"sort"
 	"strings"
 
@@ -158,6 +159,39 @@ func (c Chunk) Clone() Chunk {
 		expectations[i] = e.Clone()
 	}
 	return Chunk{comments, expectations}
+}
+
+func (c Chunk) ContainedWithinList(chunkList *[]Chunk) bool {
+	for _, otherChunk := range *chunkList {
+		if reflect.DeepEqual(c, otherChunk) {
+			return true
+		}
+	}
+	return false
+}
+
+// AppliesToResult returns whether the Expectation applies to the test + config
+// represented by the Result.
+func (e Expectation) AppliesToResult(r result.Result) bool {
+	// Tags apply as long as the Expectation's tags are a subset of the Result's
+	// tags.
+	tagsApply := r.Tags.ContainsAll(e.Tags)
+
+	// The query applies if it's an exact match or the Expectation has a wildcard
+	// and the Result's test name starts with the Expectation's test name.
+	var queryApplies bool
+	if strings.HasSuffix(e.Query, "*") && !strings.HasSuffix(e.Query, "\\*") {
+		// The expectation file format currently guarantees that wildcards are only
+		// ever at the end. If more generic wildcards are added in for WebGPU usage,
+		// this will need to be changed to a proper fnmatch check.
+		queryApplies = strings.HasPrefix(
+			r.Query.ExpectationFileString(),
+			e.Query[:len(e.Query)-1])
+	} else {
+		queryApplies = e.Query == r.Query.ExpectationFileString()
+	}
+
+	return tagsApply && queryApplies
 }
 
 // AsExpectationFileString returns the human-readable form of the expectation

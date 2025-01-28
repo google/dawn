@@ -34,6 +34,8 @@ import (
 	"path/filepath"
 	"runtime"
 	"strings"
+
+	"dawn.googlesource.com/dawn/tools/src/oswrapper"
 )
 
 // ThisLine returns the filepath and line number of the calling function
@@ -84,6 +86,19 @@ func pathOfFileInParentDirs(path string, name string) string {
 func ExpandHome(path string) string {
 	if strings.ContainsRune(path, '~') {
 		if home, err := os.UserHomeDir(); err == nil {
+			return strings.ReplaceAll(path, "~", home)
+		}
+	}
+	return path
+}
+
+// TODO(crbug.com/344014313): Merge this into ExpandHome once all uses are using
+// dependency injection.
+// ExpandHomeWithWrapper is a copy of ExpandHome that uses the provided
+// FilesystemReader instead of calling os directly.
+func ExpandHomeWithWrapper(path string, environProvider oswrapper.EnvironProvider) string {
+	if strings.ContainsRune(path, '~') {
+		if home, err := environProvider.UserHomeDir(); err == nil {
 			return strings.ReplaceAll(path, "~", home)
 		}
 	}

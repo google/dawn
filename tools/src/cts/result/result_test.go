@@ -29,6 +29,7 @@ package result_test
 
 import (
 	"bytes"
+	"path/filepath"
 	"testing"
 	"time"
 
@@ -36,7 +37,9 @@ import (
 	"dawn.googlesource.com/dawn/tools/src/cts/query"
 	"dawn.googlesource.com/dawn/tools/src/cts/result"
 	"dawn.googlesource.com/dawn/tools/src/fileutils"
+	"dawn.googlesource.com/dawn/tools/src/oswrapper"
 	"github.com/google/go-cmp/cmp"
+	"github.com/stretchr/testify/require"
 )
 
 var Q = query.Parse
@@ -786,6 +789,33 @@ func TestStatuses(t *testing.T) {
 			t.Errorf("Results:\n%v\nStatuses() was not as expected:\n%v", test.results, diff)
 		}
 	}
+}
+
+func TestSaveLoad(t *testing.T) {
+	wrapper := oswrapper.CreateMemMapOSWrapper()
+
+	in := result.ResultsByExecutionMode{
+		"bar": result.List{
+			{Query: Q(`suite:a:*`), Tags: T(`x`), Status: result.Pass},
+			{Query: Q(`suite:b,*`), Tags: T(`y`), Status: result.Failure},
+			{Query: Q(`suite:a:b:*`), Tags: T(`x`, `y`), Status: result.Skip},
+			{Query: Q(`suite:a:c,*`), Tags: T(`y`, `x`), Status: result.Failure},
+			{Query: Q(`suite:a,b:c,*`), Tags: T(`y`, `x`), Status: result.Crash},
+			{Query: Q(`suite:a,b:c:*`), Status: result.Slow},
+		},
+		"foo": result.List{
+			{Query: Q(`suite:d:*`), Tags: T(`x`), Status: result.Pass},
+			{Query: Q(`suite:e,*`), Tags: T(`y`), Status: result.Failure},
+		},
+	}
+
+	saveLocation := filepath.Join(fileutils.ThisDir(), "cache.txt")
+	err := result.SaveWithWrapper(saveLocation, in, wrapper)
+	require.NoErrorf(t, err, "Error saving results: %v", err)
+
+	out, err := result.LoadWithWrapper(saveLocation, wrapper)
+	require.NoErrorf(t, err, "Error loading results: %v", err)
+	require.Equal(t, in, out)
 }
 
 func TestReadWrite(t *testing.T) {

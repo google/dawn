@@ -30,10 +30,11 @@ package expectations
 import (
 	"testing"
 
+	"dawn.googlesource.com/dawn/tools/src/cts/query"
 	"dawn.googlesource.com/dawn/tools/src/cts/result"
 
 	"github.com/google/go-cmp/cmp"
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 // Tests behavior of Content.Format()
@@ -136,7 +137,7 @@ func TestExpectationAsExpectationFileString(t *testing.T) {
 		Status:  []string{"Failure", "Slow"},
 		Comment: "# comment",
 	}
-	assert.Equal(t, e.AsExpectationFileString(), "crbug.com/1234 [ linux nvidia ] query [ Failure Slow ] # comment")
+	require.Equal(t, e.AsExpectationFileString(), "crbug.com/1234 [ linux nvidia ] query [ Failure Slow ] # comment")
 
 	// No bug.
 	e = Expectation{
@@ -145,7 +146,7 @@ func TestExpectationAsExpectationFileString(t *testing.T) {
 		Status:  []string{"Failure", "Slow"},
 		Comment: "# comment",
 	}
-	assert.Equal(t, e.AsExpectationFileString(), "[ linux nvidia ] query [ Failure Slow ] # comment")
+	require.Equal(t, e.AsExpectationFileString(), "[ linux nvidia ] query [ Failure Slow ] # comment")
 
 	// No tags.
 	e = Expectation{
@@ -155,7 +156,7 @@ func TestExpectationAsExpectationFileString(t *testing.T) {
 		Status:  []string{"Failure", "Slow"},
 		Comment: "# comment",
 	}
-	assert.Equal(t, e.AsExpectationFileString(), "crbug.com/1234 query [ Failure Slow ] # comment")
+	require.Equal(t, e.AsExpectationFileString(), "crbug.com/1234 query [ Failure Slow ] # comment")
 
 	// No comment.
 	e = Expectation{
@@ -164,14 +165,14 @@ func TestExpectationAsExpectationFileString(t *testing.T) {
 		Query:  "query",
 		Status: []string{"Failure", "Slow"},
 	}
-	assert.Equal(t, e.AsExpectationFileString(), "crbug.com/1234 [ linux nvidia ] query [ Failure Slow ]")
+	require.Equal(t, e.AsExpectationFileString(), "crbug.com/1234 [ linux nvidia ] query [ Failure Slow ]")
 
 	// Minimal expectation.
 	e = Expectation{
 		Query:  "query",
 		Status: []string{"Failure", "Slow"},
 	}
-	assert.Equal(t, e.AsExpectationFileString(), "query [ Failure Slow ]")
+	require.Equal(t, e.AsExpectationFileString(), "query [ Failure Slow ]")
 }
 
 func TestSort(t *testing.T) {
@@ -255,7 +256,7 @@ func TestSort(t *testing.T) {
 		secondLinuxTwo,
 	}
 
-	assert.Equal(t, expectationsList, expectedList)
+	require.Equal(t, expectationsList, expectedList)
 }
 
 func TestSortPrioritizeQuery(t *testing.T) {
@@ -339,5 +340,488 @@ func TestSortPrioritizeQuery(t *testing.T) {
 		secondLinuxTwo,
 	}
 
-	assert.Equal(t, expectationsList, expectedList)
+	require.Equal(t, expectationsList, expectedList)
+}
+
+func TestChunk_ContainedWithinList(t *testing.T) {
+	tests := []struct {
+		name      string
+		chunk     Chunk
+		chunkList []Chunk
+		want      bool
+	}{
+		{ /////////////////////////////////////////////////////////////////////////
+			name:      "Empty list",
+			chunk:     Chunk{},
+			chunkList: []Chunk{},
+			want:      false,
+		},
+		{ /////////////////////////////////////////////////////////////////////////
+			name:  "Empty chunk",
+			chunk: Chunk{},
+			chunkList: []Chunk{
+				Chunk{},
+			},
+			want: true,
+		},
+		{ /////////////////////////////////////////////////////////////////////////
+			name: "Complex chunk success",
+			chunk: Chunk{
+				Comments: []string{"c1", "c2"},
+				Expectations: []Expectation{
+					{
+						Line:    2,
+						Bug:     "bug",
+						Tags:    result.NewTags("t1", "t2"),
+						Query:   "q",
+						Status:  []string{"status"},
+						Comment: "comment",
+					},
+				},
+			},
+			chunkList: []Chunk{
+				Chunk{
+					Comments: []string{"c1", "c2"},
+					Expectations: []Expectation{
+						{
+							Line:    2,
+							Bug:     "bug",
+							Tags:    result.NewTags("t1", "t2"),
+							Query:   "q",
+							Status:  []string{"status"},
+							Comment: "comment",
+						},
+					},
+				},
+			},
+			want: true,
+		},
+		{ /////////////////////////////////////////////////////////////////////////
+			name: "Complex chunk success multiple in list",
+			chunk: Chunk{
+				Comments: []string{"c1", "c2"},
+				Expectations: []Expectation{
+					{
+						Line:    2,
+						Bug:     "bug",
+						Tags:    result.NewTags("t1", "t2"),
+						Query:   "q",
+						Status:  []string{"status"},
+						Comment: "comment",
+					},
+				},
+			},
+			chunkList: []Chunk{
+				Chunk{
+					Comments: []string{"c3"},
+					Expectations: []Expectation{
+						{
+							Line:    2,
+							Bug:     "bug",
+							Tags:    result.NewTags("t1", "t2"),
+							Query:   "q",
+							Status:  []string{"status"},
+							Comment: "comment",
+						},
+					},
+				},
+				Chunk{
+					Comments: []string{"c1", "c2"},
+					Expectations: []Expectation{
+						{
+							Line:    2,
+							Bug:     "bug",
+							Tags:    result.NewTags("t1", "t2"),
+							Query:   "q",
+							Status:  []string{"status"},
+							Comment: "comment",
+						},
+					},
+				},
+			},
+			want: true,
+		},
+		{ /////////////////////////////////////////////////////////////////////////
+			name: "Complex chunk comments differ",
+			chunk: Chunk{
+				Comments: []string{"c1", "c2"},
+				Expectations: []Expectation{
+					{
+						Line:    2,
+						Bug:     "bug",
+						Tags:    result.NewTags("t1", "t2"),
+						Query:   "q",
+						Status:  []string{"status"},
+						Comment: "comment",
+					},
+				},
+			},
+			chunkList: []Chunk{
+				Chunk{
+					Comments: []string{"c2"},
+					Expectations: []Expectation{
+						{
+							Line:    2,
+							Bug:     "bug",
+							Tags:    result.NewTags("t1", "t2"),
+							Query:   "q",
+							Status:  []string{"status"},
+							Comment: "comment",
+						},
+					},
+				},
+			},
+			want: false,
+		},
+		{ /////////////////////////////////////////////////////////////////////////
+			name: "Complex chunk success expectations differ",
+			chunk: Chunk{
+				Comments: []string{"c1", "c2"},
+				Expectations: []Expectation{
+					{
+						Line:    2,
+						Bug:     "bug",
+						Tags:    result.NewTags("t1", "t2"),
+						Query:   "q",
+						Status:  []string{"status"},
+						Comment: "comment",
+					},
+				},
+			},
+			chunkList: []Chunk{
+				Chunk{
+					Comments: []string{"c1", "c2"},
+					Expectations: []Expectation{
+						{
+							Line:    2,
+							Bug:     "bug",
+							Tags:    result.NewTags("t1", "t2"),
+							Query:   "q",
+							Status:  []string{"status"},
+							Comment: "comment",
+						},
+						{
+							Line:    3,
+							Bug:     "bug",
+							Tags:    result.NewTags("t1", "t2"),
+							Query:   "q",
+							Status:  []string{"status"},
+							Comment: "comment",
+						},
+					},
+				},
+			},
+			want: false,
+		},
+		{ /////////////////////////////////////////////////////////////////////////
+			name: "Complex chunk expectation line differs",
+			chunk: Chunk{
+				Comments: []string{"c1", "c2"},
+				Expectations: []Expectation{
+					{
+						Line:    2,
+						Bug:     "bug",
+						Tags:    result.NewTags("t1", "t2"),
+						Query:   "q",
+						Status:  []string{"status"},
+						Comment: "comment",
+					},
+				},
+			},
+			chunkList: []Chunk{
+				Chunk{
+					Comments: []string{"c1", "c2"},
+					Expectations: []Expectation{
+						{
+							Line:    3,
+							Bug:     "bug",
+							Tags:    result.NewTags("t1", "t2"),
+							Query:   "q",
+							Status:  []string{"status"},
+							Comment: "comment",
+						},
+					},
+				},
+			},
+			want: false,
+		},
+		{ /////////////////////////////////////////////////////////////////////////
+			name: "Complex chunk expectation bug differs",
+			chunk: Chunk{
+				Comments: []string{"c1", "c2"},
+				Expectations: []Expectation{
+					{
+						Line:    2,
+						Bug:     "bug",
+						Tags:    result.NewTags("t1", "t2"),
+						Query:   "q",
+						Status:  []string{"status"},
+						Comment: "comment",
+					},
+				},
+			},
+			chunkList: []Chunk{
+				Chunk{
+					Comments: []string{"c1", "c2"},
+					Expectations: []Expectation{
+						{
+							Line:    2,
+							Bug:     "bug2",
+							Tags:    result.NewTags("t1", "t2"),
+							Query:   "q",
+							Status:  []string{"status"},
+							Comment: "comment",
+						},
+					},
+				},
+			},
+			want: false,
+		},
+		{ /////////////////////////////////////////////////////////////////////////
+			name: "Complex chunk expectation tags differ",
+			chunk: Chunk{
+				Comments: []string{"c1", "c2"},
+				Expectations: []Expectation{
+					{
+						Line:    2,
+						Bug:     "bug",
+						Tags:    result.NewTags("t1", "t2"),
+						Query:   "q",
+						Status:  []string{"status"},
+						Comment: "comment",
+					},
+				},
+			},
+			chunkList: []Chunk{
+				Chunk{
+					Comments: []string{"c1", "c2"},
+					Expectations: []Expectation{
+						{
+							Line:    2,
+							Bug:     "bug",
+							Tags:    result.NewTags("t1", "t2", "t3"),
+							Query:   "q",
+							Status:  []string{"status"},
+							Comment: "comment",
+						},
+					},
+				},
+			},
+			want: false,
+		},
+		{ /////////////////////////////////////////////////////////////////////////
+			name: "Complex chunk expectation query differs",
+			chunk: Chunk{
+				Comments: []string{"c1", "c2"},
+				Expectations: []Expectation{
+					{
+						Line:    2,
+						Bug:     "bug",
+						Tags:    result.NewTags("t1", "t2"),
+						Query:   "q",
+						Status:  []string{"status"},
+						Comment: "comment",
+					},
+				},
+			},
+			chunkList: []Chunk{
+				Chunk{
+					Comments: []string{"c1", "c2"},
+					Expectations: []Expectation{
+						{
+							Line:    2,
+							Bug:     "bug",
+							Tags:    result.NewTags("t1", "t2"),
+							Query:   "q2",
+							Status:  []string{"status"},
+							Comment: "comment",
+						},
+					},
+				},
+			},
+			want: false,
+		},
+		{ /////////////////////////////////////////////////////////////////////////
+			name: "Complex chunk expectation status differs",
+			chunk: Chunk{
+				Comments: []string{"c1", "c2"},
+				Expectations: []Expectation{
+					{
+						Line:    2,
+						Bug:     "bug",
+						Tags:    result.NewTags("t1", "t2"),
+						Query:   "q",
+						Status:  []string{"status"},
+						Comment: "comment",
+					},
+				},
+			},
+			chunkList: []Chunk{
+				Chunk{
+					Comments: []string{"c1", "c2"},
+					Expectations: []Expectation{
+						{
+							Line:    2,
+							Bug:     "bug",
+							Tags:    result.NewTags("t1", "t2"),
+							Query:   "q",
+							Status:  []string{"status2"},
+							Comment: "comment",
+						},
+					},
+				},
+			},
+			want: false,
+		},
+		{ /////////////////////////////////////////////////////////////////////////
+			name: "Complex chunk expectation comment differs",
+			chunk: Chunk{
+				Comments: []string{"c1", "c2"},
+				Expectations: []Expectation{
+					{
+						Line:    2,
+						Bug:     "bug",
+						Tags:    result.NewTags("t1", "t2"),
+						Query:   "q",
+						Status:  []string{"status"},
+						Comment: "comment",
+					},
+				},
+			},
+			chunkList: []Chunk{
+				Chunk{
+					Comments: []string{"c1", "c2"},
+					Expectations: []Expectation{
+						{
+							Line:    2,
+							Bug:     "bug",
+							Tags:    result.NewTags("t1", "t2"),
+							Query:   "q",
+							Status:  []string{"status"},
+							Comment: "comment2",
+						},
+					},
+				},
+			},
+			want: false,
+		},
+	}
+	for _, testCase := range tests {
+		t.Run(testCase.name, func(t *testing.T) {
+			got := testCase.chunk.ContainedWithinList(&testCase.chunkList)
+			require.Equal(t, testCase.want, got)
+		})
+	}
+}
+
+func TestAppliesToResult(t *testing.T) {
+	tests := []struct {
+		name        string
+		e           Expectation
+		r           result.Result
+		shouldMatch bool
+	}{
+		{ /////////////////////////////////////////////////////////////////////////
+			name: "Exact match",
+			e: Expectation{
+				Query: "foo",
+				Tags:  result.NewTags("android"),
+			},
+			r: result.Result{
+				Query: query.Parse("foo"),
+				Tags:  result.NewTags("android", "release"),
+			},
+			shouldMatch: true,
+		},
+		{ /////////////////////////////////////////////////////////////////////////
+			name: "Wildcard match",
+			e: Expectation{
+				Query: "foo*",
+				Tags:  result.NewTags("android"),
+			},
+			r: result.Result{
+				Query: query.Parse("foobar"),
+				Tags:  result.NewTags("android", "release"),
+			},
+			shouldMatch: true,
+		},
+		{ /////////////////////////////////////////////////////////////////////////
+			name: "Wildcard match everything",
+			e: Expectation{
+				Query: "*",
+				Tags:  result.NewTags("android"),
+			},
+			r: result.Result{
+				Query: query.Parse("foobar"),
+				Tags:  result.NewTags("android", "release"),
+			},
+			shouldMatch: true,
+		},
+		{ /////////////////////////////////////////////////////////////////////////
+			name: "Name mismatch",
+			e: Expectation{
+				Query: "foo",
+				Tags:  result.NewTags("android"),
+			},
+			r: result.Result{
+				Query: query.Parse("bar"),
+				Tags:  result.NewTags("android", "release"),
+			},
+			shouldMatch: false,
+		},
+		{ /////////////////////////////////////////////////////////////////////////
+			name: "Wildcard mismatch",
+			e: Expectation{
+				Query: "foo*",
+				Tags:  result.NewTags("android"),
+			},
+			r: result.Result{
+				Query: query.Parse("bar"),
+				Tags:  result.NewTags("android", "release"),
+			},
+			shouldMatch: false,
+		},
+		{ /////////////////////////////////////////////////////////////////////////
+			name: "Escaped wildcard mismatch",
+			e: Expectation{
+				Query: "foo\\*",
+				Tags:  result.NewTags("android"),
+			},
+			r: result.Result{
+				Query: query.Parse("foobar"),
+				Tags:  result.NewTags("android", "release"),
+			},
+			shouldMatch: false,
+		},
+		{ /////////////////////////////////////////////////////////////////////////
+			name: "Tag mismatch",
+			e: Expectation{
+				Query: "foo",
+				Tags:  result.NewTags("android"),
+			},
+			r: result.Result{
+				Query: query.Parse("foo"),
+				Tags:  result.NewTags("linux", "release"),
+			},
+			shouldMatch: false,
+		},
+		{ /////////////////////////////////////////////////////////////////////////
+			name: "Tag not subset",
+			e: Expectation{
+				Query: "foo",
+				Tags:  result.NewTags("android", "release"),
+			},
+			r: result.Result{
+				Query: query.Parse("foo"),
+				Tags:  result.NewTags("linux", "release"),
+			},
+			shouldMatch: false,
+		},
+	}
+
+	for _, testCase := range tests {
+		t.Run(testCase.name, func(t *testing.T) {
+			require.Equal(t, testCase.shouldMatch, testCase.e.AppliesToResult(testCase.r))
+		})
+	}
 }

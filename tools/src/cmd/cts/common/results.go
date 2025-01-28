@@ -45,6 +45,7 @@ import (
 	"dawn.googlesource.com/dawn/tools/src/cts/result"
 	"dawn.googlesource.com/dawn/tools/src/fileutils"
 	"dawn.googlesource.com/dawn/tools/src/gerrit"
+	"dawn.googlesource.com/dawn/tools/src/oswrapper"
 	"dawn.googlesource.com/dawn/tools/src/resultsdb"
 	"dawn.googlesource.com/dawn/tools/src/subcmd"
 	"go.chromium.org/luci/auth"
@@ -336,23 +337,6 @@ func getRawResultsImpl(
 
 	lastPrintedDot := time.Now()
 
-	toStatus := func(s string) result.Status {
-		switch s {
-		default:
-			return result.Unknown
-		case rdbpb.TestStatus_PASS.String():
-			return result.Pass
-		case rdbpb.TestStatus_FAIL.String():
-			return result.Failure
-		case rdbpb.TestStatus_CRASH.String():
-			return result.Crash
-		case rdbpb.TestStatus_ABORT.String():
-			return result.Abort
-		case rdbpb.TestStatus_SKIP.String():
-			return result.Skip
-		}
-	}
-
 	resultsByExecutionMode := result.ResultsByExecutionMode{}
 	for _, test := range cfg.Tests {
 		results := result.List{}
@@ -369,7 +353,7 @@ func getRawResultsImpl(
 				}
 
 				testName := r.TestId[len(prefix):]
-				status := toStatus(r.Status)
+				status := convertRdbStatus(r.Status)
 				tags := result.NewTags()
 				duration := time.Duration(r.Duration * float64(time.Second))
 				mayExonerate := false
@@ -413,6 +397,23 @@ func getRawResultsImpl(
 	fmt.Println(" done")
 
 	return resultsByExecutionMode, nil
+}
+
+func convertRdbStatus(rdbStatus string) result.Status {
+	switch rdbStatus {
+	default:
+		return result.Unknown
+	case rdbpb.TestStatus_PASS.String():
+		return result.Pass
+	case rdbpb.TestStatus_FAIL.String():
+		return result.Failure
+	case rdbpb.TestStatus_CRASH.String():
+		return result.Crash
+	case rdbpb.TestStatus_ABORT.String():
+		return result.Abort
+	case rdbpb.TestStatus_SKIP.String():
+		return result.Skip
+	}
 }
 
 // LatestCTSRoll returns for the latest merged CTS roll that landed in the past
@@ -545,4 +546,152 @@ func CleanResults(cfg Config, results *result.List) {
 		}
 		return result.Failure
 	})
+}
+
+// CacheRecentUniqueSuppressedCoreResults is a helper function to only get the
+// core results from CacheRecentUniqueSuppressedResults. This allows other
+// unused results to be garbage collected.
+func CacheRecentUniqueSuppressedCoreResults(
+	ctx context.Context,
+	cfg Config,
+	cacheDir string,
+	client resultsdb.Querier,
+	osWrapper oswrapper.OSWrapper) (result.List, error) {
+
+	resultsByExecutionMode, err := CacheRecentUniqueSuppressedResults(
+		ctx, cfg, cacheDir, client, osWrapper)
+	if err != nil {
+		return nil, err
+	}
+
+	return resultsByExecutionMode["core"], nil
+}
+
+// CacheRecentUniqueSuppressedCompatResults is a helper function to only get the
+// compat results from CacheRecentUniqueSuppressedResults. This allows other
+// unused results to be garbage collected.
+func CacheRecentUniqueSuppressedCompatResults(
+	ctx context.Context,
+	cfg Config,
+	cacheDir string,
+	client resultsdb.Querier,
+	osWrapper oswrapper.OSWrapper) (result.List, error) {
+
+	resultsByExecutionMode, err := CacheRecentUniqueSuppressedResults(
+		ctx, cfg, cacheDir, client, osWrapper)
+	if err != nil {
+		return nil, err
+	}
+
+	return resultsByExecutionMode["compat"], nil
+}
+
+// CacheRecentRexpectationAffectedCiResults looks in the cache at 'cacheDir' for
+// CI results from the recent history. If the cache contains the results, they
+// are loaded and returned. If the cache does not contain the results, they are
+// fetched, cleaned with CleanResults(), saved to the cache directory, and
+// returned.
+// TODO(crbug.com/390105593): Consider sharing code with the other cache
+// functions.
+func CacheRecentUniqueSuppressedResults(
+	ctx context.Context,
+	cfg Config,
+	cacheDir string,
+	client resultsdb.Querier,
+	osWrapper oswrapper.OSWrapper) (result.ResultsByExecutionMode, error) {
+
+	// Load cached results if they are available.
+	var cachePath string
+	if cacheDir != "" {
+		dir := fileutils.ExpandHomeWithWrapper(cacheDir, osWrapper)
+		year, month, day := time.Now().Date()
+		path := filepath.Join(dir, "expectation-affected-ci-results", fmt.Sprintf("%d-%d-%d.txt", year, month, day))
+		if _, err := osWrapper.Stat(path); err == nil {
+			log.Println("loading cached results for today")
+			return result.LoadWithWrapper(path, osWrapper)
+		}
+		cachePath = path
+	}
+
+	// Retrieve, clean, and cache results.
+	log.Println("fetching results from recent CI builds")
+	resultsByExecutionMode, err := getRecentUniqueSuppressedResults(ctx, cfg, client)
+	if err != nil {
+		return nil, err
+	}
+
+	for i, results := range resultsByExecutionMode {
+		CleanResults(cfg, &results)
+		results.Sort()
+		resultsByExecutionMode[i] = results
+	}
+
+	if err := result.SaveWithWrapper(cachePath, resultsByExecutionMode, osWrapper); err != nil {
+		log.Printf("failed to save results to cache: %v", err)
+	}
+
+	return resultsByExecutionMode, nil
+}
+
+// getRecentUniqueSuppressedResults fetches recent results from CI via ResultDB
+// which were affected by an expectation, without applying CleanResults(). The
+// returned results should be unique for each combination of test name and typ
+// tags, with other fields not containing real data.
+// TODO(crbug.com/390105593): Consider sharing code with the other
+// GetRawResults functions.
+func getRecentUniqueSuppressedResults(
+	ctx context.Context,
+	cfg Config,
+	client resultsdb.Querier) (result.ResultsByExecutionMode, error) {
+
+	log.Println("fetching results from resultdb...")
+
+	resultsByExecutionMode := result.ResultsByExecutionMode{}
+	for _, test := range cfg.Tests {
+		results := result.List{}
+		for _, prefix := range test.Prefixes {
+
+			rowHandler := func(r *resultsdb.QueryResult) error {
+				if !strings.HasPrefix(r.TestId, prefix) {
+					return fmt.Errorf(
+						"Test ID %s did not start with %s even though query should have filtered.",
+						r.TestId, prefix)
+				}
+
+				testName := r.TestId[len(prefix):]
+				tags := result.NewTags()
+
+				for _, tagPair := range r.Tags {
+					if tagPair.Key != "typ_tag" {
+						return fmt.Errorf("Got tag key %v when only typ_tag should be present", tagPair.Key)
+					}
+					tags.Add(tagPair.Value)
+				}
+
+				results = append(results, result.Result{
+					// We don't actually care about anything other than the query and
+					// tags.
+					Query:        query.Parse(testName),
+					Status:       result.Pass,
+					Tags:         tags,
+					Duration:     0,
+					MayExonerate: false,
+				})
+
+				return nil
+			}
+
+			err := client.QueryRecentUniqueSuppressedTestResults(ctx, prefix, rowHandler)
+			if err != nil {
+				return nil, err
+			}
+
+			results.Sort()
+		}
+		resultsByExecutionMode[test.ExecutionMode] = results
+	}
+
+	fmt.Println(" done")
+
+	return resultsByExecutionMode, nil
 }
