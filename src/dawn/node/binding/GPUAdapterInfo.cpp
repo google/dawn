@@ -67,11 +67,11 @@ std::string GPUAdapterInfo::getDescription(Napi::Env) {
     return description_;
 }
 
-std::variant<uint32_t, interop::UndefinedType> GPUAdapterInfo::getSubgroupMinSize(Napi::Env) {
+uint32_t GPUAdapterInfo::getSubgroupMinSize(Napi::Env) {
     return subgroup_properties_.subgroupMinSize;
 }
 
-std::variant<uint32_t, interop::UndefinedType> GPUAdapterInfo::getSubgroupMaxSize(Napi::Env) {
+uint32_t GPUAdapterInfo::getSubgroupMaxSize(Napi::Env) {
     return subgroup_properties_.subgroupMaxSize;
 }
 

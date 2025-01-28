@@ -1516,9 +1516,6 @@ bool Converter::Convert(wgpu::FeatureName& out, interop::GPUFeatureName in) {
         case interop::GPUFeatureName::kSubgroups:
             out = wgpu::FeatureName::Subgroups;
             return true;
-        case interop::GPUFeatureName::kSubgroupsF16:
-            out = wgpu::FeatureName::SubgroupsF16;
-            return true;
         case interop::GPUFeatureName::kMultiDrawIndirect:
             out = wgpu::FeatureName::MultiDrawIndirect;
             return true;
@@ -1558,7 +1555,6 @@ bool Converter::Convert(interop::GPUFeatureName& out, wgpu::FeatureName in) {
         CASE(TextureCompressionETC2, kTextureCompressionEtc2);
         CASE(TimestampQuery, kTimestampQuery);
         CASE(Subgroups, kSubgroups);
-        CASE(SubgroupsF16, kSubgroupsF16);
         CASE(MultiDrawIndirect, kMultiDrawIndirect);
         CASE(DualSourceBlending, kDualSourceBlending);
         CASE(ClipDistances, kClipDistances);
@@ -1613,6 +1609,7 @@ bool Converter::Convert(interop::GPUFeatureName& out, wgpu::FeatureName in) {
         case wgpu::FeatureName::SharedTextureMemoryVkDedicatedAllocation:
         case wgpu::FeatureName::SharedTextureMemoryZirconHandle:
         case wgpu::FeatureName::StaticSamplers:
+        case wgpu::FeatureName::SubgroupsF16:
         case wgpu::FeatureName::TransientAttachments:
         case wgpu::FeatureName::YCbCrVulkanSamplers:
         case wgpu::FeatureName::DawnLoadResolveTexture:

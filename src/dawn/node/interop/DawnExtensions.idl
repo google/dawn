@@ -29,9 +29,6 @@
 // upstream webgpu.idl.
 
 enum GPUFeatureName {
-    // subgroups, subgroups-f16 and multi-draw-indirect features are not in webgpu.idl yet.
-    "subgroups",
-    "subgroups-f16",
     "multi-draw-indirect",
     "chromium-experimental-immediate-data",
 };
@@ -40,13 +37,6 @@ interface GPUAdapter {
     readonly attribute boolean isCompatibilityMode;
     readonly attribute DOMString featureLevel;
 };
-
-// Not in webgpu.idl yet
-interface GPUAdapterInfo {
-    readonly attribute (unsigned long or undefined) subgroupMinSize;
-    readonly attribute (unsigned long or undefined) subgroupMaxSize;
-};
-
 
 interface GPUCommandEncoder {
     undefined writeTimestamp(GPUQuerySet querySet, GPUSize32 queryIndex);
