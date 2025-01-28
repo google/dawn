@@ -103,11 +103,11 @@ BackendConnection* Connect(InstanceBase* instance);
 
 namespace {
 
-wgpu::WGSLFeatureName ToWGPUFeature(tint::wgsl::LanguageFeature f) {
+wgpu::WGSLLanguageFeatureName ToWGPUWGSLLanguageFeature(tint::wgsl::LanguageFeature f) {
     switch (f) {
 #define CASE(WgslName, WgpuName)                \
     case tint::wgsl::LanguageFeature::WgslName: \
-        return wgpu::WGSLFeatureName::WgpuName;
+        return wgpu::WGSLLanguageFeatureName::WgpuName;
         DAWN_FOREACH_WGSL_FEATURE(CASE)
 #undef CASE
         case tint::wgsl::LanguageFeature::kUndefined:
@@ -656,7 +656,7 @@ void InstanceBase::GatherWGSLFeatures(const DawnWGSLBlocklist* wgslBlocklist) {
         }
 
         if (enable && wgslFeature != tint::wgsl::LanguageFeature::kUndefined) {
-            mWGSLFeatures.emplace(ToWGPUFeature(wgslFeature));
+            mWGSLFeatures.emplace(ToWGPUWGSLLanguageFeature(wgslFeature));
             mTintLanguageFeatures.emplace(wgslFeature);
         }
     }
@@ -671,23 +671,45 @@ void InstanceBase::GatherWGSLFeatures(const DawnWGSLBlocklist* wgslBlocklist) {
                 continue;
             }
             mTintLanguageFeatures.erase(tintFeature);
-            mWGSLFeatures.erase(ToWGPUFeature(tintFeature));
+            mWGSLFeatures.erase(ToWGPUWGSLLanguageFeature(tintFeature));
         }
     }
 }
 
-bool InstanceBase::APIHasWGSLLanguageFeature(wgpu::WGSLFeatureName feature) const {
+bool InstanceBase::APIHasWGSLLanguageFeature(wgpu::WGSLLanguageFeatureName feature) const {
     return mWGSLFeatures.contains(feature);
+}
+
+wgpu::Status InstanceBase::APIGetWGSLLanguageFeatures(
+    SupportedWGSLLanguageFeatures* features) const {
+    DAWN_ASSERT(features != nullptr);
+
+    size_t featureCount = mWGSLFeatures.size();
+    wgpu::WGSLLanguageFeatureName* wgslFeatures = new wgpu::WGSLLanguageFeatureName[featureCount];
+    uint32_t index = 0;
+    for (wgpu::WGSLLanguageFeatureName feature : mWGSLFeatures) {
+        wgslFeatures[index++] = feature;
+    }
+    DAWN_ASSERT(index == featureCount);
+
+    features->featureCount = featureCount;
+    features->features = wgslFeatures;
+    return wgpu::Status::Success;
 }
 
 size_t InstanceBase::APIEnumerateWGSLLanguageFeatures(wgpu::WGSLFeatureName* features) const {
     if (features != nullptr) {
-        for (wgpu::WGSLFeatureName f : mWGSLFeatures) {
-            *features = f;
+        for (wgpu::WGSLLanguageFeatureName f : mWGSLFeatures) {
+            *features = static_cast<wgpu::WGSLFeatureName>(f);
             ++features;
         }
     }
     return mWGSLFeatures.size();
+}
+
+void APISupportedWGSLLanguageFeaturesFreeMembers(
+    WGPUSupportedWGSLLanguageFeatures supportedFeatures) {
+    delete[] supportedFeatures.features;
 }
 
 }  // namespace dawn::native

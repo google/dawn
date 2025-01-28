@@ -149,7 +149,8 @@ class InstanceBase final : public ErrorSink, public RefCountedWithExternalCount<
     [[nodiscard]] wgpu::WaitStatus APIWaitAny(size_t count,
                                               FutureWaitInfo* futures,
                                               uint64_t timeoutNS);
-    bool APIHasWGSLLanguageFeature(wgpu::WGSLFeatureName feature) const;
+    bool APIHasWGSLLanguageFeature(wgpu::WGSLLanguageFeatureName feature) const;
+    wgpu::Status APIGetWGSLLanguageFeatures(SupportedWGSLLanguageFeatures* features) const;
     // Always writes the full list when features is not nullptr.
     // TODO(https://github.com/webgpu-native/webgpu-headers/issues/252): Add a count argument.
     size_t APIEnumerateWGSLLanguageFeatures(wgpu::WGSLFeatureName* features) const;
@@ -208,7 +209,7 @@ class InstanceBase final : public ErrorSink, public RefCountedWithExternalCount<
     TogglesState mToggles;
     TogglesInfo mTogglesInfo;
 
-    absl::flat_hash_set<wgpu::WGSLFeatureName> mWGSLFeatures;
+    absl::flat_hash_set<wgpu::WGSLLanguageFeatureName> mWGSLFeatures;
     absl::flat_hash_set<tint::wgsl::LanguageFeature> mTintLanguageFeatures;
 
 #if defined(DAWN_USE_X11)

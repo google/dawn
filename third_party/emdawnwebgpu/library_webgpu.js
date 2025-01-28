@@ -1935,7 +1935,24 @@ var LibraryWebGPU = {
     if (!('wgslLanguageFeatures' in navigator["gpu"])) {
       return false;
     }
-    return navigator["gpu"]["wgslLanguageFeatures"].has(WebGPU.WGSLFeatureName[featureEnumValue]);
+    return navigator["gpu"]["wgslLanguageFeatures"].has(WebGPU.WGSLLanguageFeatureName[featureEnumValue]);
+  },
+
+  wgpuInstanceGetWGSLLanguageFeatures: (instance, supportedFeatures) => {
+    // Always allocate enough space for all the features, though some may be unused.
+    var featuresPtr = _malloc(navigator["gpu"]["wgslLanguageFeatures"].size * 4);
+    var offset = 0;
+    var numFeatures = 0;
+    navigator["gpu"]["wgslLanguageFeatures"].forEach(feature => {
+      var featureEnumValue = WebGPU.WGSLLanguageFeatureNameString2Enum[feature];
+      if (featureEnumValue !== undefined) {
+        {{{ makeSetValue('featuresPtr', 'offset', 'featureEnumValue', 'i32') }}};
+        offset += 4;
+        numFeatures++;
+      }
+    });
+    {{{ makeSetValue('supportedFeatures', C_STRUCTS.WGPUSupportedWGSLLanguageFeatures.features, 'featuresPtr', '*') }}};
+    {{{ makeSetValue('supportedFeatures', C_STRUCTS.WGPUSupportedWGSLLanguageFeatures.featureCount, 'numFeatures', '*') }}};
   },
 
   emwgpuInstanceRequestAdapter__deps: ['emwgpuCreateAdapter', 'emwgpuOnRequestAdapterCompleted'],
@@ -2529,6 +2546,10 @@ var LibraryWebGPU = {
 LibraryWebGPU.$WebGPU.FeatureNameString2Enum = {};
 for (var value in LibraryWebGPU.$WebGPU.FeatureName) {
   LibraryWebGPU.$WebGPU.FeatureNameString2Enum[LibraryWebGPU.$WebGPU.FeatureName[value]] = value;
+}
+LibraryWebGPU.$WebGPU.WGSLLanguageFeatureNameString2Enum = {};
+for (var value in LibraryWebGPU.$WebGPU.WGSLLanguageFeatureName) {
+  LibraryWebGPU.$WebGPU.WGSLLanguageFeatureNameString2Enum[LibraryWebGPU.$WebGPU.WGSLLanguageFeatureName[value]] = value;
 }
 
 // Add and set __i53abi to true for functions with 64-bit value in their

@@ -109,11 +109,11 @@ class RequestAdapterEvent : public TrackedEvent {
     Ref<Adapter> mAdapter;
 };
 
-WGPUWGSLFeatureName ToWGPUFeature(tint::wgsl::LanguageFeature f) {
+WGPUWGSLLanguageFeatureName ToWGPUWGSLLanguageFeature(tint::wgsl::LanguageFeature f) {
     switch (f) {
 #define CASE(WgslName, WgpuName)                \
     case tint::wgsl::LanguageFeature::WgslName: \
-        return WGPUWGSLFeatureName_##WgpuName;
+        return WGPUWGSLLanguageFeatureName_##WgpuName;
         DAWN_FOREACH_WGSL_FEATURE(CASE)
 #undef CASE
         case tint::wgsl::LanguageFeature::kUndefined:
@@ -263,7 +263,7 @@ void Instance::GatherWGSLFeatures(const WGPUDawnWireWGSLControl* wgslControl,
         }
 
         if (enable && wgslFeature != tint::wgsl::LanguageFeature::kUndefined) {
-            mWGSLFeatures.emplace(ToWGPUFeature(wgslFeature));
+            mWGSLFeatures.emplace(ToWGPUWGSLLanguageFeature(wgslFeature));
         }
     }
 
@@ -276,19 +276,37 @@ void Instance::GatherWGSLFeatures(const WGPUDawnWireWGSLControl* wgslControl,
                 // Ignore unknown features in the blocklist.
                 continue;
             }
-            mWGSLFeatures.erase(ToWGPUFeature(tintFeature));
+            mWGSLFeatures.erase(ToWGPUWGSLLanguageFeature(tintFeature));
         }
     }
 }
 
-bool Instance::HasWGSLLanguageFeature(WGPUWGSLFeatureName feature) const {
+bool Instance::HasWGSLLanguageFeature(WGPUWGSLLanguageFeatureName feature) const {
     return mWGSLFeatures.contains(feature);
+}
+
+WGPUStatus Instance::GetWGSLLanguageFeatures(WGPUSupportedWGSLLanguageFeatures* features) const {
+    if (features == nullptr) {
+        return WGPUStatus_Error;
+    }
+
+    size_t featureCount = mWGSLFeatures.size();
+    WGPUWGSLLanguageFeatureName* wgslFeatures = new WGPUWGSLLanguageFeatureName[featureCount];
+    uint32_t index = 0;
+    for (WGPUWGSLLanguageFeatureName feature : mWGSLFeatures) {
+        wgslFeatures[index++] = feature;
+    }
+    DAWN_ASSERT(index == featureCount);
+
+    features->featureCount = featureCount;
+    features->features = wgslFeatures;
+    return WGPUStatus_Success;
 }
 
 size_t Instance::EnumerateWGSLLanguageFeatures(WGPUWGSLFeatureName* features) const {
     if (features != nullptr) {
-        for (WGPUWGSLFeatureName f : mWGSLFeatures) {
-            *features = f;
+        for (WGPUWGSLLanguageFeatureName f : mWGSLFeatures) {
+            *features = static_cast<WGPUWGSLFeatureName>(f);
             ++features;
         }
     }
@@ -319,4 +337,9 @@ DAWN_WIRE_EXPORT WGPUInstance
 wgpuDawnWireClientCreateInstance(WGPUInstanceDescriptor const* descriptor) {
     DAWN_UNREACHABLE();
     return nullptr;
+}
+
+DAWN_WIRE_EXPORT void wgpuDawnWireClientSupportedWGSLLanguageFeaturesFreeMembers(
+    WGPUSupportedWGSLLanguageFeatures supportedFeatures) {
+    delete[] supportedFeatures.features;
 }

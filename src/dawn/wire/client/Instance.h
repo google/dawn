@@ -50,7 +50,8 @@ class Instance final : public RefCountedWithExternalCount<ObjectWithEventsBase> 
     void ProcessEvents();
     WGPUWaitStatus WaitAny(size_t count, WGPUFutureWaitInfo* infos, uint64_t timeoutNS);
 
-    bool HasWGSLLanguageFeature(WGPUWGSLFeatureName feature) const;
+    bool HasWGSLLanguageFeature(WGPUWGSLLanguageFeatureName feature) const;
+    WGPUStatus GetWGSLLanguageFeatures(WGPUSupportedWGSLLanguageFeatures* features) const;
     // Always writes the full list when features is not nullptr.
     // TODO(https://github.com/webgpu-native/webgpu-headers/issues/252): Add a count argument.
     size_t EnumerateWGSLLanguageFeatures(WGPUWGSLFeatureName* features) const;
@@ -62,7 +63,7 @@ class Instance final : public RefCountedWithExternalCount<ObjectWithEventsBase> 
     void GatherWGSLFeatures(const WGPUDawnWireWGSLControl* wgslControl,
                             const WGPUDawnWGSLBlocklist* wgslBlocklist);
 
-    absl::flat_hash_set<WGPUWGSLFeatureName> mWGSLFeatures;
+    absl::flat_hash_set<WGPUWGSLLanguageFeatureName> mWGSLFeatures;
 };
 
 }  // namespace dawn::wire::client
