@@ -650,28 +650,6 @@ TEST_F(IR_ValidatorTest, Store_NullFrom) {
 )")) << res.Failure().reason.Str();
 }
 
-TEST_F(IR_ValidatorTest, Store_NullToAndFrom) {
-    auto* f = b.Function("my_func", ty.void_());
-
-    b.Append(f->Block(), [&] {
-        b.Append(mod.CreateInstruction<ir::Store>(nullptr, nullptr));
-        b.Return(f);
-    });
-
-    auto res = ir::Validate(mod);
-    ASSERT_NE(res, Success);
-    EXPECT_THAT(res.Failure().reason.Str(),
-                testing::HasSubstr(R"(:3:11 error: store: operand is undefined
-    store undef, undef
-          ^^^^^
-)")) << res.Failure().reason.Str();
-    EXPECT_THAT(res.Failure().reason.Str(),
-                testing::HasSubstr(R"(:3:18 error: store: operand is undefined
-    store undef, undef
-                 ^^^^^
-)")) << res.Failure().reason.Str();
-}
-
 TEST_F(IR_ValidatorTest, Store_NonEmptyResult) {
     auto* f = b.Function("my_func", ty.void_());
 

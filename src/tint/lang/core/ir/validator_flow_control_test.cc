@@ -129,50 +129,23 @@ TEST_F(IR_ValidatorTest, Discard_NotInFragment) {
 )")) << res.Failure().reason.Str();
 }
 
-TEST_F(IR_ValidatorTest, Terminator_RootBlock) {
+TEST_F(IR_ValidatorTest, Terminate_RootBlock) {
     auto f = b.Function("f", ty.void_());
     b.Append(f->Block(), [&] { b.Unreachable(); });
 
-    mod.root_block->Append(b.Return(f));
-    mod.root_block->Append(b.Unreachable());
     mod.root_block->Append(b.TerminateInvocation());
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_THAT(res.Failure().reason.Str(),
-                testing::HasSubstr(
-                    R"(:2:3 error: return: root block: invalid instruction: tint::core::ir::Return
-  ret
-  ^^^
-)")) << res.Failure().reason.Str();
     EXPECT_THAT(
         res.Failure().reason.Str(),
         testing::HasSubstr(
-            R"(:3:3 error: unreachable: root block: invalid instruction: tint::core::ir::Unreachable
-  unreachable
-  ^^^^^^^^^^^
-)")) << res.Failure().reason.Str();
-    EXPECT_THAT(
-        res.Failure().reason.Str(),
-        testing::HasSubstr(
-            R"(:4:3 error: terminate_invocation: root block: invalid instruction: tint::core::ir::TerminateInvocation
+            R"(:2:3 error: terminate_invocation: root block: invalid instruction: tint::core::ir::TerminateInvocation
   terminate_invocation
   ^^^^^^^^^^^^^^^^^^^^
 )")) << res.Failure().reason.Str();
 }
 
-TEST_F(IR_ValidatorTest, Terminator_HasResult) {
-    auto* ret_func = b.Function("ret_func", ty.void_());
-    b.Append(ret_func->Block(), [&] {
-        auto* r = b.Return(ret_func);
-        r->SetResults(Vector{b.InstructionResult(ty.i32())});
-    });
-
-    auto* unreachable_func = b.Function("unreachable_func", ty.void_());
-    b.Append(unreachable_func->Block(), [&] {
-        auto* r = b.Unreachable();
-        r->SetResults(Vector{b.InstructionResult(ty.i32())});
-    });
-
+TEST_F(IR_ValidatorTest, Terminate_MissingResult) {
     auto* terminate_func = b.Function("terminate_func", ty.void_());
     b.Append(terminate_func->Block(), [&] {
         auto* r = b.TerminateInvocation();
@@ -181,19 +154,9 @@ TEST_F(IR_ValidatorTest, Terminator_HasResult) {
 
     auto res = ir::Validate(mod);
     ASSERT_NE(res, Success);
-    EXPECT_THAT(res.Failure().reason.Str(),
-                testing::HasSubstr(R"(:3:5 error: return: expected exactly 0 results, got 1
-    ret
-    ^^^
-)")) << res.Failure().reason.Str();
-    EXPECT_THAT(res.Failure().reason.Str(),
-                testing::HasSubstr(R"(:8:5 error: unreachable: expected exactly 0 results, got 1
-    unreachable
-    ^^^^^^^^^^^
-)")) << res.Failure().reason.Str();
     EXPECT_THAT(
         res.Failure().reason.Str(),
-        testing::HasSubstr(R"(:13:5 error: terminate_invocation: expected exactly 0 results, got 1
+        testing::HasSubstr(R"(:3:5 error: terminate_invocation: expected exactly 0 results, got 1
     terminate_invocation
     ^^^^^^^^^^^^^^^^^^^^
 )")) << res.Failure().reason.Str();
@@ -964,13 +927,13 @@ TEST_F(IR_ValidatorTest, Continue_MissingValues) {
 )")) << res.Failure().reason.Str();
 }
 
-TEST_F(IR_ValidatorTest, Continue_MismatchedTypes) {
+TEST_F(IR_ValidatorTest, Continue_MismatchedInt) {
     auto* f = b.Function("my_func", ty.void_());
     b.Append(f->Block(), [&] {
         auto* loop = b.Loop();
         loop->Continuing()->SetParams(
             {b.BlockParam<i32>(), b.BlockParam<f32>(), b.BlockParam<u32>(), b.BlockParam<bool>()});
-        b.Append(loop->Body(), [&] { b.Continue(loop, 1_i, 2_i, 3_f, false); });
+        b.Append(loop->Body(), [&] { b.Continue(loop, 1_i, 2_i, 3_u, false); });
         b.Append(loop->Continuing(), [&] { b.BreakIf(loop, true); });
         b.Return(f);
     });
@@ -981,16 +944,30 @@ TEST_F(IR_ValidatorTest, Continue_MismatchedTypes) {
         res.Failure().reason.Str(),
         testing::HasSubstr(
             R"(:5:22 error: continue: operand with type 'i32' does not match 'loop' block $B3 target type 'f32'
-        continue 1i, 2i, 3.0f, false  # -> $B3
+        continue 1i, 2i, 3u, false  # -> $B3
                      ^^
 )")) << res.Failure().reason.Str();
+}
 
+TEST_F(IR_ValidatorTest, Continue_MismatchedFloat) {
+    auto* f = b.Function("my_func", ty.void_());
+    b.Append(f->Block(), [&] {
+        auto* loop = b.Loop();
+        loop->Continuing()->SetParams(
+            {b.BlockParam<i32>(), b.BlockParam<f32>(), b.BlockParam<u32>(), b.BlockParam<bool>()});
+        b.Append(loop->Body(), [&] { b.Continue(loop, 1_i, 2_f, 3_f, false); });
+        b.Append(loop->Continuing(), [&] { b.BreakIf(loop, true); });
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
     EXPECT_THAT(
         res.Failure().reason.Str(),
         testing::HasSubstr(
-            R"(:5:26 error: continue: operand with type 'f32' does not match 'loop' block $B3 target type 'u32'
-        continue 1i, 2i, 3.0f, false  # -> $B3
-                         ^^^^
+            R"(:5:28 error: continue: operand with type 'f32' does not match 'loop' block $B3 target type 'u32'
+        continue 1i, 2.0f, 3.0f, false  # -> $B3
+                           ^^^^
 )")) << res.Failure().reason.Str();
 }
 
@@ -1112,13 +1089,13 @@ TEST_F(IR_ValidatorTest, NextIteration_MissingValues) {
 )")) << res.Failure().reason.Str();
 }
 
-TEST_F(IR_ValidatorTest, NextIteration_MismatchedTypes) {
+TEST_F(IR_ValidatorTest, NextIteration_MismatchedInt) {
     auto* f = b.Function("my_func", ty.void_());
     b.Append(f->Block(), [&] {
         auto* loop = b.Loop();
         loop->Body()->SetParams(
             {b.BlockParam<i32>(), b.BlockParam<f32>(), b.BlockParam<u32>(), b.BlockParam<bool>()});
-        b.Append(loop->Initializer(), [&] { b.NextIteration(loop, 1_i, 2_i, 3_f, false); });
+        b.Append(loop->Initializer(), [&] { b.NextIteration(loop, 1_i, 2_i, 3_u, false); });
         b.Append(loop->Body(), [&] { b.ExitLoop(loop); });
         b.Return(f);
     });
@@ -1129,15 +1106,30 @@ TEST_F(IR_ValidatorTest, NextIteration_MismatchedTypes) {
         res.Failure().reason.Str(),
         testing::HasSubstr(
             R"(:5:28 error: next_iteration: operand with type 'i32' does not match 'loop' block $B3 target type 'f32'
-        next_iteration 1i, 2i, 3.0f, false  # -> $B3
+        next_iteration 1i, 2i, 3u, false  # -> $B3
                            ^^
 )")) << res.Failure().reason.Str();
+}
+
+TEST_F(IR_ValidatorTest, NextIteration_MismatchedFloat) {
+    auto* f = b.Function("my_func", ty.void_());
+    b.Append(f->Block(), [&] {
+        auto* loop = b.Loop();
+        loop->Body()->SetParams(
+            {b.BlockParam<i32>(), b.BlockParam<f32>(), b.BlockParam<u32>(), b.BlockParam<bool>()});
+        b.Append(loop->Initializer(), [&] { b.NextIteration(loop, 1_i, 2_f, 3_f, false); });
+        b.Append(loop->Body(), [&] { b.ExitLoop(loop); });
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
     EXPECT_THAT(
         res.Failure().reason.Str(),
         testing::HasSubstr(
-            R"(:5:32 error: next_iteration: operand with type 'f32' does not match 'loop' block $B3 target type 'u32'
-        next_iteration 1i, 2i, 3.0f, false  # -> $B3
-                               ^^^^
+            R"(:5:34 error: next_iteration: operand with type 'f32' does not match 'loop' block $B3 target type 'u32'
+        next_iteration 1i, 2.0f, 3.0f, false  # -> $B3
+                                 ^^^^
 )")) << res.Failure().reason.Str();
 }
 
@@ -1265,7 +1257,7 @@ TEST_F(IR_ValidatorTest, BreakIf_NextIterMissingValues) {
 )")) << res.Failure().reason.Str();
 }
 
-TEST_F(IR_ValidatorTest, BreakIf_NextIterMismatchedTypes) {
+TEST_F(IR_ValidatorTest, BreakIf_NextIterMismatchedInt) {
     auto* f = b.Function("my_func", ty.void_());
     b.Append(f->Block(), [&] {
         auto* loop = b.Loop();
@@ -1275,7 +1267,7 @@ TEST_F(IR_ValidatorTest, BreakIf_NextIterMismatchedTypes) {
                  [&] { b.NextIteration(loop, nullptr, nullptr, nullptr, nullptr); });
         b.Append(loop->Body(), [&] { b.Continue(loop); });
         b.Append(loop->Continuing(),
-                 [&] { b.BreakIf(loop, true, b.Values(1_i, 2_i, 3_f, false), Empty); });
+                 [&] { b.BreakIf(loop, true, b.Values(1_i, 2_i, 3_u, false), Empty); });
         b.Return(f);
     });
 
@@ -1285,15 +1277,33 @@ TEST_F(IR_ValidatorTest, BreakIf_NextIterMismatchedTypes) {
         res.Failure().reason.Str(),
         testing::HasSubstr(
             R"(:11:45 error: break_if: operand with type 'i32' does not match 'loop' block $B3 target type 'f32'
-        break_if true next_iteration: [ 1i, 2i, 3.0f, false ]  # -> [t: exit_loop loop_1, f: $B3]
+        break_if true next_iteration: [ 1i, 2i, 3u, false ]  # -> [t: exit_loop loop_1, f: $B3]
                                             ^^
 )")) << res.Failure().reason.Str();
+}
+
+TEST_F(IR_ValidatorTest, BreakIf_NextIterMismatchedFloat) {
+    auto* f = b.Function("my_func", ty.void_());
+    b.Append(f->Block(), [&] {
+        auto* loop = b.Loop();
+        loop->Body()->SetParams(
+            {b.BlockParam<i32>(), b.BlockParam<f32>(), b.BlockParam<u32>(), b.BlockParam<bool>()});
+        b.Append(loop->Initializer(),
+                 [&] { b.NextIteration(loop, nullptr, nullptr, nullptr, nullptr); });
+        b.Append(loop->Body(), [&] { b.Continue(loop); });
+        b.Append(loop->Continuing(),
+                 [&] { b.BreakIf(loop, true, b.Values(1_i, 2_f, 3_f, false), Empty); });
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
     EXPECT_THAT(
         res.Failure().reason.Str(),
         testing::HasSubstr(
-            R"(:11:49 error: break_if: operand with type 'f32' does not match 'loop' block $B3 target type 'u32'
-        break_if true next_iteration: [ 1i, 2i, 3.0f, false ]  # -> [t: exit_loop loop_1, f: $B3]
-                                                ^^^^
+            R"(:11:51 error: break_if: operand with type 'f32' does not match 'loop' block $B3 target type 'u32'
+        break_if true next_iteration: [ 1i, 2.0f, 3.0f, false ]  # -> [t: exit_loop loop_1, f: $B3]
+                                                  ^^^^
 )")) << res.Failure().reason.Str();
 }
 
@@ -1354,7 +1364,7 @@ TEST_F(IR_ValidatorTest, BreakIf_ExitMissingValues) {
 )")) << res.Failure().reason.Str();
 }
 
-TEST_F(IR_ValidatorTest, BreakIf_ExitMismatchedTypes) {
+TEST_F(IR_ValidatorTest, BreakIf_ExitMismatchedInt) {
     auto* f = b.Function("my_func", ty.void_());
     b.Append(f->Block(), [&] {
         auto* loop = b.Loop();
@@ -1362,7 +1372,7 @@ TEST_F(IR_ValidatorTest, BreakIf_ExitMismatchedTypes) {
                          b.InstructionResult<u32>(), b.InstructionResult<bool>());
         b.Append(loop->Body(), [&] { b.Continue(loop); });
         b.Append(loop->Continuing(),
-                 [&] { b.BreakIf(loop, true, Empty, b.Values(1_i, 2_i, 3_f, false)); });
+                 [&] { b.BreakIf(loop, true, Empty, b.Values(1_i, 2_i, 3_u, false)); });
         b.Return(f);
     });
 
@@ -1372,15 +1382,31 @@ TEST_F(IR_ValidatorTest, BreakIf_ExitMismatchedTypes) {
         res.Failure().reason.Str(),
         testing::HasSubstr(
             R"(:8:40 error: break_if: operand with type 'i32' does not match 'loop' target type 'f32'
-        break_if true exit_loop: [ 1i, 2i, 3.0f, false ]  # -> [t: exit_loop loop_1, f: $B2]
+        break_if true exit_loop: [ 1i, 2i, 3u, false ]  # -> [t: exit_loop loop_1, f: $B2]
                                        ^^
 )")) << res.Failure().reason.Str();
+}
+
+TEST_F(IR_ValidatorTest, BreakIf_ExitMismatchedTypes) {
+    auto* f = b.Function("my_func", ty.void_());
+    b.Append(f->Block(), [&] {
+        auto* loop = b.Loop();
+        loop->SetResults(b.InstructionResult<i32>(), b.InstructionResult<f32>(),
+                         b.InstructionResult<u32>(), b.InstructionResult<bool>());
+        b.Append(loop->Body(), [&] { b.Continue(loop); });
+        b.Append(loop->Continuing(),
+                 [&] { b.BreakIf(loop, true, Empty, b.Values(1_i, 2_f, 3_f, false)); });
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
     EXPECT_THAT(
         res.Failure().reason.Str(),
         testing::HasSubstr(
-            R"(:8:44 error: break_if: operand with type 'f32' does not match 'loop' target type 'u32'
-        break_if true exit_loop: [ 1i, 2i, 3.0f, false ]  # -> [t: exit_loop loop_1, f: $B2]
-                                           ^^^^
+            R"(:8:46 error: break_if: operand with type 'f32' does not match 'loop' target type 'u32'
+        break_if true exit_loop: [ 1i, 2.0f, 3.0f, false ]  # -> [t: exit_loop loop_1, f: $B2]
+                                             ^^^^
 )")) << res.Failure().reason.Str();
 }
 
@@ -1857,6 +1883,37 @@ TEST_F(IR_ValidatorTest, Return_WrongValueType) {
 )")) << res.Failure().reason.Str();
 }
 
+TEST_F(IR_ValidatorTest, Return_RootBlock) {
+    auto f = b.Function("f", ty.void_());
+    b.Append(f->Block(), [&] { b.Unreachable(); });
+
+    mod.root_block->Append(b.Return(f));
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(res.Failure().reason.Str(),
+                testing::HasSubstr(
+                    R"(:2:3 error: return: root block: invalid instruction: tint::core::ir::Return
+  ret
+  ^^^
+)")) << res.Failure().reason.Str();
+}
+
+TEST_F(IR_ValidatorTest, Return_MissingResult) {
+    auto* ret_func = b.Function("ret_func", ty.void_());
+    b.Append(ret_func->Block(), [&] {
+        auto* r = b.Return(ret_func);
+        r->SetResults(Vector{b.InstructionResult(ty.i32())});
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(res.Failure().reason.Str(),
+                testing::HasSubstr(R"(:3:5 error: return: expected exactly 0 results, got 1
+    ret
+    ^^^
+)")) << res.Failure().reason.Str();
+}
+
 TEST_F(IR_ValidatorTest, Unreachable_UnexpectedResult) {
     auto* f = b.Function("my_func", ty.void_());
     b.Append(f->Block(), [&] {  //
@@ -1884,6 +1941,37 @@ TEST_F(IR_ValidatorTest, Unreachable_UnexpectedOperand) {
     ASSERT_NE(res, Success);
     EXPECT_THAT(res.Failure().reason.Str(),
                 testing::HasSubstr(R"(:3:5 error: unreachable: expected exactly 0 operands, got 1
+    unreachable
+    ^^^^^^^^^^^
+)")) << res.Failure().reason.Str();
+}
+
+TEST_F(IR_ValidatorTest, Unreachable_RootBlock) {
+    auto f = b.Function("f", ty.void_());
+    b.Append(f->Block(), [&] { b.Unreachable(); });
+
+    mod.root_block->Append(b.Unreachable());
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(
+        res.Failure().reason.Str(),
+        testing::HasSubstr(
+            R"(:2:3 error: unreachable: root block: invalid instruction: tint::core::ir::Unreachable
+  unreachable
+  ^^^^^^^^^^^
+)")) << res.Failure().reason.Str();
+}
+
+TEST_F(IR_ValidatorTest, Unreachable_MissingResult) {
+    auto* unreachable_func = b.Function("unreachable_func", ty.void_());
+    b.Append(unreachable_func->Block(), [&] {
+        auto* r = b.Unreachable();
+        r->SetResults(Vector{b.InstructionResult(ty.i32())});
+    });
+
+    auto res = ir::Validate(mod);
+    EXPECT_THAT(res.Failure().reason.Str(),
+                testing::HasSubstr(R"(:3:5 error: unreachable: expected exactly 0 results, got 1
     unreachable
     ^^^^^^^^^^^
 )")) << res.Failure().reason.Str();

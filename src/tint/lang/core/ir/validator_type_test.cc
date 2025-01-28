@@ -51,234 +51,6 @@ namespace tint::core::ir {
 using namespace tint::core::fluent_types;     // NOLINT
 using namespace tint::core::number_suffixes;  // NOLINT
 
-TEST_F(IR_ValidatorTest, Abstract_Scalar) {
-    auto* f = b.Function("my_func", ty.void_());
-    b.Append(f->Block(), [&] {
-        b.Var("af", function, ty.AFloat());
-        b.Var("af", function, ty.AInt());
-        b.Return(f);
-    });
-
-    auto res = ir::Validate(mod);
-    ASSERT_NE(res, Success);
-    EXPECT_THAT(res.Failure().reason.Str(),
-                testing::HasSubstr(R"(:3:5 error: var: abstracts are not permitted
-    %af:ptr<function, abstract-float, read_write> = var
-    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-:2:3 note: in block
-  $B1: {
-  ^^^
-
-:4:5 error: var: abstracts are not permitted
-    %af_1:ptr<function, abstract-int, read_write> = var  # %af_1: 'af'
-    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-)")) << res.Failure().reason.Str();
-}
-
-TEST_F(IR_ValidatorTest, Abstract_Vector) {
-    auto* f = b.Function("my_func", ty.void_());
-    b.Append(f->Block(), [&] {
-        b.Var("af", function, ty.vec2<AFloat>());
-        b.Var("ai", function, ty.vec3<AInt>());
-        b.Return(f);
-    });
-
-    auto res = ir::Validate(mod);
-    ASSERT_NE(res, Success);
-    EXPECT_THAT(res.Failure().reason.Str(),
-                testing::HasSubstr(R"(:3:5 error: var: abstracts are not permitted
-    %af:ptr<function, vec2<abstract-float>, read_write> = var
-    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-)")) << res.Failure().reason.Str();
-
-    EXPECT_THAT(res.Failure().reason.Str(),
-                testing::HasSubstr(R"(:4:5 error: var: abstracts are not permitted
-    %ai:ptr<function, vec3<abstract-int>, read_write> = var
-    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-)")) << res.Failure().reason.Str();
-}
-
-TEST_F(IR_ValidatorTest, Abstract_Matrix) {
-    auto* f = b.Function("my_func", ty.void_());
-    b.Append(f->Block(), [&] {
-        b.Var("af", function, ty.mat2x2<AFloat>());
-        b.Var("ai", function, ty.mat3x4<AInt>());
-        b.Return(f);
-    });
-
-    auto res = ir::Validate(mod);
-    ASSERT_NE(res, Success);
-    EXPECT_THAT(res.Failure().reason.Str(),
-                testing::HasSubstr(R"(:3:5 error: var: abstracts are not permitted
-    %af:ptr<function, mat2x2<abstract-float>, read_write> = var
-    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-)")) << res.Failure().reason.Str();
-
-    EXPECT_THAT(res.Failure().reason.Str(),
-                testing::HasSubstr(R"(:4:5 error: var: abstracts are not permitted
-    %ai:ptr<function, mat3x4<abstract-int>, read_write> = var
-    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-)")) << res.Failure().reason.Str();
-}
-
-TEST_F(IR_ValidatorTest, Abstract_Struct) {
-    auto* str_ty =
-        ty.Struct(mod.symbols.New("MyStruct"), {
-                                                   {mod.symbols.New("af"), ty.AFloat(), {}},
-                                                   {mod.symbols.New("ai"), ty.AInt(), {}},
-                                               });
-    auto* v = b.Var(ty.ptr(private_, str_ty));
-    mod.root_block->Append(v);
-
-    auto res = ir::Validate(mod);
-    ASSERT_NE(res, Success);
-    EXPECT_THAT(res.Failure().reason.Str(),
-                testing::HasSubstr(R"(:7:3 error: var: abstracts are not permitted
-  %1:ptr<private, MyStruct, read_write> = var
-  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-)")) << res.Failure().reason.Str();
-}
-
-TEST_F(IR_ValidatorTest, Abstract_FunctionParam) {
-    auto* f = b.Function("my_func", ty.void_());
-
-    f->SetParams({b.FunctionParam(ty.AFloat()), b.FunctionParam(ty.AInt())});
-    f->Block()->Append(b.Return(f));
-
-    auto res = ir::Validate(mod);
-    ASSERT_NE(res, Success);
-    EXPECT_THAT(res.Failure().reason.Str(),
-                testing::HasSubstr(R"(:1:17 error: abstracts are not permitted
-%my_func = func(%2:abstract-float, %3:abstract-int):void {
-                ^^^^^^^^^^^^^^^^^
-)")) << res.Failure().reason.Str();
-    EXPECT_THAT(res.Failure().reason.Str(),
-                testing::HasSubstr(R"(:1:36 error: abstracts are not permitted
-%my_func = func(%2:abstract-float, %3:abstract-int):void {
-                                   ^^^^^^^^^^^^^^^
-)")) << res.Failure().reason.Str();
-}
-
-TEST_F(IR_ValidatorTest, Type_VectorElements) {
-    auto* f = b.Function("my_func", ty.void_());
-
-    b.Append(f->Block(), [&] {
-        b.Var("u32_valid", AddressSpace::kFunction, ty.vec4(ty.u32()));
-        b.Var("i32_valid", AddressSpace::kFunction, ty.vec4(ty.i32()));
-        b.Var("bool_valid", AddressSpace::kFunction, ty.vec2(ty.bool_()));
-        b.Var("f16_valid", AddressSpace::kFunction, ty.vec3(ty.f16()));
-        b.Var("f32_valid", AddressSpace::kFunction, ty.vec3(ty.f32()));
-        b.Var("void_invalid", AddressSpace::kFunction, ty.vec2(ty.void_()));
-        b.Return(f);
-    });
-
-    auto res = ir::Validate(mod);
-    ASSERT_NE(res, Success);
-    EXPECT_THAT(
-        res.Failure().reason.Str(),
-        testing::HasSubstr(R"(:8:5 error: var: vector elements, 'vec2<void>', must be scalars
-    %void_invalid:ptr<function, vec2<void>, read_write> = var
-    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-)")) << res.Failure().reason.Str();
-}
-
-TEST_F(IR_ValidatorTest, Type_MatrixElements) {
-    auto* f = b.Function("my_func", ty.void_());
-
-    b.Append(f->Block(), [&] {
-        b.Var("u32_invalid", AddressSpace::kFunction, ty.mat2x2(ty.u32()));
-        b.Var("i32_invalid", AddressSpace::kFunction, ty.mat3x2(ty.i32()));
-        b.Var("bool_invalid", AddressSpace::kFunction, ty.mat4x2(ty.bool_()));
-        b.Var("f16_valid", AddressSpace::kFunction, ty.mat2x3(ty.f16()));
-        b.Var("f32_valid", AddressSpace::kFunction, ty.mat4x4(ty.f32()));
-        b.Var("void_invalid", AddressSpace::kFunction, ty.mat3x3(ty.void_()));
-        b.Return(f);
-    });
-
-    auto res = ir::Validate(mod);
-    ASSERT_NE(res, Success);
-    EXPECT_THAT(
-        res.Failure().reason.Str(),
-        testing::HasSubstr(R"(:3:5 error: var: matrix elements, 'mat2x2<u32>', must be float scalars
-    %u32_invalid:ptr<function, mat2x2<u32>, read_write> = var
-    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-)")) << res.Failure().reason.Str();
-    EXPECT_THAT(
-        res.Failure().reason.Str(),
-        testing::HasSubstr(R"(:4:5 error: var: matrix elements, 'mat3x2<i32>', must be float scalars
-    %i32_invalid:ptr<function, mat3x2<i32>, read_write> = var
-    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-)")) << res.Failure().reason.Str();
-    EXPECT_THAT(res.Failure().reason.Str(),
-                testing::HasSubstr(
-                    R"(:5:5 error: var: matrix elements, 'mat4x2<bool>', must be float scalars
-    %bool_invalid:ptr<function, mat4x2<bool>, read_write> = var
-    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-)")) << res.Failure().reason.Str();
-    EXPECT_THAT(res.Failure().reason.Str(),
-                testing::HasSubstr(
-                    R"(:8:5 error: var: matrix elements, 'mat3x3<void>', must be float scalars
-    %void_invalid:ptr<function, mat3x3<void>, read_write> = var
-    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-)")) << res.Failure().reason.Str();
-}
-
-TEST_F(IR_ValidatorTest, Type_StorageTextureDimension) {
-    auto* valid =
-        b.Var("valid", AddressSpace::kStorage,
-              ty.storage_texture(core::type::TextureDimension::k2d, core::TexelFormat::kRgba32Float,
-                                 core::Access::kReadWrite),
-              read_write);
-    valid->SetBindingPoint(0, 0);
-    mod.root_block->Append(valid);
-
-    auto* cube =
-        b.Var("cube_invalid", AddressSpace::kStorage,
-              ty.storage_texture(core::type::TextureDimension::kCube,
-                                 core::TexelFormat::kRgba32Float, core::Access::kReadWrite),
-              read_write);
-    cube->SetBindingPoint(1, 1);
-    mod.root_block->Append(cube);
-
-    auto* cube_array =
-        b.Var("cube_array_invalid", AddressSpace::kStorage,
-              ty.storage_texture(core::type::TextureDimension::kCubeArray,
-                                 core::TexelFormat::kRgba32Float, core::Access::kReadWrite),
-              read_write);
-    cube_array->SetBindingPoint(2, 2);
-    mod.root_block->Append(cube_array);
-
-    auto* none =
-        b.Var("none_invalid", AddressSpace::kStorage,
-              ty.storage_texture(core::type::TextureDimension::kNone,
-                                 core::TexelFormat::kRgba32Float, core::Access::kReadWrite),
-              read_write);
-    none->SetBindingPoint(3, 3);
-    mod.root_block->Append(none);
-
-    auto res = ir::Validate(mod);
-    ASSERT_NE(res, Success);
-    EXPECT_THAT(res.Failure().reason.Str(),
-                testing::HasSubstr(
-                    R"(:3:3 error: var: dimension 'cube' for storage textures does not in WGSL yet
-  %cube_invalid:ptr<storage, texture_storage_cube<rgba32float, read_write>, read_write> = var @binding_point(1, 1)
-  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-)")) << res.Failure().reason.Str();
-    EXPECT_THAT(
-        res.Failure().reason.Str(),
-        testing::HasSubstr(
-            R"(:4:3 error: var: dimension 'cube_array' for storage textures does not in WGSL yet
-  %cube_array_invalid:ptr<storage, texture_storage_cube_array<rgba32float, read_write>, read_write> = var @binding_point(2, 2)
-  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-)")) << res.Failure().reason.Str();
-    EXPECT_THAT(res.Failure().reason.Str(),
-                testing::HasSubstr(R"(:5:3 error: var: invalid texture dimension 'none'
-  %none_invalid:ptr<storage, texture_storage_none<rgba32float, read_write>, read_write> = var @binding_point(3, 3)
-  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-)")) << res.Failure().reason.Str();
-}
-
 namespace {
 template <typename T>
 static const core::type::Type* TypeBuilder(core::type::Manager& m) {
@@ -292,6 +64,311 @@ static const core::type::Type* RefTypeBuilder(core::type::Manager& m) {
 
 using TypeBuilderFn = decltype(&TypeBuilder<i32>);
 }  // namespace
+
+// Note: Just parameterizing abstract int vs float doesn't significantly reduce
+// the code size of these tests, and made the code less readable.
+//
+// Combining them with the non-abstract parameterizing helps a little but adds
+// some switching logic to the fixtures since the error strings are different.
+// There is also still an issue with needing different fixtures for vec2 vs vec3
+// vs vec4, which gets even worst for matrices. There is also variance in what
+// is allowed where, so it feels like mostly a wash for code length, and makes
+// harder to read code.
+//
+// There is probably something sophisticated using builders for
+// scalar/vector/etc and testing::Combine to parameterize things, but that
+// requires handling how the type manager allows templating/dispatch.
+
+TEST_F(IR_ValidatorTest, AbstractFloat_Scalar) {
+    auto* f = b.Function("my_func", ty.void_());
+    b.Append(f->Block(), [&] {
+        b.Var("af", function, ty.AFloat());
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(res.Failure().reason.Str(),
+                testing::HasSubstr(R"(:3:5 error: var: abstracts are not permitted
+    %af:ptr<function, abstract-float, read_write> = var
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+)")) << res.Failure().reason.Str();
+}
+
+TEST_F(IR_ValidatorTest, AbstractInt_Scalar) {
+    auto* f = b.Function("my_func", ty.void_());
+    b.Append(f->Block(), [&] {
+        b.Var("ai", function, ty.AInt());
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(res.Failure().reason.Str(),
+                testing::HasSubstr(R"(:3:5 error: var: abstracts are not permitted
+    %ai:ptr<function, abstract-int, read_write> = var
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+)")) << res.Failure().reason.Str();
+}
+
+TEST_F(IR_ValidatorTest, AbstractFloat_Vector) {
+    auto* f = b.Function("my_func", ty.void_());
+    b.Append(f->Block(), [&] {
+        b.Var("af", function, ty.vec2<AFloat>());
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(res.Failure().reason.Str(),
+                testing::HasSubstr(R"(:3:5 error: var: abstracts are not permitted
+    %af:ptr<function, vec2<abstract-float>, read_write> = var
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+)")) << res.Failure().reason.Str();
+}
+
+TEST_F(IR_ValidatorTest, AbstractInt_Vector) {
+    auto* f = b.Function("my_func", ty.void_());
+    b.Append(f->Block(), [&] {
+        b.Var("ai", function, ty.vec3<AInt>());
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(res.Failure().reason.Str(),
+                testing::HasSubstr(R"(3:5 error: var: abstracts are not permitted
+    %ai:ptr<function, vec3<abstract-int>, read_write> = var
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+)")) << res.Failure().reason.Str();
+}
+
+TEST_F(IR_ValidatorTest, AbstractFloat_Matrix) {
+    auto* f = b.Function("my_func", ty.void_());
+    b.Append(f->Block(), [&] {
+        b.Var("af", function, ty.mat2x2<AFloat>());
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(res.Failure().reason.Str(),
+                testing::HasSubstr(R"(:3:5 error: var: abstracts are not permitted
+    %af:ptr<function, mat2x2<abstract-float>, read_write> = var
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+)")) << res.Failure().reason.Str();
+}
+
+TEST_F(IR_ValidatorTest, AbstractInt_Matrix) {
+    auto* f = b.Function("my_func", ty.void_());
+    b.Append(f->Block(), [&] {
+        b.Var("ai", function, ty.mat3x4<AInt>());
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(res.Failure().reason.Str(),
+                testing::HasSubstr(R"(:3:5 error: var: abstracts are not permitted
+    %ai:ptr<function, mat3x4<abstract-int>, read_write> = var
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+)")) << res.Failure().reason.Str();
+}
+
+TEST_F(IR_ValidatorTest, AbstractFloat_Struct) {
+    auto* str_ty =
+        ty.Struct(mod.symbols.New("MyStruct"), {
+                                                   {mod.symbols.New("af"), ty.AFloat(), {}},
+                                               });
+    auto* v = b.Var(ty.ptr(private_, str_ty));
+    mod.root_block->Append(v);
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(res.Failure().reason.Str(),
+                testing::HasSubstr(R"(:6:3 error: var: abstracts are not permitted
+  %1:ptr<private, MyStruct, read_write> = var
+  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+)")) << res.Failure().reason.Str();
+}
+
+TEST_F(IR_ValidatorTest, AbstractInt_Struct) {
+    auto* str_ty =
+        ty.Struct(mod.symbols.New("MyStruct"), {
+                                                   {mod.symbols.New("ai"), ty.AInt(), {}},
+                                               });
+    auto* v = b.Var(ty.ptr(private_, str_ty));
+    mod.root_block->Append(v);
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(res.Failure().reason.Str(),
+                testing::HasSubstr(R"(:6:3 error: var: abstracts are not permitted
+  %1:ptr<private, MyStruct, read_write> = var
+  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+)")) << res.Failure().reason.Str();
+}
+
+TEST_F(IR_ValidatorTest, AbstractFloat_FunctionParam) {
+    auto* f = b.Function("my_func", ty.void_());
+
+    f->SetParams({b.FunctionParam(ty.AFloat())});
+    f->Block()->Append(b.Return(f));
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(res.Failure().reason.Str(),
+                testing::HasSubstr(R"(:1:17 error: abstracts are not permitted
+%my_func = func(%2:abstract-float):void {
+                ^^^^^^^^^^^^^^^^^
+)")) << res.Failure().reason.Str();
+}
+
+TEST_F(IR_ValidatorTest, AbstractInt_FunctionParam) {
+    auto* f = b.Function("my_func", ty.void_());
+
+    f->SetParams({b.FunctionParam(ty.AInt())});
+    f->Block()->Append(b.Return(f));
+
+    auto res = ir::Validate(mod);
+    ASSERT_NE(res, Success);
+    EXPECT_THAT(res.Failure().reason.Str(),
+                testing::HasSubstr(R"(:1:17 error: abstracts are not permitted
+%my_func = func(%2:abstract-int):void {
+                ^^^^^^^^^^^^^^^
+)")) << res.Failure().reason.Str();
+}
+
+using TypeTest = IRTestParamHelper<std::tuple<
+    /* allowed */ bool,
+    /* type_builder */ TypeBuilderFn>>;
+
+using Type_VectorElements = TypeTest;
+
+TEST_P(Type_VectorElements, Test) {
+    bool allowed = std::get<0>(GetParam());
+    auto* type = std::get<1>(GetParam())(ty);
+    if (allowed) {
+        auto* f = b.Function("my_func", ty.void_());
+        b.Append(f->Block(), [&] {
+            b.Var("v2", AddressSpace::kFunction, ty.vec2(type));
+            b.Var("v3", AddressSpace::kFunction, ty.vec3(type));
+            b.Var("v4", AddressSpace::kFunction, ty.vec4(type));
+            b.Return(f);
+        });
+
+        auto res = ir::Validate(mod);
+        ASSERT_EQ(res, Success) << res.Failure().reason.Str();
+    } else {
+        auto* f = b.Function("my_func", ty.void_());
+        b.Append(f->Block(), [&] {
+            b.Var("invalid", AddressSpace::kFunction, ty.vec2(type));
+            b.Return(f);
+        });
+
+        auto res = ir::Validate(mod);
+        ASSERT_NE(res, Success) << res.Failure().reason.Str();
+        EXPECT_THAT(res.Failure().reason.Str(),
+                    testing::HasSubstr(R"(:3:5 error: var: vector elements, ')" +
+                                       ty.vec2(type)->FriendlyName() + R"(', must be scalars
+ )")) << res.Failure().reason.Str();
+    }
+}
+
+INSTANTIATE_TEST_SUITE_P(IR_ValidatorTest,
+                         Type_VectorElements,
+                         testing::Values(std::make_tuple(true, TypeBuilder<u32>),
+                                         std::make_tuple(true, TypeBuilder<i32>),
+                                         std::make_tuple(true, TypeBuilder<f32>),
+                                         std::make_tuple(true, TypeBuilder<f16>),
+                                         std::make_tuple(true, TypeBuilder<core::type::Bool>),
+                                         std::make_tuple(false, TypeBuilder<core::type::Void>)));
+
+using Type_MatrixElements = TypeTest;
+
+TEST_P(Type_MatrixElements, Test) {
+    bool allowed = std::get<0>(GetParam());
+    auto* type = std::get<1>(GetParam())(ty);
+    if (allowed) {
+        auto* f = b.Function("my_func", ty.void_());
+        b.Append(f->Block(), [&] {
+            b.Var("m2x2", AddressSpace::kFunction, ty.mat2x2(type));
+            b.Var("m2x3", AddressSpace::kFunction, ty.mat2x3(type));
+            b.Var("m2x4", AddressSpace::kFunction, ty.mat2x4(type));
+            b.Var("m3x2", AddressSpace::kFunction, ty.mat3x2(type));
+            b.Var("m3x3", AddressSpace::kFunction, ty.mat3x3(type));
+            b.Var("m3x4", AddressSpace::kFunction, ty.mat3x4(type));
+            b.Var("m4x2", AddressSpace::kFunction, ty.mat4x2(type));
+            b.Var("m4x3", AddressSpace::kFunction, ty.mat4x3(type));
+            b.Var("m4x4", AddressSpace::kFunction, ty.mat4x4(type));
+            b.Return(f);
+        });
+
+        auto res = ir::Validate(mod);
+        ASSERT_EQ(res, Success) << res.Failure().reason.Str();
+    } else {
+        auto* f = b.Function("my_func", ty.void_());
+        b.Append(f->Block(), [&] {
+            b.Var("invalid", AddressSpace::kFunction, ty.mat3x3(type));
+            b.Return(f);
+        });
+
+        auto res = ir::Validate(mod);
+        ASSERT_NE(res, Success) << res.Failure().reason.Str();
+        EXPECT_THAT(res.Failure().reason.Str(),
+                    testing::HasSubstr(R"(:3:5 error: var: matrix elements, ')" +
+                                       ty.mat3x3(type)->FriendlyName() + R"(', must be float scalars
+ )")) << res.Failure().reason.Str();
+    }
+}
+
+INSTANTIATE_TEST_SUITE_P(IR_ValidatorTest,
+                         Type_MatrixElements,
+                         testing::Values(std::make_tuple(false, TypeBuilder<u32>),
+                                         std::make_tuple(false, TypeBuilder<i32>),
+                                         std::make_tuple(true, TypeBuilder<f32>),
+                                         std::make_tuple(true, TypeBuilder<f16>),
+                                         std::make_tuple(false, TypeBuilder<core::type::Bool>),
+                                         std::make_tuple(false, TypeBuilder<core::type::Void>)));
+
+using Type_StorageTextureDimension = IRTestParamHelper<std::tuple<
+    /* allowed */ bool,
+    /* dim */ core::type::TextureDimension>>;
+
+TEST_P(Type_StorageTextureDimension, Test) {
+    bool allowed = std::get<0>(GetParam());
+    auto dim = std::get<1>(GetParam());
+
+    auto* v =
+        b.Var("v", AddressSpace::kStorage,
+              ty.storage_texture(dim, core::TexelFormat::kRgba32Float, core::Access::kReadWrite),
+              read_write);
+    v->SetBindingPoint(0, 0);
+    mod.root_block->Append(v);
+
+    if (allowed) {
+        auto res = ir::Validate(mod);
+        ASSERT_EQ(res, Success) << res.Failure().reason.Str();
+    } else {
+        auto res = ir::Validate(mod);
+        ASSERT_NE(res, Success) << res.Failure().reason.Str();
+        EXPECT_THAT(res.Failure().reason.Str(),
+                    testing::HasSubstr(
+                        dim != type::TextureDimension::kNone
+                            ? R"(:2:3 error: var: dimension ')" + std::string(ToString(dim)) +
+                                  R"(' for storage textures does not in WGSL yet)"
+                            : R"(:2:3 error: var: invalid texture dimension 'none')"))
+            << res.Failure().reason.Str();
+    }
+}
+
+INSTANTIATE_TEST_SUITE_P(
+    IR_ValidatorTest,
+    Type_StorageTextureDimension,
+    testing::Values(std::make_tuple(true, core::type::TextureDimension::k2d),
+                    std::make_tuple(false, core::type::TextureDimension::kCube),
+                    std::make_tuple(false, core::type::TextureDimension::kCubeArray),
+                    std::make_tuple(false, core::type::TextureDimension::kNone)));
 
 using IR_ValidatorRefTypeTest = IRTestParamHelper<std::tuple</* holds_ref */ bool,
                                                              /* refs_allowed */ bool,
