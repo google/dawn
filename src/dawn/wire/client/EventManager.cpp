@@ -178,7 +178,8 @@ WGPUWaitStatus EventManager::WaitAny(size_t count, WGPUFutureWaitInfo* infos, ui
         // UnsupportedMixedSources validation here, because those only apply to timed waits.)
         //
         // TODO(crbug.com/dawn/1987): CreateInstance needs to validate timedWaitEnable was false.
-        return WGPUWaitStatus_UnsupportedTimeout;
+        dawn::ErrorLog() << "Dawn wire does not currently support timed waits.";
+        return WGPUWaitStatus_Error;
     }
 
     if (count == 0) {

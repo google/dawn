@@ -32,6 +32,7 @@
 #include <memory>
 #include <mutex>
 #include <string>
+#include <string_view>
 #include <vector>
 
 #include "absl/container/flat_hash_set.h"
@@ -84,6 +85,8 @@ class InstanceBase final : public ErrorSink, public RefCountedWithExternalCount<
     std::vector<Ref<AdapterBase>> EnumerateAdapters(const RequestAdapterOptions* options = nullptr);
 
     size_t GetPhysicalDeviceCountForTesting() const;
+
+    void EmitLog(WGPULoggingType type, const std::string_view message) const;
 
     // Consume an error and log its warning at most once. This is useful for
     // physical device creation errors that happen because the backend is not

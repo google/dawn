@@ -192,7 +192,9 @@ ResultOrError<Ref<InstanceBase>> InstanceBase::Create(const InstanceDescriptor* 
 }
 
 InstanceBase::InstanceBase(const TogglesState& instanceToggles)
-    : mToggles(instanceToggles), mDeprecationWarnings(std::make_unique<DeprecationWarnings>()) {}
+    : mToggles(instanceToggles),
+      mEventManager(this),
+      mDeprecationWarnings(std::make_unique<DeprecationWarnings>()) {}
 
 InstanceBase::~InstanceBase() = default;
 
@@ -468,15 +470,21 @@ std::vector<Ref<PhysicalDeviceBase>> InstanceBase::EnumeratePhysicalDevices(
     return discoveredPhysicalDevices;
 }
 
+void InstanceBase::EmitLog(WGPULoggingType type, const std::string_view message) const {
+    if (mLoggingCallbackInfo.callback) {
+        mLoggingCallbackInfo.callback(type, ToOutputStringView(message),
+                                      mLoggingCallbackInfo.userdata1,
+                                      mLoggingCallbackInfo.userdata2);
+    }
+}
+
 bool InstanceBase::ConsumedErrorAndWarnOnce(MaybeError maybeErr) {
     if (!maybeErr.IsError()) {
         return false;
     }
     std::string message = maybeErr.AcquireError()->GetFormattedMessage();
-    if (mWarningMessages.insert(message).second && mLoggingCallbackInfo.callback) {
-        mLoggingCallbackInfo.callback(WGPULoggingType_Warning, ToOutputStringView(message),
-                                      mLoggingCallbackInfo.userdata1,
-                                      mLoggingCallbackInfo.userdata2);
+    if (mWarningMessages.insert(message).second) {
+        EmitLog(WGPULoggingType_Warning, message);
     }
     return true;
 }
@@ -581,12 +589,7 @@ void InstanceBase::ConsumeError(std::unique_ptr<ErrorData> error,
     // Note: `additionalAllowedErrors` is ignored. The instance considers every type of error to be
     // an error that is logged.
     DAWN_ASSERT(error != nullptr);
-    if (mLoggingCallbackInfo.callback) {
-        std::string messageStr = error->GetFormattedMessage();
-        mLoggingCallbackInfo.callback(WGPULoggingType_Error, ToOutputStringView(messageStr),
-                                      mLoggingCallbackInfo.userdata1,
-                                      mLoggingCallbackInfo.userdata2);
-    }
+    EmitLog(WGPULoggingType_Error, error->GetFormattedMessage());
 }
 
 const X11Functions* InstanceBase::GetOrLoadX11Functions() {

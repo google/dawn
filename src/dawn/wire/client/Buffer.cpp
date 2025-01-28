@@ -92,7 +92,7 @@ class Buffer::MapAsyncEvent : public TrackedEvent {
         }
 
         auto FailRequest = [this](const char* message) -> WireResult {
-            mStatus = WGPUMapAsyncStatus_Unknown;
+            mStatus = static_cast<WGPUMapAsyncStatus>(0);
             mMessage = message;
             return WireResult::FatalError;
         };

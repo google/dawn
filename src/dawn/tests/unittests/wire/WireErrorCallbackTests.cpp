@@ -156,7 +156,7 @@ TEST_P(WirePopErrorScopeCallbackTests, DisconnectBeforeServerReply) {
     FlushFutures();
     ExpectWireCallbacksWhen([&](auto& mockCb) {
         EXPECT_CALL(mockCb, Call(wgpu::PopErrorScopeStatus::InstanceDropped,
-                                 wgpu::ErrorType::Unknown, EmptySizedString()))
+                                 wgpu::ErrorType::NoError, EmptySizedString()))
             .Times(1);
 
         GetWireClient()->Disconnect();

@@ -85,6 +85,7 @@ void Server::OnDevicePopErrorScope(ErrorScopeUserdata* userdata,
     ReturnDevicePopErrorScopeCallbackCmd cmd;
     cmd.eventManager = userdata->eventManager;
     cmd.future = userdata->future;
+    cmd.status = status;
     cmd.type = type;
     cmd.message = message;
 
@@ -127,7 +128,7 @@ void Server::OnCreateComputePipelineAsyncCallback(CreatePipelineAsyncUserData* d
 
     if (status == WGPUCreatePipelineAsyncStatus_Success &&
         FillReservation(data->pipelineObjectID, pipeline) == WireResult::FatalError) {
-        cmd.status = WGPUCreatePipelineAsyncStatus_Unknown;
+        cmd.status = WGPUCreatePipelineAsyncStatus_InstanceDropped;
         cmd.message = ToOutputStringView("Destroyed before request was fulfilled.");
     }
     SerializeCommand(cmd);
@@ -169,7 +170,7 @@ void Server::OnCreateRenderPipelineAsyncCallback(CreatePipelineAsyncUserData* da
 
     if (status == WGPUCreatePipelineAsyncStatus_Success &&
         FillReservation(data->pipelineObjectID, pipeline) == WireResult::FatalError) {
-        cmd.status = WGPUCreatePipelineAsyncStatus_Unknown;
+        cmd.status = WGPUCreatePipelineAsyncStatus_InstanceDropped;
         cmd.message = ToOutputStringView("Destroyed before request was fulfilled.");
     }
     SerializeCommand(cmd);

@@ -798,13 +798,13 @@ Future DeviceBase::APIPopErrorScope(const WGPUPopErrorScopeCallbackInfo& callbac
                                                  ? WGPUPopErrorScopeStatus_Success
                                                  : WGPUPopErrorScopeStatus_InstanceDropped;
             WGPUErrorType type;
-            WGPUStringView message;
+            WGPUStringView message = kEmptyOutputStringView;
             if (mScope) {
                 type = static_cast<WGPUErrorType>(mScope->GetErrorType());
-                message = ToOutputStringView(mScope->GetErrorMessage());
+                message = mScope->GetErrorMessage();
             } else {
-                type = WGPUErrorType_Unknown;
-                message = ToOutputStringView("No error scopes to pop");
+                status = WGPUPopErrorScopeStatus_EmptyStack;
+                type = WGPUErrorType_NoError;
             }
 
             mCallback(status, type, message, mUserdata1.ExtractAsDangling(),
@@ -819,7 +819,7 @@ Future DeviceBase::APIPopErrorScope(const WGPUPopErrorScopeCallbackInfo& callbac
         auto deviceLock(GetScopedLock());
 
         if (IsLost()) {
-            scope = ErrorScope(wgpu::ErrorType::DeviceLost, "GPU device disconnected");
+            scope = ErrorScope(wgpu::ErrorType::NoError, "");
         } else if (!mErrorScopeStack->Empty()) {
             scope = mErrorScopeStack->Pop();
         }

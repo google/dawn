@@ -981,9 +981,10 @@ var LibraryWebGPU = {
       var status =
         ex.name === 'AbortError' ? {{{ gpu.MapAsyncStatus.Aborted }}} :
         ex.name === 'OperationError' ? {{{ gpu.MapAsyncStatus.Error }}} :
-        {{{ gpu.MapAsyncStatus.Unknown }}};
-        _emwgpuOnMapAsyncCompleted(futureId, status, {{{ gpu.passAsPointer('messagePtr') }}});
-        delete WebGPU.Internals.bufferOnUnmaps[bufferPtr];
+        0;
+      {{{ gpu.makeCheck('status') }}}
+      _emwgpuOnMapAsyncCompleted(futureId, status, {{{ gpu.passAsPointer('messagePtr') }}});
+      delete WebGPU.Internals.bufferOnUnmaps[bufferPtr];
     }));
   },
 
@@ -1547,7 +1548,8 @@ var LibraryWebGPU = {
       var status =
         pipeline.reason === 'validation' ? {{{ gpu.CreatePipelineAsyncStatus.ValidationError }}} :
         pipeline.reason === 'internal' ? {{{ gpu.CreatePipelineAsyncStatus.InternalError }}} :
-        {{{ gpu.CreatePipelineAsyncStatus.Unknown }}};
+        0;
+      {{{ gpu.makeCheck('status') }}}
       _emwgpuOnCreateComputePipelineCompleted(futureId, status,
         {{{ gpu.NULLPTR }}}, {{{ gpu.passAsPointer('messagePtr') }}});
       stackRestore(sp);
@@ -1656,7 +1658,8 @@ var LibraryWebGPU = {
       var status =
         pipeline.reason === 'validation' ? {{{ gpu.CreatePipelineAsyncStatus.ValidationError }}} :
         pipeline.reason === 'internal' ? {{{ gpu.CreatePipelineAsyncStatus.InternalError }}} :
-        {{{ gpu.CreatePipelineAsyncStatus.Unknown }}};
+        0;
+      {{{ gpu.makeCheck('status') }}}
       _emwgpuOnCreateRenderPipelineCompleted(futureId, status,
         {{{ gpu.NULLPTR }}}, {{{ gpu.passAsPointer('messagePtr') }}});
       stackRestore(sp);
@@ -2022,7 +2025,7 @@ var LibraryWebGPU = {
       _emwgpuOnWorkDoneCompleted(futureId, {{{ gpu.QueueWorkDoneStatus.Success }}});
     }, () => {
       {{{ runtimeKeepalivePop() }}}
-      _emwgpuOnWorkDoneCompleted(futureId, {{{ gpu.QueueWorkDoneStatus.Error }}});
+      abort('Unexpected failure in GPUQueue.onSubmittedWorkDone().')
     }));
   },
 
@@ -2354,7 +2357,7 @@ var LibraryWebGPU = {
 
       _emwgpuOnCompilationInfoCompleted(futureId, {{{ gpu.CompilationInfoRequestStatus.Success }}}, compilationInfoPtr);
     }, () => {
-      _emwgpuOnCompilationInfoCompleted(futureId, {{{ gpu.CompilationInfoRequestStatus.Error }}}, compilationInfoPtr);
+      abort('Unexpected failure in GPUShaderModule.getCompilationInfo().')
     }));
   },
 

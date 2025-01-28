@@ -141,7 +141,7 @@ class QueueBase : public ApiObjectBase, public ExecutionQueueBase {
                                                      const CopyTextureForBrowserOptions* options);
 
     MaybeError ValidateSubmit(uint32_t commandCount, CommandBufferBase* const* commands) const;
-    MaybeError ValidateOnSubmittedWorkDone(wgpu::QueueWorkDoneStatus* status) const;
+    MaybeError ValidateOnSubmittedWorkDone() const;
     MaybeError ValidateWriteTexture(const ImageCopyTexture* destination,
                                     size_t dataSize,
                                     const TextureDataLayout& dataLayout,

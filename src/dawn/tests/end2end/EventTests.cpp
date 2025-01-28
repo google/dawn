@@ -505,7 +505,7 @@ TEST_P(WaitAnyTests, UnsupportedTimeout) {
     // UnsupportedTimeout is still validated if no futures are passed.
     for (uint64_t timeout : {uint64_t(1), uint64_t(0), UINT64_MAX}) {
         ASSERT_EQ(instance2.WaitAny(0, nullptr, timeout),
-                  timeout > 0 ? wgpu::WaitStatus::UnsupportedTimeout : wgpu::WaitStatus::Success);
+                  timeout > 0 ? wgpu::WaitStatus::Error : wgpu::WaitStatus::Success);
     }
 
     for (uint64_t timeout : {uint64_t(1), uint64_t(0), UINT64_MAX}) {
@@ -517,7 +517,7 @@ TEST_P(WaitAnyTests, UnsupportedTimeout) {
             ASSERT_TRUE(status == wgpu::WaitStatus::Success ||
                         status == wgpu::WaitStatus::TimedOut);
         } else {
-            ASSERT_EQ(status, wgpu::WaitStatus::UnsupportedTimeout);
+            ASSERT_EQ(status, wgpu::WaitStatus::Error);
         }
     }
 }
@@ -555,11 +555,11 @@ TEST_P(WaitAnyTests, UnsupportedCount) {
                             status == wgpu::WaitStatus::TimedOut);
             } else if (UsesWire()) {
                 // Wire doesn't support timeouts at all.
-                ASSERT_EQ(status, wgpu::WaitStatus::UnsupportedTimeout);
+                ASSERT_EQ(status, wgpu::WaitStatus::Error);
             } else if (count <= 64) {
                 ASSERT_EQ(status, wgpu::WaitStatus::Success);
             } else {
-                ASSERT_EQ(status, wgpu::WaitStatus::UnsupportedCount);
+                ASSERT_EQ(status, wgpu::WaitStatus::Error);
             }
         }
     }
@@ -602,9 +602,9 @@ TEST_P(WaitAnyTests, UnsupportedMixedSources) {
                         status == wgpu::WaitStatus::TimedOut);
         } else if (UsesWire()) {
             // Wire doesn't support timeouts at all.
-            ASSERT_EQ(status, wgpu::WaitStatus::UnsupportedTimeout);
+            ASSERT_EQ(status, wgpu::WaitStatus::Error);
         } else {
-            ASSERT_EQ(status, wgpu::WaitStatus::UnsupportedMixedSources);
+            ASSERT_EQ(status, wgpu::WaitStatus::Error);
         }
     }
 }

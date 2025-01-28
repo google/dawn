@@ -164,6 +164,7 @@
         "device pop error scope callback": [
             { "name": "event manager", "type": "ObjectHandle" },
             { "name": "future", "type": "future" },
+            { "name": "status", "type": "pop error scope status" },
             { "name": "type", "type": "error type" },
             { "name": "message", "type": "string view"}
         ],

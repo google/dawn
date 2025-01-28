@@ -54,7 +54,11 @@ class PopErrorScopeEvent final : public TrackedEvent {
 
     EventType GetType() override { return kType; }
 
-    WireResult ReadyHook(FutureID futureID, WGPUErrorType errorType, WGPUStringView message) {
+    WireResult ReadyHook(FutureID futureID,
+                         WGPUPopErrorScopeStatus status,
+                         WGPUErrorType errorType,
+                         WGPUStringView message) {
+        mStatus = status;
         mType = errorType;
         mMessage = ToString(message);
         return WireResult::Success;
@@ -76,8 +80,8 @@ class PopErrorScopeEvent final : public TrackedEvent {
     raw_ptr<void> mUserdata1;
     raw_ptr<void> mUserdata2;
 
-    WGPUPopErrorScopeStatus mStatus = WGPUPopErrorScopeStatus_Success;
-    WGPUErrorType mType = WGPUErrorType_Unknown;
+    WGPUPopErrorScopeStatus mStatus = {};
+    WGPUErrorType mType = WGPUErrorType_NoError;
     std::string mMessage;
 };
 
@@ -370,10 +374,11 @@ WGPUFuture Device::PopErrorScope(const WGPUPopErrorScopeCallbackInfo& callbackIn
 
 WireResult Client::DoDevicePopErrorScopeCallback(ObjectHandle eventManager,
                                                  WGPUFuture future,
+                                                 WGPUPopErrorScopeStatus status,
                                                  WGPUErrorType errorType,
                                                  WGPUStringView message) {
     return GetEventManager(eventManager)
-        .SetFutureReady<PopErrorScopeEvent>(future.id, errorType, message);
+        .SetFutureReady<PopErrorScopeEvent>(future.id, status, errorType, message);
 }
 
 void Device::InjectError(WGPUErrorType type, WGPUStringView message) {

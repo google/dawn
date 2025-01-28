@@ -170,8 +170,6 @@ const char* str(wgpu::ErrorType ty) {
             return "out of memory";
         case wgpu::ErrorType::Internal:
             return "internal";
-        case wgpu::ErrorType::DeviceLost:
-            return "device lost";
         case wgpu::ErrorType::Unknown:
         default:
             return "unknown";

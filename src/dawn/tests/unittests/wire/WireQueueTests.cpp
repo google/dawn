@@ -37,7 +37,10 @@ namespace {
 
 using testing::_;
 using testing::InvokeWithoutArgs;
+using testing::Ne;
 using testing::Return;
+
+static constexpr WGPUQueueWorkDoneStatus kError = static_cast<WGPUQueueWorkDoneStatus>(0);
 
 using WireQueueTestBase = WireFutureTest<wgpu::QueueWorkDoneCallback<void>*>;
 class WireQueueTests : public WireQueueTestBase {
@@ -72,13 +75,13 @@ TEST_P(WireQueueTests, OnSubmittedWorkDoneError) {
     OnSubmittedWorkDone();
 
     EXPECT_CALL(api, OnQueueOnSubmittedWorkDone(apiQueue, _)).WillOnce(InvokeWithoutArgs([&] {
-        api.CallQueueOnSubmittedWorkDoneCallback(apiQueue, WGPUQueueWorkDoneStatus_Error);
+        api.CallQueueOnSubmittedWorkDoneCallback(apiQueue, kError);
     }));
     FlushClient();
     FlushFutures();
 
     ExpectWireCallbacksWhen([&](auto& mockCb) {
-        EXPECT_CALL(mockCb, Call(wgpu::QueueWorkDoneStatus::Error)).Times(1);
+        EXPECT_CALL(mockCb, Call(Ne(wgpu::QueueWorkDoneStatus::Success))).Times(1);
 
         FlushCallbacks();
     });
@@ -94,7 +97,7 @@ TEST_P(WireQueueTests, OnSubmittedWorkDoneBeforeDisconnectAfterReply) {
     OnSubmittedWorkDone();
 
     EXPECT_CALL(api, OnQueueOnSubmittedWorkDone(apiQueue, _)).WillOnce(InvokeWithoutArgs([&] {
-        api.CallQueueOnSubmittedWorkDoneCallback(apiQueue, WGPUQueueWorkDoneStatus_Error);
+        api.CallQueueOnSubmittedWorkDoneCallback(apiQueue, kError);
     }));
     FlushClient();
     FlushFutures();
@@ -113,7 +116,7 @@ TEST_P(WireQueueTests, OnSubmittedWorkDoneBeforeDisconnectBeforeReply) {
     OnSubmittedWorkDone();
 
     EXPECT_CALL(api, OnQueueOnSubmittedWorkDone(apiQueue, _)).WillOnce(InvokeWithoutArgs([&] {
-        api.CallQueueOnSubmittedWorkDoneCallback(apiQueue, WGPUQueueWorkDoneStatus_Error);
+        api.CallQueueOnSubmittedWorkDoneCallback(apiQueue, kError);
     }));
     FlushClient();
 
@@ -142,7 +145,7 @@ TEST_P(WireQueueTests, OnSubmittedWorkDoneInsideCallbackBeforeDisconnect) {
     OnSubmittedWorkDone();
 
     EXPECT_CALL(api, OnQueueOnSubmittedWorkDone(apiQueue, _)).WillOnce(InvokeWithoutArgs([&] {
-        api.CallQueueOnSubmittedWorkDoneCallback(apiQueue, WGPUQueueWorkDoneStatus_Error);
+        api.CallQueueOnSubmittedWorkDoneCallback(apiQueue, kError);
     }));
     FlushClient();
 

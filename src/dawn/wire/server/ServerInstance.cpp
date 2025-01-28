@@ -73,7 +73,7 @@ void Server::OnRequestAdapterCallback(RequestAdapterUserdata* data,
 
     // Assign the handle and allocated status if the adapter is created successfully.
     if (FillReservation(data->adapterObjectId, adapter) == WireResult::FatalError) {
-        cmd.status = WGPURequestAdapterStatus_Unknown;
+        cmd.status = WGPURequestAdapterStatus_InstanceDropped;
         cmd.message = ToOutputStringView("Destroyed before request was fulfilled.");
         SerializeCommand(cmd);
         return;

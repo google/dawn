@@ -102,8 +102,7 @@
             {"value": 1, "name": "success"},
             {"value": 2, "name": "instance dropped"},
             {"value": 3, "name": "unavailable"},
-            {"value": 4, "name": "error"},
-            {"value": 5, "name": "unknown"}
+            {"value": 4, "name": "error"}
         ]
     },
     "adapter": {
@@ -667,8 +666,7 @@
             {"value": 1, "name": "success"},
             {"value": 2, "name": "instance dropped"},
             {"value": 3, "name": "error"},
-            {"value": 4, "name": "aborted"},
-            {"value": 5, "name": "unknown"}
+            {"value": 4, "name": "aborted"}
         ]
     },
     "buffer map state": {
@@ -919,10 +917,7 @@
         "category": "enum",
         "values": [
             {"value": 1, "name": "success"},
-            {"value": 2, "name": "instance dropped"},
-            {"value": 3, "name": "error"},
-            {"value": 4, "name": "device lost"},
-            {"value": 5, "name": "unknown"}
+            {"value": 2, "name": "instance dropped"}
         ]
     },
     "compilation message": {
@@ -1123,10 +1118,7 @@
             {"value": 1, "name": "success"},
             {"value": 2, "name": "instance dropped"},
             {"value": 3, "name": "validation error"},
-            {"value": 4, "name": "internal error"},
-            {"value": 5, "name": "device lost"},
-            {"value": 6, "name": "device destroyed"},
-            {"value": 7, "name": "unknown"}
+            {"value": 4, "name": "internal error"}
         ]
     },
     "create render pipeline async callback": {
@@ -1490,7 +1482,8 @@
         "emscripten_no_enum_table": true,
         "values": [
             {"value": 1, "name": "success"},
-            {"value": 2, "name": "instance dropped"}
+            {"value": 2, "name": "instance dropped"},
+            {"value": 3, "name": "empty stack"}
         ]
     },
     "pop error scope callback": {
@@ -1639,8 +1632,7 @@
             {"value": 2, "name": "validation"},
             {"value": 3, "name": "out of memory"},
             {"value": 4, "name": "internal"},
-            {"value": 5, "name": "unknown"},
-            {"value": 6, "name": "device lost"}
+            {"value": 5, "name": "unknown"}
         ]
     },
     "logging type": {
@@ -2414,10 +2406,7 @@
         "values": [
             {"value": 1, "name": "success"},
             {"value": 2, "name": "timed out"},
-            {"value": 3, "name": "unsupported timeout"},
-            {"value": 4, "name": "unsupported count"},
-            {"value": 5, "name": "unsupported mixed sources"},
-            {"value": 6, "name": "unknown"}
+            {"value": 3, "name": "error"}
         ]
     },
     "future wait info": {
@@ -2748,8 +2737,7 @@
         "values": [
             {"value": 1, "name": "success"},
             {"value": 2, "name": "instance dropped"},
-            {"value": 3, "name": "error"},
-            {"value": 4, "name": "unknown"}
+            {"value": 3, "name": "error"}
         ]
     },
 
@@ -3216,8 +3204,7 @@
         "values": [
             {"value": 1, "name": "success"},
             {"value": 2, "name": "instance dropped"},
-            {"value": 3, "name": "error"},
-            {"value": 4, "name": "unknown"}
+            {"value": 3, "name": "error"}
         ]
     },
 

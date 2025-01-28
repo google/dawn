@@ -34,6 +34,7 @@
 #include "gmock/gmock.h"
 
 using testing::_;
+using testing::EmptySizedString;
 using testing::MockCppCallback;
 using testing::NonEmptySizedString;
 
@@ -141,9 +142,8 @@ TEST_F(ErrorScopeValidationTest, UnhandledErrorsMatchUncapturedErrorCallback) {
 TEST_F(ErrorScopeValidationTest, PushPopBalanced) {
     // No error scopes to pop.
     {
-        EXPECT_CALL(mPopErrorScopeCb,
-                    Call(wgpu::PopErrorScopeStatus::Success, wgpu::ErrorType::Unknown,
-                         testing::NonEmptySizedString()))
+        EXPECT_CALL(mPopErrorScopeCb, Call(wgpu::PopErrorScopeStatus::EmptyStack,
+                                           wgpu::ErrorType::NoError, EmptySizedString()))
             .Times(1);
         device.PopErrorScope(wgpu::CallbackMode::AllowProcessEvents, mPopErrorScopeCb.Callback());
         FlushWireAndProcessEvents();
@@ -158,9 +158,8 @@ TEST_F(ErrorScopeValidationTest, PushPopBalanced) {
         device.PopErrorScope(wgpu::CallbackMode::AllowProcessEvents, mPopErrorScopeCb.Callback());
         FlushWireAndProcessEvents();
 
-        EXPECT_CALL(mPopErrorScopeCb,
-                    Call(wgpu::PopErrorScopeStatus::Success, wgpu::ErrorType::Unknown,
-                         testing::NonEmptySizedString()))
+        EXPECT_CALL(mPopErrorScopeCb, Call(wgpu::PopErrorScopeStatus::EmptyStack,
+                                           wgpu::ErrorType::NoError, EmptySizedString()))
             .Times(1);
         device.PopErrorScope(wgpu::CallbackMode::AllowProcessEvents, mPopErrorScopeCb.Callback());
         FlushWireAndProcessEvents();
@@ -186,15 +185,15 @@ TEST_F(ErrorScopeValidationTest, DeviceDestroyedBeforeCallback) {
     FlushWireAndProcessEvents();
 }
 
-// If the device is destroyed, pop error scope should callback with device lost.
+// If the device is destroyed, pop error scope should callback with NoError.
 TEST_F(ErrorScopeValidationTest, DeviceDestroyedBeforePop) {
     device.PushErrorScope(wgpu::ErrorFilter::Validation);
     ExpectDeviceDestruction();
     device.Destroy();
     FlushWireAndProcessEvents();
 
-    EXPECT_CALL(mPopErrorScopeCb, Call(wgpu::PopErrorScopeStatus::Success,
-                                       wgpu::ErrorType::DeviceLost, testing::NonEmptySizedString()))
+    EXPECT_CALL(mPopErrorScopeCb, Call(wgpu::PopErrorScopeStatus::Success, wgpu::ErrorType::NoError,
+                                       EmptySizedString()))
         .Times(1);
     device.PopErrorScope(wgpu::CallbackMode::AllowProcessEvents, mPopErrorScopeCb.Callback());
     FlushWireAndProcessEvents();

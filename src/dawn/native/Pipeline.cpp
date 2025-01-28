@@ -205,23 +205,6 @@ ResultOrError<ShaderModuleEntryPoint> ValidateProgrammableStage(DeviceBase* devi
     return entryPoint;
 }
 
-WGPUCreatePipelineAsyncStatus CreatePipelineAsyncStatusFromErrorType(InternalErrorType error) {
-    switch (error) {
-        case InternalErrorType::None:
-            return WGPUCreatePipelineAsyncStatus_Success;
-        case InternalErrorType::Validation:
-            return WGPUCreatePipelineAsyncStatus_ValidationError;
-        case InternalErrorType::DeviceLost:
-            return WGPUCreatePipelineAsyncStatus_DeviceLost;
-        case InternalErrorType::Internal:
-        case InternalErrorType::OutOfMemory:
-            return WGPUCreatePipelineAsyncStatus_InternalError;
-        default:
-            DAWN_UNREACHABLE();
-            return WGPUCreatePipelineAsyncStatus_Unknown;
-    }
-}
-
 // PipelineBase
 
 PipelineBase::PipelineBase(DeviceBase* device,

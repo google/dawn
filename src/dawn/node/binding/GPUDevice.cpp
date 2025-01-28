@@ -570,15 +570,7 @@ interop::Promise<std::optional<interop::Interface<interop::GPUError>>> GPUDevice
                     break;
                 }
                 case wgpu::ErrorType::Unknown:
-                case wgpu::ErrorType::DeviceLost:
                     ctx->promise.Reject(Errors::OperationError(env, std::string(message)));
-                    break;
-                default:
-                    ctx->promise.Reject(
-                        "unhandled error type (" +
-                        std::to_string(
-                            static_cast<std::underlying_type<wgpu::ErrorType>::type>(type)) +
-                        ")");
                     break;
             }
         });

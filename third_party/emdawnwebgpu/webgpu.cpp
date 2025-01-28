@@ -468,7 +468,7 @@ class EventManager : NonMovable {
     if (timeoutNS > 0) {
       // Cannot handle timeouts if we are not using Asyncify.
       if (!emscripten_has_asyncify()) {
-        return WGPUWaitStatus_UnsupportedTimeout;
+        return WGPUWaitStatus_Error;
       }
 
       std::vector<FutureID> futures;

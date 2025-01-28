@@ -665,7 +665,7 @@ TEST_P(WireMemoryTransferServiceBufferMapAsyncTests, DeserializeDataUpdateFailur
 
     switch (mode) {
         case wgpu::MapMode::Read: {
-            EXPECT_CALL(mMapAsyncCb, Call(wgpu::MapAsyncStatus::Unknown, _)).Times(1);
+            EXPECT_CALL(mMapAsyncCb, Call(Ne(wgpu::MapAsyncStatus::Success), _)).Times(1);
             EXPECT_CALL(api, BufferGetConstMappedRange(apiBuffer, 0, kBufferSize))
                 .WillOnce(Return(&mServerBufferContent));
 
