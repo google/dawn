@@ -4487,6 +4487,7 @@ crbug.com/0000 [ android ] webgpu:shader,execution,expression,call,builtin,textu
 crbug.com/0000 [ android ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_3d_coords:stage="v";format="astc-8x5-unorm-srgb";filt="nearest";mode="m" [ Failure ]
 crbug.com/0000 [ android ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_3d_coords:stage="v";format="astc-8x5-unorm-srgb";filt="nearest";mode="r" [ Failure ]
 crbug.com/0000 [ android ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_3d_coords:stage="v";format="stencil8";filt="nearest";mode="c" [ Failure ]
+crbug.com/0000 [ android ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_array_2d_coords:stage="c";format="stencil8";filt="nearest";modeU="m";modeV="r";offset=false [ Failure ]
 crbug.com/0000 [ android ] webgpu:shader,execution,expression,call,builtin,textureGather:sampled_array_2d_coords:stage="v";format="stencil8";filt="nearest";modeU="c";modeV="c";offset=false [ Failure ]
 
 crbug.com/0000 [ android ] webgpu:shader,execution,expression,call,builtin,textureGatherCompare:array_2d_coords:stage="c";format="depth16unorm";filt="linear";modeU="c";modeV="m";offset=true [ Failure ]
@@ -5484,7 +5485,9 @@ crbug.com/0000 [ android ] webgpu:shader,execution,expression,call,builtin,textu
 crbug.com/0000 [ android ] webgpu:shader,execution,expression,call,builtin,textureSample:sampled_3d_coords:format="astc-8x5-unorm-srgb";dim="cube";filt="nearest";modeU="r";modeV="r";modeW="c";offset=false [ Failure ]
 crbug.com/0000 [ android ] webgpu:shader,execution,expression,call,builtin,textureSample:sampled_3d_coords:format="astc-8x5-unorm-srgb";dim="cube";filt="nearest";modeU="r";modeV="r";modeW="m";offset=false [ Failure ]
 crbug.com/0000 [ android ] webgpu:shader,execution,expression,call,builtin,textureSample:sampled_3d_coords:format="astc-8x5-unorm-srgb";dim="cube";filt="nearest";modeU="r";modeV="r";modeW="r";offset=false [ Failure ]
+crbug.com/0000 [ android ] webgpu:shader,execution,expression,call,builtin,textureSample:sampled_array_2d_coords:format="eac-r11unorm";filt="linear";modeU="c";modeV="r";offset=false [ Failure ]
 
+crbug.com/0000 [ android ] webgpu:shader,execution,expression,call,builtin,textureSampleCompare:arrayed_2d_coords:format="depth16unorm";filt="linear";modeU="c";modeV="r";offset=false [ Failure ]
 crbug.com/0000 [ android ] webgpu:shader,execution,expression,call,builtin,textureSampleCompare:arrayed_2d_coords:format="depth32float";filt="linear";modeU="r";modeV="r";offset=false [ Failure ]
 
 ################################################################################
