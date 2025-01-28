@@ -335,6 +335,11 @@ ResultOrError<VulkanDeviceInfo> GatherDeviceInfo(const PhysicalDevice& device) {
                 VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_EXTERNAL_MEMORY_HOST_PROPERTIES_EXT);
         }
 
+        if (info.extensions[DeviceExt::VulkanMemoryModel]) {
+            featuresChain.Add(&info.vulkanMemoryModelFeatures,
+                              VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_MEMORY_MODEL_FEATURES);
+        }
+
         // Use vkGetPhysicalDevice{Features,Properties}2 if required to gather information about
         // the extensions. DeviceExt::GetPhysicalDeviceProperties2 is guaranteed to be available
         // because these extensions (transitively) depend on it in `EnsureDependencies`

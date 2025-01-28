@@ -145,6 +145,7 @@ enum class Toggle {
     MetalSerializeTimestampGenerationAndResolution,
     D3D12RelaxMinSubgroupSizeTo8,
     D3D12RelaxBufferTextureCopyPitchAndOffsetAlignment,
+    UseVulkanMemoryModel,
 
     // Unresolved issues.
     NoWorkaroundSampleMaskBecomesZeroForAllButLastColorTarget,
