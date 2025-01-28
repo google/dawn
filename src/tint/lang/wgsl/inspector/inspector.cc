@@ -51,20 +51,13 @@
 #include "src/tint/lang/core/type/u32.h"
 #include "src/tint/lang/core/type/vector.h"
 #include "src/tint/lang/core/type/void.h"
-#include "src/tint/lang/wgsl/ast/blend_src_attribute.h"
-#include "src/tint/lang/wgsl/ast/bool_literal_expression.h"
 #include "src/tint/lang/wgsl/ast/call_expression.h"
-#include "src/tint/lang/wgsl/ast/float_literal_expression.h"
 #include "src/tint/lang/wgsl/ast/id_attribute.h"
 #include "src/tint/lang/wgsl/ast/identifier.h"
 #include "src/tint/lang/wgsl/ast/input_attachment_index_attribute.h"
-#include "src/tint/lang/wgsl/ast/int_literal_expression.h"
 #include "src/tint/lang/wgsl/ast/interpolate_attribute.h"
-#include "src/tint/lang/wgsl/ast/location_attribute.h"
 #include "src/tint/lang/wgsl/ast/module.h"
 #include "src/tint/lang/wgsl/ast/override.h"
-#include "src/tint/lang/wgsl/ast/var.h"
-#include "src/tint/lang/wgsl/extension.h"
 #include "src/tint/lang/wgsl/sem/builtin_enum_expression.h"
 #include "src/tint/lang/wgsl/sem/call.h"
 #include "src/tint/lang/wgsl/sem/function.h"
@@ -642,24 +635,19 @@ void Inspector::GenerateSamplerTargets() {
             continue;
         }
 
-        auto* call_func = call->Stmt()->Function();
-        Vector<const sem::Function*, 4> entry_points;
-        if (call_func->Declaration()->IsEntryPoint()) {
-            entry_points = {call_func};
-        } else {
-            entry_points = call_func->AncestorEntryPoints();
-        }
-
-        if (entry_points.IsEmpty()) {
-            continue;
-        }
-
         auto* t = c->args[static_cast<size_t>(texture_index)];
         auto* s = c->args[static_cast<size_t>(sampler_index)];
 
         GetOriginatingResources(
-            std::array<const ast::Expression*, 2>{t, s},
-            [&](std::array<const sem::GlobalVariable*, 2> globals) {
+            std::array<const ast::Expression*, 2>{t, s}, c,
+            [&](std::array<const sem::GlobalVariable*, 2> globals, const sem::Function* fn) {
+                Vector<const sem::Function*, 4> entry_points;
+                if (fn->Declaration()->IsEntryPoint()) {
+                    entry_points = {fn};
+                } else {
+                    entry_points = fn->AncestorEntryPoints();
+                }
+
                 auto texture_binding_point = *globals[0]->Attributes().binding_point;
                 auto sampler_binding_point = *globals[1]->Attributes().binding_point;
 
@@ -673,7 +661,9 @@ void Inspector::GenerateSamplerTargets() {
 }
 
 template <size_t N, typename F>
-void Inspector::GetOriginatingResources(std::array<const ast::Expression*, N> exprs, F&& callback) {
+void Inspector::GetOriginatingResources(std::array<const ast::Expression*, N> exprs,
+                                        const ast::CallExpression* callsite,
+                                        F&& callback) {
     if (DAWN_UNLIKELY(!program_.IsValid())) {
         TINT_ICE() << "attempting to get originating resources in invalid program";
         return;
@@ -707,7 +697,7 @@ void Inspector::GetOriginatingResources(std::array<const ast::Expression*, N> ex
         }
     }
 
-    if (callsites.Length()) {
+    if (!callsites.IsEmpty()) {
         for (auto* call_expr : callsites) {
             // Make a copy of the expressions for this callsite
             std::array<const ast::Expression*, N> call_exprs = exprs;
@@ -718,11 +708,11 @@ void Inspector::GetOriginatingResources(std::array<const ast::Expression*, N> ex
                 }
             }
             // Now call GetOriginatingResources() with from the callsite
-            GetOriginatingResources(call_exprs, callback);
+            GetOriginatingResources(call_exprs, call_expr, callback);
         }
     } else {
         // All the expressions resolved to globals
-        callback(globals);
+        callback(globals, sem.Get(callsite)->Stmt()->Function());
     }
 }
 

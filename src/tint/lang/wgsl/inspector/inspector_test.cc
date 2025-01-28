@@ -3509,7 +3509,7 @@ fn main() {
 }
 
 // Regression test for crbug.com/dawn/380433758.
-TEST_F(InspectorGetSamplerTextureUsesTest, DISABLED_DiamondSampler) {
+TEST_F(InspectorGetSamplerTextureUsesTest, DiamondSampler) {
     std::string shader = R"(
 fn sample(t: texture_2d<f32>, s: sampler) -> vec4f {
   return textureSampleLevel(t, s, vec2f(0), 0);
@@ -3545,6 +3545,118 @@ fn useCombos1() -> vec4f {
         EXPECT_EQ(2u, result[0].sampler_binding_point.binding);
         EXPECT_EQ(0u, result[0].texture_binding_point.group);
         EXPECT_EQ(0u, result[0].texture_binding_point.binding);
+    }
+    {
+        auto result = inspector.GetSamplerTextureUses("fs");
+        ASSERT_FALSE(inspector.has_error()) << inspector.error();
+        ASSERT_EQ(1u, result.Length());
+
+        EXPECT_EQ(0u, result[0].sampler_binding_point.group);
+        EXPECT_EQ(2u, result[0].sampler_binding_point.binding);
+        EXPECT_EQ(0u, result[0].texture_binding_point.group);
+        EXPECT_EQ(1u, result[0].texture_binding_point.binding);
+    }
+}
+
+TEST_F(InspectorGetSamplerTextureUsesTest, DiamondSampler2) {
+    std::string shader = R"(
+fn sample(t: texture_2d<f32>, s: sampler) -> vec4f {
+  return textureSampleLevel(t, s, vec2f(0), 0);
+}
+
+fn useCombos0() -> vec4f {
+  return sample(tex0_0, smp0_0);
+}
+
+fn useCombos1(t: texture_2d<f32>) -> vec4f {
+  return sample(t, smp0_0);
+}
+
+fn useCombos2() -> vec4f {
+  return useCombos1(tex1_15);
+}
+
+@group(0) @binding(0) var tex0_0: texture_2d<f32>;
+@group(0) @binding(1) var tex1_15: texture_2d<f32>;
+@group(0) @binding(2) var smp0_0: sampler;
+
+@vertex fn vs() -> @builtin(position) vec4f {
+  return useCombos0();
+}
+
+@fragment fn fs() -> @location(0) vec4f {
+  return vec4f(useCombos2());
+})";
+
+    Inspector& inspector = Initialize(shader);
+    {
+        auto result = inspector.GetSamplerTextureUses("vs");
+        ASSERT_FALSE(inspector.has_error()) << inspector.error();
+        ASSERT_EQ(1u, result.Length());
+
+        EXPECT_EQ(0u, result[0].sampler_binding_point.group);
+        EXPECT_EQ(2u, result[0].sampler_binding_point.binding);
+        EXPECT_EQ(0u, result[0].texture_binding_point.group);
+        EXPECT_EQ(0u, result[0].texture_binding_point.binding);
+    }
+    {
+        auto result = inspector.GetSamplerTextureUses("fs");
+        ASSERT_FALSE(inspector.has_error()) << inspector.error();
+        ASSERT_EQ(1u, result.Length());
+
+        EXPECT_EQ(0u, result[0].sampler_binding_point.group);
+        EXPECT_EQ(2u, result[0].sampler_binding_point.binding);
+        EXPECT_EQ(0u, result[0].texture_binding_point.group);
+        EXPECT_EQ(1u, result[0].texture_binding_point.binding);
+    }
+}
+
+TEST_F(InspectorGetSamplerTextureUsesTest, DiamondSampler3) {
+    std::string shader = R"(
+fn sample(t: texture_2d<f32>, s: sampler) -> vec4f {
+  return textureSampleLevel(t, s, vec2f(0), 0);
+}
+
+fn useCombos0() -> vec4f {
+  return sample(tex0_0, smp0_0);
+}
+
+fn useCombos1(t: texture_2d<f32>) -> vec4f {
+  return sample(t, smp0_0);
+}
+
+fn useCombos2() -> vec4f {
+  return useCombos1(tex1_15);
+}
+
+@group(0) @binding(0) var tex0_0: texture_2d<f32>;
+@group(0) @binding(1) var tex1_15: texture_2d<f32>;
+@group(0) @binding(2) var smp0_0: sampler;
+
+@vertex fn vs() -> @builtin(position) vec4f {
+  _ = useCombos0();
+  return useCombos2();
+}
+
+@fragment fn fs() -> @location(0) vec4f {
+  return vec4f(useCombos2());
+})";
+
+    Inspector& inspector = Initialize(shader);
+    {
+        auto result = inspector.GetSamplerTextureUses("vs");
+        ASSERT_FALSE(inspector.has_error()) << inspector.error();
+        ASSERT_EQ(2u, result.Length());
+
+        EXPECT_EQ(0u, result[0].sampler_binding_point.group);
+        EXPECT_EQ(2u, result[0].sampler_binding_point.binding);
+        EXPECT_EQ(0u, result[0].texture_binding_point.group);
+        EXPECT_EQ(0u, result[0].texture_binding_point.binding);
+
+        EXPECT_EQ(0u, result[1].sampler_binding_point.group);
+        EXPECT_EQ(2u, result[1].sampler_binding_point.binding);
+        EXPECT_EQ(0u, result[1].texture_binding_point.group);
+        EXPECT_EQ(1u, result[1].texture_binding_point.binding);
     }
     {
         auto result = inspector.GetSamplerTextureUses("fs");

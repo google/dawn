@@ -2582,7 +2582,7 @@ fn fs_main() -> @location(0) vec4f {
 }
 
 // Regression test for crbug.com/dawn/380433758.
-TEST_P(ShaderTests, DISABLED_DuplicateTexture) {
+TEST_P(ShaderTests, DuplicateTexture) {
     wgpu::ShaderModule module = utils::CreateShaderModule(device, R"(
 fn sample(t: texture_2d<f32>, s: sampler) -> vec4f {
   return textureSampleLevel(t, s, vec2f(0), 0);

@@ -291,11 +291,16 @@ class Inspector {
     /// @tparam N number of expressions in the n-uple
     /// @tparam F type of the callback provided.
     /// @param exprs N-uple of expressions to resolve.
+    /// @param callsite the callsite the expressions in the n-uple originated from
     /// @param cb is a callback function with the signature:
-    /// `void(std::array<const sem::GlobalVariable*, N>)`, which is invoked
-    /// whenever a set of expressions are resolved to globals.
+    /// `void(std::array<const sem::GlobalVariable*, N>, em::Function* callsite)`,
+    /// which is invoked whenever a set of expressions are resolved to globals. The `callsite`
+    /// provides the function where we determined the sampler,texture global variables. This
+    /// is the starting point to determine which entry points are using this sampler,texture.
     template <size_t N, typename F>
-    void GetOriginatingResources(std::array<const ast::Expression*, N> exprs, F&& cb);
+    void GetOriginatingResources(std::array<const ast::Expression*, N> exprs,
+                                 const ast::CallExpression* callsite,
+                                 F&& cb);
 
     /// @param func the function of the entry point. Must be non-nullptr and true for IsEntryPoint()
     /// @returns the entry point information
