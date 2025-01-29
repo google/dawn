@@ -664,5 +664,37 @@ TEST_F(SpirvParserTest, Reflect_Vector) {
 )");
 }
 
+TEST_F(SpirvParserTest, Ldexp_ScalarUnsigned) {
+    EXPECT_IR(Preamble() + R"(
+     %1 = OpExtInst %float %glsl Ldexp %float_50 %uint_10
+     OpReturn
+     OpFunctionEnd
+  )",
+              R"(
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:f32 = spirv.ldexp 50.0f, 10u
+    ret
+  }
+}
+)");
+}
+
+TEST_F(SpirvParserTest, Ldexp_VectorUnsigned) {
+    EXPECT_IR(Preamble() + R"(
+     %1 = OpExtInst %v2float %glsl Ldexp %v2float_50_60 %v2uint_10_20
+     OpReturn
+     OpFunctionEnd
+  )",
+              R"(
+%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
+  $B1: {
+    %2:vec2<f32> = spirv.ldexp vec2<f32>(50.0f, 60.0f), vec2<u32>(10u, 20u)
+    ret
+  }
+}
+)");
+}
+
 }  // namespace
 }  // namespace tint::spirv::reader

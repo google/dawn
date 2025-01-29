@@ -683,8 +683,6 @@ class Parser {
                 return core::BuiltinFn::kFma;
             case GLSLstd450InverseSqrt:
                 return core::BuiltinFn::kInverseSqrt;
-            case GLSLstd450Ldexp:
-                return core::BuiltinFn::kLdexp;
             case GLSLstd450Length:
                 return core::BuiltinFn::kLength;
             case GLSLstd450Log:
@@ -785,6 +783,8 @@ class Parser {
                 return spirv::BuiltinFn::kReflect;
             case GLSLstd450FaceForward:
                 return spirv::BuiltinFn::kFaceForward;
+            case GLSLstd450Ldexp:
+                return spirv::BuiltinFn::kLdexp;
             default:
                 break;
         }

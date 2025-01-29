@@ -1435,6 +1435,9 @@ class Printer {
             case spirv::BuiltinFn::kFaceForward:
                 ext_inst(GLSLstd450FaceForward);
                 break;
+            case spirv::BuiltinFn::kLdexp:
+                ext_inst(GLSLstd450Ldexp);
+                break;
             case spirv::BuiltinFn::kUdot:
                 module_.PushExtension("SPV_KHR_integer_dot_product");
                 module_.PushCapability(SpvCapabilityDotProductKHR);

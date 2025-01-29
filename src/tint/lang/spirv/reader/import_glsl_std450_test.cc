@@ -461,7 +461,6 @@ INSTANTIATE_TEST_SUITE_P(SpirvReader,
 INSTANTIATE_TEST_SUITE_P(SpirvReader,
                          SpirvReaderTest_GlslStd450_Floating_FloatingInting,
                          ::testing::Values(GlslStd450Case{"Ldexp", "ldexp"}));
-// For ldexp with unsigned second argument, see below.
 
 INSTANTIATE_TEST_SUITE_P(SpirvReader,
                          SpirvReaderTest_GlslStd450_Float3_Float3Float3,
@@ -780,37 +779,6 @@ INSTANTIATE_TEST_SUITE_P(SpirvReader,
                              {"UnpackUnorm2x16", "unpack2x16unorm", 2},
                              {"UnpackHalf2x16", "unpack2x16float", 2}}));
 
-// For ldexp with signed second argument, see above.
-TEST_F(SpirvReaderTest, DISABLED_GlslStd450_Ldexp_Scalar_Float_Uint) {
-    EXPECT_IR(Preamble() + R"(
-     %1 = OpExtInst %float %glsl Ldexp %float_50 %uint_10
-     OpReturn
-     OpFunctionEnd
-  )",
-              R"(
-%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
-  $B1: {
-    let x_1 = ldexp(f1, i32(u1));
-  }
-}
-)");
-}
-
-TEST_F(SpirvReaderTest, DISABLED_GlslStd450_Ldexp_Vector_Floatvec_Uintvec) {
-    EXPECT_IR(Preamble() + R"(
-     %1 = OpExtInst %v2float %glsl Ldexp %v2float_50_60 %v2uint_10_20
-     OpReturn
-     OpFunctionEnd
-  )",
-              R"(
-%main = @compute @workgroup_size(1u, 1u, 1u) func():void {
-  $B1: {
-    let x_1 = ldexp(v2f1, vec2i(v2u1));
-  }
-}
-)");
-}
-
 struct DeterminantData {
     std::string in;
     std::string out;
@@ -818,7 +786,7 @@ struct DeterminantData {
     std::string ty_name;
 };
 
-inline std::ostream& operator<<(std::ostream& out, DeterminantData c) {
+[[maybe_unused]] inline std::ostream& operator<<(std::ostream& out, DeterminantData c) {
     out << "Determinant(" << c.in << ")";
     return out;
 }

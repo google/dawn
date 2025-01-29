@@ -97,6 +97,7 @@ enum class BuiltinFn : uint8_t {
     kRefract,
     kReflect,
     kFaceForward,
+    kLdexp,
     kSdot,
     kUdot,
     kNone,

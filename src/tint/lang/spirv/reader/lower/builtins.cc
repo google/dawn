@@ -109,6 +109,9 @@ struct State {
                 case spirv::BuiltinFn::kFaceForward:
                     FaceForward(builtin);
                     break;
+                case spirv::BuiltinFn::kLdexp:
+                    Ldexp(builtin);
+                    break;
                 default:
                     TINT_UNREACHABLE() << "unknown spirv builtin: " << builtin->Func();
             }
@@ -159,6 +162,10 @@ struct State {
     void SMin(spirv::ir::BuiltinCall* call) { WrapSignedSpirvMethods(call, core::BuiltinFn::kMin); }
     void SClamp(spirv::ir::BuiltinCall* call) {
         WrapSignedSpirvMethods(call, core::BuiltinFn::kClamp);
+    }
+
+    void Ldexp(spirv::ir::BuiltinCall* call) {
+        WrapSignedSpirvMethods(call, core::BuiltinFn::kLdexp);
     }
 
     // The SPIR-V Unsigned methods all interpret their arguments as unsigned (regardless of the type
