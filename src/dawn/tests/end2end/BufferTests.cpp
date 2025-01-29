@@ -440,10 +440,10 @@ TEST_P(BufferMappingTests, MapWrite_ManySimultaneous) {
                     waitInfos[i] = {futures[i]};
                 }
                 size_t count = waitInfos.size();
-                wgpu::InstanceFeatures instanceFeatures;
-                wgpu::GetInstanceFeatures(&instanceFeatures);
+                wgpu::InstanceCapabilities instanceCapabilities;
+                wgpu::GetInstanceCapabilities(&instanceCapabilities);
                 do {
-                    size_t waitCount = std::min(count, instanceFeatures.timedWaitAnyMaxCount);
+                    size_t waitCount = std::min(count, instanceCapabilities.timedWaitAnyMaxCount);
                     auto waitInfoStart = waitInfos.begin() + (count - waitCount);
                     GetInstance().WaitAny(waitCount, &*waitInfoStart, UINT64_MAX);
                     auto it = std::partition(waitInfoStart, waitInfoStart + waitCount,

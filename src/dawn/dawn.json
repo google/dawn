@@ -2431,7 +2431,7 @@
             {"name": "completed", "type": "bool", "default": "false"}
         ]
     },
-    "instance features": {
+    "instance capabilities": {
         "category": "structure",
         "extensible": "in",
         "members": [
@@ -2443,14 +2443,15 @@
         "category": "structure",
         "extensible": "in",
         "members": [
-            {"name": "features", "type": "instance features"}
+            {"name": "capabilities", "type": "instance capabilities"},
+            {"name": "features", "type": "instance capabilities"}
         ]
     },
-    "get instance features": {
+    "get instance capabilities": {
         "category": "function",
         "returns": "status",
         "args": [
-            {"name": "features", "type": "instance features", "annotation": "*"}
+            {"name": "capabilities", "type": "instance capabilities", "annotation": "*"}
         ]
     },
     "dawn wire WGSL control": {

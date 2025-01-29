@@ -67,7 +67,7 @@ using BackendsBitset = ityp::bitset<wgpu::BackendType, kEnumCount<wgpu::BackendT
 using BackendsArray = ityp::
     array<wgpu::BackendType, std::unique_ptr<BackendConnection>, kEnumCount<wgpu::BackendType>>;
 
-wgpu::Status APIGetInstanceFeatures(InstanceFeatures* features);
+wgpu::Status APIGetInstanceCapabilities(InstanceCapabilities* capabilities);
 InstanceBase* APICreateInstance(const InstanceDescriptor* descriptor);
 
 // This is called InstanceBase for consistency across the frontend, even if the backends don't

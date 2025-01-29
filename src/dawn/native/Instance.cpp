@@ -141,13 +141,13 @@ static constexpr WGPULoggingCallbackInfo kDefaultLoggingCallbackInfo = {
 
 }  // anonymous namespace
 
-wgpu::Status APIGetInstanceFeatures(InstanceFeatures* features) {
-    if (features->nextInChain != nullptr) {
+wgpu::Status APIGetInstanceCapabilities(InstanceCapabilities* capabilities) {
+    if (capabilities->nextInChain != nullptr) {
         return wgpu::Status::Error;
     }
 
-    features->timedWaitAnyEnable = true;
-    features->timedWaitAnyMaxCount = kTimedWaitAnyMaxCountDefault;
+    capabilities->timedWaitAnyEnable = true;
+    capabilities->timedWaitAnyMaxCount = kTimedWaitAnyMaxCountDefault;
     return wgpu::Status::Success;
 }
 

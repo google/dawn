@@ -293,14 +293,16 @@ EventManager::~EventManager() {
 
 MaybeError EventManager::Initialize(const UnpackedPtr<InstanceDescriptor>& descriptor) {
     if (descriptor) {
-        if (descriptor->features.timedWaitAnyMaxCount > kTimedWaitAnyMaxCountDefault) {
-            // We don't yet support a higher timedWaitAnyMaxCount because it would be complicated
-            // to implement on Windows, and it isn't that useful to implement only on non-Windows.
-            return DAWN_VALIDATION_ERROR("Requested timedWaitAnyMaxCount is not supported");
-        }
-        mTimedWaitAnyEnable = descriptor->features.timedWaitAnyEnable;
+        mTimedWaitAnyEnable =
+            descriptor->capabilities.timedWaitAnyEnable || descriptor->features.timedWaitAnyEnable;
         mTimedWaitAnyMaxCount =
-            std::max(kTimedWaitAnyMaxCountDefault, descriptor->features.timedWaitAnyMaxCount);
+            std::max({kTimedWaitAnyMaxCountDefault, descriptor->capabilities.timedWaitAnyMaxCount,
+                      descriptor->features.timedWaitAnyMaxCount});
+    }
+    if (mTimedWaitAnyMaxCount > kTimedWaitAnyMaxCountDefault) {
+        // We don't yet support a higher timedWaitAnyMaxCount because it would be complicated
+        // to implement on Windows, and it isn't that useful to implement only on non-Windows.
+        return DAWN_VALIDATION_ERROR("Requested timedWaitAnyMaxCount is not supported");
     }
 
     return {};

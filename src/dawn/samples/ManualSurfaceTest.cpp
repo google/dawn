@@ -409,7 +409,7 @@ int main(int argc, const char* argv[]) {
 
     wgpu::InstanceDescriptor instanceDescriptor{};
     instanceDescriptor.nextInChain = &toggles;
-    instanceDescriptor.features.timedWaitAnyEnable = true;
+    instanceDescriptor.capabilities.timedWaitAnyEnable = true;
     instance = wgpu::CreateInstance(&instanceDescriptor);
 
     // Choose an adapter we like.

@@ -148,7 +148,7 @@ class EventCompletionTests : public DawnTestWithParams<EventCompletionTestParams
 
     void UseSecondInstance() {
         wgpu::InstanceDescriptor desc;
-        desc.features.timedWaitAnyEnable = !UsesWire();
+        desc.capabilities.timedWaitAnyEnable = !UsesWire();
         std::tie(testInstance, testDevice) = CreateExtraInstance(&desc);
         testQueue = testDevice.GetQueue();
     }
@@ -498,7 +498,7 @@ TEST_P(WaitAnyTests, UnsupportedTimeout) {
         // When not using the wire, DawnTest will unconditionally set timedWaitAnyEnable since it's
         // useful for other tests. For this test, we need it to be false to test validation.
         wgpu::InstanceDescriptor desc;
-        desc.features.timedWaitAnyEnable = false;
+        desc.capabilities.timedWaitAnyEnable = false;
         std::tie(instance2, device2) = CreateExtraInstance(&desc);
     }
 
@@ -535,7 +535,7 @@ TEST_P(WaitAnyTests, UnsupportedCount) {
         queue2 = queue;
     } else {
         wgpu::InstanceDescriptor desc;
-        desc.features.timedWaitAnyEnable = true;
+        desc.capabilities.timedWaitAnyEnable = true;
         std::tie(instance2, device2) = CreateExtraInstance(&desc);
         queue2 = device2.GetQueue();
     }
@@ -582,7 +582,7 @@ TEST_P(WaitAnyTests, UnsupportedMixedSources) {
         queue3 = device3.GetQueue();
     } else {
         wgpu::InstanceDescriptor desc;
-        desc.features.timedWaitAnyEnable = true;
+        desc.capabilities.timedWaitAnyEnable = true;
         std::tie(instance2, device2) = CreateExtraInstance(&desc);
         queue2 = device2.GetQueue();
         device3 = CreateExtraDevice(instance2);

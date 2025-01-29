@@ -144,11 +144,12 @@ WireResult Instance::Initialize(const WGPUInstanceDescriptor* descriptor) {
         return WireResult::Success;
     }
 
-    if (descriptor->features.timedWaitAnyEnable) {
+    if (descriptor->capabilities.timedWaitAnyEnable || descriptor->features.timedWaitAnyEnable) {
         dawn::ErrorLog() << "Wire client instance doesn't support timedWaitAnyEnable = true";
         return WireResult::FatalError;
     }
-    if (descriptor->features.timedWaitAnyMaxCount > 0) {
+    if (descriptor->capabilities.timedWaitAnyMaxCount > 0 ||
+        descriptor->features.timedWaitAnyMaxCount > 0) {
         dawn::ErrorLog() << "Wire client instance doesn't support non-zero timedWaitAnyMaxCount";
         return WireResult::FatalError;
     }
@@ -323,13 +324,14 @@ WGPUSurface Instance::CreateSurface(const WGPUSurfaceDescriptor* desc) const {
 
 // Free-standing API functions
 
-DAWN_WIRE_EXPORT WGPUStatus wgpuDawnWireClientGetInstanceFeatures(WGPUInstanceFeatures* features) {
-    if (features->nextInChain != nullptr) {
+DAWN_WIRE_EXPORT WGPUStatus
+wgpuDawnWireClientGetInstanceCapabilities(WGPUInstanceCapabilities* capabilities) {
+    if (capabilities->nextInChain != nullptr) {
         return WGPUStatus_Error;
     }
 
-    features->timedWaitAnyEnable = false;
-    features->timedWaitAnyMaxCount = dawn::kTimedWaitAnyMaxCountDefault;
+    capabilities->timedWaitAnyEnable = false;
+    capabilities->timedWaitAnyMaxCount = dawn::kTimedWaitAnyMaxCountDefault;
     return WGPUStatus_Success;
 }
 

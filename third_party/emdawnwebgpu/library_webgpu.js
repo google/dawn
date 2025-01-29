@@ -646,8 +646,8 @@ var LibraryWebGPU = {
   // Standalone (non-method) functions
   // --------------------------------------------------------------------------
 
-  wgpuGetInstanceFeatures: (featuresPtr) => {
-    abort('TODO: wgpuGetInstanceFeatures unimplemented');
+  wgpuGetInstanceCapabilities: (capabilitiesPtr) => {
+    abort('TODO: wgpuGetInstanceCapabilities unimplemented');
     return 0;
   },
 

@@ -177,7 +177,7 @@ int SampleBase::Run(unsigned int delay) {
     // Create the instance with the toggles
     wgpu::InstanceDescriptor instanceDescriptor = {};
     instanceDescriptor.nextInChain = togglesChain;
-    instanceDescriptor.features.timedWaitAnyEnable = true;
+    instanceDescriptor.capabilities.timedWaitAnyEnable = true;
     sample->instance = wgpu::CreateInstance(&instanceDescriptor);
 #else
     // Create the instance
